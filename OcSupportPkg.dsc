@@ -47,7 +47,11 @@
   UefiUsbLib|MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
 
-# [Components]
+[Components]
+  OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
+  OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
+  OcSupportPkg/Library/OcOverflowLib/OcOverflowLib.inf
+  OcSupportPkg/Library/OcPngLib/OcPngLib.inf
 
 [PcdsFixedAtBuild]
 !if $(TARGET) == DEBUG

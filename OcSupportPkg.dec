@@ -22,4 +22,17 @@
 [Includes]
   Include
 
+[LibraryClasses]
+  ##  @libraryclass
+  OcPngLib|Include/Library/OcPngLib.h
+
+  ##  @libraryclass
+  OcCryptoLib|Include/Library/OcCryptoLib.h
+
+  ##  @libraryclass
+  OcOverflowLib|Include/Library/OcOverflowLib.h
+
+  ##  @libraryclass
+  OcAppleImageVerificationLib|Include/Library/OcAppleImageVerificationLib.h
+
 # [Protocols]
