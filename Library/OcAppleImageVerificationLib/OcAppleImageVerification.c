@@ -76,12 +76,13 @@ BuildPeContext (
   EFI_IMAGE_SECTION_HEADER         *SectionCache        = NULL;
   UINT32                           Index                = 0;
   UINT32                           MaxHeaderSize        = 0;
+  UINT32                           Temp                 = 0;
 
   //
-  // Check context
+  // Check context existence
   //
   if (Context == NULL) {
-    DEBUG ((DEBUG_WARN, "Null context\n"));
+    DEBUG ((DEBUG_WARN, "No context provided\n"));
     return EFI_INVALID_PARAMETER;
   }
 
@@ -112,8 +113,13 @@ BuildPeContext (
 
     PeHdr = (EFI_IMAGE_OPTIONAL_HEADER_UNION *) ((UINT8 *) Image
                                                  + DosHdr->e_lfanew);
-    if ((UINT8 *) Image + ImageSize -
-      sizeof (EFI_IMAGE_OPTIONAL_HEADER_UNION) < (UINT8 *) PeHdr) {
+
+    if (OcOverflowSubU32 (ImageSize, sizeof (EFI_IMAGE_OPTIONAL_HEADER_UNION), &Temp)) {
+      DEBUG ((DEBUG_WARN, "Underflow detected!\n"));
+      return EFI_INVALID_PARAMETER;
+    }
+
+    if ((UINT8 *) Image + Temp < (UINT8 *) PeHdr) {
       DEBUG ((DEBUG_WARN, "Invalid PE location\n"));
       return EFI_INVALID_PARAMETER;
     }
@@ -139,9 +145,12 @@ BuildPeContext (
       DEBUG ((DEBUG_WARN, "Image header too small\n"));
       return EFI_INVALID_PARAMETER;
     }
-    //
-    // FIXME: if > ? check it
-    //
+
+    if (EFI_IMAGE_NUMBER_OF_DIRECTORY_ENTRIES >
+        PeHdr->Pe32.OptionalHeader.NumberOfRvaAndSizes) {
+      DEBUG ((DEBUG_WARN, "Non-standard entries present\n"));
+      return EFI_INVALID_PARAMETER;
+    }
 
     //
     // Check image header aligment
@@ -149,34 +158,55 @@ BuildPeContext (
     HeaderWithoutDataDir = sizeof (EFI_IMAGE_OPTIONAL_HEADER32) -
                            sizeof (EFI_IMAGE_DATA_DIRECTORY) *
                            EFI_IMAGE_NUMBER_OF_DIRECTORY_ENTRIES;
+
+    if (OcOverflowSubU32 (PeHdr->Pe32.FileHeader.SizeOfOptionalHeader,
+                          HeaderWithoutDataDir, &Temp)) {
+      DEBUG ((DEBUG_WARN, "Underflow detected!\n"));
+      return EFI_INVALID_PARAMETER;
+    }
+
     if (PeHdr->Pe32.FileHeader.SizeOfOptionalHeader < HeaderWithoutDataDir
-      || PeHdr->Pe32.FileHeader.SizeOfOptionalHeader - HeaderWithoutDataDir
-      != PeHdr->Pe32.OptionalHeader.NumberOfRvaAndSizes * sizeof (EFI_IMAGE_DATA_DIRECTORY)) {
+      || Temp != PeHdr->Pe32.OptionalHeader.NumberOfRvaAndSizes
+                 * sizeof (EFI_IMAGE_DATA_DIRECTORY)) {
       DEBUG ((DEBUG_WARN, "Image header overflows data directory\n"));
       return EFI_INVALID_PARAMETER;
     }
 
-    //
-    // Check image sections overflow
-    //
-    SectionHeaderOffset = DosHdr->e_lfanew + sizeof (UINT32)
-        + sizeof (EFI_IMAGE_FILE_HEADER)
-        + PeHdr->Pe32.FileHeader.SizeOfOptionalHeader;
+    if (OcOverflowTriAddU32 (DosHdr->e_lfanew, sizeof (UINT32),
+                             sizeof (EFI_IMAGE_FILE_HEADER), &Temp)) {
+      DEBUG ((DEBUG_WARN, "Overflow detected!\n"));
+      return EFI_INVALID_PARAMETER;
+    }
+    if (OcOverflowAddU32 (Temp, PeHdr->Pe32.FileHeader.SizeOfOptionalHeader, &Temp)) {
+      DEBUG ((DEBUG_WARN, "Overflow detected!\n"));
+      return EFI_INVALID_PARAMETER;
+    }
+
+    SectionHeaderOffset = Temp;
+
+    if (OcOverflowSubU32 (PeHdr->Pe32.OptionalHeader.SizeOfImage, SectionHeaderOffset, &Temp)) {
+      DEBUG ((DEBUG_WARN, "Underflow detected!\n"));
+      return EFI_INVALID_PARAMETER;
+    }
 
     if (PeHdr->Pe32.OptionalHeader.SizeOfImage < SectionHeaderOffset ||
-      ((PeHdr->Pe32.OptionalHeader.SizeOfImage - SectionHeaderOffset)
-      / EFI_IMAGE_SIZEOF_SECTION_HEADER) <= PeHdr->Pe32.FileHeader.NumberOfSections) {
+      (Temp / EFI_IMAGE_SIZEOF_SECTION_HEADER) <= PeHdr->Pe32.FileHeader.NumberOfSections) {
       DEBUG ((DEBUG_WARN, "Image sections overflow image size\n"));
       return EFI_INVALID_PARAMETER;
     }
 
+    if (OcOverflowSubU32 (PeHdr->Pe32.OptionalHeader.SizeOfHeaders, SectionHeaderOffset, &Temp)) {
+      DEBUG ((DEBUG_WARN, "Underflow detected!\n"));
+      return EFI_INVALID_PARAMETER;
+    }
+
     if (PeHdr->Pe32.OptionalHeader.SizeOfHeaders < SectionHeaderOffset
-      || ((PeHdr->Pe32.OptionalHeader.SizeOfHeaders - SectionHeaderOffset)
-      / EFI_IMAGE_SIZEOF_SECTION_HEADER)
+      || (Temp / EFI_IMAGE_SIZEOF_SECTION_HEADER)
       < (UINT32) PeHdr->Pe32.FileHeader.NumberOfSections) {
         DEBUG ((DEBUG_WARN, "Image sections overflow section headers\n"));
         return EFI_INVALID_PARAMETER;
     }
+
   } else if (PeHdrMagic == EFI_IMAGE_NT_OPTIONAL_HDR64_MAGIC) {
     //
     // Pe32+ part
@@ -191,15 +221,27 @@ BuildPeContext (
       return EFI_INVALID_PARAMETER;
     }
 
+    if (EFI_IMAGE_NUMBER_OF_DIRECTORY_ENTRIES >
+        PeHdr->Pe32Plus.OptionalHeader.NumberOfRvaAndSizes) {
+      DEBUG ((DEBUG_WARN, "Non-standard entries present\n"));
+      return EFI_INVALID_PARAMETER;
+    }
+
     //
     // Check image header aligment
     //
     HeaderWithoutDataDir = sizeof (EFI_IMAGE_OPTIONAL_HEADER64) -
                            sizeof (EFI_IMAGE_DATA_DIRECTORY) *
                            EFI_IMAGE_NUMBER_OF_DIRECTORY_ENTRIES;
+
+    if (OcOverflowSubU32 (PeHdr->Pe32Plus.FileHeader.SizeOfOptionalHeader, HeaderWithoutDataDir, &Temp)) {
+      DEBUG ((DEBUG_WARN, "Underflow detected!\n"));
+      return EFI_INVALID_PARAMETER;
+    }
+
     if (PeHdr->Pe32Plus.FileHeader.SizeOfOptionalHeader < HeaderWithoutDataDir
-      || (PeHdr->Pe32Plus.FileHeader.SizeOfOptionalHeader - HeaderWithoutDataDir) !=
-      PeHdr->Pe32Plus.OptionalHeader.NumberOfRvaAndSizes * sizeof (EFI_IMAGE_DATA_DIRECTORY)) {
+      || Temp != PeHdr->Pe32Plus.OptionalHeader.NumberOfRvaAndSizes
+                 * sizeof (EFI_IMAGE_DATA_DIRECTORY)) {
       DEBUG ((DEBUG_WARN, "Image header overflows data directory\n"));
       return EFI_INVALID_PARAMETER;
     }
@@ -207,21 +249,39 @@ BuildPeContext (
     //
     // Check image sections overflow
     //
-    SectionHeaderOffset = DosHdr->e_lfanew
-                          + sizeof (UINT32)
-                          + sizeof (EFI_IMAGE_FILE_HEADER)
-                          + PeHdr->Pe32Plus.FileHeader.SizeOfOptionalHeader;
+    if (OcOverflowTriAddU32 (DosHdr->e_lfanew, sizeof (UINT32),
+                             sizeof (EFI_IMAGE_FILE_HEADER), &Temp)) {
+      DEBUG ((DEBUG_WARN, "Overflow detected!\n"));
+      return EFI_INVALID_PARAMETER;
+    }
+
+    if (OcOverflowAddU32 (Temp, PeHdr->Pe32Plus.FileHeader.SizeOfOptionalHeader, &Temp)) {
+      DEBUG ((DEBUG_WARN, "Overflow detected!\n"));
+      return EFI_INVALID_PARAMETER;
+    }
+
+    SectionHeaderOffset = Temp;
+
+    if (OcOverflowSubU32 (PeHdr->Pe32Plus.OptionalHeader.SizeOfImage, SectionHeaderOffset, &Temp)) {
+      DEBUG ((DEBUG_WARN, "Underflow detected!\n"));
+      return EFI_INVALID_PARAMETER;
+    }
 
     if (PeHdr->Pe32Plus.OptionalHeader.SizeOfImage < SectionHeaderOffset
-      || ((PeHdr->Pe32Plus.OptionalHeader.SizeOfImage - SectionHeaderOffset)
-      / EFI_IMAGE_SIZEOF_SECTION_HEADER) <= PeHdr->Pe32Plus.FileHeader.NumberOfSections) {
+      || (Temp / EFI_IMAGE_SIZEOF_SECTION_HEADER)
+      <= PeHdr->Pe32Plus.FileHeader.NumberOfSections) {
       DEBUG ((DEBUG_WARN, "Image sections overflow image size\n"));
       return EFI_INVALID_PARAMETER;
     }
 
+    if (OcOverflowSubU32 (PeHdr->Pe32Plus.OptionalHeader.SizeOfHeaders, SectionHeaderOffset, &Temp)) {
+      DEBUG ((DEBUG_WARN, "Underflow detected!\n"));
+      return EFI_INVALID_PARAMETER;
+    }
+
     if (PeHdr->Pe32Plus.OptionalHeader.SizeOfHeaders < SectionHeaderOffset
-      || ((PeHdr->Pe32Plus.OptionalHeader.SizeOfHeaders - SectionHeaderOffset)
-      / EFI_IMAGE_SIZEOF_SECTION_HEADER) < (UINT32) PeHdr->Pe32Plus.FileHeader.NumberOfSections) {
+      || (Temp / EFI_IMAGE_SIZEOF_SECTION_HEADER)
+      < (UINT32) PeHdr->Pe32Plus.FileHeader.NumberOfSections) {
       DEBUG ((DEBUG_WARN, "Image sections overflow section headers\n"));
       return EFI_INVALID_PARAMETER;
     }
@@ -240,6 +300,9 @@ BuildPeContext (
     return EFI_INVALID_PARAMETER;
   }
 
+  //
+  // FIXME: Sanitize missing fields
+  //
   if (PeHdrMagic == EFI_IMAGE_NT_OPTIONAL_HDR32_MAGIC) {
     //
     // Fill context for Pe32
