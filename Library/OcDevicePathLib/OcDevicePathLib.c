@@ -23,7 +23,6 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcProtocolLib.h>
 #include <Library/OcStringLib.h>
-
 #include <Library/OcDevicePathLib.h>
 
 // AppendFileNameDevicePath

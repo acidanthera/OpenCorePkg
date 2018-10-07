@@ -71,4 +71,10 @@
   ##  @libraryclass
   OcVariableLib|Include/Library/OcVariableLib.h
 
+  ##  @libraryclass
+  OcDevicePropertyLib|Include/Library/OcDevicePropertyLib.h
+
+  ##  @libraryclass
+  OcFirmwarePasswordLib|Include/Library/OcFirmwarePasswordLib.h
+
 # [Protocols]

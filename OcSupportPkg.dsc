@@ -64,6 +64,8 @@
   OcSupportPkg/Library/OcStringLib/OcStringLib.inf
   OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
   OcSupportPkg/Library/OcVariableLib/OcVariableLib.inf
+  OcSupportPkg/Library/OcDevicePropertyLib/OcDevicePropertyLib.inf
+  OcSupportPkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
 
 [PcdsFixedAtBuild]
 !if $(TARGET) == DEBUG

@@ -35,9 +35,6 @@
   EfiPkg/EfiPkg.dec
 
 [Guids]
-  # gEfiCoreDxeEdk2FvFileGuid
-  # gAmiCoreDxeAptio4FvFileGuid
-
   gEfiAcpiTableGuid
   gEfiAcpi10TableGuid
   gEfiAcpi20TableGuid
@@ -57,26 +54,11 @@
 
 [Protocols]
   gEfiDecompressProtocolGuid
-
-  # gBdsStorageDeviceFoundProtocolGuid
-  # gBdsAllDriversConnectedProtocolGuid
-
   gEfiDevicePathPropertyDatabaseProtocolGuid
   gAppleFirmwarePasswordProtocolGuid
   gAppleKeyMapAggregatorProtocolGuid
   gAppleKeyMapDatabaseProtocolGuid
 
-  # gOcAcpiGeneratorProtocolGuid
-  # gOcBootManagementProtocolGuid
-  # gOcConfigurationProtocolGuid
-  # gOcHotkeyProtocolGuid
-  # gOcLogProtocolGuid
-  # gOcPlatformInfoProtocolGuid
-  # gOcScanFileSystemProtocolGuid
-  # gOcSmbiosGeneratorProtocolGuid
-  # gOcUserInterfaceProtocolGuid
-  # gOcRecognisePeImageProtocolGuid
-  # gOcRecogniseBootEntryProtocolGuid
 
 [LibraryClasses]
   BaseLib
