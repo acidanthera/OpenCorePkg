@@ -22,6 +22,12 @@
 [Includes]
   Include
 
+[Guids]
+  gOcLogVariableGuid          = { 0x4D1FDA02, 0x38C7, 0x4A6A, { 0x9C, 0xC6, 0x4B, 0xCC, 0xA8, 0xB3, 0x01, 0x02 }}
+
+[Protocols]
+  gOcLogProtocolGuid          = { 0xDBB6008F, 0x89E4, 0x4272, { 0x98, 0x81, 0xCE, 0x3A, 0xFD, 0x97, 0x24, 0xD0 }}
+
 [LibraryClasses]
   ##  @libraryclass
   OcPngLib|Include/Library/OcPngLib.h
@@ -34,5 +40,35 @@
 
   ##  @libraryclass
   OcAppleImageVerificationLib|Include/Library/OcAppleImageVerificationLib.h
+
+  ##  @libraryclass
+  OcAcpiLib|Include/Library/OcAcpiLib.h
+
+  ##  @libraryclass
+  OcCpuLib|Include/Library/OcCpuLib.h
+
+  ##  @libraryclass
+  OcDevicePathLib|Include/Library/OcDevicePathLib.h
+
+  ##  @libraryclass
+  OcFileLib|Include/Library/OcFileLib.h
+
+  ##  @libraryclass
+  OcMiscLib|Include/Library/OcMiscLib.h
+
+  ##  @libraryclass
+  OcPrintLib|Include/Library/OcPrintLib.h
+
+  ##  @libraryclass
+  OcProtocolLib|Include/Library/OcProtocolLib.h
+
+  ##  @libraryclass
+  OcStringLib|Include/Library/OcStringLib.h
+
+  ##  @libraryclass
+  OcTimerLib|Include/Library/OcTimerLib.h
+
+  ##  @libraryclass
+  OcVariableLib|Include/Library/OcVariableLib.h
 
 # [Protocols]

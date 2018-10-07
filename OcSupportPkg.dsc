@@ -46,12 +46,24 @@
   UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
   UefiUsbLib|MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
+  PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf
 
 [Components]
   OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
   OcSupportPkg/Library/OcOverflowLib/OcOverflowLib.inf
   OcSupportPkg/Library/OcPngLib/OcPngLib.inf
+  OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
+  OcSupportPkg/Library/OcCpuLib/OcCpuLib.inf
+  OcSupportPkg/Library/OcDebugLogLib/OcDebugLogLib.inf
+  OcSupportPkg/Library/OcDevicePathLib/OcDevicePathLib.inf
+  OcSupportPkg/Library/OcFileLib/OcFileLib.inf
+  OcSupportPkg/Library/OcMiscLib/OcMiscLib.inf
+  OcSupportPkg/Library/OcPrintLib/OcPrintLib.inf
+  OcSupportPkg/Library/OcProtocolLib/OcProtocolLib.inf
+  OcSupportPkg/Library/OcStringLib/OcStringLib.inf
+  OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
+  OcSupportPkg/Library/OcVariableLib/OcVariableLib.inf
 
 [PcdsFixedAtBuild]
 !if $(TARGET) == DEBUG
