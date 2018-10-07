@@ -34,7 +34,7 @@
 
 #include <Macros.h>
 
-#include "ProcessorInfo.h"
+#include <ProcessorInfo.h>
 
 // OcCpuScanProcessor
 /** Scan the processor and fill the cpu info structure with results
