@@ -68,16 +68,16 @@ typedef struct {
 
 // EFI_DEVICE_PATH_PROPERTY_NODE_HDR
 typedef struct {
-  UINTN      Signature;           ///< 
-  LIST_ENTRY Link;                ///< 
-  UINTN      NumberOfProperties;  ///< 
-  LIST_ENTRY Properties;          ///< 
+  UINTN      Signature;           ///<
+  LIST_ENTRY Link;                ///<
+  UINTN      NumberOfProperties;  ///<
+  LIST_ENTRY Properties;          ///<
 } EFI_DEVICE_PATH_PROPERTY_NODE_HDR;
 
 // DEVICE_PATH_PROPERTY_NODE
 typedef struct {
-  EFI_DEVICE_PATH_PROPERTY_NODE_HDR Hdr;         ///< 
-  EFI_DEVICE_PATH_PROTOCOL          DevicePath;  ///< 
+  EFI_DEVICE_PATH_PROPERTY_NODE_HDR Hdr;         ///<
+  EFI_DEVICE_PATH_PROTOCOL          DevicePath;  ///<
 } EFI_DEVICE_PATH_PROPERTY_NODE;
 
 #define EFI_DEVICE_PATH_PROPERTY_SIGNATURE  \
@@ -104,10 +104,10 @@ typedef struct {
 
 // EFI_DEVICE_PATH_PROPERTY
 typedef struct {
-  UINTN                         Signature;  ///< 
-  LIST_ENTRY                    Link;       ///< 
-  EFI_DEVICE_PATH_PROPERTY_DATA *Name;      ///< 
-  EFI_DEVICE_PATH_PROPERTY_DATA *Value;     ///< 
+  UINTN                         Signature;  ///<
+  LIST_ENTRY                    Link;       ///<
+  EFI_DEVICE_PATH_PROPERTY_DATA *Name;      ///<
+  EFI_DEVICE_PATH_PROPERTY_DATA *Value;     ///<
 } EFI_DEVICE_PATH_PROPERTY;
 
 // TODO: Move to own header
@@ -485,8 +485,8 @@ DppDbRemoveProperty (
 
       --Node->Hdr.NumberOfProperties;
 
-      // BUG: Name and Value are not freed.
-
+      gBS->FreePool ((VOID *)Property->Name);
+      gBS->FreePool ((VOID *)Property->Value);
       gBS->FreePool ((VOID *)Property);
 
       Status = EFI_SUCCESS;
@@ -882,8 +882,10 @@ OcDevicePathPropertyInstallProtocol (
   } else {
     DevicePathPropertyData = AllocatePool (sizeof (*DevicePathPropertyData));
 
-    // BUG: Compare against != NULL.
-    ASSERT (DevicePathPropertyData);
+    if (DevicePathPropertyData == NULL) {
+      Status = EFI_OUT_OF_RESOURCES;
+      goto Done;
+    }
 
     DevicePathPropertyData->Signature = DEVICE_PATH_PROPERTY_DATA_SIGNATURE;
 
@@ -950,14 +952,6 @@ OcDevicePathPropertyInstallProtocol (
                     Index
                     );
 
-                  // BUG: Don't keep copying APPLE_PATH_PROPERTIES_VARIABLE_NAME.
-
-                  StrCpyS (
-                    VariableName,
-                    sizeof (VariableName)/sizeof (CHAR16),
-                    APPLE_PATH_PROPERTIES_VARIABLE_NAME
-                    );
-
                   StrCatS (VariableName, sizeof (VariableName)/sizeof (CHAR16), IndexBuffer);
 
                   VariableSize = MIN (
@@ -989,14 +983,6 @@ OcDevicePathPropertyInstallProtocol (
                     sizeof (IndexBuffer),
                     L"%04x",
                     Index
-                    );
-
-                  // BUG: Don't keep copying APPLE_PATH_PROPERTIES_VARIABLE_NAME.
-
-                  StrCpyS (
-                    VariableName,
-                    sizeof (VariableName)/sizeof (CHAR16),
-                    APPLE_PATH_PROPERTIES_VARIABLE_NAME
                     );
 
                   StrCatS (VariableName, sizeof (VariableName)/sizeof (CHAR16), IndexBuffer);
