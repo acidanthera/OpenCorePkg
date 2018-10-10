@@ -1,5 +1,6 @@
 ## @file
 # Copyright (C) 2018, vit9696.  All rights reserved.<BR>
+# Copyright (C) 2018, Download-Fritz.  All rights reserved.<BR>
 #
 # Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 # 
@@ -18,7 +19,7 @@
   PLATFORM_GUID           = 6B1D3AB4-5C85-462D-9DC5-480F8B17D5CB
   PLATFORM_VERSION        = 1.0
   SUPPORTED_ARCHITECTURES = X64
-  BUILD_TARGETS           = RELEASE|DEBUG
+  BUILD_TARGETS           = RELEASE|DEBUG|NOOPT
   SKUID_IDENTIFIER        = DEFAULT
   DSC_SPECIFICATION       = 0x00010006
 
