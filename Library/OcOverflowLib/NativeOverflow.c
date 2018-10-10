@@ -41,7 +41,7 @@ BOOLEAN
     return OcOverflowAddU64 (A, B, Result);
   }
 
-  return OcOverflowAddU32 (A, B, Result);
+  return OcOverflowAddU32 ((UINT32)A, (UINT32)B, (UINT32 *)Result);
 }
 
 BOOLEAN
@@ -55,7 +55,7 @@ BOOLEAN
     return OcOverflowSubU64 (A, B, Result);
   }
 
-  return OcOverflowSubU32 (A, B, Result);
+  return OcOverflowSubU32 ((UINT32)A, (UINT32)B, (UINT32 *)Result);
 }
 
 BOOLEAN
@@ -69,7 +69,7 @@ BOOLEAN
     return OcOverflowMulU64 (A, B, Result);
   }
 
-  return OcOverflowMulU32 (A, B, Result);
+  return OcOverflowMulU32 ((UINT32)A, (UINT32)B, (UINT32 *)Result);
 }
 
 BOOLEAN
@@ -83,7 +83,7 @@ BOOLEAN
     return OcOverflowAddS64 (A, B, Result);
   }
 
-  return OcOverflowAddS32 (A, B, Result);
+  return OcOverflowAddS32 ((INT32)A, (INT32)B, (INT32 *)Result);
 }
 
 BOOLEAN
@@ -97,7 +97,7 @@ BOOLEAN
     return OcOverflowSubS64 (A, B, Result);
   }
 
-  return OcOverflowSubS32 (A, B, Result);
+  return OcOverflowSubS32 ((INT32)A, (INT32)B, (INT32 *)Result);
 }
 
 BOOLEAN
@@ -111,5 +111,5 @@ BOOLEAN
     return OcOverflowMulS64 (A, B, Result);
   }
 
-  return OcOverflowMulS32 (A, B, Result);
+  return OcOverflowMulS32 ((INT32)A, (INT32)B, (INT32 *)Result);
 }
