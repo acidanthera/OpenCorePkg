@@ -952,6 +952,7 @@ OcDevicePathPropertyInstallProtocol (
                     Index
                     );
 
+                  StrCpyS (VariableName, sizeof (VariableName)/sizeof (CHAR16), APPLE_PATH_PROPERTIES_VARIABLE_NAME);
                   StrCatS (VariableName, sizeof (VariableName)/sizeof (CHAR16), IndexBuffer);
 
                   VariableSize = MIN (
@@ -985,6 +986,7 @@ OcDevicePathPropertyInstallProtocol (
                     Index
                     );
 
+                  StrCpyS (VariableName, sizeof (VariableName)/sizeof (CHAR16), APPLE_PATH_PROPERTIES_VARIABLE_NAME);
                   StrCatS (VariableName, sizeof (VariableName)/sizeof (CHAR16), IndexBuffer);
 
                   VariableSize = 0;
