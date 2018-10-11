@@ -1,5 +1,5 @@
 /** @file
-  Copyright (C) 2017, CupertinoNet. All rights reserved.
+  Copyright (C) 2017, vit9696. All rights reserved.
 
   All rights reserved.
 
