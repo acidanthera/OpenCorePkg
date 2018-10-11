@@ -594,7 +594,7 @@ DppDbGetPropertyBuffer (
       Status = EFI_SUCCESS;
 
       if (!Result) {
-        BufferNode = &Buffer->Nodes[0];
+        BufferNode = &(&Buffer->Nodes)[0];
 
         do {
           BufferSize = GetDevicePathSize (&NodeWalker->DevicePath);
@@ -765,7 +765,7 @@ InternalReadEfiVariableProperties (
         Status = EFI_NOT_FOUND;
       } else if (EFI_ERROR (Status)) {
         if ((Buffer->Hdr.MustBe1 == 1) && (Buffer->Hdr.NumberOfNodes > 0)) {
-          BufferNode    = &Buffer->Nodes[0];
+          BufferNode    = &(&Buffer->Nodes)[0];
           NumberOfNodes = 0;
 
           do {
