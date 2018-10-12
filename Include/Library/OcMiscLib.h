@@ -17,11 +17,9 @@
 
 // PLATFORM_DATA_HEADER
 typedef struct {
-  struct {
-    CHAR16 Reserved[8];
-    UINT32 KeySize;
-    UINT32 DataSize;
-  } Hdr;
+  CHAR16 Reserved[8];
+  UINT32 KeySize;
+  UINT32 DataSize;
 } PLATFORM_DATA_HEADER;
 
 // Base64Decode

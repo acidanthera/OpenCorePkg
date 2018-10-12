@@ -92,10 +92,10 @@ typedef struct {
     )
 
 #define EFI_DEVICE_PATH_PROPERTY_SIZE(Property)  \
-  ((Property)->Name->Hdr.Size + (Property)->Value->Hdr.Size)
+  ((Property)->Name->Size + (Property)->Value->Size)
 
 #define EFI_DEVICE_PATH_PROPERTY_VALUE_SIZE(Property)  \
-  ((Property)->Value->Hdr.Size - sizeof ((Property)->Value->Hdr))
+  ((Property)->Value->Size - sizeof (*(Property)->Value))
 
 #define NEXT_EFI_DEVICE_PATH_PROPERTY(Property)                   \
   (EFI_DEVICE_PATH_PROPERTY *)(                                   \
@@ -384,7 +384,7 @@ DppDbSetProperty (
   Property = InternalGetProperty (Name, Node);
 
   if (Property != NULL) {
-    if (Property->Value->Hdr.Size == Size) {
+    if (Property->Value->Size == Size) {
       Result = CompareMem ((VOID *)&Property->Value->Data, Value, Size);
 
       if (Result == 0) {
@@ -408,12 +408,12 @@ DppDbSetProperty (
   Status = EFI_OUT_OF_RESOURCES;
 
   if (Property != NULL) {
-    PropertyNameSize   = (StrSize (Name) + sizeof (PropertyData->Hdr));
+    PropertyNameSize   = (StrSize (Name) + sizeof (*PropertyData));
     PropertyData       = AllocateZeroPool (PropertyNameSize);
     Property->Name     = PropertyData;
 
     if (PropertyData != NULL) {
-      PropertyDataSize = (Size + sizeof (PropertyData->Hdr));
+      PropertyDataSize = (Size + sizeof (*PropertyData));
       PropertyData     = AllocateZeroPool (PropertyDataSize);
       Property->Value  = PropertyData;
 
@@ -422,11 +422,11 @@ DppDbSetProperty (
 
         StrCpyS ((CHAR16 *)&Property->Name->Data, PropertyNameSize / sizeof (CHAR16), Name);
 
-        Property->Name->Hdr.Size = (UINT32)PropertyNameSize;
+        Property->Name->Size = (UINT32)PropertyNameSize;
 
         CopyMem ((VOID *)&Property->Value->Data, (VOID *)Value, Size);
 
-        Property->Value->Hdr.Size = (UINT32)PropertyDataSize;
+        Property->Value->Size = (UINT32)PropertyDataSize;
 
         InsertTailList (&Node->Hdr.Properties, &Property->Link);
 
@@ -548,7 +548,7 @@ DppDbGetPropertyBuffer (
 
     NodeWalker    = PROPERTY_NODE_FROM_LIST_ENTRY (GetFirstNode (Nodes));
     Result        = IsNull (Nodes, &NodeWalker->Hdr.Link);
-    BufferSize    = sizeof (Buffer->Hdr);
+    BufferSize    = sizeof (*Buffer);
     NumberOfNodes = 0;
 
     while (!Result) {
@@ -582,9 +582,9 @@ DppDbGetPropertyBuffer (
     Status = EFI_BUFFER_TOO_SMALL;
 
     if (!Result) {
-      Buffer->Hdr.Size          = (UINT32)BufferSize;
-      Buffer->Hdr.MustBe1       = 1;
-      Buffer->Hdr.NumberOfNodes = NumberOfNodes;
+      Buffer->Size          = (UINT32)BufferSize;
+      Buffer->MustBe1       = 1;
+      Buffer->NumberOfNodes = NumberOfNodes;
 
       NodeWalker = PROPERTY_NODE_FROM_LIST_ENTRY (
                      GetFirstNode (Nodes)
@@ -619,19 +619,18 @@ DppDbGetPropertyBuffer (
             CopyMem (
               BufferPtr,
               (VOID *)Property->Name,
-              (UINTN)Property->Name->Hdr.Size
+              (UINTN)Property->Name->Size
               );
 
             CopyMem (
-              (VOID *)((UINTN)BufferPtr + (UINTN)Property->Name->Hdr.Size),
+              (VOID *)((UINTN)BufferPtr + (UINTN)Property->Name->Size),
               Property->Value,
-              (UINTN)Property->Value->Hdr.Size
+              (UINTN)Property->Value->Size
               );
 
             BufferPtr = (VOID *)(
                           (UINTN)BufferPtr
-                            + Property->Name->Hdr.Size
-                              + Property->Value->Hdr.Size
+                            + Property->Name->Size + Property->Value->Size
                           );
 
             BufferSize += EFI_DEVICE_PATH_PROPERTY_SIZE (Property);
@@ -759,12 +758,12 @@ InternalReadEfiVariableProperties (
         BufferSize -= DataSize;
       }
 
-      if (Buffer->Hdr.Size != BufferSize) {
+      if (Buffer->Size != BufferSize) {
         gBS->FreePool ((VOID *)Buffer);
 
         Status = EFI_NOT_FOUND;
       } else if (EFI_ERROR (Status)) {
-        if ((Buffer->Hdr.MustBe1 == 1) && (Buffer->Hdr.NumberOfNodes > 0)) {
+        if ((Buffer->MustBe1 == 1) && (Buffer->NumberOfNodes > 0)) {
           BufferNode    = &Buffer->Nodes[0];
           NumberOfNodes = 0;
 
@@ -773,11 +772,11 @@ InternalReadEfiVariableProperties (
 
             if (BufferNode->Hdr.NumberOfProperties > 0) {
               NameData = (EFI_DEVICE_PATH_PROPERTY_DATA *)(
-                           (UINTN)BufferNode + DataSize + sizeof (Buffer->Hdr)
+                           (UINTN)BufferNode + DataSize + sizeof (*Buffer)
                            );
 
               ValueData = (EFI_DEVICE_PATH_PROPERTY_DATA *)(
-                            (UINTN)NameData + NameData->Hdr.Size
+                            (UINTN)NameData + NameData->Size
                             );
 
               Index = 0;
@@ -789,20 +788,20 @@ InternalReadEfiVariableProperties (
                                                             (CHAR16 *)&NameData->Data,
                                                             (VOID *)&ValueData->Data,
                                                             (UINTN)(
-                                                              ValueData->Hdr.Size
-                                                                - sizeof (ValueData->Hdr.Size)
+                                                              ValueData->Size
+                                                                - sizeof (ValueData->Size)
                                                               )
                                                             );
 
                 ++Index;
 
                 NameData = (EFI_DEVICE_PATH_PROPERTY_DATA *)(
-                             (UINTN)ValueData + ValueData->Hdr.Size
+                             (UINTN)ValueData + ValueData->Size
                              );
 
                 ValueData =
                   (EFI_DEVICE_PATH_PROPERTY_DATA *)(
-                    (UINTN)ValueData + ValueData->Hdr.Size + NameData->Hdr.Size
+                    (UINTN)ValueData + ValueData->Size + NameData->Size
                     );
               } while (Index < BufferNode->Hdr.NumberOfProperties);
             }
@@ -812,7 +811,7 @@ InternalReadEfiVariableProperties (
             BufferNode = (EFI_DEVICE_PATH_PROPERTY_BUFFER_NODE *)(
                            (UINTN)BufferNode + (UINTN)BufferNode->Hdr.Size
                            );
-          } while (NumberOfNodes < Buffer->Hdr.NumberOfNodes);
+          } while (NumberOfNodes < Buffer->NumberOfNodes);
         }
 
         gBS->FreePool ((VOID *)Buffer);

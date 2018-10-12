@@ -70,18 +70,18 @@ SetPlatformData (
 
   if (!EFI_ERROR (Status)) {
     KeySize   = (UINT32)(AsciiStrSize (Key) * (sizeof (CHAR16)));
-    Entry     = AllocateZeroPool (DataSize + sizeof (Entry->Hdr) + KeySize);
+    Entry     = AllocateZeroPool (DataSize + sizeof (*Entry) + KeySize);
     Status    = EFI_OUT_OF_RESOURCES;
 
     if (Entry) {
 
-      Entry->Hdr.KeySize  = KeySize;
-      Entry->Hdr.DataSize = DataSize;
+      Entry->KeySize  = KeySize;
+      Entry->DataSize = DataSize;
       DataString          = NULL;
 
-      OcAsciiStrToUnicode (Key, (CHAR16 *)(((UINTN)Entry) + sizeof (Entry->Hdr)), 0);
+      OcAsciiStrToUnicode (Key, (CHAR16 *)(((UINTN)Entry) + sizeof (*Entry)), 0);
 
-      CopyMem ((VOID *)(((UINTN)Entry) + sizeof (Entry->Hdr) + Entry->Hdr.KeySize), Data, (UINTN)Entry->Hdr.DataSize);
+      CopyMem ((VOID *)(((UINTN)Entry) + sizeof (*Entry) + Entry->KeySize), Data, (UINTN)Entry->DataSize);
 
       Status = DataHub->LogData (
                           DataHub,
@@ -89,7 +89,7 @@ SetPlatformData (
                           &gApplePlatformProducerNameGuid,
                           EFI_DATA_RECORD_CLASS_DATA,
                           Entry,
-                          (sizeof (Entry->Hdr) + Entry->Hdr.KeySize + Entry->Hdr.DataSize)
+                          (sizeof (*Entry) + Entry->KeySize + Entry->DataSize)
                           );
 
       if (DataSize < 32) {
