@@ -86,7 +86,7 @@ MachoSymbolIsSmcp64 (
   ASSERT (Symbol != NULL);
   ASSERT (StringTable != NULL);
 
-  Name = (StringTable + Symbol->StringIndex);
+  Name = (StringTable + Symbol->UnifiedName.StringIndex);
   return (AsciiStrStr (Name, SUPER_METACLASS_POINTER_TOKEN) != NULL);
 }
 
@@ -108,7 +108,7 @@ MachoSymbolIsMetaclassPointer64 (
   ASSERT (Symbol != NULL);
   ASSERT (StringTable != NULL);
 
-  Name = (StringTable + Symbol->StringIndex);
+  Name = (StringTable + Symbol->UnifiedName.StringIndex);
   return (AsciiStrStr (Name, METACLASS_TOKEN) != NULL);
 }
 
@@ -148,7 +148,7 @@ MachoGetClassNameFromSuperMetaClassPointer (
     return FALSE;
   }
 
-  SuperMetaClassName = (StringTable + SmcpSymbol->StringIndex);
+  SuperMetaClassName = (StringTable + SmcpSymbol->UnifiedName.StringIndex);
 
   PrefixLength = (ARRAY_SIZE (OSOBJ_PREFIX) - 1);
   StringLength = AsciiStrLen (SuperMetaClassName);
@@ -274,7 +274,7 @@ MachoGetClassNameFromMetaClassPointer (
     return FALSE;
   }
 
-  MetaClassName = (StringTable + MetaClassPtrSymbol->StringIndex);
+  MetaClassName = (StringTable + MetaClassPtrSymbol->UnifiedName.StringIndex);
 
   PrefixLength = (ARRAY_SIZE (OSOBJ_PREFIX) - 1);
   StringLength = AsciiStrLen (MetaClassName);
@@ -474,7 +474,7 @@ MachoSymbolIsVtable64 (
   ASSERT (Symbol != NULL);
   ASSERT (StringTable != NULL);
 
-  Name = (StringTable + Symbol->StringIndex);
+  Name = (StringTable + Symbol->UnifiedName.StringIndex);
   //
   // Implicitely checks for METACLASS_VTABLE_PREFIX.
   //

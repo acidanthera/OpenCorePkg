@@ -170,7 +170,7 @@ MachoGetSymbolByName (
   for (Index = 0; Index < NumberOfSymbols; ++Index) {
     Result = AsciiStrCmp (
                Name,
-               (StringTable + SymbolTable[Index].StringIndex)
+               (StringTable + SymbolTable[Index].UnifiedName.StringIndex)
                );
     if (Result == 0) {
       return &SymbolTable[Index];
@@ -303,7 +303,7 @@ MachoGetCxxSymbolByRelocation64 (
               );
   for (Index = 0; Index < NumberOfSymbols; ++Index) {
     Symbol = &SymbolTable[Index];
-    Name   = (StringTable + Symbol->StringIndex);
+    Name   = (StringTable + Symbol->UnifiedName.StringIndex);
 
     if ((Symbol->Value == Value) && MachoIsSymbolNameCxx (Name)) {
       return Symbol;

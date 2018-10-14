@@ -140,7 +140,7 @@ MachoGetSegmentByName64 (
   SegmentWalker = (MACH_SEGMENT_COMMAND_64 *)&MachHeader->Commands[0];
 
   for (Index = 0; Index < MachHeader->NumberOfCommands; ++Index) {
-    if (SegmentWalker->Command.Type == MACH_LOAD_COMMAND_SEGMENT_64) {
+    if (SegmentWalker->Hdr.Type == MACH_LOAD_COMMAND_SEGMENT_64) {
       Result = AsciiStrnCmp (
                  SegmentWalker->SegmentName,
                  SegmentName,
@@ -278,7 +278,7 @@ MachoGetFirstSegment64 (
   SegmentWalker = (MACH_SEGMENT_COMMAND_64 *)&MachHeader->Commands[0];
 
   for (Index = 0; Index < MachHeader->NumberOfCommands; ++Index) {
-    if (SegmentWalker->Command.Type == MACH_LOAD_COMMAND_SEGMENT_64) {
+    if (SegmentWalker->Hdr.Type == MACH_LOAD_COMMAND_SEGMENT_64) {
       return (MACH_SEGMENT_COMMAND_64 *)SegmentWalker;
     }
 
@@ -329,7 +329,7 @@ MachoGetNextSegment64 (
   SegmentCommand = NEXT_MACH_SEGMENT_64 (SegmentCommand);
 
   for (; Index < MachHeader->NumberOfCommands; ++Index) {
-    if (SegmentCommand->Command.Type == MACH_LOAD_COMMAND_SEGMENT_64) {
+    if (SegmentCommand->Hdr.Type == MACH_LOAD_COMMAND_SEGMENT_64) {
       return (MACH_SEGMENT_COMMAND_64 *)SegmentCommand;
     }
 
