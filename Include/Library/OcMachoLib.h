@@ -309,7 +309,7 @@ MachoGetCxxSymbolByRelocation64 (
 
 **/
 BOOLEAN
-MachoIsNamePureVirtual (
+MachoIsSymbolNamePureVirtual (
   IN CONST CHAR8  *Name
   );
 
@@ -320,7 +320,7 @@ MachoIsNamePureVirtual (
 
 **/
 BOOLEAN
-MachoIsNamePadslot (
+MachoIsSymbolNamePadslot (
   IN CONST CHAR8  *Name
   );
 

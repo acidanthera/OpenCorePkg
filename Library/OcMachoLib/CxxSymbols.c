@@ -45,7 +45,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 BOOLEAN
-MachoIsNamePureVirtual (
+MachoIsSymbolNamePureVirtual (
   IN CONST CHAR8  *Name
   )
 {
@@ -60,7 +60,7 @@ MachoIsNamePureVirtual (
 
 **/
 BOOLEAN
-MachoIsNamePadslot (
+MachoIsSymbolNamePadslot (
   IN CONST CHAR8  *Name
   )
 {
