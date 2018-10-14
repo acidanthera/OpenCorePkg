@@ -60,7 +60,6 @@
   OcSupportPkg/Library/OcDevicePathLib/OcDevicePathLib.inf
   OcSupportPkg/Library/OcFileLib/OcFileLib.inf
   OcSupportPkg/Library/OcMiscLib/OcMiscLib.inf
-  OcSupportPkg/Library/OcPrintLib/OcPrintLib.inf
   OcSupportPkg/Library/OcProtocolLib/OcProtocolLib.inf
   OcSupportPkg/Library/OcStringLib/OcStringLib.inf
   OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf

@@ -57,9 +57,6 @@
   OcMiscLib|Include/Library/OcMiscLib.h
 
   ##  @libraryclass
-  OcPrintLib|Include/Library/OcPrintLib.h
-
-  ##  @libraryclass
   OcProtocolLib|Include/Library/OcProtocolLib.h
 
   ##  @libraryclass
