@@ -77,4 +77,7 @@
   ##  @libraryclass
   OcFirmwarePasswordLib|Include/Library/OcFirmwarePasswordLib.h
 
+  ##  @libraryclass
+  OcMachoLib|Include/Library/OcMachoLib.h
+
 # [Protocols]
