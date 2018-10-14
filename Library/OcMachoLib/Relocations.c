@@ -63,20 +63,6 @@ MachoPreserveRelocationIntel64 (
 }
 
 /**
-  Returns whether the Relocation shall be preserved.
-  
-  @param[in] Type  The Relocation's type to verify.
-
-**/
-BOOLEAN
-MachoPreserveRelocation (
-  IN UINT8  Type
-  )
-{
-  return MachoPreserveRelocationIntel64 (Type);
-}
-
-/**
   Retrieves a Relocation by the address it targets.
 
   @param[in] NumberOfRelocations  Number of Relocations in Relocations.
