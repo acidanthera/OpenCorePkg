@@ -229,8 +229,10 @@ MachoGetLocalDefinedSymbolByName (
   @param[in]     LinkAddress  The address to be linked against.
   @param[in,out] Symbol       The symbol to be relocated.
 
+  @returns  Whether the operation has been completed successfully.
+
 **/
-VOID
+BOOLEAN
 MachoRelocateSymbol64 (
   IN     CONST MACH_HEADER_64  *MachHeader,
   IN     UINT64                LinkAddress,
@@ -247,7 +249,9 @@ MachoRelocateSymbol64 (
   //
   if (MachoSymbolIsSection (Symbol)) {
     Section = MachoGetSectionByAddress64 (MachHeader, Symbol->Value);
-    ASSERT (Section != NULL);
+    if (Section == NULL) {
+      return FALSE;
+    }
 
     Symbol->Value += ALIGN_VALUE (
                        (Section->Address + LinkAddress),
@@ -255,6 +259,8 @@ MachoRelocateSymbol64 (
                        );
     Symbol->Value -= Section->Address;
   }
+
+  return TRUE;
 }
 
 /**
@@ -298,6 +304,10 @@ MachoGetCxxSymbolByRelocation64 (
   }
 
   Section = MachoGetSectionByIndex64 (MachHeader, Relocation->SymbolNumber);
+  if (Section == NULL) {
+    return NULL;
+  }
+
   Value = *(CONST UINT64 *)(
               (UINTN)MachHeader + Section->Address + Relocation->Address
               );

@@ -273,8 +273,10 @@ MachoGetLocalDefinedSymbolByName (
   @param[in]     LinkAddress  The address to be linked against.
   @param[in,out] Symbol       The symbol to be relocated.
 
+  @returns  Whether the operation has been completed successfully.
+
 **/
-VOID
+BOOLEAN
 MachoRelocateSymbol64 (
   IN     CONST MACH_HEADER_64  *MachHeader,
   IN     UINT64                LinkAddress,
