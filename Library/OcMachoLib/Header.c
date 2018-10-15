@@ -122,10 +122,7 @@ MachoGetFirstCommand64 (
   )
 {
   ASSERT (MachHeader != NULL);
-  //
-  // LoadCommand being past the MachHeader Load Commands is implicitly caught
-  // by the for-loop.
-  //
+
   if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
     return NULL;
   }
@@ -180,8 +177,7 @@ MachoGetSegmentByName64 (
   IN CONST CHAR8           *SegmentName
   )
 {
-  CONST MACH_SEGMENT_COMMAND_64 *SegmentWalker;
-  UINTN                         Index;
+  CONST MACH_SEGMENT_COMMAND_64 *Segment;
   INTN                          Result;
 
   ASSERT (MachHeader != NULL);
@@ -191,21 +187,21 @@ MachoGetSegmentByName64 (
     return NULL;
   }
 
-  SegmentWalker = (MACH_SEGMENT_COMMAND_64 *)&MachHeader->Commands[0];
-
-  for (Index = 0; Index < MachHeader->NumberOfCommands; ++Index) {
-    if (SegmentWalker->Hdr.Type == MACH_LOAD_COMMAND_SEGMENT_64) {
+  for (
+    Segment = MachoGetFirstSegment64 (MachHeader);
+    Segment != NULL;
+    Segment = MachoGetNextSegment64 (MachHeader, Segment)
+    ) {
+    if (Segment->Hdr.Type == MACH_LOAD_COMMAND_SEGMENT_64) {
       Result = AsciiStrnCmp (
-                 SegmentWalker->SegmentName,
+                 Segment->SegmentName,
                  SegmentName,
-                 ARRAY_SIZE (SegmentWalker->SegmentName)
+                 ARRAY_SIZE (Segment->SegmentName)
                  );
       if (Result == 0) {
-        return (MACH_SEGMENT_COMMAND_64 *)SegmentWalker;
+        return (MACH_SEGMENT_COMMAND_64 *)Segment;
       }
     }
-
-    SegmentWalker = NEXT_MACH_SEGMENT_64 (SegmentWalker);
   }
 
   return NULL;
