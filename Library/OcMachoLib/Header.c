@@ -239,9 +239,12 @@ MachoGetSectionByName64 (
   // MH_OBJECT might have sections in segments they do not belong in for
   // performance reasons.  We do not support intermediate objects.
   //
-  ASSERT (MachHeader->FileType != MachHeaderFileTypeObject);
+  if (MachHeader->FileType == MachHeaderFileTypeObject) {
+    ASSERT (FALSE);
+    return NULL;
+  }
 
-  SectionWalker = (MACH_SECTION_64 *)&Segment->Sections[0];
+  SectionWalker = &Segment->Sections[0];
 
   for (Index = 0; Index < Segment->NumberOfSections; ++Index) {
     Result = AsciiStrnCmp (
@@ -249,7 +252,6 @@ MachoGetSectionByName64 (
                SectionName,
                ARRAY_SIZE (SectionWalker->SegmentName)
                );
-
     if (Result == 0) {
       DEBUG_CODE (
         Result = AsciiStrnCmp (
