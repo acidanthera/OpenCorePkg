@@ -380,19 +380,16 @@ MachoGetNextSection64 (
   IN CONST MACH_SECTION_64          *Section
   )
 {
-  MACH_SECTION_64 *FirstSection;
-
   ASSERT (Segment != NULL);
   ASSERT (Section != NULL);
 
-  DEBUG_CODE (
-    FirstSection = MachoGetFirstSection64 (Segment);
-    ASSERT (
-      ((UINTN)(Section - FirstSection) + 1) < Segment->NumberOfSections
-      );
-    );
+  ++Section;
 
-  return (MACH_SECTION_64 *)(Section + 1);
+  if ((UINTN)(Section - Segment->Sections) < Segment->NumberOfSections) {
+    return (MACH_SECTION_64 *)Section;
+  }
+
+  return NULL;
 }
 
 /**
