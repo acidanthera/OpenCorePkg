@@ -499,14 +499,14 @@ MachoIsSymbolNameCxx (
 /**
   Returns the number of VTable entires in VtableData.
 
-  @param[in] VtableData   The VTable's data.
-  @param[in] MachCpuType  CPU Type of the MACH-O.
+  @param[in] MachHeader  Header of the MACH-O.
+  @param[in] VtableData  The VTable's data.
 
 **/
 UINTN
 MachoVtableGetNumberOfEntries64 (
-  IN CONST UINT64   *VtableData,
-  IN MACH_CPU_TYPE  MachCpuType
+  IN CONST MACH_HEADER_64  *MachHeader,
+  IN CONST UINT64          *VtableData
   )
 {
   UINTN Index;
@@ -515,15 +515,14 @@ MachoVtableGetNumberOfEntries64 (
   ASSERT (VtableData != NULL);
 
   NumberOfEntries = 0;
-  //
-  // Assumption: Not ARM (ARM requires an alignment to the function pointer
-  //             retrieved from VtableData).
-  //
-  ASSERT ((MachCpuType != MachCpuTypeArm)
-       && (MachCpuType != MachCpuTypeArm64));
 
-  for (Index = VTABLE_HEADER_LEN_64; VtableData[Index] != 0; ++Index) {
-    ++NumberOfEntries;
+  if ((MachHeader->CpuType != MachCpuTypeArm)
+   && (MachHeader->CpuType != MachCpuTypeArm64)) {
+    for (Index = VTABLE_HEADER_LEN_64; VtableData[Index] != 0; ++Index) {
+      ++NumberOfEntries;
+    }
+  } else {
+    ASSERT (FALSE);
   }
 
   return NumberOfEntries;
@@ -563,10 +562,10 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
   ASSERT (Smcp != NULL);
 
   Relocation = MachoGetRelocationByOffset (
+                 MachHeader,
                  NumberOfRelocations,
                  Relocations,
-                 Smcp->Value,
-                 MachHeader->MachCpuType
+                 Smcp->Value
                  );
   if (Relocation == NULL) {
     return NULL;

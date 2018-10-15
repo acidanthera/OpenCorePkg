@@ -496,14 +496,14 @@ MachoIsSymbolNameCxx (
 /**
   Returns the number of VTable entires in VtableData.
 
-  @param[in] VtableData   The VTable's data.
-  @param[in] MachCpuType  CPU Type of the MACH-O.
+  @param[in] MachHeader  Header of the MACH-O.
+  @param[in] VtableData  The VTable's data.
 
 **/
 UINTN
 MachoVtableGetNumberOfEntries64 (
-  IN CONST UINT64   *VtableData,
-  IN MACH_CPU_TYPE  MachCpuType
+  IN CONST MACH_HEADER_64  *MachHeader,
+  IN CONST UINT64          *VtableData
   );
 
 /**
@@ -591,20 +591,20 @@ MachoPreserveRelocationIntel64 (
 /**
   Retrieves a Relocation by the address it targets.
 
+  @param[in] MachHeader           Header of the MACH-O.
   @param[in] NumberOfRelocations  Number of Relocations in Relocations.
   @param[in] Relocations          The Relocations to search.
   @param[in] Address              The address to search for.
-  @param[in] MachCpuType          CPU Type of the MACH-O.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_RELOCATION_INFO *
 MachoGetRelocationByOffset (
+  IN CONST MACH_HEADER_64        *MachHeader,
   IN UINTN                       NumberOfRelocations,
   IN CONST MACH_RELOCATION_INFO  *Relocations,
-  IN UINT64                      Address,
-  IN MACH_CPU_TYPE               MachCpuType
+  IN UINT64                      Address
   );
 
 #endif // OC_MACHO_LIB_H_

@@ -65,20 +65,20 @@ MachoPreserveRelocationIntel64 (
 /**
   Retrieves a Relocation by the address it targets.
 
+  @param[in] MachHeader           Header of the MACH-O.
   @param[in] NumberOfRelocations  Number of Relocations in Relocations.
   @param[in] Relocations          The Relocations to search.
   @param[in] Address              The address to search for.
-  @param[in] MachCpuType          CPU Type of the MACH-O.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_RELOCATION_INFO *
 MachoGetRelocationByOffset (
+  IN CONST MACH_HEADER_64        *MachHeader,
   IN UINTN                       NumberOfRelocations,
   IN CONST MACH_RELOCATION_INFO  *Relocations,
-  IN UINT64                      Address,
-  IN MACH_CPU_TYPE               MachCpuType
+  IN UINT64                      Address
   )
 {
   UINTN                      Index;
@@ -107,7 +107,7 @@ MachoGetRelocationByOffset (
     //
     // Relocation Pairs can be skipped.
     //
-    if ((MachCpuType == MachCpuTypeX8664)
+    if ((MachHeader->CpuType == MachCpuTypeX8664)
      && MachoRelocationIsPairIntel64 (Relocation->Type)) {
       ++Index;
       ++Relocation;
