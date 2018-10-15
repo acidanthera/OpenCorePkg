@@ -18,6 +18,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
+#include <Library/OcMachoLib.h>
 
 /**
   Returns the last virtual address of a MACH-O.
@@ -30,11 +31,10 @@ MachoGetLastAddress64 (
   IN CONST MACH_HEADER_64  *MachHeader
   )
 {
-  UINT64                LastAddress;
+  UINT64                        LastAddress;
 
-  MACH_LOAD_COMMAND_PTR Command;
-  UINTN                 Index;
-  UINT64                Address;
+  CONST MACH_SEGMENT_COMMAND_64 *Segment;
+  UINT64                        Address;
 
   ASSERT (MachHeader != NULL);
  
@@ -44,18 +44,16 @@ MachoGetLastAddress64 (
 
   LastAddress = 0;
 
-  Command.Hdr = &MachHeader->Commands[0];
+  for (
+    Segment = MachoGetFirstSegment64 (MachHeader);
+    Segment != NULL;
+    Segment = MachoGetNextSegment64 (MachHeader, Segment)
+    ) {
+    Address = (Segment->VirtualAddress + Segment->Hdr.Size);
 
-  for (Index = 0; Index < MachHeader->NumberOfCommands; ++Index) {
-    if (Command.Hdr->Type == MACH_LOAD_COMMAND_SEGMENT_64) {
-      Address = (Command.Segment64->VirtualAddress + Command.Hdr->Size);
-
-      if (Address > LastAddress) {
-        LastAddress = Address;
-      }
+    if (Address > LastAddress) {
+      LastAddress = Address;
     }
-
-    Command.Hdr = NEXT_MACH_LOAD_COMMAND (Command.Hdr);
   }
 
   return LastAddress;
