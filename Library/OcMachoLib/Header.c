@@ -143,7 +143,6 @@ MachoGetSegmentByName64 (
 
   ASSERT (MachHeader != NULL);
   ASSERT (SegmentName != NULL);
-  ASSERT (SegmentName[0] != '\0');
 
   if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
     return NULL;
@@ -192,9 +191,7 @@ MachoGetSectionByName64 (
 
   ASSERT (MachHeader != NULL);
   ASSERT (Segment != NULL);
-  ASSERT (Segment->SegmentName[0] != '\0');
   ASSERT (SectionName != NULL);
-  ASSERT (SectionName[0] != '\0');
 
   if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
     return NULL;
@@ -257,9 +254,7 @@ MachoGetSegmentSectionByName64 (
 
   ASSERT (MachHeader != NULL);
   ASSERT (SegmentName != NULL);
-  ASSERT (SegmentName[0] != '\0');
   ASSERT (SectionName != NULL);
-  ASSERT (SectionName[0] != '\0');
 
   if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
     return NULL;
@@ -328,7 +323,6 @@ MachoGetNextSegment64 (
   UINTN                         Index;
 
   ASSERT (MachHeader != NULL);
-  ASSERT (MachHeader->NumberOfCommands > 1);
   ASSERT (Segment != NULL);
 
   if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
@@ -377,7 +371,6 @@ MachoGetFirstSection64 (
   )
 {
   ASSERT (Segment != NULL);
-  ASSERT (Segment->NumberOfSections > 0);
 
   if (Segment->NumberOfSections > 0) {
     return (MACH_SECTION_64 *)&Segment->Sections[0];
@@ -404,7 +397,6 @@ MachoGetNextSection64 (
   MACH_SECTION_64 *FirstSection;
 
   ASSERT (Segment != NULL);
-  ASSERT (Segment->NumberOfSections > 1);
   ASSERT (Section != NULL);
 
   DEBUG_CODE (
