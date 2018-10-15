@@ -123,6 +123,19 @@ MachoGetFirstCommand64 (
   IN MACH_LOAD_COMMAND_TYPE  LoadCommandType
   )
 {
+  ASSERT (MachHeader != NULL);
+  //
+  // LoadCommand being past the MachHeader Load Commands is implicitly caught
+  // by the for-loop.
+  //
+  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
+    return NULL;
+  }
+
+  if (MachHeader->Commands[0].Type == LoadCommandType) {
+    return (MACH_LOAD_COMMAND *)&MachHeader->Commands[0];
+  }
+
   return MachoGetNextCommand64 (
            MachHeader,
            LoadCommandType,
