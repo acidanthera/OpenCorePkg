@@ -37,7 +37,10 @@ MachoGetLastAddress64 (
   UINT64                Address;
 
   ASSERT (MachHeader != NULL);
-  ASSERT (MachHeader->Signature == MACH_HEADER_64_SIGNATURE);
+ 
+  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
+    return 0;
+  }
 
   LastAddress = 0;
 
@@ -77,7 +80,10 @@ MachoGetFirstCommand64 (
   UINTN                   Index;
 
   ASSERT (MachHeader != NULL);
-  ASSERT (MachHeader->Signature == MACH_HEADER_64_SIGNATURE);
+
+  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
+    return NULL;
+  }
 
   CommandsWalker = &MachHeader->Commands[0];
 
@@ -106,7 +112,10 @@ MachoGetUuid64 (
   )
 {
   ASSERT (MachHeader != NULL);
-  ASSERT (MachHeader->Signature == MACH_HEADER_64_SIGNATURE);
+  
+  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
+    return NULL;
+  }
 
   return (MACH_UUID_COMMAND *)(
            MachoGetFirstCommand64 (MachHeader, MACH_LOAD_COMMAND_UUID)
@@ -133,9 +142,12 @@ MachoGetSegmentByName64 (
   INTN                          Result;
 
   ASSERT (MachHeader != NULL);
-  ASSERT (MachHeader->Signature == MACH_HEADER_64_SIGNATURE);
   ASSERT (SegmentName != NULL);
   ASSERT (SegmentName[0] != '\0');
+
+  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
+    return NULL;
+  }
 
   SegmentWalker = (MACH_SEGMENT_COMMAND_64 *)&MachHeader->Commands[0];
 
@@ -179,11 +191,14 @@ MachoGetSectionByName64 (
   INTN                  Result;
 
   ASSERT (MachHeader != NULL);
-  ASSERT (MachHeader->Signature == MACH_HEADER_64_SIGNATURE);
   ASSERT (Segment != NULL);
   ASSERT (Segment->SegmentName[0] != '\0');
   ASSERT (SectionName != NULL);
   ASSERT (SectionName[0] != '\0');
+
+  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
+    return NULL;
+  }
   //
   // MH_OBJECT might have sections in segments they do not belong in for
   // performance reasons.  We do not support intermediate objects.
@@ -241,11 +256,14 @@ MachoGetSegmentSectionByName64 (
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
 
   ASSERT (MachHeader != NULL);
-  ASSERT (MachHeader->Signature == MACH_HEADER_64_SIGNATURE);
   ASSERT (SegmentName != NULL);
   ASSERT (SegmentName[0] != '\0');
   ASSERT (SectionName != NULL);
   ASSERT (SectionName[0] != '\0');
+
+  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
+    return NULL;
+  }
 
   Segment = MachoGetSegmentByName64 (MachHeader, SegmentName);
 
@@ -273,7 +291,10 @@ MachoGetFirstSegment64 (
   UINTN                         Index;
 
   ASSERT (MachHeader != NULL);
-  ASSERT (MachHeader->Signature == MACH_HEADER_64_SIGNATURE);
+
+  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
+    return NULL;
+  }
 
   SegmentWalker = (MACH_SEGMENT_COMMAND_64 *)&MachHeader->Commands[0];
 
@@ -307,9 +328,12 @@ MachoGetNextSegment64 (
   UINTN                         Index;
 
   ASSERT (MachHeader != NULL);
-  ASSERT (MachHeader->Signature == MACH_HEADER_64_SIGNATURE);
   ASSERT (MachHeader->NumberOfCommands > 1);
   ASSERT (Segment != NULL);
+
+  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
+    return NULL;
+  }
 
   SegmentCommand = (MACH_SEGMENT_COMMAND_64 *)&MachHeader->Commands[0];
 
@@ -411,6 +435,12 @@ MachoGetSectionByIndex64 (
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
   UINTN                         SectionIndex;
 
+  ASSERT (MachHeader != NULL);
+
+  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
+    return NULL;
+  }
+
   SectionIndex = 0;
 
   for (
@@ -446,6 +476,12 @@ MachoGetSectionByAddress64 (
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
   CONST MACH_SECTION_64         *Section;
   UINTN                         Index;
+
+  ASSERT (MachHeader != NULL);
+
+  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
+    return NULL;
+  }
 
   for (
     Segment = MachoGetFirstSegment64 (MachHeader);
