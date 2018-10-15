@@ -66,6 +66,53 @@ MachoGetLastAddress64 (
 
   @param[in] MachHeader       Header of the MACH-O.
   @param[in] LoadCommandType  Type of the Load Command to retrieve.
+  @param[in] LoadCommand      Previous Load Command.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_LOAD_COMMAND *
+MachoGetNextCommand64 (
+  IN CONST MACH_HEADER_64     *MachHeader,
+  IN MACH_LOAD_COMMAND_TYPE   LoadCommandType,
+  IN CONST MACH_LOAD_COMMAND  *LoadCommand
+  )
+{
+  CONST MACH_LOAD_COMMAND *CommandsWalker;
+  UINTN                   Index;
+
+  ASSERT (MachHeader != NULL);
+  //
+  // LoadCommand being past the MachHeader Load Commands is implicitly caught
+  // by the for-loop.
+  //
+  if ((MachHeader->Signature != MACH_HEADER_64_SIGNATURE)
+   || (LoadCommand < MachHeader->Commands)) {
+    return NULL;
+  }
+
+  CommandsWalker = LoadCommand;
+
+  for (
+    Index = ((UINTN)(LoadCommand - MachHeader->Commands) + 1);
+    Index < MachHeader->NumberOfCommands;
+    ++Index
+    ) {
+    if (CommandsWalker->Type == LoadCommandType) {
+      return (MACH_LOAD_COMMAND *)CommandsWalker;
+    }
+
+    CommandsWalker = NEXT_MACH_LOAD_COMMAND (CommandsWalker);
+  }
+
+  return NULL;
+}
+
+/**
+  Retrieves the first Load Command of type LoadCommandType.
+
+  @param[in] MachHeader       Header of the MACH-O.
+  @param[in] LoadCommandType  Type of the Load Command to retrieve.
 
   @retval NULL  NULL is returned on failure.
 
@@ -76,26 +123,11 @@ MachoGetFirstCommand64 (
   IN MACH_LOAD_COMMAND_TYPE  LoadCommandType
   )
 {
-  CONST MACH_LOAD_COMMAND *CommandsWalker;
-  UINTN                   Index;
-
-  ASSERT (MachHeader != NULL);
-
-  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
-    return NULL;
-  }
-
-  CommandsWalker = &MachHeader->Commands[0];
-
-  for (Index = 0; Index < MachHeader->NumberOfCommands; ++Index) {
-    if (CommandsWalker->Type == LoadCommandType) {
-      return (MACH_LOAD_COMMAND *)CommandsWalker;
-    }
-
-    CommandsWalker = NEXT_MACH_LOAD_COMMAND (CommandsWalker);
-  }
-
-  return NULL;
+  return MachoGetNextCommand64 (
+           MachHeader,
+           LoadCommandType,
+           &MachHeader->Commands[0]
+           );
 }
 
 /**

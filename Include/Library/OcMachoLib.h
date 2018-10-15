@@ -44,6 +44,23 @@ MachoGetFirstCommand64 (
   );
 
 /**
+  Retrieves the first Load Command of type LoadCommandType.
+
+  @param[in] MachHeader       Header of the MACH-O.
+  @param[in] LoadCommandType  Type of the Load Command to retrieve.
+  @param[in] LoadCommand      Previous Load Command.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_LOAD_COMMAND *
+MachoGetNextCommand64 (
+  IN CONST MACH_HEADER_64     *MachHeader,
+  IN MACH_LOAD_COMMAND_TYPE   LoadCommandType,
+  IN CONST MACH_LOAD_COMMAND  *LoadCommand
+  );
+
+/**
   Retrieves the first UUID Load Command.
 
   @param[in] MachHeader  Header of the MACH-O.
