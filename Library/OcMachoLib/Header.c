@@ -314,26 +314,9 @@ MachoGetFirstSegment64 (
   IN CONST MACH_HEADER_64  *MachHeader
   )
 {
-  CONST MACH_SEGMENT_COMMAND_64 *SegmentWalker;
-  UINTN                         Index;
-
-  ASSERT (MachHeader != NULL);
-
-  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
-    return NULL;
-  }
-
-  SegmentWalker = (MACH_SEGMENT_COMMAND_64 *)&MachHeader->Commands[0];
-
-  for (Index = 0; Index < MachHeader->NumberOfCommands; ++Index) {
-    if (SegmentWalker->Hdr.Type == MACH_LOAD_COMMAND_SEGMENT_64) {
-      return (MACH_SEGMENT_COMMAND_64 *)SegmentWalker;
-    }
-
-    SegmentWalker = NEXT_MACH_SEGMENT_64 (SegmentWalker);
-  }
-
-  return NULL;
+  return (MACH_SEGMENT_COMMAND_64 *)(
+           MachoGetFirstCommand64 (MachHeader, MACH_LOAD_COMMAND_SEGMENT_64)
+           );
 }
 
 /**
@@ -351,42 +334,13 @@ MachoGetNextSegment64 (
   IN CONST MACH_SEGMENT_COMMAND_64  *Segment
   )
 {
-  CONST MACH_SEGMENT_COMMAND_64 *SegmentCommand;
-  UINTN                         Index;
-
-  ASSERT (MachHeader != NULL);
-  ASSERT (Segment != NULL);
-
-  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
-    return NULL;
-  }
-
-  SegmentCommand = (MACH_SEGMENT_COMMAND_64 *)&MachHeader->Commands[0];
-
-  for (Index = 0; Index < MachHeader->NumberOfCommands; ++Index) {
-    if (SegmentCommand == Segment) {
-      break;
-    }
-
-    SegmentCommand = NEXT_MACH_SEGMENT_64 (SegmentCommand);
-  }
-
-  if (Index == MachHeader->NumberOfCommands) {
-    return NULL;
-  }
-
-  ++Index;
-  SegmentCommand = NEXT_MACH_SEGMENT_64 (SegmentCommand);
-
-  for (; Index < MachHeader->NumberOfCommands; ++Index) {
-    if (SegmentCommand->Hdr.Type == MACH_LOAD_COMMAND_SEGMENT_64) {
-      return (MACH_SEGMENT_COMMAND_64 *)SegmentCommand;
-    }
-
-    SegmentCommand = NEXT_MACH_SEGMENT_64 (SegmentCommand);
-  }
-
-  return NULL;
+  return (MACH_SEGMENT_COMMAND_64 *)(
+           MachoGetNextCommand64 (
+             MachHeader,
+             MACH_LOAD_COMMAND_SEGMENT_64,
+             &Segment->Hdr
+             )
+           );
 }
 
 /**
