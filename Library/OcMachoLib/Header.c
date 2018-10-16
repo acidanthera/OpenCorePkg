@@ -122,7 +122,8 @@ MachoGetFirstCommand64 (
 {
   ASSERT (MachHeader != NULL);
 
-  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
+  if ((MachHeader->Signature != MACH_HEADER_64_SIGNATURE)
+   || (MachHeader->NumberOfCommands == 0)) {
     return NULL;
   }
 
