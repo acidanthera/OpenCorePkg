@@ -37,10 +37,6 @@ MachoGetLastAddress64 (
   UINT64                        Address;
 
   ASSERT (MachHeader != NULL);
- 
-  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
-    return 0;
-  }
 
   LastAddress = 0;
 
@@ -152,10 +148,6 @@ MachoGetUuid64 (
   )
 {
   ASSERT (MachHeader != NULL);
-  
-  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
-    return NULL;
-  }
 
   return (MACH_UUID_COMMAND *)(
            MachoGetFirstCommand64 (MachHeader, MACH_LOAD_COMMAND_UUID)
@@ -182,10 +174,6 @@ MachoGetSegmentByName64 (
 
   ASSERT (MachHeader != NULL);
   ASSERT (SegmentName != NULL);
-
-  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
-    return NULL;
-  }
 
   for (
     Segment = MachoGetFirstSegment64 (MachHeader);
@@ -296,10 +284,6 @@ MachoGetSegmentSectionByName64 (
   ASSERT (MachHeader != NULL);
   ASSERT (SegmentName != NULL);
   ASSERT (SectionName != NULL);
-
-  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
-    return NULL;
-  }
 
   Segment = MachoGetSegmentByName64 (MachHeader, SegmentName);
 
@@ -421,10 +405,6 @@ MachoGetSectionByIndex64 (
 
   ASSERT (MachHeader != NULL);
 
-  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
-    return NULL;
-  }
-
   SectionIndex = 0;
 
   for (
@@ -462,10 +442,6 @@ MachoGetSectionByAddress64 (
   UINTN                         Index;
 
   ASSERT (MachHeader != NULL);
-
-  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
-    return NULL;
-  }
 
   for (
     Segment = MachoGetFirstSegment64 (MachHeader);
