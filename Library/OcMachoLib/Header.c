@@ -76,31 +76,28 @@ MachoGetNextCommand64 (
   IN CONST MACH_LOAD_COMMAND  *LoadCommand
   )
 {
-  CONST MACH_LOAD_COMMAND *CommandsWalker;
-  UINTN                   Index;
+  CONST MACH_LOAD_COMMAND *Command;
 
   ASSERT (MachHeader != NULL);
   //
   // LoadCommand being past the MachHeader Load Commands is implicitly caught
-  // by the for-loop.
+  // by the while-loop.
   //
   if ((MachHeader->Signature != MACH_HEADER_64_SIGNATURE)
    || (LoadCommand < MachHeader->Commands)) {
     return NULL;
   }
 
-  CommandsWalker = LoadCommand;
+  Command = NEXT_MACH_LOAD_COMMAND (LoadCommand);
 
-  for (
-    Index = ((UINTN)(LoadCommand - MachHeader->Commands) + 1);
-    Index < MachHeader->NumberOfCommands;
-    ++Index
+  while (
+    ((UINTN)Command - (UINTN)MachHeader->Commands) < MachHeader->CommandsSize
     ) {
-    if (CommandsWalker->Type == LoadCommandType) {
-      return (MACH_LOAD_COMMAND *)CommandsWalker;
+    if (Command->Type == LoadCommandType) {
+      return (MACH_LOAD_COMMAND *)Command;
     }
 
-    CommandsWalker = NEXT_MACH_LOAD_COMMAND (CommandsWalker);
+    Command = NEXT_MACH_LOAD_COMMAND (Command);
   }
 
   return NULL;
