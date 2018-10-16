@@ -77,6 +77,7 @@ MachoGetNextCommand64 (
   )
 {
   CONST MACH_LOAD_COMMAND *Command;
+  UINTN                   TopOfCommands;
 
   ASSERT (MachHeader != NULL);
   //
@@ -88,16 +89,17 @@ MachoGetNextCommand64 (
     return NULL;
   }
 
-  Command = NEXT_MACH_LOAD_COMMAND (LoadCommand);
-
-  while (
-    ((UINTN)Command - (UINTN)MachHeader->Commands) < MachHeader->CommandsSize
+  TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
+  
+  for (
+    Command = NEXT_MACH_LOAD_COMMAND (LoadCommand);
+    ((UINTN)Command < TopOfCommands)
+     && (((UINTN)Command + Command->Size) <= TopOfCommands);
+    Command = NEXT_MACH_LOAD_COMMAND (Command)
     ) {
     if (Command->Type == LoadCommandType) {
       return (MACH_LOAD_COMMAND *)Command;
     }
-
-    Command = NEXT_MACH_LOAD_COMMAND (Command);
   }
 
   return NULL;
