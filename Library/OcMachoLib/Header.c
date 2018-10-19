@@ -90,7 +90,7 @@ MachoInitializeContext (
     CommandsSize += Command->CommandSize;
   }
 
-  if (MachHeader->CommandsSize != CommandsSize) {
+  if (MachHeader->CommandsSize < CommandsSize) {
     return FALSE;
   }
   //
