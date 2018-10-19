@@ -42,6 +42,10 @@ MachoInitializeContext (
   UINTN                   Index;
   CONST MACH_LOAD_COMMAND *Command;
   UINTN                   CommandsSize;
+
+  ASSERT (MachHeader != NULL);
+  ASSERT (FileSize > 0);
+  ASSERT (Context != NULL);
   //
   // Verify MACH-O Header sanity.
   //
