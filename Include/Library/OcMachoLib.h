@@ -234,6 +234,32 @@ MachoGetSectionByAddress64 (
   );
 
 /**
+  Retrieves the SYMTAB command.
+
+  @param[in] Context  Context of the MACH-O.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SYMTAB_COMMAND *
+MachoGetSymtab (
+  IN CONST OC_MACHO_CONTEXT  *Context
+  );
+
+/**
+  Retrieves the DYSYMTAB command.
+
+  @param[in] Context  Context of the MACH-O.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_DYSYMTAB_COMMAND *
+MachoGetDySymtab (
+  IN CONST OC_MACHO_CONTEXT  *Context
+  );
+
+/**
   Returns whether Symbol describes a section.
 
   @param[in] Symbol  Symbol to evaluate.

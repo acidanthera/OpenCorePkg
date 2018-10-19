@@ -531,3 +531,41 @@ MachoGetSectionByAddress64 (
 
   return NULL;
 }
+
+/**
+  Retrieves the SYMTAB command.
+
+  @param[in] Context  Context of the MACH-O.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SYMTAB_COMMAND *
+MachoGetSymtab (
+  IN CONST OC_MACHO_CONTEXT  *Context
+  )
+{
+  ASSERT (Context != NULL);
+  return (MACH_SYMTAB_COMMAND *)(
+           MachoGetFirstCommand64 (Context, MACH_LOAD_COMMAND_SYMTAB)
+           );
+}
+
+/**
+  Retrieves the DYSYMTAB command.
+
+  @param[in] Context  Context of the MACH-O.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_DYSYMTAB_COMMAND *
+MachoGetDySymtab (
+  IN CONST OC_MACHO_CONTEXT  *Context
+  )
+{
+  ASSERT (Context != NULL);
+  return (MACH_DYSYMTAB_COMMAND *)(
+           MachoGetFirstCommand64 (Context, MACH_LOAD_COMMAND_DYSYMTAB)
+           );
+}
