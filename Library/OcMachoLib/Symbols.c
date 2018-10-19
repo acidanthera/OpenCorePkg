@@ -92,7 +92,7 @@ MachoSymbolIsDefined (
 /**
   Returns whether Symbol is defined locally.
 
-  @param[in] MachHeader   Header of the MACH-O.
+  @param[in] Context      Context of the MACH-O.
   @param[in] SymbolTable  Symbol Table of the MACH-O.
   @param[in] DySymtab     Dynamic Symbol Table of the MACH-O.
   @param[in] Symbol       Symbol to evaluate.
@@ -100,7 +100,7 @@ MachoSymbolIsDefined (
 **/
 BOOLEAN
 MachoSymbolIsLocalDefined (
-  IN CONST MACH_HEADER_64         *MachHeader,
+  IN CONST OC_MACHO_CONTEXT       *Context,
   IN CONST MACH_NLIST_64          *SymbolTable,
   IN CONST MACH_DYSYMTAB_COMMAND  *DySymtab,
   IN CONST MACH_NLIST_64          *Symbol
@@ -111,7 +111,7 @@ MachoSymbolIsLocalDefined (
   CONST MACH_NLIST_64 *IndirectSymbols;
   CONST MACH_NLIST_64 *IndirectSymbolsTop;
 
-  ASSERT (MachHeader != NULL);
+  ASSERT (Context != NULL);
   ASSERT (SymbolTable != NULL);
   ASSERT (DySymtab != NULL);
   ASSERT (Symbol != NULL);
@@ -129,7 +129,8 @@ MachoSymbolIsLocalDefined (
   }
 
   IndirectSymbols = (CONST MACH_NLIST_64 *)(
-                      (UINTN)MachHeader + DySymtab->IndirectSymbolsOffset
+                      (UINTN)Context->MachHeader
+                        + DySymtab->IndirectSymbolsOffset
                       );
   IndirectSymbolsTop = &IndirectSymbols[DySymtab->NumberOfIndirectSymbols];
 
@@ -225,7 +226,7 @@ MachoGetLocalDefinedSymbolByName (
 /**
   Relocate Symbol to be against LinkAddress.
 
-  @param[in]     MachHeader   MACH-O header of the KEXT to relocate.
+  @param[in]     Context      Context of the MACH-O.
   @param[in]     LinkAddress  The address to be linked against.
   @param[in,out] Symbol       The symbol to be relocated.
 
@@ -234,21 +235,21 @@ MachoGetLocalDefinedSymbolByName (
 **/
 BOOLEAN
 MachoRelocateSymbol64 (
-  IN     CONST MACH_HEADER_64  *MachHeader,
-  IN     UINT64                LinkAddress,
-  IN OUT MACH_NLIST_64         *Symbol
+  IN     CONST OC_MACHO_CONTEXT  *Context,
+  IN     UINT64                  LinkAddress,
+  IN OUT MACH_NLIST_64           *Symbol
   )
 {
   CONST MACH_SECTION_64 *Section;
 
-  ASSERT (MachHeader != NULL);
+  ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
   ASSERT ((Symbol->Type & MACH_N_TYPE_EXT) == 0);
   //
   // Symbols are relocated when they describe sections.
   //
   if (MachoSymbolIsSection (Symbol)) {
-    Section = MachoGetSectionByAddress64 (MachHeader, Symbol->Value);
+    Section = MachoGetSectionByAddress64 (Context, Symbol->Value);
     if (Section == NULL) {
       return FALSE;
     }
@@ -266,7 +267,7 @@ MachoRelocateSymbol64 (
 /**
   Retrieves a symbol by the Relocation it is referenced by.
 
-  @param[in] MachHeader       Header of the MACH-O.
+  @param[in] Context          Header of the MACH-O.
   @param[in] NumberOfSymbols  Number of symbols in SymbolTable.
   @param[in] SymbolTable      Symbol Table of the MACH-O.
   @param[in] StringTable      String Table of the MACH-O.
@@ -277,7 +278,7 @@ MachoRelocateSymbol64 (
 **/
 CONST MACH_NLIST_64 *
 MachoGetCxxSymbolByRelocation64 (
-  IN CONST MACH_HEADER_64        *MachHeader,
+  IN CONST OC_MACHO_CONTEXT      *Context,
   IN UINTN                       NumberOfSymbols,
   IN CONST MACH_NLIST_64         *SymbolTable,
   IN CONST CHAR8                 *StringTable,
@@ -290,7 +291,7 @@ MachoGetCxxSymbolByRelocation64 (
   CONST MACH_NLIST_64   *Symbol;
   CONST CHAR8           *Name;
 
-  ASSERT (MachHeader != NULL);
+  ASSERT (Context != NULL);
   ASSERT (SymbolTable != NULL);
   ASSERT (StringTable != NULL);
   ASSERT (Relocation != NULL);
@@ -303,13 +304,14 @@ MachoGetCxxSymbolByRelocation64 (
     return &SymbolTable[Relocation->SymbolNumber];
   }
 
-  Section = MachoGetSectionByIndex64 (MachHeader, Relocation->SymbolNumber);
+  Section = MachoGetSectionByIndex64 (Context, Relocation->SymbolNumber);
   if (Section == NULL) {
     return NULL;
   }
 
   Value = *(CONST UINT64 *)(
-              (UINTN)MachHeader + Section->Address + Relocation->Address
+             (UINTN)Context->MachHeader
+               + (Section->Address + Relocation->Address)
               );
   for (Index = 0; Index < NumberOfSymbols; ++Index) {
     Symbol = &SymbolTable[Index];

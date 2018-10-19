@@ -17,21 +17,46 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <IndustryStandard/AppleMachoImage.h>
 
+///
+/// Context used to refer to a MACH-O.
+///
+typedef struct {
+  CONST MACH_HEADER_64 *MachHeader;
+  UINTN                FileSize;
+} OC_MACHO_CONTEXT;
+
+/**
+  Initializes a MACH-O Context.
+
+  @param[in]  MachHeader  Header of the MACH-O.
+  @param[in]  FileSize    File size of the MACH-O.
+  @param[out] Context     MACH-O Context to initialize.
+
+  @return  Whether Context has been initialized successfully.
+
+**/
+BOOLEAN
+MachoInitializeContext (
+  IN  CONST MACH_HEADER_64  *MachHeader,
+  IN  UINTN                 FileSize,
+  OUT OC_MACHO_CONTEXT      *Context
+  );
+
 /**
   Returns the last virtual address of a MACH-O.
 
-  @param[in] MachHeader  Header of the MACH-O.
+  @param[in] Context  Context of the MACH-O.
 
 **/
 UINT64
 MachoGetLastAddress64 (
-  IN CONST MACH_HEADER_64  *MachHeader
+  IN CONST OC_MACHO_CONTEXT  *Context
   );
 
 /**
   Retrieves the first Load Command of type LoadCommandType.
 
-  @param[in] MachHeader       Header of the MACH-O.
+  @param[in] Context          Context of the MACH-O.
   @param[in] LoadCommandType  Type of the Load Command to retrieve.
 
   @retval NULL  NULL is returned on failure.
@@ -39,14 +64,14 @@ MachoGetLastAddress64 (
 **/
 MACH_LOAD_COMMAND *
 MachoGetFirstCommand64 (
-  IN CONST MACH_HEADER_64    *MachHeader,
+  IN CONST OC_MACHO_CONTEXT  *Context,
   IN MACH_LOAD_COMMAND_TYPE  LoadCommandType
   );
 
 /**
   Retrieves the first Load Command of type LoadCommandType.
 
-  @param[in] MachHeader       Header of the MACH-O.
+  @param[in] Context          Context of the MACH-O.
   @param[in] LoadCommandType  Type of the Load Command to retrieve.
   @param[in] LoadCommand      Previous Load Command.
 
@@ -55,7 +80,7 @@ MachoGetFirstCommand64 (
 **/
 MACH_LOAD_COMMAND *
 MachoGetNextCommand64 (
-  IN CONST MACH_HEADER_64     *MachHeader,
+  IN CONST OC_MACHO_CONTEXT   *Context,
   IN MACH_LOAD_COMMAND_TYPE   LoadCommandType,
   IN CONST MACH_LOAD_COMMAND  *LoadCommand
   );
@@ -63,20 +88,20 @@ MachoGetNextCommand64 (
 /**
   Retrieves the first UUID Load Command.
 
-  @param[in] MachHeader  Header of the MACH-O.
+  @param[in] Context  Context of the MACH-O.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 MACH_UUID_COMMAND *
 MachoGetUuid64 (
-  IN CONST MACH_HEADER_64  *MachHeader
+  IN CONST OC_MACHO_CONTEXT  *Context
   );
 
 /**
   Retrieves the first segment by the name of SegmentName.
 
-  @param[in] MachHeader   Header of the MACH-O.
+  @param[in] Context      Context of the MACH-O.
   @param[in] SegmentName  Segment name to search for.
 
   @retval NULL  NULL is returned on failure.
@@ -84,14 +109,14 @@ MachoGetUuid64 (
 **/
 MACH_SEGMENT_COMMAND_64 *
 MachoGetSegmentByName64 (
-  IN CONST MACH_HEADER_64  *MachHeader,
-  IN CONST CHAR8           *SegmentName
+  IN CONST OC_MACHO_CONTEXT  *Context,
+  IN CONST CHAR8             *SegmentName
   );
 
 /**
   Retrieves the first section by the name of SectionName.
 
-  @param[in] MachHeader   Header of the MACH-O.
+  @param[in] Context      Context of the MACH-O.
   @param[in] Segment      Segment to search in.
   @param[in] SectionName  Section name to search for.
 
@@ -100,7 +125,7 @@ MachoGetSegmentByName64 (
 **/
 MACH_SECTION_64 *
 MachoGetSectionByName64 (
-  IN CONST MACH_HEADER_64           *MachHeader,
+  IN CONST OC_MACHO_CONTEXT         *Context,
   IN CONST MACH_SEGMENT_COMMAND_64  *Segment,
   IN CONST CHAR8                    *SectionName
   );
@@ -108,7 +133,7 @@ MachoGetSectionByName64 (
 /**
   Retrieves a section within a segment by the name of SegmentName.
 
-  @param[in] MachHeader   Header of the MACH-O.
+  @param[in] Context      Context of the MACH-O.
   @param[in] SegmentName  The name of the segment to search in.
   @param[in] SectionName  The name of the section to search for.
 
@@ -117,36 +142,36 @@ MachoGetSectionByName64 (
 **/
 MACH_SECTION_64 *
 MachoGetSegmentSectionByName64 (
-  IN CONST MACH_HEADER_64  *MachHeader,
-  IN CONST CHAR8           *SegmentName,
-  IN CONST CHAR8           *SectionName
+  IN CONST OC_MACHO_CONTEXT  *Context,
+  IN CONST CHAR8             *SegmentName,
+  IN CONST CHAR8             *SectionName
   );
 
 /**
   Retrieves the first segment.
 
-  @param[in] MachHeader  Header of the MACH-O.
+  @param[in] Context  Context of the MACH-O.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 MACH_SEGMENT_COMMAND_64 *
 MachoGetFirstSegment64 (
-  IN CONST MACH_HEADER_64  *MachHeader
+  IN CONST OC_MACHO_CONTEXT  *Context
   );
 
 /**
   Retrieves the next segment.
 
-  @param[in] MachHeader  Header of the MACH-O.
-  @param[in] Segment     Segment to retrieve the successor of.
+  @param[in] Context  Context of the MACH-O.
+  @param[in] Segment  Segment to retrieve the successor of.
 
   @retal NULL  NULL is returned on failure.
 
 **/
 MACH_SEGMENT_COMMAND_64 *
 MachoGetNextSegment64 (
-  IN CONST MACH_HEADER_64           *MachHeader,
+  IN CONST OC_MACHO_CONTEXT         *Context,
   IN CONST MACH_SEGMENT_COMMAND_64  *Segment
   );
 
@@ -181,31 +206,31 @@ MachoGetNextSection64 (
 /**
   Retrieves a section by its index.
 
-  @param[in] MachHeader  Header of the MACH-O.
-  @param[in] Index       Index of the section to retrieve.
+  @param[in] Context  Context of the MACH-O.
+  @param[in] Index    Index of the section to retrieve.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_SECTION_64 *
 MachoGetSectionByIndex64 (
-  IN CONST MACH_HEADER_64  *MachHeader,
-  IN UINTN                 Index
+  IN CONST OC_MACHO_CONTEXT  *Context,
+  IN UINTN                   Index
   );
 
 /**
   Retrieves a section by its address.
 
-  @param[in] MachHeader  Header of the MACH-O.
-  @param[in] Address     Address of the section to retrieve.
+  @param[in] Context  Context of the MACH-O.
+  @param[in] Address  Address of the section to retrieve.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_SECTION_64 *
 MachoGetSectionByAddress64 (
-  IN CONST MACH_HEADER_64  *MachHeader,
-  IN UINT64                Address
+  IN CONST OC_MACHO_CONTEXT  *Context,
+  IN UINT64                  Address
   );
 
 /**
@@ -233,7 +258,7 @@ MachoSymbolIsDefined (
 /**
   Returns whether Symbol is defined locally.
 
-  @param[in] MachHeader   Header of the MACH-O.
+  @param[in] Context      Context of the MACH-O.
   @param[in] SymbolTable  Symbol Table of the MACH-O.
   @param[in] DySymtab     Dynamic Symbol Table of the MACH-O.
   @param[in] Symbol       Symbol to evaluate.
@@ -241,7 +266,7 @@ MachoSymbolIsDefined (
 **/
 BOOLEAN
 MachoSymbolIsLocalDefined (
-  IN CONST MACH_HEADER_64         *MachHeader,
+  IN CONST OC_MACHO_CONTEXT       *Context,
   IN CONST MACH_NLIST_64          *SymbolTable,
   IN CONST MACH_DYSYMTAB_COMMAND  *DySymtab,
   IN CONST MACH_NLIST_64          *Symbol
@@ -286,7 +311,7 @@ MachoGetLocalDefinedSymbolByName (
 /**
   Relocate Symbol to be against LinkAddress.
 
-  @param[in]     MachHeader   MACH-O header of the KEXT to relocate.
+  @param[in]     Context      Context of the MACH-O.
   @param[in]     LinkAddress  The address to be linked against.
   @param[in,out] Symbol       The symbol to be relocated.
 
@@ -295,15 +320,15 @@ MachoGetLocalDefinedSymbolByName (
 **/
 BOOLEAN
 MachoRelocateSymbol64 (
-  IN     CONST MACH_HEADER_64  *MachHeader,
-  IN     UINT64                LinkAddress,
-  IN OUT MACH_NLIST_64         *Symbol
+  IN     CONST OC_MACHO_CONTEXT  *Context,
+  IN     UINT64                  LinkAddress,
+  IN OUT MACH_NLIST_64           *Symbol
   );
 
 /**
   Retrieves a symbol by the Relocation it is referenced by.
 
-  @param[in] MachHeader       Header of the MACH-O.
+  @param[in] Context          Context of the MACH-O.
   @param[in] NumberOfSymbols  Number of symbols in SymbolTable.
   @param[in] SymbolTable      Symbol Table of the MACH-O.
   @param[in] StringTable      String Table of the MACH-O.
@@ -314,7 +339,7 @@ MachoRelocateSymbol64 (
 **/
 CONST MACH_NLIST_64 *
 MachoGetCxxSymbolByRelocation64 (
-  IN CONST MACH_HEADER_64        *MachHeader,
+  IN CONST OC_MACHO_CONTEXT      *Context,
   IN UINTN                       NumberOfSymbols,
   IN CONST MACH_NLIST_64         *SymbolTable,
   IN CONST CHAR8                 *StringTable,
@@ -513,20 +538,20 @@ MachoIsSymbolNameCxx (
 /**
   Returns the number of VTable entires in VtableData.
 
-  @param[in] MachHeader  Header of the MACH-O.
+  @param[in] Context     Context of the MACH-O.
   @param[in] VtableData  The VTable's data.
 
 **/
 UINTN
 MachoVtableGetNumberOfEntries64 (
-  IN CONST MACH_HEADER_64  *MachHeader,
-  IN CONST UINT64          *VtableData
+  IN CONST OC_MACHO_CONTEXT  *Context,
+  IN CONST UINT64            *VtableData
   );
 
 /**
   Retrieves Metaclass symbol of a SMCP.
 
-  @param[in] MachHeader           Header of the MACH-O.
+  @param[in] Context              Context of the MACH-O.
   @param[in] NumberOfSymbols      Number of symbols in SymbolTable.
   @param[in] SymbolTable          Symbol Table of the MACH-O.
   @param[in] StringTable          String Table of the MACH-O.
@@ -539,7 +564,7 @@ MachoVtableGetNumberOfEntries64 (
 **/
 CONST MACH_NLIST_64 *
 MachoGetMetaclassSymbolFromSmcpSymbol64 (
-  IN CONST MACH_HEADER_64        *MachHeader,
+  IN CONST OC_MACHO_CONTEXT      *Context,
   IN UINTN                       NumberOfSymbols,
   IN CONST MACH_NLIST_64         *SymbolTable,
   IN CONST CHAR8                 *StringTable,
@@ -608,7 +633,7 @@ MachoPreserveRelocationIntel64 (
 /**
   Retrieves a Relocation by the address it targets.
 
-  @param[in] MachHeader           Header of the MACH-O.
+  @param[in] Context              Context of the MACH-O.
   @param[in] NumberOfRelocations  Number of Relocations in Relocations.
   @param[in] Relocations          The Relocations to search.
   @param[in] Address              The address to search for.
@@ -618,7 +643,7 @@ MachoPreserveRelocationIntel64 (
 **/
 CONST MACH_RELOCATION_INFO *
 MachoGetRelocationByOffset (
-  IN CONST MACH_HEADER_64        *MachHeader,
+  IN CONST OC_MACHO_CONTEXT      *Context,
   IN UINTN                       NumberOfRelocations,
   IN CONST MACH_RELOCATION_INFO  *Relocations,
   IN UINT64                      Address

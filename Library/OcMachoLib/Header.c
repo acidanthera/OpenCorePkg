@@ -21,14 +21,81 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcMachoLib.h>
 
 /**
+  Initializes a MACH-O Context.
+
+  @param[in]  MachHeader  Header of the MACH-O.
+  @param[in]  FileSize    File size of the MACH-O.
+  @param[out] Context     MACH-O Context to initialize.
+
+  @return  Whether Context has been initialized successfully.
+
+**/
+BOOLEAN
+MachoInitializeContext (
+  IN  CONST MACH_HEADER_64  *MachHeader,
+  IN  UINTN                 FileSize,
+  OUT OC_MACHO_CONTEXT      *Context
+  )
+{
+  UINTN                   TopOfCommands;
+  UINTN                   Index;
+  CONST MACH_LOAD_COMMAND *Command;
+  UINTN                   CommandsSize;
+  //
+  // Verify MACH-O Header sanity.
+  //
+  TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
+  if ((MachHeader->Signature != MACH_HEADER_64_SIGNATURE)
+   || (TopOfCommands > ((UINTN)MachHeader + FileSize))) {
+    return FALSE;
+  }
+
+  CommandsSize = 0;
+
+  for (
+    Index = 0, Command = MachHeader->Commands;
+    Index < MachHeader->NumberOfCommands;
+    ++Index, Command = NEXT_MACH_LOAD_COMMAND (Command)
+    ) {
+    if (((UINTN)Command >= ((UINTN)MachHeader + MachHeader->CommandsSize))
+     || (Command->Size < sizeof (*Command))
+     || ((Command->Size % 8) != 0)  // Assumption: 64-bit, see below.
+      ) {
+      return FALSE;
+    }
+
+    CommandsSize += Command->Size;
+  }
+
+  if (MachHeader->CommandsSize != CommandsSize) {
+    return FALSE;
+  }
+  //
+  // Verify assumptions made by this library.
+  // Carefully audit all "Assumption:" remarks before modifying these checks.
+  //
+  if ((MachHeader->CpuType != MachCpuTypeX8664)
+   || ((MachHeader->FileType != MachHeaderFileTypeKextBundle)
+    && (MachHeader->FileType != MachHeaderFileTypeExecute))) {
+    ASSERT (FALSE);
+    return FALSE;
+  }
+
+  Context->MachHeader = MachHeader;
+  Context->FileSize   = FileSize;
+
+  return TRUE;
+}
+
+/**
   Returns the last virtual address of a MACH-O.
 
-  @param[in] MachHeader  Header of the MACH-O.
+  @param[in] Context  Context of the MACH-O.
 
 **/
 UINT64
 MachoGetLastAddress64 (
-  IN CONST MACH_HEADER_64  *MachHeader
+  IN CONST OC_MACHO_CONTEXT  *Context
   )
 {
   UINT64                        LastAddress;
@@ -36,14 +103,14 @@ MachoGetLastAddress64 (
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
   UINT64                        Address;
 
-  ASSERT (MachHeader != NULL);
+  ASSERT (Context != NULL);
 
   LastAddress = 0;
 
   for (
-    Segment = MachoGetFirstSegment64 (MachHeader);
+    Segment = MachoGetFirstSegment64 (Context);
     Segment != NULL;
-    Segment = MachoGetNextSegment64 (MachHeader, Segment)
+    Segment = MachoGetNextSegment64 (Context, Segment)
     ) {
     Address = (Segment->VirtualAddress + Segment->Hdr.Size);
 
@@ -58,7 +125,7 @@ MachoGetLastAddress64 (
 /**
   Retrieves the first Load Command of type LoadCommandType.
 
-  @param[in] MachHeader       Header of the MACH-O.
+  @param[in] Context          Context of the MACH-O.
   @param[in] LoadCommandType  Type of the Load Command to retrieve.
   @param[in] LoadCommand      Previous Load Command.
 
@@ -67,30 +134,28 @@ MachoGetLastAddress64 (
 **/
 MACH_LOAD_COMMAND *
 MachoGetNextCommand64 (
-  IN CONST MACH_HEADER_64     *MachHeader,
+  IN CONST OC_MACHO_CONTEXT   *Context,
   IN MACH_LOAD_COMMAND_TYPE   LoadCommandType,
   IN CONST MACH_LOAD_COMMAND  *LoadCommand
   )
 {
   CONST MACH_LOAD_COMMAND *Command;
+  CONST MACH_HEADER_64    *MachHeader;
   UINTN                   TopOfCommands;
 
-  ASSERT (MachHeader != NULL);
-  //
-  // LoadCommand being past the MachHeader Load Commands is implicitly caught
-  // by the while-loop.
-  //
-  if ((MachHeader->Signature != MACH_HEADER_64_SIGNATURE)
-   || (LoadCommand < MachHeader->Commands)) {
-    return NULL;
-  }
+  ASSERT (Context != NULL);
 
+  MachHeader    = Context->MachHeader;
   TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
+
+  ASSERT (
+    (LoadCommand >= &MachHeader->Commands[0])
+      && ((UINTN)LoadCommand <= TopOfCommands)
+    );
   
   for (
     Command = NEXT_MACH_LOAD_COMMAND (LoadCommand);
-    ((UINTN)Command < TopOfCommands)
-     && (((UINTN)Command + Command->Size) <= TopOfCommands);
+    (UINTN)Command < TopOfCommands;
     Command = NEXT_MACH_LOAD_COMMAND (Command)
     ) {
     if (Command->Type == LoadCommandType) {
@@ -104,7 +169,7 @@ MachoGetNextCommand64 (
 /**
   Retrieves the first Load Command of type LoadCommandType.
 
-  @param[in] MachHeader       Header of the MACH-O.
+  @param[in] Context          Context of the MACH-O.
   @param[in] LoadCommandType  Type of the Load Command to retrieve.
 
   @retval NULL  NULL is returned on failure.
@@ -112,14 +177,17 @@ MachoGetNextCommand64 (
 **/
 MACH_LOAD_COMMAND *
 MachoGetFirstCommand64 (
-  IN CONST MACH_HEADER_64    *MachHeader,
+  IN CONST OC_MACHO_CONTEXT  *Context,
   IN MACH_LOAD_COMMAND_TYPE  LoadCommandType
   )
 {
-  ASSERT (MachHeader != NULL);
+  CONST MACH_HEADER_64 *MachHeader;
 
-  if ((MachHeader->Signature != MACH_HEADER_64_SIGNATURE)
-   || (MachHeader->NumberOfCommands == 0)) {
+  ASSERT (Context != NULL);
+
+  MachHeader = Context->MachHeader;
+
+  if (MachHeader->NumberOfCommands == 0) {
     return NULL;
   }
 
@@ -128,7 +196,7 @@ MachoGetFirstCommand64 (
   }
 
   return MachoGetNextCommand64 (
-           MachHeader,
+           Context,
            LoadCommandType,
            &MachHeader->Commands[0]
            );
@@ -137,27 +205,27 @@ MachoGetFirstCommand64 (
 /**
   Retrieves the first UUID Load Command.
 
-  @param[in] MachHeader  Header of the MACH-O.
+  @param[in] Context  Context of the MACH-O.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 MACH_UUID_COMMAND *
 MachoGetUuid64 (
-  IN CONST MACH_HEADER_64  *MachHeader
+  IN CONST OC_MACHO_CONTEXT  *Context
   )
 {
-  ASSERT (MachHeader != NULL);
+  ASSERT (Context != NULL);
 
   return (MACH_UUID_COMMAND *)(
-           MachoGetFirstCommand64 (MachHeader, MACH_LOAD_COMMAND_UUID)
+           MachoGetFirstCommand64 (Context, MACH_LOAD_COMMAND_UUID)
            );
 }
 
 /**
   Retrieves the first segment by the name of SegmentName.
 
-  @param[in] MachHeader   Header of the MACH-O.
+  @param[in] Context      Context of the MACH-O.
   @param[in] SegmentName  Segment name to search for.
 
   @retval NULL  NULL is returned on failure.
@@ -165,20 +233,20 @@ MachoGetUuid64 (
 **/
 MACH_SEGMENT_COMMAND_64 *
 MachoGetSegmentByName64 (
-  IN CONST MACH_HEADER_64  *MachHeader,
-  IN CONST CHAR8           *SegmentName
+  IN CONST OC_MACHO_CONTEXT  *Context,
+  IN CONST CHAR8             *SegmentName
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
   INTN                          Result;
 
-  ASSERT (MachHeader != NULL);
+  ASSERT (Context != NULL);
   ASSERT (SegmentName != NULL);
 
   for (
-    Segment = MachoGetFirstSegment64 (MachHeader);
+    Segment = MachoGetFirstSegment64 (Context);
     Segment != NULL;
-    Segment = MachoGetNextSegment64 (MachHeader, Segment)
+    Segment = MachoGetNextSegment64 (Context, Segment)
     ) {
     if (Segment->Hdr.Type == MACH_LOAD_COMMAND_SEGMENT_64) {
       Result = AsciiStrnCmp (
@@ -198,7 +266,7 @@ MachoGetSegmentByName64 (
 /**
   Retrieves the first section by the name of SectionName.
 
-  @param[in] MachHeader   Header of the MACH-O.
+  @param[in] Context      Context of the MACH-O.
   @param[in] Segment      Segment to search in.
   @param[in] SectionName  Section name to search for.
 
@@ -207,7 +275,7 @@ MachoGetSegmentByName64 (
 **/
 MACH_SECTION_64 *
 MachoGetSectionByName64 (
-  IN CONST MACH_HEADER_64           *MachHeader,
+  IN CONST OC_MACHO_CONTEXT         *Context,
   IN CONST MACH_SEGMENT_COMMAND_64  *Segment,
   IN CONST CHAR8                    *SectionName
   )
@@ -216,21 +284,9 @@ MachoGetSectionByName64 (
   UINTN                 Index;
   INTN                  Result;
 
-  ASSERT (MachHeader != NULL);
+  ASSERT (Context != NULL);
   ASSERT (Segment != NULL);
   ASSERT (SectionName != NULL);
-
-  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
-    return NULL;
-  }
-  //
-  // MH_OBJECT might have sections in segments they do not belong in for
-  // performance reasons.  We do not support intermediate objects.
-  //
-  if (MachHeader->FileType == MachHeaderFileTypeObject) {
-    ASSERT (FALSE);
-    return NULL;
-  }
 
   SectionWalker = &Segment->Sections[0];
 
@@ -241,6 +297,12 @@ MachoGetSectionByName64 (
                ARRAY_SIZE (SectionWalker->SegmentName)
                );
     if (Result == 0) {
+      //
+      // Assumption: MACH-O is not of type MH_OBJECT.
+      // MH_OBJECT might have sections in segments they do not belong in for
+      // performance reasons.  This library does not support intermediate
+      // objects.
+      //
       DEBUG_CODE (
         Result = AsciiStrnCmp (
                    SectionWalker->SegmentName,
@@ -265,7 +327,7 @@ MachoGetSectionByName64 (
 /**
   Retrieves a section within a segment by the name of SegmentName.
 
-  @param[in] MachHeader   Header of the MACH-O.
+  @param[in] Context      Context of the MACH-O.
   @param[in] SegmentName  The name of the segment to search in.
   @param[in] SectionName  The name of the section to search for.
 
@@ -274,21 +336,21 @@ MachoGetSectionByName64 (
 **/
 MACH_SECTION_64 *
 MachoGetSegmentSectionByName64 (
-  IN CONST MACH_HEADER_64  *MachHeader,
-  IN CONST CHAR8           *SegmentName,
-  IN CONST CHAR8           *SectionName
+  IN CONST OC_MACHO_CONTEXT  *Context,
+  IN CONST CHAR8             *SegmentName,
+  IN CONST CHAR8             *SectionName
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
 
-  ASSERT (MachHeader != NULL);
+  ASSERT (Context != NULL);
   ASSERT (SegmentName != NULL);
   ASSERT (SectionName != NULL);
 
-  Segment = MachoGetSegmentByName64 (MachHeader, SegmentName);
+  Segment = MachoGetSegmentByName64 (Context, SegmentName);
 
   if (Segment != NULL) {
-    return MachoGetSectionByName64 (MachHeader, Segment, SectionName);
+    return MachoGetSectionByName64 (Context, Segment, SectionName);
   }
 
   return NULL;
@@ -297,39 +359,39 @@ MachoGetSegmentSectionByName64 (
 /**
   Retrieves the first segment.
 
-  @param[in] MachHeader  Header of the MACH-O.
+  @param[in] Context  Context of the MACH-O.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 MACH_SEGMENT_COMMAND_64 *
 MachoGetFirstSegment64 (
-  IN CONST MACH_HEADER_64  *MachHeader
+  IN CONST OC_MACHO_CONTEXT  *Context
   )
 {
   return (MACH_SEGMENT_COMMAND_64 *)(
-           MachoGetFirstCommand64 (MachHeader, MACH_LOAD_COMMAND_SEGMENT_64)
+           MachoGetFirstCommand64 (Context, MACH_LOAD_COMMAND_SEGMENT_64)
            );
 }
 
 /**
   Retrieves the next segment.
 
-  @param[in] MachHeader  Header of the MACH-O.
-  @param[in] Segment     Segment to retrieve the successor of.
+  @param[in] Context  Context of the MACH-O.
+  @param[in] Segment  Segment to retrieve the successor of.
 
   @retal NULL  NULL is returned on failure.
 
 **/
 MACH_SEGMENT_COMMAND_64 *
 MachoGetNextSegment64 (
-  IN CONST MACH_HEADER_64           *MachHeader,
+  IN CONST OC_MACHO_CONTEXT         *Context,
   IN CONST MACH_SEGMENT_COMMAND_64  *Segment
   )
 {
   return (MACH_SEGMENT_COMMAND_64 *)(
            MachoGetNextCommand64 (
-             MachHeader,
+             Context,
              MACH_LOAD_COMMAND_SEGMENT_64,
              &Segment->Hdr
              )
@@ -388,29 +450,29 @@ MachoGetNextSection64 (
 /**
   Retrieves a section by its index.
 
-  @param[in] MachHeader  Header of the MACH-O.
-  @param[in] Index       Index of the section to retrieve.
+  @param[in] Context  Context of the MACH-O.
+  @param[in] Index    Index of the section to retrieve.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_SECTION_64 *
 MachoGetSectionByIndex64 (
-  IN CONST MACH_HEADER_64  *MachHeader,
-  IN UINTN                 Index
+  IN CONST OC_MACHO_CONTEXT  *Context,
+  IN UINTN                   Index
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
   UINTN                         SectionIndex;
 
-  ASSERT (MachHeader != NULL);
+  ASSERT (Context != NULL);
 
   SectionIndex = 0;
 
   for (
-    Segment = MachoGetFirstSegment64 (MachHeader);
+    Segment = MachoGetFirstSegment64 (Context);
     Segment != NULL;
-    Segment = MachoGetNextSegment64 (MachHeader, Segment)
+    Segment = MachoGetNextSegment64 (Context, Segment)
     ) {
     if (Index <= (SectionIndex + (Segment->NumberOfSections - 1))) {
       return &Segment->Sections[Index - SectionIndex];
@@ -425,28 +487,28 @@ MachoGetSectionByIndex64 (
 /**
   Retrieves a section by its address.
 
-  @param[in] MachHeader  Header of the MACH-O.
-  @param[in] Address     Address of the section to retrieve.
+  @param[in] Context  Context of the MACH-O.
+  @param[in] Address  Address of the section to retrieve.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_SECTION_64 *
 MachoGetSectionByAddress64 (
-  IN CONST MACH_HEADER_64  *MachHeader,
-  IN UINT64                Address
+  IN CONST OC_MACHO_CONTEXT  *Context,
+  IN UINT64                  Address
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
   CONST MACH_SECTION_64         *Section;
   UINTN                         Index;
 
-  ASSERT (MachHeader != NULL);
+  ASSERT (Context != NULL);
 
   for (
-    Segment = MachoGetFirstSegment64 (MachHeader);
+    Segment = MachoGetFirstSegment64 (Context);
     Segment != NULL;
-    Segment = MachoGetNextSegment64 (MachHeader, Segment)
+    Segment = MachoGetNextSegment64 (Context, Segment)
     ) {
     if ((Address >= Segment->VirtualAddress)
      && (Address < (Segment->VirtualAddress + Address >= Segment->FileSize))) {

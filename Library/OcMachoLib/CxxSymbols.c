@@ -499,30 +499,28 @@ MachoIsSymbolNameCxx (
 /**
   Returns the number of VTable entires in VtableData.
 
-  @param[in] MachHeader  Header of the MACH-O.
+  @param[in] Context     Context of the MACH-O.
   @param[in] VtableData  The VTable's data.
 
 **/
 UINTN
 MachoVtableGetNumberOfEntries64 (
-  IN CONST MACH_HEADER_64  *MachHeader,
-  IN CONST UINT64          *VtableData
+  IN CONST OC_MACHO_CONTEXT  *Context,
+  IN CONST UINT64            *VtableData
   )
 {
   UINTN Index;
   UINTN NumberOfEntries;
 
+  ASSERT (Context != NULL);
   ASSERT (VtableData != NULL);
 
   NumberOfEntries = 0;
-
-  if ((MachHeader->CpuType != MachCpuTypeArm)
-   && (MachHeader->CpuType != MachCpuTypeArm64)) {
-    for (Index = VTABLE_HEADER_LEN_64; VtableData[Index] != 0; ++Index) {
-      ++NumberOfEntries;
-    }
-  } else {
-    ASSERT (FALSE);
+  //
+  // Assumption: Not ARM.  Currently verified by the Context initialization.
+  //
+  for (Index = VTABLE_HEADER_LEN_64; VtableData[Index] != 0; ++Index) {
+    ++NumberOfEntries;
   }
 
   return NumberOfEntries;
@@ -531,7 +529,7 @@ MachoVtableGetNumberOfEntries64 (
 /**
   Retrieves Metaclass symbol of a SMCP.
 
-  @param[in] MachHeader           Header of the MACH-O.
+  @param[in] Context              Context of the MACH-O.
   @param[in] NumberOfSymbols      Number of symbols in SymbolTable.
   @param[in] SymbolTable          Symbol Table of the MACH-O.
   @param[in] StringTable          String Table of the MACH-O.
@@ -544,7 +542,7 @@ MachoVtableGetNumberOfEntries64 (
 **/
 CONST MACH_NLIST_64 *
 MachoGetMetaclassSymbolFromSmcpSymbol64 (
-  IN CONST MACH_HEADER_64        *MachHeader,
+  IN CONST OC_MACHO_CONTEXT      *Context,
   IN UINTN                       NumberOfSymbols,
   IN CONST MACH_NLIST_64         *SymbolTable,
   IN CONST CHAR8                 *StringTable,
@@ -555,14 +553,14 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
 {
   CONST MACH_RELOCATION_INFO *Relocation;
 
-  ASSERT (MachHeader != NULL);
+  ASSERT (Context != NULL);
   ASSERT (SymbolTable != NULL);
   ASSERT (StringTable != NULL);
   ASSERT (Relocations != NULL);
   ASSERT (Smcp != NULL);
 
   Relocation = MachoGetRelocationByOffset (
-                 MachHeader,
+                 Context,
                  NumberOfRelocations,
                  Relocations,
                  Smcp->Value
@@ -572,7 +570,7 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
   }
 
   return MachoGetCxxSymbolByRelocation64 (
-           MachHeader,
+           Context,
            NumberOfSymbols,
            SymbolTable,
            StringTable,

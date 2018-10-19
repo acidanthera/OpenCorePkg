@@ -17,6 +17,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <IndustryStandard/AppleMachoImage.h>
 
 #include <Library/DebugLib.h>
+#include <Library/OcMachoLib.h>
 
 /**
   Returns whether the Relocation's type indicates a Pair for the Intel 64
@@ -65,7 +66,7 @@ MachoPreserveRelocationIntel64 (
 /**
   Retrieves a Relocation by the address it targets.
 
-  @param[in] MachHeader           Header of the MACH-O.
+  @param[in] Context              Context of the MACH-O.
   @param[in] NumberOfRelocations  Number of Relocations in Relocations.
   @param[in] Relocations          The Relocations to search.
   @param[in] Address              The address to search for.
@@ -75,7 +76,7 @@ MachoPreserveRelocationIntel64 (
 **/
 CONST MACH_RELOCATION_INFO *
 MachoGetRelocationByOffset (
-  IN CONST MACH_HEADER_64        *MachHeader,
+  IN CONST OC_MACHO_CONTEXT      *Context,
   IN UINTN                       NumberOfRelocations,
   IN CONST MACH_RELOCATION_INFO  *Relocations,
   IN UINT64                      Address
@@ -84,6 +85,7 @@ MachoGetRelocationByOffset (
   UINTN                      Index;
   CONST MACH_RELOCATION_INFO *Relocation;
 
+  ASSERT (Context != NULL);
   ASSERT (Relocations != NULL);
 
   for (
@@ -106,9 +108,10 @@ MachoGetRelocationByOffset (
     }
     //
     // Relocation Pairs can be skipped.
+    // Assumption: Intel X64.  Currently verified by the Context
+    //             initialization.
     //
-    if ((MachHeader->CpuType == MachCpuTypeX8664)
-     && MachoRelocationIsPairIntel64 (Relocation->Type)) {
+    if (MachoRelocationIsPairIntel64 (Relocation->Type)) {
       ++Index;
       ++Relocation;
     }
