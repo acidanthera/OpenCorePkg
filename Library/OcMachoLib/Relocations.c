@@ -76,7 +76,7 @@ MachoPreserveRelocationIntel64 (
 **/
 CONST MACH_RELOCATION_INFO *
 MachoGetRelocationByOffset (
-  IN CONST OC_MACHO_CONTEXT      *Context,
+  IN CONST VOID                  *Context,
   IN UINTN                       NumberOfRelocations,
   IN CONST MACH_RELOCATION_INFO  *Relocations,
   IN UINT64                      Address

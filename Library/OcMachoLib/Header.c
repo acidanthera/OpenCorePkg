@@ -20,6 +20,20 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DebugLib.h>
 #include <Library/OcMachoLib.h>
 
+#include "OcMachoLibInternal.h"
+
+/**
+  Returns the size of a MACH-O Context.
+
+**/
+UINTN
+MachoGetContextSize (
+  VOID
+  )
+{
+  return sizeof (OC_MACHO_CONTEXT);
+}
+
 /**
   Initializes a MACH-O Context.
 
@@ -34,7 +48,7 @@ BOOLEAN
 MachoInitializeContext (
   IN  CONST MACH_HEADER_64  *MachHeader,
   IN  UINTN                 FileSize,
-  OUT OC_MACHO_CONTEXT      *Context
+  OUT VOID                  *Context
   )
 {
   UINTN                   MinCommandsSize;
@@ -42,6 +56,7 @@ MachoInitializeContext (
   UINTN                   Index;
   CONST MACH_LOAD_COMMAND *Command;
   UINTN                   CommandsSize;
+  OC_MACHO_CONTEXT        *MachoContext;
 
   ASSERT (MachHeader != NULL);
   ASSERT (FileSize > 0);
@@ -89,8 +104,9 @@ MachoInitializeContext (
     return FALSE;
   }
 
-  Context->MachHeader = MachHeader;
-  Context->FileSize   = FileSize;
+  MachoContext = (OC_MACHO_CONTEXT *)Context;
+  MachoContext->MachHeader = MachHeader;
+  MachoContext->FileSize   = FileSize;
 
   return TRUE;
 }
@@ -103,7 +119,7 @@ MachoInitializeContext (
 **/
 UINT64
 MachoGetLastAddress64 (
-  IN CONST OC_MACHO_CONTEXT  *Context
+  IN CONST VOID  *Context
   )
 {
   UINT64                        LastAddress;
@@ -144,7 +160,7 @@ MachoGetLastAddress64 (
 STATIC
 MACH_LOAD_COMMAND *
 InternalGetNextCommand64 (
-  IN CONST OC_MACHO_CONTEXT   *Context,
+  IN CONST VOID               *Context,
   IN MACH_LOAD_COMMAND_TYPE   LoadCommandType,
   IN CONST MACH_LOAD_COMMAND  *LoadCommand  OPTIONAL
   )
@@ -155,7 +171,7 @@ InternalGetNextCommand64 (
 
   ASSERT (Context != NULL);
 
-  MachHeader    = Context->MachHeader;
+  MachHeader    = ((CONST OC_MACHO_CONTEXT *)Context)->MachHeader;
   TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
 
   if (LoadCommand != NULL) {
@@ -191,7 +207,7 @@ InternalGetNextCommand64 (
 **/
 MACH_UUID_COMMAND *
 MachoGetUuid64 (
-  IN CONST OC_MACHO_CONTEXT  *Context
+  IN CONST VOID  *Context
   )
 {
   ASSERT (Context != NULL);
@@ -212,8 +228,8 @@ MachoGetUuid64 (
 **/
 MACH_SEGMENT_COMMAND_64 *
 MachoGetSegmentByName64 (
-  IN CONST OC_MACHO_CONTEXT  *Context,
-  IN CONST CHAR8             *SegmentName
+  IN CONST VOID   *Context,
+  IN CONST CHAR8  *SegmentName
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
@@ -252,7 +268,7 @@ MachoGetSegmentByName64 (
 **/
 MACH_SECTION_64 *
 MachoGetSectionByName64 (
-  IN CONST OC_MACHO_CONTEXT         *Context,
+  IN CONST VOID                     *Context,
   IN CONST MACH_SEGMENT_COMMAND_64  *Segment,
   IN CONST CHAR8                    *SectionName
   )
@@ -313,9 +329,9 @@ MachoGetSectionByName64 (
 **/
 MACH_SECTION_64 *
 MachoGetSegmentSectionByName64 (
-  IN CONST OC_MACHO_CONTEXT  *Context,
-  IN CONST CHAR8             *SegmentName,
-  IN CONST CHAR8             *SectionName
+  IN CONST VOID   *Context,
+  IN CONST CHAR8  *SegmentName,
+  IN CONST CHAR8  *SectionName
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
@@ -345,7 +361,7 @@ MachoGetSegmentSectionByName64 (
 **/
 MACH_SEGMENT_COMMAND_64 *
 MachoGetNextSegment64 (
-  IN CONST OC_MACHO_CONTEXT         *Context,
+  IN CONST VOID                     *Context,
   IN CONST MACH_SEGMENT_COMMAND_64  *Segment  OPTIONAL
   )
 {
@@ -401,8 +417,8 @@ MachoGetNextSection64 (
 **/
 CONST MACH_SECTION_64 *
 MachoGetSectionByIndex64 (
-  IN CONST OC_MACHO_CONTEXT  *Context,
-  IN UINTN                   Index
+  IN CONST VOID  *Context,
+  IN UINTN       Index
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
@@ -438,8 +454,8 @@ MachoGetSectionByIndex64 (
 **/
 CONST MACH_SECTION_64 *
 MachoGetSectionByAddress64 (
-  IN CONST OC_MACHO_CONTEXT  *Context,
-  IN UINT64                  Address
+  IN CONST VOID  *Context,
+  IN UINT64      Address
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
@@ -481,7 +497,7 @@ MachoGetSectionByAddress64 (
 **/
 MACH_SYMTAB_COMMAND *
 MachoGetSymtab (
-  IN CONST OC_MACHO_CONTEXT  *Context
+  IN CONST VOID  *Context
   )
 {
   ASSERT (Context != NULL);
@@ -500,7 +516,7 @@ MachoGetSymtab (
 **/
 MACH_DYSYMTAB_COMMAND *
 MachoGetDySymtab (
-  IN CONST OC_MACHO_CONTEXT  *Context
+  IN CONST VOID  *Context
   )
 {
   ASSERT (Context != NULL);

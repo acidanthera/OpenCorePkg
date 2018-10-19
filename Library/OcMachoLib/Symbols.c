@@ -20,6 +20,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DebugLib.h>
 #include <Library/OcMachoLib.h>
 
+#include "OcMachoLibInternal.h"
+
 /**
   Returns whether Symbol describes a section.
 
@@ -100,7 +102,7 @@ MachoSymbolIsDefined (
 **/
 BOOLEAN
 MachoSymbolIsLocalDefined (
-  IN CONST OC_MACHO_CONTEXT       *Context,
+  IN CONST VOID                   *Context,
   IN CONST MACH_NLIST_64          *SymbolTable,
   IN CONST MACH_DYSYMTAB_COMMAND  *DySymtab,
   IN CONST MACH_NLIST_64          *Symbol
@@ -129,7 +131,7 @@ MachoSymbolIsLocalDefined (
   }
 
   IndirectSymbols = (CONST MACH_NLIST_64 *)(
-                      (UINTN)Context->MachHeader
+                      (UINTN)((CONST OC_MACHO_CONTEXT *)Context)->MachHeader
                         + DySymtab->IndirectSymbolsOffset
                       );
   IndirectSymbolsTop = &IndirectSymbols[DySymtab->NumberOfIndirectSymbols];
@@ -235,9 +237,9 @@ MachoGetLocalDefinedSymbolByName (
 **/
 BOOLEAN
 MachoRelocateSymbol64 (
-  IN     CONST OC_MACHO_CONTEXT  *Context,
-  IN     UINT64                  LinkAddress,
-  IN OUT MACH_NLIST_64           *Symbol
+  IN     CONST VOID     *Context,
+  IN     UINT64         LinkAddress,
+  IN OUT MACH_NLIST_64  *Symbol
   )
 {
   CONST MACH_SECTION_64 *Section;
@@ -278,7 +280,7 @@ MachoRelocateSymbol64 (
 **/
 CONST MACH_NLIST_64 *
 MachoGetCxxSymbolByRelocation64 (
-  IN CONST OC_MACHO_CONTEXT      *Context,
+  IN CONST VOID                  *Context,
   IN UINTN                       NumberOfSymbols,
   IN CONST MACH_NLIST_64         *SymbolTable,
   IN CONST CHAR8                 *StringTable,
@@ -310,7 +312,7 @@ MachoGetCxxSymbolByRelocation64 (
   }
 
   Value = *(CONST UINT64 *)(
-             (UINTN)Context->MachHeader
+             (UINTN)((CONST OC_MACHO_CONTEXT *)Context)->MachHeader
                + (Section->Address + Relocation->Address)
               );
   for (Index = 0; Index < NumberOfSymbols; ++Index) {

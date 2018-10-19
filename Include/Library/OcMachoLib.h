@@ -17,13 +17,14 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <IndustryStandard/AppleMachoImage.h>
 
-///
-/// Context used to refer to a MACH-O.
-///
-typedef struct {
-  CONST MACH_HEADER_64 *MachHeader;
-  UINTN                FileSize;
-} OC_MACHO_CONTEXT;
+/**
+  Returns the size of a MACH-O Context.
+
+**/
+UINTN
+MachoGetContextSize (
+  VOID
+  );
 
 /**
   Initializes a MACH-O Context.
@@ -39,7 +40,7 @@ BOOLEAN
 MachoInitializeContext (
   IN  CONST MACH_HEADER_64  *MachHeader,
   IN  UINTN                 FileSize,
-  OUT OC_MACHO_CONTEXT      *Context
+  OUT VOID                  *Context
   );
 
 /**
@@ -50,7 +51,7 @@ MachoInitializeContext (
 **/
 UINT64
 MachoGetLastAddress64 (
-  IN CONST OC_MACHO_CONTEXT  *Context
+  IN CONST VOID  *Context
   );
 
 /**
@@ -63,7 +64,7 @@ MachoGetLastAddress64 (
 **/
 MACH_UUID_COMMAND *
 MachoGetUuid64 (
-  IN CONST OC_MACHO_CONTEXT  *Context
+  IN CONST VOID  *Context
   );
 
 /**
@@ -77,8 +78,8 @@ MachoGetUuid64 (
 **/
 MACH_SEGMENT_COMMAND_64 *
 MachoGetSegmentByName64 (
-  IN CONST OC_MACHO_CONTEXT  *Context,
-  IN CONST CHAR8             *SegmentName
+  IN CONST VOID   *Context,
+  IN CONST CHAR8  *SegmentName
   );
 
 /**
@@ -93,7 +94,7 @@ MachoGetSegmentByName64 (
 **/
 MACH_SECTION_64 *
 MachoGetSectionByName64 (
-  IN CONST OC_MACHO_CONTEXT         *Context,
+  IN CONST VOID                     *Context,
   IN CONST MACH_SEGMENT_COMMAND_64  *Segment,
   IN CONST CHAR8                    *SectionName
   );
@@ -110,9 +111,9 @@ MachoGetSectionByName64 (
 **/
 MACH_SECTION_64 *
 MachoGetSegmentSectionByName64 (
-  IN CONST OC_MACHO_CONTEXT  *Context,
-  IN CONST CHAR8             *SegmentName,
-  IN CONST CHAR8             *SectionName
+  IN CONST VOID   *Context,
+  IN CONST CHAR8  *SegmentName,
+  IN CONST CHAR8  *SectionName
   );
 
 /**
@@ -127,7 +128,7 @@ MachoGetSegmentSectionByName64 (
 **/
 MACH_SEGMENT_COMMAND_64 *
 MachoGetNextSegment64 (
-  IN CONST OC_MACHO_CONTEXT         *Context,
+  IN CONST VOID                     *Context,
   IN CONST MACH_SEGMENT_COMMAND_64  *Segment  OPTIONAL
   );
 
@@ -171,8 +172,8 @@ MachoGetNextSection64 (
 **/
 CONST MACH_SECTION_64 *
 MachoGetSectionByIndex64 (
-  IN CONST OC_MACHO_CONTEXT  *Context,
-  IN UINTN                   Index
+  IN CONST VOID  *Context,
+  IN UINTN       Index
   );
 
 /**
@@ -186,8 +187,8 @@ MachoGetSectionByIndex64 (
 **/
 CONST MACH_SECTION_64 *
 MachoGetSectionByAddress64 (
-  IN CONST OC_MACHO_CONTEXT  *Context,
-  IN UINT64                  Address
+  IN CONST VOID  *Context,
+  IN UINT64      Address
   );
 
 /**
@@ -200,7 +201,7 @@ MachoGetSectionByAddress64 (
 **/
 MACH_SYMTAB_COMMAND *
 MachoGetSymtab (
-  IN CONST OC_MACHO_CONTEXT  *Context
+  IN CONST VOID  *Context
   );
 
 /**
@@ -213,7 +214,7 @@ MachoGetSymtab (
 **/
 MACH_DYSYMTAB_COMMAND *
 MachoGetDySymtab (
-  IN CONST OC_MACHO_CONTEXT  *Context
+  IN CONST VOID  *Context
   );
 
 /**
@@ -249,7 +250,7 @@ MachoSymbolIsDefined (
 **/
 BOOLEAN
 MachoSymbolIsLocalDefined (
-  IN CONST OC_MACHO_CONTEXT       *Context,
+  IN CONST VOID                   *Context,
   IN CONST MACH_NLIST_64          *SymbolTable,
   IN CONST MACH_DYSYMTAB_COMMAND  *DySymtab,
   IN CONST MACH_NLIST_64          *Symbol
@@ -303,9 +304,9 @@ MachoGetLocalDefinedSymbolByName (
 **/
 BOOLEAN
 MachoRelocateSymbol64 (
-  IN     CONST OC_MACHO_CONTEXT  *Context,
-  IN     UINT64                  LinkAddress,
-  IN OUT MACH_NLIST_64           *Symbol
+  IN     CONST VOID     *Context,
+  IN     UINT64         LinkAddress,
+  IN OUT MACH_NLIST_64  *Symbol
   );
 
 /**
@@ -322,7 +323,7 @@ MachoRelocateSymbol64 (
 **/
 CONST MACH_NLIST_64 *
 MachoGetCxxSymbolByRelocation64 (
-  IN CONST OC_MACHO_CONTEXT      *Context,
+  IN CONST VOID                  *Context,
   IN UINTN                       NumberOfSymbols,
   IN CONST MACH_NLIST_64         *SymbolTable,
   IN CONST CHAR8                 *StringTable,
@@ -527,7 +528,7 @@ MachoIsSymbolNameCxx (
 **/
 UINTN
 MachoVtableGetNumberOfEntries64 (
-  IN CONST OC_MACHO_CONTEXT  *Context,
+  IN CONST VOID              *Context,
   IN CONST UINT64            *VtableData
   );
 
@@ -547,7 +548,7 @@ MachoVtableGetNumberOfEntries64 (
 **/
 CONST MACH_NLIST_64 *
 MachoGetMetaclassSymbolFromSmcpSymbol64 (
-  IN CONST OC_MACHO_CONTEXT      *Context,
+  IN CONST VOID                  *Context,
   IN UINTN                       NumberOfSymbols,
   IN CONST MACH_NLIST_64         *SymbolTable,
   IN CONST CHAR8                 *StringTable,
@@ -626,7 +627,7 @@ MachoPreserveRelocationIntel64 (
 **/
 CONST MACH_RELOCATION_INFO *
 MachoGetRelocationByOffset (
-  IN CONST OC_MACHO_CONTEXT      *Context,
+  IN CONST VOID                  *Context,
   IN UINTN                       NumberOfRelocations,
   IN CONST MACH_RELOCATION_INFO  *Relocations,
   IN UINT64                      Address

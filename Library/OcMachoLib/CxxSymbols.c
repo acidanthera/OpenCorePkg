@@ -505,8 +505,8 @@ MachoIsSymbolNameCxx (
 **/
 UINTN
 MachoVtableGetNumberOfEntries64 (
-  IN CONST OC_MACHO_CONTEXT  *Context,
-  IN CONST UINT64            *VtableData
+  IN CONST VOID    *Context,
+  IN CONST UINT64  *VtableData
   )
 {
   UINTN Index;
@@ -542,7 +542,7 @@ MachoVtableGetNumberOfEntries64 (
 **/
 CONST MACH_NLIST_64 *
 MachoGetMetaclassSymbolFromSmcpSymbol64 (
-  IN CONST OC_MACHO_CONTEXT      *Context,
+  IN CONST VOID                  *Context,
   IN UINTN                       NumberOfSymbols,
   IN CONST MACH_NLIST_64         *SymbolTable,
   IN CONST CHAR8                 *StringTable,
