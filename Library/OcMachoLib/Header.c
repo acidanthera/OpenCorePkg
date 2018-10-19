@@ -287,7 +287,7 @@ MachoGetSectionByName64 (
     Result = AsciiStrnCmp (
                SectionWalker->SectionName,
                SectionName,
-               ARRAY_SIZE (SectionWalker->SegmentName)
+               ARRAY_SIZE (SectionWalker->SectionName)
                );
     if (Result == 0) {
       //
