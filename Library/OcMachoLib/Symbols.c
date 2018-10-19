@@ -125,8 +125,7 @@ MachoSymbolIsLocalDefined (
   UndefinedSymbols    = &SymbolTable[DySymtab->UndefinedSymbolsIndex];
   UndefinedSymbolsTop = &UndefinedSymbols[DySymtab->NumUndefinedSymbols];
 
-  if (((UINTN)Symbol >= (UINTN)UndefinedSymbols)
-    && ((UINTN)Symbol < (UINTN)UndefinedSymbolsTop)) {
+  if ((Symbol >= UndefinedSymbols) && (Symbol < UndefinedSymbolsTop)) {
     return FALSE;
   }
 
@@ -136,8 +135,7 @@ MachoSymbolIsLocalDefined (
                       );
   IndirectSymbolsTop = &IndirectSymbols[DySymtab->NumIndirectSymbols];
 
-  if (((UINTN)Symbol >= (UINTN)IndirectSymbols)
-    && ((UINTN)Symbol < (UINTN)IndirectSymbolsTop)) {
+  if ((Symbol >= IndirectSymbols) && (Symbol < IndirectSymbolsTop)) {
     return FALSE;
   }
 
