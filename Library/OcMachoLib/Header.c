@@ -37,6 +37,7 @@ MachoInitializeContext (
   OUT OC_MACHO_CONTEXT      *Context
   )
 {
+  UINTN                   MinCommandsSize;
   UINTN                   TopOfCommands;
   UINTN                   Index;
   CONST MACH_LOAD_COMMAND *Command;
@@ -44,8 +45,11 @@ MachoInitializeContext (
   //
   // Verify MACH-O Header sanity.
   //
-  TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
-  if ((MachHeader->Signature != MACH_HEADER_64_SIGNATURE)
+  TopOfCommands   = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
+  MinCommandsSize = (MachHeader->NumberOfCommands * sizeof (*MachHeader->Commands));
+  if ((FileSize < sizeof (*MachHeader))
+   || (MachHeader->Signature != MACH_HEADER_64_SIGNATURE)
+   || (MachHeader->CommandsSize < MinCommandsSize)
    || (TopOfCommands > ((UINTN)MachHeader + FileSize))) {
     return FALSE;
   }
