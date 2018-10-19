@@ -469,7 +469,7 @@ MachoGetSectionByAddress64 (
     Segment = MachoGetNextSegment64 (Context, Segment)
     ) {
     if ((Address >= Segment->VirtualAddress)
-     && (Address < (Segment->VirtualAddress + Address >= Segment->FileSize))) {
+     && (Address < (Segment->VirtualAddress + Segment->Size))) {
       Section = &Segment->Sections[0];
 
       for (Index = 0; Index < Segment->NumberOfSections; ++Index) {
