@@ -66,13 +66,13 @@ MachoInitializeContext (
     ++Index, Command = NEXT_MACH_LOAD_COMMAND (Command)
     ) {
     if (((UINTN)Command >= ((UINTN)MachHeader + MachHeader->CommandsSize))
-     || (Command->Size < sizeof (*Command))
-     || ((Command->Size % 8) != 0)  // Assumption: 64-bit, see below.
+     || (Command->CommandSize < sizeof (*Command))
+     || ((Command->CommandSize % 8) != 0)  // Assumption: 64-bit, see below.
       ) {
       return FALSE;
     }
 
-    CommandsSize += Command->Size;
+    CommandsSize += Command->CommandSize;
   }
 
   if (MachHeader->CommandsSize != CommandsSize) {
@@ -167,7 +167,7 @@ InternalGetNextCommand64 (
     (UINTN)Command < TopOfCommands;
     Command = NEXT_MACH_LOAD_COMMAND (Command)
     ) {
-    if (Command->Type == LoadCommandType) {
+    if (Command->CommandType == LoadCommandType) {
       return (MACH_LOAD_COMMAND *)Command;
     }
   }
@@ -201,7 +201,7 @@ InternalGetFirstCommand64 (
     return NULL;
   }
 
-  if (MachHeader->Commands[0].Type == LoadCommandType) {
+  if (MachHeader->Commands[0].CommandType == LoadCommandType) {
     return (MACH_LOAD_COMMAND *)&MachHeader->Commands[0];
   }
 
@@ -401,7 +401,7 @@ MachoGetNextSegment64 (
            InternalGetNextCommand64 (
              Context,
              MACH_LOAD_COMMAND_SEGMENT_64,
-             &Segment->Hdr
+             (CONST MACH_LOAD_COMMAND *)Segment
              )
            );
 }
