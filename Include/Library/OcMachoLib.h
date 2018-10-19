@@ -54,38 +54,6 @@ MachoGetLastAddress64 (
   );
 
 /**
-  Retrieves the first Load Command of type LoadCommandType.
-
-  @param[in] Context          Context of the MACH-O.
-  @param[in] LoadCommandType  Type of the Load Command to retrieve.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
-MACH_LOAD_COMMAND *
-MachoGetFirstCommand64 (
-  IN CONST OC_MACHO_CONTEXT  *Context,
-  IN MACH_LOAD_COMMAND_TYPE  LoadCommandType
-  );
-
-/**
-  Retrieves the first Load Command of type LoadCommandType.
-
-  @param[in] Context          Context of the MACH-O.
-  @param[in] LoadCommandType  Type of the Load Command to retrieve.
-  @param[in] LoadCommand      Previous Load Command.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
-MACH_LOAD_COMMAND *
-MachoGetNextCommand64 (
-  IN CONST OC_MACHO_CONTEXT   *Context,
-  IN MACH_LOAD_COMMAND_TYPE   LoadCommandType,
-  IN CONST MACH_LOAD_COMMAND  *LoadCommand
-  );
-
-/**
   Retrieves the first UUID Load Command.
 
   @param[in] Context  Context of the MACH-O.

@@ -140,8 +140,9 @@ MachoGetLastAddress64 (
   @retval NULL  NULL is returned on failure.
 
 **/
+STATIC
 MACH_LOAD_COMMAND *
-MachoGetNextCommand64 (
+InternalGetNextCommand64 (
   IN CONST OC_MACHO_CONTEXT   *Context,
   IN MACH_LOAD_COMMAND_TYPE   LoadCommandType,
   IN CONST MACH_LOAD_COMMAND  *LoadCommand
@@ -183,8 +184,9 @@ MachoGetNextCommand64 (
   @retval NULL  NULL is returned on failure.
 
 **/
+STATIC
 MACH_LOAD_COMMAND *
-MachoGetFirstCommand64 (
+InternalGetFirstCommand64 (
   IN CONST OC_MACHO_CONTEXT  *Context,
   IN MACH_LOAD_COMMAND_TYPE  LoadCommandType
   )
@@ -203,7 +205,7 @@ MachoGetFirstCommand64 (
     return (MACH_LOAD_COMMAND *)&MachHeader->Commands[0];
   }
 
-  return MachoGetNextCommand64 (
+  return InternalGetNextCommand64 (
            Context,
            LoadCommandType,
            &MachHeader->Commands[0]
@@ -226,7 +228,7 @@ MachoGetUuid64 (
   ASSERT (Context != NULL);
 
   return (MACH_UUID_COMMAND *)(
-           MachoGetFirstCommand64 (Context, MACH_LOAD_COMMAND_UUID)
+           InternalGetFirstCommand64 (Context, MACH_LOAD_COMMAND_UUID)
            );
 }
 
@@ -378,7 +380,7 @@ MachoGetFirstSegment64 (
   )
 {
   return (MACH_SEGMENT_COMMAND_64 *)(
-           MachoGetFirstCommand64 (Context, MACH_LOAD_COMMAND_SEGMENT_64)
+           InternalGetFirstCommand64 (Context, MACH_LOAD_COMMAND_SEGMENT_64)
            );
 }
 
@@ -398,7 +400,7 @@ MachoGetNextSegment64 (
   )
 {
   return (MACH_SEGMENT_COMMAND_64 *)(
-           MachoGetNextCommand64 (
+           InternalGetNextCommand64 (
              Context,
              MACH_LOAD_COMMAND_SEGMENT_64,
              &Segment->Hdr
@@ -551,7 +553,7 @@ MachoGetSymtab (
 {
   ASSERT (Context != NULL);
   return (MACH_SYMTAB_COMMAND *)(
-           MachoGetFirstCommand64 (Context, MACH_LOAD_COMMAND_SYMTAB)
+           InternalGetFirstCommand64 (Context, MACH_LOAD_COMMAND_SYMTAB)
            );
 }
 
@@ -570,6 +572,6 @@ MachoGetDySymtab (
 {
   ASSERT (Context != NULL);
   return (MACH_DYSYMTAB_COMMAND *)(
-           MachoGetFirstCommand64 (Context, MACH_LOAD_COMMAND_DYSYMTAB)
+           InternalGetFirstCommand64 (Context, MACH_LOAD_COMMAND_DYSYMTAB)
            );
 }
