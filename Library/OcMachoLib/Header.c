@@ -116,7 +116,7 @@ MachoGetLastAddress64 (
   LastAddress = 0;
 
   for (
-    Segment = MachoGetFirstSegment64 (Context);
+    Segment = MachoGetNextSegment64 (Context, NULL);
     Segment != NULL;
     Segment = MachoGetNextSegment64 (Context, Segment)
     ) {
@@ -136,6 +136,7 @@ MachoGetLastAddress64 (
   @param[in] Context          Context of the MACH-O.
   @param[in] LoadCommandType  Type of the Load Command to retrieve.
   @param[in] LoadCommand      Previous Load Command.
+                              If NULL, the first match is returned.
 
   @retval NULL  NULL is returned on failure.
 
@@ -145,7 +146,7 @@ MACH_LOAD_COMMAND *
 InternalGetNextCommand64 (
   IN CONST OC_MACHO_CONTEXT   *Context,
   IN MACH_LOAD_COMMAND_TYPE   LoadCommandType,
-  IN CONST MACH_LOAD_COMMAND  *LoadCommand
+  IN CONST MACH_LOAD_COMMAND  *LoadCommand  OPTIONAL
   )
 {
   CONST MACH_LOAD_COMMAND *Command;
@@ -157,13 +158,18 @@ InternalGetNextCommand64 (
   MachHeader    = Context->MachHeader;
   TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
 
-  ASSERT (
-    (LoadCommand >= &MachHeader->Commands[0])
-      && ((UINTN)LoadCommand <= TopOfCommands)
-    );
+  if (LoadCommand != NULL) {
+    ASSERT (
+      (LoadCommand >= &MachHeader->Commands[0])
+        && ((UINTN)LoadCommand <= TopOfCommands)
+      );
+    Command = NEXT_MACH_LOAD_COMMAND (LoadCommand);
+  } else {
+    Command = &MachHeader->Commands[0];
+  }
   
   for (
-    Command = NEXT_MACH_LOAD_COMMAND (LoadCommand);
+    ;
     (UINTN)Command < TopOfCommands;
     Command = NEXT_MACH_LOAD_COMMAND (Command)
     ) {
@@ -173,43 +179,6 @@ InternalGetNextCommand64 (
   }
 
   return NULL;
-}
-
-/**
-  Retrieves the first Load Command of type LoadCommandType.
-
-  @param[in] Context          Context of the MACH-O.
-  @param[in] LoadCommandType  Type of the Load Command to retrieve.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
-STATIC
-MACH_LOAD_COMMAND *
-InternalGetFirstCommand64 (
-  IN CONST OC_MACHO_CONTEXT  *Context,
-  IN MACH_LOAD_COMMAND_TYPE  LoadCommandType
-  )
-{
-  CONST MACH_HEADER_64 *MachHeader;
-
-  ASSERT (Context != NULL);
-
-  MachHeader = Context->MachHeader;
-
-  if (MachHeader->NumberOfCommands == 0) {
-    return NULL;
-  }
-
-  if (MachHeader->Commands[0].CommandType == LoadCommandType) {
-    return (MACH_LOAD_COMMAND *)&MachHeader->Commands[0];
-  }
-
-  return InternalGetNextCommand64 (
-           Context,
-           LoadCommandType,
-           &MachHeader->Commands[0]
-           );
 }
 
 /**
@@ -228,7 +197,7 @@ MachoGetUuid64 (
   ASSERT (Context != NULL);
 
   return (MACH_UUID_COMMAND *)(
-           InternalGetFirstCommand64 (Context, MACH_LOAD_COMMAND_UUID)
+           InternalGetNextCommand64 (Context, MACH_LOAD_COMMAND_UUID, NULL)
            );
 }
 
@@ -254,7 +223,7 @@ MachoGetSegmentByName64 (
   ASSERT (SegmentName != NULL);
 
   for (
-    Segment = MachoGetFirstSegment64 (Context);
+    Segment = MachoGetNextSegment64 (Context, NULL);
     Segment != NULL;
     Segment = MachoGetNextSegment64 (Context, Segment)
     ) {
@@ -365,28 +334,11 @@ MachoGetSegmentSectionByName64 (
 }
 
 /**
-  Retrieves the first segment.
-
-  @param[in] Context  Context of the MACH-O.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
-MACH_SEGMENT_COMMAND_64 *
-MachoGetFirstSegment64 (
-  IN CONST OC_MACHO_CONTEXT  *Context
-  )
-{
-  return (MACH_SEGMENT_COMMAND_64 *)(
-           InternalGetFirstCommand64 (Context, MACH_LOAD_COMMAND_SEGMENT_64)
-           );
-}
-
-/**
   Retrieves the next segment.
 
   @param[in] Context  Context of the MACH-O.
   @param[in] Segment  Segment to retrieve the successor of.
+                      if NULL, the first segment is returned.
 
   @retal NULL  NULL is returned on failure.
 
@@ -394,7 +346,7 @@ MachoGetFirstSegment64 (
 MACH_SEGMENT_COMMAND_64 *
 MachoGetNextSegment64 (
   IN CONST OC_MACHO_CONTEXT         *Context,
-  IN CONST MACH_SEGMENT_COMMAND_64  *Segment
+  IN CONST MACH_SEGMENT_COMMAND_64  *Segment  OPTIONAL
   )
 {
   return (MACH_SEGMENT_COMMAND_64 *)(
@@ -407,32 +359,11 @@ MachoGetNextSegment64 (
 }
 
 /**
-  Retrieves the first section of a segment.
-
-  @param[in] Segment  The segment to get the section of.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
-MACH_SECTION_64 *
-MachoGetFirstSection64 (
-  IN CONST MACH_SEGMENT_COMMAND_64  *Segment
-  )
-{
-  ASSERT (Segment != NULL);
-
-  if (Segment->NumberOfSections > 0) {
-    return (MACH_SECTION_64 *)&Segment->Sections[0];
-  }
-
-  return NULL;
-}
-
-/**
   Retrieves the next section of a segment.
 
   @param[in] Segment  The segment to get the section of.
   @param[in] Section  The section to get the successor of.
+                      If NULL, the first section is returned.
 
   @retval NULL  NULL is returned on failure.
 
@@ -440,16 +371,20 @@ MachoGetFirstSection64 (
 MACH_SECTION_64 *
 MachoGetNextSection64 (
   IN CONST MACH_SEGMENT_COMMAND_64  *Segment,
-  IN CONST MACH_SECTION_64          *Section
+  IN CONST MACH_SECTION_64          *Section  OPTIONAL
   )
 {
   ASSERT (Segment != NULL);
   ASSERT (Section != NULL);
 
-  ++Section;
+  if (Section != NULL) {
+    ++Section;
 
-  if ((UINTN)(Section - Segment->Sections) < Segment->NumberOfSections) {
-    return (MACH_SECTION_64 *)Section;
+    if ((UINTN)(Section - Segment->Sections) < Segment->NumberOfSections) {
+      return (MACH_SECTION_64 *)Section;
+    }
+  } else if (Segment->NumberOfSections > 0) {
+    return (MACH_SECTION_64 *)&Segment->Sections[0];
   }
 
   return NULL;
@@ -478,7 +413,7 @@ MachoGetSectionByIndex64 (
   SectionIndex = 0;
 
   for (
-    Segment = MachoGetFirstSegment64 (Context);
+    Segment = MachoGetNextSegment64 (Context, NULL);
     Segment != NULL;
     Segment = MachoGetNextSegment64 (Context, Segment)
     ) {
@@ -514,7 +449,7 @@ MachoGetSectionByAddress64 (
   ASSERT (Context != NULL);
 
   for (
-    Segment = MachoGetFirstSegment64 (Context);
+    Segment = MachoGetNextSegment64 (Context, NULL);
     Segment != NULL;
     Segment = MachoGetNextSegment64 (Context, Segment)
     ) {
@@ -551,7 +486,7 @@ MachoGetSymtab (
 {
   ASSERT (Context != NULL);
   return (MACH_SYMTAB_COMMAND *)(
-           InternalGetFirstCommand64 (Context, MACH_LOAD_COMMAND_SYMTAB)
+           InternalGetNextCommand64 (Context, MACH_LOAD_COMMAND_SYMTAB, NULL)
            );
 }
 
@@ -570,6 +505,6 @@ MachoGetDySymtab (
 {
   ASSERT (Context != NULL);
   return (MACH_DYSYMTAB_COMMAND *)(
-           InternalGetFirstCommand64 (Context, MACH_LOAD_COMMAND_DYSYMTAB)
+           InternalGetNextCommand64 (Context, MACH_LOAD_COMMAND_DYSYMTAB, NULL)
            );
 }

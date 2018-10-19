@@ -116,23 +116,11 @@ MachoGetSegmentSectionByName64 (
   );
 
 /**
-  Retrieves the first segment.
-
-  @param[in] Context  Context of the MACH-O.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
-MACH_SEGMENT_COMMAND_64 *
-MachoGetFirstSegment64 (
-  IN CONST OC_MACHO_CONTEXT  *Context
-  );
-
-/**
   Retrieves the next segment.
 
   @param[in] Context  Context of the MACH-O.
   @param[in] Segment  Segment to retrieve the successor of.
+                      if NULL, the first segment is returned.
 
   @retal NULL  NULL is returned on failure.
 
@@ -140,7 +128,7 @@ MachoGetFirstSegment64 (
 MACH_SEGMENT_COMMAND_64 *
 MachoGetNextSegment64 (
   IN CONST OC_MACHO_CONTEXT         *Context,
-  IN CONST MACH_SEGMENT_COMMAND_64  *Segment
+  IN CONST MACH_SEGMENT_COMMAND_64  *Segment  OPTIONAL
   );
 
 /**
@@ -161,6 +149,7 @@ MachoGetFirstSection64 (
 
   @param[in] Segment  The segment to get the section of.
   @param[in] Section  The section to get the successor of.
+                      If NULL, the first section is returned.
 
   @retval NULL  NULL is returned on failure.
 
@@ -168,7 +157,7 @@ MachoGetFirstSection64 (
 MACH_SECTION_64 *
 MachoGetNextSection64 (
   IN CONST MACH_SEGMENT_COMMAND_64  *Segment,
-  IN CONST MACH_SECTION_64          *Section
+  IN CONST MACH_SECTION_64          *Section  OPTIONAL
   );
 
 /**
