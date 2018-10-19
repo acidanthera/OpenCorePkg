@@ -391,7 +391,6 @@ MachoGetNextSection64 (
   )
 {
   ASSERT (Segment != NULL);
-  ASSERT (Section != NULL);
 
   if (Section != NULL) {
     ++Section;
