@@ -65,7 +65,7 @@ MachoInitializeContext (
   // Verify MACH-O Header sanity.
   //
   TopOfCommands   = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
-  MinCommandsSize = (MachHeader->NumberOfCommands * sizeof (*MachHeader->Commands));
+  MinCommandsSize = (MachHeader->NumCommands * sizeof (*MachHeader->Commands));
   if ((FileSize < sizeof (*MachHeader))
    || (MachHeader->Signature != MACH_HEADER_64_SIGNATURE)
    || (MachHeader->CommandsSize < MinCommandsSize)
@@ -77,7 +77,7 @@ MachoInitializeContext (
 
   for (
     Index = 0, Command = MachHeader->Commands;
-    Index < MachHeader->NumberOfCommands;
+    Index < MachHeader->NumCommands;
     ++Index, Command = NEXT_MACH_LOAD_COMMAND (Command)
     ) {
     if (((UINTN)Command >= ((UINTN)MachHeader + MachHeader->CommandsSize))
@@ -283,7 +283,7 @@ MachoGetSectionByName64 (
 
   SectionWalker = &Segment->Sections[0];
 
-  for (Index = 0; Index < Segment->NumberOfSections; ++Index) {
+  for (Index = 0; Index < Segment->NumSections; ++Index) {
     Result = AsciiStrnCmp (
                SectionWalker->SectionName,
                SectionName,
@@ -395,10 +395,10 @@ MachoGetNextSection64 (
   if (Section != NULL) {
     ++Section;
 
-    if ((UINTN)(Section - Segment->Sections) < Segment->NumberOfSections) {
+    if ((UINTN)(Section - Segment->Sections) < Segment->NumSections) {
       return (MACH_SECTION_64 *)Section;
     }
-  } else if (Segment->NumberOfSections > 0) {
+  } else if (Segment->NumSections > 0) {
     return (MACH_SECTION_64 *)&Segment->Sections[0];
   }
 
@@ -432,11 +432,11 @@ MachoGetSectionByIndex64 (
     Segment != NULL;
     Segment = MachoGetNextSegment64 (Context, Segment)
     ) {
-    if (Index <= (SectionIndex + (Segment->NumberOfSections - 1))) {
+    if (Index <= (SectionIndex + (Segment->NumSections - 1))) {
       return &Segment->Sections[Index - SectionIndex];
     }
 
-    SectionIndex += Segment->NumberOfSections;
+    SectionIndex += Segment->NumSections;
   }
 
   return NULL;
@@ -472,7 +472,7 @@ MachoGetSectionByAddress64 (
      && (Address < (Segment->VirtualAddress + Segment->Size))) {
       Section = &Segment->Sections[0];
 
-      for (Index = 0; Index < Segment->NumberOfSections; ++Index) {
+      for (Index = 0; Index < Segment->NumSections; ++Index) {
         if ((Address >= Section->Address)
          && (Address < Section->Address + Section->Size)) {
           return Section;

@@ -123,7 +123,7 @@ MachoSymbolIsLocalDefined (
   // its storage location for Undefined or Indirect.
   //
   UndefinedSymbols    = &SymbolTable[DySymtab->UndefinedSymbolsIndex];
-  UndefinedSymbolsTop = &UndefinedSymbols[DySymtab->NumberOfUndefinedSymbols];
+  UndefinedSymbolsTop = &UndefinedSymbols[DySymtab->NumUndefinedSymbols];
 
   if (((UINTN)Symbol >= (UINTN)UndefinedSymbols)
     && ((UINTN)Symbol < (UINTN)UndefinedSymbolsTop)) {
@@ -134,7 +134,7 @@ MachoSymbolIsLocalDefined (
                       (UINTN)((CONST OC_MACHO_CONTEXT *)Context)->MachHeader
                         + DySymtab->IndirectSymbolsOffset
                       );
-  IndirectSymbolsTop = &IndirectSymbols[DySymtab->NumberOfIndirectSymbols];
+  IndirectSymbolsTop = &IndirectSymbols[DySymtab->NumIndirectSymbols];
 
   if (((UINTN)Symbol >= (UINTN)IndirectSymbols)
     && ((UINTN)Symbol < (UINTN)IndirectSymbolsTop)) {
@@ -210,14 +210,14 @@ MachoGetLocalDefinedSymbolByName (
   Symbol = MachoGetSymbolByName (
              &SymbolTable[DySymtab->LocalSymbolsIndex],
              StringTable,
-             DySymtab->NumberOfLocalSymbols,
+             DySymtab->NumLocalSymbols,
              Name
              );
   if (Symbol == NULL) {
     Symbol = MachoGetSymbolByName (
                &SymbolTable[DySymtab->ExternalSymbolsIndex],
                StringTable,
-               DySymtab->NumberOfExternalSymbols,
+               DySymtab->NumExternalSymbols,
                Name
                );
   }
