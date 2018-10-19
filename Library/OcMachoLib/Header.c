@@ -120,7 +120,7 @@ MachoGetLastAddress64 (
     Segment != NULL;
     Segment = MachoGetNextSegment64 (Context, Segment)
     ) {
-    Address = (Segment->VirtualAddress + Segment->Hdr.Size);
+    Address = (Segment->VirtualAddress + Segment->Size);
 
     if (Address > LastAddress) {
       LastAddress = Address;
