@@ -258,15 +258,13 @@ MachoGetSegmentByName64 (
     Segment != NULL;
     Segment = MachoGetNextSegment64 (Context, Segment)
     ) {
-    if (Segment->Hdr.Type == MACH_LOAD_COMMAND_SEGMENT_64) {
-      Result = AsciiStrnCmp (
-                 Segment->SegmentName,
-                 SegmentName,
-                 ARRAY_SIZE (Segment->SegmentName)
-                 );
-      if (Result == 0) {
-        return (MACH_SEGMENT_COMMAND_64 *)Segment;
-      }
+    Result = AsciiStrnCmp (
+                Segment->SegmentName,
+                SegmentName,
+                ARRAY_SIZE (Segment->SegmentName)
+                );
+    if (Result == 0) {
+      return (MACH_SEGMENT_COMMAND_64 *)Segment;
     }
   }
 
