@@ -200,7 +200,7 @@ MachoGetSectionByAddress64 (
 
 **/
 MACH_SYMTAB_COMMAND *
-MachoGetSymtab (
+MachoGetSymtab64 (
   IN CONST VOID  *Context
   );
 
@@ -213,7 +213,7 @@ MachoGetSymtab (
 
 **/
 MACH_DYSYMTAB_COMMAND *
-MachoGetDySymtab (
+MachoGetDySymtab64 (
   IN CONST VOID  *Context
   );
 
