@@ -94,9 +94,9 @@ MachoSymbolIsDefined (
 /**
   Returns whether Symbol is defined locally.
 
-  @param[in] Context      Context of the MACH-O.
-  @param[in] SymbolTable  Symbol Table of the MACH-O.
-  @param[in] DySymtab     Dynamic Symbol Table of the MACH-O.
+  @param[in] Context      Context of the Mach-O.
+  @param[in] SymbolTable  Symbol Table of the Mach-O.
+  @param[in] DySymtab     Dynamic Symbol Table of the Mach-O.
   @param[in] Symbol       Symbol to evaluate.
 
 **/
@@ -145,8 +145,8 @@ MachoSymbolIsLocalDefined (
 /**
   Retrieves a symbol by its name.
 
-  @param[in] SymbolTable      Symbol Table of the MACH-O.
-  @param[in] StringTable      String Table pf the MACH-O.
+  @param[in] SymbolTable      Symbol Table of the Mach-O.
+  @param[in] StringTable      String Table pf the Mach-O.
   @param[in] NumberOfSymbols  Number of symbols in SymbolTable.
   @param[in] Name             Name of the symbol to locate.
 
@@ -184,9 +184,9 @@ MachoGetSymbolByName (
 /**
   Retrieves a locally defined symbol by its name.
 
-  @param[in] SymbolTable  Symbol Table of the MACH-O.
-  @param[in] StringTable  String Table pf the MACH-O.
-  @param[in] DySymtab     Dynamic Symbol Table of the MACH-O.
+  @param[in] SymbolTable  Symbol Table of the Mach-O.
+  @param[in] StringTable  String Table pf the Mach-O.
+  @param[in] DySymtab     Dynamic Symbol Table of the Mach-O.
   @param[in] Name         Name of the symbol to locate.
 
 **/
@@ -226,7 +226,7 @@ MachoGetLocalDefinedSymbolByName (
 /**
   Relocate Symbol to be against LinkAddress.
 
-  @param[in]     Context      Context of the MACH-O.
+  @param[in]     Context      Context of the Mach-O.
   @param[in]     LinkAddress  The address to be linked against.
   @param[in,out] Symbol       The symbol to be relocated.
 
@@ -267,10 +267,10 @@ MachoRelocateSymbol64 (
 /**
   Retrieves a symbol by the Relocation it is referenced by.
 
-  @param[in] Context          Header of the MACH-O.
+  @param[in] Context          Header of the Mach-O.
   @param[in] NumberOfSymbols  Number of symbols in SymbolTable.
-  @param[in] SymbolTable      Symbol Table of the MACH-O.
-  @param[in] StringTable      String Table of the MACH-O.
+  @param[in] SymbolTable      Symbol Table of the Mach-O.
+  @param[in] StringTable      String Table of the Mach-O.
   @param[in] Relocation       The Relocation to evaluate.
 
   @retval NULL  NULL is returned on failure.

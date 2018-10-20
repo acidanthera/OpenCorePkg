@@ -18,7 +18,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <IndustryStandard/AppleMachoImage.h>
 
 ///
-/// Context used to refer to a MACH-O.
+/// Context used to refer to a Mach-O.
 ///
 typedef struct {
   CONST MACH_HEADER_64 *MachHeader;

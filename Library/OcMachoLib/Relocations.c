@@ -66,7 +66,7 @@ MachoPreserveRelocationIntel64 (
 /**
   Retrieves a Relocation by the address it targets.
 
-  @param[in] Context              Context of the MACH-O.
+  @param[in] Context              Context of the Mach-O.
   @param[in] NumberOfRelocations  Number of Relocations in Relocations.
   @param[in] Relocations          The Relocations to search.
   @param[in] Address              The address to search for.

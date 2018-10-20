@@ -115,7 +115,7 @@ MachoSymbolIsMetaclassPointer64 (
 /**
   Retrieves the class name of a Super Meta Class Pointer.
 
-  @param[in]  StringTable    String Table of the MACH-O.
+  @param[in]  StringTable    String Table of the Mach-O.
   @param[in]  SmcpSymbol     SMCP Symbol to get the class name of.
   @param[in]  ClassNameSize  The size of ClassName.
   @param[out] ClassName      The output buffer for the class name.
@@ -238,7 +238,7 @@ MachoGetFunctionPrefixFromClassName (
 /**
   Retrieves the class name of a Meta Class Pointer.
 
-  @param[in]  StringTable         String Table of the MACH-O.
+  @param[in]  StringTable         String Table of the Mach-O.
   @param[in]  MetaClassPtrSymbol  MCP Symbol to get the class name of.
   @param[in]  ClassNameSize       The size of ClassName.
   @param[out] ClassName           The output buffer for the class name.
@@ -499,7 +499,7 @@ MachoIsSymbolNameCxx (
 /**
   Returns the number of VTable entires in VtableData.
 
-  @param[in] Context     Context of the MACH-O.
+  @param[in] Context     Context of the Mach-O.
   @param[in] VtableData  The VTable's data.
 
 **/
@@ -529,10 +529,10 @@ MachoVtableGetNumberOfEntries64 (
 /**
   Retrieves Metaclass symbol of a SMCP.
 
-  @param[in] Context              Context of the MACH-O.
+  @param[in] Context              Context of the Mach-O.
   @param[in] NumberOfSymbols      Number of symbols in SymbolTable.
-  @param[in] SymbolTable          Symbol Table of the MACH-O.
-  @param[in] StringTable          String Table of the MACH-O.
+  @param[in] SymbolTable          Symbol Table of the Mach-O.
+  @param[in] StringTable          String Table of the Mach-O.
   @param[in] NumberOfRelocations  Number of Relocations in Relocations.
   @param[in] Relocations          The Relocations to evaluate.
   @param[in] Smcp                 The SMCP to evaluate.
@@ -582,9 +582,9 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
   Retrieves VTable and Meta VTable of a SMCP.
   Logically matches XNU's get_vtable_syms_from_smcp.
 
-  @param[in]  SymbolTable  Symbol Table of the MACH-O.
-  @param[in]  StringTable  String Table of the MACH-O.
-  @param[in]  DySymtab     Dynamic Symbol Table of the MACH-O.
+  @param[in]  SymbolTable  Symbol Table of the Mach-O.
+  @param[in]  StringTable  String Table of the Mach-O.
+  @param[in]  DySymtab     Dynamic Symbol Table of the Mach-O.
   @param[in]  SmcpSymbol   SMCP Symbol to retrieve the VTables from.
   @param[out] Vtable       Output buffer for the VTable symbol pointer.
   @param[out] MetaVtable   Output buffer for the Meta VTable symbol pointer.
