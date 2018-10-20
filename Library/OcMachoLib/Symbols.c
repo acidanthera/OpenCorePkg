@@ -153,8 +153,9 @@ MachoSymbolIsLocalDefined (
   @retval NULL  NULL is returned on failure.
 
 **/
+STATIC
 CONST MACH_NLIST_64 *
-MachoGetSymbolByName (
+InternalGetSymbolByName (
   IN CONST MACH_NLIST_64  *SymbolTable,
   IN CONST CHAR8          *StringTable,
   IN UINTN                NumberOfSymbols,
@@ -205,14 +206,14 @@ MachoGetLocalDefinedSymbolByName (
   ASSERT (DySymtab != NULL);
   ASSERT (Name != NULL);
 
-  Symbol = MachoGetSymbolByName (
+  Symbol = InternalGetSymbolByName (
              &SymbolTable[DySymtab->LocalSymbolsIndex],
              StringTable,
              DySymtab->NumLocalSymbols,
              Name
              );
   if (Symbol == NULL) {
-    Symbol = MachoGetSymbolByName (
+    Symbol = InternalGetSymbolByName (
                &SymbolTable[DySymtab->ExternalSymbolsIndex],
                StringTable,
                DySymtab->NumExternalSymbols,

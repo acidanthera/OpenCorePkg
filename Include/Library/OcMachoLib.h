@@ -259,25 +259,6 @@ MachoSymbolIsLocalDefined (
   );
 
 /**
-  Retrieves a symbol by its name.
-
-  @param[in] SymbolTable      Symbol Table of the Mach-O.
-  @param[in] StringTable      String Table pf the Mach-O.
-  @param[in] NumberOfSymbols  Number of symbols in SymbolTable.
-  @param[in] Name             Name of the symbol to locate.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
-CONST MACH_NLIST_64 *
-MachoGetSymbolByName (
-  IN CONST MACH_NLIST_64  *SymbolTable,
-  IN CONST CHAR8          *StringTable,
-  IN UINTN                NumberOfSymbols,
-  IN CONST CHAR8          *Name
-  );
-
-/**
   Retrieves a locally defined symbol by its name.
 
   @param[in] SymbolTable  Symbol Table of the Mach-O.
