@@ -148,6 +148,7 @@ MachoGetFirstSection64 (
 /**
   Retrieves the next section of a segment.
 
+  @param[in] Context  Context of the MACH-O.
   @param[in] Segment  The segment to get the section of.
   @param[in] Section  The section to get the successor of.
                       If NULL, the first section is returned.
@@ -157,6 +158,7 @@ MachoGetFirstSection64 (
 **/
 MACH_SECTION_64 *
 MachoGetNextSection64 (
+  IN CONST VOID                     *Context,
   IN CONST MACH_SEGMENT_COMMAND_64  *Segment,
   IN CONST MACH_SECTION_64          *Section  OPTIONAL
   );

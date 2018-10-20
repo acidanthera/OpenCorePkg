@@ -210,11 +210,23 @@ MachoGetUuid64 (
   IN CONST VOID  *Context
   )
 {
+  MACH_UUID_COMMAND *UuidCommand;
+
   ASSERT (Context != NULL);
 
-  return (MACH_UUID_COMMAND *)(
-           InternalGetNextCommand64 (Context, MACH_LOAD_COMMAND_UUID, NULL)
-           );
+  UuidCommand = (MACH_UUID_COMMAND *)(
+                  InternalGetNextCommand64 (
+                    Context,
+                    MACH_LOAD_COMMAND_UUID,
+                    NULL
+                    )
+                  );
+  if ((UuidCommand != NULL)
+   && (UuidCommand->CommandSize >= sizeof (*UuidCommand))) {
+    return UuidCommand;
+  }
+
+  return NULL;
 }
 
 /**
@@ -365,18 +377,49 @@ MachoGetNextSegment64 (
   IN CONST MACH_SEGMENT_COMMAND_64  *Segment  OPTIONAL
   )
 {
-  return (MACH_SEGMENT_COMMAND_64 *)(
-           InternalGetNextCommand64 (
-             Context,
-             MACH_LOAD_COMMAND_SEGMENT_64,
-             (CONST MACH_LOAD_COMMAND *)Segment
-             )
-           );
+  MACH_SEGMENT_COMMAND_64 *NextSegment;
+
+  CONST OC_MACHO_CONTEXT  *MachoContext;
+  CONST MACH_HEADER_64    *MachHeader;
+  UINTN                   TopOfCommands;
+  UINTN                   TopOfSections;
+
+  ASSERT (Context != NULL);
+
+  MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
+
+  if (Segment != NULL) {
+    MachHeader    = MachoContext->MachHeader;
+    TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
+    ASSERT (
+      ((UINTN)Segment >= (UINTN)&MachHeader->Commands[0])
+        && ((UINTN)Segment < TopOfCommands)
+      );
+  }
+
+  NextSegment = (MACH_SEGMENT_COMMAND_64 *)(
+                  InternalGetNextCommand64 (
+                    Context,
+                    MACH_LOAD_COMMAND_SEGMENT_64,
+                    (CONST MACH_LOAD_COMMAND *)Segment
+                    )
+                  );
+  if ((NextSegment != NULL)
+   && (NextSegment->CommandSize >= sizeof (*NextSegment))) {
+    TopOfSections = (UINTN)&NextSegment[NextSegment->NumSections];
+    if (((NextSegment->FileOffset + NextSegment->FileSize) > MachoContext->FileSize)
+     || (((UINTN)NextSegment + NextSegment->CommandSize) < TopOfSections)) {
+      return NULL;
+    }
+  }
+
+  return NextSegment;
 }
 
 /**
   Retrieves the next section of a segment.
 
+  @param[in] Context  Context of the MACH-O.
   @param[in] Segment  The segment to get the section of.
   @param[in] Section  The section to get the successor of.
                       If NULL, the first section is returned.
@@ -386,20 +429,29 @@ MachoGetNextSegment64 (
 **/
 MACH_SECTION_64 *
 MachoGetNextSection64 (
+  IN CONST VOID                     *Context,
   IN CONST MACH_SEGMENT_COMMAND_64  *Segment,
   IN CONST MACH_SECTION_64          *Section  OPTIONAL
   )
 {
+  CONST OC_MACHO_CONTEXT *MachContext;
+
   ASSERT (Segment != NULL);
 
   if (Section != NULL) {
+    ASSERT ((Section >= Segment->Sections)
+         && (Section < &Segment->Sections[Segment->NumSections])
+      );
     ++Section;
+  } else {
+    Section = (MACH_SECTION_64 *)&Segment->Sections[0];
+  }
 
-    if ((UINTN)(Section - Segment->Sections) < Segment->NumSections) {
-      return (MACH_SECTION_64 *)Section;
-    }
-  } else if (Segment->NumSections > 0) {
-    return (MACH_SECTION_64 *)&Segment->Sections[0];
+  MachContext = (CONST OC_MACHO_CONTEXT *)Context;
+
+  if (((UINTN)(Section - Segment->Sections) < Segment->NumSections)
+   && ((Section->Offset + Section->Size) <= MachContext->FileSize)) {
+    return (MACH_SECTION_64 *)Section;
   }
 
   return NULL;
@@ -499,10 +551,28 @@ MachoGetSymtab64 (
   IN CONST VOID  *Context
   )
 {
+  MACH_SYMTAB_COMMAND *Symtab;
+  UINTN               TopOfSymbols;
+  UINTN               FileSize;
+
   ASSERT (Context != NULL);
-  return (MACH_SYMTAB_COMMAND *)(
-           InternalGetNextCommand64 (Context, MACH_LOAD_COMMAND_SYMTAB, NULL)
-           );
+
+  Symtab = (MACH_SYMTAB_COMMAND *)(
+             InternalGetNextCommand64 (Context, MACH_LOAD_COMMAND_SYMTAB, NULL)
+             );
+  if ((Symtab != NULL) && (Symtab->CommandSize >= sizeof (*Symtab))) {
+    FileSize = ((CONST OC_MACHO_CONTEXT *)Context)->FileSize;
+
+    TopOfSymbols  = Symtab->SymbolsOffset;
+    TopOfSymbols += (Symtab->NumSymbols * sizeof (MACH_NLIST_64));
+
+    if ((TopOfSymbols <= FileSize)
+     && ((Symtab->StringsOffset + Symtab->StringsSize) <= FileSize)) {
+      return Symtab;
+    }
+  }
+
+  return NULL;
 }
 
 /**
@@ -518,8 +588,40 @@ MachoGetDySymtab64 (
   IN CONST VOID  *Context
   )
 {
+  MACH_DYSYMTAB_COMMAND *DySymtab;
+  UINTN                 FileSize;
+  UINTN                 OffsetTop;
+
   ASSERT (Context != NULL);
-  return (MACH_DYSYMTAB_COMMAND *)(
-           InternalGetNextCommand64 (Context, MACH_LOAD_COMMAND_DYSYMTAB, NULL)
-           );
+
+  DySymtab = (MACH_DYSYMTAB_COMMAND *)(
+               InternalGetNextCommand64 (
+                 Context,
+                 MACH_LOAD_COMMAND_DYSYMTAB,
+                 NULL
+                 )
+               );
+  if (DySymtab != NULL) {
+    FileSize = ((CONST OC_MACHO_CONTEXT *)Context)->FileSize;
+
+    OffsetTop  = DySymtab->IndirectSymbolsOffset;
+    OffsetTop += (DySymtab->NumIndirectSymbols * sizeof (MACH_NLIST_64));
+    if (OffsetTop > FileSize) {
+      return NULL;
+    }
+
+    OffsetTop  = DySymtab->ExternalRelocationsOffset;
+    OffsetTop += (DySymtab->NumExternalRelocations * sizeof (MACH_NLIST_64));
+    if (OffsetTop > FileSize) {
+      return NULL;
+    }
+
+    OffsetTop  = DySymtab->LocalRelocationsOffset;
+    OffsetTop += (DySymtab->NumOfLocalRelocations * sizeof (MACH_NLIST_64));
+    if (OffsetTop > FileSize) {
+      return NULL;
+    }
+  }
+
+  return DySymtab;
 }
