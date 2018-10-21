@@ -257,6 +257,25 @@ MachoGetSymbolByIndex64 (
   );
 
 /**
+  Retrieves the symbol referenced by the Relocation targeting Address.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  Address to search for.
+  @param[out]    Symbol   Buffer the pointer to the symbol is returned in.
+                          May be NULL when the symbol data is invalid.
+                          The output data is undefined when FALSE is returned.
+
+  @returns  Whether Relocation exists.
+
+**/
+BOOLEAN
+MachoGetSymbolByExternRelocationOffset64 (
+  IN OUT VOID           *Context,
+  IN     UINT64         Address,
+  OUT    MACH_NLIST_64  **Symbol
+  );
+
+/**
   Relocate Symbol to be against LinkAddress.
 
   @param[in,out] Context      Context of the Mach-O.

@@ -202,6 +202,50 @@ MachoGetSymbolByIndex64 (
 }
 
 /**
+  Retrieves the symbol referenced by the Relocation targeting Address.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  Address to search for.
+  @param[out]    Symbol   Buffer the pointer to the symbol is returned in.
+                          May be NULL when the symbol data is invalid.
+                          The output data is undefined when FALSE is returned.
+
+  @returns  Whether Relocation exists.
+
+**/
+BOOLEAN
+MachoGetSymbolByExternRelocationOffset64 (
+  IN OUT VOID           *Context,
+  IN     UINT64         Address,
+  OUT    MACH_NLIST_64  **Symbol
+  )
+{
+  CONST MACH_NLIST_64        *Sym;
+
+  OC_MACHO_CONTEXT           *MachoContext;
+  CONST MACH_RELOCATION_INFO *Relocation;
+
+  ASSERT (Context != NULL);
+  ASSERT (Symbol != NULL);
+
+  MachoContext = (OC_MACHO_CONTEXT *)Context;
+
+  Relocation = MachoGetExternalRelocationByOffset (Context, Address);
+  if (Relocation != NULL) {
+    Sym = MachoGetSymbolByIndex64 (Context, Relocation->SymbolNumber);
+    if ((Sym != NULL) && InternalSymbolIsSane (MachoContext, Sym)) {
+      *Symbol = (MACH_NLIST_64 *)Sym;
+    } else {
+      *Symbol = NULL;
+    }
+
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
   Retrieves a symbol by its name.
 
   @param[in] SymbolTable      Symbol Table of the Mach-O.
