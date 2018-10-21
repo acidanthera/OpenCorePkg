@@ -135,19 +135,6 @@ MachoGetNextSegment64 (
   );
 
 /**
-  Retrieves the first section of a segment.
-
-  @param[in] Segment  The segment to get the section of.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
-MACH_SECTION_64 *
-MachoGetFirstSection64 (
-  IN CONST MACH_SEGMENT_COMMAND_64  *Segment
-  );
-
-/**
   Retrieves the next section of a segment.
 
   @param[in,out] Context  Context of the Mach-O.
