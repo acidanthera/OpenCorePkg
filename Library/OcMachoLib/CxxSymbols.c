@@ -561,17 +561,22 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
   IN     CONST MACH_NLIST_64  *Smcp
   )
 {
-  CONST MACH_RELOCATION_INFO *Relocation;
+  BOOLEAN       Result;
+  MACH_NLIST_64 *Symbol;
 
   ASSERT (Context != NULL);
   ASSERT (Smcp != NULL);
 
-  Relocation = MachoGetExternalRelocationByOffset (Context, Smcp->Value);
-  if (Relocation == NULL) {
+  Result = MachoGetSymbolByExternRelocationOffset64 (
+             Context,
+             Smcp->Value,
+             &Symbol
+             );
+  if (!Result) {
     return NULL;
   }
 
-  return MachoGetCxxSymbolByExternRelocation64 (Context, Relocation);
+  return Symbol;
 }
 
 /**

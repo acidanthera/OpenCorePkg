@@ -293,21 +293,6 @@ MachoRelocateSymbol64 (
   );
 
 /**
-  Retrieves a C++ symbol by the Relocation it is referenced by.
-
-  @param[in,out] Context     Context of the Mach-O.
-  @param[in]     Relocation  The Relocation to evaluate.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
-CONST MACH_NLIST_64 *
-MachoGetCxxSymbolByExternRelocation64 (
-  IN OUT VOID                        *Context,
-  IN     CONST MACH_RELOCATION_INFO  *Relocation
-  );
-
-/**
   Returns whether Name is pure virtual.
 
   @param[in] Name  The name to evaluate.
