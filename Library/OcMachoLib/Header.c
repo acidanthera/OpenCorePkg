@@ -48,14 +48,13 @@ BOOLEAN
 MachoInitializeContext (
   IN  CONST MACH_HEADER_64  *MachHeader,
   IN  UINTN                 FileSize,
-  OUT VOID                  *Context
+  OUT OC_MACHO_CONTEXT      *Context
   )
 {
   UINTN                   TopOfCommands;
   UINTN                   Index;
   CONST MACH_LOAD_COMMAND *Command;
   UINTN                   CommandsSize;
-  OC_MACHO_CONTEXT        *MachoContext;
 
   ASSERT (MachHeader != NULL);
   ASSERT (FileSize > 0);
@@ -109,9 +108,8 @@ MachoInitializeContext (
     return FALSE;
   }
 
-  MachoContext = (OC_MACHO_CONTEXT *)Context;
-  MachoContext->MachHeader = MachHeader;
-  MachoContext->FileSize   = FileSize;
+  Context->MachHeader = MachHeader;
+  Context->FileSize   = FileSize;
 
   return TRUE;
 }
@@ -124,7 +122,7 @@ MachoInitializeContext (
 **/
 UINT64
 MachoGetLastAddress64 (
-  IN OUT VOID  *Context
+  IN OUT OC_MACHO_CONTEXT  *Context
   )
 {
   UINT64                        LastAddress;
@@ -165,7 +163,7 @@ MachoGetLastAddress64 (
 STATIC
 MACH_LOAD_COMMAND *
 InternalGetNextCommand64 (
-  IN OUT VOID                     *Context,
+  IN OUT OC_MACHO_CONTEXT         *Context,
   IN     MACH_LOAD_COMMAND_TYPE   LoadCommandType,
   IN     CONST MACH_LOAD_COMMAND  *LoadCommand  OPTIONAL
   )
@@ -215,7 +213,7 @@ InternalGetNextCommand64 (
 **/
 MACH_UUID_COMMAND *
 MachoGetUuid64 (
-  IN OUT VOID  *Context
+  IN OUT OC_MACHO_CONTEXT  *Context
   )
 {
   MACH_UUID_COMMAND *UuidCommand;
@@ -248,8 +246,8 @@ MachoGetUuid64 (
 **/
 MACH_SEGMENT_COMMAND_64 *
 MachoGetSegmentByName64 (
-  IN OUT VOID         *Context,
-  IN     CONST CHAR8  *SegmentName
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SegmentName
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
@@ -288,7 +286,7 @@ MachoGetSegmentByName64 (
 **/
 MACH_SECTION_64 *
 MachoGetSectionByName64 (
-  IN OUT VOID                           *Context,
+  IN OUT OC_MACHO_CONTEXT               *Context,
   IN     CONST MACH_SEGMENT_COMMAND_64  *Segment,
   IN     CONST CHAR8                    *SectionName
   )
@@ -349,9 +347,9 @@ MachoGetSectionByName64 (
 **/
 MACH_SECTION_64 *
 MachoGetSegmentSectionByName64 (
-  IN OUT VOID         *Context,
-  IN     CONST CHAR8  *SegmentName,
-  IN     CONST CHAR8  *SectionName
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SegmentName,
+  IN     CONST CHAR8       *SectionName
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
@@ -381,25 +379,23 @@ MachoGetSegmentSectionByName64 (
 **/
 MACH_SEGMENT_COMMAND_64 *
 MachoGetNextSegment64 (
-  IN OUT VOID                           *Context,
+  IN OUT OC_MACHO_CONTEXT               *Context,
   IN     CONST MACH_SEGMENT_COMMAND_64  *Segment  OPTIONAL
   )
 {
   MACH_SEGMENT_COMMAND_64 *NextSegment;
 
-  CONST OC_MACHO_CONTEXT  *MachoContext;
   CONST MACH_HEADER_64    *MachHeader;
   UINTN                   TopOfCommands;
   UINTN                   TopOfSections;
 
   ASSERT (Context != NULL);
 
-  MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
-  ASSERT (MachoContext->MachHeader != NULL);
-  ASSERT (MachoContext->FileSize > 0);
+  ASSERT (Context->MachHeader != NULL);
+  ASSERT (Context->FileSize > 0);
 
   if (Segment != NULL) {
-    MachHeader    = MachoContext->MachHeader;
+    MachHeader    = Context->MachHeader;
     TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
     ASSERT (
       ((UINTN)Segment >= (UINTN)&MachHeader->Commands[0])
@@ -417,7 +413,7 @@ MachoGetNextSegment64 (
   if ((NextSegment != NULL)
    && (NextSegment->CommandSize >= sizeof (*NextSegment))) {
     TopOfSections = (UINTN)&NextSegment[NextSegment->NumSections];
-    if (((NextSegment->FileOffset + NextSegment->FileSize) > MachoContext->FileSize)
+    if (((NextSegment->FileOffset + NextSegment->FileSize) > Context->FileSize)
      || (((UINTN)NextSegment + NextSegment->CommandSize) < TopOfSections)) {
       return NULL;
     }
@@ -439,13 +435,11 @@ MachoGetNextSegment64 (
 **/
 MACH_SECTION_64 *
 MachoGetNextSection64 (
-  IN OUT VOID                           *Context,
+  IN OUT OC_MACHO_CONTEXT               *Context,
   IN     CONST MACH_SEGMENT_COMMAND_64  *Segment,
   IN     CONST MACH_SECTION_64          *Section  OPTIONAL
   )
 {
-  CONST OC_MACHO_CONTEXT *MachoContext;
-
   ASSERT (Context != NULL);
   ASSERT (Segment != NULL);
 
@@ -458,11 +452,10 @@ MachoGetNextSection64 (
     Section = (MACH_SECTION_64 *)&Segment->Sections[0];
   }
 
-  MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
-  ASSERT (MachoContext->FileSize > 0);
+  ASSERT (Context->FileSize > 0);
 
   if (((UINTN)(Section - Segment->Sections) < Segment->NumSections)
-   && ((Section->Offset + Section->Size) <= MachoContext->FileSize)) {
+   && ((Section->Offset + Section->Size) <= Context->FileSize)) {
     return (MACH_SECTION_64 *)Section;
   }
 
@@ -480,8 +473,8 @@ MachoGetNextSection64 (
 **/
 MACH_SECTION_64 *
 MachoGetSectionByIndex64 (
-  IN OUT VOID   *Context,
-  IN     UINTN  Index
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINTN             Index
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
@@ -517,8 +510,8 @@ MachoGetSectionByIndex64 (
 **/
 MACH_SECTION_64 *
 MachoGetSectionByAddress64 (
-  IN OUT VOID    *Context,
-  IN     UINT64  Address
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
@@ -553,14 +546,14 @@ MachoGetSectionByAddress64 (
 /**
   Retrieves the SYMTAB command.
 
-  @param[in,out] MachoContext  Context of the Mach-O.
+  @param[in,out] Context  Context of the Mach-O.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 BOOLEAN
 InternalRetrieveSymtabs64 (
-  IN OUT OC_MACHO_CONTEXT  *MachoContext
+  IN OUT OC_MACHO_CONTEXT  *Context
   )
 {
   UINTN                       MachoAddress;
@@ -571,16 +564,16 @@ InternalRetrieveSymtabs64 (
   UINTN                       OffsetTop;
   UINTN                       TopOfSymbols;
 
-  ASSERT (MachoContext != NULL);
-  ASSERT (MachoContext->MachHeader != NULL);
-  ASSERT (MachoContext->FileSize > 0);
-  ASSERT (MachoContext->SymbolTable == NULL);
+  ASSERT (Context != NULL);
+  ASSERT (Context->MachHeader != NULL);
+  ASSERT (Context->FileSize > 0);
+  ASSERT (Context->SymbolTable == NULL);
   //
   // Retrieve SYMTAB.
   //
   Symtab = (MACH_SYMTAB_COMMAND *)(
              InternalGetNextCommand64 (
-               (VOID *)MachoContext,
+               (VOID *)Context,
                MACH_LOAD_COMMAND_SYMTAB,
                NULL
                )
@@ -589,7 +582,7 @@ InternalRetrieveSymtabs64 (
     return FALSE;
   }
 
-  FileSize = MachoContext->FileSize;
+  FileSize = Context->FileSize;
 
   TopOfSymbols  = Symtab->SymbolsOffset;
   TopOfSymbols += (Symtab->NumSymbols * sizeof (MACH_NLIST_64));
@@ -599,7 +592,7 @@ InternalRetrieveSymtabs64 (
     return FALSE;
   }
 
-  MachoAddress = (UINTN)MachoContext->MachHeader;
+  MachoAddress = (UINTN)Context->MachHeader;
   StringTable  = (CONST CHAR8 *)(MachoAddress + Symtab->StringsOffset);
 
   if (StringTable[(Symtab->StringsSize / sizeof (*StringTable)) - 1] != '\0') {
@@ -610,7 +603,7 @@ InternalRetrieveSymtabs64 (
   //
   DySymtab = (MACH_DYSYMTAB_COMMAND *)(
                InternalGetNextCommand64 (
-                 (VOID *)MachoContext,
+                 (VOID *)Context,
                  MACH_LOAD_COMMAND_DYSYMTAB,
                  NULL
                  )
@@ -639,22 +632,22 @@ InternalRetrieveSymtabs64 (
   //
   // Store the symbol information.
   //
-  MachoContext->NumSymbols  = Symtab->NumSymbols;
-  MachoContext->SymbolTable = (CONST MACH_NLIST_64 *)(
+  Context->NumSymbols  = Symtab->NumSymbols;
+  Context->SymbolTable = (CONST MACH_NLIST_64 *)(
                                 MachoAddress + Symtab->SymbolsOffset
                                 );
-  MachoContext->StringsSize = Symtab->StringsSize;
-  MachoContext->StringTable = StringTable;
+  Context->StringsSize = Symtab->StringsSize;
+  Context->StringTable = StringTable;
 
-  MachoContext->IndirectSymbolTable = (CONST MACH_NLIST_64 *)(
+  Context->IndirectSymbolTable = (CONST MACH_NLIST_64 *)(
                                         MachoAddress
                                           + DySymtab->IndirectSymbolsOffset
                                         );
-  MachoContext->LocalRelocations = (CONST MACH_RELOCATION_INFO *)(
+  Context->LocalRelocations = (CONST MACH_RELOCATION_INFO *)(
                                      MachoAddress
                                        + DySymtab->LocalRelocationsOffset
                                      );
-  MachoContext->ExternRelocations = (CONST MACH_RELOCATION_INFO *)(
+  Context->ExternRelocations = (CONST MACH_RELOCATION_INFO *)(
                                       MachoAddress
                                         + DySymtab->ExternalRelocationsOffset
                                       );

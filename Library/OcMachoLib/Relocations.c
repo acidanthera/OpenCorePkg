@@ -76,31 +76,28 @@ MachoPreserveRelocationIntel64 (
 **/
 MACH_RELOCATION_INFO *
 InternalGetExternalRelocationByOffset (
-  IN OUT VOID    *Context,
-  IN     UINT64  Address
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address
   )
 {
-  OC_MACHO_CONTEXT           *MachoContext;
   UINTN                      Index;
   CONST MACH_RELOCATION_INFO *Relocation;
 
   ASSERT (Context != NULL);
-
-  MachoContext = (OC_MACHO_CONTEXT *)Context;
   //
   // Assumption: 64-bit.
   //
-  if ((MachoContext->SymbolTable == NULL)
-   && !InternalRetrieveSymtabs64 (MachoContext)) {
+  if ((Context->SymbolTable == NULL)
+   && !InternalRetrieveSymtabs64 (Context)) {
     return NULL;
   }
 
-  ASSERT (MachoContext->DySymtab != NULL);
-  ASSERT (MachoContext->ExternRelocations != NULL);
+  ASSERT (Context->DySymtab != NULL);
+  ASSERT (Context->ExternRelocations != NULL);
 
   for (
-    Index = 0, Relocation = &MachoContext->ExternRelocations[0];
-    Index < MachoContext->DySymtab->NumExternalRelocations;
+    Index = 0, Relocation = &Context->ExternRelocations[0];
+    Index < Context->DySymtab->NumExternalRelocations;
     ++Index, ++Relocation
     ) {
     //

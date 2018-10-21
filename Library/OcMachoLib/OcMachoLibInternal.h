@@ -20,7 +20,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 ///
 /// Context used to refer to a Mach-O.
 ///
-typedef struct {
+struct OC_MACHO_CONTEXT_ {
   CONST MACH_HEADER_64        *MachHeader;
   UINTN                       FileSize;
   UINT32                      NumSymbols;
@@ -31,19 +31,19 @@ typedef struct {
   CONST MACH_NLIST_64         *IndirectSymbolTable;
   CONST MACH_RELOCATION_INFO  *LocalRelocations;
   CONST MACH_RELOCATION_INFO  *ExternRelocations;
-} OC_MACHO_CONTEXT;
+};
 
 /**
   Retrieves the SYMTAB command.
 
-  @param[in] MachoContext  Context of the Mach-O.
+  @param[in] Context  Context of the Mach-O.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 BOOLEAN
 InternalRetrieveSymtabs64 (
-  IN OC_MACHO_CONTEXT  *MachoContext
+  IN OUT OC_MACHO_CONTEXT  *Context
   );
 
 /**
@@ -57,8 +57,8 @@ InternalRetrieveSymtabs64 (
 **/
 MACH_RELOCATION_INFO *
 InternalGetExternalRelocationByOffset (
-  IN OUT VOID    *Context,
-  IN     UINT64  Address
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address
   );
 
 #endif // OC_MACHO_LIB_INTERNAL_H_

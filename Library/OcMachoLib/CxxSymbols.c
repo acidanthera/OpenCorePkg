@@ -79,20 +79,18 @@ MachoIsSymbolNamePadslot (
 **/
 BOOLEAN
 MachoSymbolIsSmcp64 (
-  IN OUT VOID                 *Context,
+  IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *Symbol
   )
 {
-  CONST OC_MACHO_CONTEXT *MachoContext;
-  CONST CHAR8            *Name;
+  CONST CHAR8 *Name;
 
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
 
-  MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
-  ASSERT (MachoContext->StringTable != NULL);
+  ASSERT (Context->StringTable != NULL);
 
-  Name = (MachoContext->StringTable + Symbol->UnifiedName.StringIndex);
+  Name = (Context->StringTable + Symbol->UnifiedName.StringIndex);
   return (AsciiStrStr (Name, SMCP_TOKEN) != NULL);
 }
 
@@ -105,20 +103,18 @@ MachoSymbolIsSmcp64 (
 **/
 BOOLEAN
 MachoSymbolIsMetaclassPointer64 (
-  IN OUT VOID                 *Context,
+  IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *Symbol
   )
 {
-  CONST OC_MACHO_CONTEXT *MachoContext;
   CONST CHAR8            *Name;
 
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
 
-  MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
-  ASSERT (MachoContext->StringTable != NULL);
+  ASSERT (Context->StringTable != NULL);
 
-  Name = (MachoContext->StringTable + Symbol->UnifiedName.StringIndex);
+  Name = (Context->StringTable + Symbol->UnifiedName.StringIndex);
   return (AsciiStrStr (Name, METACLASS_TOKEN) != NULL);
 }
 
@@ -135,13 +131,12 @@ MachoSymbolIsMetaclassPointer64 (
 **/
 BOOLEAN
 MachoGetClassNameFromSuperMetaClassPointer (
-  IN OUT VOID                 *Context,
+  IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *SmcpSymbol,
   IN     UINTN                ClassNameSize,
   OUT    CHAR8                *ClassName
   )
 {
-  CONST OC_MACHO_CONTEXT *MachoContext;
   BOOLEAN                Result;
   CONST CHAR8            *SmcpName;
   UINTN                  StringSize;
@@ -154,8 +149,7 @@ MachoGetClassNameFromSuperMetaClassPointer (
   ASSERT (ClassNameSize > 0);
   ASSERT (ClassName != NULL);
 
-  MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
-  ASSERT (MachoContext->StringTable != NULL);
+  ASSERT (Context->StringTable != NULL);
 
   Result = MachoSymbolIsSmcp64 (Context, SmcpSymbol);
   if (!Result) {
@@ -163,7 +157,7 @@ MachoGetClassNameFromSuperMetaClassPointer (
   }
 
   SmcpName = (
-               MachoContext->StringTable 
+               Context->StringTable 
                  + SmcpSymbol->UnifiedName.StringIndex
              );
   PrefixSize = (sizeof (OSOBJ_PREFIX) - sizeof (*OSOBJ_PREFIX));
@@ -264,13 +258,12 @@ MachoGetFunctionPrefixFromClassName (
 **/
 BOOLEAN
 MachoGetClassNameFromMetaClassPointer (
-  IN OUT VOID                 *Context,
+  IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *MetaClassPtrSymbol,
   IN     UINTN                ClassNameSize,
   OUT    CHAR8                *ClassName
   )
 {
-  CONST OC_MACHO_CONTEXT *MachoContext;
   BOOLEAN                Result;
   CONST CHAR8            *MetaClassName;
   UINTN                  StringSize;
@@ -283,8 +276,7 @@ MachoGetClassNameFromMetaClassPointer (
   ASSERT (ClassNameSize > 0);
   ASSERT (ClassName != NULL);
 
-  MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
-  ASSERT (MachoContext->StringTable != NULL);
+  ASSERT (Context->StringTable != NULL);
 
   Result = MachoSymbolIsMetaclassPointer64 (Context, MetaClassPtrSymbol);
   if (!Result) {
@@ -292,7 +284,7 @@ MachoGetClassNameFromMetaClassPointer (
   }
 
   MetaClassName = (
-                    MachoContext->StringTable
+                    Context->StringTable
                       + MetaClassPtrSymbol->UnifiedName.StringIndex
                   );
   PrefixSize = (sizeof (OSOBJ_PREFIX) - sizeof (*OSOBJ_PREFIX));
@@ -481,20 +473,18 @@ MachoGetFinalSymbolNameFromClassName (
 **/
 BOOLEAN
 MachoSymbolIsVtable64 (
-  IN OUT VOID                 *Context,
+  IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *Symbol
   )
 {
-  CONST OC_MACHO_CONTEXT *MachoContext;
   CONST CHAR8            *Name;
 
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
 
-  MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
-  ASSERT (MachoContext->StringTable != NULL);
+  ASSERT (Context->StringTable != NULL);
 
-  Name = (MachoContext->StringTable + Symbol->UnifiedName.StringIndex);
+  Name = (Context->StringTable + Symbol->UnifiedName.StringIndex);
   //
   // Implicitely checks for METACLASS_VTABLE_PREFIX.
   //
@@ -525,8 +515,8 @@ MachoIsSymbolNameCxx (
 **/
 UINTN
 MachoVtableGetNumberOfEntries64 (
-  IN OUT VOID          *Context,
-  IN     CONST UINT64  *VtableData
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST UINT64      *VtableData
   )
 {
   UINTN Index;
@@ -557,7 +547,7 @@ MachoVtableGetNumberOfEntries64 (
 **/
 MACH_NLIST_64 *
 MachoGetMetaclassSymbolFromSmcpSymbol64 (
-  IN OUT VOID                 *Context,
+  IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *Smcp
   )
 {
@@ -591,7 +581,7 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
 **/
 BOOLEAN
 MachoGetVtableSymbolsFromSmcp64 (
-  IN OUT VOID                 *Context,
+  IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *SmcpSymbol,
   OUT    CONST MACH_NLIST_64  **Vtable,
   OUT    CONST MACH_NLIST_64  **MetaVtable

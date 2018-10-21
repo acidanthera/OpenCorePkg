@@ -25,22 +25,22 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 STATIC
 BOOLEAN
 InternalSymbolIsSane (
-  IN OUT OC_MACHO_CONTEXT     *MachoContext,
+  IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *Symbol
   )
 {
-  ASSERT (MachoContext != NULL);
+  ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
 
-  ASSERT (MachoContext->SymbolTable != NULL);
-  ASSERT (MachoContext->NumSymbols > 0);
-  ASSERT ((Symbol > MachoContext->SymbolTable)
-       && (Symbol <= &MachoContext->SymbolTable[MachoContext->NumSymbols - 1]));
+  ASSERT (Context->SymbolTable != NULL);
+  ASSERT (Context->NumSymbols > 0);
+  ASSERT ((Symbol > Context->SymbolTable)
+       && (Symbol <= &Context->SymbolTable[Context->NumSymbols - 1]));
   //
   // Symbol->Section is implicitly verified by MachoGetSectionByIndex64() when
   // passed to it.
   //
-  if (Symbol->UnifiedName.StringIndex >= MachoContext->StringsSize) {
+  if (Symbol->UnifiedName.StringIndex >= Context->StringsSize) {
     return FALSE;
   }
 
@@ -57,7 +57,7 @@ InternalSymbolIsSane (
 **/
 BOOLEAN
 MachoIsSymbolValueSane64 (
-  IN OUT VOID                 *Context,
+  IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *Symbol
   )
 {
@@ -159,11 +159,10 @@ MachoSymbolIsDefined (
 **/
 BOOLEAN
 MachoSymbolIsLocalDefined (
-  IN OUT VOID                 *Context,
+  IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *Symbol
   )
 {
-  CONST OC_MACHO_CONTEXT      *MachoContext;
   CONST MACH_DYSYMTAB_COMMAND *DySymtab;
   CONST MACH_NLIST_64         *UndefinedSymbols;
   CONST MACH_NLIST_64         *UndefinedSymbolsTop;
@@ -173,9 +172,8 @@ MachoSymbolIsLocalDefined (
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
 
-  MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
-  DySymtab     = MachoContext->DySymtab;
-  ASSERT (MachoContext->SymbolTable != NULL);
+  DySymtab = Context->DySymtab;
+  ASSERT (Context->SymbolTable != NULL);
   ASSERT (DySymtab != NULL);
 
   if (DySymtab->NumUndefinedSymbols == 0) {
@@ -186,14 +184,14 @@ MachoSymbolIsLocalDefined (
   // no information on whether the symbol has been solved explicitely, check
   // its storage location for Undefined or Indirect.
   //
-  UndefinedSymbols    = &MachoContext->SymbolTable[DySymtab->UndefinedSymbolsIndex];
+  UndefinedSymbols    = &Context->SymbolTable[DySymtab->UndefinedSymbolsIndex];
   UndefinedSymbolsTop = &UndefinedSymbols[DySymtab->NumUndefinedSymbols];
 
   if ((Symbol >= UndefinedSymbols) && (Symbol < UndefinedSymbolsTop)) {
     return FALSE;
   }
 
-  IndirectSymbols = MachoContext->IndirectSymbolTable;
+  IndirectSymbols = Context->IndirectSymbolTable;
   IndirectSymbolsTop = &IndirectSymbols[DySymtab->NumIndirectSymbols];
 
   if ((Symbol >= IndirectSymbols) && (Symbol < IndirectSymbolsTop)) {
@@ -214,28 +212,25 @@ MachoSymbolIsLocalDefined (
 **/
 MACH_NLIST_64 *
 MachoGetSymbolByIndex64 (
-  IN OUT VOID    *Context,
-  IN     UINT32  Index
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT32            Index
   )
 {
-  OC_MACHO_CONTEXT    *MachoContext;
   CONST MACH_NLIST_64 *Symbol;
 
   ASSERT (Context != NULL);
 
-  MachoContext = (OC_MACHO_CONTEXT *)Context;
-
-  if ((MachoContext->SymbolTable == NULL)
-    && !InternalRetrieveSymtabs64 (MachoContext)) {
+  if ((Context->SymbolTable == NULL)
+    && !InternalRetrieveSymtabs64 (Context)) {
     return NULL;
   }
 
-  ASSERT (MachoContext->SymbolTable != NULL);
-  ASSERT (MachoContext->NumSymbols > 0);
+  ASSERT (Context->SymbolTable != NULL);
+  ASSERT (Context->NumSymbols > 0);
 
-  if (Index < MachoContext->NumSymbols) {
-    Symbol = &MachoContext->SymbolTable[Index];
-    if (InternalSymbolIsSane (MachoContext, Symbol)) {
+  if (Index < Context->NumSymbols) {
+    Symbol = &Context->SymbolTable[Index];
+    if (InternalSymbolIsSane (Context, Symbol)) {
       return (MACH_NLIST_64 *)Symbol;
     }
   } else {
@@ -259,25 +254,22 @@ MachoGetSymbolByIndex64 (
 **/
 BOOLEAN
 MachoGetSymbolByExternRelocationOffset64 (
-  IN OUT VOID           *Context,
-  IN     UINT64         Address,
-  OUT    MACH_NLIST_64  **Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address,
+  OUT    MACH_NLIST_64     **Symbol
   )
 {
   CONST MACH_NLIST_64        *Sym;
 
-  OC_MACHO_CONTEXT           *MachoContext;
   CONST MACH_RELOCATION_INFO *Relocation;
 
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
 
-  MachoContext = (OC_MACHO_CONTEXT *)Context;
-
   Relocation = InternalGetExternalRelocationByOffset (Context, Address);
   if (Relocation != NULL) {
     Sym = MachoGetSymbolByIndex64 (Context, Relocation->SymbolNumber);
-    if ((Sym != NULL) && InternalSymbolIsSane (MachoContext, Sym)) {
+    if ((Sym != NULL) && InternalSymbolIsSane (Context, Sym)) {
       *Symbol = (MACH_NLIST_64 *)Sym;
     } else {
       *Symbol = NULL;
@@ -338,11 +330,10 @@ InternalGetSymbolByName (
 **/
 MACH_NLIST_64 *
 MachoGetLocalDefinedSymbolByName (
-  IN OUT VOID         *Context,
-  IN     CONST CHAR8  *Name
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *Name
   )
 {
-  OC_MACHO_CONTEXT            *MachoContext;
   CONST MACH_NLIST_64         *SymbolTable;
   CONST CHAR8                 *StringTable;
   CONST MACH_DYSYMTAB_COMMAND *DySymtab;
@@ -351,16 +342,14 @@ MachoGetLocalDefinedSymbolByName (
   ASSERT (Context != NULL);
   ASSERT (Name != NULL);
 
-  MachoContext = (OC_MACHO_CONTEXT *)Context;
-
-  if ((MachoContext->SymbolTable == NULL)
-   && !InternalRetrieveSymtabs64 (MachoContext)) {
+  if ((Context->SymbolTable == NULL)
+   && !InternalRetrieveSymtabs64 (Context)) {
     return NULL;
   }
 
-  SymbolTable  = MachoContext->SymbolTable;
-  StringTable  = MachoContext->StringTable;
-  DySymtab     = MachoContext->DySymtab;
+  SymbolTable  = Context->SymbolTable;
+  StringTable  = Context->StringTable;
+  DySymtab     = Context->DySymtab;
   ASSERT (SymbolTable != NULL);
   ASSERT (StringTable != NULL);
   ASSERT (DySymtab != NULL);
@@ -380,7 +369,7 @@ MachoGetLocalDefinedSymbolByName (
                );
   }
 
-  if ((Symbol != NULL) && !InternalSymbolIsSane (MachoContext, Symbol)) {
+  if ((Symbol != NULL) && !InternalSymbolIsSane (Context, Symbol)) {
     return NULL;
   }
 
@@ -399,9 +388,9 @@ MachoGetLocalDefinedSymbolByName (
 **/
 BOOLEAN
 MachoRelocateSymbol64 (
-  IN OUT VOID           *Context,
-  IN     UINT64         LinkAddress,
-  IN OUT MACH_NLIST_64  *Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            LinkAddress,
+  IN OUT MACH_NLIST_64     *Symbol
   )
 {
   CONST MACH_SECTION_64 *Section;
