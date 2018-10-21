@@ -174,14 +174,18 @@ MachoSymbolIsLocalDefined (
   ASSERT (Symbol != NULL);
 
   MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
+  DySymtab     = MachoContext->DySymtab;
   ASSERT (MachoContext->SymbolTable != NULL);
-  ASSERT (MachoContext->DySymtab != NULL);
+  ASSERT (DySymtab != NULL);
+
+  if (DySymtab->NumUndefinedSymbols == 0) {
+    return TRUE;
+  }
   //
   // The symbol must have been declared locally prior to solving.  As there is
   // no information on whether the symbol has been solved explicitely, check
   // its storage location for Undefined or Indirect.
   //
-  DySymtab            = MachoContext->DySymtab;
   UndefinedSymbols    = &MachoContext->SymbolTable[DySymtab->UndefinedSymbolsIndex];
   UndefinedSymbolsTop = &UndefinedSymbols[DySymtab->NumUndefinedSymbols];
 
