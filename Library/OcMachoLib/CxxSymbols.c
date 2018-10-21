@@ -555,7 +555,7 @@ MachoVtableGetNumberOfEntries64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-CONST MACH_NLIST_64 *
+MACH_NLIST_64 *
 MachoGetMetaclassSymbolFromSmcpSymbol64 (
   IN OUT VOID                 *Context,
   IN     CONST MACH_NLIST_64  *Smcp

@@ -174,7 +174,7 @@ MachoSymbolIsLocalDefined (
   @retval NULL  NULL is returned on failure.
 
 **/
-CONST MACH_NLIST_64 *
+MACH_NLIST_64 *
 MachoGetSymbolByIndex64 (
   IN OUT VOID    *Context,
   IN     UINT32  Index
@@ -198,7 +198,7 @@ MachoGetSymbolByIndex64 (
   if (Index < MachoContext->NumSymbols) {
     Symbol = &MachoContext->SymbolTable[Index];
     if (InternalSymbolIsSane (MachoContext, Symbol)) {
-      return Symbol;
+      return (MACH_NLIST_64 *)Symbol;
     }
   } else {
     ASSERT (FALSE);
@@ -263,7 +263,7 @@ MachoGetSymbolByExternRelocationOffset64 (
 
 **/
 STATIC
-CONST MACH_NLIST_64 *
+MACH_NLIST_64 *
 InternalGetSymbolByName (
   IN CONST MACH_NLIST_64  *SymbolTable,
   IN CONST CHAR8          *StringTable,
@@ -284,7 +284,7 @@ InternalGetSymbolByName (
                (StringTable + SymbolTable[Index].UnifiedName.StringIndex)
                );
     if (Result == 0) {
-      return &SymbolTable[Index];
+      return (MACH_NLIST_64 *)&SymbolTable[Index];
     }
   }
 
@@ -298,7 +298,7 @@ InternalGetSymbolByName (
   @param[in]     Name     Name of the symbol to locate.
 
 **/
-CONST MACH_NLIST_64 *
+MACH_NLIST_64 *
 MachoGetLocalDefinedSymbolByName (
   IN OUT VOID         *Context,
   IN     CONST CHAR8  *Name
@@ -346,7 +346,7 @@ MachoGetLocalDefinedSymbolByName (
     return NULL;
   }
 
-  return Symbol;
+  return (MACH_NLIST_64 *)Symbol;
 }
 
 /**

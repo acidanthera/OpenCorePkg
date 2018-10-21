@@ -478,7 +478,7 @@ MachoGetNextSection64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-CONST MACH_SECTION_64 *
+MACH_SECTION_64 *
 MachoGetSectionByIndex64 (
   IN OUT VOID   *Context,
   IN     UINTN  Index
@@ -497,7 +497,7 @@ MachoGetSectionByIndex64 (
     Segment = MachoGetNextSegment64 (Context, Segment)
     ) {
     if (Index <= (SectionIndex + (Segment->NumSections - 1))) {
-      return &Segment->Sections[Index - SectionIndex];
+      return (MACH_SECTION_64 *)&Segment->Sections[Index - SectionIndex];
     }
 
     SectionIndex += Segment->NumSections;
@@ -515,7 +515,7 @@ MachoGetSectionByIndex64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-CONST MACH_SECTION_64 *
+MACH_SECTION_64 *
 MachoGetSectionByAddress64 (
   IN OUT VOID    *Context,
   IN     UINT64  Address
@@ -539,7 +539,7 @@ MachoGetSectionByAddress64 (
       for (Index = 0; Index < Segment->NumSections; ++Index) {
         if ((Address >= Section->Address)
          && (Address < Section->Address + Section->Size)) {
-          return Section;
+          return (MACH_SECTION_64 *)Section;
         }
 
         ++Section;

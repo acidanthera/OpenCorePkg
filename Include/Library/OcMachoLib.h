@@ -172,7 +172,7 @@ MachoGetNextSection64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-CONST MACH_SECTION_64 *
+MACH_SECTION_64 *
 MachoGetSectionByIndex64 (
   IN OUT VOID   *Context,
   IN     UINTN  Index
@@ -187,7 +187,7 @@ MachoGetSectionByIndex64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-CONST MACH_SECTION_64 *
+MACH_SECTION_64 *
 MachoGetSectionByAddress64 (
   IN OUT VOID    *Context,
   IN     UINT64  Address
@@ -235,7 +235,7 @@ MachoSymbolIsLocalDefined (
   @param[in] Name     Name of the symbol to locate.
 
 **/
-CONST MACH_NLIST_64 *
+MACH_NLIST_64 *
 MachoGetLocalDefinedSymbolByName (
   IN OUT VOID         *Context,
   IN     CONST CHAR8  *Name
@@ -250,7 +250,7 @@ MachoGetLocalDefinedSymbolByName (
   @retval NULL  NULL is returned on failure.
 
 **/
-CONST MACH_NLIST_64 *
+MACH_NLIST_64 *
 MachoGetSymbolByIndex64 (
   IN OUT VOID    *Context,
   IN     UINT32  Index
@@ -503,7 +503,7 @@ MachoVtableGetNumberOfEntries64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-CONST MACH_NLIST_64 *
+MACH_NLIST_64 *
 MachoGetMetaclassSymbolFromSmcpSymbol64 (
   IN OUT VOID                 *Context,
   IN     CONST MACH_NLIST_64  *Smcp
