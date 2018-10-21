@@ -87,7 +87,9 @@ InternalGetExternalRelocationByOffset (
   ASSERT (Context != NULL);
 
   MachoContext = (OC_MACHO_CONTEXT *)Context;
-
+  //
+  // Assumption: 64-bit.
+  //
   if ((MachoContext->SymbolTable == NULL)
    && !InternalRetrieveSymtabs64 (MachoContext)) {
     return NULL;
@@ -104,9 +106,14 @@ InternalGetExternalRelocationByOffset (
     //
     // A section-based relocation entry can be skipped for absolute 
     // symbols.
+    // Assumption: Not i386.
     //
-    if ((((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) == 0)
-     && (Relocation->Extern == 0)
+    if (((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) != 0) {
+      ASSERT (FALSE);
+      continue;
+    }
+
+    if ((Relocation->Extern == 0)
      && (Relocation->Address == MACH_RELOC_ABSOLUTE)) {
       continue;
     }
