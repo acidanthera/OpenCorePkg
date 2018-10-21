@@ -46,6 +46,17 @@ MachoInitializeContext (
   );
 
 /**
+  Returns the Mach-O Header structure.
+
+  @param[in,out] Context  Context of the Mach-O.
+
+**/
+MACH_HEADER_64 *
+MachoGetMachHeader64 (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  );
+
+/**
   Returns the last virtual address of a Mach-O.
 
   @param[in] Context  Context of the Mach-O.

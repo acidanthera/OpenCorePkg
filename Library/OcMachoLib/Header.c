@@ -35,6 +35,23 @@ MachoGetContextSize (
 }
 
 /**
+  Returns the Mach-O Header structure.
+
+  @param[in,out] Context  Context of the Mach-O.
+
+**/
+MACH_HEADER_64 *
+MachoGetMachHeader64 (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  )
+{
+  ASSERT (Context != NULL);
+  ASSERT (Context->MachHeader != NULL);
+
+  return (MACH_HEADER_64 *)Context->MachHeader;
+}
+
+/**
   Initializes a Mach-O Context.
 
   @param[in]  MachHeader  Header of the Mach-O.
