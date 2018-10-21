@@ -571,7 +571,7 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
     return NULL;
   }
 
-  return MachoGetCxxSymbolByRelocation64 (Context, Relocation);
+  return MachoGetCxxSymbolByExternRelocation64 (Context, Relocation);
 }
 
 /**

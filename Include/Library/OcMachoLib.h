@@ -293,7 +293,7 @@ MachoRelocateSymbol64 (
   );
 
 /**
-  Retrieves a symbol by the Relocation it is referenced by.
+  Retrieves a C++ symbol by the Relocation it is referenced by.
 
   @param[in,out] Context     Context of the Mach-O.
   @param[in]     Relocation  The Relocation to evaluate.
@@ -302,7 +302,7 @@ MachoRelocateSymbol64 (
 
 **/
 CONST MACH_NLIST_64 *
-MachoGetCxxSymbolByRelocation64 (
+MachoGetCxxSymbolByExternRelocation64 (
   IN OUT VOID                        *Context,
   IN     CONST MACH_RELOCATION_INFO  *Relocation
   );

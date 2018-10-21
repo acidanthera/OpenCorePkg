@@ -385,16 +385,16 @@ MachoRelocateSymbol64 (
 }
 
 /**
-  Retrieves a symbol by the Relocation it is referenced by.
+  Retrieves a C++ symbol by the extern Relocation it is referenced by.
 
   @param[in,out] Context     Context of the Mach-O.
-  @param[in]     Relocation  The Relocation to evaluate.
+  @param[in]     Relocation  The extern Relocation to evaluate.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_NLIST_64 *
-MachoGetCxxSymbolByRelocation64 (
+MachoGetCxxSymbolByExternRelocation64 (
   IN OUT VOID                        *Context,
   IN     CONST MACH_RELOCATION_INFO  *Relocation
   )
@@ -402,14 +402,11 @@ MachoGetCxxSymbolByRelocation64 (
   OC_MACHO_CONTEXT       *MachoContext;
   CONST MACH_NLIST_64    *SymbolTable;
   CONST CHAR8            *StringTable;
-  CONST MACH_SECTION_64  *Section;
-  UINT64                 Value;
-  UINTN                  Index;
   CONST MACH_NLIST_64    *Symbol;
-  CONST CHAR8            *Name;
 
   ASSERT (Context != NULL);
   ASSERT (Relocation != NULL);
+  ASSERT (Relocation->Extern != 0);
 
   MachoContext = (OC_MACHO_CONTEXT *)Context;
 
@@ -427,35 +424,9 @@ MachoGetCxxSymbolByRelocation64 (
   //
   ASSERT (((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) == 0);
 
-  if (Relocation->Extern != 0) {
-    Symbol = &SymbolTable[Relocation->SymbolNumber];
-    if (InternalSymbolIsSane (MachoContext, Symbol)) {
-      return Symbol;
-    }
-
-    return NULL;
-  }
-
-  Section = MachoGetSectionByIndex64 (Context, Relocation->SymbolNumber);
-  if (Section == NULL) {
-    return NULL;
-  }
-
-  Value = *(CONST UINT64 *)(
-             (UINTN)((CONST OC_MACHO_CONTEXT *)Context)->MachHeader
-               + (Section->Address + Relocation->Address)
-              );
-  for (Index = 0; Index < MachoContext->NumSymbols; ++Index) {
-    Symbol = &SymbolTable[Index];
-    Name   = (StringTable + Symbol->UnifiedName.StringIndex);
-
-    if ((Symbol->Value == Value) && MachoIsSymbolNameCxx (Name)) {
-      if (InternalSymbolIsSane (MachoContext, Symbol)) {
-        return Symbol;
-      }
-
-      return NULL;
-    }
+  Symbol = &SymbolTable[Relocation->SymbolNumber];
+  if (InternalSymbolIsSane (MachoContext, Symbol)) {
+    return Symbol;
   }
 
   return NULL;
