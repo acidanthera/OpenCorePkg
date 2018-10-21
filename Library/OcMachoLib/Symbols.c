@@ -241,6 +241,56 @@ MachoGetSymbolByIndex64 (
 }
 
 /**
+  Retrieves Symbol's name.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Symbol to retrieve the name of.
+
+**/
+CONST CHAR8 *
+MachoGetSymbolName64 (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST_64  *Symbol
+  )
+{
+  ASSERT (Context != NULL);
+  ASSERT (Symbol != NULL);
+
+  ASSERT (Context->SymbolTable != NULL);
+  ASSERT (Context->StringsSize > Symbol->UnifiedName.StringIndex);
+
+  ASSERT (((Symbol->Type & MACH_N_TYPE_STAB) != 0)
+       || ((Symbol->Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR));
+
+  return (Context->StringTable + Symbol->UnifiedName.StringIndex);
+}
+
+/**
+  Retrieves Symbol's name.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Indirect symbol to retrieve the name of.
+
+**/
+CONST CHAR8 *
+MachoGetIndirectSymbolName64 (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST_64  *Symbol
+  )
+{
+  ASSERT (Context != NULL);
+  ASSERT (Symbol != NULL);
+
+  ASSERT (Context->SymbolTable != NULL);
+  ASSERT (Context->StringsSize > Symbol->Value);
+
+  ASSERT (((Symbol->Type & MACH_N_TYPE_STAB) == 0)
+       && ((Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_INDR));
+
+  return (Context->StringTable + Symbol->Value);
+}
+
+/**
   Retrieves the symbol referenced by the Relocation targeting Address.
 
   @param[in,out] Context  Context of the Mach-O.

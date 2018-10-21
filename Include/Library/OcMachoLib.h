@@ -259,6 +259,32 @@ MachoGetSymbolByIndex64 (
   );
 
 /**
+  Retrieves Symbol's name.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Symbol to retrieve the name of.
+
+**/
+CONST CHAR8 *
+MachoGetSymbolName64 (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST_64  *Symbol
+  );
+
+/**
+  Retrieves Symbol's name.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Indirect symbol to retrieve the name of.
+
+**/
+CONST CHAR8 *
+MachoGetIndirectSymbolName64 (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST_64  *Symbol
+  );
+
+/**
   Returns whether the symbol's value is a valid address within the Mach-O
   referenced to by Context.
 
