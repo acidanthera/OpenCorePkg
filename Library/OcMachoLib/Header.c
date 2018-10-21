@@ -80,7 +80,7 @@ MachoInitializeContext (
     Index < MachHeader->NumCommands;
     ++Index, Command = NEXT_MACH_LOAD_COMMAND (Command)
     ) {
-    if (((UINTN)Command >= ((UINTN)MachHeader + MachHeader->CommandsSize))
+    if ((((UINTN)Command + sizeof (MACH_LOAD_COMMAND)) > ((UINTN)MachHeader + MachHeader->CommandsSize))
      || (Command->CommandSize < sizeof (*Command))
      || ((Command->CommandSize % 8) != 0)  // Assumption: 64-bit, see below.
       ) {
