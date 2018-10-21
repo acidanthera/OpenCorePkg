@@ -73,14 +73,14 @@ MachoIsSymbolNamePadslot (
 /**
   Returns whether Symbol defines a Super Metaclass Pointer.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Symbol   The symbol to check.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   The symbol to check.
 
 **/
 BOOLEAN
 MachoSymbolIsSmcp64 (
-  IN CONST VOID           *Context,
-  IN CONST MACH_NLIST_64  *Symbol
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *Symbol
   )
 {
   CONST OC_MACHO_CONTEXT *MachoContext;
@@ -99,14 +99,14 @@ MachoSymbolIsSmcp64 (
 /**
   Returns whether Symbol defines a Super Metaclass Pointer.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Symbol   The symbol to check.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   The symbol to check.
 
 **/
 BOOLEAN
 MachoSymbolIsMetaclassPointer64 (
-  IN CONST VOID           *Context,
-  IN CONST MACH_NLIST_64  *Symbol
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *Symbol
   )
 {
   CONST OC_MACHO_CONTEXT *MachoContext;
@@ -125,20 +125,20 @@ MachoSymbolIsMetaclassPointer64 (
 /**
   Retrieves the class name of a Super Meta Class Pointer.
 
-  @param[in]  Context        Context of the Mach-O.
-  @param[in]  SmcpSymbol     SMCP Symbol to get the class name of.
-  @param[in]  ClassNameSize  The size of ClassName.
-  @param[out] ClassName      The output buffer for the class name.
+  @param[in,out] Context        Context of the Mach-O.
+  @param[in]     SmcpSymbol     SMCP Symbol to get the class name of.
+  @param[in]     ClassNameSize  The size of ClassName.
+  @param[out]    ClassName      The output buffer for the class name.
 
   @returns  Whether the name has been retrieved successfully.
 
 **/
 BOOLEAN
 MachoGetClassNameFromSuperMetaClassPointer (
-  IN  CONST VOID           *Context,
-  IN  CONST MACH_NLIST_64  *SmcpSymbol,
-  IN  UINTN                ClassNameSize,
-  OUT CHAR8                *ClassName
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *SmcpSymbol,
+  IN     UINTN                ClassNameSize,
+  OUT    CHAR8                *ClassName
   )
 {
   CONST OC_MACHO_CONTEXT *MachoContext;
@@ -254,20 +254,20 @@ MachoGetFunctionPrefixFromClassName (
 /**
   Retrieves the class name of a Meta Class Pointer.
 
-  @param[in]  Context             Context of the Mach-O.
-  @param[in]  MetaClassPtrSymbol  MCP Symbol to get the class name of.
-  @param[in]  ClassNameSize       The size of ClassName.
-  @param[out] ClassName           The output buffer for the class name.
+  @param[in,out] Context             Context of the Mach-O.
+  @param[in]     MetaClassPtrSymbol  MCP Symbol to get the class name of.
+  @param[in]     ClassNameSize       The size of ClassName.
+  @param[out]    ClassName           The output buffer for the class name.
 
   @returns  Whether the name has been retrieved successfully.
 
 **/
 BOOLEAN
 MachoGetClassNameFromMetaClassPointer (
-  IN  CONST VOID           *Context,
-  IN  CONST MACH_NLIST_64  *MetaClassPtrSymbol,
-  IN  UINTN                ClassNameSize,
-  OUT CHAR8                *ClassName
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *MetaClassPtrSymbol,
+  IN     UINTN                ClassNameSize,
+  OUT    CHAR8                *ClassName
   )
 {
   CONST OC_MACHO_CONTEXT *MachoContext;
@@ -478,14 +478,14 @@ MachoGetFinalSymbolNameFromClassName (
 /**
   Returns whether Symbol defines a VTable.
 
-  @param[in] Context  Conteyt of the Mach-O.
-  @param[in] Symbol   The symbol to check.
+  @param[in,out] Context  Conteyt of the Mach-O.
+  @param[in]     Symbol   The symbol to check.
 
 **/
 BOOLEAN
 MachoSymbolIsVtable64 (
-  IN CONST VOID           *Context,
-  IN CONST MACH_NLIST_64  *Symbol
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *Symbol
   )
 {
   CONST OC_MACHO_CONTEXT *MachoContext;
@@ -522,14 +522,14 @@ MachoIsSymbolNameCxx (
 /**
   Returns the number of VTable entires in VtableData.
 
-  @param[in] Context     Context of the Mach-O.
-  @param[in] VtableData  The VTable's data.
+  @param[in,out] Context     Context of the Mach-O.
+  @param[in]     VtableData  The VTable's data.
 
 **/
 UINTN
 MachoVtableGetNumberOfEntries64 (
-  IN CONST VOID    *Context,
-  IN CONST UINT64  *VtableData
+  IN OUT VOID          *Context,
+  IN     CONST UINT64  *VtableData
   )
 {
   UINTN Index;
@@ -552,16 +552,16 @@ MachoVtableGetNumberOfEntries64 (
 /**
   Retrieves Metaclass symbol of a SMCP.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Smcp     The SMCP to evaluate.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Smcp     The SMCP to evaluate.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_NLIST_64 *
 MachoGetMetaclassSymbolFromSmcpSymbol64 (
-  IN CONST VOID                  *Context,
-  IN CONST MACH_NLIST_64         *Smcp
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *Smcp
   )
 {
   CONST MACH_RELOCATION_INFO *Relocation;
@@ -581,18 +581,18 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
   Retrieves VTable and Meta VTable of a SMCP.
   Logically matches XNU's get_vtable_syms_from_smcp.
 
-  @param[in]  Context      Context of the Mach-O.
-  @param[in]  SmcpSymbol   SMCP Symbol to retrieve the VTables from.
-  @param[out] Vtable       Output buffer for the VTable symbol pointer.
-  @param[out] MetaVtable   Output buffer for the Meta VTable symbol pointer.
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     SmcpSymbol   SMCP Symbol to retrieve the VTables from.
+  @param[out]    Vtable       Output buffer for the VTable symbol pointer.
+  @param[out]    MetaVtable   Output buffer for the Meta VTable symbol pointer.
 
 **/
 BOOLEAN
 MachoGetVtableSymbolsFromSmcp64 (
-  IN  CONST VOID           *Context,
-  IN  CONST MACH_NLIST_64  *SmcpSymbol,
-  OUT CONST MACH_NLIST_64  **Vtable,
-  OUT CONST MACH_NLIST_64  **MetaVtable
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *SmcpSymbol,
+  OUT    CONST MACH_NLIST_64  **Vtable,
+  OUT    CONST MACH_NLIST_64  **MetaVtable
   )
 {
   CHAR8               ClassName[SYM_MAX_NAME_LEN];

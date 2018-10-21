@@ -51,85 +51,85 @@ MachoInitializeContext (
 **/
 UINT64
 MachoGetLastAddress64 (
-  IN CONST VOID  *Context
+  IN OUT VOID  *Context
   );
 
 /**
   Retrieves the first UUID Load Command.
 
-  @param[in] Context  Context of the Mach-O.
+  @param[in,out] Context  Context of the Mach-O.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 MACH_UUID_COMMAND *
 MachoGetUuid64 (
-  IN CONST VOID  *Context
+  IN OUT VOID  *Context
   );
 
 /**
   Retrieves the first segment by the name of SegmentName.
 
-  @param[in] Context      Context of the Mach-O.
-  @param[in] SegmentName  Segment name to search for.
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     SegmentName  Segment name to search for.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 MACH_SEGMENT_COMMAND_64 *
 MachoGetSegmentByName64 (
-  IN CONST VOID   *Context,
-  IN CONST CHAR8  *SegmentName
+  IN OUT VOID         *Context,
+  IN     CONST CHAR8  *SegmentName
   );
 
 /**
   Retrieves the first section by the name of SectionName.
 
-  @param[in] Context      Context of the Mach-O.
-  @param[in] Segment      Segment to search in.
-  @param[in] SectionName  Section name to search for.
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     Segment      Segment to search in.
+  @param[in]     SectionName  Section name to search for.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 MACH_SECTION_64 *
 MachoGetSectionByName64 (
-  IN CONST VOID                     *Context,
-  IN CONST MACH_SEGMENT_COMMAND_64  *Segment,
-  IN CONST CHAR8                    *SectionName
+  IN OUT VOID                           *Context,
+  IN     CONST MACH_SEGMENT_COMMAND_64  *Segment,
+  IN     CONST CHAR8                    *SectionName
   );
 
 /**
   Retrieves a section within a segment by the name of SegmentName.
 
-  @param[in] Context      Context of the Mach-O.
-  @param[in] SegmentName  The name of the segment to search in.
-  @param[in] SectionName  The name of the section to search for.
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     SegmentName  The name of the segment to search in.
+  @param[in]     SectionName  The name of the section to search for.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 MACH_SECTION_64 *
 MachoGetSegmentSectionByName64 (
-  IN CONST VOID   *Context,
-  IN CONST CHAR8  *SegmentName,
-  IN CONST CHAR8  *SectionName
+  IN OUT VOID         *Context,
+  IN     CONST CHAR8  *SegmentName,
+  IN     CONST CHAR8  *SectionName
   );
 
 /**
   Retrieves the next segment.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Segment  Segment to retrieve the successor of.
-                      if NULL, the first segment is returned.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Segment  Segment to retrieve the successor of.
+                          if NULL, the first segment is returned.
 
   @retal NULL  NULL is returned on failure.
 
 **/
 MACH_SEGMENT_COMMAND_64 *
 MachoGetNextSegment64 (
-  IN CONST VOID                     *Context,
-  IN CONST MACH_SEGMENT_COMMAND_64  *Segment  OPTIONAL
+  IN OUT VOID                           *Context,
+  IN     CONST MACH_SEGMENT_COMMAND_64  *Segment  OPTIONAL
   );
 
 /**
@@ -148,49 +148,49 @@ MachoGetFirstSection64 (
 /**
   Retrieves the next section of a segment.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Segment  The segment to get the section of.
-  @param[in] Section  The section to get the successor of.
-                      If NULL, the first section is returned.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Segment  The segment to get the section of.
+  @param[in]     Section  The section to get the successor of.
+                          If NULL, the first section is returned.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 MACH_SECTION_64 *
 MachoGetNextSection64 (
-  IN CONST VOID                     *Context,
-  IN CONST MACH_SEGMENT_COMMAND_64  *Segment,
-  IN CONST MACH_SECTION_64          *Section  OPTIONAL
+  IN OUT VOID                           *Context,
+  IN     CONST MACH_SEGMENT_COMMAND_64  *Segment,
+  IN     CONST MACH_SECTION_64          *Section  OPTIONAL
   );
 
 /**
   Retrieves a section by its index.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Index    Index of the section to retrieve.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Index    Index of the section to retrieve.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_SECTION_64 *
 MachoGetSectionByIndex64 (
-  IN CONST VOID  *Context,
-  IN UINTN       Index
+  IN OUT VOID   *Context,
+  IN     UINTN  Index
   );
 
 /**
   Retrieves a section by its address.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Address  Address of the section to retrieve.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  Address of the section to retrieve.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_SECTION_64 *
 MachoGetSectionByAddress64 (
-  IN CONST VOID  *Context,
-  IN UINT64      Address
+  IN OUT VOID    *Context,
+  IN     UINT64  Address
   );
 
 /**
@@ -218,14 +218,14 @@ MachoSymbolIsDefined (
 /**
   Returns whether Symbol is defined locally.
 
-  @param[in] Context      Context of the Mach-O.
-  @param[in] Symbol       Symbol to evaluate.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Symbol to evaluate.
 
 **/
 BOOLEAN
 MachoSymbolIsLocalDefined (
-  IN CONST VOID           *Context,
-  IN CONST MACH_NLIST_64  *Symbol
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *Symbol
   );
 
 /**
@@ -237,14 +237,14 @@ MachoSymbolIsLocalDefined (
 **/
 CONST MACH_NLIST_64 *
 MachoGetLocalDefinedSymbolByName (
-  IN CONST VOID   *Context,
-  IN CONST CHAR8  *Name
+  IN OUT VOID         *Context,
+  IN     CONST CHAR8  *Name
   );
 
 /**
   Relocate Symbol to be against LinkAddress.
 
-  @param[in]     Context      Context of the Mach-O.
+  @param[in,out] Context      Context of the Mach-O.
   @param[in]     LinkAddress  The address to be linked against.
   @param[in,out] Symbol       The symbol to be relocated.
 
@@ -253,7 +253,7 @@ MachoGetLocalDefinedSymbolByName (
 **/
 BOOLEAN
 MachoRelocateSymbol64 (
-  IN     CONST VOID     *Context,
+  IN OUT VOID           *Context,
   IN     UINT64         LinkAddress,
   IN OUT MACH_NLIST_64  *Symbol
   );
@@ -261,16 +261,16 @@ MachoRelocateSymbol64 (
 /**
   Retrieves a symbol by the Relocation it is referenced by.
 
-  @param[in] Context          Context of the Mach-O.
-  @param[in] Relocation       The Relocation to evaluate.
+  @param[in,out] Context     Context of the Mach-O.
+  @param[in]     Relocation  The Relocation to evaluate.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_NLIST_64 *
 MachoGetCxxSymbolByRelocation64 (
-  IN CONST VOID                  *Context,
-  IN CONST MACH_RELOCATION_INFO  *Relocation
+  IN OUT VOID                        *Context,
+  IN     CONST MACH_RELOCATION_INFO  *Relocation
   );
 
 /**
@@ -298,46 +298,46 @@ MachoIsSymbolNamePadslot (
 /**
   Returns whether Symbol defines a Super Metaclass Pointer.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Symbol   The symbol to check.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   The symbol to check.
 
 **/
 BOOLEAN
 MachoSymbolIsSmcp64 (
-  IN CONST VOID           *Context,
-  IN CONST MACH_NLIST_64  *Symbol
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *Symbol
   );
 
 /**
   Returns whether Symbol defines a Super Metaclass Pointer.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Symbol   The symbol to check.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   The symbol to check.
 
 **/
 BOOLEAN
 MachoSymbolIsMetaclassPointer64 (
-  IN CONST VOID           *Context,
-  IN CONST MACH_NLIST_64  *Symbol
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *Symbol
   );
 
 /**
   Retrieves the class name of a Super Meta Class Pointer.
 
-  @param[in] Context         Context of the Mach-O.
-  @param[in]  SmcpSymbol     SMCP Symbol to get the class name of.
-  @param[in]  ClassNameSize  The size of ClassName.
-  @param[out] ClassName      The output buffer for the class name.
+  @param[in,out] Context        Context of the Mach-O.
+  @param[in]     SmcpSymbol     SMCP Symbol to get the class name of.
+  @param[in]     ClassNameSize  The size of ClassName.
+  @param[out]    ClassName      The output buffer for the class name.
 
   @returns  Whether the name has been retrieved successfully.
 
 **/
 BOOLEAN
 MachoGetClassNameFromSuperMetaClassPointer (
-  IN  CONST VOID           *Context,
-  IN  CONST MACH_NLIST_64  *SmcpSymbol,
-  IN  UINTN                ClassNameSize,
-  OUT CHAR8                *ClassName
+  IN OUT  VOID                 *Context,
+  IN      CONST MACH_NLIST_64  *SmcpSymbol,
+  IN      UINTN                ClassNameSize,
+  OUT     CHAR8                *ClassName
   );
 
 /**
@@ -371,20 +371,20 @@ MachoGetFunctionPrefixFromClassName (
 /**
   Retrieves the class name of a Meta Class Pointer.
 
-  @param[in] Context              Context of the Mach-O.
-  @param[in]  MetaClassPtrSymbol  MCP Symbol to get the class name of.
-  @param[in]  ClassNameSize       The size of ClassName.
-  @param[out] ClassName           The output buffer for the class name.
+  @param[in,out] Context             Context of the Mach-O.
+  @param[in]     MetaClassPtrSymbol  MCP Symbol to get the class name of.
+  @param[in]     ClassNameSize       The size of ClassName.
+  @param[out]    ClassName           The output buffer for the class name.
 
   @returns  Whether the name has been retrieved successfully.
 
 **/
 BOOLEAN
 MachoGetClassNameFromMetaClassPointer (
-  IN  CONST VOID           *Context,
-  IN  CONST MACH_NLIST_64  *MetaClassPtrSymbol,
-  IN  UINTN                ClassNameSize,
-  OUT CHAR8                *ClassName
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *MetaClassPtrSymbol,
+  IN     UINTN                ClassNameSize,
+  OUT    CHAR8                *ClassName
   );
 
 /**
@@ -441,14 +441,14 @@ MachoGetFinalSymbolNameFromClassName (
 /**
   Returns whether Symbol defines a VTable.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Symbol   The symbol to check.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   The symbol to check.
 
 **/
 BOOLEAN
 MachoSymbolIsVtable64 (
-  IN CONST VOID           *Context,
-  IN CONST MACH_NLIST_64  *Symbol
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *Symbol
   );
 
 /**
@@ -465,47 +465,47 @@ MachoIsSymbolNameCxx (
 /**
   Returns the number of VTable entires in VtableData.
 
-  @param[in] Context     Context of the Mach-O.
-  @param[in] VtableData  The VTable's data.
+  @param[in,out] Context     Context of the Mach-O.
+  @param[in]     VtableData  The VTable's data.
 
 **/
 UINTN
 MachoVtableGetNumberOfEntries64 (
-  IN CONST VOID    *Context,
-  IN CONST UINT64  *VtableData
+  IN OUT VOID          *Context,
+  IN     CONST UINT64  *VtableData
   );
 
 /**
   Retrieves Metaclass symbol of a SMCP.
 
-  @param[in] Context              Context of the Mach-O.
-  @param[in] Smcp                 The SMCP to evaluate.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Smcp     The SMCP to evaluate.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_NLIST_64 *
 MachoGetMetaclassSymbolFromSmcpSymbol64 (
-  IN CONST VOID           *Context,
-  IN CONST MACH_NLIST_64  *Smcp
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *Smcp
   );
 
 /**
   Retrieves VTable and Meta VTable of a SMCP.
   Logically matches XNU's get_vtable_syms_from_smcp.
 
-  @param[in] Context       Context of the Mach-O.
-  @param[in]  SmcpSymbol   SMCP Symbol to retrieve the VTables from.
-  @param[out] Vtable       Output buffer for the VTable symbol pointer.
-  @param[out] MetaVtable   Output buffer for the Meta VTable symbol pointer.
+  @param[in,out] Context     Context of the Mach-O.
+  @param[in]     SmcpSymbol  SMCP Symbol to retrieve the VTables from.
+  @param[out]    Vtable      Output buffer for the VTable symbol pointer.
+  @param[out]    MetaVtable  Output buffer for the Meta VTable symbol pointer.
 
 **/
 BOOLEAN
 MachoGetVtableSymbolsFromSmcp64 (
-  IN  CONST VOID           *Context,
-  IN  CONST MACH_NLIST_64  *SmcpSymbol,
-  OUT CONST MACH_NLIST_64  **Vtable,
-  OUT CONST MACH_NLIST_64  **MetaVtable
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *SmcpSymbol,
+  OUT    CONST MACH_NLIST_64  **Vtable,
+  OUT    CONST MACH_NLIST_64  **MetaVtable
   );
 
 /**
@@ -546,16 +546,16 @@ MachoPreserveRelocationIntel64 (
 /**
   Retrieves a Relocation by the address it targets.
 
-  @param[in] Context              Context of the Mach-O.
-  @param[in] Address              The address to search for.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  The address to search for.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_RELOCATION_INFO *
 MachoGetExternalRelocationByOffset (
-  IN CONST VOID  *Context,
-  IN UINT64      Address
+  IN OUT VOID    *Context,
+  IN     UINT64  Address
   );
 
 #endif // OC_MACHO_LIB_H_

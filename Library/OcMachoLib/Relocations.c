@@ -68,16 +68,16 @@ MachoPreserveRelocationIntel64 (
 /**
   Retrieves a Relocation by the address it targets.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Address  The address to search for.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  The address to search for.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_RELOCATION_INFO *
 MachoGetExternalRelocationByOffset (
-  IN CONST VOID  *Context,
-  IN UINT64      Address
+  IN OUT VOID    *Context,
+  IN     UINT64  Address
   )
 {
   OC_MACHO_CONTEXT           *MachoContext;

@@ -94,14 +94,14 @@ MachoSymbolIsDefined (
 /**
   Returns whether Symbol is defined locally.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Symbol   Symbol to evaluate.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Symbol to evaluate.
 
 **/
 BOOLEAN
 MachoSymbolIsLocalDefined (
-  IN CONST VOID           *Context,
-  IN CONST MACH_NLIST_64  *Symbol
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *Symbol
   )
 {
   CONST OC_MACHO_CONTEXT      *MachoContext;
@@ -183,14 +183,14 @@ InternalGetSymbolByName (
 /**
   Retrieves a locally defined symbol by its name.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Name     Name of the symbol to locate.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Name     Name of the symbol to locate.
 
 **/
 CONST MACH_NLIST_64 *
 MachoGetLocalDefinedSymbolByName (
-  IN CONST VOID   *Context,
-  IN CONST CHAR8  *Name
+  IN OUT VOID         *Context,
+  IN     CONST CHAR8  *Name
   )
 {
   OC_MACHO_CONTEXT            *MachoContext;
@@ -237,7 +237,7 @@ MachoGetLocalDefinedSymbolByName (
 /**
   Relocate Symbol to be against LinkAddress.
 
-  @param[in]     Context      Context of the Mach-O.
+  @param[in,out] Context      Context of the Mach-O.
   @param[in]     LinkAddress  The address to be linked against.
   @param[in,out] Symbol       The symbol to be relocated.
 
@@ -246,7 +246,7 @@ MachoGetLocalDefinedSymbolByName (
 **/
 BOOLEAN
 MachoRelocateSymbol64 (
-  IN     CONST VOID     *Context,
+  IN OUT VOID           *Context,
   IN     UINT64         LinkAddress,
   IN OUT MACH_NLIST_64  *Symbol
   )
@@ -278,16 +278,16 @@ MachoRelocateSymbol64 (
 /**
   Retrieves a symbol by the Relocation it is referenced by.
 
-  @param[in] Context     Header of the Mach-O.
-  @param[in] Relocation  The Relocation to evaluate.
+  @param[in,out] Context     Context of the Mach-O.
+  @param[in]     Relocation  The Relocation to evaluate.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_NLIST_64 *
 MachoGetCxxSymbolByRelocation64 (
-  IN CONST VOID                  *Context,
-  IN CONST MACH_RELOCATION_INFO  *Relocation
+  IN OUT VOID                        *Context,
+  IN     CONST MACH_RELOCATION_INFO  *Relocation
   )
 {
   OC_MACHO_CONTEXT       *MachoContext;

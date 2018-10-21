@@ -114,12 +114,12 @@ MachoInitializeContext (
 /**
   Returns the last virtual address of a Mach-O.
 
-  @param[in] Context  Context of the Mach-O.
+  @param[in,out] Context  Context of the Mach-O.
 
 **/
 UINT64
 MachoGetLastAddress64 (
-  IN CONST VOID  *Context
+  IN OUT VOID  *Context
   )
 {
   UINT64                        LastAddress;
@@ -149,10 +149,10 @@ MachoGetLastAddress64 (
 /**
   Retrieves the first Load Command of type LoadCommandType.
 
-  @param[in] Context          Context of the Mach-O.
-  @param[in] LoadCommandType  Type of the Load Command to retrieve.
-  @param[in] LoadCommand      Previous Load Command.
-                              If NULL, the first match is returned.
+  @param[in,out] Context          Context of the Mach-O.
+  @param[in]     LoadCommandType  Type of the Load Command to retrieve.
+  @param[in]     LoadCommand      Previous Load Command.
+                                  If NULL, the first match is returned.
 
   @retval NULL  NULL is returned on failure.
 
@@ -160,9 +160,9 @@ MachoGetLastAddress64 (
 STATIC
 MACH_LOAD_COMMAND *
 InternalGetNextCommand64 (
-  IN CONST VOID               *Context,
-  IN MACH_LOAD_COMMAND_TYPE   LoadCommandType,
-  IN CONST MACH_LOAD_COMMAND  *LoadCommand  OPTIONAL
+  IN OUT VOID                     *Context,
+  IN     MACH_LOAD_COMMAND_TYPE   LoadCommandType,
+  IN     CONST MACH_LOAD_COMMAND  *LoadCommand  OPTIONAL
   )
 {
   CONST MACH_LOAD_COMMAND *Command;
@@ -200,14 +200,14 @@ InternalGetNextCommand64 (
 /**
   Retrieves the first UUID Load Command.
 
-  @param[in] Context  Context of the Mach-O.
+  @param[in,out] Context  Context of the Mach-O.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 MACH_UUID_COMMAND *
 MachoGetUuid64 (
-  IN CONST VOID  *Context
+  IN OUT VOID  *Context
   )
 {
   MACH_UUID_COMMAND *UuidCommand;
@@ -232,16 +232,16 @@ MachoGetUuid64 (
 /**
   Retrieves the first segment by the name of SegmentName.
 
-  @param[in] Context      Context of the Mach-O.
-  @param[in] SegmentName  Segment name to search for.
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     SegmentName  Segment name to search for.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 MACH_SEGMENT_COMMAND_64 *
 MachoGetSegmentByName64 (
-  IN CONST VOID   *Context,
-  IN CONST CHAR8  *SegmentName
+  IN OUT VOID         *Context,
+  IN     CONST CHAR8  *SegmentName
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
@@ -271,18 +271,18 @@ MachoGetSegmentByName64 (
 /**
   Retrieves the first section by the name of SectionName.
 
-  @param[in] Context      Context of the Mach-O.
-  @param[in] Segment      Segment to search in.
-  @param[in] SectionName  Section name to search for.
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     Segment      Segment to search in.
+  @param[in]     SectionName  Section name to search for.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 MACH_SECTION_64 *
 MachoGetSectionByName64 (
-  IN CONST VOID                     *Context,
-  IN CONST MACH_SEGMENT_COMMAND_64  *Segment,
-  IN CONST CHAR8                    *SectionName
+  IN OUT VOID                           *Context,
+  IN     CONST MACH_SEGMENT_COMMAND_64  *Segment,
+  IN     CONST CHAR8                    *SectionName
   )
 {
   CONST MACH_SECTION_64 *SectionWalker;
@@ -332,18 +332,18 @@ MachoGetSectionByName64 (
 /**
   Retrieves a section within a segment by the name of SegmentName.
 
-  @param[in] Context      Context of the Mach-O.
-  @param[in] SegmentName  The name of the segment to search in.
-  @param[in] SectionName  The name of the section to search for.
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     SegmentName  The name of the segment to search in.
+  @param[in]     SectionName  The name of the section to search for.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 MACH_SECTION_64 *
 MachoGetSegmentSectionByName64 (
-  IN CONST VOID   *Context,
-  IN CONST CHAR8  *SegmentName,
-  IN CONST CHAR8  *SectionName
+  IN OUT VOID         *Context,
+  IN     CONST CHAR8  *SegmentName,
+  IN     CONST CHAR8  *SectionName
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
@@ -364,17 +364,17 @@ MachoGetSegmentSectionByName64 (
 /**
   Retrieves the next segment.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Segment  Segment to retrieve the successor of.
-                      if NULL, the first segment is returned.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Segment  Segment to retrieve the successor of.
+                          if NULL, the first segment is returned.
 
   @retal NULL  NULL is returned on failure.
 
 **/
 MACH_SEGMENT_COMMAND_64 *
 MachoGetNextSegment64 (
-  IN CONST VOID                     *Context,
-  IN CONST MACH_SEGMENT_COMMAND_64  *Segment  OPTIONAL
+  IN OUT VOID                           *Context,
+  IN     CONST MACH_SEGMENT_COMMAND_64  *Segment  OPTIONAL
   )
 {
   MACH_SEGMENT_COMMAND_64 *NextSegment;
@@ -419,19 +419,19 @@ MachoGetNextSegment64 (
 /**
   Retrieves the next section of a segment.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Segment  The segment to get the section of.
-  @param[in] Section  The section to get the successor of.
-                      If NULL, the first section is returned.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Segment  The segment to get the section of.
+  @param[in]     Section  The section to get the successor of.
+                          If NULL, the first section is returned.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 MACH_SECTION_64 *
 MachoGetNextSection64 (
-  IN CONST VOID                     *Context,
-  IN CONST MACH_SEGMENT_COMMAND_64  *Segment,
-  IN CONST MACH_SECTION_64          *Section  OPTIONAL
+  IN OUT VOID                           *Context,
+  IN     CONST MACH_SEGMENT_COMMAND_64  *Segment,
+  IN     CONST MACH_SECTION_64          *Section  OPTIONAL
   )
 {
   CONST OC_MACHO_CONTEXT *MachContext;
@@ -460,16 +460,16 @@ MachoGetNextSection64 (
 /**
   Retrieves a section by its index.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Index    Index of the section to retrieve.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Index    Index of the section to retrieve.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_SECTION_64 *
 MachoGetSectionByIndex64 (
-  IN CONST VOID  *Context,
-  IN UINTN       Index
+  IN OUT VOID   *Context,
+  IN     UINTN  Index
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
@@ -497,16 +497,16 @@ MachoGetSectionByIndex64 (
 /**
   Retrieves a section by its address.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Address  Address of the section to retrieve.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  Address of the section to retrieve.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_SECTION_64 *
 MachoGetSectionByAddress64 (
-  IN CONST VOID  *Context,
-  IN UINT64      Address
+  IN OUT VOID    *Context,
+  IN     UINT64  Address
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
@@ -541,14 +541,14 @@ MachoGetSectionByAddress64 (
 /**
   Retrieves the SYMTAB command.
 
-  @param[in] MachoContext  Context of the Mach-O.
+  @param[in,out] MachoContext  Context of the Mach-O.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 BOOLEAN
 InternalRetrieveSymtabs64 (
-  IN OC_MACHO_CONTEXT  *MachoContext
+  IN OUT OC_MACHO_CONTEXT  *MachoContext
   )
 {
   UINTN                       MachoAddress;
