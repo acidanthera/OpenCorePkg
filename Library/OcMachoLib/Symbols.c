@@ -166,6 +166,42 @@ MachoSymbolIsLocalDefined (
 }
 
 /**
+  Retrieves a symbol by its index.
+
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Index    Index of the symbol to locate.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+CONST MACH_NLIST_64 *
+MachoGetSymbolByIndex64 (
+  IN OUT VOID    *Context,
+  IN     UINT32  Index
+  )
+{
+  OC_MACHO_CONTEXT    *MachoContext;
+  CONST MACH_NLIST_64 *Symbol;
+
+  ASSERT (Context != NULL);
+
+  MachoContext = (OC_MACHO_CONTEXT *)Context;
+  ASSERT (MachoContext->SymbolTable != NULL);
+  ASSERT (MachoContext->NumSymbols > 0);
+
+  if (Index < MachoContext->NumSymbols) {
+    Symbol = &MachoContext->SymbolTable[Index];
+    if (InternalSymbolIsSane (MachoContext, Symbol)) {
+      return Symbol;
+    }
+  } else {
+    ASSERT (FALSE);
+  }
+
+  return NULL;
+}
+
+/**
   Retrieves a symbol by its name.
 
   @param[in] SymbolTable      Symbol Table of the Mach-O.

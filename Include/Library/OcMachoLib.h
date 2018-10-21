@@ -242,6 +242,21 @@ MachoGetLocalDefinedSymbolByName (
   );
 
 /**
+  Retrieves a symbol by its index.
+
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Index    Index of the symbol to locate.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+CONST MACH_NLIST_64 *
+MachoGetSymbolByIndex64 (
+  IN OUT VOID    *Context,
+  IN     UINT32  Index
+  );
+
+/**
   Relocate Symbol to be against LinkAddress.
 
   @param[in,out] Context      Context of the Mach-O.
