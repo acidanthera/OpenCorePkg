@@ -91,6 +91,14 @@ MachoInitializeContext (
     return FALSE;
   }
   //
+  // The Load Command retrieval code uses size instead of indices to speed up
+  // finding LCs after a provided one.  Verify padding does not include a full
+  // LC for the loop might incorrectly reference it as a valid LC.
+  //
+  ASSERT (
+    (MachHeader->CommandsSize - CommandsSize) < sizeof (MACH_LOAD_COMMAND)
+    );
+  //
   // Verify assumptions made by this library.
   // Carefully audit all "Assumption:" remarks before modifying these checks.
   //
@@ -168,7 +176,9 @@ InternalGetNextCommand64 (
 
   ASSERT (Context != NULL);
 
-  MachHeader    = ((CONST OC_MACHO_CONTEXT *)Context)->MachHeader;
+  MachHeader = ((CONST OC_MACHO_CONTEXT *)Context)->MachHeader;
+  ASSERT (MachHeader != NULL);
+
   TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
 
   if (LoadCommand != NULL) {
@@ -385,6 +395,8 @@ MachoGetNextSegment64 (
   ASSERT (Context != NULL);
 
   MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
+  ASSERT (MachoContext->MachHeader != NULL);
+  ASSERT (MachoContext->FileSize > 0);
 
   if (Segment != NULL) {
     MachHeader    = MachoContext->MachHeader;
@@ -432,8 +444,9 @@ MachoGetNextSection64 (
   IN     CONST MACH_SECTION_64          *Section  OPTIONAL
   )
 {
-  CONST OC_MACHO_CONTEXT *MachContext;
+  CONST OC_MACHO_CONTEXT *MachoContext;
 
+  ASSERT (Context != NULL);
   ASSERT (Segment != NULL);
 
   if (Section != NULL) {
@@ -445,10 +458,11 @@ MachoGetNextSection64 (
     Section = (MACH_SECTION_64 *)&Segment->Sections[0];
   }
 
-  MachContext = (CONST OC_MACHO_CONTEXT *)Context;
+  MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
+  ASSERT (MachoContext->FileSize > 0);
 
   if (((UINTN)(Section - Segment->Sections) < Segment->NumSections)
-   && ((Section->Offset + Section->Size) <= MachContext->FileSize)) {
+   && ((Section->Offset + Section->Size) <= MachoContext->FileSize)) {
     return (MACH_SECTION_64 *)Section;
   }
 
