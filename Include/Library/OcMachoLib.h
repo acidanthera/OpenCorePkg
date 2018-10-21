@@ -257,6 +257,20 @@ MachoGetSymbolByIndex64 (
   );
 
 /**
+  Returns whether the symbol's value is a valid address within the Mach-O
+  referenced to by Context.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Symbol to verify the value of.
+
+**/
+BOOLEAN
+MachoIsSymbolValueSane64 (
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *Symbol
+  );
+
+/**
   Retrieves the symbol referenced by the Relocation targeting Address.
 
   @param[in,out] Context  Context of the Mach-O.

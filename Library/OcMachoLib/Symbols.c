@@ -48,6 +48,40 @@ InternalSymbolIsSane (
 }
 
 /**
+  Returns whether the symbol's value is a valid address within the Mach-O
+  referenced to by Context.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Symbol to verify the value of.
+
+**/
+BOOLEAN
+MachoIsSymbolValueSane64 (
+  IN OUT VOID                 *Context,
+  IN     CONST MACH_NLIST_64  *Symbol
+  )
+{
+  CONST MACH_SEGMENT_COMMAND_64 *Segment;
+
+  if (MachoSymbolIsLocalDefined (Context, Symbol)) {
+    for (
+      Segment = MachoGetNextSegment64 (Context, NULL);
+      Segment != NULL;
+      Segment = MachoGetNextSegment64 (Context, Segment)
+      ) {
+      if ((Symbol->Value >= Segment->VirtualAddress)
+       && (Symbol->Value < (Segment->VirtualAddress + Segment->Size))) {
+        return TRUE;
+      }
+    }
+
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
   Returns whether Symbol describes a section.
 
   @param[in] Symbol  Symbol to evaluate.
