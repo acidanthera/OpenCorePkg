@@ -230,7 +230,7 @@ MachoGetSymbolByExternRelocationOffset64 (
 
   MachoContext = (OC_MACHO_CONTEXT *)Context;
 
-  Relocation = MachoGetExternalRelocationByOffset (Context, Address);
+  Relocation = InternalGetExternalRelocationByOffset (Context, Address);
   if (Relocation != NULL) {
     Sym = MachoGetSymbolByIndex64 (Context, Relocation->SymbolNumber);
     if ((Sym != NULL) && InternalSymbolIsSane (MachoContext, Sym)) {

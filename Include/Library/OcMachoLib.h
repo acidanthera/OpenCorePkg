@@ -562,19 +562,4 @@ MachoPreserveRelocationIntel64 (
   IN UINT8  Type
   );
 
-/**
-  Retrieves a Relocation by the address it targets.
-
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Address  The address to search for.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
-CONST MACH_RELOCATION_INFO *
-MachoGetExternalRelocationByOffset (
-  IN OUT VOID    *Context,
-  IN     UINT64  Address
-  );
-
 #endif // OC_MACHO_LIB_H_

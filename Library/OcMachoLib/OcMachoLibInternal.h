@@ -46,4 +46,19 @@ InternalRetrieveSymtabs64 (
   IN OC_MACHO_CONTEXT  *MachoContext
   );
 
+/**
+  Retrieves an extern Relocation by the address it targets.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  The address to search for.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+CONST MACH_RELOCATION_INFO *
+InternalGetExternalRelocationByOffset (
+  IN OUT VOID    *Context,
+  IN     UINT64  Address
+  );
+
 #endif // OC_MACHO_LIB_INTERNAL_H_
