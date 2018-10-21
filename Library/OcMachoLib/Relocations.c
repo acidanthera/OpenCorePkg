@@ -19,6 +19,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DebugLib.h>
 #include <Library/OcMachoLib.h>
 
+#include "OcMachoLibInternal.h"
+
 /**
   Returns whether the Relocation's type indicates a Pair for the Intel 64
   platform.
@@ -66,31 +68,37 @@ MachoPreserveRelocationIntel64 (
 /**
   Retrieves a Relocation by the address it targets.
 
-  @param[in] Context              Context of the Mach-O.
-  @param[in] NumberOfRelocations  Number of Relocations in Relocations.
-  @param[in] Relocations          The Relocations to search.
-  @param[in] Address              The address to search for.
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Address  The address to search for.
 
   @retval NULL  NULL is returned on failure.
 
 **/
 CONST MACH_RELOCATION_INFO *
-MachoGetRelocationByOffset (
-  IN CONST VOID                  *Context,
-  IN UINTN                       NumberOfRelocations,
-  IN CONST MACH_RELOCATION_INFO  *Relocations,
-  IN UINT64                      Address
+MachoGetExternalRelocationByOffset (
+  IN CONST VOID  *Context,
+  IN UINT64      Address
   )
 {
+  OC_MACHO_CONTEXT           *MachoContext;
   UINTN                      Index;
   CONST MACH_RELOCATION_INFO *Relocation;
 
   ASSERT (Context != NULL);
-  ASSERT (Relocations != NULL);
+
+  MachoContext = (OC_MACHO_CONTEXT *)Context;
+
+  if ((MachoContext->SymbolTable == NULL)
+   && !InternalRetrieveSymtabs64 (MachoContext)) {
+    return NULL;
+  }
+
+  ASSERT (MachoContext->DySymtab != NULL);
+  ASSERT (MachoContext->ExternRelocations != NULL);
 
   for (
-    Index = 0, Relocation = &Relocations[0];
-    Index < NumberOfRelocations;
+    Index = 0, Relocation = &MachoContext->ExternRelocations[0];
+    Index < MachoContext->DySymtab->NumExternalRelocations;
     ++Index, ++Relocation
     ) {
     //

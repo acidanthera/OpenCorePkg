@@ -541,87 +541,111 @@ MachoGetSectionByAddress64 (
 /**
   Retrieves the SYMTAB command.
 
-  @param[in] Context  Context of the Mach-O.
+  @param[in] MachoContext  Context of the Mach-O.
 
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_SYMTAB_COMMAND *
-MachoGetSymtab64 (
-  IN CONST VOID  *Context
+BOOLEAN
+InternalRetrieveSymtabs64 (
+  IN OC_MACHO_CONTEXT  *MachoContext
   )
 {
-  MACH_SYMTAB_COMMAND *Symtab;
-  UINTN               TopOfSymbols;
-  UINTN               FileSize;
+  UINTN                       MachoAddress;
+  CONST MACH_SYMTAB_COMMAND   *Symtab;
+  CONST MACH_DYSYMTAB_COMMAND *DySymtab;
+  CONST CHAR8                 *StringTable;
+  UINTN                       FileSize;
+  UINTN                       OffsetTop;
+  UINTN                       TopOfSymbols;
 
-  ASSERT (Context != NULL);
-
+  ASSERT (MachoContext != NULL);
+  ASSERT (MachoContext->MachHeader != NULL);
+  ASSERT (MachoContext->FileSize > 0);
+  ASSERT (MachoContext->SymbolTable == NULL);
+  //
+  // Retrieve SYMTAB.
+  //
   Symtab = (MACH_SYMTAB_COMMAND *)(
-             InternalGetNextCommand64 (Context, MACH_LOAD_COMMAND_SYMTAB, NULL)
+             InternalGetNextCommand64 (
+               (VOID *)MachoContext,
+               MACH_LOAD_COMMAND_SYMTAB,
+               NULL
+               )
              );
-  if ((Symtab != NULL) && (Symtab->CommandSize >= sizeof (*Symtab))) {
-    FileSize = ((CONST OC_MACHO_CONTEXT *)Context)->FileSize;
-
-    TopOfSymbols  = Symtab->SymbolsOffset;
-    TopOfSymbols += (Symtab->NumSymbols * sizeof (MACH_NLIST_64));
-
-    if ((TopOfSymbols <= FileSize)
-     && ((Symtab->StringsOffset + Symtab->StringsSize) <= FileSize)) {
-      return Symtab;
-    }
+  if ((Symtab == NULL) || (Symtab->CommandSize < sizeof (*Symtab))) {
+    return FALSE;
   }
 
-  return NULL;
-}
+  FileSize = MachoContext->FileSize;
 
-/**
-  Retrieves the DYSYMTAB command.
+  TopOfSymbols  = Symtab->SymbolsOffset;
+  TopOfSymbols += (Symtab->NumSymbols * sizeof (MACH_NLIST_64));
 
-  @param[in] Context  Context of the Mach-O.
+  if ((TopOfSymbols > FileSize)
+   || ((Symtab->StringsOffset + Symtab->StringsSize) > FileSize)) {
+    return FALSE;
+  }
 
-  @retval NULL  NULL is returned on failure.
+  MachoAddress = (UINTN)MachoContext->MachHeader;
+  StringTable  = (CONST CHAR8 *)(MachoAddress + Symtab->StringsOffset);
 
-**/
-MACH_DYSYMTAB_COMMAND *
-MachoGetDySymtab64 (
-  IN CONST VOID  *Context
-  )
-{
-  MACH_DYSYMTAB_COMMAND *DySymtab;
-  UINTN                 FileSize;
-  UINTN                 OffsetTop;
-
-  ASSERT (Context != NULL);
-
+  if (StringTable[(Symtab->StringsSize / sizeof (*StringTable)) - 1] != '\0') {
+    return FALSE;
+  }
+  //
+  // Retrieve DYSYMTAB.
+  //
   DySymtab = (MACH_DYSYMTAB_COMMAND *)(
                InternalGetNextCommand64 (
-                 Context,
+                 (VOID *)MachoContext,
                  MACH_LOAD_COMMAND_DYSYMTAB,
                  NULL
                  )
                );
-  if (DySymtab != NULL) {
-    FileSize = ((CONST OC_MACHO_CONTEXT *)Context)->FileSize;
-
-    OffsetTop  = DySymtab->IndirectSymbolsOffset;
-    OffsetTop += (DySymtab->NumIndirectSymbols * sizeof (MACH_NLIST_64));
-    if (OffsetTop > FileSize) {
-      return NULL;
-    }
-
-    OffsetTop  = DySymtab->ExternalRelocationsOffset;
-    OffsetTop += (DySymtab->NumExternalRelocations * sizeof (MACH_NLIST_64));
-    if (OffsetTop > FileSize) {
-      return NULL;
-    }
-
-    OffsetTop  = DySymtab->LocalRelocationsOffset;
-    OffsetTop += (DySymtab->NumOfLocalRelocations * sizeof (MACH_NLIST_64));
-    if (OffsetTop > FileSize) {
-      return NULL;
-    }
+  if ((DySymtab == NULL) || DySymtab->CommandSize < sizeof (*DySymtab)) {
+    return FALSE;
   }
 
-  return DySymtab;
+  OffsetTop  = DySymtab->IndirectSymbolsOffset;
+  OffsetTop += (DySymtab->NumIndirectSymbols * sizeof (MACH_NLIST_64));
+  if (OffsetTop > FileSize) {
+    return FALSE;
+  }
+
+  OffsetTop  = DySymtab->LocalRelocationsOffset;
+  OffsetTop += (DySymtab->NumOfLocalRelocations * sizeof (MACH_NLIST_64));
+  if (OffsetTop > FileSize) {
+    return FALSE;
+  }
+
+  OffsetTop  = DySymtab->ExternalRelocationsOffset;
+  OffsetTop += (DySymtab->NumExternalRelocations * sizeof (MACH_NLIST_64));
+  if (OffsetTop > FileSize) {
+    return FALSE;
+  }
+  //
+  // Store the symbol information.
+  //
+  MachoContext->NumSymbols  = Symtab->NumSymbols;
+  MachoContext->SymbolTable = (CONST MACH_NLIST_64 *)(
+                                MachoAddress + Symtab->SymbolsOffset
+                                );
+  MachoContext->StringsSize = Symtab->StringsSize;
+  MachoContext->StringTable = StringTable;
+
+  MachoContext->IndirectSymbolTable = (CONST MACH_NLIST_64 *)(
+                                        MachoAddress
+                                          + DySymtab->IndirectSymbolsOffset
+                                        );
+  MachoContext->LocalRelocations = (CONST MACH_RELOCATION_INFO *)(
+                                     MachoAddress
+                                       + DySymtab->LocalRelocationsOffset
+                                     );
+  MachoContext->ExternRelocations = (CONST MACH_RELOCATION_INFO *)(
+                                      MachoAddress
+                                        + DySymtab->ExternalRelocationsOffset
+                                      );
+
+  return TRUE;
 }

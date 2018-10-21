@@ -21,6 +21,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DebugLib.h>
 #include <Library/OcMachoLib.h>
 
+#include "OcMachoLibInternal.h"
+
 #define CXX_PREFIX                     "__Z"
 #define VTABLE_PREFIX                  CXX_PREFIX "TV"
 #define OSOBJ_PREFIX                   CXX_PREFIX "N"
@@ -71,51 +73,59 @@ MachoIsSymbolNamePadslot (
 /**
   Returns whether Symbol defines a Super Metaclass Pointer.
 
-  @param[in] Symbol       The symbol to check.
-  @param[in] StringTable  The KEXT's String Table.
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Symbol   The symbol to check.
 
 **/
 BOOLEAN
 MachoSymbolIsSmcp64 (
-  IN CONST MACH_NLIST_64  *Symbol,
-  IN CONST CHAR8          *StringTable
+  IN CONST VOID           *Context,
+  IN CONST MACH_NLIST_64  *Symbol
   )
 {
-  CONST CHAR8 *Name;
+  CONST OC_MACHO_CONTEXT *MachoContext;
+  CONST CHAR8            *Name;
 
+  ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
-  ASSERT (StringTable != NULL);
 
-  Name = (StringTable + Symbol->UnifiedName.StringIndex);
+  MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
+  ASSERT (MachoContext->StringTable != NULL);
+
+  Name = (MachoContext->StringTable + Symbol->UnifiedName.StringIndex);
   return (AsciiStrStr (Name, SUPER_METACLASS_POINTER_TOKEN) != NULL);
 }
 
 /**
   Returns whether Symbol defines a Super Metaclass Pointer.
 
-  @param[in] Symbol       The symbol to check.
-  @param[in] StringTable  The KEXT's String Table.
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Symbol   The symbol to check.
 
 **/
 BOOLEAN
 MachoSymbolIsMetaclassPointer64 (
-  IN CONST MACH_NLIST_64  *Symbol,
-  IN CONST CHAR8          *StringTable
+  IN CONST VOID           *Context,
+  IN CONST MACH_NLIST_64  *Symbol
   )
 {
-  CONST CHAR8 *Name;
+  CONST OC_MACHO_CONTEXT *MachoContext;
+  CONST CHAR8            *Name;
 
+  ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
-  ASSERT (StringTable != NULL);
 
-  Name = (StringTable + Symbol->UnifiedName.StringIndex);
+  MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
+  ASSERT (MachoContext->StringTable != NULL);
+
+  Name = (MachoContext->StringTable + Symbol->UnifiedName.StringIndex);
   return (AsciiStrStr (Name, METACLASS_TOKEN) != NULL);
 }
 
 /**
   Retrieves the class name of a Super Meta Class Pointer.
 
-  @param[in]  StringTable    String Table of the Mach-O.
+  @param[in]  Context        Context of the Mach-O.
   @param[in]  SmcpSymbol     SMCP Symbol to get the class name of.
   @param[in]  ClassNameSize  The size of ClassName.
   @param[out] ClassName      The output buffer for the class name.
@@ -125,31 +135,37 @@ MachoSymbolIsMetaclassPointer64 (
 **/
 BOOLEAN
 MachoGetClassNameFromSuperMetaClassPointer (
-  IN  CONST CHAR8          *StringTable,
+  IN  CONST VOID           *Context,
   IN  CONST MACH_NLIST_64  *SmcpSymbol,
   IN  UINTN                ClassNameSize,
   OUT CHAR8                *ClassName
   )
 {
-  BOOLEAN     Result;
-  CONST CHAR8 *SuperMetaClassName;
-  UINTN       StringLength;
-  UINTN       PrefixLength;
-  UINTN       SuffixLength;
-  UINTN       ClassNameLength;
+  CONST OC_MACHO_CONTEXT *MachoContext;
+  BOOLEAN                Result;
+  CONST CHAR8            *SuperMetaClassName;
+  UINTN                  StringLength;
+  UINTN                  PrefixLength;
+  UINTN                  SuffixLength;
+  UINTN                  ClassNameLength;
 
-  ASSERT (StringTable != NULL);
+  ASSERT (Context != NULL);
   ASSERT (SmcpSymbol != NULL);
   ASSERT (ClassNameSize > 0);
   ASSERT (ClassName != NULL);
 
-  Result = MachoSymbolIsSmcp64 (SmcpSymbol,  StringTable);
+  MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
+  ASSERT (MachoContext->StringTable != NULL);
+
+  Result = MachoSymbolIsSmcp64 (Context, SmcpSymbol);
   if (!Result) {
     return FALSE;
   }
 
-  SuperMetaClassName = (StringTable + SmcpSymbol->UnifiedName.StringIndex);
-
+  SuperMetaClassName = (
+                         MachoContext->StringTable 
+                           + SmcpSymbol->UnifiedName.StringIndex
+                       );
   PrefixLength = (ARRAY_SIZE (OSOBJ_PREFIX) - 1);
   StringLength = AsciiStrLen (SuperMetaClassName);
   SuffixLength = (ARRAY_SIZE (SUPER_METACLASS_POINTER_TOKEN) - 1);
@@ -238,7 +254,7 @@ MachoGetFunctionPrefixFromClassName (
 /**
   Retrieves the class name of a Meta Class Pointer.
 
-  @param[in]  StringTable         String Table of the Mach-O.
+  @param[in]  Context             Context of the Mach-O.
   @param[in]  MetaClassPtrSymbol  MCP Symbol to get the class name of.
   @param[in]  ClassNameSize       The size of ClassName.
   @param[out] ClassName           The output buffer for the class name.
@@ -248,34 +264,37 @@ MachoGetFunctionPrefixFromClassName (
 **/
 BOOLEAN
 MachoGetClassNameFromMetaClassPointer (
-  IN  CONST CHAR8          *StringTable,
+  IN  CONST VOID           *Context,
   IN  CONST MACH_NLIST_64  *MetaClassPtrSymbol,
   IN  UINTN                ClassNameSize,
   OUT CHAR8                *ClassName
   )
 {
-  BOOLEAN     Result;
-  CONST CHAR8 *MetaClassName;
-  UINTN       StringLength;
-  UINTN       PrefixLength;
-  UINTN       SuffixLength;
-  UINTN       ClassNameLength;
+  CONST OC_MACHO_CONTEXT *MachoContext;
+  BOOLEAN                Result;
+  CONST CHAR8            *MetaClassName;
+  UINTN                  StringLength;
+  UINTN                  PrefixLength;
+  UINTN                  SuffixLength;
+  UINTN                  ClassNameLength;
 
-  ASSERT (StringTable != NULL);
+  ASSERT (Context != NULL);
   ASSERT (MetaClassPtrSymbol != NULL);
   ASSERT (ClassNameSize > 0);
   ASSERT (ClassName != NULL);
 
-  Result = MachoSymbolIsMetaclassPointer64 (
-             MetaClassPtrSymbol,
-             StringTable
-             );
+  MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
+  ASSERT (MachoContext->StringTable != NULL);
+
+  Result = MachoSymbolIsMetaclassPointer64 (Context, MetaClassPtrSymbol);
   if (!Result) {
     return FALSE;
   }
 
-  MetaClassName = (StringTable + MetaClassPtrSymbol->UnifiedName.StringIndex);
-
+  MetaClassName = (
+                    MachoContext->StringTable
+                      + MetaClassPtrSymbol->UnifiedName.StringIndex
+                  );
   PrefixLength = (ARRAY_SIZE (OSOBJ_PREFIX) - 1);
   StringLength = AsciiStrLen (MetaClassName);
   SuffixLength = (ARRAY_SIZE (METACLASS_TOKEN) - 1);
@@ -459,22 +478,26 @@ MachoGetFinalSymbolNameFromClassName (
 /**
   Returns whether Symbol defines a VTable.
 
-  @param[in] Symbol       The symbol to check.
-  @param[in] StringTable  The KEXT's String Table.
+  @param[in] Context  Conteyt of the Mach-O.
+  @param[in] Symbol   The symbol to check.
 
 **/
 BOOLEAN
 MachoSymbolIsVtable64 (
-  IN CONST MACH_NLIST_64  *Symbol,
-  IN CONST CHAR8          *StringTable
+  IN CONST VOID           *Context,
+  IN CONST MACH_NLIST_64  *Symbol
   )
 {
-  CONST CHAR8 *Name;
+  CONST OC_MACHO_CONTEXT *MachoContext;
+  CONST CHAR8            *Name;
 
+  ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
-  ASSERT (StringTable != NULL);
 
-  Name = (StringTable + Symbol->UnifiedName.StringIndex);
+  MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
+  ASSERT (MachoContext->StringTable != NULL);
+
+  Name = (MachoContext->StringTable + Symbol->UnifiedName.StringIndex);
   //
   // Implicitely checks for METACLASS_VTABLE_PREFIX.
   //
@@ -529,13 +552,8 @@ MachoVtableGetNumberOfEntries64 (
 /**
   Retrieves Metaclass symbol of a SMCP.
 
-  @param[in] Context              Context of the Mach-O.
-  @param[in] NumberOfSymbols      Number of symbols in SymbolTable.
-  @param[in] SymbolTable          Symbol Table of the Mach-O.
-  @param[in] StringTable          String Table of the Mach-O.
-  @param[in] NumberOfRelocations  Number of Relocations in Relocations.
-  @param[in] Relocations          The Relocations to evaluate.
-  @param[in] Smcp                 The SMCP to evaluate.
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Smcp     The SMCP to evaluate.
 
   @retval NULL  NULL is returned on failure.
 
@@ -543,48 +561,27 @@ MachoVtableGetNumberOfEntries64 (
 CONST MACH_NLIST_64 *
 MachoGetMetaclassSymbolFromSmcpSymbol64 (
   IN CONST VOID                  *Context,
-  IN UINTN                       NumberOfSymbols,
-  IN CONST MACH_NLIST_64         *SymbolTable,
-  IN CONST CHAR8                 *StringTable,
-  IN UINTN                       NumberOfRelocations,
-  IN CONST MACH_RELOCATION_INFO  *Relocations,
   IN CONST MACH_NLIST_64         *Smcp
   )
 {
   CONST MACH_RELOCATION_INFO *Relocation;
 
   ASSERT (Context != NULL);
-  ASSERT (SymbolTable != NULL);
-  ASSERT (StringTable != NULL);
-  ASSERT (Relocations != NULL);
   ASSERT (Smcp != NULL);
 
-  Relocation = MachoGetRelocationByOffset (
-                 Context,
-                 NumberOfRelocations,
-                 Relocations,
-                 Smcp->Value
-                 );
+  Relocation = MachoGetExternalRelocationByOffset (Context, Smcp->Value);
   if (Relocation == NULL) {
     return NULL;
   }
 
-  return MachoGetCxxSymbolByRelocation64 (
-           Context,
-           NumberOfSymbols,
-           SymbolTable,
-           StringTable,
-           Relocation
-           );
+  return MachoGetCxxSymbolByRelocation64 (Context, Relocation);
 }
 
 /**
   Retrieves VTable and Meta VTable of a SMCP.
   Logically matches XNU's get_vtable_syms_from_smcp.
 
-  @param[in]  SymbolTable  Symbol Table of the Mach-O.
-  @param[in]  StringTable  String Table of the Mach-O.
-  @param[in]  DySymtab     Dynamic Symbol Table of the Mach-O.
+  @param[in]  Context      Context of the Mach-O.
   @param[in]  SmcpSymbol   SMCP Symbol to retrieve the VTables from.
   @param[out] Vtable       Output buffer for the VTable symbol pointer.
   @param[out] MetaVtable   Output buffer for the Meta VTable symbol pointer.
@@ -592,12 +589,10 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
 **/
 BOOLEAN
 MachoGetVtableSymbolsFromSmcp64 (
-  IN  CONST MACH_NLIST_64          *SymbolTable,
-  IN  CONST CHAR8                  *StringTable,
-  IN  CONST MACH_DYSYMTAB_COMMAND  *DySymtab,
-  IN  CONST MACH_NLIST_64          *SmcpSymbol,
-  OUT CONST MACH_NLIST_64          **Vtable,
-  OUT CONST MACH_NLIST_64          **MetaVtable
+  IN  CONST VOID           *Context,
+  IN  CONST MACH_NLIST_64  *SmcpSymbol,
+  OUT CONST MACH_NLIST_64  **Vtable,
+  OUT CONST MACH_NLIST_64  **MetaVtable
   )
 {
   CHAR8               ClassName[SYM_MAX_NAME_LEN];
@@ -607,15 +602,13 @@ MachoGetVtableSymbolsFromSmcp64 (
   CONST MACH_NLIST_64 *VtableSymbol;
   CONST MACH_NLIST_64 *MetaVtableSymbol;
 
-  ASSERT (SymbolTable != NULL);
-  ASSERT (SymbolTable != NULL);
-  ASSERT (DySymtab != NULL);
+  ASSERT (Context != NULL);
   ASSERT (SmcpSymbol != NULL);
   ASSERT (Vtable != NULL);
   ASSERT (MetaVtable != NULL);
 
   Result = MachoGetClassNameFromSuperMetaClassPointer (
-             NULL,
+             Context,
              SmcpSymbol,
              sizeof (ClassName),
              ClassName
@@ -633,12 +626,7 @@ MachoGetVtableSymbolsFromSmcp64 (
     return FALSE;
   }
 
-  VtableSymbol = MachoGetLocalDefinedSymbolByName (
-                   SymbolTable,
-                   StringTable,
-                   DySymtab,
-                   VtableName
-                   );
+  VtableSymbol = MachoGetLocalDefinedSymbolByName (Context, VtableName);
   if (VtableSymbol == NULL) {
     return FALSE;
   }
@@ -653,9 +641,7 @@ MachoGetVtableSymbolsFromSmcp64 (
   }
 
   MetaVtableSymbol = MachoGetLocalDefinedSymbolByName (
-                       SymbolTable,
-                       StringTable,
-                       DySymtab,
+                       Context,
                        MetaVtableName
                        );
   if (MetaVtableSymbol == NULL) {

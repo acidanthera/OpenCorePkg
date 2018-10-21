@@ -94,45 +94,43 @@ MachoSymbolIsDefined (
 /**
   Returns whether Symbol is defined locally.
 
-  @param[in] Context      Context of the Mach-O.
-  @param[in] SymbolTable  Symbol Table of the Mach-O.
-  @param[in] DySymtab     Dynamic Symbol Table of the Mach-O.
-  @param[in] Symbol       Symbol to evaluate.
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Symbol   Symbol to evaluate.
 
 **/
 BOOLEAN
 MachoSymbolIsLocalDefined (
-  IN CONST VOID                   *Context,
-  IN CONST MACH_NLIST_64          *SymbolTable,
-  IN CONST MACH_DYSYMTAB_COMMAND  *DySymtab,
-  IN CONST MACH_NLIST_64          *Symbol
+  IN CONST VOID           *Context,
+  IN CONST MACH_NLIST_64  *Symbol
   )
 {
-  CONST MACH_NLIST_64 *UndefinedSymbols;
-  CONST MACH_NLIST_64 *UndefinedSymbolsTop;
-  CONST MACH_NLIST_64 *IndirectSymbols;
-  CONST MACH_NLIST_64 *IndirectSymbolsTop;
+  CONST OC_MACHO_CONTEXT      *MachoContext;
+  CONST MACH_DYSYMTAB_COMMAND *DySymtab;
+  CONST MACH_NLIST_64         *UndefinedSymbols;
+  CONST MACH_NLIST_64         *UndefinedSymbolsTop;
+  CONST MACH_NLIST_64         *IndirectSymbols;
+  CONST MACH_NLIST_64         *IndirectSymbolsTop;
 
   ASSERT (Context != NULL);
-  ASSERT (SymbolTable != NULL);
-  ASSERT (DySymtab != NULL);
   ASSERT (Symbol != NULL);
+
+  MachoContext = (CONST OC_MACHO_CONTEXT *)Context;
+  ASSERT (MachoContext->SymbolTable != NULL);
+  ASSERT (MachoContext->DySymtab != NULL);
   //
   // The symbol must have been declared locally prior to solving.  As there is
   // no information on whether the symbol has been solved explicitely, check
   // its storage location for Undefined or Indirect.
   //
-  UndefinedSymbols    = &SymbolTable[DySymtab->UndefinedSymbolsIndex];
+  DySymtab            = MachoContext->DySymtab;
+  UndefinedSymbols    = &MachoContext->SymbolTable[DySymtab->UndefinedSymbolsIndex];
   UndefinedSymbolsTop = &UndefinedSymbols[DySymtab->NumUndefinedSymbols];
 
   if ((Symbol >= UndefinedSymbols) && (Symbol < UndefinedSymbolsTop)) {
     return FALSE;
   }
 
-  IndirectSymbols = (CONST MACH_NLIST_64 *)(
-                      (UINTN)((CONST OC_MACHO_CONTEXT *)Context)->MachHeader
-                        + DySymtab->IndirectSymbolsOffset
-                      );
+  IndirectSymbols = MachoContext->IndirectSymbolTable;
   IndirectSymbolsTop = &IndirectSymbols[DySymtab->NumIndirectSymbols];
 
   if ((Symbol >= IndirectSymbols) && (Symbol < IndirectSymbolsTop)) {
@@ -185,26 +183,38 @@ InternalGetSymbolByName (
 /**
   Retrieves a locally defined symbol by its name.
 
-  @param[in] SymbolTable  Symbol Table of the Mach-O.
-  @param[in] StringTable  String Table pf the Mach-O.
-  @param[in] DySymtab     Dynamic Symbol Table of the Mach-O.
-  @param[in] Name         Name of the symbol to locate.
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Name     Name of the symbol to locate.
 
 **/
 CONST MACH_NLIST_64 *
 MachoGetLocalDefinedSymbolByName (
-  IN CONST MACH_NLIST_64          *SymbolTable,
-  IN CONST CHAR8                  *StringTable,
-  IN CONST MACH_DYSYMTAB_COMMAND  *DySymtab,
-  IN CONST CHAR8                  *Name
+  IN CONST VOID   *Context,
+  IN CONST CHAR8  *Name
   )
 {
-  CONST MACH_NLIST_64 *Symbol;
+  OC_MACHO_CONTEXT            *MachoContext;
+  CONST MACH_NLIST_64         *SymbolTable;
+  CONST CHAR8                 *StringTable;
+  CONST MACH_DYSYMTAB_COMMAND *DySymtab;
+  CONST MACH_NLIST_64         *Symbol;
 
+  ASSERT (Context != NULL);
+  ASSERT (Name != NULL);
+
+  MachoContext = (OC_MACHO_CONTEXT *)Context;
+
+  if ((MachoContext->SymbolTable == NULL)
+   && !InternalRetrieveSymtabs64 (MachoContext)) {
+    return NULL;
+  }
+
+  SymbolTable  = MachoContext->SymbolTable;
+  StringTable  = MachoContext->StringTable;
+  DySymtab     = MachoContext->DySymtab;
   ASSERT (SymbolTable != NULL);
   ASSERT (StringTable != NULL);
   ASSERT (DySymtab != NULL);
-  ASSERT (Name != NULL);
 
   Symbol = InternalGetSymbolByName (
              &SymbolTable[DySymtab->LocalSymbolsIndex],
@@ -268,11 +278,8 @@ MachoRelocateSymbol64 (
 /**
   Retrieves a symbol by the Relocation it is referenced by.
 
-  @param[in] Context          Header of the Mach-O.
-  @param[in] NumberOfSymbols  Number of symbols in SymbolTable.
-  @param[in] SymbolTable      Symbol Table of the Mach-O.
-  @param[in] StringTable      String Table of the Mach-O.
-  @param[in] Relocation       The Relocation to evaluate.
+  @param[in] Context     Header of the Mach-O.
+  @param[in] Relocation  The Relocation to evaluate.
 
   @retval NULL  NULL is returned on failure.
 
@@ -280,22 +287,32 @@ MachoRelocateSymbol64 (
 CONST MACH_NLIST_64 *
 MachoGetCxxSymbolByRelocation64 (
   IN CONST VOID                  *Context,
-  IN UINTN                       NumberOfSymbols,
-  IN CONST MACH_NLIST_64         *SymbolTable,
-  IN CONST CHAR8                 *StringTable,
   IN CONST MACH_RELOCATION_INFO  *Relocation
   )
 {
-  CONST MACH_SECTION_64 *Section;
-  UINT64                Value;
-  UINTN                 Index;
-  CONST MACH_NLIST_64   *Symbol;
-  CONST CHAR8           *Name;
+  OC_MACHO_CONTEXT       *MachoContext;
+  CONST MACH_NLIST_64    *SymbolTable;
+  CONST CHAR8            *StringTable;
+  CONST MACH_SECTION_64  *Section;
+  UINT64                 Value;
+  UINTN                  Index;
+  CONST MACH_NLIST_64    *Symbol;
+  CONST CHAR8            *Name;
 
   ASSERT (Context != NULL);
+  ASSERT (Relocation != NULL);
+
+  MachoContext = (OC_MACHO_CONTEXT *)Context;
+
+  if ((MachoContext->SymbolTable == NULL)
+   && !InternalRetrieveSymtabs64 (MachoContext)) {
+    return NULL;
+  }
+
+  SymbolTable  = MachoContext->SymbolTable;
+  StringTable  = MachoContext->StringTable;
   ASSERT (SymbolTable != NULL);
   ASSERT (StringTable != NULL);
-  ASSERT (Relocation != NULL);
   //
   // Scattered Relocations are only supported by i386.
   //
@@ -314,7 +331,7 @@ MachoGetCxxSymbolByRelocation64 (
              (UINTN)((CONST OC_MACHO_CONTEXT *)Context)->MachHeader
                + (Section->Address + Relocation->Address)
               );
-  for (Index = 0; Index < NumberOfSymbols; ++Index) {
+  for (Index = 0; Index < MachoContext->NumSymbols; ++Index) {
     Symbol = &SymbolTable[Index];
     Name   = (StringTable + Symbol->UnifiedName.StringIndex);
 

@@ -21,8 +21,29 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 /// Context used to refer to a Mach-O.
 ///
 typedef struct {
-  CONST MACH_HEADER_64 *MachHeader;
-  UINTN                FileSize;
+  CONST MACH_HEADER_64        *MachHeader;
+  UINTN                       FileSize;
+  UINT32                      NumSymbols;
+  UINT32                      StringsSize;
+  CONST MACH_NLIST_64         *SymbolTable;
+  CONST CHAR8                 *StringTable;
+  CONST MACH_DYSYMTAB_COMMAND *DySymtab;
+  CONST MACH_NLIST_64         *IndirectSymbolTable;
+  CONST MACH_RELOCATION_INFO  *LocalRelocations;
+  CONST MACH_RELOCATION_INFO  *ExternRelocations;
 } OC_MACHO_CONTEXT;
+
+/**
+  Retrieves the SYMTAB command.
+
+  @param[in] MachoContext  Context of the Mach-O.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+BOOLEAN
+InternalRetrieveSymtabs64 (
+  IN OC_MACHO_CONTEXT  *MachoContext
+  );
 
 #endif // OC_MACHO_LIB_INTERNAL_H_
