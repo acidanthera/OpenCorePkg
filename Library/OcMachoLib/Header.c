@@ -615,7 +615,7 @@ InternalRetrieveSymtabs64 (
                  NULL
                  )
                );
-  if ((DySymtab == NULL) || DySymtab->CommandSize < sizeof (*DySymtab)) {
+  if ((DySymtab == NULL) || (DySymtab->CommandSize < sizeof (*DySymtab))) {
     return FALSE;
   }
 

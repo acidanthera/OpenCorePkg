@@ -22,6 +22,31 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "OcMachoLibInternal.h"
 
+STATIC
+BOOLEAN
+InternalSymbolIsSane (
+  IN OUT OC_MACHO_CONTEXT     *MachoContext,
+  IN     CONST MACH_NLIST_64  *Symbol
+  )
+{
+  ASSERT (MachoContext != NULL);
+  ASSERT (Symbol != NULL);
+
+  ASSERT (MachoContext->SymbolTable != NULL);
+  ASSERT (MachoContext->NumSymbols > 0);
+  ASSERT ((Symbol > MachoContext->SymbolTable)
+       && (Symbol <= &MachoContext->SymbolTable[MachoContext->NumSymbols - 1]));
+  //
+  // Symbol->Section is implicitly verified by MachoGetSectionByIndex64() when
+  // passed to it.
+  //
+  if (Symbol->UnifiedName.StringIndex >= MachoContext->StringsSize) {
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
 /**
   Returns whether Symbol describes a section.
 
@@ -231,6 +256,10 @@ MachoGetLocalDefinedSymbolByName (
                );
   }
 
+  if ((Symbol != NULL) && !InternalSymbolIsSane (MachoContext, Symbol)) {
+    return NULL;
+  }
+
   return Symbol;
 }
 
@@ -319,7 +348,12 @@ MachoGetCxxSymbolByRelocation64 (
   ASSERT (((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) == 0);
 
   if (Relocation->Extern != 0) {
-    return &SymbolTable[Relocation->SymbolNumber];
+    Symbol = &SymbolTable[Relocation->SymbolNumber];
+    if (InternalSymbolIsSane (MachoContext, Symbol)) {
+      return Symbol;
+    }
+
+    return NULL;
   }
 
   Section = MachoGetSectionByIndex64 (Context, Relocation->SymbolNumber);
@@ -336,7 +370,11 @@ MachoGetCxxSymbolByRelocation64 (
     Name   = (StringTable + Symbol->UnifiedName.StringIndex);
 
     if ((Symbol->Value == Value) && MachoIsSymbolNameCxx (Name)) {
-      return Symbol;
+      if (InternalSymbolIsSane (MachoContext, Symbol)) {
+        return Symbol;
+      }
+
+      return NULL;
     }
   }
 
