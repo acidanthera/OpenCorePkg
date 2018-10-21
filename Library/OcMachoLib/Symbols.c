@@ -186,6 +186,12 @@ MachoGetSymbolByIndex64 (
   ASSERT (Context != NULL);
 
   MachoContext = (OC_MACHO_CONTEXT *)Context;
+
+  if ((MachoContext->SymbolTable == NULL)
+    && !InternalRetrieveSymtabs64 (MachoContext)) {
+    return NULL;
+  }
+
   ASSERT (MachoContext->SymbolTable != NULL);
   ASSERT (MachoContext->NumSymbols > 0);
 
