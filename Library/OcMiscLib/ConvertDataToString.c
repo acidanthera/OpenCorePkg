@@ -27,7 +27,7 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcMiscLib.h>
-#include <Library/OcPrintLib.h>
+#include <Library/PrintLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
@@ -164,7 +164,7 @@ ConvertDataToString (
       } else {
         // Create Hex String Output
         for (Index = 0; Index < MIN (32, OutputLength); Index++) {
-          OcSPrint (&OutputBuffer[Index * 3], 4, OUTPUT_ASCII, "%02X ", Base[Index]);
+          AsciiSPrint (&OutputBuffer[Index * 3], 4, "%02X ", Base[Index]);
         }
       }
     }

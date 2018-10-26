@@ -67,6 +67,9 @@
   OcSupportPkg/Library/OcDevicePropertyLib/OcDevicePropertyLib.inf
   OcSupportPkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
   OcSupportPkg/Library/OcMachoLib/OcMachoLib.inf
+  OcSupportPkg/Library/OcSerializeLib/OcSerializeLib.inf
+  OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
+  OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
 
 [PcdsFixedAtBuild]
 !if $(TARGET) == DEBUG

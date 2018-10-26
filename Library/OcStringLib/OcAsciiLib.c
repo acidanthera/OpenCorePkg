@@ -70,7 +70,8 @@ IsAsciiSpace (
        || (Char == '\t')
        || (Char == '\v')
        || (Char == '\f')
-       || (Char == '\r'));
+       || (Char == '\r')
+       || (Char == '\n'));
 }
 
 // AsciiHexCharToUintn

@@ -26,16 +26,18 @@ typedef struct {
 /**
 
   @param[in] EncodedData        A pointer to the data to convert.
-  @param[in] EncodedDataLength  The length of data to convert.
+  @param[in] EncodedLength      The length of data to convert.
+  @param[in] DecodedData        A pointer to location to store the decoded data.
   @param[in] DecodedSize        A pointer to location to store the decoded size.
 
-  @retval  An ascii string representing the data.
+  @retval  TRUE on success.
 **/
-UINT8 *
+BOOLEAN
 Base64Decode (
-  IN  CHAR8  *EncodedData,
-  IN  UINTN  EncodedDataLength,
-  OUT UINTN  *DecodedSize
+  IN     CONST CHAR8  *EncodedData,
+  IN     UINTN        EncodedLength,
+     OUT UINT8        *DecodedData,
+  IN OUT UINTN        *DecodedLength
   );
 
 // ConvertDataToString
