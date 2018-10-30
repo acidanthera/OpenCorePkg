@@ -42,7 +42,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #ifndef OC_XML_LIB_H
 #define OC_XML_LIB_H
 
-#include <Library/OcOverflowLib.h>
+#include <Library/OcGuardLib.h>
 
 //
 // Maximum nest level.

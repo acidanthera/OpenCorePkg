@@ -36,7 +36,7 @@
   OcCryptoLib|Include/Library/OcCryptoLib.h
 
   ##  @libraryclass
-  OcOverflowLib|Include/Library/OcOverflowLib.h
+  OcGuardLib|Include/Library/OcGuardLib.h
 
   ##  @libraryclass
   OcAppleImageVerificationLib|Include/Library/OcAppleImageVerificationLib.h

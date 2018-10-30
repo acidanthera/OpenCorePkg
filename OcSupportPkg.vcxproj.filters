@@ -51,7 +51,7 @@
     <ClInclude Include="Include\Library\OcMiscLib.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Library\OcOverflowLib.h">
+    <ClInclude Include="Include\Library\OcGuardLib.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="Include\Library\OcPngLib.h">

@@ -102,7 +102,7 @@
     <ClInclude Include="Include\Library\OcFileLib.h" />
     <ClInclude Include="Include\Library\OcFirmwarePasswordLib.h" />
     <ClInclude Include="Include\Library\OcMiscLib.h" />
-    <ClInclude Include="Include\Library\OcOverflowLib.h" />
+    <ClInclude Include="Include\Library\OcGuardLib.h" />
     <ClInclude Include="Include\Library\OcPngLib.h" />
     <ClInclude Include="Include\Library\OcPrintLib.h" />
     <ClInclude Include="Include\Library\OcProtocolLib.h" />

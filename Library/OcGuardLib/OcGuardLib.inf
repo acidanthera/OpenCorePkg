@@ -1,5 +1,5 @@
 ## @file
-# OcOverflowLib
+# OcGuardLib
 #
 # Copyright (c) 2018, vit9696
 #
@@ -17,11 +17,11 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = OcOverflowLib
+  BASE_NAME                      = OcGuardLib
   FILE_GUID                      = 4709B3D7-BE0A-4FCE-9DDA-C5823E48BE3C
   MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = OcOverflowLib|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SAL_DRIVER DXE_SMM_DRIVER SMM_CORE UEFI_APPLICATION UEFI_DRIVER
+  LIBRARY_CLASS                  = OcGuardLib|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SAL_DRIVER DXE_SMM_DRIVER SMM_CORE UEFI_APPLICATION UEFI_DRIVER
 
 
 #

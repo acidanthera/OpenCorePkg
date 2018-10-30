@@ -52,7 +52,7 @@
 [Components]
   OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
-  OcSupportPkg/Library/OcOverflowLib/OcOverflowLib.inf
+  OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf
   OcSupportPkg/Library/OcPngLib/OcPngLib.inf
   OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
   OcSupportPkg/Library/OcCpuLib/OcCpuLib.inf
