@@ -200,13 +200,13 @@
     <ClCompile Include="Library\OcMiscLib\SetPlatformData.c">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="Library\OcOverflowLib\BitOverflow.c">
+    <ClCompile Include="Library\OcGuardLib\BitOverflow.c">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="Library\OcOverflowLib\NativeOverflow.c">
+    <ClCompile Include="Library\OcGuardLib\NativeOverflow.c">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="Library\OcOverflowLib\TripleOverflow.c">
+    <ClCompile Include="Library\OcGuardLib\TripleOverflow.c">
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="Library\OcPngLib\lodepng.c">
