@@ -15,7 +15,6 @@
 #include <Uefi.h>
 
 #include <Library/DebugLib.h>
-#include <Library/OcPrintLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 

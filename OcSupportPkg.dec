@@ -36,7 +36,7 @@
   OcCryptoLib|Include/Library/OcCryptoLib.h
 
   ##  @libraryclass
-  OcOverflowLib|Include/Library/OcOverflowLib.h
+  OcGuardLib|Include/Library/OcGuardLib.h
 
   ##  @libraryclass
   OcAppleImageVerificationLib|Include/Library/OcAppleImageVerificationLib.h
@@ -76,5 +76,15 @@
 
   ##  @libraryclass
   OcMachoLib|Include/Library/OcMachoLib.h
+
+  ##  @libraryclass
+  OcSerializeLib|Include/Library/OcSerializeLib.h
+
+  ##  @libraryclass
+  OcTemplateLib|Include/Library/OcTemplateLib.h
+
+  ##  @libraryclass
+  OcXmlLib|Include/Library/OcXmlLib.h
+
 
 # [Protocols]

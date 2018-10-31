@@ -1,6 +1,6 @@
 /** @file
 
-OcCryptoLib
+OcGuardLib
 
 Copyright (c) 2018, vit9696
 
@@ -16,7 +16,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <Library/OcOverflowLib.h>
+#include <Library/OcGuardLib.h>
 
 //
 // Currently no architectures provide UINTN and INTN different from 32-bit or 64-bit

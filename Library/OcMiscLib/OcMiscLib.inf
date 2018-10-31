@@ -52,4 +52,5 @@
   LegacyRegionUnLock.c
   LogBootOrder.c
   LogHexDump.c
+  NullTextOutput.c
   SetPlatformData.c

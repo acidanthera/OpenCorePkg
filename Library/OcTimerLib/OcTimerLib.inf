@@ -23,6 +23,7 @@
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = OcTimerLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+  CONSTRUCTOR                    = OcTimerLibConstructor
 
 #
 # The following information is for reference only and not required by the build tools.

@@ -27,7 +27,6 @@
 #include <Library/IoLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/PciLib.h>
-#include <Library/OcPrintLib.h>
 #include <Library/OcTimerLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
@@ -118,7 +117,7 @@ OcCpuScanProcessor (
 
     }
 
-    LOG ((EFI_D_INFO, "%a %a\n", "Found", Cpu->BrandString));
+    /* LOG */ DEBUG ((EFI_D_INFO, "%a %a\n", "Found", Cpu->BrandString));
 
     DEBUG ((
       DEBUG_INFO,
@@ -194,7 +193,7 @@ OcCpuScanProcessor (
 
             Cpu->CPUFrequency = MultU64x32 (BASE_ART_CLOCK_SOURCE, (UINT32)DivU64x32 (CpuidEbx, CpuidEax));
 
-            LOG ((
+            /* LOG */ DEBUG ((
               EFI_D_INFO,
               "%a %a %11lld %5dMHz %d * %d / %d = %ld\n",
               "ART",
@@ -217,7 +216,7 @@ OcCpuScanProcessor (
 
         if (Cpu->CPUFrequency == 0) {
 
-          LOG ((
+          /* LOG */ DEBUG ((
             EFI_D_INFO,
             "%a %a %11lld %5dMHz\n",
             "TSC",
@@ -240,7 +239,7 @@ OcCpuScanProcessor (
           }
         }
 
-        LOG ((
+        /* LOG */ DEBUG ((
           EFI_D_INFO,
           "%a %a %11lld %5dMHz\n",
           "CPU",
@@ -249,7 +248,7 @@ OcCpuScanProcessor (
           DivU64x32 (Cpu->CPUFrequency, 1000000)
           ));
 
-        LOG ((
+        /* LOG */ DEBUG ((
           EFI_D_INFO,
           "%a %a %11lld %5dMHz\n",
           "FSB",

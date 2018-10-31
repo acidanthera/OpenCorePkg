@@ -1,6 +1,6 @@
 /** @file
 
-OcCryptoLib
+OcGuardLib
 
 Copyright (c) 2018, vit9696
 
@@ -16,7 +16,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <Library/OcOverflowLib.h>
+#include <Library/OcGuardLib.h>
 
 //
 // The implementations provided try not to be obviously slow, but primarily

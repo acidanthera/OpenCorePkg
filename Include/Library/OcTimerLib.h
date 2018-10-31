@@ -15,16 +15,15 @@
 #ifndef OC_TIMER_LIB_H_
 #define OC_TIMER_LIB_H_
 
-// CalculateTSC
-/** Calculate the TSC frequency
+#include <Library/TimerLib.h>
 
-  @param[in] Recalculate  Switch to enable using cached value if already calculated.
+/** Calculate the TSC frequency
 
   @retval  The calculated TSC frequency.
 **/
 UINT64
-CalculateTSC (
-  IN BOOLEAN  Recalculate
+RecalculateTSC (
+  VOID
   );
 
 #endif // OC_TIMER_LIB_H_

@@ -52,7 +52,7 @@
 [Components]
   OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
-  OcSupportPkg/Library/OcOverflowLib/OcOverflowLib.inf
+  OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf
   OcSupportPkg/Library/OcPngLib/OcPngLib.inf
   OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
   OcSupportPkg/Library/OcCpuLib/OcCpuLib.inf
@@ -67,6 +67,9 @@
   OcSupportPkg/Library/OcDevicePropertyLib/OcDevicePropertyLib.inf
   OcSupportPkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
   OcSupportPkg/Library/OcMachoLib/OcMachoLib.inf
+  OcSupportPkg/Library/OcSerializeLib/OcSerializeLib.inf
+  OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
+  OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
 
 [PcdsFixedAtBuild]
 !if $(TARGET) == DEBUG

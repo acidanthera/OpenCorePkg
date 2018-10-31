@@ -19,8 +19,8 @@
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/PrintLib.h>
 
-#include <Library/OcPrintLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcVariableLib.h>
 
@@ -83,10 +83,9 @@ LogBootOrder (
     // Create hex ascii string representation of BootOrder variable
     for (Index = 0; Index < BootOrderCount; Index++) {
 
-      OcSPrint (
+      AsciiSPrint (
         &BootOrderString[Index * 3],
         4,
-        FORMAT_ASCII | OUTPUT_ASCII,
         "%02X ",
         BootOrder[Index]);
     }
@@ -95,7 +94,7 @@ LogBootOrder (
     *(BootOrderString + Index * 3 - sizeof (CHAR8)) = '\0';
 
     // Log BootOrder variable string
-    LOG ((EFI_D_INFO, "%a %a\n", "BootOrder", BootOrderString));
+    /* LOG */ DEBUG ((EFI_D_INFO, "%a %a\n", "BootOrder", BootOrderString));
 
     FreePool (BootOrderString);
 

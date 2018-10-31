@@ -102,7 +102,7 @@
     <ClInclude Include="Include\Library\OcFileLib.h" />
     <ClInclude Include="Include\Library\OcFirmwarePasswordLib.h" />
     <ClInclude Include="Include\Library\OcMiscLib.h" />
-    <ClInclude Include="Include\Library\OcOverflowLib.h" />
+    <ClInclude Include="Include\Library\OcGuardLib.h" />
     <ClInclude Include="Include\Library\OcPngLib.h" />
     <ClInclude Include="Include\Library\OcPrintLib.h" />
     <ClInclude Include="Include\Library\OcProtocolLib.h" />
@@ -156,9 +156,9 @@
     <ClCompile Include="Library\OcMiscLib\LogBootOrder.c" />
     <ClCompile Include="Library\OcMiscLib\LogHexDump.c" />
     <ClCompile Include="Library\OcMiscLib\SetPlatformData.c" />
-    <ClCompile Include="Library\OcOverflowLib\BitOverflow.c" />
-    <ClCompile Include="Library\OcOverflowLib\NativeOverflow.c" />
-    <ClCompile Include="Library\OcOverflowLib\TripleOverflow.c" />
+    <ClCompile Include="Library\OcGuardLib\BitOverflow.c" />
+    <ClCompile Include="Library\OcGuardLib\NativeOverflow.c" />
+    <ClCompile Include="Library\OcGuardLib\TripleOverflow.c" />
     <ClCompile Include="Library\OcPngLib\lodepng.c" />
     <ClCompile Include="Library\OcPngLib\OcPng.c" />
     <ClCompile Include="Library\OcPrintLib\GuidTable.c" />

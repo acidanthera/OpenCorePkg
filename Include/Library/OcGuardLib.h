@@ -1,6 +1,6 @@
 /** @file
 
-OcCryptoLib
+OcGuardLib
 
 Copyright (c) 2018, vit9696
 
@@ -16,11 +16,35 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#ifndef OC_OVERFLOW_LIB_H
-#define OC_OVERFLOW_LIB_H
+#ifndef OC_GUARD_LIB_H
+#define OC_GUARD_LIB_H
 
 //
-// The interfaces in this library provide base safe arithmetics, reporting
+// The macros below provide pointer alignment checking interfaces.
+// TypedPtr - pointer of a dedicated type, which alignment is to be checked.
+// Align    - valid alignment for the target platform (power of two so far).
+// Type     - valid complete typename.
+// Ptr      - raw pointer value, must fit into UINTN, meant to be uintptr_t equivalent.
+//
+
+#if defined(OC_FORCE_ALIGN_SUPPORT) || defined(MDE_CPU_AARCH64) || defined(MDE_CPU_X64) || defined(MDE_CPU_ARM) || defined(MDE_CPU_IA32)
+
+#define OC_ALIGNED(TypedPtr) (0ULL == (((UINTN) (TypedPtr)) & \
+  (sizeof (*(TypedPtr)) > sizeof (UINTN) ? (sizeof (UINTN) - 1U) : (sizeof (*(TypedPtr)) - 1U))))
+
+#define OC_POT_ALIGNED(Align, Ptr) (0ULL == (((UINTN) (Ptr)) & (Align-1)))
+
+#define OC_TYPE_ALIGNED(Type, Ptr) (0ULL == (((UINTN) (Ptr)) & \
+  (sizeof (Type) > sizeof(UINTN) ? (sizeof (UINTN) - 1U) : (sizeof (Type) - 1U))))
+
+#else
+
+#error "Unknown target platform. Alignment macros may not apply."
+
+#endif
+
+//
+// The interfaces below provide base safe arithmetics, reporting
 // signed integer overflow and unsigned integer wraparound similarly to
 // os/overflow.h in macOS SDK.
 //
@@ -615,4 +639,4 @@ VERIFY_SIZE_OF (UINTN, 4);
 
 #endif // __GNUC__
 
-#endif // OC_OVERFLOW_LIB_H
+#endif // OC_GUARD_LIB_H

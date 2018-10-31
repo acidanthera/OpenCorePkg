@@ -19,8 +19,8 @@
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/PrintLib.h>
 
-#include <Library/OcPrintLib.h>
 #include <Library/OcStringLib.h>
 
 //
@@ -65,8 +65,8 @@ LogHexDump (
     LineLength = MIN (LineSize, Length);
 
     for (Index = 0; Index < LineLength; Index++) {
-      OcSPrint (&HexString[Index * 3], 4, OUTPUT_ASCII, "%02X ", (UINT8)(Base[Index]));
-      OcSPrint (&AsciiString[Index], 2, OUTPUT_ASCII, "%c", IsAsciiPrint (Base[Index]) ? Base[Index] : '.');
+      AsciiSPrint (&HexString[Index * 3], 4, "%02X ", (UINT8)(Base[Index]));
+      AsciiSPrint (&AsciiString[Index], 2, "%c", IsAsciiPrint (Base[Index]) ? Base[Index] : '.');
     }
 
     if (DisplayAscii == TRUE) {

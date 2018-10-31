@@ -26,16 +26,18 @@ typedef struct {
 /**
 
   @param[in] EncodedData        A pointer to the data to convert.
-  @param[in] EncodedDataLength  The length of data to convert.
+  @param[in] EncodedLength      The length of data to convert.
+  @param[in] DecodedData        A pointer to location to store the decoded data.
   @param[in] DecodedSize        A pointer to location to store the decoded size.
 
-  @retval  An ascii string representing the data.
+  @retval  TRUE on success.
 **/
-UINT8 *
+BOOLEAN
 Base64Decode (
-  IN  CHAR8  *EncodedData,
-  IN  UINTN  EncodedDataLength,
-  OUT UINTN  *DecodedSize
+  IN     CONST CHAR8  *EncodedData,
+  IN     UINTN        EncodedLength,
+     OUT UINT8        *DecodedData,
+  IN OUT UINTN        *DecodedLength
   );
 
 // ConvertDataToString
@@ -129,6 +131,18 @@ SetPlatformData (
   IN CHAR8     *Key,
   IN VOID      *Data,
   IN UINT32    DataSize
+  );
+
+/**
+  Allocate new System Table with disabled text output.
+
+  @param[in] SystemTable     Base System Table.
+
+  @retval non NULL  The System Table table was allocated successfully.
+**/
+EFI_SYSTEM_TABLE *
+AllocateNullTextOutSystemTable (
+  EFI_SYSTEM_TABLE  *SystemTable
   );
 
 #endif // OC_MISC_LIB_H_
