@@ -32,6 +32,8 @@
   BitOverflow.c
   NativeOverflow.c
   TripleOverflow.c
+  UbsanPrintf.c
+  Ubsan.c
 
 [Packages]
   MdePkg/MdePkg.dec
