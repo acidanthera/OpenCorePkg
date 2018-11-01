@@ -237,7 +237,7 @@ struct CFloatCastOverflowData {
 };
 
 /* Local utility functions */
-static void Report(bool isFatal, const char *pFormat, ...) __printflike(2, 3);
+static void EFIAPI Report(bool isFatal, const char *pFormat, ...) __printflike(2, 3);
 static bool isAlreadyReported(struct CSourceLocation *pLocation);
 static size_t zDeserializeTypeWidth(struct CTypeDescriptor *pType);
 static void DeserializeLocation(char *pBuffer, size_t zBUfferLength, struct CSourceLocation *pLocation);
@@ -1118,6 +1118,7 @@ __ubsan_get_current_report_data(const char **ppOutIssueKind, const char **ppOutM
 /* Local utility functions */
 
 static void
+EFIAPI
 Report(bool isFatal, const char *pFormat, ...)
 {
 	va_list ap;

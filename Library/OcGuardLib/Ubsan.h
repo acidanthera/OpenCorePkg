@@ -165,11 +165,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // C-style printing support.
 #define TINYPRINTF_DEFINE_TFP_SPRINTF 1
 typedef void (*putcf) (void *, char);
-void tfp_format(void *putp, putcf putf, const char *fmt, va_list va);
+void EFIAPI tfp_format(void *putp, putcf putf, const char *fmt, va_list va);
 int tfp_vsnprintf(char *str, size_t size, const char *fmt, va_list ap);
-int tfp_snprintf(char *str, size_t size, const char *fmt, ...) __printflike(3, 4);
-int tfp_vsprintf(char *str, const char *fmt, va_list ap);
-int tfp_sprintf(char *str, const char *fmt, ...) __printflike(2, 3);
+int EFIAPI tfp_snprintf(char *str, size_t size, const char *fmt, ...) __printflike(3, 4);
+int EFIAPI tfp_vsprintf(char *str, const char *fmt, va_list ap);
+int EFIAPI tfp_sprintf(char *str, const char *fmt, ...) __printflike(2, 3);
 
 // Redirect log printing to standard output.
 #define snprintf tfp_snprintf

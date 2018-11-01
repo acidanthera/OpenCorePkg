@@ -258,7 +258,7 @@ static void putchw(void *putp, putcf putf, struct param *p)
     }
 }
 
-void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
+void EFIAPI tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
 {
     struct param p;
 #ifdef PRINTF_LONG_SUPPORT
@@ -438,7 +438,7 @@ void init_printf(void *putp, putcf putf)
     stdout_putp = putp;
 }
 
-void tfp_printf(char *fmt, ...)
+void EFIAPI tfp_printf(char *fmt, ...)
 {
     va_list va;
     va_start(va, fmt);
@@ -483,7 +483,7 @@ int tfp_vsnprintf(char *str, size_t size, const char *format, va_list ap)
   return data.num_chars;
 }
 
-int tfp_snprintf(char *str, size_t size, const char *format, ...)
+int EFIAPI tfp_snprintf(char *str, size_t size, const char *format, ...)
 {
   va_list ap;
   int retval;
@@ -506,7 +506,7 @@ static void _vsprintf_putcf(void *p, char c)
   data->dest[data->num_chars++] = c;
 }
 
-int tfp_vsprintf(char *str, const char *format, va_list ap)
+int EFIAPI tfp_vsprintf(char *str, const char *format, va_list ap)
 {
   struct _vsprintf_putcf_data data;
   data.dest = str;
@@ -516,7 +516,7 @@ int tfp_vsprintf(char *str, const char *format, va_list ap)
   return data.num_chars;
 }
 
-int tfp_sprintf(char *str, const char *format, ...)
+int EFIAPI tfp_sprintf(char *str, const char *format, ...)
 {
   va_list ap;
   int retval;
