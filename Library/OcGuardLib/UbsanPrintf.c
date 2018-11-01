@@ -387,6 +387,7 @@ void EFIAPI tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
 # elif defined(SIZEOF_LONG_LONG) && SIZEOF_POINTER <= SIZEOF_LONG_LONG
                 lng = 2;
 # endif
+                // Fallthrough
 #endif
             case 'x':
             case 'X':
@@ -407,6 +408,7 @@ void EFIAPI tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
                 break;
             case 'o':
                 p.base = 8;
+                p.uc = 0;
                 ui2a(va_arg(va, unsigned int), &p);
                 putchw(putp, putf, &p);
                 break;
