@@ -191,7 +191,7 @@ InternalGetNextCommand64 (
 
   ASSERT (Context != NULL);
 
-  MachHeader = ((CONST OC_MACHO_CONTEXT *)Context)->MachHeader;
+  MachHeader = Context->MachHeader;
   ASSERT (MachHeader != NULL);
 
   TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
