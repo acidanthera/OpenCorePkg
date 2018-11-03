@@ -220,8 +220,7 @@ MachoGetSymbolByIndex64 (
 
   ASSERT (Context != NULL);
 
-  if ((Context->SymbolTable == NULL)
-    && !InternalRetrieveSymtabs64 (Context)) {
+  if (!InternalRetrieveSymtabs64 (Context)) {
     return NULL;
   }
 
@@ -386,8 +385,7 @@ MachoGetLocalDefinedSymbolByName (
   ASSERT (Context != NULL);
   ASSERT (Name != NULL);
 
-  if ((Context->SymbolTable == NULL)
-   && !InternalRetrieveSymtabs64 (Context)) {
+  if (!InternalRetrieveSymtabs64 (Context)) {
     return NULL;
   }
 

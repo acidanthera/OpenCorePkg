@@ -585,6 +585,10 @@ InternalRetrieveSymtabs64 (
   ASSERT (Context->MachHeader != NULL);
   ASSERT (Context->FileSize > 0);
   ASSERT (Context->SymbolTable == NULL);
+
+  if (Context->SymbolTable != NULL) {
+    return TRUE;
+  }
   //
   // Retrieve SYMTAB.
   //

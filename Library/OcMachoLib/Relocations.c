@@ -87,8 +87,7 @@ InternalGetExternalRelocationByOffset (
   //
   // Assumption: 64-bit.
   //
-  if ((Context->SymbolTable == NULL)
-   && !InternalRetrieveSymtabs64 (Context)) {
+  if (!InternalRetrieveSymtabs64 (Context)) {
     return NULL;
   }
 
