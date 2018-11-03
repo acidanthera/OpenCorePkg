@@ -95,11 +95,8 @@ InternalGetExternalRelocationByOffset (
   ASSERT (Context->DySymtab != NULL);
   ASSERT (Context->ExternRelocations != NULL);
 
-  for (
-    Index = 0, Relocation = &Context->ExternRelocations[0];
-    Index < Context->DySymtab->NumExternalRelocations;
-    ++Index, ++Relocation
-    ) {
+  for (Index = 0; Index < Context->DySymtab->NumExternalRelocations; ++Index) {
+    Relocation = &Context->ExternRelocations[Index];
     //
     // A section-based relocation entry can be skipped for absolute 
     // symbols.
@@ -125,7 +122,6 @@ InternalGetExternalRelocationByOffset (
     //
     if (MachoRelocationIsPairIntel64 (Relocation->Type)) {
       ++Index;
-      ++Relocation;
     }
   }
 
