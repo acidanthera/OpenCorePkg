@@ -426,13 +426,15 @@ MachoGetNextSegment64 (
                     (CONST MACH_LOAD_COMMAND *)Segment
                     )
                   );
-  if ((NextSegment != NULL)
-   && (NextSegment->CommandSize >= sizeof (*NextSegment))) {
-    TopOfSections = (UINTN)&NextSegment[NextSegment->NumSections];
-    if (((NextSegment->FileOffset + NextSegment->FileSize) > Context->FileSize)
-     || (((UINTN)NextSegment + NextSegment->CommandSize) < TopOfSections)) {
-      return NULL;
-    }
+  if ((NextSegment == NULL)
+   || (NextSegment->CommandSize < sizeof (*NextSegment))) {
+    return NULL;
+  }
+
+  TopOfSections = (UINTN)&NextSegment[NextSegment->NumSections];
+  if (((NextSegment->FileOffset + NextSegment->FileSize) > Context->FileSize)
+    || (((UINTN)NextSegment + NextSegment->CommandSize) < TopOfSections)) {
+    return NULL;
   }
 
   return NextSegment;
