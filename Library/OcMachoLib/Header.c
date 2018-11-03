@@ -54,18 +54,18 @@ MachoGetMachHeader64 (
 /**
   Initializes a Mach-O Context.
 
+  @param[out] Context     Mach-O Context to initialize.
   @param[in]  MachHeader  Header of the Mach-O.
   @param[in]  FileSize    File size of the Mach-O.
-  @param[out] Context     Mach-O Context to initialize.
 
   @return  Whether Context has been initialized successfully.
 
 **/
 BOOLEAN
 MachoInitializeContext (
+  OUT OC_MACHO_CONTEXT      *Context,
   IN  CONST MACH_HEADER_64  *MachHeader,
-  IN  UINTN                 FileSize,
-  OUT OC_MACHO_CONTEXT      *Context
+  IN  UINTN                 FileSize
   )
 {
   UINTN                   TopOfCommands;
