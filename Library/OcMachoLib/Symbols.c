@@ -318,13 +318,7 @@ MachoGetSymbolByExternRelocationOffset64 (
 
   Relocation = InternalGetExternalRelocationByOffset (Context, Address);
   if (Relocation != NULL) {
-    Sym = MachoGetSymbolByIndex64 (Context, Relocation->SymbolNumber);
-    if ((Sym != NULL) && InternalSymbolIsSane (Context, Sym)) {
-      *Symbol = (MACH_NLIST_64 *)Sym;
-    } else {
-      *Symbol = NULL;
-    }
-
+    *Symbol = MachoGetSymbolByIndex64 (Context, Relocation->SymbolNumber);
     return TRUE;
   }
 
