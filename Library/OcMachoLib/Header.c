@@ -244,7 +244,7 @@ MachoGetUuid64 (
                     )
                   );
   if ((UuidCommand != NULL)
-   && (UuidCommand->CommandSize >= sizeof (*UuidCommand))) {
+   && (UuidCommand->CommandSize == sizeof (*UuidCommand))) {
     return UuidCommand;
   }
 
