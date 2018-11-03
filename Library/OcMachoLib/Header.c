@@ -208,8 +208,7 @@ InternalGetNextCommand64 (
   
   for (
     ;
-    ((UINTN)Command + sizeof (MACH_LOAD_COMMAND)) < TopOfCommands
-   && ((UINTN)Command + Command->CommandSize) < TopOfCommands;
+    (UINTN)Command < TopOfCommands;
     Command = NEXT_MACH_LOAD_COMMAND (Command)
     ) {
     if (Command->CommandType == LoadCommandType) {
