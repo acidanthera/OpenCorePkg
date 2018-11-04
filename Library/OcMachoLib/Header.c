@@ -452,7 +452,7 @@ MachoGetNextSegment64 (
                   );
   if ((NextSegment == NULL)
    || !OC_ALIGNED (NextSegment)
-   || (NextSegment->CommandSize < sizeof (*NextSegment))) {
+   || (NextSegment->CommandSize != sizeof (*NextSegment))) {
     return NULL;
   }
 
@@ -632,7 +632,7 @@ InternalRetrieveSymtabs64 (
              );
   if ((Symtab == NULL)
    || !OC_ALIGNED (Symtab)
-   || (Symtab->CommandSize < sizeof (*Symtab))) {
+   || (Symtab->CommandSize != sizeof (*Symtab))) {
     return FALSE;
   }
 
@@ -669,7 +669,7 @@ InternalRetrieveSymtabs64 (
                );
   if ((DySymtab == NULL)
    || !OC_ALIGNED (DySymtab) 
-   || (DySymtab->CommandSize < sizeof (*DySymtab))) {
+   || (DySymtab->CommandSize != sizeof (*DySymtab))) {
     return FALSE;
   }
 
