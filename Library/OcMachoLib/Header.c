@@ -52,6 +52,23 @@ MachoGetMachHeader64 (
 }
 
 /**
+  Returns the Mach-O's file size.
+
+  @param[in,out] Context  Context of the Mach-O.
+
+**/
+UINTN
+MachoGetFileSize (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  )
+{
+  ASSERT (Context != NULL);
+  ASSERT (Context->FileSize != 0);
+
+  return Context->FileSize;
+}
+
+/**
   Initializes a Mach-O Context.
 
   @param[out] Context   Mach-O Context to initialize.

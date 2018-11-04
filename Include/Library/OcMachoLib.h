@@ -57,6 +57,17 @@ MachoGetMachHeader64 (
   );
 
 /**
+  Returns the Mach-O's file size.
+
+  @param[in,out] Context  Context of the Mach-O.
+
+**/
+UINTN
+MachoGetFileSize (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  );
+
+/**
   Returns the last virtual address of a Mach-O.
 
   @param[in] Context  Context of the Mach-O.
