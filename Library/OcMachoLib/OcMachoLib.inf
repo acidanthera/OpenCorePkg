@@ -23,6 +23,12 @@
   EfiPkg/EfiPkg.dec
   OcSupportPkg/OcSupportPkg.dec
 
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  OcGuardLib
+
 [Sources]
   Header.c
   Symbols.c

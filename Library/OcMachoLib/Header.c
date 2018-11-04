@@ -18,6 +18,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
+#include <Library/OcGuardLib.h>
 #include <Library/OcMachoLib.h>
 
 #include "OcMachoLibInternal.h"
@@ -94,14 +95,16 @@ MachoInitializeContext (
   ASSERT (FileData != NULL);
   ASSERT (FileSize > 0);
   ASSERT (Context != NULL);
-
-  MachHeader = (MACH_HEADER_64 *)FileData;
   //
   // Verify Mach-O Header sanity.
   //
+  MachHeader = (MACH_HEADER_64 *)FileData;
+  if ((FileSize < sizeof (*MachHeader)) || !OC_ALIGNED (MachHeader)) {
+    return FALSE;
+  }
+
   TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
-  if ((FileSize < sizeof (*MachHeader))
-   || (MachHeader->Signature != MACH_HEADER_64_SIGNATURE)
+  if ((MachHeader->Signature != MACH_HEADER_64_SIGNATURE)
    || (TopOfCommands > ((UINTN)MachHeader + FileSize))) {
     return FALSE;
   }
@@ -264,6 +267,7 @@ MachoGetUuid64 (
                     )
                   );
   if ((UuidCommand != NULL)
+   && OC_ALIGNED (UuidCommand)
    && (UuidCommand->CommandSize == sizeof (*UuidCommand))) {
     return UuidCommand;
   }
@@ -447,6 +451,7 @@ MachoGetNextSegment64 (
                     )
                   );
   if ((NextSegment == NULL)
+   || !OC_ALIGNED (NextSegment)
    || (NextSegment->CommandSize < sizeof (*NextSegment))) {
     return NULL;
   }
@@ -602,6 +607,11 @@ InternalRetrieveSymtabs64 (
   UINTN                       OffsetTop;
   UINTN                       TopOfSymbols;
 
+  CONST MACH_NLIST_64         *SymbolTable;
+  CONST MACH_NLIST_64         *IndirectSymtab;
+  CONST MACH_RELOCATION_INFO  *LocalRelocations;
+  CONST MACH_RELOCATION_INFO  *ExternRelocations;
+
   ASSERT (Context != NULL);
   ASSERT (Context->MachHeader != NULL);
   ASSERT (Context->FileSize > 0);
@@ -620,7 +630,9 @@ InternalRetrieveSymtabs64 (
                NULL
                )
              );
-  if ((Symtab == NULL) || (Symtab->CommandSize < sizeof (*Symtab))) {
+  if ((Symtab == NULL)
+   || !OC_ALIGNED (Symtab)
+   || (Symtab->CommandSize < sizeof (*Symtab))) {
     return FALSE;
   }
 
@@ -640,6 +652,11 @@ InternalRetrieveSymtabs64 (
   if (StringTable[(Symtab->StringsSize / sizeof (*StringTable)) - 1] != '\0') {
     return FALSE;
   }
+
+  SymbolTable = (MACH_NLIST_64 *)(MachoAddress + Symtab->SymbolsOffset);
+  if (!OC_ALIGNED (SymbolTable)) {
+    return FALSE;
+  }
   //
   // Retrieve DYSYMTAB.
   //
@@ -650,7 +667,9 @@ InternalRetrieveSymtabs64 (
                  NULL
                  )
                );
-  if ((DySymtab == NULL) || (DySymtab->CommandSize < sizeof (*DySymtab))) {
+  if ((DySymtab == NULL)
+   || !OC_ALIGNED (DySymtab) 
+   || (DySymtab->CommandSize < sizeof (*DySymtab))) {
     return FALSE;
   }
 
@@ -671,28 +690,32 @@ InternalRetrieveSymtabs64 (
   if (OffsetTop > FileSize) {
     return FALSE;
   }
+
+  IndirectSymtab = (MACH_NLIST_64 *)(
+                     MachoAddress + DySymtab->IndirectSymbolsOffset
+                     );
+  LocalRelocations = (MACH_RELOCATION_INFO *)(
+                       MachoAddress + DySymtab->LocalRelocationsOffset
+                       );
+  ExternRelocations = (MACH_RELOCATION_INFO *)(
+                        MachoAddress + DySymtab->ExternalRelocationsOffset
+                        );
+  if (!OC_ALIGNED (IndirectSymtab)
+   || !OC_ALIGNED (LocalRelocations)
+   || !OC_ALIGNED (ExternRelocations)) {
+    return FALSE;
+  }
   //
   // Store the symbol information.
   //
   Context->NumSymbols  = Symtab->NumSymbols;
-  Context->SymbolTable = (CONST MACH_NLIST_64 *)(
-                                MachoAddress + Symtab->SymbolsOffset
-                                );
   Context->StringsSize = Symtab->StringsSize;
+  Context->SymbolTable = SymbolTable;
   Context->StringTable = StringTable;
 
-  Context->IndirectSymbolTable = (CONST MACH_NLIST_64 *)(
-                                        MachoAddress
-                                          + DySymtab->IndirectSymbolsOffset
-                                        );
-  Context->LocalRelocations = (CONST MACH_RELOCATION_INFO *)(
-                                     MachoAddress
-                                       + DySymtab->LocalRelocationsOffset
-                                     );
-  Context->ExternRelocations = (CONST MACH_RELOCATION_INFO *)(
-                                      MachoAddress
-                                        + DySymtab->ExternalRelocationsOffset
-                                      );
+  Context->IndirectSymbolTable = IndirectSymtab;
+  Context->LocalRelocations    = LocalRelocations;
+  Context->ExternRelocations   = ExternRelocations;
 
   return TRUE;
 }
