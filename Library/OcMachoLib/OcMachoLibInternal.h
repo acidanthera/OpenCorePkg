@@ -17,21 +17,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <IndustryStandard/AppleMachoImage.h>
 
-///
-/// Context used to refer to a Mach-O.
-///
-struct OC_MACHO_CONTEXT_ {
-  CONST MACH_HEADER_64        *MachHeader;
-  UINTN                       FileSize;
-  UINT32                      NumSymbols;
-  UINT32                      StringsSize;
-  CONST MACH_NLIST_64         *SymbolTable;
-  CONST CHAR8                 *StringTable;
-  CONST MACH_DYSYMTAB_COMMAND *DySymtab;
-  CONST MACH_NLIST_64         *IndirectSymbolTable;
-  CONST MACH_RELOCATION_INFO  *LocalRelocations;
-  CONST MACH_RELOCATION_INFO  *ExternRelocations;
-};
+#include <Library/OcMachoLib.h>
 
 /**
   Retrieves the SYMTAB command.

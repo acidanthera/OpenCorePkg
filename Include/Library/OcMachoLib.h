@@ -17,7 +17,21 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <IndustryStandard/AppleMachoImage.h>
 
-typedef struct OC_MACHO_CONTEXT_ OC_MACHO_CONTEXT;
+///
+/// Context used to refer to a Mach-O.  This struct is exposed for reference
+/// only.  Members are not guaranteed to be sane.
+///
+typedef struct {
+  CONST MACH_HEADER_64        *MachHeader;
+  UINTN                       FileSize;
+  CONST MACH_SYMTAB_COMMAND   *Symtab;
+  CONST MACH_NLIST_64         *SymbolTable;
+  CONST CHAR8                 *StringTable;
+  CONST MACH_DYSYMTAB_COMMAND *DySymtab;
+  CONST MACH_NLIST_64         *IndirectSymbolTable;
+  CONST MACH_RELOCATION_INFO  *LocalRelocations;
+  CONST MACH_RELOCATION_INFO  *ExternRelocations;
+} OC_MACHO_CONTEXT;
 
 /**
   Returns the size of a Mach-O Context.

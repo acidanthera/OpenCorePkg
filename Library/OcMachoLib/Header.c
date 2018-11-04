@@ -708,8 +708,7 @@ InternalRetrieveSymtabs64 (
   //
   // Store the symbol information.
   //
-  Context->NumSymbols  = Symtab->NumSymbols;
-  Context->StringsSize = Symtab->StringsSize;
+  Context->Symtab      = Symtab;
   Context->SymbolTable = SymbolTable;
   Context->StringTable = StringTable;
 
