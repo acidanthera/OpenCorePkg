@@ -90,7 +90,7 @@ MachoSymbolIsSmcp64 (
 
   ASSERT (Context->StringTable != NULL);
 
-  Name = (Context->StringTable + Symbol->UnifiedName.StringIndex);
+  Name = MachoGetSymbolName64 (Context, Symbol);
   return (AsciiStrStr (Name, SMCP_TOKEN) != NULL);
 }
 
@@ -114,7 +114,7 @@ MachoSymbolIsMetaclassPointer64 (
 
   ASSERT (Context->StringTable != NULL);
 
-  Name = (Context->StringTable + Symbol->UnifiedName.StringIndex);
+  Name = MachoGetSymbolName64 (Context, Symbol);
   return (AsciiStrStr (Name, METACLASS_TOKEN) != NULL);
 }
 
@@ -156,10 +156,7 @@ MachoGetClassNameFromSuperMetaClassPointer (
     return FALSE;
   }
 
-  SmcpName = (
-               Context->StringTable 
-                 + SmcpSymbol->UnifiedName.StringIndex
-             );
+  SmcpName   = MachoGetSymbolName64 (Context, SmcpSymbol);
   PrefixSize = (sizeof (OSOBJ_PREFIX) - sizeof (*OSOBJ_PREFIX));
   StringSize = (AsciiStrLen (SmcpName) * sizeof (*SmcpName));
   SuffixSize = (sizeof (SMCP_TOKEN) - sizeof (*SMCP_TOKEN));
@@ -283,10 +280,7 @@ MachoGetClassNameFromMetaClassPointer (
     return FALSE;
   }
 
-  MetaClassName = (
-                    Context->StringTable
-                      + MetaClassPtrSymbol->UnifiedName.StringIndex
-                  );
+  MetaClassName = MachoGetSymbolName64 (Context, MetaClassPtrSymbol);
   PrefixSize = (sizeof (OSOBJ_PREFIX) - sizeof (*OSOBJ_PREFIX));
   StringSize = (AsciiStrLen (MetaClassName) * sizeof (*MetaClassName));
   SuffixSize = (sizeof (METACLASS_TOKEN) - sizeof (*METACLASS_TOKEN));
@@ -484,7 +478,7 @@ MachoSymbolIsVtable64 (
 
   ASSERT (Context->StringTable != NULL);
 
-  Name = (Context->StringTable + Symbol->UnifiedName.StringIndex);
+  Name = MachoGetSymbolName64 (Context, Symbol);
   //
   // Implicitely checks for METACLASS_VTABLE_PREFIX.
   //

@@ -325,8 +325,8 @@ MachoGetSymbolByExternRelocationOffset64 (
 /**
   Retrieves a symbol by its name.
 
+  @param[in] Context          Context of the Mach-O.
   @param[in] SymbolTable      Symbol Table of the Mach-O.
-  @param[in] StringTable      String Table pf the Mach-O.
   @param[in] NumberOfSymbols  Number of symbols in SymbolTable.
   @param[in] Name             Name of the symbol to locate.
 
@@ -336,23 +336,22 @@ MachoGetSymbolByExternRelocationOffset64 (
 STATIC
 CONST MACH_NLIST_64 *
 InternalGetSymbolByName (
-  IN CONST MACH_NLIST_64  *SymbolTable,
-  IN CONST CHAR8          *StringTable,
-  IN UINTN                NumberOfSymbols,
-  IN CONST CHAR8          *Name
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST_64  *SymbolTable,
+  IN     UINTN                NumberOfSymbols,
+  IN     CONST CHAR8          *Name
   )
 {
   UINTN Index;
   INTN  Result;
 
   ASSERT (SymbolTable != NULL);
-  ASSERT (StringTable != NULL);
   ASSERT (Name != NULL);
 
   for (Index = 0; Index < NumberOfSymbols; ++Index) {
     Result = AsciiStrCmp (
                Name,
-               (StringTable + SymbolTable[Index].UnifiedName.StringIndex)
+               MachoGetSymbolName64 (Context, &SymbolTable[Index])
                );
     if (Result == 0) {
       return &SymbolTable[Index];
@@ -376,7 +375,6 @@ MachoGetLocalDefinedSymbolByName (
   )
 {
   CONST MACH_NLIST_64         *SymbolTable;
-  CONST CHAR8                 *StringTable;
   CONST MACH_DYSYMTAB_COMMAND *DySymtab;
   CONST MACH_NLIST_64         *Symbol;
 
@@ -388,22 +386,20 @@ MachoGetLocalDefinedSymbolByName (
   }
 
   SymbolTable  = Context->SymbolTable;
-  StringTable  = Context->StringTable;
   DySymtab     = Context->DySymtab;
   ASSERT (SymbolTable != NULL);
-  ASSERT (StringTable != NULL);
   ASSERT (DySymtab != NULL);
 
   Symbol = InternalGetSymbolByName (
+             Context,
              &SymbolTable[DySymtab->LocalSymbolsIndex],
-             StringTable,
              DySymtab->NumLocalSymbols,
              Name
              );
   if (Symbol == NULL) {
     Symbol = InternalGetSymbolByName (
+               Context,
                &SymbolTable[DySymtab->ExternalSymbolsIndex],
-               StringTable,
                DySymtab->NumExternalSymbols,
                Name
                );
