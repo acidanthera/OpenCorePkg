@@ -80,7 +80,7 @@ InternalGetExternalRelocationByOffset (
   IN     UINT64            Address
   )
 {
-  UINTN                      Index;
+  UINT32                     Index;
   CONST MACH_RELOCATION_INFO *Relocation;
 
   ASSERT (Context != NULL);

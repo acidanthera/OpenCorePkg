@@ -88,9 +88,9 @@ MachoInitializeContext (
 {
   CONST MACH_HEADER_64    *MachHeader;
   UINTN                   TopOfCommands;
-  UINTN                   Index;
+  UINT32                  Index;
   CONST MACH_LOAD_COMMAND *Command;
-  UINTN                   CommandsSize;
+  UINT32                  CommandsSize;
 
   ASSERT (FileData != NULL);
   ASSERT (FileSize > 0);
@@ -332,7 +332,7 @@ MachoGetSectionByName64 (
   )
 {
   CONST MACH_SECTION_64 *SectionWalker;
-  UINTN                 Index;
+  UINT32                Index;
   INTN                  Result;
 
   ASSERT (Context != NULL);
@@ -517,11 +517,11 @@ MachoGetNextSection64 (
 CONST MACH_SECTION_64 *
 MachoGetSectionByIndex64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINTN             Index
+  IN     UINT32            Index
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
-  UINTN                         SectionIndex;
+  UINT32                        SectionIndex;
 
   ASSERT (Context != NULL);
 
@@ -559,7 +559,7 @@ MachoGetSectionByAddress64 (
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
   CONST MACH_SECTION_64         *Section;
-  UINTN                         Index;
+  UINT32                        Index;
 
   ASSERT (Context != NULL);
 

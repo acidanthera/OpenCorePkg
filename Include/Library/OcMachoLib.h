@@ -200,7 +200,7 @@ MachoGetNextSection64 (
 CONST MACH_SECTION_64 *
 MachoGetSectionByIndex64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINTN             Index
+  IN     UINT32            Index
   );
 
 /**
