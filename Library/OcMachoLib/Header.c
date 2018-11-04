@@ -452,7 +452,7 @@ MachoGetNextSegment64 (
                   );
   if ((NextSegment == NULL)
    || !OC_ALIGNED (NextSegment)
-   || (NextSegment->CommandSize != sizeof (*NextSegment))) {
+   || (NextSegment->CommandSize < sizeof (*NextSegment))) {
     return NULL;
   }
 
