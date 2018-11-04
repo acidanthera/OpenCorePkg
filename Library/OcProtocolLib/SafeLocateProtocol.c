@@ -42,7 +42,7 @@ SafeLocateProtocol (
   Status = gBS->LocateProtocol (Protocol, NULL, Interface);
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "Problem Locating %a - %r\n", OcGuidToString (Protocol), Status));
+    DEBUG ((DEBUG_WARN, "Problem Locating %g - %r\n", Protocol, Status));
   }
 
   if (*Interface == NULL) {

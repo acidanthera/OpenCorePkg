@@ -147,8 +147,8 @@ OcBlobAllocate (
 
   Blob = (PRIV_OC_BLOB *) Pointer;
 
-  // DEBUG ((EFI_D_VERBOSE, "Allocating %u bytes in blob %p with size %u/%u curr %p\n",
-  //   Size, Blob, Blob->Size, Blob->MaxSize, Blob->DynValue));
+  DEBUG ((DEBUG_VERBOSE, "Allocating %u bytes in blob %p with size %u/%u curr %p\n",
+     Size, Blob, Blob->Size, Blob->MaxSize, Blob->DynValue));
 
   //
   // We fit into static space
@@ -169,7 +169,7 @@ OcBlobAllocate (
     OcFreePointer (&Blob->DynValue, Blob->Size);
     DynValue = AllocatePool (Size);
     if (DynValue == NULL) {
-      // DEBUG ((EFI_D_ERROR, "Failed to fit %u bytes in OC_BLOB\n", Size));
+      DEBUG ((DEBUG_VERBOSE, "Failed to fit %u bytes in OC_BLOB\n", Size));
       return NULL;
     }
     //

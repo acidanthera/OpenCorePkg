@@ -94,7 +94,7 @@ LogBootOrder (
     *(BootOrderString + Index * 3 - sizeof (CHAR8)) = '\0';
 
     // Log BootOrder variable string
-    /* LOG */ DEBUG ((EFI_D_INFO, "%a %a\n", "BootOrder", BootOrderString));
+    DEBUG ((DEBUG_INFO, "%a %a\n", "BootOrder", BootOrderString));
 
     FreePool (BootOrderString);
 

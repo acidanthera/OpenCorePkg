@@ -238,9 +238,9 @@ XmlNodeFree (
 //
 #ifdef XML_PARSER_VERBOSE
 #define XML_PARSER_INFO(Parser, Message) \
-  DEBUG ((EFI_D_VERBOSE, "XML_PARSER_INFO %a\n", Message));
+  DEBUG ((DEBUG_VERBOSE, "XML_PARSER_INFO %a\n", Message));
 #define XML_PARSER_TAG(Parser, Tag) \
-  DEBUG ((EFI_D_VERBOSE, "XML_PARSER_TAG %a\n", Tag));
+  DEBUG ((DEBUG_VERBOSE, "XML_PARSER_TAG %a\n", Tag));
 #else
 #define XML_PARSER_INFO(Parser, Message) do {} while (0)
 #define XML_PARSER_TAG(Parser, Tag) do {} while (0)
@@ -278,11 +278,11 @@ XmlParserError (
   }
 
   if (NO_CHARACTER != Offset) {
-    DEBUG ((EFI_D_ERROR, "XmlParserError at %u:%u (is %c): %a\n",
+    DEBUG ((DEBUG_INFO, "XmlParserError at %u:%u (is %c): %a\n",
       Row + 1, Column, Parser->Buffer[Character], Message
       ));
   } else {
-    DEBUG ((EFI_D_ERROR, "XmlParserError at %u:%u: %a\n",
+    DEBUG ((DEBUG_INFO, "XmlParserError at %u:%u: %a\n",
       Row + 1, Column, Message
       ));
   }
@@ -295,7 +295,7 @@ XmlParserError (
 #define XML_PARSER_ERROR(Parser, Offset, Message) \
   XmlParserError (Parser, Offset, Message)
 #define XML_USAGE_ERROR(Message) \
-  DEBUG ((EFI_D_VERBOSE, "XML_PARSER_TAG %a\n", Message));
+  DEBUG ((DEBUG_VERBOSE, "XML_PARSER_TAG %a\n", Message));
 #else
 #define XML_PARSER_ERROR(Parser, Offset, Message) do {} while (0)
 #define XML_USAGE_ERROR(X) do {} while (0)

@@ -81,7 +81,7 @@ OpenDirectory (
 
 
         if (EFI_ERROR (Status)) {
-          DEBUG ((DEBUG_ERROR, "Could not open the file system - %r\n", Status));
+          DEBUG ((DEBUG_WARN, "Could not open the file system - %r\n", Status));
 
           break;
         }

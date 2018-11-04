@@ -44,7 +44,7 @@ SafeHandleProtocol (
   Status = gBS->HandleProtocol (Handle, Protocol, Interface);
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "Problem Locating %a on Handle %X - %r\n", OcGuidToString (Protocol), Handle, Status));
+    DEBUG ((DEBUG_WARN, "Problem Locating %g on Handle %X - %r\n", Protocol, Handle, Status));
   }
 
   return Status;

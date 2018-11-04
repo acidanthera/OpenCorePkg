@@ -117,7 +117,7 @@ OcCpuScanProcessor (
 
     }
 
-    /* LOG */ DEBUG ((EFI_D_INFO, "%a %a\n", "Found", Cpu->BrandString));
+    DEBUG ((DEBUG_INFO, "%a %a\n", "Found", Cpu->BrandString));
 
     DEBUG ((
       DEBUG_INFO,
@@ -193,8 +193,8 @@ OcCpuScanProcessor (
 
             Cpu->CPUFrequency = MultU64x32 (BASE_ART_CLOCK_SOURCE, (UINT32)DivU64x32 (CpuidEbx, CpuidEax));
 
-            /* LOG */ DEBUG ((
-              EFI_D_INFO,
+            DEBUG ((
+              DEBUG_INFO,
               "%a %a %11lld %5dMHz %d * %d / %d = %ld\n",
               "ART",
               "Frequency",
@@ -212,12 +212,12 @@ OcCpuScanProcessor (
         }
 
         // Calculate the Tsc frequency
-        Cpu->TSCFrequency = CalculateTSC (FALSE);
+        Cpu->TSCFrequency = GetPerformanceCounterProperties (NULL, NULL);
 
         if (Cpu->CPUFrequency == 0) {
 
-          /* LOG */ DEBUG ((
-            EFI_D_INFO,
+          DEBUG ((
+            DEBUG_INFO,
             "%a %a %11lld %5dMHz\n",
             "TSC",
             "Frequency",
@@ -239,8 +239,8 @@ OcCpuScanProcessor (
           }
         }
 
-        /* LOG */ DEBUG ((
-          EFI_D_INFO,
+        DEBUG ((
+          DEBUG_INFO,
           "%a %a %11lld %5dMHz\n",
           "CPU",
           "Frequency",
@@ -248,8 +248,8 @@ OcCpuScanProcessor (
           DivU64x32 (Cpu->CPUFrequency, 1000000)
           ));
 
-        /* LOG */ DEBUG ((
-          EFI_D_INFO,
+        DEBUG ((
+          DEBUG_INFO,
           "%a %a %11lld %5dMHz\n",
           "FSB",
           "Frequency",

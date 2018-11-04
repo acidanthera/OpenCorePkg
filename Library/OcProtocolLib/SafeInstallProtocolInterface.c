@@ -58,7 +58,7 @@ SafeInstallProtocolInterface (
       if (Status == EFI_SUCCESS) {
         Status = EFI_ALREADY_STARTED;
 
-        DEBUG ((DEBUG_INFO, "Located %a (%X)\n", OcGuidToString (ProtocolGuid), *(UINT64 *)Protocol));
+        DEBUG ((DEBUG_INFO, "Located %g (%X)\n", ProtocolGuid, *(UINT64 *)Protocol));
         goto Return;
       }
     }
@@ -70,7 +70,7 @@ SafeInstallProtocolInterface (
                     Interface
                     );
 
-    DEBUG ((DEBUG_VERBOSE, "Installed %a (%X)\n", OcGuidToString (ProtocolGuid), *(UINT64 *)Interface));
+    DEBUG ((DEBUG_INFO, "Installed %g (%X)\n", ProtocolGuid, *(UINT64 *)Interface));
   }
 
 Return:

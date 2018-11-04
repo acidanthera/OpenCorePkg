@@ -72,8 +72,8 @@ void* lodepng_malloc(size_t size) {
 
   void* ptr;
   EFI_STATUS Status = gBS->AllocatePool(EfiBootServicesData, size + sizeof(size_t), &ptr);
-  if (EFI_ERROR(Status)) {
-    DEBUG((EFI_D_ERROR, "lodepng alloc failure - %r\n", Status));
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "lodepng alloc failure - %r\n", Status));
     return NULL;
   }
 
@@ -84,8 +84,8 @@ void* lodepng_malloc(size_t size) {
 void lodepng_free(void* ptr) {
   if (ptr) {
     EFI_STATUS Status = gBS->FreePool((uint8_t*)ptr - sizeof(size_t));
-    if (EFI_ERROR(Status)) {
-      DEBUG((EFI_D_ERROR, "lodepng dealloc failure - %r\n", Status));
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "lodepng dealloc failure - %r\n", Status));
     }
   }
 }

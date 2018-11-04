@@ -28,11 +28,7 @@
   BaseRngLib|MdePkg/Library/BaseRngLib/BaseRngLib.inf
   BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
   CpuLib|MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
-!if $(TARGET) == DEBUG
   DebugLib|MdePkg/Library/UefiDebugLibConOut/UefiDebugLibConOut.inf
-!else
-  DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
-!endif
   DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
   DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
@@ -72,10 +68,19 @@
   OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
 
 [PcdsFixedAtBuild]
-!if $(TARGET) == DEBUG
   gEfiMdePkgTokenSpaceGuid.PcdMaximumAsciiStringLength|0
-  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x0f
-  gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0xC04A054F
+!if $(TARGET) == DEBUG
+  # DEBUG_ASSERT_ENABLED | DEBUG_PRINT_ENABLED | DEBUG_CODE_ENABLED | CLEAR_MEMORY_ENABLED | ASSERT_DEADLOOP_ENABLED
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2f
+  # DEBUG_ERROR | DEBUG_WARN | DEBUG_INFO
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000042
+  gEfiMdePkgTokenSpaceGuid.PcdFixedDebugPrintErrorLevel|0x80000042
+!else
+  # DEBUG_PRINT_ENABLED
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|2
+  # DEBUG_ERROR | DEBUG_WARN
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000002
+  gEfiMdePkgTokenSpaceGuid.PcdFixedDebugPrintErrorLevel|0x80000002
 !endif
 
 [BuildOptions]
@@ -83,10 +88,10 @@
   DEFINE OCSUPPORTPKG_BUILD_OPTIONS_GEN = -D DISABLE_NEW_DEPRECATED_INTERFACES $(OCSUPPORTPKG_BUILD_OPTIONS)
 
   INTEL:DEBUG_*_*_CC_FLAGS   = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
-  INTEL:RELEASE_*_*_CC_FLAGS = /D MDEPKG_NDEBUG $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
+  INTEL:RELEASE_*_*_CC_FLAGS = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
   GCC:DEBUG_*_*_CC_FLAGS     = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
-  GCC:RELEASE_*_*_CC_FLAGS   = -D MDEPKG_NDEBUG $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
+  GCC:RELEASE_*_*_CC_FLAGS   = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
   MSFT:DEBUG_*_*_CC_FLAGS    = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
-  MSFT:RELEASE_*_*_CC_FLAGS  = /D MDEPKG_NDEBUG $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
-  XCODE:RELEASE_*_*_CC_FLAGS = -Wno-varargs -flto -D MDEPKG_NDEBUG $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
-  XCODE:DEBUG_*_*_CC_FLAGS   = -Wno-varargs $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
+  MSFT:RELEASE_*_*_CC_FLAGS  = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
+  XCODE:RELEASE_*_*_CC_FLAGS = -flto $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
+  XCODE:DEBUG_*_*_CC_FLAGS   = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)

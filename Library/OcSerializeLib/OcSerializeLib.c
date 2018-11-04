@@ -82,11 +82,11 @@ ParseSerializedDict (
     CurrentKey = PlistKeyValue (PlistDictChild (Node, Index, &CurrentValue));
 
     if (CurrentKey == NULL) {
-      DEBUG ((EFI_D_ERROR, "Couldn't get serialized key at %u index!\n", Index));
+      DEBUG ((DEBUG_WARN, "Couldn't get serialized key at %u index!\n", Index));
       continue;
     }
 
-    // DEBUG ((EFI_D_VERBOSE, "Parsing serialized at %a at %u index!\n", CurrentKey, Index));
+    DEBUG ((DEBUG_VERBOSE, "Parsing serialized at %a at %u index!\n", CurrentKey, Index));
 
     //
     // We do not protect from duplicating serialized entries.
@@ -94,13 +94,13 @@ ParseSerializedDict (
     NewSchema = LookupConfigSchema (Info->Dict.Schema, Info->Dict.SchemaSize, CurrentKey);
 
     if (NewSchema == NULL) {
-      // DEBUG ((EFI_D_ERROR, "Couldn't get schema for %a at %u index!\n", CurrentKey, Index));
+      DEBUG ((DEBUG_VERBOSE, "Couldn't get schema for %a at %u index!\n", CurrentKey, Index));
       continue;
     }
 
     CurrentValue = PlistNodeCast (CurrentValue, NewSchema->Type);
     if (CurrentValue == NULL) {
-      DEBUG ((EFI_D_ERROR, "Couldn't match serialized for %a at %u index!\n", CurrentKey, Index));
+      DEBUG ((DEBUG_INFO, "Couldn't match serialized for %a at %u index!\n", CurrentKey, Index));
       continue;
     }
 
@@ -142,7 +142,7 @@ ParseSerializedValue (
   }
 
   if (Result == FALSE) {
-    DEBUG ((EFI_D_ERROR, "Failed to parse %a field of type %u\n", XmlNodeName (Node), Info->Value.Type));
+    DEBUG ((DEBUG_INFO, "Failed to parse %a field of type %u\n", XmlNodeName (Node), Info->Value.Type));
   }
 }
 
@@ -174,7 +174,7 @@ ParseSerializedBlob (
   }
 
   if (Result == FALSE) {
-    DEBUG ((EFI_D_ERROR, "Failed to size %a field of type %u\n",
+    DEBUG ((DEBUG_INFO, "Failed to size %a field of type %u\n",
       XmlNodeName (Node), Info->Blob.Type));
     return;
   }
@@ -183,7 +183,7 @@ ParseSerializedBlob (
   BlobMemory = OcBlobAllocate (Field, Size, &BlobSize);
 
   if (BlobMemory == NULL) {
-    DEBUG ((EFI_D_ERROR, "Failed to allocate %u bytes %a field of type %u\n",
+    DEBUG ((DEBUG_INFO, "Failed to allocate %u bytes %a field of type %u\n",
       Size, XmlNodeName (Node), Info->Blob.Type));
     return;
   }
@@ -203,7 +203,7 @@ ParseSerializedBlob (
   }
 
   if (Result == FALSE) {
-    DEBUG ((EFI_D_ERROR, "Failed to parse %a field of type %u\n", XmlNodeName (Node), Info->Blob.Type));
+    DEBUG ((DEBUG_INFO, "Failed to parse %a field of type %u\n", XmlNodeName (Node), Info->Blob.Type));
   }
 }
 
@@ -231,12 +231,12 @@ ParseSerializedMap (
     CurrentKeyLen = CurrentKey != NULL ? (UINT32) (AsciiStrLen (CurrentKey) + 1) : 0;
 
     if (CurrentKeyLen == 0) {
-      DEBUG ((EFI_D_ERROR, "Couldn't get serialized key at %u index!\n", Index));
+      DEBUG ((DEBUG_INFO, "Couldn't get serialized key at %u index!\n", Index));
       continue;
     }
 
     if (PlistNodeCast (ChildNode, Info->List.Schema->Type) == NULL) {
-      DEBUG ((EFI_D_ERROR, "Couldn't get valid serialized value at %u index!\n", Index));
+      DEBUG ((DEBUG_INFO, "Couldn't get valid serialized value at %u index!\n", Index));
       continue;
     }
 
@@ -246,7 +246,7 @@ ParseSerializedMap (
       &NewKey
       );
     if (Success == FALSE) {
-      DEBUG ((EFI_D_ERROR, "Couldn't insert dict serialized at %u index!\n", Index));
+      DEBUG ((DEBUG_INFO, "Couldn't insert dict serialized at %u index!\n", Index));
       continue;
     }
 
@@ -254,7 +254,7 @@ ParseSerializedMap (
     if (NewKeyValue != NULL) {
       AsciiStrnCpyS ((CHAR8 *) NewKeyValue, CurrentKeyLen, CurrentKey, CurrentKeyLen - 1);
     } else {
-      DEBUG ((EFI_D_ERROR, "Couldn't allocate key name at %u index!\n", Index));
+      DEBUG ((DEBUG_INFO, "Couldn't allocate key name at %u index!\n", Index));
     }
 
     Info->List.Schema->Apply (NewValue, ChildNode, &Info->List.Schema->Info);
@@ -279,10 +279,10 @@ ParseSerializedArray (
   for (Index = 0; Index < ArraySize; Index++) {
     ChildNode = PlistNodeCast (XmlNodeChild (Node, Index), Info->List.Schema->Type);
 
-    // DEBUG ((EFI_D_VERBOSE, "Processing array %u/%u element\n", Index + 1, ArraySize));
+    DEBUG ((DEBUG_VERBOSE, "Processing array %u/%u element\n", Index + 1, ArraySize));
 
     if (ChildNode == NULL) {
-      DEBUG ((EFI_D_ERROR, "Couldn't get array serialized at %u index!\n", Index));
+      DEBUG ((DEBUG_INFO, "Couldn't get array serialized at %u index!\n", Index));
       continue;
     }
 
@@ -292,7 +292,7 @@ ParseSerializedArray (
       NULL
       );
     if (Success == FALSE) {
-      DEBUG ((EFI_D_ERROR, "Couldn't insert array serialized at %u index!\n", Index));
+      DEBUG ((DEBUG_INFO, "Couldn't insert array serialized at %u index!\n", Index));
       continue;
     }
 
@@ -314,14 +314,14 @@ ParseSerialized (
   Document = XmlParseDocument (PlistBuffer, PlistSize);
 
   if (Document == NULL) {
-    DEBUG ((EFI_D_ERROR, "Couldn't parse serialized file!\n"));
+    DEBUG ((DEBUG_INFO, "Couldn't parse serialized file!\n"));
     return FALSE;
   }
 
   RootDict = PlistNodeCast (PlistDocumentRoot (Document), PLIST_NODE_TYPE_DICT);
 
   if (RootDict == NULL) {
-    DEBUG ((EFI_D_ERROR, "Couldn't get serialized root!\n"));
+    DEBUG ((DEBUG_INFO, "Couldn't get serialized root!\n"));
     XmlDocumentFree (Document);
     return FALSE;
   }

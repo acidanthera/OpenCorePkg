@@ -56,7 +56,7 @@ RecalculateTSC (
 
     if ((PciRead8 (PCI_ICH_LPC_ADDRESS (R_ICH_LPC_ACPI_CNT)) & B_ICH_LPC_ACPI_CNT_ACPI_EN) != 0) {
       TimerAddr = ((PciRead16 (PCI_ICH_LPC_ADDRESS (R_ICH_LPC_ACPI_BASE)) & B_ICH_LPC_ACPI_BASE_BAR) + R_ACPI_PM1_TMR);
-      //DEBUG ((DEBUG_INFO, "Acpi Timer Addr 0x%0x (LPC)\n", TimerAddr));
+      DEBUG ((DEBUG_VERBOSE, "Acpi Timer Addr 0x%0x (LPC)\n", TimerAddr));
     } else {
       // Starting from Intel Sunrisepoint (Skylake PCH) the iTCO watchdog resources
       // have been moved to reside under the i801 SMBus host controller whereas
@@ -66,7 +66,7 @@ RecalculateTSC (
 
       if ((PciRead8 (PCI_ICH_SMBUS_ADDRESS (R_ICH_SMBUS_ACPI_CNT)) & B_ICH_SMBUS_ACPI_CNT_ACPI_EN) != 0) {
         TimerAddr = ((PciRead16 (PCI_ICH_SMBUS_ADDRESS (R_ICH_SMBUS_ACPI_BASE)) & B_ICH_SMBUS_ACPI_BASE_BAR) + R_ACPI_PM1_TMR);
-        //DEBUG ((DEBUG_INFO, "Acpi Timer Addr 0x%0x (SMB)\n", TimerAddr));
+        DEBUG ((DEBUG_VERBOSE, "Acpi Timer Addr 0x%0x (SMB)\n", TimerAddr));
       }
     }
 
@@ -126,7 +126,7 @@ RecalculateTSC (
     }
   }
 
-  //DEBUG ((DEBUG_INFO, "TscFrequency %lld\n", mPerformanceCounterFrequency));
+  DEBUG ((DEBUG_INFO, "TscFrequency %lld\n", mPerformanceCounterFrequency));
 
   return mPerformanceCounterFrequency;
 }
