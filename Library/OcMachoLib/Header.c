@@ -40,7 +40,7 @@ MachoGetContextSize (
   @param[in,out] Context  Context of the Mach-O.
 
 **/
-MACH_HEADER_64 *
+CONST MACH_HEADER_64 *
 MachoGetMachHeader64 (
   IN OUT OC_MACHO_CONTEXT  *Context
   )
@@ -48,7 +48,7 @@ MachoGetMachHeader64 (
   ASSERT (Context != NULL);
   ASSERT (Context->MachHeader != NULL);
 
-  return (MACH_HEADER_64 *)Context->MachHeader;
+  return Context->MachHeader;
 }
 
 /**
@@ -113,7 +113,7 @@ MachoInitializeContext (
     Index < MachHeader->NumCommands;
     ++Index, Command = NEXT_MACH_LOAD_COMMAND (Command)
     ) {
-    if ((((UINTN)Command + sizeof (MACH_LOAD_COMMAND)) > ((UINTN)MachHeader + MachHeader->CommandsSize))
+    if ((((UINTN)Command + sizeof (*Command)) > ((UINTN)MachHeader + MachHeader->CommandsSize))
      || (Command->CommandSize < sizeof (*Command))
      || ((Command->CommandSize % 8) != 0)  // Assumption: 64-bit, see below.
       ) {
@@ -198,7 +198,7 @@ MachoGetLastAddress64 (
 
 **/
 STATIC
-MACH_LOAD_COMMAND *
+CONST MACH_LOAD_COMMAND *
 InternalGetNextCommand64 (
   IN OUT OC_MACHO_CONTEXT         *Context,
   IN     MACH_LOAD_COMMAND_TYPE   LoadCommandType,
@@ -232,7 +232,7 @@ InternalGetNextCommand64 (
     Command = NEXT_MACH_LOAD_COMMAND (Command)
     ) {
     if (Command->CommandType == LoadCommandType) {
-      return (MACH_LOAD_COMMAND *)Command;
+      return Command;
     }
   }
 
@@ -247,12 +247,12 @@ InternalGetNextCommand64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_UUID_COMMAND *
+CONST MACH_UUID_COMMAND *
 MachoGetUuid64 (
   IN OUT OC_MACHO_CONTEXT  *Context
   )
 {
-  MACH_UUID_COMMAND *UuidCommand;
+  CONST MACH_UUID_COMMAND *UuidCommand;
 
   ASSERT (Context != NULL);
 
@@ -280,7 +280,7 @@ MachoGetUuid64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_SEGMENT_COMMAND_64 *
+CONST MACH_SEGMENT_COMMAND_64 *
 MachoGetSegmentByName64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST CHAR8       *SegmentName
@@ -303,7 +303,7 @@ MachoGetSegmentByName64 (
                 ARRAY_SIZE (Segment->SegmentName)
                 );
     if (Result == 0) {
-      return (MACH_SEGMENT_COMMAND_64 *)Segment;
+      return Segment;
     }
   }
 
@@ -320,7 +320,7 @@ MachoGetSegmentByName64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_SECTION_64 *
+CONST MACH_SECTION_64 *
 MachoGetSectionByName64 (
   IN OUT OC_MACHO_CONTEXT               *Context,
   IN     CONST MACH_SEGMENT_COMMAND_64  *Segment,
@@ -362,7 +362,7 @@ MachoGetSectionByName64 (
         ASSERT (Result == 0);
         );
 
-      return (MACH_SECTION_64 *)SectionWalker;
+      return SectionWalker;
     }
 
     ++SectionWalker;
@@ -381,7 +381,7 @@ MachoGetSectionByName64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_SECTION_64 *
+CONST MACH_SECTION_64 *
 MachoGetSegmentSectionByName64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST CHAR8       *SegmentName,
@@ -413,17 +413,17 @@ MachoGetSegmentSectionByName64 (
   @retal NULL  NULL is returned on failure.
 
 **/
-MACH_SEGMENT_COMMAND_64 *
+CONST MACH_SEGMENT_COMMAND_64 *
 MachoGetNextSegment64 (
   IN OUT OC_MACHO_CONTEXT               *Context,
   IN     CONST MACH_SEGMENT_COMMAND_64  *Segment  OPTIONAL
   )
 {
-  MACH_SEGMENT_COMMAND_64 *NextSegment;
+  CONST MACH_SEGMENT_COMMAND_64 *NextSegment;
 
-  CONST MACH_HEADER_64    *MachHeader;
-  UINTN                   TopOfCommands;
-  UINTN                   TopOfSections;
+  CONST MACH_HEADER_64          *MachHeader;
+  UINTN                         TopOfCommands;
+  UINTN                         TopOfSections;
 
   ASSERT (Context != NULL);
 
@@ -471,7 +471,7 @@ MachoGetNextSegment64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_SECTION_64 *
+CONST MACH_SECTION_64 *
 MachoGetNextSection64 (
   IN OUT OC_MACHO_CONTEXT               *Context,
   IN     CONST MACH_SEGMENT_COMMAND_64  *Segment,
@@ -494,7 +494,7 @@ MachoGetNextSection64 (
 
   if (((UINTN)(Section - Segment->Sections) < Segment->NumSections)
    && ((Section->Offset + Section->Size) <= Context->FileSize)) {
-    return (MACH_SECTION_64 *)Section;
+    return Section;
   }
 
   return NULL;
@@ -509,7 +509,7 @@ MachoGetNextSection64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_SECTION_64 *
+CONST MACH_SECTION_64 *
 MachoGetSectionByIndex64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINTN             Index
@@ -528,7 +528,7 @@ MachoGetSectionByIndex64 (
     Segment = MachoGetNextSegment64 (Context, Segment)
     ) {
     if (Index <= (SectionIndex + (Segment->NumSections - 1))) {
-      return (MACH_SECTION_64 *)&Segment->Sections[Index - SectionIndex];
+      return &Segment->Sections[Index - SectionIndex];
     }
 
     SectionIndex += Segment->NumSections;
@@ -546,7 +546,7 @@ MachoGetSectionByIndex64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_SECTION_64 *
+CONST MACH_SECTION_64 *
 MachoGetSectionByAddress64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT64            Address
@@ -570,7 +570,7 @@ MachoGetSectionByAddress64 (
       for (Index = 0; Index < Segment->NumSections; ++Index) {
         if ((Address >= Section->Address)
          && (Address < Section->Address + Section->Size)) {
-          return (MACH_SECTION_64 *)Section;
+          return Section;
         }
 
         ++Section;

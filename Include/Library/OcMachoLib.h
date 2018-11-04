@@ -51,7 +51,7 @@ MachoInitializeContext (
   @param[in,out] Context  Context of the Mach-O.
 
 **/
-MACH_HEADER_64 *
+CONST MACH_HEADER_64 *
 MachoGetMachHeader64 (
   IN OUT OC_MACHO_CONTEXT  *Context
   );
@@ -86,7 +86,7 @@ MachoGetLastAddress64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_UUID_COMMAND *
+CONST MACH_UUID_COMMAND *
 MachoGetUuid64 (
   IN OUT OC_MACHO_CONTEXT  *Context
   );
@@ -100,7 +100,7 @@ MachoGetUuid64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_SEGMENT_COMMAND_64 *
+CONST MACH_SEGMENT_COMMAND_64 *
 MachoGetSegmentByName64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST CHAR8       *SegmentName
@@ -116,7 +116,7 @@ MachoGetSegmentByName64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_SECTION_64 *
+CONST MACH_SECTION_64 *
 MachoGetSectionByName64 (
   IN OUT OC_MACHO_CONTEXT               *Context,
   IN     CONST MACH_SEGMENT_COMMAND_64  *Segment,
@@ -133,7 +133,7 @@ MachoGetSectionByName64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_SECTION_64 *
+CONST MACH_SECTION_64 *
 MachoGetSegmentSectionByName64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST CHAR8       *SegmentName,
@@ -150,7 +150,7 @@ MachoGetSegmentSectionByName64 (
   @retal NULL  NULL is returned on failure.
 
 **/
-MACH_SEGMENT_COMMAND_64 *
+CONST MACH_SEGMENT_COMMAND_64 *
 MachoGetNextSegment64 (
   IN OUT OC_MACHO_CONTEXT               *Context,
   IN     CONST MACH_SEGMENT_COMMAND_64  *Segment  OPTIONAL
@@ -167,7 +167,7 @@ MachoGetNextSegment64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_SECTION_64 *
+CONST MACH_SECTION_64 *
 MachoGetNextSection64 (
   IN OUT OC_MACHO_CONTEXT               *Context,
   IN     CONST MACH_SEGMENT_COMMAND_64  *Segment,
@@ -183,7 +183,7 @@ MachoGetNextSection64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_SECTION_64 *
+CONST MACH_SECTION_64 *
 MachoGetSectionByIndex64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINTN             Index
@@ -198,7 +198,7 @@ MachoGetSectionByIndex64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_SECTION_64 *
+CONST MACH_SECTION_64 *
 MachoGetSectionByAddress64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT64            Address
@@ -246,7 +246,7 @@ MachoSymbolIsLocalDefined (
   @param[in] Name     Name of the symbol to locate.
 
 **/
-MACH_NLIST_64 *
+CONST MACH_NLIST_64 *
 MachoGetLocalDefinedSymbolByName (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST CHAR8  *Name
@@ -261,7 +261,7 @@ MachoGetLocalDefinedSymbolByName (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_NLIST_64 *
+CONST MACH_NLIST_64 *
 MachoGetSymbolByIndex64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT32            Index
@@ -321,9 +321,9 @@ MachoIsSymbolValueSane64 (
 **/
 BOOLEAN
 MachoGetSymbolByExternRelocationOffset64 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT64            Address,
-  OUT    MACH_NLIST_64     **Symbol
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     UINT64               Address,
+  OUT    CONST MACH_NLIST_64  **Symbol
   );
 
 /**
@@ -554,7 +554,7 @@ MachoVtableGetNumberOfEntries64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_NLIST_64 *
+CONST MACH_NLIST_64 *
 MachoGetMetaclassSymbolFromSmcpSymbol64 (
   IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *Smcp

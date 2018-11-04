@@ -210,7 +210,7 @@ MachoSymbolIsLocalDefined (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_NLIST_64 *
+CONST MACH_NLIST_64 *
 MachoGetSymbolByIndex64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT32            Index
@@ -303,13 +303,11 @@ MachoGetIndirectSymbolName64 (
 **/
 BOOLEAN
 MachoGetSymbolByExternRelocationOffset64 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT64            Address,
-  OUT    MACH_NLIST_64     **Symbol
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     UINT64               Address,
+  OUT    CONST MACH_NLIST_64  **Symbol
   )
 {
-  CONST MACH_NLIST_64        *Sym;
-
   CONST MACH_RELOCATION_INFO *Relocation;
 
   ASSERT (Context != NULL);
@@ -371,7 +369,7 @@ InternalGetSymbolByName (
   @param[in]     Name     Name of the symbol to locate.
 
 **/
-MACH_NLIST_64 *
+CONST MACH_NLIST_64 *
 MachoGetLocalDefinedSymbolByName (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST CHAR8       *Name
@@ -415,7 +413,7 @@ MachoGetLocalDefinedSymbolByName (
     return NULL;
   }
 
-  return (MACH_NLIST_64 *)Symbol;
+  return Symbol;
 }
 
 /**
