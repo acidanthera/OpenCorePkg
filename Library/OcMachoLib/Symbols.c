@@ -230,7 +230,7 @@ MachoGetSymbolByIndex64 (
   if (Index < Context->NumSymbols) {
     Symbol = &Context->SymbolTable[Index];
     if (InternalSymbolIsSane (Context, Symbol)) {
-      return (MACH_NLIST_64 *)Symbol;
+      return Symbol;
     }
   } else {
     ASSERT (FALSE);
@@ -334,7 +334,7 @@ MachoGetSymbolByExternRelocationOffset64 (
 
 **/
 STATIC
-MACH_NLIST_64 *
+CONST MACH_NLIST_64 *
 InternalGetSymbolByName (
   IN CONST MACH_NLIST_64  *SymbolTable,
   IN CONST CHAR8          *StringTable,
@@ -355,7 +355,7 @@ InternalGetSymbolByName (
                (StringTable + SymbolTable[Index].UnifiedName.StringIndex)
                );
     if (Result == 0) {
-      return (MACH_NLIST_64 *)&SymbolTable[Index];
+      return &SymbolTable[Index];
     }
   }
 

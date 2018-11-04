@@ -74,7 +74,7 @@ MachoPreserveRelocationIntel64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-MACH_RELOCATION_INFO *
+CONST MACH_RELOCATION_INFO *
 InternalGetExternalRelocationByOffset (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT64            Address
@@ -112,7 +112,7 @@ InternalGetExternalRelocationByOffset (
     }
 
     if ((UINT64)Relocation->Address == Address) {
-      return (MACH_RELOCATION_INFO *)Relocation;
+      return Relocation;
     }
     //
     // Relocation Pairs can be skipped.

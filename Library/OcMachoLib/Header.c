@@ -487,7 +487,7 @@ MachoGetNextSection64 (
       );
     ++Section;
   } else {
-    Section = (MACH_SECTION_64 *)&Segment->Sections[0];
+    Section = &Segment->Sections[0];
   }
 
   ASSERT (Context->FileSize > 0);
@@ -615,7 +615,7 @@ InternalRetrieveSymtabs64 (
   //
   Symtab = (MACH_SYMTAB_COMMAND *)(
              InternalGetNextCommand64 (
-               (VOID *)Context,
+               Context,
                MACH_LOAD_COMMAND_SYMTAB,
                NULL
                )
@@ -645,7 +645,7 @@ InternalRetrieveSymtabs64 (
   //
   DySymtab = (MACH_DYSYMTAB_COMMAND *)(
                InternalGetNextCommand64 (
-                 (VOID *)Context,
+                 Context,
                  MACH_LOAD_COMMAND_DYSYMTAB,
                  NULL
                  )
