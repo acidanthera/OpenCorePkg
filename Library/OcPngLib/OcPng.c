@@ -58,7 +58,7 @@ GetPngDims (
   lodepng_state_cleanup (&State);
 
   if (Error) {
-    DEBUG ((DEBUG_WARN, "OcPngLib: Error while getting image dimensions from PNG header\n"));
+    DEBUG ((DEBUG_INFO, "OcPngLib: Error while getting image dimensions from PNG header\n"));
     return EFI_INVALID_PARAMETER;
   }
 
@@ -110,7 +110,7 @@ DecodePng (
 
   if (Error) {
     lodepng_state_cleanup (&State);
-    DEBUG ((DEBUG_WARN, "OcPngLib: Error while decoding PNG image\n"));
+    DEBUG ((DEBUG_INFO, "OcPngLib: Error while decoding PNG image\n"));
     return EFI_INVALID_PARAMETER;
   }
 

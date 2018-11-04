@@ -29,14 +29,14 @@ typedef UINTN OC_LOG_OPTIONS;
 
 // OC_LOG_PROTOCOL_GUID
 /// The GUID of the OC_LOG_PROTOCOL.
-#define OC_LOG_PROTOCOL_GUID                                                  \
+#define OC_LOG_PROTOCOL_GUID                                                        \
   {                                                                                 \
     0xDBB6008F, 0x89E4, 0x4272, { 0x98, 0x81, 0xCE, 0x3A, 0xFD, 0x97, 0x24, 0xD0 }  \
   }
 
 // OC_LOG_PROTOCOL
 /// The forward declaration for the protocol for the OC_LOG_PROTOCOL.
-typedef struct OC_LOG_PROTOCOL OC_LOG_PROTOCOL;
+typedef struct OC_LOG_PROTOCOL_ OC_LOG_PROTOCOL;
 
 // OcLogAddEntry
 /** Add an entry to the log buffer
@@ -46,7 +46,7 @@ typedef struct OC_LOG_PROTOCOL OC_LOG_PROTOCOL;
   @param[in] FormatString  String containing the output format.
   @param[in] Marker        Address of the VA_ARGS marker.
 
-  @retval EFI_SUCCESS  The timers were reset successfully.
+  @retval EFI_SUCCESS  The entry was successfully added.
 **/
 typedef
 EFI_STATUS
@@ -73,7 +73,7 @@ EFI_STATUS
 // OcLogGetLog
 /** Retrieve pointer to the log buffer
 
-  @param[in] This           This protocol.
+  @param[in] This         This protocol.
   @param[in] OcLogBuffer  Address to store the buffer pointer.
 
   @retval EFI_SUCCESS  The timers were reset successfully.
@@ -82,7 +82,7 @@ typedef
 EFI_STATUS
 (EFIAPI *OC_LOG_GET_LOG) (
   IN  OC_LOG_PROTOCOL  *This,
-  OUT CHAR16                 **OcLogBuffer
+  OUT CHAR16           **OcLogBuffer
   );
 
 // OcLogSaveLog
@@ -97,23 +97,21 @@ EFI_STATUS
 typedef
 EFI_STATUS
 (EFIAPI *OC_LOG_SAVE_LOG) (
-  IN OC_LOG_PROTOCOL    *This,
+  IN OC_LOG_PROTOCOL           *This,
   IN UINT32                    NonVolatile OPTIONAL,
   IN EFI_DEVICE_PATH_PROTOCOL  *FilePath OPTIONAL
   );
 
-// _OC_LOG_PROTOCOL
 /// The structure exposed by the OC_LOG_PROTOCOL.
-struct OC_LOG_PROTOCOL {
-  UINT32                    Revision;     ///< The revision of the installed protocol.
-  OC_LOG_OPTIONS          Options;      ///< The current options of the installed protocol.
+struct OC_LOG_PROTOCOL_ {
+  UINT32              Revision;     ///< The revision of the installed protocol.
+  OC_LOG_OPTIONS      Options;      ///< The current options of the installed protocol.
   OC_LOG_ADD_ENTRY    AddEntry;     ///< A pointer to the AddEntry function.
   OC_LOG_GET_LOG      GetLog;       ///< A pointer to the GetLog function.
   OC_LOG_SAVE_LOG     SaveLog;      ///< A pointer to the SaveLog function.
   OC_LOG_RESET_TIMERS ResetTimers;  ///< A pointer to the ResetTimers function.
 };
 
-// gOcLogProtocolGuid
 /// A global variable storing the GUID of the OC_LOG_PROTOCOL.
 extern EFI_GUID gOcLogProtocolGuid;
 
