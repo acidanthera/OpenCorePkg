@@ -65,8 +65,12 @@ DebugPrint (
       Status = gBS->LocateProtocol (
                       &gOcLogProtocolGuid,
                       NULL,
-                      (VOID **)&mOcLog
+                      (VOID **) &mOcLog
                       );
+
+      if (EFI_ERROR (Status)) {
+        mOcLog = NULL;
+      }
     }
 
     if (mOcLog != NULL) {
