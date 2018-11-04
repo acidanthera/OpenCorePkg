@@ -300,6 +300,8 @@ MachoGetSymbolName64 (
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Symbol   Indirect symbol to retrieve the name of.
 
+  @retval NULL  NULL is returned on failure.
+
 **/
 CONST CHAR8 *
 MachoGetIndirectSymbolName64 (

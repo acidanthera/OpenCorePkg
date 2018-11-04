@@ -270,6 +270,8 @@ MachoGetSymbolName64 (
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Symbol   Indirect symbol to retrieve the name of.
 
+  @retval NULL  NULL is returned on failure.
+
 **/
 CONST CHAR8 *
 MachoGetIndirectSymbolName64 (
@@ -281,10 +283,13 @@ MachoGetIndirectSymbolName64 (
   ASSERT (Symbol != NULL);
 
   ASSERT (Context->SymbolTable != NULL);
-  ASSERT (Context->Symtab->StringsSize > Symbol->Value);
 
   ASSERT (((Symbol->Type & MACH_N_TYPE_STAB) == 0)
        && ((Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_INDR));
+
+  if (Context->Symtab->StringsSize <= Symbol->Value) {
+    return NULL;
+  }
 
   return (Context->StringTable + Symbol->Value);
 }
