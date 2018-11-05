@@ -15,6 +15,7 @@
 #include <Uefi.h>
 
 #include <Protocol/DevicePathToText.h>
+#include <Protocol/SimpleFileSystem.h>
 
 #include <Library/DebugLib.h>
 #include <Library/BaseLib.h>
@@ -24,6 +25,7 @@
 #include <Library/OcProtocolLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcDevicePathLib.h>
+#include <Library/UefiBootServicesTableLib.h>
 
 // AppendFileNameDevicePath
 /**
@@ -61,13 +63,15 @@ AppendFileNameDevicePath (
 
       SetDevicePathNodeLength (&FilePathNode->Header, FileNameSize + sizeof (*FilePathNode));
 
-	  CopyMem (FilePathNode->PathName, FileName, FileNameSize);
+      CopyMem (FilePathNode->PathName, FileName, FileNameSize);
 
       DevicePathEndNode = NextDevicePathNode (&FilePathNode->Header);
 
       SetDevicePathEndNode (DevicePathEndNode);
 
       AppendedDevicePath = AppendDevicePath (DevicePath, (EFI_DEVICE_PATH_PROTOCOL *)FilePathNode);
+
+      FreePool (FilePathNode);
     }
   }
 
@@ -317,4 +321,105 @@ IsDeviceChild (
   FreePool (DevicePath);
 
   return Matched;
+}
+
+EFI_DEVICE_PATH_PROTOCOL *
+LocateFileSystemDevicePath (
+  IN  EFI_HANDLE                         DeviceHandle  OPTIONAL,
+  IN  EFI_DEVICE_PATH_PROTOCOL           *FilePath     OPTIONAL
+  )
+{
+  EFI_STATUS                Status;
+  EFI_DEVICE_PATH_PROTOCOL  *FileSystemPath;
+
+  if (DeviceHandle == NULL) {
+    //
+    // Locate DeviceHandle if we have none (idea by dmazar).
+    //
+    if (FilePath == NULL) {
+      DEBUG ((DEBUG_WARN, "No device handle or path to proceed\n"));
+      return NULL;
+    }
+
+    Status = gBS->LocateDevicePath (
+      &gEfiSimpleFileSystemProtocolGuid,
+      &FilePath,
+      &DeviceHandle
+      );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Failed to locate device handle over path - %r\n", Status));
+      return NULL;
+    }
+  }
+
+  FileSystemPath = DevicePathFromHandle (DeviceHandle);
+
+  if (FileSystemPath == NULL) {
+    DEBUG ((DEBUG_WARN, "Failed to locate simple fs on handle %p\n", DeviceHandle));
+
+    //
+    // Retry by looking up the handle based on FilePath.
+    //
+    if (EFI_ERROR (Status) && FilePath != NULL) {
+      DEBUG ((DEBUG_INFO, "Retrying to locate fs with NULL handle\n"));
+
+      return LocateFileSystemDevicePath (
+        NULL,
+        FilePath
+        );
+    }
+  }
+
+  return FileSystemPath;
+}
+
+VOID
+DebugPrintDevicePath (
+  IN UINTN                     ErrorLevel,
+  IN CONST CHAR8               *Message,
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+  DEBUG_CODE_BEGIN();
+
+  CHAR16   *TextDevicePath;
+  BOOLEAN  PrintedOnce;
+  BOOLEAN  EndsWithSlash;
+  UINTN    Length;
+
+  DEBUG ((ErrorLevel, "%a - ", Message));
+
+  if (DevicePath == NULL) {
+    DEBUG ((ErrorLevel, "<missing>\n", Message));
+    return;
+  }
+
+  PrintedOnce = FALSE;
+  EndsWithSlash = FALSE;
+  while (!IsDevicePathEnd (DevicePath)) {
+    TextDevicePath = ConvertDeviceNodeToText (DevicePath, TRUE, FALSE);
+    if (TextDevicePath != NULL) {
+      if (PrintedOnce && !EndsWithSlash) {
+        DEBUG ((ErrorLevel, "\\%s", TextDevicePath));
+      } else {
+        DEBUG ((ErrorLevel, "%s", TextDevicePath));
+      }
+
+      Length = StrLen (TextDevicePath);
+      EndsWithSlash = Length > 0 && TextDevicePath[Length - 1] == '\\';
+      PrintedOnce = TRUE;
+      FreePool (TextDevicePath);
+    }
+
+    DevicePath = NextDevicePathNode (DevicePath);
+  }
+
+  if (!PrintedOnce) {
+    DEBUG ((ErrorLevel, "<unconversible>\n"));
+  } else {
+    DEBUG ((ErrorLevel, "\n"));
+  }
+
+  DEBUG_CODE_END();
 }

@@ -234,6 +234,7 @@ ReadFile (
         Status = EFI_SUCCESS;
       }
 
+      FreePool (WholeDevicePath);
     }
   }
 
