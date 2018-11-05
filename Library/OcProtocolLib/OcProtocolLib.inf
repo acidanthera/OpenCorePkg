@@ -37,7 +37,6 @@
 
 [LibraryClasses]
   BaseLib
-  OcPrintLib
   MemoryAllocationLib
 
 [Sources]

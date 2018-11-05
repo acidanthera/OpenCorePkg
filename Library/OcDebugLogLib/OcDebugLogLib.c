@@ -89,7 +89,7 @@ DebugPrint (
       //
       // Fallback to console printing
       //
-      UnicodeVSPrintAsciiFormat (Buffer, ARRAY_SIZE (Buffer),  Format, Marker);
+      UnicodeVSPrintAsciiFormat (Buffer, sizeof (Buffer),  Format, Marker);
       gST->ConOut->OutputString (gST->ConOut, Buffer);
     }
 
