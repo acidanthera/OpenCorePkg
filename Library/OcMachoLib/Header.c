@@ -58,7 +58,7 @@ MachoGetMachHeader64 (
   @param[in,out] Context  Context of the Mach-O.
 
 **/
-UINTN
+UINT32
 MachoGetFileSize (
   IN OUT OC_MACHO_CONTEXT  *Context
   )
@@ -83,7 +83,7 @@ BOOLEAN
 MachoInitializeContext (
   OUT OC_MACHO_CONTEXT  *Context,
   IN  CONST VOID        *FileData,
-  IN  UINTN             FileSize
+  IN  UINT32            FileSize
   )
 {
   CONST MACH_HEADER_64    *MachHeader;
@@ -497,7 +497,7 @@ MachoGetNextSection64 (
 
   ASSERT (Context->FileSize > 0);
 
-  if (((UINTN)(Section - Segment->Sections) < Segment->NumSections)
+  if (((UINT32)(Section - Segment->Sections) < Segment->NumSections)
    && ((Section->Offset + Section->Size) <= Context->FileSize)) {
     return Section;
   }
@@ -603,9 +603,9 @@ InternalRetrieveSymtabs64 (
   CONST MACH_SYMTAB_COMMAND   *Symtab;
   CONST MACH_DYSYMTAB_COMMAND *DySymtab;
   CONST CHAR8                 *StringTable;
-  UINTN                       FileSize;
-  UINTN                       OffsetTop;
   UINTN                       TopOfSymbols;
+  UINT32                      FileSize;
+  UINT32                      OffsetTop;
 
   CONST MACH_NLIST_64         *SymbolTable;
   CONST MACH_NLIST_64         *IndirectSymtab;

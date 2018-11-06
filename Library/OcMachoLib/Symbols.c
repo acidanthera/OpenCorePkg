@@ -343,12 +343,12 @@ CONST MACH_NLIST_64 *
 InternalGetSymbolByName (
   IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *SymbolTable,
-  IN     UINTN                NumberOfSymbols,
+  IN     UINT32               NumberOfSymbols,
   IN     CONST CHAR8          *Name
   )
 {
-  UINTN Index;
-  INTN  Result;
+  UINT32 Index;
+  INTN   Result;
 
   ASSERT (SymbolTable != NULL);
   ASSERT (Name != NULL);
