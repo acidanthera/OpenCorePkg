@@ -120,7 +120,7 @@ InternalGetExternalRelocationByOffset (
     //             initialization.
     //
     if (MachoRelocationIsPairIntel64 (Relocation->Type)) {
-      if (Index == MAX_UINT32) {
+      if (Index == (MAX_UINT32 - 1)) {
         break;
       }
       ++Index;
