@@ -15,6 +15,32 @@
 #ifndef OC_STRING_LIB_H_
 #define OC_STRING_LIB_H_
 
+/**
+  Returns the length of a Null-terminated string literal.
+
+  @param[in] String  The Null-terminated string literal.
+
+**/
+#define L_STR_LEN(String) (ARRAY_SIZE (String) - 1)
+
+/**
+  Returns the size of a Null-terminated string literal in bytes, including the
+  Null terminator.
+
+  @param[in] String  The Null-terminated string literal.
+
+**/
+#define L_STR_SIZE(String) (sizeof (String))
+
+/**
+  Returns the size of a Null-terminated string literal in bytes, excluding the
+  Null terminator.
+
+  @param[in] String  The Null-terminated string literal.
+
+**/
+#define L_STR_SIZE_NT(String) (sizeof (String) - sizeof (*(String)))
+
 // IsAsciiPrint
 /** Check if character is printable
 
