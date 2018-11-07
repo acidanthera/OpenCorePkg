@@ -20,6 +20,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcMachoLib.h>
+#include <Library/OcStringLib.h>
 
 #include "OcMachoLibInternal.h"
 
@@ -157,9 +158,9 @@ MachoGetClassNameFromSuperMetaClassPointer (
   }
 
   SmcpName   = MachoGetSymbolName64 (Context, SmcpSymbol);
-  PrefixSize = (sizeof (OSOBJ_PREFIX) - sizeof (*OSOBJ_PREFIX));
+  PrefixSize = L_STR_SIZE_NT (OSOBJ_PREFIX);
   StringSize = (AsciiStrLen (SmcpName) * sizeof (*SmcpName));
-  SuffixSize = (sizeof (SMCP_TOKEN) - sizeof (*SMCP_TOKEN));
+  SuffixSize = L_STR_SIZE_NT (SMCP_TOKEN);
 
   ASSERT ((StringSize - PrefixSize - SuffixSize) < ClassNameSize);
 
@@ -190,7 +191,7 @@ MachoGetClassNameFromVtableName (
   //
   // As there is no suffix, just return a pointer from within VtableName.
   //
-  PrefixLength = (ARRAY_SIZE (VTABLE_PREFIX) - 1);
+  PrefixLength = L_STR_LEN (VTABLE_PREFIX);
   return &VtableName[PrefixLength];
 }
 
@@ -220,7 +221,7 @@ MachoGetFunctionPrefixFromClassName (
 
   BodySize = (AsciiStrLen (ClassName) * sizeof (*ClassName));
 
-  if (FunctionPrefixSize < (sizeof (OSOBJ_PREFIX) + BodySize)) {
+  if (FunctionPrefixSize < (L_STR_SIZE (OSOBJ_PREFIX) + BodySize)) {
     ASSERT (FALSE);
     return FALSE;
   }
@@ -229,10 +230,10 @@ MachoGetFunctionPrefixFromClassName (
   CopyMem (
     &FunctionPrefix[Index],
     OSOBJ_PREFIX,
-    (sizeof (OSOBJ_PREFIX) - sizeof (*OSOBJ_PREFIX))
+    L_STR_SIZE_NT (OSOBJ_PREFIX)
     );
 
-  Index += (ARRAY_SIZE (OSOBJ_PREFIX) - 1);
+  Index += L_STR_LEN (OSOBJ_PREFIX);
   CopyMem (
     &FunctionPrefix[Index],
     ClassName,
@@ -281,9 +282,9 @@ MachoGetClassNameFromMetaClassPointer (
   }
 
   MetaClassName = MachoGetSymbolName64 (Context, MetaClassPtrSymbol);
-  PrefixSize = (sizeof (OSOBJ_PREFIX) - sizeof (*OSOBJ_PREFIX));
+  PrefixSize = L_STR_SIZE_NT (OSOBJ_PREFIX);
   StringSize = (AsciiStrLen (MetaClassName) * sizeof (*MetaClassName));
-  SuffixSize = (sizeof (METACLASS_TOKEN) - sizeof (*METACLASS_TOKEN));
+  SuffixSize = L_STR_SIZE_NT (METACLASS_TOKEN);
 
   ASSERT ((StringSize - PrefixSize - SuffixSize) < ClassNameSize);
 
@@ -323,7 +324,7 @@ MachoGetVtableNameFromClassName (
 
   BodySize = AsciiStrSize (ClassName);
 
-  if (VtableNameSize < (sizeof (VTABLE_PREFIX) - sizeof (*VTABLE_PREFIX) + BodySize)) {
+  if (VtableNameSize < (L_STR_SIZE_NT (VTABLE_PREFIX) + BodySize)) {
     ASSERT (FALSE);
     return FALSE;
   }
@@ -332,10 +333,10 @@ MachoGetVtableNameFromClassName (
   CopyMem (
     &VtableName[Index],
     VTABLE_PREFIX,
-    (sizeof (VTABLE_PREFIX) - sizeof (*VTABLE_PREFIX))
+    L_STR_SIZE_NT (VTABLE_PREFIX)
     );
 
-  Index += (ARRAY_SIZE (VTABLE_PREFIX) - 1);
+  Index += L_STR_LEN (VTABLE_PREFIX);
   CopyMem (&VtableName[Index], ClassName, BodySize);
 
   return TRUE;
@@ -368,10 +369,9 @@ MachoGetMetaVtableNameFromClassName (
 
   BodySize = (AsciiStrLen (ClassName) * sizeof (*ClassName));
   NameSize = (
-               sizeof (METACLASS_VTABLE_PREFIX)
+               L_STR_SIZE (METACLASS_VTABLE_PREFIX)
                  + BodySize
-                 + (sizeof (METACLASS_VTABLE_SUFFIX)
-                   - sizeof (*METACLASS_VTABLE_SUFFIX))
+                 + L_STR_SIZE_NT (METACLASS_VTABLE_SUFFIX)
              );
   if (VtableNameSize < NameSize) {
     ASSERT (FALSE);
@@ -382,7 +382,7 @@ MachoGetMetaVtableNameFromClassName (
   CopyMem (
     &VtableName[Index],
     METACLASS_VTABLE_PREFIX,
-    (sizeof (METACLASS_VTABLE_PREFIX) - sizeof (*METACLASS_VTABLE_PREFIX))
+    L_STR_SIZE_NT (METACLASS_VTABLE_PREFIX)
     );
 
   Index += (ARRAY_SIZE (METACLASS_VTABLE_PREFIX) - 1);
@@ -392,7 +392,7 @@ MachoGetMetaVtableNameFromClassName (
   CopyMem (
     &VtableName[Index],
     METACLASS_VTABLE_SUFFIX,
-    sizeof (METACLASS_VTABLE_SUFFIX)
+    L_STR_SIZE (METACLASS_VTABLE_SUFFIX)
     );
 
   return TRUE;
@@ -425,9 +425,9 @@ MachoGetFinalSymbolNameFromClassName (
 
   BodySize = (AsciiStrLen (ClassName) * sizeof (*ClassName));
   NameSize = (
-               sizeof (OSOBJ_PREFIX)
+               L_STR_SIZE (OSOBJ_PREFIX)
                  + BodySize
-                 + (sizeof (FINAL_CLASS_TOKEN) - sizeof (*FINAL_CLASS_TOKEN))
+                 + L_STR_SIZE_NT (FINAL_CLASS_TOKEN)
              );
   if (FinalSymbolNameSize < NameSize) {
     ASSERT (FALSE);
@@ -438,10 +438,10 @@ MachoGetFinalSymbolNameFromClassName (
   CopyMem (
     &FinalSymbolName[Index],
     OSOBJ_PREFIX,
-    (sizeof (OSOBJ_PREFIX) - sizeof (*OSOBJ_PREFIX))
+    L_STR_SIZE_NT (OSOBJ_PREFIX)
     );
 
-  Index += (ARRAY_SIZE (OSOBJ_PREFIX) - 1);
+  Index += L_STR_LEN (OSOBJ_PREFIX);
   CopyMem (
     &FinalSymbolName[Index],
     ClassName,
@@ -452,7 +452,7 @@ MachoGetFinalSymbolNameFromClassName (
   CopyMem (
     &FinalSymbolName[Index],
     FINAL_CLASS_TOKEN,
-    sizeof (FINAL_CLASS_TOKEN)
+    L_STR_SIZE (FINAL_CLASS_TOKEN)
     );
 
   return TRUE;
@@ -497,7 +497,7 @@ MachoIsSymbolNameCxx (
   )
 {
   ASSERT (Name != NULL);
-  return (AsciiStrnCmp (Name, CXX_PREFIX, (ARRAY_SIZE (CXX_PREFIX) - 1)) == 0);
+  return (AsciiStrnCmp (Name, CXX_PREFIX, L_STR_LEN (CXX_PREFIX)) == 0);
 }
 
 /**
