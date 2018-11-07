@@ -18,6 +18,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
+#include <Library/OcGuardLib.h>
 #include <Library/OcMachoLib.h>
 
 #include "OcMachoLibInternal.h"
@@ -435,6 +436,8 @@ MachoRelocateSymbol64 (
   )
 {
   CONST MACH_SECTION_64 *Section;
+  UINT64                Value;
+  BOOLEAN               Result;
 
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
@@ -448,11 +451,27 @@ MachoRelocateSymbol64 (
       return FALSE;
     }
 
-    Symbol->Value += ALIGN_VALUE (
-                       (Section->Address + LinkAddress),
-                       Section->Alignment
-                       );
-    Symbol->Value -= Section->Address;
+    Value = ALIGN_VALUE (
+              (Section->Address + LinkAddress),
+              (1UL << Section->Alignment)
+              );
+    Value -= Section->Address;
+    //
+    // The overflow arithmetic functions are not used as an overflow within the
+    // ALIGN_VALUE addition and a subsequent "underflow" of the section address
+    // subtraction is valid, hence just verify whether the final result
+    // overflew.
+    //
+    if (Value < LinkAddress) {
+      return FALSE;
+    }
+
+    Result = OcOverflowAddU64 (Symbol->Value, Value, &Value);
+    if (!Result) {
+      return FALSE;
+    }
+
+    Symbol->Value = Value;
   }
 
   return TRUE;

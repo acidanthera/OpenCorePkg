@@ -87,10 +87,13 @@ MachoInitializeContext (
   )
 {
   CONST MACH_HEADER_64    *MachHeader;
+  UINTN                   TopOfFile;
   UINTN                   TopOfCommands;
   UINT32                  Index;
   CONST MACH_LOAD_COMMAND *Command;
+  UINTN                   TopOfCommand;
   UINT32                  CommandsSize;
+  BOOLEAN                 Result;
 
   ASSERT (FileData != NULL);
   ASSERT (FileSize > 0);
@@ -99,13 +102,26 @@ MachoInitializeContext (
   // Verify Mach-O Header sanity.
   //
   MachHeader = (MACH_HEADER_64 *)FileData;
-  if ((FileSize < sizeof (*MachHeader)) || !OC_ALIGNED (MachHeader)) {
+
+  Result = OcOverflowAddUN (
+             (UINTN)MachHeader,
+             FileSize,
+             &TopOfFile
+             );
+  if (!Result
+   || (FileSize < sizeof (*MachHeader))
+   || !OC_ALIGNED (MachHeader)
+   || (MachHeader->Signature != MACH_HEADER_64_SIGNATURE)
+    ) {
     return FALSE;
   }
 
-  TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
-  if ((MachHeader->Signature != MACH_HEADER_64_SIGNATURE)
-   || (TopOfCommands > ((UINTN)MachHeader + FileSize))) {
+  Result = OcOverflowAddUN (
+             (UINTN)MachHeader->Commands,
+             MachHeader->CommandsSize,
+             &TopOfCommands
+             );
+  if (!Result || (TopOfCommands > TopOfFile)) {
     return FALSE;
   }
 
@@ -116,27 +132,33 @@ MachoInitializeContext (
     Index < MachHeader->NumCommands;
     ++Index, Command = NEXT_MACH_LOAD_COMMAND (Command)
     ) {
-    if ((((UINTN)Command + sizeof (*Command)) > TopOfCommands)
+    Result = OcOverflowAddUN (
+               (UINTN)Command,
+               sizeof (*Command),
+               &TopOfCommand
+               );
+    if (!Result
+     || (TopOfCommand > TopOfCommands)
      || (Command->CommandSize < sizeof (*Command))
-     || ((Command->CommandSize % 8) != 0)  // Assumption: 64-bit, see below.
+     || ((Command->CommandSize % sizeof (UINT64)) != 0)  // Assumption: 64-bit, see below.
       ) {
       return FALSE;
     }
 
-    CommandsSize += Command->CommandSize;
+    Result = OcOverflowAddU32 (
+               CommandsSize,
+               Command->CommandSize,
+               &CommandsSize
+               );
+    if (!Result) {
+      return FALSE;
+    }
   }
 
-  if (MachHeader->CommandsSize < CommandsSize) {
+  if (MachHeader->CommandsSize != CommandsSize) {
+    ASSERT (FALSE);
     return FALSE;
   }
-  //
-  // The Load Command retrieval code uses size instead of indices to speed up
-  // finding LCs after a provided one.  Verify padding does not include a full
-  // LC for the loop might incorrectly reference it as a valid LC.
-  //
-  ASSERT (
-    (MachHeader->CommandsSize - CommandsSize) < sizeof (MACH_LOAD_COMMAND)
-    );
   //
   // Verify assumptions made by this library.
   // Carefully audit all "Assumption:" remarks before modifying these checks.
@@ -315,6 +337,73 @@ MachoGetSegmentByName64 (
 }
 
 /**
+  Returns whether Section is sane.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Section  Section to verify.
+  @param[in]     Segment  Segment the section is part of.
+
+**/
+STATIC
+BOOLEAN
+InternalSectionIsSane (
+  IN OUT OC_MACHO_CONTEXT               *Context,
+  IN     CONST MACH_SECTION_64          *Section,
+  IN     CONST MACH_SEGMENT_COMMAND_64  *Segment
+  )
+{
+  UINT32  FileSize;
+  UINT32  TopOffset;
+  UINT64  TopOfSegment;
+  BOOLEAN Result;
+  UINT64  TopOfSection;
+
+  ASSERT (Context != NULL);
+  ASSERT (Section != NULL);
+  ASSERT (Segment != NULL);
+  //
+  // Section->Alignment is stored as a power of 2.
+  //
+  if (Section->Alignment > 31) {
+    return FALSE;
+  }
+
+  TopOfSegment = (Segment->VirtualAddress + Segment->Size);
+  Result       = OcOverflowAddU64 (
+                   Section->Address,
+                   Section->Size,
+                   &TopOfSection
+                   );
+  if (!Result || (TopOfSection > TopOfSegment)) {
+    return FALSE;
+  }
+
+  FileSize = MachoGetFileSize (Context);
+  Result   = OcOverflowAddU32 (
+                Section->Offset,
+                Section->Size,
+                &TopOffset
+                );
+  if (!Result || (TopOffset > FileSize)) {
+    return FALSE;
+  }
+
+  if (Section->NumRelocations != 0) {
+    Result = OcOverflowMulAddU32 (
+               Section->NumRelocations,
+               sizeof (MACH_RELOCATION_INFO),
+               Section->RelocationsOffset,
+               &TopOffset
+               );
+    if (!Result || (TopOffset > FileSize)) {
+      return FALSE;
+    }
+  }
+
+  return TRUE;
+}
+
+/**
   Retrieves the first section by the name of SectionName.
 
   @param[in,out] Context      Context of the Mach-O.
@@ -331,21 +420,22 @@ MachoGetSectionByName64 (
   IN     CONST CHAR8                    *SectionName
   )
 {
-  CONST MACH_SECTION_64 *SectionWalker;
-  UINT32                Index;
+  CONST MACH_SECTION_64 *Section;
   INTN                  Result;
 
   ASSERT (Context != NULL);
   ASSERT (Segment != NULL);
   ASSERT (SectionName != NULL);
 
-  SectionWalker = &Segment->Sections[0];
-
-  for (Index = 0; Index < Segment->NumSections; ++Index) {
+  for (
+    Section = MachoGetNextSection64 (Context, Segment, NULL);
+    Section != NULL;
+    Section = MachoGetNextSection64 (Context, Segment, Section)
+    ) {
     Result = AsciiStrnCmp (
-               SectionWalker->SectionName,
+               Section->SectionName,
                SectionName,
-               ARRAY_SIZE (SectionWalker->SectionName)
+               ARRAY_SIZE (Section->SectionName)
                );
     if (Result == 0) {
       //
@@ -356,20 +446,18 @@ MachoGetSectionByName64 (
       //
       DEBUG_CODE (
         Result = AsciiStrnCmp (
-                   SectionWalker->SegmentName,
+                   Section->SegmentName,
                    Segment->SegmentName,
                    MIN (
-                     ARRAY_SIZE (SectionWalker->SegmentName),
+                     ARRAY_SIZE (Section->SegmentName),
                      ARRAY_SIZE (Segment->SegmentName)
                      )
                    );
         ASSERT (Result == 0);
         );
 
-      return SectionWalker;
+      return Section;
     }
-
-    ++SectionWalker;
   }
 
   return NULL;
@@ -427,6 +515,8 @@ MachoGetNextSegment64 (
 
   CONST MACH_HEADER_64          *MachHeader;
   UINTN                         TopOfCommands;
+  BOOLEAN                       Result;
+  UINT32                        TopOfSegment;
   UINTN                         TopOfSections;
 
   ASSERT (Context != NULL);
@@ -456,9 +546,23 @@ MachoGetNextSegment64 (
     return NULL;
   }
 
-  TopOfSections = (UINTN)&NextSegment[NextSegment->NumSections];
-  if (((NextSegment->FileOffset + NextSegment->FileSize) > Context->FileSize)
-    || (((UINTN)NextSegment + NextSegment->CommandSize) < TopOfSections)) {
+  Result = OcOverflowMulAddUN (
+             NextSegment->NumSections,
+             sizeof (*NextSegment->Sections),
+             (UINTN)NextSegment->Sections,
+             &TopOfSections
+             );
+  if (!Result
+   || (((UINTN)NextSegment + NextSegment->CommandSize) < TopOfSections)) {
+    return NULL;
+  }
+
+  Result = OcOverflowAddU32 (
+             NextSegment->FileOffset,
+             NextSegment->FileSize,
+             &TopOfSegment
+             );
+  if (!Result || (TopOfSegment > Context->FileSize)) {
     return NULL;
   }
 
@@ -495,14 +599,11 @@ MachoGetNextSection64 (
     Section = &Segment->Sections[0];
   }
 
-  ASSERT (Context->FileSize > 0);
-
-  if (((UINT32)(Section - Segment->Sections) < Segment->NumSections)
-   && ((Section->Offset + Section->Size) <= Context->FileSize)) {
-    return Section;
+  if (!InternalSectionIsSane (Context, Section, Segment)) {
+    return NULL;
   }
 
-  return NULL;
+  return Section;
 }
 
 /**
@@ -520,8 +621,12 @@ MachoGetSectionByIndex64 (
   IN     UINT32            Index
   )
 {
+  CONST MACH_SECTION_64         *Section;
+
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
   UINT32                        SectionIndex;
+  UINT32                        NextSectionIndex;
+  BOOLEAN                       Result;
 
   ASSERT (Context != NULL);
 
@@ -532,11 +637,24 @@ MachoGetSectionByIndex64 (
     Segment != NULL;
     Segment = MachoGetNextSegment64 (Context, Segment)
     ) {
-    if (Index <= (SectionIndex + (Segment->NumSections - 1))) {
-      return &Segment->Sections[Index - SectionIndex];
+    Result = OcOverflowAddU32 (
+               SectionIndex,
+               Segment->NumSections,
+               &NextSectionIndex
+               );
+    //
+    // If NextSectionIndex is overflowing, Index must be contained.
+    //
+    if (Result || (Index < NextSectionIndex)) {
+      Section = &Segment->Sections[Index - SectionIndex];
+      if (!InternalSectionIsSane (Context, Section, Segment)) {
+        return NULL;
+      }
+
+      return Section;
     }
 
-    SectionIndex += Segment->NumSections;
+    SectionIndex = NextSectionIndex;
   }
 
   return NULL;
@@ -559,7 +677,8 @@ MachoGetSectionByAddress64 (
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
   CONST MACH_SECTION_64         *Section;
-  UINT32                        Index;
+  UINT64                        TopOfSegment;
+  UINT64                        TopOfSection;
 
   ASSERT (Context != NULL);
 
@@ -568,17 +687,17 @@ MachoGetSectionByAddress64 (
     Segment != NULL;
     Segment = MachoGetNextSegment64 (Context, Segment)
     ) {
-    if ((Address >= Segment->VirtualAddress)
-     && (Address < (Segment->VirtualAddress + Segment->Size))) {
-      Section = &Segment->Sections[0];
-
-      for (Index = 0; Index < Segment->NumSections; ++Index) {
-        if ((Address >= Section->Address)
-         && (Address < Section->Address + Section->Size)) {
+    TopOfSegment = (Segment->VirtualAddress + Segment->Size);
+    if ((Address >= Segment->VirtualAddress) && (Address < TopOfSegment)) {
+      for (
+        Section = MachoGetNextSection64 (Context, Segment, NULL);
+        Section != NULL;
+        Section = MachoGetNextSection64 (Context, Segment, Section)
+        ) {
+        TopOfSection = (Section->Address + Section->Size);
+        if ((Address >= Section->Address) && (Address < TopOfSection)) {
           return Section;
         }
-
-        ++Section;
       }
     }
   }
@@ -603,9 +722,9 @@ InternalRetrieveSymtabs64 (
   CONST MACH_SYMTAB_COMMAND   *Symtab;
   CONST MACH_DYSYMTAB_COMMAND *DySymtab;
   CONST CHAR8                 *StringTable;
-  UINTN                       TopOfSymbols;
   UINT32                      FileSize;
   UINT32                      OffsetTop;
+  BOOLEAN                     Result;
 
   CONST MACH_NLIST_64         *SymbolTable;
   CONST MACH_NLIST_64         *IndirectSymtab;
@@ -638,11 +757,22 @@ InternalRetrieveSymtabs64 (
 
   FileSize = Context->FileSize;
 
-  TopOfSymbols  = Symtab->SymbolsOffset;
-  TopOfSymbols += (Symtab->NumSymbols * sizeof (MACH_NLIST_64));
+  Result = OcOverflowMulAddU32 (
+             Symtab->NumSymbols,
+             sizeof (MACH_NLIST_64),
+             Symtab->SymbolsOffset,
+             &OffsetTop
+             );
+  if (!Result || (OffsetTop > FileSize)) {
+    return FALSE;
+  }
 
-  if ((TopOfSymbols > FileSize)
-   || ((Symtab->StringsOffset + Symtab->StringsSize) > FileSize)) {
+  Result = OcOverflowAddU32 (
+             Symtab->StringsOffset,
+             Symtab->StringsSize,
+             &OffsetTop
+             );
+  if (!Result || (OffsetTop > FileSize)) {
     return FALSE;
   }
 
@@ -673,21 +803,60 @@ InternalRetrieveSymtabs64 (
     return FALSE;
   }
 
-  OffsetTop  = DySymtab->IndirectSymbolsOffset;
-  OffsetTop += (DySymtab->NumIndirectSymbols * sizeof (MACH_NLIST_64));
-  if (OffsetTop > FileSize) {
+  Result = OcOverflowAddU32 (
+             DySymtab->LocalSymbolsIndex,
+             DySymtab->NumLocalSymbols,
+             &OffsetTop
+             );
+  if (!Result || (OffsetTop > Symtab->NumSymbols)) {
     return FALSE;
   }
 
-  OffsetTop  = DySymtab->LocalRelocationsOffset;
-  OffsetTop += (DySymtab->NumOfLocalRelocations * sizeof (MACH_NLIST_64));
-  if (OffsetTop > FileSize) {
+  Result = OcOverflowAddU32 (
+             DySymtab->ExternalSymbolsIndex,
+             DySymtab->NumExternalSymbols,
+             &OffsetTop
+             );
+  if (!Result || (OffsetTop > Symtab->NumSymbols)) {
     return FALSE;
   }
 
-  OffsetTop  = DySymtab->ExternalRelocationsOffset;
-  OffsetTop += (DySymtab->NumExternalRelocations * sizeof (MACH_NLIST_64));
-  if (OffsetTop > FileSize) {
+  Result = OcOverflowAddU32 (
+             DySymtab->UndefinedSymbolsIndex,
+             DySymtab->NumUndefinedSymbols,
+             &OffsetTop
+             );
+  if (!Result || (OffsetTop > Symtab->NumSymbols)) {
+    return FALSE;
+  }
+
+  Result = OcOverflowMulAddU32 (
+             DySymtab->NumIndirectSymbols,
+             sizeof (MACH_NLIST_64),
+             DySymtab->IndirectSymbolsOffset,
+             &OffsetTop
+             );
+  if (!Result || (OffsetTop > FileSize)) {
+    return FALSE;
+  }
+
+  Result = OcOverflowMulAddU32 (
+             DySymtab->NumOfLocalRelocations,
+             sizeof (MACH_RELOCATION_INFO),
+             DySymtab->LocalRelocationsOffset,
+             &OffsetTop
+             );
+  if (!Result || (OffsetTop > FileSize)) {
+    return FALSE;
+  }
+
+  Result = OcOverflowMulAddU32 (
+             DySymtab->NumExternalRelocations,
+             sizeof (MACH_RELOCATION_INFO),
+             DySymtab->ExternalRelocationsOffset,
+             &OffsetTop
+             );
+  if (!Result || (OffsetTop > FileSize)) {
     return FALSE;
   }
 
