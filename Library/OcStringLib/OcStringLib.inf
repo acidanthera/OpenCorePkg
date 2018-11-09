@@ -22,7 +22,7 @@
   FILE_GUID                      = 1E0810F7-9E40-43D0-A036-185407D0231D
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = OcStringLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+  LIBRARY_CLASS                  = OcStringLib
 
 
 #
@@ -45,4 +45,6 @@
 
 [LibraryClasses]
   BaseLib
+  BaseMemoryLib
+  MemoryAllocationLib
 

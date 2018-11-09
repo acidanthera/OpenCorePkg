@@ -12,17 +12,12 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include <Uefi.h>
+#include <Base.h>
 
-#include <Library/DebugLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcStringLib.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/UefiLib.h>
-
-#include <Macros.h>
 
 // IsPrint
 /** Check if character is printable
@@ -219,17 +214,17 @@ ToUpperChar (
   @param[in] StringGuid  A pointer to a buffer containing the unicode string.
   @param[in] Guid        A pointer to location to store the converted GUID.
 
-  @retval EFI_SUCCESS  The conversion completed successfully.
+  @retval RETURN_UCCESS  The conversion completed successfully.
 **/
-EFI_STATUS
+RETURN_STATUS
 OcStrToGuid (
   IN     CONST CHAR16  *StringGuid,
-  IN OUT EFI_GUID      *Guid
+  IN OUT GUID          *Guid
   )
 {
-  EFI_STATUS Status;
+  RETURN_STATUS Status;
 
-  Status = EFI_INVALID_PARAMETER;
+  Status = RETURN_INVALID_PARAMETER;
 
   if ((StringGuid != NULL) && (Guid != NULL)) {
     ZeroMem (Guid, sizeof (*Guid));
@@ -251,7 +246,7 @@ OcStrToGuid (
       Guid->Data4[6] = (UINT8)(HexCharToUintn (StringGuid[32]) * 16 + HexCharToUintn (StringGuid[33]));
       Guid->Data4[7] = (UINT8)(HexCharToUintn (StringGuid[34]) * 16 + HexCharToUintn (StringGuid[35]));
 
-      Status = EFI_SUCCESS;
+      Status = RETURN_SUCCESS;
     }
   }
 

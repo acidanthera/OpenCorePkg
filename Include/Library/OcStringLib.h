@@ -172,12 +172,12 @@ OcAsciiStrnCmp (
   @param[in] StringGuid  A pointer to a buffer containing the ascii string.
   @param[in] Guid        A pointer to location to store the converted GUID.
 
-  @retval EFI_SUCCESS  The conversion completed successfully.
+  @retval RETURN_SUCCESS  The conversion completed successfully.
 **/
-EFI_STATUS
+RETURN_STATUS
 OcAsciiStrToGuid (
   IN     CONST CHAR8  *StringGuid,
-  IN OUT EFI_GUID     *Guid
+  IN OUT GUID         *Guid
   );
 
 // OcAsciiStrToUnicode
@@ -326,12 +326,12 @@ ToUpperChar (
   @param[in] StringGuid  A pointer to a buffer containing the unicode string.
   @param[in] Guid        A pointer to location to store the converted GUID.
 
-  @retval EFI_SUCCESS  The conversion completed successfully.
+  @retval RETURN_SUCCESS  The conversion completed successfully.
 **/
-EFI_STATUS
+RETURN_STATUS
 OcStrToGuid (
   IN     CONST CHAR16  *StringGuid,
-  IN OUT EFI_GUID      *Guid
+  IN OUT GUID          *Guid
   );
 
 // OcStrToAscii

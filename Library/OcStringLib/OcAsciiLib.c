@@ -12,17 +12,11 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include <Uefi.h>
+#include <Base.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
-#include <Library/MemoryAllocationLib.h>
 #include <Library/OcStringLib.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/UefiLib.h>
-
-#include <Macros.h>
 
 // IsAsciiPrint
 /** Check if character is printable
@@ -220,17 +214,17 @@ AsciiToUpperChar (
   @param[in] StringGuid  A pointer to a buffer containing the ascii string.
   @param[in] Guid        A pointer to location to store the converted GUID.
 
-  @retval EFI_SUCCESS  The conversion completed successfully.
+  @retval RETURN_SUCCESS  The conversion completed successfully.
 **/
-EFI_STATUS
+RETURN_STATUS
 OcAsciiStrToGuid (
   IN     CONST CHAR8  *StringGuid,
-  IN OUT EFI_GUID     *Guid
+  IN OUT GUID         *Guid
   )
 {
-  EFI_STATUS Status;
+  RETURN_STATUS Status;
 
-  Status = EFI_INVALID_PARAMETER;
+  Status = RETURN_INVALID_PARAMETER;
 
   if ((StringGuid != NULL) && (Guid != NULL)) {
     ZeroMem (Guid, sizeof (*Guid));
@@ -252,7 +246,7 @@ OcAsciiStrToGuid (
       Guid->Data4[6] = (UINT8)(AsciiHexCharToUintn (StringGuid[32]) * 16 + AsciiHexCharToUintn (StringGuid[33]));
       Guid->Data4[7] = (UINT8)(AsciiHexCharToUintn (StringGuid[34]) * 16 + AsciiHexCharToUintn (StringGuid[35]));
 
-      Status = EFI_SUCCESS;
+      Status = RETURN_SUCCESS;
     }
   }
 
