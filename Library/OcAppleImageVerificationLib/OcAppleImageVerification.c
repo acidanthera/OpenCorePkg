@@ -533,7 +533,7 @@ SanitizeApplePeImage (
   //
   // Calculate real image size
   //
-  DEBUG ((DEBUG_WARN, "Real image size: %lu\n", *RealImageSize));
+  DEBUG ((DEBUG_INFO, "Real image size: %lu\n", *RealImageSize));
 
   *RealImageSize = Context->SecDir->VirtualAddress
                    + Context->SecDir->Size
@@ -696,7 +696,7 @@ VerifyApplePeImageSignature (
   // Verify signature
   //
   if (RsaVerify (Pk, SignatureContext->Signature, Context->PeImageHash, WorkBuf32) == 1 ) {
-    DEBUG ((DEBUG_WARN, "Signature verified!\n"));
+    DEBUG ((DEBUG_INFO, "Signature verified!\n"));
     FreePool (SignatureContext);
     FreePool (Context);
     return EFI_SUCCESS;
