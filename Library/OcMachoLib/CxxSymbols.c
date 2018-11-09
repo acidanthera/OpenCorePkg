@@ -85,6 +85,7 @@ MachoSymbolIsSmcp64 (
   )
 {
   CONST CHAR8 *Name;
+  CONST CHAR8 *Suffix;
 
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
@@ -92,7 +93,21 @@ MachoSymbolIsSmcp64 (
   ASSERT (Context->StringTable != NULL);
 
   Name = MachoGetSymbolName64 (Context, Symbol);
-  return (AsciiStrStr (Name, SMCP_TOKEN) != NULL);
+  //
+  // Verify the symbol has...
+  //   1) The C++ prefix.
+  //   2) The SMCP suffix.
+  //   3) At least one character between the prefix and the suffix.
+  //
+  Suffix = AsciiStrStr (Name, SMCP_TOKEN);
+
+  if ((Suffix == NULL)
+   || (AsciiStrnCmp (Name, OSOBJ_PREFIX, L_STR_LEN (OSOBJ_PREFIX)) != 0)
+   || ((Suffix - Name) <= L_STR_LEN (OSOBJ_PREFIX))) {
+    return FALSE;
+  }
+
+  return TRUE;
 }
 
 /**
@@ -108,7 +123,8 @@ MachoSymbolIsMetaclassPointer64 (
   IN     CONST MACH_NLIST_64  *Symbol
   )
 {
-  CONST CHAR8            *Name;
+  CONST CHAR8 *Name;
+  CONST CHAR8 *Suffix;
 
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
@@ -116,7 +132,21 @@ MachoSymbolIsMetaclassPointer64 (
   ASSERT (Context->StringTable != NULL);
 
   Name = MachoGetSymbolName64 (Context, Symbol);
-  return (AsciiStrStr (Name, METACLASS_TOKEN) != NULL);
+  //
+  // Verify the symbol has...
+  //   1) The C++ prefix.
+  //   2) The MetaClass suffix.
+  //   3) At least one character between the prefix and the suffix.
+  //
+  Suffix = AsciiStrStr (Name, METACLASS_TOKEN);
+
+  if ((Suffix == NULL)
+   || (AsciiStrnCmp (Name, OSOBJ_PREFIX, L_STR_LEN (OSOBJ_PREFIX)) != 0)
+   || ((Suffix - Name) <= L_STR_LEN (OSOBJ_PREFIX))) {
+    return FALSE;
+  }
+
+  return TRUE;
 }
 
 /**
