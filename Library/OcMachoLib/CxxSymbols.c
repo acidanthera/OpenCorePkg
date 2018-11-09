@@ -48,7 +48,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 BOOLEAN
-MachoIsSymbolNamePureVirtual (
+MachoSymbolNameIsPureVirtual (
   IN CONST CHAR8  *Name
   )
 {
@@ -63,7 +63,7 @@ MachoIsSymbolNamePureVirtual (
 
 **/
 BOOLEAN
-MachoIsSymbolNamePadslot (
+MachoSymbolNameIsPadslot (
   IN CONST CHAR8  *Name
   )
 {
@@ -72,38 +72,33 @@ MachoIsSymbolNamePadslot (
 }
 
 /**
-  Returns whether Symbol defines a Super Metaclass Pointer.
+  Returns whether SymbolName defines a Super Metaclass Pointer.
 
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Symbol   The symbol to check.
+  @param[in,out] Context     Context of the Mach-O.
+  @param[in]     SymbolName  The symbol name to check.
 
 **/
 BOOLEAN
-MachoSymbolIsSmcp64 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_64  *Symbol
+MachoSymbolNameIsSmcp64 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SymbolName
   )
 {
-  CONST CHAR8 *Name;
   CONST CHAR8 *Suffix;
 
   ASSERT (Context != NULL);
-  ASSERT (Symbol != NULL);
-
-  ASSERT (Context->StringTable != NULL);
-
-  Name = MachoGetSymbolName64 (Context, Symbol);
+  ASSERT (SymbolName != NULL);
   //
   // Verify the symbol has...
   //   1) The C++ prefix.
   //   2) The SMCP suffix.
   //   3) At least one character between the prefix and the suffix.
   //
-  Suffix = AsciiStrStr (Name, SMCP_TOKEN);
+  Suffix = AsciiStrStr (SymbolName, SMCP_TOKEN);
 
   if ((Suffix == NULL)
-   || (AsciiStrnCmp (Name, OSOBJ_PREFIX, L_STR_LEN (OSOBJ_PREFIX)) != 0)
-   || ((Suffix - Name) <= L_STR_LEN (OSOBJ_PREFIX))) {
+   || (AsciiStrnCmp (SymbolName, OSOBJ_PREFIX, L_STR_LEN (OSOBJ_PREFIX)) != 0)
+   || ((Suffix - SymbolName) <= L_STR_LEN (OSOBJ_PREFIX))) {
     return FALSE;
   }
 
@@ -111,38 +106,33 @@ MachoSymbolIsSmcp64 (
 }
 
 /**
-  Returns whether Symbol defines a Super Metaclass Pointer.
+  Returns whether SymbolName defines a Super Metaclass Pointer.
 
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Symbol   The symbol to check.
+  @param[in,out] Context     Context of the Mach-O.
+  @param[in]     SymbolName  The symbol name to check.
 
 **/
 BOOLEAN
-MachoSymbolIsMetaclassPointer64 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_64  *Symbol
+MachoSymbolNameIsMetaclassPointer64 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SymbolName
   )
 {
-  CONST CHAR8 *Name;
   CONST CHAR8 *Suffix;
 
   ASSERT (Context != NULL);
-  ASSERT (Symbol != NULL);
-
-  ASSERT (Context->StringTable != NULL);
-
-  Name = MachoGetSymbolName64 (Context, Symbol);
+  ASSERT (SymbolName != NULL);
   //
   // Verify the symbol has...
   //   1) The C++ prefix.
   //   2) The MetaClass suffix.
   //   3) At least one character between the prefix and the suffix.
   //
-  Suffix = AsciiStrStr (Name, METACLASS_TOKEN);
+  Suffix = AsciiStrStr (SymbolName, METACLASS_TOKEN);
 
   if ((Suffix == NULL)
-   || (AsciiStrnCmp (Name, OSOBJ_PREFIX, L_STR_LEN (OSOBJ_PREFIX)) != 0)
-   || ((Suffix - Name) <= L_STR_LEN (OSOBJ_PREFIX))) {
+   || (AsciiStrnCmp (SymbolName, OSOBJ_PREFIX, L_STR_LEN (OSOBJ_PREFIX)) != 0)
+   || ((Suffix - SymbolName) <= L_STR_LEN (OSOBJ_PREFIX))) {
     return FALSE;
   }
 
@@ -182,12 +172,13 @@ MachoGetClassNameFromSuperMetaClassPointer (
 
   ASSERT (Context->StringTable != NULL);
 
-  Result = MachoSymbolIsSmcp64 (Context, SmcpSymbol);
+  SmcpName = MachoGetSymbolName64 (Context, SmcpSymbol);
+
+  Result = MachoSymbolNameIsSmcp64 (Context, SmcpName);
   if (!Result) {
     return FALSE;
   }
 
-  SmcpName   = MachoGetSymbolName64 (Context, SmcpSymbol);
   PrefixSize = L_STR_SIZE_NT (OSOBJ_PREFIX);
   StringSize = (AsciiStrLen (SmcpName) * sizeof (*SmcpName));
   SuffixSize = L_STR_SIZE_NT (SMCP_TOKEN);
@@ -306,12 +297,13 @@ MachoGetClassNameFromMetaClassPointer (
 
   ASSERT (Context->StringTable != NULL);
 
-  Result = MachoSymbolIsMetaclassPointer64 (Context, MetaClassPtrSymbol);
+  MetaClassName = MachoGetSymbolName64 (Context, MetaClassPtrSymbol);
+
+  Result = MachoSymbolNameIsMetaclassPointer64 (Context, MetaClassName);
   if (!Result) {
     return FALSE;
   }
 
-  MetaClassName = MachoGetSymbolName64 (Context, MetaClassPtrSymbol);
   PrefixSize = L_STR_SIZE_NT (OSOBJ_PREFIX);
   StringSize = (AsciiStrLen (MetaClassName) * sizeof (*MetaClassName));
   SuffixSize = L_STR_SIZE_NT (METACLASS_TOKEN);
@@ -489,30 +481,27 @@ MachoGetFinalSymbolNameFromClassName (
 }
 
 /**
-  Returns whether Symbol defines a VTable.
+  Returns whether SymbolName defines a VTable.
 
-  @param[in,out] Context  Conteyt of the Mach-O.
-  @param[in]     Symbol   The symbol to check.
+  @param[in,out] Context     Context of the Mach-O.
+  @param[in]     SymbolName  The symbol name to check.
 
 **/
 BOOLEAN
-MachoSymbolIsVtable64 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_64  *Symbol
+MachoSymbolNameIsVtable64 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SymbolName
   )
 {
-  CONST CHAR8            *Name;
+  INTN Result;
 
   ASSERT (Context != NULL);
-  ASSERT (Symbol != NULL);
-
-  ASSERT (Context->StringTable != NULL);
-
-  Name = MachoGetSymbolName64 (Context, Symbol);
+  ASSERT (SymbolName != NULL);
   //
   // Implicitely checks for METACLASS_VTABLE_PREFIX.
   //
-  return (AsciiStrCmp (Name, VTABLE_PREFIX) == 0);
+  Result = AsciiStrnCmp (SymbolName, VTABLE_PREFIX, L_STR_LEN (VTABLE_PREFIX));
+  return (Result == 0);
 }
 
 /**
@@ -522,7 +511,7 @@ MachoSymbolIsVtable64 (
 
 **/
 BOOLEAN
-MachoIsSymbolNameCxx (
+MachoSymbolNameIsCxx (
   IN CONST CHAR8  *Name
   )
 {

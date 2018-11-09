@@ -366,7 +366,7 @@ MachoRelocateSymbol64 (
 
 **/
 BOOLEAN
-MachoIsSymbolNamePureVirtual (
+MachoSymbolNameIsPureVirtual (
   IN CONST CHAR8  *Name
   );
 
@@ -377,34 +377,34 @@ MachoIsSymbolNamePureVirtual (
 
 **/
 BOOLEAN
-MachoIsSymbolNamePadslot (
+MachoSymbolNameIsPadslot (
   IN CONST CHAR8  *Name
   );
 
 /**
-  Returns whether Symbol defines a Super Metaclass Pointer.
+  Returns whether SymbolName defines a Super Metaclass Pointer.
 
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Symbol   The symbol to check.
+  @param[in,out] Context     Context of the Mach-O.
+  @param[in]     SymbolName  The symbol name to check.
 
 **/
 BOOLEAN
-MachoSymbolIsSmcp64 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_64  *Symbol
+MachoSymbolNameIsSmcp64 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SymbolName
   );
 
 /**
-  Returns whether Symbol defines a Super Metaclass Pointer.
+  Returns whether SymbolName defines a Super Metaclass Pointer.
 
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Symbol   The symbol to check.
+  @param[in,out] Context     Context of the Mach-O.
+  @param[in]     SymbolName  The symbol name to check.
 
 **/
 BOOLEAN
-MachoSymbolIsMetaclassPointer64 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_64  *Symbol
+MachoSymbolNameIsMetaclassPointer64 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SymbolName
   );
 
 /**
@@ -525,16 +525,16 @@ MachoGetFinalSymbolNameFromClassName (
   );
 
 /**
-  Returns whether Symbol defines a VTable.
+  Returns whether SymbolName defines a VTable.
 
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Symbol   The symbol to check.
+  @param[in,out] Context     Context of the Mach-O.
+  @param[in]     SymbolName  The symbol name to check.
 
 **/
 BOOLEAN
-MachoSymbolIsVtable64 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_64  *Symbol
+MachoSymbolNameIsVtable64 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SymbolName
   );
 
 /**
@@ -544,7 +544,7 @@ MachoSymbolIsVtable64 (
 
 **/
 BOOLEAN
-MachoIsSymbolNameCxx (
+MachoSymbolNameIsCxx (
   IN CONST CHAR8  *Name
   );
 
