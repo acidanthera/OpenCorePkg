@@ -480,16 +480,16 @@ MachoRelocateSymbol64 (
 /**
   Retrieves the Mach-O file offset of the address pointed to by Symbol.
 
-  @param[in] Context  Context of the Mach-O.
-  @param[in] Symbol   Symbol to retrieve the offset of.
+  @param[in,ouz] Context  Context of the Mach-O.
+  @param[in]     Symbol   Symbol to retrieve the offset of.
 
   @retval 0  0 is returned on failure.
 
 **/
 UINT32
 MachoSymbolGetFileOffset64 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN OUT MACH_NLIST_64     *Symbol
+  IN OUT OC_MACHO_CONTEXT      *Context,
+  IN     CONST  MACH_NLIST_64  *Symbol
   )
 {
   UINT64                Offset;
