@@ -476,3 +476,41 @@ MachoRelocateSymbol64 (
 
   return TRUE;
 }
+
+/**
+  Retrieves the Mach-O file offset of the address pointed to by Symbol.
+
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Symbol   Symbol to retrieve the offset of.
+
+  @retval 0  0 is returned on failure.
+
+**/
+UINT32
+MachoSymbolGetFileOffset64 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN OUT MACH_NLIST_64     *Symbol
+  )
+{
+  UINT64                Offset;
+
+  CONST MACH_SECTION_64 *Section;
+
+  ASSERT (Context != NULL);
+  ASSERT (Symbol != NULL);
+
+  Section = MachoGetSectionByIndex64 (Context, Symbol->Section);
+  if ((Section == NULL) || (Symbol->Value < Section->Address)) {
+    return 0;
+  }
+
+  Offset = (Symbol->Value - Section->Address);
+  if (Offset > Section->Size) {
+    return 0;
+  }
+  //
+  // The check against Section->Size guarantees a 32-bit value for the current
+  // library implementation.
+  //
+  return (Section->Offset + (UINT32)Offset);
+}
