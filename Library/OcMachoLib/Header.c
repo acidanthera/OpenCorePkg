@@ -537,7 +537,7 @@ MachoGetNextSegment64 (
                   InternalGetNextCommand64 (
                     Context,
                     MACH_LOAD_COMMAND_SEGMENT_64,
-                    (CONST MACH_LOAD_COMMAND *)Segment
+                    (MACH_LOAD_COMMAND *)Segment
                     )
                   );
   if ((NextSegment == NULL)
@@ -777,7 +777,7 @@ InternalRetrieveSymtabs64 (
   }
 
   MachoAddress = (UINTN)Context->MachHeader;
-  StringTable  = (CONST CHAR8 *)(MachoAddress + Symtab->StringsOffset);
+  StringTable  = (CHAR8 *)(MachoAddress + Symtab->StringsOffset);
 
   if (StringTable[(Symtab->StringsSize / sizeof (*StringTable)) - 1] != '\0') {
     return FALSE;
