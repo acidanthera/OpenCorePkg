@@ -20,6 +20,39 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_GUARD_LIB_H
 
 //
+// The macros below provide compile-time assertions.
+// This is important, as UDK only has VERIFY_SIZE_OF, which is limited and broken.
+// Since it is implemented as an extern, it neither lets one to verify array size and array
+// element size (due to variable redeclaration) at the same time,  nor allows macro use
+// within a .c file (due to unused variable warnings).
+// The reason for split declarations exists due to MSVC legacy.
+//
+#if defined(__GUNC__) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201100L)
+//
+// Any supported GCC-compatible implements _Static_assert.
+// So do any C11-compliant compilers.
+//
+#define OC_GLOBAL_STATIC_ASSERT(Expr, Message) _Static_assert (Expr, Message)
+#define OC_INLINE_STATIC_ASSERT(Expr, Message) _Static_assert (Expr, Message)
+#else
+//
+// For MSVC we implement static assertions via switch, as they do not have compile-time
+// offsetof implementation, yet it pointer arithmetics works fine for them in switch.
+// The struct declaration is here to avoid a warning for extra ;.
+// The concatenation indirection does not permit for multiple assertions on one line
+// or within a macro.
+//
+#define OC_STATIC_ASSERT_CONCAT2(Left, Right) Left ## Right
+#define OC_STATIC_ASSERT_CONCAT(Left, Right) OC_STATIC_ASSERT_CONCAT2 (Left, Right)
+#define OC_GLOBAL_STATIC_ASSERT(Expr, Message) \
+  VOID OC_STATIC_ASSERT_CONCAT(OC_STATIC_ASSERT__, __LINE__) (VOID) { \
+  switch (0) { case 0: case (Expr):; } } \
+  struct OC_STATIC_ASSERT_CONCAT(OC_STATIC_ASSERT_T__, __LINE__) { UINT32 Dummy; }
+#define OC_INLINE_STATIC_ASSERT(Expr, Message) \
+  do { switch (0) { case 0: case (Expr):; } } while(0)
+#endif
+
+//
 // The macros below provide pointer alignment checking interfaces.
 // TypedPtr - pointer of a dedicated type, which alignment is to be checked.
 // Align    - valid alignment for the target platform (power of two so far).
@@ -39,7 +72,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #else
 
-#error "Unknown target platform. Alignment macros may not apply."
+#error "Unknown target platform. Alignment macros are not applicable."
 
 #endif
 
