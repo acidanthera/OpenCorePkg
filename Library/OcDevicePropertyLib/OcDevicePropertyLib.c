@@ -137,7 +137,6 @@ InternalGetPropertyNode (
   EFI_DEVICE_PATH_PROPERTY_NODE *Node;
   UINTN                         DevicePathSize;
   UINTN                         DevicePathSize2;
-  INTN                          Result;
 
   Node = PROPERTY_NODE_FROM_LIST_ENTRY (
            GetFirstNode (&DevicePathPropertyData->Nodes)
@@ -145,19 +144,12 @@ InternalGetPropertyNode (
 
   DevicePathSize = GetDevicePathSize (DevicePath);
 
-  while (TRUE) {
-    if (IsNull (&DevicePathPropertyData->Nodes, &Node->Hdr.Link)) {
-      return NULL;
-    }
-
+  while (!IsNull (&DevicePathPropertyData->Nodes, &Node->Hdr.Link)) {
     DevicePathSize2 = GetDevicePathSize (&Node->DevicePath);
 
-    if (DevicePathSize == DevicePathSize2) {
-      Result = CompareMem (DevicePath, &Node->DevicePath, DevicePathSize);
-
-      if (Result == 0) {
-        break;
-      }
+    if (DevicePathSize == DevicePathSize2
+      && CompareMem (DevicePath, &Node->DevicePath, DevicePathSize)) {
+      return Node;
     }
 
     Node = PROPERTY_NODE_FROM_LIST_ENTRY (
@@ -165,7 +157,7 @@ InternalGetPropertyNode (
              );
   }
 
-  return Node;
+  return NULL;
 }
 
 // InternalGetProperty
@@ -178,21 +170,13 @@ InternalGetProperty (
 {
   EFI_DEVICE_PATH_PROPERTY *Property;
 
-  INTN                     Result;
-
   Property = EFI_DEVICE_PATH_PROPERTY_FROM_LIST_ENTRY (
                GetFirstNode (&Node->Hdr.Properties)
                );
 
-  while (TRUE) {
-    if (IsNull (&Node->Hdr.Properties, &Property->Link)) {
-      return NULL;
-    }
-
-    Result = StrCmp (Name, (CONST CHAR16 *) &Property->Value->Data[0]);
-
-    if (Result == 0) {
-      break;
+  while (!IsNull (&Node->Hdr.Properties, &Property->Link)) {
+    if (StrCmp (Name, (CONST CHAR16 *) &Property->Value->Data[0]) == 0) {
+      return Property;
     }
 
     Property = EFI_DEVICE_PATH_PROPERTY_FROM_LIST_ENTRY (
@@ -200,7 +184,7 @@ InternalGetProperty (
                  );
   }
 
-  return Property;
+  return NULL;
 }
 
 // InternalSyncWithThunderboltDevices
@@ -225,7 +209,7 @@ InternalSyncWithThunderboltDevices (
                   &Buffer
                   );
 
-  if (!EFI_ERROR(EFI_SUCCESS)) {
+  if (!EFI_ERROR (Status)) {
     for (Index = 0; Index < NumberHandles; ++Index) {
       Status = gBS->HandleProtocol (
                       Buffer[Index],
@@ -233,7 +217,7 @@ InternalSyncWithThunderboltDevices (
                       &Interface
                       );
 
-      if (Status == EFI_SUCCESS) {
+      if (!EFI_ERROR (Status)) {
         if (*(UINT32 *)((UINTN)Interface + sizeof (UINT32)) == 0) {
           (*(VOID (EFIAPI **)(VOID *))((UINTN)Interface + 232)) (Interface);
         }
@@ -334,7 +318,6 @@ DppDbSetProperty (
   EFI_DEVICE_PATH_PROPERTY_NODE *Node;
   UINTN                         DevicePathSize;
   EFI_DEVICE_PATH_PROPERTY      *Property;
-  INTN                          Result;
   UINTN                         PropertyNameSize;
   UINTN                         PropertyValueSize;
   EFI_DEVICE_PATH_PROPERTY_DATA *PropertyName;
@@ -369,12 +352,9 @@ DppDbSetProperty (
   Property = InternalGetProperty (Node, Name);
 
   if (Property != NULL) {
-    if (Property->Value->Size == Size) {
-      Result = CompareMem (&Property->Value->Data[0], Value, Size);
-
-      if (Result == 0) {
-        return EFI_SUCCESS;
-      }
+    if (Property->Value->Size == Size
+      && CompareMem (&Property->Value->Data[0], Value, Size) == 0) {
+      return EFI_SUCCESS;
     }
 
     RemoveEntryList (&Property->Link);
@@ -393,7 +373,7 @@ DppDbSetProperty (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  PropertyNameSize   = (StrSize (Name) + sizeof (*PropertyName));
+  PropertyNameSize   = sizeof (*PropertyName) + StrSize (Name);
   PropertyName       = AllocateZeroPool (PropertyNameSize);
   Property->Name     = PropertyName;
   if (PropertyName == NULL) {
@@ -401,7 +381,7 @@ DppDbSetProperty (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  PropertyValueSize = (Size + sizeof (*PropertyValue));
+  PropertyValueSize = sizeof (*PropertyValue) + Size;
   PropertyValue     = AllocateZeroPool (PropertyValueSize);
   Property->Value   = PropertyValue;
 
@@ -552,7 +532,7 @@ DppDbGetPropertyBuffer (
     return EFI_BUFFER_TOO_SMALL;
   }
 
-  Buffer->Size          = (UINT32)BufferSize;
+  Buffer->Size          = (UINT32) BufferSize;
   Buffer->Version       = EFI_DEVICE_PATH_PROPERTY_DATABASE_VERSION;
   Buffer->NumberOfNodes = NumberOfNodes;
 
@@ -680,6 +660,9 @@ InternalReadEfiVariableProperties (
     //
   }
 
+  //
+  // Discard low size with forced approval.
+  //
   if (BufferSize < sizeof (EFI_DEVICE_PATH_PROPERTY_BUFFER)) {
     return EFI_SUCCESS;
   }
@@ -844,9 +827,7 @@ OcDevicePathPropertyInstallProtocol (
                   );
 
   if (!EFI_ERROR (Status)) {
-    if (Buffer != NULL) {
-      FreePool (Buffer);
-    }
+    FreePool (Buffer);
     return EFI_DEVICE_ERROR;
   }
   
