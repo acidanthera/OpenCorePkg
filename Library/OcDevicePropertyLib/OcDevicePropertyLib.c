@@ -26,6 +26,7 @@
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library/OcGuardLib.h>
 
 #define DEVICE_PATH_PROPERTY_DATA_SIGNATURE  \
   SIGNATURE_32 ('D', 'p', 'p', 'P')
@@ -49,6 +50,7 @@ typedef struct {
 
 #define APPLE_PATH_PROPERTIES_VARIABLE_NAME    L"AAPL,PathProperties"
 #define APPLE_PATH_PROPERTY_VARIABLE_MAX_SIZE  768
+#define APPLE_PATH_PROPERTY_VARIABLE_MAX_NUM   0x10000
 
 #define EFI_DEVICE_PATH_PROPERTY_NODE_SIGNATURE  \
   SIGNATURE_32 ('D', 'p', 'n', '\0')
@@ -83,6 +85,8 @@ typedef struct {
 #define EFI_DEVICE_PATH_PROPERTY_SIGNATURE  \
   SIGNATURE_32 ('D', 'p', 'p', '\0')
 
+#define EFI_DEVICE_PATH_PROPERTY_DATABASE_VERSION 1
+
 #define EFI_DEVICE_PATH_PROPERTY_FROM_LIST_ENTRY(Entry)  \
   CR (                                                   \
     (Entry),                                             \
@@ -111,13 +115,16 @@ typedef struct {
 } EFI_DEVICE_PATH_PROPERTY;
 
 // TODO: Move to own header
-//
-#define UNKNOWN_PROTOCOL_GUID                             \
-  { 0xC649D4F3, 0xD502, 0x4DAA,                           \
+// C649D4F3-D502-4DAA-A139-394ACCF2A63B
+// This protocol describes every thunderbolt device:
+// - Thunderbolt Inter-domain Boundary
+// - Thunderbolt Device
+// TODO: explore this. Need to RE Vendor/Apple/ThunderboltPkg drivers, ThunderboltNhi in particular.
+#define APPLE_THUNDERBOLT_NATIVE_HOST_INTERFACE_PROTOCOL_GUID \
+  { 0xC649D4F3, 0xD502, 0x4DAA,                               \
     { 0xA1, 0x39, 0x39, 0x4A, 0xCC, 0xF2, 0xA6, 0x3B } }
 
-EFI_GUID mUnknownProtocolGuid = UNKNOWN_PROTOCOL_GUID;
-//
+EFI_GUID mAppleThunderboltNativeHostInterfaceProtocolGuid = APPLE_THUNDERBOLT_NATIVE_HOST_INTERFACE_PROTOCOL_GUID;
 
 // InternalGetPropertyNode
 STATIC
@@ -129,7 +136,6 @@ InternalGetPropertyNode (
 {
   EFI_DEVICE_PATH_PROPERTY_NODE *Node;
   UINTN                         DevicePathSize;
-  BOOLEAN                       IsNodeNull;
   UINTN                         DevicePathSize2;
   INTN                          Result;
 
@@ -139,13 +145,9 @@ InternalGetPropertyNode (
 
   DevicePathSize = GetDevicePathSize (DevicePath);
 
-  do {
-    IsNodeNull = IsNull (&DevicePathPropertyData->Nodes, &Node->Hdr.Link);
-
-    if (IsNodeNull) {
-      Node = NULL;
-
-      break;
+  while (TRUE) {
+    if (IsNull (&DevicePathPropertyData->Nodes, &Node->Hdr.Link)) {
+      return NULL;
     }
 
     DevicePathSize2 = GetDevicePathSize (&Node->DevicePath);
@@ -161,7 +163,7 @@ InternalGetPropertyNode (
     Node = PROPERTY_NODE_FROM_LIST_ENTRY (
              GetNextNode (&DevicePathPropertyData->Nodes, &Node->Hdr.Link)
              );
-  } while (TRUE);
+  }
 
   return Node;
 }
@@ -170,29 +172,24 @@ InternalGetPropertyNode (
 STATIC
 EFI_DEVICE_PATH_PROPERTY *
 InternalGetProperty (
-  IN CHAR16                         *Name,
-  IN EFI_DEVICE_PATH_PROPERTY_NODE  *Node
+  IN EFI_DEVICE_PATH_PROPERTY_NODE  *Node,
+  IN CONST CHAR16                   *Name
   )
 {
   EFI_DEVICE_PATH_PROPERTY *Property;
 
-  BOOLEAN                  IsPropertyNull;
   INTN                     Result;
 
   Property = EFI_DEVICE_PATH_PROPERTY_FROM_LIST_ENTRY (
                GetFirstNode (&Node->Hdr.Properties)
                );
 
-  do {
-    IsPropertyNull = IsNull (&Node->Hdr.Properties, &Property->Link);
-
-    if (IsPropertyNull) {
-      Property = NULL;
-
-      break;
+  while (TRUE) {
+    if (IsNull (&Node->Hdr.Properties, &Property->Link)) {
+      return NULL;
     }
 
-    Result = StrCmp (Name, (CHAR16 *)&Property->Value->Data);
+    Result = StrCmp (Name, (CONST CHAR16 *) &Property->Value->Data[0]);
 
     if (Result == 0) {
       break;
@@ -201,15 +198,15 @@ InternalGetProperty (
     Property = EFI_DEVICE_PATH_PROPERTY_FROM_LIST_ENTRY (
                  GetNextNode (&Node->Hdr.Properties, &Property->Link)
                  );
-  } while (TRUE);
+  }
 
   return Property;
 }
 
-// InternalCallProtocol
+// InternalSyncWithThunderboltDevices
 STATIC
 VOID
-InternalCallProtocol (
+InternalSyncWithThunderboltDevices (
   VOID
   )
 {
@@ -222,17 +219,17 @@ InternalCallProtocol (
   Buffer = NULL;
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
-                  &mUnknownProtocolGuid,
+                  &mAppleThunderboltNativeHostInterfaceProtocolGuid,
                   NULL,
                   &NumberHandles,
                   &Buffer
                   );
 
-  if (Status == EFI_SUCCESS) {
+  if (!EFI_ERROR(EFI_SUCCESS)) {
     for (Index = 0; Index < NumberHandles; ++Index) {
       Status = gBS->HandleProtocol (
                       Buffer[Index],
-                      &mUnknownProtocolGuid,
+                      &mAppleThunderboltNativeHostInterfaceProtocolGuid,
                       &Interface
                       );
 
@@ -242,10 +239,8 @@ InternalCallProtocol (
         }
       }
     }
-  }
 
-  if (Buffer != NULL) {
-    gBS->FreePool ((VOID *)Buffer);
+    FreePool (Buffer);
   }
 }
 
@@ -276,14 +271,12 @@ EFIAPI
 DppDbGetPropertyValue (
   IN     EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL  *This,
   IN     EFI_DEVICE_PATH_PROTOCOL                    *DevicePath,
-  IN     CHAR16                                      *Name,
-  OUT    VOID                                        *Value, OPTIONAL
+  IN     CONST CHAR16                                *Name,
+  OUT    VOID                                        *Value OPTIONAL,
   IN OUT UINTN                                       *Size
   )
 {
-  EFI_STATUS                        Status;
-
-  DEVICE_PATH_PROPERTY_DATA *Database;
+  DEVICE_PATH_PROPERTY_DATA         *Database;
   EFI_DEVICE_PATH_PROPERTY_NODE     *Node;
   EFI_DEVICE_PATH_PROPERTY          *Property;
   UINTN                             PropertySize;
@@ -291,30 +284,25 @@ DppDbGetPropertyValue (
 
   Database = PROPERTY_DATABASE_FROM_PROTOCOL (This);
   Node     = InternalGetPropertyNode (Database, DevicePath);
-
-  Status = EFI_NOT_FOUND;
-
-  if (Node != NULL) {
-    Property = InternalGetProperty (Name, Node);
-
-    Status = EFI_NOT_FOUND;
-
-    if (Property != NULL) {
-      PropertySize   = EFI_DEVICE_PATH_PROPERTY_VALUE_SIZE (Property);
-      BufferTooSmall = (BOOLEAN)(PropertySize > *Size);
-      *Size          = PropertySize;
-
-      Status = EFI_BUFFER_TOO_SMALL;
-
-      if (!BufferTooSmall) {
-        CopyMem (Value, (VOID *)&Property->Value->Data, PropertySize);
-
-        Status = EFI_SUCCESS;
-      }
-    }
+  if (Node == NULL) {
+    return EFI_NOT_FOUND;
   }
 
-  return Status;
+  Property = InternalGetProperty (Node, Name);
+  if (Property == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  PropertySize   = EFI_DEVICE_PATH_PROPERTY_VALUE_SIZE (Property);
+  BufferTooSmall = PropertySize > *Size;
+  *Size          = PropertySize;
+
+  if (!BufferTooSmall) {
+    CopyMem (Value, &Property->Value->Data[0], PropertySize);
+    return EFI_SUCCESS;
+  }
+
+  return EFI_BUFFER_TOO_SMALL;
 }
 
 // DppDbSetProperty
@@ -337,59 +325,55 @@ EFIAPI
 DppDbSetProperty (
   IN EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL  *This,
   IN EFI_DEVICE_PATH_PROTOCOL                    *DevicePath,
-  IN CHAR16                                      *Name,
+  IN CONST CHAR16                                *Name,
   IN VOID                                        *Value,
   IN UINTN                                       Size
   )
 {
-  EFI_STATUS                    Status;
-
   DEVICE_PATH_PROPERTY_DATA     *Database;
   EFI_DEVICE_PATH_PROPERTY_NODE *Node;
   UINTN                         DevicePathSize;
   EFI_DEVICE_PATH_PROPERTY      *Property;
   INTN                          Result;
   UINTN                         PropertyNameSize;
-  UINTN                         PropertyDataSize;
-  EFI_DEVICE_PATH_PROPERTY_DATA *PropertyData;
+  UINTN                         PropertyValueSize;
+  EFI_DEVICE_PATH_PROPERTY_DATA *PropertyName;
+  EFI_DEVICE_PATH_PROPERTY_DATA *PropertyValue;
 
   Database = PROPERTY_DATABASE_FROM_PROTOCOL (This);
   Node     = InternalGetPropertyNode (Database, DevicePath);
 
   if (Node == NULL) {
     DevicePathSize = GetDevicePathSize (DevicePath);
-    Node           = AllocateZeroPool (sizeof (Node) + DevicePathSize);
-
-    Status = EFI_OUT_OF_RESOURCES;
+    Node           = AllocateZeroPool (sizeof (*Node) + DevicePathSize);
 
     if (Node == NULL) {
-      goto Done;
-    } else {
-      Node->Hdr.Signature = EFI_DEVICE_PATH_PROPERTY_NODE_SIGNATURE;
-
-      InitializeListHead (&Node->Hdr.Properties);
-
-      CopyMem (
-        (VOID *)&Node->DevicePath,
-        (VOID *)DevicePath,
-        DevicePathSize
-        );
-
-      InsertTailList (&Database->Nodes, &Node->Hdr.Link);
-
-      Database->Modified = TRUE;
+      return EFI_OUT_OF_RESOURCES;
     }
+
+    Node->Hdr.Signature = EFI_DEVICE_PATH_PROPERTY_NODE_SIGNATURE;
+
+    InitializeListHead (&Node->Hdr.Properties);
+
+    CopyMem (
+      &Node->DevicePath,
+      DevicePath,
+      DevicePathSize
+      );
+
+    InsertTailList (&Database->Nodes, &Node->Hdr.Link);
+
+    Database->Modified = TRUE;
   }
 
-  Property = InternalGetProperty (Name, Node);
+  Property = InternalGetProperty (Node, Name);
 
   if (Property != NULL) {
     if (Property->Value->Size == Size) {
-      Result = CompareMem ((VOID *)&Property->Value->Data, Value, Size);
+      Result = CompareMem (&Property->Value->Data[0], Value, Size);
 
       if (Result == 0) {
-        Status = EFI_SUCCESS;
-        goto Done;
+        return EFI_SUCCESS;
       }
     }
 
@@ -397,48 +381,48 @@ DppDbSetProperty (
 
     --Node->Hdr.NumberOfProperties;
 
-    gBS->FreePool ((VOID *)Property->Name);
-    gBS->FreePool ((VOID *)Property->Value);
-    gBS->FreePool ((VOID *)Property);
+    FreePool (Property->Name);
+    FreePool (Property->Value);
+    FreePool (Property);
   }
 
   Database->Modified = TRUE;
-  Property           = AllocateZeroPool (sizeof (Property));
-
-  Status = EFI_OUT_OF_RESOURCES;
-
-  if (Property != NULL) {
-    PropertyNameSize   = (StrSize (Name) + sizeof (*PropertyData));
-    PropertyData       = AllocateZeroPool (PropertyNameSize);
-    Property->Name     = PropertyData;
-
-    if (PropertyData != NULL) {
-      PropertyDataSize = (Size + sizeof (*PropertyData));
-      PropertyData     = AllocateZeroPool (PropertyDataSize);
-      Property->Value  = PropertyData;
-
-      if (PropertyData != NULL) {
-        Property->Signature = EFI_DEVICE_PATH_PROPERTY_SIGNATURE;
-
-        StrCpyS ((CHAR16 *)&Property->Name->Data, PropertyNameSize / sizeof (CHAR16), Name);
-
-        Property->Name->Size = (UINT32)PropertyNameSize;
-
-        CopyMem ((VOID *)&Property->Value->Data, (VOID *)Value, Size);
-
-        Property->Value->Size = (UINT32)PropertyDataSize;
-
-        InsertTailList (&Node->Hdr.Properties, &Property->Link);
-
-        Status = EFI_SUCCESS;
-
-        ++Node->Hdr.NumberOfProperties;
-      }
-    }
+  Property           = AllocateZeroPool (sizeof (*Property));
+  
+  if (Property == NULL) {
+    return EFI_OUT_OF_RESOURCES;
   }
 
-Done:
-  return Status;
+  PropertyNameSize   = (StrSize (Name) + sizeof (*PropertyName));
+  PropertyName       = AllocateZeroPool (PropertyNameSize);
+  Property->Name     = PropertyName;
+  if (PropertyName == NULL) {
+    FreePool (Property);
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  PropertyValueSize = (Size + sizeof (*PropertyValue));
+  PropertyValue     = AllocateZeroPool (PropertyValueSize);
+  Property->Value   = PropertyValue;
+
+  if (PropertyValue == NULL) {
+    FreePool (PropertyName);
+    FreePool (Property);
+  }
+  
+  Property->Signature = EFI_DEVICE_PATH_PROPERTY_SIGNATURE;
+
+  CopyMem (&Property->Name->Data[0], Name, PropertyNameSize - sizeof (*PropertyName));
+  Property->Name->Size = (UINT32) PropertyNameSize;
+
+  CopyMem (&Property->Value->Data[0], Value, Size);
+  Property->Value->Size = (UINT32) PropertyValueSize;
+
+  InsertTailList (&Node->Hdr.Properties, &Property->Link);
+
+  ++Node->Hdr.NumberOfProperties;
+
+  return EFI_SUCCESS;
 }
 
 // DppDbRemoveProperty
@@ -458,48 +442,41 @@ EFIAPI
 DppDbRemoveProperty (
   IN EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL  *This,
   IN EFI_DEVICE_PATH_PROTOCOL                    *DevicePath,
-  IN CHAR16                                      *Name
+  IN CONST CHAR16                                *Name
   )
 {
-  EFI_STATUS                    Status;
-
   DEVICE_PATH_PROPERTY_DATA     *DevicePathPropertyData;
   EFI_DEVICE_PATH_PROPERTY_NODE *Node;
   EFI_DEVICE_PATH_PROPERTY      *Property;
 
   DevicePathPropertyData = PROPERTY_DATABASE_FROM_PROTOCOL (This);
-
   Node = InternalGetPropertyNode (DevicePathPropertyData, DevicePath);
-
   if (Node == NULL) {
-    Status = EFI_NOT_FOUND;
-  } else {
-    Property = InternalGetProperty (Name, Node);
-
-    Status = EFI_NOT_FOUND;
-
-    if (Property != NULL) {
-      DevicePathPropertyData->Modified = TRUE;
-
-      RemoveEntryList (&Property->Link);
-
-      --Node->Hdr.NumberOfProperties;
-
-      gBS->FreePool ((VOID *)Property->Name);
-      gBS->FreePool ((VOID *)Property->Value);
-      gBS->FreePool ((VOID *)Property);
-
-      Status = EFI_SUCCESS;
-
-      if (Node->Hdr.NumberOfProperties == 0) {
-        RemoveEntryList (&Node->Hdr.Link);
-
-        gBS->FreePool ((VOID *)Node);
-      }
-    }
+    return EFI_NOT_FOUND;
   }
 
-  return Status;
+  Property = InternalGetProperty (Node, Name);
+  if (Property == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  DevicePathPropertyData->Modified = TRUE;
+
+  RemoveEntryList (&Property->Link);
+
+  --Node->Hdr.NumberOfProperties;
+
+  FreePool (Property->Name);
+  FreePool (Property->Value);
+  FreePool (Property);
+
+  if (Node->Hdr.NumberOfProperties == 0) {
+    RemoveEntryList (&Node->Hdr.Link);
+
+    FreePool (Node);
+  }
+
+  return EFI_SUCCESS;
 }
 
 // DppDbGetPropertyBuffer
@@ -522,142 +499,121 @@ EFI_STATUS
 EFIAPI
 DppDbGetPropertyBuffer (
   IN     EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL  *This,
-  OUT    EFI_DEVICE_PATH_PROPERTY_BUFFER             *Buffer, OPTIONAL
+  OUT    EFI_DEVICE_PATH_PROPERTY_BUFFER             *Buffer OPTIONAL,
   IN OUT UINTN                                       *Size
   )
 {
-  EFI_STATUS                           Status;
-
   LIST_ENTRY                           *Nodes;
-  BOOLEAN                              Result;
   EFI_DEVICE_PATH_PROPERTY_NODE        *NodeWalker;
   UINTN                                BufferSize;
   EFI_DEVICE_PATH_PROPERTY             *Property;
   UINT32                               NumberOfNodes;
   EFI_DEVICE_PATH_PROPERTY_BUFFER_NODE *BufferNode;
-  VOID                                 *BufferPtr;
+  UINT8                                *BufferPtr;
+  BOOLEAN                              BufferTooSmall;
 
   Nodes  = &(PROPERTY_DATABASE_FROM_PROTOCOL (This))->Nodes;
-  Result = IsListEmpty (Nodes);
 
-  if (Result) {
+  if (IsListEmpty (Nodes)) {
     *Size  = 0;
-    Status = EFI_SUCCESS;
-  } else {
-    InternalCallProtocol ();
-
-    NodeWalker    = PROPERTY_NODE_FROM_LIST_ENTRY (GetFirstNode (Nodes));
-    Result        = IsNull (Nodes, &NodeWalker->Hdr.Link);
-    BufferSize    = sizeof (*Buffer);
-    NumberOfNodes = 0;
-
-    while (!Result) {
-      Property = EFI_DEVICE_PATH_PROPERTY_FROM_LIST_ENTRY (
-                   GetFirstNode (&NodeWalker->Hdr.Properties)
-                   );
-
-      Result = IsNull (&NodeWalker->Hdr.Properties, &Property->Link);
-
-      while (!Result) {
-        BufferSize += EFI_DEVICE_PATH_PROPERTY_SIZE (Property);
-
-        Property = EFI_DEVICE_PATH_PROPERTY_FROM_LIST_ENTRY (
-                     GetNextNode (&NodeWalker->Hdr.Properties, &Property->Link)
-                     );
-
-        Result = IsNull (&NodeWalker->Hdr.Properties, &Property->Link);
-      }
-
-      NodeWalker = PROPERTY_NODE_FROM_LIST_ENTRY (
-                     GetNextNode (Nodes, &NodeWalker->Hdr.Link)
-                     );
-
-      Result      = IsNull (Nodes, &NodeWalker->Hdr.Link);
-      BufferSize += EFI_DEVICE_PATH_PROPERTY_NODE_SIZE (NodeWalker);
-      ++NumberOfNodes;
-    }
-
-    Result = (BOOLEAN)(*Size < BufferSize);
-    *Size  = BufferSize;
-    Status = EFI_BUFFER_TOO_SMALL;
-
-    if (!Result) {
-      Buffer->Size          = (UINT32)BufferSize;
-      Buffer->MustBe1       = 1;
-      Buffer->NumberOfNodes = NumberOfNodes;
-
-      NodeWalker = PROPERTY_NODE_FROM_LIST_ENTRY (
-                     GetFirstNode (Nodes)
-                     );
-
-      Result = IsNull (&NodeWalker->Hdr.Link, &NodeWalker->Hdr.Link);
-      Status = EFI_SUCCESS;
-
-      if (!Result) {
-        BufferNode = &Buffer->Nodes[0];
-
-        do {
-          BufferSize = GetDevicePathSize (&NodeWalker->DevicePath);
-
-          CopyMem (
-            (VOID *)&BufferNode->DevicePath,
-            (VOID *)&NodeWalker->DevicePath,
-            BufferSize
-            );
-
-          BufferNode->Hdr.NumberOfProperties = (UINT32)NodeWalker->Hdr.NumberOfProperties;
-
-          Property = EFI_DEVICE_PATH_PROPERTY_FROM_LIST_ENTRY (
-                       GetFirstNode (&NodeWalker->Hdr.Properties)
-                       );
-
-          Result      = IsNull (&NodeWalker->Hdr.Properties, &Property->Link);
-          BufferSize += sizeof (BufferNode->Hdr);
-          BufferPtr   = (VOID *)((UINTN)Buffer + BufferSize);
-
-          while (!Result) {
-            CopyMem (
-              BufferPtr,
-              (VOID *)Property->Name,
-              (UINTN)Property->Name->Size
-              );
-
-            CopyMem (
-              (VOID *)((UINTN)BufferPtr + (UINTN)Property->Name->Size),
-              Property->Value,
-              (UINTN)Property->Value->Size
-              );
-
-            BufferPtr = (VOID *)(
-                          (UINTN)BufferPtr
-                            + Property->Name->Size + Property->Value->Size
-                          );
-
-            BufferSize += EFI_DEVICE_PATH_PROPERTY_SIZE (Property);
-            Property    = EFI_DEVICE_PATH_PROPERTY_FROM_LIST_ENTRY (
-                            GetNextNode (
-                              &NodeWalker->Hdr.Properties,
-                              &Property->Link
-                              )
-                            );
-
-            Result = IsNull (&NodeWalker->Hdr.Properties, &Property->Link);
-          }
-
-          BufferNode->Hdr.Size = (UINT32)BufferSize;
-          BufferNode           = (EFI_DEVICE_PATH_PROPERTY_BUFFER_NODE *)(
-                                    (UINTN)BufferNode + BufferSize
-                                    );
-
-          NodeWalker = PROPERTY_NODE_FROM_LIST_ENTRY (
-                         GetNextNode (Nodes, &NodeWalker->Hdr.Link)
-                         );
-        } while (!IsNull (&NodeWalker->Hdr.Link, &NodeWalker->Hdr.Link));
-      }
-    }
+    return EFI_SUCCESS;
   }
 
-  return Status;
+  InternalSyncWithThunderboltDevices ();
+
+  NodeWalker    = PROPERTY_NODE_FROM_LIST_ENTRY (GetFirstNode (Nodes));
+  BufferSize    = sizeof (*Buffer);
+  NumberOfNodes = 0;
+
+  while (!IsNull (Nodes, &NodeWalker->Hdr.Link)) {
+    Property = EFI_DEVICE_PATH_PROPERTY_FROM_LIST_ENTRY (
+                 GetFirstNode (&NodeWalker->Hdr.Properties)
+                 );
+
+    while (!IsNull (&NodeWalker->Hdr.Properties, &Property->Link)) {
+      BufferSize += EFI_DEVICE_PATH_PROPERTY_SIZE (Property);
+
+      Property = EFI_DEVICE_PATH_PROPERTY_FROM_LIST_ENTRY (
+                   GetNextNode (&NodeWalker->Hdr.Properties, &Property->Link)
+                   );
+    }
+
+    NodeWalker = PROPERTY_NODE_FROM_LIST_ENTRY (
+                   GetNextNode (Nodes, &NodeWalker->Hdr.Link)
+                   );
+
+    BufferSize += EFI_DEVICE_PATH_PROPERTY_NODE_SIZE (NodeWalker);
+    ++NumberOfNodes;
+  }
+
+  BufferTooSmall = *Size < BufferSize;
+  *Size  = BufferSize;
+  if (BufferTooSmall) {
+    return EFI_BUFFER_TOO_SMALL;
+  }
+
+  Buffer->Size          = (UINT32)BufferSize;
+  Buffer->Version       = EFI_DEVICE_PATH_PROPERTY_DATABASE_VERSION;
+  Buffer->NumberOfNodes = NumberOfNodes;
+
+  NodeWalker = PROPERTY_NODE_FROM_LIST_ENTRY (
+                 GetFirstNode (Nodes)
+                 );
+
+  BufferNode = &Buffer->Nodes[0];
+
+  while (!IsNull (&NodeWalker->Hdr.Link, &NodeWalker->Hdr.Link)) {
+    BufferSize = GetDevicePathSize (&NodeWalker->DevicePath);
+
+    CopyMem (
+      &BufferNode->DevicePath,
+      &NodeWalker->DevicePath,
+      BufferSize
+      );
+
+    BufferNode->Hdr.NumberOfProperties = (UINT32)NodeWalker->Hdr.NumberOfProperties;
+
+    Property = EFI_DEVICE_PATH_PROPERTY_FROM_LIST_ENTRY (
+                 GetFirstNode (&NodeWalker->Hdr.Properties)
+                 );
+
+    BufferSize += sizeof (BufferNode->Hdr);
+    BufferPtr   = (UINT8 *)((UINTN)Buffer + BufferSize);
+
+    while (!IsNull (&NodeWalker->Hdr.Properties, &Property->Link)) {
+      CopyMem (
+        BufferPtr,
+        Property->Name,
+        Property->Name->Size
+        );
+
+      CopyMem (
+        BufferPtr + Property->Name->Size,
+        Property->Value,
+        Property->Value->Size
+        );
+
+      BufferPtr  += Property->Name->Size + Property->Value->Size;
+      BufferSize += EFI_DEVICE_PATH_PROPERTY_SIZE (Property);
+      Property    = EFI_DEVICE_PATH_PROPERTY_FROM_LIST_ENTRY (
+                      GetNextNode (
+                        &NodeWalker->Hdr.Properties,
+                        &Property->Link
+                        )
+                      );
+    }
+
+    BufferNode->Hdr.Size = (UINT32) BufferSize;
+    BufferNode           = (EFI_DEVICE_PATH_PROPERTY_BUFFER_NODE *)(
+                              (UINTN)BufferNode + BufferSize
+                              );
+
+    NodeWalker = PROPERTY_NODE_FROM_LIST_ENTRY (
+                   GetNextNode (Nodes, &NodeWalker->Hdr.Link)
+                   );
+  }
+
+  return EFI_SUCCESS;
 }
 
 // InternalReadEfiVariableProperties
@@ -672,23 +628,26 @@ InternalReadEfiVariableProperties (
   EFI_STATUS                           Status;
 
   CHAR16                               IndexBuffer[5];
-  UINT64                               NumberOfVariables;
+  UINT32                               NumberOfVariables;
+  UINT32                               VariableIndex;
   CHAR16                               VariableName[64];
   UINTN                                DataSize;
   UINTN                                BufferSize;
+  UINTN                                CurrentBufferSize;
   EFI_DEVICE_PATH_PROPERTY_BUFFER      *Buffer;
-  UINT64                               Value;
-  VOID                                 *BufferPtr;
+  UINT8                                *BufferPtr;
   EFI_DEVICE_PATH_PROPERTY_BUFFER_NODE *BufferNode;
-  UINTN                                NumberOfNodes;
+  UINTN                                NodeIndex;
   UINTN                                Index;
   EFI_DEVICE_PATH_PROPERTY_DATA        *NameData;
   EFI_DEVICE_PATH_PROPERTY_DATA        *ValueData;
+  UINT32                               Attributes;
 
   NumberOfVariables = 0;
   BufferSize        = 0;
+  Status = EFI_BUFFER_TOO_SMALL;
 
-  do {
+  while (Status == EFI_BUFFER_TOO_SMALL && NumberOfVariables < APPLE_PATH_PROPERTY_VARIABLE_MAX_NUM) {
     UnicodeSPrint (
       &IndexBuffer[0],
       sizeof (IndexBuffer),
@@ -696,8 +655,8 @@ InternalReadEfiVariableProperties (
       NumberOfVariables
       );
 
-    StrCpyS (VariableName, sizeof (VariableName)/sizeof (CHAR16), APPLE_PATH_PROPERTIES_VARIABLE_NAME);
-    StrCatS (VariableName, sizeof (VariableName)/sizeof (CHAR16), IndexBuffer);
+    StrCpyS (VariableName, ARRAY_SIZE (VariableName), APPLE_PATH_PROPERTIES_VARIABLE_NAME);
+    StrCatS (VariableName, ARRAY_SIZE (VariableName), IndexBuffer);
 
     DataSize = 0;
     Status   = gRT->GetVariable (
@@ -709,125 +668,144 @@ InternalReadEfiVariableProperties (
                       );
 
     ++NumberOfVariables;
-    BufferSize += DataSize;
-  } while (Status == EFI_BUFFER_TOO_SMALL);
-
-  Status = EFI_NOT_FOUND;
-
-  if (BufferSize > 0) {
-    Status = EFI_OUT_OF_RESOURCES;
-
-    Buffer = AllocatePool (BufferSize);
-
-    if (Buffer != NULL) {
-      BufferPtr = Buffer;
-
-      for (Value = 0; Value >= NumberOfVariables; ++Value) {
-        UnicodeSPrint (
-          &IndexBuffer[0],
-          sizeof (IndexBuffer),
-          L"%04x",
-          Value
-          );
-
-        StrCpyS (VariableName, sizeof (VariableName)/sizeof (CHAR16), APPLE_PATH_PROPERTIES_VARIABLE_NAME);
-        StrCatS (VariableName, sizeof (VariableName)/sizeof (CHAR16), IndexBuffer);
-
-        DataSize = BufferSize;
-        Status   = gRT->GetVariable (
-                          VariableName,
-                          VendorGuid,
-                          NULL,
-                          &DataSize,
-                          BufferPtr
-                          );
-
-        if (EFI_ERROR (Status)) {
-          break;
-        }
-
-        if (DeleteVariables) {
-          Status = gRT->SetVariable (VariableName, VendorGuid, 0, 0, NULL);
-
-          if (EFI_ERROR (Status)) {
-            break;
-          }
-        }
-
-        BufferPtr   = (VOID *)((UINTN)BufferPtr + DataSize);
-        BufferSize -= DataSize;
-      }
-
-      if (Buffer->Size != BufferSize) {
-        gBS->FreePool ((VOID *)Buffer);
-
-        Status = EFI_NOT_FOUND;
-      } else if (EFI_ERROR (Status)) {
-        if ((Buffer->MustBe1 == 1) && (Buffer->NumberOfNodes > 0)) {
-          BufferNode    = &Buffer->Nodes[0];
-          NumberOfNodes = 0;
-
-          do {
-            DataSize = GetDevicePathSize (&BufferNode->DevicePath);
-
-            if (BufferNode->Hdr.NumberOfProperties > 0) {
-              NameData = (EFI_DEVICE_PATH_PROPERTY_DATA *)(
-                           (UINTN)BufferNode + DataSize + sizeof (*Buffer)
-                           );
-
-              ValueData = (EFI_DEVICE_PATH_PROPERTY_DATA *)(
-                            (UINTN)NameData + NameData->Size
-                            );
-
-              Index = 0;
-
-              do {
-                Status = DevicePathPropertyData->Protocol.SetProperty (
-                                                            &DevicePathPropertyData->Protocol,
-                                                            &BufferNode->DevicePath,
-                                                            (CHAR16 *)&NameData->Data,
-                                                            (VOID *)&ValueData->Data,
-                                                            (UINTN)(
-                                                              ValueData->Size
-                                                                - sizeof (ValueData->Size)
-                                                              )
-                                                            );
-
-                ++Index;
-
-                NameData = (EFI_DEVICE_PATH_PROPERTY_DATA *)(
-                             (UINTN)ValueData + ValueData->Size
-                             );
-
-                ValueData =
-                  (EFI_DEVICE_PATH_PROPERTY_DATA *)(
-                    (UINTN)ValueData + ValueData->Size + NameData->Size
-                    );
-              } while (Index < BufferNode->Hdr.NumberOfProperties);
-            }
-
-            ++NumberOfNodes;
-
-            BufferNode = (EFI_DEVICE_PATH_PROPERTY_BUFFER_NODE *)(
-                           (UINTN)BufferNode + (UINTN)BufferNode->Hdr.Size
-                           );
-          } while (NumberOfNodes < Buffer->NumberOfNodes);
-        }
-
-        gBS->FreePool ((VOID *)Buffer);
-
-        goto Done;
-      }
+    if (OcOverflowAddUN (BufferSize, DataSize, &BufferSize)) {
+      //
+      // Should never trigger due to BufferSize being 4G at least.
+      //
+      return EFI_OUT_OF_RESOURCES;
     }
-
-    if (Status == EFI_NOT_FOUND) {
-      Status = EFI_SUCCESS;
-    }
+    //
+    // NumberOfVariables check is an extra caution here, writing 0x10000 variables
+    // to NVRAM is pretty much impossible.
+    //
   }
 
-Done:
-  return Status;
+  if (BufferSize < sizeof (EFI_DEVICE_PATH_PROPERTY_BUFFER)) {
+    return EFI_SUCCESS;
+  }
+
+  Buffer = AllocateZeroPool (BufferSize);
+  if (Buffer == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  BufferPtr = (UINT8 *) Buffer;
+  CurrentBufferSize = BufferSize;
+  Status = EFI_SUCCESS;
+
+  for (VariableIndex = 0; VariableIndex < NumberOfVariables; ++VariableIndex) {
+    UnicodeSPrint (
+      &IndexBuffer[0],
+      sizeof (IndexBuffer),
+      L"%04x",
+      VariableIndex
+      );
+
+    StrCpyS (VariableName, ARRAY_SIZE (VariableName), APPLE_PATH_PROPERTIES_VARIABLE_NAME);
+    StrCatS (VariableName, ARRAY_SIZE (VariableName), IndexBuffer);
+
+    DataSize = CurrentBufferSize;
+    Status   = gRT->GetVariable (
+                      VariableName,
+                      VendorGuid,
+                      &Attributes,
+                      &DataSize,
+                      BufferPtr
+                      );
+
+    if (EFI_ERROR (Status)) {
+      break;
+    }
+
+    if (DeleteVariables) {
+      Status = gRT->SetVariable (VariableName, VendorGuid, Attributes, 0, NULL);
+
+      if (EFI_ERROR (Status)) {
+        break;
+      }
+    }
+
+    BufferPtr         += DataSize;
+    CurrentBufferSize -= DataSize;
+  }
+
+  //
+  // Force success on format mismatch, this slightly differs from Apple implementation,
+  // where variable read failure results in error unless EFI_NOT_FOUND.
+  //
+  if (Buffer->Size != BufferSize
+    || Buffer->Version != EFI_DEVICE_PATH_PROPERTY_DATABASE_VERSION
+    || Buffer->NumberOfNodes == 0) {
+    FreePool (Buffer);
+    return EFI_SUCCESS;
+  }
+
+  if (EFI_ERROR (Status)) {
+    FreePool (Buffer);
+    return Status;
+  }
+
+  //
+  // TODO: while this does not seem exploitable, we should sanity check the input data.
+  //
+ 
+  BufferNode    = &Buffer->Nodes[0];
+  for (NodeIndex = 0; NodeIndex < Buffer->NumberOfNodes; ++NodeIndex) {
+    DataSize = GetDevicePathSize (&BufferNode->DevicePath);
+
+    if (BufferNode->Hdr.NumberOfProperties > 0) {
+      NameData = (EFI_DEVICE_PATH_PROPERTY_DATA *)(
+                   (UINTN)BufferNode + DataSize + sizeof (*Buffer)
+                   );
+
+      ValueData = (EFI_DEVICE_PATH_PROPERTY_DATA *)(
+                    (UINTN)NameData + NameData->Size
+                    );
+
+      for (Index = 0; Index < BufferNode->Hdr.NumberOfProperties; ++Index) {
+        //
+        // Apple implementation does check for an error here, and returns failure
+        // if all the writes failed. This is illogical, so we just ignore it.
+        //
+        DevicePathPropertyData->Protocol.SetProperty (
+          &DevicePathPropertyData->Protocol,
+          &BufferNode->DevicePath,
+          (CHAR16 *)&NameData->Data,
+          (VOID *)&ValueData->Data,
+          (UINTN)(
+            ValueData->Size
+              - sizeof (ValueData->Size)
+            )
+          );
+
+        NameData = (EFI_DEVICE_PATH_PROPERTY_DATA *)(
+                     (UINTN)ValueData + ValueData->Size
+                     );
+
+        ValueData =
+          (EFI_DEVICE_PATH_PROPERTY_DATA *)(
+            (UINTN)ValueData + ValueData->Size + NameData->Size
+            );
+      }
+    }
+
+    BufferNode = (EFI_DEVICE_PATH_PROPERTY_BUFFER_NODE *)(
+                   (UINTN)BufferNode + (UINTN)BufferNode->Hdr.Size
+                   );
+  }
+
+  FreePool (Buffer);
+
+  return EFI_SUCCESS;
 }
+
+STATIC EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL DppDbProtocolTemplate = {
+  EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL_REVISION,
+  DppDbGetPropertyValue,
+  DppDbSetProperty,
+  DppDbRemoveProperty,
+  DppDbGetPropertyBuffer
+};
 
 /**
 
@@ -843,22 +821,15 @@ OcDevicePathPropertyInstallProtocol (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  STATIC EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL DppDbProtocolTemplate = {
-    EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL_REVISION,
-    DppDbGetPropertyValue,
-    DppDbSetProperty,
-    DppDbRemoveProperty,
-    DppDbGetPropertyBuffer
-  };
-
   EFI_STATUS                      Status;
 
   UINTN                           NumberHandles;
   EFI_DEVICE_PATH_PROPERTY_BUFFER *Buffer;
+  UINT8                           *BufferPtr;
   DEVICE_PATH_PROPERTY_DATA       *DevicePathPropertyData;
   UINTN                           DataSize;
-  UINTN                           Index;
-  CHAR16                          IndexBuffer[4];
+  UINT32                          VariableIndex;
+  CHAR16                          IndexBuffer[5];
   CHAR16                          VariableName[64];
   UINTN                           VariableSize;
   UINT32                          Attributes;
@@ -873,179 +844,178 @@ OcDevicePathPropertyInstallProtocol (
                   );
 
   if (!EFI_ERROR (Status)) {
-    Status = EFI_DEVICE_ERROR;
-
     if (Buffer != NULL) {
-      gBS->FreePool ((VOID *)Buffer);
+      FreePool (Buffer);
     }
-  } else {
-    DevicePathPropertyData = AllocatePool (sizeof (*DevicePathPropertyData));
+    return EFI_DEVICE_ERROR;
+  }
+  
+  DevicePathPropertyData = AllocateZeroPool (sizeof (*DevicePathPropertyData));
+  if (DevicePathPropertyData == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
 
-    if (DevicePathPropertyData == NULL) {
-      Status = EFI_OUT_OF_RESOURCES;
-      goto Done;
-    }
+  DevicePathPropertyData->Signature = DEVICE_PATH_PROPERTY_DATA_SIGNATURE;
 
-    DevicePathPropertyData->Signature = DEVICE_PATH_PROPERTY_DATA_SIGNATURE;
+  CopyMem (
+    &DevicePathPropertyData->Protocol,
+    &DppDbProtocolTemplate,
+    sizeof (DppDbProtocolTemplate)
+    );
 
-    CopyMem (
-      (VOID *)&DevicePathPropertyData->Protocol,
-      (VOID *)&DppDbProtocolTemplate,
-      sizeof (DppDbProtocolTemplate)
-      );
+  InitializeListHead (&DevicePathPropertyData->Nodes);
 
-    InitializeListHead (&DevicePathPropertyData->Nodes);
+  Status = InternalReadEfiVariableProperties (
+             &gAppleVendorVariableGuid,
+             FALSE,
+             DevicePathPropertyData
+             );
 
-    Status = InternalReadEfiVariableProperties (
-               &gAppleVendorVariableGuid,
-               FALSE,
-               DevicePathPropertyData
-               );
+  if (EFI_ERROR (Status)) {
+    FreePool (DevicePathPropertyData);
+    return Status;
+  }
 
-    if (EFI_ERROR (Status)) {
-      gBS->FreePool ((VOID *)DevicePathPropertyData);
-    } else {
-      DevicePathPropertyData->Modified = FALSE;
+  DevicePathPropertyData->Modified = FALSE;
 
-      Status = InternalReadEfiVariableProperties (
-                 &gAppleBootVariableGuid,
-                 TRUE,
-                 DevicePathPropertyData
+  Status = InternalReadEfiVariableProperties (
+             &gAppleBootVariableGuid,
+             TRUE,
+             DevicePathPropertyData
+             );
+
+  if (EFI_ERROR (Status)) {
+    FreePool (DevicePathPropertyData);
+    return Status;
+  }
+
+  if (DevicePathPropertyData->Modified) {
+    DataSize = 0;
+    Status   = DppDbGetPropertyBuffer (
+                 &DevicePathPropertyData->Protocol,
+                 NULL,
+                 &DataSize
                  );
 
-      if (!EFI_ERROR (Status)) {
-        if (DevicePathPropertyData->Modified) {
-          DataSize = 0;
-          Status   = DppDbGetPropertyBuffer (
-                       &DevicePathPropertyData->Protocol,
-                       NULL,
-                       &DataSize
+    if (Status != EFI_BUFFER_TOO_SMALL) {
+      FreePool (DevicePathPropertyData);
+      return Status;
+    }
+
+    Buffer = AllocateZeroPool (DataSize);
+    if (Buffer == NULL) {
+      FreePool (DevicePathPropertyData);
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    Status = DppDbGetPropertyBuffer (
+               &DevicePathPropertyData->Protocol,
+               Buffer,
+               &DataSize
+               );
+    if (EFI_ERROR (Status)) {
+      FreePool (Buffer);
+      FreePool (DevicePathPropertyData);
+      return Status;
+    }
+
+    VariableIndex = 0;
+    Attributes = (EFI_VARIABLE_NON_VOLATILE
+                | EFI_VARIABLE_BOOTSERVICE_ACCESS
+                | EFI_VARIABLE_RUNTIME_ACCESS);
+    BufferPtr = (UINT8 *) Buffer;
+
+    while (VariableIndex < APPLE_PATH_PROPERTY_VARIABLE_MAX_NUM && DataSize > 0) {
+      UnicodeSPrint (
+        &IndexBuffer[0],
+        sizeof (IndexBuffer),
+        L"%04x",
+        VariableIndex
+        );
+
+      StrCpyS (VariableName, ARRAY_SIZE (VariableName), APPLE_PATH_PROPERTIES_VARIABLE_NAME);
+      StrCatS (VariableName, ARRAY_SIZE (VariableName), IndexBuffer);
+
+      VariableSize = MIN (
+                       DataSize,
+                       APPLE_PATH_PROPERTY_VARIABLE_MAX_SIZE
                        );
 
-          if (Status != EFI_BUFFER_TOO_SMALL) {
-            Buffer = AllocatePool (DataSize);
+      Status = gRT->SetVariable (
+                      VariableName,
+                      &gAppleVendorVariableGuid,
+                      Attributes,
+                      VariableSize,
+                      BufferPtr
+                      );
 
-            if (Buffer == NULL) {
-              Status = EFI_OUT_OF_RESOURCES;
-
-              gBS->FreePool ((VOID *)DevicePathPropertyData);
-
-              goto Done;
-            } else {
-              Status = DppDbGetPropertyBuffer (
-                         &DevicePathPropertyData->Protocol,
-                         Buffer,
-                         &DataSize
-                         );
-
-              Attributes = (EFI_VARIABLE_NON_VOLATILE
-                          | EFI_VARIABLE_BOOTSERVICE_ACCESS
-                          | EFI_VARIABLE_RUNTIME_ACCESS);
-
-              if (!EFI_ERROR (Status)) {
-                for (Index = 0; DataSize > 0; ++Index) {
-                  UnicodeSPrint (
-                    &IndexBuffer[0],
-                    sizeof (IndexBuffer),
-                    L"%04x",
-                    Index
-                    );
-
-                  StrCpyS (VariableName, sizeof (VariableName)/sizeof (CHAR16), APPLE_PATH_PROPERTIES_VARIABLE_NAME);
-                  StrCatS (VariableName, sizeof (VariableName)/sizeof (CHAR16), IndexBuffer);
-
-                  VariableSize = MIN (
-                                   DataSize,
-                                   APPLE_PATH_PROPERTY_VARIABLE_MAX_SIZE
-                                   );
-
-                  Status = gRT->SetVariable (
-                                  VariableName,
-                                  &gAppleVendorVariableGuid,
-                                  Attributes,
-                                  VariableSize,
-                                  (VOID *)Buffer
-                                  );
-
-                  if (EFI_ERROR (Status)) {
-                    gBS->FreePool ((VOID *)Buffer);
-                    gBS->FreePool ((VOID *)DevicePathPropertyData);
-                    goto Done;
-                  }
-
-                  Buffer    = (VOID *)((UINTN)Buffer + VariableSize);
-                  DataSize -= VariableSize;
-                }
-
-                do {
-                  UnicodeSPrint (
-                    &IndexBuffer[0],
-                    sizeof (IndexBuffer),
-                    L"%04x",
-                    Index
-                    );
-
-                  StrCpyS (VariableName, sizeof (VariableName)/sizeof (CHAR16), APPLE_PATH_PROPERTIES_VARIABLE_NAME);
-                  StrCatS (VariableName, sizeof (VariableName)/sizeof (CHAR16), IndexBuffer);
-
-                  VariableSize = 0;
-                  Status       = gRT->GetVariable (
-                                        VariableName,
-                                        &gAppleVendorVariableGuid,
-                                        &Attributes,
-                                        &VariableSize,
-                                        NULL
-                                        );
-
-                  if (Status != EFI_BUFFER_TOO_SMALL) {
-                    Status = EFI_SUCCESS;
-
-                    break;
-                  }
-
-                  VariableSize = 0;
-                  Status       = gRT->SetVariable (
-                                        VariableName,
-                                        &gAppleVendorVariableGuid,
-                                        Attributes,
-                                        0,
-                                        NULL
-                                        );
-
-                  ++Index;
-                } while (!EFI_ERROR (Status));
-              }
-
-              gBS->FreePool ((VOID *)Buffer);
-
-              if (EFI_ERROR (Status)) {
-                gBS->FreePool ((VOID *)DevicePathPropertyData);
-                goto Done;
-              }
-            }
-          } else {
-            gBS->FreePool ((VOID *)DevicePathPropertyData);
-            goto Done;
-          }
-        }
-
-        DevicePathPropertyData->Modified = FALSE;
-
-        Handle = NULL;
-        Status = gBS->InstallProtocolInterface (
-                        &Handle,
-                        &gEfiDevicePathPropertyDatabaseProtocolGuid,
-                        EFI_NATIVE_INTERFACE,
-                        &DevicePathPropertyData->Protocol
-                        );
-
-        ASSERT_EFI_ERROR (Status);
-      } else {
-        gBS->FreePool ((VOID *)DevicePathPropertyData);
+      if (EFI_ERROR (Status)) {
+        break;
       }
+
+      BufferPtr += VariableSize;
+      DataSize  -= VariableSize;
+      ++VariableIndex;
+    }
+
+    FreePool (Buffer);
+    if (EFI_ERROR (Status) || DataSize != 0) {
+      FreePool (DevicePathPropertyData);
+      return Status;
+    }
+
+    while (!EFI_ERROR (Status) && VariableIndex < APPLE_PATH_PROPERTY_VARIABLE_MAX_NUM) {
+      UnicodeSPrint (
+        &IndexBuffer[0],
+        sizeof (IndexBuffer),
+        L"%04x",
+        VariableIndex
+        );
+
+      StrCpyS (VariableName, ARRAY_SIZE (VariableName), APPLE_PATH_PROPERTIES_VARIABLE_NAME);
+      StrCatS (VariableName, ARRAY_SIZE (VariableName), IndexBuffer);
+
+      VariableSize = 0;
+      Status       = gRT->GetVariable (
+                            VariableName,
+                            &gAppleVendorVariableGuid,
+                            &Attributes,
+                            &VariableSize,
+                            NULL
+                            );
+
+      if (Status != EFI_BUFFER_TOO_SMALL) {
+        Status = EFI_SUCCESS;
+        break;
+      }
+
+      Status       = gRT->SetVariable (
+                            VariableName,
+                            &gAppleVendorVariableGuid,
+                            Attributes,
+                            0,
+                            NULL
+                            );
+
+      ++VariableIndex;
+    }
+
+    if (EFI_ERROR (Status)) {
+      FreePool (DevicePathPropertyData);
+      return Status;
     }
   }
 
-Done:
+  DevicePathPropertyData->Modified = FALSE;
+
+  Handle = NULL;
+  Status = gBS->InstallProtocolInterface (
+                  &Handle,
+                  &gEfiDevicePathPropertyDatabaseProtocolGuid,
+                  EFI_NATIVE_INTERFACE,
+                  &DevicePathPropertyData->Protocol
+                  );
+
+  ASSERT_EFI_ERROR (Status);
   return Status;
 }

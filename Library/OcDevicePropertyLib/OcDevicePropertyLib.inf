@@ -34,6 +34,7 @@
   OcDevicePropertyLib.c
 
 [Packages]
+  OcSupportPkg/OcSupportPkg.dec
   MdePkg/MdePkg.dec
   EfiPkg/EfiPkg.dec
 
@@ -54,3 +55,4 @@
   UefiBootServicesTableLib
   UefiDriverEntryPoint
   UefiRuntimeServicesTableLib
+  OcGuardLib
