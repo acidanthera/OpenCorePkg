@@ -591,9 +591,12 @@ MachoGetNextSection64 (
   ASSERT (Segment != NULL);
 
   if (Section != NULL) {
-    ASSERT ((Section >= Segment->Sections)
-         && (Section < &Segment->Sections[Segment->NumSections])
-      );
+    ASSERT (Section >= Segment->Sections);
+
+    if (Section >= &Segment->Sections[Segment->NumSections]) {
+      return NULL;
+    }
+
     ++Section;
   } else {
     Section = &Segment->Sections[0];
