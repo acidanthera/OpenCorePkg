@@ -41,7 +41,7 @@ MachoGetContextSize (
   @param[in,out] Context  Context of the Mach-O.
 
 **/
-CONST MACH_HEADER_64 *
+MACH_HEADER_64 *
 MachoGetMachHeader64 (
   IN OUT OC_MACHO_CONTEXT  *Context
   )
@@ -82,11 +82,11 @@ MachoGetFileSize (
 BOOLEAN
 MachoInitializeContext (
   OUT OC_MACHO_CONTEXT  *Context,
-  IN  CONST VOID        *FileData,
+  IN  VOID              *FileData,
   IN  UINT32            FileSize
   )
 {
-  CONST MACH_HEADER_64    *MachHeader;
+  MACH_HEADER_64          *MachHeader;
   UINTN                   TopOfFile;
   UINTN                   TopOfCommands;
   UINT32                  Index;
@@ -272,12 +272,12 @@ InternalGetNextCommand64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-CONST MACH_UUID_COMMAND *
+MACH_UUID_COMMAND *
 MachoGetUuid64 (
   IN OUT OC_MACHO_CONTEXT  *Context
   )
 {
-  CONST MACH_UUID_COMMAND *UuidCommand;
+  MACH_UUID_COMMAND *UuidCommand;
 
   ASSERT (Context != NULL);
 
@@ -306,14 +306,14 @@ MachoGetUuid64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-CONST MACH_SEGMENT_COMMAND_64 *
+MACH_SEGMENT_COMMAND_64 *
 MachoGetSegmentByName64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST CHAR8       *SegmentName
   )
 {
-  CONST MACH_SEGMENT_COMMAND_64 *Segment;
-  INTN                          Result;
+  MACH_SEGMENT_COMMAND_64 *Segment;
+  INTN                    Result;
 
   ASSERT (Context != NULL);
   ASSERT (SegmentName != NULL);
@@ -413,15 +413,15 @@ InternalSectionIsSane (
   @retval NULL  NULL is returned on failure.
 
 **/
-CONST MACH_SECTION_64 *
+MACH_SECTION_64 *
 MachoGetSectionByName64 (
-  IN OUT OC_MACHO_CONTEXT               *Context,
-  IN     CONST MACH_SEGMENT_COMMAND_64  *Segment,
-  IN     CONST CHAR8                    *SectionName
+  IN OUT OC_MACHO_CONTEXT         *Context,
+  IN     MACH_SEGMENT_COMMAND_64  *Segment,
+  IN     CONST CHAR8              *SectionName
   )
 {
-  CONST MACH_SECTION_64 *Section;
-  INTN                  Result;
+  MACH_SECTION_64 *Section;
+  INTN            Result;
 
   ASSERT (Context != NULL);
   ASSERT (Segment != NULL);
@@ -473,14 +473,14 @@ MachoGetSectionByName64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-CONST MACH_SECTION_64 *
+MACH_SECTION_64 *
 MachoGetSegmentSectionByName64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST CHAR8       *SegmentName,
   IN     CONST CHAR8       *SectionName
   )
 {
-  CONST MACH_SEGMENT_COMMAND_64 *Segment;
+  MACH_SEGMENT_COMMAND_64 *Segment;
 
   ASSERT (Context != NULL);
   ASSERT (SegmentName != NULL);
@@ -505,19 +505,19 @@ MachoGetSegmentSectionByName64 (
   @retal NULL  NULL is returned on failure.
 
 **/
-CONST MACH_SEGMENT_COMMAND_64 *
+MACH_SEGMENT_COMMAND_64 *
 MachoGetNextSegment64 (
   IN OUT OC_MACHO_CONTEXT               *Context,
   IN     CONST MACH_SEGMENT_COMMAND_64  *Segment  OPTIONAL
   )
 {
-  CONST MACH_SEGMENT_COMMAND_64 *NextSegment;
+  MACH_SEGMENT_COMMAND_64 *NextSegment;
 
-  CONST MACH_HEADER_64          *MachHeader;
-  UINTN                         TopOfCommands;
-  BOOLEAN                       Result;
-  UINT32                        TopOfSegment;
-  UINTN                         TopOfSections;
+  CONST MACH_HEADER_64    *MachHeader;
+  UINTN                   TopOfCommands;
+  BOOLEAN                 Result;
+  UINT64                  TopOfSegment;
+  UINTN                   TopOfSections;
 
   ASSERT (Context != NULL);
 
@@ -580,11 +580,11 @@ MachoGetNextSegment64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-CONST MACH_SECTION_64 *
+MACH_SECTION_64 *
 MachoGetNextSection64 (
-  IN OUT OC_MACHO_CONTEXT               *Context,
-  IN     CONST MACH_SEGMENT_COMMAND_64  *Segment,
-  IN     CONST MACH_SECTION_64          *Section  OPTIONAL
+  IN OUT OC_MACHO_CONTEXT         *Context,
+  IN     MACH_SEGMENT_COMMAND_64  *Segment,
+  IN     MACH_SECTION_64          *Section  OPTIONAL
   )
 {
   ASSERT (Context != NULL);
@@ -615,18 +615,18 @@ MachoGetNextSection64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-CONST MACH_SECTION_64 *
+MACH_SECTION_64 *
 MachoGetSectionByIndex64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT32            Index
   )
 {
-  CONST MACH_SECTION_64         *Section;
+  MACH_SECTION_64         *Section;
 
-  CONST MACH_SEGMENT_COMMAND_64 *Segment;
-  UINT32                        SectionIndex;
-  UINT32                        NextSectionIndex;
-  BOOLEAN                       Result;
+  MACH_SEGMENT_COMMAND_64 *Segment;
+  UINT32                  SectionIndex;
+  UINT32                  NextSectionIndex;
+  BOOLEAN                 Result;
 
   ASSERT (Context != NULL);
 
@@ -669,16 +669,16 @@ MachoGetSectionByIndex64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-CONST MACH_SECTION_64 *
+MACH_SECTION_64 *
 MachoGetSectionByAddress64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT64            Address
   )
 {
-  CONST MACH_SEGMENT_COMMAND_64 *Segment;
-  CONST MACH_SECTION_64         *Section;
-  UINT64                        TopOfSegment;
-  UINT64                        TopOfSection;
+  MACH_SEGMENT_COMMAND_64 *Segment;
+  MACH_SECTION_64         *Section;
+  UINT64                  TopOfSegment;
+  UINT64                  TopOfSection;
 
   ASSERT (Context != NULL);
 
@@ -718,18 +718,18 @@ InternalRetrieveSymtabs64 (
   IN OUT OC_MACHO_CONTEXT  *Context
   )
 {
-  UINTN                       MachoAddress;
-  CONST MACH_SYMTAB_COMMAND   *Symtab;
-  CONST MACH_DYSYMTAB_COMMAND *DySymtab;
-  CONST CHAR8                 *StringTable;
-  UINT32                      FileSize;
-  UINT32                      OffsetTop;
-  BOOLEAN                     Result;
+  UINTN                 MachoAddress;
+  MACH_SYMTAB_COMMAND   *Symtab;
+  MACH_DYSYMTAB_COMMAND *DySymtab;
+  CHAR8                 *StringTable;
+  UINT32                FileSize;
+  UINT32                OffsetTop;
+  BOOLEAN               Result;
 
-  CONST MACH_NLIST_64         *SymbolTable;
-  CONST MACH_NLIST_64         *IndirectSymtab;
-  CONST MACH_RELOCATION_INFO  *LocalRelocations;
-  CONST MACH_RELOCATION_INFO  *ExternRelocations;
+  MACH_NLIST_64         *SymbolTable;
+  MACH_NLIST_64         *IndirectSymtab;
+  MACH_RELOCATION_INFO  *LocalRelocations;
+  MACH_RELOCATION_INFO  *ExternRelocations;
 
   ASSERT (Context != NULL);
   ASSERT (Context->MachHeader != NULL);

@@ -41,7 +41,7 @@ InternalRetrieveSymtabs64 (
   @retval NULL  NULL is returned on failure.
 
 **/
-CONST MACH_RELOCATION_INFO *
+MACH_RELOCATION_INFO *
 InternalGetExternalRelocationByOffset (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT64            Address
