@@ -893,6 +893,7 @@ XmlNodeChild (
 }
 
 XML_NODE *
+EFIAPI
 XmlEasyChild (
   XML_NODE     *Node,
   CONST CHAR8  *ChildName,
