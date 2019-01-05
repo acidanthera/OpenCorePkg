@@ -53,6 +53,5 @@
   MemoryAllocationLib
   PrintLib
   UefiBootServicesTableLib
-  UefiDriverEntryPoint
   UefiRuntimeServicesTableLib
   OcGuardLib
