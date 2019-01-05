@@ -557,7 +557,7 @@ MachoGetNextSegment64 (
     return NULL;
   }
 
-  Result = OcOverflowAddU32 (
+  Result = OcOverflowAddU64 (
              NextSegment->FileOffset,
              NextSegment->FileSize,
              &TopOfSegment
