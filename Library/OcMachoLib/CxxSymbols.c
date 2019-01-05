@@ -19,6 +19,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/OcGuardLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/OcStringLib.h>
 
@@ -233,16 +234,18 @@ MachoGetFunctionPrefixFromClassName (
   OUT CHAR8        *FunctionPrefix
   )
 {
-  UINTN Index;
-  UINTN BodySize;
+  UINTN   Index;
+  UINTN   BodySize;
+  BOOLEAN Result;
+  UINTN   TotalSize;
 
   ASSERT (ClassName != NULL);
   ASSERT (FunctionPrefixSize > 0);
   ASSERT (FunctionPrefix != NULL);
 
-  BodySize = (AsciiStrLen (ClassName) * sizeof (*ClassName));
-
-  if (FunctionPrefixSize < (L_STR_SIZE (OSOBJ_PREFIX) + BodySize)) {
+  BodySize = AsciiStrSize (ClassName);
+  Result   = OcOverflowAddUN (L_STR_SIZE (OSOBJ_PREFIX), BodySize, &TotalSize);
+  if (!Result || (FunctionPrefixSize < TotalSize)) {
     ASSERT (FALSE);
     return FALSE;
   }
@@ -258,7 +261,7 @@ MachoGetFunctionPrefixFromClassName (
   CopyMem (
     &FunctionPrefix[Index],
     ClassName,
-    (BodySize + sizeof (*ClassName))
+    BodySize
     );
 
   return TRUE;
@@ -337,8 +340,10 @@ MachoGetVtableNameFromClassName (
   OUT CHAR8        *VtableName
   )
 {
-  UINTN Index;
-  UINTN BodySize;
+  UINTN   Index;
+  UINTN   BodySize;
+  BOOLEAN Result;
+  UINTN   TotalSize;
 
   ASSERT (ClassName != NULL);
   ASSERT (VtableNameSize > 0);
@@ -346,7 +351,12 @@ MachoGetVtableNameFromClassName (
 
   BodySize = AsciiStrSize (ClassName);
 
-  if (VtableNameSize < (L_STR_SIZE_NT (VTABLE_PREFIX) + BodySize)) {
+  Result = OcOverflowAddUN (
+             L_STR_SIZE_NT (VTABLE_PREFIX),
+             BodySize,
+             &TotalSize
+             );
+  if (!Result || (VtableNameSize < TotalSize)) {
     ASSERT (FALSE);
     return FALSE;
   }
@@ -381,21 +391,24 @@ MachoGetMetaVtableNameFromClassName (
   OUT CHAR8        *VtableName
   )
 {
-  UINTN NameSize;
-  UINTN BodySize;
-  UINTN Index;
+  UINTN   BodySize;
+  BOOLEAN Result;
+  UINTN   TotalSize;
+  UINTN   Index;
 
   ASSERT (ClassName != NULL);
   ASSERT (VtableNameSize > 0);
   ASSERT (VtableName != NULL);
 
   BodySize = (AsciiStrLen (ClassName) * sizeof (*ClassName));
-  NameSize = (
-               L_STR_SIZE (METACLASS_VTABLE_PREFIX)
-                 + BodySize
-                 + L_STR_SIZE_NT (METACLASS_VTABLE_SUFFIX)
+
+  Result = OcOverflowTriAddUN (
+             L_STR_SIZE_NT (METACLASS_VTABLE_PREFIX),
+             BodySize,
+             L_STR_SIZE (METACLASS_VTABLE_SUFFIX),
+             &TotalSize
              );
-  if (VtableNameSize < NameSize) {
+  if (!Result || (VtableNameSize < TotalSize)) {
     ASSERT (FALSE);
     return FALSE;
   }
@@ -437,21 +450,24 @@ MachoGetFinalSymbolNameFromClassName (
   OUT CHAR8        *FinalSymbolName
   )
 {
-  UINTN NameSize;
-  UINTN BodySize;
-  UINTN Index;
+  UINTN   BodySize;
+  BOOLEAN Result;
+  UINTN   TotalSize;
+  UINTN   Index;
 
   ASSERT (ClassName != NULL);
   ASSERT (FinalSymbolNameSize > 0);
   ASSERT (FinalSymbolName != NULL);
 
   BodySize = (AsciiStrLen (ClassName) * sizeof (*ClassName));
-  NameSize = (
-               L_STR_SIZE (OSOBJ_PREFIX)
-                 + BodySize
-                 + L_STR_SIZE_NT (FINAL_CLASS_TOKEN)
+
+  Result = OcOverflowTriAddUN (
+             L_STR_SIZE_NT (OSOBJ_PREFIX),
+             BodySize,
+             L_STR_SIZE (FINAL_CLASS_TOKEN),
+             &TotalSize
              );
-  if (FinalSymbolNameSize < NameSize) {
+  if (!Result || (FinalSymbolNameSize < TotalSize)) {
     ASSERT (FALSE);
     return FALSE;
   }
