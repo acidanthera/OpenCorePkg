@@ -242,10 +242,12 @@ InternalGetNextCommand64 (
   TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
 
   if (LoadCommand != NULL) {
-    ASSERT (
-      (LoadCommand >= &MachHeader->Commands[0])
-        && ((UINTN)LoadCommand <= TopOfCommands)
-      );
+    ASSERT (LoadCommand >= &MachHeader->Commands[0]);
+
+    if ((UINTN)LoadCommand >= TopOfCommands) {
+      return NULL;
+    }
+
     Command = NEXT_MACH_LOAD_COMMAND (LoadCommand);
   } else {
     Command = &MachHeader->Commands[0];
