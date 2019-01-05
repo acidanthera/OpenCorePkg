@@ -23,8 +23,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcMachoLib.h>
 #include <Library/OcStringLib.h>
 
-#include "OcMachoLibInternal.h"
-
 #define CXX_PREFIX               "__Z"
 #define VTABLE_PREFIX            CXX_PREFIX "TV"
 #define OSOBJ_PREFIX             CXX_PREFIX "N"
@@ -99,7 +97,7 @@ MachoSymbolNameIsSmcp64 (
 
   if ((Suffix == NULL)
    || (AsciiStrnCmp (SymbolName, OSOBJ_PREFIX, L_STR_LEN (OSOBJ_PREFIX)) != 0)
-   || ((Suffix - SymbolName) <= L_STR_LEN (OSOBJ_PREFIX))) {
+   || ((UINTN)(Suffix - SymbolName) <= L_STR_LEN (OSOBJ_PREFIX))) {
     return FALSE;
   }
 
@@ -133,7 +131,7 @@ MachoSymbolNameIsMetaclassPointer64 (
 
   if ((Suffix == NULL)
    || (AsciiStrnCmp (SymbolName, OSOBJ_PREFIX, L_STR_LEN (OSOBJ_PREFIX)) != 0)
-   || ((Suffix - SymbolName) <= L_STR_LEN (OSOBJ_PREFIX))) {
+   || ((UINTN)(Suffix - SymbolName) <= L_STR_LEN (OSOBJ_PREFIX))) {
     return FALSE;
   }
 
@@ -207,14 +205,11 @@ MachoGetClassNameFromVtableName (
   IN  CONST CHAR8  *VtableName
   )
 {
-  UINTN PrefixLength;
-
   ASSERT (VtableName != NULL);
   //
   // As there is no suffix, just return a pointer from within VtableName.
   //
-  PrefixLength = L_STR_LEN (VTABLE_PREFIX);
-  return &VtableName[PrefixLength];
+  return &VtableName[L_STR_LEN (VTABLE_PREFIX)];
 }
 
 /**
@@ -420,7 +415,7 @@ MachoGetMetaVtableNameFromClassName (
     L_STR_SIZE_NT (METACLASS_VTABLE_PREFIX)
     );
 
-  Index += (ARRAY_SIZE (METACLASS_VTABLE_PREFIX) - 1);
+  Index += L_STR_LEN (METACLASS_VTABLE_PREFIX);
   CopyMem (&VtableName[Index], ClassName, BodySize);
 
   Index += (BodySize / sizeof (*ClassName));
