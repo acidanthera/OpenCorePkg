@@ -1,0 +1,88 @@
+UEFI Debugging with GDB
+=======================
+
+These scripts provide support for easier UEFI code debugging on virtual machines like VMware Fusion
+or QEMU. The code is based on [Andrei Warkentin](https://github.com/andreiw)'s
+[DebugPkg](https://github.com/andreiw/andreiw-wip/tree/master/uefi/DebugPkg) with improvements
+in macOS support, pretty printing, and bug fixing.
+
+The general approach is as follows:
+
+1. Build GdbSyms binary with EDK II type info in DWARF
+1. Locate `EFI_SYSTEM_TABLE` in memory by its magic
+1. Locate `EFI_DEBUG_IMAGE_INFO_TABLE` by its GUID
+1. Map relocated images within GDB
+1. Provide handy functions and pretty printers
+
+#### Preparing Source Code
+
+By default EDK II optimises produced binaries, so to build a "real" debug binary one should target
+`NOOPT`. Do be aware that it strongly affects resulting binary size.
+
+`GdbSyms.dll` is built as a part of OcSupportPkg, yet prebuilt binaries are also available:
+
+- `GdbSyms/Bin/X64_XCODE5/GdbSyms.dll` is built with UDK2018 and XCODE5
+
+To wait for debugger connection on startup `WaitForKeyPress` functions from `OcMiscLib.h` can be
+utilised. Do be aware that this function additionally calls `DebugBreak` function, which may
+be broken at during GDB init.
+
+#### VMware Configuration
+
+VMware Fusion contains a dedicated debugStub, which can be enabled by adding the following
+lines to .vmx file. Afterwards vmware-vmx will listen on TCP ports 8832 and 8864 (on the host)
+for 32-bit and 64-bit gdb connections respectively, similarly to QEMU:
+```
+debugStub.listen.guest32 = "TRUE"
+debugStub.listen.guest64 = "TRUE"
+```
+
+In case the debugging session is remote the following lines should be appended:
+```
+debugStub.listen.guest32.remote = "TRUE"
+debugStub.listen.guest64.remote = "TRUE"
+```
+
+To halt the virtual machine upon executing the first instruction the following line code be added.
+Note, that it does not seem to work on VMware Fusion 11 and results in freezes:
+```
+monitor.debugOnStartGuest32 = "TRUE"
+```
+
+To force hardware breakpoints (instead of software INT 3 breakpoints) add the following line:
+```
+debugStub.hideBreakpoints = "TRUE"
+```
+
+To stall during POST for 3 seconds add the following line. Pressing any key will boot into firmware
+settings:
+```
+bios.bootDelay = "3000"
+```
+
+#### GDB Configuration
+
+It is a good idea to use GDB Multiarch in case different debugging architectures are planned to be
+used. This can be done in several ways:
+
+- https://www.gnu.org/software/gdb/ — from source
+- https://macports.org/ — via MacPorts (`sudo port install gdb +multiarch`)
+- Your preferred method here
+
+Once GDB is installed the process is as simple as running the following set of commands:
+
+```
+$ ggdb /opt/UDK/Build/OcSupportPkg/NOOPT_XCODE5/X64/OcSupportPkg/Debug/GdbSyms/GdbSyms/DEBUG/GdbSyms.dll.dSYM/Contents/Resources/DWARF/GdbSyms.dll
+
+target remote localhost:8864
+source /opt/UDK/OcSupportPkg/Debug/Scripts/gdb_uefi.py
+set pagination off
+reload-uefi
+b DebugBreak
+```
+
+#### References
+
+1. https://communities.vmware.com/thread/390128
+1. https://wiki.osdev.org/VMware
+1. https://github.com/andreiw/andreiw-wip/tree/master/uefi/DebugPkg

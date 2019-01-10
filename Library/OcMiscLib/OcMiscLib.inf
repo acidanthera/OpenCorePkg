@@ -48,6 +48,7 @@
 [Sources]
   Base64Decode.c
   ConvertDataToString.c
+  DebugHelp.c
   LegacyRegionLock.c
   LegacyRegionUnLock.c
   LogBootOrder.c

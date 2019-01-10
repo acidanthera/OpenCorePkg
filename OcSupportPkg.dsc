@@ -44,6 +44,8 @@
   UefiUsbLib|MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
   PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf
+  DxeServicesTableLib|MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf
+  HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
 
 [Components]
   OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
@@ -66,6 +68,7 @@
   OcSupportPkg/Library/OcSerializeLib/OcSerializeLib.inf
   OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
   OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
+  OcSupportPkg/Debug/GdbSyms/GdbSyms.inf
 
 [PcdsFixedAtBuild]
   gEfiMdePkgTokenSpaceGuid.PcdMaximumAsciiStringLength|0
@@ -87,11 +90,12 @@
   # While there are no PCDs as of now, there at least are some custom macros.
   DEFINE OCSUPPORTPKG_BUILD_OPTIONS_GEN = -D DISABLE_NEW_DEPRECATED_INTERFACES $(OCSUPPORTPKG_BUILD_OPTIONS)
 
-  INTEL:DEBUG_*_*_CC_FLAGS   = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
-  INTEL:RELEASE_*_*_CC_FLAGS = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
   GCC:DEBUG_*_*_CC_FLAGS     = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
+  GCC:NOOPT_*_*_CC_FLAGS     = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
   GCC:RELEASE_*_*_CC_FLAGS   = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
   MSFT:DEBUG_*_*_CC_FLAGS    = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
+  MSFT:NOOPT_*_*_CC_FLAGS    = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
   MSFT:RELEASE_*_*_CC_FLAGS  = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
-  XCODE:RELEASE_*_*_CC_FLAGS = -flto $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
   XCODE:DEBUG_*_*_CC_FLAGS   = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
+  XCODE:NOOPT_*_*_CC_FLAGS   = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
+  XCODE:RELEASE_*_*_CC_FLAGS = -flto $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)

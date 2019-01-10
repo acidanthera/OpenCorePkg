@@ -145,4 +145,22 @@ AllocateNullTextOutSystemTable (
   EFI_SYSTEM_TABLE  *SystemTable
   );
 
+/**
+  Dummy function that debuggers may break on.
+**/
+VOID
+DebugBreak (
+  VOID
+  );
+
+/**
+  Wait for user input after printing message.
+
+  @param[in] Message   Message to print.
+**/
+VOID
+WaitForKeyPress (
+  CONST CHAR16 *Message
+  );
+
 #endif // OC_MISC_LIB_H_

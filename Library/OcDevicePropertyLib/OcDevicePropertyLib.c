@@ -228,7 +228,7 @@ InternalSyncWithThunderboltDevices (
   }
 }
 
-// DppDbGetPropertyValue
+// DppDbGetProperty
 /** Locates a device property in the database and returns its value into Value.
 
   @param[in]      This        A pointer to the protocol instance.
@@ -252,7 +252,7 @@ InternalSyncWithThunderboltDevices (
 **/
 EFI_STATUS
 EFIAPI
-DppDbGetPropertyValue (
+DppDbGetProperty (
   IN     EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL  *This,
   IN     EFI_DEVICE_PATH_PROTOCOL                    *DevicePath,
   IN     CONST CHAR16                                *Name,
@@ -784,7 +784,7 @@ InternalReadEfiVariableProperties (
 
 STATIC EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL DppDbProtocolTemplate = {
   EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL_REVISION,
-  DppDbGetPropertyValue,
+  DppDbGetProperty,
   DppDbSetProperty,
   DppDbRemoveProperty,
   DppDbGetPropertyBuffer
