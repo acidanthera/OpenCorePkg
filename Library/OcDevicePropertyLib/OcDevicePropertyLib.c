@@ -23,6 +23,7 @@
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/PcdLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -148,7 +149,7 @@ InternalGetPropertyNode (
     DevicePathSize2 = GetDevicePathSize (&Node->DevicePath);
 
     if (DevicePathSize == DevicePathSize2
-      && CompareMem (DevicePath, &Node->DevicePath, DevicePathSize)) {
+      && CompareMem (DevicePath, &Node->DevicePath, DevicePathSize) == 0) {
       return Node;
     }
 
@@ -175,7 +176,7 @@ InternalGetProperty (
                );
 
   while (!IsNull (&Node->Hdr.Properties, &Property->Link)) {
-    if (StrCmp (Name, (CONST CHAR16 *) &Property->Value->Data[0]) == 0) {
+    if (StrCmp (Name, (CONST CHAR16 *) &Property->Name->Data[0]) == 0) {
       return Property;
     }
 
@@ -388,6 +389,7 @@ DppDbSetProperty (
   if (PropertyValue == NULL) {
     FreePool (PropertyName);
     FreePool (Property);
+    return EFI_OUT_OF_RESOURCES;
   }
   
   Property->Signature = EFI_DEVICE_PATH_PROPERTY_SIGNATURE;
@@ -499,7 +501,9 @@ DppDbGetPropertyBuffer (
     return EFI_SUCCESS;
   }
 
-  InternalSyncWithThunderboltDevices ();
+  if (PcdGetBool (PcdEnableAppleThunderboltSync)) {
+    InternalSyncWithThunderboltDevices ();
+  }
 
   NodeWalker    = PROPERTY_NODE_FROM_LIST_ENTRY (GetFirstNode (Nodes));
   BufferSize    = sizeof (*Buffer);
@@ -859,135 +863,137 @@ OcDevicePathPropertyInstallProtocol (
 
   DevicePathPropertyData->Modified = FALSE;
 
-  Status = InternalReadEfiVariableProperties (
-             &gAppleBootVariableGuid,
-             TRUE,
-             DevicePathPropertyData
-             );
-
-  if (EFI_ERROR (Status)) {
-    FreePool (DevicePathPropertyData);
-    return Status;
-  }
-
-  if (DevicePathPropertyData->Modified) {
-    DataSize = 0;
-    Status   = DppDbGetPropertyBuffer (
-                 &DevicePathPropertyData->Protocol,
-                 NULL,
-                 &DataSize
-                 );
-
-    if (Status != EFI_BUFFER_TOO_SMALL) {
-      FreePool (DevicePathPropertyData);
-      return Status;
-    }
-
-    Buffer = AllocateZeroPool (DataSize);
-    if (Buffer == NULL) {
-      FreePool (DevicePathPropertyData);
-      return EFI_OUT_OF_RESOURCES;
-    }
-
-    Status = DppDbGetPropertyBuffer (
-               &DevicePathPropertyData->Protocol,
-               Buffer,
-               &DataSize
+  if (PcdGetBool (PcNvramInitDevicePropertyDatabase)) {
+    Status = InternalReadEfiVariableProperties (
+               &gAppleBootVariableGuid,
+               TRUE,
+               DevicePathPropertyData
                );
+
     if (EFI_ERROR (Status)) {
-      FreePool (Buffer);
       FreePool (DevicePathPropertyData);
       return Status;
     }
 
-    VariableIndex = 0;
-    Attributes = (EFI_VARIABLE_NON_VOLATILE
-                | EFI_VARIABLE_BOOTSERVICE_ACCESS
-                | EFI_VARIABLE_RUNTIME_ACCESS);
-    BufferPtr = (UINT8 *) Buffer;
-
-    while (VariableIndex < APPLE_PATH_PROPERTY_VARIABLE_MAX_NUM && DataSize > 0) {
-      UnicodeSPrint (
-        &IndexBuffer[0],
-        sizeof (IndexBuffer),
-        L"%04x",
-        VariableIndex
-        );
-
-      StrCpyS (VariableName, ARRAY_SIZE (VariableName), APPLE_PATH_PROPERTIES_VARIABLE_NAME);
-      StrCatS (VariableName, ARRAY_SIZE (VariableName), IndexBuffer);
-
-      VariableSize = MIN (
-                       DataSize,
-                       APPLE_PATH_PROPERTY_VARIABLE_MAX_SIZE
-                       );
-
-      Status = gRT->SetVariable (
-                      VariableName,
-                      &gAppleVendorVariableGuid,
-                      Attributes,
-                      VariableSize,
-                      BufferPtr
-                      );
-
-      if (EFI_ERROR (Status)) {
-        break;
-      }
-
-      BufferPtr += VariableSize;
-      DataSize  -= VariableSize;
-      ++VariableIndex;
-    }
-
-    FreePool (Buffer);
-    if (EFI_ERROR (Status) || DataSize != 0) {
-      FreePool (DevicePathPropertyData);
-      return Status;
-    }
-
-    while (!EFI_ERROR (Status) && VariableIndex < APPLE_PATH_PROPERTY_VARIABLE_MAX_NUM) {
-      UnicodeSPrint (
-        &IndexBuffer[0],
-        sizeof (IndexBuffer),
-        L"%04x",
-        VariableIndex
-        );
-
-      StrCpyS (VariableName, ARRAY_SIZE (VariableName), APPLE_PATH_PROPERTIES_VARIABLE_NAME);
-      StrCatS (VariableName, ARRAY_SIZE (VariableName), IndexBuffer);
-
-      VariableSize = 0;
-      Status       = gRT->GetVariable (
-                            VariableName,
-                            &gAppleVendorVariableGuid,
-                            &Attributes,
-                            &VariableSize,
-                            NULL
-                            );
+    if (DevicePathPropertyData->Modified) {
+      DataSize = 0;
+      Status   = DppDbGetPropertyBuffer (
+                   &DevicePathPropertyData->Protocol,
+                   NULL,
+                   &DataSize
+                   );
 
       if (Status != EFI_BUFFER_TOO_SMALL) {
-        Status = EFI_SUCCESS;
-        break;
+        FreePool (DevicePathPropertyData);
+        return Status;
       }
 
-      Status       = gRT->SetVariable (
-                            VariableName,
-                            &gAppleVendorVariableGuid,
-                            Attributes,
-                            0,
-                            NULL
-                            );
+      Buffer = AllocateZeroPool (DataSize);
+      if (Buffer == NULL) {
+        FreePool (DevicePathPropertyData);
+        return EFI_OUT_OF_RESOURCES;
+      }
 
-      ++VariableIndex;
+      Status = DppDbGetPropertyBuffer (
+                 &DevicePathPropertyData->Protocol,
+                 Buffer,
+                 &DataSize
+                 );
+      if (EFI_ERROR (Status)) {
+        FreePool (Buffer);
+        FreePool (DevicePathPropertyData);
+        return Status;
+      }
+
+      VariableIndex = 0;
+      Attributes = (EFI_VARIABLE_NON_VOLATILE
+                  | EFI_VARIABLE_BOOTSERVICE_ACCESS
+                  | EFI_VARIABLE_RUNTIME_ACCESS);
+      BufferPtr = (UINT8 *) Buffer;
+
+      while (VariableIndex < APPLE_PATH_PROPERTY_VARIABLE_MAX_NUM && DataSize > 0) {
+        UnicodeSPrint (
+          &IndexBuffer[0],
+          sizeof (IndexBuffer),
+          L"%04x",
+          VariableIndex
+          );
+
+        StrCpyS (VariableName, ARRAY_SIZE (VariableName), APPLE_PATH_PROPERTIES_VARIABLE_NAME);
+        StrCatS (VariableName, ARRAY_SIZE (VariableName), IndexBuffer);
+
+        VariableSize = MIN (
+                         DataSize,
+                         APPLE_PATH_PROPERTY_VARIABLE_MAX_SIZE
+                         );
+
+        Status = gRT->SetVariable (
+                        VariableName,
+                        &gAppleVendorVariableGuid,
+                        Attributes,
+                        VariableSize,
+                        BufferPtr
+                        );
+
+        if (EFI_ERROR (Status)) {
+          break;
+        }
+
+        BufferPtr += VariableSize;
+        DataSize  -= VariableSize;
+        ++VariableIndex;
+      }
+
+      FreePool (Buffer);
+      if (EFI_ERROR (Status) || DataSize != 0) {
+        FreePool (DevicePathPropertyData);
+        return Status;
+      }
+
+      while (!EFI_ERROR (Status) && VariableIndex < APPLE_PATH_PROPERTY_VARIABLE_MAX_NUM) {
+        UnicodeSPrint (
+          &IndexBuffer[0],
+          sizeof (IndexBuffer),
+          L"%04x",
+          VariableIndex
+          );
+
+        StrCpyS (VariableName, ARRAY_SIZE (VariableName), APPLE_PATH_PROPERTIES_VARIABLE_NAME);
+        StrCatS (VariableName, ARRAY_SIZE (VariableName), IndexBuffer);
+
+        VariableSize = 0;
+        Status       = gRT->GetVariable (
+                              VariableName,
+                              &gAppleVendorVariableGuid,
+                              &Attributes,
+                              &VariableSize,
+                              NULL
+                              );
+
+        if (Status != EFI_BUFFER_TOO_SMALL) {
+          Status = EFI_SUCCESS;
+          break;
+        }
+
+        Status       = gRT->SetVariable (
+                              VariableName,
+                              &gAppleVendorVariableGuid,
+                              Attributes,
+                              0,
+                              NULL
+                              );
+
+        ++VariableIndex;
+      }
+
+      if (EFI_ERROR (Status)) {
+        FreePool (DevicePathPropertyData);
+        return Status;
+      }
     }
 
-    if (EFI_ERROR (Status)) {
-      FreePool (DevicePathPropertyData);
-      return Status;
-    }
+    DevicePathPropertyData->Modified = FALSE;
   }
-
-  DevicePathPropertyData->Modified = FALSE;
 
   Handle = NULL;
   Status = gBS->InstallProtocolInterface (
