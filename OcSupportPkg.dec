@@ -55,6 +55,9 @@
   OcGuardLib|Include/Library/OcGuardLib.h
 
   ##  @libraryclass
+  OcAppleBootPolicyLib|Include/Library/OcAppleBootPolicyLib.h
+
+  ##  @libraryclass
   OcAppleImageVerificationLib|Include/Library/OcAppleImageVerificationLib.h
 
   ##  @libraryclass

@@ -48,6 +48,7 @@
   HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
 
 [Components]
+  OcSupportPkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
   OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
   OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf
