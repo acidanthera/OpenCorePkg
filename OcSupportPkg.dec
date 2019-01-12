@@ -25,8 +25,24 @@
 [Guids]
   gOcLogVariableGuid          = { 0x4D1FDA02, 0x38C7, 0x4A6A, { 0x9C, 0xC6, 0x4B, 0xCC, 0xA8, 0xB3, 0x01, 0x02 }}
 
+  ## OcSupport package token space guid
+  gOcSupportPkgTokenSpaceGuid = { 0x38D40CB0, 0x7E37, 0x4CAA, { 0x91, 0xD3, 0x00, 0x47, 0x70, 0xA8, 0x73, 0x77 }}
+
 [Protocols]
   gOcLogProtocolGuid          = { 0xDBB6008F, 0x89E4, 0x4272, { 0x98, 0x81, 0xCE, 0x3A, 0xFD, 0x97, 0x24, 0xD0 }}
+
+[PcdsFeatureFlag]
+  ## Indicates if Apple Thunderbolt NHI protocol is called during device property export.<BR><BR>
+  #   TRUE  - Apple Thunderbolt NHI protocol will be called.<BR>
+  #   FALSE - Apple Thunderbolt NHI protocol will not be called.<BR>
+  # @Prompt Inform Thunderbolt devices about device property export.
+  gOcSupportPkgTokenSpaceGuid.PcdEnableAppleThunderboltSync|FALSE|BOOLEAN|0x00000000
+
+  ## Indicates if NVRAM properties are used to initialize device property database.<BR><BR>
+  #   TRUE  - NVRAM properties initialize device property database.<BR>
+  #   FALSE - NVRAM properties do not initialize device property database.<BR>
+  # @Prompt Register a protocol installation notify for Apple KeyMap Database when not found initially.
+  gOcSupportPkgTokenSpaceGuid.PcNvramInitDevicePropertyDatabase|FALSE|BOOLEAN|0x00000001
 
 [LibraryClasses]
   ##  @libraryclass
@@ -37,6 +53,9 @@
 
   ##  @libraryclass
   OcGuardLib|Include/Library/OcGuardLib.h
+
+  ##  @libraryclass
+  OcAppleBootPolicyLib|Include/Library/OcAppleBootPolicyLib.h
 
   ##  @libraryclass
   OcAppleImageVerificationLib|Include/Library/OcAppleImageVerificationLib.h
@@ -85,6 +104,3 @@
 
   ##  @libraryclass
   OcXmlLib|Include/Library/OcXmlLib.h
-
-
-# [Protocols]

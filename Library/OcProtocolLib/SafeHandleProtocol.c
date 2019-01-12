@@ -1,4 +1,4 @@
-﻿/** @file
+/** @file
   Copyright (C) 2016, The HermitCrabs Lab. All rights reserved.
 
   All rights reserved.
