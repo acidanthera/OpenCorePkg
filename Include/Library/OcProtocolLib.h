@@ -109,4 +109,15 @@ SignalProtocolEvent (
   IN EFI_GUID  *ProtocolGuid
   );
 
+/**
+  @param[in] Protocol    The published unique identifier of the protocol. It is the caller’s responsibility to pass in
+                         a valid GUID.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+UninstallAllProtocolInstances (
+  EFI_GUID  *Protocol
+  );
+
 #endif // OC_PROTOCOL_LIB_H_

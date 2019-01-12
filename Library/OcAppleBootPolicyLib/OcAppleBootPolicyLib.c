@@ -55,16 +55,16 @@ STATIC CONST CHAR16 *mBootPathNames[] = {
 EFI_STATUS
 EFIAPI
 BootPolicyGetBootFile (
-  IN     EFI_HANDLE                      Device,
-  IN OUT CONST EFI_DEVICE_PATH_PROTOCOL  **FilePath
+  IN     EFI_HANDLE                Device,
+  IN OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
   );
 
 EFI_STATUS
 EFIAPI
 BootPolicyGetBootFileEx (
-  IN  EFI_HANDLE                      Device,
-  IN  UINT32                          Unused, OPTIONAL
-  OUT CONST EFI_DEVICE_PATH_PROTOCOL  **FilePath
+  IN  EFI_HANDLE                Device,
+  IN  UINT32                    Unused OPTIONAL,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
   );
 
 EFI_STATUS
@@ -81,7 +81,7 @@ EFIAPI
 BootPolicyGetPathNameOnApfsRecovery (
   IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
   IN  CONST CHAR16              *PathName,
-  OUT CONST CHAR16              **FullPathName,
+  OUT CHAR16                    **FullPathName,
   OUT UINTN                     *Unknown,
   IN  EFI_FILE_PROTOCOL         **Root,
   OUT EFI_HANDLE                *DeviceHandle
@@ -150,8 +150,8 @@ InternalFileExists (
 STATIC
 EFI_STATUS
 InternalGetBlessedSystemFilePath (
-  IN  EFI_FILE_PROTOCOL               *Root,
-  OUT CONST EFI_DEVICE_PATH_PROTOCOL  **FilePath
+  IN  EFI_FILE_PROTOCOL         *Root,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
   )
 {
   EFI_STATUS       Status;
@@ -184,7 +184,7 @@ InternalGetBlessedSystemFilePath (
         *FilePath = DuplicateDevicePath (DevPath.DevPath);
       }
 
-      gBS->FreePool ((VOID *)DevPath.DevPath);
+      FreePool (DevPath.DevPath);
     }
   } else {
     Status = EFI_NOT_FOUND;
@@ -246,7 +246,7 @@ InternalGetFilePathName (
 {
   EFI_STATUS           Status;
 
-  CONST VOID           *DevicePath;
+  VOID                 *DevicePath;
   CONST VOID           *DevicePathWalker;
   FILEPATH_DEVICE_PATH *FilePath;
   UINTN                PathNameSize;
@@ -281,7 +281,7 @@ InternalGetFilePathName (
       DevicePathWalker = NextDevicePathNode (DevicePathWalker);
     }
 
-    gBS->FreePool ((VOID *)DevicePath);
+    FreePool (DevicePath);
   }
 
   return Status;
@@ -290,9 +290,9 @@ InternalGetFilePathName (
 STATIC
 EFI_STATUS
 InternalAppendBootPathName (
-  IN  EFI_HANDLE                      Device,
-  IN  EFI_FILE_PROTOCOL               *Root,
-  OUT CONST EFI_DEVICE_PATH_PROTOCOL  **DevicePath
+  IN  EFI_HANDLE                Device,
+  IN  EFI_FILE_PROTOCOL         *Root,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath
   )
 {
   EFI_STATUS   Status;
@@ -358,7 +358,7 @@ InternalGetApfsVolumeInfo (
           &ApfsContainerInfo->Uuid
           );
 
-        FreePool ((VOID *)ApfsContainerInfo);
+        FreePool (ApfsContainerInfo);
 
         Status = EFI_SUCCESS;
       }
@@ -373,7 +373,7 @@ InternalGetApfsVolumeInfo (
 
         *VolumeRole = ApfsVolumeInfo->Role;
 
-        FreePool ((VOID *)ApfsVolumeInfo);
+        FreePool (ApfsVolumeInfo);
       }
 
       Root->Close (Root);
@@ -390,7 +390,7 @@ InternalGetApfsBootFile (
   IN  EFI_FILE_PROTOCOL               *Root,
   IN  CONST GUID                      *ContainerUuid,
   IN  CONST CHAR16                    *VolumeUuid,
-  OUT CONST EFI_DEVICE_PATH_PROTOCOL  **DevicePath,
+  OUT EFI_DEVICE_PATH_PROTOCOL        **DevicePath,
   OUT EFI_HANDLE                      *VolumeHandle
   )
 {
@@ -520,7 +520,7 @@ InternalGetApfsBootFile (
 
                             FilePath = FileDevicePath (Device, FullPathName);
 
-                            FreePool ((VOID *)FullPathName);
+                            FreePool (FullPathName);
 
                             if (FilePath != NULL) {
                               Status = EFI_SUCCESS;
@@ -545,7 +545,7 @@ InternalGetApfsBootFile (
 
                                 if ((DevPathSize == 0)
                                  || (DevPathWalker == FilePath)) {
-                                  FreePool ((VOID *)DevPathWalker);
+                                  FreePool (DevPathWalker);
 
                                   break;
                                 }
@@ -556,7 +556,7 @@ InternalGetApfsBootFile (
                                             DevPathSize
                                             );
 
-                                FreePool ((VOID *)DevPathWalker);
+                                FreePool (DevPathWalker);
                               } while (Result != 0);
                             }
                           }
@@ -566,17 +566,17 @@ InternalGetApfsBootFile (
                       }
                     }
 
-                    FreePool ((VOID *)VolumeDirectoryInfo);
+                    FreePool (VolumeDirectoryInfo);
                   }
                 }
               }
 
               if (VolumeInfo != NULL) {
-                FreePool ((VOID *)VolumeInfo);
+                FreePool (VolumeInfo);
               }
             }
 
-            FreePool ((VOID *)ContainerInfo);
+            FreePool (ContainerInfo);
           }
 
           HandleRoot->Close (HandleRoot);
@@ -584,7 +584,7 @@ InternalGetApfsBootFile (
       }
     }
 
-    FreePool ((VOID *)HandleBuffer);
+    FreePool (HandleBuffer);
   }
 
   return Status;
@@ -616,8 +616,8 @@ InternalGetApfsBootFile (
 EFI_STATUS
 EFIAPI
 BootPolicyGetBootFile (
-  IN     EFI_HANDLE                      Device,
-  IN OUT CONST EFI_DEVICE_PATH_PROTOCOL  **FilePath
+  IN     EFI_HANDLE                Device,
+  IN OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
   )
 {
   EFI_STATUS                      Status;
@@ -630,30 +630,31 @@ BootPolicyGetBootFile (
   Status = gBS->HandleProtocol (
                   Device,
                   &gEfiSimpleFileSystemProtocolGuid,
-                  (VOID **)&FileSystem
+                  (VOID **) &FileSystem
                   );
 
-  if (!EFI_ERROR (Status)) {
-    Status = FileSystem->OpenVolume (FileSystem, &Root);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
-    if (!EFI_ERROR (Status)) {
-      Status = InternalGetBlessedSystemFilePath (Root, FilePath);
+  Status = FileSystem->OpenVolume (FileSystem, &Root);
 
-      if (EFI_ERROR (Status)) {
-        Status = InternalGetFilePathName (Root);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
-        if (EFI_ERROR (Status)) {
-          Status = InternalAppendBootPathName (Device, Root, FilePath);
-        }
-      }
-
-      // BUG: Root should be closed here, it cannot be open before.
+  //
+  // Choose most appropriate blessed path.
+  //
+  Status = InternalGetBlessedSystemFilePath (Root, FilePath);
+  if (EFI_ERROR (Status)) {
+    Status = InternalGetFilePathName (Root);
+    if (EFI_ERROR (Status)) {
+      Status = InternalAppendBootPathName (Device, Root, FilePath);
     }
   }
 
-  if (Root != NULL) {
-    Root->Close (Root);
-  }
+  Root->Close (Root);
 
   return Status;
 }
@@ -662,8 +663,8 @@ EFI_STATUS
 EFIAPI
 BootPolicyGetBootFileEx (
   IN  EFI_HANDLE                      Device,
-  IN  UINT32                          Unused, OPTIONAL
-  OUT CONST EFI_DEVICE_PATH_PROTOCOL  **FilePath
+  IN  UINT32                          Unused OPTIONAL,
+  OUT EFI_DEVICE_PATH_PROTOCOL        **FilePath
   )
 {
   EFI_STATUS                      Status;
@@ -675,6 +676,10 @@ BootPolicyGetBootFileEx (
   EFI_STATUS                      Status2;
 
   *FilePath = NULL;
+
+  //
+  // Note, Unused is either 1 or 3.
+  //
 
   Status = gBS->HandleProtocol (
                   Device,
@@ -715,10 +720,10 @@ BootPolicyGetBootFileEx (
             }
           }
 
-          FreePool ((VOID *)ContainerInfo);
+          FreePool (ContainerInfo);
         }
 
-        FreePool ((VOID *)VolumeInfo);
+        FreePool (VolumeInfo);
 
         Root->Close (Root);
       } else {
@@ -789,7 +794,7 @@ BootPolicyGetBootInfo (
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem;
   EFI_FILE_PROTOCOL               *Root;
   APPLE_APFS_CONTAINER_INFO       *ContainerInfo;
-  CONST EFI_DEVICE_PATH_PROTOCOL  *BootDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL        *BootDevicePath;
 
   *BootPathName = NULL;
   *Device       = NULL;
@@ -888,10 +893,10 @@ BootPolicyGetBootInfo (
                 );
 
               if (BootDevicePath != NULL) {
-                FreePool ((VOID *)BootDevicePath);
+                FreePool (BootDevicePath);
               }
 
-              FreePool ((VOID *)ContainerInfo);
+              FreePool (ContainerInfo);
             }
           }
         }
@@ -909,7 +914,7 @@ EFIAPI
 BootPolicyGetPathNameOnApfsRecovery (
   IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
   IN  CONST CHAR16              *PathName,
-  OUT CONST CHAR16              **FullPathName,
+  OUT CHAR16                    **FullPathName,
   OUT UINTN                     *Unknown,
   IN  EFI_FILE_PROTOCOL         **Root,
   OUT EFI_HANDLE                *DeviceHandle
@@ -1038,12 +1043,12 @@ BootPolicyGetPathNameOnApfsRecovery (
 
                         // BUG: NewHandle is not closed.
 
-                        FreePool ((VOID *)FileInfo);
+                        FreePool (FileInfo);
 
                         break;
                       }
 
-                      FreePool ((VOID *)FileInfo);
+                      FreePool (FileInfo);
                     }
 
                     NewHandle->Close (NewHandle);
@@ -1053,7 +1058,7 @@ BootPolicyGetPathNameOnApfsRecovery (
             }
           }
 
-          FreePool ((VOID *)HandleBuffer);
+          FreePool (HandleBuffer);
         }
       }
     }
@@ -1258,9 +1263,9 @@ BootPolicyGetApfsRecoveryVolumes (
               }
             }
 
-            FreePool ((VOID *)VolumeInfo);
-            FreePool ((VOID *)ContainerGuids);
-            FreePool ((VOID *)HandleBuffer);
+            FreePool (VolumeInfo);
+            FreePool (ContainerGuids);
+            FreePool (HandleBuffer);
           }
         }
       }

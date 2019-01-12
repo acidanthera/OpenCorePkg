@@ -45,3 +45,4 @@
   SafeInstallProtocolInterface.c
   SafeLocateProtocol.c
   SignalProtocolEvent.c
+  UninstallAllProtocolInterfaces.c
