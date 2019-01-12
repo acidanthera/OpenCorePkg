@@ -580,10 +580,7 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
 
   ASSERT (Context != NULL);
   ASSERT (Smcp != NULL);
-
-  if (!MachoIsSymbolValueSane64 (Context, Smcp)) {
-    return NULL;
-  }
+  ASSERT (MachoIsSymbolValueSane64 (Context, Smcp));
 
   Result = MachoGetSymbolByExternRelocationOffset64 (
              Context,
@@ -615,17 +612,19 @@ MachoGetVtableSymbolsFromSmcp64 (
   OUT    CONST MACH_NLIST_64  **MetaVtable
   )
 {
-  CHAR8               ClassName[SYM_MAX_NAME_LEN];
-  CHAR8               VtableName[SYM_MAX_NAME_LEN];
-  CHAR8               MetaVtableName[SYM_MAX_NAME_LEN];
-  BOOLEAN             Result;
-  CONST MACH_NLIST_64 *VtableSymbol;
-  CONST MACH_NLIST_64 *MetaVtableSymbol;
+  CHAR8         ClassName[SYM_MAX_NAME_LEN];
+  CHAR8         VtableName[SYM_MAX_NAME_LEN];
+  CHAR8         MetaVtableName[SYM_MAX_NAME_LEN];
+  BOOLEAN       Result;
+  MACH_NLIST_64 *VtableSymbol;
+  MACH_NLIST_64 *MetaVtableSymbol;
 
   ASSERT (Context != NULL);
   ASSERT (SmcpSymbol != NULL);
   ASSERT (Vtable != NULL);
   ASSERT (MetaVtable != NULL);
+
+  ASSERT (MachoIsSymbolValueSane64 (Context, SmcpSymbol));
 
   Result = MachoGetClassNameFromSuperMetaClassPointer (
              Context,
@@ -646,8 +645,12 @@ MachoGetVtableSymbolsFromSmcp64 (
     return FALSE;
   }
 
-  VtableSymbol = MachoGetLocalDefinedSymbolByName (Context, VtableName);
-  if (VtableSymbol == NULL) {
+  Result = MachoGetLocalDefinedSymbolByName (
+             Context,
+             VtableName,
+             &VtableSymbol
+             );
+  if (!Result || (VtableSymbol == NULL)) {
     return FALSE;
   }
 
@@ -660,11 +663,12 @@ MachoGetVtableSymbolsFromSmcp64 (
     return FALSE;
   }
 
-  MetaVtableSymbol = MachoGetLocalDefinedSymbolByName (
-                       Context,
-                       MetaVtableName
-                       );
-  if (MetaVtableSymbol == NULL) {
+  Result = MachoGetLocalDefinedSymbolByName (
+             Context,
+             MetaVtableName,
+             &MetaVtableSymbol
+             );
+  if (!Result || (MetaVtableSymbol == NULL)) {
     return FALSE;
   }
 
