@@ -54,7 +54,7 @@ typedef struct XML_NODE_LIST_ XML_NODE_LIST;
 typedef struct XML_PARSER_ XML_PARSER;
 
 //
-// An xml_node will always contain a tag name and a 0-terminated list of
+// An XML_NODE will always contain a tag name and a 0-terminated list of
 // children. Moreover it may contain text content.
 //
 struct XML_NODE_ {
@@ -70,7 +70,7 @@ struct XML_NODE_LIST_ {
 };
 
 //
-// An xml_document simply contains the root node and the underlying buffer.
+// An XML_DOCUMENT simply contains the root node and the underlying buffer.
 //
 struct XML_DOCUMENT_ {
   struct {

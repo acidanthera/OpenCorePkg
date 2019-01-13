@@ -104,13 +104,14 @@ typedef struct XML_NODE_ XML_NODE;
 //
 // Tries to parse the XML fragment in buffer
 //
-// @param buffer Chunk to parse
-// @param length Size of the buffer
+// @param Buffer Chunk to parse
+// @param Length Size of the buffer
 //
-// @warning `buffer` will be referenced by the document, you may not free it
-//     until you free the xml_document
-// @warning You have to call xml_document_free after you finished using the
+// @warning `Buffer` will be referenced by the document, you may not free it
+//     until you free the XML_DOCUMENT
+// @warning You have to call XmlDocumentFree after you finished using the
 //     document
+// @warning `Buffer` contents are permanently modified during parsing
 //
 // @return The parsed xml fragment iff parsing was successful, 0 otherwise
 //
@@ -121,10 +122,10 @@ XmlParseDocument (
   );
 
 //
-// Frees all resources associated with the document. All xml_node and xml_string
+// Frees all resources associated with the document. All XML_NODE
 // references obtained through the document will be invalidated.
 //
-// @param document xml_document to free
+// @param Document XML_DOCUMENT to free
 //
 VOID
 XmlDocumentFree (
@@ -132,7 +133,7 @@ XmlDocumentFree (
   );
 
 //
-// @return xml_node representing the document root.
+// @return XML_NODE representing the document root.
 //
 XML_NODE *
 XmlDocumentRoot (
@@ -140,7 +141,7 @@ XmlDocumentRoot (
   );
 
 //
-// @return The xml_node's tag name.
+// @return The XML_NODE's tag name.
 //
 CONST CHAR8 *
 XmlNodeName (
@@ -148,7 +149,7 @@ XmlNodeName (
   );
 
 //
-// @return The xml_node's string content (if available, otherwise NULL).
+// @return The XML_NODE's string content (if available, otherwise NULL).
 //
 CONST CHAR8 *
 XmlNodeContent (
@@ -186,7 +187,7 @@ XmlEasyChild (
   );
 
 //
-// @return xml_node representing plist root or NULL.
+// @return XML_NODE representing plist root or NULL.
 // @warning Only a subset of plist is supported.
 // @warning No validation of plist format is performed.
 //
