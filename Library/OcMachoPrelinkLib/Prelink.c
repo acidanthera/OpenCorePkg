@@ -383,7 +383,7 @@ InternalCalculateTargetsIntel64 (
                 Relocation->SymbolNumber,
                 &Symbol
                 );
-    if (!Success || (Symbol == NULL)) {
+    if (!Success) {
       return FALSE;
     }
 

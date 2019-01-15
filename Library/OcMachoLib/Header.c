@@ -171,21 +171,20 @@ MachoGetLastAddress64 (
   IN OUT OC_MACHO_CONTEXT  *Context
   )
 {
-  UINT64                  LastAddress;
+  UINT64                        LastAddress;
 
-  MACH_SEGMENT_COMMAND_64 *Segment;
-  UINT64                  Address;
+  CONST MACH_SEGMENT_COMMAND_64 *Segment;
+  UINT64                        Address;
 
   ASSERT (Context != NULL);
 
   LastAddress = 0;
 
-  Segment = NULL;
-  while (MachoGetNextSegment64 (Context, &Segment)) {
-    if (Segment == NULL) {
-      return LastAddress;
-    }
-
+  for (
+    Segment = MachoGetNextSegment64 (Context, NULL);
+    Segment != NULL;
+    Segment = MachoGetNextSegment64 (Context, Segment)
+    ) {
     Address = (Segment->VirtualAddress + Segment->Size);
 
     if (Address > LastAddress) {
@@ -193,7 +192,7 @@ MachoGetLastAddress64 (
     }
   }
 
-  return 0;
+  return LastAddress;
 }
 
 /**
@@ -253,22 +252,18 @@ InternalGetNextCommand64 (
   Retrieves the first UUID Load Command.
 
   @param[in,out] Context  Context of the Mach-O.
-  @param[out]    Uuid     The pointer the UUID command is returned into.
-                          NULL if unavailable.  Undefined if FALSE is returned.
 
-  @return  Whether the inspected binary elements are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_UUID_COMMAND *
 MachoGetUuid64 (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  OUT    MACH_UUID_COMMAND  **Uuid
+  IN OUT OC_MACHO_CONTEXT  *Context
   )
 {
   MACH_UUID_COMMAND *UuidCommand;
 
   ASSERT (Context != NULL);
-  ASSERT (Uuid != NULL);
 
   UuidCommand = (MACH_UUID_COMMAND *)(
                   InternalGetNextCommand64 (
@@ -277,14 +272,14 @@ MachoGetUuid64 (
                     NULL
                     )
                   );
-  if (UuidCommand == NULL
-    || !OC_ALIGNED (UuidCommand)
-    || UuidCommand->CommandSize != sizeof (*UuidCommand)) {
-    return FALSE;
+
+  if ((UuidCommand != NULL)
+   && OC_ALIGNED (UuidCommand)
+   && (UuidCommand->CommandSize == sizeof (*UuidCommand))) {
+    return UuidCommand;
   }
 
-  *Uuid = UuidCommand;
-  return TRUE;
+  return NULL;
 }
 
 /**
@@ -292,44 +287,40 @@ MachoGetUuid64 (
 
   @param[in,out] Context      Context of the Mach-O.
   @param[in]     SegmentName  Segment name to search for.
-  @param[out]    Segment      Pointer the segment is returned in.
-                              If FALSE is returned, the output is undefined.
 
-  @return  Whether the inspected binary elements are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_SEGMENT_COMMAND_64 *
 MachoGetSegmentByName64 (
-  IN OUT OC_MACHO_CONTEXT         *Context,
-  IN     CONST CHAR8              *SegmentName,
-  OUT    MACH_SEGMENT_COMMAND_64  **Segment
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SegmentName
   )
 {
-  MACH_SEGMENT_COMMAND_64 *SegmentTemp;
+  MACH_SEGMENT_COMMAND_64 *Segment;
   INTN                    Result;
 
   ASSERT (Context != NULL);
   ASSERT (SegmentName != NULL);
-  ASSERT (Segment != NULL);
 
   Result = 0;
 
-  SegmentTemp = NULL;
-  while (MachoGetNextSegment64 (Context, &SegmentTemp)) {
-    if (SegmentTemp != NULL) {
-      Result = AsciiStrnCmp (
-                 SegmentTemp->SegmentName,
-                 SegmentName,
-                 ARRAY_SIZE (SegmentTemp->SegmentName)
-                 );
-      if (Result == 0) {
-        *Segment = SegmentTemp;
-        return TRUE;
-      }
+  for (
+    Segment = MachoGetNextSegment64 (Context, NULL);
+    Segment != NULL;
+    Segment = MachoGetNextSegment64 (Context, Segment)
+    ) {
+    Result = AsciiStrnCmp (
+                Segment->SegmentName,
+                SegmentName,
+                ARRAY_SIZE (Segment->SegmentName)
+                );
+    if (Result == 0) {
+      return Segment;
     }
   }
 
-  return FALSE;
+  return NULL;
 }
 
 /**
@@ -405,39 +396,35 @@ InternalSectionIsSane (
   @param[in,out] Context      Context of the Mach-O.
   @param[in]     Segment      Segment to search in.
   @param[in]     SectionName  Section name to search for.
-  @param[out]    Section      Pointer the section is returned in.
-                              If FALSE is returned, the output is undefined.
 
-  @return  Whether all inspected sections are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_SECTION_64 *
 MachoGetSectionByName64 (
   IN OUT OC_MACHO_CONTEXT         *Context,
   IN     MACH_SEGMENT_COMMAND_64  *Segment,
-  IN     CONST CHAR8              *SectionName,
-  OUT    MACH_SECTION_64          **Section
+  IN     CONST CHAR8              *SectionName
   )
 {
+  MACH_SECTION_64 *Section;
   INTN            Result;
-  MACH_SECTION_64 *SectionTemp;
 
   ASSERT (Context != NULL);
   ASSERT (Segment != NULL);
   ASSERT (SectionName != NULL);
-  ASSERT (Section != NULL);
 
-  SectionTemp = NULL;
-  while (MachoGetNextSection64 (Context, Segment, &SectionTemp)) {
-    if (SectionTemp != NULL) {
-      Result = AsciiStrnCmp (
-                 SectionTemp->SectionName,
-                 SectionName,
-                 ARRAY_SIZE (SectionTemp->SectionName)
-                 );
-      if (Result != 0) {
-        continue;
-      }
+  for (
+    Section = MachoGetNextSection64 (Context, Segment, NULL);
+    Section != NULL;
+    Section = MachoGetNextSection64 (Context, Segment, Section)
+    ) {
+    Result = AsciiStrnCmp (
+               Section->SectionName,
+               SectionName,
+               ARRAY_SIZE (Section->SectionName)
+               );
+    if (Result == 0) {
       //
       // Assumption: Mach-O is not of type MH_OBJECT.
       // MH_OBJECT might have sections in segments they do not belong in for
@@ -446,22 +433,21 @@ MachoGetSectionByName64 (
       //
       DEBUG_CODE (
         Result = AsciiStrnCmp (
-                    SectionTemp->SegmentName,
-                    Segment->SegmentName,
-                    MIN (
-                      ARRAY_SIZE (SectionTemp->SegmentName),
-                      ARRAY_SIZE (Segment->SegmentName)
-                      )
-                    );
+                   Section->SegmentName,
+                   Segment->SegmentName,
+                   MIN (
+                     ARRAY_SIZE (Section->SegmentName),
+                     ARRAY_SIZE (Segment->SegmentName)
+                     )
+                   );
         ASSERT (Result == 0);
         );
-    }
 
-    *Section = SectionTemp;
-    return TRUE;
+      return Section;
+    }
   }
 
-  return FALSE;
+  return NULL;
 }
 
 /**
@@ -470,18 +456,15 @@ MachoGetSectionByName64 (
   @param[in,out] Context      Context of the Mach-O.
   @param[in]     SegmentName  The name of the segment to search in.
   @param[in]     SectionName  The name of the section to search for.
-  @param[out]    Section      Pointer the section is returned in.
-                              If FALSE is returned, the output is undefined.
 
-  @retval  Whether the inspected binary elements are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_SECTION_64 *
 MachoGetSegmentSectionByName64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST CHAR8       *SegmentName,
-  IN     CONST CHAR8       *SectionName,
-  OUT    MACH_SECTION_64   **Section
+  IN     CONST CHAR8       *SectionName
   )
 {
   MACH_SEGMENT_COMMAND_64 *Segment;
@@ -489,45 +472,34 @@ MachoGetSegmentSectionByName64 (
   ASSERT (Context != NULL);
   ASSERT (SegmentName != NULL);
   ASSERT (SectionName != NULL);
-  ASSERT (Section != NULL);
 
-  if (!MachoGetSegmentByName64 (Context, SegmentName, &Segment)) {
-    return FALSE;
+  Segment = MachoGetSegmentByName64 (Context, SegmentName);
+
+  if (Segment != NULL) {
+    return MachoGetSectionByName64 (Context, Segment, SectionName);
   }
 
-  if (Segment == NULL) {
-    *Section = NULL;
-    return TRUE;
-  }
-
-  return MachoGetSectionByName64 (
-            Context,
-            Segment,
-            SectionName,
-            Section
-            );
+  return NULL;
 }
 
 /**
   Retrieves the next segment.
 
   @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Segment  On input, the segment to retrieve the successor of.
-                          If NULL, the first segment is returned.
-                          On output, the following segment is returned.  If no
-                          more segment is defined, NULL is returned.
-                          If FALSE is returned, the output is undefined.
+  @param[in]     Segment  Segment to retrieve the successor of.
+                          if NULL, the first segment is returned.
 
-  @retval  Whether the inspected binary elements are sane.
+  @retal NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_SEGMENT_COMMAND_64 *
 MachoGetNextSegment64 (
-  IN OUT OC_MACHO_CONTEXT         *Context,
-  IN     MACH_SEGMENT_COMMAND_64  **Segment
+  IN OUT OC_MACHO_CONTEXT               *Context,
+  IN     CONST MACH_SEGMENT_COMMAND_64  *Segment  OPTIONAL
   )
 {
-  MACH_SEGMENT_COMMAND_64 *SegmentTemp;
+  MACH_SEGMENT_COMMAND_64 *NextSegment;
+
   CONST MACH_HEADER_64    *MachHeader;
   UINTN                   TopOfCommands;
   BOOLEAN                 Result;
@@ -535,106 +507,92 @@ MachoGetNextSegment64 (
   UINTN                   TopOfSections;
 
   ASSERT (Context != NULL);
-  ASSERT (Segment != NULL);
 
   ASSERT (Context->MachHeader != NULL);
   ASSERT (Context->FileSize > 0);
 
-  SegmentTemp = *Segment;
-
-  if (SegmentTemp != NULL) {
+  if (Segment != NULL) {
     MachHeader    = Context->MachHeader;
     TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
     ASSERT (
-      ((UINTN)SegmentTemp >= (UINTN)&MachHeader->Commands[0])
-        && ((UINTN)SegmentTemp < TopOfCommands)
+      ((UINTN)Segment >= (UINTN)&MachHeader->Commands[0])
+        && ((UINTN)Segment < TopOfCommands)
       );
   }
 
-  SegmentTemp = (MACH_SEGMENT_COMMAND_64 *)(
+  NextSegment = (MACH_SEGMENT_COMMAND_64 *)(
                   InternalGetNextCommand64 (
                     Context,
                     MACH_LOAD_COMMAND_SEGMENT_64,
-                    (MACH_LOAD_COMMAND *)SegmentTemp
+                    (MACH_LOAD_COMMAND *)Segment
                     )
                   );
-  if (SegmentTemp != NULL) {
-    if (!OC_ALIGNED (SegmentTemp)
-     || (SegmentTemp->CommandSize != sizeof (*SegmentTemp))) {
-      return FALSE;
-    }
-
-    Result = OcOverflowMulAddUN (
-               SegmentTemp->NumSections,
-               sizeof (*SegmentTemp->Sections),
-               (UINTN)SegmentTemp->Sections,
-               &TopOfSections
-               );
-    if (Result
-     || (((UINTN)SegmentTemp + SegmentTemp->CommandSize) != TopOfSections)) {
-      return FALSE;
-    }
-
-    Result = OcOverflowAddU64 (
-               SegmentTemp->FileOffset,
-               SegmentTemp->FileSize,
-               &TopOfSegment
-               );
-    if (Result || (TopOfSegment > Context->FileSize)) {
-      return FALSE;
-    }
+  if ((NextSegment == NULL)
+   || !OC_ALIGNED (NextSegment)
+   || (NextSegment->CommandSize < sizeof (*NextSegment))) {
+    return NULL;
   }
 
-  *Segment = SegmentTemp;
-  return TRUE;
+  Result = OcOverflowMulAddUN (
+             NextSegment->NumSections,
+             sizeof (*NextSegment->Sections),
+             (UINTN)NextSegment->Sections,
+             &TopOfSections
+             );
+  if (Result || (((UINTN)NextSegment + NextSegment->CommandSize) < TopOfSections)) {
+    return NULL;
+  }
+
+  Result = OcOverflowAddU64 (
+             NextSegment->FileOffset,
+             NextSegment->FileSize,
+             &TopOfSegment
+             );
+  if (Result || (TopOfSegment > Context->FileSize)) {
+    return NULL;
+  }
+
+  return NextSegment;
 }
 
 /**
   Retrieves the next section of a segment.
 
+
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Segment  The segment to get the section of.
-  @param[in]     Section  On input, The section to get the successor of.
+  @param[in]     Section  The section to get the successor of.
                           If NULL, the first section is returned.
-                          On output, the successor of the input section.
-                          If FALSE is returned, the output is undefined.
-
-  @return  Whether the inspected binary elements are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_SECTION_64 *
 MachoGetNextSection64 (
   IN OUT OC_MACHO_CONTEXT         *Context,
   IN     MACH_SEGMENT_COMMAND_64  *Segment,
-  IN     MACH_SECTION_64          **Section
+  IN     MACH_SECTION_64          *Section  OPTIONAL
   )
 {
-  MACH_SECTION_64 *SectionTemp;
-
   ASSERT (Context != NULL);
   ASSERT (Segment != NULL);
-  ASSERT (Section != NULL);
 
-  SectionTemp = *Section;
+  if (Section != NULL) {
+    ASSERT (Section >= Segment->Sections);
 
-  if (SectionTemp != NULL) {
-    ASSERT (SectionTemp >= Segment->Sections);
-    ++SectionTemp;
+    if (Section >= &Segment->Sections[Segment->NumSections]) {
+      return NULL;
+    }
+
+    ++Section;
   } else {
-    SectionTemp = &Segment->Sections[0];
+    Section = &Segment->Sections[0];
   }
 
-  if (SectionTemp >= &Segment->Sections[Segment->NumSections]) {
-    *Section = NULL;
-    return TRUE;
+  if (!InternalSectionIsSane (Context, Section, Segment)) {
+    return NULL;
   }
 
-  if (!InternalSectionIsSane (Context, SectionTemp, Segment)) {
-    return FALSE;
-  }
-
-  *Section = SectionTemp;
-  return TRUE;
+  return Section;
 }
 
 /**
@@ -642,20 +600,17 @@ MachoGetNextSection64 (
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Index    Index of the section to retrieve.
-  @param[out]    Section  Pointer the section is returned into.
-                          If FALSE is returned, the output is undefined.
 
-  @return  Whether the inspected binary elements are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_SECTION_64 *
 MachoGetSectionByIndex64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT32            Index,
-  OUT    MACH_SECTION_64   **Section
+  IN     UINT32            Index
   )
 {
-  MACH_SECTION_64         *SectionTemp;
+  MACH_SECTION_64         *Section;
 
   MACH_SEGMENT_COMMAND_64 *Segment;
   UINT32                  SectionIndex;
@@ -663,17 +618,15 @@ MachoGetSectionByIndex64 (
   BOOLEAN                 Result;
 
   ASSERT (Context != NULL);
-  ASSERT (Section != NULL);
 
   SectionIndex = 0;
 
   Segment = NULL;
-  while (MachoGetNextSegment64 (Context, &Segment)) {
-    if (Segment == NULL) {
-      *Section = NULL;
-      return TRUE;
-    }
-
+  for (
+    Segment = MachoGetNextSegment64 (Context, NULL);
+    Segment != NULL;
+    Segment = MachoGetNextSegment64 (Context, Segment)
+    ) {
     Result = OcOverflowAddU32 (
                SectionIndex,
                Segment->NumSections,
@@ -683,19 +636,18 @@ MachoGetSectionByIndex64 (
     // If NextSectionIndex is wrapping around, Index must be contained.
     //
     if (Result || (Index < NextSectionIndex)) {
-      SectionTemp = &Segment->Sections[Index - SectionIndex];
-      if (!InternalSectionIsSane (Context, SectionTemp, Segment)) {
-        break;
+      Section = &Segment->Sections[Index - SectionIndex];
+      if (!InternalSectionIsSane (Context, Section, Segment)) {
+        return NULL;
       }
 
-      *Section = SectionTemp;
-      return TRUE;
+      return Section;
     }
 
     SectionIndex = NextSectionIndex;
   }
 
-  return FALSE;
+  return NULL;
 }
 
 /**
@@ -703,59 +655,44 @@ MachoGetSectionByIndex64 (
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Address  Address of the section to retrieve.
-  @param[out]    Section  Pointer the section is returned in.
-                          If FALSE is returned, the output is undefined.
 
-  @return  Whether the inspected binary elements are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_SECTION_64 *
 MachoGetSectionByAddress64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT64            Address,
-  OUT    MACH_SECTION_64   **Section
+  IN     UINT64            Address
   )
 {
-  BOOLEAN                 Result;
   MACH_SEGMENT_COMMAND_64 *Segment;
-  MACH_SECTION_64         *SectionWalker;
+  MACH_SECTION_64         *Section;
   UINT64                  TopOfSegment;
+  UINT64                  TopOfSection;
 
   ASSERT (Context != NULL);
-  ASSERT (Section != NULL);
 
-  Segment = NULL;
-  while (MachoGetNextSegment64 (Context, &Segment)) {
-    if (Segment == NULL) {
-      *Section = NULL;
-      return TRUE;
-    }
-
+  for (
+    Segment = MachoGetNextSegment64 (Context, NULL);
+    Segment != NULL;
+    Segment = MachoGetNextSegment64 (Context, Segment)
+    ) {
     TopOfSegment = (Segment->VirtualAddress + Segment->Size);
     if ((Address >= Segment->VirtualAddress) && (Address < TopOfSegment)) {
-      Result = FALSE;
-
-      SectionWalker = NULL;
-      while (MachoGetNextSection64 (Context, Segment, &SectionWalker)) {
-        if (SectionWalker == NULL) {
-          Result = TRUE;
-          break;
+      for (
+        Section = MachoGetNextSection64 (Context, Segment, NULL);
+        Section != NULL;
+        Section = MachoGetNextSection64 (Context, Segment, Section)
+        ) {
+        TopOfSection = (Section->Address + Section->Size);
+        if ((Address >= Section->Address) && (Address < TopOfSection)) {
+          return Section;
         }
-
-        if ((Address >= SectionWalker->Address)
-         && (Address < (SectionWalker->Address + SectionWalker->Size))) {
-          *Section = SectionWalker;
-          return TRUE;
-        }
-      }
-
-      if (!Result) {
-        break;
       }
     }
   }
 
-  return FALSE;
+  return NULL;
 }
 
 /**

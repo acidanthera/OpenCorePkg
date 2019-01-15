@@ -628,12 +628,8 @@ MachoGetVtableSymbolsFromSmcp64 (
     return FALSE;
   }
 
-  Result = MachoGetLocalDefinedSymbolByName (
-             Context,
-             VtableName,
-             &VtableSymbol
-             );
-  if (!Result || (VtableSymbol == NULL)) {
+  VtableSymbol = MachoGetLocalDefinedSymbolByName (Context, VtableName);
+  if (VtableSymbol == NULL) {
     return FALSE;
   }
 
@@ -646,12 +642,11 @@ MachoGetVtableSymbolsFromSmcp64 (
     return FALSE;
   }
 
-  Result = MachoGetLocalDefinedSymbolByName (
-             Context,
-             MetaVtableName,
-             &MetaVtableSymbol
-             );
-  if (!Result || (MetaVtableSymbol == NULL)) {
+  MetaVtableSymbol = MachoGetLocalDefinedSymbolByName (
+                       Context,
+                       MetaVtableName
+                       );
+  if (MetaVtableSymbol == NULL) {
     return FALSE;
   }
 

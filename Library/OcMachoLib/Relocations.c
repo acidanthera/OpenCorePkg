@@ -68,39 +68,31 @@ MachoPreserveRelocationIntel64 (
 /**
   Retrieves an extern Relocation by the address it targets.
 
-  @param[in,out] Context         Context of the Mach-O.
-  @param[in]     Address         The address to search for.
-  @param[out]    RelocationInfo  The pointer to return the Relocation info
-                                 into.
-                                 If FALSE is returned, the output is undefined.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  The address to search for.
 
-  @return  Whether the inspected binary elements are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_RELOCATION_INFO *
 InternalGetExternalRelocationByOffset (
-  IN OUT OC_MACHO_CONTEXT      *Context,
-  IN     UINT64                Address,
-  OUT    MACH_RELOCATION_INFO  **RelocationInfo
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address
   )
 {
-  MACH_RELOCATION_INFO *RelocationInfoTemp;
   UINT32               Index;
   MACH_RELOCATION_INFO *Relocation;
 
   ASSERT (Context != NULL);
-  ASSERT (RelocationInfo != NULL);
   //
   // Assumption: 64-bit.
   //
   if (!InternalRetrieveSymtabs64 (Context)) {
-    return FALSE;
+    return NULL;
   }
 
   ASSERT (Context->DySymtab != NULL);
   ASSERT (Context->ExternRelocations != NULL);
-
-  RelocationInfoTemp = NULL;
 
   for (Index = 0; Index < Context->DySymtab->NumExternalRelocations; ++Index) {
     Relocation = &Context->ExternRelocations[Index];
@@ -120,8 +112,7 @@ InternalGetExternalRelocationByOffset (
     }
 
     if ((UINT64)Relocation->Address == Address) {
-      RelocationInfoTemp = Relocation;
-      break;
+      return Relocation;
     }
     //
     // Relocation Pairs can be skipped.
@@ -136,6 +127,5 @@ InternalGetExternalRelocationByOffset (
     }
   }
 
-  *RelocationInfo = RelocationInfoTemp;
-  return TRUE;
+  return NULL;
 }

@@ -89,16 +89,13 @@ MachoGetLastAddress64 (
   Retrieves the first UUID Load Command.
 
   @param[in,out] Context  Context of the Mach-O.
-  @param[out]    Uuid     The pointer the UUID command is returned into.
-                          NULL if unavailable.  Undefined if FALSE is returned.
 
-  @return  Whether the inspected binary elements are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_UUID_COMMAND *
 MachoGetUuid64 (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  OUT    MACH_UUID_COMMAND  **Uuid
+  IN OUT OC_MACHO_CONTEXT  *Context
   );
 
 /**
@@ -106,17 +103,14 @@ MachoGetUuid64 (
 
   @param[in,out] Context      Context of the Mach-O.
   @param[in]     SegmentName  Segment name to search for.
-  @param[out]    Segment      Pointer the segment is returned in.
-                              If FALSE is returned, the output is undefined.
 
-  @return  Whether the inspected binary elements are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_SEGMENT_COMMAND_64 *
 MachoGetSegmentByName64 (
-  IN OUT OC_MACHO_CONTEXT         *Context,
-  IN     CONST CHAR8              *SegmentName,
-  OUT    MACH_SEGMENT_COMMAND_64  **Segment
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SegmentName
   );
 
 /**
@@ -125,18 +119,15 @@ MachoGetSegmentByName64 (
   @param[in,out] Context      Context of the Mach-O.
   @param[in]     Segment      Segment to search in.
   @param[in]     SectionName  Section name to search for.
-  @param[out]    Section      Pointer the section is returned in.
-                              If FALSE is returned, the output is undefined.
 
-  @return  Whether all inspected sections are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_SECTION_64 *
 MachoGetSectionByName64 (
   IN OUT OC_MACHO_CONTEXT         *Context,
   IN     MACH_SEGMENT_COMMAND_64  *Segment,
-  IN     CONST CHAR8              *SectionName,
-  OUT    MACH_SECTION_64          **Section
+  IN     CONST CHAR8              *SectionName
   );
 
 /**
@@ -145,37 +136,31 @@ MachoGetSectionByName64 (
   @param[in,out] Context      Context of the Mach-O.
   @param[in]     SegmentName  The name of the segment to search in.
   @param[in]     SectionName  The name of the section to search for.
-  @param[out]    Section      Pointer the section is returned in.
-                              If FALSE is returned, the output is undefined.
 
-  @retval  Whether the inspected binary elements are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_SECTION_64 *
 MachoGetSegmentSectionByName64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST CHAR8       *SegmentName,
-  IN     CONST CHAR8       *SectionName,
-  OUT    MACH_SECTION_64   **Section
+  IN     CONST CHAR8       *SectionName
   );
 
 /**
   Retrieves the next segment.
 
   @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Segment  On input, the segment to retrieve the successor of.
-                          If NULL, the first segment is returned.
-                          On output, the following segment is returned.  If no
-                          more segment is defined, NULL is returned.
-                          If FALSE is returned, the output is undefined.
+  @param[in]     Segment  Segment to retrieve the successor of.
+                          if NULL, the first segment is returned.
 
-  @retval  Whether the inspected binary elements are sane.
+  @retal NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_SEGMENT_COMMAND_64 *
 MachoGetNextSegment64 (
-  IN OUT OC_MACHO_CONTEXT         *Context,
-  IN     MACH_SEGMENT_COMMAND_64  **Segment
+  IN OUT OC_MACHO_CONTEXT               *Context,
+  IN     CONST MACH_SEGMENT_COMMAND_64  *Segment  OPTIONAL
   );
 
 /**
@@ -183,19 +168,16 @@ MachoGetNextSegment64 (
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Segment  The segment to get the section of.
-  @param[in]     Section  On input, The section to get the successor of.
-                          If NULL, the first section is returned.
-                          On output, the successor of the input section.
-                          If FALSE is returned, the output is undefined.
+  @param[in]     Section  The section to get the successor of.
 
-  @return  Whether the inspected binary elements are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_SECTION_64 *
 MachoGetNextSection64 (
   IN OUT OC_MACHO_CONTEXT         *Context,
   IN     MACH_SEGMENT_COMMAND_64  *Segment,
-  IN     MACH_SECTION_64          **Section
+  IN     MACH_SECTION_64          *Section  OPTIONAL
   );
 
 /**
@@ -203,17 +185,14 @@ MachoGetNextSection64 (
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Index    Index of the section to retrieve.
-  @param[out]    Section  Pointer the section is returned into.
-                          If FALSE is returned, the output is undefined.
 
-  @return  Whether the inspected binary elements are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_SECTION_64 *
 MachoGetSectionByIndex64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT32            Index,
-  OUT    MACH_SECTION_64   **Section
+  IN     UINT32            Index
   );
 
 /**
@@ -221,43 +200,36 @@ MachoGetSectionByIndex64 (
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Address  Address of the section to retrieve.
-  @param[out]    Section  Pointer the section is returned in.
-                          If FALSE is returned, the output is undefined.
 
-  @return  Whether the inspected binary elements are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_SECTION_64 *
 MachoGetSectionByAddress64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT64            Address,
-  OUT    MACH_SECTION_64   **Section
+  IN     UINT64            Address
   );
 
 /**
   Returns whether Symbol describes a section.
 
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Symbol   Symbol to evaluate.
+  @param[in] Symbol  Symbol to evaluate.
 
 **/
 BOOLEAN
 MachoSymbolIsSection (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_64  *Symbol
+  IN CONST MACH_NLIST_64  *Symbol
   );
 
 /**
   Returns whether Symbol is defined.
 
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Symbol   Symbol to evaluate.
+  @param[in] Symbol  Symbol to evaluate.
 
 **/
 BOOLEAN
 MachoSymbolIsDefined (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_64  *Symbol
+  IN CONST MACH_NLIST_64  *Symbol
   );
 
 /**
@@ -276,37 +248,29 @@ MachoSymbolIsLocalDefined (
 /**
   Retrieves a locally defined symbol by its name.
 
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Name     Name of the symbol to locate.
-  @param[out]    Symbol   Pointer to return the symbol into.
-                          If FALSE is returned, the output is undefined.
-
-  @return  Whether the inspected binary elements are sane.
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Name     Name of the symbol to locate.
 
 **/
-BOOLEAN
+MACH_NLIST_64 *
 MachoGetLocalDefinedSymbolByName (
   IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     CONST CHAR8       *Name,
-  OUT    MACH_NLIST_64     **Symbol
+  IN     CONST CHAR8  *Name
   );
 
 /**
   Retrieves a symbol by its index.
 
-  @param[in]  Context  Context of the Mach-O.
-  @param[in]  Index    Index of the symbol to locate.
-  @param[out] Symbol   Pointer to return the symbol into.
-                       If FALSE is returned, the output is undefined.
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Index    Index of the symbol to locate.
 
-  @return  Whether the inspected binary elements are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_NLIST_64 *
 MachoGetSymbolByIndex64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT32            Index,
-  OUT    MACH_NLIST_64     **Symbol
+  IN     UINT32            Index
   );
 
 /**
@@ -358,12 +322,11 @@ MachoIsSymbolValueSane64 (
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Address  Address to search for.
-  @param[out]    Symbol   Pointer the symbol is returned into.
-                          If FALSE is returned, the output data is undefined.
-                          If TRUE is returned and Symbol is NULL, no
-                          Relocation exists that references Address.                     
+  @param[out]    Symbol   Buffer the pointer to the symbol is returned in.
+                          May be NULL when the symbol data is invalid.
+                          The output data is undefined when FALSE is returned.
 
-  @return  Whether the inspected binary elements are sane.
+  @returns  Whether Relocation exists.
 
 **/
 BOOLEAN
@@ -393,12 +356,12 @@ MachoRelocateSymbol64 (
 /**
   Retrieves the Mach-O file offset of the address pointed to by Symbol.
 
-  @param[in,ouz] Context     Context of the Mach-O.
+  @param[in,out] Context     Context of the Mach-O.
   @param[in]     Symbol      Symbol to retrieve the offset of.
   @param[out]    FileOffset  Pointer the file offset is returned into.
                              If FALSE is returned, the output is undefined.
 
-  @retval 0  0 is returned on failure.
+  @retval FALSE is returned on failure.
 
 **/
 BOOLEAN

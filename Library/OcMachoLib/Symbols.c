@@ -62,43 +62,38 @@ MachoIsSymbolValueSane64 (
   IN     CONST MACH_NLIST_64  *Symbol
   )
 {
-  MACH_SEGMENT_COMMAND_64 *Segment;
+  CONST MACH_SEGMENT_COMMAND_64 *Segment;
 
-  ASSERT (Context != NULL);
-  ASSERT (Symbol != NULL);
-
-  if (!MachoSymbolIsLocalDefined (Context, Symbol)) {
-    return TRUE;
-  }
-
-  Segment = NULL;
-  while (MachoGetNextSegment64 (Context, &Segment) && (Segment != NULL)) {
-    if ((Symbol->Value >= Segment->VirtualAddress)
-      && (Symbol->Value < (Segment->VirtualAddress + Segment->Size))) {
-      return TRUE;
+  if (MachoSymbolIsLocalDefined (Context, Symbol)) {
+    for (
+      Segment = MachoGetNextSegment64 (Context, NULL);
+      Segment != NULL;
+      Segment = MachoGetNextSegment64 (Context, Segment)
+      ) {
+      if ((Symbol->Value >= Segment->VirtualAddress)
+       && (Symbol->Value < (Segment->VirtualAddress + Segment->Size))) {
+        return TRUE;
+      }
     }
+
+    return FALSE;
   }
 
-  return FALSE;
+  return TRUE;
 }
 
 /**
   Returns whether Symbol describes a section.
 
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Symbol  Symbol to evaluate.
+  @param[in] Symbol  Symbol to evaluate.
 
 **/
 BOOLEAN
 MachoSymbolIsSection (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_64  *Symbol
+  IN CONST MACH_NLIST_64  *Symbol
   )
 {
-  ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
-
-  ASSERT (MachoIsSymbolValueSane64 (Context, Symbol));
 
   if ((Symbol->Type & MACH_N_TYPE_STAB) != 0) {
     switch (Symbol->Type) {
@@ -142,21 +137,18 @@ MachoSymbolIsSection (
 /**
   Returns whether Symbol is defined.
 
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Symbol   Symbol to evaluate.
+  @param[in] Symbol  Symbol to evaluate.
 
 **/
 BOOLEAN
 MachoSymbolIsDefined (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_64  *Symbol
+  IN CONST MACH_NLIST_64  *Symbol
   )
 {
-  ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
 
   return ((Symbol->Type == MACH_RELOC_ABSOLUTE)
-           || MachoSymbolIsSection (Context, Symbol));
+           || MachoSymbolIsSection (Symbol));
 }
 
 /**
@@ -207,50 +199,45 @@ MachoSymbolIsLocalDefined (
     return FALSE;
   }
 
-  return MachoSymbolIsDefined (Context, Symbol);
+  return MachoSymbolIsDefined (Symbol);
 }
 
 /**
   Retrieves a symbol by its index.
 
-  @param[in]  Context  Context of the Mach-O.
-  @param[in]  Index    Index of the symbol to locate.
-  @param[out] Symbol   Pointer to return the symbol into.
-                       If FALSE is returned, the output is undefined.
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Index    Index of the symbol to locate.
 
-  @return  Whether the inspected binary elements are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_NLIST_64 *
 MachoGetSymbolByIndex64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT32            Index,
-  OUT    MACH_NLIST_64     **Symbol
+  IN     UINT32            Index
   )
 {
-  MACH_NLIST_64 *SymbolTemp;
+  MACH_NLIST_64 *Symbol;
 
   ASSERT (Context != NULL);
-  ASSERT (Symbol != NULL);
 
   if (!InternalRetrieveSymtabs64 (Context)) {
-    return FALSE;
+    return NULL;
   }
 
   ASSERT (Context->SymbolTable != NULL);
   ASSERT (Context->Symtab->NumSymbols > 0);
 
-  SymbolTemp = NULL;
-
   if (Index < Context->Symtab->NumSymbols) {
-    SymbolTemp = &Context->SymbolTable[Index];
-    if (!InternalSymbolIsSane (Context, SymbolTemp)) {
-      return FALSE;
+    Symbol = &Context->SymbolTable[Index];
+    if (InternalSymbolIsSane (Context, Symbol)) {
+      return Symbol;
     }
+  } else {
+    ASSERT (FALSE);
   }
 
-  *Symbol = SymbolTemp;
-  return TRUE;
+  return NULL;
 }
 
 /**
@@ -271,16 +258,11 @@ MachoGetSymbolName64 (
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
 
-  ASSERT (MachoIsSymbolValueSane64 (Context, Symbol));
-
   ASSERT (Context->SymbolTable != NULL);
+  ASSERT (Context->Symtab->StringsSize > Symbol->UnifiedName.StringIndex);
 
   ASSERT (((Symbol->Type & MACH_N_TYPE_STAB) != 0)
        || ((Symbol->Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR));
-
-  if (Context->Symtab->StringsSize <= Symbol->UnifiedName.StringIndex) {
-    return NULL;
-  }
 
   return (Context->StringTable + Symbol->UnifiedName.StringIndex);
 }
@@ -303,8 +285,6 @@ MachoGetIndirectSymbolName64 (
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
 
-  ASSERT (MachoIsSymbolValueSane64 (Context, Symbol));
-
   ASSERT (Context->SymbolTable != NULL);
 
   ASSERT (((Symbol->Type & MACH_N_TYPE_STAB) == 0)
@@ -322,12 +302,11 @@ MachoGetIndirectSymbolName64 (
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Address  Address to search for.
-  @param[out]    Symbol   Pointer the symbol is returned into.
-                          If FALSE is returned, the output data is undefined.
-                          If TRUE is returned and Symbol is NULL, no
-                          Relocation exists that references Address.                     
+  @param[out]    Symbol   Buffer the pointer to the symbol is returned in.
+                          May be NULL when the symbol data is invalid.
+                          The output data is undefined when FALSE is returned.
 
-  @return  Whether the inspected binary elements are sane.
+  @returns  Whether Relocation exists.
 
 **/
 BOOLEAN
@@ -337,37 +316,18 @@ MachoGetSymbolByExternRelocationOffset64 (
   OUT    MACH_NLIST_64     **Symbol
   )
 {
-  MACH_NLIST_64        *SymbolTemp;
-  BOOLEAN              Result;
-  MACH_RELOCATION_INFO *Relocation;
+  CONST MACH_RELOCATION_INFO *Relocation;
 
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
 
-  Result = InternalGetExternalRelocationByOffset (
-             Context,
-             Address,
-             &Relocation
-             );
-  if (!Result) {
-    return FALSE;
-  }
-
-  SymbolTemp = NULL;
-
+  Relocation = InternalGetExternalRelocationByOffset (Context, Address);
   if (Relocation != NULL) {
-    Result = MachoGetSymbolByIndex64 (
-               Context,
-               Relocation->SymbolNumber,
-               &SymbolTemp
-               );
-    if (!Result || (SymbolTemp == NULL)) {
-      return FALSE;
-    }
+    *Symbol = MachoGetSymbolByIndex64 (Context, Relocation->SymbolNumber);
+    return TRUE;
   }
 
-  *Symbol = SymbolTemp;
-  return TRUE;
+  return FALSE;
 }
 
 /**
@@ -397,6 +357,9 @@ InternalGetSymbolByName (
   ASSERT (Name != NULL);
 
   for (Index = 0; Index < NumberOfSymbols; ++Index) {
+    if (!InternalSymbolIsSane (Context, &SymbolTable[Index])) {
+      continue;
+    }
     TmpName = MachoGetSymbolName64 (Context, &SymbolTable[Index]);
     if (TmpName != NULL && AsciiStrCmp (Name, TmpName) == 0) {
       return &SymbolTable[Index];
@@ -411,29 +374,23 @@ InternalGetSymbolByName (
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Name     Name of the symbol to locate.
-  @param[out]    Symbol   Pointer to return the symbol into.
-                          If FALSE is returned, the output is undefined.
-
-  @return  Whether the inspected binary elements are sane.
 
 **/
-BOOLEAN
+MACH_NLIST_64 *
 MachoGetLocalDefinedSymbolByName (
   IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     CONST CHAR8       *Name,
-  OUT    MACH_NLIST_64     **Symbol
+  IN     CONST CHAR8       *Name
   )
 {
   MACH_NLIST_64               *SymbolTable;
   CONST MACH_DYSYMTAB_COMMAND *DySymtab;
-  MACH_NLIST_64               *SymbolTemp;
+  MACH_NLIST_64               *Symbol;
 
   ASSERT (Context != NULL);
   ASSERT (Name != NULL);
-  ASSERT (Symbol != NULL);
 
   if (!InternalRetrieveSymtabs64 (Context)) {
-    return FALSE;
+    return NULL;
   }
 
   SymbolTable  = Context->SymbolTable;
@@ -441,27 +398,26 @@ MachoGetLocalDefinedSymbolByName (
   ASSERT (SymbolTable != NULL);
   ASSERT (DySymtab != NULL);
 
-  SymbolTemp = InternalGetSymbolByName (
-                 Context,
-                 &SymbolTable[DySymtab->LocalSymbolsIndex],
-                 DySymtab->NumLocalSymbols,
-                 Name
-                 );
-  if (SymbolTemp == NULL) {
-    SymbolTemp = InternalGetSymbolByName (
-                   Context,
-                   &SymbolTable[DySymtab->ExternalSymbolsIndex],
-                   DySymtab->NumExternalSymbols,
-                   Name
-                   );
+  Symbol = InternalGetSymbolByName (
+             Context,
+             &SymbolTable[DySymtab->LocalSymbolsIndex],
+             DySymtab->NumLocalSymbols,
+             Name
+             );
+  if (Symbol == NULL) {
+    Symbol = InternalGetSymbolByName (
+               Context,
+               &SymbolTable[DySymtab->ExternalSymbolsIndex],
+               DySymtab->NumExternalSymbols,
+               Name
+               );
   }
 
-  if ((SymbolTemp != NULL) && !InternalSymbolIsSane (Context, SymbolTemp)) {
-    return FALSE;
+  if ((Symbol != NULL) && !InternalSymbolIsSane (Context, Symbol)) {
+    return NULL;
   }
 
-  *Symbol = SymbolTemp;
-  return TRUE;
+  return Symbol;
 }
 
 /**
@@ -481,21 +437,19 @@ MachoRelocateSymbol64 (
   IN OUT MACH_NLIST_64     *Symbol
   )
 {
-  MACH_SECTION_64 *Section;
-  UINT64          Value;
-  BOOLEAN         Result;
+  CONST MACH_SECTION_64 *Section;
+  UINT64                Value;
+  BOOLEAN               Result;
 
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
-
-  ASSERT (MachoIsSymbolValueSane64 (Context, Symbol));
   ASSERT ((Symbol->Type & MACH_N_TYPE_EXT) == 0);
   //
   // Symbols are relocated when they describe sections.
   //
-  if (MachoSymbolIsSection (Context, Symbol)) {
-    Result = MachoGetSectionByAddress64 (Context, Symbol->Value, &Section);
-    if (!Result || (Section == NULL)) {
+  if (MachoSymbolIsSection (Symbol)) {
+    Section = MachoGetSectionByAddress64 (Context, Symbol->Value);
+    if (Section == NULL) {
       return FALSE;
     }
 
@@ -552,8 +506,9 @@ MachoSymbolGetFileOffset64 (
 
   ASSERT (MachoIsSymbolValueSane64 (Context, Symbol));
 
-  if (!MachoGetSectionByIndex64 (Context, Symbol->Section, &Section)
-   || (Section == NULL) || (Symbol->Value < Section->Address)) {
+  Section = MachoGetSectionByIndex64 (Context, Symbol->Section);
+
+  if ((Section == NULL) || (Symbol->Value < Section->Address)) {
     return FALSE;
   }
 

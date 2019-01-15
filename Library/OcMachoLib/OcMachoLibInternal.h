@@ -35,20 +35,16 @@ InternalRetrieveSymtabs64 (
 /**
   Retrieves an extern Relocation by the address it targets.
 
-  @param[in,out] Context         Context of the Mach-O.
-  @param[in]     Address         The address to search for.
-  @param[out]    RelocationInfo  The pointer to return the Relocation info
-                                 into.
-                                 If FALSE is returned, the output is undefined.
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  The address to search for.
 
-  @return  Whether the inspected binary elements are sane.
+  @retval NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_RELOCATION_INFO *
 InternalGetExternalRelocationByOffset (
-  IN OUT OC_MACHO_CONTEXT      *Context,
-  IN     UINT64                Address,
-  OUT    MACH_RELOCATION_INFO  **RelocationInfo
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address
   );
 
 #endif // OC_MACHO_LIB_INTERNAL_H_
