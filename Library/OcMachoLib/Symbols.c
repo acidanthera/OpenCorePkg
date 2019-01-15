@@ -259,6 +259,8 @@ MachoGetSymbolByIndex64 (
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Symbol   Symbol to retrieve the name of.
 
+  @retval NULL  NULL is returned on failure.
+
 **/
 CONST CHAR8 *
 MachoGetSymbolName64 (
@@ -272,10 +274,13 @@ MachoGetSymbolName64 (
   ASSERT (MachoIsSymbolValueSane64 (Context, Symbol));
 
   ASSERT (Context->SymbolTable != NULL);
-  ASSERT (Context->Symtab->StringsSize > Symbol->UnifiedName.StringIndex);
 
   ASSERT (((Symbol->Type & MACH_N_TYPE_STAB) != 0)
        || ((Symbol->Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR));
+
+  if (Context->Symtab->StringsSize <= Symbol->UnifiedName.StringIndex) {
+    return NULL;
+  }
 
   return (Context->StringTable + Symbol->UnifiedName.StringIndex);
 }
@@ -385,18 +390,15 @@ InternalGetSymbolByName (
   IN     CONST CHAR8       *Name
   )
 {
-  UINT32 Index;
-  INTN   Result;
+  UINT32       Index;
+  CONST CHAR8  *TmpName;
 
   ASSERT (SymbolTable != NULL);
   ASSERT (Name != NULL);
 
   for (Index = 0; Index < NumberOfSymbols; ++Index) {
-    Result = AsciiStrCmp (
-               Name,
-               MachoGetSymbolName64 (Context, &SymbolTable[Index])
-               );
-    if (Result == 0) {
+    TmpName = MachoGetSymbolName64 (Context, &SymbolTable[Index]);
+    if (TmpName != NULL && AsciiStrCmp (Name, TmpName) == 0) {
       return &SymbolTable[Index];
     }
   }
@@ -513,7 +515,7 @@ MachoRelocateSymbol64 (
     }
 
     Result = OcOverflowAddU64 (Symbol->Value, Value, &Value);
-    if (!Result) {
+    if (Result) {
       return FALSE;
     }
 
@@ -563,7 +565,10 @@ MachoSymbolGetFileOffset64 (
   // The check against Section->Size guarantees a 32-bit value for the current
   // library implementation.
   //
-  ASSERT (Offset == (UINT32)Offset);
+  if (Offset != (UINT32)Offset) {
+    return FALSE;
+  }
+
   *FileOffset = (Section->Offset + (UINT32)Offset);
   return TRUE;
 }

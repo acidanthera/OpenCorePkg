@@ -142,7 +142,7 @@ MachoSymbolNameIsMetaclassPointer64 (
   Retrieves the class name of a Super Meta Class Pointer.
 
   @param[in,out] Context        Context of the Mach-O.
-  @param[in]     SmcpSymbol     SMCP Symbol to get the class name of.
+  @param[in]     SmcpName       SMCP Symbol name to get the class name of.
   @param[in]     ClassNameSize  The size of ClassName.
   @param[out]    ClassName      The output buffer for the class name.
 
@@ -152,44 +152,41 @@ MachoSymbolNameIsMetaclassPointer64 (
 BOOLEAN
 MachoGetClassNameFromSuperMetaClassPointer (
   IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_64  *SmcpSymbol,
+  IN     CONST CHAR8          *SmcpName,
   IN     UINTN                ClassNameSize,
   OUT    CHAR8                *ClassName
   )
 {
   BOOLEAN                Result;
-  CONST CHAR8            *SmcpName;
   UINTN                  StringSize;
   UINTN                  PrefixSize;
   UINTN                  SuffixSize;
   UINTN                  OutputSize;
 
   ASSERT (Context != NULL);
-  ASSERT (SmcpSymbol != NULL);
+  ASSERT (SmcpName != NULL);
   ASSERT (ClassNameSize > 0);
   ASSERT (ClassName != NULL);
 
   ASSERT (Context->StringTable != NULL);
-
-  SmcpName = MachoGetSymbolName64 (Context, SmcpSymbol);
 
   Result = MachoSymbolNameIsSmcp64 (Context, SmcpName);
   if (!Result) {
     return FALSE;
   }
 
-  PrefixSize = L_STR_SIZE_NT (OSOBJ_PREFIX);
-  StringSize = (AsciiStrLen (SmcpName) * sizeof (*SmcpName));
-  SuffixSize = L_STR_SIZE_NT (SMCP_TOKEN);
+  PrefixSize = L_STR_LEN (OSOBJ_PREFIX);
+  StringSize = AsciiStrLen (SmcpName);
+  SuffixSize = L_STR_LEN (SMCP_TOKEN);
 
   ASSERT ((StringSize - PrefixSize - SuffixSize) < ClassNameSize);
 
   OutputSize = MIN (
                  (StringSize - PrefixSize - SuffixSize),
-                 (ClassNameSize - sizeof (*ClassName))
+                 (ClassNameSize - 1)
                  );
   CopyMem (ClassName, &SmcpName[PrefixSize], OutputSize);
-  ClassName[OutputSize / sizeof (*ClassName)] = '\0';
+  ClassName[OutputSize] = '\0';
 
   return TRUE;
 }
@@ -239,9 +236,8 @@ MachoGetFunctionPrefixFromClassName (
   ASSERT (FunctionPrefix != NULL);
 
   BodySize = AsciiStrSize (ClassName);
-  Result   = OcOverflowAddUN (L_STR_SIZE (OSOBJ_PREFIX), BodySize, &TotalSize);
-  if (!Result || (FunctionPrefixSize < TotalSize)) {
-    ASSERT (FALSE);
+  Result   = OcOverflowAddUN (L_STR_LEN (OSOBJ_PREFIX), BodySize, &TotalSize);
+  if (Result || (FunctionPrefixSize < TotalSize)) {
     return FALSE;
   }
 
@@ -249,7 +245,7 @@ MachoGetFunctionPrefixFromClassName (
   CopyMem (
     &FunctionPrefix[Index],
     OSOBJ_PREFIX,
-    L_STR_SIZE_NT (OSOBJ_PREFIX)
+    L_STR_LEN (OSOBJ_PREFIX)
     );
 
   Index += L_STR_LEN (OSOBJ_PREFIX);
@@ -266,7 +262,7 @@ MachoGetFunctionPrefixFromClassName (
   Retrieves the class name of a Meta Class Pointer.
 
   @param[in,out] Context             Context of the Mach-O.
-  @param[in]     MetaClassPtrSymbol  MCP Symbol to get the class name of.
+  @param[in]     MetaClassName       MCP Symbol name to get the class name of.
   @param[in]     ClassNameSize       The size of ClassName.
   @param[out]    ClassName           The output buffer for the class name.
 
@@ -276,44 +272,41 @@ MachoGetFunctionPrefixFromClassName (
 BOOLEAN
 MachoGetClassNameFromMetaClassPointer (
   IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_64  *MetaClassPtrSymbol,
+  IN     CONST CHAR8          *MetaClassName,
   IN     UINTN                ClassNameSize,
   OUT    CHAR8                *ClassName
   )
 {
   BOOLEAN                Result;
-  CONST CHAR8            *MetaClassName;
   UINTN                  StringSize;
   UINTN                  PrefixSize;
   UINTN                  SuffixSize;
   UINTN                  ClassNameLength;
 
   ASSERT (Context != NULL);
-  ASSERT (MetaClassPtrSymbol != NULL);
+  ASSERT (MetaClassName != NULL);
   ASSERT (ClassNameSize > 0);
   ASSERT (ClassName != NULL);
 
   ASSERT (Context->StringTable != NULL);
-
-  MetaClassName = MachoGetSymbolName64 (Context, MetaClassPtrSymbol);
 
   Result = MachoSymbolNameIsMetaclassPointer64 (Context, MetaClassName);
   if (!Result) {
     return FALSE;
   }
 
-  PrefixSize = L_STR_SIZE_NT (OSOBJ_PREFIX);
-  StringSize = (AsciiStrLen (MetaClassName) * sizeof (*MetaClassName));
-  SuffixSize = L_STR_SIZE_NT (METACLASS_TOKEN);
+  PrefixSize = L_STR_LEN (OSOBJ_PREFIX);
+  StringSize = AsciiStrLen (MetaClassName);
+  SuffixSize = L_STR_LEN (METACLASS_TOKEN);
 
   ASSERT ((StringSize - PrefixSize - SuffixSize) < ClassNameSize);
 
   ClassNameLength = MIN (
                       (StringSize - PrefixSize - SuffixSize),
-                      (ClassNameSize - sizeof (*ClassName))
+                      (ClassNameSize - 1)
                       );
   CopyMem (ClassName, &MetaClassName[PrefixSize], ClassNameLength);
-  ClassName[ClassNameLength / sizeof (*ClassName)] = '\0';
+  ClassName[ClassNameLength] = '\0';
 
   return TRUE;
 }
@@ -347,12 +340,11 @@ MachoGetVtableNameFromClassName (
   BodySize = AsciiStrSize (ClassName);
 
   Result = OcOverflowAddUN (
-             L_STR_SIZE_NT (VTABLE_PREFIX),
+             L_STR_LEN (VTABLE_PREFIX),
              BodySize,
              &TotalSize
              );
-  if (!Result || (VtableNameSize < TotalSize)) {
-    ASSERT (FALSE);
+  if (Result || (VtableNameSize < TotalSize)) {
     return FALSE;
   }
 
@@ -360,7 +352,7 @@ MachoGetVtableNameFromClassName (
   CopyMem (
     &VtableName[Index],
     VTABLE_PREFIX,
-    L_STR_SIZE_NT (VTABLE_PREFIX)
+    L_STR_LEN (VTABLE_PREFIX)
     );
 
   Index += L_STR_LEN (VTABLE_PREFIX);
@@ -386,7 +378,7 @@ MachoGetMetaVtableNameFromClassName (
   OUT CHAR8        *VtableName
   )
 {
-  UINTN   BodySize;
+  UINTN   BodyLength;
   BOOLEAN Result;
   UINTN   TotalSize;
   UINTN   Index;
@@ -395,16 +387,15 @@ MachoGetMetaVtableNameFromClassName (
   ASSERT (VtableNameSize > 0);
   ASSERT (VtableName != NULL);
 
-  BodySize = (AsciiStrLen (ClassName) * sizeof (*ClassName));
+  BodyLength = AsciiStrLen (ClassName);
 
   Result = OcOverflowTriAddUN (
-             L_STR_SIZE_NT (METACLASS_VTABLE_PREFIX),
-             BodySize,
+             L_STR_LEN (METACLASS_VTABLE_PREFIX),
+             BodyLength,
              L_STR_SIZE (METACLASS_VTABLE_SUFFIX),
              &TotalSize
              );
-  if (!Result || (VtableNameSize < TotalSize)) {
-    ASSERT (FALSE);
+  if (Result || (VtableNameSize < TotalSize)) {
     return FALSE;
   }
 
@@ -412,13 +403,13 @@ MachoGetMetaVtableNameFromClassName (
   CopyMem (
     &VtableName[Index],
     METACLASS_VTABLE_PREFIX,
-    L_STR_SIZE_NT (METACLASS_VTABLE_PREFIX)
+    L_STR_LEN (METACLASS_VTABLE_PREFIX)
     );
 
   Index += L_STR_LEN (METACLASS_VTABLE_PREFIX);
-  CopyMem (&VtableName[Index], ClassName, BodySize);
+  CopyMem (&VtableName[Index], ClassName, BodyLength);
 
-  Index += (BodySize / sizeof (*ClassName));
+  Index += BodyLength;
   CopyMem (
     &VtableName[Index],
     METACLASS_VTABLE_SUFFIX,
@@ -445,7 +436,7 @@ MachoGetFinalSymbolNameFromClassName (
   OUT CHAR8        *FinalSymbolName
   )
 {
-  UINTN   BodySize;
+  UINTN   BodyLength;
   BOOLEAN Result;
   UINTN   TotalSize;
   UINTN   Index;
@@ -454,16 +445,15 @@ MachoGetFinalSymbolNameFromClassName (
   ASSERT (FinalSymbolNameSize > 0);
   ASSERT (FinalSymbolName != NULL);
 
-  BodySize = (AsciiStrLen (ClassName) * sizeof (*ClassName));
+  BodyLength = AsciiStrLen (ClassName);
 
   Result = OcOverflowTriAddUN (
-             L_STR_SIZE_NT (OSOBJ_PREFIX),
-             BodySize,
+             L_STR_LEN (OSOBJ_PREFIX),
+             BodyLength,
              L_STR_SIZE (FINAL_CLASS_TOKEN),
              &TotalSize
              );
-  if (!Result || (FinalSymbolNameSize < TotalSize)) {
-    ASSERT (FALSE);
+  if (Result || (FinalSymbolNameSize < TotalSize)) {
     return FALSE;
   }
 
@@ -471,17 +461,17 @@ MachoGetFinalSymbolNameFromClassName (
   CopyMem (
     &FinalSymbolName[Index],
     OSOBJ_PREFIX,
-    L_STR_SIZE_NT (OSOBJ_PREFIX)
+    L_STR_LEN (OSOBJ_PREFIX)
     );
 
   Index += L_STR_LEN (OSOBJ_PREFIX);
   CopyMem (
     &FinalSymbolName[Index],
     ClassName,
-    BodySize
+    BodyLength
     );
 
-  Index += (BodySize / sizeof (*ClassName));
+  Index += BodyLength;
   CopyMem (
     &FinalSymbolName[Index],
     FINAL_CLASS_TOKEN,
@@ -500,19 +490,14 @@ MachoGetFinalSymbolNameFromClassName (
 **/
 BOOLEAN
 MachoSymbolNameIsVtable64 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST CHAR8       *SymbolName
   )
 {
-  INTN Result;
-
-  ASSERT (Context != NULL);
   ASSERT (SymbolName != NULL);
   //
   // Implicitely checks for METACLASS_VTABLE_PREFIX.
   //
-  Result = AsciiStrnCmp (SymbolName, VTABLE_PREFIX, L_STR_LEN (VTABLE_PREFIX));
-  return (Result == 0);
+  return AsciiStrnCmp (SymbolName, VTABLE_PREFIX, L_STR_LEN (VTABLE_PREFIX)) == 0;
 }
 
 /**
@@ -527,7 +512,7 @@ MachoSymbolNameIsCxx (
   )
 {
   ASSERT (Name != NULL);
-  return (AsciiStrnCmp (Name, CXX_PREFIX, L_STR_LEN (CXX_PREFIX)) == 0);
+  return AsciiStrnCmp (Name, CXX_PREFIX, L_STR_LEN (CXX_PREFIX)) == 0;
 }
 
 /**
@@ -599,7 +584,7 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
   Logically matches XNU's get_vtable_syms_from_smcp.
 
   @param[in,out] Context      Context of the Mach-O.
-  @param[in]     SmcpSymbol   SMCP Symbol to retrieve the VTables from.
+  @param[in]     SmcpName     SMCP Symbol mame to retrieve the VTables from.
   @param[out]    Vtable       Output buffer for the VTable symbol pointer.
   @param[out]    MetaVtable   Output buffer for the Meta VTable symbol pointer.
 
@@ -607,7 +592,7 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
 BOOLEAN
 MachoGetVtableSymbolsFromSmcp64 (
   IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_64  *SmcpSymbol,
+  IN     CONST CHAR8          *SmcpName,
   OUT    CONST MACH_NLIST_64  **Vtable,
   OUT    CONST MACH_NLIST_64  **MetaVtable
   )
@@ -620,15 +605,13 @@ MachoGetVtableSymbolsFromSmcp64 (
   MACH_NLIST_64 *MetaVtableSymbol;
 
   ASSERT (Context != NULL);
-  ASSERT (SmcpSymbol != NULL);
+  ASSERT (SmcpName != NULL);
   ASSERT (Vtable != NULL);
   ASSERT (MetaVtable != NULL);
 
-  ASSERT (MachoIsSymbolValueSane64 (Context, SmcpSymbol));
-
   Result = MachoGetClassNameFromSuperMetaClassPointer (
              Context,
-             SmcpSymbol,
+             SmcpName,
              sizeof (ClassName),
              ClassName
              );

@@ -400,7 +400,7 @@ InternalCalculateTargetsIntel64 (
       return FALSE;
     }
 
-    if ((Vtable != NULL) && MachoSymbolNameIsVtable64 (MachoContext, Name)) {
+    if ((Vtable != NULL) && MachoSymbolNameIsVtable64 (Name)) {
       VtablesWalker = Vtables;
 
       while (TRUE) {

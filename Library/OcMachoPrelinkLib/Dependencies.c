@@ -1021,7 +1021,7 @@ InternalGetNewPrelinkedKextLoadAddress (
              ((UINTN)KernelHeader + PrelinkedKextsSegment->FileOffset),
              &Address
              );
-  if (!Result) {
+  if (Result) {
     return FALSE;
   }
 

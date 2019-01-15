@@ -236,7 +236,7 @@ InternalPrepareCreateVtablesPrelinked64 (
   for (Index = 0; Index < NumSymbols; ++Index) {
     Symbol = &SymbolTable[Index];
     Name = MachoGetSymbolName64 (MachoContext, Symbol);
-    if (MachoSymbolNameIsVtable64 (MachoContext, Name)) {
+    if (MachoSymbolNameIsVtable64 (Name)) {
       Result = MachoIsSymbolValueSane64 (
                  MachoContext,
                  VtableExport->Symbols[Index]
@@ -582,7 +582,7 @@ InternalPrepareVtableCreationNonPrelinked64 (
       //
       Result = MachoGetVtableSymbolsFromSmcp64 (
                  MachoContext,
-                 Smcp,
+                 Name,
                  &VtableSymbol,
                  &MetaVtableSymbol
                  );
@@ -659,7 +659,7 @@ InternalCreateVtablesNonPrelinked64 (
       //
       Result = MachoGetClassNameFromSuperMetaClassPointer (
                  MachoContext,
-                 Smcp,
+                 Name,
                  sizeof (ClassName),
                  ClassName
                  );
@@ -692,7 +692,7 @@ InternalCreateVtablesNonPrelinked64 (
       //
       Result = MachoGetClassNameFromMetaClassPointer (
                  MachoContext,
-                 MetaClass,
+                 MachoGetSymbolName64 (MachoContext, MetaClass),
                  sizeof (SuperClassName),
                  SuperClassName
                  );

@@ -34,15 +34,6 @@ typedef struct {
 } OC_MACHO_CONTEXT;
 
 /**
-  Returns the size of a Mach-O Context.
-
-**/
-UINTN
-MachoGetContextSize (
-  VOID
-  );
-
-/**
   Initializes a Mach-O Context.
 
   @param[out] Context   Mach-O Context to initialize.
@@ -324,6 +315,8 @@ MachoGetSymbolByIndex64 (
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Symbol   Symbol to retrieve the name of.
 
+  @retval NULL  NULL is returned on failure.
+
 **/
 CONST CHAR8 *
 MachoGetSymbolName64 (
@@ -467,7 +460,7 @@ MachoSymbolNameIsMetaclassPointer64 (
   Retrieves the class name of a Super Meta Class Pointer.
 
   @param[in,out] Context        Context of the Mach-O.
-  @param[in]     SmcpSymbol     SMCP Symbol to get the class name of.
+  @param[in]     SmcpName       SMCP Symbol name to get the class name of.
   @param[in]     ClassNameSize  The size of ClassName.
   @param[out]    ClassName      The output buffer for the class name.
 
@@ -476,10 +469,10 @@ MachoSymbolNameIsMetaclassPointer64 (
 **/
 BOOLEAN
 MachoGetClassNameFromSuperMetaClassPointer (
-  IN OUT  OC_MACHO_CONTEXT     *Context,
-  IN      CONST MACH_NLIST_64  *SmcpSymbol,
-  IN      UINTN                ClassNameSize,
-  OUT     CHAR8                *ClassName
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST CHAR8          *SmcpName,
+  IN     UINTN                ClassNameSize,
+  OUT    CHAR8                *ClassName
   );
 
 /**
@@ -514,7 +507,7 @@ MachoGetFunctionPrefixFromClassName (
   Retrieves the class name of a Meta Class Pointer.
 
   @param[in,out] Context             Context of the Mach-O.
-  @param[in]     MetaClassPtrSymbol  MCP Symbol to get the class name of.
+  @param[in]     MetaClassName       MCP Symbol name to get the class name of.
   @param[in]     ClassNameSize       The size of ClassName.
   @param[out]    ClassName           The output buffer for the class name.
 
@@ -524,7 +517,7 @@ MachoGetFunctionPrefixFromClassName (
 BOOLEAN
 MachoGetClassNameFromMetaClassPointer (
   IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_64  *MetaClassPtrSymbol,
+  IN     CONST CHAR8          *MetaClassName,
   IN     UINTN                ClassNameSize,
   OUT    CHAR8                *ClassName
   );
@@ -583,13 +576,11 @@ MachoGetFinalSymbolNameFromClassName (
 /**
   Returns whether SymbolName defines a VTable.
 
-  @param[in,out] Context     Context of the Mach-O.
   @param[in]     SymbolName  The symbol name to check.
 
 **/
 BOOLEAN
 MachoSymbolNameIsVtable64 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST CHAR8       *SymbolName
   );
 
@@ -636,16 +627,16 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
   Retrieves VTable and Meta VTable of a SMCP.
   Logically matches XNU's get_vtable_syms_from_smcp.
 
-  @param[in,out] Context     Context of the Mach-O.
-  @param[in]     SmcpSymbol  SMCP Symbol to retrieve the VTables from.
-  @param[out]    Vtable      Output buffer for the VTable symbol pointer.
-  @param[out]    MetaVtable  Output buffer for the Meta VTable symbol pointer.
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     SmcpName     SMCP Symbol mame to retrieve the VTables from.
+  @param[out]    Vtable       Output buffer for the VTable symbol pointer.
+  @param[out]    MetaVtable   Output buffer for the Meta VTable symbol pointer.
 
 **/
 BOOLEAN
 MachoGetVtableSymbolsFromSmcp64 (
   IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_64  *SmcpSymbol,
+  IN     CONST CHAR8          *SmcpName,
   OUT    CONST MACH_NLIST_64  **Vtable,
   OUT    CONST MACH_NLIST_64  **MetaVtable
   );

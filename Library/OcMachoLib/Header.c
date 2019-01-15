@@ -24,18 +24,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include "OcMachoLibInternal.h"
 
 /**
-  Returns the size of a Mach-O Context.
-
-**/
-UINTN
-MachoGetContextSize (
-  VOID
-  )
-{
-  return sizeof (OC_MACHO_CONTEXT);
-}
-
-/**
   Returns the Mach-O Header structure.
 
   @param[in,out] Context  Context of the Mach-O.
@@ -98,19 +86,15 @@ MachoInitializeContext (
   ASSERT (FileData != NULL);
   ASSERT (FileSize > 0);
   ASSERT (Context != NULL);
-  //
-  // Verify Mach-O Header sanity.
-  // The initial checks on the input data are ASSERTs because the caller is
-  // expected to submit a valid buffer.
-  //
+
   MachHeader = (MACH_HEADER_64 *)FileData;
   TopOfFile  = ((UINTN)MachHeader + FileSize);
 
-  ASSERT (FileSize >= sizeof (*MachHeader));
-  ASSERT (OC_ALIGNED (MachHeader));
   ASSERT (TopOfFile > (UINTN)MachHeader);
 
-  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
+  if (FileSize < sizeof (*MachHeader)
+    || !OC_ALIGNED (MachHeader)
+    || MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
     return FALSE;
   }
 
@@ -119,7 +103,7 @@ MachoInitializeContext (
              MachHeader->CommandsSize,
              &TopOfCommands
              );
-  if (!Result || (TopOfCommands > TopOfFile)) {
+  if (Result || (TopOfCommands > TopOfFile)) {
     return FALSE;
   }
 
@@ -135,7 +119,7 @@ MachoInitializeContext (
                sizeof (*Command),
                &TopOfCommand
                );
-    if (!Result
+    if (Result
      || (TopOfCommand > TopOfCommands)
      || (Command->CommandSize < sizeof (*Command))
      || ((Command->CommandSize % sizeof (UINT64)) != 0)  // Assumption: 64-bit, see below.
@@ -148,13 +132,12 @@ MachoInitializeContext (
                Command->CommandSize,
                &CommandsSize
                );
-    if (!Result) {
+    if (Result) {
       return FALSE;
     }
   }
 
   if (MachHeader->CommandsSize != CommandsSize) {
-    ASSERT (FALSE);
     return FALSE;
   }
   //
@@ -164,7 +147,6 @@ MachoInitializeContext (
   if ((MachHeader->CpuType != MachCpuTypeX8664)
    || ((MachHeader->FileType != MachHeaderFileTypeKextBundle)
     && (MachHeader->FileType != MachHeaderFileTypeExecute))) {
-    ASSERT (FALSE);
     return FALSE;
   }
 
@@ -293,9 +275,9 @@ MachoGetUuid64 (
                     NULL
                     )
                   );
-  if ((UuidCommand != NULL)
-   && (!OC_ALIGNED (UuidCommand)
-    || (UuidCommand->CommandSize != sizeof (*UuidCommand)))) {
+  if (UuidCommand == NULL
+    || !OC_ALIGNED (UuidCommand)
+    || UuidCommand->CommandSize != sizeof (*UuidCommand)) {
     return FALSE;
   }
 
@@ -338,11 +320,10 @@ MachoGetSegmentByName64 (
                  SegmentName,
                  ARRAY_SIZE (SegmentTemp->SegmentName)
                  );
+      if (Result == 0) {
+        *Segment = SegmentTemp;
+        return TRUE;
       }
-
-    if (Result == 0) {
-      *Segment = SegmentTemp;
-      return TRUE;
     }
   }
 
@@ -387,7 +368,7 @@ InternalSectionIsSane (
                    Section->Size,
                    &TopOfSection
                    );
-  if (!Result || (TopOfSection > TopOfSegment)) {
+  if (Result || (TopOfSection > TopOfSegment)) {
     return FALSE;
   }
 
@@ -397,7 +378,7 @@ InternalSectionIsSane (
                 Section->Size,
                 &TopOffset
                 );
-  if (!Result || (TopOffset > FileSize)) {
+  if (Result || (TopOffset > FileSize)) {
     return FALSE;
   }
 
@@ -408,7 +389,7 @@ InternalSectionIsSane (
                Section->RelocationsOffset,
                &TopOffset
                );
-    if (!Result || (TopOffset > FileSize)) {
+    if (Result || (TopOffset > FileSize)) {
       return FALSE;
     }
   }
@@ -587,7 +568,7 @@ MachoGetNextSegment64 (
                (UINTN)SegmentTemp->Sections,
                &TopOfSections
                );
-    if (!Result
+    if (Result
      || (((UINTN)SegmentTemp + SegmentTemp->CommandSize) != TopOfSections)) {
       return FALSE;
     }
@@ -597,7 +578,7 @@ MachoGetNextSegment64 (
                SegmentTemp->FileSize,
                &TopOfSegment
                );
-    if (!Result || (TopOfSegment > Context->FileSize)) {
+    if (Result || (TopOfSegment > Context->FileSize)) {
       return FALSE;
     }
   }
@@ -699,7 +680,7 @@ MachoGetSectionByIndex64 (
     //
     // If NextSectionIndex is wrapping around, Index must be contained.
     //
-    if (!Result || (Index < NextSectionIndex)) {
+    if (Result || (Index < NextSectionIndex)) {
       SectionTemp = &Segment->Sections[Index - SectionIndex];
       if (!InternalSectionIsSane (Context, SectionTemp, Segment)) {
         break;
@@ -804,7 +785,6 @@ InternalRetrieveSymtabs64 (
   ASSERT (Context != NULL);
   ASSERT (Context->MachHeader != NULL);
   ASSERT (Context->FileSize > 0);
-  ASSERT (Context->SymbolTable == NULL);
 
   if (Context->SymbolTable != NULL) {
     return TRUE;
@@ -833,7 +813,7 @@ InternalRetrieveSymtabs64 (
              Symtab->SymbolsOffset,
              &OffsetTop
              );
-  if (!Result || (OffsetTop > FileSize)) {
+  if (Result || (OffsetTop > FileSize)) {
     return FALSE;
   }
 
@@ -842,7 +822,7 @@ InternalRetrieveSymtabs64 (
              Symtab->StringsSize,
              &OffsetTop
              );
-  if (!Result || (OffsetTop > FileSize)) {
+  if (Result || (OffsetTop > FileSize)) {
     return FALSE;
   }
 
@@ -878,7 +858,7 @@ InternalRetrieveSymtabs64 (
              DySymtab->NumLocalSymbols,
              &OffsetTop
              );
-  if (!Result || (OffsetTop > Symtab->NumSymbols)) {
+  if (Result || (OffsetTop > Symtab->NumSymbols)) {
     return FALSE;
   }
 
@@ -887,7 +867,7 @@ InternalRetrieveSymtabs64 (
              DySymtab->NumExternalSymbols,
              &OffsetTop
              );
-  if (!Result || (OffsetTop > Symtab->NumSymbols)) {
+  if (Result || (OffsetTop > Symtab->NumSymbols)) {
     return FALSE;
   }
 
@@ -896,7 +876,7 @@ InternalRetrieveSymtabs64 (
              DySymtab->NumUndefinedSymbols,
              &OffsetTop
              );
-  if (!Result || (OffsetTop > Symtab->NumSymbols)) {
+  if (Result || (OffsetTop > Symtab->NumSymbols)) {
     return FALSE;
   }
 
@@ -906,7 +886,7 @@ InternalRetrieveSymtabs64 (
              DySymtab->IndirectSymbolsOffset,
              &OffsetTop
              );
-  if (!Result || (OffsetTop > FileSize)) {
+  if (Result || (OffsetTop > FileSize)) {
     return FALSE;
   }
 
@@ -916,7 +896,7 @@ InternalRetrieveSymtabs64 (
              DySymtab->LocalRelocationsOffset,
              &OffsetTop
              );
-  if (!Result || (OffsetTop > FileSize)) {
+  if (Result || (OffsetTop > FileSize)) {
     return FALSE;
   }
 
@@ -926,7 +906,7 @@ InternalRetrieveSymtabs64 (
              DySymtab->ExternalRelocationsOffset,
              &OffsetTop
              );
-  if (!Result || (OffsetTop > FileSize)) {
+  if (Result || (OffsetTop > FileSize)) {
     return FALSE;
   }
 
