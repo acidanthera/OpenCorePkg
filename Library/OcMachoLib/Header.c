@@ -153,6 +153,8 @@ MachoInitializeContext (
   Context->MachHeader = MachHeader;
   Context->FileSize   = FileSize;
 
+  Context->SymbolTable = NULL;
+
   return TRUE;
 }
 
