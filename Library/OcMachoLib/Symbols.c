@@ -35,8 +35,9 @@ InternalSymbolIsSane (
 
   ASSERT (Context->SymbolTable != NULL);
   ASSERT (Context->Symtab->NumSymbols > 0);
-  ASSERT ((Symbol > Context->SymbolTable)
-       && (Symbol <= &Context->SymbolTable[Context->Symtab->NumSymbols - 1]));
+
+  ASSERT ((Symbol >= &Context->SymbolTable[0])
+       && (Symbol < &Context->SymbolTable[Context->Symtab->NumSymbols]));
   //
   // Symbol->Section is implicitly verified by MachoGetSectionByIndex64() when
   // passed to it.
@@ -226,15 +227,12 @@ MachoGetSymbolByIndex64 (
   }
 
   ASSERT (Context->SymbolTable != NULL);
-  ASSERT (Context->Symtab->NumSymbols > 0);
 
   if (Index < Context->Symtab->NumSymbols) {
     Symbol = &Context->SymbolTable[Index];
     if (InternalSymbolIsSane (Context, Symbol)) {
       return Symbol;
     }
-  } else {
-    ASSERT (FALSE);
   }
 
   return NULL;
@@ -261,9 +259,6 @@ MachoGetSymbolName64 (
   ASSERT (Context->SymbolTable != NULL);
   ASSERT (Context->Symtab->StringsSize > Symbol->UnifiedName.StringIndex);
 
-  ASSERT (((Symbol->Type & MACH_N_TYPE_STAB) != 0)
-       || ((Symbol->Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR));
-
   return (Context->StringTable + Symbol->UnifiedName.StringIndex);
 }
 
@@ -287,8 +282,10 @@ MachoGetIndirectSymbolName64 (
 
   ASSERT (Context->SymbolTable != NULL);
 
-  ASSERT (((Symbol->Type & MACH_N_TYPE_STAB) == 0)
-       && ((Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_INDR));
+  if ((Symbol->Type & MACH_N_TYPE_STAB) != 0
+    || (Symbol->Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR) {
+    return NULL;
+  }
 
   if (Context->Symtab->StringsSize <= Symbol->Value) {
     return NULL;

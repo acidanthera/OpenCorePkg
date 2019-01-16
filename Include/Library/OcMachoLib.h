@@ -255,7 +255,7 @@ MachoSymbolIsLocalDefined (
 MACH_NLIST_64 *
 MachoGetLocalDefinedSymbolByName (
   IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     CONST CHAR8  *Name
+  IN     CONST CHAR8       *Name
   );
 
 /**
@@ -279,7 +279,7 @@ MachoGetSymbolByIndex64 (
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Symbol   Symbol to retrieve the name of.
 
-  @retval NULL  NULL is returned on failure.
+  @retval symbol name.
 
 **/
 CONST CHAR8 *

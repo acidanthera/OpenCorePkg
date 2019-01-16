@@ -768,7 +768,7 @@ InternalRetrieveSymtabs64 (
   MachoAddress = (UINTN)Context->MachHeader;
   StringTable  = (CHAR8 *)(MachoAddress + Symtab->StringsOffset);
 
-  if (StringTable[(Symtab->StringsSize / sizeof (*StringTable)) - 1] != '\0') {
+  if (Symtab->StringsSize == 0 || StringTable[Symtab->StringsSize - 1] != '\0') {
     return FALSE;
   }
 
