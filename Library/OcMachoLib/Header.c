@@ -150,10 +150,10 @@ MachoInitializeContext (
     return FALSE;
   }
 
+  ZeroMem (Context, sizeof (*Context));
+
   Context->MachHeader = MachHeader;
   Context->FileSize   = FileSize;
-
-  Context->SymbolTable = NULL;
 
   return TRUE;
 }
@@ -513,10 +513,10 @@ MachoGetNextSegment64 (
 
   if (Segment != NULL) {
     MachHeader    = Context->MachHeader;
-    TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
+    TopOfCommands = ((UINTN) MachHeader->Commands + MachHeader->CommandsSize);
     ASSERT (
-      ((UINTN)Segment >= (UINTN)&MachHeader->Commands[0])
-        && ((UINTN)Segment < TopOfCommands)
+      ((UINTN) Segment >= (UINTN) &MachHeader->Commands[0])
+        && ((UINTN) Segment < TopOfCommands)
       );
   }
 
@@ -524,7 +524,7 @@ MachoGetNextSegment64 (
                   InternalGetNextCommand64 (
                     Context,
                     MACH_LOAD_COMMAND_SEGMENT_64,
-                    (MACH_LOAD_COMMAND *)Segment
+                    (MACH_LOAD_COMMAND *) Segment
                     )
                   );
   if ((NextSegment == NULL)
@@ -536,10 +536,10 @@ MachoGetNextSegment64 (
   Result = OcOverflowMulAddUN (
              NextSegment->NumSections,
              sizeof (*NextSegment->Sections),
-             (UINTN)NextSegment->Sections,
+             (UINTN) NextSegment->Sections,
              &TopOfSections
              );
-  if (Result || (((UINTN)NextSegment + NextSegment->CommandSize) < TopOfSections)) {
+  if (Result || (((UINTN) NextSegment + NextSegment->CommandSize) < TopOfSections)) {
     return NULL;
   }
 
@@ -579,11 +579,11 @@ MachoGetNextSection64 (
   if (Section != NULL) {
     ASSERT (Section >= Segment->Sections);
 
+    ++Section;
+
     if (Section >= &Segment->Sections[Segment->NumSections]) {
       return NULL;
     }
-
-    ++Section;
   } else {
     Section = &Segment->Sections[0];
   }
@@ -869,6 +869,7 @@ InternalRetrieveSymtabs64 (
   Context->Symtab      = Symtab;
   Context->SymbolTable = SymbolTable;
   Context->StringTable = StringTable;
+  Context->DySymtab    = DySymtab;
 
   Context->IndirectSymbolTable = IndirectSymtab;
   Context->LocalRelocations    = LocalRelocations;

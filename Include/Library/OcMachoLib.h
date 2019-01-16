@@ -312,7 +312,7 @@ MachoGetIndirectSymbolName64 (
 
 **/
 BOOLEAN
-MachoIsSymbolValueSane64 (
+MachoIsSymbolValueInRange64 (
   IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *Symbol
   );
@@ -322,18 +322,14 @@ MachoIsSymbolValueSane64 (
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Address  Address to search for.
-  @param[out]    Symbol   Buffer the pointer to the symbol is returned in.
-                          May be NULL when the symbol data is invalid.
-                          The output data is undefined when FALSE is returned.
 
-  @returns  Whether Relocation exists.
+  @returns  NULL  NULL is returned on failure.
 
 **/
-BOOLEAN
+MACH_NLIST_64 *
 MachoGetSymbolByExternRelocationOffset64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT64            Address,
-  OUT    MACH_NLIST_64     **Symbol
+  IN     UINT64            Address
   );
 
 /**

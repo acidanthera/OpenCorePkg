@@ -102,7 +102,6 @@ InternalGetExternalRelocationByOffset (
     // Assumption: Not i386.
     //
     if (((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) != 0) {
-      ASSERT (FALSE);
       continue;
     }
 

@@ -184,17 +184,15 @@ InternalGetVtableSizeWithRelocs64 (
   )
 {
   UINT32        Size;
-  BOOLEAN       Result;
   MACH_NLIST_64 *Symbol;
 
   Size = InternalGetVtableSize64 (VtableData);
 
-  Result = MachoGetSymbolByExternRelocationOffset64 (
+  Symbol = MachoGetSymbolByExternRelocationOffset64 (
              MachoContext,
-             ((UINTN)VtableData + Size),
-             &Symbol
+             ((UINTN)VtableData + Size)
              );
-  if (!Result || (Symbol == NULL)) {
+  if (Symbol == NULL) {
     return FALSE;
   }
 
@@ -237,7 +235,7 @@ InternalPrepareCreateVtablesPrelinked64 (
     Symbol = &SymbolTable[Index];
     Name = MachoGetSymbolName64 (MachoContext, Symbol);
     if (MachoSymbolNameIsVtable64 (Name)) {
-      Result = MachoIsSymbolValueSane64 (
+      Result = MachoIsSymbolValueInRange64 (
                  MachoContext,
                  VtableExport->Symbols[Index]
                  );
@@ -329,13 +327,13 @@ InternalPatchVtableSymbol (
   // (which is not likely).
   //
   if (ParentEntry->Name == NULL) {
-    return MachoIsSymbolValueSane64 (MachoContext, Symbol);
+    return MachoIsSymbolValueInRange64 (MachoContext, Symbol);
   }
   //
   // 1) If the symbol is defined locally, do not patch
   //
   if (MachoSymbolIsLocalDefined (MachoContext, Symbol)) {
-    return MachoIsSymbolValueSane64 (MachoContext, Symbol);
+    return MachoIsSymbolValueInRange64 (MachoContext, Symbol);
   }
 
   Name = MachoGetSymbolName64 (MachoContext, Symbol);
@@ -347,14 +345,14 @@ InternalPatchVtableSymbol (
   // virtual property itself overrides the parent's implementation.
   //
   if (MachoSymbolNameIsPureVirtual (Name)) {
-    return MachoIsSymbolValueSane64 (MachoContext, Symbol);
+    return MachoIsSymbolValueInRange64 (MachoContext, Symbol);
   }
   //
   // 3) If the symbols are the same, do not patch
   //
   Result = AsciiStrCmp (Name, ParentEntry->Name);
   if (Result == 0) {
-    return MachoIsSymbolValueSane64 (MachoContext, Symbol);
+    return MachoIsSymbolValueInRange64 (MachoContext, Symbol);
   }
   //
   // 4) If the parent vtable entry is a pad slot, and the child does not
@@ -510,14 +508,10 @@ InternalInitializeVtableByEntriesAndRelocations64 (
         }
       } while (TRUE);
     } else if (NumEntries < SuperVtable->NumEntries) {
-      Result = MachoGetSymbolByExternRelocationOffset64 (
+      Symbol = MachoGetSymbolByExternRelocationOffset64 (
                  MachoContext,
-                 (VtableSymbol->Value + EntryOffset),
-                 &Symbol
+                 (VtableSymbol->Value + EntryOffset)
                  );
-      if (!Result) {
-        return FALSE;
-      }
 
       if (Symbol == NULL) {
         //
