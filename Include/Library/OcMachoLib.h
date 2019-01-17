@@ -561,7 +561,7 @@ MachoSymbolNameIsCxx (
   @param[in]     VtableData  The VTable's data.
 
 **/
-UINTN
+UINT32
 MachoVtableGetNumberOfEntries64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST UINT64      *VtableData

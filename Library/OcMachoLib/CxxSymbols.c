@@ -203,6 +203,7 @@ MachoGetClassNameFromVtableName (
   )
 {
   ASSERT (VtableName != NULL);
+  ASSERT (MachoSymbolNameIsVtable64 (VtableName));
   //
   // As there is no suffix, just return a pointer from within VtableName.
   //
@@ -522,24 +523,32 @@ MachoSymbolNameIsCxx (
   @param[in]     VtableData  The VTable's data.
 
 **/
-UINTN
+UINT32
 MachoVtableGetNumberOfEntries64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST UINT64      *VtableData
   )
 {
-  UINTN Index;
-  UINTN NumberOfEntries;
+  UINT32 Index;
+  UINT32 NumberOfEntries;
+  UINT64 *LastEntry;
 
   ASSERT (Context != NULL);
   ASSERT (VtableData != NULL);
+  ASSERT (&VtableData[0] > (UINT64 *) Context->MachHeader);
+
+  LastEntry = (UINT64 *) ((UINTN) Context->MachHeader + Context->FileSize) - 1;
+
+  ASSERT (&VtableData[VTABLE_HEADER_LEN_64] <= LastEntry);
 
   NumberOfEntries = 0;
   //
   // Assumption: Not ARM.  Currently verified by the Context initialization.
   //
-  for (Index = VTABLE_HEADER_LEN_64; VtableData[Index] != 0; ++Index) {
+  Index = VTABLE_HEADER_LEN_64;
+  while (&VtableData[Index] <= LastEntry && VtableData[Index] != 0) {
     ++NumberOfEntries;
+    ++Index;
   }
 
   return NumberOfEntries;
@@ -562,7 +571,10 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
 {
   ASSERT (Context != NULL);
   ASSERT (Smcp != NULL);
-  ASSERT (MachoIsSymbolValueInRange64 (Context, Smcp));
+
+  if (!MachoIsSymbolValueInRange64 (Context, Smcp)) {
+    return NULL;
+  }
 
   return MachoGetSymbolByExternRelocationOffset64 (
              Context,
