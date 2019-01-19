@@ -511,7 +511,7 @@ InternalGetBooterFromApfsPredefinedNameList (
   EFI_FILE_PROTOCOL               *HandleRoot;
   APPLE_APFS_CONTAINER_INFO       *ContainerInfo;
   APPLE_APFS_VOLUME_INFO          *VolumeInfo;
-  CHAR16                          VolumeDirectoryName[INTERNAL_GUID_STRING_LENGTH+2];
+  CHAR16                          VolumeDirectoryName[INTERNAL_GUID_STRING_LENGTH+1];
 
   Status =  gBS->LocateHandleBuffer (
                    ByProtocol,
@@ -1111,23 +1111,19 @@ BootPolicyGetApfsRecoveryVolumes (
   UINTN                           NumberOfHandles;
   EFI_HANDLE                      *HandleBuffer;
   APFS_VOLUME_INFO                *VolumeInfo;
-  GUID                            **ContainerGuids;
-  GUID                            UnusedGuid; // BUG: This variable is never used.
-  UINTN                           Index;
+  GUID                            *ContainerGuids;
   EFI_GUID                        ContainerGuid;
-  EFI_GUID                        VolumeGuid;
-  APPLE_APFS_VOLUME_ROLE          VolumeRole;
-  UINTN                           Index2;
   UINTN                           NumberOfContainers;
-  UINTN                           NumberOfVolumeInfo;
-  APFS_VOLUME_ROOT                **ApfsVolumes;
+  UINTN                           NumberOfVolumeInfos;
+  UINTN                           Index;
+  UINTN                           Index2;
   UINTN                           Index3;
-  UINTN                           Index4;
+  APFS_VOLUME_ROOT                **ApfsVolumes;
   BOOLEAN                         GuidPresent;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem;
   EFI_FILE_PROTOCOL               *Root;
   EFI_FILE_PROTOCOL               *NewHandle;
-  CHAR16                          String[40];
+  CHAR16                          VolumePathName[INTERNAL_GUID_STRING_LENGTH + 1];
   EFI_FILE_INFO                   *FileInfo;
   APFS_VOLUME_ROOT                *ApfsRoot;
 
@@ -1139,170 +1135,192 @@ BootPolicyGetApfsRecoveryVolumes (
                   &HandleBuffer
                   );
 
-  if (!EFI_ERROR (Status)) {
-    Status = EFI_NOT_FOUND;
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
-    if (NumberOfHandles > 0) {
-      VolumeInfo = AllocateZeroPool (NumberOfHandles * sizeof (*VolumeInfo));
+  if (NumberOfEntries > 0) {
+    VolumeInfo = AllocateZeroPool (NumberOfHandles * sizeof (*VolumeInfo));
+    ContainerGuids = AllocateZeroPool (NumberOfHandles * sizeof (*ContainerGuids));
 
+    if (VolumeInfo == NULL || ContainerGuids == NULL) {
       Status = EFI_OUT_OF_RESOURCES;
+    }
+  } else {
+    Status = EFI_NOT_FOUND;
+    VolumeInfo = NULL;
+    ContainerGuids = NULL;
+  }
 
-      if (VolumeInfo != NULL) {
-        // BUG: The previous allocation is verified, this isn't.
-        ContainerGuids = AllocateZeroPool (
-                           NumberOfHandles * sizeof (**ContainerGuids)
-                           );
+  if (EFI_ERROR (Status)) {
+    FreePool (HandleBuffer);
 
-        ZeroMem ((VOID *)&UnusedGuid, sizeof (UnusedGuid));
+    if (VolumeInfo != NULL) {
+      FreePool (VolumeInfo);
+    }
 
-        NumberOfVolumeInfo = 0;
-        NumberOfContainers = 0;
+    if (ContainerGuids != NULL) {
+      FreePool (ContainerGuids);
+    }
 
-        Status = EFI_NOT_FOUND;
+    return Status;
+  }
 
-        for (Index = 0; Index < NumberOfHandles; ++Index) {
-          Status = InternalGetApfsVolumeInfo (
-                     HandleBuffer[Index],
-                     &ContainerGuid,
-                     &VolumeGuid,
-                     &VolumeRole
-                     );
+  NumberOfVolumeInfos = 0;
+  NumberOfContainers = 0;
 
-          if (!EFI_ERROR (Status)) {
-            CopyGuid (
-              &VolumeInfo[NumberOfVolumeInfo].ContainerGuid,
-              &ContainerGuid
-              );
+  for (Index = 0; Index < NumberOfHandles; ++Index) {
+    Status = InternalGetApfsVolumeInfo (
+               HandleBuffer[Index],
+               &VolumeInfo[NumberOfVolumeInfos].ContainerGuid,
+               &VolumeInfo[NumberOfVolumeInfos].VolumeGuid,
+               &VolumeInfo[NumberOfVolumeInfos].VolumeRole
+               );
 
-            CopyGuid (
-              &VolumeInfo[NumberOfVolumeInfo].VolumeGuid,
-              &VolumeGuid
-              );
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
 
-            VolumeInfo[NumberOfVolumeInfo].VolumeRole = VolumeRole;
-            VolumeInfo[NumberOfVolumeInfo].Handle     = HandleBuffer[Index];
+    VolumeInfo[NumberOfVolumeInfos].Handle     = HandleBuffer[Index];
 
-            GuidPresent = FALSE;
+    GuidPresent = FALSE;
+    for (Index2 = 0; Index2 < NumberOfContainers; ++Index2) {
+      if (CompareGuid (&ContainerGuids[Index2], &ContainerGuid)) {
+        GuidPresent = TRUE;
+        break;
+      }
+    }
 
-            for (Index2 = 0; Index2 < NumberOfContainers; ++Index2) {
-              if (CompareGuid (ContainerGuids[Index2], &ContainerGuid)) {
-                GuidPresent = TRUE;
-                break;
-              }
-            }
+    if (!GuidPresent) {
+      CopyGuid (
+        &ContainerGuids[NumberOfContainers],
+        &VolumeInfo[NumberOfVolumeInfos].ContainerGuid
+        );
 
-            if (!GuidPresent || (NumberOfContainers == 0)) {
-              CopyGuid (
-                ContainerGuids[NumberOfContainers],
-                &VolumeInfo[NumberOfVolumeInfo].ContainerGuid
-                );
+      if (Index2 != 0 && HandleBuffer[Index] == Handle) {
+        CopyMem (
+          &ContainerGuids[1],
+          &ContainerGuids[0],
+          NumberOfContainers * sizeof (ContainerGuids[0])
+          );
+        CopyGuid (
+          &ContainerGuids[0],
+          &VolumeInfo[NumberOfVolumeInfos].ContainerGuid
+          );
+      }
 
-              // BUG: This may overwrite the GUID at [0]?
-              if ((Index2 != 0) && (HandleBuffer[Index] == Handle)) {
-                CopyGuid (
-                  ContainerGuids[0],
-                  &VolumeInfo[NumberOfVolumeInfo].ContainerGuid
-                  );
-              }
+      ++NumberOfContainers;
+    }
 
-              ++NumberOfContainers;
-            }
+    ++NumberOfVolumeInfos;
+  }
 
-            ++NumberOfVolumeInfo;
-          }
+  Status = EFI_SUCCESS;
+
+  if (NumberOfVolumeInfos > 0) {
+    ApfsVolumes = AllocateZeroPool (
+                    NumberOfVolumeInfos * sizeof (*ApfsVolumes)
+                    );
+    if (ApfsVolumes == NULL) {
+      Status = EFI_OUT_OF_RESOURCES;
+    }
+  } else {
+    Status = EFI_NOT_FOUND;
+  }
+
+  if (EFI_ERROR (Status)) {
+    FreePool (HandleBuffer);
+    FreePool (VolumeInfo);
+    FreePool (ContainerGuids);
+    return Status;
+  }
+
+  *Volumes         = ApfsVolumes;
+  *NumberOfEntries = 0;
+
+  for (Index = 0; Index < NumberOfContainers; ++Index) {
+    for (Index2 = 0; Index2 < NumberOfVolumeInfos; ++Index2) {
+      if ((VolumeInfo[Index2].VolumeRole & APPLE_APFS_VOLUME_ROLE_RECOVERY) == 0
+        || !CompareGuid (&ContainerGuids[Index], &VolumeInfo[Index2].ContainerGuid)) {
+        continue;
+      }
+
+      Status = gBS->HandleProtocol (
+                      VolumeInfo[Index2].Handle,
+                      &gEfiSimpleFileSystemProtocolGuid,
+                      (VOID **) &FileSystem
+                      );
+      if (EFI_ERROR (Status)) {
+        continue;
+      }
+
+      Status = FileSystem->OpenVolume (FileSystem, &Root);
+      if (EFI_ERROR (Status)) {
+        continue;
+      }
+
+      //
+      // Locate recovery for every volume present.
+      //
+      for (Index3 = 0; Index3 < NumberOfVolumeInfos; ++Index3) {
+        if ((VolumeInfo[Index2].VolumeRole &
+          (APPLE_APFS_VOLUME_ROLE_RECOVERY|APPLE_APFS_VOLUME_ROLE_PREBOOT)) != 0
+          || !CompareGuid (&ContainerGuids[Index], &VolumeInfo[Index3].ContainerGuid)) {
+          continue;
         }
 
-        if (NumberOfVolumeInfo != 0) {
-          ApfsVolumes = AllocateZeroPool (
-                          NumberOfVolumeInfo * sizeof (ApfsVolumes)
-                          );
+        UnicodeSPrint (
+          VolumePathName,
+          sizeof (VolumePathName),
+          L"%g",
+          &VolumeInfo[Index3].VolumeGuid
+          );
 
-          Status = EFI_OUT_OF_RESOURCES;
+        Status = Root->Open (
+                         Root,
+                         &NewHandle,
+                         VolumePathName,
+                         EFI_FILE_MODE_READ,
+                         0
+                         );
 
-          if (ApfsVolumes != NULL) {
-            *Volumes         = ApfsVolumes;
-            *NumberOfEntries = 0;
+        if (EFI_ERROR (Status)) {
+          continue;
+        }
 
-            for (Index2 = 0; Index2 < NumberOfContainers; ++Index2) {
-              for (Index3 = 0; Index3 < NumberOfVolumeInfo; ++Index3) {
-                if (CompareGuid (
-                      ContainerGuids[Index2],
-                      &VolumeInfo[Index3].ContainerGuid
-                      )
-                 && ((VolumeInfo[Index3].VolumeRole & APPLE_APFS_VOLUME_ROLE_RECOVERY) != 0)
-                 ) {
-                  Status = gBS->HandleProtocol (
-                                  VolumeInfo[Index3].Handle,
-                                  &gEfiSimpleFileSystemProtocolGuid,
-                                  (VOID **)&FileSystem
-                                  );
+        FileInfo = InternalGetFileInfo (
+                     NewHandle,
+                     &gEfiFileInfoGuid,
+                     sizeof (*FileInfo),
+                     NULL
+                     );
 
-                  if (!EFI_ERROR (Status)) {
-                    Status = FileSystem->OpenVolume (FileSystem, &Root);
+        NewHandle->Close (NewHandle);
 
-                    if (!EFI_ERROR (Status)) {
-                      for (Index4 = 0; Index4 < NumberOfVolumeInfo; ++Index4) {
-                        if (
-                          CompareGuid (
-                            ContainerGuids[Index2],
-                            &VolumeInfo[Index4].ContainerGuid
-                            )
-                          ) {
-                          UnicodeSPrint (
-                            &String[0],
-                            sizeof (String),
-                            L"%g",
-                            &VolumeInfo[Index4].VolumeGuid
-                            );
+        if (FileInfo != NULL) {
+          if ((FileInfo->Attribute & EFI_FILE_DIRECTORY) != 0) {
+            ApfsRoot = ApfsVolumes[*NumberOfEntries];
+            ApfsRoot->Handle = VolumeInfo[Index2].Handle;
+            ApfsRoot->VolumeDirName = AllocateCopyPool (
+                                        StrSize (VolumePathName),
+                                        VolumePathName
+                                        );
+            ApfsRoot->Root = Root;
 
-                          Status = Root->Open (
-                                           Root,
-                                           &NewHandle,
-                                           String,
-                                           EFI_FILE_MODE_READ,
-                                           0
-                                           );
-
-                          if (!EFI_ERROR (Status)) {
-                            FileInfo = InternalGetFileInfo (
-                                         NewHandle,
-                                         &gEfiFileInfoGuid,
-                                         sizeof (*FileInfo),
-                                         NULL
-                                         );
-
-                            if ((FileInfo != NULL)
-                             && ((FileInfo->Attribute & EFI_FILE_DIRECTORY) != 0)
-                             ) {
-                              ApfsRoot = ApfsVolumes[*NumberOfEntries];
-
-                              ApfsRoot->Handle = VolumeInfo[Index3].Handle;
-
-                              ApfsRoot->VolumeDirName = AllocateCopyPool (
-                                                          StrSize (String),
-                                                          (VOID *)&String[0]
-                                                          );
-
-                              ApfsRoot->Root = Root;
-
-                              ++(*NumberOfEntries);
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-
-            FreePool (VolumeInfo);
-            FreePool (ContainerGuids);
-            FreePool (HandleBuffer);
+            ++(*NumberOfEntries);
           }
+          FreePool (FileInfo);
         }
       }
     }
+  }
+
+  FreePool (VolumeInfo);
+  FreePool (ContainerGuids);
+  FreePool (HandleBuffer);
+
+  if (!EFI_ERROR (Status) && *NumberOfEntries == 0) {
+    Status = EFI_NOT_FOUND;
   }
 
   return Status;
@@ -1327,8 +1345,8 @@ OcAppleBootPolicyInstallProtocol (
 {
   EFI_STATUS Status;
 
-  VOID       *Interface;
-  EFI_HANDLE Handle;
+  VOID        *Interface;
+  EFI_HANDLE  Handle;
 
   Status = gBS->LocateProtocol (
                   &gAppleBootPolicyProtocolGuid,
@@ -1337,11 +1355,12 @@ OcAppleBootPolicyInstallProtocol (
                   );
 
   if (EFI_ERROR (Status)) {
+    Handle = NULL;
     Status = gBS->InstallProtocolInterface (
                     &Handle,
                     &gAppleBootPolicyProtocolGuid,
                     EFI_NATIVE_INTERFACE,
-                    (VOID **)&mAppleBootPolicyProtocol
+                    (VOID **) &mAppleBootPolicyProtocol
                     );
   } else {
     Status = EFI_ALREADY_STARTED;
