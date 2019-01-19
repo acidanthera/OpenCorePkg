@@ -49,6 +49,7 @@
 
 [Components]
   OcSupportPkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
+  OcSupportPkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
   OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
   OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf

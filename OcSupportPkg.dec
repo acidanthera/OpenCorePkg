@@ -58,6 +58,9 @@
   OcAppleBootPolicyLib|Include/Library/OcAppleBootPolicyLib.h
 
   ##  @libraryclass
+  OcAppleChunklistLib|Include/Library/OcAppleChunklistLib.h
+
+  ##  @libraryclass
   OcAppleImageVerificationLib|Include/Library/OcAppleImageVerificationLib.h
 
   ##  @libraryclass
