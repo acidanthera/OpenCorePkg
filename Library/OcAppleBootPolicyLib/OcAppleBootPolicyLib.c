@@ -22,6 +22,7 @@
 #include <Protocol/AppleBootPolicy.h>
 
 #include <Library/OcAppleBootPolicyLib.h>
+#include <Library/OcFileLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DevicePathLib.h>
@@ -145,56 +146,6 @@ InternalFileExists (
 }
 
 STATIC
-VOID *
-InternalGetFileInfo (
-  IN  EFI_FILE_PROTOCOL  *Root,
-  IN  EFI_GUID           *InformationType,
-  IN  UINTN              MinFileInfoSize,
-  OUT UINTN              *RealFileInfoSize  OPTIONAL
-  )
-{
-  VOID       *FileInfoBuffer;
-
-  UINTN      FileInfoSize;
-  EFI_STATUS Status;
-
-  FileInfoSize   = 0;
-  FileInfoBuffer = NULL;
-
-  Status = Root->GetInfo (
-                   Root,
-                   InformationType,
-                   &FileInfoSize,
-                   NULL
-                   );
-
-  if (Status == EFI_BUFFER_TOO_SMALL && FileInfoSize >= MinFileInfoSize) {
-    FileInfoBuffer = AllocateZeroPool (FileInfoSize);
-
-    if (FileInfoBuffer != NULL) {
-      Status = Root->GetInfo (
-                       Root,
-                       InformationType,
-                       &FileInfoSize,
-                       FileInfoBuffer
-                       );
-
-      if (!EFI_ERROR (Status)) {
-        if (RealFileInfoSize != NULL) {
-          *RealFileInfoSize = FileInfoSize;
-        }
-      } else {
-        FreePool (FileInfoBuffer);
-
-        FileInfoBuffer = NULL;
-      }
-    }
-  }
-
-  return FileInfoBuffer;
-}
-
-STATIC
 EFI_STATUS
 InternalGetApfsSpecialFileInfo (
   IN     EFI_FILE_PROTOCOL          *Root,
@@ -207,7 +158,7 @@ InternalGetApfsSpecialFileInfo (
   }
 
   if (VolumeInfo != NULL) {
-    *VolumeInfo = InternalGetFileInfo (
+    *VolumeInfo = GetFileInfo (
       Root,
       &gAppleApfsVolumeInfoGuid,
       sizeof (*VolumeInfo),
@@ -220,7 +171,7 @@ InternalGetApfsSpecialFileInfo (
   }
 
   if (ContainerInfo != NULL) {
-    *ContainerInfo = InternalGetFileInfo (
+    *ContainerInfo = GetFileInfo (
       Root,
       &gAppleApfsContainerInfoGuid,
       sizeof (*ContainerInfo),
@@ -247,7 +198,7 @@ InternalGetBooterFromBlessedSystemFilePath (
 {
   UINTN  FilePathSize;
 
-  *FilePath = (EFI_DEVICE_PATH_PROTOCOL *) InternalGetFileInfo (
+  *FilePath = (EFI_DEVICE_PATH_PROTOCOL *) GetFileInfo (
                 Root,
                 &gAppleBlessedSystemFileInfoGuid,
                 sizeof (EFI_DEVICE_PATH_PROTOCOL),
@@ -286,7 +237,7 @@ InternalGetBooterFromBlessedSystemFolderPath (
 
   Status = EFI_NOT_FOUND;
 
-  DevicePath = (EFI_DEVICE_PATH_PROTOCOL *) InternalGetFileInfo (
+  DevicePath = (EFI_DEVICE_PATH_PROTOCOL *) GetFileInfo (
                   Root,
                   &gAppleBlessedSystemFolderInfoGuid,
                   sizeof (EFI_DEVICE_PATH_PROTOCOL),
@@ -450,7 +401,7 @@ InternalGetBooterFromApfsVolumePredefinedNameList (
     return Status;
   }
 
-  VolumeDirectoryInfo = InternalGetFileInfo (
+  VolumeDirectoryInfo = GetFileInfo (
                           VolumeDirectoryHandle,
                           &gEfiFileInfoGuid,
                           sizeof (*VolumeDirectoryInfo),
@@ -1066,7 +1017,7 @@ BootPolicyGetPathNameOnApfsRecovery (
       continue;
     }
 
-    FileInfo = InternalGetFileInfo (
+    FileInfo = GetFileInfo (
                  NewHandle,
                  &gEfiFileInfoGuid,
                  sizeof (*FileInfo),
@@ -1288,7 +1239,7 @@ BootPolicyGetApfsRecoveryVolumes (
           continue;
         }
 
-        FileInfo = InternalGetFileInfo (
+        FileInfo = GetFileInfo (
                      NewHandle,
                      &gEfiFileInfoGuid,
                      sizeof (*FileInfo),

@@ -27,15 +27,9 @@
 # VALID_ARCHITECTURES = IA32 X64
 
 [Sources]
-  FileExists.c
   GetFileInfo.c
-  GetNextDirEntry.c
   GetVolumeLabel.c
-  OpenDirectory.c
-  OpenFileSystem.c
   ReadFile.c
-  ReadFvFile.c
-  WriteFile.c
 
 [Packages]
   OcSupportPkg/OcSupportPkg.dec

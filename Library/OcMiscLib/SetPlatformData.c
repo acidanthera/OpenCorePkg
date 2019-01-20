@@ -78,7 +78,7 @@ SetPlatformData (
       Entry->DataSize = DataSize;
       DataString          = NULL;
 
-      OcAsciiStrToUnicode (Key, (CHAR16 *)(((UINTN)Entry) + sizeof (*Entry)), 0);
+      AsciiStrToUnicodeStrS (Key, (CHAR16 *)(((UINTN)Entry) + sizeof (*Entry)), KeySize / sizeof (CHAR16));
 
       CopyMem ((VOID *)(((UINTN)Entry) + sizeof (*Entry) + Entry->KeySize), Data, (UINTN)Entry->DataSize);
 

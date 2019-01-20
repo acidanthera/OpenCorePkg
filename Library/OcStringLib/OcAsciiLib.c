@@ -16,6 +16,8 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/DebugLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/OcStringLib.h>
 
 // IsAsciiPrint
@@ -257,38 +259,38 @@ OcAsciiStrToGuid (
 /** Convert null terminated ascii string to unicode.
 
   @param[in]  String1  A pointer to the ascii string to convert to unicode.
-  @param[out] String2  A pointer to the converted unicode string.
   @param[in]  Length   Length or 0 to calculate the length of the ascii string to convert.
 
-  @retval  A pointer to the converted unicode string.
+  @retval  A pointer to the converted unicode string allocated from pool.
 **/
 CHAR16 *
 OcAsciiStrToUnicode (
-  IN  CHAR8   *String1,
-  IN  CHAR16  *String2,
+  IN  CHAR8   *AsciiString,
   IN  UINTN   Length
   )
 {
-  CHAR16 *Start;
+  CHAR16  *UnicodeString;
+  CHAR16  *UnicodeStringWalker;
+  UINTN   UnicodeStringSize;
 
-  Start = NULL;
+  ASSERT (AsciiString != NULL);
 
-  if ((String1 != NULL) && (String2 != NULL)) {
-
-    if (Length == 0) {
-      Length = AsciiStrLen (String1);
-    }
-
-    Start = String2;
-
-    while (*String1 != '\0' && Length--) {
-      *(String2++) = *(String1++);
-    }
-
-    *String2 = L'\0';
+  if (Length == 0) {
+    Length = AsciiStrLen (AsciiString);
   }
 
-  return Start;
+  UnicodeStringSize = (Length + 1) * sizeof (CHAR16);
+  UnicodeString = AllocatePool (UnicodeStringSize);
+
+  if (UnicodeString != NULL) {
+    UnicodeStringWalker = UnicodeString;
+    while (*AsciiString != '\0' && Length--) {
+      *(UnicodeStringWalker++) = *(AsciiString++);
+    }
+    *UnicodeStringWalker = L'\0';
+  }
+
+  return UnicodeString;
 }
 
 // UnicodeBaseName

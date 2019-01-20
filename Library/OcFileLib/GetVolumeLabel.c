@@ -1,5 +1,5 @@
 /** @file
-  Copyright (C) 2016, The HermitCrabs Lab. All rights reserved.
+  Copyright (C) 2019, vit9696. All rights reserved.
 
   All rights reserved.
 
@@ -26,78 +26,49 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
+#include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 
-#include "OcFileLibInternal.h"
-
-// GetVolumeLabel
-/**
-
-  @param[in] DevicePath    A pointer to the device path to retrieve the volume label from.
-  @param[out] VolumeLabel  A pointer to the NULL terminated unicode volume label.
-
-  @retval EFI_SUCCESS  The volume label was successfully returned.
-**/
-EFI_STATUS
+CHAR16 *
 GetVolumeLabel (
-  IN     EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
-  IN OUT CHAR16                    **VolumeLabel
+  IN     EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem
   )
 {
   EFI_STATUS                      Status;
 
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem;
-  EFI_FILE_HANDLE                 File;
+  EFI_FILE_HANDLE                 Volume;
   EFI_FILE_SYSTEM_VOLUME_LABEL    *VolumeInfo;
-  UINTN                           FileSize;
 
-  Status = EFI_INVALID_PARAMETER;
+  ASSERT (FileSystem != NULL);
 
-  if ((DevicePath != NULL) && (VolumeLabel != NULL)) {
-    // Open the Filesystem on our DevicePath.
+  Volume   = NULL;
+  Status = FileSystem->OpenVolume (
+                         FileSystem,
+                         &Volume
+                         );
 
-    FileSystem = NULL;
-    Status     = OpenFileSystem (
-                   &DevicePath,
-                   &FileSystem
-                   );
-
-    if (!EFI_ERROR (Status)) {
-      File   = NULL;
-      Status = FileSystem->OpenVolume (
-                             FileSystem,
-                             &File
-                             );
-
-      if (!EFI_ERROR (Status)) {
-        FileSize   = 0;
-        VolumeInfo = NULL;
-        Status     = File->GetInfo (
-                             File,
-                             &gEfiFileSystemVolumeLabelInfoIdGuid,
-                             &FileSize,
-                             VolumeInfo
-                             );
-
-        if (Status == EFI_BUFFER_TOO_SMALL) {
-          VolumeInfo = AllocateZeroPool (FileSize);
-          Status     = File->GetInfo (
-                               File,
-                               &gEfiFileSystemVolumeLabelInfoIdGuid,
-                               &FileSize,
-                               VolumeInfo
-                               );
-
-          if (!EFI_ERROR (Status)) {
-            *VolumeLabel = AllocateCopyPool (StrSize (VolumeInfo->VolumeLabel), VolumeInfo->VolumeLabel);
-
-            FreePool ((VOID *)VolumeInfo);
-          }
-        }
-      }
-    }
+  if (EFI_ERROR (Status)) {
+    return NULL;
   }
 
-  return Status;
+  VolumeInfo = GetFileInfo (
+    Volume,
+    &gEfiFileSystemVolumeLabelInfoIdGuid,
+    sizeof (EFI_FILE_SYSTEM_VOLUME_LABEL),
+    NULL
+    );
+
+  Volume->Close (Volume);
+
+  OC_INLINE_STATIC_ASSERT (
+    OFFSET_OF(EFI_FILE_SYSTEM_VOLUME_LABEL, VolumeLabel) == 0,
+    "Expected EFI_FILE_SYSTEM_VOLUME_LABEL to represent CHAR16 string!"
+    );
+
+  if (VolumeInfo != NULL) {
+    return VolumeInfo->VolumeLabel;
+  }
+
+  return NULL;
 }

@@ -1,5 +1,5 @@
 /** @file
-  Copyright (C) 2016 - 2018, The HermitCrabs Lab. All rights reserved.
+  Copyright (C) 2019, vit9696. All rights reserved.
 
   All rights reserved.
 
@@ -28,137 +28,51 @@
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
 
-#include "OcFileLibInternal.h"
-
-// GetFileInfo
-/**
-
-  @param[in] DevicePath  A pointer to the device path to device.
-  @param[in] Directory   A pointer to the directory that contains the file.
-  @param[in] FileName    A pointer to the the filename.
-  @param[out] FileInfo   A pointer to the FILE_INFO structure returned or NULL
-
-  @retval EFI_SUCCESS  The FILE_INFO structure was successfully returned.
-**/
-EFI_STATUS
+VOID *
 GetFileInfo (
-  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
-  IN  CHAR16                    *Directory,
-  IN  CHAR16                    *FileName,
-  OUT EFI_FILE_INFO             **FileInfo
+  IN  EFI_FILE_PROTOCOL  *FileHandle,
+  IN  EFI_GUID           *InformationType,
+  IN  UINTN              MinFileInfoSize,
+  OUT UINTN              *RealFileInfoSize  OPTIONAL
   )
 {
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem;
-  EFI_FILE                        *FileSystemRoot;
+  VOID       *FileInfoBuffer;
 
-  EFI_STATUS                      Status;
-  EFI_FILE                        *File;
-  UINTN                           FileInfoSize;
-  CHAR16                          *FilePath;
-  UINTN                           FilePathSize;
+  UINTN      FileInfoSize;
+  EFI_STATUS Status;
 
-  Status = EFI_INVALID_PARAMETER;
+  FileInfoSize   = 0;
+  FileInfoBuffer = NULL;
 
-  if ((DevicePath != NULL) && (Directory != NULL) && (FileName != NULL)) {
+  Status = FileHandle->GetInfo (
+                   FileHandle,
+                   InformationType,
+                   &FileInfoSize,
+                   NULL
+                   );
 
-    Status       = EFI_OUT_OF_RESOURCES;
-    FilePathSize = StrSize (Directory) + StrSize (FileName);
-    FilePath     = AllocateZeroPool (FilePathSize);
+  if (Status == EFI_BUFFER_TOO_SMALL && FileInfoSize >= MinFileInfoSize) {
+    FileInfoBuffer = AllocateZeroPool (FileInfoSize);
 
-    if (FilePath != NULL) {
-
-      CHAR16 *TempFilePath = FilePath;
-
-      while (*Directory != 0) {
-        *(TempFilePath++) = *(Directory++);
-      }
-
-      while (*FileName != 0) {
-        *(TempFilePath++) = *(FileName++);
-      }
-
-      *TempFilePath = 0;
-
-      // Open the Filesystem on our DeviceHandle.
-
-      FileSystem = NULL;
-      Status     = OpenFileSystem (
-                     &DevicePath,
-                     &FileSystem
-                     );
+    if (FileInfoBuffer != NULL) {
+      Status = FileHandle->GetInfo (
+                       FileHandle,
+                       InformationType,
+                       &FileInfoSize,
+                       FileInfoBuffer
+                       );
 
       if (!EFI_ERROR (Status)) {
-        // We need to open the target volume to be able to load files from it.
-        // What we get is the filesystem root. This function also has to be called
-        // if any further calls to FileSystem return EFI_MEDIA_CHANGED to indicate
-        // that our volume has changed.
+        if (RealFileInfoSize != NULL) {
+          *RealFileInfoSize = FileInfoSize;
+        }
+      } else {
+        FreePool (FileInfoBuffer);
 
-        do {
-          FileSystemRoot = NULL;
-          Status         = FileSystem->OpenVolume (
-                                         FileSystem,
-                                         &FileSystemRoot
-                                         );
-
-          if (EFI_ERROR (Status)) {
-            DEBUG ((DEBUG_WARN, "Could not open the file system - %r\n", Status));
-            
-            break;
-          }
-
-          // Now we can try to open the target file on our filesystem.
-
-          File   = NULL;
-          Status = FileSystemRoot->Open (
-                                     FileSystemRoot,
-                                     &File,
-                                     FilePath,
-                                     EFI_FILE_MODE_READ,
-                                     EFI_FILE_READ_ONLY
-                                     );
-
-          if (!EFI_ERROR (Status)) {
-            // Try to retrieve information of our file.
-
-            FileInfoSize = 0;
-            Status       = File->GetInfo (
-                                   File,
-                                   &gEfiFileInfoGuid,
-                                   &FileInfoSize,
-                                   NULL
-                                   );
-
-            if (Status == EFI_BUFFER_TOO_SMALL) {
-              // The first call to this function we get the right size of the
-              // FileInfo buffer, so we allocate it with that size and call the function again.
-              //
-              // Some drivers do not count 0 at the end of file name
-
-              *FileInfo = AllocateZeroPool (FileInfoSize + sizeof (CHAR16));
-
-              if (*FileInfo != NULL) {
-                Status = File->GetInfo (
-                                 File,
-                                 &gEfiFileInfoGuid,
-                                 &FileInfoSize,
-                                 *FileInfo
-                                 );
-              }
-            }
-          }
-
-          if (!EFI_ERROR (Status)) {
-            break;
-          }
-
-          // If we get the EFI_MEDIA_CHANGED error, we need to reopen the volume by calling
-          // OpenVolume() on our DeviceHandle
-        } while (Status == EFI_MEDIA_CHANGED);
-      } 
-
-      FreePool ((VOID *)FilePath);
+        FileInfoBuffer = NULL;
+      }
     }
   }
 
-  return Status;
+  return FileInfoBuffer;
 }

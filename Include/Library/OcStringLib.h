@@ -184,15 +184,13 @@ OcAsciiStrToGuid (
 /** Convert null terminated ascii string to unicode.
 
   @param[in]  String1  A pointer to the ascii string to convert to unicode.
-  @param[out] String2  A pointer to the converted unicode string.
   @param[in]  Length   Length or 0 to calculate the length of the ascii string to convert.
 
-  @retval  A pointer to the converted unicode string.
+  @retval  A pointer to the converted unicode string allocated from pool.
 **/
 CHAR16 *
 OcAsciiStrToUnicode (
-  IN  CHAR8   *String1,
-  IN  CHAR16  *String2,
+  IN  CHAR8   *String,
   IN  UINTN   Length
   );
 

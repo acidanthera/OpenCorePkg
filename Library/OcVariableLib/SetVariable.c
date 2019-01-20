@@ -61,7 +61,7 @@ SetVariable (
 
   if (VariableName != NULL) {
 
-    OcAsciiStrToUnicode (Name, VariableName, 0);
+    AsciiStrToUnicodeStrS (Name, VariableName, AsciiStrSize (Name));
 
     Size   = 0;
     Status = gRT->GetVariable (

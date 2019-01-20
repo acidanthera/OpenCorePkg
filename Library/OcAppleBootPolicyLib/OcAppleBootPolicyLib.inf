@@ -32,6 +32,7 @@
 
 [Sources]
   OcAppleBootPolicyLib.c
+  OcSupportBootPolicy.c
 
 [Packages]
   OcSupportPkg/OcSupportPkg.dec
@@ -58,3 +59,6 @@
   PrintLib
   UefiBootServicesTableLib
   OcGuardLib
+  OcFileLib
+  OcXmlLib
+
