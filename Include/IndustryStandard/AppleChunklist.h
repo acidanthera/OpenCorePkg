@@ -10,10 +10,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef APPLE_CHUNKLIST_H_
-#define APPLE_CHUNKLIST_H_
-
-#pragma pack(1)
+#ifndef APPLE_CHUNKLIST_H
+#define APPLE_CHUNKLIST_H
 
 //
 // Magic number used to identify chunklist.
@@ -29,10 +27,12 @@
 #define APPLE_CHUNKLIST_CHECKSUM_LENGTH     32
 #define APPLE_CHUNKLIST_SIG_LENGTH          256
 
+#pragma pack(push, 1)
+
 //
 // Chunklist chunk.
 //
-typedef struct {
+typedef struct APPLE_CHUNKLIST_CHUNK_ {
     UINT32  Length;
     UINT8   Checksum[APPLE_CHUNKLIST_CHECKSUM_LENGTH];
 } APPLE_CHUNKLIST_CHUNK;
@@ -40,7 +40,7 @@ typedef struct {
 //
 // Chunklist signature.
 //
-typedef struct {
+typedef struct APPLE_CHUNKLIST_SIG_ {
     UINT8   Signature[APPLE_CHUNKLIST_SIG_LENGTH];
 } APPLE_CHUNKLIST_SIG;
 
@@ -60,6 +60,6 @@ typedef struct {
     UINT64  SigOffset;
 } APPLE_CHUNKLIST_HEADER;
 
-#pragma pack()
+#pragma pack(pop)
 
-#endif
+#endif // APPLE_CHUNKLIST_H

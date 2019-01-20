@@ -68,7 +68,7 @@ GetAppleDiskLabel (
 
 STATIC
 CHAR16 *
-GetAppleRecoveryNameFromPlsit (
+GetAppleRecoveryNameFromPlist (
   IN CHAR8   *SystemVersionData,
   IN UINTN   SystemVersionDataSize
   )
@@ -149,7 +149,7 @@ GetAppleRecoveryName (
   FreePool (SystemVersionPath);
 
   if (SystemVersionData != NULL) {
-    UnicodeDiskLabel = GetAppleRecoveryNameFromPlsit (SystemVersionData, SystemVersionDataSize);
+    UnicodeDiskLabel = GetAppleRecoveryNameFromPlist (SystemVersionData, SystemVersionDataSize);
     FreePool (SystemVersionData);
   } else {
     UnicodeDiskLabel = NULL;

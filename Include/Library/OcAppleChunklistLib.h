@@ -10,19 +10,19 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef APPLE_CHUNKLIST_LIB_H_
-#define APPLE_CHUNKLIST_LIB_H_
+#ifndef APPLE_CHUNKLIST_LIB_H
+#define APPLE_CHUNKLIST_LIB_H
 
 #include <IndustryStandard/AppleChunklist.h>
 
 //
 // Chunklist context.
 //
-typedef struct {
-    APPLE_CHUNKLIST_HEADER  *Header;
-    UINTN                   FileSize;
-    APPLE_CHUNKLIST_CHUNK   *Chunks;
-    APPLE_CHUNKLIST_SIG     *Signature;
+typedef struct OC_APPLE_CHUNKLIST_CONTEXT_ {
+  APPLE_CHUNKLIST_HEADER  *Header;
+  UINTN                   FileSize;
+  APPLE_CHUNKLIST_CHUNK   *Chunks;
+  APPLE_CHUNKLIST_SIG     *Signature;
 } OC_APPLE_CHUNKLIST_CONTEXT;
 
 //
@@ -42,10 +42,11 @@ typedef struct {
 **/
 EFI_STATUS
 EFIAPI
-OcAppleChunklistInitializeContext(
-    IN  VOID *Buffer,
-    IN  UINTN Length,
-    OUT OC_APPLE_CHUNKLIST_CONTEXT *Context);
+OcAppleChunklistInitializeContext (
+  IN  VOID                        *Buffer,
+  IN  UINTN                       Length,
+  OUT OC_APPLE_CHUNKLIST_CONTEXT  *Context
+  );
 
 /**
   Verifies the specified data against a chunklist context.
@@ -61,9 +62,10 @@ OcAppleChunklistInitializeContext(
 **/
 EFI_STATUS
 EFIAPI
-OcAppleChunklistVerifyData(
-    IN OC_APPLE_CHUNKLIST_CONTEXT *Context,
-    IN VOID *Buffer,
-    IN UINTN Length);
+OcAppleChunklistVerifyData (
+  IN OC_APPLE_CHUNKLIST_CONTEXT *Context,
+  IN VOID                       *Buffer,
+  IN UINTN                      Length
+  );
 
-#endif
+#endif // APPLE_CHUNKLIST_LIB_H
