@@ -36,7 +36,8 @@ STATIC
 CHAR16 *
 GetAppleDiskLabel (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
-  IN  CONST CHAR16                     *BootDirectoryName
+  IN  CONST CHAR16                     *BootDirectoryName,
+  IN  CONST CHAR16                     *LabelFilename
   )
 {
   CHAR16   *DiskLabelPath;
@@ -45,14 +46,14 @@ GetAppleDiskLabel (
   CHAR16   *UnicodeDiskLabel;
   UINTN    DiskLabelLength;
 
-  DiskLabelPathSize = StrSize (BootDirectoryName) + L_STR_SIZE_NT (L".disk_label.contentDetails");
+  DiskLabelPathSize = StrSize (BootDirectoryName) + StrLen (LabelFilename);
   DiskLabelPath = AllocatePool (DiskLabelPathSize);
 
   if (DiskLabelPath == NULL) {
     return NULL;
   }
 
-  UnicodeSPrint (DiskLabelPath, DiskLabelPathSize, L"%s.disk_label.contentDetails", BootDirectoryName);
+  UnicodeSPrint (DiskLabelPath, DiskLabelPathSize, L"%s%s", BootDirectoryName, LabelFilename);
   AsciiDiskLabel = (CHAR8 *) ReadFile (FileSystem, DiskLabelPath, &DiskLabelLength);
   FreePool (DiskLabelPath);
 
@@ -158,6 +159,54 @@ GetAppleRecoveryName (
   return UnicodeDiskLabel;
 }
 
+STATIC
+EFI_STATUS
+GetAlternateOsBooter (
+  IN  EFI_HANDLE                Device,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
+  )
+{
+  EFI_STATUS                       Status;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  EFI_FILE_PROTOCOL                *Root;
+  UINTN                            FilePathSize;
+
+  Status = gBS->HandleProtocol (
+    Device,
+    &gEfiSimpleFileSystemProtocolGuid,
+    (VOID **) &FileSystem
+    );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = FileSystem->OpenVolume (FileSystem, &Root);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  *FilePath = (EFI_DEVICE_PATH_PROTOCOL *) GetFileInfo (
+                Root,
+                &gAppleBlessedAlternateOsInfoGuid,
+                sizeof (EFI_DEVICE_PATH_PROTOCOL),
+                &FilePathSize
+                );
+
+  if (*FilePath != NULL) {
+    if (!IsDevicePathValid(*FilePath, FilePathSize)) {
+      FreePool (*FilePath);
+      *FilePath = NULL;
+      Status = EFI_NOT_FOUND;
+    }
+  } else {
+    Status = EFI_NOT_FOUND;
+  }
+
+  Root->Close (Root);
+
+  return Status;
+}
+
 EFI_STATUS
 OcDescribeBootEntry (
   IN     APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
@@ -198,7 +247,13 @@ OcDescribeBootEntry (
   }
 
   if (BootEntryName != NULL) { 
-    *BootEntryName = GetAppleDiskLabel (FileSystem, BootDirectoryName);
+    //
+    // Try to use APFS-style label or legacy HFS one.
+    //
+    *BootEntryName = GetAppleDiskLabel (FileSystem, BootDirectoryName, L".contentDetails");
+    if (*BootEntryName == NULL) {
+      *BootEntryName = GetAppleDiskLabel (FileSystem, BootDirectoryName, L".disk_label.contentDetails");
+    }
     if (*BootEntryName == NULL) {
       *BootEntryName = GetVolumeLabel (FileSystem);
       if (*BootEntryName != NULL && !StrCmp (*BootEntryName, L"Recovery HD")) {
@@ -221,6 +276,100 @@ OcDescribeBootEntry (
   } else {
     FreePool (BootDirectoryName);
   }
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+OcScanForBootEntries (
+  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
+  IN  UINT32                      Mode,
+  OUT OC_BOOT_ENTRY               **BootEntries,
+  OUT UINTN                       *Count
+  )
+{
+  EFI_STATUS                Status;
+  UINTN                     NoHandles;
+  EFI_HANDLE                *Handles;
+  UINTN                     Index;
+  OC_BOOT_ENTRY             *Entries;
+  UINTN                     EntryIndex;
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
+  CHAR16                    *RecoveryPath;
+  VOID                      *Reserved;
+  EFI_FILE_PROTOCOL         *RecoveryRoot;
+  EFI_HANDLE                RecoveryDeviceHandle;
+
+  Status = gBS->LocateHandleBuffer (
+                  ByProtocol,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  NULL,
+                  &NoHandles,
+                  &Handles
+                  );
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  if (NoHandles == 0) {
+    FreePool (Handles);
+    return EFI_NOT_FOUND;
+  }
+
+  Entries = AllocateZeroPool (NoHandles * 2 * sizeof (OC_BOOT_ENTRY));
+  if (Entries == NULL) {
+    FreePool (Handles);
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  EntryIndex = 0;
+
+  for (Index = 0; Index < NoHandles; ++Index) {
+    Status = BootPolicy->GetBootFileEx (
+      Handles[Index],
+      APPLE_BOOT_POLICY_MODE_1,
+      &DevicePath
+      );
+
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    Entries[EntryIndex].DevicePath = DevicePath;
+
+    ++EntryIndex;
+
+    Status = BootPolicy->GetPathNameOnApfsRecovery (
+      DevicePath,
+      L"",
+      &RecoveryPath,
+      &Reserved,
+      &RecoveryRoot,
+      &RecoveryDeviceHandle
+      );
+
+    if (!EFI_ERROR (Status)) {
+      DevicePath = FileDevicePath (RecoveryDeviceHandle, RecoveryPath);
+      FreePool (RecoveryPath);
+      RecoveryRoot->Close (RecoveryRoot);
+    } else {
+      Status = GetAlternateOsBooter (Handles[Index], &DevicePath);
+      if (EFI_ERROR (Status)) {
+        continue;
+      }
+    }
+
+    Entries[EntryIndex].DevicePath     = DevicePath;
+    Entries[EntryIndex].PrefersDmgBoot = TRUE;
+
+    ++EntryIndex;
+  }
+
+  FreePool (Handles);
+
+  *BootEntries = Entries;
+  *Count = EntryIndex;
 
   return EFI_SUCCESS;
 }

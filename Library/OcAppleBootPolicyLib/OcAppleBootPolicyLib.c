@@ -556,9 +556,10 @@ HasValidGuidStringPrefix (
   }
 
   for (Index = 0; Index < GuidLength; ++Index) {
-    if ((Index == 8 || Index == 12 || Index == 16 || Index == 20)
-      && String[Index] != '-') {
-      return FALSE;
+    if (Index == 8 || Index == 13 || Index == 18 || Index == 23) {
+      if (String[Index] != '-') {
+        return FALSE;
+      }
     } else if (!(String[Index] >= L'0' && String[Index] <= L'9')
       && !(String[Index] >= L'A' && String[Index] <= L'F')
       && !(String[Index] >= L'a' && String[Index] <= L'f')) {
@@ -1035,12 +1036,12 @@ BootPolicyGetPathNameOnApfsRecovery (
     }
 
     NewHandle->Close (NewHandle);
-    (*Root)->Close (*Root);
 
     if (!EFI_ERROR (Result)) {
       break;
     }
 
+    (*Root)->Close (*Root);
     FreePool (FullPathBuffer);
   }
 

@@ -47,4 +47,30 @@ OcDescribeBootEntry (
   IN OUT CHAR16                     **BootPathName OPTIONAL
   );
 
+/**
+  Discovered boot entry.
+  Note, DevicePath must be freed.
+**/
+typedef struct OC_BOOT_ENTRY_ {
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
+  BOOLEAN                   PrefersDmgBoot;
+} OC_BOOT_ENTRY;
+
+/**
+  @param[in]  BootPolicy     Apple Boot Policy Protocol.
+  @param[in]  Mode           Lookup mode.
+  @param[out] BootEntries    List of boot entries (allocated from pool).
+  @param[out] Count          Number of boot entries.
+
+  @retval EFI_SUCCESS          The entry point is executed successfully.
+  @retval EFI_ALREADY_STARTED  The protocol has already been installed.
+**/
+EFI_STATUS
+OcScanForBootEntries (
+  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
+  IN  UINT32                      Mode,
+  OUT OC_BOOT_ENTRY               **BootEntries,
+  OUT UINTN                       *Count
+  );
+
 #endif // OC_APPLE_BOOT_POLICY_LIB_H
