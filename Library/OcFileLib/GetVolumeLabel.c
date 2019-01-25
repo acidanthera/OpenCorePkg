@@ -67,8 +67,11 @@ GetVolumeLabel (
     );
 
   if (VolumeInfo != NULL) {
-    return VolumeInfo->VolumeLabel;
+    if (VolumeInfo->VolumeLabel[0] != L'\0') {
+      return VolumeInfo->VolumeLabel;
+    }
+    FreePool (VolumeInfo);
   }
 
-  return NULL;
+  return AllocateCopyPool (sizeof (L"NO NAME"), L"NO NAME");
 }

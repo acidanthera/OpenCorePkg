@@ -207,6 +207,36 @@ GetAlternateOsBooter (
   return Status;
 }
 
+//
+// TODO: This should be less hardcoded.
+//
+STATIC
+BOOLEAN
+IsFolderBootEntry (
+  IN     EFI_DEVICE_PATH_PROTOCOL   *DevicePath
+  )
+{
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
+  FILEPATH_DEVICE_PATH      *FolderDevicePath;
+  BOOLEAN                   IsFolder;
+
+  IsFolder = FALSE;
+
+  DevicePathWalker = DevicePath;
+  while (!IsDevicePathEnd (DevicePathWalker)) {
+    if ((DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
+     && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)) {
+      FolderDevicePath = (FILEPATH_DEVICE_PATH *) DevicePathWalker;
+      IsFolder = FolderDevicePath->PathName[StrLen (FolderDevicePath->PathName) - 1] == L'\\';
+    } else {
+      IsFolder = FALSE;
+    }
+
+    DevicePathWalker = NextDevicePathNode (DevicePathWalker);
+  }
+  return IsFolder;
+}
+
 EFI_STATUS
 OcDescribeBootEntry (
   IN     APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
@@ -337,6 +367,7 @@ OcScanForBootEntries (
     }
 
     Entries[EntryIndex].DevicePath = DevicePath;
+    Entries[EntryIndex].PrefersDmgBoot = IsFolderBootEntry (DevicePath);
 
     ++EntryIndex;
 
@@ -361,7 +392,7 @@ OcScanForBootEntries (
     }
 
     Entries[EntryIndex].DevicePath     = DevicePath;
-    Entries[EntryIndex].PrefersDmgBoot = TRUE;
+    Entries[EntryIndex].PrefersDmgBoot = IsFolderBootEntry (DevicePath);
 
     ++EntryIndex;
   }
