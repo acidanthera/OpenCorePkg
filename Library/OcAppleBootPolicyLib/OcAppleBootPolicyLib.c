@@ -987,7 +987,7 @@ BootPolicyGetPathNameOnApfsRecovery (
       continue;
     }
 
-    FullPathNameSize  = StrSize (PathName);
+    FullPathNameSize  = sizeof (CHAR16) + StrSize (PathName);
     FullPathNameSize += INTERNAL_GUID_STRING_LENGTH * sizeof (CHAR16);
     FullPathBuffer    = AllocateZeroPool (FullPathNameSize);
 
@@ -996,10 +996,14 @@ BootPolicyGetPathNameOnApfsRecovery (
       continue;
     }
 
+    //
+    // Note, this \\ prefixing does not exist in Apple code, and should not be required,
+    // but we add it for return path consistency.
+    //
     UnicodeSPrint (
       FullPathBuffer,
       FullPathNameSize,
-      L"%g%s",
+      L"\\%g%s",
       &VolumeGuid,
       PathName
       );

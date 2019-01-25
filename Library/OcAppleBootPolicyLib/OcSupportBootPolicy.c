@@ -46,7 +46,7 @@ GetAppleDiskLabel (
   CHAR16   *UnicodeDiskLabel;
   UINTN    DiskLabelLength;
 
-  DiskLabelPathSize = StrSize (BootDirectoryName) + StrLen (LabelFilename);
+  DiskLabelPathSize = StrSize (BootDirectoryName) + StrLen (LabelFilename) * sizeof (CHAR16);
   DiskLabelPath = AllocatePool (DiskLabelPathSize);
 
   if (DiskLabelPath == NULL) {
@@ -256,7 +256,7 @@ OcDescribeBootEntry (
     }
     if (*BootEntryName == NULL) {
       *BootEntryName = GetVolumeLabel (FileSystem);
-      if (*BootEntryName != NULL && !StrCmp (*BootEntryName, L"Recovery HD")) {
+      if (*BootEntryName != NULL && (!StrCmp (*BootEntryName, L"Recovery HD") || !StrCmp (*BootEntryName, L"Recovery"))) {
         RecoveryBootName = GetAppleRecoveryName (FileSystem, BootDirectoryName);
         if (RecoveryBootName != NULL) {
           FreePool (*BootEntryName);
@@ -342,7 +342,7 @@ OcScanForBootEntries (
 
     Status = BootPolicy->GetPathNameOnApfsRecovery (
       DevicePath,
-      L"",
+      L"\\",
       &RecoveryPath,
       &Reserved,
       &RecoveryRoot,
