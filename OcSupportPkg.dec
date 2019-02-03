@@ -46,13 +46,7 @@
 
 [LibraryClasses]
   ##  @libraryclass
-  OcPngLib|Include/Library/OcPngLib.h
-
-  ##  @libraryclass
-  OcCryptoLib|Include/Library/OcCryptoLib.h
-
-  ##  @libraryclass
-  OcGuardLib|Include/Library/OcGuardLib.h
+  OcAcpiLib|Include/Library/OcAcpiLib.h
 
   ##  @libraryclass
   OcAppleBootPolicyLib|Include/Library/OcAppleBootPolicyLib.h
@@ -64,46 +58,55 @@
   OcAppleImageVerificationLib|Include/Library/OcAppleImageVerificationLib.h
 
   ##  @libraryclass
-  OcAcpiLib|Include/Library/OcAcpiLib.h
+  OcCpuLib|Include/Library/OcCpuLib.h
 
   ##  @libraryclass
-  OcCpuLib|Include/Library/OcCpuLib.h
+  OcCryptoLib|Include/Library/OcCryptoLib.h
 
   ##  @libraryclass
   OcDevicePathLib|Include/Library/OcDevicePathLib.h
 
   ##  @libraryclass
+  OcDevicePropertyLib|Include/Library/OcDevicePropertyLib.h
+
+  ##  @libraryclass
   OcFileLib|Include/Library/OcFileLib.h
+
+  ##  @libraryclass
+  OcFirmwarePasswordLib|Include/Library/OcFirmwarePasswordLib.h
+
+  ##  @libraryclass
+  OcGuardLib|Include/Library/OcGuardLib.h
+
+  ##  @libraryclass
+  OcMachoLib|Include/Library/OcMachoLib.h
 
   ##  @libraryclass
   OcMiscLib|Include/Library/OcMiscLib.h
 
   ##  @libraryclass
+  OcPngLib|Include/Library/OcPngLib.h
+
+  ##  @libraryclass
   OcProtocolLib|Include/Library/OcProtocolLib.h
 
   ##  @libraryclass
+  OcSerializeLib|Include/Library/OcSerializeLib.h
+
+  ##  @libraryclass
+  OcSmbiosLib|Include/Library/OcSmbiosLib.h
+
+  ##  @libraryclass
   OcStringLib|Include/Library/OcStringLib.h
+
+  ##  @libraryclass
+  OcTemplateLib|Include/Library/OcTemplateLib.h
 
   ##  @libraryclass
   OcTimerLib|Include/Library/OcTimerLib.h
 
   ##  @libraryclass
   OcVariableLib|Include/Library/OcVariableLib.h
-
-  ##  @libraryclass
-  OcDevicePropertyLib|Include/Library/OcDevicePropertyLib.h
-
-  ##  @libraryclass
-  OcFirmwarePasswordLib|Include/Library/OcFirmwarePasswordLib.h
-
-  ##  @libraryclass
-  OcMachoLib|Include/Library/OcMachoLib.h
-
-  ##  @libraryclass
-  OcSerializeLib|Include/Library/OcSerializeLib.h
-
-  ##  @libraryclass
-  OcTemplateLib|Include/Library/OcTemplateLib.h
 
   ##  @libraryclass
   OcXmlLib|Include/Library/OcXmlLib.h

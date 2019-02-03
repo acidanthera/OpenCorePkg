@@ -48,27 +48,28 @@
   HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
 
 [Components]
+  OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
   OcSupportPkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
   OcSupportPkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
   OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
-  OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
-  OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf
-  OcSupportPkg/Library/OcPngLib/OcPngLib.inf
-  OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
   OcSupportPkg/Library/OcCpuLib/OcCpuLib.inf
+  OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
   OcSupportPkg/Library/OcDebugLogLib/OcDebugLogLib.inf
   OcSupportPkg/Library/OcDevicePathLib/OcDevicePathLib.inf
+  OcSupportPkg/Library/OcDevicePropertyLib/OcDevicePropertyLib.inf
   OcSupportPkg/Library/OcFileLib/OcFileLib.inf
+  OcSupportPkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
+  OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf
+  OcSupportPkg/Library/OcMachoLib/OcMachoLib.inf
   OcSupportPkg/Library/OcMiscLib/OcMiscLib.inf
+  OcSupportPkg/Library/OcPngLib/OcPngLib.inf
   OcSupportPkg/Library/OcProtocolLib/OcProtocolLib.inf
+  OcSupportPkg/Library/OcSerializeLib/OcSerializeLib.inf
+  OcSupportPkg/Library/OcSmbiosLib/OcSmbiosLib.inf
   OcSupportPkg/Library/OcStringLib/OcStringLib.inf
+  OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
   OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
   OcSupportPkg/Library/OcVariableLib/OcVariableLib.inf
-  OcSupportPkg/Library/OcDevicePropertyLib/OcDevicePropertyLib.inf
-  OcSupportPkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
-  OcSupportPkg/Library/OcMachoLib/OcMachoLib.inf
-  OcSupportPkg/Library/OcSerializeLib/OcSerializeLib.inf
-  OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
   OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
   OcSupportPkg/Debug/GdbSyms/GdbSyms.inf
 
