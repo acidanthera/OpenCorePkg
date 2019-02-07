@@ -151,34 +151,48 @@ enum {
 #define K8_FIDVID_STATUS   0xC0010042
 #define K10_COFVID_STATUS  0xC0010071
 
-#define CPU_MODEL_DOTHAN        0x0D  ///< Dothan
-#define CPU_MODEL_YONAH         0x0E  ///< Sossaman, Yonah
-#define CPU_MODEL_MEROM         0x0F  ///< Allendale, Conroe, Kentsfield, Woodcrest, Clovertown, Tigerton, Merom
-#define CPU_MODEL_PENRYN        0x17  ///< Wolfdale, Yorkfield, Harpertown, Penryn
-#define CPU_MODEL_NEHALEM       0x1A  ///< Bloomfield. Nehalem-EP, Nehalem-WS, Gainestown
-#define CPU_MODEL_ATOM          0x1C  ///< Atom
-#define CPU_MODEL_FIELDS        0x1E  ///< Lynnfield, Clarksfield, Jasper Forest
-#define CPU_MODEL_DALES         0x1F  ///< Havendale, Auburndale
-#define CPU_MODEL_DALES_32NM    0x25  ///< Clarkdale, Arrandale
-#define CPU_MODEL_SANDYBRIDGE   0x2A  ///< Sandy Bridge
-#define CPU_MODEL_WESTMERE      0x2C  ///< Gulftown, Westmere-EP, Westmere-WS
-#define CPU_MODEL_JAKETOWN      0x2D  ///< Sandy Bridge Xeon
-#define CPU_MODEL_NEHALEM_EX    0x2E  ///< Beckton
-#define CPU_MODEL_WESTMERE_EX   0x2F
-#define CPU_MODEL_IVYBRIDGE     0x3A  ///< Ivy Bridge
-#define CPU_MODEL_HASWELL       0x3C
-#define CPU_MODEL_BROADWELL     0x3D  ///< Broadwell
-#define CPU_MODEL_IVYBRIDGE_E5  0x3E
-#define CPU_MODEL_HASWELL_MB    0x3F  ///< Haswell MB
-#define CPU_MODEL_HASWELL_ULT   0x45  ///< Haswell ULT
-#define CPU_MODEL_HASWELL_ULX   0x46  ///< Haswell ULX
-#define CPU_MODEL_SKYLAKE       0x5E  ///< Skylake-S
+#define CPU_MODEL_DOTHAN         0x0D  ///< Dothan
+#define CPU_MODEL_YONAH          0x0E  ///< Sossaman, Yonah
+#define CPU_MODEL_MEROM          0x0F  ///< Allendale, Conroe, Kentsfield, Woodcrest, Clovertown, Tigerton, Merom
+#define CPU_MODEL_PENRYN         0x17  ///< Wolfdale, Yorkfield, Harpertown, Penryn
+#define CPU_MODEL_NEHALEM        0x1A  ///< Bloomfield. Nehalem-EP, Nehalem-WS, Gainestown
+#define CPU_MODEL_ATOM           0x1C  ///< Atom
+#define CPU_MODEL_FIELDS         0x1E  ///< Lynnfield, Clarksfield, Jasper Forest
+#define CPU_MODEL_DALES          0x1F  ///< Havendale, Auburndale
+#define CPU_MODEL_DALES_32NM     0x25  ///< Clarkdale, Arrandale
+#define CPU_MODEL_SANDY_BRIDGE   0x2A  ///< Sandy Bridge
+#define CPU_MODEL_WESTMERE       0x2C  ///< Gulftown, Westmere-EP, Westmere-WS
+#define CPU_MODEL_JAKETOWN       0x2D  ///< Sandy Bridge Xeon
+#define CPU_MODEL_NEHALEM_EX     0x2E  ///< Beckton
+#define CPU_MODEL_WESTMERE_EX    0x2F
+#define CPU_MODEL_IVYBRIDGE      0x3A  ///< Ivy Bridge
+#define CPU_MODEL_CRYSTALWELL    0x46
+#define CPU_MODEL_BRYSTALWELL    0x47
+#define CPU_MODEL_HASWELL        0x3C
+#define CPU_MODEL_BROADWELL      0x3D  ///< Broadwell
+#define CPU_MODEL_BROADWELL_ULT  0x3D
+#define CPU_MODEL_BROADWELL_ULX  0x3D
+#define CPU_MODEL_IVYBRIDGE_EP   0x3E
+#define CPU_MODEL_HASWELL_EP     0x3F  ///< Haswell MB
+#define CPU_MODEL_HASWELL_ULT    0x45  ///< Haswell ULT
+#define CPU_MODEL_HASWELL_ULX    0x46  ///< Haswell ULX
+#define CPU_MODEL_SKYLAKE        0x4E  ///< Skylake-S
+#define CPU_MODEL_SKYLAKE_ULT    0x4E
+#define CPU_MODEL_SKYLAKE_ULX    0x4E
+#define CPU_MODEL_SKYLAKE_DT     0x5E
+#define CPU_MODEL_SKYLAKE_W      0x55
 
-#define CPU_MODEL_DENVERTON     0x5F  ///< Goldmont Microserver
-#define CPU_MODEL_CANNONLAKE    0x66
-#define CPU_MODEL_XEON_MILL     0x85  ///< Knights Mill
-#define CPU_MODEL_KABYLAKE_U    0x8E  ///< Kabylake Mobile
-#define CPU_MODEL_KABYLAKE      0x9E  ///< Kabylake Dektop
+#define CPU_MODEL_DENVERTON      0x5F  ///< Goldmont Microserver
+#define CPU_MODEL_CANNONLAKE     0x66
+#define CPU_MODEL_XEON_MILL      0x85  ///< Knights Mill
+#define CPU_MODEL_KABYLAKE       0x8E  ///< Kabylake Dektop
+#define CPU_MODEL_KABYLAKE_ULT   0x8E
+#define CPU_MODEL_KABYLAKE_ULX   0x8E
+#define CPU_MODEL_KABYLAKE_DT    0x9E
+#define CPU_MODEL_COFFEELAKE     0x9E
+#define CPU_MODEL_COFFEELAKE_ULT 0x9E
+#define CPU_MODEL_COFFEELAKE_ULX 0x9E
+#define CPU_MODEL_COFFEELAKE_DT  0x9E
 
 #define CPU_SOCKET_UNKNOWN  0x02
 #define CPU_SOCKET_PGA478   0x0F
