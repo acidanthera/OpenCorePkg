@@ -17,6 +17,7 @@
 #include <IndustryStandard/CpuId.h>
 #include <IndustryStandard/GenericIch.h>
 #include <IndustryStandard/Pci.h>
+#include <IndustryStandard/AppleSmBios.h>
 
 #include <Protocol/PciIo.h>
 
@@ -27,6 +28,7 @@
 #include <Library/IoLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/PciLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/OcTimerLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
@@ -44,16 +46,17 @@
 **/
 EFI_STATUS
 OcCpuScanProcessor (
-  IN CPU_INFO  *Cpu
+  IN OUT CPU_INFO  *Cpu
   )
 {
   EFI_STATUS Status;
 
-  UINT32     CpuidEax;
-  UINT32     CpuidEbx;
-  UINT32     CpuidEcx;
-  UINT32     CpuidEdx;
-  UINT64     Msr = 0;
+  UINT32       CpuidEax;
+  UINT32       CpuidEbx;
+  UINT32       CpuidEcx;
+  UINT32       CpuidEdx;
+  UINT64       Msr = 0;
+  CONST CHAR8  *BrandInfix;
 
   DEBUG_FUNCTION_ENTRY (DEBUG_VERBOSE);
 
@@ -132,6 +135,58 @@ OcCpuScanProcessor (
       ));
 
     if (*(UINT32 *)Cpu->Vendor == CPUID_VENDOR_INTEL) {
+
+      BrandInfix = AsciiStrStr (Cpu->BrandString, "Core");
+      if (BrandInfix != NULL) {
+        while ((*BrandInfix != ' ') && (*BrandInfix != '\0')) {
+          ++BrandInfix;
+        }
+
+        while (*BrandInfix == ' ') {
+          ++BrandInfix;
+        }
+
+        if (AsciiStrnCmp (BrandInfix, "i7", L_STR_LEN("i7")) == 0) {
+          Cpu->AppleMajorType = AppleProcessorMajorI7;
+        } else if (AsciiStrnCmp (BrandInfix, "i5", L_STR_LEN("i5")) == 0) {
+          Cpu->AppleMajorType = AppleProcessorMajorI5;
+        } else if (AsciiStrnCmp (BrandInfix, "i3", L_STR_LEN("i3")) == 0) {
+          Cpu->AppleMajorType = AppleProcessorMajorI3;
+        } else if (AsciiStrnCmp (BrandInfix, "i9", L_STR_LEN("i9")) == 0) {
+          Cpu->AppleMajorType = AppleProcessorMajorI9;
+        } else if (AsciiStrnCmp (BrandInfix, "m3", L_STR_LEN("m3")) == 0) {
+          Cpu->AppleMajorType = AppleProcessorMajorM3;
+        } else if (AsciiStrnCmp (BrandInfix, "m5", L_STR_LEN("m5")) == 0) {
+          Cpu->AppleMajorType = AppleProcessorMajorM5;
+        } else if (AsciiStrnCmp (BrandInfix, "m7", L_STR_LEN("m7")) == 0) {
+          Cpu->AppleMajorType = AppleProcessorMajorM7;
+        } else if (AsciiStrnCmp (BrandInfix, "M", L_STR_LEN("M")) == 0) {
+          Cpu->AppleMajorType = AppleProcessorMajorM;
+        } else if (AsciiStrnCmp (BrandInfix, "2 Duo", L_STR_LEN("2 Duo")) == 0) {
+          Cpu->AppleMajorType = AppleProcessorMajorCore2;
+        } else {
+          Cpu->AppleMajorType = AppleProcessorMajorCore;
+        }
+      } else {
+        BrandInfix = AsciiStrStr (Cpu->BrandString, "Xeon");
+        if (BrandInfix != NULL) {
+          while ((*BrandInfix != ' ') && (*BrandInfix != '\0')) {
+            ++BrandInfix;
+          }
+
+          while (*BrandInfix == ' ') {
+            ++BrandInfix;
+          }
+
+          if (AsciiStrnCmp (BrandInfix, "E5", L_STR_LEN("E5")) == 0) {
+            Cpu->AppleMajorType = AppleProcessorMajorXeonE5;
+          } else if (AsciiStrnCmp (BrandInfix, "W", L_STR_LEN("W")) == 0) {
+            Cpu->AppleMajorType = AppleProcessorMajorXeonW;
+          } else {
+            Cpu->AppleMajorType = AppleProcessorMajorXeonNehalem;
+          }
+        }
+      }
 
       Msr = AsmReadMsr64 (MSR_PKG_CST_CONFIG_CONTROL);
 

@@ -12,8 +12,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef OC_CPU_LIB_H_
-#define OC_CPU_LIB_H_
+#ifndef OC_CPU_LIB_H
+#define OC_CPU_LIB_H
 
 // CPU_INFO
 typedef struct {
@@ -30,6 +30,7 @@ typedef struct {
   UINT64               ExtFeatures;
   UINT32               Signature;
   UINT8                Brand;
+  UINT8                AppleMajorType;
 
   UINT32               MaxExtId;
 
@@ -60,7 +61,7 @@ typedef struct {
 **/
 EFI_STATUS
 OcCpuScanProcessor (
-  IN CPU_INFO  *Platform
+  IN OUT CPU_INFO  *Cpu
   );
 
 #endif // OC_CPU_LIB_H_
