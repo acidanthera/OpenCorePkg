@@ -1315,17 +1315,11 @@ CreateSmBios (
 
     if (Buffer != NULL) {
 
-      CPU_INFO                      *CpuInfo;
-
-      UINT8   *Table;
+      CPU_INFO  CpuInfo;
+      UINT8     *Table;
 
       if (!EFI_ERROR (Status)) {
-        CpuInfo = NULL;
-        //FIXME:
-        /*Status  = PlatformInfo->GetProcessorInfo (
-                                  PlatformInfo,
-                                  (VOID **)&CpuInfo
-                                  );*/
+        Status = OcCpuScanProcessor (&CpuInfo);
 
         if (!EFI_ERROR (Status)) {
 
@@ -1364,7 +1358,7 @@ CreateSmBios (
 
           // Combine the following
           PatchCacheInformation (&Table, &Handle, &L1CacheHandle, &L2CacheHandle, &L3CacheHandle);
-          PatchProcessorInformation (&Table, &Handle, L1CacheHandle, L2CacheHandle, L3CacheHandle, CpuInfo);
+          PatchProcessorInformation (&Table, &Handle, L1CacheHandle, L2CacheHandle, L3CacheHandle, &CpuInfo);
 
           PatchSystemPorts (&Table, &Handle);
           PatchSystemSlots (&Table, &Handle);
@@ -1422,7 +1416,7 @@ CreateSmBios (
 
           PatchBootInformation (&Table, &Handle);
 
-          CreateAppleProcessorType (&Table, &Handle, CpuInfo);
+          CreateAppleProcessorType (&Table, &Handle, &CpuInfo);
 
           CreateAppleFirmwareVolume (&Table, &Handle);
 

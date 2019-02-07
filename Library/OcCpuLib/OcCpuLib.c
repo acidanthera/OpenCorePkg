@@ -63,6 +63,7 @@ OcCpuScanProcessor (
   Status = EFI_INVALID_PARAMETER;
 
   if (Cpu != NULL) {
+    ZeroMem (Cpu, sizeof (*Cpu));
 
     // Get vendor CPUID 0x00000000
     AsmCpuid (CPUID_SIGNATURE, &CpuidEax, (UINT32 *)Cpu->Vendor, (UINT32 *)(Cpu->Vendor + 8), (UINT32 *)(Cpu->Vendor + 4));
