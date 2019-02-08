@@ -447,7 +447,7 @@ PatchProcessorInformation (
     p->AssetTag             = p->ProcessorVersion;
 
     // Models newer than Sandybridge require quad pumped bus value instead of a front side bus value.
-    if (CpuInfo->Model < CPU_MODEL_SANDY_BRIDGE) {
+    if (CpuInfo->Model < CPU_MODEL_SANDYBRIDGE) {
       p->ExternalClock = (UINT16)DivU64x32 (CpuInfo->FSBFrequency, 1000000);
     } else {
       p->ExternalClock = 0x19;
@@ -1253,7 +1253,7 @@ CreateAppleProcessorType (
       //   SNB-E based Core i7 (and Extreme): 3970X, 3960X, 3930K, 3820,
       //   Pentium, Celeron
       //
-      case CPU_MODEL_SANDY_BRIDGE: // 0x2A
+      case CPU_MODEL_SANDYBRIDGE: // 0x2A
       case CPU_MODEL_JAKETOWN:     // 0x2D, SNB-E, not used by Apple
 
         if (CpuInfo->AppleMajorType == AppleProcessorMajorI3) {
