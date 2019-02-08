@@ -1254,7 +1254,7 @@ CreateAppleProcessorType (
       //   Pentium, Celeron
       //
       case CPU_MODEL_SANDYBRIDGE: // 0x2A
-      case CPU_MODEL_JAKETOWN:     // 0x2D, SNB-E, not used by Apple
+      case CPU_MODEL_JAKETOWN:    // 0x2D, SNB-E, not used by Apple
 
         if (CpuInfo->AppleMajorType == AppleProcessorMajorI3) {
           // FIXME: used by Apple on iMac12,1 (EDU, i3-2100), not confirmed yet

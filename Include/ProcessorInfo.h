@@ -164,7 +164,7 @@ enum {
 #define CPU_MODEL_WESTMERE       0x2C  ///< Gulftown, Westmere-EP, Westmere-WS
 #define CPU_MODEL_WESTMERE_EX    0x2F
 #define CPU_MODEL_SANDYBRIDGE    0x2A  ///< Sandy Bridge
-#define CPU_MODEL_JAKETOWN       0x2D  ///< Sandy Bridge Xeon
+#define CPU_MODEL_JAKETOWN       0x2D  ///< Sandy Bridge Xeon E5, Core i7 Extreme
 #define CPU_MODEL_IVYBRIDGE      0x3A  ///< Ivy Bridge
 #define CPU_MODEL_IVYBRIDGE_EP   0x3E
 #define CPU_MODEL_CRYSTALWELL    0x46
