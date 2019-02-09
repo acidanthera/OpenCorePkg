@@ -1417,7 +1417,8 @@ CreateAppleProcessorType (
           p->ProcessorType.Type = AppleProcessorTypeCoreMType6;   // 0x0B06
         } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI5) {
           // IM161  (i5-5250U), IM162 (i5-5675R),
-          // MBP121 (i5-5257U)
+          // MBP121 (i5-5257U),
+          // MBA71  (i5-5250U), MBA72 (unknown)
           p->ProcessorType.Type = AppleProcessorTypeCorei5Type6; // 0x0606
         } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI7) {
           // FIXME: 0x0706 is just an ideal value for i7, waiting for confirmation
@@ -1531,10 +1532,11 @@ CreateAppleProcessorType (
         } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI5) {
           // Kaby has 0x9 stepping, and Coffee use 0xA / 0xB stepping.
           if (CpuInfo->Stepping == 9) {
-            // IM182  (i5-7400), IM183 (i5-7600)
+            // IM181 (i5-7360U), IM182  (i5-7400), IM183 (i5-7600)
             // MBP141 (i5-7360U), MBP142 (i5-7267U)
             p->ProcessorType.Type = AppleProcessorTypeCorei5Type5; // 0x0605
           } else {
+            // MM81 (i5-8500B)
             // MBP152 (i5-8259U)
             p->ProcessorType.Type = AppleProcessorTypeCorei5Type9; // 0x0609
           }
