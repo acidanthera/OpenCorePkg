@@ -36,6 +36,7 @@
 [LibraryClasses]
   BaseLib
   IoLib
+  OcTimerLib
 
 [Sources]
   OcCpuLib.c

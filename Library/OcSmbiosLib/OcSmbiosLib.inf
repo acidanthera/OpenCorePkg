@@ -43,3 +43,9 @@
 
 [Protocols]
   gEfiPciRootBridgeIoProtocolGuid
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  MemoryAllocationLib
+  OcCpuLib
