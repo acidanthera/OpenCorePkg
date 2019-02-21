@@ -1099,9 +1099,9 @@ PlistDataValue (
   UINT32    *Size
   )
 {
-  CONST CHAR8  *Content;
-  UINTN        Length;
-  BOOLEAN      Result;
+  CONST CHAR8    *Content;
+  UINTN          Length;
+  RETURN_STATUS  Result;
 
   if (PlistNodeCast (Node, PLIST_NODE_TYPE_DATA) == NULL) {
     return FALSE;
@@ -1114,9 +1114,9 @@ PlistDataValue (
   }
 
   Length = *Size;
-  Result = Base64Decode (Content, AsciiStrLen (Content), Buffer, &Length);
+  Result = OcBase64Decode (Content, AsciiStrLen (Content), Buffer, &Length);
 
-  if (Result && (UINT32) Length == Length) {
+  if (!RETURN_ERROR (Result) && (UINT32) Length == Length) {
     *Size = (UINT32) Length;
     return TRUE;
   }
@@ -1184,16 +1184,16 @@ PlistMetaDataValue (
   UINT32    *Size
   )
 {
-  CONST CHAR8  *Content;
-  UINTN        Length;
-  BOOLEAN      Result;
+  CONST CHAR8    *Content;
+  UINTN          Length;
+  RETURN_STATUS  Result;
 
   if (PlistNodeCast (Node, PLIST_NODE_TYPE_DATA) != NULL) {
     Content = XmlNodeContent (Node);
     if (Content != NULL) {
-      Result = Base64Decode (Content, AsciiStrLen (Content), Buffer, &Length);
+      Result = OcBase64Decode (Content, AsciiStrLen (Content), Buffer, &Length);
 
-      if (Result && (UINT32) Length == Length) {
+      if (!RETURN_ERROR (Result) && (UINT32) Length == Length) {
         *Size = (UINT32) Length;
       } else {
         return FALSE;

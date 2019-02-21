@@ -50,8 +50,9 @@ STATIC CONST UINT8 D[] = {
   66,66,66,66,66,66
 };
 
-BOOLEAN
-Base64Decode (
+RETURN_STATUS
+EFIAPI
+OcBase64Decode (
   IN     CONST CHAR8  *EncodedData,
   IN     UINTN        EncodedLength,
      OUT UINT8        *DecodedData,
@@ -70,7 +71,7 @@ Base64Decode (
       case WHITESPACE:
         continue;       /* skip whitespace */
       case INVALID:
-        return FALSE;   /* invalid input, return error */
+        return RETURN_INVALID_PARAMETER;   /* invalid input, return error */
       case EQUALS:      /* pad character, end of data */
         EncodedData = End;
         continue;
@@ -79,7 +80,7 @@ Base64Decode (
         Iter++; /* increment the number of iteration */
         /* If the buffer is full, split it into bytes */
         if (Iter == 4) {
-          if ((Len += 3) > *DecodedLength) return FALSE; /* buffer overflow */
+          if ((Len += 3) > *DecodedLength) return RETURN_BUFFER_TOO_SMALL; /* buffer overflow */
           *(DecodedData++) = (Buf >> 16U) & 255U;
           *(DecodedData++) = (Buf >> 8U) & 255U;
           *(DecodedData++) = Buf & 255U;
@@ -89,14 +90,14 @@ Base64Decode (
   }
  
   if (Iter == 3) {
-    if ((Len += 2) > *DecodedLength) return FALSE; /* buffer overflow */
+    if ((Len += 2) > *DecodedLength) return RETURN_BUFFER_TOO_SMALL; /* buffer overflow */
     *(DecodedData++) = (Buf >> 10U) & 255U;
     *(DecodedData++) = (Buf >> 2U) & 255U;
   } else if (Iter == 2) {
-    if (++Len > *DecodedLength) return FALSE; /* buffer overflow */
+    if (++Len > *DecodedLength) return RETURN_BUFFER_TOO_SMALL; /* buffer overflow */
     *(DecodedData++) = (Buf >> 4U) & 255U;
   }
 
   *DecodedLength = Len; /* modify to reflect the actual output size */
-  return TRUE;
+  return EFI_SUCCESS;
 }

@@ -25,6 +25,8 @@ typedef struct {
 // Base64Decode
 /**
 
+  TODO: edk2 now has its implementation in BaseLib, review it and use once it appears in UDK.
+
   @param[in] EncodedData        A pointer to the data to convert.
   @param[in] EncodedLength      The length of data to convert.
   @param[in] DecodedData        A pointer to location to store the decoded data.
@@ -32,8 +34,9 @@ typedef struct {
 
   @retval  TRUE on success.
 **/
-BOOLEAN
-Base64Decode (
+RETURN_STATUS
+EFIAPI
+OcBase64Decode (
   IN     CONST CHAR8  *EncodedData,
   IN     UINTN        EncodedLength,
      OUT UINT8        *DecodedData,
