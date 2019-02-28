@@ -15,6 +15,12 @@
 #ifndef OC_CPU_LIB_H
 #define OC_CPU_LIB_H
 
+//
+// External clock value on Sandy Bridge and above (in MHz).
+// Rounded FSB * 4.
+//
+#define OC_CPU_SNB_QPB_CLOCK 0x19U
+
 // CPU_INFO
 typedef struct {
   UINT8                Type;
@@ -45,6 +51,12 @@ typedef struct {
   UINT8                TurboBusRatio3;
   UINT8                TurboBusRatio4;
 
+  //
+  // FIXME: Implement these.
+  //
+  UINT16               CoreCount;
+  UINT16               ThreadCount;
+
   UINT64               ARTFrequency;
   UINT64               TSCFrequency;
   UINT64               CPUFrequency;
@@ -56,10 +68,8 @@ typedef struct {
 /** Scan the processor and fill the cpu info structure with results
 
   @param[in] Cpu  A pointer to the cpu info structure to fill with results
-
-  @retval EFI_SUCCESS  The scan was completed successfully.
 **/
-EFI_STATUS
+VOID
 OcCpuScanProcessor (
   IN OUT CPU_INFO  *Cpu
   );

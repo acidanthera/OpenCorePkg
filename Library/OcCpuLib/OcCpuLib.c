@@ -44,13 +44,11 @@
 
   @retval EFI_SUCCESS  The scan was completed successfully.
 **/
-EFI_STATUS
+VOID
 OcCpuScanProcessor (
   IN OUT CPU_INFO  *Cpu
   )
 {
-  EFI_STATUS Status;
-
   UINT32       CpuidEax;
   UINT32       CpuidEbx;
   UINT32       CpuidEcx;
@@ -58,86 +56,111 @@ OcCpuScanProcessor (
   UINT64       Msr = 0;
   CONST CHAR8  *BrandInfix;
 
-  DEBUG_FUNCTION_ENTRY (DEBUG_VERBOSE);
+  ASSERT (Cpu != NULL);
 
-  Status = EFI_INVALID_PARAMETER;
+  ZeroMem (Cpu, sizeof (*Cpu));
 
-  if (Cpu != NULL) {
-    ZeroMem (Cpu, sizeof (*Cpu));
+  // Get vendor CPUID 0x00000000
+  AsmCpuid (CPUID_SIGNATURE, &CpuidEax, (UINT32 *)Cpu->Vendor, (UINT32 *)(Cpu->Vendor + 8), (UINT32 *)(Cpu->Vendor + 4));
 
-    // Get vendor CPUID 0x00000000
-    AsmCpuid (CPUID_SIGNATURE, &CpuidEax, (UINT32 *)Cpu->Vendor, (UINT32 *)(Cpu->Vendor + 8), (UINT32 *)(Cpu->Vendor + 4));
+  // Get extended CPUID 0x80000000
+  AsmCpuid (CPUID_EXTENDED_FUNCTION, &CpuidEax, &CpuidEbx, &CpuidEcx, &CpuidEdx);
 
-    // Get extended CPUID 0x80000000
-    AsmCpuid (CPUID_EXTENDED_FUNCTION, &CpuidEax, &CpuidEbx, &CpuidEcx, &CpuidEdx);
+  Cpu->MaxExtId = CpuidEax;
 
-    Cpu->MaxExtId = CpuidEax;
+  // Get brand string CPUID 0x80000002 - 0x80000004
+  if (Cpu->MaxExtId >= CPUID_BRAND_STRING3) {
+    // The brandstring 48 bytes max, guaranteed NULL terminated.
+    UINT32  *BrandString = (UINT32 *)Cpu->BrandString;
 
-    // Get brand string CPUID 0x80000002 - 0x80000004
-    if (Cpu->MaxExtId >= CPUID_BRAND_STRING3) {
+    AsmCpuid (
+      CPUID_BRAND_STRING1,
+      BrandString,
+      (BrandString + 1),
+      (BrandString + 2),
+      (BrandString + 3)
+      );
 
-      // The brandstring 48 bytes max, guaranteed NULL terminated.
-      UINT32	*BrandString = (UINT32 *)Cpu->BrandString;
+    AsmCpuid (
+      CPUID_BRAND_STRING2,
+      (BrandString + 4),
+      (BrandString + 5),
+      (BrandString + 6),
+      (BrandString + 7)
+      );
 
-      AsmCpuid (
-        CPUID_BRAND_STRING1,
-        BrandString,
-        (BrandString + 1),
-        (BrandString + 2),
-        (BrandString + 3)
-        );
+    AsmCpuid (
+      CPUID_BRAND_STRING3,
+      (BrandString + 8),
+      (BrandString + 9),
+      (BrandString + 10),
+      (BrandString + 11)
+      );
+  }
 
-      AsmCpuid (
-        CPUID_BRAND_STRING2,
-        (BrandString + 4),
-        (BrandString + 5),
-        (BrandString + 6),
-        (BrandString + 7)
-        );
+  // Get processor signature and decode
+  if (Cpu->MaxExtId >= CPUID_VERSION_INFO) {
+    AsmCpuid (CPUID_VERSION_INFO, &CpuidEax, &CpuidEbx, &CpuidEcx, &CpuidEdx);
 
-      AsmCpuid (
-        CPUID_BRAND_STRING3,
-        (BrandString + 8),
-        (BrandString + 9),
-        (BrandString + 10),
-        (BrandString + 11)
-        );
-    }
+    Cpu->Signature = CpuidEax;
+    Cpu->Stepping  = (UINT8)BITFIELD (CpuidEax, 3, 0);
+    Cpu->ExtModel  = (UINT8)BITFIELD (CpuidEax, 19, 16);
+    Cpu->Model     = ((UINT8)BITFIELD (CpuidEax, 7, 4) + (Cpu->ExtModel << 4));
+    Cpu->Family    = (UINT8)BITFIELD (CpuidEax, 11, 8);
+    Cpu->Type      = (UINT8)BITFIELD (CpuidEax, 13, 12);
+    Cpu->ExtFamily = (UINT8)BITFIELD (CpuidEax, 27, 20);
+    Cpu->Brand     = (UINT8)BITFIELD (CpuidEbx, 7, 0);
+    Cpu->Features  = QUAD (CpuidEcx, CpuidEdx);
+  }
 
-    // Get processor signature and decode
-    if (Cpu->MaxExtId >= CPUID_VERSION_INFO) {
+  DEBUG ((DEBUG_INFO, "%a %a\n", "Found", Cpu->BrandString));
 
-      AsmCpuid (CPUID_VERSION_INFO, &CpuidEax, &CpuidEbx, &CpuidEcx, &CpuidEdx);
+  DEBUG ((
+    DEBUG_INFO,
+    "Signature %0X Stepping %0X Model %0X Family %0X Type %0X ExtModel %0X ExtFamily %0X\n",
+    Cpu->Signature,
+    Cpu->Stepping,
+    Cpu->Model,
+    Cpu->Family,
+    Cpu->Type,
+    Cpu->ExtModel,
+    Cpu->ExtFamily
+    ));
 
-      Cpu->Signature = CpuidEax;
-      Cpu->Stepping  = (UINT8)BITFIELD (CpuidEax, 3, 0);
-      Cpu->ExtModel  = (UINT8)BITFIELD (CpuidEax, 19, 16);
-      Cpu->Model     = ((UINT8)BITFIELD (CpuidEax, 7, 4) + (Cpu->ExtModel << 4));
-      Cpu->Family    = (UINT8)BITFIELD (CpuidEax, 11, 8);
-      Cpu->Type      = (UINT8)BITFIELD (CpuidEax, 13, 12);
-      Cpu->ExtFamily = (UINT8)BITFIELD (CpuidEax, 27, 20);
-      Cpu->Brand     = (UINT8)BITFIELD (CpuidEbx, 7, 0);
-      Cpu->Features  = QUAD (CpuidEcx, CpuidEdx);
+  if (*(UINT32 *)Cpu->Vendor == CPUID_VENDOR_INTEL) {
+    BrandInfix = AsciiStrStr (Cpu->BrandString, "Core");
+    if (BrandInfix != NULL) {
+      while ((*BrandInfix != ' ') && (*BrandInfix != '\0')) {
+        ++BrandInfix;
+      }
 
-    }
+      while (*BrandInfix == ' ') {
+        ++BrandInfix;
+      }
 
-    DEBUG ((DEBUG_INFO, "%a %a\n", "Found", Cpu->BrandString));
-
-    DEBUG ((
-      DEBUG_INFO,
-      "Signature %0X Stepping %0X Model %0X Family %0X Type %0X ExtModel %0X ExtFamily %0X\n",
-      Cpu->Signature,
-      Cpu->Stepping,
-      Cpu->Model,
-      Cpu->Family,
-      Cpu->Type,
-      Cpu->ExtModel,
-      Cpu->ExtFamily
-      ));
-
-    if (*(UINT32 *)Cpu->Vendor == CPUID_VENDOR_INTEL) {
-
-      BrandInfix = AsciiStrStr (Cpu->BrandString, "Core");
+      if (AsciiStrnCmp (BrandInfix, "i7", L_STR_LEN("i7")) == 0) {
+        Cpu->AppleMajorType = AppleProcessorMajorI7;
+      } else if (AsciiStrnCmp (BrandInfix, "i5", L_STR_LEN("i5")) == 0) {
+        Cpu->AppleMajorType = AppleProcessorMajorI5;
+      } else if (AsciiStrnCmp (BrandInfix, "i3", L_STR_LEN("i3")) == 0) {
+        Cpu->AppleMajorType = AppleProcessorMajorI3;
+      } else if (AsciiStrnCmp (BrandInfix, "i9", L_STR_LEN("i9")) == 0) {
+        Cpu->AppleMajorType = AppleProcessorMajorI9;
+      } else if (AsciiStrnCmp (BrandInfix, "m3", L_STR_LEN("m3")) == 0) {
+        Cpu->AppleMajorType = AppleProcessorMajorM3;
+      } else if (AsciiStrnCmp (BrandInfix, "m5", L_STR_LEN("m5")) == 0) {
+        Cpu->AppleMajorType = AppleProcessorMajorM5;
+      } else if (AsciiStrnCmp (BrandInfix, "m7", L_STR_LEN("m7")) == 0) {
+        Cpu->AppleMajorType = AppleProcessorMajorM7;
+      } else if (AsciiStrnCmp (BrandInfix, "M", L_STR_LEN("M")) == 0) {
+        Cpu->AppleMajorType = AppleProcessorMajorM;
+      } else if (AsciiStrnCmp (BrandInfix, "2 Duo", L_STR_LEN("2 Duo")) == 0) {
+        Cpu->AppleMajorType = AppleProcessorMajorCore2;
+      } else {
+        Cpu->AppleMajorType = AppleProcessorMajorCore;
+      }
+    } else {
+      BrandInfix = AsciiStrStr (Cpu->BrandString, "Xeon");
       if (BrandInfix != NULL) {
         while ((*BrandInfix != ' ') && (*BrandInfix != '\0')) {
           ++BrandInfix;
@@ -147,179 +170,133 @@ OcCpuScanProcessor (
           ++BrandInfix;
         }
 
-        if (AsciiStrnCmp (BrandInfix, "i7", L_STR_LEN("i7")) == 0) {
-          Cpu->AppleMajorType = AppleProcessorMajorI7;
-        } else if (AsciiStrnCmp (BrandInfix, "i5", L_STR_LEN("i5")) == 0) {
-          Cpu->AppleMajorType = AppleProcessorMajorI5;
-        } else if (AsciiStrnCmp (BrandInfix, "i3", L_STR_LEN("i3")) == 0) {
-          Cpu->AppleMajorType = AppleProcessorMajorI3;
-        } else if (AsciiStrnCmp (BrandInfix, "i9", L_STR_LEN("i9")) == 0) {
-          Cpu->AppleMajorType = AppleProcessorMajorI9;
-        } else if (AsciiStrnCmp (BrandInfix, "m3", L_STR_LEN("m3")) == 0) {
-          Cpu->AppleMajorType = AppleProcessorMajorM3;
-        } else if (AsciiStrnCmp (BrandInfix, "m5", L_STR_LEN("m5")) == 0) {
-          Cpu->AppleMajorType = AppleProcessorMajorM5;
-        } else if (AsciiStrnCmp (BrandInfix, "m7", L_STR_LEN("m7")) == 0) {
-          Cpu->AppleMajorType = AppleProcessorMajorM7;
-        } else if (AsciiStrnCmp (BrandInfix, "M", L_STR_LEN("M")) == 0) {
-          Cpu->AppleMajorType = AppleProcessorMajorM;
-        } else if (AsciiStrnCmp (BrandInfix, "2 Duo", L_STR_LEN("2 Duo")) == 0) {
-          Cpu->AppleMajorType = AppleProcessorMajorCore2;
+        if (AsciiStrnCmp (BrandInfix, "E5", L_STR_LEN("E5")) == 0) {
+          Cpu->AppleMajorType = AppleProcessorMajorXeonE5;
+        } else if (AsciiStrnCmp (BrandInfix, "W", L_STR_LEN("W")) == 0) {
+          Cpu->AppleMajorType = AppleProcessorMajorXeonW;
         } else {
-          Cpu->AppleMajorType = AppleProcessorMajorCore;
-        }
-      } else {
-        BrandInfix = AsciiStrStr (Cpu->BrandString, "Xeon");
-        if (BrandInfix != NULL) {
-          while ((*BrandInfix != ' ') && (*BrandInfix != '\0')) {
-            ++BrandInfix;
-          }
-
-          while (*BrandInfix == ' ') {
-            ++BrandInfix;
-          }
-
-          if (AsciiStrnCmp (BrandInfix, "E5", L_STR_LEN("E5")) == 0) {
-            Cpu->AppleMajorType = AppleProcessorMajorXeonE5;
-          } else if (AsciiStrnCmp (BrandInfix, "W", L_STR_LEN("W")) == 0) {
-            Cpu->AppleMajorType = AppleProcessorMajorXeonW;
-          } else {
-            Cpu->AppleMajorType = AppleProcessorMajorXeonNehalem;
-          }
+          Cpu->AppleMajorType = AppleProcessorMajorXeonNehalem;
         }
       }
+    }
 
-      Msr = AsmReadMsr64 (MSR_PKG_CST_CONFIG_CONTROL);
+    Msr = AsmReadMsr64 (MSR_PKG_CST_CONFIG_CONTROL);
 
-      if ((Cpu->Family == 0x06 && Cpu->Model >= 0x0c) ||
-          (Cpu->Family == 0x0f && Cpu->Model >= 0x03))
+    if ((Cpu->Family == 0x06 && Cpu->Model >= 0x0c) ||
+        (Cpu->Family == 0x0f && Cpu->Model >= 0x03))
+    {
+
+      Msr = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
+
+      if (Cpu->Model >= CPU_MODEL_NEHALEM) {
+        Cpu->CurBusRatio = (UINT8)BITFIELD(Msr, 15, 8);
+
+        Msr = AsmReadMsr64 (MSR_PLATFORM_INFO);
+
+        Cpu->MinBusRatio = (UINT8)(RShiftU64 (Msr, 40) & 0xFF);
+        Cpu->MaxBusRatio = (UINT8)(RShiftU64 (Msr, 8) & 0xFF);
+      } else {
+        Cpu->MaxBusRatio = (UINT8)(Msr >> 8) & 0x1f;
+
+        // Non-integer bus ratio for the max-multi
+        Cpu->MaxBusRatioDiv = (UINT8)(Msr >> 46) & 0x01;
+
+        // Non-integer bus ratio for the current-multi (undocumented)
+        //CurrDiv = (UINT8)(Msr >> 14) & 0x01;
+      }
+
+      if ((Cpu->Model != CPU_MODEL_NEHALEM_EX) &&
+          (Cpu->Model != CPU_MODEL_WESTMERE_EX))
       {
+        Msr = AsmReadMsr64 (MSR_TURBO_RATIO_LIMIT);
+        Cpu->TurboBusRatio1 = (UINT8)(RShiftU64 (Msr, MAX_RATIO_LIMIT_1C_OFFSET) & MAX_RATIO_LIMIT_MASK);
+        Cpu->TurboBusRatio2 = (UINT8)(RShiftU64 (Msr, MAX_RATIO_LIMIT_2C_OFFSET) & MAX_RATIO_LIMIT_MASK);
+        Cpu->TurboBusRatio3 = (UINT8)(RShiftU64 (Msr, MAX_RATIO_LIMIT_3C_OFFSET) & MAX_RATIO_LIMIT_MASK);
+        Cpu->TurboBusRatio4 = (UINT8)(RShiftU64 (Msr, MAX_RATIO_LIMIT_4C_OFFSET) & MAX_RATIO_LIMIT_MASK);
+      }
 
-        Msr = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
+      DEBUG ((
+        DEBUG_INFO,
+        "Ratio Min %d Max %d Current %d Turbo %d %d %d %d\n",
+        Cpu->MinBusRatio,
+        Cpu->MaxBusRatio,
+        Cpu->CurBusRatio,
+        Cpu->TurboBusRatio1,
+        Cpu->TurboBusRatio2,
+        Cpu->TurboBusRatio3,
+        Cpu->TurboBusRatio4
+        ));
 
-        if (Cpu->Model >= CPU_MODEL_NEHALEM) {
+      // SkyLake and later have an Always Running Timer
+      if (Cpu->Model >= CPU_MODEL_SKYLAKE) {
+        AsmCpuid (0x15, &CpuidEax, &CpuidEbx, &CpuidEcx, &CpuidEdx);
 
-          Cpu->CurBusRatio = (UINT8)BITFIELD(Msr, 15, 8);
+        if (CpuidEbx && CpuidEbx) {
 
-          Msr = AsmReadMsr64 (MSR_PLATFORM_INFO);
-
-          Cpu->MinBusRatio = (UINT8)(RShiftU64 (Msr, 40) & 0xFF);
-          Cpu->MaxBusRatio = (UINT8)(RShiftU64 (Msr, 8) & 0xFF);
-
-        } else {
-
-          Cpu->MaxBusRatio = (UINT8)(Msr >> 8) & 0x1f;
-
-          // Non-integer bus ratio for the max-multi
-          Cpu->MaxBusRatioDiv = (UINT8)(Msr >> 46) & 0x01;
-
-          // Non-integer bus ratio for the current-multi (undocumented)
-          //CurrDiv = (UINT8)(Msr >> 14) & 0x01;
-
-        }
-
-        if ((Cpu->Model != CPU_MODEL_NEHALEM_EX) &&
-            (Cpu->Model != CPU_MODEL_WESTMERE_EX))
-        {
-          Msr = AsmReadMsr64 (MSR_TURBO_RATIO_LIMIT);
-          Cpu->TurboBusRatio1 = (UINT8)(RShiftU64 (Msr, MAX_RATIO_LIMIT_1C_OFFSET) & MAX_RATIO_LIMIT_MASK);
-          Cpu->TurboBusRatio2 = (UINT8)(RShiftU64 (Msr, MAX_RATIO_LIMIT_2C_OFFSET) & MAX_RATIO_LIMIT_MASK);
-          Cpu->TurboBusRatio3 = (UINT8)(RShiftU64 (Msr, MAX_RATIO_LIMIT_3C_OFFSET) & MAX_RATIO_LIMIT_MASK);
-          Cpu->TurboBusRatio4 = (UINT8)(RShiftU64 (Msr, MAX_RATIO_LIMIT_4C_OFFSET) & MAX_RATIO_LIMIT_MASK);
-      	}
-
-      	DEBUG ((
-          DEBUG_INFO,
-          "Ratio Min %d Max %d Current %d Turbo %d %d %d %d\n",
-          Cpu->MinBusRatio,
-          Cpu->MaxBusRatio,
-          Cpu->CurBusRatio,
-          Cpu->TurboBusRatio1,
-          Cpu->TurboBusRatio2,
-          Cpu->TurboBusRatio3,
-          Cpu->TurboBusRatio4
-          ));
-      
-        // SkyLake and later have an Always Running Timer
-        if (Cpu->Model >= CPU_MODEL_SKYLAKE) {
-
-          AsmCpuid (0x15, &CpuidEax, &CpuidEbx, &CpuidEcx, &CpuidEdx);
-
-          if (CpuidEbx && CpuidEbx) {
-
-            Cpu->CPUFrequency = MultU64x32 (BASE_ART_CLOCK_SOURCE, (UINT32)DivU64x32 (CpuidEbx, CpuidEax));
-
-            DEBUG ((
-              DEBUG_INFO,
-              "%a %a %11lld %5dMHz %d * %d / %d = %ld\n",
-              "ART",
-              "Frequency",
-              Cpu->CPUFrequency,
-              DivU64x32 (Cpu->CPUFrequency, 1000000),
-              BASE_ART_CLOCK_SOURCE,
-              CpuidEbx,
-              CpuidEax,
-              Cpu->CPUFrequency
-              ));
-
-            Cpu->FSBFrequency = DivU64x32 (Cpu->CPUFrequency, Cpu->MaxBusRatio);
-
-          }
-        }
-
-        // Calculate the Tsc frequency
-        Cpu->TSCFrequency = GetPerformanceCounterProperties (NULL, NULL);
-
-        if (Cpu->CPUFrequency == 0) {
+          Cpu->CPUFrequency = MultU64x32 (BASE_ART_CLOCK_SOURCE, (UINT32)DivU64x32 (CpuidEbx, CpuidEax));
 
           DEBUG ((
             DEBUG_INFO,
-            "%a %a %11lld %5dMHz\n",
-            "TSC",
+            "%a %a %11lld %5dMHz %d * %d / %d = %ld\n",
+            "ART",
             "Frequency",
-            Cpu->TSCFrequency,
-            DivU64x32 (Cpu->TSCFrequency, 1000000)
+            Cpu->CPUFrequency,
+            DivU64x32 (Cpu->CPUFrequency, 1000000),
+            BASE_ART_CLOCK_SOURCE,
+            CpuidEbx,
+            CpuidEax,
+            Cpu->CPUFrequency
             ));
 
-          // Both checked to workaround virtual cpu
-          if ((Cpu->MinBusRatio > 0) &&
-          	  (Cpu->MaxBusRatio > Cpu->MinBusRatio))
-          {
-            Cpu->FSBFrequency = DivU64x32 (Cpu->TSCFrequency, Cpu->MaxBusRatio);
-            Cpu->CPUFrequency = MultU64x32 (Cpu->FSBFrequency, Cpu->MaxBusRatio);
-
-          } else {
-
-            Cpu->CPUFrequency = Cpu->TSCFrequency;
-            Cpu->FSBFrequency = 100000000;
-          }
-        }
-
-        DEBUG ((
-          DEBUG_INFO,
-          "%a %a %11lld %5dMHz\n",
-          "CPU",
-          "Frequency",
-          Cpu->CPUFrequency,
-          DivU64x32 (Cpu->CPUFrequency, 1000000)
-          ));
-
-        DEBUG ((
-          DEBUG_INFO,
-          "%a %a %11lld %5dMHz\n",
-          "FSB",
-          "Frequency",
-          Cpu->FSBFrequency,
-          DivU64x32 (Cpu->FSBFrequency, 1000000)
-          ));
-
+          Cpu->FSBFrequency = DivU64x32 (Cpu->CPUFrequency, Cpu->MaxBusRatio);
         }
       }
 
-    Status = EFI_SUCCESS;
+      // Calculate the Tsc frequency
+      Cpu->TSCFrequency = GetPerformanceCounterProperties (NULL, NULL);
+
+      if (Cpu->CPUFrequency == 0) {
+        DEBUG ((
+          DEBUG_INFO,
+          "%a %a %11lld %5dMHz\n",
+          "TSC",
+          "Frequency",
+          Cpu->TSCFrequency,
+          DivU64x32 (Cpu->TSCFrequency, 1000000)
+          ));
+
+        // Both checked to workaround virtual cpu
+        if ((Cpu->MinBusRatio > 0) &&
+            (Cpu->MaxBusRatio > Cpu->MinBusRatio))
+        {
+          Cpu->FSBFrequency = DivU64x32 (Cpu->TSCFrequency, Cpu->MaxBusRatio);
+          Cpu->CPUFrequency = MultU64x32 (Cpu->FSBFrequency, Cpu->MaxBusRatio);
+
+        } else {
+
+          Cpu->CPUFrequency = Cpu->TSCFrequency;
+          Cpu->FSBFrequency = 100000000;
+        }
+      }
+
+      DEBUG ((
+        DEBUG_INFO,
+        "%a %a %11lld %5dMHz\n",
+        "CPU",
+        "Frequency",
+        Cpu->CPUFrequency,
+        DivU64x32 (Cpu->CPUFrequency, 1000000)
+        ));
+
+      DEBUG ((
+        DEBUG_INFO,
+        "%a %a %11lld %5dMHz\n",
+        "FSB",
+        "Frequency",
+        Cpu->FSBFrequency,
+        DivU64x32 (Cpu->FSBFrequency, 1000000)
+        ));
+
+    }
   }
-
-  DEBUG_FUNCTION_RETURN (DEBUG_VERBOSE);
-
-  return Status;
 }

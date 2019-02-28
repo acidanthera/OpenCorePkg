@@ -800,12 +800,10 @@ XmlParseDocument (
   //
   // Initialize parser.
   //
-  XML_PARSER Parser = {
-    .Buffer = Buffer,
-    .Position = 0,
-    .Length = Length,
-    .Level = 0
-  };
+  XML_PARSER Parser;
+  ZeroMem (&Parser, sizeof (Parser));
+  Parser.Buffer = Buffer;
+  Parser.Length = Length;
 
   //
   // An empty buffer can never contain a valid document.
@@ -902,7 +900,7 @@ XmlEasyChild (
   VA_LIST   Arguments;
   XML_NODE  *Next;
   XML_NODE  *Child;
-  UINTN     Index;
+  UINT32    Index;
 
   VA_START (Arguments, ChildName);
 

@@ -66,8 +66,6 @@ OcFirmwarePasswordInstallProtocol (
 
   APPLE_FIRMWARE_PASSWORD_PRIVATE_DATA *Private = NULL;
 
-  DEBUG_FUNCTION_ENTRY (DEBUG_VERBOSE);
-
   Private = (APPLE_FIRMWARE_PASSWORD_PRIVATE_DATA *)AllocateZeroPool (sizeof(APPLE_FIRMWARE_PASSWORD_PRIVATE_DATA));
 
   if (Private == NULL) {
@@ -86,8 +84,6 @@ OcFirmwarePasswordInstallProtocol (
   if (EFI_ERROR(Status)) {
     FreePool (Private);
   }
-
-  DEBUG_FUNCTION_RETURN (DEBUG_VERBOSE);
 
   return Status;
 }
