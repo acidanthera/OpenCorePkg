@@ -12,8 +12,10 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef DEBUG_SMBIOS_H_
-#define DEBUG_SMBIOS_H_
+#ifndef DEBUG_SMBIOS_H
+#define DEBUG_SMBIOS_H
+
+#include <IndustryStandard/AppleSmBios.h>
 
 // TODO: Use PCD?
 #define LOG_SMBIOS
@@ -25,94 +27,8 @@
 #endif
 
 VOID
-SmbiosDebugGeneric (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-VOID
-SmbiosDebugBiosInformation (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-VOID
-SmbiosDebugSystemInformation (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-VOID
-SmbiosDebugBaseboardInformation (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-VOID
-SmbiosDebugSystemEnclosure (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-VOID
-SmbiosDebugProcessorInformation (
-  IN  SMBIOS_TABLE_ENTRY_POINT       *Smbios,
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-VOID
-SmbiosDebugCacheInformation (
+SmbiosDebugAnyStructure (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
   );
 
-VOID
-SmbiosDebugSystemPorts (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-VOID
-SmbiosDebugSystemSlots (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-VOID
-SmbiosDebugPhysicalMemoryArray (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-VOID
-SmbiosDebugMemoryDevice (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-VOID
-SmbiosDebugType19Device (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-VOID
-SmbiosDebugType20Device (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-VOID
-SmbiosDebugPortableBatteryDevice (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-VOID
-SmbiosDebugBootInformation (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-VOID
-SmbiosDebugAppleFirmwareVolume (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-VOID
-SmbiosDebugAppleProcessorType (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-VOID
-SmbiosDebugAppleProcessorSpeed (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
-  );
-
-#endif // DEBUG_SMBIOS_H_
+#endif // DEBUG_SMBIOS_H

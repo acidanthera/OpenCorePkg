@@ -24,8 +24,9 @@
 #include "DebugSmbios.h"
 #include "OcSmbiosInternal.h"
 
+//
 // String Conversion Lookup Table
-
+//
 GLOBAL_REMOVE_IF_UNREFERENCED CONST CHAR8 *SlotDataWidthStrings[] = {
   "",
   "Other",
@@ -44,6 +45,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED CONST CHAR8 *SlotDataWidthStrings[] = {
   "32X"
 };
 
+STATIC
 VOID
 SmbiosDebugGeneric (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
@@ -58,6 +60,7 @@ SmbiosDebugGeneric (
     ));
 }
 
+STATIC
 VOID
 SmbiosDebugBiosInformation (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
@@ -87,6 +90,7 @@ SmbiosDebugBiosInformation (
     ));
 }
 
+STATIC
 VOID
 SmbiosDebugSystemInformation (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
@@ -144,6 +148,7 @@ SmbiosDebugSystemInformation (
     ));
 }
 
+STATIC
 VOID
 SmbiosDebugBaseboardInformation (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
@@ -187,6 +192,7 @@ SmbiosDebugBaseboardInformation (
     ));
 }
 
+STATIC
 VOID
 SmbiosDebugSystemEnclosure (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
@@ -234,9 +240,9 @@ SmbiosDebugSystemEnclosure (
     ));
 }
 
+STATIC
 VOID
 SmbiosDebugProcessorInformation (
-  IN  SMBIOS_TABLE_ENTRY_POINT       *Smbios,
   IN  APPLE_SMBIOS_STRUCTURE_POINTER  Record
   )
 {
@@ -291,19 +297,15 @@ SmbiosDebugProcessorInformation (
     Record.Standard.Type4->ProcessorFamily
     ));
 
-  // Not present before 2.7 specifications
-  if (((Smbios->MajorVersion == 2) && (Smbios->MinorVersion >= 7)) ||
-       (Smbios->MajorVersion == 3))
-  {
-    DEBUG_SMBIOS ((
-      DEBUG_INFO,
-      " %-16a 0x%02X\n",
-      "Family2",
-      Record.Standard.Type4->ProcessorFamily2
-    ));
-  }
+  DEBUG_SMBIOS ((
+    DEBUG_INFO,
+    " %-16a 0x%02X\n",
+    "Family2",
+    Record.Standard.Type4->ProcessorFamily2
+  ));
 }
 
+STATIC
 VOID
 SmbiosDebugSystemPorts (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
@@ -347,6 +349,7 @@ SmbiosDebugSystemPorts (
     ));
 }
 
+STATIC
 VOID
 SmbiosDebugCacheInformation (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
@@ -383,6 +386,7 @@ SmbiosDebugCacheInformation (
     ));
 }
 
+STATIC
 VOID
 SmbiosDebugSystemSlots (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
@@ -433,6 +437,7 @@ SmbiosDebugSystemSlots (
     ));
 }
 
+STATIC
 VOID
 SmbiosDebugPhysicalMemoryArray (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
@@ -476,6 +481,7 @@ SmbiosDebugPhysicalMemoryArray (
     ));
 }
 
+STATIC
 VOID
 SmbiosDebugMemoryDevice (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
@@ -552,8 +558,9 @@ SmbiosDebugMemoryDevice (
     ));
 }
 
+STATIC
 VOID
-SmbiosDebugType19Device (
+SmbiosDebugMemoryMappedAddress (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
   )
 {
@@ -588,8 +595,9 @@ SmbiosDebugType19Device (
     ));
 }
 
+STATIC
 VOID
-SmbiosDebugType20Device (
+SmbiosDebugMemoryMappedDevice (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
   )
 {
@@ -645,6 +653,7 @@ SmbiosDebugType20Device (
     ));
 }
 
+STATIC
 VOID
 SmbiosDebugPortableBatteryDevice (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
@@ -695,6 +704,7 @@ SmbiosDebugPortableBatteryDevice (
     ));
 }
 
+STATIC
 VOID
 SmbiosDebugBootInformation (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
@@ -710,6 +720,7 @@ SmbiosDebugBootInformation (
     ));
 }
 
+STATIC
 VOID
 SmbiosDebugAppleFirmwareVolume (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
@@ -732,6 +743,7 @@ SmbiosDebugAppleFirmwareVolume (
     ));
 }
 
+STATIC
 VOID
 SmbiosDebugAppleProcessorType (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
@@ -747,6 +759,7 @@ SmbiosDebugAppleProcessorType (
     ));
 }
 
+STATIC
 VOID
 SmbiosDebugAppleProcessorSpeed (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
@@ -761,3 +774,49 @@ SmbiosDebugAppleProcessorSpeed (
     Record.Type132->ProcessorBusSpeed
     ));
 }
+
+VOID
+SmbiosDebugAnyStructure (
+  IN APPLE_SMBIOS_STRUCTURE_POINTER  Record
+  )
+{
+  switch (Record.Standard.Hdr->Type) {
+    case SMBIOS_TYPE_BIOS_INFORMATION:
+      return SmbiosDebugBiosInformation (Record);
+    case SMBIOS_TYPE_SYSTEM_INFORMATION:
+      return SmbiosDebugSystemInformation (Record);
+    case SMBIOS_TYPE_BASEBOARD_INFORMATION:
+      return SmbiosDebugBaseboardInformation (Record);
+    case SMBIOS_TYPE_SYSTEM_ENCLOSURE:
+      return SmbiosDebugSystemEnclosure (Record);
+    case SMBIOS_TYPE_PROCESSOR_INFORMATION:
+      return SmbiosDebugProcessorInformation (Record);
+    case SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION:
+      return SmbiosDebugSystemPorts (Record);
+    case SMBIOS_TYPE_CACHE_INFORMATION:
+      return SmbiosDebugCacheInformation (Record);
+    case SMBIOS_TYPE_SYSTEM_SLOTS:
+      return SmbiosDebugSystemSlots (Record);
+    case SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY:
+      return SmbiosDebugPhysicalMemoryArray (Record);
+    case SMBIOS_TYPE_MEMORY_DEVICE:
+      return SmbiosDebugMemoryDevice (Record);
+    case SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS:
+      return SmbiosDebugMemoryMappedAddress (Record);
+    case SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS:
+      return SmbiosDebugMemoryMappedDevice (Record);
+    case SMBIOS_TYPE_PORTABLE_BATTERY:
+      return SmbiosDebugPortableBatteryDevice (Record);
+    case SMBIOS_TYPE_SYSTEM_BOOT_INFORMATION:
+      return SmbiosDebugBootInformation (Record);
+    case APPLE_SMBIOS_TYPE_FIRMWARE_INFORMATION:
+      return SmbiosDebugAppleFirmwareVolume (Record);
+    case APPLE_SMBIOS_TYPE_PROCESSOR_TYPE:
+      return SmbiosDebugAppleProcessorType (Record);
+    case APPLE_SMBIOS_TYPE_PROCESSOR_BUS_SPEED:
+      return SmbiosDebugAppleProcessorSpeed (Record);
+    default:
+      return SmbiosDebugGeneric (Record);
+  }
+}
+

@@ -369,7 +369,7 @@ InternalSectionIsSane (
   FileSize = MachoGetFileSize (Context);
   Result   = OcOverflowAddU32 (
                 Section->Offset,
-                Section->Size,
+                (UINT32) Section->Size,
                 &TopOffset
                 );
   if (Result || (TopOffset > FileSize)) {

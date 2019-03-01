@@ -24,42 +24,19 @@
   #endif
 #endif
 
-#define DEBUG_CONSOLE  0x40000000
-
-#define EFI_FIELD_OFFSET(TYPE,Field) ((UINTN)(&(((TYPE *) 0)->Field)))
-
 // FIXME: Find EFI original decls
 
 #define EFI_MAX_PATH_LENGTH		0x200
 #define EFI_MAX_PATH_SIZE   	(EFI_MAX_PATH_LENGTH * sizeof (CHAR16))
 
-#define EFI_GUID_STRING_LENGTH	36
-
-#define KILO  (1000ULL)
-#define MEGA  (KILO * KILO)
-#define GIGA  (KILO * MEGA)
-#define TERA  (KILO * GIGA)
-#define PETA  (KILO * TERA)
-
 // PTR_OFFSET
 /// Adds Offset bytes to SourcePtr and returns new pointer as ReturnType.
 #define PTR_OFFSET(SourcePtr, Offset, ReturnType) ((ReturnType)(((UINT8 *)(UINTN)SourcePtr) + Offset))
-
-#define CALC_EFI_PCI_ADDRESS(Bus, Device, Function, Register)   \
-    ((UINT64) ((((UINTN) Bus) << 24) + (((UINTN) Device) << 16) + (((UINTN) Function) << 8) + ((UINTN) Register)))
-
-#define ROUND_WORD(x) ALIGN_VALUE ((UINTN)(x), sizeof (UINT16))
-#define ROUND_LONG(x) ALIGN_VALUE ((UINTN)(x), sizeof (UINT32))
-#define ROUND_PAGE(x) ALIGN_VALUE ((UINTN)(x), EFI_PAGE_SIZE)
 
 #define QUAD(hi, lo)    (((UINT64)(hi)) << 32 | (lo))
 #define BIT(n)          (1ULL << (n))
 #define BITMASK(h, l)   ((BIT (h) | (BIT (h) - 1)) & ~(BIT (l) - 1))
 #define BITFIELD(x,h,l) (((x) & BITMASK(h, l)) >> l)
-
-#ifndef ARRAY_SIZE
-#define ARRAY_SIZE(a) (sizeof (a) / sizeof (*(a)))
-#endif
 
 #define IS_DIGIT(a) (((a) >= '0') && ((a) <= '9'))
 #define IS_HEX(a)   (((a) >= 'a') && ((a) <= 'f'))
@@ -84,16 +61,5 @@
                  | ((((UINT64)(V)) >> 24) & 0x0000000000FF0000ULL)  \
                  | ((((UINT64)(V)) >> 40) & 0x000000000000FF00ULL)  \
                  | ((((UINT64)(V)) >> 56) & 0x00000000000000FFULL))
-
-#define DEEP_DEBUG
-#ifndef DEEP_DEBUG
-  #define DEBUG_FUNCTION_ENTRY(ErrorLevel)
-  #define DEBUG_FUNCTION_RETURN(ErrorLevel)
-#else
-  #define DEBUG_FUNCTION_ENTRY(ErrorLevel) \
-    DEBUG (((ErrorLevel), "%a: Started\n", FUNCTION_NAME))
-  #define DEBUG_FUNCTION_RETURN(ErrorLevel) \
-    DEBUG (((ErrorLevel), "%a: Finished\n", FUNCTION_NAME))
-#endif
 
 #endif // OPEN_CORE_MACROS_H_

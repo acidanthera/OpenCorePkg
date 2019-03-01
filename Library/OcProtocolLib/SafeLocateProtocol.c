@@ -20,6 +20,8 @@
 
 #include <Macros.h>
 
+//TODO: remove, note Registration is also broken.
+
 // SafeLocateProtocol
 /**
 

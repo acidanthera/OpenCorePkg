@@ -34,6 +34,12 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 #define OC_GLOBAL_STATIC_ASSERT(Expr, Message) _Static_assert (Expr, Message)
 #define OC_INLINE_STATIC_ASSERT(Expr, Message) _Static_assert (Expr, Message)
+#elif defined(_MSC_VER) && _MSC_VER >= 1600
+//
+// Starting from VS 2010 MSVC supports static_assert in both C and C++ modes.
+//
+#define OC_GLOBAL_STATIC_ASSERT(Expr, Message) static_assert (Expr, Message)
+#define OC_INLINE_STATIC_ASSERT(Expr, Message) static_assert (Expr, Message)
 #else
 //
 // For MSVC we implement static assertions via switch, as they do not have compile-time

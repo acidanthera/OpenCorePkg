@@ -22,7 +22,9 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcCpuLib.h>
+#include <Library/OcSmbiosLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcGuardLib.h>
 #include <Library/OcProtocolLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcVariableLib.h>
@@ -38,88 +40,78 @@
 #include <Macros.h>
 #include <ProcessorInfo.h>
 
-//FIXME: REMOVE
-#define APPLE_FIRMWARE_FEATURES_VARIABLE        "FirmwareFeatures"
-#define APPLE_FIRMWARE_FEATURES_MASK_VARIABLE   "FirmwareFeaturesMask"
+STATIC SMBIOS_TABLE_ENTRY_POINT        *mOriginalSmbios;
+STATIC SMBIOS_TABLE_3_0_ENTRY_POINT    *mOriginalSmbios3;
+STATIC APPLE_SMBIOS_STRUCTURE_POINTER  mOriginalTable;
+STATIC UINT32                          mOriginalTableSize;
 
-#define OPEN_CORE_BIOS_VERSION_VARIABLE          "BiosVersion"
-#define OPEN_CORE_BIOS_DATE_VARIABLE             "BiosDate"
-#define OPEN_CORE_PRODUCT_NAME_VARIABLE          "ProductName"
-#define OPEN_CORE_PRODUCT_FAMILY_VARIABLE        "ProductFamily"
-#define OPEN_CORE_SYSTEM_VERSION_VARIABLE        "SystemVersion"
-#define OPEN_CORE_SYSTEM_SERIAL_VARIABLE         "SystemSerial"
-#define OPEN_CORE_PRODUCT_ID_VARIABLE            "ProductId"
-#define OPEN_CORE_BOARD_VERSION_VARIABLE         "BoardVersion"
-#define OPEN_CORE_BASE_BOARD_SERIAL_VARIABLE     "BaseBoardSerial"
-#define OPEN_CORE_MANUFACTURER_VARIABLE          "Manufacturer"
-#define OPEN_CORE_PROCESSOR_SERIAL_VARIABLE      "ProcessorSerial"
+#define SMBIOS_OVERRIDE_STR(Table, Field, Original, Value, Index, Fallback, Hex) \
+  do { \
+    CONST CHAR8  *RealValue__ = (Value); \
+    if (RealValue__ == NULL && ((Original).Raw) != NULL && (Original).Raw + (Original).Standard.Hdr->Length \
+      >= ((UINT8 *)&((Original).Field) + sizeof (SMBIOS_TABLE_STRING))) { \
+      RealValue__ = SmbiosGetOriginalString ((Original), ((Original).Field)); \
+    } \
+    (((Table)->CurrentPtr).Field) = SmbiosOverrideString ( \
+      (Table), \
+      RealValue__ != NULL ? RealValue__ : (Fallback), \
+      (Index), \
+      (Hex) \
+      ); \
+  } while (0)
 
-#define OPEN_CORE_SYSTEM_SKU_VARIABLE            "SystemSKU"
-#define OPEN_CORE_BASE_BOARD_ASSET_TAG_VARIABLE  "BaseBoardAssetTag"
-#define OPEN_CORE_CHASSIS_ASSET_TAG_VARIABLE     "ChassisAssetTag"
+#define SMBIOS_OVERRIDE_S(Table, Field, Original, Value, Index, Fallback) \
+  SMBIOS_OVERRIDE_STR ((Table), Field, (Original), (Value), (Index), (Fallback), FALSE)
 
-#define OPEN_CORE_CPU_TYPE_VARIABLE              "CpuType"
-#define OPEN_CORE_HARDWARE_SIGNATURE_VARIABLE    "HardwareSignature"
-#define OPEN_CORE_HARDWARE_ADDRESS_VARIABLE      "HardwareAddress"
-#define OPEN_CORE_ENCLOSURE_TYPE_VARIABLE        "EnclosureType"
+#define SMBIOS_OVERRIDE_H(Table, Field, Original, Value, Index, Fallback) \
+  SMBIOS_OVERRIDE_STR ((Table), Field, (Original), (Value), (Index), (Fallback), TRUE)
 
-#define OPEN_CORE_FIRMWARE_VENDOR_VARIABLE       "FirmwareVendor"
-#define OPEN_CORE_FIRMWARE_REVISION_VARIABLE     "FirmwareRevision"
+#define SMBIOS_OVERRIDE_V(Table, Field, Original, Value, Fallback) \
+  do { \
+    if ((Value) != NULL) { \
+      CopyMem (&(((Table)->CurrentPtr).Field), (Value), sizeof ((((Table)->CurrentPtr).Field))); \
+    } else if ((Original).Raw != NULL && (Original).Raw + (Original).Standard.Hdr->Length \
+      >= ((UINT8 *)&((Original).Field) + sizeof ((((Table)->CurrentPtr).Field)))) { \
+      CopyMem (&(((Table)->CurrentPtr).Field), &((Original).Field), sizeof ((((Table)->CurrentPtr).Field))); \
+    } else if ((Fallback) != NULL) { \
+      CopyMem (&(((Table)->CurrentPtr).Field), (Fallback), sizeof ((((Table)->CurrentPtr).Field))); \
+    } else { \
+      /* No ZeroMem call as written area is guaranteed to be 0 */ \
+    } \
+  } while (0)
 
-EFI_GUID gOpenCoreOverridesGuid;
-
-
-SMBIOS_TABLE_ENTRY_POINT        *mSmbios;
-
-APPLE_SMBIOS_STRUCTURE_POINTER   mOriginal;
-APPLE_SMBIOS_STRUCTURE_POINTER   This;
-
-UINT16  mTableLength;
-UINT16  mMaxStructureSize;
-UINT16  mNumberOfSmbiosStructures;
-
-//
-typedef enum {
-  iMac            = 0x01,
-  MacAir          = 0x02,
-  MacMini         = 0x03,
-  MacBook         = 0x04,
-  MacBookPro      = 0x05,
-  MacPro          = 0x06
-} OC_MODEL_TYPE_DATA;
-
-// SmBiosFinaliseStruct
-/**
-
-  @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-  @param[in] Length                 Length of the table to finalise.
-
-  @retval
-**/
-VOID
-SmBiosFinaliseStruct (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle,
-  IN  UINTN           Length
+STATIC
+APPLE_SMBIOS_STRUCTURE_POINTER
+SmbiosGetOriginalTable (
+  IN  SMBIOS_TYPE   Type,
+  IN  UINT16        Index
   )
 {
-  if (Length > mMaxStructureSize) {
-    mMaxStructureSize = Length;
-  }
-
-  Length++;
-
-  mTableLength += Length;
-  mNumberOfSmbiosStructures++;
-
-  (*Handle)++;
-
-  *Table  += Length;
-
+  return SmbiosGetTableFromType (mOriginalTable, mOriginalTableSize, Type, Index);
 }
 
-// PatchBiosInformation
+STATIC
+UINT16
+SmbiosGetOriginalTableCount (
+  IN  SMBIOS_TYPE   Type
+  )
+{
+  return SmbiosGetTableCount (mOriginalTable, mOriginalTableSize, Type);
+}
+
+STATIC
+CONST CHAR8 *
+SmbiosGetOriginalString (
+  IN APPLE_SMBIOS_STRUCTURE_POINTER     Table,
+  IN SMBIOS_TABLE_STRING                String
+  )
+{
+  //
+  // TODO: check bounds!
+  //
+  return SmbiosGetString (Table, String);
+}
+
 /** Type 0
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
@@ -127,45 +119,42 @@ SmBiosFinaliseStruct (
 
   @retval
 **/
+STATIC
 VOID
 PatchBiosInformation (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle
+  IN OUT OC_SMBIOS_TABLE *Table,
+  IN     OC_SMBIOS_DATA  *Data
   )
 {
-  mOriginal = SmbiosGetTableFromType (mSmbios, SMBIOS_TYPE_BIOS_INFORMATION, 1);
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  UINT32                          MinLength;
+  UINT8                           StringIndex;
 
-  if (mOriginal.Raw != NULL) {
+  Original    = SmbiosGetOriginalTable (SMBIOS_TYPE_BIOS_INFORMATION, 1);
+  MinLength   = sizeof (*Original.Standard.Type0);
+  StringIndex = 0;
 
-    SMBIOS_TABLE_TYPE0   *p = (SMBIOS_TABLE_TYPE0 *)*(Table);
-
-    CHAR8   *Strings        = PTR_OFFSET(p, mOriginal.Standard.Type0->Hdr.Length, CHAR8 *);
-    UINT8   StringsIndex    = 0;
-
-    CopyMem (p, mOriginal.Standard.Type0, mOriginal.Standard.Type0->Hdr.Length);
-
-    p->Hdr.Handle           = *(Handle);
-
-    p->Vendor               = SmbiosSetOverrideString (&Strings, OPEN_CORE_MANUFACTURER_VARIABLE, &StringsIndex);
-    p->BiosVersion          = SmbiosSetOverrideString (&Strings, OPEN_CORE_BIOS_VERSION_VARIABLE, &StringsIndex);
-    p->BiosReleaseDate      = SmbiosSetOverrideString (&Strings, OPEN_CORE_BIOS_DATE_VARIABLE, &StringsIndex);
-
-    // ensure checks for IODeviceTree:/rom@0 or IODeviceTree:/rom@e0000 are met.
-    p->BiosSegment          = 0x0;
-
-    SmBiosFinaliseStruct (Table, Handle, ((UINTN)Strings - (UINTN)p));
-
-    DEBUG_CODE_BEGIN();
-
-    This.Raw = (UINT8 *)p;
-
-    SmbiosDebugBiosInformation (This);
-
-    DEBUG_CODE_END();
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_BIOS_INFORMATION, MinLength, 1))) {
+    return;
   }
+
+  SMBIOS_OVERRIDE_S (Table, Standard.Type0->Vendor, Original, Data->BIOSVendor, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type0->BiosVersion, Original, Data->BIOSVersion, &StringIndex, NULL);
+  //
+  // Leave BiosSegment as 0 to ensure checks for IODeviceTree:/rom@0 or IODeviceTree:/rom@e0000 are met.
+  //
+  SMBIOS_OVERRIDE_S (Table, Standard.Type0->BiosReleaseDate, Original, Data->BIOSReleaseDate, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type0->BiosSize, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type0->BiosCharacteristics, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type0->BIOSCharacteristicsExtensionBytes, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type0->SystemBiosMajorRelease, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type0->SystemBiosMinorRelease, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type0->EmbeddedControllerFirmwareMajorRelease, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type0->EmbeddedControllerFirmwareMinorRelease, Original, NULL, NULL);
+
+  SmbiosFinaliseStruct (Table);
 }
 
-// PatchSystemInformation
 /** Type 1
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
@@ -173,84 +162,37 @@ PatchBiosInformation (
 
   @retval
 **/
+STATIC
 VOID
 PatchSystemInformation (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle
+  IN OUT OC_SMBIOS_TABLE *Table,
+  IN     OC_SMBIOS_DATA  *Data
   )
 {
-  mOriginal = SmbiosGetTableFromType (mSmbios, SMBIOS_TYPE_SYSTEM_INFORMATION, 1);
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  UINT32                          MinLength;
+  UINT8                           StringIndex;
 
-  if (mOriginal.Raw != NULL) {
+  Original    = SmbiosGetOriginalTable (SMBIOS_TYPE_SYSTEM_INFORMATION, 1);
+  MinLength   = sizeof (*Original.Standard.Type1);
+  StringIndex = 0;
 
-    SMBIOS_TABLE_TYPE1  *p = (SMBIOS_TABLE_TYPE1 *)*(Table);
-
-    CHAR8   *Strings       = PTR_OFFSET(p, mOriginal.Standard.Type1->Hdr.Length, CHAR8 *);
-    UINT8   StringsIndex   = 0;
-
-    EFI_GUID  *PlatformUuid;
-    UINTN     PlatformUuidSize;
-
-    CopyMem (p, mOriginal.Standard.Type1, mOriginal.Standard.Type1->Hdr.Length);
-
-    p->Hdr.Handle    = *(Handle);
-
-    p->Manufacturer  = SmbiosSetOverrideString (&Strings, OPEN_CORE_MANUFACTURER_VARIABLE, &StringsIndex);
-    p->ProductName   = SmbiosSetOverrideString (&Strings, OPEN_CORE_PRODUCT_NAME_VARIABLE, &StringsIndex);
-    p->Version       = SmbiosSetOverrideString (&Strings, OPEN_CORE_SYSTEM_VERSION_VARIABLE, &StringsIndex);
-    p->SerialNumber  = SmbiosSetOverrideString (&Strings, OPEN_CORE_SYSTEM_SERIAL_VARIABLE, &StringsIndex);
-    p->SKUNumber     = SmbiosSetOverrideString (&Strings, OPEN_CORE_SYSTEM_SKU_VARIABLE, &StringsIndex);
-    p->Family        = SmbiosSetOverrideString (&Strings, OPEN_CORE_PRODUCT_FAMILY_VARIABLE, &StringsIndex);
-
-    PlatformUuidSize = 0;
-    PlatformUuid     = NULL;
-
-    OcGetVariable (
-      OPEN_CORE_HARDWARE_SIGNATURE_VARIABLE,
-      &gOpenCoreOverridesGuid,
-      (VOID **)&PlatformUuid,
-      &PlatformUuidSize
-      );
-
-    if (PlatformUuid != NULL) {
-      if (PlatformUuidSize != EFI_GUID_STRING_LENGTH) {
-
-        DEBUG ((
-          DEBUG_ERROR,
-          "Variable %a is of incorrect size should be %d, but is %d",
-          OPEN_CORE_HARDWARE_SIGNATURE_VARIABLE,
-          EFI_GUID_STRING_LENGTH,
-          PlatformUuidSize
-          ));
-
-      } else {
-
-        // Ensure User Expected Value
-        PlatformUuid->Data1 = SwapBytes32 (PlatformUuid->Data1);
-        PlatformUuid->Data2 = SwapBytes16 (PlatformUuid->Data2);
-        PlatformUuid->Data3 = SwapBytes16 (PlatformUuid->Data3);
-
-        OcAsciiStrToGuid ((CHAR8 *)(UINTN)PlatformUuid, &p->Uuid);
-
-      }
-
-      FreePool (PlatformUuid);
-
-    }
-
-    SmBiosFinaliseStruct (Table, Handle, ((UINTN)Strings - (UINTN)p));
-
-    DEBUG_CODE_BEGIN();
-
-    This.Raw = (UINT8 *)p;
-
-    SmbiosDebugSystemInformation (This);
-
-    DEBUG_CODE_END();
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_SYSTEM_INFORMATION, MinLength, 1))) {
+    return;
   }
+
+  SMBIOS_OVERRIDE_S (Table, Standard.Type1->Manufacturer, Original, Data->SystemManufacturer, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type1->ProductName, Original, Data->SystemProductName, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type1->Version, Original, Data->SystemVersion, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type1->SerialNumber, Original, Data->SystemSerialNumber, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type1->Uuid, Original, Data->SystemUUID, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type1->WakeUpType, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type1->SKUNumber, Original, Data->SystemSKUNumber, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type1->Family, Original, Data->SystemFamily, &StringIndex, NULL);
+
+  SmbiosFinaliseStruct (Table);
 }
 
-// PatchBaseboardInformation
 /** Type 2
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
@@ -258,64 +200,51 @@ PatchSystemInformation (
 
   @retval
 **/
+STATIC
 VOID
 PatchBaseboardInformation (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle,
-  IN  UINT8           MacModel
+  IN OUT OC_SMBIOS_TABLE *Table,
+  IN     OC_SMBIOS_DATA  *Data
   )
 {
-  mOriginal = SmbiosGetTableFromType (mSmbios, SMBIOS_TYPE_BASEBOARD_INFORMATION, 1);
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  UINT32                          MinLength;
+  UINT8                           StringIndex;
 
-  if (mOriginal.Raw != NULL) {
+  Original      = SmbiosGetOriginalTable (SMBIOS_TYPE_BASEBOARD_INFORMATION, 1);
+  MinLength     = sizeof (*Original.Standard.Type2);
+  StringIndex   = 0;
 
-    SMBIOS_TABLE_TYPE2  *p = (SMBIOS_TABLE_TYPE2 *)*(Table);
+  //
+  // Hack for EDK 2 not using flexible array members adding extra data at struct end.
+  //
+  MinLength -= sizeof (Original.Standard.Type2->ContainedObjectHandles[0]);
+  OC_INLINE_STATIC_ASSERT (
+    sizeof (Original.Standard.Type2->ContainedObjectHandles) == sizeof (UINT16),
+    "Please remove this hack, the structure should have been fixed by now."
+    );
 
-    CHAR8   *Strings       = PTR_OFFSET(p, mOriginal.Standard.Type2->Hdr.Length, CHAR8 *);
-    UINT8   StringsIndex   = 0;
-
-    CopyMem (p, mOriginal.Standard.Type2, mOriginal.Standard.Type2->Hdr.Length);
-
-    p->Hdr.Handle    = *(Handle);
-
-    // FIXME: This requires the type 2 structure to come next
-
-    p->ChassisHandle  = *(Handle) + 1;
-
-    p->Manufacturer   = SmbiosSetOverrideString (&Strings, OPEN_CORE_MANUFACTURER_VARIABLE, &StringsIndex);
-    p->ProductName    = SmbiosSetOverrideString (&Strings, OPEN_CORE_PRODUCT_ID_VARIABLE, &StringsIndex);
-
-    This.Raw = (UINT8 *)p;
-
-    if (MacModel == MacPro) {
-      p->SerialNumber = SmbiosSetOverrideString (&Strings, OPEN_CORE_PROCESSOR_SERIAL_VARIABLE, &StringsIndex);
-      p->BoardType    = BaseBoardTypeProcessorMemoryModule;
-
-      p->FeatureFlag.Removable = 1;
-
-    } else {
-      p->SerialNumber = SmbiosSetOverrideString (&Strings, OPEN_CORE_BASE_BOARD_SERIAL_VARIABLE, &StringsIndex);
-      p->BoardType    = BaseBoardTypeMotherBoard;
-    }
-
-    p->Version        = SmbiosSetOverrideString (&Strings, OPEN_CORE_BOARD_VERSION_VARIABLE, &StringsIndex);
-    p->AssetTag       = SmbiosSetOverrideString (&Strings, OPEN_CORE_BASE_BOARD_ASSET_TAG_VARIABLE, &StringsIndex);
-
-    p->LocationInChassis = SmbiosSetString (&Strings, "Part Component", &StringsIndex);
-
-    SmBiosFinaliseStruct (Table, Handle, ((UINTN)Strings - (UINTN)p));
-
-    DEBUG_CODE_BEGIN();
-
-    This.Raw = (UINT8 *)p;
-
-    SmbiosDebugBaseboardInformation (This);
-
-    DEBUG_CODE_END();
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_BASEBOARD_INFORMATION, MinLength, 1))) {
+    return;
   }
+
+  SMBIOS_OVERRIDE_S (Table, Standard.Type2->Manufacturer, Original, Data->BoardManufacturer, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type2->ProductName, Original, Data->BoardProduct, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type2->Version, Original, Data->BoardVersion, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type2->SerialNumber, Original, Data->BoardSerialNumber, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type2->AssetTag, Original, Data->BoardAssetTag, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type2->FeatureFlag, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type2->LocationInChassis, Original, Data->BoardLocationInChassis, &StringIndex, NULL);
+  Table->CurrentPtr.Standard.Type2->ChassisHandle = OcSmbiosSystemEnclosureHandle;
+  SMBIOS_OVERRIDE_V (Table, Standard.Type2->BoardType, Original, &Data->BoardType, NULL);
+
+  //
+  // Leave NumberOfContainedObjectHandles as 0, just like Apple does.
+  //
+
+  SmbiosFinaliseStruct (Table);
 }
 
-// PatchSystemEnclosure
 /** Type 3
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
@@ -323,229 +252,212 @@ PatchBaseboardInformation (
 
   @retval
 **/
+STATIC
 VOID
 PatchSystemEnclosure (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle,
-  IN  UINT8           MacModel
+  IN OUT OC_SMBIOS_TABLE *Table,
+  IN     OC_SMBIOS_DATA  *Data
   )
 {
-  EFI_STATUS Status;
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  UINT32                          MinLength;
+  UINT8                           StringIndex;
 
-  mOriginal = SmbiosGetTableFromType (mSmbios, SMBIOS_TYPE_SYSTEM_ENCLOSURE, 1);
+  Original      = SmbiosGetOriginalTable (SMBIOS_TYPE_SYSTEM_ENCLOSURE, 1);
+  MinLength     = sizeof (*Original.Standard.Type3);
+  StringIndex   = 0;
 
-  if (mOriginal.Raw != NULL) {
+  //
+  // Hack for EDK 2 not using flexible array members adding extra data at struct end.
+  //
+  MinLength -= sizeof (Original.Standard.Type3->ContainedElements[0]);
+  OC_INLINE_STATIC_ASSERT (
+    sizeof (Original.Standard.Type3->ContainedElements) == sizeof (UINT8)*3,
+    "Please remove this hack, the structure should have been fixed by now."
+    );
 
-    SMBIOS_TABLE_TYPE3  *p = (SMBIOS_TABLE_TYPE3 *)*(Table);
+  //
+  // Another hack for omitted SKUNumber after flexible array.
+  // Note, Apple just ignores this field and just writes Type3 as is.
+  //
+  MinLength += sizeof (SMBIOS_TABLE_STRING);
+  OC_INLINE_STATIC_ASSERT (
+    sizeof (*Original.Standard.Type3) == sizeof (UINT8) * 0x18,
+    "The structure has changed, please fix this up."
+    );
 
-    CHAR8   *Strings       = PTR_OFFSET(p, mOriginal.Standard.Type3->Hdr.Length, CHAR8 *);
-    UINT8   StringsIndex   = 0;
-
-    UINT8   *Type;
-    UINTN   Length;
-
-    CopyMem (p, mOriginal.Standard.Type3, mOriginal.Standard.Type3->Hdr.Length);
-
-    p->Hdr.Handle   = *(Handle);
-
-    p->Manufacturer = SmbiosSetOverrideString (&Strings, OPEN_CORE_MANUFACTURER_VARIABLE, &StringsIndex);
-    p->Version      = SmbiosSetOverrideString (&Strings, OPEN_CORE_PRODUCT_NAME_VARIABLE, &StringsIndex);
-    p->SerialNumber = SmbiosSetOverrideString (&Strings, OPEN_CORE_SYSTEM_SERIAL_VARIABLE, &StringsIndex);
-    p->AssetTag     = SmbiosSetOverrideString (&Strings, OPEN_CORE_CHASSIS_ASSET_TAG_VARIABLE, &StringsIndex);
-
-    Length = sizeof(p->Type);
-    Type   = &p->Type;
-
-    Status = OcGetVariable (
-               OPEN_CORE_ENCLOSURE_TYPE_VARIABLE,
-               &gOpenCoreOverridesGuid,
-               (VOID **)&Type,
-               &Length
-               );
-
-    if ((EFI_ERROR (Status)) && (Length != sizeof(p->Type))) {
-      if (MacModel == MacPro) {
-        p->Type = MiscChassisTypeTower;
-      } else {
-        p->Type = MiscChassisTypeDeskTop;
-      }
-    }
-
-    {
-      UINTN   Offset     = MultU64x32 (p->ContainedElementCount, p->ContainedElementRecordLength) + 0x15;
-      UINT8   *SkuNumber = PTR_OFFSET(p, Offset, UINT8 *);
-
-      *SkuNumber = SmbiosSetString (
-                     &Strings,
-                     SmbiosGetString (mOriginal, *(PTR_OFFSET(mOriginal.Raw, Offset, UINT8 *))),
-                     &StringsIndex
-                     );
-
-
-    }
-
-    SmBiosFinaliseStruct (Table, Handle, ((UINTN)Strings - (UINTN)p));
-
-    DEBUG_CODE_BEGIN();
-
-    This.Raw = (UINT8 *)p;
-
-    SmbiosDebugSystemEnclosure (This);
-
-    DEBUG_CODE_END();
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_SYSTEM_ENCLOSURE, MinLength, 1))) {
+    return;
   }
+
+  SMBIOS_OVERRIDE_S (Table, Standard.Type3->Manufacturer, Original, Data->ChassisManufacturer, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type3->Type, Original, &Data->ChassisType, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type3->Version, Original, Data->ChassisVersion, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type3->SerialNumber, Original, Data->ChassisSerialNumber, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type3->AssetTag, Original, Data->ChassisAssetTag, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type3->BootupState, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type3->PowerSupplyState, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type3->ThermalState, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type3->SecurityStatus, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type3->OemDefined, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type3->Height, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type3->NumberofPowerCords, Original, NULL, NULL);
+
+  //
+  // Leave ContainedElementCount and ContainedElementRecordLength 0.
+  // Also do not assign anything to SKUNumber.
+  //
+
+  SmbiosFinaliseStruct (Table);
 }
 
-// PatchProcessorInformation
 /** Type 4
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
   @param[in] Handle                 Pointer to tocation containing the current handle value.
-  @param[in] L1CacheHandle          The discovered L1 cache handle value.
-  @param[in] L2CacheHandle          The discovered L2 cache handle value.
-  @param[in] L2CacheHandle          The discovered L3 cache handle value.
   @param[in] CpuInfo                Pointer to a valid pico cpu info structure.
 
   @retval
 **/
+STATIC
 VOID
 PatchProcessorInformation (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle,
-  IN  SMBIOS_HANDLE   L1CacheHandle,
-  IN  SMBIOS_HANDLE   L2CacheHandle,
-  IN  SMBIOS_HANDLE   L3CacheHandle,
-  IN  CPU_INFO        *CpuInfo
+  IN OUT OC_SMBIOS_TABLE *Table,
+  IN     OC_SMBIOS_DATA  *Data,
+  IN     CPU_INFO        *CpuInfo
   )
 {
-  mOriginal = SmbiosGetTableFromType (mSmbios, SMBIOS_TYPE_PROCESSOR_INFORMATION, 1);
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  UINT32                          MinLength;
+  UINT8                           StringIndex;
+  UINT8                           TmpCount;
 
-  if (mOriginal.Raw != NULL) {
+  Original      = SmbiosGetOriginalTable (SMBIOS_TYPE_PROCESSOR_INFORMATION, 1);
+  MinLength     = sizeof (*Original.Standard.Type4);
+  StringIndex   = 0;
 
-    SMBIOS_TABLE_TYPE4  *p = (SMBIOS_TABLE_TYPE4 *)*(Table);
-
-    CHAR8   *Strings       = PTR_OFFSET(p, mOriginal.Standard.Type4->Hdr.Length, CHAR8 *);
-    UINT8   StringsIndex   = 0;
-
-    CopyMem (p, mOriginal.Standard.Type4, mOriginal.Standard.Type4->Hdr.Length);
-
-    p->Hdr.Handle = *(Handle);
-
-    p->Socket = SmbiosSetString (
-                  &Strings,
-                  SmbiosGetString (mOriginal, mOriginal.Standard.Type4->Socket),
-                  &StringsIndex
-                  );
-
-    p->ProcessorManufacture = SmbiosSetString (
-                                &Strings,
-                                SmbiosGetString (mOriginal, mOriginal.Standard.Type4->ProcessorManufacture),
-                                &StringsIndex
-                                );
-
-    p->ProcessorVersion     = SmbiosSetString (&Strings, CpuInfo->BrandString, &StringsIndex);
-    p->AssetTag             = p->ProcessorVersion;
-
-    // Models newer than Sandybridge require quad pumped bus value instead of a front side bus value.
-    if (CpuInfo->Model < CPU_MODEL_SANDYBRIDGE) {
-      p->ExternalClock = (UINT16)DivU64x32 (CpuInfo->FSBFrequency, 1000000);
-    } else {
-      p->ExternalClock = 0x19;
-    }
-
-    p->MaxSpeed = (UINT16)DivU64x32 (CpuInfo->CPUFrequency, 1000000);
-
-    if ((p->MaxSpeed % 100) != 0) {
-      p->MaxSpeed = (UINT16)(((p->MaxSpeed + 50) / 100) * 100);
-    }
-
-    p->CurrentSpeed  = p->MaxSpeed;
-
-    p->L1CacheHandle = L1CacheHandle;
-    p->L2CacheHandle = L2CacheHandle;
-    p->L3CacheHandle = L3CacheHandle;
-
-    //
-
-    p->SerialNumber  = SmbiosSetString (&Strings, "Unavailable" , &StringsIndex);
-    p->PartNumber    = SmbiosSetString (&Strings, "Unavailable" , &StringsIndex);
-
-    SmBiosFinaliseStruct (Table, Handle, ((UINTN)Strings - (UINTN)p));
-
-    DEBUG_CODE_BEGIN();
-
-    This.Raw = (UINT8 *)p;
-
-    SmbiosDebugProcessorInformation (mSmbios, This);
-
-    DEBUG_CODE_END();
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_PROCESSOR_INFORMATION, MinLength, 1))) {
+    return;
   }
+
+  SMBIOS_OVERRIDE_S (Table, Standard.Type4->Socket, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorType, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorFamily, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type4->ProcessorManufacture, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorId, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type4->ProcessorVersion, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type4->Voltage, Original, NULL, NULL);
+  //
+  // Models newer than Sandybridge require quad pumped bus value instead of a front side bus value.
+  //
+  if (CpuInfo->Model >= CPU_MODEL_SANDYBRIDGE) {
+    Table->CurrentPtr.Standard.Type4->ExternalClock = OC_CPU_SNB_QPB_CLOCK;
+  } else {
+    Table->CurrentPtr.Standard.Type4->ExternalClock = (UINT16) DivU64x32 (CpuInfo->FSBFrequency, 1000000);
+  }
+
+  Table->CurrentPtr.Standard.Type4->MaxSpeed = (UINT16) DivU64x32 (CpuInfo->CPUFrequency, 1000000);
+  if (Table->CurrentPtr.Standard.Type4->MaxSpeed % 100 != 0) {
+    Table->CurrentPtr.Standard.Type4->MaxSpeed = (UINT16) (((Table->CurrentPtr.Standard.Type4->MaxSpeed + 50) / 100) * 100);
+  }
+
+  Table->CurrentPtr.Standard.Type4->CurrentSpeed  = Table->CurrentPtr.Standard.Type4->MaxSpeed;
+
+  SMBIOS_OVERRIDE_V (Table, Standard.Type4->Status, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorUpgrade, Original, NULL, NULL);
+
+  Table->CurrentPtr.Standard.Type4->L1CacheHandle = OcSmbiosL1CacheHandle;
+  Table->CurrentPtr.Standard.Type4->L2CacheHandle = OcSmbiosL2CacheHandle;
+  Table->CurrentPtr.Standard.Type4->L3CacheHandle = OcSmbiosL3CacheHandle;
+
+  SMBIOS_OVERRIDE_S (Table, Standard.Type4->SerialNumber, Original, NULL, &StringIndex, NULL);
+  //
+  // Most bootloaders set this to ProcessorVersion, yet Apple does not care and has UNKNOWN.
+  //
+  SMBIOS_OVERRIDE_S (Table, Standard.Type4->AssetTag, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type4->PartNumber, Original, NULL, &StringIndex, NULL);
+
+  TmpCount = (UINT8) (CpuInfo->CoreCount < 256 ? CpuInfo->CoreCount : 0xFF);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type4->CoreCount, Original, NULL, &TmpCount);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type4->EnabledCoreCount, Original, NULL, &TmpCount);
+  TmpCount = (UINT8) (CpuInfo->ThreadCount < 256 ? CpuInfo->ThreadCount : 0xFF);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type4->ThreadCount, Original, NULL, &TmpCount);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorCharacteristics, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorFamily2, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type4->CoreCount2, Original, NULL, &CpuInfo->CoreCount);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type4->EnabledCoreCount2, Original, NULL, &CpuInfo->CoreCount);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type4->ThreadCount2, Original, NULL, &CpuInfo->ThreadCount);
+
+  SmbiosFinaliseStruct (Table);
 }
 
-// PatchCacheInformation
 /** Type 7
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
   @param[in] Handle                 Pointer to tocation containing the current handle value.
-  @param[in] L1CacheHandle          Pointer to location to store the discovered L1 cache handle value.
-  @param[in] L2CacheHandle          Pointer to location to store the discovered L2 cache handle value.
-  @param[in] L3CacheHandle          Pointer to location to store the discovered L3 cache handle value.
 
   @retval
 **/
+STATIC
 VOID
 PatchCacheInformation (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle,
-  OUT SMBIOS_HANDLE   *L1CacheHandle,
-  OUT SMBIOS_HANDLE   *L2CacheHandle,
-  OUT SMBIOS_HANDLE   *L3CacheHandle
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data
   )
 {
-  APPLE_SMBIOS_STRUCTURE_POINTER  OriginalProcessor;
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  UINT16                          NumberEntries;
+  UINT16                          EntryNo;
+  UINT32                          MinLength;
+  UINT8                           StringIndex;
+  UINT16                          CacheLevel;
+  BOOLEAN                         CacheLevels[3];
 
-  UINT8  NumberCacheEntries;
-  UINT8  CacheEntryNo;
+  ZeroMem (CacheLevels, sizeof (CacheLevels));
 
-  OriginalProcessor  = SmbiosGetTableFromType (mSmbios, SMBIOS_TYPE_PROCESSOR_INFORMATION, 1);
-  NumberCacheEntries = SmbiosGetTableCount (mSmbios, SMBIOS_TYPE_CACHE_INFORMATION);
+  NumberEntries = SmbiosGetOriginalTableCount (SMBIOS_TYPE_CACHE_INFORMATION);
 
-  for (CacheEntryNo = 1; CacheEntryNo <= NumberCacheEntries; CacheEntryNo++) {
-
-    mOriginal = SmbiosGetTableFromType (mSmbios, SMBIOS_TYPE_CACHE_INFORMATION, CacheEntryNo);
-
-    if (mOriginal.Raw != NULL) {
-
-      SMBIOS_TABLE_TYPE7  *p = (SMBIOS_TABLE_TYPE7 *)*(Table);
-      UINTN      TableLength = SmbiosGetTableLength (mOriginal);
-
-      CopyMem (p, mOriginal.Standard.Type7, TableLength);
-
-      p->Hdr.Handle = *(Handle);
-
-      // Use the original type 4 cache handles to set correct new handles for type 4 creation.
-      if (mOriginal.Standard.Type7->Hdr.Handle == OriginalProcessor.Standard.Type4->L1CacheHandle) {
-        *L1CacheHandle = p->Hdr.Handle;
-      } else if (mOriginal.Standard.Type7->Hdr.Handle == OriginalProcessor.Standard.Type4->L2CacheHandle) {
-        *L2CacheHandle = p->Hdr.Handle;
-      } else if (mOriginal.Standard.Type7->Hdr.Handle == OriginalProcessor.Standard.Type4->L3CacheHandle) {
-        *L3CacheHandle = p->Hdr.Handle;
-      }
-
-      SmBiosFinaliseStruct (Table, Handle, --TableLength);
-
-      DEBUG_CODE_BEGIN();
-
-      This.Raw = (UINT8 *)p;
-
-      SmbiosDebugCacheInformation (This);
-
-      DEBUG_CODE_END();
+  for (EntryNo = 1; EntryNo <= NumberEntries; EntryNo++) {
+    Original = SmbiosGetOriginalTable (SMBIOS_TYPE_CACHE_INFORMATION, EntryNo);
+    if (Original.Raw == NULL) {
+      continue;
     }
+
+    //
+    // Check if already done with this cache type.
+    // Only support L1 to L3 caches.
+    //
+    CacheLevel = Original.Standard.Type7->CacheConfiguration & 7U;
+    if (CacheLevel <= 2 && !CacheLevels[CacheLevel]) {
+      CacheLevels[CacheLevel] = TRUE;
+    } else {
+      continue;
+    }
+
+    MinLength     = sizeof (*Original.Standard.Type7);
+    StringIndex   = 0;
+
+    if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_CACHE_INFORMATION, MinLength, CacheLevel+1))) {
+      continue;
+    }
+
+    SMBIOS_OVERRIDE_S (Table, Standard.Type7->SocketDesignation, Original, NULL, &StringIndex, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type7->CacheConfiguration, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type7->MaximumCacheSize, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type7->InstalledSize, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type7->SupportedSRAMType, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type7->CurrentSRAMType, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type7->CacheSpeed, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type7->ErrorCorrectionType, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type7->SystemCacheType, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type7->Associativity, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type7->MaximumCacheSize2, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type7->InstalledSize2, Original, NULL, NULL);
+
+    SmbiosFinaliseStruct (Table);
   }
 }
 
-// PatchSystemPorts
 /** Type 8
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
@@ -553,45 +465,44 @@ PatchCacheInformation (
 
   @retval
 **/
+STATIC
 VOID
 PatchSystemPorts (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data
   )
 {
-  UINT8  NumberPortEntries;
-  UINT8  PortNo;
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  UINT16                          NumberEntries;
+  UINT16                          EntryNo;
+  UINT32                          MinLength;
+  UINT8                           StringIndex;
 
-  NumberPortEntries = SmbiosGetTableCount (mSmbios, SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION);
+  NumberEntries = SmbiosGetOriginalTableCount (SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION);
 
-  for (PortNo = 1; PortNo <= NumberPortEntries; PortNo++) {
-
-    mOriginal = SmbiosGetTableFromType (mSmbios, SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION, PortNo);
-
-    if (mOriginal.Raw != NULL) {
-
-      SMBIOS_TABLE_TYPE8  *p = (SMBIOS_TABLE_TYPE8 *)*(Table);
-
-      UINTN           Length = SmbiosGetTableLength (mOriginal);
-
-      CopyMem (p, mOriginal.Standard.Type8, Length);
-
-      p->Hdr.Handle = *(Handle);
-
-      SmBiosFinaliseStruct (Table, Handle, --Length);
-
-      DEBUG_CODE_BEGIN();
-
-      This.Raw = (UINT8 *)p;
-
-      SmbiosDebugSystemPorts (This);
-
-      DEBUG_CODE_END();
+  for (EntryNo = 1; EntryNo <= NumberEntries; EntryNo++) {
+    Original = SmbiosGetOriginalTable (SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION, EntryNo);
+    if (Original.Raw == NULL) {
+      continue;
     }
+
+    MinLength     = sizeof (*Original.Standard.Type8);
+    StringIndex   = 0;
+
+    if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION, MinLength, EntryNo))) {
+      continue;
+    }
+
+    SMBIOS_OVERRIDE_S (Table, Standard.Type8->InternalReferenceDesignator, Original, NULL, &StringIndex, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type8->InternalConnectorType, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_S (Table, Standard.Type8->ExternalReferenceDesignator, Original, NULL, &StringIndex, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type8->ExternalConnectorType, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type8->PortType, Original, NULL, NULL);
+
+    SmbiosFinaliseStruct (Table);
   }
 }
 
-// PatchSystemSlots
 /** Type 9
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
@@ -599,166 +510,166 @@ PatchSystemPorts (
 
   @retval
 **/
+STATIC
 VOID
 PatchSystemSlots (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data
   )
 {
-  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL *PciRootBridgeIo;
-  EFI_STATUS  Status;
+  APPLE_SMBIOS_STRUCTURE_POINTER   Original;
+  UINT16                           NumberEntries;
+  UINT16                           EntryNo;
+  UINT32                           MinLength;
+  UINT8                            StringIndex;
+  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL  *PciRootBridgeIo;
+  EFI_STATUS                       Status;
+  UINT64                           PciAddress;
+  UINT8                            SecSubBus;
+  UINT16                           ClassCode;
+  CONST CHAR8                      *SlotDesignation;
 
-  UINT8  NumberSlotEntries;
-  UINT8  SlotNo;
+  Status = gBS->LocateProtocol (
+    &gEfiPciRootBridgeIoProtocolGuid,
+    NULL,
+    (VOID **) &PciRootBridgeIo
+    );
+  if (EFI_ERROR (Status)) {
+    PciRootBridgeIo = NULL;
+  }
 
-  PciRootBridgeIo = NULL;
+  NumberEntries = SmbiosGetOriginalTableCount (SMBIOS_TYPE_SYSTEM_SLOTS);
 
-  Status          = SafeLocateProtocol (
-                      &gEfiPciRootBridgeIoProtocolGuid,
-                      NULL,
-                      (VOID **)&PciRootBridgeIo
-                      );
+  for (EntryNo = 1; EntryNo <= NumberEntries; EntryNo++) {
+    Original = SmbiosGetOriginalTable (SMBIOS_TYPE_SYSTEM_SLOTS, EntryNo);
+    if (Original.Raw == NULL) {
+      continue;
+    }
 
-  NumberSlotEntries = SmbiosGetTableCount (mSmbios, SMBIOS_TYPE_SYSTEM_SLOTS);
+    MinLength     = sizeof (*Original.Standard.Type9);
+    StringIndex   = 0;
 
-  for (SlotNo = 1; SlotNo <= NumberSlotEntries; SlotNo++) {
+    if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_SYSTEM_SLOTS, MinLength, EntryNo))) {
+      continue;
+    }
 
-    mOriginal = SmbiosGetTableFromType (mSmbios, SMBIOS_TYPE_SYSTEM_SLOTS, SlotNo);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type9->SlotType, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type9->SlotDataBusWidth, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type9->SlotLength, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type9->SlotID, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type9->SlotType, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type9->SlotCharacteristics1, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type9->SlotCharacteristics2, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type9->SegmentGroupNum, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type9->BusNum, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type9->DevFuncNum, Original, NULL, NULL);
 
-    if (mOriginal.Raw != NULL) {
+    //
+    // Correct SlotDesignation and CurrentUsage if PCI protocol is available.
+    //
 
-      SMBIOS_TABLE_TYPE9  *p   = (SMBIOS_TABLE_TYPE9 *)*(Table);
-      CHAR8   *Strings         = PTR_OFFSET(p, mOriginal.Standard.Type9->Hdr.Length, CHAR8 *);
-      UINT8   StringsIndex     = 0;
+    if (PciRootBridgeIo == NULL) {
+      SMBIOS_OVERRIDE_S (Table, Standard.Type9->SlotDesignation, Original, NULL, &StringIndex, NULL);
+      SMBIOS_OVERRIDE_V (Table, Standard.Type9->CurrentUsage, Original, NULL, NULL);
+    } else {
+      SlotDesignation = NULL;
+      Table->CurrentPtr.Standard.Type9->CurrentUsage = SlotUsageAvailable;
 
-      CHAR8   *SlotDesignation;
-      UINT64  PciAddress;
-
-      CopyMem (p, mOriginal.Standard.Type9, mOriginal.Standard.Type9->Hdr.Length);
-
-      p->Hdr.Handle = *(Handle);
-
-      // Correct firmware data
-      if (mOriginal.Standard.Type9->BusNum != 0) {
-        PciAddress = CALC_EFI_PCI_ADDRESS(BITFIELD(mOriginal.Standard.Type9->DevFuncNum, 3, 7),
-                                          mOriginal.Standard.Type9->BusNum,
-                                          BITFIELD(mOriginal.Standard.Type9->DevFuncNum, 2, 0),
-                                          0);
+      if (Table->CurrentPtr.Standard.Type9->BusNum != 0) {
+        PciAddress = EFI_PCI_ADDRESS (
+          BITFIELD (Table->CurrentPtr.Standard.Type9->DevFuncNum, 3, 7),
+          Table->CurrentPtr.Standard.Type9->BusNum,
+          BITFIELD (Table->CurrentPtr.Standard.Type9->DevFuncNum, 2, 0),
+          0
+          );
       } else {
-        PciAddress = CALC_EFI_PCI_ADDRESS(mOriginal.Standard.Type9->BusNum,
-                                          BITFIELD(mOriginal.Standard.Type9->DevFuncNum, 3, 7),
-                                          BITFIELD(mOriginal.Standard.Type9->DevFuncNum, 2, 0),
-                                          0);
+        PciAddress = EFI_PCI_ADDRESS (
+          Table->CurrentPtr.Standard.Type9->BusNum,
+          BITFIELD (Table->CurrentPtr.Standard.Type9->DevFuncNum, 3, 7),
+          BITFIELD (Table->CurrentPtr.Standard.Type9->DevFuncNum, 2, 0),
+          0
+          );
       }
 
-      SlotDesignation = NULL;
-      p->CurrentUsage = SlotUsageAvailable;
+      SecSubBus = MAX_UINT8;
+      ClassCode = MAX_UINT16;
+      Status = PciRootBridgeIo->Pci.Read (
+        PciRootBridgeIo,
+        EfiPciWidthUint8,
+        PciAddress + PCI_BRIDGE_SECONDARY_BUS_REGISTER_OFFSET,
+        1,
+        &SecSubBus
+        );
 
-      if (!EFI_ERROR (Status)) {
+      if (!EFI_ERROR (Status) && SecSubBus != MAX_UINT8) {
+        Status = PciRootBridgeIo->Pci.Read (
+          PciRootBridgeIo,
+          EfiPciWidthUint16,
+          EFI_PCI_ADDRESS (SecSubBus, 0, 0, 0) + 10,
+          1,
+          &ClassCode
+          );
+      }
 
-        UINT8     SecSubBus = MAX_UINT8;
-
-        PciRootBridgeIo->Pci.Read (
-                               PciRootBridgeIo,
-                               EfiPciWidthUint8,
-                               (PciAddress + PCI_BRIDGE_SECONDARY_BUS_REGISTER_OFFSET),
-                               1,
-                               &SecSubBus
-                               );
-
-        if (SecSubBus != MAX_UINT8) {
-
-          UINT16  ClassCode = MAX_UINT16;
-
-          PciRootBridgeIo->Pci.Read (
-                                 PciRootBridgeIo,
-                                 EfiPciWidthUint16,
-                                 CALC_EFI_PCI_ADDRESS (SecSubBus, 0, 0, 0) + 10,
-                                 1,
-                                 &ClassCode
-                                 );
-
-          if (ClassCode != MAX_UINT16) {
-            p->CurrentUsage = SlotUsageInUse;
-            if (ClassCode == 0x0280) {
-              SlotDesignation = "AirPort";
-            }
-            // FIXME: Expand checks since not all nvme uses m.2 slot
-            if (ClassCode == 0x0108) {
-              SlotDesignation = "M.2";
-            }
-          }
+      if (!EFI_ERROR (Status) && ClassCode != MAX_UINT16) {
+        Table->CurrentPtr.Standard.Type9->CurrentUsage = SlotUsageAvailable;
+        if (ClassCode == 0x0280) {
+          SlotDesignation = "AirPort";
+        } else if (ClassCode == 0x0108) {
+          //
+          // FIXME: Expand checks since not all nvme uses m.2 slot
+          //
+          SlotDesignation = "M.2";
         }
       }
 
-      if (SlotDesignation == NULL) {
-        SlotDesignation = SmbiosGetString (mOriginal, mOriginal.Standard.Type9->SlotDesignation);
-      }
-
-      p->SlotDesignation = SmbiosSetString (
-                             &Strings,
-                             SlotDesignation,
-                             &StringsIndex
-                             );
-
-      SmBiosFinaliseStruct (Table, Handle, ((UINTN)Strings - (UINTN)p));
-
-      DEBUG_CODE_BEGIN();
-
-      This.Raw = (UINT8 *)p;
-
-      SmbiosDebugSystemSlots (This);
-
-      DEBUG_CODE_END();
+      SMBIOS_OVERRIDE_S (Table, Standard.Type9->SlotDesignation, Original, SlotDesignation, &StringIndex, NULL);
     }
+
+    SmbiosFinaliseStruct (Table);
   }
 }
 
-// SmBiosInitType16
 /** Type 16
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
   @param[in] Handle                 Pointer to tocation containing the current handle value.
-  @param[in] MemoryArrayHandle      Pointer to location to store the discovered this structures handle value.
-  @param[in] MemoryErrorInfoHandle  The discovered memory error information structure handle value.
 
   @retval
 **/
+STATIC
 VOID
-SmBiosInitType16 (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle,
-  IN  SMBIOS_HANDLE   *MemoryArrayHandle,
-  IN  SMBIOS_HANDLE   MemoryErrorInfoHandle
+PatchMemoryArray (
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data
   )
 {
-  mOriginal = SmbiosGetTableFromType (mSmbios, SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, 1);
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  UINT32                          MinLength;
+  UINT8                           StringIndex;
 
-  if (mOriginal.Raw != NULL) {
+  Original      = SmbiosGetOriginalTable (SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, 1);
+  MinLength     = sizeof (*Original.Standard.Type16);
+  StringIndex   = 0;
 
-    SMBIOS_TABLE_TYPE16  *p = (SMBIOS_TABLE_TYPE16 *)*(Table);
-
-    CopyMem (p, mOriginal.Standard.Type16, mOriginal.Standard.Type16->Hdr.Length);
-
-    p->Hdr.Handle = *(Handle);
-
-    p->MemoryErrorInformationHandle = MemoryErrorInfoHandle;
-
-    *MemoryArrayHandle = p->Hdr.Handle;
-
-    SmBiosFinaliseStruct (Table, Handle, p->Hdr.Length + 1);
-
-    DEBUG_CODE_BEGIN();
-
-    This.Raw = (UINT8 *)p;
-
-    SmbiosDebugPhysicalMemoryArray (This);
-
-    DEBUG_CODE_END();
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, MinLength, 1))) {
+    return;
   }
+
+  SMBIOS_OVERRIDE_V (Table, Standard.Type16->Location, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type16->Use, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type16->MemoryErrorCorrection, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type16->MaximumCapacity, Original, NULL, NULL);
+  //
+  // Do not support memory error information.
+  //
+  Table->CurrentPtr.Standard.Type16->MemoryErrorInformationHandle = 0xFFFF;
+  SMBIOS_OVERRIDE_V (Table, Standard.Type16->NumberOfMemoryDevices, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type16->ExtendedMaximumCapacity, Original, NULL, NULL);
+
+  SmbiosFinaliseStruct (Table);
 }
 
-// PatchMemoryDevice
 /** Type 17
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
@@ -766,252 +677,290 @@ SmBiosInitType16 (
 
   @retval
 **/
+STATIC
 VOID
 PatchMemoryDevice (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle,
-  IN  SMBIOS_HANDLE   MemoryArrayHandle,
-  IN  SMBIOS_HANDLE   MemoryErrorHandle,
-  IN  UINT8           SlotNo,
-  IN  UINT8           MacModel
+  IN OUT OC_SMBIOS_TABLE                 *Table,
+  IN     OC_SMBIOS_DATA                  *Data,
+  IN     APPLE_SMBIOS_STRUCTURE_POINTER  Original,
+  IN     UINT16                          Index,
+     OUT SMBIOS_HANDLE                   *Handle
   )
 {
-  SMBIOS_TABLE_TYPE17  *p = (SMBIOS_TABLE_TYPE17 *)*(Table);
+  UINT32   MinLength;
+  UINT8    StringIndex;
+  BOOLEAN  IsEmpty;
 
-  mOriginal = SmbiosGetTableFromType (mSmbios, SMBIOS_TYPE_MEMORY_DEVICE, SlotNo);
+  *Handle       = OcSmbiosInvalidHandle;
+  Original      = SmbiosGetOriginalTable (SMBIOS_TYPE_MEMORY_DEVICE, Index);
+  MinLength     = sizeof (*Original.Standard.Type17);
+  StringIndex   = 0;
 
-  if (mOriginal.Raw != NULL) {
-
-    CHAR8   *Strings      = NULL;
-    UINT8   StringsIndex  = 0;
-
-    CopyMem (p, mOriginal.Standard.Type17, mOriginal.Standard.Type17->Hdr.Length);
-
-    Strings       = PTR_OFFSET(p, p->Hdr.Length, CHAR8 *);
-    p->Hdr.Handle = *(Handle);
-
-    // Use the SODIMM form factor on everything but macpro family
-    if (MacModel == MacPro) {
-      p->FormFactor = MemoryFormFactorDimm;
-    } else {
-      p->FormFactor = MemoryFormFactorSodimm;
-    }
-
-    p->DeviceLocator = SmbiosSetString (
-                         &Strings,
-                         SmbiosGetString (mOriginal, mOriginal.Standard.Type17->DeviceLocator),
-                         &StringsIndex
-                         );
-
-    p->BankLocator = SmbiosSetString (
-                       &Strings,
-                       SmbiosGetString (mOriginal, mOriginal.Standard.Type17->BankLocator),
-                       &StringsIndex
-                       );
-
-    if (p->TotalWidth != 0) {
-
-      CHAR8   *Vendor       = SmbiosGetString (mOriginal, mOriginal.Standard.Type17->Manufacturer);
-      CHAR8   *SerialNumber = SmbiosGetString (mOriginal, mOriginal.Standard.Type17->SerialNumber);
-      CHAR8   *PartNumber   = SmbiosGetString (mOriginal, mOriginal.Standard.Type17->PartNumber);
-      CHAR8   *AssetTag     = SmbiosGetString (mOriginal, mOriginal.Standard.Type17->AssetTag);
-
-      p->Manufacturer       = SmbiosSetStringHex (&Strings, Vendor, &StringsIndex);
-      p->SerialNumber       = SmbiosSetStringHex (&Strings, SerialNumber, &StringsIndex);
-      p->PartNumber         = SmbiosSetStringHex (&Strings, PartNumber, &StringsIndex);
-      p->AssetTag           = SmbiosSetStringHex (&Strings, AssetTag, &StringsIndex);
-
-    } else {
-
-      // Empty slots should have no physical memory array handle
-      MemoryArrayHandle     = 0xFFFF;
-
-      p->Manufacturer       = 0;
-      p->SerialNumber       = 0;
-      p->PartNumber         = 0;
-      p->AssetTag           = 0;
-
-    }
-
-    p->MemoryArrayHandle            = MemoryArrayHandle;
-    p->MemoryErrorInformationHandle = MemoryErrorHandle;
-
-    SmBiosFinaliseStruct (Table, Handle, ((UINTN)Strings - (UINTN)p));
-
-    DEBUG_CODE_BEGIN();
-
-    This.Raw = (UINT8 *)p;
-
-    SmbiosDebugMemoryDevice (This);
-
-    DEBUG_CODE_END();
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_MEMORY_DEVICE, MinLength, Index))) {
+    return;
   }
+
+  //
+  // External handles are set below.
+  //
+  SMBIOS_OVERRIDE_V (Table, Standard.Type17->TotalWidth, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type17->DataWidth, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type17->Size, Original, NULL, NULL);
+  Table->CurrentPtr.Standard.Type17->FormFactor = Data->MemoryFormFactor;
+  SMBIOS_OVERRIDE_V (Table, Standard.Type17->DeviceSet, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type17->DeviceLocator, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type17->BankLocator, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type17->MemoryType, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type17->TypeDetail, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type17->Speed, Original, NULL, NULL);
+
+  //
+  // Empty modules should have 0 Size according to the spec.
+  // Original OC implementation relies on TotalWidth, which may be a workaround for some FW.
+  //
+  IsEmpty = Table->CurrentPtr.Standard.Type17->Size == 0
+    || Table->CurrentPtr.Standard.Type17->TotalWidth == 0;
+
+  if (!IsEmpty) {
+    Table->CurrentPtr.Standard.Type17->MemoryArrayHandle = OcSmbiosPhysicalMemoryArrayHandle;
+    Table->CurrentPtr.Standard.Type17->MemoryErrorInformationHandle = 0xFFFF;
+  } else {
+    //
+    // Empty slots should have no physical memory array handle.
+    //
+    Table->CurrentPtr.Standard.Type17->MemoryArrayHandle = 0xFFFF;
+    Table->CurrentPtr.Standard.Type17->MemoryErrorInformationHandle = 0xFFFF;
+  }
+
+  SMBIOS_OVERRIDE_H (Table, Standard.Type17->Manufacturer, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_H (Table, Standard.Type17->SerialNumber, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_H (Table, Standard.Type17->AssetTag, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_H (Table, Standard.Type17->PartNumber, Original, NULL, &StringIndex, NULL);
+
+  SMBIOS_OVERRIDE_V (Table, Standard.Type17->Attributes, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type17->ExtendedSize, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type17->ConfiguredMemoryClockSpeed, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type17->MinimumVoltage, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type17->MaximumVoltage, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type17->ConfiguredVoltage, Original, NULL, NULL);
+
+  //
+  // Return assigned handle
+  //
+  *Handle = Table->CurrentPtr.Standard.Hdr->Handle;
+
+  SmbiosFinaliseStruct (Table);
 }
 
-// SmBiosInitType19
-/**
+/** Type 19
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
   @param[in] Handle                 Pointer to tocation containing the current handle value.
-  @param[in] MemoryArrayHandle      The discovered handle of the memory arrary that this structure is part of.
 
   @retval
 **/
+STATIC
 VOID
-SmBiosInitType19 (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle,
-  IN  SMBIOS_HANDLE   MemoryArrayHandle
+PatchMemoryMappedAddress (
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data
   )
 {
-  UINT8  NumberMappedArrayDevices;
-  UINT8  MappedDeviceNo;
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  UINT16                          NumberEntries;
+  UINT16                          EntryNo;
+  UINT32                          MinLength;
+  UINT8                           StringIndex;
 
-  NumberMappedArrayDevices = SmbiosGetTableCount (mSmbios, SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS);
+  NumberEntries = SmbiosGetOriginalTableCount (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS);
 
-  for (MappedDeviceNo = 1; MappedDeviceNo <= NumberMappedArrayDevices; MappedDeviceNo++) {
-
-    mOriginal = SmbiosGetTableFromType (mSmbios, SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS, MappedDeviceNo);
-
-    if (mOriginal.Raw != NULL) {
-
-      SMBIOS_TABLE_TYPE19  *p = (SMBIOS_TABLE_TYPE19 *)*(Table);
-
-      CopyMem (p, mOriginal.Standard.Type19, mOriginal.Standard.Type19->Hdr.Length);
-
-      p->Hdr.Handle        = *(Handle);
-      p->MemoryArrayHandle = MemoryArrayHandle;
-
-      SmBiosFinaliseStruct (Table, Handle, p->Hdr.Length + 1);
-
-      DEBUG_CODE_BEGIN();
-
-      This.Raw = (UINT8 *)p;
-
-      SmbiosDebugType19Device (This);
-
-      DEBUG_CODE_END();
+  for (EntryNo = 1; EntryNo <= NumberEntries; EntryNo++) {
+    Original = SmbiosGetOriginalTable (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS, EntryNo);
+    if (Original.Raw == NULL) {
+      continue;
     }
+
+    MinLength     = sizeof (*Original.Standard.Type19);
+    StringIndex   = 0;
+
+    if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS, MinLength, EntryNo))) {
+      continue;
+    }
+
+    SMBIOS_OVERRIDE_V (Table, Standard.Type19->StartingAddress, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type19->EndingAddress, Original, NULL, NULL);
+    Table->CurrentPtr.Standard.Type19->MemoryArrayHandle = OcSmbiosPhysicalMemoryArrayHandle;
+    SMBIOS_OVERRIDE_V (Table, Standard.Type19->PartitionWidth, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type19->ExtendedStartingAddress, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type19->ExtendedEndingAddress, Original, NULL, NULL);
+
+    SmbiosFinaliseStruct (Table);
   }
 }
 
-// SmBiosInitType20
-/**
+/** Type 20
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
   @param[in] Handle                 Pointer to tocation containing the current handle value.
 
   @retval
 **/
+STATIC
 VOID
-SmBiosInitType20 (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle,
-  IN  SMBIOS_HANDLE   MemoryArrayHandle,
-  IN  SMBIOS_HANDLE   MemoryDeviceHandle,
-  IN  INT8            SlotNo
+PatchMemoryMappedDevice (
+  IN OUT OC_SMBIOS_TABLE                 *Table,
+  IN     OC_SMBIOS_DATA                  *Data,
+  IN     APPLE_SMBIOS_STRUCTURE_POINTER  Original,
+  IN     UINT16                          Index,
+     OUT SMBIOS_HANDLE                   MemoryDeviceHandle
   )
 {
-  mOriginal = SmbiosGetTableFromType (mSmbios, SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, SlotNo);
+  UINT32   MinLength;
+  UINT8    StringIndex;
 
-  if (mOriginal.Raw != NULL) {
+  Original      = SmbiosGetOriginalTable (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, Index);
+  MinLength     = sizeof (*Original.Standard.Type20);
+  StringIndex   = 0;
 
-    SMBIOS_TABLE_TYPE20  *p = (SMBIOS_TABLE_TYPE20 *)*(Table);
-
-    CopyMem (p, mOriginal.Standard.Type20, mOriginal.Standard.Type20->Hdr.Length);
-
-    p->Hdr.Handle = *(Handle);
-
-    p->MemoryDeviceHandle             = MemoryDeviceHandle;
-    p->MemoryArrayMappedAddressHandle = MemoryArrayHandle;
-
-    SmBiosFinaliseStruct (Table, Handle, p->Hdr.Length + 1);
-
-    DEBUG_CODE_BEGIN();
-
-    This.Raw = (UINT8 *)p;
-
-    SmbiosDebugType20Device (This);
-
-    DEBUG_CODE_END();
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, MinLength, Index))) {
+    return;
   }
+
+  SMBIOS_OVERRIDE_V (Table, Standard.Type20->StartingAddress, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type20->EndingAddress, Original, NULL, NULL);
+  Table->CurrentPtr.Standard.Type20->MemoryDeviceHandle = MemoryDeviceHandle;
+  //
+  // FIXME: This one should point to Original Type 19...
+  //
+  Table->CurrentPtr.Standard.Type20->MemoryArrayMappedAddressHandle = 0xFFFF;
+  SMBIOS_OVERRIDE_V (Table, Standard.Type20->PartitionRowPosition, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type20->InterleavePosition, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type20->InterleavedDataDepth, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type20->ExtendedStartingAddress, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type20->ExtendedEndingAddress, Original, NULL, NULL);
+
+  SmbiosFinaliseStruct (Table);
 }
 
-// PatchPortableBatteryDevice
-/**
+/** Type 22
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
   @param[in] Handle                 Pointer to tocation containing the current handle value.
 
   @retval
 **/
+STATIC
 VOID
 PatchPortableBatteryDevice (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data
   )
 {
-  mOriginal = SmbiosGetTableFromType (mSmbios, SMBIOS_TYPE_PORTABLE_BATTERY, 1);
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  UINT32                          MinLength;
+  UINT8                           StringIndex;
 
-  if (mOriginal.Raw != NULL) {
+  Original    = SmbiosGetOriginalTable (SMBIOS_TYPE_PORTABLE_BATTERY, 1);
+  MinLength   = sizeof (*Original.Standard.Type22);
+  StringIndex = 0;
 
-    SMBIOS_TABLE_TYPE22  *p = (SMBIOS_TABLE_TYPE22 *)*(Table);
-    UINTN       TableLength = SmbiosGetTableLength (mOriginal);
-
-    CopyMem (p, mOriginal.Standard.Type22, TableLength);
-
-    p->Hdr.Handle = *(Handle);
-
-    SmBiosFinaliseStruct (Table, Handle, --TableLength);
-
-    DEBUG_CODE_BEGIN();
-
-    This.Raw = (UINT8 *)p;
-
-    SmbiosDebugPortableBatteryDevice (This);
-
-    DEBUG_CODE_END();
+  //
+  // Do not add batteries where it does not exist (e.g. desktop).
+  //
+  if (Original.Raw == NULL) {
+    return;
   }
+
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_PORTABLE_BATTERY, MinLength, 1))) {
+    return;
+  }
+
+  SMBIOS_OVERRIDE_S (Table, Standard.Type22->Location, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type22->Manufacturer, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type22->ManufactureDate, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type22->SerialNumber, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type22->DeviceName, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type22->DeviceChemistry, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type22->DeviceCapacity, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type22->DesignVoltage, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type22->SBDSVersionNumber, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type22->MaximumErrorInBatteryData, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type22->SBDSSerialNumber, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type22->SBDSManufactureDate, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type22->SBDSDeviceChemistry, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type22->DesignCapacityMultiplier, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type22->OEMSpecific, Original, NULL, NULL);
+
+  SmbiosFinaliseStruct (Table);
 }
 
-// PatchBootInformation
-/**
+/** Type 32
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
   @param[in] Handle                 Pointer to tocation containing the current handle value.
 
   @retval
 **/
+STATIC
 VOID
 PatchBootInformation (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data
   )
 {
-  mOriginal = SmbiosGetTableFromType (mSmbios, SMBIOS_TYPE_SYSTEM_BOOT_INFORMATION, 1);
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  UINT32                          MinLength;
+  UINT8                           StringIndex;
 
-  if (mOriginal.Raw != NULL) {
+  Original    = SmbiosGetOriginalTable (SMBIOS_TYPE_SYSTEM_BOOT_INFORMATION, 1);
+  MinLength   = sizeof (*Original.Standard.Type32);
+  StringIndex = 0;
 
-    SMBIOS_TABLE_TYPE32  *p = (SMBIOS_TABLE_TYPE32 *)*(Table);
-
-    CopyMem (p, mOriginal.Standard.Type32, mOriginal.Standard.Type32->Hdr.Length);
-
-    p->Hdr.Handle = *(Handle);
-
-    SmBiosFinaliseStruct (Table, Handle, p->Hdr.Length + 1);
-
-    DEBUG_CODE_BEGIN();
-
-    This.Raw = (UINT8 *)p;
-
-    SmbiosDebugBootInformation (This);
-
-    DEBUG_CODE_END();
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_SYSTEM_BOOT_INFORMATION, MinLength, 1))) {
+    return;
   }
+
+  SMBIOS_OVERRIDE_V (Table, Standard.Type32->Reserved, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type32->BootStatus, Original, NULL, NULL);
+
+  SmbiosFinaliseStruct (Table);
 }
 
-// CreateAppleFirmwareVolume
-/**
+/** Type 128
+
+  @param[in] Table                  Pointer to location containing the current address within the buffer.
+  @param[in] Handle                 Pointer to tocation containing the current handle value.
+
+  @retval
+**/
+STATIC
+VOID
+PatchAppleFirmwareVolume (
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data
+  )
+{
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  UINT32                          MinLength;
+  UINT8                           StringIndex;
+
+  Original    = SmbiosGetOriginalTable (APPLE_SMBIOS_TYPE_FIRMWARE_INFORMATION, 1);
+  MinLength   = sizeof (*Original.Type128);
+  StringIndex = 0;
+
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, APPLE_SMBIOS_TYPE_FIRMWARE_INFORMATION, MinLength, 1))) {
+    return;
+  }
+
+  SMBIOS_OVERRIDE_V (Table, Type128->FirmwareFeatures, Original, &Data->FirmwareFeatures, NULL);
+  SMBIOS_OVERRIDE_V (Table, Type128->FirmwareFeaturesMask, Original, &Data->FirmwareFeaturesMask, NULL);
+  SMBIOS_OVERRIDE_V (Table, Type128->ExtendedFirmwareFeatures, Original, &Data->ExtendedFirmwareFeatures, NULL);
+  SMBIOS_OVERRIDE_V (Table, Type128->ExtendedFirmwareFeaturesMask, Original, &Data->ExtendedFirmwareFeaturesMask, NULL);
+
+  SmbiosFinaliseStruct (Table);
+}
+
+/** Type 131
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
   @param[in] Handle                 Pointer to tocation containing the current handle value.
@@ -1019,63 +968,473 @@ PatchBootInformation (
 
   @retval
 **/
+STATIC
 VOID
-CreateAppleFirmwareVolume (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle
+PatchAppleProcessorType (
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data,
+  IN     CPU_INFO         *CpuInfo
   )
 {
-  APPLE_SMBIOS_TABLE_TYPE128  *p = (APPLE_SMBIOS_TABLE_TYPE128 *)*(Table);
-  EFI_STATUS  Status;
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  UINT32                          MinLength;
+  UINT8                           StringIndex;
+  APPLE_PROCESSOR_TYPE            *ProcessorType;
 
-  UINT32    *Data;
-  UINTN     Length;
+  Original    = SmbiosGetOriginalTable (APPLE_SMBIOS_TYPE_PROCESSOR_TYPE, 1);
+  MinLength   = sizeof (*Original.Type131);
+  StringIndex = 0;
 
-  p->Hdr.Type   = APPLE_SMBIOS_TYPE_FIRMWARE_INFORMATION;
-  p->Hdr.Length = sizeof (APPLE_SMBIOS_TABLE_TYPE128);
-  p->Hdr.Handle = *(Handle);
-
-  Length = sizeof (UINT32);
-  Data   = &p->FirmwareFeatures;
-
-  Status = OcGetVariable (
-             APPLE_FIRMWARE_FEATURES_VARIABLE,
-             &gOpenCoreOverridesGuid,
-             (VOID **)&Data,
-             &Length
-             );
-
-  if ((EFI_ERROR (Status)) && (Length != sizeof(UINT32))) {
-    p->FirmwareFeatures = 0x80001417;
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, APPLE_SMBIOS_TYPE_PROCESSOR_TYPE, MinLength, 1))) {
+    return;
   }
 
-  Length = sizeof(UINT32);
-  Data   = &p->FirmwareFeaturesMask;
+  SMBIOS_OVERRIDE_V (Table, Type131->ProcessorType, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Type131->Reserved, Original, NULL, NULL);
 
-  Status = OcGetVariable (
-             APPLE_FIRMWARE_FEATURES_MASK_VARIABLE,
-             &gOpenCoreOverridesGuid,
-             (VOID **)&Data,
-             &Length
-             );
+  ProcessorType = &Table->CurrentPtr.Type131->ProcessorType;
 
-  if ((EFI_ERROR (Status)) || (Length != sizeof(UINT32))) {
-    p->FirmwareFeaturesMask = 0xC003FF37;
+  switch (CpuInfo->Model) {
+    //
+    // Yonah: https://en.wikipedia.org/wiki/Yonah_(microprocessor)#Models_and_brand_names
+    //
+    // Used by Apple:
+    //   Core Duo, Core Solo
+    //
+    // NOT used by Apple:
+    //   Pentium, Celeron
+    //
+    // All 0x0201.
+    //
+    case CPU_MODEL_DOTHAN: // 0x0D
+    case CPU_MODEL_YONAH:  // 0x0E
+
+      // IM41  (T2400/T2500), MM11 (Solo T1200 / Duo T2300/T2400),
+      // MBP11 (L2400/T2400/T2500/T2600), MBP12 (T2600),
+      // MB11  (T2400/T2500)
+      ProcessorType->Type = AppleProcessorTypeCoreSolo; // 0x0201
+
+      break;
+
+    //
+    // Merom:  https://en.wikipedia.org/wiki/Merom_(microprocessor)#Variants
+    // Penryn: https://en.wikipedia.org/wiki/Penryn_(microprocessor)#Variants
+    //
+    // Used by Apple:
+    //   Core 2 Extreme, Core 2 Duo (Merom),
+    //   Core 2 Duo,                (Penryn),
+    //   certain Clovertown (Merom) / Harpertown (Penryn) based models
+    //
+    // Not used by Apple:
+    //   Merom:  Core 2 Solo, Pentium, Celeron M, Celeron
+    //   Penryn: Core 2 Extreme, Core 2 Quad, Core 2 Solo, Pentium, Celeron
+    //
+    case CPU_MODEL_MEROM:  // 0x0F
+    case CPU_MODEL_PENRYN: // 0x17
+
+      if (CpuInfo->AppleMajorType == AppleProcessorMajorCore2) {
+        // TODO: add check for models above. (by changing the following "if (0)")
+        if (0) {
+          // ONLY MBA31 (SU9400/SU9600) and MBA32 (SL9400/SL9600)
+          ProcessorType->Type = AppleProcessorTypeCore2DuoType2; // 0x0302
+        } else {
+          // IM51 (T7200), IM61 (T7400), IM71 (T7300), IM81 (E8435), IM101 (E7600),
+          // MM21 (unknown), MM31 (P7350),
+          // MBP21 (T7600), MBP22 (unknown), MBP31 (T7700), MBP41 (T8300), MBP71 (P8600),
+          // MBP51 (P8600), MBP52 (T9600), MBP53 (P8800), MBP54 (P8700), MBP55 (P7550),
+          // MBA11 (P7500), MBA21 (SL9600),
+          // MB21 (unknown), MB31 (T7500), MB41 (T8300), MB51 (P8600), MB52 (P7450), MB61 (P7550), MB71 (P8600)
+          ProcessorType->Type = AppleProcessorTypeCore2DuoType1; // 0x0301
+        }
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonPenryn) {
+        // MP21 (2x X5365), MP31 (2x E5462) - 0x0402
+        // FIXME: check when 0x0401 will be used.
+        ProcessorType->Type = AppleProcessorTypeXeonPenrynType2; // 0x0402
+      } else {
+        // here stands for models not used by Apple (Merom/Penryn), putting 0x0301 as lowest
+        ProcessorType->Type = AppleProcessorTypeCore2DuoType1;   // 0x0301
+      }
+
+      break;
+
+    //
+    // Nehalem:  https://en.wikipedia.org/wiki/Nehalem_(microarchitecture)#Server_and_desktop_processors
+    // Westmere: https://en.wikipedia.org/wiki/Westmere_(microarchitecture)#Server_/_Desktop_processors
+    //
+    // Used by Apple:
+    //   Gainestown (Xeon), Bloomfield (Xeon), Lynnfield (i5/i7)                   [Nehalem]
+    //   Gulftown (aka Westmere-EP, Xeon), Clarkdale (i3/i5), Arrandale (i5/i7)    [Westmere]
+    //
+    // Not used by Apple:
+    //   Beckton (Xeon), Jasper Forest (Xeon), Clarksfield (i7), Pentium, Celeron [Nehalem]
+    //   Westmere-EX (Xeon E7), Pentium, Celeron                                  [Westmere]
+    //
+    case CPU_MODEL_NEHALEM:     // 0x1A
+    case CPU_MODEL_NEHALEM_EX:  // 0x2E, not used by Apple
+    case CPU_MODEL_FIELDS:      // 0x1E, Lynnfield, Clarksfield (part of Nehalem)
+    case CPU_MODEL_WESTMERE:    // 0x2C
+    case CPU_MODEL_WESTMERE_EX: // 0x2F, not used by Apple
+    case CPU_MODEL_DALES_32NM:  // 0x25, Clarkdale, Arrandale (part of Westmere)
+
+      if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonNehalem) {
+        // MP41 & Xserve31 (2x E5520, CPU_MODEL_NEHALEM), MP51 (2x X5670, CPU_MODEL_WESTMERE)
+        ProcessorType->Type = AppleProcessorTypeXeon;        // 0x0501
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI3) {
+        // IM112 (i3-540, 0x0901, CPU_MODEL_DALES_32NM)
+        ProcessorType->Type = AppleProcessorTypeCorei3Type1; // 0x0901
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI5) {
+        // FIXME: no idea what it is on IM112 (i5-680)
+        // MBP61, i5-640M, 0x0602, CPU_MODEL_DALES_32NM
+        ProcessorType->Type = AppleProcessorTypeCorei5Type2; // 0x0602
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI7) {
+        // FIXME: used by Apple, no idea what to use, assuming 0x0702 for now (based off 0x0602 on i5)
+        ProcessorType->Type = AppleProcessorTypeCorei7Type2; // 0x0702
+      } else {
+        // here stands for Pentium and Celeron (Nehalem/Westmere), not used by Apple at all.
+        // putting 0x0901 (i3) as lowest
+        ProcessorType->Type = AppleProcessorTypeCorei3Type1; // 0x0901
+      }
+
+      break;
+
+    //
+    // Sandy Bridge:   https://en.wikipedia.org/wiki/Sandy_Bridge#List_of_Sandy_Bridge_processors
+    // Sandy Bridge-E: https://en.wikipedia.org/wiki/Sandy_Bridge-E#Overview
+    //
+    // Used by Apple:
+    //   Core i5/i7 / i3 (see NOTE below)
+    //
+    // NOTE: There seems to be one more i3-2100 used on IM121 (EDU),
+    //       assuming it exists for now.
+    //
+    // Not used by Apple:
+    //   Xeon v1 (E5/E3),
+    //   SNB-E based Core i7 (and Extreme): 3970X, 3960X, 3930K, 3820,
+    //   Pentium, Celeron
+    //
+    case CPU_MODEL_SANDYBRIDGE: // 0x2A
+    case CPU_MODEL_JAKETOWN:    // 0x2D, SNB-E, not used by Apple
+
+      if (CpuInfo->AppleMajorType == AppleProcessorMajorI3) {
+        // FIXME: used by Apple on iMac12,1 (EDU, i3-2100), not confirmed yet
+        ProcessorType->Type = AppleProcessorTypeCorei3Type3;   // 0x0903
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI5) {
+        // NOTE: two values are used here. (0x0602 and 0x0603)
+        // TODO: how to classify them. (by changing "if (0)")
+        if (0) {
+          // MM51 (i5-2415M), MM52 (i5-2520M), MBA41 (i5-2467M), MBA42 (i5-2557M)
+          ProcessorType->Type = AppleProcessorTypeCorei5Type2; // 0x0602
+        } else {
+          // IM121 (i5-2400S), MBP81 (i5-2415M)
+          ProcessorType->Type = AppleProcessorTypeCorei5Type3; // 0x0603
+        }
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI7) {
+        // IM122 (i7-2600), MBP82 (i7-2675QM), MBP83 (i7-2820QM)
+        //
+        // FIXME: will those i7 not used by Apple (see above), be identified as AppleProcessorMajorI7?
+        ProcessorType->Type = AppleProcessorTypeCorei7Type3;   // 0x0703
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonE5) { // see TODO below
+        // for Sandy Xeon E5, not used by Apple
+        // FIXME: is AppleProcessorMajorXeonE5, which seems to be for IVY-E only, compatible with SNB-E too?
+        // TODO: write some decent code to check SNB-E based Xeon E5.
+        ProcessorType->Type = AppleProcessorTypeXeonE5;        // 0x0A01
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
+        // for Sandy Xeon E3
+        // NOTE: Xeon E3 is not used by Apple at all and should be somehow treated as i7,
+        //       but here we'd like to show Xeon in "About This Mac".
+        // TODO: CPU major type check for SNB based Xeon E3
+        ProcessorType->Type = AppleProcessorTypeXeon;          // 0x0501
+      } else {
+        // here stands for Pentium and Celeron (Sandy), not used by Apple at all.
+        // putting 0x0903 (i3) as lowest
+        ProcessorType->Type = AppleProcessorTypeCorei3Type3;   // 0x0903
+      }
+
+      break;
+
+    //
+    // Ivy Bridge:   https://en.wikipedia.org/wiki/Ivy_Bridge_(microarchitecture)#List_of_Ivy_Bridge_processors
+    // Ivy Bridge-E: https://en.wikipedia.org/wiki/Ivy_Bridge_(microarchitecture)#Models_and_steppings_2
+    //
+    // Used by Apple:
+    //   Core i5/i7 / i3 (see NOTE below),
+    //   Xeon E5 v2
+    //
+    // NOTE: There seems to be an iMac13,1 (EDU version), or rather iMac13,3, with CPU i3-3225,
+    //       assuming it exists for now.
+    //
+    // Not used by Apple:
+    //   Xeon v2 (E7/E3),
+    //   IVY-E based Core i7 (and Extreme): 4960X, 4930K, 4820K,
+    //   Pentium, Celeron
+    //
+    case CPU_MODEL_IVYBRIDGE:    // 0x3A
+    case CPU_MODEL_IVYBRIDGE_EP: // 0x3E
+
+      if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonE5) {
+        // MP61 (E5-1620 v2)
+        ProcessorType->Type = AppleProcessorTypeXeonE5;      // 0x0A01
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI5) {
+        // IM131 (i5-3470S), IM132  (i5-3470S),
+        // MBP92 (i5-3210M), MBP102 (i5-3210M)
+        // MBA51 (i6-3317U), MBA52  (i5-3427U)
+        ProcessorType->Type = AppleProcessorTypeCorei5Type4; // 0x0604
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI7) {
+        // MM62  (i7-3615QM),
+        // MBP91 (i7-3615QM), MBP101 (i7-3820QM)
+        //
+        // FIXME: will those i7 not used by Apple (see above), be identified as AppleProcessorMajorI7?
+        ProcessorType->Type = AppleProcessorTypeCorei7Type4; // 0x0704
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI3) {
+        // FIXME: used by Apple (if iMac13,3 were existent, i3-3225), not confirmed yet
+        // assuming it exists for now
+        ProcessorType->Type = AppleProcessorTypeCorei3Type4; // 0x0904
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
+        // for Ivy/Ivy-E E3/E7, not used by Apple
+        // NOTE: Xeon E3/E7 is not used by Apple at all and should be somehow treated as i7,
+        //       but here we'd like to show Xeon in "About This Mac".
+        // TODO: CPU major type check for IVY based Xeon E3/E7
+        ProcessorType->Type = AppleProcessorTypeXeon;        // 0x0501
+      } else {
+        // here stands for Pentium and Celeron (Ivy), not used by Apple at all.
+        // putting 0x0904 (i3) as lowest.
+        ProcessorType->Type = AppleProcessorTypeCorei3Type4; // 0x0904
+      }
+
+      break;
+
+    //
+    // Haswell:   https://en.wikipedia.org/wiki/Haswell_(microarchitecture)#List_of_Haswell_processors
+    // Haswell-E: basically the same page.
+    //
+    // Used by Apple:
+    //   Core i5/i7
+    //
+    // Not used by Apple:
+    //   Xeon v3 (E7/E5/E3),
+    //   Core i3,
+    //   Haswell-E based Core i7 Extreme: 5960X, 5930K, 5820K,
+    //   Pentium, Celeron
+    //
+    case CPU_MODEL_HASWELL:     // 0x3C
+    case CPU_MODEL_HASWELL_EP:  // 0x3F
+    case CPU_MODEL_HASWELL_ULT: // 0x45
+
+      if (CpuInfo->AppleMajorType == AppleProcessorMajorI5) {
+        // IM141 (i5-4570R), IM142 (i5-4670), IM151 (i5-4690),
+        // MM71  (i5-4260U),
+        // MBA62 (i5-4250U)
+        ProcessorType->Type = AppleProcessorTypeCorei5Type5; // 0x0605
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI7) {
+        // MBP112 (i7-4770HQ), MBP113 (i7-4850HQ)
+        //
+        // FIXME: will those i7 not used by Apple (see above), be identified as AppleProcessorMajorI7?
+        ProcessorType->Type = AppleProcessorTypeCorei7Type5; // 0x0705
+      } else if (CpuInfo->AppleMajorType ==  AppleProcessorMajorI3) {
+        // for i3, not used by Apple, just for showing i3 in "About This Mac".
+        ProcessorType->Type = AppleProcessorTypeCorei3Type5; // 0x0905
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonE5) { // see TODO below
+        // for Haswell-E Xeon E5, not used by Apple
+        // FIXME: is AppleProcessorMajorXeonE5, which seems to be for IVY-E only, compatible with Haswell-E too?
+        // TODO: write some decent code to check Haswell-E based Xeon E5.
+        ProcessorType->Type = AppleProcessorTypeXeonE5;      // 0x0A01
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
+        // for Haswell/Haswell-E E3/E7, not used by Apple
+        // NOTE: Xeon E3/E7 is not used by Apple at all and should be somehow treated as i7,
+        //       but here we'd like to show Xeon in "About This Mac".
+        // TODO: CPU major type check for Haswell/Haswell-E based Xeon E3/E7
+        ProcessorType->Type = AppleProcessorTypeXeon;        // 0x0501
+      } else {
+        // here stands for Pentium and Celeron (Haswell), not used by Apple at all.
+        // putting 0x0905 (i3) as lowest.
+        ProcessorType->Type = AppleProcessorTypeCorei3Type5; // 0x0905
+      }
+
+      break;
+
+    //
+    // Broadwell:   https://en.wikipedia.org/wiki/Broadwell_(microarchitecture)#List_of_Broadwell_processors
+    // Broadwell-E: https://en.wikipedia.org/wiki/Broadwell_(microarchitecture)#"Broadwell-E"_HEDT_(14_nm)
+    //
+    // NOTE: support table for BDW-E is missing in XNU, thus a CPUID patch might be needed. (See Clover FakeCPUID)
+    //
+    // Used by Apple:
+    //   Core i5/i7, Core M
+    //
+    // Not used by Apple:
+    //   Broadwell-E: i7 6950X/6900K/6850K/6800K,
+    //   Xeon v4 (E5/E3),
+    //   Core i3,
+    //   Pentium, Celeron
+    //
+    case CPU_MODEL_BROADWELL:     // 0x3D
+    case CPU_MODEL_CRYSTALWELL:   // 0x46
+    case CPU_MODEL_BRYSTALWELL:   // 0x47
+
+      if (CpuInfo->AppleMajorType == AppleProcessorMajorM) {
+        // MB81 (M 5Y51)
+        ProcessorType->Type = AppleProcessorTypeCoreMType6;   // 0x0B06
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI5) {
+        // IM161  (i5-5250U), IM162 (i5-5675R),
+        // MBP121 (i5-5257U),
+        // MBA71  (i5-5250U), MBA72 (unknown)
+        ProcessorType->Type = AppleProcessorTypeCorei5Type6; // 0x0606
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI7) {
+        // FIXME: 0x0706 is just an ideal value for i7, waiting for confirmation
+        // FIXME: will those i7 not used by Apple (see above), be identified as AppleProcessorMajorI7?
+        ProcessorType->Type = AppleProcessorTypeCorei7Type6; // 0x0706
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI3) {
+        // for i3, not used by Apple, just for showing i3 in "About This Mac".
+        // FIXME: 0x0906 is just an ideal value for i3, waiting for confirmation
+        ProcessorType->Type = AppleProcessorTypeCorei3Type6; // 0x0906
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonE5) { // see TODO below
+        // for Broadwell-E Xeon E5, not used by Apple
+        // FIXME: is AppleProcessorMajorXeonE5, which seems to be for IVY-E only, compatible with Broadwell-E too?
+        // TODO: write some decent code to check Broadwell-E based Xeon E5.
+        ProcessorType->Type = AppleProcessorTypeXeonE5;      // 0x0A01
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
+        // for Broadwell E3, not used by Apple
+        // NOTE: Xeon E3 is not used by Apple at all and should be somehow treated as i7,
+        //       but here we'd like to show Xeon in "About This Mac".
+        // TODO: CPU major type check for Broadwell based Xeon E3
+        ProcessorType->Type = AppleProcessorTypeXeon;        // 0x0501
+      } else {
+        // here stands for Pentium and Celeron (Broadwell), not used by Apple at all.
+        // putting 0x0906 (i3) as lowest.
+        ProcessorType->Type = AppleProcessorTypeCorei3Type5; // 0x0906
+      }
+
+      break;
+
+    //
+    // Skylake: https://en.wikipedia.org/wiki/Skylake_(microarchitecture)#List_of_Skylake_processor_models
+    //
+    // Used by Apple:
+    //   Xeon W, Core m3, m5, m7, i5, i7
+    //
+    // Not used by Apple:
+    //   Core i3,
+    //   all high-end models (Core i9, i7 Extreme): see https://en.wikipedia.org/wiki/Skylake_(microarchitecture)#High-end_desktop_processors
+    //   Xeon E3 v5,
+    //   Pentium, Celeron
+    //
+    case CPU_MODEL_SKYLAKE:     // 0x4E
+    case CPU_MODEL_SKYLAKE_DT:  // 0x5E
+    case CPU_MODEL_SKYLAKE_W:   // 0x55, also SKL-X
+
+      if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonW) {
+        // IMP11 (Xeon W 2140B)
+        ProcessorType->Type = AppleProcessorTypeXeonW;       // 0x0F01
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorM3) {
+        // FIXME: we dont have any m3 (Skylake) dump!
+        // using an ideal value (0x0C07), which is used on MB101 (m3-7Y32)
+        ProcessorType->Type = AppleProcessorTypeCoreM3Type7; // 0x0C07
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorM5) {
+        // MB91 (m5 6Y54)
+        ProcessorType->Type = AppleProcessorTypeCoreM5Type7; // 0x0D07
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorM7) {
+        // FIXME: we dont have any m7 (Skylake) dump!
+        // using an ideal value (0x0E07)
+        ProcessorType->Type = AppleProcessorTypeCoreM7Type7; // 0x0E07
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI5) {
+        ProcessorType->Type = AppleProcessorTypeCorei5Type5; // 0x0605
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI7) {
+        // FIXME: used by Apple, but not sure what to use...
+        // 0x0707 is used on MBP133 (i7-6700HQ),
+        // 0x0705 is not confirmed, just an ideal one comparing to 0x0605 (AppleProcessorTypeCorei5Type5)
+        // using 0x0705 for now
+        ProcessorType->Type = AppleProcessorTypeCorei7Type5; // 0x0705
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI3) {
+        // for i3, not used by Apple, just for showing i3 in "About This Mac".
+        ProcessorType->Type = AppleProcessorTypeCorei3Type5; // 0x0905
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI9) {
+        // for i9 (SKL-X), not used by Apple, just for showing i9 in "About This Mac".
+        // FIXME: i9 was not introdced in this era but later (MBP151, Coffee Lake),
+        //        will AppleProcessorMajorI9 work here?
+        // NOTE: using a mostly invalid value 0x1005 for now...
+        ProcessorType->Type = AppleProcessorTypeCorei9Type5; // 0x1005
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
+        // for Skylake E3 (there's no E5/E7 on Skylake), not used by Apple
+        // NOTE: Xeon E3 is not used by Apple at all and should be somehow treated as i7,
+        //       but here we'd like to show Xeon in "About This Mac".
+        // TODO: CPU major type check for Skylake based Xeon E3
+        ProcessorType->Type = AppleProcessorTypeXeon;        // 0x0501
+      } else {
+        // here stands for Pentium and Celeron (Skylake), not used by Apple at all.
+        // putting 0x0905 (i3) as lowest.
+        ProcessorType->Type = AppleProcessorTypeCorei3Type5; // 0x0905
+      }
+
+      break;
+
+    //
+    // Kaby Lake:   https://en.wikipedia.org/wiki/Kaby_Lake#List_of_7th_generation_Kaby_Lake_processors
+    // Coffee Lake: https://en.wikipedia.org/wiki/Coffee_Lake#List_of_8th_generation_Coffee_Lake_processors
+    //
+    // Used by Apple:
+    //   Core m3    [Kaby],
+    //   Core i5/i7 [Kaby/Coffee],
+    //   Core i9    [Coffee],
+    //
+    // Not used by Apple:
+    //   Core i3    [Kaby/Coffee],
+    //   Xeon E3 v6 [Kaby],
+    //   Xeon E     [Coffee],
+    //   Pentium, Celeron
+    //
+    case CPU_MODEL_KABYLAKE:       // 0x8E
+    case CPU_MODEL_COFFEELAKE:     // 0x9E
+
+      if (CpuInfo->AppleMajorType == AppleProcessorMajorM3) {
+        // MB101 (m3 7Y32)
+        ProcessorType->Type = AppleProcessorTypeCoreM3Type7; // 0x0C07
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI5) {
+        // Kaby has 0x9 stepping, and Coffee use 0xA / 0xB stepping.
+        if (CpuInfo->Stepping == 9) {
+          // IM181 (i5-7360U), IM182  (i5-7400), IM183 (i5-7600)
+          // MBP141 (i5-7360U), MBP142 (i5-7267U)
+          ProcessorType->Type = AppleProcessorTypeCorei5Type5; // 0x0605
+        } else {
+          // MM81 (i5-8500B)
+          // MBP152 (i5-8259U)
+          ProcessorType->Type = AppleProcessorTypeCorei5Type9; // 0x0609
+        }
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI7) {
+        // FIXME: used by Apple, but not sure what to use...
+        // 0x0709 is used on MBP151 (i7-8850H),
+        // 0x0705 is not confirmed, just an ideal one comparing to 0x0605 (AppleProcessorTypeCorei5Type5)
+        // using 0x0705 for now
+        ProcessorType->Type = AppleProcessorTypeCorei7Type5; // 0x0705
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI9) {
+        // FIXME: find a dump from MBP151 with i9-8950HK,
+        // for now using an ideal value (0x1009), comparing to 0x0709 (used on MBP151, i7-8850H)
+        ProcessorType->Type = AppleProcessorTypeCorei9Type9; // 0x1009
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI3) {
+        // for i3, not used by Apple, just for showing i3 in "About This Mac".
+        ProcessorType->Type = AppleProcessorTypeCorei3Type5; // 0x0905
+      } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
+        // for Kaby Lake/Coffee Lake E3 (there's no E5/E7 on either), not used by Apple
+        // NOTE: Xeon E3 is not used by Apple at all and should be somehow treated as i7,
+        //       but here we'd like to show Xeon in "About This Mac".
+        // TODO: CPU major type check for KBL/CFL based Xeon E3
+        ProcessorType->Type = AppleProcessorTypeXeon;        // 0x0501
+      } else {
+        // here stands for Pentium and Celeron (KBL/CFL), not used by Apple at all.
+        // putting 0x0905 (i3) as lowest.
+        ProcessorType->Type = AppleProcessorTypeCorei3Type5; // 0x0905
+      }
+      break;
+
+    default:
+      // NOTE: by default it should be unknown
+      ProcessorType->Type = AppleProcessorTypeCorei5Type5; // 0x0605
+      break;
   }
 
-  SmBiosFinaliseStruct (Table, Handle, p->Hdr.Length + 1);
-
-  DEBUG_CODE_BEGIN();
-
-  This.Raw = (UINT8 *)p;
-
-  SmbiosDebugAppleFirmwareVolume (This);
-
-  DEBUG_CODE_END();
+  SmbiosFinaliseStruct (Table);
 }
 
-// SmBiosInitType130
-/**
+/** Type 132
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
   @param[in] Handle                 Pointer to tocation containing the current handle value.
@@ -1083,512 +1442,45 @@ CreateAppleFirmwareVolume (
 
   @retval
 **/
+STATIC
 VOID
-SmBiosInitType130 (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle,
-  IN  CPU_INFO        *CpuInfo
+PatchAppleProcessorSpeed (
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data,
+  IN     CPU_INFO         *CpuInfo
   )
 {
-  APPLE_SMBIOS_TABLE_TYPE130  *p = (APPLE_SMBIOS_TABLE_TYPE130 *)*(Table);
+#ifndef OC_PROVIDE_APPLE_PROCESSOR_BUS_SPEED
+  //
+  // I believe this table is no longer used.
+  // The code below may be inaccurate as well, since it expects KHz.
+  //
+  (VOID) Table;
+  (VOID) Data;
+  (VOID) CpuInfo;
+#else
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  UINT32                          MinLength;
+  UINT8                           StringIndex;
 
-  p->Hdr.Type   = APPLE_SMBIOS_TYPE_MEMORY_SPD_DATA;
-  p->Hdr.Length = sizeof(APPLE_SMBIOS_TABLE_TYPE130);
-  p->Hdr.Handle = *(Handle);
+  Original    = SmbiosGetOriginalTable (APPLE_SMBIOS_TYPE_PROCESSOR_BUS_SPEED, 1);
+  MinLength   = sizeof (*Original.Type132);
+  StringIndex = 0;
 
-  SmBiosFinaliseStruct (Table, Handle, p->Hdr.Length + 1);
-}
-
-// CreateAppleProcessorType
-/**
-
-  @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-  @param[in] CpuInfo                Pointer to a valid pico cpu info structure.
-
-  @retval
-**/
-VOID
-CreateAppleProcessorType (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle,
-  IN  CPU_INFO        *CpuInfo
-  )
-{
-  APPLE_SMBIOS_TABLE_TYPE131  *p = (APPLE_SMBIOS_TABLE_TYPE131 *)*(Table);
-  EFI_STATUS  Status;
-  UINT16      *CpuType;
-  UINTN       Length;
-
-  p->Hdr.Type   = APPLE_SMBIOS_TYPE_PROCESSOR_TYPE;
-  p->Hdr.Length = sizeof (APPLE_SMBIOS_TABLE_TYPE131);
-  p->Hdr.Handle = *(Handle);
-
-  CpuType = &p->ProcessorType.Type;
-  Length  = sizeof (p->ProcessorType);
-
-  Status  = OcGetVariable (
-              OPEN_CORE_CPU_TYPE_VARIABLE,
-              &gOpenCoreOverridesGuid,
-              (VOID **)&CpuType,
-              &Length
-              );
-
-  if ((EFI_ERROR (Status)) || (Length != sizeof (p->ProcessorType.Type))) {
-    switch (CpuInfo->Model) {
-      //
-      // Yonah: https://en.wikipedia.org/wiki/Yonah_(microprocessor)#Models_and_brand_names
-      //
-      // Used by Apple:
-      //   Core Duo, Core Solo
-      //
-      // NOT used by Apple:
-      //   Pentium, Celeron
-      //
-      // All 0x0201.
-      //
-      case CPU_MODEL_DOTHAN: // 0x0D
-      case CPU_MODEL_YONAH:  // 0x0E
-
-        // IM41  (T2400/T2500), MM11 (Solo T1200 / Duo T2300/T2400),
-        // MBP11 (L2400/T2400/T2500/T2600), MBP12 (T2600),
-        // MB11  (T2400/T2500)
-        p->ProcessorType.Type = AppleProcessorTypeCoreSolo; // 0x0201
-
-        break;
-
-      //
-      // Merom:  https://en.wikipedia.org/wiki/Merom_(microprocessor)#Variants
-      // Penryn: https://en.wikipedia.org/wiki/Penryn_(microprocessor)#Variants
-      //
-      // Used by Apple:
-      //   Core 2 Extreme, Core 2 Duo (Merom),
-      //   Core 2 Duo,                (Penryn),
-      //   certain Clovertown (Merom) / Harpertown (Penryn) based models
-      //
-      // Not used by Apple:
-      //   Merom:  Core 2 Solo, Pentium, Celeron M, Celeron
-      //   Penryn: Core 2 Extreme, Core 2 Quad, Core 2 Solo, Pentium, Celeron
-      //
-      case CPU_MODEL_MEROM:  // 0x0F
-      case CPU_MODEL_PENRYN: // 0x17
-
-        if (CpuInfo->AppleMajorType == AppleProcessorMajorCore2) {
-          // TODO: add check for models above. (by changing the following "if (0)")
-          if (0) {
-            // ONLY MBA31 (SU9400/SU9600) and MBA32 (SL9400/SL9600)
-            p->ProcessorType.Type = AppleProcessorTypeCore2DuoType2; // 0x0302
-          } else {
-            // IM51 (T7200), IM61 (T7400), IM71 (T7300), IM81 (E8435), IM101 (E7600),
-            // MM21 (unknown), MM31 (P7350),
-            // MBP21 (T7600), MBP22 (unknown), MBP31 (T7700), MBP41 (T8300), MBP71 (P8600),
-            // MBP51 (P8600), MBP52 (T9600), MBP53 (P8800), MBP54 (P8700), MBP55 (P7550),
-            // MBA11 (P7500), MBA21 (SL9600), 
-            // MB21 (unknown), MB31 (T7500), MB41 (T8300), MB51 (P8600), MB52 (P7450), MB61 (P7550), MB71 (P8600)
-            p->ProcessorType.Type = AppleProcessorTypeCore2DuoType1; // 0x0301
-          }
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonPenryn) {
-          // MP21 (2x X5365), MP31 (2x E5462) - 0x0402
-          // FIXME: check when 0x0401 will be used.
-          p->ProcessorType.Type = AppleProcessorTypeXeonPenrynType2; // 0x0402
-        } else {
-          // here stands for models not used by Apple (Merom/Penryn), putting 0x0301 as lowest
-          p->ProcessorType.Type = AppleProcessorTypeCore2DuoType1;   // 0x0301
-        }
-
-        break;
-
-      //
-      // Nehalem:  https://en.wikipedia.org/wiki/Nehalem_(microarchitecture)#Server_and_desktop_processors
-      // Westmere: https://en.wikipedia.org/wiki/Westmere_(microarchitecture)#Server_/_Desktop_processors
-      //
-      // Used by Apple:
-      //   Gainestown (Xeon), Bloomfield (Xeon), Lynnfield (i5/i7)                   [Nehalem]
-      //   Gulftown (aka Westmere-EP, Xeon), Clarkdale (i3/i5), Arrandale (i5/i7)    [Westmere]
-      //
-      // Not used by Apple:
-      //   Beckton (Xeon), Jasper Forest (Xeon), Clarksfield (i7), Pentium, Celeron [Nehalem]
-      //   Westmere-EX (Xeon E7), Pentium, Celeron                                  [Westmere]
-      // 
-      case CPU_MODEL_NEHALEM:     // 0x1A
-      case CPU_MODEL_NEHALEM_EX:  // 0x2E, not used by Apple
-      case CPU_MODEL_FIELDS:      // 0x1E, Lynnfield, Clarksfield (part of Nehalem)
-      case CPU_MODEL_WESTMERE:    // 0x2C
-      case CPU_MODEL_WESTMERE_EX: // 0x2F, not used by Apple
-      case CPU_MODEL_DALES_32NM:  // 0x25, Clarkdale, Arrandale (part of Westmere)
-
-        if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonNehalem) {
-          // MP41 & Xserve31 (2x E5520, CPU_MODEL_NEHALEM), MP51 (2x X5670, CPU_MODEL_WESTMERE)
-          p->ProcessorType.Type = AppleProcessorTypeXeon;        // 0x0501
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI3) {
-          // IM112 (i3-540, 0x0901, CPU_MODEL_DALES_32NM)
-          p->ProcessorType.Type = AppleProcessorTypeCorei3Type1; // 0x0901
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI5) {
-          // FIXME: no idea what it is on IM112 (i5-680)
-          // MBP61, i5-640M, 0x0602, CPU_MODEL_DALES_32NM
-          p->ProcessorType.Type = AppleProcessorTypeCorei5Type2; // 0x0602
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI7) {
-          // FIXME: used by Apple, no idea what to use, assuming 0x0702 for now (based off 0x0602 on i5)
-          p->ProcessorType.Type = AppleProcessorTypeCorei7Type2; // 0x0702
-        } else {
-          // here stands for Pentium and Celeron (Nehalem/Westmere), not used by Apple at all.
-          // putting 0x0901 (i3) as lowest
-          p->ProcessorType.Type = AppleProcessorTypeCorei3Type1; // 0x0901
-        }
-
-        break;
-
-      //
-      // Sandy Bridge:   https://en.wikipedia.org/wiki/Sandy_Bridge#List_of_Sandy_Bridge_processors
-      // Sandy Bridge-E: https://en.wikipedia.org/wiki/Sandy_Bridge-E#Overview
-      //
-      // Used by Apple:
-      //   Core i5/i7 / i3 (see NOTE below)
-      //
-      // NOTE: There seems to be one more i3-2100 used on IM121 (EDU),
-      //       assuming it exists for now.
-      //
-      // Not used by Apple:
-      //   Xeon v1 (E5/E3),
-      //   SNB-E based Core i7 (and Extreme): 3970X, 3960X, 3930K, 3820,
-      //   Pentium, Celeron
-      //
-      case CPU_MODEL_SANDYBRIDGE: // 0x2A
-      case CPU_MODEL_JAKETOWN:    // 0x2D, SNB-E, not used by Apple
-
-        if (CpuInfo->AppleMajorType == AppleProcessorMajorI3) {
-          // FIXME: used by Apple on iMac12,1 (EDU, i3-2100), not confirmed yet
-          p->ProcessorType.Type = AppleProcessorTypeCorei3Type3;   // 0x0903
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI5) {
-          // NOTE: two values are used here. (0x0602 and 0x0603)
-          // TODO: how to classify them. (by changing "if (0)")
-          if (0) {
-            // MM51 (i5-2415M), MM52 (i5-2520M), MBA41 (i5-2467M), MBA42 (i5-2557M)
-            p->ProcessorType.Type = AppleProcessorTypeCorei5Type2; // 0x0602
-          } else {
-            // IM121 (i5-2400S), MBP81 (i5-2415M)
-            p->ProcessorType.Type = AppleProcessorTypeCorei5Type3; // 0x0603
-          }
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI7) {
-          // IM122 (i7-2600), MBP82 (i7-2675QM), MBP83 (i7-2820QM)
-          //
-          // FIXME: will those i7 not used by Apple (see above), be identified as AppleProcessorMajorI7?
-          p->ProcessorType.Type = AppleProcessorTypeCorei7Type3;   // 0x0703
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonE5) { // see TODO below
-          // for Sandy Xeon E5, not used by Apple
-          // FIXME: is AppleProcessorMajorXeonE5, which seems to be for IVY-E only, compatible with SNB-E too?
-          // TODO: write some decent code to check SNB-E based Xeon E5.
-          p->ProcessorType.Type = AppleProcessorTypeXeonE5;        // 0x0A01
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
-          // for Sandy Xeon E3
-          // NOTE: Xeon E3 is not used by Apple at all and should be somehow treated as i7, 
-          //       but here we'd like to show Xeon in "About This Mac".
-          // TODO: CPU major type check for SNB based Xeon E3
-          p->ProcessorType.Type = AppleProcessorTypeXeon;          // 0x0501
-        } else {
-          // here stands for Pentium and Celeron (Sandy), not used by Apple at all.
-          // putting 0x0903 (i3) as lowest
-          p->ProcessorType.Type = AppleProcessorTypeCorei3Type3;   // 0x0903
-        }
-
-        break;
-
-      //
-      // Ivy Bridge:   https://en.wikipedia.org/wiki/Ivy_Bridge_(microarchitecture)#List_of_Ivy_Bridge_processors
-      // Ivy Bridge-E: https://en.wikipedia.org/wiki/Ivy_Bridge_(microarchitecture)#Models_and_steppings_2
-      // 
-      // Used by Apple:
-      //   Core i5/i7 / i3 (see NOTE below),
-      //   Xeon E5 v2
-      //
-      // NOTE: There seems to be an iMac13,1 (EDU version), or rather iMac13,3, with CPU i3-3225,
-      //       assuming it exists for now.
-      //
-      // Not used by Apple:
-      //   Xeon v2 (E7/E3),
-      //   IVY-E based Core i7 (and Extreme): 4960X, 4930K, 4820K,
-      //   Pentium, Celeron 
-      //
-      case CPU_MODEL_IVYBRIDGE:    // 0x3A
-      case CPU_MODEL_IVYBRIDGE_EP: // 0x3E
-
-        if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonE5) {
-          // MP61 (E5-1620 v2)
-          p->ProcessorType.Type = AppleProcessorTypeXeonE5;      // 0x0A01
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI5) {
-          // IM131 (i5-3470S), IM132  (i5-3470S),
-          // MBP92 (i5-3210M), MBP102 (i5-3210M)
-          // MBA51 (i6-3317U), MBA52  (i5-3427U)
-          p->ProcessorType.Type = AppleProcessorTypeCorei5Type4; // 0x0604
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI7) {
-          // MM62  (i7-3615QM),
-          // MBP91 (i7-3615QM), MBP101 (i7-3820QM)
-          //
-          // FIXME: will those i7 not used by Apple (see above), be identified as AppleProcessorMajorI7?
-          p->ProcessorType.Type = AppleProcessorTypeCorei7Type4; // 0x0704
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI3) {
-          // FIXME: used by Apple (if iMac13,3 were existent, i3-3225), not confirmed yet
-          // assuming it exists for now
-          p->ProcessorType.Type = AppleProcessorTypeCorei3Type4; // 0x0904
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
-          // for Ivy/Ivy-E E3/E7, not used by Apple
-          // NOTE: Xeon E3/E7 is not used by Apple at all and should be somehow treated as i7, 
-          //       but here we'd like to show Xeon in "About This Mac".
-          // TODO: CPU major type check for IVY based Xeon E3/E7
-          p->ProcessorType.Type = AppleProcessorTypeXeon;        // 0x0501
-        } else {
-          // here stands for Pentium and Celeron (Ivy), not used by Apple at all.
-          // putting 0x0904 (i3) as lowest.
-          p->ProcessorType.Type = AppleProcessorTypeCorei3Type4; // 0x0904
-        }
-
-        break;
-
-      //
-      // Haswell:   https://en.wikipedia.org/wiki/Haswell_(microarchitecture)#List_of_Haswell_processors
-      // Haswell-E: basically the same page.
-      //
-      // Used by Apple:
-      //   Core i5/i7
-      //
-      // Not used by Apple:
-      //   Xeon v3 (E7/E5/E3),
-      //   Core i3,
-      //   Haswell-E based Core i7 Extreme: 5960X, 5930K, 5820K,
-      //   Pentium, Celeron
-      //
-      case CPU_MODEL_HASWELL:     // 0x3C
-      case CPU_MODEL_HASWELL_EP:  // 0x3F
-      case CPU_MODEL_HASWELL_ULT: // 0x45
-
-        if (CpuInfo->AppleMajorType == AppleProcessorMajorI5) {
-          // IM141 (i5-4570R), IM142 (i5-4670), IM151 (i5-4690),
-          // MM71  (i5-4260U),
-          // MBA62 (i5-4250U)
-          p->ProcessorType.Type = AppleProcessorTypeCorei5Type5; // 0x0605
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI7) {
-          // MBP112 (i7-4770HQ), MBP113 (i7-4850HQ)
-          //
-          // FIXME: will those i7 not used by Apple (see above), be identified as AppleProcessorMajorI7?
-          p->ProcessorType.Type = AppleProcessorTypeCorei7Type5; // 0x0705
-        } else if (CpuInfo->AppleMajorType ==  AppleProcessorMajorI3) {
-          // for i3, not used by Apple, just for showing i3 in "About This Mac".
-          p->ProcessorType.Type = AppleProcessorTypeCorei3Type5; // 0x0905
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonE5) { // see TODO below
-          // for Haswell-E Xeon E5, not used by Apple
-          // FIXME: is AppleProcessorMajorXeonE5, which seems to be for IVY-E only, compatible with Haswell-E too?
-          // TODO: write some decent code to check Haswell-E based Xeon E5.
-          p->ProcessorType.Type = AppleProcessorTypeXeonE5;      // 0x0A01
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
-          // for Haswell/Haswell-E E3/E7, not used by Apple
-          // NOTE: Xeon E3/E7 is not used by Apple at all and should be somehow treated as i7, 
-          //       but here we'd like to show Xeon in "About This Mac".
-          // TODO: CPU major type check for Haswell/Haswell-E based Xeon E3/E7
-          p->ProcessorType.Type = AppleProcessorTypeXeon;        // 0x0501
-        } else {
-          // here stands for Pentium and Celeron (Haswell), not used by Apple at all.
-          // putting 0x0905 (i3) as lowest.
-          p->ProcessorType.Type = AppleProcessorTypeCorei3Type5; // 0x0905
-        }
-
-        break;
-
-      //
-      // Broadwell:   https://en.wikipedia.org/wiki/Broadwell_(microarchitecture)#List_of_Broadwell_processors
-      // Broadwell-E: https://en.wikipedia.org/wiki/Broadwell_(microarchitecture)#"Broadwell-E"_HEDT_(14_nm)
-      //
-      // NOTE: support table for BDW-E is missing in XNU, thus a CPUID patch might be needed. (See Clover FakeCPUID)
-      //
-      // Used by Apple:
-      //   Core i5/i7, Core M
-      //
-      // Not used by Apple:
-      //   Broadwell-E: i7 6950X/6900K/6850K/6800K,
-      //   Xeon v4 (E5/E3),
-      //   Core i3,
-      //   Pentium, Celeron
-      //
-      case CPU_MODEL_BROADWELL:     // 0x3D
-      case CPU_MODEL_CRYSTALWELL:   // 0x46
-      case CPU_MODEL_BRYSTALWELL:   // 0x47
-
-        if (CpuInfo->AppleMajorType == AppleProcessorMajorM) {
-          // MB81 (M 5Y51)
-          p->ProcessorType.Type = AppleProcessorTypeCoreMType6;   // 0x0B06
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI5) {
-          // IM161  (i5-5250U), IM162 (i5-5675R),
-          // MBP121 (i5-5257U),
-          // MBA71  (i5-5250U), MBA72 (unknown)
-          p->ProcessorType.Type = AppleProcessorTypeCorei5Type6; // 0x0606
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI7) {
-          // FIXME: 0x0706 is just an ideal value for i7, waiting for confirmation
-          // FIXME: will those i7 not used by Apple (see above), be identified as AppleProcessorMajorI7?
-          p->ProcessorType.Type = AppleProcessorTypeCorei7Type6; // 0x0706
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI3) {
-          // for i3, not used by Apple, just for showing i3 in "About This Mac".
-          // FIXME: 0x0906 is just an ideal value for i3, waiting for confirmation
-          p->ProcessorType.Type = AppleProcessorTypeCorei3Type6; // 0x0906
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonE5) { // see TODO below
-          // for Broadwell-E Xeon E5, not used by Apple
-          // FIXME: is AppleProcessorMajorXeonE5, which seems to be for IVY-E only, compatible with Broadwell-E too?
-          // TODO: write some decent code to check Broadwell-E based Xeon E5.
-          p->ProcessorType.Type = AppleProcessorTypeXeonE5;      // 0x0A01
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
-          // for Broadwell E3, not used by Apple
-          // NOTE: Xeon E3 is not used by Apple at all and should be somehow treated as i7, 
-          //       but here we'd like to show Xeon in "About This Mac".
-          // TODO: CPU major type check for Broadwell based Xeon E3
-          p->ProcessorType.Type = AppleProcessorTypeXeon;        // 0x0501
-        } else {
-          // here stands for Pentium and Celeron (Broadwell), not used by Apple at all.
-          // putting 0x0906 (i3) as lowest.
-          p->ProcessorType.Type = AppleProcessorTypeCorei3Type5; // 0x0906
-        }
-
-        break;
-
-      //
-      // Skylake: https://en.wikipedia.org/wiki/Skylake_(microarchitecture)#List_of_Skylake_processor_models
-      //
-      // Used by Apple:
-      //   Xeon W, Core m3, m5, m7, i5, i7
-      //
-      // Not used by Apple:
-      //   Core i3, 
-      //   all high-end models (Core i9, i7 Extreme): see https://en.wikipedia.org/wiki/Skylake_(microarchitecture)#High-end_desktop_processors
-      //   Xeon E3 v5,
-      //   Pentium, Celeron
-      //
-      case CPU_MODEL_SKYLAKE:     // 0x4E
-      case CPU_MODEL_SKYLAKE_DT:  // 0x5E
-      case CPU_MODEL_SKYLAKE_W:   // 0x55, also SKL-X
-
-        if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonW) {
-          // IMP11 (Xeon W 2140B)
-          p->ProcessorType.Type = AppleProcessorTypeXeonW;       // 0x0F01
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorM3) {
-          // FIXME: we dont have any m3 (Skylake) dump!
-          // using an ideal value (0x0C07), which is used on MB101 (m3-7Y32)
-          p->ProcessorType.Type = AppleProcessorTypeCoreM3Type7; // 0x0C07
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorM5) {
-          // MB91 (m5 6Y54)
-          p->ProcessorType.Type = AppleProcessorTypeCoreM5Type7; // 0x0D07
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorM7) {
-          // FIXME: we dont have any m7 (Skylake) dump!
-          // using an ideal value (0x0E07)
-          p->ProcessorType.Type = AppleProcessorTypeCoreM7Type7; // 0x0E07
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI5) {
-          p->ProcessorType.Type = AppleProcessorTypeCorei5Type5; // 0x0605
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI7) {
-          // FIXME: used by Apple, but not sure what to use...
-          // 0x0707 is used on MBP133 (i7-6700HQ),
-          // 0x0705 is not confirmed, just an ideal one comparing to 0x0605 (AppleProcessorTypeCorei5Type5)
-          // using 0x0705 for now
-          p->ProcessorType.Type = AppleProcessorTypeCorei7Type5; // 0x0705
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI3) {
-          // for i3, not used by Apple, just for showing i3 in "About This Mac".
-          p->ProcessorType.Type = AppleProcessorTypeCorei3Type5; // 0x0905
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI9) {
-          // for i9 (SKL-X), not used by Apple, just for showing i9 in "About This Mac".
-          // FIXME: i9 was not introdced in this era but later (MBP151, Coffee Lake),
-          //        will AppleProcessorMajorI9 work here?
-          // NOTE: using a mostly invalid value 0x1005 for now...
-          p->ProcessorType.Type = AppleProcessorTypeCorei9Type5; // 0x1005
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
-          // for Skylake E3 (there's no E5/E7 on Skylake), not used by Apple
-          // NOTE: Xeon E3 is not used by Apple at all and should be somehow treated as i7, 
-          //       but here we'd like to show Xeon in "About This Mac".
-          // TODO: CPU major type check for Skylake based Xeon E3
-          p->ProcessorType.Type = AppleProcessorTypeXeon;        // 0x0501
-        } else {
-          // here stands for Pentium and Celeron (Skylake), not used by Apple at all.
-          // putting 0x0905 (i3) as lowest.
-          p->ProcessorType.Type = AppleProcessorTypeCorei3Type5; // 0x0905
-        }
-
-        break;
-
-      //
-      // Kaby Lake:   https://en.wikipedia.org/wiki/Kaby_Lake#List_of_7th_generation_Kaby_Lake_processors
-      // Coffee Lake: https://en.wikipedia.org/wiki/Coffee_Lake#List_of_8th_generation_Coffee_Lake_processors
-      //
-      // Used by Apple:
-      //   Core m3    [Kaby],
-      //   Core i5/i7 [Kaby/Coffee],
-      //   Core i9    [Coffee],
-      //
-      // Not used by Apple:
-      //   Core i3    [Kaby/Coffee],
-      //   Xeon E3 v6 [Kaby],
-      //   Xeon E     [Coffee],
-      //   Pentium, Celeron
-      // 
-      case CPU_MODEL_KABYLAKE:       // 0x8E
-      case CPU_MODEL_COFFEELAKE:     // 0x9E
-
-        if (CpuInfo->AppleMajorType == AppleProcessorMajorM3) {
-          // MB101 (m3 7Y32)
-          p->ProcessorType.Type = AppleProcessorTypeCoreM3Type7; // 0x0C07
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI5) {
-          // Kaby has 0x9 stepping, and Coffee use 0xA / 0xB stepping.
-          if (CpuInfo->Stepping == 9) {
-            // IM181 (i5-7360U), IM182  (i5-7400), IM183 (i5-7600)
-            // MBP141 (i5-7360U), MBP142 (i5-7267U)
-            p->ProcessorType.Type = AppleProcessorTypeCorei5Type5; // 0x0605
-          } else {
-            // MM81 (i5-8500B)
-            // MBP152 (i5-8259U)
-            p->ProcessorType.Type = AppleProcessorTypeCorei5Type9; // 0x0609
-          }
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI7) {
-          // FIXME: used by Apple, but not sure what to use...
-          // 0x0709 is used on MBP151 (i7-8850H),
-          // 0x0705 is not confirmed, just an ideal one comparing to 0x0605 (AppleProcessorTypeCorei5Type5)
-          // using 0x0705 for now
-          p->ProcessorType.Type = AppleProcessorTypeCorei7Type5; // 0x0705
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI9) {
-          // FIXME: find a dump from MBP151 with i9-8950HK,
-          // for now using an ideal value (0x1009), comparing to 0x0709 (used on MBP151, i7-8850H)
-          p->ProcessorType.Type = AppleProcessorTypeCorei9Type9; // 0x1009
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorI3) {
-          // for i3, not used by Apple, just for showing i3 in "About This Mac".
-          p->ProcessorType.Type = AppleProcessorTypeCorei3Type5; // 0x0905
-        } else if (CpuInfo->AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
-          // for Kaby Lake/Coffee Lake E3 (there's no E5/E7 on either), not used by Apple
-          // NOTE: Xeon E3 is not used by Apple at all and should be somehow treated as i7, 
-          //       but here we'd like to show Xeon in "About This Mac".
-          // TODO: CPU major type check for KBL/CFL based Xeon E3
-          p->ProcessorType.Type = AppleProcessorTypeXeon;        // 0x0501
-        } else {
-          // here stands for Pentium and Celeron (KBL/CFL), not used by Apple at all.
-          // putting 0x0905 (i3) as lowest.
-          p->ProcessorType.Type = AppleProcessorTypeCorei3Type5; // 0x0905
-        }
-
-        break;
-
-
-      default:
-
-        // NOTE: by default it should be unknown
-        p->ProcessorType.Type = AppleProcessorTypeCorei5Type5; // 0x0605
-
-        break;
-    }
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, APPLE_SMBIOS_TYPE_PROCESSOR_BUS_SPEED, MinLength, 1))) {
+    return;
   }
 
-  SmBiosFinaliseStruct (Table, Handle, p->Hdr.Length + 1);
+  if (CpuInfo->Model >= CPU_MODEL_SANDYBRIDGE) {
+    Table->CurrentPtr.Type132->ProcessorBusSpeed = OC_CPU_SNB_QPB_CLOCK * 1000;
+  } else {
+    Table->CurrentPtr.Type132->ProcessorBusSpeed = (UINT16) DivU64x32 (CpuInfo->FSBFrequency, 1000);
+  }
 
-  DEBUG_CODE_BEGIN();
-
-  This.Raw = (UINT8 *)p;
-
-  SmbiosDebugAppleProcessorType (This);
-
-  DEBUG_CODE_END();
+  SmbiosFinaliseStruct (Table);
+#endif
 }
 
-// CreateSmBiosEndOfTable
 /** Type 127
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
@@ -1596,53 +1488,215 @@ CreateAppleProcessorType (
 
   @retval
 **/
+STATIC
 VOID
-CreateSmBiosEndOfTable (
-  IN  UINT8           **Table,
-  IN  SMBIOS_HANDLE   *Handle
+PatchSmBiosEndOfTable (
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data
   )
 {
-  SMBIOS_TABLE_TYPE127 *p = (SMBIOS_TABLE_TYPE127 *)*(Table);
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  UINT32                          MinLength;
+  UINT8                           StringIndex;
 
-  p->Hdr.Type   = SMBIOS_TYPE_END_OF_TABLE;
-  p->Hdr.Length = sizeof(SMBIOS_TABLE_TYPE127);
-  p->Hdr.Handle = *(Handle);
+  Original    = SmbiosGetOriginalTable (SMBIOS_TYPE_END_OF_TABLE, 1);
+  MinLength   = sizeof (*Original.Standard.Type127);
+  StringIndex = 0;
 
-  SmBiosFinaliseStruct (Table, Handle, p->Hdr.Length + 1);
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_END_OF_TABLE, MinLength, 1))) {
+    return;
+  }
+
+  SmbiosFinaliseStruct (Table);
 }
 
-// SmbiosGetModelOverride
 /**
+  Lock or unlock legacy region if used
 
-  @retval
+  @param  Unlock  TRUE to unlock, FALSE to lock
 **/
-UINT8
-SmbiosGetModelOverride (
+STATIC
+VOID
+SmbiosHandleLegacyRegion (
+  BOOLEAN  Unlock
   )
 {
   EFI_STATUS  Status;
-  CHAR8       *ProductName;
-  UINTN       Length;
-  UINT8       MacModel;
 
-  MacModel    = 0;
+  if (Unlock) {
+    if (((UINTN) mOriginalSmbios) < BASE_1MB) {
+      //
+      // Enable write access to DMI anchor
+      //
+      Status = LegacyRegionUnlock (
+                 (UINT32)(UINTN)(mOriginalSmbios) & 0xFFFF8000ULL,
+                 EFI_PAGE_SIZE
+                 );
 
-  ProductName = NULL;
-  Length      = 0;
-  Status      = OcGetVariable (
-                  OPEN_CORE_PRODUCT_NAME_VARIABLE,
-                  &gOpenCoreOverridesGuid,
-                  (VOID **)&ProductName,
-                  &Length
-                  );
-
-  if (!EFI_ERROR (Status) && Length > 0) {
-    if (CompareMem (ProductName, "MacPro", 6) == 0) {
-      MacModel = MacPro;
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_VERBOSE, "LegacyRegionUnlock DMI anchor failure - %r", Status));
+      }
     }
-    FreePool ((VOID *)ProductName);
+
+    if (((UINTN) mOriginalSmbios->TableAddress) < BASE_1MB) {
+      //
+      // Enable write access to DMI table
+      //
+      Status = LegacyRegionUnlock (
+                 (UINT32)(UINTN)(mOriginalSmbios->TableAddress) & 0xFFFF8000ULL,
+                 EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (mOriginalSmbios->TableLength))
+                 );
+
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_VERBOSE, "LegacyRegionUnlock DMI table failure - %r", Status));
+      }
+    }
+  } else {
+    if ((UINTN) mOriginalSmbios->TableAddress < BASE_1MB) {
+      // Lock write access To DMI table
+      Status = LegacyRegionLock (
+                 (UINT32)(UINTN)(mOriginalSmbios->TableAddress) & 0xFFFF8000ULL,
+                 EFI_PAGES_TO_SIZE(EFI_SIZE_TO_PAGES(mOriginalSmbios->TableLength))
+                 );
+
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_VERBOSE, "LegacyRegionLock DMI table failure - %r", Status));
+      }
+    }
+
+    if ((UINTN) mOriginalSmbios < BASE_1MB) {
+      // Lock write access To DMI anchor
+      Status = LegacyRegionLock (
+                 (UINT32)(UINTN)(mOriginalSmbios) & 0xFFFF8000ULL,
+                 EFI_PAGE_SIZE
+                 );
+
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_VERBOSE, "LegacyRegionLock DMI anchor failure - %r", Status));
+      }
+    }
   }
-  return MacModel;
+}
+
+/**
+  Prepare new SMBIOS table based on host data.
+
+  @param  SmbiosTable
+
+  @retval EFI_SUCCESS if buffer is ready to be filled.
+**/
+STATIC
+EFI_STATUS
+SmbiosTableAllocate (
+  IN OUT OC_SMBIOS_TABLE  *SmbiosTable
+  )
+{
+  EFI_STATUS  Status;
+  UINT32      BufferLen;
+
+  mOriginalSmbios    = NULL;
+  mOriginalSmbios3   = NULL;
+  mOriginalTableSize = 0;
+  mOriginalTable.Raw = NULL;
+  ZeroMem (SmbiosTable, sizeof (*SmbiosTable));
+  SmbiosTable->Handle = OcSmbiosAutomaticHandle;
+
+  Status  = EfiGetSystemConfigurationTable (
+              &gEfiSmbiosTableGuid,
+              (VOID **) &mOriginalSmbios
+              );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_VERBOSE, "SmbiosLookupHost failed to lookup SMBIOS - %r", Status));
+  }
+
+  Status  = EfiGetSystemConfigurationTable (
+              &gEfiSmbios3TableGuid,
+              (VOID **) &mOriginalSmbios3
+              );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_VERBOSE, "SmbiosLookupHost failed to lookup SMBIOSv3 - %r", Status));
+  }
+
+  //
+  // TODO: I think we may want to try harder.
+  //
+
+  //
+  // Pad the table length to a page and calculate byte size.
+  //
+  if (mOriginalSmbios != NULL) {
+    mOriginalTableSize = BufferLen = EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (mOriginalSmbios->TableLength));
+    mOriginalTable.Raw = (UINT8 *)(UINTN) mOriginalSmbios->TableAddress;
+  } else if (mOriginalSmbios3 != NULL) {
+    mOriginalTableSize = BufferLen = EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (mOriginalSmbios3->TableMaximumSize));
+    mOriginalTable.Raw = (UINT8 *)(UINTN) mOriginalSmbios3->TableAddress;
+  } else {
+    BufferLen = EFI_PAGE_SIZE;
+  }
+
+  if (mOriginalSmbios != NULL) {
+    DEBUG ((
+      DEBUG_INFO,
+      "Found DMI Anchor 0x%08X v%d.%d Table Address 0x%08X Length 0x%04X 0x%04X\n",
+      mOriginalSmbios,
+      mOriginalSmbios->MajorVersion,
+      mOriginalSmbios->MinorVersion,
+      mOriginalSmbios->TableAddress,
+      mOriginalSmbios->TableLength,
+      BufferLen
+      ));
+  }
+
+  Status = SmbiosExtendTable (SmbiosTable, BufferLen);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_VERBOSE, "SmbiosLookupHost failed to lookup SMBIOSv3 - %r", Status));
+  }
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
+SmbiosTableApply (
+  IN OUT OC_SMBIOS_TABLE  *SmbiosTable
+  )
+{
+  SmbiosHandleLegacyRegion (TRUE);
+
+  CopyMem ((VOID *)(UINTN)mOriginalSmbios->TableAddress,
+           SmbiosTable->Table,
+           SmbiosTable->CurrentPtr.Raw - SmbiosTable->Table
+           );
+
+  mOriginalSmbios->TableLength              = SmbiosTable->CurrentPtr.Raw - SmbiosTable->Table;
+  mOriginalSmbios->MaxStructureSize         = SmbiosTable->MaxStructureSize;
+  mOriginalSmbios->NumberOfSmbiosStructures = SmbiosTable->NumberOfStructures;
+
+  //
+  // Fix checksums
+  //
+  mOriginalSmbios->EntryPointStructureChecksum = 0;
+  mOriginalSmbios->EntryPointStructureChecksum = CalculateCheckSum8 ((UINT8 *) mOriginalSmbios, 0x10);
+  mOriginalSmbios->IntermediateChecksum = 0;
+  mOriginalSmbios->IntermediateChecksum = CalculateCheckSum8 ((UINT8 *) mOriginalSmbios + 0x10, mOriginalSmbios->EntryPointLength - 0x10);
+
+  DEBUG ((
+    DEBUG_INFO,
+    "Patched 0x%08X v%d.%d Table Address 0x%08X Length 0x%04X 0x%X 0x%X\n",
+    mOriginalSmbios,
+    mOriginalSmbios->MajorVersion,
+    mOriginalSmbios->MinorVersion,
+    mOriginalSmbios->TableAddress,
+    mOriginalSmbios->TableLength,
+    mOriginalSmbios->EntryPointStructureChecksum,
+    mOriginalSmbios->IntermediateChecksum
+    ));
+
+  SmbiosHandleLegacyRegion (FALSE);
+
+  return EFI_SUCCESS;
 }
 
 // CreateSmBios
@@ -1652,216 +1706,101 @@ SmbiosGetModelOverride (
 **/
 EFI_STATUS
 CreateSmBios (
-  VOID
+  OC_SMBIOS_DATA         *Data,
+  OC_SMBIOS_UPDATE_MODE  Mode
   )
 {
-  EFI_STATUS    Status;
+  EFI_STATUS                      Status;
+  OC_SMBIOS_TABLE                 SmbiosTable;
+  CPU_INFO                        CpuInfo;
+  SMBIOS_HANDLE                   MemoryDeviceHandle;
+  APPLE_SMBIOS_STRUCTURE_POINTER  MemoryDeviceInfo;
+  APPLE_SMBIOS_STRUCTURE_POINTER  MemoryDeviceAddress;
+  UINT8                           NumberMemoryDevices;
+  UINT8                           MemoryDeviceNo;
+  UINT8                           RamModuleNo;
 
-  DEBUG_FUNCTION_ENTRY (DEBUG_VERBOSE);
 
-  mSmbios = NULL;
-  Status  = EfiGetSystemConfigurationTable (
-              &gEfiSmbiosTableGuid,
-              (VOID **)&mSmbios);
+  ASSERT (Data != NULL);
 
-  if (mSmbios != NULL) {
+  Status = SmbiosTableAllocate (&SmbiosTable);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
-    UINT8   *Buffer;
-    UINT32  BufferLen;
+  OcCpuScanProcessor (&CpuInfo);
 
-    // Pad the table length to a page and calculate byte size.
-    BufferLen = EFI_PAGES_TO_SIZE(EFI_SIZE_TO_PAGES(mSmbios->TableLength));
+  PatchBiosInformation (&SmbiosTable, Data);
+  PatchSystemInformation (&SmbiosTable, Data);
+  PatchBaseboardInformation (&SmbiosTable, Data);
+  PatchSystemEnclosure (&SmbiosTable, Data);
+  PatchProcessorInformation (&SmbiosTable, Data, &CpuInfo);
+  PatchCacheInformation (&SmbiosTable, Data);
+  PatchSystemPorts (&SmbiosTable, Data);
+  PatchSystemSlots (&SmbiosTable, Data);
+  PatchMemoryArray (&SmbiosTable, Data);
+  PatchMemoryMappedAddress (&SmbiosTable, Data);
 
-    DEBUG ((
-      DEBUG_INFO,
-      "Found DMI Anchor 0x%08X v%d.%d Table Address 0x%08X Length 0x%04X 0x%04X\n",
-      mSmbios,
-      mSmbios->MajorVersion,
-      mSmbios->MinorVersion,
-      mSmbios->TableAddress,
-      mSmbios->TableLength,
-      BufferLen
-      ));
+  NumberMemoryDevices = SmbiosGetOriginalTableCount (SMBIOS_TYPE_MEMORY_DEVICE);
 
-    Buffer = AllocateZeroPool (BufferLen);
+  for (MemoryDeviceNo = 1, RamModuleNo = 1; MemoryDeviceNo <= NumberMemoryDevices; MemoryDeviceNo++) {
+    MemoryDeviceInfo = SmbiosGetOriginalTable (SMBIOS_TYPE_MEMORY_DEVICE, MemoryDeviceNo);
 
-    Status = EFI_OUT_OF_RESOURCES;
+    if (MemoryDeviceInfo.Raw == NULL) {
+      continue;
+    }
 
-    if (Buffer != NULL) {
+    //
+    // For each memory device we must generate type 17
+    //
+    PatchMemoryDevice (
+      &SmbiosTable,
+      Data,
+      MemoryDeviceInfo,
+      MemoryDeviceNo,
+      &MemoryDeviceHandle
+    );
 
-      CPU_INFO  CpuInfo;
-      UINT8     *Table;
+    MemoryDeviceAddress = SmbiosGetOriginalTable (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, RamModuleNo);
+    if (MemoryDeviceAddress.Raw != NULL) {
+      //
+      // For each occupied memory device we must generate type 20
+      //
 
-      if (!EFI_ERROR (Status)) {
-        Status = OcCpuScanProcessor (&CpuInfo);
+      //
+      // FIXME: While I believe it may be the case that Type20 and Type17 are sorted,
+      // it is not guaranteed by the spec. Rework the matching to do a proper nested loop.
+      //
+      ASSERT (MemoryDeviceAddress.Standard.Type20->MemoryDeviceHandle ==
+          MemoryDeviceInfo.Standard.Type17->Hdr.Handle);
 
-        if (!EFI_ERROR (Status)) {
+      if (MemoryDeviceAddress.Standard.Type20->MemoryDeviceHandle ==
+          MemoryDeviceInfo.Standard.Type17->Hdr.Handle) {
+        PatchMemoryMappedDevice (
+          &SmbiosTable,
+          Data,
+          MemoryDeviceAddress,
+          RamModuleNo,
+          MemoryDeviceHandle
+          );
 
-          SMBIOS_HANDLE   Handle;
-          SMBIOS_HANDLE   MemoryArrayHandle;
-          SMBIOS_HANDLE   MemoryErrorInfoHandle;
+        //
+        // TODO: Type 130 - Apple Memory SPD Info
+        //
 
-          SMBIOS_HANDLE   L1CacheHandle;
-          SMBIOS_HANDLE   L2CacheHandle;
-          SMBIOS_HANDLE   L3CacheHandle;
-
-          UINT8   NumberMemoryDevices;
-          UINT8   MemoryDeviceNo;
-          UINT8   RamModuleNo;
-
-          UINT8   MacModel;
-
-          Handle = 0;
-          Table  = Buffer;
-
-          mTableLength      = 0;
-          mMaxStructureSize = 0;
-
-          L1CacheHandle     = 0xFFFF;
-          L2CacheHandle     = 0xFFFF;
-          L3CacheHandle     = 0xFFFF;
-
-          MacModel          = SmbiosGetModelOverride ();
-
-          //
-
-          PatchBiosInformation (&Table, &Handle);
-          PatchSystemInformation (&Table, &Handle);
-          PatchBaseboardInformation (&Table, &Handle, MacModel);
-          PatchSystemEnclosure (&Table, &Handle, MacModel);
-
-          // Combine the following
-          PatchCacheInformation (&Table, &Handle, &L1CacheHandle, &L2CacheHandle, &L3CacheHandle);
-          PatchProcessorInformation (&Table, &Handle, L1CacheHandle, L2CacheHandle, L3CacheHandle, &CpuInfo);
-
-          PatchSystemPorts (&Table, &Handle);
-          PatchSystemSlots (&Table, &Handle);
-
-          MemoryErrorInfoHandle = 0xFFFF;
-
-          SmBiosInitType16 (&Table, &Handle, &MemoryArrayHandle, MemoryErrorInfoHandle);
-          SmBiosInitType19 (&Table, &Handle, MemoryArrayHandle);
-
-          NumberMemoryDevices = SmbiosGetTableCount (mSmbios, SMBIOS_TYPE_MEMORY_DEVICE);
-
-          for (MemoryDeviceNo = 1, RamModuleNo = 1; MemoryDeviceNo <= NumberMemoryDevices; MemoryDeviceNo++) {
-
-            APPLE_SMBIOS_STRUCTURE_POINTER  MemoryDeviceInfo;
-            APPLE_SMBIOS_STRUCTURE_POINTER  MemoryDeviceAddress;
-
-            MemoryDeviceInfo = SmbiosGetTableFromType (mSmbios, 17, MemoryDeviceNo);
-
-            if (MemoryDeviceInfo.Raw != NULL) {
-
-              MemoryDeviceAddress = SmbiosGetTableFromType (mSmbios, 20, RamModuleNo);
-
-              if (MemoryDeviceAddress.Raw != NULL) {
-
-                // For each occupied memory device we must generate type 20
-                if (MemoryDeviceAddress.Standard.Type20->MemoryDeviceHandle ==
-                    MemoryDeviceInfo.Standard.Type17->Hdr.Handle)
-                {
-                  SmBiosInitType20 (
-                    &Table,
-                    &Handle,
-                    MemoryArrayHandle,
-                    Handle + 1,
-                    RamModuleNo++
-                    );
-
-                  // TODO: Type 130 - Apple Memory SPD Info
-                }
-              }
-
-              // For each memory device we must generate type 17
-              PatchMemoryDevice (
-                &Table,
-                &Handle,
-                MemoryArrayHandle,
-                MemoryErrorInfoHandle,
-                MemoryDeviceNo,
-                MacModel
-              );
-
-            }
-          }
-
-          PatchPortableBatteryDevice (&Table, &Handle);
-
-          PatchBootInformation (&Table, &Handle);
-
-          CreateAppleProcessorType (&Table, &Handle, &CpuInfo);
-
-          CreateAppleFirmwareVolume (&Table, &Handle);
-
-          CreateSmBiosEndOfTable (&Table, &Handle);
-
-          if (((UINTN)mSmbios) < BASE_1MB) {
-            // Enable write access to DMI anchor
-            Status = LegacyRegionUnlock (
-                       (UINT32)(UINTN)(mSmbios) & 0xFFFF8000ULL,
-                       EFI_PAGE_SIZE
-                       );
-          }
-
-          if (((UINTN)mSmbios->TableAddress) < BASE_1MB) {
-            // Enable write access to DMI table
-            Status = LegacyRegionUnlock (
-                       (UINT32)(UINTN)(mSmbios->TableAddress) & 0xFFFF8000ULL,
-                       EFI_PAGES_TO_SIZE(EFI_SIZE_TO_PAGES(mSmbios->TableLength))
-                       );
-          }
-
-          CopyMem ((VOID *)(UINTN)mSmbios->TableAddress,
-                   Buffer,
-                   mTableLength);
-
-          mSmbios->TableLength              = mTableLength;
-          mSmbios->MaxStructureSize         = mMaxStructureSize;
-          mSmbios->NumberOfSmbiosStructures = mNumberOfSmbiosStructures;
-
-          // Fix checksums
-          mSmbios->EntryPointStructureChecksum = 0;
-          mSmbios->EntryPointStructureChecksum = CalculateCheckSum8 ((UINT8 *)mSmbios, 0x10);
-          mSmbios->IntermediateChecksum = 0;
-          mSmbios->IntermediateChecksum = CalculateCheckSum8 ((UINT8 *)mSmbios + 0x10, mSmbios->EntryPointLength - 0x10);
-
-          DEBUG ((
-            DEBUG_INFO,
-            "Patched 0x%08X v%d.%d Table Address 0x%08X Length 0x%04X 0x%X 0x%X\n",
-            mSmbios,
-            mSmbios->MajorVersion,
-            mSmbios->MinorVersion,
-            mSmbios->TableAddress,
-            mSmbios->TableLength,
-            mSmbios->EntryPointStructureChecksum,
-            mSmbios->IntermediateChecksum
-            ));
-
-          if (((UINTN)mSmbios->TableAddress) < BASE_1MB) {
-            // Lock write access To DMI table
-            Status = LegacyRegionLock (
-                       (UINT32)(UINTN)(mSmbios->TableAddress) & 0xFFFF8000ULL,
-                       EFI_PAGES_TO_SIZE(EFI_SIZE_TO_PAGES(mSmbios->TableLength))
-                       );
-          }
-
-          if (((UINTN)mSmbios) < BASE_1MB) {
-            // Lock write access To DMI anchor
-            Status = LegacyRegionLock (
-                       (UINT32)(UINTN)(mSmbios) & 0xFFFF8000ULL,
-                       EFI_PAGE_SIZE
-                       );
-          }
-
-          FreePool (Buffer);
-
-        }
+        RamModuleNo++;
       }
     }
   }
 
-  DEBUG_FUNCTION_RETURN (DEBUG_VERBOSE);
+  PatchPortableBatteryDevice (&SmbiosTable, Data);
+  PatchBootInformation (&SmbiosTable, Data);
+  PatchAppleProcessorType (&SmbiosTable, Data, &CpuInfo);
+  PatchAppleProcessorSpeed (&SmbiosTable, Data, &CpuInfo);
+  PatchAppleFirmwareVolume (&SmbiosTable, Data);
+  PatchSmBiosEndOfTable (&SmbiosTable, Data);
+
+  Status = SmbiosTableApply (&SmbiosTable);
 
   return Status;
 }

@@ -16,6 +16,155 @@
 #define OC_SMBIOS_INTERNAL_H
 
 #include <IndustryStandard/AppleSmBios.h>
+#include <Library/OcGuardLib.h>
+
+#define SMBIOS_STRUCTURE_TERMINATOR_SIZE 2
+
+//
+// According to SMBIOS spec (3.2.0, page 26) SMBIOS handle is a number from 0 to 0xFF00.
+// SMBIOS spec does not require handles to be contiguous or remain valid across SMBIOS.
+// The only requirements is uniqueness and range conformance, so we reserve select handles
+// for dedicated tables here for easier assignment. Automatic handle assignment starts with
+// OcSmbiosAutomaticHandle.
+//
+enum {
+  OcSmbiosInvalidHandle,
+  OcSmbiosBiosInformationHandle,
+  OcSmbiosSystemInformationHandle,
+  OcSmbiosBaseboardInformationHandle,
+  OcSmbiosSystemEnclosureHandle,
+  OcSmbiosProcessorInformationHandle,
+  OcSmbiosMemoryControllerInformationHandle,
+  OcSmbiosMemoryModuleInformatonHandle,
+  /* OcSmbiosCacheInformationHandle, */
+  OcSmbiosL1CacheHandle,
+  OcSmbiosL2CacheHandle,
+  OcSmbiosL3CacheHandle,
+  /* OcSmbiosPortConnectorInformationHandle, */
+  /* OcSmbiosSystemSlotsHandle, */
+  OcSmbiosOnboardDeviceInformationHandle,
+  OcSmbiosOemStringsHandle,
+  OcSmbiosSystemConfigurationOptionsHandle,
+  OcSmbiosBiosLanguageInformationHandle,
+  OcSmbiosGroupAssociationsHandle,
+  OcSmbiosSystemEventLogHandle,
+  OcSmbiosPhysicalMemoryArrayHandle,
+  /* OcSmbiosMemoryDeviceHandle, */
+  OcSmbios32BitMemoryErrorInformationHandle,
+  /* OcSmbiosMemoryArrayMappedAddressHandle, */
+  /* OcSmbiosMemoryDeviceMappedAddressHandle, */
+  OcSmbiosBuiltInPointingDeviceHandle,
+  OcSmbiosPortableBatteryHandle,
+  OcSmbiosSystemResetHandle,
+  OcSmbiosHardwareSecurityHandle,
+  OcSmbiosSystemPowerControlsHandle,
+  OcSmbiosVoltageProbeHandle,
+  OcSmbiosCoolingDeviceHandle,
+  OcSmbiosTemperatureProbeHandle,
+  OcSmbiosElectricalCurrentProbeHandle,
+  OcSmbiosOutOfBandRemoteAccessHandle,
+  OcSmbiosBootIntegrityServiceHandle,
+  OcSmbiosSystemBootInformationHandle,
+  OcSmbios64BitMemoryErrorInformationHandle,
+  OcSmbiosManagementDeviceHandle,
+  OcSmbiosManagementDeviceComponentHandle,
+  OcSmbiosManagementDeviceThresholdDataHandle,
+  OcSmbiosMemoryChannelHandle,
+  OcSmbiosIpmiDeviceInformationHandle,
+  OcSmbiosSystemPowerSupplyHandle,
+  OcSmbiosAdditionalInformationHandle,
+  OcSmbiosOnboardDevicesExtendedInformationHandle,
+  OcSmbiosManagementControllerHostInterfaceHandle,
+  OcSmbiosTpmDeviceHandle,
+  OcSmbiosInactiveHandle,
+  OcSmbiosEndOfTableHandle,
+  OcAppleSmbiosFirmwareInformationHandle,
+  OcAppleSmbiosMemorySpdDataHandle,
+  OcAppleSmbiosProcessorTypeHandle,
+  OcAppleSmbiosProcessorBusSpeedHandle,
+  OcAppleSmbiosPlatformFeatureHandle,
+  OcAppleSmbiosSmcInformationHandle,
+
+  OcSmbiosLastReservedHandle,
+  OcSmbiosAutomaticHandle = 128,
+};
+
+OC_GLOBAL_STATIC_ASSERT (OcSmbiosAutomaticHandle > OcSmbiosLastReservedHandle, "Inconsistent handle IDs");
+
+//
+// Growing SMBIOS table data
+//
+typedef struct OC_SMBIOS_TABLE_ {
+  //
+  // SMBIOS table.
+  //
+  UINT8                            *Table;
+  //
+  // Current table position.
+  //
+  APPLE_SMBIOS_STRUCTURE_POINTER   CurrentPtr;
+  //
+  // Current string position.
+  //
+  CHAR8                            *CurrentStrPtr;
+  //
+  // Allocated table size, multiple of EFI_PAGE_SIZE.
+  //
+  UINT32                           AllocatedTableSize;
+  //
+  // Incrementable handle.
+  //
+  SMBIOS_HANDLE                    Handle;
+  //
+  // Largest structure size within the table.
+  //
+  UINT16                           MaxStructureSize;
+  //
+  // Number of structures within the table.
+  //
+  UINT16                           NumberOfStructures;
+} OC_SMBIOS_TABLE;
+
+/**
+  Allocate bytes in SMBIOS table if necessary
+
+  @retval EFI_SUCCESS on success
+**/
+EFI_STATUS
+SmbiosExtendTable (
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     UINT32           NewSize
+  );
+
+/**
+  Initialise SMBIOS structure
+
+  @param[in] Table             Pointer to location containing the current address within the buffer.
+  @param[in] Type              Table type.
+  @param[in] MinLength         Initial length of the table.
+  @param[in] Index             Table index, normally 1.
+
+  @retval
+**/
+EFI_STATUS
+SmbiosInitialiseStruct (
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     UINT32           Type,
+  IN     UINT32           MinLength,
+  IN     UINT16           Index
+  );
+
+/**
+  Finalise SMBIOS structure
+
+  @param[in] Table                  Pointer to location containing the current address within the buffer.
+
+  @retval
+**/
+VOID
+SmbiosFinaliseStruct (
+  IN OUT OC_SMBIOS_TABLE  *Table
+  );
 
 // SmbiosGetString
 /**
@@ -59,20 +208,20 @@ SmbiosSetStringHex (
   IN  UINT8     *Index
   );
 
-// SmbiosSetOverrideString
+// SmbiosOverrideString
 /**
+  @param[in] Table         Current table buffer.
+  @param[in] Override      String data override
+  @param[in] Index         Pointer to current string index, incremented on success
 
-  @param[in] Buffer        Pointer to the buffer where to create the smbios string.
-  @param[in] VariableName  Pointer to the null terminated ascii variable name.
-  @param[in] Index         Pointer to byte index.
-
-  @retval
+  @retval new string index or 0
 **/
 UINT8
-SmbiosSetOverrideString (
-  IN  CHAR8   **Buffer,
-  IN  CHAR8   *VariableName,
-  IN  UINT8   *Index
+SmbiosOverrideString (
+  IN  OC_SMBIOS_TABLE  *Table,
+  IN  CONST CHAR8      *Override,
+  IN  UINT8            *Index,
+  IN  BOOLEAN          Hex
   );
 
 // SmbiosGetTableLength
@@ -85,6 +234,18 @@ SmbiosGetTableLength (
   IN  APPLE_SMBIOS_STRUCTURE_POINTER  SmbiosTable
   );
 
+/**
+  Obtain minimal size for a table of specific type.
+
+  @param[in]  Type   Table type
+
+  @retval underlying table type size or generic header size
+**/
+UINT32
+SmbiosGetTableTypeLength (
+  IN  SMBIOS_TYPE                     Type
+  );
+
 // SmbiosGetTableFromType
 /**
 
@@ -92,9 +253,10 @@ SmbiosGetTableLength (
 **/
 APPLE_SMBIOS_STRUCTURE_POINTER
 SmbiosGetTableFromType (
-  IN  SMBIOS_TABLE_ENTRY_POINT  *Smbios,
-  IN  SMBIOS_TYPE               Type,
-  IN  UINTN                     Index
+  IN  APPLE_SMBIOS_STRUCTURE_POINTER  SmbiosTable,
+  IN  UINT32                          SmbiosTableSize,
+  IN  SMBIOS_TYPE                     Type,
+  IN  UINT16                          Index
   );
 
 // SmbiosGetTableFromHandle
@@ -113,20 +275,11 @@ SmbiosGetTableFromHandle (
 
   @retval
 **/
-UINTN
+UINT16
 SmbiosGetTableCount (
-  IN  SMBIOS_TABLE_ENTRY_POINT    *Smbios,
-  IN  UINT8                       Type
-  );
-
-// CreateSmBios
-/**
-
-  @retval EFI_SUCCESS     The smbios structure was created and installed successfully.
-**/
-EFI_STATUS
-CreateSmBios (
-  VOID
+  IN  APPLE_SMBIOS_STRUCTURE_POINTER  SmbiosTable,
+  IN  UINT32                          SmbiosTableSize,
+  IN  SMBIOS_TYPE                     Type
   );
 
 #endif // OC_SMBIOS_INTERNAL_H

@@ -30,8 +30,6 @@
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#define INTERNAL_GUID_STRING_LENGTH 36
-
 typedef struct {
   EFI_HANDLE             Handle;
   GUID                   ContainerGuid;
@@ -462,7 +460,7 @@ InternalGetBooterFromApfsPredefinedNameList (
   EFI_FILE_PROTOCOL               *HandleRoot;
   APPLE_APFS_CONTAINER_INFO       *ContainerInfo;
   APPLE_APFS_VOLUME_INFO          *VolumeInfo;
-  CHAR16                          VolumeDirectoryName[INTERNAL_GUID_STRING_LENGTH+1];
+  CHAR16                          VolumeDirectoryName[GUID_STRING_LENGTH+1];
 
   Status =  gBS->LocateHandleBuffer (
                    ByProtocol,
@@ -548,7 +546,7 @@ HasValidGuidStringPrefix (
 {
   UINTN  Length;
   UINTN  Index;
-  UINTN  GuidLength = INTERNAL_GUID_STRING_LENGTH;
+  UINTN  GuidLength = GUID_STRING_LENGTH;
 
   Length = StrLen (String);
   if (Length < GuidLength) {
@@ -988,7 +986,7 @@ BootPolicyGetPathNameOnApfsRecovery (
     }
 
     FullPathNameSize  = sizeof (CHAR16) + StrSize (PathName);
-    FullPathNameSize += INTERNAL_GUID_STRING_LENGTH * sizeof (CHAR16);
+    FullPathNameSize += GUID_STRING_LENGTH * sizeof (CHAR16);
     FullPathBuffer    = AllocateZeroPool (FullPathNameSize);
 
     if (FullPathBuffer == NULL) {
@@ -1079,7 +1077,7 @@ BootPolicyGetApfsRecoveryVolumes (
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem;
   EFI_FILE_PROTOCOL               *Root;
   EFI_FILE_PROTOCOL               *NewHandle;
-  CHAR16                          VolumePathName[INTERNAL_GUID_STRING_LENGTH + 1];
+  CHAR16                          VolumePathName[GUID_STRING_LENGTH + 1];
   EFI_FILE_INFO                   *FileInfo;
   APFS_VOLUME_ROOT                *ApfsRoot;
 
