@@ -22,7 +22,7 @@
 #include <Macros.h>
 
 #include "DebugSmbios.h"
-#include "OcSmbiosInternal.h"
+#include "SmbiosInternal.h"
 
 //
 // String Conversion Lookup Table

@@ -35,7 +35,7 @@
 #include <IndustryStandard/Pci.h>
 
 #include "DebugSmbios.h"
-#include "OcSmbiosInternal.h"
+#include "SmbiosInternal.h"
 
 #include <Macros.h>
 #include <ProcessorInfo.h>
@@ -1649,7 +1649,7 @@ SmbiosTableAllocate (
       ));
   }
 
-  Status = SmbiosExtendTable (SmbiosTable, BufferLen);
+  Status = SmbiosExtendTable (SmbiosTable, 1);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_VERBOSE, "SmbiosLookupHost failed to lookup SMBIOSv3 - %r", Status));
   }

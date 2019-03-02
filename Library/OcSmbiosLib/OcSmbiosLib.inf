@@ -27,10 +27,10 @@
 # VALID_ARCHITECTURES = IA32 X64 IPF EBC
 
 [Sources]
-  AutoSmbios.c
   DebugSmbios.c
   SmbiosPatch.c
-  OcSmbiosInternal.h
+  SmbiosInternal.c
+  SmbiosInternal.h
 
 [Packages]
   EfiPkg/EfiPkg.dec

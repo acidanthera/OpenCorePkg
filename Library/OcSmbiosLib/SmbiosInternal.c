@@ -30,29 +30,114 @@
 
 #include <Macros.h>
 
-#include "OcSmbiosInternal.h"
+#include "SmbiosInternal.h"
 #include "DebugSmbios.h"
 
 EFI_STATUS
 SmbiosExtendTable (
   IN OUT OC_SMBIOS_TABLE  *Table,
-  IN     UINT32           NewSize
+  IN     UINT32           Size
   )
 {
-  //TODO: implement
-  return EFI_OUT_OF_RESOURCES;
+  UINT32  TableSize;
+  UINT32  RequestedSize;
+  UINT8   *NewTable;
+
+  //
+  // Always requrest 2 more bytes, so that the table can be terminated.
+  //
+  Size += SMBIOS_STRUCTURE_TERMINATOR_SIZE;
+
+  if (Table->Table == NULL) {
+    TableSize = 0;
+  } else {
+    TableSize = (UINT8 *) Table->CurrentStrPtr - Table->Table;
+  }
+
+  //
+  // We are not allowed to allocate more than we can write.
+  //
+  RequestedSize = TableSize + Size;
+  if (RequestedSize > SMBIOS_TABLE_MAX_LENGTH) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+  //
+  // Skip reallocation if region fits.
+  //
+  if (RequestedSize <= Table->AllocatedTableSize) {
+    return EFI_SUCCESS;
+  }
+
+  RequestedSize = ALIGN_VALUE (RequestedSize, EFI_PAGE_SIZE);
+  if (RequestedSize > ALIGN_VALUE (SMBIOS_TABLE_MAX_LENGTH, EFI_PAGE_SIZE)) {
+    RequestedSize = ALIGN_VALUE (SMBIOS_TABLE_MAX_LENGTH, EFI_PAGE_SIZE);
+  }
+
+  NewTable = ReallocatePool (TableSize, RequestedSize, Table->Table);
+  if (NewTable == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Table->CurrentPtr.Raw     = NewTable + (Table->CurrentPtr.Raw - Table->Table);
+  Table->CurrentStrPtr      = (CHAR8 *) NewTable + TableSize;
+  Table->Table              = NewTable;
+  Table->AllocatedTableSize = RequestedSize;
+
+  return EFI_SUCCESS;
 }
 
 UINT8
 SmbiosOverrideString (
   IN  OC_SMBIOS_TABLE  *Table,
-  IN  CONST CHAR8      *Override,
+  IN  CONST CHAR8      *Override OPTIONAL,
   IN  UINT8            *Index,
   IN  BOOLEAN          Hex
   )
 {
-  //TODO: implement
-  return 0;
+  UINTN   Length;
+  UINT32  ByteLength;
+  UINT32  MaxLength;
+
+  //
+  // No override.
+  //
+  if (Override == NULL) {
+    return 0;
+  }
+
+  //
+  // In hex format each string is prefixed with 0x and each char becomes two.
+  //
+  MaxLength = Hex ? SMBIOS_STRING_MAX_LENGTH / 2 - SMBIOS_STRING_HEX_PREFIX_SIZE : SMBIOS_STRING_MAX_LENGTH;
+
+  Length = AsciiStrLen (Override);
+
+  //
+  // Truncate to fit but do not error.
+  //
+  if (Length > MaxLength) {
+    Length = MaxLength;
+    DEBUG ((DEBUG_INFO, "SMBIOS truncating '%a' to %u bytes for hex %d\n", Override, Length, Hex));
+  }
+
+  //
+  // Remove any spaces found at the end.
+  //
+  while (Length > 0 && Override[Length - 1] == ' ') {
+    Length--;
+  }
+
+  ByteLength = Hex ? Length * 2 + SMBIOS_STRING_HEX_PREFIX_SIZE + 1 : Length + 1;
+  if (EFI_ERROR (SmbiosExtendTable (Table, ByteLength))) {
+    DEBUG ((DEBUG_WARN, "SMBIOS failed to write '%a' with %u byte extension\n", Override, ByteLength));
+    return 0;
+  }
+
+  if (Hex) {
+    return SmbiosSetStringHex (&Table->CurrentStrPtr, Override, Length, Index);
+  }
+
+  return SmbiosSetString (&Table->CurrentStrPtr, Override, Length, Index);
 }
 
 STATIC
@@ -251,7 +336,7 @@ SmbiosInitialiseStruct (
 {
   EFI_STATUS  Status;
 
-  Status = SmbiosExtendTable (Table, MinLength + SMBIOS_STRUCTURE_TERMINATOR_SIZE);
+  Status = SmbiosExtendTable (Table, MinLength);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "Failed to extend SMBIOS for table %u - %r", Type, Status));
     return Status;
@@ -288,12 +373,13 @@ SmbiosFinaliseStruct (
 
   //
   // SMBIOS spec requires 2 terminator bytes after structures without strings and 1 byte otherwise.
-  // We initially allocate 2 extra bytes (SMBIOS_STRUCTURE_TERMINATOR_SIZE), and end up using one
-  // or two here.
+  // We allocate 2 extra bytes (SMBIOS_STRUCTURE_TERMINATOR_SIZE), and end up using one or two here.
   //
   if (Table->CurrentStrPtr != (CHAR8 *) Table->CurrentPtr.Raw) {
-    Table->CurrentPtr.Raw = (UINT8 *) Table->CurrentStrPtr + 1;
+    Table->CurrentStrPtr++;
+    Table->CurrentPtr.Raw = (UINT8 *) Table->CurrentStrPtr;
   } else {
+    Table->CurrentStrPtr += 2;
     Table->CurrentPtr.Raw += 2;
   }
 }
@@ -331,136 +417,56 @@ SmbiosGetString (
   return AString;
 }
 
-// SmbiosSetString
-/**
-  @param[in] Buffer        Pointer to location containing the current address within the buffer.
-  @param[in] StringIndex   String Index to retrieve
-  @param[in] String        Buffer containing the null terminated ascii string
-
-  @retval
-**/
 UINT8
 SmbiosSetString (
-  IN  CHAR8     **Buffer,
-  IN  CHAR8     *String,
-  IN  UINT8     *Index
+  IN OUT  CHAR8        **Buffer,
+  IN      CONST CHAR8  *String,
+  IN      UINT32       Length,
+  IN OUT  UINT8        *Index
   )
 {
-  UINTN   Length  = 0;
-  VOID    *Target = (VOID *)*((UINTN *)Buffer);
-
-  if (String == NULL) {
-    return 0;
-  }
-
-  Length = AsciiStrLen (String);
-
-  // Remove any spaces found at the end
-  while ((Length != 0) && (String[Length - 1] == ' '))
-  {
-    Length--;
-  }
-
-  if (Length == 0)
-  {
-    return 0;
-  }
-
-  CopyMem (Target, String, Length);
-
-  *Buffer += (Length + 1);
-
-  return *Index += 1;
-}
-
-// SmbiosSetStringHex
-/**
-  @param[in] Buffer        Pointer to location containing the current address within the buffer.
-  @param[in] StringIndex   String Index to retrieve
-  @param[in] String        Buffer containing the null terminated ascii string
-
-  @retval
-**/
-UINT8
-SmbiosSetStringHex (
-  IN  CHAR8     **Buffer,
-  IN  CHAR8     *String,
-  IN  UINT8     *Index
-  )
-{
-  UINTN   Length  = 0;
-  CHAR8   Digit;
-  CHAR8   *Target = (VOID *)*((UINTN *)Buffer);
-
-  if (String == NULL) {
-    return 0;
-  }
-
-  Length = AsciiStrLen (String);
-
-  if (Length == 0) {
-    return 0;
-  }
-
-  // Remove any spaces found at the end
-  while ((Length != 0) && (String[Length - 1] == ' '))
-  {
-    Length--;
-  }
-
-  if (Length == 0)
-  {
-    return 0;
-  }
-
-  *Target++ = '0';
-  *Target++ = 'x';
-
-  while ((Length != 0) && (*String) != 0)
-  {
-    Digit = *String++;
-    *Target++ = "0123456789ABCDEF"[((Digit >> 4) & 0xF)];
-    *Target++ = "0123456789ABCDEF"[(Digit & 0xF)];
-    Length--;
-  }
-
-  *Buffer += (Target - *Buffer) + 1;
-
-  return *Index += 1;
-}
-
-// SmbiosSetOverrideString
-/**
-  @param[in] Buffer        Pointer to location containing the current address within the buffer.
-  @param[in] Override      String data override
-  @param[in] Index         Pointer to current string index, incremented on success
-
-  @retval next string index
-**/
-UINT8
-SmbiosSetOverrideString (
-  IN  CHAR8         **Buffer,
-  IN  CONST CHAR8   *Override,
-  IN  UINT8         *Index
-  )
-{
-  UINTN       Length;
-
   ASSERT (Buffer != NULL);
-  ASSERT (Override != NULL);
+  ASSERT (String != NULL);
   ASSERT (Index != NULL);
 
-  Length = AsciiStrLen (Override);
-  if (Length > SMBIOS_STRING_MAX_LENGTH) {
-    //
-    // Truncate on size exceed.
-    //
-    Length = SMBIOS_STRING_MAX_LENGTH;
+
+  if (Length > 0) {
+    CopyMem (*Buffer, String, Length);
   }
 
-  CopyMem (*Buffer, Override, Length);
   *Buffer += Length + 1;
-  *Index += 1;
+  (*Index)++;
+
+  return *Index;
+}
+
+UINT8
+SmbiosSetStringHex (
+  IN OUT  CHAR8        **Buffer,
+  IN      CONST CHAR8  *String,
+  IN      UINT32       Length,
+  IN OUT  UINT8        *Index
+  )
+{
+  CHAR8  *Target;
+  UINT8  Byte;
+
+  Target = *Buffer;
+
+  if (Length > 0) {
+    *Target++ = '0';
+    *Target++ = 'x';
+
+    while (Length > 0) {
+      Byte = (UINT8) (*String++);
+      *Target++ = "0123456789ABCDEF"[((Byte >> 4U) & 0xFU)];
+      *Target++ = "0123456789ABCDEF"[(Byte & 0xFU)];
+      Length--;
+    }
+  }
+
+  *Buffer = Target + 1;
+  (*Index)++;
 
   return *Index;
 }
