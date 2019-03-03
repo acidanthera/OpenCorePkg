@@ -38,6 +38,8 @@
 
 #include "Ubsan.h"
 
+#ifdef HAVE_UBSAN_SUPPORT
+
 // OC change: unsupported in EDK2
 // #include <sys/cdefs.h>
 #if defined(_KERNEL)
@@ -1641,3 +1643,6 @@ isShiftExponentTooLarge(char *szLocation, struct CTypeDescriptor *pType, unsigne
 
 	return llluGetNumber(szLocation, pType, ulNumber) >= zWidth;
 }
+
+#endif // HAVE_UBSAN_SUPPORT
+

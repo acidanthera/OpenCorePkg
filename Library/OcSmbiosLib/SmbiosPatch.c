@@ -127,7 +127,7 @@ PatchBiosInformation (
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-  UINT32                          MinLength;
+  UINT8                           MinLength;
   UINT8                           StringIndex;
 
   Original    = SmbiosGetOriginalTable (SMBIOS_TYPE_BIOS_INFORMATION, 1);
@@ -170,7 +170,7 @@ PatchSystemInformation (
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-  UINT32                          MinLength;
+  UINT8                           MinLength;
   UINT8                           StringIndex;
 
   Original    = SmbiosGetOriginalTable (SMBIOS_TYPE_SYSTEM_INFORMATION, 1);
@@ -208,7 +208,7 @@ PatchBaseboardInformation (
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-  UINT32                          MinLength;
+  UINT8                           MinLength;
   UINT8                           StringIndex;
 
   Original      = SmbiosGetOriginalTable (SMBIOS_TYPE_BASEBOARD_INFORMATION, 1);
@@ -260,7 +260,7 @@ PatchSystemEnclosure (
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-  UINT32                          MinLength;
+  UINT8                           MinLength;
   UINT8                           StringIndex;
 
   Original      = SmbiosGetOriginalTable (SMBIOS_TYPE_SYSTEM_ENCLOSURE, 1);
@@ -328,7 +328,7 @@ PatchProcessorInformation (
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-  UINT32                          MinLength;
+  UINT8                           MinLength;
   UINT8                           StringIndex;
   UINT8                           TmpCount;
 
@@ -408,7 +408,7 @@ PatchCacheInformation (
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT16                          NumberEntries;
   UINT16                          EntryNo;
-  UINT32                          MinLength;
+  UINT8                           MinLength;
   UINT8                           StringIndex;
   UINT16                          CacheLevel;
   BOOLEAN                         CacheLevels[3];
@@ -475,7 +475,7 @@ PatchSystemPorts (
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT16                          NumberEntries;
   UINT16                          EntryNo;
-  UINT32                          MinLength;
+  UINT8                           MinLength;
   UINT8                           StringIndex;
 
   NumberEntries = SmbiosGetOriginalTableCount (SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION);
@@ -520,7 +520,7 @@ PatchSystemSlots (
   APPLE_SMBIOS_STRUCTURE_POINTER   Original;
   UINT16                           NumberEntries;
   UINT16                           EntryNo;
-  UINT32                           MinLength;
+  UINT8                            MinLength;
   UINT8                            StringIndex;
   EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL  *PciRootBridgeIo;
   EFI_STATUS                       Status;
@@ -645,7 +645,7 @@ PatchMemoryArray (
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-  UINT32                          MinLength;
+  UINT8                           MinLength;
   UINT8                           StringIndex;
 
   Original      = SmbiosGetOriginalTable (SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, 1);
@@ -687,7 +687,7 @@ PatchMemoryDevice (
      OUT SMBIOS_HANDLE                   *Handle
   )
 {
-  UINT32   MinLength;
+  UINT8    MinLength;
   UINT8    StringIndex;
   BOOLEAN  IsEmpty;
 
@@ -769,7 +769,7 @@ PatchMemoryMappedAddress (
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT16                          NumberEntries;
   UINT16                          EntryNo;
-  UINT32                          MinLength;
+  UINT8                           MinLength;
   UINT8                           StringIndex;
 
   NumberEntries = SmbiosGetOriginalTableCount (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS);
@@ -815,7 +815,7 @@ PatchMemoryMappedDevice (
      OUT SMBIOS_HANDLE                   MemoryDeviceHandle
   )
 {
-  UINT32   MinLength;
+  UINT8    MinLength;
   UINT8    StringIndex;
 
   Original      = SmbiosGetOriginalTable (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, Index);
@@ -857,7 +857,7 @@ PatchPortableBatteryDevice (
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-  UINT32                          MinLength;
+  UINT8                           MinLength;
   UINT8                           StringIndex;
 
   Original    = SmbiosGetOriginalTable (SMBIOS_TYPE_PORTABLE_BATTERY, 1);
@@ -909,7 +909,7 @@ PatchBootInformation (
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-  UINT32                          MinLength;
+  UINT8                           MinLength;
   UINT8                           StringIndex;
 
   Original    = SmbiosGetOriginalTable (SMBIOS_TYPE_SYSTEM_BOOT_INFORMATION, 1);
@@ -941,7 +941,7 @@ PatchAppleFirmwareVolume (
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-  UINT32                          MinLength;
+  UINT8                           MinLength;
   UINT8                           StringIndex;
 
   Original    = SmbiosGetOriginalTable (APPLE_SMBIOS_TYPE_FIRMWARE_INFORMATION, 1);
@@ -977,7 +977,7 @@ PatchAppleProcessorType (
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-  UINT32                          MinLength;
+  UINT8                           MinLength;
   UINT8                           StringIndex;
   APPLE_PROCESSOR_TYPE            *ProcessorType;
 
@@ -1460,7 +1460,7 @@ PatchAppleProcessorSpeed (
   (VOID) CpuInfo;
 #else
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-  UINT32                          MinLength;
+  UINT8                           MinLength;
   UINT8                           StringIndex;
 
   Original    = SmbiosGetOriginalTable (APPLE_SMBIOS_TYPE_PROCESSOR_BUS_SPEED, 1);
@@ -1496,7 +1496,7 @@ PatchSmBiosEndOfTable (
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-  UINT32                          MinLength;
+  UINT8                           MinLength;
   UINT8                           StringIndex;
 
   Original    = SmbiosGetOriginalTable (SMBIOS_TYPE_END_OF_TABLE, 1);
@@ -1670,7 +1670,7 @@ SmbiosTableApply (
            SmbiosTable->CurrentPtr.Raw - SmbiosTable->Table
            );
 
-  mOriginalSmbios->TableLength              = SmbiosTable->CurrentPtr.Raw - SmbiosTable->Table;
+  mOriginalSmbios->TableLength              = (UINT16) (SmbiosTable->CurrentPtr.Raw - SmbiosTable->Table);
   mOriginalSmbios->MaxStructureSize         = SmbiosTable->MaxStructureSize;
   mOriginalSmbios->NumberOfSmbiosStructures = SmbiosTable->NumberOfStructures;
 
@@ -1716,7 +1716,7 @@ CreateSmBios (
   SMBIOS_HANDLE                   MemoryDeviceHandle;
   APPLE_SMBIOS_STRUCTURE_POINTER  MemoryDeviceInfo;
   APPLE_SMBIOS_STRUCTURE_POINTER  MemoryDeviceAddress;
-  UINT8                           NumberMemoryDevices;
+  UINT16                          NumberMemoryDevices;
   UINT8                           MemoryDeviceNo;
   UINT8                           RamModuleNo;
 

@@ -51,7 +51,7 @@ SmbiosExtendTable (
   if (Table->Table == NULL) {
     TableSize = 0;
   } else {
-    TableSize = (UINT8 *) Table->CurrentStrPtr - Table->Table;
+    TableSize = (UINT32)((UINT8 *) Table->CurrentStrPtr - Table->Table);
   }
 
   //
@@ -94,7 +94,7 @@ SmbiosOverrideString (
   IN  BOOLEAN          Hex
   )
 {
-  UINTN   Length;
+  UINT32  Length;
   UINT32  ByteLength;
   UINT32  MaxLength;
 
@@ -110,7 +110,7 @@ SmbiosOverrideString (
   //
   MaxLength = Hex ? SMBIOS_STRING_MAX_LENGTH / 2 - SMBIOS_STRING_HEX_PREFIX_SIZE : SMBIOS_STRING_MAX_LENGTH;
 
-  Length = AsciiStrLen (Override);
+  Length = (UINT32) AsciiStrLen (Override);
 
   //
   // Truncate to fit but do not error.
@@ -329,8 +329,8 @@ SmbiosAssignStructHandle (
 EFI_STATUS
 SmbiosInitialiseStruct (
   IN OUT OC_SMBIOS_TABLE  *Table,
-  IN     UINT32           Type,
-  IN     UINT32           MinLength,
+  IN     SMBIOS_TYPE      Type,
+  IN     UINT8            MinLength,
   IN     UINT16           Index
   )
 {

@@ -29,6 +29,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define _KERNEL 1
 #endif
 
+#if !defined(HAVE_UBSAN_SUPPORT) && defined(__clang__)
+#define HAVE_UBSAN_SUPPORT 1
+#endif
+
+
 // Mark long double as supported (since we may use softfp).
 #ifndef __HAVE_LONG_DOUBLE
 #define __HAVE_LONG_DOUBLE
@@ -154,7 +159,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 // Note, that we do not use UEFI-like printf.
 #ifndef __printflike
+#ifdef __GNUC__
 #define __printflike(x, y) __attribute__((format(printf, (x), (y))))
+#else
+#define __printflike(x, y)
+#endif
 #endif
 
 // Route arraycount to ARRAY_SIZE

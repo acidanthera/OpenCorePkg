@@ -178,8 +178,8 @@ SmbiosOverrideString (
 EFI_STATUS
 SmbiosInitialiseStruct (
   IN OUT OC_SMBIOS_TABLE  *Table,
-  IN     UINT32           Type,
-  IN     UINT32           MinLength,
+  IN     SMBIOS_TYPE      Type,
+  IN     UINT8            MinLength,
   IN     UINT16           Index
   );
 

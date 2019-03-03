@@ -30,6 +30,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Ubsan.h"
 
+#ifdef HAVE_UBSAN_SUPPORT
+
 /*
  * Configuration
  */
@@ -529,3 +531,6 @@ int EFIAPI tfp_sprintf(char *str, const char *format, ...)
   return retval;
 }
 #endif
+
+#endif // HAVE_UBSAN_SUPPORT
+

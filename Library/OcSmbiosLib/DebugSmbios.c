@@ -782,41 +782,58 @@ SmbiosDebugAnyStructure (
 {
   switch (Record.Standard.Hdr->Type) {
     case SMBIOS_TYPE_BIOS_INFORMATION:
-      return SmbiosDebugBiosInformation (Record);
+      SmbiosDebugBiosInformation (Record);
+      return;
     case SMBIOS_TYPE_SYSTEM_INFORMATION:
-      return SmbiosDebugSystemInformation (Record);
+      SmbiosDebugSystemInformation (Record);
+      return;
     case SMBIOS_TYPE_BASEBOARD_INFORMATION:
-      return SmbiosDebugBaseboardInformation (Record);
+      SmbiosDebugBaseboardInformation (Record);
+      return;
     case SMBIOS_TYPE_SYSTEM_ENCLOSURE:
-      return SmbiosDebugSystemEnclosure (Record);
+      SmbiosDebugSystemEnclosure (Record);
+      return;
     case SMBIOS_TYPE_PROCESSOR_INFORMATION:
-      return SmbiosDebugProcessorInformation (Record);
+      SmbiosDebugProcessorInformation (Record);
+      return;
     case SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION:
-      return SmbiosDebugSystemPorts (Record);
+      SmbiosDebugSystemPorts (Record);
+      return;
     case SMBIOS_TYPE_CACHE_INFORMATION:
-      return SmbiosDebugCacheInformation (Record);
+      SmbiosDebugCacheInformation (Record);
+      return;
     case SMBIOS_TYPE_SYSTEM_SLOTS:
-      return SmbiosDebugSystemSlots (Record);
+      SmbiosDebugSystemSlots (Record);
+      return;
     case SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY:
-      return SmbiosDebugPhysicalMemoryArray (Record);
+      SmbiosDebugPhysicalMemoryArray (Record);
+      return;
     case SMBIOS_TYPE_MEMORY_DEVICE:
-      return SmbiosDebugMemoryDevice (Record);
+      SmbiosDebugMemoryDevice (Record);
+      return;
     case SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS:
-      return SmbiosDebugMemoryMappedAddress (Record);
+      SmbiosDebugMemoryMappedAddress (Record);
+      return;
     case SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS:
-      return SmbiosDebugMemoryMappedDevice (Record);
+      SmbiosDebugMemoryMappedDevice (Record);
+      return;
     case SMBIOS_TYPE_PORTABLE_BATTERY:
-      return SmbiosDebugPortableBatteryDevice (Record);
+      SmbiosDebugPortableBatteryDevice (Record);
+      return;
     case SMBIOS_TYPE_SYSTEM_BOOT_INFORMATION:
-      return SmbiosDebugBootInformation (Record);
+      SmbiosDebugBootInformation (Record);
+      return;
     case APPLE_SMBIOS_TYPE_FIRMWARE_INFORMATION:
-      return SmbiosDebugAppleFirmwareVolume (Record);
+      SmbiosDebugAppleFirmwareVolume (Record);
+      return;
     case APPLE_SMBIOS_TYPE_PROCESSOR_TYPE:
-      return SmbiosDebugAppleProcessorType (Record);
+      SmbiosDebugAppleProcessorType (Record);
+      return;
     case APPLE_SMBIOS_TYPE_PROCESSOR_BUS_SPEED:
-      return SmbiosDebugAppleProcessorSpeed (Record);
+      SmbiosDebugAppleProcessorSpeed (Record);
+      return;
     default:
-      return SmbiosDebugGeneric (Record);
+      SmbiosDebugGeneric (Record);
   }
 }
 
