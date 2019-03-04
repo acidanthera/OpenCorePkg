@@ -130,7 +130,7 @@ SmbiosDebugSystemInformation (
     DEBUG_INFO,
     " %-16a %g\n",
     "Uuid",
-    Record.Standard.Type1->Uuid
+    &Record.Standard.Type1->Uuid
     ));
 
   DEBUG_SMBIOS ((

@@ -42,10 +42,34 @@
   UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
   UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
   UefiUsbLib|MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
+  PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
   PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf
   DxeServicesTableLib|MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf
   HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
+  OcAcpiLib|OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
+  OcAppleBootPolicyLib|OcSupportPkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
+  OcAppleChunklistLib|OcSupportPkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
+  OcAppleImageVerificationLib|OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
+  OcCpuLib|OcSupportPkg/Library/OcCpuLib/OcCpuLib.inf
+  OcCryptoLib|OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
+  OcDebugLogLib|OcSupportPkg/Library/OcDebugLogLib/OcDebugLogLib.inf
+  OcDevicePathLib|OcSupportPkg/Library/OcDevicePathLib/OcDevicePathLib.inf
+  OcDevicePropertyLib|OcSupportPkg/Library/OcDevicePropertyLib/OcDevicePropertyLib.inf
+  OcFileLib|OcSupportPkg/Library/OcFileLib/OcFileLib.inf
+  OcFirmwarePasswordLib|OcSupportPkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
+  OcGuardLib|OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf
+  OcMachoLib|OcSupportPkg/Library/OcMachoLib/OcMachoLib.inf
+  OcMiscLib|OcSupportPkg/Library/OcMiscLib/OcMiscLib.inf
+  OcPngLib|OcSupportPkg/Library/OcPngLib/OcPngLib.inf
+  OcProtocolLib|OcSupportPkg/Library/OcProtocolLib/OcProtocolLib.inf
+  OcSerializeLib|OcSupportPkg/Library/OcSerializeLib/OcSerializeLib.inf
+  OcSmbiosLib|OcSupportPkg/Library/OcSmbiosLib/OcSmbiosLib.inf
+  OcStringLib|OcSupportPkg/Library/OcStringLib/OcStringLib.inf
+  OcTemplateLib|OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
+  OcTimerLib|OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
+  OcVariableLib|OcSupportPkg/Library/OcVariableLib/OcVariableLib.inf
+  OcXmlLib|OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
 
 [Components]
   OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
@@ -72,6 +96,12 @@
   OcSupportPkg/Library/OcVariableLib/OcVariableLib.inf
   OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
   OcSupportPkg/Debug/GdbSyms/GdbSyms.inf
+  OcSupportPkg/Tests/BlessTest/BlessTest.inf
+  OcSupportPkg/Tests/BlessTest/BlessTestApp.inf
+  OcSupportPkg/Tests/PropertyTest/PropertyTest.inf
+  OcSupportPkg/Tests/PropertyTest/PropertyTestApp.inf
+  OcSupportPkg/Tests/SmbiosTest/SmbiosTest.inf
+  OcSupportPkg/Tests/SmbiosTest/SmbiosTestApp.inf
 
 [PcdsFixedAtBuild]
   gEfiMdePkgTokenSpaceGuid.PcdMaximumAsciiStringLength|0
@@ -101,4 +131,4 @@
   MSFT:RELEASE_*_*_CC_FLAGS  = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
   XCODE:DEBUG_*_*_CC_FLAGS   = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
   XCODE:NOOPT_*_*_CC_FLAGS   = $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
-  XCODE:RELEASE_*_*_CC_FLAGS = -flto $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)
+  XCODE:RELEASE_*_*_CC_FLAGS = -Wno-error -flto $(OCSUPPORTPKG_BUILD_OPTIONS_GEN)

@@ -1771,8 +1771,8 @@ CreateSmBios (
       // FIXME: While I believe it may be the case that Type20 and Type17 are sorted,
       // it is not guaranteed by the spec. Rework the matching to do a proper nested loop.
       //
-      ASSERT (MemoryDeviceAddress.Standard.Type20->MemoryDeviceHandle ==
-          MemoryDeviceInfo.Standard.Type17->Hdr.Handle);
+      //ASSERT (MemoryDeviceAddress.Standard.Type20->MemoryDeviceHandle ==
+      //    MemoryDeviceInfo.Standard.Type17->Hdr.Handle);
 
       if (MemoryDeviceAddress.Standard.Type20->MemoryDeviceHandle ==
           MemoryDeviceInfo.Standard.Type17->Hdr.Handle) {

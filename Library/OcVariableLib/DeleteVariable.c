@@ -116,7 +116,7 @@ DeleteVariables (
                       NULL
                       );
 
-      DEBUG ((DEBUG_VARIABLE, "Delete %g:%s - %r\n", VariableGuid, VariableName, Status));
+      DEBUG ((DEBUG_VARIABLE, "Delete %g:%s - %r\n", &VariableGuid, VariableName, Status));
 
     }
 
