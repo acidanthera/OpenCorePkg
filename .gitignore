@@ -8,3 +8,4 @@ TestsUser/Smbios/Smbios
 DICT
 fuzz-*.log
 crash-*
+oom-*

@@ -50,7 +50,7 @@ STATIC UINT32                          mOriginalTableSize;
     CONST CHAR8  *RealValue__ = (Value); \
     if (RealValue__ == NULL && ((Original).Raw) != NULL && (Original).Raw + (Original).Standard.Hdr->Length \
       >= ((UINT8 *)&((Original).Field) + sizeof (SMBIOS_TABLE_STRING))) { \
-      RealValue__ = SmbiosGetOriginalString ((Original), ((Original).Field)); \
+      RealValue__ = SmbiosGetString ((Original), ((Original).Field)); \
     } \
     (((Table)->CurrentPtr).Field) = SmbiosOverrideString ( \
       (Table), \
@@ -82,34 +82,29 @@ STATIC UINT32                          mOriginalTableSize;
 
 STATIC
 APPLE_SMBIOS_STRUCTURE_POINTER
-SmbiosGetOriginalTable (
+SmbiosGetOriginalStructure (
   IN  SMBIOS_TYPE   Type,
   IN  UINT16        Index
   )
 {
-  return SmbiosGetTableFromType (mOriginalTable, mOriginalTableSize, Type, Index);
+  if (mOriginalTable.Raw == NULL) {
+    return mOriginalTable;
+  }
+
+  return SmbiosGetStructureOfType (mOriginalTable, mOriginalTableSize, Type, Index);
 }
 
 STATIC
 UINT16
-SmbiosGetOriginalTableCount (
+SmbiosGetOriginalStructureCount (
   IN  SMBIOS_TYPE   Type
   )
 {
-  return SmbiosGetTableCount (mOriginalTable, mOriginalTableSize, Type);
-}
+  if (mOriginalTable.Raw == NULL) {
+    return 0;
+  }
 
-STATIC
-CONST CHAR8 *
-SmbiosGetOriginalString (
-  IN APPLE_SMBIOS_STRUCTURE_POINTER     Table,
-  IN SMBIOS_TABLE_STRING                String
-  )
-{
-  //
-  // TODO: check bounds!
-  //
-  return SmbiosGetString (Table, String);
+  return SmbiosGetStructureCount (mOriginalTable, mOriginalTableSize, Type);
 }
 
 /** Type 0
@@ -130,7 +125,7 @@ PatchBiosInformation (
   UINT8                           MinLength;
   UINT8                           StringIndex;
 
-  Original    = SmbiosGetOriginalTable (SMBIOS_TYPE_BIOS_INFORMATION, 1);
+  Original    = SmbiosGetOriginalStructure (SMBIOS_TYPE_BIOS_INFORMATION, 1);
   MinLength   = sizeof (*Original.Standard.Type0);
   StringIndex = 0;
 
@@ -173,7 +168,7 @@ PatchSystemInformation (
   UINT8                           MinLength;
   UINT8                           StringIndex;
 
-  Original    = SmbiosGetOriginalTable (SMBIOS_TYPE_SYSTEM_INFORMATION, 1);
+  Original    = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_INFORMATION, 1);
   MinLength   = sizeof (*Original.Standard.Type1);
   StringIndex = 0;
 
@@ -211,7 +206,7 @@ PatchBaseboardInformation (
   UINT8                           MinLength;
   UINT8                           StringIndex;
 
-  Original      = SmbiosGetOriginalTable (SMBIOS_TYPE_BASEBOARD_INFORMATION, 1);
+  Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_BASEBOARD_INFORMATION, 1);
   MinLength     = sizeof (*Original.Standard.Type2);
   StringIndex   = 0;
 
@@ -263,7 +258,7 @@ PatchSystemEnclosure (
   UINT8                           MinLength;
   UINT8                           StringIndex;
 
-  Original      = SmbiosGetOriginalTable (SMBIOS_TYPE_SYSTEM_ENCLOSURE, 1);
+  Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_ENCLOSURE, 1);
   MinLength     = sizeof (*Original.Standard.Type3);
   StringIndex   = 0;
 
@@ -332,7 +327,7 @@ PatchProcessorInformation (
   UINT8                           StringIndex;
   UINT8                           TmpCount;
 
-  Original      = SmbiosGetOriginalTable (SMBIOS_TYPE_PROCESSOR_INFORMATION, 1);
+  Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_PROCESSOR_INFORMATION, 1);
   MinLength     = sizeof (*Original.Standard.Type4);
   StringIndex   = 0;
 
@@ -415,10 +410,10 @@ PatchCacheInformation (
 
   ZeroMem (CacheLevels, sizeof (CacheLevels));
 
-  NumberEntries = SmbiosGetOriginalTableCount (SMBIOS_TYPE_CACHE_INFORMATION);
+  NumberEntries = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_CACHE_INFORMATION);
 
   for (EntryNo = 1; EntryNo <= NumberEntries; EntryNo++) {
-    Original = SmbiosGetOriginalTable (SMBIOS_TYPE_CACHE_INFORMATION, EntryNo);
+    Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_CACHE_INFORMATION, EntryNo);
     if (Original.Raw == NULL) {
       continue;
     }
@@ -478,10 +473,10 @@ PatchSystemPorts (
   UINT8                           MinLength;
   UINT8                           StringIndex;
 
-  NumberEntries = SmbiosGetOriginalTableCount (SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION);
+  NumberEntries = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION);
 
   for (EntryNo = 1; EntryNo <= NumberEntries; EntryNo++) {
-    Original = SmbiosGetOriginalTable (SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION, EntryNo);
+    Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION, EntryNo);
     if (Original.Raw == NULL) {
       continue;
     }
@@ -538,10 +533,10 @@ PatchSystemSlots (
     PciRootBridgeIo = NULL;
   }
 
-  NumberEntries = SmbiosGetOriginalTableCount (SMBIOS_TYPE_SYSTEM_SLOTS);
+  NumberEntries = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_SYSTEM_SLOTS);
 
   for (EntryNo = 1; EntryNo <= NumberEntries; EntryNo++) {
-    Original = SmbiosGetOriginalTable (SMBIOS_TYPE_SYSTEM_SLOTS, EntryNo);
+    Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_SLOTS, EntryNo);
     if (Original.Raw == NULL) {
       continue;
     }
@@ -648,7 +643,7 @@ PatchMemoryArray (
   UINT8                           MinLength;
   UINT8                           StringIndex;
 
-  Original      = SmbiosGetOriginalTable (SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, 1);
+  Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, 1);
   MinLength     = sizeof (*Original.Standard.Type16);
   StringIndex   = 0;
 
@@ -692,7 +687,7 @@ PatchMemoryDevice (
   BOOLEAN  IsEmpty;
 
   *Handle       = OcSmbiosInvalidHandle;
-  Original      = SmbiosGetOriginalTable (SMBIOS_TYPE_MEMORY_DEVICE, Index);
+  Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE, Index);
   MinLength     = sizeof (*Original.Standard.Type17);
   StringIndex   = 0;
 
@@ -732,10 +727,10 @@ PatchMemoryDevice (
     Table->CurrentPtr.Standard.Type17->MemoryErrorInformationHandle = 0xFFFF;
   }
 
-  SMBIOS_OVERRIDE_H (Table, Standard.Type17->Manufacturer, Original, NULL, &StringIndex, NULL);
-  SMBIOS_OVERRIDE_H (Table, Standard.Type17->SerialNumber, Original, NULL, &StringIndex, NULL);
-  SMBIOS_OVERRIDE_H (Table, Standard.Type17->AssetTag, Original, NULL, &StringIndex, NULL);
-  SMBIOS_OVERRIDE_H (Table, Standard.Type17->PartNumber, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type17->Manufacturer, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type17->SerialNumber, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type17->AssetTag, Original, NULL, &StringIndex, NULL);
+  SMBIOS_OVERRIDE_S (Table, Standard.Type17->PartNumber, Original, NULL, &StringIndex, NULL);
 
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->Attributes, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->ExtendedSize, Original, NULL, NULL);
@@ -772,10 +767,10 @@ PatchMemoryMappedAddress (
   UINT8                           MinLength;
   UINT8                           StringIndex;
 
-  NumberEntries = SmbiosGetOriginalTableCount (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS);
+  NumberEntries = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS);
 
   for (EntryNo = 1; EntryNo <= NumberEntries; EntryNo++) {
-    Original = SmbiosGetOriginalTable (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS, EntryNo);
+    Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS, EntryNo);
     if (Original.Raw == NULL) {
       continue;
     }
@@ -818,7 +813,7 @@ PatchMemoryMappedDevice (
   UINT8    MinLength;
   UINT8    StringIndex;
 
-  Original      = SmbiosGetOriginalTable (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, Index);
+  Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, Index);
   MinLength     = sizeof (*Original.Standard.Type20);
   StringIndex   = 0;
 
@@ -860,7 +855,7 @@ PatchPortableBatteryDevice (
   UINT8                           MinLength;
   UINT8                           StringIndex;
 
-  Original    = SmbiosGetOriginalTable (SMBIOS_TYPE_PORTABLE_BATTERY, 1);
+  Original    = SmbiosGetOriginalStructure (SMBIOS_TYPE_PORTABLE_BATTERY, 1);
   MinLength   = sizeof (*Original.Standard.Type22);
   StringIndex = 0;
 
@@ -912,7 +907,7 @@ PatchBootInformation (
   UINT8                           MinLength;
   UINT8                           StringIndex;
 
-  Original    = SmbiosGetOriginalTable (SMBIOS_TYPE_SYSTEM_BOOT_INFORMATION, 1);
+  Original    = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_BOOT_INFORMATION, 1);
   MinLength   = sizeof (*Original.Standard.Type32);
   StringIndex = 0;
 
@@ -944,7 +939,7 @@ PatchAppleFirmwareVolume (
   UINT8                           MinLength;
   UINT8                           StringIndex;
 
-  Original    = SmbiosGetOriginalTable (APPLE_SMBIOS_TYPE_FIRMWARE_INFORMATION, 1);
+  Original    = SmbiosGetOriginalStructure (APPLE_SMBIOS_TYPE_FIRMWARE_INFORMATION, 1);
   MinLength   = sizeof (*Original.Type128);
   StringIndex = 0;
 
@@ -981,7 +976,7 @@ PatchAppleProcessorType (
   UINT8                           StringIndex;
   APPLE_PROCESSOR_TYPE            *ProcessorType;
 
-  Original    = SmbiosGetOriginalTable (APPLE_SMBIOS_TYPE_PROCESSOR_TYPE, 1);
+  Original    = SmbiosGetOriginalStructure (APPLE_SMBIOS_TYPE_PROCESSOR_TYPE, 1);
   MinLength   = sizeof (*Original.Type131);
   StringIndex = 0;
 
@@ -1463,7 +1458,7 @@ PatchAppleProcessorSpeed (
   UINT8                           MinLength;
   UINT8                           StringIndex;
 
-  Original    = SmbiosGetOriginalTable (APPLE_SMBIOS_TYPE_PROCESSOR_BUS_SPEED, 1);
+  Original    = SmbiosGetOriginalStructure (APPLE_SMBIOS_TYPE_PROCESSOR_BUS_SPEED, 1);
   MinLength   = sizeof (*Original.Type132);
   StringIndex = 0;
 
@@ -1499,7 +1494,7 @@ PatchSmBiosEndOfTable (
   UINT8                           MinLength;
   UINT8                           StringIndex;
 
-  Original    = SmbiosGetOriginalTable (SMBIOS_TYPE_END_OF_TABLE, 1);
+  Original    = SmbiosGetOriginalStructure (SMBIOS_TYPE_END_OF_TABLE, 1);
   MinLength   = sizeof (*Original.Standard.Type127);
   StringIndex = 0;
 
@@ -1516,7 +1511,7 @@ PatchSmBiosEndOfTable (
   @param  Unlock  TRUE to unlock, FALSE to lock
 **/
 STATIC
-VOID
+EFI_STATUS
 SmbiosHandleLegacyRegion (
   BOOLEAN  Unlock
   )
@@ -1527,7 +1522,7 @@ SmbiosHandleLegacyRegion (
   // Not needed for mOriginalSmbios3.
   //
   if (mOriginalSmbios == NULL) {
-    return;
+    return EFI_SUCCESS;
   }
 
   if (Unlock) {
@@ -1536,12 +1531,13 @@ SmbiosHandleLegacyRegion (
       // Enable write access to DMI anchor
       //
       Status = LegacyRegionUnlock (
-                 (UINT32)(UINTN)(mOriginalSmbios) & 0xFFFF8000ULL,
-                 EFI_PAGE_SIZE
-                 );
+        (UINT32) ((UINTN) mOriginalSmbios & 0xFFFF8000ULL),
+        EFI_PAGE_SIZE
+        );
 
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_VERBOSE, "LegacyRegionUnlock DMI anchor failure - %r", Status));
+        DEBUG ((DEBUG_INFO, "LegacyRegionUnlock DMI anchor failure - %r\n", Status));
+        return Status;
       }
     }
 
@@ -1550,39 +1546,48 @@ SmbiosHandleLegacyRegion (
       // Enable write access to DMI table
       //
       Status = LegacyRegionUnlock (
-                 (UINT32)(UINTN)(mOriginalSmbios->TableAddress) & 0xFFFF8000ULL,
-                 EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (mOriginalSmbios->TableLength))
-                 );
+        (UINT32) ((UINTN) mOriginalSmbios->TableAddress & 0xFFFF8000ULL),
+        EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (mOriginalSmbios->TableLength))
+        );
 
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_VERBOSE, "LegacyRegionUnlock DMI table failure - %r", Status));
+        DEBUG ((DEBUG_INFO, "LegacyRegionUnlock DMI table failure - %r\n", Status));
+        return Status;
       }
     }
   } else {
     if ((UINTN) mOriginalSmbios->TableAddress < BASE_1MB) {
+      //
       // Lock write access To DMI table
+      //
       Status = LegacyRegionLock (
-                 (UINT32)(UINTN)(mOriginalSmbios->TableAddress) & 0xFFFF8000ULL,
-                 EFI_PAGES_TO_SIZE(EFI_SIZE_TO_PAGES(mOriginalSmbios->TableLength))
-                 );
+        (UINT32) ((UINTN) mOriginalSmbios->TableAddress & 0xFFFF8000ULL),
+        EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (mOriginalSmbios->TableLength))
+        );
 
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_VERBOSE, "LegacyRegionLock DMI table failure - %r", Status));
+        DEBUG ((DEBUG_INFO, "LegacyRegionLock DMI table failure - %r\n", Status));
+        return Status;
       }
     }
 
     if ((UINTN) mOriginalSmbios < BASE_1MB) {
+      //
       // Lock write access To DMI anchor
+      //
       Status = LegacyRegionLock (
-                 (UINT32)(UINTN)(mOriginalSmbios) & 0xFFFF8000ULL,
-                 EFI_PAGE_SIZE
-                 );
+        (UINT32) ((UINTN) mOriginalSmbios & 0xFFFF8000ULL),
+        EFI_PAGE_SIZE
+        );
 
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_VERBOSE, "LegacyRegionLock DMI anchor failure - %r", Status));
+        DEBUG ((DEBUG_INFO, "LegacyRegionLock DMI anchor failure - %r\n", Status));
+        return Status;
       }
     }
   }
+
+  return EFI_SUCCESS;
 }
 
 /**
@@ -1594,7 +1599,7 @@ SmbiosHandleLegacyRegion (
 **/
 STATIC
 EFI_STATUS
-SmbiosTableAllocate (
+SmbiosPrepareTable (
   IN OUT OC_SMBIOS_TABLE  *SmbiosTable
   )
 {
@@ -1613,17 +1618,48 @@ SmbiosTableAllocate (
               (VOID **) &mOriginalSmbios
               );
 
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_VERBOSE, "SmbiosLookupHost failed to lookup SMBIOS - %r\n", Status));
+  //
+  // Perform basic sanity checks. We assume EfiGetSystemConfigurationTable returns trusted data
+  // in terms of file size at the very least, but try to detect potential issues.
+  //
+  if (!EFI_ERROR (Status)) {
+    if (mOriginalSmbios->EntryPointLength < sizeof (SMBIOS_TABLE_ENTRY_POINT)) {
+      DEBUG ((DEBUG_WARN, "SmbiosLookupHost entry is too small - %u/%u bytes\n",
+        mOriginalSmbios->EntryPointLength, (UINT32) sizeof (SMBIOS_TABLE_ENTRY_POINT)));
+      mOriginalSmbios = NULL;
+    } else if (mOriginalSmbios->TableAddress == 0
+      || mOriginalSmbios->TableLength == 0
+      || mOriginalSmbios->TableLength > SMBIOS_TABLE_MAX_LENGTH) {
+      DEBUG ((DEBUG_WARN, "SmbiosLookupHost entry has invalid table - %08X of %u bytes\n",
+        mOriginalSmbios->TableAddress, mOriginalSmbios->TableLength));
+      mOriginalSmbios = NULL;
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "SmbiosLookupHost failed to lookup SMBIOSv1 - %r\n", Status));
   }
 
+  //
+  // Do similar checks on SMBIOSv3.
+  //
   Status  = EfiGetSystemConfigurationTable (
               &gEfiSmbios3TableGuid,
               (VOID **) &mOriginalSmbios3
               );
 
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_VERBOSE, "SmbiosLookupHost failed to lookup SMBIOSv3 - %r\n", Status));
+  if (!EFI_ERROR (Status)) {
+    if (mOriginalSmbios3->EntryPointLength < sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT)) {
+      DEBUG ((DEBUG_INFO, "SmbiosLookupHost v3 entry is too small - %u/%u bytes\n",
+        mOriginalSmbios3->EntryPointLength, (UINT32) sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT)));
+      mOriginalSmbios3 = NULL;
+    } else if (mOriginalSmbios3->TableAddress == 0
+      || mOriginalSmbios3->TableMaximumSize == 0
+      || mOriginalSmbios3->TableMaximumSize > SMBIOS_3_0_TABLE_MAX_LENGTH) {
+      DEBUG ((DEBUG_INFO, "SmbiosLookupHost v3 entry has invalid table - %016LX of %u bytes\n",
+        mOriginalSmbios3->TableAddress, mOriginalSmbios3->TableMaximumSize));
+      mOriginalSmbios3 = NULL;
+    }
+  } else {
+    DEBUG ((DEBUG_INFO, "SmbiosLookupHost failed to lookup SMBIOSv3 - %r\n", Status));
   }
 
   //
@@ -1634,10 +1670,10 @@ SmbiosTableAllocate (
   // Pad the table length to a page and calculate byte size.
   //
   if (mOriginalSmbios != NULL) {
-    mOriginalTableSize = BufferLen = EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (mOriginalSmbios->TableLength));
+    mOriginalTableSize = mOriginalSmbios->TableLength;
     mOriginalTable.Raw = (UINT8 *)(UINTN) mOriginalSmbios->TableAddress;
   } else if (mOriginalSmbios3 != NULL) {
-    mOriginalTableSize = BufferLen = EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (mOriginalSmbios3->TableMaximumSize));
+    mOriginalTableSize = mOriginalSmbios3->TableMaximumSize;
     mOriginalTable.Raw = (UINT8 *)(UINTN) mOriginalSmbios3->TableAddress;
   } else {
     BufferLen = EFI_PAGE_SIZE;
@@ -1646,19 +1682,30 @@ SmbiosTableAllocate (
   if (mOriginalSmbios != NULL) {
     DEBUG ((
       DEBUG_INFO,
-      "Found DMI Anchor 0x%08X v%d.%d Table Address 0x%08X Length 0x%04X 0x%04X\n",
-      mOriginalSmbios,
+      "Found DMI Anchor %08LX v%u.%u Table Address %08LX Length %04X\n",
+      (UINT64) mOriginalSmbios,
       mOriginalSmbios->MajorVersion,
       mOriginalSmbios->MinorVersion,
-      mOriginalSmbios->TableAddress,
-      mOriginalSmbios->TableLength,
-      BufferLen
+      (UINT64) mOriginalSmbios->TableAddress,
+      mOriginalSmbios->TableLength
+      ));
+  }
+
+  if (mOriginalSmbios3 != NULL) {
+    DEBUG ((
+      DEBUG_INFO,
+      "Found DMI Anchor %08LX v%u.%u Table Address %08LX Length %04X\n",
+      (UINT64) mOriginalSmbios3,
+      mOriginalSmbios3->MajorVersion,
+      mOriginalSmbios3->MinorVersion,
+      mOriginalSmbios3->TableAddress,
+      mOriginalSmbios3->TableMaximumSize
       ));
   }
 
   Status = SmbiosExtendTable (SmbiosTable, 1);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_VERBOSE, "SmbiosLookupHost failed to lookup SMBIOSv3 - %r\n", Status));
+    DEBUG ((DEBUG_VERBOSE, "SmbiosLookupHost failed to initialise smbios table - %r\n", Status));
   }
 
   return Status;
@@ -1666,59 +1713,235 @@ SmbiosTableAllocate (
 
 STATIC
 EFI_STATUS
-SmbiosTableApply (
-  IN OUT OC_SMBIOS_TABLE  *SmbiosTable
+SmbiosTableAllocate (
+  IN      UINT16                        TableLength,
+  IN OUT  SMBIOS_TABLE_ENTRY_POINT      **TableEntryPoint,
+  IN OUT  SMBIOS_TABLE_3_0_ENTRY_POINT  **TableEntryPoint3,
+  IN OUT  VOID                          **TableAddress,
+  IN OUT  VOID                          **TableAddress3
   )
 {
-  SmbiosHandleLegacyRegion (TRUE);
+  UINT16      TablePages;
+  EFI_STATUS  Status;
 
-  if (mOriginalSmbios == NULL) {
-    return EFI_INVALID_PARAMETER;
+  TablePages         = EFI_SIZE_TO_PAGES (TableLength);
+  *TableEntryPoint   = NULL;
+  *TableEntryPoint3  = NULL;
+  *TableAddress      = NULL;
+  *TableAddress3     = NULL;
+
+  Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, TablePages, (EFI_PHYSICAL_ADDRESS *) TableAddress);
+  if (!EFI_ERROR (Status)) {
+    Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, 1, (EFI_PHYSICAL_ADDRESS *) TableEntryPoint);
+    if (!EFI_ERROR (Status) && mOriginalSmbios3 != NULL) {
+      Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, 1, (EFI_PHYSICAL_ADDRESS *) TableEntryPoint3);
+      *TableAddress3 = *TableAddress;
+    }
   }
 
-  CopyMem ((VOID *)(UINTN)mOriginalSmbios->TableAddress,
-           SmbiosTable->Table,
-           SmbiosTable->CurrentPtr.Raw - SmbiosTable->Table
-           );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "SmbiosTableAllocate aborts as it cannot allocate SMBIOS pages with %d %d %d\n",
+      *TableEntryPoint != NULL, *TableAddress != NULL, *TableEntryPoint3 != NULL));
+    if (*TableEntryPoint != NULL) {
+      FreePages (*TableEntryPoint, 1);
+    }
+    if (*TableEntryPoint3 != NULL) {
+      FreePages (*TableEntryPoint3, 1);
+    }
+    if (*TableAddress != NULL) {
+      FreePages (*TableAddress, TablePages);
+    }
+    return Status;
+  }
 
-  mOriginalSmbios->TableLength              = (UINT16) (SmbiosTable->CurrentPtr.Raw - SmbiosTable->Table);
-  mOriginalSmbios->MaxStructureSize         = SmbiosTable->MaxStructureSize;
-  mOriginalSmbios->NumberOfSmbiosStructures = SmbiosTable->NumberOfStructures;
-
-  //
-  // Fix checksums
-  //
-  mOriginalSmbios->EntryPointStructureChecksum = 0;
-  mOriginalSmbios->EntryPointStructureChecksum = CalculateCheckSum8 ((UINT8 *) mOriginalSmbios, 0x10);
-  mOriginalSmbios->IntermediateChecksum = 0;
-  mOriginalSmbios->IntermediateChecksum = CalculateCheckSum8 ((UINT8 *) mOriginalSmbios + 0x10, mOriginalSmbios->EntryPointLength - 0x10);
-
-  DEBUG ((
-    DEBUG_INFO,
-    "Patched 0x%08X v%d.%d Table Address 0x%08X Length 0x%04X 0x%X 0x%X\n",
-    mOriginalSmbios,
-    mOriginalSmbios->MajorVersion,
-    mOriginalSmbios->MinorVersion,
-    mOriginalSmbios->TableAddress,
-    mOriginalSmbios->TableLength,
-    mOriginalSmbios->EntryPointStructureChecksum,
-    mOriginalSmbios->IntermediateChecksum
-    ));
-
-  SmbiosHandleLegacyRegion (FALSE);
+  ZeroMem (*TableAddress, TablePages * EFI_PAGE_SIZE);
+  ZeroMem (*TableEntryPoint, EFI_PAGE_SIZE);
+  if (mOriginalSmbios3 != NULL) {
+    ZeroMem (*TableEntryPoint3, EFI_PAGE_SIZE);
+  }
 
   return EFI_SUCCESS;
 }
 
-// CreateSmBios
+STATIC
+EFI_STATUS
+SmbiosTableApply (
+  IN OUT OC_SMBIOS_TABLE        *SmbiosTable,
+  IN     OC_SMBIOS_UPDATE_MODE  Mode
+  )
+{
+  EFI_STATUS                    Status;
+  UINT16                        TableLength;
+  SMBIOS_TABLE_ENTRY_POINT      *TableEntryPoint;
+  SMBIOS_TABLE_3_0_ENTRY_POINT  *TableEntryPoint3;
+  VOID                          *TableAddress;
+  VOID                          *TableAddress3;
+
+  ASSERT (Mode == OcSmbiosUpdateCreate
+    || Mode == OcSmbiosUpdateOverwrite
+    || Mode == OcSmbiosUpdateCustom
+    || Mode == OcSmbiosUpdateAuto
+    );
+
+  //
+  // We check maximum table size during table extension, so this cast is valid.
+  //
+  TableLength = (UINT16) (SmbiosTable->CurrentPtr.Raw - SmbiosTable->Table);
+
+  if (Mode == OcSmbiosUpdateAuto || Mode == OcSmbiosUpdateOverwrite) {
+    Status = SmbiosHandleLegacyRegion (TRUE);
+
+    if (EFI_ERROR (Status)) {
+      if (Mode == OcSmbiosUpdateOverwrite) {
+        DEBUG ((DEBUG_WARN, "SmbiosTableApply aborts as it cannot handle legacy region - %r\n", Status));
+        return Status;
+      }
+
+      //
+      // Fallback to create mode.
+      //
+      Mode = OcSmbiosUpdateCreate;
+    } else if (mOriginalSmbios == NULL || TableLength > mOriginalSmbios->TableLength) {
+      if (Mode == OcSmbiosUpdateOverwrite) {
+        DEBUG ((DEBUG_WARN, "SmbiosTableApply aborts as it cannot update old SMBIOS (%p, %u) with %u\n",
+          mOriginalSmbios, mOriginalSmbios != NULL ? mOriginalSmbios->TableLength : 0, TableLength));
+        return EFI_OUT_OF_RESOURCES;
+      }
+      //
+      // Fallback to create mode.
+      //
+      Mode = OcSmbiosUpdateCreate;
+    } else if (mOriginalSmbios3 != NULL && TableLength > mOriginalSmbios3->TableMaximumSize) {
+      Mode = OcSmbiosUpdateCreate;
+    } else {
+      Mode = OcSmbiosUpdateOverwrite;
+    }
+  }
+
+  ASSERT (Mode != Mode == OcSmbiosUpdateAuto);
+
+  if (Mode != OcSmbiosUpdateOverwrite) {
+    Status = SmbiosTableAllocate (
+      TableLength,
+      &TableEntryPoint,
+      &TableEntryPoint3,
+      &TableAddress,
+      &TableAddress3
+      );
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+  } else {
+    TableEntryPoint = mOriginalSmbios;
+    TableEntryPoint3 = mOriginalSmbios3;
+    TableAddress = (VOID *)(UINTN) TableEntryPoint->TableAddress;
+    TableAddress3 = mOriginalSmbios3 != NULL ? (VOID *)(UINTN) TableEntryPoint3->TableAddress : NULL;
+  }
+
+  CopyMem (TableAddress,
+    SmbiosTable->Table,
+    TableLength
+    );
+
+  if (TableAddress3 != TableAddress) {
+    CopyMem (TableAddress3,
+      SmbiosTable->Table,
+      TableLength
+      );
+  }
+
+  TableEntryPoint->AnchorString[0]             = (UINT8) '_';
+  TableEntryPoint->AnchorString[1]             = (UINT8) 'S';
+  TableEntryPoint->AnchorString[2]             = (UINT8) 'M';
+  TableEntryPoint->AnchorString[3]             = (UINT8) '_';
+  TableEntryPoint->EntryPointLength            = sizeof (SMBIOS_TABLE_ENTRY_POINT);
+  TableEntryPoint->MajorVersion                = 3;
+  TableEntryPoint->MinorVersion                = 2;
+  TableEntryPoint->MaxStructureSize            = SmbiosTable->MaxStructureSize;
+  TableEntryPoint->IntermediateAnchorString[0] = (UINT8) '_';
+  TableEntryPoint->IntermediateAnchorString[1] = (UINT8) 'D';
+  TableEntryPoint->IntermediateAnchorString[2] = (UINT8) 'M';
+  TableEntryPoint->IntermediateAnchorString[3] = (UINT8) 'I';
+  TableEntryPoint->IntermediateAnchorString[4] = (UINT8) '_';
+  TableEntryPoint->TableLength                 = TableLength;
+  TableEntryPoint->TableAddress                = (UINT32)(UINTN) TableAddress;
+  TableEntryPoint->NumberOfSmbiosStructures    = SmbiosTable->NumberOfStructures;
+  TableEntryPoint->SmbiosBcdRevision           = 0x32;
+  TableEntryPoint->EntryPointStructureChecksum = CalculateCheckSum8 (
+    (UINT8 *) TableEntryPoint,
+    SMBIOS_ENTRY_POINT_CHECKSUM_SIZE
+    );
+  TableEntryPoint->IntermediateChecksum        = CalculateCheckSum8 (
+    (UINT8 *) TableEntryPoint + SMBIOS_ENTRY_POINT_CHECKSUM_SIZE,
+    TableEntryPoint->EntryPointLength - SMBIOS_ENTRY_POINT_CHECKSUM_SIZE
+    );
+
+  if (TableEntryPoint3 != NULL) {
+    TableEntryPoint3->AnchorString[0]             = (UINT8) '_';
+    TableEntryPoint3->AnchorString[1]             = (UINT8) 'S';
+    TableEntryPoint3->AnchorString[2]             = (UINT8) 'M';
+    TableEntryPoint3->AnchorString[3]             = (UINT8) '3';
+    TableEntryPoint3->AnchorString[4]             = (UINT8) '_';
+    TableEntryPoint3->EntryPointLength            = sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT);
+    TableEntryPoint3->MajorVersion                = 3;
+    TableEntryPoint3->MinorVersion                = 2;
+    TableEntryPoint3->EntryPointRevision          = 1;
+    TableEntryPoint3->TableMaximumSize            = TableLength;
+    TableEntryPoint3->TableAddress                = (UINT32)(UINTN) TableAddress;
+    TableEntryPoint3->EntryPointStructureChecksum = CalculateCheckSum8 (
+      (UINT8 *) TableEntryPoint3,
+      TableEntryPoint3->EntryPointLength
+      );
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "Patched %08LX v%d.%d Table Address %08LX Length %04X %X %X\n",
+    (UINT64) TableEntryPoint,
+    TableEntryPoint->MajorVersion,
+    TableEntryPoint->MinorVersion,
+    (UINT64) TableEntryPoint->TableAddress,
+    TableEntryPoint->TableLength,
+    TableEntryPoint->EntryPointStructureChecksum,
+    TableEntryPoint->IntermediateChecksum
+    ));
+
+  if (Mode == OcSmbiosUpdateOverwrite) {
+    SmbiosHandleLegacyRegion (FALSE);
+  } else {
+    if (TableEntryPoint3 != NULL) {
+      Status  = gBS->InstallConfigurationTable (
+        &gEfiSmbios3TableGuid,
+        TableEntryPoint3
+        );
+
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_WARN, "Failed to install v3 table - %r\n", Status));
+      }
+    }
+
+    Status  = gBS->InstallConfigurationTable (
+      Mode == OcSmbiosUpdateCustom ? &gOcCustomSmbiosTableGuid : &gEfiSmbiosTableGuid,
+      TableEntryPoint
+      );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Failed to install v1 table - %r\n", Status));
+      return Status;
+    }
+  }
+
+  return EFI_SUCCESS;
+}
+
 /**
 
   @retval EFI_SUCCESS               The smbios tables were generated successfully
 **/
 EFI_STATUS
-CreateSmBios (
-  OC_SMBIOS_DATA         *Data,
-  OC_SMBIOS_UPDATE_MODE  Mode
+CreateSmbios (
+  IN OC_SMBIOS_DATA         *Data,
+  IN OC_SMBIOS_UPDATE_MODE  Mode
   )
 {
   EFI_STATUS                      Status;
@@ -1734,7 +1957,7 @@ CreateSmBios (
 
   ASSERT (Data != NULL);
 
-  Status = SmbiosTableAllocate (&SmbiosTable);
+  Status = SmbiosPrepareTable (&SmbiosTable);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -1752,10 +1975,10 @@ CreateSmBios (
   PatchMemoryArray (&SmbiosTable, Data);
   PatchMemoryMappedAddress (&SmbiosTable, Data);
 
-  NumberMemoryDevices = SmbiosGetOriginalTableCount (SMBIOS_TYPE_MEMORY_DEVICE);
+  NumberMemoryDevices = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_DEVICE);
 
   for (MemoryDeviceNo = 1, RamModuleNo = 1; MemoryDeviceNo <= NumberMemoryDevices; MemoryDeviceNo++) {
-    MemoryDeviceInfo = SmbiosGetOriginalTable (SMBIOS_TYPE_MEMORY_DEVICE, MemoryDeviceNo);
+    MemoryDeviceInfo = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE, MemoryDeviceNo);
 
     if (MemoryDeviceInfo.Raw == NULL) {
       continue;
@@ -1772,7 +1995,7 @@ CreateSmBios (
       &MemoryDeviceHandle
     );
 
-    MemoryDeviceAddress = SmbiosGetOriginalTable (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, RamModuleNo);
+    MemoryDeviceAddress = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, RamModuleNo);
     if (MemoryDeviceAddress.Raw != NULL) {
       //
       // For each occupied memory device we must generate type 20
@@ -1811,7 +2034,9 @@ CreateSmBios (
   PatchAppleFirmwareVolume (&SmbiosTable, Data);
   PatchSmBiosEndOfTable (&SmbiosTable, Data);
 
-  Status = SmbiosTableApply (&SmbiosTable);
+  Status = SmbiosTableApply (&SmbiosTable, Mode);
+
+  SmbiosTableFree (&SmbiosTable);
 
   return Status;
 }

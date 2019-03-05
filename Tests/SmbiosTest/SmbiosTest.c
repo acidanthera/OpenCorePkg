@@ -83,7 +83,7 @@ TestSmbios (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  CreateSmBios (&Data, 0);
+  CreateSmbios (&Data, OcSmbiosUpdateAuto);
   return EFI_SUCCESS;
 }
 

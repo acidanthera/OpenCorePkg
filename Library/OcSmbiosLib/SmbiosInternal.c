@@ -78,12 +78,29 @@ SmbiosExtendTable (
     return EFI_OUT_OF_RESOURCES;
   }
 
+  //
+  // Guarantee zero fill for the table.
+  //
+  ZeroMem (NewTable + TableSize, RequestedSize - TableSize);
+
   Table->CurrentPtr.Raw     = NewTable + (Table->CurrentPtr.Raw - Table->Table);
   Table->CurrentStrPtr      = (CHAR8 *) NewTable + TableSize;
   Table->Table              = NewTable;
   Table->AllocatedTableSize = RequestedSize;
 
   return EFI_SUCCESS;
+}
+
+VOID
+SmbiosTableFree (
+  IN OUT OC_SMBIOS_TABLE  *Table
+  )
+{
+  if (Table->Table != NULL) {
+    FreePool (Table->Table);
+  }
+
+  ZeroMem (Table, sizeof (*Table));
 }
 
 UINT8
@@ -384,37 +401,37 @@ SmbiosFinaliseStruct (
   }
 }
 
-// SmbiosGetString
-/**
-  @param[in] SmbiosTable
-  @param[in] StringIndex  String Index to retrieve
-
-  @retval
-**/
 CHAR8 *
 SmbiosGetString (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  SmbiosTable,
   IN SMBIOS_TABLE_STRING             String
   )
 {
-  CHAR8      *AString = (CHAR8 *)(SmbiosTable.Raw + SmbiosTable.Standard.Hdr->Length);
-  UINT8      Index = 1;
+  UINT8  *Walker;
+  UINT8  Index;
 
-  if (String == 0)
+  if (String == 0) {
     return NULL;
-
-  while (Index != String) {
-    while (*AString != 0) {
-      AString ++;
-    }
-    AString ++;
-    if (*AString == 0) {
-      return AString;
-    }
-    Index ++;
   }
 
-  return AString;
+  Walker = SmbiosTable.Raw + SmbiosTable.Standard.Hdr->Length;
+
+  for (Index = 1; Index != String; Index++) {
+    while (*Walker != 0) {
+      Walker++;
+    }
+
+    Walker++;
+
+    //
+    // Double NULL termination means end of table.
+    //
+    if (*Walker == 0) {
+      return NULL;
+    }
+  }
+
+  return (CHAR8*) Walker;
 }
 
 UINT8
@@ -471,40 +488,34 @@ SmbiosSetStringHex (
   return *Index;
 }
 
-// SmbiosGetTableLength
-/**
-
-  @retval
-**/
-UINTN
-SmbiosGetTableLength (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  SmbiosTable
+UINT32
+SmbiosGetStructureLength (
+  IN  APPLE_SMBIOS_STRUCTURE_POINTER  SmbiosTable,
+  IN  UINT32                          SmbiosTableSize
   )
 {
-  CHAR8  *AChar;
-  UINTN  Length;
+  UINT32  Length;
+  UINT8   *Walker;
 
-  AChar = (CHAR8 *)(SmbiosTable.Raw + SmbiosTable.Standard.Hdr->Length);
-  while ((*AChar != 0) || (*(AChar + 1) != 0)) {
-    AChar ++;
+  Length = SmbiosTable.Standard.Hdr->Length;
+  if (Length > SmbiosTableSize) {
+    return 0;
   }
-  Length = ((UINTN)AChar - (UINTN)SmbiosTable.Raw + 2);
 
-  return Length;
+  SmbiosTableSize -= Length;
+  Walker = SmbiosTable.Raw;
+  while (SmbiosTableSize >= SMBIOS_STRUCTURE_TERMINATOR_SIZE) {
+    if (Walker[0] == 0 && Walker[1] == 0) {
+      return Length + (Walker - SmbiosTable.Raw) + SMBIOS_STRUCTURE_TERMINATOR_SIZE;
+    }
+    SmbiosTableSize--;
+  }
+
+  return 0;
 }
 
-// SmbiosGetTableFromType
-/**
-
-  @param[in] SmbiosTable      Pointer to SMBIOS table.
-  @param[in] SmbiosTableSize  SMBIOS table size
-  @param[in] Type             SMBIOS table type
-  @param[in] Index            SMBIOS table index starting from 1
-
-  @retval found table or NULL
-**/
 APPLE_SMBIOS_STRUCTURE_POINTER
-SmbiosGetTableFromType (
+SmbiosGetStructureOfType (
   IN  APPLE_SMBIOS_STRUCTURE_POINTER  SmbiosTable,
   IN  UINT32                          SmbiosTableSize,
   IN  SMBIOS_TYPE                     Type,
@@ -512,102 +523,98 @@ SmbiosGetTableFromType (
   )
 {
   UINT16  SmbiosTypeIndex;
-
-  (VOID) SmbiosTableSize;
-
-  //TODO: fix iteration code accessing out of bounds memory.
-  // Note, we should not call SmbiosGetTableTypeLength here as vendor extensions are unknown.
-
-  if (SmbiosTable.Raw == NULL) {
-    return SmbiosTable;
-  }
+  UINT32  Length;
 
   SmbiosTypeIndex = 1;
 
-  while ((SmbiosTypeIndex != Index) || (SmbiosTable.Standard.Hdr->Type != Type)) {
-    if (SmbiosTable.Standard.Hdr->Type == SMBIOS_TYPE_END_OF_TABLE) {
-      SmbiosTable.Raw = NULL;
+  while (SmbiosTableSize >= sizeof (SMBIOS_STRUCTURE)) {
+    //
+    // Perform basic size sanity check.
+    //
+    Length = SmbiosGetStructureLength (SmbiosTable, SmbiosTableSize);
+    if (Length == 0) {
       break;
     }
+
+    //
+    // We found the right table.
+    //
+    if (SmbiosTypeIndex == Index && SmbiosTable.Standard.Hdr->Type == Type) {
+      return SmbiosTable;
+    }
+
+    //
+    // Abort on EOT.
+    //
+    if (SmbiosTable.Standard.Hdr->Type == SMBIOS_TYPE_END_OF_TABLE) {
+      break;
+    }
+
+    //
+    // Skip extra tables of this type until we reach requested number.
+    //
     if (SmbiosTable.Standard.Hdr->Type == Type) {
       SmbiosTypeIndex++;
+      //
+      // Unsigned wraparound, we have more than MAX_UINT16 tables of this kind.
+      //
+      if (SmbiosTypeIndex == 0) {
+        break;
+      }
     }
-    SmbiosTable.Raw = (UINT8 *)(SmbiosTable.Raw + SmbiosGetTableLength (SmbiosTable));
-    if (SmbiosTable.Raw > (UINT8 *)(UINTN)(SmbiosTable.Raw + SmbiosTableSize)) {
-      SmbiosTable.Raw = NULL;
-      break;
-    }
+
+    SmbiosTable.Raw += Length;
+    SmbiosTableSize -= Length;
   }
 
+  SmbiosTable.Raw = NULL;
   return SmbiosTable;
 }
 
-// SmbiosGetTableFromHandle
-/**
-
-  @param[in] Smbios        Pointer to smbios entry point structure.
-  @param[in] Handle
-
-  @retval
-**/
-APPLE_SMBIOS_STRUCTURE_POINTER
-SmbiosGetTableFromHandle (
-  IN  SMBIOS_TABLE_ENTRY_POINT    *Smbios,
-  IN  SMBIOS_HANDLE               Handle
-  )
-{
-  APPLE_SMBIOS_STRUCTURE_POINTER    SmbiosTable;
-
-  SmbiosTable.Raw = (UINT8 *)(UINTN)Smbios->TableAddress;
-  if (SmbiosTable.Raw == NULL) {
-    return SmbiosTable;
-  }
-
-  while (SmbiosTable.Standard.Hdr->Handle != Handle) {
-    if (SmbiosTable.Standard.Hdr->Type == SMBIOS_TYPE_END_OF_TABLE) {
-      SmbiosTable.Raw = NULL;
-      break;
-    }
-    SmbiosTable.Raw = (UINT8 *)(SmbiosTable.Raw + SmbiosGetTableLength (SmbiosTable));
-    if (SmbiosTable.Raw > (UINT8 *)(UINTN)(Smbios->TableAddress + Smbios->TableLength)) {
-      SmbiosTable.Raw = NULL;
-      break;
-    }
-  }
-
-  return SmbiosTable;
-}
-
-// SmbiosGetTableCount
-/**
-
-  @param[in] Smbios        Pointer to smbios entry point structure.
-  @param[in] Type
-
-  @retval
-**/
 UINT16
-SmbiosGetTableCount (
+SmbiosGetStructureCount (
   IN  APPLE_SMBIOS_STRUCTURE_POINTER  SmbiosTable,
   IN  UINT32                          SmbiosTableSize,
   IN  SMBIOS_TYPE                     Type
   )
 {
-  UINT16  SmbiosTypeIndex;
+  UINT16  Count;
+  UINT32  Length;
 
-  SmbiosTypeIndex = 0;
-  if (SmbiosTable.Raw == NULL) {
-    return 0;
-  }
+  Count = 0;
 
-  while (SmbiosTable.Standard.Hdr->Type != SMBIOS_TYPE_END_OF_TABLE) {
-    if (SmbiosTable.Standard.Hdr->Type == Type) {
-      SmbiosTypeIndex ++;
-    }
-    SmbiosTable.Raw = (UINT8 *)(SmbiosTable.Raw + SmbiosGetTableLength (SmbiosTable));
-    if (SmbiosTable.Raw > (UINT8 *)(UINTN)(SmbiosTable.Raw + SmbiosTableSize)) {
+  while (SmbiosTableSize >= sizeof (SMBIOS_STRUCTURE)) {
+    //
+    // Perform basic size sanity check.
+    //
+    Length = SmbiosGetStructureLength (SmbiosTable, SmbiosTableSize);
+    if (Length == 0) {
       break;
     }
+
+    //
+    // We found the right table.
+    //
+    if (SmbiosTable.Standard.Hdr->Type == Type) {
+      Count++;
+      //
+      // Unsigned wraparound, we have more than MAX_UINT16 tables of this kind.
+      //
+      if (Count == 0) {
+        break;
+      }
+    }
+
+    //
+    // Abort on EOT.
+    //
+    if (SmbiosTable.Standard.Hdr->Type == SMBIOS_TYPE_END_OF_TABLE) {
+      break;
+    }
+
+    SmbiosTable.Raw += Length;
+    SmbiosTableSize -= Length;
   }
-  return SmbiosTypeIndex;
+
+  return Count;
 }

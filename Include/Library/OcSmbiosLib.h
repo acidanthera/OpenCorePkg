@@ -94,8 +94,8 @@ typedef struct OC_SMBIOS_DATA_ {
 
 typedef enum OC_SMBIOS_UPDATE_MODE_ {
   //
-  // OcSmbiosUpdateOverwrite if new size is <= than the page-aligned original.
-  // OcSmbiosUpdateCreate otherwise.
+  // OcSmbiosUpdateOverwrite if new size is <= than the page-aligned original and
+  // there are no issues with legacy region unlock. OcSmbiosUpdateCreate otherwise.
   //
   OcSmbiosUpdateAuto       = 0,
   //
@@ -127,9 +127,9 @@ typedef enum OC_SMBIOS_UPDATE_MODE_ {
 } OC_SMBIOS_UPDATE_MODE;
 
 EFI_STATUS
-CreateSmBios (
-  OC_SMBIOS_DATA         *Data,
-  OC_SMBIOS_UPDATE_MODE  Mode
+CreateSmbios (
+  IN OC_SMBIOS_DATA         *Data,
+  IN OC_SMBIOS_UPDATE_MODE  Mode
   );
 
 #endif // OC_SMBIOS_LIB_H

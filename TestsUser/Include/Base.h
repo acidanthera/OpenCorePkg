@@ -372,7 +372,8 @@ typedef VOID (*EFI_EVENT_NOTIFY)(EFI_EVENT Event, VOID *Context);
 #define AsciiStrDecimalToUint64(a) strtoull(a, NULL, 10)
 #define AsciiStrHexToUint64(a) strtoull(a, NULL, 16)
 #define ASSERT assert
-#define DebugCodeEnabled() false
+#define DebugCodeEnabled() true
+#define FreePages(a,b) do {} while (0)
 
 EFI_STATUS EfiGetSystemConfigurationTable (EFI_GUID *TableGuid, OUT VOID **Table);
 
@@ -567,6 +568,8 @@ GetPerformanceCounterProperties (
 
 struct EFI_BOOT_SERVICES_ {
   EFI_STATUS (*LocateProtocol)(EFI_GUID *ProtocolGuid, VOID *Registration, VOID **Interface);
+  EFI_STATUS (*AllocatePages)(EFI_ALLOCATE_TYPE Type, EFI_MEMORY_TYPE MemoryType, UINTN Pages, EFI_PHYSICAL_ADDRESS *Memory);
+  EFI_STATUS (*InstallConfigurationTable)(EFI_GUID *Guid, VOID *Table);
 };
 
 STATIC EFI_STATUS NilLocateProtocol(EFI_GUID *ProtocolGuid, VOID *Registration, VOID **Interface) {
@@ -576,8 +579,30 @@ STATIC EFI_STATUS NilLocateProtocol(EFI_GUID *ProtocolGuid, VOID *Registration, 
   return EFI_NOT_FOUND;
 }
 
+#define TOTAL_PAGES 1000
+extern _Thread_local uint32_t externalUsedPages;
+extern _Thread_local uint8_t externalBlob[EFI_PAGE_SIZE*TOTAL_PAGES];
+
+STATIC EFI_STATUS NilAllocatePages(EFI_ALLOCATE_TYPE Type, EFI_MEMORY_TYPE MemoryType, UINTN Pages, EFI_PHYSICAL_ADDRESS *Memory) {
+  if (TOTAL_PAGES - externalUsedPages >= Pages) {
+    *Memory = (EFI_PHYSICAL_ADDRESS)(externalBlob + externalUsedPages * EFI_PAGE_SIZE);
+    externalUsedPages += Pages;
+    return EFI_SUCCESS;
+  }
+  return EFI_OUT_OF_RESOURCES;
+}
+
+STATIC EFI_STATUS NilInstallConfigurationTable(EFI_GUID *Guid, VOID *Table) {
+  (VOID) Guid;
+  (VOID) Table;
+  return EFI_SUCCESS;
+}
+
+
 STATIC EFI_BOOT_SERVICES gNilBS = {
-  .LocateProtocol = NilLocateProtocol
+  .LocateProtocol = NilLocateProtocol,
+  .AllocatePages = NilAllocatePages,
+  .InstallConfigurationTable = NilInstallConfigurationTable
 };
 
 STATIC EFI_BOOT_SERVICES *gBS = &gNilBS;

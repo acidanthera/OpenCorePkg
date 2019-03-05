@@ -41,6 +41,7 @@
   gEfiEndOfDxeEventGroupGuid
   gEfiSmbiosTableGuid
   gEfiSmbios3TableGuid
+  gOcCustomSmbiosTableGuid
 
 [Protocols]
   gEfiPciRootBridgeIoProtocolGuid

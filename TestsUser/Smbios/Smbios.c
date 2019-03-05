@@ -52,6 +52,7 @@ EFI_GUID gEfiLegacyRegionProtocolGuid;
 EFI_GUID gEfiPciRootBridgeIoProtocolGuid;
 EFI_GUID gEfiSmbios3TableGuid;
 EFI_GUID gEfiSmbiosTableGuid;
+EFI_GUID gOcCustomSmbiosTableGuid;
 
 static GUID SystemUUID = {0x5BC82C38, 0x4DB6, 0x4883, {0x85, 0x2E, 0xE7, 0x8D, 0x78, 0x0A, 0x6F, 0xE6}};
 static OC_SMBIOS_DATA SmbiosData = {
@@ -87,6 +88,9 @@ static OC_SMBIOS_DATA SmbiosData = {
   .PlatformFeature = 1
 };
 
+_Thread_local uint32_t externalUsedPages = 0;
+_Thread_local uint8_t externalBlob[EFI_PAGE_SIZE*TOTAL_PAGES];
+
 _Thread_local SMBIOS_TABLE_ENTRY_POINT        gSmbios;
 _Thread_local SMBIOS_TABLE_3_0_ENTRY_POINT    gSmbios3;
 
@@ -113,7 +117,7 @@ int main(int argc, char** argv) {
   gSmbios3.TableMaximumSize = f;
   gSmbios3.TableAddress = (uintptr_t)b;
 
-  CreateSmBios (
+  CreateSmbios (
     &SmbiosData,
     0
     );
@@ -127,10 +131,12 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
     if (NewData) {
       CopyMem (NewData, Data, Size);
 
+      externalUsedPages = 0;
       gSmbios3.TableMaximumSize = Size;
       gSmbios3.TableAddress = (uintptr_t)NewData;
+      gSmbios3.EntryPointLength = sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT);
 
-      CreateSmBios (
+      CreateSmbios (
         &SmbiosData,
         0
         );

@@ -33,7 +33,6 @@
 
 #include <Macros.h>
 
-// LegacyRegionUnlock
 /** Unlock the legacy region specified to enable modification.
 
   @param[in] LegacyAddress  The address of the region to unlock.
@@ -58,9 +57,10 @@ LegacyRegionUnlock (
                   (VOID **) &LegacyRegionProtocol
                   );
 
-  if (!EFI_ERROR (Status) && (LegacyRegionProtocol != NULL)) {
+  if (!EFI_ERROR (Status)) {
+    //
     // Unlock Region Using LegacyRegionProtocol
-
+    //
     Granularity = 0;
     Status      = LegacyRegionProtocol->UnLock (
                                           LegacyRegionProtocol,
@@ -71,7 +71,7 @@ LegacyRegionUnlock (
 
     DEBUG ((
       DEBUG_INFO,
-      "Unlock LegacyRegion 0x%0X-0x%0X - %r\n",
+      "Unlock LegacyRegion %0X-%0X - %r\n",
       LegacyAddress,
       (LegacyAddress + (LegacyLength - 1)),
       Status

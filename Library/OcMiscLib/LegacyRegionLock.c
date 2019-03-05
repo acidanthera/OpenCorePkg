@@ -33,7 +33,6 @@
 
 #include <Macros.h>
 
-// LegacyRegionlock
 /** Lock the legacy region specified to enable modification.
 
   @param[in] LegacyAddress  The address of the region to lock.
@@ -59,8 +58,10 @@ LegacyRegionLock (
                                 (VOID **) &LegacyRegionProtocol
                                 );
 
-  if (!EFI_ERROR (Status) && (LegacyRegionProtocol != NULL)) {
+  if (!EFI_ERROR (Status)) {
+    //
     // Lock Region Using LegacyRegionProtocol
+    //
 
     Granularity = 0;
     Status      = LegacyRegionProtocol->Lock (

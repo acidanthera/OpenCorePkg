@@ -29,6 +29,11 @@
 #define SMBIOS_STRING_HEX_PREFIX_SIZE    2
 
 //
+// 0x prefix size in SMBIOS strings in hex mode.
+//
+#define SMBIOS_ENTRY_POINT_CHECKSUM_SIZE 16U
+
+//
 // According to SMBIOS spec (3.2.0, page 26) SMBIOS handle is a number from 0 to 0xFF00.
 // SMBIOS spec does not require handles to be contiguous or remain valid across SMBIOS.
 // The only requirements is uniqueness and range conformance, so we reserve select handles
@@ -148,6 +153,18 @@ SmbiosExtendTable (
   );
 
 /**
+  Free SMBIOS table
+
+  @param[in, out]  Table  Current table buffer.
+
+  @retval EFI_SUCCESS on success
+**/
+VOID
+SmbiosTableFree (
+  IN OUT OC_SMBIOS_TABLE  *Table
+  );
+
+/**
   Write override string to SMBIOS table
 
   @param[in, out]  Table     Current table buffer.
@@ -195,15 +212,19 @@ SmbiosFinaliseStruct (
   IN OUT OC_SMBIOS_TABLE  *Table
   );
 
-// SmbiosGetString
+
 /**
+  Obtain string from previously validated structure.
+
+  @param[in] SmbiosTable
+  @param[in] StringIndex  String Index to retrieve
 
   @retval
 **/
 CHAR8 *
 SmbiosGetString (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  SmbiosTable,
-  IN SMBIOS_TABLE_STRING            String
+  IN SMBIOS_TABLE_STRING             String
   );
 
 /**
@@ -242,59 +263,48 @@ SmbiosSetStringHex (
   IN OUT  UINT8        *Index
   );
 
-// SmbiosGetTableLength
 /**
+  Obtain and validate structure length.
 
-  @retval
-**/
-UINTN
-SmbiosGetTableLength (
-  IN  APPLE_SMBIOS_STRUCTURE_POINTER  SmbiosTable
-  );
+  @param[in] SmbiosTable
+  @param[in] SmbiosTableSize  SMBIOS table size
 
-/**
-  Obtain minimal size for a table of specific type.
-
-  @param[in]  Type   Table type
-
-  @retval underlying table type size or generic header size
+  @retval table length or 0 for invalid
 **/
 UINT32
-SmbiosGetTableTypeLength (
-  IN  SMBIOS_TYPE                     Type
+SmbiosGetStructureLength (
+  IN  APPLE_SMBIOS_STRUCTURE_POINTER  SmbiosTable,
+  IN  UINT32                          SmbiosTableSize
   );
 
-// SmbiosGetTableFromType
 /**
+  Obtain and validate Nth structure of specified type.
 
-  @retval
+  @param[in] SmbiosTable      Pointer to SMBIOS table.
+  @param[in] SmbiosTableSize  SMBIOS table size
+  @param[in] Type             SMBIOS table type
+  @param[in] Index            SMBIOS table index starting from 1
+
+  @retval found table or NULL
 **/
 APPLE_SMBIOS_STRUCTURE_POINTER
-SmbiosGetTableFromType (
+SmbiosGetStructureOfType (
   IN  APPLE_SMBIOS_STRUCTURE_POINTER  SmbiosTable,
   IN  UINT32                          SmbiosTableSize,
   IN  SMBIOS_TYPE                     Type,
   IN  UINT16                          Index
   );
 
-// SmbiosGetTableFromHandle
 /**
+  Obtain structure count of specified type.
 
-  @retval
-**/
-APPLE_SMBIOS_STRUCTURE_POINTER
-SmbiosGetTableFromHandle (
-  IN  SMBIOS_TABLE_ENTRY_POINT    *Smbios,
-  IN  SMBIOS_HANDLE               Handle
-  );
+  @param[in] SmbiosTable      Pointer to SMBIOS table.
+  @param[in] SmbiosTableSize  SMBIOS table size
 
-// SmbiosGetTableCount
-/**
-
-  @retval
+  @retval structure count or 0
 **/
 UINT16
-SmbiosGetTableCount (
+SmbiosGetStructureCount (
   IN  APPLE_SMBIOS_STRUCTURE_POINTER  SmbiosTable,
   IN  UINT32                          SmbiosTableSize,
   IN  SMBIOS_TYPE                     Type
