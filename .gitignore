@@ -1,4 +1,10 @@
 .DS_Store
 UDK
 Binaries
-TestsPrivate
+*.dSYM
+TestsUser/Serialized/Serialized
+TestsUser/Macho/Macho
+TestsUser/Smbios/Smbios
+DICT
+fuzz-*.log
+crash-*

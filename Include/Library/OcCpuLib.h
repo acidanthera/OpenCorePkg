@@ -23,9 +23,12 @@
 
 // CPU_INFO
 typedef struct {
-  UINT8                Type;
+  //
+  // Note, Vendor and BrandString are reordered for proper alignment.
+  //
   UINT8                Vendor[16];
   CHAR8                BrandString[48];
+  UINT8                Type;
 
   UINT8                Family;
   UINT8                Model;

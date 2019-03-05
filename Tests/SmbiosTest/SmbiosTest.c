@@ -1,5 +1,5 @@
 /** @file
-  Test bless support.
+  Test smbios support.
 
 Copyright (c) 2018, vit9696. All rights reserved.<BR>
 This program and the accompanying materials

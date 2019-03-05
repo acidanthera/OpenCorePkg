@@ -18,7 +18,6 @@
 
 #include <Guid/ApplePlatformInfo.h>
 
-#include <Protocol/DataHub.h>
 #include <Protocol/LegacyRegion.h>
 #include <Protocol/PciIo.h>
 

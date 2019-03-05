@@ -1523,6 +1523,13 @@ SmbiosHandleLegacyRegion (
 {
   EFI_STATUS  Status;
 
+  //
+  // Not needed for mOriginalSmbios3.
+  //
+  if (mOriginalSmbios == NULL) {
+    return;
+  }
+
   if (Unlock) {
     if (((UINTN) mOriginalSmbios) < BASE_1MB) {
       //
@@ -1607,7 +1614,7 @@ SmbiosTableAllocate (
               );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_VERBOSE, "SmbiosLookupHost failed to lookup SMBIOS - %r", Status));
+    DEBUG ((DEBUG_VERBOSE, "SmbiosLookupHost failed to lookup SMBIOS - %r\n", Status));
   }
 
   Status  = EfiGetSystemConfigurationTable (
@@ -1616,7 +1623,7 @@ SmbiosTableAllocate (
               );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_VERBOSE, "SmbiosLookupHost failed to lookup SMBIOSv3 - %r", Status));
+    DEBUG ((DEBUG_VERBOSE, "SmbiosLookupHost failed to lookup SMBIOSv3 - %r\n", Status));
   }
 
   //
@@ -1651,7 +1658,7 @@ SmbiosTableAllocate (
 
   Status = SmbiosExtendTable (SmbiosTable, 1);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_VERBOSE, "SmbiosLookupHost failed to lookup SMBIOSv3 - %r", Status));
+    DEBUG ((DEBUG_VERBOSE, "SmbiosLookupHost failed to lookup SMBIOSv3 - %r\n", Status));
   }
 
   return Status;
@@ -1664,6 +1671,10 @@ SmbiosTableApply (
   )
 {
   SmbiosHandleLegacyRegion (TRUE);
+
+  if (mOriginalSmbios == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   CopyMem ((VOID *)(UINTN)mOriginalSmbios->TableAddress,
            SmbiosTable->Table,
