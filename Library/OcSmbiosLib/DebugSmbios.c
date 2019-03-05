@@ -410,9 +410,11 @@ SmbiosDebugSystemSlots (
 
   DEBUG_SMBIOS ((
     DEBUG_INFO,
-    " %-16a %a\n",
+    " %-16a %u %a\n",
     "DataBus Width",
-    SlotDataWidthStrings[Record.Standard.Type9->SlotDataBusWidth]
+    Record.Standard.Type9->SlotDataBusWidth,
+    Record.Standard.Type9->SlotDataBusWidth < ARRAY_SIZE (SlotDataWidthStrings)
+    ? SlotDataWidthStrings[Record.Standard.Type9->SlotDataBusWidth] : "Invalid"
     ));
 
   DEBUG_SMBIOS ((

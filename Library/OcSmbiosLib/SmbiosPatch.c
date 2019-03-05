@@ -133,6 +133,14 @@ PatchBiosInformation (
     return;
   }
 
+  CONST CHAR8  *RealValue__ = Data->BIOSVendor;
+  if (RealValue__ == NULL
+    && ((Original).Raw) != NULL
+    && (Original).Raw + (Original).Standard.Hdr->Length
+    >= ((UINT8 *)&((Original).Standard.Type0->Vendor) + sizeof (SMBIOS_TABLE_STRING))) {
+    RealValue__ = SmbiosGetString ((Original), ((Original).Standard.Type0->Vendor));
+  }
+
   SMBIOS_OVERRIDE_S (Table, Standard.Type0->Vendor, Original, Data->BIOSVendor, &StringIndex, NULL);
   SMBIOS_OVERRIDE_S (Table, Standard.Type0->BiosVersion, Original, Data->BIOSVersion, &StringIndex, NULL);
   //
@@ -414,7 +422,8 @@ PatchCacheInformation (
 
   for (EntryNo = 1; EntryNo <= NumberEntries; EntryNo++) {
     Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_CACHE_INFORMATION, EntryNo);
-    if (Original.Raw == NULL) {
+    if (Original.Raw == NULL || (UINT8 *) &Original.Standard.Type7->CacheConfiguration - Original.Raw
+      + sizeof (Original.Standard.Type7->CacheConfiguration) > Original.Standard.Hdr->Length) {
       continue;
     }
 
@@ -1721,8 +1730,9 @@ SmbiosTableAllocate (
   IN OUT  VOID                          **TableAddress3
   )
 {
-  UINT16      TablePages;
-  EFI_STATUS  Status;
+  UINT16                TablePages;
+  EFI_STATUS            Status;
+  EFI_PHYSICAL_ADDRESS  TmpAddr;
 
   TablePages         = EFI_SIZE_TO_PAGES (TableLength);
   *TableEntryPoint   = NULL;
@@ -1730,12 +1740,22 @@ SmbiosTableAllocate (
   *TableAddress      = NULL;
   *TableAddress3     = NULL;
 
-  Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, TablePages, (EFI_PHYSICAL_ADDRESS *) TableAddress);
+  TmpAddr = (BASE_4GB - 1);
+  Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, TablePages, &TmpAddr);
   if (!EFI_ERROR (Status)) {
-    Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, 1, (EFI_PHYSICAL_ADDRESS *) TableEntryPoint);
-    if (!EFI_ERROR (Status) && mOriginalSmbios3 != NULL) {
-      Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, 1, (EFI_PHYSICAL_ADDRESS *) TableEntryPoint3);
-      *TableAddress3 = *TableAddress;
+    *TableAddress = (VOID *) TmpAddr;
+    TmpAddr = (BASE_4GB - 1);
+    Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, 1,  &TmpAddr);
+    if (!EFI_ERROR (Status)) {
+      *TableEntryPoint = (SMBIOS_TABLE_ENTRY_POINT *) TmpAddr;
+      if (mOriginalSmbios3 != NULL) {
+        TmpAddr = (BASE_4GB - 1);
+        Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, 1, &TmpAddr);
+        if (!EFI_ERROR (Status)) {
+          *TableEntryPoint3 = (SMBIOS_TABLE_3_0_ENTRY_POINT *) TmpAddr;
+          *TableAddress3 = *TableAddress;
+        }
+      }
     }
   }
 
@@ -1792,8 +1812,8 @@ SmbiosTableApply (
     Status = SmbiosHandleLegacyRegion (TRUE);
 
     if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "SmbiosTableApply(%u) cannot handle legacy region - %r\n", Mode, Status));
       if (Mode == OcSmbiosUpdateOverwrite) {
-        DEBUG ((DEBUG_WARN, "SmbiosTableApply aborts as it cannot handle legacy region - %r\n", Status));
         return Status;
       }
 
@@ -1801,17 +1821,22 @@ SmbiosTableApply (
       // Fallback to create mode.
       //
       Mode = OcSmbiosUpdateCreate;
-    } else if (mOriginalSmbios == NULL || TableLength > mOriginalSmbios->TableLength) {
+    } else if (mOriginalSmbios == NULL || TableLength > mOriginalSmbios->TableLength
+      || mOriginalSmbios->EntryPointLength < sizeof (SMBIOS_TABLE_ENTRY_POINT)) {
+      DEBUG ((DEBUG_WARN, "SmbiosTableApply(%u) cannot update old SMBIOS (%p, %u, %u) with %u\n",
+        Mode, mOriginalSmbios, mOriginalSmbios != NULL ? mOriginalSmbios->TableLength : 0,
+        mOriginalSmbios != NULL ? mOriginalSmbios->EntryPointLength : 0, TableLength));
       if (Mode == OcSmbiosUpdateOverwrite) {
-        DEBUG ((DEBUG_WARN, "SmbiosTableApply aborts as it cannot update old SMBIOS (%p, %u) with %u\n",
-          mOriginalSmbios, mOriginalSmbios != NULL ? mOriginalSmbios->TableLength : 0, TableLength));
         return EFI_OUT_OF_RESOURCES;
       }
       //
       // Fallback to create mode.
       //
       Mode = OcSmbiosUpdateCreate;
-    } else if (mOriginalSmbios3 != NULL && TableLength > mOriginalSmbios3->TableMaximumSize) {
+    } else if (mOriginalSmbios3 != NULL && (TableLength > mOriginalSmbios3->TableMaximumSize
+      || mOriginalSmbios3->EntryPointLength < sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT))) {
+      DEBUG ((DEBUG_WARN, "SmbiosTableApply(%u) cannot fit SMBIOSv3 (%p, %u, %u) with %u\n",
+        Mode, mOriginalSmbios3, mOriginalSmbios3->EntryPointLength, mOriginalSmbios3->TableMaximumSize, TableLength));
       Mode = OcSmbiosUpdateCreate;
     } else {
       Mode = OcSmbiosUpdateOverwrite;
@@ -1835,7 +1860,7 @@ SmbiosTableApply (
     TableEntryPoint = mOriginalSmbios;
     TableEntryPoint3 = mOriginalSmbios3;
     TableAddress = (VOID *)(UINTN) TableEntryPoint->TableAddress;
-    TableAddress3 = mOriginalSmbios3 != NULL ? (VOID *)(UINTN) TableEntryPoint3->TableAddress : NULL;
+    TableAddress3 = mOriginalSmbios3 != NULL ? (VOID *)(UINTN) TableAddress : NULL;
   }
 
   CopyMem (TableAddress,
@@ -1843,7 +1868,7 @@ SmbiosTableApply (
     TableLength
     );
 
-  if (TableAddress3 != TableAddress) {
+  if (TableAddress3 != NULL && TableAddress3 != TableAddress) {
     CopyMem (TableAddress3,
       SmbiosTable->Table,
       TableLength

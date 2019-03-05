@@ -333,7 +333,7 @@ typedef VOID (*EFI_EVENT_NOTIFY)(EFI_EVENT Event, VOID *Context);
 // Functional macros
 //
 
-#define DEBUG(X) ppprintf X
+#define DEBUG(X) do { ppprintf X ; } while (0)
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof((x)[0]))
 #define EFI_ERROR(x) ((x) != 0)
 #define OFFSET_OF(Base, Type) offsetof(Base, Type)
@@ -389,17 +389,18 @@ ppptransform (
 {
   char *AAA = NULL;
 
-  #define REPL(P, V) \
+  #define REPL(P, I, V) \
     do { \
       AAA = strstr(Buffer, P); \
       if (AAA) \
-        AAA[1] = V; \
-    } while (AAA != NULL);
+        AAA[I] = V; \
+    } while (AAA != NULL)
 
 
-  REPL("%a", 's')
-  REPL("%r", 'p')
-  REPL("%g", 'p')
+  REPL("%a", 1, 's');
+  REPL("%-16a", 4, 's');
+  REPL("%r", 1, 'p');
+  REPL("%g", 1, 'p');
 
   #undef REPL
 }

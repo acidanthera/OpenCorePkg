@@ -502,12 +502,14 @@ SmbiosGetStructureLength (
     return 0;
   }
 
+  SmbiosTable.Raw += Length;
   SmbiosTableSize -= Length;
   Walker = SmbiosTable.Raw;
   while (SmbiosTableSize >= SMBIOS_STRUCTURE_TERMINATOR_SIZE) {
     if (Walker[0] == 0 && Walker[1] == 0) {
       return Length + (Walker - SmbiosTable.Raw) + SMBIOS_STRUCTURE_TERMINATOR_SIZE;
     }
+    Walker++;
     SmbiosTableSize--;
   }
 

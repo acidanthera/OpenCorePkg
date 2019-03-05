@@ -105,18 +105,18 @@
 
 [PcdsFixedAtBuild]
   gEfiMdePkgTokenSpaceGuid.PcdMaximumAsciiStringLength|0
-!if $(TARGET) == DEBUG
-  # DEBUG_ASSERT_ENABLED | DEBUG_PRINT_ENABLED | DEBUG_CODE_ENABLED | CLEAR_MEMORY_ENABLED | ASSERT_DEADLOOP_ENABLED
-  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2f
-  # DEBUG_ERROR | DEBUG_WARN | DEBUG_INFO
-  gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000042
-  gEfiMdePkgTokenSpaceGuid.PcdFixedDebugPrintErrorLevel|0x80000042
-!else
+!if $(TARGET) == RELEASE
   # DEBUG_PRINT_ENABLED
   gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|2
   # DEBUG_ERROR | DEBUG_WARN
   gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000002
   gEfiMdePkgTokenSpaceGuid.PcdFixedDebugPrintErrorLevel|0x80000002
+!else
+  # DEBUG_ASSERT_ENABLED | DEBUG_PRINT_ENABLED | DEBUG_CODE_ENABLED | CLEAR_MEMORY_ENABLED | ASSERT_DEADLOOP_ENABLED
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2f
+  # DEBUG_ERROR | DEBUG_WARN | DEBUG_INFO
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000042
+  gEfiMdePkgTokenSpaceGuid.PcdFixedDebugPrintErrorLevel|0x80000042
 !endif
 
 [BuildOptions]
