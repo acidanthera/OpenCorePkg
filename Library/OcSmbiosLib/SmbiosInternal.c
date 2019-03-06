@@ -126,7 +126,7 @@ SmbiosOverrideString (
   //
   if (Length > SMBIOS_STRING_MAX_LENGTH) {
     Length = SMBIOS_STRING_MAX_LENGTH;
-    DEBUG ((DEBUG_INFO, "SMBIOS truncating '%a' to %u bytes for safe %d\n", Override, Length, Safe));
+    DEBUG ((DEBUG_INFO, "SMBIOS truncating '%a' to %u bytes\n", Override, Length));
   }
 
   while (Length > 0 && Override[Length - 1] == ' ') {
@@ -142,7 +142,7 @@ SmbiosOverrideString (
     return 0;
   }
 
-  return SmbiosSetString (&Table->CurrentStrPtr, Override, Length, Index, Safe);
+  return SmbiosSetString (&Table->CurrentStrPtr, Override, Length, Index);
 }
 
 STATIC
