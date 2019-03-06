@@ -24,16 +24,6 @@
 #define SMBIOS_STRUCTURE_TERMINATOR_SIZE 2
 
 //
-// 0x prefix size in SMBIOS strings in hex mode.
-//
-#define SMBIOS_STRING_HEX_PREFIX_SIZE    2
-
-//
-// 0x prefix size in SMBIOS strings in hex mode.
-//
-#define SMBIOS_ENTRY_POINT_CHECKSUM_SIZE 16U
-
-//
 // According to SMBIOS spec (3.2.0, page 26) SMBIOS handle is a number from 0 to 0xFF00.
 // SMBIOS spec does not require handles to be contiguous or remain valid across SMBIOS.
 // The only requirements is uniqueness and range conformance, so we reserve select handles
@@ -170,7 +160,7 @@ SmbiosTableFree (
   @param[in, out]  Table     Current table buffer.
   @param[in]       Override  String data override.
   @param[in, out]  Index     Pointer to current string index, incremented on success.
-  @param[in]       Hex       Write in hex format.
+  @param[in]       Safe      Filter certain characters.
 
   @retval assigned string index or 0
 **/
@@ -178,8 +168,7 @@ UINT8
 SmbiosOverrideString (
   IN OUT  OC_SMBIOS_TABLE  *Table,
   IN      CONST CHAR8      *Override OPTIONAL,
-  IN OUT  UINT8            *Index,
-  IN      BOOLEAN          Hex
+  IN OUT  UINT8            *Index
   );
 
 /**
@@ -239,24 +228,6 @@ SmbiosGetString (
 **/
 UINT8
 SmbiosSetString (
-  IN OUT  CHAR8        **Buffer,
-  IN      CONST CHAR8  *String,
-  IN      UINT32       Length,
-  IN OUT  UINT8        *Index
-  );
-
-/**
-  Write string to SMBIOS structure in hex format
-
-  @param[in, out] Buffer        Pointer to location containing the current address within the buffer.
-  @param[in]      String        Buffer containing the null terminated ascii string.
-  @param[in]      Length        String length to write.
-  @param[in, out] Index         Pointer to current string index, incremented on success.
-
-  @retval assigned string index or 0
-**/
-UINT8
-SmbiosSetStringHex (
   IN OUT  CHAR8        **Buffer,
   IN      CONST CHAR8  *String,
   IN      UINT32       Length,

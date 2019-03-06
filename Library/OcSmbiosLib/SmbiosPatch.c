@@ -45,7 +45,7 @@ STATIC SMBIOS_TABLE_3_0_ENTRY_POINT    *mOriginalSmbios3;
 STATIC APPLE_SMBIOS_STRUCTURE_POINTER  mOriginalTable;
 STATIC UINT32                          mOriginalTableSize;
 
-#define SMBIOS_OVERRIDE_STR(Table, Field, Original, Value, Index, Fallback, Hex) \
+#define SMBIOS_OVERRIDE_S(Table, Field, Original, Value, Index, Fallback) \
   do { \
     CONST CHAR8  *RealValue__ = (Value); \
     if (RealValue__ == NULL && ((Original).Raw) != NULL && (Original).Raw + (Original).Standard.Hdr->Length \
@@ -55,16 +55,9 @@ STATIC UINT32                          mOriginalTableSize;
     (((Table)->CurrentPtr).Field) = SmbiosOverrideString ( \
       (Table), \
       RealValue__ != NULL ? RealValue__ : (Fallback), \
-      (Index), \
-      (Hex) \
+      (Index) \
       ); \
   } while (0)
-
-#define SMBIOS_OVERRIDE_S(Table, Field, Original, Value, Index, Fallback) \
-  SMBIOS_OVERRIDE_STR ((Table), Field, (Original), (Value), (Index), (Fallback), FALSE)
-
-#define SMBIOS_OVERRIDE_H(Table, Field, Original, Value, Index, Fallback) \
-  SMBIOS_OVERRIDE_STR ((Table), Field, (Original), (Value), (Index), (Fallback), TRUE)
 
 #define SMBIOS_OVERRIDE_V(Table, Field, Original, Value, Fallback) \
   do { \

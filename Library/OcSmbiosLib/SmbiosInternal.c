@@ -107,13 +107,10 @@ UINT8
 SmbiosOverrideString (
   IN  OC_SMBIOS_TABLE  *Table,
   IN  CONST CHAR8      *Override OPTIONAL,
-  IN  UINT8            *Index,
-  IN  BOOLEAN          Hex
+  IN  UINT8            *Index
   )
 {
   UINT32  Length;
-  UINT32  ByteLength;
-  UINT32  MaxLength;
 
   //
   // No override.
@@ -122,36 +119,30 @@ SmbiosOverrideString (
     return 0;
   }
 
-  //
-  // In hex format each string is prefixed with 0x and each char becomes two.
-  //
-  MaxLength = Hex ? SMBIOS_STRING_MAX_LENGTH / 2 - SMBIOS_STRING_HEX_PREFIX_SIZE : SMBIOS_STRING_MAX_LENGTH;
-
   Length = (UINT32) AsciiStrLen (Override);
 
   //
   // Truncate to fit but do not error.
   //
-  if (Length > MaxLength) {
-    Length = MaxLength;
-    DEBUG ((DEBUG_INFO, "SMBIOS truncating '%a' to %u bytes for hex %d\n", Override, Length, Hex));
+  if (Length > SMBIOS_STRING_MAX_LENGTH) {
+    Length = SMBIOS_STRING_MAX_LENGTH;
+    DEBUG ((DEBUG_INFO, "SMBIOS truncating '%a' to %u bytes for safe %d\n", Override, Length, Safe));
+  }
+
+  while (Length > 0 && Override[Length - 1] == ' ') {
+    Length--;
   }
 
   if (Length == 0) {
     return 0;
   }
 
-  ByteLength = Hex ? Length * 2 + SMBIOS_STRING_HEX_PREFIX_SIZE + 1 : Length + 1;
-  if (EFI_ERROR (SmbiosExtendTable (Table, ByteLength))) {
-    DEBUG ((DEBUG_WARN, "SMBIOS failed to write '%a' with %u byte extension\n", Override, ByteLength));
+  if (EFI_ERROR (SmbiosExtendTable (Table, Length + 1))) {
+    DEBUG ((DEBUG_WARN, "SMBIOS failed to write '%a' with %u byte extension\n", Override, Length + 1));
     return 0;
   }
 
-  if (Hex) {
-    return SmbiosSetStringHex (&Table->CurrentStrPtr, Override, Length, Index);
-  }
-
-  return SmbiosSetString (&Table->CurrentStrPtr, Override, Length, Index);
+  return SmbiosSetString (&Table->CurrentStrPtr, Override, Length, Index, Safe);
 }
 
 STATIC
@@ -442,44 +433,10 @@ SmbiosSetString (
   ASSERT (Buffer != NULL);
   ASSERT (String != NULL);
   ASSERT (Index != NULL);
+  ASSERT (Length > 0);
 
-
-  if (Length > 0) {
-    CopyMem (*Buffer, String, Length);
-  }
-
+  CopyMem (*Buffer, String, Length);
   *Buffer += Length + 1;
-  (*Index)++;
-
-  return *Index;
-}
-
-UINT8
-SmbiosSetStringHex (
-  IN OUT  CHAR8        **Buffer,
-  IN      CONST CHAR8  *String,
-  IN      UINT32       Length,
-  IN OUT  UINT8        *Index
-  )
-{
-  CHAR8  *Target;
-  UINT8  Byte;
-
-  Target = *Buffer;
-
-  if (Length > 0) {
-    *Target++ = '0';
-    *Target++ = 'x';
-
-    while (Length > 0) {
-      Byte = (UINT8) (*String++);
-      *Target++ = "0123456789ABCDEF"[((Byte >> 4U) & 0xFU)];
-      *Target++ = "0123456789ABCDEF"[(Byte & 0xFU)];
-      Length--;
-    }
-  }
-
-  *Buffer = Target + 1;
   (*Index)++;
 
   return *Index;

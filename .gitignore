@@ -9,3 +9,5 @@ DICT
 fuzz-*.log
 crash-*
 oom-*
+out.bin
+
