@@ -1860,16 +1860,24 @@ SmbiosTableApply (
     TableEntryPoint = mOriginalSmbios;
     TableEntryPoint3 = mOriginalSmbios3;
     TableAddress = (VOID *)(UINTN) TableEntryPoint->TableAddress;
-    TableAddress3 = mOriginalSmbios3 != NULL ? (VOID *)(UINTN) TableAddress : NULL;
+    ZeroMem (TableEntryPoint, sizeof (SMBIOS_TABLE_ENTRY_POINT));
+    if (TableEntryPoint3 != NULL) {
+      TableAddress3 = (VOID *)(UINTN) TableEntryPoint3->TableAddress;
+      ZeroMem (TableEntryPoint3, sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT));
+    } else {
+      TableAddress3 = NULL;
+    }
   }
 
-  CopyMem (TableAddress,
+  CopyMem (
+    TableAddress,
     SmbiosTable->Table,
     TableLength
     );
 
   if (TableAddress3 != NULL && TableAddress3 != TableAddress) {
-    CopyMem (TableAddress3,
+    CopyMem (
+      TableAddress3,
       SmbiosTable->Table,
       TableLength
       );
@@ -1892,13 +1900,13 @@ SmbiosTableApply (
   TableEntryPoint->TableAddress                = (UINT32)(UINTN) TableAddress;
   TableEntryPoint->NumberOfSmbiosStructures    = SmbiosTable->NumberOfStructures;
   TableEntryPoint->SmbiosBcdRevision           = 0x32;
+  TableEntryPoint->IntermediateChecksum        = CalculateCheckSum8 (
+    (UINT8 *) TableEntryPoint + OFFSET_OF (SMBIOS_TABLE_ENTRY_POINT, IntermediateAnchorString),
+    TableEntryPoint->EntryPointLength - OFFSET_OF (SMBIOS_TABLE_ENTRY_POINT, IntermediateAnchorString)
+    );
   TableEntryPoint->EntryPointStructureChecksum = CalculateCheckSum8 (
     (UINT8 *) TableEntryPoint,
-    SMBIOS_ENTRY_POINT_CHECKSUM_SIZE
-    );
-  TableEntryPoint->IntermediateChecksum        = CalculateCheckSum8 (
-    (UINT8 *) TableEntryPoint + SMBIOS_ENTRY_POINT_CHECKSUM_SIZE,
-    TableEntryPoint->EntryPointLength - SMBIOS_ENTRY_POINT_CHECKSUM_SIZE
+    TableEntryPoint->EntryPointLength
     );
 
   if (TableEntryPoint3 != NULL) {
