@@ -108,7 +108,7 @@ TestDeviceProperties (
   Print (L"Get to-the-sky is %r %u <%02x %02x %02x %02x>\n", Status, (UINT32) ReadSize, ReadData[0], ReadData[1], ReadData[2], ReadData[3]);
 
   /* {
-    static UINT8 Data[4] = {1, 2, 3, 4};
+    static UINT8 Data[4] = {0x01, 0x02, 0x03, 0x04};
     Status = PropertyDatabase->SetProperty (
       PropertyDatabase,
       ConvertTextToDevicePath (L"PciRoot(0x0)/Pci(0x11,0x0)/Pci(0x1,0x0)"),
