@@ -88,6 +88,7 @@ static OC_SMBIOS_DATA SmbiosData = {
   .PlatformFeature = 1
 };
 
+bool doDump = false;
 _Thread_local uint32_t externalUsedPages = 0;
 _Thread_local uint8_t externalBlob[EFI_PAGE_SIZE*TOTAL_PAGES];
 
@@ -106,6 +107,20 @@ EFI_STATUS EfiGetSystemConfigurationTable (EFI_GUID *TableGuid, OUT VOID **Table
   return EFI_NOT_FOUND;
 }
 
+EFI_STATUS NilInstallConfigurationTable(EFI_GUID *Guid, VOID *Table) {
+  printf("Set table %p, looking for %p\n", Guid, &gEfiSmbios3TableGuid);
+  if (Guid == &gEfiSmbios3TableGuid && doDump) {
+    SMBIOS_TABLE_3_0_ENTRY_POINT  *Ep = (SMBIOS_TABLE_3_0_ENTRY_POINT *) Table;
+    (void)remove("out.bin");
+    FILE *fh = fopen("out.bin", "wb");
+    if (fh != NULL) {
+      fwrite((void *)Ep->TableAddress, Ep->TableMaximumSize, 1, fh);
+      fclose(fh);
+    }
+  }
+  return EFI_SUCCESS;
+}
+
 int main(int argc, char** argv) {
   uint32_t f;
   uint8_t *b;
@@ -114,8 +129,10 @@ int main(int argc, char** argv) {
     return -1;
   }
 
+  doDump = true;
   gSmbios3.TableMaximumSize = f;
   gSmbios3.TableAddress = (uintptr_t)b;
+  gSmbios3.EntryPointLength = sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT);
 
   CreateSmbios (
     &SmbiosData,

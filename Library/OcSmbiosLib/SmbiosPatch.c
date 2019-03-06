@@ -1912,7 +1912,7 @@ SmbiosTableApply (
     TableEntryPoint3->MinorVersion                = 2;
     TableEntryPoint3->EntryPointRevision          = 1;
     TableEntryPoint3->TableMaximumSize            = TableLength;
-    TableEntryPoint3->TableAddress                = (UINT32)(UINTN) TableAddress;
+    TableEntryPoint3->TableAddress                = (UINT64)(UINTN) TableAddress;
     TableEntryPoint3->EntryPointStructureChecksum = CalculateCheckSum8 (
       (UINT8 *) TableEntryPoint3,
       TableEntryPoint3->EntryPointLength

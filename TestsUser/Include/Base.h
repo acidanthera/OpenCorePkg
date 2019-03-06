@@ -593,11 +593,7 @@ STATIC EFI_STATUS NilAllocatePages(EFI_ALLOCATE_TYPE Type, EFI_MEMORY_TYPE Memor
   return EFI_OUT_OF_RESOURCES;
 }
 
-STATIC EFI_STATUS NilInstallConfigurationTable(EFI_GUID *Guid, VOID *Table) {
-  (VOID) Guid;
-  (VOID) Table;
-  return EFI_SUCCESS;
-}
+EFI_STATUS NilInstallConfigurationTable(EFI_GUID *Guid, VOID *Table);
 
 
 STATIC EFI_BOOT_SERVICES gNilBS = {

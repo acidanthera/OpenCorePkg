@@ -137,11 +137,8 @@ SmbiosOverrideString (
     DEBUG ((DEBUG_INFO, "SMBIOS truncating '%a' to %u bytes for hex %d\n", Override, Length, Hex));
   }
 
-  //
-  // Remove any spaces found at the end.
-  //
-  while (Length > 0 && Override[Length - 1] == ' ') {
-    Length--;
+  if (Length == 0) {
+    return 0;
   }
 
   ByteLength = Hex ? Length * 2 + SMBIOS_STRING_HEX_PREFIX_SIZE + 1 : Length + 1;
