@@ -24,6 +24,11 @@
 #define SMBIOS_STRUCTURE_TERMINATOR_SIZE 2
 
 //
+// Max memory mapping slots
+//
+#define OC_SMBIOS_MAX_MAPPING 512
+
+//
 // According to SMBIOS spec (3.2.0, page 26) SMBIOS handle is a number from 0 to 0xFF00.
 // SMBIOS spec does not require handles to be contiguous or remain valid across SMBIOS.
 // The only requirements is uniqueness and range conformance, so we reserve select handles
@@ -95,7 +100,7 @@ enum {
 OC_GLOBAL_STATIC_ASSERT (OcSmbiosAutomaticHandle > OcSmbiosLastReservedHandle, "Inconsistent handle IDs");
 
 //
-// Growing SMBIOS table data
+// Growing SMBIOS table data.
 //
 typedef struct OC_SMBIOS_TABLE_ {
   //
@@ -127,6 +132,14 @@ typedef struct OC_SMBIOS_TABLE_ {
   //
   UINT16                           NumberOfStructures;
 } OC_SMBIOS_TABLE;
+
+//
+// Map old handles to new ones.
+//
+typedef struct OC_SMBIOS_MAPPING_ {
+  SMBIOS_HANDLE  Old;
+  SMBIOS_HANDLE  New;
+} OC_SMBIOS_MAPPING;
 
 /**
   Allocate bytes in SMBIOS table if necessary

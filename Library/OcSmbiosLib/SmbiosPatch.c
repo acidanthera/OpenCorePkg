@@ -73,6 +73,9 @@ STATIC UINT32                          mOriginalTableSize;
     } \
   } while (0)
 
+#define SMBIOS_ACCESSIBLE(Table, Field) \
+  (((UINT8 *) &(Table).Field - (Table).Raw + sizeof ((Table).Field)) <= (Table).Standard.Hdr->Length)
+
 STATIC
 APPLE_SMBIOS_STRUCTURE_POINTER
 SmbiosGetOriginalStructure (
@@ -124,14 +127,6 @@ PatchBiosInformation (
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_BIOS_INFORMATION, MinLength, 1))) {
     return;
-  }
-
-  CONST CHAR8  *RealValue__ = Data->BIOSVendor;
-  if (RealValue__ == NULL
-    && ((Original).Raw) != NULL
-    && (Original).Raw + (Original).Standard.Hdr->Length
-    >= ((UINT8 *)&((Original).Standard.Type0->Vendor) + sizeof (SMBIOS_TABLE_STRING))) {
-    RealValue__ = SmbiosGetString ((Original), ((Original).Standard.Type0->Vendor));
   }
 
   SMBIOS_OVERRIDE_S (Table, Standard.Type0->Vendor, Original, Data->BIOSVendor, &StringIndex, NULL);
@@ -415,8 +410,7 @@ PatchCacheInformation (
 
   for (EntryNo = 1; EntryNo <= NumberEntries; EntryNo++) {
     Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_CACHE_INFORMATION, EntryNo);
-    if (Original.Raw == NULL || (UINT8 *) &Original.Standard.Type7->CacheConfiguration - Original.Raw
-      + sizeof (Original.Standard.Type7->CacheConfiguration) > Original.Standard.Hdr->Length) {
+    if (Original.Raw == NULL || !SMBIOS_ACCESSIBLE (Original, Standard.Type7->CacheConfiguration)) {
       continue;
     }
 
@@ -759,8 +753,10 @@ PatchMemoryDevice (
 STATIC
 VOID
 PatchMemoryMappedAddress (
-  IN OUT OC_SMBIOS_TABLE  *Table,
-  IN     OC_SMBIOS_DATA   *Data
+  IN OUT OC_SMBIOS_TABLE    *Table,
+  IN     OC_SMBIOS_DATA     *Data,
+  IN OUT OC_SMBIOS_MAPPING  *Mapping,
+  IN OUT UINT16             *MappingNum
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
@@ -768,6 +764,8 @@ PatchMemoryMappedAddress (
   UINT16                          EntryNo;
   UINT8                           MinLength;
   UINT8                           StringIndex;
+
+  *MappingNum = 0;
 
   NumberEntries = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS);
 
@@ -791,6 +789,17 @@ PatchMemoryMappedAddress (
     SMBIOS_OVERRIDE_V (Table, Standard.Type19->ExtendedStartingAddress, Original, NULL, NULL);
     SMBIOS_OVERRIDE_V (Table, Standard.Type19->ExtendedEndingAddress, Original, NULL, NULL);
 
+    if (*MappingNum < OC_SMBIOS_MAX_MAPPING) {
+      Mapping[*MappingNum].Old = Original.Standard.Hdr->Handle;
+      Mapping[*MappingNum].New = Table->CurrentPtr.Standard.Hdr->Handle;
+      (*MappingNum)++;
+    } else {
+      //
+      // The value is reasonably large enough for this to never happen, yet just in case.
+      //
+      DEBUG ((DEBUG_WARN, "OC_SMBIOS_MAX_MAPPING exceeded\n"));
+    }
+
     SmbiosFinaliseStruct (Table);
   }
 }
@@ -809,11 +818,14 @@ PatchMemoryMappedDevice (
   IN     OC_SMBIOS_DATA                  *Data,
   IN     APPLE_SMBIOS_STRUCTURE_POINTER  Original,
   IN     UINT16                          Index,
-     OUT SMBIOS_HANDLE                   MemoryDeviceHandle
+  IN     SMBIOS_HANDLE                   MemoryDeviceHandle,
+  IN     OC_SMBIOS_MAPPING               *Mapping,
+  IN     UINT16                          MappingNum
   )
 {
   UINT8    MinLength;
   UINT8    StringIndex;
+  UINT16   MapIndex;
 
   Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, Index);
   MinLength     = sizeof (*Original.Standard.Type20);
@@ -826,10 +838,17 @@ PatchMemoryMappedDevice (
   SMBIOS_OVERRIDE_V (Table, Standard.Type20->StartingAddress, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type20->EndingAddress, Original, NULL, NULL);
   Table->CurrentPtr.Standard.Type20->MemoryDeviceHandle = MemoryDeviceHandle;
-  //
-  // FIXME: This one should point to Original Type 19...
-  //
+
   Table->CurrentPtr.Standard.Type20->MemoryArrayMappedAddressHandle = 0xFFFF;
+  if (Original.Raw != NULL && SMBIOS_ACCESSIBLE(Original, Standard.Type20->MemoryArrayMappedAddressHandle)) {
+    for (MapIndex = 0; MapIndex < MappingNum; MapIndex++) {
+      if (Mapping[MapIndex].Old == Original.Standard.Type20->MemoryArrayMappedAddressHandle) {
+        Table->CurrentPtr.Standard.Type20->MemoryArrayMappedAddressHandle = Mapping[Index].New;
+        break;
+      }
+    }
+  }
+
   SMBIOS_OVERRIDE_V (Table, Standard.Type20->PartitionRowPosition, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type20->InterleavePosition, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type20->InterleavedDataDepth, Original, NULL, NULL);
@@ -1977,15 +1996,23 @@ CreateSmbios (
   APPLE_SMBIOS_STRUCTURE_POINTER  MemoryDeviceInfo;
   APPLE_SMBIOS_STRUCTURE_POINTER  MemoryDeviceAddress;
   UINT16                          NumberMemoryDevices;
-  UINT8                           MemoryDeviceNo;
-  UINT8                           RamModuleNo;
-
+  UINT16                          NumberMemoryMapped;
+  UINT16                          MemoryDeviceNo;
+  UINT16                          MemoryMappedNo;
+  OC_SMBIOS_MAPPING               *Mapping;
+  UINT16                          MappingNum;
 
   ASSERT (Data != NULL);
 
   Status = SmbiosPrepareTable (&SmbiosTable);
   if (EFI_ERROR (Status)) {
     return Status;
+  }
+
+  Mapping = AllocatePool (OC_SMBIOS_MAX_MAPPING * sizeof (*Mapping));
+  if (Mapping == NULL) {
+    DEBUG ((DEBUG_WARN, "Cannot allocate mapping table\n"));
+    return EFI_OUT_OF_RESOURCES;
   }
 
   OcCpuScanProcessor (&CpuInfo);
@@ -1999,11 +2026,12 @@ CreateSmbios (
   PatchSystemPorts (&SmbiosTable, Data);
   PatchSystemSlots (&SmbiosTable, Data);
   PatchMemoryArray (&SmbiosTable, Data);
-  PatchMemoryMappedAddress (&SmbiosTable, Data);
+  PatchMemoryMappedAddress (&SmbiosTable, Data, Mapping, &MappingNum);
 
   NumberMemoryDevices = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_DEVICE);
+  NumberMemoryMapped  = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS);
 
-  for (MemoryDeviceNo = 1, RamModuleNo = 1; MemoryDeviceNo <= NumberMemoryDevices; MemoryDeviceNo++) {
+  for (MemoryDeviceNo = 1; MemoryDeviceNo <= NumberMemoryDevices; MemoryDeviceNo++) {
     MemoryDeviceInfo = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE, MemoryDeviceNo);
 
     if (MemoryDeviceInfo.Raw == NULL) {
@@ -2021,34 +2049,25 @@ CreateSmbios (
       &MemoryDeviceHandle
     );
 
-    MemoryDeviceAddress = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, RamModuleNo);
-    if (MemoryDeviceAddress.Raw != NULL) {
-      //
-      // For each occupied memory device we must generate type 20
-      //
+    //
+    // For each occupied memory device we must generate type 20
+    //
+    for (MemoryMappedNo = 1; MemoryMappedNo <= NumberMemoryMapped; MemoryMappedNo++) {
+      MemoryDeviceAddress = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, MemoryMappedNo);
 
-      //
-      // FIXME: While I believe it may be the case that Type20 and Type17 are sorted,
-      // it is not guaranteed by the spec. Rework the matching to do a proper nested loop.
-      //
-      //ASSERT (MemoryDeviceAddress.Standard.Type20->MemoryDeviceHandle ==
-      //    MemoryDeviceInfo.Standard.Type17->Hdr.Handle);
-
-      if (MemoryDeviceAddress.Standard.Type20->MemoryDeviceHandle ==
-          MemoryDeviceInfo.Standard.Type17->Hdr.Handle) {
-        PatchMemoryMappedDevice (
-          &SmbiosTable,
-          Data,
-          MemoryDeviceAddress,
-          RamModuleNo,
-          MemoryDeviceHandle
-          );
-
-        //
-        // TODO: Type 130 - Apple Memory SPD Info
-        //
-
-        RamModuleNo++;
+      if (MemoryDeviceAddress.Raw != NULL
+        && SMBIOS_ACCESSIBLE (MemoryDeviceAddress, Standard.Type20->MemoryDeviceHandle)
+        && MemoryDeviceAddress.Standard.Type20->MemoryDeviceHandle ==
+           MemoryDeviceInfo.Standard.Type17->Hdr.Handle) {
+          PatchMemoryMappedDevice (
+            &SmbiosTable,
+            Data,
+            MemoryDeviceAddress,
+            MemoryMappedNo,
+            MemoryDeviceHandle,
+            Mapping,
+            MappingNum
+            );
       }
     }
   }
@@ -2059,6 +2078,8 @@ CreateSmbios (
   PatchAppleProcessorSpeed (&SmbiosTable, Data, &CpuInfo);
   PatchAppleFirmwareVolume (&SmbiosTable, Data);
   PatchSmBiosEndOfTable (&SmbiosTable, Data);
+
+  FreePool (Mapping);
 
   Status = SmbiosTableApply (&SmbiosTable, Mode);
 
