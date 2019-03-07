@@ -271,8 +271,63 @@ typedef VOID (*EFI_EVENT_NOTIFY)(EFI_EVENT Event, VOID *Context);
 #define  BIT63    0x8000000000000000ULL
 
 //
-// Bases
+// Bases and sizes
 //
+
+#define  SIZE_1KB    0x00000400
+#define  SIZE_2KB    0x00000800
+#define  SIZE_4KB    0x00001000
+#define  SIZE_8KB    0x00002000
+#define  SIZE_16KB   0x00004000
+#define  SIZE_32KB   0x00008000
+#define  SIZE_64KB   0x00010000
+#define  SIZE_128KB  0x00020000
+#define  SIZE_256KB  0x00040000
+#define  SIZE_512KB  0x00080000
+#define  SIZE_1MB    0x00100000
+#define  SIZE_2MB    0x00200000
+#define  SIZE_4MB    0x00400000
+#define  SIZE_8MB    0x00800000
+#define  SIZE_16MB   0x01000000
+#define  SIZE_32MB   0x02000000
+#define  SIZE_64MB   0x04000000
+#define  SIZE_128MB  0x08000000
+#define  SIZE_256MB  0x10000000
+#define  SIZE_512MB  0x20000000
+#define  SIZE_1GB    0x40000000
+#define  SIZE_2GB    0x80000000
+#define  SIZE_4GB    0x0000000100000000ULL
+#define  SIZE_8GB    0x0000000200000000ULL
+#define  SIZE_16GB   0x0000000400000000ULL
+#define  SIZE_32GB   0x0000000800000000ULL
+#define  SIZE_64GB   0x0000001000000000ULL
+#define  SIZE_128GB  0x0000002000000000ULL
+#define  SIZE_256GB  0x0000004000000000ULL
+#define  SIZE_512GB  0x0000008000000000ULL
+#define  SIZE_1TB    0x0000010000000000ULL
+#define  SIZE_2TB    0x0000020000000000ULL
+#define  SIZE_4TB    0x0000040000000000ULL
+#define  SIZE_8TB    0x0000080000000000ULL
+#define  SIZE_16TB   0x0000100000000000ULL
+#define  SIZE_32TB   0x0000200000000000ULL
+#define  SIZE_64TB   0x0000400000000000ULL
+#define  SIZE_128TB  0x0000800000000000ULL
+#define  SIZE_256TB  0x0001000000000000ULL
+#define  SIZE_512TB  0x0002000000000000ULL
+#define  SIZE_1PB    0x0004000000000000ULL
+#define  SIZE_2PB    0x0008000000000000ULL
+#define  SIZE_4PB    0x0010000000000000ULL
+#define  SIZE_8PB    0x0020000000000000ULL
+#define  SIZE_16PB   0x0040000000000000ULL
+#define  SIZE_32PB   0x0080000000000000ULL
+#define  SIZE_64PB   0x0100000000000000ULL
+#define  SIZE_128PB  0x0200000000000000ULL
+#define  SIZE_256PB  0x0400000000000000ULL
+#define  SIZE_512PB  0x0800000000000000ULL
+#define  SIZE_1EB    0x1000000000000000ULL
+#define  SIZE_2EB    0x2000000000000000ULL
+#define  SIZE_4EB    0x4000000000000000ULL
+#define  SIZE_8EB    0x8000000000000000ULL
 
 #define  BASE_1KB    0x00000400
 #define  BASE_2KB    0x00000800
@@ -534,6 +589,33 @@ AsmCpuid (
        "xchgq %%rbx, %q1"
        : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
        : "0" (Index));
+
+  if (Eax) *Eax = eax;
+  if (Ebx) *Ebx = ebx;
+  if (Ecx) *Ecx = ecx;
+  if (Edx) *Edx = edx;
+
+  return Index;
+}
+
+STATIC
+UINT32
+AsmCpuidEx (
+  IN      UINT32                    Index,
+  IN      UINT32                    SubIndex,
+  OUT     UINT32                    *Eax,  OPTIONAL
+  OUT     UINT32                    *Ebx,  OPTIONAL
+  OUT     UINT32                    *Ecx,  OPTIONAL
+  OUT     UINT32                    *Edx   OPTIONAL
+  )
+{
+  uint32_t eax = 0, ebx = 0, ecx = 0, edx = 0;
+
+  asm ("xchgq %%rbx, %q1\n"
+       "cpuid\n"
+       "xchgq %%rbx, %q1"
+       : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
+       : "0" (Index), "2" (SubIndex));
 
   if (Eax) *Eax = eax;
   if (Ebx) *Ebx = ebx;

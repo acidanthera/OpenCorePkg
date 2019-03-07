@@ -28,13 +28,8 @@
 
 #define BASE_ART_CLOCK_SOURCE  24000000ULL
 
-#define MSR_IA32_PLATFORM_ID      0x17
 #define MSR_PIC_MSG_CONTROL       0x2E
 #define MSR_CORE_THREAD_COUNT     0x35
-#define MSR_IA32_FEATURE_CONTROL  0x3A
-#define MSR_IA32_TSC_ADJUST       0x3B
-#define MSR_IA32_BIOS_SIGN_ID     0x8B  ///< microcode version
-#define MSR_PLATFORM_INFO         0xCE
 
 #define EFI_PLATFORM_INFORMATION                        0x000000CE
 #define N_EFI_PLATFORM_INFO_MIN_RATIO                   40
@@ -49,16 +44,11 @@
 
 //#define PLATFORM_INFO_SET_TDP
 
-#define MSR_PKG_CST_CONFIG_CONTROL        0xE2
 #define MSR_PMG_IO_CAPTURE_BASE           0xE4
 #define MSR_IA32_EXT_CONFIG               0xEE
 #define MSR_FEATURE_CONFIG                0x13C
 #define MSR_FLEX_RATIO                    0x194
-#define MSR_IA32_PERF_STATUS              0x198
 #define MSR_IA32_PERF_CONTROL             0x199
-#define MSR_IA32_CLOCK_MODULATION         0x19A
-#define MSR_IA32_THERM_INTERRUPT          0x19B
-#define MSR_IA32_THERM_STATUS             0x19C
 #define MSR_THERM2_CTL                    0x19D
 
 #define MSR_IA32_MISC_ENABLES             0x1A0
@@ -68,7 +58,6 @@
 #define MSR_TEMPERATURE_TARGET            0x1A2
 #define MSR_MISC_PWR_MGMT                 0x1AA
 #define MISC_PWR_MGMT_EIST_HW_DIS         (1 << 0)
-#define MSR_TURBO_RATIO_LIMIT             0x1AD
 #define MAX_RATIO_LIMIT_8C_OFFSET         56
 #define MAX_RATIO_LIMIT_7C_OFFSET         48
 #define MAX_RATIO_LIMIT_6C_OFFSET         40
@@ -82,11 +71,8 @@
 #define ENERGY_POLICY_PERFORMANCE         0
 #define ENERGY_POLICY_NORMAL              6
 #define ENERGY_POLICY_POWERSAVE           15
-#define MSR_IA32_PACKAGE_THERM_INTERRUPT  0x1B2
 #define MSR_POWER_CTL                     0x1FC
-#define MSR_IA32_PLATFORM_DCA_CAP         0x1F8
 #define MSR_LT_LOCK_MEMORY                0x2E7
-#define MSR_IA32_MC0_STATUS               0x401
 #define MSR_IA32_CR_PAT                   0x277
 
 // Sandy Bridge & JakeTown specific 'Running Average Power Limit' MSR's.

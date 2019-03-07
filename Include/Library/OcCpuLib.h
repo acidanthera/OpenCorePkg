@@ -39,7 +39,8 @@ typedef struct {
   UINT64               ExtFeatures;
   UINT32               Signature;
   UINT8                Brand;
-  UINT8                AppleMajorType;
+  UINT16               AppleProcessorType;
+  BOOLEAN              CstConfigLock;
 
   UINT32               MaxExtId;
 
@@ -54,9 +55,7 @@ typedef struct {
   UINT8                TurboBusRatio3;
   UINT8                TurboBusRatio4;
 
-  //
-  // FIXME: Implement these.
-  //
+  UINT16               PackageCount;
   UINT16               CoreCount;
   UINT16               ThreadCount;
 
