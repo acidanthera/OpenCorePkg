@@ -571,6 +571,8 @@ ScanIntelProcessor (
   AppleMajorType = DetectAppleMajorType (Cpu->BrandString);
   Cpu->AppleProcessorType = DetectAppleProcessorType (Cpu->Model, Cpu->Stepping, AppleMajorType);
 
+  DEBUG ((DEBUG_INFO, "Detected Apple Processor Type: %02X -> %04X\n", AppleMajorType, Cpu->AppleProcessorType));
+
   if ((Cpu->Family != 0x06 || Cpu->Model < 0x0c)
     && (Cpu->Family != 0x0f || Cpu->Model < 0x03)) {
     return;

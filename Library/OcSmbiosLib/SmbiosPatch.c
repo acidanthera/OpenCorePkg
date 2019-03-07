@@ -951,27 +951,23 @@ PatchBootInformation (
 **/
 STATIC
 VOID
-PatchAppleFirmwareVolume (
+CreateAppleFirmwareVolume (
   IN OUT OC_SMBIOS_TABLE  *Table,
   IN     OC_SMBIOS_DATA   *Data
   )
 {
-  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT8                           MinLength;
-  UINT8                           StringIndex;
 
-  Original    = SmbiosGetOriginalStructure (APPLE_SMBIOS_TYPE_FIRMWARE_INFORMATION, 1);
-  MinLength   = sizeof (*Original.Type128);
-  StringIndex = 0;
+  MinLength   = sizeof (*Table->CurrentPtr.Type128);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, APPLE_SMBIOS_TYPE_FIRMWARE_INFORMATION, MinLength, 1))) {
     return;
   }
 
-  SMBIOS_OVERRIDE_V (Table, Type128->FirmwareFeatures, Original, &Data->FirmwareFeatures, NULL);
-  SMBIOS_OVERRIDE_V (Table, Type128->FirmwareFeaturesMask, Original, &Data->FirmwareFeaturesMask, NULL);
-  SMBIOS_OVERRIDE_V (Table, Type128->ExtendedFirmwareFeatures, Original, &Data->ExtendedFirmwareFeatures, NULL);
-  SMBIOS_OVERRIDE_V (Table, Type128->ExtendedFirmwareFeaturesMask, Original, &Data->ExtendedFirmwareFeaturesMask, NULL);
+  Table->CurrentPtr.Type128->FirmwareFeatures = Data->FirmwareFeatures;
+  Table->CurrentPtr.Type128->FirmwareFeaturesMask = Data->FirmwareFeaturesMask;
+  Table->CurrentPtr.Type128->ExtendedFirmwareFeatures = Data->ExtendedFirmwareFeatures;
+  Table->CurrentPtr.Type128->ExtendedFirmwareFeaturesMask = Data->ExtendedFirmwareFeaturesMask;
 
   SmbiosFinaliseStruct (Table);
 }
@@ -986,30 +982,21 @@ PatchAppleFirmwareVolume (
 **/
 STATIC
 VOID
-PatchAppleProcessorType (
+CreateAppleProcessorType (
   IN OUT OC_SMBIOS_TABLE  *Table,
   IN     OC_SMBIOS_DATA   *Data,
   IN     CPU_INFO         *CpuInfo
   )
 {
-  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT8                           MinLength;
-  UINT8                           StringIndex;
 
-  Original    = SmbiosGetOriginalStructure (APPLE_SMBIOS_TYPE_PROCESSOR_TYPE, 1);
-  MinLength   = sizeof (*Original.Type131);
-  StringIndex = 0;
+  MinLength   = sizeof (*Table->CurrentPtr.Type131);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, APPLE_SMBIOS_TYPE_PROCESSOR_TYPE, MinLength, 1))) {
     return;
   }
 
-  SMBIOS_OVERRIDE_V (Table, Type131->ProcessorType, Original, NULL, NULL);
-  SMBIOS_OVERRIDE_V (Table, Type131->Reserved, Original, NULL, NULL);
-
-  if (Table->CurrentPtr.Type131->ProcessorType.Type == AppleProcessorMajorUnknown) {
-    Table->CurrentPtr.Type131->ProcessorType.Type = CpuInfo->AppleProcessorType;
-  }
+  Table->CurrentPtr.Type131->ProcessorType.Type = CpuInfo->AppleProcessorType;
 
   SmbiosFinaliseStruct (Table);
 }
@@ -1024,7 +1011,7 @@ PatchAppleProcessorType (
 **/
 STATIC
 VOID
-PatchAppleProcessorSpeed (
+CreateAppleProcessorSpeed (
   IN OUT OC_SMBIOS_TABLE  *Table,
   IN     OC_SMBIOS_DATA   *Data,
   IN     CPU_INFO         *CpuInfo
@@ -1039,13 +1026,9 @@ PatchAppleProcessorSpeed (
   (VOID) Data;
   (VOID) CpuInfo;
 #else
-  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT8                           MinLength;
-  UINT8                           StringIndex;
 
-  Original    = SmbiosGetOriginalStructure (APPLE_SMBIOS_TYPE_PROCESSOR_BUS_SPEED, 1);
-  MinLength   = sizeof (*Original.Type132);
-  StringIndex = 0;
+  MinLength   = sizeof (*Table->CurrentPtr.Type132);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, APPLE_SMBIOS_TYPE_PROCESSOR_BUS_SPEED, MinLength, 1))) {
     return;
@@ -1070,18 +1053,14 @@ PatchAppleProcessorSpeed (
 **/
 STATIC
 VOID
-PatchSmBiosEndOfTable (
+CreateSmBiosEndOfTable (
   IN OUT OC_SMBIOS_TABLE  *Table,
   IN     OC_SMBIOS_DATA   *Data
   )
 {
-  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT8                           MinLength;
-  UINT8                           StringIndex;
 
-  Original    = SmbiosGetOriginalStructure (SMBIOS_TYPE_END_OF_TABLE, 1);
-  MinLength   = sizeof (*Original.Standard.Type127);
-  StringIndex = 0;
+  MinLength   = sizeof (*Table->CurrentPtr.Standard.Type127);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_END_OF_TABLE, MinLength, 1))) {
     return;
@@ -1638,10 +1617,10 @@ CreateSmbios (
 
   PatchPortableBatteryDevice (&SmbiosTable, Data);
   PatchBootInformation (&SmbiosTable, Data);
-  PatchAppleProcessorType (&SmbiosTable, Data, &CpuInfo);
-  PatchAppleProcessorSpeed (&SmbiosTable, Data, &CpuInfo);
-  PatchAppleFirmwareVolume (&SmbiosTable, Data);
-  PatchSmBiosEndOfTable (&SmbiosTable, Data);
+  CreateAppleProcessorType (&SmbiosTable, Data, &CpuInfo);
+  CreateAppleProcessorSpeed (&SmbiosTable, Data, &CpuInfo);
+  CreateAppleFirmwareVolume (&SmbiosTable, Data);
+  CreateSmBiosEndOfTable (&SmbiosTable, Data);
 
   FreePool (Mapping);
 
