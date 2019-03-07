@@ -16,6 +16,7 @@
 
 #include <Guid/AppleVariable.h>
 
+#include <Protocol/DevicePath.h>
 #include <Protocol/DevicePathPropertyDatabase.h>
 
 #include <Library/BaseLib.h>
@@ -353,7 +354,7 @@ DppDbSetProperty (
   Property = InternalGetProperty (Node, Name);
 
   if (Property != NULL) {
-    if (Property->Value->Size == Size
+    if (Property->Value->Size == Size + sizeof (UINT32)
       && CompareMem (&Property->Value->Data[0], Value, Size) == 0) {
       return EFI_SUCCESS;
     }
@@ -522,11 +523,12 @@ DppDbGetPropertyBuffer (
                    );
     }
 
+    BufferSize += EFI_DEVICE_PATH_PROPERTY_NODE_SIZE (NodeWalker);
+
     NodeWalker = PROPERTY_NODE_FROM_LIST_ENTRY (
                    GetNextNode (Nodes, &NodeWalker->Hdr.Link)
                    );
 
-    BufferSize += EFI_DEVICE_PATH_PROPERTY_NODE_SIZE (NodeWalker);
     ++NumberOfNodes;
   }
 
@@ -562,7 +564,7 @@ DppDbGetPropertyBuffer (
                  );
 
     BufferSize += sizeof (BufferNode->Hdr);
-    BufferPtr   = (UINT8 *)((UINTN)Buffer + BufferSize);
+    BufferPtr   = (UINT8 *) Buffer + BufferSize;
 
     while (!IsNull (&NodeWalker->Hdr.Properties, &Property->Link)) {
       CopyMem (
@@ -577,7 +579,7 @@ DppDbGetPropertyBuffer (
         Property->Value->Size
         );
 
-      BufferPtr  += Property->Name->Size + Property->Value->Size;
+      BufferPtr  += EFI_DEVICE_PATH_PROPERTY_SIZE (Property);
       BufferSize += EFI_DEVICE_PATH_PROPERTY_SIZE (Property);
       Property    = EFI_DEVICE_PATH_PROPERTY_FROM_LIST_ENTRY (
                       GetNextNode (
@@ -589,7 +591,7 @@ DppDbGetPropertyBuffer (
 
     BufferNode->Hdr.Size = (UINT32) BufferSize;
     BufferNode           = (EFI_DEVICE_PATH_PROPERTY_BUFFER_NODE *)(
-                              (UINTN)BufferNode + BufferSize
+                              (UINTN) BufferNode + BufferSize
                               );
 
     NodeWalker = PROPERTY_NODE_FROM_LIST_ENTRY (
@@ -850,20 +852,20 @@ OcDevicePathPropertyInstallProtocol (
 
   InitializeListHead (&DevicePathPropertyData->Nodes);
 
-  Status = InternalReadEfiVariableProperties (
-             &gAppleVendorVariableGuid,
-             FALSE,
-             DevicePathPropertyData
-             );
-
-  if (EFI_ERROR (Status)) {
-    FreePool (DevicePathPropertyData);
-    return Status;
-  }
-
-  DevicePathPropertyData->Modified = FALSE;
-
   if (PcdGetBool (PcNvramInitDevicePropertyDatabase)) {
+    Status = InternalReadEfiVariableProperties (
+               &gAppleVendorVariableGuid,
+               FALSE,
+               DevicePathPropertyData
+               );
+
+    if (EFI_ERROR (Status)) {
+      FreePool (DevicePathPropertyData);
+      return Status;
+    }
+
+    DevicePathPropertyData->Modified = FALSE;
+
     Status = InternalReadEfiVariableProperties (
                &gAppleBootVariableGuid,
                TRUE,

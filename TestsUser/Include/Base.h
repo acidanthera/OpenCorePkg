@@ -37,6 +37,7 @@
 #define MAX_UINT16    UINT16_MAX
 #define MAX_UINT32    UINT32_MAX
 #define MAX_UINT64    UINT64_MAX
+#define MAX_UINTN     UINT64_MAX
 #define MAX_BIT       0x8000000000000000
 #define EFI_PAGE_SIZE  0x1000
 #define EFI_PAGE_MASK  0xFFF
@@ -47,7 +48,7 @@
 #define CONST const
 #define STATIC static
 typedef char CHAR8;
-typedef short CHAR16;
+typedef unsigned short CHAR16;
 typedef signed char INT8;
 typedef unsigned char UINT8;
 typedef ssize_t INTN;
@@ -73,6 +74,14 @@ typedef struct {
   UINT16  Data3;
   UINT8   Data4[8];
 } GUID;
+
+typedef struct {
+  UINT8 Addr[4];
+} IPv4_ADDRESS;
+
+typedef struct {
+  UINT8 Addr[16];
+} IPv6_ADDRESS;
 
 typedef enum {
   AllocateAnyPages,
@@ -100,11 +109,44 @@ typedef enum {
   EfiMaxMemoryType
 } EFI_MEMORY_TYPE;
 
+typedef enum {
+  EFI_NATIVE_INTERFACE
+} EFI_INTERFACE_TYPE;
+
+///
+/// Enumeration of EFI Locate Search Types
+///
+typedef enum {
+  AllHandles,
+  ByRegisterNotify,
+  ByProtocol
+} EFI_LOCATE_SEARCH_TYPE;
+
+typedef struct {
+  UINT8 Addr[32];
+} EFI_MAC_ADDRESS;
+
+typedef IPv4_ADDRESS EFI_IPv4_ADDRESS;
+typedef IPv6_ADDRESS EFI_IPv6_ADDRESS;
+
+typedef union {
+  UINT32            Addr[4];
+  EFI_IPv4_ADDRESS  v4;
+  EFI_IPv6_ADDRESS  v6;
+} EFI_IP_ADDRESS;
+
 typedef GUID EFI_GUID;
 typedef struct EFI_SYSTEM_TABLE_ EFI_SYSTEM_TABLE;
 typedef struct EFI_BOOT_SERVICES_ EFI_BOOT_SERVICES;
 typedef struct EFI_RUNTIME_SERVICES_ EFI_RUNTIME_SERVICES;
 typedef VOID (*EFI_EVENT_NOTIFY)(EFI_EVENT Event, VOID *Context);
+
+typedef struct _LIST_ENTRY LIST_ENTRY;
+
+struct _LIST_ENTRY {
+  LIST_ENTRY  *ForwardLink;
+  LIST_ENTRY  *BackLink;
+};
 
 #define IN
 #define OUT
@@ -384,10 +426,17 @@ typedef VOID (*EFI_EVENT_NOTIFY)(EFI_EVENT Event, VOID *Context);
 #define  BASE_4EB    0x4000000000000000ULL
 #define  BASE_8EB    0x8000000000000000ULL
 
+#define EFI_VARIABLE_NON_VOLATILE       0x00000001
+#define EFI_VARIABLE_BOOTSERVICE_ACCESS 0x00000002
+#define EFI_VARIABLE_RUNTIME_ACCESS     0x00000004
+#define EFI_VARIABLE_READ_ONLY          0x00000008
+
 //
 // Functional macros
 //
 
+#define SIGNATURE_16(A, B)        ((A) | ((B) << 8))
+#define SIGNATURE_32(A, B, C, D)  (SIGNATURE_16 (A, B) | (SIGNATURE_16 (C, D) << 16))
 #define DEBUG(X) do { ppprintf X ; } while (0)
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof((x)[0]))
 #define EFI_ERROR(x) ((x) != 0)
@@ -405,8 +454,16 @@ typedef VOID (*EFI_EVENT_NOTIFY)(EFI_EVENT Event, VOID *Context);
   DEBUG_CODE_END ()
 #define EFI_SIZE_TO_PAGES(a)  (((a) >> EFI_PAGE_SHIFT) + (((a) & EFI_PAGE_MASK) ? 1 : 0))
 #define EFI_PAGES_TO_SIZE(a)   ( (a) << EFI_PAGE_SHIFT)
-
-
+#define BASE_CR(Record, TYPE, Field)  ((TYPE *) ((CHAR8 *) (Record) - OFFSET_OF (TYPE, Field)))
+#define CR(Record, TYPE, Field, TestSignature)                                              \
+  (DebugAssertEnabled () && (BASE_CR (Record, TYPE, Field)->Signature != TestSignature)) ?  \
+  (TYPE *) (ASSERT (false), Record) :                                       \
+  BASE_CR (Record, TYPE, Field)
+#define ASSERT_EFI_ERROR(status)  if (EFI_ERROR(status))                \
+    DEBUG_CODE ( {                                                      \
+      DEBUG((EFI_D_ERROR, "\nASSERT!Status = 0x%x Info :",status));     \
+      ASSERT(!EFI_ERROR(status));                                \
+    } )
 //
 // Functions
 //
@@ -415,6 +472,7 @@ typedef VOID (*EFI_EVENT_NOTIFY)(EFI_EVENT Event, VOID *Context);
 #define AllocateZeroPool(x) calloc(1, x)
 #define ReallocatePool(a,b,c) realloc(c,b)
 #define FreePool(x) free(x)
+#define CompareMem(a,b,c) memcmp((a),(b),(c))
 #define CopyMem(a,b,c) memcpy((a),(b),(c))
 #define ZeroMem(a,b) memset(a, 0, b)
 #define AsciiSPrint snppprintf
@@ -428,7 +486,11 @@ typedef VOID (*EFI_EVENT_NOTIFY)(EFI_EVENT Event, VOID *Context);
 #define AsciiStrHexToUint64(a) strtoull(a, NULL, 16)
 #define ASSERT assert
 #define DebugCodeEnabled() true
+#define DebugAssertEnabled() true
 #define FreePages(a,b) do {} while (0)
+#define UnicodeSPrint(...) assert(false)
+#define CompareGuid(a, b) (memcmp((a), (b), sizeof (EFI_GUID)) == 0)
+#define CopyGuid(a, b) memcpy((a), (b), sizeof (EFI_GUID))
 
 EFI_STATUS EfiGetSystemConfigurationTable (EFI_GUID *TableGuid, OUT VOID **Table);
 
@@ -645,6 +707,404 @@ GetPerformanceCounterProperties (
   return 0;
 }
 
+STATIC
+UINTN
+StrLen (
+  CONST CHAR16              *String
+  )
+{
+  UINTN   Length;
+
+  ASSERT (String != NULL);
+  ASSERT (((UINTN) String & BIT0) == 0);
+
+  for (Length = 0; *String != L'\0'; String++, Length++) { }
+  return Length;
+}
+
+#define SAFE_STRING_CONSTRAINT_CHECK(Expression, Status)  \
+  do { \
+    ASSERT (Expression); \
+    if (!(Expression)) { \
+      return Status; \
+    } \
+  } while (FALSE)
+
+STATIC
+UINTN
+StrnLenS (
+   CONST CHAR16              *String,
+   UINTN                     MaxSize
+  )
+{
+  UINTN     Length;
+
+  ASSERT (((UINTN) String & BIT0) == 0);
+
+  //
+  // If String is a null pointer or MaxSize is 0, then the StrnLenS function returns zero.
+  //
+  if ((String == NULL) || (MaxSize == 0)) {
+    return 0;
+  }
+
+  Length = 0;
+  while (String[Length] != 0) {
+    if (Length >= MaxSize - 1) {
+      return MaxSize;
+    }
+    Length++;
+  }
+  return Length;
+}
+
+STATIC
+UINTN
+StrSize (
+  CONST CHAR16              *String
+  )
+{
+  return (StrLen (String) + 1) * sizeof (*String);
+}
+
+STATIC
+RETURN_STATUS
+StrCpyS (
+  CHAR16       *Destination,
+  UINTN        DestMax,
+  CONST CHAR16 *Source
+  )
+{
+  UINTN            SourceLen;
+
+  ASSERT (((UINTN) Destination & BIT0) == 0);
+  ASSERT (((UINTN) Source & BIT0) == 0);
+
+  //
+  // 1. Neither Destination nor Source shall be a null pointer.
+  //
+  SAFE_STRING_CONSTRAINT_CHECK ((Destination != NULL), RETURN_INVALID_PARAMETER);
+  SAFE_STRING_CONSTRAINT_CHECK ((Source != NULL), RETURN_INVALID_PARAMETER);
+
+  //
+  // 2. DestMax shall not be greater than RSIZE_MAX.
+  //
+  if (RSIZE_MAX != 0) {
+    SAFE_STRING_CONSTRAINT_CHECK ((DestMax <= RSIZE_MAX), RETURN_INVALID_PARAMETER);
+  }
+
+  //
+  // 3. DestMax shall not equal zero.
+  //
+  SAFE_STRING_CONSTRAINT_CHECK ((DestMax != 0), RETURN_INVALID_PARAMETER);
+
+  //
+  // 4. DestMax shall be greater than StrnLenS(Source, DestMax).
+  //
+  SourceLen = StrnLenS (Source, DestMax);
+  SAFE_STRING_CONSTRAINT_CHECK ((DestMax > SourceLen), RETURN_BUFFER_TOO_SMALL);
+
+  //
+  // 5. Copying shall not take place between objects that overlap.
+  //
+  // SAFE_STRING_CONSTRAINT_CHECK (InternalSafeStringNoStrOverlap (Destination, DestMax, (CHAR16 *)Source, SourceLen + 1), RETURN_ACCESS_DENIED);
+
+  //
+  // The StrCpyS function copies the string pointed to by Source (including the terminating
+  // null character) into the array pointed to by Destination.
+  //
+  while (*Source != 0) {
+    *(Destination++) = *(Source++);
+  }
+  *Destination = 0;
+
+  return RETURN_SUCCESS;
+}
+
+STATIC
+RETURN_STATUS
+EFIAPI
+StrCatS (
+  IN OUT CHAR16       *Destination,
+  IN     UINTN        DestMax,
+  IN     CONST CHAR16 *Source
+  )
+{
+  UINTN               DestLen;
+  UINTN               CopyLen;
+  UINTN               SourceLen;
+
+  ASSERT (((UINTN) Destination & BIT0) == 0);
+  ASSERT (((UINTN) Source & BIT0) == 0);
+
+  //
+  // Let CopyLen denote the value DestMax - StrnLenS(Destination, DestMax) upon entry to StrCatS.
+  //
+  DestLen = StrnLenS (Destination, DestMax);
+  CopyLen = DestMax - DestLen;
+
+  //
+  // 1. Neither Destination nor Source shall be a null pointer.
+  //
+  SAFE_STRING_CONSTRAINT_CHECK ((Destination != NULL), RETURN_INVALID_PARAMETER);
+  SAFE_STRING_CONSTRAINT_CHECK ((Source != NULL), RETURN_INVALID_PARAMETER);
+
+  //
+  // 2. DestMax shall not be greater than RSIZE_MAX.
+  //
+  if (RSIZE_MAX != 0) {
+    SAFE_STRING_CONSTRAINT_CHECK ((DestMax <= RSIZE_MAX), RETURN_INVALID_PARAMETER);
+  }
+
+  //
+  // 3. DestMax shall not equal zero.
+  //
+  SAFE_STRING_CONSTRAINT_CHECK ((DestMax != 0), RETURN_INVALID_PARAMETER);
+
+  //
+  // 4. CopyLen shall not equal zero.
+  //
+  SAFE_STRING_CONSTRAINT_CHECK ((CopyLen != 0), RETURN_BAD_BUFFER_SIZE);
+
+  //
+  // 5. CopyLen shall be greater than StrnLenS(Source, CopyLen).
+  //
+  SourceLen = StrnLenS (Source, CopyLen);
+  SAFE_STRING_CONSTRAINT_CHECK ((CopyLen > SourceLen), RETURN_BUFFER_TOO_SMALL);
+
+  //
+  // 6. Copying shall not take place between objects that overlap.
+  //
+  // SAFE_STRING_CONSTRAINT_CHECK (InternalSafeStringNoStrOverlap (Destination, DestMax, (CHAR16 *)Source, SourceLen + 1), RETURN_ACCESS_DENIED);
+
+  //
+  // The StrCatS function appends a copy of the string pointed to by Source (including the
+  // terminating null character) to the end of the string pointed to by Destination. The initial character
+  // from Source overwrites the null character at the end of Destination.
+  //
+  Destination = Destination + DestLen;
+  while (*Source != 0) {
+    *(Destination++) = *(Source++);
+  }
+  *Destination = 0;
+
+  return RETURN_SUCCESS;
+}
+
+
+STATIC
+INTN
+StrCmp (
+  CONST CHAR16              *FirstString,
+  CONST CHAR16              *SecondString
+  )
+{
+  while ((*FirstString != L'\0') && (*FirstString == *SecondString)) {
+    FirstString++;
+    SecondString++;
+  }
+  return *FirstString - *SecondString;
+}
+
+STATIC
+VOID
+InitializeListHead (
+  LIST_ENTRY       *List
+  )
+{
+  List->ForwardLink = List;
+  List->BackLink    = List;
+}
+
+STATIC
+VOID
+InsertTailList (
+  LIST_ENTRY  *ListHead,
+  LIST_ENTRY  *Entry
+  )
+{
+  LIST_ENTRY *_ListHead;
+  LIST_ENTRY *_BackLink;
+
+  _ListHead              = ListHead;
+  _BackLink              = _ListHead->BackLink;
+  Entry->ForwardLink     = _ListHead;
+  Entry->BackLink        = _BackLink;
+  _BackLink->ForwardLink = Entry;
+  _ListHead->BackLink    = Entry;
+}
+
+VOID
+RemoveEntryList (
+  LIST_ENTRY  *Entry
+  )
+{
+  LIST_ENTRY  *_ForwardLink;
+  LIST_ENTRY  *_BackLink;
+
+  _ForwardLink           = Entry->ForwardLink;
+  _BackLink              = Entry->BackLink;
+  _BackLink->ForwardLink = _ForwardLink;
+  _ForwardLink->BackLink = _BackLink;
+}
+
+STATIC
+LIST_ENTRY *
+GetFirstNode (
+  LIST_ENTRY  *List
+  )
+{
+  return List->ForwardLink;
+}
+
+STATIC
+BOOLEAN
+IsNull (
+  LIST_ENTRY  *List,
+  LIST_ENTRY  *Node
+  )
+{
+  return (BOOLEAN)(Node == List);
+}
+
+BOOLEAN
+IsListEmpty (
+  LIST_ENTRY  *List
+  )
+{
+  return (BOOLEAN)(List->ForwardLink == List);
+}
+
+STATIC
+LIST_ENTRY *
+GetNextNode (
+  LIST_ENTRY  *List,
+  LIST_ENTRY  *Node
+  )
+{
+  if (Node == List) {
+    return List;
+  }
+  return Node->ForwardLink;
+}
+
+STATIC
+UINT16
+EFIAPI
+ReadUnaligned16 (
+  IN CONST UINT16              *Buffer
+  )
+{
+  volatile UINT8 LowerByte;
+  volatile UINT8 HigherByte;
+
+  ASSERT (Buffer != NULL);
+
+  LowerByte = ((UINT8*)Buffer)[0];
+  HigherByte = ((UINT8*)Buffer)[1];
+
+  return (UINT16)(LowerByte | (HigherByte << 8));
+}
+
+STATIC
+UINT16
+EFIAPI
+WriteUnaligned16 (
+  OUT UINT16                    *Buffer,
+  IN  UINT16                    Value
+  )
+{
+  ASSERT (Buffer != NULL);
+
+  ((volatile UINT8*)Buffer)[0] = (UINT8)Value;
+  ((volatile UINT8*)Buffer)[1] = (UINT8)(Value >> 8);
+
+  return Value;
+}
+
+STATIC
+UINT32
+EFIAPI
+ReadUnaligned32 (
+  IN      CONST UINT32              *Buffer
+  )
+{
+  UINT16  LowerBytes;
+  UINT16  HigherBytes;
+
+  ASSERT (Buffer != NULL);
+
+  LowerBytes  = ReadUnaligned16 ((UINT16*) Buffer);
+  HigherBytes = ReadUnaligned16 ((UINT16*) Buffer + 1);
+
+  return (UINT32) (LowerBytes | (HigherBytes << 16));
+}
+
+STATIC
+UINT32
+EFIAPI
+WriteUnaligned32 (
+  OUT     UINT32                    *Buffer,
+  IN      UINT32                    Value
+  )
+{
+  ASSERT (Buffer != NULL);
+
+  WriteUnaligned16 ((UINT16*)Buffer, (UINT16)Value);
+  WriteUnaligned16 ((UINT16*)Buffer + 1, (UINT16)(Value >> 16));
+  return Value;
+}
+
+STATIC
+UINT64
+EFIAPI
+ReadUnaligned64 (
+  IN      CONST UINT64              *Buffer
+  )
+{
+  UINT32  LowerBytes;
+  UINT32  HigherBytes;
+
+  ASSERT (Buffer != NULL);
+
+  LowerBytes  = ReadUnaligned32 ((UINT32*) Buffer);
+  HigherBytes = ReadUnaligned32 ((UINT32*) Buffer + 1);
+
+  return (UINT64) (LowerBytes | LShiftU64 (HigherBytes, 32));
+}
+
+STATIC
+UINT64
+EFIAPI
+WriteUnaligned64 (
+  OUT UINT64                    *Buffer,
+  IN  UINT64                    Value
+  )
+{
+  ASSERT (Buffer != NULL);
+
+  WriteUnaligned32 ((UINT32*)Buffer, (UINT32)Value);
+  WriteUnaligned32 ((UINT32*)Buffer + 1, (UINT32)RShiftU64 (Value, 32));
+  return Value;
+}
+
+STATIC
+VOID *
+AllocateCopyPool (
+   UINTN            AllocationSize,
+   CONST VOID       *Buffer
+  )
+{
+  VOID  *Memory;
+
+  Memory = malloc (AllocationSize);
+  if (Memory != NULL) {
+     Memory = memcpy (Memory, Buffer, AllocationSize);
+  }
+  return Memory;
+}
+
+
 //
 // Services
 //
@@ -653,6 +1113,14 @@ struct EFI_BOOT_SERVICES_ {
   EFI_STATUS (*LocateProtocol)(EFI_GUID *ProtocolGuid, VOID *Registration, VOID **Interface);
   EFI_STATUS (*AllocatePages)(EFI_ALLOCATE_TYPE Type, EFI_MEMORY_TYPE MemoryType, UINTN Pages, EFI_PHYSICAL_ADDRESS *Memory);
   EFI_STATUS (*InstallConfigurationTable)(EFI_GUID *Guid, VOID *Table);
+  EFI_STATUS (*LocateHandleBuffer) (EFI_LOCATE_SEARCH_TYPE SearchType, EFI_GUID * Protocol, VOID *SearchKey, UINTN *NumberHandles, EFI_HANDLE **Buffer);
+  EFI_STATUS (*HandleProtocol)(EFI_HANDLE Handle, EFI_GUID *Protocol, VOID **Interface);
+  EFI_STATUS (*InstallProtocolInterface) (EFI_HANDLE *Handle, EFI_GUID *Protocol, EFI_INTERFACE_TYPE InterfaceType, VOID *Interface);
+};
+
+struct EFI_RUNTIME_SERVICES_ {
+  EFI_STATUS (*GetVariable)(CHAR16 *VariableName, EFI_GUID *VendorGuid, UINT32 *Attributes, UINTN *DataSize, VOID *Data);
+  EFI_STATUS (*SetVariable)(CHAR16 *VariableName, EFI_GUID *VendorGuid, UINT32 Attributes, UINTN DataSize, VOID *Data);
 };
 
 STATIC EFI_STATUS NilLocateProtocol(EFI_GUID *ProtocolGuid, VOID *Registration, VOID **Interface) {
@@ -677,13 +1145,52 @@ STATIC EFI_STATUS NilAllocatePages(EFI_ALLOCATE_TYPE Type, EFI_MEMORY_TYPE Memor
 
 EFI_STATUS NilInstallConfigurationTable(EFI_GUID *Guid, VOID *Table);
 
+STATIC EFI_STATUS NilLocateHandleBuffer (EFI_LOCATE_SEARCH_TYPE SearchType, EFI_GUID * Protocol, VOID *SearchKey, UINTN *NumberHandles, EFI_HANDLE **Buffer) {
+  return EFI_NOT_FOUND;
+}
+
+STATIC EFI_STATUS NilHandleProtocol(EFI_HANDLE Handle, EFI_GUID *Protocol, VOID **Interface) {
+  return EFI_NOT_FOUND;
+}
+
+STATIC EFI_STATUS NilGetVariable(CHAR16 *VariableName, EFI_GUID *VendorGuid, UINT32 *Attributes, UINTN *DataSize, VOID *Data) {
+  return EFI_NOT_FOUND;
+}
+
+STATIC EFI_STATUS NilSetVariable(CHAR16 *VariableName, EFI_GUID *VendorGuid, UINT32 Attributes, UINTN DataSize, VOID *Data) {
+  return EFI_SUCCESS;
+}
+
+STATIC EFI_STATUS NilInstallProtocolInterface (EFI_HANDLE *Handle, EFI_GUID *Protocol, EFI_INTERFACE_TYPE InterfaceType, VOID *Interface) {
+  return EFI_SUCCESS;
+}
+
 
 STATIC EFI_BOOT_SERVICES gNilBS = {
   .LocateProtocol = NilLocateProtocol,
   .AllocatePages = NilAllocatePages,
-  .InstallConfigurationTable = NilInstallConfigurationTable
+  .InstallConfigurationTable = NilInstallConfigurationTable,
+  .LocateHandleBuffer = NilLocateHandleBuffer,
+  .HandleProtocol = NilHandleProtocol,
+  .InstallProtocolInterface = NilInstallProtocolInterface
 };
 
 STATIC EFI_BOOT_SERVICES *gBS = &gNilBS;
+
+STATIC EFI_RUNTIME_SERVICES gNilRT = {
+  .SetVariable = NilSetVariable,
+  .GetVariable = NilGetVariable
+};
+
+STATIC EFI_RUNTIME_SERVICES *gRT = &gNilRT;
+
+//
+// Specific
+//
+#define _PCD_GET_MODE_BOOL_PcdEnableAppleThunderboltSync false
+#define _PCD_GET_MODE_BOOL_PcNvramInitDevicePropertyDatabase false
+#define _PCD_GET_MODE_32_PcdMaximumDevicePathNodeCount 11
+
+#include <Protocol/DevicePath.h>
 
 #endif
