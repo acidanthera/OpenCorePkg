@@ -12,51 +12,121 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef OC_ACPI_LIB_H_
-#define OC_ACPI_LIB_H_
+#ifndef OC_ACPI_LIB_H
+#define OC_ACPI_LIB_H
 
-// TODO: remove this nasty temporary workaround
+#include <IndustryStandard/Acpi62.h>
 
-#include <Protocol/AcpiSupport.h>
+//
+// RSDP and XSDT table definitions not provided by EDK2 due to no
+// flexible array support.
+//
 
-// AcpiFindLegacyRsdPtr
-/** Find RSD_PTR Table In Legacy Area
+#pragma pack(push, 1)
 
-  @retval EFI_ACPI_6_0_ROOT_SYSTEM_DESCRIPTION_POINTER
-**/
-EFI_ACPI_6_0_ROOT_SYSTEM_DESCRIPTION_POINTER *
-AcpiFindLegacyRsdPtr (
-  VOID
-  );
+typedef struct {
+  EFI_ACPI_DESCRIPTION_HEADER  Header;
+  UINT32                       Tables[];
+} OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE;
 
-// AcpiFindRsdPtr
-/** Find RSD_PTR Table From System Configuration Tables
+typedef struct {
+  EFI_ACPI_DESCRIPTION_HEADER  Header;
+  UINT64                       Tables[];
+} OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE;
 
-  @retval EFI_ACPI_6_0_ROOT_SYSTEM_DESCRIPTION_POINTER
-**/
-EFI_ACPI_6_0_ROOT_SYSTEM_DESCRIPTION_POINTER *
-AcpiFindRsdPtr (
-  VOID
-  );
+#pragma pack(pop)
 
-// AcpiLocateTable
-/** Locate an existing ACPI table.
+typedef struct {
+  //
+  // Pointer to original RSDP table.
+  //
+  EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER   *Rsdp;
+  //
+  // Pointer to active RSDT table.
+  //
+  OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE      *Rsdt;
+  //
+  // Pointer to active XSDT table.
+  //
+  OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE  *Xsdt;
+  //
+  // Current list of tables allocated from heap.
+  //
+  EFI_ACPI_COMMON_HEADER                         **Tables;
+  //
+  // Number of tables.
+  //
+  UINT32                                         NumberOfTables;
+  //
+  // Number of allocated table slots.
+  //
+  UINT32                                         AllocatedTables;
+} OC_ACPI_CONTEXT;
 
-  @param[in]      Signature
-  @param[in, out] Table
-  @param[in, out] Handle
-  @param[in, out] Version
+/** Find ACPI System Tables for later table configuration.
 
-  @retval EFI_SUCCESS
-  @retval EFI_NOT_FOUND
-  @retval EFI_INVALID_PARAMETER
+  @param Context  ACPI library context.
+
+  @retval EFI_SUCCESS when Rsdp and Xsdt or Rsdt are found.
 **/
 EFI_STATUS
-AcpiLocateTable (
-  IN     UINT32                       Signature,
-  IN OUT EFI_ACPI_DESCRIPTION_HEADER  **Table,
-  IN OUT UINTN                        *Handle,
-  IN OUT EFI_ACPI_TABLE_VERSION       *Version
+AcpiInitContext (
+  IN OUT OC_ACPI_CONTEXT  *Context
   );
 
-#endif // OC_ACPI_LIB_H_
+/** Free ACPI context dynamic resources.
+
+  @param Context  ACPI library context.
+**/
+VOID
+AcpiFreeContext (
+  IN OUT OC_ACPI_CONTEXT  *Context
+  );
+
+/** Apply ACPI context to this system.
+
+  @param Context  ACPI library context.
+**/
+EFI_STATUS
+AcpiApplyContext (
+  IN OUT OC_ACPI_CONTEXT  *Context
+  );
+
+/** Drop one ACPI table.
+
+  @param Context     ACPI library context
+  @param Signature   Table signature or 0.
+  @param Length      Table length or 0.
+  @param OemTableId  Table Id or 0.
+**/
+EFI_STATUS
+AcpiDropTable (
+  IN OUT OC_ACPI_CONTEXT  *Context,
+  IN     UINT32           Signature,
+  IN     UINT32           Length,
+  IN     UINT64           OemTableId
+  );
+
+/** Install one ACPI table. For DSDT this performs table replacement.
+
+  @param Context     ACPI library context
+  @param Data        Table data.
+  @param Length      Table length.
+**/
+EFI_STATUS
+AcpiInsertTable (
+  IN OUT OC_ACPI_CONTEXT  *Context,
+  IN     CONST UINT8      *Data,
+  IN     UINT32           Length
+  );
+
+/** Normalise ACPI headers to contain 7-bit ASCII.
+
+  @param Context     ACPI library context
+**/
+VOID
+AcpiNormalizeHeaders (
+  IN OUT OC_ACPI_CONTEXT  *Context
+  );
+
+#endif // OC_ACPI_LIB_H

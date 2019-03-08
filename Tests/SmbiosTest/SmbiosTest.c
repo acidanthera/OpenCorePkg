@@ -72,7 +72,6 @@ static OC_SMBIOS_DATA Data = {
   .ExtendedFirmwareFeatures = 0xE00FE137,
   .ExtendedFirmwareFeaturesMask = 0xFF1FFF3F,
   .ProcessorType = 0, // Will be calculated automatically
-  .ProcessorBusSpeed = 0, // unused
   .PlatformFeature = 1
 };
 

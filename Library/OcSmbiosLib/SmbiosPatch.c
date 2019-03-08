@@ -697,7 +697,11 @@ PatchMemoryDevice (
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->TotalWidth, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->DataWidth, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->Size, Original, NULL, NULL);
-  Table->CurrentPtr.Standard.Type17->FormFactor = Data->MemoryFormFactor;
+  if (Data->MemoryFormFactor != 0) {
+    Table->CurrentPtr.Standard.Type17->FormFactor = Data->MemoryFormFactor;
+  } else {
+    Table->CurrentPtr.Standard.Type17->FormFactor = MemoryFormFactorSodimm;
+  }
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->DeviceSet, Original, NULL, NULL);
   SMBIOS_OVERRIDE_S (Table, Standard.Type17->DeviceLocator, Original, NULL, &StringIndex, NULL);
   SMBIOS_OVERRIDE_S (Table, Standard.Type17->BankLocator, Original, NULL, &StringIndex, NULL);
@@ -996,7 +1000,11 @@ CreateAppleProcessorType (
     return;
   }
 
-  Table->CurrentPtr.Type131->ProcessorType.Type = CpuInfo->AppleProcessorType;
+  if (Data->ProcessorType != AppleProcessorTypeUnknown) {
+    Table->CurrentPtr.Type131->ProcessorType.Type = Data->ProcessorType;
+  } else {
+    Table->CurrentPtr.Type131->ProcessorType.Type = CpuInfo->AppleProcessorType;
+  }
 
   SmbiosFinaliseStruct (Table);
 }

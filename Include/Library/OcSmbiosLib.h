@@ -83,10 +83,6 @@ typedef struct OC_SMBIOS_DATA_ {
   //
   UINT16          ProcessorType;
   //
-  // Type 132
-  //
-  UINT16          ProcessorBusSpeed;
-  //
   // Type 133
   //
   UINT32          PlatformFeature;

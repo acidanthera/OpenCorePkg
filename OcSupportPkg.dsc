@@ -102,6 +102,8 @@
   OcSupportPkg/Tests/PropertyTest/PropertyTestApp.inf
   OcSupportPkg/Tests/SmbiosTest/SmbiosTest.inf
   OcSupportPkg/Tests/SmbiosTest/SmbiosTestApp.inf
+  OcSupportPkg/Tests/AcpiTest/AcpiTest.inf
+  OcSupportPkg/Tests/AcpiTest/AcpiTestApp.inf
 
 [PcdsFixedAtBuild]
   gEfiMdePkgTokenSpaceGuid.PcdMaximumAsciiStringLength|0

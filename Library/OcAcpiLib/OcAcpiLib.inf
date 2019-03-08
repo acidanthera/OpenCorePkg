@@ -36,7 +36,9 @@
 [LibraryClasses]
   BaseLib
 
+[Guids]
+  gEfiAcpi10TableGuid
+  gEfiAcpi20TableGuid
+
 [Sources]
-  AcpiLocateTable.c
-  AcpiFindLegacyRsdPtr.c
-  AcpiFindRsdPtr.c
+  OcAcpiLib.c
