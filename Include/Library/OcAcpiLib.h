@@ -36,6 +36,9 @@ typedef struct {
 
 #pragma pack(pop)
 
+//
+// Main ACPI context describing current tableset worked on.
+//
 typedef struct {
   //
   // Pointer to original RSDP table.
@@ -50,6 +53,14 @@ typedef struct {
   //
   OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE  *Xsdt;
   //
+  // Pointer to active FADT table.
+  //
+  EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE      *Fadt;
+  //
+  // Pointer to active DSDT table.
+  //
+  EFI_ACPI_DESCRIPTION_HEADER                    *Dsdt;
+  //
   // Current list of tables allocated from heap.
   //
   EFI_ACPI_COMMON_HEADER                         **Tables;
@@ -62,6 +73,48 @@ typedef struct {
   //
   UINT32                                         AllocatedTables;
 } OC_ACPI_CONTEXT;
+
+//
+// ACPI patch structure.
+//
+typedef struct {
+  //
+  // Find bytes.
+  //
+  CONST UINT8  *Find;
+  //
+  // Replace bytes.
+  //
+  CONST UINT8  *Replace;
+  //
+  // Find mask or NULL.
+  //
+  CONST UINT8  *Mask;
+  //
+  // Patch size.
+  //
+  UINT32       Size;
+  //
+  // Replace count or 0 for all.
+  //
+  UINT32       Count;
+  //
+  // Skip count or 0 to start from 1 match.
+  //
+  UINT32       Skip;
+  //
+  // ACPI Table signature or 0.
+  //
+  UINT32       TableSignature;
+  //
+  // ACPI Table length or 0.
+  //
+  UINT32       TableLength;
+  //
+  // ACPI Table Id or 0.
+  //
+  UINT64       OemTableId;
+} OC_ACPI_PATCH;
 
 /** Find ACPI System Tables for later table configuration.
 
@@ -94,7 +147,7 @@ AcpiApplyContext (
 
 /** Drop one ACPI table.
 
-  @param Context     ACPI library context
+  @param Context     ACPI library context.
   @param Signature   Table signature or 0.
   @param Length      Table length or 0.
   @param OemTableId  Table Id or 0.
@@ -109,7 +162,7 @@ AcpiDropTable (
 
 /** Install one ACPI table. For DSDT this performs table replacement.
 
-  @param Context     ACPI library context
+  @param Context     ACPI library context.
   @param Data        Table data.
   @param Length      Table length.
 **/
@@ -122,11 +175,22 @@ AcpiInsertTable (
 
 /** Normalise ACPI headers to contain 7-bit ASCII.
 
-  @param Context     ACPI library context
+  @param Context     ACPI library context.
 **/
 VOID
 AcpiNormalizeHeaders (
   IN OUT OC_ACPI_CONTEXT  *Context
+  );
+
+/** Patch ACPI tables.
+
+  @param Context     ACPI library context.
+  @param Patch       ACPI patch.
+**/
+EFI_STATUS
+AcpiApplyPatch (
+  IN OUT OC_ACPI_CONTEXT  *Context,
+  IN     OC_ACPI_PATCH    *Patch
   );
 
 #endif // OC_ACPI_LIB_H

@@ -12,8 +12,10 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef OC_MISC_LIB_H_
-#define OC_MISC_LIB_H_
+#ifndef OC_MISC_LIB_H
+#define OC_MISC_LIB_H
+
+#include <Uefi.h>
 
 // PLATFORM_DATA_HEADER
 typedef struct {
@@ -166,4 +168,26 @@ WaitForKeyPress (
   CONST CHAR16 *Message
   );
 
-#endif // OC_MISC_LIB_H_
+INT32
+FindPattern (
+  IN CONST UINT8   *Pattern,
+  IN CONST UINT8   *PatternMask OPTIONAL,
+  IN CONST UINT32  PatternSize,
+  IN CONST UINT8   *Data,
+  IN UINT32        DataSize,
+  IN INT32         DataOff
+  );
+
+UINT32
+ApplyPatch (
+  IN CONST UINT8   *Pattern,
+  IN CONST UINT8   *PatternMask OPTIONAL,
+  IN CONST UINT32  PatternSize,
+  IN CONST UINT8   *Replace,
+  IN UINT8         *Data,
+  IN UINT32        DataSize,
+  IN UINT32        Count,
+  IN UINT32        Skip
+  );
+
+#endif // OC_MISC_LIB_H

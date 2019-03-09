@@ -35,6 +35,7 @@
 
 [LibraryClasses]
   BaseLib
+  OcMiscLib
 
 [Guids]
   gEfiAcpi10TableGuid

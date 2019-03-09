@@ -19,6 +19,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/OcMiscLib.h>
 
 #include <IndustryStandard/AcpiAml.h>
 #include <IndustryStandard/Acpi62.h>
@@ -202,9 +203,11 @@ AcpiInitContext (
       ? Context->Xsdt->Tables[Index] : (UINT64) Context->Rsdt->Tables[Index]);
 
     //
-    // Skip NULL table entries if any.
+    // Skip NULL table entries, DSDT, and RSDP if any.
     //
-    if (Context->Tables[DstIndex] == NULL) {
+    if (Context->Tables[DstIndex] == NULL
+      || Context->Tables[DstIndex]->Signature == EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE
+      || *(UINT64 *) Context->Tables[DstIndex] == EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER_SIGNATURE) {
       continue;
     }
 
@@ -216,12 +219,30 @@ AcpiInitContext (
       Index
       ));
 
+    if (Context->Tables[DstIndex]->Signature == EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE_SIGNATURE) {
+      Context->Fadt = (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE *) Context->Tables[DstIndex];
+
+      if (Context->Fadt->Header.Length >= OFFSET_OF (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE, XDsdt) + sizeof (Context->Fadt->XDsdt)) {
+        Context->Dsdt = (EFI_ACPI_DESCRIPTION_HEADER *)(UINTN) Context->Fadt->XDsdt;
+      } else {
+        Context->Dsdt = (EFI_ACPI_DESCRIPTION_HEADER *)(UINTN) Context->Fadt->Dsdt;
+      }
+    }
+
     ++DstIndex;
   }
 
   if (Context->NumberOfTables != DstIndex) {
     DEBUG ((DEBUG_WARN, "Only %u ACPI tables out of %u were valid\n", DstIndex, Context->NumberOfTables));
     Context->NumberOfTables = DstIndex;
+  }
+
+  if (Context->Fadt == NULL) {
+    DEBUG ((DEBUG_WARN, "Failed to find ACPI FADT table\n"));
+  }
+
+  if (Context->Dsdt == NULL) {
+    DEBUG ((DEBUG_WARN, "Failed to find ACPI DSDT table\n"));
   }
 
   return EFI_SUCCESS;
@@ -443,4 +464,112 @@ AcpiNormalizeHeaders (
       // TODO: normalize headers (https://alextjam.es/debugging-appleacpiplatform/)
     }
   }
+}
+
+EFI_STATUS
+AcpiApplyPatch (
+  IN OUT OC_ACPI_CONTEXT  *Context,
+  IN     OC_ACPI_PATCH    *Patch
+  )
+{
+  UINT32  Index;
+  UINT64  CurrOemTableId;
+  UINT32  ReplaceCount;
+
+  DEBUG ((DEBUG_INFO, "Applying %u byte ACPI patch skip %u, count %u\n", Patch->Size, Patch->Skip, Patch->Count));
+
+  if (Context->Dsdt != NULL
+    && (Patch->TableSignature == 0 || Patch->TableSignature == EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE)
+    && (Patch->TableLength == 0 || Context->Dsdt->Length == Patch->TableLength)
+    && (Patch->OemTableId == 0 || Context->Dsdt->OemTableId == Patch->OemTableId)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "Patching DSDT of %u bytes with %016Lx ID\n",
+      Patch->TableLength,
+      Patch->OemTableId
+      ));
+
+    ReplaceCount = ApplyPatch (
+      Patch->Find,
+      Patch->Mask,
+      Patch->Size,
+      Patch->Replace,
+      (UINT8 *) Context->Dsdt,
+      Context->Dsdt->Length,
+      Patch->Count,
+      Patch->Skip
+      );
+
+    (VOID) ReplaceCount;
+    DEBUG ((DEBUG_INFO, "Replaced %u matches out of requested %u in DSDT\n", ReplaceCount, Patch->Count));
+
+    if (ReplaceCount > 0) {
+      Context->Dsdt->Checksum = 0;
+      Context->Dsdt->Checksum = CalculateCheckSum8 (
+        (UINT8 *) Context->Dsdt,
+        Context->Dsdt->Length
+        );
+
+      DEBUG ((
+        DEBUG_INFO,
+        "Refreshed DSDT checksum to %02x\n",
+        Context->Dsdt->Checksum
+        ));
+    }
+  }
+
+  for (Index = 0; Index < Context->NumberOfTables; ++Index) {
+    if ((Patch->TableSignature == 0 || Context->Tables[Index]->Signature == Patch->TableSignature)
+      && (Patch->TableLength == 0 || Context->Tables[Index]->Length == Patch->TableLength)) {
+
+      if (Context->Tables[Index]->Length >= sizeof (EFI_ACPI_DESCRIPTION_HEADER)) {
+        CurrOemTableId = ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Tables[Index])->OemTableId;
+      } else {
+        CurrOemTableId = 0;
+      }
+
+      if (Patch->OemTableId != 0 && CurrOemTableId != Patch->OemTableId) {
+        continue;
+      }
+
+      DEBUG ((
+        DEBUG_INFO,
+        "Patching table %08x of %u bytes with %016Lx ID at index %u\n",
+        Context->Tables[Index]->Signature,
+        Context->Tables[Index]->Length,
+        CurrOemTableId,
+        Index
+        ));
+
+      ReplaceCount = ApplyPatch (
+        Patch->Find,
+        Patch->Mask,
+        Patch->Size,
+        Patch->Replace,
+        (UINT8 *) Context->Tables[Index],
+        Context->Tables[Index]->Length,
+        Patch->Count,
+        Patch->Skip
+        );
+
+      (VOID) ReplaceCount;
+      DEBUG ((DEBUG_INFO, "Replaced %u matches out of requested %u\n", ReplaceCount, Patch->Count));
+
+      if (ReplaceCount > 0 && Context->Tables[Index]->Length >= sizeof (EFI_ACPI_DESCRIPTION_HEADER)) {
+        ((EFI_ACPI_DESCRIPTION_HEADER *)Context->Tables[Index])->Checksum = 0;
+        ((EFI_ACPI_DESCRIPTION_HEADER *)Context->Tables[Index])->Checksum = CalculateCheckSum8 (
+          (UINT8 *) Context->Tables[Index],
+          Context->Tables[Index]->Length
+          );
+
+        DEBUG ((
+          DEBUG_INFO,
+          "Refreshed checksum to %02x\n",
+          ((EFI_ACPI_DESCRIPTION_HEADER *)Context->Tables[Index])->Checksum
+          ));
+      }
+    }
+  }
+
+  return EFI_UNSUPPORTED;
 }

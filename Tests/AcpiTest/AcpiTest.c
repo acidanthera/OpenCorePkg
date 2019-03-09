@@ -65,6 +65,28 @@ UINT8 PatchedSsdt8[] = {
   0x47, 0x50, 0x45, 0x0A, 0x17
 };
 
+STATIC UINT8 HpetPatchFind[] = {'H', 'P', 'E', 'T'};
+STATIC UINT8 HpetPatchReplace[] = {'X', 'P', 'E', 'T'};
+STATIC UINT8 HpetPatchMask[] = {0xFF, 0xFF, 0xFF, 0xFF};
+STATIC
+OC_ACPI_PATCH
+HpetPatch = {
+  .Find    = HpetPatchFind,
+  .Replace = HpetPatchReplace,
+  .Mask    = HpetPatchMask,
+  .Size    = sizeof (HpetPatchFind),
+  //
+  // Replace only once.
+  //
+  .Count   = 1,
+  .Skip    = 0,
+  //
+  // Only patch DSDT.
+  //
+  .TableSignature = EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE,
+  .TableLength = 0,
+  .OemTableId = 0
+};
 
 EFI_STATUS
 EFIAPI
@@ -84,6 +106,8 @@ TestAcpi (
     AcpiDropTable (&Context, EFI_ACPI_6_2_WINDOWS_ACPI_EMULATED_DEVICES_TABLE_SIGNATURE, 0, 0);
 
     AcpiInsertTable (&Context, PatchedSsdt8, sizeof (PatchedSsdt8));
+
+    AcpiApplyPatch (&Context, &HpetPatch);
 
     AcpiApplyContext (&Context);
 
