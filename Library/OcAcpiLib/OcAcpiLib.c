@@ -244,7 +244,7 @@ AcpiLoadTableRegions (
     if (Buffer[Index] == AML_EXT_OP
       && Buffer[Index+1] == AML_EXT_REGION_OP
       && AcpiReadName (&Buffer[Index+2], &Name[0], &NameOffset)
-      && Buffer[Index+OC_ACPI_NAME_SIZE+2+NameOffset] == 0) {
+      && Buffer[Index+OC_ACPI_NAME_SIZE+2+NameOffset] == EFI_ACPI_6_2_SYSTEM_MEMORY) {
       //
       // This is SystemMemory region. Try to save it.
       //
@@ -264,11 +264,18 @@ AcpiLoadTableRegions (
         }
       }
 
+      for (Index2 = 0; Index2 < Context->NumberOfRegions; ++Index2) {
+        if (Context->Regions[Index2].Address == Address) {
+          Address = 0;
+          break;
+        }
+      }
+
       if (Address != 0) {
         if (Context->AllocatedRegions == Context->NumberOfRegions) {
           NewRegions = AllocatePool ((Context->AllocatedRegions + 2) * sizeof (Context->Regions[0]));
           if (NewRegions == NULL) {
-            DEBUG ((DEBUG_WARN, "Failed to allocate memory for %u regions\n", Context->NumberOfRegions+2));
+            DEBUG ((DEBUG_WARN, "Failed to allocate memory for %u regions\n", Context->AllocatedRegions+2));
             return EFI_OUT_OF_RESOURCES;
           }
           CopyMem (NewRegions, Context->Regions, Context->NumberOfRegions * sizeof (Context->Regions[0]));
@@ -281,7 +288,7 @@ AcpiLoadTableRegions (
         DEBUG ((DEBUG_INFO, "Found OperationRegion %a at %08X\n", Name, Address));
         Context->Regions[Context->NumberOfRegions].Address = Address;
         CopyMem (&Context->Regions[Context->NumberOfRegions].Name[0], &Name[0], sizeof (Name));
-        Context->NumberOfRegions++;
+        ++Context->NumberOfRegions;
       }
     }
   }
@@ -324,11 +331,10 @@ AcpiRelocateTableRegions (
     if (Buffer[Index] == AML_EXT_OP
       && Buffer[Index+1] == AML_EXT_REGION_OP
       && AcpiReadName (&Buffer[Index+2], &Name[0], &NameOffset)
-      && Buffer[Index+OC_ACPI_NAME_SIZE+2+NameOffset] == 0) {
+      && Buffer[Index+OC_ACPI_NAME_SIZE+2+NameOffset] == EFI_ACPI_6_2_SYSTEM_MEMORY) {
       //
       // This is region. Compare to current BIOS tables and relocate.
       //
-
       for (RegionIndex = 0; RegionIndex < Context->NumberOfRegions; ++RegionIndex) {
         if (AsciiStrCmp (Context->Regions[RegionIndex].Name, Name) == 0) {
           OldAddress = 0;
@@ -381,6 +387,70 @@ AcpiRelocateTableRegions (
       Table->Length
       );
   }
+}
+
+/** Cleanup ACPI table from unprintable symbols.
+  Reference: https://alextjam.es/debugging-appleacpiplatform/.
+
+  @param Table        ACPI table.
+**/
+STATIC
+BOOLEAN
+AcpiNormalizeTableHeaders (
+  IN EFI_ACPI_DESCRIPTION_HEADER  *Table
+  )
+{
+  BOOLEAN  Modified;
+  UINT8    *Walker;
+  UINT32   Index;
+
+  if (Table->Length < sizeof (EFI_ACPI_DESCRIPTION_HEADER)) {
+    return FALSE;
+  }
+
+  Modified = FALSE;
+
+  Walker = (UINT8 *) &Table->Signature;
+  for (Index = 0; Index < sizeof (Table->Signature); ++Index) {
+    if (Walker[Index] & 0x80) {
+      Walker[Index] = '?';
+      Modified = TRUE;
+    }
+  }
+
+  Walker = (UINT8 *) &Table->OemId;
+  for (Index = 0; Index < sizeof (Table->OemId); ++Index) {
+    if (Walker[Index] & 0x80) {
+      Walker[Index] = '?';
+      Modified = TRUE;
+    }
+  }
+
+  Walker = (UINT8 *) &Table->OemTableId;
+  for (Index = 0; Index < sizeof (Table->OemTableId); ++Index) {
+    if (Walker[Index] & 0x80) {
+      Walker[Index] = '?';
+      Modified = TRUE;
+    }
+  }
+
+  Walker = (UINT8 *) &Table->CreatorId;
+  for (Index = 0; Index < sizeof (Table->CreatorId); ++Index) {
+    if (Walker[Index] & 0x80) {
+      Walker[Index] = '?';
+      Modified = TRUE;
+    }
+  }
+
+  if (Modified) {
+    Table->Checksum = 0;
+    Table->Checksum = CalculateCheckSum8 (
+      (UINT8 *) Table,
+      Table->Length
+      );
+  }
+
+  return Modified;
 }
 
 EFI_STATUS
@@ -729,9 +799,21 @@ AcpiNormalizeHeaders (
 {
   UINT32  Index;
 
+  if (Context->Dsdt != NULL) {
+    if (AcpiNormalizeTableHeaders (Context->Dsdt)) {
+      DEBUG ((DEBUG_INFO, "Normalized DSDT of %u bytes headers\n", Context->Dsdt->Length));
+    }
+  }
+
   for (Index = 0; Index < Context->NumberOfTables; ++Index) {
-    if (Context->Tables[Index]->Length >= sizeof (EFI_ACPI_COMMON_HEADER)) {
-      // TODO: normalize headers (https://alextjam.es/debugging-appleacpiplatform/)
+    if (AcpiNormalizeTableHeaders ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Tables[Index])) {
+      DEBUG ((
+        DEBUG_INFO,
+        "Normalized %08x of %u bytes headers at index %u\n",
+        Context->Tables[Index]->Signature,
+        Context->Tables[Index]->Length,
+        Index
+        ));
     }
   }
 }

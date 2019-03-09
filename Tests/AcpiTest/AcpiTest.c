@@ -113,6 +113,8 @@ TestAcpi (
 
     AcpiRelocateRegions (&Context);
 
+    AcpiNormalizeHeaders (&Context);
+
     AcpiApplyContext (&Context);
 
     AcpiFreeContext (&Context);
