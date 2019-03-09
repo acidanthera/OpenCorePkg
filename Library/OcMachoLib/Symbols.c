@@ -450,7 +450,7 @@ MachoRelocateSymbol64 (
 
     Value = ALIGN_VALUE (
               (Section->Address + LinkAddress),
-              (1UL << Section->Alignment)
+              (1ULL << Section->Alignment)
               );
     Value -= Section->Address;
     //

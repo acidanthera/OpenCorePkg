@@ -118,7 +118,7 @@ InternalGetExternalRelocationByOffset (
     // Assumption: Intel X64.  Currently verified by the Context
     //             initialization.
     //
-    if (MachoRelocationIsPairIntel64 (Relocation->Type)) {
+    if (MachoRelocationIsPairIntel64 ((UINT8)Relocation->Type)) {
       if (Index == (MAX_UINT32 - 1)) {
         break;
       }
