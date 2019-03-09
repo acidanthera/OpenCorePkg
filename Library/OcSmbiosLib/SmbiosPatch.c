@@ -568,16 +568,16 @@ PatchSystemSlots (
 
       if (Table->CurrentPtr.Standard.Type9->BusNum != 0) {
         PciAddress = EFI_PCI_ADDRESS (
-          BITFIELD (Table->CurrentPtr.Standard.Type9->DevFuncNum, 3, 7),
+          BitFieldRead8 (Table->CurrentPtr.Standard.Type9->DevFuncNum, 3, 7),
           Table->CurrentPtr.Standard.Type9->BusNum,
-          BITFIELD (Table->CurrentPtr.Standard.Type9->DevFuncNum, 2, 0),
+          BitFieldRead8 (Table->CurrentPtr.Standard.Type9->DevFuncNum, 0, 2),
           0
           );
       } else {
         PciAddress = EFI_PCI_ADDRESS (
           Table->CurrentPtr.Standard.Type9->BusNum,
-          BITFIELD (Table->CurrentPtr.Standard.Type9->DevFuncNum, 3, 7),
-          BITFIELD (Table->CurrentPtr.Standard.Type9->DevFuncNum, 2, 0),
+          BitFieldRead8 (Table->CurrentPtr.Standard.Type9->DevFuncNum, 3, 7),
+          BitFieldRead8 (Table->CurrentPtr.Standard.Type9->DevFuncNum, 0, 2),
           0
           );
       }

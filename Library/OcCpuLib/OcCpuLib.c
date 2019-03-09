@@ -703,12 +703,12 @@ ScanIntelProcessor (
     }
   } else if (Cpu->Model == CPU_MODEL_WESTMERE) {
     Msr = AsmReadMsr64 (MSR_CORE_THREAD_COUNT);
-    Cpu->CoreCount   = BITFIELD (Msr, 19, 16);
-    Cpu->ThreadCount = BITFIELD (Msr, 15,  0);
+    Cpu->CoreCount   = (UINT16)BitFieldRead64 (Msr, 16, 19);
+    Cpu->ThreadCount = (UINT16)BitFieldRead64 (Msr, 0,  15);
   } else {
     Msr = AsmReadMsr64 (MSR_CORE_THREAD_COUNT);
-    Cpu->CoreCount   = BITFIELD (Msr, 31, 16);
-    Cpu->ThreadCount = BITFIELD (Msr, 15,  0);
+    Cpu->CoreCount   = (UINT16)BitFieldRead64 (Msr, 16, 31);
+    Cpu->ThreadCount = (UINT16)BitFieldRead64 (Msr, 0,  15);
   }
 
   if (Cpu->CoreCount == 0) {
