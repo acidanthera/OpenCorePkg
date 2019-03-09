@@ -30,7 +30,9 @@ FindPattern (
   BOOLEAN  Matches;
   UINT32   Index;
 
-  if (PatternSize == 0 || DataSize == 0 || DataOff >= DataSize || DataSize - DataOff < PatternSize) {
+  ASSERT (DataOff >= 0);
+
+  if (PatternSize == 0 || DataSize == 0 || (DataOff < 0) || (UINT32)DataOff >= DataSize || DataSize - DataOff < PatternSize) {
     return -1;
   }
 
