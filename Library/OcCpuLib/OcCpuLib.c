@@ -567,6 +567,7 @@ ScanIntelProcessor (
   MSR_IA32_PERF_STATUS_REGISTER                     PerfStatus;
   MSR_NEHALEM_PLATFORM_INFO_REGISTER                PlatformInfo;
   MSR_NEHALEM_TURBO_RATIO_LIMIT_REGISTER            TurboLimit;
+  UINT16                                            CoreCount;
 
   AppleMajorType = DetectAppleMajorType (Cpu->BrandString);
   Cpu->AppleProcessorType = DetectAppleProcessorType (Cpu->Model, Cpu->Stepping, AppleMajorType);
@@ -695,7 +696,11 @@ ScanIntelProcessor (
   if (Cpu->MaxExtId >= CPUID_CACHE_PARAMS && Cpu->Model <= CPU_MODEL_PENRYN) {
     AsmCpuidEx (CPUID_CACHE_PARAMS, 0, &CpuidCacheEax.Uint32, &CpuidCacheEbx.Uint32, NULL, NULL);
     if (CpuidCacheEax.Bits.CacheType != CPUID_CACHE_PARAMS_CACHE_TYPE_NULL) {
-      Cpu->CoreCount   = CpuidCacheEax.Bits.MaximumAddressableIdsForProcessorCores + 1;
+      CoreCount = (UINT16)GetPowerOfTwo32 (CpuidCacheEax.Bits.MaximumAddressableIdsForProcessorCores + 1);
+      if (CoreCount < CpuidCacheEax.Bits.MaximumAddressableIdsForProcessorCores + 1) {
+        CoreCount *= 2;
+      }
+      Cpu->CoreCount   = CoreCount;
       Cpu->ThreadCount = Cpu->CoreCount;
       if (Cpu->Features & CPUID_FEATURE_HTT) {
         Cpu->ThreadCount *= 2;
