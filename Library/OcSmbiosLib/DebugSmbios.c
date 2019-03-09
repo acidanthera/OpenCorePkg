@@ -19,8 +19,6 @@
 #include <Library/DebugLib.h>
 #include <Library/UefiLib.h>
 
-#include <Macros.h>
-
 #include "DebugSmbios.h"
 #include "SmbiosInternal.h"
 
@@ -232,11 +230,10 @@ SmbiosDebugSystemEnclosure (
     DEBUG_INFO,
     " %-16a %a\n",
     "SKUNumber",
-    SmbiosGetString (Record, *(PTR_OFFSET(Record.Raw,
-                                          MultU64x32 (
-                                            Record.Standard.Type3->ContainedElementCount,
-                                            Record.Standard.Type3->ContainedElementRecordLength) + 0x15,
-                                          UINT8 *)))
+    SmbiosGetString (Record, *(Record.Raw +
+                                MultU64x32 (
+                                  Record.Standard.Type3->ContainedElementCount,
+                                  Record.Standard.Type3->ContainedElementRecordLength) + 0x15))
     ));
 }
 

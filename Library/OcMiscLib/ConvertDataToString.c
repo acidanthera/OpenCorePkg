@@ -33,8 +33,6 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
-#include <Macros.h>
-
 // ConvertDataToString
 /** Attempt to convert the data into an ascii string.
 
@@ -71,7 +69,7 @@ ConvertDataToString (
     VariableSize     = DataSize;
 
     // Detect Unicode String
-    if ((IS_ASCII (*(CHAR16 *)VariableData) > 0) && (DataSize > sizeof (CHAR16))) {
+    if (DataSize > sizeof (CHAR16)) {
       IsUnicode = TRUE;
 
       do {
@@ -91,7 +89,7 @@ ConvertDataToString (
         IsUnicode = FALSE;
       }
 
-    } else if ((IS_ASCII (*(CHAR8 *)VariableData) > 0) && (DataSize > sizeof (CHAR8))) {
+    } else if (DataSize > sizeof (CHAR8)) {
       IsAscii = TRUE;
 
       // Detect Ascii String
