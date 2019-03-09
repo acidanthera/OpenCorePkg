@@ -17,6 +17,8 @@
 
 #include <IndustryStandard/Acpi62.h>
 
+#define OC_ACPI_NAME_SIZE 4
+
 //
 // RSDP and XSDT table definitions not provided by EDK2 due to no
 // flexible array support.
@@ -41,13 +43,13 @@ typedef struct {
 //
 typedef struct {
   //
-  // Region name, not guaranteed to be null-terminated.
-  //
-  CHAR8   Name[8];
-  //
   // Region address.
   //
   UINT32  Address;
+  //
+  // Region name, not guaranteed to be null-terminated.
+  //
+  CHAR8   Name[OC_ACPI_NAME_SIZE+1];
 } OC_ACPI_REGION;
 
 //
@@ -226,6 +228,15 @@ AcpiApplyPatch (
 EFI_STATUS
 AcpiLoadRegions (
   IN OUT OC_ACPI_CONTEXT  *Context
+  );
+
+/** Attempt to relocate ACPI regions based on loaded ones.
+
+  @param Context     ACPI library context.
+**/
+VOID
+AcpiRelocateRegions (
+  IN OUT  OC_ACPI_CONTEXT  *Context
   );
 
 #endif // OC_ACPI_LIB_H

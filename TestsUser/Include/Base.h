@@ -934,6 +934,7 @@ InsertTailList (
   _ListHead->BackLink    = Entry;
 }
 
+STATIC
 VOID
 RemoveEntryList (
   LIST_ENTRY  *Entry
@@ -967,6 +968,7 @@ IsNull (
   return (BOOLEAN)(Node == List);
 }
 
+STATIC
 BOOLEAN
 IsListEmpty (
   LIST_ENTRY  *List

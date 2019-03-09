@@ -128,6 +128,261 @@ AcpiFindRsdp (
   return Rsdp;
 }
 
+/** Extract and verify ACPI name from data.
+
+  @param Data        Data of at least OC_ACPI_NAME_SIZE+1 bytes to read name from.
+  @param Name        Name buffer of at least OC_ACPI_NAME_SIZE+1 bytes.
+  @param NameOffset  Name offset from original data (1 if '\\' and 0 otherwise).
+
+  @return TRUE for valid names.
+**/
+STATIC
+BOOLEAN
+AcpiReadName (
+  IN  CONST UINT8  *Data,
+  OUT CHAR8        *Name,
+  OUT UINT32       *NameOffset OPTIONAL
+  )
+{
+  UINT32  Index;
+  UINT32  Off;
+
+  //
+  // Skip \ in \NAME.
+  //
+  Off = Data[0] == '\\' ? 1 : 0;
+
+  for (Index = Off; Index < Off + OC_ACPI_NAME_SIZE; ++Index) {
+    if (Data[Index] < '/'
+      || ((Data[Index] > '9') && (Data[Index] < 'A'))
+      || ((Data[Index] > 'Z') && (Data[Index] != '_'))) {
+      return FALSE;
+    }
+
+    Name[Index - Off] = Data[Index];
+  }
+
+  Name[OC_ACPI_NAME_SIZE] = 0;
+
+  if (NameOffset != NULL) {
+    *NameOffset = Off;
+  }
+
+  return TRUE;
+}
+
+/** Find ACPI name declaration in data.
+
+  @param Data        ACPI table data.
+  @param Length      ACPI table data length.
+  @param Name        ACPI name of at least OC_ACPI_NAME_SIZE bytes.
+
+  @return offset > 0 for valid names.
+**/
+STATIC
+UINT32
+AcpiFindName (
+  IN CONST UINT8  *Data,
+  IN UINT32       Length,
+  IN CONST CHAR8  *Name
+  )
+{
+  UINT32  Index;
+
+  //
+  // Lookup from offset 1 and after.
+  //
+  if (Length < OC_ACPI_NAME_SIZE + 1) {
+    return 0;
+  }
+
+  for (Index = 0; Index < Length - OC_ACPI_NAME_SIZE; ++Index) {
+    if (Data[Index] == AML_NAME_OP
+      && Data[Index+1] == Name[0]
+      && Data[Index+2] == Name[1]
+      && Data[Index+3] == Name[2]
+      && Data[Index+4] == Name[3]) {
+      return Index+1;
+    }
+  }
+
+  return 0;
+}
+
+/** Load ACPI table regions.
+
+  @param Context      ACPI library context.
+  @param Table        ACPI table.
+
+  @return EFI_SUCCESS unless memory allocation failure.
+**/
+STATIC
+EFI_STATUS
+AcpiLoadTableRegions (
+  IN OUT OC_ACPI_CONTEXT         *Context,
+  IN     EFI_ACPI_COMMON_HEADER  *Table
+  )
+{
+  UINT32          Index;
+  UINT32          Index2;
+  UINT32          NameOffset;
+  UINT8           *Buffer;
+  UINT32          BufferLen;
+  CHAR8           Name[OC_ACPI_NAME_SIZE+1];
+  CHAR8           NameAddr[OC_ACPI_NAME_SIZE+1];
+  OC_ACPI_REGION  *NewRegions;
+  UINT32          Address;
+
+  Buffer    = (UINT8 *) Table;
+  BufferLen = Table->Length;
+
+  if (BufferLen < sizeof (EFI_ACPI_DESCRIPTION_HEADER)) {
+    return EFI_SUCCESS;
+  }
+
+  for (Index = sizeof (EFI_ACPI_DESCRIPTION_HEADER); Index < BufferLen - 0xF; ++Index) {
+    if (Buffer[Index] == AML_EXT_OP
+      && Buffer[Index+1] == AML_EXT_REGION_OP
+      && AcpiReadName (&Buffer[Index+2], &Name[0], &NameOffset)
+      && Buffer[Index+OC_ACPI_NAME_SIZE+2+NameOffset] == 0) {
+      //
+      // This is SystemMemory region. Try to save it.
+      //
+      Address = 0;
+      if (Buffer[Index+OC_ACPI_NAME_SIZE+3+NameOffset] == AML_DWORD_PREFIX) {
+        CopyMem (&Address, &Buffer[Index+OC_ACPI_NAME_SIZE+4+NameOffset], sizeof (UINT32));
+      } else if (Buffer[Index+OC_ACPI_NAME_SIZE+3+NameOffset] == AML_WORD_PREFIX) {
+        CopyMem (&Address, &Buffer[Index+OC_ACPI_NAME_SIZE+4+NameOffset], sizeof (UINT16));
+      } else if (AcpiReadName (&Buffer[Index+OC_ACPI_NAME_SIZE+3+NameOffset], &NameAddr[0], NULL)) {
+        Index2 = AcpiFindName (Buffer, BufferLen, &NameAddr[0]);
+        if (Index2 > 0 && Index2 < BufferLen - 0xF) {
+          if (Buffer[Index2+OC_ACPI_NAME_SIZE] == AML_DWORD_PREFIX) {
+            CopyMem (&Address, &Buffer[Index2+OC_ACPI_NAME_SIZE+1], sizeof (UINT32));
+          } else if (Buffer[Index2+OC_ACPI_NAME_SIZE] == AML_WORD_PREFIX) {
+            CopyMem (&Address, &Buffer[Index2+OC_ACPI_NAME_SIZE+1], sizeof (UINT16));
+          }
+        }
+      }
+
+      if (Address != 0) {
+        if (Context->AllocatedRegions == Context->NumberOfRegions) {
+          NewRegions = AllocatePool ((Context->AllocatedRegions + 2) * sizeof (Context->Regions[0]));
+          if (NewRegions == NULL) {
+            DEBUG ((DEBUG_WARN, "Failed to allocate memory for %u regions\n", Context->NumberOfRegions+2));
+            return EFI_OUT_OF_RESOURCES;
+          }
+          CopyMem (NewRegions, Context->Regions, Context->NumberOfRegions * sizeof (Context->Regions[0]));
+          FreePool (Context->Regions);
+
+          Context->Regions = NewRegions;
+          Context->AllocatedRegions += 2;
+        }
+
+        DEBUG ((DEBUG_INFO, "Found OperationRegion %a at %08X\n", Name, Address));
+        Context->Regions[Context->NumberOfRegions].Address = Address;
+        CopyMem (&Context->Regions[Context->NumberOfRegions].Name[0], &Name[0], sizeof (Name));
+        Context->NumberOfRegions++;
+      }
+    }
+  }
+
+  return EFI_SUCCESS;
+}
+
+/** Relocate ACPI table regions.
+
+  @param Context      ACPI library context.
+  @param Table        ACPI table.
+**/
+STATIC
+VOID
+AcpiRelocateTableRegions (
+  IN OUT OC_ACPI_CONTEXT         *Context,
+  IN     EFI_ACPI_COMMON_HEADER  *Table
+  )
+{
+  UINT32          Index;
+  UINT32          Index2;
+  UINT32          RegionIndex;
+  UINT32          NameOffset;
+  UINT8           *Buffer;
+  UINT32          BufferLen;
+  CHAR8           Name[OC_ACPI_NAME_SIZE+1];
+  CHAR8           NameAddr[OC_ACPI_NAME_SIZE+1];
+  UINT32          OldAddress;
+  BOOLEAN         Modified;
+
+  Buffer    = (UINT8 *) Table;
+  BufferLen = Table->Length;
+  Modified  = FALSE;
+
+  if (BufferLen < sizeof (EFI_ACPI_DESCRIPTION_HEADER)) {
+    return;
+  }
+
+  for (Index = sizeof (EFI_ACPI_DESCRIPTION_HEADER); Index < BufferLen - 0xF; ++Index) {
+    if (Buffer[Index] == AML_EXT_OP
+      && Buffer[Index+1] == AML_EXT_REGION_OP
+      && AcpiReadName (&Buffer[Index+2], &Name[0], &NameOffset)
+      && Buffer[Index+OC_ACPI_NAME_SIZE+2+NameOffset] == 0) {
+      //
+      // This is region. Compare to current BIOS tables and relocate.
+      //
+
+      for (RegionIndex = 0; RegionIndex < Context->NumberOfRegions; ++RegionIndex) {
+        if (AsciiStrCmp (Context->Regions[RegionIndex].Name, Name) == 0) {
+          OldAddress = 0;
+          if (Buffer[Index+OC_ACPI_NAME_SIZE+3+NameOffset] == AML_DWORD_PREFIX) {
+            CopyMem (&OldAddress, &Buffer[Index+OC_ACPI_NAME_SIZE+4+NameOffset], sizeof (UINT32));
+            CopyMem (&Buffer[Index+OC_ACPI_NAME_SIZE+4+NameOffset], &Context->Regions[RegionIndex].Address, sizeof (UINT32));
+            Modified = TRUE;
+          } else if (Buffer[Index+OC_ACPI_NAME_SIZE+3+NameOffset] == AML_WORD_PREFIX) {
+            CopyMem (&OldAddress, &Buffer[Index+OC_ACPI_NAME_SIZE+4+NameOffset], sizeof (UINT16));
+            CopyMem (&Buffer[Index+OC_ACPI_NAME_SIZE+4+NameOffset], &Context->Regions[RegionIndex].Address, sizeof (UINT16));
+            Modified = TRUE;
+          } else if (AcpiReadName (&Buffer[Index+OC_ACPI_NAME_SIZE+3+NameOffset], &NameAddr[0], NULL)) {
+            Index2 = AcpiFindName (Buffer, BufferLen, &NameAddr[0]);
+            if (Index2 > 0 && Index2 < BufferLen - 0xF) {
+              if (Buffer[Index2+OC_ACPI_NAME_SIZE] == AML_DWORD_PREFIX) {
+                CopyMem (&OldAddress, &Buffer[Index2+OC_ACPI_NAME_SIZE+1], sizeof (UINT32));
+                CopyMem (&Buffer[Index2+OC_ACPI_NAME_SIZE+1], &Context->Regions[RegionIndex].Address, sizeof (UINT32));
+                Modified = TRUE;
+              } else if (Buffer[Index2+OC_ACPI_NAME_SIZE] == AML_WORD_PREFIX) {
+                CopyMem (&OldAddress, &Buffer[Index2+OC_ACPI_NAME_SIZE+1], sizeof (UINT16));
+                CopyMem (&Buffer[Index2+OC_ACPI_NAME_SIZE+1], &Context->Regions[RegionIndex].Address, sizeof (UINT16));
+                Modified = TRUE;
+              }
+            }
+          }
+
+          if (Modified && OldAddress != Context->Regions[RegionIndex].Address) {
+            DEBUG ((
+              DEBUG_INFO,
+              "Region %a address relocated from %08X to %08X\n",
+              Context->Regions[RegionIndex].Name,
+              OldAddress,
+              Context->Regions[RegionIndex].Address
+              ));
+          }
+
+          break;
+        }
+      }
+    }
+  }
+
+  //
+  // Update checksum
+  //
+  if (Modified) {
+    ((EFI_ACPI_DESCRIPTION_HEADER *)Table)->Checksum = 0;
+    ((EFI_ACPI_DESCRIPTION_HEADER *)Table)->Checksum = CalculateCheckSum8 (
+      (UINT8 *) Table,
+      Table->Length
+      );
+  }
+}
+
 EFI_STATUS
 AcpiInitContext (
   IN OUT OC_ACPI_CONTEXT  *Context
@@ -398,7 +653,7 @@ AcpiInsertTable (
     return EFI_INVALID_PARAMETER;
   }
 
-  ReplaceDsdt = Common->Signature != EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE;
+  ReplaceDsdt = Common->Signature == EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE;
 
   if (ReplaceDsdt && Context->Dsdt == NULL) {
     DEBUG ((DEBUG_WARN, "We do not have DSDT to replace\n"));
@@ -594,6 +849,9 @@ AcpiLoadRegions (
   IN OUT OC_ACPI_CONTEXT  *Context
   )
 {
+  EFI_STATUS  Status;
+  UINT32      Index;
+
   //
   // Should not be called twice, but just in case.
   //
@@ -611,7 +869,48 @@ AcpiLoadRegions (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  //TODO: Implement.
+  if (Context->Dsdt != NULL) {
+    Status = AcpiLoadTableRegions (Context, (EFI_ACPI_COMMON_HEADER *) Context->Dsdt);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+  }
 
-  return EFI_UNSUPPORTED;
+  for (Index = 0; Index < Context->NumberOfTables; ++Index) {
+    if (Context->Tables[Index]->Signature == EFI_ACPI_6_2_SECONDARY_SYSTEM_DESCRIPTION_TABLE_SIGNATURE) {
+      Status = AcpiLoadTableRegions (Context, Context->Tables[Index]);
+      if (EFI_ERROR (Status)) {
+        return Status;
+      }
+    }
+  }
+
+  return EFI_SUCCESS;
+}
+
+VOID
+AcpiRelocateRegions (
+  IN OUT  OC_ACPI_CONTEXT  *Context
+  )
+{
+  UINT32      Index;
+
+  //
+  // Should not be called before AcpiLoadRegions, but just in case.
+  //
+  ASSERT (Context->Regions != NULL);
+
+  if (Context->NumberOfRegions == 0) {
+    return;
+  }
+
+  if (Context->Dsdt != NULL) {
+    AcpiRelocateTableRegions (Context, (EFI_ACPI_COMMON_HEADER *) Context->Dsdt);
+  }
+
+  for (Index = 0; Index < Context->NumberOfTables; ++Index) {
+    if (Context->Tables[Index]->Signature == EFI_ACPI_6_2_SECONDARY_SYSTEM_DESCRIPTION_TABLE_SIGNATURE) {
+      AcpiRelocateTableRegions (Context, Context->Tables[Index]);
+    }
+  }
 }

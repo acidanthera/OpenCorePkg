@@ -101,6 +101,8 @@ TestAcpi (
   Status = AcpiInitContext (&Context);
 
   if (!EFI_ERROR (Status)) {
+    AcpiLoadRegions (&Context);
+
     AcpiDropTable (&Context, EFI_ACPI_6_2_DMA_REMAPPING_TABLE_SIGNATURE, 0, 0);
     AcpiDropTable (&Context, EFI_ACPI_6_2_WINDOWS_SMM_SECURITY_MITIGATION_TABLE_SIGNATURE, 0, 0);
     AcpiDropTable (&Context, EFI_ACPI_6_2_WINDOWS_ACPI_EMULATED_DEVICES_TABLE_SIGNATURE, 0, 0);
@@ -108,6 +110,8 @@ TestAcpi (
     AcpiInsertTable (&Context, PatchedSsdt8, sizeof (PatchedSsdt8));
 
     AcpiApplyPatch (&Context, &HpetPatch);
+
+    AcpiRelocateRegions (&Context);
 
     AcpiApplyContext (&Context);
 
