@@ -31,8 +31,6 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
-#include <Macros.h>
-
 /** Unlock the legacy region specified to enable modification.
 
   @param[in] LegacyAddress  The address of the region to unlock.

@@ -32,8 +32,6 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
-#include <Macros.h>
-
 // SetPlatformData
 /**
 

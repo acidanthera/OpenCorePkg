@@ -31,8 +31,6 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 
-#include <Macros.h>
-
 /** Lock the legacy region specified to enable modification.
 
   @param[in] LegacyAddress  The address of the region to lock.

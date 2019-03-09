@@ -36,7 +36,6 @@
 #include "DebugSmbios.h"
 #include "SmbiosInternal.h"
 
-#include <Macros.h>
 #include <ProcessorInfo.h>
 
 STATIC SMBIOS_TABLE_ENTRY_POINT        *mOriginalSmbios;

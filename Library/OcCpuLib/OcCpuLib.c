@@ -33,8 +33,6 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 
-#include <Macros.h>
-
 #include <ProcessorInfo.h>
 #include <Register/Msr.h>
 #include <Register/Msr/SandyBridgeMsr.h>

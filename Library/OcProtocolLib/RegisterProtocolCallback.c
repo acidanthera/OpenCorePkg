@@ -18,8 +18,6 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include <Macros.h>
-
 // RegisterProtocolCallback
 /**
 

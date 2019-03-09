@@ -23,7 +23,6 @@
 
 #include <Protocol/AppleFirmwarePassword.h>
 
-#include <Macros.h>
 #include "AppleFwPasswordInternal.h"
 
 // AppleFirmwarePasswordCheck

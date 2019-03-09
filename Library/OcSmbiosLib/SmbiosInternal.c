@@ -27,8 +27,6 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
-#include <Macros.h>
-
 #include "SmbiosInternal.h"
 #include "DebugSmbios.h"
 

@@ -24,8 +24,6 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/TimerLib.h>
 
-#include <Macros.h>
-
 STATIC UINT64 mPerformanceCounterFrequency = 0;
 
 /** Calculate the TSC frequency

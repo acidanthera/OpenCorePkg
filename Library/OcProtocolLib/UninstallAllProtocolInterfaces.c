@@ -18,8 +18,6 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include <Macros.h>
-
 /**
   @param[in] Protocol    The published unique identifier of the protocol. It is the caller’s responsibility to pass in
                          a valid GUID.
