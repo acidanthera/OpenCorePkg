@@ -23,7 +23,6 @@
 #include <Library/OcMiscLib.h>
 #include <Library/OcProtocolLib.h>
 #include <Library/PrintLib.h>
-#include <Library/OcVariableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>

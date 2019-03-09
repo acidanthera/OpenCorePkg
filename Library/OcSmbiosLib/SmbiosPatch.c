@@ -27,7 +27,6 @@
 #include <Library/OcGuardLib.h>
 #include <Library/OcProtocolLib.h>
 #include <Library/OcStringLib.h>
-#include <Library/OcVariableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 

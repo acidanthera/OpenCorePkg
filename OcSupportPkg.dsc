@@ -68,7 +68,6 @@
   OcStringLib|OcSupportPkg/Library/OcStringLib/OcStringLib.inf
   OcTemplateLib|OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
   OcTimerLib|OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
-  OcVariableLib|OcSupportPkg/Library/OcVariableLib/OcVariableLib.inf
   OcXmlLib|OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
 
 [Components]
@@ -93,7 +92,6 @@
   OcSupportPkg/Library/OcStringLib/OcStringLib.inf
   OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
   OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
-  OcSupportPkg/Library/OcVariableLib/OcVariableLib.inf
   OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
   OcSupportPkg/Debug/GdbSyms/GdbSyms.inf
   OcSupportPkg/Tests/BlessTest/BlessTest.inf

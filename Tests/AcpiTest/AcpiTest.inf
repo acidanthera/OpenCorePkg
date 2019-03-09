@@ -62,5 +62,4 @@
   OcProtocolLib
   OcAppleBootPolicyLib
   OcSmbiosLib
-  OcVariableLib
   OcAcpiLib

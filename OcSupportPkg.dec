@@ -108,7 +108,4 @@
   OcTimerLib|Include/Library/OcTimerLib.h
 
   ##  @libraryclass
-  OcVariableLib|Include/Library/OcVariableLib.h
-
-  ##  @libraryclass
   OcXmlLib|Include/Library/OcXmlLib.h
