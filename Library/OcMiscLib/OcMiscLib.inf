@@ -44,6 +44,7 @@
 
 [LibraryClasses]
   BaseLib
+  UefiLib
 
 [Sources]
   Base64Decode.c

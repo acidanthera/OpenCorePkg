@@ -22,7 +22,6 @@
 #include <Library/PrintLib.h>
 
 #include <Library/OcStringLib.h>
-#include <Library/OcVariableLib.h>
 
 #include <Guid/GlobalVariable.h>
 
@@ -49,8 +48,8 @@ LogBootOrder (
 
   if (BootOrder == NULL && BootOrderSize == 0) {
 
-    Status = OcGetVariable (
-               "BootOrder",
+    Status = GetVariable2 (
+               L"BootOrder",
                &gEfiGlobalVariableGuid,
                (VOID **)&BootOrderBuffer,
                &BootOrderSize
