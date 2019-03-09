@@ -968,10 +968,10 @@ CreateAppleFirmwareVolume (
     return;
   }
 
-  Table->CurrentPtr.Type128->FirmwareFeatures = Data->FirmwareFeatures;
-  Table->CurrentPtr.Type128->FirmwareFeaturesMask = Data->FirmwareFeaturesMask;
-  Table->CurrentPtr.Type128->ExtendedFirmwareFeatures = Data->ExtendedFirmwareFeatures;
-  Table->CurrentPtr.Type128->ExtendedFirmwareFeaturesMask = Data->ExtendedFirmwareFeaturesMask;
+  Table->CurrentPtr.Type128->FirmwareFeatures             = (UINT32)BitFieldRead64 (Data->FirmwareFeatures,     0,  31);
+  Table->CurrentPtr.Type128->FirmwareFeaturesMask         = (UINT32)BitFieldRead64 (Data->FirmwareFeaturesMask, 0,  31);
+  Table->CurrentPtr.Type128->ExtendedFirmwareFeatures     = (UINT32)BitFieldRead64 (Data->FirmwareFeatures,     32, 63);
+  Table->CurrentPtr.Type128->ExtendedFirmwareFeaturesMask = (UINT32)BitFieldRead64 (Data->FirmwareFeaturesMask, 32, 63);
 
   SmbiosFinaliseStruct (Table);
 }

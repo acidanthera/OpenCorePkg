@@ -73,11 +73,12 @@ typedef struct OC_SMBIOS_DATA_ {
   CONST CHAR8     *ChassisAssetTag;
   //
   // Type 128
+  // FirmwareFeatures and FirmwareFeaturesMask are split into two UINT32
+  // values, the lower referring to the traditional FirmwareFeatures and the
+  // upper representing the additions introduced by ExtendedFirmwareFeatures.
   //
-  UINT32          FirmwareFeatures;
-  UINT32          FirmwareFeaturesMask;
-  UINT64          ExtendedFirmwareFeatures;
-  UINT64          ExtendedFirmwareFeaturesMask;
+  UINT64          FirmwareFeatures;
+  UINT64          FirmwareFeaturesMask;
   //
   // Type 131
   //

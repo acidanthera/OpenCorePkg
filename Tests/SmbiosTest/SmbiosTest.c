@@ -69,8 +69,6 @@ static OC_SMBIOS_DATA Data = {
   .ChassisAssetTag = "iMac-Aluminum",
   .FirmwareFeatures = 0xE00FE137,
   .FirmwareFeaturesMask = 0xFF1FFF3F,
-  .ExtendedFirmwareFeatures = 0xE00FE137,
-  .ExtendedFirmwareFeaturesMask = 0xFF1FFF3F,
   .ProcessorType = 0, // Will be calculated automatically
   .PlatformFeature = 1
 };
