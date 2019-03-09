@@ -1291,7 +1291,6 @@ BootPolicyGetApfsRecoveryVolumes (
 
 **/
 EFI_STATUS
-EFIAPI
 OcAppleBootPolicyInstallProtocol (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
