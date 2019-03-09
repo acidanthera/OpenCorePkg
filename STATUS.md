@@ -93,10 +93,6 @@ listed here.
     **Status**: functional  
     **Issues**:
     1. No AMD CPU support.
-* OcVariableLib  
-    **Status**: legacy  
-    **Issues**:
-    1. Subject for removal if no use.
 * OcXmlLib  
     **Status**: functional  
     **Issues**: none
