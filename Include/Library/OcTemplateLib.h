@@ -37,7 +37,13 @@ VOID
 #define PRIV_OC_STRUCTOR_EXPAND(...) __VA_ARGS__
 
 #define PRIV_OC_SELECT_NEXT_INNER(Dummy, Next, ...) Next
-#define PRIV_OC_SELECT_NEXT(...) PRIV_OC_SELECT_NEXT_INNER(__VA_ARGS__, Unused)
+//
+// Without this layer of indirection, MSVC evaluates __VA_ARGS__ early and
+// PRIV_OC_SELECT_NEXT_INNER receives only two arguments, the second always
+// being Unused as per PRIV_OC_SELECT_NEXT.
+//
+#define PRIV_OC_SELECT_NEXT_INNER_INDIR(...) PRIV_OC_SELECT_NEXT_INNER __VA_ARGS__
+#define PRIV_OC_SELECT_NEXT(...) PRIV_OC_SELECT_NEXT_INNER_INDIR((__VA_ARGS__, Unused))
 #define PRIV_OC_REMOVE_NEXT(...) , do { } while (0),
 
 #define PRIV_OC_DECLARE_STRUCT_MEMBER(Type, Name, Suffix, Constructor, Destructor)   \
