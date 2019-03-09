@@ -37,6 +37,20 @@ typedef struct {
 #pragma pack(pop)
 
 //
+// Operation region structure.
+//
+typedef struct {
+  //
+  // Region name, not guaranteed to be null-terminated.
+  //
+  CHAR8   Name[8];
+  //
+  // Region address.
+  //
+  UINT32  Address;
+} OC_ACPI_REGION;
+
+//
 // Main ACPI context describing current tableset worked on.
 //
 typedef struct {
@@ -72,6 +86,18 @@ typedef struct {
   // Number of allocated table slots.
   //
   UINT32                                         AllocatedTables;
+  //
+  // Detected operation regions if any.
+  //
+  OC_ACPI_REGION                                 *Regions;
+  //
+  // Number of regions.
+  //
+  UINT32                                         NumberOfRegions;
+  //
+  // Number of allocated region slots.
+  //
+  UINT32                                         AllocatedRegions;
 } OC_ACPI_CONTEXT;
 
 //
@@ -191,6 +217,15 @@ EFI_STATUS
 AcpiApplyPatch (
   IN OUT OC_ACPI_CONTEXT  *Context,
   IN     OC_ACPI_PATCH    *Patch
+  );
+
+/** Try to load ACPI regions.
+
+  @param Context     ACPI library context.
+**/
+EFI_STATUS
+AcpiLoadRegions (
+  IN OUT OC_ACPI_CONTEXT  *Context
   );
 
 #endif // OC_ACPI_LIB_H

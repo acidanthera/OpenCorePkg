@@ -128,18 +128,6 @@ AcpiFindRsdp (
   return Rsdp;
 }
 
-STATIC
-EFI_STATUS
-AcpiReplaceDsdt (
-  IN OUT OC_ACPI_CONTEXT  *Context,
-  IN     CONST UINT8      *Data,
-  IN     UINT32           Length
-  )
-{
-  DEBUG ((DEBUG_WARN, "Patching DSDT is not yet supported\n"));
-  return EFI_UNSUPPORTED;
-}
-
 EFI_STATUS
 AcpiInitContext (
   IN OUT OC_ACPI_CONTEXT  *Context
@@ -256,6 +244,11 @@ AcpiFreeContext (
   if (Context->Tables != NULL) {
     FreePool (Context->Tables);
     Context->Tables = NULL;
+  }
+
+  if (Context->Regions != NULL) {
+    FreePool (Context->Regions);
+    Context->Regions = NULL;
   }
 }
 
@@ -392,6 +385,7 @@ AcpiInsertTable (
   EFI_STATUS                Status;
   EFI_PHYSICAL_ADDRESS      Table;
   EFI_ACPI_COMMON_HEADER    **NewTables;
+  BOOLEAN                   ReplaceDsdt;
 
   if (Length < sizeof (EFI_ACPI_COMMON_HEADER)) {
     DEBUG ((DEBUG_WARN, "Inserted ACPI table is only %u bytes, ignoring\n", Length));
@@ -404,11 +398,14 @@ AcpiInsertTable (
     return EFI_INVALID_PARAMETER;
   }
 
-  if (Common->Signature == EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE) {
-    return AcpiReplaceDsdt (Context, Data, Length);
+  ReplaceDsdt = Common->Signature != EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE;
+
+  if (ReplaceDsdt && Context->Dsdt == NULL) {
+    DEBUG ((DEBUG_WARN, "We do not have DSDT to replace\n"));
+    return EFI_INVALID_PARAMETER;
   }
 
-  if (Context->NumberOfTables == Context->AllocatedTables) {
+  if (!ReplaceDsdt && Context->NumberOfTables == Context->AllocatedTables) {
     NewTables = AllocatePool ((Context->NumberOfTables + 2) * sizeof (Context->Tables[0]));
     if (NewTables == NULL) {
       DEBUG ((DEBUG_WARN, "Cannot allocate space for new %u ACPI tables\n", Context->NumberOfTables+2));
@@ -438,16 +435,34 @@ AcpiInsertTable (
   CopyMem ((UINT8 *) Table, Data, Length);
   ZeroMem ((UINT8 *) Table + Length, EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (Length)) - Length);
 
-  DEBUG ((
-    DEBUG_INFO,
-    "Inserted table %08x of %u bytes into ACPI at index %u\n",
-    Common->Signature,
-    Common->Length,
-    Context->NumberOfTables
-    ));
+  if (ReplaceDsdt) {
+    DEBUG ((
+      DEBUG_INFO,
+      "Replaced DSDT of %u bytes into ACPI\n",
+      Common->Length
+      ));
+    Context->Dsdt = (EFI_ACPI_DESCRIPTION_HEADER *) Table;
+    if (Context->Fadt->Header.Length >= OFFSET_OF (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE, XDsdt) + sizeof (Context->Fadt->XDsdt)) {
+      Context->Fadt->XDsdt = (UINT64)(UINTN) Context->Dsdt;
+    }
+    Context->Fadt->Dsdt = (UINT32)(UINTN) Context->Dsdt;
+    Context->Fadt->Header.Checksum = 0;
+    Context->Fadt->Header.Checksum = CalculateCheckSum8 (
+      (UINT8 *) Context->Fadt,
+      Context->Fadt->Header.Length
+      );
+  } else {
+    DEBUG ((
+      DEBUG_INFO,
+      "Inserted table %08x of %u bytes into ACPI at index %u\n",
+      Common->Signature,
+      Common->Length,
+      Context->NumberOfTables
+      ));
 
-  Context->Tables[Context->NumberOfTables] = (EFI_ACPI_COMMON_HEADER *) Table;
-  ++Context->NumberOfTables;
+    Context->Tables[Context->NumberOfTables] = (EFI_ACPI_COMMON_HEADER *) Table;
+    ++Context->NumberOfTables;
+  }
 
   return EFI_UNSUPPORTED;
 }
@@ -570,6 +585,33 @@ AcpiApplyPatch (
       }
     }
   }
+
+  return EFI_UNSUPPORTED;
+}
+
+EFI_STATUS
+AcpiLoadRegions (
+  IN OUT OC_ACPI_CONTEXT  *Context
+  )
+{
+  //
+  // Should not be called twice, but just in case.
+  //
+  ASSERT (Context->Regions == NULL);
+
+  //
+  // Allocate something reasonably large by default.
+  //
+  Context->NumberOfRegions  = 0;
+  Context->AllocatedRegions = 8;
+  Context->Regions = AllocatePool (sizeof (Context->Regions[0]) * Context->AllocatedRegions);
+
+  if (Context->Regions == NULL) {
+    DEBUG ((DEBUG_WARN, "Failed to allocate memory for %u regions\n", Context->NumberOfRegions));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  //TODO: Implement.
 
   return EFI_UNSUPPORTED;
 }
