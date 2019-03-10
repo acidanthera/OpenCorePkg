@@ -240,6 +240,7 @@ UpdateDataHub (
   )
 {
   EFI_DATA_HUB_PROTOCOL  *DataHub;
+  GUID                   SystemId;
 
   DataHub = LocateDataHubProtocol ();
 
@@ -250,7 +251,16 @@ UpdateDataHub (
   DataHubSetAppleMiscAscii (DataHub, OC_PLATFORM_NAME, Data->PlatformName);
   DataHubSetAppleMiscUnicode (DataHub, OC_SYSTEM_PRODUCT_NAME, Data->SystemProductName);
   DataHubSetAppleMiscUnicode (DataHub, OC_SYSTEM_SERIAL_NUMBER, Data->SystemSerialNumber);
-  DataHubSetAppleMiscData (DataHub, OC_SYSTEM_UUID, Data->SystemUUID, sizeof (*Data->SystemUUID));
+  if (Data->SystemUUID != NULL) {
+    //
+    // Byte order for SystemId must be swapped.
+    //
+    CopyGuid (&SystemId, Data->SystemUUID);
+    SystemId.Data1 = SwapBytes32 (SystemId.Data1);
+    SystemId.Data2 = SwapBytes16 (SystemId.Data2);
+    SystemId.Data3 = SwapBytes16 (SystemId.Data3);
+    DataHubSetAppleMiscData (DataHub, OC_SYSTEM_UUID, &SystemId, sizeof (SystemId));
+  }
   DataHubSetAppleMiscAscii (DataHub, OC_BOARD_PRODUCT, Data->BoardProduct);
   //
   // TODO: Clover uses DataHubSetAppleProcessorData equivalent here, check if legit.
