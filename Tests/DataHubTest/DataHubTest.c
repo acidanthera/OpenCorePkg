@@ -80,6 +80,23 @@ TestDataHub (
   OC_CPU_INFO  CpuInfo;
   OcCpuScanProcessor (&CpuInfo);
   UpdateDataHub (&Data, &CpuInfo);
+
+  //TODO: put elsewhere
+  {
+    STATIC UINT32 Attributes = EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS;
+    STATIC CHAR8 Mlb[] = "MLBSERIAL";
+    STATIC UINT8 Rom[] = {0, 0, 0, 0, 0, 0};
+    STATIC UINT32 FirmwareFeatures = 0xE00FE137;
+    STATIC UINT32 FirmwareFeaturesMask = 0xFF1FFF3F;
+    STATIC UINT32 CsrActiveConfig = 0;
+
+    gRT->SetVariable (L"MLB", &gAppleVendorVariableGuid, Attributes, AsciiStrLen (Mlb), Mlb);
+    gRT->SetVariable (L"ROM", &gAppleVendorVariableGuid, Attributes, sizeof (Rom), Rom);
+    gRT->SetVariable (L"FirmwareFeatures", &gAppleVendorVariableGuid, Attributes, sizeof (FirmwareFeatures), &FirmwareFeatures);
+    gRT->SetVariable (L"FirmwareFeaturesMask", &gAppleVendorVariableGuid, Attributes, sizeof (FirmwareFeaturesMask), &FirmwareFeaturesMask);
+    gRT->SetVariable (L"csr-active-config", &gAppleBootVariableGuid, Attributes, sizeof (CsrActiveConfig), &CsrActiveConfig);
+
+  }
   return EFI_SUCCESS;
 }
 
