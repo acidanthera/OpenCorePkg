@@ -552,7 +552,7 @@ DetectAppleProcessorType (
 
 VOID
 ScanIntelProcessor (
-  IN OUT CPU_INFO  *Cpu
+  IN OUT OC_CPU_INFO  *Cpu
   )
 {
   UINT32                                            CpuidEax;
@@ -743,7 +743,7 @@ ScanIntelProcessor (
 **/
 VOID
 OcCpuScanProcessor (
-  IN OUT CPU_INFO  *Cpu
+  IN OUT OC_CPU_INFO  *Cpu
   )
 {
   UINT32                  CpuidEax;

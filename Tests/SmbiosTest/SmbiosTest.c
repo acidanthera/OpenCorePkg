@@ -27,6 +27,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcProtocolLib.h>
 #include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcSmbiosLib.h>
+#include <Library/OcCpuLib.h>
 
 #include <Protocol/AppleBootPolicy.h>
 #include <Protocol/DevicePathPropertyDatabase.h>
@@ -42,8 +43,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/SimpleTextInEx.h>
 #include <Protocol/SimpleFileSystem.h>
 
-static GUID SystemUUID = {0x5BC82C38, 0x4DB6, 0x4883, {0x85, 0x2E, 0xE7, 0x8D, 0x78, 0x0A, 0x6F, 0xE6}};
-static OC_SMBIOS_DATA Data = {
+STATIC GUID SystemUUID = {0x5BC82C38, 0x4DB6, 0x4883, {0x85, 0x2E, 0xE7, 0x8D, 0x78, 0x0A, 0x6F, 0xE6}};
+STATIC UINT8 BoardType = 0xA; // Motherboard (BaseBoardTypeMotherBoard)
+STATIC UINT8 MemoryFormFactor = 0xD; // SODIMM, 0x9 for DIMM (MemoryFormFactorSodimm)
+STATIC UINT8 ChassisType = 0xD; // All in one (MiscChassisTypeAllInOne)
+STATIC OC_SMBIOS_DATA Data = {
   .BIOSVendor = NULL, // Do not change BIOS Vendor
   .BIOSVersion = "134.0.0.0.0",
   .BIOSReleaseDate = "12/08/2017",
@@ -60,16 +64,16 @@ static OC_SMBIOS_DATA Data = {
   .BoardSerialNumber = "SU77PEPELATZWAFFE",
   .BoardAssetTag = "",
   .BoardLocationInChassis = "Part Component",
-  .BoardType = 0xA, // Motherboard (BaseBoardTypeMotherBoard)
-  .MemoryFormFactor = 0xD, // SODIMM, 0x9 for DIMM (MemoryFormFactorSodimm)
-  .ChassisType = 0xD, // All in one (MiscChassisTypeAllInOne)
+  .BoardType = &BoardType,
+  .MemoryFormFactor = &MemoryFormFactor,
+  .ChassisType = &ChassisType,
   .ChassisManufacturer = NULL, // Do not change Chassis Manufacturer
   .ChassisVersion = "Mac-27ADBB7B4CEE8E61",
   .ChassisSerialNumber = "SU77OPENCORE",
   .ChassisAssetTag = "iMac-Aluminum",
   .FirmwareFeatures = 0xE00FE137,
   .FirmwareFeaturesMask = 0xFF1FFF3F,
-  .ProcessorType = 0, // Will be calculated automatically
+  .ProcessorType = NULL, // Will be calculated automatically
   .PlatformFeature = 1
 };
 
@@ -80,7 +84,9 @@ TestSmbios (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  CreateSmbios (&Data, OcSmbiosUpdateAuto);
+  OC_CPU_INFO  CpuInfo;
+  OcCpuScanProcessor (&CpuInfo);
+  CreateSmbios (&Data, OcSmbiosUpdateAuto, &CpuInfo);
   return EFI_SUCCESS;
 }
 

@@ -473,7 +473,7 @@ struct _LIST_ENTRY {
 #define ReallocatePool(a,b,c) realloc(c,b)
 #define FreePool(x) free(x)
 #define CompareMem(a,b,c) memcmp((a),(b),(c))
-#define CopyMem(a,b,c) memcpy((a),(b),(c))
+#define CopyMem(a,b,c) memmove((a),(b),(c))
 #define ZeroMem(a,b) memset(a, 0, b)
 #define AsciiSPrint snppprintf
 #define AsciiStrCmp strcmp
@@ -1088,6 +1088,77 @@ WriteUnaligned64 (
   WriteUnaligned32 ((UINT32*)Buffer, (UINT32)Value);
   WriteUnaligned32 ((UINT32*)Buffer + 1, (UINT32)RShiftU64 (Value, 32));
   return Value;
+}
+
+STATIC
+UINTN
+InternalBaseLibBitFieldReadUint (
+  IN      UINTN                     Operand,
+  IN      UINTN                     StartBit,
+  IN      UINTN                     EndBit
+  )
+{
+  //
+  // ~((UINTN)-2 << EndBit) is a mask in which bit[0] thru bit[EndBit]
+  // are 1's while bit[EndBit + 1] thru the most significant bit are 0's.
+  //
+  return (Operand & ~((UINTN)-2 << EndBit)) >> StartBit;
+}
+
+STATIC
+UINT8
+BitFieldRead8 (
+  IN      UINT8                     Operand,
+  IN      UINTN                     StartBit,
+  IN      UINTN                     EndBit
+  )
+{
+  ASSERT (EndBit < 8);
+  ASSERT (StartBit <= EndBit);
+  return (UINT8)InternalBaseLibBitFieldReadUint (Operand, StartBit, EndBit);
+}
+
+
+STATIC
+UINT64
+BitFieldRead64 (
+  IN      UINT64                    Operand,
+  IN      UINTN                     StartBit,
+  IN      UINTN                     EndBit
+  )
+{
+  ASSERT (EndBit < 64);
+  ASSERT (StartBit <= EndBit);
+  return RShiftU64 (Operand & ~LShiftU64 ((UINT64)-2, EndBit), StartBit);
+}
+
+STATIC
+INTN
+HighBitSet32 (
+  IN      UINT32                    Operand
+  )
+{
+  INTN                              BitIndex;
+
+  if (Operand == 0) {
+    return - 1;
+  }
+  for (BitIndex = 31; (INT32)Operand > 0; BitIndex--, Operand <<= 1);
+  return BitIndex;
+}
+
+
+STATIC
+UINT32
+GetPowerOfTwo32 (
+  IN      UINT32                    Operand
+  )
+{
+  if (0 == Operand) {
+    return 0;
+  }
+
+  return 1ul << HighBitSet32 (Operand);
 }
 
 STATIC

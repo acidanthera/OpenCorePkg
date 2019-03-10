@@ -19,6 +19,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #ifndef OC_SMBIOS_LIB_H
 #define OC_SMBIOS_LIB_H
 
+#include <Library/OcCpuLib.h>
+
 //
 // This GUID is used for storing SMBIOS data when the firmware overwrites SMBIOS data at original
 // GUID at ExitBootServices, like it happens on some Dell computers.
@@ -58,19 +60,19 @@ typedef struct OC_SMBIOS_DATA_ {
   CONST CHAR8     *BoardSerialNumber;
   CONST CHAR8     *BoardAssetTag;
   CONST CHAR8     *BoardLocationInChassis;
-  UINT8           BoardType;
-  //
-  // Type 17
-  //
-  UINT8           MemoryFormFactor;
+  UINT8           *BoardType;
   //
   // Type 3
   //
-  UINT8           ChassisType;
+  UINT8           *ChassisType;
   CONST CHAR8     *ChassisManufacturer;
   CONST CHAR8     *ChassisVersion;
   CONST CHAR8     *ChassisSerialNumber;
   CONST CHAR8     *ChassisAssetTag;
+  //
+  // Type 17
+  //
+  UINT8           *MemoryFormFactor;
   //
   // Type 128
   // FirmwareFeatures and FirmwareFeaturesMask are split into two UINT32
@@ -82,7 +84,7 @@ typedef struct OC_SMBIOS_DATA_ {
   //
   // Type 131
   //
-  UINT16          ProcessorType;
+  UINT16          *ProcessorType;
   //
   // Type 133
   //
@@ -126,7 +128,8 @@ typedef enum OC_SMBIOS_UPDATE_MODE_ {
 EFI_STATUS
 CreateSmbios (
   IN OC_SMBIOS_DATA         *Data,
-  IN OC_SMBIOS_UPDATE_MODE  Mode
+  IN OC_SMBIOS_UPDATE_MODE  Mode,
+  IN OC_CPU_INFO            *CpuInfo
   );
 
 #endif // OC_SMBIOS_LIB_H

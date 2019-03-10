@@ -21,7 +21,6 @@
 //
 #define OC_CPU_SNB_QPB_CLOCK 0x19U
 
-// CPU_INFO
 typedef struct {
   //
   // Note, Vendor and BrandString are reordered for proper alignment.
@@ -64,7 +63,7 @@ typedef struct {
   UINT64               CPUFrequency;
   UINT64               FSBFrequency;
   
-} CPU_INFO;
+} OC_CPU_INFO;
 
 // OcCpuScanProcessor
 /** Scan the processor and fill the cpu info structure with results
@@ -73,7 +72,7 @@ typedef struct {
 **/
 VOID
 OcCpuScanProcessor (
-  IN OUT CPU_INFO  *Cpu
+  IN OUT OC_CPU_INFO  *Cpu
   );
 
 #endif // OC_CPU_LIB_H_

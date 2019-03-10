@@ -225,7 +225,7 @@ PatchBaseboardInformation (
   SMBIOS_OVERRIDE_V (Table, Standard.Type2->FeatureFlag, Original, NULL, NULL);
   SMBIOS_OVERRIDE_S (Table, Standard.Type2->LocationInChassis, Original, Data->BoardLocationInChassis, &StringIndex, NULL);
   Table->CurrentPtr.Standard.Type2->ChassisHandle = OcSmbiosSystemEnclosureHandle;
-  SMBIOS_OVERRIDE_V (Table, Standard.Type2->BoardType, Original, &Data->BoardType, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type2->BoardType, Original, Data->BoardType, NULL);
 
   //
   // Leave NumberOfContainedObjectHandles as 0, just like Apple does.
@@ -280,7 +280,7 @@ PatchSystemEnclosure (
   }
 
   SMBIOS_OVERRIDE_S (Table, Standard.Type3->Manufacturer, Original, Data->ChassisManufacturer, &StringIndex, NULL);
-  SMBIOS_OVERRIDE_V (Table, Standard.Type3->Type, Original, &Data->ChassisType, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type3->Type, Original, Data->ChassisType, NULL);
   SMBIOS_OVERRIDE_S (Table, Standard.Type3->Version, Original, Data->ChassisVersion, &StringIndex, NULL);
   SMBIOS_OVERRIDE_S (Table, Standard.Type3->SerialNumber, Original, Data->ChassisSerialNumber, &StringIndex, NULL);
   SMBIOS_OVERRIDE_S (Table, Standard.Type3->AssetTag, Original, Data->ChassisAssetTag, &StringIndex, NULL);
@@ -313,7 +313,7 @@ VOID
 PatchProcessorInformation (
   IN OUT OC_SMBIOS_TABLE *Table,
   IN     OC_SMBIOS_DATA  *Data,
-  IN     CPU_INFO        *CpuInfo
+  IN     OC_CPU_INFO     *CpuInfo
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
@@ -695,11 +695,7 @@ PatchMemoryDevice (
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->TotalWidth, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->DataWidth, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->Size, Original, NULL, NULL);
-  if (Data->MemoryFormFactor != 0) {
-    Table->CurrentPtr.Standard.Type17->FormFactor = Data->MemoryFormFactor;
-  } else {
-    Table->CurrentPtr.Standard.Type17->FormFactor = MemoryFormFactorSodimm;
-  }
+  SMBIOS_OVERRIDE_V (Table, Standard.Type17->FormFactor, Original, Data->MemoryFormFactor, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->DeviceSet, Original, NULL, NULL);
   SMBIOS_OVERRIDE_S (Table, Standard.Type17->DeviceLocator, Original, NULL, &StringIndex, NULL);
   SMBIOS_OVERRIDE_S (Table, Standard.Type17->BankLocator, Original, NULL, &StringIndex, NULL);
@@ -987,22 +983,20 @@ VOID
 CreateAppleProcessorType (
   IN OUT OC_SMBIOS_TABLE  *Table,
   IN     OC_SMBIOS_DATA   *Data,
-  IN     CPU_INFO         *CpuInfo
+  IN     OC_CPU_INFO      *CpuInfo
   )
 {
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT8                           MinLength;
 
-  MinLength   = sizeof (*Table->CurrentPtr.Type131);
+  Original.Raw = NULL;
+  MinLength    = sizeof (*Table->CurrentPtr.Type131);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, APPLE_SMBIOS_TYPE_PROCESSOR_TYPE, MinLength, 1))) {
     return;
   }
 
-  if (Data->ProcessorType != AppleProcessorTypeUnknown) {
-    Table->CurrentPtr.Type131->ProcessorType.Type = Data->ProcessorType;
-  } else {
-    Table->CurrentPtr.Type131->ProcessorType.Type = CpuInfo->AppleProcessorType;
-  }
+  SMBIOS_OVERRIDE_V (Table, Type131->ProcessorType.Type, Original, Data->ProcessorType, &CpuInfo->AppleProcessorType);
 
   SmbiosFinaliseStruct (Table);
 }
@@ -1020,7 +1014,7 @@ VOID
 CreateAppleProcessorSpeed (
   IN OUT OC_SMBIOS_TABLE  *Table,
   IN     OC_SMBIOS_DATA   *Data,
-  IN     CPU_INFO         *CpuInfo
+  IN     OC_CPU_INFO      *CpuInfo
   )
 {
 #ifndef OC_PROVIDE_APPLE_PROCESSOR_BUS_SPEED
@@ -1535,12 +1529,12 @@ SmbiosTableApply (
 EFI_STATUS
 CreateSmbios (
   IN OC_SMBIOS_DATA         *Data,
-  IN OC_SMBIOS_UPDATE_MODE  Mode
+  IN OC_SMBIOS_UPDATE_MODE  Mode,
+  IN OC_CPU_INFO            *CpuInfo
   )
 {
   EFI_STATUS                      Status;
   OC_SMBIOS_TABLE                 SmbiosTable;
-  CPU_INFO                        CpuInfo;
   SMBIOS_HANDLE                   MemoryDeviceHandle;
   APPLE_SMBIOS_STRUCTURE_POINTER  MemoryDeviceInfo;
   APPLE_SMBIOS_STRUCTURE_POINTER  MemoryDeviceAddress;
@@ -1564,13 +1558,11 @@ CreateSmbios (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  OcCpuScanProcessor (&CpuInfo);
-
   PatchBiosInformation (&SmbiosTable, Data);
   PatchSystemInformation (&SmbiosTable, Data);
   PatchBaseboardInformation (&SmbiosTable, Data);
   PatchSystemEnclosure (&SmbiosTable, Data);
-  PatchProcessorInformation (&SmbiosTable, Data, &CpuInfo);
+  PatchProcessorInformation (&SmbiosTable, Data, CpuInfo);
   PatchCacheInformation (&SmbiosTable, Data);
   PatchSystemPorts (&SmbiosTable, Data);
   PatchSystemSlots (&SmbiosTable, Data);
@@ -1623,8 +1615,8 @@ CreateSmbios (
 
   PatchPortableBatteryDevice (&SmbiosTable, Data);
   PatchBootInformation (&SmbiosTable, Data);
-  CreateAppleProcessorType (&SmbiosTable, Data, &CpuInfo);
-  CreateAppleProcessorSpeed (&SmbiosTable, Data, &CpuInfo);
+  CreateAppleProcessorType (&SmbiosTable, Data, CpuInfo);
+  CreateAppleProcessorSpeed (&SmbiosTable, Data, CpuInfo);
   CreateAppleFirmwareVolume (&SmbiosTable, Data);
   CreateSmBiosEndOfTable (&SmbiosTable, Data);
 

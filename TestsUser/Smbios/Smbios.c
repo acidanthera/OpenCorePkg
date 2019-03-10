@@ -54,8 +54,11 @@ EFI_GUID gEfiSmbios3TableGuid;
 EFI_GUID gEfiSmbiosTableGuid;
 EFI_GUID gOcCustomSmbiosTableGuid;
 
-static GUID SystemUUID = {0x5BC82C38, 0x4DB6, 0x4883, {0x85, 0x2E, 0xE7, 0x8D, 0x78, 0x0A, 0x6F, 0xE6}};
-static OC_SMBIOS_DATA SmbiosData = {
+STATIC GUID SystemUUID = {0x5BC82C38, 0x4DB6, 0x4883, {0x85, 0x2E, 0xE7, 0x8D, 0x78, 0x0A, 0x6F, 0xE6}};
+STATIC UINT8 BoardType = 0xA; // Motherboard (BaseBoardTypeMotherBoard)
+STATIC UINT8 MemoryFormFactor = 0xD; // SODIMM, 0x9 for DIMM (MemoryFormFactorSodimm)
+STATIC UINT8 ChassisType = 0xD; // All in one (MiscChassisTypeAllInOne)
+STATIC OC_SMBIOS_DATA SmbiosData = {
   .BIOSVendor = NULL, // Do not change BIOS Vendor
   .BIOSVersion = "134.0.0.0.0",
   .BIOSReleaseDate = "12/08/2017",
@@ -72,18 +75,19 @@ static OC_SMBIOS_DATA SmbiosData = {
   .BoardSerialNumber = "SU77PEPELATZWAFFE",
   .BoardAssetTag = "",
   .BoardLocationInChassis = "Part Component",
-  .BoardType = 0xA, // Motherboard (BaseBoardTypeMotherBoard)
-  .MemoryFormFactor = 0xD, // SODIMM, 0x9 for DIMM (MemoryFormFactorSodimm)
-  .ChassisType = 0xD, // All in one (MiscChassisTypeAllInOne)
+  .BoardType = &BoardType,
+  .MemoryFormFactor = &MemoryFormFactor,
+  .ChassisType = &ChassisType,
   .ChassisManufacturer = NULL, // Do not change Chassis Manufacturer
   .ChassisVersion = "Mac-27ADBB7B4CEE8E61",
   .ChassisSerialNumber = "SU77OPENCORE",
   .ChassisAssetTag = "iMac-Aluminum",
   .FirmwareFeatures = 0xE00FE137,
   .FirmwareFeaturesMask = 0xFF1FFF3F,
-  .ProcessorType = 0, // Will be calculated automatically
+  .ProcessorType = NULL, // Will be calculated automatically
   .PlatformFeature = 1
 };
+
 
 bool doDump = false;
 _Thread_local uint32_t externalUsedPages = 0;
@@ -131,9 +135,13 @@ int main(int argc, char** argv) {
   gSmbios3.TableAddress = (uintptr_t)b;
   gSmbios3.EntryPointLength = sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT);
 
+  OC_CPU_INFO  CpuInfo;
+  OcCpuScanProcessor (&CpuInfo);
+
   CreateSmbios (
     &SmbiosData,
-    0
+    0,
+    &CpuInfo
     );
 
   return 0;
@@ -150,9 +158,13 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
       gSmbios3.TableAddress = (uintptr_t)NewData;
       gSmbios3.EntryPointLength = sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT);
 
+      OC_CPU_INFO  CpuInfo;
+      OcCpuScanProcessor (&CpuInfo);
+
       CreateSmbios (
         &SmbiosData,
-        0
+        0,
+        &CpuInfo
         );
 
       FreePool (NewData);
