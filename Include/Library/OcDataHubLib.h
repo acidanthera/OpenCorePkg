@@ -37,7 +37,6 @@
 #define OC_SMC_BRANCH              L"RBr"
 #define OC_SMC_PLATFORM            L"RPlt"
 
-#define OC_STARTUP_POWER_EVENTS_SIZE 8U
 #define OC_SMC_REVISION_SIZE         6U
 #define OC_SMC_BRANCH_SIZE           8U
 #define OC_SMC_PLATFORM_SIZE         8U
@@ -49,7 +48,7 @@ typedef struct {
   CONST GUID    *SystemUUID;
   CONST CHAR8   *BoardProduct;
   CONST UINT8   *BoardRevision;
-  CONST UINT8   *StartupPowerEvents;
+  CONST UINT64  *StartupPowerEvents;
   CONST UINT64  *InitialTSC;
   CONST UINT64  *FSBFrequency;
   CONST UINT64  *ARTFrequency;

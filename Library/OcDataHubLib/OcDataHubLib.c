@@ -256,7 +256,7 @@ UpdateDataHub (
   // TODO: Clover uses DataHubSetAppleProcessorData equivalent here, check if legit.
   //
   DataHubSetAppleMiscData (DataHub, OC_BOARD_REVISION, Data->BoardRevision, sizeof (*Data->BoardRevision));
-  DataHubSetAppleMiscData (DataHub, OC_STARTUP_POWER_EVENTS, Data->StartupPowerEvents, OC_STARTUP_POWER_EVENTS_SIZE);
+  DataHubSetAppleMiscData (DataHub, OC_STARTUP_POWER_EVENTS, Data->StartupPowerEvents, sizeof (*Data->StartupPowerEvents));
   DataHubSetAppleProcessorData (DataHub, OC_INITIAL_TSC, Data->InitialTSC, sizeof (*Data->InitialTSC));
   if (Data->FSBFrequency == NULL) {
     Data->FSBFrequency = &CpuInfo->FSBFrequency;
