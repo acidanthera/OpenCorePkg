@@ -43,8 +43,8 @@
 **/
 CHAR8 *
 ConvertDataToString (
-  IN VOID   *Data,
-  IN UINTN  DataSize
+  IN CONST VOID   *Data,
+  IN UINTN        DataSize
   )
 {
   CHAR8   *OutputBuffer;
@@ -65,7 +65,7 @@ ConvertDataToString (
     IsAscii          = FALSE;
     //IsNullTerminated = FALSE;
     IsUnicode        = FALSE;
-    VariableData     = Data;
+    VariableData     = (UINT8*) Data;
     VariableSize     = DataSize;
 
     // Detect Unicode String
@@ -118,7 +118,7 @@ ConvertDataToString (
     OutputBuffer = AllocateZeroPool ((UINTN)MultU64x32 (OutputLength, 4));
 
     if (OutputBuffer != NULL) {
-      Base   = Data;
+      Base   = (UINT8*) Data;
       String = OutputBuffer;
 
       if (IsAscii) {

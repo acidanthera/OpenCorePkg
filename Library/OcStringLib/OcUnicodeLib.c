@@ -208,51 +208,6 @@ ToUpperChar (
   return Char;
 }
 
-// OcStrToGuid
-/** Convert correctly formatted string into a GUID.
-
-  @param[in] StringGuid  A pointer to a buffer containing the unicode string.
-  @param[in] Guid        A pointer to location to store the converted GUID.
-
-  @retval RETURN_UCCESS  The conversion completed successfully.
-**/
-RETURN_STATUS
-OcStrToGuid (
-  IN     CONST CHAR16  *StringGuid,
-  IN OUT GUID          *Guid
-  )
-{
-  RETURN_STATUS Status;
-
-  Status = RETURN_INVALID_PARAMETER;
-
-  if ((StringGuid != NULL) && (Guid != NULL)) {
-    ZeroMem (Guid, sizeof (*Guid));
-
-    if ((StringGuid[8] == L'-')
-     && (StringGuid[13] == L'-')
-     && (StringGuid[18] == L'-')
-     && (StringGuid[23] == L'-')) {
-      Guid->Data1 = (UINT32)StrHexToUint64 (StringGuid);
-      Guid->Data2 = (UINT16)StrHexToUint64 (StringGuid + 9);
-      Guid->Data3 = (UINT16)StrHexToUint64 (StringGuid + 14);
-
-      Guid->Data4[0] = (UINT8)(HexCharToUintn (StringGuid[19]) * 16 + HexCharToUintn (StringGuid[20]));
-      Guid->Data4[1] = (UINT8)(HexCharToUintn (StringGuid[21]) * 16 + HexCharToUintn (StringGuid[22]));
-      Guid->Data4[2] = (UINT8)(HexCharToUintn (StringGuid[24]) * 16 + HexCharToUintn (StringGuid[25]));
-      Guid->Data4[3] = (UINT8)(HexCharToUintn (StringGuid[26]) * 16 + HexCharToUintn (StringGuid[27]));
-      Guid->Data4[4] = (UINT8)(HexCharToUintn (StringGuid[28]) * 16 + HexCharToUintn (StringGuid[29]));
-      Guid->Data4[5] = (UINT8)(HexCharToUintn (StringGuid[30]) * 16 + HexCharToUintn (StringGuid[31]));
-      Guid->Data4[6] = (UINT8)(HexCharToUintn (StringGuid[32]) * 16 + HexCharToUintn (StringGuid[33]));
-      Guid->Data4[7] = (UINT8)(HexCharToUintn (StringGuid[34]) * 16 + HexCharToUintn (StringGuid[35]));
-
-      Status = RETURN_SUCCESS;
-    }
-  }
-
-  return Status;
-}
-
 // OcStrToAscii
 /** Convert null terminated unicode string to ascii.
 

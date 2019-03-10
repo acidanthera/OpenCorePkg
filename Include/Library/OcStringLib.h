@@ -41,7 +41,6 @@
 **/
 #define L_STR_SIZE_NT(String) (sizeof (String) - sizeof (*(String)))
 
-// IsAsciiPrint
 /** Check if character is printable
 
   @param[in] Char  The ascii character to check if is printable.
@@ -65,7 +64,6 @@ IsAsciiDecimalDigitCharacter (
   IN CHAR8  Char
   );
 
-// IsAsciiSpace
 /** Check if character is a white space character
 
   @param[in] Char  The ascii character to check if is white space.
@@ -89,7 +87,6 @@ AsciiHexCharToUintn (
   IN CHAR8  Char
   );
 
-// AsciiStrnIntegerCmp
 /**
 
   @param[in] String1  A pointer to a buffer containing the first ascii string to compare.
@@ -105,7 +102,6 @@ AsciiStrnIntegerCmp (
   IN UINTN  Length
   );
 
-// AsciiStrToInteger
 /** Convert ascii string to unsigned integer.
 
   @param[in] Char  The null terminated ascii string to convert to integer.
@@ -117,7 +113,6 @@ AsciiStrToInteger (
   IN CHAR8  *Start
   );
 
-// AsciiToUpperChar
 /** Convert ascii character to upper case
 
   @param[in] Char  The ascii character to convert to upperase.
@@ -129,58 +124,6 @@ AsciiToUpperChar (
   IN CHAR8  Char
   );
 
-// OcAsciiStrStr
-/**
-  Returns the first occurrence of a Null-terminated ASCII sub-string
-  in a Null-terminated ASCII string.
-
-  @param[in]  String1       A pointer to a Null-terminated ASCII string.
-  @param[in]  SearchString  A pointer to a Null-terminated ASCII string to search for.
-
-  @retval NULL              If the SearchString does not appear in String.
-
-**/
-CHAR8 *
-OcAsciiStrStr (
-  IN      CONST CHAR8               *String,
-  IN      CONST CHAR8               *SearchString
-  );
-
-// OcAsciiStrnCmp
-/**
-  Compares two Null-terminated ASCII strings with maximum lengths, and returns
-  the difference between the first mismatched ASCII characters.
-
-  @param[in]  String1  A pointer to a Null-terminated ASCII string.
-  @param[in]  String2  A pointer to a Null-terminated ASCII string.
-  @param[in]  Length   The maximum number of ASCII characters for compare.
-
-  @retval ==0          FirstString is identical to SecondString.
-  @retval !=0          FirstString is not identical to SecondString.
-
-**/
-INTN
-OcAsciiStrnCmp (
-  IN      CONST CHAR8               *FirstString,
-  IN      CONST CHAR8               *SecondString,
-  IN      UINTN                     Length
-  );
-
-// OcAsciiStrToGuid
-/** Convert correctly formatted string into a GUID.
-
-  @param[in] StringGuid  A pointer to a buffer containing the ascii string.
-  @param[in] Guid        A pointer to location to store the converted GUID.
-
-  @retval RETURN_SUCCESS  The conversion completed successfully.
-**/
-RETURN_STATUS
-OcAsciiStrToGuid (
-  IN     CONST CHAR8  *StringGuid,
-  IN OUT GUID         *Guid
-  );
-
-// OcAsciiStrToUnicode
 /** Convert null terminated ascii string to unicode.
 
   @param[in]  String1  A pointer to the ascii string to convert to unicode.
@@ -189,12 +132,11 @@ OcAsciiStrToGuid (
   @retval  A pointer to the converted unicode string allocated from pool.
 **/
 CHAR16 *
-OcAsciiStrToUnicode (
-  IN  CHAR8   *String,
-  IN  UINTN   Length
+AsciiStrCopyToUnicode (
+  IN  CONST CHAR8   *String,
+  IN  UINTN         Length
   );
 
-// AsciiTrimWhiteSpace
 /** Remove leading and trailing spaces in the string
 
   @param[in] Start  A pointer to the ascii string
@@ -206,7 +148,6 @@ AsciiTrimWhiteSpace (
   IN  CHAR8   *String
   );
 
-// AsciiBaseName
 /** Return the filename element of a pathname
 
   @param[in] FullPath  A pointer to a ascii path
@@ -218,7 +159,6 @@ AsciiBaseName (
   IN CHAR8  *FullPath
   );
 
-// AsciiDirName
 /** Return the folder element of a pathname
 
   @param[in] FullPath  A pointer to a ascii path
@@ -230,7 +170,6 @@ AsciiDirName (
   IN CHAR8  *FullPath
   );
 
-// IsPrint
 /** Check if character is printable
 
   @param[in] Char  The unicode character to check if is printable.
@@ -242,7 +181,6 @@ IsPrint (
   IN CHAR16  Char
   );
 
-// IsDecimalDigitCharacter
 /** Check if character is a decimal digit
 
   @param[in] Char  The unicode character to check if is printable.
@@ -254,7 +192,6 @@ IsDecimalDigitCharacter (
   IN CHAR16  Char
   );
 
-// IsSpace
 /** Check if character is a white space character
 
   @param[in] Char  The unicode character to check if is white space.
@@ -266,7 +203,6 @@ IsSpace (
     IN CHAR16  Char
   );
 
-// HexCharToUintn
 /** Convert unicode hexadecimal character to unsigned integer.
 
   @param[in] Char  The unicode character to convert to integer.
@@ -278,7 +214,6 @@ HexCharToUintn (
   IN CHAR16  Char
   );
 
-// StrnIntegerCmp
 /**
 
   @param[in] String1  A pointer to a buffer containing the first unicode string to compare.
@@ -294,7 +229,6 @@ StrnIntegerCmp (
   IN UINTN   Length
   );
 
-// StrToInteger
 /** Convert unicode string to unsigned integer.
 
   @param[in] Char  The null terminated unicode string to convert to integer.
@@ -306,7 +240,6 @@ StrToInteger (
   IN CHAR16  *Start
   );
 
-// ToUpperChar
 /** Convert unicode character to upper case
 
   @param[in] Char  The unicode character to convert to upperase.
@@ -318,21 +251,6 @@ ToUpperChar (
   IN CHAR16  Char
   );
 
-// OcStrToGuid
-/** Convert correctly formatted string into a GUID.
-
-  @param[in] StringGuid  A pointer to a buffer containing the unicode string.
-  @param[in] Guid        A pointer to location to store the converted GUID.
-
-  @retval RETURN_SUCCESS  The conversion completed successfully.
-**/
-RETURN_STATUS
-OcStrToGuid (
-  IN     CONST CHAR16  *StringGuid,
-  IN OUT GUID          *Guid
-  );
-
-// OcStrToAscii
 /** Convert null terminated unicode string to ascii.
 
   @param[in]  String1  A pointer to the unicode string to convert to ascii.
@@ -346,7 +264,6 @@ OcStrToAscii (
   IN CHAR8   *String2
   );
 
-// StrCmpiAscii
 /** Compare unicode string with ascii string ignoring case
 
   @param[in] String1  A pointer to a unicode string to compare.
@@ -360,7 +277,6 @@ StrCmpiAscii (
   IN CHAR8   *String2
   );
 
-// StrCmpiBasic
 /** Compare unicode strings ignoring case
 
   @param[in] String1  A pointer to a unicode string to compare.
@@ -374,7 +290,6 @@ StrCmpiBasic (
   IN CHAR16  *String2
   );
 
-// UnicodeBaseName
 /** Return the filename element of a pathname
 
   @param[in] FullPath  A pointer to a unicode path
@@ -386,7 +301,6 @@ UnicodeBaseName (
   IN CHAR16  *FullPath
   );
 
-// UnicodeDirName
 /** Return the folder element of a pathname
 
   @param[in] FullPath  A pointer to a unicode path
@@ -398,7 +312,6 @@ UnicodeDirName (
   IN CHAR16  *FullPath
   );
 
-// UnicodeParseString
 /**
 
   @param[in] String    A pointer to a unicode string
@@ -412,7 +325,6 @@ UnicodeParseString (
   IN  CHAR16    *Variable
   );
 
-// TrimWhiteSpace
 /** Remove leading and trailing spaces in the string
 
   @param[in] Start  A pointer to the unicode string

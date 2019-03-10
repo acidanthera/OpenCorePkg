@@ -1,8 +1,8 @@
 ## @file
 #
-#  Component description file for OcMisclibrary.
+#  Component description file for OcDataHubLib.
 #
-#  Copyright (C) 2016 - 2018, The HermitCrabs Lab. All rights reserved.<BR>
+#  Copyright (C) 2019, vit9696. All rights reserved.<BR>
 #
 # All rights reserved.
 #
@@ -18,11 +18,11 @@
 
 [Defines]
   INF_VERSION    = 0x00010005
-  BASE_NAME      = OcMiscLib
-  FILE_GUID      = E9DF6F29-95AC-429A-8E42-FCE1F5B81148
+  BASE_NAME      = OcDataHubLib
+  FILE_GUID      = 0E93775E-0EDB-484E-A6E7-851F0580D450
   MODULE_TYPE    = BASE
   VERSION_STRING = 1.0
-  LIBRARY_CLASS  = OcMiscLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+  LIBRARY_CLASS  = OcDataHubLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
 
 # VALID_ARCHITECTURES = IA32 X64
 
@@ -40,19 +40,12 @@
 
 [Protocols]
   gEfiDataHubProtocolGuid       ## SOMETIMES_CONSUMES
-  gEfiLegacyRegionProtocolGuid 
 
 [LibraryClasses]
   BaseLib
   UefiLib
+  OcStringLib
+  OcMiscLib
 
 [Sources]
-  Base64Decode.c
-  ConvertDataToString.c
-  DataPatcher.c
-  DebugHelp.c
-  LegacyRegionLock.c
-  LegacyRegionUnLock.c
-  LogBootOrder.c
-  LogHexDump.c
-  NullTextOutput.c
+  OcDataHubLib.c

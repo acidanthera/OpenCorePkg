@@ -66,6 +66,9 @@
   OcCryptoLib|Include/Library/OcCryptoLib.h
 
   ##  @libraryclass
+  OcDataHubLib|Include/Library/OcDataHubLib.h
+
+  ##  @libraryclass
   OcDevicePathLib|Include/Library/OcDevicePathLib.h
 
   ##  @libraryclass

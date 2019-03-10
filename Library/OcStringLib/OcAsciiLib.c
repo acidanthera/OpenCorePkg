@@ -210,52 +210,6 @@ AsciiToUpperChar (
   return Char;
 }
 
-// OcAsciiStrToGuid
-/** Convert correctly formatted string into a GUID.
-
-  @param[in] StringGuid  A pointer to a buffer containing the ascii string.
-  @param[in] Guid        A pointer to location to store the converted GUID.
-
-  @retval RETURN_SUCCESS  The conversion completed successfully.
-**/
-RETURN_STATUS
-OcAsciiStrToGuid (
-  IN     CONST CHAR8  *StringGuid,
-  IN OUT GUID         *Guid
-  )
-{
-  RETURN_STATUS Status;
-
-  Status = RETURN_INVALID_PARAMETER;
-
-  if ((StringGuid != NULL) && (Guid != NULL)) {
-    ZeroMem (Guid, sizeof (*Guid));
-
-    if ((StringGuid[8] == '-')
-     && (StringGuid[13] == '-')
-     && (StringGuid[18] == '-')
-     && (StringGuid[23] == '-')) {
-      Guid->Data1 = (UINT32)AsciiStrHexToUint64 (StringGuid);
-      Guid->Data2 = (UINT16)AsciiStrHexToUint64 (StringGuid + 9);
-      Guid->Data3 = (UINT16)AsciiStrHexToUint64 (StringGuid + 14);
-
-      Guid->Data4[0] = (UINT8)(AsciiHexCharToUintn (StringGuid[19]) * 16 + AsciiHexCharToUintn (StringGuid[20]));
-      Guid->Data4[1] = (UINT8)(AsciiHexCharToUintn (StringGuid[21]) * 16 + AsciiHexCharToUintn (StringGuid[22]));
-      Guid->Data4[2] = (UINT8)(AsciiHexCharToUintn (StringGuid[24]) * 16 + AsciiHexCharToUintn (StringGuid[25]));
-      Guid->Data4[3] = (UINT8)(AsciiHexCharToUintn (StringGuid[26]) * 16 + AsciiHexCharToUintn (StringGuid[27]));
-      Guid->Data4[4] = (UINT8)(AsciiHexCharToUintn (StringGuid[28]) * 16 + AsciiHexCharToUintn (StringGuid[29]));
-      Guid->Data4[5] = (UINT8)(AsciiHexCharToUintn (StringGuid[30]) * 16 + AsciiHexCharToUintn (StringGuid[31]));
-      Guid->Data4[6] = (UINT8)(AsciiHexCharToUintn (StringGuid[32]) * 16 + AsciiHexCharToUintn (StringGuid[33]));
-      Guid->Data4[7] = (UINT8)(AsciiHexCharToUintn (StringGuid[34]) * 16 + AsciiHexCharToUintn (StringGuid[35]));
-
-      Status = RETURN_SUCCESS;
-    }
-  }
-
-  return Status;
-}
-
-// OcAsciiStrToUnicode
 /** Convert null terminated ascii string to unicode.
 
   @param[in]  String1  A pointer to the ascii string to convert to unicode.
@@ -264,9 +218,9 @@ OcAsciiStrToGuid (
   @retval  A pointer to the converted unicode string allocated from pool.
 **/
 CHAR16 *
-OcAsciiStrToUnicode (
-  IN  CHAR8   *AsciiString,
-  IN  UINTN   Length
+AsciiStrCopyToUnicode (
+  IN  CONST CHAR8   *AsciiString,
+  IN  UINTN         Length
   )
 {
   CHAR16  *UnicodeString;
@@ -382,85 +336,3 @@ AsciiTrimWhiteSpace (
   return String;
 }
 
-// OcAsciiStrnCmp
-/**
-  Compares two Null-terminated ASCII strings with maximum lengths, and returns
-  the difference between the first mismatched ASCII characters.
-
-  @param[in]  FirstString   A pointer to a Null-terminated ASCII string.
-  @param[in]  SecondString  A pointer to a Null-terminated ASCII string.
-  @param[in]  Length        The maximum number of ASCII characters for compare.
-
-  @retval ==0               FirstString is identical to SecondString.
-  @retval !=0               FirstString is not identical to SecondString.
-
-**/
-INTN
-OcAsciiStrnCmp (
-  IN      CONST CHAR8               *FirstString,
-  IN      CONST CHAR8               *SecondString,
-  IN      UINTN                     Length
-  )
-{
-  if (Length == 0) {
-    return 0;
-  }
-
-  while ((*FirstString != '\0') &&
-         (*SecondString != '\0') &&
-         (*FirstString == *SecondString) &&
-         (Length > 1)) {
-    FirstString++;
-    SecondString++;
-    Length--;
-  }
-  return *FirstString - *SecondString;
-}
-
-// OcAsciiStrStr
-/**
-  Returns the first occurrence of a Null-terminated ASCII sub-string
-  in a Null-terminated ASCII string.
-
-  @param[in]  String1       A pointer to a Null-terminated ASCII string.
-  @param[in]  SearchString  A pointer to a Null-terminated ASCII string to search for.
-
-  @retval NULL              If the SearchString does not appear in String.
-
-**/
-CHAR8 *
-OcAsciiStrStr (
-  IN      CONST CHAR8               *String,
-  IN      CONST CHAR8               *SearchString
-  )
-{
-  CONST CHAR8 *FirstMatch;
-  CONST CHAR8 *SearchStringTmp;
-
-  if (*SearchString == '\0') {
-    return (CHAR8 *) String;
-  }
-
-  while (*String != '\0') {
-    SearchStringTmp = SearchString;
-    FirstMatch = String;
-    
-    while ((*String == *SearchStringTmp) 
-            && (*String != '\0')) {
-      String++;
-      SearchStringTmp++;
-    } 
-    
-    if (*SearchStringTmp == '\0') {
-      return (CHAR8 *) FirstMatch;
-    }
-
-    if (*String == '\0') {
-      return NULL;
-    }
-
-    String = FirstMatch + 1;
-  }
-
-  return NULL;
-}

@@ -33,6 +33,9 @@ listed here.
 * OcCryptoLib  
     **Status**: functional  
     **Issues**: none
+* OcDataHubLib  
+    **Status**: functional  
+    **Issues**: none
 * OcDebugLogLib  
     **Status**: functional  
     **Issues**:
@@ -83,9 +86,9 @@ listed here.
     1. Potentially reports incorrect memory on some boards.
     1. No SMC information table is provided.
 * OcStringLib  
-    **Status**: legacy  
+    **Status**: functional  
     **Issues**:
-    1. Subject for removal if no use.
+    1. Several functions are duplicates of UDK or are insecurely designed and are subject for removal.
 * OcTemplateLib  
     **Status**: functional  
     **Issues**: none

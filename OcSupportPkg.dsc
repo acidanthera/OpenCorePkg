@@ -53,6 +53,7 @@
   OcAppleImageVerificationLib|OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcCpuLib|OcSupportPkg/Library/OcCpuLib/OcCpuLib.inf
   OcCryptoLib|OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
+  OcDataHubLib|OcSupportPkg/Library/OcDataHubLib/OcDataHubLib.inf
   OcDebugLogLib|OcSupportPkg/Library/OcDebugLogLib/OcDebugLogLib.inf
   OcDevicePathLib|OcSupportPkg/Library/OcDevicePathLib/OcDevicePathLib.inf
   OcDevicePropertyLib|OcSupportPkg/Library/OcDevicePropertyLib/OcDevicePropertyLib.inf
@@ -77,6 +78,7 @@
   OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcSupportPkg/Library/OcCpuLib/OcCpuLib.inf
   OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
+  OcSupportPkg/Library/OcDataHubLib/OcDataHubLib.inf
   OcSupportPkg/Library/OcDebugLogLib/OcDebugLogLib.inf
   OcSupportPkg/Library/OcDevicePathLib/OcDevicePathLib.inf
   OcSupportPkg/Library/OcDevicePropertyLib/OcDevicePropertyLib.inf
@@ -94,14 +96,16 @@
   OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
   OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
   OcSupportPkg/Debug/GdbSyms/GdbSyms.inf
+  OcSupportPkg/Tests/AcpiTest/AcpiTest.inf
+  OcSupportPkg/Tests/AcpiTest/AcpiTestApp.inf
   OcSupportPkg/Tests/BlessTest/BlessTest.inf
   OcSupportPkg/Tests/BlessTest/BlessTestApp.inf
+  OcSupportPkg/Tests/DataHubTest/DataHubTest.inf
+  OcSupportPkg/Tests/DataHubTest/DataHubTestApp.inf
   OcSupportPkg/Tests/PropertyTest/PropertyTest.inf
   OcSupportPkg/Tests/PropertyTest/PropertyTestApp.inf
   OcSupportPkg/Tests/SmbiosTest/SmbiosTest.inf
   OcSupportPkg/Tests/SmbiosTest/SmbiosTestApp.inf
-  OcSupportPkg/Tests/AcpiTest/AcpiTest.inf
-  OcSupportPkg/Tests/AcpiTest/AcpiTestApp.inf
 
 [PcdsFixedAtBuild]
   gEfiMdePkgTokenSpaceGuid.PcdMaximumAsciiStringLength|0

@@ -17,11 +17,11 @@
 
 #include <Uefi.h>
 
-// PLATFORM_DATA_HEADER
 typedef struct {
   CHAR16 Reserved[8];
   UINT32 KeySize;
   UINT32 DataSize;
+  UINT8  Data[];
 } PLATFORM_DATA_HEADER;
 
 // Base64Decode
@@ -55,8 +55,8 @@ OcBase64Decode (
 **/
 CHAR8 *
 ConvertDataToString (
-  IN VOID   *Data,
-  IN UINTN  DataSize
+  IN CONST VOID   *Data,
+  IN UINTN        DataSize
   );
 
 // LegacyRegionlock

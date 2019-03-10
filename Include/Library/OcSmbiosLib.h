@@ -60,11 +60,11 @@ typedef struct OC_SMBIOS_DATA_ {
   CONST CHAR8     *BoardSerialNumber;
   CONST CHAR8     *BoardAssetTag;
   CONST CHAR8     *BoardLocationInChassis;
-  UINT8           *BoardType;
+  CONST UINT8     *BoardType;
   //
   // Type 3
   //
-  UINT8           *ChassisType;
+  CONST UINT8     *ChassisType;
   CONST CHAR8     *ChassisManufacturer;
   CONST CHAR8     *ChassisVersion;
   CONST CHAR8     *ChassisSerialNumber;
@@ -72,7 +72,7 @@ typedef struct OC_SMBIOS_DATA_ {
   //
   // Type 17
   //
-  UINT8           *MemoryFormFactor;
+  CONST UINT8     *MemoryFormFactor;
   //
   // Type 128
   // FirmwareFeatures and FirmwareFeaturesMask are split into two UINT32
