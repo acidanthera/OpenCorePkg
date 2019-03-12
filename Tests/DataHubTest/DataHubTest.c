@@ -126,6 +126,10 @@ TestDataHub (
       }
     }
   }
+
+  //TODO: also put elsewhere, boot.efi kills watchdog only in FV2 UI.
+  gBS->SetWatchdogTimer (0, 0, 0, NULL);
+
   return EFI_SUCCESS;
 }
 
