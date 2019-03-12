@@ -89,13 +89,42 @@ TestDataHub (
     STATIC UINT32 FirmwareFeatures = 0xE00FE137;
     STATIC UINT32 FirmwareFeaturesMask = 0xFF1FFF3F;
     STATIC UINT32 CsrActiveConfig = 0;
+    STATIC CHAR8 SecurityMode[] = "full";
 
     gRT->SetVariable (L"MLB", &gAppleVendorVariableGuid, Attributes, AsciiStrLen (Mlb), Mlb);
     gRT->SetVariable (L"ROM", &gAppleVendorVariableGuid, Attributes, sizeof (Rom), Rom);
     gRT->SetVariable (L"FirmwareFeatures", &gAppleVendorVariableGuid, Attributes, sizeof (FirmwareFeatures), &FirmwareFeatures);
     gRT->SetVariable (L"FirmwareFeaturesMask", &gAppleVendorVariableGuid, Attributes, sizeof (FirmwareFeaturesMask), &FirmwareFeaturesMask);
     gRT->SetVariable (L"csr-active-config", &gAppleBootVariableGuid, Attributes, sizeof (CsrActiveConfig), &CsrActiveConfig);
+    gRT->SetVariable (L"security-mode", &gAppleBootVariableGuid, Attributes, sizeof (SecurityMode), SecurityMode);
+  }
 
+  //TODO: this is done by AMF or ConSplitter normally, here it temporarily exists for legacy.
+  {
+    EFI_STATUS  Status;
+    VOID        *Gop;
+
+    Gop = NULL;
+    Status = gBS->HandleProtocol (gST->ConsoleOutHandle, &gEfiGraphicsOutputProtocolGuid, &Gop);
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Missing GOP on ConsoleOutHandle - %r\n", Status));
+      Status = gBS->LocateProtocol (&gEfiGraphicsOutputProtocolGuid, NULL, &Gop);
+
+      if (!EFI_ERROR (Status)) {
+        Status = gBS->InstallMultipleProtocolInterfaces (
+          &gST->ConsoleOutHandle,
+          &gEfiGraphicsOutputProtocolGuid,
+          Gop,
+          NULL
+          );
+        if (EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_WARN, "Failed to install GOP on ConsoleOutHandle - %r\n", Status));
+        }
+      } else {
+        DEBUG ((DEBUG_WARN, "Missing GOP entirely - %r\n", Status));
+      }
+    }
   }
   return EFI_SUCCESS;
 }
