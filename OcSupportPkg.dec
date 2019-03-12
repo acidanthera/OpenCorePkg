@@ -111,4 +111,7 @@
   OcTimerLib|Include/Library/OcTimerLib.h
 
   ##  @libraryclass
+  OcVirtualFsLib|Include/Library/OcVirtualFsLib.h
+
+  ##  @libraryclass
   OcXmlLib|Include/Library/OcXmlLib.h

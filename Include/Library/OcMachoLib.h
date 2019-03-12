@@ -38,7 +38,7 @@ typedef struct {
 
   @param[out] Context   Mach-O Context to initialize.
   @param[in]  FileData  Pointer to the file's data.
-  @param[in]  FileSize  File size of FIleData.
+  @param[in]  FileSize  File size of FileData.
 
   @return  Whether Context has been initialized successfully.
 

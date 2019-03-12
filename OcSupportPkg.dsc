@@ -69,6 +69,7 @@
   OcStringLib|OcSupportPkg/Library/OcStringLib/OcStringLib.inf
   OcTemplateLib|OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
   OcTimerLib|OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
+  OcVirtualFsLib|OcSupportPkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OcXmlLib|OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
 
 [Components]
@@ -94,6 +95,7 @@
   OcSupportPkg/Library/OcStringLib/OcStringLib.inf
   OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
   OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
+  OcSupportPkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
   OcSupportPkg/Debug/GdbSyms/GdbSyms.inf
   OcSupportPkg/Tests/AcpiTest/AcpiTest.inf
@@ -102,6 +104,8 @@
   OcSupportPkg/Tests/BlessTest/BlessTestApp.inf
   OcSupportPkg/Tests/DataHubTest/DataHubTest.inf
   OcSupportPkg/Tests/DataHubTest/DataHubTestApp.inf
+  OcSupportPkg/Tests/KernelTest/KernelTest.inf
+  OcSupportPkg/Tests/KernelTest/KernelTestApp.inf
   OcSupportPkg/Tests/PropertyTest/PropertyTest.inf
   OcSupportPkg/Tests/PropertyTest/PropertyTestApp.inf
   OcSupportPkg/Tests/SmbiosTest/SmbiosTest.inf
