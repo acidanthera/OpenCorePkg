@@ -43,6 +43,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/GraphicsOutput.h>
 #include <Protocol/SimpleTextInEx.h>
 #include <Protocol/SimpleFileSystem.h>
+#include <ProcessorInfo.h>
 
 STATIC GUID SystemUUID = {0x5BC82C38, 0x4DB6, 0x4883, {0x85, 0x2E, 0xE7, 0x8D, 0x78, 0x0A, 0x6F, 0xE6}};
 STATIC UINT8 BoardRevision = 1;
@@ -129,6 +130,29 @@ TestDataHub (
 
   //TODO: also put elsewhere, boot.efi kills watchdog only in FV2 UI.
   gBS->SetWatchdogTimer (0, 0, 0, NULL);
+
+  //TODO: put this elsewhere, fixes early reboot on APTIO IV (Ivy/Haswell).
+  {
+    UINT64  Msr;
+    UINT64  FlexRatio;
+
+    if (CpuInfo.Vendor[0] == CPUID_VENDOR_INTEL
+      && CpuInfo.Model != CPU_MODEL_GOLDMONT
+      && CpuInfo.Model != CPU_MODEL_AIRMONT
+      && CpuInfo.Model != CPU_MODEL_AVOTON) {
+      Msr = AsmReadMsr64 (MSR_FLEX_RATIO);
+      if (Msr & FLEX_RATIO_EN) {
+        FlexRatio = BitFieldRead64 (Msr, 8, 15);
+        if (FlexRatio == 0) {
+          //
+          // Disable Flex Ratio if current value is 0.
+          //
+          AsmWriteMsr64 (MSR_FLEX_RATIO, Msr & ~((UINT64) MSR_FLEX_RATIO));
+        }
+      }
+    }
+  }
+
 
   return EFI_SUCCESS;
 }

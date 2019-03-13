@@ -25,7 +25,7 @@ typedef struct {
   //
   // Note, Vendor and BrandString are reordered for proper alignment.
   //
-  UINT8                Vendor[16];
+  UINT32               Vendor[4];
   CHAR8                BrandString[48];
   UINT8                Type;
 

@@ -48,6 +48,8 @@
 #define MSR_IA32_EXT_CONFIG               0xEE
 #define MSR_FEATURE_CONFIG                0x13C
 #define MSR_FLEX_RATIO                    0x194
+#define FLEX_RATIO_LOCK                   (1U << 20U)
+#define FLEX_RATIO_EN                     (1U << 16U)
 #define MSR_IA32_PERF_CONTROL             0x199
 #define MSR_THERM2_CTL                    0x19D
 
@@ -161,12 +163,14 @@ enum {
 #define CPU_MODEL_BROADWELL_ULX  0x3D
 #define CPU_MODEL_BROADWELL_ULT  0x3D
 #define CPU_MODEL_BRYSTALWELL    0x47
+#define CPU_MODEL_AIRMONT        0x4C  ///< CherryTrail / Braswell
+#define CPU_MODEL_AVOTON         0x4D  ///< Avaton/Rangely
 #define CPU_MODEL_SKYLAKE        0x4E  ///< Skylake-S
 #define CPU_MODEL_SKYLAKE_ULT    0x4E
 #define CPU_MODEL_SKYLAKE_ULX    0x4E
 #define CPU_MODEL_SKYLAKE_DT     0x5E
 #define CPU_MODEL_SKYLAKE_W      0x55
-
+#define CPU_MODEL_GOLDMONT       0x5C  ///< Apollo Lake
 #define CPU_MODEL_DENVERTON      0x5F  ///< Goldmont Microserver
 #define CPU_MODEL_CANNONLAKE     0x66
 #define CPU_MODEL_XEON_MILL      0x85  ///< Knights Mill

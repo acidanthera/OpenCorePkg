@@ -10,7 +10,8 @@ listed here.
 
 * OcAcpiLib  
     **Status**: functional  
-    **Issues**: none
+    **Issues**:
+    1. On legacy platforms rebooting may not work afterwards.
 * OcAppleBootPolicyLib  
     **Status**: functional  
     **Issues**:
@@ -30,6 +31,7 @@ listed here.
     1. No package count detection.
     1. No AMD CPU support.
     1. Apple processor type detection is incomplete.
+    1. FSBFrequency calculation is sometimes incorrect, e.g. for Core 2 Quad Q9450.
 * OcCryptoLib  
     **Status**: functional  
     **Issues**: none
@@ -96,6 +98,10 @@ listed here.
     **Status**: functional  
     **Issues**:
     1. No AMD CPU support.
+* OcVirtualFsLib  
+    **Status**: functional  
+    **Issues**:
+    1. Does not support directory iteration with virtualised files.
 * OcXmlLib  
     **Status**: functional  
     **Issues**: none

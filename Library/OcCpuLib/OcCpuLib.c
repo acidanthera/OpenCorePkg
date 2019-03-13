@@ -762,7 +762,7 @@ OcCpuScanProcessor (
   //
   // Get vendor CPUID 0x00000000
   //
-  AsmCpuid (CPUID_SIGNATURE, &CpuidEax, (UINT32 *) Cpu->Vendor, (UINT32 *) (Cpu->Vendor + 8), (UINT32 *) (Cpu->Vendor + 4));
+  AsmCpuid (CPUID_SIGNATURE, &CpuidEax, &Cpu->Vendor[0], &Cpu->Vendor[2], &Cpu->Vendor[1]);
 
   //
   // Get extended CPUID 0x80000000
@@ -843,7 +843,7 @@ OcCpuScanProcessor (
     Cpu->ExtFamily
     ));
 
-  if (*(UINT32 *) Cpu->Vendor == CPUID_VENDOR_INTEL) {
+  if (Cpu->Vendor[0] == CPUID_VENDOR_INTEL) {
     ScanIntelProcessor (Cpu);
   }
 }
