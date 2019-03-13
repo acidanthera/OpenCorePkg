@@ -100,7 +100,7 @@ EFIAPI
 VirtualFileRead (
   IN EFI_FILE_PROTOCOL        *This,
   IN OUT UINTN                *BufferSize,
-  OUT VOID                    *Buffer
+     OUT VOID                 *Buffer
   )
 {
   VIRTUAL_FILE_DATA  *Data;

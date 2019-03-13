@@ -17,6 +17,12 @@ listed here.
     **Issues**:
     1. No proper interface for OS detection.
     1. No dmg boot detection.
+* OcAppleKernelLib  
+    **Status**: functional  
+    **Issues**: none
+* OcCompressionLib  
+    **Status**: functional  
+    **Issues**: none
 * OcAppleChunklistLib  
     **Status**: in progress  
     **Issues**:

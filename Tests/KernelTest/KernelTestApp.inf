@@ -61,4 +61,6 @@
   OcAppleBootPolicyLib
   OcSmbiosLib
   OcDataHubLib
+  OcAppleKernelLib
+  OcCompressionLib
   OcVirtualFsLib

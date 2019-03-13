@@ -60,6 +60,9 @@
   OcAppleImageVerificationLib|Include/Library/OcAppleImageVerificationLib.h
 
   ##  @libraryclass
+  OcAppleKernelLib|Include/Library/OcAppleKernelLib.h
+
+  ##  @libraryclass
   OcCompressionLib|Include/Library/OcCompressionLib.h
 
   ##  @libraryclass

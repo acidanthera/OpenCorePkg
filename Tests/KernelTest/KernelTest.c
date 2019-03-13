@@ -28,7 +28,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcSmbiosLib.h>
 #include <Library/OcCpuLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/OcVirtualFsLib.h>
+#include <Library/OcAppleKernelLib.h>
 
 #include <Protocol/AppleBootPolicy.h>
 #include <Protocol/DevicePathPropertyDatabase.h>
@@ -55,11 +57,68 @@ TestFileOpen (
   IN  UINT64                  Attributes
   )
 {
-  EFI_STATUS  Status;
+  EFI_STATUS         Status;
+  UINT8              *Kernel;
+  UINT32             KernelSize;
+  UINT32             AllocatedSize;
+  CHAR16             *FileNameCopy;
+  EFI_FILE_PROTOCOL  *VirtualFileHandle;
 
   Status = This->Open (This, NewHandle, FileName, OpenMode, Attributes);
 
-  Print (L"[FS %p] %s in %X/%X - %r\n", This, FileName, OpenMode, Attributes, Status);
+  if (!EFI_ERROR (Status)
+    && OpenMode == EFI_FILE_MODE_READ
+    && StrStr (FileName, L"kernel") != NULL) {
+    Print (L"Trying XNU hook on %s\n", FileName);
+    Status = ReadAppleKernel (*NewHandle, &Kernel, &KernelSize, &AllocatedSize);
+    Print (L"Result of XNU hook on %s is %r\n", FileName, Status);
+
+    //
+    // This is not Apple kernel, just return the original file.
+    //
+    if (EFI_ERROR (Status)) {
+      return EFI_SUCCESS;
+    }
+
+    //
+    // TODO: patches, dropping, and injection here.
+    //
+
+    ApplyPatch (
+      (UINT8 *) "Darwin Kernel Version",
+      NULL,
+      L_STR_LEN ("Darwin Kernel Version"),
+      (UINT8 *) "OpenCore Boot Version",
+      Kernel,
+      KernelSize,
+      1,
+      0
+      );
+
+    //
+    // This was our file, yet firmware is dying.
+    //
+    FileNameCopy = AllocateCopyPool (StrSize (FileName), FileName);
+    if (FileNameCopy == NULL) {
+      DEBUG ((DEBUG_WARN, "Failed to allocate kernel name (%a) copy\n", FileName));
+      FreePool (Kernel);
+      return EFI_SUCCESS;
+    }
+
+    Status = CreateVirtualFile (FileNameCopy, Kernel, KernelSize, &VirtualFileHandle);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Failed to virtualise kernel file (%a)\n", FileName));
+      FreePool (Kernel);
+      FreePool (FileNameCopy);
+      return EFI_SUCCESS;
+    }
+
+    //
+    // Return our handle.
+    //
+    (*NewHandle)->Close(*NewHandle);
+    *NewHandle = VirtualFileHandle;
+  }
 
   return Status;
 }

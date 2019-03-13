@@ -62,6 +62,7 @@
   OcMiscLib
   OcProtocolLib
   OcAppleBootPolicyLib
+  OcAppleKernelLib
   OcSmbiosLib
   OcDataHubLib
   OcVirtualFsLib

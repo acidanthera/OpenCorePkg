@@ -50,7 +50,8 @@ GetVolumeLabel (
   IN     EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem
   );
 
-/** Read file from device path with implicit double (2 byte) null termination.
+/**
+  Read file from device path with implicit double (2 byte) null termination.
   Null termination does not affect the returned file size.
   Depending on the implementation 0 byte files may return null.
 
@@ -65,6 +66,38 @@ ReadFile (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
   IN  CONST CHAR16                     *FilePath,
   OUT UINTN                            *FileSize OPTIONAL
+  );
+
+/**
+  Read exact amount of bytes from EFI_FILE_PROTOCOL at specified position.
+
+  @param[in]  File         A pointer to the file protocol.
+  @param[in]  Position     Position to read data from.
+  @param[in]  Size         The size of the data read.
+  @param[out] Buffer       A pointer to previously allocated buffer to read data to.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+ReadFileData (
+  IN  EFI_FILE_PROTOCOL  *File,
+  IN  UINT32             Position,
+  IN  UINT32             Size,
+  OUT UINT8              *Buffer
+  );
+
+/**
+  Determine file size if it is less than 4 GB.
+
+  @param[in]  File         A pointer to the file protocol.
+  @param[out] Size         32-bit file size.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+ReadFileSize (
+  IN  EFI_FILE_PROTOCOL  *File,
+  OUT UINT32             *Size
   );
 
 #endif // OC_FILE_LIB_H_

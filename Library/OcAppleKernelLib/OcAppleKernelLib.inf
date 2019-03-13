@@ -1,5 +1,5 @@
 ## @file
-# OcCompressionLib
+# OcAppleKernelLib
 #
 # Copyright (c) 2019, vit9696
 #
@@ -17,11 +17,11 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = OcCompressionLib
-  FILE_GUID                      = C384FA2A-B1AE-44FA-A33C-D59325B637C9
+  BASE_NAME                      = OcAppleKernelLib
+  FILE_GUID                      = 9CFA01EA-9A9B-450C-B672-E108CA30DC3F
   MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = OcCompressionLib|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SAL_DRIVER DXE_SMM_DRIVER SMM_CORE UEFI_APPLICATION UEFI_DRIVER
+  LIBRARY_CLASS                  = OcAppleKernelLib|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SAL_DRIVER DXE_SMM_DRIVER SMM_CORE UEFI_APPLICATION UEFI_DRIVER
 
 
 #
@@ -29,12 +29,10 @@
 #
 
 [Sources]
-  lzss/lzss.c
-  lzss/lzss.h
-  lzvn/lzvn.c
-  lzvn/lzvn.h
+  ReadAppleKernel.c
 
 [Packages]
+  EfiPkg/EfiPkg.dec
   MdePkg/MdePkg.dec
   OcSupportPkg/OcSupportPkg.dec
 
@@ -42,3 +40,6 @@
   BaseLib
   BaseMemoryLib
   MemoryAllocationLib
+  OcCompressionLib
+  OcFileLib
+  OcMachoLib

@@ -27,6 +27,7 @@
 # VALID_ARCHITECTURES = IA32 X64
 
 [Sources]
+  FileProtocol.c
   GetFileInfo.c
   GetVolumeLabel.c
   ReadFile.c
