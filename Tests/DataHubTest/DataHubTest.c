@@ -147,7 +147,7 @@ TestDataHub (
           //
           // Disable Flex Ratio if current value is 0.
           //
-          AsmWriteMsr64 (MSR_FLEX_RATIO, Msr & ~((UINT64) MSR_FLEX_RATIO));
+          AsmWriteMsr64 (MSR_FLEX_RATIO, Msr & ~((UINT64) FLEX_RATIO_EN));
         }
       }
     }
