@@ -69,6 +69,16 @@ TestFileOpen (
   if (!EFI_ERROR (Status)
     && OpenMode == EFI_FILE_MODE_READ
     && StrStr (FileName, L"kernel") != NULL) {
+
+    //
+    // boot.efi uses kernel as is to determine valid filesystem.
+    // Just skip it to speedup the boot process.
+    // On 10.9 mach_kernel is loaded for manual linking aferwards, so we cannot skip it.
+    //
+    if (StrCmp (FileName, L"System\\Library\\Kernels\\kernel") == 0) {
+      return Status;
+    }
+
     Print (L"Trying XNU hook on %s\n", FileName);
     Status = ReadAppleKernel (*NewHandle, &Kernel, &KernelSize, &AllocatedSize);
     Print (L"Result of XNU hook on %s is %r\n", FileName, Status);
@@ -91,7 +101,7 @@ TestFileOpen (
       (UINT8 *) "OpenCore Boot Version",
       Kernel,
       KernelSize,
-      1,
+      0, ///< At least on 10.14 we have BSD version string.
       0
       );
 

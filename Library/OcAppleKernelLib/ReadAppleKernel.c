@@ -248,6 +248,8 @@ ReadAppleKernelImage (
             DEBUG ((DEBUG_INFO, "Kernel size cannot be determined - %r\n", Status));
             return EFI_OUT_OF_RESOURCES;
           }
+
+          DEBUG ((DEBUG_VERBOSE, "Determined kernel size is %u bytes\n", *KernelSize));
         }
 
         Status = ReplaceBuffer (*KernelSize, Buffer, AllocatedSize);

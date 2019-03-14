@@ -68,5 +68,7 @@ ReadFileSize (
     return EFI_OUT_OF_RESOURCES;
   }
 
+  *Size = (UINT32) Position;
+
   return EFI_SUCCESS;
 }
