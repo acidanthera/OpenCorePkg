@@ -26,8 +26,8 @@
 
 STATIC EFI_HANDLE_PROTOCOL mOriginalHandleProtocol;
 STATIC EFI_LOCATE_PROTOCOL mOriginalLocateProtocol;
-STATIC EFI_OPEN_PROTOCOL   mOriginalOpenProtocol;
 STATIC EFI_FILE_OPEN       mOpenCallback;
+STATIC UINT32              mEntranceCount;
 
 STATIC
 VOID
@@ -62,8 +62,10 @@ VirtualFsHandleProtocol (
 
   Status = mOriginalHandleProtocol (Handle, Protocol, Interface);
 
-  if (!EFI_ERROR (Status) && Interface != NULL) {
+  if (!EFI_ERROR (Status) && Interface != NULL && mEntranceCount == 0) {
+    ++mEntranceCount;
     VirtualFsWrapProtocol (Protocol, Interface);
+    --mEntranceCount;
   }
 
   return Status;
@@ -82,31 +84,10 @@ VirtualFsLocateProtocol (
 
   Status = mOriginalLocateProtocol (Protocol, Registration, Interface);
 
-  if (!EFI_ERROR (Status) && Interface != NULL) {
+  if (!EFI_ERROR (Status) && Interface != NULL && mEntranceCount == 0) {
+    ++mEntranceCount;
     VirtualFsWrapProtocol (Protocol, Interface);
-  }
-
-  return Status;
-}
-
-STATIC
-EFI_STATUS
-EFIAPI
-VirtualFsOpenProtocol (
-  IN  EFI_HANDLE                Handle,
-  IN  EFI_GUID                  *Protocol,
-  OUT VOID                      **Interface OPTIONAL,
-  IN  EFI_HANDLE                AgentHandle,
-  IN  EFI_HANDLE                ControllerHandle,
-  IN  UINT32                    Attributes
-  )
-{
-  EFI_STATUS  Status;
-
-  Status = mOriginalOpenProtocol (Handle, Protocol, Interface, AgentHandle, ControllerHandle, Attributes);
-
-  if (!EFI_ERROR (Status) && Interface != NULL) {
-    VirtualFsWrapProtocol (Protocol, Interface);
+    --mEntranceCount;
   }
 
   return Status;
@@ -123,13 +104,14 @@ EnableVirtualFs (
     return EFI_ALREADY_STARTED;
   }
 
+  //
+  // Note, we should normally also hook OpenProtocol, but it results in freezes on APTIO IV and V.
+  //
   mOpenCallback                = OpenCallback;
   mOriginalHandleProtocol      = BootServices->HandleProtocol;
   mOriginalLocateProtocol      = BootServices->LocateProtocol;
-  mOriginalOpenProtocol        = BootServices->OpenProtocol;
   BootServices->HandleProtocol = VirtualFsHandleProtocol;
   BootServices->LocateProtocol = VirtualFsLocateProtocol;
-  BootServices->OpenProtocol   = VirtualFsOpenProtocol;
   BootServices->Hdr.CRC32      = 0;
   BootServices->CalculateCrc32 (BootServices, BootServices->Hdr.HeaderSize, &BootServices->Hdr.CRC32);
 
@@ -148,11 +130,9 @@ DisableVirtualFs (
 
   BootServices->HandleProtocol = mOriginalHandleProtocol;
   BootServices->LocateProtocol = mOriginalLocateProtocol;
-  BootServices->OpenProtocol   = mOriginalOpenProtocol;
   mOpenCallback                = NULL;
   mOriginalHandleProtocol      = NULL;
   mOriginalLocateProtocol      = NULL;
-  mOriginalOpenProtocol        = NULL;
   BootServices->Hdr.CRC32      = 0;
   BootServices->CalculateCrc32 (BootServices, BootServices->Hdr.HeaderSize, &BootServices->Hdr.CRC32);
 
