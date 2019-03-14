@@ -10,8 +10,7 @@ listed here.
 
 * OcAcpiLib  
     **Status**: functional  
-    **Issues**:
-    1. On legacy platforms rebooting may not work afterwards.
+    **Issues**: none
 * OcAppleBootPolicyLib  
     **Status**: functional  
     **Issues**:

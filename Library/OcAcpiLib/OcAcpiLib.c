@@ -725,7 +725,7 @@ AcpiInsertTable (
 
   ReplaceDsdt = Common->Signature == EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE;
 
-  if (ReplaceDsdt && Context->Dsdt == NULL) {
+  if (ReplaceDsdt && (Context->Dsdt == NULL || Context->Fadt == NULL)) {
     DEBUG ((DEBUG_WARN, "We do not have DSDT to replace\n"));
     return EFI_INVALID_PARAMETER;
   }
@@ -771,11 +771,13 @@ AcpiInsertTable (
       Context->Fadt->XDsdt = (UINT64)(UINTN) Context->Dsdt;
     }
     Context->Fadt->Dsdt = (UINT32)(UINTN) Context->Dsdt;
+
     Context->Fadt->Header.Checksum = 0;
     Context->Fadt->Header.Checksum = CalculateCheckSum8 (
       (UINT8 *) Context->Fadt,
       Context->Fadt->Header.Length
       );
+
   } else {
     DEBUG ((
       DEBUG_INFO,
@@ -972,10 +974,10 @@ AcpiLoadRegions (
 
 VOID
 AcpiRelocateRegions (
-  IN OUT  OC_ACPI_CONTEXT  *Context
+  IN OUT OC_ACPI_CONTEXT  *Context
   )
 {
-  UINT32      Index;
+  UINT32  Index;
 
   //
   // Should not be called before AcpiLoadRegions, but just in case.
@@ -995,4 +997,44 @@ AcpiRelocateRegions (
       AcpiRelocateTableRegions (Context, Context->Tables[Index]);
     }
   }
+}
+
+EFI_STATUS
+AcpiFadtEnableReset (
+  IN OUT OC_ACPI_CONTEXT  *Context
+  )
+{
+  if (Context->Fadt == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  if (Context->Fadt->Header.Length < OFFSET_OF (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE, ArmBootArch)) {
+    //
+    // TODO: we can potentially reallocate, but all current supported hardware is fine.
+    //
+    return EFI_BUFFER_TOO_SMALL;
+  }
+
+  if (Context->Fadt->Flags & EFI_ACPI_6_2_RESET_REG_SUP) {
+    return EFI_SUCCESS;
+  }
+
+  Context->Fadt->Flags |= EFI_ACPI_6_2_RESET_REG_SUP;
+
+  //
+  // Resetting through port 0xCF9 is universal on Intel and AMD.
+  //
+  Context->Fadt->ResetReg.AddressSpaceId    = EFI_ACPI_6_2_SYSTEM_MEMORY;
+  Context->Fadt->ResetReg.RegisterBitWidth  = 8;
+  Context->Fadt->ResetReg.RegisterBitOffset = 0;
+  Context->Fadt->ResetReg.AccessSize        = EFI_ACPI_6_2_BYTE;
+  Context->Fadt->ResetReg.Address           = 0xCF9;
+
+  Context->Fadt->Header.Checksum = 0;
+  Context->Fadt->Header.Checksum = CalculateCheckSum8 (
+    (UINT8 *) Context->Fadt,
+    Context->Fadt->Header.Length
+    );
+
+  return EFI_SUCCESS;
 }

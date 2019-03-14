@@ -144,18 +144,20 @@ typedef struct {
   UINT64       OemTableId;
 } OC_ACPI_PATCH;
 
-/** Find ACPI System Tables for later table configuration.
+/**
+  Find ACPI System Tables for later table configuration.
 
   @param Context  ACPI library context.
 
-  @retval EFI_SUCCESS when Rsdp and Xsdt or Rsdt are found.
+  @return EFI_SUCCESS when Rsdp and Xsdt or Rsdt are found.
 **/
 EFI_STATUS
 AcpiInitContext (
   IN OUT OC_ACPI_CONTEXT  *Context
   );
 
-/** Free ACPI context dynamic resources.
+/**
+  Free ACPI context dynamic resources.
 
   @param Context  ACPI library context.
 **/
@@ -164,7 +166,8 @@ AcpiFreeContext (
   IN OUT OC_ACPI_CONTEXT  *Context
   );
 
-/** Apply ACPI context to this system.
+/**
+  Apply ACPI context to this system.
 
   @param Context  ACPI library context.
 **/
@@ -173,7 +176,8 @@ AcpiApplyContext (
   IN OUT OC_ACPI_CONTEXT  *Context
   );
 
-/** Drop one ACPI table.
+/**
+  Drop one ACPI table.
 
   @param Context     ACPI library context.
   @param Signature   Table signature or 0.
@@ -188,7 +192,8 @@ AcpiDropTable (
   IN     UINT64           OemTableId
   );
 
-/** Install one ACPI table. For DSDT this performs table replacement.
+/**
+  Install one ACPI table. For DSDT this performs table replacement.
 
   @param Context     ACPI library context.
   @param Data        Table data.
@@ -201,7 +206,8 @@ AcpiInsertTable (
   IN     UINT32           Length
   );
 
-/** Normalise ACPI headers to contain 7-bit ASCII.
+/**
+  Normalise ACPI headers to contain 7-bit ASCII.
 
   @param Context     ACPI library context.
 **/
@@ -210,7 +216,8 @@ AcpiNormalizeHeaders (
   IN OUT OC_ACPI_CONTEXT  *Context
   );
 
-/** Patch ACPI tables.
+/**
+  Patch ACPI tables.
 
   @param Context     ACPI library context.
   @param Patch       ACPI patch.
@@ -221,7 +228,8 @@ AcpiApplyPatch (
   IN     OC_ACPI_PATCH    *Patch
   );
 
-/** Try to load ACPI regions.
+/**
+  Try to load ACPI regions.
 
   @param Context     ACPI library context.
 **/
@@ -230,13 +238,27 @@ AcpiLoadRegions (
   IN OUT OC_ACPI_CONTEXT  *Context
   );
 
-/** Attempt to relocate ACPI regions based on loaded ones.
+/**
+  Attempt to relocate ACPI regions based on loaded ones.
 
   @param Context     ACPI library context.
 **/
 VOID
 AcpiRelocateRegions (
-  IN OUT  OC_ACPI_CONTEXT  *Context
+  IN OUT OC_ACPI_CONTEXT  *Context
+  );
+
+/**
+  Upgrade FADT to support reset register needed on very
+  old legacy hardware.
+
+  @param Context     ACPI library context.
+
+  @return EFI_SUCCESS if successful or not needed.
+**/
+EFI_STATUS
+AcpiFadtEnableReset (
+  IN OUT OC_ACPI_CONTEXT  *Context
   );
 
 #endif // OC_ACPI_LIB_H

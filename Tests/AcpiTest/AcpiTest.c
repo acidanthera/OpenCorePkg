@@ -109,6 +109,8 @@ TestAcpi (
 
     AcpiInsertTable (&Context, PatchedSsdt8, sizeof (PatchedSsdt8));
 
+    AcpiFadtEnableReset (&Context);
+
     AcpiApplyPatch (&Context, &HpetPatch);
 
     AcpiRelocateRegions (&Context);
