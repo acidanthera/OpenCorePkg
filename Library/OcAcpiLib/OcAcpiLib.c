@@ -1024,7 +1024,7 @@ AcpiFadtEnableReset (
   //
   // Resetting through port 0xCF9 is universal on Intel and AMD.
   //
-  Context->Fadt->ResetReg.AddressSpaceId    = EFI_ACPI_6_2_SYSTEM_MEMORY;
+  Context->Fadt->ResetReg.AddressSpaceId    = EFI_ACPI_6_2_SYSTEM_IO;
   Context->Fadt->ResetReg.RegisterBitWidth  = 8;
   Context->Fadt->ResetReg.RegisterBitOffset = 0;
   Context->Fadt->ResetReg.AccessSize        = EFI_ACPI_6_2_BYTE;
