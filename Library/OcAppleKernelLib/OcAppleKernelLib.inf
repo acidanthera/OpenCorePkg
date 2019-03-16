@@ -30,6 +30,7 @@
 
 [Sources]
   ReadAppleKernel.c
+  Prelinked.c
 
 [Packages]
   EfiPkg/EfiPkg.dec
@@ -43,3 +44,5 @@
   OcCompressionLib
   OcFileLib
   OcMachoLib
+  OcXmlLib
+

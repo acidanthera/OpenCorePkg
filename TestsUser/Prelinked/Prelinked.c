@@ -15,14 +15,15 @@
 #include <Library/OcTemplateLib.h>
 #include <Library/OcSerializeLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcAppleKernelLib.h>
 
 #include <sys/time.h>
 
 /*
- clang -g -fsanitize=undefined,address -I../Include -I../../Include -I../../../MdePkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c  -o Prelinked
+ clang -g -fsanitize=undefined,address -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c ../../Library/OcAppleKernelLib/Prelinked.c -o Prelinked
 
  for fuzzing:
- clang-mp-7.0 -Dmain=__main -g -fsanitize=undefined,address,fuzzer -I../Include -I../../Include -I../../../MdePkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c  -o Prelinked
+ clang-mp-7.0 -Dmain=__main -g -fsanitize=undefined,address,fuzzer -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c ../../Library/OcAppleKernelLib/Prelinked.c -o Prelinked
  rm -rf DICT fuzz*.log ; mkdir DICT ; cp Prelinked.plist DICT ; ./Prelinked -jobs=4 DICT
 
  rm -rf Prelinked.dSYM DICT fuzz*.log Prelinked
@@ -56,34 +57,38 @@ uint8_t *readFile(const char *str, uint32_t *size) {
 }
 
 int main(int argc, char** argv) {
-  uint32_t f;
-  uint8_t *b;
-  if ((b = readFile(argc > 1 ? argv[1] : "Prelinked.xml", &f)) == NULL) {
+  UINT32 Size;
+  UINT8  *Prelinked;
+  PRELINKED_CONTEXT Context;
+  if ((Prelinked = readFile(argc > 1 ? argv[1] : "prelinkedkernel.unpack", &Size)) == NULL) {
     printf("Read fail\n");
     return -1;
   }
 
-  XML_DOCUMENT *doc = XmlDocumentParse((char *)b, f);
+  EFI_STATUS Status = PrelinkedContextInit (&Context, Prelinked, Size, Size);
 
-  if (doc == NULL) {
-    printf("Parse fail\n");
-    return -2;
-  }
+  if (!EFI_ERROR (Status)) {
+    PrelinkedDropPlistInfo (&Context);
 
-  UINT32 s;
-  CHAR8 *buf = XmlDocumentExport(doc, &s);
+    Status = PrelinkedInsertPlistInfo (&Context);
 
-  if (buf != NULL) {
-    printf("Exported into %u bytes:\n\n\n", s);
-    printf("%s\n", buf);
-    FreePool (buf);
+    if (EFI_ERROR (Status)) {
+      printf("Plist insert error %zx\n", Status);
+    }
+
+    FILE *Fh = fopen("out.bin", "wb");
+
+    if (Fh != NULL) {
+      fwrite (Prelinked, Context.PrelinkedSize, 1, Fh);
+      fclose(Fh);
+    }
+
+    PrelinkedContextFree (&Context);
   } else {
-    printf("Exporting gave NULL\n");
+    printf("Context creation error %zx\n", Status);
   }
 
-  XmlDocumentFree (doc);
-
-  free(b);
+  free(Prelinked);
 
   return 0;
 }

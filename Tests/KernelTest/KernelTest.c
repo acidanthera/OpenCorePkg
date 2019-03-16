@@ -49,61 +49,31 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/SimpleFileSystem.h>
 
 STATIC
-INT32
+EFI_STATUS
 CheckPrelinked (
   IN OUT UINT8   *Kernel,
-  IN     UINT32  KernelSize
+  IN     UINT32  KernelSize,
+  IN     UINT32  AllocatedSize
   )
 {
-  OC_MACHO_CONTEXT         Context;
-  MACH_HEADER_64           *Hdr;
-  MACH_SEGMENT_COMMAND_64  *InfoSegment;
-  MACH_SECTION_64          *InfoSection;
-  XML_DOCUMENT             *InfoDocument;
-  CHAR8                    *NewInfo;
-  UINT32                   NewInfoSize;
+  EFI_STATUS         Status;
+  PRELINKED_CONTEXT  Context;
 
-  if (!MachoInitializeContext (&Context, Kernel, KernelSize)) {
-    return -1;
+  Status = PrelinkedContextInit (&Context, Kernel, KernelSize, AllocatedSize);
+
+  if (!EFI_ERROR (Status)) {
+    PrelinkedDropPlistInfo (&Context);
+
+    Status = PrelinkedInsertPlistInfo (&Context);
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Plist insertion error - %r\n", Status));
+    }
+
+    PrelinkedContextFree (&Context);
   }
 
-  Hdr = MachoGetMachHeader64 (&Context);
-  if (Hdr == NULL) {
-    return -2;
-  }
-
-  InfoSegment = MachoGetSegmentByName64(&Context, "__PRELINK_INFO");
-  if (InfoSegment == NULL) {
-    return -3;
-  }
-
-  InfoSection = MachoGetSectionByName64 (&Context, InfoSegment, "__info");
-  if (InfoSection == NULL) {
-    return -4;
-  }
-
-  InfoDocument = XmlDocumentParse ((CHAR8 *) &Kernel[InfoSection->Offset], InfoSection->Size);
-  if (InfoDocument == NULL) {
-    return -5;
-  }
-
-  NewInfo = XmlDocumentExport(InfoDocument, &NewInfoSize);
-
-  XmlDocumentFree (InfoDocument);
-
-  if (NewInfo == NULL) {
-    return -6;
-  }
-
-  if (InfoSection->Size < NewInfoSize) {
-    FreePool (NewInfo);
-    return -7;
-  }
-
-  CopyMem (&Kernel[InfoSection->Offset], NewInfo, NewInfoSize);
-  ZeroMem (&Kernel[InfoSection->Offset + NewInfoSize], InfoSection->Size - NewInfoSize);
-
-  return 0;
+  return Status;
 }
 
 STATIC
@@ -123,7 +93,7 @@ TestFileOpen (
   UINT32             AllocatedSize;
   CHAR16             *FileNameCopy;
   EFI_FILE_PROTOCOL  *VirtualFileHandle;
-  INT32              PrelinkedCode;
+  EFI_STATUS         PrelinkedStatus;
 
   Status = This->Open (This, NewHandle, FileName, OpenMode, Attributes);
 
@@ -141,7 +111,13 @@ TestFileOpen (
     }
 
     Print (L"Trying XNU hook on %s\n", FileName);
-    Status = ReadAppleKernel (*NewHandle, &Kernel, &KernelSize, &AllocatedSize);
+    Status = ReadAppleKernel (
+      *NewHandle,
+      &Kernel,
+      &KernelSize,
+      &AllocatedSize,
+      PRELINK_INFO_RESERVE_SIZE ///< TODO: add kexts here.
+      );
     Print (L"Result of XNU hook on %s is %r\n", FileName, Status);
 
     //
@@ -155,9 +131,9 @@ TestFileOpen (
     // TODO: patches, dropping, and injection here.
     //
 
-    PrelinkedCode = CheckPrelinked (Kernel, KernelSize);
+    PrelinkedStatus = CheckPrelinked (Kernel, KernelSize, AllocatedSize);
 
-    DEBUG ((DEBUG_WARN, "Prelinked code is %u\n", PrelinkedCode));
+    DEBUG ((DEBUG_WARN, "Prelinked status - %r\n", PrelinkedStatus));
 
     ApplyPatch (
       (UINT8 *) "Darwin Kernel Version",
