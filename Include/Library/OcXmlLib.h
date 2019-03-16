@@ -126,13 +126,15 @@ XmlDocumentParse (
 //
 // @param Document XML_DOCUMENT to export
 // @param Length   Resulting length of the buffer without trailing \0 (optional)
+// @param Skip     N root levels before exporting, normally 0.
 //
 // @return Exported buffer allocated from pool or NULL.
 //
 CHAR8 *
 XmlDocumentExport (
   XML_DOCUMENT  *Document,
-  UINT32        *Length
+  UINT32        *Length,
+  UINT32        Skip
   );
 
 //
@@ -198,6 +200,26 @@ XmlEasyChild (
   XML_NODE     *Node,
   CONST CHAR8  *Child,
   ...
+  );
+
+//
+// Append new node to current node.
+//
+// @param  Node        Current node.
+// @param  Name        Name of the new node.
+// @param  Attributes  Attributes of the new node (optional).
+// @param  Content     New node content (optional).
+//
+// @return Newly created node or NULL.
+//
+// @warning Name, Attributes, and Content must stay valid till XmlDocumentFree.
+//
+XML_NODE *
+XmlNodeAppend (
+  XML_NODE     *Node,
+  CONST CHAR8  *Name,
+  CONST CHAR8  *Attributes,
+  CONST CHAR8  *Content
   );
 
 //

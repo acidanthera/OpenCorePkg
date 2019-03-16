@@ -729,11 +729,22 @@ XmlNodeExportRecursive (
   XML_NODE  *Node,
   CHAR8     **Buffer,
   UINT32    *AllocSize,
-  UINT32    *CurrentSize
+  UINT32    *CurrentSize,
+  UINT32    Skip
   )
 {
   UINT32  Index;
   UINT32  NameLength;
+
+  if (Skip != 0) {
+    if (Node->Children != NULL) {
+      for (Index = 0; Index < Node->Children->NodeCount; ++Index) {
+        XmlNodeExportRecursive (Node->Children->NodeList[Index], Buffer, AllocSize, CurrentSize, Skip - 1);
+      }
+    }
+
+    return;
+  }
 
   NameLength = AsciiStrLen (Node->Name);
 
@@ -750,7 +761,7 @@ XmlNodeExportRecursive (
 
     if (Node->Children != NULL) {
       for (Index = 0; Index < Node->Children->NodeCount; ++Index) {
-        XmlNodeExportRecursive (Node->Children->NodeList[Index], Buffer, AllocSize, CurrentSize);
+        XmlNodeExportRecursive (Node->Children->NodeList[Index], Buffer, AllocSize, CurrentSize, 0);
       }
     } else {
       XmlBufferAppend (Buffer, AllocSize, CurrentSize, Node->Content, AsciiStrLen (Node->Content));
@@ -957,7 +968,8 @@ XmlDocumentParse (
 CHAR8 *
 XmlDocumentExport (
   XML_DOCUMENT  *Document,
-  UINT32        *Length
+  UINT32        *Length,
+  UINT32        Skip
   )
 {
   CHAR8   *Buffer;
@@ -972,7 +984,7 @@ XmlDocumentExport (
   }
 
   CurrentSize = 0;
-  XmlNodeExportRecursive (Document->Root, &Buffer, &AllocSize, &CurrentSize);
+  XmlNodeExportRecursive (Document->Root, &Buffer, &AllocSize, &CurrentSize, Skip);
 
   if (Length != NULL) {
     *Length = CurrentSize;
@@ -1096,6 +1108,29 @@ XmlEasyChild (
   // Return current element.
   //
   return Node;
+}
+
+XML_NODE *
+XmlNodeAppend (
+  XML_NODE     *Node,
+  CONST CHAR8  *Name,
+  CONST CHAR8  *Attributes,
+  CONST CHAR8  *Content
+  )
+{
+  XML_NODE  *NewNode;
+
+  NewNode = XmlNodeCreate (Name, Attributes, Content, NULL);
+  if (NewNode == NULL) {
+    return NULL;
+  }
+
+  if (!XmlNodeChildPush (Node, NewNode)) {
+    XmlNodeFree (NewNode);
+    return NULL;
+  }
+
+  return NewNode;
 }
 
 XML_NODE *

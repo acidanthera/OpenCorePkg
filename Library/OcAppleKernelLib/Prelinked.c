@@ -172,7 +172,7 @@ PrelinkedInsertPlistInfo (
     return EFI_INVALID_PARAMETER;
   }
 
-  ExportedInfo = XmlDocumentExport (Context->PlistInfoDocument, &ExportedInfoSize);
+  ExportedInfo = XmlDocumentExport (Context->PlistInfoDocument, &ExportedInfoSize, 0);
   if (ExportedInfo == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -210,6 +210,65 @@ PrelinkedInsertPlistInfo (
   Context->PrelinkedSize += PRELINKED_ALIGN (ExportedInfoSize);
 
   FreePool (ExportedInfo);
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+PrelinkedInjectKext (
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     CONST CHAR8        *BundlePath,
+  IN OUT CHAR8              *InfoPlist,
+  IN     UINT32             InfoPlistSize,
+     OUT CHAR8              **NewInfoPlist,
+  IN     CONST CHAR8        *ExecutablePath OPTIONAL,
+  IN OUT UINT8              *Executable OPTIONAL,
+  IN     UINT32             ExecutableSize OPTIONAL
+  )
+{
+  XML_DOCUMENT  *InfoPlistDocument;
+  XML_NODE      *InfoPlistRoot;
+  UINT32        NewInfoPlistSize;
+
+  if (Executable != NULL) {
+    //
+    // TODO: Implement full kext injection.
+    //
+    return EFI_UNSUPPORTED;
+  }
+
+  InfoPlistDocument = XmlDocumentParse (InfoPlist, InfoPlistSize);
+  if (InfoPlistDocument == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  InfoPlistRoot = PlistNodeCast (PlistDocumentRoot (InfoPlistDocument), PLIST_NODE_TYPE_DICT);
+  if (InfoPlistRoot == NULL) {
+    XmlDocumentFree (InfoPlistDocument);
+    return EFI_INVALID_PARAMETER;
+  }
+
+  if (XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_BUNDLE_PATH_KEY) == NULL ||
+    XmlNodeAppend (InfoPlistRoot, "string", NULL, BundlePath) == NULL) {
+    XmlDocumentFree (InfoPlistDocument);
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  //
+  // Strip outer plist & dict.
+  //
+  *NewInfoPlist = XmlDocumentExport (InfoPlistDocument, &NewInfoPlistSize, 2);
+
+  XmlDocumentFree (InfoPlistDocument);
+
+  if (*NewInfoPlist == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  if (XmlNodeAppend (Context->KextList, "dict", NULL, *NewInfoPlist) == NULL) {
+    FreePool (*NewInfoPlist);
+    return EFI_OUT_OF_RESOURCES;
+  }
 
   return EFI_SUCCESS;
 }

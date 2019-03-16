@@ -23,7 +23,16 @@
 
 #define PRELINK_INFO_SEGMENT "__PRELINK_INFO"
 #define PRELINK_INFO_SECTION "__info"
+
 #define PRELINK_INFO_DICTIONARY_KEY "_PrelinkInfoDictionary"
+#define PRELINK_INFO_KMOD_INFO_KEY                "_PrelinkKmodInfo"
+#define PRELINK_INFO_BUNDLE_PATH_KEY              "_PrelinkBundlePath"
+#define PRELINK_INFO_EXECUTABLE_RELATIVE_PATH_KEY "_PrelinkExecutableRelativePath"
+#define PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY     "_PrelinkExecutableLoadAddr"
+#define PRELINK_INFO_EXECUTABLE_SOURCE_ADDR_KEY   "_PrelinkExecutableSourceAddr"
+#define PRELINK_INFO_EXECUTABLE_SIZE_KEY          "_PrelinkExecutableSize"
+
+#define PRELINK_INFO_INTEGER_ATTRIBUTES           "size=\"64\""
 
 //
 // Failsafe default for plist reserve allocation.
@@ -150,6 +159,32 @@ PrelinkedDropPlistInfo (
 EFI_STATUS
 PrelinkedInsertPlistInfo (
   IN OUT PRELINKED_CONTEXT  *Context
+  );
+
+/**
+  Perform kext injection.
+
+  @param[in,out] Context         Prelinked context.
+  @param[in]     BundlePath      Kext bundle path (e.g. /L/E/mykext.kext).
+  @param[in,out] InfoPlist       Kext Info.plist, overwritten.
+  @param[in]     InfoPlistSize   Kext Info.plist size.
+  @param[out]    NewInfoPlist    Injected NewInfoPlist, must be freed after PrelinkedInsertPlistInfo.
+  @param[in,out] ExecutablePath  Kext executable path (e.g. Contents/MacOS/mykext), optional.
+  @param[in,out] Executable      Kext executable, overwritten, optional.
+  @param[in]     ExecutableSize  Kext executable, optional.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PrelinkedInjectKext (
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     CONST CHAR8        *BundlePath,
+  IN OUT CHAR8              *InfoPlist,
+  IN     UINT32             InfoPlistSize,
+     OUT CHAR8              **NewInfoPlist,
+  IN     CONST CHAR8        *ExecutablePath OPTIONAL,
+  IN OUT UINT8              *Executable OPTIONAL,
+  IN     UINT32             ExecutableSize OPTIONAL
   );
 
 #endif // OC_APPLE_KERNEL_LIB_H
