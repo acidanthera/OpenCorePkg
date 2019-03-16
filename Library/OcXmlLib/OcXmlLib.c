@@ -454,10 +454,10 @@ XmlParseTagEnd (
   // Handle attributes.
   //
   if (NameLength != 0) {
-    if (Attributes != NULL) {
+    if (Attributes != NULL && (Current == '/' || Current == '>')) {
       *Attributes = &Parser->Buffer[Start + NameLength];
       AttributeStart = NameLength;
-      while (IsAsciiSpace (**Attributes) && AttributeStart < Length) {
+      while (AttributeStart < Length && IsAsciiSpace (**Attributes)) {
         (*Attributes)++;
         AttributeStart++;
       }
