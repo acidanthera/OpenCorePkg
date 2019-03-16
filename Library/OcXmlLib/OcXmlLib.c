@@ -64,6 +64,7 @@ typedef struct XML_PARSER_ XML_PARSER;
 //
 struct XML_NODE_ {
   CONST CHAR8    *Name;
+  CONST CHAR8    *Attributes;
   CONST CHAR8    *Content;
   XML_NODE_LIST  *Children;
 };
@@ -130,6 +131,7 @@ STATIC
 XML_NODE *
 XmlNodeCreate (
   CONST CHAR8    *Name,
+  CONST CHAR8    *Attributes,
   CONST CHAR8    *Content,
   XML_NODE_LIST  *Children
   )
@@ -139,9 +141,10 @@ XmlNodeCreate (
   Node = AllocatePool (sizeof (XML_NODE));
 
   if (Node != NULL) {
-    Node->Name = Name;
-    Node->Content = Content;
-    Node->Children = Children;
+    Node->Name       = Name;
+    Node->Attributes = Attributes;
+    Node->Content    = Content;
+    Node->Children   = Children;
   }
 
   return Node;
@@ -409,11 +412,13 @@ STATIC
 CONST CHAR8 *
 XmlParseTagEnd (
   XML_PARSER   *Parser,
-  BOOLEAN      *SelfClosing
+  BOOLEAN      *SelfClosing,
+  CONST CHAR8  **Attributes
   )
 {
   CHAR8   Current;
   UINT32  Start;
+  UINT32  AttributeStart;
   UINT32  Length = 0;
   UINT32  NameLength = 0;
 
@@ -446,9 +451,22 @@ XmlParseTagEnd (
   }
 
   //
-  // No attributes besides name.
+  // Handle attributes.
   //
-  if (NameLength == 0) {
+  if (NameLength != 0) {
+    if (Attributes != NULL) {
+      *Attributes = &Parser->Buffer[Start + NameLength];
+      AttributeStart = NameLength;
+      while (IsAsciiSpace (**Attributes) && AttributeStart < Length) {
+        (*Attributes)++;
+        AttributeStart++;
+      }
+      Parser->Buffer[Start + Length] = '\0';
+    }
+  } else {
+    //
+    // No attributes besides name.
+    //
     NameLength = Length;
   }
 
@@ -491,7 +509,8 @@ STATIC
 CONST CHAR8 *
 XmlParseTagOpen (
   XML_PARSER  *Parser,
-  BOOLEAN     *SelfClosing
+  BOOLEAN     *SelfClosing,
+  CONST CHAR8 **Attributes
   )
 {
   CHAR8  Current;
@@ -539,7 +558,7 @@ XmlParseTagOpen (
   //
   // Consume tag name.
   //
-  return XmlParseTagEnd (Parser, SelfClosing);
+  return XmlParseTagEnd (Parser, SelfClosing, Attributes);
 }
 
 //
@@ -589,7 +608,7 @@ XmlParseTagClose (
   //
   // Consume tag name.
   //
-  return XmlParseTagEnd(Parser, NULL);
+  return XmlParseTagEnd(Parser, NULL, NULL);
 }
 
 //
@@ -721,6 +740,11 @@ XmlNodeExportRecursive (
   XmlBufferAppend (Buffer, AllocSize, CurrentSize, "<", L_STR_LEN ("<"));
   XmlBufferAppend (Buffer, AllocSize, CurrentSize, Node->Name, NameLength);
 
+  if (Node->Attributes != NULL) {
+    XmlBufferAppend (Buffer, AllocSize, CurrentSize, " ", L_STR_LEN (" "));
+    XmlBufferAppend (Buffer, AllocSize, CurrentSize, Node->Attributes, AsciiStrLen (Node->Attributes));
+  }
+
   if (Node->Children != NULL || Node->Content != NULL) {
     XmlBufferAppend (Buffer, AllocSize, CurrentSize, ">", L_STR_LEN (">"));
 
@@ -763,17 +787,22 @@ XmlParseNode (
 {
   CONST CHAR8  *TagOpen;
   CONST CHAR8  *TagClose;
+  CONST CHAR8  *Attributes;
   XML_NODE     *Node;
   XML_NODE     *Child;
-  BOOLEAN      SelfClosing = FALSE;
-  BOOLEAN      Unprefixed = FALSE;
+  BOOLEAN      SelfClosing;
+  BOOLEAN      Unprefixed;
 
   XML_PARSER_INFO (Parser, "node");
+
+  Attributes  = NULL;
+  SelfClosing = FALSE;
+  Unprefixed  = FALSE;
 
   //
   // Parse open tag.
   //
-  TagOpen = XmlParseTagOpen (Parser, &SelfClosing);
+  TagOpen = XmlParseTagOpen (Parser, &SelfClosing, &Attributes);
   if (TagOpen == NULL) {
     if ('/' != XmlParserPeek (Parser, CURRENT_CHARACTER)) {
       XML_PARSER_ERROR (Parser, NO_CHARACTER, "XmlParseNode::tag_open");
@@ -783,7 +812,7 @@ XmlParseNode (
 
   XmlSkipWhitespace (Parser);
 
-  Node = XmlNodeCreate (TagOpen, NULL, NULL);
+  Node = XmlNodeCreate (TagOpen, Attributes, NULL, NULL);
   if (Node == NULL) {
     XML_PARSER_ERROR (Parser, NO_CHARACTER, "XmlParseNode::node alloc fail");
     return NULL;

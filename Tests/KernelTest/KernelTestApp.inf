@@ -52,7 +52,6 @@
   UefiLib
   PcdLib
   IoLib
-  # PrintLib
   OcGuardLib
   DevicePathLib
   OcDevicePropertyLib
@@ -64,3 +63,5 @@
   OcAppleKernelLib
   OcCompressionLib
   OcVirtualFsLib
+  OcXmlLib
+
