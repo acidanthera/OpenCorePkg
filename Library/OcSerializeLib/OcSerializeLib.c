@@ -311,7 +311,7 @@ ParseSerialized (
   XML_DOCUMENT        *Document;
   XML_NODE            *RootDict;
 
-  Document = XmlParseDocument (PlistBuffer, PlistSize);
+  Document = XmlDocumentParse (PlistBuffer, PlistSize);
 
   if (Document == NULL) {
     DEBUG ((DEBUG_INFO, "Couldn't parse serialized file!\n"));

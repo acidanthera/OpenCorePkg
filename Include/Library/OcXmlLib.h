@@ -116,9 +116,23 @@ typedef struct XML_NODE_ XML_NODE;
 // @return The parsed xml fragment iff parsing was successful, 0 otherwise
 //
 XML_DOCUMENT *
-XmlParseDocument (
+XmlDocumentParse (
   CHAR8   *Buffer,
   UINT32  Length
+  );
+
+//
+// Exports parsed document into the buffer.
+//
+// @param Document XML_DOCUMENT to export
+// @param Length   Resulting length of the buffer without trailing \0 (optional)
+//
+// @return Exported buffer allocated from pool or NULL.
+//
+CHAR8 *
+XmlDocumentExport (
+  XML_DOCUMENT  *Document,
+  UINT32        *Length
   );
 
 //

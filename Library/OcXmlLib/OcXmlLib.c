@@ -47,6 +47,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 
+//
+// Minimal extra allocation size during export.
+//
+#define XML_EXPORT_MIN_ALLOCATION_SIZE 4096
+
 struct XML_NODE_LIST_;
 struct XML_PARSER_;
 
@@ -54,8 +59,8 @@ typedef struct XML_NODE_LIST_ XML_NODE_LIST;
 typedef struct XML_PARSER_ XML_PARSER;
 
 //
-// An XML_NODE will always contain a tag name and a 0-terminated list of
-// children. Moreover it may contain text content.
+// An XML_NODE will always contain a tag name and possibly a list of
+// children or text content.
 //
 struct XML_NODE_ {
   CONST CHAR8    *Name;
@@ -295,7 +300,7 @@ XmlParserError (
 #define XML_PARSER_ERROR(Parser, Offset, Message) \
   XmlParserError (Parser, Offset, Message)
 #define XML_USAGE_ERROR(Message) \
-  DEBUG ((DEBUG_VERBOSE, "XML_PARSER_TAG %a\n", Message));
+  DEBUG ((DEBUG_VERBOSE, "%a\n", Message));
 #else
 #define XML_PARSER_ERROR(Parser, Offset, Message) do {} while (0)
 #define XML_USAGE_ERROR(X) do {} while (0)
@@ -656,6 +661,86 @@ XmlParseContent (
 }
 
 //
+// Prints to growing buffer always preserving one byte extra.
+//
+STATIC
+VOID
+XmlBufferAppend (
+  CHAR8        **Buffer,
+  UINT32       *AllocSize,
+  UINT32       *CurrentSize,
+  CONST CHAR8  *Data,
+  UINT32       DataLength
+  )
+{
+  CHAR8   *NewBuffer;
+  UINT32  NewSize;
+
+  NewSize = *AllocSize;
+
+  if (NewSize - *CurrentSize <= DataLength) {
+    if (DataLength + 1 <= XML_EXPORT_MIN_ALLOCATION_SIZE) {
+      NewSize += XML_EXPORT_MIN_ALLOCATION_SIZE;
+    } else {
+      NewSize += DataLength + 1;
+    }
+
+    NewBuffer = AllocatePool (NewSize);
+    if (NewBuffer == NULL) {
+      XML_USAGE_ERROR("XmlBufferAppend::failed to allocate");
+      return;
+    }
+
+    CopyMem (NewBuffer, *Buffer, *CurrentSize);
+    FreePool (*Buffer);
+    *Buffer    = NewBuffer;
+    *AllocSize = NewSize;
+  }
+
+  CopyMem (&(*Buffer)[*CurrentSize], Data, DataLength);
+  *CurrentSize += DataLength;
+}
+
+//
+// Prints node to growing buffer always preserving one byte extra.
+//
+STATIC
+VOID
+XmlNodeExportRecursive (
+  XML_NODE  *Node,
+  CHAR8     **Buffer,
+  UINT32    *AllocSize,
+  UINT32    *CurrentSize
+  )
+{
+  UINT32  Index;
+  UINT32  NameLength;
+
+  NameLength = AsciiStrLen (Node->Name);
+
+  XmlBufferAppend (Buffer, AllocSize, CurrentSize, "<", L_STR_LEN ("<"));
+  XmlBufferAppend (Buffer, AllocSize, CurrentSize, Node->Name, NameLength);
+
+  if (Node->Children != NULL || Node->Content != NULL) {
+    XmlBufferAppend (Buffer, AllocSize, CurrentSize, ">", L_STR_LEN (">"));
+
+    if (Node->Children != NULL) {
+      for (Index = 0; Index < Node->Children->NodeCount; ++Index) {
+        XmlNodeExportRecursive (Node->Children->NodeList[Index], Buffer, AllocSize, CurrentSize);
+      }
+    } else {
+      XmlBufferAppend (Buffer, AllocSize, CurrentSize, Node->Content, AsciiStrLen (Node->Content));
+    }
+
+    XmlBufferAppend (Buffer, AllocSize, CurrentSize, "</", L_STR_LEN ("</"));
+    XmlBufferAppend (Buffer, AllocSize, CurrentSize, Node->Name, NameLength);
+    XmlBufferAppend (Buffer, AllocSize, CurrentSize, ">", L_STR_LEN (">"));
+  } else {
+    XmlBufferAppend (Buffer, AllocSize, CurrentSize, "/>", L_STR_LEN ("/>"));
+  }
+}
+
+//
 // Parses an XML fragment node.
 //
 // ---( Example without children )---
@@ -789,7 +874,7 @@ XmlParseNode (
 }
 
 XML_DOCUMENT *
-XmlParseDocument (
+XmlDocumentParse (
   CHAR8   *Buffer,
   UINT32  Length
   )
@@ -809,7 +894,7 @@ XmlParseDocument (
   // An empty buffer can never contain a valid document.
   //
   if (Length == 0 || Length > XML_PARSER_MAX_SIZE) {
-    XML_PARSER_ERROR (&Parser, NO_CHARACTER, "XmlParseDocument::length is too small or too large");
+    XML_PARSER_ERROR (&Parser, NO_CHARACTER, "XmlDocumentParse::length is too small or too large");
     return NULL;
   }
 
@@ -818,7 +903,7 @@ XmlParseDocument (
   //
   Root = XmlParseNode (&Parser);
   if (Root == NULL) {
-    XML_PARSER_ERROR (&Parser, NO_CHARACTER, "XmlParseDocument::parsing document failed");
+    XML_PARSER_ERROR (&Parser, NO_CHARACTER, "XmlDocumentParse::parsing document failed");
     return NULL;
   }
 
@@ -828,7 +913,7 @@ XmlParseDocument (
   Document = AllocatePool (sizeof(XML_DOCUMENT));
 
   if (Document == NULL) {
-    XML_PARSER_ERROR (&Parser, NO_CHARACTER, "XmlParseDocument::document allocation failed");
+    XML_PARSER_ERROR (&Parser, NO_CHARACTER, "XmlDocumentParse::document allocation failed");
     XmlNodeFree (Root);
     return NULL;
   }
@@ -838,6 +923,38 @@ XmlParseDocument (
   Document->Root = Root;
 
   return Document;
+}
+
+CHAR8 *
+XmlDocumentExport (
+  XML_DOCUMENT  *Document,
+  UINT32        *Length
+  )
+{
+  CHAR8   *Buffer;
+  UINT32  AllocSize;
+  UINT32  CurrentSize;
+
+  AllocSize = Document->Buffer.Length + 1;
+  Buffer    = AllocatePool (AllocSize);
+  if (Buffer == NULL) {
+    XML_USAGE_ERROR ("XmlDocumentExport::failed to allocate");
+    return NULL;
+  }
+
+  CurrentSize = 0;
+  XmlNodeExportRecursive (Document->Root, &Buffer, &AllocSize, &CurrentSize);
+
+  if (Length != NULL) {
+    *Length = CurrentSize;
+  }
+
+  //
+  // XmlBufferAppend guarantees one more byte.
+  //
+  Buffer[CurrentSize] = '\0';
+
+  return Buffer;
 }
 
 VOID

@@ -2,8 +2,10 @@
 UDK
 Binaries
 *.dSYM
-TestsUser/Serialized/Serialized
 TestsUser/Macho/Macho
+TestsUser/Prelinked/Prelinked
+TestsUser/Prelinked/Result.xml
+TestsUser/Serialized/Serialized
 TestsUser/Smbios/Smbios
 DICT
 fuzz-*.log
