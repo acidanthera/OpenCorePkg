@@ -61,6 +61,14 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #endif
 
 //
+// Maximum reference count.
+// XML_PARSER_MAX_REFERENCE_COUNT*2 is required to fit into INT32.
+//
+#ifndef XML_PARSER_MAX_REFERENCE_COUNT
+#define XML_PARSER_MAX_REFERENCE_COUNT (8192ULL)
+#endif
+
+//
 // Maximum input data size, currently 32 MB.
 // XML_PARSER_MAX_SIZE is required to fit into INT32.
 //
@@ -103,9 +111,13 @@ typedef struct XML_NODE_ XML_NODE;
 
 //
 // Tries to parse the XML fragment in buffer
+// References in the document to allow deduplicated node reading:
+// <integer ID="0" size="64">0x0</integer>
+// <integer IDREF="0" size="64"/>
 //
-// @param Buffer Chunk to parse
-// @param Length Size of the buffer
+// @param Buffer  Chunk to parse
+// @param Length  Size of the buffer
+// @param WithRef Enable reference lookup support
 //
 // @warning `Buffer` will be referenced by the document, you may not free it
 //     until you free the XML_DOCUMENT
@@ -117,8 +129,9 @@ typedef struct XML_NODE_ XML_NODE;
 //
 XML_DOCUMENT *
 XmlDocumentParse (
-  CHAR8   *Buffer,
-  UINT32  Length
+  CHAR8    *Buffer,
+  UINT32   Length,
+  BOOLEAN  WithRefs
   );
 
 //
@@ -312,7 +325,8 @@ BOOLEAN
 PlistIntegerValue (
   XML_NODE  *Node,
   VOID      *Value,
-  UINT32    Size
+  UINT32    Size,
+  BOOLEAN   Hex
   );
 
 //

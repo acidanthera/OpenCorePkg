@@ -12941,6 +12941,133 @@ STATIC CHAR8 LiluKextInfoPlistData[] = {
 };
 
 STATIC
+UINT8
+IOAHCIBlockStoragePatchFind[] = {
+  0x41, 0x50, 0x50, 0x4C, 0x45, 0x20, 0x53, 0x53, 0x44, 0x00
+};
+
+STATIC
+UINT8
+IOAHCIBlockStoragePatchReplace[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+IOAHCIBlockStoragePatch = {
+  .Base    = NULL, // Symbolic patch
+  .Find    = IOAHCIBlockStoragePatchFind,
+  .Mask    = NULL,
+  .Replace = IOAHCIBlockStoragePatchReplace,
+  .Size    = sizeof (IOAHCIBlockStoragePatchFind),
+  .Count   = 1,
+  .Skip    = 0
+};
+
+STATIC
+UINT8
+IOAHCIPortPatchFind[] = {
+  0x45, 0x78, 0x74, 0x65, 0x72, 0x6E, 0x61, 0x6C
+};
+
+STATIC
+UINT8
+IOAHCIPortPatchReplace[] = {
+  0x49, 0x6E, 0x74, 0x65, 0x72, 0x6E, 0x61, 0x6C
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+IOAHCIPortPatch = {
+  .Base    = NULL, // For symbolic patch
+  .Find    = IOAHCIPortPatchFind,
+  .Mask    = NULL,
+  .Replace = IOAHCIPortPatchReplace,
+  .Size    = sizeof (IOAHCIPortPatchFind),
+  .Count   = 1,
+  .Skip    = 0
+};
+
+STATIC
+UINT8
+DisableAppleHDAPatchReplace[] = {
+  0x31, 0xC0, 0xC3 // xor eax, eax ; ret
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+DisableAppleHDAPatch = {
+  .Base    = "__ZN20AppleHDACodecGeneric5probeEP9IOServicePi",
+  .Find    = NULL,
+  .Mask    = NULL,
+  .Replace = DisableAppleHDAPatchReplace,
+  .Size    = sizeof (DisableAppleHDAPatchReplace),
+  .Count   = 1,
+  .Skip    = 0
+};
+
+STATIC
+VOID
+ApplyKextPatches (
+  PRELINKED_CONTEXT  *Context
+  )
+{
+  EFI_STATUS       Status;
+  PATCHER_CONTEXT  Patcher;
+
+  Status = PatcherInitContextFromPrelinked (
+    &Patcher,
+    Context,
+    "com.apple.iokit.IOAHCIBlockStorage"
+    );
+
+  if (!EFI_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (&Patcher, &IOAHCIBlockStoragePatch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Failed to apply patch com.apple.iokit.IOAHCIBlockStorage - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_WARN, "Patch success com.apple.iokit.IOAHCIBlockStorage\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "Failed to find com.apple.iokit.IOAHCIBlockStorage - %r\n", Status));
+  }
+
+  Status = PatcherInitContextFromPrelinked (
+    &Patcher,
+    Context,
+    "com.apple.driver.AppleAHCIPort"
+    );
+
+  if (!EFI_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (&Patcher, &IOAHCIPortPatch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Failed to apply patch com.apple.driver.AppleAHCIPort - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_WARN, "Patch success com.apple.driver.AppleAHCIPort\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.AppleAHCIPort - %r\n", Status));
+  }
+
+  Status = PatcherInitContextFromPrelinked (
+    &Patcher,
+    Context,
+    "com.apple.driver.AppleHDA"
+    );
+
+  if (!EFI_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (&Patcher, &DisableAppleHDAPatch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Failed to apply patch com.apple.driver.AppleHDA - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_WARN, "Patch success com.apple.driver.AppleHDA\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.AppleHDA - %r\n", Status));
+  }
+}
+
+STATIC
 UINT32
 CalculateReserveSize (
   VOID
@@ -12970,6 +13097,9 @@ TestInjectPrelinked (
   Status = PrelinkedContextInit (&Context, Kernel, *KernelSize, AllocatedSize);
 
   if (!EFI_ERROR (Status)) {
+
+    ApplyKextPatches (&Context);
+
     Status = PrelinkedInjectPrepare (&Context);
     if (!EFI_ERROR (Status)) {
       Status = PrelinkedInjectKext (

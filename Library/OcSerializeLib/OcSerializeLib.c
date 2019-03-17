@@ -128,7 +128,7 @@ ParseSerializedValue (
       Result = PlistBooleanValue (Node, (BOOLEAN *) Field);
       break;
     case OC_SCHEMA_VALUE_INTEGER:
-      Result = PlistIntegerValue (Node, Field, Size);
+      Result = PlistIntegerValue (Node, Field, Size, FALSE);
       break;
     case OC_SCHEMA_VALUE_DATA:
       Result = PlistDataValue (Node, Field, &Size);
@@ -311,7 +311,7 @@ ParseSerialized (
   XML_DOCUMENT        *Document;
   XML_NODE            *RootDict;
 
-  Document = XmlDocumentParse (PlistBuffer, PlistSize);
+  Document = XmlDocumentParse (PlistBuffer, PlistSize, FALSE);
 
   if (Document == NULL) {
     DEBUG ((DEBUG_INFO, "Couldn't parse serialized file!\n"));

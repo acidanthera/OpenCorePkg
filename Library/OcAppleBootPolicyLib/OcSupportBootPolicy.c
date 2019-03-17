@@ -84,7 +84,7 @@ GetAppleRecoveryNameFromPlist (
   CHAR16              *RecoveryName;
   UINTN               RecoveryNameSize;
 
-  Document = XmlDocumentParse (SystemVersionData, (UINT32) SystemVersionDataSize);
+  Document = XmlDocumentParse (SystemVersionData, (UINT32) SystemVersionDataSize, FALSE);
 
   if (Document == NULL) {
     return NULL;

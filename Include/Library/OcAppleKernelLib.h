@@ -26,13 +26,15 @@
 #define PRELINK_TEXT_SEGMENT "__PRELINK_TEXT"
 #define PRELINK_TEXT_SECTION "__text"
 
-#define PRELINK_INFO_DICTIONARY_KEY "_PrelinkInfoDictionary"
+#define PRELINK_INFO_DICTIONARY_KEY               "_PrelinkInfoDictionary"
 #define PRELINK_INFO_KMOD_INFO_KEY                "_PrelinkKmodInfo"
 #define PRELINK_INFO_BUNDLE_PATH_KEY              "_PrelinkBundlePath"
 #define PRELINK_INFO_EXECUTABLE_RELATIVE_PATH_KEY "_PrelinkExecutableRelativePath"
 #define PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY     "_PrelinkExecutableLoadAddr"
 #define PRELINK_INFO_EXECUTABLE_SOURCE_ADDR_KEY   "_PrelinkExecutableSourceAddr"
 #define PRELINK_INFO_EXECUTABLE_SIZE_KEY          "_PrelinkExecutableSize"
+
+#define INFO_BUNDLE_IDENTIFIER_KEY                "CFBundleIdentifier"
 
 #define PRELINK_INFO_INTEGER_ATTRIBUTES           "size=\"64\""
 
@@ -66,10 +68,6 @@ typedef struct {
   // Mach-O context for prelinkedkernel.
   //
   OC_MACHO_CONTEXT         PrelinkedMachContext;
-  //
-  // Mach-O header for prelinkedkernel.
-  //
-  MACH_HEADER_64           *PrelinkedMachHeader;
   //
   // Pointer to PRELINK_INFO_SEGMENT.
   //
@@ -113,6 +111,58 @@ typedef struct {
   //
   UINT32                   PooledBuffersAllocCount;
 } PRELINKED_CONTEXT;
+
+//
+// Kernel and kext patching context.
+//
+typedef struct {
+  //
+  // Mach-O context for patched binary.
+  //
+  OC_MACHO_CONTEXT         MachContext;
+  //
+  // Virtual base to subtract to obtain file offset.
+  //
+  UINT64                   VirtualBase;
+  //
+  // Virtual kmod_info_t address.
+  //
+  UINT64                   VirtualKmod;
+} PATCHER_CONTEXT;
+
+//
+// Kernel and kext patch description.
+//
+typedef struct {
+  //
+  // Symbol base or NULL (0 base is used then).
+  //
+  CONST CHAR8  *Base;
+  //
+  // Find bytes or NULL (data is written to base then).
+  //
+  CONST UINT8  *Find;
+  //
+  // Replace bytes.
+  //
+  CONST UINT8  *Replace;
+  //
+  // Find mask or NULL.
+  //
+  CONST UINT8  *Mask;
+  //
+  // Patch size.
+  //
+  UINT32       Size;
+  //
+  // Replace count or 0 for all.
+  //
+  UINT32       Count;
+  //
+  // Skip count or 0 to start from 1 match.
+  //
+  UINT32       Skip;
+} PATCHER_GENERIC_PATCH;
 
 /**
   Read Apple kernel for target architecture (possibly decompressing)
@@ -263,6 +313,72 @@ PrelinkedLinkExecutable (
   IN     XML_NODE           *PlistRoot,
      OUT UINT64             *LoadAddress,
      OUT UINT64             *KmodAddress
+  );
+
+/**
+  Initialize patcher from prelinked context for kext patching.
+
+  @param[in,out] Context         Patcher context.
+  @param[in,out] Prelinked       Prelinked context.
+  @param[in]     Name            Kext bundle identifier.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PatcherInitContextFromPrelinked (
+  IN OUT PATCHER_CONTEXT    *Context,
+  IN OUT PRELINKED_CONTEXT  *Prelinked,
+  IN     CONST CHAR8        *Name
+  );
+
+/**
+  Initialize patcher from buffer for e.g. kernel patching.
+
+  @param[in,out] Context         Patcher context.
+  @param[in,out] Buffer          Kernel buffer (could be prelinked).
+  @param[in]     Name            Kernel buffer size.
+  @param[in]     VirtualBase     Virtual base, optional (can be calculated).
+  @param[in]     VirtualKmod     Kmod structure virtual address, optional (unused).
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PatcherInitContextFromBuffer (
+  IN OUT PATCHER_CONTEXT    *Context,
+  IN OUT UINT8              *Buffer,
+  IN     UINT32             BufferSize,
+  IN     UINT64             VirtualBase OPTIONAL,
+  IN     UINT64             VirtualKmod OPTIONAL
+  );
+
+/**
+  Get local symbol address.
+
+  @param[in,out] Context         Patcher context.
+  @param[in]     Name            Symbol name.
+  @param[in,out] Address         Returned symbol address in file.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PatcherGetSymbolAddress (
+  IN OUT PATCHER_CONTEXT    *Context,
+  IN     CONST CHAR8        *Name,
+  IN OUT UINT8              **Address
+  );
+
+/**
+  Apply generic patch.
+
+  @param[in,out] Context         Patcher context.
+  @param[in]     Patch           Patch description.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PatcherApplyGenericPatch (
+  IN OUT PATCHER_CONTEXT        *Context,
+  IN     PATCHER_GENERIC_PATCH  *Patch
   );
 
 #endif // OC_APPLE_KERNEL_LIB_H

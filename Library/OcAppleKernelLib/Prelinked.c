@@ -54,11 +54,6 @@ PrelinkedContextInit (
     return EFI_INVALID_PARAMETER;
   }
 
-  Context->PrelinkedMachHeader = MachoGetMachHeader64 (&Context->PrelinkedMachContext);
-  if (Context->PrelinkedMachHeader == NULL) {
-    return EFI_INVALID_PARAMETER;
-  }
-
   Context->PrelinkedLastAddress = PRELINKED_ALIGN (MachoGetLastAddress64 (&Context->PrelinkedMachContext));
   if (Context->PrelinkedLastAddress == 0) {
     return EFI_INVALID_PARAMETER;
@@ -106,7 +101,7 @@ PrelinkedContextInit (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Context->PrelinkedInfoDocument = XmlDocumentParse (Context->PrelinkedInfo, Context->PrelinkedInfoSection->Size);
+  Context->PrelinkedInfoDocument = XmlDocumentParse (Context->PrelinkedInfo, Context->PrelinkedInfoSection->Size, TRUE);
   if (Context->PrelinkedInfoDocument == NULL) {
     PrelinkedContextFree (Context);
     return EFI_INVALID_PARAMETER;
@@ -375,7 +370,7 @@ PrelinkedInjectKext (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  InfoPlistDocument = XmlDocumentParse (TmpInfoPlist, InfoPlistSize);
+  InfoPlistDocument = XmlDocumentParse (TmpInfoPlist, InfoPlistSize, FALSE);
   if (InfoPlistDocument == NULL) {
     FreePool (TmpInfoPlist);
     return EFI_INVALID_PARAMETER;

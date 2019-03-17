@@ -66,6 +66,7 @@ struct XML_NODE_ {
   CONST CHAR8    *Name;
   CONST CHAR8    *Attributes;
   CONST CHAR8    *Content;
+  XML_NODE       *Real;
   XML_NODE_LIST  *Children;
 };
 
@@ -74,6 +75,12 @@ struct XML_NODE_LIST_ {
   UINT32    AllocCount;
   XML_NODE  *NodeList[];
 };
+
+typedef struct {
+  UINT32        RefCount;
+  UINT32        RefAllocCount;
+  XML_NODE      **RefList;
+} XML_REFLIST;
 
 //
 // An XML_DOCUMENT simply contains the root node and the underlying buffer.
@@ -85,6 +92,7 @@ struct XML_DOCUMENT_ {
   } Buffer;
 
   XML_NODE      *Root;
+  XML_REFLIST   References;
 };
 
 //
@@ -124,6 +132,45 @@ PlistNodeTypes[PLIST_NODE_TYPE_MAX] = {
   "integer"
 };
 
+
+STATIC
+BOOLEAN
+XmlParseAttributeNumber (
+  CONST CHAR8  *Attributes,
+  CONST CHAR8  *Argument,
+  UINT32       ArgumentLength,
+  UINT32       *ArgumentValue
+  )
+{
+  CONST CHAR8  *ArgumentStart;
+  CONST CHAR8  *ArgumentEnd;
+  UINTN        Number;
+  CHAR8        NumberStr[16];
+
+  //
+  // FIXME: This may give false positives.
+  //
+
+  ArgumentStart = AsciiStrStr (Attributes, Argument);
+  if (ArgumentStart == NULL) {
+    return FALSE;
+  }
+
+  ArgumentStart += ArgumentLength;
+  ArgumentEnd   = AsciiStrStr (ArgumentStart, "\"");
+  Number        = ArgumentEnd - ArgumentStart;
+
+  if (ArgumentEnd == NULL || Number > sizeof (NumberStr) - 1) {
+    return FALSE;
+  }
+
+  CopyMem (&NumberStr, ArgumentStart, Number);
+  NumberStr[Number] = '\0';
+  *ArgumentValue = (UINT32) AsciiStrDecimalToUint64 (NumberStr);
+
+  return TRUE;
+}
+
 //
 // Allocates the node with contents.
 //
@@ -133,6 +180,7 @@ XmlNodeCreate (
   CONST CHAR8    *Name,
   CONST CHAR8    *Attributes,
   CONST CHAR8    *Content,
+  XML_NODE       *Real,
   XML_NODE_LIST  *Children
   )
 {
@@ -144,6 +192,7 @@ XmlNodeCreate (
     Node->Name       = Name;
     Node->Attributes = Attributes;
     Node->Content    = Content;
+    Node->Real       = Real;
     Node->Children   = Children;
   }
 
@@ -220,6 +269,80 @@ XmlNodeChildPush (
   return TRUE;
 }
 
+STATIC
+BOOLEAN
+XmlPushReference (
+  XML_REFLIST  *References,
+  XML_NODE     *Node,
+  UINT32       ReferenceNumber
+  )
+{
+  XML_NODE   **NewReferences;
+  UINT32     NewRefAllocCount;
+
+  if (ReferenceNumber >= XML_PARSER_MAX_REFERENCE_COUNT) {
+    return FALSE;
+  }
+
+  if (ReferenceNumber >= References->RefAllocCount) {
+    if (OcOverflowAddMulU32 (ReferenceNumber, 1, 2, &NewRefAllocCount)) {
+      return FALSE;
+    }
+
+    NewReferences = AllocateZeroPool (NewRefAllocCount * sizeof (References->RefList[0]));
+    if (NewReferences == NULL) {
+      return FALSE;
+    }
+
+    if (References->RefList != NULL) {
+      CopyMem (
+        &NewReferences[0],
+        &References->RefList[0],
+        References->RefCount * sizeof (References->RefList[0])
+        );
+      FreePool (References->RefList);
+    }
+
+    References->RefList       = NewReferences;
+    References->RefAllocCount = NewRefAllocCount;
+  }
+
+  References->RefList[ReferenceNumber] = Node;
+  if (ReferenceNumber >= References->RefCount) {
+    References->RefCount = ReferenceNumber + 1;
+  }
+
+  return TRUE;
+}
+
+STATIC
+XML_NODE *
+XmlNodeReal (
+  XML_REFLIST  *References,
+  CONST CHAR8  *Attributes
+  )
+{
+  BOOLEAN      HasArgument;
+  UINT32       Number;
+
+  if (References == NULL || Attributes == NULL) {
+    return NULL;
+  }
+
+  HasArgument = XmlParseAttributeNumber (
+    Attributes,
+    "IDREF=\"",
+    L_STR_LEN ("IDREF=\""),
+    &Number
+    );
+
+  if (!HasArgument || Number >= References->RefCount) {
+    return NULL;
+  }
+
+  return References->RefList[Number];
+}
+
 //
 // Frees the resources allocated by the node.
 //
@@ -239,6 +362,18 @@ XmlNodeFree (
   }
 
   FreePool (Node);
+}
+
+STATIC
+VOID
+XmlFreeRefs (
+  XML_REFLIST  *References
+  )
+{
+  if (References->RefList != NULL) {
+    FreePool (References->RefList);
+    References->RefList = NULL;
+  }
 }
 
 //
@@ -793,7 +928,8 @@ XmlNodeExportRecursive (
 STATIC
 XML_NODE *
 XmlParseNode (
-  XML_PARSER  *Parser
+  XML_PARSER  *Parser,
+  XML_REFLIST *References
   )
 {
   CONST CHAR8  *TagOpen;
@@ -801,14 +937,18 @@ XmlParseNode (
   CONST CHAR8  *Attributes;
   XML_NODE     *Node;
   XML_NODE     *Child;
+  UINT32       ReferenceNumber;
+  BOOLEAN      IsReference;
   BOOLEAN      SelfClosing;
   BOOLEAN      Unprefixed;
+  BOOLEAN      HasChildren;
 
   XML_PARSER_INFO (Parser, "node");
 
   Attributes  = NULL;
   SelfClosing = FALSE;
   Unprefixed  = FALSE;
+  IsReference = FALSE;
 
   //
   // Parse open tag.
@@ -823,7 +963,7 @@ XmlParseNode (
 
   XmlSkipWhitespace (Parser);
 
-  Node = XmlNodeCreate (TagOpen, Attributes, NULL, NULL);
+  Node = XmlNodeCreate (TagOpen, Attributes, NULL, XmlNodeReal (References, Attributes), NULL);
   if (Node == NULL) {
     XML_PARSER_ERROR (Parser, NO_CHARACTER, "XmlParseNode::node alloc fail");
     return NULL;
@@ -848,6 +988,18 @@ XmlParseNode (
       return NULL;
     }
 
+    //
+    // All references must be defined sequentially.
+    //
+    if (References != NULL && Node->Attributes != NULL) {
+      IsReference = XmlParseAttributeNumber (
+        Node->Attributes,
+        "ID=\"",
+        L_STR_LEN ("ID=\""),
+        &ReferenceNumber
+        );
+    }
+
     Unprefixed = TRUE;
 
   //
@@ -862,12 +1014,14 @@ XmlParseNode (
       return NULL;
     }
 
+    HasChildren = FALSE;
+
     while ('/' != XmlParserPeek (Parser, NEXT_CHARACTER)) {
 
       //
       // Parse child node.
       //
-      Child = XmlParseNode (Parser);
+      Child = XmlParseNode (Parser, References);
       if (Child == NULL) {
         if ('/' == XmlParserPeek (Parser, CURRENT_CHARACTER)) {
           XML_PARSER_INFO (Parser, "child_end");
@@ -886,9 +1040,20 @@ XmlParseNode (
         XmlNodeFree (Child);
         return NULL;
       }
+
+      HasChildren = TRUE;
     }
 
     Parser->Level--;
+
+    if (!HasChildren && References != NULL && Attributes != NULL) {
+      IsReference = XmlParseAttributeNumber (
+        Node->Attributes,
+        "ID=\"",
+        L_STR_LEN ("ID=\""),
+        &ReferenceNumber
+        );
+    }
   }
 
   //
@@ -910,17 +1075,25 @@ XmlParseNode (
     return NULL;
   }
 
+  if (IsReference && !XmlPushReference (References, Node, ReferenceNumber)) {
+    XML_PARSER_ERROR (Parser, 0, "XmlParseNode::reference");
+    XmlNodeFree (Node);
+    return NULL;
+  }
+
   return Node;
 }
 
 XML_DOCUMENT *
 XmlDocumentParse (
-  CHAR8   *Buffer,
-  UINT32  Length
+  CHAR8    *Buffer,
+  UINT32   Length,
+  BOOLEAN  WithRefs
   )
 {
   XML_NODE      *Root;
   XML_DOCUMENT  *Document;
+  XML_REFLIST   References;
 
   //
   // Initialize parser.
@@ -929,6 +1102,7 @@ XmlDocumentParse (
   ZeroMem (&Parser, sizeof (Parser));
   Parser.Buffer = Buffer;
   Parser.Length = Length;
+  ZeroMem (&References, sizeof (References));
 
   //
   // An empty buffer can never contain a valid document.
@@ -941,7 +1115,7 @@ XmlDocumentParse (
   //
   // Parse the root node.
   //
-  Root = XmlParseNode (&Parser);
+  Root = XmlParseNode (&Parser, WithRefs ? &References : NULL);
   if (Root == NULL) {
     XML_PARSER_ERROR (&Parser, NO_CHARACTER, "XmlDocumentParse::parsing document failed");
     return NULL;
@@ -955,12 +1129,14 @@ XmlDocumentParse (
   if (Document == NULL) {
     XML_PARSER_ERROR (&Parser, NO_CHARACTER, "XmlDocumentParse::document allocation failed");
     XmlNodeFree (Root);
+    XmlFreeRefs (&References);
     return NULL;
   }
 
   Document->Buffer.Buffer = Buffer;
   Document->Buffer.Length = Length;
   Document->Root = Root;
+  CopyMem (&Document->References, &References, sizeof (References));
 
   return Document;
 }
@@ -1004,6 +1180,7 @@ XmlDocumentFree (
   )
 {
   XmlNodeFree (Document->Root);
+  XmlFreeRefs (&Document->References);
   FreePool (Document);
 }
 
@@ -1028,7 +1205,7 @@ XmlNodeContent (
   XML_NODE  *Node
   )
 {
-  return Node->Content;
+  return Node->Real != NULL ? Node->Real->Content : Node->Content;
 }
 
 UINT32
@@ -1120,7 +1297,7 @@ XmlNodeAppend (
 {
   XML_NODE  *NewNode;
 
-  NewNode = XmlNodeCreate (Name, Attributes, Content, NULL);
+  NewNode = XmlNodeCreate (Name, Attributes, Content, NULL, NULL);
   if (NewNode == NULL) {
     return NULL;
   }
@@ -1327,7 +1504,8 @@ BOOLEAN
 PlistIntegerValue (
   XML_NODE  *Node,
   VOID      *Value,
-  UINT32    Size
+  UINT32    Size,
+  BOOLEAN   Hex
   )
 {
   UINT64  Temp;
@@ -1336,7 +1514,11 @@ PlistIntegerValue (
     return FALSE;
   }
 
-  Temp = AsciiStrDecimalToUint64 (XmlNodeContent (Node));
+  if (Hex) {
+    Temp = AsciiStrHexToUint64 (XmlNodeContent (Node));
+  } else {
+    Temp = AsciiStrDecimalToUint64 (XmlNodeContent (Node));
+  }
 
   switch (Size) {
     case sizeof (UINT64):

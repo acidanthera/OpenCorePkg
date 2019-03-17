@@ -20,10 +20,10 @@
 #include <sys/time.h>
 
 /*
- clang -g -fsanitize=undefined,address -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c ../../Library/OcAppleKernelLib/Prelinked.c -o Prelinked
+ clang -g -fsanitize=undefined,address -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c ../../Library/OcAppleKernelLib/Prelinked.c ../../Library/OcAppleKernelLib/Patcher.c ../../Library/OcMiscLib/DataPatcher.c -o Prelinked
 
  for fuzzing:
- clang-mp-7.0 -Dmain=__main -g -fsanitize=undefined,address,fuzzer -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c ../../Library/OcAppleKernelLib/Prelinked.c -o Prelinked
+ clang-mp-7.0 -Dmain=__main -g -fsanitize=undefined,address,fuzzer -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c ../../Library/OcAppleKernelLib/Prelinked.c ../../Library/OcAppleKernelLib/Patcher.c ../../Library/OcMiscLib/DataPatcher.c -o Prelinked
  rm -rf DICT fuzz*.log ; mkdir DICT ; cp Prelinked.plist DICT ; ./Prelinked -jobs=4 DICT
 
  rm -rf Prelinked.dSYM DICT fuzz*.log Prelinked
@@ -208,6 +208,133 @@ uint8_t *readFile(const char *str, uint32_t *size) {
   return string;
 }
 
+STATIC
+UINT8
+IOAHCIBlockStoragePatchFind[] = {
+  0x41, 0x50, 0x50, 0x4C, 0x45, 0x20, 0x53, 0x53, 0x44, 0x00
+};
+
+STATIC
+UINT8
+IOAHCIBlockStoragePatchReplace[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+IOAHCIBlockStoragePatch = {
+  .Base    = NULL, // Symbolic patch
+  .Find    = IOAHCIBlockStoragePatchFind,
+  .Mask    = NULL,
+  .Replace = IOAHCIBlockStoragePatchReplace,
+  .Size    = sizeof (IOAHCIBlockStoragePatchFind),
+  .Count   = 1,
+  .Skip    = 0
+};
+
+STATIC
+UINT8
+IOAHCIPortPatchFind[] = {
+  0x45, 0x78, 0x74, 0x65, 0x72, 0x6E, 0x61, 0x6C
+};
+
+STATIC
+UINT8
+IOAHCIPortPatchReplace[] = {
+  0x49, 0x6E, 0x74, 0x65, 0x72, 0x6E, 0x61, 0x6C
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+IOAHCIPortPatch = {
+  .Base    = NULL, // For symbolic patch
+  .Find    = IOAHCIPortPatchFind,
+  .Mask    = NULL,
+  .Replace = IOAHCIPortPatchReplace,
+  .Size    = sizeof (IOAHCIPortPatchFind),
+  .Count   = 1,
+  .Skip    = 0
+};
+
+STATIC
+UINT8
+DisableAppleHDAPatchReplace[] = {
+  0x31, 0xC0, 0xC3 // xor eax, eax ; ret
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+DisableAppleHDAPatch = {
+  .Base    = "__ZN20AppleHDACodecGeneric5probeEP9IOServicePi",
+  .Find    = NULL,
+  .Mask    = NULL,
+  .Replace = DisableAppleHDAPatchReplace,
+  .Size    = sizeof (DisableAppleHDAPatchReplace),
+  .Count   = 1,
+  .Skip    = 0
+};
+
+STATIC
+VOID
+ApplyKextPatches (
+  PRELINKED_CONTEXT  *Context
+  )
+{
+  EFI_STATUS       Status;
+  PATCHER_CONTEXT  Patcher;
+
+  Status = PatcherInitContextFromPrelinked (
+    &Patcher,
+    Context,
+    "com.apple.iokit.IOAHCIBlockStorage"
+    );
+
+  if (!EFI_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (&Patcher, &IOAHCIBlockStoragePatch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Failed to apply patch com.apple.iokit.IOAHCIBlockStorage - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_WARN, "Patch success com.apple.iokit.IOAHCIBlockStorage\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "Failed to find com.apple.iokit.IOAHCIBlockStorage - %r\n", Status));
+  }
+
+  Status = PatcherInitContextFromPrelinked (
+    &Patcher,
+    Context,
+    "com.apple.driver.AppleAHCIPort"
+    );
+
+  if (!EFI_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (&Patcher, &IOAHCIPortPatch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Failed to apply patch com.apple.driver.AppleAHCIPort - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_WARN, "Patch success com.apple.driver.AppleAHCIPort\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.AppleAHCIPort - %r\n", Status));
+  }
+
+  Status = PatcherInitContextFromPrelinked (
+    &Patcher,
+    Context,
+    "com.apple.driver.AppleHDA"
+    );
+
+  if (!EFI_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (&Patcher, &DisableAppleHDAPatch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Failed to apply patch com.apple.driver.AppleHDA - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_WARN, "Patch success com.apple.driver.AppleHDA\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.AppleHDA - %r\n", Status));
+  }
+}
+
 int main(int argc, char** argv) {
   UINT32 Size;
   UINT32 AllocSize;
@@ -230,6 +357,8 @@ int main(int argc, char** argv) {
   EFI_STATUS Status = PrelinkedContextInit (&Context, Prelinked, Size, AllocSize);
 
   if (!EFI_ERROR (Status)) {
+    ApplyKextPatches (&Context);
+
     Status = PrelinkedInjectPrepare (&Context);
     if (EFI_ERROR (Status)) {
       printf("Prelink inject prepare error %zx\n", Status);
@@ -282,7 +411,7 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
   VOID *NewData = AllocatePool (Size);
   if (NewData) {
     CopyMem (NewData, Data, Size);
-    XML_DOCUMENT *doc = XmlDocumentParse((char *)NewData, Size);
+    XML_DOCUMENT *doc = XmlDocumentParse((char *)NewData, Size, TRUE);
     if (doc != NULL) {
       UINT32 s;
       CHAR8 *buf = XmlDocumentExport(doc, &s, 0);
