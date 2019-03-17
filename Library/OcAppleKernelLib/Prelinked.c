@@ -18,6 +18,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleKernelLib.h>
 #include <Library/OcMachoLib.h>
+#include <Library/PrintLib.h>
 
 EFI_STATUS
 PrelinkedContextInit (
@@ -27,10 +28,10 @@ PrelinkedContextInit (
   IN      UINT32             PrelinkedAllocSize
   )
 {
-  XML_NODE                 *PlistInfoRoot;
-  XML_NODE                 *PlistInfoRootKey;
-  UINT32                   PlistInfoRootIndex;
-  UINT32                   PlistInfoRootCount;
+  XML_NODE                 *PrelinkedInfoRoot;
+  XML_NODE                 *PrelinkedInfoRootKey;
+  UINT32                   PrelinkedInfoRootIndex;
+  UINT32                   PrelinkedInfoRootCount;
 
   ZeroMem (Context, sizeof (*Context));
 
@@ -58,68 +59,73 @@ PrelinkedContextInit (
     return EFI_INVALID_PARAMETER;
   }
 
-  Context->PlistInfoSegment = MachoGetSegmentByName64 (
+  Context->PrelinkedLastAddress = PRELINKED_ALIGN (MachoGetLastAddress64 (&Context->PrelinkedMachContext));
+  if (Context->PrelinkedLastAddress == 0) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Context->PrelinkedInfoSegment = MachoGetSegmentByName64 (
     &Context->PrelinkedMachContext,
     PRELINK_INFO_SEGMENT
     );
-  if (Context->PlistInfoSegment == NULL) {
+  if (Context->PrelinkedInfoSegment == NULL) {
     return EFI_NOT_FOUND;
   }
 
-  Context->PlistInfoSection = MachoGetSectionByName64 (
+  Context->PrelinkedInfoSection = MachoGetSectionByName64 (
     &Context->PrelinkedMachContext,
-    Context->PlistInfoSegment,
+    Context->PrelinkedInfoSegment,
     PRELINK_INFO_SECTION
     );
-  if (Context->PlistInfoSection == NULL) {
+  if (Context->PrelinkedInfoSection == NULL) {
     return EFI_NOT_FOUND;
   }
 
-  Context->PlistTextSegment = MachoGetSegmentByName64 (
+  Context->PrelinkedTextSegment = MachoGetSegmentByName64 (
     &Context->PrelinkedMachContext,
     PRELINK_TEXT_SEGMENT
     );
-  if (Context->PlistTextSegment == NULL) {
+  if (Context->PrelinkedTextSegment == NULL) {
     return EFI_NOT_FOUND;
   }
 
-  Context->PlistTextSection = MachoGetSectionByName64 (
+  Context->PrelinkedTextSection = MachoGetSectionByName64 (
     &Context->PrelinkedMachContext,
-    Context->PlistTextSegment,
+    Context->PrelinkedTextSegment,
     PRELINK_TEXT_SECTION
     );
-  if (Context->PlistTextSection == NULL) {
+  if (Context->PrelinkedTextSection == NULL) {
     return EFI_NOT_FOUND;
   }
 
-  Context->PlistInfo = AllocateCopyPool (
-    Context->PlistInfoSection->Size,
-    &Context->Prelinked[Context->PlistInfoSection->Offset]
+  Context->PrelinkedInfo = AllocateCopyPool (
+    Context->PrelinkedInfoSection->Size,
+    &Context->Prelinked[Context->PrelinkedInfoSection->Offset]
     );
-  if (Context->PlistInfo == NULL) {
+  if (Context->PrelinkedInfo == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Context->PlistInfoDocument = XmlDocumentParse (Context->PlistInfo, Context->PlistInfoSection->Size);
-  if (Context->PlistInfoDocument == NULL) {
+  Context->PrelinkedInfoDocument = XmlDocumentParse (Context->PrelinkedInfo, Context->PrelinkedInfoSection->Size);
+  if (Context->PrelinkedInfoDocument == NULL) {
     PrelinkedContextFree (Context);
     return EFI_INVALID_PARAMETER;
   }
 
-  PlistInfoRoot = PlistNodeCast (XmlDocumentRoot (Context->PlistInfoDocument), PLIST_NODE_TYPE_DICT);
-  if (PlistInfoRoot == NULL) {
+  PrelinkedInfoRoot = PlistNodeCast (XmlDocumentRoot (Context->PrelinkedInfoDocument), PLIST_NODE_TYPE_DICT);
+  if (PrelinkedInfoRoot == NULL) {
     PrelinkedContextFree (Context);
     return EFI_INVALID_PARAMETER;
   }
 
-  PlistInfoRootCount = PlistDictChildren (PlistInfoRoot);
-  for (PlistInfoRootIndex = 0; PlistInfoRootIndex < PlistInfoRootCount; ++PlistInfoRootIndex) {
-    PlistInfoRootKey = PlistDictChild (PlistInfoRoot, PlistInfoRootIndex, &Context->KextList);
-    if (PlistInfoRootKey == NULL) {
+  PrelinkedInfoRootCount = PlistDictChildren (PrelinkedInfoRoot);
+  for (PrelinkedInfoRootIndex = 0; PrelinkedInfoRootIndex < PrelinkedInfoRootCount; ++PrelinkedInfoRootIndex) {
+    PrelinkedInfoRootKey = PlistDictChild (PrelinkedInfoRoot, PrelinkedInfoRootIndex, &Context->KextList);
+    if (PrelinkedInfoRootKey == NULL) {
       continue;
     }
 
-    if (AsciiStrCmp (PlistKeyValue (PlistInfoRootKey), PRELINK_INFO_DICTIONARY_KEY) == 0) {
+    if (AsciiStrCmp (PlistKeyValue (PrelinkedInfoRootKey), PRELINK_INFO_DICTIONARY_KEY) == 0) {
       if (PlistNodeCast (Context->KextList, PLIST_NODE_TYPE_ARRAY) != NULL) {
         return EFI_SUCCESS;
       }
@@ -138,14 +144,14 @@ PrelinkedContextFree (
 {
   UINT32  Index;
 
-  if (Context->PlistInfoDocument != NULL) {
-    XmlDocumentFree (Context->PlistInfoDocument);
-    Context->PlistInfoDocument = NULL;
+  if (Context->PrelinkedInfoDocument != NULL) {
+    XmlDocumentFree (Context->PrelinkedInfoDocument);
+    Context->PrelinkedInfoDocument = NULL;
   }
 
-  if (Context->PlistInfo != NULL) {
-    FreePool (Context->PlistInfo);
-    Context->PlistInfo = NULL;
+  if (Context->PrelinkedInfo != NULL) {
+    FreePool (Context->PrelinkedInfo);
+    Context->PrelinkedInfo = NULL;
   }
 
   if (Context->PooledBuffers != NULL) {
@@ -202,25 +208,30 @@ PrelinkedInjectPrepare (
   // some data by removing it and then appending new kexts over.
   //
 
-  SegmentEndOffset = Context->PlistInfoSegment->FileOffset + Context->PlistInfoSegment->FileSize;
+  SegmentEndOffset = Context->PrelinkedInfoSegment->FileOffset + Context->PrelinkedInfoSegment->FileSize;
 
   if (PRELINKED_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
-    Context->PrelinkedSize = PRELINKED_ALIGN (Context->PlistInfoSegment->FileOffset);
+    Context->PrelinkedSize = PRELINKED_ALIGN (Context->PrelinkedInfoSegment->FileOffset);
   }
 
-  Context->PlistInfoSegment->VirtualAddress = 0;
-  Context->PlistInfoSegment->Size           = 0;
-  Context->PlistInfoSegment->FileOffset     = 0;
-  Context->PlistInfoSegment->FileSize       = 0;
-  Context->PlistInfoSection->Address        = 0;
-  Context->PlistInfoSection->Size           = 0;
-  Context->PlistInfoSection->Offset         = 0;
+  Context->PrelinkedInfoSegment->VirtualAddress = 0;
+  Context->PrelinkedInfoSegment->Size           = 0;
+  Context->PrelinkedInfoSegment->FileOffset     = 0;
+  Context->PrelinkedInfoSegment->FileSize       = 0;
+  Context->PrelinkedInfoSection->Address        = 0;
+  Context->PrelinkedInfoSection->Size           = 0;
+  Context->PrelinkedInfoSection->Offset         = 0;
+
+  Context->PrelinkedLastAddress = PRELINKED_ALIGN (MachoGetLastAddress64 (&Context->PrelinkedMachContext));
+  if (Context->PrelinkedLastAddress == 0) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   //
   // Prior to plist there usually is prelinked text. 
   //
 
-  SegmentEndOffset = Context->PlistTextSegment->FileOffset + Context->PlistTextSegment->FileSize;
+  SegmentEndOffset = Context->PrelinkedTextSegment->FileOffset + Context->PrelinkedTextSegment->FileSize;
 
   if (PRELINKED_ALIGN (SegmentEndOffset) != Context->PrelinkedSize) {
     //
@@ -238,17 +249,11 @@ PrelinkedInjectComplete (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
-  UINT64      LastAddress;
   CHAR8       *ExportedInfo;
   UINT32      ExportedInfoSize;
   UINT32      NewSize;
 
-  LastAddress = PRELINKED_ALIGN (MachoGetLastAddress64 (&Context->PrelinkedMachContext));
-  if (LastAddress == 0) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  ExportedInfo = XmlDocumentExport (Context->PlistInfoDocument, &ExportedInfoSize, 0);
+  ExportedInfo = XmlDocumentExport (Context->PrelinkedInfoDocument, &ExportedInfoSize, 0);
   if (ExportedInfo == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -264,13 +269,13 @@ PrelinkedInjectComplete (
     return EFI_BUFFER_TOO_SMALL;
   }
 
-  Context->PlistInfoSegment->VirtualAddress = LastAddress;
-  Context->PlistInfoSegment->Size           = ExportedInfoSize;
-  Context->PlistInfoSegment->FileOffset     = Context->PrelinkedSize;
-  Context->PlistInfoSegment->FileSize       = ExportedInfoSize;
-  Context->PlistInfoSection->Address        = LastAddress;
-  Context->PlistInfoSection->Size           = ExportedInfoSize;
-  Context->PlistInfoSection->Offset         = Context->PrelinkedSize;
+  Context->PrelinkedInfoSegment->VirtualAddress = Context->PrelinkedLastAddress;
+  Context->PrelinkedInfoSegment->Size           = ExportedInfoSize;
+  Context->PrelinkedInfoSegment->FileOffset     = Context->PrelinkedSize;
+  Context->PrelinkedInfoSegment->FileSize       = ExportedInfoSize;
+  Context->PrelinkedInfoSection->Address        = Context->PrelinkedLastAddress;
+  Context->PrelinkedInfoSection->Size           = ExportedInfoSize;
+  Context->PrelinkedInfoSection->Offset         = Context->PrelinkedSize;
 
   CopyMem (
     &Context->Prelinked[Context->PrelinkedSize],
@@ -283,10 +288,33 @@ PrelinkedInjectComplete (
     PRELINKED_ALIGN (ExportedInfoSize) - ExportedInfoSize
     );
 
-  Context->PrelinkedSize += PRELINKED_ALIGN (ExportedInfoSize);
+  Context->PrelinkedLastAddress += PRELINKED_ALIGN (ExportedInfoSize);
+  Context->PrelinkedSize        += PRELINKED_ALIGN (ExportedInfoSize);
 
   FreePool (ExportedInfo);
 
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+PrelinkedReserveKextSize (
+  IN OUT UINT32       *ReservedSize,
+  IN     UINT32       InfoPlistSize,
+  IN     UINT32       ExecutableSize OPTIONAL
+  )
+{
+  if (OcOverflowAddU32 (InfoPlistSize, 512, &InfoPlistSize)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  InfoPlistSize  = PRELINKED_ALIGN (InfoPlistSize);
+  ExecutableSize = PRELINKED_ALIGN (ExecutableSize);
+
+  if (OcOverflowTriAddU32 (*ReservedSize, InfoPlistSize, ExecutableSize, &ExecutableSize)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  *ReservedSize = ExecutableSize;
   return EFI_SUCCESS;
 }
 
@@ -308,12 +336,21 @@ PrelinkedInjectKext (
   CHAR8         *NewInfoPlist;
   UINT32        NewInfoPlistSize;
   UINT32        NewPrelinkedSize;
+  UINT32        AlignedExecutableSize;
+  BOOLEAN       Failed;
+  UINT64        KmodAddress;
+  UINT64        LoadAddress;
+  CHAR8         ExecutableSourceAddrStr[24];
+  CHAR8         ExecutableSizeStr[24];
+  CHAR8         ExecutableLoadAddrStr[24];
+  CHAR8         KmodInfoStr[24];
 
   //
   // Copy executable to prelinkedkernel.
   //
   if (Executable != NULL) {
-    if (OcOverflowAddU32 (Context->PrelinkedSize, PRELINKED_ALIGN (ExecutableSize), &NewPrelinkedSize)
+    AlignedExecutableSize = PRELINKED_ALIGN (ExecutableSize);
+    if (OcOverflowAddU32 (Context->PrelinkedSize, AlignedExecutableSize, &NewPrelinkedSize)
       || NewPrelinkedSize > Context->PrelinkedAllocSize) {
       return EFI_BUFFER_TOO_SMALL;
     }
@@ -324,10 +361,10 @@ PrelinkedInjectKext (
       ExecutableSize
       );
 
-    //
-    // TODO: Implement full kext injection.
-    //
-    return EFI_UNSUPPORTED;
+    ZeroMem (
+      &Context->Prelinked[Context->PrelinkedSize + ExecutableSize],
+      AlignedExecutableSize - ExecutableSize
+      );
   }
 
   //
@@ -351,11 +388,65 @@ PrelinkedInjectKext (
     return EFI_INVALID_PARAMETER;
   }
 
-  if (XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_BUNDLE_PATH_KEY) == NULL ||
-    XmlNodeAppend (InfoPlistRoot, "string", NULL, BundlePath) == NULL) {
+  Failed = FALSE;
+  Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_BUNDLE_PATH_KEY) == NULL;
+  Failed |= XmlNodeAppend (InfoPlistRoot, "string", NULL, BundlePath) == NULL;
+  if (Executable != NULL) {
+    Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_RELATIVE_PATH_KEY) == NULL;
+    Failed |= XmlNodeAppend (InfoPlistRoot, "string", NULL, ExecutablePath) == NULL;
+    AsciiSPrint (ExecutableSourceAddrStr, sizeof (ExecutableSourceAddrStr), "0x%Lx", Context->PrelinkedLastAddress);
+    Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_SOURCE_ADDR_KEY) == NULL;
+    Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableSourceAddrStr) == NULL;
+    AsciiSPrint (ExecutableSizeStr, sizeof (ExecutableSizeStr), "0x%x", AlignedExecutableSize);
+    Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_SIZE_KEY) == NULL;
+    Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableSizeStr) == NULL;
+  }
+
+  if (Failed) {
     XmlDocumentFree (InfoPlistDocument);
     FreePool (TmpInfoPlist);
     return EFI_OUT_OF_RESOURCES;
+  }
+
+  if (Executable != NULL) {
+    Status = PrelinkedLinkExecutable (
+      Context,
+      &Context->Prelinked[Context->PrelinkedSize],
+      ExecutableSize,
+      InfoPlistRoot,
+      &LoadAddress,
+      &KmodAddress
+      );
+
+    if (!EFI_ERROR (Status)) {
+      Failed = FALSE;
+      AsciiSPrint (ExecutableLoadAddrStr, sizeof (ExecutableLoadAddrStr), "0x%Lx", LoadAddress);
+      Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == NULL;
+      Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableLoadAddrStr) == NULL;
+      AsciiSPrint (KmodInfoStr, sizeof (KmodInfoStr), "0x%Lx", KmodAddress);
+      Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_KMOD_INFO_KEY) == NULL;
+      Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, KmodInfoStr) == NULL;
+      if (Failed) {
+        Status = EFI_OUT_OF_RESOURCES;
+      }
+    }
+
+    if (EFI_ERROR (Status)) {
+      XmlDocumentFree (InfoPlistDocument);
+      FreePool (TmpInfoPlist);
+      return Status;
+    }
+
+    //
+    // Only executable source addresses are present here, so we can append
+    // AlignedExecutableSize to vm_size as well as long as executable size
+    // does not change, and currently it is a constraint.
+    //
+    Context->PrelinkedSize              += AlignedExecutableSize;
+    Context->PrelinkedLastAddress       += AlignedExecutableSize;
+    Context->PrelinkedTextSegment->Size     += AlignedExecutableSize;
+    Context->PrelinkedTextSegment->FileSize += AlignedExecutableSize;
+    Context->PrelinkedTextSection->Size     += AlignedExecutableSize;
   }
 
   //
@@ -381,4 +472,20 @@ PrelinkedInjectKext (
   }
 
   return EFI_SUCCESS;
+}
+
+EFI_STATUS
+PrelinkedLinkExecutable (
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN OUT UINT8              *Executable,
+  IN     UINT32             ExecutableSize,
+  IN     XML_NODE           *PlistRoot,
+     OUT UINT64             *LoadAddress,
+     OUT UINT64             *KmodAddress
+  )
+{
+  //
+  // TODO: Implement linking kexts.
+  //
+  return EFI_UNSUPPORTED;
 }

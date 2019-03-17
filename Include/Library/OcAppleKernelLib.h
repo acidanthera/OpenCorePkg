@@ -59,6 +59,10 @@ typedef struct {
   //
   UINT32                   PrelinkedAllocSize;
   //
+  // Current last virtual address.
+  //
+  UINT64                   PrelinkedLastAddress;
+  //
   // Mach-O context for prelinkedkernel.
   //
   OC_MACHO_CONTEXT         PrelinkedMachContext;
@@ -69,28 +73,28 @@ typedef struct {
   //
   // Pointer to PRELINK_INFO_SEGMENT.
   //
-  MACH_SEGMENT_COMMAND_64  *PlistInfoSegment;
+  MACH_SEGMENT_COMMAND_64  *PrelinkedInfoSegment;
   //
   // Pointer to PRELINK_INFO_SECTION.
   //
-  MACH_SECTION_64          *PlistInfoSection;
+  MACH_SECTION_64          *PrelinkedInfoSection;
   //
   // Pointer to PRELINK_TEXT_SEGMENT.
   //
-  MACH_SEGMENT_COMMAND_64  *PlistTextSegment;
+  MACH_SEGMENT_COMMAND_64  *PrelinkedTextSegment;
   //
   // Pointer to PRELINK_TEXT_SECTION.
   //
-  MACH_SECTION_64          *PlistTextSection;
+  MACH_SECTION_64          *PrelinkedTextSection;
   //
   // Copy of prelinkedkernel PRELINK_INFO_SECTION used for XML_DOCUMENT.
   // Freed upon context destruction.
   //
-  CHAR8                    *PlistInfo;
+  CHAR8                    *PrelinkedInfo;
   //
   // Parsed instance of PlistInfo. New entries are added here.
   //
-  XML_DOCUMENT             *PlistInfoDocument;
+  XML_DOCUMENT             *PrelinkedInfoDocument;
   //
   // Reference for PRELINK_INFO_DICTIONARY_KEY in PlistDocument.
   // This reference is used for quick path during kext injection.
@@ -200,6 +204,22 @@ PrelinkedInjectComplete (
   );
 
 /**
+  Updated required reserve size to inject this kext.
+
+  @param[in,out] ReservedSize    Current reserved size, updated.
+  @param[in]     InfoPlistSize   Kext Info.plist size.
+  @param[in]     ExecutableSize  Kext executable size, optional.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PrelinkedReserveKextSize (
+  IN OUT UINT32       *ReservedSize,
+  IN     UINT32       InfoPlistSize,
+  IN     UINT32       ExecutableSize OPTIONAL
+  );
+
+/**
   Perform kext injection.
 
   @param[in,out] Context         Prelinked context.
@@ -208,7 +228,7 @@ PrelinkedInjectComplete (
   @param[in]     InfoPlistSize   Kext Info.plist size.
   @param[in,out] ExecutablePath  Kext executable path (e.g. Contents/MacOS/mykext), optional.
   @param[in,out] Executable      Kext executable, optional.
-  @param[in]     ExecutableSize  Kext executable, optional.
+  @param[in]     ExecutableSize  Kext executable size, optional.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -221,6 +241,28 @@ PrelinkedInjectKext (
   IN     CONST CHAR8        *ExecutablePath OPTIONAL,
   IN OUT CONST UINT8        *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL
+  );
+
+/**
+  Link executable within current prelink context.
+
+  @param[in,out] Context         Prelinked context.
+  @param[in,out] Executable      Kext executable copied to prelinked.
+  @param[in]     ExecutableSize  Kext executable size.
+  @param[in]     PlistRoot       Current kext info.plist.
+  @param[out]    LoadAddress     Resulting kext load address.
+  @param[out]    KmodAddress     Resulting kext kmod_info address.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PrelinkedLinkExecutable (
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN OUT UINT8              *Executable,
+  IN     UINT32             ExecutableSize,
+  IN     XML_NODE           *PlistRoot,
+     OUT UINT64             *LoadAddress,
+     OUT UINT64             *KmodAddress
   );
 
 #endif // OC_APPLE_KERNEL_LIB_H
