@@ -31,6 +31,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcStringLib.h>
 #include <Library/OcVirtualFsLib.h>
 #include <Library/OcAppleKernelLib.h>
+#include <Library/OcFileLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/OcXmlLib.h>
 
@@ -264,6 +265,7 @@ TestFileOpen (
   CHAR16             *FileNameCopy;
   EFI_FILE_PROTOCOL  *VirtualFileHandle;
   EFI_STATUS         PrelinkedStatus;
+  EFI_TIME           ModificationTime;
 
   Status = This->Open (This, NewHandle, FileName, OpenMode, Attributes);
 
@@ -326,7 +328,12 @@ TestFileOpen (
       return EFI_SUCCESS;
     }
 
-    Status = CreateVirtualFile (FileNameCopy, Kernel, KernelSize, &VirtualFileHandle);
+    Status = ReadFileModifcationTime (*NewHandle, &ModificationTime);
+    if (EFI_ERROR (Status)) {
+      ZeroMem (&ModificationTime, sizeof (ModificationTime));
+    }
+
+    Status = CreateVirtualFile (FileNameCopy, Kernel, KernelSize, &ModificationTime, &VirtualFileHandle);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "Failed to virtualise kernel file (%a)\n", FileName));
       FreePool (Kernel);

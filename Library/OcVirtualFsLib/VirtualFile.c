@@ -19,6 +19,7 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/OcVirtualFsLib.h>
 
@@ -41,6 +42,7 @@ typedef struct {
   UINT8               *FileBuffer;
   UINT64              FileSize;
   UINT64              FilePosition;
+  EFI_TIME            ModificationTime;
   EFI_FILE_PROTOCOL   Protocol;
 } VIRTUAL_FILE_DATA;
 
@@ -224,6 +226,11 @@ VirtualFileGetInfo (
     FileInfo->Size         = InfoSize;
     FileInfo->FileSize     = Data->FileSize;
     FileInfo->PhysicalSize = Data->FileSize;
+
+    CopyMem (&FileInfo->CreateTime, &Data->ModificationTime, sizeof (FileInfo->ModificationTime));
+    CopyMem (&FileInfo->LastAccessTime, &Data->ModificationTime, sizeof (FileInfo->ModificationTime));
+    CopyMem (&FileInfo->ModificationTime, &Data->ModificationTime, sizeof (FileInfo->ModificationTime));
+
     //
     // Return zeroes for timestamps.
     //
@@ -364,6 +371,7 @@ CreateVirtualFile (
   IN     CHAR16             *FileName,
   IN     VOID               *FileBuffer,
   IN     UINT64             FileSize,
+  IN     EFI_TIME           *ModificationTime OPTIONAL,
   IN OUT EFI_FILE_PROTOCOL  **File
   )
 {
@@ -385,6 +393,11 @@ CreateVirtualFile (
   Data->FileSize     = FileSize;
   Data->FilePosition = 0;
   CopyMem (&Data->Protocol, &mVirtualFileProtocolTemplate, sizeof (Data->Protocol));
+  if (ModificationTime != NULL) {
+    CopyMem (&Data->ModificationTime, ModificationTime, sizeof (*ModificationTime));
+  } else {
+    ZeroMem(&Data->ModificationTime, sizeof (*ModificationTime));
+  }
 
   *File = &Data->Protocol;
 

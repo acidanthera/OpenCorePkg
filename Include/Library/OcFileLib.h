@@ -12,8 +12,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef OC_FILE_LIB_H_
-#define OC_FILE_LIB_H_
+#ifndef OC_FILE_LIB_H
+#define OC_FILE_LIB_H
 
 // Include the abstracted protocol for its definitions
 
@@ -100,4 +100,18 @@ ReadFileSize (
   OUT UINT32             *Size
   );
 
-#endif // OC_FILE_LIB_H_
+/**
+  Determine file modification time.
+
+  @param[in]  File         A pointer to the file protocol.
+  @param[out] Time         Modification time.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+ReadFileModifcationTime (
+  IN  EFI_FILE_PROTOCOL  *File,
+  OUT EFI_TIME           *Time
+  );
+
+#endif // OC_FILE_LIB_H

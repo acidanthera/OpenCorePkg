@@ -295,4 +295,3 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
   }
   return 0;
 }
-

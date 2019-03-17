@@ -204,10 +204,10 @@ PrelinkedInjectComplete (
 
   @param[in,out] Context         Prelinked context.
   @param[in]     BundlePath      Kext bundle path (e.g. /L/E/mykext.kext).
-  @param[in,out] InfoPlist       Kext Info.plist, overwritten.
+  @param[in,out] InfoPlist       Kext Info.plist.
   @param[in]     InfoPlistSize   Kext Info.plist size.
   @param[in,out] ExecutablePath  Kext executable path (e.g. Contents/MacOS/mykext), optional.
-  @param[in,out] Executable      Kext executable, overwritten, optional.
+  @param[in,out] Executable      Kext executable, optional.
   @param[in]     ExecutableSize  Kext executable, optional.
 
   @return  EFI_SUCCESS on success.
@@ -216,10 +216,10 @@ EFI_STATUS
 PrelinkedInjectKext (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     CONST CHAR8        *BundlePath,
-  IN OUT CHAR8              *InfoPlist,
+  IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,
   IN     CONST CHAR8        *ExecutablePath OPTIONAL,
-  IN OUT UINT8              *Executable OPTIONAL,
+  IN OUT CONST UINT8        *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL
   );
 

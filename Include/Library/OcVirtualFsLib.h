@@ -28,10 +28,11 @@
   Resulting EFI_FILE_PROTOCOL has 2nd revision, but may be downgraded
   to 1st by updating the corresponding field.
 
-  @param[in]      FileName    Pointer to the file's name.
-  @param[in]      FileBuffer  Pointer to the file's data.
-  @param[in]      FileSize    File size of FileData.
-  @param[in, out] File        Resulting file protocol.
+  @param[in]      FileName         Pointer to the file's name.
+  @param[in]      FileBuffer       Pointer to the file's data.
+  @param[in]      FileSize         File size of FileData.
+  @param[in]      ModificationTime File modification date, optional.
+  @param[in, out] File             Resulting file protocol.
 
   @return  EFI_SUCCESS if instance was successfully created.
 **/
@@ -40,6 +41,7 @@ CreateVirtualFile (
   IN     CHAR16             *FileName,
   IN     VOID               *FileBuffer,
   IN     UINT64             FileSize,
+  IN     EFI_TIME           *ModificationTime OPTIONAL,
   IN OUT EFI_FILE_PROTOCOL  **File
   );
 
