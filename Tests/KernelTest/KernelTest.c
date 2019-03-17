@@ -12958,16 +12958,16 @@ CalculateReserveSize (
 
 STATIC
 EFI_STATUS
-CheckPrelinked (
+TestInjectPrelinked (
   IN OUT UINT8   *Kernel,
-  IN     UINT32  KernelSize,
+  IN     UINT32  *KernelSize,
   IN     UINT32  AllocatedSize
   )
 {
   EFI_STATUS         Status;
   PRELINKED_CONTEXT  Context;
 
-  Status = PrelinkedContextInit (&Context, Kernel, KernelSize, AllocatedSize);
+  Status = PrelinkedContextInit (&Context, Kernel, *KernelSize, AllocatedSize);
 
   if (!EFI_ERROR (Status)) {
     Status = PrelinkedInjectPrepare (&Context);
@@ -13004,6 +13004,8 @@ CheckPrelinked (
     } else {
       DEBUG ((DEBUG_WARN, "Plist inject prepare error - %r\n", Status));
     }
+
+    *KernelSize = Context.PrelinkedSize;
 
     PrelinkedContextFree (&Context);
   }
@@ -13067,7 +13069,7 @@ TestFileOpen (
     // TODO: patches, dropping, and injection here.
     //
 
-    PrelinkedStatus = CheckPrelinked (Kernel, KernelSize, AllocatedSize);
+    PrelinkedStatus = TestInjectPrelinked (Kernel, &KernelSize, AllocatedSize);
 
     DEBUG ((DEBUG_WARN, "Prelinked status - %r\n", PrelinkedStatus));
 
