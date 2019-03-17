@@ -362,8 +362,6 @@ OcPrelinkKexts64 (
   OC_KEXT_REQUEST           *Request;
   OC_DEPENDENCY_INFO_ENTRY  *DependencyInfo;
   BOOLEAN                   Result;
-  MACH_SEGMENT_COMMAND_64   *PrelinkInfoSegment;
-  MACH_SECTION_64           *PrelinkInfoSection;
   MACH_SEGMENT_COMMAND_64   *PrelinkTextSegment;
   CONST CHAR8               *PrelinkedPlist;
   LIST_ENTRY                Dependencies;
@@ -373,36 +371,15 @@ OcPrelinkKexts64 (
   ASSERT (KernelContext != NULL);
   ASSERT (NumRequests > 0);
   ASSERT (Requests != NULL);
-  //
-  // Get the Prelinked PLIST data.
-  //
-  Result = MachoGetSegmentByName64 (
-             KernelContext,
-             "__PRELINK_INFO",
-             &PrelinkInfoSegment
-             );
-  if (!Result || (PrelinkInfoSegment == NULL)) {
-    return FALSE;
-  }
 
-  Result = MachoGetSectionByName64 (
-             KernelContext,
-             PrelinkInfoSegment,
-             "__info",
-             &PrelinkInfoSection
-             );
-  if (!Result || (PrelinkInfoSection == NULL)) {
-    return FALSE;
-  }
   //
   // Get the segment containing the prelinked KEXT binaries.
   //
-  Result = MachoGetSegmentByName64 (
+  PrelinkTextSegment = MachoGetSegmentByName64 (
              KernelContext,
-             "__PRELINK_TEXT",
-             &PrelinkTextSegment
+             "__PRELINK_TEXT"
              );
-  if (!Result || (PrelinkTextSegment == NULL)) {
+  if (PrelinkTextSegment == NULL) {
     return FALSE;
   }
 

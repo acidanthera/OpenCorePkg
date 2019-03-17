@@ -23,6 +23,8 @@
 
 #define PRELINK_INFO_SEGMENT "__PRELINK_INFO"
 #define PRELINK_INFO_SECTION "__info"
+#define PRELINK_TEXT_SEGMENT "__PRELINK_TEXT"
+#define PRELINK_TEXT_SECTION "__text"
 
 #define PRELINK_INFO_DICTIONARY_KEY "_PrelinkInfoDictionary"
 #define PRELINK_INFO_KMOD_INFO_KEY                "_PrelinkKmodInfo"
@@ -73,6 +75,14 @@ typedef struct {
   //
   MACH_SECTION_64          *PlistInfoSection;
   //
+  // Pointer to PRELINK_TEXT_SEGMENT.
+  //
+  MACH_SEGMENT_COMMAND_64  *PlistTextSegment;
+  //
+  // Pointer to PRELINK_TEXT_SECTION.
+  //
+  MACH_SECTION_64          *PlistTextSection;
+  //
   // Copy of prelinkedkernel PRELINK_INFO_SECTION used for XML_DOCUMENT.
   // Freed upon context destruction.
   //
@@ -86,6 +96,18 @@ typedef struct {
   // This reference is used for quick path during kext injection.
   //
   XML_NODE                 *KextList;
+  //
+  // Buffers allocated from pool for internal needs.
+  //
+  VOID                     **PooledBuffers;
+  //
+  // Currently used pooled buffers.
+  //
+  UINT32                   PooledBuffersCount;
+  //
+  // Currently allocated pooled buffers. PooledBuffersAllocCount >= PooledBuffersCount.
+  //
+  UINT32                   PooledBuffersAllocCount;
 } PRELINKED_CONTEXT;
 
 /**
@@ -140,12 +162,28 @@ PrelinkedContextFree (
   );
 
 /**
+  Insert pool-allocated buffer dependency with the same lifetime as
+  prelinked context, so it gets freed with PrelinkedContextFree.
+
+  @param[in,out] Context          Prelinked context.
+  @param[in]     Buffer           Pool allocated buffer.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PrelinkedDependencyInsert (
+  IN OUT  PRELINKED_CONTEXT  *Context,
+  IN      VOID               *Buffer
+  );
+
+/**
   Drop current plist entry, required for kext injection.
+  Ensure that prelinked text can grow with new kexts.
 
   @param[in,out] Context  Prelinked context.
 **/
-VOID
-PrelinkedDropPlistInfo (
+EFI_STATUS
+PrelinkedInjectPrepare (
   IN OUT PRELINKED_CONTEXT  *Context
   );
 
@@ -157,7 +195,7 @@ PrelinkedDropPlistInfo (
   @return  EFI_SUCCESS on success.
 **/
 EFI_STATUS
-PrelinkedInsertPlistInfo (
+PrelinkedInjectComplete (
   IN OUT PRELINKED_CONTEXT  *Context
   );
 
@@ -168,7 +206,6 @@ PrelinkedInsertPlistInfo (
   @param[in]     BundlePath      Kext bundle path (e.g. /L/E/mykext.kext).
   @param[in,out] InfoPlist       Kext Info.plist, overwritten.
   @param[in]     InfoPlistSize   Kext Info.plist size.
-  @param[out]    NewInfoPlist    Injected NewInfoPlist, must be freed after PrelinkedInsertPlistInfo.
   @param[in,out] ExecutablePath  Kext executable path (e.g. Contents/MacOS/mykext), optional.
   @param[in,out] Executable      Kext executable, overwritten, optional.
   @param[in]     ExecutableSize  Kext executable, optional.
@@ -181,7 +218,6 @@ PrelinkedInjectKext (
   IN     CONST CHAR8        *BundlePath,
   IN OUT CHAR8              *InfoPlist,
   IN     UINT32             InfoPlistSize,
-     OUT CHAR8              **NewInfoPlist,
   IN     CONST CHAR8        *ExecutablePath OPTIONAL,
   IN OUT UINT8              *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL

@@ -210,38 +210,49 @@ uint8_t *readFile(const char *str, uint32_t *size) {
 
 int main(int argc, char** argv) {
   UINT32 Size;
+  UINT32 AllocSize;
   UINT8  *Prelinked;
   PRELINKED_CONTEXT Context;
-  CHAR8 *NewKextInfoPlistData;
   if ((Prelinked = readFile(argc > 1 ? argv[1] : "prelinkedkernel.unpack", &Size)) == NULL) {
     printf("Read fail\n");
     return -1;
   }
 
-  EFI_STATUS Status = PrelinkedContextInit (&Context, Prelinked, Size, Size);
+
+  AllocSize = PRELINKED_ALIGN (Size + sizeof (KextInfoPlistData));
+
+  Prelinked = realloc (Prelinked, AllocSize);
+  if (Prelinked == NULL) {
+    printf("Realloc fail\n");
+    return -1;
+  }
+
+  EFI_STATUS Status = PrelinkedContextInit (&Context, Prelinked, Size, AllocSize);
 
   if (!EFI_ERROR (Status)) {
-    PrelinkedDropPlistInfo (&Context);
+    Status = PrelinkedInjectPrepare (&Context);
+    if (EFI_ERROR (Status)) {
+      printf("Prelink inject prepare error %zx\n", Status);
+    }
 
     Status = PrelinkedInjectKext (
       &Context,
       "/Library/Extensions/TestDriver.kext",
       KextInfoPlistData,
       sizeof (KextInfoPlistData),
-      &NewKextInfoPlistData,
       NULL,
       NULL,
       0
       );
 
     if (EFI_ERROR (Status)) {
-      NewKextInfoPlistData = NULL;
+      printf("Prelink inject error %zx\n", Status);
     }
 
-    Status = PrelinkedInsertPlistInfo (&Context);
+    Status = PrelinkedInjectComplete (&Context);
 
     if (EFI_ERROR (Status)) {
-      printf("Plist insert error %zx\n", Status);
+      printf("Prelink inject complete error %zx\n", Status);
     }
 
     FILE *Fh = fopen("out.bin", "wb");
@@ -249,12 +260,15 @@ int main(int argc, char** argv) {
     if (Fh != NULL) {
       fwrite (Prelinked, Context.PrelinkedSize, 1, Fh);
       fclose(Fh);
+
+      if (!EFI_ERROR (Status)) {
+        printf("All good\n");
+      }
+    } else {
+      printf("File error\n");
     }
 
     PrelinkedContextFree (&Context);
-    if (NewKextInfoPlistData != NULL) {
-      FreePool (NewKextInfoPlistData);
-    }
   } else {
     printf("Context creation error %zx\n", Status);
   }

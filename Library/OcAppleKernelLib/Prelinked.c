@@ -75,6 +75,23 @@ PrelinkedContextInit (
     return EFI_NOT_FOUND;
   }
 
+  Context->PlistTextSegment = MachoGetSegmentByName64 (
+    &Context->PrelinkedMachContext,
+    PRELINK_TEXT_SEGMENT
+    );
+  if (Context->PlistTextSegment == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  Context->PlistTextSection = MachoGetSectionByName64 (
+    &Context->PrelinkedMachContext,
+    Context->PlistTextSegment,
+    PRELINK_TEXT_SECTION
+    );
+  if (Context->PlistTextSection == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
   Context->PlistInfo = AllocateCopyPool (
     Context->PlistInfoSection->Size,
     &Context->Prelinked[Context->PlistInfoSection->Offset]
@@ -119,33 +136,76 @@ PrelinkedContextFree (
   IN OUT  PRELINKED_CONTEXT  *Context
   )
 {
+  UINT32  Index;
+
   if (Context->PlistInfoDocument != NULL) {
     XmlDocumentFree (Context->PlistInfoDocument);
     Context->PlistInfoDocument = NULL;
   }
 
-  if (Context->PlistInfo) {
+  if (Context->PlistInfo != NULL) {
     FreePool (Context->PlistInfo);
     Context->PlistInfo = NULL;
   }
+
+  if (Context->PooledBuffers != NULL) {
+    for (Index = 0; Index < Context->PooledBuffersCount; ++Index) {
+      FreePool (Context->PooledBuffers[Index]);
+    }
+    FreePool (Context->PooledBuffers);
+    Context->PooledBuffers = NULL;
+  }
 }
 
-VOID
-PrelinkedDropPlistInfo (
+EFI_STATUS
+PrelinkedDependencyInsert (
+  IN OUT  PRELINKED_CONTEXT  *Context,
+  IN      VOID               *Buffer
+  )
+{
+  VOID   **NewPooledBuffers;
+
+  if (Context->PooledBuffersCount == Context->PooledBuffersAllocCount) {
+    NewPooledBuffers = AllocatePool (
+      2 * (Context->PooledBuffersAllocCount + 1) * sizeof (NewPooledBuffers[0])
+      );
+    if (NewPooledBuffers == NULL) {
+      return EFI_OUT_OF_RESOURCES;
+    }
+    if (Context->PooledBuffers != NULL) {
+      CopyMem (
+        &NewPooledBuffers[0],
+        &Context->PooledBuffers[0],
+        Context->PooledBuffersCount * sizeof (NewPooledBuffers[0])
+        );
+      FreePool (Context->PooledBuffers);
+    }
+    Context->PooledBuffers           = NewPooledBuffers;
+    Context->PooledBuffersAllocCount = 2 * (Context->PooledBuffersAllocCount + 1);
+  }
+
+  Context->PooledBuffers[Context->PooledBuffersCount] = Buffer;
+  Context->PooledBuffersCount++;
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+PrelinkedInjectPrepare (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
-  UINT32  PlistEndOffset;
+  UINT32  SegmentEndOffset;
 
   //
   // Plist info is normally the last segment, so we may potentially save
   // some data by removing it and then appending new kexts over.
   //
 
-  PlistEndOffset = Context->PlistInfoSegment->FileOffset + Context->PlistInfoSegment->FileSize;
+  SegmentEndOffset = Context->PlistInfoSegment->FileOffset + Context->PlistInfoSegment->FileSize;
 
-  if (PRELINKED_ALIGN (PlistEndOffset) == PRELINKED_ALIGN (Context->PrelinkedSize)) {
-    Context->PrelinkedSize = Context->PlistInfoSegment->FileOffset;
+  if (PRELINKED_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
+    Context->PrelinkedSize = PRELINKED_ALIGN (Context->PlistInfoSegment->FileOffset);
   }
 
   Context->PlistInfoSegment->VirtualAddress = 0;
@@ -155,10 +215,26 @@ PrelinkedDropPlistInfo (
   Context->PlistInfoSection->Address        = 0;
   Context->PlistInfoSection->Size           = 0;
   Context->PlistInfoSection->Offset         = 0;
+
+  //
+  // Prior to plist there usually is prelinked text. 
+  //
+
+  SegmentEndOffset = Context->PlistTextSegment->FileOffset + Context->PlistTextSegment->FileSize;
+
+  if (PRELINKED_ALIGN (SegmentEndOffset) != Context->PrelinkedSize) {
+    //
+    // TODO: Implement prelinked text relocation when it is not preceding prelinked info
+    // and is not in the end of prelinked info.
+    //
+    return EFI_UNSUPPORTED;
+  }
+
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
-PrelinkedInsertPlistInfo (
+PrelinkedInjectComplete (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
@@ -220,14 +296,15 @@ PrelinkedInjectKext (
   IN     CONST CHAR8        *BundlePath,
   IN OUT CHAR8              *InfoPlist,
   IN     UINT32             InfoPlistSize,
-     OUT CHAR8              **NewInfoPlist,
   IN     CONST CHAR8        *ExecutablePath OPTIONAL,
   IN OUT UINT8              *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL
   )
 {
+  EFI_STATUS    Status;
   XML_DOCUMENT  *InfoPlistDocument;
   XML_NODE      *InfoPlistRoot;
+  CHAR8         *NewInfoPlist;
   UINT32        NewInfoPlistSize;
 
   if (Executable != NULL) {
@@ -257,16 +334,21 @@ PrelinkedInjectKext (
   //
   // Strip outer plist & dict.
   //
-  *NewInfoPlist = XmlDocumentExport (InfoPlistDocument, &NewInfoPlistSize, 2);
+  NewInfoPlist = XmlDocumentExport (InfoPlistDocument, &NewInfoPlistSize, 2);
 
   XmlDocumentFree (InfoPlistDocument);
 
-  if (*NewInfoPlist == NULL) {
+  if (NewInfoPlist == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  if (XmlNodeAppend (Context->KextList, "dict", NULL, *NewInfoPlist) == NULL) {
-    FreePool (*NewInfoPlist);
+  Status = PrelinkedDependencyInsert (Context, NewInfoPlist);
+  if (EFI_ERROR (Status)) {
+    FreePool (NewInfoPlist);
+    return Status;
+  }
+
+  if (XmlNodeAppend (Context->KextList, "dict", NULL, NewInfoPlist) == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 

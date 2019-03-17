@@ -213,41 +213,34 @@ CheckPrelinked (
 {
   EFI_STATUS         Status;
   PRELINKED_CONTEXT  Context;
-  CHAR8              *NewKextInfoPlistData;
 
   Status = PrelinkedContextInit (&Context, Kernel, KernelSize, AllocatedSize);
 
   if (!EFI_ERROR (Status)) {
-    PrelinkedDropPlistInfo (&Context);
+    Status = PrelinkedInjectPrepare (&Context);
+    if (!EFI_ERROR (Status)) {
+      Status = PrelinkedInjectKext (
+        &Context,
+        "/Library/Extensions/TestDriver.kext",
+        KextInfoPlistData,
+        sizeof (KextInfoPlistData),
+        NULL,
+        NULL,
+        0
+        );
 
-    Status = PrelinkedInjectKext (
-      &Context,
-      "/Library/Extensions/TestDriver.kext",
-      KextInfoPlistData,
-      sizeof (KextInfoPlistData),
-      &NewKextInfoPlistData,
-      NULL,
-      NULL,
-      0
-      );
+      DEBUG ((DEBUG_WARN, "TestDriver.kext injected - %r\n", Status));
 
-    if (EFI_ERROR (Status)) {
-      NewKextInfoPlistData = NULL;
-    }
+      Status = PrelinkedInjectComplete (&Context);
 
-    DEBUG ((DEBUG_WARN, "TestDriver.kext injected - %r\n", Status));
-
-    Status = PrelinkedInsertPlistInfo (&Context);
-
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "Plist insertion error - %r\n", Status));
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_WARN, "Plist insertion error - %r\n", Status));
+      }
+    } else {
+      DEBUG ((DEBUG_WARN, "Plist inject prepare error - %r\n", Status));
     }
 
     PrelinkedContextFree (&Context);
-
-    if (NewKextInfoPlistData != NULL) {
-      FreePool (NewKextInfoPlistData);
-    }
   }
 
   return Status;
