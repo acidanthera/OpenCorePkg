@@ -806,8 +806,8 @@ invalid_match_distance:
 #endif
 }
 
-size_t lzvn_decode_buffer(void *dst, size_t dst_size,
-                          const void *src, size_t src_size) {
+size_t lzvn_decode_buffer(unsigned char *dst, size_t dst_size,
+                          const unsigned char *src, size_t src_size) {
   // Init LZVN decoder state
   lzvn_decoder_state dstate;
 
@@ -830,5 +830,5 @@ size_t lzvn_decode_buffer(void *dst, size_t dst_size,
   lzvn_decode(&dstate);
 
   // This is how much we decompressed
-  return dstate.dst - (unsigned char*) dst;
+  return dstate.dst - dst;
 }

@@ -69,10 +69,10 @@ DecompressLZSS (
 **/
 UINTN
 DecompressLZVN (
-  OUT VOID        *Dst,
-  IN  UINTN       DstLen,
-  IN  CONST VOID  *Src,
-  IN  UINTN       SrcLen
+  OUT UINT8        *Dst,
+  IN  UINTN        DstLen,
+  IN  CONST UINT8  *Src,
+  IN  UINTN        SrcLen
   );
 
 #endif // OC_COMPRESSION_LIB_H
