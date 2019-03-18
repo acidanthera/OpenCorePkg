@@ -179,7 +179,6 @@ SetDataHubEntry (
   EFI_STATUS            Status;
   
   PLATFORM_DATA_HEADER  *Entry;
-  CHAR8                 *DataString;
   UINT32                KeySize;
   UINT32                TotalSize;
 
@@ -208,25 +207,14 @@ SetDataHubEntry (
     TotalSize
     );
 
-  if (DataSize < 32) {
-    DataString = ConvertDataToString (Data, DataSize);
-  } else {
-    DataString = NULL;
-  }
-
   DEBUG ((
     EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-    "Setting DataHub %g:%s = %a (%u) - %r\n",
+    "Setting DataHub %g:%s (%u) - %r\n",
     &gApplePlatformProducerNameGuid,
     Key,
-    DataString != NULL ? DataString : "<...>",
     DataSize,
     Status
     ));
-
-  if (DataString != NULL) {
-    FreePool (DataString);
-  }
 
   FreePool (Entry);
 

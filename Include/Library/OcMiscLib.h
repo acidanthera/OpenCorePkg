@@ -45,20 +45,6 @@ OcBase64Decode (
   IN OUT UINTN        *DecodedLength
   );
 
-// ConvertDataToString
-/** Attempt to convert the data into an ascii string.
-
-  @param[in] Data      A pointer to the data to convert.
-  @param[in] DataSize  The length of data to convert.
-
-  @retval  An ascii string representing the data.
-**/
-CHAR8 *
-ConvertDataToString (
-  IN CONST VOID   *Data,
-  IN UINTN        DataSize
-  );
-
 // LegacyRegionlock
 /** Lock the legacy region specified to enable modification.
 

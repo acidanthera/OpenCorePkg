@@ -48,7 +48,6 @@
 
 [Sources]
   Base64Decode.c
-  ConvertDataToString.c
   DataPatcher.c
   DebugHelp.c
   LegacyRegionLock.c
