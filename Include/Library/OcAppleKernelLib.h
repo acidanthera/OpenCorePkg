@@ -381,5 +381,17 @@ PatcherApplyGenericPatch (
   IN     PATCHER_GENERIC_PATCH  *Patch
   );
 
+/**
+  Block kext from loading.
+
+  @param[in,out] Context         Patcher context.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PatcherBlockKext (
+  IN OUT PATCHER_CONTEXT        *Context
+  );
+
 #endif // OC_APPLE_KERNEL_LIB_H
 

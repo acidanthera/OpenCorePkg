@@ -12,6 +12,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include <IndustryStandard/AppleKmodInfo.h>
+
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
@@ -233,4 +235,52 @@ PatcherApplyGenericPatch (
   }
 
   return EFI_NOT_FOUND;
+}
+
+EFI_STATUS
+PatcherBlockKext (
+  IN OUT PATCHER_CONTEXT        *Context
+  )
+{
+  UINT64           KmodOffset;
+  UINT64           TmpOffset;
+  KMOD_INFO_64_V1  *KmodInfo;
+  UINT8            *PatchAddr;
+
+  //
+  // Kernel has 0 kmod.
+  //
+  if (Context->VirtualKmod == 0 || Context->VirtualBase > Context->VirtualKmod) {
+    return EFI_UNSUPPORTED;
+  }
+
+  KmodOffset = Context->VirtualKmod - Context->VirtualBase;
+  KmodInfo   = (KMOD_INFO_64_V1 *) ((UINT8 *) MachoGetMachHeader64 (&Context->MachContext) + KmodOffset);
+  if (OcOverflowAddU64 (KmodOffset, sizeof (KMOD_INFO_64_V1), &TmpOffset)
+    || KmodOffset > MachoGetFileSize (&Context->MachContext)
+    || !OC_ALIGNED (KmodInfo)
+    || KmodInfo->StartAddr == 0
+    || Context->VirtualBase > KmodInfo->StartAddr) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  TmpOffset = KmodInfo->StartAddr - Context->VirtualBase;
+  if (TmpOffset > MachoGetFileSize (&Context->MachContext) - 6) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  PatchAddr = (UINT8 *) MachoGetMachHeader64 (&Context->MachContext) + TmpOffset;
+
+  //
+  // mov eax, KMOD_RETURN_FAILURE
+  // ret
+  //
+  PatchAddr[0] = 0xB8;
+  PatchAddr[1] = KMOD_RETURN_FAILURE;
+  PatchAddr[2] = 0x00;
+  PatchAddr[3] = 0x00;
+  PatchAddr[4] = 0x00;
+  PatchAddr[5] = 0xC3;
+
+  return EFI_SUCCESS;
 }

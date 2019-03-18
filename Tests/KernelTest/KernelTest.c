@@ -13148,6 +13148,23 @@ ApplyKextPatches (
   } else {
     DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
   }
+
+  Status = PatcherInitContextFromPrelinked (
+    &Patcher,
+    Context,
+    "com.apple.driver.AppleHDAController"
+    );
+
+  if (!EFI_ERROR (Status)) {
+    Status = PatcherBlockKext (&Patcher);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Failed to block com.apple.driver.AppleHDAController - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_WARN, "Block success com.apple.driver.AppleHDAController\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.AppleHDAController - %r\n", Status));
+  }
 }
 
 STATIC
