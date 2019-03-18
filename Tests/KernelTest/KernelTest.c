@@ -13007,6 +13007,55 @@ DisableAppleHDAPatch = {
 };
 
 STATIC
+UINT8
+RemoveUsbLimitV1Find[] = {
+  0xff, 0xff, 0x10
+};
+
+STATIC
+UINT8
+RemoveUsbLimitV1Replace[] = {
+  0xff, 0xff, 0x40
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+RemoveUsbLimitV1Patch = {
+  .Base    = "__ZN15AppleUSBXHCIPCI11createPortsEv",
+  .Find    = RemoveUsbLimitV1Find,
+  .Mask    = NULL,
+  .Replace = RemoveUsbLimitV1Replace,
+  .Size    = sizeof (RemoveUsbLimitV1Replace),
+  .Count   = 1,
+  .Skip    = 0
+};
+
+STATIC
+UINT8
+RemoveUsbLimitV2Find[] = {
+  0x0f, 0x0f, 0x83
+};
+
+STATIC
+UINT8
+RemoveUsbLimitV2Replace[] = {
+  0x40, 0x0f, 0x83
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+RemoveUsbLimitV2Patch = {
+  .Base    = "__ZN12AppleUSBXHCI11createPortsEv",
+  .Find    = RemoveUsbLimitV2Find,
+  .Mask    = NULL,
+  .Replace = RemoveUsbLimitV2Replace,
+  .Size    = sizeof (RemoveUsbLimitV2Replace),
+  .Count   = 1,
+  .Skip    = 0
+};
+
+
+STATIC
 VOID
 ApplyKextPatches (
   PRELINKED_CONTEXT  *Context
@@ -13064,6 +13113,40 @@ ApplyKextPatches (
     }
   } else {
     DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.AppleHDA - %r\n", Status));
+  }
+
+  Status = PatcherInitContextFromPrelinked (
+    &Patcher,
+    Context,
+    "com.apple.driver.usb.AppleUSBXHCI"
+    );
+
+  if (!EFI_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (&Patcher, &RemoveUsbLimitV2Patch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Failed to apply patch com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_WARN, "Patch success com.apple.driver.usb.AppleUSBXHCI\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
+  }
+
+  Status = PatcherInitContextFromPrelinked (
+    &Patcher,
+    Context,
+    "com.apple.driver.usb.AppleUSBXHCIPCI"
+    );
+
+  if (!EFI_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (&Patcher, &RemoveUsbLimitV1Patch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Failed to apply patch com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_WARN, "Patch success com.apple.driver.usb.AppleUSBXHCIPCI\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
   }
 }
 
