@@ -74,7 +74,7 @@ DataHubSetAppleMiscAscii (
       &gEfiMiscSubClassGuid,
       Key,
       Value,
-      AsciiStrSize (Value)
+      (UINT32)AsciiStrSize (Value)
       );
   }
 
@@ -106,7 +106,7 @@ DataHubSetAppleMiscUnicode (
       &gEfiMiscSubClassGuid,
       Key,
       UnicodeValue,
-      StrSize (UnicodeValue)
+      (UINT32)StrSize (UnicodeValue)
       );
 
     FreePool (UnicodeValue);

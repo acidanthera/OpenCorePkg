@@ -196,7 +196,7 @@ PrelinkedInjectPrepare (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
-  UINT32  SegmentEndOffset;
+  UINT64  SegmentEndOffset;
 
   //
   // Plist info is normally the last segment, so we may potentially save

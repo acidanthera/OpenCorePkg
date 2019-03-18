@@ -881,14 +881,14 @@ XmlNodeExportRecursive (
     return;
   }
 
-  NameLength = AsciiStrLen (Node->Name);
+  NameLength = (UINT32)AsciiStrLen (Node->Name);
 
   XmlBufferAppend (Buffer, AllocSize, CurrentSize, "<", L_STR_LEN ("<"));
   XmlBufferAppend (Buffer, AllocSize, CurrentSize, Node->Name, NameLength);
 
   if (Node->Attributes != NULL) {
     XmlBufferAppend (Buffer, AllocSize, CurrentSize, " ", L_STR_LEN (" "));
-    XmlBufferAppend (Buffer, AllocSize, CurrentSize, Node->Attributes, AsciiStrLen (Node->Attributes));
+    XmlBufferAppend (Buffer, AllocSize, CurrentSize, Node->Attributes, (UINT32)AsciiStrLen (Node->Attributes));
   }
 
   if (Node->Children != NULL || Node->Content != NULL) {
@@ -899,7 +899,7 @@ XmlNodeExportRecursive (
         XmlNodeExportRecursive (Node->Children->NodeList[Index], Buffer, AllocSize, CurrentSize, 0);
       }
     } else {
-      XmlBufferAppend (Buffer, AllocSize, CurrentSize, Node->Content, AsciiStrLen (Node->Content));
+      XmlBufferAppend (Buffer, AllocSize, CurrentSize, Node->Content, (UINT32)AsciiStrLen (Node->Content));
     }
 
     XmlBufferAppend (Buffer, AllocSize, CurrentSize, "</", L_STR_LEN ("</"));

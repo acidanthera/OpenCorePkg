@@ -98,7 +98,8 @@ u_int32_t decompress_lzss(
     u_int8_t * dststart = dst;
     const u_int8_t * dstend = dst + dstlen;
     const u_int8_t * srcend = src + srclen;
-    int  i, j, k, r, c;
+    int  i, j, k, r;
+    u_int8_t c;
     unsigned int flags;
 
     if (dstlen > OC_COMPRESSION_MAX_LENGTH || srclen > OC_COMPRESSION_MAX_LENGTH) {
@@ -263,7 +264,8 @@ u_int8_t * compress_lzss(
     /* Encoding state, mostly tree but some current match stuff */
     struct encode_state *sp;
 
-    int  i, c, len, r, s, last_match_length, code_buf_ptr;
+    int  i, len, r, s, last_match_length, code_buf_ptr;
+    u_int8_t c;
     u_int8_t code_buf[17], mask;
     u_int8_t * srcend = src + srclen;
     u_int8_t *dstend = dst + dstlen;
