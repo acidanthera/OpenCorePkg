@@ -13054,6 +13054,23 @@ RemoveUsbLimitV2Patch = {
   .Skip    = 0
 };
 
+STATIC
+UINT8
+DisableKernelLog[] = {
+  0xC3
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+KernelPatch = {
+  .Base    = "_IOLog",
+  .Find    = NULL,
+  .Mask    = NULL,
+  .Replace = DisableKernelLog,
+  .Size    = sizeof (DisableKernelLog),
+  .Count   = 1,
+  .Skip    = 0
+};
 
 STATIC
 VOID
@@ -13164,6 +13181,36 @@ ApplyKextPatches (
     }
   } else {
     DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.AppleHDAController - %r\n", Status));
+  }
+}
+
+STATIC
+VOID
+ApplyKernelPatches (
+  IN OUT UINT8   *Kernel,
+  IN     UINT32  Size
+  )
+{
+  EFI_STATUS       Status;
+  PATCHER_CONTEXT  Patcher;
+
+  Status = PatcherInitContextFromBuffer (
+    &Patcher,
+    Kernel,
+    Size,
+    0,
+    0
+    );
+
+  if (!EFI_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (&Patcher, &KernelPatch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Failed to apply patch kernel - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_WARN, "Patch success kernel\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "Failed to find kernel - %r\n", Status));
   }
 }
 
@@ -13298,6 +13345,8 @@ TestFileOpen (
     //
     // TODO: patches, dropping, and injection here.
     //
+
+    ApplyKernelPatches (Kernel, KernelSize);
 
     PrelinkedStatus = TestInjectPrelinked (Kernel, &KernelSize, AllocatedSize);
 

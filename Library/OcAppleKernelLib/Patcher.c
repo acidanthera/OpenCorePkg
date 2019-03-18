@@ -135,15 +135,25 @@ PatcherInitContextFromBuffer (
   IN     UINT64             VirtualKmod OPTIONAL
   )
 {
+  MACH_SEGMENT_COMMAND_64  *Segment;
+
   if (!MachoInitializeContext (&Context->MachContext, Buffer, BufferSize)) {
     return EFI_INVALID_PARAMETER;
   }
 
   if (VirtualBase == 0) {
     //
-    // TODO: iterate segments and get it.
+    // Get the segment containing kernel segment.
     //
-    return EFI_UNSUPPORTED;
+    Segment = MachoGetSegmentByName64 (
+      &Context->MachContext,
+      "__TEXT"
+      );
+    if (Segment == NULL || Segment->VirtualAddress < Segment->FileOffset) {
+      return EFI_NOT_FOUND;
+    }
+
+    VirtualBase = Segment->VirtualAddress - Segment->FileOffset;
   }
 
   Context->VirtualBase = VirtualBase;
