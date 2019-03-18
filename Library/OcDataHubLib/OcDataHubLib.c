@@ -28,6 +28,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcDataHubLib.h>
+#include <Library/OcGuardLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
@@ -181,10 +182,20 @@ SetDataHubEntry (
   PLATFORM_DATA_HEADER  *Entry;
   UINT32                KeySize;
   UINT32                TotalSize;
+  BOOLEAN               Result;
 
-  KeySize   = (UINT32) StrSize (Key);
-  TotalSize = sizeof (*Entry) + KeySize + DataSize;
-  Entry     = AllocateZeroPool (TotalSize);
+  KeySize = (UINT32) StrSize (Key);
+  Result  = OcOverflowTriAddU32 (
+              sizeof (*Entry),
+              KeySize,
+              DataSize,
+              &TotalSize
+              );
+  if (Result) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Entry = AllocateZeroPool (TotalSize);
 
   if (Entry == NULL) {
     return EFI_OUT_OF_RESOURCES;

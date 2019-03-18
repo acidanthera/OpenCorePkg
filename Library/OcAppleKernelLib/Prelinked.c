@@ -66,6 +66,9 @@ PrelinkedContextInit (
   if (Context->PrelinkedInfoSegment == NULL) {
     return EFI_NOT_FOUND;
   }
+  if (Context->PrelinkedInfoSegment->FileOffset > MAX_UINT32) {
+    return EFI_UNSUPPORTED;
+  }
 
   Context->PrelinkedInfoSection = MachoGetSectionByName64 (
     &Context->PrelinkedMachContext,
@@ -74,6 +77,9 @@ PrelinkedContextInit (
     );
   if (Context->PrelinkedInfoSection == NULL) {
     return EFI_NOT_FOUND;
+  }
+  if (Context->PrelinkedInfoSection->Size > MAX_UINT32) {
+    return EFI_UNSUPPORTED;
   }
 
   Context->PrelinkedTextSegment = MachoGetSegmentByName64 (
@@ -101,7 +107,7 @@ PrelinkedContextInit (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Context->PrelinkedInfoDocument = XmlDocumentParse (Context->PrelinkedInfo, Context->PrelinkedInfoSection->Size, TRUE);
+  Context->PrelinkedInfoDocument = XmlDocumentParse (Context->PrelinkedInfo, (UINT32)Context->PrelinkedInfoSection->Size, TRUE);
   if (Context->PrelinkedInfoDocument == NULL) {
     PrelinkedContextFree (Context);
     return EFI_INVALID_PARAMETER;
@@ -206,7 +212,7 @@ PrelinkedInjectPrepare (
   SegmentEndOffset = Context->PrelinkedInfoSegment->FileOffset + Context->PrelinkedInfoSegment->FileSize;
 
   if (PRELINKED_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
-    Context->PrelinkedSize = PRELINKED_ALIGN (Context->PrelinkedInfoSegment->FileOffset);
+    Context->PrelinkedSize = (UINT32)PRELINKED_ALIGN (Context->PrelinkedInfoSegment->FileOffset);
   }
 
   Context->PrelinkedInfoSegment->VirtualAddress = 0;
