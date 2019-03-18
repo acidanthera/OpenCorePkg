@@ -1,5 +1,5 @@
 /** @file
-  Test data hub support.
+  Test kernel patch support.
 
 Copyright (c) 2018, vit9696. All rights reserved.<BR>
 This program and the accompanying materials
