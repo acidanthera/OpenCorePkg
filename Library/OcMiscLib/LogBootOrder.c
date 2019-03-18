@@ -46,7 +46,7 @@ LogBootOrder (
 
   BootOrderBuffer = NULL;
 
-  if (BootOrder == NULL && BootOrderSize == 0) {
+  if (BootOrderSize == 0) {
 
     Status = GetVariable2 (
                L"BootOrder",
@@ -59,14 +59,10 @@ LogBootOrder (
       return Status;
     }
 
-    if (BootOrder == NULL || BootOrderSize == 0) {
-      return EFI_NOT_FOUND;
-    }
-
     BootOrder = BootOrderBuffer;
 
-  } else if (BootOrder == NULL || BootOrderSize == 0) {
-    return EFI_INVALID_PARAMETER;
+  } else {
+    ASSERT (BootOrder != NULL);
   }
 
   Status = EFI_OUT_OF_RESOURCES;
