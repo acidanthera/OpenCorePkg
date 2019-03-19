@@ -25,7 +25,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   @param[in] Context  Context of the Mach-O.
 
   @retval NULL  NULL is returned on failure.
-
 **/
 BOOLEAN
 InternalRetrieveSymtabs64 (
@@ -39,12 +38,25 @@ InternalRetrieveSymtabs64 (
   @param[in]     Address  The address to search for.
 
   @retval NULL  NULL is returned on failure.
-
 **/
 MACH_RELOCATION_INFO *
 InternalGetExternalRelocationByOffset (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT64            Address
+  );
+
+/**
+  Check symbol validity.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Symbol from some table.
+
+  @retval TRUE on success.
+**/
+BOOLEAN
+InternalSymbolIsSane (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST_64  *Symbol
   );
 
 #endif // OC_MACHO_LIB_INTERNAL_H_

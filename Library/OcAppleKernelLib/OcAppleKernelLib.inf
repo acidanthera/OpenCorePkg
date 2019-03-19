@@ -29,6 +29,7 @@
 #
 
 [Sources]
+  Dependencies.c
   Link.c
   Link.h
   Patcher.c

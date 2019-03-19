@@ -878,3 +878,87 @@ InternalRetrieveSymtabs64 (
 
   return TRUE;
 }
+
+UINT32
+MachoGetSymbolTable (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  OUT    CONST MACH_NLIST_64  **SymbolTable,
+  OUT    CONST MACH_NLIST_64  **LocalSymbols, OPTIONAL
+  OUT    UINT32               *NumLocalSymbols, OPTIONAL
+  OUT    CONST MACH_NLIST_64  **ExternalSymbols, OPTIONAL
+  OUT    UINT32               *NumExternalSymbols, OPTIONAL
+  OUT    CONST MACH_NLIST_64  **UndefinedSymbols, OPTIONAL
+  OUT    UINT32               *NumUndefinedSymbols OPTIONAL
+  )
+{
+  UINT32              Index;
+  CONST MACH_NLIST_64 *SymTab;
+
+  ASSERT (Context != NULL);
+
+  if (!InternalRetrieveSymtabs64 (Context)
+   || (Context->Symtab->NumSymbols == 0)) {
+    return 0;
+  }
+
+  SymTab = Context->SymbolTable;
+
+  for (Index = 0; Index < Context->Symtab->NumSymbols; ++Index) {
+    if (!InternalSymbolIsSane (Context, &SymTab[Index])) {
+      return 0;
+    }
+  }
+
+  *SymbolTable = Context->SymbolTable;
+
+  if (LocalSymbols != NULL) {
+    ASSERT (NumLocalSymbols != NULL);
+    *NumLocalSymbols = Context->DySymtab->NumLocalSymbols;
+    if (Context->DySymtab->NumLocalSymbols != 0) {
+      *LocalSymbols = &SymTab[Context->DySymtab->LocalSymbolsIndex];
+    }
+  }
+
+  if (ExternalSymbols != NULL) {
+    ASSERT (NumExternalSymbols != NULL);
+    *NumExternalSymbols = Context->DySymtab->NumExternalSymbols;
+    if (Context->DySymtab->NumExternalSymbols != 0) {
+      *ExternalSymbols = &SymTab[Context->DySymtab->ExternalSymbolsIndex];
+    }
+  }
+
+  if (UndefinedSymbols != NULL) {
+    ASSERT (NumUndefinedSymbols != NULL);
+    *NumUndefinedSymbols = Context->DySymtab->NumUndefinedSymbols;
+    if (Context->DySymtab->NumUndefinedSymbols != 0) {
+      *UndefinedSymbols = &SymTab[Context->DySymtab->UndefinedSymbolsIndex];
+    }
+  }
+
+  return Context->Symtab->NumSymbols;
+}
+
+UINT32
+MachoGetIndirectSymbolTable (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  OUT    CONST MACH_NLIST_64  **SymbolTable
+  )
+{
+  UINT32 Index;
+
+  if (!InternalRetrieveSymtabs64 (Context)) {
+    return 0;
+  }
+
+  for (Index = 0; Index < Context->DySymtab->NumIndirectSymbols; ++Index) {
+    if (
+      !InternalSymbolIsSane (Context, &Context->IndirectSymbolTable[Index])
+      ) {
+      return 0;
+    }
+  }
+
+  *SymbolTable = Context->IndirectSymbolTable;
+
+  return Context->DySymtab->NumIndirectSymbols;
+}

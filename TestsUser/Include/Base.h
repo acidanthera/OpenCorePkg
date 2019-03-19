@@ -1266,4 +1266,8 @@ STATIC EFI_RUNTIME_SERVICES *gRT = &gNilRT;
 
 #include <Protocol/DevicePath.h>
 
+#ifndef ABS
+#define ABS(x) (((x)<0) ? -(x) : (x))
+#endif
+
 #endif

@@ -20,10 +20,10 @@
 #include <sys/time.h>
 
 /*
- clang -g -fsanitize=undefined,address -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c ../../Library/OcAppleKernelLib/Prelinked.c ../../Library/OcAppleKernelLib/Patcher.c ../../Library/OcMiscLib/DataPatcher.c -o Prelinked
+ clang -g -fsanitize=undefined,address -Wno-incompatible-pointer-types-discards-qualifiers -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c ../../Library/OcAppleKernelLib/Prelinked.c ../../Library/OcAppleKernelLib/Patcher.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcAppleKernelLib/Prelinker.c ../../Library/OcAppleKernelLib/Link.c ../../Library/OcAppleKernelLib/Dependencies.c ../../Library/OcAppleKernelLib/Vtables.c -o Prelinked
 
  for fuzzing:
- clang-mp-7.0 -Dmain=__main -g -fsanitize=undefined,address,fuzzer -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c ../../Library/OcAppleKernelLib/Prelinked.c ../../Library/OcAppleKernelLib/Patcher.c ../../Library/OcMiscLib/DataPatcher.c -o Prelinked
+ clang-mp-7.0 -Dmain=__main -g -fsanitize=undefined,address,fuzzer -Wno-incompatible-pointer-types-discards-qualifiers -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c ../../Library/OcAppleKernelLib/Prelinked.c ../../Library/OcAppleKernelLib/Patcher.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcAppleKernelLib/Prelinker.c ../../Library/OcAppleKernelLib/Link.c ../../Library/OcAppleKernelLib/Dependencies.c ../../Library/OcAppleKernelLib/Vtables.c -o Prelinked
  rm -rf DICT fuzz*.log ; mkdir DICT ; cp Prelinked.plist DICT ; ./Prelinked -jobs=4 DICT
 
  rm -rf Prelinked.dSYM DICT fuzz*.log Prelinked
@@ -13149,7 +13149,7 @@ int main(int argc, char** argv) {
   }
 
 
-  AllocSize = PRELINKED_ALIGN (Size + sizeof (KextInfoPlistData));
+  AllocSize = PRELINKED_ALIGN (Size + 16*1024*1024);
 
   Prelinked = realloc (Prelinked, AllocSize);
   if (Prelinked == NULL) {
@@ -13223,19 +13223,55 @@ int main(int argc, char** argv) {
 }
 
 INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
-  VOID *NewData = AllocatePool (Size);
-  if (NewData) {
-    CopyMem (NewData, Data, Size);
-    XML_DOCUMENT *doc = XmlDocumentParse((char *)NewData, Size, TRUE);
-    if (doc != NULL) {
-      UINT32 s;
-      CHAR8 *buf = XmlDocumentExport(doc, &s, 0);
-      if (buf != NULL) {
-        FreePool (buf);
-      }
-      XmlDocumentFree (doc);
-    }
-    FreePool (NewData);
+  UINT32 PrelinkedSize;
+  UINT32 AllocSize;
+  UINT8  *Prelinked;
+  PRELINKED_CONTEXT Context;
+
+  if (Size == 0) {
+    return 0;
   }
+
+  if ((Prelinked = readFile("prelinkedkernel.unpack", &PrelinkedSize)) == NULL) {
+    printf("Read fail\n");
+    return 0;
+  }
+
+  AllocSize = PRELINKED_ALIGN (PrelinkedSize + 16*1024*1024);
+
+  Prelinked = realloc (Prelinked, AllocSize);
+  if (Prelinked == NULL) {
+    return 0;
+  }
+
+  EFI_STATUS Status = PrelinkedContextInit (&Context, Prelinked, PrelinkedSize, AllocSize);
+
+  if (EFI_ERROR (Status)) {
+    free (Prelinked);
+    return 0;
+  }
+
+  Status = PrelinkedInjectPrepare (&Context);
+  if (EFI_ERROR (Status)) {
+    printf("Prelink inject prepare error %zx\n", Status);
+    PrelinkedContextFree (&Context);
+    free (Prelinked);
+    return 0;
+  }
+
+  Status = PrelinkedInjectKext (
+      &Context,
+      "/Library/Extensions/Lilu.kext",
+      LiluKextInfoPlistData,
+      sizeof (LiluKextInfoPlistData),
+      "Contents/MacOS/Lilu",
+      Data,
+      Size
+      );
+
+  PrelinkedInjectComplete (&Context);
+  PrelinkedContextFree (&Context);
+  free(Prelinked);
+
   return 0;
 }
