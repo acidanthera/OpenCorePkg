@@ -12,6 +12,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include <IndustryStandard/AppleKmodInfo.h>
+
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
@@ -19,6 +21,112 @@
 #include <Library/OcAppleKernelLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/PrintLib.h>
+
+STATIC
+UINT64
+PrelinkedFindLastLoadAddress (
+  IN XML_NODE  *KextList
+  )
+{
+  UINT32    KextCount;
+  UINT32    FieldIndex;
+  UINT32    FieldCount;
+  XML_NODE  *LastKext;
+  XML_NODE  *KextPlistKey;
+  XML_NODE  *KextPlistValue;
+  UINT64    LoadAddress;
+  UINT64    LoadSize;
+
+  KextCount = XmlNodeChildren (KextList);
+  if (KextCount == 0) {
+    return 0;
+  }
+
+  //
+  // Here we make an assumption that last kext has the highest load address.
+  //
+  LastKext = PlistNodeCast (XmlNodeChild (KextList, KextCount - 1), PLIST_NODE_TYPE_DICT);
+  if (LastKext == NULL) {
+    return 0;
+  }
+
+  LoadAddress = 0;
+  LoadSize = 0;
+
+  FieldCount = PlistDictChildren (LastKext);
+  for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
+    KextPlistKey = PlistDictChild (LastKext, FieldIndex, &KextPlistValue);
+    if (KextPlistKey == NULL) {
+      continue;
+    }
+
+    if (LoadAddress == 0 && AsciiStrCmp (PlistKeyValue (KextPlistKey), PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == 0) {
+      if (!PlistIntegerValue (KextPlistValue, &LoadAddress, sizeof (LoadAddress), TRUE)) {
+        return 0;
+      }
+    } else if (LoadSize == 0 && AsciiStrCmp (PlistKeyValue (KextPlistKey), PRELINK_INFO_EXECUTABLE_SIZE_KEY) == 0) {
+      if (!PlistIntegerValue (KextPlistValue, &LoadSize, sizeof (LoadSize), TRUE)) {
+        return 0;
+      }
+    }
+
+    if (LoadSize != 0 && LoadAddress != 0) {
+      break;
+    }
+  }
+
+  if (OcOverflowAddU64 (LoadAddress, LoadSize, &LoadAddress)) {
+    return 0;
+  }
+
+  return LoadAddress;
+}
+
+STATIC
+UINT64
+PrelinkedFindKmodAddress (
+  IN OC_MACHO_CONTEXT  *ExecutableContext,
+  IN UINT64            LoadAddress,
+  IN UINT32            Size
+  )
+{
+  MACH_NLIST_64            *Symbol;
+  CONST CHAR8              *SymbolName;
+  MACH_SEGMENT_COMMAND_64  *TextSegment;
+  UINT64                   Address;
+  UINT32                   Index;
+
+  Index = 0;
+  while (TRUE) {
+    Symbol = MachoGetSymbolByIndex64 (ExecutableContext, Index);
+    if (Symbol == NULL) {
+      return 0;
+    }
+
+    SymbolName = MachoGetSymbolName64 (ExecutableContext, Symbol);
+    if (SymbolName && AsciiStrCmp (SymbolName, "_kmod_info") == 0) {
+      if (!MachoIsSymbolValueInRange64 (ExecutableContext, Symbol)) {
+        return 0;
+      }
+      break;
+    }
+
+    Index++;
+  }
+
+  TextSegment = MachoGetSegmentByName64 (ExecutableContext, "__TEXT");
+  if (TextSegment == NULL || TextSegment->FileOffset > TextSegment->VirtualAddress) {
+    return 0;
+  }
+
+  Address = TextSegment->VirtualAddress - TextSegment->FileOffset;
+  if (OcOverflowTriAddU64 (Address, LoadAddress, Symbol->Value, &Address)
+    || Address > LoadAddress + Size - sizeof (KMOD_INFO_64_V1)) {
+    return 0;
+  }
+
+  return Address;
+}
 
 EFI_STATUS
 PrelinkedContextInit (
@@ -128,7 +236,10 @@ PrelinkedContextInit (
 
     if (AsciiStrCmp (PlistKeyValue (PrelinkedInfoRootKey), PRELINK_INFO_DICTIONARY_KEY) == 0) {
       if (PlistNodeCast (Context->KextList, PLIST_NODE_TYPE_ARRAY) != NULL) {
-        return EFI_SUCCESS;
+        Context->PrelinkedLastLoadAddress = PrelinkedFindLastLoadAddress (Context->KextList);
+        if (Context->PrelinkedLastLoadAddress != 0) {
+          return EFI_SUCCESS;
+        }
       }
       break;
     }
@@ -330,21 +441,22 @@ PrelinkedInjectKext (
   IN     UINT32             ExecutableSize OPTIONAL
   )
 {
-  EFI_STATUS    Status;
-  XML_DOCUMENT  *InfoPlistDocument;
-  XML_NODE      *InfoPlistRoot;
-  CHAR8         *TmpInfoPlist;
-  CHAR8         *NewInfoPlist;
-  UINT32        NewInfoPlistSize;
-  UINT32        NewPrelinkedSize;
-  UINT32        AlignedExecutableSize;
-  BOOLEAN       Failed;
-  UINT64        KmodAddress;
-  UINT64        LoadAddress;
-  CHAR8         ExecutableSourceAddrStr[24];
-  CHAR8         ExecutableSizeStr[24];
-  CHAR8         ExecutableLoadAddrStr[24];
-  CHAR8         KmodInfoStr[24];
+  EFI_STATUS        Status;
+  XML_DOCUMENT      *InfoPlistDocument;
+  XML_NODE          *InfoPlistRoot;
+  CHAR8             *TmpInfoPlist;
+  CHAR8             *NewInfoPlist;
+  OC_MACHO_CONTEXT  ExecutableContext;
+  UINT32            NewInfoPlistSize;
+  UINT32            NewPrelinkedSize;
+  UINT32            AlignedExecutableSize;
+  BOOLEAN           Failed;
+  UINT64            KmodAddress;
+  UINT64            LoadAddress;
+  CHAR8             ExecutableSourceAddrStr[24];
+  CHAR8             ExecutableSizeStr[24];
+  CHAR8             ExecutableLoadAddrStr[24];
+  CHAR8             KmodInfoStr[24];
 
   //
   // Copy executable to prelinkedkernel.
@@ -366,6 +478,15 @@ PrelinkedInjectKext (
       &Context->Prelinked[Context->PrelinkedSize + ExecutableSize],
       AlignedExecutableSize - ExecutableSize
       );
+
+    if (!MachoInitializeContext (&ExecutableContext, &Context->Prelinked[Context->PrelinkedSize], ExecutableSize)) {
+      return EFI_INVALID_PARAMETER;
+    }
+
+    KmodAddress = PrelinkedFindKmodAddress (&ExecutableContext, Context->PrelinkedLastLoadAddress, ExecutableSize);
+    if (KmodAddress == 0) {
+      return EFI_INVALID_PARAMETER;
+    }
   }
 
   //
@@ -398,9 +519,15 @@ PrelinkedInjectKext (
     AsciiSPrint (ExecutableSourceAddrStr, sizeof (ExecutableSourceAddrStr), "0x%Lx", Context->PrelinkedLastAddress);
     Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_SOURCE_ADDR_KEY) == NULL;
     Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableSourceAddrStr) == NULL;
+    AsciiSPrint (ExecutableLoadAddrStr, sizeof (ExecutableLoadAddrStr), "0x%Lx", Context->PrelinkedLastLoadAddress);
+    Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == NULL;
+    Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableLoadAddrStr) == NULL;
     AsciiSPrint (ExecutableSizeStr, sizeof (ExecutableSizeStr), "0x%x", AlignedExecutableSize);
     Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_SIZE_KEY) == NULL;
-    Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableSizeStr) == NULL;
+    Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableSizeStr) == NULL;   
+    AsciiSPrint (KmodInfoStr, sizeof (KmodInfoStr), "0x%Lx", KmodAddress);
+    Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_KMOD_INFO_KEY) == NULL;
+    Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, KmodInfoStr) == NULL;  
   }
 
   if (Failed) {
@@ -412,25 +539,10 @@ PrelinkedInjectKext (
   if (Executable != NULL) {
     Status = PrelinkedLinkExecutable (
       Context,
-      &Context->Prelinked[Context->PrelinkedSize],
-      ExecutableSize,
+      &ExecutableContext,
       InfoPlistRoot,
-      &LoadAddress,
-      &KmodAddress
+      Context->PrelinkedLastAddress
       );
-
-    if (!EFI_ERROR (Status)) {
-      Failed = FALSE;
-      AsciiSPrint (ExecutableLoadAddrStr, sizeof (ExecutableLoadAddrStr), "0x%Lx", LoadAddress);
-      Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == NULL;
-      Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableLoadAddrStr) == NULL;
-      AsciiSPrint (KmodInfoStr, sizeof (KmodInfoStr), "0x%Lx", KmodAddress);
-      Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_KMOD_INFO_KEY) == NULL;
-      Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, KmodInfoStr) == NULL;
-      if (Failed) {
-        Status = EFI_OUT_OF_RESOURCES;
-      }
-    }
 
     if (EFI_ERROR (Status)) {
       XmlDocumentFree (InfoPlistDocument);
@@ -439,12 +551,13 @@ PrelinkedInjectKext (
     }
 
     //
-    // Only executable source addresses are present here, so we can append
+    // XNU assumes that load size and source size are same, so we can append
     // AlignedExecutableSize to vm_size as well as long as executable size
     // does not change, and currently it is a constraint.
     //
-    Context->PrelinkedSize              += AlignedExecutableSize;
-    Context->PrelinkedLastAddress       += AlignedExecutableSize;
+    Context->PrelinkedSize                  += AlignedExecutableSize;
+    Context->PrelinkedLastAddress           += AlignedExecutableSize;
+    Context->PrelinkedLastLoadAddress       += AlignedExecutableSize;
     Context->PrelinkedTextSegment->Size     += AlignedExecutableSize;
     Context->PrelinkedTextSegment->FileSize += AlignedExecutableSize;
     Context->PrelinkedTextSection->Size     += AlignedExecutableSize;
@@ -478,11 +591,9 @@ PrelinkedInjectKext (
 EFI_STATUS
 PrelinkedLinkExecutable (
   IN OUT PRELINKED_CONTEXT  *Context,
-  IN OUT UINT8              *Executable,
-  IN     UINT32             ExecutableSize,
+  IN OUT OC_MACHO_CONTEXT   *Executable,
   IN     XML_NODE           *PlistRoot,
-     OUT UINT64             *LoadAddress,
-     OUT UINT64             *KmodAddress
+  IN     UINT64             LoadAddress
   )
 {
   //

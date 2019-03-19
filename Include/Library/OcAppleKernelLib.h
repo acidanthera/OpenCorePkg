@@ -61,9 +61,13 @@ typedef struct {
   //
   UINT32                   PrelinkedAllocSize;
   //
-  // Current last virtual address.
+  // Current last virtual address (kext source files and plist are put here).
   //
   UINT64                   PrelinkedLastAddress;
+  //
+  // Current last virtual load address (kexts are loaded here after kernel startup).
+  //
+  UINT64                   PrelinkedLastLoadAddress;
   //
   // Mach-O context for prelinkedkernel.
   //
@@ -301,18 +305,15 @@ PrelinkedInjectKext (
   @param[in]     ExecutableSize  Kext executable size.
   @param[in]     PlistRoot       Current kext info.plist.
   @param[out]    LoadAddress     Resulting kext load address.
-  @param[out]    KmodAddress     Resulting kext kmod_info address.
 
   @return  EFI_SUCCESS on success.
 **/
 EFI_STATUS
 PrelinkedLinkExecutable (
   IN OUT PRELINKED_CONTEXT  *Context,
-  IN OUT UINT8              *Executable,
-  IN     UINT32             ExecutableSize,
+  IN OUT OC_MACHO_CONTEXT   *Executable,
   IN     XML_NODE           *PlistRoot,
-     OUT UINT64             *LoadAddress,
-     OUT UINT64             *KmodAddress
+  IN     UINT64             LoadAddress
   );
 
 /**
