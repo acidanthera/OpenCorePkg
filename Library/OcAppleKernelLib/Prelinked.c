@@ -22,6 +22,8 @@
 #include <Library/OcMachoLib.h>
 #include <Library/PrintLib.h>
 
+#include "Link.h"
+
 STATIC
 UINT64
 PrelinkedFindLastLoadAddress (
@@ -452,7 +454,6 @@ PrelinkedInjectKext (
   UINT32            AlignedExecutableSize;
   BOOLEAN           Failed;
   UINT64            KmodAddress;
-  UINT64            LoadAddress;
   CHAR8             ExecutableSourceAddrStr[24];
   CHAR8             ExecutableSizeStr[24];
   CHAR8             ExecutableLoadAddrStr[24];
@@ -586,18 +587,4 @@ PrelinkedInjectKext (
   }
 
   return EFI_SUCCESS;
-}
-
-EFI_STATUS
-PrelinkedLinkExecutable (
-  IN OUT PRELINKED_CONTEXT  *Context,
-  IN OUT OC_MACHO_CONTEXT   *Executable,
-  IN     XML_NODE           *PlistRoot,
-  IN     UINT64             LoadAddress
-  )
-{
-  //
-  // TODO: Implement linking kexts.
-  //
-  return EFI_UNSUPPORTED;
 }

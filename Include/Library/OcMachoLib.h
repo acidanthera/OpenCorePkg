@@ -535,12 +535,12 @@ MachoGetFinalSymbolNameFromClassName (
 /**
   Returns whether SymbolName defines a VTable.
 
-  @param[in]     SymbolName  The symbol name to check.
+  @param[in] SymbolName  The symbol name to check.
 
 **/
 BOOLEAN
 MachoSymbolNameIsVtable64 (
-  IN     CONST CHAR8       *SymbolName
+  IN CONST CHAR8  *SymbolName
   );
 
 /**
@@ -633,6 +633,46 @@ MachoIsRelocationPairTypeIntel64 (
 BOOLEAN
 MachoPreserveRelocationIntel64 (
   IN UINT8  Type
+  );
+
+/**
+  Obtain symbol tables.
+
+  @param[in]     Context              Context of the Mach-O.
+  @param[in,out] SymbolTable          Symbol table.
+  @param[in,out] LocalSymbols         Local symbol table.
+  @param[in,out] NumLocalSymbols      Number of symbols in local symbol table.
+  @param[in,out] ExternalSymbols      External symbol table.
+  @param[in,out] NumExternalSymbols   Number of symbols in external symbol table.
+  @param[in,out] UndefinedSymbols     Undefined symbol table.
+  @param[in,out] NumUndefinedSymbols  Number of symbols in undefined symbol table.
+
+  @return number of symbols in symbol table or 0.
+**/
+UINT32
+MachoGetSymbolTable (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+     OUT CONST MACH_NLIST_64  **SymbolTable,
+     OUT CONST MACH_NLIST_64  **LocalSymbols OPTIONAL,
+     OUT UINT32               *NumLocalSymbols OPTIONAL,
+     OUT CONST MACH_NLIST_64  **ExternalSymbols OPTIONAL,
+     OUT UINT32               *NumExternalSymbols OPTIONAL,
+     OUT CONST MACH_NLIST_64  **UndefinedSymbols OPTIONAL,
+     OUT UINT32               *NumUndefinedSymbols OPTIONAL
+  );
+
+/**
+  Obtain indirect symbol table.
+
+  @param[in]     Context              Context of the Mach-O.
+  @param[in,out] SymbolTable          Indirect symbol table.
+
+  @return number of symbols in indirect symbol table or 0.
+**/
+UINT32
+MachoGetIndirectSymbolTable (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+     OUT CONST MACH_NLIST_64  **SymbolTable
   );
 
 #endif // OC_MACHO_LIB_H_

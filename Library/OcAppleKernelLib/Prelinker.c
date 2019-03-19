@@ -18,26 +18,26 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <IndustryStandard/AppleMachoImage.h>
 
 #include <Library/BaseLib.h>
+#include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/OcMachoLib.h>
+#include <Library/OcAppleKernelLib.h>
 
-#include "OcMachoPrelinkInternal.h"
+#include "Link.h"
 
-STATIC
+/*STATIC
 BOOLEAN
 InternalPrelinkKextsWorker (
   IN     OC_MACHO_CONTEXT               *KernelContext,
-  IN     UINTN                          NumRequests,
-  IN OUT OC_KEXT_REQUEST                *Requests,
+  IN OUT OC_KEXT_REQUEST                *Request,
   IN     LIST_ENTRY                     *Dependencies,
   IN     CONST MACH_SEGMENT_COMMAND_64  *PrelinkTextSegment,
   IN     CONST CHAR8                    *PrelinkedPlist
   )
 {
   UINTN                         Index;
-  OC_KEXT_REQUEST               *Request;
   LIST_ENTRY                    *DependencyEntry;
   OC_DEPENDENCY_INFO_ENTRY      *DependencyInfo;
   OC_DEPENDENCY_INFO            *Info;
@@ -71,28 +71,24 @@ InternalPrelinkKextsWorker (
 
   ScratchSize = 0;
 
-  for (Index = 0; Index < NumRequests; ++Index) {
-    Request = &Requests[Index];
-    if (Request->Private.Info == NULL) {
-      continue;
-    }
-    //
-    // Retrieve the __LINKEDIT segment.
-    //
-    Result = MachoGetSegmentByName64 (
-               &Request->Private.MachoContext,
-               "__LINKEDIT",
-               &LinkEdit
-               );
-    if (!Result || (LinkEdit == NULL)) {
-      InternalInvalidateKextRequest (
-        Dependencies,
-        NumRequests,
-        Requests,
-        Request
-        );
-      continue;
-    }
+  if (Request->Private.Info == NULL) {
+    return FALSE;
+  }
+
+  //
+  // Retrieve the __LINKEDIT segment.
+  //
+  LinkEdit = MachoGetSegmentByName64 (
+             Request->Private.MachoContext,
+             "__LINKEDIT"
+             );
+  if (LinkEdit == NULL) {
+    InternalInvalidateKextRequest (
+      Dependencies,
+      Request
+      );
+    return FALSE;
+  }
 
     Request->Private.LinkEdit = LinkEdit;
 
@@ -173,8 +169,6 @@ InternalPrelinkKextsWorker (
     if (NumSymbols == 0) {
       DependencyEntry = InternalRemoveDependency (
                           Dependencies,
-                          NumRequests,
-                          Requests,
                           DependencyInfo
                           );
       continue;
@@ -348,99 +342,70 @@ InternalPrelinkKextsWorker (
   FreePool (ScratchMemory);
 
   return TRUE;
-}
+}*/
 
-BOOLEAN
-OcPrelinkKexts64 (
-  IN     OC_MACHO_CONTEXT  *KernelContext,
-  IN     UINTN             NumRequests,
-  IN OUT OC_KEXT_REQUEST   *Requests
+EFI_STATUS
+PrelinkedLinkExecutable (
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN OUT OC_MACHO_CONTEXT   *Executable,
+  IN     XML_NODE           *PlistRoot,
+  IN     UINT64             LoadAddress
   )
 {
   CONST MACH_HEADER_64      *KernelHeader;
-  UINTN                     Index;
-  OC_KEXT_REQUEST           *Request;
+  OC_KEXT_REQUEST           Request;
   OC_DEPENDENCY_INFO_ENTRY  *DependencyInfo;
   BOOLEAN                   Result;
-  MACH_SEGMENT_COMMAND_64   *PrelinkTextSegment;
-  CONST CHAR8               *PrelinkedPlist;
   LIST_ENTRY                Dependencies;
   LIST_ENTRY                *DependencyEntry;
-  UINT64                    KextAddress;
 
-  ASSERT (KernelContext != NULL);
-  ASSERT (NumRequests > 0);
-  ASSERT (Requests != NULL);
+  KernelHeader = MachoGetMachHeader64 (&Context->PrelinkedMachContext);
 
-  KernelHeader = MachoGetMachHeader64 (KernelContext);
-  ASSERT (KernelHeader != NULL);
-  //
-  // Collect the KEXT information for all KEXTs to be prelinked.  Do not solve
-  // dependencies yet so we can verify successful dependency against other
-  // KEXTs to be prelinked in one go.
-  //
-  for (Index = 0; Index < NumRequests; ++Index) {
-    Request = &Requests[Index];
-    //
-    // Create a Mach-O Context for this KEXT.
-    //
-    Result = MachoInitializeContext (
-               &Request->Private.MachoContext,
-               Request->Input.MachHeader,
-               Request->Input.MachoSize
-               );
-    if (Result) {
-      Request->Output.Linked        = FALSE;
-      Request->Private.IsDependedOn = FALSE;
-      Request->Private.Info = InternalKextCollectInformation (
-                                Request->Input.Plist,
-                                &Request->Private.MachoContext,
-                                0,
-                                0,
-                                0
-                                );
-    } else {
-      Request->Private.Info = NULL;
-    }
-  }
+  ZeroMem (&Request, sizeof (Request));
 
-  PrelinkedPlist = (CHAR8 *)((UINTN)KernelHeader + PrelinkInfoSection->Offset);
+  Request.Input.MachoContext = Executable;
+  Request.Input.Plist        = PlistRoot;
+
+  Request.Output.Linked        = FALSE;
+  Request.Private.IsDependedOn = FALSE;
+  Request.Private.Info = InternalKextCollectInformation (
+                            Request.Input.Plist,
+                            Request.Input.MachoContext,
+                            0,
+                            0,
+                            0
+                            );
   //
   // Resolve dependencies.
   //
   InitializeListHead (&Dependencies);
 
-  for (Index = 0; Index < NumRequests; ++Index) {
-    Request = &Requests[Index];
-    if (Request->Private.Info != NULL) {
-      Result = FALSE;
+  Result = FALSE;
 
-      KextAddress  = (UINTN)Request->Input.MachHeader;
-      KextAddress += PrelinkTextSegment->FileOffset;
-      if (KextAddress == (UINTN)KextAddress) {
-        Result = InternalResolveDependencies (
-                   &Dependencies,
-                   NumRequests,
-                   Requests,
-                   PrelinkedPlist,
-                   Request->Private.Info,
-                   PrelinkTextSegment->VirtualAddress,
-                   (UINTN)KextAddress
-                   );
-      }
+  /*if (Request.Private.Info != NULL) {
+    KextAddress  = (UINTN) MachoGetMachHeader64 (Request.Input.MachoContext);
+    KextAddress += Context->PrelinkedTextSegment->FileOffset;
+    if (KextAddress == (UINTN)KextAddress) {
+      Result = InternalResolveDependencies (
+                 &Dependencies,
+                 PrelinkedPlist,
+                 Request.Private.Info,
+                 PrelinkTextSegment->VirtualAddress,
+                 (UINTN)KextAddress
+                 );
+    }
 
-      if (!Result) {
-        //
-        // Only pass the KEXT Requests that already had their dependencies
-        // resolved.
-        //
-        InternalRemoveDependency (
-          &Dependencies,
-          Index,
-          Requests,
-          Request->Private.Info
-          );
-      }
+    if (!Result) {
+      //
+      // Only pass the KEXT Requests that already had their dependencies
+      // resolved.
+      //
+      InternalRemoveDependency (
+        &Dependencies,
+        Index,
+        Requests,
+        Request.Private.Info
+        );
     }
   }
   //
@@ -448,20 +413,17 @@ OcPrelinkKexts64 (
   //
   Result = InternalPrelinkKextsWorker (
              KernelContext,
-             NumRequests,
-             Requests,
+             &Request,
              &Dependencies,
              PrelinkTextSegment,
              PrelinkedPlist
-             );
+             );*/
+
   //
   // Free all resources.
   //
-  for (Index = 0; Index < NumRequests; ++Index) {
-    Request = &Requests[Index];
-    if (Request->Private.Info != NULL) {
-      InternalFreeDependencyEntry (Request->Private.Info);
-    }
+  if (Request.Private.Info != NULL) {
+    InternalFreeDependencyEntry (Request.Private.Info);
   }
 
   DependencyEntry = GetFirstNode (&Dependencies);
@@ -472,5 +434,5 @@ OcPrelinkKexts64 (
     InternalFreeDependencyEntry (DependencyInfo);
   }
 
-  return Result;
+  return Result == TRUE ? EFI_SUCCESS : EFI_INVALID_PARAMETER;
 }

@@ -29,9 +29,13 @@
 #
 
 [Sources]
+  Link.c
+  Link.h
   Patcher.c
   Prelinked.c
+  Prelinker.c
   ReadAppleKernel.c
+  Vtables.c
 
 [Packages]
   EfiPkg/EfiPkg.dec
