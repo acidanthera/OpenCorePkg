@@ -22,7 +22,7 @@
 #include <Library/OcMachoLib.h>
 #include <Library/PrintLib.h>
 
-#include "Link.h"
+#include "PrelinkedInternal.h"
 
 STATIC
 UINT64
@@ -30,14 +30,14 @@ PrelinkedFindLastLoadAddress (
   IN XML_NODE  *KextList
   )
 {
-  UINT32    KextCount;
-  UINT32    FieldIndex;
-  UINT32    FieldCount;
-  XML_NODE  *LastKext;
-  XML_NODE  *KextPlistKey;
-  XML_NODE  *KextPlistValue;
-  UINT64    LoadAddress;
-  UINT64    LoadSize;
+  UINT32       KextCount;
+  UINT32       FieldIndex;
+  UINT32       FieldCount;
+  XML_NODE     *LastKext;
+  CONST CHAR8  *KextPlistKey;
+  XML_NODE     *KextPlistValue;
+  UINT64       LoadAddress;
+  UINT64       LoadSize;
 
   KextCount = XmlNodeChildren (KextList);
   if (KextCount == 0) {
@@ -57,16 +57,16 @@ PrelinkedFindLastLoadAddress (
 
   FieldCount = PlistDictChildren (LastKext);
   for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
-    KextPlistKey = PlistDictChild (LastKext, FieldIndex, &KextPlistValue);
+    KextPlistKey = PlistKeyValue (PlistDictChild (LastKext, FieldIndex, &KextPlistValue));
     if (KextPlistKey == NULL) {
       continue;
     }
 
-    if (LoadAddress == 0 && AsciiStrCmp (PlistKeyValue (KextPlistKey), PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == 0) {
+    if (LoadAddress == 0 && AsciiStrCmp (KextPlistKey, PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == 0) {
       if (!PlistIntegerValue (KextPlistValue, &LoadAddress, sizeof (LoadAddress), TRUE)) {
         return 0;
       }
-    } else if (LoadSize == 0 && AsciiStrCmp (PlistKeyValue (KextPlistKey), PRELINK_INFO_EXECUTABLE_SIZE_KEY) == 0) {
+    } else if (LoadSize == 0 && AsciiStrCmp (KextPlistKey, PRELINK_INFO_EXECUTABLE_SIZE_KEY) == 0) {
       if (!PlistIntegerValue (KextPlistValue, &LoadSize, sizeof (LoadSize), TRUE)) {
         return 0;
       }
@@ -138,10 +138,10 @@ PrelinkedContextInit (
   IN      UINT32             PrelinkedAllocSize
   )
 {
-  XML_NODE                 *PrelinkedInfoRoot;
-  XML_NODE                 *PrelinkedInfoRootKey;
-  UINT32                   PrelinkedInfoRootIndex;
-  UINT32                   PrelinkedInfoRootCount;
+  XML_NODE     *PrelinkedInfoRoot;
+  CONST CHAR8  *PrelinkedInfoRootKey;
+  UINT32       PrelinkedInfoRootIndex;
+  UINT32       PrelinkedInfoRootCount;
 
   ZeroMem (Context, sizeof (*Context));
 
@@ -232,12 +232,12 @@ PrelinkedContextInit (
 
   PrelinkedInfoRootCount = PlistDictChildren (PrelinkedInfoRoot);
   for (PrelinkedInfoRootIndex = 0; PrelinkedInfoRootIndex < PrelinkedInfoRootCount; ++PrelinkedInfoRootIndex) {
-    PrelinkedInfoRootKey = PlistDictChild (PrelinkedInfoRoot, PrelinkedInfoRootIndex, &Context->KextList);
+    PrelinkedInfoRootKey = PlistKeyValue (PlistDictChild (PrelinkedInfoRoot, PrelinkedInfoRootIndex, &Context->KextList));
     if (PrelinkedInfoRootKey == NULL) {
       continue;
     }
 
-    if (AsciiStrCmp (PlistKeyValue (PrelinkedInfoRootKey), PRELINK_INFO_DICTIONARY_KEY) == 0) {
+    if (AsciiStrCmp (PrelinkedInfoRootKey, PRELINK_INFO_DICTIONARY_KEY) == 0) {
       if (PlistNodeCast (Context->KextList, PLIST_NODE_TYPE_ARRAY) != NULL) {
         Context->PrelinkedLastLoadAddress = PrelinkedFindLastLoadAddress (Context->KextList);
         if (Context->PrelinkedLastLoadAddress != 0) {
@@ -257,7 +257,9 @@ PrelinkedContextFree (
   IN OUT  PRELINKED_CONTEXT  *Context
   )
 {
-  UINT32  Index;
+  UINT32          Index;
+  LIST_ENTRY      *Link;
+  PRELINKED_KEXT  *Kext;
 
   if (Context->PrelinkedInfoDocument != NULL) {
     XmlDocumentFree (Context->PrelinkedInfoDocument);
@@ -277,7 +279,14 @@ PrelinkedContextFree (
     Context->PooledBuffers = NULL;
   }
 
-  InternalFreePrelinkedKexts (&Context->PrelinkedKexts);
+  while (!IsListEmpty (&Context->PrelinkedKexts)) {
+    Link = GetFirstNode (&Context->PrelinkedKexts);
+    Kext = GET_PRELINKED_KEXT_FROM_LINK (Link);
+    RemoveEntryList (Link);
+    FreePool (Kext);
+  }
+
+  ZeroMem (&Context->PrelinkedKexts, sizeof (Context->PrelinkedKexts));
 }
 
 EFI_STATUS

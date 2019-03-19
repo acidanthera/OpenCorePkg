@@ -25,7 +25,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcMachoLib.h>
 #include <Library/OcAppleKernelLib.h>
 
-#include "Link.h"
+#include "PrelinkedInternal.h"
 
 /**
   Fills SymbolTable with the symbols provided in Symbols.  For performance
@@ -85,35 +85,4 @@ InternalFillSymbolTable64 (
 
   SymbolTable->NumSymbols    = NumSymbols;
   SymbolTable->NumCxxSymbols = NumCxxSymbols;
-}
-
-
-VOID
-InternalFreeDependencyEntry (
-  IN OC_DEPENDENCY_INFO_ENTRY  *Entry
-  )
-{
-  if (Entry->Data.SymbolTable != NULL) {
-    FreePool (Entry->Data.SymbolTable);
-  }
-
-  if (Entry->Data.Vtables != NULL) {
-    FreePool (Entry->Data.Vtables);
-  }
-
-  RemoveEntryList (&Entry->Link);
-
-  FreePool (Entry);
-}
-
-OC_DEPENDENCY_INFO_ENTRY *
-InternalKextCollectInformation (
-  IN     XML_NODE          *Plist,
-  IN OUT OC_MACHO_CONTEXT  *MachoContext OPTIONAL,
-  IN     UINT64            KextsVirtual OPTIONAL,
-  IN     UINTN             KextsPhysical OPTIONAL,
-  IN     UINT64            RequestedVersion OPTIONAL
-  )
-{
-  return NULL;
 }

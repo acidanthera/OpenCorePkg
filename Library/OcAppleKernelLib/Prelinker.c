@@ -25,7 +25,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcMachoLib.h>
 #include <Library/OcAppleKernelLib.h>
 
-#include "Link.h"
+#include "PrelinkedInternal.h"
 
 /*STATIC
 BOOLEAN
@@ -352,35 +352,23 @@ PrelinkedLinkExecutable (
   IN     UINT64             LoadAddress
   )
 {
-  CONST MACH_HEADER_64      *KernelHeader;
-  OC_KEXT_REQUEST           Request;
-  OC_DEPENDENCY_INFO_ENTRY  *DependencyInfo;
-  BOOLEAN                   Result;
-  LIST_ENTRY                Dependencies;
-  LIST_ENTRY                *DependencyEntry;
+  EFI_STATUS                Status;
+  PRELINKED_KEXT            *Kext;
 
-  KernelHeader = MachoGetMachHeader64 (&Context->PrelinkedMachContext);
+  Kext = InternalNewPrelinkedKext (Executable, PlistRoot);
+  if (Kext == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
-  ZeroMem (&Request, sizeof (Request));
+  Status = InternalScanPrelinkedKext (Kext, Context);
+  if (EFI_ERROR (Status)) {
+    FreePool (Kext);
+    return Status;
+  }
 
-  Request.Input.MachoContext = Executable;
-  Request.Input.Plist        = PlistRoot;
+  FreePool (Kext);
 
-  Request.Output.Linked        = FALSE;
-  Request.Private.IsDependedOn = FALSE;
-  Request.Private.Info = InternalKextCollectInformation (
-                            Request.Input.Plist,
-                            Request.Input.MachoContext,
-                            0,
-                            0,
-                            0
-                            );
-  //
-  // Resolve dependencies.
-  //
-  InitializeListHead (&Dependencies);
-
-  Result = FALSE;
+  return EFI_UNSUPPORTED;
 
   /*if (Request.Private.Info != NULL) {
     KextAddress  = (UINTN) MachoGetMachHeader64 (Request.Input.MachoContext);
@@ -422,17 +410,5 @@ PrelinkedLinkExecutable (
   //
   // Free all resources.
   //
-  if (Request.Private.Info != NULL) {
-    InternalFreeDependencyEntry (Request.Private.Info);
-  }
 
-  DependencyEntry = GetFirstNode (&Dependencies);
-
-  while (!IsNull (DependencyEntry, &Dependencies)) {
-    DependencyInfo  = OC_DEP_INFO_FROM_LINK (DependencyEntry);
-    DependencyEntry = GetNextNode (&Dependencies, DependencyEntry);
-    InternalFreeDependencyEntry (DependencyInfo);
-  }
-
-  return Result == TRUE ? EFI_SUCCESS : EFI_INVALID_PARAMETER;
 }

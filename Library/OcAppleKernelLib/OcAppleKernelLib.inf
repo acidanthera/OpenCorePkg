@@ -30,12 +30,13 @@
 
 [Sources]
   Dependencies.c
+  KernelReader.c
+  KextPatcher.c
   Link.c
-  Link.h
-  Patcher.c
-  Prelinked.c
+  PrelinkedContext.c
+  PrelinkedInternal.h
+  PrelinkedKext.c
   Prelinker.c
-  ReadAppleKernel.c
   Vtables.c
 
 [Packages]

@@ -13,8 +13,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#ifndef OC_MACHO_PRELINK_INTERNAL_H
-#define OC_MACHO_PRELINK_INTERNAL_H
+#ifndef PRELINKED_INTERNAL_H
+#define PRELINKED_INTERNAL_H
 
 #include <IndustryStandard/AppleMachoImage.h>
 
@@ -22,7 +22,14 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcMachoLib.h>
 #include <Library/OcXmlLib.h>
 
-typedef struct {
+//
+// Some sane maximum value.
+//
+#define MAX_KEXT_DEPEDENCIES 12
+
+typedef struct PRELINKED_KEXT_ PRELINKED_KEXT;
+
+struct PRELINKED_KEXT_ {
   //
   // These data are used to construct linked lists of dependency information
   // for each KEXT.  It is declared hear for every dependency will
@@ -39,15 +46,23 @@ typedef struct {
   //
   PATCHER_CONTEXT  Context;
   //
-  // Dependencies dictionary (OSBundleLibraries).
+  // Dependencies dictionary (OSBundleLibraries), may be NULL for KPI kexts.
   //
   XML_NODE         *BundleLibraries;
   //
   // Compatible version, may be NULL.
   //
   CONST CHAR8      *CompatibleVersion;
-} PRELINKED_KEXT;
+  //
+  // Scanned dependencies (PRELINKED_KEXT) from BundleLibraries.
+  // Not resolved by default. See InternalScanPrelinkedKext.
+  //
+  PRELINKED_KEXT   *Dependencies[MAX_KEXT_DEPEDENCIES];
+};
 
+//
+// PRELINKED_KEXT signature for list identification.
+//
 #define PRELINKED_KEXT_SIGNATURE  SIGNATURE_32 ('P', 'K', 'X', 'T')
 
 /**
@@ -64,21 +79,32 @@ typedef struct {
     ))
 
 /**
+  Creates cached PRELINKED_KEXT from OC_MACHO_CONTEXT.
+**/
+PRELINKED_KEXT *
+InternalNewPrelinkedKext (
+  IN OC_MACHO_CONTEXT       *Context,
+  IN XML_NODE               *KextPlist
+  );
+
+/**
   Gets cached PRELINKED_KEXT from PRELINKED_CONTEXT.
 **/
 PRELINKED_KEXT *
-InternalGetPrelinkedKext (
+InternalCachedPrelinkedKext (
   IN OUT PRELINKED_CONTEXT  *Prelinked,
   IN     CONST CHAR8        *Identifier
   );
 
 /**
-  Frees PRELINKED_KEXT list.
+  Scan PRELINKED_KEXT for dependencies.
 **/
-VOID
-InternalFreePrelinkedKexts (
-  LIST_ENTRY  *Kexts
+EFI_STATUS
+InternalScanPrelinkedKext (
+  IN OUT PRELINKED_KEXT     *Kext,
+  IN OUT PRELINKED_CONTEXT  *Context
   );
+
 
 #define KXLD_WEAK_TEST_SYMBOL  "_gOSKextUnresolved"
 
@@ -249,25 +275,6 @@ struct OC_DEPENDENCY_INFO_ENTRY_ {
 };
 
 typedef struct {
-  struct {
-    OC_MACHO_CONTEXT         *MachoContext;
-    XML_NODE                 *Plist;
-  } Input;
-
-  struct {
-    BOOLEAN                  Linked;
-  } Output;
-  //
-  // Private data.
-  //
-  struct {
-    OC_DEPENDENCY_INFO_ENTRY *Info;
-    MACH_SEGMENT_COMMAND_64  *LinkEdit;
-    BOOLEAN                  IsDependedOn;
-  } Private;
-} OC_KEXT_REQUEST;
-
-typedef struct {
   CONST MACH_NLIST_64 *Smcp;
   CONST MACH_NLIST_64 *Vtable;
   CONST MACH_NLIST_64 *MetaVtable;
@@ -299,45 +306,6 @@ InternalKextCollectInformation (
 VOID
 InternalFreeDependencyEntry (
   IN OC_DEPENDENCY_INFO_ENTRY  *Entry
-  );
-
-BOOLEAN
-InternalResolveDependencies (
-  IN     LIST_ENTRY                *Dependencies,
-  IN     UINTN                     NumRequests, OPTIONAL
-  IN OUT OC_KEXT_REQUEST           *Requests, OPTIONAL
-  IN     CONST CHAR8               *PrelinkedPlist,
-  IN     OC_DEPENDENCY_INFO_ENTRY  *KextInfo,
-  IN     UINT64                    KextsVirtual,
-  IN     UINTN                     KextsPhysical
-  );
-
-LIST_ENTRY *
-InternalRemoveDependency (
-  IN     CONST LIST_ENTRY          *Dependencies,
-  IN     UINTN                     NumRequests,
-  IN OUT OC_KEXT_REQUEST           *Requests,
-  IN     OC_DEPENDENCY_INFO_ENTRY  *DepInfo
-  );
-
-VOID
-InternalInvalidateKextRequest (
-  IN     CONST LIST_ENTRY  *Dependencies,
-  IN     UINTN             NumRequests,
-  IN OUT OC_KEXT_REQUEST   *Requests,
-  IN     OC_KEXT_REQUEST   *Request
-  );
-
-BOOLEAN
-InternalConstructDependencyArrays (
-  IN  UINTN                     NumDependencies,
-  IN  OC_DEPENDENCY_INFO_ENTRY  **Dependencies,
-  OUT OC_DEPENDENCY_DATA        *DependencyData
-  );
-
-VOID
-InternalDestructDependencyArrays (
-  OUT CONST OC_DEPENDENCY_DATA *DependencyData
   );
 
 UINT64
@@ -493,4 +461,4 @@ InternalPrelinkKext64 (
   OUT    VOID                     *ScratchMemory
   );
 
-#endif // OC_MACHO_PRELINK_INTERNAL_H
+#endif // PRELINKED_INTERNAL_H

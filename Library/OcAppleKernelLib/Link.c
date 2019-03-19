@@ -25,7 +25,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcMachoLib.h>
 #include <Library/OcAppleKernelLib.h>
 
-#include "Link.h"
+#include "PrelinkedInternal.h"
 
 //
 // Symbols
