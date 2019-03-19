@@ -13197,9 +13197,7 @@ ApplyKernelPatches (
   Status = PatcherInitContextFromBuffer (
     &Patcher,
     Kernel,
-    Size,
-    0,
-    0
+    Size
     );
 
   if (!EFI_ERROR (Status)) {

@@ -24,110 +24,11 @@
 #include <Library/OcXmlLib.h>
 #include <Library/PrintLib.h>
 
+#include "Link.h"
+
+STATIC
 EFI_STATUS
-PatcherInitContextFromPrelinked (
-  IN OUT PATCHER_CONTEXT    *Context,
-  IN OUT PRELINKED_CONTEXT  *Prelinked,
-  IN     CONST CHAR8        *Name
-  )
-{
-  UINT32    Index;
-  UINT32    KextCount;
-  UINT32    FieldIndex;
-  UINT32    FieldCount;
-  XML_NODE  *KextPlist;
-  XML_NODE  *KextPlistKey;
-  XML_NODE  *KextPlistValue;
-  UINT64    SourceBase;
-  UINT64    SourceSize;
-  UINT64    SourceEnd;
-  UINT64    VirtualBase;
-  UINT64    VirtualKmod;
-  BOOLEAN   Found;
-
-  Found     = FALSE;
-  KextCount = XmlNodeChildren (Prelinked->KextList);
-
-  for (Index = 0; Index < KextCount && !Found; ++Index) {
-    KextPlist = PlistNodeCast (XmlNodeChild (Prelinked->KextList, Index), PLIST_NODE_TYPE_DICT);
-
-    if (KextPlist == NULL) {
-      continue;
-    }
-
-    VirtualBase = 0;
-    VirtualKmod = 0;
-    SourceBase  = 0;
-    SourceSize  = 0;
-    BOOLEAN HasId = FALSE;
-
-    FieldCount = PlistDictChildren (KextPlist);
-    for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
-      KextPlistKey = PlistDictChild (KextPlist, FieldIndex, &KextPlistValue);
-      if (KextPlistKey == NULL) {
-        continue;
-      }
-
-      if (!Found && AsciiStrCmp (PlistKeyValue (KextPlistKey), INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
-        HasId = TRUE;
-        if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_STRING) == NULL
-          || XmlNodeContent (KextPlistValue) == NULL) {
-          break;
-        }
-        if (AsciiStrCmp (XmlNodeContent (KextPlistValue), Name) == 0) {
-          Found = TRUE;
-          continue;
-        }
-      } else if (VirtualBase == 0 && AsciiStrCmp (PlistKeyValue (KextPlistKey), PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == 0) {
-        if (!PlistIntegerValue (KextPlistValue, &VirtualBase, sizeof (VirtualBase), TRUE)) {
-          break;
-        }
-      } else if (VirtualKmod == 0 && AsciiStrCmp (PlistKeyValue (KextPlistKey), PRELINK_INFO_KMOD_INFO_KEY) == 0) {
-        if (!PlistIntegerValue (KextPlistValue, &VirtualKmod, sizeof (VirtualKmod), TRUE)) {
-          break;
-        }
-      } else if (SourceBase == 0 && AsciiStrCmp (PlistKeyValue (KextPlistKey), PRELINK_INFO_EXECUTABLE_SOURCE_ADDR_KEY) == 0) {
-        if (!PlistIntegerValue (KextPlistValue, &SourceBase, sizeof (SourceBase), TRUE)) {
-          break;
-        }
-      } else if (SourceSize == 0 && AsciiStrCmp (PlistKeyValue (KextPlistKey), PRELINK_INFO_EXECUTABLE_SIZE_KEY) == 0) {
-        if (!PlistIntegerValue (KextPlistValue, &SourceSize, sizeof (SourceSize), TRUE)) {
-          break;
-        }
-      }
-
-      if (Found && VirtualBase != 0 && VirtualKmod != 0 && SourceBase != 0 && SourceSize != 0) {
-        break;
-      }
-    }
-  }
-
-  if (!Found || VirtualBase == 0 || VirtualKmod == 0 || SourceBase == 0 || SourceSize == 0) {
-    return EFI_NOT_FOUND;
-  }
-
-  if (SourceBase < VirtualBase) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  SourceBase -= Prelinked->PrelinkedTextSegment->VirtualAddress;
-  if (OcOverflowAddU64 (SourceBase, Prelinked->PrelinkedTextSegment->FileOffset, &SourceBase) ||
-    OcOverflowAddU64 (SourceBase, SourceSize, &SourceEnd) ||
-    SourceEnd > Prelinked->PrelinkedSize) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  return PatcherInitContextFromBuffer (
-    Context,
-    &Prelinked->Prelinked[SourceBase],
-    (UINT32) SourceSize,
-    VirtualBase,
-    VirtualKmod
-    );
-}
-
-EFI_STATUS
-PatcherInitContextFromBuffer (
+InternalInitPatcherContext (
   IN OUT PATCHER_CONTEXT    *Context,
   IN OUT UINT8              *Buffer,
   IN     UINT32             BufferSize,
@@ -160,6 +61,215 @@ PatcherInitContextFromBuffer (
   Context->VirtualKmod = VirtualKmod;
 
   return EFI_SUCCESS;
+}
+
+PRELINKED_KEXT *
+InternalGetPrelinkedKext (
+  IN OUT PRELINKED_CONTEXT  *Prelinked,
+  IN     CONST CHAR8        *Identifier
+  )
+{
+  PRELINKED_KEXT  *NewKext;
+  LIST_ENTRY      *Kext;
+  EFI_STATUS      Status;
+  UINT32          Index;
+  UINT32          KextCount;
+  UINT32          FieldIndex;
+  UINT32          FieldCount;
+  XML_NODE        *KextPlist;
+  XML_NODE        *KextPlistKey;
+  XML_NODE        *KextPlistValue;
+  XML_NODE        *BundleLibraries;
+  CONST CHAR8     *KextIdentifier;
+  CONST CHAR8     *CompatibleVersion;
+  UINT64          SourceBase;
+  UINT64          SourceSize;
+  UINT64          SourceEnd;
+  UINT64          VirtualBase;
+  UINT64          VirtualKmod;
+  BOOLEAN         Found;
+
+  //
+  // Find cached entry if any.
+  //
+  Kext = GetFirstNode (&Prelinked->PrelinkedKexts);
+  while (!IsNull (&Prelinked->PrelinkedKexts, Kext)) {
+    if (AsciiStrCmp (Identifier, GET_PRELINKED_KEXT_FROM_LINK (Kext)->Identifier) == 0) {
+      return GET_PRELINKED_KEXT_FROM_LINK (Kext);
+    }
+
+    Kext = GetNextNode (&Prelinked->PrelinkedKexts, Kext);
+  }
+
+  //
+  // Try with real entry.
+  //
+  Found     = FALSE;
+  KextCount = XmlNodeChildren (Prelinked->KextList);
+
+  for (Index = 0; Index < KextCount && !Found; ++Index) {
+    KextPlist = PlistNodeCast (XmlNodeChild (Prelinked->KextList, Index), PLIST_NODE_TYPE_DICT);
+
+    if (KextPlist == NULL) {
+      continue;
+    }
+
+    VirtualBase       = 0;
+    VirtualKmod       = 0;
+    SourceBase        = 0;
+    SourceSize        = 0;
+    BundleLibraries   = NULL;
+    CompatibleVersion = NULL;
+
+    FieldCount = PlistDictChildren (KextPlist);
+    for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
+      KextPlistKey = PlistDictChild (KextPlist, FieldIndex, &KextPlistValue);
+      if (KextPlistKey == NULL) {
+        continue;
+      }
+
+      if (!Found && AsciiStrCmp (PlistKeyValue (KextPlistKey), INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
+        KextIdentifier = XmlNodeContent (KextPlistValue);
+        if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_STRING) == NULL || KextIdentifier == NULL) {
+          break;
+        }
+        if (AsciiStrCmp (KextIdentifier, Identifier) == 0) {
+          Found = TRUE;
+          continue;
+        }
+      } else if (VirtualBase == 0 && AsciiStrCmp (PlistKeyValue (KextPlistKey), PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == 0) {
+        if (!PlistIntegerValue (KextPlistValue, &VirtualBase, sizeof (VirtualBase), TRUE)) {
+          break;
+        }
+      } else if (VirtualKmod == 0 && AsciiStrCmp (PlistKeyValue (KextPlistKey), PRELINK_INFO_KMOD_INFO_KEY) == 0) {
+        if (!PlistIntegerValue (KextPlistValue, &VirtualKmod, sizeof (VirtualKmod), TRUE)) {
+          break;
+        }
+      } else if (SourceBase == 0 && AsciiStrCmp (PlistKeyValue (KextPlistKey), PRELINK_INFO_EXECUTABLE_SOURCE_ADDR_KEY) == 0) {
+        if (!PlistIntegerValue (KextPlistValue, &SourceBase, sizeof (SourceBase), TRUE)) {
+          break;
+        }
+      } else if (SourceSize == 0 && AsciiStrCmp (PlistKeyValue (KextPlistKey), PRELINK_INFO_EXECUTABLE_SIZE_KEY) == 0) {
+        if (!PlistIntegerValue (KextPlistValue, &SourceSize, sizeof (SourceSize), TRUE)) {
+          break;
+        }
+      } else if (BundleLibraries == NULL && AsciiStrCmp (PlistKeyValue (KextPlistKey), INFO_BUNDLE_LIBRARIES_KEY) == 0) {
+        if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_DICT) == NULL) {
+          break;
+        }
+        BundleLibraries = KextPlistValue;
+      } else if (CompatibleVersion == NULL && AsciiStrCmp (PlistKeyValue (KextPlistKey), INFO_BUNDLE_COMPATIBLE_VERSION_KEY) == 0) {
+        if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_STRING) == NULL) {
+          break;
+        }
+        CompatibleVersion = XmlNodeContent (KextPlistValue);
+        if (CompatibleVersion == NULL) {
+          break;
+        }
+      }
+
+      if (Found
+        && VirtualBase != 0
+        && VirtualKmod != 0
+        && SourceBase != 0
+        && SourceSize != 0
+        && BundleLibraries != NULL
+        && CompatibleVersion != NULL) {
+        break;
+      }
+    }
+  }
+
+  //
+  // CompatibleVersion is optional and thus not checked.
+  //
+  if (!Found || VirtualBase == 0 || VirtualKmod == 0 || SourceBase == 0 || SourceSize == 0 || BundleLibraries == NULL) {
+    return NULL;
+  }
+
+  if (SourceBase < VirtualBase) {
+    return NULL;
+  }
+
+  SourceBase -= Prelinked->PrelinkedTextSegment->VirtualAddress;
+  if (OcOverflowAddU64 (SourceBase, Prelinked->PrelinkedTextSegment->FileOffset, &SourceBase) ||
+    OcOverflowAddU64 (SourceBase, SourceSize, &SourceEnd) ||
+    SourceEnd > Prelinked->PrelinkedSize) {
+    return NULL;
+  }
+
+  NewKext = AllocatePool (sizeof (*NewKext));
+  if (NewKext == NULL) {
+    return NULL;
+  }
+
+  Status = InternalInitPatcherContext (
+    &NewKext->Context,
+    &Prelinked->Prelinked[SourceBase],
+    (UINT32) SourceSize,
+    VirtualBase,
+    VirtualKmod
+    );
+
+  if (EFI_ERROR (Status)) {
+    FreePool (NewKext);
+    return NULL;
+  }
+
+  NewKext->Signature         = PRELINKED_KEXT_SIGNATURE;
+  NewKext->Identifier        = KextIdentifier;
+  NewKext->BundleLibraries   = BundleLibraries;
+  NewKext->CompatibleVersion = CompatibleVersion;
+
+  InsertTailList (&Prelinked->PrelinkedKexts, &NewKext->Link);
+
+  return NewKext;
+}
+
+VOID
+InternalFreePrelinkedKexts (
+  LIST_ENTRY  *Kexts
+  )
+{
+  LIST_ENTRY      *Link;
+  PRELINKED_KEXT  *Kext;
+
+  while (!IsListEmpty (Kexts)) {
+    Link = GetFirstNode (Kexts);
+    Kext = GET_PRELINKED_KEXT_FROM_LINK (Link);
+    RemoveEntryList (Link);
+    FreePool (Kext);
+  }
+
+  ZeroMem (Kexts, sizeof (*Kexts));
+}
+
+EFI_STATUS
+PatcherInitContextFromPrelinked (
+  IN OUT PATCHER_CONTEXT    *Context,
+  IN OUT PRELINKED_CONTEXT  *Prelinked,
+  IN     CONST CHAR8        *Name
+  )
+{
+  PRELINKED_KEXT  *Kext;
+
+  Kext = InternalGetPrelinkedKext (Prelinked, Name);
+  if (Kext == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  CopyMem (Context, &Kext->Context, sizeof (*Context));
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+PatcherInitContextFromBuffer (
+  IN OUT PATCHER_CONTEXT    *Context,
+  IN OUT UINT8              *Buffer,
+  IN     UINT32             BufferSize
+  )
+{
+  return InternalInitPatcherContext (Context, Buffer, BufferSize, 0, 0);
 }
 
 EFI_STATUS

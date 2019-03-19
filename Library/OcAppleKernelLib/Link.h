@@ -18,9 +18,67 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <IndustryStandard/AppleMachoImage.h>
 
+#include <Library/OcAppleKernelLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/OcXmlLib.h>
 
+typedef struct {
+  //
+  // These data are used to construct linked lists of dependency information
+  // for each KEXT.  It is declared hear for every dependency will
+  // eventually be part of a list and to save separate allocations per KEXT.
+  //
+  UINT32           Signature;
+  LIST_ENTRY       Link;
+  //
+  // Kext CFBundleIdentifier.
+  //
+  CONST CHAR8      *Identifier;
+  //
+  // Patcher context containing useful data.
+  //
+  PATCHER_CONTEXT  Context;
+  //
+  // Dependencies dictionary (OSBundleLibraries).
+  //
+  XML_NODE         *BundleLibraries;
+  //
+  // Compatible version, may be NULL.
+  //
+  CONST CHAR8      *CompatibleVersion;
+} PRELINKED_KEXT;
+
+#define PRELINKED_KEXT_SIGNATURE  SIGNATURE_32 ('P', 'K', 'X', 'T')
+
+/**
+  Gets the next element in a linked list of PRELINKED_KEXT.
+
+  @param[in] This  The current ListEntry.
+**/
+#define GET_PRELINKED_KEXT_FROM_LINK(This)  \
+  (CR (                                     \
+    (This),                                 \
+    PRELINKED_KEXT,                         \
+    Link,                                   \
+    PRELINKED_KEXT_SIGNATURE                \
+    ))
+
+/**
+  Gets cached PRELINKED_KEXT from PRELINKED_CONTEXT.
+**/
+PRELINKED_KEXT *
+InternalGetPrelinkedKext (
+  IN OUT PRELINKED_CONTEXT  *Prelinked,
+  IN     CONST CHAR8        *Identifier
+  );
+
+/**
+  Frees PRELINKED_KEXT list.
+**/
+VOID
+InternalFreePrelinkedKexts (
+  LIST_ENTRY  *Kexts
+  );
 
 #define KXLD_WEAK_TEST_SYMBOL  "_gOSKextUnresolved"
 
@@ -33,11 +91,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define VTABLE_ENTRY_SIZE_64   8U
 #define VTABLE_HEADER_LEN_64   2U
 #define VTABLE_HEADER_SIZE_64  (VTABLE_HEADER_LEN_64 * VTABLE_ENTRY_SIZE_64)
-
-#define OS_BUNDLE_LIBRARIES_STR           "OSBundleLibraries"
-#define OS_BUNDLE_IDENTIFIER_STR          "CFBundleIdentifier"
-#define OS_BUNDLE_VERSION_STR             "CFBundleVersion"
-#define OS_BUNDLE_COMPATIBLE_VERSION_STR  "OSBundleCompatibleVersion"
 
 typedef struct {
   UINT32 StringIndex;  ///< index into the string table

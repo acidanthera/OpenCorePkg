@@ -35,6 +35,10 @@
 #define PRELINK_INFO_EXECUTABLE_SIZE_KEY          "_PrelinkExecutableSize"
 
 #define INFO_BUNDLE_IDENTIFIER_KEY                "CFBundleIdentifier"
+#define INFO_BUNDLE_LIBRARIES_KEY                 "OSBundleLibraries"
+#define INFO_BUNDLE_VERSION_KEY                   "CFBundleVersion"
+#define INFO_BUNDLE_COMPATIBLE_VERSION_KEY        "OSBundleCompatibleVersion"
+
 
 #define PRELINK_INFO_INTEGER_ATTRIBUTES           "size=\"64\""
 
@@ -114,6 +118,10 @@ typedef struct {
   // Currently allocated pooled buffers. PooledBuffersAllocCount >= PooledBuffersCount.
   //
   UINT32                   PooledBuffersAllocCount;
+  //
+  // Used for caching prelinked kexts.
+  //
+  LIST_ENTRY               PrelinkedKexts;
 } PRELINKED_CONTEXT;
 
 //
@@ -338,8 +346,6 @@ PatcherInitContextFromPrelinked (
   @param[in,out] Context         Patcher context.
   @param[in,out] Buffer          Kernel buffer (could be prelinked).
   @param[in]     Name            Kernel buffer size.
-  @param[in]     VirtualBase     Virtual base, optional (can be calculated).
-  @param[in]     VirtualKmod     Kmod structure virtual address, optional (unused).
 
   @return  EFI_SUCCESS on success.
 **/
@@ -347,9 +353,7 @@ EFI_STATUS
 PatcherInitContextFromBuffer (
   IN OUT PATCHER_CONTEXT    *Context,
   IN OUT UINT8              *Buffer,
-  IN     UINT32             BufferSize,
-  IN     UINT64             VirtualBase OPTIONAL,
-  IN     UINT64             VirtualKmod OPTIONAL
+  IN     UINT32             BufferSize
   );
 
 /**

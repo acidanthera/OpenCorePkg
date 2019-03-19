@@ -148,6 +148,7 @@ PrelinkedContextInit (
   Context->Prelinked          = Prelinked;
   Context->PrelinkedSize      = PRELINKED_ALIGN (PrelinkedSize);
   Context->PrelinkedAllocSize = PrelinkedAllocSize;
+  InitializeListHead (&Context->PrelinkedKexts);
 
   //
   // Ensure that PrelinkedSize is always aligned.
@@ -275,6 +276,8 @@ PrelinkedContextFree (
     FreePool (Context->PooledBuffers);
     Context->PooledBuffers = NULL;
   }
+
+  InternalFreePrelinkedKexts (&Context->PrelinkedKexts);
 }
 
 EFI_STATUS
