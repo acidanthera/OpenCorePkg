@@ -47,7 +47,6 @@ typedef struct {
   UINT8                CurBusRatio;  ///< Current Multiplier
   UINT8                MinBusRatio;  ///< Min Bus Ratio
   UINT8                MaxBusRatio;  ///< Max Bus Ratio
-  UINT8                MaxBusRatioDiv;
 
   UINT8                TurboBusRatio1;
   UINT8                TurboBusRatio2;
@@ -65,14 +64,25 @@ typedef struct {
   
 } OC_CPU_INFO;
 
-// OcCpuScanProcessor
-/** Scan the processor and fill the cpu info structure with results
+/**
+  Scan the processor and fill the cpu info structure with results.
 
-  @param[in] Cpu  A pointer to the cpu info structure to fill with results
+  @param[in] Cpu  A pointer to the cpu info structure to fill with results.
 **/
 VOID
 OcCpuScanProcessor (
   IN OUT OC_CPU_INFO  *Cpu
+  );
+
+/**
+  Disable flex ratio if it has invalid value.
+  Commonly fixes early reboot on APTIO IV (Ivy/Haswell).
+
+  @param[in] Cpu  A pointer to the cpu info.
+**/
+VOID
+OcCpuCorrectFlexRatio (
+  IN OC_CPU_INFO  *Cpu
   );
 
 #endif // OC_CPU_LIB_H_

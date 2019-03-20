@@ -18,7 +18,8 @@ listed here.
     1. No dmg boot detection.
 * OcAppleKernelLib  
     **Status**: functional  
-    **Issues**: none
+    **Issues**:
+    1. No executable kext injection.
 * OcCompressionLib  
     **Status**: functional  
     **Issues**: none
@@ -36,7 +37,6 @@ listed here.
     1. No package count detection.
     1. No AMD CPU support.
     1. Apple processor type detection is incomplete.
-    1. FSBFrequency calculation is sometimes incorrect, e.g. for Core 2 Quad Q9450.
 * OcCryptoLib  
     **Status**: functional  
     **Issues**: none

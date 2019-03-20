@@ -697,6 +697,15 @@ AsmReadMsr64 (
 }
 
 STATIC
+VOID
+AsmWriteMsr64 (
+  UINT32  Index,
+  UINT64  Value
+  )
+{
+}
+
+STATIC
 UINT64
 EFIAPI
 GetPerformanceCounterProperties (

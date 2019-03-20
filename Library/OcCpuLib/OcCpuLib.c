@@ -587,12 +587,21 @@ ScanIntelProcessor (
   //
   if (Cpu->Model >= CPU_MODEL_NEHALEM) {
     PerfStatus.Uint64 = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
-
     Cpu->CurBusRatio = (UINT8) (PerfStatus.Bits.State >> 8U);
-
     PlatformInfo.Uint64 = AsmReadMsr64 (MSR_NEHALEM_PLATFORM_INFO);
     Cpu->MinBusRatio = (UINT8) PlatformInfo.Bits.MaximumEfficiencyRatio;
     Cpu->MaxBusRatio = (UINT8) PlatformInfo.Bits.MaximumNonTurboRatio;
+  } else if (Cpu->Model >= CPU_MODEL_PENRYN) {
+    PerfStatus.Uint64 = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
+    Cpu->MaxBusRatio = (UINT8) (PerfStatus.Uint64 >> 8U) & 0x1FU;
+    //
+    // Undocumented values:
+    // Non-integer bus ratio for the max-multi.
+    // Non-integer bus ratio for the current-multi.
+    //
+    // MaxBusRatioDiv = (UINT8)(PerfStatus.Uint64 >> 46U) & 0x01U;
+    // CurrDiv = (UINT8)(PerfStatus.Uint64 >> 14U) & 0x01U;
+    //
   }
 
   if (Cpu->Model >= CPU_MODEL_NEHALEM
@@ -659,9 +668,10 @@ ScanIntelProcessor (
       ));
 
     //
-    // Both checked to workaround virtual cpu
+    // There may be some quirks with virtual CPUs (VMware is fine).
+    // Formerly we checked Cpu->MinBusRatio > 0, but we have no MinBusRatio on Penryn.
     //
-    if (Cpu->MinBusRatio > 0 && Cpu->MaxBusRatio > Cpu->MinBusRatio) {
+    if (Cpu->TSCFrequency > 0 && Cpu->MaxBusRatio > Cpu->MinBusRatio) {
       Cpu->FSBFrequency = DivU64x32 (Cpu->TSCFrequency, Cpu->MaxBusRatio);
       Cpu->CPUFrequency = MultU64x32 (Cpu->FSBFrequency, Cpu->MaxBusRatio);
     } else {
@@ -699,9 +709,12 @@ ScanIntelProcessor (
         CoreCount *= 2;
       }
       Cpu->CoreCount   = CoreCount;
-      Cpu->ThreadCount = Cpu->CoreCount;
-      if (Cpu->Features & CPUID_FEATURE_HTT) {
-        Cpu->ThreadCount *= 2;
+      //
+      // We should not be blindly relying on Cpu->Features & CPUID_FEATURE_HTT.
+      // On Penryn CPUs it is set even without Hyper Threading.
+      //
+      if (Cpu->ThreadCount < Cpu->CoreCount) {
+        Cpu->ThreadCount = Cpu->CoreCount;
       }
     }
   } else if (Cpu->Model == CPU_MODEL_WESTMERE) {
@@ -845,5 +858,30 @@ OcCpuScanProcessor (
 
   if (Cpu->Vendor[0] == CPUID_VENDOR_INTEL) {
     ScanIntelProcessor (Cpu);
+  }
+}
+
+VOID
+OcCpuCorrectFlexRatio (
+  IN OC_CPU_INFO  *Cpu
+  )
+{
+  UINT64  Msr;
+  UINT64  FlexRatio;
+
+  if (Cpu->Vendor[0] == CPUID_VENDOR_INTEL
+    && Cpu->Model != CPU_MODEL_GOLDMONT
+    && Cpu->Model != CPU_MODEL_AIRMONT
+    && Cpu->Model != CPU_MODEL_AVOTON) {
+    Msr = AsmReadMsr64 (MSR_FLEX_RATIO);
+    if (Msr & FLEX_RATIO_EN) {
+      FlexRatio = BitFieldRead64 (Msr, 8, 15);
+      if (FlexRatio == 0) {
+        //
+        // Disable Flex Ratio if current value is 0.
+        //
+        AsmWriteMsr64 (MSR_FLEX_RATIO, Msr & ~((UINT64) FLEX_RATIO_EN));
+      }
+    }
   }
 }

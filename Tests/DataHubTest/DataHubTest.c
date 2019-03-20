@@ -132,27 +132,7 @@ TestDataHub (
   gBS->SetWatchdogTimer (0, 0, 0, NULL);
 
   //TODO: put this elsewhere, fixes early reboot on APTIO IV (Ivy/Haswell).
-  {
-    UINT64  Msr;
-    UINT64  FlexRatio;
-
-    if (CpuInfo.Vendor[0] == CPUID_VENDOR_INTEL
-      && CpuInfo.Model != CPU_MODEL_GOLDMONT
-      && CpuInfo.Model != CPU_MODEL_AIRMONT
-      && CpuInfo.Model != CPU_MODEL_AVOTON) {
-      Msr = AsmReadMsr64 (MSR_FLEX_RATIO);
-      if (Msr & FLEX_RATIO_EN) {
-        FlexRatio = BitFieldRead64 (Msr, 8, 15);
-        if (FlexRatio == 0) {
-          //
-          // Disable Flex Ratio if current value is 0.
-          //
-          AsmWriteMsr64 (MSR_FLEX_RATIO, Msr & ~((UINT64) FLEX_RATIO_EN));
-        }
-      }
-    }
-  }
-
+  OcCpuCorrectFlexRatio (&CpuInfo);
 
   return EFI_SUCCESS;
 }
