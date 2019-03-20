@@ -366,7 +366,10 @@ PrelinkedLinkExecutable (
     return Status;
   }
 
-  FreePool (Kext);
+
+
+
+  InternalFreePrelinkedKext (Kext);
 
   return EFI_UNSUPPORTED;
 

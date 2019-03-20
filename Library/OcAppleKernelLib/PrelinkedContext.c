@@ -283,7 +283,7 @@ PrelinkedContextFree (
     Link = GetFirstNode (&Context->PrelinkedKexts);
     Kext = GET_PRELINKED_KEXT_FROM_LINK (Link);
     RemoveEntryList (Link);
-    FreePool (Kext);
+    InternalFreePrelinkedKext (Kext);
   }
 
   ZeroMem (&Context->PrelinkedKexts, sizeof (Context->PrelinkedKexts));

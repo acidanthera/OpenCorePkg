@@ -35,29 +35,33 @@ struct PRELINKED_KEXT_ {
   // for each KEXT.  It is declared hear for every dependency will
   // eventually be part of a list and to save separate allocations per KEXT.
   //
-  UINT32           Signature;
-  LIST_ENTRY       Link;
+  UINT32                   Signature;
+  LIST_ENTRY               Link;
   //
   // Kext CFBundleIdentifier.
   //
-  CONST CHAR8      *Identifier;
+  CONST CHAR8              *Identifier;
   //
   // Patcher context containing useful data.
   //
-  PATCHER_CONTEXT  Context;
+  PATCHER_CONTEXT          Context;
   //
   // Dependencies dictionary (OSBundleLibraries), may be NULL for KPI kexts.
   //
-  XML_NODE         *BundleLibraries;
+  XML_NODE                 *BundleLibraries;
   //
   // Compatible version, may be NULL.
   //
-  CONST CHAR8      *CompatibleVersion;
+  CONST CHAR8              *CompatibleVersion;
   //
   // Scanned dependencies (PRELINKED_KEXT) from BundleLibraries.
   // Not resolved by default. See InternalScanPrelinkedKext.
   //
-  PRELINKED_KEXT   *Dependencies[MAX_KEXT_DEPEDENCIES];
+  PRELINKED_KEXT           *Dependencies[MAX_KEXT_DEPEDENCIES];
+  //
+  // Linkedit segment reference. Not resolved by default.
+  //
+  MACH_SEGMENT_COMMAND_64  *LinkEditSegment;
 };
 
 //
@@ -79,12 +83,20 @@ struct PRELINKED_KEXT_ {
     ))
 
 /**
-  Creates cached PRELINKED_KEXT from OC_MACHO_CONTEXT.
+  Creates new PRELINKED_KEXT from OC_MACHO_CONTEXT.
 **/
 PRELINKED_KEXT *
 InternalNewPrelinkedKext (
   IN OC_MACHO_CONTEXT       *Context,
   IN XML_NODE               *KextPlist
+  );
+
+/**
+  Frees PRELINKED_KEXT.
+**/
+VOID
+InternalFreePrelinkedKext (
+  IN PRELINKED_KEXT  *Kext
   );
 
 /**

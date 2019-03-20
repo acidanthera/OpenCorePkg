@@ -137,6 +137,9 @@ InternalCreatePrelinkedKext (
     }
   }
 
+  //
+  // Important to ZeroPool for dependency cleanup.
+  //
   NewKext = AllocateZeroPool (sizeof (*NewKext));
   if (NewKext == NULL) {
     return NULL;
@@ -173,6 +176,14 @@ InternalNewPrelinkedKext (
 
   CopyMem (&NewKext->Context.MachContext, Context, sizeof (NewKext->Context.MachContext));
   return NewKext;
+}
+
+VOID
+InternalFreePrelinkedKext (
+  IN PRELINKED_KEXT  *Kext
+  )
+{
+  FreePool (Kext);
 }
 
 PRELINKED_KEXT *
@@ -246,6 +257,17 @@ InternalScanPrelinkedKext (
     return EFI_SUCCESS;
   }
 
+  if (Kext->LinkEditSegment == NULL) {
+    Kext->LinkEditSegment = MachoGetSegmentByName64 (
+      &Kext->Context.MachContext,
+      "__LINKEDIT"
+      );
+
+    if (Kext->LinkEditSegment == NULL) {
+      return EFI_NOT_FOUND;
+    }
+  }
+
   DependencyIndex = 0;
   FieldCount = PlistDictChildren (Kext->BundleLibraries);
   for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
@@ -262,7 +284,18 @@ InternalScanPrelinkedKext (
     if (DependencyIndex >= ARRAY_SIZE (Kext->Dependencies)) {
       return EFI_OUT_OF_RESOURCES;
     }
-   
+
+    if (DependencyKext->LinkEditSegment == NULL) {
+      DependencyKext->LinkEditSegment = MachoGetSegmentByName64 (
+        &DependencyKext->Context.MachContext,
+        "__LINKEDIT"
+        );
+
+      if (DependencyKext->LinkEditSegment == NULL) {
+        return EFI_NOT_FOUND;
+      }
+    }
+
     Kext->Dependencies[DependencyIndex] = DependencyKext;
     ++DependencyIndex;
   }
