@@ -31,60 +31,130 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Symbols
 //
 
-CONST OC_SYMBOL_64 *
-InternalOcGetSymbolByName (
-  IN CONST OC_SYMBOL_TABLE_64  *DefinedSymbols,
-  IN CONST CHAR8               *Name,
-  IN BOOLEAN                   CheckIndirect
+STATIC
+CONST PRELINKED_KEXT_SYMBOL *
+InternalOcGetSymbolWorker (
+  IN PRELINKED_KEXT                   *Kext,
+  IN UINT64                           PredicateContext,
+  IN PRELINKED_KEXT_SYMBOL_PREDICATE  Predicate,
+  IN OC_GET_SYMBOL_LEVEL              SymbolLevel
   )
 {
-  CONST OC_SYMBOL_TABLE_64 *SymbolsWalker;
-  CONST OC_SYMBOL_64       *Symbols;
-  UINT32                   NumSymbols;
-  UINT32                   CxxIndex;
-  UINT32                   Index;
-  INTN                     Result;
+  UINTN                       Index;
+  PRELINKED_KEXT              *Dependency;
+  CONST PRELINKED_KEXT_SYMBOL *Symbols;
+  UINT32                      NumSymbols;
+  UINT32                      CxxIndex;
+  UINT32                      SymIndex;
+  BOOLEAN                     Result;
 
-  ASSERT (DefinedSymbols != NULL);
-  ASSERT (Name != NULL);
+  ASSERT (Kext != NULL);
 
-  SymbolsWalker = DefinedSymbols;
+  for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
+    Dependency = Kext->Dependencies[Index];
+    if (Dependency == NULL) {
+      break;
+    }
 
-  do {
-    Symbols    = SymbolsWalker->Symbols;
-    NumSymbols = SymbolsWalker->NumSymbols;
+    if (Dependency->Processed) {
+      continue;
+    }
 
-    if (SymbolsWalker->IsIndirect) {
-      if (!CheckIndirect) {
-        continue;
-      }
+    Dependency->Processed = TRUE;
+
+    NumSymbols = Dependency->NumberOfSymbols;
+    Symbols    = Dependency->LinkedSymbolTable;
+    //
+    // A value of 2 will only be passed from within this function, the value is
+    // reserved to indicate the iteration of an indirect dependency.
+    //
+    if (SymbolLevel == OcGetSymbolOnlyCxx) {
       //
       // Only consider C++ symbols for indirect dependencies.
       //
-      CxxIndex   = (SymbolsWalker->NumSymbols - SymbolsWalker->NumCxxSymbols);
+      CxxIndex   = (NumSymbols - Dependency->NumberOfCxxSymbols);
       Symbols    = &Symbols[CxxIndex];
-      NumSymbols = SymbolsWalker->NumCxxSymbols;
+      NumSymbols = Dependency->NumberOfCxxSymbols;
     }
 
-    for (Index = 0; Index < NumSymbols; ++Index) {
-      Result = AsciiStrCmp (
-                 Name,
-                 (SymbolsWalker->StringTable + Symbols[Index].StringIndex)
-                 );
-      if (Result == 0) {
-        return &Symbols[Index];
+    for (SymIndex = 0; SymIndex < NumSymbols; ++SymIndex) {
+      Result = Predicate (Kext, &Symbols[SymIndex], PredicateContext);
+      if (Result) {
+        return &Symbols[SymIndex];
       }
     }
 
-    SymbolsWalker = GET_OC_SYMBOL_TABLE_64_FROM_LINK (
-                      GetNextNode (
-                        &DefinedSymbols->Link,
-                        &SymbolsWalker->Link
-                        )
-                      );
-  } while (!IsNull (&DefinedSymbols->Link, &SymbolsWalker->Link));
+    if (SymbolLevel == OcGetSymbolAnyLevel) {
+      InternalOcGetSymbolWorker (
+        Dependency,
+        PredicateContext,
+        Predicate,
+        OcGetSymbolOnlyCxx
+        );
+    }
+
+    Dependency->Processed = FALSE;
+  }
 
   return NULL;
+}
+
+STATIC
+BOOLEAN
+InternalOcGetSymbolByNamePredicate (
+  IN CONST PRELINKED_KEXT         *Kext,
+  IN CONST PRELINKED_KEXT_SYMBOL  *Symbol,
+  IN       UINT64                 Context
+  )
+{
+  INTN Result;
+
+  Result = AsciiStrCmp (
+             (CHAR8 *)(UINTN)Context,
+             (Kext->StringTable + Symbol->StringIndex)
+             );
+  return (Result == 0);
+}
+
+CONST PRELINKED_KEXT_SYMBOL *
+InternalOcGetSymbolByName (
+  IN PRELINKED_KEXT       *Kext,
+  IN CONST CHAR8          *Name,
+  IN OC_GET_SYMBOL_LEVEL  SymbolLevel
+  )
+{
+  return InternalOcGetSymbolWorker (
+           Kext,
+           (UINTN)Name,
+           InternalOcGetSymbolByNamePredicate,
+           SymbolLevel
+           );
+}
+
+STATIC
+BOOLEAN
+InternalOcGetSymbolByValuePredicate (
+  IN CONST PRELINKED_KEXT         *Kext,
+  IN CONST PRELINKED_KEXT_SYMBOL  *Symbol,
+  IN       UINT64                 Context
+  )
+{
+  return (Symbol->Value == Context);
+}
+
+CONST PRELINKED_KEXT_SYMBOL *
+InternalOcGetSymbolByValue (
+  IN PRELINKED_KEXT       *Kext,
+  IN UINT64               Value,
+  IN OC_GET_SYMBOL_LEVEL  SymbolLevel
+  )
+{
+  return InternalOcGetSymbolWorker (
+           Kext,
+           Value,
+           InternalOcGetSymbolByValuePredicate,
+           SymbolLevel
+           );
 }
 
 /**
@@ -120,14 +190,13 @@ InternalSolveSymbolValue64 (
 STATIC
 BOOLEAN
 InternalSolveSymbolNonWeak64 (
-  IN OUT OC_MACHO_CONTEXT          *MachoContext,
-  IN     CONST OC_SYMBOL_TABLE_64  *DefinedSymbols,
+  IN     PRELINKED_KEXT            *Kext,
   IN     CONST CHAR8               *Name,
   IN OUT MACH_NLIST_64             *Symbol
   )
 {
-  INTN               Result;
-  CONST OC_SYMBOL_64 *ResolveSymbol;
+  INTN                        Result;
+  CONST PRELINKED_KEXT_SYMBOL *ResolveSymbol;
 
   if (Symbol->Type != MACH_N_TYPE_UNDF) {
     if (Symbol->Type != MACH_N_TYPE_INDR) {
@@ -136,7 +205,7 @@ InternalSolveSymbolNonWeak64 (
       // at the end of InternalSolveSymbol64. 
       //
       Result = AsciiStrCmp (
-                 MachoGetSymbolName64 (MachoContext, Symbol),
+                 MachoGetSymbolName64 (&Kext->Context.MachContext, Symbol),
                  KXLD_WEAK_TEST_SYMBOL
                  );
       if (Result == 0) {
@@ -159,9 +228,9 @@ InternalSolveSymbolNonWeak64 (
   }
 
   ResolveSymbol = InternalOcGetSymbolByName (
-                    DefinedSymbols,
+                    Kext,
                     Name,
-                    FALSE
+                    OcGetSymbolFirstLevel
                     );
   if (ResolveSymbol != NULL) {
     InternalSolveSymbolValue64 (ResolveSymbol->Value, Symbol);
@@ -192,8 +261,7 @@ InternalSolveSymbolNonWeak64 (
 STATIC
 BOOLEAN
 InternalSolveSymbol64 (
-  IN OUT OC_MACHO_CONTEXT          *MachoContext,
-  IN     CONST OC_SYMBOL_TABLE_64  *DefinedSymbols,
+  IN     PRELINKED_KEXT            *Kext,
   IN     CONST CHAR8               *Name,
   IN OUT MACH_NLIST_64             *Symbol,
   IN OUT UINT64                    *WeakTestValue,
@@ -214,8 +282,7 @@ InternalSolveSymbol64 (
   }
 
   Success = InternalSolveSymbolNonWeak64 (
-              MachoContext,
-              DefinedSymbols,
+              Kext,
               Name,
               Symbol
               );
@@ -236,14 +303,16 @@ InternalSolveSymbol64 (
       for (Index = 0; Index < NumUndefinedSymbols; ++Index) {
         WeakTestSymbol = &UndefinedSymbols[Index];
         Result = AsciiStrCmp (
-                   MachoGetSymbolName64 (MachoContext, WeakTestSymbol),
+                   MachoGetSymbolName64 (
+                     &Kext->Context.MachContext,
+                     WeakTestSymbol
+                     ),
                    KXLD_WEAK_TEST_SYMBOL
                    );
         if (Result == 0) {
           if (WeakTestSymbol->Type == MACH_N_TYPE_UNDF) {
             Success = InternalSolveSymbolNonWeak64 (
-                        MachoContext,
-                        DefinedSymbols,
+                        Kext,
                         Name,
                         Symbol
                         );
@@ -317,7 +386,7 @@ InternalCalculateDisplacementIntel64 (
   Logically matches XNU's calculate_targets.
 
   @param[in]  MachoContext     Mach-O context of the KEXT to relocate.
-  @param[in]  LinkAddress      The address to be linked against.
+  @param[in]  LoadAddress      The address to be linked against.
   @param[in]  Vtables          List of all dependent VTables.
   @param[in]  Relocation       The Relocation to be resolved.
   @param[in]  NextRelocation   The Relocation following Relocation.
@@ -333,7 +402,7 @@ STATIC
 BOOLEAN
 InternalCalculateTargetsIntel64 (
   IN OUT VOID                        *MachoContext,
-  IN     UINT64                      LinkAddress,
+  IN     UINT64                      LoadAddress,
   IN     CONST OC_VTABLE_ARRAY       *Vtables,
   IN     CONST MACH_RELOCATION_INFO  *Relocation,
   IN     CONST MACH_RELOCATION_INFO  *NextRelocation  OPTIONAL,
@@ -369,10 +438,10 @@ InternalCalculateTargetsIntel64 (
   //
   // Relocations referencing a symbol result in a Target of its resolved value.
   // Relocations referencing a section result in a Target of
-  // (link_addr - base_addr), which should be LinkAddress aligned on the
+  // (link_addr - base_addr), which should be LoadAddress aligned on the
   // section's boundary.
   //
-  TargetAddress = LinkAddress;
+  TargetAddress = LoadAddress;
   //
   // Scattered Relocations are only supported by i386.
   //
@@ -445,7 +514,7 @@ InternalCalculateTargetsIntel64 (
 
   if (Section != NULL) {
     TargetAddress = ALIGN_VALUE (
-                      (Section->Address + LinkAddress),
+                      (Section->Address + LoadAddress),
                       Section->Alignment
                       );
     TargetAddress -= Section->Address;
@@ -461,7 +530,7 @@ InternalCalculateTargetsIntel64 (
     //
     Success = InternalCalculateTargetsIntel64 (
                 MachoContext,
-                LinkAddress,
+                LoadAddress,
                 Vtables,
                 NextRelocation,
                 NULL,
@@ -515,10 +584,10 @@ InternalIsDirectPureVirtualCall64 (
 
 /**
   Relocates Relocation against the specified Symtab's Symbol Table and
-  LinkAddress.  This logically matches KXLD's x86_64_process_reloc.
+  LoadAddress.  This logically matches KXLD's x86_64_process_reloc.
 
   @param[in] MachoContext     Mach-O context of the KEXT to relocate.
-  @param[in] LinkAddress      The address to be linked against.
+  @param[in] LoadAddress      The address to be linked against.
   @param[in] Vtables          List of all dependent VTables.
   @param[in] RelocationBase   The Relocations base address.
   @param[in] Relocation       The Relocation to be processed.
@@ -538,7 +607,7 @@ STATIC
 UINTN
 InternalRelocateRelocationIntel64 (
   IN OC_MACHO_CONTEXT            *MachoContext,
-  IN UINT64                      LinkAddress,
+  IN UINT64                      LoadAddress,
   IN CONST OC_VTABLE_ARRAY       *Vtables,
   IN UINTN                       RelocationBase,
   IN CONST MACH_RELOCATION_INFO  *Relocation,
@@ -596,13 +665,13 @@ InternalRelocateRelocationIntel64 (
 
   ASSERT ((Length == 2) || (Length == 3));
 
-  LinkPc         = (Address + LinkAddress);
+  LinkPc         = (Address + LoadAddress);
   InstructionPtr = (UINT8 *)(RelocationBase + Address);
 
   Vtable = NULL;
   Result = InternalCalculateTargetsIntel64 (
              MachoContext,
-             LinkAddress,
+             LoadAddress,
              Vtables,
              Relocation,
              NextRelocation,
@@ -694,7 +763,7 @@ InternalRelocateRelocationIntel64 (
       case MachX8664RelocSigned4:
       {
         ASSERT (PcRelative);
-        Adjustment += (IsNormalLocal ? LinkAddress : LinkPc);
+        Adjustment += (IsNormalLocal ? LoadAddress : LinkPc);
         break;
       }
 
@@ -782,7 +851,7 @@ InternalRelocateRelocationIntel64 (
   prelinking to TargetRelocations.
 
   @param[in]  MachoContext         Mach-O context of the KEXT to relocate.
-  @param[in]  LinkAddress          The address to be linked against.
+  @param[in]  LoadAddress          The address to be linked against.
   @param[in]  Vtables              The patched VTables of this KEXT and its
                                    dependencies.
   @param[in]  RelocationBase       The Relocations base address.
@@ -799,7 +868,7 @@ STATIC
 BOOLEAN
 InternalRelocateAndCopyRelocations64 (
   IN  OC_MACHO_CONTEXT            *MachoContext,
-  IN  UINT64                      LinkAddress,
+  IN  UINT64                      LoadAddress,
   IN  CONST OC_VTABLE_ARRAY       *Vtables,
   IN  UINTN                       RelocationBase,
   IN  CONST MACH_RELOCATION_INFO  *SourceRelocations,
@@ -836,7 +905,7 @@ InternalRelocateAndCopyRelocations64 (
     //
     Result = InternalRelocateRelocationIntel64 (
                MachoContext,
-               LinkAddress,
+               LoadAddress,
                Vtables,
                RelocationBase,
                &SourceRelocations[Index],
@@ -961,34 +1030,28 @@ InternalStripLoadCommands64 (
 }
 
 /**
-  Prelinks the specified KEXT against the specified LinkAddress and the data
+  Prelinks the specified KEXT against the specified LoadAddress and the data
   of its dependencies.
 
   @param[in,out] MachoContext     Mach-O context of the KEXT to prelink.
   @param[in]     LinkEditSegment  __LINKEDIT segment of the KEXT to prelink.
-  @param[in]     LinkAddress      The address this KEXT shall be linked
+  @param[in]     LoadAddress      The address this KEXT shall be linked
                                   against.
-  @param[in]     DependencyData   List of data of all dependencies.
-  @param[in]     ExposeSymbols    Whether the symbol table shall be exposed.
-  @param[out]    OutputData       Buffer to output data into.
-  @param[out]    ScratchMemory    Scratch memory buffer that is at least as big
-                                  as the KEXT's __LINKEDIT segment.
 
   @retval  Returned is whether the prelinking process has been successful.
            The state of the KEXT is undefined in case this routine fails.
 
 **/
-BOOLEAN
+RETURN_STATUS
 InternalPrelinkKext64 (
-  IN OUT OC_MACHO_CONTEXT         *MachoContext,
-  IN     MACH_SEGMENT_COMMAND_64  *LinkEditSegment,
-  IN     UINT64                   LinkAddress,
-  IN     OC_DEPENDENCY_DATA       *DependencyData,
-  IN     BOOLEAN                  ExposeSymbols,
-  IN OUT OC_DEPENDENCY_DATA       *OutputData,
-  OUT    VOID                     *ScratchMemory
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     PRELINKED_KEXT     *Kext,
+  IN     UINT64             LoadAddress
   )
 {
+  OC_MACHO_CONTEXT           *MachoContext;
+  MACH_SEGMENT_COMMAND_64    *LinkEditSegment;
+
   MACH_HEADER_64             *MachHeader;
 
   MACH_SEGMENT_COMMAND_64    *Segment;
@@ -1016,12 +1079,6 @@ InternalPrelinkKext64 (
   UINT32                     NumUndefinedSymbols;
   UINT64                     WeakTestValue;
   OC_VTABLE_PATCH_ARRAY      *PatchData;
-  CONST OC_VTABLE_PATCH_ENTRY *VtablePatchEntry;
-  UINT32                     VtableOffset;
-  CONST UINT64               *VtableData;
-  UINT32                     VtableSize;
-  UINT32                     VtablesSize;
-  OC_VTABLE_ARRAY            *Vtables;
 
   UINT32                     NumRelocations;
   UINT32                     NumRelocations2;
@@ -1041,20 +1098,19 @@ InternalPrelinkKext64 (
   UINT32                     SegmentOffset;
   UINT32                     SegmentSize;
 
-  ASSERT (MachoContext != NULL);
-  ASSERT (LinkAddress != 0);
-  ASSERT (DependencyData != NULL);
-  ASSERT (DependencyData->SymbolTable != NULL);
-  ASSERT (DependencyData->Vtables != NULL);
-  ASSERT (OutputData != NULL);
+  ASSERT (Context != NULL);
+  ASSERT (Kext != NULL);
+  ASSERT (LoadAddress != 0);
+
+  MachoContext    = &Kext->Context.MachContext;
+  LinkEditSegment = Kext->LinkEditSegment;
 
   MachHeader = MachoGetMachHeader64 (MachoContext);
   //
   // Only perform actions when the kext is flag'd to be dynamically linked.
   //
   if ((MachHeader->Flags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) == 0) {
-    ASSERT (FALSE);
-    return FALSE;
+    return RETURN_SUCCESS;
   }
   //
   // Strip superfluous Load Commands.
@@ -1086,12 +1142,11 @@ InternalPrelinkKext64 (
     Symbol     = (MACH_NLIST_64 *)&IndirectSymtab[Index];
     SymbolName = MachoGetIndirectSymbolName64 (MachoContext, Symbol);
     if (SymbolName == NULL) {
-      return FALSE;
+      return RETURN_LOAD_ERROR;
     }
 
     Result = InternalSolveSymbol64 (
-               MachoContext,
-               DependencyData->SymbolTable,
+               Kext,
                SymbolName,
                Symbol,
                &WeakTestValue,
@@ -1099,8 +1154,7 @@ InternalPrelinkKext64 (
                NumUndefinedSymbols
                );
     if (!Result) {
-      ASSERT (FALSE);
-      return FALSE;
+      return RETURN_LOAD_ERROR;
     }
   }
   //
@@ -1112,8 +1166,7 @@ InternalPrelinkKext64 (
     // Undefined symbols are solved via their name.
     //
     Result = InternalSolveSymbol64 (
-               MachoContext,
-               DependencyData->SymbolTable,
+               Kext,
                MachoGetSymbolName64 (MachoContext, Symbol),
                Symbol,
                &WeakTestValue,
@@ -1121,8 +1174,15 @@ InternalPrelinkKext64 (
                NumUndefinedSymbols
                );
     if (!Result) {
-      ASSERT (FALSE);
-      return FALSE;
+      return RETURN_LOAD_ERROR;
+    }
+  }
+
+  if (Context->LinkBufferSize < LinkEditSegment->FileSize) {
+    FreePool (Context->LinkBuffer);
+    Context->LinkBuffer = AllocatePool (LinkEditSegment->FileSize);
+    if (Context->LinkBuffer) {
+      return RETURN_OUT_OF_RESOURCES;
     }
   }
   //
@@ -1130,7 +1190,7 @@ InternalPrelinkKext64 (
   // ScratchMemory is at least as big as __LINKEDIT, so it can store all
   // symbols.
   //
-  PatchData = (OC_VTABLE_PATCH_ARRAY *)ScratchMemory;
+  PatchData = (OC_VTABLE_PATCH_ARRAY *)Context->LinkBuffer;
   Result = InternalPrepareVtableCreationNonPrelinked64 (
              MachoContext,
              NumSymbols,
@@ -1138,109 +1198,30 @@ InternalPrelinkKext64 (
              PatchData
              );
   if (!Result) {
-    return FALSE;
+    return RETURN_LOAD_ERROR;
   }
-  //
-  // Then we double the number of vtables we're expecting, because every
-  // pointer will have a class vtable and a MetaClass vtable.
-  //
-  VtablesSize = 0;
-  for (Index = 0; Index < PatchData->NumEntries; ++Index) {
-    VtablePatchEntry = &PatchData->Entries[Index];
-
-    Result = MachoSymbolGetFileOffset64 (
-               MachoContext,
-               VtablePatchEntry->Vtable,
-               &VtableOffset
-               );
-    if (!Result || (VtableOffset == 0)) {
-      return FALSE;
-    }
-
-    VtableData = (UINT64 *)((UINTN)MachHeader + VtableOffset);
-    if (!OC_ALIGNED (VtableData)) {
-      return FALSE;
-    }
-
-    Result = InternalGetVtableSizeWithRelocs64 (
-               MachoContext,
-               VtableData,
-               &VtableSize
-               );
-    if (!Result) {
-      return FALSE;
-    }
-
-    VtablesSize += VtableSize;
-
-    Result = MachoSymbolGetFileOffset64 (
-               MachoContext,
-               VtablePatchEntry->MetaVtable,
-               &VtableOffset
-               );
-    if (!Result || (VtableOffset == 0)) {
-      return FALSE;
-    }
-
-    VtableData = (UINT64 *)((UINTN)MachHeader + VtableOffset);
-    if (!OC_ALIGNED (VtableData)) {
-      return FALSE;
-    }
-
-    Result = InternalGetVtableSizeWithRelocs64 (
-               MachoContext,
-               VtableData,
-               &VtableSize
-               );
-    if (!Result) {
-      return FALSE;
-    }
-
-    VtablesSize += VtableSize;
-  }
-
-  Vtables = AllocatePool (sizeof (*Vtables) + VtablesSize);
-  if (Vtables == NULL) {
-    return FALSE;
-  }
-  //
-  // From this point onwards it will be free'd via OutputData.
-  //
-  OutputData->Vtables = Vtables;
-
-  Result = InternalCreateVtablesNonPrelinked64 (
-             MachoContext,
-             DependencyData,
-             PatchData,
-             Vtables
-             );
-  if (!Result) {
-    return FALSE;
-  }
-
-  Vtables->Link.ForwardLink = NULL;
   //
   // Relocate local and external symbols.
   //
   for (Index = 0; Index < NumLocalSymbols; ++Index) {
     Result = MachoRelocateSymbol64 (
                MachoContext,
-               LinkAddress,
+               LoadAddress,
                (MACH_NLIST_64 *)&LocalSymtab[Index]
                );
     if (!Result) {
-      return FALSE;
+      return RETURN_LOAD_ERROR;
     }
   }
 
   for (Index = 0; Index < NumExternalSymbols; ++Index) {
     Result = MachoRelocateSymbol64 (
                MachoContext,
-               LinkAddress,
+               LoadAddress,
                (MACH_NLIST_64 *)&ExternalSymtab[Index]
                );
     if (!Result) {
-      return FALSE;
+      return RETURN_LOAD_ERROR;
     }
   }
   //
@@ -1272,11 +1253,11 @@ InternalPrelinkKext64 (
   NumRelocations += MachoContext->DySymtab->NumExternalRelocations;
   RelocationsSize = (NumRelocations * sizeof (MACH_RELOCATION_INFO));
 
-  LinkEdit = ScratchMemory;
+  LinkEdit = Context->LinkBuffer;
 
   FirstSegment = MachoGetNextSegment64 (MachoContext, NULL);
   if (FirstSegment == NULL) {
-    return FALSE;
+    return RETURN_UNSUPPORTED;
   }
   //
   // Copy the relocations to be reserved and adapt the symbol number they
@@ -1295,7 +1276,7 @@ InternalPrelinkKext64 (
   NumRelocations = MachoContext->DySymtab->NumOfLocalRelocations;
   Result = InternalRelocateAndCopyRelocations64 (
              MachoContext,
-             LinkAddress,
+             LoadAddress,
              DependencyData->Vtables,
              RelocationBase,
              Relocations,
@@ -1303,15 +1284,14 @@ InternalPrelinkKext64 (
              &TargetRelocation[0]
              );
   if (!Result) {
-    ASSERT (FALSE);
-    return FALSE;
+    return RETURN_LOAD_ERROR;
   }
 
   Relocations     = MachoContext->ExternRelocations;
   NumRelocations2 = MachoContext->DySymtab->NumExternalRelocations;
   Result = InternalRelocateAndCopyRelocations64 (
              MachoContext,
-             LinkAddress,
+             LoadAddress,
              DependencyData->Vtables,
              RelocationBase,
              Relocations,
@@ -1319,26 +1299,9 @@ InternalPrelinkKext64 (
              &TargetRelocation[NumRelocations]
              );
   if (!Result) {
-    ASSERT (FALSE);
-    return FALSE;
+    return RETURN_LOAD_ERROR;
   }
   NumRelocations += NumRelocations2;
-  //
-  // Expose the external Symbol Table if requested.
-  //
-  if (ExposeSymbols) {
-    OutputData->SymbolTable = AllocatePool (
-                                sizeof (OutputData->SymbolTable)
-                                  + (NumExternalSymbols
-                                       * sizeof (*OutputData->SymbolTable->Symbols))
-                                );
-    InternalFillSymbolTable64 (
-      MachoContext,
-      NumExternalSymbols,
-      ExternalSymtab,
-      OutputData->SymbolTable
-      );
-  }
   //
   // Copy the entire symbol table excluding the area for undefined symbols.
   //
@@ -1431,30 +1394,19 @@ InternalPrelinkKext64 (
         (SegmentOffset + SegmentSize)
         );
 
-      return TRUE;
+      return RETURN_SUCCESS;
     }
 
-    Result = FALSE;
-
     Section = NULL;
-    while ((Section = MachoGetNextSection64 (MachoContext, Segment, Section))) {
-      if (Section == NULL) {
-        Result = TRUE;
-        break;
-      }
-
+    while ((Section = MachoGetNextSection64 (MachoContext, Segment, Section)) != NULL) {
       Section->Address = ALIGN_VALUE (
-                           (Section->Address + LinkAddress),
+                           (Section->Address + LoadAddress),
                            Section->Alignment
                            );
       ++Section;
     }
 
-    if (!Result) {
-      return FALSE;
-    }
-
-    Segment->VirtualAddress += LinkAddress;
+    Segment->VirtualAddress += LoadAddress;
 
     if (Segment->FileOffset > SegmentOffset) {
       SegmentOffset = (UINT32)Segment->FileOffset;
@@ -1467,5 +1419,5 @@ InternalPrelinkKext64 (
   //
   // Reaching here means one or more segments are malformed.
   //
-  return FALSE;
+  return RETURN_SUCCESS;
 }

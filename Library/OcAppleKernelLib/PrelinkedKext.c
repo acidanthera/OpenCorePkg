@@ -12,6 +12,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include <Uefi.h>
+
 #include <IndustryStandard/AppleKmodInfo.h>
 
 #include <Library/BaseLib.h>
@@ -204,12 +206,51 @@ InternalScanBuildLinkedSymbolTable (
   IN OUT PRELINKED_KEXT  *Kext
   )
 {
+  PRELINKED_KEXT_SYMBOL *SymbolTable;
+  PRELINKED_KEXT_SYMBOL *WalkerBottom;
+  PRELINKED_KEXT_SYMBOL *WalkerTop;
+  UINT32                NumCxxSymbols;
+  UINT32                Index;
+  CONST MACH_NLIST_64   *Symbol;
+  CONST CHAR8           *Name;
+  BOOLEAN               Result;
+
   if (Kext->LinkedSymbolTable != NULL) {
     return EFI_ALREADY_STARTED;
   }
 
-  //TODO: port InternalFillSymbolTable64.
-  return EFI_UNSUPPORTED;
+  SymbolTable = AllocatePool (Kext->NumberOfSymbols * sizeof (*SymbolTable));
+  if (SymbolTable == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  WalkerBottom = &SymbolTable[0];
+  WalkerTop    = &SymbolTable[Kext->NumberOfSymbols - 1];
+
+  NumCxxSymbols = 0;
+
+  for (Index = 0; Index < Kext->NumberOfSymbols; ++Index) {
+    Symbol = &Kext->SymbolTable[Index];
+    Name   = MachoGetSymbolName64 (&Kext->Context.MachContext, Symbol);
+    Result = MachoSymbolNameIsCxx (Name);
+
+    if (!Result) {
+      WalkerBottom->StringIndex = Symbol->UnifiedName.StringIndex;
+      WalkerBottom->Value       = Symbol->Value;
+      ++WalkerBottom;
+    } else {
+      WalkerTop->StringIndex = Symbol->UnifiedName.StringIndex;
+      WalkerTop->Value       = Symbol->Value;
+      --WalkerTop;
+
+      ++NumCxxSymbols;
+    }
+  }
+
+  Kext->LinkedSymbolTable  = SymbolTable;
+  Kext->NumberOfCxxSymbols = NumCxxSymbols;
+
+  return EFI_SUCCESS;
 }
 
 PRELINKED_KEXT *

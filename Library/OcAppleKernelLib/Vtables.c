@@ -62,28 +62,25 @@ InternalGetOcVtableByName (
 STATIC
 BOOLEAN
 InternalConstructVtablePrelinked64 (
-  IN OUT OC_MACHO_CONTEXT          *MachoContext,
-  IN     CONST OC_SYMBOL_TABLE_64  *DefinedSymbols,
+  IN OUT PRELINKED_KEXT            *Kext,
   IN     CONST MACH_NLIST_64       *VtableSymbol,
   OUT    OC_VTABLE                 *Vtable
   )
 {
-  BOOLEAN                  Result;
-  CONST MACH_HEADER_64     *MachHeader;
-  UINT32                   VtableOffset;
-  CONST UINT64             *VtableData;
-  UINT64                   Value;
-  CONST OC_SYMBOL_TABLE_64 *SymbolsWalker;
-  CONST CHAR8              *StringTable;
-  UINT32                   Index;
-  UINT32                   Index2;
-  UINT32                   CxxIndex;
-  CONST OC_SYMBOL_64       *Symbol;
+  OC_MACHO_CONTEXT            *MachoContext;
+  BOOLEAN                     Result;
+  CONST MACH_HEADER_64        *MachHeader;
+  UINT32                      VtableOffset;
+  CONST UINT64                *VtableData;
+  UINT64                      Value;
+  UINT32                      Index;
+  CONST PRELINKED_KEXT_SYMBOL *Symbol;
 
-  ASSERT (MachoContext != NULL);
-  ASSERT (DefinedSymbols != NULL);
+  ASSERT (Kext != NULL);
   ASSERT (VtableSymbol != NULL);
   ASSERT (Vtable != NULL);
+
+  MachoContext = &Kext->Context.MachContext;
 
   MachHeader = MachoGetMachHeader64 (MachoContext);
   ASSERT (MachHeader != NULL);
@@ -106,54 +103,31 @@ InternalConstructVtablePrelinked64 (
   //
   // Initialize the VTable by entries.
   //
-  SymbolsWalker = DefinedSymbols;
 
-  do {
-    StringTable = SymbolsWalker->StringTable;
-    CxxIndex = (
-                 SymbolsWalker->NumSymbols
-                   - SymbolsWalker->NumCxxSymbols
-               );
-    //
-    // Assumption: Not ARM (ARM requires an alignment to the function pointer
-    //             retrieved from VtableData.
-    //
-    for (
-      Index = VTABLE_HEADER_LEN_64;
-      (Value = VtableData[Index]) != 0;
-      ++Index
-      ) {
-      for (
-        Index2 = CxxIndex;
-        Index2 < SymbolsWalker->NumSymbols;
-        ++Index2
-        ) {
-        Symbol = &SymbolsWalker->Symbols[Index2];
+  //
+  // Assumption: Not ARM (ARM requires an alignment to the function pointer
+  //             retrieved from VtableData.
+  //
+  for (
+    Index = VTABLE_HEADER_LEN_64;
+    (Value = VtableData[Index]) != 0;
+    ++Index
+    ) {
+    Symbol = InternalOcGetSymbolByValue (Kext, Value, OcGetSymbolOnlyCxx);
 
-        if (Symbol->Value == Value) {
-          Vtable->Entries[Index].Address = Value;
-          Vtable->Entries[Index].Name    = (StringTable + Symbol->StringIndex);
-          break;
-        }
-      }
+    if (Symbol != NULL) {
+      Vtable->Entries[Index].Address = Value;
+      Vtable->Entries[Index].Name = (Kext->StringTable + Symbol->StringIndex);
+    } else {
       //
       // If we can't find the symbol, it means that the virtual function was
       // defined inline.  There's not much I can do about this; it just means
       // I can't patch this function.
       //
-      if (Index == SymbolsWalker->NumCxxSymbols) {
-        Vtable->Entries[Index].Address = 0;
-        Vtable->Entries[Index].Name    = NULL;
-      }
+      Vtable->Entries[Index].Address = 0;
+      Vtable->Entries[Index].Name    = NULL;
     }
-
-    SymbolsWalker = GET_OC_SYMBOL_TABLE_64_FROM_LINK (
-                      GetNextNode (
-                        &DefinedSymbols->Link,
-                        &SymbolsWalker->Link
-                        )
-                      );
-  } while (!IsNull (&DefinedSymbols->Link, &SymbolsWalker->Link));
+  }
 
   return TRUE;
 }
@@ -263,8 +237,7 @@ InternalPrepareCreateVtablesPrelinked64 (
 
 BOOLEAN
 InternalCreateVtablesPrelinked64 (
-  IN  OC_MACHO_CONTEXT          *MachoContext,
-  IN  CONST OC_SYMBOL_TABLE_64  *DefinedSymbols,
+  IN OUT PRELINKED_KEXT         *Kext,
   IN  OC_VTABLE_EXPORT_ARRAY    *VtableExport,
   OUT OC_VTABLE                 *VtableBuffer
   )
@@ -273,14 +246,12 @@ InternalCreateVtablesPrelinked64 (
   UINT32              Index;
   BOOLEAN             Result;
 
-  ASSERT (MachoContext != NULL);
-  ASSERT (DefinedSymbols != NULL);
+  ASSERT (Kext != NULL);
 
   for (Index = 0; Index < VtableExport->NumSymbols; ++Index) {
     Symbol = VtableExport->Symbols[Index];
     Result = InternalConstructVtablePrelinked64 (
-                MachoContext,
-                DefinedSymbols,
+                Kext,
                 Symbol,
                 VtableBuffer
                 );
@@ -432,24 +403,16 @@ STATIC
 BOOLEAN
 InternalInitializeVtableByEntriesAndRelocations64 (
   IN OUT OC_MACHO_CONTEXT             *MachoContext,
-  IN     CONST OC_SYMBOL_TABLE_64     *DefinedSymbols,
   IN     CONST OC_VTABLE              *SuperVtable,
   IN     CONST MACH_NLIST_64          *VtableSymbol,
-  IN     CONST UINT64                 *VtableData,
-  OUT    OC_VTABLE                    *Vtable
+  IN     CONST UINT64                 *VtableData
   )
 {
   UINT32                     NumEntries;
-  UINT32                     Index;
-  UINT32                     CxxIndex;
   UINT32                     EntryOffset;
   UINT64                     EntryValue;
-  CONST OC_SYMBOL_TABLE_64   *SymbolsWalker;
-  CONST OC_SYMBOL_64         *OcSymbol;
-  CONST CHAR8                *StringTable;
   MACH_NLIST_64              *Symbol;
   BOOLEAN                    Result;
-  CONST CHAR8                *Name;
   //
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.
@@ -467,54 +430,11 @@ InternalInitializeVtableByEntriesAndRelocations64 (
     // skip it.  We won't be able to patch subclasses with this symbol,
     // but there isn't much we can do about that.
     //
-    if (EntryValue != 0) {
-      SymbolsWalker = DefinedSymbols;
-      CxxIndex = (
-                   SymbolsWalker->NumSymbols
-                     - SymbolsWalker->NumCxxSymbols
-                 );
-      do {
-        StringTable = SymbolsWalker->StringTable;
-        //
-        // Imported symbols are implicitely locally defined and hence do not
-        // need to be patched.
-        //
-        for (
-          Index = CxxIndex;
-          Index < SymbolsWalker->NumSymbols;
-          ++Index
-          ) {
-          OcSymbol = &SymbolsWalker->Symbols[Index];
-
-          if (OcSymbol->Value == EntryValue) {
-            Name = (StringTable + OcSymbol->StringIndex);
-            Vtable->Entries[NumEntries].Name    = Name;
-            Vtable->Entries[NumEntries].Address = OcSymbol->Value;
-            break;
-          }
-        }
-
-        if (Index != SymbolsWalker->NumSymbols) {
-          break;
-        }
-
-        SymbolsWalker = GET_OC_SYMBOL_TABLE_64_FROM_LINK (
-                          GetNextNode (
-                            &DefinedSymbols->Link,
-                            &SymbolsWalker->Link
-                            )
-                          );
-        if (IsNull (&DefinedSymbols->Link, &SymbolsWalker->Link)) {
-          ASSERT (FALSE);
-          return FALSE;
-        }
-      } while (TRUE);
-    } else if (NumEntries < SuperVtable->NumEntries) {
+    if (EntryValue == 0) {
       Symbol = MachoGetSymbolByExternRelocationOffset64 (
                  MachoContext,
                  (VtableSymbol->Value + EntryOffset)
                  );
-
       if (Symbol == NULL) {
         //
         // When the VTable entry is 0 and it is not referenced by a Relocation,
@@ -532,14 +452,8 @@ InternalInitializeVtableByEntriesAndRelocations64 (
       if (!Result) {
         return FALSE;
       }
-
-      Name = MachoGetSymbolName64 (MachoContext, Symbol);
-      Vtable->Entries[NumEntries].Name    = Name;
-      Vtable->Entries[NumEntries].Address = Symbol->Value;
     }
   }
-
-  Vtable->NumEntries = NumEntries;
 
   return TRUE;
 }
@@ -600,13 +514,11 @@ InternalPrepareVtableCreationNonPrelinked64 (
 
 BOOLEAN
 InternalCreateVtablesNonPrelinked64 (
-  IN OUT OC_MACHO_CONTEXT          *MachoContext,
-  IN     CONST OC_DEPENDENCY_DATA  *DependencyData,
-  IN     OC_VTABLE_PATCH_ARRAY     *PatchData,
-  OUT    OC_VTABLE_ARRAY           *VtableArray
+  IN OUT PRELINKED_KEXT            *Kext,
+  IN     OC_VTABLE_PATCH_ARRAY     *PatchData
   )
 {
-  OC_VTABLE            *VtableBuffer;
+  OC_MACHO_CONTEXT     *MachoContext;
   CONST MACH_HEADER_64 *MachHeader;
   UINT32               Index;
   UINT32               NumPatched;
@@ -620,7 +532,7 @@ InternalCreateVtablesNonPrelinked64 (
   CONST UINT64         *VtableData;
   CONST OC_VTABLE      *SuperVtable;
   CONST OC_VTABLE      *MetaVtable;
-  CONST OC_SYMBOL_64   *OcSymbolDummy;
+  CONST VOID           *OcSymbolDummy;
   MACH_NLIST_64        *SymbolDummy;
   CHAR8                ClassName[SYM_MAX_NAME_LEN];
   CHAR8                SuperClassName[SYM_MAX_NAME_LEN];
@@ -629,10 +541,11 @@ InternalCreateVtablesNonPrelinked64 (
   CHAR8                FinalSymbolName[SYM_MAX_NAME_LEN];
   BOOLEAN              SuccessfulIteration;
 
+  MachoContext = &Kext->Context.MachContext;
+
   MachHeader = MachoGetMachHeader64 (MachoContext);
   ASSERT (MachHeader != NULL);
-
-  VtableBuffer = GET_FIRST_OC_VTABLE (VtableArray);
+;
   NumPatched   = 0;
 
   while (NumPatched < PatchData->NumEntries) {
@@ -721,9 +634,9 @@ InternalCreateVtablesNonPrelinked64 (
       // all the externally defined symbols, then check locally.
       //
       OcSymbolDummy = InternalOcGetSymbolByName (
-                        DependencyData->SymbolTable,
+                        Kext,
                         FinalSymbolName,
-                        TRUE
+                        OcGetSymbolAnyLevel
                         );
       if (OcSymbolDummy != NULL) {
         return FALSE;
@@ -755,22 +668,13 @@ InternalCreateVtablesNonPrelinked64 (
 
       Result = InternalInitializeVtableByEntriesAndRelocations64 (
                  MachoContext,
-                 DependencyData->SymbolTable,
                  SuperVtable,
                  VtableSymbol,
-                 VtableData,
-                 VtableBuffer
+                 VtableData
                  );
       if (!Result) {
         return FALSE;
       }
-
-      VtableBuffer->Name = MachoGetSymbolName64 (MachoContext, VtableSymbol);
-      //
-      // Add the class's vtable to the set of patched vtables
-      // This is done implicitely as we're operating on an array.
-      //
-      VtableBuffer = GET_NEXT_OC_VTABLE (VtableBuffer);
       //
       // Get the meta vtable name from the class name 
       //
@@ -824,22 +728,13 @@ InternalCreateVtablesNonPrelinked64 (
 
       Result = InternalInitializeVtableByEntriesAndRelocations64 (
                  MachoContext,
-                 DependencyData->SymbolTable,
                  SuperVtable,
                  MetaVtableSymbol,
-                 VtableData,
-                 VtableBuffer
+                 VtableData
                  );
       if (!Result) {
         return FALSE;
       }
-
-      VtableBuffer->Name = MachoGetSymbolName64 (MachoContext, MetaVtableSymbol);
-      //
-      // Add the MetaClass's vtable to the set of patched vtables
-      // This is done implicitely as we're operating on an array.
-      //
-      VtableBuffer = GET_NEXT_OC_VTABLE (VtableBuffer);
 
       ++NumPatched;
       SuccessfulIteration = TRUE;
@@ -853,8 +748,6 @@ InternalCreateVtablesNonPrelinked64 (
       return FALSE;
     }
   }
-
-  VtableArray->NumVtables = (NumPatched * 2);
 
   return TRUE;
 }

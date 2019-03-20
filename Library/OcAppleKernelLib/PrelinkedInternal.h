@@ -80,17 +80,15 @@ struct PRELINKED_KEXT_ {
   //
   UINT32                   NumberOfSymbols;
   //
+  // Number of C++ symbols. They are put at the end of LinkedSymbolTable.
+  // Calculated at LinkedSymbolTable construction.
+  //
+  UINT32                   NumberOfCxxSymbols;
+  //
   // Sorted symbol table used only for dependencies.
   //
   PRELINKED_KEXT_SYMBOL    *LinkedSymbolTable;
-  //
-  // The number of symbols in the entire LinkedSymbolTable.
-  //
-  UINT32                   LinkedNumberOfSymbols;
-  //
-  // The number of C++ symbols at the end of LinkedSymbolTable.
-  //
-  UINT32                   LinkedNumberOfCxxSymbols;
+  BOOLEAN                  Processed;
 };
 
 //
@@ -158,51 +156,6 @@ InternalScanPrelinkedKext (
 #define VTABLE_ENTRY_SIZE_64   8U
 #define VTABLE_HEADER_LEN_64   2U
 #define VTABLE_HEADER_SIZE_64  (VTABLE_HEADER_LEN_64 * VTABLE_ENTRY_SIZE_64)
-
-typedef struct {
-  UINT32 StringIndex;  ///< index into the string table
-  UINT64 Value;        ///< value of this symbol (or stab offset)
-} OC_SYMBOL_64;
-
-#define OC_SYMBOL_TABLE_64_SIGNATURE  SIGNATURE_32 ('O', 'S', '6', '4')
-
-/**
-  Gets the next element in a linked list of OC_SYMBOL_TABLE_64.
-
-  @param[in] This  The current ListEntry.
-
-**/
-#define GET_OC_SYMBOL_TABLE_64_FROM_LINK(This)  \
-  CR (                                          \
-    (This),                                     \
-    OC_SYMBOL_TABLE_64,                         \
-    Link,                                       \
-    OC_SYMBOL_TABLE_64_SIGNATURE                \
-    )
-
-typedef struct {
-  ///
-  /// These data are used to construct linked lists of dependency information
-  /// for each KEXT.  It is declared hear for every dependency will
-  /// eventually be part of a list and to save separate allocations per KEXT.
-  ///
-  UINT32       Signature;
-  LIST_ENTRY   Link;
-  BOOLEAN      IsIndirect;
-  ///
-  /// The String Table associated with this symbol table.
-  ///
-  CONST CHAR8  *StringTable;
-  ///
-  /// The number of symbols in the entire symbols buffer.
-  ///
-  UINT32       NumSymbols;
-  ///
-  /// The number of C++ symbols at the end of the symbols buffer.
-  ///
-  UINT32       NumCxxSymbols;
-  OC_SYMBOL_64 Symbols[];  ///< The symbol buffer.
-} OC_SYMBOL_TABLE_64;
 
 typedef struct {
   CONST CHAR8 *Name;    ///< The symbol's name.
@@ -280,42 +233,6 @@ typedef enum {
 } OC_KEXT_VERSION_STAGE;
 
 typedef struct {
-  OC_SYMBOL_TABLE_64 *SymbolTable;
-  OC_VTABLE_ARRAY    *Vtables;
-} OC_DEPENDENCY_DATA;
-
-#define OC_DEPENDENCY_INFO_ENTRY_SIGNATURE  \
-  SIGNATURE_32 ('O', 'D', 'I', 'E')
-
-#define OC_DEP_INFO_FROM_LINK(This)  \
-  (CR (  \
-     (This),  \
-     OC_DEPENDENCY_INFO_ENTRY,  \
-     Link,  \
-     OC_DEPENDENCY_INFO_ENTRY_SIGNATURE  \
-     ))
-
-typedef struct OC_DEPENDENCY_INFO_ENTRY_ OC_DEPENDENCY_INFO_ENTRY;
-
-typedef struct {
-  MACH_HEADER_64           *MachHeader;
-  UINT32                   MachoSize;
-  CONST CHAR8              *Name;
-  OC_KEXT_VERSION          Version;
-  OC_KEXT_VERSION          CompatibleVersion;
-  UINTN                    NumDependencies;
-  OC_DEPENDENCY_INFO_ENTRY *Dependencies[];
-} OC_DEPENDENCY_INFO;
-
-struct OC_DEPENDENCY_INFO_ENTRY_ {
-  UINT32             Signature;
-  LIST_ENTRY         Link;
-  BOOLEAN            Prelinked;
-  OC_DEPENDENCY_DATA Data;
-  OC_DEPENDENCY_INFO Info;
-};
-
-typedef struct {
   CONST MACH_NLIST_64 *Smcp;
   CONST MACH_NLIST_64 *Vtable;
   CONST MACH_NLIST_64 *MetaVtable;
@@ -330,83 +247,6 @@ typedef struct {
   UINT32              NumSymbols;
   CONST MACH_NLIST_64 *Symbols[];
 } OC_VTABLE_EXPORT_ARRAY;
-
-//
-// Dependencies
-//
-
-OC_DEPENDENCY_INFO_ENTRY *
-InternalKextCollectInformation (
-  IN     XML_NODE          *Plist,
-  IN OUT OC_MACHO_CONTEXT  *MachoContext OPTIONAL,
-  IN     UINT64            KextsVirtual OPTIONAL,
-  IN     UINTN             KextsPhysical OPTIONAL,
-  IN     UINT64            RequestedVersion OPTIONAL
-  );
-
-VOID
-InternalFreeDependencyEntry (
-  IN OC_DEPENDENCY_INFO_ENTRY  *Entry
-  );
-
-UINT64
-InternalGetNewPrelinkedKextLoadAddress (
-  IN OUT OC_MACHO_CONTEXT               *KernelContext,
-  IN     CONST MACH_SEGMENT_COMMAND_64  *PrelinkedKextsSegment,
-  IN     CONST CHAR8                    *PrelinkedPlist
-  );
-
-/**
-  Fills SymbolTable with the symbols provided in Symbols.  For performance
-  reasons, the C++ symbols are continuously added to the top of the buffer.
-  Their order is not preserved.  SymbolTable->SymbolTable is expected to be
-  a valid buffer that can store at least NumSymbols symbols.
-
-  @param[in]     MachoContext  Context of the Mach-O.
-  @param[in]     NumSymbols    The number of symbols to copy.
-  @param[in]     Symbols       The source symbol array.
-  @param[in,out] SymbolTable   The desination Symbol List.  Must be able to
-                               hold at least NumSymbols symbols.
-
-**/
-VOID
-InternalFillSymbolTable64 (
-  IN OUT OC_MACHO_CONTEXT     *MachoContext,
-  IN     UINT32               NumSymbols,
-  IN     CONST MACH_NLIST_64  *Symbols,
-  IN OUT OC_SYMBOL_TABLE_64   *SymbolTable
-  );
-
-//
-// PLIST
-//
-
-CONST CHAR8 *
-InternalPlistStrStrSameLevelUp (
-  IN CONST CHAR8  *AnchorString,
-  IN CONST CHAR8  *FindString,
-  IN UINTN        FindStringLen
-  );
-
-CONST CHAR8 *
-InternalPlistStrStrSameLevelDown (
-  IN CONST CHAR8  *AnchorString,
-  IN CONST CHAR8  *FindString,
-  IN UINTN        FindStringLen
-  );
-
-CONST CHAR8 *
-InternalPlistStrStrSameLevel (
-  IN CONST CHAR8  *AnchorString,
-  IN CONST CHAR8  *FindString,
-  IN UINTN        FindStringLen,
-  IN UINTN        DownwardsOffset
-  );
-
-UINT64
-InternalPlistGetIntValue (
-  IN CONST CHAR8  **Tag
-  );
 
 //
 // VTables
@@ -434,10 +274,8 @@ InternalPrepareVtableCreationNonPrelinked64 (
 
 BOOLEAN
 InternalCreateVtablesNonPrelinked64 (
-  IN OUT OC_MACHO_CONTEXT          *MachoContext,
-  IN     CONST OC_DEPENDENCY_DATA  *DependencyData,
-  IN     OC_VTABLE_PATCH_ARRAY     *PatchData,
-  OUT    OC_VTABLE_ARRAY           *VtableArray
+  IN OUT PRELINKED_KEXT            *Kext,
+  IN     OC_VTABLE_PATCH_ARRAY     *PatchData
   );
 
 BOOLEAN
@@ -449,8 +287,7 @@ InternalPrepareCreateVtablesPrelinked64 (
 
 BOOLEAN
 InternalCreateVtablesPrelinked64 (
-  IN  OC_MACHO_CONTEXT          *MachoContext,
-  IN  CONST OC_SYMBOL_TABLE_64  *DefinedSymbols,
+  IN OUT PRELINKED_KEXT         *Kext,
   IN  OC_VTABLE_EXPORT_ARRAY    *VtableExport,
   OUT OC_VTABLE                 *VtableBuffer
   );
@@ -459,12 +296,33 @@ InternalCreateVtablesPrelinked64 (
 // Prelink
 //
 
+typedef enum {
+  OcGetSymbolAnyLevel,
+  OcGetSymbolFirstLevel,
+  OcGetSymbolOnlyCxx
+} OC_GET_SYMBOL_LEVEL;
+
+typedef
+BOOLEAN
+(*PRELINKED_KEXT_SYMBOL_PREDICATE)(
+  IN CONST PRELINKED_KEXT         *Kext,
+  IN CONST PRELINKED_KEXT_SYMBOL  *Symbol,
+  IN       UINT64                 Context
+  );
+
 // TODO: Move?
-CONST OC_SYMBOL_64 *
+CONST PRELINKED_KEXT_SYMBOL *
 InternalOcGetSymbolByName (
-  IN CONST OC_SYMBOL_TABLE_64  *DefinedSymbols,
-  IN CONST CHAR8               *Name,
-  IN BOOLEAN                   CheckIndirect
+  IN PRELINKED_KEXT       *Kext,
+  IN CONST CHAR8          *Name,
+  IN OC_GET_SYMBOL_LEVEL  SymbolLevel
+  );
+
+CONST PRELINKED_KEXT_SYMBOL *
+InternalOcGetSymbolByValue (
+  IN PRELINKED_KEXT       *Kext,
+  IN UINT64               Value,
+  IN OC_GET_SYMBOL_LEVEL  SymbolLevel
   );
 
 VOID
@@ -474,12 +332,12 @@ InternalSolveSymbolValue64 (
   );
 
 /**
-  Prelinks the specified KEXT against the specified LinkAddress and the data
+  Prelinks the specified KEXT against the specified LoadAddress and the data
   of its dependencies.
 
   @param[in,out] MachoContext     Mach-O context of the KEXT to prelink.
   @param[in]     LinkEditSegment  __LINKEDIT segment of the KEXT to prelink.
-  @param[in]     LinkAddress      The address this KEXT shall be linked
+  @param[in]     LoadAddress      The address this KEXT shall be linked
                                   against.
   @param[in]     DependencyData   List of data of all dependencies.
   @param[in]     ExposeSymbols    Whether the symbol table shall be exposed.
@@ -491,15 +349,11 @@ InternalSolveSymbolValue64 (
            The state of the KEXT is undefined in case this routine fails.
 
 **/
-BOOLEAN
+RETURN_STATUS
 InternalPrelinkKext64 (
-  IN OUT OC_MACHO_CONTEXT         *MachoContext,
-  IN     MACH_SEGMENT_COMMAND_64  *LinkEditSegment,
-  IN     UINT64                   LinkAddress,
-  IN     OC_DEPENDENCY_DATA       *DependencyData,
-  IN     BOOLEAN                  ExposeSymbols,
-  IN OUT OC_DEPENDENCY_DATA       *OutputData,
-  OUT    VOID                     *ScratchMemory
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     PRELINKED_KEXT     *Kext,
+  IN     UINT64             LoadAddress
   );
 
 #endif // PRELINKED_INTERNAL_H

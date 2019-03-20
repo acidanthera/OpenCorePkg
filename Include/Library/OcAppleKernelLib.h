@@ -118,6 +118,8 @@ typedef struct {
   // Currently allocated pooled buffers. PooledBuffersAllocCount >= PooledBuffersCount.
   //
   UINT32                   PooledBuffersAllocCount;
+  VOID                     *LinkBuffer;
+  UINTN                    LinkBufferSize;
   //
   // Used for caching prelinked kexts.
   //
