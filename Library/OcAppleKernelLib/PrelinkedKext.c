@@ -161,6 +161,26 @@ InternalCreatePrelinkedKext (
   return NewKext;
 }
 
+STATIC
+EFI_STATUS
+InternalScanCurrentPrelinkedKext (
+  IN OUT PRELINKED_KEXT  *Kext
+  )
+{
+  if (Kext->LinkEditSegment == NULL) {
+    Kext->LinkEditSegment = MachoGetSegmentByName64 (
+      &Kext->Context.MachContext,
+      "__LINKEDIT"
+      );
+
+    if (Kext->LinkEditSegment == NULL) {
+      return EFI_NOT_FOUND;
+    }
+  }
+
+  return EFI_SUCCESS;
+}
+
 PRELINKED_KEXT *
 InternalNewPrelinkedKext (
   IN OC_MACHO_CONTEXT       *Context,
@@ -243,6 +263,7 @@ InternalScanPrelinkedKext (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
+  EFI_STATUS      Status;
   UINT32          FieldCount;
   UINT32          FieldIndex;
   UINT32          DependencyIndex;
@@ -257,15 +278,9 @@ InternalScanPrelinkedKext (
     return EFI_SUCCESS;
   }
 
-  if (Kext->LinkEditSegment == NULL) {
-    Kext->LinkEditSegment = MachoGetSegmentByName64 (
-      &Kext->Context.MachContext,
-      "__LINKEDIT"
-      );
-
-    if (Kext->LinkEditSegment == NULL) {
-      return EFI_NOT_FOUND;
-    }
+  Status = InternalScanCurrentPrelinkedKext (Kext);
+  if (EFI_ERROR (Status)) {
+    return Status;
   }
 
   DependencyIndex = 0;
@@ -285,15 +300,9 @@ InternalScanPrelinkedKext (
       return EFI_OUT_OF_RESOURCES;
     }
 
-    if (DependencyKext->LinkEditSegment == NULL) {
-      DependencyKext->LinkEditSegment = MachoGetSegmentByName64 (
-        &DependencyKext->Context.MachContext,
-        "__LINKEDIT"
-        );
-
-      if (DependencyKext->LinkEditSegment == NULL) {
-        return EFI_NOT_FOUND;
-      }
+    Status = InternalScanPrelinkedKext (DependencyKext, Context);
+    if (EFI_ERROR (Status) && Status != EFI_ALREADY_STARTED) {
+      return Status;
     }
 
     Kext->Dependencies[DependencyIndex] = DependencyKext;

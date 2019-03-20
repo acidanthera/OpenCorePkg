@@ -366,9 +366,6 @@ PrelinkedLinkExecutable (
     return Status;
   }
 
-
-
-
   InternalFreePrelinkedKext (Kext);
 
   return EFI_UNSUPPORTED;
