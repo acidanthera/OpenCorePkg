@@ -1066,6 +1066,7 @@ InternalPrelinkKext64 (
   NumSymbols = MachoGetSymbolTable (
                  MachoContext,
                  &SymbolTable,
+                 &StringTable,
                  &LocalSymtab,
                  &NumLocalSymbols,
                  &ExternalSymtab,
@@ -1073,7 +1074,6 @@ InternalPrelinkKext64 (
                  &UndefinedSymtab,
                  &NumUndefinedSymbols
                  );
-  StringTable = MachoContext->StringTable;
   //
   // Solve indirect symbols.
   //

@@ -230,6 +230,7 @@ InternalPrepareCreateVtablesPrelinked64 (
                  NULL,
                  NULL,
                  NULL,
+                 NULL,
                  NULL
                  );
   for (Index = 0; Index < NumSymbols; ++Index) {

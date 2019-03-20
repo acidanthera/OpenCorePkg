@@ -178,7 +178,38 @@ InternalScanCurrentPrelinkedKext (
     }
   }
 
+  if (Kext->SymbolTable == NULL) {
+    Kext->NumberOfSymbols = MachoGetSymbolTable (
+                   &Kext->Context.MachContext,
+                   &Kext->SymbolTable,
+                   &Kext->StringTable,
+                   NULL,
+                   NULL,
+                   NULL,
+                   NULL,
+                   NULL,
+                   NULL
+                   );
+    if (Kext->NumberOfSymbols == 0) {
+      return EFI_NOT_FOUND;
+    }
+  }
+
   return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+InternalScanBuildLinkedSymbolTable (
+  IN OUT PRELINKED_KEXT  *Kext
+  )
+{
+  if (Kext->LinkedSymbolTable != NULL) {
+    return EFI_ALREADY_STARTED;
+  }
+
+  //TODO: port InternalFillSymbolTable64.
+  return EFI_UNSUPPORTED;
 }
 
 PRELINKED_KEXT *
@@ -203,6 +234,11 @@ InternalFreePrelinkedKext (
   IN PRELINKED_KEXT  *Kext
   )
 {
+  if (Kext->LinkedSymbolTable != NULL) {
+    FreePool (Kext->LinkedSymbolTable);
+    Kext->LinkedSymbolTable = NULL;
+  }
+
   FreePool (Kext);
 }
 
@@ -301,6 +337,11 @@ InternalScanPrelinkedKext (
     }
 
     Status = InternalScanPrelinkedKext (DependencyKext, Context);
+    if (EFI_ERROR (Status) && Status != EFI_ALREADY_STARTED) {
+      return Status;
+    }
+
+    Status = InternalScanBuildLinkedSymbolTable (DependencyKext);
     if (EFI_ERROR (Status) && Status != EFI_ALREADY_STARTED) {
       return Status;
     }

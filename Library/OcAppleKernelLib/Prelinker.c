@@ -362,7 +362,7 @@ PrelinkedLinkExecutable (
 
   Status = InternalScanPrelinkedKext (Kext, Context);
   if (EFI_ERROR (Status)) {
-    FreePool (Kext);
+    InternalFreePrelinkedKext (Kext);
     return Status;
   }
 

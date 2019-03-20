@@ -639,13 +639,14 @@ MachoPreserveRelocationIntel64 (
   Obtain symbol tables.
 
   @param[in]     Context              Context of the Mach-O.
-  @param[in,out] SymbolTable          Symbol table.
-  @param[in,out] LocalSymbols         Local symbol table.
-  @param[in,out] NumLocalSymbols      Number of symbols in local symbol table.
-  @param[in,out] ExternalSymbols      External symbol table.
-  @param[in,out] NumExternalSymbols   Number of symbols in external symbol table.
-  @param[in,out] UndefinedSymbols     Undefined symbol table.
-  @param[in,out] NumUndefinedSymbols  Number of symbols in undefined symbol table.
+  @param[out]    SymbolTable          Symbol table.
+  @param[out]    StringTable          String table for that symbol table.
+  @param[out]    LocalSymbols         Local symbol table.
+  @param[out]    NumLocalSymbols      Number of symbols in local symbol table.
+  @param[out]    ExternalSymbols      External symbol table.
+  @param[out]    NumExternalSymbols   Number of symbols in external symbol table.
+  @param[out]    UndefinedSymbols     Undefined symbol table.
+  @param[out]    NumUndefinedSymbols  Number of symbols in undefined symbol table.
 
   @return number of symbols in symbol table or 0.
 **/
@@ -653,6 +654,7 @@ UINT32
 MachoGetSymbolTable (
   IN OUT OC_MACHO_CONTEXT     *Context,
      OUT CONST MACH_NLIST_64  **SymbolTable,
+     OUT CONST CHAR8          **StringTable OPTIONAL,
      OUT CONST MACH_NLIST_64  **LocalSymbols OPTIONAL,
      OUT UINT32               *NumLocalSymbols OPTIONAL,
      OUT CONST MACH_NLIST_64  **ExternalSymbols OPTIONAL,

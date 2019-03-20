@@ -882,13 +882,14 @@ InternalRetrieveSymtabs64 (
 UINT32
 MachoGetSymbolTable (
   IN OUT OC_MACHO_CONTEXT     *Context,
-  OUT    CONST MACH_NLIST_64  **SymbolTable,
-  OUT    CONST MACH_NLIST_64  **LocalSymbols, OPTIONAL
-  OUT    UINT32               *NumLocalSymbols, OPTIONAL
-  OUT    CONST MACH_NLIST_64  **ExternalSymbols, OPTIONAL
-  OUT    UINT32               *NumExternalSymbols, OPTIONAL
-  OUT    CONST MACH_NLIST_64  **UndefinedSymbols, OPTIONAL
-  OUT    UINT32               *NumUndefinedSymbols OPTIONAL
+     OUT CONST MACH_NLIST_64  **SymbolTable,
+     OUT CONST CHAR8          **StringTable OPTIONAL,
+     OUT CONST MACH_NLIST_64  **LocalSymbols, OPTIONAL
+     OUT UINT32               *NumLocalSymbols, OPTIONAL
+     OUT CONST MACH_NLIST_64  **ExternalSymbols, OPTIONAL
+     OUT UINT32               *NumExternalSymbols, OPTIONAL
+     OUT CONST MACH_NLIST_64  **UndefinedSymbols, OPTIONAL
+     OUT UINT32               *NumUndefinedSymbols OPTIONAL
   )
 {
   UINT32              Index;
@@ -910,6 +911,10 @@ MachoGetSymbolTable (
   }
 
   *SymbolTable = Context->SymbolTable;
+
+  if (StringTable != NULL) {
+    *StringTable = Context->StringTable;
+  }
 
   if (LocalSymbols != NULL) {
     ASSERT (NumLocalSymbols != NULL);

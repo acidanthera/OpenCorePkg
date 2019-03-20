@@ -29,6 +29,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 typedef struct PRELINKED_KEXT_ PRELINKED_KEXT;
 
+typedef struct {
+  UINT32 StringIndex;  ///< index into the string table
+  UINT64 Value;        ///< value of this symbol (or stab offset)
+} PRELINKED_KEXT_SYMBOL;
+
 struct PRELINKED_KEXT_ {
   //
   // These data are used to construct linked lists of dependency information
@@ -55,13 +60,37 @@ struct PRELINKED_KEXT_ {
   CONST CHAR8              *CompatibleVersion;
   //
   // Scanned dependencies (PRELINKED_KEXT) from BundleLibraries.
-  // Not resolved by default. See InternalScanPrelinkedKext.
+  // Not resolved by default. See InternalScanPrelinkedKext for fields below.
   //
   PRELINKED_KEXT           *Dependencies[MAX_KEXT_DEPEDENCIES];
   //
-  // Linkedit segment reference. Not resolved by default.
+  // Linkedit segment reference.
   //
   MACH_SEGMENT_COMMAND_64  *LinkEditSegment;
+  //
+  // The String Table associated with this symbol table.
+  //
+  CONST CHAR8              *StringTable;
+  //
+  // Symbol table.
+  //
+  CONST MACH_NLIST_64      *SymbolTable;
+  //
+  // Symbol table size.
+  //
+  UINT32                   NumberOfSymbols;
+  //
+  // Sorted symbol table used only for dependencies.
+  //
+  PRELINKED_KEXT_SYMBOL    *LinkedSymbolTable;
+  //
+  // The number of symbols in the entire LinkedSymbolTable.
+  //
+  UINT32                   LinkedNumberOfSymbols;
+  //
+  // The number of C++ symbols at the end of LinkedSymbolTable.
+  //
+  UINT32                   LinkedNumberOfCxxSymbols;
 };
 
 //
