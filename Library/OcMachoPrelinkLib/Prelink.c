@@ -128,8 +128,8 @@ InternalSolveSymbolNonWeak64 (
   INTN               Result;
   CONST OC_SYMBOL_64 *ResolveSymbol;
 
-  if (Symbol->Type != MACH_N_TYPE_UNDF) {
-    if (Symbol->Type != MACH_N_TYPE_INDR) {
+  if ((Symbol->Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_UNDF) {
+    if ((Symbol->Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR) {
       //
       // KXLD_WEAK_TEST_SYMBOL might have been resolved by the resolving code
       // at the end of InternalSolveSymbol64. 
@@ -239,7 +239,7 @@ InternalSolveSymbol64 (
                    KXLD_WEAK_TEST_SYMBOL
                    );
         if (Result == 0) {
-          if (WeakTestSymbol->Type == MACH_N_TYPE_UNDF) {
+          if ((WeakTestSymbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_UNDF) {
             Success = InternalSolveSymbolNonWeak64 (
                         MachoContext,
                         DefinedSymbols,

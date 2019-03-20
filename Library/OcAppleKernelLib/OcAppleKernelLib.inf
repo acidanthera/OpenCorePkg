@@ -29,7 +29,6 @@
 #
 
 [Sources]
-  Dependencies.c
   KernelReader.c
   KextPatcher.c
   Link.c
@@ -37,7 +36,6 @@
   PrelinkedContext.c
   PrelinkedInternal.h
   PrelinkedKext.c
-  Prelinker.c
   Vtables.c
 
 [Packages]

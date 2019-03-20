@@ -312,25 +312,6 @@ PrelinkedInjectKext (
   );
 
 /**
-  Link executable within current prelink context.
-
-  @param[in,out] Context         Prelinked context.
-  @param[in,out] Executable      Kext executable copied to prelinked.
-  @param[in]     ExecutableSize  Kext executable size.
-  @param[in]     PlistRoot       Current kext info.plist.
-  @param[out]    LoadAddress     Resulting kext load address.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-PrelinkedLinkExecutable (
-  IN OUT PRELINKED_CONTEXT  *Context,
-  IN OUT OC_MACHO_CONTEXT   *Executable,
-  IN     XML_NODE           *PlistRoot,
-  IN     UINT64             LoadAddress
-  );
-
-/**
   Initialize patcher from prelinked context for kext patching.
 
   @param[in,out] Context         Patcher context.

@@ -216,7 +216,7 @@ InternalScanBuildLinkedSymbolTable (
   BOOLEAN               Result;
 
   if (Kext->LinkedSymbolTable != NULL) {
-    return EFI_ALREADY_STARTED;
+    return EFI_SUCCESS;
   }
 
   SymbolTable = AllocatePool (Kext->NumberOfSymbols * sizeof (*SymbolTable));
@@ -347,10 +347,6 @@ InternalScanPrelinkedKext (
   CONST CHAR8     *DependencyId;
   PRELINKED_KEXT  *DependencyKext;
 
-  if (Kext->Dependencies[0] != NULL) {
-    return EFI_ALREADY_STARTED;
-  }
-
   if (Kext->BundleLibraries == NULL) {
     return EFI_SUCCESS;
   }
@@ -378,12 +374,12 @@ InternalScanPrelinkedKext (
     }
 
     Status = InternalScanPrelinkedKext (DependencyKext, Context);
-    if (EFI_ERROR (Status) && Status != EFI_ALREADY_STARTED) {
+    if (EFI_ERROR (Status)) {
       return Status;
     }
 
     Status = InternalScanBuildLinkedSymbolTable (DependencyKext);
-    if (EFI_ERROR (Status) && Status != EFI_ALREADY_STARTED) {
+    if (EFI_ERROR (Status)) {
       return Status;
     }
 
@@ -391,5 +387,82 @@ InternalScanPrelinkedKext (
     ++DependencyIndex;
   }
 
+  //
+  // We do not need this anymore.
+  // Additionally it may point to invalid memory on prelinked kexts.
+  //
+  Kext->BundleLibraries = NULL;
+
   return EFI_SUCCESS;
+}
+
+PRELINKED_KEXT *
+InternalLinkPrelinkedKext (
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN OUT OC_MACHO_CONTEXT   *Executable,
+  IN     XML_NODE           *PlistRoot,
+  IN     UINT64             LoadAddress,
+  IN     UINT64             KmodAddress
+  )
+{
+  EFI_STATUS     Status;
+  PRELINKED_KEXT *Kext;
+
+  Kext = InternalNewPrelinkedKext (Executable, PlistRoot);
+  if (Kext == NULL) {
+    return NULL;
+  }
+
+  Status = InternalScanPrelinkedKext (Kext, Context);
+  if (EFI_ERROR (Status)) {
+    InternalFreePrelinkedKext (Kext);
+    return NULL;
+  }
+
+  //
+  // Detach Identifier from temporary memory location.
+  //
+  Kext->Identifier = AllocateCopyPool (AsciiStrSize (Kext->Identifier), Kext->Identifier);
+  if (Kext->Identifier == NULL) {
+    InternalFreePrelinkedKext (Kext);
+    return NULL;
+  }
+
+  Status = PrelinkedDependencyInsert (Context, (CHAR8 *) Kext->Identifier);
+  if (EFI_ERROR (Status)) {
+    FreePool ((CHAR8 *) Kext->Identifier);
+    InternalFreePrelinkedKext (Kext);
+    return NULL;
+  }
+  //
+  // Also detach bundle compatible version if any.
+  //
+  if (Kext->CompatibleVersion != NULL) {
+    Kext->CompatibleVersion = AllocateCopyPool (AsciiStrSize (Kext->CompatibleVersion), Kext->CompatibleVersion);
+    if (Kext->CompatibleVersion == NULL) {
+      InternalFreePrelinkedKext (Kext);
+      return NULL;
+    }
+
+    Status = PrelinkedDependencyInsert (Context, (CHAR8 *) Kext->CompatibleVersion);
+    if (EFI_ERROR (Status)) {
+      FreePool ((CHAR8 *) Kext->CompatibleVersion);
+      InternalFreePrelinkedKext (Kext);
+      return NULL;
+    }
+  }
+  //
+  // Set virtual addresses.
+  //
+  Kext->Context.VirtualBase = LoadAddress;
+  Kext->Context.VirtualKmod = KmodAddress;
+
+  Status = InternalPrelinkKext64 (Context, Kext, LoadAddress);
+
+  if (EFI_ERROR (Status)) {
+    InternalFreePrelinkedKext (Kext);
+    return NULL;
+  }
+
+  return Kext;
 }

@@ -466,10 +466,13 @@ PrelinkedInjectKext (
   UINT32            AlignedExecutableSize;
   BOOLEAN           Failed;
   UINT64            KmodAddress;
+  PRELINKED_KEXT    *PrelinkedKext;
   CHAR8             ExecutableSourceAddrStr[24];
   CHAR8             ExecutableSizeStr[24];
   CHAR8             ExecutableLoadAddrStr[24];
   CHAR8             KmodInfoStr[24];
+
+  PrelinkedKext = NULL;
 
   //
   // Copy executable to prelinkedkernel.
@@ -550,17 +553,18 @@ PrelinkedInjectKext (
   }
 
   if (Executable != NULL) {
-    Status = PrelinkedLinkExecutable (
+    PrelinkedKext = InternalLinkPrelinkedKext (
       Context,
       &ExecutableContext,
       InfoPlistRoot,
-      Context->PrelinkedLastAddress
+      Context->PrelinkedLastAddress,
+      KmodAddress
       );
 
-    if (EFI_ERROR (Status)) {
+    if (PrelinkedKext == NULL) {
       XmlDocumentFree (InfoPlistDocument);
       FreePool (TmpInfoPlist);
-      return Status;
+      return EFI_INVALID_PARAMETER;
     }
 
     //
@@ -585,17 +589,33 @@ PrelinkedInjectKext (
   FreePool (TmpInfoPlist);
 
   if (NewInfoPlist == NULL) {
+    if (PrelinkedKext != NULL) {
+      InternalFreePrelinkedKext (PrelinkedKext);
+    }
     return EFI_OUT_OF_RESOURCES;
   }
 
   Status = PrelinkedDependencyInsert (Context, NewInfoPlist);
   if (EFI_ERROR (Status)) {
     FreePool (NewInfoPlist);
+    if (PrelinkedKext != NULL) {
+      InternalFreePrelinkedKext (PrelinkedKext);
+    }
     return Status;
   }
 
   if (XmlNodeAppend (Context->KextList, "dict", NULL, NewInfoPlist) == NULL) {
+    if (PrelinkedKext != NULL) {
+      InternalFreePrelinkedKext (PrelinkedKext);
+    }
     return EFI_OUT_OF_RESOURCES;
+  }
+
+  //
+  // Let other kexts depend on this one.
+  //
+  if (PrelinkedKext != NULL) {
+    InsertTailList (&Context->PrelinkedKexts, &PrelinkedKext->Link);
   }
 
   return EFI_SUCCESS;

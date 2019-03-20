@@ -51,7 +51,8 @@ struct PRELINKED_KEXT_ {
   //
   PATCHER_CONTEXT          Context;
   //
-  // Dependencies dictionary (OSBundleLibraries), may be NULL for KPI kexts.
+  // Dependencies dictionary (OSBundleLibraries).
+  // May be NULL for KPI kexts or after Dependencies are set.
   //
   XML_NODE                 *BundleLibraries;
   //
@@ -144,6 +145,26 @@ InternalScanPrelinkedKext (
   IN OUT PRELINKED_CONTEXT  *Context
   );
 
+/**
+  Link executable within current prelink context.
+
+  @param[in,out] Context         Prelinked context.
+  @param[in,out] Executable      Kext executable copied to prelinked.
+  @param[in]     ExecutableSize  Kext executable size.
+  @param[in]     PlistRoot       Current kext info.plist.
+  @param[in]     LoadAddress     Kext load address.
+  @param[in]     KmodAddress     Kext kmod address.
+
+  @return  prelinked kext to be inserted into PRELINKED_CONTEXT.
+**/
+PRELINKED_KEXT *
+InternalLinkPrelinkedKext (
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN OUT OC_MACHO_CONTEXT   *Executable,
+  IN     XML_NODE           *PlistRoot,
+  IN     UINT64             LoadAddress,
+  IN     UINT64             KmodAddress
+  );
 
 #define KXLD_WEAK_TEST_SYMBOL  "_gOSKextUnresolved"
 

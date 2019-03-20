@@ -612,7 +612,7 @@ InternalCreateVtablesNonPrelinked64 (
       // Get the super vtable if it's been patched
       //
       SuperVtable = InternalGetOcVtableByName (
-                      DependencyData->Vtables,
+                      /* DependencyData->Vtables */ NULL,
                       SuperVtableName
                       );
       if (SuperVtable == NULL) {
@@ -688,7 +688,7 @@ InternalCreateVtablesNonPrelinked64 (
       }
 
       MetaVtable = InternalGetOcVtableByName (
-                     DependencyData->Vtables,
+                     /* DependencyData->Vtables */ NULL,
                      VtableName
                      );
       if (MetaVtable != NULL) {
@@ -700,7 +700,7 @@ InternalCreateVtablesNonPrelinked64 (
       // OSMetaClass, so we just hardcode that vtable name here.
       //
       SuperVtable = InternalGetOcVtableByName (
-                      DependencyData->Vtables,
+                      /* DependencyData->Vtables */ NULL,
                       OS_METACLASS_VTABLE_NAME
                       );
       if (SuperVtable == NULL) {

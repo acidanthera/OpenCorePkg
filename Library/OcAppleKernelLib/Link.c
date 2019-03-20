@@ -198,8 +198,8 @@ InternalSolveSymbolNonWeak64 (
   INTN                        Result;
   CONST PRELINKED_KEXT_SYMBOL *ResolveSymbol;
 
-  if (Symbol->Type != MACH_N_TYPE_UNDF) {
-    if (Symbol->Type != MACH_N_TYPE_INDR) {
+  if ((Symbol->Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_UNDF) {
+    if ((Symbol->Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR) {
       //
       // KXLD_WEAK_TEST_SYMBOL might have been resolved by the resolving code
       // at the end of InternalSolveSymbol64. 
@@ -1004,7 +1004,7 @@ InternalStripLoadCommands64 (
 
     SizeOfLeftCommands -= LoadCommand->CommandSize;
 
-    for (Index2 = 0; Index < ARRAY_SIZE (LoadCommandsToStrip); ++Index2) {
+    for (Index2 = 0; Index2 < ARRAY_SIZE (LoadCommandsToStrip); ++Index2) {
       if (LoadCommand->CommandType == LoadCommandsToStrip[Index2]) {
         if (Index != (MachHeader->NumCommands - 1)) {
           //
@@ -1277,7 +1277,7 @@ InternalPrelinkKext64 (
   Result = InternalRelocateAndCopyRelocations64 (
              MachoContext,
              LoadAddress,
-             DependencyData->Vtables,
+             /* DependencyData->Vtables */ NULL,
              RelocationBase,
              Relocations,
              &NumRelocations,
@@ -1292,7 +1292,7 @@ InternalPrelinkKext64 (
   Result = InternalRelocateAndCopyRelocations64 (
              MachoContext,
              LoadAddress,
-             DependencyData->Vtables,
+             /* DependencyData->Vtables */ NULL,
              RelocationBase,
              Relocations,
              &NumRelocations2,
