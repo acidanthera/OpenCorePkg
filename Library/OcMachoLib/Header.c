@@ -787,83 +787,90 @@ InternalRetrieveSymtabs64 (
                  NULL
                  )
                );
-  if ((DySymtab == NULL)
-   || !OC_ALIGNED (DySymtab) 
-   || (DySymtab->CommandSize != sizeof (*DySymtab))) {
-    return FALSE;
-  }
+  
+  if (DySymtab != NULL) {
+    if (!OC_ALIGNED (DySymtab) 
+     || (DySymtab->CommandSize != sizeof (*DySymtab))) {
+      return FALSE;
+    }
 
-  Result = OcOverflowAddU32 (
-             DySymtab->LocalSymbolsIndex,
-             DySymtab->NumLocalSymbols,
-             &OffsetTop
-             );
-  if (Result || (OffsetTop > Symtab->NumSymbols)) {
-    return FALSE;
-  }
+    Result = OcOverflowAddU32 (
+               DySymtab->LocalSymbolsIndex,
+               DySymtab->NumLocalSymbols,
+               &OffsetTop
+               );
+    if (Result || (OffsetTop > Symtab->NumSymbols)) {
+      return FALSE;
+    }
 
-  Result = OcOverflowAddU32 (
-             DySymtab->ExternalSymbolsIndex,
-             DySymtab->NumExternalSymbols,
-             &OffsetTop
-             );
-  if (Result || (OffsetTop > Symtab->NumSymbols)) {
-    return FALSE;
-  }
+    Result = OcOverflowAddU32 (
+               DySymtab->ExternalSymbolsIndex,
+               DySymtab->NumExternalSymbols,
+               &OffsetTop
+               );
+    if (Result || (OffsetTop > Symtab->NumSymbols)) {
+      return FALSE;
+    }
 
-  Result = OcOverflowAddU32 (
-             DySymtab->UndefinedSymbolsIndex,
-             DySymtab->NumUndefinedSymbols,
-             &OffsetTop
-             );
-  if (Result || (OffsetTop > Symtab->NumSymbols)) {
-    return FALSE;
-  }
+    Result = OcOverflowAddU32 (
+               DySymtab->UndefinedSymbolsIndex,
+               DySymtab->NumUndefinedSymbols,
+               &OffsetTop
+               );
+    if (Result || (OffsetTop > Symtab->NumSymbols)) {
+      return FALSE;
+    }
 
-  Result = OcOverflowMulAddU32 (
-             DySymtab->NumIndirectSymbols,
-             sizeof (MACH_NLIST_64),
-             DySymtab->IndirectSymbolsOffset,
-             &OffsetTop
-             );
-  if (Result || (OffsetTop > FileSize)) {
-    return FALSE;
-  }
+    Result = OcOverflowMulAddU32 (
+               DySymtab->NumIndirectSymbols,
+               sizeof (MACH_NLIST_64),
+               DySymtab->IndirectSymbolsOffset,
+               &OffsetTop
+               );
+    if (Result || (OffsetTop > FileSize)) {
+      return FALSE;
+    }
 
-  Result = OcOverflowMulAddU32 (
-             DySymtab->NumOfLocalRelocations,
-             sizeof (MACH_RELOCATION_INFO),
-             DySymtab->LocalRelocationsOffset,
-             &OffsetTop
-             );
-  if (Result || (OffsetTop > FileSize)) {
-    return FALSE;
-  }
+    Result = OcOverflowMulAddU32 (
+               DySymtab->NumOfLocalRelocations,
+               sizeof (MACH_RELOCATION_INFO),
+               DySymtab->LocalRelocationsOffset,
+               &OffsetTop
+               );
+    if (Result || (OffsetTop > FileSize)) {
+      return FALSE;
+    }
 
-  Result = OcOverflowMulAddU32 (
-             DySymtab->NumExternalRelocations,
-             sizeof (MACH_RELOCATION_INFO),
-             DySymtab->ExternalRelocationsOffset,
-             &OffsetTop
-             );
-  if (Result || (OffsetTop > FileSize)) {
-    return FALSE;
-  }
+    Result = OcOverflowMulAddU32 (
+               DySymtab->NumExternalRelocations,
+               sizeof (MACH_RELOCATION_INFO),
+               DySymtab->ExternalRelocationsOffset,
+               &OffsetTop
+               );
+    if (Result || (OffsetTop > FileSize)) {
+      return FALSE;
+    }
 
-  IndirectSymtab = (MACH_NLIST_64 *)(
-                     MachoAddress + DySymtab->IndirectSymbolsOffset
-                     );
-  LocalRelocations = (MACH_RELOCATION_INFO *)(
-                       MachoAddress + DySymtab->LocalRelocationsOffset
+    IndirectSymtab = (MACH_NLIST_64 *)(
+                       MachoAddress + DySymtab->IndirectSymbolsOffset
                        );
-  ExternRelocations = (MACH_RELOCATION_INFO *)(
-                        MachoAddress + DySymtab->ExternalRelocationsOffset
-                        );
-  if (!OC_ALIGNED (IndirectSymtab)
-   || !OC_ALIGNED (LocalRelocations)
-   || !OC_ALIGNED (ExternRelocations)) {
-    return FALSE;
+    LocalRelocations = (MACH_RELOCATION_INFO *)(
+                         MachoAddress + DySymtab->LocalRelocationsOffset
+                         );
+    ExternRelocations = (MACH_RELOCATION_INFO *)(
+                          MachoAddress + DySymtab->ExternalRelocationsOffset
+                          );
+    if (!OC_ALIGNED (IndirectSymtab)
+     || !OC_ALIGNED (LocalRelocations)
+     || !OC_ALIGNED (ExternRelocations)) {
+      return FALSE;
+    }
+  } else {
+    IndirectSymtab    = NULL;
+    LocalRelocations  = NULL;
+    ExternRelocations = NULL;
   }
+
   //
   // Store the symbol information.
   //

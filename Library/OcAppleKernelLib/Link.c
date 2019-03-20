@@ -60,6 +60,10 @@ InternalOcGetSymbolWorker (
       continue;
     }
 
+    //
+    // FIXME: This does not look correct to me, as it only limits recursion
+    // from finding this exact kext, while all dependencies should actually be blacklisted.
+    //
     Dependency->Processed = TRUE;
 
     NumSymbols = Dependency->NumberOfSymbols;
@@ -78,8 +82,9 @@ InternalOcGetSymbolWorker (
     }
 
     for (SymIndex = 0; SymIndex < NumSymbols; ++SymIndex) {
-      Result = Predicate (Kext, &Symbols[SymIndex], PredicateContext);
+      Result = Predicate (Dependency, &Symbols[SymIndex], PredicateContext);
       if (Result) {
+        Dependency->Processed = FALSE;
         return &Symbols[SymIndex];
       }
     }
@@ -310,7 +315,7 @@ InternalSolveSymbol64 (
                    KXLD_WEAK_TEST_SYMBOL
                    );
         if (Result == 0) {
-          if (WeakTestSymbol->Type == MACH_N_TYPE_UNDF) {
+          if ((WeakTestSymbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_UNDF) {
             Success = InternalSolveSymbolNonWeak64 (
                         Kext,
                         Name,

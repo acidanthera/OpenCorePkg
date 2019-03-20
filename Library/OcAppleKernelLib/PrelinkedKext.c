@@ -347,13 +347,13 @@ InternalScanPrelinkedKext (
   CONST CHAR8     *DependencyId;
   PRELINKED_KEXT  *DependencyKext;
 
-  if (Kext->BundleLibraries == NULL) {
-    return EFI_SUCCESS;
-  }
-
   Status = InternalScanCurrentPrelinkedKext (Kext);
   if (EFI_ERROR (Status)) {
     return Status;
+  }
+
+  if (Kext->BundleLibraries == NULL) {
+    return EFI_SUCCESS;
   }
 
   DependencyIndex = 0;
