@@ -628,6 +628,17 @@ InternalPatchByVtables64 (
       if (!Result) {
         return FALSE;
       }
+
+      Result = MachoGetVtableNameFromClassName (
+        SuperClassName,
+        sizeof (SuperVtableName),
+        SuperVtableName
+        );
+
+      if (!Result) {
+        return FALSE;
+      }
+
       //
       // Get the super vtable if it's been patched
       //

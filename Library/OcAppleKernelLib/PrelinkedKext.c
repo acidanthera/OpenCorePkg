@@ -506,23 +506,6 @@ InternalScanPrelinkedKext (
 }
 
 VOID
-InternalLockDependencyKexts (
-  IN PRELINKED_KEXT  *Kext
-  )
-{
-  UINT32                      Index;
-  PRELINKED_KEXT              *Dependency;
-
-  for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
-    Dependency = Kext->Dependencies[Index];
-    if (Dependency == NULL) {
-      break;
-    }
-    Dependency->Processed = TRUE;
-  }
-}
-
-VOID
 InternalUnlockContextKexts (
   IN PRELINKED_CONTEXT                *Context
   )
