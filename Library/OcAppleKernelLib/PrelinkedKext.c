@@ -351,47 +351,82 @@ InternalScanPrelinkedKext (
   if (EFI_ERROR (Status)) {
     return Status;
   }
-
-  if (Kext->BundleLibraries == NULL) {
-    return EFI_SUCCESS;
+  //
+  // Find the biggest __LINKEDIT size down the first dependency tree walk to
+  // possibly save a few re-allocations.
+  //
+  if ((Context->LinkBuffer == NULL)
+   && (Context->LinkBufferSize < Kext->LinkEditSegment->FileSize)) {
+    Context->LinkBufferSize = (UINT32)Kext->LinkEditSegment->FileSize;
   }
 
-  DependencyIndex = 0;
-  FieldCount = PlistDictChildren (Kext->BundleLibraries);
-  for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
-    DependencyId = PlistKeyValue (PlistDictChild (Kext->BundleLibraries, FieldIndex, NULL));
-    if (DependencyId == NULL) {
-      continue;
+  if (Kext->BundleLibraries != NULL) {
+    DependencyIndex = 0;
+    FieldCount = PlistDictChildren (Kext->BundleLibraries);
+    for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
+      DependencyId = PlistKeyValue (PlistDictChild (Kext->BundleLibraries, FieldIndex, NULL));
+      if (DependencyId == NULL) {
+        continue;
+      }
+
+      DependencyKext = InternalCachedPrelinkedKext (Context, DependencyId);
+      if (DependencyKext == NULL) {
+        return EFI_NOT_FOUND;
+      }
+
+      if (DependencyIndex >= ARRAY_SIZE (Kext->Dependencies)) {
+        return EFI_OUT_OF_RESOURCES;
+      }
+
+      Status = InternalScanPrelinkedKext (DependencyKext, Context);
+      if (EFI_ERROR (Status)) {
+        return Status;
+      }
+
+      Status = InternalScanBuildLinkedSymbolTable (DependencyKext);
+      if (EFI_ERROR (Status)) {
+        return Status;
+      }
+
+      if (Context->LinkBuffer == NULL) {
+        //
+        // Allocate the LinkBuffer from the size cached during the initial
+        // function recursion.
+        //
+        Context->LinkBuffer = AllocatePool (Context->LinkBufferSize);
+        if (Context->LinkBuffer == NULL) {
+          return RETURN_OUT_OF_RESOURCES;
+        }
+      } else if (Context->LinkBufferSize < DependencyKext->LinkEditSegment->FileSize) {
+        FreePool (Context->LinkBuffer);
+
+        Context->LinkBufferSize = (UINT32)DependencyKext->LinkEditSegment->FileSize;
+        Context->LinkBuffer     = AllocatePool (Context->LinkBufferSize);
+        if (Context->LinkBuffer == NULL) {
+          return RETURN_OUT_OF_RESOURCES;
+        }
+      }
+
+      Kext->Dependencies[DependencyIndex] = DependencyKext;
+      ++DependencyIndex;
     }
 
-    DependencyKext = InternalCachedPrelinkedKext (Context, DependencyId);
-    if (DependencyKext == NULL) {
-      return EFI_NOT_FOUND;
-    }
-
-    if (DependencyIndex >= ARRAY_SIZE (Kext->Dependencies)) {
-      return EFI_OUT_OF_RESOURCES;
-    }
-
-    Status = InternalScanPrelinkedKext (DependencyKext, Context);
-    if (EFI_ERROR (Status)) {
-      return Status;
-    }
-
-    Status = InternalScanBuildLinkedSymbolTable (DependencyKext);
-    if (EFI_ERROR (Status)) {
-      return Status;
-    }
-
-    Kext->Dependencies[DependencyIndex] = DependencyKext;
-    ++DependencyIndex;
+    //
+    // We do not need this anymore.
+    // Additionally it may point to invalid memory on prelinked kexts.
+    //
+    Kext->BundleLibraries = NULL;
   }
 
-  //
-  // We do not need this anymore.
-  // Additionally it may point to invalid memory on prelinked kexts.
-  //
-  Kext->BundleLibraries = NULL;
+  if (Context->LinkBuffer == NULL) {
+    //
+    // Allocate the LinkBuffer in case there are no dependencies.
+    //
+    Context->LinkBuffer = AllocatePool (Context->LinkBufferSize);
+    if (Context->LinkBuffer == NULL) {
+      return RETURN_OUT_OF_RESOURCES;
+    }
+  }
 
   return EFI_SUCCESS;
 }

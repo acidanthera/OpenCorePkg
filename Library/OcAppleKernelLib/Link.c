@@ -1207,14 +1207,6 @@ InternalPrelinkKext64 (
       return RETURN_LOAD_ERROR;
     }
   }
-
-  if (Context->LinkBufferSize < LinkEditSegment->FileSize) {
-    FreePool (Context->LinkBuffer);
-    Context->LinkBuffer = AllocatePool (LinkEditSegment->FileSize);
-    if (Context->LinkBuffer) {
-      return RETURN_OUT_OF_RESOURCES;
-    }
-  }
   //
   // Create and patch the KEXT's VTables.
   // ScratchMemory is at least as big as __LINKEDIT, so it can store all
