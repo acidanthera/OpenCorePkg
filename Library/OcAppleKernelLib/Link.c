@@ -282,7 +282,6 @@ InternalSolveSymbol64 (
   CONST MACH_NLIST_64 *WeakTestSymbol;
 
   ASSERT (Symbol != NULL);
-  ASSERT ((Symbol->Type & MACH_N_TYPE_STAB) == 0);
   if (NumUndefinedSymbols != 0) {
     ASSERT (UndefinedSymbols != NULL);
   }
@@ -327,10 +326,7 @@ InternalSolveSymbol64 (
             }
           }
 
-          Value = WeakTestSymbol->Value;
-          ASSERT (Value != 0);
-
-          *WeakTestValue = Value;
+          *WeakTestValue = WeakTestSymbol->Value;
           break;
         }
       }
@@ -448,10 +444,13 @@ InternalCalculateTargetsIntel64 (
   // section's boundary.
   //
   TargetAddress = LoadAddress;
+
   //
-  // Scattered Relocations are only supported by i386.
+  // Assertion: Scattered Relocations are only supported by i386.
   //
-  ASSERT (((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) == 0);
+  if (((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) != 0) {
+    DEBUG ((DEBUG_WARN, "Prelink: Scattered symbols are not supported.\n"));
+  }
 
   if (Relocation->Extern != 0) {
     Symbol = MachoGetSymbolByIndex64 (
@@ -527,8 +526,9 @@ InternalCalculateTargetsIntel64 (
   }
 
   if (MachoRelocationIsPairIntel64 (Relocation->Type)) {
-    ASSERT (NextRelocation != NULL);
-    ASSERT (MachoIsRelocationPairTypeIntel64 (NextRelocation->Type));
+    if (NextRelocation == NULL) {
+      return FALSE;
+    }
     //
     // As this relocation is the second one in a pair, it cannot be the start
     // of a pair itself.  Pass dummy data for the related arguments.  This call
@@ -574,7 +574,6 @@ InternalIsDirectPureVirtualCall64 (
   CONST OC_VTABLE_ENTRY *Entry;
 
   if ((Offset % sizeof (UINT64)) != 0) {
-    ASSERT (FALSE);
     return FALSE;
   }
 
@@ -639,13 +638,16 @@ InternalRelocateRelocationIntel64 (
   BOOLEAN         PcRelative;
   BOOLEAN         IsNormalLocal;
   BOOLEAN         Result;
+  BOOLEAN         InvalidPcRel;
 
   ASSERT (RelocationBase != 0);
   ASSERT (Relocation != NULL);
   //
   // Scattered Relocations are only supported by i386.
   //
-  ASSERT (((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) == 0);
+  if (((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) != 0) {
+    DEBUG ((DEBUG_WARN, "Prelink: Scattered symbols are not supported.\n"));
+  }
 
   IsPair        = FALSE;
   Adjustment    = 0;
@@ -657,7 +659,7 @@ InternalRelocateRelocationIntel64 (
     // A section-based relocation entry can be skipped for absolute 
     // symbols.
     //
-    return FALSE;
+    return 0;
   }
 
   Address    = Relocation->Address;
@@ -665,11 +667,13 @@ InternalRelocateRelocationIntel64 (
   Type       = Relocation->Type;
   PcRelative = (Relocation->PcRelative != 0);
 
+  if (Length < 2) {
+    return MAX_UINTN;
+  }
+
   if (Relocation->Extern == 0) {
     IsNormalLocal = TRUE;
   }
-
-  ASSERT ((Length == 2) || (Length == 3));
 
   LinkPc         = (Address + LoadAddress);
   InstructionPtr = (UINT8 *)(RelocationBase + Address);
@@ -689,7 +693,10 @@ InternalRelocateRelocationIntel64 (
     return MAX_UINTN;
   }
 
-  if (Length == 2) {
+  InvalidPcRel = FALSE;
+
+  // Length == 2
+  if (Length != 3) {
     Instruction32Ptr = (INT32 *)InstructionPtr;
     Instruction32    = *Instruction32Ptr;
 
@@ -758,7 +765,7 @@ InternalRelocateRelocationIntel64 (
     switch (Type) {
       case MachX8664RelocBranch:
       {
-        ASSERT (PcRelative);
+        InvalidPcRel = !PcRelative;
         Adjustment += LinkPc;
         break;
       }
@@ -768,7 +775,7 @@ InternalRelocateRelocationIntel64 (
       case MachX8664RelocSigned2:
       case MachX8664RelocSigned4:
       {
-        ASSERT (PcRelative);
+        InvalidPcRel = !PcRelative;
         Adjustment += (IsNormalLocal ? LoadAddress : LinkPc);
         break;
       }
@@ -776,7 +783,7 @@ InternalRelocateRelocationIntel64 (
       case MachX8664RelocGot:
       case MachX8664RelocGotLoad:
       {
-        ASSERT (PcRelative);
+        InvalidPcRel = !PcRelative;
         Adjustment += LinkPc;
         Target      = PairTarget;
         IsPair      = TRUE;
@@ -785,7 +792,7 @@ InternalRelocateRelocationIntel64 (
 
       case MachX8664RelocSubtractor:
       {
-        ASSERT (!PcRelative);
+        InvalidPcRel = PcRelative;
         Instruction32 = (INT32)(Target - PairTarget);
         IsPair        = TRUE;
         break;
@@ -793,7 +800,7 @@ InternalRelocateRelocationIntel64 (
 
       default:
       {
-        return FALSE;
+        return MAX_UINTN;
       }
     }
 
@@ -804,7 +811,7 @@ InternalRelocateRelocationIntel64 (
                  &Instruction32
                  );
       if (!Result) {
-        return FALSE;
+        return MAX_UINTN;
       }
     }
         
@@ -821,14 +828,14 @@ InternalRelocateRelocationIntel64 (
     switch (Type) {
       case MachX8664RelocUnsigned:
       {
-        ASSERT (!PcRelative);
+        InvalidPcRel = PcRelative;
         Instruction64 += Target;
         break;
       }
 
       case MachX8664RelocSubtractor:
       {
-        ASSERT (!PcRelative);
+        InvalidPcRel = PcRelative;
         Instruction64 = (Target - PairTarget);
         IsPair        = TRUE;
         break;
@@ -836,11 +843,15 @@ InternalRelocateRelocationIntel64 (
 
       default:
       {
-        return FALSE;
+        return MAX_UINTN;
       }
     }
 
     *Instruction64Ptr = Instruction64;
+  }
+
+  if (InvalidPcRel) {
+    DEBUG ((DEBUG_WARN, "Prelink: Relocation has invalid PC relative flag.\n"));
   }
 
   ReturnValue = (MachoPreserveRelocationIntel64 (Type) ? 1 : 0);
@@ -925,10 +936,13 @@ InternalRelocateAndCopyRelocations64 (
     //
     if ((Result & ~(UINTN)BIT31) != 0) {
       Relocation = &TargetRelocations[PreservedRelocations];
+
       //
-      // Scattered Relocations are only supported by i386.
+      // Assertion: Scattered Relocations are only supported by i386.
       //
-      ASSERT (((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) == 0);
+      if (((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) != 0) {
+        DEBUG ((DEBUG_WARN, "Prelink: Scattered symbols are not supported.\n"));
+      }
 
       CopyMem (Relocation, &SourceRelocations[Index], sizeof (*Relocation));
 
@@ -1002,11 +1016,13 @@ InternalStripLoadCommands64 (
 
   for (Index = 0; Index < MachHeader->NumCommands; ++Index) {
     //
-    // LC_UNIXTHREAD and LC_MAIN are technically stripped in KXLD, but they are
-    // not supposed to be present in the first place.
+    // Assertion: LC_UNIXTHREAD and LC_MAIN are technically stripped in KXLD,
+    //            but they are not supposed to be present in the first place.
     //
-    ASSERT ((LoadCommand->CommandType != MACH_LOAD_COMMAND_UNIX_THREAD)
-         && (LoadCommand->CommandType != MACH_LOAD_COMMAND_MAIN));
+    if ((LoadCommand->CommandType == MACH_LOAD_COMMAND_UNIX_THREAD)
+     || (LoadCommand->CommandType == MACH_LOAD_COMMAND_MAIN)) {
+      DEBUG ((DEBUG_WARN, "Prelink: UNIX Thread and Main LCs are unsupported.\n"));
+    }
 
     SizeOfLeftCommands -= LoadCommand->CommandSize;
 
@@ -1277,8 +1293,6 @@ InternalPrelinkKext64 (
   TargetRelocation = (MACH_RELOCATION_INFO *)(
                        (UINTN)LinkEdit + RelocationsOffset
                        );
-
-  ASSERT (FirstSegment->FileOffset == (UINTN)FirstSegment->FileOffset);
   RelocationBase = ((UINTN)MachHeader + (UINTN)FirstSegment->FileOffset);
   //
   // Relocate and copy local and external relocations.
@@ -1373,9 +1387,7 @@ InternalPrelinkKext64 (
   // Copy the new __LINKEDIT segment into the binary and fix its Load Command.
   //
   LinkEditSegment->FileSize = (SymbolTableSize + RelocationsSize + StringTableSize);
-  ASSERT ((UINTN)LinkEditSegment->FileSize == LinkEditSegment->FileSize);
-
-  LinkEditSegment->Size = ALIGN_VALUE (LinkEditSegment->FileSize, BASE_4KB);
+  LinkEditSegment->Size     = ALIGN_VALUE (LinkEditSegment->FileSize, BASE_4KB);
   
   CopyMem (
     (VOID *)((UINTN)MachHeader + (UINTN)LinkEditSegment->FileOffset),
@@ -1421,10 +1433,7 @@ InternalPrelinkKext64 (
 
     if (Segment->FileOffset > SegmentOffset) {
       SegmentOffset = (UINT32)Segment->FileOffset;
-      ASSERT (SegmentOffset == Segment->FileOffset);
-
-      SegmentSize = (UINT32)Segment->FileSize;
-      ASSERT (SegmentSize == Segment->FileSize);
+      SegmentSize   = (UINT32)Segment->FileSize;
     }
   }
   //

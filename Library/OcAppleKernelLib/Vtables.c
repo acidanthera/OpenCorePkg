@@ -222,7 +222,6 @@ InternalPrepareCreateVtablesPrelinked64 (
       ++NumVtables;
 
       if (VtableExportSize < (NumVtables * sizeof (*VtableExport))) {
-        ASSERT (FALSE);
         return FALSE;
       }
 
@@ -363,7 +362,6 @@ InternalPatchVtableSymbol (
       // The VTable's class declares a method without providing an
       // implementation.
       //
-      ASSERT (FALSE);
       return FALSE;
     }
   }
@@ -394,7 +392,9 @@ InternalPatchVtableSymbol (
   // context.
   //
   Name = ParentEntry->Name;
-  ASSERT (MachoSymbolNameIsPureVirtual (Name) || ((Symbol->Value & 1U) == 0));
+  if (!MachoSymbolNameIsPureVirtual (Name) && ((Symbol->Value & 1U) != 0)) {
+    DEBUG ((DEBUG_WARN, "Prelink: Invalid VTable symbol\n"));
+  }
 
   return TRUE;
 }
@@ -744,7 +744,6 @@ InternalPatchByVtables64 (
     // in a full iteration.
     //
     if (!SuccessfulIteration) {
-      ASSERT (FALSE);
       return FALSE;
     }
   }

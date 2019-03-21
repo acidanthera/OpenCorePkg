@@ -126,7 +126,7 @@ InternalCreatePrelinkedKext (
   // BundleLibraries, CompatibleVersion, and KmodInfo are optional and thus not checked.
   //
   if (!Found || KextIdentifier == NULL || SourceBase < VirtualBase
-    || (Prelinked != NULL && (VirtualBase == 0 || SourceBase == 0 || SourceSize == 0))) {
+    || (Prelinked != NULL && (VirtualBase == 0 || SourceBase == 0 || SourceSize == 0 || SourceSize > MAX_UINT32))) {
     return NULL;
   }
 
