@@ -34,6 +34,22 @@ typedef struct {
   UINT64 Value;        ///< value of this symbol (or stab offset)
 } PRELINKED_KEXT_SYMBOL;
 
+typedef struct {
+  CONST CHAR8 *Name;    ///< The symbol's name.
+  UINT64      Address;  ///< The symbol's address.
+} PRELINKED_VTABLE_ENTRY;
+
+#define GET_NEXT_PRELINKED_VTABLE(This)                                    \
+  (PRELINKED_VTABLE *)(                                                    \
+    (UINTN)((This) + 1) + ((This)->NumEntries * sizeof (*(This)->Entries)) \
+    )
+
+typedef struct {
+  CONST CHAR8            *Name;       ///< The VTable's name.
+  UINT32                 NumEntries;  ///< The number of VTable entries.
+  PRELINKED_VTABLE_ENTRY Entries[];   ///< The VTable entries.
+} PRELINKED_VTABLE;
+
 struct PRELINKED_KEXT_ {
   //
   // These data are used to construct linked lists of dependency information
@@ -90,6 +106,8 @@ struct PRELINKED_KEXT_ {
   //
   PRELINKED_KEXT_SYMBOL    *LinkedSymbolTable;
   BOOLEAN                  Processed;
+  UINT32                   NumberOfVtables;
+  PRELINKED_VTABLE         *LinkedVtables;
 };
 
 //
@@ -178,62 +196,6 @@ InternalLinkPrelinkedKext (
 #define VTABLE_HEADER_LEN_64   2U
 #define VTABLE_HEADER_SIZE_64  (VTABLE_HEADER_LEN_64 * VTABLE_ENTRY_SIZE_64)
 
-typedef struct {
-  CONST CHAR8 *Name;    ///< The symbol's name.
-  UINT64      Address;  ///< The symbol's address.
-} OC_VTABLE_ENTRY;
-
-#define GET_NEXT_OC_VTABLE(This)  \
-  ((OC_VTABLE *)(&(This)->Entries[(This)->NumEntries]))
-
-typedef struct {
-  CONST CHAR8     *Name;       ///< The VTable's name.
-  UINT32          NumEntries;  ///< The number of VTable entries.
-  OC_VTABLE_ENTRY Entries[];   ///< The VTable entries.
-} OC_VTABLE;
-
-#define OC_VTABLE_ARRAY_SIGNATURE  SIGNATURE_32 ('O', 'V', 'T', 'A')
-
-/**
-  Gets the next element in a linked list of OC_VTABLE_ARRAY.
-
-  @param[in] This  The current ListEntry.
-
-**/
-#define GET_OC_VTABLE_ARRAY_FROM_LINK(This)  \
-  CR (                                       \
-    (This),                                  \
-    OC_VTABLE_ARRAY,                         \
-    Link,                                    \
-    OC_VTABLE_ARRAY_SIGNATURE                \
-    )
-
-#define GET_FIRST_OC_VTABLE(This)  \
-  ((OC_VTABLE *)((This) + 1))
-
-typedef struct {
-  ///
-  /// These data are used to construct linked lists of dependency information
-  /// for each KEXT.  It is declared hear for every dependency will
-  /// eventually be part of a list and to save separate allocations per KEXT.
-  ///
-  UINT32     Signature;
-  LIST_ENTRY Link;
-  ///
-  /// The number of VTables in the array.
-  ///
-  UINT32     NumVtables;
-  //
-  // NOTE: This is an array that cannot be declared as such as OC_VTABLE
-  //       contains a flexible array itself.  As the size is dynamic, do not
-  //       try to use pointer arithmetics.
-  //
-  ///
-  /// VTable array.
-  ///
-  OC_VTABLE  Vtables;
-} OC_VTABLE_ARRAY;
-
 typedef union {
   struct {
     UINT32 Major      : 14;
@@ -274,7 +236,7 @@ typedef struct {
 //
 
 UINT32
-InternalGetVtableSize64 (
+InternalGetVtableEntries64 (
   IN CONST UINT64  *VtableData
   );
 
@@ -310,7 +272,13 @@ BOOLEAN
 InternalCreateVtablesPrelinked64 (
   IN OUT PRELINKED_KEXT         *Kext,
   IN  OC_VTABLE_EXPORT_ARRAY    *VtableExport,
-  OUT OC_VTABLE                 *VtableBuffer
+  OUT PRELINKED_VTABLE          *VtableBuffer
+  );
+
+CONST PRELINKED_VTABLE *
+InternalGetOcVtableByName (
+  IN CONST PRELINKED_KEXT  *Kext,
+  IN CONST CHAR8           *Name
   );
 
 //

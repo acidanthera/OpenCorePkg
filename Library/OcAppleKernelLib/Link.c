@@ -20,7 +20,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
-#include <Library/MemoryAllocationLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/OcAppleKernelLib.h>
@@ -411,17 +410,18 @@ InternalCalculateDisplacementIntel64 (
 STATIC
 BOOLEAN
 InternalCalculateTargetsIntel64 (
-  IN OUT VOID                        *MachoContext,
+  IN OUT PRELINKED_KEXT              *Kext,
   IN     UINT64                      LoadAddress,
-  IN     CONST OC_VTABLE_ARRAY       *Vtables,
   IN     CONST MACH_RELOCATION_INFO  *Relocation,
   IN     CONST MACH_RELOCATION_INFO  *NextRelocation  OPTIONAL,
   OUT    UINT64                      *Target,
   OUT    UINT64                      *PairTarget,
-  OUT    CONST OC_VTABLE             **Vtable  OPTIONAL
+  OUT    CONST PRELINKED_VTABLE      **Vtable  OPTIONAL
   )
 {
   BOOLEAN               Success;
+
+  OC_MACHO_CONTEXT      *MachoContext;
 
   UINT64                TargetAddress;
   MACH_NLIST_64         *Symbol;
@@ -429,13 +429,11 @@ InternalCalculateTargetsIntel64 (
   MACH_SECTION_64       *Section;
   UINT64                PairAddress;
   UINT64                PairDummy;
-  UINT32                Index;
-  CONST OC_VTABLE_ARRAY *VtablesWalker;
-  INTN                  Result;
-  CONST OC_VTABLE       *VtableWalker;
 
   ASSERT (Target != NULL);
   ASSERT (PairTarget != NULL);
+
+  MachoContext = &Kext->Context.MachContext;
 
   Section     = NULL;
   PairAddress = 0;
@@ -483,35 +481,7 @@ InternalCalculateTargetsIntel64 (
     }
 
     if ((Vtable != NULL) && MachoSymbolNameIsVtable64 (Name)) {
-      VtablesWalker = Vtables;
-
-      while (TRUE) {
-        for (
-          Index = 0, VtableWalker = GET_FIRST_OC_VTABLE (VtablesWalker);
-          Index < VtablesWalker->NumVtables;
-          ++Index, VtableWalker = GET_NEXT_OC_VTABLE (VtableWalker)
-          ) {
-          Result = AsciiStrCmp (VtableWalker->Name, Name);
-          if (Result == 0) {
-            *Vtable = VtableWalker;
-            break;
-          }
-        }
-
-        if (Index == VtablesWalker->NumVtables) {
-          break;
-        }
-
-        VtablesWalker = GET_OC_VTABLE_ARRAY_FROM_LINK (
-                          GetNextNode (
-                            &Vtables->Link,
-                            &VtablesWalker->Link
-                            )
-                          );
-        if (IsNull (&Vtables->Link, &VtablesWalker->Link)) {
-          return FALSE;
-        }
-      }
+      *Vtable = InternalGetOcVtableByName (Kext, Name);
     }
 
     TargetAddress = Symbol->Value;
@@ -543,9 +513,8 @@ InternalCalculateTargetsIntel64 (
     // shall never reach this very branch.
     //
     Success = InternalCalculateTargetsIntel64 (
-                MachoContext,
+                Kext,
                 LoadAddress,
-                Vtables,
                 NextRelocation,
                 NULL,
                 &PairAddress,
@@ -574,12 +543,12 @@ InternalCalculateTargetsIntel64 (
 STATIC
 BOOLEAN
 InternalIsDirectPureVirtualCall64 (
-  IN CONST OC_VTABLE  *Vtable,
-  IN UINT64            Offset
+  IN CONST PRELINKED_VTABLE  *Vtable,
+  IN UINT64                  Offset
   )
 {
-  UINT64                Index;
-  CONST OC_VTABLE_ENTRY *Entry;
+  UINT64                       Index;
+  CONST PRELINKED_VTABLE_ENTRY *Entry;
 
   if ((Offset % sizeof (UINT64)) != 0) {
     return FALSE;
@@ -619,9 +588,8 @@ InternalIsDirectPureVirtualCall64 (
 STATIC
 UINTN
 InternalRelocateRelocationIntel64 (
-  IN OC_MACHO_CONTEXT            *MachoContext,
+  IN PRELINKED_KEXT              *Kext,
   IN UINT64                      LoadAddress,
-  IN CONST OC_VTABLE_ARRAY       *Vtables,
   IN UINTN                       RelocationBase,
   IN CONST MACH_RELOCATION_INFO  *Relocation,
   IN CONST MACH_RELOCATION_INFO  *NextRelocation  OPTIONAL
@@ -637,7 +605,7 @@ InternalRelocateRelocationIntel64 (
   UINT64          Target;
   BOOLEAN         IsPair;
   UINT64          PairTarget;
-  CONST OC_VTABLE *Vtable;
+  CONST PRELINKED_VTABLE *Vtable;
   UINT64          LinkPc;
   UINT64          Adjustment;
   UINT32          Length;
@@ -688,9 +656,8 @@ InternalRelocateRelocationIntel64 (
 
   Vtable = NULL;
   Result = InternalCalculateTargetsIntel64 (
-             MachoContext,
+             Kext,
              LoadAddress,
-             Vtables,
              Relocation,
              NextRelocation,
              &Target,
@@ -892,9 +859,8 @@ InternalRelocateRelocationIntel64 (
 STATIC
 BOOLEAN
 InternalRelocateAndCopyRelocations64 (
-  IN  OC_MACHO_CONTEXT            *MachoContext,
+  IN  PRELINKED_KEXT              *Kext,
   IN  UINT64                      LoadAddress,
-  IN  CONST OC_VTABLE_ARRAY       *Vtables,
   IN  UINTN                       RelocationBase,
   IN  CONST MACH_RELOCATION_INFO  *SourceRelocations,
   IN  OUT UINT32                  *NumRelocations,
@@ -908,7 +874,7 @@ InternalRelocateAndCopyRelocations64 (
   UINTN                      Result;
   MACH_RELOCATION_INFO       *Relocation;
 
-  ASSERT (MachoContext != NULL);
+  ASSERT (Kext != NULL);
   ASSERT (RelocationBase != 0);
   ASSERT (SourceRelocations != NULL);
   ASSERT (NumRelocations != NULL);
@@ -929,9 +895,8 @@ InternalRelocateAndCopyRelocations64 (
     // Relocate the relocation.
     //
     Result = InternalRelocateRelocationIntel64 (
-               MachoContext,
+               Kext,
                LoadAddress,
-               Vtables,
                RelocationBase,
                &SourceRelocations[Index],
                NextRelocation
@@ -1300,9 +1265,8 @@ InternalPrelinkKext64 (
   Relocations    = MachoContext->LocalRelocations;
   NumRelocations = MachoContext->DySymtab->NumOfLocalRelocations;
   Result = InternalRelocateAndCopyRelocations64 (
-             MachoContext,
+             Kext,
              LoadAddress,
-             /* DependencyData->Vtables */ NULL,
              RelocationBase,
              Relocations,
              &NumRelocations,
@@ -1315,9 +1279,8 @@ InternalPrelinkKext64 (
   Relocations     = MachoContext->ExternRelocations;
   NumRelocations2 = MachoContext->DySymtab->NumExternalRelocations;
   Result = InternalRelocateAndCopyRelocations64 (
-             MachoContext,
+             Kext,
              LoadAddress,
-             /* DependencyData->Vtables */ NULL,
              RelocationBase,
              Relocations,
              &NumRelocations2,

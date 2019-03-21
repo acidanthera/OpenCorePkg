@@ -25,36 +25,55 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "PrelinkedInternal.h"
 
-STATIC
-CONST OC_VTABLE *
+CONST PRELINKED_VTABLE *
 InternalGetOcVtableByName (
-  IN CONST OC_VTABLE_ARRAY  *Vtables,
-  IN CONST CHAR8            *Name
+  IN CONST PRELINKED_KEXT  *Kext,
+  IN CONST CHAR8           *Name
   )
 {
-  CONST OC_VTABLE_ARRAY *VtableWalker;
-  CONST OC_VTABLE       *Vtable;
-  UINT32                Index;
-  INTN                  Result;
+  CONST PRELINKED_VTABLE *Vtable;
 
-  VtableWalker = Vtables;
+  UINTN                  Index;
+  PRELINKED_KEXT         *Dependency;
+  INTN                   Result;
 
-  do {
-    Vtable = GET_FIRST_OC_VTABLE (VtableWalker);
+  for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
+    Dependency = Kext->Dependencies[Index];
+    if (Dependency == NULL) {
+      break;
+    }
 
-    for (Index = 0; Index < VtableWalker->NumVtables; ++Index) {
+    if (Dependency->Processed) {
+      continue;
+    }
+
+    //
+    // FIXME: This does not look correct to me, as it only limits recursion
+    // from finding this exact kext, while all dependencies should actually be blacklisted.
+    //
+    Dependency->Processed = TRUE;
+
+    for (
+      Index = 0, Vtable = Dependency->LinkedVtables;
+      Index < Dependency->NumberOfVtables;
+      ++Index, Vtable = GET_NEXT_PRELINKED_VTABLE (Vtable)
+      ) {
       Result = AsciiStrCmp (Vtable->Name, Name);
       if (Result == 0) {
         return Vtable;
       }
-
-      Vtable = GET_NEXT_OC_VTABLE (Vtable);
     }
 
-    VtableWalker = GET_OC_VTABLE_ARRAY_FROM_LINK (
-                     GetNextNode (&Vtables->Link, &VtableWalker->Link)
-                     );
-  } while (!IsNull (&Vtables->Link, &VtableWalker->Link));
+    Vtable = InternalGetOcVtableByName (Dependency, Name);
+    if (Vtable != NULL) {
+      // FIXME:
+      Dependency->Processed = FALSE;
+      return Vtable;
+    }
+
+    // FIXME:
+    Dependency->Processed = FALSE;
+  }
 
   return NULL;
 }
@@ -64,7 +83,7 @@ BOOLEAN
 InternalConstructVtablePrelinked64 (
   IN OUT PRELINKED_KEXT            *Kext,
   IN     CONST MACH_NLIST_64       *VtableSymbol,
-  OUT    OC_VTABLE                 *Vtable
+  OUT    PRELINKED_VTABLE          *Vtable
   )
 {
   OC_MACHO_CONTEXT            *MachoContext;
@@ -133,7 +152,7 @@ InternalConstructVtablePrelinked64 (
 }
 
 UINT32
-InternalGetVtableSize64 (
+InternalGetVtableEntries64 (
   IN CONST UINT64  *VtableData
   )
 {
@@ -148,7 +167,7 @@ InternalGetVtableSize64 (
     ;
   }
 
-  return (Index * VTABLE_ENTRY_SIZE_64);
+  return Index;
 }
 
 BOOLEAN
@@ -161,7 +180,7 @@ InternalGetVtableSizeWithRelocs64 (
   UINT32        Size;
   MACH_NLIST_64 *Symbol;
 
-  Size = InternalGetVtableSize64 (VtableData);
+  Size = InternalGetVtableEntries64 (VtableData);
 
   Symbol = MachoGetSymbolByExternRelocationOffset64 (
              MachoContext,
@@ -220,10 +239,10 @@ InternalPrepareCreateVtablesPrelinked64 (
       }
 
       ++NumVtables;
-
-      if (VtableExportSize < (NumVtables * sizeof (*VtableExport))) {
-        return FALSE;
-      }
+      //
+      // This should be accounted for via previous sanity checks.
+      //
+      ASSERT (VtableExportSize >= (sizeof (*VtableExport) + (NumVtables * sizeof (*VtableExport->Symbols))));
 
       VtableExport->Symbols[NumVtables] = Symbol;
     }
@@ -238,7 +257,7 @@ BOOLEAN
 InternalCreateVtablesPrelinked64 (
   IN OUT PRELINKED_KEXT         *Kext,
   IN  OC_VTABLE_EXPORT_ARRAY    *VtableExport,
-  OUT OC_VTABLE                 *VtableBuffer
+  OUT PRELINKED_VTABLE          *VtableBuffer
   )
 {
   CONST MACH_NLIST_64 *Symbol;
@@ -258,7 +277,7 @@ InternalCreateVtablesPrelinked64 (
       return FALSE;
     }
       
-    VtableBuffer = GET_NEXT_OC_VTABLE (VtableBuffer);
+    VtableBuffer = GET_NEXT_PRELINKED_VTABLE (VtableBuffer);
   }
 
   return TRUE;
@@ -270,10 +289,10 @@ InternalCreateVtablesPrelinked64 (
 STATIC
 BOOLEAN
 InternalPatchVtableSymbol (
-  IN OUT OC_MACHO_CONTEXT       *MachoContext,
-  IN     CONST OC_VTABLE_ENTRY  *ParentEntry,
-  IN     CONST CHAR8            *VtableName,
-  OUT    MACH_NLIST_64          *Symbol
+  IN OUT OC_MACHO_CONTEXT              *MachoContext,
+  IN     CONST PRELINKED_VTABLE_ENTRY  *ParentEntry,
+  IN     CONST CHAR8                   *VtableName,
+  OUT    MACH_NLIST_64                 *Symbol
   )
 {
   CONST CHAR8 *Name;
@@ -403,7 +422,7 @@ STATIC
 BOOLEAN
 InternalInitializeVtableByEntriesAndRelocations64 (
   IN OUT OC_MACHO_CONTEXT             *MachoContext,
-  IN     CONST OC_VTABLE              *SuperVtable,
+  IN     CONST PRELINKED_VTABLE       *SuperVtable,
   IN     CONST MACH_NLIST_64          *VtableSymbol,
   IN     CONST UINT64                 *VtableData
   )
@@ -530,8 +549,8 @@ InternalPatchByVtables64 (
   CONST MACH_NLIST_64  *MetaVtableSymbol;
   CONST MACH_NLIST_64  *MetaClass;
   CONST UINT64         *VtableData;
-  CONST OC_VTABLE      *SuperVtable;
-  CONST OC_VTABLE      *MetaVtable;
+  CONST PRELINKED_VTABLE *SuperVtable;
+  CONST PRELINKED_VTABLE *MetaVtable;
   CONST VOID           *OcSymbolDummy;
   MACH_NLIST_64        *SymbolDummy;
   CHAR8                ClassName[SYM_MAX_NAME_LEN];
@@ -545,7 +564,7 @@ InternalPatchByVtables64 (
 
   MachHeader = MachoGetMachHeader64 (MachoContext);
   ASSERT (MachHeader != NULL);
-;
+
   NumPatched   = 0;
 
   while (NumPatched < PatchData->NumEntries) {
@@ -612,7 +631,7 @@ InternalPatchByVtables64 (
       // Get the super vtable if it's been patched
       //
       SuperVtable = InternalGetOcVtableByName (
-                      /* DependencyData->Vtables */ NULL,
+                      Kext,
                       SuperVtableName
                       );
       if (SuperVtable == NULL) {
@@ -688,7 +707,7 @@ InternalPatchByVtables64 (
       }
 
       MetaVtable = InternalGetOcVtableByName (
-                     /* DependencyData->Vtables */ NULL,
+                     Kext,
                      VtableName
                      );
       if (MetaVtable != NULL) {
@@ -700,7 +719,7 @@ InternalPatchByVtables64 (
       // OSMetaClass, so we just hardcode that vtable name here.
       //
       SuperVtable = InternalGetOcVtableByName (
-                      /* DependencyData->Vtables */ NULL,
+                      Kext,
                       OS_METACLASS_VTABLE_NAME
                       );
       if (SuperVtable == NULL) {

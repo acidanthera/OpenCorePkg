@@ -253,6 +253,75 @@ InternalScanBuildLinkedSymbolTable (
   return EFI_SUCCESS;
 }
 
+STATIC
+EFI_STATUS
+InternalScanBuildLinkedVtables (
+  IN OUT PRELINKED_KEXT     *Kext,
+  IN     PRELINKED_CONTEXT  *Context
+  )
+{
+  OC_VTABLE_EXPORT_ARRAY *VtableExport;
+  BOOLEAN                Result;
+  UINT32                 NumVtables;
+  UINT32                 Index;
+  UINT32                 VtableOffset;
+  CONST UINT64           *VtableData;
+  CONST MACH_HEADER_64   *MachHeader;
+  PRELINKED_VTABLE       *Vtables;
+
+  VtableExport = Context->LinkBuffer;
+
+  Result = InternalPrepareCreateVtablesPrelinked64 (
+             &Kext->Context.MachContext,
+             VtableExport,
+             Context->LinkBufferSize
+             );
+  if (!Result) {
+    return EFI_UNSUPPORTED;
+  }
+
+  MachHeader = MachoGetMachHeader64 (&Kext->Context.MachContext);
+  ASSERT (MachHeader != NULL);
+
+  NumVtables = 0;
+
+  for (Index = 0; Index < VtableExport->NumSymbols; ++Index) {
+    Result = MachoSymbolGetFileOffset64 (
+                &Kext->Context.MachContext,
+                VtableExport->Symbols[Index],
+                &VtableOffset
+                );
+    if (!Result) {
+      return Result;
+    }
+
+    VtableData = (UINT64 *)((UINTN)MachHeader + VtableOffset);
+    if (!OC_ALIGNED (VtableData)) {
+      return FALSE;
+    }
+
+    NumVtables += InternalGetVtableEntries64 (VtableData);
+  }
+
+  Vtables = AllocatePool (
+              (VtableExport->NumSymbols * sizeof (*Vtables))
+                + (NumVtables * sizeof (*Vtables->Entries))
+              );
+  if (Vtables == NULL) {
+    return FALSE;
+  }
+
+  Result = InternalCreateVtablesPrelinked64 (Kext, VtableExport, Vtables);
+  if (!Result) {
+    return EFI_UNSUPPORTED;
+  }
+
+  Kext->LinkedVtables   = Vtables;
+  Kext->NumberOfVtables = NumVtables;
+
+  return EFI_SUCCESS;
+}
+
 PRELINKED_KEXT *
 InternalNewPrelinkedKext (
   IN OC_MACHO_CONTEXT       *Context,
@@ -405,6 +474,11 @@ InternalScanPrelinkedKext (
         if (Context->LinkBuffer == NULL) {
           return RETURN_OUT_OF_RESOURCES;
         }
+      }
+
+      Status = InternalScanBuildLinkedVtables (DependencyKext, Context);
+      if (EFI_ERROR (Status)) {
+        return Status;
       }
 
       Kext->Dependencies[DependencyIndex] = DependencyKext;
