@@ -232,19 +232,19 @@ InternalPrepareCreateVtablesPrelinked64 (
     if (MachoSymbolNameIsVtable64 (Name)) {
       Result = MachoIsSymbolValueInRange64 (
                  MachoContext,
-                 VtableExport->Symbols[Index]
+                 Symbol
                  );
       if (!Result) {
         return FALSE;
       }
+
+      VtableExport->Symbols[NumVtables] = Symbol;
 
       ++NumVtables;
       //
       // This should be accounted for via previous sanity checks.
       //
       ASSERT (VtableExportSize >= (sizeof (*VtableExport) + (NumVtables * sizeof (*VtableExport->Symbols))));
-
-      VtableExport->Symbols[NumVtables] = Symbol;
     }
   }
 
