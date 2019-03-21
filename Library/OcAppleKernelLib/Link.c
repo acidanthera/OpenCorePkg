@@ -230,7 +230,10 @@ InternalSolveSymbolNonWeak64 (
     //
     return FALSE;
   }
-
+  //
+  // Do not error when the referenced symbol cannot be found as some will be
+  // patched by the VTable code.  This matches the KXLD behaviour.
+  //
   ResolveSymbol = InternalOcGetSymbolByName (
                     Kext,
                     Name,
@@ -238,10 +241,9 @@ InternalSolveSymbolNonWeak64 (
                     );
   if (ResolveSymbol != NULL) {
     InternalSolveSymbolValue64 (ResolveSymbol->Value, Symbol);
-    return TRUE;
   }
 
-  return FALSE;
+  return TRUE;
 }
 
 /**
