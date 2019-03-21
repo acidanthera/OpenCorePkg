@@ -222,13 +222,12 @@ InternalSolveSymbolNonWeak64 (
       //
       // Any other symbols must be undefined or indirect.
       //
-      ASSERT (FALSE);
+      return FALSE;
     }
   } else if (Symbol->Value != 0) {
     //
     // Common symbols are not supported.
     //
-    ASSERT (FALSE);
     return FALSE;
   }
 
