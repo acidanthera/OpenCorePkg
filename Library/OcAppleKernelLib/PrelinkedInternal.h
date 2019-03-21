@@ -164,6 +164,16 @@ InternalScanPrelinkedKext (
   );
 
 /**
+  Unlock all context dependency kexts by unsetting Processed flag.
+
+  @param[in] Context      Prelinked context.
+**/
+VOID
+InternalUnlockContextKexts (
+  IN PRELINKED_CONTEXT  *Context
+  );
+
+/**
   Link executable within current prelink context.
 
   @param[in,out] Context         Prelinked context.
@@ -273,14 +283,16 @@ BOOLEAN
 InternalCreateVtablesPrelinked64 (
   IN     PRELINKED_CONTEXT      *Context,
   IN OUT PRELINKED_KEXT         *Kext,
-  IN  OC_VTABLE_EXPORT_ARRAY    *VtableExport,
-  OUT PRELINKED_VTABLE          *VtableBuffer
+  IN     OC_VTABLE_EXPORT_ARRAY *VtableExport,
+     OUT PRELINKED_VTABLE       *VtableBuffer
   );
 
 CONST PRELINKED_VTABLE *
 InternalGetOcVtableByName (
+  IN PRELINKED_CONTEXT     *Context,
   IN CONST PRELINKED_KEXT  *Kext,
-  IN CONST CHAR8           *Name
+  IN CONST CHAR8           *Name,
+  IN UINT32                RecursionLevel
   );
 
 //

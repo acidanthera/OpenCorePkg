@@ -505,6 +505,38 @@ InternalScanPrelinkedKext (
   return EFI_SUCCESS;
 }
 
+VOID
+InternalLockDependencyKexts (
+  IN PRELINKED_KEXT  *Kext
+  )
+{
+  UINT32                      Index;
+  PRELINKED_KEXT              *Dependency;
+
+  for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
+    Dependency = Kext->Dependencies[Index];
+    if (Dependency == NULL) {
+      break;
+    }
+    Dependency->Processed = TRUE;
+  }
+}
+
+VOID
+InternalUnlockContextKexts (
+  IN PRELINKED_CONTEXT                *Context
+  )
+{
+  LIST_ENTRY  *Kext;
+
+  Kext = GetFirstNode (&Context->PrelinkedKexts);
+  while (!IsNull (&Context->PrelinkedKexts, Kext)) {
+    GET_PRELINKED_KEXT_FROM_LINK (Kext)->Processed = FALSE;
+    Kext = GetNextNode (&Context->PrelinkedKexts, Kext);
+  }
+}
+
+
 PRELINKED_KEXT *
 InternalLinkPrelinkedKext (
   IN OUT PRELINKED_CONTEXT  *Context,

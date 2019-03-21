@@ -27,8 +27,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 CONST PRELINKED_VTABLE *
 InternalGetOcVtableByName (
+  IN PRELINKED_CONTEXT     *Context,
   IN CONST PRELINKED_KEXT  *Kext,
-  IN CONST CHAR8           *Name
+  IN CONST CHAR8           *Name,
+  IN UINT32                RecursionLevel
   )
 {
   CONST PRELINKED_VTABLE *Vtable;
@@ -37,7 +39,9 @@ InternalGetOcVtableByName (
   PRELINKED_KEXT         *Dependency;
   INTN                   Result;
 
-  for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
+  Vtable = NULL;
+
+  for (Index = 0; Vtable == NULL && Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
     Dependency = Kext->Dependencies[Index];
     if (Dependency == NULL) {
       break;
@@ -47,10 +51,6 @@ InternalGetOcVtableByName (
       continue;
     }
 
-    //
-    // FIXME: This does not look correct to me, as it only limits recursion
-    // from finding this exact kext, while all dependencies should actually be blacklisted.
-    //
     Dependency->Processed = TRUE;
 
     for (
@@ -60,22 +60,20 @@ InternalGetOcVtableByName (
       ) {
       Result = AsciiStrCmp (Vtable->Name, Name);
       if (Result == 0) {
-        return Vtable;
+        break;
       }
     }
 
-    Vtable = InternalGetOcVtableByName (Dependency, Name);
-    if (Vtable != NULL) {
-      // FIXME:
-      Dependency->Processed = FALSE;
-      return Vtable;
+    if (Index == Dependency->NumberOfVtables) {
+      Vtable = InternalGetOcVtableByName (Context, Dependency, Name, RecursionLevel+1);
     }
-
-    // FIXME:
-    Dependency->Processed = FALSE;
   }
 
-  return NULL;
+  if (RecursionLevel == 0) {
+    InternalUnlockContextKexts (Context);
+  }
+
+  return Vtable;
 }
 
 STATIC
@@ -634,8 +632,10 @@ InternalPatchByVtables64 (
       // Get the super vtable if it's been patched
       //
       SuperVtable = InternalGetOcVtableByName (
+                      Context,
                       Kext,
-                      SuperVtableName
+                      SuperVtableName,
+                      0
                       );
       if (SuperVtable == NULL) {
         continue;
@@ -711,8 +711,10 @@ InternalPatchByVtables64 (
       }
 
       MetaVtable = InternalGetOcVtableByName (
+                     Context,
                      Kext,
-                     VtableName
+                     VtableName,
+                     0
                      );
       if (MetaVtable != NULL) {
         return FALSE;
@@ -723,8 +725,10 @@ InternalPatchByVtables64 (
       // OSMetaClass, so we just hardcode that vtable name here.
       //
       SuperVtable = InternalGetOcVtableByName (
+                      Context,
                       Kext,
-                      OS_METACLASS_VTABLE_NAME
+                      OS_METACLASS_VTABLE_NAME,
+                      0
                       );
       if (SuperVtable == NULL) {
         return FALSE;

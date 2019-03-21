@@ -31,21 +31,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 
 STATIC
-VOID
-InternalUnlockContextKexts (
-  IN PRELINKED_CONTEXT                *Context
-  )
-{
-  LIST_ENTRY  *Kext;
-
-  Kext = GetFirstNode (&Context->PrelinkedKexts);
-  while (!IsNull (&Context->PrelinkedKexts, Kext)) {
-    GET_PRELINKED_KEXT_FROM_LINK (Kext)->Processed = FALSE;
-    Kext = GetNextNode (&Context->PrelinkedKexts, Kext);
-  }
-}
-
-STATIC
 CONST PRELINKED_KEXT_SYMBOL *
 InternalOcGetSymbolWorker (
   IN PRELINKED_CONTEXT                *Context,
@@ -68,26 +53,15 @@ InternalOcGetSymbolWorker (
 
   ASSERT (Kext != NULL);
 
-  //
-  // Disable all first level dependencies.
-  //
-  if (RecursionLevel == 0) {
-    for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
-      Dependency = Kext->Dependencies[Index];
-      if (Dependency == NULL) {
-        break;
-      }
-      Dependency->Processed = TRUE;
-    }
-  }
+  Symbol = NULL;
 
-  for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
+  for (Index = 0; Symbol == NULL && Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
     Dependency = Kext->Dependencies[Index];
     if (Dependency == NULL) {
       break;
     }
 
-    if (Dependency->Processed && RecursionLevel != 0) {
+    if (Dependency->Processed) {
       continue;
     }
 
@@ -114,18 +88,12 @@ InternalOcGetSymbolWorker (
     for (SymIndex = 0; SymIndex < NumSymbols; ++SymIndex) {
       Result = Predicate (Dependency, &Symbols[SymIndex], PredicateContext);
       if (Result) {
-        //
-        // Unlock all on match.
-        //
-        InternalUnlockContextKexts (Context);
-        return &Symbols[SymIndex];
+        Symbol = &Symbols[SymIndex];
+        break;
       }
     }
 
-    if (SymbolLevel == OcGetSymbolAnyLevel) {
-      //
-      // Handle all 1+ level dependencies excluding 0 level dependencies.
-      //
+    if (Symbol == NULL && SymbolLevel == OcGetSymbolAnyLevel) {
       Symbol = InternalOcGetSymbolWorker (
                  Context,
                  Dependency,
@@ -134,20 +102,14 @@ InternalOcGetSymbolWorker (
                  OcGetSymbolOnlyCxx,
                  RecursionLevel + 1
                  );
-      if (Symbol != NULL) {
-        return Symbol;
-      }
     }
   }
 
   if (RecursionLevel == 0) {
-    //
-    // Unlock all on failure.
-    //
     InternalUnlockContextKexts (Context);
   }
 
-  return NULL;
+  return Symbol;
 }
 
 STATIC
@@ -460,6 +422,7 @@ InternalCalculateDisplacementIntel64 (
 STATIC
 BOOLEAN
 InternalCalculateTargetsIntel64 (
+  IN     PRELINKED_CONTEXT           *Context,
   IN OUT PRELINKED_KEXT              *Kext,
   IN     UINT64                      LoadAddress,
   IN     CONST MACH_RELOCATION_INFO  *Relocation,
@@ -531,7 +494,7 @@ InternalCalculateTargetsIntel64 (
     }
 
     if ((Vtable != NULL) && MachoSymbolNameIsVtable64 (Name)) {
-      *Vtable = InternalGetOcVtableByName (Kext, Name);
+      *Vtable = InternalGetOcVtableByName (Context, Kext, Name, 0);
     }
 
     TargetAddress = Symbol->Value;
@@ -563,6 +526,7 @@ InternalCalculateTargetsIntel64 (
     // shall never reach this very branch.
     //
     Success = InternalCalculateTargetsIntel64 (
+                Context,
                 Kext,
                 LoadAddress,
                 NextRelocation,
@@ -638,6 +602,7 @@ InternalIsDirectPureVirtualCall64 (
 STATIC
 UINTN
 InternalRelocateRelocationIntel64 (
+  IN PRELINKED_CONTEXT           *Context,
   IN PRELINKED_KEXT              *Kext,
   IN UINT64                      LoadAddress,
   IN UINTN                       RelocationBase,
@@ -706,6 +671,7 @@ InternalRelocateRelocationIntel64 (
 
   Vtable = NULL;
   Result = InternalCalculateTargetsIntel64 (
+             Context,
              Kext,
              LoadAddress,
              Relocation,
@@ -909,6 +875,7 @@ InternalRelocateRelocationIntel64 (
 STATIC
 BOOLEAN
 InternalRelocateAndCopyRelocations64 (
+  IN  PRELINKED_CONTEXT           *Context,
   IN  PRELINKED_KEXT              *Kext,
   IN  UINT64                      LoadAddress,
   IN  UINTN                       RelocationBase,
@@ -945,6 +912,7 @@ InternalRelocateAndCopyRelocations64 (
     // Relocate the relocation.
     //
     Result = InternalRelocateRelocationIntel64 (
+               Context,
                Kext,
                LoadAddress,
                RelocationBase,
@@ -1317,6 +1285,7 @@ InternalPrelinkKext64 (
   Relocations    = MachoContext->LocalRelocations;
   NumRelocations = MachoContext->DySymtab->NumOfLocalRelocations;
   Result = InternalRelocateAndCopyRelocations64 (
+             Context,
              Kext,
              LoadAddress,
              RelocationBase,
@@ -1331,6 +1300,7 @@ InternalPrelinkKext64 (
   Relocations     = MachoContext->ExternRelocations;
   NumRelocations2 = MachoContext->DySymtab->NumExternalRelocations;
   Result = InternalRelocateAndCopyRelocations64 (
+             Context,
              Kext,
              LoadAddress,
              RelocationBase,
