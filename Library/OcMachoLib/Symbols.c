@@ -175,9 +175,8 @@ MachoSymbolIsLocalDefined (
 
   DySymtab = Context->DySymtab;
   ASSERT (Context->SymbolTable != NULL);
-  ASSERT (DySymtab != NULL);
 
-  if (DySymtab->NumUndefinedSymbols == 0) {
+  if ((DySymtab == NULL) || (DySymtab->NumUndefinedSymbols == 0)) {
     return TRUE;
   }
   //
@@ -383,22 +382,32 @@ MachoGetLocalDefinedSymbolByName (
     return NULL;
   }
 
-  SymbolTable  = Context->SymbolTable;
-  DySymtab     = Context->DySymtab;
+  SymbolTable = Context->SymbolTable;
   ASSERT (SymbolTable != NULL);
-  ASSERT (DySymtab != NULL);
 
-  Symbol = InternalGetSymbolByName (
-             Context,
-             &SymbolTable[DySymtab->LocalSymbolsIndex],
-             DySymtab->NumLocalSymbols,
-             Name
-             );
-  if (Symbol == NULL) {
+  DySymtab = Context->DySymtab;
+
+  if (DySymtab != NULL) {
     Symbol = InternalGetSymbolByName (
                Context,
-               &SymbolTable[DySymtab->ExternalSymbolsIndex],
-               DySymtab->NumExternalSymbols,
+               &SymbolTable[DySymtab->LocalSymbolsIndex],
+               DySymtab->NumLocalSymbols,
+               Name
+               );
+    if (Symbol == NULL) {
+      Symbol = InternalGetSymbolByName (
+                 Context,
+                 &SymbolTable[DySymtab->ExternalSymbolsIndex],
+                 DySymtab->NumExternalSymbols,
+                 Name
+                 );
+    }
+  } else {
+    ASSERT (Context->Symtab != NULL);
+    Symbol = InternalGetSymbolByName (
+               Context,
+               SymbolTable,
+               Context->Symtab->NumSymbols,
                Name
                );
   }

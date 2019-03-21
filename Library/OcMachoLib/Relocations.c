@@ -87,11 +87,10 @@ InternalGetExternalRelocationByOffset (
   //
   // Assumption: 64-bit.
   //
-  if (!InternalRetrieveSymtabs64 (Context)) {
+  if (!InternalRetrieveSymtabs64 (Context) || (Context->DySymtab == NULL)) {
     return NULL;
   }
 
-  ASSERT (Context->DySymtab != NULL);
   ASSERT (Context->ExternRelocations != NULL);
 
   for (Index = 0; Index < Context->DySymtab->NumExternalRelocations; ++Index) {
