@@ -525,7 +525,7 @@ InternalCalculateTargetsIntel64 (
     TargetAddress -= Section->Address;
   }
 
-  if (MachoRelocationIsPairIntel64 (Relocation->Type)) {
+  if (MachoRelocationIsPairIntel64 ((UINT8)Relocation->Type)) {
     if (NextRelocation == NULL) {
       return FALSE;
     }
@@ -570,7 +570,7 @@ InternalIsDirectPureVirtualCall64 (
   IN UINT64            Offset
   )
 {
-  UINT32                Index;
+  UINT64                Index;
   CONST OC_VTABLE_ENTRY *Entry;
 
   if ((Offset % sizeof (UINT64)) != 0) {
@@ -664,7 +664,7 @@ InternalRelocateRelocationIntel64 (
 
   Address    = Relocation->Address;
   Length     = Relocation->Size;
-  Type       = Relocation->Type;
+  Type       = (UINT8)Relocation->Type;
   PcRelative = (Relocation->PcRelative != 0);
 
   if (Length < 2) {
@@ -1330,7 +1330,7 @@ InternalPrelinkKext64 (
   //
   // Copy the entire symbol table excluding the area for undefined symbols.
   //
-  SymtabSize = ((UndefinedSymtab - SymbolTable) * sizeof (MACH_NLIST_64));
+  SymtabSize = (UINT32)((UndefinedSymtab - SymbolTable) * sizeof (MACH_NLIST_64));
   if (SymtabSize != 0) {
     CopyMem (
       (VOID *)((UINTN)LinkEdit + SymbolTableOffset),
@@ -1339,7 +1339,7 @@ InternalPrelinkKext64 (
       );
   }
 
-  SymtabSize2  = (&SymbolTable[NumSymbols] - &UndefinedSymtab[NumUndefinedSymbols]);
+  SymtabSize2  = (UINT32)(&SymbolTable[NumSymbols] - &UndefinedSymtab[NumUndefinedSymbols]);
   SymtabSize2 *= sizeof (MACH_NLIST_64);
   if (SymtabSize2 != 0) {
     CopyMem (
@@ -1401,7 +1401,7 @@ InternalPrelinkKext64 (
   SegmentSize   = 0;
 
   Segment = NULL;
-  while ((Segment = MachoGetNextSegment64 (MachoContext, Segment))) {
+  while ((Segment = MachoGetNextSegment64 (MachoContext, Segment)) != NULL) {
     if (Segment == NULL) {
       //
       // Adapt the Mach-O header to signal being prelinked.
