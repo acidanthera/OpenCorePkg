@@ -294,7 +294,7 @@ InternalPrepareVtableCreationNonPrelinked64 (
   );
 
 BOOLEAN
-InternalCreateVtablesNonPrelinked64 (
+InternalPatchByVtables64 (
   IN OUT PRELINKED_KEXT            *Kext,
   IN     OC_VTABLE_PATCH_ARRAY     *PatchData
   );

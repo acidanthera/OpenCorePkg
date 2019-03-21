@@ -1204,6 +1204,11 @@ InternalPrelinkKext64 (
   if (!Result) {
     return RETURN_LOAD_ERROR;
   }
+
+  Result = InternalPatchByVtables64 (Kext, PatchData);
+  if (!Result) {
+    return FALSE;
+  }
   //
   // Relocate local and external symbols.
   //
