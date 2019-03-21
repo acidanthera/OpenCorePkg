@@ -237,14 +237,13 @@ InternalPrepareCreateVtablesPrelinked64 (
       if (!Result) {
         return FALSE;
       }
-
-      VtableExport->Symbols[NumVtables] = Symbol;
-
-      ++NumVtables;
       //
       // This should be accounted for via previous sanity checks.
       //
-      ASSERT (VtableExportSize >= (sizeof (*VtableExport) + (NumVtables * sizeof (*VtableExport->Symbols))));
+      ASSERT (VtableExportSize >= (sizeof (*VtableExport) + ((NumVtables + 1) * sizeof (*VtableExport->Symbols))));
+
+      VtableExport->Symbols[NumVtables] = Symbol;
+      ++NumVtables;
     }
   }
 
