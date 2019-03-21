@@ -257,6 +257,7 @@ InternalPrepareVtableCreationNonPrelinked64 (
 
 BOOLEAN
 InternalPatchByVtables64 (
+  IN     PRELINKED_CONTEXT         *Context,
   IN OUT PRELINKED_KEXT            *Kext,
   IN     OC_VTABLE_PATCH_ARRAY     *PatchData
   );
@@ -270,6 +271,7 @@ InternalPrepareCreateVtablesPrelinked64 (
 
 BOOLEAN
 InternalCreateVtablesPrelinked64 (
+  IN     PRELINKED_CONTEXT      *Context,
   IN OUT PRELINKED_KEXT         *Kext,
   IN  OC_VTABLE_EXPORT_ARRAY    *VtableExport,
   OUT PRELINKED_VTABLE          *VtableBuffer
@@ -302,6 +304,7 @@ BOOLEAN
 // TODO: Move?
 CONST PRELINKED_KEXT_SYMBOL *
 InternalOcGetSymbolByName (
+  IN PRELINKED_CONTEXT    *Context,
   IN PRELINKED_KEXT       *Kext,
   IN CONST CHAR8          *Name,
   IN OC_GET_SYMBOL_LEVEL  SymbolLevel
@@ -309,6 +312,7 @@ InternalOcGetSymbolByName (
 
 CONST PRELINKED_KEXT_SYMBOL *
 InternalOcGetSymbolByValue (
+  IN PRELINKED_CONTEXT    *Context,
   IN PRELINKED_KEXT       *Kext,
   IN UINT64               Value,
   IN OC_GET_SYMBOL_LEVEL  SymbolLevel

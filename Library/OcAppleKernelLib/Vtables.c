@@ -81,6 +81,7 @@ InternalGetOcVtableByName (
 STATIC
 BOOLEAN
 InternalConstructVtablePrelinked64 (
+  IN     PRELINKED_CONTEXT         *Context,
   IN OUT PRELINKED_KEXT            *Kext,
   IN     CONST MACH_NLIST_64       *VtableSymbol,
   OUT    PRELINKED_VTABLE          *Vtable
@@ -132,7 +133,7 @@ InternalConstructVtablePrelinked64 (
     (Value = VtableData[Index]) != 0;
     ++Index
     ) {
-    Symbol = InternalOcGetSymbolByValue (Kext, Value, OcGetSymbolOnlyCxx);
+    Symbol = InternalOcGetSymbolByValue (Context, Kext, Value, OcGetSymbolOnlyCxx);
 
     if (Symbol != NULL) {
       Vtable->Entries[Index].Address = Value;
@@ -254,6 +255,7 @@ InternalPrepareCreateVtablesPrelinked64 (
 
 BOOLEAN
 InternalCreateVtablesPrelinked64 (
+  IN     PRELINKED_CONTEXT      *Context,
   IN OUT PRELINKED_KEXT         *Kext,
   IN  OC_VTABLE_EXPORT_ARRAY    *VtableExport,
   OUT PRELINKED_VTABLE          *VtableBuffer
@@ -268,6 +270,7 @@ InternalCreateVtablesPrelinked64 (
   for (Index = 0; Index < VtableExport->NumSymbols; ++Index) {
     Symbol = VtableExport->Symbols[Index];
     Result = InternalConstructVtablePrelinked64 (
+                Context,
                 Kext,
                 Symbol,
                 VtableBuffer
@@ -532,6 +535,7 @@ InternalPrepareVtableCreationNonPrelinked64 (
 
 BOOLEAN
 InternalPatchByVtables64 (
+  IN     PRELINKED_CONTEXT         *Context,
   IN OUT PRELINKED_KEXT            *Kext,
   IN     OC_VTABLE_PATCH_ARRAY     *PatchData
   )
@@ -652,6 +656,7 @@ InternalPatchByVtables64 (
       // all the externally defined symbols, then check locally.
       //
       OcSymbolDummy = InternalOcGetSymbolByName (
+                        Context,
                         Kext,
                         FinalSymbolName,
                         OcGetSymbolAnyLevel

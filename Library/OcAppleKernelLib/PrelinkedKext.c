@@ -311,7 +311,7 @@ InternalScanBuildLinkedVtables (
     return FALSE;
   }
 
-  Result = InternalCreateVtablesPrelinked64 (Kext, VtableExport, Vtables);
+  Result = InternalCreateVtablesPrelinked64 (Context, Kext, VtableExport, Vtables);
   if (!Result) {
     return EFI_UNSUPPORTED;
   }

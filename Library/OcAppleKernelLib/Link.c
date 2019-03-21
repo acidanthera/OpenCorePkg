@@ -31,12 +31,29 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 
 STATIC
+VOID
+InternalUnlockContextKexts (
+  IN PRELINKED_CONTEXT                *Context
+  )
+{
+  LIST_ENTRY  *Kext;
+
+  Kext = GetFirstNode (&Context->PrelinkedKexts);
+  while (!IsNull (&Context->PrelinkedKexts, Kext)) {
+    GET_PRELINKED_KEXT_FROM_LINK (Kext)->Processed = FALSE;
+    Kext = GetNextNode (&Context->PrelinkedKexts, Kext);
+  }
+}
+
+STATIC
 CONST PRELINKED_KEXT_SYMBOL *
 InternalOcGetSymbolWorker (
+  IN PRELINKED_CONTEXT                *Context,
   IN PRELINKED_KEXT                   *Kext,
   IN UINT64                           PredicateContext,
   IN PRELINKED_KEXT_SYMBOL_PREDICATE  Predicate,
-  IN OC_GET_SYMBOL_LEVEL              SymbolLevel
+  IN OC_GET_SYMBOL_LEVEL              SymbolLevel,
+  IN UINT32                           RecursionLevel
   )
 {
   CONST PRELINKED_KEXT_SYMBOL *Symbol;
@@ -51,19 +68,31 @@ InternalOcGetSymbolWorker (
 
   ASSERT (Kext != NULL);
 
+  //
+  // Disable all first level dependencies.
+  //
+  if (RecursionLevel == 0) {
+    for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
+      Dependency = Kext->Dependencies[Index];
+      if (Dependency == NULL) {
+        break;
+      }
+      Dependency->Processed = TRUE;
+    }
+  }
+
   for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
     Dependency = Kext->Dependencies[Index];
     if (Dependency == NULL) {
       break;
     }
 
-    if (Dependency->Processed) {
+    if (Dependency->Processed && RecursionLevel != 0) {
       continue;
     }
 
     //
-    // FIXME: This does not look correct to me, as it only limits recursion
-    // from finding this exact kext, while all dependencies should actually be blacklisted.
+    // Block any 1+ level dependencies.
     //
     Dependency->Processed = TRUE;
 
@@ -85,27 +114,37 @@ InternalOcGetSymbolWorker (
     for (SymIndex = 0; SymIndex < NumSymbols; ++SymIndex) {
       Result = Predicate (Dependency, &Symbols[SymIndex], PredicateContext);
       if (Result) {
-        // FIXME:
-        Dependency->Processed = FALSE;
+        //
+        // Unlock all on match.
+        //
+        InternalUnlockContextKexts (Context);
         return &Symbols[SymIndex];
       }
     }
 
     if (SymbolLevel == OcGetSymbolAnyLevel) {
+      //
+      // Handle all 1+ level dependencies excluding 0 level dependencies.
+      //
       Symbol = InternalOcGetSymbolWorker (
+                 Context,
                  Dependency,
                  PredicateContext,
                  Predicate,
-                 OcGetSymbolOnlyCxx
+                 OcGetSymbolOnlyCxx,
+                 RecursionLevel + 1
                  );
       if (Symbol != NULL) {
-        // FIXME:
-        Dependency->Processed = FALSE;
         return Symbol;
       }
     }
-    // FIXME:
-    Dependency->Processed = FALSE;
+  }
+
+  if (RecursionLevel == 0) {
+    //
+    // Unlock all on failure.
+    //
+    InternalUnlockContextKexts (Context);
   }
 
   return NULL;
@@ -130,16 +169,19 @@ InternalOcGetSymbolByNamePredicate (
 
 CONST PRELINKED_KEXT_SYMBOL *
 InternalOcGetSymbolByName (
+  IN PRELINKED_CONTEXT    *Context,
   IN PRELINKED_KEXT       *Kext,
   IN CONST CHAR8          *Name,
   IN OC_GET_SYMBOL_LEVEL  SymbolLevel
   )
 {
   return InternalOcGetSymbolWorker (
+           Context,
            Kext,
            (UINTN)Name,
            InternalOcGetSymbolByNamePredicate,
-           SymbolLevel
+           SymbolLevel,
+           0
            );
 }
 
@@ -156,16 +198,19 @@ InternalOcGetSymbolByValuePredicate (
 
 CONST PRELINKED_KEXT_SYMBOL *
 InternalOcGetSymbolByValue (
+  IN PRELINKED_CONTEXT    *Context,
   IN PRELINKED_KEXT       *Kext,
   IN UINT64               Value,
   IN OC_GET_SYMBOL_LEVEL  SymbolLevel
   )
 {
   return InternalOcGetSymbolWorker (
+           Context,
            Kext,
            Value,
            InternalOcGetSymbolByValuePredicate,
-           SymbolLevel
+           SymbolLevel,
+           0
            );
 }
 
@@ -202,6 +247,7 @@ InternalSolveSymbolValue64 (
 STATIC
 BOOLEAN
 InternalSolveSymbolNonWeak64 (
+  IN     PRELINKED_CONTEXT         *Context,
   IN     PRELINKED_KEXT            *Kext,
   IN     CONST CHAR8               *Name,
   IN OUT MACH_NLIST_64             *Symbol
@@ -242,6 +288,7 @@ InternalSolveSymbolNonWeak64 (
   // patched by the VTable code.  This matches the KXLD behaviour.
   //
   ResolveSymbol = InternalOcGetSymbolByName (
+                    Context,
                     Kext,
                     Name,
                     OcGetSymbolFirstLevel
@@ -274,6 +321,7 @@ InternalSolveSymbolNonWeak64 (
 STATIC
 BOOLEAN
 InternalSolveSymbol64 (
+  IN     PRELINKED_CONTEXT         *Context,
   IN     PRELINKED_KEXT            *Kext,
   IN     CONST CHAR8               *Name,
   IN OUT MACH_NLIST_64             *Symbol,
@@ -294,6 +342,7 @@ InternalSolveSymbol64 (
   }
 
   Success = InternalSolveSymbolNonWeak64 (
+              Context,
               Kext,
               Name,
               Symbol
@@ -324,6 +373,7 @@ InternalSolveSymbol64 (
         if (Result == 0) {
           if ((WeakTestSymbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_UNDF) {
             Success = InternalSolveSymbolNonWeak64 (
+                        Context,
                         Kext,
                         Name,
                         Symbol
@@ -1141,6 +1191,7 @@ InternalPrelinkKext64 (
     }
 
     Result = InternalSolveSymbol64 (
+               Context,
                Kext,
                SymbolName,
                Symbol,
@@ -1161,6 +1212,7 @@ InternalPrelinkKext64 (
     // Undefined symbols are solved via their name.
     //
     Result = InternalSolveSymbol64 (
+               Context,
                Kext,
                MachoGetSymbolName64 (MachoContext, Symbol),
                Symbol,
@@ -1188,7 +1240,7 @@ InternalPrelinkKext64 (
     return RETURN_LOAD_ERROR;
   }
 
-  Result = InternalPatchByVtables64 (Kext, PatchData);
+  Result = InternalPatchByVtables64 (Context, Kext, PatchData);
   if (!Result) {
     return FALSE;
   }
