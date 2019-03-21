@@ -518,6 +518,7 @@ ppptransform (
   REPL("%-16a", 4, 's');
   REPL("%r", 1, 'p');
   REPL("%g", 1, 'p');
+  REPL("%Lx", 1, 'z');
 
   #undef REPL
 }

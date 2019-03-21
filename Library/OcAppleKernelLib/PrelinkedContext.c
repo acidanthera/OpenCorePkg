@@ -446,6 +446,26 @@ PrelinkedReserveKextSize (
   return EFI_SUCCESS;
 }
 
+STATIC
+VOID
+AsciiIntegerToLowerHex (
+  OUT CHAR8   *Buffer,
+  IN  UINT32  BufferSize,
+  IN  UINT64  Value
+  )
+{
+  //
+  // FIXME: This is utter crap, implement int to hex functions.
+  //
+  AsciiSPrint (Buffer, BufferSize, "0x%Lx", Value);
+  while (Buffer[0] != 0) {
+    if (Buffer[0] >= 'A' && Buffer[0] <= 'F') {
+      Buffer[0] += ('a' - 'A');
+    }
+    Buffer++;
+  }
+}
+
 EFI_STATUS
 PrelinkedInjectKext (
   IN OUT PRELINKED_CONTEXT  *Context,
@@ -534,16 +554,16 @@ PrelinkedInjectKext (
   if (Executable != NULL) {
     Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_RELATIVE_PATH_KEY) == NULL;
     Failed |= XmlNodeAppend (InfoPlistRoot, "string", NULL, ExecutablePath) == NULL;
-    AsciiSPrint (ExecutableSourceAddrStr, sizeof (ExecutableSourceAddrStr), "0x%Lx", Context->PrelinkedLastAddress);
+    AsciiIntegerToLowerHex (ExecutableSourceAddrStr, sizeof (ExecutableSourceAddrStr), Context->PrelinkedLastAddress);
     Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_SOURCE_ADDR_KEY) == NULL;
     Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableSourceAddrStr) == NULL;
-    AsciiSPrint (ExecutableLoadAddrStr, sizeof (ExecutableLoadAddrStr), "0x%Lx", Context->PrelinkedLastLoadAddress);
+    AsciiIntegerToLowerHex (ExecutableLoadAddrStr, sizeof (ExecutableLoadAddrStr), Context->PrelinkedLastLoadAddress);
     Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == NULL;
     Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableLoadAddrStr) == NULL;
-    AsciiSPrint (ExecutableSizeStr, sizeof (ExecutableSizeStr), "0x%x", AlignedExecutableSize);
+    AsciiIntegerToLowerHex (ExecutableSizeStr, sizeof (ExecutableSizeStr), AlignedExecutableSize);
     Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_SIZE_KEY) == NULL;
     Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableSizeStr) == NULL;   
-    AsciiSPrint (KmodInfoStr, sizeof (KmodInfoStr), "0x%Lx", KmodAddress);
+    AsciiIntegerToLowerHex (KmodInfoStr, sizeof (KmodInfoStr), KmodAddress);
     Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_KMOD_INFO_KEY) == NULL;
     Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, KmodInfoStr) == NULL;  
   }
