@@ -40,6 +40,8 @@ InternalOcGetSymbolWorker (
   IN OC_GET_SYMBOL_LEVEL              SymbolLevel
   )
 {
+  CONST PRELINKED_KEXT_SYMBOL *Symbol;
+
   UINTN                       Index;
   PRELINKED_KEXT              *Dependency;
   CONST PRELINKED_KEXT_SYMBOL *Symbols;
@@ -84,20 +86,26 @@ InternalOcGetSymbolWorker (
     for (SymIndex = 0; SymIndex < NumSymbols; ++SymIndex) {
       Result = Predicate (Dependency, &Symbols[SymIndex], PredicateContext);
       if (Result) {
+        // FIXME:
         Dependency->Processed = FALSE;
         return &Symbols[SymIndex];
       }
     }
 
     if (SymbolLevel == OcGetSymbolAnyLevel) {
-      InternalOcGetSymbolWorker (
-        Dependency,
-        PredicateContext,
-        Predicate,
-        OcGetSymbolOnlyCxx
-        );
+      Symbol = InternalOcGetSymbolWorker (
+                 Dependency,
+                 PredicateContext,
+                 Predicate,
+                 OcGetSymbolOnlyCxx
+                 );
+      if (Symbol != NULL) {
+        // FIXME:
+        Dependency->Processed = FALSE;
+        return Symbol;
+      }
     }
-
+    // FIXME:
     Dependency->Processed = FALSE;
   }
 
