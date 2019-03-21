@@ -170,6 +170,7 @@ ApplyPatch (
   IN CONST UINT8   *PatternMask OPTIONAL,
   IN CONST UINT32  PatternSize,
   IN CONST UINT8   *Replace,
+  IN CONST UINT8   *ReplaceMask OPTIONAL,
   IN UINT8         *Data,
   IN UINT32        DataSize,
   IN UINT32        Count,

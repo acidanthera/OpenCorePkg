@@ -119,6 +119,10 @@ typedef struct {
   //
   CONST UINT8  *Mask;
   //
+  // Replace mask or NULL.
+  //
+  CONST UINT8  *ReplaceMask;
+  //
   // Patch size.
   //
   UINT32       Size;

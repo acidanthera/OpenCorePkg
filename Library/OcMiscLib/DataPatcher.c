@@ -61,6 +61,7 @@ ApplyPatch (
   IN CONST UINT8   *PatternMask OPTIONAL,
   IN CONST UINT32  PatternSize,
   IN CONST UINT8   *Replace,
+  IN CONST UINT8   *ReplaceMask OPTIONAL,
   IN UINT8         *Data,
   IN UINT32        DataSize,
   IN UINT32        Count,
@@ -89,7 +90,11 @@ ApplyPatch (
       //
       // Perform replacement.
       //
-      CopyMem (&Data[DataOff], Replace, PatternSize);
+      if (ReplaceMask == NULL)
+        CopyMem (&Data[DataOff], Replace, PatternSize);
+      else
+        for (UINTN Index = 0; Index < PatternSize; ++Index)
+          Data[DataOff + Index] = (Data[DataOff + Index] & ~ReplaceMask[Index]) | (Replace[Index] & ReplaceMask[Index]);
       ++ReplaceCount;
       DataOff += PatternSize;
 

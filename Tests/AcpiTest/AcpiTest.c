@@ -74,6 +74,7 @@ HpetPatch = {
   .Find    = HpetPatchFind,
   .Replace = HpetPatchReplace,
   .Mask    = HpetPatchMask,
+  .ReplaceMask = NULL,
   .Size    = sizeof (HpetPatchFind),
   //
   // Replace only once.

@@ -12959,10 +12959,75 @@ IOAHCIBlockStoragePatch = {
   .Find    = IOAHCIBlockStoragePatchFind,
   .Mask    = NULL,
   .Replace = IOAHCIBlockStoragePatchReplace,
+  .ReplaceMask = NULL,
   .Size    = sizeof (IOAHCIBlockStoragePatchFind),
   .Count   = 1,
   .Skip    = 0
 };
+
+STATIC
+UINT8
+AppleIntelCPUPowerManagementPatchFind[] = {
+  0xB9, 0xE2, 0x00, 0x00, 0x00, 0x0F, 0x30
+};
+
+STATIC
+UINT8
+AppleIntelCPUPowerManagementPatchReplace[] = {
+  0xB9, 0xE2, 0x00, 0x00, 0x00, 0x90, 0x90
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+AppleIntelCPUPowerManagementPatch = {
+  .Base    = NULL, // Symbolic patch
+  .Find    = AppleIntelCPUPowerManagementPatchFind,
+  .Mask    = NULL,
+  .Replace = AppleIntelCPUPowerManagementPatchReplace,
+  .ReplaceMask = NULL,
+  .Size    = sizeof (AppleIntelCPUPowerManagementPatchFind),
+  .Count   = 0,
+  .Skip    = 0
+};
+
+STATIC
+UINT8
+AppleIntelCPUPowerManagementPatch2Find[] = {
+  0xB9, 0xE2, 0x00, 0x00, 0x00, 0x48, 0x89, 0xF0, 0x0F, 0x30
+};
+
+STATIC
+UINT8
+AppleIntelCPUPowerManagementPatch2FindMask[] = {
+  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0xFF, 0xFF
+};
+
+STATIC
+UINT8
+AppleIntelCPUPowerManagementPatch2Replace[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90
+};
+
+STATIC
+UINT8
+AppleIntelCPUPowerManagementPatch2ReplaceMask[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+AppleIntelCPUPowerManagementPatch2 = {
+  .Base    = NULL, // Symbolic patch
+  .Find    = AppleIntelCPUPowerManagementPatch2Find,
+  .Mask    = AppleIntelCPUPowerManagementPatch2FindMask,
+  .Replace = AppleIntelCPUPowerManagementPatch2Replace,
+  .ReplaceMask = AppleIntelCPUPowerManagementPatch2ReplaceMask,
+  .Size    = sizeof (AppleIntelCPUPowerManagementPatch2Find),
+  .Count   = 0,
+  .Skip    = 0
+};
+
+
 
 STATIC
 UINT8
@@ -12983,6 +13048,7 @@ IOAHCIPortPatch = {
   .Find    = IOAHCIPortPatchFind,
   .Mask    = NULL,
   .Replace = IOAHCIPortPatchReplace,
+  .ReplaceMask = NULL,
   .Size    = sizeof (IOAHCIPortPatchFind),
   .Count   = 1,
   .Skip    = 0
@@ -13001,6 +13067,7 @@ DisableAppleHDAPatch = {
   .Find    = NULL,
   .Mask    = NULL,
   .Replace = DisableAppleHDAPatchReplace,
+  .ReplaceMask = NULL,
   .Size    = sizeof (DisableAppleHDAPatchReplace),
   .Count   = 1,
   .Skip    = 0
@@ -13025,6 +13092,7 @@ RemoveUsbLimitV1Patch = {
   .Find    = RemoveUsbLimitV1Find,
   .Mask    = NULL,
   .Replace = RemoveUsbLimitV1Replace,
+  .ReplaceMask = NULL,
   .Size    = sizeof (RemoveUsbLimitV1Replace),
   .Count   = 1,
   .Skip    = 0
@@ -13049,6 +13117,7 @@ RemoveUsbLimitV2Patch = {
   .Find    = RemoveUsbLimitV2Find,
   .Mask    = NULL,
   .Replace = RemoveUsbLimitV2Replace,
+  .ReplaceMask = NULL,
   .Size    = sizeof (RemoveUsbLimitV2Replace),
   .Count   = 1,
   .Skip    = 0
@@ -13081,6 +13150,40 @@ ApplyKextPatches (
   EFI_STATUS       Status;
   PATCHER_CONTEXT  Patcher;
 
+  Status = PatcherInitContextFromPrelinked (
+    &Patcher,
+    Context,
+    "com.apple.driver.AppleIntelCPUPowerManagement"
+    );
+  
+  if (!EFI_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (&Patcher, &AppleIntelCPUPowerManagementPatch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Failed to apply patch com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_WARN, "Patch success com.apple.driver.AppleIntelCPUPowerManagement\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
+  }
+  
+  Status = PatcherInitContextFromPrelinked (
+                                            &Patcher,
+                                            Context,
+                                            "com.apple.driver.AppleIntelCPUPowerManagement"
+                                            );
+  
+  if (!EFI_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (&Patcher, &AppleIntelCPUPowerManagementPatch2);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "Failed to apply patch com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_WARN, "Patch success com.apple.driver.AppleIntelCPUPowerManagement\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
+  }
+  
   Status = PatcherInitContextFromPrelinked (
     &Patcher,
     Context,
@@ -13355,6 +13458,7 @@ TestFileOpen (
       NULL,
       L_STR_LEN ("Darwin Kernel Version"),
       (UINT8 *) "OpenCore Boot Version",
+      NULL,
       Kernel,
       KernelSize,
       0, ///< At least on 10.14 we have BSD version string.

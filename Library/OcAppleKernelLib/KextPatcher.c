@@ -142,6 +142,7 @@ PatcherApplyGenericPatch (
     Patch->Mask,
     Patch->Size,
     Patch->Replace,
+    Patch->ReplaceMask,
     Base,
     Size,
     Patch->Count,
