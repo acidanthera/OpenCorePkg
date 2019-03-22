@@ -118,6 +118,8 @@ InternalConstructVtablePrelinked64 (
   }
 
   Vtable->Name = MachoGetSymbolName64 (MachoContext, VtableSymbol);
+  Vtable->NumEntries = 0;
+
   //
   // Initialize the VTable by entries.
   //
@@ -145,6 +147,8 @@ InternalConstructVtablePrelinked64 (
       Vtable->Entries[Index].Address = 0;
       Vtable->Entries[Index].Name    = NULL;
     }
+
+    ++Vtable->NumEntries;
   }
 
   return TRUE;
