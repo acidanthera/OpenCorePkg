@@ -1387,31 +1387,12 @@ InternalPrelinkKext64 (
 
   Segment = NULL;
   while ((Segment = MachoGetNextSegment64 (MachoContext, Segment)) != NULL) {
-    if (Segment == NULL) {
-      //
-      // Adapt the Mach-O header to signal being prelinked.
-      //
-      MachHeader->Flags = MACH_HEADER_FLAG_NO_UNDEFINED_REFERENCES;
-      //
-      // Reinitialize the Mach-O context to account for the changed __LINKEDIT
-      // segment and file size.
-      //
-      MachoInitializeContext (
-        MachoContext,
-        MachHeader,
-        (SegmentOffset + SegmentSize)
-        );
-
-      return RETURN_SUCCESS;
-    }
-
     Section = NULL;
     while ((Section = MachoGetNextSection64 (MachoContext, Segment, Section)) != NULL) {
       Section->Address = ALIGN_VALUE (
                            (Section->Address + LoadAddress),
                            Section->Alignment
                            );
-      ++Section;
     }
 
     Segment->VirtualAddress += LoadAddress;
@@ -1422,7 +1403,17 @@ InternalPrelinkKext64 (
     }
   }
   //
-  // Reaching here means one or more segments are malformed.
+  // Adapt the Mach-O header to signal being prelinked.
   //
+  MachHeader->Flags = MACH_HEADER_FLAG_NO_UNDEFINED_REFERENCES;
+  //
+  // Reinitialize the Mach-O context to account for the changed __LINKEDIT
+  // segment and file size.
+  //
+  MachoInitializeContext (
+    MachoContext,
+    MachHeader,
+    (SegmentOffset + SegmentSize)
+    );
   return RETURN_SUCCESS;
 }
