@@ -481,10 +481,10 @@ InternalCalculateTargetsIntel64 (
     // MetaClass structure to find classes for patching, so an unpatched
     // vtable means that there is an OSObject-dervied class that is missing
     // its OSDeclare/OSDefine macros.
+    // - FIXME: This cannot currently be checked with the means of this
+    //          library.  KXLD creates copies of patched VTable symbols, marks
+    //          the originals patched and then updates the referencing reloc.
     //
-    if (MachoSymbolNameIsPadslot (Name)) {
-      return FALSE;
-    }
 
     if ((Vtable != NULL) && MachoSymbolNameIsVtable64 (Name)) {
       *Vtable = InternalGetOcVtableByName (Context, Kext, Name, 0);
