@@ -606,9 +606,7 @@ InternalRelocateRelocationIntel64 (
   UINTN           ReturnValue;
 
   UINT8           Type;
-  INT32           *Instruction32Ptr;
   INT32           Instruction32;
-  UINT64          *Instruction64Ptr;
   UINT64          Instruction64;
   UINT64          Target;
   BOOLEAN         IsPair;
@@ -666,8 +664,7 @@ InternalRelocateRelocationIntel64 (
 
   // Length == 2
   if (Length != 3) {
-    Instruction32Ptr = (INT32 *)InstructionPtr;
-    Instruction32    = *Instruction32Ptr;
+    CopyMem (&Instruction32, InstructionPtr, sizeof (Instruction32));
 
     if ((Vtable != NULL)
      && InternalIsDirectPureVirtualCall64 (Vtable, Instruction32)) {
@@ -783,11 +780,10 @@ InternalRelocateRelocationIntel64 (
         return MAX_UINTN;
       }
     }
-        
-    *Instruction32Ptr = Instruction32;
+
+    CopyMem (InstructionPtr, &Instruction32, sizeof (Instruction32));
   } else {
-    Instruction64Ptr = (UINT64 *)InstructionPtr;
-    Instruction64    = *Instruction64Ptr;
+    CopyMem (&Instruction64, InstructionPtr, sizeof (Instruction64));
 
     if ((Vtable != NULL)
      && InternalIsDirectPureVirtualCall64 (Vtable, Instruction64)) {
@@ -816,7 +812,7 @@ InternalRelocateRelocationIntel64 (
       }
     }
 
-    *Instruction64Ptr = Instruction64;
+    CopyMem (InstructionPtr, &Instruction64, sizeof (Instruction64));
   }
 
   if (InvalidPcRel) {
