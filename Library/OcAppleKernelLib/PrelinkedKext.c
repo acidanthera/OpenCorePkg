@@ -264,10 +264,12 @@ InternalScanBuildLinkedVtables (
   OC_VTABLE_EXPORT_ARRAY *VtableExport;
   BOOLEAN                Result;
   UINT32                 NumVtables;
+  UINT32                 NumVtablesTemp;
   UINT32                 Index;
   UINT32                 VtableOffset;
   CONST UINT64           *VtableData;
   CONST MACH_HEADER_64   *MachHeader;
+  UINT32                 MachSize;
   PRELINKED_VTABLE       *Vtables;
 
   VtableExport = Context->LinkBuffer;
@@ -283,6 +285,9 @@ InternalScanBuildLinkedVtables (
 
   MachHeader = MachoGetMachHeader64 (&Kext->Context.MachContext);
   ASSERT (MachHeader != NULL);
+
+  MachSize = MachoGetFileSize (&Kext->Context.MachContext);
+  ASSERT (MachSize != 0);
 
   NumVtables = 0;
 
@@ -301,7 +306,16 @@ InternalScanBuildLinkedVtables (
       return FALSE;
     }
 
-    NumVtables += InternalGetVtableEntries64 (VtableData);
+    Result = InternalGetVtableEntries64 (
+               VtableData,
+               (MachSize - VtableOffset),
+               &NumVtablesTemp
+               );
+    if (!Result) {
+      return FALSE;
+    }
+
+    NumVtables += NumVtablesTemp;
   }
 
   Vtables = AllocatePool (

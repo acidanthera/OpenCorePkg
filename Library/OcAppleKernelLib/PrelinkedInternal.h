@@ -253,9 +253,11 @@ typedef struct {
 // VTables
 //
 
-UINT32
+BOOLEAN
 InternalGetVtableEntries64 (
-  IN CONST UINT64  *VtableData
+  IN  CONST UINT64  *VtableData,
+  IN  UINT32        MaxSize,
+  OUT UINT32        *NumEntries
   );
 
 BOOLEAN

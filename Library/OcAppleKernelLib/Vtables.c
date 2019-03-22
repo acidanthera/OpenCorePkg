@@ -127,6 +127,7 @@ InternalConstructVtablePrelinked64 (
   //
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.
+  // VTable bounds are verified in InternalGetVtableEntries64() called earlier.
   //
   for (
     Index = 0;
@@ -154,23 +155,30 @@ InternalConstructVtablePrelinked64 (
   return TRUE;
 }
 
-UINT32
+BOOLEAN
 InternalGetVtableEntries64 (
-  IN CONST UINT64  *VtableData
+  IN  CONST UINT64  *VtableData,
+  IN  UINT32        MaxSize,
+  OUT UINT32        *NumEntries
   )
 {
   UINT32 Index;
 
   ASSERT (VtableData != NULL);
+  ASSERT (NumEntries != NULL);
   //
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.
   //
-  for (Index = VTABLE_HEADER_LEN_64; VtableData[Index] != 0; ++Index) {
-    ;
-  }
+  Index = VTABLE_HEADER_LEN_64;
+  do {
+    if (Index >= (MaxSize / sizeof (*VtableData))) {
+      return FALSE;
+    }
+  } while (VtableData[Index++] != 0);
 
-  return (Index - VTABLE_HEADER_LEN_64);
+  *NumEntries = (Index - VTABLE_HEADER_LEN_64);
+  return TRUE;
 }
 
 BOOLEAN
