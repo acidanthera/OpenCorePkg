@@ -1332,7 +1332,7 @@ InternalPrelinkKext64 (
   DySymtab = MachoContext->DySymtab;
 
   Symtab->SymbolsOffset = (LinkEditSegment->FileOffset + SymbolTableOffset);
-  Symtab->NumSymbols   -= NumSymbols;
+  Symtab->NumSymbols    = NumSymbols;
   Symtab->StringsOffset = (LinkEditSegment->FileOffset + StringTableOffset);
 
   DySymtab->LocalRelocationsOffset = (LinkEditSegment->FileOffset + RelocationsOffset);
