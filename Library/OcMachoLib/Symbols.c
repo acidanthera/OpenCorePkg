@@ -443,10 +443,6 @@ MachoRelocateSymbol64 (
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
 
-  if ((Symbol->Type & MACH_N_TYPE_EXT) != 0) {
-    return FALSE;
-  }
-
   //
   // Symbols are relocated when they describe sections.
   //
