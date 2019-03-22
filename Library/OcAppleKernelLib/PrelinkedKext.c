@@ -318,7 +318,7 @@ InternalScanBuildLinkedVtables (
   }
 
   Kext->LinkedVtables   = Vtables;
-  Kext->NumberOfVtables = NumVtables;
+  Kext->NumberOfVtables = VtableExport->NumSymbols;
 
   return EFI_SUCCESS;
 }
