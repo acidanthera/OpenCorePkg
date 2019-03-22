@@ -504,7 +504,7 @@ InternalCalculateTargetsIntel64 (
   if (Section != NULL) {
     TargetAddress = ALIGN_VALUE (
                       (Section->Address + LoadAddress),
-                      Section->Alignment
+                      (1ULL << Section->Alignment)
                       );
     TargetAddress -= Section->Address;
   }
@@ -1371,7 +1371,7 @@ InternalPrelinkKext64 (
     while ((Section = MachoGetNextSection64 (MachoContext, Segment, Section)) != NULL) {
       Section->Address = ALIGN_VALUE (
                            (Section->Address + LoadAddress),
-                           Section->Alignment
+                           (1ULL << Section->Alignment)
                            );
     }
 
