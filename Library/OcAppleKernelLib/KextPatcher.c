@@ -53,6 +53,13 @@ PatcherInitContextFromBuffer (
 {
   MACH_SEGMENT_COMMAND_64  *Segment;
 
+  //
+  // This interface is still used for the kernel due to the need to patch
+  // standalone kernel outside of prelinkedkernel in e.g. 10.9.
+  // Once 10.9 support is dropped one could call PatcherInitContextFromPrelinked
+  // and request PRELINK_KERNEL_IDENTIFIER.
+  //
+
   if (!MachoInitializeContext (&Context->MachContext, Buffer, BufferSize)) {
     return EFI_INVALID_PARAMETER;
   }

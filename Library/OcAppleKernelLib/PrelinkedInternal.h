@@ -155,6 +155,14 @@ InternalCachedPrelinkedKext (
   );
 
 /**
+  Gets cached kernel PRELINKED_KEXT from PRELINKED_CONTEXT.
+**/
+PRELINKED_KEXT *
+InternalCachedPrelinkedKernel (
+  IN OUT PRELINKED_CONTEXT  *Prelinked
+  );
+
+/**
   Scan PRELINKED_KEXT for dependencies.
 **/
 EFI_STATUS

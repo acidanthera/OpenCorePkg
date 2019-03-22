@@ -150,7 +150,14 @@ PrelinkedContextInit (
   Context->Prelinked          = Prelinked;
   Context->PrelinkedSize      = PRELINKED_ALIGN (PrelinkedSize);
   Context->PrelinkedAllocSize = PrelinkedAllocSize;
+
+  //
+  // Initialize kext list with kernel pseudo kext.
+  //
   InitializeListHead (&Context->PrelinkedKexts);
+  if (InternalCachedPrelinkedKernel (Context) == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   //
   // Ensure that PrelinkedSize is always aligned.

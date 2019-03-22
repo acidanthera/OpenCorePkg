@@ -23,6 +23,7 @@
 #include <Library/OcAppleKernelLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/OcXmlLib.h>
 #include <Library/PrintLib.h>
 
@@ -403,6 +404,54 @@ InternalCachedPrelinkedKext (
   return NewKext;
 }
 
+PRELINKED_KEXT *
+InternalCachedPrelinkedKernel (
+  IN OUT PRELINKED_CONTEXT  *Prelinked
+  )
+{
+  LIST_ENTRY               *Kext;
+  PRELINKED_KEXT           *NewKext;
+  MACH_SEGMENT_COMMAND_64  *Segment;
+
+  //
+  // First entry is prelinked kernel.
+  //
+  Kext = GetFirstNode (&Prelinked->PrelinkedKexts);
+  if (!IsNull (&Prelinked->PrelinkedKexts, Kext)) {
+    return GET_PRELINKED_KEXT_FROM_LINK (Kext);
+  }
+
+  NewKext = AllocateZeroPool (sizeof (*NewKext));
+  if (NewKext == NULL) {
+    return NULL;
+  }
+
+  if (!MachoInitializeContext (&NewKext->Context.MachContext, &Prelinked->Prelinked[0], Prelinked->PrelinkedSize)) {
+    FreePool (NewKext);
+    return NULL;
+  }
+
+  Segment = MachoGetSegmentByName64 (
+    &NewKext->Context.MachContext,
+    "__TEXT"
+    );
+  if (Segment == NULL || Segment->VirtualAddress < Segment->FileOffset) {
+    FreePool (NewKext);
+    return NULL;
+  }
+
+  NewKext->Signature            = PRELINKED_KEXT_SIGNATURE;
+  NewKext->Identifier           = PRELINK_KERNEL_IDENTIFIER;
+  NewKext->BundleLibraries      = NULL;
+  NewKext->CompatibleVersion    = "0";
+  NewKext->Context.VirtualBase  = Segment->VirtualAddress - Segment->FileOffset;
+  NewKext->Context.VirtualKmod  = 0;
+
+  InsertTailList (&Prelinked->PrelinkedKexts, &NewKext->Link);
+
+  return NewKext;
+}
+
 EFI_STATUS
 InternalScanPrelinkedKext (
   IN OUT PRELINKED_KEXT     *Kext,
@@ -415,6 +464,7 @@ InternalScanPrelinkedKext (
   UINT32          DependencyIndex;
   CONST CHAR8     *DependencyId;
   PRELINKED_KEXT  *DependencyKext;
+  BOOLEAN         HasKpi;
 
   Status = InternalScanCurrentPrelinkedKext (Kext);
   if (EFI_ERROR (Status)) {
@@ -429,6 +479,8 @@ InternalScanPrelinkedKext (
     Context->LinkBufferSize = (UINT32)Kext->LinkEditSegment->FileSize;
   }
 
+  HasKpi = FALSE;
+
   if (Kext->BundleLibraries != NULL) {
     DependencyIndex = 0;
     FieldCount = PlistDictChildren (Kext->BundleLibraries);
@@ -438,9 +490,22 @@ InternalScanPrelinkedKext (
         continue;
       }
 
-      DependencyKext = InternalCachedPrelinkedKext (Context, DependencyId);
+      if (AsciiStrnCmp (DependencyId, PRELINK_KPI_IDENTIFIER_PREFIX, L_STR_LEN (PRELINK_KPI_IDENTIFIER_PREFIX)) == 0) {
+        if (HasKpi) {
+          DependencyKext = NULL;
+        } else {
+          DependencyKext = InternalCachedPrelinkedKernel (Context);
+          HasKpi         = TRUE;
+        }
+      } else {
+        DependencyKext = InternalCachedPrelinkedKext (Context, DependencyId);
+        if (DependencyKext == NULL) {
+          return EFI_NOT_FOUND;
+        }
+      }
+
       if (DependencyKext == NULL) {
-        return EFI_NOT_FOUND;
+        continue;
       }
 
       if (DependencyIndex >= ARRAY_SIZE (Kext->Dependencies)) {
