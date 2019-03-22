@@ -1331,11 +1331,11 @@ InternalPrelinkKext64 (
   Symtab   = MachoContext->Symtab;
   DySymtab = MachoContext->DySymtab;
 
-  Symtab->SymbolsOffset = SymbolTableOffset;
+  Symtab->SymbolsOffset = (LinkEditSegment->FileOffset + SymbolTableOffset);
   Symtab->NumSymbols   -= NumSymbols;
-  Symtab->StringsOffset = StringTableOffset;
+  Symtab->StringsOffset = (LinkEditSegment->FileOffset + StringTableOffset);
 
-  DySymtab->LocalRelocationsOffset = RelocationsOffset;
+  DySymtab->LocalRelocationsOffset = (LinkEditSegment->FileOffset + RelocationsOffset);
   DySymtab->NumOfLocalRelocations  = NumRelocations;
   //
   // Clear dynamic linker information.
