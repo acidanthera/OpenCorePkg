@@ -204,15 +204,21 @@ InternalScanCurrentPrelinkedKext (
 STATIC
 EFI_STATUS
 InternalScanBuildLinkedSymbolTable (
-  IN OUT PRELINKED_KEXT  *Kext
+  IN OUT PRELINKED_KEXT     *Kext,
+  IN     PRELINKED_CONTEXT  *Context
   )
 {
+  CONST MACH_HEADER_64  *MachHeader;
+  BOOLEAN               ResolveSymbols;
   PRELINKED_KEXT_SYMBOL *SymbolTable;
   PRELINKED_KEXT_SYMBOL *WalkerBottom;
   PRELINKED_KEXT_SYMBOL *WalkerTop;
   UINT32                NumCxxSymbols;
+  UINT32                NumDiscardedSyms;
   UINT32                Index;
   CONST MACH_NLIST_64   *Symbol;
+  MACH_NLIST_64         SymbolScratch;
+  CONST PRELINKED_KEXT_SYMBOL *ResolvedSymbol;
   CONST CHAR8           *Name;
   BOOLEAN               Result;
 
@@ -225,6 +231,14 @@ InternalScanBuildLinkedSymbolTable (
     return EFI_OUT_OF_RESOURCES;
   }
 
+  MachHeader = MachoGetMachHeader64 (&Kext->Context.MachContext);
+  ASSERT (MachHeader != NULL);
+  //
+  // KPIs declare undefined and indirect symbols even in prelinkedkernel.
+  //
+  ResolveSymbols = ((MachHeader->Flags & MACH_HEADER_FLAG_NO_UNDEFINED_REFERENCES) == 0);
+  NumDiscardedSyms = 0;
+
   WalkerBottom = &SymbolTable[0];
   WalkerTop    = &SymbolTable[Kext->NumberOfSymbols - 1];
 
@@ -234,6 +248,39 @@ InternalScanBuildLinkedSymbolTable (
     Symbol = &Kext->SymbolTable[Index];
     Name   = MachoGetSymbolName64 (&Kext->Context.MachContext, Symbol);
     Result = MachoSymbolNameIsCxx (Name);
+
+    if (ResolveSymbols) {
+      //
+      // Undefined symbols will be resolved via the KPI's dependencies and
+      // hence do not need to be included (again).
+      //
+      if ((Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_UNDF) {
+        ++NumDiscardedSyms;
+        continue;
+      }
+      //
+      // Resolve indirect symbols via the KPI's dependencies (kernel).
+      //
+      if ((Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_INDR) {
+        Name = MachoGetIndirectSymbolName64 (&Kext->Context.MachContext, Symbol);
+        if (Name == NULL) {
+          return EFI_LOAD_ERROR;
+        }
+
+        CopyMem (&SymbolScratch, Symbol, sizeof (SymbolScratch));
+        ResolvedSymbol = InternalOcGetSymbolByName (
+                           Context,
+                           Kext,
+                           Name,
+                           OcGetSymbolFirstLevel
+                           );
+        if (ResolvedSymbol == NULL) {
+          return EFI_NOT_FOUND;
+        }
+        SymbolScratch.Value = ResolvedSymbol->Value;
+        Symbol = &SymbolScratch;
+      }
+    }
 
     if (!Result) {
       WalkerBottom->StringIndex = Symbol->UnifiedName.StringIndex;
@@ -246,6 +293,18 @@ InternalScanBuildLinkedSymbolTable (
 
       ++NumCxxSymbols;
     }
+  }
+  //
+  // Move the C++ symbols to the actual end of the non-C++ symbols as undefined
+  // symbols got discarded.
+  //
+  if (NumDiscardedSyms > 0) {
+    CopyMem (
+      &SymbolTable[Kext->NumberOfSymbols - NumCxxSymbols - NumDiscardedSyms],
+      &SymbolTable[Kext->NumberOfSymbols - NumCxxSymbols],
+      (NumCxxSymbols * sizeof (*SymbolTable))
+      );
+    Kext->NumberOfSymbols -= NumDiscardedSyms;
   }
 
   Kext->LinkedSymbolTable  = SymbolTable;
@@ -357,7 +416,7 @@ InternalInsertPrelinkedKextDependency (
     return Status;
   }
 
-  Status = InternalScanBuildLinkedSymbolTable (DependencyKext);
+  Status = InternalScanBuildLinkedSymbolTable (DependencyKext, Context);
   if (EFI_ERROR (Status)) {
     return Status;
   }
