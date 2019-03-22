@@ -182,31 +182,6 @@ InternalGetVtableEntries64 (
 }
 
 BOOLEAN
-InternalGetVtableSizeWithRelocs64 (
-  IN OUT OC_MACHO_CONTEXT  *MachoContext,
-  IN     CONST UINT64      *VtableData,
-  OUT    UINT32            *VtableSize
-  )
-{
-  UINT32        Size;
-  MACH_NLIST_64 *Symbol;
-
-  Size = InternalGetVtableEntries64 (VtableData);
-
-  Symbol = MachoGetSymbolByExternRelocationOffset64 (
-             MachoContext,
-             ((UINTN)VtableData + Size)
-             );
-  if (Symbol == NULL) {
-    return FALSE;
-  }
-
-  *VtableSize = Size;
-
-  return TRUE;
-}
-
-BOOLEAN
 InternalPrepareCreateVtablesPrelinked64 (
   IN  OC_MACHO_CONTEXT          *MachoContext,
   OUT OC_VTABLE_EXPORT_ARRAY    *VtableExport,

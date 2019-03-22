@@ -261,13 +261,6 @@ InternalGetVtableEntries64 (
   );
 
 BOOLEAN
-InternalGetVtableSizeWithRelocs64 (
-  IN OUT OC_MACHO_CONTEXT  *MachoContext,
-  IN     CONST UINT64      *VtableData,
-  OUT    UINT32            *VtableSize
-  );
-
-BOOLEAN
 InternalPrepareVtableCreationNonPrelinked64 (
   IN OUT OC_MACHO_CONTEXT       *MachoContext,
   IN     UINT32                 NumSymbols,
