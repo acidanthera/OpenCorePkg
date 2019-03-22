@@ -1342,6 +1342,7 @@ InternalPrelinkKext64 (
   //
   DySymtab->LocalSymbolsIndex      = 0;
   DySymtab->NumLocalSymbols        = 0;
+  DySymtab->NumExternalSymbols     = 0;
   DySymtab->ExternalSymbolsIndex   = 0;
   DySymtab->NumExternalRelocations = 0;
   DySymtab->UndefinedSymbolsIndex  = 0;
