@@ -547,23 +547,24 @@ InternalScanPrelinkedKext (
     Context->LinkBufferSize = (UINT32)Kext->LinkEditSegment->FileSize;
   }
 
-  if (Kext->BundleLibraries != NULL) {
-    DependencyIndex = 0;
-    FieldCount = PlistDictChildren (Kext->BundleLibraries);
+  //
+  // Always add kernel dependency.
+  //
+  DependencyKext = InternalCachedPrelinkedKernel (Context);
+  if (DependencyKext == NULL) {
+    return EFI_NOT_FOUND;
+  }
 
-    //
-    // Always add kernel dependency.
-    //
-    DependencyKext = InternalCachedPrelinkedKernel (Context);
-    if (DependencyKext == NULL) {
-      return EFI_NOT_FOUND;
-    }
-    Status = InternalInsertPrelinkedKextDependency (Kext, Context, DependencyIndex, DependencyKext);
+  if (DependencyKext != Kext) {
+    Status = InternalInsertPrelinkedKextDependency (Kext, Context, 0, DependencyKext);
     if (EFI_ERROR (Status)) {
       return Status;
     }
+  }
 
-    ++DependencyIndex;
+  if (Kext->BundleLibraries != NULL) {
+    DependencyIndex = 1;
+    FieldCount = PlistDictChildren (Kext->BundleLibraries);
 
     for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
       DependencyId = PlistKeyValue (PlistDictChild (Kext->BundleLibraries, FieldIndex, NULL));
