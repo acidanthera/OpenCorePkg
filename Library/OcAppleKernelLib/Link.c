@@ -557,7 +557,7 @@ InternalIsDirectPureVirtualCall64 (
   UINT64                       Index;
   CONST PRELINKED_VTABLE_ENTRY *Entry;
 
-  if ((Offset % sizeof (UINT64)) != 0) {
+  if ((Offset % sizeof (UINT64)) != 0 || (Offset < VTABLE_ENTRY_SIZE_64)) {
     return FALSE;
   }
 
