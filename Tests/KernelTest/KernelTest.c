@@ -12967,70 +12967,6 @@ IOAHCIBlockStoragePatch = {
 
 STATIC
 UINT8
-AppleIntelCPUPowerManagementPatchFind[] = {
-  0xB9, 0xE2, 0x00, 0x00, 0x00, 0x0F, 0x30
-};
-
-STATIC
-UINT8
-AppleIntelCPUPowerManagementPatchReplace[] = {
-  0xB9, 0xE2, 0x00, 0x00, 0x00, 0x90, 0x90
-};
-
-STATIC
-PATCHER_GENERIC_PATCH
-AppleIntelCPUPowerManagementPatch = {
-  .Base    = NULL, // Symbolic patch
-  .Find    = AppleIntelCPUPowerManagementPatchFind,
-  .Mask    = NULL,
-  .Replace = AppleIntelCPUPowerManagementPatchReplace,
-  .ReplaceMask = NULL,
-  .Size    = sizeof (AppleIntelCPUPowerManagementPatchFind),
-  .Count   = 0,
-  .Skip    = 0
-};
-
-STATIC
-UINT8
-AppleIntelCPUPowerManagementPatch2Find[] = {
-  0xB9, 0xE2, 0x00, 0x00, 0x00, 0x48, 0x89, 0xF0, 0x0F, 0x30
-};
-
-STATIC
-UINT8
-AppleIntelCPUPowerManagementPatch2FindMask[] = {
-  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xF0, 0xFF, 0xFF
-};
-
-STATIC
-UINT8
-AppleIntelCPUPowerManagementPatch2Replace[] = {
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90
-};
-
-STATIC
-UINT8
-AppleIntelCPUPowerManagementPatch2ReplaceMask[] = {
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF
-};
-
-STATIC
-PATCHER_GENERIC_PATCH
-AppleIntelCPUPowerManagementPatch2 = {
-  .Base    = NULL, // Symbolic patch
-  .Find    = AppleIntelCPUPowerManagementPatch2Find,
-  .Mask    = AppleIntelCPUPowerManagementPatch2FindMask,
-  .Replace = AppleIntelCPUPowerManagementPatch2Replace,
-  .ReplaceMask = AppleIntelCPUPowerManagementPatch2ReplaceMask,
-  .Size    = sizeof (AppleIntelCPUPowerManagementPatch2Find),
-  .Count   = 0,
-  .Skip    = 0
-};
-
-
-
-STATIC
-UINT8
 IOAHCIPortPatchFind[] = {
   0x45, 0x78, 0x74, 0x65, 0x72, 0x6E, 0x61, 0x6C
 };
@@ -13075,56 +13011,6 @@ DisableAppleHDAPatch = {
 
 STATIC
 UINT8
-RemoveUsbLimitV1Find[] = {
-  0xff, 0xff, 0x10
-};
-
-STATIC
-UINT8
-RemoveUsbLimitV1Replace[] = {
-  0xff, 0xff, 0x40
-};
-
-STATIC
-PATCHER_GENERIC_PATCH
-RemoveUsbLimitV1Patch = {
-  .Base    = "__ZN15AppleUSBXHCIPCI11createPortsEv",
-  .Find    = RemoveUsbLimitV1Find,
-  .Mask    = NULL,
-  .Replace = RemoveUsbLimitV1Replace,
-  .ReplaceMask = NULL,
-  .Size    = sizeof (RemoveUsbLimitV1Replace),
-  .Count   = 1,
-  .Skip    = 0
-};
-
-STATIC
-UINT8
-RemoveUsbLimitV2Find[] = {
-  0x0f, 0x0f, 0x83
-};
-
-STATIC
-UINT8
-RemoveUsbLimitV2Replace[] = {
-  0x40, 0x0f, 0x83
-};
-
-STATIC
-PATCHER_GENERIC_PATCH
-RemoveUsbLimitV2Patch = {
-  .Base    = "__ZN12AppleUSBXHCI11createPortsEv",
-  .Find    = RemoveUsbLimitV2Find,
-  .Mask    = NULL,
-  .Replace = RemoveUsbLimitV2Replace,
-  .ReplaceMask = NULL,
-  .Size    = sizeof (RemoveUsbLimitV2Replace),
-  .Count   = 1,
-  .Skip    = 0
-};
-
-STATIC
-UINT8
 DisableKernelLog[] = {
   0xC3
 };
@@ -13149,40 +13035,10 @@ ApplyKextPatches (
 {
   EFI_STATUS       Status;
   PATCHER_CONTEXT  Patcher;
-
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.driver.AppleIntelCPUPowerManagement"
-    );
   
-  if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &AppleIntelCPUPowerManagementPatch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "Failed to apply patch com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_WARN, "Patch success com.apple.driver.AppleIntelCPUPowerManagement\n"));
-    }
-  } else {
-    DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
-  }
+  PatchAppleIntelCPUPowerManagement(Context);
   
-  Status = PatcherInitContextFromPrelinked (
-                                            &Patcher,
-                                            Context,
-                                            "com.apple.driver.AppleIntelCPUPowerManagement"
-                                            );
-  
-  if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &AppleIntelCPUPowerManagementPatch2);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "Failed to apply patch com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_WARN, "Patch success com.apple.driver.AppleIntelCPUPowerManagement\n"));
-    }
-  } else {
-    DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
-  }
+  RemoveUSBXHCIPortLimit(Context);
   
   Status = PatcherInitContextFromPrelinked (
     &Patcher,
@@ -13233,40 +13089,6 @@ ApplyKextPatches (
     }
   } else {
     DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.AppleHDA - %r\n", Status));
-  }
-
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.driver.usb.AppleUSBXHCI"
-    );
-
-  if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &RemoveUsbLimitV2Patch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "Failed to apply patch com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_WARN, "Patch success com.apple.driver.usb.AppleUSBXHCI\n"));
-    }
-  } else {
-    DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
-  }
-
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.driver.usb.AppleUSBXHCIPCI"
-    );
-
-  if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &RemoveUsbLimitV1Patch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "Failed to apply patch com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_WARN, "Patch success com.apple.driver.usb.AppleUSBXHCIPCI\n"));
-    }
-  } else {
-    DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
   }
 
   Status = PatcherInitContextFromPrelinked (

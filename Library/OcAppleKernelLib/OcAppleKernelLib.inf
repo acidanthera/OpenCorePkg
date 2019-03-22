@@ -33,6 +33,7 @@
   KernelReader.c
   KextPatcher.c
   Link.c
+  CommonPatches.c
   PrelinkedContext.c
   PrelinkedInternal.h
   PrelinkedKext.c

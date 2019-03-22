@@ -402,5 +402,29 @@ PatcherBlockKext (
   IN OUT PATCHER_CONTEXT        *Context
   );
 
+
+/**
+ Apply MSR E2 patches to AppleIntelCPUPowerManagement kext
+
+ @param Context Prelinked kernel context
+
+ @return  EFI_SUCCESS on success.
+ */
+EFI_STATUS
+PatchAppleIntelCPUPowerManagement (
+  PRELINKED_CONTEXT  *Context
+  );
+
+/**
+ Apply port limit patches to AppleUSBXHCI and AppleUSBXHCIPCI kexts
+
+ @param Context Prelinked kernel context
+
+ @return  EFI_SUCCESS on success.
+ */
+EFI_STATUS
+RemoveUSBXHCIPortLimit (
+  PRELINKED_CONTEXT  *Context
+  );
 #endif // OC_APPLE_KERNEL_LIB_H
 
