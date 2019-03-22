@@ -323,6 +323,61 @@ InternalScanBuildLinkedVtables (
   return EFI_SUCCESS;
 }
 
+STATIC
+EFI_STATUS
+InternalInsertPrelinkedKextDependency (
+  IN OUT PRELINKED_KEXT     *Kext,
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     UINT32             DependencyIndex,
+  IN OUT PRELINKED_KEXT     *DependencyKext
+  )
+{
+  EFI_STATUS  Status;
+
+  if (DependencyIndex >= ARRAY_SIZE (Kext->Dependencies)) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Status = InternalScanPrelinkedKext (DependencyKext, Context);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = InternalScanBuildLinkedSymbolTable (DependencyKext);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  if (Context->LinkBuffer == NULL) {
+    //
+    // Allocate the LinkBuffer from the size cached during the initial
+    // function recursion.
+    //
+    Context->LinkBuffer = AllocatePool (Context->LinkBufferSize);
+    if (Context->LinkBuffer == NULL) {
+      return RETURN_OUT_OF_RESOURCES;
+    }
+  } else if (Context->LinkBufferSize < DependencyKext->LinkEditSegment->FileSize) {
+    FreePool (Context->LinkBuffer);
+
+    Context->LinkBufferSize = (UINT32)DependencyKext->LinkEditSegment->FileSize;
+    Context->LinkBuffer     = AllocatePool (Context->LinkBufferSize);
+    if (Context->LinkBuffer == NULL) {
+      return RETURN_OUT_OF_RESOURCES;
+    }
+  }
+
+  Status = InternalScanBuildLinkedVtables (DependencyKext, Context);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Kext->Dependencies[DependencyIndex] = DependencyKext;
+
+  return RETURN_SUCCESS;
+}
+
+
 PRELINKED_KEXT *
 InternalNewPrelinkedKext (
   IN OC_MACHO_CONTEXT       *Context,
@@ -464,7 +519,6 @@ InternalScanPrelinkedKext (
   UINT32          DependencyIndex;
   CONST CHAR8     *DependencyId;
   PRELINKED_KEXT  *DependencyKext;
-  BOOLEAN         HasKpi;
 
   Status = InternalScanCurrentPrelinkedKext (Kext);
   if (EFI_ERROR (Status)) {
@@ -479,74 +533,44 @@ InternalScanPrelinkedKext (
     Context->LinkBufferSize = (UINT32)Kext->LinkEditSegment->FileSize;
   }
 
-  HasKpi = FALSE;
-
   if (Kext->BundleLibraries != NULL) {
     DependencyIndex = 0;
     FieldCount = PlistDictChildren (Kext->BundleLibraries);
+
+    //
+    // Always add kernel dependency.
+    //
+    DependencyKext = InternalCachedPrelinkedKernel (Context);
+    if (DependencyKext == NULL) {
+      return EFI_NOT_FOUND;
+    }
+    Status = InternalInsertPrelinkedKextDependency (Kext, Context, DependencyIndex, DependencyKext);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+
+    ++DependencyIndex;
+
     for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
       DependencyId = PlistKeyValue (PlistDictChild (Kext->BundleLibraries, FieldIndex, NULL));
       if (DependencyId == NULL) {
         continue;
       }
 
-      if (AsciiStrnCmp (DependencyId, PRELINK_KPI_IDENTIFIER_PREFIX, L_STR_LEN (PRELINK_KPI_IDENTIFIER_PREFIX)) == 0) {
-        if (HasKpi) {
-          DependencyKext = NULL;
-        } else {
-          DependencyKext = InternalCachedPrelinkedKernel (Context);
-          HasKpi         = TRUE;
-        }
-      } else {
-        DependencyKext = InternalCachedPrelinkedKext (Context, DependencyId);
-        if (DependencyKext == NULL) {
-          return EFI_NOT_FOUND;
-        }
-      }
-
+      //
+      // We still need to add KPI dependencies, as they may have indirect symbols,
+      // which are not present in kernel (e.g. _IOLockLock).
+      //
+      DependencyKext = InternalCachedPrelinkedKext (Context, DependencyId);
       if (DependencyKext == NULL) {
-        continue;
+        return EFI_NOT_FOUND;
       }
 
-      if (DependencyIndex >= ARRAY_SIZE (Kext->Dependencies)) {
-        return EFI_OUT_OF_RESOURCES;
-      }
-
-      Status = InternalScanPrelinkedKext (DependencyKext, Context);
+      Status = InternalInsertPrelinkedKextDependency (Kext, Context, DependencyIndex, DependencyKext);
       if (EFI_ERROR (Status)) {
         return Status;
       }
 
-      Status = InternalScanBuildLinkedSymbolTable (DependencyKext);
-      if (EFI_ERROR (Status)) {
-        return Status;
-      }
-
-      if (Context->LinkBuffer == NULL) {
-        //
-        // Allocate the LinkBuffer from the size cached during the initial
-        // function recursion.
-        //
-        Context->LinkBuffer = AllocatePool (Context->LinkBufferSize);
-        if (Context->LinkBuffer == NULL) {
-          return RETURN_OUT_OF_RESOURCES;
-        }
-      } else if (Context->LinkBufferSize < DependencyKext->LinkEditSegment->FileSize) {
-        FreePool (Context->LinkBuffer);
-
-        Context->LinkBufferSize = (UINT32)DependencyKext->LinkEditSegment->FileSize;
-        Context->LinkBuffer     = AllocatePool (Context->LinkBufferSize);
-        if (Context->LinkBuffer == NULL) {
-          return RETURN_OUT_OF_RESOURCES;
-        }
-      }
-
-      Status = InternalScanBuildLinkedVtables (DependencyKext, Context);
-      if (EFI_ERROR (Status)) {
-        return Status;
-      }
-
-      Kext->Dependencies[DependencyIndex] = DependencyKext;
       ++DependencyIndex;
     }
 
