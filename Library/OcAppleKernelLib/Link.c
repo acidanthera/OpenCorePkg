@@ -464,13 +464,6 @@ InternalCalculateTargetsIntel64 (
   //
   TargetAddress = LoadAddress;
 
-  //
-  // Assertion: Scattered Relocations are only supported by i386.
-  //
-  if (((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) != 0) {
-    DEBUG ((DEBUG_WARN, "Prelink: Scattered symbols are not supported.\n"));
-  }
-
   if (Relocation->Extern != 0) {
     Symbol = MachoGetSymbolByIndex64 (
                 MachoContext,
@@ -633,25 +626,10 @@ InternalRelocateRelocationIntel64 (
 
   ASSERT (RelocationBase != 0);
   ASSERT (Relocation != NULL);
-  //
-  // Scattered Relocations are only supported by i386.
-  //
-  if (((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) != 0) {
-    DEBUG ((DEBUG_WARN, "Prelink: Scattered symbols are not supported.\n"));
-  }
 
   IsPair        = FALSE;
   Adjustment    = 0;
   IsNormalLocal = FALSE;
-
-  if ((Relocation->Extern == 0)
-   && (Relocation->SymbolNumber == MACH_RELOC_ABSOLUTE)) {
-    //
-    // A section-based relocation entry can be skipped for absolute 
-    // symbols.
-    //
-    return 0;
-  }
 
   Address    = Relocation->Address;
   Length     = Relocation->Size;
@@ -901,6 +879,19 @@ InternalRelocateAndCopyRelocations64 (
   PreservedRelocations = 0;
 
   for (Index = 0; Index < *NumRelocations; ++Index) {
+    //
+    // Assertion: Not i386.  Scattered Relocations are only supported by i386.
+    //            && ((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) == 0
+    //
+    if ((SourceRelocations[Index].Extern == 0)
+     && (SourceRelocations[Index].SymbolNumber == MACH_RELOC_ABSOLUTE)) {
+      //
+      // A section-based relocation entry can be skipped for absolute 
+      // symbols.
+      //
+      continue;
+    }
+
     NextRelocation = &SourceRelocations[Index + 1];
     //
     // The last Relocation does not have a successor.
@@ -927,13 +918,6 @@ InternalRelocateAndCopyRelocations64 (
     //
     if ((Result & ~(UINTN)BIT31) != 0) {
       Relocation = &TargetRelocations[PreservedRelocations];
-
-      //
-      // Assertion: Scattered Relocations are only supported by i386.
-      //
-      if (((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) != 0) {
-        DEBUG ((DEBUG_WARN, "Prelink: Scattered symbols are not supported.\n"));
-      }
 
       CopyMem (Relocation, &SourceRelocations[Index], sizeof (*Relocation));
 
