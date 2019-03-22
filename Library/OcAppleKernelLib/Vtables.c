@@ -129,8 +129,8 @@ InternalConstructVtablePrelinked64 (
   //             retrieved from VtableData.
   //
   for (
-    Index = VTABLE_HEADER_LEN_64;
-    (Value = VtableData[Index]) != 0;
+    Index = 0;
+    (Value = VtableData[Index + VTABLE_HEADER_LEN_64]) != 0;
     ++Index
     ) {
     Symbol = InternalOcGetSymbolByValue (Context, Kext, Value, OcGetSymbolOnlyCxx);
@@ -170,7 +170,7 @@ InternalGetVtableEntries64 (
     ;
   }
 
-  return Index;
+  return (Index - VTABLE_HEADER_LEN_64);
 }
 
 BOOLEAN
