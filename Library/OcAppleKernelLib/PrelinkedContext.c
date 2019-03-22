@@ -288,6 +288,10 @@ PrelinkedContextFree (
     Context->PooledBuffers = NULL;
   }
 
+  if (Context->LinkBuffer != NULL) {
+    FreePool (Context->LinkBuffer);
+  }
+
   while (!IsListEmpty (&Context->PrelinkedKexts)) {
     Link = GetFirstNode (&Context->PrelinkedKexts);
     Kext = GET_PRELINKED_KEXT_FROM_LINK (Link);
