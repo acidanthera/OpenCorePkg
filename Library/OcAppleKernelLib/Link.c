@@ -16,6 +16,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Base.h>
 
 #include <IndustryStandard/AppleMachoImage.h>
+#include <IndustryStandard/AppleKmodInfo.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -1022,6 +1023,55 @@ InternalStripLoadCommands64 (
   }
 }
 
+STATIC
+BOOLEAN
+InternalRelocateSymbols (
+  IN     OC_MACHO_CONTEXT  *MachoContext,
+  IN     UINT64            LoadAddress,
+  IN     UINT32            NumSymbols,
+  IN OUT MACH_NLIST_64     *Symbols,
+  OUT    UINT64            *KmodInfoOffset
+  )
+{
+  UINT32        Index;
+  MACH_NLIST_64 *Symbol;
+  CONST CHAR8   *SymbolName;
+  BOOLEAN       Result;
+  UINT64        KmodOffset;
+
+  ASSERT (MachoContext != NULL);
+  ASSERT (Symbols != NULL);
+  ASSERT (KmodInfoOffset != NULL);
+
+  KmodOffset = *KmodInfoOffset;
+
+  for (Index = 0; Index < NumSymbols; ++Index) {
+    Symbol = &Symbols[Index];
+
+    if (KmodOffset == 0) {
+      SymbolName = MachoGetSymbolName64 (MachoContext, Symbol);
+      ASSERT (SymbolName != NULL);
+
+      if (AsciiStrCmp (SymbolName, "_kmod_info") == 0) {
+        KmodOffset = Symbol->Value;
+      }
+    }
+
+    Result = MachoRelocateSymbol64 (
+               MachoContext,
+               LoadAddress,
+               Symbol
+               );
+    if (!Result) {
+      return FALSE;
+    }
+  }
+
+  *KmodInfoOffset = KmodOffset;
+  return TRUE;
+}
+
+
 /**
   Prelinks the specified KEXT against the specified LoadAddress and the data
   of its dependencies.
@@ -1090,6 +1140,10 @@ InternalPrelinkKext64 (
 
   UINT32                     SegmentOffset;
   UINT32                     SegmentSize;
+
+  UINT64                     SegmentVmSizes;
+  UINT64                     KmodInfoOffset;
+  KMOD_INFO_64_V1            *KmodInfo;
 
   ASSERT (Context != NULL);
   ASSERT (Kext != NULL);
@@ -1195,26 +1249,33 @@ InternalPrelinkKext64 (
   //
   // Relocate local and external symbols.
   //
-  for (Index = 0; Index < NumLocalSymbols; ++Index) {
-    Result = MachoRelocateSymbol64 (
-               MachoContext,
-               LoadAddress,
-               (MACH_NLIST_64 *)&LocalSymtab[Index]
-               );
-    if (!Result) {
-      return RETURN_LOAD_ERROR;
-    }
+  KmodInfoOffset = 0;
+
+  Result = InternalRelocateSymbols (
+             MachoContext,
+             LoadAddress,
+             NumLocalSymbols,
+             (MACH_NLIST_64 *)LocalSymtab,
+             &KmodInfoOffset
+             );
+  if (!Result) {
+    return RETURN_LOAD_ERROR;
   }
 
-  for (Index = 0; Index < NumExternalSymbols; ++Index) {
-    Result = MachoRelocateSymbol64 (
-               MachoContext,
-               LoadAddress,
-               (MACH_NLIST_64 *)&ExternalSymtab[Index]
-               );
-    if (!Result) {
-      return RETURN_LOAD_ERROR;
-    }
+  Result = InternalRelocateSymbols (
+             MachoContext,
+             LoadAddress,
+             NumExternalSymbols,
+             (MACH_NLIST_64 *)ExternalSymtab,
+             &KmodInfoOffset
+             );
+  if (!Result || (KmodInfoOffset == 0)) {
+    return RETURN_LOAD_ERROR;
+  }
+
+  KmodInfo = (KMOD_INFO_64_V1 *)((UINTN)MachHeader + (UINTN)KmodInfoOffset);
+  if (((UINTN)KmodInfo % 4) != 0) {
+    return RETURN_LOAD_ERROR;
   }
   //
   // Prepare constructing a new __LINKEDIT section to...
@@ -1366,6 +1427,8 @@ InternalPrelinkKext64 (
   SegmentOffset = 0;
   SegmentSize   = 0;
 
+  SegmentVmSizes = 0;
+
   Segment = NULL;
   while ((Segment = MachoGetNextSegment64 (MachoContext, Segment)) != NULL) {
     Section = NULL;
@@ -1382,7 +1445,18 @@ InternalPrelinkKext64 (
       SegmentOffset = (UINT32)Segment->FileOffset;
       SegmentSize   = (UINT32)Segment->FileSize;
     }
+
+    SegmentVmSizes += Segment->Size;
   }
+  //
+  // Populate kmod information.
+  //
+  KmodInfo->Address = LoadAddress;
+  KmodInfo->HdrSize = ALIGN_VALUE (
+                        (sizeof (*MachHeader) + MachHeader->CommandsSize),
+                        4096
+                        );
+  KmodInfo->Size = (KmodInfo->HdrSize + SegmentVmSizes);
   //
   // Adapt the Mach-O header to signal being prelinked.
   //
