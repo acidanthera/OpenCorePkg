@@ -470,7 +470,8 @@ InternalCalculateTargetsIntel64 (
                 MachoContext,
                 Relocation->SymbolNumber
                 );
-    if (Symbol == NULL) {
+    if ((Symbol == NULL)
+     || !MachoIsSymbolValueInRange64 (MachoContext, Symbol)) {
       return FALSE;
     }
 
@@ -1053,6 +1054,10 @@ InternalRelocateSymbols (
       ASSERT (SymbolName != NULL);
 
       if (AsciiStrCmp (SymbolName, "_kmod_info") == 0) {
+        if (!MachoIsSymbolValueInRange64 (MachoContext, Symbol)) {
+          return FALSE;
+        }
+        
         KmodOffset = Symbol->Value;
       }
     }
