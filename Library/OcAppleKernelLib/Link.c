@@ -1472,11 +1472,16 @@ InternalPrelinkKext64 (
   // Populate kmod information.
   //
   KmodInfo->Address = LoadAddress;
-  KmodInfo->HdrSize = ALIGN_VALUE (
-                        (sizeof (*MachHeader) + MachHeader->CommandsSize),
-                        4096
-                        );
-  KmodInfo->Size = (KmodInfo->HdrSize + SegmentVmSizes);
+  //
+  // This is a hack borrowed from XNU. Real header size is equal to:
+  //   sizeof (*MachHeader) + MachHeader->CommandsSize (often aligned to 4096)
+  // However, it cannot be set to this value unless it exists in a separate segment,
+  // and presently it is not the case on macOS. When header is put to __TEXT (as usual),
+  // XNU makes it read only, and this prevents __TEXT from gaining executable permission.
+  // See OSKext::setVMAttributes.
+  //
+  KmodInfo->HdrSize = 0;
+  KmodInfo->Size    = KmodInfo->HdrSize + SegmentVmSizes;
   //
   // Adapt the Mach-O header to signal being prelinked.
   //
