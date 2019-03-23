@@ -105,8 +105,17 @@ struct PRELINKED_KEXT_ {
   // Sorted symbol table used only for dependencies.
   //
   PRELINKED_KEXT_SYMBOL    *LinkedSymbolTable;
+  //
+  // A flag set during dependency walk BFS to avoid going through the same path.
+  //
   BOOLEAN                  Processed;
+  //
+  // Number of vtables in this kext.
+  //
   UINT32                   NumberOfVtables;
+  //
+  // Scanned vtable buffer. Iterated with GET_NEXT_PRELINKED_VTABLE.
+  //
   PRELINKED_VTABLE         *LinkedVtables;
 };
 

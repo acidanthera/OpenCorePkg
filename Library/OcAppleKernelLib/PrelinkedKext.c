@@ -764,5 +764,9 @@ InternalLinkPrelinkedKext (
 
   *AlignedLoadSize = RealLoadSize;
 
+  Kext->SymbolTable     = NULL;
+  Kext->StringTable     = NULL;
+  Kext->NumberOfSymbols = 0;
+
   return Kext;
 }
