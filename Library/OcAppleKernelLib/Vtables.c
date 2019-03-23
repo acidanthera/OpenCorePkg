@@ -288,7 +288,6 @@ InternalPatchVtableSymbol (
   CONST CHAR8 *ClassName;
   CHAR8       FunctionPrefix[SYM_MAX_NAME_LEN];
 
-  ASSERT (Symbol != NULL);
   ASSERT (ParentEntry != NULL);
   //
   // The child entry can be NULL when a locally-defined, non-external
@@ -437,11 +436,12 @@ InternalInitializeVtableByEntriesAndRelocations64 (
     // but there isn't much we can do about that.
     //
     if (EntryValue == 0) {
-      Symbol = MachoGetSymbolByExternRelocationOffset64 (
+      Result = MachoGetSymbolByExternRelocationOffset64 (
                  MachoContext,
                  (VtableSymbol->Value + (EntryOffset * sizeof (*VtableData))),
+                 &Symbol
                  );
-      if (Symbol == NULL) {
+      if (!Result) {
         //
         // When the VTable entry is 0 and it is not referenced by a Relocation,
         // it is the end of the table.
