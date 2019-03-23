@@ -322,14 +322,18 @@ MachoIsSymbolValueInRange64 (
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Address  Address to search for.
+  @param[out]    Symbol   Buffer to output the symbol referenced by the
+                          Relocation into.  The output is undefined when FALSE
+                          is returned.  May be NULL.
 
-  @returns  NULL  NULL is returned on failure.
+  @returns  Whether the Relocation exists.
 
 **/
-MACH_NLIST_64 *
+BOOLEAN
 MachoGetSymbolByExternRelocationOffset64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT64            Address
+  IN     UINT64            Address,
+  OUT    MACH_NLIST_64     **Symbol
   );
 
 /**
