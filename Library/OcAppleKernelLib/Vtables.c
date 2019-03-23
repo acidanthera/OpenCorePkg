@@ -90,6 +90,7 @@ InternalConstructVtablePrelinked64 (
   BOOLEAN                     Result;
   CONST MACH_HEADER_64        *MachHeader;
   UINT32                      VtableOffset;
+  UINT32                      MaxSize;
   CONST UINT64                *VtableData;
   UINT64                      Value;
   UINT32                      Index;
@@ -107,9 +108,10 @@ InternalConstructVtablePrelinked64 (
   Result = MachoSymbolGetFileOffset64 (
              MachoContext,
              VtableSymbol,
-             &VtableOffset
+             &VtableOffset,
+             &MaxSize
              );
-  if (!Result) {
+  if (!Result || (MaxSize < (VTABLE_HEADER_SIZE_64 + VTABLE_ENTRY_SIZE_64))) {
     return FALSE;
   }
 
@@ -130,6 +132,7 @@ InternalConstructVtablePrelinked64 (
   //             retrieved from VtableData.
   // VTable bounds are verified in InternalGetVtableEntries64() called earlier.
   //
+  MaxSize /= VTABLE_ENTRY_SIZE_64;
   for (
     Index = 0;
     (Value = VtableData[Index + VTABLE_HEADER_LEN_64]) != 0;
@@ -151,6 +154,10 @@ InternalConstructVtablePrelinked64 (
     }
 
     ++Vtable->NumEntries;
+
+    if ((Index + VTABLE_HEADER_LEN_64 + 1) >= MaxSize) {
+      return FALSE;
+    }
   }
 
   return TRUE;
@@ -171,9 +178,10 @@ InternalGetVtableEntries64 (
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.
   //
-  Index = VTABLE_HEADER_LEN_64;
+  MaxSize /= VTABLE_ENTRY_SIZE_64;
+  Index    = VTABLE_HEADER_LEN_64;
   do {
-    if (Index >= (MaxSize / sizeof (*VtableData))) {
+    if (Index >= MaxSize) {
       return FALSE;
     }
   } while (VtableData[Index++] != 0);
@@ -403,7 +411,8 @@ InternalInitializeVtableByEntriesAndRelocations64 (
   IN OUT OC_MACHO_CONTEXT             *MachoContext,
   IN     CONST PRELINKED_VTABLE       *SuperVtable,
   IN     CONST MACH_NLIST_64          *VtableSymbol,
-  IN     CONST UINT64                 *VtableData
+  IN     CONST UINT64                 *VtableData,
+  IN     UINT32                       MaxSize
   )
 {
   UINT32                     NumEntries;
@@ -411,10 +420,15 @@ InternalInitializeVtableByEntriesAndRelocations64 (
   UINT64                     EntryValue;
   MACH_NLIST_64              *Symbol;
   BOOLEAN                    Result;
+
+  if (MaxSize < (VTABLE_HEADER_SIZE_64 + VTABLE_ENTRY_SIZE_64)) {
+    return FALSE;
+  }
   //
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.
   //
+  MaxSize /= VTABLE_ENTRY_SIZE_64;
   for (
     NumEntries = 0, EntryOffset = VTABLE_HEADER_LEN_64;
     TRUE;
@@ -451,6 +465,10 @@ InternalInitializeVtableByEntriesAndRelocations64 (
       if (!Result) {
         return FALSE;
       }
+    }
+
+    if ((EntryOffset + 1) >= MaxSize) {
+      return FALSE;
     }
   }
 
@@ -526,6 +544,7 @@ InternalPatchByVtables64 (
   CONST MACH_NLIST_64  *Smcp;
   CONST CHAR8          *Name;
   UINT32               VtableOffset;
+  UINT32               MaxSize;
   CONST MACH_NLIST_64  *VtableSymbol;
   CONST MACH_NLIST_64  *MetaVtableSymbol;
   CONST MACH_NLIST_64  *MetaClass;
@@ -669,9 +688,10 @@ InternalPatchByVtables64 (
       Result = MachoSymbolGetFileOffset64 (
                  MachoContext,
                  VtableSymbol,
-                 &VtableOffset
+                 &VtableOffset,
+                 &MaxSize
                  );
-      if (!Result) {
+      if (!Result || (MaxSize < (VTABLE_HEADER_SIZE_64 + VTABLE_ENTRY_SIZE_64))) {
         return FALSE;
       }
 
@@ -684,7 +704,8 @@ InternalPatchByVtables64 (
                  MachoContext,
                  SuperVtable,
                  VtableSymbol,
-                 VtableData
+                 VtableData,
+                 MaxSize
                  );
       if (!Result) {
         return FALSE;
@@ -733,9 +754,10 @@ InternalPatchByVtables64 (
       Result = MachoSymbolGetFileOffset64 (
                  MachoContext,
                  MetaVtableSymbol,
-                 &VtableOffset
+                 &VtableOffset,
+                 &MaxSize
                  );
-      if (!Result) {
+      if (!Result || (MaxSize < (VTABLE_HEADER_SIZE_64 + VTABLE_ENTRY_SIZE_64))) {
         return FALSE;
       }
 
@@ -748,7 +770,8 @@ InternalPatchByVtables64 (
                  MachoContext,
                  SuperVtable,
                  MetaVtableSymbol,
-                 VtableData
+                 VtableData,
+                 MaxSize
                  );
       if (!Result) {
         return FALSE;

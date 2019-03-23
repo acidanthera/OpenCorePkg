@@ -106,7 +106,7 @@ PatcherGetSymbolAddress (
     Index++;
   }
 
-  if (!MachoSymbolGetFileOffset64 (&Context->MachContext, Symbol, &Offset)) {
+  if (!MachoSymbolGetFileOffset64 (&Context->MachContext, Symbol, &Offset, NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 

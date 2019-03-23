@@ -490,6 +490,7 @@ MachoRelocateSymbol64 (
   @param[in]     Symbol      Symbol to retrieve the offset of.
   @param[out]    FileOffset  Pointer the file offset is returned into.
                              If FALSE is returned, the output is undefined.
+  @param[out]    MaxSize     Maximum data safely available from FileOffset.
 
   @retval 0  0 is returned on failure.
 
@@ -498,7 +499,8 @@ BOOLEAN
 MachoSymbolGetFileOffset64 (
   IN OUT OC_MACHO_CONTEXT      *Context,
   IN     CONST  MACH_NLIST_64  *Symbol,
-  OUT    UINT32                *FileOffset
+  OUT    UINT32                *FileOffset,
+  OUT    UINT32                *MaxSize OPTIONAL
   )
 {
   UINT64          Offset;
@@ -530,5 +532,10 @@ MachoSymbolGetFileOffset64 (
   }
 
   *FileOffset = (Section->Offset + (UINT32)Offset);
+
+  if (MaxSize != NULL) {
+    *MaxSize = (UINT32)(Section->Size - Offset);
+  }
+
   return TRUE;
 }

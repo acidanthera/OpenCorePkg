@@ -326,6 +326,7 @@ InternalScanBuildLinkedVtables (
   UINT32                 NumVtablesTemp;
   UINT32                 Index;
   UINT32                 VtableOffset;
+  UINT32                 MaxSize;
   CONST UINT64           *VtableData;
   CONST MACH_HEADER_64   *MachHeader;
   UINT32                 MachSize;
@@ -354,9 +355,10 @@ InternalScanBuildLinkedVtables (
     Result = MachoSymbolGetFileOffset64 (
                 &Kext->Context.MachContext,
                 VtableExport->Symbols[Index],
-                &VtableOffset
+                &VtableOffset,
+                &MaxSize
                 );
-    if (!Result) {
+    if (!Result || (MaxSize < (VTABLE_HEADER_SIZE_64 + VTABLE_ENTRY_SIZE_64))) {
       return Result;
     }
 
@@ -367,7 +369,7 @@ InternalScanBuildLinkedVtables (
 
     Result = InternalGetVtableEntries64 (
                VtableData,
-               (MachSize - VtableOffset),
+               MaxSize,
                &NumVtablesTemp
                );
     if (!Result) {

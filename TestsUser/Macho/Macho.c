@@ -117,7 +117,7 @@ static int FeedMacho(void *file, uint32_t size) {
     }
 
     UINT32 Offset;
-    if (MachoSymbolGetFileOffset64 (&Context, Symbol, &Offset)) {
+    if (MachoSymbolGetFileOffset64 (&Context, Symbol, &Offset, NULL)) {
       code += Offset;
     }
 
@@ -220,7 +220,7 @@ static int FeedMacho(void *file, uint32_t size) {
       code++;
     }
     UINT32 Offset;
-    if (MachoSymbolGetFileOffset64 (&Context, Symbol, &Offset)) {
+    if (MachoSymbolGetFileOffset64 (&Context, Symbol, &Offset, NULL)) {
       code += Offset;
     }
 

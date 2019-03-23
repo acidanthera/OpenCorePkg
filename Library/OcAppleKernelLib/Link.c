@@ -1053,14 +1053,15 @@ InternalRelocateSymbols (
   IN     UINT64            LoadAddress,
   IN     UINT32            NumSymbols,
   IN OUT MACH_NLIST_64     *Symbols,
-  OUT    UINT64            *KmodInfoOffset
+  OUT    UINT32            *KmodInfoOffset
   )
 {
   UINT32        Index;
   MACH_NLIST_64 *Symbol;
   CONST CHAR8   *SymbolName;
   BOOLEAN       Result;
-  UINT64        KmodOffset;
+  UINT32        KmodOffset;
+  UINT32        MaxSize;
 
   ASSERT (MachoContext != NULL);
   ASSERT (Symbols != NULL);
@@ -1076,11 +1077,19 @@ InternalRelocateSymbols (
       ASSERT (SymbolName != NULL);
 
       if (AsciiStrCmp (SymbolName, "_kmod_info") == 0) {
-        if (!MachoIsSymbolValueInRange64 (MachoContext, Symbol)) {
+        Result = MachoSymbolGetFileOffset64 (
+                   MachoContext,
+                   Symbol,
+                   &KmodOffset,
+                   &MaxSize
+                   );
+        if (!Result
+         || (MaxSize < sizeof (KMOD_INFO_64_V1)
+         || (KmodOffset % 4) != 0)) {
           return FALSE;
         }
-        
-        KmodOffset = Symbol->Value;
+
+        *KmodInfoOffset = KmodOffset;
       }
     }
 
@@ -1094,7 +1103,6 @@ InternalRelocateSymbols (
     }
   }
 
-  *KmodInfoOffset = KmodOffset;
   return TRUE;
 }
 
@@ -1169,7 +1177,7 @@ InternalPrelinkKext64 (
   UINT32                     SegmentSize;
 
   UINT64                     SegmentVmSizes;
-  UINT64                     KmodInfoOffset;
+  UINT32                     KmodInfoOffset;
   KMOD_INFO_64_V1            *KmodInfo;
 
   ASSERT (Context != NULL);
@@ -1415,11 +1423,11 @@ InternalPrelinkKext64 (
   Symtab   = MachoContext->Symtab;
   DySymtab = MachoContext->DySymtab;
 
-  Symtab->SymbolsOffset = (LinkEditSegment->FileOffset + SymbolTableOffset);
+  Symtab->SymbolsOffset = (UINT32)(LinkEditSegment->FileOffset + SymbolTableOffset);
   Symtab->NumSymbols    = NumSymbols;
-  Symtab->StringsOffset = (LinkEditSegment->FileOffset + StringTableOffset);
+  Symtab->StringsOffset = (UINT32)(LinkEditSegment->FileOffset + StringTableOffset);
 
-  DySymtab->LocalRelocationsOffset = (LinkEditSegment->FileOffset + RelocationsOffset);
+  DySymtab->LocalRelocationsOffset = (UINT32)(LinkEditSegment->FileOffset + RelocationsOffset);
   DySymtab->NumOfLocalRelocations  = NumRelocations;
   //
   // Clear dynamic linker information.
