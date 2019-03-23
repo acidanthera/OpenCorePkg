@@ -190,6 +190,7 @@ InternalUnlockContextKexts (
   @param[in]     PlistRoot       Current kext info.plist.
   @param[in]     LoadAddress     Kext load address.
   @param[in]     KmodAddress     Kext kmod address.
+  @param[in,out] AlignedLoadSize Resulting virtual space size.
 
   @return  prelinked kext to be inserted into PRELINKED_CONTEXT.
 **/
@@ -199,7 +200,8 @@ InternalLinkPrelinkedKext (
   IN OUT OC_MACHO_CONTEXT   *Executable,
   IN     XML_NODE           *PlistRoot,
   IN     UINT64             LoadAddress,
-  IN     UINT64             KmodAddress
+  IN     UINT64             KmodAddress,
+  IN OUT UINT32             *AlignedLoadSize
   );
 
 #define KXLD_WEAK_TEST_SYMBOL  "_gOSKextUnresolved"

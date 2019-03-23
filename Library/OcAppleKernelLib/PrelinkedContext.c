@@ -497,6 +497,7 @@ PrelinkedInjectKext (
   UINT32            NewInfoPlistSize;
   UINT32            NewPrelinkedSize;
   UINT32            AlignedExecutableSize;
+  UINT32            AlignedLoadSize;
   BOOLEAN           Failed;
   UINT64            KmodAddress;
   PRELINKED_KEXT    *PrelinkedKext;
@@ -571,9 +572,6 @@ PrelinkedInjectKext (
     AsciiIntegerToLowerHex (ExecutableLoadAddrStr, sizeof (ExecutableLoadAddrStr), Context->PrelinkedLastLoadAddress);
     Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == NULL;
     Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableLoadAddrStr) == NULL;
-    AsciiIntegerToLowerHex (ExecutableSizeStr, sizeof (ExecutableSizeStr), AlignedExecutableSize);
-    Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_SIZE_KEY) == NULL;
-    Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableSizeStr) == NULL;   
     AsciiIntegerToLowerHex (KmodInfoStr, sizeof (KmodInfoStr), KmodAddress);
     Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_KMOD_INFO_KEY) == NULL;
     Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, KmodInfoStr) == NULL;  
@@ -586,31 +584,47 @@ PrelinkedInjectKext (
   }
 
   if (Executable != NULL) {
+    AlignedLoadSize = Context->PrelinkedAllocSize - Context->PrelinkedSize;
     PrelinkedKext = InternalLinkPrelinkedKext (
       Context,
       &ExecutableContext,
       InfoPlistRoot,
       Context->PrelinkedLastLoadAddress,
-      KmodAddress
+      KmodAddress,
+      &AlignedLoadSize
       );
 
-    if (PrelinkedKext == NULL) {
+    if (PrelinkedKext != NULL) {
+      if (AlignedLoadSize < ExecutableSize) {
+        AlignedLoadSize = ExecutableSize;
+      }
+
+      AsciiIntegerToLowerHex (ExecutableSizeStr, sizeof (ExecutableSizeStr), AlignedLoadSize);
+      Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_SIZE_KEY) == NULL;
+      Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableSizeStr) == NULL;
+    }
+
+    if (PrelinkedKext == NULL || Failed) {
       XmlDocumentFree (InfoPlistDocument);
       FreePool (TmpInfoPlist);
       return EFI_INVALID_PARAMETER;
     }
 
+    ZeroMem (
+      &Context->Prelinked[Context->PrelinkedSize + AlignedExecutableSize],
+      AlignedLoadSize - AlignedExecutableSize
+      );
+
     //
-    // XNU assumes that load size and source size are same, so we can append
-    // AlignedExecutableSize to vm_size as well as long as executable size
-    // does not change, and currently it is a constraint.
+    // XNU assumes that load size and source size are same, so we should append
+    // whatever is bigger to all sizes.
     //
-    Context->PrelinkedSize                  += AlignedExecutableSize;
-    Context->PrelinkedLastAddress           += AlignedExecutableSize;
-    Context->PrelinkedLastLoadAddress       += AlignedExecutableSize;
-    Context->PrelinkedTextSegment->Size     += AlignedExecutableSize;
-    Context->PrelinkedTextSegment->FileSize += AlignedExecutableSize;
-    Context->PrelinkedTextSection->Size     += AlignedExecutableSize;
+    Context->PrelinkedSize                  += AlignedLoadSize;
+    Context->PrelinkedLastAddress           += AlignedLoadSize;
+    Context->PrelinkedLastLoadAddress       += AlignedLoadSize;
+    Context->PrelinkedTextSegment->Size     += AlignedLoadSize;
+    Context->PrelinkedTextSegment->FileSize += AlignedLoadSize;
+    Context->PrelinkedTextSection->Size     += AlignedLoadSize;
   }
 
   //
