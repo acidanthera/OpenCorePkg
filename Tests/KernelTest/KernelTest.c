@@ -428,9 +428,9 @@ CalculateReserveSize (
 
   ReserveSize = PRELINK_INFO_RESERVE_SIZE;
 
-  PrelinkedReserveKextSize (&ReserveSize, sizeof (TestKextInfoPlistData), 0);
-  PrelinkedReserveKextSize (&ReserveSize, LiluKextInfoPlistDataSize, LiluKextDataSize);
-  PrelinkedReserveKextSize (&ReserveSize, VsmcKextInfoPlistDataSize, VsmcKextDataSize);
+  PrelinkedReserveKextSize (&ReserveSize, sizeof (TestKextInfoPlistData), 0, 0);
+  PrelinkedReserveKextSize (&ReserveSize, LiluKextInfoPlistDataSize, LiluKextData, LiluKextDataSize);
+  PrelinkedReserveKextSize (&ReserveSize, VsmcKextInfoPlistDataSize, VsmcKextData, VsmcKextDataSize);
 
   return ReserveSize;
 }

@@ -148,7 +148,7 @@ PrelinkedContextInit (
   ZeroMem (Context, sizeof (*Context));
 
   Context->Prelinked          = Prelinked;
-  Context->PrelinkedSize      = PRELINKED_ALIGN (PrelinkedSize);
+  Context->PrelinkedSize      = MACHO_ALIGN (PrelinkedSize);
   Context->PrelinkedAllocSize = PrelinkedAllocSize;
 
   //
@@ -174,7 +174,7 @@ PrelinkedContextInit (
     return EFI_INVALID_PARAMETER;
   }
 
-  Context->PrelinkedLastAddress = PRELINKED_ALIGN (MachoGetLastAddress64 (&Context->PrelinkedMachContext));
+  Context->PrelinkedLastAddress = MACHO_ALIGN (MachoGetLastAddress64 (&Context->PrelinkedMachContext));
   if (Context->PrelinkedLastAddress == 0) {
     return EFI_INVALID_PARAMETER;
   }
@@ -350,8 +350,8 @@ PrelinkedInjectPrepare (
 
   SegmentEndOffset = Context->PrelinkedInfoSegment->FileOffset + Context->PrelinkedInfoSegment->FileSize;
 
-  if (PRELINKED_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
-    Context->PrelinkedSize = (UINT32)PRELINKED_ALIGN (Context->PrelinkedInfoSegment->FileOffset);
+  if (MACHO_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
+    Context->PrelinkedSize = (UINT32) MACHO_ALIGN (Context->PrelinkedInfoSegment->FileOffset);
   }
 
   Context->PrelinkedInfoSegment->VirtualAddress = 0;
@@ -362,7 +362,7 @@ PrelinkedInjectPrepare (
   Context->PrelinkedInfoSection->Size           = 0;
   Context->PrelinkedInfoSection->Offset         = 0;
 
-  Context->PrelinkedLastAddress = PRELINKED_ALIGN (MachoGetLastAddress64 (&Context->PrelinkedMachContext));
+  Context->PrelinkedLastAddress = MACHO_ALIGN (MachoGetLastAddress64 (&Context->PrelinkedMachContext));
   if (Context->PrelinkedLastAddress == 0) {
     return EFI_INVALID_PARAMETER;
   }
@@ -373,7 +373,7 @@ PrelinkedInjectPrepare (
 
   SegmentEndOffset = Context->PrelinkedTextSegment->FileOffset + Context->PrelinkedTextSegment->FileSize;
 
-  if (PRELINKED_ALIGN (SegmentEndOffset) != Context->PrelinkedSize) {
+  if (MACHO_ALIGN (SegmentEndOffset) != Context->PrelinkedSize) {
     //
     // TODO: Implement prelinked text relocation when it is not preceding prelinked info
     // and is not in the end of prelinked info.
@@ -403,7 +403,7 @@ PrelinkedInjectComplete (
   //
   ExportedInfoSize++;
 
-  if (OcOverflowAddU32 (Context->PrelinkedSize, PRELINKED_ALIGN (ExportedInfoSize), &NewSize)
+  if (OcOverflowAddU32 (Context->PrelinkedSize, MACHO_ALIGN (ExportedInfoSize), &NewSize)
     || NewSize > Context->PrelinkedAllocSize) {
     FreePool (ExportedInfo);
     return EFI_BUFFER_TOO_SMALL;
@@ -425,11 +425,11 @@ PrelinkedInjectComplete (
 
   ZeroMem (
     &Context->Prelinked[Context->PrelinkedSize + ExportedInfoSize],
-    PRELINKED_ALIGN (ExportedInfoSize) - ExportedInfoSize
+    MACHO_ALIGN (ExportedInfoSize) - ExportedInfoSize
     );
 
-  Context->PrelinkedLastAddress += PRELINKED_ALIGN (ExportedInfoSize);
-  Context->PrelinkedSize        += PRELINKED_ALIGN (ExportedInfoSize);
+  Context->PrelinkedLastAddress += MACHO_ALIGN (ExportedInfoSize);
+  Context->PrelinkedSize        += MACHO_ALIGN (ExportedInfoSize);
 
   FreePool (ExportedInfo);
 
@@ -440,9 +440,12 @@ EFI_STATUS
 PrelinkedReserveKextSize (
   IN OUT UINT32       *ReservedSize,
   IN     UINT32       InfoPlistSize,
+  IN     UINT8        *Executable,
   IN     UINT32       ExecutableSize OPTIONAL
   )
 {
+  OC_MACHO_CONTEXT  Context;
+
   //
   // For new fields.
   //
@@ -450,15 +453,18 @@ PrelinkedReserveKextSize (
     return EFI_INVALID_PARAMETER;
   }
 
-  //
-  // For __LINKEDIT segment.
-  //
-  if (OcOverflowAddU32 (ExecutableSize, 4096*2, &ExecutableSize)) {
-    return EFI_INVALID_PARAMETER;
-  }
+  InfoPlistSize  = MACHO_ALIGN (InfoPlistSize);
 
-  InfoPlistSize  = PRELINKED_ALIGN (InfoPlistSize);
-  ExecutableSize = PRELINKED_ALIGN (ExecutableSize);
+  if (Executable != NULL) {
+    if (!MachoInitializeContext (&Context, Executable, ExecutableSize)) {
+      return EFI_INVALID_PARAMETER;
+    }
+
+    ExecutableSize = MachoGetVmSize64 (&Context);
+    if (ExecutableSize == 0) {
+      return EFI_INVALID_PARAMETER;
+    }
+  }
 
   if (OcOverflowTriAddU32 (*ReservedSize, InfoPlistSize, ExecutableSize, &ExecutableSize)) {
     return EFI_INVALID_PARAMETER;
@@ -508,7 +514,6 @@ PrelinkedInjectKext (
   UINT32            NewInfoPlistSize;
   UINT32            NewPrelinkedSize;
   UINT32            AlignedExecutableSize;
-  UINT32            AlignedLoadSize;
   BOOLEAN           Failed;
   UINT64            KmodAddress;
   PRELINKED_KEXT    *PrelinkedKext;
@@ -523,17 +528,23 @@ PrelinkedInjectKext (
   // Copy executable to prelinkedkernel.
   //
   if (Executable != NULL) {
-    AlignedExecutableSize = PRELINKED_ALIGN (ExecutableSize);
-    if (OcOverflowAddU32 (Context->PrelinkedSize, AlignedExecutableSize, &NewPrelinkedSize)
-      || NewPrelinkedSize > Context->PrelinkedAllocSize) {
-      return EFI_BUFFER_TOO_SMALL;
+    if (!MachoInitializeContext (&ExecutableContext, (UINT8 *) Executable, ExecutableSize)) {
+      return EFI_INVALID_PARAMETER;
     }
 
-    CopyMem (
+    ExecutableSize = MachoExpandImage64 (
+      &ExecutableContext,
       &Context->Prelinked[Context->PrelinkedSize],
-      Executable,
-      ExecutableSize
+      Context->PrelinkedAllocSize - Context->PrelinkedSize
       );
+
+    AlignedExecutableSize = MACHO_ALIGN (ExecutableSize);
+
+    if (OcOverflowAddU32 (Context->PrelinkedSize, AlignedExecutableSize, &NewPrelinkedSize)
+      || NewPrelinkedSize > Context->PrelinkedAllocSize
+      || ExecutableSize == 0) {
+      return EFI_BUFFER_TOO_SMALL;
+    }
 
     ZeroMem (
       &Context->Prelinked[Context->PrelinkedSize + ExecutableSize],
@@ -583,6 +594,9 @@ PrelinkedInjectKext (
     AsciiIntegerToLowerHex (ExecutableLoadAddrStr, sizeof (ExecutableLoadAddrStr), Context->PrelinkedLastLoadAddress);
     Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == NULL;
     Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableLoadAddrStr) == NULL;
+    AsciiIntegerToLowerHex (ExecutableSizeStr, sizeof (ExecutableSizeStr), AlignedExecutableSize);
+    Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_SIZE_KEY) == NULL;
+    Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableSizeStr) == NULL;
     AsciiIntegerToLowerHex (KmodInfoStr, sizeof (KmodInfoStr), KmodAddress);
     Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_KMOD_INFO_KEY) == NULL;
     Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, KmodInfoStr) == NULL;  
@@ -595,47 +609,30 @@ PrelinkedInjectKext (
   }
 
   if (Executable != NULL) {
-    AlignedLoadSize = Context->PrelinkedAllocSize - Context->PrelinkedSize;
     PrelinkedKext = InternalLinkPrelinkedKext (
       Context,
       &ExecutableContext,
       InfoPlistRoot,
       Context->PrelinkedLastLoadAddress,
-      KmodAddress,
-      &AlignedLoadSize
+      KmodAddress
       );
 
-    if (PrelinkedKext != NULL) {
-      if (AlignedLoadSize < AlignedExecutableSize) {
-        AlignedLoadSize = AlignedExecutableSize;
-      }
-
-      AsciiIntegerToLowerHex (ExecutableSizeStr, sizeof (ExecutableSizeStr), AlignedLoadSize);
-      Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_EXECUTABLE_SIZE_KEY) == NULL;
-      Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableSizeStr) == NULL;
-    }
-
-    if (PrelinkedKext == NULL || Failed) {
+    if (PrelinkedKext == NULL) {
       XmlDocumentFree (InfoPlistDocument);
       FreePool (TmpInfoPlist);
       return EFI_INVALID_PARAMETER;
     }
 
-    ZeroMem (
-      &Context->Prelinked[Context->PrelinkedSize + AlignedExecutableSize],
-      AlignedLoadSize - AlignedExecutableSize
-      );
-
     //
     // XNU assumes that load size and source size are same, so we should append
     // whatever is bigger to all sizes.
     //
-    Context->PrelinkedSize                  += AlignedLoadSize;
-    Context->PrelinkedLastAddress           += AlignedLoadSize;
-    Context->PrelinkedLastLoadAddress       += AlignedLoadSize;
-    Context->PrelinkedTextSegment->Size     += AlignedLoadSize;
-    Context->PrelinkedTextSegment->FileSize += AlignedLoadSize;
-    Context->PrelinkedTextSection->Size     += AlignedLoadSize;
+    Context->PrelinkedSize                  += AlignedExecutableSize;
+    Context->PrelinkedLastAddress           += AlignedExecutableSize;
+    Context->PrelinkedLastLoadAddress       += AlignedExecutableSize;
+    Context->PrelinkedTextSegment->Size     += AlignedExecutableSize;
+    Context->PrelinkedTextSegment->FileSize += AlignedExecutableSize;
+    Context->PrelinkedTextSection->Size     += AlignedExecutableSize;
   }
 
   //

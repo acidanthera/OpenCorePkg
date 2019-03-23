@@ -59,6 +59,43 @@ MachoGetFileSize (
 }
 
 /**
+  Returns the Mach-O's virtual address space size.
+
+  @param[out] Context   Context of the Mach-O.
+
+**/
+UINT32
+MachoGetVmSize64 (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  )
+{
+  UINT64                   VmSize;
+  MACH_SEGMENT_COMMAND_64  *Segment;
+
+  ASSERT (Context != NULL);
+  ASSERT (Context->FileSize != 0);
+
+  VmSize = 0;
+
+  for (
+    Segment = MachoGetNextSegment64 (Context, NULL);
+    Segment != NULL;
+    Segment = MachoGetNextSegment64 (Context, Segment)
+    ) {
+    if (OcOverflowAddU64 (VmSize, Segment->Size, &VmSize)) {
+      return 0;
+    }
+    VmSize = MACHO_ALIGN (VmSize);
+  }
+
+  if (VmSize > MAX_UINT32) {
+    return 0;
+  }
+
+  return (UINT32) VmSize;
+}
+
+/**
   Initializes a Mach-O Context.
 
   @param[out] Context   Mach-O Context to initialize.
@@ -1012,4 +1049,172 @@ MachoGetFilePointerByAddress64 (
   }
 
   return NULL;
+}
+
+UINT32
+MachoExpandImage64 (
+  IN  OC_MACHO_CONTEXT   *Context,
+  OUT UINT8              *Destination,
+  IN  UINT32             DestinationSize
+  )
+{
+  MACH_HEADER_64           *Header;
+  UINT8                    *Source;
+  UINT32                   HeaderSize;
+  UINT64                   CopyFileOffset;
+  UINT64                   CopyFileSize;
+  UINT64                   CopyVmSize;
+  UINT32                   CurrentDelta;
+  UINT32                   OriginalDelta;
+  UINT64                   CurrentSize;
+  MACH_SEGMENT_COMMAND_64  *Segment;
+  MACH_SEGMENT_COMMAND_64  *DstSegment;
+  MACH_SYMTAB_COMMAND      *Symtab;
+  MACH_DYSYMTAB_COMMAND    *DySymtab;
+  UINT32                   Index;
+
+  ASSERT (Context != NULL);
+  ASSERT (Context->FileSize != 0);
+
+  //
+  // Header is valid, copy it first.
+  //
+  Header     = MachoGetMachHeader64 (Context);
+  Source     = (UINT8 *) Header;
+  HeaderSize = sizeof (*Header) + Header->CommandsSize;
+  if (HeaderSize > DestinationSize) {
+    return 0;
+  }
+  CopyMem (Destination, Header, HeaderSize);
+
+  CurrentDelta = 0;
+  for (
+    Segment = MachoGetNextSegment64 (Context, NULL);
+    Segment != NULL;
+    Segment = MachoGetNextSegment64 (Context, Segment)
+    ) {
+    //
+    // Align delta by x86 page size, this is what our lib expects.
+    //
+    OriginalDelta = CurrentDelta;
+    CurrentDelta  = MACHO_ALIGN (CurrentDelta);
+    //
+    // Do not overwrite header.
+    //
+    CopyFileOffset = Segment->FileOffset;
+    CopyFileSize   = Segment->FileSize;
+    CopyVmSize     = Segment->Size;
+    if (CopyFileOffset <= HeaderSize) {
+      CopyFileOffset = HeaderSize;
+      CopyFileSize  -= (HeaderSize - CopyFileOffset);
+      CopyVmSize    -= (HeaderSize - CopyFileOffset);
+      if (Segment->FileSize > Segment->Size
+        || CopyFileSize > Segment->FileSize
+        || CopyVmSize > Segment->Size) {
+        //
+        // Header must fit in 1 segment.
+        //
+        return 0;
+      }
+    }
+    //
+    // Ensure that it still fits. In legit files segments are ordered.
+    // We do not care for other (the file will be truncated).
+    //
+    if (OcOverflowTriAddU64 (CopyFileOffset, CurrentDelta, CopyVmSize, &CurrentSize)
+      || CurrentSize > DestinationSize) {
+      return 0;
+    }
+    //
+    // Copy and zero fill file data. We can do this because only last sections can have 0 file size.
+    //
+    ZeroMem (&Destination[CopyFileOffset + OriginalDelta], CurrentDelta - OriginalDelta);
+    CopyMem (&Destination[CopyFileOffset + CurrentDelta], &Source[CopyFileOffset], CopyFileSize);
+    ZeroMem (&Destination[CopyFileOffset + CurrentDelta + CopyFileSize], CopyVmSize - CopyFileSize);
+    //
+    // Refresh destination segment size and offsets.
+    //
+    DstSegment = (MACH_SEGMENT_COMMAND_64 *) ((UINT8 *) Segment - Source + Destination);
+    DstSegment->FileOffset += CurrentDelta;
+    DstSegment->FileSize    = DstSegment->Size;
+    //
+    // We need to update fields in SYMTAB and DYSYMTAB. Tables have to be present before 0 FileSize
+    // sections as they have data, so we update them before parsing sections. 
+    // Note: There is an assumption they are in __LINKEDIT segment, another option is to check addresses.
+    //
+    if (AsciiStrnCmp (DstSegment->SegmentName, "__LINKEDIT", ARRAY_SIZE (DstSegment->SegmentName)) == 0) {
+      Symtab = (MACH_SYMTAB_COMMAND *)(
+                 InternalGetNextCommand64 (
+                   Context,
+                   MACH_LOAD_COMMAND_SYMTAB,
+                   NULL
+                   )
+                 );
+
+      if (Symtab != NULL) {
+        Symtab = (MACH_SYMTAB_COMMAND *) ((UINT8 *) Symtab - Source + Destination);
+        if (Symtab->SymbolsOffset != 0) {
+          Symtab->SymbolsOffset += CurrentDelta;
+        }
+        if (Symtab->StringsOffset != 0) {
+          Symtab->StringsOffset += CurrentDelta;
+        }
+      }
+
+      DySymtab = (MACH_DYSYMTAB_COMMAND *)(
+                     InternalGetNextCommand64 (
+                       Context,
+                       MACH_LOAD_COMMAND_DYSYMTAB,
+                       NULL
+                       )
+                     );
+
+      if (DySymtab != NULL) {
+        DySymtab = (MACH_DYSYMTAB_COMMAND *) ((UINT8 *) DySymtab - Source + Destination);
+        if (DySymtab->TableOfContentsNumEntries != 0) {
+          DySymtab->TableOfContentsNumEntries += CurrentDelta;
+        }
+        if (DySymtab->ModuleTableFileOffset != 0) {
+          DySymtab->ModuleTableFileOffset += CurrentDelta;
+        }
+        if (DySymtab->ReferencedSymbolTableFileOffset != 0) {
+          DySymtab->ReferencedSymbolTableFileOffset += CurrentDelta;
+        }
+        if (DySymtab->IndirectSymbolsOffset != 0) {
+          DySymtab->IndirectSymbolsOffset += CurrentDelta;
+        }
+        if (DySymtab->ExternalRelocationsOffset != 0) {
+          DySymtab->ExternalRelocationsOffset += CurrentDelta;
+        }
+        if (DySymtab->LocalRelocationsOffset != 0) {
+          DySymtab->LocalRelocationsOffset += CurrentDelta;
+        }
+      }
+    }
+    //
+    // These may well wrap around with invalid data.
+    // But we do not care, as we do not access these fields ourselves,
+    // and later on the section values are checked by MachoLib.
+    // Note: There is an assumption that 'CopyFileOffset + CurrentDelta' is aligned.
+    //
+    for (Index = 0; Index < DstSegment->NumSections; ++Index) {
+      if (DstSegment->Sections[Index].Offset == 0) {
+        DstSegment->Sections[Index].Offset = CopyFileOffset + CurrentDelta;
+        CurrentDelta += DstSegment->Sections[Index].Size;
+      } else {
+        DstSegment->Sections[Index].Offset += CurrentDelta;
+        OriginalDelta = CopyFileOffset + DstSegment->Sections[Index].Size;
+        CopyFileOffset = DstSegment->Sections[Index].Offset + DstSegment->Sections[Index].Size;
+      }
+    }
+    //
+    // After sections we may have extra padding (OriginalDelta), which may save us up to 1 page.
+    // The following is true for all valid data, and invalid data will be caught by fits check.
+    // CopyFileOffset + CurrentDelta <= DstSegment->FileOffset + DstSegment->FileSize
+    //
+    OriginalDelta = DstSegment->FileOffset + DstSegment->FileSize - CopyFileOffset - CurrentDelta;
+    CurrentDelta -= MIN (OriginalDelta, CurrentDelta);
+  }
+
+  return (UINT32) CurrentSize;
 }

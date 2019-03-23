@@ -1435,8 +1435,8 @@ InternalPrelinkKext64 (
   //
   // Copy the new __LINKEDIT segment into the binary and fix its Load Command.
   //
-  LinkEditSize = (SymbolTableSize + RelocationsSize + StringTableSize);
-  
+  LinkEditSize          = (SymbolTableSize + RelocationsSize + StringTableSize);
+
   CopyMem (
     (VOID *)((UINTN)MachHeader + (UINTN)LinkEditSegment->FileOffset),
     LinkEdit,
@@ -1448,7 +1448,8 @@ InternalPrelinkKext64 (
     );
 
   LinkEditSegment->FileSize = LinkEditSize;
-  LinkEditSegment->Size     = ALIGN_VALUE (LinkEditSize, BASE_4KB);
+  LinkEditSegment->Size     = MACHO_ALIGN (LinkEditSize);
+
   //
   // Adapt the link addresses of all Segments and their Sections.
   //

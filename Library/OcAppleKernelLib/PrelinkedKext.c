@@ -691,13 +691,11 @@ InternalLinkPrelinkedKext (
   IN OUT OC_MACHO_CONTEXT   *Executable,
   IN     XML_NODE           *PlistRoot,
   IN     UINT64             LoadAddress,
-  IN     UINT64             KmodAddress,
-  IN OUT UINT32             *AlignedLoadSize
+  IN     UINT64             KmodAddress
   )
 {
   EFI_STATUS      Status;
   PRELINKED_KEXT  *Kext;
-  UINT32          RealLoadSize;
 
   Kext = InternalNewPrelinkedKext (Executable, PlistRoot);
   if (Kext == NULL) {
@@ -754,17 +752,6 @@ InternalLinkPrelinkedKext (
     InternalFreePrelinkedKext (Kext);
     return NULL;
   }
-
-  RealLoadSize = (UINT32) PRELINKED_ALIGN (MachoGetLastAddress64 (
-    &Kext->Context.MachContext) - Kext->Context.VirtualBase
-    );
-
-  if (RealLoadSize > *AlignedLoadSize) {
-    InternalFreePrelinkedKext (Kext);
-    return NULL;
-  }
-
-  *AlignedLoadSize = RealLoadSize;
 
   Kext->SymbolTable     = NULL;
   Kext->StringTable     = NULL;

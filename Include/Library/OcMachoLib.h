@@ -18,6 +18,16 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <IndustryStandard/AppleMachoImage.h>
 
 ///
+/// Default assumed page size.
+///
+#define MACHO_PAGE_SIZE 4096U
+
+///
+/// Macro to align by default assumed page size.
+///
+#define MACHO_ALIGN(x) ALIGN_VALUE((x), MACHO_PAGE_SIZE)
+
+///
 /// Context used to refer to a Mach-O.  This struct is exposed for reference
 /// only.  Members are not guaranteed to be sane.
 ///
@@ -69,6 +79,17 @@ MachoGetMachHeader64 (
 **/
 UINT32
 MachoGetFileSize (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  );
+
+/**
+  Returns the Mach-O's virtual address space size.
+
+  @param[out] Context   Context of the Mach-O.
+
+**/
+UINT32
+MachoGetVmSize64 (
   IN OUT OC_MACHO_CONTEXT  *Context
   );
 
@@ -697,6 +718,23 @@ MachoGetFilePointerByAddress64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT64            Address,
   OUT    UINT32            *MaxSize OPTIONAL
+  );
+
+/**
+  Expand Mach-O image to Destination (make segment file sizes equal to vm sizes).
+
+  @param[in]  Context          Context of the Mach-O.
+  @param[out] Destination      Output buffer.
+  @param[in]  DestinationSize  Output buffer maximum size.
+
+  @returns  New image size or 0 on failure.
+
+**/
+UINT32
+MachoExpandImage64 (
+  IN  OC_MACHO_CONTEXT   *Context,
+  OUT UINT8              *Destination,
+  IN  UINT32             DestinationSize
   );
 
 #endif // OC_MACHO_LIB_H_

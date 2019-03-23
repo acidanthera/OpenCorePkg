@@ -19,8 +19,6 @@
 #include <Library/OcXmlLib.h>
 #include <Protocol/SimpleFileSystem.h>
 
-#define PRELINKED_ALIGN(x) ALIGN_VALUE((x), 4096)
-
 #define PRELINK_KERNEL_IDENTIFIER "__kernel__"
 #define PRELINK_KPI_IDENTIFIER_PREFIX "com.apple.kpi."
 
@@ -279,6 +277,7 @@ PrelinkedInjectComplete (
 
   @param[in,out] ReservedSize    Current reserved size, updated.
   @param[in]     InfoPlistSize   Kext Info.plist size.
+  @param[in]     Executable      Kext executable, optional.
   @param[in]     ExecutableSize  Kext executable size, optional.
 
   @return  EFI_SUCCESS on success.
@@ -287,6 +286,7 @@ EFI_STATUS
 PrelinkedReserveKextSize (
   IN OUT UINT32       *ReservedSize,
   IN     UINT32       InfoPlistSize,
+  IN     UINT8        *Executable OPTIONAL,
   IN     UINT32       ExecutableSize OPTIONAL
   );
 

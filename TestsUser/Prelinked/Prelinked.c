@@ -382,7 +382,6 @@ ApplyKextPatches (
   }
 }
 
-STATIC
 VOID
 ApplyKernelPatches (
   IN OUT UINT8   *Kernel,
@@ -421,7 +420,7 @@ int main(int argc, char** argv) {
   }
 
 
-  AllocSize = PRELINKED_ALIGN (Size + 16*1024*1024);
+  AllocSize = MACHO_ALIGN (Size + 16*1024*1024);
 
   Prelinked = realloc (Prelinked, AllocSize);
   if (Prelinked == NULL) {
@@ -429,7 +428,9 @@ int main(int argc, char** argv) {
     return -1;
   }
 
+#if 0
   ApplyKernelPatches (Prelinked, Size);
+#endif
 
   EFI_STATUS Status = PrelinkedContextInit (&Context, Prelinked, Size, AllocSize);
 
@@ -532,7 +533,7 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
     return 0;
   }
 
-  AllocSize = PRELINKED_ALIGN (PrelinkedSize + 16*1024*1024);
+  AllocSize = MACHO_ALIGN (PrelinkedSize + 16*1024*1024);
 
   Prelinked = realloc (Prelinked, AllocSize);
   if (Prelinked == NULL) {
