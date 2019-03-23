@@ -59,6 +59,19 @@ InternalOcGetSymbolWorker (
 
   Symbol = NULL;
 
+  if (SymbolLevel == OcGetSymbolOnlyCxx) {
+    CxxIndex = (Kext->NumberOfSymbols - Kext->NumberOfCxxSymbols);
+    Symbols  = &Kext->LinkedSymbolTable[CxxIndex];
+
+    for (SymIndex = 0; SymIndex < Kext->NumberOfCxxSymbols; ++SymIndex) {
+      Result = Predicate (Kext, &Symbols[SymIndex], PredicateContext);
+      if (Result) {
+        Symbol = &Symbols[SymIndex];
+        break;
+      }
+    }
+  }
+
   for (Index = 0; Symbol == NULL && Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
     Dependency = Kext->Dependencies[Index];
     if (Dependency == NULL) {
