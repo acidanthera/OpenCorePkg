@@ -523,13 +523,6 @@ MachoSymbolGetFileOffset64 (
   if (Offset > Section->Size) {
     return FALSE;
   }
-  //
-  // The check against Section->Size guarantees a 32-bit value for the current
-  // library implementation.
-  //
-  if (Offset != (UINT32)Offset) {
-    return FALSE;
-  }
 
   *FileOffset = (Section->Offset + (UINT32)Offset);
 
