@@ -605,8 +605,8 @@ PrelinkedInjectKext (
       );
 
     if (PrelinkedKext != NULL) {
-      if (AlignedLoadSize < ExecutableSize) {
-        AlignedLoadSize = ExecutableSize;
+      if (AlignedLoadSize < AlignedExecutableSize) {
+        AlignedLoadSize = AlignedExecutableSize;
       }
 
       AsciiIntegerToLowerHex (ExecutableSizeStr, sizeof (ExecutableSizeStr), AlignedLoadSize);
