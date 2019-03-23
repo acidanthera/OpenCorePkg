@@ -1311,6 +1311,27 @@ XmlNodeAppend (
 }
 
 XML_NODE *
+XmlNodePrepend (
+  XML_NODE     *Node,
+  CONST CHAR8  *Name,
+  CONST CHAR8  *Attributes,
+  CONST CHAR8  *Content
+  )
+{
+  XML_NODE  *NewNode;
+
+  NewNode = XmlNodeAppend (Node, Name, Attributes, Content);
+  if (NewNode == NULL) {
+    return NULL;
+  }
+
+  CopyMem (&Node->Children->NodeList[1], &Node->Children->NodeList[0], (Node->Children->NodeCount - 1) * sizeof (Node->Children->NodeList[0]));
+  Node->Children->NodeList[0] = NewNode;
+
+  return NewNode;
+}
+
+XML_NODE *
 PlistDocumentRoot (
   XML_DOCUMENT  *Document
   )

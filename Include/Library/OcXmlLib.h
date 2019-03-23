@@ -236,6 +236,18 @@ XmlNodeAppend (
   );
 
 //
+// Prepend new node to current node.
+// Otherwise equivalent to XmlNodeAppend.
+//
+XML_NODE *
+XmlNodePrepend (
+  XML_NODE     *Node,
+  CONST CHAR8  *Name,
+  CONST CHAR8  *Attributes,
+  CONST CHAR8  *Content
+  );
+
+//
 // @return XML_NODE representing plist root or NULL.
 // @warning Only a subset of plist is supported.
 // @warning No validation of plist format is performed.
