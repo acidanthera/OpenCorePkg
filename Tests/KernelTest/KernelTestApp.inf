@@ -33,6 +33,8 @@
 
 [Sources]
   KernelTest.c
+  Lilu.c
+  Vsmc.c
 
 [Packages]
   OcSupportPkg/OcSupportPkg.dec

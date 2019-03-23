@@ -442,7 +442,17 @@ PrelinkedReserveKextSize (
   IN     UINT32       ExecutableSize OPTIONAL
   )
 {
+  //
+  // For new fields.
+  //
   if (OcOverflowAddU32 (InfoPlistSize, 512, &InfoPlistSize)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // For __LINKEDIT segment.
+  //
+  if (OcOverflowAddU32 (ExecutableSize, 4096*2, &ExecutableSize)) {
     return EFI_INVALID_PARAMETER;
   }
 
