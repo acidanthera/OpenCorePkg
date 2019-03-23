@@ -623,6 +623,8 @@ InternalRelocateRelocationIntel64 (
 {
   UINTN           ReturnValue;
 
+  CONST MACH_HEADER_64 *MachHeader;
+  UINT32          MachSize;
   UINT8           Type;
   INT32           Instruction32;
   UINT64          Instruction64;
@@ -662,6 +664,16 @@ InternalRelocateRelocationIntel64 (
 
   LinkPc         = (Address + LoadAddress);
   InstructionPtr = (UINT8 *)(RelocationBase + Address);
+
+  MachHeader = MachoGetMachHeader64 (&Kext->Context.MachContext);
+  ASSERT (MachHeader != NULL);
+
+  MachSize = MachoGetFileSize (&Kext->Context.MachContext);
+
+  if (((UINTN)InstructionPtr < (UINTN)MachHeader)
+   || ((UINTN)(InstructionPtr + 1) > ((UINTN)MachHeader + MachSize))) {
+    return MAX_UINTN;
+  }
 
   Vtable = NULL;
   Result = InternalCalculateTargetsIntel64 (
