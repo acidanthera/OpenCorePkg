@@ -1059,7 +1059,7 @@ InternalRelocateSymbols (
   UINT32        MaxSize;
 
   ASSERT (MachoContext != NULL);
-  ASSERT (Symbols != NULL);
+  ASSERT (Symbols != NULL || NumSymbols == 0);
   ASSERT (KmodInfoOffset != NULL);
 
   KmodOffset = *KmodInfoOffset;

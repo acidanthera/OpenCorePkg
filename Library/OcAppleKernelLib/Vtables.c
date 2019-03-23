@@ -579,7 +579,9 @@ InternalPatchByVtables64 (
       // number of vtables we're expecting, because every pointer will have a
       // class vtable and a MetaClass vtable.
       //
-      ASSERT (MachoSymbolNameIsSmcp64 (MachoContext, Name));
+      if (!MachoSymbolNameIsSmcp64 (MachoContext, Name)) {
+        return FALSE;
+      }
       VtableSymbol     = PatchData->Entries[Index].Vtable;
       MetaVtableSymbol = PatchData->Entries[Index].MetaVtable;
       //
