@@ -27,6 +27,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "PrelinkedInternal.h"
 
+#define TEXT_SEG_PROT (MACH_SEGMENT_VM_PROT_READ | MACH_SEGMENT_VM_PROT_EXECUTE)
+#define DATA_SEG_PROT (MACH_SEGMENT_VM_PROT_READ | MACH_SEGMENT_VM_PROT_WRITE)
+
 //
 // Symbols
 //
@@ -1445,6 +1448,18 @@ InternalPrelinkKext64 (
     }
 
     Segment->VirtualAddress += LoadAddress;
+
+    //
+    // Logically equivalent to kxld_seg_set_vm_protections.
+    // Assertion: Not i386 (strict protection).
+    //
+    if (AsciiStrnCmp (Segment->SegmentName, "__TEXT", ARRAY_SIZE (Segment->SegmentName)) == 0) {
+      Segment->InitialProtection = TEXT_SEG_PROT;
+      Segment->MaximumProtection = TEXT_SEG_PROT;
+    } else {
+      Segment->InitialProtection = DATA_SEG_PROT;
+      Segment->MaximumProtection = DATA_SEG_PROT;
+    }
 
     if (Segment->FileOffset > SegmentOffset) {
       SegmentOffset = (UINT32)Segment->FileOffset;
