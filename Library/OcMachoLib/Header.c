@@ -976,3 +976,40 @@ MachoGetIndirectSymbolTable (
 
   return Context->DySymtab->NumIndirectSymbols;
 }
+
+/**
+  Returns a pointer to the Mach-O file at the specified virtual address.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  Virtual address to look up.    
+  @param[out]    MaxSize  Maximum data safely available from FileOffset.
+                          If NULL is returned, the output is undefined.
+
+**/
+VOID *
+MachoGetFilePointerByAddress64 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address,
+  OUT    UINT32            *MaxSize OPTIONAL
+  )
+{
+  CONST MACH_SEGMENT_COMMAND_64 *Segment;
+  UINT32                        Offset;
+
+  Segment = NULL;
+  while ((Segment = MachoGetNextSegment64 (Context, Segment)) != NULL) {
+    if ((Address >= Segment->VirtualAddress)
+     && (Address < Segment->VirtualAddress + Segment->Size)) {
+      Offset = (Address - Segment->VirtualAddress);
+
+      if (MaxSize != NULL) {
+        *MaxSize = (Segment->Size - Offset);
+      }
+
+      Offset += Segment->FileOffset;
+      return (VOID *)((UINTN)Context->MachHeader + Offset);
+    }
+  }
+
+  return NULL;
+}

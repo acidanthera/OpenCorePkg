@@ -617,8 +617,6 @@ InternalRelocateRelocationIntel64 (
 {
   UINTN           ReturnValue;
 
-  CONST MACH_HEADER_64 *MachHeader;
-  UINT32          MachSize;
   UINT8           Type;
   INT32           Instruction32;
   UINT64          Instruction64;
@@ -631,12 +629,12 @@ InternalRelocateRelocationIntel64 (
   UINT32          Length;
   UINT32          Address;
   UINT8           *InstructionPtr;
+  UINT32          MaxSize;
   BOOLEAN         PcRelative;
   BOOLEAN         IsNormalLocal;
   BOOLEAN         Result;
   BOOLEAN         InvalidPcRel;
 
-  ASSERT (RelocationBase != 0);
   ASSERT (Relocation != NULL);
 
   IsPair        = FALSE;
@@ -652,22 +650,20 @@ InternalRelocateRelocationIntel64 (
     return MAX_UINTN;
   }
 
+  InstructionPtr = MachoGetFilePointerByAddress64 (
+                     &Kext->Context.MachContext,
+                     (RelocationBase + Address),
+                     &MaxSize
+                     );
+  if ((InstructionPtr == NULL) || (MaxSize < ((Length != 3) ? 4 : 8))) {
+    return MAX_UINTN;
+  }
+
   if (Relocation->Extern == 0) {
     IsNormalLocal = TRUE;
   }
 
-  LinkPc         = (Address + LoadAddress);
-  InstructionPtr = (UINT8 *)(RelocationBase + Address);
-
-  MachHeader = MachoGetMachHeader64 (&Kext->Context.MachContext);
-  ASSERT (MachHeader != NULL);
-
-  MachSize = MachoGetFileSize (&Kext->Context.MachContext);
-
-  if (((UINTN)InstructionPtr < (UINTN)MachHeader)
-   || (((UINTN)InstructionPtr + ((Length != 3) ? 4 : 8)) > ((UINTN)MachHeader + MachSize))) {
-    return MAX_UINTN;
-  }
+  LinkPc = (Address + LoadAddress);
 
   Vtable = NULL;
   Result = InternalCalculateTargetsIntel64 (
@@ -890,7 +886,6 @@ InternalRelocateAndCopyRelocations64 (
   MACH_RELOCATION_INFO       *Relocation;
 
   ASSERT (Kext != NULL);
-  ASSERT (RelocationBase != 0);
   ASSERT (SourceRelocations != NULL);
   ASSERT (NumRelocations != NULL);
   ASSERT (NumRelocations > 0);
@@ -1160,7 +1155,6 @@ InternalPrelinkKext64 (
 
   UINT32                     NumRelocations;
   UINT32                     NumRelocations2;
-  UINTN                      RelocationBase;
   CONST MACH_RELOCATION_INFO *Relocations;
   MACH_RELOCATION_INFO       *TargetRelocation;
   MACH_SEGMENT_COMMAND_64    *FirstSegment;
@@ -1348,7 +1342,6 @@ InternalPrelinkKext64 (
   TargetRelocation = (MACH_RELOCATION_INFO *)(
                        (UINTN)LinkEdit + RelocationsOffset
                        );
-  RelocationBase = ((UINTN)MachHeader + (UINTN)FirstSegment->FileOffset);
   //
   // Relocate and copy local and external relocations.
   //
@@ -1358,7 +1351,7 @@ InternalPrelinkKext64 (
              Context,
              Kext,
              LoadAddress,
-             RelocationBase,
+             FirstSegment->VirtualAddress,
              Relocations,
              &NumRelocations,
              &TargetRelocation[0]
@@ -1373,7 +1366,7 @@ InternalPrelinkKext64 (
              Context,
              Kext,
              LoadAddress,
-             RelocationBase,
+             FirstSegment->VirtualAddress,
              Relocations,
              &NumRelocations2,
              &TargetRelocation[NumRelocations]
