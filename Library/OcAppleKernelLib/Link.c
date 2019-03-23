@@ -1305,9 +1305,6 @@ InternalPrelinkKext64 (
   }
 
   KmodInfo = (KMOD_INFO_64_V1 *)((UINTN)MachHeader + (UINTN)KmodInfoOffset);
-  if (((UINTN)KmodInfo % 4) != 0) {
-    return RETURN_LOAD_ERROR;
-  }
   //
   // Prepare constructing a new __LINKEDIT section to...
   //   1. strip undefined symbols for they are not allowed in prelinked
