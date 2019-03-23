@@ -585,8 +585,10 @@ MachoGetNextSection64 (
     if (Section >= &Segment->Sections[Segment->NumSections]) {
       return NULL;
     }
-  } else {
+  } else if (Segment->NumSections > 0) {
     Section = &Segment->Sections[0];
+  } else {
+    return NULL;
   }
 
   if (!InternalSectionIsSane (Context, Section, Segment)) {

@@ -1181,10 +1181,6 @@ InternalPrelinkKext64 (
     return RETURN_SUCCESS;
   }
   //
-  // Strip superfluous Load Commands.
-  //
-  InternalStripLoadCommands64 (MachHeader);
-  //
   // Retrieve the symbol tables required for most following operations.
   //
   NumSymbols = MachoGetSymbolTable (
@@ -1499,6 +1495,10 @@ InternalPrelinkKext64 (
   // Adapt the Mach-O header to signal being prelinked.
   //
   MachHeader->Flags = MACH_HEADER_FLAG_NO_UNDEFINED_REFERENCES;
+  //
+  // Strip superfluous Load Commands.
+  //
+  //InternalStripLoadCommands64 (MachHeader);
   //
   // Reinitialize the Mach-O context to account for the changed __LINKEDIT
   // segment and file size.
