@@ -196,7 +196,6 @@ InternalPrepareCreateVtablesPrelinked64 (
   CONST CHAR8         *Name;
   UINT32              NumSymbols;
   UINT32              Index;
-  BOOLEAN             Result;
 
   ASSERT (MachoContext != NULL);
 
@@ -217,13 +216,6 @@ InternalPrepareCreateVtablesPrelinked64 (
     Symbol = &SymbolTable[Index];
     Name = MachoGetSymbolName64 (MachoContext, Symbol);
     if (MachoSymbolNameIsVtable64 (Name)) {
-      Result = MachoIsSymbolValueInRange64 (
-                 MachoContext,
-                 Symbol
-                 );
-      if (!Result) {
-        return FALSE;
-      }
       //
       // This should be accounted for via previous sanity checks.
       //
@@ -305,13 +297,13 @@ InternalPatchVtableSymbol (
   // (which is not likely).
   //
   if (ParentEntry->Name == NULL) {
-    return MachoIsSymbolValueInRange64 (MachoContext, Symbol);
+    return TRUE;
   }
   //
   // 1) If the symbol is defined locally, do not patch
   //
   if (MachoSymbolIsLocalDefined (MachoContext, Symbol)) {
-    return MachoIsSymbolValueInRange64 (MachoContext, Symbol);
+    return TRUE;
   }
 
   Name = MachoGetSymbolName64 (MachoContext, Symbol);
@@ -323,14 +315,14 @@ InternalPatchVtableSymbol (
   // virtual property itself overrides the parent's implementation.
   //
   if (MachoSymbolNameIsPureVirtual (Name)) {
-    return MachoIsSymbolValueInRange64 (MachoContext, Symbol);
+    return TRUE;
   }
   //
   // 3) If the symbols are the same, do not patch
   //
   Result = AsciiStrCmp (Name, ParentEntry->Name);
   if (Result == 0) {
-    return MachoIsSymbolValueInRange64 (MachoContext, Symbol);
+    return TRUE;
   }
   //
   // 4) If the parent vtable entry is a pad slot, and the child does not

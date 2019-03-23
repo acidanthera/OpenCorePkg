@@ -508,10 +508,6 @@ MachoSymbolGetFileOffset64 (
   ASSERT (Symbol != NULL);
   ASSERT (FileOffset != NULL);
 
-  if (!MachoIsSymbolValueInRange64 (Context, Symbol)) {
-    return FALSE;
-  }
-
   Section = MachoGetSectionByIndex64 (
     Context,
     Symbol->Section == NO_SECT ? 0 : Symbol->Section - 1

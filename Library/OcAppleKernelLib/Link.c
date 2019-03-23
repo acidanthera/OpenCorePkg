@@ -465,7 +465,6 @@ InternalCalculateTargetsIntel64 (
 
   MachoContext = &Kext->Context.MachContext;
 
-  Section     = NULL;
   PairAddress = 0;
   //
   // Pull out the data from the relocation entries.  The target_type depends
@@ -479,15 +478,12 @@ InternalCalculateTargetsIntel64 (
   // (link_addr - base_addr), which should be LoadAddress aligned on the
   // section's boundary.
   //
-  TargetAddress = LoadAddress;
-
   if (Relocation->Extern != 0) {
     Symbol = MachoGetSymbolByIndex64 (
                 MachoContext,
                 Relocation->SymbolNumber
                 );
-    if ((Symbol == NULL)
-     || !MachoIsSymbolValueInRange64 (MachoContext, Symbol)) {
+    if (Symbol == NULL) {
       return FALSE;
     }
 
@@ -517,9 +513,7 @@ InternalCalculateTargetsIntel64 (
     if (Section == NULL) {
       return FALSE;
     }
-  }
 
-  if (Section != NULL) {
     TargetAddress = ALIGN_VALUE (
                       (Section->Address + LoadAddress),
                       (1ULL << Section->Alignment)
