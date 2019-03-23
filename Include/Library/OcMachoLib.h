@@ -683,4 +683,20 @@ MachoGetIndirectSymbolTable (
      OUT CONST MACH_NLIST_64  **SymbolTable
   );
 
+/**
+  Returns a pointer to the Mach-O file at the specified virtual address.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  Virtual address to look up.    
+  @param[out]    MaxSize  Maximum data safely available from FileOffset.
+                          If NULL is returned, the output is undefined.
+
+**/
+VOID *
+MachoGetFilePointerByAddress64 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address,
+  OUT    UINT32            *MaxSize OPTIONAL
+  );
+
 #endif // OC_MACHO_LIB_H_
