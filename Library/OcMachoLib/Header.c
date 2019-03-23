@@ -340,8 +340,8 @@ InternalSectionIsSane (
   IN     CONST MACH_SEGMENT_COMMAND_64  *Segment
   )
 {
-  UINT32  FileSize;
-  UINT32  TopOffset;
+  UINT64  TopOffset64;
+  UINT32  TopOffset32;
   UINT64  TopOfSegment;
   BOOLEAN Result;
   UINT64  TopOfSection;
@@ -352,7 +352,8 @@ InternalSectionIsSane (
   //
   // Section->Alignment is stored as a power of 2.
   //
-  if (Section->Alignment > 31) {
+  if ((Section->Alignment > 31)
+   || ((Section->Offset != 0) && (Section->Offset < Segment->FileOffset))) {
     return FALSE;
   }
 
@@ -366,13 +367,12 @@ InternalSectionIsSane (
     return FALSE;
   }
 
-  FileSize = MachoGetFileSize (Context);
-  Result   = OcOverflowAddU32 (
+  Result   = OcOverflowAddU64 (
                 Section->Offset,
-                (UINT32) Section->Size,
-                &TopOffset
+                Section->Size,
+                &TopOffset64
                 );
-  if (Result || (TopOffset > FileSize)) {
+  if (Result || (TopOffset64 > (Segment->FileOffset + Segment->FileSize))) {
     return FALSE;
   }
 
@@ -381,9 +381,9 @@ InternalSectionIsSane (
                Section->NumRelocations,
                sizeof (MACH_RELOCATION_INFO),
                Section->RelocationsOffset,
-               &TopOffset
+               &TopOffset32
                );
-    if (Result || (TopOffset > FileSize)) {
+    if (Result || (TopOffset32 > Context->FileSize)) {
       return FALSE;
     }
   }
