@@ -439,7 +439,7 @@ InternalInitializeVtableByEntriesAndRelocations64 (
     if (EntryValue == 0) {
       Symbol = MachoGetSymbolByExternRelocationOffset64 (
                  MachoContext,
-                 (VtableSymbol->Value + EntryOffset)
+                 (VtableSymbol->Value + (EntryOffset * sizeof (*VtableData))),
                  );
       if (Symbol == NULL) {
         //
