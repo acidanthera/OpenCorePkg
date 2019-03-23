@@ -671,7 +671,7 @@ InternalRelocateRelocationIntel64 (
   MachSize = MachoGetFileSize (&Kext->Context.MachContext);
 
   if (((UINTN)InstructionPtr < (UINTN)MachHeader)
-   || ((UINTN)(InstructionPtr + 1) > ((UINTN)MachHeader + MachSize))) {
+   || (((UINTN)InstructionPtr + ((Length != 3) ? 4 : 8)) > ((UINTN)MachHeader + MachSize))) {
     return MAX_UINTN;
   }
 
