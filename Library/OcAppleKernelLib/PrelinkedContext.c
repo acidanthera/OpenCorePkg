@@ -590,7 +590,7 @@ PrelinkedInjectKext (
       Context,
       &ExecutableContext,
       InfoPlistRoot,
-      Context->PrelinkedLastAddress,
+      Context->PrelinkedLastLoadAddress,
       KmodAddress
       );
 
@@ -637,12 +637,14 @@ PrelinkedInjectKext (
     return Status;
   }
 
-  if (XmlNodeAppend (Context->KextList, "dict", NULL, NewInfoPlist) == NULL) {
+  if (XmlNodePrepend (Context->KextList, "dict", NULL, NewInfoPlist) == NULL) {
     if (PrelinkedKext != NULL) {
       InternalFreePrelinkedKext (PrelinkedKext);
     }
     return EFI_OUT_OF_RESOURCES;
   }
+
+  DEBUG ((DEBUG_WARN, "Result %u\n", XmlNodeChildren (Context->KextList)));
 
   //
   // Let other kexts depend on this one.
