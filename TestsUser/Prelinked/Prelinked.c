@@ -453,14 +453,25 @@ int main(int argc, char** argv) {
 
     DEBUG ((DEBUG_WARN, "TestDriver.kext injected - %zx\n", Status));
 
+    UINT8  *TestData = LiluKextData;
+    UINT32 TestDataSize = LiluKextDataSize;
+
+    if (argc > 2) {
+      TestData = readFile(argv[2], &TestDataSize);
+      if (TestData == NULL) {
+        printf("Read fail\n");
+        return -1;
+      }
+    }
+
     Status = PrelinkedInjectKext (
       &Context,
       "/Library/Extensions/Lilu.kext",
       LiluKextInfoPlistData,
       LiluKextInfoPlistDataSize,
       "Contents/MacOS/Lilu",
-      LiluKextData,
-      LiluKextDataSize
+      TestData,
+      TestDataSize
       );
 
     DEBUG ((DEBUG_WARN, "Lilu.kext injected - %r\n", Status));
