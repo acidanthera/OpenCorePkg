@@ -36,6 +36,7 @@ InternalGetOcVtableByName (
   CONST PRELINKED_VTABLE *Vtable;
 
   UINTN                  Index;
+  UINT32                 Index2;
   PRELINKED_KEXT         *Dependency;
   INTN                   Result;
 
@@ -54,9 +55,9 @@ InternalGetOcVtableByName (
     Dependency->Processed = TRUE;
 
     for (
-      Index = 0, Vtable = Dependency->LinkedVtables;
-      Index < Dependency->NumberOfVtables;
-      ++Index, Vtable = GET_NEXT_PRELINKED_VTABLE (Vtable)
+      Index2 = 0, Vtable = Dependency->LinkedVtables;
+      Index2 < Dependency->NumberOfVtables;
+      ++Index2, Vtable = GET_NEXT_PRELINKED_VTABLE (Vtable)
       ) {
       Result = AsciiStrCmp (Vtable->Name, Name);
       if (Result == 0) {
@@ -64,7 +65,7 @@ InternalGetOcVtableByName (
       }
     }
 
-    if (Index == Dependency->NumberOfVtables) {
+    if (Index2 == Dependency->NumberOfVtables) {
       Vtable = InternalGetOcVtableByName (Context, Dependency, Name, RecursionLevel+1);
     }
   }
