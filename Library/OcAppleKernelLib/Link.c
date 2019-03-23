@@ -1498,7 +1498,7 @@ InternalPrelinkKext64 (
   //
   // Strip superfluous Load Commands.
   //
-  //InternalStripLoadCommands64 (MachHeader);
+  InternalStripLoadCommands64 (MachHeader);
   //
   // Reinitialize the Mach-O context to account for the changed __LINKEDIT
   // segment and file size.
