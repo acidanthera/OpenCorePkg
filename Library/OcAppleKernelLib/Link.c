@@ -1130,6 +1130,46 @@ InternalPrelinkKext64 (
                  &UndefinedSymtab,
                  &NumUndefinedSymbols
                  );
+  if (NumSymbols == 0) {
+    return FALSE;
+  }
+  //
+  // Prepare constructing a new __LINKEDIT section to...
+  //   1. strip undefined symbols for they are not allowed in prelinked
+  //      binaries,
+  //   2. merge local and external relocations as only sliding is allowed from
+  //      this point onwards,
+  //   3. strip Code Signature because we modified the binary, as well as other
+  //      linker metadata stripped by KXLD as well, probably for space reasons.
+  //
+  // Example original layout:
+  //   Local relocations - Symbol Table - external relocations - String Table -
+  //   Code Signature
+  //
+  // Example prelinked layout
+  //   Symbol Table - relocations (external -> local) - String Table
+  //
+  SymbolTableSize = (NumSymbols * sizeof (MACH_NLIST_64));
+  StringTableSize = MachoContext->Symtab->StringsSize;
+  //
+  // For the allocation, assume all relocations will be preserved to simplify
+  // the code, the memory is only temporarily allocated anyway.
+  //
+  NumRelocations  = MachoContext->DySymtab->NumOfLocalRelocations;
+  NumRelocations += MachoContext->DySymtab->NumExternalRelocations;
+  RelocationsSize = (NumRelocations * sizeof (MACH_RELOCATION_INFO));
+
+  LinkEdit     = Context->LinkBuffer;
+  LinkEditSize = (SymbolTableSize + RelocationsSize + StringTableSize);
+
+  if (LinkEditSize > LinkEditSegment->FileSize) {
+    return FALSE;
+  }
+
+  SymbolTableSize -= (NumUndefinedSymbols * sizeof (MACH_NLIST_64));
+
+  SymbolTableOffset = 0;
+  RelocationsOffset = (SymbolTableOffset + SymbolTableSize);
   //
   // Solve indirect symbols.
   //
@@ -1227,36 +1267,6 @@ InternalPrelinkKext64 (
   }
 
   KmodInfo = (KMOD_INFO_64_V1 *)((UINTN)MachHeader + (UINTN)KmodInfoOffset);
-  //
-  // Prepare constructing a new __LINKEDIT section to...
-  //   1. strip undefined symbols for they are not allowed in prelinked
-  //      binaries,
-  //   2. merge local and external relocations as only sliding is allowed from
-  //      this point onwards,
-  //   3. strip Code Signature because we modified the binary, as well as other
-  //      linker metadata stripped by KXLD as well, probably for space reasons.
-  //
-  // Example original layout:
-  //   Local relocations - Symbol Table - external relocations - String Table -
-  //   Code Signature
-  //
-  // Example prelinked layout
-  //   Symbol Table - relocations (external -> local) - String Table
-  //
-  SymbolTableOffset = 0;
-  SymbolTableSize   = (NumSymbols - NumUndefinedSymbols);
-  SymbolTableSize  *= sizeof (MACH_NLIST_64);
-  RelocationsOffset = (SymbolTableOffset + SymbolTableSize);
-  StringTableSize   = MachoContext->Symtab->StringsSize;
-  //
-  // For the allocation, assume all relocations will be preserved to simplify
-  // the code, the memory is only temporarily allocated anyway.
-  //
-  NumRelocations  = MachoContext->DySymtab->NumOfLocalRelocations;
-  NumRelocations += MachoContext->DySymtab->NumExternalRelocations;
-  RelocationsSize = (NumRelocations * sizeof (MACH_RELOCATION_INFO));
-
-  LinkEdit = Context->LinkBuffer;
 
   FirstSegment = MachoGetNextSegment64 (MachoContext, NULL);
   if (FirstSegment == NULL) {
@@ -1305,22 +1315,28 @@ InternalPrelinkKext64 (
   //
   // Copy the entire symbol table excluding the area for undefined symbols.
   //
-  SymtabSize = (UINT32)((UndefinedSymtab - SymbolTable) * sizeof (MACH_NLIST_64));
+  SymtabSize = SymbolTableSize;
+  if (NumUndefinedSymbols > 0) {
+    SymtabSize = (UINT32)((UndefinedSymtab - SymbolTable) * sizeof (MACH_NLIST_64));
+  }
+
   CopyMem (
     (VOID *)((UINTN)LinkEdit + SymbolTableOffset),
     SymbolTable,
     SymtabSize
     );
 
-  SymtabSize2  = (UINT32)(&SymbolTable[NumSymbols] - &UndefinedSymtab[NumUndefinedSymbols]);
-  SymtabSize2 *= sizeof (MACH_NLIST_64);
-  CopyMem (
-    (VOID *)((UINTN)LinkEdit + SymbolTableOffset + SymtabSize),
-    (VOID *)&UndefinedSymtab[NumUndefinedSymbols],
-    SymtabSize2
-    );
+  if (NumUndefinedSymbols > 0) {
+    SymtabSize2  = (UINT32)(&SymbolTable[NumSymbols] - &UndefinedSymtab[NumUndefinedSymbols]);
+    SymtabSize2 *= sizeof (MACH_NLIST_64);
+    CopyMem (
+      (VOID *)((UINTN)LinkEdit + SymbolTableOffset + SymtabSize),
+      (VOID *)&UndefinedSymtab[NumUndefinedSymbols],
+      SymtabSize2
+      );
 
-  NumSymbols -= NumUndefinedSymbols;
+    NumSymbols -= NumUndefinedSymbols;
+  }
   //
   // Copy the String Table.  Don't strip it for the saved bytes are unlikely
   // worth the time required.
@@ -1358,7 +1374,7 @@ InternalPrelinkKext64 (
   //
   // Copy the new __LINKEDIT segment into the binary and fix its Load Command.
   //
-  LinkEditSize          = (SymbolTableSize + RelocationsSize + StringTableSize);
+  LinkEditSize = (SymbolTableSize + RelocationsSize + StringTableSize);
 
   CopyMem (
     (VOID *)((UINTN)MachHeader + (UINTN)LinkEditSegment->FileOffset),
