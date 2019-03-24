@@ -30,8 +30,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 typedef struct PRELINKED_KEXT_ PRELINKED_KEXT;
 
 typedef struct {
-  UINT32 StringIndex;  ///< index into the string table
   UINT64 Value;        ///< value of this symbol (or stab offset)
+  UINT32 StringIndex;  ///< index into the string table
 } PRELINKED_KEXT_SYMBOL;
 
 typedef struct {
@@ -311,10 +311,17 @@ typedef enum {
 
 // TODO: Move?
 CONST PRELINKED_KEXT_SYMBOL *
-InternalOcGetSymbol (
+InternalOcGetSymbolName (
   IN PRELINKED_CONTEXT    *Context,
   IN PRELINKED_KEXT       *Kext,
-  IN OC_GET_SYMBOL_TYPE   LookupType,
+  IN UINT64               LookupValue,
+  IN OC_GET_SYMBOL_LEVEL  SymbolLevel
+  );
+
+CONST PRELINKED_KEXT_SYMBOL *
+InternalOcGetSymbolValue (
+  IN PRELINKED_CONTEXT    *Context,
+  IN PRELINKED_KEXT       *Kext,
   IN UINT64               LookupValue,
   IN OC_GET_SYMBOL_LEVEL  SymbolLevel
   );

@@ -268,10 +268,9 @@ InternalScanBuildLinkedSymbolTable (
         }
 
         CopyMem (&SymbolScratch, Symbol, sizeof (SymbolScratch));
-        ResolvedSymbol = InternalOcGetSymbol (
+        ResolvedSymbol = InternalOcGetSymbolName (
                            Context,
                            Kext,
-                           OcGetSymbolByName,
                            (UINTN)Name,
                            OcGetSymbolFirstLevel
                            );
