@@ -517,9 +517,9 @@ InternalPrepareVtableCreationNonPrelinked64 (
         return FALSE;
       }
 
-      PatchData[NumTables].Entries->Smcp       = Smcp;
-      PatchData[NumTables].Entries->Vtable     = VtableSymbol;
-      PatchData[NumTables].Entries->MetaVtable = MetaVtableSymbol;
+      PatchData->Entries[NumTables].Smcp       = Smcp;
+      PatchData->Entries[NumTables].Vtable     = VtableSymbol;
+      PatchData->Entries[NumTables].MetaVtable = MetaVtableSymbol;
       ++NumTables;
     }
   }
@@ -572,10 +572,6 @@ InternalPatchByVtables64 (
 
     for (Index = 0; Index < PatchData->NumEntries; ++Index) {
       Smcp = PatchData->Entries[Index].Smcp;
-      if (!MachoIsSymbolValueInRange64 (MachoContext, Smcp)) {
-        return FALSE;
-      }
-
       Name = MachoGetSymbolName64 (MachoContext, Smcp);
       //
       // We walk over the super metaclass pointer symbols because classes
@@ -583,9 +579,7 @@ InternalPatchByVtables64 (
       // number of vtables we're expecting, because every pointer will have a
       // class vtable and a MetaClass vtable.
       //
-      if (!MachoSymbolNameIsSmcp64 (MachoContext, Name)) {
-        return FALSE;
-      }
+      ASSERT (MachoSymbolNameIsSmcp64 (MachoContext, Name));
       VtableSymbol     = PatchData->Entries[Index].Vtable;
       MetaVtableSymbol = PatchData->Entries[Index].MetaVtable;
       //
