@@ -572,6 +572,10 @@ InternalPatchByVtables64 (
 
     for (Index = 0; Index < PatchData->NumEntries; ++Index) {
       Smcp = PatchData->Entries[Index].Smcp;
+      if (Smcp == NULL) {
+        continue;
+      }
+
       Name = MachoGetSymbolName64 (MachoContext, Smcp);
       //
       // We walk over the super metaclass pointer symbols because classes
@@ -777,6 +781,8 @@ InternalPatchByVtables64 (
       if (!Result) {
         return FALSE;
       }
+
+      PatchData->Entries[Index].Smcp = NULL;
 
       ++NumPatched;
       SuccessfulIteration = TRUE;
