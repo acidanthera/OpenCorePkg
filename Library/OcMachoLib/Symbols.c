@@ -35,8 +35,11 @@ InternalSymbolIsSane (
   ASSERT (Context->SymbolTable != NULL);
   ASSERT (Context->Symtab->NumSymbols > 0);
 
-  ASSERT ((Symbol >= &Context->SymbolTable[0])
-       && (Symbol < &Context->SymbolTable[Context->Symtab->NumSymbols]));
+  ASSERT (((Symbol >= &Context->SymbolTable[0])
+        && (Symbol < &Context->SymbolTable[Context->Symtab->NumSymbols]))
+       || ((Context->DySymtab != NULL)
+        && (Symbol >= &Context->IndirectSymbolTable[0])
+        && (Symbol < &Context->IndirectSymbolTable[Context->DySymtab->NumIndirectSymbols])));
   //
   // Symbol->Section is implicitly verified by MachoGetSectionByIndex64() when
   // passed to it.
