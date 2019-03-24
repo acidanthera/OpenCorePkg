@@ -1031,7 +1031,7 @@ MachoGetFilePointerByAddress64 (
   )
 {
   CONST MACH_SEGMENT_COMMAND_64 *Segment;
-  UINT32                        Offset;
+  UINT64                        Offset;
 
   Segment = NULL;
   while ((Segment = MachoGetNextSegment64 (Context, Segment)) != NULL) {
@@ -1040,11 +1040,11 @@ MachoGetFilePointerByAddress64 (
       Offset = (Address - Segment->VirtualAddress);
 
       if (MaxSize != NULL) {
-        *MaxSize = (Segment->Size - Offset);
+        *MaxSize = (UINT32)(Segment->Size - Offset);
       }
 
       Offset += Segment->FileOffset;
-      return (VOID *)((UINTN)Context->MachHeader + Offset);
+      return (VOID *)((UINTN)Context->MachHeader + (UINTN)Offset);
     }
   }
 
@@ -1275,11 +1275,11 @@ MachoExpandImage64 (
     //
     for (Index = 0; Index < DstSegment->NumSections; ++Index) {
       if (DstSegment->Sections[Index].Offset == 0) {
-        DstSegment->Sections[Index].Offset = CopyFileOffset + CurrentDelta;
-        CurrentDelta += DstSegment->Sections[Index].Size;
+        DstSegment->Sections[Index].Offset = (UINT32)CopyFileOffset + CurrentDelta;
+        CurrentDelta += (UINT32)DstSegment->Sections[Index].Size;
       } else {
         DstSegment->Sections[Index].Offset += CurrentDelta;
-        OriginalDelta = CopyFileOffset + DstSegment->Sections[Index].Size;
+        OriginalDelta = (UINT32)(CopyFileOffset + DstSegment->Sections[Index].Size);
         CopyFileOffset = DstSegment->Sections[Index].Offset + DstSegment->Sections[Index].Size;
       }
     }
@@ -1288,7 +1288,7 @@ MachoExpandImage64 (
     // The following is true for all valid data, and invalid data will be caught by fits check.
     // CopyFileOffset + CurrentDelta <= DstSegment->FileOffset + DstSegment->FileSize
     //
-    OriginalDelta = DstSegment->FileOffset + DstSegment->FileSize - CopyFileOffset - CurrentDelta;
+    OriginalDelta = (UINT32)(DstSegment->FileOffset + DstSegment->FileSize - CopyFileOffset - CurrentDelta);
     CurrentDelta -= MIN (OriginalDelta, CurrentDelta);
   }
 

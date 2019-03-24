@@ -653,7 +653,7 @@ InternalRelocateRelocationIntel64 (
                      (RelocationBase + Address),
                      &MaxSize
                      );
-  if ((InstructionPtr == NULL) || (MaxSize < ((Length != 3) ? 4 : 8))) {
+  if ((InstructionPtr == NULL) || (MaxSize < ((Length != 3) ? 4U : 8U))) {
     return MAX_UINTN;
   }
 
