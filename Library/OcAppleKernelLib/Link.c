@@ -1070,7 +1070,6 @@ InternalPrelinkKext64 (
   CONST MACH_NLIST_64        *UndefinedSymtab;
   UINT32                     NumUndefinedSymbols;
   UINT64                     WeakTestValue;
-  OC_VTABLE_PATCH_ARRAY      *PatchData;
 
   UINT32                     NumRelocations;
   UINT32                     NumRelocations2;
@@ -1216,18 +1215,7 @@ InternalPrelinkKext64 (
   // ScratchMemory is at least as big as __LINKEDIT, so it can store all
   // symbols.
   //
-  PatchData = (OC_VTABLE_PATCH_ARRAY *)Context->LinkBuffer;
-  Result = InternalPrepareVtableCreationNonPrelinked64 (
-             MachoContext,
-             NumSymbols,
-             SymbolTable,
-             PatchData
-             );
-  if (!Result) {
-    return RETURN_LOAD_ERROR;
-  }
-
-  Result = InternalPatchByVtables64 (Context, Kext, PatchData);
+  Result = InternalPatchByVtables64 (Context, Kext, Context->LinkBuffer);
   if (!Result) {
     return RETURN_LOAD_ERROR;
   }

@@ -249,11 +249,6 @@ typedef struct {
 } OC_VTABLE_PATCH_ENTRY;
 
 typedef struct {
-  UINTN                 NumEntries;
-  OC_VTABLE_PATCH_ENTRY Entries[];
-} OC_VTABLE_PATCH_ARRAY;
-
-typedef struct {
   UINT32              NumSymbols;
   CONST MACH_NLIST_64 *Symbols[];
 } OC_VTABLE_EXPORT_ARRAY;
@@ -270,18 +265,10 @@ InternalGetVtableEntries64 (
   );
 
 BOOLEAN
-InternalPrepareVtableCreationNonPrelinked64 (
-  IN OUT OC_MACHO_CONTEXT       *MachoContext,
-  IN     UINT32                 NumSymbols,
-  IN     CONST MACH_NLIST_64    *SymbolTable,
-  OUT    OC_VTABLE_PATCH_ARRAY  *PatchData
-  );
-
-BOOLEAN
 InternalPatchByVtables64 (
   IN     PRELINKED_CONTEXT         *Context,
   IN OUT PRELINKED_KEXT            *Kext,
-  IN     OC_VTABLE_PATCH_ARRAY     *PatchData
+  IN     VOID                      *ScratchBuffer
   );
 
 BOOLEAN

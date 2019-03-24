@@ -476,69 +476,18 @@ InternalInitializeVtableByEntriesAndRelocations64 (
 }
 
 BOOLEAN
-InternalPrepareVtableCreationNonPrelinked64 (
-  IN OUT OC_MACHO_CONTEXT       *MachoContext,
-  IN     UINT32                 NumSymbols,
-  IN     CONST MACH_NLIST_64    *SymbolTable,
-  OUT    OC_VTABLE_PATCH_ARRAY  *PatchData
-  )
-{
-  CONST MACH_HEADER_64 *MachHeader;
-  UINT32               Index;
-  UINT32               NumTables;
-  BOOLEAN              Result;
-  CONST MACH_NLIST_64  *Smcp;
-  CONST CHAR8          *Name;
-  CONST MACH_NLIST_64  *VtableSymbol;
-  CONST MACH_NLIST_64  *MetaVtableSymbol;
-
-  MachHeader = MachoGetMachHeader64 (MachoContext);
-  ASSERT (MachHeader != NULL);
-
-  NumTables = 0;
-
-  for (Index = 0; Index < NumSymbols; ++Index) {
-    Smcp = &SymbolTable[Index];
-    Name = MachoGetSymbolName64 (MachoContext, Smcp);
-    if (MachoSymbolNameIsSmcp64 (MachoContext, Name)) {
-      //
-      // We walk over the super metaclass pointer symbols because classes
-      // with them are the only ones that need patching.  Then we double the
-      // number of vtables we're expecting, because every pointer will have a
-      // class vtable and a MetaClass vtable.
-      //
-      Result = MachoGetVtableSymbolsFromSmcp64 (
-                 MachoContext,
-                 Name,
-                 &VtableSymbol,
-                 &MetaVtableSymbol
-                 );
-      if (!Result) {
-        return FALSE;
-      }
-
-      PatchData->Entries[NumTables].Smcp       = Smcp;
-      PatchData->Entries[NumTables].Vtable     = VtableSymbol;
-      PatchData->Entries[NumTables].MetaVtable = MetaVtableSymbol;
-      ++NumTables;
-    }
-  }
-
-  PatchData->NumEntries = NumTables;
-
-  return TRUE;
-}
-
-BOOLEAN
 InternalPatchByVtables64 (
   IN     PRELINKED_CONTEXT         *Context,
   IN OUT PRELINKED_KEXT            *Kext,
-  IN     OC_VTABLE_PATCH_ARRAY     *PatchData
+  IN     VOID                      *ScratchBuffer
   )
 {
+  OC_VTABLE_PATCH_ENTRY *Entries;
+
   OC_MACHO_CONTEXT     *MachoContext;
   CONST MACH_HEADER_64 *MachHeader;
   UINT32               Index;
+  UINT32               NumTables;
   UINT32               NumPatched;
   BOOLEAN              Result;
   CONST MACH_NLIST_64  *Smcp;
@@ -560,18 +509,56 @@ InternalPatchByVtables64 (
   CHAR8                FinalSymbolName[SYM_MAX_NAME_LEN];
   BOOLEAN              SuccessfulIteration;
 
+  Entries = ScratchBuffer;
+
   MachoContext = &Kext->Context.MachContext;
 
   MachHeader = MachoGetMachHeader64 (MachoContext);
   ASSERT (MachHeader != NULL);
+  //
+  // Retrieve all SMCPs.
+  //
+  NumTables = 0;
 
+  for (
+    Index = 0;
+    (Smcp = MachoGetSymbolByIndex64 (MachoContext, Index)) != NULL;
+    ++Index
+    ) {
+    Name = MachoGetSymbolName64 (MachoContext, Smcp);
+    if (MachoSymbolNameIsSmcp64 (MachoContext, Name)) {
+      //
+      // We walk over the super metaclass pointer symbols because classes
+      // with them are the only ones that need patching.  Then we double the
+      // number of vtables we're expecting, because every pointer will have a
+      // class vtable and a MetaClass vtable.
+      //
+      Result = MachoGetVtableSymbolsFromSmcp64 (
+                 MachoContext,
+                 Name,
+                 &VtableSymbol,
+                 &MetaVtableSymbol
+                 );
+      if (!Result) {
+        return FALSE;
+      }
+
+      Entries[NumTables].Smcp       = Smcp;
+      Entries[NumTables].Vtable     = VtableSymbol;
+      Entries[NumTables].MetaVtable = MetaVtableSymbol;
+      ++NumTables;
+    }
+  }
+  //
+  // Patch via the previously retrieved SMCPs.
+  //
   NumPatched   = 0;
 
-  while (NumPatched < PatchData->NumEntries) {
+  while (NumPatched < NumTables) {
     SuccessfulIteration = FALSE;
 
-    for (Index = 0; Index < PatchData->NumEntries; ++Index) {
-      Smcp = PatchData->Entries[Index].Smcp;
+    for (Index = 0; Index < NumTables; ++Index) {
+      Smcp = Entries[Index].Smcp;
       if (Smcp == NULL) {
         continue;
       }
@@ -584,8 +571,8 @@ InternalPatchByVtables64 (
       // class vtable and a MetaClass vtable.
       //
       ASSERT (MachoSymbolNameIsSmcp64 (MachoContext, Name));
-      VtableSymbol     = PatchData->Entries[Index].Vtable;
-      MetaVtableSymbol = PatchData->Entries[Index].MetaVtable;
+      VtableSymbol     = Entries[Index].Vtable;
+      MetaVtableSymbol = Entries[Index].MetaVtable;
       //
       // Get the class name from the smc pointer 
       //
@@ -782,7 +769,7 @@ InternalPatchByVtables64 (
         return FALSE;
       }
 
-      PatchData->Entries[Index].Smcp = NULL;
+      Entries[Index].Smcp = NULL;
 
       ++NumPatched;
       SuccessfulIteration = TRUE;
