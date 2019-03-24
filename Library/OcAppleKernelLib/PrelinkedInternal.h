@@ -312,33 +312,23 @@ InternalGetOcVtableByName (
 //
 
 typedef enum {
+  OcGetSymbolByName,
+  OcGetSymbolByValue
+} OC_GET_SYMBOL_TYPE;
+
+typedef enum {
   OcGetSymbolAnyLevel,
   OcGetSymbolFirstLevel,
   OcGetSymbolOnlyCxx
 } OC_GET_SYMBOL_LEVEL;
 
-typedef
-BOOLEAN
-(*PRELINKED_KEXT_SYMBOL_PREDICATE)(
-  IN CONST PRELINKED_KEXT         *Kext,
-  IN CONST PRELINKED_KEXT_SYMBOL  *Symbol,
-  IN       UINT64                 Context
-  );
-
 // TODO: Move?
 CONST PRELINKED_KEXT_SYMBOL *
-InternalOcGetSymbolByName (
+InternalOcGetSymbol (
   IN PRELINKED_CONTEXT    *Context,
   IN PRELINKED_KEXT       *Kext,
-  IN CONST CHAR8          *Name,
-  IN OC_GET_SYMBOL_LEVEL  SymbolLevel
-  );
-
-CONST PRELINKED_KEXT_SYMBOL *
-InternalOcGetSymbolByValue (
-  IN PRELINKED_CONTEXT    *Context,
-  IN PRELINKED_KEXT       *Kext,
-  IN UINT64               Value,
+  IN OC_GET_SYMBOL_TYPE   LookupType,
+  IN UINT64               LookupValue,
   IN OC_GET_SYMBOL_LEVEL  SymbolLevel
   );
 

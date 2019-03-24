@@ -36,13 +36,47 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 STATIC
 CONST PRELINKED_KEXT_SYMBOL *
+InternalOcGetSymbolLookup (
+  IN PRELINKED_KEXT               *Kext,
+  IN OC_GET_SYMBOL_TYPE           LookupType,
+  IN UINT64                       LookupValue,
+  IN CONST PRELINKED_KEXT_SYMBOL  *Symbols,
+  IN UINT32                       NumSymbols
+  )
+{
+  CONST PRELINKED_KEXT_SYMBOL *Symbol;
+  UINT32                      Index;
+  INTN                        Result;
+
+  for (Index = 0; Index < NumSymbols; ++Index) {
+    Symbol = &Symbols[Index];
+
+    if (LookupType == OcGetSymbolByName) {
+      Result = AsciiStrCmp (
+                  (CHAR8 *)(UINTN)LookupValue,
+                  (Kext->StringTable + Symbol->StringIndex)
+                  );
+      if (Result == 0) {
+        return Symbol;
+      }
+    } else {
+      ASSERT (LookupType == OcGetSymbolByValue);
+      if (Symbol->Value == LookupValue) {
+        return Symbol;
+      }
+    }
+  }
+
+  return NULL;
+}
+
+STATIC
+CONST PRELINKED_KEXT_SYMBOL *
 InternalOcGetSymbolWorker (
-  IN PRELINKED_CONTEXT                *Context,
   IN PRELINKED_KEXT                   *Kext,
-  IN UINT64                           PredicateContext,
-  IN PRELINKED_KEXT_SYMBOL_PREDICATE  Predicate,
-  IN OC_GET_SYMBOL_LEVEL              SymbolLevel,
-  IN UINT32                           RecursionLevel
+  IN OC_GET_SYMBOL_TYPE               LookupType,
+  IN UINT64                           LookupValue,
+  IN OC_GET_SYMBOL_LEVEL              SymbolLevel
   )
 {
   CONST PRELINKED_KEXT_SYMBOL *Symbol;
@@ -52,27 +86,26 @@ InternalOcGetSymbolWorker (
   CONST PRELINKED_KEXT_SYMBOL *Symbols;
   UINT32                      NumSymbols;
   UINT32                      CxxIndex;
-  UINT32                      SymIndex;
-  BOOLEAN                     Result;
 
   ASSERT (Kext != NULL);
-
-  Symbol = NULL;
 
   if (SymbolLevel == OcGetSymbolOnlyCxx) {
     CxxIndex = (Kext->NumberOfSymbols - Kext->NumberOfCxxSymbols);
     Symbols  = &Kext->LinkedSymbolTable[CxxIndex];
 
-    for (SymIndex = 0; SymIndex < Kext->NumberOfCxxSymbols; ++SymIndex) {
-      Result = Predicate (Kext, &Symbols[SymIndex], PredicateContext);
-      if (Result) {
-        Symbol = &Symbols[SymIndex];
-        break;
-      }
+    Symbol = InternalOcGetSymbolLookup (
+               Kext,
+               LookupType,
+               LookupValue,
+               Symbols,
+               Kext->NumberOfCxxSymbols
+               );
+    if (Symbol != NULL) {
+      return Symbol;
     }
   }
 
-  for (Index = 0; Symbol == NULL && Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
+  for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
     Dependency = Kext->Dependencies[Index];
     if (Dependency == NULL) {
       break;
@@ -102,95 +135,53 @@ InternalOcGetSymbolWorker (
       NumSymbols = Dependency->NumberOfCxxSymbols;
     }
 
-    for (SymIndex = 0; SymIndex < NumSymbols; ++SymIndex) {
-      Result = Predicate (Dependency, &Symbols[SymIndex], PredicateContext);
-      if (Result) {
-        Symbol = &Symbols[SymIndex];
-        break;
+    Symbol = InternalOcGetSymbolLookup (
+               Dependency,
+               LookupType,
+               LookupValue,
+               Symbols,
+               NumSymbols
+               );
+    if (Symbol != NULL) {
+      return Symbol;
+    }
+
+    if (SymbolLevel == OcGetSymbolAnyLevel) {
+      Symbol = InternalOcGetSymbolWorker (
+                 Dependency,
+                 LookupType,
+                 LookupValue,
+                 OcGetSymbolOnlyCxx
+                 );
+      if (Symbol != NULL) {
+        return Symbol;
       }
     }
-
-    if (Symbol == NULL && SymbolLevel == OcGetSymbolAnyLevel) {
-      Symbol = InternalOcGetSymbolWorker (
-                 Context,
-                 Dependency,
-                 PredicateContext,
-                 Predicate,
-                 OcGetSymbolOnlyCxx,
-                 RecursionLevel + 1
-                 );
-    }
   }
 
-  if (RecursionLevel == 0) {
-    InternalUnlockContextKexts (Context);
-  }
+  return NULL;
+}
+
+CONST PRELINKED_KEXT_SYMBOL *
+InternalOcGetSymbol (
+  IN PRELINKED_CONTEXT    *Context,
+  IN PRELINKED_KEXT       *Kext,
+  IN OC_GET_SYMBOL_TYPE   LookupType,
+  IN UINT64               LookupValue,
+  IN OC_GET_SYMBOL_LEVEL  SymbolLevel
+  )
+{
+  CONST PRELINKED_KEXT_SYMBOL *Symbol;
+
+  Symbol = InternalOcGetSymbolWorker (
+             Kext,
+             LookupType,
+             LookupValue,
+             SymbolLevel
+             );
+  InternalUnlockContextKexts (Context);
 
   return Symbol;
-}
-
-STATIC
-BOOLEAN
-InternalOcGetSymbolByNamePredicate (
-  IN CONST PRELINKED_KEXT         *Kext,
-  IN CONST PRELINKED_KEXT_SYMBOL  *Symbol,
-  IN       UINT64                 Context
-  )
-{
-  INTN Result;
-
-  Result = AsciiStrCmp (
-             (CHAR8 *)(UINTN)Context,
-             (Kext->StringTable + Symbol->StringIndex)
-             );
-  return (Result == 0);
-}
-
-CONST PRELINKED_KEXT_SYMBOL *
-InternalOcGetSymbolByName (
-  IN PRELINKED_CONTEXT    *Context,
-  IN PRELINKED_KEXT       *Kext,
-  IN CONST CHAR8          *Name,
-  IN OC_GET_SYMBOL_LEVEL  SymbolLevel
-  )
-{
-  return InternalOcGetSymbolWorker (
-           Context,
-           Kext,
-           (UINTN)Name,
-           InternalOcGetSymbolByNamePredicate,
-           SymbolLevel,
-           0
-           );
-}
-
-STATIC
-BOOLEAN
-InternalOcGetSymbolByValuePredicate (
-  IN CONST PRELINKED_KEXT         *Kext,
-  IN CONST PRELINKED_KEXT_SYMBOL  *Symbol,
-  IN       UINT64                 Context
-  )
-{
-  return (Symbol->Value == Context);
-}
-
-CONST PRELINKED_KEXT_SYMBOL *
-InternalOcGetSymbolByValue (
-  IN PRELINKED_CONTEXT    *Context,
-  IN PRELINKED_KEXT       *Kext,
-  IN UINT64               Value,
-  IN OC_GET_SYMBOL_LEVEL  SymbolLevel
-  )
-{
-  return InternalOcGetSymbolWorker (
-           Context,
-           Kext,
-           Value,
-           InternalOcGetSymbolByValuePredicate,
-           SymbolLevel,
-           0
-           );
 }
 
 /**
@@ -266,10 +257,11 @@ InternalSolveSymbolNonWeak64 (
   // Do not error when the referenced symbol cannot be found as some will be
   // patched by the VTable code.  This matches the KXLD behaviour.
   //
-  ResolveSymbol = InternalOcGetSymbolByName (
+  ResolveSymbol = InternalOcGetSymbol (
                     Context,
                     Kext,
-                    Name,
+                    OcGetSymbolByName,
+                    (UINTN)Name,
                     OcGetSymbolFirstLevel
                     );
   if (ResolveSymbol != NULL) {

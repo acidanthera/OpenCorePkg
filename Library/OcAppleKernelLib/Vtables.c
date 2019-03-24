@@ -138,7 +138,7 @@ InternalConstructVtablePrelinked64 (
     (Value = VtableData[Index + VTABLE_HEADER_LEN_64]) != 0;
     ++Index
     ) {
-    Symbol = InternalOcGetSymbolByValue (Context, Kext, Value, OcGetSymbolOnlyCxx);
+    Symbol = InternalOcGetSymbol (Context, Kext, OcGetSymbolByValue, Value, OcGetSymbolOnlyCxx);
 
     if (Symbol != NULL) {
       Vtable->Entries[Index].Address = Value;
@@ -671,10 +671,11 @@ InternalPatchByVtables64 (
       // Verify that the final symbol does not exist.  First check
       // all the externally defined symbols, then check locally.
       //
-      OcSymbolDummy = InternalOcGetSymbolByName (
+      OcSymbolDummy = InternalOcGetSymbol (
                         Context,
                         Kext,
-                        FinalSymbolName,
+                        OcGetSymbolByName,
+                        (UINTN)FinalSymbolName,
                         OcGetSymbolAnyLevel
                         );
       if (OcSymbolDummy != NULL) {
