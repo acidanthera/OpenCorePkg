@@ -316,9 +316,7 @@ InternalSolveSymbol64 (
   CONST MACH_NLIST_64 *WeakTestSymbol;
 
   ASSERT (Symbol != NULL);
-  if (NumUndefinedSymbols != 0) {
-    ASSERT (UndefinedSymbols != NULL);
-  }
+  ASSERT (UndefinedSymbols != NULL || NumUndefinedSymbols == 0);
 
   Success = InternalSolveSymbolNonWeak64 (
               Context,
@@ -970,77 +968,6 @@ InternalRelocateAndCopyRelocations64 (
 // MACH header
 //
 
-/**
-  Strip superfluous Load Commands from the Mach-O header.  This includes the
-  Code Signature Load Command which must be removed for the binary has been
-  modified by the prelinking routines.
-
-  @param[in,out] MachHeader  Mach-O header to strip the Load Commands from.
-
-**/
-STATIC
-VOID
-InternalStripLoadCommands64 (
-  IN OUT MACH_HEADER_64  *MachHeader
-  )
-{
-  STATIC CONST MACH_LOAD_COMMAND_TYPE LoadCommandsToStrip[] = {
-    MACH_LOAD_COMMAND_CODE_SIGNATURE,
-    MACH_LOAD_COMMAND_DYLD_INFO,
-    MACH_LOAD_COMMAND_DYLD_INFO_ONLY,
-    MACH_LOAD_COMMAND_FUNCTION_STARTS,
-    MACH_LOAD_COMMAND_DATA_IN_CODE,
-    MACH_LOAD_COMMAND_DYLIB_CODE_SIGN_DRS
-  };
-
-  UINT32            Index;
-  UINT32            Index2;
-  MACH_LOAD_COMMAND *LoadCommand;
-  UINT32            SizeOfLeftCommands;
-  //
-  // Delete the Code Signature Load Command if existent as we modified the
-  // binary, as well as linker metadata not needed for runtime operation.
-  //
-  LoadCommand        = MachHeader->Commands;
-  SizeOfLeftCommands = MachHeader->CommandsSize;
-
-  for (Index = 0; Index < MachHeader->NumCommands; ++Index) {
-    //
-    // Assertion: LC_UNIXTHREAD and LC_MAIN are technically stripped in KXLD,
-    //            but they are not supposed to be present in the first place.
-    //
-    if ((LoadCommand->CommandType == MACH_LOAD_COMMAND_UNIX_THREAD)
-     || (LoadCommand->CommandType == MACH_LOAD_COMMAND_MAIN)) {
-      DEBUG ((DEBUG_WARN, "Prelink: UNIX Thread and Main LCs are unsupported.\n"));
-    }
-
-    SizeOfLeftCommands -= LoadCommand->CommandSize;
-
-    for (Index2 = 0; Index2 < ARRAY_SIZE (LoadCommandsToStrip); ++Index2) {
-      if (LoadCommand->CommandType == LoadCommandsToStrip[Index2]) {
-        if (Index != (MachHeader->NumCommands - 1)) {
-          //
-          // If the current Load Command is not the last one, relocate the
-          // subsequent ones.
-          //
-          CopyMem (
-            LoadCommand,
-            NEXT_MACH_LOAD_COMMAND (LoadCommand),
-            SizeOfLeftCommands
-            );
-        }
-
-        --MachHeader->NumCommands;
-        MachHeader->CommandsSize -= LoadCommand->CommandSize;
-
-        break;
-      }
-    }
-
-    LoadCommand = NEXT_MACH_LOAD_COMMAND (LoadCommand);
-  }
-}
-
 STATIC
 BOOLEAN
 InternalRelocateSymbols (
@@ -1379,23 +1306,19 @@ InternalPrelinkKext64 (
   // Copy the entire symbol table excluding the area for undefined symbols.
   //
   SymtabSize = (UINT32)((UndefinedSymtab - SymbolTable) * sizeof (MACH_NLIST_64));
-  if (SymtabSize != 0) {
-    CopyMem (
-      (VOID *)((UINTN)LinkEdit + SymbolTableOffset),
-      SymbolTable,
-      SymtabSize
-      );
-  }
+  CopyMem (
+    (VOID *)((UINTN)LinkEdit + SymbolTableOffset),
+    SymbolTable,
+    SymtabSize
+    );
 
   SymtabSize2  = (UINT32)(&SymbolTable[NumSymbols] - &UndefinedSymtab[NumUndefinedSymbols]);
   SymtabSize2 *= sizeof (MACH_NLIST_64);
-  if (SymtabSize2 != 0) {
-    CopyMem (
-      (VOID *)((UINTN)LinkEdit + SymbolTableOffset + SymtabSize),
-      (VOID *)&UndefinedSymtab[NumUndefinedSymbols],
-      SymtabSize2
-      );
-  }
+  CopyMem (
+    (VOID *)((UINTN)LinkEdit + SymbolTableOffset + SymtabSize),
+    (VOID *)&UndefinedSymtab[NumUndefinedSymbols],
+    SymtabSize2
+    );
 
   NumSymbols -= NumUndefinedSymbols;
   //
@@ -1507,10 +1430,6 @@ InternalPrelinkKext64 (
   // Adapt the Mach-O header to signal being prelinked.
   //
   MachHeader->Flags = MACH_HEADER_FLAG_NO_UNDEFINED_REFERENCES;
-  //
-  // Strip superfluous Load Commands.
-  //
-  InternalStripLoadCommands64 (MachHeader);
   //
   // Reinitialize the Mach-O context to account for the changed __LINKEDIT
   // segment and file size.

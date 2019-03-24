@@ -1051,11 +1051,87 @@ MachoGetFilePointerByAddress64 (
   return NULL;
 }
 
+/**
+  Strip superfluous Load Commands from the Mach-O header.  This includes the
+  Code Signature Load Command which must be removed for the binary has been
+  modified by the prelinking routines.
+
+  @param[in,out] MachHeader  Mach-O header to strip the Load Commands from.
+
+**/
+STATIC
+VOID
+InternalStripLoadCommands64 (
+  IN OUT MACH_HEADER_64  *MachHeader
+  )
+{
+  STATIC CONST MACH_LOAD_COMMAND_TYPE LoadCommandsToStrip[] = {
+    MACH_LOAD_COMMAND_CODE_SIGNATURE,
+    MACH_LOAD_COMMAND_DYLD_INFO,
+    MACH_LOAD_COMMAND_DYLD_INFO_ONLY,
+    MACH_LOAD_COMMAND_FUNCTION_STARTS,
+    MACH_LOAD_COMMAND_DATA_IN_CODE,
+    MACH_LOAD_COMMAND_DYLIB_CODE_SIGN_DRS
+  };
+
+  UINT32            Index;
+  UINT32            Index2;
+  MACH_LOAD_COMMAND *LoadCommand;
+  UINT32            SizeOfLeftCommands;
+  UINT32            OriginalCommandSize;
+  //
+  // Delete the Code Signature Load Command if existent as we modified the
+  // binary, as well as linker metadata not needed for runtime operation.
+  //
+  LoadCommand         = MachHeader->Commands;
+  SizeOfLeftCommands  = MachHeader->CommandsSize;
+  OriginalCommandSize = SizeOfLeftCommands;
+
+  for (Index = 0; Index < MachHeader->NumCommands; ++Index) {
+    //
+    // Assertion: LC_UNIXTHREAD and LC_MAIN are technically stripped in KXLD,
+    //            but they are not supposed to be present in the first place.
+    //
+    if ((LoadCommand->CommandType == MACH_LOAD_COMMAND_UNIX_THREAD)
+     || (LoadCommand->CommandType == MACH_LOAD_COMMAND_MAIN)) {
+      DEBUG ((DEBUG_WARN, "UNIX Thread and Main LCs are unsupported.\n"));
+    }
+
+    SizeOfLeftCommands -= LoadCommand->CommandSize;
+
+    for (Index2 = 0; Index2 < ARRAY_SIZE (LoadCommandsToStrip); ++Index2) {
+      if (LoadCommand->CommandType == LoadCommandsToStrip[Index2]) {
+        if (Index != (MachHeader->NumCommands - 1)) {
+          //
+          // If the current Load Command is not the last one, relocate the
+          // subsequent ones.
+          //
+          CopyMem (
+            LoadCommand,
+            NEXT_MACH_LOAD_COMMAND (LoadCommand),
+            SizeOfLeftCommands
+            );
+        }
+
+        --MachHeader->NumCommands;
+        MachHeader->CommandsSize -= LoadCommand->CommandSize;
+
+        break;
+      }
+    }
+
+    LoadCommand = NEXT_MACH_LOAD_COMMAND (LoadCommand);
+  }
+
+  ZeroMem (LoadCommand, OriginalCommandSize - MachHeader->CommandsSize);
+}
+
 UINT32
 MachoExpandImage64 (
   IN  OC_MACHO_CONTEXT   *Context,
   OUT UINT8              *Destination,
-  IN  UINT32             DestinationSize
+  IN  UINT32             DestinationSize,
+  IN  BOOLEAN            Strip
   )
 {
   MACH_HEADER_64           *Header;
@@ -1214,6 +1290,10 @@ MachoExpandImage64 (
     //
     OriginalDelta = DstSegment->FileOffset + DstSegment->FileSize - CopyFileOffset - CurrentDelta;
     CurrentDelta -= MIN (OriginalDelta, CurrentDelta);
+  }
+
+  if (Strip) {
+    InternalStripLoadCommands64 ((MACH_HEADER_64 *) Destination);
   }
 
   return (UINT32) CurrentSize;

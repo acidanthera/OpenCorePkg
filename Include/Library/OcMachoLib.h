@@ -726,6 +726,7 @@ MachoGetFilePointerByAddress64 (
   @param[in]  Context          Context of the Mach-O.
   @param[out] Destination      Output buffer.
   @param[in]  DestinationSize  Output buffer maximum size.
+  @param[in]  Strip            Output with stripped prelink commands.
 
   @returns  New image size or 0 on failure.
 
@@ -734,7 +735,8 @@ UINT32
 MachoExpandImage64 (
   IN  OC_MACHO_CONTEXT   *Context,
   OUT UINT8              *Destination,
-  IN  UINT32             DestinationSize
+  IN  UINT32             DestinationSize,
+  IN  BOOLEAN            Strip
   );
 
 #endif // OC_MACHO_LIB_H_

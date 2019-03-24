@@ -535,7 +535,8 @@ PrelinkedInjectKext (
     ExecutableSize = MachoExpandImage64 (
       &ExecutableContext,
       &Context->Prelinked[Context->PrelinkedSize],
-      Context->PrelinkedAllocSize - Context->PrelinkedSize
+      Context->PrelinkedAllocSize - Context->PrelinkedSize,
+      TRUE
       );
 
     AlignedExecutableSize = MACHO_ALIGN (ExecutableSize);
