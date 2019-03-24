@@ -45,6 +45,7 @@
 [LibraryClasses]
   BaseLib
   UefiLib
+  OcStringLib
 
 [Sources]
   Base64Decode.c
