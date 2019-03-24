@@ -484,7 +484,7 @@ struct _LIST_ENTRY {
 #define AsciiStrnCpyS(a, b, c, d) strlcpy(a, c, b)
 #define AsciiStrDecimalToUint64(a) strtoull(a, NULL, 10)
 #define AsciiStrHexToUint64(a) strtoull(a, NULL, 16)
-#define ASSERT assert
+#define ASSERT(x) assert(x)
 #define DebugCodeEnabled() true
 #define DebugAssertEnabled() true
 #define FreePages(a,b) do {} while (0)
