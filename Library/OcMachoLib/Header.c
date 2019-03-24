@@ -1174,6 +1174,9 @@ MachoExpandImage64 (
     //
     OriginalDelta = CurrentDelta;
     CurrentDelta  = MACHO_ALIGN (CurrentDelta);
+    if (Segment->FileSize > Segment->Size) {
+      return 0;
+    }
     //
     // Do not overwrite header.
     //
@@ -1182,11 +1185,9 @@ MachoExpandImage64 (
     CopyVmSize     = Segment->Size;
     if (CopyFileOffset <= HeaderSize) {
       CopyFileOffset = HeaderSize;
-      CopyFileSize  -= (HeaderSize - CopyFileOffset);
-      CopyVmSize    -= (HeaderSize - CopyFileOffset);
-      if (Segment->FileSize > Segment->Size
-        || CopyFileSize > Segment->FileSize
-        || CopyVmSize > Segment->Size) {
+      CopyFileSize   = Segment->FileSize - CopyFileOffset;
+      CopyVmSize     = Segment->Size - CopyFileOffset;
+      if (CopyFileSize > Segment->FileSize || CopyVmSize > Segment->Size) {
         //
         // Header must fit in 1 segment.
         //
@@ -1201,6 +1202,7 @@ MachoExpandImage64 (
       || CurrentSize > DestinationSize) {
       return 0;
     }
+
     //
     // Copy and zero fill file data. We can do this because only last sections can have 0 file size.
     //

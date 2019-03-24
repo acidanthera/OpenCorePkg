@@ -18,8 +18,7 @@ listed here.
     1. No dmg boot detection.
 * OcAppleKernelLib  
     **Status**: functional  
-    **Issues**:
-    1. No executable kext injection.
+    **Issues**: none
 * OcCompressionLib  
     **Status**: functional  
     **Issues**: none
@@ -68,8 +67,8 @@ listed here.
     **Status**: functional  
     **Issues**: none
 * OcMachoLib  
-    **Status**: in progress  
-    **Issues**:
+    **Status**: functional  
+    **Issues**: none
 * OcMiscLib  
     **Status**: legacy  
     **Issues**:
@@ -107,6 +106,7 @@ listed here.
     **Status**: functional  
     **Issues**:
     1. Does not support directory iteration with virtualised files.
+    1. Has issues with Recovery boot, causing CR failure.
 * OcXmlLib  
     **Status**: functional  
     **Issues**: none
