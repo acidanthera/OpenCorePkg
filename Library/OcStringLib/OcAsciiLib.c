@@ -336,3 +336,42 @@ AsciiTrimWhiteSpace (
   return String;
 }
 
+BOOLEAN
+AsciiUint64ToLowerHex (
+  OUT CHAR8   *Buffer,
+  IN  UINT32  BufferSize,
+  IN  UINT64  Value
+  )
+{
+  CONST UINT32  MaxShifts = (sizeof (UINT64) * 8) - 4;
+  UINT32        Index;
+  BOOLEAN       Printed;
+  UINT8         Curr;
+
+  if (BufferSize < 4) {
+    return FALSE;
+  }
+
+  *Buffer++   = '0';
+  *Buffer++   = 'x';
+
+  if (Value > 0) {
+    BufferSize -= 2;
+    for (Printed = FALSE, Index = MaxShifts; Index <= MaxShifts; Index -= 4) {
+      Curr     = (UINT8) ((Value >> Index) & 0xFU);
+      Printed |= Curr > 0;
+      if (Printed) {
+        *Buffer++ = "0123456789abcdef"[Curr];
+        if (--BufferSize == 0) {
+          return FALSE;
+        }
+      }
+    }
+  } else {
+    *Buffer++ = '0';
+  }
+
+  *Buffer++ = '\0';
+  return TRUE;
+}
+

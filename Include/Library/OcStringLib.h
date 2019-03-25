@@ -336,4 +336,18 @@ TrimWhiteSpace (
   IN  CHAR16   *String
   );
 
+/**
+  Convert 64-bit unsigned integer to a nul-termianted hex string.
+
+  @param[out]  Buffer      Destination buffer.
+  @param[in]   BufferSize  Destination buffer size in bytes.
+  @param[in]   Value       Value to convert.
+**/
+BOOLEAN
+AsciiUint64ToLowerHex (
+  OUT CHAR8   *Buffer,
+  IN  UINT32  BufferSize,
+  IN  UINT64  Value
+  );
+
 #endif // OC_STRING_LIB_H_
