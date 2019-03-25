@@ -272,7 +272,6 @@ MachoGetClassNameFromMetaClassPointer (
   OUT    CHAR8                *ClassName
   )
 {
-  BOOLEAN                Result;
   UINTN                  PrefixSize;
   UINTN                  SuffixSize;
   UINTN                  ClassNameLength;
