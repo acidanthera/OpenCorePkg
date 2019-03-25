@@ -547,7 +547,7 @@ InternalCalculateTargetsIntel64 (
     //
 
     if ((Vtable != NULL) && MachoSymbolNameIsVtable64 (Name)) {
-      *Vtable = InternalGetOcVtableByName (Context, Kext, Name, 0);
+      *Vtable = InternalGetOcVtableByName (Context, Kext, Name);
     }
 
     TargetAddress = Symbol->Value;

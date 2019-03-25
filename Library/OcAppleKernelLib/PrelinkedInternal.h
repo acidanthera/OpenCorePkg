@@ -311,8 +311,7 @@ CONST PRELINKED_VTABLE *
 InternalGetOcVtableByName (
   IN PRELINKED_CONTEXT     *Context,
   IN PRELINKED_KEXT        *Kext,
-  IN CONST CHAR8           *Name,
-  IN UINT32                RecursionLevel
+  IN CONST CHAR8           *Name
   );
 
 //

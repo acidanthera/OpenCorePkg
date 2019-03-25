@@ -27,11 +27,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include "PrelinkedInternal.h"
 
 CONST PRELINKED_VTABLE *
-InternalGetOcVtableByName (
+InternalGetOcVtableByNameWorker (
   IN PRELINKED_CONTEXT     *Context,
   IN PRELINKED_KEXT        *Kext,
-  IN CONST CHAR8           *Name,
-  IN UINT32                RecursionLevel
+  IN CONST CHAR8           *Name
   )
 {
   CONST PRELINKED_VTABLE *Vtable;
@@ -67,12 +66,24 @@ InternalGetOcVtableByName (
       continue;
     }
 
-    Vtable = InternalGetOcVtableByName (Context, Dependency, Name, RecursionLevel+1);
+    Vtable = InternalGetOcVtableByName (Context, Dependency, Name);
   }
 
-  if (RecursionLevel == 0) {
-    InternalUnlockContextKexts (Context);
-  }
+  return Vtable;
+}
+
+CONST PRELINKED_VTABLE *
+InternalGetOcVtableByName (
+  IN PRELINKED_CONTEXT     *Context,
+  IN PRELINKED_KEXT        *Kext,
+  IN CONST CHAR8           *Name
+  )
+{
+  CONST PRELINKED_VTABLE *Vtable;
+
+  Vtable = InternalGetOcVtableByNameWorker (Context, Kext, Name);
+
+  InternalUnlockContextKexts (Context);
 
   return Vtable;
 }
@@ -757,8 +768,7 @@ InternalPatchByVtables64 (
       SuperVtable = InternalGetOcVtableByName (
                       Context,
                       Kext,
-                      SuperVtableName,
-                      0
+                      SuperVtableName
                       );
       if (SuperVtable == NULL) {
         continue;
@@ -828,8 +838,7 @@ InternalPatchByVtables64 (
       MetaVtable = InternalGetOcVtableByName (
                      Context,
                      Kext,
-                     VtableName,
-                     0
+                     VtableName
                      );
       if (MetaVtable != NULL) {
         return FALSE;
@@ -842,8 +851,7 @@ InternalPatchByVtables64 (
       SuperVtable = InternalGetOcVtableByName (
                       Context,
                       Kext,
-                      OS_METACLASS_VTABLE_NAME,
-                      0
+                      OS_METACLASS_VTABLE_NAME
                       );
       if (SuperVtable == NULL) {
         return FALSE;
