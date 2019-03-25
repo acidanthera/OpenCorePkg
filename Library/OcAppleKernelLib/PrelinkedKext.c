@@ -283,12 +283,12 @@ InternalScanBuildLinkedSymbolTable (
     }
 
     if (!Result) {
-      WalkerBottom->StringIndex = Symbol->UnifiedName.StringIndex;
-      WalkerBottom->Value       = Symbol->Value;
+      WalkerBottom->Name  = (Kext->StringTable + Symbol->UnifiedName.StringIndex);
+      WalkerBottom->Value = Symbol->Value;
       ++WalkerBottom;
     } else {
-      WalkerTop->StringIndex = Symbol->UnifiedName.StringIndex;
-      WalkerTop->Value       = Symbol->Value;
+      WalkerTop->Name  = (Kext->StringTable + Symbol->UnifiedName.StringIndex);
+      WalkerTop->Value = Symbol->Value;
       --WalkerTop;
 
       ++NumCxxSymbols;

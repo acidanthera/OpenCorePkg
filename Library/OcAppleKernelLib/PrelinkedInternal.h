@@ -30,8 +30,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 typedef struct PRELINKED_KEXT_ PRELINKED_KEXT;
 
 typedef struct {
-  UINT64 Value;        ///< value of this symbol (or stab offset)
-  UINT32 StringIndex;  ///< index into the string table
+  CONST CHAR8 *Name;  ///< name of this symbol
+  UINT64      Value;  ///< value of this symbol (or stab offset)
 } PRELINKED_KEXT_SYMBOL;
 
 typedef struct {

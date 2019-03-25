@@ -54,7 +54,7 @@ InternalOcGetSymbolWorkerName (
     SymbolsEnd = &Kext->LinkedSymbolTable[NumSymbols];
 
     while (Symbols < SymbolsEnd) {
-      if (AsciiStrCmp (LookupValue, Kext->StringTable + Symbols->StringIndex) == 0) {
+      if (AsciiStrCmp (LookupValue, Symbols->Name) == 0) {
         return Symbols;
       }
       Symbols++;
@@ -91,7 +91,7 @@ InternalOcGetSymbolWorkerName (
     }
 
     while (Symbols < SymbolsEnd) {
-      if (AsciiStrCmp (LookupValue, Dependency->StringTable + Symbols->StringIndex) == 0) {
+      if (AsciiStrCmp (LookupValue, Symbols->Name) == 0) {
         return Symbols;
       }
       Symbols++;
