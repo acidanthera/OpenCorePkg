@@ -358,7 +358,7 @@ InternalScanBuildLinkedVtables (
                 &VtableOffset,
                 &MaxSize
                 );
-    if (!Result || (MaxSize < (VTABLE_HEADER_SIZE_64 + VTABLE_ENTRY_SIZE_64))) {
+    if (!Result) {
       return Result;
     }
 
