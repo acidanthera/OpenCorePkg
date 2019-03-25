@@ -519,6 +519,7 @@ InternalInitializeVtablePatchData (
   UINT64               *VtableData;
   UINT32               Index;
   UINT32               EntryOffset;
+  MACH_NLIST_64        **SymbolWalker;
 
   Result = MachoSymbolGetFileOffset64 (
              MachoContext,
@@ -541,6 +542,7 @@ InternalInitializeVtablePatchData (
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.
   //
+  SymbolWalker = SolveSymbols;
   MaxSize /= VTABLE_ENTRY_SIZE_64;
   for (
     Index = 0, EntryOffset = VTABLE_HEADER_LEN_64;
@@ -551,19 +553,19 @@ InternalInitializeVtablePatchData (
       Result = MachoGetSymbolByExternRelocationOffset64 (
                  MachoContext,
                  (VtableSymbol->Value + (EntryOffset * sizeof (*VtableData))),
-                 SolveSymbols
+                 SymbolWalker
                  );
       if (!Result) {
         //
         // If the VTable entry is 0 and it is not referenced by a Relocation,
         // it is the end of the table.
         //
-        *NumEntries    = Index;
+        *NumEntries    = (SymbolWalker - SolveSymbols);
         *VtableDataPtr = VtableData;
         return TRUE;
       }
 
-      ++SolveSymbols;
+      ++SymbolWalker;
     }
   }
 
