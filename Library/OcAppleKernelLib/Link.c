@@ -1268,10 +1268,8 @@ InternalPrelinkKext64 (
   }
   //
   // Create and patch the KEXT's VTables.
-  // ScratchMemory is at least as big as __LINKEDIT, so it can store all
-  // symbols.
   //
-  Result = InternalPatchByVtables64 (Context, Kext, Context->LinkBuffer);
+  Result = InternalPatchByVtables64 (Context, Kext);
   if (!Result) {
     return RETURN_LOAD_ERROR;
   }

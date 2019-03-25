@@ -288,8 +288,7 @@ InternalGetVtableEntries64 (
 BOOLEAN
 InternalPatchByVtables64 (
   IN     PRELINKED_CONTEXT         *Context,
-  IN OUT PRELINKED_KEXT            *Kext,
-  IN     VOID                      *ScratchBuffer
+  IN OUT PRELINKED_KEXT            *Kext
   );
 
 BOOLEAN
