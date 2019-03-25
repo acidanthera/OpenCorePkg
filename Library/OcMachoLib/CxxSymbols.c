@@ -284,10 +284,7 @@ MachoGetClassNameFromMetaClassPointer (
 
   ASSERT (Context->StringTable != NULL);
 
-  Result = MachoSymbolNameIsMetaclassPointer64 (Context, MetaClassName);
-  if (!Result) {
-    return FALSE;
-  }
+  ASSERT (MachoSymbolNameIsMetaclassPointer64 (Context, MetaClassName));
 
   PrefixSize = L_STR_LEN (OSOBJ_PREFIX);
   SuffixSize = L_STR_LEN (METACLASS_TOKEN);
@@ -505,44 +502,6 @@ MachoSymbolNameIsCxx (
 {
   ASSERT (Name != NULL);
   return AsciiStrnCmp (Name, CXX_PREFIX, L_STR_LEN (CXX_PREFIX)) == 0;
-}
-
-/**
-  Returns the number of VTable entires in VtableData.
-
-  @param[in,out] Context     Context of the Mach-O.
-  @param[in]     VtableData  The VTable's data.
-
-**/
-UINT32
-MachoVtableGetNumberOfEntries64 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     CONST UINT64      *VtableData
-  )
-{
-  UINT32 Index;
-  UINT32 NumberOfEntries;
-  UINT64 *LastEntry;
-
-  ASSERT (Context != NULL);
-  ASSERT (VtableData != NULL);
-  ASSERT (&VtableData[0] > (UINT64 *) Context->MachHeader);
-
-  LastEntry = (UINT64 *) ((UINTN) Context->MachHeader + Context->FileSize) - 1;
-
-  ASSERT (&VtableData[VTABLE_HEADER_LEN_64] <= LastEntry);
-
-  NumberOfEntries = 0;
-  //
-  // Assumption: Not ARM.  Currently verified by the Context initialization.
-  //
-  Index = VTABLE_HEADER_LEN_64;
-  while (&VtableData[Index] <= LastEntry && VtableData[Index] != 0) {
-    ++NumberOfEntries;
-    ++Index;
-  }
-
-  return NumberOfEntries;
 }
 
 /**

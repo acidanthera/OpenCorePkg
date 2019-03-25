@@ -582,19 +582,6 @@ MachoSymbolNameIsCxx (
   );
 
 /**
-  Returns the number of VTable entires in VtableData.
-
-  @param[in,out] Context     Context of the Mach-O.
-  @param[in]     VtableData  The VTable's data.
-
-**/
-UINT32
-MachoVtableGetNumberOfEntries64 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     CONST UINT64      *VtableData
-  );
-
-/**
   Retrieves Metaclass symbol of a SMCP.
 
   @param[in,out] Context  Context of the Mach-O.
