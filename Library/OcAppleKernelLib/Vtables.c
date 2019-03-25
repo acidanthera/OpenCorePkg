@@ -29,7 +29,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 CONST PRELINKED_VTABLE *
 InternalGetOcVtableByName (
   IN PRELINKED_CONTEXT     *Context,
-  IN CONST PRELINKED_KEXT  *Kext,
+  IN PRELINKED_KEXT        *Kext,
   IN CONST CHAR8           *Name,
   IN UINT32                RecursionLevel
   )
@@ -37,11 +37,25 @@ InternalGetOcVtableByName (
   CONST PRELINKED_VTABLE *Vtable;
 
   UINTN                  Index;
-  UINT32                 Index2;
   PRELINKED_KEXT         *Dependency;
   INTN                   Result;
+  CONST PRELINKED_VTABLE *VtableWalker;
 
   Vtable = NULL;
+
+  Kext->Processed = TRUE;
+
+  for (
+    Index = 0, VtableWalker = Kext->LinkedVtables;
+    Index < Kext->NumberOfVtables;
+    ++Index, VtableWalker = GET_NEXT_PRELINKED_VTABLE (VtableWalker)
+    ) {
+    Result = AsciiStrCmp (VtableWalker->Name, Name);
+    if (Result == 0) {
+      Vtable = VtableWalker;
+      break;
+    }
+  }
 
   for (Index = 0; Vtable == NULL && Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
     Dependency = Kext->Dependencies[Index];
@@ -53,22 +67,7 @@ InternalGetOcVtableByName (
       continue;
     }
 
-    Dependency->Processed = TRUE;
-
-    for (
-      Index2 = 0, Vtable = Dependency->LinkedVtables;
-      Index2 < Dependency->NumberOfVtables;
-      ++Index2, Vtable = GET_NEXT_PRELINKED_VTABLE (Vtable)
-      ) {
-      Result = AsciiStrCmp (Vtable->Name, Name);
-      if (Result == 0) {
-        break;
-      }
-    }
-
-    if (Index2 == Dependency->NumberOfVtables) {
-      Vtable = InternalGetOcVtableByName (Context, Dependency, Name, RecursionLevel+1);
-    }
+    Vtable = InternalGetOcVtableByName (Context, Dependency, Name, RecursionLevel+1);
   }
 
   if (RecursionLevel == 0) {
@@ -487,7 +486,7 @@ InternalInitializeVtableByEntriesAndRelocations64 (
   }
 
   Vtable->Name       = VtableName;
-  Vtable->NumEntries = (VtableEntry - Vtable->Entries);
+  Vtable->NumEntries = (UINT32)(VtableEntry - Vtable->Entries);
 
   return TRUE;
 }

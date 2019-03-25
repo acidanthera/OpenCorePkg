@@ -310,7 +310,7 @@ InternalCreateVtablesPrelinked64 (
 CONST PRELINKED_VTABLE *
 InternalGetOcVtableByName (
   IN PRELINKED_CONTEXT     *Context,
-  IN CONST PRELINKED_KEXT  *Kext,
+  IN PRELINKED_KEXT        *Kext,
   IN CONST CHAR8           *Name,
   IN UINT32                RecursionLevel
   );
