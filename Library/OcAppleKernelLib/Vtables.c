@@ -413,28 +413,26 @@ InternalInitializeVtableByEntriesAndRelocations64 (
   IN     CONST PRELINKED_VTABLE       *SuperVtable,
   IN     CONST MACH_NLIST_64          *VtableSymbol,
   IN     CONST UINT64                 *VtableData,
-  IN     UINT32                       MaxSize
+  IN     UINT32                       NumSolveSymbols,
+  OUT    MACH_NLIST_64                **SolveSymbols
   )
 {
   UINT32                     Index;
   UINT32                     EntryOffset;
   UINT64                     EntryValue;
-  MACH_NLIST_64              *Symbol;
+  UINT32                     SolveSymbolIndex;
   BOOLEAN                    Result;
+
+  SolveSymbolIndex = 0;
   //
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.
   //
-  MaxSize /= VTABLE_ENTRY_SIZE_64;
   for (
     Index = 0, EntryOffset = VTABLE_HEADER_LEN_64;
     Index < SuperVtable->NumEntries;
     ++Index, ++EntryOffset
     ) {
-    if (EntryOffset >= MaxSize) {
-      return FALSE;
-    }
-
     EntryValue = VtableData[EntryOffset];
     //
     // If we can't find a symbol, it means it is a locally-defined,
@@ -444,15 +442,9 @@ InternalInitializeVtableByEntriesAndRelocations64 (
     // but there isn't much we can do about that.
     //
     if (EntryValue == 0) {
-      Result = MachoGetSymbolByExternRelocationOffset64 (
-                 MachoContext,
-                 (VtableSymbol->Value + (EntryOffset * sizeof (*VtableData))),
-                 &Symbol
-                 );
-      if (!Result) {
+      if (SolveSymbolIndex >= NumSolveSymbols) {
         //
-        // When the VTable entry is 0 and it is not referenced by a Relocation,
-        // it is the end of the table.
+        // When no more symbols are left to resolve with, this marks the end.
         //
         break;
       }
@@ -461,15 +453,85 @@ InternalInitializeVtableByEntriesAndRelocations64 (
                  MachoContext,
                  &SuperVtable->Entries[Index],
                  MachoGetSymbolName64 (MachoContext, VtableSymbol),
-                 Symbol
+                 SolveSymbols[SolveSymbolIndex]
                  );
       if (!Result) {
         return FALSE;
       }
+
+      ++SolveSymbolIndex;
     }
   }
 
   return TRUE;
+}
+
+STATIC
+BOOLEAN
+InternalInitializeVtablePatchData (
+  IN OUT OC_MACHO_CONTEXT     *MachoContext,
+  IN     CONST MACH_NLIST_64  *VtableSymbol,
+  OUT    UINT32               *NumEntries,
+  OUT    UINT64               **VtableDataPtr,
+  OUT    MACH_NLIST_64        **SolveSymbols
+  )
+{
+  BOOLEAN              Result;
+  UINT32               VtableOffset;
+  UINT32               MaxSize;
+  CONST MACH_HEADER_64 *MachHeader;
+  UINT64               *VtableData;
+  UINT32               Index;
+  UINT32               EntryOffset;
+
+  Result = MachoSymbolGetFileOffset64 (
+             MachoContext,
+             VtableSymbol,
+             &VtableOffset,
+             &MaxSize
+             );
+  if (!Result) {
+    return FALSE;
+  }
+
+  MachHeader = MachoGetMachHeader64 (MachoContext);
+  ASSERT (MachHeader != NULL);
+
+  VtableData = (UINT64 *)((UINTN)MachHeader + VtableOffset);
+  if (!OC_ALIGNED (VtableData)) {
+    return FALSE;
+  }
+  //
+  // Assumption: Not ARM (ARM requires an alignment to the function pointer
+  //             retrieved from VtableData.
+  //
+  MaxSize /= VTABLE_ENTRY_SIZE_64;
+  for (
+    Index = 0, EntryOffset = VTABLE_HEADER_LEN_64;
+    EntryOffset < MaxSize;
+    ++Index, ++EntryOffset
+    ) {
+    if (VtableData[EntryOffset] == 0) {
+      Result = MachoGetSymbolByExternRelocationOffset64 (
+                 MachoContext,
+                 (VtableSymbol->Value + (EntryOffset * sizeof (*VtableData))),
+                 SolveSymbols
+                 );
+      if (!Result) {
+        //
+        // If the VTable entry is 0 and it is not referenced by a Relocation,
+        // it is the end of the table.
+        //
+        *NumEntries    = Index;
+        *VtableDataPtr = VtableData;
+        return TRUE;
+      }
+
+      ++SolveSymbols;
+    }
+  }
+
+  return FALSE;
 }
 
 BOOLEAN
@@ -480,6 +542,7 @@ InternalPatchByVtables64 (
   )
 {
   OC_VTABLE_PATCH_ENTRY *Entries;
+  OC_VTABLE_PATCH_ENTRY *EntryWalker;
 
   OC_MACHO_CONTEXT     *MachoContext;
   CONST MACH_HEADER_64 *MachHeader;
@@ -489,12 +552,7 @@ InternalPatchByVtables64 (
   BOOLEAN              Result;
   CONST MACH_NLIST_64  *Smcp;
   CONST CHAR8          *Name;
-  UINT32               VtableOffset;
-  UINT32               MaxSize;
-  CONST MACH_NLIST_64  *VtableSymbol;
-  CONST MACH_NLIST_64  *MetaVtableSymbol;
   CONST MACH_NLIST_64  *MetaClass;
-  CONST UINT64         *VtableData;
   CONST PRELINKED_VTABLE *SuperVtable;
   CONST PRELINKED_VTABLE *MetaVtable;
   CONST VOID           *OcSymbolDummy;
@@ -515,7 +573,8 @@ InternalPatchByVtables64 (
   //
   // Retrieve all SMCPs.
   //
-  NumTables = 0;
+  EntryWalker = Entries;
+  NumTables   = 0;
 
   for (
     Index = 0;
@@ -533,17 +592,42 @@ InternalPatchByVtables64 (
       Result = MachoGetVtableSymbolsFromSmcp64 (
                  MachoContext,
                  Name,
-                 &VtableSymbol,
-                 &MetaVtableSymbol
+                 &EntryWalker->Vtable,
+                 &EntryWalker->MetaVtable
                  );
       if (!Result) {
         return FALSE;
       }
 
-      Entries[NumTables].Smcp       = Smcp;
-      Entries[NumTables].Vtable     = VtableSymbol;
-      Entries[NumTables].MetaVtable = MetaVtableSymbol;
+      EntryWalker->Smcp = Smcp;
+
+      Result = InternalInitializeVtablePatchData (
+                 MachoContext,
+                 EntryWalker->Vtable,
+                 &EntryWalker->MetaSymsIndex,
+                 &EntryWalker->VtableData,
+                 EntryWalker->SolveSymbols
+                 );
+      if (!Result) {
+        return FALSE;
+      }
+
+      Result = InternalInitializeVtablePatchData (
+                 MachoContext,
+                 EntryWalker->MetaVtable,
+                 &EntryWalker->NumSolveSymbols,
+                 &EntryWalker->MetaVtableData,
+                 &EntryWalker->SolveSymbols[EntryWalker->MetaSymsIndex]
+                 );
+      if (!Result) {
+        return FALSE;
+      }
+
+      EntryWalker->NumSolveSymbols += EntryWalker->MetaSymsIndex;
+
       ++NumTables;
+
+      EntryWalker = GET_NEXT_OC_VTABLE_PATCH_ENTRY (EntryWalker);
     }
   }
   //
@@ -554,8 +638,12 @@ InternalPatchByVtables64 (
   while (NumPatched < NumTables) {
     SuccessfulIteration = FALSE;
 
-    for (Index = 0; Index < NumTables; ++Index) {
-      Smcp = Entries[Index].Smcp;
+    for (
+      Index = 0, EntryWalker = Entries;
+      Index < NumTables;
+      ++Index, EntryWalker = GET_NEXT_OC_VTABLE_PATCH_ENTRY (EntryWalker)
+      ) {
+      Smcp = EntryWalker->Smcp;
       if (Smcp == NULL) {
         continue;
       }
@@ -568,8 +656,6 @@ InternalPatchByVtables64 (
       // class vtable and a MetaClass vtable.
       //
       ASSERT (MachoSymbolNameIsSmcp64 (MachoContext, Name));
-      VtableSymbol     = Entries[Index].Vtable;
-      MetaVtableSymbol = Entries[Index].MetaVtable;
       //
       // Get the class name from the smc pointer 
       //
@@ -673,27 +759,13 @@ InternalPatchByVtables64 (
       //
       // Patch the class's vtable
       //
-      Result = MachoSymbolGetFileOffset64 (
-                 MachoContext,
-                 VtableSymbol,
-                 &VtableOffset,
-                 &MaxSize
-                 );
-      if (!Result) {
-        return FALSE;
-      }
-
-      VtableData = (UINT64 *)((UINTN)MachHeader + VtableOffset);
-      if (!OC_ALIGNED (VtableData)) {
-        return FALSE;
-      }
-
       Result = InternalInitializeVtableByEntriesAndRelocations64 (
                  MachoContext,
                  SuperVtable,
-                 VtableSymbol,
-                 VtableData,
-                 MaxSize
+                 EntryWalker->Vtable,
+                 EntryWalker->VtableData,
+                 EntryWalker->NumSolveSymbols,
+                 EntryWalker->SolveSymbols
                  );
       if (!Result) {
         return FALSE;
@@ -739,33 +811,19 @@ InternalPatchByVtables64 (
       // case, we just reduce the expect number of vtables by 1.
       // Only i386 does not support strict patchting.
       //
-      Result = MachoSymbolGetFileOffset64 (
-                 MachoContext,
-                 MetaVtableSymbol,
-                 &VtableOffset,
-                 &MaxSize
-                 );
-      if (!Result) {
-        return FALSE;
-      }
-
-      VtableData = (UINT64 *)((UINTN)MachHeader + VtableOffset);
-      if (!OC_ALIGNED (VtableData)) {
-        return FALSE;
-      }
-
       Result = InternalInitializeVtableByEntriesAndRelocations64 (
                  MachoContext,
                  SuperVtable,
-                 MetaVtableSymbol,
-                 VtableData,
-                 MaxSize
+                 EntryWalker->Vtable,
+                 EntryWalker->MetaVtableData,
+                 (EntryWalker->NumSolveSymbols - EntryWalker->MetaSymsIndex),
+                 &EntryWalker->SolveSymbols[EntryWalker->MetaSymsIndex]
                  );
       if (!Result) {
         return FALSE;
       }
 
-      Entries[Index].Smcp = NULL;
+      EntryWalker->Smcp = NULL;
 
       ++NumPatched;
       SuccessfulIteration = TRUE;

@@ -242,11 +242,32 @@ typedef enum {
   OcKextVersionStageRelease     = 9
 } OC_KEXT_VERSION_STAGE;
 
+#define GET_NEXT_OC_VTABLE_PATCH_ENTRY(Entry)                         \
+  (OC_VTABLE_PATCH_ENTRY *)(                                          \
+    (UINTN)((Entry) + 1)                                              \
+      + ((Entry)->NumSolveSymbols * sizeof (*(Entry)->SolveSymbols))  \
+    )
+
 typedef struct {
   CONST MACH_NLIST_64 *Smcp;
   CONST MACH_NLIST_64 *Vtable;
+  UINT64              *VtableData;
   CONST MACH_NLIST_64 *MetaVtable;
+  UINT64              *MetaVtableData;
+  UINT32              NumSolveSymbols;
+  UINT32              MetaSymsIndex;
+  MACH_NLIST_64       *SolveSymbols[];
 } OC_VTABLE_PATCH_ENTRY;
+//
+// This ASSERT is very dirty, but it is unlikely to trigger nevertheless.
+// One symbol pointer, for which LinkBuffer is guaranteed to be able to fit one
+// NLIST, has either 1 pointer or 2 UINT32s following in the struct.
+// Due to the location logic, the three symbols pointers will not be equal.
+//
+OC_GLOBAL_STATIC_ASSERT (
+  ((sizeof (VOID *) + MAX ((2 * sizeof (UINT32)), sizeof (VOID *))) <= sizeof (MACH_NLIST_64)),
+  "VTable Patch data might not safely fit LinkBuffer"
+  );
 
 typedef struct {
   UINT32              NumSymbols;
