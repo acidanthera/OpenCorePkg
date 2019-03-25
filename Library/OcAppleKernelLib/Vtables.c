@@ -139,22 +139,23 @@ InternalConstructVtablePrelinked64 (
     (Value = VtableData[Index + VTABLE_HEADER_LEN_64]) != 0;
     ++Index
     ) {
+    //
+    // If we can't find the symbol, it means that the virtual function was
+    // defined inline.  There's not much I can do about this; it just means
+    // I can't patch this function.
+    //
+    // It's possible for the patched parent entry not to have a symbol
+    // (e.g. when the definition is inlined).  We can't patch this entry no
+    // matter what, so we'll just skip it and die later if it's a problem
+    // (which is not likely).
+    //
     Symbol = InternalOcGetSymbolValue (Context, Kext, Value, OcGetSymbolOnlyCxx);
 
     if (Symbol != NULL) {
       Vtable->Entries[Index].Address = Value;
-      Vtable->Entries[Index].Name = (Kext->StringTable + Symbol->StringIndex);
-    } else {
-      //
-      // If we can't find the symbol, it means that the virtual function was
-      // defined inline.  There's not much I can do about this; it just means
-      // I can't patch this function.
-      //
-      Vtable->Entries[Index].Address = 0;
-      Vtable->Entries[Index].Name    = NULL;
+      Vtable->Entries[Index].Name    = Symbol->Name;
+      ++Vtable->NumEntries;
     }
-
-    ++Vtable->NumEntries;
 
     if ((Index + VTABLE_HEADER_LEN_64 + 1) >= MaxSize) {
       return FALSE;
@@ -297,15 +298,6 @@ InternalPatchVtableSymbol (
   // just skip it.
   //
   if (Symbol == NULL) {
-    return TRUE;
-  }
-  //
-  // It's possible for the patched parent entry not to have a symbol
-  // (e.g. when the definition is inlined).  We can't patch this entry no
-  // matter what, so we'll just skip it and die later if it's a problem
-  // (which is not likely).
-  //
-  if (ParentEntry->Name == NULL) {
     return TRUE;
   }
   //
