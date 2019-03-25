@@ -390,27 +390,52 @@ PatcherBlockKext (
 
 
 /**
- Apply MSR E2 patches to AppleIntelCPUPowerManagement kext
+  Apply MSR E2 patches to AppleIntelCPUPowerManagement kext.
 
- @param Context Prelinked kernel context
+  @param Context  Prelinked kernel context.
 
- @return  EFI_SUCCESS on success.
- */
+  @return  EFI_SUCCESS on success.
+**/
 EFI_STATUS
 PatchAppleIntelCPUPowerManagement (
-  PRELINKED_CONTEXT  *Context
+  IN OUT PRELINKED_CONTEXT  *Context
   );
 
 /**
- Apply port limit patches to AppleUSBXHCI and AppleUSBXHCIPCI kexts
+  Apply port limit patches to AppleUSBXHCI and AppleUSBXHCIPCI kexts.
 
- @param Context Prelinked kernel context
+  @param Context  Prelinked kernel context.
 
- @return  EFI_SUCCESS on success.
- */
+  @return  EFI_SUCCESS on success.
+**/
 EFI_STATUS
-RemoveUSBXHCIPortLimit (
-  PRELINKED_CONTEXT  *Context
+PatchUsbXhciPortLimit (
+  IN OUT PRELINKED_CONTEXT  *Context
   );
+
+/**
+  Apply vendor patches to IOAHCIFamily kext to enable TRIM on third-party SSD.
+
+  @param Context  Prelinked kernel context.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PatchThirdPartySsdTrim (
+  IN OUT PRELINKED_CONTEXT  *Context
+  );
+
+/**
+  Apply icon type patches to IOAHCIPort kext to force internal disk icons.
+
+  @param Context  Prelinked kernel context.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PatchForceInternalDiskIcons (
+  IN OUT PRELINKED_CONTEXT  *Context
+  );
+
 #endif // OC_APPLE_KERNEL_LIB_H
 

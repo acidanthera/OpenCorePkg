@@ -202,56 +202,6 @@ STATIC CHAR8 TestKextInfoPlistData[] = {
   0x6C, 0x69, 0x73, 0x74, 0x3E
 };
 
-STATIC
-UINT8
-IOAHCIBlockStoragePatchFind[] = {
-  0x41, 0x50, 0x50, 0x4C, 0x45, 0x20, 0x53, 0x53, 0x44, 0x00
-};
-
-STATIC
-UINT8
-IOAHCIBlockStoragePatchReplace[] = {
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
-
-STATIC
-PATCHER_GENERIC_PATCH
-IOAHCIBlockStoragePatch = {
-  .Base    = NULL, // Symbolic patch
-  .Find    = IOAHCIBlockStoragePatchFind,
-  .Mask    = NULL,
-  .Replace = IOAHCIBlockStoragePatchReplace,
-  .ReplaceMask = NULL,
-  .Size    = sizeof (IOAHCIBlockStoragePatchFind),
-  .Count   = 1,
-  .Skip    = 0
-};
-
-STATIC
-UINT8
-IOAHCIPortPatchFind[] = {
-  0x45, 0x78, 0x74, 0x65, 0x72, 0x6E, 0x61, 0x6C
-};
-
-STATIC
-UINT8
-IOAHCIPortPatchReplace[] = {
-  0x49, 0x6E, 0x74, 0x65, 0x72, 0x6E, 0x61, 0x6C
-};
-
-STATIC
-PATCHER_GENERIC_PATCH
-IOAHCIPortPatch = {
-  .Base    = NULL, // For symbolic patch
-  .Find    = IOAHCIPortPatchFind,
-  .Mask    = NULL,
-  .Replace = IOAHCIPortPatchReplace,
-  .ReplaceMask = NULL,
-  .Size    = sizeof (IOAHCIPortPatchFind),
-  .Count   = 1,
-  .Skip    = 0
-};
-
 #if 0
 
 STATIC
@@ -299,48 +249,18 @@ ApplyKextPatches (
   PRELINKED_CONTEXT  *Context
   )
 {
-  EFI_STATUS       Status;
-  PATCHER_CONTEXT  Patcher;
-  
-  PatchAppleIntelCPUPowerManagement(Context);
-  
-  RemoveUSBXHCIPortLimit(Context);
-  
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.iokit.IOAHCIBlockStorage"
-    );
+  PatchAppleIntelCPUPowerManagement (Context);
 
-  if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &IOAHCIBlockStoragePatch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "Failed to apply patch com.apple.iokit.IOAHCIBlockStorage - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_WARN, "Patch success com.apple.iokit.IOAHCIBlockStorage\n"));
-    }
-  } else {
-    DEBUG ((DEBUG_WARN, "Failed to find com.apple.iokit.IOAHCIBlockStorage - %r\n", Status));
-  }
+  PatchUsbXhciPortLimit (Context);
 
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.driver.AppleAHCIPort"
-    );
+  PatchThirdPartySsdTrim (Context);
 
-  if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &IOAHCIPortPatch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "Failed to apply patch com.apple.driver.AppleAHCIPort - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_WARN, "Patch success com.apple.driver.AppleAHCIPort\n"));
-    }
-  } else {
-    DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.AppleAHCIPort - %r\n", Status));
-  }
+  PatchForceInternalDiskIcons (Context);
 
 #if 0
+
+  EFI_STATUS       Status;
+  PATCHER_CONTEXT  Patcher;
 
   Status = PatcherInitContextFromPrelinked (
     &Patcher,

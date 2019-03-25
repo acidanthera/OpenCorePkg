@@ -90,11 +90,13 @@ ApplyPatch (
       //
       // Perform replacement.
       //
-      if (ReplaceMask == NULL)
+      if (ReplaceMask == NULL) {
         CopyMem (&Data[DataOff], Replace, PatternSize);
-      else
-        for (UINTN Index = 0; Index < PatternSize; ++Index)
+      } else {
+        for (UINTN Index = 0; Index < PatternSize; ++Index) {
           Data[DataOff + Index] = (Data[DataOff + Index] & ~ReplaceMask[Index]) | (Replace[Index] & ReplaceMask[Index]);
+        }
+      }
       ++ReplaceCount;
       DataOff += PatternSize;
 
