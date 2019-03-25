@@ -48,56 +48,38 @@ InternalOcGetSymbolWorkerName (
   UINT32                      Index;
   UINT32                      NumSymbols;
 
-  if (SymbolLevel == OcGetSymbolOnlyCxx) {
-    NumSymbols = Kext->NumberOfSymbols;
-    Symbols    = &Kext->LinkedSymbolTable[NumSymbols - Kext->NumberOfCxxSymbols];
-    SymbolsEnd = &Kext->LinkedSymbolTable[NumSymbols];
+  //
+  // Block any 1+ level dependencies.
+  //
+  Kext->Processed = TRUE;
 
-    while (Symbols < SymbolsEnd) {
-      if (AsciiStrCmp (LookupValue, Symbols->Name) == 0) {
-        return Symbols;
-      }
-      Symbols++;
-    }
+  NumSymbols = Kext->NumberOfSymbols;
+  Symbols    = Kext->LinkedSymbolTable;
+
+  if (SymbolLevel == OcGetSymbolOnlyCxx) {
+    NumSymbols = Kext->NumberOfCxxSymbols;
+    Symbols    = &Kext->LinkedSymbolTable[Kext->NumberOfSymbols - Kext->NumberOfCxxSymbols];
   }
 
-  for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
-    Dependency = Kext->Dependencies[Index];
-    if (Dependency == NULL) {
-      return NULL;
+  SymbolsEnd = &Symbols[NumSymbols];
+  while (Symbols < SymbolsEnd) {
+    if (AsciiStrCmp (LookupValue, Symbols->Name) == 0) {
+      return Symbols;
     }
+    Symbols++;
+  }
 
-    if (Dependency->Processed) {
-      continue;
-    }
-
-    //
-    // Block any 1+ level dependencies.
-    //
-    Dependency->Processed = TRUE;
-
-    NumSymbols = Dependency->NumberOfSymbols;
-    Symbols    = Dependency->LinkedSymbolTable;
-    SymbolsEnd = &Symbols[NumSymbols];
-    //
-    // A value of 2 will only be passed from within this function, the value is
-    // reserved to indicate the iteration of an indirect dependency.
-    //
-    if (SymbolLevel == OcGetSymbolOnlyCxx) {
-      //
-      // Only consider C++ symbols for indirect dependencies.
-      //
-      Symbols += NumSymbols - Dependency->NumberOfCxxSymbols;
-    }
-
-    while (Symbols < SymbolsEnd) {
-      if (AsciiStrCmp (LookupValue, Symbols->Name) == 0) {
-        return Symbols;
+  if (SymbolLevel != OcGetSymbolFirstLevel) {
+    for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
+      Dependency = Kext->Dependencies[Index];
+      if (Dependency == NULL) {
+        return NULL;
       }
-      Symbols++;
-    }
 
-    if (SymbolLevel == OcGetSymbolAnyLevel) {
+      if (Dependency->Processed) {
+        continue;
+      }
+
       Symbols = InternalOcGetSymbolWorkerName (
                  Dependency,
                  LookupValue,
@@ -126,72 +108,45 @@ InternalOcGetSymbolWorkerValue (
   UINT32                      Index;
   UINT32                      NumSymbols;
 
+  //
+  // Block any 1+ level dependencies.
+  //
+  Kext->Processed = TRUE;
+
+  NumSymbols = Kext->NumberOfSymbols;
+  Symbols    = Kext->LinkedSymbolTable;
+
   if (SymbolLevel == OcGetSymbolOnlyCxx) {
-    //
-    // WARN! Hot path! Do not change this code unless you have decent profiling data.
-    // We are not allowed to use SIMD in UEFI, but we can still do better with larger iteration.
-    // Up to 15 C symbols extra may get parsed, but it is fine, as they will not match.
-    // Increasing the iteration block to more than 16 no longer pays off.
-    // Note, lower loop is not on hot path.
-    //
-    NumSymbols = Kext->NumberOfSymbols;
-    Symbols    = &Kext->LinkedSymbolTable[(NumSymbols - Kext->NumberOfCxxSymbols) & ~15ULL];
-    SymbolsEnd = &Kext->LinkedSymbolTable[NumSymbols & ~15ULL];
-
-    while (Symbols < SymbolsEnd) {
-      #define MATCH(X) if (Symbols[X].Value == LookupValue) { return &Symbols[X]; }
-      MATCH( 0) MATCH( 1) MATCH( 2) MATCH( 3) MATCH( 4) MATCH( 5) MATCH( 6) MATCH( 7)
-      MATCH( 8) MATCH( 9) MATCH(10) MATCH(11) MATCH(12) MATCH(13) MATCH(14) MATCH(15)
-      #undef MATCH
-      Symbols += 16;
-    }
-
-    SymbolsEnd = &Kext->LinkedSymbolTable[NumSymbols];
-    while (Symbols < SymbolsEnd) {
-      if (Symbols->Value == LookupValue) {
-        return Symbols;
-      }
-      ++Symbols;
-    }
+    NumSymbols = Kext->NumberOfCxxSymbols;
+    Symbols    = &Kext->LinkedSymbolTable[(Kext->NumberOfSymbols - Kext->NumberOfCxxSymbols) & ~15ULL];
+  }
+  //
+  // WARN! Hot path! Do not change this code unless you have decent profiling data.
+  // We are not allowed to use SIMD in UEFI, but we can still do better with larger iteration.
+  // Up to 15 C symbols extra may get parsed, but it is fine, as they will not match.
+  // Increasing the iteration block to more than 16 no longer pays off.
+  // Note, lower loop is not on hot path.
+  //
+  SymbolsEnd = &Symbols[NumSymbols & ~15ULL];
+  while (Symbols < SymbolsEnd) {
+    #define MATCH(X) if (Symbols[X].Value == LookupValue) { return &Symbols[X]; }
+    MATCH( 0) MATCH( 1) MATCH( 2) MATCH( 3) MATCH( 4) MATCH( 5) MATCH( 6) MATCH( 7)
+    MATCH( 8) MATCH( 9) MATCH(10) MATCH(11) MATCH(12) MATCH(13) MATCH(14) MATCH(15)
+    #undef MATCH
+    Symbols += 16;
   }
 
-  for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
-    Dependency = Kext->Dependencies[Index];
-    if (Dependency == NULL) {
-      return NULL;
-    }
-
-    if (Dependency->Processed) {
-      continue;
-    }
-
-    //
-    // Block any 1+ level dependencies.
-    //
-    Dependency->Processed = TRUE;
-
-    NumSymbols = Dependency->NumberOfSymbols;
-    Symbols    = Dependency->LinkedSymbolTable;
-    SymbolsEnd = &Symbols[NumSymbols];
-    //
-    // A value of 2 will only be passed from within this function, the value is
-    // reserved to indicate the iteration of an indirect dependency.
-    //
-    if (SymbolLevel == OcGetSymbolOnlyCxx) {
-      //
-      // Only consider C++ symbols for indirect dependencies.
-      //
-      Symbols += NumSymbols - Dependency->NumberOfCxxSymbols;
-    }
-
-    while (Symbols < SymbolsEnd) {
-      if (Symbols->Value == LookupValue) {
-        return Symbols;
+  if (SymbolLevel != OcGetSymbolFirstLevel) {
+    for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
+      Dependency = Kext->Dependencies[Index];
+      if (Dependency == NULL) {
+        return NULL;
       }
-      ++Symbols;
-    }
 
-    if (SymbolLevel == OcGetSymbolAnyLevel) {
+      if (Dependency->Processed) {
+        continue;
+      }
+
       Symbols = InternalOcGetSymbolWorkerValue (
                  Dependency,
                  LookupValue,
@@ -216,7 +171,30 @@ InternalOcGetSymbolName (
 {
   CONST PRELINKED_KEXT_SYMBOL *Symbol;
 
-  Symbol = InternalOcGetSymbolWorkerName (Kext, (CONST CHAR8*) LookupValue, SymbolLevel);
+  PRELINKED_KEXT              *Dependency;
+  UINT32                      Index;
+
+  Symbol = NULL;
+
+  if ((SymbolLevel == OcGetSymbolOnlyCxx) && (Kext->LinkedSymbolTable != NULL)) {
+    Symbol = InternalOcGetSymbolWorkerName (Kext, (CHAR8 *)(UINTN)LookupValue, SymbolLevel);
+  } else {
+    for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
+      Dependency = Kext->Dependencies[Index];
+      if (Dependency == NULL) {
+        break;
+      }
+
+      Symbol = InternalOcGetSymbolWorkerName (
+                 Dependency,
+                 (CHAR8 *)(UINTN)LookupValue,
+                 SymbolLevel
+                 );
+      if (Symbol != NULL) {
+        break;
+      }
+    }
+  }
 
   InternalUnlockContextKexts (Context);
 
@@ -233,7 +211,30 @@ InternalOcGetSymbolValue (
 {
   CONST PRELINKED_KEXT_SYMBOL *Symbol;
 
-  Symbol = InternalOcGetSymbolWorkerValue (Kext, LookupValue, SymbolLevel);
+  PRELINKED_KEXT              *Dependency;
+  UINT32                      Index;
+
+  Symbol = NULL;
+
+  if ((SymbolLevel == OcGetSymbolOnlyCxx) && (Kext->LinkedSymbolTable != NULL)) {
+    Symbol = InternalOcGetSymbolWorkerValue (Kext, LookupValue, SymbolLevel);
+  } else {
+    for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
+      Dependency = Kext->Dependencies[Index];
+      if (Dependency == NULL) {
+        break;
+      }
+
+      Symbol = InternalOcGetSymbolWorkerValue (
+                 Dependency,
+                 LookupValue,
+                 SymbolLevel
+                 );
+      if (Symbol != NULL) {
+        break;
+      }
+    }
+  }
 
   InternalUnlockContextKexts (Context);
 
