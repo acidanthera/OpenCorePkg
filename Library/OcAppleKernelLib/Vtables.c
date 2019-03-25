@@ -816,7 +816,7 @@ InternalPatchByVtables64 (
                  SuperVtable,
                  EntryWalker->Vtable,
                  EntryWalker->VtableData,
-                 EntryWalker->NumSolveSymbols,
+                 EntryWalker->MetaSymsIndex,
                  EntryWalker->SolveSymbols,
                  CurrentVtable
                  );
