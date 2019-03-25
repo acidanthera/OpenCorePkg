@@ -157,8 +157,6 @@ MachoGetClassNameFromSuperMetaClassPointer (
   OUT    CHAR8                *ClassName
   )
 {
-  BOOLEAN                Result;
-  UINTN                  StringSize;
   UINTN                  PrefixSize;
   UINTN                  SuffixSize;
   UINTN                  OutputSize;
@@ -170,21 +168,17 @@ MachoGetClassNameFromSuperMetaClassPointer (
 
   ASSERT (Context->StringTable != NULL);
 
-  Result = MachoSymbolNameIsSmcp64 (Context, SmcpName);
-  if (!Result) {
+  ASSERT (MachoSymbolNameIsSmcp64 (Context, SmcpName));
+
+  PrefixSize = L_STR_LEN (OSOBJ_PREFIX);
+  SuffixSize = L_STR_LEN (SMCP_TOKEN);
+
+  OutputSize = (AsciiStrLen (SmcpName) - PrefixSize - SuffixSize);
+
+  if ((OutputSize + 1) > ClassNameSize) {
     return FALSE;
   }
 
-  PrefixSize = L_STR_LEN (OSOBJ_PREFIX);
-  StringSize = AsciiStrLen (SmcpName);
-  SuffixSize = L_STR_LEN (SMCP_TOKEN);
-
-  ASSERT ((StringSize - PrefixSize - SuffixSize) < ClassNameSize);
-
-  OutputSize = MIN (
-                 (StringSize - PrefixSize - SuffixSize),
-                 (ClassNameSize - 1)
-                 );
   CopyMem (ClassName, &SmcpName[PrefixSize], OutputSize);
   ClassName[OutputSize] = '\0';
 
@@ -279,7 +273,6 @@ MachoGetClassNameFromMetaClassPointer (
   )
 {
   BOOLEAN                Result;
-  UINTN                  StringSize;
   UINTN                  PrefixSize;
   UINTN                  SuffixSize;
   UINTN                  ClassNameLength;
@@ -297,15 +290,13 @@ MachoGetClassNameFromMetaClassPointer (
   }
 
   PrefixSize = L_STR_LEN (OSOBJ_PREFIX);
-  StringSize = AsciiStrLen (MetaClassName);
   SuffixSize = L_STR_LEN (METACLASS_TOKEN);
 
-  ASSERT ((StringSize - PrefixSize - SuffixSize) < ClassNameSize);
+  ClassNameLength = (AsciiStrLen (MetaClassName) - PrefixSize - SuffixSize);
+  if ((ClassNameLength + 1) > ClassNameSize) {
+    return FALSE;
+  }
 
-  ClassNameLength = MIN (
-                      (StringSize - PrefixSize - SuffixSize),
-                      (ClassNameSize - 1)
-                      );
   CopyMem (ClassName, &MetaClassName[PrefixSize], ClassNameLength);
   ClassName[ClassNameLength] = '\0';
 
