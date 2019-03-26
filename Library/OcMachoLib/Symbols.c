@@ -86,20 +86,21 @@ MachoIsSymbolValueInRange64 (
 }
 
 /**
-  Returns whether Symbol describes a section.
+  Returns whether Symbol describes a section type.
 
   @param[in] Symbol  Symbol to evaluate.
 
 **/
+STATIC
 BOOLEAN
-MachoSymbolIsSection (
+InternalSymbolIsSectionType (
   IN CONST MACH_NLIST_64  *Symbol
   )
 {
   ASSERT (Symbol != NULL);
 
   if ((Symbol->Type & MACH_N_TYPE_STAB) != 0) {
-    switch (Symbol->Type & MACH_N_TYPE_STAB) {
+    switch (Symbol->Type) {
       //
       // Labeled as MACH_N_sect in stab.h
       //
@@ -138,6 +139,21 @@ MachoSymbolIsSection (
 }
 
 /**
+  Returns whether Symbol describes a section.
+
+  @param[in] Symbol  Symbol to evaluate.
+
+**/
+BOOLEAN
+MachoSymbolIsSection (
+  IN CONST MACH_NLIST_64  *Symbol
+  )
+{
+  ASSERT (Symbol != NULL);
+  return (InternalSymbolIsSectionType (Symbol) && (Symbol->Section != NO_SECT));
+}
+
+/**
   Returns whether Symbol is defined.
 
   @param[in] Symbol  Symbol to evaluate.
@@ -152,7 +168,7 @@ MachoSymbolIsDefined (
 
   return (((Symbol->Type & MACH_N_TYPE_STAB) == 0)
       && (((Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_ABS)
-       || MachoSymbolIsSection (Symbol)));
+       || InternalSymbolIsSectionType (Symbol)));
 }
 
 /**
