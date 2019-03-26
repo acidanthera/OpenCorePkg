@@ -190,7 +190,7 @@ PatchUsbXhciPortLimit (
     );
 
   if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &mRemoveUsbLimitV2Patch);
+    Status = PatcherApplyGenericPatch (&Patcher, &mRemoveUsbLimitV1Patch);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
     } else {
@@ -207,7 +207,7 @@ PatchUsbXhciPortLimit (
     );
 
   if (!EFI_ERROR (Status2)) {
-    Status2 = PatcherApplyGenericPatch (&Patcher, &mRemoveUsbLimitV1Patch);
+    Status2 = PatcherApplyGenericPatch (&Patcher, &mRemoveUsbLimitV2Patch);
     if (EFI_ERROR (Status2)) {
       DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status2));
     } else {
