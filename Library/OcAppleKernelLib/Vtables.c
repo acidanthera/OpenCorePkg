@@ -565,7 +565,7 @@ InternalInitializeVtablePatchData (
     ++EntryOffset
     ) {
     if (VtableData[EntryOffset] == 0) {
-      Result = MachoGetSymbolByRelocationOffset64 (
+      Result = MachoGetSymbolByExternRelocationOffset64 (
                  MachoContext,
                  (VtableSymbol->Value + (EntryOffset * sizeof (*VtableData))),
                  &Symbol
