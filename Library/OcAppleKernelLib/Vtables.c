@@ -471,12 +471,13 @@ InternalInitializeVtableByEntriesAndRelocations64 (
                    EntryValue,
                    OcGetSymbolOnlyCxx
                    );
-      if (OcSymbol == NULL) {
-        continue;
+      if (OcSymbol != NULL) {
+        VtableEntry->Name    = OcSymbol->Name;
+        VtableEntry->Address = OcSymbol->Value;
+      } else {
+        VtableEntry->Name    = NULL;
+        VtableEntry->Address = 0;
       }
-
-      VtableEntry->Name    = OcSymbol->Name;
-      VtableEntry->Address = OcSymbol->Value;
     } else {
       if (SolveSymbolIndex >= NumSolveSymbols) {
         //
