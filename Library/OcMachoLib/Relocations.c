@@ -115,15 +115,11 @@ InternalLookupRelocationByOffset (
 
 **/
 MACH_RELOCATION_INFO *
-InternalGetExternalRelocationByOffset (
+InternalGetExternRelocationByOffset (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT64            Address
   )
 {
-  if (!InternalRetrieveSymtabs64 (Context) || (Context->DySymtab == NULL)) {
-    return NULL;
-  }
-
   return InternalLookupRelocationByOffset (
            Address,
            Context->DySymtab->NumExternalRelocations,
@@ -141,29 +137,14 @@ InternalGetExternalRelocationByOffset (
 
 **/
 MACH_RELOCATION_INFO *
-InternalGetRelocationByOffset (
+InternalGetLocalRelocationByOffset (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT64            Address
   )
 {
-  MACH_RELOCATION_INFO *Relocation;
-
-  if (!InternalRetrieveSymtabs64 (Context) || (Context->DySymtab == NULL)) {
-    return NULL;
-  }
-
-  Relocation = InternalLookupRelocationByOffset (
-                 Address,
-                 Context->DySymtab->NumExternalRelocations,
-                 Context->ExternRelocations
-                 );
-  if (Relocation == NULL) {
-    Relocation = InternalLookupRelocationByOffset (
-                   Address,
-                   Context->DySymtab->NumOfLocalRelocations,
-                   Context->LocalRelocations
-                   );
-  }
-
-  return Relocation;
+  return InternalLookupRelocationByOffset (
+           Address,
+           Context->DySymtab->NumOfLocalRelocations,
+           Context->LocalRelocations
+           );
 }

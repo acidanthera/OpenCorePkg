@@ -358,6 +358,25 @@ MachoGetSymbolByRelocationOffset64 (
   );
 
 /**
+  Retrieves the symbol referenced by the extern Relocation targeting Address.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  Address to search for.
+  @param[out]    Symbol   Buffer to output the symbol referenced by the
+                          Relocation into.  The output is undefined when FALSE
+                          is returned.  May be NULL.
+
+  @returns  Whether the Relocation exists.
+
+**/
+BOOLEAN
+MachoGetSymbolByExternRelocationOffset64 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address,
+  OUT    MACH_NLIST_64     **Symbol
+  );
+
+/**
   Relocate Symbol to be against LinkAddress.
 
   @param[in,out] Context      Context of the Mach-O.

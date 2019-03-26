@@ -326,6 +326,38 @@ InternalGetSymbolByValue (
 }
 
 /**
+  Retrieves the symbol referenced by the extern Relocation targeting Address.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  Address to search for.
+  @param[out]    Symbol   Buffer to output the symbol referenced by the
+                          Relocation into.  The output is undefined when FALSE
+                          is returned.  May be NULL.
+
+  @returns  Whether the Relocation exists.
+
+**/
+BOOLEAN
+MachoGetSymbolByExternRelocationOffset64 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address,
+  OUT    MACH_NLIST_64     **Symbol
+  )
+{
+  CONST MACH_RELOCATION_INFO *Relocation;
+
+  ASSERT (Context != NULL);
+
+  Relocation = InternalGetExternRelocationByOffset (Context, Address);
+  if (Relocation != NULL) {
+    *Symbol = MachoGetSymbolByIndex64 (Context, Relocation->SymbolNumber);
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
   Retrieves the symbol referenced by the Relocation targeting Address.
 
   @param[in,out] Context  Context of the Mach-O.
@@ -344,27 +376,29 @@ MachoGetSymbolByRelocationOffset64 (
   OUT    MACH_NLIST_64     **Symbol
   )
 {
+  BOOLEAN                    Result;
   CONST MACH_RELOCATION_INFO *Relocation;
   CONST UINT64               *Data;
   MACH_NLIST_64              *Sym;
 
   ASSERT (Context != NULL);
 
-  Relocation = InternalGetRelocationByOffset (Context, Address);
+  Result = MachoGetSymbolByExternRelocationOffset64 (Context, Address, Symbol);
+  if (Result) {
+    return TRUE;
+  }
+
+  Relocation = InternalGetLocalRelocationByOffset (Context, Address);
   if (Relocation != NULL) {
     Sym = NULL;
 
-    if (Relocation->Extern != 0) {
-      Sym = MachoGetSymbolByIndex64 (Context, Relocation->SymbolNumber);
-    } else {
-      Data = ((UINT64 *)((UINTN)Context->MachHeader + Address));
-      if (((Address + sizeof (UINT64)) <= Context->FileSize)
-       && OC_ALIGNED (Data)) {
-        // FIXME: Only C++ symbols.
-        Sym = InternalGetSymbolByValue (Context, *Data);
-        if ((Sym != NULL) && !InternalSymbolIsSane (Context, Sym)) {
-          Sym = NULL;
-        }
+    Data = ((UINT64 *)((UINTN)Context->MachHeader + Address));
+    if (((Address + sizeof (UINT64)) <= Context->FileSize)
+     && OC_ALIGNED (Data)) {
+      // FIXME: Only C++ symbols.
+      Sym = InternalGetSymbolByValue (Context, *Data);
+      if ((Sym != NULL) && !InternalSymbolIsSane (Context, Sym)) {
+        Sym = NULL;
       }
     }
 
