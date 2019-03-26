@@ -552,6 +552,10 @@ InternalCalculateTargetsIntel64 (
 
     TargetAddress = Symbol->Value;
   } else {
+    if (Relocation->SymbolNumber == 0) {
+      return FALSE;
+    }
+
     Section = MachoGetSectionByIndex64 (
                 MachoContext,
                 (Relocation->SymbolNumber - 1)
