@@ -555,7 +555,11 @@ MachoRelocateSymbol64 (
   // Symbols are relocated when they describe sections.
   //
   if (MachoSymbolIsSection (Symbol)) {
-    Section = MachoGetSectionByAddress64 (Context, Symbol->Value);
+    if (Symbol->Section > MAX_SECT) {
+      return FALSE;
+    }
+
+    Section = MachoGetSectionByIndex64 (Context, (Symbol->Section - 1));
     if (Section == NULL) {
       return FALSE;
     }
