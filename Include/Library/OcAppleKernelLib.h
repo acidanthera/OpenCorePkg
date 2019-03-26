@@ -37,6 +37,7 @@
 
 #define INFO_BUNDLE_IDENTIFIER_KEY                "CFBundleIdentifier"
 #define INFO_BUNDLE_LIBRARIES_KEY                 "OSBundleLibraries"
+#define INFO_BUNDLE_LIBRARIES_64_KEY              "OSBundleLibraries_x86_64"
 #define INFO_BUNDLE_VERSION_KEY                   "CFBundleVersion"
 #define INFO_BUNDLE_COMPATIBLE_VERSION_KEY        "OSBundleCompatibleVersion"
 

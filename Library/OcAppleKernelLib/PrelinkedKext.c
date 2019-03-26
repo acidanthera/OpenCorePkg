@@ -53,6 +53,7 @@ InternalCreatePrelinkedKext (
   XML_NODE        *KextPlistValue;
   CONST CHAR8     *KextIdentifier;
   XML_NODE        *BundleLibraries;
+  XML_NODE        *BundleLibraries64;
   CONST CHAR8     *CompatibleVersion;
   UINT64          VirtualBase;
   UINT64          VirtualKmod;
@@ -63,6 +64,7 @@ InternalCreatePrelinkedKext (
 
   KextIdentifier    = NULL;
   BundleLibraries   = NULL;
+  BundleLibraries64 = NULL;
   CompatibleVersion = NULL;
   VirtualBase       = 0;
   VirtualKmod       = 0;
@@ -91,6 +93,11 @@ InternalCreatePrelinkedKext (
         break;
       }
       BundleLibraries = KextPlistValue;
+    } else if (BundleLibraries64 == NULL && AsciiStrCmp (KextPlistKey, INFO_BUNDLE_LIBRARIES_64_KEY) == 0) {
+      if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_DICT) == NULL) {
+        break;
+      }
+      BundleLibraries64 = BundleLibraries = KextPlistValue;
     } else if (CompatibleVersion == NULL && AsciiStrCmp (KextPlistKey, INFO_BUNDLE_COMPATIBLE_VERSION_KEY) == 0) {
       if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_STRING) == NULL) {
         break;
@@ -117,7 +124,7 @@ InternalCreatePrelinkedKext (
       }
     }
 
-    if (KextIdentifier != NULL && BundleLibraries != NULL && CompatibleVersion != NULL
+    if (KextIdentifier != NULL && BundleLibraries64 != NULL && CompatibleVersion != NULL
       && (Prelinked == NULL || (Prelinked != NULL && VirtualBase != 0 && VirtualKmod != 0 && SourceBase != 0 && SourceSize != 0))) {
       break;
     }
@@ -420,6 +427,7 @@ InternalInsertPrelinkedKextDependency (
   EFI_STATUS  Status;
 
   if (DependencyIndex >= ARRAY_SIZE (Kext->Dependencies)) {
+    DEBUG ((DEBUG_INFO, "Kext %a has more than %u or more dependencies!", Kext->Identifier, DependencyIndex));
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -649,7 +657,8 @@ InternalScanPrelinkedKext (
       //
       DependencyKext = InternalCachedPrelinkedKext (Context, DependencyId);
       if (DependencyKext == NULL) {
-        continue;
+        DEBUG ((DEBUG_INFO, "Dependency %a was not found for kext %a\n", DependencyId, Kext->Identifier));
+        return EFI_NOT_FOUND;
       }
 
       Status = InternalInsertPrelinkedKextDependency (Kext, Context, DependencyIndex, DependencyKext);
