@@ -86,6 +86,14 @@ InternalLookupRelocationByOffset (
 
   for (Index = 0; Index < NumRelocs; ++Index) {
     Relocation = &Relocs[Index];
+    //
+    // A section-based relocation entry can be skipped for absolute symbols.
+    //
+    if ((Relocation->Extern == 0)
+     && (Relocation->SymbolNumber == MACH_RELOC_ABSOLUTE)) {
+      continue;
+    }
+
     if ((UINT64)Relocation->Address == Address) {
       return Relocation;
     }
