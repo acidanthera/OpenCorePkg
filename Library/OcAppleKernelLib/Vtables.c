@@ -507,8 +507,9 @@ InternalInitializeVtablePatchData (
   IN OUT OC_MACHO_CONTEXT     *MachoContext,
   IN     CONST MACH_NLIST_64  *VtableSymbol,
   IN OUT UINT32               *MaxSize,
-  OUT    UINT32               *NumEntries,
   OUT    UINT64               **VtableDataPtr,
+  OUT    UINT32               *NumEntries,
+  OUT    UINT32               *NumSymbols,
   OUT    MACH_NLIST_64        **SolveSymbols
   )
 {
@@ -517,7 +518,7 @@ InternalInitializeVtablePatchData (
   UINT32               VtableMaxSize;
   CONST MACH_HEADER_64 *MachHeader;
   UINT64               *VtableData;
-  UINT32               Index;
+  UINT32               SymIndex;
   UINT32               EntryOffset;
   UINT32               MaxSymbols;
   MACH_NLIST_64        *Symbol;
@@ -546,7 +547,7 @@ InternalInitializeVtablePatchData (
   MaxSymbols     = (*MaxSize / sizeof (*SolveSymbols));
   VtableMaxSize /= VTABLE_ENTRY_SIZE_64;
 
-  Index = 0;
+  SymIndex = 0;
 
   for (
     EntryOffset = VTABLE_HEADER_LEN_64;
@@ -564,18 +565,19 @@ InternalInitializeVtablePatchData (
         // If the VTable entry is 0 and it is not referenced by a Relocation,
         // it is the end of the table.
         //
-        *NumEntries    = Index;
-        *MaxSize      -= (Index * sizeof (*SolveSymbols));
+        *MaxSize      -= (SymIndex * sizeof (*SolveSymbols));
         *VtableDataPtr = VtableData;
+        *NumEntries    = (EntryOffset - VTABLE_HEADER_LEN_64);
+        *NumSymbols    = SymIndex;
         return TRUE;
       }
 
-      if (Index >= MaxSymbols) {
+      if (SymIndex >= MaxSymbols) {
         return FALSE;
       }
 
-      SolveSymbols[Index] = Symbol;
-      ++Index;
+      SolveSymbols[SymIndex] = Symbol;
+      ++SymIndex;
     }
   }
 
@@ -597,6 +599,7 @@ InternalPatchByVtables64 (
   UINT32               Index;
   UINT32               NumTables;
   UINT32               NumEntries;
+  UINT32               NumEntriesTemp;
   UINT32               NumPatched;
   BOOLEAN              Result;
   CONST MACH_NLIST_64  *Smcp;
@@ -662,29 +665,33 @@ InternalPatchByVtables64 (
                  MachoContext,
                  EntryWalker->Vtable,
                  &MaxSize,
-                 &EntryWalker->MetaSymsIndex,
                  &EntryWalker->VtableData,
+                 &NumEntriesTemp,
+                 &EntryWalker->MetaSymsIndex,
                  EntryWalker->SolveSymbols
                  );
       if (!Result) {
         return FALSE;
       }
 
+      NumEntries += NumEntriesTemp;
+
       Result = InternalInitializeVtablePatchData (
                  MachoContext,
                  EntryWalker->MetaVtable,
                  &MaxSize,
-                 &EntryWalker->NumSolveSymbols,
                  &EntryWalker->MetaVtableData,
+                 &NumEntriesTemp,
+                 &EntryWalker->NumSolveSymbols,
                  &EntryWalker->SolveSymbols[EntryWalker->MetaSymsIndex]
                  );
       if (!Result) {
         return FALSE;
       }
 
-      EntryWalker->NumSolveSymbols += EntryWalker->MetaSymsIndex;
+      NumEntries += NumEntriesTemp;
 
-      NumEntries += EntryWalker->NumSolveSymbols;
+      EntryWalker->NumSolveSymbols += EntryWalker->MetaSymsIndex;
       ++NumTables;
 
       EntryWalker = GET_NEXT_OC_VTABLE_PATCH_ENTRY (EntryWalker);
