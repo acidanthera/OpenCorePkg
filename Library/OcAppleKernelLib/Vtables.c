@@ -155,23 +155,22 @@ InternalConstructVtablePrelinked64 (
     // defined inline.  There's not much I can do about this; it just means
     // I can't patch this function.
     //
-    // It's possible for the patched parent entry not to have a symbol
-    // (e.g. when the definition is inlined).  We can't patch this entry no
-    // matter what, so we'll just skip it and die later if it's a problem
-    // (which is not likely).
-    //
     Symbol = InternalOcGetSymbolValue (Context, Kext, Value, OcGetSymbolOnlyCxx);
 
     if (Symbol != NULL) {
       Vtable->Entries[Index].Address = Value;
       Vtable->Entries[Index].Name    = Symbol->Name;
-      ++Vtable->NumEntries;
+    } else {
+      Vtable->Entries[Index].Address = 0;
+      Vtable->Entries[Index].Name    = NULL;
     }
 
     if ((Index + VTABLE_HEADER_LEN_64 + 1) >= MaxSize) {
       return FALSE;
     }
   }
+
+  Vtable->NumEntries = Index;
 
   return TRUE;
 }
@@ -304,6 +303,15 @@ InternalPatchVtableSymbol (
 
   ASSERT (Symbol != NULL);
   ASSERT (ParentEntry != NULL);
+  //
+  // It's possible for the patched parent entry not to have a symbol
+  // (e.g. when the definition is inlined).  We can't patch this entry no
+  // matter what, so we'll just skip it and die later if it's a problem
+  // (which is not likely).
+  //
+  if (ParentEntry->Name == NULL) {
+    return TRUE;
+  }
   //
   // 1) If the symbol is defined locally, do not patch
   //
