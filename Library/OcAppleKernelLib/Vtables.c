@@ -205,11 +205,12 @@ InternalGetVtableEntries64 (
 BOOLEAN
 InternalPrepareCreateVtablesPrelinked64 (
   IN  OC_MACHO_CONTEXT          *MachoContext,
-  OUT OC_VTABLE_EXPORT_ARRAY    *VtableExport,
-  IN  UINT32                    VtableExportSize
+  IN  UINT32                    MaxSize,
+  OUT UINT32                    *NumVtables,
+  OUT CONST MACH_NLIST_64       **Vtables
   )
 {
-  UINT32              NumVtables;
+  UINT32              VtableIndex;
 
   CONST MACH_NLIST_64 *SymbolTable;
   CONST MACH_NLIST_64 *Symbol;
@@ -219,7 +220,7 @@ InternalPrepareCreateVtablesPrelinked64 (
 
   ASSERT (MachoContext != NULL);
 
-  NumVtables = 0;
+  VtableIndex = 0;
 
   NumSymbols = MachoGetSymbolTable (
                  MachoContext,
@@ -232,21 +233,26 @@ InternalPrepareCreateVtablesPrelinked64 (
                  NULL,
                  NULL
                  );
+  if (NumSymbols == 0) {
+    return FALSE;
+  }
+
+  MaxSize /= sizeof (*Vtables);
+
   for (Index = 0; Index < NumSymbols; ++Index) {
     Symbol = &SymbolTable[Index];
     Name = MachoGetSymbolName64 (MachoContext, Symbol);
     if (MachoSymbolNameIsVtable64 (Name)) {
-      //
-      // This should be accounted for via previous sanity checks.
-      //
-      ASSERT (VtableExportSize >= (sizeof (*VtableExport) + ((NumVtables + 1) * sizeof (*VtableExport->Symbols))));
+      if (VtableIndex >= MaxSize) {
+        return FALSE;
+      }
 
-      VtableExport->Symbols[NumVtables] = Symbol;
-      ++NumVtables;
+      Vtables[VtableIndex] = Symbol;
+      ++VtableIndex;
     }
   }
 
-  VtableExport->NumSymbols = NumVtables;
+  *NumVtables = VtableIndex;
 
   return TRUE;
 }
@@ -255,8 +261,9 @@ BOOLEAN
 InternalCreateVtablesPrelinked64 (
   IN     PRELINKED_CONTEXT      *Context,
   IN OUT PRELINKED_KEXT         *Kext,
-  IN  OC_VTABLE_EXPORT_ARRAY    *VtableExport,
-  OUT PRELINKED_VTABLE          *VtableBuffer
+  IN     UINT32                 NumVtables,
+  IN     CONST MACH_NLIST_64    **VtableSymbols,
+  OUT    PRELINKED_VTABLE       *VtableBuffer
   )
 {
   CONST MACH_NLIST_64 *Symbol;
@@ -265,8 +272,8 @@ InternalCreateVtablesPrelinked64 (
 
   ASSERT (Kext != NULL);
 
-  for (Index = 0; Index < VtableExport->NumSymbols; ++Index) {
-    Symbol = VtableExport->Symbols[Index];
+  for (Index = 0; Index < NumVtables; ++Index) {
+    Symbol = VtableSymbols[Index];
     Result = InternalConstructVtablePrelinked64 (
                 Context,
                 Kext,

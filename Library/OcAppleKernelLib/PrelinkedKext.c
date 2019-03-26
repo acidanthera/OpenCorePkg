@@ -320,24 +320,28 @@ InternalScanBuildLinkedVtables (
   IN     PRELINKED_CONTEXT  *Context
   )
 {
-  OC_VTABLE_EXPORT_ARRAY *VtableExport;
+  CONST MACH_NLIST_64    **VtableSymbols;
+  UINT32                 MaxSize;
   BOOLEAN                Result;
   UINT32                 NumVtables;
-  UINT32                 NumVtablesTemp;
+  UINT32                 NumEntries;
+  UINT32                 NumEntriesTemp;
   UINT32                 Index;
   UINT32                 VtableOffset;
-  UINT32                 MaxSize;
+  UINT32                 VtableMaxSize;
   CONST UINT64           *VtableData;
   CONST MACH_HEADER_64   *MachHeader;
   UINT32                 MachSize;
-  PRELINKED_VTABLE       *Vtables;
+  PRELINKED_VTABLE       *LinkedVtables;
 
-  VtableExport = Context->LinkBuffer;
+  VtableSymbols = Context->LinkBuffer;
+  MaxSize       = Context->LinkBufferSize;
 
   Result = InternalPrepareCreateVtablesPrelinked64 (
              &Kext->Context.MachContext,
-             VtableExport,
-             Context->LinkBufferSize
+             MaxSize,
+             &NumVtables,
+             VtableSymbols
              );
   if (!Result) {
     return EFI_UNSUPPORTED;
@@ -349,14 +353,14 @@ InternalScanBuildLinkedVtables (
   MachSize = MachoGetFileSize (&Kext->Context.MachContext);
   ASSERT (MachSize != 0);
 
-  NumVtables = 0;
+  NumEntries = 0;
 
-  for (Index = 0; Index < VtableExport->NumSymbols; ++Index) {
+  for (Index = 0; Index < NumVtables; ++Index) {
     Result = MachoSymbolGetFileOffset64 (
                 &Kext->Context.MachContext,
-                VtableExport->Symbols[Index],
+                VtableSymbols[Index],
                 &VtableOffset,
-                &MaxSize
+                &VtableMaxSize
                 );
     if (!Result) {
       return Result;
@@ -369,31 +373,37 @@ InternalScanBuildLinkedVtables (
 
     Result = InternalGetVtableEntries64 (
                VtableData,
-               MaxSize,
-               &NumVtablesTemp
+               VtableMaxSize,
+               &NumEntriesTemp
                );
     if (!Result) {
       return FALSE;
     }
 
-    NumVtables += NumVtablesTemp;
+    NumEntries += NumEntriesTemp;
   }
 
-  Vtables = AllocatePool (
-              (VtableExport->NumSymbols * sizeof (*Vtables))
-                + (NumVtables * sizeof (*Vtables->Entries))
-              );
-  if (Vtables == NULL) {
+  LinkedVtables = AllocatePool (
+                    (NumVtables * sizeof (*LinkedVtables))
+                      + (NumEntries * sizeof (*LinkedVtables->Entries))
+                    );
+  if (LinkedVtables == NULL) {
     return FALSE;
   }
 
-  Result = InternalCreateVtablesPrelinked64 (Context, Kext, VtableExport, Vtables);
+  Result = InternalCreateVtablesPrelinked64 (
+             Context,
+             Kext,
+             NumVtables,
+             VtableSymbols,
+             LinkedVtables
+             );
   if (!Result) {
     return EFI_UNSUPPORTED;
   }
 
-  Kext->LinkedVtables   = Vtables;
-  Kext->NumberOfVtables = VtableExport->NumSymbols;
+  Kext->LinkedVtables   = LinkedVtables;
+  Kext->NumberOfVtables = NumVtables;
 
   return EFI_SUCCESS;
 }

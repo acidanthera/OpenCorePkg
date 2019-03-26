@@ -269,11 +269,6 @@ OC_GLOBAL_STATIC_ASSERT (
   "VTable Patch data might not safely fit LinkBuffer"
   );
 
-typedef struct {
-  UINT32              NumSymbols;
-  CONST MACH_NLIST_64 *Symbols[];
-} OC_VTABLE_EXPORT_ARRAY;
-
 //
 // VTables
 //
@@ -294,16 +289,18 @@ InternalPatchByVtables64 (
 BOOLEAN
 InternalPrepareCreateVtablesPrelinked64 (
   IN  OC_MACHO_CONTEXT          *MachoContext,
-  OUT OC_VTABLE_EXPORT_ARRAY    *VtableExport,
-  IN  UINT32                    VtableExportSize
+  IN  UINT32                    MaxSize,
+  OUT UINT32                    *NumVtables,
+  OUT CONST MACH_NLIST_64       **Vtables
   );
 
 BOOLEAN
 InternalCreateVtablesPrelinked64 (
   IN     PRELINKED_CONTEXT      *Context,
   IN OUT PRELINKED_KEXT         *Kext,
-  IN     OC_VTABLE_EXPORT_ARRAY *VtableExport,
-     OUT PRELINKED_VTABLE       *VtableBuffer
+  IN     UINT32                 NumVtables,
+  IN     CONST MACH_NLIST_64    **VtableSymbols,
+  OUT    PRELINKED_VTABLE       *VtableBuffer
   );
 
 CONST PRELINKED_VTABLE *
