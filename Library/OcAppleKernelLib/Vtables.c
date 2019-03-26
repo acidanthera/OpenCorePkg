@@ -702,14 +702,16 @@ InternalPatchByVtables64 (
       NumEntries += NumEntriesTemp;
 
       EntryWalker->NumSolveSymbols += EntryWalker->MetaSymsIndex;
-      NumTables += 2;
+      ++NumTables;
 
       EntryWalker = GET_NEXT_OC_VTABLE_PATCH_ENTRY (EntryWalker);
     }
   }
-
+  //
+  // One structure contains two VTables, hence (NumTables * 2).
+  //
   Kext->LinkedVtables = AllocatePool (
-                          (NumTables * sizeof (*Kext->LinkedVtables))
+                          ((NumTables * 2) * sizeof (*Kext->LinkedVtables))
                             + (NumEntries * sizeof (*Kext->LinkedVtables->Entries))
                           );
   if (Kext->LinkedVtables == NULL) {
