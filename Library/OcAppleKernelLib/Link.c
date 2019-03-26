@@ -631,9 +631,12 @@ InternalIsDirectPureVirtualCall64 (
   }
 
   Index = ((Offset - VTABLE_ENTRY_SIZE_64) / sizeof (UINT64));
-  Entry = &Vtable->Entries[Index];
+  if (Index >= Vtable->NumEntries) {
+    return FALSE;
+  }
 
-  if ((Index >= Vtable->NumEntries) || (Entry->Name == NULL)) {
+  Entry = &Vtable->Entries[Index];
+  if (Entry->Name == NULL) {
     return FALSE;
   }
 
