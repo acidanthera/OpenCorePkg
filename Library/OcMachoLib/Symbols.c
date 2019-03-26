@@ -591,11 +591,15 @@ MachoSymbolGetFileOffset64 (
   ASSERT (Symbol != NULL);
   ASSERT (FileOffset != NULL);
 
-  Section = MachoGetSectionByIndex64 (
-    Context,
-    Symbol->Section == NO_SECT ? 0 : Symbol->Section - 1
-    );
+  if ((Symbol->Section == NO_SECT)
+   || (Symbol->Section > MAX_SECT)) {
+    return FALSE;
+  }
 
+  Section = MachoGetSectionByIndex64 (
+              Context,
+              (Symbol->Section - 1)
+              );
   if ((Section == NULL) || (Symbol->Value < Section->Address)) {
     return FALSE;
   }

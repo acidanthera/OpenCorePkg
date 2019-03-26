@@ -552,7 +552,8 @@ InternalCalculateTargetsIntel64 (
 
     TargetAddress = Symbol->Value;
   } else {
-    if (Relocation->SymbolNumber == 0) {
+    if ((Relocation->SymbolNumber == NO_SECT)
+     || (Relocation->SymbolNumber > MAX_SECT)) {
       return FALSE;
     }
 
