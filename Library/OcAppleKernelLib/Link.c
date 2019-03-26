@@ -1268,6 +1268,8 @@ InternalPrelinkKext64 (
                NumUndefinedSymbols
                );
     if (!Result) {
+      DEBUG ((DEBUG_INFO, "Symbol %s was unresolved for kext %a\n",
+        MachoGetSymbolName64 (MachoContext, Symbol), Kext->Identifier));
       return RETURN_LOAD_ERROR;
     }
   }
@@ -1276,6 +1278,7 @@ InternalPrelinkKext64 (
   //
   Result = InternalPatchByVtables64 (Context, Kext);
   if (!Result) {
+    DEBUG ((DEBUG_INFO, "Vtable patching failed for kext %a\n", Kext->Identifier));
     return RETURN_LOAD_ERROR;
   }
   //

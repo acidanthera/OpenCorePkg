@@ -27,6 +27,12 @@
  rm -rf DICT fuzz*.log ; mkdir DICT ; find /System/Library/Extensions/<< * >>/Contents/MacOS -type f -exec cp {} DICT \; ./Prelinked -jobs=4 DICT
 
  rm -rf Prelinked.dSYM DICT fuzz*.log Prelinked
+
+ clang -DTEST_SLE=1 -g -O3 -fno-sanitize=undefined,address -Wno-incompatible-pointer-types-discards-qualifiers -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c ../../Library/OcAppleKernelLib/PrelinkedContext.c ../../Library/OcAppleKernelLib/PrelinkedKext.c ../../Library/OcAppleKernelLib/KextPatcher.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcAppleKernelLib/Link.c ../../Library/OcAppleKernelLib/Vtables.c ../../Tests/KernelTest/Lilu.c ../../Tests/KernelTest/Vsmc.c  -o Prelinked
+
+ for i in /System/Library/Extensions/<< * >>.kext ; do plist=$i/Contents/Info.plist ; kext="$i/Contents/MacOS/$(/usr/libexec/PlistBuddy -c 'Print CFBundleExecutable' "$plist")" ; echo "$kext $plist" ; ./Prelinked prelinkedkernel.unpack "$kext" "$plist" ; done
+
+ /[^\n]+\nPassed.kext injected - 0x8[^\n]+
 */
 
 STATIC CHAR8 KextInfoPlistData[] = {
@@ -444,6 +450,7 @@ int main(int argc, char** argv) {
       printf("Prelink inject prepare error %zx\n", Status);
     }
 
+#ifndef TEST_SLE
     Status = PrelinkedInjectKext (
       &Context,
       "/Library/Extensions/TestDriver.kext",
@@ -455,6 +462,7 @@ int main(int argc, char** argv) {
       );
 
     DEBUG ((DEBUG_WARN, "TestDriver.kext injected - %zx\n", Status));
+#endif
 
     UINT8  *TestData = LiluKextData;
     UINT32 TestDataSize = LiluKextDataSize;
@@ -489,6 +497,7 @@ int main(int argc, char** argv) {
 
     DEBUG ((DEBUG_WARN, "%s injected - %r\n", argc > 2 ? "Passed.kext" : "Lilu.kext", Status));
 
+#ifndef TEST_SLE
     Status = PrelinkedInjectKext (
       &Context,
       "/Library/Extensions/VirtualSMC.kext",
@@ -519,7 +528,7 @@ int main(int argc, char** argv) {
     } else {
       printf("File error\n");
     }
-
+#endif
     PrelinkedContextFree (&Context);
   } else {
     printf("Context creation error %zx\n", Status);

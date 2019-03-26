@@ -99,7 +99,7 @@ MachoSymbolIsSection (
   ASSERT (Symbol != NULL);
 
   if ((Symbol->Type & MACH_N_TYPE_STAB) != 0) {
-    switch (Symbol->Type) {
+    switch (Symbol->Type & MACH_N_TYPE_STAB) {
       //
       // Labeled as MACH_N_sect in stab.h
       //
@@ -150,8 +150,8 @@ MachoSymbolIsDefined (
 {
   ASSERT (Symbol != NULL);
 
-  return ((Symbol->Type == MACH_RELOC_ABSOLUTE)
-           || MachoSymbolIsSection (Symbol));
+  return (Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_ABS
+    || MachoSymbolIsSection (Symbol);
 }
 
 /**
