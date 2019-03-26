@@ -150,8 +150,9 @@ MachoSymbolIsDefined (
 {
   ASSERT (Symbol != NULL);
 
-  return (Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_ABS
-    || MachoSymbolIsSection (Symbol);
+  return (((Symbol->Type & MACH_N_TYPE_STAB) == 0)
+      && (((Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_ABS)
+       || MachoSymbolIsSection (Symbol)));
 }
 
 /**
@@ -422,7 +423,7 @@ MachoGetSymbolByRelocationOffset64 (
 **/
 STATIC
 MACH_NLIST_64 *
-InternalGetSymbolByName (
+InternalGetLocalDefinedSymbolByNameWorker (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     MACH_NLIST_64     *SymbolTable,
   IN     UINT32            NumberOfSymbols,
@@ -439,6 +440,11 @@ InternalGetSymbolByName (
     if (!InternalSymbolIsSane (Context, &SymbolTable[Index])) {
       break;
     }
+
+    if (!MachoSymbolIsDefined (&SymbolTable[Index])) {
+      continue;
+    }
+
     TmpName = MachoGetSymbolName64 (Context, &SymbolTable[Index]);
     if (AsciiStrCmp (Name, TmpName) == 0) {
       return &SymbolTable[Index];
@@ -478,14 +484,14 @@ MachoGetLocalDefinedSymbolByName (
   DySymtab = Context->DySymtab;
 
   if (DySymtab != NULL) {
-    Symbol = InternalGetSymbolByName (
+    Symbol = InternalGetLocalDefinedSymbolByNameWorker (
                Context,
                &SymbolTable[DySymtab->LocalSymbolsIndex],
                DySymtab->NumLocalSymbols,
                Name
                );
     if (Symbol == NULL) {
-      Symbol = InternalGetSymbolByName (
+      Symbol = InternalGetLocalDefinedSymbolByNameWorker (
                  Context,
                  &SymbolTable[DySymtab->ExternalSymbolsIndex],
                  DySymtab->NumExternalSymbols,
@@ -494,7 +500,7 @@ MachoGetLocalDefinedSymbolByName (
     }
   } else {
     ASSERT (Context->Symtab != NULL);
-    Symbol = InternalGetSymbolByName (
+    Symbol = InternalGetLocalDefinedSymbolByNameWorker (
                Context,
                SymbolTable,
                Context->Symtab->NumSymbols,
