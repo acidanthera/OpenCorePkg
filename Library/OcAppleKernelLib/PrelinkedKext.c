@@ -649,7 +649,7 @@ InternalScanPrelinkedKext (
       //
       DependencyKext = InternalCachedPrelinkedKext (Context, DependencyId);
       if (DependencyKext == NULL) {
-        return EFI_NOT_FOUND;
+        continue;
       }
 
       Status = InternalInsertPrelinkedKextDependency (Kext, Context, DependencyIndex, DependencyKext);
