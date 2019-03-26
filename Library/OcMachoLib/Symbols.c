@@ -398,7 +398,7 @@ InternalGetSymbolByName (
 
   for (Index = 0; Index < NumberOfSymbols; ++Index) {
     if (!InternalSymbolIsSane (Context, &SymbolTable[Index])) {
-      continue;
+      break;
     }
     TmpName = MachoGetSymbolName64 (Context, &SymbolTable[Index]);
     if (AsciiStrCmp (Name, TmpName) == 0) {
@@ -461,10 +461,6 @@ MachoGetLocalDefinedSymbolByName (
                Context->Symtab->NumSymbols,
                Name
                );
-  }
-
-  if ((Symbol != NULL) && !InternalSymbolIsSane (Context, Symbol)) {
-    return NULL;
   }
 
   return Symbol;
