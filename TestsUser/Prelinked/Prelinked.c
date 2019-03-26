@@ -428,7 +428,7 @@ int main(int argc, char** argv) {
   }
 
 
-  AllocSize = MACHO_ALIGN (Size + 16*1024*1024);
+  AllocSize = MACHO_ALIGN (Size + 64*1024*1024);
 
   Prelinked = realloc (Prelinked, AllocSize);
   if (Prelinked == NULL) {
@@ -554,7 +554,7 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
     return 0;
   }
 
-  AllocSize = MACHO_ALIGN (PrelinkedSize + 16*1024*1024);
+  AllocSize = MACHO_ALIGN (PrelinkedSize + 64*1024*1024);
 
   Prelinked = realloc (Prelinked, AllocSize);
   if (Prelinked == NULL) {
