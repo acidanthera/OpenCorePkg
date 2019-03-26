@@ -435,15 +435,15 @@ InternalInitializeVtableByEntriesAndRelocations64 (
   CONST CHAR8                *VtableName;
   CONST PRELINKED_KEXT_SYMBOL *OcSymbol;
   UINT32                     Index;
-  PRELINKED_VTABLE_ENTRY     *VtableEntry;
+  PRELINKED_VTABLE_ENTRY     *VtableEntries;
   UINT32                     EntryOffset;
   UINT64                     EntryValue;
   UINT32                     SolveSymbolIndex;
   BOOLEAN                    Result;
   MACH_NLIST_64              *Symbol;
 
-  MachoContext = &Kext->Context.MachContext;
-  VtableEntry  = Vtable->Entries;
+  MachoContext  = &Kext->Context.MachContext;
+  VtableEntries = Vtable->Entries;
 
   VtableName       = MachoGetSymbolName64 (MachoContext, VtableSymbol);
   SolveSymbolIndex = 0;
@@ -472,11 +472,11 @@ InternalInitializeVtableByEntriesAndRelocations64 (
                    OcGetSymbolOnlyCxx
                    );
       if (OcSymbol != NULL) {
-        VtableEntry->Name    = OcSymbol->Name;
-        VtableEntry->Address = OcSymbol->Value;
+        VtableEntries[Index].Name    = OcSymbol->Name;
+        VtableEntries[Index].Address = OcSymbol->Value;
       } else {
-        VtableEntry->Name    = NULL;
-        VtableEntry->Address = 0;
+        VtableEntries[Index].Name    = NULL;
+        VtableEntries[Index].Address = 0;
       }
     } else {
       if (SolveSymbolIndex >= NumSolveSymbols) {
@@ -504,16 +504,14 @@ InternalInitializeVtableByEntriesAndRelocations64 (
           return FALSE;
         }
 
-        VtableEntry->Name    = MachoGetSymbolName64 (MachoContext, Symbol);
-        VtableEntry->Address = Symbol->Value;
+        VtableEntries[Index].Name    = MachoGetSymbolName64 (MachoContext, Symbol);
+        VtableEntries[Index].Address = Symbol->Value;
       }
     }
-
-    ++VtableEntry;
   }
 
   Vtable->Name       = VtableName;
-  Vtable->NumEntries = (UINT32)(VtableEntry - Vtable->Entries);
+  Vtable->NumEntries = Index;
 
   return TRUE;
 }
