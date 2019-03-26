@@ -365,6 +365,12 @@ InternalSolveSymbol64 (
 
   ASSERT (Symbol != NULL);
   ASSERT (UndefinedSymbols != NULL || NumUndefinedSymbols == 0);
+  //
+  // STAB symbols are not considered undefined.
+  //
+  if ((Symbol->Type & MACH_N_TYPE_STAB) != 0) {
+    return TRUE;
+  }
 
   Success = InternalSolveSymbolNonWeak64 (
               Context,
@@ -1047,7 +1053,7 @@ InternalRelocateSymbols (
   for (Index = 0; Index < NumSymbols; ++Index) {
     Symbol = &Symbols[Index];
 
-    if (KmodOffset == 0) {
+    if ((KmodOffset == 0) && ((Symbol->Type & MACH_N_TYPE_STAB) == 0)) {
       SymbolName = MachoGetSymbolName64 (MachoContext, Symbol);
       ASSERT (SymbolName != NULL);
 

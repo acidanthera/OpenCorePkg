@@ -649,7 +649,8 @@ InternalPatchByVtables64 (
     ++Index
     ) {
     Name = MachoGetSymbolName64 (MachoContext, Smcp);
-    if (MachoSymbolNameIsSmcp64 (MachoContext, Name)) {
+    if (((Smcp->Type & MACH_N_TYPE_STAB) == 0)
+     && MachoSymbolNameIsSmcp64 (MachoContext, Name)) {
       if (MaxSize < sizeof (*EntryWalker)) {
         return FALSE;
       }
