@@ -345,6 +345,7 @@ MachoGetSymbolByRelocationOffset64 (
   )
 {
   CONST MACH_RELOCATION_INFO *Relocation;
+  CONST UINT64               *Data;
 
   ASSERT (Context != NULL);
 
@@ -353,14 +354,13 @@ MachoGetSymbolByRelocationOffset64 (
     if (Relocation->Extern != 0) {
       *Symbol = MachoGetSymbolByIndex64 (Context, Relocation->SymbolNumber);
     } else {
-      if ((Address + sizeof (UINT64)) > Context->FileSize) {
+      Data = ((UINT64 *)((UINTN)Context->MachHeader + Address));
+      if (((Address + sizeof (UINT64)) > Context->FileSize)
+       || !OC_ALIGNED (Data)) {
         *Symbol = NULL;
       } else {
         // FIXME: Only C++ symbols.
-        *Symbol = InternalGetSymbolByValue (
-                    Context,
-                    ReadUnaligned64 ((UINT64 *)((UINTN)Context->MachHeader + Address))
-                    );
+        *Symbol = InternalGetSymbolByValue (Context, *Data);
       }
     }
 
