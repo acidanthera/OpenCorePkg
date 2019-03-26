@@ -38,25 +38,23 @@ InternalGetOcVtableByNameWorker (
   UINTN                  Index;
   PRELINKED_KEXT         *Dependency;
   INTN                   Result;
-  CONST PRELINKED_VTABLE *VtableWalker;
 
   Vtable = NULL;
 
   Kext->Processed = TRUE;
 
   for (
-    Index = 0, VtableWalker = Kext->LinkedVtables;
+    Index = 0, Vtable = Kext->LinkedVtables;
     Index < Kext->NumberOfVtables;
-    ++Index, VtableWalker = GET_NEXT_PRELINKED_VTABLE (VtableWalker)
+    ++Index, Vtable = GET_NEXT_PRELINKED_VTABLE (Vtable)
     ) {
-    Result = AsciiStrCmp (VtableWalker->Name, Name);
+    Result = AsciiStrCmp (Vtable->Name, Name);
     if (Result == 0) {
-      Vtable = VtableWalker;
-      break;
+      return Vtable;
     }
   }
 
-  for (Index = 0; Vtable == NULL && Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
+  for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
     Dependency = Kext->Dependencies[Index];
     if (Dependency == NULL) {
       break;
@@ -67,9 +65,12 @@ InternalGetOcVtableByNameWorker (
     }
 
     Vtable = InternalGetOcVtableByName (Context, Dependency, Name);
+    if (Vtable != NULL) {
+      return Vtable;
+    }
   }
 
-  return Vtable;
+  return NULL;
 }
 
 CONST PRELINKED_VTABLE *
