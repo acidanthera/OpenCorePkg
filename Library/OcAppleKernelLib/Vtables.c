@@ -302,15 +302,8 @@ InternalPatchVtableSymbol (
   CONST CHAR8 *ClassName;
   CHAR8       FunctionPrefix[SYM_MAX_NAME_LEN];
 
+  ASSERT (Symbol != NULL);
   ASSERT (ParentEntry != NULL);
-  //
-  // The child entry can be NULL when a locally-defined, non-external
-  // symbol is stripped.  We wouldn't patch this entry anyway, so we
-  // just skip it.
-  //
-  if (Symbol == NULL) {
-    return TRUE;
-  }
   //
   // 1) If the symbol is defined locally, do not patch
   //
@@ -477,20 +470,26 @@ InternalInitializeVtableByEntriesAndRelocations64 (
       }
 
       Symbol = SolveSymbols[SolveSymbolIndex];
-      Result = InternalPatchVtableSymbol (
-                 MachoContext,
-                 &SuperVtable->Entries[Index],
-                 VtableName,
-                 Symbol
-                 );
-      if (!Result) {
-        return FALSE;
-      }
-
-      VtableEntry->Name    = MachoGetSymbolName64 (MachoContext, Symbol);
-      VtableEntry->Address = Symbol->Value;
-
       ++SolveSymbolIndex;
+      //
+      // The child entry can be NULL when a locally-defined, non-external
+      // symbol is stripped.  We wouldn't patch this entry anyway, so we
+      // just skip it.
+      //
+      if (Symbol != NULL) {
+        Result = InternalPatchVtableSymbol (
+                   MachoContext,
+                   &SuperVtable->Entries[Index],
+                   VtableName,
+                   Symbol
+                   );
+        if (!Result) {
+          return FALSE;
+        }
+
+        VtableEntry->Name    = MachoGetSymbolName64 (MachoContext, Symbol);
+        VtableEntry->Address = Symbol->Value;
+      }
     }
 
     ++VtableEntry;
