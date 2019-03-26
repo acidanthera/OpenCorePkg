@@ -296,6 +296,36 @@ MachoGetIndirectSymbolName64 (
 }
 
 /**
+  Retrieves a symbol by its value.
+
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Value    Value of the symbol to locate.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+STATIC
+MACH_NLIST_64 *
+InternalGetSymbolByValue (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Value
+  )
+{
+  UINT32 Index;
+
+  ASSERT (Context->SymbolTable != NULL);
+  ASSERT (Context->Symtab != NULL);
+
+  for (Index = 0; Index < Context->Symtab->NumSymbols; ++Index) {
+    if (Context->SymbolTable[Index].Value == Value) {
+      return &Context->SymbolTable[Index];
+    }
+  }
+
+  return NULL;
+}
+
+/**
   Retrieves the symbol referenced by the Relocation targeting Address.
 
   @param[in,out] Context  Context of the Mach-O.
@@ -308,7 +338,7 @@ MachoGetIndirectSymbolName64 (
 
 **/
 BOOLEAN
-MachoGetSymbolByExternRelocationOffset64 (
+MachoGetSymbolByRelocationOffset64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT64            Address,
   OUT    MACH_NLIST_64     **Symbol
@@ -318,9 +348,22 @@ MachoGetSymbolByExternRelocationOffset64 (
 
   ASSERT (Context != NULL);
 
-  Relocation = InternalGetExternalRelocationByOffset (Context, Address);
+  Relocation = InternalGetRelocationByOffset (Context, Address);
   if (Relocation != NULL) {
-    *Symbol = MachoGetSymbolByIndex64 (Context, Relocation->SymbolNumber);
+    if (Relocation->Extern != 0) {
+      *Symbol = MachoGetSymbolByIndex64 (Context, Relocation->SymbolNumber);
+    } else {
+      if ((Address + sizeof (UINT64)) > Context->FileSize) {
+        *Symbol = NULL;
+      } else {
+        // FIXME: Only C++ symbols.
+        *Symbol = InternalGetSymbolByValue (
+                    Context,
+                    ReadUnaligned64 ((UINT64 *)((UINTN)Context->MachHeader + Address))
+                    );
+      }
+    }
+
     return TRUE;
   }
 
@@ -358,7 +401,7 @@ InternalGetSymbolByName (
       continue;
     }
     TmpName = MachoGetSymbolName64 (Context, &SymbolTable[Index]);
-    if (TmpName != NULL && AsciiStrCmp (Name, TmpName) == 0) {
+    if (AsciiStrCmp (Name, TmpName) == 0) {
       return &SymbolTable[Index];
     }
   }

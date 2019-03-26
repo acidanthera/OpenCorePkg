@@ -524,7 +524,7 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
   ASSERT (Context != NULL);
   ASSERT (Smcp != NULL);
 
-  Result = MachoGetSymbolByExternRelocationOffset64 (
+  Result = MachoGetSymbolByRelocationOffset64 (
              Context,
              Smcp->Value,
              &Symbol

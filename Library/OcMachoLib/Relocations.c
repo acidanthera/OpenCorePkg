@@ -68,47 +68,24 @@ MachoPreserveRelocationIntel64 (
 /**
   Retrieves an extern Relocation by the address it targets.
 
-  @param[in,out] Context  Context of the Mach-O.
   @param[in]     Address  The address to search for.
 
   @retval NULL  NULL is returned on failure.
 
 **/
+STATIC
 MACH_RELOCATION_INFO *
-InternalGetExternalRelocationByOffset (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT64            Address
+InternalLookupRelocationByOffset (
+  IN     UINT64                Address,
+  IN     UINT32                NumRelocs,
+  IN     MACH_RELOCATION_INFO  *Relocs
   )
 {
   UINT32               Index;
   MACH_RELOCATION_INFO *Relocation;
 
-  ASSERT (Context != NULL);
-  //
-  // Assumption: 64-bit.
-  //
-  if (!InternalRetrieveSymtabs64 (Context) || (Context->DySymtab == NULL)) {
-    return NULL;
-  }
-
-  ASSERT (Context->ExternRelocations != NULL);
-
-  for (Index = 0; Index < Context->DySymtab->NumExternalRelocations; ++Index) {
-    Relocation = &Context->ExternRelocations[Index];
-    //
-    // A section-based relocation entry can be skipped for absolute 
-    // symbols.
-    // Assumption: Not i386.
-    //
-    if (((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) != 0) {
-      continue;
-    }
-
-    if ((Relocation->Extern == 0)
-     && (Relocation->Address == MACH_RELOC_ABSOLUTE)) {
-      continue;
-    }
-
+  for (Index = 0; Index < NumRelocs; ++Index) {
+    Relocation = &Relocs[Index];
     if ((UINT64)Relocation->Address == Address) {
       return Relocation;
     }
@@ -126,4 +103,67 @@ InternalGetExternalRelocationByOffset (
   }
 
   return NULL;
+}
+
+/**
+  Retrieves an extern Relocation by the address it targets.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  The address to search for.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_RELOCATION_INFO *
+InternalGetExternalRelocationByOffset (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address
+  )
+{
+  if (!InternalRetrieveSymtabs64 (Context) || (Context->DySymtab == NULL)) {
+    return NULL;
+  }
+
+  return InternalLookupRelocationByOffset (
+           Address,
+           Context->DySymtab->NumExternalRelocations,
+           Context->ExternRelocations
+           );
+}
+
+/**
+  Retrieves an extern Relocation by the address it targets.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  The address to search for.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_RELOCATION_INFO *
+InternalGetRelocationByOffset (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address
+  )
+{
+  MACH_RELOCATION_INFO *Relocation;
+
+  if (!InternalRetrieveSymtabs64 (Context) || (Context->DySymtab == NULL)) {
+    return NULL;
+  }
+
+  Relocation = InternalLookupRelocationByOffset (
+                 Address,
+                 Context->DySymtab->NumExternalRelocations,
+                 Context->ExternRelocations
+                 );
+  if (Relocation == NULL) {
+    Relocation = InternalLookupRelocationByOffset (
+                   Address,
+                   Context->DySymtab->NumOfLocalRelocations,
+                   Context->LocalRelocations
+                   );
+  }
+
+  return Relocation;
 }

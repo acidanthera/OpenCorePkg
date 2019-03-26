@@ -351,7 +351,7 @@ MachoIsSymbolValueInRange64 (
 
 **/
 BOOLEAN
-MachoGetSymbolByExternRelocationOffset64 (
+MachoGetSymbolByRelocationOffset64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT64            Address,
   OUT    MACH_NLIST_64     **Symbol

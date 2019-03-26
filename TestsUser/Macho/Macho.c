@@ -283,7 +283,7 @@ static int FeedMacho(void *file, uint32_t size) {
   }
 
   for (size_t i = 0x1000000; i < 0x100000000; i+= 0x1000000) {
-    if ((Symbol = MachoGetSymbolByExternRelocationOffset64 (&Context, i))) {
+    if ((Symbol = MachoGetSymbolByRelocationOffset64 (&Context, i))) {
       if (!AsciiStrCmp (MachoGetSymbolName64 (&Context, Symbol), "__hack")) {
         code++;
       }

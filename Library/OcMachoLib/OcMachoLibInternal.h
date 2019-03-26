@@ -46,6 +46,21 @@ InternalGetExternalRelocationByOffset (
   );
 
 /**
+  Retrieves a Relocation by the address it targets.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  The address to search for.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_RELOCATION_INFO *
+InternalGetRelocationByOffset (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address
+  );
+
+/**
   Check symbol validity.
 
   @param[in,out] Context  Context of the Mach-O.
