@@ -310,6 +310,7 @@ ApplyKextPatches (
   PRELINKED_CONTEXT  *Context
   )
 {
+#if 0
   EFI_STATUS       Status;
   PATCHER_CONTEXT  Patcher;
 
@@ -380,6 +381,7 @@ ApplyKextPatches (
   } else {
     DEBUG ((DEBUG_WARN, "Failed to find com.apple.driver.AppleHDAController - %r\n", Status));
   }
+#endif
 }
 
 VOID
@@ -456,11 +458,21 @@ int main(int argc, char** argv) {
 
     UINT8  *TestData = LiluKextData;
     UINT32 TestDataSize = LiluKextDataSize;
+    CHAR8  *TestPlist = LiluKextInfoPlistData;
+    UINT32 TestPlistSize = LiluKextInfoPlistDataSize;
 
     if (argc > 2) {
       TestData = readFile(argv[2], &TestDataSize);
       if (TestData == NULL) {
-        printf("Read fail\n");
+        printf("Read data fail\n");
+        return -1;
+      }
+    }
+
+    if (argc > 3) {
+      TestPlist = (CHAR8*) readFile(argv[3], &TestPlistSize);
+      if (TestPlist == NULL) {
+        printf("Read plist fail\n");
         return -1;
       }
     }
@@ -468,14 +480,14 @@ int main(int argc, char** argv) {
     Status = PrelinkedInjectKext (
       &Context,
       "/Library/Extensions/Lilu.kext",
-      LiluKextInfoPlistData,
-      LiluKextInfoPlistDataSize,
+      TestPlist,
+      TestPlistSize,
       "Contents/MacOS/Lilu",
       TestData,
       TestDataSize
       );
 
-    DEBUG ((DEBUG_WARN, "Lilu.kext injected - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "%s injected - %r\n", argc > 2 ? "Passed.kext" : "Lilu.kext", Status));
 
     Status = PrelinkedInjectKext (
       &Context,
