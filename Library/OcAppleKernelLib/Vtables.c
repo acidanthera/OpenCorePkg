@@ -436,7 +436,6 @@ InternalInitializeVtableByEntriesAndRelocations64 (
   CONST PRELINKED_KEXT_SYMBOL *OcSymbol;
   UINT32                     Index;
   PRELINKED_VTABLE_ENTRY     *VtableEntries;
-  UINT32                     EntryOffset;
   UINT64                     EntryValue;
   UINT32                     SolveSymbolIndex;
   BOOLEAN                    Result;
@@ -451,12 +450,8 @@ InternalInitializeVtableByEntriesAndRelocations64 (
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.
   //
-  for (
-    Index = 0, EntryOffset = VTABLE_HEADER_LEN_64;
-    Index < SuperVtable->NumEntries;
-    ++Index, ++EntryOffset
-    ) {
-    EntryValue = VtableData[EntryOffset];
+  for (Index = 0; Index < SuperVtable->NumEntries; ++Index) {
+    EntryValue = VtableData[Index + VTABLE_HEADER_LEN_64];
     if (EntryValue != 0) {
       //
       // If we can't find a symbol, it means it is a locally-defined,
