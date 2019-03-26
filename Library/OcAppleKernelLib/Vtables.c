@@ -709,7 +709,7 @@ InternalPatchByVtables64 (
       NumEntries += NumEntriesTemp;
 
       EntryWalker->NumSolveSymbols += EntryWalker->MetaSymsIndex;
-      ++NumTables;
+      NumTables += 2;
 
       EntryWalker = GET_NEXT_OC_VTABLE_PATCH_ENTRY (EntryWalker);
     }
