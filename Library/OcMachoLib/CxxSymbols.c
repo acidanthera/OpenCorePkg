@@ -529,8 +529,14 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
              Smcp->Value,
              &Symbol
              );
-  if (Result) {
-    return Symbol;
+  if (Result && (Symbol != NULL)) {
+    Result = MachoSymbolNameIsMetaclassPointer64 (
+               Context,
+               MachoGetSymbolName64 (Context, Symbol)
+               );
+    if (Result) {
+      return Symbol;
+    }
   }
 
   return NULL;
