@@ -346,24 +346,29 @@ MachoGetSymbolByRelocationOffset64 (
 {
   CONST MACH_RELOCATION_INFO *Relocation;
   CONST UINT64               *Data;
+  MACH_NLIST_64              *Sym;
 
   ASSERT (Context != NULL);
 
   Relocation = InternalGetRelocationByOffset (Context, Address);
   if (Relocation != NULL) {
+    Sym = NULL;
+
     if (Relocation->Extern != 0) {
-      *Symbol = MachoGetSymbolByIndex64 (Context, Relocation->SymbolNumber);
+      Sym = MachoGetSymbolByIndex64 (Context, Relocation->SymbolNumber);
     } else {
       Data = ((UINT64 *)((UINTN)Context->MachHeader + Address));
-      if (((Address + sizeof (UINT64)) > Context->FileSize)
-       || !OC_ALIGNED (Data)) {
-        *Symbol = NULL;
-      } else {
+      if (((Address + sizeof (UINT64)) <= Context->FileSize)
+       && OC_ALIGNED (Data)) {
         // FIXME: Only C++ symbols.
-        *Symbol = InternalGetSymbolByValue (Context, *Data);
+        Sym = InternalGetSymbolByValue (Context, *Data);
+        if ((Sym != NULL) && !InternalSymbolIsSane (Context, Sym)) {
+          Sym = NULL;
+        }
       }
     }
 
+    *Symbol = Sym;
     return TRUE;
   }
 
