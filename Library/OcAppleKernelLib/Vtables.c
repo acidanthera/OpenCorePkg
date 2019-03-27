@@ -242,6 +242,10 @@ InternalPrepareCreateVtablesPrelinked64 (
 
   for (Index = 0; Index < NumSymbols; ++Index) {
     Symbol = &SymbolTable[Index];
+    if (((Symbol->Type) &  MACH_N_TYPE_STAB) != 0) {
+      continue;
+    }
+
     Name = MachoGetSymbolName64 (MachoContext, Symbol);
     if (MachoSymbolNameIsVtable64 (Name)) {
       if (VtableIndex >= MaxSize) {
