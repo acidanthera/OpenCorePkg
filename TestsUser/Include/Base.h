@@ -604,6 +604,30 @@ RShiftU64 (
 }
 
 STATIC
+UINT16
+SwapBytes16 (
+  IN      UINT16                    Value
+  )
+{
+  return (UINT16) ((Value<< 8) | (Value>> 8));
+}
+
+STATIC
+UINT32
+SwapBytes32 (
+  IN      UINT32                    Value
+  )
+{
+  UINT32  LowerBytes;
+  UINT32  HigherBytes;
+
+  LowerBytes  = (UINT32) SwapBytes16 ((UINT16) Value);
+  HigherBytes = (UINT32) SwapBytes16 ((UINT16) (Value >> 16));
+
+  return (LowerBytes << 16 | HigherBytes);
+}
+
+STATIC
 UINT8
 CalculateSum8 (
   IN UINT8  *Buffer,
