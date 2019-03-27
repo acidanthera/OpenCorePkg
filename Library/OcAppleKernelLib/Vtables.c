@@ -469,9 +469,7 @@ InternalInitializeVtableByEntriesAndRelocations64 (
       if (OcSymbol != NULL) {
         VtableEntries[Index].Name    = OcSymbol->Name;
         VtableEntries[Index].Address = OcSymbol->Value;
-      } else {
-        VtableEntries[Index].Name    = NULL;
-        VtableEntries[Index].Address = 0;
+        continue;
       }
     } else {
       if (SolveSymbolIndex >= NumSolveSymbols) {
@@ -501,8 +499,12 @@ InternalInitializeVtableByEntriesAndRelocations64 (
 
         VtableEntries[Index].Name    = MachoGetSymbolName64 (MachoContext, Symbol);
         VtableEntries[Index].Address = Symbol->Value;
+        continue;
       }
     }
+
+    VtableEntries[Index].Name    = NULL;
+    VtableEntries[Index].Address = 0;
   }
 
   Vtable->Name       = VtableName;
