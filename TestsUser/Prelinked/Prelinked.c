@@ -501,7 +501,7 @@ int main(int argc, char** argv) {
 
       Status = PrelinkedInjectKext (
         &Context,
-        KextPath
+        KextPath,
         TestPlist,
         TestPlistSize,
         "Contents/MacOS/Kext",
