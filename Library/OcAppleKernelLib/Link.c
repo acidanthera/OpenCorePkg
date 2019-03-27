@@ -382,8 +382,7 @@ InternalSolveSymbol64 (
     return TRUE;
   }
 
-  if (((Symbol->Type & MACH_N_TYPE_STAB) == 0)
-   && ((Symbol->Descriptor & MACH_N_WEAK_DEF) != 0)) {
+  if ((Symbol->Descriptor & MACH_N_WEAK_DEF) != 0) {
     //
     // KXLD_WEAK_TEST_SYMBOL is not going to be defined or exposed by a KEXT
     // prelinked by this library, hence only check the undefined symbols region
