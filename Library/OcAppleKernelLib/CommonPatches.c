@@ -253,7 +253,7 @@ PatchUsbXhciPortLimit (
   Status = PatcherInitContextFromPrelinked (
     &Patcher,
     Context,
-    "com.apple.driver.usb.AppleUSBXHCIPCI"
+    "com.apple.driver.usb.AppleUSBXHCI"
     );
 
   if (!EFI_ERROR (Status)) {
@@ -263,13 +263,13 @@ PatchUsbXhciPortLimit (
       // We do not need to patch com.apple.driver.usb.AppleUSBXHCI if this patch was successful.
       // Only legacy systems require com.apple.driver.usb.AppleUSBXHCI to be patched.
       //
-      DEBUG ((DEBUG_INFO, "Patch success com.apple.driver.usb.AppleUSBXHCIPCI\n"));
+      DEBUG ((DEBUG_INFO, "Patch success com.apple.driver.usb.AppleUSBXHCI\n"));
       return EFI_SUCCESS;
     } else {
-      DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "Failed to find com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "Failed to find com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
   }
 
   //
@@ -278,18 +278,18 @@ PatchUsbXhciPortLimit (
   Status = PatcherInitContextFromPrelinked (
     &Patcher,
     Context,
-    "com.apple.driver.usb.AppleUSBXHCI"
+    "com.apple.driver.usb.AppleUSBXHCIPCI"
     );
 
   if (!EFI_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &mRemoveUsbLimitV1Patch);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "Patch success com.apple.driver.usb.AppleUSBXHCI\n"));
+      DEBUG ((DEBUG_INFO, "Patch success com.apple.driver.usb.AppleUSBXHCIPCI\n"));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "Failed to find com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "Failed to find com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
   }
 
   return Status;
