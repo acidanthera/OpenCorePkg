@@ -1412,15 +1412,16 @@ InternalPrelinkKext64 (
   //
   // Clear dynamic linker information.
   //
-  DySymtab->LocalSymbolsIndex      = 0;
-  DySymtab->NumLocalSymbols        = 0;
-  DySymtab->NumExternalSymbols     = 0;
-  DySymtab->ExternalSymbolsIndex   = 0;
-  DySymtab->NumExternalRelocations = 0;
-  DySymtab->UndefinedSymbolsIndex  = 0;
-  DySymtab->NumUndefinedSymbols    = 0;
-  DySymtab->IndirectSymbolsOffset  = 0;
-  DySymtab->NumIndirectSymbols     = 0;
+  DySymtab->LocalSymbolsIndex         = 0;
+  DySymtab->NumLocalSymbols           = 0;
+  DySymtab->NumExternalSymbols        = 0;
+  DySymtab->ExternalSymbolsIndex      = 0;
+  DySymtab->NumExternalRelocations    = 0;
+  DySymtab->ExternalRelocationsOffset = 0;
+  DySymtab->UndefinedSymbolsIndex     = 0;
+  DySymtab->NumUndefinedSymbols       = 0;
+  DySymtab->IndirectSymbolsOffset     = 0;
+  DySymtab->NumIndirectSymbols        = 0;
   //
   // Copy the new __LINKEDIT segment into the binary and fix its Load Command.
   //
