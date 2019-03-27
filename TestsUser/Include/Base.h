@@ -29,6 +29,10 @@
 #include <assert.h>
 #include <cpuid.h>
 
+#ifndef RSIZE_MAX
+#define RSIZE_MAX (SIZE_MAX >> 1)
+#endif
+
 //
 // Types and limits
 //
@@ -481,7 +485,7 @@ struct _LIST_ENTRY {
 #define AsciiStrStr strstr
 #define AsciiStrnCmp strncmp
 #define AsciiStrSize(x) (strlen(x) + 1)
-#define AsciiStrnCpyS(a, b, c, d) strlcpy(a, c, b)
+#define AsciiStrnCpyS(a, b, c, d) oc_strlcpy(a, c, b)
 #define AsciiStrDecimalToUint64(a) strtoull(a, NULL, 10)
 #define AsciiStrHexToUint64(a) strtoull(a, NULL, 16)
 #define ASSERT(x) assert(x)
@@ -493,6 +497,37 @@ struct _LIST_ENTRY {
 #define CopyGuid(a, b) memcpy((a), (b), sizeof (EFI_GUID))
 
 EFI_STATUS EfiGetSystemConfigurationTable (EFI_GUID *TableGuid, OUT VOID **Table);
+
+/*
+ * Copy string src to buffer dst of size dsize.  At most dsize-1
+ * chars will be copied.  Always NUL terminates (unless dsize == 0).
+ * Returns strlen(src); if retval >= dsize, truncation occurred.
+ */
+STATIC
+size_t
+oc_strlcpy(char * __restrict dst, const char * __restrict src, size_t dsize)
+{
+	const char *osrc = src;
+	size_t nleft = dsize;
+
+	/* Copy as many bytes as will fit. */
+	if (nleft != 0) {
+		while (--nleft != 0) {
+			if ((*dst++ = *src++) == '\0')
+				break;
+		}
+	}
+
+	/* Not enough room in dst, add NUL and traverse rest of src. */
+	if (nleft == 0) {
+		if (dsize != 0)
+			*dst = '\0';		/* NUL-terminate dst */
+		while (*src++)
+			;
+	}
+
+	return(src - osrc - 1);	/* count does not include NUL */
+}
 
 //
 // Dirty printf implementation
@@ -531,7 +566,7 @@ ppprintf (
   ...
 ) {
   char  Buffer[1024];
-  strlcpy (Buffer, Src, sizeof (Buffer));
+  oc_strlcpy (Buffer, Src, sizeof (Buffer));
 
   ppptransform(Buffer);
 
@@ -552,7 +587,7 @@ snppprintf (
   )
 {
   char  Buffer[1024];
-  strlcpy(Buffer, Src, sizeof (Buffer));
+  oc_strlcpy (Buffer, Src, sizeof (Buffer));
 
   ppptransform(Buffer);
 
