@@ -502,17 +502,19 @@ int main(int argc, char** argv) {
     DEBUG ((DEBUG_WARN, "%s injected - %r\n", argc > 2 ? "Passed.kext" : "Lilu.kext", Status));
 
 #ifndef TEST_SLE
-    Status = PrelinkedInjectKext (
-      &Context,
-      "/Library/Extensions/VirtualSMC.kext",
-      VsmcKextInfoPlistData,
-      VsmcKextInfoPlistDataSize,
-      "Contents/MacOS/VirtualSMC",
-      VsmcKextData,
-      VsmcKextDataSize
-      );
+    if (argc <= 2) {
+      Status = PrelinkedInjectKext (
+        &Context,
+        "/Library/Extensions/VirtualSMC.kext",
+        VsmcKextInfoPlistData,
+        VsmcKextInfoPlistDataSize,
+        "Contents/MacOS/VirtualSMC",
+        VsmcKextData,
+        VsmcKextDataSize
+        );
 
-    DEBUG ((DEBUG_WARN, "VirtualSMC.kext injected - %r\n", Status));
+      DEBUG ((DEBUG_WARN, "VirtualSMC.kext injected - %r\n", Status));
+    }
 
     Status = PrelinkedInjectComplete (&Context);
 
