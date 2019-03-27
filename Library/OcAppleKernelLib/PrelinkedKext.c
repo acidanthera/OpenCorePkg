@@ -495,6 +495,11 @@ InternalFreePrelinkedKext (
     Kext->LinkedSymbolTable = NULL;
   }
 
+  if (Kext->LinkedVtables != NULL) {
+    FreePool (Kext->LinkedVtables);
+    Kext->LinkedVtables = NULL;
+  }
+
   FreePool (Kext);
 }
 
