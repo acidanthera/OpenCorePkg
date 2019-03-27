@@ -253,6 +253,11 @@ InternalScanBuildLinkedSymbolTable (
 
   for (Index = 0; Index < Kext->NumberOfSymbols; ++Index) {
     Symbol = &Kext->SymbolTable[Index];
+    if ((Symbol->Type & MACH_N_TYPE_STAB) != 0) {
+      ++NumDiscardedSyms;
+      continue;
+    }
+
     Name   = MachoGetSymbolName64 (&Kext->Context.MachContext, Symbol);
     Result = MachoSymbolNameIsCxx (Name);
 
