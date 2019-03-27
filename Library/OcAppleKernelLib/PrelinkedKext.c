@@ -332,54 +332,44 @@ InternalScanBuildLinkedVtables (
   IN     PRELINKED_CONTEXT  *Context
   )
 {
-  CONST MACH_NLIST_64    **VtableSymbols;
-  UINT32                 MaxSize;
-  BOOLEAN                Result;
-  UINT32                 NumVtables;
-  UINT32                 NumEntries;
-  UINT32                 NumEntriesTemp;
-  UINT32                 Index;
-  UINT32                 VtableOffset;
-  UINT32                 VtableMaxSize;
-  CONST UINT64           *VtableData;
-  CONST MACH_HEADER_64   *MachHeader;
-  UINT32                 MachSize;
-  PRELINKED_VTABLE       *LinkedVtables;
+  OC_PRELINKED_VTABLE_LOOKUP_ENTRY *VtableLookups;
+  UINT32                           MaxSize;
+  BOOLEAN                          Result;
+  UINT32                           NumVtables;
+  UINT32                           NumEntries;
+  UINT32                           NumEntriesTemp;
+  UINT32                           Index;
+  UINT32                           VtableMaxSize;
+  CONST UINT64                     *VtableData;
+  PRELINKED_VTABLE                 *LinkedVtables;
 
-  VtableSymbols = Context->LinkBuffer;
+  VtableLookups = Context->LinkBuffer;
   MaxSize       = Context->LinkBufferSize;
 
   Result = InternalPrepareCreateVtablesPrelinked64 (
-             &Kext->Context.MachContext,
+             Kext,
              MaxSize,
              &NumVtables,
-             VtableSymbols
+             VtableLookups
              );
   if (!Result) {
     return EFI_UNSUPPORTED;
   }
 
-  MachHeader = MachoGetMachHeader64 (&Kext->Context.MachContext);
-  ASSERT (MachHeader != NULL);
-
-  MachSize = MachoGetFileSize (&Kext->Context.MachContext);
-  ASSERT (MachSize != 0);
-
   NumEntries = 0;
 
   for (Index = 0; Index < NumVtables; ++Index) {
-    Result = MachoSymbolGetFileOffset64 (
-                &Kext->Context.MachContext,
-                VtableSymbols[Index],
-                &VtableOffset,
-                &VtableMaxSize
-                );
-    if (!Result) {
-      return Result;
-    }
-
-    VtableData = (UINT64 *)((UINTN)MachHeader + VtableOffset);
-    if (!OC_ALIGNED (VtableData)) {
+    //
+    // NOTE: KXLD locates the section via MACH_NLIST_64.Section. However, as we
+    //       need to abort anyway when the value is out of its bounds, we can
+    //       just locate it by address in the first place.
+    //
+    VtableData = MachoGetFilePointerByAddress64 (
+                   &Kext->Context.MachContext,
+                   VtableLookups[Index].Vtable.Value,
+                   &VtableMaxSize
+                   );
+    if ((VtableData == NULL) || !OC_ALIGNED (VtableData)) {
       return FALSE;
     }
 
@@ -391,6 +381,8 @@ InternalScanBuildLinkedVtables (
     if (!Result) {
       return FALSE;
     }
+
+    VtableLookups[Index].Vtable.Data = VtableData;
 
     NumEntries += NumEntriesTemp;
   }
@@ -407,7 +399,7 @@ InternalScanBuildLinkedVtables (
              Context,
              Kext,
              NumVtables,
-             VtableSymbols,
+             VtableLookups,
              LinkedVtables
              );
   if (!Result) {

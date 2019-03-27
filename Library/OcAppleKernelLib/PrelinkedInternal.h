@@ -249,6 +249,19 @@ typedef enum {
     )
 
 typedef struct {
+  CONST CHAR8  *Name;
+  union {
+    UINT64       Value;
+    CONST UINT64 *Data;
+  } Vtable;
+} OC_PRELINKED_VTABLE_LOOKUP_ENTRY;
+
+OC_GLOBAL_STATIC_ASSERT (
+  (sizeof (OC_PRELINKED_VTABLE_LOOKUP_ENTRY) <= sizeof (MACH_NLIST_64)),
+  "Prelinked VTable lookup data might not safely fit LinkBuffer"
+  );
+
+typedef struct {
   CONST MACH_NLIST_64 *Smcp;
   CONST MACH_NLIST_64 *Vtable;
   UINT64              *VtableData;
@@ -288,19 +301,19 @@ InternalPatchByVtables64 (
 
 BOOLEAN
 InternalPrepareCreateVtablesPrelinked64 (
-  IN  OC_MACHO_CONTEXT          *MachoContext,
-  IN  UINT32                    MaxSize,
-  OUT UINT32                    *NumVtables,
-  OUT CONST MACH_NLIST_64       **Vtables
+  IN  PRELINKED_KEXT                    *Kext,
+  IN  UINT32                            MaxSize,
+  OUT UINT32                            *NumVtables,
+  OUT OC_PRELINKED_VTABLE_LOOKUP_ENTRY  *Vtables
   );
 
 BOOLEAN
 InternalCreateVtablesPrelinked64 (
-  IN     PRELINKED_CONTEXT      *Context,
-  IN OUT PRELINKED_KEXT         *Kext,
-  IN     UINT32                 NumVtables,
-  IN     CONST MACH_NLIST_64    **VtableSymbols,
-  OUT    PRELINKED_VTABLE       *VtableBuffer
+  IN     PRELINKED_CONTEXT                       *Context,
+  IN OUT PRELINKED_KEXT                          *Kext,
+  IN     UINT32                                  NumVtables,
+  IN     CONST OC_PRELINKED_VTABLE_LOOKUP_ENTRY  *VtableLookups,
+  OUT    PRELINKED_VTABLE                        *VtableBuffer
   );
 
 CONST PRELINKED_VTABLE *

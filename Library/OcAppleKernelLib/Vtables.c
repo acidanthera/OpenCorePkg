@@ -92,47 +92,23 @@ InternalGetOcVtableByName (
 STATIC
 BOOLEAN
 InternalConstructVtablePrelinked64 (
-  IN     PRELINKED_CONTEXT         *Context,
-  IN OUT PRELINKED_KEXT            *Kext,
-  IN     CONST MACH_NLIST_64       *VtableSymbol,
-  OUT    PRELINKED_VTABLE          *Vtable
+  IN     PRELINKED_CONTEXT                      *Context,
+  IN OUT PRELINKED_KEXT                         *Kext,
+  IN     CONST OC_PRELINKED_VTABLE_LOOKUP_ENTRY *VtableLookup,
+  OUT    PRELINKED_VTABLE                       *Vtable
   )
 {
-  OC_MACHO_CONTEXT            *MachoContext;
-  BOOLEAN                     Result;
-  CONST MACH_HEADER_64        *MachHeader;
-  UINT32                      VtableOffset;
-  UINT32                      MaxSize;
   CONST UINT64                *VtableData;
   UINT64                      Value;
   UINT32                      Index;
   CONST PRELINKED_KEXT_SYMBOL *Symbol;
 
   ASSERT (Kext != NULL);
-  ASSERT (VtableSymbol != NULL);
+  ASSERT (VtableLookup != NULL);
   ASSERT (Vtable != NULL);
 
-  MachoContext = &Kext->Context.MachContext;
-
-  MachHeader = MachoGetMachHeader64 (MachoContext);
-  ASSERT (MachHeader != NULL);
-
-  Result = MachoSymbolGetFileOffset64 (
-             MachoContext,
-             VtableSymbol,
-             &VtableOffset,
-             &MaxSize
-             );
-  if (!Result || (MaxSize < (VTABLE_HEADER_SIZE_64 + VTABLE_ENTRY_SIZE_64))) {
-    return FALSE;
-  }
-
-  VtableData = (UINT64 *)((UINTN)MachHeader + VtableOffset);
-  if (!OC_ALIGNED (VtableData)) {
-    return FALSE;
-  }
-
-  Vtable->Name = MachoGetSymbolName64 (MachoContext, VtableSymbol);
+  VtableData   = VtableLookup->Vtable.Data;
+  Vtable->Name = VtableLookup->Name;
   Vtable->NumEntries = 0;
 
   //
@@ -145,7 +121,6 @@ InternalConstructVtablePrelinked64 (
   // VTable bounds are verified in InternalGetVtableEntries64() called earlier.
   // The buffer is allocated to be able to hold all entries.
   //
-  MaxSize /= VTABLE_ENTRY_SIZE_64;
   for (
     Index = 0;
     (Value = VtableData[Index + VTABLE_HEADER_LEN_64]) != 0;
@@ -164,10 +139,6 @@ InternalConstructVtablePrelinked64 (
     } else {
       Vtable->Entries[Index].Address = 0;
       Vtable->Entries[Index].Name    = NULL;
-    }
-
-    if ((Index + VTABLE_HEADER_LEN_64 + 1) >= MaxSize) {
-      return FALSE;
     }
   }
 
@@ -205,54 +176,35 @@ InternalGetVtableEntries64 (
 
 BOOLEAN
 InternalPrepareCreateVtablesPrelinked64 (
-  IN  OC_MACHO_CONTEXT          *MachoContext,
-  IN  UINT32                    MaxSize,
-  OUT UINT32                    *NumVtables,
-  OUT CONST MACH_NLIST_64       **Vtables
+  IN  PRELINKED_KEXT                    *Kext,
+  IN  UINT32                            MaxSize,
+  OUT UINT32                            *NumVtables,
+  OUT OC_PRELINKED_VTABLE_LOOKUP_ENTRY  *Vtables
   )
 {
-  UINT32              VtableIndex;
+  UINT32                      VtableIndex;
 
-  CONST MACH_NLIST_64 *SymbolTable;
-  CONST MACH_NLIST_64 *Symbol;
-  CONST CHAR8         *Name;
-  UINT32              NumSymbols;
-  UINT32              Index;
+  CONST PRELINKED_KEXT_SYMBOL *Symbol;
+  UINT32                      Index;
 
-  ASSERT (MachoContext != NULL);
+  ASSERT (Kext != NULL);
 
   VtableIndex = 0;
 
-  NumSymbols = MachoGetSymbolTable (
-                 MachoContext,
-                 &SymbolTable,
-                 NULL,
-                 NULL,
-                 NULL,
-                 NULL,
-                 NULL,
-                 NULL,
-                 NULL
-                 );
-  if (NumSymbols == 0) {
-    return FALSE;
-  }
-
   MaxSize /= sizeof (*Vtables);
-
-  for (Index = 0; Index < NumSymbols; ++Index) {
-    Symbol = &SymbolTable[Index];
-    if (((Symbol->Type) &  MACH_N_TYPE_STAB) != 0) {
-      continue;
-    }
-
-    Name = MachoGetSymbolName64 (MachoContext, Symbol);
-    if (MachoSymbolNameIsVtable64 (Name)) {
-      if (VtableIndex >= MaxSize) {
+  for (
+    Index = (Kext->NumberOfSymbols - Kext->NumberOfCxxSymbols);
+    Index < Kext->NumberOfSymbols;
+    ++Index
+    ) {
+    Symbol = &Kext->LinkedSymbolTable[Index];
+    if (MachoSymbolNameIsVtable64 (Symbol->Name)) {
+      if ((Symbol->Value == 0) || (VtableIndex >= MaxSize)) {
         return FALSE;
       }
 
-      Vtables[VtableIndex] = Symbol;
+      Vtables[VtableIndex].Name         = Symbol->Name;
+      Vtables[VtableIndex].Vtable.Value = Symbol->Value;
       ++VtableIndex;
     }
   }
@@ -264,25 +216,23 @@ InternalPrepareCreateVtablesPrelinked64 (
 
 BOOLEAN
 InternalCreateVtablesPrelinked64 (
-  IN     PRELINKED_CONTEXT      *Context,
-  IN OUT PRELINKED_KEXT         *Kext,
-  IN     UINT32                 NumVtables,
-  IN     CONST MACH_NLIST_64    **VtableSymbols,
-  OUT    PRELINKED_VTABLE       *VtableBuffer
+  IN     PRELINKED_CONTEXT                       *Context,
+  IN OUT PRELINKED_KEXT                          *Kext,
+  IN     UINT32                                  NumVtables,
+  IN     CONST OC_PRELINKED_VTABLE_LOOKUP_ENTRY  *VtableLookups,
+  OUT    PRELINKED_VTABLE                        *VtableBuffer
   )
 {
-  CONST MACH_NLIST_64 *Symbol;
   UINT32              Index;
   BOOLEAN             Result;
 
   ASSERT (Kext != NULL);
 
   for (Index = 0; Index < NumVtables; ++Index) {
-    Symbol = VtableSymbols[Index];
     Result = InternalConstructVtablePrelinked64 (
                 Context,
                 Kext,
-                Symbol,
+                &VtableLookups[Index],
                 VtableBuffer
                 );
     if (!Result) {
