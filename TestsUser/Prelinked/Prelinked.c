@@ -473,33 +473,37 @@ int main(int argc, char** argv) {
     CHAR8  *TestPlist = LiluKextInfoPlistData;
     UINT32 TestPlistSize = LiluKextInfoPlistDataSize;
 
-    if (argc > 2) {
-      TestData = readFile(argv[2], &TestDataSize);
-      if (TestData == NULL) {
-        printf("Read data fail\n");
-        return -1;
+    while (argc > 2) {
+      if (argc > 2) {
+        TestData = readFile(argv[2], &TestDataSize);
+        if (TestData == NULL) {
+          printf("Read data fail\n");
+          return -1;
+        }
       }
-    }
 
-    if (argc > 3) {
-      TestPlist = (CHAR8*) readFile(argv[3], &TestPlistSize);
-      if (TestPlist == NULL) {
-        printf("Read plist fail\n");
-        return -1;
+      if (argc > 3) {
+        TestPlist = (CHAR8*) readFile(argv[3], &TestPlistSize);
+        if (TestPlist == NULL) {
+          printf("Read plist fail\n");
+          return -1;
+        }
       }
+
+      Status = PrelinkedInjectKext (
+        &Context,
+        "/Library/Extensions/Lilu.kext",
+        TestPlist,
+        TestPlistSize,
+        "Contents/MacOS/Lilu",
+        TestData,
+        TestDataSize
+        );
+
+      DEBUG ((DEBUG_WARN, "%s injected - %r\n", argc > 2 ? "Passed.kext" : "Lilu.kext", Status));
+
+      argc -= 2;
     }
-
-    Status = PrelinkedInjectKext (
-      &Context,
-      "/Library/Extensions/Lilu.kext",
-      TestPlist,
-      TestPlistSize,
-      "Contents/MacOS/Lilu",
-      TestData,
-      TestDataSize
-      );
-
-    DEBUG ((DEBUG_WARN, "%s injected - %r\n", argc > 2 ? "Passed.kext" : "Lilu.kext", Status));
 
 #ifndef TEST_SLE
     if (argc <= 2) {
