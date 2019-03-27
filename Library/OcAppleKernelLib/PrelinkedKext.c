@@ -628,7 +628,7 @@ InternalScanPrelinkedKext (
   //
   DependencyKext = InternalCachedPrelinkedKernel (Context);
   if (DependencyKext == NULL) {
-    return EFI_NOT_FOUND;
+    return RETURN_NOT_FOUND;
   }
 
   if (DependencyKext != Kext) {
@@ -655,7 +655,25 @@ InternalScanPrelinkedKext (
       DependencyKext = InternalCachedPrelinkedKext (Context, DependencyId);
       if (DependencyKext == NULL) {
         DEBUG ((DEBUG_INFO, "Dependency %a was not found for kext %a\n", DependencyId, Kext->Identifier));
-        return EFI_NOT_FOUND;
+        //
+        // Some kexts, notably VoodooPS2 forks, link against IOHIDSystem.kext, which is a plist-only
+        // dummy, macOS does not add to the prelinkedkernel. This cannot succeed as /S/L/E directory
+        // is not accessible (and can be encrypted). Normally kext's Info.plist is to be fixed, but
+        // we also put a hack here to let some common kexts work.
+        //
+        if (AsciiStrCmp (DependencyId, "com.apple.iokit.IOHIDSystem") == 0) {
+          DependencyKext = InternalCachedPrelinkedKext (Context, "com.apple.iokit.IOHIDFamily");
+          DEBUG ((
+            DEBUG_WARN,
+            "Dependency %a fallback to %a %a. Please fix your kext!\n",
+            DependencyId,
+            "com.apple.iokit.IOHIDSystem",
+            DependencyKext != NULL ? "succeeded" : "failed"
+            ));
+        }
+        if (DependencyKext == NULL) {
+          return RETURN_NOT_FOUND;
+        }
       }
 
       Status = InternalInsertPrelinkedKextDependency (Kext, Context, DependencyIndex, DependencyKext);
@@ -683,7 +701,7 @@ InternalScanPrelinkedKext (
     }
   }
 
-  return EFI_SUCCESS;
+  return RETURN_SUCCESS;
 }
 
 VOID
