@@ -1362,6 +1362,7 @@ InternalPrelinkKext64 (
     return RETURN_LOAD_ERROR;
   }
   NumRelocations += NumRelocations2;
+  RelocationsSize = (NumRelocations * sizeof (MACH_RELOCATION_INFO));
   //
   // Copy the entire symbol table excluding the area for undefined symbols.
   //
