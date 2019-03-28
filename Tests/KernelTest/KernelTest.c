@@ -352,6 +352,8 @@ CalculateReserveSize (
   PrelinkedReserveKextSize (&ReserveSize, LiluKextInfoPlistDataSize, LiluKextData, LiluKextDataSize);
   PrelinkedReserveKextSize (&ReserveSize, VsmcKextInfoPlistDataSize, VsmcKextData, VsmcKextDataSize);
 
+  DEBUG ((DEBUG_INFO, "Kext reservation size %u\n", ReserveSize));
+
   return ReserveSize;
 }
 
