@@ -238,6 +238,8 @@ InternalScanBuildLinkedSymbolTable (
     return EFI_OUT_OF_RESOURCES;
   }
 
+  Kext->LinkedSymbolTable = SymbolTable;
+
   MachHeader = MachoGetMachHeader64 (&Kext->Context.MachContext);
   ASSERT (MachHeader != NULL);
   //
@@ -319,7 +321,6 @@ InternalScanBuildLinkedSymbolTable (
     Kext->NumberOfSymbols -= NumDiscardedSyms;
   }
 
-  Kext->LinkedSymbolTable  = SymbolTable;
   Kext->NumberOfCxxSymbols = NumCxxSymbols;
 
   return EFI_SUCCESS;

@@ -292,6 +292,7 @@ PrelinkedContextFree (
   if (Context->LinkBuffer != NULL) {
     ZeroMem (Context->LinkBuffer, Context->LinkBufferSize);
     FreePool (Context->LinkBuffer);
+    Context->LinkBuffer = NULL;
   }
 
   while (!IsListEmpty (&Context->PrelinkedKexts)) {
