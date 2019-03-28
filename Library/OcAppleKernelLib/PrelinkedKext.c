@@ -238,8 +238,6 @@ InternalScanBuildLinkedSymbolTable (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Kext->LinkedSymbolTable = SymbolTable;
-
   MachHeader = MachoGetMachHeader64 (&Kext->Context.MachContext);
   ASSERT (MachHeader != NULL);
   //
@@ -278,6 +276,7 @@ InternalScanBuildLinkedSymbolTable (
       if ((Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_INDR) {
         Name = MachoGetIndirectSymbolName64 (&Kext->Context.MachContext, Symbol);
         if (Name == NULL) {
+          FreePool (SymbolTable);
           return EFI_LOAD_ERROR;
         }
 
@@ -289,6 +288,7 @@ InternalScanBuildLinkedSymbolTable (
                            OcGetSymbolFirstLevel
                            );
         if (ResolvedSymbol == NULL) {
+          FreePool (SymbolTable);
           return EFI_NOT_FOUND;
         }
         SymbolScratch.Value = ResolvedSymbol->Value;
@@ -322,6 +322,7 @@ InternalScanBuildLinkedSymbolTable (
   }
 
   Kext->NumberOfCxxSymbols = NumCxxSymbols;
+  Kext->LinkedSymbolTable  = SymbolTable;
 
   return EFI_SUCCESS;
 }
@@ -400,8 +401,6 @@ InternalScanBuildLinkedVtables (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Kext->LinkedVtables = LinkedVtables;
-
   Result = InternalCreateVtablesPrelinked64 (
              Context,
              Kext,
@@ -415,6 +414,7 @@ InternalScanBuildLinkedVtables (
   }
 
   Kext->NumberOfVtables = NumVtables;
+  Kext->LinkedVtables   = LinkedVtables;
 
   return EFI_SUCCESS;
 }
