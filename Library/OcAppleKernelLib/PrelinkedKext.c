@@ -396,6 +396,8 @@ InternalScanBuildLinkedVtables (
     return EFI_OUT_OF_RESOURCES;
   }
 
+  Kext->LinkedVtables = LinkedVtables;
+
   Result = InternalCreateVtablesPrelinked64 (
              Context,
              Kext,
@@ -407,7 +409,6 @@ InternalScanBuildLinkedVtables (
     return EFI_UNSUPPORTED;
   }
 
-  Kext->LinkedVtables   = LinkedVtables;
   Kext->NumberOfVtables = NumVtables;
 
   return EFI_SUCCESS;
