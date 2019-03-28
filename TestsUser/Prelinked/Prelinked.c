@@ -421,7 +421,7 @@ ApplyKernelPatches (
 #define main no_main
 #endif
 
-int main(int argc, char** argv) {
+int wrap_main(int argc, char** argv) {
   UINT32 Size;
   UINT32 AllocSize;
   UINT8  *Prelinked;
@@ -431,12 +431,12 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-
   AllocSize = MACHO_ALIGN (Size + 64*1024*1024);
 
   Prelinked = realloc (Prelinked, AllocSize);
   if (Prelinked == NULL) {
     printf("Realloc fail\n");
+    abort();
     return -1;
   }
 
@@ -468,21 +468,20 @@ int main(int argc, char** argv) {
     DEBUG ((DEBUG_WARN, "TestDriver.kext injected - %zx\n", Status));
 #endif
 
-    UINT8  *TestData = LiluKextData;
-    UINT32 TestDataSize = LiluKextDataSize;
-    CHAR8  *TestPlist = LiluKextInfoPlistData;
-    UINT32 TestPlistSize = LiluKextInfoPlistDataSize;
-
     int c = 0;
 
     while (argc > 2) {
+      UINT8  *TestData = LiluKextData;
+      UINT32 TestDataSize = LiluKextDataSize;
+      CHAR8  *TestPlist = LiluKextInfoPlistData;
+      UINT32 TestPlistSize = LiluKextInfoPlistDataSize;
+
       if (argc > 2) {
         TestData = readFile(argv[2], &TestDataSize);
         if (TestData == NULL) {
           printf("Read data fail\n");
+          abort();
           return -1;
-        } else {
-          printf("Read data success\n");
         }
       }
 
@@ -490,9 +489,8 @@ int main(int argc, char** argv) {
         TestPlist = (CHAR8*) readFile(argv[3], &TestPlistSize);
         if (TestPlist == NULL) {
           printf("Read plist fail\n");
+          abort();
           return -1;
-        } else {
-          printf("Read plist success\n");
         }
       }
 
@@ -510,6 +508,9 @@ int main(int argc, char** argv) {
         );
 
       DEBUG ((DEBUG_WARN, "%s injected - %r\n", argc > 2 ? "Passed.kext" : "Lilu.kext", Status));
+
+      if (argc > 2) free(TestData);
+      if (argc > 3) free(TestPlist);
 
       argc -= 2;
       argv += 2;
@@ -611,5 +612,12 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
   PrelinkedContextFree (&Context);
   free(Prelinked);
 
+  return 0;
+}
+
+int main(int argc, char *argv[]) {
+  for (size_t i = 0; i < 15; i++) {
+    wrap_main(argc, argv);
+  }
   return 0;
 }

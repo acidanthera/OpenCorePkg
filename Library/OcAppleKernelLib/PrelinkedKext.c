@@ -344,6 +344,10 @@ InternalScanBuildLinkedVtables (
   CONST UINT64                     *VtableData;
   PRELINKED_VTABLE                 *LinkedVtables;
 
+  if (Kext->LinkedVtables != NULL) {
+    return EFI_SUCCESS;
+  }
+
   VtableLookups = Context->LinkBuffer;
   MaxSize       = Context->LinkBufferSize;
 
@@ -406,6 +410,7 @@ InternalScanBuildLinkedVtables (
              LinkedVtables
              );
   if (!Result) {
+    FreePool (LinkedVtables);
     return EFI_UNSUPPORTED;
   }
 
