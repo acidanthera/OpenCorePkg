@@ -393,7 +393,7 @@ InternalScanBuildLinkedVtables (
                       + (NumEntries * sizeof (*LinkedVtables->Entries))
                     );
   if (LinkedVtables == NULL) {
-    return FALSE;
+    return EFI_OUT_OF_RESOURCES;
   }
 
   Result = InternalCreateVtablesPrelinked64 (
