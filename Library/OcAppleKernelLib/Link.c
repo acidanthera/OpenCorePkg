@@ -947,7 +947,6 @@ InternalRelocateAndCopyRelocations64 (
   ASSERT (Kext != NULL);
   ASSERT (SourceRelocations != NULL);
   ASSERT (NumRelocations != NULL);
-  ASSERT (NumRelocations > 0);
   ASSERT (TargetRelocations != NULL);
 
   PreservedRelocations = 0;
@@ -1089,6 +1088,92 @@ InternalRelocateSymbols (
   return TRUE;
 }
 
+/**
+  process_symbol_pointers
+**/
+STATIC
+BOOLEAN
+InternalProcessSymbolPointers (
+  IN OC_MACHO_CONTEXT             *MachoContext,
+  IN CONST MACH_DYSYMTAB_COMMAND  *DySymtab,
+  IN UINT64                       LoadAddress
+  )
+{
+  CONST MACH_HEADER_64  *MachHeader;
+  UINT32                MachSize;
+  CONST MACH_SECTION_64 *Section;
+  UINT32                NumSymbols;
+  UINT32                FirstSym;
+  BOOLEAN               Result;
+  UINT32                OffsetTop;
+  CONST UINT32          *SymIndex;
+  CHAR8                 *SymPtr;
+  UINT32                Index;
+  CONST MACH_NLIST_64   *Symbol;
+
+  Section = MachoGetSegmentSectionByName64 (
+              MachoContext,
+              "__DATA",
+              "__nl_symbol_ptr"
+              );
+  if (Section == NULL) {
+    return TRUE;
+  }
+
+  NumSymbols = (Section->Size / sizeof (MACH_NLIST_64));
+  FirstSym   = Section->Reserved1;
+
+  Result = OcOverflowAddU32 (FirstSym, NumSymbols, &OffsetTop);
+  if (Result || (OffsetTop > DySymtab->NumIndirectSymbols)) {
+    return FALSE;
+  }
+
+  MachSize = MachoGetFileSize (MachoContext);
+  Result = OcOverflowMulAddU32 (
+             DySymtab->NumIndirectSymbols,
+             sizeof (MACH_NLIST_64),
+             DySymtab->IndirectSymbolsOffset,
+             &OffsetTop
+             );
+  if (Result || (OffsetTop > MachSize)) {
+    return FALSE;
+  }
+
+  MachHeader = MachoGetMachHeader64 (MachoContext);
+  ASSERT (MachHeader != NULL);
+  //
+  // Iterate through the indirect symbol table and fill in the section of
+  // symbol pointers.  There are three cases:
+  //   1) A normal symbol - put its value directly in the table
+  //   2) An INDIRECT_SYMBOL_LOCAL - symbols that are local and already have
+  //      their offset from the start of the file in the section.  Simply
+  //      add the file's link address to fill this entry.
+  //   3) An INDIRECT_SYMBOL_ABS - prepopulated absolute symbols.  No
+  //      action is required.
+  //
+  SymIndex  = (UINT32 *)((UINTN)MachHeader + DySymtab->IndirectSymbolsOffset);
+  SymIndex += FirstSym;
+  SymPtr    = (CHAR8 *)((UINTN)MachHeader + Section->Offset);
+
+  for (Index = 0; Index < NumSymbols; ++Index, SymPtr += sizeof (MACH_NLIST_64)) {
+    if ((*SymIndex & MACH_INDIRECT_SYMBOL_LOCAL) != 0) {
+      if ((*SymIndex & MACH_INDIRECT_SYMBOL_ABS) != 0) {
+        continue;
+      }
+
+      *(UINT64 *)SymPtr += LoadAddress;
+    } else {
+      Symbol = MachoGetSymbolByIndex64 (MachoContext, *SymIndex);
+      if (Symbol == NULL) {
+        return FALSE;
+      }
+
+      *(UINT64 *)SymPtr += Symbol->Value;
+    }
+  }
+
+  return TRUE;
+}
 
 /**
   Prelinks the specified KEXT against the specified LoadAddress and the data
@@ -1321,6 +1406,11 @@ InternalPrelinkKext64 (
   FirstSegment = MachoGetNextSegment64 (MachoContext, NULL);
   if (FirstSegment == NULL) {
     return RETURN_UNSUPPORTED;
+  }
+  
+  Result = InternalProcessSymbolPointers (MachoContext, DySymtab, LoadAddress);
+  if (!Result) {
+    return RETURN_LOAD_ERROR;
   }
   //
   // Copy the relocations to be reserved and adapt the symbol number they
