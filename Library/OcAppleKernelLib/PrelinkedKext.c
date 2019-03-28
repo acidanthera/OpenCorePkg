@@ -371,7 +371,7 @@ InternalScanBuildLinkedVtables (
                    &VtableMaxSize
                    );
     if ((VtableData == NULL) || !OC_ALIGNED (VtableData)) {
-      return FALSE;
+      return EFI_UNSUPPORTED;
     }
 
     Result = InternalGetVtableEntries64 (
@@ -380,7 +380,7 @@ InternalScanBuildLinkedVtables (
                &NumEntriesTemp
                );
     if (!Result) {
-      return FALSE;
+      return EFI_UNSUPPORTED;
     }
 
     VtableLookups[Index].Vtable.Data = VtableData;
