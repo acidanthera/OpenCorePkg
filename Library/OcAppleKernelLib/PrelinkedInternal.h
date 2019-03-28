@@ -34,7 +34,8 @@ typedef struct {
   // Value is declared first as it has shown to improve comparison performance.
   //
   UINT64      Value;  ///< value of this symbol (or stab offset)
-  CONST CHAR8 *Name;  ///< name of this symbol
+  UINT32      Name;  ///< name of this symbol
+  UINT32      Length;
 } PRELINKED_KEXT_SYMBOL;
 
 typedef struct {
@@ -341,12 +342,11 @@ typedef enum {
   OcGetSymbolOnlyCxx
 } OC_GET_SYMBOL_LEVEL;
 
-// TODO: Move?
 CONST PRELINKED_KEXT_SYMBOL *
 InternalOcGetSymbolName (
   IN PRELINKED_CONTEXT    *Context,
   IN PRELINKED_KEXT       *Kext,
-  IN UINT64               LookupValue,
+  IN CONST CHAR8          *LookupValue,
   IN OC_GET_SYMBOL_LEVEL  SymbolLevel
   );
 

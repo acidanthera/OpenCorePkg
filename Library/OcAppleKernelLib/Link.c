@@ -39,12 +39,14 @@ CONST PRELINKED_KEXT_SYMBOL *
 InternalOcGetSymbolWorkerName (
   IN PRELINKED_KEXT                   *Kext,
   IN CONST CHAR8                      *LookupValue,
+  IN UINT32                           LookupValueLength,
   IN OC_GET_SYMBOL_LEVEL              SymbolLevel
   )
 {
   PRELINKED_KEXT              *Dependency;
   CONST PRELINKED_KEXT_SYMBOL *Symbols;
   CONST PRELINKED_KEXT_SYMBOL *SymbolsEnd;
+  CONST CHAR8                 *LookedSymbol;
   UINT32                      Index;
   UINT32                      NumSymbols;
 
@@ -63,8 +65,24 @@ InternalOcGetSymbolWorkerName (
 
   SymbolsEnd = &Symbols[NumSymbols];
   while (Symbols < SymbolsEnd) {
-    if (AsciiStrCmp (LookupValue, Symbols->Name) == 0) {
-      return Symbols;
+    //
+    // Symbol names often start and end similarly due to C++ mangling (e.g. __ZN).
+    // To optimise the lookup we compare their length check in the middle.
+    // Please do not change this without careful profiling.
+    //
+    if (Symbols->Length == LookupValueLength) {
+      LookedSymbol = Kext->StringTable + Symbols->Name;
+      if (LookedSymbol[LookupValueLength/2] == LookupValue[LookupValueLength/2]
+        && LookedSymbol[LookupValueLength/2 + 1] == LookupValue[LookupValueLength/2 + 1]) {
+        for (Index = 0; Index < LookupValueLength; ++Index) {
+          if (LookedSymbol[Index] != LookupValue[Index]) {
+            break;
+          }
+        }
+        if (Index == LookupValueLength) {
+          return Symbols;
+        }
+      }
     }
     Symbols++;
   }
@@ -83,6 +101,7 @@ InternalOcGetSymbolWorkerName (
       Symbols = InternalOcGetSymbolWorkerName (
                  Dependency,
                  LookupValue,
+                 LookupValueLength,
                  OcGetSymbolOnlyCxx
                  );
       if (Symbols != NULL) {
@@ -165,7 +184,7 @@ CONST PRELINKED_KEXT_SYMBOL *
 InternalOcGetSymbolName (
   IN PRELINKED_CONTEXT    *Context,
   IN PRELINKED_KEXT       *Kext,
-  IN UINT64               LookupValue,
+  IN CONST CHAR8          *LookupValue,
   IN OC_GET_SYMBOL_LEVEL  SymbolLevel
   )
 {
@@ -173,11 +192,25 @@ InternalOcGetSymbolName (
 
   PRELINKED_KEXT              *Dependency;
   UINT32                      Index;
+  UINT32                      LookupValueLength;
 
   Symbol = NULL;
+  LookupValueLength = (UINT32) AsciiStrLen (LookupValue);
+
+  //
+  // Such symbols are illegit, but InternalOcGetSymbolWorkerName assumes Length > 0.
+  //
+  if (LookupValueLength == 0) {
+    return NULL;
+  }
 
   if ((SymbolLevel == OcGetSymbolOnlyCxx) && (Kext->LinkedSymbolTable != NULL)) {
-    Symbol = InternalOcGetSymbolWorkerName (Kext, (CHAR8 *)(UINTN)LookupValue, SymbolLevel);
+    Symbol = InternalOcGetSymbolWorkerName (
+      Kext,
+      LookupValue,
+      LookupValueLength,
+      SymbolLevel
+      );
   } else {
     for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
       Dependency = Kext->Dependencies[Index];
@@ -187,7 +220,8 @@ InternalOcGetSymbolName (
 
       Symbol = InternalOcGetSymbolWorkerName (
                  Dependency,
-                 (CHAR8 *)(UINTN)LookupValue,
+                 LookupValue,
+                 LookupValueLength,
                  SymbolLevel
                  );
       if (Symbol != NULL) {
@@ -317,7 +351,7 @@ InternalSolveSymbolNonWeak64 (
   ResolveSymbol = InternalOcGetSymbolName (
                     Context,
                     Kext,
-                    (UINTN)Name,
+                    Name,
                     OcGetSymbolFirstLevel
                     );
   if (ResolveSymbol != NULL) {

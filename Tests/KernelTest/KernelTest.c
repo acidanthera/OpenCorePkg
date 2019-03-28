@@ -525,6 +525,17 @@ TestFileOpen (
         return EFI_OUT_OF_RESOURCES;
       }
 
+#if 0
+      STATIC UINT32 DumpCounter;
+      CHAR16 DumpName[64];
+      UnicodeSPrint (DumpName, sizeof (DumpName), L"prel%u.bin", DumpCounter++);
+      Print (
+        L"Writing resulting kernel of %u bytes - %r\n",
+        KernelSize,
+        WriteFileData (NULL, DumpName, Kernel, KernelSize)
+        );
+#endif
+
       //
       // Return our handle.
       //

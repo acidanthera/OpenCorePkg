@@ -670,7 +670,7 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
 }
 
 int main(int argc, char *argv[]) {
-  for (size_t i = 0; i < 15; i++) {
+  for (size_t i = 0; i < 1; i++) {
     wrap_main(argc, argv);
   }
   return 0;

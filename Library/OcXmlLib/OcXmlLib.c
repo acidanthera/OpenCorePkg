@@ -238,9 +238,10 @@ XmlNodeChildPush (
   }
 
   //
-  // Allocate twice more room.
+  // Allocate three times more room.
+  // This balances performance and memory usage on large files like prelinked plist.
   //
-  AllocCount *= 2;
+  AllocCount *= 3;
 
   NewList = (XML_NODE_LIST *) AllocatePool (
     sizeof (XML_NODE_LIST) + sizeof (NewList->NodeList[0]) * AllocCount

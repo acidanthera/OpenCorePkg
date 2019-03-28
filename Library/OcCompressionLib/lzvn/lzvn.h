@@ -31,6 +31,14 @@ typedef UINTN uintmax_t;
 
 #define lzvn_decode_buffer DecompressLZVN
 
+#ifdef memset
+#undef memset
+#endif
+
+#ifdef memcpy
+#undef memcpy
+#endif
+
 #define memset(Dst, Value, Size) SetMem ((Dst), (Size), (UINT8)(Value))
 #define memcpy(Dst, Src, Size) CopyMem ((Dst), (Src), (Size))
 

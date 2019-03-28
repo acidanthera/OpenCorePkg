@@ -135,7 +135,7 @@ InternalConstructVtablePrelinked64 (
 
     if (Symbol != NULL) {
       Vtable->Entries[Index].Address = Value;
-      Vtable->Entries[Index].Name    = Symbol->Name;
+      Vtable->Entries[Index].Name    = Kext->StringTable + Symbol->Name;
     } else {
       Vtable->Entries[Index].Address = 0;
       Vtable->Entries[Index].Name    = NULL;
@@ -198,12 +198,12 @@ InternalPrepareCreateVtablesPrelinked64 (
     ++Index
     ) {
     Symbol = &Kext->LinkedSymbolTable[Index];
-    if (MachoSymbolNameIsVtable64 (Symbol->Name)) {
+    if (MachoSymbolNameIsVtable64 (Kext->StringTable + Symbol->Name)) {
       if ((Symbol->Value == 0) || (VtableIndex >= MaxSize)) {
         return FALSE;
       }
 
-      Vtables[VtableIndex].Name         = Symbol->Name;
+      Vtables[VtableIndex].Name         = Kext->StringTable + Symbol->Name;
       Vtables[VtableIndex].Vtable.Value = Symbol->Value;
       ++VtableIndex;
     }
@@ -421,7 +421,7 @@ InternalInitializeVtableByEntriesAndRelocations64 (
                    OcGetSymbolOnlyCxx
                    );
       if (OcSymbol != NULL) {
-        VtableEntries[Index].Name    = OcSymbol->Name;
+        VtableEntries[Index].Name    = Kext->StringTable + OcSymbol->Name;
         VtableEntries[Index].Address = OcSymbol->Value;
         continue;
       }
@@ -787,7 +787,7 @@ InternalPatchByVtables64 (
       OcSymbolDummy = InternalOcGetSymbolName (
                         Context,
                         Kext,
-                        (UINTN)FinalSymbolName,
+                        FinalSymbolName,
                         OcGetSymbolAnyLevel
                         );
       if (OcSymbolDummy != NULL) {

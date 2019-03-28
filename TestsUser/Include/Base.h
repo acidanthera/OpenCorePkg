@@ -486,14 +486,14 @@ struct _LIST_ENTRY {
 // Functions
 //
 
-#define AllocatePool(x) malloc(x)
-#define AllocateZeroPool(x) calloc(1, x)
-#define ReallocatePool(a,b,c) realloc(c,b)
-#define FreePool(x) free(x)
-#define CompareMem(a,b,c) memcmp((a),(b),(c))
-#define CopyMem(a,b,c) memmove((a),(b),(c))
-#define ZeroMem(a,b) memset(a, 0, b)
-#define SetMem(Dst, Size, Value) memset(Dst, Value, Size)
+#define AllocatePool(x) (malloc)(x)
+#define AllocateZeroPool(x) (calloc)(1, x)
+#define ReallocatePool(a,b,c) (realloc)(c,b)
+#define FreePool(x) (free)(x)
+#define CompareMem(a,b,c) (memcmp)((a),(b),(c))
+#define CopyMem(a,b,c) (memmove)((a),(b),(c))
+#define ZeroMem(a,b) (memset)(a, 0, b)
+#define SetMem(Dst, Size, Value) (memset)(Dst, Value, Size)
 #define AsciiSPrint snppprintf
 #define AsciiStrCmp strcmp
 #define AsciiStrLen strlen
@@ -501,15 +501,15 @@ struct _LIST_ENTRY {
 #define AsciiStrnCmp strncmp
 #define AsciiStrSize(x) (strlen(x) + 1)
 #define AsciiStrnCpyS(a, b, c, d) oc_strlcpy(a, c, b)
-#define AsciiStrDecimalToUint64(a) strtoull(a, NULL, 10)
-#define AsciiStrHexToUint64(a) strtoull(a, NULL, 16)
+#define AsciiStrDecimalToUint64(a) (strtoull)(a, NULL, 10)
+#define AsciiStrHexToUint64(a) (strtoull)(a, NULL, 16)
 #define ASSERT(x) assert(x)
 #define DebugCodeEnabled() true
 #define DebugAssertEnabled() true
 #define FreePages(a,b) do {} while (0)
 #define UnicodeSPrint(...) assert(false)
-#define CompareGuid(a, b) (memcmp((a), (b), sizeof (EFI_GUID)) == 0)
-#define CopyGuid(a, b) memcpy((a), (b), sizeof (EFI_GUID))
+#define CompareGuid(a, b) ((memcmp)((a), (b), sizeof (EFI_GUID)) == 0)
+#define CopyGuid(a, b) (memcpy)((a), (b), sizeof (EFI_GUID))
 
 EFI_STATUS EfiGetSystemConfigurationTable (EFI_GUID *TableGuid, OUT VOID **Table);
 

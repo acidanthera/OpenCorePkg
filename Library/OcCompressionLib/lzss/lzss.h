@@ -30,6 +30,18 @@ typedef INT32 int32_t;
 #define compress_lzss CompressLZSS
 #define decompress_lzss DecompressLZSS
 
+#ifdef bzero
+#undef bzero
+#endif
+
+#ifdef malloc
+#undef malloc
+#endif
+
+#ifdef free
+#undef free
+#endif
+
 #define bzero(Dst, Size) ZeroMem ((Dst), (Size))
 #define malloc(Size) AllocatePool (Size)
 #define free(Ptr) FreePool (Ptr)

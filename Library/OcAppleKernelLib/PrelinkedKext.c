@@ -284,7 +284,7 @@ InternalScanBuildLinkedSymbolTable (
         ResolvedSymbol = InternalOcGetSymbolName (
                            Context,
                            Kext,
-                           (UINTN)Name,
+                           Name,
                            OcGetSymbolFirstLevel
                            );
         if (ResolvedSymbol == NULL) {
@@ -297,12 +297,14 @@ InternalScanBuildLinkedSymbolTable (
     }
 
     if (!Result) {
-      WalkerBottom->Name  = (Kext->StringTable + Symbol->UnifiedName.StringIndex);
       WalkerBottom->Value = Symbol->Value;
+      WalkerBottom->Name  = Symbol->UnifiedName.StringIndex;
+      WalkerBottom->Length = AsciiStrLen (Kext->StringTable + Symbol->UnifiedName.StringIndex);
       ++WalkerBottom;
     } else {
-      WalkerTop->Name  = (Kext->StringTable + Symbol->UnifiedName.StringIndex);
-      WalkerTop->Value = Symbol->Value;
+      WalkerTop->Value  = Symbol->Value;
+      WalkerTop->Name   = Symbol->UnifiedName.StringIndex;
+      WalkerTop->Length = AsciiStrLen (Kext->StringTable + Symbol->UnifiedName.StringIndex);
       --WalkerTop;
 
       ++NumCxxSymbols;
