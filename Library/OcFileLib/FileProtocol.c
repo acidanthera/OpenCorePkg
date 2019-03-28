@@ -18,8 +18,10 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcFileLib.h>
+#include <Library/UefiBootServicesTableLib.h>
 
 EFI_STATUS
 ReadFileData (
@@ -114,4 +116,150 @@ ReadFileModifcationTime (
   FreePool (FileInfo);
 
   return EFI_SUCCESS;
+}
+
+EFI_STATUS
+FindWritableFileSystem (
+  IN OUT EFI_FILE_PROTOCOL  **WritableFs
+  )
+{
+  EFI_HANDLE                       *HandleBuffer;
+  UINTN                            HandleCount;
+  UINTN                            Index;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *SimpleFs;
+  EFI_FILE_PROTOCOL                *Fs;
+  EFI_FILE_PROTOCOL                *File;
+
+  //
+  // Locate all the simple file system devices in the system.
+  //
+  EFI_STATUS Status = gBS->LocateHandleBuffer (
+    ByProtocol,
+    &gEfiSimpleFileSystemProtocolGuid,
+    NULL,
+    &HandleCount,
+    &HandleBuffer
+    );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  for (Index = 0; Index < HandleCount; ++Index) {
+    Status = gBS->HandleProtocol (
+      HandleBuffer[Index],
+      &gEfiSimpleFileSystemProtocolGuid,
+      (VOID **) &SimpleFs
+      );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_VERBOSE,
+        "FindWritableFileSystem: gBS->HandleProtocol[%u] returned %r\n",
+        (UINT32) Index,
+        Status
+        ));
+      continue;
+    }
+    
+    Status = SimpleFs->OpenVolume (SimpleFs, &Fs);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_VERBOSE,
+        "FindWritableFileSystem: SimpleFs->OpenVolume[%u] returned %r\n",
+        (UINT32) Index,
+        Status
+        ));
+      continue;
+    }
+    
+    //
+    // We cannot test if the file system is writeable without attempting to create some file.
+    //
+    Status = Fs->Open (
+      Fs,
+      &File,
+      L"octest.fil",
+      EFI_FILE_MODE_CREATE | EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE,
+      0
+      );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_VERBOSE,
+        "FindWritableFileSystem: Fs->Open[%u] returned %r\n",
+        (UINT32) Index,
+        Status
+        ));
+      continue;
+    }
+    
+    //
+    // Delete the temporary file and report the found file system.
+    //
+    Fs->Delete (File);
+    *WritableFs = Fs;
+    break;
+  }
+  
+  gBS->FreePool (HandleBuffer);
+  
+  return Status;
+}
+
+EFI_STATUS
+WriteFileData (
+  IN EFI_FILE_PROTOCOL  *WritableFs OPTIONAL,
+  IN CONST CHAR16       *FileName,
+  IN CONST VOID         *Buffer,
+  IN UINT32             Size
+  )
+{
+  EFI_STATUS         Status;
+  EFI_FILE_PROTOCOL  *Fs;
+  EFI_FILE_PROTOCOL  *File;
+  UINTN              WrittenSize;
+
+  if (WritableFs == NULL) {
+    Status = FindWritableFileSystem (&Fs);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_VERBOSE, "WriteFileData: Can't find writable FS\n"));
+      return Status;
+    }
+  } else {
+    Fs = WritableFs;
+  }
+
+  Status = Fs->Open (
+    Fs,
+    &File,
+    (CHAR16 *) FileName,
+    EFI_FILE_MODE_CREATE | EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE,
+    0
+    );
+
+  if (!EFI_ERROR (Status)) {
+    WrittenSize = Size;
+    Status = File->Write (File, &WrittenSize, (VOID *) Buffer);
+    Fs->Close (File);
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_VERBOSE, "WriteFileData: File->Write returned %r\n", Status));
+    } else if (WrittenSize != Size) {
+      DEBUG ((
+        DEBUG_VERBOSE,
+        "WriteFileData: File->Write truncated %u to %u\n",
+        Status,
+        Size,
+        (UINT32) WrittenSize
+        ));
+      Status = EFI_BAD_BUFFER_SIZE;
+    }
+  } else {
+    DEBUG ((DEBUG_VERBOSE, "WriteFileData: Fs->Open of %s returned %r\n", FileName, Status));
+  }
+
+  if (WritableFs == NULL) {
+    Fs->Close (Fs);
+  } 
+
+  return Status;
 }

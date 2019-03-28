@@ -87,6 +87,25 @@ ReadFileData (
   );
 
 /**
+  Write exact amount of bytes to a newly created file in EFI_FILE_PROTOCOL.
+  Please note, that several filesystems (or drivers) may limit file name length.
+
+  @param[in] WritableFs   A pointer to the file protocol, any will be tried if NULL.
+  @param[in] FileName     File name (possibly with path) to write.
+  @param[in] Buffer       A pointer with the data to be written.
+  @param[in] Size         Amount of data to be written.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+WriteFileData (
+  IN EFI_FILE_PROTOCOL  *WritableFs OPTIONAL,
+  IN CONST CHAR16       *FileName,
+  IN CONST VOID         *Buffer,
+  IN UINT32             Size
+  );
+
+/**
   Determine file size if it is less than 4 GB.
 
   @param[in]  File         A pointer to the file protocol.
@@ -112,6 +131,18 @@ EFI_STATUS
 ReadFileModifcationTime (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT EFI_TIME           *Time
+  );
+
+/**
+  Determine writeable filesystem.
+
+  @param[in,out]  WritableFs   First found writeable file system.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+FindWritableFileSystem (
+  IN OUT EFI_FILE_PROTOCOL  **WritableFs
   );
 
 #endif // OC_FILE_LIB_H
