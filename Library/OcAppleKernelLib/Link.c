@@ -1535,8 +1535,9 @@ InternalPrelinkKext64 (
     (LinkEditSegment->FileSize - LinkEditSize)
     );
 
+  LinkEditSize = MACHO_ALIGN (LinkEditSize);
   LinkEditSegment->FileSize = LinkEditSize;
-  LinkEditSegment->Size     = MACHO_ALIGN (LinkEditSize);
+  LinkEditSegment->Size     = LinkEditSize;
 
   //
   // Adapt the link addresses of all Segments and their Sections.
