@@ -25,26 +25,7 @@
 
 #include <Guid/FileInfo.h>
 
-#define VIRTUAL_FILE_DATA_SIGNATURE  \
-  SIGNATURE_32 ('V', 'F', 'S', 'f')
-
-#define VIRTUAL_FILE_FROM_PROTOCOL(This) \
-  CR (                           \
-    This,                        \
-    VIRTUAL_FILE_DATA,           \
-    Protocol,                    \
-    VIRTUAL_FILE_DATA_SIGNATURE  \
-    )
-
-typedef struct {
-  UINT32              Signature;
-  CHAR16              *FileName;
-  UINT8               *FileBuffer;
-  UINT64              FileSize;
-  UINT64              FilePosition;
-  EFI_TIME            ModificationTime;
-  EFI_FILE_PROTOCOL   Protocol;
-} VIRTUAL_FILE_DATA;
+#include "VirtualFsInternal.h"
 
 STATIC
 EFI_STATUS
@@ -57,6 +38,35 @@ VirtualFileOpen (
   IN  UINT64                  Attributes
   )
 {
+  EFI_STATUS         Status;
+  VIRTUAL_FILE_DATA  *Data;
+
+  Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
+
+  if (Data->OpenCallback != NULL) {
+    return Data->OpenCallback (
+      Data->OriginalProtocol,
+      NewHandle,
+      FileName,
+      OpenMode,
+      Attributes
+      );
+  }
+
+  if (Data->OriginalProtocol != NULL) {
+    Status = Data->OriginalProtocol->Open (
+      Data->OriginalProtocol,
+      NewHandle,
+      FileName,
+      OpenMode,
+      Attributes
+      );
+    if (!EFI_ERROR (Status)) {
+      return CreateRealFile (*NewHandle, NULL, TRUE, NewHandle);
+    }
+    return Status;
+  }
+
   //
   // Virtual files are not directories and cannot be reopened.
   // TODO: May want to handle parent directory paths.
@@ -75,11 +85,17 @@ VirtualFileClose (
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
-  FreePool (Data->FileBuffer);
-  FreePool (Data->FileName);
-  FreePool (Data);
+  if (Data->OriginalProtocol == NULL) {
+    FreePool (Data->FileBuffer);
+    FreePool (Data->FileName);
+    FreePool (Data);
 
-  return EFI_SUCCESS;
+    return EFI_SUCCESS;
+  }
+
+  return Data->OriginalProtocol->Close (
+    Data->OriginalProtocol
+    );
 }
 
 STATIC
@@ -89,11 +105,23 @@ VirtualFileDelete (
   IN EFI_FILE_PROTOCOL  *This
   )
 {
-  VirtualFileClose (This);
-  //
-  // Virtual files cannot be deleted.
-  //
-  return EFI_WARN_DELETE_FAILURE;
+  VIRTUAL_FILE_DATA  *Data;
+
+  Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
+
+  if (Data->OriginalProtocol == NULL) {
+    FreePool (Data->FileBuffer);
+    FreePool (Data->FileName);
+    FreePool (Data);
+    //
+    // Virtual files cannot be deleted.
+    //
+    return EFI_WARN_DELETE_FAILURE;
+  }
+
+  return Data->OriginalProtocol->Delete (
+    Data->OriginalProtocol
+    );
 }
 
 STATIC
@@ -110,27 +138,39 @@ VirtualFileRead (
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
-  if (Data->FilePosition > Data->FileSize) {
-    //
-    // On entry, the current file position is beyond the end of the file.
-    //
-    return EFI_DEVICE_ERROR;
+  if (Data->OriginalProtocol == NULL) {
+    if (Data->FilePosition > Data->FileSize) {
+      //
+      // On entry, the current file position is beyond the end of the file.
+      //
+      return EFI_DEVICE_ERROR;
+    }
+
+    ReadSize = Data->FileSize - Data->FilePosition;
+
+    if (*BufferSize >= ReadSize) {
+      *BufferSize = ReadSize;
+    } else {
+      ReadSize = *BufferSize;
+    }
+
+    if (ReadSize > 0) {
+      CopyMem (Buffer, &Data->FileBuffer[Data->FilePosition], ReadSize);
+      Data->FilePosition += ReadSize;
+    }
+
+    return EFI_SUCCESS;
   }
 
-  ReadSize = Data->FileSize - Data->FilePosition;
+  //
+  // TODO: we may want to provide ReadCallback for directory info update.
+  //
 
-  if (*BufferSize >= ReadSize) {
-    *BufferSize = ReadSize;
-  } else {
-    ReadSize = *BufferSize;
-  }
-
-  if (ReadSize > 0) {
-    CopyMem (Buffer, &Data->FileBuffer[Data->FilePosition], ReadSize);
-    Data->FilePosition += ReadSize;
-  }
-
-  return EFI_SUCCESS;
+  return Data->OriginalProtocol->Read (
+    Data->OriginalProtocol,
+    BufferSize,
+    Buffer
+    );
 }
 
 STATIC
@@ -142,10 +182,22 @@ VirtualFileWrite (
   IN VOID                     *Buffer
   )
 {
-  //
-  // Virtual files are not writeable.
-  //
-  return EFI_WRITE_PROTECTED;
+  VIRTUAL_FILE_DATA  *Data;
+
+  Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
+
+  if (Data->OriginalProtocol == NULL) {
+    //
+    // Virtual files are not writeable.
+    //
+    return EFI_WRITE_PROTECTED;
+  }
+
+  return Data->OriginalProtocol->Write (
+    Data->OriginalProtocol,
+    BufferSize,
+    Buffer
+    );
 }
 
 STATIC
@@ -160,16 +212,23 @@ VirtualFileSetPosition (
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
-  if (Position == 0xFFFFFFFFFFFFFFFFULL) {
-    Data->FilePosition = Data->FileSize;
-  } else {
-    //
-    // Seeking past the end of the file is allowed.
-    //
-    Data->FilePosition = Position;
+  if (Data->OriginalProtocol == NULL) {
+    if (Position == 0xFFFFFFFFFFFFFFFFULL) {
+      Data->FilePosition = Data->FileSize;
+    } else {
+      //
+      // Seeking past the end of the file is allowed.
+      //
+      Data->FilePosition = Position;
+    }
+
+    return EFI_SUCCESS;
   }
 
-  return EFI_SUCCESS;
+  return Data->OriginalProtocol->SetPosition (
+    Data->OriginalProtocol,
+    Position
+    );
 }
 
 STATIC
@@ -183,9 +242,16 @@ VirtualFileGetPosition (
   VIRTUAL_FILE_DATA  *Data;
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
-  *Position = Data->FilePosition;
 
-  return EFI_SUCCESS;
+  if (Data->OriginalProtocol == NULL) {
+    *Position = Data->FilePosition;
+    return EFI_SUCCESS;
+  }
+
+  return Data->OriginalProtocol->GetPosition (
+    Data->OriginalProtocol,
+    Position
+    );
 }
 
 STATIC
@@ -206,45 +272,54 @@ VirtualFileGetInfo (
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
-  if (CompareGuid (InformationType, &gEfiFileInfoGuid)) {
-    OC_INLINE_STATIC_ASSERT (
-      sizeof (FileInfo->FileName) == sizeof (CHAR16),
-      "Header changed, flexible array member is now supported"
-      );
+  if (Data->OriginalProtocol == NULL) {
+    if (CompareGuid (InformationType, &gEfiFileInfoGuid)) {
+      OC_INLINE_STATIC_ASSERT (
+        sizeof (FileInfo->FileName) == sizeof (CHAR16),
+        "Header changed, flexible array member is now supported"
+        );
 
-    FileInfo    = (EFI_FILE_INFO *) Buffer;
-    NameSize    = StrSize (Data->FileName);
-    InfoSize    = sizeof (EFI_FILE_INFO) - sizeof (CHAR16) + NameSize;
-    Fits        = *BufferSize >= InfoSize;
-    *BufferSize = InfoSize;
+      FileInfo    = (EFI_FILE_INFO *) Buffer;
+      NameSize    = StrSize (Data->FileName);
+      InfoSize    = sizeof (EFI_FILE_INFO) - sizeof (CHAR16) + NameSize;
+      Fits        = *BufferSize >= InfoSize;
+      *BufferSize = InfoSize;
 
-    if (!Fits) {
-      return EFI_BUFFER_TOO_SMALL;
+      if (!Fits) {
+        return EFI_BUFFER_TOO_SMALL;
+      }
+
+      ZeroMem (FileInfo, InfoSize - NameSize);
+      FileInfo->Size         = InfoSize;
+      FileInfo->FileSize     = Data->FileSize;
+      FileInfo->PhysicalSize = Data->FileSize;
+
+      CopyMem (&FileInfo->CreateTime, &Data->ModificationTime, sizeof (FileInfo->ModificationTime));
+      CopyMem (&FileInfo->LastAccessTime, &Data->ModificationTime, sizeof (FileInfo->ModificationTime));
+      CopyMem (&FileInfo->ModificationTime, &Data->ModificationTime, sizeof (FileInfo->ModificationTime));
+
+      //
+      // Return zeroes for timestamps.
+      //
+      FileInfo->Attribute    = EFI_FILE_READ_ONLY;
+      CopyMem (&FileInfo->FileName[0], Data->FileName, NameSize);
+
+      return EFI_SUCCESS;
     }
 
-    ZeroMem (FileInfo, InfoSize - NameSize);
-    FileInfo->Size         = InfoSize;
-    FileInfo->FileSize     = Data->FileSize;
-    FileInfo->PhysicalSize = Data->FileSize;
-
-    CopyMem (&FileInfo->CreateTime, &Data->ModificationTime, sizeof (FileInfo->ModificationTime));
-    CopyMem (&FileInfo->LastAccessTime, &Data->ModificationTime, sizeof (FileInfo->ModificationTime));
-    CopyMem (&FileInfo->ModificationTime, &Data->ModificationTime, sizeof (FileInfo->ModificationTime));
-
     //
-    // Return zeroes for timestamps.
+    // TODO: return some dummy data for EFI_FILE_SYSTEM_INFO?
     //
-    FileInfo->Attribute    = EFI_FILE_READ_ONLY;
-    CopyMem (&FileInfo->FileName[0], Data->FileName, NameSize);
 
-    return EFI_SUCCESS;
+    return EFI_UNSUPPORTED;
   }
 
-  //
-  // TODO: return some dummy data for EFI_FILE_SYSTEM_INFO?
-  //
-
-  return EFI_UNSUPPORTED;
+  return Data->OriginalProtocol->GetInfo (
+    Data->OriginalProtocol,
+    InformationType,
+    BufferSize,
+    Buffer
+    );
 }
 
 STATIC
@@ -257,10 +332,23 @@ VirtualFileSetInfo (
   IN VOID                     *Buffer
   )
 {
-  //
-  // Virtual files are not writeable, this applies to info.
-  //
-  return EFI_WRITE_PROTECTED;
+  VIRTUAL_FILE_DATA  *Data;
+
+  Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
+
+  if (Data->OriginalProtocol == NULL) {
+    //
+    // Virtual files are not writeable, this applies to info.
+    //
+    return EFI_WRITE_PROTECTED;
+  }
+
+  return Data->OriginalProtocol->SetInfo (
+    Data->OriginalProtocol,
+    InformationType,
+    BufferSize,
+    Buffer
+    );
 }
 
 STATIC
@@ -270,10 +358,20 @@ VirtualFileFlush (
   IN EFI_FILE_PROTOCOL        *This
   )
 {
-  //
-  // Virtual files are not writeable.
-  //
-  return EFI_WRITE_PROTECTED;
+  VIRTUAL_FILE_DATA  *Data;
+
+  Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
+
+  if (Data->OriginalProtocol == NULL) {
+    //
+    // Virtual files are not writeable.
+    //
+    return EFI_WRITE_PROTECTED;
+  }
+
+  return Data->OriginalProtocol->Flush (
+    Data->OriginalProtocol
+    );
 }
 
 STATIC
@@ -288,13 +386,32 @@ VirtualFileOpenEx (
   IN OUT EFI_FILE_IO_TOKEN    *Token
   )
 {
+  EFI_STATUS         Status;
+
+  //
+  // Ignore asynchronous interface for now.
   //
   // Virtual files are not directories and cannot be reopened.
   // TODO: May want to handle parent directory paths.
   // WARN: Unlike Open for OpenEx UEFI 2.7A explicitly dicates EFI_NO_MEDIA for
   //  "The specified file could not be found on the device." error case.
+  //  We do not care for simplicity.
   //
-  return EFI_NO_MEDIA;
+
+  Status = VirtualFileOpen (
+    This,
+    NewHandle,
+    FileName,
+    OpenMode,
+    Attributes
+    );
+
+  if (!EFI_ERROR (Status) && Token->Event != NULL) {
+    Token->Status = EFI_SUCCESS;
+    gBS->SignalEvent (Token->Event);
+  }
+
+  return Status;
 }
 
 STATIC
@@ -305,13 +422,23 @@ VirtualFileReadEx (
   IN OUT EFI_FILE_IO_TOKEN  *Token
   )
 {
-  EFI_STATUS  Status;
+  EFI_STATUS         Status;
+  VIRTUAL_FILE_DATA  *Data;
 
-  Status = VirtualFileRead (This, Token->Buffer, &Token->BufferSize);
+  Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
-  if (!EFI_ERROR (Status) && Token->Event != NULL) {
-    Token->Status = EFI_SUCCESS;
-    gBS->SignalEvent (Token->Event);
+  if (Data->OriginalProtocol == NULL) {
+    Status = VirtualFileRead (This, Token->Buffer, &Token->BufferSize);
+
+    if (!EFI_ERROR (Status) && Token->Event != NULL) {
+      Token->Status = EFI_SUCCESS;
+      gBS->SignalEvent (Token->Event);
+    }
+  } else {
+    Status = Data->OriginalProtocol->ReadEx (
+      This,
+      Token
+      );
   }
 
   return Status;
@@ -325,10 +452,21 @@ VirtualFileWriteEx (
   IN OUT EFI_FILE_IO_TOKEN  *Token
   )
 {
-  //
-  // Virtual files are not writeable.
-  //
-  return EFI_WRITE_PROTECTED;
+  VIRTUAL_FILE_DATA  *Data;
+
+  Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
+
+  if (Data->OriginalProtocol == NULL) {
+    //
+    // Virtual files are not writeable.
+    //
+    return EFI_WRITE_PROTECTED;
+  }
+
+  return Data->OriginalProtocol->WriteEx (
+    This,
+    Token
+    );
 }
 
 STATIC
@@ -339,10 +477,21 @@ VirtualFileFlushEx (
   IN OUT EFI_FILE_IO_TOKEN  *Token
   )
 {
-  //
-  // Virtual files are not writeable.
-  //
-  return EFI_WRITE_PROTECTED;
+  VIRTUAL_FILE_DATA  *Data;
+
+  Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
+
+  if (Data->OriginalProtocol == NULL) {
+    //
+    // Virtual files are not writeable.
+    //
+    return EFI_WRITE_PROTECTED;
+  }
+
+  return Data->OriginalProtocol->FlushEx (
+    This,
+    Token
+    );
 }
 
 STATIC
@@ -387,17 +536,61 @@ CreateVirtualFile (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Data->Signature    = VIRTUAL_FILE_DATA_SIGNATURE;
-  Data->FileName     = FileName;
-  Data->FileBuffer   = FileBuffer;
-  Data->FileSize     = FileSize;
-  Data->FilePosition = 0;
+  Data->Signature        = VIRTUAL_FILE_DATA_SIGNATURE;
+  Data->FileName         = FileName;
+  Data->FileBuffer       = FileBuffer;
+  Data->FileSize         = FileSize;
+  Data->FilePosition     = 0;
+  Data->OpenCallback     = NULL;
+  Data->OriginalProtocol = NULL;
   CopyMem (&Data->Protocol, &mVirtualFileProtocolTemplate, sizeof (Data->Protocol));
   if (ModificationTime != NULL) {
     CopyMem (&Data->ModificationTime, ModificationTime, sizeof (*ModificationTime));
   } else {
-    ZeroMem(&Data->ModificationTime, sizeof (*ModificationTime));
+    ZeroMem (&Data->ModificationTime, sizeof (*ModificationTime));
   }
+
+  *File = &Data->Protocol;
+
+  return EFI_SUCCESS;
+}
+
+VOID
+InternalInitVirtualVolumeData (
+  IN OUT VIRTUAL_FILE_DATA  *Data,
+  IN     EFI_FILE_OPEN      OpenCallback
+  )
+{
+  ZeroMem (Data, sizeof (*Data));
+  Data->Signature    = VIRTUAL_FILE_DATA_SIGNATURE;
+  Data->OpenCallback = OpenCallback;
+  CopyMem (&Data->Protocol, &mVirtualFileProtocolTemplate, sizeof (Data->Protocol));
+}
+
+EFI_STATUS
+CreateRealFile (
+  IN     EFI_FILE_PROTOCOL  *OriginalFile OPTIONAL,
+  IN     EFI_FILE_OPEN      OpenCallback OPTIONAL,
+  IN     BOOLEAN            CloseOnFailure,
+  IN OUT EFI_FILE_PROTOCOL  **File
+  )
+{
+  VIRTUAL_FILE_DATA  *Data;
+
+  ASSERT (File != NULL);
+
+  Data = AllocatePool (sizeof (VIRTUAL_FILE_DATA));
+
+  if (Data == NULL) {
+    if (CloseOnFailure) {
+      ASSERT (OriginalFile != NULL);
+      OriginalFile->Close (OriginalFile);
+    }
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  InternalInitVirtualVolumeData (Data, OpenCallback);
+  Data->OriginalProtocol = OriginalFile;
 
   *File = &Data->Protocol;
 

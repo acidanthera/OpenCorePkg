@@ -24,6 +24,8 @@
 
 #include <Guid/FileInfo.h>
 
+#include "VirtualFsInternal.h"
+
 STATIC EFI_HANDLE_PROTOCOL mOriginalHandleProtocol;
 STATIC EFI_LOCATE_PROTOCOL mOriginalLocateProtocol;
 STATIC EFI_FILE_OPEN       mOpenCallback;

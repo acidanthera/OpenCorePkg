@@ -31,6 +31,7 @@
 [Sources]
   VirtualFile.c
   VirtualFs.c
+  VirtualFsInternal.h
   VirtualVolume.c
 
 [Packages]

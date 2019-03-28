@@ -46,6 +46,27 @@ CreateVirtualFile (
   );
 
 /**
+  Creates virtual file system instance around any file.
+  CreateRealFile or CreateVirtualFile must be called from
+  any registered OpenCallback.
+
+  @param[in]      OriginalFile     Pointer to the original file.
+  @param[in]      OpenCallback     File open callback.
+  @param[in]      CloseOnFailure   Close the original file on failure.
+  @param[in, out] File             Resulting file protocol.
+
+  @return  EFI_SUCCESS if instance was successfully created.
+  @return  EFI_SIMPLE_FILE_SYSTEM Open-compatible error return code.
+**/
+EFI_STATUS
+CreateRealFile (
+  IN     EFI_FILE_PROTOCOL  *OriginalFile OPTIONAL,
+  IN     EFI_FILE_OPEN      OpenCallback OPTIONAL,
+  IN     BOOLEAN            CloseOnFailure,
+  IN OUT EFI_FILE_PROTOCOL  **File
+  );
+
+/**
   Create virtual file system by wrapping OriginalFileSystem
   into NewFileSystem with specified callback. Cacheable.
 

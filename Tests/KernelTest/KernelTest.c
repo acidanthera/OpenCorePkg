@@ -449,18 +449,18 @@ TestFileOpen (
 
   Status = This->Open (This, NewHandle, FileName, OpenMode, Attributes);
 
-  if (!EFI_ERROR (Status)
-    && OpenMode == EFI_FILE_MODE_READ
-    && StrStr (FileName, L"kernel") != NULL) {
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
-    //
-    // boot.efi uses kernel as is to determine valid filesystem.
-    // Just skip it to speedup the boot process.
-    // On 10.9 mach_kernel is loaded for manual linking aferwards, so we cannot skip it.
-    //
-    if (StrCmp (FileName, L"System\\Library\\Kernels\\kernel") == 0) {
-      return Status;
-    }
+  //
+  // boot.efi uses /S/L/K/kernel as is to determine valid filesystem.
+  // Just skip it to speedup the boot process.
+  // On 10.9 mach_kernel is loaded for manual linking aferwards, so we cannot skip it.
+  //
+  if (OpenMode == EFI_FILE_MODE_READ
+    && StrStr (FileName, L"kernel") != NULL
+    && StrCmp (FileName, L"System\\Library\\Kernels\\kernel") != 0) {
 
     Print (L"Trying XNU hook on %s\n", FileName);
     Status = ReadAppleKernel (
@@ -475,63 +475,63 @@ TestFileOpen (
     //
     // This is not Apple kernel, just return the original file.
     //
-    if (EFI_ERROR (Status)) {
+    if (!EFI_ERROR (Status)) {
+      //
+      // TODO: patches, dropping, and injection here.
+      //
+
+      ApplyKernelPatches (Kernel, KernelSize);
+
+      PrelinkedStatus = TestInjectPrelinked (Kernel, &KernelSize, AllocatedSize);
+
+      DEBUG ((DEBUG_WARN, "Prelinked status - %r\n", PrelinkedStatus));
+
+      ApplyPatch (
+        (UINT8 *) "Darwin Kernel Version",
+        NULL,
+        L_STR_LEN ("Darwin Kernel Version"),
+        (UINT8 *) "OpenCore Boot Version",
+        NULL,
+        Kernel,
+        KernelSize,
+        0, ///< At least on 10.14 we have BSD version string.
+        0
+        );
+
+      Status = ReadFileModifcationTime (*NewHandle, &ModificationTime);
+      if (EFI_ERROR (Status)) {
+        ZeroMem (&ModificationTime, sizeof (ModificationTime));
+      }
+
+      (*NewHandle)->Close(*NewHandle);
+
+      //
+      // This was our file, yet firmware is dying.
+      //
+      FileNameCopy = AllocateCopyPool (StrSize (FileName), FileName);
+      if (FileNameCopy == NULL) {
+        DEBUG ((DEBUG_WARN, "Failed to allocate kernel name (%a) copy\n", FileName));
+        FreePool (Kernel);
+        return EFI_OUT_OF_RESOURCES;
+      }
+
+      Status = CreateVirtualFile (FileNameCopy, Kernel, KernelSize, &ModificationTime, &VirtualFileHandle);
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_WARN, "Failed to virtualise kernel file (%a)\n", FileName));
+        FreePool (Kernel);
+        FreePool (FileNameCopy);
+        return EFI_OUT_OF_RESOURCES;
+      }
+
+      //
+      // Return our handle.
+      //
+      *NewHandle = VirtualFileHandle;
       return EFI_SUCCESS;
     }
-
-    //
-    // TODO: patches, dropping, and injection here.
-    //
-
-    ApplyKernelPatches (Kernel, KernelSize);
-
-    PrelinkedStatus = TestInjectPrelinked (Kernel, &KernelSize, AllocatedSize);
-
-    DEBUG ((DEBUG_WARN, "Prelinked status - %r\n", PrelinkedStatus));
-
-    ApplyPatch (
-      (UINT8 *) "Darwin Kernel Version",
-      NULL,
-      L_STR_LEN ("Darwin Kernel Version"),
-      (UINT8 *) "OpenCore Boot Version",
-      NULL,
-      Kernel,
-      KernelSize,
-      0, ///< At least on 10.14 we have BSD version string.
-      0
-      );
-
-    //
-    // This was our file, yet firmware is dying.
-    //
-    FileNameCopy = AllocateCopyPool (StrSize (FileName), FileName);
-    if (FileNameCopy == NULL) {
-      DEBUG ((DEBUG_WARN, "Failed to allocate kernel name (%a) copy\n", FileName));
-      FreePool (Kernel);
-      return EFI_SUCCESS;
-    }
-
-    Status = ReadFileModifcationTime (*NewHandle, &ModificationTime);
-    if (EFI_ERROR (Status)) {
-      ZeroMem (&ModificationTime, sizeof (ModificationTime));
-    }
-
-    Status = CreateVirtualFile (FileNameCopy, Kernel, KernelSize, &ModificationTime, &VirtualFileHandle);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "Failed to virtualise kernel file (%a)\n", FileName));
-      FreePool (Kernel);
-      FreePool (FileNameCopy);
-      return EFI_SUCCESS;
-    }
-
-    //
-    // Return our handle.
-    //
-    (*NewHandle)->Close(*NewHandle);
-    *NewHandle = VirtualFileHandle;
   }
 
-  return Status;
+  return CreateRealFile (*NewHandle, NULL, TRUE, NewHandle);
 }
 
 EFI_STATUS
