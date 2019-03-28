@@ -1151,9 +1151,16 @@ InternalProcessSymbolPointers (
   //   3) An INDIRECT_SYMBOL_ABS - prepopulated absolute symbols.  No
   //      action is required.
   //
-  SymIndex  = (UINT32 *)((UINTN)MachHeader + DySymtab->IndirectSymbolsOffset);
+  SymIndex = (UINT32 *)((UINTN)MachHeader + DySymtab->IndirectSymbolsOffset);
+  if (!OC_ALIGNED (SymIndex)) {
+    return FALSE;
+  }
   SymIndex += FirstSym;
-  SymPtr    = (CHAR8 *)((UINTN)MachHeader + Section->Offset);
+
+  SymPtr = (CHAR8 *)((UINTN)MachHeader + Section->Offset);
+  if (!OC_ALIGNED ((UINT64 *)SymPtr)) {
+    return FALSE;
+  }
 
   for (Index = 0; Index < NumSymbols; ++Index, SymPtr += sizeof (MACH_NLIST_64)) {
     if ((*SymIndex & MACH_INDIRECT_SYMBOL_LOCAL) != 0) {
