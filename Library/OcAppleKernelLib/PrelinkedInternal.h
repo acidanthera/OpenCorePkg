@@ -30,8 +30,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 typedef struct PRELINKED_KEXT_ PRELINKED_KEXT;
 
 typedef struct {
-  CONST CHAR8 *Name;  ///< name of this symbol
+  //
+  // Value is declared first as it has shown to improve comparison performance.
+  //
   UINT64      Value;  ///< value of this symbol (or stab offset)
+  CONST CHAR8 *Name;  ///< name of this symbol
 } PRELINKED_KEXT_SYMBOL;
 
 typedef struct {
