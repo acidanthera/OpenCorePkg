@@ -1224,6 +1224,7 @@ MachoExpandImage64 (
   UINT32                   OriginalDelta;
   UINT64                   CurrentSize;
   MACH_SEGMENT_COMMAND_64  *Segment;
+  MACH_SEGMENT_COMMAND_64  *FirstSegment;
   MACH_SEGMENT_COMMAND_64  *DstSegment;
   MACH_SYMTAB_COMMAND      *Symtab;
   MACH_DYSYMTAB_COMMAND    *DySymtab;
@@ -1244,6 +1245,7 @@ MachoExpandImage64 (
   CopyMem (Destination, Header, HeaderSize);
 
   CurrentDelta = 0;
+  FirstSegment = NULL;
   for (
     Segment = MachoGetNextSegment64 (Context, NULL);
     Segment != NULL;
@@ -1257,6 +1259,11 @@ MachoExpandImage64 (
     if (Segment->FileSize > Segment->Size) {
       return 0;
     }
+
+    if (FirstSegment == NULL) {
+      FirstSegment = Segment;
+    }
+
     //
     // Do not overwrite header.
     //
@@ -1295,6 +1302,11 @@ MachoExpandImage64 (
     DstSegment = (MACH_SEGMENT_COMMAND_64 *) ((UINT8 *) Segment - Source + Destination);
     DstSegment->FileOffset += CurrentDelta;
     DstSegment->FileSize    = DstSegment->Size;
+
+    if (DstSegment->VirtualAddress - DstSegment->FileOffset != FirstSegment->VirtualAddress) {
+      return 0;
+    }
+
     //
     // We need to update fields in SYMTAB and DYSYMTAB. Tables have to be present before 0 FileSize
     // sections as they have data, so we update them before parsing sections. 
@@ -1355,23 +1367,19 @@ MachoExpandImage64 (
     // and later on the section values are checked by MachoLib.
     // Note: There is an assumption that 'CopyFileOffset + CurrentDelta' is aligned.
     //
+    OriginalDelta  = CurrentDelta;
+    CopyFileOffset = Segment->FileOffset;
     for (Index = 0; Index < DstSegment->NumSections; ++Index) {
       if (DstSegment->Sections[Index].Offset == 0) {
-        DstSegment->Sections[Index].Offset = (UINT32)CopyFileOffset + CurrentDelta;
-        CurrentDelta += (UINT32)DstSegment->Sections[Index].Size;
+        DstSegment->Sections[Index].Offset = (UINT32) CopyFileOffset + CurrentDelta;
+        CurrentDelta += (UINT32) DstSegment->Sections[Index].Size;
       } else {
         DstSegment->Sections[Index].Offset += CurrentDelta;
-        OriginalDelta = (UINT32)(CopyFileOffset + DstSegment->Sections[Index].Size);
         CopyFileOffset = DstSegment->Sections[Index].Offset + DstSegment->Sections[Index].Size;
       }
     }
-    //
-    // After sections we may have extra padding (OriginalDelta), which may save us up to 1 page.
-    // The following is true for all valid data, and invalid data will be caught by fits check.
-    // CopyFileOffset + CurrentDelta <= DstSegment->FileOffset + DstSegment->FileSize
-    //
-    OriginalDelta = (UINT32)(DstSegment->FileOffset + DstSegment->FileSize - CopyFileOffset - CurrentDelta);
-    CurrentDelta -= MIN (OriginalDelta, CurrentDelta);
+
+    CurrentDelta = OriginalDelta + Segment->Size - Segment->FileSize;
   }
 
   if (Strip) {
