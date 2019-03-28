@@ -80,6 +80,20 @@ typedef struct {
 } GUID;
 
 typedef struct {
+  UINT16  Year;
+  UINT8   Month;
+  UINT8   Day;
+  UINT8   Hour;
+  UINT8   Minute;
+  UINT8   Second;
+  UINT8   Pad1;
+  UINT32  Nanosecond;
+  INT16   TimeZone;
+  UINT8   Daylight;
+  UINT8   Pad2;
+} EFI_TIME;
+
+typedef struct {
   UINT8 Addr[4];
 } IPv4_ADDRESS;
 
@@ -479,6 +493,7 @@ struct _LIST_ENTRY {
 #define CompareMem(a,b,c) memcmp((a),(b),(c))
 #define CopyMem(a,b,c) memmove((a),(b),(c))
 #define ZeroMem(a,b) memset(a, 0, b)
+#define SetMem(Dst, Size, Value) memset(Dst, Value, Size)
 #define AsciiSPrint snppprintf
 #define AsciiStrCmp strcmp
 #define AsciiStrLen strlen

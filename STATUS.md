@@ -20,7 +20,6 @@ listed here.
     **Status**: functional  
     **Issues**:
     1. Booting without caches on 10.9 or earlier will bypass kext injection.
-    2. Booting to Recovery HD may fail.
 * OcCompressionLib  
     **Status**: functional  
     **Issues**: none
