@@ -75,4 +75,40 @@ DecompressLZVN (
   IN  UINTN        SrcLen
   );
 
+/**
+  Compress buffer with ZLIB algorithm.
+
+  @param[out]  Dst         Destination buffer.
+  @param[in]   DstLen      Destination buffer size.
+  @param[in]   Src         Source buffer.
+  @param[in]   SrcLen      Source buffer size.
+
+  @return  Dst + CompressedLen on success otherwise NULL.
+**/
+UINT8 *
+CompressZLIB (
+  OUT UINT8   *Dst,
+  IN  UINT32  DstLen,
+  IN  UINT8   *Src,
+  IN  UINT32  SrcLen
+  );
+
+/**
+  Decompress buffer with ZLIB algorithm.
+
+  @param[out]  Dst         Destination buffer.
+  @param[in]   DstLen      Destination buffer size.
+  @param[in]   Src         Source buffer.
+  @param[in]   SrcLen      Source buffer size.
+
+  @return  DecompressedLen on success otherwise 0.
+**/
+UINTN
+DecompressZLIB (
+  OUT UINT8  *Dst,
+  IN  UINTN  DstLen,
+  IN  UINT8  *Src,
+  IN  UINTN  SrcLen
+  );
+
 #endif // OC_COMPRESSION_LIB_H

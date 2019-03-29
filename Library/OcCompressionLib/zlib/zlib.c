@@ -1185,3 +1185,102 @@ int zlib_decompress_block(void *handle, unsigned char *block, int len,
     *outlen = 0;
     return 0;
 }
+
+/**
+  Compress buffer with ZLIB algorithm.
+
+  @param[out]  Dst         Destination buffer.
+  @param[in]   DstLen      Destination buffer size.
+  @param[in]   Src         Source buffer.
+  @param[in]   SrcLen      Source buffer size.
+
+  @return  Dst + CompressedLen on success otherwise NULL.
+**/
+UINT8 *
+CompressZLIB (
+  OUT UINT8   *Dst,
+  IN  UINT32  DstLen,
+  IN  UINT8   *Src,
+  IN  UINT32  SrcLen
+  )
+{
+  VOID  *Return;
+
+  VOID  *Handle;
+  INT32 Result;
+  UINT8 *OutBlock;
+  INT32 OutSize;
+
+  Handle = zlib_compress_init ();
+  if (Handle == NULL) {
+    return NULL;
+  }
+
+  Return = NULL;
+
+  Result = zlib_compress_block (
+             Handle,
+             Src,
+             SrcLen,
+             &OutBlock,
+             &OutSize
+             );
+  if (Result) {
+    if ((UINTN)OutSize <= DstLen) {
+      CopyMem (Dst, OutBlock, OutSize);
+      Return = (Dst + OutSize);
+    }
+  }
+
+  zlib_decompress_cleanup (Handle);
+
+  return Return;
+}
+
+/**
+  Decompress buffer with ZLIB algorithm.
+
+  @param[out]  Dst         Destination buffer.
+  @param[in]   DstLen      Destination buffer size.
+  @param[in]   Src         Source buffer.
+  @param[in]   SrcLen      Source buffer size.
+
+  @return  DecompressedLen on success otherwise 0.
+**/
+UINTN
+DecompressZLIB (
+  OUT UINT8  *Dst,
+  IN  UINTN  DstLen,
+  IN  UINT8  *Src,
+  IN  UINTN  SrcLen
+  )
+{
+  VOID  *Handle;
+  UINT8 *OutBlock;
+  INT32 OutSize;
+  INT32 Result;
+
+  Handle = zlib_decompress_init ();
+  if (Handle == NULL) {
+    return 0;
+  }
+
+  Result = zlib_decompress_block (
+             Handle,
+             Src,
+             SrcLen,
+             &OutBlock,
+             &OutSize
+             );
+  if (Result) {
+    if ((UINTN)OutSize <= DstLen) {
+      CopyMem (Dst, OutBlock, OutSize);
+    } else {
+      OutSize = 0;
+    }
+  }
+
+  zlib_decompress_cleanup (Handle);
+
+  return OutSize;
+}
