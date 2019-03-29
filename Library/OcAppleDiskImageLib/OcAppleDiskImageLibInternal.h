@@ -87,27 +87,6 @@ typedef struct {
 } RAM_DMG_HEADER;
 #pragma pack()
 
-//
-// Mounted disk image private data.
-//
-#define OC_APPLE_DISK_IMAGE_MOUNTED_DATA_SIGNATURE SIGNATURE_32('D','m','g','I')
-typedef struct {
-    // Signature.
-    UINTN Signature;
-
-    // Protocols.
-    EFI_BLOCK_IO_PROTOCOL BlockIo;
-    EFI_BLOCK_IO_MEDIA    BlockIoMedia;
-    EFI_DEVICE_PATH_PROTOCOL *DevicePath;
-    EFI_HANDLE Handle;
-
-    // Disk image data.
-    OC_APPLE_DISK_IMAGE_CONTEXT *ImageContext;
-    RAM_DMG_HEADER *RamDmgHeader;
-} OC_APPLE_DISK_IMAGE_MOUNTED_DATA;
-#define OC_APPLE_DISK_IMAGE_MOUNTED_DATA_FROM_THIS(This) \
-    CR(This, OC_APPLE_DISK_IMAGE_MOUNTED_DATA, BlockIo, OC_APPLE_DISK_IMAGE_MOUNTED_DATA_SIGNATURE)
-
 EFI_STATUS
 EFIAPI
 FindPlistDictChild(
@@ -139,42 +118,5 @@ GetBlockChunk(
     IN  EFI_LBA Lba,
     OUT APPLE_DISK_IMAGE_BLOCK_DATA **Data,
     OUT APPLE_DISK_IMAGE_CHUNK **Chunk);
-
-//
-// Block I/O protocol template.
-//
-extern EFI_BLOCK_IO_PROTOCOL mDiskImageBlockIo;
-
-//
-// Block I/O protocol functions.
-//
-EFI_STATUS
-EFIAPI
-DiskImageBlockIoReset(
-    IN EFI_BLOCK_IO_PROTOCOL *This,
-    IN BOOLEAN ExtendedVerification);
-
-EFI_STATUS
-EFIAPI
-DiskImageBlockIoReadBlocks(
-    IN EFI_BLOCK_IO_PROTOCOL *This,
-    IN UINT32 MediaId,
-    IN EFI_LBA Lba,
-    IN UINTN BufferSize,
-    OUT VOID *Buffer);
-
-EFI_STATUS
-EFIAPI
-DiskImageBlockIoWriteBlocks(
-    IN EFI_BLOCK_IO_PROTOCOL *This,
-    IN UINT32 MediaId,
-    IN EFI_LBA Lba,
-    IN UINTN BufferSize,
-    IN VOID *Buffer);
-
-EFI_STATUS
-EFIAPI
-DiskImageBlockIoFlushBlocks(
-    IN EFI_BLOCK_IO_PROTOCOL *This);
 
 #endif
