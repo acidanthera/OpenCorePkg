@@ -259,7 +259,6 @@ VerifyCrc32(
     IN UINT32 Checksum) {
 
     // Create variables.
-    EFI_STATUS Status;
     UINT32 Crc32 = 0;
 
     // Check that parameters are valid.
@@ -267,9 +266,7 @@ VerifyCrc32(
         return EFI_INVALID_PARAMETER;
 
     // Calculate CRC32 of full image.
-    Status = gBS->CalculateCrc32(Buffer, Length, &Crc32);
-    if (EFI_ERROR(Status))
-        return Status;
+    Crc32 = CalculateCrc32(Buffer, Length);
 
     // Ensure CRC32 matches.
     if (Crc32 != Checksum)
