@@ -45,18 +45,6 @@ typedef struct {
 
 EFI_STATUS
 EFIAPI
-OcAppleDiskImageAllocateBuffer(
-    IN  UINTN Length,
-    OUT VOID **Buffer);
-
-EFI_STATUS
-EFIAPI
-OcAppleDiskImageFreeBuffer(
-    IN VOID *Buffer,
-    IN UINTN Length);
-
-EFI_STATUS
-EFIAPI
 OcAppleDiskImageInitializeContext(
     IN  VOID *Buffer,
     IN  UINTN BufferLength,

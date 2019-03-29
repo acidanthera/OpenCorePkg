@@ -15,47 +15,6 @@
 
 EFI_STATUS
 EFIAPI
-OcAppleDiskImageAllocateBuffer (
-  IN  UINTN   Length,
-  OUT VOID    **Buffer
-  )
-{
-  EFI_STATUS            Status;
-  EFI_PHYSICAL_ADDRESS  BufferPhysAddr;
-
-  ASSERT (Buffer != NULL);
-  ASSERT (Length > 0);
-
-  //
-  // Allocate pages for disk image.
-  //
-  Status = gBS->AllocatePages (AllocateAnyPages, EfiACPIMemoryNVS, EFI_SIZE_TO_PAGES(Length), &BufferPhysAddr);
-  if (EFI_ERROR(Status))
-    return EFI_OUT_OF_RESOURCES;
-
-  *Buffer = (VOID*)BufferPhysAddr;
-  return EFI_SUCCESS;
-}
-
-EFI_STATUS
-EFIAPI
-OcAppleDiskImageFreeBuffer (
-  IN VOID   *Buffer,
-  IN UINTN  Length
-  )
-{
-  ASSERT (Buffer != NULL);
-  ASSERT (Length > 0);
-
-  //
-  // Free pages used by disk image.
-  //
-  FreePages (Buffer, EFI_SIZE_TO_PAGES(Length));
-  return EFI_SUCCESS;
-}
-
-EFI_STATUS
-EFIAPI
 OcAppleDiskImageInitializeContext (
   IN  VOID                          *Buffer,
   IN  UINTN                         BufferLength,
