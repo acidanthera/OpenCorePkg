@@ -33,6 +33,8 @@
   lzss/lzss.h
   lzvn/lzvn.c
   lzvn/lzvn.h
+  zlib/zlib.c
+  zlib/zlib.h
 
 [Packages]
   MdePkg/MdePkg.dec
