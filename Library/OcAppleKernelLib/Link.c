@@ -1485,7 +1485,7 @@ InternalPrelinkKext64 (
   }
 
   Relocations     = MachoContext->ExternRelocations;
-  NumRelocations2 = >DySymtab->NumExternalRelocations;
+  NumRelocations2 = DySymtab->NumExternalRelocations;
   Result = InternalRelocateAndCopyRelocations64 (
              Context,
              Kext,
