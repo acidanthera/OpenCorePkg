@@ -896,19 +896,25 @@ InternalRetrieveSymtabs64 (
   if (!OC_ALIGNED (SymbolTable)) {
     return FALSE;
   }
-  //
-  // Retrieve DYSYMTAB.
-  //
-  DySymtab = (MACH_DYSYMTAB_COMMAND *)(
-               InternalGetNextCommand64 (
-                 Context,
-                 MACH_LOAD_COMMAND_DYSYMTAB,
-                 NULL
-                 )
-               );
-  
-  if (DySymtab != NULL) {
-    if (!OC_ALIGNED (DySymtab) 
+
+  DySymtab          = NULL;
+  IndirectSymtab    = NULL;
+  LocalRelocations  = NULL;
+  ExternRelocations = NULL;
+
+  if ((Context->MachHeader->Flags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) != 0) {
+    //
+    // Retrieve DYSYMTAB.
+    //
+    DySymtab = (MACH_DYSYMTAB_COMMAND *)(
+                 InternalGetNextCommand64 (
+                   Context,
+                   MACH_LOAD_COMMAND_DYSYMTAB,
+                   NULL
+                   )
+                 );
+    if ((DySymtab == NULL)
+     || !OC_ALIGNED (DySymtab)
      || (DySymtab->CommandSize != sizeof (*DySymtab))) {
       return FALSE;
     }
@@ -984,10 +990,6 @@ InternalRetrieveSymtabs64 (
      || !OC_ALIGNED (ExternRelocations)) {
       return FALSE;
     }
-  } else {
-    IndirectSymtab    = NULL;
-    LocalRelocations  = NULL;
-    ExternRelocations = NULL;
   }
 
   //
@@ -1020,6 +1022,9 @@ MachoGetSymbolTable (
 {
   UINT32              Index;
   CONST MACH_NLIST_64 *SymTab;
+  UINT32              NoLocalSymbols;
+  UINT32              NoExternalSymbols;
+  UINT32              NoUndefinedSymbols;
 
   ASSERT (Context != NULL);
 
@@ -1042,26 +1047,36 @@ MachoGetSymbolTable (
     *StringTable = Context->StringTable;
   }
 
-  if (LocalSymbols != NULL) {
-    ASSERT (NumLocalSymbols != NULL);
-    *NumLocalSymbols = Context->DySymtab->NumLocalSymbols;
-    if (Context->DySymtab->NumLocalSymbols != 0) {
+  NoLocalSymbols     = 0;
+  NoExternalSymbols  = 0;
+  NoUndefinedSymbols = 0;
+
+  if (Context->DySymtab != NULL) {
+    NoLocalSymbols     = Context->DySymtab->NumLocalSymbols;
+    NoExternalSymbols  = Context->DySymtab->NumExternalSymbols;
+    NoUndefinedSymbols = Context->DySymtab->NumUndefinedSymbols;
+  }
+
+  if (NumLocalSymbols != NULL) {
+    ASSERT (LocalSymbols != NULL);
+    *NumLocalSymbols = NoLocalSymbols;
+    if (NoLocalSymbols != 0) {
       *LocalSymbols = &SymTab[Context->DySymtab->LocalSymbolsIndex];
     }
   }
 
-  if (ExternalSymbols != NULL) {
-    ASSERT (NumExternalSymbols != NULL);
-    *NumExternalSymbols = Context->DySymtab->NumExternalSymbols;
-    if (Context->DySymtab->NumExternalSymbols != 0) {
+  if (NumExternalSymbols != NULL) {
+    ASSERT (ExternalSymbols != NULL);
+    *NumExternalSymbols = NoExternalSymbols;
+    if (NoExternalSymbols != 0) {
       *ExternalSymbols = &SymTab[Context->DySymtab->ExternalSymbolsIndex];
     }
   }
 
-  if (UndefinedSymbols != NULL) {
-    ASSERT (NumUndefinedSymbols != NULL);
-    *NumUndefinedSymbols = Context->DySymtab->NumUndefinedSymbols;
-    if (Context->DySymtab->NumUndefinedSymbols != 0) {
+  if (NumUndefinedSymbols != NULL) {
+    ASSERT (UndefinedSymbols != NULL);
+    *NumUndefinedSymbols = NoUndefinedSymbols;
+    if (NoUndefinedSymbols != 0) {
       *UndefinedSymbols = &SymTab[Context->DySymtab->UndefinedSymbolsIndex];
     }
   }
