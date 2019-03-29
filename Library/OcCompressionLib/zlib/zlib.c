@@ -1,41 +1,33 @@
-/*
- * Zlib (RFC1950 / RFC1951) compression for PuTTY.
- * 
- * There will no doubt be criticism of my decision to reimplement
- * Zlib compression from scratch instead of using the existing zlib
- * code. People will cry `reinventing the wheel'; they'll claim
- * that the `fundamental basis of OSS' is code reuse; they'll want
- * to see a really good reason for me having chosen not to use the
- * existing code.
- * 
- * Well, here are my reasons. Firstly, I don't want to link the
- * whole of zlib into the PuTTY binary; PuTTY is justifiably proud
- * of its small size and I think zlib contains a lot of unnecessary
- * baggage for the kind of compression that SSH requires.
- * 
- * Secondly, I also don't like the alternative of using zlib.dll.
- * Another thing PuTTY is justifiably proud of is its ease of
- * installation, and the last thing I want to do is to start
- * mandating DLLs. Not only that, but there are two _kinds_ of
- * zlib.dll kicking around, one with C calling conventions on the
- * exported functions and another with WINAPI conventions, and
- * there would be a significant danger of getting the wrong one.
- * 
- * Thirdly, there seems to be a difference of opinion on the IETF
- * secsh mailing list about the correct way to round off a
- * compressed packet and start the next. In particular, there's
- * some talk of switching to a mechanism zlib isn't currently
- * capable of supporting (see below for an explanation). Given that
- * sort of uncertainty, I thought it might be better to have code
- * that will support even the zlib-incompatible worst case.
- * 
- * Fourthly, it's a _second implementation_. Second implementations
- * are fundamentally a Good Thing in standardisation efforts. The
- * difference of opinion mentioned above has arisen _precisely_
- * because there has been only one zlib implementation and
- * everybody has used it. I don't intend that this should happen
- * again.
- */
+/**
+  Zlib (RFC1950 / RFC1951) compression for PuTTY.
+
+  Copyright (C) 1997 - 2017, Simon Tatham.  All rights reserved.
+
+  Portions copyright Robert de Bath, Joris van Rantwijk, Delian
+  Delchev, Andreas Schultz, Jeroen Massar, Wez Furlong, Nicolas Barry,
+  Justin Bradford, Ben Harris, Malcolm Smith, Ahmad Khalifa, Markus
+  Kuhn, Colin Watson, Christopher Staite, and CORE SDI S.A.
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation files
+(the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software,
+and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT.  IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE
+FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+**/
 
 #include "zlib.h"
 
