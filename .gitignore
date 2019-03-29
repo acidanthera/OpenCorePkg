@@ -1,6 +1,11 @@
 .DS_Store
 UDK
 Binaries
+build
+DerivedData
+xcshareddata
+xcuserdata
+project.xcworkspace
 *.dSYM
 TestsUser/Macho/Macho
 TestsUser/Prelinked/Prelinked

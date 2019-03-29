@@ -282,7 +282,7 @@
 		352190DB224D4AE2002A2CA6 /* gdb_uefi.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = gdb_uefi.py; sourceTree = "<group>"; };
 		3521914E224E0E6F002A2CA6 /* build.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = build.sh; sourceTree = "<group>"; };
 		3521951A224E14D8002A2CA6 /* X64 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = X64; path = ../Build/OcSupportPkg/RELEASE_XCODE5/X64; sourceTree = "<group>"; };
-		3521951B224E155D002A2CA6 /* lib__index_OcSupportPkg.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = lib__index_OcSupportPkg.dylib; path = /Users/usrsse2/AppleSupportPkg/UDK/OcSupportPkg/build/Debug/lib__index_OcSupportPkg.dylib; sourceTree = "<absolute>"; };
+		3521951B224E155D002A2CA6 /* lib__index_OcSupportPkg.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = lib__index_OcSupportPkg.dylib; path = "$(SRCROOT)/build/Debug/lib__index_OcSupportPkg.dylib"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
