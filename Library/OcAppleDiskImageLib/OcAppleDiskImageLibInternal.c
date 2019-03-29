@@ -95,7 +95,7 @@ ParsePlist(
     }
 
     // Open plist and get root node.
-    XmlPlistDoc = XmlParseDocument(XmlPlistBuffer, (UINT32)XmlLength);
+    XmlPlistDoc = XmlDocumentParse(XmlPlistBuffer, (UINT32)XmlLength, FALSE);
     if (!XmlPlistDoc) {
         Status = EFI_OUT_OF_RESOURCES;
         goto DONE_ERROR;
@@ -137,7 +137,7 @@ ParsePlist(
         if (EFI_ERROR(Status))
             goto DONE_ERROR;
         PlistIntegerValue(XmlPlistBlockDictChildValue,
-            &DmgBlocks[b].Attributes, sizeof(DmgBlocks[b].Attributes));
+            &DmgBlocks[b].Attributes, sizeof(DmgBlocks[b].Attributes), FALSE);
 
         // Get CFName node.
         Status = FindPlistDictChild(XmlPlistNodeBlockDict, DMG_PLIST_CFNAME,
@@ -179,7 +179,7 @@ ParsePlist(
         if (EFI_ERROR(Status))
             goto DONE_ERROR;
         PlistIntegerValue(XmlPlistBlockDictChildValue,
-            &DmgBlocks[b].Id, sizeof(DmgBlocks[b].Id));
+            &DmgBlocks[b].Id, sizeof(DmgBlocks[b].Id), FALSE);
 
         // Get block data.
         Status = FindPlistDictChild(XmlPlistNodeBlockDict, DMG_PLIST_DATA,
