@@ -447,15 +447,16 @@ InternalSolveSymbol64 (
             }
           }
 
-          *WeakTestValue = WeakTestSymbol->Value;
+          Value = WeakTestSymbol->Value;
+          *WeakTestValue = Value;
           break;
         }
       }
+    }
 
-      if (Value != 0) {
-        InternalSolveSymbolValue64 (Value, Symbol);
-        return TRUE;
-      }
+    if (Value != 0) {
+      InternalSolveSymbolValue64 (Value, Symbol);
+      return TRUE;
     }
   }
 
