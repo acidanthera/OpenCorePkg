@@ -1342,13 +1342,13 @@ InternalPrelinkKext64 (
   //   Symbol Table - relocations (external -> local) - String Table
   //
   SymbolTableSize = (NumSymbols * sizeof (MACH_NLIST_64));
-  StringTableSize = MachoContext->Symtab->StringsSize;
+  StringTableSize = Symtab->StringsSize;
   //
   // For the allocation, assume all relocations will be preserved to simplify
   // the code, the memory is only temporarily allocated anyway.
   //
-  NumRelocations  = MachoContext->DySymtab->NumOfLocalRelocations;
-  NumRelocations += MachoContext->DySymtab->NumExternalRelocations;
+  NumRelocations  = DySymtab->NumOfLocalRelocations;
+  NumRelocations += DySymtab->NumExternalRelocations;
   RelocationsSize = (NumRelocations * sizeof (MACH_RELOCATION_INFO));
 
   LinkEdit     = Context->LinkBuffer;
@@ -1470,7 +1470,7 @@ InternalPrelinkKext64 (
   // Relocate and copy local and external relocations.
   //
   Relocations    = MachoContext->LocalRelocations;
-  NumRelocations = MachoContext->DySymtab->NumOfLocalRelocations;
+  NumRelocations = DySymtab->NumOfLocalRelocations;
   Result = InternalRelocateAndCopyRelocations64 (
              Context,
              Kext,
@@ -1485,7 +1485,7 @@ InternalPrelinkKext64 (
   }
 
   Relocations     = MachoContext->ExternRelocations;
-  NumRelocations2 = MachoContext->DySymtab->NumExternalRelocations;
+  NumRelocations2 = >DySymtab->NumExternalRelocations;
   Result = InternalRelocateAndCopyRelocations64 (
              Context,
              Kext,
