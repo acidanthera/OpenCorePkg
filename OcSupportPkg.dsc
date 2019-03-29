@@ -73,6 +73,7 @@
   OcTimerLib|OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
   OcVirtualFsLib|OcSupportPkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OcXmlLib|OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
+  OcAppleDiskImageLib|OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
 
 [Components]
   OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
@@ -101,6 +102,7 @@
   OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
   OcSupportPkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
+  OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
   OcSupportPkg/Debug/GdbSyms/GdbSyms.inf
   OcSupportPkg/Tests/AcpiTest/AcpiTest.inf
   OcSupportPkg/Tests/AcpiTest/AcpiTestApp.inf

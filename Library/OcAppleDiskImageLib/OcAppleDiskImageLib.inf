@@ -1,0 +1,57 @@
+## @file
+# Copyright (C) 2019, Goldfish64. All rights reserved.
+#
+# This program and the accompanying materials
+# are licensed and made available under the terms and conditions of the BSD License
+# which accompanies this distribution.  The full text of the license may be found at
+# http://opensource.org/licenses/bsd-license.php
+#
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+##
+
+[Defines]
+    INF_VERSION    = 0x00010005
+    BASE_NAME      = OcAppleDiskImageLib
+    FILE_GUID      = F8E071ED-3EAB-46C6-9C50-B99B6B3915FF
+    MODULE_TYPE    = BASE
+    VERSION_STRING = 1.0
+    LIBRARY_CLASS  = OcAppleDiskImageLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+
+[Packages]
+    EfiPkg/EfiPkg.dec
+    MdePkg/MdePkg.dec
+    OcSupportPkg/OcSupportPkg.dec
+    StdLib/StdLib.dec
+
+[LibraryClasses]
+    BaseMemoryLib
+    DebugLib
+    DevicePathLib
+    MemoryAllocationLib
+    OcXmlLib
+    UefiBootServicesTableLib
+    UefiLib
+
+[Protocols]
+    gEfiDevicePathProtocolGuid  # PRODUCES
+    gEfiBlockIoProtocolGuid     # PRODUCES
+
+[Sources]
+    OcAppleDiskImageBlockIo.c
+    OcAppleDiskImageLib.c
+    OcAppleDiskImageLibInternal.c
+
+    # zlib
+    zlib/adler32.c
+    zlib/compress.c
+    zlib/crc32.c
+    zlib/deflate.c
+    zlib/infback.c
+    zlib/inffast.c
+    zlib/inflate.c
+    zlib/inftrees.c
+    zlib/trees.c
+    zlib/uncompr.c
+    zlib/zutil.c
