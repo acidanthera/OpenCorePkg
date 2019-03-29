@@ -21,6 +21,8 @@
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleDiskImageLib.h>
+#include <Library/OcGuardLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
@@ -345,6 +347,16 @@ DONE:
     return Status;
 }
 
+#define DMG_FILE_PATH_LEN  (L_STR_LEN (L"DMG_.dmg") + 16 + 1)
+
+typedef struct {
+  EFI_DEVICE_PATH_PROTOCOL Header;
+  ///
+  /// A NULL-terminated Path string including directory and file names.
+  ///
+  CHAR16                   PathName[DMG_FILE_PATH_LEN];
+} DMG_FILEPATH_DEVICE_PATH;
+
 EFI_STATUS
 EFIAPI
 OcAppleDiskImageInstallBlockIo(
@@ -361,11 +373,11 @@ OcAppleDiskImageInstallBlockIo(
     // Device path.
     EFI_DEVICE_PATH_PROTOCOL *DevicePath = NULL;
     EFI_DEVICE_PATH_PROTOCOL *DevicePathNew = NULL;
-    DMG_CONTROLLER_DEVICE_PATH *DevicePathDmgController = NULL;
-    MEMMAP_DEVICE_PATH *DevicePathMemMap = NULL;
-    FILEPATH_DEVICE_PATH *DevicePathFilePath = NULL;
-    DMG_SIZE_DEVICE_PATH *DevicePathDmgSize = NULL;
-    CHAR16 FilePathStr[8 + 16 + 1];
+    DMG_CONTROLLER_DEVICE_PATH DevicePathDmgController;
+    MEMMAP_DEVICE_PATH DevicePathMemMap;
+    DMG_FILEPATH_DEVICE_PATH DevicePathFilePath;
+    DMG_SIZE_DEVICE_PATH DevicePathDmgSize;
+    CHAR16 FilePathStr[DMG_FILE_PATH_LEN];
 
     // If a parameter is invalid, return error.
     if (!Context)
@@ -374,16 +386,15 @@ OcAppleDiskImageInstallBlockIo(
         return EFI_ALREADY_STARTED;
 
     // Create DMG controller device node.
-    DevicePathDmgController = (DMG_CONTROLLER_DEVICE_PATH*)CreateDeviceNode(HARDWARE_DEVICE_PATH, HW_VENDOR_DP, sizeof(DMG_CONTROLLER_DEVICE_PATH));
-    if (!DevicePathDmgController) {
-        Status = EFI_OUT_OF_RESOURCES;
-        goto DONE_ERROR;
-    }
-    DevicePathDmgController->Guid = gDmgControllerDpGuid;
-    DevicePathDmgController->Key = 0;
+    DevicePathDmgController.Header.Type    = HARDWARE_DEVICE_PATH;
+    DevicePathDmgController.Header.SubType = HW_VENDOR_DP;
+    SetDevicePathNodeLength (&DevicePathDmgController, sizeof (DevicePathDmgController));
+
+    DevicePathDmgController.Guid = gDmgControllerDpGuid;
+    DevicePathDmgController.Key = 0;
 
     // Start device path with controller node.
-    DevicePath = AppendDevicePathNode(NULL, (EFI_DEVICE_PATH_PROTOCOL*)DevicePathDmgController);
+    DevicePath = AppendDevicePathNode(NULL, &DevicePathDmgController.Header);
     if (!DevicePath) {
         Status = EFI_OUT_OF_RESOURCES;
         goto DONE_ERROR;
@@ -407,19 +418,17 @@ OcAppleDiskImageInstallBlockIo(
     DEBUG((DEBUG_INFO, "DMG extent @ 0x%lx, length 0x%lx\n", RamDmgHeader->ExtentInfo[0].Start, RamDmgHeader->ExtentInfo[0].Length));
 
     // Allocate memmap node.
-    DevicePathMemMap = (MEMMAP_DEVICE_PATH*)CreateDeviceNode(HARDWARE_DEVICE_PATH, HW_MEMMAP_DP, sizeof(MEMMAP_DEVICE_PATH));
-    if (!DevicePathMemMap) {
-        Status = EFI_OUT_OF_RESOURCES;
-        goto DONE_ERROR;
-    }
+    DevicePathMemMap.Header.Type    = HARDWARE_DEVICE_PATH;
+    DevicePathMemMap.Header.SubType = HW_MEMMAP_DP;
+    SetDevicePathNodeLength (&DevicePathMemMap, sizeof (DevicePathMemMap));
 
     // Set memmap node properties.
-    DevicePathMemMap->MemoryType = EfiACPIMemoryNVS;
-    DevicePathMemMap->StartingAddress = RamDmgPhysAddr;
-    DevicePathMemMap->EndingAddress = DevicePathMemMap->StartingAddress + sizeof(RAM_DMG_HEADER);
+    DevicePathMemMap.MemoryType = EfiACPIMemoryNVS;
+    DevicePathMemMap.StartingAddress = RamDmgPhysAddr;
+    DevicePathMemMap.EndingAddress = DevicePathMemMap.StartingAddress + sizeof(RAM_DMG_HEADER);
 
     // Add memmap node to device path.
-    DevicePathNew = AppendDevicePathNode(DevicePath, (EFI_DEVICE_PATH_PROTOCOL*)DevicePathMemMap);
+    DevicePathNew = AppendDevicePathNode(DevicePath, &DevicePathMemMap.Header);
     if (!DevicePathNew) {
         Status = EFI_OUT_OF_RESOURCES;
         goto DONE_ERROR;
@@ -434,16 +443,18 @@ OcAppleDiskImageInstallBlockIo(
     UnicodeSPrint (FilePathStr, sizeof (FilePathStr), L"DMG_%16X.dmg", Context->Length);
 
     // Allocate filepath node. Length is struct length (includes null terminator) and name length.
-    DevicePathFilePath = (FILEPATH_DEVICE_PATH*)CreateDeviceNode(MEDIA_DEVICE_PATH, MEDIA_FILEPATH_DP,
-        (UINT16)(sizeof(FILEPATH_DEVICE_PATH) + (StrLen(FilePathStr) * sizeof(CHAR16))));
-    if (!DevicePathFilePath) {
-        Status = EFI_OUT_OF_RESOURCES;
-        goto DONE_ERROR;
-    }
-    CopyMem(DevicePathFilePath->PathName, FilePathStr, (StrLen(FilePathStr) + 1) * sizeof(CHAR16));
+    DevicePathFilePath.Header.Type = MEDIA_DEVICE_PATH;
+    DevicePathFilePath.Header.Type = MEDIA_FILEPATH_DP;
+    SetDevicePathNodeLength (&DevicePathFilePath, sizeof (DevicePathFilePath));
+
+    OC_INLINE_STATIC_ASSERT (
+      (sizeof (DevicePathFilePath.PathName) == sizeof (FilePathStr)),
+      "Invalid DMG file path buffer size."
+      );
+    CopyMem(&DevicePathFilePath.PathName, FilePathStr, sizeof (DevicePathFilePath.PathName));
 
     // Add filepath node to device path.
-    DevicePathNew = AppendDevicePathNode(DevicePath, (EFI_DEVICE_PATH_PROTOCOL*)DevicePathFilePath);
+    DevicePathNew = AppendDevicePathNode(DevicePath, &DevicePathFilePath.Header);
     if (!DevicePathNew) {
         Status = EFI_OUT_OF_RESOURCES;
         goto DONE_ERROR;
@@ -455,16 +466,15 @@ OcAppleDiskImageInstallBlockIo(
     DevicePathNew = NULL;
 
     // Allocate DMG size node.
-    DevicePathDmgSize = (DMG_SIZE_DEVICE_PATH*)CreateDeviceNode(MESSAGING_DEVICE_PATH, MSG_VENDOR_DP, sizeof(DMG_SIZE_DEVICE_PATH));
-    if (!DevicePathDmgSize) {
-        Status = EFI_OUT_OF_RESOURCES;
-        goto DONE_ERROR;
-    }
-    DevicePathDmgSize->Guid = gDmgSizeDpGuid;
-    DevicePathDmgSize->Length = Context->Length;
+    DevicePathDmgSize.Header.Type    = MESSAGING_DEVICE_PATH;
+    DevicePathDmgSize.Header.SubType = MSG_VENDOR_DP;
+    SetDevicePathNodeLength (&DevicePathDmgSize, sizeof (DevicePathDmgSize));
+
+    DevicePathDmgSize.Guid = gDmgSizeDpGuid;
+    DevicePathDmgSize.Length = Context->Length;
 
     // Add filepath node to device path.
-    DevicePathNew = AppendDevicePathNode(DevicePath, (EFI_DEVICE_PATH_PROTOCOL*)DevicePathDmgSize);
+    DevicePathNew = AppendDevicePathNode(DevicePath, &DevicePathDmgSize.Header);
     if (!DevicePathNew) {
         Status = EFI_OUT_OF_RESOURCES;
         goto DONE_ERROR;
@@ -528,13 +538,6 @@ DONE_ERROR:
         gBS->FreePages(RamDmgPhysAddr, EFI_SIZE_TO_PAGES(sizeof(RAM_DMG_HEADER)));
 
 DONE:
-    // Free data.
-    if (DevicePathDmgController)
-        FreePool(DevicePathDmgController);
-    if (DevicePathMemMap)
-        FreePool(DevicePathMemMap);
-    if (DevicePathFilePath)
-        FreePool(DevicePathFilePath);
     return Status;
 }
 
