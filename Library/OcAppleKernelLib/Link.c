@@ -1154,7 +1154,7 @@ InternalProcessSymbolPointers (
     return TRUE;
   }
 
-  NumSymbols = (Section->Size / sizeof (MACH_NLIST_64));
+  NumSymbols = (UINT32)(Section->Size / sizeof (MACH_NLIST_64));
   FirstSym   = Section->Reserved1;
 
   Result = OcOverflowAddU32 (FirstSym, NumSymbols, &OffsetTop);

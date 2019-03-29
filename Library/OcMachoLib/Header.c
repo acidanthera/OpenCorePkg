@@ -1379,7 +1379,7 @@ MachoExpandImage64 (
       }
     }
 
-    CurrentDelta = OriginalDelta + Segment->Size - Segment->FileSize;
+    CurrentDelta = OriginalDelta + (UINT32)(Segment->Size - Segment->FileSize);
   }
 
   if (Strip) {
