@@ -257,7 +257,7 @@ OcAppleDiskImageRead(
     EFI_LBA LbaLength;
     UINTN RemainingBufferSize;
     UINTN BufferChunkSize;
-    VOID *BufferCurrent;
+    UINT8 *BufferCurrent;
 
     // zlib data.
     z_stream ZlibStream;
@@ -287,7 +287,7 @@ OcAppleDiskImageRead(
         LbaOffset = LbaCurrent - DMG_SECTOR_START_ABS(BlockData, Chunk);
         LbaLength = Chunk->SectorCount - LbaOffset;
         ChunkOffset = LbaOffset * APPLE_DISK_IMAGE_SECTOR_SIZE;
-        ChunkTotalLength = Chunk->SectorCount * APPLE_DISK_IMAGE_SECTOR_SIZE;
+        ChunkTotalLength = (UINTN)Chunk->SectorCount * APPLE_DISK_IMAGE_SECTOR_SIZE;
         ChunkLength = ChunkTotalLength - ChunkOffset;
 
         // If the buffer size is bigger than the chunk, there will be more chunks to get.
@@ -307,7 +307,7 @@ OcAppleDiskImageRead(
             // Raw data, write data as-is.
             case APPLE_DISK_IMAGE_CHUNK_TYPE_RAW:
                 // Determine pointer to source data.
-                ChunkData = (UINT8*)(Context->Buffer + BlockData->DataOffset + Chunk->CompressedOffset);
+                ChunkData = ((UINT8 *)Context->Buffer + BlockData->DataOffset + Chunk->CompressedOffset);
                 ChunkDataCurrent = ChunkData + ChunkOffset;
 
                 // Copy to destination buffer.
@@ -330,9 +330,9 @@ OcAppleDiskImageRead(
                 }
 
                 // Set stream parameters.
-                ZlibStream.avail_in = Chunk->CompressedLength;
-                ZlibStream.next_in = (Bytef*)(Context->Buffer + BlockData->DataOffset + Chunk->CompressedOffset);
-                ZlibStream.avail_out = ChunkTotalLength;
+                ZlibStream.avail_in = (UINT32)Chunk->CompressedLength;
+                ZlibStream.next_in = ((Bytef*)Context->Buffer + BlockData->DataOffset + Chunk->CompressedOffset);
+                ZlibStream.avail_out = (UINT32)ChunkTotalLength;
                 ZlibStream.next_out = (Bytef*)ChunkData;
 
                 // Inflate chunk and close stream.
@@ -466,7 +466,7 @@ OcAppleDiskImageInstallBlockIo(
 
     // Allocate filepath node. Length is struct length (includes null terminator) and name length.
     DevicePathFilePath = (FILEPATH_DEVICE_PATH*)CreateDeviceNode(MEDIA_DEVICE_PATH, MEDIA_FILEPATH_DP,
-        sizeof(FILEPATH_DEVICE_PATH) + (StrLen(FilePathStr) * sizeof(CHAR16)));
+        (UINT16)(sizeof(FILEPATH_DEVICE_PATH) + (StrLen(FilePathStr) * sizeof(CHAR16))));
     if (!DevicePathFilePath) {
         Status = EFI_OUT_OF_RESOURCES;
         goto DONE_ERROR;
