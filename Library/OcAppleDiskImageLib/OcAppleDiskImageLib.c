@@ -493,17 +493,13 @@ OcAppleDiskImageInstallBlockIo(
     DiskImageData->RamDmgHeader = RamDmgHeader;
 
     // Allocate media info.
-    DiskImageData->BlockIo.Media = AllocateZeroPool(sizeof(EFI_BLOCK_IO_MEDIA));
-    if (!DiskImageData->BlockIo.Media) {
-        Status = EFI_OUT_OF_RESOURCES;
-        goto DONE_ERROR;
-    }
+    DiskImageData->BlockIo.Media = &DiskImageData->BlockIoMedia;
 
     // Fill media info.
-    DiskImageData->BlockIo.Media->MediaPresent = TRUE;
-    DiskImageData->BlockIo.Media->ReadOnly = TRUE;
-    DiskImageData->BlockIo.Media->BlockSize = APPLE_DISK_IMAGE_SECTOR_SIZE;
-    DiskImageData->BlockIo.Media->LastBlock = Context->Trailer.SectorCount - 1;
+    DiskImageData->BlockIoMedia.MediaPresent = TRUE;
+    DiskImageData->BlockIoMedia.ReadOnly = TRUE;
+    DiskImageData->BlockIoMedia.BlockSize = APPLE_DISK_IMAGE_SECTOR_SIZE;
+    DiskImageData->BlockIoMedia.LastBlock = Context->Trailer.SectorCount - 1;
 
     // Install protocols on child.
     Status = gBS->InstallMultipleProtocolInterfaces(&(DiskImageData->Handle),

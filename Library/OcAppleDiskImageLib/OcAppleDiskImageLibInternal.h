@@ -97,6 +97,7 @@ typedef struct {
 
     // Protocols.
     EFI_BLOCK_IO_PROTOCOL BlockIo;
+    EFI_BLOCK_IO_MEDIA    BlockIoMedia;
     EFI_DEVICE_PATH_PROTOCOL *DevicePath;
     EFI_HANDLE Handle;
 
