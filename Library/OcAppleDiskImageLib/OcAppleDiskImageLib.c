@@ -21,7 +21,7 @@
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleDiskImageLib.h>
-#include <Library/UefiLib.h>
+#include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 #include "OcAppleDiskImageLibInternal.h"
@@ -365,7 +365,7 @@ OcAppleDiskImageInstallBlockIo(
     MEMMAP_DEVICE_PATH *DevicePathMemMap = NULL;
     FILEPATH_DEVICE_PATH *DevicePathFilePath = NULL;
     DMG_SIZE_DEVICE_PATH *DevicePathDmgSize = NULL;
-    CHAR16 *FilePathStr = NULL;
+    CHAR16 FilePathStr[8 + 16 + 1];
 
     // If a parameter is invalid, return error.
     if (!Context)
@@ -431,11 +431,7 @@ OcAppleDiskImageInstallBlockIo(
     DevicePathNew = NULL;
 
     // Build filepath string.
-    FilePathStr = CatSPrint(NULL, L"DMG_%16X.dmg", Context->Length);
-    if (!FilePathStr) {
-        Status = EFI_OUT_OF_RESOURCES;
-        goto DONE_ERROR;
-    }
+    UnicodeSPrint (FilePathStr, sizeof (FilePathStr), L"DMG_%16X.dmg", Context->Length);
 
     // Allocate filepath node. Length is struct length (includes null terminator) and name length.
     DevicePathFilePath = (FILEPATH_DEVICE_PATH*)CreateDeviceNode(MEDIA_DEVICE_PATH, MEDIA_FILEPATH_DP,
@@ -539,8 +535,6 @@ DONE:
         FreePool(DevicePathMemMap);
     if (DevicePathFilePath)
         FreePool(DevicePathFilePath);
-    if (FilePathStr)
-        FreePool(FilePathStr);
     return Status;
 }
 

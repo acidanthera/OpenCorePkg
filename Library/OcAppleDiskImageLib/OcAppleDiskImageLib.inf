@@ -32,7 +32,7 @@
     MemoryAllocationLib
     OcXmlLib
     UefiBootServicesTableLib
-    UefiLib
+    PrintLib
 
 [Protocols]
     gEfiDevicePathProtocolGuid  # PRODUCES
