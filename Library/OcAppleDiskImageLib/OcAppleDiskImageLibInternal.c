@@ -10,6 +10,16 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include <Uefi.h>
+
+#include <Protocol/BlockIo.h>
+
+#include <Library/BaseLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/OcAppleDiskImageLib.h>
+#include <Library/OcXmlLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+
 #include "OcAppleDiskImageLibInternal.h"
 
 // DP GUIDs.

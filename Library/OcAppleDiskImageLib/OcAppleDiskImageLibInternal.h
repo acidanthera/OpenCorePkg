@@ -13,21 +13,7 @@
 #ifndef APPLE_DISK_IMAGE_LIB_INTERNAL_H_
 #define APPLE_DISK_IMAGE_LIB_INTERNAL_H_
 
-// Common libraries.
-#include <Uefi.h>
-#include <Library/BaseLib.h>
-#include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
-#include <Library/DevicePathLib.h>
-#include <Library/MemoryAllocationLib.h>
-#include <Library/OcAppleDiskImageLib.h>
 #include <Library/OcXmlLib.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/UefiLib.h>
-
-// Consumed protocols.
-#include <Protocol/BlockIo.h>
-#include <Protocol/DevicePath.h>
 
 // Sizes.
 #define BASE_256B   0x100
