@@ -377,7 +377,6 @@ OcAppleDiskImageInstallBlockIo(
     MEMMAP_DEVICE_PATH DevicePathMemMap;
     DMG_FILEPATH_DEVICE_PATH DevicePathFilePath;
     DMG_SIZE_DEVICE_PATH DevicePathDmgSize;
-    CHAR16 FilePathStr[DMG_FILE_PATH_LEN];
 
     // If a parameter is invalid, return error.
     if (!Context)
@@ -439,19 +438,12 @@ OcAppleDiskImageInstallBlockIo(
     DevicePath = DevicePathNew;
     DevicePathNew = NULL;
 
-    // Build filepath string.
-    UnicodeSPrint (FilePathStr, sizeof (FilePathStr), L"DMG_%16X.dmg", Context->Length);
-
     // Allocate filepath node. Length is struct length (includes null terminator) and name length.
     DevicePathFilePath.Header.Type = MEDIA_DEVICE_PATH;
     DevicePathFilePath.Header.Type = MEDIA_FILEPATH_DP;
     SetDevicePathNodeLength (&DevicePathFilePath, sizeof (DevicePathFilePath));
 
-    OC_INLINE_STATIC_ASSERT (
-      (sizeof (DevicePathFilePath.PathName) == sizeof (FilePathStr)),
-      "Invalid DMG file path buffer size."
-      );
-    CopyMem(&DevicePathFilePath.PathName, FilePathStr, sizeof (DevicePathFilePath.PathName));
+    UnicodeSPrint (DevicePathFilePath.PathName, sizeof (DevicePathFilePath.PathName), L"DMG_%16X.dmg", Context->Length);
 
     // Add filepath node to device path.
     DevicePathNew = AppendDevicePathNode(DevicePath, &DevicePathFilePath.Header);
