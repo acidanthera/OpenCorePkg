@@ -1319,6 +1319,12 @@ InternalPrelinkKext64 (
   if (NumSymbols == 0) {
     return FALSE;
   }
+
+  Symtab = MachoContext->Symtab;
+  ASSERT (Symtab != NULL);
+
+  DySymtab = MachoContext->DySymtab;
+  ASSERT (DySymtab != NULL);
   //
   // Prepare constructing a new __LINKEDIT section to...
   //   1. strip undefined symbols for they are not allowed in prelinked
@@ -1532,9 +1538,6 @@ InternalPrelinkKext64 (
   //
   // Set up the tables with the new offsets and Symbol Table length.
   //
-  Symtab   = MachoContext->Symtab;
-  DySymtab = MachoContext->DySymtab;
-
   Symtab->SymbolsOffset = (UINT32)(LinkEditSegment->FileOffset + SymbolTableOffset);
   Symtab->NumSymbols    = NumSymbols;
   Symtab->StringsOffset = (UINT32)(LinkEditSegment->FileOffset + StringTableOffset);
