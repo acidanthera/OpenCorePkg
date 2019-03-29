@@ -146,6 +146,11 @@ PrelinkedContextInit (
   UINT32       PrelinkedInfoRootIndex;
   UINT32       PrelinkedInfoRootCount;
 
+  ASSERT (Context != NULL);
+  ASSERT (Prelinked != NULL);
+  ASSERT (PrelinkedSize > 0);
+  ASSERT (PrelinkedAllocSize >= PrelinkedSize);
+
   ZeroMem (Context, sizeof (*Context));
 
   Context->Prelinked          = Prelinked;
@@ -458,6 +463,7 @@ PrelinkedReserveKextSize (
   InfoPlistSize  = MACHO_ALIGN (InfoPlistSize);
 
   if (Executable != NULL) {
+    ASSERT (ExecutableSize > 0);
     if (!MachoInitializeContext (&Context, Executable, ExecutableSize)) {
       return EFI_INVALID_PARAMETER;
     }
@@ -510,6 +516,7 @@ PrelinkedInjectKext (
   // Copy executable to prelinkedkernel.
   //
   if (Executable != NULL) {
+    ASSERT (ExecutableSize > 0);
     if (!MachoInitializeContext (&ExecutableContext, (UINT8 *) Executable, ExecutableSize)) {
       DEBUG ((DEBUG_INFO, "Injected kext %a/%a is not a supported executable\n", BundlePath, ExecutablePath));
       return EFI_INVALID_PARAMETER;

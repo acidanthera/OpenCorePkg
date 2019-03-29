@@ -585,6 +585,9 @@ InternalCachedPrelinkedKernel (
     return NULL;
   }
 
+  ASSERT (Prelinked->Prelinked != NULL);
+  ASSERT (Prelinked->PrelinkedSize > 0);
+
   if (!MachoInitializeContext (&NewKext->Context.MachContext, &Prelinked->Prelinked[0], Prelinked->PrelinkedSize)) {
     FreePool (NewKext);
     return NULL;

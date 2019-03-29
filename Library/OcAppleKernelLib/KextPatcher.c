@@ -53,6 +53,10 @@ PatcherInitContextFromBuffer (
 {
   MACH_SEGMENT_COMMAND_64  *Segment;
 
+  ASSERT (Context != NULL);
+  ASSERT (Buffer != NULL);
+  ASSERT (BufferSize > 0);
+
   //
   // This interface is still used for the kernel due to the need to patch
   // standalone kernel outside of prelinkedkernel in e.g. 10.9.
