@@ -27,7 +27,9 @@
 
 #define DMG_FILE_PATH_LEN  (L_STR_LEN (L"DMG_.dmg") + 16 + 1)
 
-typedef struct {
+#pragma pack(1)
+
+typedef PACKED struct {
   EFI_DEVICE_PATH_PROTOCOL Header;
   ///
   /// A NULL-terminated Path string including directory and file names.
@@ -35,7 +37,7 @@ typedef struct {
   CHAR16                   PathName[DMG_FILE_PATH_LEN];
 } DMG_FILEPATH_DEVICE_PATH;
 
-typedef struct {
+typedef PACKED struct {
   DMG_CONTROLLER_DEVICE_PATH Controller;
   MEMMAP_DEVICE_PATH         MemMap;
   DMG_FILEPATH_DEVICE_PATH   FilePath;
@@ -43,30 +45,32 @@ typedef struct {
   EFI_DEVICE_PATH_PROTOCOL   End;
 } DMG_DEVICE_PATH;
 
-//
-// Mounted disk image private data.
-//
-#define OC_APPLE_DISK_IMAGE_MOUNTED_DATA_SIGNATURE SIGNATURE_32('D','m','g','I')
+#pragma pack()
+
+#define OC_APPLE_DISK_IMAGE_MOUNTED_DATA_SIGNATURE  \
+  SIGNATURE_32('D','m','g','I')
+
+#define OC_APPLE_DISK_IMAGE_MOUNTED_DATA_FROM_THIS(This)  \
+  CR (                                                    \
+    (This),                                               \
+    OC_APPLE_DISK_IMAGE_MOUNTED_DATA,                     \
+    BlockIo,                                              \
+    OC_APPLE_DISK_IMAGE_MOUNTED_DATA_SIGNATURE            \
+    )
+
 typedef struct {
-    // Signature.
-    UINTN Signature;
+  UINT32                      Signature;
 
-    // Protocols.
-    EFI_BLOCK_IO_PROTOCOL BlockIo;
-    EFI_BLOCK_IO_MEDIA    BlockIoMedia;
-    DMG_DEVICE_PATH       DevicePath;
-    EFI_HANDLE Handle;
+  EFI_HANDLE                  Handle;
+  EFI_BLOCK_IO_PROTOCOL       BlockIo;
+  EFI_BLOCK_IO_MEDIA          BlockIoMedia;
+  DMG_DEVICE_PATH             DevicePath;
 
-    // Disk image data.
-    OC_APPLE_DISK_IMAGE_CONTEXT *ImageContext;
-    RAM_DMG_HEADER *RamDmgHeader;
+  OC_APPLE_DISK_IMAGE_CONTEXT *ImageContext;
+  RAM_DMG_HEADER              *RamDmgHeader;
 } OC_APPLE_DISK_IMAGE_MOUNTED_DATA;
-#define OC_APPLE_DISK_IMAGE_MOUNTED_DATA_FROM_THIS(This) \
-    CR(This, OC_APPLE_DISK_IMAGE_MOUNTED_DATA, BlockIo, OC_APPLE_DISK_IMAGE_MOUNTED_DATA_SIGNATURE)
 
-//
-// Block I/O protocol functions.
-//
+STATIC
 EFI_STATUS
 EFIAPI
 DiskImageBlockIoReset (
@@ -77,6 +81,7 @@ DiskImageBlockIoReset (
   return EFI_SUCCESS;
 }
 
+STATIC
 EFI_STATUS
 EFIAPI
 DiskImageBlockIoReadBlocks (
@@ -87,7 +92,7 @@ DiskImageBlockIoReadBlocks (
   OUT VOID                  *Buffer
   ) 
 {
-  OC_APPLE_DISK_IMAGE_MOUNTED_DATA  *DiskImageData;
+  OC_APPLE_DISK_IMAGE_MOUNTED_DATA *DiskImageData;
 
   if ((This == NULL) || (Buffer == NULL)) {
     return EFI_INVALID_PARAMETER;
@@ -102,12 +107,16 @@ DiskImageBlockIoReadBlocks (
   if (Lba >= DiskImageData->ImageContext->Trailer.SectorCount) {
     return EFI_INVALID_PARAMETER;
   }
-  //
-  // Read data from image.
-  //
-  return OcAppleDiskImageRead(DiskImageData->ImageContext, Lba, BufferSize, Buffer);
+
+  return OcAppleDiskImageRead (
+           DiskImageData->ImageContext,
+           Lba,
+           BufferSize,
+           Buffer
+           );
 }
 
+STATIC
 EFI_STATUS
 EFIAPI
 DiskImageBlockIoWriteBlocks (
@@ -121,6 +130,7 @@ DiskImageBlockIoWriteBlocks (
   return EFI_WRITE_PROTECTED;
 }
 
+STATIC
 EFI_STATUS
 EFIAPI
 DiskImageBlockIoFlushBlocks (
@@ -130,10 +140,54 @@ DiskImageBlockIoFlushBlocks (
   return EFI_SUCCESS;
 }
 
-//
-// Block I/O protocol template.
-//
-EFI_BLOCK_IO_PROTOCOL mDiskImageBlockIo = {
+STATIC
+VOID
+InternalConstructDmgDevicePath (
+  IN OUT OC_APPLE_DISK_IMAGE_MOUNTED_DATA  *DiskImageData,
+  IN     EFI_PHYSICAL_ADDRESS              RamDmgAddress
+  )
+{
+  UINT64          DmgSize;
+  DMG_DEVICE_PATH *DevPath;
+
+  ASSERT (DiskImageData != NULL);
+
+  DmgSize = DiskImageData->ImageContext->Length;
+  DevPath = &DiskImageData->DevicePath;
+
+  DevPath->Controller.Header.Type    = HARDWARE_DEVICE_PATH;
+  DevPath->Controller.Header.SubType = HW_VENDOR_DP;
+  DevPath->Controller.Key            = 0;
+  CopyGuid (&DevPath->Controller.Guid, &gDmgControllerDpGuid);
+  SetDevicePathNodeLength (&DevPath->Controller, sizeof (DevPath->Controller));
+
+  DevPath->MemMap.Header.Type     = HARDWARE_DEVICE_PATH;
+  DevPath->MemMap.Header.SubType  = HW_MEMMAP_DP;
+  DevPath->MemMap.MemoryType      = EfiACPIMemoryNVS;
+  DevPath->MemMap.StartingAddress = RamDmgAddress;
+  DevPath->MemMap.EndingAddress   = (RamDmgAddress + sizeof (RAM_DMG_HEADER));
+  SetDevicePathNodeLength (&DevPath->MemMap, sizeof (DevPath->MemMap));
+
+  DevPath->FilePath.Header.Type = MEDIA_DEVICE_PATH;
+  DevPath->FilePath.Header.Type = MEDIA_FILEPATH_DP;
+  SetDevicePathNodeLength (&DevPath->FilePath, sizeof (DevPath->FilePath));
+  UnicodeSPrint (
+    DevPath->FilePath.PathName,
+    sizeof (DevPath->FilePath.PathName),
+    L"DMG_%16X.dmg",
+    DmgSize
+    );
+
+  DevPath->Size.Header.Type    = MESSAGING_DEVICE_PATH;
+  DevPath->Size.Header.SubType = MSG_VENDOR_DP;
+  DevPath->Size.Guid           = gDmgSizeDpGuid;
+  DevPath->Size.Length         = DmgSize;
+  SetDevicePathNodeLength (&DevPath->Size, sizeof (DevPath->Size));
+
+  SetDevicePathEndNode (&DevPath->End);
+}
+
+STATIC CONST EFI_BLOCK_IO_PROTOCOL mDiskImageBlockIo = {
   EFI_BLOCK_IO_PROTOCOL_REVISION,
   NULL,
   DiskImageBlockIoReset,
@@ -142,138 +196,104 @@ EFI_BLOCK_IO_PROTOCOL mDiskImageBlockIo = {
   DiskImageBlockIoFlushBlocks
 };
 
-STATIC
-VOID
-InternalConstructDmgDevicePath (
-  IN OUT OC_APPLE_DISK_IMAGE_MOUNTED_DATA  *DiskImageData,
-  IN     EFI_PHYSICAL_ADDRESS              RamDmgPhysAddr
-  )
-{
-    UINT64          DmgSize;
-    DMG_DEVICE_PATH *DevicePath;
-
-    ASSERT (DiskImageData != NULL);
-
-    DmgSize    = DiskImageData->ImageContext->Length;
-    DevicePath = &DiskImageData->DevicePath;
-
-    // Create DMG controller device node.
-    DevicePath->Controller.Header.Type    = HARDWARE_DEVICE_PATH;
-    DevicePath->Controller.Header.SubType = HW_VENDOR_DP;
-    SetDevicePathNodeLength (&DevicePath->Controller, sizeof (DevicePath->Controller));
-
-    DevicePath->Controller.Guid = gDmgControllerDpGuid;
-    DevicePath->Controller.Key = 0;
-
-    // Allocate memmap node.
-    DevicePath->MemMap.Header.Type    = HARDWARE_DEVICE_PATH;
-    DevicePath->MemMap.Header.SubType = HW_MEMMAP_DP;
-    SetDevicePathNodeLength (&DevicePath->MemMap, sizeof (DevicePath->MemMap));
-
-    // Set memmap node properties.
-    DevicePath->MemMap.MemoryType = EfiACPIMemoryNVS;
-    DevicePath->MemMap.StartingAddress = RamDmgPhysAddr;
-    DevicePath->MemMap.EndingAddress = DevicePath->MemMap.StartingAddress + sizeof(RAM_DMG_HEADER);
-
-    // Allocate filepath node. Length is struct length (includes null terminator) and name length.
-    DevicePath->FilePath.Header.Type = MEDIA_DEVICE_PATH;
-    DevicePath->FilePath.Header.Type = MEDIA_FILEPATH_DP;
-    SetDevicePathNodeLength (&DevicePath->FilePath, sizeof (DevicePath->FilePath));
-
-    UnicodeSPrint (DevicePath->FilePath.PathName, sizeof (DevicePath->FilePath.PathName), L"DMG_%16X.dmg", DmgSize);
-
-    // Allocate DMG size node.
-    DevicePath->Size.Header.Type    = MESSAGING_DEVICE_PATH;
-    DevicePath->Size.Header.SubType = MSG_VENDOR_DP;
-    SetDevicePathNodeLength (&DevicePath->Size, sizeof (DevicePath->Size));
-
-    DevicePath->Size.Guid = gDmgSizeDpGuid;
-    DevicePath->Size.Length = DmgSize;
-
-    SetDevicePathEndNode (&DevicePath->End);
-}
-
 EFI_STATUS
 EFIAPI
-OcAppleDiskImageInstallBlockIo(
-    IN OC_APPLE_DISK_IMAGE_CONTEXT *Context) {
+OcAppleDiskImageInstallBlockIo (
+  IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context
+  )
+{
+  EFI_STATUS                       Status;
+  OC_APPLE_DISK_IMAGE_MOUNTED_DATA *DiskImageData;
+  UINTN                            NumRamDmgPages;
+  EFI_PHYSICAL_ADDRESS             RamDmgAddress;
+  RAM_DMG_HEADER                   *RamDmgHeader;
 
-    // Create variables.
-    EFI_STATUS Status;
-    OC_APPLE_DISK_IMAGE_MOUNTED_DATA *DiskImageData = NULL;
+  ASSERT (Context != NULL);
+  ASSERT (Context->BlockIoHandle == NULL);
 
-    // RAM DMG.
-    EFI_PHYSICAL_ADDRESS RamDmgPhysAddr;
-    RAM_DMG_HEADER *RamDmgHeader = NULL;
+  NumRamDmgPages = EFI_SIZE_TO_PAGES (sizeof (*RamDmgHeader));
+  Status = gBS->AllocatePages (
+                  AllocateAnyPages,
+                  EfiACPIMemoryNVS,
+                  NumRamDmgPages,
+                  &RamDmgAddress
+                  );
+  if (EFI_ERROR(Status)) {
+      return EFI_OUT_OF_RESOURCES;
+  }
 
-    ASSERT (Context != NULL);
-    ASSERT (Context->BlockIoHandle != NULL);
+  RamDmgHeader = (RAM_DMG_HEADER *)(UINTN)RamDmgAddress;
+  ZeroMem (RamDmgHeader, sizeof (*RamDmgHeader));
 
-    // Allocate page for RAM DMG header used by boot.efi.
-    Status = gBS->AllocatePages(AllocateAnyPages, EfiACPIMemoryNVS, EFI_SIZE_TO_PAGES(sizeof(RAM_DMG_HEADER)), &RamDmgPhysAddr);
-    if (EFI_ERROR(Status)) {
-        return EFI_OUT_OF_RESOURCES;
-    }
-    RamDmgHeader = (RAM_DMG_HEADER*)RamDmgPhysAddr;
-    ZeroMem(RamDmgHeader, sizeof(RAM_DMG_HEADER));
+  RamDmgHeader->Signature            =  RAM_DMG_SIGNATURE;
+  RamDmgHeader->Signature2           =  RAM_DMG_SIGNATURE;
+  RamDmgHeader->Version              = RAM_DMG_VERSION;
+  RamDmgHeader->ExtentCount          = 1;
+  RamDmgHeader->ExtentInfo[0].Start  = (UINT64)(UINTN)Context->Buffer;
+  RamDmgHeader->ExtentInfo[0].Length = Context->Length;
+  DEBUG ((
+    DEBUG_INFO,
+    "DMG extent @ 0x%lx, length 0x%lx\n",
+    RamDmgHeader->ExtentInfo[0].Start,
+    RamDmgHeader->ExtentInfo[0].Length
+    ));
 
-    // Fill RAM DMG header.
-    RamDmgHeader->Signature = RamDmgHeader->Signature2 = RAM_DMG_SIGNATURE;
-    RamDmgHeader->Version = RAM_DMG_VERSION;
-    RamDmgHeader->ExtentCount = 1;
-    RamDmgHeader->ExtentInfo[0].Start = (UINT64)Context->Buffer;
-    RamDmgHeader->ExtentInfo[0].Length = Context->Length;
-    DEBUG((DEBUG_INFO, "DMG extent @ 0x%lx, length 0x%lx\n", RamDmgHeader->ExtentInfo[0].Start, RamDmgHeader->ExtentInfo[0].Length));
+  DiskImageData = AllocateZeroPool (sizeof (*DiskImageData));
+  if (DiskImageData == NULL) {
+    gBS->FreePages (RamDmgAddress, NumRamDmgPages);
+    return EFI_OUT_OF_RESOURCES;
+  }
 
-    // Allocate installed DMG info.
-    DiskImageData = AllocateZeroPool(sizeof(OC_APPLE_DISK_IMAGE_MOUNTED_DATA));
-    if (!DiskImageData) {
-        gBS->FreePages(RamDmgPhysAddr, EFI_SIZE_TO_PAGES(sizeof(RAM_DMG_HEADER)));
-        return EFI_OUT_OF_RESOURCES;
-    }
+  DiskImageData->Signature    = OC_APPLE_DISK_IMAGE_MOUNTED_DATA_SIGNATURE;
+  DiskImageData->Handle       = NULL;
+  DiskImageData->ImageContext = Context;
+  DiskImageData->RamDmgHeader = RamDmgHeader;
+  CopyMem (
+    &DiskImageData->BlockIo,
+    &mDiskImageBlockIo,
+    sizeof (DiskImageData->BlockIo)
+    );
 
-    // Fill disk image data.
-    DiskImageData->Signature = OC_APPLE_DISK_IMAGE_MOUNTED_DATA_SIGNATURE;
-    CopyMem(&(DiskImageData->BlockIo), &mDiskImageBlockIo, sizeof(EFI_BLOCK_IO_PROTOCOL));
-    DiskImageData->Handle = NULL;
-    DiskImageData->ImageContext = Context;
-    DiskImageData->RamDmgHeader = RamDmgHeader;
+  DiskImageData->BlockIo.Media             = &DiskImageData->BlockIoMedia;
+  DiskImageData->BlockIoMedia.MediaPresent = TRUE;
+  DiskImageData->BlockIoMedia.ReadOnly     = TRUE;
+  DiskImageData->BlockIoMedia.BlockSize    = APPLE_DISK_IMAGE_SECTOR_SIZE;
+  DiskImageData->BlockIoMedia.LastBlock    = (Context->Trailer.SectorCount - 1);
 
-    // Allocate media info.
-    DiskImageData->BlockIo.Media = &DiskImageData->BlockIoMedia;
+  InternalConstructDmgDevicePath (DiskImageData, RamDmgAddress);
 
-    // Fill media info.
-    DiskImageData->BlockIoMedia.MediaPresent = TRUE;
-    DiskImageData->BlockIoMedia.ReadOnly = TRUE;
-    DiskImageData->BlockIoMedia.BlockSize = APPLE_DISK_IMAGE_SECTOR_SIZE;
-    DiskImageData->BlockIoMedia.LastBlock = Context->Trailer.SectorCount - 1;
+  Status = gBS->InstallMultipleProtocolInterfaces (
+                  &DiskImageData->Handle,
+                  &gEfiBlockIoProtocolGuid,
+                  &DiskImageData->BlockIo,
+                  &gEfiDevicePathProtocolGuid,
+                  &DiskImageData->DevicePath,
+                  NULL
+                  );
+  if (EFI_ERROR(Status)) {
+      FreePool (DiskImageData);
+      gBS->FreePages (RamDmgAddress, NumRamDmgPages);
+      return Status;
+  }
 
-    InternalConstructDmgDevicePath (DiskImageData, RamDmgPhysAddr);
+  Status = gBS->ConnectController (DiskImageData->Handle, NULL, NULL, TRUE);
+  if (EFI_ERROR(Status)) {
+      gBS->UninstallMultipleProtocolInterfaces (
+             DiskImageData->Handle,
+             &gEfiBlockIoProtocolGuid,
+             &DiskImageData->BlockIo,
+             &gEfiDevicePathProtocolGuid,
+             &DiskImageData->DevicePath,
+             NULL
+             );
+      FreePool (DiskImageData);
+      gBS->FreePages (RamDmgAddress, NumRamDmgPages);
+      return Status;
+  }
 
-    // Install protocols on child.
-    Status = gBS->InstallMultipleProtocolInterfaces(&(DiskImageData->Handle),
-        &gEfiBlockIoProtocolGuid, &DiskImageData->BlockIo,
-        &gEfiDevicePathProtocolGuid, &DiskImageData->DevicePath, NULL);
-    if (EFI_ERROR(Status)) {
-        FreePool(DiskImageData);
-        gBS->FreePages(RamDmgPhysAddr, EFI_SIZE_TO_PAGES(sizeof(RAM_DMG_HEADER)));
-        return Status;
-    }
+  Context->BlockIoHandle = DiskImageData->Handle;
 
-    // Connect controller.
-    Status = gBS->ConnectController(DiskImageData->Handle, NULL, NULL, TRUE);
-    if (EFI_ERROR(Status)) {
-        gBS->UninstallMultipleProtocolInterfaces (DiskImageData->Handle,
-          &gEfiBlockIoProtocolGuid, &(DiskImageData->BlockIo),
-          &gEfiDevicePathProtocolGuid, &DiskImageData->DevicePath, NULL);
-        FreePool(DiskImageData);
-        gBS->FreePages(RamDmgPhysAddr, EFI_SIZE_TO_PAGES(sizeof(RAM_DMG_HEADER)));
-        return Status;
-    }
-
-    // Success.
-    Context->BlockIoHandle = DiskImageData->Handle;
-    return EFI_SUCCESS;
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -287,50 +307,48 @@ OcAppleDiskImageUninstallBlockIo (
   OC_APPLE_DISK_IMAGE_MOUNTED_DATA  *DiskImageData;
 
   ASSERT (Context != NULL);
-  if (Context->BlockIoHandle == NULL)
-    return EFI_NOT_STARTED;
+  ASSERT (Context->BlockIoHandle != NULL);
 
-  //
-  // Get block I/O.
-  //
-  Status = gBS->HandleProtocol (Context->BlockIoHandle, &gEfiBlockIoProtocolGuid, (VOID**)&BlockIo);
-  if (EFI_ERROR (Status))
+  Status = gBS->HandleProtocol (
+                  Context->BlockIoHandle,
+                  &gEfiBlockIoProtocolGuid,
+                  (VOID **)&BlockIo
+                  );
+  if (EFI_ERROR (Status)) {
     return Status;
+  }
 
-  //
-  // Get disk image data.
-  //
   DiskImageData = OC_APPLE_DISK_IMAGE_MOUNTED_DATA_FROM_THIS (BlockIo);
 
-  //
-  // Ensure context matches.
-  //
-  ASSERT (DiskImageData->Handle == Context->BlockIoHandle && DiskImageData->ImageContext == Context);
+  ASSERT (
+    (DiskImageData->Handle == Context->BlockIoHandle)
+      && (DiskImageData->ImageContext == Context)
+    );
 
-  //
-  // Disconnect controller.
-  //
   Status = gBS->DisconnectController (DiskImageData->Handle, NULL, NULL);
-  if (EFI_ERROR (Status))
+  if (EFI_ERROR (Status)) {
     return Status;
+  }
 
-  //
-  // Uninstall protocols.
-  //
-  Status = gBS->UninstallMultipleProtocolInterfaces (DiskImageData->Handle,
-    &gEfiBlockIoProtocolGuid, &(DiskImageData->BlockIo),
-    &gEfiDevicePathProtocolGuid, &DiskImageData->DevicePath, NULL);
-  if (EFI_ERROR (Status))
+  Status = gBS->UninstallMultipleProtocolInterfaces (
+                  DiskImageData->Handle,
+                  &gEfiBlockIoProtocolGuid,
+                  &DiskImageData->BlockIo,
+                  &gEfiDevicePathProtocolGuid,
+                  &DiskImageData->DevicePath,
+                  NULL
+                  );
+  if (EFI_ERROR (Status)) {
     return Status;
+  }
+
   Context->BlockIoHandle = NULL;
 
-  // Free RAM DMG header pages.
-  if (DiskImageData->RamDmgHeader != NULL)
-    FreePages (DiskImageData->RamDmgHeader, EFI_SIZE_TO_PAGES (sizeof(RAM_DMG_HEADER)));
+  gBS->FreePages (
+         (EFI_PHYSICAL_ADDRESS)(UINTN)DiskImageData->RamDmgHeader,
+         EFI_SIZE_TO_PAGES (sizeof (*DiskImageData->RamDmgHeader))
+         );
 
-  //
-  // Free disk image data.
-  //
   FreePool (DiskImageData);
   return EFI_SUCCESS;
 }
