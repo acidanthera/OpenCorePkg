@@ -64,6 +64,41 @@ FindPlistDictChild(
     return EFI_NOT_FOUND;
 }
 
+STATIC
+VOID
+InternalSwapBlockData (
+  IN OUT APPLE_DISK_IMAGE_BLOCK_DATA  *BlockData
+  )
+{
+    APPLE_DISK_IMAGE_CHUNK *Chunk;
+
+    // Swap block fields.
+    BlockData->Version = SwapBytes32(BlockData->Version);
+    BlockData->SectorNumber = SwapBytes64(BlockData->SectorNumber);
+    BlockData->SectorCount = SwapBytes64(BlockData->SectorCount);
+    BlockData->DataOffset = SwapBytes64(BlockData->DataOffset);
+    BlockData->BuffersNeeded = SwapBytes32(BlockData->BuffersNeeded);
+    BlockData->BlockDescriptors = SwapBytes32(BlockData->BlockDescriptors);
+
+    // Swap checksum.
+    BlockData->Checksum.Type = SwapBytes32(BlockData->Checksum.Type);
+    BlockData->Checksum.Size = SwapBytes32(BlockData->Checksum.Size);
+    for (UINTN i = 0; i < APPLE_DISK_IMAGE_CHECKSUM_SIZE; i++)
+        BlockData->Checksum.Data[i] = SwapBytes32(BlockData->Checksum.Data[i]);
+
+    // Swap chunks.
+    BlockData->ChunkCount = SwapBytes32(BlockData->ChunkCount);
+    for (UINT32 c = 0; c < BlockData->ChunkCount; c++) {
+        Chunk = &BlockData->Chunks[c];
+        Chunk->Type = SwapBytes32(Chunk->Type);
+        Chunk->Comment = SwapBytes32(Chunk->Comment);
+        Chunk->SectorNumber = SwapBytes64(Chunk->SectorNumber);
+        Chunk->SectorCount = SwapBytes64(Chunk->SectorCount);
+        Chunk->CompressedOffset = SwapBytes64(Chunk->CompressedOffset);
+        Chunk->CompressedLength = SwapBytes64(Chunk->CompressedLength);
+    }
+}
+
 EFI_STATUS
 EFIAPI
 ParsePlist(
@@ -94,6 +129,8 @@ ParsePlist(
     // DMG blocks.
     UINT32 DmgBlockCount;
     OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT *DmgBlocks;
+
+    OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT *Block;
 
     ASSERT (Buffer != NULL);
     ASSERT (XmlLength > 0);
@@ -141,6 +178,8 @@ ParsePlist(
 
     // Get blocks in plist.
     for (UINT32 b = 0; b < DmgBlockCount; b++) {
+        Block = &DmgBlocks[b];
+
         // Get dictionary.
         XmlPlistNodeBlockDict = XmlNodeChild(XmlPlistNodeBlockListValue, b);
 
@@ -150,7 +189,7 @@ ParsePlist(
         if (EFI_ERROR(Status))
             goto DONE_ERROR;
         PlistIntegerValue(XmlPlistBlockDictChildValue,
-            &DmgBlocks[b].Attributes, sizeof(DmgBlocks[b].Attributes), FALSE);
+            &Block->Attributes, sizeof(Block->Attributes), FALSE);
 
         // Get CFName node.
         Status = FindPlistDictChild(XmlPlistNodeBlockDict, DMG_PLIST_CFNAME,
@@ -161,13 +200,13 @@ ParsePlist(
         // Allocate CFName string and get it.
         XmlPlistBlockDictChildDataSize = 0;
         PlistStringSize(XmlPlistBlockDictChildValue, &XmlPlistBlockDictChildDataSize);
-        DmgBlocks[b].CfName = AllocateZeroPool(XmlPlistBlockDictChildDataSize);
-        if (!DmgBlocks[b].CfName) {
+        Block->CfName = AllocateZeroPool(XmlPlistBlockDictChildDataSize);
+        if (!Block->CfName) {
             Status = EFI_OUT_OF_RESOURCES;
             goto DONE_ERROR;
         }
         PlistStringValue(XmlPlistBlockDictChildValue,
-            DmgBlocks[b].CfName, &XmlPlistBlockDictChildDataSize);
+            Block->CfName, &XmlPlistBlockDictChildDataSize);
 
         // Get Name node.
         Status = FindPlistDictChild(XmlPlistNodeBlockDict, DMG_PLIST_NAME,
@@ -178,13 +217,13 @@ ParsePlist(
         // Allocate Name string and get it.
         XmlPlistBlockDictChildDataSize = 0;
         PlistStringSize(XmlPlistBlockDictChildValue, &XmlPlistBlockDictChildDataSize);
-        DmgBlocks[b].Name = AllocateZeroPool(XmlPlistBlockDictChildDataSize);
-        if (!DmgBlocks[b].Name) {
+        Block->Name = AllocateZeroPool(XmlPlistBlockDictChildDataSize);
+        if (!Block->Name) {
             Status = EFI_OUT_OF_RESOURCES;
             goto DONE_ERROR;
         }
         PlistStringValue(XmlPlistBlockDictChildValue,
-            DmgBlocks[b].Name, &XmlPlistBlockDictChildDataSize);
+            Block->Name, &XmlPlistBlockDictChildDataSize);
 
         // Get ID.
         Status = FindPlistDictChild(XmlPlistNodeBlockDict, DMG_PLIST_ID,
@@ -192,7 +231,7 @@ ParsePlist(
         if (EFI_ERROR(Status))
             goto DONE_ERROR;
         PlistIntegerValue(XmlPlistBlockDictChildValue,
-            &DmgBlocks[b].Id, sizeof(DmgBlocks[b].Id), FALSE);
+            &Block->Id, sizeof(Block->Id), FALSE);
 
         // Get block data.
         Status = FindPlistDictChild(XmlPlistNodeBlockDict, DMG_PLIST_DATA,
@@ -203,38 +242,16 @@ ParsePlist(
         // Allocate block data and get it.
         XmlPlistBlockDictChildDataSize = 0;
         PlistDataSize(XmlPlistBlockDictChildValue, &XmlPlistBlockDictChildDataSize);
-        DmgBlocks[b].BlockData = AllocateZeroPool(XmlPlistBlockDictChildDataSize);
-        if (!DmgBlocks[b].BlockData) {
+        Block->BlockData = AllocateZeroPool(XmlPlistBlockDictChildDataSize);
+        if (!Block->BlockData) {
             Status = EFI_OUT_OF_RESOURCES;
             goto DONE_ERROR;
         }
+
         PlistDataValue(XmlPlistBlockDictChildValue,
-            (UINT8*)DmgBlocks[b].BlockData, &XmlPlistBlockDictChildDataSize);
+            (UINT8*)Block->BlockData, &XmlPlistBlockDictChildDataSize);
 
-        // Swap block fields.
-        DmgBlocks[b].BlockData->Version = SwapBytes32(DmgBlocks[b].BlockData->Version);
-        DmgBlocks[b].BlockData->SectorNumber = SwapBytes64(DmgBlocks[b].BlockData->SectorNumber);
-        DmgBlocks[b].BlockData->SectorCount = SwapBytes64(DmgBlocks[b].BlockData->SectorCount);
-        DmgBlocks[b].BlockData->DataOffset = SwapBytes64(DmgBlocks[b].BlockData->DataOffset);
-        DmgBlocks[b].BlockData->BuffersNeeded = SwapBytes32(DmgBlocks[b].BlockData->BuffersNeeded);
-        DmgBlocks[b].BlockData->BlockDescriptors = SwapBytes32(DmgBlocks[b].BlockData->BlockDescriptors);
-
-        // Swap checksum.
-        DmgBlocks[b].BlockData->Checksum.Type = SwapBytes32(DmgBlocks[b].BlockData->Checksum.Type);
-        DmgBlocks[b].BlockData->Checksum.Size = SwapBytes32(DmgBlocks[b].BlockData->Checksum.Size);
-        for (UINTN i = 0; i < APPLE_DISK_IMAGE_CHECKSUM_SIZE; i++)
-            DmgBlocks[b].BlockData->Checksum.Data[i] = SwapBytes32(DmgBlocks[b].BlockData->Checksum.Data[i]);
-
-        // Swap chunks.
-        DmgBlocks[b].BlockData->ChunkCount = SwapBytes32(DmgBlocks[b].BlockData->ChunkCount);
-        for (UINT32 c = 0; c < DmgBlocks[b].BlockData->ChunkCount; c++) {
-            DmgBlocks[b].BlockData->Chunks[c].Type = SwapBytes32(DmgBlocks[b].BlockData->Chunks[c].Type);
-            DmgBlocks[b].BlockData->Chunks[c].Comment = SwapBytes32(DmgBlocks[b].BlockData->Chunks[c].Comment);
-            DmgBlocks[b].BlockData->Chunks[c].SectorNumber = SwapBytes64(DmgBlocks[b].BlockData->Chunks[c].SectorNumber);
-            DmgBlocks[b].BlockData->Chunks[c].SectorCount = SwapBytes64(DmgBlocks[b].BlockData->Chunks[c].SectorCount);
-            DmgBlocks[b].BlockData->Chunks[c].CompressedOffset = SwapBytes64(DmgBlocks[b].BlockData->Chunks[c].CompressedOffset);
-            DmgBlocks[b].BlockData->Chunks[c].CompressedLength = SwapBytes64(DmgBlocks[b].BlockData->Chunks[c].CompressedLength);
-        }
+        InternalSwapBlockData (Block->BlockData);
     }
 
     // Success.
