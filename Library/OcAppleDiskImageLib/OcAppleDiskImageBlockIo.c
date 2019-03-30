@@ -56,6 +56,13 @@ typedef struct {
   CHAR16                   PathName[DMG_FILE_PATH_LEN];
 } DMG_FILEPATH_DEVICE_PATH;
 
+typedef struct {
+  DMG_CONTROLLER_DEVICE_PATH Controller;
+  MEMMAP_DEVICE_PATH         MemMap;
+  DMG_FILEPATH_DEVICE_PATH   FilePath;
+  DMG_SIZE_DEVICE_PATH       Size;
+} DMG_DEVICE_PATH;
+
 //
 // Block I/O protocol functions.
 //
@@ -139,33 +146,13 @@ OcAppleDiskImageInstallBlockIo(
     RAM_DMG_HEADER *RamDmgHeader = NULL;
 
     // Device path.
-    EFI_DEVICE_PATH_PROTOCOL *DevicePath = NULL;
-    EFI_DEVICE_PATH_PROTOCOL *DevicePathNew = NULL;
-    DMG_CONTROLLER_DEVICE_PATH DevicePathDmgController;
-    MEMMAP_DEVICE_PATH DevicePathMemMap;
-    DMG_FILEPATH_DEVICE_PATH DevicePathFilePath;
-    DMG_SIZE_DEVICE_PATH DevicePathDmgSize;
+    DMG_DEVICE_PATH *DevicePath = NULL;
 
     // If a parameter is invalid, return error.
     if (!Context)
         return EFI_INVALID_PARAMETER;
     if (Context->BlockIoHandle)
         return EFI_ALREADY_STARTED;
-
-    // Create DMG controller device node.
-    DevicePathDmgController.Header.Type    = HARDWARE_DEVICE_PATH;
-    DevicePathDmgController.Header.SubType = HW_VENDOR_DP;
-    SetDevicePathNodeLength (&DevicePathDmgController, sizeof (DevicePathDmgController));
-
-    DevicePathDmgController.Guid = gDmgControllerDpGuid;
-    DevicePathDmgController.Key = 0;
-
-    // Start device path with controller node.
-    DevicePath = AppendDevicePathNode(NULL, &DevicePathDmgController.Header);
-    if (!DevicePath) {
-        Status = EFI_OUT_OF_RESOURCES;
-        goto DONE_ERROR;
-    }
 
     // Allocate page for RAM DMG header used by boot.efi.
     Status = gBS->AllocatePages(AllocateAnyPages, EfiACPIMemoryNVS, EFI_SIZE_TO_PAGES(sizeof(RAM_DMG_HEADER)), &RamDmgPhysAddr);
@@ -184,66 +171,45 @@ OcAppleDiskImageInstallBlockIo(
     RamDmgHeader->ExtentInfo[0].Length = Context->Length;
     DEBUG((DEBUG_INFO, "DMG extent @ 0x%lx, length 0x%lx\n", RamDmgHeader->ExtentInfo[0].Start, RamDmgHeader->ExtentInfo[0].Length));
 
+    DevicePath = AllocatePool (sizeof (*DevicePath));
+    if (DevicePath == NULL) {
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    // Create DMG controller device node.
+    DevicePath->Controller.Header.Type    = HARDWARE_DEVICE_PATH;
+    DevicePath->Controller.Header.SubType = HW_VENDOR_DP;
+    SetDevicePathNodeLength (&DevicePath->Controller, sizeof (DevicePath->Controller));
+
+    DevicePath->Controller.Guid = gDmgControllerDpGuid;
+    DevicePath->Controller.Key = 0;
+
     // Allocate memmap node.
-    DevicePathMemMap.Header.Type    = HARDWARE_DEVICE_PATH;
-    DevicePathMemMap.Header.SubType = HW_MEMMAP_DP;
-    SetDevicePathNodeLength (&DevicePathMemMap, sizeof (DevicePathMemMap));
+    DevicePath->MemMap.Header.Type    = HARDWARE_DEVICE_PATH;
+    DevicePath->MemMap.Header.SubType = HW_MEMMAP_DP;
+    SetDevicePathNodeLength (&DevicePath->MemMap, sizeof (DevicePath->MemMap));
 
     // Set memmap node properties.
-    DevicePathMemMap.MemoryType = EfiACPIMemoryNVS;
-    DevicePathMemMap.StartingAddress = RamDmgPhysAddr;
-    DevicePathMemMap.EndingAddress = DevicePathMemMap.StartingAddress + sizeof(RAM_DMG_HEADER);
-
-    // Add memmap node to device path.
-    DevicePathNew = AppendDevicePathNode(DevicePath, &DevicePathMemMap.Header);
-    if (!DevicePathNew) {
-        Status = EFI_OUT_OF_RESOURCES;
-        goto DONE_ERROR;
-    }
-
-    // Free original device path and use the new one.
-    FreePool(DevicePath);
-    DevicePath = DevicePathNew;
-    DevicePathNew = NULL;
+    DevicePath->MemMap.MemoryType = EfiACPIMemoryNVS;
+    DevicePath->MemMap.StartingAddress = RamDmgPhysAddr;
+    DevicePath->MemMap.EndingAddress = DevicePath->MemMap.StartingAddress + sizeof(RAM_DMG_HEADER);
 
     // Allocate filepath node. Length is struct length (includes null terminator) and name length.
-    DevicePathFilePath.Header.Type = MEDIA_DEVICE_PATH;
-    DevicePathFilePath.Header.Type = MEDIA_FILEPATH_DP;
-    SetDevicePathNodeLength (&DevicePathFilePath, sizeof (DevicePathFilePath));
+    DevicePath->FilePath.Header.Type = MEDIA_DEVICE_PATH;
+    DevicePath->FilePath.Header.Type = MEDIA_FILEPATH_DP;
+    SetDevicePathNodeLength (&DevicePath->FilePath, sizeof (DevicePath->FilePath));
 
-    UnicodeSPrint (DevicePathFilePath.PathName, sizeof (DevicePathFilePath.PathName), L"DMG_%16X.dmg", Context->Length);
-
-    // Add filepath node to device path.
-    DevicePathNew = AppendDevicePathNode(DevicePath, &DevicePathFilePath.Header);
-    if (!DevicePathNew) {
-        Status = EFI_OUT_OF_RESOURCES;
-        goto DONE_ERROR;
-    }
-
-    // Free original device path and use the new one.
-    FreePool(DevicePath);
-    DevicePath = DevicePathNew;
-    DevicePathNew = NULL;
+    UnicodeSPrint (DevicePath->FilePath.PathName, sizeof (DevicePath->FilePath.PathName), L"DMG_%16X.dmg", Context->Length);
 
     // Allocate DMG size node.
-    DevicePathDmgSize.Header.Type    = MESSAGING_DEVICE_PATH;
-    DevicePathDmgSize.Header.SubType = MSG_VENDOR_DP;
-    SetDevicePathNodeLength (&DevicePathDmgSize, sizeof (DevicePathDmgSize));
+    DevicePath->Size.Header.Type    = MESSAGING_DEVICE_PATH;
+    DevicePath->Size.Header.SubType = MSG_VENDOR_DP;
+    SetDevicePathNodeLength (&DevicePath->Size, sizeof (DevicePath->Size));
 
-    DevicePathDmgSize.Guid = gDmgSizeDpGuid;
-    DevicePathDmgSize.Length = Context->Length;
+    DevicePath->Size.Guid = gDmgSizeDpGuid;
+    DevicePath->Size.Length = Context->Length;
 
-    // Add filepath node to device path.
-    DevicePathNew = AppendDevicePathNode(DevicePath, &DevicePathDmgSize.Header);
-    if (!DevicePathNew) {
-        Status = EFI_OUT_OF_RESOURCES;
-        goto DONE_ERROR;
-    }
-
-    // Free original device path and use the new one.
-    FreePool(DevicePath);
-    DevicePath = DevicePathNew;
-    DevicePathNew = NULL;
+    SetDevicePathEndNode (DevicePath);
 
     // Allocate installed DMG info.
     DiskImageData = AllocateZeroPool(sizeof(OC_APPLE_DISK_IMAGE_MOUNTED_DATA));
@@ -255,7 +221,7 @@ OcAppleDiskImageInstallBlockIo(
     // Fill disk image data.
     DiskImageData->Signature = OC_APPLE_DISK_IMAGE_MOUNTED_DATA_SIGNATURE;
     CopyMem(&(DiskImageData->BlockIo), &mDiskImageBlockIo, sizeof(EFI_BLOCK_IO_PROTOCOL));
-    DiskImageData->DevicePath = DevicePath;
+    DiskImageData->DevicePath = (EFI_DEVICE_PATH_PROTOCOL *)DevicePath;
     DiskImageData->Handle = NULL;
     DiskImageData->ImageContext = Context;
     DiskImageData->RamDmgHeader = RamDmgHeader;
