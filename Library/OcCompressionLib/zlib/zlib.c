@@ -40,9 +40,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Therefore, here I provide a self-contained implementation of the
  * macros required from the rest of the PuTTY sources.
  */
-#define snew(type) ( (type *) malloc(sizeof(type)) )
-#define snewn(n, type) ( (type *) malloc((n) * sizeof(type)) )
-#define sfree(x) ( free((x)) )
 
 #ifndef FALSE
 #define FALSE 0

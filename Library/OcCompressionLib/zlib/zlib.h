@@ -1,20 +1,39 @@
-#include <Base.h>
+/** @file
+  Copyright (C) 2019, vit9696. All rights reserved.
+
+  All rights reserved.
+
+  This program and the accompanying materials
+  are licensed and made available under the terms and conditions of the BSD License
+  which accompanies this distribution.  The full text of the license may be found at
+  http://opensource.org/licenses/bsd-license.php
+
+  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+**/
+
+#ifndef ZLIB_H
+#define ZLIB_H
+
+#include <Library/BaseMemoryLib.h>
+#include <Library/DebugLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/OcCompressionLib.h>
+
+#ifdef memset
+#undef memset
+#endif
 
 #ifndef assert
-#include <Library/DebugLib.h>
 #define assert ASSERT
 #endif
 
-#ifndef malloc
-#include <Library/MemoryAllocationLib.h>
-#define malloc(Size)  (AllocatePool (Size))
-#define free(Ptr)     (FreePool (Ptr))
+#define memset(Dst, Value, Size) SetMem ((Dst), (Size), (UINT8)(Value))
+
+#define snew(type) ( (type *) AllocatePool (sizeof(type)) )
+#define snewn(n, type) ( (type *) AllocatePool ((n) * sizeof(type)) )
+#define sfree(x) ( FreePool ((x)) )
 #define sresize(OldBuffer, OldSize, NewSize, Type)  \
-  ((Type *)ReallocatePool((OldSize) * sizeof(Type), (NewSize) * sizeof(Type), (OldBuffer)))
-#endif
+  ((Type *) ReallocatePool((OldSize) * sizeof (Type), (NewSize) * sizeof (Type), (OldBuffer)))
 
-#ifndef memset
-#include <Library/BaseMemoryLib.h>
-#define memset(Memory, Value, Length)  (SetMem ((Memory), (Length), (Value)))
-#endif
-
+#endif // ZLIB_H
