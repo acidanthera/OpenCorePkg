@@ -129,6 +129,8 @@ InternalParsePlist (
   ASSERT (BlockCount != NULL);
   ASSERT (Blocks != NULL);
 
+  DmgBlocks = NULL;
+
   XmlPlistDoc = NULL;
 
   XmlPlistBuffer = AllocateCopyPool (XmlLength, ((UINT8 *)Buffer + XmlOffset));
@@ -218,6 +220,14 @@ InternalParsePlist (
   Result      = TRUE;
 
 DONE_ERROR:
+  if (!Result && (DmgBlocks != NULL)) {
+    while ((Index--) != 0) {
+      FreePool (DmgBlocks[Index]);
+    }
+
+    FreePool (DmgBlocks);
+  }
+
   if (XmlPlistDoc != NULL) {
     XmlDocumentFree (XmlPlistDoc);
   }
