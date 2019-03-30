@@ -37,6 +37,11 @@
 // Types and limits
 //
 
+#define MAX_INT8      INT8_MAX
+#define MAX_INT16     INT16_MAX
+#define MAX_INT32     INT32_MAX
+#define MAX_INT64     INT64_MAX
+#define MAX_INTN      INT64_MAX
 #define MAX_UINT8     UINT8_MAX
 #define MAX_UINT16    UINT16_MAX
 #define MAX_UINT32    UINT32_MAX

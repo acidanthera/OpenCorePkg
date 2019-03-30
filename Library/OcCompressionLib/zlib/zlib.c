@@ -31,6 +31,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "zlib.h"
 
+#ifdef USE_SYSTEM_ZLIB
+#include <zlib.h>
+#else
+
 /*
  * This module also makes a handy zlib decoding tool for when
  * you're picking apart Zip files or PDFs or PNGs. If you compile
@@ -912,21 +916,21 @@ static int zlib_huflookup(unsigned long *bitsp, int *nbitsp,
     }
 }
 
-static void zlib_emit_char(struct zlib_decompress_ctx *dctx, int c)
+static int zlib_emit_char(struct zlib_decompress_ctx *dctx, int c)
 {
     dctx->window[dctx->winpos] = c;
     dctx->winpos = (dctx->winpos + 1) & (WINSIZE - 1);
     if (dctx->outlen >= dctx->outsize) {
-        dctx->outblk = sresize(dctx->outblk, dctx->outsize, dctx->outlen + 512, unsigned char);
-        dctx->outsize = dctx->outlen + 512;
+        return FALSE;
     }
     dctx->outblk[dctx->outlen++] = c;
+    return TRUE;
 }
 
 #define EATBITS(n) ( dctx->nbits -= (n), dctx->bits >>= (n) )
 
 int zlib_decompress_block(void *handle, unsigned char *block, int len,
-                          unsigned char **outblock, int *outlen)
+                          unsigned char *outblock, int *outlen)
 {
     struct zlib_decompress_ctx *dctx = (struct zlib_decompress_ctx *)handle;
     const coderecord *rec;
@@ -935,8 +939,8 @@ int zlib_decompress_block(void *handle, unsigned char *block, int len,
         16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15
     };
 
-    dctx->outblk = snewn(256, unsigned char);
-    dctx->outsize = 256;
+    dctx->outblk = outblock;
+    dctx->outsize = *outlen;
     dctx->outlen = 0;
     last = 0;
 
@@ -1073,13 +1077,17 @@ int zlib_decompress_block(void *handle, unsigned char *block, int len,
           case INBLK:
             code =
                 zlib_huflookup(&dctx->bits, &dctx->nbits, dctx->currlentable);
-            if (code == -1)
+            if (code == -1) {
                 goto finished;
-            if (code == -2)
+            }
+            if (code == -2) {
                 goto decode_error;
-            if (code < 256)
-                zlib_emit_char(dctx, code);
-            else if (code == 256) {
+            }
+            if (code < 256) {
+              if (!zlib_emit_char(dctx, code)) {
+                goto decode_error;
+              }
+            } else if (code == 256) {
                 dctx->state = OUTSIDEBLK;
                 if (dctx->currlentable != dctx->staticlentable) {
                     zlib_freetable(&dctx->currlentable);
@@ -1123,9 +1131,12 @@ int zlib_decompress_block(void *handle, unsigned char *block, int len,
             dist = rec->min + (dctx->bits & ((1 << rec->extrabits) - 1));
             EATBITS(rec->extrabits);
             dctx->state = INBLK;
-            while (dctx->len--)
-                zlib_emit_char(dctx, dctx->window[(dctx->winpos - dist) &
-                                                  (WINSIZE - 1)]);
+            while (dctx->len--) {
+                if (!zlib_emit_char(dctx, dctx->window[(dctx->winpos - dist) &
+                                                  (WINSIZE - 1)])) {
+                    goto decode_error;
+                }
+            }
             break;
           case UNCOMP_LEN:
             /*
@@ -1157,7 +1168,9 @@ int zlib_decompress_block(void *handle, unsigned char *block, int len,
           case UNCOMP_DATA:
             if (dctx->nbits < 8)
                 goto finished;
-            zlib_emit_char(dctx, dctx->bits & 0xFF);
+            if (!zlib_emit_char(dctx, dctx->bits & 0xFF)) {
+                goto decode_error;
+            }
             EATBITS(8);
             if (--dctx->uncomplen == 0)
                 dctx->state = OUTSIDEBLK;       /* end of uncompressed block */
@@ -1166,16 +1179,15 @@ int zlib_decompress_block(void *handle, unsigned char *block, int len,
     }
 
   finished:
-    *outblock = dctx->outblk;
     *outlen = dctx->outlen;
-    return 1;
+    return TRUE;
 
   decode_error:
-    sfree(dctx->outblk);
-    *outblock = dctx->outblk = NULL;
     *outlen = 0;
-    return 0;
+    return FALSE;
 }
+
+#endif // USE_SYSTEM_ZLIB
 
 /**
   Compress buffer with ZLIB algorithm.
@@ -1195,6 +1207,9 @@ CompressZLIB (
   IN  UINT32  SrcLen
   )
 {
+#ifdef USE_SYSTEM_ZLIB
+  return NULL;
+#else
   VOID  *Return;
 
   VOID  *Handle;
@@ -1226,6 +1241,7 @@ CompressZLIB (
   zlib_compress_cleanup (Handle);
 
   return Return;
+#endif
 }
 
 /**
@@ -1246,32 +1262,69 @@ DecompressZLIB (
   IN  UINTN  SrcLen
   )
 {
+#ifdef USE_SYSTEM_ZLIB
+  z_stream  ZlibStream;
+  INT32     ZlibStatus;
+
+  //
+  // Initialize zlib stream.
+  //
+  ZeroMem (&ZlibStream, sizeof (z_stream));
+  ZlibStatus = inflateInit (&ZlibStream);
+  if (ZlibStatus != Z_OK) {
+    return 0;
+  }
+
+  //
+  // Set stream parameters.
+  //
+  ZlibStream.avail_in  = SrcLen;
+  ZlibStream.next_in   = Src;
+  ZlibStream.avail_out = DstLen;
+  ZlibStream.next_out  = Dst;
+
+  //
+  // Inflate chunk and close stream.
+  //
+  ZlibStatus = inflate (&ZlibStream, Z_NO_FLUSH);
+  inflateEnd (&ZlibStream);
+
+  //
+  // If inflation reported an error, fail.
+  //
+  if (ZlibStatus != Z_OK && ZlibStatus != Z_STREAM_END) {
+    return 0;
+  }
+
+  return DstLen;
+#else
   VOID  *Handle;
-  UINT8 *OutBlock;
   INT32 OutSize;
   INT32 Result;
+
+  if (DstLen > MAX_INT32 || SrcLen > MAX_INT32) {
+    return 0;
+  }
 
   Handle = zlib_decompress_init ();
   if (Handle == NULL) {
     return 0;
   }
 
+  OutSize = (INT32) DstLen;
   Result = zlib_decompress_block (
              Handle,
              Src,
              SrcLen,
-             &OutBlock,
+             Dst,
              &OutSize
              );
-  if (Result) {
-    if ((UINTN)OutSize <= DstLen) {
-      CopyMem (Dst, OutBlock, OutSize);
-    } else {
-      OutSize = 0;
-    }
+  if (!Result) {
+    OutSize = 0;
   }
 
   zlib_decompress_cleanup (Handle);
 
   return OutSize;
+#endif
 }

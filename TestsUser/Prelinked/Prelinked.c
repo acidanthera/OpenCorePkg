@@ -458,7 +458,7 @@ ReadFileSize (
 int wrap_main(int argc, char** argv) {
   UINT32 AllocSize;
   PRELINKED_CONTEXT Context;
-  const char *name = argc > 1 ? argv[1] : "prelinkedkernel.unpack";
+  const char *name = argc > 1 ? argv[1] : "/System/Library/PrelinkedKernels/prelinkedkernel";
   if ((Prelinked = readFile(name, &PrelinkedSize)) == NULL) {
     printf("Read fail\n");
     return -1;

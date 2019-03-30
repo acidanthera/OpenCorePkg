@@ -7,6 +7,7 @@ xcshareddata
 xcuserdata
 project.xcworkspace
 *.dSYM
+TestsUser/DiskImage/DiskImage
 TestsUser/Macho/Macho
 TestsUser/Prelinked/Prelinked
 TestsUser/Prelinked/Result.xml

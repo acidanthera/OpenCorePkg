@@ -12,8 +12,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef ZLIB_H
-#define ZLIB_H
+#ifndef ZLIB_INTERNAL_H
+#define ZLIB_INTERNAL_H
 
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
@@ -36,4 +36,4 @@
 #define sresize(OldBuffer, OldSize, NewSize, Type)  \
   ((Type *) ReallocatePool((OldSize) * sizeof (Type), (NewSize) * sizeof (Type), (OldBuffer)))
 
-#endif // ZLIB_H
+#endif // ZLIB_INTERNAL_H
