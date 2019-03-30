@@ -22,6 +22,49 @@
 
 #include "OcAppleDiskImageLibInternal.h"
 
+STATIC
+VOID
+InternalSwapTrailerData (
+  IN OUT APPLE_DISK_IMAGE_TRAILER  *Trailer
+  )
+{
+  ASSERT (Trailer != NULL);
+
+  Trailer->Signature = SwapBytes32 (Trailer->Signature);
+  Trailer->Version = SwapBytes32 (Trailer->Version);
+  Trailer->HeaderSize = SwapBytes32 (Trailer->HeaderSize);
+  Trailer->Flags = SwapBytes32 (Trailer->Flags);
+
+  // Swap main fields.
+  Trailer->RunningDataForkOffset = SwapBytes64 (Trailer->RunningDataForkOffset);
+  Trailer->DataForkOffset = SwapBytes64 (Trailer->DataForkOffset);
+  Trailer->DataForkLength = SwapBytes64 (Trailer->DataForkLength);
+  Trailer->RsrcForkOffset = SwapBytes64 (Trailer->RsrcForkOffset);
+  Trailer->RsrcForkLength = SwapBytes64 (Trailer->RsrcForkLength);
+  Trailer->SegmentNumber = SwapBytes32 (Trailer->SegmentNumber);
+  Trailer->SegmentCount = SwapBytes32 (Trailer->SegmentCount);
+
+  // Swap data fork checksum.
+  Trailer->DataForkChecksum.Type = SwapBytes32 (Trailer->DataForkChecksum.Type);
+  Trailer->DataForkChecksum.Size = SwapBytes32 (Trailer->DataForkChecksum.Size);
+  for (UINTN i = 0; i < APPLE_DISK_IMAGE_CHECKSUM_SIZE; i++)
+    Trailer->DataForkChecksum.Data[i] = SwapBytes32 (Trailer->DataForkChecksum.Data[i]);
+
+  // Swap XML info.
+  Trailer->XmlOffset = SwapBytes64 (Trailer->XmlOffset);
+  Trailer->XmlLength = SwapBytes64 (Trailer->XmlLength);
+
+  // Swap main checksum.
+  Trailer->Checksum.Type = SwapBytes32 (Trailer->Checksum.Type);
+  Trailer->Checksum.Size = SwapBytes32 (Trailer->Checksum.Size);
+  for (UINTN i = 0; i < APPLE_DISK_IMAGE_CHECKSUM_SIZE; i++)
+    Trailer->Checksum.Data[i] = SwapBytes32 (Trailer->Checksum.Data[i]);
+
+  // Swap addition fields.
+  Trailer->ImageVariant = SwapBytes32 (Trailer->ImageVariant);
+  Trailer->SectorCount = SwapBytes64 (Trailer->SectorCount);
+}
+
 EFI_STATUS
 EFIAPI
 OcAppleDiskImageInitializeContext (
@@ -77,10 +120,7 @@ OcAppleDiskImageInitializeContext (
   // Get trailer.
   //
   CopyMem (&Trailer, BufferTrailer, sizeof (APPLE_DISK_IMAGE_TRAILER));
-  Trailer.Signature = SwapBytes32 (Trailer.Signature);
-  Trailer.Version = SwapBytes32 (Trailer.Version);
-  Trailer.HeaderSize = SwapBytes32 (Trailer.HeaderSize);
-  Trailer.Flags = SwapBytes32 (Trailer.Flags);
+  InternalSwapTrailerData (&Trailer);
 
   //
   // Ensure signature and size are valid.
@@ -89,35 +129,6 @@ OcAppleDiskImageInitializeContext (
       Trailer.HeaderSize != sizeof (APPLE_DISK_IMAGE_TRAILER)) {
       return EFI_UNSUPPORTED;
   }
-
-  // Swap main fields.
-  Trailer.RunningDataForkOffset = SwapBytes64 (Trailer.RunningDataForkOffset);
-  Trailer.DataForkOffset = SwapBytes64 (Trailer.DataForkOffset);
-  Trailer.DataForkLength = SwapBytes64 (Trailer.DataForkLength);
-  Trailer.RsrcForkOffset = SwapBytes64 (Trailer.RsrcForkOffset);
-  Trailer.RsrcForkLength = SwapBytes64 (Trailer.RsrcForkLength);
-  Trailer.SegmentNumber = SwapBytes32 (Trailer.SegmentNumber);
-  Trailer.SegmentCount = SwapBytes32 (Trailer.SegmentCount);
-
-  // Swap data fork checksum.
-  Trailer.DataForkChecksum.Type = SwapBytes32 (Trailer.DataForkChecksum.Type);
-  Trailer.DataForkChecksum.Size = SwapBytes32 (Trailer.DataForkChecksum.Size);
-  for (UINTN i = 0; i < APPLE_DISK_IMAGE_CHECKSUM_SIZE; i++)
-    Trailer.DataForkChecksum.Data[i] = SwapBytes32 (Trailer.DataForkChecksum.Data[i]);
-
-  // Swap XML info.
-  Trailer.XmlOffset = SwapBytes64 (Trailer.XmlOffset);
-  Trailer.XmlLength = SwapBytes64 (Trailer.XmlLength);
-
-  // Swap main checksum.
-  Trailer.Checksum.Type = SwapBytes32 (Trailer.Checksum.Type);
-  Trailer.Checksum.Size = SwapBytes32 (Trailer.Checksum.Size);
-  for (UINTN i = 0; i < APPLE_DISK_IMAGE_CHECKSUM_SIZE; i++)
-    Trailer.Checksum.Data[i] = SwapBytes32 (Trailer.Checksum.Data[i]);
-
-  // Swap addition fields.
-  Trailer.ImageVariant = SwapBytes32 (Trailer.ImageVariant);
-  Trailer.SectorCount = SwapBytes64 (Trailer.SectorCount);
 
   // If data fork checksum is CRC32, verify it.
   if (Trailer.DataForkChecksum.Type == APPLE_DISK_IMAGE_CHECKSUM_TYPE_CRC32) {
