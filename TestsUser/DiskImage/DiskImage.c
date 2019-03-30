@@ -7,6 +7,9 @@
 
 clang -g -fsanitize=undefined,address -Wno-incompatible-pointer-types-discards-qualifiers -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h DiskImage.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLibInternal.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcCompressionLib/zlib/zlib.c -o DiskImage
 
+clang-mp-7.0 -DFUZZING_TEST=1 -g -fsanitize=undefined,address,fuzzer -Wno-incompatible-pointer-types-discards-qualifiers -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h DiskImage.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLibInternal.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcCompressionLib/zlib/zlib.c -o DiskImage
+rm -rf DICT fuzz*.log ; mkdir DICT ; UBSAN_OPTIONS='halt_on_error=1' ./DiskImage -jobs=4 DICT -rss_limit_mb=4096
+
 **/
 
 uint8_t *readFile(const char *str, uint32_t *size) {
@@ -27,6 +30,14 @@ uint8_t *readFile(const char *str, uint32_t *size) {
 
   return string;
 }
+
+#ifdef FUZZING_TEST
+#define main no_main
+#include <sanitizer/asan_interface.h>
+#else
+#define ASAN_POISON_MEMORY_REGION(addr, size)
+#define ASAN_UNPOISON_MEMORY_REGION(addr, size)
+#endif
 
 int main (int argc, char *argv[]) {
   if (argc < 2) {
@@ -80,3 +91,31 @@ int main (int argc, char *argv[]) {
 
   return 0;
 }
+
+INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
+  #define MAX_INPUT 256
+  #define MAX_OUTPUT 4096
+
+  if (Size > MAX_INPUT) {
+    return 0;
+  }
+
+  UINT8 *Test = AllocateZeroPool (MAX_OUTPUT);
+  if (Test == NULL) {
+    return 0;
+  }
+
+  for (size_t Index = 0; Index < 4096; ++Index) {
+    ASAN_POISON_MEMORY_REGION (Test + Index, MAX_OUTPUT - Index);
+    UINT32 CurrentLength = DecompressZLIB (
+                           Test,
+                           Index,
+                           Data,
+                           Size
+                           );
+    ASAN_UNPOISON_MEMORY_REGION (Test + Index, MAX_OUTPUT - Index);
+    ASSERT (CurrentLength <= Index);
+  }
+  return 0;
+}
+
