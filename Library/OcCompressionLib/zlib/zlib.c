@@ -1223,7 +1223,7 @@ CompressZLIB (
     }
   }
 
-  zlib_decompress_cleanup (Handle);
+  zlib_compress_cleanup (Handle);
 
   return Return;
 }
