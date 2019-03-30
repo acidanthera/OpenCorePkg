@@ -933,7 +933,7 @@ int zlib_decompress_block(void *handle, unsigned char *block, int len,
 {
     struct zlib_decompress_ctx *dctx = (struct zlib_decompress_ctx *)handle;
     const coderecord *rec;
-    int code, blktype, rep, dist, nlen, header;
+    int code, blktype, rep, dist, nlen, header, last;
     static const unsigned char lenlenmap[] = {
 	16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15
     };
@@ -941,6 +941,7 @@ int zlib_decompress_block(void *handle, unsigned char *block, int len,
     dctx->outblk = snewn(256, unsigned char);
     dctx->outsize = 256;
     dctx->outlen = 0;
+    last = 0;
 
     while (len > 0 || dctx->nbits > 0) {
 	while (dctx->nbits < 24 && len > 0) {
@@ -983,8 +984,9 @@ int zlib_decompress_block(void *handle, unsigned char *block, int len,
 	    break;
 	  case OUTSIDEBLK:
 	    /* Expect 3-bit block header. */
-	    if (dctx->nbits < 3)
+	    if (dctx->nbits < 3 || last)
 		goto finished;	       /* done all we can */
+	    last = dctx->bits & 1;
 	    EATBITS(1);
 	    blktype = dctx->bits & 3;
 	    EATBITS(2);

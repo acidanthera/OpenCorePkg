@@ -1,6 +1,13 @@
 #include "../Include/Uefi.h"
 
 #include <Library/OcAppleDiskImageLib.h>
+#include <Library/OcCompressionLib.h>
+
+/**
+
+clang -g -fsanitize=undefined,address -Wno-incompatible-pointer-types-discards-qualifiers -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h DiskImage.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLibInternal.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcCompressionLib/zlib/zlib.c -o DiskImage
+
+**/
 
 uint8_t *readFile(const char *str, uint32_t *size) {
   FILE *f = fopen(str, "rb");
