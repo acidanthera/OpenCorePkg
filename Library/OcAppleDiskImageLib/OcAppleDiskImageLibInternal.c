@@ -42,15 +42,15 @@ InternalFindPlistDictChild (
 
   ChildCount = PlistDictChildren (Node);
   for (Index = 0; Index < ChildCount; ++Index) {
-      ChildKey     = PlistDictChild (Node, Index, &ChildValue);
-      ChildKeyName = PlistKeyValue (ChildKey);
+    ChildKey     = PlistDictChild (Node, Index, &ChildValue);
+    ChildKeyName = PlistKeyValue (ChildKey);
 
-      if ((ChildKeyName != NULL)
-        && (AsciiStrCmp (ChildKeyName, KeyName) == 0)) {
-        *Key   = ChildKey;
-        *Value = ChildValue;
-        return TRUE;
-      }
+    if ((ChildKeyName != NULL)
+      && (AsciiStrCmp (ChildKeyName, KeyName) == 0)) {
+      *Key   = ChildKey;
+      *Value = ChildValue;
+      return TRUE;
+    }
   }
 
   return FALSE;
@@ -96,31 +96,31 @@ InternalSwapBlockData (
 
 BOOLEAN
 InternalParsePlist (
-  IN  VOID                               *Buffer,
-  IN  UINT32                             XmlOffset,
-  IN  UINT32                             XmlLength,
-  OUT UINT32                             *BlockCount,
-  OUT OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT  **Blocks
+  IN  VOID                         *Buffer,
+  IN  UINT32                       XmlOffset,
+  IN  UINT32                       XmlLength,
+  OUT UINT32                       *BlockCount,
+  OUT APPLE_DISK_IMAGE_BLOCK_DATA  ***Blocks
   )
 {
-  BOOLEAN                           Result;
+  BOOLEAN                     Result;
 
-  CHAR8                             *XmlPlistBuffer;
-  XML_DOCUMENT                      *XmlPlistDoc;
-  XML_NODE                          *NodeRoot;
-  XML_NODE                          *NodeResourceForkKey;
-  XML_NODE                          *NodeResourceForkValue;
-  XML_NODE                          *NodeBlockListKey;
-  XML_NODE                          *NodeBlockListValue;
+  CHAR8                       *XmlPlistBuffer;
+  XML_DOCUMENT                *XmlPlistDoc;
+  XML_NODE                    *NodeRoot;
+  XML_NODE                    *NodeResourceForkKey;
+  XML_NODE                    *NodeResourceForkValue;
+  XML_NODE                    *NodeBlockListKey;
+  XML_NODE                    *NodeBlockListValue;
 
-  XML_NODE                          *NodeBlockDict;
-  XML_NODE                          *BlockDictChildKey;
-  XML_NODE                          *BlockDictChildValue;
-  UINT32                            BlockDictChildDataSize;
+  XML_NODE                    *NodeBlockDict;
+  XML_NODE                    *BlockDictChildKey;
+  XML_NODE                    *BlockDictChildValue;
+  UINT32                      BlockDictChildDataSize;
 
-  UINT32                            NumDmgBlocks;
-  OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT *DmgBlocks;
-  OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT *Block;
+  UINT32                      NumDmgBlocks;
+  APPLE_DISK_IMAGE_BLOCK_DATA **DmgBlocks;
+  APPLE_DISK_IMAGE_BLOCK_DATA *Block;
 
   UINT32 Index;
 
@@ -170,123 +170,47 @@ InternalParsePlist (
   }
 
   NumDmgBlocks = XmlNodeChildren (NodeBlockListValue);
-  DmgBlocks    = AllocateZeroPool (NumDmgBlocks * sizeof (*DmgBlocks));
+  DmgBlocks    = AllocatePool (NumDmgBlocks * sizeof (*DmgBlocks));
   if (DmgBlocks == NULL) {
     Result = FALSE;
     goto DONE_ERROR;
   }
 
   for (Index = 0; Index < NumDmgBlocks; ++Index) {
-    Block = &DmgBlocks[Index];
-
     NodeBlockDict = XmlNodeChild (NodeBlockListValue, Index);
 
-    // TODO they are actually string.
     Result = InternalFindPlistDictChild (
-                NodeBlockDict,
-                DMG_PLIST_ATTRIBUTES,
-                &BlockDictChildKey,
-                &BlockDictChildValue
-                );
+               NodeBlockDict,
+               DMG_PLIST_DATA,
+               &BlockDictChildKey,
+               &BlockDictChildValue
+               );
     if (!Result) {
       goto DONE_ERROR;
     }
 
-    PlistIntegerValue (
-      BlockDictChildValue,
-      &Block->Attributes,
-      sizeof(Block->Attributes),
-      FALSE
-      );
-
-    Result = InternalFindPlistDictChild (
-                NodeBlockDict,
-                DMG_PLIST_CFNAME,
-                &BlockDictChildKey,
-                &BlockDictChildValue
-                );
+    Result = PlistDataSize (BlockDictChildValue, &BlockDictChildDataSize);
     if (!Result) {
       goto DONE_ERROR;
     }
 
-    BlockDictChildDataSize = 0;
-    PlistStringSize (BlockDictChildValue, &BlockDictChildDataSize);
-    Block->CfName = AllocateZeroPool (BlockDictChildDataSize);
-    if (Block->CfName == NULL) {
-      Result = FALSE;
-      goto DONE_ERROR;
-    }
-    PlistStringValue (
-      BlockDictChildValue,
-      Block->CfName,
-      &BlockDictChildDataSize
-      );
-
-    Result = InternalFindPlistDictChild (
-                NodeBlockDict,
-                DMG_PLIST_NAME,
-                &BlockDictChildKey,
-                &BlockDictChildValue
-                );
-    if (!Result) {
-      goto DONE_ERROR;
-    }
-
-    BlockDictChildDataSize = 0;
-    PlistStringSize (BlockDictChildValue, &BlockDictChildDataSize);
-    Block->Name = AllocateZeroPool (BlockDictChildDataSize);
-    if (Block->Name == NULL) {
-      Result = FALSE;
-      goto DONE_ERROR;
-    }
-    PlistStringValue (
-      BlockDictChildValue,
-      Block->Name,
-      &BlockDictChildDataSize
-      );
-
-    Result = InternalFindPlistDictChild (
-                NodeBlockDict,
-                DMG_PLIST_ID,
-                &BlockDictChildKey,
-                &BlockDictChildValue
-                );
-    if (!Result) {
-      goto DONE_ERROR;
-    }
-
-    PlistIntegerValue (
-      BlockDictChildValue,
-      &Block->Id,
-      sizeof (Block->Id),
-      FALSE
-      );
-
-    Result = InternalFindPlistDictChild (
-                NodeBlockDict,
-                DMG_PLIST_DATA,
-                &BlockDictChildKey,
-                &BlockDictChildValue
-                );
-    if (!Result) {
-      goto DONE_ERROR;
-    }
-
-    BlockDictChildDataSize = 0;
-    PlistDataSize (BlockDictChildValue, &BlockDictChildDataSize);
-    Block->BlockData = AllocateZeroPool (BlockDictChildDataSize);
-    if (Block->BlockData == NULL) {
+    Block = AllocatePool (BlockDictChildDataSize);
+    if (Block == NULL) {
       Result = FALSE;
       goto DONE_ERROR;
     }
 
-    PlistDataValue (
-      BlockDictChildValue,
-      (UINT8*)Block->BlockData,
-      &BlockDictChildDataSize
-      );
+    Result = PlistDataValue (
+               BlockDictChildValue,
+               (UINT8 *)Block,
+               &BlockDictChildDataSize
+               );
+    if (!Result) {
+      goto DONE_ERROR;
+    }
 
-    InternalSwapBlockData (Block->BlockData);
+    InternalSwapBlockData (Block);
+    DmgBlocks[Index] = Block;
   }
 
   *BlockCount = NumDmgBlocks;
@@ -294,7 +218,6 @@ InternalParsePlist (
   Result      = TRUE;
 
 DONE_ERROR:
-
   if (XmlPlistDoc != NULL) {
     XmlDocumentFree (XmlPlistDoc);
   }
@@ -320,10 +243,10 @@ InternalGetBlockChunk (
   APPLE_DISK_IMAGE_CHUNK      *BlockChunk;
 
   for (BlockIndex = 0; BlockIndex < Context->BlockCount; ++BlockIndex) {
-    BlockData = Context->Blocks[BlockIndex].BlockData;
+    BlockData = Context->Blocks[BlockIndex];
 
-    if ((Lba >= BlockData->SectorNumber) &&
-        (Lba < (BlockData->SectorNumber + BlockData->SectorCount))) {
+    if ((Lba >= BlockData->SectorNumber)
+     && (Lba < (BlockData->SectorNumber + BlockData->SectorCount))) {
       for (ChunkIndex = 0; ChunkIndex < BlockData->ChunkCount; ++ChunkIndex) {
         BlockChunk = &BlockData->Chunks[ChunkIndex];
 

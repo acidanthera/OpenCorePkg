@@ -80,7 +80,7 @@ OcAppleDiskImageInitializeContext (
   APPLE_DISK_IMAGE_TRAILER          *BufferTrailer;
   APPLE_DISK_IMAGE_TRAILER          Trailer;
   UINT32                            DmgBlockCount;
-  OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT *DmgBlocks;
+  APPLE_DISK_IMAGE_BLOCK_DATA       **DmgBlocks;
   UINT32                            Crc32;
   UINT32                            SwappedSig;
 
@@ -167,17 +167,12 @@ OcAppleDiskImageFreeContext (
   IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context
   )
 {
-  UINT64                            Index;
-  OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT *CurrentBlockContext;
+  UINT32 Index;
 
   ASSERT (Context != NULL);
 
   for (Index = 0; Index < Context->BlockCount; ++Index) {
-    CurrentBlockContext = &Context->Blocks[Index];
-
-    FreePool (CurrentBlockContext->CfName);
-    FreePool (CurrentBlockContext->Name);
-    FreePool (CurrentBlockContext->BlockData);
+    FreePool (Context->Blocks[Index]);
   }
 
   FreePool (Context->Blocks);

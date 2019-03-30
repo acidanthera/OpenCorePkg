@@ -16,17 +16,6 @@
 #include <IndustryStandard/AppleDiskImage.h>
 
 //
-// Disk image block context.
-//
-typedef struct {
-    UINT16                          Attributes;
-    CHAR8                           *CfName;
-    CHAR8                           *Name;
-    UINT32                          Id;
-    APPLE_DISK_IMAGE_BLOCK_DATA     *BlockData;
-} OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT;
-
-//
 // Disk image context.
 //
 typedef struct {
@@ -37,7 +26,7 @@ typedef struct {
     // Disk image info.
     APPLE_DISK_IMAGE_TRAILER        Trailer;
     UINT32                          BlockCount;
-    OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT  *Blocks;
+    APPLE_DISK_IMAGE_BLOCK_DATA     **Blocks;
 
     // Block I/O info.
     VOID                            *BlockIoHandle;
@@ -60,7 +49,7 @@ OcAppleDiskImageRead (
   IN  OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
   IN  UINT64                       Lba,
   IN  UINTN                        BufferSize,
-  OUT VOID                          *Buffer
+  OUT VOID                         *Buffer
   );
 
 BOOLEAN
