@@ -106,13 +106,6 @@ ParsePlist(
 
 EFI_STATUS
 EFIAPI
-VerifyCrc32(
-    IN VOID *Buffer,
-    IN UINTN Length,
-    IN UINT32 Checksum);
-
-EFI_STATUS
-EFIAPI
 GetBlockChunk(
     IN  OC_APPLE_DISK_IMAGE_CONTEXT *Context,
     IN  EFI_LBA Lba,

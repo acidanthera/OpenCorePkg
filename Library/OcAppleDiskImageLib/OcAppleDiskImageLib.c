@@ -39,6 +39,7 @@ OcAppleDiskImageInitializeContext (
   APPLE_DISK_IMAGE_TRAILER            Trailer;
   UINT32                              DmgBlockCount;
   OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT   *DmgBlocks = NULL;
+  UINT32                              Crc32;
 
   ASSERT (Buffer != NULL);
   ASSERT (BufferLength > sizeof (APPLE_DISK_IMAGE_TRAILER));
@@ -116,10 +117,12 @@ OcAppleDiskImageInitializeContext (
 
   // If data fork checksum is CRC32, verify it.
   if (Trailer.DataForkChecksum.Type == APPLE_DISK_IMAGE_CHECKSUM_TYPE_CRC32) {
-    Status = VerifyCrc32 (((UINT8*)Buffer) + Trailer.DataForkOffset,
-      Trailer.DataForkLength, Trailer.DataForkChecksum.Data[0]);
-    if (EFI_ERROR (Status))
-        return Status;
+    Crc32 = CalculateCrc32 (
+              ((UINT8*)Buffer + Trailer.DataForkOffset),
+              Trailer.DataForkLength
+              );
+    if (Crc32 != Trailer.DataForkChecksum.Data[0])
+        return EFI_COMPROMISED_DATA;
   }
 
   //

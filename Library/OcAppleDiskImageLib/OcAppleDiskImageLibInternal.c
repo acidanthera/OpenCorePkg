@@ -256,28 +256,6 @@ DONE:
 
 EFI_STATUS
 EFIAPI
-VerifyCrc32(
-    IN VOID *Buffer,
-    IN UINTN Length,
-    IN UINT32 Checksum) {
-
-    // Create variables.
-    UINT32 Crc32 = 0;
-
-    ASSERT (Buffer != NULL);
-    ASSERT (Length > 0);
-
-    // Calculate CRC32 of full image.
-    Crc32 = CalculateCrc32(Buffer, Length);
-
-    // Ensure CRC32 matches.
-    if (Crc32 != Checksum)
-        return EFI_COMPROMISED_DATA;
-    return EFI_SUCCESS;
-}
-
-EFI_STATUS
-EFIAPI
 GetBlockChunk(
     IN  OC_APPLE_DISK_IMAGE_CONTEXT *Context,
     IN  EFI_LBA Lba,
