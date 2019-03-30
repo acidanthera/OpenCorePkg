@@ -15,6 +15,7 @@
 #include <Protocol/BlockIo.h>
 
 #include <Library/BaseLib.h>
+#include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleDiskImageLib.h>
 #include <Library/OcXmlLib.h>
@@ -39,9 +40,10 @@ FindPlistDictChild(
     XML_NODE *ChildKey = NULL;
     CONST CHAR8 *ChildKeyStr = NULL;
 
-    // Ensure parameters are valid.
-    if (!Node || !KeyName || !Key || !Value)
-        return EFI_INVALID_PARAMETER;
+    ASSERT (Node != NULL);
+    ASSERT (KeyName != NULL);
+    ASSERT (Key != NULL);
+    ASSERT (Value != NULL);
 
     // Search for key.
     ChildCount = PlistDictChildren(Node);
@@ -93,9 +95,10 @@ ParsePlist(
     UINT32 DmgBlockCount;
     OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT *DmgBlocks;
 
-    // Ensure parameters are valid.
-    if (!Buffer || !XmlLength || !BlockCount || !Blocks)
-        return EFI_INVALID_PARAMETER;
+    ASSERT (Buffer != NULL);
+    ASSERT (XmlLength > 0);
+    ASSERT (BlockCount != NULL);
+    ASSERT (Blocks != NULL);
 
     // Allocate buffer for plist and copy plist to it.
     XmlPlistBuffer = AllocateCopyPool(XmlLength, (UINT8*)Buffer + XmlOffset);
@@ -261,9 +264,8 @@ VerifyCrc32(
     // Create variables.
     UINT32 Crc32 = 0;
 
-    // Check that parameters are valid.
-    if (!Buffer || !Length)
-        return EFI_INVALID_PARAMETER;
+    ASSERT (Buffer != NULL);
+    ASSERT (Length > 0);
 
     // Calculate CRC32 of full image.
     Crc32 = CalculateCrc32(Buffer, Length);

@@ -220,13 +220,9 @@ OcAppleDiskImageRead(
     // zlib data.
     UINTN OutSize;
 
-    // Check if parameters are valid.
-    if (!Context || !Buffer)
-        return EFI_INVALID_PARAMETER;
-
-    // Check that sector is in range.
-    if (Lba >= Context->Trailer.SectorCount)
-        return EFI_INVALID_PARAMETER;
+    ASSERT (Context != NULL);
+    ASSERT (Buffer != NULL);
+    ASSERT (Lba < Context->Trailer.SectorCount);
 
     // Read blocks.
     LbaCurrent = Lba;

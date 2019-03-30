@@ -89,13 +89,22 @@ DiskImageBlockIoReadBlocks (
 {
   OC_APPLE_DISK_IMAGE_MOUNTED_DATA  *DiskImageData;
 
-  ASSERT (This != NULL);
-  ASSERT (Buffer != NULL);
+  if ((This == NULL) || (Buffer == NULL)) {
+    return EFI_INVALID_PARAMETER;
+  }
 
+  if ((BufferSize % APPLE_DISK_IMAGE_SECTOR_SIZE) != 0) {
+    return EFI_BAD_BUFFER_SIZE;
+  }
+
+  DiskImageData = OC_APPLE_DISK_IMAGE_MOUNTED_DATA_FROM_THIS (This);
+
+  if (Lba >= DiskImageData->ImageContext->Trailer.SectorCount) {
+    return EFI_INVALID_PARAMETER;
+  }
   //
   // Read data from image.
   //
-  DiskImageData = OC_APPLE_DISK_IMAGE_MOUNTED_DATA_FROM_THIS(This);
   return OcAppleDiskImageRead(DiskImageData->ImageContext, Lba, BufferSize, Buffer);
 }
 
@@ -149,11 +158,8 @@ OcAppleDiskImageInstallBlockIo(
     // Device path.
     DMG_DEVICE_PATH *DevicePath = NULL;
 
-    // If a parameter is invalid, return error.
-    if (!Context)
-        return EFI_INVALID_PARAMETER;
-    if (Context->BlockIoHandle)
-        return EFI_ALREADY_STARTED;
+    ASSERT (Context != NULL);
+    ASSERT (Context->BlockIoHandle != NULL);
 
     // Allocate page for RAM DMG header used by boot.efi.
     Status = gBS->AllocatePages(AllocateAnyPages, EfiACPIMemoryNVS, EFI_SIZE_TO_PAGES(sizeof(RAM_DMG_HEADER)), &RamDmgPhysAddr);
@@ -287,8 +293,7 @@ OcAppleDiskImageUninstallBlockIo (
   //
   // Ensure context matches.
   //
-  if (DiskImageData->Handle != Context->BlockIoHandle || DiskImageData->ImageContext != Context)
-    return EFI_INVALID_PARAMETER;
+  ASSERT (DiskImageData->Handle == Context->BlockIoHandle && DiskImageData->ImageContext == Context);
 
   //
   // Disconnect controller.
