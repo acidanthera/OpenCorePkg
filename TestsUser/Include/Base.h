@@ -1148,7 +1148,7 @@ ReadUnaligned32 (
   LowerBytes  = ReadUnaligned16 ((UINT16*) Buffer);
   HigherBytes = ReadUnaligned16 ((UINT16*) Buffer + 1);
 
-  return (UINT32) (LowerBytes | (HigherBytes << 16));
+  return (UINT32) (LowerBytes | ((UINT32)HigherBytes << 16));
 }
 
 STATIC
