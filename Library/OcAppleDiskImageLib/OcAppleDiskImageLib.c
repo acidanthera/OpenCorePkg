@@ -53,7 +53,7 @@ OcAppleDiskImageInitializeContext (
   // Look for trailer signature.
   //
   BufferBytes = (UINT8*)Buffer;
-  BufferBytesCurrent = BufferBytes + BufferLength - sizeof (UINT32);
+  BufferBytesCurrent = BufferBytes + BufferLength - sizeof (APPLE_DISK_IMAGE_TRAILER);
   BufferTrailer = NULL;
   while (BufferBytesCurrent >= BufferBytes) {
     // Check for trailer signature.
@@ -287,8 +287,7 @@ OcAppleDiskImageRead(
                             );
                 if (OutSize != ChunkTotalLength) {
                   FreePool (ChunkData);
-                  Status = EFI_DEVICE_ERROR;
-                  goto DONE;
+                  return EFI_DEVICE_ERROR;
                 }
 
                 // Copy to destination buffer.
