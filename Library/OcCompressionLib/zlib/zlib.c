@@ -703,23 +703,592 @@ struct zlib_table {
     struct zlib_tableentry *table;
 };
 
+static const struct zlib_tableentry default_lentable_entries[] = {
+  {.code = 256, .nbits =   7, .nexttable = NULL },
+  {.code =  80, .nbits =   8, .nexttable = NULL },
+  {.code =  16, .nbits =   8, .nexttable = NULL },
+  {.code = 280, .nbits =   8, .nexttable = NULL },
+  {.code = 272, .nbits =   7, .nexttable = NULL },
+  {.code = 112, .nbits =   8, .nexttable = NULL },
+  {.code =  48, .nbits =   8, .nexttable = NULL },
+  {.code = 192, .nbits =   9, .nexttable = NULL },
+  {.code = 264, .nbits =   7, .nexttable = NULL },
+  {.code =  96, .nbits =   8, .nexttable = NULL },
+  {.code =  32, .nbits =   8, .nexttable = NULL },
+  {.code = 160, .nbits =   9, .nexttable = NULL },
+  {.code =   0, .nbits =   8, .nexttable = NULL },
+  {.code = 128, .nbits =   8, .nexttable = NULL },
+  {.code =  64, .nbits =   8, .nexttable = NULL },
+  {.code = 224, .nbits =   9, .nexttable = NULL },
+  {.code = 260, .nbits =   7, .nexttable = NULL },
+  {.code =  88, .nbits =   8, .nexttable = NULL },
+  {.code =  24, .nbits =   8, .nexttable = NULL },
+  {.code = 144, .nbits =   9, .nexttable = NULL },
+  {.code = 276, .nbits =   7, .nexttable = NULL },
+  {.code = 120, .nbits =   8, .nexttable = NULL },
+  {.code =  56, .nbits =   8, .nexttable = NULL },
+  {.code = 208, .nbits =   9, .nexttable = NULL },
+  {.code = 268, .nbits =   7, .nexttable = NULL },
+  {.code = 104, .nbits =   8, .nexttable = NULL },
+  {.code =  40, .nbits =   8, .nexttable = NULL },
+  {.code = 176, .nbits =   9, .nexttable = NULL },
+  {.code =   8, .nbits =   8, .nexttable = NULL },
+  {.code = 136, .nbits =   8, .nexttable = NULL },
+  {.code =  72, .nbits =   8, .nexttable = NULL },
+  {.code = 240, .nbits =   9, .nexttable = NULL },
+  {.code = 258, .nbits =   7, .nexttable = NULL },
+  {.code =  84, .nbits =   8, .nexttable = NULL },
+  {.code =  20, .nbits =   8, .nexttable = NULL },
+  {.code = 284, .nbits =   8, .nexttable = NULL },
+  {.code = 274, .nbits =   7, .nexttable = NULL },
+  {.code = 116, .nbits =   8, .nexttable = NULL },
+  {.code =  52, .nbits =   8, .nexttable = NULL },
+  {.code = 200, .nbits =   9, .nexttable = NULL },
+  {.code = 266, .nbits =   7, .nexttable = NULL },
+  {.code = 100, .nbits =   8, .nexttable = NULL },
+  {.code =  36, .nbits =   8, .nexttable = NULL },
+  {.code = 168, .nbits =   9, .nexttable = NULL },
+  {.code =   4, .nbits =   8, .nexttable = NULL },
+  {.code = 132, .nbits =   8, .nexttable = NULL },
+  {.code =  68, .nbits =   8, .nexttable = NULL },
+  {.code = 232, .nbits =   9, .nexttable = NULL },
+  {.code = 262, .nbits =   7, .nexttable = NULL },
+  {.code =  92, .nbits =   8, .nexttable = NULL },
+  {.code =  28, .nbits =   8, .nexttable = NULL },
+  {.code = 152, .nbits =   9, .nexttable = NULL },
+  {.code = 278, .nbits =   7, .nexttable = NULL },
+  {.code = 124, .nbits =   8, .nexttable = NULL },
+  {.code =  60, .nbits =   8, .nexttable = NULL },
+  {.code = 216, .nbits =   9, .nexttable = NULL },
+  {.code = 270, .nbits =   7, .nexttable = NULL },
+  {.code = 108, .nbits =   8, .nexttable = NULL },
+  {.code =  44, .nbits =   8, .nexttable = NULL },
+  {.code = 184, .nbits =   9, .nexttable = NULL },
+  {.code =  12, .nbits =   8, .nexttable = NULL },
+  {.code = 140, .nbits =   8, .nexttable = NULL },
+  {.code =  76, .nbits =   8, .nexttable = NULL },
+  {.code = 248, .nbits =   9, .nexttable = NULL },
+  {.code = 257, .nbits =   7, .nexttable = NULL },
+  {.code =  82, .nbits =   8, .nexttable = NULL },
+  {.code =  18, .nbits =   8, .nexttable = NULL },
+  {.code = 282, .nbits =   8, .nexttable = NULL },
+  {.code = 273, .nbits =   7, .nexttable = NULL },
+  {.code = 114, .nbits =   8, .nexttable = NULL },
+  {.code =  50, .nbits =   8, .nexttable = NULL },
+  {.code = 196, .nbits =   9, .nexttable = NULL },
+  {.code = 265, .nbits =   7, .nexttable = NULL },
+  {.code =  98, .nbits =   8, .nexttable = NULL },
+  {.code =  34, .nbits =   8, .nexttable = NULL },
+  {.code = 164, .nbits =   9, .nexttable = NULL },
+  {.code =   2, .nbits =   8, .nexttable = NULL },
+  {.code = 130, .nbits =   8, .nexttable = NULL },
+  {.code =  66, .nbits =   8, .nexttable = NULL },
+  {.code = 228, .nbits =   9, .nexttable = NULL },
+  {.code = 261, .nbits =   7, .nexttable = NULL },
+  {.code =  90, .nbits =   8, .nexttable = NULL },
+  {.code =  26, .nbits =   8, .nexttable = NULL },
+  {.code = 148, .nbits =   9, .nexttable = NULL },
+  {.code = 277, .nbits =   7, .nexttable = NULL },
+  {.code = 122, .nbits =   8, .nexttable = NULL },
+  {.code =  58, .nbits =   8, .nexttable = NULL },
+  {.code = 212, .nbits =   9, .nexttable = NULL },
+  {.code = 269, .nbits =   7, .nexttable = NULL },
+  {.code = 106, .nbits =   8, .nexttable = NULL },
+  {.code =  42, .nbits =   8, .nexttable = NULL },
+  {.code = 180, .nbits =   9, .nexttable = NULL },
+  {.code =  10, .nbits =   8, .nexttable = NULL },
+  {.code = 138, .nbits =   8, .nexttable = NULL },
+  {.code =  74, .nbits =   8, .nexttable = NULL },
+  {.code = 244, .nbits =   9, .nexttable = NULL },
+  {.code = 259, .nbits =   7, .nexttable = NULL },
+  {.code =  86, .nbits =   8, .nexttable = NULL },
+  {.code =  22, .nbits =   8, .nexttable = NULL },
+  {.code = 286, .nbits =   8, .nexttable = NULL },
+  {.code = 275, .nbits =   7, .nexttable = NULL },
+  {.code = 118, .nbits =   8, .nexttable = NULL },
+  {.code =  54, .nbits =   8, .nexttable = NULL },
+  {.code = 204, .nbits =   9, .nexttable = NULL },
+  {.code = 267, .nbits =   7, .nexttable = NULL },
+  {.code = 102, .nbits =   8, .nexttable = NULL },
+  {.code =  38, .nbits =   8, .nexttable = NULL },
+  {.code = 172, .nbits =   9, .nexttable = NULL },
+  {.code =   6, .nbits =   8, .nexttable = NULL },
+  {.code = 134, .nbits =   8, .nexttable = NULL },
+  {.code =  70, .nbits =   8, .nexttable = NULL },
+  {.code = 236, .nbits =   9, .nexttable = NULL },
+  {.code = 263, .nbits =   7, .nexttable = NULL },
+  {.code =  94, .nbits =   8, .nexttable = NULL },
+  {.code =  30, .nbits =   8, .nexttable = NULL },
+  {.code = 156, .nbits =   9, .nexttable = NULL },
+  {.code = 279, .nbits =   7, .nexttable = NULL },
+  {.code = 126, .nbits =   8, .nexttable = NULL },
+  {.code =  62, .nbits =   8, .nexttable = NULL },
+  {.code = 220, .nbits =   9, .nexttable = NULL },
+  {.code = 271, .nbits =   7, .nexttable = NULL },
+  {.code = 110, .nbits =   8, .nexttable = NULL },
+  {.code =  46, .nbits =   8, .nexttable = NULL },
+  {.code = 188, .nbits =   9, .nexttable = NULL },
+  {.code =  14, .nbits =   8, .nexttable = NULL },
+  {.code = 142, .nbits =   8, .nexttable = NULL },
+  {.code =  78, .nbits =   8, .nexttable = NULL },
+  {.code = 252, .nbits =   9, .nexttable = NULL },
+  {.code = 256, .nbits =   7, .nexttable = NULL },
+  {.code =  81, .nbits =   8, .nexttable = NULL },
+  {.code =  17, .nbits =   8, .nexttable = NULL },
+  {.code = 281, .nbits =   8, .nexttable = NULL },
+  {.code = 272, .nbits =   7, .nexttable = NULL },
+  {.code = 113, .nbits =   8, .nexttable = NULL },
+  {.code =  49, .nbits =   8, .nexttable = NULL },
+  {.code = 194, .nbits =   9, .nexttable = NULL },
+  {.code = 264, .nbits =   7, .nexttable = NULL },
+  {.code =  97, .nbits =   8, .nexttable = NULL },
+  {.code =  33, .nbits =   8, .nexttable = NULL },
+  {.code = 162, .nbits =   9, .nexttable = NULL },
+  {.code =   1, .nbits =   8, .nexttable = NULL },
+  {.code = 129, .nbits =   8, .nexttable = NULL },
+  {.code =  65, .nbits =   8, .nexttable = NULL },
+  {.code = 226, .nbits =   9, .nexttable = NULL },
+  {.code = 260, .nbits =   7, .nexttable = NULL },
+  {.code =  89, .nbits =   8, .nexttable = NULL },
+  {.code =  25, .nbits =   8, .nexttable = NULL },
+  {.code = 146, .nbits =   9, .nexttable = NULL },
+  {.code = 276, .nbits =   7, .nexttable = NULL },
+  {.code = 121, .nbits =   8, .nexttable = NULL },
+  {.code =  57, .nbits =   8, .nexttable = NULL },
+  {.code = 210, .nbits =   9, .nexttable = NULL },
+  {.code = 268, .nbits =   7, .nexttable = NULL },
+  {.code = 105, .nbits =   8, .nexttable = NULL },
+  {.code =  41, .nbits =   8, .nexttable = NULL },
+  {.code = 178, .nbits =   9, .nexttable = NULL },
+  {.code =   9, .nbits =   8, .nexttable = NULL },
+  {.code = 137, .nbits =   8, .nexttable = NULL },
+  {.code =  73, .nbits =   8, .nexttable = NULL },
+  {.code = 242, .nbits =   9, .nexttable = NULL },
+  {.code = 258, .nbits =   7, .nexttable = NULL },
+  {.code =  85, .nbits =   8, .nexttable = NULL },
+  {.code =  21, .nbits =   8, .nexttable = NULL },
+  {.code = 285, .nbits =   8, .nexttable = NULL },
+  {.code = 274, .nbits =   7, .nexttable = NULL },
+  {.code = 117, .nbits =   8, .nexttable = NULL },
+  {.code =  53, .nbits =   8, .nexttable = NULL },
+  {.code = 202, .nbits =   9, .nexttable = NULL },
+  {.code = 266, .nbits =   7, .nexttable = NULL },
+  {.code = 101, .nbits =   8, .nexttable = NULL },
+  {.code =  37, .nbits =   8, .nexttable = NULL },
+  {.code = 170, .nbits =   9, .nexttable = NULL },
+  {.code =   5, .nbits =   8, .nexttable = NULL },
+  {.code = 133, .nbits =   8, .nexttable = NULL },
+  {.code =  69, .nbits =   8, .nexttable = NULL },
+  {.code = 234, .nbits =   9, .nexttable = NULL },
+  {.code = 262, .nbits =   7, .nexttable = NULL },
+  {.code =  93, .nbits =   8, .nexttable = NULL },
+  {.code =  29, .nbits =   8, .nexttable = NULL },
+  {.code = 154, .nbits =   9, .nexttable = NULL },
+  {.code = 278, .nbits =   7, .nexttable = NULL },
+  {.code = 125, .nbits =   8, .nexttable = NULL },
+  {.code =  61, .nbits =   8, .nexttable = NULL },
+  {.code = 218, .nbits =   9, .nexttable = NULL },
+  {.code = 270, .nbits =   7, .nexttable = NULL },
+  {.code = 109, .nbits =   8, .nexttable = NULL },
+  {.code =  45, .nbits =   8, .nexttable = NULL },
+  {.code = 186, .nbits =   9, .nexttable = NULL },
+  {.code =  13, .nbits =   8, .nexttable = NULL },
+  {.code = 141, .nbits =   8, .nexttable = NULL },
+  {.code =  77, .nbits =   8, .nexttable = NULL },
+  {.code = 250, .nbits =   9, .nexttable = NULL },
+  {.code = 257, .nbits =   7, .nexttable = NULL },
+  {.code =  83, .nbits =   8, .nexttable = NULL },
+  {.code =  19, .nbits =   8, .nexttable = NULL },
+  {.code = 283, .nbits =   8, .nexttable = NULL },
+  {.code = 273, .nbits =   7, .nexttable = NULL },
+  {.code = 115, .nbits =   8, .nexttable = NULL },
+  {.code =  51, .nbits =   8, .nexttable = NULL },
+  {.code = 198, .nbits =   9, .nexttable = NULL },
+  {.code = 265, .nbits =   7, .nexttable = NULL },
+  {.code =  99, .nbits =   8, .nexttable = NULL },
+  {.code =  35, .nbits =   8, .nexttable = NULL },
+  {.code = 166, .nbits =   9, .nexttable = NULL },
+  {.code =   3, .nbits =   8, .nexttable = NULL },
+  {.code = 131, .nbits =   8, .nexttable = NULL },
+  {.code =  67, .nbits =   8, .nexttable = NULL },
+  {.code = 230, .nbits =   9, .nexttable = NULL },
+  {.code = 261, .nbits =   7, .nexttable = NULL },
+  {.code =  91, .nbits =   8, .nexttable = NULL },
+  {.code =  27, .nbits =   8, .nexttable = NULL },
+  {.code = 150, .nbits =   9, .nexttable = NULL },
+  {.code = 277, .nbits =   7, .nexttable = NULL },
+  {.code = 123, .nbits =   8, .nexttable = NULL },
+  {.code =  59, .nbits =   8, .nexttable = NULL },
+  {.code = 214, .nbits =   9, .nexttable = NULL },
+  {.code = 269, .nbits =   7, .nexttable = NULL },
+  {.code = 107, .nbits =   8, .nexttable = NULL },
+  {.code =  43, .nbits =   8, .nexttable = NULL },
+  {.code = 182, .nbits =   9, .nexttable = NULL },
+  {.code =  11, .nbits =   8, .nexttable = NULL },
+  {.code = 139, .nbits =   8, .nexttable = NULL },
+  {.code =  75, .nbits =   8, .nexttable = NULL },
+  {.code = 246, .nbits =   9, .nexttable = NULL },
+  {.code = 259, .nbits =   7, .nexttable = NULL },
+  {.code =  87, .nbits =   8, .nexttable = NULL },
+  {.code =  23, .nbits =   8, .nexttable = NULL },
+  {.code = 287, .nbits =   8, .nexttable = NULL },
+  {.code = 275, .nbits =   7, .nexttable = NULL },
+  {.code = 119, .nbits =   8, .nexttable = NULL },
+  {.code =  55, .nbits =   8, .nexttable = NULL },
+  {.code = 206, .nbits =   9, .nexttable = NULL },
+  {.code = 267, .nbits =   7, .nexttable = NULL },
+  {.code = 103, .nbits =   8, .nexttable = NULL },
+  {.code =  39, .nbits =   8, .nexttable = NULL },
+  {.code = 174, .nbits =   9, .nexttable = NULL },
+  {.code =   7, .nbits =   8, .nexttable = NULL },
+  {.code = 135, .nbits =   8, .nexttable = NULL },
+  {.code =  71, .nbits =   8, .nexttable = NULL },
+  {.code = 238, .nbits =   9, .nexttable = NULL },
+  {.code = 263, .nbits =   7, .nexttable = NULL },
+  {.code =  95, .nbits =   8, .nexttable = NULL },
+  {.code =  31, .nbits =   8, .nexttable = NULL },
+  {.code = 158, .nbits =   9, .nexttable = NULL },
+  {.code = 279, .nbits =   7, .nexttable = NULL },
+  {.code = 127, .nbits =   8, .nexttable = NULL },
+  {.code =  63, .nbits =   8, .nexttable = NULL },
+  {.code = 222, .nbits =   9, .nexttable = NULL },
+  {.code = 271, .nbits =   7, .nexttable = NULL },
+  {.code = 111, .nbits =   8, .nexttable = NULL },
+  {.code =  47, .nbits =   8, .nexttable = NULL },
+  {.code = 190, .nbits =   9, .nexttable = NULL },
+  {.code =  15, .nbits =   8, .nexttable = NULL },
+  {.code = 143, .nbits =   8, .nexttable = NULL },
+  {.code =  79, .nbits =   8, .nexttable = NULL },
+  {.code = 254, .nbits =   9, .nexttable = NULL },
+  {.code = 256, .nbits =   7, .nexttable = NULL },
+  {.code =  80, .nbits =   8, .nexttable = NULL },
+  {.code =  16, .nbits =   8, .nexttable = NULL },
+  {.code = 280, .nbits =   8, .nexttable = NULL },
+  {.code = 272, .nbits =   7, .nexttable = NULL },
+  {.code = 112, .nbits =   8, .nexttable = NULL },
+  {.code =  48, .nbits =   8, .nexttable = NULL },
+  {.code = 193, .nbits =   9, .nexttable = NULL },
+  {.code = 264, .nbits =   7, .nexttable = NULL },
+  {.code =  96, .nbits =   8, .nexttable = NULL },
+  {.code =  32, .nbits =   8, .nexttable = NULL },
+  {.code = 161, .nbits =   9, .nexttable = NULL },
+  {.code =   0, .nbits =   8, .nexttable = NULL },
+  {.code = 128, .nbits =   8, .nexttable = NULL },
+  {.code =  64, .nbits =   8, .nexttable = NULL },
+  {.code = 225, .nbits =   9, .nexttable = NULL },
+  {.code = 260, .nbits =   7, .nexttable = NULL },
+  {.code =  88, .nbits =   8, .nexttable = NULL },
+  {.code =  24, .nbits =   8, .nexttable = NULL },
+  {.code = 145, .nbits =   9, .nexttable = NULL },
+  {.code = 276, .nbits =   7, .nexttable = NULL },
+  {.code = 120, .nbits =   8, .nexttable = NULL },
+  {.code =  56, .nbits =   8, .nexttable = NULL },
+  {.code = 209, .nbits =   9, .nexttable = NULL },
+  {.code = 268, .nbits =   7, .nexttable = NULL },
+  {.code = 104, .nbits =   8, .nexttable = NULL },
+  {.code =  40, .nbits =   8, .nexttable = NULL },
+  {.code = 177, .nbits =   9, .nexttable = NULL },
+  {.code =   8, .nbits =   8, .nexttable = NULL },
+  {.code = 136, .nbits =   8, .nexttable = NULL },
+  {.code =  72, .nbits =   8, .nexttable = NULL },
+  {.code = 241, .nbits =   9, .nexttable = NULL },
+  {.code = 258, .nbits =   7, .nexttable = NULL },
+  {.code =  84, .nbits =   8, .nexttable = NULL },
+  {.code =  20, .nbits =   8, .nexttable = NULL },
+  {.code = 284, .nbits =   8, .nexttable = NULL },
+  {.code = 274, .nbits =   7, .nexttable = NULL },
+  {.code = 116, .nbits =   8, .nexttable = NULL },
+  {.code =  52, .nbits =   8, .nexttable = NULL },
+  {.code = 201, .nbits =   9, .nexttable = NULL },
+  {.code = 266, .nbits =   7, .nexttable = NULL },
+  {.code = 100, .nbits =   8, .nexttable = NULL },
+  {.code =  36, .nbits =   8, .nexttable = NULL },
+  {.code = 169, .nbits =   9, .nexttable = NULL },
+  {.code =   4, .nbits =   8, .nexttable = NULL },
+  {.code = 132, .nbits =   8, .nexttable = NULL },
+  {.code =  68, .nbits =   8, .nexttable = NULL },
+  {.code = 233, .nbits =   9, .nexttable = NULL },
+  {.code = 262, .nbits =   7, .nexttable = NULL },
+  {.code =  92, .nbits =   8, .nexttable = NULL },
+  {.code =  28, .nbits =   8, .nexttable = NULL },
+  {.code = 153, .nbits =   9, .nexttable = NULL },
+  {.code = 278, .nbits =   7, .nexttable = NULL },
+  {.code = 124, .nbits =   8, .nexttable = NULL },
+  {.code =  60, .nbits =   8, .nexttable = NULL },
+  {.code = 217, .nbits =   9, .nexttable = NULL },
+  {.code = 270, .nbits =   7, .nexttable = NULL },
+  {.code = 108, .nbits =   8, .nexttable = NULL },
+  {.code =  44, .nbits =   8, .nexttable = NULL },
+  {.code = 185, .nbits =   9, .nexttable = NULL },
+  {.code =  12, .nbits =   8, .nexttable = NULL },
+  {.code = 140, .nbits =   8, .nexttable = NULL },
+  {.code =  76, .nbits =   8, .nexttable = NULL },
+  {.code = 249, .nbits =   9, .nexttable = NULL },
+  {.code = 257, .nbits =   7, .nexttable = NULL },
+  {.code =  82, .nbits =   8, .nexttable = NULL },
+  {.code =  18, .nbits =   8, .nexttable = NULL },
+  {.code = 282, .nbits =   8, .nexttable = NULL },
+  {.code = 273, .nbits =   7, .nexttable = NULL },
+  {.code = 114, .nbits =   8, .nexttable = NULL },
+  {.code =  50, .nbits =   8, .nexttable = NULL },
+  {.code = 197, .nbits =   9, .nexttable = NULL },
+  {.code = 265, .nbits =   7, .nexttable = NULL },
+  {.code =  98, .nbits =   8, .nexttable = NULL },
+  {.code =  34, .nbits =   8, .nexttable = NULL },
+  {.code = 165, .nbits =   9, .nexttable = NULL },
+  {.code =   2, .nbits =   8, .nexttable = NULL },
+  {.code = 130, .nbits =   8, .nexttable = NULL },
+  {.code =  66, .nbits =   8, .nexttable = NULL },
+  {.code = 229, .nbits =   9, .nexttable = NULL },
+  {.code = 261, .nbits =   7, .nexttable = NULL },
+  {.code =  90, .nbits =   8, .nexttable = NULL },
+  {.code =  26, .nbits =   8, .nexttable = NULL },
+  {.code = 149, .nbits =   9, .nexttable = NULL },
+  {.code = 277, .nbits =   7, .nexttable = NULL },
+  {.code = 122, .nbits =   8, .nexttable = NULL },
+  {.code =  58, .nbits =   8, .nexttable = NULL },
+  {.code = 213, .nbits =   9, .nexttable = NULL },
+  {.code = 269, .nbits =   7, .nexttable = NULL },
+  {.code = 106, .nbits =   8, .nexttable = NULL },
+  {.code =  42, .nbits =   8, .nexttable = NULL },
+  {.code = 181, .nbits =   9, .nexttable = NULL },
+  {.code =  10, .nbits =   8, .nexttable = NULL },
+  {.code = 138, .nbits =   8, .nexttable = NULL },
+  {.code =  74, .nbits =   8, .nexttable = NULL },
+  {.code = 245, .nbits =   9, .nexttable = NULL },
+  {.code = 259, .nbits =   7, .nexttable = NULL },
+  {.code =  86, .nbits =   8, .nexttable = NULL },
+  {.code =  22, .nbits =   8, .nexttable = NULL },
+  {.code = 286, .nbits =   8, .nexttable = NULL },
+  {.code = 275, .nbits =   7, .nexttable = NULL },
+  {.code = 118, .nbits =   8, .nexttable = NULL },
+  {.code =  54, .nbits =   8, .nexttable = NULL },
+  {.code = 205, .nbits =   9, .nexttable = NULL },
+  {.code = 267, .nbits =   7, .nexttable = NULL },
+  {.code = 102, .nbits =   8, .nexttable = NULL },
+  {.code =  38, .nbits =   8, .nexttable = NULL },
+  {.code = 173, .nbits =   9, .nexttable = NULL },
+  {.code =   6, .nbits =   8, .nexttable = NULL },
+  {.code = 134, .nbits =   8, .nexttable = NULL },
+  {.code =  70, .nbits =   8, .nexttable = NULL },
+  {.code = 237, .nbits =   9, .nexttable = NULL },
+  {.code = 263, .nbits =   7, .nexttable = NULL },
+  {.code =  94, .nbits =   8, .nexttable = NULL },
+  {.code =  30, .nbits =   8, .nexttable = NULL },
+  {.code = 157, .nbits =   9, .nexttable = NULL },
+  {.code = 279, .nbits =   7, .nexttable = NULL },
+  {.code = 126, .nbits =   8, .nexttable = NULL },
+  {.code =  62, .nbits =   8, .nexttable = NULL },
+  {.code = 221, .nbits =   9, .nexttable = NULL },
+  {.code = 271, .nbits =   7, .nexttable = NULL },
+  {.code = 110, .nbits =   8, .nexttable = NULL },
+  {.code =  46, .nbits =   8, .nexttable = NULL },
+  {.code = 189, .nbits =   9, .nexttable = NULL },
+  {.code =  14, .nbits =   8, .nexttable = NULL },
+  {.code = 142, .nbits =   8, .nexttable = NULL },
+  {.code =  78, .nbits =   8, .nexttable = NULL },
+  {.code = 253, .nbits =   9, .nexttable = NULL },
+  {.code = 256, .nbits =   7, .nexttable = NULL },
+  {.code =  81, .nbits =   8, .nexttable = NULL },
+  {.code =  17, .nbits =   8, .nexttable = NULL },
+  {.code = 281, .nbits =   8, .nexttable = NULL },
+  {.code = 272, .nbits =   7, .nexttable = NULL },
+  {.code = 113, .nbits =   8, .nexttable = NULL },
+  {.code =  49, .nbits =   8, .nexttable = NULL },
+  {.code = 195, .nbits =   9, .nexttable = NULL },
+  {.code = 264, .nbits =   7, .nexttable = NULL },
+  {.code =  97, .nbits =   8, .nexttable = NULL },
+  {.code =  33, .nbits =   8, .nexttable = NULL },
+  {.code = 163, .nbits =   9, .nexttable = NULL },
+  {.code =   1, .nbits =   8, .nexttable = NULL },
+  {.code = 129, .nbits =   8, .nexttable = NULL },
+  {.code =  65, .nbits =   8, .nexttable = NULL },
+  {.code = 227, .nbits =   9, .nexttable = NULL },
+  {.code = 260, .nbits =   7, .nexttable = NULL },
+  {.code =  89, .nbits =   8, .nexttable = NULL },
+  {.code =  25, .nbits =   8, .nexttable = NULL },
+  {.code = 147, .nbits =   9, .nexttable = NULL },
+  {.code = 276, .nbits =   7, .nexttable = NULL },
+  {.code = 121, .nbits =   8, .nexttable = NULL },
+  {.code =  57, .nbits =   8, .nexttable = NULL },
+  {.code = 211, .nbits =   9, .nexttable = NULL },
+  {.code = 268, .nbits =   7, .nexttable = NULL },
+  {.code = 105, .nbits =   8, .nexttable = NULL },
+  {.code =  41, .nbits =   8, .nexttable = NULL },
+  {.code = 179, .nbits =   9, .nexttable = NULL },
+  {.code =   9, .nbits =   8, .nexttable = NULL },
+  {.code = 137, .nbits =   8, .nexttable = NULL },
+  {.code =  73, .nbits =   8, .nexttable = NULL },
+  {.code = 243, .nbits =   9, .nexttable = NULL },
+  {.code = 258, .nbits =   7, .nexttable = NULL },
+  {.code =  85, .nbits =   8, .nexttable = NULL },
+  {.code =  21, .nbits =   8, .nexttable = NULL },
+  {.code = 285, .nbits =   8, .nexttable = NULL },
+  {.code = 274, .nbits =   7, .nexttable = NULL },
+  {.code = 117, .nbits =   8, .nexttable = NULL },
+  {.code =  53, .nbits =   8, .nexttable = NULL },
+  {.code = 203, .nbits =   9, .nexttable = NULL },
+  {.code = 266, .nbits =   7, .nexttable = NULL },
+  {.code = 101, .nbits =   8, .nexttable = NULL },
+  {.code =  37, .nbits =   8, .nexttable = NULL },
+  {.code = 171, .nbits =   9, .nexttable = NULL },
+  {.code =   5, .nbits =   8, .nexttable = NULL },
+  {.code = 133, .nbits =   8, .nexttable = NULL },
+  {.code =  69, .nbits =   8, .nexttable = NULL },
+  {.code = 235, .nbits =   9, .nexttable = NULL },
+  {.code = 262, .nbits =   7, .nexttable = NULL },
+  {.code =  93, .nbits =   8, .nexttable = NULL },
+  {.code =  29, .nbits =   8, .nexttable = NULL },
+  {.code = 155, .nbits =   9, .nexttable = NULL },
+  {.code = 278, .nbits =   7, .nexttable = NULL },
+  {.code = 125, .nbits =   8, .nexttable = NULL },
+  {.code =  61, .nbits =   8, .nexttable = NULL },
+  {.code = 219, .nbits =   9, .nexttable = NULL },
+  {.code = 270, .nbits =   7, .nexttable = NULL },
+  {.code = 109, .nbits =   8, .nexttable = NULL },
+  {.code =  45, .nbits =   8, .nexttable = NULL },
+  {.code = 187, .nbits =   9, .nexttable = NULL },
+  {.code =  13, .nbits =   8, .nexttable = NULL },
+  {.code = 141, .nbits =   8, .nexttable = NULL },
+  {.code =  77, .nbits =   8, .nexttable = NULL },
+  {.code = 251, .nbits =   9, .nexttable = NULL },
+  {.code = 257, .nbits =   7, .nexttable = NULL },
+  {.code =  83, .nbits =   8, .nexttable = NULL },
+  {.code =  19, .nbits =   8, .nexttable = NULL },
+  {.code = 283, .nbits =   8, .nexttable = NULL },
+  {.code = 273, .nbits =   7, .nexttable = NULL },
+  {.code = 115, .nbits =   8, .nexttable = NULL },
+  {.code =  51, .nbits =   8, .nexttable = NULL },
+  {.code = 199, .nbits =   9, .nexttable = NULL },
+  {.code = 265, .nbits =   7, .nexttable = NULL },
+  {.code =  99, .nbits =   8, .nexttable = NULL },
+  {.code =  35, .nbits =   8, .nexttable = NULL },
+  {.code = 167, .nbits =   9, .nexttable = NULL },
+  {.code =   3, .nbits =   8, .nexttable = NULL },
+  {.code = 131, .nbits =   8, .nexttable = NULL },
+  {.code =  67, .nbits =   8, .nexttable = NULL },
+  {.code = 231, .nbits =   9, .nexttable = NULL },
+  {.code = 261, .nbits =   7, .nexttable = NULL },
+  {.code =  91, .nbits =   8, .nexttable = NULL },
+  {.code =  27, .nbits =   8, .nexttable = NULL },
+  {.code = 151, .nbits =   9, .nexttable = NULL },
+  {.code = 277, .nbits =   7, .nexttable = NULL },
+  {.code = 123, .nbits =   8, .nexttable = NULL },
+  {.code =  59, .nbits =   8, .nexttable = NULL },
+  {.code = 215, .nbits =   9, .nexttable = NULL },
+  {.code = 269, .nbits =   7, .nexttable = NULL },
+  {.code = 107, .nbits =   8, .nexttable = NULL },
+  {.code =  43, .nbits =   8, .nexttable = NULL },
+  {.code = 183, .nbits =   9, .nexttable = NULL },
+  {.code =  11, .nbits =   8, .nexttable = NULL },
+  {.code = 139, .nbits =   8, .nexttable = NULL },
+  {.code =  75, .nbits =   8, .nexttable = NULL },
+  {.code = 247, .nbits =   9, .nexttable = NULL },
+  {.code = 259, .nbits =   7, .nexttable = NULL },
+  {.code =  87, .nbits =   8, .nexttable = NULL },
+  {.code =  23, .nbits =   8, .nexttable = NULL },
+  {.code = 287, .nbits =   8, .nexttable = NULL },
+  {.code = 275, .nbits =   7, .nexttable = NULL },
+  {.code = 119, .nbits =   8, .nexttable = NULL },
+  {.code =  55, .nbits =   8, .nexttable = NULL },
+  {.code = 207, .nbits =   9, .nexttable = NULL },
+  {.code = 267, .nbits =   7, .nexttable = NULL },
+  {.code = 103, .nbits =   8, .nexttable = NULL },
+  {.code =  39, .nbits =   8, .nexttable = NULL },
+  {.code = 175, .nbits =   9, .nexttable = NULL },
+  {.code =   7, .nbits =   8, .nexttable = NULL },
+  {.code = 135, .nbits =   8, .nexttable = NULL },
+  {.code =  71, .nbits =   8, .nexttable = NULL },
+  {.code = 239, .nbits =   9, .nexttable = NULL },
+  {.code = 263, .nbits =   7, .nexttable = NULL },
+  {.code =  95, .nbits =   8, .nexttable = NULL },
+  {.code =  31, .nbits =   8, .nexttable = NULL },
+  {.code = 159, .nbits =   9, .nexttable = NULL },
+  {.code = 279, .nbits =   7, .nexttable = NULL },
+  {.code = 127, .nbits =   8, .nexttable = NULL },
+  {.code =  63, .nbits =   8, .nexttable = NULL },
+  {.code = 223, .nbits =   9, .nexttable = NULL },
+  {.code = 271, .nbits =   7, .nexttable = NULL },
+  {.code = 111, .nbits =   8, .nexttable = NULL },
+  {.code =  47, .nbits =   8, .nexttable = NULL },
+  {.code = 191, .nbits =   9, .nexttable = NULL },
+  {.code =  15, .nbits =   8, .nexttable = NULL },
+  {.code = 143, .nbits =   8, .nexttable = NULL },
+  {.code =  79, .nbits =   8, .nexttable = NULL },
+  {.code = 255, .nbits =   9, .nexttable = NULL },
+};
+
+static const struct zlib_table default_lentable = {
+  .mask = 511,
+  .table = (struct zlib_tableentry *) default_lentable_entries
+};
+
+static const struct zlib_tableentry default_disttable_entries[] = {
+  {.code =   0, .nbits =   5, .nexttable = NULL },
+  {.code =  16, .nbits =   5, .nexttable = NULL },
+  {.code =   8, .nbits =   5, .nexttable = NULL },
+  {.code =  24, .nbits =   5, .nexttable = NULL },
+  {.code =   4, .nbits =   5, .nexttable = NULL },
+  {.code =  20, .nbits =   5, .nexttable = NULL },
+  {.code =  12, .nbits =   5, .nexttable = NULL },
+  {.code =  28, .nbits =   5, .nexttable = NULL },
+  {.code =   2, .nbits =   5, .nexttable = NULL },
+  {.code =  18, .nbits =   5, .nexttable = NULL },
+  {.code =  10, .nbits =   5, .nexttable = NULL },
+  {.code =  26, .nbits =   5, .nexttable = NULL },
+  {.code =   6, .nbits =   5, .nexttable = NULL },
+  {.code =  22, .nbits =   5, .nexttable = NULL },
+  {.code =  14, .nbits =   5, .nexttable = NULL },
+  {.code =  30, .nbits =   5, .nexttable = NULL },
+  {.code =   1, .nbits =   5, .nexttable = NULL },
+  {.code =  17, .nbits =   5, .nexttable = NULL },
+  {.code =   9, .nbits =   5, .nexttable = NULL },
+  {.code =  25, .nbits =   5, .nexttable = NULL },
+  {.code =   5, .nbits =   5, .nexttable = NULL },
+  {.code =  21, .nbits =   5, .nexttable = NULL },
+  {.code =  13, .nbits =   5, .nexttable = NULL },
+  {.code =  29, .nbits =   5, .nexttable = NULL },
+  {.code =   3, .nbits =   5, .nexttable = NULL },
+  {.code =  19, .nbits =   5, .nexttable = NULL },
+  {.code =  11, .nbits =   5, .nexttable = NULL },
+  {.code =  27, .nbits =   5, .nexttable = NULL },
+  {.code =   7, .nbits =   5, .nexttable = NULL },
+  {.code =  23, .nbits =   5, .nexttable = NULL },
+  {.code =  15, .nbits =   5, .nexttable = NULL },
+  {.code =  31, .nbits =   5, .nexttable = NULL },
+};
+
+static const struct zlib_table default_disttable = {
+  .mask = 31,
+  .table = (struct zlib_tableentry *) default_disttable_entries
+};
+
 #define MAXCODELEN 16
 #define MAXSYMS 288
+#define MAXBITS 9
 
 /*
  * Build a single-level decode table for elements
  * [minlength,maxlength) of the provided code/length tables, and
  * recurse to build subtables.
  */
-static struct zlib_table *zlib_mkonetab(int *codes, unsigned char *lengths,
-                                        int nsyms,
+static struct zlib_table *zlib_mkonetab(struct zlib_table *tab, int *codes,
+                                        unsigned char *lengths, int nsyms,
                                         int pfx, int pfxbits, int bits)
 {
-    struct zlib_table *tab = snew(struct zlib_table);
     int pfxmask = (1 << pfxbits) - 1;
     int nbits, i, j, code;
+    int total_size = 0;
 
-    tab->table = snewn(1 << bits, struct zlib_tableentry);
+    if (tab == NULL) {
+      total_size = sizeof (struct zlib_table) + (1 << bits) * sizeof (struct zlib_tableentry);
+      tab = (struct zlib_table *) salloc(total_size);
+      if (tab == NULL) {
+        return NULL;
+      }
+    }
+
+    tab->table = (struct zlib_tableentry *) (tab + 1);
     tab->mask = (1 << bits) - 1;
 
     for (code = 0; code <= tab->mask; code++) {
@@ -742,13 +1311,16 @@ static struct zlib_table *zlib_mkonetab(int *codes, unsigned char *lengths,
     for (code = 0; code <= tab->mask; code++) {
         if (tab->table[code].nbits <= bits)
             continue;
+        /* Cannot generate subtables for preallocatd. */
+        if (total_size == 0)
+          return NULL;
         /* Generate a subtable. */
         tab->table[code].code = -1;
         nbits = tab->table[code].nbits - bits;
         if (nbits > 7)
             nbits = 7;
         tab->table[code].nbits = bits;
-        tab->table[code].nexttable = zlib_mkonetab(codes, lengths, nsyms,
+        tab->table[code].nexttable = zlib_mkonetab(NULL, codes, lengths, nsyms,
                                                    pfx | (code << pfxbits),
                                                    pfxbits + bits, nbits);
     }
@@ -759,7 +1331,7 @@ static struct zlib_table *zlib_mkonetab(int *codes, unsigned char *lengths,
 /*
  * Build a decode table, given a set of Huffman tree lengths.
  */
-static struct zlib_table *zlib_mktable(unsigned char *lengths,
+static struct zlib_table *zlib_mktable(struct zlib_table *tab, unsigned char *lengths,
                                        int nlengths)
 {
     int count[MAXCODELEN], startcode[MAXCODELEN], codes[MAXSYMS];
@@ -796,8 +1368,8 @@ static struct zlib_table *zlib_mktable(unsigned char *lengths,
      * Now we have the complete list of Huffman codes. Build a
      * table.
      */
-    return zlib_mkonetab(codes, lengths, nlengths, 0, 0,
-                         maxlen < 9 ? maxlen : 9);
+    return zlib_mkonetab(tab, codes, lengths, nlengths, 0, 0,
+                         maxlen < MAXBITS ? maxlen : MAXBITS);
 }
 
 static int zlib_freetable(struct zlib_table **ztab)
@@ -816,9 +1388,6 @@ static int zlib_freetable(struct zlib_table **ztab)
     for (code = 0; code <= tab->mask; code++)
         if (tab->table[code].nexttable != NULL)
             zlib_freetable(&tab->table[code].nexttable);
-
-    sfree(tab->table);
-    tab->table = NULL;
 
     sfree(tab);
     *ztab = NULL;
@@ -839,6 +1408,7 @@ struct zlib_decompress_ctx {
         lenrep;
     int uncomplen;
     unsigned char lenlen[19];
+    struct zlib_table lenlentabledata[2 + ((1 << MAXBITS) * sizeof (struct zlib_tableentry)) / sizeof (struct zlib_table) ];
     unsigned char lengths[286 + 32];
     unsigned long bits;
     int nbits;
@@ -848,23 +1418,51 @@ struct zlib_decompress_ctx {
     int outlen, outsize;
 };
 
+#ifdef ZLIB_DUMP_TABLES
+static void zlib_dump_table(const char *name, struct zlib_table *table)
+{
+  printf("static const struct zlib_tableentry %s_entries[] = {\n", name);
+  for (int i = 0; i <= table->mask; ++i) {
+    printf("  {.code = %3d, .nbits = %3d, .nexttable = %s },\n",
+      table->table[i].code, table->table[i].nbits,
+      table->table[i].nexttable == NULL ? "NULL" : "<non null>");
+  }
+  printf ("};\n\n"
+          "static const struct zlib_table %s = {\n"
+          "  .mask = %d,\n"
+          "  .table = (struct zlib_tableentry *) %s_entries\n"
+          "};\n\n", name, table->mask, name);
+  
+}
+#endif
+
 void *zlib_decompress_init(void)
 {
     struct zlib_decompress_ctx *dctx = snew(struct zlib_decompress_ctx);
-    unsigned char lengths[288];
 
+#ifdef ZLIB_ALLOCATE_DEFAULT_TABLES
+    unsigned char lengths[288];
     memset(lengths, 8, 144);
     memset(lengths + 144, 9, 256 - 144);
     memset(lengths + 256, 7, 280 - 256);
     memset(lengths + 280, 8, 288 - 280);
-    dctx->staticlentable = zlib_mktable(lengths, 288);
+    dctx->staticlentable = zlib_mktable(NULL, lengths, 288);
     memset(lengths, 5, 32);
-    dctx->staticdisttable = zlib_mktable(lengths, 32);
+    dctx->staticdisttable = zlib_mktable(NULL, lengths, 32);
+#else
+    dctx->staticlentable = (struct zlib_table *) &default_lentable;
+    dctx->staticdisttable = (struct zlib_table *) &default_disttable;
+#endif
     dctx->state = START;                       /* even before header */
     dctx->currlentable = dctx->currdisttable = dctx->lenlentable = NULL;
     dctx->bits = 0;
     dctx->nbits = 0;
     dctx->winpos = 0;
+
+#ifdef ZLIB_DUMP_TABLES
+    zlib_dump_table("default_lentable", dctx->staticlentable);
+    zlib_dump_table("default_disttable", dctx->staticdisttable);
+#endif
 
     return dctx;
 }
@@ -877,10 +1475,10 @@ void zlib_decompress_cleanup(void *handle)
         zlib_freetable(&dctx->currlentable);
     if (dctx->currdisttable && dctx->currdisttable != dctx->staticdisttable)
         zlib_freetable(&dctx->currdisttable);
-    if (dctx->lenlentable)
-        zlib_freetable(&dctx->lenlentable);
+#ifdef ZLIB_ALLOCATE_DEFAULT_TABLES
     zlib_freetable(&dctx->staticlentable);
     zlib_freetable(&dctx->staticdisttable);
+#endif
     sfree(dctx);
 }
 
@@ -1029,17 +1627,16 @@ int zlib_decompress_block(void *handle, unsigned char *block, int len,
                 EATBITS(3);
             }
             if (dctx->lenptr == dctx->hclen) {
-                dctx->lenlentable = zlib_mktable(dctx->lenlen, 19);
+                dctx->lenlentable = zlib_mktable(dctx->lenlentabledata, dctx->lenlen, 19);
                 dctx->state = TREES_LEN;
                 dctx->lenptr = 0;
             }
             break;
           case TREES_LEN:
             if (dctx->lenptr >= dctx->hlit + dctx->hdist) {
-                dctx->currlentable = zlib_mktable(dctx->lengths, dctx->hlit);
-                dctx->currdisttable = zlib_mktable(dctx->lengths + dctx->hlit,
+                dctx->currlentable = zlib_mktable(NULL, dctx->lengths, dctx->hlit);
+                dctx->currdisttable = zlib_mktable(NULL, dctx->lengths + dctx->hlit,
                                                   dctx->hdist);
-                zlib_freetable(&dctx->lenlentable);
                 dctx->lenlentable = NULL;
                 dctx->state = INBLK;
                 break;

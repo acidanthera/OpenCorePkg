@@ -30,6 +30,7 @@
 
 #define memset(Dst, Value, Size) SetMem ((Dst), (Size), (UINT8)(Value))
 
+#define salloc(size) AllocatePool (size)
 #define snew(type) ( (type *) AllocatePool (sizeof(type)) )
 #define snewn(n, type) ( (type *) AllocatePool ((n) * sizeof(type)) )
 #define sfree(x) ( FreePool ((x)) )
