@@ -12,56 +12,48 @@
 
 #include <Uefi.h>
 
-#include <Protocol/BlockIo.h>
-
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleDiskImageLib.h>
 #include <Library/OcXmlLib.h>
-#include <Library/UefiBootServicesTableLib.h>
 
 #include "OcAppleDiskImageLibInternal.h"
 
-// DP GUIDs.
-EFI_GUID gDmgControllerDpGuid = DMG_CONTROLLER_DP_GUID;
-EFI_GUID gDmgSizeDpGuid = DMG_SIZE_DP_GUID;
-
+STATIC
 EFI_STATUS
-EFIAPI
-FindPlistDictChild(
-    IN  XML_NODE *Node,
-    IN  CHAR8 *KeyName,
-    OUT XML_NODE **Key,
-    OUT XML_NODE **Value) {
-    // Create variables.
-    UINT32 ChildCount;
-    XML_NODE *ChildValue = NULL;
-    XML_NODE *ChildKey = NULL;
-    CONST CHAR8 *ChildKeyStr = NULL;
+InternalFindPlistDictChild (
+  IN  XML_NODE  *Node,
+  IN  CHAR8     *KeyName,
+  OUT XML_NODE  **Key,
+  OUT XML_NODE  **Value
+  )
+{
+  UINT32      ChildCount;
+  XML_NODE    *ChildValue;
+  XML_NODE    *ChildKey;
+  CONST CHAR8 *ChildKeyName;
+  UINT32      Index;
 
-    ASSERT (Node != NULL);
-    ASSERT (KeyName != NULL);
-    ASSERT (Key != NULL);
-    ASSERT (Value != NULL);
+  ASSERT (Node != NULL);
+  ASSERT (KeyName != NULL);
+  ASSERT (Key != NULL);
+  ASSERT (Value != NULL);
 
-    // Search for key.
-    ChildCount = PlistDictChildren(Node);
-    for (UINT32 i = 0; i < ChildCount; i++) {
-        // Get child key/value and key name.
-        ChildKey = PlistDictChild(Node, i, &ChildValue);
-        ChildKeyStr = PlistKeyValue(ChildKey);
+  ChildCount = PlistDictChildren (Node);
+  for (Index = 0; Index < ChildCount; ++Index) {
+      ChildKey     = PlistDictChild (Node, Index, &ChildValue);
+      ChildKeyName = PlistKeyValue (ChildKey);
 
-        // Check if key matches.
-        if (ChildKeyStr && !AsciiStrCmp(ChildKeyStr, KeyName)) {
-            *Key = ChildKey;
-            *Value = ChildValue;
-            return EFI_SUCCESS;
-        }
-    }
+      if ((ChildKeyName != NULL)
+        && (AsciiStrCmp (ChildKeyName, KeyName) == 0)) {
+        *Key   = ChildKey;
+        *Value = ChildValue;
+        return EFI_SUCCESS;
+      }
+  }
 
-    // If we get here, we couldn't find it.
-    return EFI_NOT_FOUND;
+  return EFI_NOT_FOUND;
 }
 
 STATIC
@@ -70,244 +62,280 @@ InternalSwapBlockData (
   IN OUT APPLE_DISK_IMAGE_BLOCK_DATA  *BlockData
   )
 {
-    APPLE_DISK_IMAGE_CHUNK *Chunk;
+  APPLE_DISK_IMAGE_CHUNK *Chunk;
+  UINT32                 Index;
 
-    // Swap block fields.
-    BlockData->Version = SwapBytes32(BlockData->Version);
-    BlockData->SectorNumber = SwapBytes64(BlockData->SectorNumber);
-    BlockData->SectorCount = SwapBytes64(BlockData->SectorCount);
-    BlockData->DataOffset = SwapBytes64(BlockData->DataOffset);
-    BlockData->BuffersNeeded = SwapBytes32(BlockData->BuffersNeeded);
-    BlockData->BlockDescriptors = SwapBytes32(BlockData->BlockDescriptors);
+  BlockData->Version          = SwapBytes32 (BlockData->Version);
+  BlockData->SectorNumber     = SwapBytes64 (BlockData->SectorNumber);
+  BlockData->SectorCount      = SwapBytes64 (BlockData->SectorCount);
+  BlockData->DataOffset       = SwapBytes64 (BlockData->DataOffset);
+  BlockData->BuffersNeeded    = SwapBytes32 (BlockData->BuffersNeeded);
+  BlockData->BlockDescriptors = SwapBytes32 (BlockData->BlockDescriptors);
+  BlockData->Checksum.Type    = SwapBytes32 (BlockData->Checksum.Type);
+  BlockData->Checksum.Size    = SwapBytes32 (BlockData->Checksum.Size);
 
-    // Swap checksum.
-    BlockData->Checksum.Type = SwapBytes32(BlockData->Checksum.Type);
-    BlockData->Checksum.Size = SwapBytes32(BlockData->Checksum.Size);
-    for (UINTN i = 0; i < APPLE_DISK_IMAGE_CHECKSUM_SIZE; i++)
-        BlockData->Checksum.Data[i] = SwapBytes32(BlockData->Checksum.Data[i]);
+  for (Index = 0; Index < APPLE_DISK_IMAGE_CHECKSUM_SIZE; ++Index) {
+    BlockData->Checksum.Data[Index] = SwapBytes32 (
+                                        BlockData->Checksum.Data[Index]
+                                        );
+  }
 
-    // Swap chunks.
-    BlockData->ChunkCount = SwapBytes32(BlockData->ChunkCount);
-    for (UINT32 c = 0; c < BlockData->ChunkCount; c++) {
-        Chunk = &BlockData->Chunks[c];
-        Chunk->Type = SwapBytes32(Chunk->Type);
-        Chunk->Comment = SwapBytes32(Chunk->Comment);
-        Chunk->SectorNumber = SwapBytes64(Chunk->SectorNumber);
-        Chunk->SectorCount = SwapBytes64(Chunk->SectorCount);
-        Chunk->CompressedOffset = SwapBytes64(Chunk->CompressedOffset);
-        Chunk->CompressedLength = SwapBytes64(Chunk->CompressedLength);
-    }
+  BlockData->ChunkCount = SwapBytes32 (BlockData->ChunkCount);
+
+  for (Index = 0; Index < BlockData->ChunkCount; ++Index) {
+    Chunk = &BlockData->Chunks[Index];
+
+    Chunk->Type             = SwapBytes32 (Chunk->Type);
+    Chunk->Comment          = SwapBytes32 (Chunk->Comment);
+    Chunk->SectorNumber     = SwapBytes64 (Chunk->SectorNumber);
+    Chunk->SectorCount      = SwapBytes64 (Chunk->SectorCount);
+    Chunk->CompressedOffset = SwapBytes64 (Chunk->CompressedOffset);
+    Chunk->CompressedLength = SwapBytes64 (Chunk->CompressedLength);
+  }
 }
 
 EFI_STATUS
-EFIAPI
-ParsePlist(
-    IN  VOID *Buffer,
-    IN  UINT64 XmlOffset,
-    IN  UINT64 XmlLength,
-    OUT UINT32 *BlockCount,
-    OUT OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT **Blocks) {
+InternalParsePlist (
+  IN  VOID                               *Buffer,
+  IN  UINT32                             XmlOffset,
+  IN  UINT32                             XmlLength,
+  OUT UINT32                             *BlockCount,
+  OUT OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT  **Blocks
+  )
+{
+  EFI_STATUS                        Status;
 
-    // Create variables.
-    EFI_STATUS Status;
+  CHAR8                             *XmlPlistBuffer;
+  XML_DOCUMENT                      *XmlPlistDoc;
+  XML_NODE                          *NodeRoot;
+  XML_NODE                          *NodeResourceForkKey;
+  XML_NODE                          *NodeResourceForkValue;
+  XML_NODE                          *NodeBlockListKey;
+  XML_NODE                          *NodeBlockListValue;
 
-    // Plist buffer.
-    CHAR8 *XmlPlistBuffer = NULL;
-    XML_DOCUMENT *XmlPlistDoc = NULL;
-    XML_NODE *XmlPlistNodeRoot = NULL;
-    XML_NODE *XmlPlistNodeResourceForkKey = NULL;
-    XML_NODE *XmlPlistNodeResourceForkValue = NULL;
-    XML_NODE *XmlPlistNodeBlockListKey = NULL;
-    XML_NODE *XmlPlistNodeBlockListValue = NULL;
+  XML_NODE                          *NodeBlockDict;
+  XML_NODE                          *BlockDictChildKey;
+  XML_NODE                          *BlockDictChildValue;
+  UINT32                            BlockDictChildDataSize;
 
-    // Plist blocks.
-    XML_NODE *XmlPlistNodeBlockDict = NULL;
-    XML_NODE *XmlPlistBlockDictChildKey = NULL;
-    XML_NODE *XmlPlistBlockDictChildValue = NULL;
-    UINT32 XmlPlistBlockDictChildDataSize;
+  UINT32                            NumDmgBlocks;
+  OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT *DmgBlocks;
+  OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT *Block;
 
-    // DMG blocks.
-    UINT32 DmgBlockCount;
-    OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT *DmgBlocks;
+  UINT32 Index;
 
-    OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT *Block;
+  ASSERT (Buffer != NULL);
+  ASSERT (XmlLength > 0);
+  ASSERT (BlockCount != NULL);
+  ASSERT (Blocks != NULL);
 
-    ASSERT (Buffer != NULL);
-    ASSERT (XmlLength > 0);
-    ASSERT (BlockCount != NULL);
-    ASSERT (Blocks != NULL);
+  XmlPlistDoc = NULL;
 
-    // Allocate buffer for plist and copy plist to it.
-    XmlPlistBuffer = AllocateCopyPool(XmlLength, (UINT8*)Buffer + XmlOffset);
-    if (!XmlPlistBuffer) {
-        Status = EFI_OUT_OF_RESOURCES;
-        goto DONE_ERROR;
+  XmlPlistBuffer = AllocateCopyPool (XmlLength, ((UINT8 *)Buffer + XmlOffset));
+  if (XmlPlistBuffer == NULL) {
+    Status = EFI_OUT_OF_RESOURCES;
+    goto DONE_ERROR;
+  }
+
+  XmlPlistDoc = XmlDocumentParse (XmlPlistBuffer, XmlLength, FALSE);
+  if (XmlPlistDoc == NULL) {
+    Status = EFI_OUT_OF_RESOURCES;
+    goto DONE_ERROR;
+  }
+
+  NodeRoot = PlistDocumentRoot (XmlPlistDoc);
+  if (NodeRoot == NULL) {
+    Status = EFI_OUT_OF_RESOURCES;
+    goto DONE_ERROR;
+  }
+
+  Status = InternalFindPlistDictChild (
+             NodeRoot,
+             DMG_PLIST_RESOURCE_FORK_KEY,
+             &NodeResourceForkKey,
+             &NodeResourceForkValue
+             );
+  if (EFI_ERROR (Status)) {
+    goto DONE_ERROR;
+  }
+
+  Status = InternalFindPlistDictChild (
+             NodeResourceForkValue,
+             DMG_PLIST_BLOCK_LIST_KEY,
+             &NodeBlockListKey,
+             &NodeBlockListValue
+             );
+  if (EFI_ERROR (Status)) {
+    goto DONE_ERROR;
+  }
+
+  NumDmgBlocks = XmlNodeChildren (NodeBlockListValue);
+  DmgBlocks    = AllocateZeroPool (NumDmgBlocks * sizeof (*DmgBlocks));
+  if (DmgBlocks == NULL) {
+    Status = EFI_OUT_OF_RESOURCES;
+    goto DONE_ERROR;
+  }
+
+  for (Index = 0; Index < NumDmgBlocks; ++Index) {
+    Block = &DmgBlocks[Index];
+
+    NodeBlockDict = XmlNodeChild (NodeBlockListValue, Index);
+
+    // TODO they are actually string.
+    Status = InternalFindPlistDictChild (
+                NodeBlockDict,
+                DMG_PLIST_ATTRIBUTES,
+                &BlockDictChildKey,
+                &BlockDictChildValue
+                );
+    if (EFI_ERROR (Status)) {
+      goto DONE_ERROR;
     }
 
-    // Open plist and get root node.
-    XmlPlistDoc = XmlDocumentParse(XmlPlistBuffer, (UINT32)XmlLength, FALSE);
-    if (!XmlPlistDoc) {
-        Status = EFI_OUT_OF_RESOURCES;
-        goto DONE_ERROR;
-    }
-    XmlPlistNodeRoot = PlistDocumentRoot(XmlPlistDoc);
-    if (!XmlPlistNodeRoot) {
-        Status = EFI_OUT_OF_RESOURCES;
-        goto DONE_ERROR;
-    }
+    PlistIntegerValue (
+      BlockDictChildValue,
+      &Block->Attributes,
+      sizeof(Block->Attributes),
+      FALSE
+      );
 
-    // Get resource fork dictionary.
-    Status = FindPlistDictChild(XmlPlistNodeRoot, DMG_PLIST_RESOURCE_FORK_KEY,
-        &XmlPlistNodeResourceForkKey, &XmlPlistNodeResourceForkValue);
-    if (EFI_ERROR(Status))
-        goto DONE_ERROR;
-
-    // Get block list dictionary.
-    Status = FindPlistDictChild(XmlPlistNodeResourceForkValue, DMG_PLIST_BLOCK_LIST_KEY,
-        &XmlPlistNodeBlockListKey, &XmlPlistNodeBlockListValue);
-    if (EFI_ERROR(Status))
-        goto DONE_ERROR;
-
-    // Get block count and allocate space for blocks.
-    DmgBlockCount = XmlNodeChildren(XmlPlistNodeBlockListValue);
-    DmgBlocks = AllocateZeroPool(DmgBlockCount * sizeof(OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT));
-    if (!DmgBlocks) {
-        Status = EFI_OUT_OF_RESOURCES;
-        goto DONE_ERROR;
+    Status = InternalFindPlistDictChild (
+                NodeBlockDict,
+                DMG_PLIST_CFNAME,
+                &BlockDictChildKey,
+                &BlockDictChildValue
+                );
+    if (EFI_ERROR (Status)) {
+      goto DONE_ERROR;
     }
 
-    // Get blocks in plist.
-    for (UINT32 b = 0; b < DmgBlockCount; b++) {
-        Block = &DmgBlocks[b];
+    BlockDictChildDataSize = 0;
+    PlistStringSize (BlockDictChildValue, &BlockDictChildDataSize);
+    Block->CfName = AllocateZeroPool (BlockDictChildDataSize);
+    if (Block->CfName == NULL) {
+      Status = EFI_OUT_OF_RESOURCES;
+      goto DONE_ERROR;
+    }
+    PlistStringValue (
+      BlockDictChildValue,
+      Block->CfName,
+      &BlockDictChildDataSize
+      );
 
-        // Get dictionary.
-        XmlPlistNodeBlockDict = XmlNodeChild(XmlPlistNodeBlockListValue, b);
-
-        // Get attributes. TODO they are actually string.
-        Status = FindPlistDictChild(XmlPlistNodeBlockDict, DMG_PLIST_ATTRIBUTES,
-            &XmlPlistBlockDictChildKey, &XmlPlistBlockDictChildValue);
-        if (EFI_ERROR(Status))
-            goto DONE_ERROR;
-        PlistIntegerValue(XmlPlistBlockDictChildValue,
-            &Block->Attributes, sizeof(Block->Attributes), FALSE);
-
-        // Get CFName node.
-        Status = FindPlistDictChild(XmlPlistNodeBlockDict, DMG_PLIST_CFNAME,
-            &XmlPlistBlockDictChildKey, &XmlPlistBlockDictChildValue);
-        if (EFI_ERROR(Status))
-            goto DONE_ERROR;
-
-        // Allocate CFName string and get it.
-        XmlPlistBlockDictChildDataSize = 0;
-        PlistStringSize(XmlPlistBlockDictChildValue, &XmlPlistBlockDictChildDataSize);
-        Block->CfName = AllocateZeroPool(XmlPlistBlockDictChildDataSize);
-        if (!Block->CfName) {
-            Status = EFI_OUT_OF_RESOURCES;
-            goto DONE_ERROR;
-        }
-        PlistStringValue(XmlPlistBlockDictChildValue,
-            Block->CfName, &XmlPlistBlockDictChildDataSize);
-
-        // Get Name node.
-        Status = FindPlistDictChild(XmlPlistNodeBlockDict, DMG_PLIST_NAME,
-            &XmlPlistBlockDictChildKey, &XmlPlistBlockDictChildValue);
-        if (EFI_ERROR(Status))
-            goto DONE_ERROR;
-
-        // Allocate Name string and get it.
-        XmlPlistBlockDictChildDataSize = 0;
-        PlistStringSize(XmlPlistBlockDictChildValue, &XmlPlistBlockDictChildDataSize);
-        Block->Name = AllocateZeroPool(XmlPlistBlockDictChildDataSize);
-        if (!Block->Name) {
-            Status = EFI_OUT_OF_RESOURCES;
-            goto DONE_ERROR;
-        }
-        PlistStringValue(XmlPlistBlockDictChildValue,
-            Block->Name, &XmlPlistBlockDictChildDataSize);
-
-        // Get ID.
-        Status = FindPlistDictChild(XmlPlistNodeBlockDict, DMG_PLIST_ID,
-            &XmlPlistBlockDictChildKey, &XmlPlistBlockDictChildValue);
-        if (EFI_ERROR(Status))
-            goto DONE_ERROR;
-        PlistIntegerValue(XmlPlistBlockDictChildValue,
-            &Block->Id, sizeof(Block->Id), FALSE);
-
-        // Get block data.
-        Status = FindPlistDictChild(XmlPlistNodeBlockDict, DMG_PLIST_DATA,
-            &XmlPlistBlockDictChildKey, &XmlPlistBlockDictChildValue);
-        if (EFI_ERROR(Status))
-            goto DONE_ERROR;
-
-        // Allocate block data and get it.
-        XmlPlistBlockDictChildDataSize = 0;
-        PlistDataSize(XmlPlistBlockDictChildValue, &XmlPlistBlockDictChildDataSize);
-        Block->BlockData = AllocateZeroPool(XmlPlistBlockDictChildDataSize);
-        if (!Block->BlockData) {
-            Status = EFI_OUT_OF_RESOURCES;
-            goto DONE_ERROR;
-        }
-
-        PlistDataValue(XmlPlistBlockDictChildValue,
-            (UINT8*)Block->BlockData, &XmlPlistBlockDictChildDataSize);
-
-        InternalSwapBlockData (Block->BlockData);
+    Status = InternalFindPlistDictChild (
+                NodeBlockDict,
+                DMG_PLIST_NAME,
+                &BlockDictChildKey,
+                &BlockDictChildValue
+                );
+    if (EFI_ERROR (Status)) {
+      goto DONE_ERROR;
     }
 
-    // Success.
-    *BlockCount = DmgBlockCount;
-    *Blocks = DmgBlocks;
-    Status = EFI_SUCCESS;
-    goto DONE;
+    BlockDictChildDataSize = 0;
+    PlistStringSize (BlockDictChildValue, &BlockDictChildDataSize);
+    Block->Name = AllocateZeroPool (BlockDictChildDataSize);
+    if (Block->Name == NULL) {
+      Status = EFI_OUT_OF_RESOURCES;
+      goto DONE_ERROR;
+    }
+    PlistStringValue (
+      BlockDictChildValue,
+      Block->Name,
+      &BlockDictChildDataSize
+      );
+
+    Status = InternalFindPlistDictChild (
+                NodeBlockDict,
+                DMG_PLIST_ID,
+                &BlockDictChildKey,
+                &BlockDictChildValue
+                );
+    if (EFI_ERROR (Status)) {
+      goto DONE_ERROR;
+    }
+
+    PlistIntegerValue (
+      BlockDictChildValue,
+      &Block->Id,
+      sizeof (Block->Id),
+      FALSE
+      );
+
+    Status = InternalFindPlistDictChild (
+                NodeBlockDict,
+                DMG_PLIST_DATA,
+                &BlockDictChildKey,
+                &BlockDictChildValue
+                );
+    if (EFI_ERROR (Status)) {
+      goto DONE_ERROR;
+    }
+
+    BlockDictChildDataSize = 0;
+    PlistDataSize (BlockDictChildValue, &BlockDictChildDataSize);
+    Block->BlockData = AllocateZeroPool (BlockDictChildDataSize);
+    if (Block->BlockData == NULL) {
+      Status = EFI_OUT_OF_RESOURCES;
+      goto DONE_ERROR;
+    }
+
+    PlistDataValue (
+      BlockDictChildValue,
+      (UINT8*)Block->BlockData,
+      &BlockDictChildDataSize
+      );
+
+    InternalSwapBlockData (Block->BlockData);
+  }
+
+  *BlockCount = NumDmgBlocks;
+  *Blocks     = DmgBlocks;
+  Status      = EFI_SUCCESS;
 
 DONE_ERROR:
 
-DONE:
-    // Free XML.
-    if (XmlPlistDoc)
-        XmlDocumentFree(XmlPlistDoc);
-    if (XmlPlistBuffer)
-        FreePool(XmlPlistBuffer);
-    return Status;
+  if (XmlPlistDoc != NULL) {
+    XmlDocumentFree (XmlPlistDoc);
+  }
+
+  if (XmlPlistBuffer != NULL) {
+    FreePool (XmlPlistBuffer);
+  }
+
+  return Status;
 }
 
 EFI_STATUS
-EFIAPI
-GetBlockChunk(
-    IN  OC_APPLE_DISK_IMAGE_CONTEXT *Context,
-    IN  EFI_LBA Lba,
-    OUT APPLE_DISK_IMAGE_BLOCK_DATA **Data,
-    OUT APPLE_DISK_IMAGE_CHUNK **Chunk) {
+InternalGetBlockChunk (
+  IN  OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
+  IN  EFI_LBA                      Lba,
+  OUT APPLE_DISK_IMAGE_BLOCK_DATA  **Data,
+  OUT APPLE_DISK_IMAGE_CHUNK       **Chunk
+  )
+{
+  UINT32                      BlockIndex;
+  UINT32                      ChunkIndex;
+  APPLE_DISK_IMAGE_BLOCK_DATA *BlockData;
+  APPLE_DISK_IMAGE_CHUNK      *BlockChunk;
 
-    // Create variables.
-    APPLE_DISK_IMAGE_BLOCK_DATA *BlockData;
-    APPLE_DISK_IMAGE_CHUNK *BlockChunk;
+  for (BlockIndex = 0; BlockIndex < Context->BlockCount; ++BlockIndex) {
+    BlockData = Context->Blocks[BlockIndex].BlockData;
 
-    // Search for chunk.
-    for (UINT32 b = 0; b < Context->BlockCount; b++) {
-        // Get block data.
-        BlockData = Context->Blocks[b].BlockData;
+    if ((Lba >= BlockData->SectorNumber) &&
+        (Lba < (BlockData->SectorNumber + BlockData->SectorCount))) {
+      for (ChunkIndex = 0; ChunkIndex < BlockData->ChunkCount; ++ChunkIndex) {
+        BlockChunk = &BlockData->Chunks[ChunkIndex];
 
-        // Is the desired sector part of this block?
-        if ((Lba >= BlockData->SectorNumber) &&
-            (Lba < (BlockData->SectorNumber + BlockData->SectorCount))) {
-            // Determine chunk.
-            for (UINT32 c = 0; c < BlockData->ChunkCount; c++) {
-                // Get chunk.
-                BlockChunk = BlockData->Chunks + c;
-
-                // Is the desired sector part of this chunk?
-                if ((Lba >= DMG_SECTOR_START_ABS(BlockData, BlockChunk)) &&
-                    (Lba < (DMG_SECTOR_START_ABS(BlockData, BlockChunk) + BlockChunk->SectorCount))) {
-                    // Found the chunk.
-                    *Data = BlockData;
-                    *Chunk = BlockChunk;
-                    return EFI_SUCCESS;
-                }
-            }
+        if ((Lba >= DMG_SECTOR_START_ABS (BlockData, BlockChunk))
+         && (Lba < (DMG_SECTOR_START_ABS (BlockData, BlockChunk) + BlockChunk->SectorCount))) {
+          *Data  = BlockData;
+          *Chunk = BlockChunk;
+          return EFI_SUCCESS;
         }
+      }
     }
+  }
 
-    // Couldn't find chunk.
-    return EFI_NOT_FOUND;
+  return EFI_NOT_FOUND;
 }

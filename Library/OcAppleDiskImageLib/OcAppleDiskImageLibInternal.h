@@ -13,103 +13,69 @@
 #ifndef APPLE_DISK_IMAGE_LIB_INTERNAL_H_
 #define APPLE_DISK_IMAGE_LIB_INTERNAL_H_
 
-#include <Library/OcXmlLib.h>
+#define BASE_256B  0x0100U
+#define SIZE_512B  0x0200U
 
-// Sizes.
-#define BASE_256B   0x100
-#define SIZE_512B   0x200
+#define DMG_SECTOR_START_ABS(b, c) (((b)->SectorNumber) + ((c)->SectorNumber))
 
-// Used for determining absolute sector start within chunk.
-#define DMG_SECTOR_START_ABS(b, c)  ((b->SectorNumber) + (c->SectorNumber))
+#define DMG_PLIST_RESOURCE_FORK_KEY  "resource-fork"
+#define DMG_PLIST_BLOCK_LIST_KEY     "blkx"
+#define DMG_PLIST_ATTRIBUTES         "Attributes"
+#define DMG_PLIST_CFNAME             "CFName"
+#define DMG_PLIST_DATA               "Data"
+#define DMG_PLIST_ID                 "ID"
+#define DMG_PLIST_NAME               "Name"
 
-#define DMG_PLIST_RESOURCE_FORK_KEY     "resource-fork"
-#define DMG_PLIST_BLOCK_LIST_KEY        "blkx"
-#define DMG_PLIST_ATTRIBUTES            "Attributes"
-#define DMG_PLIST_CFNAME                "CFName"
-#define DMG_PLIST_DATA                  "Data"
-#define DMG_PLIST_ID                    "ID"
-#define DMG_PLIST_NAME                  "Name"
-
-//
-// Device path stuff.
-//
 #pragma pack(1)
 
-// DMG controller device path.
-#define DMG_CONTROLLER_DP_GUID { \
-    0x957932CC, 0x7E8E, 0x433B, { 0x8F, 0x41, 0xD3, 0x91, 0xEA, 0x3C, 0x10, 0xF8 } \
-}
-extern EFI_GUID gDmgControllerDpGuid;
-
-// DMG vendor device path node.
-typedef struct {
+typedef PACKED struct {
     EFI_DEVICE_PATH_PROTOCOL Header;
-    EFI_GUID Guid;
-    UINT32 Key;
+    EFI_GUID                 Guid;
+    UINT32                   Key;
 } DMG_CONTROLLER_DEVICE_PATH;
 
-// DMG size device path.
-#define DMG_SIZE_DP_GUID { \
-    0x004B07E8, 0x0B9C, 0x427E, { 0xB0, 0xD4, 0xA4, 0x66, 0xE6, 0xE5, 0x7A, 0x62 } \
-}
-extern EFI_GUID gDmgSizeDpGuid;
-
-// DMG size device path node.
-typedef struct {
+typedef PACKED struct {
     EFI_DEVICE_PATH_PROTOCOL Header;
-    EFI_GUID Guid;
-    UINT64 Length;
+    EFI_GUID                 Guid;
+    UINT64                   Length;
 } DMG_SIZE_DEVICE_PATH;
-#pragma pack()
 
-//
-// RAM DMG structures used by boot.efi.
-//
-#pragma pack(1)
+#define RAM_DMG_SIGNATURE  0x544E5458444D4152ULL // "RAMDXTNT"
+#define RAM_DMG_VERSION    0x010000U
 
-#define RAM_DMG_SIGNATURE   0x544E5458444D4152ULL // "RAMDXTNT"
-#define RAM_DMG_VERSION     0x10000
-
-// RAM DMG extent info.
 typedef struct {
-    UINT64 Start;
-    UINT64 Length;
+  UINT64 Start;
+  UINT64 Length;
 } RAM_DMG_EXTENT_INFO;
 
-// RAM DMG header.
 typedef struct {
-    UINT64 Signature;
-    UINT32 Version;
-    UINT32 ExtentCount;
-    RAM_DMG_EXTENT_INFO ExtentInfo[0xFE];
-    UINT64 Reserved;
-    UINT64 Signature2;
+  UINT64              Signature;
+  UINT32              Version;
+  UINT32              ExtentCount;
+  RAM_DMG_EXTENT_INFO ExtentInfo[0xFE];
+  UINT64              Reserved;
+  UINT64              Signature2;
 } RAM_DMG_HEADER;
+
 #pragma pack()
 
 EFI_STATUS
 EFIAPI
-FindPlistDictChild(
-    IN  XML_NODE *Node,
-    IN  CHAR8 *KeyName,
-    OUT XML_NODE **Key,
-    OUT XML_NODE **Value);
+InternalParsePlist (
+  IN  VOID                               *Buffer,
+  IN  UINT32                             XmlOffset,
+  IN  UINT32                             XmlLength,
+  OUT UINT32                             *BlockCount,
+  OUT OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT  **Blocks
+  );
 
 EFI_STATUS
 EFIAPI
-ParsePlist(
-    IN  VOID *Buffer,
-    IN  UINT64 XmlOffset,
-    IN  UINT64 XmlLength,
-    OUT UINT32 *BlockCount,
-    OUT OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT **Blocks);
-
-EFI_STATUS
-EFIAPI
-GetBlockChunk(
-    IN  OC_APPLE_DISK_IMAGE_CONTEXT *Context,
-    IN  EFI_LBA Lba,
-    OUT APPLE_DISK_IMAGE_BLOCK_DATA **Data,
-    OUT APPLE_DISK_IMAGE_CHUNK **Chunk);
+InternalGetBlockChunk (
+  IN  OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
+  IN  EFI_LBA                      Lba,
+  OUT APPLE_DISK_IMAGE_BLOCK_DATA  **Data,
+  OUT APPLE_DISK_IMAGE_CHUNK       **Chunk
+  );
 
 #endif

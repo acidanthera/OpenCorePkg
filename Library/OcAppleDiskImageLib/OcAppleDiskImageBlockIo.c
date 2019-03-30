@@ -25,6 +25,14 @@
 
 #include "OcAppleDiskImageLibInternal.h"
 
+#define DMG_CONTROLLER_DP_GUID   \
+  { 0x957932CC, 0x7E8E, 0x433B,  \
+    { 0x8F, 0x41, 0xD3, 0x91, 0xEA, 0x3C, 0x10, 0xF8 } }
+
+#define DMG_SIZE_DP_GUID         \
+  { 0x004B07E8, 0x0B9C, 0x427E,  \
+    { 0xB0, 0xD4, 0xA4, 0x66, 0xE6, 0xE5, 0x7A, 0x62 } }
+
 #define DMG_FILE_PATH_LEN  (L_STR_LEN (L"DMG_.dmg") + 16 + 1)
 
 #pragma pack(1)
@@ -69,6 +77,9 @@ typedef struct {
   OC_APPLE_DISK_IMAGE_CONTEXT *ImageContext;
   RAM_DMG_HEADER              *RamDmgHeader;
 } OC_APPLE_DISK_IMAGE_MOUNTED_DATA;
+
+STATIC CONST EFI_GUID mDmgControllerDpGuid = DMG_CONTROLLER_DP_GUID;
+STATIC CONST EFI_GUID mDmgSizeDpGuid       = DMG_SIZE_DP_GUID;
 
 STATIC
 EFI_STATUS
@@ -158,7 +169,7 @@ InternalConstructDmgDevicePath (
   DevPath->Controller.Header.Type    = HARDWARE_DEVICE_PATH;
   DevPath->Controller.Header.SubType = HW_VENDOR_DP;
   DevPath->Controller.Key            = 0;
-  CopyGuid (&DevPath->Controller.Guid, &gDmgControllerDpGuid);
+  CopyGuid (&DevPath->Controller.Guid, &mDmgControllerDpGuid);
   SetDevicePathNodeLength (&DevPath->Controller, sizeof (DevPath->Controller));
 
   DevPath->MemMap.Header.Type     = HARDWARE_DEVICE_PATH;
@@ -180,8 +191,8 @@ InternalConstructDmgDevicePath (
 
   DevPath->Size.Header.Type    = MESSAGING_DEVICE_PATH;
   DevPath->Size.Header.SubType = MSG_VENDOR_DP;
-  DevPath->Size.Guid           = gDmgSizeDpGuid;
   DevPath->Size.Length         = DmgSize;
+  CopyGuid (&DevPath->Size.Guid, &mDmgSizeDpGuid);
   SetDevicePathNodeLength (&DevPath->Size, sizeof (DevPath->Size));
 
   SetDevicePathEndNode (&DevPath->End);
