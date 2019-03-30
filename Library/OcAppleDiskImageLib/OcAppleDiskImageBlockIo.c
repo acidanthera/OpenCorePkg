@@ -283,8 +283,7 @@ OcAppleDiskImageInstallBlockIo(
 
     // Success.
     Context->BlockIoHandle = DiskImageData->Handle;
-    Status = EFI_SUCCESS;
-    goto DONE;
+    return EFI_SUCCESS;
 
 DONE_ERROR:
     // Free data.
@@ -293,7 +292,6 @@ DONE_ERROR:
     if (RamDmgHeader)
         gBS->FreePages(RamDmgPhysAddr, EFI_SIZE_TO_PAGES(sizeof(RAM_DMG_HEADER)));
 
-DONE:
     return Status;
 }
 

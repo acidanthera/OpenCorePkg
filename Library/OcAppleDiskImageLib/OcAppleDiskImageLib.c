@@ -82,8 +82,7 @@ OcAppleDiskImageInitializeContext (
   //
   if (Trailer.Signature != APPLE_DISK_IMAGE_MAGIC ||
       Trailer.HeaderSize != sizeof (APPLE_DISK_IMAGE_TRAILER)) {
-      Status = EFI_UNSUPPORTED;
-      goto DONE_ERROR;
+      return EFI_UNSUPPORTED;
   }
 
   // Swap main fields.
@@ -120,7 +119,7 @@ OcAppleDiskImageInitializeContext (
     Status = VerifyCrc32 (((UINT8*)Buffer) + Trailer.DataForkOffset,
       Trailer.DataForkLength, Trailer.DataForkChecksum.Data[0]);
     if (EFI_ERROR (Status))
-        goto DONE_ERROR;
+        return Status;
   }
 
   //
@@ -128,8 +127,7 @@ OcAppleDiskImageInitializeContext (
   //
   if (Trailer.XmlOffset == 0 || Trailer.XmlOffset >= (DmgLength - sizeof (APPLE_DISK_IMAGE_TRAILER)) ||
     Trailer.XmlLength == 0 || (Trailer.XmlOffset + Trailer.XmlLength) > (DmgLength - sizeof (APPLE_DISK_IMAGE_TRAILER))) {
-    Status = EFI_UNSUPPORTED;
-    goto DONE_ERROR;
+    return EFI_UNSUPPORTED;
   }
 
   //
@@ -137,15 +135,15 @@ OcAppleDiskImageInitializeContext (
   //
   Status = ParsePlist (Buffer, Trailer.XmlOffset, Trailer.XmlLength, &DmgBlockCount, &DmgBlocks);
   if (EFI_ERROR(Status))
-    goto DONE_ERROR;
+    return Status;
 
   //
   // Allocate DMG file structure.
   //
   DmgContext = AllocateZeroPool (sizeof (OC_APPLE_DISK_IMAGE_CONTEXT));
   if (!DmgContext) {
-    Status = EFI_OUT_OF_RESOURCES;
-    goto DONE_ERROR;
+    FreePool (DmgBlocks);
+    return EFI_OUT_OF_RESOURCES;
   }
 
   // Fill DMG file structure.
@@ -156,15 +154,7 @@ OcAppleDiskImageInitializeContext (
   DmgContext->Blocks = DmgBlocks;
 
   *Context = DmgContext;
-  Status = EFI_SUCCESS;
-  goto DONE;
-
-DONE_ERROR:
-  if (DmgBlocks != NULL)
-    FreePool (DmgBlocks);
-
-DONE:
-  return Status;
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -246,8 +236,7 @@ OcAppleDiskImageRead(
         // Determine block in DMG.
         Status = GetBlockChunk(Context, LbaCurrent, &BlockData, &Chunk);
         if (EFI_ERROR(Status)) {
-            Status = EFI_DEVICE_ERROR;
-            goto DONE;
+            return EFI_DEVICE_ERROR;
         }
 
         // Determine offset into source DMG.
@@ -307,8 +296,7 @@ OcAppleDiskImageRead(
 
             // Unknown chunk type.
             default:
-                Status = EFI_DEVICE_ERROR;
-                goto DONE;
+                return EFI_DEVICE_ERROR;
         }
 
         // Move to next chunk.
@@ -317,9 +305,5 @@ OcAppleDiskImageRead(
         LbaCurrent += LbaLength;
     }
 
-    // Success.
-    Status = EFI_SUCCESS;
-
-DONE:
-    return Status;
+    return EFI_SUCCESS;
 }
