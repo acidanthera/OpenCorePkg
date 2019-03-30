@@ -57,18 +57,6 @@ typedef struct {
 } DMG_FILEPATH_DEVICE_PATH;
 
 //
-// Block I/O protocol template.
-//
-EFI_BLOCK_IO_PROTOCOL mDiskImageBlockIo = {
-  EFI_BLOCK_IO_PROTOCOL_REVISION,
-  NULL,
-  DiskImageBlockIoReset,
-  DiskImageBlockIoReadBlocks,
-  DiskImageBlockIoWriteBlocks,
-  DiskImageBlockIoFlushBlocks
-};
-
-//
 // Block I/O protocol functions.
 //
 EFI_STATUS
@@ -124,6 +112,18 @@ DiskImageBlockIoFlushBlocks (
 {
   return EFI_SUCCESS;
 }
+
+//
+// Block I/O protocol template.
+//
+EFI_BLOCK_IO_PROTOCOL mDiskImageBlockIo = {
+  EFI_BLOCK_IO_PROTOCOL_REVISION,
+  NULL,
+  DiskImageBlockIoReset,
+  DiskImageBlockIoReadBlocks,
+  DiskImageBlockIoWriteBlocks,
+  DiskImageBlockIoFlushBlocks
+};
 
 EFI_STATUS
 EFIAPI
