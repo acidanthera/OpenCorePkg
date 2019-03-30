@@ -28,27 +28,15 @@
 
 #pragma pack(1)
 
-typedef PACKED struct {
-    EFI_DEVICE_PATH_PROTOCOL Header;
-    EFI_GUID                 Guid;
-    UINT32                   Key;
-} DMG_CONTROLLER_DEVICE_PATH;
-
-typedef PACKED struct {
-    EFI_DEVICE_PATH_PROTOCOL Header;
-    EFI_GUID                 Guid;
-    UINT64                   Length;
-} DMG_SIZE_DEVICE_PATH;
-
 #define RAM_DMG_SIGNATURE  0x544E5458444D4152ULL // "RAMDXTNT"
 #define RAM_DMG_VERSION    0x010000U
 
-typedef struct {
+typedef PACKED struct {
   UINT64 Start;
   UINT64 Length;
 } RAM_DMG_EXTENT_INFO;
 
-typedef struct {
+typedef PACKED struct {
   UINT64              Signature;
   UINT32              Version;
   UINT32              ExtentCount;
@@ -59,8 +47,7 @@ typedef struct {
 
 #pragma pack()
 
-EFI_STATUS
-EFIAPI
+BOOLEAN
 InternalParsePlist (
   IN  VOID                               *Buffer,
   IN  UINT32                             XmlOffset,
@@ -69,11 +56,10 @@ InternalParsePlist (
   OUT OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT  **Blocks
   );
 
-EFI_STATUS
-EFIAPI
+BOOLEAN
 InternalGetBlockChunk (
   IN  OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
-  IN  EFI_LBA                      Lba,
+  IN  UINT64                       Lba,
   OUT APPLE_DISK_IMAGE_BLOCK_DATA  **Data,
   OUT APPLE_DISK_IMAGE_CHUNK       **Chunk
   );

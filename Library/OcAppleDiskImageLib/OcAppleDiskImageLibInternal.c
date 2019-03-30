@@ -10,7 +10,7 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include <Uefi.h>
+#include <Base.h>
 
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
@@ -21,7 +21,7 @@
 #include "OcAppleDiskImageLibInternal.h"
 
 STATIC
-EFI_STATUS
+BOOLEAN
 InternalFindPlistDictChild (
   IN  XML_NODE  *Node,
   IN  CHAR8     *KeyName,
@@ -49,11 +49,11 @@ InternalFindPlistDictChild (
         && (AsciiStrCmp (ChildKeyName, KeyName) == 0)) {
         *Key   = ChildKey;
         *Value = ChildValue;
-        return EFI_SUCCESS;
+        return TRUE;
       }
   }
 
-  return EFI_NOT_FOUND;
+  return FALSE;
 }
 
 STATIC
@@ -94,7 +94,7 @@ InternalSwapBlockData (
   }
 }
 
-EFI_STATUS
+BOOLEAN
 InternalParsePlist (
   IN  VOID                               *Buffer,
   IN  UINT32                             XmlOffset,
@@ -103,7 +103,7 @@ InternalParsePlist (
   OUT OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT  **Blocks
   )
 {
-  EFI_STATUS                        Status;
+  BOOLEAN                           Result;
 
   CHAR8                             *XmlPlistBuffer;
   XML_DOCUMENT                      *XmlPlistDoc;
@@ -133,46 +133,46 @@ InternalParsePlist (
 
   XmlPlistBuffer = AllocateCopyPool (XmlLength, ((UINT8 *)Buffer + XmlOffset));
   if (XmlPlistBuffer == NULL) {
-    Status = EFI_OUT_OF_RESOURCES;
+    Result = FALSE;
     goto DONE_ERROR;
   }
 
   XmlPlistDoc = XmlDocumentParse (XmlPlistBuffer, XmlLength, FALSE);
   if (XmlPlistDoc == NULL) {
-    Status = EFI_OUT_OF_RESOURCES;
+    Result = FALSE;
     goto DONE_ERROR;
   }
 
   NodeRoot = PlistDocumentRoot (XmlPlistDoc);
   if (NodeRoot == NULL) {
-    Status = EFI_OUT_OF_RESOURCES;
+    Result = FALSE;
     goto DONE_ERROR;
   }
 
-  Status = InternalFindPlistDictChild (
+  Result = InternalFindPlistDictChild (
              NodeRoot,
              DMG_PLIST_RESOURCE_FORK_KEY,
              &NodeResourceForkKey,
              &NodeResourceForkValue
              );
-  if (EFI_ERROR (Status)) {
+  if (!Result) {
     goto DONE_ERROR;
   }
 
-  Status = InternalFindPlistDictChild (
+  Result = InternalFindPlistDictChild (
              NodeResourceForkValue,
              DMG_PLIST_BLOCK_LIST_KEY,
              &NodeBlockListKey,
              &NodeBlockListValue
              );
-  if (EFI_ERROR (Status)) {
+  if (!Result) {
     goto DONE_ERROR;
   }
 
   NumDmgBlocks = XmlNodeChildren (NodeBlockListValue);
   DmgBlocks    = AllocateZeroPool (NumDmgBlocks * sizeof (*DmgBlocks));
   if (DmgBlocks == NULL) {
-    Status = EFI_OUT_OF_RESOURCES;
+    Result = FALSE;
     goto DONE_ERROR;
   }
 
@@ -182,13 +182,13 @@ InternalParsePlist (
     NodeBlockDict = XmlNodeChild (NodeBlockListValue, Index);
 
     // TODO they are actually string.
-    Status = InternalFindPlistDictChild (
+    Result = InternalFindPlistDictChild (
                 NodeBlockDict,
                 DMG_PLIST_ATTRIBUTES,
                 &BlockDictChildKey,
                 &BlockDictChildValue
                 );
-    if (EFI_ERROR (Status)) {
+    if (!Result) {
       goto DONE_ERROR;
     }
 
@@ -199,13 +199,13 @@ InternalParsePlist (
       FALSE
       );
 
-    Status = InternalFindPlistDictChild (
+    Result = InternalFindPlistDictChild (
                 NodeBlockDict,
                 DMG_PLIST_CFNAME,
                 &BlockDictChildKey,
                 &BlockDictChildValue
                 );
-    if (EFI_ERROR (Status)) {
+    if (!Result) {
       goto DONE_ERROR;
     }
 
@@ -213,7 +213,7 @@ InternalParsePlist (
     PlistStringSize (BlockDictChildValue, &BlockDictChildDataSize);
     Block->CfName = AllocateZeroPool (BlockDictChildDataSize);
     if (Block->CfName == NULL) {
-      Status = EFI_OUT_OF_RESOURCES;
+      Result = FALSE;
       goto DONE_ERROR;
     }
     PlistStringValue (
@@ -222,13 +222,13 @@ InternalParsePlist (
       &BlockDictChildDataSize
       );
 
-    Status = InternalFindPlistDictChild (
+    Result = InternalFindPlistDictChild (
                 NodeBlockDict,
                 DMG_PLIST_NAME,
                 &BlockDictChildKey,
                 &BlockDictChildValue
                 );
-    if (EFI_ERROR (Status)) {
+    if (!Result) {
       goto DONE_ERROR;
     }
 
@@ -236,7 +236,7 @@ InternalParsePlist (
     PlistStringSize (BlockDictChildValue, &BlockDictChildDataSize);
     Block->Name = AllocateZeroPool (BlockDictChildDataSize);
     if (Block->Name == NULL) {
-      Status = EFI_OUT_OF_RESOURCES;
+      Result = FALSE;
       goto DONE_ERROR;
     }
     PlistStringValue (
@@ -245,13 +245,13 @@ InternalParsePlist (
       &BlockDictChildDataSize
       );
 
-    Status = InternalFindPlistDictChild (
+    Result = InternalFindPlistDictChild (
                 NodeBlockDict,
                 DMG_PLIST_ID,
                 &BlockDictChildKey,
                 &BlockDictChildValue
                 );
-    if (EFI_ERROR (Status)) {
+    if (!Result) {
       goto DONE_ERROR;
     }
 
@@ -262,13 +262,13 @@ InternalParsePlist (
       FALSE
       );
 
-    Status = InternalFindPlistDictChild (
+    Result = InternalFindPlistDictChild (
                 NodeBlockDict,
                 DMG_PLIST_DATA,
                 &BlockDictChildKey,
                 &BlockDictChildValue
                 );
-    if (EFI_ERROR (Status)) {
+    if (!Result) {
       goto DONE_ERROR;
     }
 
@@ -276,7 +276,7 @@ InternalParsePlist (
     PlistDataSize (BlockDictChildValue, &BlockDictChildDataSize);
     Block->BlockData = AllocateZeroPool (BlockDictChildDataSize);
     if (Block->BlockData == NULL) {
-      Status = EFI_OUT_OF_RESOURCES;
+      Result = FALSE;
       goto DONE_ERROR;
     }
 
@@ -291,7 +291,7 @@ InternalParsePlist (
 
   *BlockCount = NumDmgBlocks;
   *Blocks     = DmgBlocks;
-  Status      = EFI_SUCCESS;
+  Result      = TRUE;
 
 DONE_ERROR:
 
@@ -303,13 +303,13 @@ DONE_ERROR:
     FreePool (XmlPlistBuffer);
   }
 
-  return Status;
+  return Result;
 }
 
-EFI_STATUS
+BOOLEAN
 InternalGetBlockChunk (
   IN  OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
-  IN  EFI_LBA                      Lba,
+  IN  UINT64                       Lba,
   OUT APPLE_DISK_IMAGE_BLOCK_DATA  **Data,
   OUT APPLE_DISK_IMAGE_CHUNK       **Chunk
   )
@@ -331,11 +331,11 @@ InternalGetBlockChunk (
          && (Lba < (DMG_SECTOR_START_ABS (BlockData, BlockChunk) + BlockChunk->SectorCount))) {
           *Data  = BlockData;
           *Chunk = BlockChunk;
-          return EFI_SUCCESS;
+          return TRUE;
         }
       }
     }
   }
 
-  return EFI_NOT_FOUND;
+  return FALSE;
 }

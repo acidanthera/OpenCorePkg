@@ -40,37 +40,37 @@ typedef struct {
     OC_APPLE_DISK_IMAGE_BLOCK_CONTEXT  *Blocks;
 
     // Block I/O info.
-    EFI_HANDLE                      BlockIoHandle;
+    VOID                            *BlockIoHandle;
 } OC_APPLE_DISK_IMAGE_CONTEXT;
 
-EFI_STATUS
-EFIAPI
-OcAppleDiskImageInitializeContext(
-    IN  VOID *Buffer,
-    IN  UINTN BufferLength,
-    OUT OC_APPLE_DISK_IMAGE_CONTEXT **Context);
+BOOLEAN
+OcAppleDiskImageInitializeContext (
+  IN  VOID                         *Buffer,
+  IN  UINTN                        BufferLength,
+  OUT OC_APPLE_DISK_IMAGE_CONTEXT  **Context
+  );
 
-EFI_STATUS
-EFIAPI
+VOID
 OcAppleDiskImageFreeContext(
-    IN OC_APPLE_DISK_IMAGE_CONTEXT *Context);
+  IN OC_APPLE_DISK_IMAGE_CONTEXT *Context
+  );
 
-EFI_STATUS
-EFIAPI
-OcAppleDiskImageRead(
-    IN  OC_APPLE_DISK_IMAGE_CONTEXT *Context,
-    IN  EFI_LBA Lba,
-    IN  UINTN BufferSize,
-    OUT VOID *Buffer);
+BOOLEAN
+OcAppleDiskImageRead (
+  IN  OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
+  IN  UINT64                       Lba,
+  IN  UINTN                        BufferSize,
+  OUT VOID                          *Buffer
+  );
 
-EFI_STATUS
-EFIAPI
-OcAppleDiskImageInstallBlockIo(
-    IN OC_APPLE_DISK_IMAGE_CONTEXT *Context);
+BOOLEAN
+OcAppleDiskImageInstallBlockIo (
+  IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context
+  );
 
-EFI_STATUS
-EFIAPI
-OcAppleDiskImageUninstallBlockIo(
-    IN OC_APPLE_DISK_IMAGE_CONTEXT *Context);
+BOOLEAN
+OcAppleDiskImageUninstallBlockIo (
+  IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context
+  );
 
 #endif

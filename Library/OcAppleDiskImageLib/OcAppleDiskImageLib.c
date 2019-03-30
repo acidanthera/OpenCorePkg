@@ -10,7 +10,7 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include <Uefi.h>
+#include <Base.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -65,15 +65,14 @@ InternalSwapTrailerData (
   Trailer->SectorCount  = SwapBytes64 (Trailer->SectorCount);
 }
 
-EFI_STATUS
-EFIAPI
+BOOLEAN
 OcAppleDiskImageInitializeContext (
   IN  VOID                         *Buffer,
   IN  UINTN                        BufferLength,
   OUT OC_APPLE_DISK_IMAGE_CONTEXT  **Context
   )
 {
-  EFI_STATUS                        Status;
+  BOOLEAN                           Result;
   OC_APPLE_DISK_IMAGE_CONTEXT       *DmgContext;
   UINTN                             TrailerOffset;
   UINT8                             *BufferBytes;
@@ -90,7 +89,7 @@ OcAppleDiskImageInitializeContext (
   ASSERT (Context != NULL);
 
   if (BufferLength <= sizeof (APPLE_DISK_IMAGE_TRAILER)) {
-    return EFI_UNSUPPORTED;
+    return FALSE;
   }
 
   SwappedSig = SwapBytes32 (APPLE_DISK_IMAGE_MAGIC);
@@ -111,7 +110,7 @@ OcAppleDiskImageInitializeContext (
   }
 
   if (BufferTrailer == NULL) {
-    return EFI_UNSUPPORTED;
+    return FALSE;
   }
 
   CopyMem (&Trailer, BufferTrailer, sizeof (Trailer));
@@ -122,7 +121,7 @@ OcAppleDiskImageInitializeContext (
    || (Trailer.XmlOffset >= TrailerOffset)
    || (Trailer.XmlLength == 0)
    || ((Trailer.XmlOffset + Trailer.XmlLength) > TrailerOffset)) {
-    return EFI_UNSUPPORTED;
+    return FALSE;
   }
 
   if (Trailer.DataForkChecksum.Type == APPLE_DISK_IMAGE_CHECKSUM_TYPE_CRC32) {
@@ -131,25 +130,25 @@ OcAppleDiskImageInitializeContext (
               Trailer.DataForkLength
               );
     if (Crc32 != Trailer.DataForkChecksum.Data[0]) {
-      return EFI_COMPROMISED_DATA;
+      return FALSE;
     }
   }
 
-  Status = InternalParsePlist (
+  Result = InternalParsePlist (
              Buffer,
              (UINT32)Trailer.XmlOffset,
              (UINT32)Trailer.XmlLength,
              &DmgBlockCount,
              &DmgBlocks
              );
-  if (EFI_ERROR (Status)) {
-    return Status;
+  if (!Result) {
+    return FALSE;
   }
 
   DmgContext = AllocateZeroPool (sizeof (*DmgContext));
   if (DmgContext == NULL) {
     FreePool (DmgBlocks);
-    return EFI_OUT_OF_RESOURCES;
+    return FALSE;
   }
 
   DmgContext->Buffer     = BufferBytes;
@@ -160,11 +159,10 @@ OcAppleDiskImageInitializeContext (
 
   *Context = DmgContext;
 
-  return EFI_SUCCESS;
+  return TRUE;
 }
 
-EFI_STATUS
-EFIAPI
+VOID
 OcAppleDiskImageFreeContext (
   IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context
   )
@@ -184,20 +182,17 @@ OcAppleDiskImageFreeContext (
 
   FreePool (Context->Blocks);
   FreePool (Context);
-
-  return EFI_SUCCESS;
 }
 
-EFI_STATUS
-EFIAPI
+BOOLEAN
 OcAppleDiskImageRead (
   IN  OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
-  IN  EFI_LBA                      Lba,
+  IN  UINT64                       Lba,
   IN  UINTN                        BufferSize,
   OUT VOID                         *Buffer
   )
 {
-  EFI_STATUS                  Status;
+  BOOLEAN                     Result;
 
   APPLE_DISK_IMAGE_BLOCK_DATA *BlockData;
   APPLE_DISK_IMAGE_CHUNK      *Chunk;
@@ -207,9 +202,9 @@ OcAppleDiskImageRead (
   UINT8                       *ChunkData;
   UINT8                       *ChunkDataCurrent;
 
-  EFI_LBA                     LbaCurrent;
-  EFI_LBA                     LbaOffset;
-  EFI_LBA                     LbaLength;
+  UINT64                      LbaCurrent;
+  UINT64                      LbaOffset;
+  UINT64                      LbaLength;
   UINTN                       RemainingBufferSize;
   UINTN                       BufferChunkSize;
   UINT8                       *BufferCurrent;
@@ -225,70 +220,70 @@ OcAppleDiskImageRead (
   BufferCurrent       = Buffer;
 
   while (RemainingBufferSize > 0) {
-      Status = InternalGetBlockChunk (Context, LbaCurrent, &BlockData, &Chunk);
-      if (EFI_ERROR (Status)) {
-        return Status;
+    Result = InternalGetBlockChunk (Context, LbaCurrent, &BlockData, &Chunk);
+    if (!Result) {
+      return FALSE;
+    }
+
+    LbaOffset        = (LbaCurrent - DMG_SECTOR_START_ABS (BlockData, Chunk));
+    LbaLength        = (Chunk->SectorCount - LbaOffset);
+    ChunkOffset      = (LbaOffset * APPLE_DISK_IMAGE_SECTOR_SIZE);
+    ChunkTotalLength = (Chunk->SectorCount * APPLE_DISK_IMAGE_SECTOR_SIZE);
+    ChunkLength      = (ChunkTotalLength - ChunkOffset);
+
+    BufferChunkSize = (UINTN)MIN (RemainingBufferSize, ChunkLength);
+
+    switch (Chunk->Type) {
+      case APPLE_DISK_IMAGE_CHUNK_TYPE_ZERO:
+      case APPLE_DISK_IMAGE_CHUNK_TYPE_IGNORE:
+      {
+        ZeroMem (BufferCurrent, BufferChunkSize);
+        break;
       }
 
-      LbaOffset        = (LbaCurrent - DMG_SECTOR_START_ABS (BlockData, Chunk));
-      LbaLength        = (Chunk->SectorCount - LbaOffset);
-      ChunkOffset      = (LbaOffset * APPLE_DISK_IMAGE_SECTOR_SIZE);
-      ChunkTotalLength = (Chunk->SectorCount * APPLE_DISK_IMAGE_SECTOR_SIZE);
-      ChunkLength      = (ChunkTotalLength - ChunkOffset);
+      case APPLE_DISK_IMAGE_CHUNK_TYPE_RAW:
+      {
+        ChunkData = (Context->Buffer + BlockData->DataOffset + Chunk->CompressedOffset);
+        ChunkDataCurrent = (ChunkData + ChunkOffset);
 
-      BufferChunkSize = (UINTN)MIN (RemainingBufferSize, ChunkLength);
+        CopyMem (BufferCurrent, ChunkDataCurrent, BufferChunkSize);
+        break;
+      }
 
-      switch (Chunk->Type) {
-        case APPLE_DISK_IMAGE_CHUNK_TYPE_ZERO:
-        case APPLE_DISK_IMAGE_CHUNK_TYPE_IGNORE:
-        {
-          ZeroMem (BufferCurrent, BufferChunkSize);
-          break;
+      case APPLE_DISK_IMAGE_CHUNK_TYPE_ZLIB:
+      {
+        ChunkData = AllocateZeroPool (ChunkTotalLength);
+        if (ChunkData == NULL) {
+          return FALSE;
         }
 
-        case APPLE_DISK_IMAGE_CHUNK_TYPE_RAW:
-        {
-          ChunkData = (Context->Buffer + BlockData->DataOffset + Chunk->CompressedOffset);
-          ChunkDataCurrent = (ChunkData + ChunkOffset);
-
-          CopyMem (BufferCurrent, ChunkDataCurrent, BufferChunkSize);
-          break;
-        }
-
-        case APPLE_DISK_IMAGE_CHUNK_TYPE_ZLIB:
-        {
-          ChunkData = AllocateZeroPool (ChunkTotalLength);
-          if (ChunkData == NULL) {
-            return EFI_OUT_OF_RESOURCES;
-          }
-
-          ChunkDataCurrent = ChunkData + ChunkOffset;
-          OutSize = DecompressZLIB (
-                      ChunkData,
-                      ChunkTotalLength,
-                      (Context->Buffer + BlockData->DataOffset + Chunk->CompressedOffset),
-                      Chunk->CompressedLength
-                      );
-          if (OutSize != ChunkTotalLength) {
-            FreePool (ChunkData);
-            return EFI_DEVICE_ERROR;
-          }
-
-          CopyMem (BufferCurrent, ChunkDataCurrent, BufferChunkSize);
+        ChunkDataCurrent = ChunkData + ChunkOffset;
+        OutSize = DecompressZLIB (
+                    ChunkData,
+                    ChunkTotalLength,
+                    (Context->Buffer + BlockData->DataOffset + Chunk->CompressedOffset),
+                    Chunk->CompressedLength
+                    );
+        if (OutSize != ChunkTotalLength) {
           FreePool (ChunkData);
-          break;
+          return FALSE;
         }
 
-        default:
-        {
-          return EFI_UNSUPPORTED;
-        }
+        CopyMem (BufferCurrent, ChunkDataCurrent, BufferChunkSize);
+        FreePool (ChunkData);
+        break;
       }
 
-      RemainingBufferSize -= BufferChunkSize;
-      BufferCurrent       += BufferChunkSize;
-      LbaCurrent          += LbaLength;
+      default:
+      {
+        return FALSE;
+      }
+    }
+
+    RemainingBufferSize -= BufferChunkSize;
+    BufferCurrent       += BufferChunkSize;
+    LbaCurrent          += LbaLength;
   }
 
-  return EFI_SUCCESS;
+  return TRUE;
 }
