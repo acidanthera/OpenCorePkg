@@ -42,8 +42,12 @@ OcAppleDiskImageInitializeContext (
   UINT32                              Crc32;
 
   ASSERT (Buffer != NULL);
-  ASSERT (BufferLength > sizeof (APPLE_DISK_IMAGE_TRAILER));
+  ASSERT (BufferLength > 0);
   ASSERT (Context != NULL);
+
+  if (BufferLength <= sizeof (APPLE_DISK_IMAGE_TRAILER)) {
+    return EFI_UNSUPPORTED;
+  }
 
   //
   // Look for trailer signature.
