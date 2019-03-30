@@ -56,12 +56,12 @@ int main (int argc, char *argv[]) {
       continue;
     }
 
-    EFI_STATUS                  Status;
+    BOOLEAN                     Result;
     OC_APPLE_DISK_IMAGE_CONTEXT *DmgContext;
 
-    Status = OcAppleDiskImageInitializeContext (Dmg, DmgSize, &DmgContext);
-    if (EFI_ERROR (Status)) {
-      printf ("Context initialization error %zx\n", Status);
+    Result = OcAppleDiskImageInitializeContext (Dmg, DmgSize, &DmgContext);
+    if (!Result) {
+      printf ("Context initialization error\n");
       continue;
     }
 
@@ -72,19 +72,15 @@ int main (int argc, char *argv[]) {
       continue;
     }
 
-    Status = OcAppleDiskImageRead (DmgContext, 0, UncompSize, UncompDmg);
-    if (EFI_ERROR (Status)) {
-      printf ("DMG read error %zx\n", Status);
+    Result = OcAppleDiskImageRead (DmgContext, 0, UncompSize, UncompDmg);
+    if (!Result) {
+      printf ("DMG read error\n");
       continue;
     }
 
     printf ("Decompressed the entire DMG...\n");
 
-    Status = OcAppleDiskImageFreeContext (DmgContext);
-    if (EFI_ERROR (Status)) {
-      printf ("Context destruction error %zx\n", Status);
-      continue;
-    }
+    OcAppleDiskImageFreeContext (DmgContext);
 
     printf ("Success...\n");
   }
