@@ -31,7 +31,7 @@ typedef struct {
 //
 typedef struct {
     // Source buffer.
-    VOID                            *Buffer;
+    UINT8                           *Buffer;
     UINTN                           Length;
 
     // Disk image info.

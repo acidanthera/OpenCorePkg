@@ -18,9 +18,9 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleDiskImageLib.h>
 #include <Library/OcGuardLib.h>
+#include <Library/OcCompressionLib.h>
 
 #include "OcAppleDiskImageLibInternal.h"
-#include "zlib/zlib.h"
 
 EFI_STATUS
 EFIAPI
@@ -52,7 +52,7 @@ OcAppleDiskImageInitializeContext (
   BufferTrailer = NULL;
   while (BufferBytesCurrent >= BufferBytes) {
     // Check for trailer signature.
-    if (*((UINT32*)BufferBytesCurrent) == SwapBytes32 (APPLE_DISK_IMAGE_MAGIC)) {
+    if (ReadUnaligned32 ((UINT32*)BufferBytesCurrent) == SwapBytes32 (APPLE_DISK_IMAGE_MAGIC)) {
       BufferTrailer = (APPLE_DISK_IMAGE_TRAILER*)BufferBytesCurrent;
       DmgLength = BufferBytesCurrent - BufferBytes + sizeof (APPLE_DISK_IMAGE_TRAILER);
       break;
@@ -228,8 +228,7 @@ OcAppleDiskImageRead(
     UINT8 *BufferCurrent;
 
     // zlib data.
-    z_stream ZlibStream;
-    INT32 ZlibStatus;
+    UINTN OutSize;
 
     // Check if parameters are valid.
     if (!Context || !Buffer)
@@ -275,7 +274,7 @@ OcAppleDiskImageRead(
             // Raw data, write data as-is.
             case APPLE_DISK_IMAGE_CHUNK_TYPE_RAW:
                 // Determine pointer to source data.
-                ChunkData = ((UINT8 *)Context->Buffer + BlockData->DataOffset + Chunk->CompressedOffset);
+                ChunkData = (Context->Buffer + BlockData->DataOffset + Chunk->CompressedOffset);
                 ChunkDataCurrent = ChunkData + ChunkOffset;
 
                 // Copy to destination buffer.
@@ -288,30 +287,16 @@ OcAppleDiskImageRead(
                 // Allocate buffer for inflated data.
                 ChunkData = AllocateZeroPool(ChunkTotalLength);
                 ChunkDataCurrent = ChunkData + ChunkOffset;
-
-                // Initialize zlib stream.
-                ZeroMem(&ZlibStream, sizeof(z_stream));
-                ZlibStatus = inflateInit(&ZlibStream);
-                if (ZlibStatus != Z_OK) {
-                    Status = EFI_DEVICE_ERROR;
-                    goto DONE;
-                }
-
-                // Set stream parameters.
-                ZlibStream.avail_in = (UINT32)Chunk->CompressedLength;
-                ZlibStream.next_in = ((Bytef*)Context->Buffer + BlockData->DataOffset + Chunk->CompressedOffset);
-                ZlibStream.avail_out = (UINT32)ChunkTotalLength;
-                ZlibStream.next_out = (Bytef*)ChunkData;
-
-                // Inflate chunk and close stream.
-                ZlibStatus = inflate(&ZlibStream, Z_NO_FLUSH);
-                inflateEnd(&ZlibStream);
-
-                // If inflation reported an error, fail.
-                if (!((ZlibStatus == Z_OK) || (ZlibStatus == Z_STREAM_END))) {
-                    FreePool(ChunkData);
-                    Status = EFI_DEVICE_ERROR;
-                    goto DONE;
+                OutSize = DecompressZLIB (
+                            ChunkData,
+                            ChunkTotalLength,
+                            (Context->Buffer + BlockData->DataOffset + Chunk->CompressedOffset),
+                            Chunk->CompressedLength
+                            );
+                if (OutSize != ChunkTotalLength) {
+                  FreePool (ChunkData);
+                  Status = EFI_DEVICE_ERROR;
+                  goto DONE;
                 }
 
                 // Copy to destination buffer.
@@ -336,6 +321,5 @@ OcAppleDiskImageRead(
     Status = EFI_SUCCESS;
 
 DONE:
-    ASSERT_EFI_ERROR(Status);
     return Status;
 }
