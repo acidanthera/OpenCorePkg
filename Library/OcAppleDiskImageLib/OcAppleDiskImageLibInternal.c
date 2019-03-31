@@ -252,7 +252,6 @@ InternalParsePlist (
 
     Block = AllocatePool (BlockDictChildDataSize);
     if (Block == NULL) {
-      FreePool (Block);
       Result = FALSE;
       goto DONE_ERROR;
     }
