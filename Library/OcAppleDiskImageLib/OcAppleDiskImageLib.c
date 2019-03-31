@@ -47,6 +47,7 @@ OcAppleDiskImageInitializeContext (
   UINT64                      DataForkLength;
   UINT32                      SegmentCount;
   APPLE_DISK_IMAGE_CHECKSUM   DataForkChecksum;
+  UINT32                      DataForkChecksumSize;
   UINT64                      XmlOffset;
   UINT64                      XmlLength;
   UINT64                      SectorCount;
@@ -127,13 +128,14 @@ OcAppleDiskImageInitializeContext (
     return FALSE;
   }
 
-  for (Index = 0; Index < DataForkChecksum.Size; ++Index) {
-    DataForkChecksum.Data[Index] = SwapBytes32 (
-                                     Trailer->DataForkChecksum.Data[Index]
-                                     );
-  }
-
   if (DataForkChecksum.Type == APPLE_DISK_IMAGE_CHECKSUM_TYPE_CRC32) {
+    if (DataForkChecksum.Size != 32) {
+      return FALSE;
+    }
+
+    DataForkChecksum.Data[0] = SwapBytes32 (
+                                 Trailer->DataForkChecksum.Data[0]
+                                 );
     Crc32 = CalculateCrc32 (
               (BufferBytes + DataForkOffset),
               DataForkLength
