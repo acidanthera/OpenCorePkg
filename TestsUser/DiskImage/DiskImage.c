@@ -12,7 +12,7 @@ rm -rf DICT fuzz*.log ; mkdir DICT ; UBSAN_OPTIONS='halt_on_error=1' ./DiskImage
 
 **/
 
-uint8_t *readFile(const char *str, uint32_t *size) {
+uint8_t *readFile(const char *str, long *size) {
   FILE *f = fopen(str, "rb");
 
   if (!f) return NULL;
@@ -50,7 +50,7 @@ int main (int argc, char *argv[]) {
   }
 
   uint8_t  *Dmg;
-  uint32_t DmgSize;
+  long DmgSize;
   uint8_t  *UncompDmg = NULL;
   uint32_t UncompSize;
 
