@@ -22,54 +22,84 @@
 
 #include "OcAppleDiskImageLibInternal.h"
 
-STATIC
 BOOLEAN
-InternalSwapTrailerData (
-  IN OUT APPLE_DISK_IMAGE_TRAILER  *Trailer,
-  IN     UINTN                     TrailerOffset
+OcAppleDiskImageInitializeContext (
+  IN  VOID                         *Buffer,
+  IN  UINTN                        BufferLength,
+  OUT OC_APPLE_DISK_IMAGE_CONTEXT  **Context
   )
 {
-  BOOLEAN Result;
-  UINT64  OffsetTop;
-  UINTN   Index;
+  BOOLEAN                     Result;
+  OC_APPLE_DISK_IMAGE_CONTEXT *DmgContext;
+  UINTN                       TrailerOffset;
+  UINT8                       *BufferBytes;
+  UINT8                       *BufferBytesCurrent;
+  APPLE_DISK_IMAGE_TRAILER    *Trailer;
+  UINT32                      DmgBlockCount;
+  APPLE_DISK_IMAGE_BLOCK_DATA **DmgBlocks;
+  UINT32                      Crc32;
+  UINT32                      SwappedSig;
+  UINT64                      OffsetTop;
+  UINT32                      Index;
 
-  ASSERT (Trailer != NULL);
+  UINT32                      HeaderSize;
+  UINT64                      DataForkOffset;
+  UINT64                      DataForkLength;
+  UINT32                      SegmentCount;
+  APPLE_DISK_IMAGE_CHECKSUM   DataForkChecksum;
+  UINT64                      XmlOffset;
+  UINT64                      XmlLength;
+  UINT64                      SectorCount;
 
-  Trailer->Signature  = SwapBytes32 (Trailer->Signature);
-  Trailer->Version    = SwapBytes32 (Trailer->Version);
-  Trailer->HeaderSize = SwapBytes32 (Trailer->HeaderSize);
-  Trailer->Flags      = SwapBytes32 (Trailer->Flags);
+  ASSERT (Buffer != NULL);
+  ASSERT (BufferLength > 0);
+  ASSERT (Context != NULL);
 
-  Trailer->RunningDataForkOffset = SwapBytes64 (Trailer->RunningDataForkOffset);
-  Trailer->DataForkOffset        = SwapBytes64 (Trailer->DataForkOffset);
-  Trailer->DataForkLength        = SwapBytes64 (Trailer->DataForkLength);
-  Trailer->RsrcForkOffset        = SwapBytes64 (Trailer->RsrcForkOffset);
-  Trailer->RsrcForkLength        = SwapBytes64 (Trailer->RsrcForkLength);
-  Trailer->SegmentNumber         = SwapBytes32 (Trailer->SegmentNumber);
-  Trailer->SegmentCount          = SwapBytes32 (Trailer->SegmentCount);
-
-  Trailer->DataForkChecksum.Type = SwapBytes32 (Trailer->DataForkChecksum.Type);
-  Trailer->DataForkChecksum.Size = SwapBytes32 (Trailer->DataForkChecksum.Size);
-
-  Trailer->XmlOffset = SwapBytes64 (Trailer->XmlOffset);
-  Trailer->XmlLength = SwapBytes64 (Trailer->XmlLength);
-
-  Trailer->Checksum.Type = SwapBytes32 (Trailer->Checksum.Type);
-  Trailer->Checksum.Size = SwapBytes32 (Trailer->Checksum.Size);
-
-  Trailer->ImageVariant = SwapBytes32 (Trailer->ImageVariant);
-  Trailer->SectorCount = SwapBytes64 (Trailer->SectorCount);
-
-  if ((Trailer->HeaderSize != sizeof (*Trailer))
-   || (Trailer->XmlLength == 0)
-   || (Trailer->XmlLength > MAX_UINT32)
-   || (Trailer->DataForkChecksum.Size > sizeof (Trailer->DataForkChecksum.Data)
-   || (Trailer->Checksum.Size > sizeof (Trailer->Checksum.Data)))) {
-
+  if (BufferLength <= sizeof (*Trailer)) {
     return FALSE;
   }
 
-  if ((Trailer->SegmentCount != 0) && (Trailer->SegmentCount != 1)) {
+  SwappedSig = SwapBytes32 (APPLE_DISK_IMAGE_MAGIC);
+
+  BufferBytes = (UINT8 *)Buffer;
+
+  Trailer       = NULL;
+  TrailerOffset = 0;
+
+  for (
+    BufferBytesCurrent = (BufferBytes + (BufferLength - sizeof (*Trailer)));
+    BufferBytesCurrent >= BufferBytes;
+    --BufferBytesCurrent
+    ) {
+    Trailer = (APPLE_DISK_IMAGE_TRAILER *)BufferBytesCurrent;
+    if (Trailer->Signature == SwappedSig) {
+      TrailerOffset = (BufferBytesCurrent - BufferBytes);
+      break;
+    }
+  }
+
+  if (TrailerOffset == 0) {
+    return FALSE;
+  }
+
+  HeaderSize            = SwapBytes32 (Trailer->HeaderSize);
+  DataForkOffset        = SwapBytes64 (Trailer->DataForkOffset);
+  DataForkLength        = SwapBytes64 (Trailer->DataForkLength);
+  SegmentCount          = SwapBytes32 (Trailer->SegmentCount);
+  XmlOffset             = SwapBytes64 (Trailer->XmlOffset);
+  XmlLength             = SwapBytes64 (Trailer->XmlLength);
+  SectorCount           = SwapBytes64 (Trailer->SectorCount);
+  DataForkChecksum.Type = SwapBytes32 (Trailer->DataForkChecksum.Type);
+  DataForkChecksum.Size = SwapBytes32 (Trailer->DataForkChecksum.Size);
+
+  if ((HeaderSize != sizeof (*Trailer))
+   || (XmlLength == 0)
+   || (XmlLength > MAX_UINT32)
+   || (DataForkChecksum.Size > sizeof (DataForkChecksum.Data))) {
+    return FALSE;
+  }
+
+  if ((SegmentCount != 0) && (SegmentCount != 1)) {
     DEBUG ((DEBUG_ERROR, "Multiple segments are unsupported.\n"));
     return FALSE;
   }
@@ -80,8 +110,8 @@ InternalSwapTrailerData (
   }
 
   Result = OcOverflowAddU64 (
-             Trailer->XmlOffset,
-             Trailer->XmlLength,
+             XmlOffset,
+             XmlLength,
              &OffsetTop
              );
   if (Result || (OffsetTop > TrailerOffset)) {
@@ -89,111 +119,42 @@ InternalSwapTrailerData (
   }
 
   Result = OcOverflowAddU64 (
-             Trailer->DataForkOffset,
-             Trailer->DataForkLength,
+             DataForkOffset,
+             DataForkLength,
              &OffsetTop
              );
   if (Result || (OffsetTop > TrailerOffset)) {
     return FALSE;
   }
 
-  Result = OcOverflowAddU64 (
-             Trailer->RsrcForkOffset,
-             Trailer->RsrcForkLength,
-             &OffsetTop
-             );
-  if (Result || (OffsetTop > TrailerOffset)) {
-    return FALSE;
+  for (Index = 0; Index < DataForkChecksum.Size; ++Index) {
+    DataForkChecksum.Data[Index] = SwapBytes32 (
+                                     Trailer->DataForkChecksum.Data[Index]
+                                     );
   }
 
-  for (Index = 0; Index < Trailer->DataForkChecksum.Size; ++Index) {
-    Trailer->DataForkChecksum.Data[Index] = SwapBytes32 (
-                                              Trailer->DataForkChecksum.Data[Index]
-                                              );
-  }
-  for (Index = 0; Index < APPLE_DISK_IMAGE_CHECKSUM_SIZE; ++Index) {
-    Trailer->Checksum.Data[Index] = SwapBytes32 (Trailer->Checksum.Data[Index]);
-  }
-
-  return TRUE;
-}
-
-BOOLEAN
-OcAppleDiskImageInitializeContext (
-  IN  VOID                         *Buffer,
-  IN  UINTN                        BufferLength,
-  OUT OC_APPLE_DISK_IMAGE_CONTEXT  **Context
-  )
-{
-  BOOLEAN                           Result;
-  OC_APPLE_DISK_IMAGE_CONTEXT       *DmgContext;
-  UINTN                             TrailerOffset;
-  UINT8                             *BufferBytes;
-  UINT8                             *BufferBytesCurrent;
-  APPLE_DISK_IMAGE_TRAILER          *BufferTrailer;
-  APPLE_DISK_IMAGE_TRAILER          Trailer;
-  UINT32                            DmgBlockCount;
-  APPLE_DISK_IMAGE_BLOCK_DATA       **DmgBlocks;
-  UINT32                            Crc32;
-  UINT32                            SwappedSig;
-
-  ASSERT (Buffer != NULL);
-  ASSERT (BufferLength > 0);
-  ASSERT (Context != NULL);
-
-  if (BufferLength <= sizeof (Trailer)) {
-    return FALSE;
-  }
-
-  SwappedSig = SwapBytes32 (APPLE_DISK_IMAGE_MAGIC);
-
-  BufferBytes   = (UINT8 *)Buffer;
-  BufferTrailer = NULL;
-
-  for (
-    BufferBytesCurrent = (BufferBytes + (BufferLength - sizeof (Trailer)));
-    BufferBytesCurrent >= BufferBytes;
-    --BufferBytesCurrent
-    ) {
-    if (ReadUnaligned32 ((UINT32 *)BufferBytesCurrent) == SwappedSig) {
-      BufferTrailer = (APPLE_DISK_IMAGE_TRAILER *)BufferBytesCurrent;
-      TrailerOffset = (BufferBytesCurrent - BufferBytes);
-      break;
-    }
-  }
-
-  if (BufferTrailer == NULL) {
-    return FALSE;
-  }
-
-  CopyMem (&Trailer, BufferTrailer, sizeof (Trailer));
-  Result = InternalSwapTrailerData (&Trailer, TrailerOffset);
-  if (!Result) {
-    return FALSE;
-  }
-
-  if (Trailer.DataForkChecksum.Type == APPLE_DISK_IMAGE_CHECKSUM_TYPE_CRC32) {
+  if (DataForkChecksum.Type == APPLE_DISK_IMAGE_CHECKSUM_TYPE_CRC32) {
     Crc32 = CalculateCrc32 (
-              (BufferBytes + Trailer.DataForkOffset),
-              Trailer.DataForkLength
+              (BufferBytes + DataForkOffset),
+              DataForkLength
               );
-    if (Crc32 != Trailer.DataForkChecksum.Data[0]) {
+    if (Crc32 != DataForkChecksum.Data[0]) {
       return FALSE;
     }
   } else {
     DEBUG ((
       DEBUG_ERROR,
       "DMG checksum algorithm %x unsupported.\n",
-      Trailer.DataForkChecksum.Type
+      DataForkChecksum.Type
       ));
     return FALSE;
   }
 
   Result = InternalParsePlist (
-             ((CHAR8 *)Buffer + Trailer.XmlOffset),
-             (UINT32)Trailer.XmlLength,
-             Trailer.DataForkOffset,
-             Trailer.DataForkLength,
+             ((CHAR8 *)Buffer + XmlOffset),
+             (UINT32)XmlLength,
+             DataForkOffset,
+             DataForkLength,
              &DmgBlockCount,
              &DmgBlocks
              );
@@ -208,10 +169,10 @@ OcAppleDiskImageInitializeContext (
   }
 
   DmgContext->Buffer      = BufferBytes;
-  DmgContext->Length      = (TrailerOffset + sizeof (Trailer));
+  DmgContext->Length      = (TrailerOffset + sizeof (*Trailer));
   DmgContext->BlockCount  = DmgBlockCount;
   DmgContext->Blocks      = DmgBlocks;
-  DmgContext->SectorCount = Trailer.SectorCount;
+  DmgContext->SectorCount = SectorCount;
 
   *Context = DmgContext;
 
