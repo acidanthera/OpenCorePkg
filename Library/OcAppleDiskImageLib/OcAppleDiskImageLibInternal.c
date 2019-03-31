@@ -44,9 +44,11 @@ InternalFindPlistDictChild (
   for (Index = 0; Index < ChildCount; ++Index) {
     ChildKey     = PlistDictChild (Node, Index, &ChildValue);
     ChildKeyName = PlistKeyValue (ChildKey);
+    if (ChildKeyName == NULL) {
+      break;
+    }
 
-    if ((ChildKeyName != NULL)
-      && (AsciiStrCmp (ChildKeyName, KeyName) == 0)) {
+    if (AsciiStrCmp (ChildKeyName, KeyName) == 0) {
       *Key   = ChildKey;
       *Value = ChildValue;
       return TRUE;
@@ -172,7 +174,12 @@ InternalParsePlist (
   }
 
   NumDmgBlocks = XmlNodeChildren (NodeBlockListValue);
-  DmgBlocks    = AllocatePool (NumDmgBlocks * sizeof (*DmgBlocks));
+  if (NumDmgBlocks == 0) {
+    Result = FALSE;
+    goto DONE_ERROR;
+  }
+
+  DmgBlocks = AllocatePool (NumDmgBlocks * sizeof (*DmgBlocks));
   if (DmgBlocks == NULL) {
     Result = FALSE;
     goto DONE_ERROR;
@@ -198,6 +205,7 @@ InternalParsePlist (
 
     Block = AllocatePool (BlockDictChildDataSize);
     if (Block == NULL) {
+      FreePool (Block);
       Result = FALSE;
       goto DONE_ERROR;
     }
@@ -208,6 +216,7 @@ InternalParsePlist (
                &BlockDictChildDataSize
                );
     if (!Result) {
+      FreePool (Block);
       goto DONE_ERROR;
     }
 
