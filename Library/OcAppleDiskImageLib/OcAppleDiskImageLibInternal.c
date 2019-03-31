@@ -92,7 +92,7 @@ InternalSwapBlockData (
     return FALSE;
   }
 
-  if ((BlockData->Checksum.Size > sizeof (BlockData->Checksum.Data))
+  if ((BlockData->Checksum.Size > (sizeof (BlockData->Checksum.Data) * 8))
    || (BlockData->DataOffset > MaxOffset)
    || (BlockData->SectorNumber + BlockData->SectorCount) < BlockData->SectorNumber) {
     return FALSE;

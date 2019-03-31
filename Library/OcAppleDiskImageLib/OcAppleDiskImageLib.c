@@ -40,14 +40,12 @@ OcAppleDiskImageInitializeContext (
   UINT32                      Crc32;
   UINT32                      SwappedSig;
   UINT64                      OffsetTop;
-  UINT32                      Index;
 
   UINT32                      HeaderSize;
   UINT64                      DataForkOffset;
   UINT64                      DataForkLength;
   UINT32                      SegmentCount;
   APPLE_DISK_IMAGE_CHECKSUM   DataForkChecksum;
-  UINT32                      DataForkChecksumSize;
   UINT64                      XmlOffset;
   UINT64                      XmlLength;
   UINT64                      SectorCount;
@@ -96,7 +94,7 @@ OcAppleDiskImageInitializeContext (
   if ((HeaderSize != sizeof (*Trailer))
    || (XmlLength == 0)
    || (XmlLength > MAX_UINT32)
-   || (DataForkChecksum.Size > sizeof (DataForkChecksum.Data))) {
+   || (DataForkChecksum.Size > (sizeof (DataForkChecksum.Data) * 8))) {
     return FALSE;
   }
 
