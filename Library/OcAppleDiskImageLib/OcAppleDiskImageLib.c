@@ -207,11 +207,11 @@ OcAppleDiskImageInitializeContext (
     return FALSE;
   }
 
-  DmgContext->Buffer     = BufferBytes;
-  DmgContext->Length     = (TrailerOffset + sizeof (DmgContext->Trailer));
-  DmgContext->BlockCount = DmgBlockCount;
-  DmgContext->Blocks     = DmgBlocks;
-  CopyMem (&DmgContext->Trailer, &Trailer, sizeof (DmgContext->Trailer));
+  DmgContext->Buffer      = BufferBytes;
+  DmgContext->Length      = (TrailerOffset + sizeof (Trailer));
+  DmgContext->BlockCount  = DmgBlockCount;
+  DmgContext->Blocks      = DmgBlocks;
+  DmgContext->SectorCount = Trailer.SectorCount;
 
   *Context = DmgContext;
 
@@ -264,7 +264,7 @@ OcAppleDiskImageRead (
 
   ASSERT (Context != NULL);
   ASSERT (Buffer != NULL);
-  ASSERT (Lba < Context->Trailer.SectorCount);
+  ASSERT (Lba < Context->SectorCount);
 
   LbaCurrent          = Lba;
   RemainingBufferSize = BufferSize;

@@ -127,7 +127,7 @@ DiskImageBlockIoReadBlocks (
 
   DiskImageData = OC_APPLE_DISK_IMAGE_MOUNTED_DATA_FROM_THIS (This);
 
-  if (Lba >= DiskImageData->ImageContext->Trailer.SectorCount) {
+  if (Lba >= DiskImageData->ImageContext->SectorCount) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -284,7 +284,7 @@ OcAppleDiskImageInstallBlockIo (
   DiskImageData->BlockIoMedia.MediaPresent = TRUE;
   DiskImageData->BlockIoMedia.ReadOnly     = TRUE;
   DiskImageData->BlockIoMedia.BlockSize    = APPLE_DISK_IMAGE_SECTOR_SIZE;
-  DiskImageData->BlockIoMedia.LastBlock    = (Context->Trailer.SectorCount - 1);
+  DiskImageData->BlockIoMedia.LastBlock    = (Context->SectorCount - 1);
 
   InternalConstructDmgDevicePath (DiskImageData, RamDmgAddress);
 

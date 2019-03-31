@@ -23,8 +23,8 @@ typedef struct {
     UINT8                           *Buffer;
     UINTN                           Length;
 
-    // Disk image info.
-    APPLE_DISK_IMAGE_TRAILER        Trailer;
+    UINT64                          SectorCount;
+
     UINT32                          BlockCount;
     APPLE_DISK_IMAGE_BLOCK_DATA     **Blocks;
 
