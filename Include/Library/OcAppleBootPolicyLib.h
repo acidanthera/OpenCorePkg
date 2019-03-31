@@ -94,10 +94,18 @@ OcFreeBootEntries (
   );
 
 /**
+  TODO: Implement scanning policy.
+  We would like to load from:
+  - select filesystems (APFS, HFS, FAT).
+  - select devices (internal, pcie, USB).
+**/
+#define OC_SCAN_DEFAULT_POLICY 0
+
+/**
   Fill boot entry from device handle.
 
   @param[in]  BootPolicy          Apple Boot Policy Protocol.
-  @param[in]  Mode                Lookup mode.
+  @param[in]  Policy              Lookup policy.
   @param[in]  Handle              Device handle (with EfiSimpleFileSystem protocol).
   @param[out] BootEntry           Resulting boot entry.
   @param[out] AlternateBootEntry  Resulting alternate boot entry (e.g. recovery).
@@ -109,7 +117,7 @@ OcFreeBootEntries (
 UINTN
 OcFillBootEntry (
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN  UINT32                      Mode,
+  IN  UINT32                      Policy,
   IN  EFI_HANDLE                  Handle,
   OUT OC_BOOT_ENTRY               *BootEntry,
   OUT OC_BOOT_ENTRY               *AlternateBootEntry OPTIONAL
@@ -119,7 +127,7 @@ OcFillBootEntry (
   Scan system for boot entries.
 
   @param[in]  BootPolicy     Apple Boot Policy Protocol.
-  @param[in]  Mode           Lookup mode.
+  @param[in]  Policy         Lookup policy.
   @param[out] BootEntries    List of boot entries (allocated from pool).
   @param[out] Count          Number of boot entries.
   @param[out] AllocCount     Number of allocated boot entries.
@@ -130,7 +138,7 @@ OcFillBootEntry (
 EFI_STATUS
 OcScanForBootEntries (
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN  UINT32                      Mode,
+  IN  UINT32                      Policy,
   OUT OC_BOOT_ENTRY               **BootEntries,
   OUT UINTN                       *Count,
   OUT UINTN                       *AllocCount OPTIONAL,
@@ -156,6 +164,85 @@ OcShowSimpleBootMenu (
   IN  UINTN                       DefaultEntry,
   IN  UINTN                       TimeOutSeconds,
   OUT OC_BOOT_ENTRY               **ChosenBootEntry
+  );
+
+/**
+  OcLoadBootEntry Mode policy bits allow to configure OcLoadBootEntry behaviour.
+**/
+
+/**
+  Thin EFI image loading (normal PE) is allowed.
+**/
+#define OC_LOAD_ALLOW_EFI_THIN_BOOT  BIT0
+/**
+  FAT EFI image loading (Apple FAT PE) is allowed.
+  These can be found on macOS 10.8 and below.
+**/
+#define OC_LOAD_ALLOW_EFI_FAT_BOOT   BIT1
+/**
+  One level recursion into dmg file is allowed.
+  It is assumed that dmg contains a single volume and a single blessed entry.
+  Loading dmg from dmg is not allowed in any case.
+**/
+#define OC_LOAD_ALLOW_DMG_BOOT       BIT2
+/**
+  Abort loading on invalid Apple-like signature.
+  If file is signed with Apple-like signature, and it is mismatched, then abort.
+  @warn Unsigned files or UEFI-signed files will skip this check.
+  @warn It is ignored what certificate was used for signing.
+**/
+#define OC_LOAD_VERIFY_APPLE_SIGN    BIT8
+/**
+  Abort loading on missing Apple-like signature.
+  If file is not signed with Apple-like signature (valid or not) then abort.
+  @warn Unsigned files or UEFI-signed files will not load with this check. 
+  @warn Without OC_LOAD_VERIFY_APPLE_SIGN corrupted binaries may still load.
+**/
+#define OC_LOAD_REQUIRE_APPLE_SIGN   BIT9
+/**
+  Abort loading on untrusted key (otherwise may warn).
+  @warn Unsigned files or UEFI-signed files will skip this check.
+**/
+#define OC_LOAD_REQUIRE_TRUSTED_KEY  BIT10
+/**
+  Trust specified (as OcLoadBootEntry argument) custom keys.
+**/
+#define OC_LOAD_TRUST_CUSTOM_KEY     BIT16
+/**
+  Trust Apple CFFD3E6B public key.
+  TODO: Move certificates from ApplePublicKeyDb.h to EfiPkg?
+**/
+#define OC_LOAD_TRUST_APPLE_V1_KEY   BIT17
+/**
+  Trust Apple E50AC288 public key.
+  TODO: Move certificates from ApplePublicKeyDb.h to EfiPkg?
+**/
+#define OC_LOAD_TRUST_APPLE_V2_KEY   BIT18
+/**
+  Default moderate policy meant to augment secure boot facilities.
+  Loads almost everything and bypasses secure boot for Apple and Custom signed binaries.
+**/
+#define OC_LOAD_DEFAULT_POLICY ( \
+  OC_LOAD_ALLOW_EFI_THIN_BOOT | OC_LOAD_ALLOW_DMG_BOOT      | OC_LOAD_REQUIRE_APPLE_SIGN | \
+  OC_LOAD_VERIFY_APPLE_SIGN   | OC_LOAD_REQUIRE_TRUSTED_KEY | \
+  OC_LOAD_TRUST_CUSTOM_KEY    | OC_LOAD_TRUST_APPLE_V1_KEY  | OC_LOAD_TRUST_APPLE_V2_KEY)
+
+/**
+  Load boot entry loader image with given options and return its handle.
+
+  @param[in]  BootEntry      Located boot entry.
+  @param[in]  Policy         Load policy.
+  @param[in]  ParentHandle   Parent image handle.
+  @param[out] EntryHandle    Loaded image handle.
+
+  @retval EFI_SUCCESS        The image was found and loaded succesfully.
+**/
+EFI_STATUS
+OcLoadBootEntry (
+  IN  OC_BOOT_ENTRY               *BootEntry,
+  IN  UINT32                      Policy,
+  IN  EFI_HANDLE                  ParentHandle,
+  OUT EFI_HANDLE                  *EntryHandle
   );
 
 #endif // OC_APPLE_BOOT_POLICY_LIB_H

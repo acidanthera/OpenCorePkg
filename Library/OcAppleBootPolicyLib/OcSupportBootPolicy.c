@@ -351,7 +351,7 @@ OcFreeBootEntries (
 UINTN
 OcFillBootEntry (
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN  UINT32                      Mode,
+  IN  UINT32                      Policy,
   IN  EFI_HANDLE                  Handle,
   OUT OC_BOOT_ENTRY               *BootEntry,
   OUT OC_BOOT_ENTRY               *AlternateBootEntry OPTIONAL
@@ -402,8 +402,8 @@ OcFillBootEntry (
       }
     }
 
-    AlternateBootEntry->DevicePath     = DevicePath;
-    SetBootEntryFlags (BootEntry);
+    AlternateBootEntry->DevicePath = DevicePath;
+    SetBootEntryFlags (AlternateBootEntry);
     return 2;
   }
 
@@ -413,7 +413,7 @@ OcFillBootEntry (
 EFI_STATUS
 OcScanForBootEntries (
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN  UINT32                      Mode,
+  IN  UINT32                      Policy,
   OUT OC_BOOT_ENTRY               **BootEntries,
   OUT UINTN                       *Count,
   OUT UINTN                       *AllocCount OPTIONAL,
@@ -455,7 +455,7 @@ OcScanForBootEntries (
   for (Index = 0; Index < NoHandles; ++Index) {
     EntryIndex += OcFillBootEntry (
       BootPolicy,
-      Mode,
+      Policy,
       Handles[Index],
       &Entries[EntryIndex],
       &Entries[EntryIndex+1]
@@ -552,4 +552,18 @@ OcShowSimpleBootMenu (
   }
 
   return EFI_UNSUPPORTED;
+}
+
+EFI_STATUS
+OcLoadBootEntry (
+  IN  OC_BOOT_ENTRY               *BootEntry,
+  IN  UINT32                      Policy,
+  IN  EFI_HANDLE                  ParentHandle,
+  OUT EFI_HANDLE                  *EntryHandle
+  )
+{
+  //
+  // TODO: support Apple loaded image, policy, and dmg boot.
+  //
+  return gBS->LoadImage (FALSE, ParentHandle, BootEntry->DevicePath, NULL, 0, EntryHandle);
 }

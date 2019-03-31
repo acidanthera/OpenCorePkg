@@ -95,7 +95,7 @@ TestBless (
       return Status;
     }
 
-    Status = OcShowSimpleBootMenu (Entries, EntryCount, 0, TimeoutSeconds, &Chosen);
+    Status = OcShowSimpleBootMenu (Entries, EntryCount, OC_SCAN_DEFAULT_POLICY, TimeoutSeconds, &Chosen);
 
     if (EFI_ERROR (Status) && Status != EFI_ABORTED) {
       Print (L"OcShowSimpleBootMenu failed - %r\n", Status);
@@ -113,8 +113,7 @@ TestBless (
     // TODO: This should properly handle folder boot entries.
     //
     if (!EFI_ERROR (Status)) {
-      Status = gBS->LoadImage (FALSE, ImageHandle, Chosen->DevicePath, NULL, 0, &BooterHandle);
-
+      Status = OcLoadBootEntry (Chosen, OC_LOAD_DEFAULT_POLICY, ImageHandle, &BooterHandle);
       if (!EFI_ERROR (Status)) {
         Status = gBS->StartImage (BooterHandle, NULL, NULL);
         if (EFI_ERROR (Status)) {
