@@ -29,11 +29,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **/
 
-#include "zlib.h"
+#include <Library/OcCompressionLib.h>
 
-#ifdef USE_SYSTEM_ZLIB
-#include <zlib.h>
-#else
+#ifdef OC_USE_SSH_ZLIB
+
+#include "sshzlib.h"
+
+#ifdef OC_INFLATE_VERIFY_DATA
+#error "sshzlib cannot verify zlib data"
+#endif
 
 /*
  * This module also makes a handy zlib decoding tool for when
@@ -1866,18 +1870,6 @@ int zlib_decompress_block(void *handle, unsigned char *block, int len,
     return FALSE;
 }
 
-#endif // USE_SYSTEM_ZLIB
-
-/**
-  Compress buffer with ZLIB algorithm.
-
-  @param[out]  Dst         Destination buffer.
-  @param[in]   DstLen      Destination buffer size.
-  @param[in]   Src         Source buffer.
-  @param[in]   SrcLen      Source buffer size.
-
-  @return  Dst + CompressedLen on success otherwise NULL.
-**/
 UINT8 *
 CompressZLIB (
   OUT UINT8        *Dst,
@@ -1886,15 +1878,16 @@ CompressZLIB (
   IN  UINT32       SrcLen
   )
 {
-#ifdef USE_SYSTEM_ZLIB
-  return NULL;
-#else
   VOID  *Return;
 
   VOID  *Handle;
   INT32 Result;
   UINT8 *OutBlock;
   INT32 OutSize;
+
+  if (SrcLen > OC_COMPRESSION_MAX_LENGTH || DstLen > OC_COMPRESSION_MAX_LENGTH) {
+    return 0;
+  }
 
   Handle = zlib_compress_init ();
   if (Handle == NULL) {
@@ -1920,19 +1913,8 @@ CompressZLIB (
   zlib_compress_cleanup (Handle);
 
   return Return;
-#endif
 }
 
-/**
-  Decompress buffer with ZLIB algorithm.
-
-  @param[out]  Dst         Destination buffer.
-  @param[in]   DstLen      Destination buffer size.
-  @param[in]   Src         Source buffer.
-  @param[in]   SrcLen      Source buffer size.
-
-  @return  DecompressedLen on success otherwise 0.
-**/
 UINTN
 DecompressZLIB (
   OUT UINT8        *Dst,
@@ -1941,47 +1923,11 @@ DecompressZLIB (
   IN  UINTN        SrcLen
   )
 {
-#ifdef USE_SYSTEM_ZLIB
-  z_stream  ZlibStream;
-  INT32     ZlibStatus;
-
-  //
-  // Initialize zlib stream.
-  //
-  ZeroMem (&ZlibStream, sizeof (z_stream));
-  ZlibStatus = inflateInit (&ZlibStream);
-  if (ZlibStatus != Z_OK) {
-    return 0;
-  }
-
-  //
-  // Set stream parameters.
-  //
-  ZlibStream.avail_in  = SrcLen;
-  ZlibStream.next_in   = Src;
-  ZlibStream.avail_out = DstLen;
-  ZlibStream.next_out  = Dst;
-
-  //
-  // Inflate chunk and close stream.
-  //
-  ZlibStatus = inflate (&ZlibStream, Z_NO_FLUSH);
-  inflateEnd (&ZlibStream);
-
-  //
-  // If inflation reported an error, fail.
-  //
-  if (ZlibStatus != Z_OK && ZlibStatus != Z_STREAM_END) {
-    return 0;
-  }
-
-  return DstLen;
-#else
   VOID  *Handle;
   INT32 OutSize;
   INT32 Result;
 
-  if (DstLen > MAX_INT32 || SrcLen > MAX_INT32) {
+  if (SrcLen > OC_COMPRESSION_MAX_LENGTH || DstLen > OC_COMPRESSION_MAX_LENGTH) {
     return 0;
   }
 
@@ -2005,5 +1951,6 @@ DecompressZLIB (
   zlib_decompress_cleanup (Handle);
 
   return OutSize;
-#endif
 }
+
+#endif // USE_SSH_ZLIB
