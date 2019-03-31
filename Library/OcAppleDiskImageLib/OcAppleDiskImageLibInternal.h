@@ -49,9 +49,10 @@ typedef PACKED struct {
 
 BOOLEAN
 InternalParsePlist (
-  IN  VOID                         *Buffer,
-  IN  UINT32                       XmlOffset,
-  IN  UINT32                       XmlLength,
+  IN  CONST CHAR8                  *Plist,
+  IN  UINT32                       PlistSize,
+  IN  UINT64                       DataForkOffset,
+  IN  UINT64                       DataForkSize,
   OUT UINT32                       *BlockCount,
   OUT APPLE_DISK_IMAGE_BLOCK_DATA  ***Blocks
   );

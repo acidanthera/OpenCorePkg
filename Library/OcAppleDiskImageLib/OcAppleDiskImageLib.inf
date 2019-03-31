@@ -31,6 +31,7 @@
     DevicePathLib
     MemoryAllocationLib
     OcCompressionLib
+    OcGuardLib
     OcXmlLib
     UefiBootServicesTableLib
     PrintLib
