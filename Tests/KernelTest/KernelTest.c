@@ -26,6 +26,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcMiscLib.h>
 #include <Library/OcProtocolLib.h>
 #include <Library/OcAppleBootPolicyLib.h>
+#include <Library/OcCompressionLib.h>
 #include <Library/OcSmbiosLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcStringLib.h>

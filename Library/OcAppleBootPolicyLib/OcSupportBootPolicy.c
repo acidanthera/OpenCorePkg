@@ -13,16 +13,19 @@
 **/
 
 #include <AppleMacEfi.h>
+#include <Uefi.h>
 
 #include <Guid/AppleApfsInfo.h>
 #include <Guid/AppleBless.h>
 #include <Guid/FileInfo.h>
 
-#include <Protocol/SimpleFileSystem.h>
 #include <Protocol/AppleBootPolicy.h>
+#include <Protocol/SimpleFileSystem.h>
+#include <Protocol/SimpleTextOut.h>
 
 #include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcFileLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcXmlLib.h>
 #include <Library/BaseLib.h>
@@ -31,6 +34,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiLib.h>
 
 STATIC
 CHAR16 *
@@ -211,42 +215,43 @@ GetAlternateOsBooter (
 // TODO: This should be less hardcoded.
 //
 STATIC
-BOOLEAN
-IsFolderBootEntry (
-  IN     EFI_DEVICE_PATH_PROTOCOL   *DevicePath
+VOID
+SetBootEntryFlags (
+  IN OUT OC_BOOT_ENTRY   *BootEntry
   )
 {
   EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
   FILEPATH_DEVICE_PATH      *FolderDevicePath;
-  BOOLEAN                   IsFolder;
 
-  IsFolder = FALSE;
+  BootEntry->IsRecovery = FALSE;
+  BootEntry->IsFolder   = FALSE;
 
-  DevicePathWalker = DevicePath;
+  DevicePathWalker = BootEntry->DevicePath;
   while (!IsDevicePathEnd (DevicePathWalker)) {
     if ((DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
      && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)) {
       FolderDevicePath = (FILEPATH_DEVICE_PATH *) DevicePathWalker;
-      IsFolder = FolderDevicePath->PathName[StrLen (FolderDevicePath->PathName) - 1] == L'\\';
+      if (FolderDevicePath->PathName[StrLen (FolderDevicePath->PathName) - 1] == L'\\') {
+        BootEntry->IsFolder = TRUE;
+      }
+      if (StrStr (FolderDevicePath->PathName, L"com.apple.recovery.boot") != NULL) {
+        BootEntry->IsRecovery = TRUE;
+      }
     } else {
-      IsFolder = FALSE;
+      BootEntry->IsFolder = FALSE;
     }
 
     DevicePathWalker = NextDevicePathNode (DevicePathWalker);
   }
-  return IsFolder;
 }
 
 EFI_STATUS
 OcDescribeBootEntry (
   IN     APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
-  IN     EFI_DEVICE_PATH_PROTOCOL   *DevicePath,
-  IN OUT CHAR16                     **BootEntryName OPTIONAL,
-  IN OUT CHAR16                     **BootPathName OPTIONAL
+  IN OUT OC_BOOT_ENTRY              *BootEntry
   )
 {
-  EFI_STATUS     Status;
-
+  EFI_STATUS                       Status;
   CHAR16                           *BootDirectoryName;
   CHAR16                           *RecoveryBootName;
   EFI_HANDLE                       Device;
@@ -255,7 +260,7 @@ OcDescribeBootEntry (
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
 
   Status = BootPolicy->GetBootInfo (
-    DevicePath,
+    BootEntry->DevicePath,
     &BootDirectoryName,
     &Device,
     &ApfsVolumeHandle
@@ -276,38 +281,133 @@ OcDescribeBootEntry (
     return Status;
   }
 
-  if (BootEntryName != NULL) { 
-    //
-    // Try to use APFS-style label or legacy HFS one.
-    //
-    *BootEntryName = GetAppleDiskLabel (FileSystem, BootDirectoryName, L".contentDetails");
-    if (*BootEntryName == NULL) {
-      *BootEntryName = GetAppleDiskLabel (FileSystem, BootDirectoryName, L".disk_label.contentDetails");
+  //
+  // Try to use APFS-style label or legacy HFS one.
+  //
+  BootEntry->Name = GetAppleDiskLabel (FileSystem, BootDirectoryName, L".contentDetails");
+  if (BootEntry->Name == NULL) {
+    BootEntry->Name = GetAppleDiskLabel (FileSystem, BootDirectoryName, L".disk_label.contentDetails");
+  }
+  if (BootEntry->Name == NULL) {
+    BootEntry->Name = GetVolumeLabel (FileSystem);
+    if (BootEntry->Name != NULL 
+      && (!StrCmp (BootEntry->Name, L"Recovery HD")
+       || !StrCmp (BootEntry->Name, L"Recovery"))) {
+      BootEntry->IsRecovery = TRUE;
+      RecoveryBootName = GetAppleRecoveryName (FileSystem, BootDirectoryName);
+      if (RecoveryBootName != NULL) {
+        FreePool (BootEntry->Name);
+        BootEntry->Name = RecoveryBootName;
+      }
     }
-    if (*BootEntryName == NULL) {
-      *BootEntryName = GetVolumeLabel (FileSystem);
-      if (*BootEntryName != NULL && (!StrCmp (*BootEntryName, L"Recovery HD") || !StrCmp (*BootEntryName, L"Recovery"))) {
-        RecoveryBootName = GetAppleRecoveryName (FileSystem, BootDirectoryName);
-        if (RecoveryBootName != NULL) {
-          FreePool (*BootEntryName);
-          *BootEntryName = RecoveryBootName;
-        }
+  }
+
+  if (BootEntry->Name == NULL) {
+    FreePool (BootDirectoryName);
+    return EFI_NOT_FOUND;
+  }
+
+  BootEntry->PathName = BootDirectoryName;
+
+  return EFI_SUCCESS;
+}
+
+VOID
+OcResetBootEntry (
+  IN OUT OC_BOOT_ENTRY              *BootEntry
+  )
+{
+  if (BootEntry->DevicePath != NULL) {
+    FreePool (BootEntry->DevicePath);
+    BootEntry->DevicePath = NULL;
+  }
+
+  if (BootEntry->Name != NULL) {
+    FreePool (BootEntry->Name);
+    BootEntry->Name = NULL;
+  }
+
+  if (BootEntry->PathName != NULL) {
+    FreePool (BootEntry->PathName);
+    BootEntry->PathName = NULL;
+  }
+}
+
+VOID
+OcFreeBootEntries (
+  IN OUT OC_BOOT_ENTRY              *BootEntries,
+  IN     UINTN                      Count
+  )
+{
+  UINTN  Index;
+
+  for (Index = 0; Index < Count; ++Index) {
+    OcResetBootEntry (&BootEntries[Index]);
+  }
+
+  FreePool (BootEntries);
+}
+
+UINTN
+OcFillBootEntry (
+  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
+  IN  UINT32                      Mode,
+  IN  EFI_HANDLE                  Handle,
+  OUT OC_BOOT_ENTRY               *BootEntry,
+  OUT OC_BOOT_ENTRY               *AlternateBootEntry OPTIONAL
+  )
+{
+  EFI_STATUS                Status;
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
+  CHAR16                    *RecoveryPath;
+  VOID                      *Reserved;
+  EFI_FILE_PROTOCOL         *RecoveryRoot;
+  EFI_HANDLE                RecoveryDeviceHandle;
+
+  Status = BootPolicy->GetBootFileEx (
+    Handle,
+    APPLE_BOOT_POLICY_MODE_1,
+    &DevicePath
+    );
+
+  if (EFI_ERROR (Status)) {
+    return 0;
+  }
+
+  BootEntry->DevicePath = DevicePath;
+  SetBootEntryFlags (BootEntry);
+
+  //
+  // We skip alternate entry when current one is actually a recovery.
+  // This is to prevent recovery duplicates on HFS+ systems.
+  //
+  if (AlternateBootEntry != NULL && !BootEntry->IsRecovery) {
+    Status = BootPolicy->GetPathNameOnApfsRecovery (
+      DevicePath,
+      L"\\",
+      &RecoveryPath,
+      &Reserved,
+      &RecoveryRoot,
+      &RecoveryDeviceHandle
+      );
+
+    if (!EFI_ERROR (Status)) {
+      DevicePath = FileDevicePath (RecoveryDeviceHandle, RecoveryPath);
+      FreePool (RecoveryPath);
+      RecoveryRoot->Close (RecoveryRoot);
+    } else {
+      Status = GetAlternateOsBooter (Handle, &DevicePath);
+      if (EFI_ERROR (Status)) {
+        return 1;
       }
     }
 
-    if (*BootEntryName == NULL) {
-      FreePool (BootDirectoryName);
-      return EFI_NOT_FOUND;
-    }
+    AlternateBootEntry->DevicePath     = DevicePath;
+    SetBootEntryFlags (BootEntry);
+    return 2;
   }
 
-  if (BootPathName != NULL) {
-    *BootPathName = BootDirectoryName;
-  } else {
-    FreePool (BootDirectoryName);
-  }
-
-  return EFI_SUCCESS;
+  return 1;
 }
 
 EFI_STATUS
@@ -315,7 +415,9 @@ OcScanForBootEntries (
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
   IN  UINT32                      Mode,
   OUT OC_BOOT_ENTRY               **BootEntries,
-  OUT UINTN                       *Count
+  OUT UINTN                       *Count,
+  OUT UINTN                       *AllocCount OPTIONAL,
+  IN  BOOLEAN                     Describe
   )
 {
   EFI_STATUS                Status;
@@ -324,11 +426,6 @@ OcScanForBootEntries (
   UINTN                     Index;
   OC_BOOT_ENTRY             *Entries;
   UINTN                     EntryIndex;
-  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
-  CHAR16                    *RecoveryPath;
-  VOID                      *Reserved;
-  EFI_FILE_PROTOCOL         *RecoveryRoot;
-  EFI_HANDLE                RecoveryDeviceHandle;
 
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
@@ -356,51 +453,103 @@ OcScanForBootEntries (
   EntryIndex = 0;
 
   for (Index = 0; Index < NoHandles; ++Index) {
-    Status = BootPolicy->GetBootFileEx (
+    EntryIndex += OcFillBootEntry (
+      BootPolicy,
+      Mode,
       Handles[Index],
-      APPLE_BOOT_POLICY_MODE_1,
-      &DevicePath
+      &Entries[EntryIndex],
+      &Entries[EntryIndex+1]
       );
-
-    if (EFI_ERROR (Status)) {
-      continue;
-    }
-
-    Entries[EntryIndex].DevicePath = DevicePath;
-    Entries[EntryIndex].PrefersDmgBoot = IsFolderBootEntry (DevicePath);
-
-    ++EntryIndex;
-
-    Status = BootPolicy->GetPathNameOnApfsRecovery (
-      DevicePath,
-      L"\\",
-      &RecoveryPath,
-      &Reserved,
-      &RecoveryRoot,
-      &RecoveryDeviceHandle
-      );
-
-    if (!EFI_ERROR (Status)) {
-      DevicePath = FileDevicePath (RecoveryDeviceHandle, RecoveryPath);
-      FreePool (RecoveryPath);
-      RecoveryRoot->Close (RecoveryRoot);
-    } else {
-      Status = GetAlternateOsBooter (Handles[Index], &DevicePath);
-      if (EFI_ERROR (Status)) {
-        continue;
-      }
-    }
-
-    Entries[EntryIndex].DevicePath     = DevicePath;
-    Entries[EntryIndex].PrefersDmgBoot = IsFolderBootEntry (DevicePath);
-
-    ++EntryIndex;
   }
 
   FreePool (Handles);
 
+  if (Describe) {
+    for (Index = 0; Index < EntryIndex; ++Index) {
+      Status = OcDescribeBootEntry (BootPolicy, &Entries[Index]);
+      if (EFI_ERROR (Status)) {
+        break;
+      }
+    }
+
+    if (EFI_ERROR (Status)) {
+      OcFreeBootEntries (Entries, EntryIndex);
+      return Status;
+    }
+  }
+
   *BootEntries = Entries;
-  *Count = EntryIndex;
+  *Count       = EntryIndex;
+
+  if (AllocCount != NULL) {
+    *AllocCount = NoHandles * 2;
+  }
 
   return EFI_SUCCESS;
+}
+
+EFI_STATUS
+OcShowSimpleBootMenu (
+  IN OC_BOOT_ENTRY                *BootEntries,
+  IN UINTN                        Count,
+  IN UINTN                        DefaultEntry,
+  IN UINTN                        TimeOutSeconds,
+  OUT OC_BOOT_ENTRY               **ChosenBootEntry
+  )
+{
+  INTN    Index;
+  CHAR16  Code[2];
+
+  Code[1] = '\0';
+
+  while (TRUE) {
+    gST->ConOut->ClearScreen (gST->ConOut);
+    gST->ConOut->OutputString (gST->ConOut, L"OpenCore Boot Menu\r\n\r\n");
+
+    for (Index = 0; Index < MIN (Count, OC_INPUT_MAX); ++Index) {
+      Code[0] = OC_INPUT_STR[Index];
+      gST->ConOut->OutputString (gST->ConOut, DefaultEntry == Index && TimeOutSeconds > 0 ? L"* " : L"  ");
+      gST->ConOut->OutputString (gST->ConOut, Code);
+      gST->ConOut->OutputString (gST->ConOut, L". ");
+      gST->ConOut->OutputString (gST->ConOut, BootEntries[Index].Name);
+      if (BootEntries[Index].IsFolder) {
+        gST->ConOut->OutputString (gST->ConOut, L" (dmg)");
+      }
+      if (BootEntries[Index].IsRecovery) {
+        gST->ConOut->OutputString (gST->ConOut, L" (recovery)");
+      }
+      gST->ConOut->OutputString (gST->ConOut, L"\r\n");
+    }
+
+    if (Index < Count) {
+      gST->ConOut->OutputString (gST->ConOut, L"WARN: Some entries were skipped!\r\n");
+    }
+
+    gST->ConOut->OutputString (gST->ConOut, L"\r\nChoose boot entry: ");
+
+    while (TRUE) {
+      Index = WaitForKeyIndex (TimeOutSeconds);
+      if (Index == OC_INPUT_TIMEOUT) {
+        *ChosenBootEntry = &BootEntries[DefaultEntry];
+        gST->ConOut->OutputString (gST->ConOut, L"Timeout\r\n");
+        return EFI_SUCCESS;
+      } else if (Index == OC_INPUT_ABORTED) {
+        gST->ConOut->OutputString (gST->ConOut, L"Aborted\r\n");
+        return EFI_ABORTED;
+      } else if (Index != OC_INPUT_INVALID && Index < Count) {
+        *ChosenBootEntry = &BootEntries[Index];
+        Code[0] = OC_INPUT_STR[Index];
+        gST->ConOut->OutputString (gST->ConOut, Code);
+        gST->ConOut->OutputString (gST->ConOut, L"\r\n");
+        return EFI_SUCCESS;
+      }
+
+      if (TimeOutSeconds > 0) {
+        TimeOutSeconds = 0;
+        break;
+      }
+    }
+  }
+
+  return EFI_UNSUPPORTED;
 }

@@ -16,6 +16,7 @@
 #define OC_MISC_LIB_H
 
 #include <Uefi.h>
+#include <Library/OcStringLib.h>
 
 typedef struct {
   CHAR16 Reserved[8];
@@ -152,6 +153,27 @@ DebugBreak (
 VOID
 WaitForKeyPress (
   CONST CHAR16 *Message
+  );
+
+/**
+  Default index mapping macros.
+**/
+#define OC_INPUT_STR      "123456789ABCDEFGHIJKLMNOPQRSTUVXWZ"
+#define OC_INPUT_MAX      L_STR_LEN (OC_INPUT_STR)
+#define OC_INPUT_ABORTED  -1 ///< Esc or 0
+#define OC_INPUT_INVALID  -2 ///< Some other key
+#define OC_INPUT_TIMEOUT  -3 ///< Timeout
+
+/**
+  Obtains key index from user input.
+
+  @param TimeOutSeconds  Timeout to wait for.
+
+  @returns key index [0, OC_INPUT_MAX), OC_INPUT_ABORTED, or OC_INPUT_INVALID.
+**/
+INTN
+WaitForKeyIndex (
+  UINTN  TimeOutSeconds
   );
 
 INT32

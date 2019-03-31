@@ -61,3 +61,77 @@ WaitForKeyPress (
     DebugBreak ();
   }
 }
+
+INTN
+WaitForKeyIndex (
+  UINTN  Timeout
+  )
+{
+  EFI_STATUS        Status;
+  EFI_INPUT_KEY     Key;
+  INTN              Index;
+  UINTN             EventIndex;
+  EFI_EVENT         TimerEvent;
+  EFI_EVENT         WaitList[2];
+
+  //
+  // Skip previously pressed characters.
+  //
+  do {
+    Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &Key);
+  } while (!EFI_ERROR (Status));
+
+  //
+  // Prepare timer if we have any.
+  //
+  TimerEvent = NULL;
+  if (Timeout > 0) {
+    Status = gBS->CreateEvent (EVT_TIMER, TPL_APPLICATION, NULL, NULL, &TimerEvent);
+    if (!EFI_ERROR (Status)) {
+      Status = gBS->SetTimer (TimerEvent, TimerRelative, 10000000 * Timeout);
+      if (EFI_ERROR (Status)) {
+        gBS->CloseEvent (TimerEvent);
+        TimerEvent = NULL;
+      }
+    }
+  }
+
+  //
+  // Wait for the keystroke event or the timer
+  //
+  WaitList[0] = gST->ConIn->WaitForKey;
+  WaitList[1] = TimerEvent;
+  Status      = gBS->WaitForEvent (TimerEvent != NULL ? 2 : 1, WaitList, &EventIndex);
+  if (TimerEvent != NULL) {
+    gBS->CloseEvent (TimerEvent);
+  }
+
+  //
+  // Check for the timer expiration
+  //
+  if (!EFI_ERROR (Status) && EventIndex == 1) {
+    return OC_INPUT_TIMEOUT;
+  }
+
+  //
+  // Read our key otherwise.
+  //
+  do {
+    Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &Key);
+  } while (EFI_ERROR (Status));
+
+  if (Key.ScanCode == SCAN_ESC || Key.UnicodeChar == '0') {
+    return OC_INPUT_ABORTED;
+  }
+
+  //
+  // Using loop to allow OC_INPUT_STR changes.
+  //
+  for (Index = 0; Index < OC_INPUT_MAX; ++Index) {
+    if (OC_INPUT_STR[Index] == Key.UnicodeChar) {
+      return Index;
+    }
+  }
+
+  return OC_INPUT_INVALID;
+}

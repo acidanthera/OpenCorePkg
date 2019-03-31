@@ -51,14 +51,12 @@ TestBless (
 {
   EFI_STATUS                                  Status;
   APPLE_BOOT_POLICY_PROTOCOL                  *AppleBootPolicy;
-  UINTN                                       Index;
-  CHAR16                                      *TextualDevicePath1;
-  CHAR16                                      *TextualDevicePath2;
-  CHAR16                                      *BootEntryName;
-  CHAR16                                      *BootPathName;
   OC_BOOT_ENTRY                               *Entries;
+  OC_BOOT_ENTRY                               *Chosen;
   UINTN                                       EntryCount;
-  
+  EFI_HANDLE                                  BooterHandle;
+  UINT32                                      TimeoutSeconds;
+
   Print (L"TestBless\n");
 
   Status = UninstallAllProtocolInstances (&gAppleBootPolicyProtocolGuid);
@@ -80,58 +78,57 @@ TestBless (
     return Status;
   }
 
-  Status = OcScanForBootEntries (
-    AppleBootPolicy,
-    0,
-    &Entries,
-    &EntryCount
-    );
+  TimeoutSeconds = 5;
 
-  if (EFI_ERROR (Status)) {
-    Print (L"Locate OcScanForBootEntries failed %r\n", Status);
-    return Status;
-  }
-
-  Print (L"Located %u bless entries\n", (UINT32) EntryCount);
-
-  for (Index = 0; Index < EntryCount; ++Index) {
-    Status = OcDescribeBootEntry (
+  while (TRUE) {
+    Status = OcScanForBootEntries (
       AppleBootPolicy,
-      Entries[Index].DevicePath,
-      &BootEntryName,
-      &BootPathName
+      0,
+      &Entries,
+      &EntryCount,
+      NULL,
+      TRUE
       );
 
     if (EFI_ERROR (Status)) {
-      FreePool (Entries[Index].DevicePath);
-      continue;
+      Print (L"Locate OcScanForBootEntries failed %r\n", Status);
+      return Status;
     }
 
-    TextualDevicePath1 = ConvertDevicePathToText (Entries[Index].DevicePath, FALSE, FALSE);
-    TextualDevicePath2 = ConvertDevicePathToText (Entries[Index].DevicePath, TRUE, TRUE);
+    Status = OcShowSimpleBootMenu (Entries, EntryCount, 0, TimeoutSeconds, &Chosen);
 
-    Print (L"%u. Bless Entry <%s> (on handle %p, dmg %d)\n",
-      (UINT32) Index, BootEntryName, &Entries[Index], Entries[Index].PrefersDmgBoot);
-    Print (L"Full path: %s\n", TextualDevicePath1 ? TextualDevicePath1 : L"<null>");
-    Print (L"Short path: %s\n", TextualDevicePath2 ? TextualDevicePath2 : L"<null>");
-    Print (L"Dir path: %s\n", BootPathName);
-
-    if (TextualDevicePath1 != NULL) {
-      FreePool (TextualDevicePath1);
+    if (EFI_ERROR (Status) && Status != EFI_ABORTED) {
+      Print (L"OcShowSimpleBootMenu failed - %r\n", Status);
+      OcFreeBootEntries (Entries, EntryCount);
+      return Status;
     }
 
-    if (TextualDevicePath2 != NULL) {
-      FreePool (TextualDevicePath2);
+    TimeoutSeconds = 0;
+
+    if (!EFI_ERROR (Status)) {
+      Print (L"Should boot from %s\n", Chosen->Name);
     }
 
-    FreePool (Entries[Index].DevicePath);
-    FreePool (BootEntryName);
-    FreePool (BootPathName);
+    //
+    // TODO: This should properly handle folder boot entries.
+    //
+    if (!EFI_ERROR (Status)) {
+      Status = gBS->LoadImage (FALSE, ImageHandle, Chosen->DevicePath, NULL, 0, &BooterHandle);
+
+      if (!EFI_ERROR (Status)) {
+        Status = gBS->StartImage (BooterHandle, NULL, NULL);
+        if (EFI_ERROR (Status)) {
+          Print (L"StartImage failed - %r\n", Status);
+        }
+      } else {
+        Print (L"LoadImage failed - %r\n", Status);
+      }
+
+      gBS->Stall (5000000);
+    }
+
+    OcFreeBootEntries (Entries, EntryCount);
   }
-
-  FreePool (Entries);
-
-  return EFI_SUCCESS;
 }
 
 EFI_STATUS
