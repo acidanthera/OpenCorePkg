@@ -501,8 +501,11 @@ VERIFY_SIZE_OF (unsigned, 4);
 //
 #if defined(MDE_CPU_AARCH64) || defined(MDE_CPU_ARM) || defined(MDE_CPU_X64) || defined(MDE_CPU_IA32)
 
-VERIFY_SIZE_OF (long long, 8);
-VERIFY_SIZE_OF (unsigned long long, 8);
+typedef long long oc_guard_long_long;
+typedef unsigned long long oc_guard_unsigned_long_long;
+
+VERIFY_SIZE_OF (oc_guard_long_long, 8);
+VERIFY_SIZE_OF (oc_guard_unsigned_long_long, 8);
 
 #define OcOverflowAddU64(A, B, Res) __builtin_uaddll_overflow((UINT64)(A), (UINT64)(B), (UINT64 *)(Res))
 #define OcOverflowSubU64(A, B, Res) __builtin_usubll_overflow((UINT64)(A), (UINT64)(B), (UINT64 *)(Res))

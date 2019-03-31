@@ -1880,10 +1880,10 @@ int zlib_decompress_block(void *handle, unsigned char *block, int len,
 **/
 UINT8 *
 CompressZLIB (
-  OUT UINT8   *Dst,
-  IN  UINT32  DstLen,
-  IN  UINT8   *Src,
-  IN  UINT32  SrcLen
+  OUT UINT8        *Dst,
+  IN  UINT32       DstLen,
+  IN  CONST UINT8  *Src,
+  IN  UINT32       SrcLen
   )
 {
 #ifdef USE_SYSTEM_ZLIB
@@ -1905,7 +1905,7 @@ CompressZLIB (
 
   Result = zlib_compress_block (
              Handle,
-             Src,
+             (UINT8 *) Src,
              SrcLen,
              &OutBlock,
              &OutSize
@@ -1935,10 +1935,10 @@ CompressZLIB (
 **/
 UINTN
 DecompressZLIB (
-  OUT UINT8  *Dst,
-  IN  UINTN  DstLen,
-  IN  UINT8  *Src,
-  IN  UINTN  SrcLen
+  OUT UINT8        *Dst,
+  IN  UINTN        DstLen,
+  IN  CONST UINT8  *Src,
+  IN  UINTN        SrcLen
   )
 {
 #ifdef USE_SYSTEM_ZLIB
@@ -1993,7 +1993,7 @@ DecompressZLIB (
   OutSize = (INT32) DstLen;
   Result = zlib_decompress_block (
              Handle,
-             Src,
+             (UINT8 *) Src,
              SrcLen,
              Dst,
              &OutSize

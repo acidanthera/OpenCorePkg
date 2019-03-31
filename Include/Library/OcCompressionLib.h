@@ -87,10 +87,10 @@ DecompressLZVN (
 **/
 UINT8 *
 CompressZLIB (
-  OUT UINT8   *Dst,
-  IN  UINT32  DstLen,
-  IN  UINT8   *Src,
-  IN  UINT32  SrcLen
+  OUT UINT8         *Dst,
+  IN  UINT32        DstLen,
+  IN  CONST UINT8   *Src,
+  IN  UINT32        SrcLen
   );
 
 /**
@@ -105,10 +105,10 @@ CompressZLIB (
 **/
 UINTN
 DecompressZLIB (
-  OUT UINT8  *Dst,
-  IN  UINTN  DstLen,
-  IN  UINT8  *Src,
-  IN  UINTN  SrcLen
+  OUT UINT8        *Dst,
+  IN  UINTN        DstLen,
+  IN  CONST UINT8  *Src,
+  IN  UINTN        SrcLen
   );
 
 #endif // OC_COMPRESSION_LIB_H
