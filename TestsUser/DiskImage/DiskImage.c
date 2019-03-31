@@ -39,6 +39,10 @@ uint8_t *readFile(const char *str, uint32_t *size) {
 #define ASAN_UNPOISON_MEMORY_REGION(addr, size)
 #endif
 
+#if 0
+#include <CommonCrypto/CommonDigest.h>
+#endif
+
 int main (int argc, char *argv[]) {
   if (argc < 2) {
     printf ("Please provide a valid Disk Image path.\n");
@@ -57,6 +61,7 @@ int main (int argc, char *argv[]) {
     }
 
     BOOLEAN                     Result;
+    EFI_STATUS                  Status;
     OC_APPLE_DISK_IMAGE_CONTEXT *DmgContext;
 
     Result = OcAppleDiskImageInitializeContext (Dmg, DmgSize, &DmgContext);
@@ -77,6 +82,27 @@ int main (int argc, char *argv[]) {
       printf ("DMG read error\n");
       continue;
     }
+
+#if 0
+    FILE *Fh = fopen("out.bin", "wb");
+    if (Fh != NULL) {
+      fwrite (UncompDmg, UncompSize, 1, Fh);
+      fclose (Fh);
+    } else {
+      printf("File error\n");
+    }
+#endif
+
+#if 0
+    unsigned char Digest[CC_MD5_DIGEST_LENGTH];
+    CC_MD5_CTX Context;
+    CC_MD5_Init (&Context);
+    CC_MD5_Update (&Context, UncompDmg, UncompSize);
+    CC_MD5_Final (Digest, &Context);
+    for (size_t i = 0; i < CC_MD5_DIGEST_LENGTH; ++i)
+      printf("%02x", (unsigned int) Digest[i]);
+    puts("");
+#endif
 
     printf ("Decompressed the entire DMG...\n");
 

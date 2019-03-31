@@ -24,11 +24,20 @@
 #undef memset
 #endif
 
+#ifdef memcpy
+#undef memcpy
+#endif
+
 #ifndef assert
 #define assert ASSERT
 #endif
 
+#ifndef USHRT_MAX
+#define USHRT_MAX MAX_UINT16
+#endif
+
 #define memset(Dst, Value, Size) SetMem ((Dst), (Size), (UINT8)(Value))
+#define memcpy(Dst, Src, Size) CopyMem ((Dst), (Src), (Size))
 
 #define salloc(size) AllocatePool (size)
 #define snew(type) ( (type *) AllocatePool (sizeof(type)) )
