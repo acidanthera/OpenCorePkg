@@ -255,7 +255,7 @@ OcAppleDiskImageRead (
 
       case APPLE_DISK_IMAGE_CHUNK_TYPE_RAW:
       {
-        ChunkData = (Context->Buffer + BlockData->DataOffset + Chunk->CompressedOffset);
+        ChunkData = (Context->Buffer + Chunk->CompressedOffset);
         ChunkDataCurrent = (ChunkData + ChunkOffset);
 
         CopyMem (BufferCurrent, ChunkDataCurrent, BufferChunkSize);
@@ -273,7 +273,7 @@ OcAppleDiskImageRead (
         OutSize = DecompressZLIB (
                     ChunkData,
                     ChunkTotalLength,
-                    (Context->Buffer + BlockData->DataOffset + Chunk->CompressedOffset),
+                    (Context->Buffer + Chunk->CompressedOffset),
                     Chunk->CompressedLength
                     );
         if (OutSize != ChunkTotalLength) {
