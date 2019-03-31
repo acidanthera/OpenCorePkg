@@ -264,7 +264,7 @@ OcAppleDiskImageRead (
 
       case APPLE_DISK_IMAGE_CHUNK_TYPE_ZLIB:
       {
-        ChunkData = AllocateZeroPool (ChunkTotalLength);
+        ChunkData = AllocatePool (ChunkTotalLength);
         if (ChunkData == NULL) {
           return FALSE;
         }
