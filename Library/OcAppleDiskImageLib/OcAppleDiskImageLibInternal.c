@@ -188,10 +188,11 @@ InternalParsePlist (
   UINT32                      BlockDictChildDataSize;
 
   UINT32                      NumDmgBlocks;
+  UINTN                       DmgBlocksSize;
   APPLE_DISK_IMAGE_BLOCK_DATA **DmgBlocks;
   APPLE_DISK_IMAGE_BLOCK_DATA *Block;
 
-  UINT32 Index;
+  UINT32                      Index;
 
   ASSERT (Plist != NULL);
   ASSERT (PlistSize > 0);
@@ -246,7 +247,12 @@ InternalParsePlist (
     goto DONE_ERROR;
   }
 
-  DmgBlocks = AllocatePool (NumDmgBlocks * sizeof (*DmgBlocks));
+  Result = OcOverflowMulUN (NumDmgBlocks, sizeof (*DmgBlocks), &DmgBlocksSize);
+  if (Result) {
+    return FALSE;
+  }
+
+  DmgBlocks = AllocatePool (DmgBlocksSize);
   if (DmgBlocks == NULL) {
     Result = FALSE;
     goto DONE_ERROR;

@@ -237,11 +237,28 @@ OcAppleDiskImageRead (
       return FALSE;
     }
 
-    LbaOffset        = (LbaCurrent - DMG_SECTOR_START_ABS (BlockData, Chunk));
-    LbaLength        = (Chunk->SectorCount - LbaOffset);
-    ChunkOffset      = (LbaOffset * APPLE_DISK_IMAGE_SECTOR_SIZE);
-    ChunkTotalLength = (Chunk->SectorCount * APPLE_DISK_IMAGE_SECTOR_SIZE);
-    ChunkLength      = (ChunkTotalLength - ChunkOffset);
+    LbaOffset = (LbaCurrent - DMG_SECTOR_START_ABS (BlockData, Chunk));
+    LbaLength = (Chunk->SectorCount - LbaOffset);
+
+    Result = OcOverflowMulU64 (
+               LbaOffset,
+               APPLE_DISK_IMAGE_SECTOR_SIZE,
+               &ChunkOffset
+               );
+    if (Result) {
+      return FALSE;
+    }
+
+    Result = OcOverflowMulU64 (
+               Chunk->SectorCount,
+               APPLE_DISK_IMAGE_SECTOR_SIZE,
+               &ChunkTotalLength
+               );
+    if (Result) {
+      return FALSE;
+    }
+
+    ChunkLength = (ChunkTotalLength - ChunkOffset);
 
     BufferChunkSize = (UINTN)MIN (RemainingBufferSize, ChunkLength);
 
