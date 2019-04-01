@@ -33,9 +33,9 @@ typedef struct {
   //
   // Value is declared first as it has shown to improve comparison performance.
   //
-  UINT64      Value;  ///< value of this symbol (or stab offset)
-  UINT32      Name;  ///< name of this symbol
-  UINT32      Length;
+  UINT64       Value;  ///< value of this symbol (or stab offset)
+  CONST CHAR8  *Name;  ///< name of this symbol
+  UINT32       Length;
 } PRELINKED_KEXT_SYMBOL;
 
 typedef struct {

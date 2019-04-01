@@ -46,7 +46,6 @@ InternalOcGetSymbolWorkerName (
   PRELINKED_KEXT              *Dependency;
   CONST PRELINKED_KEXT_SYMBOL *Symbols;
   CONST PRELINKED_KEXT_SYMBOL *SymbolsEnd;
-  CONST CHAR8                 *LookedSymbol;
   UINT32                      Index;
   UINT32                      NumSymbols;
 
@@ -71,11 +70,10 @@ InternalOcGetSymbolWorkerName (
     // Please do not change this without careful profiling.
     //
     if (Symbols->Length == LookupValueLength) {
-      LookedSymbol = Kext->StringTable + Symbols->Name;
-      if (LookedSymbol[LookupValueLength/2] == LookupValue[LookupValueLength/2]
-        && LookedSymbol[LookupValueLength/2 + 1] == LookupValue[LookupValueLength/2 + 1]) {
+      if (Symbols->Name[LookupValueLength/2] == LookupValue[LookupValueLength/2]
+        && Symbols->Name[LookupValueLength/2 + 1] == LookupValue[LookupValueLength/2 + 1]) {
         for (Index = 0; Index < LookupValueLength; ++Index) {
-          if (LookedSymbol[Index] != LookupValue[Index]) {
+          if (Symbols->Name[Index] != LookupValue[Index]) {
             break;
           }
         }

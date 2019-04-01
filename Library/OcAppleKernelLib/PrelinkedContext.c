@@ -514,6 +514,8 @@ PrelinkedInjectKext (
 
   PrelinkedKext = NULL;
 
+  ASSERT (InfoPlistSize > 0);
+
   //
   // Copy executable to prelinkedkernel.
   //

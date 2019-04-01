@@ -297,14 +297,14 @@ InternalScanBuildLinkedSymbolTable (
     }
 
     if (!Result) {
-      WalkerBottom->Value = Symbol->Value;
-      WalkerBottom->Name  = Symbol->UnifiedName.StringIndex;
-      WalkerBottom->Length = AsciiStrLen (Kext->StringTable + Symbol->UnifiedName.StringIndex);
+      WalkerBottom->Value  = Symbol->Value;
+      WalkerBottom->Name   = Kext->StringTable + Symbol->UnifiedName.StringIndex;
+      WalkerBottom->Length = AsciiStrLen (WalkerBottom->Name);
       ++WalkerBottom;
     } else {
       WalkerTop->Value  = Symbol->Value;
-      WalkerTop->Name   = Symbol->UnifiedName.StringIndex;
-      WalkerTop->Length = AsciiStrLen (Kext->StringTable + Symbol->UnifiedName.StringIndex);
+      WalkerTop->Name   = Kext->StringTable + Symbol->UnifiedName.StringIndex;
+      WalkerTop->Length = AsciiStrLen (WalkerTop->Name);
       --WalkerTop;
 
       ++NumCxxSymbols;
