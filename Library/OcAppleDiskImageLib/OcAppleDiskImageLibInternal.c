@@ -90,13 +90,9 @@ InternalSwapBlockData (
   BlockData->Checksum.Type    = SwapBytes32 (BlockData->Checksum.Type);
   BlockData->Checksum.Size    = SwapBytes32 (BlockData->Checksum.Size);
 
-  if (BlockData->DataOffset > DataForkOffset) {
-    return FALSE;
-  }
-
-  if ((BlockData->Checksum.Size > (sizeof (BlockData->Checksum.Data) * 8))
-   || (BlockData->DataOffset > MaxOffset)
-   || (BlockData->SectorNumber + BlockData->SectorCount) < BlockData->SectorNumber) {
+  if (BlockData->DataOffset > DataForkOffset
+   || (BlockData->Checksum.Size > (sizeof (BlockData->Checksum.Data) * 8))
+   || (BlockData->DataOffset > MaxOffset)) {
     return FALSE;
   }
 
@@ -109,7 +105,7 @@ InternalSwapBlockData (
     return FALSE;
   }
 
-  for (Index = 0; Index < BlockData->Checksum.Size / 8; ++Index) {
+  for (Index = 0; Index < APPLE_DISK_IMAGE_CHECKSUM_SIZE; ++Index) {
     BlockData->Checksum.Data[Index] = SwapBytes32 (
                                         BlockData->Checksum.Data[Index]
                                         );
@@ -128,15 +124,11 @@ InternalSwapBlockData (
     Chunk->CompressedLength = SwapBytes64 (Chunk->CompressedLength);
 
     Result = OcOverflowAddU64 (
-             Chunk->SectorNumber,
-             Chunk->SectorCount,
-             &ChunkSectorTop
-             );
+               Chunk->SectorNumber,
+               Chunk->SectorCount,
+               &ChunkSectorTop
+               );
     if (Result || (ChunkSectorTop > BlockSectorTop)) {
-      return FALSE;
-    }
-
-    if ((Chunk->SectorNumber + Chunk->SectorCount) < Chunk->SectorNumber) {
       return FALSE;
     }
 
