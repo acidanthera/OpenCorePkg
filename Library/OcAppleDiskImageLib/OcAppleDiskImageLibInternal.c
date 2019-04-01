@@ -141,16 +141,7 @@ InternalSwapBlockData (
     }
 
     Result = OcOverflowAddU64 (
-               BlockData->DataOffset,
                Chunk->CompressedOffset,
-               &OffsetTop
-               );
-    if (Result) {
-      return FALSE;
-    }
-
-    Result = OcOverflowAddU64 (
-               OffsetTop,
                Chunk->CompressedLength,
                &OffsetTop
                );
