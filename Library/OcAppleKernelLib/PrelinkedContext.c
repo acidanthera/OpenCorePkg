@@ -108,12 +108,14 @@ PrelinkedFindKmodAddress (
       return 0;
     }
 
-    SymbolName = MachoGetSymbolName64 (ExecutableContext, Symbol);
-    if (SymbolName && AsciiStrCmp (SymbolName, "_kmod_info") == 0) {
-      if (!MachoIsSymbolValueInRange64 (ExecutableContext, Symbol)) {
-        return 0;
+    if ((Symbol->Type & MACH_N_TYPE_STAB) == 0) {
+      SymbolName = MachoGetSymbolName64 (ExecutableContext, Symbol);
+      if (SymbolName && AsciiStrCmp (SymbolName, "_kmod_info") == 0) {
+        if (!MachoIsSymbolValueInRange64 (ExecutableContext, Symbol)) {
+          return 0;
+        }
+        break;
       }
-      break;
     }
 
     Index++;
