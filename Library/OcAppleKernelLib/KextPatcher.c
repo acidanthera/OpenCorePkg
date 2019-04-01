@@ -160,8 +160,16 @@ PatcherApplyGenericPatch (
     Patch->Skip
     );
 
-  if ((ReplaceCount > 0 && Patch->Count == 0)
-    || (ReplaceCount == Patch->Count && Patch->Count > 0)) {
+  if (ReplaceCount > 0 && Patch->Count > 0 && ReplaceCount != Patch->Count) {
+    DEBUG ((
+      DEBUG_INFO,
+      "Performed only %u replacements out of %u\n",
+      ReplaceCount,
+      Patch->Count
+      ));
+  }
+
+  if (ReplaceCount > 0) {
     return EFI_SUCCESS;
   }
 
