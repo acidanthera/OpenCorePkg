@@ -336,7 +336,7 @@ PatcherInitContextFromPrelinked (
 
   @param[in,out] Context         Patcher context.
   @param[in,out] Buffer          Kernel buffer (could be prelinked).
-  @param[in]     Name            Kernel buffer size.
+  @param[in]     BufferSize      Kernel buffer size.
 
   @return  EFI_SUCCESS on success.
 **/
