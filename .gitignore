@@ -1,0 +1,14 @@
+.DS_Store
+UDK
+Binaries
+build
+DerivedData
+xcshareddata
+xcuserdata
+project.xcworkspace
+*.dSYM
+DICT
+fuzz-*.log
+crash-*
+oom-*
+slow-unit-*
