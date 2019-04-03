@@ -61,7 +61,7 @@ AcpiFindLegacyRsdp (
   //
 
   if (Rsdp == NULL) {
-    Address = ((*(UINT16 *) 0x040E) << 4);
+    Address = ((UINTN)(*(UINT16 *) 0x040E) << 4U);
 
     for (Index = 0; Index < 0x0400; Index += 16) {
       if (*(UINT64 *) (Address + Index) == EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER_SIGNATURE) {

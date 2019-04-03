@@ -1191,9 +1191,12 @@ SmbiosPrepareTable (
       DEBUG ((DEBUG_WARN, "SmbiosLookupHost entry is too small - %u/%u bytes\n",
         mOriginalSmbios->EntryPointLength, (UINT32) sizeof (SMBIOS_TABLE_ENTRY_POINT)));
       mOriginalSmbios = NULL;
-    } else if (mOriginalSmbios->TableAddress == 0
-      || mOriginalSmbios->TableLength == 0
-      || mOriginalSmbios->TableLength > SMBIOS_TABLE_MAX_LENGTH) {
+    } else if (mOriginalSmbios->TableAddress == 0 || mOriginalSmbios->TableLength == 0) {
+      OC_INLINE_STATIC_ASSERT (
+        sizeof (mOriginalSmbios->TableLength) == sizeof (UINT16)
+        && SMBIOS_TABLE_MAX_LENGTH == MAX_UINT16,
+        "mOriginalTable->TableLength may exceed SMBIOS_TABLE_MAX_LENGTH"
+        );
       DEBUG ((DEBUG_WARN, "SmbiosLookupHost entry has invalid table - %08X of %u bytes\n",
         mOriginalSmbios->TableAddress, mOriginalSmbios->TableLength));
       mOriginalSmbios = NULL;
@@ -1215,9 +1218,12 @@ SmbiosPrepareTable (
       DEBUG ((DEBUG_INFO, "SmbiosLookupHost v3 entry is too small - %u/%u bytes\n",
         mOriginalSmbios3->EntryPointLength, (UINT32) sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT)));
       mOriginalSmbios3 = NULL;
-    } else if (mOriginalSmbios3->TableAddress == 0
-      || mOriginalSmbios3->TableMaximumSize == 0
-      || mOriginalSmbios3->TableMaximumSize > SMBIOS_3_0_TABLE_MAX_LENGTH) {
+    } else if (mOriginalSmbios3->TableAddress == 0 || mOriginalSmbios3->TableMaximumSize == 0) {
+      OC_INLINE_STATIC_ASSERT (
+        sizeof (mOriginalSmbios3->TableMaximumSize) == sizeof (UINT32)
+        && SMBIOS_3_0_TABLE_MAX_LENGTH == MAX_UINT32,
+        "mOriginalSmbios3->TableMaximumSize may exceed SMBIOS_3_0_TABLE_MAX_LENGTH"
+        );
       DEBUG ((DEBUG_INFO, "SmbiosLookupHost v3 entry has invalid table - %016LX of %u bytes\n",
         mOriginalSmbios3->TableAddress, mOriginalSmbios3->TableMaximumSize));
       mOriginalSmbios3 = NULL;

@@ -121,7 +121,7 @@ PatchAppleIntelCPUPowerManagement (
     DEBUG ((DEBUG_INFO, "Failed to find com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
   }
 
-  return !EFI_ERROR (Status) ? Status : Status2;
+  return EFI_ERROR (Status) ? Status : Status2;
 }
 
 STATIC

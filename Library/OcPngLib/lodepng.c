@@ -39,8 +39,8 @@ Rename this file to lodepng.cpp to use it for C++, or to lodepng.c to use it for
 const int32_t _fltused = 0;
 
 // Internal C function implementations
-static inline void* memcpy(void* dst, void* src, size_t size) {
-  gBS->CopyMem(dst, src, size);
+static inline void* memcpy(void* dst, const void* src, size_t size) {
+  gBS->CopyMem(dst, (VOID *) src, size);
   return dst;
 }
 
@@ -2910,6 +2910,10 @@ static void color_tree_add(ColorTree* tree,
     int i = 8 * ((r >> bit) & 1) + 4 * ((g >> bit) & 1) + 2 * ((b >> bit) & 1) + 1 * ((a >> bit) & 1);
     if(!tree->children[i]) {
       tree->children[i] = (ColorTree*)lodepng_malloc(sizeof(ColorTree));
+      if(!tree->children[i]) {
+        //FIXME: This should do proper error reporting!
+        return;
+      }
       color_tree_init(tree->children[i]);
     }
     tree = tree->children[i];

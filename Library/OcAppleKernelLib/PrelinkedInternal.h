@@ -311,7 +311,7 @@ InternalPrepareCreateVtablesPrelinked64 (
   OUT OC_PRELINKED_VTABLE_LOOKUP_ENTRY  *Vtables
   );
 
-BOOLEAN
+VOID
 InternalCreateVtablesPrelinked64 (
   IN     PRELINKED_CONTEXT                       *Context,
   IN OUT PRELINKED_KEXT                          *Kext,

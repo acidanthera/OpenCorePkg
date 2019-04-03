@@ -361,7 +361,7 @@ LocateFileSystemDevicePath (
     //
     // Retry by looking up the handle based on FilePath.
     //
-    if (EFI_ERROR (Status) && FilePath != NULL) {
+    if (FilePath != NULL) {
       DEBUG ((DEBUG_INFO, "Retrying to locate fs with NULL handle\n"));
 
       return LocateFileSystemDevicePath (

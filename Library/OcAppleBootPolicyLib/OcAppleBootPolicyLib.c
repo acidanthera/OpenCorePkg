@@ -159,7 +159,7 @@ InternalGetApfsSpecialFileInfo (
     *VolumeInfo = GetFileInfo (
       Root,
       &gAppleApfsVolumeInfoGuid,
-      sizeof (*VolumeInfo),
+      sizeof (**VolumeInfo),
       NULL
       );
 
@@ -172,7 +172,7 @@ InternalGetApfsSpecialFileInfo (
     *ContainerInfo = GetFileInfo (
       Root,
       &gAppleApfsContainerInfoGuid,
-      sizeof (*ContainerInfo),
+      sizeof (**ContainerInfo),
       NULL
       );
 

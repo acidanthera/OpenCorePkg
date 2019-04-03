@@ -1,7 +1,7 @@
 /** @file
   Library handling KEXT prelinking.
   Currently limited to Intel 64 architectures.
-  
+
 Copyright (c) 2018, Download-Fritz.  All rights reserved.<BR>
 This program and the accompanying materials are licensed and made available
 under the terms and conditions of the BSD License which accompanies this
@@ -90,7 +90,7 @@ InternalGetOcVtableByName (
 }
 
 STATIC
-BOOLEAN
+VOID
 InternalConstructVtablePrelinked64 (
   IN     PRELINKED_CONTEXT                      *Context,
   IN OUT PRELINKED_KEXT                         *Kext,
@@ -143,8 +143,6 @@ InternalConstructVtablePrelinked64 (
   }
 
   Vtable->NumEntries = Index;
-
-  return TRUE;
 }
 
 BOOLEAN
@@ -214,7 +212,7 @@ InternalPrepareCreateVtablesPrelinked64 (
   return TRUE;
 }
 
-BOOLEAN
+VOID
 InternalCreateVtablesPrelinked64 (
   IN     PRELINKED_CONTEXT                       *Context,
   IN OUT PRELINKED_KEXT                          *Kext,
@@ -224,25 +222,18 @@ InternalCreateVtablesPrelinked64 (
   )
 {
   UINT32              Index;
-  BOOLEAN             Result;
 
   ASSERT (Kext != NULL);
 
   for (Index = 0; Index < NumVtables; ++Index) {
-    Result = InternalConstructVtablePrelinked64 (
+    InternalConstructVtablePrelinked64 (
                 Context,
                 Kext,
                 &VtableLookups[Index],
                 VtableBuffer
                 );
-    if (!Result) {
-      return FALSE;
-    }
-      
     VtableBuffer = GET_NEXT_PRELINKED_VTABLE (VtableBuffer);
   }
-
-  return TRUE;
 }
 
 /**
@@ -284,7 +275,7 @@ InternalPatchVtableSymbol (
   Name = MachoGetSymbolName64 (MachoContext, Symbol);
   //
   // 2) If the child is a pure virtual function, do not patch.
-  // In general, we want to proceed with patching when the symbol is 
+  // In general, we want to proceed with patching when the symbol is
   // externally defined because pad slots fall into this category.
   // The pure virtual function symbol is special case, as the pure
   // virtual property itself overrides the parent's implementation.
@@ -703,7 +694,7 @@ InternalPatchByVtables64 (
       //
       ASSERT (MachoSymbolNameIsSmcp64 (MachoContext, Name));
       //
-      // Get the class name from the smc pointer 
+      // Get the class name from the smc pointer
       //
       Result = MachoGetClassNameFromSuperMetaClassPointer (
                  MachoContext,
@@ -726,7 +717,7 @@ InternalPatchByVtables64 (
         return FALSE;
       }
       //
-      // Find the SMCP's meta class symbol 
+      // Find the SMCP's meta class symbol
       //
       MetaClass = MachoGetMetaclassSymbolFromSmcpSymbol64 (
                     MachoContext,
@@ -820,7 +811,7 @@ InternalPatchByVtables64 (
 
       CurrentVtable = GET_NEXT_PRELINKED_VTABLE (CurrentVtable);
       //
-      // Get the meta vtable name from the class name 
+      // Get the meta vtable name from the class name
       //
       Result = MachoGetMetaVtableNameFromClassName (
                  ClassName,

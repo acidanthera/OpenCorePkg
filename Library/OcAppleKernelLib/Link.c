@@ -1636,10 +1636,12 @@ InternalPrelinkKext64 (
   // Reinitialize the Mach-O context to account for the changed __LINKEDIT
   // segment and file size.
   //
-  MachoInitializeContext (
-    MachoContext,
-    MachHeader,
-    (SegmentOffset + SegmentSize)
-    );
+  if (!MachoInitializeContext (MachoContext, MachHeader, (SegmentOffset + SegmentSize))) {
+    //
+    // This should never failed under normal and abnormal conditions.
+    //
+    ASSERT (FALSE);
+    return RETURN_INVALID_PARAMETER;
+  }
   return RETURN_SUCCESS;
 }

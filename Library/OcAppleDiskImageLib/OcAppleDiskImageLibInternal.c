@@ -109,7 +109,7 @@ InternalSwapBlockData (
     return FALSE;
   }
 
-  for (Index = 0; Index < BlockData->Checksum.Size; ++Index) {
+  for (Index = 0; Index < BlockData->Checksum.Size / 8; ++Index) {
     BlockData->Checksum.Data[Index] = SwapBytes32 (
                                         BlockData->Checksum.Data[Index]
                                         );

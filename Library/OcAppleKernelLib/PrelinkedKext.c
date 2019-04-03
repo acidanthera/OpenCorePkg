@@ -403,17 +403,13 @@ InternalScanBuildLinkedVtables (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Result = InternalCreateVtablesPrelinked64 (
+  InternalCreateVtablesPrelinked64 (
              Context,
              Kext,
              NumVtables,
              VtableLookups,
              LinkedVtables
              );
-  if (!Result) {
-    FreePool (LinkedVtables);
-    return EFI_UNSUPPORTED;
-  }
 
   Kext->NumberOfVtables = NumVtables;
   Kext->LinkedVtables   = LinkedVtables;

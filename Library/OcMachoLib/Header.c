@@ -1261,6 +1261,7 @@ MachoExpandImage64 (
 
   CurrentDelta = 0;
   FirstSegment = NULL;
+  CurrentSize  = 0;
   for (
     Segment = MachoGetNextSegment64 (Context, NULL);
     Segment != NULL;
