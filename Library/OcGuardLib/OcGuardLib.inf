@@ -43,7 +43,6 @@
 [LibraryClasses]
   BaseLib
 
-
 [BuildOptions]
   XCODE:DEBUG_*_*_CC_FLAGS   = -fno-stack-protector
   XCODE:NOOPT_*_*_CC_FLAGS   = -fno-stack-protector
