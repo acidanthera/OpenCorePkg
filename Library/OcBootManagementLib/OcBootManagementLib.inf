@@ -18,11 +18,11 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = OcAppleBootPolicyLib
-  FILE_GUID                      = 330E9083-C008-4030-AA86-ECF1FBAE824D
+  BASE_NAME                      = OcBootManagementLib
+  FILE_GUID                      = A28FEC6F-DD5C-4D8D-9351-50D9A2047634
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = OcAppleBootPolicyLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+  LIBRARY_CLASS                  = OcBootManagementLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
 
 #
 # The following information is for reference only and not required by the build tools.
@@ -31,7 +31,7 @@
 #
 
 [Sources]
-  OcAppleBootPolicyLib.c
+  OcBootManagementLib.c
 
 [Packages]
   OcSupportPkg/OcSupportPkg.dec
@@ -58,6 +58,7 @@
   MemoryAllocationLib
   PrintLib
   UefiBootServicesTableLib
+  OcAppleBootPolicyLib
   OcGuardLib
   OcFileLib
   OcXmlLib

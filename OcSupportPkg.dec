@@ -57,10 +57,16 @@
   OcAppleChunklistLib|Include/Library/OcAppleChunklistLib.h
 
   ##  @libraryclass
+  OcAppleDiskImageLib|Include/Library/OcAppleDiskImageLib.h
+
+  ##  @libraryclass
   OcAppleImageVerificationLib|Include/Library/OcAppleImageVerificationLib.h
 
   ##  @libraryclass
   OcAppleKernelLib|Include/Library/OcAppleKernelLib.h
+
+  ##  @libraryclass
+  OcBootManagementLib|Include/Library/OcBootManagementLib.h
 
   ##  @libraryclass
   OcCompressionLib|Include/Library/OcCompressionLib.h

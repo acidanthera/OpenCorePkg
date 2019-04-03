@@ -13,9 +13,7 @@ listed here.
     **Issues**: none
 * OcAppleBootPolicyLib  
     **Status**: functional  
-    **Issues**:
-    1. No proper interface for OS detection.
-    1. No dmg boot detection.
+    **Issues**: none
 * OcAppleKernelLib  
     **Status**: functional  
     **Issues**:
@@ -31,6 +29,10 @@ listed here.
     **Status**: functional  
     **Issues**:
     1. Has potential security flaws.
+* OcBootManagementLib
+    1. No proper interface for OS detection.
+    1. No dmg boot detection.
+    1. No preferred entry detection from nvram BootOrder
 * OcCpuLib  
     **Status**: functional  
     **Issues**:
@@ -43,6 +45,9 @@ listed here.
 * OcDataHubLib  
     **Status**: functional  
     **Issues**: none
+* OcAppleDiskImageLib  
+    **Status**: in progress  
+    **Issues**:
 * OcDebugLogLib  
     **Status**: functional  
     **Issues**:
@@ -66,7 +71,9 @@ listed here.
     1. No research done on Apple Firmware Password protocol.
 * OcGuardLib  
     **Status**: functional  
-    **Issues**: none
+    **Issues**:
+    1. Stack canary has no runtime support (e.g. via rdrand)
+    1. Stack canary does not work with LTO
 * OcMachoLib  
     **Status**: functional  
     **Issues**: none
@@ -107,7 +114,6 @@ listed here.
     **Status**: functional  
     **Issues**:
     1. Does not support directory iteration with virtualised files.
-    1. Has issues with Recovery boot, causing CR failure.
 * OcXmlLib  
     **Status**: functional  
     **Issues**: none

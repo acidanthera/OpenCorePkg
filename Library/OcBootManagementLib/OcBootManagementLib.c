@@ -23,7 +23,7 @@
 #include <Protocol/SimpleFileSystem.h>
 #include <Protocol/SimpleTextOut.h>
 
-#include <Library/OcAppleBootPolicyLib.h>
+#include <Library/OcBootManagementLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>

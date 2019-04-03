@@ -50,8 +50,10 @@
   OcAcpiLib|OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
   OcAppleBootPolicyLib|OcSupportPkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
   OcAppleChunklistLib|OcSupportPkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
+  OcAppleDiskImageLib|OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
   OcAppleImageVerificationLib|OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcAppleKernelLib|OcSupportPkg/Library/OcAppleKernelLib/OcAppleKernelLib.inf
+  OcBootManagementLib|OcSupportPkg/Library/OcBootManagementLib/OcBootManagementLib.inf
   OcCpuLib|OcSupportPkg/Library/OcCpuLib/OcCpuLib.inf
   OcCryptoLib|OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
   OcCompressionLib|OcSupportPkg/Library/OcCompressionLib/OcCompressionLib.inf
@@ -73,14 +75,15 @@
   OcTimerLib|OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
   OcVirtualFsLib|OcSupportPkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OcXmlLib|OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
-  OcAppleDiskImageLib|OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
 
 [Components]
   OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
   OcSupportPkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
   OcSupportPkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
+  OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
   OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcSupportPkg/Library/OcAppleKernelLib/OcAppleKernelLib.inf
+  OcSupportPkg/Library/OcBootManagementLib/OcBootManagementLib.inf
   OcSupportPkg/Library/OcCpuLib/OcCpuLib.inf
   OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
   OcSupportPkg/Library/OcCompressionLib/OcCompressionLib.inf
@@ -102,7 +105,6 @@
   OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
   OcSupportPkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
-  OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
   OcSupportPkg/Debug/GdbSyms/GdbSyms.inf
   OcSupportPkg/Tests/AcpiTest/AcpiTest.inf
   OcSupportPkg/Tests/AcpiTest/AcpiTestApp.inf

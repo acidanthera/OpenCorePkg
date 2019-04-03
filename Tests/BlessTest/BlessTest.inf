@@ -61,4 +61,5 @@
   OcMiscLib
   OcProtocolLib
   OcAppleBootPolicyLib
+  OcBootManagementLib
   OcSmbiosLib
