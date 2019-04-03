@@ -81,6 +81,7 @@ VirtualFileClose (
   IN EFI_FILE_PROTOCOL  *This
   )
 {
+  EFI_STATUS         Status;
   VIRTUAL_FILE_DATA  *Data;
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
@@ -93,9 +94,12 @@ VirtualFileClose (
     return EFI_SUCCESS;
   }
 
-  return Data->OriginalProtocol->Close (
+  Status = Data->OriginalProtocol->Close (
     Data->OriginalProtocol
     );
+  FreePool (Data);
+
+  return Status;
 }
 
 STATIC
@@ -105,6 +109,7 @@ VirtualFileDelete (
   IN EFI_FILE_PROTOCOL  *This
   )
 {
+  EFI_STATUS         Status;
   VIRTUAL_FILE_DATA  *Data;
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
@@ -119,9 +124,12 @@ VirtualFileDelete (
     return EFI_WARN_DELETE_FAILURE;
   }
 
-  return Data->OriginalProtocol->Delete (
+  Status = Data->OriginalProtocol->Close (
     Data->OriginalProtocol
     );
+  FreePool (Data);
+
+  return Status;
 }
 
 STATIC
@@ -555,6 +563,7 @@ CreateVirtualFile (
   return EFI_SUCCESS;
 }
 
+STATIC
 VOID
 InternalInitVirtualVolumeData (
   IN OUT VIRTUAL_FILE_DATA  *Data,

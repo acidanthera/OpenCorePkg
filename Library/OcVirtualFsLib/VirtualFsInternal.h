@@ -58,14 +58,8 @@ struct VIRTUAL_FILE_DATA_ {
 struct VIRTUAL_FILESYSTEM_DATA_ {
   UINT32                           Signature;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *OriginalFileSystem;
-  VIRTUAL_FILE_DATA                RootVolume;
+  EFI_FILE_OPEN                    OpenCallback;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  FileSystem;
 };
-
-VOID
-InternalInitVirtualVolumeData (
-  IN OUT VIRTUAL_FILE_DATA  *Data,
-  IN     EFI_FILE_OPEN      OpenCallback
-  );
 
 #endif // VIRTUAL_FS_INTERNAL_H

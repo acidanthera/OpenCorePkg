@@ -43,16 +43,17 @@ VirtualFsOpenVolume (
 {
   EFI_STATUS               Status;
   VIRTUAL_FILESYSTEM_DATA  *Data;
+  EFI_FILE_PROTOCOL        *NewFile;
 
   Data = VIRTUAL_VOLUME_FROM_FILESYSTEM_PROTOCOL (This);
 
   Status = Data->OriginalFileSystem->OpenVolume (
     Data->OriginalFileSystem,
-    &Data->RootVolume.OriginalProtocol
+    &NewFile
     );
 
   if (!EFI_ERROR (Status)) {
-    *Root = &Data->RootVolume.Protocol;
+    return CreateRealFile (NewFile, Data->OpenCallback, TRUE, Root);
   }
 
   return Status;
@@ -118,7 +119,7 @@ CreateVirtualFs (
 
   Data->Signature          = VIRTUAL_VOLUME_DATA_SIGNATURE;
   Data->OriginalFileSystem = OriginalFileSystem;
-  InternalInitVirtualVolumeData (&Data->RootVolume, OpenCallback);
+  Data->OpenCallback       = OpenCallback;
   CopyMem (&Data->FileSystem, &mVirtualFileSystemProtocolTemplate, sizeof (Data->FileSystem));
 
   mVirtualFileSystems[mVirtualFileSystemsUsed] = Data;
