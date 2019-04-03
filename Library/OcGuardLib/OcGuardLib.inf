@@ -30,6 +30,7 @@
 
 [Sources]
   BitOverflow.c
+  Canary.c
   NativeOverflow.c
   TripleOverflow.c
   UbsanPrintf.c
@@ -41,3 +42,9 @@
 
 [LibraryClasses]
   BaseLib
+
+
+[BuildOptions]
+  XCODE:DEBUG_*_*_CC_FLAGS   = -fno-stack-protector
+  XCODE:NOOPT_*_*_CC_FLAGS   = -fno-stack-protector
+  XCODE:RELEASE_*_*_CC_FLAGS = -fno-stack-protector

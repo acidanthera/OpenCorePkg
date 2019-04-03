@@ -48,6 +48,7 @@
   UefiBootServicesTableLib
   UefiDriverEntryPoint
   UefiLib
+  OcGuardLib
 
 [Guids]
 
