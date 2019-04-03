@@ -23,6 +23,34 @@
 #include <Protocol/DevicePath.h>
 
 /**
+  Locate file system from Device handle or path.
+
+  @param[in]  DeviceHandle  Device handle.
+  @param[in]  FilePath      Device path.
+
+  @retval  simple file system protocol or NULL.
+**/
+EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *
+LocateFileSystem (
+  IN  EFI_HANDLE                         DeviceHandle  OPTIONAL,
+  IN  EFI_DEVICE_PATH_PROTOCOL           *FilePath     OPTIONAL
+  );
+
+/**
+  Locate root volume from Device handle or path.
+
+  @param[in]  DeviceHandle  Device handle.
+  @param[in]  FilePath      Device path.
+
+  @retval  opened file protocol or NULL.
+**/
+EFI_FILE_PROTOCOL *
+LocateRootVolume (
+  IN  EFI_HANDLE                         DeviceHandle  OPTIONAL,
+  IN  EFI_DEVICE_PATH_PROTOCOL           *FilePath     OPTIONAL
+  );
+
+/**
 
   @param[in]  FileHandle         A pointer to file handle.
   @param[in]  InformationType    A pointer to file info GUID.

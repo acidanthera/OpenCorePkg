@@ -30,6 +30,7 @@
   FileProtocol.c
   GetFileInfo.c
   GetVolumeLabel.c
+  LocateFileSystem.c
   ReadFile.c
 
 [Packages]

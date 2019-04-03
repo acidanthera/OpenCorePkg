@@ -323,57 +323,6 @@ IsDeviceChild (
   return Matched;
 }
 
-EFI_DEVICE_PATH_PROTOCOL *
-LocateFileSystemDevicePath (
-  IN  EFI_HANDLE                         DeviceHandle  OPTIONAL,
-  IN  EFI_DEVICE_PATH_PROTOCOL           *FilePath     OPTIONAL
-  )
-{
-  EFI_STATUS                Status;
-  EFI_DEVICE_PATH_PROTOCOL  *FileSystemPath;
-
-  if (DeviceHandle == NULL) {
-    //
-    // Locate DeviceHandle if we have none (idea by dmazar).
-    //
-    if (FilePath == NULL) {
-      DEBUG ((DEBUG_WARN, "No device handle or path to proceed\n"));
-      return NULL;
-    }
-
-    Status = gBS->LocateDevicePath (
-      &gEfiSimpleFileSystemProtocolGuid,
-      &FilePath,
-      &DeviceHandle
-      );
-
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "Failed to locate device handle over path - %r\n", Status));
-      return NULL;
-    }
-  }
-
-  FileSystemPath = DevicePathFromHandle (DeviceHandle);
-
-  if (FileSystemPath == NULL) {
-    DEBUG ((DEBUG_WARN, "Failed to locate simple fs on handle %p\n", DeviceHandle));
-
-    //
-    // Retry by looking up the handle based on FilePath.
-    //
-    if (FilePath != NULL) {
-      DEBUG ((DEBUG_INFO, "Retrying to locate fs with NULL handle\n"));
-
-      return LocateFileSystemDevicePath (
-        NULL,
-        FilePath
-        );
-    }
-  }
-
-  return FileSystemPath;
-}
-
 VOID
 DebugPrintDevicePath (
   IN UINTN                     ErrorLevel,
