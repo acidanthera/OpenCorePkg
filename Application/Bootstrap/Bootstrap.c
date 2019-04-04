@@ -12,6 +12,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
+#include <OpenCore.h>
 #include <Uefi.h>
 
 #include <Protocol/DevicePath.h>
@@ -46,7 +47,7 @@ LoadOpenCore (
   ASSERT (ImageHandle != NULL);
 
   BufferSize = 0;
-  Buffer = ReadFile (FileSystem, L"EFI\\OC\\OpenCore.efi", &BufferSize);
+  Buffer = ReadFile (FileSystem, OPEN_CORE_IMAGE_PATH, &BufferSize);
   if (Buffer == NULL) {
     DEBUG ((DEBUG_ERROR, "BS: Failed to locate valid OpenCore image - %p!\n", Buffer));
     return EFI_NOT_FOUND;
@@ -132,7 +133,7 @@ UefiMain (
   //
   // We have just started at EFI/BOOT/BOOTx64.efi.
   // We need to run OpenCore on this partition as it failed automatically.
-  // The image is optionally located at EFI/OC/OpenCore.efi file.
+  // The image is optionally located at OPEN_CORE_IMAGE_PATH file.
   //
 
   LoadedImage = NULL;

@@ -26,6 +26,11 @@
   }
 
 ///
+/// OC_BOOTSTRAP_PROTOCOL revision
+///
+#define OC_BOOTSTRAP_PROTOCOL_REVISION 1
+
+///
 /// Forward declaration of OC_BOOTSTRAP_PROTOCOL structure.
 ///
 typedef struct OC_BOOTSTRAP_PROTOCOL_ OC_BOOTSTRAP_PROTOCOL;

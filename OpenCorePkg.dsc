@@ -70,6 +70,7 @@
   OcProtocolLib|OcSupportPkg/Library/OcProtocolLib/OcProtocolLib.inf
   OcSerializeLib|OcSupportPkg/Library/OcSerializeLib/OcSerializeLib.inf
   OcSmbiosLib|OcSupportPkg/Library/OcSmbiosLib/OcSmbiosLib.inf
+  OcStorageLib|OcSupportPkg/Library/OcStorageLib/OcStorageLib.inf
   OcStringLib|OcSupportPkg/Library/OcStringLib/OcStringLib.inf
   OcTemplateLib|OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
   OcTimerLib|OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
@@ -78,6 +79,7 @@
 
 [Components]
   OpenCorePkg/Application/Bootstrap/Bootstrap.inf
+  OpenCorePkg/Platform/OpenCore/OpenCore.inf
 
 [PcdsFixedAtBuild]
   gEfiMdePkgTokenSpaceGuid.PcdMaximumAsciiStringLength|0
