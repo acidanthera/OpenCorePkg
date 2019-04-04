@@ -22,12 +22,69 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcBootManagementLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcStorageLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiDriverEntryPoint.h>
 #include <Library/UefiLib.h>
+
+STATIC
+EFI_STATUS
+EFIAPI OcStartImage (
+  IN  EFI_HANDLE                  ImageHandle,
+  OUT UINTN                       *ExitDataSize,
+  OUT CHAR16                      **ExitData    OPTIONAL
+  )
+{
+  //
+  // TODO: Perform file system interception here...
+  //
+
+  return gBS->StartImage (
+    ImageHandle,
+    ExitDataSize,
+    ExitData
+    );
+}
+
+STATIC
+VOID
+OcMain (
+  IN OC_STORAGE_CONTEXT  *Storage
+  )
+{
+  EFI_STATUS          Status;
+  CHAR8               *Config;
+  UINT32              ConfigSize;
+
+  Config = OcStorageReadFileUnicode (
+    Storage,
+    OPEN_CORE_CONFIG_PATH,
+    &ConfigSize
+    );
+
+  if (Config != NULL) {
+    //
+    // TODO: parse configuration.
+    //
+    DEBUG ((DEBUG_INFO, "OC: Loaded configuration of %u bytes\n", ConfigSize));
+    FreePool (Config);
+  } else {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to load configuration!\n"));
+  }
+
+  Status = OcRunSimpleBootMenu (
+    OC_SCAN_DEFAULT_POLICY,
+    OC_LOAD_DEFAULT_POLICY,
+    5,
+    OcStartImage
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to show boot menu!\n"));
+  }
+}
 
 STATIC
 VOID
@@ -38,8 +95,6 @@ OcBootstrapRerun (
 {
   EFI_STATUS          Status;
   OC_STORAGE_CONTEXT  Storage;
-  CHAR8               *Config;
-  UINT32              ConfigSize;
 
   DEBUG ((DEBUG_INFO, "OC: ReRun executed!\n"));
 
@@ -59,18 +114,7 @@ OcBootstrapRerun (
     return;
   }
 
-  Config = OcStorageReadFileUnicode (
-    &Storage,
-    OPEN_CORE_CONFIG_PATH,
-    &ConfigSize
-    );
-
-  if (Config != NULL) {
-    DEBUG ((DEBUG_INFO, "OC: Loaded configuration of %u bytes\n", ConfigSize));
-    FreePool (Config);
-  } else {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to load configuration!\n"));
-  }
+  OcMain (&Storage);
 
   OcStorageFree (&Storage);
 }
