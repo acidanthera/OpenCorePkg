@@ -124,7 +124,7 @@ RecalculateTSC (
     }
   }
 
-  DEBUG ((DEBUG_INFO, "TscFrequency %lld\n", mPerformanceCounterFrequency));
+  DEBUG ((DEBUG_VERBOSE, "TscFrequency %lld\n", mPerformanceCounterFrequency));
 
   return mPerformanceCounterFrequency;
 }
