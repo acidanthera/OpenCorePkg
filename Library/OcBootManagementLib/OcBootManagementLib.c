@@ -30,6 +30,7 @@
 #include <Library/OcXmlLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
@@ -566,4 +567,91 @@ OcLoadBootEntry (
   // TODO: support Apple loaded image, policy, and dmg boot.
   //
   return gBS->LoadImage (FALSE, ParentHandle, BootEntry->DevicePath, NULL, 0, EntryHandle);
+}
+
+EFI_STATUS
+OcRunSimpleBootMenu (
+  IN  UINT32           LookupPolicy,
+  IN  UINT32           BootPolicy,
+  IN  UINT32           TimeoutSeconds,
+  IN  EFI_IMAGE_START  StartImage
+  )
+{
+  EFI_STATUS                  Status;
+  APPLE_BOOT_POLICY_PROTOCOL  *AppleBootPolicy;
+  OC_BOOT_ENTRY               *Chosen;
+  OC_BOOT_ENTRY               *Entries;
+  UINTN                       EntryCount;
+  EFI_HANDLE                  BooterHandle;
+
+  Status = OcAppleBootPolicyInstallProtocol (gImageHandle, gST);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "AppleBootPolicy install failure - %r\n", Status));
+  }
+
+  Status = gBS->LocateProtocol (
+    &gAppleBootPolicyProtocolGuid,
+    NULL,
+    (VOID **) &AppleBootPolicy
+    );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "AppleBootPolicy locate failure - %r\n", Status));
+    return Status;
+  }
+
+  while (TRUE) {
+    Status = OcScanForBootEntries (
+      AppleBootPolicy,
+      LookupPolicy,
+      &Entries,
+      &EntryCount,
+      NULL,
+      TRUE
+      );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OcScanForBootEntries failure - %r\n", Status));
+      return Status;
+    }
+
+    //
+    // TODO: obtain default entry!
+    //
+    Status = OcShowSimpleBootMenu (
+      Entries,
+      EntryCount,
+      0,
+      TimeoutSeconds,
+      &Chosen
+      );
+
+    if (EFI_ERROR (Status) && Status != EFI_ABORTED) {
+      DEBUG ((DEBUG_ERROR, "OcShowSimpleBootMenu failed - %r\n", Status));
+      OcFreeBootEntries (Entries, EntryCount);
+      return Status;
+    }
+
+    TimeoutSeconds = 0;
+
+    if (!EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "Should boot from %s\n", Chosen->Name));
+    }
+
+    if (!EFI_ERROR (Status)) {
+      Status = OcLoadBootEntry (Chosen, BootPolicy, gImageHandle, &BooterHandle);
+      if (!EFI_ERROR (Status)) {
+        Status = StartImage (BooterHandle, NULL, NULL);
+        if (EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_ERROR, "StartImage failed - %r\n", Status));
+        }
+      } else {
+        DEBUG ((DEBUG_ERROR, "LoadImage failed - %r\n", Status));
+      }
+
+      gBS->Stall (5000000);
+    }
+
+    OcFreeBootEntries (Entries, EntryCount);
+  }
 }

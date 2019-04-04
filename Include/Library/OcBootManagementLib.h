@@ -232,4 +232,22 @@ OcLoadBootEntry (
   OUT EFI_HANDLE                  *EntryHandle
   );
 
+/**
+  Install missing boot policy, scan, and show simple boot menu.
+
+  @param[in]  LookupPolicy     Lookup policy.
+  @param[in]  BootPolicy       Boot policy.
+  @param[in]  TimeOutSeconds   Default entry selection timeout (pass 0 to ignore).
+  @param[in]  StartImage       Image starting routine used.
+
+  @retval does not return unless a fatal error happened.
+**/
+EFI_STATUS
+OcRunSimpleBootMenu (
+  IN  UINT32           LookupPolicy,
+  IN  UINT32           BootPolicy,
+  IN  UINT32           TimeoutSeconds,
+  IN  EFI_IMAGE_START  StartImage
+  );
+
 #endif // OC_BOOT_MANAGEMENT_LIB_H
