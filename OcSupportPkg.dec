@@ -72,6 +72,9 @@
   OcCompressionLib|Include/Library/OcCompressionLib.h
 
   ##  @libraryclass
+  OcConfigurationLib|Include/Library/OcConfigurationLib.h
+
+  ##  @libraryclass
   OcCpuLib|Include/Library/OcCpuLib.h
 
   ##  @libraryclass

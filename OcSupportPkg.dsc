@@ -84,6 +84,7 @@
   OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcSupportPkg/Library/OcAppleKernelLib/OcAppleKernelLib.inf
   OcSupportPkg/Library/OcBootManagementLib/OcBootManagementLib.inf
+  OcSupportPkg/Library/OcConfigurationLib/OcConfigurationLib.inf
   OcSupportPkg/Library/OcCpuLib/OcCpuLib.inf
   OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
   OcSupportPkg/Library/OcCompressionLib/OcCompressionLib.inf

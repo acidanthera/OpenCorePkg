@@ -92,15 +92,27 @@ VOID
     };                                                                             \
   }                                                                                \
   VOID Name ## _DESTRUCT(VOID *Ptr, UINT32 Size) {                                 \
-    Name  *Obj = (Name *) Ptr;                                                     \
+    Name  *Obj = (Name *) Ptr;  (VOID) Obj;                                        \
     PRIV_OC_INVOKE_DESTRUCTOR(Destructor, Obj, sizeof (Name));                     \
     Name ## _FIELDS(PRIV_OC_DESTRUCT_STRUCT_MEMBER, PRIV_OC_STRUCTOR_EXPAND)       \
   }
 
 //
 // Use previously defined structure constructor or destructor
+// FIXME: We need to use these recursively, and normally one would implement
+// it with deferred execution, like this:
+// #define OC_CONSTR_REAL(A, _, __) ({A ## _FIELDS(_, __)})
+// #define OC_CONSTR_REAL_ID() OC_CONSTR_REAL
+// #define OC_CONSTR DEFER(OC_CONSTR_REAL_ID)()
+// However, this will not work in this exact case, as _, which itself is a macro,
+// changes the expansion order. The right fix here is to entirely remove the mess
+// and use external tool for template generation.
 //
-#define OC_CONSTR(A, _, __) {A ## _FIELDS(_, __)}
+#define OC_CONSTR(A, _, __)  {A ## _FIELDS(_, __)}
+#define OC_CONSTR1(A, _, __) {A ## _FIELDS(_, __)}
+#define OC_CONSTR2(A, _, __) {A ## _FIELDS(_, __)}
+#define OC_CONSTR3(A, _, __) {A ## _FIELDS(_, __)}
+#define OC_CONSTR5(A, _, __) {A ## _FIELDS(_, __)}
 #define OC_DESTR(A) A ## _DESTRUCT
 
 //
@@ -237,9 +249,9 @@ OcListEntryAllocate (
 
 //
 // Some useful generic types
-// OC_STRING_T  - implements support for resizable ASCII strings.
-// OC_BLOB_T    - implements support for resizable data blobs.
-// OC_ASSOC_MAP - implements support for maps with ASCII keys and data values.
+// OC_STRING  - implements support for resizable ASCII strings.
+// OC_DATA    - implements support for resizable data blobs.
+// OC_ASSOC   - implements support for maps with ASCII keys and data values.
 //
 #define OC_STRING_FIELDS(_, __) \
   OC_BLOB (CHAR8, [64], {0}, _, __)
