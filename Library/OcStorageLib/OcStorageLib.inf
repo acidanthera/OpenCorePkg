@@ -2,7 +2,7 @@
 #
 #  Component description file for OcFileLibrary.
 #
-#  Copyright (C) 2016 - 2017, The HermitCrabs Lab. All rights reserved.<BR>
+#  Copyright (C) 2019, vit9696. All rights reserved.<BR>
 #
 # All rights reserved.
 #
@@ -18,20 +18,16 @@
 
 [Defines]
   INF_VERSION    = 0x00010005
-  BASE_NAME      = OcFileLib
-  FILE_GUID      = E7FF8BF4-1641-44AF-BFCE-EF3CF0EF21BE
+  BASE_NAME      = OcStorageLib
+  FILE_GUID      = 2B20EC2A-ACAB-4A98-B34A-B5B9BFB05746
   MODULE_TYPE    = BASE
   VERSION_STRING = 1.0
-  LIBRARY_CLASS  = OcFileLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+  LIBRARY_CLASS  = OcStorageLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
 
 # VALID_ARCHITECTURES = IA32 X64
 
 [Sources]
-  FileProtocol.c
-  GetFileInfo.c
-  GetVolumeLabel.c
-  LocateFileSystem.c
-  ReadFile.c
+  OcStorageLib.c
 
 [Packages]
   OcSupportPkg/OcSupportPkg.dec
@@ -41,6 +37,8 @@
 [LibraryClasses]
   BaseLib
   MemoryAllocationLib
+  OcFileLib
+  OcStringLib
 
 [Guids]
   gEfiFileInfoGuid                     ## CONSUMES

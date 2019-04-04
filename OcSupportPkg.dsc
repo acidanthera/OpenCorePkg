@@ -100,6 +100,7 @@
   OcSupportPkg/Library/OcProtocolLib/OcProtocolLib.inf
   OcSupportPkg/Library/OcSerializeLib/OcSerializeLib.inf
   OcSupportPkg/Library/OcSmbiosLib/OcSmbiosLib.inf
+  OcSupportPkg/Library/OcStorageLib/OcStorageLib.inf
   OcSupportPkg/Library/OcStringLib/OcStringLib.inf
   OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
   OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf

@@ -114,6 +114,9 @@
   OcSmbiosLib|Include/Library/OcSmbiosLib.h
 
   ##  @libraryclass
+  OcStorageLib|Include/Library/OcStorageLib.h
+
+  ##  @libraryclass
   OcStringLib|Include/Library/OcStringLib.h
 
   ##  @libraryclass
