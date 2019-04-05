@@ -69,7 +69,7 @@ OcAppleChunklistInitializeContext (
   if (OcOverflowMulAddUN (sizeof (APPLE_CHUNKLIST_CHUNK), ChunklistHeader->ChunkCount, (UINTN) Context->Chunks, &DataEnd)
     || DataEnd > (UINTN) Buffer + Length
     || OcOverflowAddUN (sizeof (APPLE_CHUNKLIST_SIG), (UINTN) Context->Signature, &DataEnd)
-    || DataEnd > (UINTN) Buffer + Length) {
+    || DataEnd != (UINTN) Buffer + Length) {
     return EFI_INVALID_PARAMETER;
   }
 
