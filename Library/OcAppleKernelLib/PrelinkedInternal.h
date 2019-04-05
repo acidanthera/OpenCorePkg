@@ -178,7 +178,7 @@ InternalCachedPrelinkedKernel (
 /**
   Scan PRELINKED_KEXT for dependencies.
 **/
-EFI_STATUS
+RETURN_STATUS
 InternalScanPrelinkedKext (
   IN OUT PRELINKED_KEXT     *Kext,
   IN OUT PRELINKED_CONTEXT  *Context
@@ -199,7 +199,6 @@ InternalUnlockContextKexts (
 
   @param[in,out] Context         Prelinked context.
   @param[in,out] Executable      Kext executable copied to prelinked.
-  @param[in]     ExecutableSize  Kext executable size.
   @param[in]     PlistRoot       Current kext info.plist.
   @param[in]     LoadAddress     Kext load address.
   @param[in]     KmodAddress     Kext kmod address.
@@ -282,7 +281,7 @@ typedef struct {
 // Due to the location logic, the three symbols pointers will not be equal.
 //
 OC_GLOBAL_STATIC_ASSERT (
-  ((sizeof (VOID *) + MAX ((2 * sizeof (UINT32)), sizeof (VOID *))) <= sizeof (MACH_NLIST_64)),
+  ((sizeof (MACH_NLIST_64 *) + MAX ((2 * sizeof (UINT32)), sizeof (UINT64 *))) <= sizeof (MACH_NLIST_64)),
   "VTable Patch data might not safely fit LinkBuffer"
   );
 
@@ -368,15 +367,9 @@ InternalSolveSymbolValue64 (
   Prelinks the specified KEXT against the specified LoadAddress and the data
   of its dependencies.
 
-  @param[in,out] MachoContext     Mach-O context of the KEXT to prelink.
-  @param[in]     LinkEditSegment  __LINKEDIT segment of the KEXT to prelink.
-  @param[in]     LoadAddress      The address this KEXT shall be linked
-                                  against.
-  @param[in]     DependencyData   List of data of all dependencies.
-  @param[in]     ExposeSymbols    Whether the symbol table shall be exposed.
-  @param[out]    OutputData       Buffer to output data into.
-  @param[out]    ScratchMemory    Scratch memory buffer that is at least as big
-                                  as the KEXT's __LINKEDIT segment.
+  @param[in,out] Context      Prelinking context.
+  @param[in]     Kext         KEXT prelinking context.
+  @param[in]     LoadAddress  The address this KEXT shall be linked against.
 
   @retval  Returned is whether the prelinking process has been successful.
            The state of the KEXT is undefined in case this routine fails.

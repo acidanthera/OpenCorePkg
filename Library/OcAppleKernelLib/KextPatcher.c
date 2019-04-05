@@ -12,21 +12,21 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include <Base.h>
+
 #include <IndustryStandard/AppleKmodInfo.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
-#include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleKernelLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcXmlLib.h>
-#include <Library/PrintLib.h>
 
 #include "PrelinkedInternal.h"
 
-EFI_STATUS
+RETURN_STATUS
 PatcherInitContextFromPrelinked (
   IN OUT PATCHER_CONTEXT    *Context,
   IN OUT PRELINKED_CONTEXT  *Prelinked,
@@ -37,14 +37,14 @@ PatcherInitContextFromPrelinked (
 
   Kext = InternalCachedPrelinkedKext (Prelinked, Name);
   if (Kext == NULL) {
-    return EFI_NOT_FOUND;
+    return RETURN_NOT_FOUND;
   }
 
   CopyMem (Context, &Kext->Context, sizeof (*Context));
-  return EFI_SUCCESS;
+  return RETURN_SUCCESS;
 }
 
-EFI_STATUS
+RETURN_STATUS
 PatcherInitContextFromBuffer (
   IN OUT PATCHER_CONTEXT    *Context,
   IN OUT UINT8              *Buffer,
@@ -65,7 +65,7 @@ PatcherInitContextFromBuffer (
   //
 
   if (!MachoInitializeContext (&Context->MachContext, Buffer, BufferSize)) {
-    return EFI_INVALID_PARAMETER;
+    return RETURN_INVALID_PARAMETER;
   }
 
   Segment = MachoGetSegmentByName64 (
@@ -73,16 +73,16 @@ PatcherInitContextFromBuffer (
     "__TEXT"
     );
   if (Segment == NULL || Segment->VirtualAddress < Segment->FileOffset) {
-    return EFI_NOT_FOUND;
+    return RETURN_NOT_FOUND;
   }
 
   Context->VirtualBase = Segment->VirtualAddress - Segment->FileOffset;
   Context->VirtualKmod = 0;
 
-  return EFI_SUCCESS;
+  return RETURN_SUCCESS;
 }
 
-EFI_STATUS
+RETURN_STATUS
 PatcherGetSymbolAddress (
   IN OUT PATCHER_CONTEXT    *Context,
   IN     CONST CHAR8        *Name,
@@ -98,7 +98,7 @@ PatcherGetSymbolAddress (
   while (TRUE) {
     Symbol = MachoGetSymbolByIndex64 (&Context->MachContext, Index);
     if (Symbol == NULL) {
-      return EFI_NOT_FOUND;
+      return RETURN_NOT_FOUND;
     }
 
     SymbolName = MachoGetSymbolName64 (&Context->MachContext, Symbol);
@@ -111,41 +111,41 @@ PatcherGetSymbolAddress (
   }
 
   if (!MachoSymbolGetFileOffset64 (&Context->MachContext, Symbol, &Offset, NULL)) {
-    return EFI_INVALID_PARAMETER;
+    return RETURN_INVALID_PARAMETER;
   }
 
-  *Address = (UINT8 *) MachoGetMachHeader64 (&Context->MachContext) + Offset;
-  return EFI_SUCCESS;
+  *Address = (UINT8 *)MachoGetMachHeader64 (&Context->MachContext) + Offset;
+  return RETURN_SUCCESS;
 }
 
-EFI_STATUS
+RETURN_STATUS
 PatcherApplyGenericPatch (
   IN OUT PATCHER_CONTEXT        *Context,
   IN     PATCHER_GENERIC_PATCH  *Patch
   )
 {
-  EFI_STATUS  Status;
+  RETURN_STATUS  Status;
   UINT8       *Base;
   UINT32      Size;
   UINT32      ReplaceCount;
 
-  Base = (UINT8 *) MachoGetMachHeader64 (&Context->MachContext);
+  Base = (UINT8 *)MachoGetMachHeader64 (&Context->MachContext);
   Size = MachoGetFileSize (&Context->MachContext);
   if (Patch->Base != NULL) {
     Status = PatcherGetSymbolAddress (Context, Patch->Base, &Base);
-    if (EFI_ERROR (Status)) {
+    if (RETURN_ERROR (Status)) {
       return Status;
     }
 
-    Size -= (UINT32) (Base - (UINT8 *) MachoGetMachHeader64 (&Context->MachContext));
+    Size -= (UINT32)(Base - (UINT8 *)MachoGetMachHeader64 (&Context->MachContext));
   }
 
   if (Patch->Find == NULL) {
     if (Size < Patch->Size) {
-      return EFI_NOT_FOUND;
+      return RETURN_NOT_FOUND;
     }
     CopyMem (Base, Patch->Replace, Patch->Size);
-    return EFI_SUCCESS;
+    return RETURN_SUCCESS;
   }
 
   ReplaceCount = ApplyPatch (
@@ -170,13 +170,13 @@ PatcherApplyGenericPatch (
   }
 
   if (ReplaceCount > 0) {
-    return EFI_SUCCESS;
+    return RETURN_SUCCESS;
   }
 
-  return EFI_NOT_FOUND;
+  return RETURN_NOT_FOUND;
 }
 
-EFI_STATUS
+RETURN_STATUS
 PatcherBlockKext (
   IN OUT PATCHER_CONTEXT        *Context
   )
@@ -190,25 +190,25 @@ PatcherBlockKext (
   // Kernel has 0 kmod.
   //
   if (Context->VirtualKmod == 0 || Context->VirtualBase > Context->VirtualKmod) {
-    return EFI_UNSUPPORTED;
+    return RETURN_UNSUPPORTED;
   }
 
   KmodOffset = Context->VirtualKmod - Context->VirtualBase;
-  KmodInfo   = (KMOD_INFO_64_V1 *) ((UINT8 *) MachoGetMachHeader64 (&Context->MachContext) + KmodOffset);
+  KmodInfo   = (KMOD_INFO_64_V1 *)((UINT8 *) MachoGetMachHeader64 (&Context->MachContext) + KmodOffset);
   if (OcOverflowAddU64 (KmodOffset, sizeof (KMOD_INFO_64_V1), &TmpOffset)
     || KmodOffset > MachoGetFileSize (&Context->MachContext)
     || !OC_ALIGNED (KmodInfo)
     || KmodInfo->StartAddr == 0
     || Context->VirtualBase > KmodInfo->StartAddr) {
-    return EFI_INVALID_PARAMETER;
+    return RETURN_INVALID_PARAMETER;
   }
 
   TmpOffset = KmodInfo->StartAddr - Context->VirtualBase;
   if (TmpOffset > MachoGetFileSize (&Context->MachContext) - 6) {
-    return EFI_INVALID_PARAMETER;
+    return RETURN_INVALID_PARAMETER;
   }
 
-  PatchAddr = (UINT8 *) MachoGetMachHeader64 (&Context->MachContext) + TmpOffset;
+  PatchAddr = (UINT8 *)MachoGetMachHeader64 (&Context->MachContext) + TmpOffset;
 
   //
   // mov eax, KMOD_RETURN_FAILURE
@@ -221,5 +221,5 @@ PatcherBlockKext (
   PatchAddr[4] = 0x00;
   PatchAddr[5] = 0xC3;
 
-  return EFI_SUCCESS;
+  return RETURN_SUCCESS;
 }

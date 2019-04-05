@@ -12,9 +12,7 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include <Uefi.h>
-
-#include <IndustryStandard/AppleKmodInfo.h>
+#include <Base.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -22,10 +20,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleKernelLib.h>
 #include <Library/OcMachoLib.h>
-#include <Library/OcMiscLib.h>
-#include <Library/OcStringLib.h>
 #include <Library/OcXmlLib.h>
-#include <Library/PrintLib.h>
 
 #include "PrelinkedInternal.h"
 
@@ -172,7 +167,7 @@ InternalCreatePrelinkedKext (
 }
 
 STATIC
-EFI_STATUS
+RETURN_STATUS
 InternalScanCurrentPrelinkedKext (
   IN OUT PRELINKED_KEXT  *Kext
   )
@@ -184,7 +179,7 @@ InternalScanCurrentPrelinkedKext (
       );
 
     if (Kext->LinkEditSegment == NULL) {
-      return EFI_NOT_FOUND;
+      return RETURN_NOT_FOUND;
     }
   }
 
@@ -201,15 +196,15 @@ InternalScanCurrentPrelinkedKext (
                    NULL
                    );
     if (Kext->NumberOfSymbols == 0) {
-      return EFI_NOT_FOUND;
+      return RETURN_NOT_FOUND;
     }
   }
 
-  return EFI_SUCCESS;
+  return RETURN_SUCCESS;
 }
 
 STATIC
-EFI_STATUS
+RETURN_STATUS
 InternalScanBuildLinkedSymbolTable (
   IN OUT PRELINKED_KEXT     *Kext,
   IN     PRELINKED_CONTEXT  *Context
@@ -230,12 +225,12 @@ InternalScanBuildLinkedSymbolTable (
   BOOLEAN               Result;
 
   if (Kext->LinkedSymbolTable != NULL) {
-    return EFI_SUCCESS;
+    return RETURN_SUCCESS;
   }
 
   SymbolTable = AllocatePool (Kext->NumberOfSymbols * sizeof (*SymbolTable));
   if (SymbolTable == NULL) {
-    return EFI_OUT_OF_RESOURCES;
+    return RETURN_OUT_OF_RESOURCES;
   }
 
   MachHeader = MachoGetMachHeader64 (&Kext->Context.MachContext);
@@ -277,7 +272,7 @@ InternalScanBuildLinkedSymbolTable (
         Name = MachoGetIndirectSymbolName64 (&Kext->Context.MachContext, Symbol);
         if (Name == NULL) {
           FreePool (SymbolTable);
-          return EFI_LOAD_ERROR;
+          return RETURN_LOAD_ERROR;
         }
 
         CopyMem (&SymbolScratch, Symbol, sizeof (SymbolScratch));
@@ -289,7 +284,7 @@ InternalScanBuildLinkedSymbolTable (
                            );
         if (ResolvedSymbol == NULL) {
           FreePool (SymbolTable);
-          return EFI_NOT_FOUND;
+          return RETURN_NOT_FOUND;
         }
         SymbolScratch.Value = ResolvedSymbol->Value;
         Symbol = &SymbolScratch;
@@ -326,11 +321,11 @@ InternalScanBuildLinkedSymbolTable (
   Kext->NumberOfCxxSymbols = NumCxxSymbols;
   Kext->LinkedSymbolTable  = SymbolTable;
 
-  return EFI_SUCCESS;
+  return RETURN_SUCCESS;
 }
 
 STATIC
-EFI_STATUS
+RETURN_STATUS
 InternalScanBuildLinkedVtables (
   IN OUT PRELINKED_KEXT     *Kext,
   IN     PRELINKED_CONTEXT  *Context
@@ -348,7 +343,7 @@ InternalScanBuildLinkedVtables (
   PRELINKED_VTABLE                 *LinkedVtables;
 
   if (Kext->LinkedVtables != NULL) {
-    return EFI_SUCCESS;
+    return RETURN_SUCCESS;
   }
 
   VtableLookups = Context->LinkBuffer;
@@ -361,7 +356,7 @@ InternalScanBuildLinkedVtables (
              VtableLookups
              );
   if (!Result) {
-    return EFI_UNSUPPORTED;
+    return RETURN_UNSUPPORTED;
   }
 
   NumEntries = 0;
@@ -378,7 +373,7 @@ InternalScanBuildLinkedVtables (
                    &VtableMaxSize
                    );
     if ((VtableData == NULL) || !OC_ALIGNED (VtableData)) {
-      return EFI_UNSUPPORTED;
+      return RETURN_UNSUPPORTED;
     }
 
     Result = InternalGetVtableEntries64 (
@@ -387,7 +382,7 @@ InternalScanBuildLinkedVtables (
                &NumEntriesTemp
                );
     if (!Result) {
-      return EFI_UNSUPPORTED;
+      return RETURN_UNSUPPORTED;
     }
 
     VtableLookups[Index].Vtable.Data = VtableData;
@@ -400,7 +395,7 @@ InternalScanBuildLinkedVtables (
                       + (NumEntries * sizeof (*LinkedVtables->Entries))
                     );
   if (LinkedVtables == NULL) {
-    return EFI_OUT_OF_RESOURCES;
+    return RETURN_OUT_OF_RESOURCES;
   }
 
   InternalCreateVtablesPrelinked64 (
@@ -414,11 +409,11 @@ InternalScanBuildLinkedVtables (
   Kext->NumberOfVtables = NumVtables;
   Kext->LinkedVtables   = LinkedVtables;
 
-  return EFI_SUCCESS;
+  return RETURN_SUCCESS;
 }
 
 STATIC
-EFI_STATUS
+RETURN_STATUS
 InternalInsertPrelinkedKextDependency (
   IN OUT PRELINKED_KEXT     *Kext,
   IN OUT PRELINKED_CONTEXT  *Context,
@@ -426,20 +421,20 @@ InternalInsertPrelinkedKextDependency (
   IN OUT PRELINKED_KEXT     *DependencyKext
   )
 {
-  EFI_STATUS  Status;
+  RETURN_STATUS  Status;
 
   if (DependencyIndex >= ARRAY_SIZE (Kext->Dependencies)) {
     DEBUG ((DEBUG_INFO, "Kext %a has more than %u or more dependencies!", Kext->Identifier, DependencyIndex));
-    return EFI_OUT_OF_RESOURCES;
+    return RETURN_OUT_OF_RESOURCES;
   }
 
   Status = InternalScanPrelinkedKext (DependencyKext, Context);
-  if (EFI_ERROR (Status)) {
+  if (RETURN_ERROR (Status)) {
     return Status;
   }
 
   Status = InternalScanBuildLinkedSymbolTable (DependencyKext, Context);
-  if (EFI_ERROR (Status)) {
+  if (RETURN_ERROR (Status)) {
     return Status;
   }
 
@@ -463,7 +458,7 @@ InternalInsertPrelinkedKextDependency (
   }
 
   Status = InternalScanBuildLinkedVtables (DependencyKext, Context);
-  if (EFI_ERROR (Status)) {
+  if (RETURN_ERROR (Status)) {
     return Status;
   }
 
@@ -471,7 +466,6 @@ InternalInsertPrelinkedKextDependency (
 
   return RETURN_SUCCESS;
 }
-
 
 PRELINKED_KEXT *
 InternalNewPrelinkedKext (
@@ -610,13 +604,13 @@ InternalCachedPrelinkedKernel (
   return NewKext;
 }
 
-EFI_STATUS
+RETURN_STATUS
 InternalScanPrelinkedKext (
   IN OUT PRELINKED_KEXT     *Kext,
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
-  EFI_STATUS      Status;
+  RETURN_STATUS      Status;
   UINT32          FieldCount;
   UINT32          FieldIndex;
   UINT32          DependencyIndex;
@@ -624,7 +618,7 @@ InternalScanPrelinkedKext (
   PRELINKED_KEXT  *DependencyKext;
 
   Status = InternalScanCurrentPrelinkedKext (Kext);
-  if (EFI_ERROR (Status)) {
+  if (RETURN_ERROR (Status)) {
     return Status;
   }
   //
@@ -646,7 +640,7 @@ InternalScanPrelinkedKext (
 
   if (DependencyKext != Kext) {
     Status = InternalInsertPrelinkedKextDependency (Kext, Context, 0, DependencyKext);
-    if (EFI_ERROR (Status)) {
+    if (RETURN_ERROR (Status)) {
       return Status;
     }
   }
@@ -690,7 +684,7 @@ InternalScanPrelinkedKext (
       }
 
       Status = InternalInsertPrelinkedKextDependency (Kext, Context, DependencyIndex, DependencyKext);
-      if (EFI_ERROR (Status)) {
+      if (RETURN_ERROR (Status)) {
         return Status;
       }
 
@@ -731,7 +725,6 @@ InternalUnlockContextKexts (
   }
 }
 
-
 PRELINKED_KEXT *
 InternalLinkPrelinkedKext (
   IN OUT PRELINKED_CONTEXT  *Context,
@@ -741,7 +734,7 @@ InternalLinkPrelinkedKext (
   IN     UINT64             KmodAddress
   )
 {
-  EFI_STATUS      Status;
+  RETURN_STATUS      Status;
   PRELINKED_KEXT  *Kext;
 
   Kext = InternalNewPrelinkedKext (Executable, PlistRoot);
@@ -750,7 +743,7 @@ InternalLinkPrelinkedKext (
   }
 
   Status = InternalScanPrelinkedKext (Kext, Context);
-  if (EFI_ERROR (Status)) {
+  if (RETURN_ERROR (Status)) {
     InternalFreePrelinkedKext (Kext);
     return NULL;
   }
@@ -764,9 +757,9 @@ InternalLinkPrelinkedKext (
     return NULL;
   }
 
-  Status = PrelinkedDependencyInsert (Context, (CHAR8 *) Kext->Identifier);
-  if (EFI_ERROR (Status)) {
-    FreePool ((CHAR8 *) Kext->Identifier);
+  Status = PrelinkedDependencyInsert (Context, (VOID *)Kext->Identifier);
+  if (RETURN_ERROR (Status)) {
+    FreePool ((VOID *)Kext->Identifier);
     InternalFreePrelinkedKext (Kext);
     return NULL;
   }
@@ -780,9 +773,9 @@ InternalLinkPrelinkedKext (
       return NULL;
     }
 
-    Status = PrelinkedDependencyInsert (Context, (CHAR8 *) Kext->CompatibleVersion);
-    if (EFI_ERROR (Status)) {
-      FreePool ((CHAR8 *) Kext->CompatibleVersion);
+    Status = PrelinkedDependencyInsert (Context, (VOID *)Kext->CompatibleVersion);
+    if (RETURN_ERROR (Status)) {
+      FreePool ((VOID *)Kext->CompatibleVersion);
       InternalFreePrelinkedKext (Kext);
       return NULL;
     }
@@ -795,7 +788,7 @@ InternalLinkPrelinkedKext (
 
   Status = InternalPrelinkKext64 (Context, Kext, LoadAddress);
 
-  if (EFI_ERROR (Status)) {
+  if (RETURN_ERROR (Status)) {
     InternalFreePrelinkedKext (Kext);
     return NULL;
   }

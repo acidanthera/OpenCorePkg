@@ -196,7 +196,7 @@ typedef struct {
 
   @return  EFI_SUCCESS on success.
 **/
-EFI_STATUS
+RETURN_STATUS
 ReadAppleKernel (
   IN     EFI_FILE_PROTOCOL  *File,
   IN OUT UINT8              **Kernel,
@@ -217,7 +217,7 @@ ReadAppleKernel (
 
   @return  EFI_SUCCESS on success.
 **/
-EFI_STATUS
+RETURN_STATUS
 PrelinkedContextInit (
   IN OUT  PRELINKED_CONTEXT  *Context,
   IN OUT  UINT8              *Prelinked,
@@ -244,7 +244,7 @@ PrelinkedContextFree (
 
   @return  EFI_SUCCESS on success.
 **/
-EFI_STATUS
+RETURN_STATUS
 PrelinkedDependencyInsert (
   IN OUT  PRELINKED_CONTEXT  *Context,
   IN      VOID               *Buffer
@@ -256,7 +256,7 @@ PrelinkedDependencyInsert (
 
   @param[in,out] Context  Prelinked context.
 **/
-EFI_STATUS
+RETURN_STATUS
 PrelinkedInjectPrepare (
   IN OUT PRELINKED_CONTEXT  *Context
   );
@@ -268,7 +268,7 @@ PrelinkedInjectPrepare (
 
   @return  EFI_SUCCESS on success.
 **/
-EFI_STATUS
+RETURN_STATUS
 PrelinkedInjectComplete (
   IN OUT PRELINKED_CONTEXT  *Context
   );
@@ -283,7 +283,7 @@ PrelinkedInjectComplete (
 
   @return  EFI_SUCCESS on success.
 **/
-EFI_STATUS
+RETURN_STATUS
 PrelinkedReserveKextSize (
   IN OUT UINT32       *ReservedSize,
   IN     UINT32       InfoPlistSize,
@@ -304,7 +304,7 @@ PrelinkedReserveKextSize (
 
   @return  EFI_SUCCESS on success.
 **/
-EFI_STATUS
+RETURN_STATUS
 PrelinkedInjectKext (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     CONST CHAR8        *BundlePath,
@@ -324,7 +324,7 @@ PrelinkedInjectKext (
 
   @return  EFI_SUCCESS on success.
 **/
-EFI_STATUS
+RETURN_STATUS
 PatcherInitContextFromPrelinked (
   IN OUT PATCHER_CONTEXT    *Context,
   IN OUT PRELINKED_CONTEXT  *Prelinked,
@@ -340,7 +340,7 @@ PatcherInitContextFromPrelinked (
 
   @return  EFI_SUCCESS on success.
 **/
-EFI_STATUS
+RETURN_STATUS
 PatcherInitContextFromBuffer (
   IN OUT PATCHER_CONTEXT    *Context,
   IN OUT UINT8              *Buffer,
@@ -356,7 +356,7 @@ PatcherInitContextFromBuffer (
 
   @return  EFI_SUCCESS on success.
 **/
-EFI_STATUS
+RETURN_STATUS
 PatcherGetSymbolAddress (
   IN OUT PATCHER_CONTEXT    *Context,
   IN     CONST CHAR8        *Name,
@@ -371,7 +371,7 @@ PatcherGetSymbolAddress (
 
   @return  EFI_SUCCESS on success.
 **/
-EFI_STATUS
+RETURN_STATUS
 PatcherApplyGenericPatch (
   IN OUT PATCHER_CONTEXT        *Context,
   IN     PATCHER_GENERIC_PATCH  *Patch
@@ -384,7 +384,7 @@ PatcherApplyGenericPatch (
 
   @return  EFI_SUCCESS on success.
 **/
-EFI_STATUS
+RETURN_STATUS
 PatcherBlockKext (
   IN OUT PATCHER_CONTEXT        *Context
   );
@@ -397,7 +397,7 @@ PatcherBlockKext (
 
   @return  EFI_SUCCESS on success.
 **/
-EFI_STATUS
+RETURN_STATUS
 PatchAppleIntelCPUPowerManagement (
   IN OUT PRELINKED_CONTEXT  *Context
   );
@@ -409,7 +409,7 @@ PatchAppleIntelCPUPowerManagement (
 
   @return  EFI_SUCCESS on success.
 **/
-EFI_STATUS
+RETURN_STATUS
 PatchUsbXhciPortLimit (
   IN OUT PRELINKED_CONTEXT  *Context
   );
@@ -421,7 +421,7 @@ PatchUsbXhciPortLimit (
 
   @return  EFI_SUCCESS on success.
 **/
-EFI_STATUS
+RETURN_STATUS
 PatchThirdPartySsdTrim (
   IN OUT PRELINKED_CONTEXT  *Context
   );
@@ -433,7 +433,7 @@ PatchThirdPartySsdTrim (
 
   @return  EFI_SUCCESS on success.
 **/
-EFI_STATUS
+RETURN_STATUS
 PatchForceInternalDiskIcons (
   IN OUT PRELINKED_CONTEXT  *Context
   );

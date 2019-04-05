@@ -12,10 +12,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <Library/BaseMemoryLib.h>
-#include <Library/OcMiscLib.h>
-#include <Library/OcAppleKernelLib.h>
+#include <Base.h>
+
 #include <Library/DebugLib.h>
+#include <Library/OcAppleKernelLib.h>
 
 STATIC
 UINT8
@@ -89,13 +89,13 @@ mAppleIntelCPUPowerManagementPatch2 = {
   .Skip        = 0
 };
 
-EFI_STATUS
+RETURN_STATUS
 PatchAppleIntelCPUPowerManagement (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
-  EFI_STATUS       Status;
-  EFI_STATUS       Status2;
+  RETURN_STATUS       Status;
+  RETURN_STATUS       Status2;
   PATCHER_CONTEXT  Patcher;
 
   Status = PatcherInitContextFromPrelinked (
@@ -104,15 +104,15 @@ PatchAppleIntelCPUPowerManagement (
     "com.apple.driver.AppleIntelCPUPowerManagement"
     );
 
-  if (!EFI_ERROR (Status)) {
+  if (!RETURN_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &mAppleIntelCPUPowerManagementPatch);
-    if (EFI_ERROR (Status)) {
+    if (RETURN_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
     } else {
       DEBUG ((DEBUG_INFO, "Patch success com.apple.driver.AppleIntelCPUPowerManagement\n"));
     }
     Status2 = PatcherApplyGenericPatch (&Patcher, &mAppleIntelCPUPowerManagementPatch2);
-    if (EFI_ERROR (Status2)) {
+    if (RETURN_ERROR (Status2)) {
       DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status2));
     } else {
       DEBUG ((DEBUG_INFO, "Patch success com.apple.driver.AppleIntelCPUPowerManagement\n"));
@@ -121,7 +121,7 @@ PatchAppleIntelCPUPowerManagement (
     DEBUG ((DEBUG_INFO, "Failed to find com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
   }
 
-  return EFI_ERROR (Status) ? Status : Status2;
+  return RETURN_ERROR (Status) ? Status : Status2;
 }
 
 STATIC
@@ -199,12 +199,12 @@ mRemoveUsbLimitIoP1Patch = {
   .Skip        = 0
 };
 
-EFI_STATUS
+RETURN_STATUS
 PatchUsbXhciPortLimit (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
-  EFI_STATUS       Status;
+  RETURN_STATUS       Status;
   PATCHER_CONTEXT  Patcher;
 
   //
@@ -217,9 +217,9 @@ PatchUsbXhciPortLimit (
     "com.apple.iokit.IOUSBHostFamily"
     );
 
-  if (!EFI_ERROR (Status)) {
+  if (!RETURN_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &mRemoveUsbLimitIoP1Patch);
-    if (EFI_ERROR (Status)) {
+    if (RETURN_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "Failed to apply P1 patch com.apple.iokit.IOUSBHostFamily - %r\n", Status));
     } else {
       DEBUG ((DEBUG_INFO, "Patch success com.apple.iokit.IOUSBHostFamily\n"));
@@ -256,18 +256,18 @@ PatchUsbXhciPortLimit (
     "com.apple.driver.usb.AppleUSBXHCI"
     );
 
-  if (!EFI_ERROR (Status)) {
+  if (!RETURN_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &mRemoveUsbLimitV2Patch);
-    if (!EFI_ERROR (Status)) {
+    if (!RETURN_ERROR (Status)) {
       //
       // We do not need to patch com.apple.driver.usb.AppleUSBXHCI if this patch was successful.
       // Only legacy systems require com.apple.driver.usb.AppleUSBXHCI to be patched.
       //
       DEBUG ((DEBUG_INFO, "Patch success com.apple.driver.usb.AppleUSBXHCI\n"));
-      return EFI_SUCCESS;
-    } else {
-      DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
+      return RETURN_SUCCESS;
     }
+
+    DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
   } else {
     DEBUG ((DEBUG_INFO, "Failed to find com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
   }
@@ -281,9 +281,9 @@ PatchUsbXhciPortLimit (
     "com.apple.driver.usb.AppleUSBXHCIPCI"
     );
 
-  if (!EFI_ERROR (Status)) {
+  if (!RETURN_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &mRemoveUsbLimitV1Patch);
-    if (EFI_ERROR (Status)) {
+    if (RETURN_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
     } else {
       DEBUG ((DEBUG_INFO, "Patch success com.apple.driver.usb.AppleUSBXHCIPCI\n"));
@@ -320,12 +320,12 @@ mIOAHCIBlockStoragePatch = {
   .Skip        = 0
 };
 
-EFI_STATUS
+RETURN_STATUS
 PatchThirdPartySsdTrim (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
-  EFI_STATUS       Status;
+  RETURN_STATUS       Status;
   PATCHER_CONTEXT  Patcher;
 
   Status = PatcherInitContextFromPrelinked (
@@ -334,9 +334,9 @@ PatchThirdPartySsdTrim (
     "com.apple.iokit.IOAHCIBlockStorage"
     );
 
-  if (!EFI_ERROR (Status)) {
+  if (!RETURN_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &mIOAHCIBlockStoragePatch);
-    if (EFI_ERROR (Status)) {
+    if (RETURN_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.iokit.IOAHCIBlockStorage - %r\n", Status));
     } else {
       DEBUG ((DEBUG_INFO, "Patch success com.apple.iokit.IOAHCIBlockStorage\n"));
@@ -373,12 +373,12 @@ mIOAHCIPortPatch = {
   .Skip    = 0
 };
 
-EFI_STATUS
+RETURN_STATUS
 PatchForceInternalDiskIcons (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
-  EFI_STATUS       Status;
+  RETURN_STATUS       Status;
   PATCHER_CONTEXT  Patcher;
 
   Status = PatcherInitContextFromPrelinked (
@@ -387,9 +387,9 @@ PatchForceInternalDiskIcons (
     "com.apple.driver.AppleAHCIPort"
     );
 
-  if (!EFI_ERROR (Status)) {
+  if (!RETURN_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &mIOAHCIPortPatch);
-    if (EFI_ERROR (Status)) {
+    if (RETURN_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.AppleAHCIPort - %r\n", Status));
     } else {
       DEBUG ((DEBUG_INFO, "Patch success com.apple.driver.AppleAHCIPort\n"));

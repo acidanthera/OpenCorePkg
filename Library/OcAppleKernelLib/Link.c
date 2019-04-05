@@ -15,15 +15,15 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Base.h>
 
-#include <IndustryStandard/AppleMachoImage.h>
 #include <IndustryStandard/AppleKmodInfo.h>
+#include <IndustryStandard/AppleMachoImage.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/OcAppleKernelLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/OcMachoLib.h>
-#include <Library/OcAppleKernelLib.h>
 
 #include "PrelinkedInternal.h"
 
@@ -70,8 +70,8 @@ InternalOcGetSymbolWorkerName (
     // Please do not change this without careful profiling.
     //
     if (Symbols->Length == LookupValueLength) {
-      if (Symbols->Name[LookupValueLength/2] == LookupValue[LookupValueLength/2]
-        && Symbols->Name[LookupValueLength/2 + 1] == LookupValue[LookupValueLength/2 + 1]) {
+      if (Symbols->Name[LookupValueLength / 2] == LookupValue[LookupValueLength / 2]
+        && Symbols->Name[(LookupValueLength / 2) + 1] == LookupValue[(LookupValueLength / 2) + 1]) {
         for (Index = 0; Index < LookupValueLength; ++Index) {
           if (Symbols->Name[Index] != LookupValue[Index]) {
             break;
@@ -147,8 +147,8 @@ InternalOcGetSymbolWorkerValue (
   SymbolsEnd = &Symbols[NumSymbols & ~15ULL];
   while (Symbols < SymbolsEnd) {
     #define MATCH(X) if (Symbols[X].Value == LookupValue) { return &Symbols[X]; }
-    MATCH( 0) MATCH( 1) MATCH( 2) MATCH( 3) MATCH( 4) MATCH( 5) MATCH( 6) MATCH( 7)
-    MATCH( 8) MATCH( 9) MATCH(10) MATCH(11) MATCH(12) MATCH(13) MATCH(14) MATCH(15)
+    MATCH (0) MATCH (1) MATCH (2)  MATCH (3)  MATCH (4)  MATCH (5)  MATCH (6)  MATCH (7)
+    MATCH (8) MATCH (9) MATCH (10) MATCH (11) MATCH (12) MATCH (13) MATCH (14) MATCH (15)
     #undef MATCH
     Symbols += 16;
   }
@@ -193,7 +193,7 @@ InternalOcGetSymbolName (
   UINT32                      LookupValueLength;
 
   Symbol = NULL;
-  LookupValueLength = (UINT32) AsciiStrLen (LookupValue);
+  LookupValueLength = (UINT32)AsciiStrLen (LookupValue);
 
   //
   // Such symbols are illegit, but InternalOcGetSymbolWorkerName assumes Length > 0.
@@ -295,10 +295,10 @@ InternalSolveSymbolValue64 (
   Worker function to solve Symbol against the specified DefinedSymbols.
   It does not consider Symbol might be a weak reference.
 
-  @param[in,out] MachoContext    Context of the Mach-O.
-  @param[in]     DefinedSymbols  List of defined symbols of all dependencies.
-  @param[in]     Name            The name of the symbol to resolve against.
-  @param[in,out] Symbol          The symbol to be resolved.
+  @param[in,out] Context  Prelinking context.
+  @param[in]     Kext     KEXT prelinking context.
+  @param[in]     Name     The name of the symbol to resolve against.
+  @param[in,out] Symbol   The symbol to be resolved.
 
   @retval  Returned is whether the symbol was solved successfully.
 
@@ -362,8 +362,8 @@ InternalSolveSymbolNonWeak64 (
 /**
   Solves Symbol against the specified DefinedSymbols.
 
-  @param[in]     MachoContext     Context of the Mach-O.
-  @param[in]     DefinedSymbols   List of defined symbols of all dependencies.
+  @param[in,out] Context          Prelinking context.
+  @param[in]     Kext             KEXT prelinking context.
   @param[in]     Name             The name of the symbol to resolve against.
   @param[in,out] Symbol           The symbol to be resolved.
   @param[in,out] WeakTestValue    Points to the value of the Weak test symbol.
@@ -507,15 +507,15 @@ InternalCalculateDisplacementIntel64 (
   Calculate the target addresses for Relocation and NextRelocation.
   Logically matches XNU's calculate_targets.
 
-  @param[in]  MachoContext     Mach-O context of the KEXT to relocate.
-  @param[in]  LoadAddress      The address to be linked against.
-  @param[in]  Vtables          List of all dependent VTables.
-  @param[in]  Relocation       The Relocation to be resolved.
-  @param[in]  NextRelocation   The Relocation following Relocation.
-  @param[out] Target           Relocation's target address.
-  @param[out] PairTarget       NextRelocation's target address.
-  @param[out] Vtable           The VTable described by the symbol referenced by
-                               Relocation.  NULL, if there is none.
+  @param[in,out] Context          Prelinking context.
+  @param[in]     Kext             KEXT prelinking context.
+  @param[in]     LoadAddress      The address to be linked against.
+  @param[in]     Relocation       The Relocation to be resolved.
+  @param[in]     NextRelocation   The Relocation following Relocation.
+  @param[out]    Target           Relocation's target address.
+  @param[out]    PairTarget       NextRelocation's target address.
+  @param[out]    Vtable           The VTable described by the symbol referenced
+                                  by Relocation.  NULL, if there is none.
 
   @returns  Whether the operation was completed successfully.
 
@@ -679,12 +679,12 @@ InternalIsDirectPureVirtualCall64 (
   Relocates Relocation against the specified Symtab's Symbol Table and
   LoadAddress.  This logically matches KXLD's x86_64_process_reloc.
 
-  @param[in] MachoContext     Mach-O context of the KEXT to relocate.
-  @param[in] LoadAddress      The address to be linked against.
-  @param[in] Vtables          List of all dependent VTables.
-  @param[in] RelocationBase   The Relocations base address.
-  @param[in] Relocation       The Relocation to be processed.
-  @param[in] NextRelocation   The Relocation following Relocation.
+  @param[in,out] Context         Prelinking context.
+  @param[in]     Kext            KEXT prelinking context.
+  @param[in]     LoadAddress      The address to be linked against.
+  @param[in]     RelocationBase  The Relocations base address.
+  @param[in]     Relocation      The Relocation to be processed.
+  @param[in]     NextRelocation  The Relocation following Relocation.
 
   @retval 0          The Relocation does not need to be preseved.
   @retval 1          The Relocation must be preseved.
@@ -771,8 +771,6 @@ InternalRelocateRelocationIntel64 (
   if (!Result) {
     return MAX_UINTN;
   }
-
-  InvalidPcRel = FALSE;
 
   // Length == 2
   if (Length != 3) {
@@ -944,16 +942,16 @@ InternalRelocateRelocationIntel64 (
   Relocates all Mach-O Relocations and copies the ones to be preserved after
   prelinking to TargetRelocations.
 
-  @param[in]  MachoContext         Mach-O context of the KEXT to relocate.
-  @param[in]  LoadAddress          The address to be linked against.
-  @param[in]  Vtables              The patched VTables of this KEXT and its
-                                   dependencies.
-  @param[in]  RelocationBase       The Relocations base address.
-  @param[in]  SourceRelocations    The Relocations source buffer.
-  @param[in]  NumRelocations       On input, the number of source Relocations.
-                                   On output, the number of Relocations to
-                                   preserve.
-  @param[out] TargetRelocations    The Relocations destination buffer.
+  @param[in,out] Context            Prelinking context.
+  @param[in]     Kext               KEXT prelinking context.
+  @param[in]     LoadAddress        The address to be linked against.
+                                    dependencies.
+  @param[in]     RelocationBase     The Relocations base address.
+  @param[in]     SourceRelocations  The Relocations source buffer.
+  @param[in]     NumRelocations     On input, the number of source Relocations.
+                                    On output, the number of Relocations to
+                                    preserve.
+  @param[out]    TargetRelocations  The Relocations destination buffer.
 
   @retval  Returned is the number of preserved Relocations.
 
@@ -1219,10 +1217,9 @@ InternalProcessSymbolPointers (
   Prelinks the specified KEXT against the specified LoadAddress and the data
   of its dependencies.
 
-  @param[in,out] MachoContext     Mach-O context of the KEXT to prelink.
-  @param[in]     LinkEditSegment  __LINKEDIT segment of the KEXT to prelink.
-  @param[in]     LoadAddress      The address this KEXT shall be linked
-                                  against.
+  @param[in,out] Context      Prelinking context.
+  @param[in]     Kext         KEXT prelinking context.
+  @param[in]     LoadAddress  The address this KEXT shall be linked against.
 
   @retval  Returned is whether the prelinking process has been successful.
            The state of the KEXT is undefined in case this routine fails.
