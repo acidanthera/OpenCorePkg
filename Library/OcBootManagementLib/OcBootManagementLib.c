@@ -498,7 +498,8 @@ OcShowSimpleBootMenu (
   OUT OC_BOOT_ENTRY               **ChosenBootEntry
   )
 {
-  INTN    Index;
+  UINTN   Index;
+  INTN    KeyIndex;
   CHAR16  Code[2];
 
   Code[1] = '\0';
@@ -529,17 +530,18 @@ OcShowSimpleBootMenu (
     gST->ConOut->OutputString (gST->ConOut, L"\r\nChoose boot entry: ");
 
     while (TRUE) {
-      Index = WaitForKeyIndex (TimeOutSeconds);
-      if (Index == OC_INPUT_TIMEOUT) {
+      KeyIndex = WaitForKeyIndex (TimeOutSeconds);
+      if (KeyIndex == OC_INPUT_TIMEOUT) {
         *ChosenBootEntry = &BootEntries[DefaultEntry];
         gST->ConOut->OutputString (gST->ConOut, L"Timeout\r\n");
         return EFI_SUCCESS;
-      } else if (Index == OC_INPUT_ABORTED) {
+      } else if (KeyIndex == OC_INPUT_ABORTED) {
         gST->ConOut->OutputString (gST->ConOut, L"Aborted\r\n");
         return EFI_ABORTED;
-      } else if (Index != OC_INPUT_INVALID && Index < Count) {
-        *ChosenBootEntry = &BootEntries[Index];
-        Code[0] = OC_INPUT_STR[Index];
+      } else if (KeyIndex != OC_INPUT_INVALID && (UINTN)KeyIndex < Count) {
+	    ASSERT (KeyIndex >= 0);
+        *ChosenBootEntry = &BootEntries[KeyIndex];
+        Code[0] = OC_INPUT_STR[KeyIndex];
         gST->ConOut->OutputString (gST->ConOut, Code);
         gST->ConOut->OutputString (gST->ConOut, L"\r\n");
         return EFI_SUCCESS;
@@ -552,7 +554,7 @@ OcShowSimpleBootMenu (
     }
   }
 
-  return EFI_UNSUPPORTED;
+  ASSERT (FALSE);
 }
 
 EFI_STATUS
