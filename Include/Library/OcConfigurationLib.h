@@ -55,4 +55,30 @@
   _(OC_UEFI_CONFIG              , Uefi              ,     , OC_CONSTR1 (OC_UEFI_CONFIG, _, __)      , OC_DESTR (OC_UEFI_CONFIG))
   OC_DECLARE (OC_GLOBAL_CONFIG)
 
+/**
+  Initialize configuration with plist data.
+
+  @param[out]  Config   Configuration structure.
+  @param[in]   Buffer   Configuration buffer in plist format.
+  @param[in]   Size     Configuration buffer size.
+
+  @retval  EFI_SUCCESS on success
+**/
+EFI_STATUS
+OcConfigurationInit (
+  OUT OC_GLOBAL_CONFIG   *Config,
+  IN  VOID               *Buffer,
+  IN  UINT32             Size
+  );
+
+/**
+  Free configuration structure.
+
+  @param[in,out]  Config   Configuration structure.
+**/
+VOID
+OcConfigurationFree (
+  IN OUT OC_GLOBAL_CONFIG   *Config
+  );
+
 #endif // OC_CONFIGURATION_LIB_H
