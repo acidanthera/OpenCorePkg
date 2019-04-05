@@ -33,52 +33,28 @@
   lzss/lzss.h
   lzvn/lzvn.c
   lzvn/lzvn.h
-  sshzlib/sshzlib.c
-  sshzlib/sshzlib.h
 
-  zlib/adler32.c         | GCC
-  zlib/compress.c        | GCC
-  zlib/crc32.c           | GCC
-  zlib/crc32.h           | GCC
-  zlib/deflate.c         | GCC
-  zlib/deflate.h         | GCC
-  zlib/infback.c         | GCC
-  zlib/inffast.c         | GCC
-  zlib/inffast.h         | GCC
-  zlib/inffixed.h        | GCC
-  zlib/inflate.c         | GCC
-  zlib/inflate.h         | GCC
-  zlib/inftrees.c        | GCC
-  zlib/inftrees.h        | GCC
-  zlib/trees.c           | GCC
-  zlib/trees.h           | GCC
-  zlib/uncompr.c         | GCC
-  zlib/zconf.h           | GCC
-  zlib/zlib.h            | GCC
-  zlib/zlib_uefi.c       | GCC
-  zlib/zutil.h           | GCC
-
-  zlib/adler32.c         | XCODE
-  zlib/compress.c        | XCODE
-  zlib/crc32.c           | XCODE
-  zlib/crc32.h           | XCODE
-  zlib/deflate.c         | XCODE
-  zlib/deflate.h         | XCODE
-  zlib/infback.c         | XCODE
-  zlib/inffast.c         | XCODE
-  zlib/inffast.h         | XCODE
-  zlib/inffixed.h        | XCODE
-  zlib/inflate.c         | XCODE
-  zlib/inflate.h         | XCODE
-  zlib/inftrees.c        | XCODE
-  zlib/inftrees.h        | XCODE
-  zlib/trees.c           | XCODE
-  zlib/trees.h           | XCODE
-  zlib/uncompr.c         | XCODE
-  zlib/zconf.h           | XCODE
-  zlib/zlib.h            | XCODE
-  zlib/zlib_uefi.c       | XCODE
-  zlib/zutil.h           | XCODE
+  zlib/adler32.c
+  zlib/compress.c
+  zlib/crc32.c
+  zlib/crc32.h
+  zlib/deflate.c
+  zlib/deflate.h
+  zlib/infback.c
+  zlib/inffast.c
+  zlib/inffast.h
+  zlib/inffixed.h
+  zlib/inflate.c
+  zlib/inflate.h
+  zlib/inftrees.c
+  zlib/inftrees.h
+  zlib/trees.c
+  zlib/trees.h
+  zlib/uncompr.c
+  zlib/zconf.h
+  zlib/zlib.h
+  zlib/zlib_uefi.c
+  zlib/zutil.h
 
 [Packages]
   MdePkg/MdePkg.dec

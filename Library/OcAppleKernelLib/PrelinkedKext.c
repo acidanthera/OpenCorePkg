@@ -299,12 +299,12 @@ InternalScanBuildLinkedSymbolTable (
     if (!Result) {
       WalkerBottom->Value  = Symbol->Value;
       WalkerBottom->Name   = Kext->StringTable + Symbol->UnifiedName.StringIndex;
-      WalkerBottom->Length = AsciiStrLen (WalkerBottom->Name);
+      WalkerBottom->Length = (UINT32)AsciiStrLen (WalkerBottom->Name);
       ++WalkerBottom;
     } else {
       WalkerTop->Value  = Symbol->Value;
       WalkerTop->Name   = Kext->StringTable + Symbol->UnifiedName.StringIndex;
-      WalkerTop->Length = AsciiStrLen (WalkerTop->Name);
+      WalkerTop->Length = (UINT32)AsciiStrLen (WalkerTop->Name);
       --WalkerTop;
 
       ++NumCxxSymbols;

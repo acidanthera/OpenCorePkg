@@ -31,6 +31,12 @@
 #ifndef ZLIB_H
 #define ZLIB_H
 
+#if defined(_MSC_VER)
+  #include <stddef.h>
+  #pragma warning ( disable : 4131 )
+  #pragma warning ( disable : 4244 )
+#endif
+
 #include "zconf.h"
 
 #ifdef __cplusplus
