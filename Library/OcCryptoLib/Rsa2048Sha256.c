@@ -212,10 +212,10 @@ ModPow (
   //
   for (Index = 0; Index < (INT32) RSANUMWORDS; ++Index) {
     Tmp =
-      (InOut[((RSANUMWORDS - 1 - Index) * 4) + 0] << 24) |
-      (InOut[((RSANUMWORDS - 1 - Index) * 4) + 1] << 16) |
-      (InOut[((RSANUMWORDS - 1 - Index) * 4) + 2] << 8) |
-      (InOut[((RSANUMWORDS - 1 - Index) * 4) + 3] << 0);
+      ((UINT32)InOut[((RSANUMWORDS - 1 - Index) * 4) + 0] << 24) |
+      ((UINT32)InOut[((RSANUMWORDS - 1 - Index) * 4) + 1] << 16) |
+      ((UINT32)InOut[((RSANUMWORDS - 1 - Index) * 4) + 2] << 8) |
+      ((UINT32)InOut[((RSANUMWORDS - 1 - Index) * 4) + 3] << 0);
     A[Index] = Tmp;
   }
 

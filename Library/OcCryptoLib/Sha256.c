@@ -63,7 +63,7 @@ Sha256Transform (
   UINT32 M[64];
 
   for (Index1 = 0, Index2 = 0; Index1 < 16; Index1++, Index2 += 4)
-    M[Index1] = (Data[Index2] << 24) | (Data[Index2 + 1] << 16) | (Data[Index2 + 2] << 8) | (Data[Index2 + 3]);
+    M[Index1] = ((UINT32)Data[Index2] << 24) | ((UINT32)Data[Index2 + 1] << 16) | ((UINT32)Data[Index2 + 2] << 8) | ((UINT32)Data[Index2 + 3]);
   for ( ; Index1 < 64; Index1++)
     M[Index1] = SIG1 (M[Index1 - 2]) + M[Index1 - 7] + SIG0 (M[Index1 - 15]) + M[Index1 - 16];
 
