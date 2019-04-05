@@ -31,6 +31,10 @@
 #ifndef ZLIB_H
 #define ZLIB_H
 
+//
+// EDIT (Download-Fritz): Disable MSVC warnings preventing compilation.
+//                        Include stddef.h for its wchar_t definition.
+//
 #if defined(_MSC_VER)
   #include <stddef.h>
   #pragma warning ( disable : 4131 )
