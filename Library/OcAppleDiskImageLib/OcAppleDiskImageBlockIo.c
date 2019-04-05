@@ -186,7 +186,7 @@ InternalConstructDmgDevicePath (
   DevPath->Controller.Header.Type    = HARDWARE_DEVICE_PATH;
   DevPath->Controller.Header.SubType = HW_VENDOR_DP;
   DevPath->Controller.Key            = 0;
-  CopyGuid (&DevPath->Controller.Guid, &mDmgControllerDpGuid);
+  CopyMem (&DevPath->Controller.Guid, &mDmgControllerDpGuid, sizeof (DevPath->Controller.Guid));
   SetDevicePathNodeLength (&DevPath->Controller, sizeof (DevPath->Controller));
 
   DevPath->MemMap.Header.Type     = HARDWARE_DEVICE_PATH;
@@ -209,7 +209,7 @@ InternalConstructDmgDevicePath (
   DevPath->Size.Header.Type    = MESSAGING_DEVICE_PATH;
   DevPath->Size.Header.SubType = MSG_VENDOR_DP;
   DevPath->Size.Length         = DmgSize;
-  CopyGuid (&DevPath->Size.Guid, &mDmgSizeDpGuid);
+  CopyMem (&DevPath->Size.Guid, &mDmgSizeDpGuid, sizeof (DevPath->Size.Guid));
   SetDevicePathNodeLength (&DevPath->Size, sizeof (DevPath->Size));
 
   SetDevicePathEndNode (&DevPath->End);
@@ -246,14 +246,14 @@ OcAppleDiskImageInstallBlockIo (
                   &RamDmgAddress
                   );
   if (EFI_ERROR(Status)) {
-      return FALSE;
+    return FALSE;
   }
 
   RamDmgHeader = (RAM_DMG_HEADER *)(UINTN)RamDmgAddress;
   ZeroMem (RamDmgHeader, sizeof (*RamDmgHeader));
 
-  RamDmgHeader->Signature            =  RAM_DMG_SIGNATURE;
-  RamDmgHeader->Signature2           =  RAM_DMG_SIGNATURE;
+  RamDmgHeader->Signature            = RAM_DMG_SIGNATURE;
+  RamDmgHeader->Signature2           = RAM_DMG_SIGNATURE;
   RamDmgHeader->Version              = RAM_DMG_VERSION;
   RamDmgHeader->ExtentCount          = 1;
   RamDmgHeader->ExtentInfo[0].Start  = (UINT64)(UINTN)Context->Buffer;
