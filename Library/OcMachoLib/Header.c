@@ -537,30 +537,18 @@ MachoGetSectionByName64 (
     Section != NULL;
     Section = MachoGetNextSection64 (Context, Segment, Section)
     ) {
+    //
+    // Assumption: Mach-O is not of type MH_OBJECT.
+    // MH_OBJECT might have sections in segments they do not belong in for
+    // performance reasons.  This library does not support intermediate
+    // objects.
+    //
     Result = AsciiStrnCmp (
                Section->SectionName,
                SectionName,
                ARRAY_SIZE (Section->SectionName)
                );
     if (Result == 0) {
-      //
-      // Assumption: Mach-O is not of type MH_OBJECT.
-      // MH_OBJECT might have sections in segments they do not belong in for
-      // performance reasons.  This library does not support intermediate
-      // objects.
-      //
-      DEBUG_CODE (
-        Result = AsciiStrnCmp (
-                   Section->SegmentName,
-                   Segment->SegmentName,
-                   MIN (
-                     ARRAY_SIZE (Section->SegmentName),
-                     ARRAY_SIZE (Segment->SegmentName)
-                     )
-                   );
-        ASSERT (Result == 0);
-        );
-
       return Section;
     }
   }
