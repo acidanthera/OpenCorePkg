@@ -54,7 +54,7 @@ STATIC
 OC_SCHEMA
 mRootConfigurationNodes[] = {
   OC_SCHEMA_MAP_IN  ("DeviceProperties", OC_GLOBAL_CONFIG, DeviceProperties, &mDevicePropertiesSchema),
-  OC_SCHEMA_DICT    ("Uefi", mUefiConfigurationSchema)
+  OC_SCHEMA_DICT    ("UEFI", mUefiConfigurationSchema)
 };
 
 STATIC
