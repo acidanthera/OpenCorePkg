@@ -39,6 +39,8 @@ GetVolumeLabel (
 
   EFI_FILE_HANDLE                 Volume;
   EFI_FILE_SYSTEM_VOLUME_LABEL    *VolumeInfo;
+  UINTN                           VolumeLabelSize;
+  CHAR16                          *VolumeLabel;
 
   ASSERT (FileSystem != NULL);
 
@@ -56,7 +58,7 @@ GetVolumeLabel (
     Volume,
     &gEfiFileSystemVolumeLabelInfoIdGuid,
     sizeof (EFI_FILE_SYSTEM_VOLUME_LABEL),
-    NULL
+    &VolumeLabelSize
     );
 
   Volume->Close (Volume);
@@ -67,8 +69,18 @@ GetVolumeLabel (
     );
 
   if (VolumeInfo != NULL) {
-    if (VolumeInfo->VolumeLabel[0] != L'\0') {
-      return VolumeInfo->VolumeLabel;
+    if (VolumeInfo->VolumeLabel[0] != L'\0'
+      && VolumeLabelSize <= MAX_UINTN - sizeof (VolumeLabel[0])) {
+      //
+      // Some old HFS Plus drivers may not provide terminating \0 on volume label.
+      //
+      VolumeLabel = AllocatePool (VolumeLabelSize + sizeof (VolumeLabel[0]));
+      if (VolumeLabel != NULL) {
+        CopyMem (VolumeLabel, VolumeInfo->VolumeLabel, VolumeLabelSize);
+        VolumeLabel[VolumeLabelSize / sizeof (VolumeLabel[0])] = '\0';
+        FreePool (VolumeInfo);
+        return VolumeLabel;
+      }
     }
     FreePool (VolumeInfo);
   }
