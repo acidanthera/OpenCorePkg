@@ -22,14 +22,7 @@
 #define OC_COMPRESSION_MAX_LENGTH BASE_1GB
 
 /**
-  MSVC-compatible zlib library. 2~14 KB (decoder~encoder) less and twice slower.
-**/
-#if !defined(__GNUC__) && !defined(__clang__) && !defined(OC_USE_SSH_ZLIB)
-#define OC_USE_SSH_ZLIB
-#endif
-
-/**
-  Allow the use of extra adler32 validation. Not compatible with sshzlib.
+  Allow the use of extra adler32 validation.
   Not very useful as dmg has own checks.
 **/
 // #define OC_INFLATE_VERIFY_DATA

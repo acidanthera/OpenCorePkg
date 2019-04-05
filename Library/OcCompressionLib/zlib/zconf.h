@@ -10,6 +10,16 @@
 
 #include <Library/BaseMemoryLib.h>
 
+//
+// EDIT (Download-Fritz): Disable MSVC warnings preventing compilation.
+//                        Include stddef.h for its wchar_t definition.
+//
+#if defined(_MSC_VER)
+  #include <stddef.h>
+  #pragma warning ( disable : 4131 )
+  #pragma warning ( disable : 4244 )
+#endif
+
 #define NO_GZIP 1
 
 /* Maximum value for memLevel in deflateInit2 */
