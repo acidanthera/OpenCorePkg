@@ -23,12 +23,17 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcBootManagementLib.h>
+#include <Library/OcConfigurationLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcStorageLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiDriverEntryPoint.h>
 #include <Library/UefiLib.h>
+
+STATIC
+OC_GLOBAL_CONFIG
+mOpenCoreConfiguration;
 
 STATIC
 EFI_STATUS
@@ -66,14 +71,19 @@ OcMain (
     );
 
   if (Config != NULL) {
-    //
-    // TODO: parse configuration.
-    //
     DEBUG ((DEBUG_INFO, "OC: Loaded configuration of %u bytes\n", ConfigSize));
+
+    Status = OcConfigurationInit (&mOpenCoreConfiguration, Config, ConfigSize);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OC: Failed to parse configuration!\n"));
+    }
+
     FreePool (Config);
   } else {
     DEBUG ((DEBUG_ERROR, "OC: Failed to load configuration!\n"));
   }
+
+  OcLoadUefiSupport (Storage, &mOpenCoreConfiguration);
 
   Status = OcRunSimpleBootMenu (
     OC_SCAN_DEFAULT_POLICY,

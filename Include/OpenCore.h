@@ -15,10 +15,28 @@
 #ifndef OPEN_CORE_H
 #define OPEN_CORE_H
 
-#define OPEN_CORE_IMAGE_PATH  L"EFI\\OC\\OpenCore.efi"
+#include <Library/OcConfigurationLib.h>
+#include <Library/OcStorageLib.h>
 
-#define OPEN_CORE_ROOT_PATH   L"EFI\\OC\\"
+#define OPEN_CORE_IMAGE_PATH       L"EFI\\OC\\OpenCore.efi"
 
-#define OPEN_CORE_CONFIG_PATH L"config.plist"
+#define OPEN_CORE_ROOT_PATH        L"EFI\\OC\\"
+
+#define OPEN_CORE_CONFIG_PATH      L"config.plist"
+
+#define OPEN_CORE_UEFI_DRIVER_PATH L"Drivers\\"
+
+
+/**
+  Load UEFI compatibility support like drivers.
+
+  @param[in]  Storage   OpenCore storage.
+  @param[in]  Config    OpenCore configuration.
+**/
+VOID
+OcLoadUefiSupport (
+  IN OC_STORAGE_CONTEXT  *Storage,
+  IN OC_GLOBAL_CONFIG    *Config
+  );
 
 #endif // OPEN_CORE_H

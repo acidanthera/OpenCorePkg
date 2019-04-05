@@ -57,6 +57,7 @@
   OcCpuLib|OcSupportPkg/Library/OcCpuLib/OcCpuLib.inf
   OcCryptoLib|OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
   OcCompressionLib|OcSupportPkg/Library/OcCompressionLib/OcCompressionLib.inf
+  OcConfigurationLib|OcSupportPkg/Library/OcConfigurationLib/OcConfigurationLib.inf
   OcDataHubLib|OcSupportPkg/Library/OcDataHubLib/OcDataHubLib.inf
   OcDebugLogLib|OcSupportPkg/Library/OcDebugLogLib/OcDebugLogLib.inf
   OcDevicePathLib|OcSupportPkg/Library/OcDevicePathLib/OcDevicePathLib.inf
