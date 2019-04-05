@@ -72,7 +72,10 @@ GetVolumeLabel (
     if (VolumeInfo->VolumeLabel[0] != L'\0'
       && VolumeLabelSize <= MAX_UINTN - sizeof (VolumeLabel[0])) {
       //
-      // Some old HFS Plus drivers may not provide terminating \0 on volume label.
+      // Some old HFS Plus drivers provide volume label size without
+      // terminating \0 (though they do append it).
+      // The spec requires disk label to be NULL-terminated, but since
+      // some drivers may not follow it, we do it ourselves for extra safety.
       //
       VolumeLabel = AllocatePool (VolumeLabelSize + sizeof (VolumeLabel[0]));
       if (VolumeLabel != NULL) {
