@@ -19,6 +19,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #ifndef OC_TEMPLATE_LIB_H
 #define OC_TEMPLATE_LIB_H
 
+#include <Library/BaseMemoryLib.h>
+
 //
 // Common structor prototype.
 //
@@ -86,10 +88,10 @@ VOID
 //
 #define OC_STRUCTORS(Name, Destructor)                                             \
   VOID Name ## _CONSTRUCT(VOID *Ptr, UINT32 Size) {                                \
-    Name  *Obj = (Name *) Ptr;                                                     \
-    *Obj = (Name) {                                                                \
+    STATIC Name Obj = {                                                            \
       Name ## _FIELDS(PRIV_OC_CONSTRUCT_STRUCT_MEMBER, PRIV_OC_STRUCTOR_EXPAND)    \
     };                                                                             \
+    CopyMem (Ptr, &Obj, sizeof (Name));                                            \
   }                                                                                \
   VOID Name ## _DESTRUCT(VOID *Ptr, UINT32 Size) {                                 \
     Name  *Obj = (Name *) Ptr;  (VOID) Obj;                                        \
