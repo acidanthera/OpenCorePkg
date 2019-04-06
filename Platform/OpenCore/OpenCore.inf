@@ -36,6 +36,7 @@
 
 [Sources]
   OpenCore.c
+  OpenCoreAcpi.c
   OpenCoreKernel.c
   OpenCoreUefi.c
 

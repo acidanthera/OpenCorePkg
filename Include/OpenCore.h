@@ -25,9 +25,23 @@
 
 #define OPEN_CORE_CONFIG_PATH      L"config.plist"
 
+#define OPEN_CORE_ACPI_PATH        L"ACPI\\Custom\\"
+
 #define OPEN_CORE_UEFI_DRIVER_PATH L"Drivers\\"
 
 #define OPEN_CORE_KEXT_PATH        L"Kexts\\"
+
+/**
+  Load ACPI compatibility support like custom tables.
+
+  @param[in]  Storage   OpenCore storage.
+  @param[in]  Config    OpenCore configuration.
+**/
+VOID
+OcLoadAcpiSupport (
+  IN OC_STORAGE_CONTEXT  *Storage,
+  IN OC_GLOBAL_CONFIG    *Config
+  );
 
 /**
   Load Kernel compatibility support like kexts.
