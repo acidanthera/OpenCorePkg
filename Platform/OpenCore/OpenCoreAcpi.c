@@ -123,7 +123,58 @@ OcAcpiPatchTables (
   IN OC_ACPI_CONTEXT     *Context
   )
 {
+  EFI_STATUS           Status;
+  UINT32               Index;
+  OC_ACPI_PATCH_ENTRY  *UserPatch;
+  OC_ACPI_PATCH        Patch;
 
+  for (Index = 0; Index < Config->Acpi.Patch.Count; ++Index) {
+    UserPatch = Config->Acpi.Patch.Values[Index];
+
+    if (UserPatch->Disabled) {
+      continue;
+    }
+
+    //
+    // Ignore patch if:
+    // - There is nothing to replace.
+    // - Find and replace mismatch in size.
+    // - Mask and ReplaceMask mismatch in size when are available.
+    //
+    if (UserPatch->Replace.Size == 0
+      || UserPatch->Find.Size != UserPatch->Replace.Size
+      || (UserPatch->Mask.Size > 0 && UserPatch->Find.Size != UserPatch->Mask.Size)
+      || (UserPatch->ReplaceMask.Size > 0 && UserPatch->Find.Size != UserPatch->ReplaceMask.Size)) {
+      DEBUG ((DEBUG_ERROR, "OC: ACPI patch %u is borked\n", Index));
+      continue;
+    }
+
+    ZeroMem (&Patch, sizeof (Patch));
+
+    Patch.Find  = OC_BLOB_GET (&UserPatch->Find);
+    Patch.Replace = OC_BLOB_GET (&UserPatch->Replace);
+
+    if (UserPatch->Mask.Size > 0) {
+      Patch.Mask  = OC_BLOB_GET (&UserPatch->Mask);
+    }
+
+    if (UserPatch->ReplaceMask.Size > 0) {
+      Patch.ReplaceMask = OC_BLOB_GET (&UserPatch->ReplaceMask);
+    }
+
+    Patch.Size        = UserPatch->Replace.Size;
+    Patch.Count       = UserPatch->Count;
+    Patch.Skip        = UserPatch->Skip;
+    Patch.Limit       = UserPatch->Limit;
+    CopyMem (&Patch.TableSignature, UserPatch->TableSignature, sizeof (UserPatch->TableSignature));
+    Patch.TableLength = UserPatch->TableLength;
+    CopyMem (&Patch.OemTableId, UserPatch->OemTableId, sizeof (UserPatch->OemTableId));
+
+    Status = AcpiApplyPatch (Context, &Patch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "OC: ACPI patcher failed %u - %r\n", Index, Status));
+    }
+  }
 }
 
 VOID
