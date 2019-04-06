@@ -69,20 +69,20 @@ GetVolumeLabel (
     );
 
   if (VolumeInfo != NULL) {
-    if (VolumeInfo->VolumeLabel[0] != L'\0'
+    if (VolumeLabelSize > 0 && VolumeInfo->VolumeLabel[0] != L'\0'
       && VolumeLabelSize <= MAX_UINTN - sizeof (VolumeLabel[0])) {
       //
+      // The spec requires disk label to be NULL-terminated, but it
+      // was unclear whether the size should contain terminator or not.
       // Some old HFS Plus drivers provide volume label size without
-      // terminating \0 (though they do append it).
-      // The spec requires disk label to be NULL-terminated, but since
-      // some drivers may not follow it, we do it ourselves for extra safety.
+      // terminating \0 (though they do append it). These drivers must
+      // not be used, but we try not to die when debugging is off.
       //
-      VolumeLabel = AllocatePool (VolumeLabelSize + sizeof (VolumeLabel[0]));
-      if (VolumeLabel != NULL) {
-        CopyMem (VolumeLabel, VolumeInfo->VolumeLabel, VolumeLabelSize);
-        VolumeLabel[VolumeLabelSize / sizeof (VolumeLabel[0])] = '\0';
-        FreePool (VolumeInfo);
-        return VolumeLabel;
+      if (VolumeInfo->VolumeLabel[VolumeLabelSize/2-1] != '\0') {
+        DEBUG ((DEBUG_ERROR, "Found unterminated volume label!"));
+        return AllocateCopyPool (sizeof (L"INVALID"), L"INVALID");
+      } else {
+        return VolumeInfo->VolumeLabel;
       }
     }
     FreePool (VolumeInfo);
