@@ -29,6 +29,7 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/OcGuardLib.h>
+#include <Library/OcMiscLib.h>
 
 #define DEVICE_PATH_PROPERTY_DATA_SIGNATURE  \
   SIGNATURE_32 ('D', 'p', 'p', 'P')
@@ -775,50 +776,42 @@ STATIC EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL DppDbProtocolTemplate = {
   DppDbGetPropertyBuffer
 };
 
-/**
-
-  @param[in] ImageHandle  The firmware allocated handle for the EFI image.
-  @param[in] SystemTable  A pointer to the EFI System Table.
-
-  @retval EFI_SUCCESS          The entry point is executed successfully.
-  @retval EFI_ALREADY_STARTED  The protocol has already been installed.
-**/
-EFI_STATUS
+EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL *
 OcDevicePathPropertyInstallProtocol (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+  IN BOOLEAN  Reinstall
   )
 {
-  EFI_STATUS                      Status;
+  EFI_STATUS                                  Status;
 
-  UINTN                           NumberHandles;
-  EFI_DEVICE_PATH_PROPERTY_BUFFER *Buffer;
-  UINT8                           *BufferPtr;
-  DEVICE_PATH_PROPERTY_DATA       *DevicePathPropertyData;
-  UINTN                           DataSize;
-  UINT32                          VariableIndex;
-  CHAR16                          IndexBuffer[5];
-  CHAR16                          VariableName[64];
-  UINTN                           VariableSize;
-  UINT32                          Attributes;
-  EFI_HANDLE                      Handle;
+  EFI_DEVICE_PATH_PROPERTY_BUFFER             *Buffer;
+  EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL  *Protocol;
+  UINT8                                       *BufferPtr;
+  DEVICE_PATH_PROPERTY_DATA                   *DevicePathPropertyData;
+  UINTN                                       DataSize;
+  UINT32                                      VariableIndex;
+  CHAR16                                      IndexBuffer[5];
+  CHAR16                                      VariableName[64];
+  UINTN                                       VariableSize;
+  UINT32                                      Attributes;
+  EFI_HANDLE                                  Handle;
 
-  Status = gBS->LocateHandleBuffer (
-                  ByProtocol,
+  if (Reinstall) {
+    UninstallAllProtocolInstances (&gEfiDevicePathPropertyDatabaseProtocolGuid);
+  }
+
+  Status = gBS->LocateProtocol (
                   &gEfiDevicePathPropertyDatabaseProtocolGuid,
                   NULL,
-                  &NumberHandles,
-                  (VOID *)&Buffer
+                  (VOID *)&Protocol
                   );
 
   if (!EFI_ERROR (Status)) {
-    FreePool (Buffer);
-    return EFI_DEVICE_ERROR;
+    return Protocol;
   }
   
   DevicePathPropertyData = AllocateZeroPool (sizeof (*DevicePathPropertyData));
   if (DevicePathPropertyData == NULL) {
-    return EFI_OUT_OF_RESOURCES;
+    return NULL;
   }
 
   DevicePathPropertyData->Signature = DEVICE_PATH_PROPERTY_DATA_SIGNATURE;
@@ -840,7 +833,7 @@ OcDevicePathPropertyInstallProtocol (
 
     if (EFI_ERROR (Status)) {
       FreePool (DevicePathPropertyData);
-      return Status;
+      return NULL;
     }
 
     DevicePathPropertyData->Modified = FALSE;
@@ -853,7 +846,7 @@ OcDevicePathPropertyInstallProtocol (
 
     if (EFI_ERROR (Status)) {
       FreePool (DevicePathPropertyData);
-      return Status;
+      return NULL;
     }
 
     if (DevicePathPropertyData->Modified) {
@@ -866,13 +859,13 @@ OcDevicePathPropertyInstallProtocol (
 
       if (Status != EFI_BUFFER_TOO_SMALL) {
         FreePool (DevicePathPropertyData);
-        return Status;
+        return NULL;
       }
 
       Buffer = AllocateZeroPool (DataSize);
       if (Buffer == NULL) {
         FreePool (DevicePathPropertyData);
-        return EFI_OUT_OF_RESOURCES;
+        return NULL;
       }
 
       Status = DppDbGetPropertyBuffer (
@@ -883,7 +876,7 @@ OcDevicePathPropertyInstallProtocol (
       if (EFI_ERROR (Status)) {
         FreePool (Buffer);
         FreePool (DevicePathPropertyData);
-        return Status;
+        return NULL;
       }
 
       VariableIndex = 0;
@@ -928,7 +921,7 @@ OcDevicePathPropertyInstallProtocol (
       FreePool (Buffer);
       if (EFI_ERROR (Status) || DataSize != 0) {
         FreePool (DevicePathPropertyData);
-        return Status;
+        return NULL;
       }
 
       while (!EFI_ERROR (Status) && VariableIndex < APPLE_PATH_PROPERTY_VARIABLE_MAX_NUM) {
@@ -969,7 +962,7 @@ OcDevicePathPropertyInstallProtocol (
 
       if (EFI_ERROR (Status)) {
         FreePool (DevicePathPropertyData);
-        return Status;
+        return NULL;
       }
     }
 
@@ -985,5 +978,5 @@ OcDevicePathPropertyInstallProtocol (
                   );
 
   ASSERT_EFI_ERROR (Status);
-  return Status;
+  return &DevicePathPropertyData->Protocol;
 }

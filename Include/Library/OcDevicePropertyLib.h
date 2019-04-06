@@ -15,17 +15,18 @@
 #ifndef OC_DEVICE_PROPERTY_LIB_H
 #define OC_DEVICE_PROPERTY_LIB_H
 
-/**
-  @param[in] ImageHandle  The firmware allocated handle for the EFI image.
-  @param[in] SystemTable  A pointer to the EFI System Table.
+#include <Protocol/DevicePathPropertyDatabase.h>
 
-  @retval EFI_SUCCESS          The entry point is executed successfully.
-  @retval EFI_ALREADY_STARTED  The protocol has already been installed.
+/**
+  Install and initialise EFI DevicePath property protocol.
+
+  @param[in] Overwrite  Overwrite installed protocol.
+
+  @retval installed or located protocol or NULL.
 **/
-EFI_STATUS
+EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL *
 OcDevicePathPropertyInstallProtocol (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+  IN BOOLEAN  Reinstall
   );
 
 #endif // OC_DEVICE_PROPERTY_LIB_H

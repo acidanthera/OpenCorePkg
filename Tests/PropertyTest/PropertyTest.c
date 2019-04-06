@@ -59,21 +59,11 @@ TestDeviceProperties (
 
   Print (L"TestDeviceProperties\n");
 
-  Status = UninstallAllProtocolInstances (&gEfiDevicePathPropertyDatabaseProtocolGuid);
-
-  Print (L"UninstallAllProtocolInstances is %r\n", Status);
-
-  Status = OcDevicePathPropertyInstallProtocol (ImageHandle, SystemTable);
-
-  Print (L"OcDevicePathPropertyInstallProtocol is %r\n", Status);
-
-  Status = gBS->LocateProtocol (
-    &gEfiDevicePathPropertyDatabaseProtocolGuid,
-    NULL,
-    (VOID **) &PropertyDatabase
-    );
-
-  Print (L"Locate gEfiDevicePathPropertyDatabaseProtocolGuid is %r\n", Status);
+  PropertyDatabase = OcDevicePathPropertyInstallProtocol (TRUE);
+  if (PropertyDatabase == NULL) {
+    Print (L"OcDevicePathPropertyInstallProtocol is missing\n");
+    return EFI_UNSUPPORTED;
+  }
 
   DevicePath = ConvertTextToDevicePath (L"PciRoot(0x0)/Pci(0x11,0x0)/Pci(0x1,0x0)");
 
