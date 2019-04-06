@@ -18,6 +18,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleKernelLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcVirtualFsLib.h>
 #include <Library/PrintLib.h>
@@ -27,6 +28,46 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 STATIC OC_STORAGE_CONTEXT  *mOcStorage;
 STATIC OC_GLOBAL_CONFIG    *mOcConfiguration;
+
+STATIC
+VOID
+OcKernelReadDarwinVersion (
+  IN  CONST UINT8   *Kernel,
+  IN  UINT32        KernelSize,
+  OUT CHAR8         *DarwinVersion,
+  OUT UINT32        DarwinVersionSize
+  )
+{
+  INT32   Offset;
+  UINT32  Index;
+
+  ASSERT (DarwinVersion > 0);
+
+  Offset = FindPattern (
+    (CONST UINT8 *) "Darwin Kernel Version ",
+    NULL,
+    L_STR_LEN ("Darwin Kernel Version "),
+    Kernel,
+    KernelSize,
+    0
+    );
+
+  if (Offset < 0) {
+    DEBUG ((DEBUG_WARN, "OC: Failed to determine kernel version\n"));
+    DarwinVersion[0] = '\0';
+    return;
+  }
+
+  for (Index = 0; Index < DarwinVersionSize - 1; ++Index, ++Offset) {
+    if (Offset >= KernelSize || Kernel[Offset] == ':') {
+      break;
+    }
+    DarwinVersion[Index] = (CHAR8) Kernel[Offset];
+  }
+  DarwinVersion[Index] = '\0';
+
+  DEBUG ((DEBUG_INFO, "OC: Read kernel version %a\n", DarwinVersion));
+}
 
 STATIC
 UINT32
@@ -125,6 +166,7 @@ STATIC
 VOID
 OcKernelApplyPatches (
   IN     OC_GLOBAL_CONFIG  *Config,
+  IN     CONST CHAR8       *DarwinVersion,
   IN     PRELINKED_CONTEXT *Context,
   IN OUT UINT8             *Kernel,
   IN     UINT32            Size
@@ -136,6 +178,7 @@ OcKernelApplyPatches (
   PATCHER_GENERIC_PATCH  Patch;
   OC_KERNEL_PATCH_ENTRY  *UserPatch;
   CONST CHAR8            *Target;
+  CONST CHAR8            *MatchKernel;
   BOOLEAN                IsKernelPatch;
 
   IsKernelPatch = Context == NULL;
@@ -155,12 +198,26 @@ OcKernelApplyPatches (
     }
   }
 
-  for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
+  for (Index = 0; Index < Config->Kernel.Patch.Count; ++Index) {
     UserPatch = Config->Kernel.Patch.Values[Index];
     Target    = OC_BLOB_GET (&UserPatch->Identifier);
 
     if (UserPatch->Disabled
     || (AsciiStrCmp (Target, "kernel") == 0) != IsKernelPatch) {
+      continue;
+    }
+
+    MatchKernel = OC_BLOB_GET (&UserPatch->MatchKernel);
+
+    if (AsciiStrnCmp (DarwinVersion, MatchKernel, UserPatch->MatchKernel.Size) != 0) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: Kernel patcher skips %a patch at %u due to version %a vs %a",
+        Target,
+        Index,
+        MatchKernel,
+        DarwinVersion
+        ));
       continue;
     }
 
@@ -173,7 +230,7 @@ OcKernelApplyPatches (
 
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_ERROR, "OC: Kernel patcher %a init failure - %r\n", Target, Status));
-        return;
+        continue;
       }
     }
 
@@ -222,42 +279,135 @@ OcKernelApplyPatches (
       DEBUG ((DEBUG_WARN, "OC: Kernel patcher failed %u for %a - %r\n", Index, Target, Status));
     }
   }
+
+  if (!IsKernelPatch) {
+    if (Config->Kernel.Quirks.AppleCpuPmCfgLock) {
+      PatchAppleIntelCPUPowerManagement (Context);
+    }
+
+    if (Config->Kernel.Quirks.ExternalDiskIcons) {
+      PatchForceInternalDiskIcons (Context);
+    }
+
+    if (Config->Kernel.Quirks.ThirdPartyTrim) {
+      PatchThirdPartySsdTrim (Context);
+    }
+
+    if (Config->Kernel.Quirks.XhciPortLimit) {
+      PatchUsbXhciPortLimit (Context);
+    }
+  }
+}
+
+STATIC
+VOID
+OcKernelBlockKexts (
+  IN     OC_GLOBAL_CONFIG  *Config,
+  IN     CONST CHAR8       *DarwinVersion,
+  IN     PRELINKED_CONTEXT *Context
+  )
+{
+  EFI_STATUS             Status;
+  PATCHER_CONTEXT        Patcher;
+  UINT32                 Index;
+  OC_KERNEL_BLOCK_ENTRY  *Kext;
+  CONST CHAR8            *Target;
+  CONST CHAR8            *MatchKernel;
+
+  for (Index = 0; Index < Config->Kernel.Block.Count; ++Index) {
+    Kext   = Config->Kernel.Block.Values[Index];
+    Target = OC_BLOB_GET (&Kext->Identifier);
+
+    if (Kext->Disabled) {
+      continue;
+    }
+
+    MatchKernel = OC_BLOB_GET (&Kext->MatchKernel);
+
+    if (AsciiStrnCmp (DarwinVersion, MatchKernel, Kext->MatchKernel.Size) != 0) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: Kernel blocker skips %a block at %u due to version %a vs %a",
+        Target,
+        Index,
+        MatchKernel,
+        DarwinVersion
+        ));
+      continue;
+    }
+
+    Status = PatcherInitContextFromPrelinked (
+      &Patcher,
+      Context,
+      Target
+      );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OC: Kernel blocker %a init failure - %r\n", Target, Status));
+      continue;
+    }
+
+    Status = PatcherBlockKext (&Patcher);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OC: Kernel blocker %a failed - %r\n", Target, Status));
+    }
+  }
 }
 
 STATIC
 EFI_STATUS
 OcKernelProcessPrelinked (
   IN     OC_GLOBAL_CONFIG  *Config,
+  IN     CONST CHAR8       *DarwinVersion,
   IN OUT UINT8             *Kernel,
   IN     UINT32            *KernelSize,
   IN     UINT32            AllocatedSize
   )
 {
-  EFI_STATUS         Status;
-  PRELINKED_CONTEXT  Context;
-  CHAR8              *BundleName;
-  CHAR8              *ExecutablePath;
-  UINT32             Index;
-  CHAR8              FullPath[128];
+  EFI_STATUS           Status;
+  PRELINKED_CONTEXT    Context;
+  CHAR8                *BundleName;
+  CHAR8                *ExecutablePath;
+  UINT32               Index;
+  CHAR8                FullPath[128];
+  OC_KERNEL_ADD_ENTRY  *Kext;
+  CONST CHAR8          *MatchKernel;
 
   Status = PrelinkedContextInit (&Context, Kernel, *KernelSize, AllocatedSize);
 
   if (!EFI_ERROR (Status)) {
-    OcKernelApplyPatches (Config, &Context, NULL, 0);
+    OcKernelApplyPatches (Config, DarwinVersion, &Context, NULL, 0);
+
+    OcKernelBlockKexts (Config, DarwinVersion, &Context);
 
     Status = PrelinkedInjectPrepare (&Context);
     if (!EFI_ERROR (Status)) {
 
       for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
-        if (Config->Kernel.Add.Values[Index]->Disabled
-          || Config->Kernel.Add.Values[Index]->PlistDataSize == 0) {
+        Kext = Config->Kernel.Add.Values[Index];
+
+        if (Kext->Disabled || Kext->PlistDataSize == 0) {
           continue;
         }
 
-        BundleName     = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->BundleName);
+        BundleName     = OC_BLOB_GET (&Kext->BundleName);
+        MatchKernel = OC_BLOB_GET (&Kext->MatchKernel);
+
+        if (AsciiStrnCmp (DarwinVersion, MatchKernel, Kext->MatchKernel.Size) != 0) {
+          DEBUG ((
+            DEBUG_INFO,
+            "OC: Prelink injection skips %a kext at %u due to version %a vs %a",
+            BundleName,
+            Index,
+            MatchKernel,
+            DarwinVersion
+            ));
+          continue;
+        }
+
         AsciiSPrint (FullPath, sizeof (FullPath), "/Library/Extensions/%a", BundleName);
-        if (Config->Kernel.Add.Values[Index]->ImageData != NULL) {
-          ExecutablePath = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->ExecutablePath);
+        if (Kext->ImageData != NULL) {
+          ExecutablePath = OC_BLOB_GET (&Kext->ExecutablePath);
         } else {
           ExecutablePath = NULL;
         }
@@ -265,11 +415,11 @@ OcKernelProcessPrelinked (
         Status = PrelinkedInjectKext (
           &Context,
           FullPath,
-          Config->Kernel.Add.Values[Index]->PlistData,
-          Config->Kernel.Add.Values[Index]->PlistDataSize,
+          Kext->PlistData,
+          Kext->PlistDataSize,
           ExecutablePath,
-          Config->Kernel.Add.Values[Index]->ImageData,
-          Config->Kernel.Add.Values[Index]->ImageDataSize
+          Kext->ImageData,
+          Kext->ImageDataSize
           );
 
         DEBUG ((DEBUG_INFO, "OC: Prelink injection %a - %r\n", BundleName, Status));
@@ -310,6 +460,7 @@ OcKernelFileOpen (
   EFI_FILE_PROTOCOL  *VirtualFileHandle;
   EFI_STATUS         PrelinkedStatus;
   EFI_TIME           ModificationTime;
+  CHAR8              DarwinVersion[16];
 
   Status = This->Open (This, NewHandle, FileName, OpenMode, Attributes);
 
@@ -340,11 +491,12 @@ OcKernelFileOpen (
     // This is not Apple kernel, just return the original file.
     //
     if (!EFI_ERROR (Status)) {
-      /* TODO: get Darwin Kernel Version  */
-      OcKernelApplyPatches (mOcConfiguration, NULL, Kernel, KernelSize);
+      OcKernelReadDarwinVersion (Kernel, KernelSize, DarwinVersion, sizeof (DarwinVersion));
+      OcKernelApplyPatches (mOcConfiguration, DarwinVersion, NULL, Kernel, KernelSize);
 
       PrelinkedStatus = OcKernelProcessPrelinked (
         mOcConfiguration,
+        DarwinVersion,
         Kernel,
         &KernelSize,
         AllocatedSize
