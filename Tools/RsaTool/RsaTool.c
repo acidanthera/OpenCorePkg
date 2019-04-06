@@ -6,7 +6,6 @@
  * support for additional RSA key sizes. (platform/system/core,git/libmincrypt
  * /tools/DumpPublicKey.java). Uses the OpenSSL X509 and BIGNUM library.
  */
-#include <openssl/pem.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
@@ -15,7 +14,7 @@
  * and output a pre-processed version of keys for use by RSA verification
  * routines.
  */
-int check(RSA* key) {
+static int check(RSA* key) {
   const BIGNUM *n, *e;
   int public_exponent, modulus;
   RSA_get0_key(key, &n, &e, NULL);
@@ -33,7 +32,7 @@ int check(RSA* key) {
   }
   return 1;
 }
-void native_to_big(unsigned char *data, size_t size) {
+static void native_to_big(unsigned char *data, size_t size) {
   size_t i, tmp = 1;
   if (*(unsigned char *)&tmp == 1) {
     fprintf(stderr, "WARNING: Assuming little endian encoding.\n");
@@ -46,7 +45,7 @@ void native_to_big(unsigned char *data, size_t size) {
     fprintf(stderr, "WARNING: Assuming big endian encoding.\n");
   }
 }
-void print_data(void *data, size_t size) {
+static void print_data(void *data, size_t size) {
   size_t i;
   static size_t block = 0;
   if (data == NULL) {
@@ -64,7 +63,7 @@ void print_data(void *data, size_t size) {
 }
 /* Pre-processes and outputs RSA public key to standard out.
  */
-void output(RSA* key) {
+static void output(RSA* key) {
   int i, nwords;
   const BIGNUM *key_n;
   BIGNUM *N = NULL;
