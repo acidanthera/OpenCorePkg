@@ -289,9 +289,11 @@ OcDescribeBootEntry (
   if (BootEntry->Name == NULL) {
     BootEntry->Name = GetAppleDiskLabel (FileSystem, BootDirectoryName, L".disk_label.contentDetails");
   }
-  Status = ReadFileSize (FileSystem, L"\\EFI\\Microsoft\\Boot\\BCD", &BcdSize);
-  if (!EFI_ERROR (Status)) {
-    BootEntry->Name = AllocateCopyPool(sizeof (L"BOOTCAMP Windows"), L"BOOTCAMP Windows");
+  if (BootEntry->Name == NULL) {
+    Status = ReadFileSize (FileSystem, L"\\EFI\\Microsoft\\Boot\\BCD", &BcdSize);
+    if (!EFI_ERROR (Status)) {
+      BootEntry->Name = AllocateCopyPool(sizeof (L"BOOTCAMP Windows"), L"BOOTCAMP Windows");
+    }
   }  
   if (BootEntry->Name == NULL) {
     BootEntry->Name = GetVolumeLabel (FileSystem);
