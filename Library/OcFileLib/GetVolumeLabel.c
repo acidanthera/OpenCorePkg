@@ -80,6 +80,7 @@ GetVolumeLabel (
       //
       if (VolumeInfo->VolumeLabel[VolumeLabelSize/2-1] != '\0') {
         DEBUG ((DEBUG_ERROR, "Found unterminated volume label!"));
+        FreePool (VolumeInfo);
         return AllocateCopyPool (sizeof (L"INVALID"), L"INVALID");
       } else {
         return VolumeInfo->VolumeLabel;
