@@ -86,9 +86,9 @@ OcMain (
   }
 
   OcCpuScanProcessor (&CpuInfo);
-
   OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &CpuInfo);
-
+  OcLoadAcpiSupport (Storage, &mOpenCoreConfiguration);
+  OcLoadDevPropsSupport (&mOpenCoreConfiguration);
   OcLoadKernelSupport (Storage, &mOpenCoreConfiguration);
 
   Status = OcRunSimpleBootMenu (

@@ -20,7 +20,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcAcpiLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
-#include <Library/OcVirtualFsLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 

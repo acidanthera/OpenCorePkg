@@ -44,6 +44,17 @@ OcLoadAcpiSupport (
   );
 
 /**
+  Load device properties compatibility support.
+
+  @param[in]  Storage   OpenCore storage.
+  @param[in]  Config    OpenCore configuration.
+**/
+VOID
+OcLoadDevPropsSupport (
+  IN OC_GLOBAL_CONFIG    *Config
+  );
+
+/**
   Load Kernel compatibility support like kexts.
 
   @param[in]  Storage   OpenCore storage.

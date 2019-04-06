@@ -37,6 +37,7 @@
 [Sources]
   OpenCore.c
   OpenCoreAcpi.c
+  OpenCoreDevProps.c
   OpenCoreKernel.c
   OpenCoreUefi.c
 
@@ -57,6 +58,7 @@
 [LibraryClasses]
   DevicePathLib
   IoLib
+  OcAcpiLib
   OcAppleBootPolicyLib
   OcAppleKernelLib
   OcBootManagementLib
