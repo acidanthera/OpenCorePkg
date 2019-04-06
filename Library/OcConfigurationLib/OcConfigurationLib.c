@@ -14,19 +14,89 @@
 
 #include <Library/OcConfigurationLib.h>
 
-OC_MAP_STRUCTORS (OC_DEVICE_PROP_MAP)
-OC_STRUCTORS (OC_KERNEL_ADD_ENTRY, ())
+OC_ARRAY_STRUCTORS (OC_ACPI_ADD_ARRAY)
+OC_STRUCTORS       (OC_ACPI_BLOCK_ENTRY, ())
+OC_ARRAY_STRUCTORS (OC_ACPI_BLOCK_ARRAY)
+OC_STRUCTORS       (OC_ACPI_PATCH_ENTRY, ())
+OC_ARRAY_STRUCTORS (OC_ACPI_PATCH_ARRAY)
+OC_STRUCTORS       (OC_ACPI_QUIRKS, ())
+OC_STRUCTORS       (OC_ACPI_CONFIG, ())
+
+OC_MAP_STRUCTORS   (OC_DEVICE_PROP_MAP)
+OC_STRUCTORS       (OC_KERNEL_ADD_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_KERNEL_ADD_ARRAY)
-OC_STRUCTORS (OC_KERNEL_BLOCK_ENTRY, ())
+OC_STRUCTORS       (OC_KERNEL_BLOCK_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_KERNEL_BLOCK_ARRAY)
-OC_STRUCTORS (OC_KERNEL_PATCH_ENTRY, ())
+OC_STRUCTORS       (OC_KERNEL_PATCH_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_KERNEL_PATCH_ARRAY)
-OC_STRUCTORS (OC_KERNEL_QUIRKS, ())
-OC_STRUCTORS (OC_KERNEL_CONFIG, ())
+OC_STRUCTORS       (OC_KERNEL_QUIRKS, ())
+OC_STRUCTORS       (OC_KERNEL_CONFIG, ())
+
 OC_ARRAY_STRUCTORS (OC_UEFI_DRIVER_ARRAY)
-OC_STRUCTORS (OC_UEFI_QUIRKS, ())
-OC_STRUCTORS (OC_UEFI_CONFIG, ())
-OC_STRUCTORS (OC_GLOBAL_CONFIG, ())
+OC_STRUCTORS       (OC_UEFI_QUIRKS, ())
+OC_STRUCTORS       (OC_UEFI_CONFIG, ())
+
+OC_STRUCTORS       (OC_GLOBAL_CONFIG, ())
+
+//
+// ACPI configuration support
+//
+
+STATIC
+OC_SCHEMA
+mAcpiAddSchema = OC_SCHEMA_STRING (NULL);
+
+STATIC
+OC_SCHEMA
+mAcpiBlockSchemaEntry[] = {
+  OC_SCHEMA_BOOLEAN_IN   ("Disabled",       OC_ACPI_BLOCK_ENTRY, Disabled),
+  OC_SCHEMA_DATAF_IN     ("OemTableId",     OC_ACPI_BLOCK_ENTRY, OemTableId),
+  OC_SCHEMA_INTEGER_IN   ("TableLength",    OC_ACPI_BLOCK_ENTRY, TableLength),
+  OC_SCHEMA_DATAF_IN     ("TableSignature", OC_ACPI_BLOCK_ENTRY, TableSignature),
+};
+
+STATIC
+OC_SCHEMA
+mAcpiBlockSchema = OC_SCHEMA_DICT (NULL, mAcpiBlockSchemaEntry);
+
+STATIC
+OC_SCHEMA
+mAcpiPatchSchemaEntry[] = {
+  OC_SCHEMA_INTEGER_IN   ("Count",          OC_ACPI_PATCH_ENTRY, Count),
+  OC_SCHEMA_BOOLEAN_IN   ("Disabled",       OC_ACPI_PATCH_ENTRY, Disabled),
+  OC_SCHEMA_DATA_IN      ("Find",           OC_ACPI_PATCH_ENTRY, Find),
+  OC_SCHEMA_INTEGER_IN   ("Limit",          OC_ACPI_PATCH_ENTRY, Limit),
+  OC_SCHEMA_DATA_IN      ("Mask",           OC_ACPI_PATCH_ENTRY, Mask),
+  OC_SCHEMA_DATAF_IN     ("OemTableId",     OC_ACPI_PATCH_ENTRY, OemTableId),
+  OC_SCHEMA_DATA_IN      ("Replace",        OC_ACPI_PATCH_ENTRY, Replace),
+  OC_SCHEMA_DATA_IN      ("ReplaceMask",    OC_ACPI_PATCH_ENTRY, ReplaceMask),
+  OC_SCHEMA_INTEGER_IN   ("Skip",           OC_ACPI_PATCH_ENTRY, Skip),
+  OC_SCHEMA_INTEGER_IN   ("TableLength",    OC_ACPI_PATCH_ENTRY, TableLength),
+  OC_SCHEMA_DATAF_IN     ("TableSignature", OC_ACPI_PATCH_ENTRY, TableSignature),
+};
+
+STATIC
+OC_SCHEMA
+mAcpiPatchSchema = OC_SCHEMA_DICT (NULL, mAcpiPatchSchemaEntry);
+
+STATIC
+OC_SCHEMA
+mAcpiQuirksSchema[] = {
+  OC_SCHEMA_BOOLEAN_IN ("FadtEnableReset",  OC_GLOBAL_CONFIG, Acpi.Quirks.FadtEnableReset),
+  OC_SCHEMA_BOOLEAN_IN ("NormalizeHeaders", OC_GLOBAL_CONFIG, Acpi.Quirks.NormalizeHeaders),
+  OC_SCHEMA_BOOLEAN_IN ("RebaseRegions",    OC_GLOBAL_CONFIG, Acpi.Quirks.RebaseRegions)
+};
+
+STATIC
+OC_SCHEMA
+mAcpiConfigurationSchema[] = {
+  OC_SCHEMA_ARRAY_IN   ("Add",    OC_GLOBAL_CONFIG, Acpi.Add,    &mAcpiAddSchema),
+  OC_SCHEMA_ARRAY_IN   ("Block",  OC_GLOBAL_CONFIG, Acpi.Block,  &mAcpiBlockSchema),
+  OC_SCHEMA_ARRAY_IN   ("Patch",  OC_GLOBAL_CONFIG, Acpi.Patch,  &mAcpiPatchSchema),
+  OC_SCHEMA_DICT       ("Quirks", mAcpiQuirksSchema),
+};
+
+
 
 //
 // Device properties support
@@ -107,7 +177,7 @@ mKernelConfigurationSchema[] = {
   OC_SCHEMA_ARRAY_IN   ("Add",    OC_GLOBAL_CONFIG, Kernel.Add, &mKernelAddSchema),
   OC_SCHEMA_ARRAY_IN   ("Block",  OC_GLOBAL_CONFIG, Kernel.Block, &mKernelBlockSchema),
   OC_SCHEMA_ARRAY_IN   ("Patch",  OC_GLOBAL_CONFIG, Kernel.Patch, &mKernelPatchSchema),
-  OC_SCHEMA_ARRAY_IN   ("Quirks", OC_GLOBAL_CONFIG, Kernel.Quirks, mKernelQuirksSchema),
+  OC_SCHEMA_DICT       ("Quirks", mKernelQuirksSchema),
 };
 
 //
@@ -141,6 +211,7 @@ mUefiConfigurationSchema[] = {
 STATIC
 OC_SCHEMA
 mRootConfigurationNodes[] = {
+  OC_SCHEMA_DICT    ("ACPI",             mAcpiConfigurationSchema),
   OC_SCHEMA_MAP_IN  ("DeviceProperties", OC_GLOBAL_CONFIG, DeviceProperties, &mDevicePropertiesSchema),
   OC_SCHEMA_DICT    ("Kernel",           mKernelConfigurationSchema),
   OC_SCHEMA_DICT    ("UEFI",             mUefiConfigurationSchema)

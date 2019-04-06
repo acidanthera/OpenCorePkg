@@ -18,6 +18,68 @@
 #include <Library/OcSerializeLib.h>
 
 /**
+  ACPI section
+**/
+
+///
+/// ACPI added tables.
+///
+#define OC_ACPI_ADD_ARRAY_FIELDS(_, __) \
+  OC_ARRAY (OC_STRING, _, __)
+  OC_DECLARE (OC_ACPI_ADD_ARRAY)
+
+///
+/// ACPI table blocks.
+///
+#define OC_ACPI_BLOCK_ENTRY_FIELDS(_, __) \
+  _(BOOLEAN                     , Disabled         ,     , FALSE   , () ) \
+  _(UINT8                       , OemTableId       , [8] , {0}     , () ) \
+  _(UINT32                      , TableLength      ,     , 0       , () ) \
+  _(UINT8                       , TableSignature   , [4] , {0}     , () )
+  OC_DECLARE (OC_ACPI_BLOCK_ENTRY)
+
+#define OC_ACPI_BLOCK_ARRAY_FIELDS(_, __) \
+  OC_ARRAY (OC_ACPI_BLOCK_ENTRY, _, __)
+  OC_DECLARE (OC_ACPI_BLOCK_ARRAY)
+
+///
+/// ACPI patches.
+///
+#define OC_ACPI_PATCH_ENTRY_FIELDS(_, __) \
+  _(UINT32                      , Count            ,     , 0                           , ()                   ) \
+  _(BOOLEAN                     , Disabled         ,     , FALSE                       , ()                   ) \
+  _(OC_DATA                     , Find             ,     , OC_DATA_CONSTR ({0}, _, __) , OC_DESTR (OC_DATA)   ) \
+  _(UINT32                      , Limit            ,     , 0                           , ()                   ) \
+  _(OC_DATA                     , Mask             ,     , OC_DATA_CONSTR ({0}, _, __) , OC_DESTR (OC_DATA)   ) \
+  _(OC_DATA                     , Replace          ,     , OC_DATA_CONSTR ({0}, _, __) , OC_DESTR (OC_DATA)   ) \
+  _(OC_DATA                     , ReplaceMask      ,     , OC_DATA_CONSTR ({0}, _, __) , OC_DESTR (OC_DATA)   ) \
+  _(UINT8                       , OemTableId       , [8] , {0}                         , ()                   ) \
+  _(UINT32                      , TableLength      ,     , 0                           , ()                   ) \
+  _(UINT8                       , TableSignature   , [4] , {0}                         , ()                   ) \
+  _(UINT32                      , Skip             ,     , 0                           , ()                   )
+  OC_DECLARE (OC_ACPI_PATCH_ENTRY)
+
+#define OC_ACPI_PATCH_ARRAY_FIELDS(_, __) \
+  OC_ARRAY (OC_ACPI_PATCH_ENTRY, _, __)
+  OC_DECLARE (OC_ACPI_PATCH_ARRAY)
+
+///
+/// ACPI quirks.
+///
+#define OC_ACPI_QUIRKS_FIELDS(_, __) \
+  _(BOOLEAN                     , FadtEnableReset     ,     , FALSE  , ()) \
+  _(BOOLEAN                     , NormalizeHeaders    ,     , FALSE  , ()) \
+  _(BOOLEAN                     , RebaseRegions       ,     , FALSE  , ())
+  OC_DECLARE (OC_ACPI_QUIRKS)
+
+#define OC_ACPI_CONFIG_FIELDS(_, __) \
+  _(OC_ACPI_ADD_ARRAY         , Add              ,     , OC_CONSTR2 (OC_ACPI_ADD_ARRAY, _, __)     , OC_DESTR (OC_ACPI_ADD_ARRAY)) \
+  _(OC_ACPI_BLOCK_ARRAY       , Block            ,     , OC_CONSTR2 (OC_ACPI_BLOCK_ARRAY, _, __)   , OC_DESTR (OC_ACPI_BLOCK_ARRAY)) \
+  _(OC_ACPI_PATCH_ARRAY       , Patch            ,     , OC_CONSTR2 (OC_ACPI_PATCH_ARRAY, _, __)   , OC_DESTR (OC_ACPI_PATCH_ARRAY)) \
+  _(OC_ACPI_QUIRKS            , Quirks           ,     , OC_CONSTR2 (OC_ACPI_QUIRKS, _, __)        , OC_DESTR (OC_ACPI_QUIRKS))
+  OC_DECLARE (OC_ACPI_CONFIG)
+
+/**
   DeviceProperties section
 **/
 
@@ -35,7 +97,6 @@
 ///
 /// KernelSpace kext adds.
 ///
-
 #define OC_KERNEL_ADD_ENTRY_FIELDS(_, __) \
   _(BOOLEAN                     , Disabled         ,     , FALSE                       , ()                   ) \
   _(OC_STRING                   , MatchKernel      ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
@@ -55,7 +116,6 @@
 ///
 /// KernelSpace kext blocks.
 ///
-
 #define OC_KERNEL_BLOCK_ENTRY_FIELDS(_, __) \
   _(BOOLEAN                     , Disabled         ,     , FALSE                       , ()                   ) \
   _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
@@ -69,7 +129,6 @@
 ///
 /// KernelSpace patches.
 ///
-
 #define OC_KERNEL_PATCH_ENTRY_FIELDS(_, __) \
   _(OC_STRING                   , Base             ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(UINT32                      , Count            ,     , 0                           , ()                   ) \
@@ -125,7 +184,6 @@
   _(BOOLEAN                     , ProvideConsoleGop           ,     , FALSE  , ())
   OC_DECLARE (OC_UEFI_QUIRKS)
 
-
 ///
 /// Uefi contains firmware tweaks and extra drivers.
 ///
@@ -140,6 +198,7 @@
 **/
 
 #define OC_GLOBAL_CONFIG_FIELDS(_, __) \
+  _(OC_ACPI_CONFIG              , Acpi              ,     , OC_CONSTR1 (OC_ACPI_CONFIG, _, __)      , OC_DESTR (OC_ACPI_CONFIG)) \
   _(OC_DEVICE_PROP_MAP          , DeviceProperties  ,     , OC_CONSTR1 (OC_DEVICE_PROP_MAP, _, __)  , OC_DESTR (OC_DEVICE_PROP_MAP)) \
   _(OC_KERNEL_CONFIG            , Kernel            ,     , OC_CONSTR1 (OC_KERNEL_CONFIG, _, __)    , OC_DESTR (OC_KERNEL_CONFIG)) \
   _(OC_UEFI_CONFIG              , Uefi              ,     , OC_CONSTR1 (OC_UEFI_CONFIG, _, __)      , OC_DESTR (OC_UEFI_CONFIG))
