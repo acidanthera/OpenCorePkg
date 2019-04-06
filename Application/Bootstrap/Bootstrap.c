@@ -40,7 +40,7 @@ LoadOpenCore (
 {
   EFI_STATUS                 Status;
   VOID                       *Buffer;
-  UINTN                      BufferSize;
+  UINT32                     BufferSize;
 
   ASSERT (FileSystem != NULL);
   ASSERT (ParentImageHandle != NULL);
