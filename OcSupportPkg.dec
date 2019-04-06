@@ -111,9 +111,6 @@
   OcPngLib|Include/Library/OcPngLib.h
 
   ##  @libraryclass
-  OcProtocolLib|Include/Library/OcProtocolLib.h
-
-  ##  @libraryclass
   OcSerializeLib|Include/Library/OcSerializeLib.h
 
   ##  @libraryclass

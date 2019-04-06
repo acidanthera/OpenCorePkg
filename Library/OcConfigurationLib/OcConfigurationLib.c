@@ -15,7 +15,16 @@
 #include <Library/OcConfigurationLib.h>
 
 OC_MAP_STRUCTORS (OC_DEVICE_PROP_MAP)
+OC_STRUCTORS (OC_KERNEL_ADD_ENTRY, ())
+OC_ARRAY_STRUCTORS (OC_KERNEL_ADD_ARRAY)
+OC_STRUCTORS (OC_KERNEL_BLOCK_ENTRY, ())
+OC_ARRAY_STRUCTORS (OC_KERNEL_BLOCK_ARRAY)
+OC_STRUCTORS (OC_KERNEL_PATCH_ENTRY, ())
+OC_ARRAY_STRUCTORS (OC_KERNEL_PATCH_ARRAY)
+OC_STRUCTORS (OC_KERNEL_QUIRKS, ())
+OC_STRUCTORS (OC_KERNEL_CONFIG, ())
 OC_ARRAY_STRUCTORS (OC_UEFI_DRIVER_ARRAY)
+OC_STRUCTORS (OC_UEFI_QUIRKS, ())
 OC_STRUCTORS (OC_UEFI_CONFIG, ())
 OC_STRUCTORS (OC_GLOBAL_CONFIG, ())
 
@@ -32,6 +41,37 @@ STATIC
 OC_SCHEMA
 mDevicePropertiesSchema = OC_SCHEMA_MAP (NULL, OC_ASSOC, &mDevicePropertiesEntrySchema);
 
+
+//
+// Kernel space configuration support
+//
+
+STATIC
+OC_SCHEMA
+mKernelAddSchema[] = {
+  OC_SCHEMA_STRING_IN    ("Identifier", OC_KERNEL_ADD_ENTRY, Identifier),
+};
+
+STATIC
+OC_SCHEMA
+mKernelBlockSchema[] = {
+  OC_SCHEMA_STRING_IN    ("Identifier", OC_KERNEL_BLOCK_ENTRY, Identifier),
+};
+
+STATIC
+OC_SCHEMA
+mKernelPatchSchema[] = {
+  OC_SCHEMA_STRING_IN    ("Identifier", OC_KERNEL_PATCH_ENTRY, Identifier),
+};
+
+STATIC
+OC_SCHEMA
+mKernelConfigurationSchema[] = {
+  OC_SCHEMA_ARRAY_IN   ("Add", OC_GLOBAL_CONFIG, Kernel.Add, mKernelAddSchema),
+  OC_SCHEMA_ARRAY_IN   ("Block", OC_GLOBAL_CONFIG, Kernel.Block, mKernelBlockSchema),
+  OC_SCHEMA_ARRAY_IN   ("Patch", OC_GLOBAL_CONFIG, Kernel.Patch, mKernelPatchSchema),
+};
+
 //
 // Uefi configuration support
 //
@@ -42,8 +82,18 @@ mUefiDriversSchema = OC_SCHEMA_STRING (NULL);
 
 STATIC
 OC_SCHEMA
+mUefiQuirksSchema[] = {
+  OC_SCHEMA_BOOLEAN_IN ("DisableWatchDog", OC_GLOBAL_CONFIG, Uefi.Quirks.DisableWatchDog),
+  OC_SCHEMA_BOOLEAN_IN ("IgnoreInvalidFlexRatio", OC_GLOBAL_CONFIG, Uefi.Quirks.IgnoreInvalidFlexRatio),
+  OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop", OC_GLOBAL_CONFIG, Uefi.Quirks.ProvideConsoleGop)
+};
+
+STATIC
+OC_SCHEMA
 mUefiConfigurationSchema[] = {
-  OC_SCHEMA_ARRAY_IN ("Drivers", OC_GLOBAL_CONFIG, Uefi.Drivers, &mUefiDriversSchema)
+  OC_SCHEMA_BOOLEAN_IN ("ConnectDrivers", OC_GLOBAL_CONFIG, Uefi.ConnectDrivers),
+  OC_SCHEMA_ARRAY_IN   ("Drivers", OC_GLOBAL_CONFIG, Uefi.Drivers, &mUefiDriversSchema),
+  OC_SCHEMA_DICT       ("Quirks", mUefiQuirksSchema)
 };
 
 //
@@ -54,6 +104,7 @@ STATIC
 OC_SCHEMA
 mRootConfigurationNodes[] = {
   OC_SCHEMA_MAP_IN  ("DeviceProperties", OC_GLOBAL_CONFIG, DeviceProperties, &mDevicePropertiesSchema),
+  OC_SCHEMA_DICT    ("KernelSpace", mKernelConfigurationSchema),
   OC_SCHEMA_DICT    ("UEFI", mUefiConfigurationSchema)
 };
 
