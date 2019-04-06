@@ -17,11 +17,11 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = OcAppleImageVerificationLib
-  FILE_GUID                      = 504C5C9C-BF67-421D-9592-EAD58CE17D01
+  BASE_NAME                      = OcAppleKeysLib
+  FILE_GUID                      = 1CADD588-89D4-464C-92DC-FA0ABE350B16
   MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = OcAppleImageVerificationLib|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SAL_DRIVER DXE_SMM_DRIVER SMM_CORE UEFI_APPLICATION UEFI_DRIVER
+  LIBRARY_CLASS                  = OcAppleKeysLib|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SAL_DRIVER DXE_SMM_DRIVER SMM_CORE UEFI_APPLICATION UEFI_DRIVER
 
 
 #
@@ -29,7 +29,7 @@
 #
 
 [Sources]
-  OcAppleImageVerification.c
+  OcAppleKeysLib.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -37,18 +37,5 @@
   OcSupportPkg/OcSupportPkg.dec
 
 [LibraryClasses]
-  UefiRuntimeServicesTableLib
-  UefiBootServicesTableLib
-  MemoryAllocationLib
-  BaseMemoryLib
   BaseLib
-  UefiLib
-  DebugLib
-  OcAppleKeysLib
-  OcCryptoLib
-  OcGuardLib
-
-[Guids]
-  gAppleEfiCertificateGuid
-  gEfiCertTypeRsa2048Sha256Guid
 

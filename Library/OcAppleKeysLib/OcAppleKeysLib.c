@@ -1,41 +1,29 @@
 /** @file
+  Copyright (C) 2019, vit9696. All rights reserved.
 
-OcAppleImageVerificationLib
+  All rights reserved.
 
-Copyright (c) 2018, savvas
+  This program and the accompanying materials
+  are licensed and made available under the terms and conditions of the BSD License
+  which accompanies this distribution.  The full text of the license may be found at
+  http://opensource.org/licenses/bsd-license.php
 
-All rights reserved.
-
-This program and the accompanying materials
-are licensed and made available under the terms and conditions of the BSD License
-which accompanies this distribution.  The full text of the license may be found at
-http://opensource.org/licenses/bsd-license.php
-
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-
+  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef APPLE_PK_DB_H
-#define APPLE_PK_DB_H
+#include <Library/OcAppleKeysLib.h>
 
-#define NUM_OF_PK 2
-
-typedef struct APPLE_PK_ENTRY_ {
-  UINT8 Hash[32];
-  UINT8 PublicKey[520];
-} APPLE_PK_ENTRY;
-
-APPLE_PK_ENTRY PkDataBase[NUM_OF_PK] = {
-	{
-  	//
-  	// PublicKey hash
-  	//
-  	{
+CONST APPLE_PK_ENTRY PkDataBase[NUM_OF_PK] = {
+  {
+    //
+    // PublicKey hash
+    //
+    {
       0xc7, 0xa1, 0xb9, 0x36, 0x28, 0x80, 0xde, 0x69, 0x57, 0x62, 0xb7, 0xb6,
       0x5b, 0xec, 0x6b, 0xf1, 0x56, 0xa5, 0x5c, 0xf9, 0x24, 0x7f, 0x22, 0xef,
       0x78, 0x62, 0x35, 0x53, 0x7f, 0x95, 0x2b, 0x45
-  	},
+    },
     //
     // Original PublicKey
     //
@@ -52,10 +40,10 @@ APPLE_PK_ENTRY PkDataBase[NUM_OF_PK] = {
       299E9EC8 6F5E85D4 79213FB1 F9DD5B93 8C57DE9A 52FF62A7
       E1431EA9 250EE129 4338CDD9 CA48E7C3
     **/
-  	//
-  	// PublicKey in format specified by Chromium project implementation
-  	//
-  	{
+    //
+    // PublicKey in format specified by Chromium project implementation
+    //
+    {
       0x40, 0x00, 0x00, 0x00, 0xd1, 0x16, 0xcd, 0xe7, 0xcf, 0xfd, 0x3e, 0x6b,
       0xfe, 0x66, 0xec, 0x75, 0xf4, 0x4b, 0x7e, 0x2e, 0x0e, 0xd2, 0x63, 0x98,
       0x08, 0xa9, 0x8d, 0x10, 0xac, 0x37, 0x8e, 0x55, 0x1c, 0xaa, 0x0e, 0x1c,
@@ -101,8 +89,8 @@ APPLE_PK_ENTRY PkDataBase[NUM_OF_PK] = {
       0xe1, 0x72, 0xc3, 0x6c, 0x5f, 0xe4, 0x66, 0x0d, 0x4e, 0x08, 0x65, 0x9c,
       0x46, 0xc5, 0x7b, 0x04
     }
-	},
-	{
+  },
+  {
     //
     // PublicKey hash
     //
@@ -176,9 +164,5 @@ APPLE_PK_ENTRY PkDataBase[NUM_OF_PK] = {
       0x37, 0x2e, 0x4c, 0x39, 0x19, 0xa0, 0x4e, 0x43, 0xe0, 0xcc, 0xd9, 0x87,
       0x2c, 0xd1, 0x2c, 0x3e
     }
-	}
+  }
 };
-
-extern APPLE_PK_ENTRY PkDataBase[NUM_OF_PK];
-
-#endif //APPLE_PK_DB_H

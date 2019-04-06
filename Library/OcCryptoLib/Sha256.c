@@ -30,7 +30,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
               This implementation uses little endian byte order.
 **/
 
+#ifdef EFIAPI
 #include <Library/BaseMemoryLib.h>
+#endif
+
 #include <Library/OcCryptoLib.h>
 
 #define ROTLEFT(a, b) (((a) << (b)) | ((a) >> (32-(b))))

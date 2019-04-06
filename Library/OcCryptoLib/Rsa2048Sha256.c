@@ -25,7 +25,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   for computation.
 **/
 
+#ifdef EFIAPI
 #include <Library/BaseMemoryLib.h>
+#endif
+
 #include <Library/OcCryptoLib.h>
 
 /**

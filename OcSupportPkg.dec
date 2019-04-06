@@ -66,6 +66,9 @@
   OcAppleKernelLib|Include/Library/OcAppleKernelLib.h
 
   ##  @libraryclass
+  OcAppleKeysLib|Include/Library/OcAppleKeysLib.h
+
+  ##  @libraryclass
   OcBootManagementLib|Include/Library/OcBootManagementLib.h
 
   ##  @libraryclass
