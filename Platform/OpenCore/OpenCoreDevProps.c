@@ -16,6 +16,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
+#include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcDevicePropertyLib.h>
 #include <Library/OcMiscLib.h>
@@ -31,5 +32,63 @@ OcLoadDevPropsSupport (
   IN OC_GLOBAL_CONFIG    *Config
   )
 {
+  EFI_STATUS                                  Status;
+  UINT32                                      DeviceIndex;
+  UINT32                                      PropertyIndex;
+  EFI_DEVICE_PATH_PROPERTY_DATABASE_PROTOCOL  *PropertyDatabase;
+  OC_ASSOC                                    *PropertyMap;
+  CHAR8                                       *AsciiDevicePath;
+  CHAR16                                      *UnicodeDevicePath;
+  CHAR8                                       *AsciiProperty;
+  CHAR16                                      *UnicodeProperty;
+  EFI_DEVICE_PATH_PROTOCOL                    *DevicePath;
 
+  PropertyDatabase = OcDevicePathPropertyInstallProtocol (FALSE);
+  if (PropertyDatabase == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Device property database protocol is missing\n"));
+    return;
+  }
+
+  for (DeviceIndex = 0; DeviceIndex < Config->DeviceProperties.Count; ++DeviceIndex) {
+    PropertyMap       = Config->DeviceProperties.Values[DeviceIndex];
+    AsciiDevicePath   = OC_BLOB_GET (Config->DeviceProperties.Keys[DeviceIndex]);
+    UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
+    DevicePath        = NULL;
+
+    if (UnicodeDevicePath != NULL) {
+      DevicePath = ConvertTextToDevicePath (UnicodeDevicePath);
+      FreePool (UnicodeDevicePath);
+    }
+
+    if (DevicePath == NULL) {
+      DEBUG ((DEBUG_WARN, "OC: Failed to parse %a device path\n", DevicePath));
+      continue;
+    }
+
+    for (PropertyIndex = 0; PropertyIndex < PropertyMap->Count; ++PropertyIndex) {
+      AsciiProperty   = OC_BLOB_GET (PropertyMap->Keys[PropertyIndex]);
+      UnicodeProperty = AsciiStrCopyToUnicode (AsciiProperty, 0);
+
+      if (UnicodeProperty == NULL) {
+        DEBUG ((DEBUG_WARN, "OC: Failed to convert %a property\n", AsciiProperty));
+        continue;
+      }
+
+      Status = PropertyDatabase->SetProperty (
+        PropertyDatabase,
+        DevicePath,
+        UnicodeProperty,
+        OC_BLOB_GET (PropertyMap->Values[PropertyIndex]),
+        PropertyMap->Values[PropertyIndex]->Size
+        );
+
+      FreePool (UnicodeProperty);
+
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_WARN, "OC: Failed to set %a property - %r\n", AsciiProperty, Status));
+      }
+    }
+
+    FreePool (DevicePath);
+  }
 }
