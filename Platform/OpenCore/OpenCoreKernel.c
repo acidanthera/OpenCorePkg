@@ -24,8 +24,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include <Protocol/DevicePath.h>
-
 STATIC OC_STORAGE_CONTEXT  *mOcStorage;
 STATIC OC_GLOBAL_CONFIG    *mOcConfiguration;
 
@@ -57,6 +55,8 @@ OcKernelReadDarwinVersion (
     DarwinVersion[0] = '\0';
     return;
   }
+
+  Offset += L_STR_LEN ("Darwin Kernel Version ");
 
   for (Index = 0; Index < DarwinVersionSize - 1; ++Index, ++Offset) {
     if (Offset >= KernelSize || Kernel[Offset] == ':') {
@@ -209,7 +209,7 @@ OcKernelApplyPatches (
 
     MatchKernel = OC_BLOB_GET (&UserPatch->MatchKernel);
 
-    if (AsciiStrnCmp (DarwinVersion, MatchKernel, UserPatch->MatchKernel.Size) != 0) {
+    if (AsciiStrnCmp (DarwinVersion, MatchKernel, AsciiStrLen (MatchKernel)) != 0) {
       DEBUG ((
         DEBUG_INFO,
         "OC: Kernel patcher skips %a patch at %u due to version %a vs %a",
@@ -324,7 +324,7 @@ OcKernelBlockKexts (
 
     MatchKernel = OC_BLOB_GET (&Kext->MatchKernel);
 
-    if (AsciiStrnCmp (DarwinVersion, MatchKernel, Kext->MatchKernel.Size) != 0) {
+    if (AsciiStrnCmp (DarwinVersion, MatchKernel, AsciiStrLen (MatchKernel)) != 0) {
       DEBUG ((
         DEBUG_INFO,
         "OC: Kernel blocker skips %a block at %u due to version %a vs %a",
@@ -390,10 +390,10 @@ OcKernelProcessPrelinked (
           continue;
         }
 
-        BundleName     = OC_BLOB_GET (&Kext->BundleName);
+        BundleName  = OC_BLOB_GET (&Kext->BundleName);
         MatchKernel = OC_BLOB_GET (&Kext->MatchKernel);
 
-        if (AsciiStrnCmp (DarwinVersion, MatchKernel, Kext->MatchKernel.Size) != 0) {
+        if (AsciiStrnCmp (DarwinVersion, MatchKernel, AsciiStrLen (MatchKernel)) != 0) {
           DEBUG ((
             DEBUG_INFO,
             "OC: Prelink injection skips %a kext at %u due to version %a vs %a",
