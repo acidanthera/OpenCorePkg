@@ -52,23 +52,6 @@ LocateRootVolume (
 
 /**
 
-  @param[in]  FileHandle         A pointer to file handle.
-  @param[in]  InformationType    A pointer to file info GUID.
-  @param[in]  MinFileInfoSize    Minimal size of the info provided.
-  @param[out] RealFileInfoSize   Actual info size read (optional).
-
-  @retval read file info or NULL.
-**/
-VOID *
-GetFileInfo (
-  IN  EFI_FILE_PROTOCOL  *FileHandle,
-  IN  EFI_GUID           *InformationType,
-  IN  UINTN              MinFileInfoSize,
-  OUT UINTN              *RealFileInfoSize  OPTIONAL
-  );
-
-/**
-
   @param[in]  FileSystem   A pointer to the file system protocol of the volume.
 
   @retval A pointer to the NULL terminated unicode volume label.
@@ -93,7 +76,22 @@ VOID *
 ReadFile (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
   IN  CONST CHAR16                     *FilePath,
-  OUT UINTN                            *FileSize OPTIONAL
+  OUT UINT32                           *FileSize OPTIONAL
+  );
+
+/**
+  Determine file size if it is less than 4 GB.
+
+  @param[in]  File         A pointer to the file protocol.
+  @param[out] Size         32-bit file size.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+ReadFileSize (
+  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
+  IN  CONST CHAR16                     *FilePath,
+  OUT UINT32                           *Size
   );
 
 /**
@@ -107,7 +105,7 @@ ReadFile (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-ReadFileData (
+GetFileData (
   IN  EFI_FILE_PROTOCOL  *File,
   IN  UINT32             Position,
   IN  UINT32             Size,
@@ -126,11 +124,29 @@ ReadFileData (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-WriteFileData (
+SetFileData (
   IN EFI_FILE_PROTOCOL  *WritableFs OPTIONAL,
   IN CONST CHAR16       *FileName,
   IN CONST VOID         *Buffer,
   IN UINT32             Size
+  );
+
+/**
+  Get file information of specified type.
+
+  @param[in]  FileHandle         A pointer to file handle.
+  @param[in]  InformationType    A pointer to file info GUID.
+  @param[in]  MinFileInfoSize    Minimal size of the info provided.
+  @param[out] RealFileInfoSize   Actual info size read (optional).
+
+  @retval read file info or NULL.
+**/
+VOID *
+GetFileInfo (
+  IN  EFI_FILE_PROTOCOL  *File,
+  IN  EFI_GUID           *InformationType,
+  IN  UINTN              MinFileInfoSize,
+  OUT UINTN              *RealFileInfoSize  OPTIONAL
   );
 
 /**
@@ -142,7 +158,7 @@ WriteFileData (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-ReadFileSize (
+GetFileSize (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT UINT32             *Size
   );
@@ -156,7 +172,7 @@ ReadFileSize (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-ReadFileModifcationTime (
+GetFileModifcationTime (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT EFI_TIME           *Time
   );

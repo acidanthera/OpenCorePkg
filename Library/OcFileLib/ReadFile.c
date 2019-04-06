@@ -33,16 +33,15 @@ VOID *
 ReadFile (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
   IN  CONST CHAR16                     *FilePath,
-  OUT UINTN                            *FileSize  OPTIONAL
+  OUT UINT32                           *FileSize  OPTIONAL
   )
 {
   EFI_STATUS                      Status;
   EFI_FILE_HANDLE                 Volume;
   EFI_FILE_HANDLE                 FileHandle;
-  EFI_FILE_INFO                   *FileInfo;
   UINT8                           *FileBuffer;
-  UINTN                           FileBufferSize;
-  UINTN                           FileReadSize;
+  UINT32                          FileBufferSize;
+  UINT32                          FileReadSize;
 
   ASSERT (FileSystem != NULL);
   ASSERT (FilePath != NULL);
@@ -63,40 +62,36 @@ ReadFile (
     0
     );
 
+  Volume->Close (Volume);
+
   if (EFI_ERROR (Status)) {
-    Volume->Close (Volume);
     return NULL;
   }
 
-  FileInfo = GetFileInfo (
+  Status = GetFileSize (
     FileHandle,
-    &gEfiFileInfoGuid,
-    sizeof (EFI_FILE_INFO),
-    NULL
+    &FileReadSize
     );
-
-  if (FileInfo == NULL
-    || OcOverflowAddUN(FileInfo->FileSize, sizeof (CHAR16), &FileBufferSize)) {
+  if (EFI_ERROR (Status)
+    || OcOverflowAddU32 (FileReadSize, sizeof (CHAR16), &FileBufferSize)) {
     FileHandle->Close (FileHandle);
-    Volume->Close (Volume);
     return NULL;
   }
 
   FileBuffer = AllocatePool (FileBufferSize);
-
   if (FileBuffer != NULL) {
-    FileReadSize = FileInfo->FileSize;
-    Status = FileHandle->Read (
+    Status = GetFileData (
       FileHandle,
-      &FileReadSize,
+      0,
+      FileReadSize,
       FileBuffer
       );
 
-    if (!EFI_ERROR (Status) && FileReadSize == FileInfo->FileSize) {
-      FileBuffer[FileInfo->FileSize] = 0;
-      FileBuffer[FileInfo->FileSize + 1] = 0;
+    if (!EFI_ERROR (Status)) {
+      FileBuffer[FileReadSize] = 0;
+      FileBuffer[FileReadSize + 1] = 0;
       if (FileSize != NULL) {
-        *FileSize = FileInfo->FileSize;
+        *FileSize = FileReadSize;
       }
     } else {
       FreePool (FileBuffer);
@@ -105,6 +100,50 @@ ReadFile (
   }
 
   FileHandle->Close (FileHandle);
-  Volume->Close (Volume);
   return FileBuffer;
+}
+
+EFI_STATUS
+ReadFileSize (
+  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
+  IN  CONST CHAR16                     *FilePath,
+  OUT UINT32                           *Size
+  )
+{
+  EFI_STATUS                      Status;
+  EFI_FILE_HANDLE                 Volume;
+  EFI_FILE_HANDLE                 FileHandle;
+
+  ASSERT (FileSystem != NULL);
+  ASSERT (FilePath != NULL);
+  ASSERT (Size != NULL);
+
+  Status = FileSystem->OpenVolume (
+    FileSystem,
+    &Volume
+    );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = Volume->Open (
+    Volume,
+    &FileHandle,
+    (CHAR16 *) FilePath,
+    EFI_FILE_MODE_READ,
+    0
+    );
+
+  Volume->Close (Volume);
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = GetFileSize (
+    FileHandle,
+    Size
+    );
+
+  return Status;
 }

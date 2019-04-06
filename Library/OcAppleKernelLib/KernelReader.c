@@ -171,7 +171,7 @@ ParseCompressedHeader (
     return KernelSize;
   }
 
-  Status = ReadFileData (File, Offset + sizeof (MACH_COMP_HEADER), CompressedSize, CompressedBuffer);
+  Status = GetFileData (File, Offset + sizeof (MACH_COMP_HEADER), CompressedSize, CompressedBuffer);
   if (RETURN_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "Comp kernel (%u bytes) cannot be read at %08X\n", CompressedSize, Offset));
     FreePool (CompressedBuffer);
@@ -213,7 +213,7 @@ ReadAppleKernelImage (
   BOOLEAN           ForbidFat;
   BOOLEAN           Compressed;
 
-  Status = ReadFileData (File, Offset, KERNEL_HEADER_SIZE, *Buffer);
+  Status = GetFileData (File, Offset, KERNEL_HEADER_SIZE, *Buffer);
   if (RETURN_ERROR (Status)) {
     return Status;
   }
@@ -250,7 +250,7 @@ ReadAppleKernelImage (
           //
           // Figure out size for a non fat image.
           //
-          Status = ReadFileSize (File, KernelSize);
+          Status = GetFileSize (File, KernelSize);
           if (RETURN_ERROR (Status)) {
             DEBUG ((DEBUG_INFO, "Kernel size cannot be determined - %r\n", Status));
             return RETURN_OUT_OF_RESOURCES;
@@ -265,7 +265,7 @@ ReadAppleKernelImage (
           return Status;
         }
 
-        Status = ReadFileData (File, Offset, *KernelSize, *Buffer);
+        Status = GetFileData (File, Offset, *KernelSize, *Buffer);
         if (RETURN_ERROR (Status)) {
           DEBUG ((DEBUG_INFO, "Kernel (%u bytes) cannot be read at %08X\n", *KernelSize, Offset));
         }

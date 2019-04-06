@@ -49,7 +49,7 @@ GetAppleDiskLabel (
   UINTN    DiskLabelPathSize;
   CHAR8    *AsciiDiskLabel;
   CHAR16   *UnicodeDiskLabel;
-  UINTN    DiskLabelLength;
+  UINT32   DiskLabelLength;
 
   DiskLabelPathSize = StrSize (BootDirectoryName) + StrLen (LabelFilename) * sizeof (CHAR16);
   DiskLabelPath = AllocatePool (DiskLabelPathSize);
@@ -76,7 +76,7 @@ STATIC
 CHAR16 *
 GetAppleRecoveryNameFromPlist (
   IN CHAR8   *SystemVersionData,
-  IN UINTN   SystemVersionDataSize
+  IN UINT32  SystemVersionDataSize
   )
 {
   XML_DOCUMENT        *Document;
@@ -89,7 +89,7 @@ GetAppleRecoveryNameFromPlist (
   CHAR16              *RecoveryName;
   UINTN               RecoveryNameSize;
 
-  Document = XmlDocumentParse (SystemVersionData, (UINT32) SystemVersionDataSize, FALSE);
+  Document = XmlDocumentParse (SystemVersionData, SystemVersionDataSize, FALSE);
 
   if (Document == NULL) {
     return NULL;
@@ -141,7 +141,7 @@ GetAppleRecoveryName (
   UINTN    SystemVersionPathSize;
   CHAR8    *SystemVersionData;
   CHAR16   *UnicodeDiskLabel;
-  UINTN    SystemVersionDataSize;
+  UINT32   SystemVersionDataSize;
 
   SystemVersionPathSize = StrSize (BootDirectoryName) + L_STR_SIZE_NT (L"SystemVersion.plist");
   SystemVersionPath = AllocatePool (SystemVersionPathSize);
@@ -257,7 +257,7 @@ OcDescribeBootEntry (
   CHAR16                           *RecoveryBootName;
   EFI_HANDLE                       Device;
   EFI_HANDLE                       ApfsVolumeHandle;
-
+  UINT32                           BcdSize;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
 
   Status = BootPolicy->GetBootInfo (
@@ -289,6 +289,10 @@ OcDescribeBootEntry (
   if (BootEntry->Name == NULL) {
     BootEntry->Name = GetAppleDiskLabel (FileSystem, BootDirectoryName, L".disk_label.contentDetails");
   }
+  Status = ReadFileSize (FileSystem, L"\\EFI\\Microsoft\\Boot\\BCD", &BcdSize);
+  if (!EFI_ERROR (Status)) {
+    BootEntry->Name = AllocateCopyPool(sizeof (L"BOOTCAMP Windows"), L"BOOTCAMP Windows");
+  }  
   if (BootEntry->Name == NULL) {
     BootEntry->Name = GetVolumeLabel (FileSystem);
     if (BootEntry->Name != NULL 

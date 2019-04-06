@@ -30,7 +30,7 @@
 
 VOID *
 GetFileInfo (
-  IN  EFI_FILE_PROTOCOL  *FileHandle,
+  IN  EFI_FILE_PROTOCOL  *File,
   IN  EFI_GUID           *InformationType,
   IN  UINTN              MinFileInfoSize,
   OUT UINTN              *RealFileInfoSize  OPTIONAL
@@ -44,8 +44,8 @@ GetFileInfo (
   FileInfoSize   = 0;
   FileInfoBuffer = NULL;
 
-  Status = FileHandle->GetInfo (
-                   FileHandle,
+  Status = File->GetInfo (
+                   File,
                    InformationType,
                    &FileInfoSize,
                    NULL
@@ -55,8 +55,8 @@ GetFileInfo (
     FileInfoBuffer = AllocateZeroPool (FileInfoSize);
 
     if (FileInfoBuffer != NULL) {
-      Status = FileHandle->GetInfo (
-                       FileHandle,
+      Status = File->GetInfo (
+                       File,
                        InformationType,
                        &FileInfoSize,
                        FileInfoBuffer

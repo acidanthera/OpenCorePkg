@@ -104,7 +104,7 @@ OcStorageReadFileUnicode (
     return NULL;
   }
 
-  Status = ReadFileSize (File, &Size);
+  Status = GetFileSize (File, &Size);
   if (EFI_ERROR (Status) || Size >= MAX_UINT32 - 1) {
     File->Close (File);
     return NULL;
@@ -116,7 +116,7 @@ OcStorageReadFileUnicode (
     return NULL;
   }
 
-  Status = ReadFileData (File, 0, Size, FileBuffer);
+  Status = GetFileData (File, 0, Size, FileBuffer);
   File->Close (File);
   if (EFI_ERROR (Status)) {
     FreePool (FileBuffer);

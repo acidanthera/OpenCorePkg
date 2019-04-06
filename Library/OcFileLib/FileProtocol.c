@@ -24,7 +24,7 @@
 #include <Library/UefiBootServicesTableLib.h>
 
 EFI_STATUS
-ReadFileData (
+GetFileData (
   IN  EFI_FILE_PROTOCOL  *File,
   IN  UINT32             Position,
   IN  UINT32             Size,
@@ -53,7 +53,7 @@ ReadFileData (
 }
 
 EFI_STATUS
-ReadFileSize (
+GetFileSize (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT UINT32             *Size
   )
@@ -81,7 +81,7 @@ ReadFileSize (
 }
 
 EFI_STATUS
-ReadFileModifcationTime (
+GetFileModifcationTime (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT EFI_TIME           *Time
   )
@@ -206,7 +206,7 @@ FindWritableFileSystem (
 }
 
 EFI_STATUS
-WriteFileData (
+SetFileData (
   IN EFI_FILE_PROTOCOL  *WritableFs OPTIONAL,
   IN CONST CHAR16       *FileName,
   IN CONST VOID         *Buffer,

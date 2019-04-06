@@ -501,7 +501,7 @@ TestFileOpen (
         0
         );
 
-      Status = ReadFileModifcationTime (*NewHandle, &ModificationTime);
+      Status = GetFileModifcationTime (*NewHandle, &ModificationTime);
       if (EFI_ERROR (Status)) {
         ZeroMem (&ModificationTime, sizeof (ModificationTime));
       }
@@ -533,7 +533,7 @@ TestFileOpen (
       Print (
         L"Writing resulting kernel of %u bytes - %r\n",
         KernelSize,
-        WriteFileData (NULL, DumpName, Kernel, KernelSize)
+        SetFileData (NULL, DumpName, Kernel, KernelSize)
         );
 #endif
 
