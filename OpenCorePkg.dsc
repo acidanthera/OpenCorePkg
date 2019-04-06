@@ -68,7 +68,6 @@
   OcMachoLib|OcSupportPkg/Library/OcMachoLib/OcMachoLib.inf
   OcMiscLib|OcSupportPkg/Library/OcMiscLib/OcMiscLib.inf
   OcPngLib|OcSupportPkg/Library/OcPngLib/OcPngLib.inf
-  OcProtocolLib|OcSupportPkg/Library/OcProtocolLib/OcProtocolLib.inf
   OcSerializeLib|OcSupportPkg/Library/OcSerializeLib/OcSerializeLib.inf
   OcSmbiosLib|OcSupportPkg/Library/OcSmbiosLib/OcSmbiosLib.inf
   OcStorageLib|OcSupportPkg/Library/OcStorageLib/OcStorageLib.inf

@@ -16,6 +16,7 @@
 #define OPEN_CORE_H
 
 #include <Library/OcConfigurationLib.h>
+#include <Library/OcCpuLib.h>
 #include <Library/OcStorageLib.h>
 
 #define OPEN_CORE_IMAGE_PATH       L"EFI\\OC\\OpenCore.efi"
@@ -36,7 +37,8 @@
 VOID
 OcLoadUefiSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
-  IN OC_GLOBAL_CONFIG    *Config
+  IN OC_GLOBAL_CONFIG    *Config,
+  IN OC_CPU_INFO         *CpuInfo
   );
 
 #endif // OPEN_CORE_H

@@ -17,6 +17,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
+#include <Library/OcCpuLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 #include <Protocol/DevicePath.h>
@@ -154,13 +155,63 @@ ConnectDrivers (
   FreePool (HandleBuffer);
 }
 
+STATIC
+VOID
+ProvideConsoleGop (
+  VOID
+  )
+{
+  EFI_STATUS  Status;
+  VOID        *Gop;
+
+  Gop = NULL;
+  Status = gBS->HandleProtocol (gST->ConsoleOutHandle, &gEfiGraphicsOutputProtocolGuid, &Gop);
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "Missing GOP on ConsoleOutHandle - %r\n", Status));
+    Status = gBS->LocateProtocol (&gEfiGraphicsOutputProtocolGuid, NULL, &Gop);
+
+    if (!EFI_ERROR (Status)) {
+      Status = gBS->InstallMultipleProtocolInterfaces (
+        &gST->ConsoleOutHandle,
+        &gEfiGraphicsOutputProtocolGuid,
+        Gop,
+        NULL
+        );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_WARN, "Failed to install GOP on ConsoleOutHandle - %r\n", Status));
+      }
+    } else {
+      DEBUG ((DEBUG_WARN, "Missing GOP entirely - %r\n", Status));
+    }
+  }
+}
+
 VOID
 OcLoadUefiSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
-  IN OC_GLOBAL_CONFIG    *Config
+  IN OC_GLOBAL_CONFIG    *Config,
+  IN OC_CPU_INFO         *CpuInfo
   )
 {
+  if (Config->Uefi.Quirks.DisableWatchDog) {
+    //
+    // boot.efi kills watchdog only in FV2 UI.
+    //
+    gBS->SetWatchdogTimer (0, 0, 0, NULL);
+  }
+
+  if (Config->Uefi.Quirks.IgnoreInvalidFlexRatio) {
+    OcCpuCorrectFlexRatio (CpuInfo);
+  }
+
+  if (Config->Uefi.Quirks.ProvideConsoleGop) {
+    ProvideConsoleGop ();
+  }
+
   LoadDrivers (Storage, Config);
 
-  ConnectDrivers ();
+  if (Config->Uefi.ConnectDrivers) {
+    ConnectDrivers ();
+  }
 }

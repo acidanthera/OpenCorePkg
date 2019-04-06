@@ -24,6 +24,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConfigurationLib.h>
+#include <Library/OcCpuLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcStorageLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -63,6 +64,7 @@ OcMain (
   EFI_STATUS          Status;
   CHAR8               *Config;
   UINT32              ConfigSize;
+  OC_CPU_INFO         CpuInfo;
 
   Config = OcStorageReadFileUnicode (
     Storage,
@@ -83,7 +85,9 @@ OcMain (
     DEBUG ((DEBUG_ERROR, "OC: Failed to load configuration!\n"));
   }
 
-  OcLoadUefiSupport (Storage, &mOpenCoreConfiguration);
+  OcCpuScanProcessor (&CpuInfo);
+
+  OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &CpuInfo);
 
   Status = OcRunSimpleBootMenu (
     OC_SCAN_DEFAULT_POLICY,
