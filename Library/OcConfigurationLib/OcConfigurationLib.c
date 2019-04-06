@@ -48,7 +48,7 @@ mDevicePropertiesSchema = OC_SCHEMA_MAP (NULL, OC_ASSOC, &mDevicePropertiesEntry
 
 STATIC
 OC_SCHEMA
-mKernelAddSchema[] = {
+mKernelAddSchemaEntry[] = {
   OC_SCHEMA_STRING_IN    ("BundleName",     OC_KERNEL_ADD_ENTRY, BundleName),
   OC_SCHEMA_BOOLEAN_IN   ("Disabled",       OC_KERNEL_ADD_ENTRY, Disabled),
   OC_SCHEMA_STRING_IN    ("ExecutablePath", OC_KERNEL_ADD_ENTRY, ExecutablePath),
@@ -58,7 +58,11 @@ mKernelAddSchema[] = {
 
 STATIC
 OC_SCHEMA
-mKernelBlockSchema[] = {
+mKernelAddSchema = OC_SCHEMA_DICT (NULL, mKernelAddSchemaEntry);
+
+STATIC
+OC_SCHEMA
+mKernelBlockSchemaEntry[] = {
   OC_SCHEMA_BOOLEAN_IN   ("Disabled",       OC_KERNEL_BLOCK_ENTRY, Disabled),
   OC_SCHEMA_STRING_IN    ("Identifier",     OC_KERNEL_BLOCK_ENTRY, Identifier),
   OC_SCHEMA_STRING_IN    ("MatchKernel",    OC_KERNEL_BLOCK_ENTRY, MatchKernel),
@@ -66,7 +70,11 @@ mKernelBlockSchema[] = {
 
 STATIC
 OC_SCHEMA
-mKernelPatchSchema[] = {
+mKernelBlockSchema = OC_SCHEMA_DICT (NULL, mKernelBlockSchemaEntry);
+
+STATIC
+OC_SCHEMA
+mKernelPatchSchemaEntry[] = {
   OC_SCHEMA_STRING_IN    ("Base",           OC_KERNEL_PATCH_ENTRY, Base),
   OC_SCHEMA_INTEGER_IN   ("Count",          OC_KERNEL_PATCH_ENTRY, Count),
   OC_SCHEMA_BOOLEAN_IN   ("Disabled",       OC_KERNEL_PATCH_ENTRY, Disabled),
@@ -82,6 +90,10 @@ mKernelPatchSchema[] = {
 
 STATIC
 OC_SCHEMA
+mKernelPatchSchema = OC_SCHEMA_DICT (NULL, mKernelPatchSchemaEntry);
+
+STATIC
+OC_SCHEMA
 mKernelQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("AppleCpuPmCfgLock", OC_GLOBAL_CONFIG, Kernel.Quirks.AppleCpuPmCfgLock),
   OC_SCHEMA_BOOLEAN_IN ("ExternalDiskIcons", OC_GLOBAL_CONFIG, Kernel.Quirks.ExternalDiskIcons),
@@ -92,9 +104,9 @@ mKernelQuirksSchema[] = {
 STATIC
 OC_SCHEMA
 mKernelConfigurationSchema[] = {
-  OC_SCHEMA_ARRAY_IN   ("Add",    OC_GLOBAL_CONFIG, Kernel.Add, mKernelAddSchema),
-  OC_SCHEMA_ARRAY_IN   ("Block",  OC_GLOBAL_CONFIG, Kernel.Block, mKernelBlockSchema),
-  OC_SCHEMA_ARRAY_IN   ("Patch",  OC_GLOBAL_CONFIG, Kernel.Patch, mKernelPatchSchema),
+  OC_SCHEMA_ARRAY_IN   ("Add",    OC_GLOBAL_CONFIG, Kernel.Add, &mKernelAddSchema),
+  OC_SCHEMA_ARRAY_IN   ("Block",  OC_GLOBAL_CONFIG, Kernel.Block, &mKernelBlockSchema),
+  OC_SCHEMA_ARRAY_IN   ("Patch",  OC_GLOBAL_CONFIG, Kernel.Patch, &mKernelPatchSchema),
   OC_SCHEMA_ARRAY_IN   ("Quirks", OC_GLOBAL_CONFIG, Kernel.Quirks, mKernelQuirksSchema),
 };
 
@@ -130,7 +142,7 @@ STATIC
 OC_SCHEMA
 mRootConfigurationNodes[] = {
   OC_SCHEMA_MAP_IN  ("DeviceProperties", OC_GLOBAL_CONFIG, DeviceProperties, &mDevicePropertiesSchema),
-  OC_SCHEMA_DICT    ("KernelSpace",      mKernelConfigurationSchema),
+  OC_SCHEMA_DICT    ("Kernel",           mKernelConfigurationSchema),
   OC_SCHEMA_DICT    ("UEFI",             mUefiConfigurationSchema)
 };
 

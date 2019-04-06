@@ -393,7 +393,6 @@ PatcherBlockKext (
   IN OUT PATCHER_CONTEXT        *Context
   );
 
-
 /**
   Apply MSR E2 patches to AppleIntelCPUPowerManagement kext.
 
