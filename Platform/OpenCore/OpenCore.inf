@@ -39,6 +39,7 @@
   OpenCoreAcpi.c
   OpenCoreDevProps.c
   OpenCoreKernel.c
+  OpenCoreNvram.c
   OpenCoreUefi.c
 
 [Packages]

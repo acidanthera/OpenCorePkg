@@ -89,6 +89,7 @@ OcMain (
   OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &CpuInfo);
   OcLoadAcpiSupport (Storage, &mOpenCoreConfiguration);
   OcLoadDevPropsSupport (&mOpenCoreConfiguration);
+  OcLoadNvramSupport (&mOpenCoreConfiguration);
   OcLoadKernelSupport (Storage, &mOpenCoreConfiguration);
 
   Status = OcRunSimpleBootMenu (

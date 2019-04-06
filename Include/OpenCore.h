@@ -46,7 +46,6 @@ OcLoadAcpiSupport (
 /**
   Load device properties compatibility support.
 
-  @param[in]  Storage   OpenCore storage.
   @param[in]  Config    OpenCore configuration.
 **/
 VOID
@@ -72,6 +71,16 @@ OcLoadKernelSupport (
 VOID
 OcUnloadKernelSupport (
   VOID
+  );
+
+/**
+  Load NVRAM compatibility support.
+
+  @param[in]  Config    OpenCore configuration.
+**/
+VOID
+OcLoadNvramSupport (
+  IN OC_GLOBAL_CONFIG    *Config
   );
 
 /**
