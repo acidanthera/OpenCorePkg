@@ -165,6 +165,31 @@
   OC_DECLARE (OC_KERNEL_CONFIG)
 
 /**
+  NVRAM section
+**/
+
+///
+/// NVRAM values is an associative map of GUIDS with their property key value maps.
+///
+#define OC_NVRAM_ADD_MAP_FIELDS(_, __) \
+  OC_MAP (OC_STRING, OC_ASSOC, _, __)
+  OC_DECLARE (OC_NVRAM_ADD_MAP)
+
+#define OC_NVRAM_BLOCK_ENTRY_FIELDS(_, __) \
+  OC_ARRAY (OC_STRING, _, __)
+  OC_DECLARE (OC_NVRAM_BLOCK_ENTRY)
+
+#define OC_NVRAM_BLOCK_MAP_FIELDS(_, __) \
+  OC_MAP (OC_STRING, OC_NVRAM_BLOCK_ENTRY, _, __)
+  OC_DECLARE (OC_NVRAM_BLOCK_MAP)
+
+#define OC_NVRAM_CONFIG_FIELDS(_, __) \
+  _(OC_NVRAM_ADD_MAP           , Add               ,     , OC_CONSTR2 (OC_NVRAM_ADD_MAP, _, __)        , OC_DESTR (OC_NVRAM_ADD_MAP)) \
+  _(OC_NVRAM_BLOCK_MAP         , Block             ,     , OC_CONSTR2 (OC_NVRAM_BLOCK_MAP, _, __)      , OC_DESTR (OC_NVRAM_BLOCK_MAP))
+  /* _(OC_NVRAM_QUIRKS         , Quirks            ,     , OC_CONSTR2 (OC_NVRAM_QUIRKS, _, __)         , OC_DESTR (OC_NVRAM_QUIRKS)) */
+  OC_DECLARE (OC_NVRAM_CONFIG)
+
+/**
   Uefi section
 **/
 
@@ -201,6 +226,7 @@
   _(OC_ACPI_CONFIG              , Acpi              ,     , OC_CONSTR1 (OC_ACPI_CONFIG, _, __)      , OC_DESTR (OC_ACPI_CONFIG)) \
   _(OC_DEVICE_PROP_MAP          , DeviceProperties  ,     , OC_CONSTR1 (OC_DEVICE_PROP_MAP, _, __)  , OC_DESTR (OC_DEVICE_PROP_MAP)) \
   _(OC_KERNEL_CONFIG            , Kernel            ,     , OC_CONSTR1 (OC_KERNEL_CONFIG, _, __)    , OC_DESTR (OC_KERNEL_CONFIG)) \
+  _(OC_NVRAM_CONFIG             , Nvram             ,     , OC_CONSTR1 (OC_NVRAM_CONFIG, _, __)     , OC_DESTR (OC_NVRAM_CONFIG)) \
   _(OC_UEFI_CONFIG              , Uefi              ,     , OC_CONSTR1 (OC_UEFI_CONFIG, _, __)      , OC_DESTR (OC_UEFI_CONFIG))
   OC_DECLARE (OC_GLOBAL_CONFIG)
 

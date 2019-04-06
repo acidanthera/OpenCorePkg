@@ -23,6 +23,7 @@ OC_STRUCTORS       (OC_ACPI_QUIRKS, ())
 OC_STRUCTORS       (OC_ACPI_CONFIG, ())
 
 OC_MAP_STRUCTORS   (OC_DEVICE_PROP_MAP)
+
 OC_STRUCTORS       (OC_KERNEL_ADD_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_KERNEL_ADD_ARRAY)
 OC_STRUCTORS       (OC_KERNEL_BLOCK_ENTRY, ())
@@ -31,6 +32,11 @@ OC_STRUCTORS       (OC_KERNEL_PATCH_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_KERNEL_PATCH_ARRAY)
 OC_STRUCTORS       (OC_KERNEL_QUIRKS, ())
 OC_STRUCTORS       (OC_KERNEL_CONFIG, ())
+
+OC_STRUCTORS       (OC_NVRAM_BLOCK_ENTRY, ())
+OC_MAP_STRUCTORS   (OC_NVRAM_ADD_MAP)
+OC_MAP_STRUCTORS   (OC_NVRAM_BLOCK_MAP)
+OC_STRUCTORS       (OC_NVRAM_CONFIG, ())
 
 OC_ARRAY_STRUCTORS (OC_UEFI_DRIVER_ARRAY)
 OC_STRUCTORS       (OC_UEFI_QUIRKS, ())
@@ -181,6 +187,29 @@ mKernelConfigurationSchema[] = {
 };
 
 //
+// Nvram configuration support
+//
+
+STATIC
+OC_SCHEMA
+mNvramAddEntrySchema = OC_SCHEMA_MDATA (NULL);
+
+STATIC
+OC_SCHEMA
+mNvramAddSchema = OC_SCHEMA_MAP (NULL, OC_ASSOC, &mNvramAddEntrySchema);
+
+STATIC
+OC_SCHEMA
+mNvramBlockSchema = OC_SCHEMA_STRING (NULL);
+
+STATIC
+OC_SCHEMA
+mNvramConfigurationSchema[] = {
+  OC_SCHEMA_MAP_IN   ("Add",    OC_GLOBAL_CONFIG, Nvram.Add, &mNvramAddSchema),
+  OC_SCHEMA_MAP_IN   ("Block",  OC_GLOBAL_CONFIG, Nvram.Block, &mNvramBlockSchema)
+};
+
+//
 // Uefi configuration support
 //
 
@@ -214,6 +243,7 @@ mRootConfigurationNodes[] = {
   OC_SCHEMA_DICT    ("ACPI",             mAcpiConfigurationSchema),
   OC_SCHEMA_MAP_IN  ("DeviceProperties", OC_GLOBAL_CONFIG, DeviceProperties, &mDevicePropertiesSchema),
   OC_SCHEMA_DICT    ("Kernel",           mKernelConfigurationSchema),
+  OC_SCHEMA_DICT    ("NVRAM",            mNvramConfigurationSchema),
   OC_SCHEMA_DICT    ("UEFI",             mUefiConfigurationSchema)
 };
 
