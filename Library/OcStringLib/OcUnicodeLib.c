@@ -471,3 +471,15 @@ TrimWhiteSpace (
 
   return String;
 }
+
+VOID
+UnicodeUefiSlashes (
+  IN OUT CHAR16  *String
+  )
+{
+  CHAR16  *Needle;
+
+  while ((Needle = StrStr (String, L"/")) != NULL) {
+    *Needle = '\\';
+  }
+}

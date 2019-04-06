@@ -350,4 +350,14 @@ AsciiUint64ToLowerHex (
   IN  UINT64  Value
   );
 
+/**
+  Convert path with mixed slashes to UEFI slashes (\\).
+
+  @param[in,out]  String      Path.
+**/
+VOID
+UnicodeUefiSlashes (
+  IN OUT CHAR16  *String
+  );
+
 #endif // OC_STRING_LIB_H_
