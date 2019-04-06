@@ -146,7 +146,8 @@ mRemoveUsbLimitV1Patch = {
   .ReplaceMask = NULL,
   .Size        = sizeof (mRemoveUsbLimitV1Replace),
   .Count       = 1,
-  .Skip        = 0
+  .Skip        = 0,
+  .Limit       = 4096
 };
 
 STATIC
@@ -171,7 +172,8 @@ mRemoveUsbLimitV2Patch = {
   .ReplaceMask = NULL,
   .Size        = sizeof (mRemoveUsbLimitV2Replace),
   .Count       = 1,
-  .Skip        = 0
+  .Skip        = 0,
+  .Limit       = 4096
 };
 
 STATIC
@@ -196,7 +198,8 @@ mRemoveUsbLimitIoP1Patch = {
   .ReplaceMask = NULL,
   .Size        = sizeof (mRemoveUsbLimitIoP1Replace),
   .Count       = 1,
-  .Skip        = 0
+  .Skip        = 0,
+  .Limit       = 4096
 };
 
 RETURN_STATUS

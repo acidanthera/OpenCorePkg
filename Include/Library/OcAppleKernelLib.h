@@ -182,6 +182,10 @@ typedef struct {
   // Skip count or 0 to start from 1 match.
   //
   UINT32       Skip;
+  //
+  // Limit replacement size to this value or 0, which assumes table size.
+  //
+  UINT32       Limit;
 } PATCHER_GENERIC_PATCH;
 
 /**

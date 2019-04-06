@@ -148,6 +148,10 @@ PatcherApplyGenericPatch (
     return RETURN_SUCCESS;
   }
 
+  if (Patch->Limit > 0 && Patch->Limit < Size) {
+    Size = Patch->Limit;
+  }
+
   ReplaceCount = ApplyPatch (
     Patch->Find,
     Patch->Mask,

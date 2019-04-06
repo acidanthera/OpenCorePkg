@@ -829,6 +829,7 @@ AcpiApplyPatch (
   UINT32  Index;
   UINT64  CurrOemTableId;
   UINT32  ReplaceCount;
+  UINT32  ReplaceLimit;
 
   DEBUG ((DEBUG_INFO, "Applying %u byte ACPI patch skip %u, count %u\n", Patch->Size, Patch->Skip, Patch->Count));
 
@@ -843,6 +844,11 @@ AcpiApplyPatch (
       Patch->OemTableId
       ));
 
+    ReplaceLimit = Patch->Limit;
+    if (ReplaceLimit == 0) {
+      ReplaceLimit = Context->Dsdt->Length;
+    }
+
     ReplaceCount = ApplyPatch (
       Patch->Find,
       Patch->Mask,
@@ -850,7 +856,7 @@ AcpiApplyPatch (
       Patch->Replace,
       Patch->ReplaceMask,
       (UINT8 *) Context->Dsdt,
-      Context->Dsdt->Length,
+      ReplaceLimit,
       Patch->Count,
       Patch->Skip
       );
@@ -896,6 +902,11 @@ AcpiApplyPatch (
         Index
         ));
 
+      ReplaceLimit = Patch->Limit;
+      if (ReplaceLimit == 0) {
+        ReplaceLimit = Context->Tables[Index]->Length;
+      }
+
       ReplaceCount = ApplyPatch (
         Patch->Find,
         Patch->Mask,
@@ -903,7 +914,7 @@ AcpiApplyPatch (
         Patch->Replace,
         Patch->ReplaceMask,
         (UINT8 *) Context->Tables[Index],
-        Context->Tables[Index]->Length,
+        ReplaceLimit,
         Patch->Count,
         Patch->Skip
         );

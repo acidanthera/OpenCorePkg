@@ -135,6 +135,10 @@ typedef struct {
   //
   UINT32       Skip;
   //
+  // Limit replacement size to this value or 0, which assumes table size.
+  //
+  UINT32       Limit;
+  //
   // ACPI Table signature or 0.
   //
   UINT32       TableSignature;
