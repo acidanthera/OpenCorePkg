@@ -49,27 +49,52 @@ mDevicePropertiesSchema = OC_SCHEMA_MAP (NULL, OC_ASSOC, &mDevicePropertiesEntry
 STATIC
 OC_SCHEMA
 mKernelAddSchema[] = {
-  OC_SCHEMA_STRING_IN    ("Identifier", OC_KERNEL_ADD_ENTRY, Identifier),
+  OC_SCHEMA_STRING_IN    ("BundleName",     OC_KERNEL_ADD_ENTRY, BundleName),
+  OC_SCHEMA_BOOLEAN_IN   ("Disabled",       OC_KERNEL_ADD_ENTRY, Disabled),
+  OC_SCHEMA_STRING_IN    ("ExecutablePath", OC_KERNEL_ADD_ENTRY, ExecutablePath),
+  OC_SCHEMA_STRING_IN    ("MatchKernel",    OC_KERNEL_ADD_ENTRY, MatchKernel),
+  OC_SCHEMA_STRING_IN    ("PlistPath",      OC_KERNEL_ADD_ENTRY, PlistPath),
 };
 
 STATIC
 OC_SCHEMA
 mKernelBlockSchema[] = {
-  OC_SCHEMA_STRING_IN    ("Identifier", OC_KERNEL_BLOCK_ENTRY, Identifier),
+  OC_SCHEMA_BOOLEAN_IN   ("Disabled",       OC_KERNEL_BLOCK_ENTRY, Disabled),
+  OC_SCHEMA_STRING_IN    ("Identifier",     OC_KERNEL_BLOCK_ENTRY, Identifier),
+  OC_SCHEMA_STRING_IN    ("MatchKernel",    OC_KERNEL_BLOCK_ENTRY, MatchKernel),
 };
 
 STATIC
 OC_SCHEMA
 mKernelPatchSchema[] = {
-  OC_SCHEMA_STRING_IN    ("Identifier", OC_KERNEL_PATCH_ENTRY, Identifier),
+  OC_SCHEMA_STRING_IN    ("Base",           OC_KERNEL_PATCH_ENTRY, Base),
+  OC_SCHEMA_INTEGER_IN   ("Count",          OC_KERNEL_PATCH_ENTRY, Count),
+  OC_SCHEMA_BOOLEAN_IN   ("Disabled",       OC_KERNEL_PATCH_ENTRY, Disabled),
+  OC_SCHEMA_DATA_IN      ("Find",           OC_KERNEL_PATCH_ENTRY, Find),
+  OC_SCHEMA_STRING_IN    ("Identifier",     OC_KERNEL_PATCH_ENTRY, Identifier),
+  OC_SCHEMA_INTEGER_IN   ("Limit",          OC_KERNEL_PATCH_ENTRY, Limit),
+  OC_SCHEMA_DATA_IN      ("Mask",           OC_KERNEL_PATCH_ENTRY, Mask),
+  OC_SCHEMA_STRING_IN    ("MatchKernel",    OC_KERNEL_PATCH_ENTRY, MatchKernel),
+  OC_SCHEMA_DATA_IN      ("Replace",        OC_KERNEL_PATCH_ENTRY, Replace),
+  OC_SCHEMA_DATA_IN      ("ReplaceMask",    OC_KERNEL_PATCH_ENTRY, ReplaceMask),
+  OC_SCHEMA_INTEGER_IN   ("Skip",           OC_KERNEL_PATCH_ENTRY, Skip)
+};
+
+STATIC
+OC_SCHEMA
+mKernelQuirksSchema[] = {
+  OC_SCHEMA_BOOLEAN_IN ("AppleCpuPmCfgLock", OC_GLOBAL_CONFIG, Kernel.Quirks.AppleCpuPmCfgLock),
+  OC_SCHEMA_BOOLEAN_IN ("ThirdPartyTrim",    OC_GLOBAL_CONFIG, Kernel.Quirks.ThirdPartyTrim),
+  OC_SCHEMA_BOOLEAN_IN ("XhciPortLimit",     OC_GLOBAL_CONFIG, Kernel.Quirks.XhciPortLimit),
 };
 
 STATIC
 OC_SCHEMA
 mKernelConfigurationSchema[] = {
-  OC_SCHEMA_ARRAY_IN   ("Add", OC_GLOBAL_CONFIG, Kernel.Add, mKernelAddSchema),
-  OC_SCHEMA_ARRAY_IN   ("Block", OC_GLOBAL_CONFIG, Kernel.Block, mKernelBlockSchema),
-  OC_SCHEMA_ARRAY_IN   ("Patch", OC_GLOBAL_CONFIG, Kernel.Patch, mKernelPatchSchema),
+  OC_SCHEMA_ARRAY_IN   ("Add",    OC_GLOBAL_CONFIG, Kernel.Add, mKernelAddSchema),
+  OC_SCHEMA_ARRAY_IN   ("Block",  OC_GLOBAL_CONFIG, Kernel.Block, mKernelBlockSchema),
+  OC_SCHEMA_ARRAY_IN   ("Patch",  OC_GLOBAL_CONFIG, Kernel.Patch, mKernelPatchSchema),
+  OC_SCHEMA_ARRAY_IN   ("Quirks", OC_GLOBAL_CONFIG, Kernel.Quirks, mKernelQuirksSchema),
 };
 
 //
@@ -83,17 +108,17 @@ mUefiDriversSchema = OC_SCHEMA_STRING (NULL);
 STATIC
 OC_SCHEMA
 mUefiQuirksSchema[] = {
-  OC_SCHEMA_BOOLEAN_IN ("DisableWatchDog", OC_GLOBAL_CONFIG, Uefi.Quirks.DisableWatchDog),
+  OC_SCHEMA_BOOLEAN_IN ("DisableWatchDog",        OC_GLOBAL_CONFIG, Uefi.Quirks.DisableWatchDog),
   OC_SCHEMA_BOOLEAN_IN ("IgnoreInvalidFlexRatio", OC_GLOBAL_CONFIG, Uefi.Quirks.IgnoreInvalidFlexRatio),
-  OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop", OC_GLOBAL_CONFIG, Uefi.Quirks.ProvideConsoleGop)
+  OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop",      OC_GLOBAL_CONFIG, Uefi.Quirks.ProvideConsoleGop)
 };
 
 STATIC
 OC_SCHEMA
 mUefiConfigurationSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("ConnectDrivers", OC_GLOBAL_CONFIG, Uefi.ConnectDrivers),
-  OC_SCHEMA_ARRAY_IN   ("Drivers", OC_GLOBAL_CONFIG, Uefi.Drivers, &mUefiDriversSchema),
-  OC_SCHEMA_DICT       ("Quirks", mUefiQuirksSchema)
+  OC_SCHEMA_ARRAY_IN   ("Drivers",        OC_GLOBAL_CONFIG, Uefi.Drivers, &mUefiDriversSchema),
+  OC_SCHEMA_DICT       ("Quirks",         mUefiQuirksSchema)
 };
 
 //
@@ -104,8 +129,8 @@ STATIC
 OC_SCHEMA
 mRootConfigurationNodes[] = {
   OC_SCHEMA_MAP_IN  ("DeviceProperties", OC_GLOBAL_CONFIG, DeviceProperties, &mDevicePropertiesSchema),
-  OC_SCHEMA_DICT    ("KernelSpace", mKernelConfigurationSchema),
-  OC_SCHEMA_DICT    ("UEFI", mUefiConfigurationSchema)
+  OC_SCHEMA_DICT    ("KernelSpace",      mKernelConfigurationSchema),
+  OC_SCHEMA_DICT    ("UEFI",             mUefiConfigurationSchema)
 };
 
 STATIC

@@ -37,7 +37,15 @@
 ///
 
 #define OC_KERNEL_ADD_ENTRY_FIELDS(_, __) \
-  _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
+  _(BOOLEAN                     , Disabled         ,     , FALSE                       , ()                   ) \
+  _(OC_STRING                   , MatchKernel      ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , BundleName       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , ExecutablePath   ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , PlistPath        ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(UINT8 *                     , ImageData        ,     , NULL                        , OcFreePointer        ) \
+  _(UINT32                      , ImageDataSize    ,     , 0                           , ()                   ) \
+  _(CHAR8 *                     , PlistData        ,     , NULL                        , OcFreePointer        ) \
+  _(UINT32                      , PlistDataSize    ,     , 0                           , ()                   )
   OC_DECLARE (OC_KERNEL_ADD_ENTRY)
 
 #define OC_KERNEL_ADD_ARRAY_FIELDS(_, __) \
@@ -49,7 +57,9 @@
 ///
 
 #define OC_KERNEL_BLOCK_ENTRY_FIELDS(_, __) \
-  _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
+  _(BOOLEAN                     , Disabled         ,     , FALSE                       , ()                   ) \
+  _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , MatchKernel      ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
   OC_DECLARE (OC_KERNEL_BLOCK_ENTRY)
 
 #define OC_KERNEL_BLOCK_ARRAY_FIELDS(_, __) \
@@ -61,7 +71,17 @@
 ///
 
 #define OC_KERNEL_PATCH_ENTRY_FIELDS(_, __) \
-  _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
+  _(OC_STRING                   , Base             ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(UINT32                      , Count            ,     , 0                           , ()                   ) \
+  _(BOOLEAN                     , Disabled         ,     , FALSE                       , ()                   ) \
+  _(OC_DATA                     , Find             ,     , OC_DATA_CONSTR ({0}, _, __) , OC_DESTR (OC_DATA)   ) \
+  _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_DATA                     , Mask             ,     , OC_DATA_CONSTR ({0}, _, __) , OC_DESTR (OC_DATA)   ) \
+  _(OC_STRING                   , MatchKernel      ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_DATA                     , Replace          ,     , OC_DATA_CONSTR ({0}, _, __) , OC_DESTR (OC_DATA)   ) \
+  _(OC_DATA                     , ReplaceMask      ,     , OC_DATA_CONSTR ({0}, _, __) , OC_DESTR (OC_DATA)   ) \
+  _(UINT32                      , Limit            ,     , 0                           , ()                   ) \
+  _(UINT32                      , Skip             ,     , 0                           , ()                   )
   OC_DECLARE (OC_KERNEL_PATCH_ENTRY)
 
 #define OC_KERNEL_PATCH_ARRAY_FIELDS(_, __) \
