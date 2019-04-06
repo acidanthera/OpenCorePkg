@@ -93,8 +93,9 @@
 ///
 #define OC_KERNEL_QUIRKS_FIELDS(_, __) \
   _(BOOLEAN                     , AppleCpuPmCfgLock           ,     , FALSE  , ()) \
-  _(BOOLEAN                     , XhciPortLimit               ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ThirdPartyTrim              ,     , FALSE  , ())
+  _(BOOLEAN                     , ExternalDiskIcons           ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ThirdPartyTrim              ,     , FALSE  , ()) \
+  _(BOOLEAN                     , XhciPortLimit               ,     , FALSE  , ())
   OC_DECLARE (OC_KERNEL_QUIRKS)
 
 #define OC_KERNEL_CONFIG_FIELDS(_, __) \

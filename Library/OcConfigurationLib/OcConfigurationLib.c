@@ -84,6 +84,7 @@ STATIC
 OC_SCHEMA
 mKernelQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("AppleCpuPmCfgLock", OC_GLOBAL_CONFIG, Kernel.Quirks.AppleCpuPmCfgLock),
+  OC_SCHEMA_BOOLEAN_IN ("ExternalDiskIcons", OC_GLOBAL_CONFIG, Kernel.Quirks.ExternalDiskIcons),
   OC_SCHEMA_BOOLEAN_IN ("ThirdPartyTrim",    OC_GLOBAL_CONFIG, Kernel.Quirks.ThirdPartyTrim),
   OC_SCHEMA_BOOLEAN_IN ("XhciPortLimit",     OC_GLOBAL_CONFIG, Kernel.Quirks.XhciPortLimit),
 };
