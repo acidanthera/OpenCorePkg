@@ -106,11 +106,6 @@ listed here.
     **Summary**: PNG image decoding  
     **Status**: functional  
     **Issues**: none
-* OcProtocolLib  
-    **Summary**: UEFI protocol handling and management  
-    **Status**: legacy  
-    **Issues**:
-    1. Subject for removal if no use.
 * OcRtcLib  
     **Summary**: CMOS memory access  
     **Status**: functional  

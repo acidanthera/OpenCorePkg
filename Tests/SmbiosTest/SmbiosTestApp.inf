@@ -56,6 +56,5 @@
   DevicePathLib
   OcDevicePropertyLib
   OcMiscLib
-  OcProtocolLib
   OcAppleBootPolicyLib
   OcSmbiosLib

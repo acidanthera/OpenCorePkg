@@ -56,3 +56,4 @@
   LogBootOrder.c
   LogHexDump.c
   NullTextOutput.c
+  UninstallAllProtocolInterfaces.c

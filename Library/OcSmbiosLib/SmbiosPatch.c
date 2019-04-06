@@ -25,7 +25,6 @@
 #include <Library/OcSmbiosLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcGuardLib.h>
-#include <Library/OcProtocolLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>

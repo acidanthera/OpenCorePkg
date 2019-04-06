@@ -21,7 +21,6 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcMiscLib.h>
-#include <Library/OcProtocolLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>

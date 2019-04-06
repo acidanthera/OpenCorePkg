@@ -22,7 +22,6 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/OcProtocolLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -101,11 +100,11 @@ DevicePathToText (
   EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevicePathToText = NULL;
   EFI_STATUS                       Status;
 
-  Status = SafeLocateProtocol (
-             &gEfiDevicePathToTextProtocolGuid,
-             NULL,
-             (VOID **)&DevicePathToText
-             );
+  Status = gBS->LocateProtocol (
+                  &gEfiDevicePathToTextProtocolGuid,
+                  NULL,
+                  (VOID **)&DevicePathToText
+                  );
 
   // TODO: Shorten the device path to the last node ?
 
