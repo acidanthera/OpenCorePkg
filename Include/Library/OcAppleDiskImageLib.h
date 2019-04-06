@@ -34,9 +34,10 @@ typedef struct {
 
 BOOLEAN
 OcAppleDiskImageInitializeContext (
+  OUT OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
   IN  VOID                         *Buffer,
-  IN  UINTN                        BufferLength,
-  OUT OC_APPLE_DISK_IMAGE_CONTEXT  *Context
+  IN  UINTN                        BufferSize,
+  IN  BOOLEAN                      VerifyChecksum
   );
 
 VOID

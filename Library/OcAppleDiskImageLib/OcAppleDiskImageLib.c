@@ -24,9 +24,10 @@
 
 BOOLEAN
 OcAppleDiskImageInitializeContext (
+  OUT OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
   IN  VOID                         *Buffer,
-  IN  UINTN                        BufferLength,
-  OUT OC_APPLE_DISK_IMAGE_CONTEXT  *Context
+  IN  UINTN                        BufferSize,
+  IN  BOOLEAN                      VerifyChecksum
   )
 {
   BOOLEAN                     Result;
@@ -49,11 +50,11 @@ OcAppleDiskImageInitializeContext (
   UINT64                      XmlLength;
   UINT64                      SectorCount;
 
-  ASSERT (Buffer != NULL);
-  ASSERT (BufferLength > 0);
   ASSERT (Context != NULL);
+  ASSERT (Buffer != NULL);
+  ASSERT (BufferSize > 0);
 
-  if (BufferLength <= sizeof (*Trailer)) {
+  if (BufferSize <= sizeof (*Trailer)) {
     return FALSE;
   }
 
@@ -65,7 +66,7 @@ OcAppleDiskImageInitializeContext (
   TrailerOffset = 0;
 
   for (
-    BufferBytesCurrent = (BufferBytes + (BufferLength - sizeof (*Trailer)));
+    BufferBytesCurrent = (BufferBytes + (BufferSize - sizeof (*Trailer)));
     BufferBytesCurrent >= BufferBytes;
     --BufferBytesCurrent
     ) {
@@ -87,7 +88,6 @@ OcAppleDiskImageInitializeContext (
   XmlOffset             = SwapBytes64 (Trailer->XmlOffset);
   XmlLength             = SwapBytes64 (Trailer->XmlLength);
   SectorCount           = SwapBytes64 (Trailer->SectorCount);
-  DataForkChecksum.Type = SwapBytes32 (Trailer->DataForkChecksum.Type);
   DataForkChecksum.Size = SwapBytes32 (Trailer->DataForkChecksum.Size);
 
   if ((HeaderSize != sizeof (*Trailer))
@@ -99,11 +99,6 @@ OcAppleDiskImageInitializeContext (
 
   if ((SegmentCount != 0) && (SegmentCount != 1)) {
     DEBUG ((DEBUG_ERROR, "Multiple segments are unsupported.\n"));
-    return FALSE;
-  }
-
-  if ((Trailer->RsrcForkOffset != 0) || (Trailer->RsrcForkLength != 0)) {
-    DEBUG ((DEBUG_ERROR, "Resource forks are unsupported.\n"));
     return FALSE;
   }
 
@@ -125,28 +120,32 @@ OcAppleDiskImageInitializeContext (
     return FALSE;
   }
 
-  if (DataForkChecksum.Type == APPLE_DISK_IMAGE_CHECKSUM_TYPE_CRC32) {
-    if (DataForkChecksum.Size != 32) {
-      return FALSE;
-    }
+  if (VerifyChecksum) {
+    DataForkChecksum.Type = SwapBytes32 (Trailer->DataForkChecksum.Type);
 
-    DataForkChecksum.Data[0] = SwapBytes32 (
-                                 Trailer->DataForkChecksum.Data[0]
-                                 );
-    Crc32 = CalculateCrc32 (
-              (BufferBytes + DataForkOffset),
-              DataForkLength
-              );
-    if (Crc32 != DataForkChecksum.Data[0]) {
+    if (DataForkChecksum.Type == APPLE_DISK_IMAGE_CHECKSUM_TYPE_CRC32) {
+      if (DataForkChecksum.Size != 32) {
+        return FALSE;
+      }
+
+      DataForkChecksum.Data[0] = SwapBytes32 (
+                                   Trailer->DataForkChecksum.Data[0]
+                                   );
+      Crc32 = CalculateCrc32 (
+                (BufferBytes + DataForkOffset),
+                DataForkLength
+                );
+      if (Crc32 != DataForkChecksum.Data[0]) {
+        return FALSE;
+      }
+    } else {
+      DEBUG ((
+        DEBUG_ERROR,
+        "DMG checksum algorithm %x unsupported.\n",
+        DataForkChecksum.Type
+        ));
       return FALSE;
     }
-  } else {
-    DEBUG ((
-      DEBUG_ERROR,
-      "DMG checksum algorithm %x unsupported.\n",
-      DataForkChecksum.Type
-      ));
-    return FALSE;
   }
 
   Result = InternalParsePlist (

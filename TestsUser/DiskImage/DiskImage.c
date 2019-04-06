@@ -64,7 +64,7 @@ int main (int argc, char *argv[]) {
     EFI_STATUS                  Status;
     OC_APPLE_DISK_IMAGE_CONTEXT DmgContext;
 
-    Result = OcAppleDiskImageInitializeContext (Dmg, DmgSize, &DmgContext);
+    Result = OcAppleDiskImageInitializeContext (&DmgContext, Dmg, DmgSize, TRUE);
     if (!Result) {
       printf ("Context initialization error\n");
       continue;
