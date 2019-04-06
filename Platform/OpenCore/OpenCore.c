@@ -89,6 +89,8 @@ OcMain (
 
   OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &CpuInfo);
 
+  OcLoadKernelSupport (Storage, &mOpenCoreConfiguration);
+
   Status = OcRunSimpleBootMenu (
     OC_SCAN_DEFAULT_POLICY,
     OC_LOAD_DEFAULT_POLICY,
@@ -98,6 +100,8 @@ OcMain (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to show boot menu!\n"));
   }
+
+  OcUnloadKernelSupport ();
 }
 
 STATIC

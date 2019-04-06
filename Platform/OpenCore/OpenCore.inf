@@ -36,6 +36,7 @@
 
 [Sources]
   OpenCore.c
+  OpenCoreKernel.c
   OpenCoreUefi.c
 
 [Packages]
@@ -53,20 +54,23 @@
   gOcBootstrapProtocolGuid            ## CONSUMES
 
 [LibraryClasses]
-  UefiDriverEntryPoint
-  UefiRuntimeServicesTableLib
-  UefiBootServicesTableLib
-  UefiLib
-  PcdLib
-  IoLib
-  PrintLib
-  OcGuardLib
   DevicePathLib
-  OcDevicePropertyLib
-  OcMiscLib
+  IoLib
   OcAppleBootPolicyLib
+  OcAppleKernelLib
   OcBootManagementLib
   OcConfigurationLib
   OcDevicePathLib
+  OcDevicePropertyLib
+  OcGuardLib
+  OcMachoLib
+  OcMiscLib
   OcSmbiosLib
   OcStorageLib
+  OcVirtualFsLib
+  PcdLib
+  PrintLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  UefiLib
+  UefiRuntimeServicesTableLib

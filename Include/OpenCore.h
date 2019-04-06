@@ -27,12 +27,34 @@
 
 #define OPEN_CORE_UEFI_DRIVER_PATH L"Drivers\\"
 
+#define OPEN_CORE_KEXT_PATH        L"Kexts\\"
+
+/**
+  Load Kernel compatibility support like kexts.
+
+  @param[in]  Storage   OpenCore storage.
+  @param[in]  Config    OpenCore configuration.
+**/
+VOID
+OcLoadKernelSupport (
+  IN OC_STORAGE_CONTEXT  *Storage,
+  IN OC_GLOBAL_CONFIG    *Config
+  );
+
+/**
+  Cleanup Kernel compatibility support on failure.
+**/
+VOID
+OcUnloadKernelSupport (
+  VOID
+  );
 
 /**
   Load UEFI compatibility support like drivers.
 
   @param[in]  Storage   OpenCore storage.
   @param[in]  Config    OpenCore configuration.
+  @param[in]  CpuInfo   CPU information.
 **/
 VOID
 OcLoadUefiSupport (
