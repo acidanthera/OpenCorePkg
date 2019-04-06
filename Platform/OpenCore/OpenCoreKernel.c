@@ -18,6 +18,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleKernelLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/OcVirtualFsLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -34,23 +35,26 @@ OcKernelLoadKextsAndReserve (
   IN OC_GLOBAL_CONFIG    *Config
   )
 {
-  UINT32  Index;
-  UINT32  ReserveSize;
-  CHAR8   *BundleName;
-  CHAR8   *PlistPath;
-  CHAR8   *ExecutablePath;
-  CHAR16  FullPath[128];
+  UINT32               Index;
+  UINT32               ReserveSize;
+  CHAR8                *BundleName;
+  CHAR8                *PlistPath;
+  CHAR8                *ExecutablePath;
+  CHAR16               FullPath[128];
+  OC_KERNEL_ADD_ENTRY  *Kext;
 
   ReserveSize = PRELINK_INFO_RESERVE_SIZE;
 
   for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
-    if (Config->Kernel.Add.Values[Index]->Disabled) {
+    Kext = Config->Kernel.Add.Values[Index];
+
+    if (Kext->Disabled) {
       continue;
     }
 
-    if (Config->Kernel.Add.Values[Index]->PlistDataSize == 0) {
-      BundleName     = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->BundleName);
-      PlistPath      = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->PlistPath);
+    if (Kext->PlistDataSize == 0) {
+      BundleName     = OC_BLOB_GET (&Kext->BundleName);
+      PlistPath      = OC_BLOB_GET (&Kext->PlistPath);
       if (BundleName[0] == '\0' || PlistPath[0] == '\0') {
         DEBUG ((DEBUG_ERROR, "OC: Your config has improper for kext info\n"));
         continue;
@@ -64,18 +68,20 @@ OcKernelLoadKextsAndReserve (
         PlistPath
         );
 
-      Config->Kernel.Add.Values[Index]->PlistData = OcStorageReadFileUnicode (
+      UnicodeUefiSlashes (FullPath);
+
+      Kext->PlistData = OcStorageReadFileUnicode (
         Storage,
         FullPath,
-        &Config->Kernel.Add.Values[Index]->PlistDataSize
+        &Kext->PlistDataSize
         );
 
-      if (Config->Kernel.Add.Values[Index]->PlistData == NULL) {
+      if (Kext->PlistData == NULL) {
         DEBUG ((DEBUG_ERROR, "OC: Plist %s is missing for kext %s\n", FullPath, BundleName));
         continue;
       }
 
-      ExecutablePath = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->ExecutablePath);
+      ExecutablePath = OC_BLOB_GET (&Kext->ExecutablePath);
       if (ExecutablePath[0] != '\0') {
         UnicodeSPrint (
           FullPath,
@@ -85,13 +91,15 @@ OcKernelLoadKextsAndReserve (
           ExecutablePath
           );
 
-        Config->Kernel.Add.Values[Index]->ImageData = OcStorageReadFileUnicode (
+        UnicodeUefiSlashes (FullPath);
+
+        Kext->ImageData = OcStorageReadFileUnicode (
           Storage,
           FullPath,
-          &Config->Kernel.Add.Values[Index]->ImageDataSize
+          &Kext->ImageDataSize
           );
 
-        if (Config->Kernel.Add.Values[Index]->ImageData == NULL) {
+        if (Kext->ImageData == NULL) {
           DEBUG ((DEBUG_ERROR, "OC: Image %s is missing for kext %s\n", FullPath, BundleName));
           //
           // Still continue loading?
@@ -102,15 +110,118 @@ OcKernelLoadKextsAndReserve (
 
     PrelinkedReserveKextSize (
       &ReserveSize,
-      Config->Kernel.Add.Values[Index]->PlistDataSize,
-      Config->Kernel.Add.Values[Index]->ImageData,
-      Config->Kernel.Add.Values[Index]->ImageDataSize
+      Kext->PlistDataSize,
+      Kext->ImageData,
+      Kext->ImageDataSize
       );
   }
 
   DEBUG ((DEBUG_INFO, "Kext reservation size %u\n", ReserveSize));
 
   return ReserveSize;
+}
+
+STATIC
+VOID
+OcKernelApplyPatches (
+  IN     OC_GLOBAL_CONFIG  *Config,
+  IN     PRELINKED_CONTEXT *Context,
+  IN OUT UINT8             *Kernel,
+  IN     UINT32            Size
+  )
+{
+  EFI_STATUS             Status;
+  PATCHER_CONTEXT        Patcher;
+  UINT32                 Index;
+  PATCHER_GENERIC_PATCH  Patch;
+  OC_KERNEL_PATCH_ENTRY  *UserPatch;
+  CONST CHAR8            *Target;
+  BOOLEAN                IsKernelPatch;
+
+  IsKernelPatch = Context == NULL;
+
+  if (IsKernelPatch) {
+    ASSERT (Kernel != NULL);
+
+    Status = PatcherInitContextFromBuffer (
+      &Patcher,
+      Kernel,
+      Size
+      );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OC: Kernel patcher kernel init failure - %r\n", Status));
+      return;
+    }
+  }
+
+  for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
+    UserPatch = Config->Kernel.Patch.Values[Index];
+    Target    = OC_BLOB_GET (&UserPatch->Identifier);
+
+    if (UserPatch->Disabled
+    || (AsciiStrCmp (Target, "kernel") == 0) != IsKernelPatch) {
+      continue;
+    }
+
+    if (!IsKernelPatch) {
+      Status = PatcherInitContextFromPrelinked (
+        &Patcher,
+        Context,
+        Target
+        );
+
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_ERROR, "OC: Kernel patcher %a init failure - %r\n", Target, Status));
+        return;
+      }
+    }
+
+    //
+    // Ignore patch if:
+    // - There is nothing to replace.
+    // - We have neither symbolic base, nor find data.
+    // - Find and replace mismatch in size.
+    // - Mask and ReplaceMask mismatch in size when are available.
+    //
+    if (UserPatch->Replace.Size == 0
+      || (UserPatch->Base.Size == 0 && UserPatch->Find.Size != UserPatch->Replace.Size)
+      || (UserPatch->Mask.Size > 0 && UserPatch->Find.Size != UserPatch->Mask.Size)
+      || (UserPatch->ReplaceMask.Size > 0 && UserPatch->Find.Size != UserPatch->ReplaceMask.Size)) {
+      DEBUG ((DEBUG_ERROR, "OC: Kernel patch %u for %a is borked\n", Index, Target));
+      continue;
+    }
+
+    ZeroMem (&Patch, sizeof (Patch));
+
+    if (UserPatch->Base.Size > 0) {
+      Patch.Base  = OC_BLOB_GET (&UserPatch->Base);
+    }
+
+    if (UserPatch->Find.Size > 0) {
+      Patch.Find  = OC_BLOB_GET (&UserPatch->Find);
+    }
+
+    Patch.Replace = OC_BLOB_GET (&UserPatch->Replace);
+
+    if (UserPatch->Mask.Size > 0) {
+      Patch.Mask  = OC_BLOB_GET (&UserPatch->Mask);
+    }
+
+    if (UserPatch->ReplaceMask.Size > 0) {
+      Patch.ReplaceMask = OC_BLOB_GET (&UserPatch->ReplaceMask);
+    }
+
+    Patch.Size    = UserPatch->Replace.Size;
+    Patch.Count   = UserPatch->Count;
+    Patch.Skip    = UserPatch->Skip;
+    Patch.Limit   = UserPatch->Limit;
+
+    Status = PatcherApplyGenericPatch (&Patcher, &Patch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "OC: Kernel patcher failed %u for %a - %r\n", Index, Target, Status));
+    }
+  }
 }
 
 STATIC
@@ -132,8 +243,7 @@ OcKernelProcessPrelinked (
   Status = PrelinkedContextInit (&Context, Kernel, *KernelSize, AllocatedSize);
 
   if (!EFI_ERROR (Status)) {
-
-    /* TODO: ApplyKextPatches (&Context); */
+    OcKernelApplyPatches (Config, &Context, NULL, 0);
 
     Status = PrelinkedInjectPrepare (&Context);
     if (!EFI_ERROR (Status)) {
@@ -231,7 +341,7 @@ OcKernelFileOpen (
     //
     if (!EFI_ERROR (Status)) {
       /* TODO: get Darwin Kernel Version  */
-      /* ApplyKernelPatches (Kernel, KernelSize); */
+      OcKernelApplyPatches (mOcConfiguration, NULL, Kernel, KernelSize);
 
       PrelinkedStatus = OcKernelProcessPrelinked (
         mOcConfiguration,
