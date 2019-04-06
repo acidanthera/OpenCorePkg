@@ -36,7 +36,7 @@ BOOLEAN
 OcAppleDiskImageInitializeContext (
   IN  VOID                         *Buffer,
   IN  UINTN                        BufferLength,
-  OUT OC_APPLE_DISK_IMAGE_CONTEXT  **Context
+  OUT OC_APPLE_DISK_IMAGE_CONTEXT  *Context
   );
 
 VOID

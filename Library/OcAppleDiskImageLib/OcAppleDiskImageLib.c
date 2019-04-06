@@ -26,11 +26,10 @@ BOOLEAN
 OcAppleDiskImageInitializeContext (
   IN  VOID                         *Buffer,
   IN  UINTN                        BufferLength,
-  OUT OC_APPLE_DISK_IMAGE_CONTEXT  **Context
+  OUT OC_APPLE_DISK_IMAGE_CONTEXT  *Context
   )
 {
   BOOLEAN                     Result;
-  OC_APPLE_DISK_IMAGE_CONTEXT *DmgContext;
   UINTN                       TrailerOffset;
   UINT8                       *BufferBytes;
   UINT8                       *BufferBytesCurrent;
@@ -162,19 +161,12 @@ OcAppleDiskImageInitializeContext (
     return FALSE;
   }
 
-  DmgContext = AllocateZeroPool (sizeof (*DmgContext));
-  if (DmgContext == NULL) {
-    FreePool (DmgBlocks);
-    return FALSE;
-  }
-
-  DmgContext->Buffer      = BufferBytes;
-  DmgContext->Length      = (TrailerOffset + sizeof (*Trailer));
-  DmgContext->BlockCount  = DmgBlockCount;
-  DmgContext->Blocks      = DmgBlocks;
-  DmgContext->SectorCount = SectorCount;
-
-  *Context = DmgContext;
+  Context->Buffer        = BufferBytes;
+  Context->Length        = (TrailerOffset + sizeof (*Trailer));
+  Context->BlockCount    = DmgBlockCount;
+  Context->Blocks        = DmgBlocks;
+  Context->SectorCount   = SectorCount;
+  Context->BlockIoHandle = NULL;
 
   return TRUE;
 }
@@ -193,7 +185,6 @@ OcAppleDiskImageFreeContext (
   }
 
   FreePool (Context->Blocks);
-  FreePool (Context);
 }
 
 BOOLEAN

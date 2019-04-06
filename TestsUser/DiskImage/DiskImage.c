@@ -62,7 +62,7 @@ int main (int argc, char *argv[]) {
 
     BOOLEAN                     Result;
     EFI_STATUS                  Status;
-    OC_APPLE_DISK_IMAGE_CONTEXT *DmgContext;
+    OC_APPLE_DISK_IMAGE_CONTEXT DmgContext;
 
     Result = OcAppleDiskImageInitializeContext (Dmg, DmgSize, &DmgContext);
     if (!Result) {
@@ -70,14 +70,14 @@ int main (int argc, char *argv[]) {
       continue;
     }
 
-    UncompSize = (DmgContext->SectorCount * APPLE_DISK_IMAGE_SECTOR_SIZE);
+    UncompSize = (DmgContext.SectorCount * APPLE_DISK_IMAGE_SECTOR_SIZE);
     UncompDmg  = malloc (UncompSize);
     if (UncompDmg == NULL) {
       printf ("DMG data allocation failed.\n");
       continue;
     }
 
-    Result = OcAppleDiskImageRead (DmgContext, 0, UncompSize, UncompDmg);
+    Result = OcAppleDiskImageRead (&DmgContext, 0, UncompSize, UncompDmg);
     if (!Result) {
       printf ("DMG read error\n");
       continue;
@@ -106,7 +106,7 @@ int main (int argc, char *argv[]) {
 
     printf ("Decompressed the entire DMG...\n");
 
-    OcAppleDiskImageFreeContext (DmgContext);
+    OcAppleDiskImageFreeContext (&DmgContext);
 
     printf ("Success...\n");
   }
