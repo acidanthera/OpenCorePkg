@@ -15,6 +15,8 @@
 
 #include <IndustryStandard/AppleDiskImage.h>
 
+#include <Library/OcAppleChunklistLib.h>
+
 //
 // Disk image context.
 //
@@ -43,6 +45,12 @@ OcAppleDiskImageInitializeContext (
 VOID
 OcAppleDiskImageFreeContext(
   IN OC_APPLE_DISK_IMAGE_CONTEXT *Context
+  );
+
+BOOLEAN
+OcAppleDiskImageVerifyData (
+  IN OUT OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
+  IN OUT OC_APPLE_CHUNKLIST_CONTEXT   *ChunklistContext
   );
 
 BOOLEAN

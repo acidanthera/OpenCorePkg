@@ -16,6 +16,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcAppleChunklistLib.h>
 #include <Library/OcAppleDiskImageLib.h>
 #include <Library/OcCompressionLib.h>
 #include <Library/OcGuardLib.h>
@@ -168,6 +169,22 @@ OcAppleDiskImageInitializeContext (
   Context->BlockIoHandle = NULL;
 
   return TRUE;
+}
+
+BOOLEAN
+OcAppleDiskImageVerifyData (
+  IN OUT OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
+  IN OUT OC_APPLE_CHUNKLIST_CONTEXT   *ChunklistContext
+  )
+{
+  ASSERT (Context != NULL);
+  ASSERT (ChunklistContext != NULL);
+
+  return OcAppleChunklistVerifyData (
+           ChunklistContext,
+           Context->Buffer,
+           Context->Length
+           );
 }
 
 VOID
