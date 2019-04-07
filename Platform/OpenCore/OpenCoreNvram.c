@@ -74,7 +74,7 @@ OcLoadNvramSupport (
         EFI_ERROR (Status) && Status != EFI_NOT_FOUND ? DEBUG_WARN : DEBUG_INFO,
         "OC: Deleting NVRAM %g:%a - %r\n",
         &VariableGuid,
-        AsciiVariableGuid,
+        AsciiVariableName,
         Status
         ));
 
@@ -123,7 +123,7 @@ OcLoadNvramSupport (
         DEBUG_INFO,
         "OC: Getting NVRAM %g:%a - %r (will skip on too small)\n",
         &VariableGuid,
-        AsciiVariableGuid,
+        AsciiVariableName,
         Status
         ));
 
@@ -139,7 +139,7 @@ OcLoadNvramSupport (
           EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
           "OC: Setting NVRAM %g:%a - %r\n",
           &VariableGuid,
-          AsciiVariableGuid,
+          AsciiVariableName,
           Status
           ));
       }
