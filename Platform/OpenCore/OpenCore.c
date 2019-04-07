@@ -37,22 +37,50 @@ OC_GLOBAL_CONFIG
 mOpenCoreConfiguration;
 
 STATIC
+OC_STORAGE_CONTEXT
+mOpenCoreStorage;
+
+STATIC
 EFI_STATUS
 EFIAPI OcStartImage (
+  IN  OC_BOOT_ENTRY               *Chosen,
   IN  EFI_HANDLE                  ImageHandle,
   OUT UINTN                       *ExitDataSize,
   OUT CHAR16                      **ExitData    OPTIONAL
   )
 {
-  //
-  // TODO: Perform file system interception here...
-  //
+  EFI_STATUS   Status;
 
-  return gBS->StartImage (
+  //
+  // Some make their ACPI tables incompatible with Windows after modding them for macOS.
+  // While obviously it is their fault, here we provide a quick and dirty workaround.
+  //
+  if (!Chosen->IsWindows || !mOpenCoreConfiguration.Acpi.Quirks.IgnoreForWindows) {
+    OcLoadAcpiSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
+  }
+
+  //
+  // Do not waste time for kext injection, when we are Windows.
+  //
+  if (!Chosen->IsWindows) {
+    OcLoadKernelSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
+  }
+
+  Status = gBS->StartImage (
     ImageHandle,
     ExitDataSize,
     ExitData
     );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OC: Boot failed - %r\n", Status));
+  }
+
+  if (!Chosen->IsWindows) {
+    OcUnloadKernelSupport ();
+  }
+
+  return Status;
 }
 
 STATIC
@@ -87,11 +115,9 @@ OcMain (
 
   OcCpuScanProcessor (&CpuInfo);
   OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &CpuInfo);
-  OcLoadAcpiSupport (Storage, &mOpenCoreConfiguration);
   OcLoadPlatformSupport (&mOpenCoreConfiguration, &CpuInfo);
   OcLoadDevPropsSupport (&mOpenCoreConfiguration);
   OcLoadNvramSupport (&mOpenCoreConfiguration);
-  OcLoadKernelSupport (Storage, &mOpenCoreConfiguration);
 
   Status = OcRunSimpleBootMenu (
     OC_SCAN_DEFAULT_POLICY,
@@ -102,8 +128,6 @@ OcMain (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to show boot menu!\n"));
   }
-
-  OcUnloadKernelSupport ();
 }
 
 STATIC
@@ -114,7 +138,6 @@ OcBootstrapRerun (
   )
 {
   EFI_STATUS          Status;
-  OC_STORAGE_CONTEXT  Storage;
 
   DEBUG ((DEBUG_INFO, "OC: ReRun executed!\n"));
 
@@ -123,7 +146,7 @@ OcBootstrapRerun (
   // updated via bin patching prior to signing OpenCore.efi.
   //
   Status = OcStorageInitFromFs (
-    &Storage,
+    &mOpenCoreStorage,
     FileSystem,
     OPEN_CORE_ROOT_PATH,
     NULL
@@ -134,9 +157,9 @@ OcBootstrapRerun (
     return;
   }
 
-  OcMain (&Storage);
+  OcMain (&mOpenCoreStorage);
 
-  OcStorageFree (&Storage);
+  OcStorageFree (&mOpenCoreStorage);
 }
 
 STATIC
