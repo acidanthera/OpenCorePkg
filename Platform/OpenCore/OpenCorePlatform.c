@@ -32,6 +32,7 @@ OcPlatformUpdateDataHub (
   IN OC_CPU_INFO         *CpuInfo
   )
 {
+  EFI_STATUS        Status;
   OC_DATA_HUB_DATA  Data;
   EFI_GUID          Uuid;
 
@@ -105,7 +106,132 @@ OcPlatformUpdateDataHub (
     Data.SmcPlatform      = &Config->PlatformInfo.DataHub.SmcPlatform[0];
   }
 
-  UpdateDataHub (&Data, CpuInfo);
+  Status = UpdateDataHub (&Data, CpuInfo);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OC: Failed to update Data Hub - %r\n", Status));
+  }
+}
+
+STATIC
+VOID
+OcPlatformUpdateSmbios (
+  IN OC_GLOBAL_CONFIG       *Config,
+  IN OC_CPU_INFO            *CpuInfo,
+  IN OC_SMBIOS_UPDATE_MODE  UpdateMode
+  )
+{
+  EFI_STATUS       Status;
+  OC_SMBIOS_DATA   Data;
+  EFI_GUID         Uuid;
+
+  ZeroMem (&Data, sizeof (Data));
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSVendor)[0] != '\0') {
+    Data.BIOSVendor = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSVendor);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSVersion)[0] != '\0') {
+    Data.BIOSVersion = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSVersion);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSReleaseDate)[0] != '\0') {
+    Data.BIOSReleaseDate = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSReleaseDate);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemManufacturer)[0] != '\0') {
+    Data.SystemManufacturer = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemManufacturer);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemProductName)[0] != '\0') {
+    Data.SystemProductName = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemProductName);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemVersion)[0] != '\0') {
+    Data.SystemVersion = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemVersion);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemSerialNumber)[0] != '\0') {
+    Data.SystemSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemSerialNumber);
+  }
+
+  if (Config->PlatformInfo.DataHub.SystemUuid.Size == GUID_STRING_LENGTH
+    && !EFI_ERROR (AsciiStrToGuid (OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemUuid), &Uuid))) {
+    Data.SystemUUID         = &Uuid;
+  }
+
+  if (Config->PlatformInfo.Smbios.BoardType != 0) {
+    Data.BoardType = &Config->PlatformInfo.Smbios.BoardType;
+  }
+
+  if (Config->PlatformInfo.Smbios.ChassisType != 0) {
+    Data.ChassisType = &Config->PlatformInfo.Smbios.ChassisType;
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemSKUNumber)[0] != '\0') {
+    Data.SystemSKUNumber = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemSKUNumber);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemFamily)[0] != '\0') {
+    Data.SystemFamily = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemFamily);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardManufacturer)[0] != '\0') {
+    Data.BoardManufacturer = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardManufacturer);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardProduct)[0] != '\0') {
+    Data.BoardProduct = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardProduct);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardVersion)[0] != '\0') {
+    Data.BoardVersion = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardVersion);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardSerialNumber)[0] != '\0') {
+    Data.BoardSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardSerialNumber);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardAssetTag)[0] != '\0') {
+    Data.BoardAssetTag = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardAssetTag);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardLocationInChassis)[0] != '\0') {
+    Data.BoardLocationInChassis = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardLocationInChassis);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisManufacturer)[0] != '\0') {
+    Data.ChassisManufacturer = OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisManufacturer);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisVersion)[0] != '\0') {
+    Data.ChassisVersion = OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisVersion);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisSerialNumber)[0] != '\0') {
+    Data.ChassisSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisSerialNumber);
+  }
+
+  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisAssetTag)[0] != '\0') {
+    Data.ChassisAssetTag = OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisAssetTag);
+  }
+
+  if (Config->PlatformInfo.Smbios.MemoryFormFactor != 0) {
+    Data.MemoryFormFactor = &Config->PlatformInfo.Smbios.MemoryFormFactor;
+  }
+
+  Data.FirmwareFeatures     = Config->PlatformInfo.Smbios.FirmwareFeatures;
+  Data.FirmwareFeaturesMask = Config->PlatformInfo.Smbios.FirmwareFeaturesMask;
+
+  if (Config->PlatformInfo.Smbios.ProcessorType != 0) {
+    Data.ProcessorType      = &Config->PlatformInfo.Smbios.ProcessorType;
+  }
+
+  Data.PlatformFeature      = Config->PlatformInfo.Smbios.PlatformFeature;
+
+  Status = CreateSmbios (&Data, UpdateMode, CpuInfo);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OC: Failed to update SMBIOS - %r\n", Status));
+  }
 }
 
 VOID
@@ -114,6 +240,9 @@ OcLoadPlatformSupport (
   IN OC_CPU_INFO         *CpuInfo
   )
 {
+  CONST CHAR8            *SmbiosUpdateStr;
+  OC_SMBIOS_UPDATE_MODE  SmbiosUpdateMode;
+
   //
   // TODO: implement
   //
@@ -124,5 +253,24 @@ OcLoadPlatformSupport (
 
   if (Config->PlatformInfo.UpdateDataHub) {
     OcPlatformUpdateDataHub (Config, CpuInfo);
+  }
+
+  if (Config->PlatformInfo.UpdateSmbios) {
+    SmbiosUpdateStr  = OC_BLOB_GET (&Config->PlatformInfo.UpdateSmbiosMode);
+
+    if (AsciiStrCmp (SmbiosUpdateStr, "Auto") == 0) {
+      SmbiosUpdateMode = OcSmbiosUpdateAuto;
+    } else if (AsciiStrCmp (SmbiosUpdateStr, "Create") == 0) {
+      SmbiosUpdateMode = OcSmbiosUpdateCreate;
+    } else if (AsciiStrCmp (SmbiosUpdateStr, "Overwrite") == 0) {
+      SmbiosUpdateMode = OcSmbiosUpdateOverwrite;
+    } else if (AsciiStrCmp (SmbiosUpdateStr, "Custom") == 0) {
+      SmbiosUpdateMode = OcSmbiosUpdateCustom;
+    } else {
+      DEBUG ((DEBUG_WARN, "OC: Invalid SMBIOS update mode %a\n", SmbiosUpdateStr));
+      SmbiosUpdateMode = OcSmbiosUpdateAuto;
+    }
+
+    OcPlatformUpdateSmbios (Config, CpuInfo, SmbiosUpdateMode);
   }
 }
