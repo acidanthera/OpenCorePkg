@@ -70,6 +70,7 @@
 ///
 #define OC_ACPI_QUIRKS_FIELDS(_, __) \
   _(BOOLEAN                     , FadtEnableReset     ,     , FALSE  , ()) \
+  _(BOOLEAN                     , IgnoreForWindows    ,     , FALSE  , ()) \
   _(BOOLEAN                     , NormalizeHeaders    ,     , FALSE  , ()) \
   _(BOOLEAN                     , RebaseRegions       ,     , FALSE  , ())
   OC_DECLARE (OC_ACPI_QUIRKS)
