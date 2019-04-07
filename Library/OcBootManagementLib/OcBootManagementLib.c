@@ -581,7 +581,7 @@ OcRunSimpleBootMenu (
   IN  UINT32           LookupPolicy,
   IN  UINT32           BootPolicy,
   IN  UINT32           TimeoutSeconds,
-  IN  EFI_IMAGE_START  StartImage
+  IN  OC_IMAGE_START   StartImage
   )
 {
   EFI_STATUS                  Status;
@@ -648,7 +648,7 @@ OcRunSimpleBootMenu (
     if (!EFI_ERROR (Status)) {
       Status = OcLoadBootEntry (Chosen, BootPolicy, gImageHandle, &BooterHandle);
       if (!EFI_ERROR (Status)) {
-        Status = StartImage (BooterHandle, NULL, NULL);
+        Status = StartImage (Chosen, BooterHandle, NULL, NULL);
         if (EFI_ERROR (Status)) {
           DEBUG ((DEBUG_ERROR, "StartImage failed - %r\n", Status));
         }

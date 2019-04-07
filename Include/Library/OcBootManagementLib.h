@@ -237,6 +237,19 @@ OcLoadBootEntry (
   );
 
 /**
+  Exposed start interface with chosen boot entry but otherwise equivalent
+  to EFI_BOOT_SERVICES StartImage.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *OC_IMAGE_START) (
+  IN  OC_BOOT_ENTRY               *ChosenEntry,
+  IN  EFI_HANDLE                  ImageHandle,
+  OUT UINTN                       *ExitDataSize,
+  OUT CHAR16                      **ExitData    OPTIONAL
+  );
+
+/**
   Install missing boot policy, scan, and show simple boot menu.
 
   @param[in]  LookupPolicy     Lookup policy.
@@ -251,7 +264,7 @@ OcRunSimpleBootMenu (
   IN  UINT32           LookupPolicy,
   IN  UINT32           BootPolicy,
   IN  UINT32           TimeoutSeconds,
-  IN  EFI_IMAGE_START  StartImage
+  IN  OC_IMAGE_START    StartImage
   );
 
 #endif // OC_BOOT_MANAGEMENT_LIB_H
