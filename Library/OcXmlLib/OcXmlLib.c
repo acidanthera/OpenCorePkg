@@ -1574,6 +1574,8 @@ PlistMetaDataValue (
   if (PlistNodeCast (Node, PLIST_NODE_TYPE_DATA) != NULL) {
     Content = XmlNodeContent (Node);
     if (Content != NULL) {
+
+      Length = *Size;
       Result = OcBase64Decode (Content, AsciiStrLen (Content), Buffer, &Length);
 
       if (!RETURN_ERROR (Result) && (UINT32) Length == Length) {
