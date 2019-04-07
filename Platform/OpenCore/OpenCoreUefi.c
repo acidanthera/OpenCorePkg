@@ -42,8 +42,8 @@ LoadDrivers (
     DEBUG ((
       DEBUG_INFO,
       "OC: Driver %a at %u is being loaded...\n",
-      Index,
-      OC_BLOB_GET (Config->Uefi.Drivers.Values[Index])
+      OC_BLOB_GET (Config->Uefi.Drivers.Values[Index]),
+      Index
       ));
 
     UnicodeSPrint (
@@ -58,8 +58,8 @@ LoadDrivers (
       DEBUG ((
         DEBUG_ERROR,
         "OC: Driver %a at %u cannot be found!\n",
-        Index,
-        OC_BLOB_GET (Config->Uefi.Drivers.Values[Index])
+        OC_BLOB_GET (Config->Uefi.Drivers.Values[Index]),
+        Index
         ));
       //
       // TODO: This should cause security violation if configured!
@@ -83,8 +83,8 @@ LoadDrivers (
       DEBUG ((
         DEBUG_ERROR,
         "OC: Driver %a at %u cannot be loaded - %r!\n",
-        Index,
         OC_BLOB_GET (Config->Uefi.Drivers.Values[Index]),
+        Index,
         Status
         ));
       FreePool (Driver);
@@ -101,8 +101,8 @@ LoadDrivers (
       DEBUG ((
         DEBUG_ERROR,
         "OC: Driver %a at %u cannot be started - %r!\n",
-        Index,
         OC_BLOB_GET (Config->Uefi.Drivers.Values[Index]),
+        Index,
         Status
         ));
       gBS->UnloadImage (ImageHandle);
