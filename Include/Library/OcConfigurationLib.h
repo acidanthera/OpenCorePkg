@@ -261,6 +261,12 @@
   _(UINT8                       , SmcPlatform         , [8] , {0}                              , () )
   OC_DECLARE (OC_PLATFORM_DATA_HUB_CONFIG)
 
+#define OC_PLATFORM_NVRAM_CONFIG_FIELDS(_, __) \
+  _(OC_STRING                   , Bid  ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Mlb  ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(UINT8                       , Rom  , [6] , {0}                              , ()                   )
+  OC_DECLARE (OC_PLATFORM_NVRAM_CONFIG)
+
 #define OC_PLATFORM_SMBIOS_CONFIG_FIELDS(_, __) \
   _(OC_STRING                    , BIOSVendor            ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                    , BIOSVersion           ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
@@ -299,6 +305,7 @@
   _(OC_STRING                   , UpdateSmbiosMode ,     , OC_STRING_CONSTR ("Auto", _, __)                , OC_DESTR (OC_STRING) ) \
   _(OC_PLATFORM_GENERIC_CONFIG  , Generic          ,     , OC_CONSTR2 (OC_PLATFORM_GENERIC_CONFIG, _, __)  , OC_DESTR (OC_PLATFORM_GENERIC_CONFIG)) \
   _(OC_PLATFORM_DATA_HUB_CONFIG , DataHub          ,     , OC_CONSTR2 (OC_PLATFORM_DATA_HUB_CONFIG, _, __) , OC_DESTR (OC_PLATFORM_DATA_HUB_CONFIG)) \
+  _(OC_PLATFORM_NVRAM_CONFIG    , Nvram            ,     , OC_CONSTR2 (OC_PLATFORM_NVRAM_CONFIG, _, __)    , OC_DESTR (OC_PLATFORM_NVRAM_CONFIG)) \
   _(OC_PLATFORM_SMBIOS_CONFIG   , Smbios           ,     , OC_CONSTR2 (OC_PLATFORM_SMBIOS_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_SMBIOS_CONFIG))
   OC_DECLARE (OC_PLATFORM_CONFIG)
 
