@@ -43,15 +43,15 @@ OcLoadDevPropsSupport (
   CHAR16                                      *UnicodeProperty;
   EFI_DEVICE_PATH_PROTOCOL                    *DevicePath;
 
-  PropertyDatabase = OcDevicePathPropertyInstallProtocol (FALSE);
+  PropertyDatabase = OcDevicePathPropertyInstallProtocol (Config->DeviceProperties.ReinstallProtocol);
   if (PropertyDatabase == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Device property database protocol is missing\n"));
     return;
   }
 
-  for (DeviceIndex = 0; DeviceIndex < Config->DeviceProperties.Count; ++DeviceIndex) {
-    PropertyMap       = Config->DeviceProperties.Values[DeviceIndex];
-    AsciiDevicePath   = OC_BLOB_GET (Config->DeviceProperties.Keys[DeviceIndex]);
+  for (DeviceIndex = 0; DeviceIndex < Config->DeviceProperties.Add.Count; ++DeviceIndex) {
+    PropertyMap       = Config->DeviceProperties.Add.Values[DeviceIndex];
+    AsciiDevicePath   = OC_BLOB_GET (Config->DeviceProperties.Add.Keys[DeviceIndex]);
     UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
     DevicePath        = NULL;
 
