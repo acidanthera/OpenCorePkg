@@ -42,6 +42,7 @@ OcLoadNvramSupport (
   OC_ASSOC      *VariableMap;
   UINT8         *VariableData;
   UINT32        VariableSize;
+  UINTN         OriginalVariableSize;
 
   for (GuidIndex = 0; GuidIndex < Config->Nvram.Block.Count; ++GuidIndex) {
     //
@@ -109,20 +110,39 @@ OcLoadNvramSupport (
         continue;
       }
 
-      Status = gRT->SetVariable (
+      OriginalVariableSize = 0;
+      Status = gRT->GetVariable (
         UnicodeVariableName,
         &VariableGuid,
-        mDefaultAttributes,
-        VariableSize,
-        VariableData
+        NULL,
+        &OriginalVariableSize,
+        NULL
         );
+
       DEBUG ((
-        EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-        "OC: Setting NVRAM %g:%a - %r\n",
+        DEBUG_INFO,
+        "OC: Getting NVRAM %g:%a - %r (will skip on too small)\n",
         &VariableGuid,
         AsciiVariableGuid,
         Status
         ));
+
+      if (Status != EFI_BUFFER_TOO_SMALL) {
+        Status = gRT->SetVariable (
+          UnicodeVariableName,
+          &VariableGuid,
+          mDefaultAttributes,
+          VariableSize,
+          VariableData
+          );
+        DEBUG ((
+          EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+          "OC: Setting NVRAM %g:%a - %r\n",
+          &VariableGuid,
+          AsciiVariableGuid,
+          Status
+          ));
+      }
 
       FreePool (UnicodeVariableName);
     }
