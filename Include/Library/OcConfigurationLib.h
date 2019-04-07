@@ -90,8 +90,17 @@
   OC_MAP (OC_STRING, OC_ASSOC, _, __)
   OC_DECLARE (OC_DEV_PROP_ADD_MAP)
 
+#define OC_DEV_PROP_BLOCK_ENTRY_FIELDS(_, __) \
+  OC_ARRAY (OC_STRING, _, __)
+  OC_DECLARE (OC_DEV_PROP_BLOCK_ENTRY)
+
+#define OC_DEV_PROP_BLOCK_MAP_FIELDS(_, __) \
+  OC_MAP (OC_STRING, OC_DEV_PROP_BLOCK_ENTRY, _, __)
+  OC_DECLARE (OC_DEV_PROP_BLOCK_MAP)
+
 #define OC_DEV_PROP_CONFIG_FIELDS(_, __) \
   _(OC_DEV_PROP_ADD_MAP       , Add              ,     , OC_CONSTR2 (OC_DEV_PROP_ADD_MAP, _, __)   , OC_DESTR (OC_DEV_PROP_ADD_MAP)) \
+  _(OC_DEV_PROP_BLOCK_MAP     , Block            ,     , OC_CONSTR2 (OC_DEV_PROP_BLOCK_MAP, _, __) , OC_DESTR (OC_DEV_PROP_BLOCK_MAP)) \
   _(BOOLEAN                   , ReinstallProtocol,     , FALSE  , ())
   OC_DECLARE (OC_DEV_PROP_CONFIG)
 
