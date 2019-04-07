@@ -25,6 +25,7 @@ OC_STRUCTORS       (OC_ACPI_CONFIG, ())
 OC_MAP_STRUCTORS   (OC_DEV_PROP_ADD_MAP)
 OC_STRUCTORS       (OC_DEV_PROP_BLOCK_ENTRY, ())
 OC_MAP_STRUCTORS   (OC_DEV_PROP_BLOCK_MAP)
+OC_STRUCTORS       (OC_DEV_PROP_QUIRKS, ())
 OC_STRUCTORS       (OC_DEV_PROP_CONFIG, ())
 
 OC_STRUCTORS       (OC_KERNEL_ADD_ENTRY, ())
@@ -58,7 +59,8 @@ mAcpiAddSchema = OC_SCHEMA_STRING (NULL);
 STATIC
 OC_SCHEMA
 mAcpiBlockSchemaEntry[] = {
-  OC_SCHEMA_BOOLEAN_IN   ("Disabled",       OC_ACPI_BLOCK_ENTRY, Disabled),
+  OC_SCHEMA_STRING_IN    ("Comment",        OC_ACPI_BLOCK_ENTRY, Comment),
+  OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_ACPI_BLOCK_ENTRY, Enabled),
   OC_SCHEMA_DATAF_IN     ("OemTableId",     OC_ACPI_BLOCK_ENTRY, OemTableId),
   OC_SCHEMA_INTEGER_IN   ("TableLength",    OC_ACPI_BLOCK_ENTRY, TableLength),
   OC_SCHEMA_DATAF_IN     ("TableSignature", OC_ACPI_BLOCK_ENTRY, TableSignature),
@@ -71,8 +73,9 @@ mAcpiBlockSchema = OC_SCHEMA_DICT (NULL, mAcpiBlockSchemaEntry);
 STATIC
 OC_SCHEMA
 mAcpiPatchSchemaEntry[] = {
+  OC_SCHEMA_STRING_IN    ("Comment",        OC_ACPI_BLOCK_ENTRY, Comment),
   OC_SCHEMA_INTEGER_IN   ("Count",          OC_ACPI_PATCH_ENTRY, Count),
-  OC_SCHEMA_BOOLEAN_IN   ("Disabled",       OC_ACPI_PATCH_ENTRY, Disabled),
+  OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_ACPI_PATCH_ENTRY, Enabled),
   OC_SCHEMA_DATA_IN      ("Find",           OC_ACPI_PATCH_ENTRY, Find),
   OC_SCHEMA_INTEGER_IN   ("Limit",          OC_ACPI_PATCH_ENTRY, Limit),
   OC_SCHEMA_DATA_IN      ("Mask",           OC_ACPI_PATCH_ENTRY, Mask),
@@ -128,13 +131,18 @@ STATIC
 OC_SCHEMA
 mDevicePropertiesBlockSchema = OC_SCHEMA_ARRAY (NULL, &mDevicePropertiesBlockEntrySchema);
 
+STATIC
+OC_SCHEMA
+mDevicePropertiesQuirksSchema[] = {
+  OC_SCHEMA_BOOLEAN_IN  ("ReinstallProtocol",  OC_GLOBAL_CONFIG, DeviceProperties.Quirks.ReinstallProtocol),
+};
 
 STATIC
 OC_SCHEMA
 mDevicePropertiesSchema[] = {
   OC_SCHEMA_MAP_IN      ("Add",                OC_GLOBAL_CONFIG, DeviceProperties.Add, &mDevicePropertiesAddSchema),
   OC_SCHEMA_MAP_IN      ("Block",              OC_GLOBAL_CONFIG, DeviceProperties.Block, &mDevicePropertiesBlockSchema),
-  OC_SCHEMA_BOOLEAN_IN  ("ReinstallProtocol",  OC_GLOBAL_CONFIG, DeviceProperties.ReinstallProtocol),
+  OC_SCHEMA_DICT        ("Quirks",             mDevicePropertiesQuirksSchema)
 };
 
 //
@@ -145,7 +153,8 @@ STATIC
 OC_SCHEMA
 mKernelAddSchemaEntry[] = {
   OC_SCHEMA_STRING_IN    ("BundleName",     OC_KERNEL_ADD_ENTRY, BundleName),
-  OC_SCHEMA_BOOLEAN_IN   ("Disabled",       OC_KERNEL_ADD_ENTRY, Disabled),
+  OC_SCHEMA_STRING_IN    ("Comment",        OC_KERNEL_ADD_ENTRY, Comment),
+  OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_KERNEL_ADD_ENTRY, Enabled),
   OC_SCHEMA_STRING_IN    ("ExecutablePath", OC_KERNEL_ADD_ENTRY, ExecutablePath),
   OC_SCHEMA_STRING_IN    ("MatchKernel",    OC_KERNEL_ADD_ENTRY, MatchKernel),
   OC_SCHEMA_STRING_IN    ("PlistPath",      OC_KERNEL_ADD_ENTRY, PlistPath),
@@ -158,7 +167,8 @@ mKernelAddSchema = OC_SCHEMA_DICT (NULL, mKernelAddSchemaEntry);
 STATIC
 OC_SCHEMA
 mKernelBlockSchemaEntry[] = {
-  OC_SCHEMA_BOOLEAN_IN   ("Disabled",       OC_KERNEL_BLOCK_ENTRY, Disabled),
+  OC_SCHEMA_STRING_IN    ("Comment",        OC_KERNEL_BLOCK_ENTRY, Comment),
+  OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_KERNEL_BLOCK_ENTRY, Enabled),
   OC_SCHEMA_STRING_IN    ("Identifier",     OC_KERNEL_BLOCK_ENTRY, Identifier),
   OC_SCHEMA_STRING_IN    ("MatchKernel",    OC_KERNEL_BLOCK_ENTRY, MatchKernel),
 };
@@ -171,8 +181,9 @@ STATIC
 OC_SCHEMA
 mKernelPatchSchemaEntry[] = {
   OC_SCHEMA_STRING_IN    ("Base",           OC_KERNEL_PATCH_ENTRY, Base),
+  OC_SCHEMA_STRING_IN    ("Comment",        OC_KERNEL_BLOCK_ENTRY, Comment),
   OC_SCHEMA_INTEGER_IN   ("Count",          OC_KERNEL_PATCH_ENTRY, Count),
-  OC_SCHEMA_BOOLEAN_IN   ("Disabled",       OC_KERNEL_PATCH_ENTRY, Disabled),
+  OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_KERNEL_PATCH_ENTRY, Enabled),
   OC_SCHEMA_DATA_IN      ("Find",           OC_KERNEL_PATCH_ENTRY, Find),
   OC_SCHEMA_STRING_IN    ("Identifier",     OC_KERNEL_PATCH_ENTRY, Identifier),
   OC_SCHEMA_INTEGER_IN   ("Limit",          OC_KERNEL_PATCH_ENTRY, Limit),

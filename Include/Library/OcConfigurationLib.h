@@ -32,7 +32,8 @@
 /// ACPI table blocks.
 ///
 #define OC_ACPI_BLOCK_ENTRY_FIELDS(_, __) \
-  _(BOOLEAN                     , Disabled         ,     , FALSE   , () ) \
+  _(BOOLEAN                     , Enabled          ,     , FALSE   , () ) \
+  _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(UINT8                       , OemTableId       , [8] , {0}     , () ) \
   _(UINT32                      , TableLength      ,     , 0       , () ) \
   _(UINT8                       , TableSignature   , [4] , {0}     , () )
@@ -47,7 +48,8 @@
 ///
 #define OC_ACPI_PATCH_ENTRY_FIELDS(_, __) \
   _(UINT32                      , Count            ,     , 0                           , ()                   ) \
-  _(BOOLEAN                     , Disabled         ,     , FALSE                       , ()                   ) \
+  _(BOOLEAN                     , Enabled          ,     , FALSE                       , ()                   ) \
+  _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_DATA                     , Find             ,     , OC_DATA_CONSTR ({0}, _, __) , OC_DESTR (OC_DATA)   ) \
   _(UINT32                      , Limit            ,     , 0                           , ()                   ) \
   _(OC_DATA                     , Mask             ,     , OC_DATA_CONSTR ({0}, _, __) , OC_DESTR (OC_DATA)   ) \
@@ -98,10 +100,14 @@
   OC_MAP (OC_STRING, OC_DEV_PROP_BLOCK_ENTRY, _, __)
   OC_DECLARE (OC_DEV_PROP_BLOCK_MAP)
 
+#define OC_DEV_PROP_QUIRKS_FIELDS(_, __) \
+  _(BOOLEAN                   , ReinstallProtocol,     , FALSE  , ())
+  OC_DECLARE (OC_DEV_PROP_QUIRKS)
+
 #define OC_DEV_PROP_CONFIG_FIELDS(_, __) \
   _(OC_DEV_PROP_ADD_MAP       , Add              ,     , OC_CONSTR2 (OC_DEV_PROP_ADD_MAP, _, __)   , OC_DESTR (OC_DEV_PROP_ADD_MAP)) \
   _(OC_DEV_PROP_BLOCK_MAP     , Block            ,     , OC_CONSTR2 (OC_DEV_PROP_BLOCK_MAP, _, __) , OC_DESTR (OC_DEV_PROP_BLOCK_MAP)) \
-  _(BOOLEAN                   , ReinstallProtocol,     , FALSE  , ())
+  _(OC_DEV_PROP_QUIRKS        , Quirks           ,     , OC_CONSTR2 (OC_DEV_PROP_QUIRKS, _, __)    , OC_DESTR (OC_DEV_PROP_QUIRKS))
   OC_DECLARE (OC_DEV_PROP_CONFIG)
 
 /**
@@ -112,7 +118,8 @@
 /// KernelSpace kext adds.
 ///
 #define OC_KERNEL_ADD_ENTRY_FIELDS(_, __) \
-  _(BOOLEAN                     , Disabled         ,     , FALSE                       , ()                   ) \
+  _(BOOLEAN                     , Enabled          ,     , FALSE                       , ()                   ) \
+  _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , MatchKernel      ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , BundleName       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , ExecutablePath   ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
@@ -131,7 +138,8 @@
 /// KernelSpace kext blocks.
 ///
 #define OC_KERNEL_BLOCK_ENTRY_FIELDS(_, __) \
-  _(BOOLEAN                     , Disabled         ,     , FALSE                       , ()                   ) \
+  _(BOOLEAN                     , Enabled          ,     , FALSE                       , ()                   ) \
+  _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , MatchKernel      ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
   OC_DECLARE (OC_KERNEL_BLOCK_ENTRY)
@@ -145,8 +153,9 @@
 ///
 #define OC_KERNEL_PATCH_ENTRY_FIELDS(_, __) \
   _(OC_STRING                   , Base             ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(UINT32                      , Count            ,     , 0                           , ()                   ) \
-  _(BOOLEAN                     , Disabled         ,     , FALSE                       , ()                   ) \
+  _(BOOLEAN                     , Enabled          ,     , FALSE                       , ()                   ) \
   _(OC_DATA                     , Find             ,     , OC_DATA_CONSTR ({0}, _, __) , OC_DESTR (OC_DATA)   ) \
   _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_DATA                     , Mask             ,     , OC_DATA_CONSTR ({0}, _, __) , OC_DESTR (OC_DATA)   ) \
