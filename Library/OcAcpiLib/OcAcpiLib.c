@@ -649,7 +649,7 @@ AcpiApplyContext (
     Context->Xsdt != NULL ? Context->Rsdp->Length : 20
     );
 
-  return EFI_UNSUPPORTED;
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -791,7 +791,7 @@ AcpiInsertTable (
     ++Context->NumberOfTables;
   }
 
-  return EFI_UNSUPPORTED;
+  return EFI_SUCCESS;
 }
 
 VOID
@@ -938,7 +938,7 @@ AcpiApplyPatch (
     }
   }
 
-  return EFI_UNSUPPORTED;
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
