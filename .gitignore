@@ -12,3 +12,8 @@ fuzz-*.log
 crash-*
 oom-*
 slow-unit-*
+*.log
+*.aux
+*.out
+*.synctex.gz
+*.toc
