@@ -25,6 +25,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
+#include <Guid/AppleVariable.h>
+
 STATIC
 VOID
 OcPlatformUpdateDataHub (
@@ -50,7 +52,7 @@ OcPlatformUpdateDataHub (
     Data.SystemSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemSerialNumber);
   }
 
-  if (Config->PlatformInfo.DataHub.SystemUuid.Size == GUID_STRING_LENGTH
+  if (Config->PlatformInfo.DataHub.SystemUuid.Size == GUID_STRING_LENGTH + 1
     && !EFI_ERROR (AsciiStrToGuid (OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemUuid), &Uuid))) {
     Data.SystemUUID         = &Uuid;
   }
@@ -154,7 +156,7 @@ OcPlatformUpdateSmbios (
     Data.SystemSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemSerialNumber);
   }
 
-  if (Config->PlatformInfo.DataHub.SystemUuid.Size == GUID_STRING_LENGTH
+  if (Config->PlatformInfo.DataHub.SystemUuid.Size == GUID_STRING_LENGTH + 1
     && !EFI_ERROR (AsciiStrToGuid (OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemUuid), &Uuid))) {
     Data.SystemUUID         = &Uuid;
   }
@@ -234,6 +236,98 @@ OcPlatformUpdateSmbios (
   }
 }
 
+STATIC
+VOID
+OcPlatformUpdateNvram (
+  IN OC_GLOBAL_CONFIG    *Config
+  )
+{
+  EFI_STATUS   Status;
+  CHAR8  *Bid;
+  CHAR8  *Mlb;
+  UINT8  *Rom;
+
+  Bid = OC_BLOB_GET (&Config->PlatformInfo.Nvram.Bid);
+  Mlb = OC_BLOB_GET (&Config->PlatformInfo.Nvram.Mlb);
+  Rom = &Config->PlatformInfo.Nvram.Rom[0];
+
+  if (Bid[0] != '\0') {
+    Status = gRT->SetVariable (
+      L"HW_BID",
+      &gAppleVendorVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+      Config->PlatformInfo.Nvram.Bid.Size - 1,
+      Bid
+      );
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Setting HW_BID %a - %r\n",
+      Bid,
+      Status
+      ));
+  }
+
+  if (Rom[0] != 0 || Rom[1] != 0 || Rom[2] != 0 || Rom[3] != 0 || Rom[4] != 0 || Rom[5] != 0) {
+    Status = gRT->SetVariable (
+      L"HW_ROM",
+      &gAppleVendorVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+      sizeof (Config->PlatformInfo.Nvram.Rom) - 1,
+      Rom
+      );
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Setting HW_ROM %a - %r\n",
+      Bid,
+      Status
+      ));
+
+    Status = gRT->SetVariable (
+      L"ROM",
+      &gAppleVendorVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+      sizeof (Config->PlatformInfo.Nvram.Rom) - 1,
+      Rom
+      );
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Setting ROM %a - %r\n",
+      Bid,
+      Status
+      ));
+  }
+
+  if (Mlb[0] != '\0') {
+    Status = gRT->SetVariable (
+      L"HW_MLB",
+      &gAppleVendorVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+      Config->PlatformInfo.Nvram.Mlb.Size - 1,
+      Mlb
+      );
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Setting HW_MLB %a - %r\n",
+      Bid,
+      Status
+      ));
+
+    Status = gRT->SetVariable (
+      L"MLB",
+      &gAppleVendorVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+      Config->PlatformInfo.Nvram.Mlb.Size - 1,
+      Mlb
+      );
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Setting MLB %a - %r\n",
+      Bid,
+      Status
+      ));
+  }
+}
+
 VOID
 OcLoadPlatformSupport (
   IN OC_GLOBAL_CONFIG    *Config,
@@ -272,5 +366,9 @@ OcLoadPlatformSupport (
     }
 
     OcPlatformUpdateSmbios (Config, CpuInfo, SmbiosUpdateMode);
+  }
+
+  if (Config->PlatformInfo.UpdateNvram) {
+    OcPlatformUpdateNvram (Config);
   }
 }
