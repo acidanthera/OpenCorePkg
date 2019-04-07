@@ -274,11 +274,11 @@ ParseSerialized (
 #define OC_SCHEMA_MDATAF(Name, Type)                                     \
   OC_SCHEMA_VALUE (Name, 0, Type, OC_SCHEMA_VALUE_MDATA)
 
-#define OC_SCHEMA_ARRAY(Name, Type, ChildSchema)                         \
+#define OC_SCHEMA_ARRAY(Name, ChildSchema)                               \
   {(Name), PLIST_NODE_TYPE_ARRAY, ParseSerializedArray,                  \
     {.List = {0, ChildSchema}}}
 
-#define OC_SCHEMA_MAP(Name, Type, ChildSchema)                           \
+#define OC_SCHEMA_MAP(Name, ChildSchema)                                 \
   {(Name), PLIST_NODE_TYPE_DICT, ParseSerializedMap,                     \
     {.List = {0, ChildSchema}}}
 

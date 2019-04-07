@@ -115,7 +115,7 @@ mDevicePropertiesEntrySchema = OC_SCHEMA_MDATA (NULL);
 
 STATIC
 OC_SCHEMA
-mDevicePropertiesSchema = OC_SCHEMA_MAP (NULL, OC_ASSOC, &mDevicePropertiesEntrySchema);
+mDevicePropertiesSchema = OC_SCHEMA_MAP (NULL, &mDevicePropertiesEntrySchema);
 
 
 //
@@ -196,11 +196,15 @@ mNvramAddEntrySchema = OC_SCHEMA_MDATA (NULL);
 
 STATIC
 OC_SCHEMA
-mNvramAddSchema = OC_SCHEMA_MAP (NULL, OC_ASSOC, &mNvramAddEntrySchema);
+mNvramAddSchema = OC_SCHEMA_MAP (NULL, &mNvramAddEntrySchema);
 
 STATIC
 OC_SCHEMA
-mNvramBlockSchema = OC_SCHEMA_STRING (NULL);
+mNvramBlockEntrySchema = OC_SCHEMA_STRING (NULL);
+
+STATIC
+OC_SCHEMA
+mNvramBlockSchema = OC_SCHEMA_ARRAY (NULL, &mNvramBlockEntrySchema);
 
 STATIC
 OC_SCHEMA
