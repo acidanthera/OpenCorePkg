@@ -87,7 +87,7 @@ OcLoadNvramSupport (
     //
     // FIXME: Checking string length manually is due to inadequate assertions.
     //
-    AsciiVariableGuid = OC_BLOB_GET (VariableMap->Keys[GuidIndex]);
+    AsciiVariableGuid = OC_BLOB_GET (Config->Nvram.Add.Keys[GuidIndex]);
     if (AsciiStrLen (AsciiVariableGuid) == GUID_STRING_LENGTH) {
       Status = AsciiStrToGuid (AsciiVariableGuid, &VariableGuid);
     } else {
