@@ -242,7 +242,7 @@ OcKernelApplyPatches (
     // - Mask and ReplaceMask mismatch in size when are available.
     //
     if (UserPatch->Replace.Size == 0
-      || (UserPatch->Base.Size == 0 && UserPatch->Find.Size != UserPatch->Replace.Size)
+      || (OC_BLOB_GET (&UserPatch->Base)[0] == '\0' && UserPatch->Find.Size != UserPatch->Replace.Size)
       || (UserPatch->Mask.Size > 0 && UserPatch->Find.Size != UserPatch->Mask.Size)
       || (UserPatch->ReplaceMask.Size > 0 && UserPatch->Find.Size != UserPatch->ReplaceMask.Size)) {
       DEBUG ((DEBUG_ERROR, "OC: Kernel patch %u for %a is borked\n", Index, Target));

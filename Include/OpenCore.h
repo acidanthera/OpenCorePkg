@@ -84,6 +84,18 @@ OcLoadNvramSupport (
   );
 
 /**
+  Load platform compatibility support like DataHub or SMBIOS.
+
+  @param[in]  Config    OpenCore configuration.
+  @param[in]  CpuInfo   CPU information.
+**/
+VOID
+OcLoadPlatformSupport (
+  IN OC_GLOBAL_CONFIG    *Config,
+  IN OC_CPU_INFO         *CpuInfo
+  );
+
+/**
   Load UEFI compatibility support like drivers.
 
   @param[in]  Storage   OpenCore storage.

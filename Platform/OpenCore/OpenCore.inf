@@ -40,14 +40,16 @@
   OpenCoreDevProps.c
   OpenCoreKernel.c
   OpenCoreNvram.c
+  OpenCorePlatform.c
   OpenCoreUefi.c
 
 [Packages]
+  EfiPkg/EfiPkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
   OpenCorePkg/OpenCorePkg.dec
   OcSupportPkg/OcSupportPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
-  EfiPkg/EfiPkg.dec
 
 [Protocols]
   gEfiDevicePathProtocolGuid          ## CONSUMES
@@ -64,6 +66,7 @@
   OcAppleKernelLib
   OcBootManagementLib
   OcConfigurationLib
+  OcDataHubLib
   OcDevicePathLib
   OcDevicePropertyLib
   OcGuardLib

@@ -88,6 +88,7 @@ OcMain (
   OcCpuScanProcessor (&CpuInfo);
   OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &CpuInfo);
   OcLoadAcpiSupport (Storage, &mOpenCoreConfiguration);
+  OcLoadPlatformSupport (&mOpenCoreConfiguration, &CpuInfo);
   OcLoadDevPropsSupport (&mOpenCoreConfiguration);
   OcLoadNvramSupport (&mOpenCoreConfiguration);
   OcLoadKernelSupport (Storage, &mOpenCoreConfiguration);
