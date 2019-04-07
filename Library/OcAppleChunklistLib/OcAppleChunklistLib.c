@@ -29,6 +29,10 @@ OcAppleChunklistInitializeContext (
 {
   APPLE_CHUNKLIST_HEADER  *ChunklistHeader;
   UINTN                   DataEnd;
+  UINT8                   *Signature;
+  UINT32                  SigLength;
+  UINT32                  Index;
+  UINT8                   SwapValue;
 
   ASSERT (Buffer != NULL);
   ASSERT (Length > 0);
@@ -73,7 +77,49 @@ OcAppleChunklistInitializeContext (
     return EFI_INVALID_PARAMETER;
   }
 
+  //
+  // Prepare signature verification data.
+  //
+  Sha256 (Context->Hash, (UINT8 *)ChunklistHeader, (UINTN)ChunklistHeader->SigOffset);
+
+  Signature = Context->Signature->Signature;
+  SigLength = sizeof (Context->Signature->Signature);
+
+  for (Index = 0; Index < (SigLength / 2); ++Index) {
+    SwapValue                        = Signature[Index];
+    Signature[Index]                 = Signature[SigLength - Index - 1];
+    Signature[SigLength - Index - 1] = SwapValue;
+  }
+
   return EFI_SUCCESS;
+}
+
+BOOLEAN
+OcAppleChunklistVerifySignature (
+  IN OC_APPLE_CHUNKLIST_CONTEXT  *Context,
+  IN RSA_PUBLIC_KEY              *PublicKey
+  )
+{
+  BOOLEAN Result;
+
+  UINT32  WorkBuf32[RSANUMWORDS * 3];
+
+  ASSERT (Context != NULL);
+  ASSERT (Context->Signature != NULL);
+
+  Result = RsaVerify (
+             PublicKey,
+             Context->Signature->Signature,
+             Context->Hash,
+             WorkBuf32
+             );
+  DEBUG_CODE (
+    if (Result) {
+      Context->Signature = NULL;
+    }
+    );
+
+  return Result;
 }
 
 EFI_STATUS
@@ -98,6 +144,10 @@ OcAppleChunklistVerifyData (
   ASSERT (Context->FileSize > 0);
   ASSERT (Context->Chunks != NULL);
   ASSERT (Context->Signature != NULL);
+
+  DEBUG_CODE (
+    ASSERT (Context->Signature == NULL);
+    );
 
   RemainingLength = Length;
   BufferCurrent   = (UINT8 *) Buffer;

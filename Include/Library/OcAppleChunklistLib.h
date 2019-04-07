@@ -15,6 +15,8 @@
 
 #include <IndustryStandard/AppleChunklist.h>
 
+#include <Library/OcCryptoLib.h>
+
 //
 // Chunklist context.
 //
@@ -23,6 +25,7 @@ typedef struct OC_APPLE_CHUNKLIST_CONTEXT_ {
   UINTN                   FileSize;
   APPLE_CHUNKLIST_CHUNK   *Chunks;
   APPLE_CHUNKLIST_SIG     *Signature;
+  UINT8                   Hash[SHA256_DIGEST_SIZE];
 } OC_APPLE_CHUNKLIST_CONTEXT;
 
 //
@@ -46,6 +49,12 @@ OcAppleChunklistInitializeContext (
   IN  VOID                        *Buffer,
   IN  UINTN                       Length,
   OUT OC_APPLE_CHUNKLIST_CONTEXT  *Context
+  );
+
+BOOLEAN
+OcAppleChunklistVerifySignature (
+  IN OC_APPLE_CHUNKLIST_CONTEXT  *Context,
+  IN RSA_PUBLIC_KEY              *PublicKey
   );
 
 /**
