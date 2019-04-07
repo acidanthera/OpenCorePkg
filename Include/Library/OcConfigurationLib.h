@@ -232,6 +232,76 @@
   _(BOOLEAN                     , ProvideConsoleGop           ,     , FALSE  , ())
   OC_DECLARE (OC_UEFI_QUIRKS)
 
+/**
+  Platform information configuration
+**/
+
+#define OC_PLATFORM_GENERIC_CONFIG_FIELDS(_, __) \
+  _(OC_STRING                   , SystemProductName  ,     , OC_STRING_CONSTR ("MacPro6,1", _, __)        , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , SystemSerialNumber ,     , OC_STRING_CONSTR ("OPENCORE_SN1", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , SystemUuid         ,     , OC_STRING_CONSTR ("", _, __)                 , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Mlb                ,     , OC_STRING_CONSTR ("OPENCORE_MLB_SN11", _, __), OC_DESTR (OC_STRING) ) \
+  _(UINT8                       , Rom                , [6] , {0}                                          , () )
+  OC_DECLARE (OC_PLATFORM_GENERIC_CONFIG)
+
+#define OC_PLATFORM_DATA_HUB_CONFIG_FIELDS(_, __) \
+  _(OC_STRING                   , PlatformName        ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , SystemProductName   ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , SystemSerialNumber  ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , SystemUuid          ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , BoardProduct        ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(UINT8                       , BoardRevision       , [1] , {0}                              , () )                   \
+  _(UINT64                      , StartupPowerEvents  ,     , 0                                , () )                   \
+  _(UINT64                      , InitialTSC          ,     , 0                                , () )                   \
+  _(UINT64                      , FSBFrequency        ,     , 0                                , () )                   \
+  _(UINT64                      , ARTFrequency        ,     , 0                                , () )                   \
+  _(UINT8                       , DevicePathsSupported, [1] , {0}                              , () )                   \
+  _(UINT8                       , SmcRevision         , [6] , {0}                              , () )                   \
+  _(UINT8                       , SmcBranch           , [8] , {0}                              , () )                   \
+  _(UINT8                       , SmcPlatform         , [8] , {0}                              , () )
+  OC_DECLARE (OC_PLATFORM_DATA_HUB_CONFIG)
+
+#define OC_PLATFORM_SMBIOS_CONFIG_FIELDS(_, __) \
+  _(OC_STRING                    , BIOSVendor            ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , BIOSVersion           ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , BIOSReleaseDate       ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , SystemManufacturer    ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , SystemProductName     ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , SystemVersion         ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , SystemSerialNumber    ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , SystemUuid            ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , SystemSKUNumber       ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , SystemFamily          ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , BoardManufacturer     ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , BoardProduct          ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , BoardVersion          ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , BoardSerialNumber     ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , BoardAssetTag         ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(UINT8                        , BoardType             ,  , 0                                , ()                   ) \
+  _(OC_STRING                    , BoardLocationInChassis,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , ChassisManufacturer   ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(UINT8                        , ChassisType           ,  , 0                                , ()                   ) \
+  _(OC_STRING                    , ChassisVersion        ,  , 0                                , ()                   ) \
+  _(OC_STRING                    , ChassisSerialNumber   ,  , 0                                , ()                   ) \
+  _(OC_STRING                    , ChassisAssetTag       ,  , 0                                , ()                   ) \
+  _(UINT32                       , PlatformFeature       ,  , 0                                , ()                   ) \
+  _(UINT64                       , FirmwareFeatures      ,  , 0                                , ()                   ) \
+  _(UINT64                       , FirmwareFeaturesMask  ,  , 0                                , ()                   ) \
+  _(UINT16                       , ProcessorType         ,  , 0                                , ()                   ) \
+  _(UINT8                        , MemoryFormFactor      ,  , 0                                , ()                   )
+  OC_DECLARE (OC_PLATFORM_SMBIOS_CONFIG)
+
+#define OC_PLATFORM_CONFIG_FIELDS(_, __) \
+  _(BOOLEAN                     , Automatic        ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , UpdateDataHub    ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , UpdateNvram      ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , UpdateSmbios     ,     , FALSE                                           , ()) \
+  _(OC_STRING                   , UpdateSmbiosMode ,     , OC_STRING_CONSTR ("Auto", _, __)                , OC_DESTR (OC_STRING) ) \
+  _(OC_PLATFORM_GENERIC_CONFIG  , Generic          ,     , OC_CONSTR2 (OC_PLATFORM_GENERIC_CONFIG, _, __)  , OC_DESTR (OC_PLATFORM_GENERIC_CONFIG)) \
+  _(OC_PLATFORM_DATA_HUB_CONFIG , DataHub          ,     , OC_CONSTR2 (OC_PLATFORM_DATA_HUB_CONFIG, _, __) , OC_DESTR (OC_PLATFORM_DATA_HUB_CONFIG)) \
+  _(OC_PLATFORM_SMBIOS_CONFIG   , Smbios           ,     , OC_CONSTR2 (OC_PLATFORM_SMBIOS_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_SMBIOS_CONFIG))
+  OC_DECLARE (OC_PLATFORM_CONFIG)
+
 ///
 /// Uefi contains firmware tweaks and extra drivers.
 ///
@@ -250,6 +320,7 @@
   _(OC_DEV_PROP_CONFIG          , DeviceProperties  ,     , OC_CONSTR1 (OC_DEV_PROP_CONFIG, _, __)  , OC_DESTR (OC_DEV_PROP_CONFIG)) \
   _(OC_KERNEL_CONFIG            , Kernel            ,     , OC_CONSTR1 (OC_KERNEL_CONFIG, _, __)    , OC_DESTR (OC_KERNEL_CONFIG)) \
   _(OC_NVRAM_CONFIG             , Nvram             ,     , OC_CONSTR1 (OC_NVRAM_CONFIG, _, __)     , OC_DESTR (OC_NVRAM_CONFIG)) \
+  _(OC_PLATFORM_CONFIG          , PlatformInfo      ,     , OC_CONSTR1 (OC_PLATFORM_CONFIG, _, __)  , OC_DESTR (OC_PLATFORM_CONFIG)) \
   _(OC_UEFI_CONFIG              , Uefi              ,     , OC_CONSTR1 (OC_UEFI_CONFIG, _, __)      , OC_DESTR (OC_UEFI_CONFIG))
   OC_DECLARE (OC_GLOBAL_CONFIG)
 

@@ -42,6 +42,11 @@ OC_STRUCTORS       (OC_NVRAM_BLOCK_ENTRY, ())
 OC_MAP_STRUCTORS   (OC_NVRAM_BLOCK_MAP)
 OC_STRUCTORS       (OC_NVRAM_CONFIG, ())
 
+OC_STRUCTORS       (OC_PLATFORM_GENERIC_CONFIG, ())
+OC_STRUCTORS       (OC_PLATFORM_DATA_HUB_CONFIG, ())
+OC_STRUCTORS       (OC_PLATFORM_SMBIOS_CONFIG, ())
+OC_STRUCTORS       (OC_PLATFORM_CONFIG, ())
+
 OC_ARRAY_STRUCTORS (OC_UEFI_DRIVER_ARRAY)
 OC_STRUCTORS       (OC_UEFI_QUIRKS, ())
 OC_STRUCTORS       (OC_UEFI_CONFIG, ())
@@ -244,6 +249,83 @@ mNvramConfigurationSchema[] = {
 };
 
 //
+// Platform info configuration support
+//
+STATIC
+OC_SCHEMA
+mPlatformConfigurationDataHubSchema[] = {
+  OC_SCHEMA_INTEGER_IN ("ARTFrequency",         OC_GLOBAL_CONFIG, PlatformInfo.DataHub.ARTFrequency),
+  OC_SCHEMA_STRING_IN  ("BoardProduct",         OC_GLOBAL_CONFIG, PlatformInfo.DataHub.BoardProduct),
+  OC_SCHEMA_DATAF_IN   ("BoardRevision",        OC_GLOBAL_CONFIG, PlatformInfo.DataHub.BoardRevision),
+  OC_SCHEMA_DATAF_IN   ("DevicePathsSupported", OC_GLOBAL_CONFIG, PlatformInfo.DataHub.DevicePathsSupported),
+  OC_SCHEMA_INTEGER_IN ("FSBFrequency",         OC_GLOBAL_CONFIG, PlatformInfo.DataHub.FSBFrequency),
+  OC_SCHEMA_INTEGER_IN ("InitialTSC",           OC_GLOBAL_CONFIG, PlatformInfo.DataHub.InitialTSC),
+  OC_SCHEMA_STRING_IN  ("PlatformName",         OC_GLOBAL_CONFIG, PlatformInfo.DataHub.PlatformName),
+  OC_SCHEMA_DATAF_IN   ("SmcBranch",            OC_GLOBAL_CONFIG, PlatformInfo.DataHub.SmcBranch),
+  OC_SCHEMA_DATAF_IN   ("SmcPlatform",          OC_GLOBAL_CONFIG, PlatformInfo.DataHub.SmcPlatform),
+  OC_SCHEMA_DATAF_IN   ("SmcRevision",          OC_GLOBAL_CONFIG, PlatformInfo.DataHub.SmcRevision),
+  OC_SCHEMA_INTEGER_IN ("StartupPowerEvents",   OC_GLOBAL_CONFIG, PlatformInfo.DataHub.StartupPowerEvents),
+  OC_SCHEMA_STRING_IN  ("SystemProductName",    OC_GLOBAL_CONFIG, PlatformInfo.DataHub.SystemProductName),
+  OC_SCHEMA_STRING_IN  ("SystemSerialNumber",   OC_GLOBAL_CONFIG, PlatformInfo.DataHub.SystemSerialNumber),
+  OC_SCHEMA_STRING_IN  ("SystemUUID",           OC_GLOBAL_CONFIG, PlatformInfo.DataHub.SystemUuid),
+};
+
+STATIC
+OC_SCHEMA
+mPlatformConfigurationGenericSchema[] = {
+  OC_SCHEMA_STRING_IN ("MLB",                OC_GLOBAL_CONFIG, PlatformInfo.Generic.Mlb),
+  OC_SCHEMA_DATAF_IN  ("ROM",                OC_GLOBAL_CONFIG, PlatformInfo.Generic.Rom),
+  OC_SCHEMA_STRING_IN ("SystemProductName",  OC_GLOBAL_CONFIG, PlatformInfo.Generic.SystemProductName),
+  OC_SCHEMA_STRING_IN ("SystemSerialNumber", OC_GLOBAL_CONFIG, PlatformInfo.Generic.SystemSerialNumber),
+  OC_SCHEMA_STRING_IN ("SystemUUID",         OC_GLOBAL_CONFIG, PlatformInfo.Generic.SystemUuid),
+};
+
+STATIC
+OC_SCHEMA
+mPlatformConfigurationSmbiosSchema[] = {
+  OC_SCHEMA_STRING_IN  ("BIOSReleaseDate",        OC_GLOBAL_CONFIG, PlatformInfo.Smbios.BIOSReleaseDate),
+  OC_SCHEMA_STRING_IN  ("BIOSVendor",             OC_GLOBAL_CONFIG, PlatformInfo.Smbios.BIOSVendor),
+  OC_SCHEMA_STRING_IN  ("BIOSVersion",            OC_GLOBAL_CONFIG, PlatformInfo.Smbios.BIOSVersion),
+  OC_SCHEMA_STRING_IN  ("BoardAssetTag",          OC_GLOBAL_CONFIG, PlatformInfo.Smbios.BoardAssetTag),
+  OC_SCHEMA_STRING_IN  ("BoardLocationInChassis", OC_GLOBAL_CONFIG, PlatformInfo.Smbios.BoardLocationInChassis),
+  OC_SCHEMA_STRING_IN  ("BoardManufacturer",      OC_GLOBAL_CONFIG, PlatformInfo.Smbios.BoardManufacturer),
+  OC_SCHEMA_STRING_IN  ("BoardProduct",           OC_GLOBAL_CONFIG, PlatformInfo.Smbios.BoardProduct),
+  OC_SCHEMA_STRING_IN  ("BoardSerialNumber",      OC_GLOBAL_CONFIG, PlatformInfo.Smbios.BoardSerialNumber),
+  OC_SCHEMA_INTEGER_IN ("BoardType",              OC_GLOBAL_CONFIG, PlatformInfo.Smbios.BoardType),
+  OC_SCHEMA_STRING_IN  ("BoardVersion",           OC_GLOBAL_CONFIG, PlatformInfo.Smbios.BoardVersion),
+  OC_SCHEMA_STRING_IN  ("ChassisAssetTag",        OC_GLOBAL_CONFIG, PlatformInfo.Smbios.ChassisAssetTag),
+  OC_SCHEMA_STRING_IN  ("ChassisManufacturer",    OC_GLOBAL_CONFIG, PlatformInfo.Smbios.ChassisManufacturer),
+  OC_SCHEMA_STRING_IN  ("ChassisSerialNumber",    OC_GLOBAL_CONFIG, PlatformInfo.Smbios.ChassisSerialNumber),
+  OC_SCHEMA_INTEGER_IN ("ChassisType",            OC_GLOBAL_CONFIG, PlatformInfo.Smbios.ChassisType),
+  OC_SCHEMA_STRING_IN  ("ChassisVersion",         OC_GLOBAL_CONFIG, PlatformInfo.Smbios.ChassisVersion),
+  OC_SCHEMA_INTEGER_IN ("FirmwareFeatures",       OC_GLOBAL_CONFIG, PlatformInfo.Smbios.FirmwareFeatures),
+  OC_SCHEMA_INTEGER_IN ("FirmwareFeaturesMask",   OC_GLOBAL_CONFIG, PlatformInfo.Smbios.FirmwareFeaturesMask),
+  OC_SCHEMA_INTEGER_IN ("MemoryFormFactor",       OC_GLOBAL_CONFIG, PlatformInfo.Smbios.MemoryFormFactor),
+  OC_SCHEMA_INTEGER_IN ("PlatformFeature",        OC_GLOBAL_CONFIG, PlatformInfo.Smbios.PlatformFeature),
+  OC_SCHEMA_INTEGER_IN ("ProcessorType",          OC_GLOBAL_CONFIG, PlatformInfo.Smbios.ProcessorType),
+  OC_SCHEMA_STRING_IN  ("SystemFamily",           OC_GLOBAL_CONFIG, PlatformInfo.Smbios.SystemFamily),
+  OC_SCHEMA_STRING_IN  ("SystemManufacturer",     OC_GLOBAL_CONFIG, PlatformInfo.Smbios.SystemManufacturer),
+  OC_SCHEMA_STRING_IN  ("SystemProductName",      OC_GLOBAL_CONFIG, PlatformInfo.Smbios.SystemProductName),
+  OC_SCHEMA_STRING_IN  ("SystemSKUNumber",        OC_GLOBAL_CONFIG, PlatformInfo.Smbios.SystemSKUNumber),
+  OC_SCHEMA_STRING_IN  ("SystemSerialNumber",     OC_GLOBAL_CONFIG, PlatformInfo.Smbios.SystemSerialNumber),
+  OC_SCHEMA_STRING_IN  ("SystemUUID",             OC_GLOBAL_CONFIG, PlatformInfo.Smbios.SystemUuid),
+  OC_SCHEMA_STRING_IN  ("SystemVersion",          OC_GLOBAL_CONFIG, PlatformInfo.Smbios.SystemVersion),
+};
+
+STATIC
+OC_SCHEMA
+mPlatformConfigurationSchema[] = {
+  OC_SCHEMA_BOOLEAN_IN ("Automatic",        OC_GLOBAL_CONFIG, PlatformInfo.Automatic),
+  OC_SCHEMA_DICT       ("DataHub",          mPlatformConfigurationDataHubSchema),
+  OC_SCHEMA_DICT       ("Generic",          mPlatformConfigurationGenericSchema),
+  OC_SCHEMA_DICT       ("SMBIOS",           mPlatformConfigurationSmbiosSchema),
+  OC_SCHEMA_BOOLEAN_IN ("UpdateDataHub",    OC_GLOBAL_CONFIG, PlatformInfo.UpdateDataHub),
+  OC_SCHEMA_BOOLEAN_IN ("UpdateNVRAM",      OC_GLOBAL_CONFIG, PlatformInfo.UpdateNvram),
+  OC_SCHEMA_BOOLEAN_IN ("UpdateSMBIOS",     OC_GLOBAL_CONFIG, PlatformInfo.UpdateSmbios),
+  OC_SCHEMA_STRING_IN  ("UpdateSMBIOSMode", OC_GLOBAL_CONFIG, PlatformInfo.UpdateSmbiosMode)
+};
+
+//
 // Uefi configuration support
 //
 
@@ -278,6 +360,7 @@ mRootConfigurationNodes[] = {
   OC_SCHEMA_DICT    ("DeviceProperties", mDevicePropertiesSchema),
   OC_SCHEMA_DICT    ("Kernel",           mKernelConfigurationSchema),
   OC_SCHEMA_DICT    ("NVRAM",            mNvramConfigurationSchema),
+  OC_SCHEMA_DICT    ("PlatformInfo",     mPlatformConfigurationSchema),
   OC_SCHEMA_DICT    ("UEFI",             mUefiConfigurationSchema)
 };
 

@@ -86,6 +86,13 @@ ParseSerializedDict (
       continue;
     }
 
+    //
+    // Skip comments.
+    //
+    if (CurrentKey[0] == '#') {
+      continue;
+    }
+
     DEBUG ((DEBUG_VERBOSE, "Parsing serialized at %a at %u index!\n", CurrentKey, Index));
 
     //
@@ -232,6 +239,13 @@ ParseSerializedMap (
 
     if (CurrentKeyLen == 0) {
       DEBUG ((DEBUG_INFO, "Couldn't get serialized key at %u index!\n", Index));
+      continue;
+    }
+
+    //
+    // Skip comments.
+    //
+    if (CurrentKey[0] == '#') {
       continue;
     }
 
