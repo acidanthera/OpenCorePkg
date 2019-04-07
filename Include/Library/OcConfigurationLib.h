@@ -86,9 +86,14 @@
 ///
 /// Device properties is an associative map of devices with their property key value maps.
 ///
-#define OC_DEVICE_PROP_MAP_FIELDS(_, __) \
+#define OC_DEV_PROP_ADD_MAP_FIELDS(_, __) \
   OC_MAP (OC_STRING, OC_ASSOC, _, __)
-  OC_DECLARE (OC_DEVICE_PROP_MAP)
+  OC_DECLARE (OC_DEV_PROP_ADD_MAP)
+
+#define OC_DEV_PROP_CONFIG_FIELDS(_, __) \
+  _(OC_DEV_PROP_ADD_MAP       , Add              ,     , OC_CONSTR2 (OC_DEV_PROP_ADD_MAP, _, __)   , OC_DESTR (OC_DEV_PROP_ADD_MAP)) \
+  _(BOOLEAN                   , ReinstallProtocol,     , FALSE  , ())
+  OC_DECLARE (OC_DEV_PROP_CONFIG)
 
 /**
   KernelSpace section
@@ -224,7 +229,7 @@
 
 #define OC_GLOBAL_CONFIG_FIELDS(_, __) \
   _(OC_ACPI_CONFIG              , Acpi              ,     , OC_CONSTR1 (OC_ACPI_CONFIG, _, __)      , OC_DESTR (OC_ACPI_CONFIG)) \
-  _(OC_DEVICE_PROP_MAP          , DeviceProperties  ,     , OC_CONSTR1 (OC_DEVICE_PROP_MAP, _, __)  , OC_DESTR (OC_DEVICE_PROP_MAP)) \
+  _(OC_DEV_PROP_CONFIG          , DeviceProperties  ,     , OC_CONSTR1 (OC_DEV_PROP_CONFIG, _, __)  , OC_DESTR (OC_DEV_PROP_CONFIG)) \
   _(OC_KERNEL_CONFIG            , Kernel            ,     , OC_CONSTR1 (OC_KERNEL_CONFIG, _, __)    , OC_DESTR (OC_KERNEL_CONFIG)) \
   _(OC_NVRAM_CONFIG             , Nvram             ,     , OC_CONSTR1 (OC_NVRAM_CONFIG, _, __)     , OC_DESTR (OC_NVRAM_CONFIG)) \
   _(OC_UEFI_CONFIG              , Uefi              ,     , OC_CONSTR1 (OC_UEFI_CONFIG, _, __)      , OC_DESTR (OC_UEFI_CONFIG))

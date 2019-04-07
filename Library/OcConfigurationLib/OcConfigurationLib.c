@@ -22,7 +22,8 @@ OC_ARRAY_STRUCTORS (OC_ACPI_PATCH_ARRAY)
 OC_STRUCTORS       (OC_ACPI_QUIRKS, ())
 OC_STRUCTORS       (OC_ACPI_CONFIG, ())
 
-OC_MAP_STRUCTORS   (OC_DEVICE_PROP_MAP)
+OC_MAP_STRUCTORS   (OC_DEV_PROP_ADD_MAP)
+OC_STRUCTORS       (OC_DEV_PROP_CONFIG, ())
 
 OC_STRUCTORS       (OC_KERNEL_ADD_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_KERNEL_ADD_ARRAY)
@@ -110,13 +111,19 @@ mAcpiConfigurationSchema[] = {
 
 STATIC
 OC_SCHEMA
-mDevicePropertiesEntrySchema = OC_SCHEMA_MDATA (NULL);
+mDevicePropertiesAddEntrySchema = OC_SCHEMA_MDATA (NULL);
 
 
 STATIC
 OC_SCHEMA
-mDevicePropertiesSchema = OC_SCHEMA_MAP (NULL, &mDevicePropertiesEntrySchema);
+mDevicePropertiesAddSchema = OC_SCHEMA_MAP (NULL, &mDevicePropertiesAddEntrySchema);
 
+STATIC
+OC_SCHEMA
+mDevicePropertiesSchema[] = {
+  OC_SCHEMA_MAP_IN      ("Add",                OC_GLOBAL_CONFIG, DeviceProperties.Add, &mDevicePropertiesAddSchema),
+  OC_SCHEMA_BOOLEAN_IN  ("ReinstallProtocol",  OC_GLOBAL_CONFIG, DeviceProperties.ReinstallProtocol),
+};
 
 //
 // Kernel space configuration support
@@ -245,7 +252,7 @@ STATIC
 OC_SCHEMA
 mRootConfigurationNodes[] = {
   OC_SCHEMA_DICT    ("ACPI",             mAcpiConfigurationSchema),
-  OC_SCHEMA_MAP_IN  ("DeviceProperties", OC_GLOBAL_CONFIG, DeviceProperties, &mDevicePropertiesSchema),
+  OC_SCHEMA_DICT    ("DeviceProperties", mDevicePropertiesSchema),
   OC_SCHEMA_DICT    ("Kernel",           mKernelConfigurationSchema),
   OC_SCHEMA_DICT    ("NVRAM",            mNvramConfigurationSchema),
   OC_SCHEMA_DICT    ("UEFI",             mUefiConfigurationSchema)
