@@ -251,7 +251,7 @@ OcKernelApplyPatches (
 
     ZeroMem (&Patch, sizeof (Patch));
 
-    if (UserPatch->Base.Size > 0) {
+    if (OC_BLOB_GET (&UserPatch->Base)[0] != '\0') {
       Patch.Base  = OC_BLOB_GET (&UserPatch->Base);
     }
 
@@ -327,7 +327,7 @@ OcKernelBlockKexts (
     if (AsciiStrnCmp (DarwinVersion, MatchKernel, AsciiStrLen (MatchKernel)) != 0) {
       DEBUG ((
         DEBUG_INFO,
-        "OC: Kernel blocker skips %a block at %u due to version %a vs %a",
+        "OC: Prelink blocker skips %a block at %u due to version %a vs %a",
         Target,
         Index,
         MatchKernel,
@@ -343,14 +343,18 @@ OcKernelBlockKexts (
       );
 
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OC: Kernel blocker %a init failure - %r\n", Target, Status));
+      DEBUG ((DEBUG_WARN, "OC: Prelink blocker %a init failure - %r\n", Target, Status));
       continue;
     }
 
     Status = PatcherBlockKext (&Patcher);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OC: Kernel blocker %a failed - %r\n", Target, Status));
-    }
+
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Prelink blocker %a - %r\n",
+      Target,
+      Status
+      ));
   }
 }
 
@@ -422,7 +426,12 @@ OcKernelProcessPrelinked (
           Kext->ImageDataSize
           );
 
-        DEBUG ((DEBUG_INFO, "OC: Prelink injection %a - %r\n", BundleName, Status));
+        DEBUG ((
+          EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+          "OC: Prelink injection %a - %r\n",
+          BundleName,
+          Status
+          ));
       }
 
       Status = PrelinkedInjectComplete (&Context);
