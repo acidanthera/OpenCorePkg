@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <OpenCore.h>
 
+#include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
@@ -31,25 +32,32 @@ OcLoadNvramSupport (
   IN OC_GLOBAL_CONFIG    *Config
   )
 {
+  EFI_STATUS    Status;
   UINT32        GuidIndex;
   UINT32        VariableIndex;
   CONST CHAR8   *AsciiVariableGuid;
   CONST CHAR8   *AsciiVariableName;
   CHAR16        *UnicodeVariableName;
-  EFI_GUID      VariableGuid;
+  GUID          VariableGuid;
   OC_ASSOC      *VariableMap;
   UINT8         *VariableData;
   UINT32        VariableSize;
 
   for (GuidIndex = 0; GuidIndex < Config->Nvram.Block.Count; ++GuidIndex) {
+    //
+    // FIXME: Checking string length manually is due to inadequate assertions.
+    //
     AsciiVariableGuid = OC_BLOB_GET (Config->Nvram.Block.Keys[GuidIndex]);
-    ZeroMem (&VariableGuid, sizeof (VariableGuid));
+    if (AsciiStrLen (AsciiVariableGuid) == GUID_STRING_LENGTH) {
+      Status = AsciiStrToGuid (AsciiVariableGuid, &VariableGuid);
+    } else {
+      Status = EFI_BUFFER_TOO_SMALL;
+    }
 
-    //
-    // TODO: string to EFI_GUID
-    //
-    (VOID) AsciiVariableGuid;
-    (VOID) mDefaultAttributes;
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "OC: Failed to convert NVRAM GUID %a - %r\n", AsciiVariableGuid, Status));
+      continue;
+    }
 
     for (VariableIndex = 0; VariableIndex < Config->Nvram.Block.Values[GuidIndex]->Count; ++VariableIndex) {
       AsciiVariableName   = OC_BLOB_GET (Config->Nvram.Block.Values[GuidIndex]->Values[VariableIndex]);
@@ -60,10 +68,14 @@ OcLoadNvramSupport (
         continue;
       }
 
-#if 0
       Status = gRT->SetVariable (UnicodeVariableName, &VariableGuid, 0, 0, 0);
-      DEBUG ((DEBUG_INFO, "OC: Deleting NVRAM %g:%a - %r\n", &VariableGuid, AsciiVariableGuid, Status));
-#endif
+      DEBUG ((
+        EFI_ERROR (Status) && Status != EFI_NOT_FOUND ? DEBUG_WARN : DEBUG_INFO,
+        "OC: Deleting NVRAM %g:%a - %r\n",
+        &VariableGuid,
+        AsciiVariableGuid,
+        Status
+        ));
 
       FreePool (UnicodeVariableName);
     }
@@ -71,13 +83,20 @@ OcLoadNvramSupport (
 
   for (GuidIndex = 0; GuidIndex < Config->Nvram.Add.Count; ++GuidIndex) {
     VariableMap       = Config->Nvram.Add.Values[GuidIndex];
+    //
+    // FIXME: Checking string length manually is due to inadequate assertions.
+    //
     AsciiVariableGuid = OC_BLOB_GET (VariableMap->Keys[GuidIndex]);
-    ZeroMem (&VariableGuid, sizeof (VariableGuid));
+    if (AsciiStrLen (AsciiVariableGuid) == GUID_STRING_LENGTH) {
+      Status = AsciiStrToGuid (AsciiVariableGuid, &VariableGuid);
+    } else {
+      Status = EFI_BUFFER_TOO_SMALL;
+    }
 
-    //
-    // TODO: string to EFI_GUID
-    //
-    (VOID) AsciiVariableGuid;
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "OC: Failed to convert NVRAM GUID %a - %r\n", AsciiVariableGuid, Status));
+      continue;
+    }
 
     for (VariableIndex = 0; VariableIndex < VariableMap->Count; ++VariableIndex) {
       AsciiVariableName   = OC_BLOB_GET (VariableMap->Keys[VariableIndex]);
@@ -90,16 +109,20 @@ OcLoadNvramSupport (
         continue;
       }
 
-#if 0
       Status = gRT->SetVariable (
         UnicodeVariableName,
         &VariableGuid,
         mDefaultAttributes,
-        VariableData,
-        VariableSize
+        VariableSize,
+        VariableData
         );
-      DEBUG ((DEBUG_INFO, "OC: Setting NVRAM %g:%a - %r\n", &VariableGuid, AsciiVariableGuid, Status));
-#endif
+      DEBUG ((
+        EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+        "OC: Setting NVRAM %g:%a - %r\n",
+        &VariableGuid,
+        AsciiVariableGuid,
+        Status
+        ));
 
       FreePool (UnicodeVariableName);
     }
