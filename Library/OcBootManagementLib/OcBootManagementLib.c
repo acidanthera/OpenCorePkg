@@ -226,6 +226,7 @@ SetBootEntryFlags (
 
   BootEntry->IsRecovery = FALSE;
   BootEntry->IsFolder   = FALSE;
+  BootEntry->IsWindows  = FALSE;
 
   DevicePathWalker = BootEntry->DevicePath;
   while (!IsDevicePathEnd (DevicePathWalker)) {
@@ -292,7 +293,8 @@ OcDescribeBootEntry (
   if (BootEntry->Name == NULL) {
     Status = ReadFileSize (FileSystem, L"\\EFI\\Microsoft\\Boot\\BCD", &BcdSize);
     if (!EFI_ERROR (Status)) {
-      BootEntry->Name = AllocateCopyPool(sizeof (L"BOOTCAMP Windows"), L"BOOTCAMP Windows");
+      BootEntry->IsWindows = TRUE;
+      BootEntry->Name      = AllocateCopyPool(sizeof (L"BOOTCAMP Windows"), L"BOOTCAMP Windows");
     }
   }  
   if (BootEntry->Name == NULL) {
@@ -522,9 +524,6 @@ OcShowSimpleBootMenu (
       gST->ConOut->OutputString (gST->ConOut, BootEntries[Index].Name);
       if (BootEntries[Index].IsFolder) {
         gST->ConOut->OutputString (gST->ConOut, L" (dmg)");
-      }
-      if (BootEntries[Index].IsRecovery) {
-        gST->ConOut->OutputString (gST->ConOut, L" (recovery)");
       }
       gST->ConOut->OutputString (gST->ConOut, L"\r\n");
     }
