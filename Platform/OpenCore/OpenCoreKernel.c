@@ -89,7 +89,7 @@ OcKernelLoadKextsAndReserve (
   for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
     Kext = Config->Kernel.Add.Values[Index];
 
-    if (Kext->Disabled) {
+    if (!Kext->Enabled) {
       continue;
     }
 
@@ -202,7 +202,7 @@ OcKernelApplyPatches (
     UserPatch = Config->Kernel.Patch.Values[Index];
     Target    = OC_BLOB_GET (&UserPatch->Identifier);
 
-    if (UserPatch->Disabled
+    if (!UserPatch->Enabled
     || (AsciiStrCmp (Target, "kernel") == 0) != IsKernelPatch) {
       continue;
     }
@@ -318,7 +318,7 @@ OcKernelBlockKexts (
     Kext   = Config->Kernel.Block.Values[Index];
     Target = OC_BLOB_GET (&Kext->Identifier);
 
-    if (Kext->Disabled) {
+    if (!Kext->Enabled) {
       continue;
     }
 
@@ -390,7 +390,7 @@ OcKernelProcessPrelinked (
       for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
         Kext = Config->Kernel.Add.Values[Index];
 
-        if (Kext->Disabled || Kext->PlistDataSize == 0) {
+        if (!Kext->Enabled || Kext->PlistDataSize == 0) {
           continue;
         }
 

@@ -88,7 +88,7 @@ OcAcpiBlockTables (
   for (Index = 0; Index < Config->Acpi.Block.Count; ++Index) {
     Table = Config->Acpi.Block.Values[Index];
 
-    if (Table->Disabled) {
+    if (!Table->Enabled) {
       continue;
     }
 
@@ -130,7 +130,7 @@ OcAcpiPatchTables (
   for (Index = 0; Index < Config->Acpi.Patch.Count; ++Index) {
     UserPatch = Config->Acpi.Patch.Values[Index];
 
-    if (UserPatch->Disabled) {
+    if (!UserPatch->Enabled) {
       continue;
     }
 

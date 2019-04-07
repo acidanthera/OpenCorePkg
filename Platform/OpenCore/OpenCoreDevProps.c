@@ -44,7 +44,9 @@ OcLoadDevPropsSupport (
   EFI_DEVICE_PATH_PROTOCOL                    *DevicePath;
   UINTN                                       OriginalSize;
 
-  PropertyDatabase = OcDevicePathPropertyInstallProtocol (Config->DeviceProperties.ReinstallProtocol);
+  PropertyDatabase = OcDevicePathPropertyInstallProtocol (
+    Config->DeviceProperties.Quirks.ReinstallProtocol
+    );
   if (PropertyDatabase == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Device property database protocol is missing\n"));
     return;
