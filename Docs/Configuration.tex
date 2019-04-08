@@ -481,13 +481,6 @@ some of those are provided as a part of OpenCore.
   \texttt{true}.
 
 \item
-  \texttt{Signature}\\
-  \textbf{Type}: \texttt{plist\ data}, 4 bytes\\
-  \textbf{Default value}: All zero\\
-  \textbf{Description}: Match table signature to be equal to this value
-  unless all zero.
-
-\item
   \texttt{OemTableId}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
   \textbf{Default value}: All zero\\
@@ -495,11 +488,18 @@ some of those are provided as a part of OpenCore.
   unless all zero.
 
 \item
-  \texttt{Size}\\
+  \texttt{TableLength}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Default value}: \texttt{0}\\
   \textbf{Description}: Match table size to be equal to this value
   unless \texttt{0}.
+
+\item
+  \texttt{TableSignature}\\
+  \textbf{Type}: \texttt{plist\ data}, 4 bytes\\
+  \textbf{Default value}: All zero\\
+  \textbf{Description}: Match table signature to be equal to this value
+  unless all zero.
 
 \end{enumerate}
 
