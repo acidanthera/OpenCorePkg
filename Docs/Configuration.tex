@@ -15,6 +15,12 @@
 \usepackage[margin=0.7in]{geometry}
 \usepackage{titlesec}
 \usepackage[yyyymmdd,hhmmss]{datetime}
+\usepackage{tikz}
+
+\usetikzlibrary{trees}
+\tikzstyle{every node}=[draw=black,thick,anchor=west]
+\tikzstyle{selected}=[draw=blue]
+\tikzstyle{optional}=[dashed,fill=gray!50]
 
 \renewcommand{\dateseparator}{.}
 
@@ -308,6 +314,98 @@ Root configuration entries consist of the following:
 \emph{Note}: Currently most properties try to have defined values even if not
 specified in the configuration for safety reasons. This behaviour should not
 be relied upon, and all fields must be properly specified in the configuration.
+
+\subsection{Directory Structure}\label{directory-structure}
+
+When directory boot is used the directory structure used should follow
+the description on \hyperref[fig:DS]{Directory Structure} figure. Available
+entries include:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{BOOTx64.efi}
+  \break
+  Initial booter, which loads \texttt{OpenCore.efi} unless it was
+  already started as a driver.
+\item
+  \texttt{ACPI}
+  \break
+  Directory used for storing supplemental ACPI information
+  for \hyperref[acpi]{\texttt{ACPI}} section.
+\item
+  \texttt{Drivers}
+  \break
+  Directory used for storing supplemental \texttt{UEFI}
+  drivers for \hyperref[uefi]{\texttt{UEFI}} section.
+\item
+  \texttt{Kexts}
+  \break
+  Directory used for storing supplemental kernel information
+  for \hyperref[kernel]{\texttt{Kernel}} section.
+\item
+  \texttt{OpenCore.efi}
+  \break
+  Main booter driver responsible for operating system loading.
+\item
+  \texttt{config.hash}
+  \break
+  Hashes for all files potentially loadable by \texttt{OC Config}.
+\item
+  \texttt{config.plist}
+  \break
+  \texttt{OC Config}.
+\item
+  \texttt{config.sig}
+  \break
+  Signature for \texttt{config.hash}.
+\end{itemize}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[%
+  grow via three points={one child at (0.5,-0.7) and
+  two children at (0.5,-0.7) and (0.5,-1.4)},
+  edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
+  \node {ESP}
+    child { node {BOOT}
+      child { node [selected] {BOOTx64.efi}}
+    }
+    child [missing] {}
+    child { node {EFI}
+      child { node {OC}
+        child { node {ACPI}
+          child { node {Custom}
+            child { node [optional] {DSDT.aml}}
+            child { node [optional] {SSDT-1.aml}}
+            child { node [optional] {MYTABLE.aml}}
+          }
+        }
+        child [missing] {}
+        child [missing] {}
+        child [missing] {}
+        child [missing] {}
+        child { node {Drivers}
+          child { node [optional] {MyDriver.efi}}
+          child { node [optional] {OtherDriver.efi}}
+        }
+        child [missing] {}
+        child [missing] {}
+        child { node {Kexts}
+          child { node [optional] {MyKext.kext}}
+          child { node [optional] {OtherKext.kext}}
+        }
+        child [missing] {}
+        child [missing] {}
+        child { node [selected] {OpenCore.efi}}
+        child { node [optional] {config.hash}}
+        child { node {config.plist}}
+        child { node [optional] {config.sig}}
+      }
+    };
+\end{tikzpicture}
+\caption{Directory Structure} \label{fig:DS}
+\end{figure}
 
 \section{ACPI}\label{acpi}
 
