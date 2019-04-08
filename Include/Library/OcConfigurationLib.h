@@ -288,9 +288,9 @@
   _(OC_STRING                    , BoardLocationInChassis,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                    , ChassisManufacturer   ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
   _(UINT8                        , ChassisType           ,  , 0                                , ()                   ) \
-  _(OC_STRING                    , ChassisVersion        ,  , 0                                , ()                   ) \
-  _(OC_STRING                    , ChassisSerialNumber   ,  , 0                                , ()                   ) \
-  _(OC_STRING                    , ChassisAssetTag       ,  , 0                                , ()                   ) \
+  _(OC_STRING                    , ChassisVersion        ,  , OC_STRING_CONSTR ("", _, __)     , ()                   ) \
+  _(OC_STRING                    , ChassisSerialNumber   ,  , OC_STRING_CONSTR ("", _, __)     , ()                   ) \
+  _(OC_STRING                    , ChassisAssetTag       ,  , OC_STRING_CONSTR ("", _, __)     , ()                   ) \
   _(UINT32                       , PlatformFeature       ,  , 0                                , ()                   ) \
   _(UINT64                       , FirmwareFeatures      ,  , 0                                , ()                   ) \
   _(UINT64                       , FirmwareFeaturesMask  ,  , 0                                , ()                   ) \
