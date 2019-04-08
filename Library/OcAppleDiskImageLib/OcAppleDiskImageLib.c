@@ -10,7 +10,7 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include <Base.h>
+#include <Uefi.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -161,12 +161,11 @@ OcAppleDiskImageInitializeContext (
     return FALSE;
   }
 
-  Context->Buffer        = BufferBytes;
-  Context->Length        = (TrailerOffset + sizeof (*Trailer));
-  Context->BlockCount    = DmgBlockCount;
-  Context->Blocks        = DmgBlocks;
-  Context->SectorCount   = SectorCount;
-  Context->BlockIoHandle = NULL;
+  Context->Buffer      = BufferBytes;
+  Context->Length      = (TrailerOffset + sizeof (*Trailer));
+  Context->BlockCount  = DmgBlockCount;
+  Context->Blocks      = DmgBlocks;
+  Context->SectorCount = SectorCount;
 
   return TRUE;
 }

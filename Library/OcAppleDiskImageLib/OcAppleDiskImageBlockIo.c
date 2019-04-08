@@ -224,11 +224,15 @@ STATIC CONST EFI_BLOCK_IO_PROTOCOL mDiskImageBlockIo = {
   DiskImageBlockIoFlushBlocks
 };
 
-BOOLEAN
+EFI_HANDLE
 OcAppleDiskImageInstallBlockIo (
-  IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context
+  IN  OC_APPLE_DISK_IMAGE_CONTEXT     *Context,
+  OUT CONST EFI_DEVICE_PATH_PROTOCOL  **DevicePath OPTIONAL,
+  OUT UINTN                           *DevicePathSize OPTIONAL
   )
 {
+  EFI_HANDLE                       BlockIoHandle;
+
   EFI_STATUS                       Status;
   OC_APPLE_DISK_IMAGE_MOUNTED_DATA *DiskImageData;
   UINTN                            NumRamDmgPages;
@@ -236,7 +240,6 @@ OcAppleDiskImageInstallBlockIo (
   RAM_DMG_HEADER                   *RamDmgHeader;
 
   ASSERT (Context != NULL);
-  ASSERT (Context->BlockIoHandle == NULL);
 
   NumRamDmgPages = EFI_SIZE_TO_PAGES (sizeof (*RamDmgHeader));
   Status = gBS->AllocatePages (
@@ -245,8 +248,8 @@ OcAppleDiskImageInstallBlockIo (
                   NumRamDmgPages,
                   &RamDmgAddress
                   );
-  if (EFI_ERROR(Status)) {
-    return FALSE;
+  if (EFI_ERROR (Status)) {
+    return NULL;
   }
 
   RamDmgHeader = (RAM_DMG_HEADER *)(UINTN)RamDmgAddress;
@@ -268,7 +271,7 @@ OcAppleDiskImageInstallBlockIo (
   DiskImageData = AllocateZeroPool (sizeof (*DiskImageData));
   if (DiskImageData == NULL) {
     gBS->FreePages (RamDmgAddress, NumRamDmgPages);
-    return FALSE;
+    return NULL;
   }
 
   DiskImageData->Signature    = OC_APPLE_DISK_IMAGE_MOUNTED_DATA_SIGNATURE;
@@ -289,42 +292,49 @@ OcAppleDiskImageInstallBlockIo (
   InternalConstructDmgDevicePath (DiskImageData, RamDmgAddress);
 
   Status = gBS->InstallMultipleProtocolInterfaces (
-                  &Context->BlockIoHandle,
+                  &BlockIoHandle,
                   &gEfiBlockIoProtocolGuid,
                   &DiskImageData->BlockIo,
                   &gEfiDevicePathProtocolGuid,
                   &DiskImageData->DevicePath,
                   NULL
                   );
-  if (EFI_ERROR(Status)) {
-    Context->BlockIoHandle = NULL;
+  if (EFI_ERROR (Status)) {
     FreePool (DiskImageData);
     gBS->FreePages (RamDmgAddress, NumRamDmgPages);
-    return FALSE;
+    return NULL;
   }
 
-  Status = gBS->ConnectController (Context->BlockIoHandle, NULL, NULL, TRUE);
+  Status = gBS->ConnectController (BlockIoHandle, NULL, NULL, TRUE);
   if (EFI_ERROR (Status)) {
     gBS->UninstallMultipleProtocolInterfaces (
-           Context->BlockIoHandle,
+           BlockIoHandle,
            &gEfiBlockIoProtocolGuid,
            &DiskImageData->BlockIo,
            &gEfiDevicePathProtocolGuid,
            &DiskImageData->DevicePath,
            NULL
            );
-    Context->BlockIoHandle = NULL;
     FreePool (DiskImageData);
     gBS->FreePages (RamDmgAddress, NumRamDmgPages);
-    return FALSE;
+    return NULL;
   }
 
-  return TRUE;
+  if (DevicePath != NULL) {
+    *DevicePath = (EFI_DEVICE_PATH_PROTOCOL *)&DiskImageData->DevicePath;
+
+    if (DevicePathSize != NULL) {
+      *DevicePathSize = sizeof (DiskImageData->DevicePath);
+    }
+  }
+
+  return BlockIoHandle;
 }
 
 BOOLEAN
 OcAppleDiskImageUninstallBlockIo (
-  IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context
+  IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
+  IN VOID                         *BlockIoHandle
   )
 {
   EFI_STATUS                       Status;
@@ -332,10 +342,10 @@ OcAppleDiskImageUninstallBlockIo (
   OC_APPLE_DISK_IMAGE_MOUNTED_DATA *DiskImageData;
 
   ASSERT (Context != NULL);
-  ASSERT (Context->BlockIoHandle != NULL);
+  ASSERT (BlockIoHandle != NULL);
 
   Status = gBS->HandleProtocol (
-                  Context->BlockIoHandle,
+                  BlockIoHandle,
                   &gEfiBlockIoProtocolGuid,
                   (VOID **)&BlockIo
                   );
@@ -343,15 +353,14 @@ OcAppleDiskImageUninstallBlockIo (
     return FALSE;
   }
 
-  DiskImageData = OC_APPLE_DISK_IMAGE_MOUNTED_DATA_FROM_THIS (BlockIo);
-
-  Status = gBS->DisconnectController (Context->BlockIoHandle, NULL, NULL);
+  Status = gBS->DisconnectController (BlockIoHandle, NULL, NULL);
   if (EFI_ERROR (Status)) {
     return FALSE;
   }
 
+  DiskImageData = OC_APPLE_DISK_IMAGE_MOUNTED_DATA_FROM_THIS (BlockIo);
   Status = gBS->UninstallMultipleProtocolInterfaces (
-                  Context->BlockIoHandle,
+                  BlockIoHandle,
                   &gEfiBlockIoProtocolGuid,
                   &DiskImageData->BlockIo,
                   &gEfiDevicePathProtocolGuid,
@@ -362,13 +371,12 @@ OcAppleDiskImageUninstallBlockIo (
     return FALSE;
   }
 
-  Context->BlockIoHandle = NULL;
-
   gBS->FreePages (
          (EFI_PHYSICAL_ADDRESS)(UINTN)DiskImageData->RamDmgHeader,
          EFI_SIZE_TO_PAGES (sizeof (*DiskImageData->RamDmgHeader))
          );
 
   FreePool (DiskImageData);
+
   return TRUE;
 }

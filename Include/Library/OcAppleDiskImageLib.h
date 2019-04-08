@@ -29,9 +29,6 @@ typedef struct {
 
     UINT32                          BlockCount;
     APPLE_DISK_IMAGE_BLOCK_DATA     **Blocks;
-
-    // Block I/O info.
-    VOID                            *BlockIoHandle;
 } OC_APPLE_DISK_IMAGE_CONTEXT;
 
 BOOLEAN
@@ -61,14 +58,17 @@ OcAppleDiskImageRead (
   OUT VOID                         *Buffer
   );
 
-BOOLEAN
+EFI_HANDLE
 OcAppleDiskImageInstallBlockIo (
-  IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context
+  IN OC_APPLE_DISK_IMAGE_CONTEXT      *Context,
+  OUT CONST EFI_DEVICE_PATH_PROTOCOL  **DevicePath OPTIONAL,
+  OUT UINTN                           *DevicePathSize OPTIONAL
   );
 
 BOOLEAN
 OcAppleDiskImageUninstallBlockIo (
-  IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context
+  IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
+  IN VOID                         *BlockIoHandle
   );
 
 #endif
