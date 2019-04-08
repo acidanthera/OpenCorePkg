@@ -40,7 +40,8 @@
 
 [Protocols]
   gEfiDataHubProtocolGuid       ## SOMETIMES_CONSUMES
-  gEfiLegacyRegionProtocolGuid 
+  gEfiLegacyRegionProtocolGuid
+  gEfiPciIoProtocolGuid
 
 [LibraryClasses]
   BaseLib
@@ -55,5 +56,6 @@
   LegacyRegionUnLock.c
   LogBootOrder.c
   LogHexDump.c
+  ReleaseUsbOwnership.c
   NullTextOutput.c
   UninstallAllProtocolInterfaces.c

@@ -210,4 +210,12 @@ UninstallAllProtocolInstances (
   EFI_GUID  *Protocol
   );
 
+/**
+  Release UEFI ownership from USB controllers at booting.
+**/
+EFI_STATUS
+ReleaseUsbOwnership (
+  VOID
+  );
+
 #endif // OC_MISC_LIB_H

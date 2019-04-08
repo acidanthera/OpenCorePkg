@@ -230,6 +230,7 @@
 #define OC_UEFI_QUIRKS_FIELDS(_, __) \
   _(BOOLEAN                     , DisableWatchDog             ,     , FALSE  , ()) \
   _(BOOLEAN                     , IgnoreInvalidFlexRatio      ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ReleaseUsbOwnership         ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProvideConsoleGop           ,     , FALSE  , ())
   OC_DECLARE (OC_UEFI_QUIRKS)
 

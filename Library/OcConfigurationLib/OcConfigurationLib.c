@@ -349,7 +349,8 @@ OC_SCHEMA
 mUefiQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("DisableWatchDog",        OC_GLOBAL_CONFIG, Uefi.Quirks.DisableWatchDog),
   OC_SCHEMA_BOOLEAN_IN ("IgnoreInvalidFlexRatio", OC_GLOBAL_CONFIG, Uefi.Quirks.IgnoreInvalidFlexRatio),
-  OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop",      OC_GLOBAL_CONFIG, Uefi.Quirks.ProvideConsoleGop)
+  OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop",      OC_GLOBAL_CONFIG, Uefi.Quirks.ProvideConsoleGop),
+  OC_SCHEMA_BOOLEAN_IN ("ReleaseUsbOwnership",    OC_GLOBAL_CONFIG, Uefi.Quirks.ReleaseUsbOwnership)
 };
 
 STATIC
