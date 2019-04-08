@@ -23,6 +23,9 @@
 #include <Protocol/SimpleFileSystem.h>
 #include <Protocol/SimpleTextOut.h>
 
+#include <Library/OcAppleChunklistLib.h>
+#include <Library/OcAppleDiskImageLib.h>
+#include <Library/OcAppleKeysLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcMiscLib.h>
@@ -417,6 +420,226 @@ OcFillBootEntry (
   }
 
   return 1;
+}
+
+STATIC
+BOOLEAN
+InternalBootAppleDiskImage (
+  IN APPLE_BOOT_POLICY_PROTOCOL      *BootPolicy,
+  IN UINT32                          Policy,
+  IN OC_IMAGE_START                  StartImage,
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DmgDevicePath,
+  IN UINTN                           DmgDevicePathSize
+  )
+{
+  BOOLEAN                        Result;
+
+  EFI_STATUS                     Status;
+  INTN                           CmpResult;
+
+  UINTN                          NumBootEntries;
+  OC_BOOT_ENTRY                  BootEntry;
+  EFI_HANDLE                     BooterHandle;
+
+  CONST EFI_DEVICE_PATH_PROTOCOL *FsDevicePath;
+  UINTN                          FsDevicePathSize;
+
+  UINTN                          NumHandles;
+  EFI_HANDLE                     *HandleBuffer;
+  UINTN                          Index;
+
+  Result = FALSE;
+
+  Status = gBS->LocateHandleBuffer (
+                  ByProtocol,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  NULL,
+                  &NumHandles,
+                  &HandleBuffer
+                  );
+  if (EFI_ERROR (Status)) {
+    return FALSE;
+  }
+
+  for (Index = 0; Index < NumHandles; ++Index) {
+    Status = gBS->HandleProtocol (
+                    &HandleBuffer[Index],
+                    &gEfiDevicePathProtocolGuid,
+                    (VOID **)&FsDevicePath
+                    );
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    FsDevicePathSize = GetDevicePathSize (FsDevicePath);
+
+    if (FsDevicePathSize < DmgDevicePathSize) {
+      continue;
+    }
+
+    CmpResult = CompareMem (
+                  FsDevicePath,
+                  DmgDevicePath,
+                  (DmgDevicePathSize - END_DEVICE_PATH_LENGTH)
+                  );
+    if (CmpResult != 0) {
+      continue;
+    }
+
+    NumBootEntries = OcFillBootEntry (
+                       BootPolicy,
+                       Policy,
+                       &HandleBuffer[Index],
+                       &BootEntry,
+                       NULL
+                       );
+    if (NumBootEntries == 0) {
+      continue;
+    }
+
+    Status = OcLoadBootEntry (
+               &BootEntry,
+               Policy,
+               gImageHandle,
+               &BooterHandle
+               );
+    if (!EFI_ERROR (Status)) {
+      Status = StartImage (&BootEntry, BooterHandle, NULL, NULL);
+      if (!EFI_ERROR (Status)) {
+        Result = TRUE;
+      } else {
+        DEBUG ((DEBUG_ERROR, "StartImage failed - %r\n", Status));
+      }
+    } else {
+      DEBUG ((DEBUG_ERROR, "LoadImage failed - %r\n", Status));
+    }
+
+    break;
+  }
+
+  FreePool (HandleBuffer);
+
+  return Result;
+}
+
+BOOLEAN
+OcLoadAppleDiskImage (
+  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
+  IN  UINT32                      Policy,
+  IN  OC_IMAGE_START              StartImage,
+  IN  VOID                        *DmgBuffer,
+  IN  UINTN                       DmgBufferSize,
+  IN  VOID                        *ChunklistBuffer OPTIONAL,
+  IN  UINT32                      ChunklistBufferSize OPTIONAL
+  )
+{
+  BOOLEAN                        Result;
+
+  OC_APPLE_DISK_IMAGE_CONTEXT    DmgContext;
+  OC_APPLE_CHUNKLIST_CONTEXT     ChunklistContext;
+  EFI_HANDLE                     BlockIoHandle;
+
+  CONST EFI_DEVICE_PATH_PROTOCOL *DmgDevicePath;
+  UINTN                          DmgDevicePathSize;
+
+  ASSERT (BootPolicy != NULL);
+  ASSERT (StartImage != NULL);
+  ASSERT (DmgBuffer != NULL);
+  ASSERT (DmgBufferSize > 0);
+
+  if ((Policy & OC_LOAD_ALLOW_DMG_BOOT) == 0) {
+    return FALSE;
+  }
+
+  Result = OcAppleDiskImageInitializeContext (
+             &DmgContext,
+             DmgBuffer,
+             DmgBufferSize,
+             FALSE
+             );
+  if (!Result) {
+    return FALSE;
+  }
+
+  if (ChunklistBuffer == NULL) {
+    if ((Policy & OC_LOAD_REQUIRE_APPLE_SIGN) != 0) {
+      Result = FALSE;
+      goto Done;
+    }
+  } else if ((Policy & (OC_LOAD_VERIFY_APPLE_SIGN | OC_LOAD_REQUIRE_TRUSTED_KEY)) != 0) {
+    ASSERT (ChunklistBufferSize > 0);
+
+    Result = OcAppleChunklistInitializeContext (
+                &ChunklistContext,
+                ChunklistBuffer,
+                ChunklistBufferSize
+                );
+    if (!Result) {
+      goto Done;
+    }
+
+    if ((Policy & OC_LOAD_REQUIRE_TRUSTED_KEY) != 0) {
+      Result = FALSE;
+      //
+      // FIXME: Properly abstract OcAppleKeysLib.
+      //
+      if ((Policy & OC_LOAD_TRUST_APPLE_V1_KEY) != 0) {
+        Result = OcAppleChunklistVerifySignature (
+                   &ChunklistContext,
+                   (RSA_PUBLIC_KEY *)&PkDataBase[0].PublicKey
+                   );
+      }
+
+      if (!Result && ((Policy & OC_LOAD_TRUST_APPLE_V2_KEY) != 0)) {
+        Result = OcAppleChunklistVerifySignature (
+                   &ChunklistContext,
+                   (RSA_PUBLIC_KEY *)&PkDataBase[1].PublicKey
+                   );
+      }
+
+      if (!Result) {
+        goto Done;
+      }
+    }
+
+    Result = OcAppleDiskImageVerifyData (&DmgContext, &ChunklistContext);
+    if (!Result) {
+      //
+      // FIXME: Warn user instead of aborting when OC_LOAD_REQUIRE_TRUSTED_KEY
+      //        is not set.
+      //
+      goto Done;
+    }
+  }
+
+  BlockIoHandle = OcAppleDiskImageInstallBlockIo (
+                    &DmgContext,
+                    &DmgDevicePath,
+                    &DmgDevicePathSize
+                    );
+  if (BlockIoHandle == NULL) {
+    Result = FALSE;
+    goto Done;
+  }
+
+  Result = InternalBootAppleDiskImage (
+             BootPolicy,
+             Policy,
+             StartImage,
+             DmgDevicePath,
+             DmgDevicePathSize
+             );
+
+  //
+  // If we reach here, booting from the DMG has been unsuccessful.
+  //
+
+  OcAppleDiskImageUninstallBlockIo (&DmgContext, BlockIoHandle);
+
+Done:
+  OcAppleDiskImageFreeContext (&DmgContext);
+
+  return Result;
 }
 
 EFI_STATUS

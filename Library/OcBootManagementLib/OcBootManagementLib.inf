@@ -59,6 +59,9 @@
   PrintLib
   UefiBootServicesTableLib
   OcAppleBootPolicyLib
+  OcAppleChunklistLib
+  OcAppleDiskImageLib
+  OcAppleKeysLib
   OcGuardLib
   OcFileLib
   OcXmlLib
