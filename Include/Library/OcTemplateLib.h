@@ -69,8 +69,8 @@ VOID
 // VOID NAME_DESTRUCT(Void *Ptr, UINTN Size);
 //
 // Field information will be retrieved from NAME_FIELDS X-Macro, written as follows:
-// #define NAME_FIELDS(_, __) \
-//   _(Type, Name, Type Suffix, __(Constant Initializer), Destructor Function)  \
+// #define NAME_FIELDS(_, __) *backslash*
+//   _(Type, Name, Type Suffix, __(Constant Initializer), Destructor Function) *backslash*
 //   _(Type, Name, Type Suffix, OC_CONSTR(Type, _, __), OC_DESTR(Type))
 //
 
