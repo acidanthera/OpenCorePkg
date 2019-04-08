@@ -18,13 +18,17 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
 #include <Library/OcCpuLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 #include <Protocol/DevicePath.h>
+#include <Protocol/GraphicsOutput.h>
+
+STATIC EFI_EVENT mReleaseUsbOwnershipEvent;
 
 STATIC
 VOID
-LoadDrivers (
+OcLoadDrivers (
   IN OC_STORAGE_CONTEXT  *Storage,
   IN OC_GLOBAL_CONFIG    *Config
   )
@@ -114,7 +118,7 @@ LoadDrivers (
 
 STATIC
 VOID
-ConnectDrivers (
+OcConnectDrivers (
   VOID
   )
 {
@@ -157,7 +161,7 @@ ConnectDrivers (
 
 STATIC
 VOID
-ProvideConsoleGop (
+OcProvideConsoleGop (
   VOID
   )
 {
@@ -187,6 +191,21 @@ ProvideConsoleGop (
   }
 }
 
+STATIC
+VOID
+EFIAPI
+OcReleaseUsbOwnership (
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
+  )
+{
+  EFI_STATUS  Status;
+
+  Status = ReleaseUsbOwnership ();
+
+  DEBUG ((DEBUG_INFO, "ReleaseUsbOwnership status - %r\n"));
+}
+
 VOID
 OcLoadUefiSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
@@ -206,12 +225,22 @@ OcLoadUefiSupport (
   }
 
   if (Config->Uefi.Quirks.ProvideConsoleGop) {
-    ProvideConsoleGop ();
+    OcProvideConsoleGop ();
   }
 
-  LoadDrivers (Storage, Config);
+  if (Config->Uefi.Quirks.ReleaseUsbOwnership) {
+    gBS->CreateEvent (
+      EVT_SIGNAL_EXIT_BOOT_SERVICES,
+      TPL_NOTIFY,
+      OcReleaseUsbOwnership,
+      NULL,
+      &mReleaseUsbOwnershipEvent
+      );
+  }
+
+  OcLoadDrivers (Storage, Config);
 
   if (Config->Uefi.ConnectDrivers) {
-    ConnectDrivers ();
+    OcConnectDrivers ();
   }
 }

@@ -11,6 +11,7 @@
 \usepackage[unicode=true]{hyperref}
 \usepackage{longtable,booktabs}
 \usepackage{footnote}
+\usepackage{listings}
 \usepackage{parskip}
 \usepackage[margin=0.7in]{geometry}
 \usepackage{titlesec}
@@ -153,7 +154,7 @@ Currently this file has the following entries not completed:
   larger integers invoke undefined behaviour.
 \end{itemize}
 
-\section{Configuration Overview}\label{configuration-overview}
+\section{Overview}\label{configuration-overview}
 
 \subsection{Configuration Terms}\label{configuration-terms}
 
@@ -361,8 +362,7 @@ entries include:
   Signature for \texttt{config.hash}.
 \end{itemize}
 
-\begin{figure}
-\centering
+\begin{center}
 \begin{tikzpicture}[%
   grow via three points={one child at (0.5,-0.7) and
   two children at (0.5,-0.7) and (0.5,-1.4)},
@@ -404,8 +404,38 @@ entries include:
       }
     };
 \end{tikzpicture}
-\caption{Directory Structure} \label{fig:DS}
-\end{figure}
+\break
+\label{fig:DS}
+Figure 1. Directory Structure
+\end{center}
+
+\subsection{Contribution}\label{configuration-comp}
+
+OpenCore can be compiled as an ordinary EDK II package with
+\href{https://github.com/tianocore/tianocore.github.io/wiki/UDK2018}{UDK 2018}.
+
+The only officially supported toolchain is \texttt{XCODE5}. Other toolchains
+might work, but are neither supported, nor recommended. Contribution of clean
+patches is welcome. Please do follow
+\href{https://github.com/tianocore/tianocore.github.io/wiki/Code-Style-C}{EDK II C Codestyle}.
+
+Required external package dependencies include \href{https://github.com/acidanthera/OcSupportPkg}{EfiPkg} and \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}.
+
+To compile with \texttt{XCODE5}, besides \href{https://developer.apple.com/xcode}{Xcode},
+one should also install \href{https://www.nasm.us}{NASM} and
+\href{https://github.com/acidanthera/AppleSupportPkg/blob/master/External/mtoc-mac64.zip}{MTOC}. Example command sequence may look as follows:
+
+\begin{lstlisting}[caption=Compilation Commands, frame=single, captionpos=b, label=compile]
+git clone https://github.com/tianocore/edk2 -b UDK2018 UDK
+cd UDK
+git clone https://github.com/acidanthera/EfiPkg
+git clone https://github.com/acidanthera/OcSupportPkg
+git clone https://github.com/acidanthera/OpenCorePkg
+source edksetup.sh
+make -c BaseTools
+build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
+\end{lstlisting}
+
 
 \section{ACPI}\label{acpi}
 
@@ -697,6 +727,15 @@ source file may help understanding ACPI opcodes.
   \texttt{PCI\ Configuration\ Begin} phase of macOS booting by
   attempting to fix the ACPI addresses. It does not do magic, and only
   works with most common cases. Do not use unless absolutely required.
+
+\item
+  \texttt{ReleaseUsbOwnership}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Attempt to detach USB controller ownership from
+  the firmware driver. While most firmwares manage to properly do that,
+  or at least have an option for, select firmwares do not. As a result,
+  operating system may freeze upon boot. Not recommended unless required.
 
 \end{enumerate}
 
