@@ -634,11 +634,9 @@ PatchMemoryArray (
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT8                           MinLength;
-  UINT8                           StringIndex;
 
   Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, 1);
   MinLength     = sizeof (*Original.Standard.Type16);
-  StringIndex   = 0;
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, MinLength, 1))) {
     return;
@@ -760,7 +758,6 @@ PatchMemoryMappedAddress (
   UINT16                          NumberEntries;
   UINT16                          EntryNo;
   UINT8                           MinLength;
-  UINT8                           StringIndex;
 
   *MappingNum = 0;
 
@@ -773,7 +770,6 @@ PatchMemoryMappedAddress (
     }
 
     MinLength     = sizeof (*Original.Standard.Type19);
-    StringIndex   = 0;
 
     if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS, MinLength, EntryNo))) {
       continue;
@@ -821,12 +817,10 @@ PatchMemoryMappedDevice (
   )
 {
   UINT8    MinLength;
-  UINT8    StringIndex;
   UINT16   MapIndex;
 
   Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, Index);
   MinLength     = sizeof (*Original.Standard.Type20);
-  StringIndex   = 0;
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, MinLength, Index))) {
     return;
@@ -923,11 +917,9 @@ PatchBootInformation (
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT8                           MinLength;
-  UINT8                           StringIndex;
 
   Original    = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_BOOT_INFORMATION, 1);
   MinLength   = sizeof (*Original.Standard.Type32);
-  StringIndex = 0;
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_SYSTEM_BOOT_INFORMATION, MinLength, 1))) {
     return;
@@ -1167,7 +1159,6 @@ SmbiosPrepareTable (
   )
 {
   EFI_STATUS  Status;
-  UINT32      BufferLen;
 
   mOriginalSmbios    = NULL;
   mOriginalSmbios3   = NULL;
@@ -1244,8 +1235,6 @@ SmbiosPrepareTable (
   } else if (mOriginalSmbios3 != NULL) {
     mOriginalTableSize = mOriginalSmbios3->TableMaximumSize;
     mOriginalTable.Raw = (UINT8 *)(UINTN) mOriginalSmbios3->TableAddress;
-  } else {
-    BufferLen = EFI_PAGE_SIZE;
   }
 
   if (mOriginalSmbios != NULL) {
@@ -1403,7 +1392,7 @@ SmbiosTableApply (
     }
   }
 
-  ASSERT (Mode != Mode == OcSmbiosUpdateAuto);
+  ASSERT (Mode != OcSmbiosUpdateAuto);
 
   if (Mode != OcSmbiosUpdateOverwrite) {
     Status = SmbiosTableAllocate (
