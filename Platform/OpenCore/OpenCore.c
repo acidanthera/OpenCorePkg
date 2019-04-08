@@ -132,6 +132,7 @@ OcMain (
 
 STATIC
 VOID
+EFIAPI
 OcBootstrapRerun (
   IN OC_BOOTSTRAP_PROTOCOL            *This,
   IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem
