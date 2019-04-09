@@ -728,15 +728,6 @@ source file may help understanding ACPI opcodes.
   attempting to fix the ACPI addresses. It does not do magic, and only
   works with most common cases. Do not use unless absolutely required.
 
-\item
-  \texttt{ReleaseUsbOwnership}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Attempt to detach USB controller ownership from
-  the firmware driver. While most firmwares manage to properly do that,
-  or at least have an option for, select firmwares do not. As a result,
-  operating system may freeze upon boot. Not recommended unless required.
-
 \end{enumerate}
 
 
@@ -1987,6 +1978,15 @@ tweaks for the onboard firmware.
   \emph{Note}: Some drivers, like AptioMemoryFix, may provide equivalent functionality.
   These drivers are not guaranteed to adhere to the same logic, and if a quirk is
   necessary, this option is preferred.
+
+\item
+  \texttt{ReleaseUsbOwnership}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Attempt to detach USB controller ownership from
+  the firmware driver. While most firmwares manage to properly do that,
+  or at least have an option for, select firmwares do not. As a result,
+  operating system may freeze upon boot. Not recommended unless required.
 
 \end{enumerate}
 
