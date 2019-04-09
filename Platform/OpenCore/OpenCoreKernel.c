@@ -59,7 +59,7 @@ OcKernelReadDarwinVersion (
   Offset += L_STR_LEN ("Darwin Kernel Version ");
 
   for (Index = 0; Index < DarwinVersionSize - 1; ++Index, ++Offset) {
-    if (Offset >= KernelSize || Kernel[Offset] == ':') {
+    if ((UINT32) Offset >= KernelSize || Kernel[Offset] == ':') {
       break;
     }
     DarwinVersion[Index] = (CHAR8) Kernel[Offset];

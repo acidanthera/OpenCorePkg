@@ -203,18 +203,6 @@ UefiMain (
     return EFI_ALREADY_STARTED;
   }
 
-  BootstrapHandle = NULL;
-  Status = gBS->InstallMultipleProtocolInterfaces (
-    &BootstrapHandle,
-    &gOcBootstrapProtocolGuid,
-    &mOpenCoreBootStrap,
-    NULL
-    );
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install bootstrap protocol - %r\n", Status));
-    return Status;
-  }
-
   LoadedImage = NULL;
   Status = gBS->HandleProtocol (
     ImageHandle,
@@ -225,6 +213,18 @@ UefiMain (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to locate loaded image - %r\n", Status));
     return EFI_NOT_FOUND;
+  }
+
+  BootstrapHandle = NULL;
+  Status = gBS->InstallMultipleProtocolInterfaces (
+    &BootstrapHandle,
+    &gOcBootstrapProtocolGuid,
+    &mOpenCoreBootStrap,
+    NULL
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install bootstrap protocol - %r\n", Status));
+    return Status;
   }
 
   DebugPrintDevicePath (DEBUG_INFO, "OC: Booter path", LoadedImage->FilePath);

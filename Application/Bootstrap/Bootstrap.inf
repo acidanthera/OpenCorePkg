@@ -55,3 +55,4 @@
   MemoryAllocationLib
   OcDevicePathLib
   OcFileLib
+  OcStringLib
