@@ -42,9 +42,16 @@ OC_STORAGE_CONTEXT
 mOpenCoreStorage;
 
 STATIC
+EFI_IMAGE_START
+mOcOriginalStartImage;
+
+STATIC
+UINT32
+mOpenCoreStartImageNest;
+
+STATIC
 EFI_STATUS
-EFIAPI OcStartImage (
-  IN  OC_BOOT_ENTRY               *Chosen,
+OcEfiStartImage (
   IN  EFI_HANDLE                  ImageHandle,
   OUT UINTN                       *ExitDataSize,
   OUT CHAR16                      **ExitData    OPTIONAL
@@ -52,22 +59,18 @@ EFIAPI OcStartImage (
 {
   EFI_STATUS   Status;
 
-  //
-  // Some make their ACPI tables incompatible with Windows after modding them for macOS.
-  // While obviously it is their fault, here we provide a quick and dirty workaround.
-  //
-  if (!Chosen->IsWindows || !mOpenCoreConfiguration.Acpi.Quirks.IgnoreForWindows) {
-    OcLoadAcpiSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
-  }
+  ++mOpenCoreStartImageNest;
 
   //
-  // Do not waste time for kext injection, when we are Windows.
+  // We do not know what OS is that, probably booted macOS from shell.
+  // Apply all the fixtures once, they are harmless for any OS.
   //
-  if (!Chosen->IsWindows) {
+  if (mOpenCoreStartImageNest == 1) {
+    OcLoadAcpiSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
     OcLoadKernelSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
   }
 
-  Status = gBS->StartImage (
+  Status = mOcOriginalStartImage (
     ImageHandle,
     ExitDataSize,
     ExitData
@@ -77,9 +80,61 @@ EFIAPI OcStartImage (
     DEBUG ((DEBUG_WARN, "OC: Boot failed - %r\n", Status));
   }
 
-  if (!Chosen->IsWindows) {
+  if (mOpenCoreStartImageNest == 1) {
     OcUnloadKernelSupport ();
   }
+
+  --mOpenCoreStartImageNest;
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
+EFIAPI
+OcStartImage (
+  IN  OC_BOOT_ENTRY               *Chosen,
+  IN  EFI_HANDLE                  ImageHandle,
+  OUT UINTN                       *ExitDataSize,
+  OUT CHAR16                      **ExitData    OPTIONAL
+  )
+{
+  EFI_STATUS   Status;
+
+  ++mOpenCoreStartImageNest;
+
+  if (mOpenCoreStartImageNest == 1) {
+    //
+    // Some make their ACPI tables incompatible with Windows after modding them for macOS.
+    // While obviously it is their fault, here we provide a quick and dirty workaround.
+    //
+    if (!Chosen->IsWindows || !mOpenCoreConfiguration.Acpi.Quirks.IgnoreForWindows) {
+      OcLoadAcpiSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
+    }
+
+    //
+    // Do not waste time for kext injection, when we are Windows.
+    //
+    if (!Chosen->IsWindows) {
+      OcLoadKernelSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
+    }
+  }
+
+  Status = mOcOriginalStartImage (
+    ImageHandle,
+    ExitDataSize,
+    ExitData
+    );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OC: Boot failed - %r\n", Status));
+  }
+
+  if (mOpenCoreStartImageNest == 1 && !Chosen->IsWindows) {
+    OcUnloadKernelSupport ();
+  }
+
+  --mOpenCoreStartImageNest;
 
   return Status;
 }
@@ -118,6 +173,14 @@ OcMain (
     mOpenCoreConfiguration.Misc.Debug.Target,
     mOpenCoreConfiguration.Misc.Debug.Delay
     );
+
+  //
+  // This is required to catch UEFI Shell boot if any.
+  //
+  mOcOriginalStartImage = gBS->StartImage;
+  gBS->StartImage = OcEfiStartImage;
+  gBS->Hdr.CRC32 = 0;
+  gBS->CalculateCrc32 (gBS, gBS->Hdr.HeaderSize, &gBS->Hdr.CRC32);
 
   OcCpuScanProcessor (&CpuInfo);
   OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &CpuInfo);
