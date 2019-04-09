@@ -553,9 +553,10 @@ AcpiInitContext (
 
     DEBUG ((
       DEBUG_INFO,
-      "Detected table %08x (%016Lx) of %u bytes at index %u\n",
+      "Detected table %08x (%016Lx) at %p of %u bytes at index %u\n",
       Context->Tables[DstIndex]->Signature,
       AcpiReadOemTableId (Context->Tables[DstIndex]),
+      Context->Tables[DstIndex],
       Context->Tables[DstIndex]->Length,
       Index
       ));
@@ -739,7 +740,7 @@ AcpiDropTable (
       CopyMem (
         &Context->Tables[Index],
         &Context->Tables[Index+1],
-        Context->NumberOfTables - Index - 1
+        (Context->NumberOfTables - Index - 1) * sizeof (Context->Tables[0])
         );
       --Context->NumberOfTables;
       return EFI_SUCCESS;
