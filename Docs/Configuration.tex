@@ -16,6 +16,7 @@
 \usepackage[margin=0.7in]{geometry}
 \usepackage{titlesec}
 \usepackage[yyyymmdd,hhmmss]{datetime}
+\usepackage{textcomp}
 \usepackage{tikz}
 
 \usetikzlibrary{trees}
@@ -30,12 +31,13 @@
   frame=tb,
   columns=fullflexible,
   captionpos=b,
-  morekeywords={git, make, build},
+  morekeywords={git, make, build, ioreg, grep, nvram},
   literate =
-    {"}{{\uprightquote}}1
+    {"}{{\textquotedbl}}1
     {'}{{\textquotesingle}}1
     {-}{{-}}1
-    {~}{{\centeredtilde}}1
+    {~}{{\texttildelow}}1
+    {*}{{*}}1
     ,
 }
 
@@ -99,7 +101,6 @@ Currently this file has the following entries not completed:
 \begin{itemize}
 \item Known \texttt{UEFI} driver list is incomplete.
 \item Not all \texttt{NVRAM} variables are properly described (e.g. boot-args).
-\item \texttt{Misc} section is missing.
 \end{itemize}
 
 \section{Generic Terms}\label{generic-terms}
@@ -846,7 +847,9 @@ blocking.
   \textbf{Description}: Load selected kernel drivers from \texttt{OC/Kexts} directory.
 
   Designed to be filled with \texttt{plist\ dict} values, describing each driver.
-  See \hyperref[kernelpropsadd]{Add Properties} section below.
+  See \hyperref[kernelpropsadd]{Add Properties} section below. Kernel driver load
+  order follows the item order in the array, thus the dependencies should be written
+  prior to their consumers.
 
 \item
   \texttt{Block}\\
@@ -1118,7 +1121,69 @@ behaviour that does not go to any other sections
 
 \subsection{Properties}\label{miscprops}
 
-FIXME
+\begin{enumerate}
+\item
+  \texttt{Debug}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Description}: Apply debug configuration described in
+  \hyperref[miscdebugprops]{Debug Properties} section below.
+
+\end{enumerate}
+
+\subsection{Debug Properties}\label{miscdebugprops}
+
+\begin{enumerate}
+
+\item
+  \texttt{Delay}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Default value}: \texttt{0}\\
+  \textbf{Description}: Delay in microseconds performed after
+  every printed line of visible logging output like console,
+  Data Hub, or serial port.
+
+\item
+  \texttt{Target}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Default value}: \texttt{0}\\
+  \textbf{Description}: A bitmask (sum) of enabled logging targets.
+  By default all the logging output is hidden, so this option is
+  required to be set when debugging is necessary. The following
+  logging targets are supported:
+
+  \begin{itemize}
+  \tightlist
+    \item \texttt{ 1} --- Enable logging, otherwise all log is discarded.
+    \item \texttt{ 2} --- Enable basic console (onscreen) logging.
+    \item \texttt{ 4} --- Enable logging to Data Hub.
+    \item \texttt{ 8} --- Enable serial port logging.
+    \item \texttt{16} --- Enable UEFI variable logging.
+    \item \texttt{32} --- Enable non-volatile UEFI variable logging.
+    \item \texttt{64} --- Enable logging to file.
+  \end{itemize}
+
+  \emph{Note}: Console logging prints less than all the other variants.
+  Depending on the build type (\texttt{RELEASE}, \texttt{DEBUG}, or
+  \texttt{NOOPT}) different amount of logging may be read (from least to most).
+
+  \emph{Note}: To obtain Data Hub log use the following command
+  in macOS:
+\begin{lstlisting}[label=dhublog, style=ocbash]
+ioreg -lw0 -p IODeviceTree | grep boot-log | sed 's/.*<\(.*\)>.*/\1/'
+\end{lstlisting}
+
+  \emph{Note}: UEFI variable log may get truncated on some firmwares.
+  Using non-volatile flag will write the log to NVRAM flash after every
+  printed line. To obtain UEFI variable log use the following command
+  in macOS:
+\begin{lstlisting}[label=nvramlog, style=ocbash]
+nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log | \
+  awk '{gsub(/%0d%0a%00/,"");gsub(/%0d%0a/,"\n")}1'
+\end{lstlisting}
+
+  \emph{Note}: File logging is currently not implemented.
+
+\end{enumerate}
 
 \section{NVRAM}\label{nvram}
 
@@ -1148,6 +1213,13 @@ several GUIDs, including but not limited to:
   \texttt{8BE4DF61-93CA-11D2-AA0D-00E098032B8C}
   (\texttt{EFI\_GLOBAL\_VARIABLE\_GUID})
 \end{itemize}
+
+\emph{Note}: Some of the variables may be added by
+\hyperref[platforminfonvram]{PlatformNVRAM} or
+\hyperref[platforminfogeneric]{Generic} subsections of
+\hyperref[platforminfo]{PlatformInfo} section.
+Please ensure that variables of this section never collide with them,
+as behaviour is undefined otherwise.
 
 \subsection{Properties}\label{nvramprops}
 

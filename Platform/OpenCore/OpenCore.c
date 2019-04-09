@@ -114,11 +114,10 @@ OcMain (
     DEBUG ((DEBUG_ERROR, "OC: Failed to load configuration!\n"));
   }
 
-  //
-  // TODO: Make this configurable, additional variants include:
-  // OC_LOG_DATA_HUB | OC_LOG_SERIAL | OC_LOG_VARIABLE | OC_LOG_NONVOLATILE | OC_LOG_FILE
-  //
-  OcConfigureLogProtocol (OC_LOG_ENABLE | OC_LOG_CONSOLE);
+  OcConfigureLogProtocol (
+    mOpenCoreConfiguration.Misc.Debug.Target,
+    mOpenCoreConfiguration.Misc.Debug.Delay
+    );
 
   OcCpuScanProcessor (&CpuInfo);
   OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &CpuInfo);
