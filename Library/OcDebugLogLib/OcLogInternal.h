@@ -39,6 +39,7 @@ typedef struct {
   CHAR16                 UnicodeLineBuffer[OC_LOG_LINE_BUFFER_SIZE];
   CHAR8                  AsciiBuffer[OC_LOG_BUFFER_SIZE];
   UINTN                  AsciiBufferSize;
+  UINT32                 LogCounter;
   CHAR16                 *LogFilePathName;
   EFI_DATA_HUB_PROTOCOL  *DataHub;
   OC_LOG_PROTOCOL        OcLog;

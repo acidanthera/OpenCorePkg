@@ -26,6 +26,7 @@
 #include <Library/PrintLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcDataHubLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/OcTimerLib.h>
 #include <Library/SerialPortLib.h>
 #include <Library/UefiLib.h>
@@ -106,7 +107,10 @@ OcLogAddEntry  (
 
   OC_LOG_PRIVATE_DATA    *Private;
   UINT32                 Attributes;
+  UINT32                 TimingLength;
+  UINT32                 LineLength;
   PLATFORM_DATA_HEADER   *Entry;
+  UINTN                  KeySize;
   UINTN                  DataSize;
   UINTN                  TotalSize;
 
@@ -148,19 +152,69 @@ OcLogAddEntry  (
       gST->ConOut->OutputString (gST->ConOut, Private->UnicodeLineBuffer);
     }
 
+    TimingLength = (UINT32) AsciiStrLen (Private->TimingTxt);
+    LineLength   = (UINT32) AsciiStrLen (Private->LineBuffer);
+
     //
     // Write to serial port.
     //
-
     if ((OcLog->Options & OC_LOG_SERIAL) != 0) {
-      Status = SerialPortWrite ((UINT8 *) Private->TimingTxt, AsciiStrLen (Private->TimingTxt));
+      Status = SerialPortWrite ((UINT8 *) Private->TimingTxt, TimingLength);
       if (Status == EFI_NO_MAPPING) {
         //
         // Disable serial port option.
         //
         OcLog->Options &= ~OC_LOG_SERIAL;
       }
-      SerialPortWrite ((UINT8 *) Private->LineBuffer, AsciiStrLen (Private->LineBuffer));
+      SerialPortWrite ((UINT8 *) Private->LineBuffer, LineLength);
+    }
+
+    //
+    // Write to DataHub.
+    //
+    if ((OcLog->Options & OC_LOG_DATA_HUB) != 0) {
+      if (Private->DataHub == NULL) {
+        gBS->LocateProtocol (
+          &gEfiDataHubProtocolGuid,
+          NULL,
+          (VOID **) &Private->DataHub
+          );
+      }
+
+      if (Private->DataHub != NULL) {
+        KeySize   = (L_STR_LEN (OC_LOG_VARIABLE_NAME) + 6) * sizeof (CHAR16);
+        DataSize  = LineLength + 1;
+        TotalSize = sizeof (*Entry) + KeySize + DataSize;
+
+        Entry = AllocatePool (TotalSize);
+
+        if (Entry != NULL) {
+          ZeroMem (Entry, sizeof (*Entry));
+          Entry->KeySize  = KeySize;
+          Entry->DataSize = DataSize;
+
+          UnicodeSPrint (
+            (CHAR16 *) &Entry->Data[0],
+            Entry->KeySize,
+            L"%s%05u",
+            OC_LOG_VARIABLE_NAME,
+            Private->LogCounter++
+            );
+
+          CopyMem (&Entry->Data[Entry->KeySize], Private->LineBuffer, Entry->DataSize);
+
+          Private->DataHub->LogData (
+            Private->DataHub,
+            &gEfiMiscSubClassGuid,
+            &gApplePlatformProducerNameGuid,
+            EFI_DATA_RECORD_CLASS_DATA,
+            Entry,
+            TotalSize
+            );
+
+          FreePool (Entry);
+        }
+      }
     }
 
     //
@@ -182,45 +236,6 @@ OcLogAddEntry  (
     //
     if ((OcLog->Options & OC_LOG_FILE) != 0) {
       OcLog->Options &= ~OC_LOG_FILE;
-    }
-
-    //
-    // Write to DataHub.
-    //
-    if ((OcLog->Options & OC_LOG_DATA_HUB) != 0) {
-      if (Private->DataHub == NULL) {
-        gBS->LocateProtocol (
-          &gEfiDataHubProtocolGuid,
-          NULL,
-          (VOID **) &Private->DataHub
-          );
-      }
-
-      if (Private->DataHub != NULL) {
-        DataSize  = AsciiStrSize (Private->AsciiBuffer);
-        TotalSize = sizeof (*Entry) + sizeof (OC_LOG_VARIABLE_NAME) + DataSize;
-
-        Entry = AllocatePool (sizeof (*Entry) + sizeof (OC_LOG_VARIABLE_NAME) + DataSize);
-        if (Entry != NULL) {
-          ZeroMem (Entry, sizeof (*Entry));
-          Entry->KeySize  = sizeof (OC_LOG_VARIABLE_NAME);
-          Entry->DataSize = DataSize;
-
-          CopyMem (&Entry->Data[0], OC_LOG_VARIABLE_NAME, Entry->KeySize);
-          CopyMem (&Entry->Data[Entry->KeySize], Private->AsciiBuffer, DataSize);
-
-          Private->DataHub->LogData (
-            Private->DataHub,
-            &gEfiMiscSubClassGuid,
-            &gApplePlatformProducerNameGuid,
-            EFI_DATA_RECORD_CLASS_DATA,
-            Entry,
-            TotalSize
-            );
-
-          FreePool (Entry);
-        }
-      }
     }
 
     //
