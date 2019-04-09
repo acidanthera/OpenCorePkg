@@ -33,6 +33,7 @@
 
 [Guids]
   gEfiMiscSubClassGuid
+  gOcLogVariableGuid
 
 [Protocols]
   gOcLogProtocolGuid

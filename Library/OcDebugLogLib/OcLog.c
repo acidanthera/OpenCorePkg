@@ -199,7 +199,7 @@ OcLogAddEntry  (
           &gEfiMiscSubClassGuid,
           OC_LOG_VARIABLE_NAME,
           Private->AsciiBuffer,
-          AsciiStrSize (Private->AsciiBuffer)
+          (UINT32)AsciiStrSize (Private->AsciiBuffer)
           );
       }
     }
