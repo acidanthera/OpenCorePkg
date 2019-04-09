@@ -183,7 +183,7 @@ OcLogAddEntry  (
 
       if (Private->DataHub != NULL) {
         KeySize   = (L_STR_LEN (OC_LOG_VARIABLE_NAME) + 6) * sizeof (CHAR16);
-        DataSize  = LineLength + 1;
+        DataSize  = TimingLength + LineLength + 1;
         TotalSize = sizeof (*Entry) + KeySize + DataSize;
 
         Entry = AllocatePool (TotalSize);
@@ -201,7 +201,17 @@ OcLogAddEntry  (
             Private->LogCounter++
             );
 
-          CopyMem (&Entry->Data[Entry->KeySize], Private->LineBuffer, Entry->DataSize);
+          CopyMem (
+            &Entry->Data[Entry->KeySize],
+            Private->TimingTxt,
+            TimingLength
+            );
+
+          CopyMem (
+            &Entry->Data[Entry->KeySize + TimingLength],
+            Private->LineBuffer,
+            LineLength + 1
+            );
 
           Private->DataHub->LogData (
             Private->DataHub,
