@@ -20,6 +20,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/OcBootstrap.h>
 
 #include <Library/DebugLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcBootManagementLib.h>
@@ -112,6 +113,12 @@ OcMain (
   } else {
     DEBUG ((DEBUG_ERROR, "OC: Failed to load configuration!\n"));
   }
+
+  //
+  // TODO: Make this configurable, additional variants include:
+  // OC_LOG_DATA_HUB | OC_LOG_SERIAL | OC_LOG_VARIABLE | OC_LOG_NONVOLATILE | OC_LOG_FILE
+  //
+  OcConfigureLogProtocol (OC_LOG_ENABLE | OC_LOG_CONSOLE);
 
   OcCpuScanProcessor (&CpuInfo);
   OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &CpuInfo);
