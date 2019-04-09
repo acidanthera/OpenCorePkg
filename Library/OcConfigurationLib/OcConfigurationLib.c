@@ -37,6 +37,9 @@ OC_ARRAY_STRUCTORS (OC_KERNEL_PATCH_ARRAY)
 OC_STRUCTORS       (OC_KERNEL_QUIRKS, ())
 OC_STRUCTORS       (OC_KERNEL_CONFIG, ())
 
+OC_STRUCTORS       (OC_MISC_DEBUG, ())
+OC_STRUCTORS       (OC_MISC_CONFIG, ())
+
 OC_MAP_STRUCTORS   (OC_NVRAM_ADD_MAP)
 OC_STRUCTORS       (OC_NVRAM_BLOCK_ENTRY, ())
 OC_MAP_STRUCTORS   (OC_NVRAM_BLOCK_MAP)
@@ -224,6 +227,24 @@ mKernelConfigurationSchema[] = {
 };
 
 //
+// Misc configuration support
+//
+
+STATIC
+OC_SCHEMA
+mMiscConfigurationDebugSchema[] = {
+  OC_SCHEMA_INTEGER_IN ("Delay",            OC_GLOBAL_CONFIG, Misc.Debug.Delay),
+  OC_SCHEMA_INTEGER_IN ("Target",           OC_GLOBAL_CONFIG, Misc.Debug.Target)
+};
+
+
+STATIC
+OC_SCHEMA
+mMiscConfigurationSchema[] = {
+  OC_SCHEMA_DICT       ("Debug",            mMiscConfigurationDebugSchema),
+};
+
+//
 // Nvram configuration support
 //
 
@@ -371,6 +392,7 @@ mRootConfigurationNodes[] = {
   OC_SCHEMA_DICT    ("ACPI",             mAcpiConfigurationSchema),
   OC_SCHEMA_DICT    ("DeviceProperties", mDevicePropertiesSchema),
   OC_SCHEMA_DICT    ("Kernel",           mKernelConfigurationSchema),
+  OC_SCHEMA_DICT    ("Misc",             mMiscConfigurationSchema),
   OC_SCHEMA_DICT    ("NVRAM",            mNvramConfigurationSchema),
   OC_SCHEMA_DICT    ("PlatformInfo",     mPlatformConfigurationSchema),
   OC_SCHEMA_DICT    ("UEFI",             mUefiConfigurationSchema)

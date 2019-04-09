@@ -26,7 +26,7 @@
 #define OC_LOG_NONVOLATILE  BIT5
 #define OC_LOG_FILE         BIT6
 
-typedef UINTN OC_LOG_OPTIONS;
+typedef UINT32 OC_LOG_OPTIONS;
 
 // OC_LOG_PROTOCOL_GUID
 /// The GUID of the OC_LOG_PROTOCOL.
@@ -53,9 +53,9 @@ typedef
 EFI_STATUS
 (EFIAPI *OC_LOG_ADD_ENTRY) (
   IN OC_LOG_PROTOCOL  *This,
-  IN UINTN                  ErrorLevel,
-  IN CONST CHAR8            *FormatString,
-  IN VA_LIST                Marker
+  IN UINTN            ErrorLevel,
+  IN CONST CHAR8      *FormatString,
+  IN VA_LIST          Marker
   );
 
 /** 
@@ -107,6 +107,7 @@ EFI_STATUS
 struct OC_LOG_PROTOCOL_ {
   UINT32              Revision;     ///< The revision of the installed protocol.
   OC_LOG_OPTIONS      Options;      ///< The current options of the installed protocol.
+  UINT32              Delay;        ///< The delay after printed message in microseconds.
   OC_LOG_ADD_ENTRY    AddEntry;     ///< A pointer to the AddEntry function.
   OC_LOG_GET_LOG      GetLog;       ///< A pointer to the GetLog function.
   OC_LOG_SAVE_LOG     SaveLog;      ///< A pointer to the SaveLog function.

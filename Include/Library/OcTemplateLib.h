@@ -270,9 +270,15 @@ OcListEntryAllocate (
 #define OC_STRING_CONSTR(Constructor, _, __) \
   OC_BLOB_CONSTR (OC_STRING, __(Constructor), sizeof (Constructor), _, __)
 
+#define OC_ESTRING_CONSTR(_, __) \
+  OC_BLOB_CONSTR (OC_STRING, __(""), 0, _, __)
+
 #define OC_DATA_FIELDS(_, __) \
   OC_BLOB (UINT8, [64], {0}, _, __)
   OC_DECLARE (OC_DATA)
+
+#define OC_EDATA_CONSTR(_, __) \
+  OC_BLOB_CONSTR (OC_DATA, __({0}), 0, _, __)
 
 #define OC_DATA_CONSTR(Constructor, _, __) \
   OC_BLOB_CONSTR (OC_DATA, __(Constructor), sizeof ((UINT8[]) Constructor), _, __)

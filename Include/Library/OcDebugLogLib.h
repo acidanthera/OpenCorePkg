@@ -15,18 +15,21 @@
 #ifndef OC_DEBUG_LOG_LIB_H
 #define OC_DEBUG_LOG_LIB_H
 
+#include <Library/DebugLib.h>
 #include <Protocol/OcLog.h>
 
 /**
   Install or update the OcLog protocol with specified options.
 
   @param[in] Options  Logging options.
+  @param[in] Delay    Delay in microseconds after each log entry.
 
   @retval EFI_SUCCESS  The entry point is executed successfully.
 **/
 EFI_STATUS
 OcConfigureLogProtocol (
-  IN OC_LOG_OPTIONS      Options
+  IN OC_LOG_OPTIONS      Options,
+  IN UINT32              Delay
   );
 
 #endif // OC_DEBUG_LOG_LIB_H

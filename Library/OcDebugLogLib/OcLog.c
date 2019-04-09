@@ -227,6 +227,10 @@ OcLogAddEntry  (
       }
     }
 
+    if (OcLog->Delay > 0) {
+      gBS->Stall (OcLog->Delay);
+    }
+
     //
     // Write to internal buffer.
     //
@@ -340,12 +344,14 @@ OcLogResetTimers (
   Install or update the OcLog protocol with specified options.
 
   @param[in] Options  Logging options.
+  @param[in] Delay    Delay in microseconds after each log entry.
 
   @retval EFI_SUCCESS  The entry point is executed successfully.
 **/
 EFI_STATUS
 OcConfigureLogProtocol (
-  IN OC_LOG_OPTIONS      Options
+  IN OC_LOG_OPTIONS      Options,
+  IN UINT32              Delay
   )
 {
   EFI_STATUS            Status;
@@ -371,6 +377,7 @@ OcConfigureLogProtocol (
     // Set desired options in existing protocol.
     //
     OcLog->Options = Options;
+    OcLog->Delay   = Delay;
 
     //
     // Keep EFI_SUCCESS...
@@ -389,6 +396,7 @@ OcConfigureLogProtocol (
       Private->AsciiBufferSize   = OC_LOG_BUFFER_SIZE;
       Private->OcLog.Revision    = OC_LOG_REVISION;
       Private->OcLog.Options     = Options;
+      Private->OcLog.Delay       = Delay;
       Private->OcLog.AddEntry    = OcLogAddEntry;
       Private->OcLog.GetLog      = OcLogGetLog;
       Private->OcLog.SaveLog     = OcLogSaveLog;
