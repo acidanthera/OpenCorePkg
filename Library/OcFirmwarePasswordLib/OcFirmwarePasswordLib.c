@@ -19,8 +19,6 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include <Library/OcProtocolLib.h>
-
 #include <Protocol/AppleFirmwarePassword.h>
 
 #include "AppleFwPasswordInternal.h"

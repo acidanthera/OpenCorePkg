@@ -135,7 +135,6 @@
 		35218FD6224D4AE2002A2CA6 /* OcAppleBootPolicyLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcAppleBootPolicyLib.h; sourceTree = "<group>"; };
 		35218FD7224D4AE2002A2CA6 /* OcCryptoLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcCryptoLib.h; sourceTree = "<group>"; };
 		35218FD8224D4AE2002A2CA6 /* OcDevicePropertyLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcDevicePropertyLib.h; sourceTree = "<group>"; };
-		35218FD9224D4AE2002A2CA6 /* OcProtocolLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcProtocolLib.h; sourceTree = "<group>"; };
 		35218FDA224D4AE2002A2CA6 /* OcPngLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcPngLib.h; sourceTree = "<group>"; };
 		35218FDB224D4AE2002A2CA6 /* OcAppleImageVerificationLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcAppleImageVerificationLib.h; sourceTree = "<group>"; };
 		35218FDC224D4AE2002A2CA6 /* OcTimerLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcTimerLib.h; sourceTree = "<group>"; };
@@ -178,7 +177,6 @@
 		3521904F224D4AE2002A2CA6 /* SafeHandleProtocol.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SafeHandleProtocol.c; sourceTree = "<group>"; };
 		35219050224D4AE2002A2CA6 /* SignalProtocolEvent.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SignalProtocolEvent.c; sourceTree = "<group>"; };
 		35219051224D4AE2002A2CA6 /* RegisterProtocolCallback.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RegisterProtocolCallback.c; sourceTree = "<group>"; };
-		35219052224D4AE2002A2CA6 /* OcProtocolLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcProtocolLib.inf; sourceTree = "<group>"; };
 		35219054224D4AE2002A2CA6 /* OcStringLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcStringLib.inf; sourceTree = "<group>"; };
 		35219055224D4AE2002A2CA6 /* OcUnicodeLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcUnicodeLib.c; sourceTree = "<group>"; };
 		35219056224D4AE2002A2CA6 /* OcAsciiLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAsciiLib.c; sourceTree = "<group>"; };
@@ -449,7 +447,6 @@
 				35218FD6224D4AE2002A2CA6 /* OcAppleBootPolicyLib.h */,
 				35218FD7224D4AE2002A2CA6 /* OcCryptoLib.h */,
 				35218FD8224D4AE2002A2CA6 /* OcDevicePropertyLib.h */,
-				35218FD9224D4AE2002A2CA6 /* OcProtocolLib.h */,
 				35218FDA224D4AE2002A2CA6 /* OcPngLib.h */,
 				35218FDB224D4AE2002A2CA6 /* OcAppleImageVerificationLib.h */,
 				35218FDC224D4AE2002A2CA6 /* OcTimerLib.h */,
@@ -554,7 +551,6 @@
 			isa = PBXGroup;
 			children = (
 				35219044224D4AE2002A2CA6 /* OcMachoLib */,
-				3521904B224D4AE2002A2CA6 /* OcProtocolLib */,
 				35219053224D4AE2002A2CA6 /* OcStringLib */,
 				35219057224D4AE2002A2CA6 /* OcPngLib */,
 				3521905C224D4AE2002A2CA6 /* OcSerializeLib */,
@@ -595,20 +591,6 @@
 				3521904A224D4AE2002A2CA6 /* CxxSymbols.c */,
 			);
 			path = OcMachoLib;
-			sourceTree = "<group>";
-		};
-		3521904B224D4AE2002A2CA6 /* OcProtocolLib */ = {
-			isa = PBXGroup;
-			children = (
-				3521904C224D4AE2002A2CA6 /* SafeLocateProtocol.c */,
-				3521904D224D4AE2002A2CA6 /* SafeInstallProtocolInterface.c */,
-				3521904E224D4AE2002A2CA6 /* UninstallAllProtocolInterfaces.c */,
-				3521904F224D4AE2002A2CA6 /* SafeHandleProtocol.c */,
-				35219050224D4AE2002A2CA6 /* SignalProtocolEvent.c */,
-				35219051224D4AE2002A2CA6 /* RegisterProtocolCallback.c */,
-				35219052224D4AE2002A2CA6 /* OcProtocolLib.inf */,
-			);
-			path = OcProtocolLib;
 			sourceTree = "<group>";
 		};
 		35219053224D4AE2002A2CA6 /* OcStringLib */ = {
