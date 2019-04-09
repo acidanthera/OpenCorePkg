@@ -668,6 +668,7 @@ AcpiApplyContext (
       Context->Rsdt->Header.Length
       );
 
+    Context->Rsdp->RsdtAddress = (UINT32) Table;
     Table += ALIGN_VALUE (RsdtSize, sizeof (UINT64));
   }
 
