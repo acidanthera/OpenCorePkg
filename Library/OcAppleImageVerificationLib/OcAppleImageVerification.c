@@ -615,7 +615,6 @@ VerifyApplePeImageSignature (
   IN OUT APPLE_PE_COFF_LOADER_IMAGE_CONTEXT  *Context OPTIONAL
   )
 {
-  UINT32                   WorkBuf32[RSANUMWORDS * 3];
   UINTN                    Index                       = 0;
   APPLE_SIGNATURE_CONTEXT  *SignatureContext           = NULL;
   RSA_PUBLIC_KEY           *Pk                         = NULL;
@@ -695,7 +694,7 @@ VerifyApplePeImageSignature (
   //
   // Verify signature
   //
-  if (RsaVerify (Pk, SignatureContext->Signature, Context->PeImageHash, WorkBuf32) == 1 ) {
+  if (RsaVerify (Pk, SignatureContext->Signature, Context->PeImageHash) == 1 ) {
     DEBUG ((DEBUG_INFO, "Signature verified!\n"));
     FreePool (SignatureContext);
     FreePool (Context);

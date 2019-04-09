@@ -183,15 +183,12 @@ MontMul (
 
   @param Key        Key to use in signing
   @param InOut      Input and output big-endian byte array
-  @param Workbuf32  Work buffer; caller must verify this is
-                    3 x RSANUMWORDS elements long.
  **/
 STATIC
 VOID
 ModPow (
   RSA_PUBLIC_KEY  *Key,
-  UINT8           *InOut,
-  UINT32          *Workbuf32
+  UINT8           *InOut
   )
 {
   UINT32 *A     = NULL;
@@ -200,6 +197,8 @@ ModPow (
   UINT32 *Aaa   = NULL;
   INT32  Index  = 0;
   UINT32 Tmp    = 0;
+
+  UINT32 Workbuf32[RSANUMWORDS * 3];
 
   A = Workbuf32;
   Ar = A + RSANUMWORDS;
@@ -290,16 +289,14 @@ CheckPadding (
   @param Key         RSA public key
   @param Signature   RSA signature
   @param Sha256      SHA-256 digest of the content to verify
-  @param Workbuf32   Work buffer; caller must verify this is
-                     3 x RSANUMWORDS elements long.
+
   @return FALSE on failure, TRUE on success.
  **/
 BOOLEAN
 RsaVerify (
   RSA_PUBLIC_KEY  *Key,
   UINT8           *Signature,
-  UINT8           *Sha256,
-  UINT32          *Workbuf32
+  UINT8           *Sha256
   )
 {
   UINT8 Buf[RSANUMBYTES];
@@ -312,7 +309,7 @@ RsaVerify (
   //
   // In-place exponentiation
   //
-  ModPow (Key, Buf, Workbuf32);
+  ModPow (Key, Buf);
 
   //
   // Check the PKCS#1 padding

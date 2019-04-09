@@ -428,7 +428,6 @@ VerifyApplePeImageSignature (
   uint8_t                            SigBe[256];
   uint8_t                            CalcucatedHash[32];
   uint8_t                            PkHash[32];
-  uint32_t                           WorkBuf32[RSANUMWORDS*3];
   RSA_PUBLIC_KEY                     *Pk                      = NULL;
   APPLE_PE_COFF_LOADER_IMAGE_CONTEXT *Context                 = NULL;
 
@@ -492,7 +491,7 @@ VerifyApplePeImageSignature (
   //
   // Verify signature
   //
-  if (RsaVerify (Pk, SigBe, CalcucatedHash, WorkBuf32) == 1 ) {
+  if (RsaVerify (Pk, SigBe, CalcucatedHash) == 1 ) {
     puts ("Signature verified!\n");
     return 0;
   }

@@ -98,16 +98,13 @@ OcAppleChunklistVerifySignature (
 {
   BOOLEAN Result;
 
-  UINT32  WorkBuf32[RSANUMWORDS * 3];
-
   ASSERT (Context != NULL);
   ASSERT (Context->Signature != NULL);
 
   Result = RsaVerify (
              PublicKey,
              Context->Signature->Signature,
-             Context->Hash,
-             WorkBuf32
+             Context->Hash
              );
   DEBUG_CODE (
     if (Result) {

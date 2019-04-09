@@ -108,8 +108,7 @@ BOOLEAN
 RsaVerify (
   RSA_PUBLIC_KEY  *Key,
   UINT8           *Signature,
-  UINT8           *Sha256,
-  UINT32          *Workbuf32
+  UINT8           *Sha256
   );
 
 VOID
