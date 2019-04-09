@@ -21,6 +21,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcGuardLib.h>
 
 #define PRIV_OC_BLOB_FIELDS(_, __) \
   OC_BLOB (CHAR8, [], {0}, _, __)
@@ -43,14 +44,12 @@ typedef union PRIV_OC_LIST_ {
 // We have to be a bit careful about this hack, so assert that type layouts match at the very least.
 //
 #if defined(__GNUC__) && (__GNUC__ == 3 && __GNUC_MINOR__ >= 5 || __GNUC__ > 3)
-#define OC_TPL_ASSERT(x) typedef UINT8 OC_TPL_ASSERTION_##__LINE__[(x)?1:-1]
-OC_TPL_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, Count)      == __builtin_offsetof (PRIV_OC_MAP, Count));
-OC_TPL_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, AllocCount) == __builtin_offsetof (PRIV_OC_MAP, AllocCount));
-OC_TPL_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, Construct)  == __builtin_offsetof (PRIV_OC_MAP, Construct));
-OC_TPL_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, Destruct)   == __builtin_offsetof (PRIV_OC_MAP, Destruct));
-OC_TPL_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, Values)     == __builtin_offsetof (PRIV_OC_MAP, Values));
-OC_TPL_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, ValueSize)  == __builtin_offsetof (PRIV_OC_MAP, ValueSize));
-#undef OC_TPL_ASSERT
+OC_GLOBAL_STATIC_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, Count)      == __builtin_offsetof (PRIV_OC_MAP, Count), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+OC_GLOBAL_STATIC_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, AllocCount) == __builtin_offsetof (PRIV_OC_MAP, AllocCount), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+OC_GLOBAL_STATIC_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, Construct)  == __builtin_offsetof (PRIV_OC_MAP, Construct), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+OC_GLOBAL_STATIC_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, Destruct)   == __builtin_offsetof (PRIV_OC_MAP, Destruct), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+OC_GLOBAL_STATIC_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, Values)     == __builtin_offsetof (PRIV_OC_MAP, Values), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+OC_GLOBAL_STATIC_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, ValueSize)  == __builtin_offsetof (PRIV_OC_MAP, ValueSize), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
 #endif
 
 VOID
