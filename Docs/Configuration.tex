@@ -1169,7 +1169,7 @@ behaviour that does not go to any other sections
   \emph{Note}: To obtain Data Hub log use the following command
   in macOS:
 \begin{lstlisting}[label=dhublog, style=ocbash]
-ioreg -lw0 -p IODeviceTree | grep boot-log | sed 's/.*<\(.*\)>.*/\1/'
+ioreg -lw0 -p IODeviceTree | grep boot-log | sed 's/.*<\(.*\)>.*/\1/' | xxd -r -p
 \end{lstlisting}
 
   \emph{Note}: UEFI variable log may get truncated on some firmwares.
