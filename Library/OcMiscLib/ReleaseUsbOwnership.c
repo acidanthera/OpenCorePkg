@@ -210,8 +210,6 @@ EhciReleaseOwnership (
   UINT32           OpAddr;
   UINT32           ExtendCap;
   UINT32           UsbCmd;
-  UINT32           UsbSts;
-  UINT32           UsbIntr;
   UINT32           UsbLegSup;
   UINT32           UsbLegCtlSts;
   UINTN            IsOsOwned;
@@ -263,10 +261,6 @@ EhciReleaseOwnership (
 
   ExtendCap = (HcCapParams >> 8U) & 0xFFU;
 
-  UsbCmd  = MmioRead32 (OpAddr + EHC_USBCMD_OFFSET);
-  UsbSts  = MmioRead32 (OpAddr + EHC_USBSTS_OFFSET);
-  UsbIntr = MmioRead32 (OpAddr + EHC_USBINT_OFFSET);
-
   //
   // Read PCI Config 32bit USBLEGSUP (eecp+0).
   //
@@ -309,10 +303,7 @@ EhciReleaseOwnership (
     &UsbLegCtlSts
     );
 
-  gBS->Stall (500);
   UsbCmd  = MmioRead32 (OpAddr + EHC_USBCMD_OFFSET);
-  UsbSts  = MmioRead32 (OpAddr + EHC_USBSTS_OFFSET);
-  UsbIntr = MmioRead32 (OpAddr + EHC_USBINT_OFFSET);
 
   //
   // Clear registers to default.
@@ -330,13 +321,6 @@ EhciReleaseOwnership (
     1,
     &Value
     );
-
-  //
-  // Get the results.
-  //
-  UsbCmd  = MmioRead32 (OpAddr + EHC_USBCMD_OFFSET);
-  UsbSts  = MmioRead32 (OpAddr + EHC_USBSTS_OFFSET);
-  UsbIntr = MmioRead32 (OpAddr + EHC_USBINT_OFFSET);
 
   //
   // Read 32bit USBLEGSUP (eecp+0).
