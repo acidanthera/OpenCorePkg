@@ -191,6 +191,7 @@ ParseCompressedHeader (
   //
   // TODO: implement adler32 hash verification.
   //
+  (VOID) DecompressedHash;
 
   FreePool (CompressedBuffer);
 

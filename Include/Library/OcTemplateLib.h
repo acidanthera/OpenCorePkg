@@ -69,9 +69,11 @@ VOID
 // VOID NAME_DESTRUCT(Void *Ptr, UINTN Size);
 //
 // Field information will be retrieved from NAME_FIELDS X-Macro, written as follows:
-// #define NAME_FIELDS(_, __) *backslash*
-//   _(Type, Name, Type Suffix, __(Constant Initializer), Destructor Function) *backslash*
-//   _(Type, Name, Type Suffix, OC_CONSTR(Type, _, __), OC_DESTR(Type))
+#if 0
+#define NAME_FIELDS(_, __) \
+  _(Type, Name, Type Suffix, __(Constant Initializer), Destructor Function) \
+  _(Type, Name, Type Suffix, OC_CONSTR(Type, _, __), OC_DESTR(Type))
+#endif
 //
 
 #define OC_DECLARE(Name)                                                           \
@@ -135,11 +137,14 @@ VOID
 
 //
 // Generate map-like container with key elements of type KeyType, OC_BLOB derivative,
-// value types of Type constructed by Constructor and destructed by Destructor.
-// #define CONT_FIELDS(_, __) \
-//   OC_MAP (KEY, ELEM, _, __)
-//   OC_DECLARE (CONT)
+// value types of Type constructed by Constructor and destructed by Destructor:
+#if 0
+#define CONT_FIELDS(_, __) \
+  OC_MAP (KEY, ELEM, _, __)
+  OC_DECLARE (CONT)
+#endif
 //
+
 #define OC_MAP(KeyType, Type, _, __) \
   _(UINT32      , Count         , , 0                     , () ) \
   _(UINT32      , AllocCount    , , 0                     , () ) \
@@ -158,9 +163,12 @@ VOID
 //
 // Generate array-like container with elements of type Type, constructed
 // by Constructor and destructed by Destructor.
-// #define CONT_FIELDS(_, __) \
-//   OC_ARRAY (ELEM, _, __)
-//   OC_DECLARE (CONT)
+#if 0
+#define CONT_FIELDS(_, __) \
+  OC_ARRAY (ELEM, _, __)
+  OC_DECLARE (CONT)
+#endif
+//
 
 #define OC_ARRAY(Type, _, __) \
   _(UINT32      , Count         , , 0                     , () ) \
