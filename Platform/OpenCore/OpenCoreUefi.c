@@ -203,7 +203,7 @@ OcReleaseUsbOwnership (
 
   Status = ReleaseUsbOwnership ();
 
-  DEBUG ((DEBUG_INFO, "ReleaseUsbOwnership status - %r\n"));
+  DEBUG ((DEBUG_INFO, "ReleaseUsbOwnership status - %r\n", Status));
 }
 
 VOID
