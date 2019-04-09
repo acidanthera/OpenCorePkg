@@ -12,18 +12,19 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef OC_LOG_PROTOCOL_H_
-#define OC_LOG_PROTOCOL_H_
+#ifndef OC_LOG_PROTOCOL_H
+#define OC_LOG_PROTOCOL_H
 
 // The defines for the log flags.
 
 #define OC_LOG_DISABLE      0
 #define OC_LOG_ENABLE       BIT0
 #define OC_LOG_CONSOLE      BIT1
-#define OC_LOG_SERIAL       BIT2
-#define OC_LOG_VARIABLE     BIT3
-#define OC_LOG_FILE         BIT4
+#define OC_LOG_DATA_HUB     BIT2
+#define OC_LOG_SERIAL       BIT3
+#define OC_LOG_VARIABLE     BIT4
 #define OC_LOG_NONVOLATILE  BIT5
+#define OC_LOG_FILE         BIT6
 
 typedef UINTN OC_LOG_OPTIONS;
 
@@ -38,8 +39,8 @@ typedef UINTN OC_LOG_OPTIONS;
 /// The forward declaration for the protocol for the OC_LOG_PROTOCOL.
 typedef struct OC_LOG_PROTOCOL_ OC_LOG_PROTOCOL;
 
-// OcLogAddEntry
-/** Add an entry to the log buffer
+/**
+  Add an entry to the log buffer
 
   @param[in] This          This protocol.
   @param[in] ErrorLevel    Debug level.
@@ -57,8 +58,8 @@ EFI_STATUS
   IN VA_LIST                Marker
   );
 
-// OcLogResetTimers
-/** Reset the internal timers
+/** 
+  Reset the internal timers
 
   @param[in] This  This protocol.
 
@@ -70,8 +71,8 @@ EFI_STATUS
   IN OC_LOG_PROTOCOL  *This
   );
 
-// OcLogGetLog
-/** Retrieve pointer to the log buffer
+/**
+  Retrieve pointer to the log buffer
 
   @param[in] This         This protocol.
   @param[in] OcLogBuffer  Address to store the buffer pointer.
@@ -82,11 +83,11 @@ typedef
 EFI_STATUS
 (EFIAPI *OC_LOG_GET_LOG) (
   IN  OC_LOG_PROTOCOL  *This,
-  OUT CHAR16           **OcLogBuffer
+  OUT CHAR8            **OcLogBuffer
   );
 
-// OcLogSaveLog
-/** Save the current log
+/**
+  Save the current log
 
   @param[in] This         This protocol.
   @param[in] NonVolatile  Variable.
@@ -115,4 +116,4 @@ struct OC_LOG_PROTOCOL_ {
 /// A global variable storing the GUID of the OC_LOG_PROTOCOL.
 extern EFI_GUID gOcLogProtocolGuid;
 
-#endif // OC_LOG_PROTOCOL_H_
+#endif // OC_LOG_PROTOCOL_H

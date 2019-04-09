@@ -61,11 +61,15 @@ listed here.
     **Summary**: Expose DMG as an UEFI RAM disk  
     **Status**: in progress  
     **Issues**:
+* OcConfigurationLib  
+    **Summary**: Deserialize OpenCore configuration  
+    **Status**: functional  
+    **Issues**:
 * OcDebugLogLib  
     **Summary**: Debug output redirection through OC Log protocol  
     **Status**: functional  
     **Issues**:
-    1. No open-source OC Log protocol implementation.
+    1. No file logging.
 * OcDevicePathLib  
     **Summary**: Device path management and transformation  
     **Status**: legacy  

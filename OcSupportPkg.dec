@@ -87,6 +87,9 @@
   OcDataHubLib|Include/Library/OcDataHubLib.h
 
   ##  @libraryclass
+  OcDebugLogLib|Include/Library/OcDebugLogLib.h
+
+  ##  @libraryclass
   OcDevicePathLib|Include/Library/OcDevicePathLib.h
 
   ##  @libraryclass

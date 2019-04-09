@@ -641,6 +641,16 @@ AcpiApplyContext (
 
     for (Index = 0; Index < Context->NumberOfTables; ++Index) {
       Context->Xsdt->Tables[Index] = (UINT64)(UINTN) Context->Tables[Index];
+
+      DEBUG ((
+        DEBUG_INFO,
+        "Exposing XSDT table %08x (%016Lx) at %p of %u bytes at index %u\n",
+        Context->Tables[Index]->Signature,
+        AcpiReadOemTableId (Context->Tables[Index]),
+        Context->Tables[Index],
+        Context->Tables[Index]->Length,
+        Index
+        ));
     }
 
     Context->Xsdt->Header.Checksum = 0;
@@ -660,6 +670,16 @@ AcpiApplyContext (
 
     for (Index = 0; Index < Context->NumberOfTables; ++Index) {
       Context->Rsdt->Tables[Index] = (UINT32)(UINTN) Context->Tables[Index];
+
+      DEBUG ((
+        DEBUG_INFO,
+        "Exposing RSDT table %08x (%016Lx) at %p of %u bytes at index %u\n",
+        Context->Tables[Index]->Signature,
+        AcpiReadOemTableId (Context->Tables[Index]),
+        Context->Tables[Index],
+        Context->Tables[Index]->Length,
+        Index
+        ));
     }
 
     Context->Rsdt->Header.Checksum = 0;

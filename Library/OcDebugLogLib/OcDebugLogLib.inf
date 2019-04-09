@@ -27,14 +27,21 @@
 # VALID_ARCHITECTURES = IA32 X64 IPF EBC
 
 [Packages]
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
   OcSupportPkg/OcSupportPkg.dec
   MdePkg/MdePkg.dec
+
+[Guids]
+  gEfiMiscSubClassGuid
 
 [Protocols]
   gOcLogProtocolGuid
 
 [LibraryClasses]
+  SerialPortLib
   DebugPrintErrorLevelLib
+  OcDataHubLib
+  UefiRuntimeServicesTableLib
 
 [Pcd]
   gEfiMdePkgTokenSpaceGuid.PcdDebugClearMemoryValue
@@ -43,3 +50,5 @@
 
 [Sources]
   OcDebugLogLib.c
+  OcLog.c
+  OcLogInternal.h

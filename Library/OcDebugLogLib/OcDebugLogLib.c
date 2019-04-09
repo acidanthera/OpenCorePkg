@@ -51,50 +51,35 @@ DebugPrint (
 {
   EFI_STATUS Status;
   VA_LIST    Marker;
-  CHAR16     *LogBuffer;
   CHAR16     Buffer[256];
 
   ASSERT (Format != NULL);
 
-  // Check driver debug mask value and global mask
+  //
+  // Obtaing logging protocol if any.
+  //
+  if (mOcLog == NULL) {
+    Status = gBS->LocateProtocol (
+      &gOcLogProtocolGuid,
+      NULL,
+      (VOID **) &mOcLog
+      );
 
-  if ((ErrorLevel & GetDebugPrintErrorLevel ()) != 0) {
-    VA_START (Marker, Format);
-
-    if (mOcLog == NULL) {
-      Status = gBS->LocateProtocol (
-                      &gOcLogProtocolGuid,
-                      NULL,
-                      (VOID **) &mOcLog
-                      );
-
-      if (EFI_ERROR (Status)) {
-        mOcLog = NULL;
-      }
+    if (EFI_ERROR (Status)) {
+      mOcLog = NULL;
     }
-
-    if (mOcLog != NULL) {
-      LogBuffer = NULL;
-      Status    = mOcLog->GetLog (mOcLog, &LogBuffer);
-
-      if (!EFI_ERROR (Status) && (LogBuffer != NULL)) {
-        //
-        // Save end of current buffer
-        //
-        LogBuffer += StrLen (LogBuffer);
-
-        mOcLog->AddEntry (mOcLog, ErrorLevel, Format, Marker);
-      }
-    } else if ((gST != NULL) && (gST->ConOut != NULL)) {
-      //
-      // Fallback to console printing
-      //
-      UnicodeVSPrintAsciiFormat (Buffer, sizeof (Buffer),  Format, Marker);
-      gST->ConOut->OutputString (gST->ConOut, Buffer);
-    }
-
-    VA_END (Marker);
   }
+
+  VA_START (Marker, Format);
+
+  if (mOcLog != NULL) {
+    mOcLog->AddEntry (mOcLog, ErrorLevel, Format, Marker);
+  } else if ((ErrorLevel & GetDebugPrintErrorLevel ()) != 0) {
+    UnicodeVSPrintAsciiFormat (Buffer, sizeof (Buffer),  Format, Marker);
+    gST->ConOut->OutputString (gST->ConOut, Buffer);
+  }
+
+  VA_END (Marker);
 }
 
 
