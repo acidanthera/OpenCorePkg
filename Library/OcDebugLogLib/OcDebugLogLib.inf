@@ -27,6 +27,7 @@
 # VALID_ARCHITECTURES = IA32 X64 IPF EBC
 
 [Packages]
+  EfiPkg/EfiPkg.dec
   IntelFrameworkPkg/IntelFrameworkPkg.dec
   OcSupportPkg/OcSupportPkg.dec
   MdePkg/MdePkg.dec
@@ -34,6 +35,7 @@
 [Guids]
   gEfiMiscSubClassGuid
   gOcLogVariableGuid
+  gApplePlatformProducerNameGuid
 
 [Protocols]
   gOcLogProtocolGuid

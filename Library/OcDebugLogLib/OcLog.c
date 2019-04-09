@@ -105,10 +105,10 @@ OcLogAddEntry  (
   EFI_STATUS             Status;
 
   OC_LOG_PRIVATE_DATA    *Private;
-  CHAR8                  *SerialBuffer;
-  UINTN                  SerialBufferLength;
   UINT32                 Attributes;
-  EFI_DATA_HUB_PROTOCOL  *DataHub;
+  PLATFORM_DATA_HEADER   *Entry;
+  UINTN                  DataSize;
+  UINTN                  TotalSize;
 
   Private = OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog);
 
@@ -153,17 +153,14 @@ OcLogAddEntry  (
     //
 
     if ((OcLog->Options & OC_LOG_SERIAL) != 0) {
-      SerialBufferLength = AsciiStrLen (SerialBuffer);
-      if (SerialBufferLength != 0) {
-        Status = SerialPortWrite ((UINT8 *) Private->TimingTxt, AsciiStrLen (Private->TimingTxt));
-        if (Status == EFI_NO_MAPPING) {
-          //
-          // Disable serial port option.
-          //
-          OcLog->Options &= ~OC_LOG_SERIAL;
-        }
-        SerialPortWrite ((UINT8 *) Private->LineBuffer, AsciiStrLen (Private->LineBuffer));
+      Status = SerialPortWrite ((UINT8 *) Private->TimingTxt, AsciiStrLen (Private->TimingTxt));
+      if (Status == EFI_NO_MAPPING) {
+        //
+        // Disable serial port option.
+        //
+        OcLog->Options &= ~OC_LOG_SERIAL;
       }
+      SerialPortWrite ((UINT8 *) Private->LineBuffer, AsciiStrLen (Private->LineBuffer));
     }
 
     //
@@ -191,16 +188,38 @@ OcLogAddEntry  (
     // Write to DataHub.
     //
     if ((OcLog->Options & OC_LOG_DATA_HUB) != 0) {
-      DataHub = LocateDataHubProtocol ();
-
-      if (DataHub != NULL) {
-        SetDataHubEntry (
-          DataHub,
-          &gEfiMiscSubClassGuid,
-          OC_LOG_VARIABLE_NAME,
-          Private->AsciiBuffer,
-          (UINT32)AsciiStrSize (Private->AsciiBuffer)
+      if (Private->DataHub == NULL) {
+        gBS->LocateProtocol (
+          &gEfiDataHubProtocolGuid,
+          NULL,
+          (VOID **) &Private->DataHub
           );
+      }
+
+      if (Private->DataHub != NULL) {
+        DataSize  = AsciiStrSize (Private->AsciiBuffer);
+        TotalSize = sizeof (*Entry) + sizeof (OC_LOG_VARIABLE_NAME) + DataSize;
+
+        Entry = AllocatePool (sizeof (*Entry) + sizeof (OC_LOG_VARIABLE_NAME) + DataSize);
+        if (Entry != NULL) {
+          ZeroMem (Entry, sizeof (*Entry));
+          Entry->KeySize  = sizeof (OC_LOG_VARIABLE_NAME);
+          Entry->DataSize = DataSize;
+
+          CopyMem (&Entry->Data[0], OC_LOG_VARIABLE_NAME, Entry->KeySize);
+          CopyMem (&Entry->Data[Entry->KeySize], Private->AsciiBuffer, DataSize);
+
+          Private->DataHub->LogData (
+            Private->DataHub,
+            &gEfiMiscSubClassGuid,
+            &gApplePlatformProducerNameGuid,
+            EFI_DATA_RECORD_CLASS_DATA,
+            Entry,
+            TotalSize
+            );
+
+          FreePool (Entry);
+        }
       }
     }
 

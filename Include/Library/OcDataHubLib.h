@@ -42,6 +42,13 @@
 #define OC_SMC_PLATFORM_SIZE         8U
 
 typedef struct {
+  CHAR16 Reserved[8];
+  UINT32 KeySize;
+  UINT32 DataSize;
+  UINT8  Data[];
+} PLATFORM_DATA_HEADER;
+
+typedef struct {
   CONST CHAR8   *PlatformName;
   CONST CHAR8   *SystemProductName;
   CONST CHAR8   *SystemSerialNumber;

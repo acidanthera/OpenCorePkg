@@ -18,13 +18,6 @@
 #include <Uefi.h>
 #include <Library/OcStringLib.h>
 
-typedef struct {
-  CHAR16 Reserved[8];
-  UINT32 KeySize;
-  UINT32 DataSize;
-  UINT8  Data[];
-} PLATFORM_DATA_HEADER;
-
 // Base64Decode
 /**
 
