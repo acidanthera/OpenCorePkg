@@ -29,7 +29,8 @@
 #include <Library/OcAcpiLib.h>
 
 
-/** Find RSD_PTR Table In Legacy Area
+/**
+  Find RSD_PTR Table In Legacy Area
 
   @retval EFI_ACPI_6_0_ROOT_SYSTEM_DESCRIPTION_POINTER
 **/
@@ -73,7 +74,8 @@ AcpiFindLegacyRsdp (
   return Rsdp;
 }
 
-/** Find RSD_PTR Table From System Configuration Tables
+/**
+  Find RSD_PTR Table From System Configuration Tables
 
   @retval EFI_ACPI_6_0_ROOT_SYSTEM_DESCRIPTION_POINTER
 **/
@@ -128,7 +130,28 @@ AcpiFindRsdp (
   return Rsdp;
 }
 
-/** Extract and verify ACPI name from data.
+/**
+  Extract and verify ACPI OemTableId from common header.
+
+  @param Common      ACPI common header.
+
+  @return OemTableId or 0.
+**/
+STATIC
+UINT64
+AcpiReadOemTableId (
+  IN  CONST EFI_ACPI_COMMON_HEADER  *Common
+  )
+{
+  if (Common->Length <= sizeof (EFI_ACPI_DESCRIPTION_HEADER)) {
+    return 0;
+  }
+
+  return ((EFI_ACPI_DESCRIPTION_HEADER *) Common)->OemTableId;
+}
+
+/**
+  Extract and verify ACPI name from data.
 
   @param Data        Data of at least OC_ACPI_NAME_SIZE+1 bytes to read name from.
   @param Name        Name buffer of at least OC_ACPI_NAME_SIZE+1 bytes.
@@ -171,7 +194,8 @@ AcpiReadName (
   return TRUE;
 }
 
-/** Find ACPI name declaration in data.
+/**
+  Find ACPI name declaration in data.
 
   @param Data        ACPI table data.
   @param Length      ACPI table data length.
@@ -209,7 +233,8 @@ AcpiFindName (
   return 0;
 }
 
-/** Load ACPI table regions.
+/**
+  Load ACPI table regions.
 
   @param Context      ACPI library context.
   @param Table        ACPI table.
@@ -296,7 +321,8 @@ AcpiLoadTableRegions (
   return EFI_SUCCESS;
 }
 
-/** Relocate ACPI table regions.
+/**
+  Relocate ACPI table regions.
 
   @param Context      ACPI library context.
   @param Table        ACPI table.
@@ -389,7 +415,8 @@ AcpiRelocateTableRegions (
   }
 }
 
-/** Cleanup ACPI table from unprintable symbols.
+/**
+  Cleanup ACPI table from unprintable symbols.
   Reference: https://alextjam.es/debugging-appleacpiplatform/.
 
   @param Table        ACPI table.
@@ -526,8 +553,9 @@ AcpiInitContext (
 
     DEBUG ((
       DEBUG_INFO,
-      "Detected table %08x of %u bytes at index %u\n",
+      "Detected table %08x (%016Lx) of %u bytes at index %u\n",
       Context->Tables[DstIndex]->Signature,
+      AcpiReadOemTableId (Context->Tables[DstIndex]),
       Context->Tables[DstIndex]->Length,
       Index
       ));
@@ -679,8 +707,9 @@ AcpiDropTable (
 
       DEBUG ((
         DEBUG_INFO,
-        "Dropping table %08x of %u bytes with %016Lx ID at index %u\n",
+        "Dropping table %08x (%016Lx) of %u bytes with %016Lx ID at index %u\n",
         Context->Tables[Index]->Signature,
+        AcpiReadOemTableId (Context->Tables[Index]),
         Context->Tables[Index]->Length,
         CurrOemTableId,
         Index
@@ -781,8 +810,9 @@ AcpiInsertTable (
   } else {
     DEBUG ((
       DEBUG_INFO,
-      "Inserted table %08x of %u bytes into ACPI at index %u\n",
+      "Inserted table %08x (%016Lx) of %u bytes into ACPI at index %u\n",
       Common->Signature,
+      AcpiReadOemTableId (Common),
       Common->Length,
       Context->NumberOfTables
       ));
@@ -811,8 +841,9 @@ AcpiNormalizeHeaders (
     if (AcpiNormalizeTableHeaders ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Tables[Index])) {
       DEBUG ((
         DEBUG_INFO,
-        "Normalized %08x of %u bytes headers at index %u\n",
+        "Normalized %08x (%08Lx) of %u bytes headers at index %u\n",
         Context->Tables[Index]->Signature,
+        AcpiReadOemTableId (Context->Tables[Index]),
         Context->Tables[Index]->Length,
         Index
         ));
@@ -895,8 +926,9 @@ AcpiApplyPatch (
 
       DEBUG ((
         DEBUG_INFO,
-        "Patching table %08x of %u bytes with %016Lx ID at index %u\n",
+        "Patching table %08x (%016Lx) of %u bytes with %016Lx ID at index %u\n",
         Context->Tables[Index]->Signature,
+        AcpiReadOemTableId (Context->Tables[Index]),
         Context->Tables[Index]->Length,
         CurrOemTableId,
         Index
