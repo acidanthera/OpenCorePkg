@@ -59,7 +59,6 @@ OcFirmwarePasswordInstallProtocol (
   )
 {
   EFI_STATUS Status;
-  BOOLEAN DupeCheck = TRUE;
 
   APPLE_FIRMWARE_PASSWORD_PRIVATE_DATA *Private = NULL;
 
@@ -74,10 +73,12 @@ OcFirmwarePasswordInstallProtocol (
 
   // Install our protocol with dupe check enabled.
 
-  Status = SafeInstallProtocolInterface (&gAppleFirmwarePasswordProtocolGuid,
+  Status = gBS->InstallMultipleProtocolInterfaces (
+    &ImageHandle,
+    &gAppleFirmwarePasswordProtocolGuid,
     &Private->AppleFirmwarePassword,
-    ImageHandle,
-    DupeCheck);
+    NULL
+    );
   if (EFI_ERROR(Status)) {
     FreePool (Private);
   }
