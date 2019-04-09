@@ -25,6 +25,20 @@
 
 \renewcommand{\dateseparator}{.}
 
+\lstdefinestyle{ocbash}{
+  language=bash,
+  frame=tb,
+  columns=fullflexible,
+  captionpos=b,
+  morekeywords={git, make, build},
+  literate =
+    {"}{{\uprightquote}}1
+    {'}{{\textquotesingle}}1
+    {-}{{-}}1
+    {~}{{\centeredtilde}}1
+    ,
+}
+
 \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 \PassOptionsToPackage{hyphens}{url} % url is loaded by hyperref
 
@@ -425,14 +439,14 @@ To compile with \texttt{XCODE5}, besides \href{https://developer.apple.com/xcode
 one should also install \href{https://www.nasm.us}{NASM} and
 \href{https://github.com/acidanthera/AppleSupportPkg/blob/master/External/mtoc-mac64.zip}{MTOC}. Example command sequence may look as follows:
 
-\begin{lstlisting}[caption=Compilation Commands, frame=single, captionpos=b, label=compile]
+\begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
 git clone https://github.com/tianocore/edk2 -b UDK2018 UDK
 cd UDK
 git clone https://github.com/acidanthera/EfiPkg
 git clone https://github.com/acidanthera/OcSupportPkg
 git clone https://github.com/acidanthera/OpenCorePkg
 source edksetup.sh
-make -c BaseTools
+make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
 
@@ -925,7 +939,7 @@ blocking.
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: This kernel driver will not be added unless set to
+  \textbf{Description}: This kernel driver will not be blocked unless set to
   \texttt{true}.
 
 \item
@@ -1014,7 +1028,7 @@ blocking.
   \texttt{MatchKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Default value}: Empty string\\
-  \textbf{Description}: Blocks kernel driver on selected macOS version only.
+  \textbf{Description}: Adds kernel driver to selected macOS version only.
   The selection happens based on prefix match with the kernel version, i.e.
   \texttt{16.7.0} will match macOS 10.12.6 and \texttt{16.} will match
   any macOS 10.12.x version.
