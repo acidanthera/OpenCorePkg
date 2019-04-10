@@ -554,7 +554,10 @@ OcKernelFileOpen (
     }
   }
 
-  return CreateRealFile (*NewHandle, NULL, TRUE, NewHandle);
+  //
+  // We recurse the filtering to additionally catch com.apple.boot.[RPS] directories.
+  //
+  return CreateRealFile (*NewHandle, OcKernelFileOpen, TRUE, NewHandle);
 }
 
 VOID
