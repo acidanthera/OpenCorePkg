@@ -282,7 +282,7 @@ OcKernelApplyPatches (
 
   if (!IsKernelPatch) {
     if (Config->Kernel.Quirks.AppleCpuPmCfgLock) {
-      PatchAppleIntelCPUPowerManagement (Context);
+      PatchAppleCpuPmCfgLock (Context);
     }
 
     if (Config->Kernel.Quirks.ExternalDiskIcons) {
@@ -295,6 +295,10 @@ OcKernelApplyPatches (
 
     if (Config->Kernel.Quirks.XhciPortLimit) {
       PatchUsbXhciPortLimit (Context);
+    }
+  } else {
+    if (Config->Kernel.Quirks.AppleXcpmCfgLock) {
+      PatchAppleXcpmCfgLock (&Patcher);
     }
   }
 }

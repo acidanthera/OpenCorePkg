@@ -421,6 +421,8 @@
 		<dict>
 			<key>AppleCpuPmCfgLock</key>
 			<false/>
+			<key>AppleXcpmCfgLock</key>
+			<false/>
 			<key>ExternalDiskIcons</key>
 			<false/>
 			<key>ThirdPartyTrim</key>

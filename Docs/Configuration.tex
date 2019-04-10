@@ -1114,6 +1114,19 @@ blocking.
   \href{https://github.com/acidanthera/AptioFixPkg#verifymsre2}{VerifyMsrE2} notes.
 
 \item
+  \texttt{AppleXcpmCfgLock}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Disables \texttt{PKG\_CST\_CONFIG\_CONTROL} (\texttt{0xE2})
+  MSR modification in XNU kernel, commonly causing early kernel panic, when it is
+  locked from writing (XCPM power management).
+
+  \emph{Note}: This option should avoided whenever possible. Modern firmwares provide
+  \texttt{CFG Lock} setting, disabling which is much cleaner. More details
+  about the issue can be found in
+  \href{https://github.com/acidanthera/AptioFixPkg#verifymsre2}{VerifyMsrE2} notes.
+
+\item
   \texttt{ExternalDiskIcons}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
