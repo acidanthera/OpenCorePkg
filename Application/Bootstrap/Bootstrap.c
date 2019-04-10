@@ -111,7 +111,7 @@ StartOpenCore (
     );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "BS: Failed to locate bootstrap protocol - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "BS: Failed to locate bootstrap protocol - %r\n", Status));
     return;
   }
 

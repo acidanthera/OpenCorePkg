@@ -181,7 +181,7 @@ OcProvideConsoleGop (
   Status = gBS->HandleProtocol (gST->ConsoleOutHandle, &gEfiGraphicsOutputProtocolGuid, &Gop);
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "Missing GOP on ConsoleOutHandle - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "Missing GOP on ConsoleOutHandle - %r\n", Status));
     Status = gBS->LocateProtocol (&gEfiGraphicsOutputProtocolGuid, NULL, &Gop);
 
     if (!EFI_ERROR (Status)) {
