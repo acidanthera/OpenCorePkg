@@ -51,6 +51,7 @@ mOpenCoreStartImageNest;
 
 STATIC
 EFI_STATUS
+EFIAPI
 OcEfiStartImage (
   IN  EFI_HANDLE                  ImageHandle,
   OUT UINTN                       *ExitDataSize,
