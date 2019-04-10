@@ -228,6 +228,7 @@ OcLogAddEntry  (
     }
 
     if (OcLog->Delay > 0) {
+      gST->ConOut->OutputString (gST->ConOut, L"Halting on critical error\r\n");
       gBS->Stall (OcLog->Delay);
     }
 
