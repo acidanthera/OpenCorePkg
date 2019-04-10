@@ -31,7 +31,7 @@
   frame=tb,
   columns=fullflexible,
   captionpos=b,
-  morekeywords={git, make, build, ioreg, grep, nvram},
+  morekeywords={git, make, build, ioreg, grep, nvram, sort},
   literate =
     {"}{{\textquotedbl}}1
     {'}{{\textquotesingle}}1
@@ -451,6 +451,43 @@ make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
 
+\texttt{NOOPT} or \texttt{DEBUG} build modes instead of \texttt{RELEASE}
+can produce a lot more debug output. With \texttt{NOOPT} source level debugging with
+GDB or IDA Pro is also available. For GDB check
+\href{https://github.com/acidanthera/OcSupportPkg/tree/master/Debug}{OcSupport Debug}
+page. For IDA Pro you will need IDA Pro 7.3 or newer.
+
+For IDE usage Xcode projects are available in the root of the repositories. Another
+approach could be \href{https://www.sublimetext.com}{Sublime Text} with
+\href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
+Add \texttt{.clang\_complete} file with similar content to your UDK root:
+
+\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash]
+-I/UefiPackages/MdePkg
+-I/UefiPackages/MdePkg/Include
+-I/UefiPackages/MdePkg/Include/X64
+-I/UefiPackages/EfiPkg
+-I/UefiPackages/EfiPkg/Include
+-I/UefiPackages/EfiPkg/Include/X64
+-I/UefiPackages/AptioFixPkg/Include
+-I/UefiPackages/AppleSupportPkg/Include
+-I/UefiPackages/OpenCorePkg/Include
+-I/UefiPackages/OcSupportPkg/Include
+-I/UefiPackages/IntelFrameworkPkg/Include
+-IInclude
+-include
+/UefiPackages/MdePkg/Include/Uefi.h
+-fshort-wchar
+-Wall
+-Wextra
+-Wno-unused-parameter
+-Wno-missing-braces
+-Wno-missing-field-initializers
+-Wno-tautological-compare
+-Wno-sign-compare
+-Wno-varargs 
+-Wno-unused-const-variable
+\end{lstlisting}
 
 \section{ACPI}\label{acpi}
 
@@ -478,7 +515,7 @@ some of those are provided as a part of OpenCore.
   tables. Example values include \texttt{DSDT.aml}, \texttt{SSDT-8.aml},
   \texttt{SSDT-USBX.aml}, etc. ACPI table load order follows the item order in the array.
 
-  \textbf{Note}: all values but \texttt{DSDT.aml} insert new ables into ACPI stack.
+  \textbf{Note}: All values but \texttt{DSDT.aml} insert new ables into ACPI stack.
   \texttt{DSDT.aml}, unlike the rest, performs replacement of DSDT table.
 \item
   \texttt{Block}\\
@@ -1169,7 +1206,7 @@ behaviour that does not go to any other sections
   \emph{Note}: To obtain Data Hub log use the following command
   in macOS:
 \begin{lstlisting}[label=dhublog, style=ocbash]
-ioreg -lw0 -p IODeviceTree | grep boot-log | sed 's/.*<\(.*\)>.*/\1/' | xxd -r -p
+ioreg -lw0 -p IODeviceTree | grep boot-log | sort | sed 's/.*<\(.*\)>.*/\1/' | xxd -r -p
 \end{lstlisting}
 
   \emph{Note}: UEFI variable log may get truncated on some firmwares.
@@ -1718,7 +1755,7 @@ for system configuration.
   \texttt{ROM}\\
   \textbf{Type}: \texttt{plist\ data}, 6 bytes\\
   \textbf{Default value}: Not installed\\
-  \textbf{Description}: Specifies the values of of NVRAM variables
+  \textbf{Description}: Specifies the values of NVRAM variables
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_ROM} and
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}.
 
@@ -1948,7 +1985,7 @@ Apple ROM Version
   for more details.
 \item
   \texttt{FirmwareFeatures}\\
-  \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
+  \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
   \textbf{Default value}: \texttt{0}\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE128} -
   \texttt{FirmwareFeatures} and \texttt{ExtendedFirmwareFeatures}\\
@@ -1958,7 +1995,7 @@ Apple ROM Version
   64 bits match \texttt{ExtendedFirmwareFeatures}.
 \item
   \texttt{FirmwareFeaturesMask}\\
-  \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
+  \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
   \textbf{Default value}: \texttt{0}\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE128} -
   \texttt{FirmwareFeaturesMask} and
