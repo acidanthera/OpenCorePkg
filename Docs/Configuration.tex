@@ -31,7 +31,7 @@
   frame=tb,
   columns=fullflexible,
   captionpos=b,
-  morekeywords={git, make, build, ioreg, grep, nvram, sort},
+  morekeywords={git, make, build, ioreg, grep, nvram, sort, sudo, diskutil},
   literate =
     {"}{{\textquotedbl}}1
     {'}{{\textquotesingle}}1
@@ -1217,6 +1217,12 @@ behaviour that does not go to any other sections
   To obtain booter path use the following command in macOS:
 \begin{lstlisting}[label=nvrampath, style=ocbash]
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path
+\end{lstlisting}
+
+  To use booter path for mounting booter volume use the following command in macOS:
+\begin{lstlisting}[label=nvrampathmount, style=ocbash]
+u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\),.*/\1/'); \
+  if [ "$u" != "" ]; then sudo diskutil mount $u ; fi
 \end{lstlisting}
 
 

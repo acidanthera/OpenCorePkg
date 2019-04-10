@@ -223,14 +223,21 @@ OcMain (
     (UINTN) mOpenCoreConfiguration.Misc.Security.HaltLevel
     );
 
+  DEBUG ((DEBUG_INFO, "OC: OpenCore is now loading...\n"));
+
   if (mOpenCoreConfiguration.Misc.Debug.ExposeBootPath) {
     OcStoreLoadPath (LoadPath);
   }
 
   OcCpuScanProcessor (&CpuInfo);
+
+  DEBUG ((DEBUG_INFO, "OC: OcLoadUefiSupport...\n"));
   OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &CpuInfo);
+  DEBUG ((DEBUG_INFO, "OC: OcLoadPlatformSupport...\n"));
   OcLoadPlatformSupport (&mOpenCoreConfiguration, &CpuInfo);
+  DEBUG ((DEBUG_INFO, "OC: OcLoadDevPropsSupport...\n"));
   OcLoadDevPropsSupport (&mOpenCoreConfiguration);
+  DEBUG ((DEBUG_INFO, "OC: OcLoadNvramSupport...\n"));
   OcLoadNvramSupport (&mOpenCoreConfiguration);
 
   //
@@ -241,6 +248,8 @@ OcMain (
   gBS->StartImage = OcEfiStartImage;
   gBS->Hdr.CRC32 = 0;
   gBS->CalculateCrc32 (gBS, gBS->Hdr.HeaderSize, &gBS->Hdr.CRC32);
+
+  DEBUG ((DEBUG_INFO, "OC: OpenCore is loaded, showing boot menu...\n"));
 
   Status = OcRunSimpleBootMenu (
     OC_SCAN_DEFAULT_POLICY,

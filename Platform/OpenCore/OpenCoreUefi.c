@@ -112,6 +112,15 @@ OcLoadDrivers (
       gBS->UnloadImage (ImageHandle);
     }
 
+    if (!EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: Driver %a at %u is successfully loaded!\n",
+        OC_BLOB_GET (Config->Uefi.Drivers.Values[Index]),
+        Index
+        ));
+    }
+
     FreePool (Driver);
   }
 }
@@ -239,6 +248,8 @@ OcLoadUefiSupport (
   }
 
   OcLoadDrivers (Storage, Config);
+
+  DEBUG ((DEBUG_INFO, "OC: Connecting drivers..."));
 
   if (Config->Uefi.ConnectDrivers) {
     OcConnectDrivers ();
