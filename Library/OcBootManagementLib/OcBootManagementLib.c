@@ -874,7 +874,14 @@ OcRunSimpleBootMenu (
     TimeoutSeconds = 0;
 
     if (!EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "Should boot from %s\n", Chosen->Name));
+      DEBUG ((
+        DEBUG_INFO,
+        "Should boot from %s (Windows %d, Recovery %d, Folder %d)\n",
+        Chosen->Name,
+        Chosen->IsWindows,
+        Chosen->IsRecovery,
+        Chosen->IsFolder
+        ));
     }
 
     if (!EFI_ERROR (Status)) {
