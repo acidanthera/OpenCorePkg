@@ -18,7 +18,7 @@
 #include <IndustryStandard/AppleSmBios.h>
 
 // TODO: Use PCD?
-#define LOG_SMBIOS
+//#define LOG_SMBIOS
 
 #ifdef LOG_SMBIOS
   #define DEBUG_SMBIOS(arg) DEBUG (arg)
