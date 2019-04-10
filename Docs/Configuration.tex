@@ -530,8 +530,8 @@ some of those are provided as a part of OpenCore.
   \texttt{Patch}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Default value}: Empty\\
-  \textbf{Description}: Perform binary patches in ACPI tables after
-  table addition and removal.
+  \textbf{Description}: Perform binary patches in ACPI tables before
+  table addition or removal.
 
   Designed to be filled with \texttt{plist\ dictionary} values describing each
   patch entry. See \hyperref[acpipropspatch]{Patch Properties} section below.
@@ -902,7 +902,7 @@ blocking.
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Default value}: Empty\\
   \textbf{Description}: Perform binary patches in kernel and drivers prior to
-  driver addition and removal (FIXME: consistency with ACPI?).
+  driver addition and removal.
 
   Designed to be filled with \texttt{plist\ dictionary} values, describing each
   patch. See \hyperref[kernelpropspatch]{Patch Properties} section below.

@@ -196,11 +196,11 @@ OcLoadAcpiSupport (
     AcpiLoadRegions (&Context);
   }
 
+  OcAcpiPatchTables (Config, &Context);
+
   OcAcpiBlockTables (Config, &Context);
 
   OcAcpiAddTables (Config, Storage, &Context);
-
-  OcAcpiPatchTables (Config, &Context);
 
   if (Config->Acpi.Quirks.FadtEnableReset) {
     AcpiFadtEnableReset (&Context);
