@@ -275,9 +275,13 @@ OcKernelApplyPatches (
     Patch.Limit   = UserPatch->Limit;
 
     Status = PatcherApplyGenericPatch (&Patcher, &Patch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "OC: Kernel patcher failed %u for %a - %r\n", Index, Target, Status));
-    }
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_INFO : DEBUG_WARN,
+      "OC: Kernel patcher result %u for %a - %r\n",
+      Index,
+      Target,
+      Status
+      ));
   }
 
   if (!IsKernelPatch) {

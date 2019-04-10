@@ -1264,8 +1264,8 @@ u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\
   Depending on the build type (\texttt{RELEASE}, \texttt{DEBUG}, or
   \texttt{NOOPT}) different amount of logging may be read (from least to most).
 
-  To obtain Data Hub log use the following command
-  in macOS:
+  Data Hub log will not log kernel and kext patches. To obtain Data Hub log use
+  the following command in macOS:
 \begin{lstlisting}[label=dhublog, style=ocbash]
 ioreg -lw0 -p IODeviceTree | grep boot-log | sort | sed 's/.*<\(.*\)>.*/\1/' | xxd -r -p
 \end{lstlisting}
