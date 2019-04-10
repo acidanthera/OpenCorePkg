@@ -112,7 +112,7 @@ OcLogAddEntry  (
   PLATFORM_DATA_HEADER   *Entry;
   UINTN                  KeySize;
   UINTN                  DataSize;
-  UINTN                  TotalSize;
+  UINT32                 TotalSize;
 
   Private = OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog);
 
