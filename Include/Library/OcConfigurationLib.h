@@ -202,7 +202,7 @@
   OC_DECLARE (OC_MISC_DEBUG)
 
 #define OC_MISC_SECURITY_FIELDS(_, __) \
-  _(UINT64                      , HaltLevel                   ,     , DEBUG_ERROR  , ())
+  _(UINT64                      , HaltLevel                   ,     , 0x80000000   , ())
   OC_DECLARE (OC_MISC_SECURITY)
 
 #define OC_MISC_CONFIG_FIELDS(_, __) \

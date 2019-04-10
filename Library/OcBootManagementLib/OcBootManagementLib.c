@@ -663,6 +663,7 @@ OcScanForBootEntries (
   UINTN                     Index;
   OC_BOOT_ENTRY             *Entries;
   UINTN                     EntryIndex;
+  CHAR16                    *DevicePath;
 
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
@@ -702,10 +703,35 @@ OcScanForBootEntries (
   FreePool (Handles);
 
   if (Describe) {
+    DEBUG ((DEBUG_INFO, "Scanning got %u entries\n", (UINT32) EntryIndex));
+
     for (Index = 0; Index < EntryIndex; ++Index) {
       Status = OcDescribeBootEntry (BootPolicy, &Entries[Index]);
       if (EFI_ERROR (Status)) {
         break;
+      }
+
+      DEBUG ((
+        DEBUG_INFO,
+        "Entry %u is %s at %s (W:%d|R:%d|F:%d)\n",
+        (UINT32) Index,
+        Entries[Index].Name,
+        Entries[Index].PathName,
+        Entries[Index].IsWindows,
+        Entries[Index].IsRecovery,
+        Entries[Index].IsFolder
+        ));
+
+      DevicePath = ConvertDevicePathToText(Entries[Index].DevicePath, FALSE, FALSE);
+      if (DevicePath != NULL) {
+        DEBUG ((
+          DEBUG_INFO,
+          "Entry %u is %s at dp %s\n",
+          (UINT32) Index,
+          Entries[Index].Name,
+          DevicePath
+          ));
+        FreePool (DevicePath);
       }
     }
 
@@ -852,7 +878,7 @@ OcRunSimpleBootMenu (
       return Status;
     }
 
-    DEBUG ((DEBUG_INFO, "Performing OcShowSimpleBootMenu..."));
+    DEBUG ((DEBUG_INFO, "Performing OcShowSimpleBootMenu...\n"));
 
     //
     // TODO: obtain default entry!
