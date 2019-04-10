@@ -249,7 +249,7 @@ ApplyKextPatches (
   PRELINKED_CONTEXT  *Context
   )
 {
-  PatchAppleIntelCPUPowerManagement (Context);
+  PatchAppleCpuPmCfgLock (Context);
 
   PatchUsbXhciPortLimit (Context);
 
