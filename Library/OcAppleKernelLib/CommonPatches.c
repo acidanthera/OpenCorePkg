@@ -90,13 +90,13 @@ mAppleIntelCPUPowerManagementPatch2 = {
 };
 
 RETURN_STATUS
-PatchAppleIntelCPUPowerManagement (
+PatchAppleCpuPmCfgLock (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
   RETURN_STATUS       Status;
   RETURN_STATUS       Status2;
-  PATCHER_CONTEXT  Patcher;
+  PATCHER_CONTEXT     Patcher;
 
   Status = PatcherInitContextFromPrelinked (
     &Patcher,
@@ -122,6 +122,69 @@ PatchAppleIntelCPUPowerManagement (
   }
 
   return RETURN_ERROR (Status) ? Status : Status2;
+}
+
+#pragma pack(push, 1)
+
+//
+// XCPM record definition, extracted from XNU debug kernel.
+//
+typedef struct XCPM_MSR_RECORD_ {
+  UINT32  xcpm_msr_num;
+  UINT32  xcpm_msr_applicable_cpus;
+  UINT32  *xcpm_msr_flag_p;
+  UINT64  xcpm_msr_bits_clear;
+  UINT64  xcpm_msr_bits_set;
+  UINT64  xcpm_msr_initial_value;
+  UINT64  xcpm_msr_rb_value;
+} XCPM_MSR_RECORD;
+
+#pragma pack(pop)
+
+RETURN_STATUS
+PatchAppleXcpmCfgLock (
+  IN OUT PATCHER_CONTEXT  *Patcher
+  )
+{
+  RETURN_STATUS       Status;
+  XCPM_MSR_RECORD     *Record;
+  XCPM_MSR_RECORD     *Last;
+
+  UINT32              Replacements;
+
+  Last = (XCPM_MSR_RECORD *) ((UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext)
+    + MachoGetFileSize (&Patcher->MachContext) - sizeof (XCPM_MSR_RECORD));
+
+  Replacements = 0;
+
+  Status = PatcherGetSymbolAddress (Patcher, "_xcpm_core_scope_msrs", (UINT8 **) &Record);
+  if (!RETURN_ERROR (Status)) {
+    while (Record < Last) {
+      if (Record->xcpm_msr_num == 0xE2) {
+        DEBUG ((
+          DEBUG_INFO,
+          "Replacing _xcpm_core_scope_msrs data %u %u\n",
+          Record->xcpm_msr_num,
+          Record->xcpm_msr_applicable_cpus
+          ));
+        Record->xcpm_msr_applicable_cpus = 0;
+        ++Replacements;
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "Not matching _xcpm_core_scope_msrs data %u %u\n",
+          Record->xcpm_msr_num,
+          Record->xcpm_msr_applicable_cpus
+          ));
+        break;
+      }
+      ++Record;
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "Failed to locate _xcpm_core_scope_msrs - %r\n", Status));
+  }
+
+  return Replacements > 0 ? EFI_SUCCESS : EFI_NOT_FOUND;
 }
 
 STATIC

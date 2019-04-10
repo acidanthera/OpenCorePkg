@@ -401,8 +401,20 @@ PatcherBlockKext (
   @return  EFI_SUCCESS on success.
 **/
 RETURN_STATUS
-PatchAppleIntelCPUPowerManagement (
+PatchAppleCpuPmCfgLock (
   IN OUT PRELINKED_CONTEXT  *Context
+  );
+
+/**
+  Apply MSR E2 patches to XNU kernel (XCPM).
+
+  @param Patcher  Patcher context.
+
+  @return  EFI_SUCCESS on success.
+**/
+RETURN_STATUS
+PatchAppleXcpmCfgLock (
+  IN OUT PATCHER_CONTEXT  *Patcher
   );
 
 /**
