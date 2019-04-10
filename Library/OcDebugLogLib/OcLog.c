@@ -381,7 +381,7 @@ OcConfigureLogProtocol (
     //
     OcLog->Options      = Options;
     OcLog->Delay        = Delay;
-    OcLog->DisplayLevel = DisplayLevel & PcdGet8 (PcdDebugPropertyMask);
+    OcLog->DisplayLevel = DisplayLevel;
     OcLog->HaltLevel    = HaltLevel;
 
     //
@@ -406,7 +406,7 @@ OcConfigureLogProtocol (
       Private->OcLog.ResetTimers  = OcLogResetTimers;
       Private->OcLog.Options      = Options;
       Private->OcLog.Delay        = Delay;
-      Private->OcLog.DisplayLevel = DisplayLevel & PcdGet8 (PcdDebugPropertyMask);
+      Private->OcLog.DisplayLevel = DisplayLevel;
       Private->OcLog.HaltLevel    = HaltLevel;
 
       Handle = NULL;
