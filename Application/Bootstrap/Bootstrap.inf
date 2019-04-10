@@ -56,3 +56,4 @@
   OcDevicePathLib
   OcFileLib
   OcStringLib
+  OcTimerLib
