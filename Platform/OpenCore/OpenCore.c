@@ -174,19 +174,20 @@ OcMain (
     mOpenCoreConfiguration.Misc.Debug.Delay
     );
 
-  //
-  // This is required to catch UEFI Shell boot if any.
-  //
-  mOcOriginalStartImage = gBS->StartImage;
-  gBS->StartImage = OcEfiStartImage;
-  gBS->Hdr.CRC32 = 0;
-  gBS->CalculateCrc32 (gBS, gBS->Hdr.HeaderSize, &gBS->Hdr.CRC32);
-
   OcCpuScanProcessor (&CpuInfo);
   OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &CpuInfo);
   OcLoadPlatformSupport (&mOpenCoreConfiguration, &CpuInfo);
   OcLoadDevPropsSupport (&mOpenCoreConfiguration);
   OcLoadNvramSupport (&mOpenCoreConfiguration);
+
+  //
+  // This is required to catch UEFI Shell boot if any.
+  // We do it as late as possible to let other drivers install their hooks.
+  //
+  mOcOriginalStartImage = gBS->StartImage;
+  gBS->StartImage = OcEfiStartImage;
+  gBS->Hdr.CRC32 = 0;
+  gBS->CalculateCrc32 (gBS, gBS->Hdr.HeaderSize, &gBS->Hdr.CRC32);
 
   Status = OcRunSimpleBootMenu (
     OC_SCAN_DEFAULT_POLICY,
