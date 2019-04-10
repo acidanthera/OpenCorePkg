@@ -836,7 +836,7 @@ OcRunSimpleBootMenu (
   }
 
   while (TRUE) {
-    DEBUG ((DEBUG_INFO, "Performing OcScanForBootEntries..."));
+    DEBUG ((DEBUG_INFO, "Performing OcScanForBootEntries...\n"));
 
     Status = OcScanForBootEntries (
       AppleBootPolicy,
