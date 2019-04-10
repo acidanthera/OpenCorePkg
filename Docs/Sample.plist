@@ -454,13 +454,6 @@
 	<dict>
 		<key>Add</key>
 		<dict>
-			<key>4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14</key>
-			<dict>
-				<key>FirmwareFeatures</key>
-				<data>N+EP6A==</data>
-				<key>FirmwareFeaturesMask</key>
-				<data>P/8f/w==</data>
-			</dict>
 			<key>7C436110-AB2A-4BBB-A880-FE41995C9F82</key>
 			<dict>
 				<key>boot-args</key>
@@ -537,6 +530,10 @@
 			<string>M000000000001</string>
 			<key>ROM</key>
 			<data>ESIzAAAA</data>
+			<key>FirmwareFeatures</key>
+			<data>N+EP6AAAAAA=</data>
+			<key>FirmwareFeaturesMask</key>
+			<data>P/8f/wAAAAA=</data>
 		</dict>
 		<key>SMBIOS</key>
 		<dict>

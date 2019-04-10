@@ -249,7 +249,7 @@ OcLoadUefiSupport (
 
   OcLoadDrivers (Storage, Config);
 
-  DEBUG ((DEBUG_INFO, "OC: Connecting drivers..."));
+  DEBUG ((DEBUG_INFO, "OC: Connecting drivers...\n"));
 
   if (Config->Uefi.ConnectDrivers) {
     OcConnectDrivers ();

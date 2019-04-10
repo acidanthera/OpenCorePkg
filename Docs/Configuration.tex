@@ -1369,6 +1369,12 @@ A continuously updated variable list can be found in a corresponding document:
 
 \subsection{Mandatory Variables}\label{nvramvars}
 
+\emph{Warning}: These variables may be added by
+\hyperref[platforminfonvram]{PlatformNVRAM} or
+\hyperref[platforminfogeneric]{Generic} subsections of
+\hyperref[platforminfo]{PlatformInfo} section.
+Using \texttt{PlatformInfo} is the recommend way of setting these variables.
+
 The following variables are mandatory for macOS functioning:
 
 \begin{itemize}
@@ -1660,6 +1666,7 @@ for system configuration.
   \textbf{Default value}: all zero\\
   \textbf{Description}: Refer to
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}.
+
 \end{enumerate}
 
 \subsection{DataHub Properties}\label{platforminfodatahub}
@@ -1839,6 +1846,30 @@ for system configuration.
   \textbf{Description}: Specifies the values of NVRAM variables
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_MLB} and
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:MLB}.
+
+\item
+  \texttt{FirmwareFeatures}\\
+  \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
+  \textbf{Default value}: Not installed\\
+  \textbf{Description}: This variable comes in pair with \texttt{FirmwareFeaturesMask}.
+  Specifies the values of NVRAM variables:
+  \begin{itemize}
+  \tightlist
+  \item \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:FirmwareFeatures}
+  \item \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ExtendedFirmwareFeatures}
+  \end{itemize}
+
+\item
+  \texttt{FirmwareFeaturesMask}\\
+  \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
+  \textbf{Default value}: Not installed\\
+  \textbf{Description}: This variable comes in pair with \texttt{FirmwareFeatures}.
+  Specifies the values of NVRAM variables:
+  \begin{itemize}
+  \tightlist
+  \item \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:FirmwareFeaturesMask}
+  \item \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ExtendedFirmwareFeaturesMask}
+  \end{itemize}
 
 \end{enumerate}
 

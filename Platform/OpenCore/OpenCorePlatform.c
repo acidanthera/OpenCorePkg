@@ -243,13 +243,21 @@ OcPlatformUpdateNvram (
   )
 {
   EFI_STATUS   Status;
-  CHAR8  *Bid;
-  CHAR8  *Mlb;
-  UINT8  *Rom;
+  CHAR8        *Bid;
+  CHAR8        *Mlb;
+  UINT8        *Rom;
+  UINT64       ExFeatures;
+  UINT64       ExFeaturesMask;
+  UINT32       Features;
+  UINT32       FeaturesMask;
 
-  Bid = OC_BLOB_GET (&Config->PlatformInfo.Nvram.Bid);
-  Mlb = OC_BLOB_GET (&Config->PlatformInfo.Nvram.Mlb);
-  Rom = &Config->PlatformInfo.Nvram.Rom[0];
+  Bid            = OC_BLOB_GET (&Config->PlatformInfo.Nvram.Bid);
+  Mlb            = OC_BLOB_GET (&Config->PlatformInfo.Nvram.Mlb);
+  Rom            = &Config->PlatformInfo.Nvram.Rom[0];
+  ExFeatures     = Config->PlatformInfo.Nvram.FirmwareFeatures;
+  ExFeaturesMask = Config->PlatformInfo.Nvram.FirmwareFeaturesMask;
+  Features       = (UINT32) ExFeatures;
+  FeaturesMask   = (UINT32) ExFeaturesMask;
 
   if (Bid[0] != '\0') {
     Status = gRT->SetVariable (
@@ -277,8 +285,8 @@ OcPlatformUpdateNvram (
       );
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-      "OC: Setting HW_ROM %a - %r\n",
-      Bid,
+      "OC: Setting HW_ROM %02x:%02x:%02x:%02x:%02x:%02x - %r\n",
+      Rom[0], Rom[1], Rom[2], Rom[3], Rom[4], Rom[5],
       Status
       ));
 
@@ -291,8 +299,8 @@ OcPlatformUpdateNvram (
       );
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-      "OC: Setting ROM %a - %r\n",
-      Bid,
+      "OC: Setting ROM %02x:%02x:%02x:%02x:%02x:%02x - %r\n",
+      Rom[0], Rom[1], Rom[2], Rom[3], Rom[4], Rom[5],
       Status
       ));
   }
@@ -308,7 +316,7 @@ OcPlatformUpdateNvram (
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
       "OC: Setting HW_MLB %a - %r\n",
-      Bid,
+      Mlb,
       Status
       ));
 
@@ -322,7 +330,65 @@ OcPlatformUpdateNvram (
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
       "OC: Setting MLB %a - %r\n",
-      Bid,
+      Mlb,
+      Status
+      ));
+  }
+
+  if (ExFeatures != 0 || ExFeaturesMask != 0) {
+    Status = gRT->SetVariable (
+      L"FirmwareFeatures",
+      &gAppleVendorVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+      sizeof (Features),
+      &Features
+      );
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Setting FirmwareFeatures %08x - %r\n",
+      Features,
+      Status
+      ));
+
+    Status = gRT->SetVariable (
+      L"ExtendedFirmwareFeatures",
+      &gAppleVendorVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+      sizeof (ExFeatures),
+      &ExFeatures
+      );
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Setting ExtendedFirmwareFeatures %016Lx - %r\n",
+      ExFeatures,
+      Status
+      ));
+
+    Status = gRT->SetVariable (
+      L"FirmwareFeaturesMask",
+      &gAppleVendorVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+      sizeof (FeaturesMask),
+      &FeaturesMask
+      );
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Setting FirmwareFeaturesMask %08x - %r\n",
+      FeaturesMask,
+      Status
+      ));
+
+    Status = gRT->SetVariable (
+      L"ExtendedFirmwareFeaturesMask",
+      &gAppleVendorVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+      sizeof (ExFeaturesMask),
+      &ExFeaturesMask
+      );
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Setting ExtendedFirmwareFeaturesMask %016Lx - %r\n",
+      ExFeaturesMask,
       Status
       ));
   }
