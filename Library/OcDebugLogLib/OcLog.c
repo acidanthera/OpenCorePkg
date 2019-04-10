@@ -110,7 +110,7 @@ OcLogAddEntry  (
   UINT32                 TimingLength;
   UINT32                 LineLength;
   PLATFORM_DATA_HEADER   *Entry;
-  UINTN                  KeySize;
+  UINT32                  KeySize;
   UINT32                 DataSize;
   UINT32                 TotalSize;
 
