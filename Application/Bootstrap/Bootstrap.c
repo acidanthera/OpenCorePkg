@@ -94,7 +94,8 @@ LoadOpenCore (
 STATIC
 VOID
 StartOpenCore (
-  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL   *FileSystem
+  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL   *FileSystem,
+  IN EFI_HANDLE                        LoadHandle
   )
 {
   EFI_STATUS             Status;
@@ -112,7 +113,17 @@ StartOpenCore (
     return;
   }
 
-  Bootstrap->ReRun (Bootstrap, FileSystem);
+  if (Bootstrap->Revision != OC_BOOTSTRAP_PROTOCOL_REVISION) {
+    DEBUG ((
+      DEBUG_ERROR,
+      "BS: Unsupported bootstrap protocol %u vs %u\n",
+      Bootstrap->Revision,
+      OC_BOOTSTRAP_PROTOCOL_REVISION
+      ));
+    return;
+  }
+
+  Bootstrap->ReRun (Bootstrap, FileSystem, LoadHandle);
 }
 
 EFI_STATUS
@@ -168,7 +179,7 @@ UefiMain (
   //
 
   DEBUG ((DEBUG_INFO, "BS: Trying to start loaded OpenCore image...\n"));
-  StartOpenCore (FileSystem);
+  StartOpenCore (FileSystem, LoadedImage->FilePath);
 
   DEBUG ((DEBUG_INFO, "BS: Trying to load OpenCore image...\n"));
   Status = LoadOpenCore (FileSystem, ImageHandle, &OcImageHandle);
@@ -177,7 +188,7 @@ UefiMain (
     return EFI_NOT_FOUND;
   }
 
-  StartOpenCore (FileSystem);
+  StartOpenCore (FileSystem, LoadedImage->FilePath);
   DEBUG ((DEBUG_ERROR, "BS: Failed to start OpenCore image...\n"));
 
   return EFI_NOT_FOUND;

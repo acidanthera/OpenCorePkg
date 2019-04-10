@@ -28,7 +28,7 @@
 ///
 /// OC_BOOTSTRAP_PROTOCOL revision
 ///
-#define OC_BOOTSTRAP_PROTOCOL_REVISION 1
+#define OC_BOOTSTRAP_PROTOCOL_REVISION 2
 
 ///
 /// Forward declaration of OC_BOOTSTRAP_PROTOCOL structure.
@@ -40,12 +40,14 @@ typedef struct OC_BOOTSTRAP_PROTOCOL_ OC_BOOTSTRAP_PROTOCOL;
 
   @param[in] This           This protocol.
   @param[in] FileSystem     File system to bootstrap in.
+  @param[in] LoadPath       EFI device path to loaded image.
 **/
 typedef
 VOID
 (EFIAPI *OC_BOOTSTRAP_RERUN) (
   IN OC_BOOTSTRAP_PROTOCOL            *This,
-  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem
+  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
+  IN EFI_DEVICE_PATH_PROTOCOL         *LoadPath  OPTIONAL
   );
 
 ///

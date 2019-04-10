@@ -23,10 +23,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
-STATIC
-CONST UINT32
-mDefaultAttributes = EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS;
-
 VOID
 OcLoadNvramSupport (
   IN OC_GLOBAL_CONFIG    *Config
@@ -131,7 +127,7 @@ OcLoadNvramSupport (
         Status = gRT->SetVariable (
           UnicodeVariableName,
           &VariableGuid,
-          mDefaultAttributes,
+          OPEN_CORE_NVRAM_ATTR,
           VariableSize,
           VariableData
           );

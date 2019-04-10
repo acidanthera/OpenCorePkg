@@ -31,6 +31,8 @@
 
 #define OPEN_CORE_KEXT_PATH        L"Kexts\\"
 
+#define OPEN_CORE_NVRAM_ATTR       (EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS)
+
 /**
   Load ACPI compatibility support like custom tables.
 

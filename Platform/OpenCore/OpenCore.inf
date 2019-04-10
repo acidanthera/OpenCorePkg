@@ -51,6 +51,9 @@
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
 
+[Guids]
+  gOcLogVariableGuid
+
 [Protocols]
   gEfiDevicePathProtocolGuid          ## CONSUMES
   gEfiDevicePathProtocolGuid          ## CONSUMES

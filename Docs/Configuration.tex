@@ -485,7 +485,7 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -Wno-missing-field-initializers
 -Wno-tautological-compare
 -Wno-sign-compare
--Wno-varargs 
+-Wno-varargs
 -Wno-unused-const-variable
 \end{lstlisting}
 
@@ -1165,6 +1165,13 @@ behaviour that does not go to any other sections
   \textbf{Description}: Apply debug configuration described in
   \hyperref[miscdebugprops]{Debug Properties} section below.
 
+\item
+  \texttt{Security}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Description}: Apply security configuration described in
+  \hyperref[miscsecurityprops]{Security Properties} section below.
+
+
 \end{enumerate}
 
 \subsection{Debug Properties}\label{miscdebugprops}
@@ -1180,36 +1187,71 @@ behaviour that does not go to any other sections
   Data Hub, or serial port.
 
 \item
+  \texttt{DisplayLevel}\\
+  \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
+  \textbf{Default value}: \texttt{0}\\
+  \textbf{Description}: EDK II debug level bitmask (sum) showed onscreen.
+  Unless \texttt{Target} enables console (onscreen) printing,
+  onscreen debug output will not be visible. The following levels
+  are supported (discover more in
+  \href{https://github.com/tianocore/edk2/blob/UDK2018/MdePkg/Include/Library/DebugLib.h}{DebugLib.h}):
+
+  \begin{itemize}
+  \tightlist
+    \item \texttt{0x00000002} --- \texttt{DEBUG\_WARN} in \texttt{DEBUG},
+      \texttt{NOOPT}, \texttt{RELEASE}.
+    \item \texttt{0x00000040} --- \texttt{DEBUG\_INFO} in \texttt{DEBUG},
+      \texttt{NOOPT}.
+    \item \texttt{0x00400000} --- \texttt{DEBUG\_VERBOSE} in custom builds.
+    \item \texttt{0x80000000} --- \texttt{DEBUG\_ERROR} in \texttt{DEBUG},
+      \texttt{NOOPT}, \texttt{RELEASE}.
+  \end{itemize}
+
+\item
+  \texttt{ExposeBootPath}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Expose printable booter path to OpenCore.efi or its booter
+  (depending on the load order) as an UEFI variable.
+
+  To obtain booter path use the following command in macOS:
+\begin{lstlisting}[label=nvrampath, style=ocbash]
+nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path
+\end{lstlisting}
+
+
+\item
   \texttt{Target}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Default value}: \texttt{0}\\
   \textbf{Description}: A bitmask (sum) of enabled logging targets.
   By default all the logging output is hidden, so this option is
-  required to be set when debugging is necessary. The following
-  logging targets are supported:
+  required to be set when debugging is necessary.
+
+  The following logging targets are supported:
 
   \begin{itemize}
   \tightlist
-    \item \texttt{ 1} --- Enable logging, otherwise all log is discarded.
-    \item \texttt{ 2} --- Enable basic console (onscreen) logging.
-    \item \texttt{ 4} --- Enable logging to Data Hub.
-    \item \texttt{ 8} --- Enable serial port logging.
-    \item \texttt{16} --- Enable UEFI variable logging.
-    \item \texttt{32} --- Enable non-volatile UEFI variable logging.
-    \item \texttt{64} --- Enable logging to file.
+    \item \texttt{0x01} --- Enable logging, otherwise all log is discarded.
+    \item \texttt{0x02} --- Enable basic console (onscreen) logging.
+    \item \texttt{0x04} --- Enable logging to Data Hub.
+    \item \texttt{0x08} --- Enable serial port logging.
+    \item \texttt{0x10} --- Enable UEFI variable logging.
+    \item \texttt{0x20} --- Enable non-volatile UEFI variable logging.
+    \item \texttt{0x40} --- Enable logging to file.
   \end{itemize}
 
-  \emph{Note}: Console logging prints less than all the other variants.
+  Console logging prints less than all the other variants.
   Depending on the build type (\texttt{RELEASE}, \texttt{DEBUG}, or
   \texttt{NOOPT}) different amount of logging may be read (from least to most).
 
-  \emph{Note}: To obtain Data Hub log use the following command
+  To obtain Data Hub log use the following command
   in macOS:
 \begin{lstlisting}[label=dhublog, style=ocbash]
 ioreg -lw0 -p IODeviceTree | grep boot-log | sort | sed 's/.*<\(.*\)>.*/\1/' | xxd -r -p
 \end{lstlisting}
 
-  \emph{Note}: UEFI variable log may get truncated on some firmwares.
+  UEFI variable log may get truncated on some firmwares.
   Using non-volatile flag will write the log to NVRAM flash after every
   printed line. To obtain UEFI variable log use the following command
   in macOS:
@@ -1220,6 +1262,18 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log | \
 
   \emph{Note}: File logging is currently not implemented.
 
+\end{enumerate}
+
+\subsection{Security Properties}\label{miscsecurityprops}
+
+\begin{enumerate}
+\item
+  \texttt{HaltLevel}\\
+  \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
+  \textbf{Default value}: \texttt{0x80000000} (\texttt{DEBUG\_ERROR})\\
+  \textbf{Description}: EDK II debug level bitmask (sum) causing CPU to
+  halt (stop execution) after obtaining a message of \texttt{HaltLevel}.
+  Possible values match \texttt{DisplayLevel} values.
 \end{enumerate}
 
 \section{NVRAM}\label{nvram}

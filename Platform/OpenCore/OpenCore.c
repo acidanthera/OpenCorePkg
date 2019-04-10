@@ -15,6 +15,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <OpenCore.h>
 #include <Uefi.h>
 
+#include <Guid/OcLogVariable.h>
+
 #include <Protocol/DevicePath.h>
 #include <Protocol/LoadedImage.h>
 #include <Protocol/OcBootstrap.h>
@@ -28,6 +30,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcCpuLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcStorageLib.h>
+#include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiDriverEntryPoint.h>
@@ -142,14 +145,57 @@ OcStartImage (
 
 STATIC
 VOID
-OcMain (
-  IN OC_STORAGE_CONTEXT  *Storage
+OcStoreLoadPath (
+  IN EFI_DEVICE_PATH_PROTOCOL  *LoadPath OPTIONAL
   )
 {
-  EFI_STATUS          Status;
-  CHAR8               *Config;
-  UINT32              ConfigSize;
-  OC_CPU_INFO         CpuInfo;
+  EFI_STATUS  Status;
+  CHAR16      *DevicePath;
+  CHAR8       OutPath[256];
+
+  if (LoadPath != NULL) {
+    DevicePath = ConvertDevicePathToText (LoadPath, FALSE, FALSE);
+    if (DevicePath != NULL) {
+      AsciiSPrint (OutPath, sizeof (OutPath), "%s", DevicePath);
+      FreePool (DevicePath);
+    } else {
+      LoadPath = NULL;
+    }
+  }
+
+  if (LoadPath == NULL) {
+    AsciiSPrint (OutPath, sizeof (OutPath), "Unknown");
+  }
+
+  Status = gRT->SetVariable (
+    OC_LOG_VARIABLE_PATH,
+    &gOcLogVariableGuid,
+    OPEN_CORE_NVRAM_ATTR,
+    AsciiStrSize (OutPath),
+    OutPath
+    );
+
+  DEBUG ((
+    EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+    "OC: Setting NVRAM %g:%a = %a - %r\n",
+    &gOcLogVariableGuid,
+    OC_LOG_VARIABLE_PATH,
+    OutPath,
+    Status
+    ));
+}
+
+STATIC
+VOID
+OcMain (
+  IN OC_STORAGE_CONTEXT        *Storage,
+  IN EFI_DEVICE_PATH_PROTOCOL  *LoadPath OPTIONAL
+  )
+{
+  EFI_STATUS                Status;
+  CHAR8                     *Config;
+  UINT32                    ConfigSize;
+  OC_CPU_INFO               CpuInfo;
 
   Config = OcStorageReadFileUnicode (
     Storage,
@@ -172,8 +218,14 @@ OcMain (
 
   OcConfigureLogProtocol (
     mOpenCoreConfiguration.Misc.Debug.Target,
-    mOpenCoreConfiguration.Misc.Debug.Delay
+    mOpenCoreConfiguration.Misc.Debug.Delay,
+    (UINTN) mOpenCoreConfiguration.Misc.Debug.DisplayLevel,
+    (UINTN) mOpenCoreConfiguration.Misc.Security.HaltLevel
     );
+
+  if (mOpenCoreConfiguration.Misc.Debug.ExposeBootPath) {
+    OcStoreLoadPath (LoadPath);
+  }
 
   OcCpuScanProcessor (&CpuInfo);
   OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &CpuInfo);
@@ -206,7 +258,8 @@ VOID
 EFIAPI
 OcBootstrapRerun (
   IN OC_BOOTSTRAP_PROTOCOL            *This,
-  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem
+  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
+  IN EFI_DEVICE_PATH_PROTOCOL         *LoadPath OPTIONAL
   )
 {
   EFI_STATUS          Status;
@@ -229,7 +282,7 @@ OcBootstrapRerun (
     return;
   }
 
-  OcMain (&mOpenCoreStorage);
+  OcMain (&mOpenCoreStorage, LoadPath);
 
   OcStorageFree (&mOpenCoreStorage);
 }
@@ -317,7 +370,7 @@ UefiMain (
   // Return success in either case to let rerun work afterwards.
   //
   if (FileSystem != NULL) {
-    mOpenCoreBootStrap.ReRun (&mOpenCoreBootStrap, FileSystem);
+    mOpenCoreBootStrap.ReRun (&mOpenCoreBootStrap, FileSystem, LoadedImage->FilePath);
     DEBUG ((DEBUG_ERROR, "OC: Failed to boot\n"));
   } else {
     DEBUG ((DEBUG_ERROR, "OC: Failed to locate file system\n"));

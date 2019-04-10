@@ -435,8 +435,17 @@
 		<dict>
 			<key>Delay</key>
 			<integer>0</integer>
+			<key>DisplayLevel</key>
+			<integer>2147483650</integer>
+			<key>ExposeBootPath</key>
+			<false/>
 			<key>Target</key>
 			<integer>7</integer>
+		</dict>
+		<key>Security</key>
+		<dict>
+			<key>HaltLevel</key>
+			<integer>2147483648</integer>
 		</dict>
 	</dict>
 	<key>NVRAM</key>
@@ -534,7 +543,7 @@
 			<key>BIOSVersion</key>
 			<string>142.0.0.0.0</string>
 			<key>BIOSReleaseDate</key>
-			<string>02/14/19</string>
+			<string>02/14/2019</string>
 			<key>SystemManufacturer</key>
 			<string></string>
 			<key>SystemProductName</key>
