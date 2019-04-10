@@ -530,7 +530,8 @@ DetectAppleProcessorType (
         return AppleProcessorTypeCorei9Type9; // 0x1009
       }
       if (AppleMajorType == AppleProcessorMajorI3) {
-        // for i3, not used by Apple, just for showing i3 in "About This Mac".
+        // FIXME: find a dump from MM71 with i3...
+        // for now using an idea value (0x0905)
         return AppleProcessorTypeCorei3Type5; // 0x0905
       }
       if (AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below

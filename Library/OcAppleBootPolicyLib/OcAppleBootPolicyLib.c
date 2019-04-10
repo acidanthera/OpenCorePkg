@@ -246,7 +246,7 @@ InternalGetBooterFromBlessedSystemFolderPath (
     return Status;
   }
 
-  if (!IsDevicePathValid(DevicePath, DevicePathSize)) {
+  if (!IsDevicePathValid (DevicePath, DevicePathSize)) {
     FreePool (DevicePath);
     return EFI_NOT_FOUND;
   }

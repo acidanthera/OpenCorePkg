@@ -387,15 +387,14 @@ AbsoluteDevicePath (
   }
 
   if (RelativePath == NULL) {
-    return HandlePath;
+    return DuplicateDevicePath (HandlePath);
   }
 
   NewPath = AppendDevicePath (HandlePath, RelativePath);
 
   if (NewPath == NULL) {
-    return HandlePath;
+    return DuplicateDevicePath (HandlePath);
   }
 
-  FreePool (HandlePath);
   return NewPath;
 }

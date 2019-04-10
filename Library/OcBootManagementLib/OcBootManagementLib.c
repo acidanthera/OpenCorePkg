@@ -232,6 +232,11 @@ SetBootEntryFlags (
   BootEntry->IsWindows  = FALSE;
 
   DevicePathWalker = BootEntry->DevicePath;
+
+  if (DevicePathWalker == NULL) {
+    return;
+  }
+
   while (!IsDevicePathEnd (DevicePathWalker)) {
     if ((DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
      && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)) {
@@ -831,6 +836,8 @@ OcRunSimpleBootMenu (
   }
 
   while (TRUE) {
+    DEBUG ((DEBUG_INFO, "Performing OcScanForBootEntries..."));
+
     Status = OcScanForBootEntries (
       AppleBootPolicy,
       LookupPolicy,
@@ -844,6 +851,8 @@ OcRunSimpleBootMenu (
       DEBUG ((DEBUG_ERROR, "OcScanForBootEntries failure - %r\n", Status));
       return Status;
     }
+
+    DEBUG ((DEBUG_INFO, "Performing OcShowSimpleBootMenu..."));
 
     //
     // TODO: obtain default entry!
