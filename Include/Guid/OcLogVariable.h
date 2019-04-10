@@ -17,6 +17,8 @@
 
 #define OC_LOG_VARIABLE_NAME  L"boot-log"
 
+#define OC_LOG_VARIABLE_PATH  L"boot-path"
+
 /// Definition for OcLog Variable
 /// 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102
 #define OC_LOG_VARIABLE_GUID                                                        \

@@ -38,6 +38,7 @@ OC_STRUCTORS       (OC_KERNEL_QUIRKS, ())
 OC_STRUCTORS       (OC_KERNEL_CONFIG, ())
 
 OC_STRUCTORS       (OC_MISC_DEBUG, ())
+OC_STRUCTORS       (OC_MISC_SECURITY, ())
 OC_STRUCTORS       (OC_MISC_CONFIG, ())
 
 OC_MAP_STRUCTORS   (OC_NVRAM_ADD_MAP)
@@ -234,14 +235,22 @@ STATIC
 OC_SCHEMA
 mMiscConfigurationDebugSchema[] = {
   OC_SCHEMA_INTEGER_IN ("Delay",            OC_GLOBAL_CONFIG, Misc.Debug.Delay),
+  OC_SCHEMA_INTEGER_IN ("DisplayLevel",     OC_GLOBAL_CONFIG, Misc.Debug.DisplayLevel),
+  OC_SCHEMA_BOOLEAN_IN ("ExposeBootPath",   OC_GLOBAL_CONFIG, Misc.Debug.ExposeBootPath),
   OC_SCHEMA_INTEGER_IN ("Target",           OC_GLOBAL_CONFIG, Misc.Debug.Target)
 };
 
+STATIC
+OC_SCHEMA
+mMiscConfigurationSecuritySchema[] = {
+  OC_SCHEMA_INTEGER_IN ("HaltLevel",        OC_GLOBAL_CONFIG, Misc.Security.HaltLevel),
+};
 
 STATIC
 OC_SCHEMA
 mMiscConfigurationSchema[] = {
   OC_SCHEMA_DICT       ("Debug",            mMiscConfigurationDebugSchema),
+  OC_SCHEMA_DICT       ("Security",         mMiscConfigurationSecuritySchema),
 };
 
 //

@@ -106,12 +106,15 @@ EFI_STATUS
 /// The structure exposed by the OC_LOG_PROTOCOL.
 struct OC_LOG_PROTOCOL_ {
   UINT32              Revision;     ///< The revision of the installed protocol.
-  OC_LOG_OPTIONS      Options;      ///< The current options of the installed protocol.
-  UINT32              Delay;        ///< The delay after printed message in microseconds.
+  UINTN               Reserved;     ///< Reserved for future extension.
   OC_LOG_ADD_ENTRY    AddEntry;     ///< A pointer to the AddEntry function.
   OC_LOG_GET_LOG      GetLog;       ///< A pointer to the GetLog function.
   OC_LOG_SAVE_LOG     SaveLog;      ///< A pointer to the SaveLog function.
   OC_LOG_RESET_TIMERS ResetTimers;  ///< A pointer to the ResetTimers function.
+  OC_LOG_OPTIONS      Options;      ///< The current options of the installed protocol.
+  UINT32              Delay;        ///< The delay after printed message in microseconds.
+  UINTN               DisplayLevel; ///< The error level visible onscreen.
+  UINTN               HaltLevel;    ///< The error level causing CPU dead loop.
 };
 
 /// A global variable storing the GUID of the OC_LOG_PROTOCOL.

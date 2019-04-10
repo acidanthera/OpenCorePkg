@@ -15,6 +15,7 @@
 #ifndef OC_CONFIGURATION_LIB_H
 #define OC_CONFIGURATION_LIB_H
 
+#include <Library/DebugLib.h>
 #include <Library/OcSerializeLib.h>
 
 /**
@@ -193,12 +194,19 @@
 **/
 
 #define OC_MISC_DEBUG_FIELDS(_, __) \
-  _(UINT32                      , Delay                       ,     , 0  , ()) \
-  _(UINT32                      , Target                      ,     , 0  , ())
+  _(UINT32                      , Delay                       ,     , 0            , ()) \
+  _(UINT64                      , DisplayLevel                ,     , 0            , ()) \
+  _(BOOLEAN                     , ExposeBootPath              ,     , FALSE        , ()) \
+  _(UINT32                      , Target                      ,     , 0            , ())
   OC_DECLARE (OC_MISC_DEBUG)
 
+#define OC_MISC_SECURITY_FIELDS(_, __) \
+  _(UINT64                      , HaltLevel                   ,     , DEBUG_ERROR  , ())
+  OC_DECLARE (OC_MISC_SECURITY)
+
 #define OC_MISC_CONFIG_FIELDS(_, __) \
-  _(OC_MISC_DEBUG              , Debug           ,     , OC_CONSTR2 (OC_MISC_DEBUG, _, __)        , OC_DESTR (OC_MISC_DEBUG))
+  _(OC_MISC_DEBUG              , Debug           ,     , OC_CONSTR2 (OC_MISC_DEBUG, _, __)        , OC_DESTR (OC_MISC_DEBUG)) \
+  _(OC_MISC_SECURITY           , Security        ,     , OC_CONSTR2 (OC_MISC_SECURITY, _, __)     , OC_DESTR (OC_MISC_SECURITY))
   OC_DECLARE (OC_MISC_CONFIG)
 
 /**

@@ -110,7 +110,7 @@ OcLogAddEntry  (
   UINT32                 TimingLength;
   UINT32                 LineLength;
   PLATFORM_DATA_HEADER   *Entry;
-  UINT32                  KeySize;
+  UINT32                 KeySize;
   UINT32                 DataSize;
   UINT32                 TotalSize;
 
@@ -142,7 +142,7 @@ OcLogAddEntry  (
     //
     // Send the string to the console output device.
     //
-    if ((OcLog->Options & OC_LOG_CONSOLE) != 0 && DebugPrintLevelEnabled (ErrorLevel)) {
+    if ((OcLog->Options & OC_LOG_CONSOLE) != 0 && (OcLog->DisplayLevel & ErrorLevel) != 0) {
       UnicodeSPrint (
         Private->UnicodeLineBuffer,
         sizeof (Private->UnicodeLineBuffer),
@@ -236,13 +236,8 @@ OcLogAddEntry  (
     //
 
     Status = AsciiStrCatS (Private->AsciiBuffer, Private->AsciiBufferSize, Private->TimingTxt);
-    if (EFI_ERROR (Status)) {
-      return Status;
-    }
-
-    Status = AsciiStrCatS (Private->AsciiBuffer, Private->AsciiBufferSize, Private->LineBuffer);
-    if (EFI_ERROR (Status)) {
-      return Status;
+    if (!EFI_ERROR (Status)) {
+      Status = AsciiStrCatS (Private->AsciiBuffer, Private->AsciiBufferSize, Private->LineBuffer);
     }
 
     //
@@ -255,7 +250,7 @@ OcLogAddEntry  (
     //
     // Write to a variable.
     //
-    if ((OcLog->Options & (OC_LOG_VARIABLE | OC_LOG_NONVOLATILE)) != 0) {
+    if (!EFI_ERROR (Status) && (OcLog->Options & (OC_LOG_VARIABLE | OC_LOG_NONVOLATILE)) != 0) {
       Attributes = EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS;
       if ((OcLog->Options & OC_LOG_NONVOLATILE) != 0) {
         Attributes |= EFI_VARIABLE_NON_VOLATILE;
@@ -269,6 +264,10 @@ OcLogAddEntry  (
         Private->AsciiBuffer
         );
     }
+  }
+
+  if ((ErrorLevel & OcLog->HaltLevel) != 0) {
+    CpuDeadLoop ();
   }
 
   return Status;
@@ -343,15 +342,19 @@ OcLogResetTimers (
 /**
   Install or update the OcLog protocol with specified options.
 
-  @param[in] Options  Logging options.
-  @param[in] Delay    Delay in microseconds after each log entry.
+  @param[in] Options       Logging options.
+  @param[in] Delay         Delay in microseconds after each log entry.
+  @param[in] DisplayLevel  Console visible error level.
+  @param[in] HaltLevel     Error level causing CPU halt.
 
   @retval EFI_SUCCESS  The entry point is executed successfully.
 **/
 EFI_STATUS
 OcConfigureLogProtocol (
   IN OC_LOG_OPTIONS      Options,
-  IN UINT32              Delay
+  IN UINT32              Delay,
+  IN UINTN               DisplayLevel,
+  IN UINTN               HaltLevel
   )
 {
   EFI_STATUS            Status;
@@ -376,8 +379,10 @@ OcConfigureLogProtocol (
     //
     // Set desired options in existing protocol.
     //
-    OcLog->Options = Options;
-    OcLog->Delay   = Delay;
+    OcLog->Options      = Options;
+    OcLog->Delay        = Delay;
+    OcLog->DisplayLevel = DisplayLevel & PcdGet8 (PcdDebugPropertyMask);
+    OcLog->HaltLevel    = HaltLevel;
 
     //
     // Keep EFI_SUCCESS...
@@ -393,22 +398,24 @@ OcConfigureLogProtocol (
       // TODO: Dynamically resizeable buffer.
       //
 
-      Private->AsciiBufferSize   = OC_LOG_BUFFER_SIZE;
-      Private->OcLog.Revision    = OC_LOG_REVISION;
-      Private->OcLog.Options     = Options;
-      Private->OcLog.Delay       = Delay;
-      Private->OcLog.AddEntry    = OcLogAddEntry;
-      Private->OcLog.GetLog      = OcLogGetLog;
-      Private->OcLog.SaveLog     = OcLogSaveLog;
-      Private->OcLog.ResetTimers = OcLogResetTimers;
+      Private->AsciiBufferSize    = OC_LOG_BUFFER_SIZE;
+      Private->OcLog.Revision     = OC_LOG_REVISION;
+      Private->OcLog.AddEntry     = OcLogAddEntry;
+      Private->OcLog.GetLog       = OcLogGetLog;
+      Private->OcLog.SaveLog      = OcLogSaveLog;
+      Private->OcLog.ResetTimers  = OcLogResetTimers;
+      Private->OcLog.Options      = Options;
+      Private->OcLog.Delay        = Delay;
+      Private->OcLog.DisplayLevel = DisplayLevel & PcdGet8 (PcdDebugPropertyMask);
+      Private->OcLog.HaltLevel    = HaltLevel;
 
       Handle = NULL;
       Status = gBS->InstallProtocolInterface (
-                      &Handle,
-                      &gOcLogProtocolGuid,
-                      EFI_NATIVE_INTERFACE,
-                      &Private->OcLog
-                      );
+        &Handle,
+        &gOcLogProtocolGuid,
+        EFI_NATIVE_INTERFACE,
+        &Private->OcLog
+        );
 
       if (EFI_ERROR (Status)) {
         FreePool (Private);
