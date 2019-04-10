@@ -111,7 +111,7 @@ OcLogAddEntry  (
   UINT32                 LineLength;
   PLATFORM_DATA_HEADER   *Entry;
   UINTN                  KeySize;
-  UINTN                  DataSize;
+  UINT32                 DataSize;
   UINT32                 TotalSize;
 
   Private = OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog);
@@ -184,7 +184,7 @@ OcLogAddEntry  (
       if (Private->DataHub != NULL) {
         KeySize   = (L_STR_LEN (OC_LOG_VARIABLE_NAME) + 6) * sizeof (CHAR16);
         DataSize  = TimingLength + LineLength + 1;
-        TotalSize = sizeof (*Entry) + KeySize + DataSize;
+        TotalSize = KeySize + DataSize + sizeof (*Entry);
 
         Entry = AllocatePool (TotalSize);
 
