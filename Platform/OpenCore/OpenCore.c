@@ -306,6 +306,7 @@ UefiMain (
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL   *FileSystem;
   EFI_HANDLE                        BootstrapHandle;
   OC_BOOTSTRAP_PROTOCOL             *Bootstrap;
+  EFI_DEVICE_PATH_PROTOCOL          *AbsPath;
 
   DEBUG ((DEBUG_INFO, "OC: Starting OpenCore...\n"));
 
@@ -366,14 +367,20 @@ UefiMain (
     LoadedImage->FilePath
     );
 
+  AbsPath = AbsoluteDevicePath (LoadedImage->DeviceHandle, LoadedImage->FilePath);
+
   //
   // Return success in either case to let rerun work afterwards.
   //
   if (FileSystem != NULL) {
-    mOpenCoreBootStrap.ReRun (&mOpenCoreBootStrap, FileSystem, LoadedImage->FilePath);
+    mOpenCoreBootStrap.ReRun (&mOpenCoreBootStrap, FileSystem, AbsPath);
     DEBUG ((DEBUG_ERROR, "OC: Failed to boot\n"));
   } else {
     DEBUG ((DEBUG_ERROR, "OC: Failed to locate file system\n"));
+  }
+
+  if (AbsPath != NULL) {
+    FreePool (AbsPath);
   }
 
   return EFI_SUCCESS;
