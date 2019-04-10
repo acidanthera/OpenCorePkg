@@ -414,6 +414,34 @@ InternalScanBuildLinkedVtables (
 
 STATIC
 RETURN_STATUS
+InternalUpdateLinkBuffer (
+  IN OUT PRELINKED_KEXT     *Kext,
+  IN OUT PRELINKED_CONTEXT  *Context
+  )
+{
+  ASSERT (Kext != NULL);
+  ASSERT (Context != NULL);
+
+  if (Context->LinkBuffer == NULL) {
+    Context->LinkBuffer = AllocatePool (Context->LinkBufferSize);
+    if (Context->LinkBuffer == NULL) {
+      return RETURN_OUT_OF_RESOURCES;
+    }
+  } else if (Context->LinkBufferSize < Kext->LinkEditSegment->FileSize) {
+    FreePool (Context->LinkBuffer);
+
+    Context->LinkBufferSize = (UINT32)Kext->LinkEditSegment->FileSize;
+    Context->LinkBuffer     = AllocatePool (Context->LinkBufferSize);
+    if (Context->LinkBuffer == NULL) {
+      return RETURN_OUT_OF_RESOURCES;
+    }
+  }
+
+  return RETURN_SUCCESS;
+}
+
+STATIC
+RETURN_STATUS
 InternalInsertPrelinkedKextDependency (
   IN OUT PRELINKED_KEXT     *Kext,
   IN OUT PRELINKED_CONTEXT  *Context,
@@ -437,24 +465,13 @@ InternalInsertPrelinkedKextDependency (
   if (RETURN_ERROR (Status)) {
     return Status;
   }
-
-  if (Context->LinkBuffer == NULL) {
-    //
-    // Allocate the LinkBuffer from the size cached during the initial
-    // function recursion.
-    //
-    Context->LinkBuffer = AllocatePool (Context->LinkBufferSize);
-    if (Context->LinkBuffer == NULL) {
-      return RETURN_OUT_OF_RESOURCES;
-    }
-  } else if (Context->LinkBufferSize < DependencyKext->LinkEditSegment->FileSize) {
-    FreePool (Context->LinkBuffer);
-
-    Context->LinkBufferSize = (UINT32)DependencyKext->LinkEditSegment->FileSize;
-    Context->LinkBuffer     = AllocatePool (Context->LinkBufferSize);
-    if (Context->LinkBuffer == NULL) {
-      return RETURN_OUT_OF_RESOURCES;
-    }
+  //
+  // Allocate the LinkBuffer from the size cached during the initial
+  // function recursion.
+  //
+  Status = InternalUpdateLinkBuffer (DependencyKext, Context);
+  if (RETURN_ERROR (Status)) {
+    return Status;
   }
 
   Status = InternalScanBuildLinkedVtables (DependencyKext, Context);
@@ -698,14 +715,12 @@ InternalScanPrelinkedKext (
     Kext->BundleLibraries = NULL;
   }
 
-  if (Context->LinkBuffer == NULL) {
-    //
-    // Allocate the LinkBuffer in case there are no dependencies.
-    //
-    Context->LinkBuffer = AllocatePool (Context->LinkBufferSize);
-    if (Context->LinkBuffer == NULL) {
-      return RETURN_OUT_OF_RESOURCES;
-    }
+  //
+  // Extend or allocate LinkBuffer in case there are no dependencies (kernel).
+  //
+  Status = InternalUpdateLinkBuffer (Kext, Context);
+  if (RETURN_ERROR (Status)) {
+    return Status;
   }
 
   return RETURN_SUCCESS;
