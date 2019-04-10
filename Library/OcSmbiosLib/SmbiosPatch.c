@@ -1384,7 +1384,7 @@ SmbiosTableApply (
       Mode = OcSmbiosUpdateCreate;
     } else if (mOriginalSmbios3 != NULL && (TableLength > mOriginalSmbios3->TableMaximumSize
       || mOriginalSmbios3->EntryPointLength < sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT))) {
-      DEBUG ((DEBUG_WARN, "SmbiosTableApply(%u) cannot fit SMBIOSv3 (%p, %u, %u) with %u\n",
+      DEBUG ((DEBUG_INFO, "SmbiosTableApply(%u) cannot fit SMBIOSv3 (%p, %u, %u) with %u\n",
         Mode, mOriginalSmbios3, mOriginalSmbios3->EntryPointLength, mOriginalSmbios3->TableMaximumSize, TableLength));
       Mode = OcSmbiosUpdateCreate;
     } else {

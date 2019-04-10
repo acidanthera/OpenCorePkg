@@ -12,11 +12,11 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef OC_DEVICE_PATH_LIB_H_
-#define OC_DEVICE_PATH_LIB_H_
+#ifndef OC_DEVICE_PATH_LIB_H
+#define OC_DEVICE_PATH_LIB_H
 
-// AppendFileNameDevicePath
 /**
+  Append file name to device path.
 
   @param[in] DevicePath  The device path which to append the file path.
   @param[in] FileName    The file name to append to the device path.
@@ -31,8 +31,8 @@ AppendFileNameDevicePath (
   IN CHAR16                    *FileName
   );
 
-// DevicePathToText
-/** Converts a device path structure to its string representative.
+/**
+  Converts a device path structure to its string representative.
 
   @param[in] StorageDevicePath  The device path to convert to unicode string.
   @param[in] DisplayOnly        If DisplayOnly is TRUE, then the shorter text
@@ -55,8 +55,8 @@ DevicePathToText (
   IN BOOLEAN                   AllowShortcuts
   );
 
-// FindDevicePathNodeWithType
-/** Locate the node inside the device path specified by Type an SubType values.
+/**
+  Locate the node inside the device path specified by Type an SubType values.
 
   @param[in] DevicePath  The device path used in the search.
   @param[in] Type        The Type field of the device path node specified by Node.
@@ -71,8 +71,8 @@ FindDevicePathNodeWithType (
   IN UINT8                     SubType OPTIONAL
   );
 
-// IsDevicePathEqual
-/** 
+/**
+  Check whether device paths are equal.
 
   @param[in] DevicePath1 The first device path protocol to compare.
   @param[in] DevicePath2 The second device path protocol to compare.
@@ -87,8 +87,8 @@ IsDevicePathEqual (
   IN  EFI_DEVICE_PATH_PROTOCOL      *DevicePath2
   );
 
-// IsDeviceChild
-/** 
+/**
+  Check whether one device path exists in the other.
 
   @param[in] ParentPath  The parent device path protocol to check against.
   @param[in] ChildPath   The device path protocol of the child device to compare.
@@ -104,6 +104,13 @@ IsDeviceChild (
   IN  UINT8                         EndPathType
   );
 
+/**
+  Print debug path to log.
+
+  @param[in] ErrorLevel  Debug error level.
+  @param[in] ChildPath   Prefixed message.
+  @param[in] DevicePath  Device path to print.
+**/
 VOID
 DebugPrintDevicePath (
   IN UINTN                     ErrorLevel,
@@ -111,4 +118,18 @@ DebugPrintDevicePath (
   IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   );
 
-#endif // OC_DEVICE_PATH_LIB_H_
+/**
+  Get absolute device path.
+
+  @param[in] Handle        Device handle.
+  @param[in] RelativePath  Relative device path to handle, optional.
+
+  @retval  New device path or NULL.
+**/
+EFI_DEVICE_PATH_PROTOCOL *
+AbsoluteDevicePath (
+  IN EFI_HANDLE                Handle,
+  IN EFI_DEVICE_PATH_PROTOCOL  *RelativePath OPTIONAL
+  );
+
+#endif // OC_DEVICE_PATH_LIB_H

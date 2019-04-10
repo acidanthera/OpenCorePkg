@@ -371,3 +371,31 @@ DebugPrintDevicePath (
 
   DEBUG_CODE_END();
 }
+
+EFI_DEVICE_PATH_PROTOCOL *
+AbsoluteDevicePath (
+  IN EFI_HANDLE                Handle,
+  IN EFI_DEVICE_PATH_PROTOCOL  *RelativePath OPTIONAL
+  )
+{
+  EFI_DEVICE_PATH_PROTOCOL  *HandlePath;
+  EFI_DEVICE_PATH_PROTOCOL  *NewPath;
+
+  HandlePath = DevicePathFromHandle (Handle);
+  if (HandlePath == NULL) {
+    return NULL;
+  }
+
+  if (RelativePath == NULL) {
+    return HandlePath;
+  }
+
+  NewPath = AppendDevicePath (HandlePath, RelativePath);
+
+  if (NewPath == NULL) {
+    return HandlePath;
+  }
+
+  FreePool (HandlePath);
+  return NewPath;
+}
