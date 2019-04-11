@@ -194,6 +194,11 @@
   Misc section
 **/
 
+#define OC_MISC_BOOT_FIELDS(_, __) \
+  _(BOOLEAN                     , ShowPicker                  ,     , FALSE        , ()) \
+  _(UINT32                      , Timeout                     ,     , 0            , ())
+  OC_DECLARE (OC_MISC_BOOT)
+
 #define OC_MISC_DEBUG_FIELDS(_, __) \
   _(UINT32                      , Delay                       ,     , 0            , ()) \
   _(UINT64                      , DisplayLevel                ,     , 0            , ()) \
@@ -206,6 +211,7 @@
   OC_DECLARE (OC_MISC_SECURITY)
 
 #define OC_MISC_CONFIG_FIELDS(_, __) \
+  _(OC_MISC_BOOT               , Boot            ,     , OC_CONSTR2 (OC_MISC_BOOT, _, __)         , OC_DESTR (OC_MISC_BOOT)) \
   _(OC_MISC_DEBUG              , Debug           ,     , OC_CONSTR2 (OC_MISC_DEBUG, _, __)        , OC_DESTR (OC_MISC_DEBUG)) \
   _(OC_MISC_SECURITY           , Security        ,     , OC_CONSTR2 (OC_MISC_SECURITY, _, __)     , OC_DESTR (OC_MISC_SECURITY))
   OC_DECLARE (OC_MISC_CONFIG)

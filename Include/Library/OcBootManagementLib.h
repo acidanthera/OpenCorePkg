@@ -256,15 +256,17 @@ EFI_STATUS
   @param[in]  BootPolicy       Boot policy.
   @param[in]  TimeOutSeconds   Default entry selection timeout (pass 0 to ignore).
   @param[in]  StartImage       Image starting routine used.
+  @param[in]  ShowPicker       Show boot menu or just boot the default option.
 
   @retval does not return unless a fatal error happened.
 **/
 EFI_STATUS
-OcRunSimpleBootMenu (
+OcRunSimpleBootPicker (
   IN  UINT32           LookupPolicy,
   IN  UINT32           BootPolicy,
   IN  UINT32           TimeoutSeconds,
-  IN  OC_IMAGE_START    StartImage
+  IN  OC_IMAGE_START   StartImage,
+  IN  BOOLEAN          ShowPicker
   );
 
 #endif // OC_BOOT_MANAGEMENT_LIB_H

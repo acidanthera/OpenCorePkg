@@ -966,11 +966,12 @@ OcLoadBootEntry (
 }
 
 EFI_STATUS
-OcRunSimpleBootMenu (
+OcRunSimpleBootPicker (
   IN  UINT32           LookupPolicy,
   IN  UINT32           BootPolicy,
   IN  UINT32           TimeoutSeconds,
-  IN  OC_IMAGE_START   StartImage
+  IN  OC_IMAGE_START   StartImage,
+  IN  BOOLEAN          ShowPicker
   )
 {
   EFI_STATUS                  Status;
@@ -979,6 +980,7 @@ OcRunSimpleBootMenu (
   OC_BOOT_ENTRY               *Entries;
   UINTN                       EntryCount;
   EFI_HANDLE                  BooterHandle;
+  UINT32                      DefaultEntry;
 
   Status = OcAppleBootPolicyInstallProtocol (gImageHandle, gST);
   if (EFI_ERROR (Status)) {
@@ -1018,13 +1020,20 @@ OcRunSimpleBootMenu (
     //
     // TODO: obtain default entry!
     //
-    Status = OcShowSimpleBootMenu (
-      Entries,
-      EntryCount,
-      0,
-      TimeoutSeconds,
-      &Chosen
-      );
+    DefaultEntry = 0;
+
+    if (ShowPicker) {
+      Status = OcShowSimpleBootMenu (
+        Entries,
+        EntryCount,
+        DefaultEntry,
+        TimeoutSeconds,
+        &Chosen
+        );
+    } else {
+      Chosen = &Entries[DefaultEntry];
+      Status = EFI_SUCCESS;
+    }
 
     if (EFI_ERROR (Status) && Status != EFI_ABORTED) {
       DEBUG ((DEBUG_ERROR, "OcShowSimpleBootMenu failed - %r\n", Status));

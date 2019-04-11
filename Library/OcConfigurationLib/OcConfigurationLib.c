@@ -37,6 +37,7 @@ OC_ARRAY_STRUCTORS (OC_KERNEL_PATCH_ARRAY)
 OC_STRUCTORS       (OC_KERNEL_QUIRKS, ())
 OC_STRUCTORS       (OC_KERNEL_CONFIG, ())
 
+OC_STRUCTORS       (OC_MISC_BOOT, ())
 OC_STRUCTORS       (OC_MISC_DEBUG, ())
 OC_STRUCTORS       (OC_MISC_SECURITY, ())
 OC_STRUCTORS       (OC_MISC_CONFIG, ())
@@ -234,6 +235,13 @@ mKernelConfigurationSchema[] = {
 
 STATIC
 OC_SCHEMA
+mMiscConfigurationBootSchema[] = {
+  OC_SCHEMA_BOOLEAN_IN ("ShowPicker",       OC_GLOBAL_CONFIG, Misc.Boot.ShowPicker),
+  OC_SCHEMA_INTEGER_IN ("Timeout",          OC_GLOBAL_CONFIG, Misc.Boot.Timeout)
+};
+
+STATIC
+OC_SCHEMA
 mMiscConfigurationDebugSchema[] = {
   OC_SCHEMA_INTEGER_IN ("Delay",            OC_GLOBAL_CONFIG, Misc.Debug.Delay),
   OC_SCHEMA_INTEGER_IN ("DisplayLevel",     OC_GLOBAL_CONFIG, Misc.Debug.DisplayLevel),
@@ -250,6 +258,7 @@ mMiscConfigurationSecuritySchema[] = {
 STATIC
 OC_SCHEMA
 mMiscConfigurationSchema[] = {
+  OC_SCHEMA_DICT       ("Boot",             mMiscConfigurationBootSchema),
   OC_SCHEMA_DICT       ("Debug",            mMiscConfigurationDebugSchema),
   OC_SCHEMA_DICT       ("Security",         mMiscConfigurationSecuritySchema),
 };
