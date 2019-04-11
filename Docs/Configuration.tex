@@ -382,41 +382,39 @@ entries include:
   grow via three points={one child at (0.5,-0.7) and
   two children at (0.5,-0.7) and (0.5,-1.4)},
   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
-  \node {ESP}
+  \node {EFI}
     child { node {BOOT}
       child { node [selected] {BOOTx64.efi}}
     }
     child [missing] {}
-    child { node {EFI}
-      child { node {OC}
-        child { node {ACPI}
-          child { node {Custom}
-            child { node [optional] {DSDT.aml}}
-            child { node [optional] {SSDT-1.aml}}
-            child { node [optional] {MYTABLE.aml}}
-          }
+    child { node {OC}
+      child { node {ACPI}
+        child { node {Custom}
+          child { node [optional] {DSDT.aml}}
+          child { node [optional] {SSDT-1.aml}}
+          child { node [optional] {MYTABLE.aml}}
         }
-        child [missing] {}
-        child [missing] {}
-        child [missing] {}
-        child [missing] {}
-        child { node {Drivers}
-          child { node [optional] {MyDriver.efi}}
-          child { node [optional] {OtherDriver.efi}}
-        }
-        child [missing] {}
-        child [missing] {}
-        child { node {Kexts}
-          child { node [optional] {MyKext.kext}}
-          child { node [optional] {OtherKext.kext}}
-        }
-        child [missing] {}
-        child [missing] {}
-        child { node [selected] {OpenCore.efi}}
-        child { node [optional] {config.hash}}
-        child { node {config.plist}}
-        child { node [optional] {config.sig}}
       }
+      child [missing] {}
+      child [missing] {}
+      child [missing] {}
+      child [missing] {}
+      child { node {Drivers}
+        child { node [optional] {MyDriver.efi}}
+        child { node [optional] {OtherDriver.efi}}
+      }
+      child [missing] {}
+      child [missing] {}
+      child { node {Kexts}
+        child { node [optional] {MyKext.kext}}
+        child { node [optional] {OtherKext.kext}}
+      }
+      child [missing] {}
+      child [missing] {}
+      child { node [selected] {OpenCore.efi}}
+      child { node [optional] {config.hash}}
+      child { node {config.plist}}
+      child { node [optional] {config.sig}}
     };
 \end{tikzpicture}
 \break
@@ -919,10 +917,11 @@ blocking.
 
 \begin{enumerate}
 \item
-  \texttt{BundleName}\\
+  \texttt{BundlePath}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Default value}: Empty string\\
-  \textbf{Description}: Kext bundle name (e.g. \texttt{Lilu.kext}).
+  \textbf{Description}: Kext bundle path (e.g. \texttt{Lilu.kext}
+  or \texttt{MyKext.kext/Contents/PlugIns/MySubKext.kext}).
 
 \item
   \texttt{Comment}\\
@@ -1275,7 +1274,7 @@ ioreg -lw0 -p IODeviceTree | grep boot-log | sort | sed 's/.*<\(.*\)>.*/\1/' | x
   printed line. To obtain UEFI variable log use the following command
   in macOS:
 \begin{lstlisting}[label=nvramlog, style=ocbash]
-nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log | \
+nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   awk '{gsub(/%0d%0a%00/,"");gsub(/%0d%0a/,"\n")}1'
 \end{lstlisting}
 

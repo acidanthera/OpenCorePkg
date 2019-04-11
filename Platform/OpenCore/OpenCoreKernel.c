@@ -78,7 +78,7 @@ OcKernelLoadKextsAndReserve (
 {
   UINT32               Index;
   UINT32               ReserveSize;
-  CHAR8                *BundleName;
+  CHAR8                *BundlePath;
   CHAR8                *PlistPath;
   CHAR8                *ExecutablePath;
   CHAR16               FullPath[128];
@@ -94,9 +94,9 @@ OcKernelLoadKextsAndReserve (
     }
 
     if (Kext->PlistDataSize == 0) {
-      BundleName     = OC_BLOB_GET (&Kext->BundleName);
+      BundlePath     = OC_BLOB_GET (&Kext->BundlePath);
       PlistPath      = OC_BLOB_GET (&Kext->PlistPath);
-      if (BundleName[0] == '\0' || PlistPath[0] == '\0') {
+      if (BundlePath[0] == '\0' || PlistPath[0] == '\0') {
         DEBUG ((DEBUG_ERROR, "OC: Your config has improper for kext info\n"));
         continue;
       }
@@ -105,7 +105,7 @@ OcKernelLoadKextsAndReserve (
         FullPath,
         sizeof (FullPath),
         OPEN_CORE_KEXT_PATH "%a\\%a",
-        BundleName,
+        BundlePath,
         PlistPath
         );
 
@@ -118,7 +118,7 @@ OcKernelLoadKextsAndReserve (
         );
 
       if (Kext->PlistData == NULL) {
-        DEBUG ((DEBUG_ERROR, "OC: Plist %s is missing for kext %s\n", FullPath, BundleName));
+        DEBUG ((DEBUG_ERROR, "OC: Plist %s is missing for kext %s\n", FullPath, BundlePath));
         continue;
       }
 
@@ -128,7 +128,7 @@ OcKernelLoadKextsAndReserve (
           FullPath,
           sizeof (FullPath),
           OPEN_CORE_KEXT_PATH "%a\\%a",
-          BundleName,
+          BundlePath,
           ExecutablePath
           );
 
@@ -141,7 +141,7 @@ OcKernelLoadKextsAndReserve (
           );
 
         if (Kext->ImageData == NULL) {
-          DEBUG ((DEBUG_ERROR, "OC: Image %s is missing for kext %s\n", FullPath, BundleName));
+          DEBUG ((DEBUG_ERROR, "OC: Image %s is missing for kext %s\n", FullPath, BundlePath));
           //
           // Still continue loading?
           //
@@ -378,7 +378,7 @@ OcKernelProcessPrelinked (
 {
   EFI_STATUS           Status;
   PRELINKED_CONTEXT    Context;
-  CHAR8                *BundleName;
+  CHAR8                *BundlePath;
   CHAR8                *ExecutablePath;
   UINT32               Index;
   CHAR8                FullPath[128];
@@ -402,14 +402,14 @@ OcKernelProcessPrelinked (
           continue;
         }
 
-        BundleName  = OC_BLOB_GET (&Kext->BundleName);
+        BundlePath  = OC_BLOB_GET (&Kext->BundlePath);
         MatchKernel = OC_BLOB_GET (&Kext->MatchKernel);
 
         if (AsciiStrnCmp (DarwinVersion, MatchKernel, AsciiStrLen (MatchKernel)) != 0) {
           DEBUG ((
             DEBUG_INFO,
             "OC: Prelink injection skips %a kext at %u due to version %a vs %a",
-            BundleName,
+            BundlePath,
             Index,
             MatchKernel,
             DarwinVersion
@@ -417,7 +417,7 @@ OcKernelProcessPrelinked (
           continue;
         }
 
-        AsciiSPrint (FullPath, sizeof (FullPath), "/Library/Extensions/%a", BundleName);
+        AsciiSPrint (FullPath, sizeof (FullPath), "/Library/Extensions/%a", BundlePath);
         if (Kext->ImageData != NULL) {
           ExecutablePath = OC_BLOB_GET (&Kext->ExecutablePath);
         } else {
@@ -437,7 +437,7 @@ OcKernelProcessPrelinked (
         DEBUG ((
           EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
           "OC: Prelink injection %a - %r\n",
-          BundleName,
+          BundlePath,
           Status
           ));
       }

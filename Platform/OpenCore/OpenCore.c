@@ -216,12 +216,21 @@ OcMain (
     DEBUG ((DEBUG_ERROR, "OC: Failed to load configuration!\n"));
   }
 
+#if 1
+  OcConfigureLogProtocol (
+    OC_LOG_ENABLE | OC_LOG_CONSOLE | OC_LOG_VARIABLE | OC_LOG_DATA_HUB,
+    0,
+    DEBUG_VERBOSE | DEBUG_INFO | DEBUG_WARN | DEBUG_ERROR,
+    0
+    );
+#else
   OcConfigureLogProtocol (
     mOpenCoreConfiguration.Misc.Debug.Target,
     mOpenCoreConfiguration.Misc.Debug.Delay,
     (UINTN) mOpenCoreConfiguration.Misc.Debug.DisplayLevel,
     (UINTN) mOpenCoreConfiguration.Misc.Security.HaltLevel
     );
+#endif
 
   DEBUG ((DEBUG_INFO, "OC: OpenCore is now loading...\n"));
 
