@@ -232,7 +232,7 @@ GetAppleRecoveryName (
 
 STATIC
 EFI_STATUS
-GetAlternateOsBooter (
+GetRecoveryOsBooter (
   IN  EFI_HANDLE                Device,
   OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
   )
@@ -240,6 +240,7 @@ GetAlternateOsBooter (
   EFI_STATUS                       Status;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
   EFI_FILE_PROTOCOL                *Root;
+  EFI_FILE_PROTOCOL                *Recovery;
   UINTN                            FilePathSize;
   EFI_DEVICE_PATH_PROTOCOL         *TmpPath;
 
@@ -268,7 +269,7 @@ GetAlternateOsBooter (
   if (*FilePath != NULL) {
     if (IsDevicePathValid (*FilePath, FilePathSize)) {
       //
-      // This entry may point to boot.efi or to a folder.
+      // This entry should point to a folder with recovery.
       // Apple never adds trailing slashes to blessed folder paths.
       // However, we do rely on trailing slashes in folder paths and add them here.
       //
@@ -283,7 +284,32 @@ GetAlternateOsBooter (
       Status = EFI_NOT_FOUND;
     }
   } else {
-    Status = EFI_NOT_FOUND;
+    //
+    // Ok, this one can still be FileVault 2 HFS+ recovery.
+    // Apple does add its path to so called "Alternate OS blessed file/folder", but this
+    // path is not accessible from HFSPlus.efi driver. Just why???
+    // Their SlingShot.efi app just bruteforces com.apple.recovery.boot directory existence,
+    // and we have to copy.
+    //
+
+    Status = Root->Open (Root, &Recovery, L"\\com.apple.recovery.boot\\", EFI_FILE_MODE_READ, 0);
+    if (!EFI_ERROR (Status)) {
+      //
+      // Do not do any extra checks for simplicity, as they will be done later either way.
+      //
+      Root->Close (Recovery);
+      Status    = EFI_NOT_FOUND;
+      TmpPath   = DevicePathFromHandle (Device);
+
+      if (TmpPath != NULL) {
+        *FilePath = AppendFileNameDevicePath (TmpPath, L"\\com.apple.recovery.boot\\");
+        if (*FilePath != NULL) {
+          Status = EFI_SUCCESS;
+        }
+      }
+    } else {
+      Status = EFI_NOT_FOUND;
+    }
   }
 
   Root->Close (Root);
@@ -507,7 +533,7 @@ OcFillBootEntry (
       FreePool (RecoveryPath);
       RecoveryRoot->Close (RecoveryRoot);
     } else {
-      Status = GetAlternateOsBooter (Handle, &DevicePath);
+      Status = GetRecoveryOsBooter (Handle, &DevicePath);
       if (EFI_ERROR (Status)) {
         return 1;
       }
