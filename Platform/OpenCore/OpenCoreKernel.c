@@ -481,6 +481,14 @@ OcKernelFileOpen (
 
   Status = This->Open (This, NewHandle, FileName, OpenMode, Attributes);
 
+  DEBUG ((
+    DEBUG_VERBOSE,
+    "Opening file %s with %u mode gave - %r\n",
+    FileName,
+    (UINT32) OpenMode,
+    Status
+    ));
+
   if (EFI_ERROR (Status)) {
     return Status;
   }
