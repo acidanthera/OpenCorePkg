@@ -62,6 +62,7 @@
   OcAppleChunklistLib
   OcAppleDiskImageLib
   OcAppleKeysLib
+  OcDevicePathLib
   OcGuardLib
   OcFileLib
   OcXmlLib
