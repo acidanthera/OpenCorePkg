@@ -69,6 +69,7 @@
   OcAppleKernelLib
   OcBootManagementLib
   OcConfigurationLib
+  OcConsoleLib
   OcDataHubLib
   OcDevicePathLib
   OcDevicePropertyLib

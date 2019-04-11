@@ -17,6 +17,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
+#include <Library/OcConsoleLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -202,6 +203,17 @@ OcProvideConsoleGop (
 
 STATIC
 VOID
+OcProvideConsoleControl (
+  )
+{
+  //
+  // TODO: Evolve.
+  //
+  ConfigureConsoleControl (FALSE);
+}
+
+STATIC
+VOID
 EFIAPI
 OcReleaseUsbOwnership (
   IN EFI_EVENT  Event,
@@ -235,6 +247,10 @@ OcLoadUefiSupport (
 
   if (Config->Uefi.Quirks.ProvideConsoleGop) {
     OcProvideConsoleGop ();
+  }
+
+  if (Config->Uefi.Quirks.ProvideConsoleControl) {
+    OcProvideConsoleControl ();
   }
 
   if (Config->Uefi.Quirks.ReleaseUsbOwnership) {

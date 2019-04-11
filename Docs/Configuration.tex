@@ -2220,6 +2220,17 @@ tweaks for the onboard firmware.
   its usage is not recommended when it is not required.
 
 \item
+  \texttt{ProvideConsoleControl}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{NO}\\
+  \textbf{Description}: macOS bootloader requires console control protocol
+  for text output, some firmwares miss it.
+
+  \emph{Note}: Some drivers, like AppleUiSupport, may provide equivalent functionality.
+  These drivers are not guaranteed to adhere to the same logic, and if a quirk is
+  necessary, this option is preferred.
+
+\item
   \texttt{ProvideConsoleGop}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{NO}\\
