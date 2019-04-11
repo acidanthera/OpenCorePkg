@@ -257,9 +257,10 @@ GetAlternateOsBooter (
     return Status;
   }
 
+  FilePathSize = 0;
   *FilePath = (EFI_DEVICE_PATH_PROTOCOL *) GetFileInfo (
                 Root,
-                &gAppleBlessedAlternateOsInfoGuid,
+                &gAppleBlessedOsxFolderInfoGuid,
                 sizeof (EFI_DEVICE_PATH_PROTOCOL),
                 &FilePathSize
                 );

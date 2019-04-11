@@ -43,7 +43,7 @@
   gAppleApfsVolumeInfoGuid           ## SOMETIMES_CONSUMES
   gAppleBlessedSystemFileInfoGuid    ## SOMETIMES_CONSUMES
   gAppleBlessedSystemFolderInfoGuid  ## SOMETIMES_CONSUMES
-  gAppleBlessedAlternateOsInfoGuid   ## SOMETIMES_CONSUMES
+  gAppleBlessedOsxFolderInfoGuid     ## SOMETIMES_CONSUMES
   gEfiFileInfoGuid                   ## SOMETIMES_CONSUMES
 
 [Protocols]
