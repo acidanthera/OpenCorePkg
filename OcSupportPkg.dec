@@ -78,6 +78,9 @@
   OcConfigurationLib|Include/Library/OcConfigurationLib.h
 
   ##  @libraryclass
+  OcConsoleLib|Include/Library/OcConsoleLib.h
+
+  ##  @libraryclass
   OcCpuLib|Include/Library/OcCpuLib.h
 
   ##  @libraryclass
