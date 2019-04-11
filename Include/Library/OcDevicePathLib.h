@@ -132,4 +132,17 @@ AbsoluteDevicePath (
   IN EFI_DEVICE_PATH_PROTOCOL  *RelativePath OPTIONAL
   );
 
+/**
+  Get trailed (slash-appended) device path for booter paths.
+  This way \\smth.efi gets NULL and \\smth gives \\smth\\.
+
+  @param[in] DevicePath    Device path.
+
+  @retval  New device path or NULL.
+**/
+EFI_DEVICE_PATH_PROTOCOL *
+TrailedBooterDevicePath (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  );
+
 #endif // OC_DEVICE_PATH_LIB_H

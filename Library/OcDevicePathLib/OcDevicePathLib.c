@@ -26,16 +26,6 @@
 #include <Library/OcDevicePathLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-// AppendFileNameDevicePath
-/**
-
-  @param[in] DevicePath  The device path which to append the file path.
-  @param[in] FileName    The file name to append to the device path.
-
-  @retval EFI_SUCCESS            The defaults were initialized successfully.
-  @retval EFI_INVALID_PARAMETER  The parameters passed were invalid.
-  @retval EFI_OUT_OF_RESOURCES   The system ran out of memory.
-**/
 EFI_DEVICE_PATH_PROTOCOL *
 AppendFileNameDevicePath (
   IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
@@ -77,17 +67,6 @@ AppendFileNameDevicePath (
   return AppendedDevicePath;
 }
 
-// DevicePathToText
-/**
-
-  @param[in] StorageDevicePath  The device path to convert to unicode string.
-  @param[in] DisplayOnly
-  @param[in] AllowShortcuts
-
-  @retval EFI_SUCCESS            The defaults were initialized successfully.
-  @retval EFI_INVALID_PARAMETER  The parameters passed were invalid.
-  @retval EFI_OUT_OF_RESOURCES   The system ran out of memory.
-**/
 CHAR16 *
 DevicePathToText (
   IN EFI_DEVICE_PATH_PROTOCOL       *DevicePath,
@@ -134,15 +113,6 @@ DevicePathToText (
   return DevicePathString;
 }
 
-// FindDevicePathNodeWithType
-/**
-
-  @param[in] DevicePath  The device path used in the search.
-  @param[in] Type        The Type field of the device path node specified by Node.
-  @param[in] SubType     The SubType field of the device path node specified by Node.
-
-  @return  Returned is the first Device Path Node with the given type.
-**/
 EFI_DEVICE_PATH_PROTOCOL *
 FindDevicePathNodeWithType (
   IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
@@ -168,15 +138,6 @@ FindDevicePathNodeWithType (
   return DevicePathNode;
 }
 
-// IsDevicePathEqual
-/** 
-
-  @param[in] DevicePath1 The first device path protocol to compare.
-  @param[in] DevicePath2 The second device path protocol to compare.
-
-  @retval TRUE         The device paths matched
-  @retval FALSE        The device paths were different
-**/
 BOOLEAN
 EFIAPI
 IsDevicePathEqual (
@@ -279,15 +240,6 @@ IsDevicePathEqual (
   return Equal;
 }
 
-// IsDeviceChild
-/** 
-
-  @param[in] ParentPath  The parent device path protocol to check against.
-  @param[in] ChildPath   The device path protocol of the child device to compare.
-
-  @retval TRUE         The child device path contains the parent device path.
-  @retval FALSE        The device paths were different
-**/
 BOOLEAN
 EFIAPI
 IsDeviceChild (
@@ -397,4 +349,70 @@ AbsoluteDevicePath (
   }
 
   return NewPath;
+}
+
+EFI_DEVICE_PATH_PROTOCOL *
+TrailedBooterDevicePath (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
+  EFI_DEVICE_PATH_PROTOCOL  *NewDevicePath;
+  FILEPATH_DEVICE_PATH      *FilePath;
+  FILEPATH_DEVICE_PATH      *NewFilePath;
+  CHAR16                    *Path;
+  UINTN                     Length;
+  UINTN                     Size;
+
+  DevicePathWalker = DevicePath;
+
+  while (!IsDevicePathEnd (DevicePathWalker)) {
+    if ((DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
+     && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)
+     && IsDevicePathEnd (NextDevicePathNode (DevicePathWalker))) {
+      FilePath = (FILEPATH_DEVICE_PATH *) DevicePathWalker;
+      Path     = FilePath->PathName;
+      Length   = StrLen (Path);
+
+      if (Path[Length - 1] == L'\\') {
+        //
+        // Already appended, good. It should never be true with Apple entries though.
+        //
+        return NULL;
+      } else if (Length > 4 &&        (Path[Length - 4] != '.'
+        || (Path[Length - 3] != 'e' && Path[Length - 3] != 'E')
+        || (Path[Length - 2] != 'f' && Path[Length - 2] != 'F')
+        || (Path[Length - 1] != 'i' && Path[Length - 1] != 'I'))) {
+        //
+        // Found! We should have gotten something like:
+        // PciRoot(0x0)/Pci(...)/Pci(...)/Sata(...)/HD(...)/\com.apple.recovery.boot
+        //
+
+        Size          = GetDevicePathSize (DevicePath) + sizeof (CHAR16);
+        NewDevicePath = (EFI_DEVICE_PATH_PROTOCOL *) AllocatePool (Size);
+        if (NewDevicePath == NULL) {
+          //
+          // Allocation failure, just ignore.
+          //
+          return NULL;
+        }
+
+        CopyMem (NewDevicePath, DevicePath, Size - sizeof (CHAR16));
+        NewFilePath = (FILEPATH_DEVICE_PATH *) (DevicePathWalker - DevicePath + NewDevicePath);
+        Size        = DevicePathNodeLength (NewFilePath) + sizeof (CHAR16);
+        SetDevicePathNodeLength (NewFilePath, Size);
+        NewFilePath->PathName[Length]   = L'\\';
+        NewFilePath->PathName[Length+1] = L'\0';
+        SetDevicePathEndNode ((UINT8 *) NewFilePath + Size);
+        return NewDevicePath;
+      }
+    }
+
+    DevicePathWalker = NextDevicePathNode (DevicePathWalker);
+  }
+
+  //
+  // Has .efi suffix or unsupported format.
+  //
+  return NULL;
 }

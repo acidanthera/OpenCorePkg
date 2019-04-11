@@ -27,6 +27,7 @@
 #include <Library/OcAppleDiskImageLib.h>
 #include <Library/OcAppleKeysLib.h>
 #include <Library/OcBootManagementLib.h>
+#include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
@@ -54,14 +55,15 @@ GetAppleDiskLabel (
   CHAR16   *UnicodeDiskLabel;
   UINT32   DiskLabelLength;
 
-  DiskLabelPathSize = StrSize (BootDirectoryName) + StrLen (LabelFilename) * sizeof (CHAR16);
-  DiskLabelPath = AllocatePool (DiskLabelPathSize);
+  DiskLabelPathSize = StrSize (BootDirectoryName) + StrSize (LabelFilename) - sizeof (CHAR16);
+  DiskLabelPath     = AllocatePool (DiskLabelPathSize);
 
   if (DiskLabelPath == NULL) {
     return NULL;
   }
 
   UnicodeSPrint (DiskLabelPath, DiskLabelPathSize, L"%s%s", BootDirectoryName, LabelFilename);
+  DEBUG ((DEBUG_INFO, "Trying to get label from %s\n", DiskLabelPath));
   AsciiDiskLabel = (CHAR8 *) ReadFile (FileSystem, DiskLabelPath, &DiskLabelLength);
   FreePool (DiskLabelPath);
 
@@ -73,6 +75,66 @@ GetAppleDiskLabel (
   }
 
   return UnicodeDiskLabel;
+}
+
+STATIC
+CHAR16 *
+GetAppleRootedName (
+  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
+  IN  CONST CHAR16                     *BootDirectoryName
+  )
+{
+  EFI_STATUS  Status;
+  CHAR16      *RootedDiskPath;
+  UINTN       RootedDiskPathSize;
+  EFI_GUID    RootUuid;
+  CHAR8       *AsciiRootUuid;
+  CHAR16      *UnicodeRootUuid;
+  CHAR16      *UnicodeRootedName;
+  UINT32      AsciiRootUuidLength;
+
+  RootedDiskPathSize = StrSize (BootDirectoryName) + L_STR_SIZE_NT (L".root_uuid");
+  RootedDiskPath     = AllocatePool (RootedDiskPathSize);
+
+  if (RootedDiskPath == NULL) {
+    return NULL;
+  }
+
+  UnicodeSPrint (RootedDiskPath, RootedDiskPathSize, L"%s%a", BootDirectoryName, ".root_uuid");
+  DEBUG ((DEBUG_INFO, "Trying to get root from %s\n", RootedDiskPath));
+  AsciiRootUuid = (CHAR8 *) ReadFile (FileSystem, RootedDiskPath, &AsciiRootUuidLength);
+  FreePool (RootedDiskPath);
+
+  if (AsciiRootUuid == NULL) {
+    DEBUG ((DEBUG_INFO, "Failed!\n"));
+    return NULL;
+  }
+
+  if (AsciiRootUuidLength >= GUID_STRING_LENGTH) {
+    UnicodeRootUuid = AsciiStrCopyToUnicode (AsciiRootUuid, GUID_STRING_LENGTH);
+  }
+
+  FreePool (AsciiRootUuid);
+
+  if (AsciiRootUuidLength < GUID_STRING_LENGTH || UnicodeRootUuid == NULL) {
+    return NULL;
+  }
+
+  Status = StrToGuid (UnicodeRootUuid, &RootUuid);
+  FreePool (UnicodeRootUuid);  
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
+
+  //
+  // FIXME: Obtain actual partition label once Apple Partition Info is ready.
+  //
+  UnicodeRootedName = AllocatePool (128);
+  if (UnicodeRootedName != NULL) {
+    UnicodeSPrint (UnicodeRootedName, 128, L"Blessed %g", &RootUuid);
+  }
+
+  return UnicodeRootedName;
 }
 
 STATIC
@@ -147,13 +209,14 @@ GetAppleRecoveryName (
   UINT32   SystemVersionDataSize;
 
   SystemVersionPathSize = StrSize (BootDirectoryName) + L_STR_SIZE_NT (L"SystemVersion.plist");
-  SystemVersionPath = AllocatePool (SystemVersionPathSize);
+  SystemVersionPath     = AllocatePool (SystemVersionPathSize);
 
   if (SystemVersionPath == NULL) {
     return NULL;
   }
 
   UnicodeSPrint (SystemVersionPath, SystemVersionPathSize, L"%sSystemVersion.plist", BootDirectoryName);
+  DEBUG ((DEBUG_INFO, "Trying to get recovery from %s\n", SystemVersionPath));
   SystemVersionData = (CHAR8 *) ReadFile (FileSystem, SystemVersionPath, &SystemVersionDataSize);
   FreePool (SystemVersionPath);
 
@@ -178,6 +241,7 @@ GetAlternateOsBooter (
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
   EFI_FILE_PROTOCOL                *Root;
   UINTN                            FilePathSize;
+  EFI_DEVICE_PATH_PROTOCOL         *TmpPath;
 
   Status = gBS->HandleProtocol (
     Device,
@@ -201,7 +265,18 @@ GetAlternateOsBooter (
                 );
 
   if (*FilePath != NULL) {
-    if (!IsDevicePathValid(*FilePath, FilePathSize)) {
+    if (IsDevicePathValid (*FilePath, FilePathSize)) {
+      //
+      // This entry may point to boot.efi or to a folder.
+      // Apple never adds trailing slashes to blessed folder paths.
+      // However, we do rely on trailing slashes in folder paths and add them here.
+      //
+      TmpPath = TrailedBooterDevicePath (*FilePath);
+      if (TmpPath != NULL) {
+        FreePool (*FilePath);
+        *FilePath = TmpPath;
+      }
+    } else {
       FreePool (*FilePath);
       *FilePath = NULL;
       Status = EFI_NOT_FOUND;
@@ -225,10 +300,10 @@ SetBootEntryFlags (
   )
 {
   EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
-  FILEPATH_DEVICE_PATH      *FolderDevicePath;
+  CONST CHAR16              *Path;
 
-  BootEntry->IsRecovery = FALSE;
   BootEntry->IsFolder   = FALSE;
+  BootEntry->IsRecovery = FALSE;
   BootEntry->IsWindows  = FALSE;
 
   DevicePathWalker = BootEntry->DevicePath;
@@ -240,11 +315,11 @@ SetBootEntryFlags (
   while (!IsDevicePathEnd (DevicePathWalker)) {
     if ((DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
      && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)) {
-      FolderDevicePath = (FILEPATH_DEVICE_PATH *) DevicePathWalker;
-      if (FolderDevicePath->PathName[StrLen (FolderDevicePath->PathName) - 1] == L'\\') {
+      Path   = ((FILEPATH_DEVICE_PATH *) DevicePathWalker)->PathName;
+      if (Path[StrLen (Path) - 1] == L'\\') {
         BootEntry->IsFolder = TRUE;
       }
-      if (StrStr (FolderDevicePath->PathName, L"com.apple.recovery.boot") != NULL) {
+      if (StrStr (Path, L"com.apple.recovery.boot") != NULL) {
         BootEntry->IsRecovery = TRUE;
       }
     } else {
@@ -298,7 +373,25 @@ OcDescribeBootEntry (
   if (BootEntry->Name == NULL) {
     BootEntry->Name = GetAppleDiskLabel (FileSystem, BootDirectoryName, L".disk_label.contentDetails");
   }
+
+  //
+  // With FV2 encryption on HFS+ the actual boot happens from "Recovery HD/S/L/CoreServices".
+  // For some reason "Recovery HD/S/L/CoreServices/.disk_label" may not get updated immediately,
+  // and will contain "Recovery HD" despite actually pointing to "Macintosh HD".
+  // In this case we should prioritise .root_uuid, which contains real partition UUID in ASCII.
+  // TODO: I *think* later we can use this by default, but only when GetAppleRootedName
+  // starts to return proper volume label.
+  //
+  if (BootEntry->Name != NULL && !BootEntry->IsRecovery && StrCmp (BootEntry->Name, L"Recovery HD") == 0) {
+    RecoveryBootName = GetAppleRootedName (FileSystem, BootDirectoryName);
+    if (RecoveryBootName != NULL) {
+      FreePool (BootEntry->Name);
+      BootEntry->Name = RecoveryBootName;
+    }
+  }
+
   if (BootEntry->Name == NULL) {
+    DEBUG ((DEBUG_INFO, "Trying to detect Microsoft BCD\n"));
     Status = ReadFileSize (FileSystem, L"\\EFI\\Microsoft\\Boot\\BCD", &BcdSize);
     if (!EFI_ERROR (Status)) {
       BootEntry->IsWindows = TRUE;
@@ -824,10 +917,25 @@ OcLoadBootEntry (
   OUT EFI_HANDLE                  *EntryHandle
   )
 {
+  EFI_STATUS                Status;
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
+
   //
   // TODO: support Apple loaded image, policy, and dmg boot.
   //
-  return gBS->LoadImage (FALSE, ParentHandle, BootEntry->DevicePath, NULL, 0, EntryHandle);
+
+  if (BootEntry->IsFolder) {
+    DevicePath = AppendFileNameDevicePath (BootEntry->DevicePath, L"boot.efi");
+    DEBUG ((DEBUG_WARN, "HACK! HACK! HACK! Using boot.efi for dmg boot!\n"));
+  } else {
+    DevicePath = DuplicateDevicePath (BootEntry->DevicePath);
+  }
+
+  Status = gBS->LoadImage (FALSE, ParentHandle, DevicePath, NULL, 0, EntryHandle);
+
+  FreePool (DevicePath);
+
+  return Status;
 }
 
 EFI_STATUS
@@ -902,7 +1010,7 @@ OcRunSimpleBootMenu (
     if (!EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
-        "Should boot from %s (Windows %d, Recovery %d, Folder %d)\n",
+        "Should boot from %s (W:%d|R:%d|F:%d)\n",
         Chosen->Name,
         Chosen->IsWindows,
         Chosen->IsRecovery,

@@ -839,8 +839,8 @@ BootPolicyGetBootInfo (
   EFI_HANDLE                      DeviceHandle;
   CHAR16                          *PathName;
 
-  *BootPathName = NULL;
-  *Device       = NULL;
+  *BootPathName     = NULL;
+  *Device           = NULL;
   *ApfsVolumeHandle = NULL;
 
   Status = gBS->LocateDevicePath (
@@ -857,7 +857,7 @@ BootPolicyGetBootInfo (
     return Status;
   }
 
-  *Device = DeviceHandle;
+  *Device       = DeviceHandle;
   *BootPathName = PathName;
 
   InternalGetApfsVolumeHandle (DeviceHandle, PathName, ApfsVolumeHandle);
