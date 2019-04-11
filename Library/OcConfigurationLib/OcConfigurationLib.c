@@ -163,7 +163,7 @@ mDevicePropertiesSchema[] = {
 STATIC
 OC_SCHEMA
 mKernelAddSchemaEntry[] = {
-  OC_SCHEMA_STRING_IN    ("BundleName",     OC_KERNEL_ADD_ENTRY, BundleName),
+  OC_SCHEMA_STRING_IN    ("BundlePath",     OC_KERNEL_ADD_ENTRY, BundlePath),
   OC_SCHEMA_STRING_IN    ("Comment",        OC_KERNEL_ADD_ENTRY, Comment),
   OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_KERNEL_ADD_ENTRY, Enabled),
   OC_SCHEMA_STRING_IN    ("ExecutablePath", OC_KERNEL_ADD_ENTRY, ExecutablePath),
