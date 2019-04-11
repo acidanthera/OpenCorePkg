@@ -135,7 +135,7 @@
 		<key>Add</key>
 		<array>
 			<dict>
-				<key>BundleName</key>
+				<key>BundlePath</key>
 				<string>Lilu.kext</string>
 				<key>Comment</key>
 				<string></string>
@@ -149,7 +149,7 @@
 				<string>Contents/Info.plist</string>
 			</dict>
 			<dict>
-				<key>BundleName</key>
+				<key>BundlePath</key>
 				<string>VirtualSMC.kext</string>
 				<key>Comment</key>
 				<string></string>
@@ -163,7 +163,7 @@
 				<string>Contents/Info.plist</string>
 			</dict>
 			<dict>
-				<key>BundleName</key>
+				<key>BundlePath</key>
 				<string>RTCMemoryFixup.kext</string>
 				<key>Comment</key>
 				<string></string>
@@ -177,7 +177,7 @@
 				<string>Contents/Info.plist</string>
 			</dict>
 			<dict>
-				<key>BundleName</key>
+				<key>BundlePath</key>
 				<string>FakeSMC.kext</string>
 				<key>Comment</key>
 				<string></string>
@@ -191,7 +191,7 @@
 				<string>Contents/Info.plist</string>
 			</dict>
 			<dict>
-				<key>BundleName</key>
+				<key>BundlePath</key>
 				<string>AppleRTL8169Ethernet.kext</string>
 				<key>Comment</key>
 				<string></string>
@@ -205,7 +205,7 @@
 				<string>Contents/Info.plist</string>
 			</dict>
 			<dict>
-				<key>BundleName</key>
+				<key>BundlePath</key>
 				<string>AppleALC.kext</string>
 				<key>Comment</key>
 				<string></string>
