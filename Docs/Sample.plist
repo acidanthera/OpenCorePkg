@@ -10,10 +10,10 @@
 	<dict>
 		<key>Add</key>
 		<array>
-			<string>DSDT-patched.aml</string>
+			<string>DSDT.aml</string>
 			<string>SSDT.aml</string>
-			<string>SSDT1.aml</string>
-			<string>SSDT_ACPI.aml</string>
+			<string>SSDT-1.aml</string>
+			<string>SSDT-ACPI.aml</string>
 		</array>
 		<key>Block</key>
 		<array>
