@@ -1172,6 +1172,12 @@ behaviour that does not go to any other sections
 
 \begin{enumerate}
 \item
+  \texttt{Boot}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Description}: Apply boot configuration described in
+  \hyperref[miscbootprops]{Boot Properties} section below.
+
+\item
   \texttt{Debug}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Apply debug configuration described in
@@ -1183,6 +1189,25 @@ behaviour that does not go to any other sections
   \textbf{Description}: Apply security configuration described in
   \hyperref[miscsecurityprops]{Security Properties} section below.
 
+
+\end{enumerate}
+
+\subsection{Boot Properties}\label{miscbootprops}
+
+\begin{enumerate}
+
+\item
+  \texttt{ShowPicker}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Show simple boot picker to allow boot entry selection.
+
+\item
+  \texttt{Timeout}\\
+  \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
+  \textbf{Default value}: \texttt{0}\\
+  \textbf{Description}: Timeout in seconds in boot picker before
+  automatic booting of the default boot entry.
 
 \end{enumerate}
 

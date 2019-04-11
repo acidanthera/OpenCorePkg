@@ -58,13 +58,13 @@
 		<array>
 			<dict>
 				<key>Comment</key>
-				<string></string>
+				<string>SAT0 to SATA</string>
 				<key>Count</key>
 				<integer>0</integer>
 				<key>Enabled</key>
 				<false/>
 				<key>Find</key>
-				<data>TFBDQg==</data>
+				<data>U0FUMA==</data>
 				<key>Limit</key>
 				<integer>0</integer>
 				<key>Mask</key>
@@ -72,7 +72,7 @@
 				<key>OemTableId</key>
 				<data></data>
 				<key>Replace</key>
-				<data>U1BSRw==</data>
+				<data>U0FUQQ==</data>
 				<key>ReplaceMask</key>
 				<data></data>
 				<key>Skip</key>
@@ -81,6 +81,32 @@
 				<integer>0</integer>
 				<key>TableSignature</key>
 				<data></data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Selective patch PXSX to ARPT (For an example)</string>
+				<key>Count</key>
+				<integer>2</integer>
+				<key>Enabled</key>
+				<false/>
+				<key>Find</key>
+				<data>UFhTWA==</data>
+				<key>Limit</key>
+				<integer>0</integer>
+				<key>Mask</key>
+				<data></data>
+				<key>OemTableId</key>
+				<data></data>
+				<key>Replace</key>
+				<data>QVJQVA==</data>
+				<key>ReplaceMask</key>
+				<data></data>
+				<key>Skip</key>
+				<integer>12</integer>
+				<key>TableLength</key>
+				<integer>0</integer>
+				<key>TableSignature</key>
+				<data>RFNEVA==</data>
 			</dict>
 		</array>
 		<key>Quirks</key>
@@ -99,22 +125,15 @@
 	<dict>
 		<key>Add</key>
 		<dict>
-			<key>PciRoot(0x0)/Pci(0x1a,0x0)</key>
+			<key>PciRoot(0x0)/Pci(0x2,0x0)</key>
 			<dict>
-				<key>device-id</key>
-				<data>NzoAAA==</data>
+				<key>AAPL,ig-platform-id</key>
+				<data></data>
 			</dict>
 			<key>PciRoot(0x0)/Pci(0x1b,0x0)</key>
 			<dict>
 				<key>layout-id</key>
-				<data>QgAAAA==</data>
-			</dict>
-			<key>PciRoot(0x0)/Pci(0x1c,0x5)/Pci(0x0,0x0)</key>
-			<dict>
-				<key>built-in</key>
-				<data>AA==</data>
-				<key>device-id</key>
-				<data>VEMAAA==</data>
+				<data>AQAAAA==</data>
 			</dict>
 		</dict>
 		<key>Block</key>
@@ -164,41 +183,13 @@
 			</dict>
 			<dict>
 				<key>BundlePath</key>
-				<string>RTCMemoryFixup.kext</string>
+				<string>WhateverGreen.kext</string>
 				<key>Comment</key>
-				<string></string>
-				<key>Enabled</key>
-				<false/>
-				<key>ExecutablePath</key>
-				<string>Contents/MacOS/RTCMemoryFixup</string>
-				<key>MatchKernel</key>
-				<string>16.2.</string>
-				<key>PlistPath</key>
-				<string>Contents/Info.plist</string>
-			</dict>
-			<dict>
-				<key>BundlePath</key>
-				<string>FakeSMC.kext</string>
-				<key>Comment</key>
-				<string></string>
-				<key>Enabled</key>
-				<false/>
-				<key>ExecutablePath</key>
-				<string>Contents/MacOS/FakeSMC</string>
-				<key>MatchKernel</key>
-				<string>12.</string>
-				<key>PlistPath</key>
-				<string>Contents/Info.plist</string>
-			</dict>
-			<dict>
-				<key>BundlePath</key>
-				<string>AppleRTL8169Ethernet.kext</string>
-				<key>Comment</key>
-				<string></string>
+				<string>Video card</string>
 				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>
-				<string>Contents/MacOS/AppleRTL8169Ethernet</string>
+				<string>Contents/MacOS/WhateverGreen</string>
 				<key>MatchKernel</key>
 				<string></string>
 				<key>PlistPath</key>
@@ -208,11 +199,39 @@
 				<key>BundlePath</key>
 				<string>AppleALC.kext</string>
 				<key>Comment</key>
+				<string>Sound</string>
+				<key>Enabled</key>
+				<true/>
+				<key>ExecutablePath</key>
+				<string>Contents/MacOS/AppleALC</string>
+				<key>MatchKernel</key>
+				<string></string>
+				<key>PlistPath</key>
+				<string>Contents/Info.plist</string>
+			</dict>
+			<dict>
+				<key>BundlePath</key>
+				<string>IntelMausiEthernet.kext</string>
+				<key>Comment</key>
 				<string></string>
 				<key>Enabled</key>
 				<false/>
 				<key>ExecutablePath</key>
-				<string>Contents/MacOS/AppleALC</string>
+				<string>Contents/MacOS/IntelMausiEthernet</string>
+				<key>MatchKernel</key>
+				<string></string>
+				<key>PlistPath</key>
+				<string>Contents/Info.plist</string>
+			</dict>
+			<dict>
+				<key>BundlePath</key>
+				<string>Legacy_USB3.kext</string>
+				<key>Comment</key>
+				<string></string>
+				<key>Enabled</key>
+				<false/>
+				<key>ExecutablePath</key>
+				<string></string>
 				<key>MatchKernel</key>
 				<string></string>
 				<key>PlistPath</key>
@@ -225,7 +244,7 @@
 				<key>Comment</key>
 				<string></string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>Identifier</key>
 				<string>com.apple.driver.AppleTyMCEDriver</string>
 				<key>MatchKernel</key>
@@ -242,59 +261,7 @@
 				<key>Count</key>
 				<integer>1</integer>
 				<key>Enabled</key>
-				<true/>
-				<key>Find</key>
-				<data>D7eH3AQAAA==</data>
-				<key>Identifier</key>
-				<string>com.apple.driver.AirPort.Atheros40</string>
-				<key>Limit</key>
-				<integer>0</integer>
-				<key>Mask</key>
-				<data></data>
-				<key>MatchKernel</key>
-				<string></string>
-				<key>Replace</key>
-				<data>uGQAAACQkA==</data>
-				<key>ReplaceMask</key>
-				<data></data>
-				<key>Skip</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>Base</key>
-				<string></string>
-				<key>Comment</key>
-				<string></string>
-				<key>Count</key>
-				<integer>3</integer>
-				<key>Enabled</key>
-				<true/>
-				<key>Find</key>
-				<data>eG1sLnps</data>
-				<key>Identifier</key>
-				<string>com.apple.driver.AppleHDA</string>
-				<key>Limit</key>
-				<integer>0</integer>
-				<key>Mask</key>
-				<data></data>
-				<key>MatchKernel</key>
-				<string></string>
-				<key>Replace</key>
-				<data>em1sLnps</data>
-				<key>ReplaceMask</key>
-				<data></data>
-				<key>Skip</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>Base</key>
-				<string></string>
-				<key>Comment</key>
-				<string></string>
-				<key>Count</key>
-				<integer>1</integer>
-				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>Find</key>
 				<data>dS4Ptg==</data>
 				<key>Identifier</key>
@@ -320,7 +287,7 @@
 				<key>Count</key>
 				<integer>1</integer>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>Find</key>
 				<data>dTMPtw==</data>
 				<key>Identifier</key>
@@ -346,59 +313,7 @@
 				<key>Count</key>
 				<integer>0</integer>
 				<key>Enabled</key>
-				<true/>
-				<key>Find</key>
-				<data></data>
-				<key>Identifier</key>
-				<string>com.apple.driver.AppleACPIPlatform</string>
-				<key>Limit</key>
-				<integer>0</integer>
-				<key>Mask</key>
-				<data></data>
-				<key>MatchKernel</key>
-				<string>18.5.0</string>
-				<key>Replace</key>
-				<data>ww==</data>
-				<key>ReplaceMask</key>
-				<data></data>
-				<key>Skip</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>Base</key>
-				<string>_AcpiOsPrintf</string>
-				<key>Comment</key>
-				<string></string>
-				<key>Count</key>
-				<integer>0</integer>
-				<key>Enabled</key>
-				<true/>
-				<key>Find</key>
-				<data></data>
-				<key>Identifier</key>
-				<string>com.apple.driver.AppleACPIPlatform</string>
-				<key>Limit</key>
-				<integer>0</integer>
-				<key>Mask</key>
-				<data></data>
-				<key>MatchKernel</key>
-				<string>18.5.0</string>
-				<key>Replace</key>
-				<data>ww==</data>
-				<key>ReplaceMask</key>
-				<data></data>
-				<key>Skip</key>
-				<integer>0</integer>
-			</dict>
-			<dict>
-				<key>Base</key>
-				<string>_AcpiDebugPrint</string>
-				<key>Comment</key>
-				<string></string>
-				<key>Count</key>
-				<integer>0</integer>
-				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>Find</key>
 				<data></data>
 				<key>Identifier</key>
@@ -433,6 +348,13 @@
 	</dict>
 	<key>Misc</key>
 	<dict>
+		<key>Boot</key>
+		<dict>
+			<key>ShowPicker</key>
+			<true/>
+			<key>Timeout</key>
+			<integer>5</integer>
+		</dict>
 		<key>Debug</key>
 		<dict>
 			<key>Delay</key>
@@ -457,7 +379,7 @@
 			<key>7C436110-AB2A-4BBB-A880-FE41995C9F82</key>
 			<dict>
 				<key>boot-args</key>
-				<string>-nehalem_error_disable nvda_drv=1 rtcfx_exclude=10-ff -v</string>
+				<string>-v keepsyms=1</string>
 				<key>csr-active-config</key>
 				<data>dwAAAA==</data>
 				<key>nvda_drv</key>
