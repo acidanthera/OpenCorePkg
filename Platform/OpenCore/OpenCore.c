@@ -256,7 +256,7 @@ OcMain (
     OC_LOAD_DEFAULT_POLICY,
     mOpenCoreConfiguration.Misc.Boot.Timeout,
     OcStartImage,
-    mOpenCoreConfiguration.Misc.Boot.ShowPicker == FALSE
+    mOpenCoreConfiguration.Misc.Boot.ShowPicker
     );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to show boot menu!\n"));
