@@ -310,7 +310,7 @@ OcPlatformUpdateNvram (
       L"HW_MLB",
       &gAppleVendorVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-      Config->PlatformInfo.Nvram.Mlb.Size,
+      Config->PlatformInfo.Nvram.Mlb.Size - 1,
       Mlb
       );
     DEBUG ((
@@ -324,7 +324,7 @@ OcPlatformUpdateNvram (
       L"MLB",
       &gAppleVendorVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-      Config->PlatformInfo.Nvram.Mlb.Size,
+      Config->PlatformInfo.Nvram.Mlb.Size - 1,
       Mlb
       );
     DEBUG ((
