@@ -774,6 +774,7 @@ OcScanForBootEntries (
   OUT OC_BOOT_ENTRY               **BootEntries,
   OUT UINTN                       *Count,
   OUT UINTN                       *AllocCount OPTIONAL,
+  IN  EFI_HANDLE                  LoadHandle  OPTIONAL,
   IN  BOOLEAN                     Describe
   )
 {
@@ -784,6 +785,7 @@ OcScanForBootEntries (
   OC_BOOT_ENTRY             *Entries;
   UINTN                     EntryIndex;
   CHAR16                    *DevicePath;
+  UINTN                     EntryCount;
 
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
@@ -811,13 +813,25 @@ OcScanForBootEntries (
   EntryIndex = 0;
 
   for (Index = 0; Index < NoHandles; ++Index) {
-    EntryIndex += OcFillBootEntry (
+    EntryCount = OcFillBootEntry (
       BootPolicy,
       Policy,
       Handles[Index],
       &Entries[EntryIndex],
       &Entries[EntryIndex+1]
       );
+
+    if (LoadHandle == Handles[Index] && EntryCount > 0) {
+      DEBUG ((DEBUG_INFO, "Skipping self load handle entry %p\n", LoadHandle));
+      --EntryCount;
+      CopyMem (
+        &Entries[EntryIndex+1],
+        &Entries[EntryIndex],
+        sizeof (Entries[EntryIndex]) * EntryCount
+        );
+    }
+
+    EntryIndex += EntryCount;
   }
 
   FreePool (Handles);
@@ -971,7 +985,8 @@ OcRunSimpleBootPicker (
   IN  UINT32           BootPolicy,
   IN  UINT32           TimeoutSeconds,
   IN  OC_IMAGE_START   StartImage,
-  IN  BOOLEAN          ShowPicker
+  IN  BOOLEAN          ShowPicker,
+  IN  EFI_HANDLE       LoadHandle  OPTIONAL
   )
 {
   EFI_STATUS                  Status;
@@ -1007,6 +1022,7 @@ OcRunSimpleBootPicker (
       &Entries,
       &EntryCount,
       NULL,
+      LoadHandle,
       TRUE
       );
 

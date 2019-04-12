@@ -122,6 +122,7 @@ OcFillBootEntry (
   @param[out] BootEntries    List of boot entries (allocated from pool).
   @param[out] Count          Number of boot entries.
   @param[out] AllocCount     Number of allocated boot entries.
+  @param[in]  LoadHandle     Load handle to skip.
   @param[in]  Describe       Automatically fill description fields
 
   @retval EFI_SUCCESS        Executed successfully and found entries.
@@ -133,6 +134,7 @@ OcScanForBootEntries (
   OUT OC_BOOT_ENTRY               **BootEntries,
   OUT UINTN                       *Count,
   OUT UINTN                       *AllocCount OPTIONAL,
+  IN  EFI_HANDLE                  LoadHandle  OPTIONAL,
   IN  BOOLEAN                     Describe
   );
 
@@ -257,6 +259,7 @@ EFI_STATUS
   @param[in]  TimeOutSeconds   Default entry selection timeout (pass 0 to ignore).
   @param[in]  StartImage       Image starting routine used.
   @param[in]  ShowPicker       Show boot menu or just boot the default option.
+  @param[in]  LoadHandle       Load handle, skips main handle on this handle.
 
   @retval does not return unless a fatal error happened.
 **/
@@ -266,7 +269,8 @@ OcRunSimpleBootPicker (
   IN  UINT32           BootPolicy,
   IN  UINT32           TimeoutSeconds,
   IN  OC_IMAGE_START   StartImage,
-  IN  BOOLEAN          ShowPicker
+  IN  BOOLEAN          ShowPicker,
+  IN  EFI_HANDLE       LoadHandle  OPTIONAL
   );
 
 #endif // OC_BOOT_MANAGEMENT_LIB_H

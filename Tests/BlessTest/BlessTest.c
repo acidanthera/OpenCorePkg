@@ -86,6 +86,7 @@ TestBless (
       &Entries,
       &EntryCount,
       NULL,
+      NULL,
       TRUE
       );
 
