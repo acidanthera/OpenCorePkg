@@ -28,7 +28,7 @@
 ///
 /// OC_BOOTSTRAP_PROTOCOL revision
 ///
-#define OC_BOOTSTRAP_PROTOCOL_REVISION 2
+#define OC_BOOTSTRAP_PROTOCOL_REVISION 3
 
 ///
 /// Forward declaration of OC_BOOTSTRAP_PROTOCOL structure.
@@ -55,6 +55,7 @@ VOID
 ///
 struct OC_BOOTSTRAP_PROTOCOL_ {
   UINTN               Revision;
+  UINTN               NestedCount;
   OC_BOOTSTRAP_RERUN  ReRun;
 };
 

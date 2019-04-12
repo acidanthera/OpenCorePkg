@@ -20,6 +20,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/DevicePath.h>
 #include <Protocol/LoadedImage.h>
 #include <Protocol/OcBootstrap.h>
+#include <Protocol/SimpleFileSystem.h>
 
 #include <Library/DebugLib.h>
 #include <Library/OcDebugLogLib.h>
@@ -196,6 +197,7 @@ OcMain (
   CHAR8                     *Config;
   UINT32                    ConfigSize;
   OC_CPU_INFO               CpuInfo;
+  EFI_HANDLE                LoadHandle;
 
   Config = OcStorageReadFileUnicode (
     Storage,
@@ -229,6 +231,16 @@ OcMain (
     OcStoreLoadPath (LoadPath);
   }
 
+  LoadHandle = NULL;
+  if (LoadPath != NULL) {
+    Status = gBS->LocateDevicePath (
+      &gEfiSimpleFileSystemProtocolGuid,
+      &LoadPath,
+      &LoadHandle
+      );
+    DEBUG ((DEBUG_INFO, "OC: LoadHandle is %p - %r\n", LoadHandle, Status));
+  }
+
   OcCpuScanProcessor (&CpuInfo);
 
   DEBUG ((DEBUG_INFO, "OC: OcLoadUefiSupport...\n"));
@@ -245,8 +257,8 @@ OcMain (
   // We do it as late as possible to let other drivers install their hooks.
   //
   mOcOriginalStartImage = gBS->StartImage;
-  gBS->StartImage = OcEfiStartImage;
-  gBS->Hdr.CRC32 = 0;
+  gBS->StartImage       = OcEfiStartImage;
+  gBS->Hdr.CRC32        = 0;
   gBS->CalculateCrc32 (gBS, gBS->Hdr.HeaderSize, &gBS->Hdr.CRC32);
 
   DEBUG ((DEBUG_INFO, "OC: OpenCore is loaded, showing boot menu...\n"));
@@ -256,7 +268,8 @@ OcMain (
     OC_LOAD_DEFAULT_POLICY,
     mOpenCoreConfiguration.Misc.Boot.Timeout,
     OcStartImage,
-    mOpenCoreConfiguration.Misc.Boot.ShowPicker
+    mOpenCoreConfiguration.Misc.Boot.ShowPicker,
+    LoadHandle
     );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to show boot menu!\n"));
@@ -276,31 +289,38 @@ OcBootstrapRerun (
 
   DEBUG ((DEBUG_INFO, "OC: ReRun executed!\n"));
 
-  //
-  // FIXME: Key should not be NULL, but be a statically defined RSA key
-  // updated via bin patching prior to signing OpenCore.efi.
-  //
-  Status = OcStorageInitFromFs (
-    &mOpenCoreStorage,
-    FileSystem,
-    OPEN_CORE_ROOT_PATH,
-    NULL
-    );
+  ++This->NestedCount;
 
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to open root FS - %r!\n", Status));
-    return;
+  if (This->NestedCount == 1) {
+    //
+    // FIXME: Key should not be NULL, but be a statically defined RSA key
+    // updated via bin patching prior to signing OpenCore.efi.
+    //
+    Status = OcStorageInitFromFs (
+      &mOpenCoreStorage,
+      FileSystem,
+      OPEN_CORE_ROOT_PATH,
+      NULL
+      );
+
+    if (!EFI_ERROR (Status)) {
+      OcMain (&mOpenCoreStorage, LoadPath);
+      OcStorageFree (&mOpenCoreStorage);
+    } else {
+      DEBUG ((DEBUG_ERROR, "OC: Failed to open root FS - %r!\n", Status));
+    }
+  } else {
+    DEBUG ((DEBUG_ERROR, "OC: Nested ReRun is not supported\n"));
   }
 
-  OcMain (&mOpenCoreStorage, LoadPath);
-
-  OcStorageFree (&mOpenCoreStorage);
+  --This->NestedCount;
 }
 
 STATIC
 OC_BOOTSTRAP_PROTOCOL
 mOpenCoreBootStrap = {
   OC_BOOTSTRAP_PROTOCOL_REVISION,
+  0,
   OcBootstrapRerun
 };
 
