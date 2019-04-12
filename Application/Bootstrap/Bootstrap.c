@@ -47,7 +47,7 @@ LoadOpenCore (
   ASSERT (ImageHandle != NULL);
 
   BufferSize = 0;
-  Buffer = ReadFile (FileSystem, OPEN_CORE_IMAGE_PATH, &BufferSize);
+  Buffer = ReadFile (FileSystem, OPEN_CORE_IMAGE_PATH, &BufferSize, BASE_16MB);
   if (Buffer == NULL) {
     DEBUG ((DEBUG_ERROR, "BS: Failed to locate valid OpenCore image - %p!\n", Buffer));
     return EFI_NOT_FOUND;
