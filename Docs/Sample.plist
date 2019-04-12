@@ -542,7 +542,9 @@
 			<false/>
 			<key>IgnoreInvalidFlexRatio</key>
 			<false/>
-			<key>ProvideConsoleGop</key>
+			<key>ProvideConsoleControl</key>
+			<false/>
+			key>ProvideConsoleGop</key>
 			<false/>
 			<key>ReleaseUsbOwnership</key>
 			<false/>
