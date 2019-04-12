@@ -544,7 +544,7 @@
 			<false/>
 			<key>ProvideConsoleControl</key>
 			<false/>
-			key>ProvideConsoleGop</key>
+			<key>ProvideConsoleGop</key>
 			<false/>
 			<key>ReleaseUsbOwnership</key>
 			<false/>
