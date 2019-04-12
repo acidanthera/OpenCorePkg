@@ -41,7 +41,6 @@ GetVolumeLabel (
   EFI_FILE_HANDLE                 Volume;
   EFI_FILE_SYSTEM_VOLUME_LABEL    *VolumeInfo;
   UINTN                           VolumeLabelSize;
-  CHAR16                          *VolumeLabel;
 
   ASSERT (FileSystem != NULL);
 
