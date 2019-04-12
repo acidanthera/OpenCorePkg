@@ -400,7 +400,7 @@ XmlParserError (
   CONST CHAR8        *Message
   )
 {
-  UINT32  Character;
+  UINT32  Character = 0;
   UINT32  Position;
   UINT32  Row = 0;
   UINT32  Column = 0;
