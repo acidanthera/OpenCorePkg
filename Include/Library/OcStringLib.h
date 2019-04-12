@@ -360,4 +360,16 @@ UnicodeUefiSlashes (
   IN OUT CHAR16  *String
   );
 
+/**
+  Filter string from unprintable characters.
+
+  @param[in,out]  String      String to filter.
+  @param[in]      SingleLine  Enforce only one line.
+**/
+VOID
+UnicodeFilterString (
+  IN OUT CHAR16   *String,
+  IN     BOOLEAN  SingleLine
+  );
+
 #endif // OC_STRING_LIB_H_

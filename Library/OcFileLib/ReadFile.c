@@ -33,7 +33,8 @@ VOID *
 ReadFile (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
   IN  CONST CHAR16                     *FilePath,
-  OUT UINT32                           *FileSize  OPTIONAL
+  OUT UINT32                           *FileSize   OPTIONAL,
+  IN  UINT32                           MaxFileSize OPTIONAL
   )
 {
   EFI_STATUS                      Status;
@@ -73,7 +74,8 @@ ReadFile (
     &FileReadSize
     );
   if (EFI_ERROR (Status)
-    || OcOverflowAddU32 (FileReadSize, sizeof (CHAR16), &FileBufferSize)) {
+    || OcOverflowAddU32 (FileReadSize, sizeof (CHAR16), &FileBufferSize)
+    || (MaxFileSize > 0 && FileReadSize > MaxFileSize)) {
     FileHandle->Close (FileHandle);
     return NULL;
   }

@@ -27,6 +27,7 @@
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcGuardLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 
@@ -69,8 +70,7 @@ GetVolumeLabel (
     );
 
   if (VolumeInfo != NULL) {
-    if (VolumeLabelSize > 0 && VolumeInfo->VolumeLabel[0] != L'\0'
-      && VolumeLabelSize <= MAX_UINTN - sizeof (VolumeLabel[0])) {
+    if (VolumeLabelSize >= sizeof (CHAR16) && VolumeInfo->VolumeLabel[0] != L'\0') {
       //
       // The spec requires disk label to be NULL-terminated, but it
       // was unclear whether the size should contain terminator or not.
@@ -78,11 +78,13 @@ GetVolumeLabel (
       // terminating \0 (though they do append it). These drivers must
       // not be used, but we try not to die when debugging is off.
       //
-      if (VolumeInfo->VolumeLabel[VolumeLabelSize/2-1] != '\0') {
-        DEBUG ((DEBUG_ERROR, "Found unterminated volume label!"));
+      if (VolumeInfo->VolumeLabel[VolumeLabelSize / sizeof (CHAR16) - 1] != '\0'
+        || VolumeLabelSize > OC_MAX_VOLUME_LABEL_SIZE * sizeof (CHAR16)) {
+        DEBUG ((DEBUG_ERROR, "Found unterminated or too long volume label!"));
         FreePool (VolumeInfo);
         return AllocateCopyPool (sizeof (L"INVALID"), L"INVALID");
       } else {
+        UnicodeFilterString (VolumeInfo->VolumeLabel, TRUE);
         return VolumeInfo->VolumeLabel;
       }
     }

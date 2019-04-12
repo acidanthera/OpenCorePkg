@@ -483,3 +483,32 @@ UnicodeUefiSlashes (
     *Needle = '\\';
   }
 }
+
+VOID
+UnicodeFilterString (
+  IN OUT CHAR16   *String,
+  IN     BOOLEAN  SingleLine
+  )
+{
+  while (*String != '\0') {
+    if ((*String & 0x7FU) != *String) {
+      //
+      // Remove all unicode characters.
+      //
+      *String = '_';
+    } else if (SingleLine && (*String == '\r' || *String == '\n')) {
+      //
+      // Stop after printing one line.
+      //
+      *String = '\0';
+      break;
+    } else if (*String < 0x20 || *String == 0x7F) {
+      //
+      // Drop all unprintable spaces but space including tabs.
+      //
+      *String = '_';
+    }
+
+    ++String;
+  }
+}

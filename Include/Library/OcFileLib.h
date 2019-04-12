@@ -23,6 +23,11 @@
 #include <Protocol/DevicePath.h>
 
 /**
+  Maximum safe volume label size.
+**/
+#define OC_MAX_VOLUME_LABEL_SIZE 64
+
+/**
   Locate file system from Device handle or path.
 
   @param[in]  DeviceHandle  Device handle.
@@ -69,6 +74,7 @@ GetVolumeLabel (
   @param[in]  FileSystem   A pointer to the file system protocol of the volume.
   @param[in]  FilePath     The full path to the file on the device.
   @param[out] FileSize     The size of the file read (optional).
+  @param[in]  MaxFileSize  Upper file size bound (optional).
 
   @retval A pointer to a buffer containing file read or NULL.
 **/
@@ -76,7 +82,8 @@ VOID *
 ReadFile (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
   IN  CONST CHAR16                     *FilePath,
-  OUT UINT32                           *FileSize OPTIONAL
+  OUT UINT32                           *FileSize OPTIONAL,
+  IN  UINT32                           MaxFileSize OPTIONAL
   );
 
 /**

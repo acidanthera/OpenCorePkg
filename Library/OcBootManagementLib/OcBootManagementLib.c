@@ -64,11 +64,13 @@ GetAppleDiskLabel (
 
   UnicodeSPrint (DiskLabelPath, DiskLabelPathSize, L"%s%s", BootDirectoryName, LabelFilename);
   DEBUG ((DEBUG_INFO, "Trying to get label from %s\n", DiskLabelPath));
-  AsciiDiskLabel = (CHAR8 *) ReadFile (FileSystem, DiskLabelPath, &DiskLabelLength);
+
+  AsciiDiskLabel = (CHAR8 *) ReadFile (FileSystem, DiskLabelPath, &DiskLabelLength, OC_MAX_VOLUME_LABEL_SIZE);
   FreePool (DiskLabelPath);
 
   if (AsciiDiskLabel != NULL) {
     UnicodeDiskLabel = AsciiStrCopyToUnicode (AsciiDiskLabel, DiskLabelLength);
+    UnicodeFilterString (UnicodeDiskLabel, TRUE);
     FreePool (AsciiDiskLabel);
   } else {
     UnicodeDiskLabel = NULL;
@@ -102,7 +104,10 @@ GetAppleRootedName (
 
   UnicodeSPrint (RootedDiskPath, RootedDiskPathSize, L"%s%a", BootDirectoryName, ".root_uuid");
   DEBUG ((DEBUG_INFO, "Trying to get root from %s\n", RootedDiskPath));
-  AsciiRootUuid = (CHAR8 *) ReadFile (FileSystem, RootedDiskPath, &AsciiRootUuidLength);
+  //
+  // Permit a few new lines afterwards, though I doubt Apple has them anywhere.
+  //
+  AsciiRootUuid = (CHAR8 *) ReadFile (FileSystem, RootedDiskPath, &AsciiRootUuidLength, GUID_STRING_LENGTH + 4);
   FreePool (RootedDiskPath);
 
   if (AsciiRootUuid == NULL) {
@@ -183,7 +188,8 @@ GetAppleRecoveryNameFromPlist (
         RecoveryNameSize = L_STR_SIZE(L"Recovery ") + AsciiStrLen (Version) * sizeof (CHAR16);
         RecoveryName = AllocatePool (RecoveryNameSize);
         if (RecoveryName != NULL) {
-          UnicodeSPrint(RecoveryName, RecoveryNameSize, L"Recovery %a", Version);
+          UnicodeSPrint (RecoveryName, RecoveryNameSize, L"Recovery %a", Version);
+          UnicodeFilterString (RecoveryName, TRUE);
         }
       }
     }
@@ -217,7 +223,7 @@ GetAppleRecoveryName (
 
   UnicodeSPrint (SystemVersionPath, SystemVersionPathSize, L"%sSystemVersion.plist", BootDirectoryName);
   DEBUG ((DEBUG_INFO, "Trying to get recovery from %s\n", SystemVersionPath));
-  SystemVersionData = (CHAR8 *) ReadFile (FileSystem, SystemVersionPath, &SystemVersionDataSize);
+  SystemVersionData = (CHAR8 *) ReadFile (FileSystem, SystemVersionPath, &SystemVersionDataSize, BASE_1MB);
   FreePool (SystemVersionPath);
 
   if (SystemVersionData != NULL) {
