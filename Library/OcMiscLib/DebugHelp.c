@@ -13,6 +13,7 @@
 **/
 
 #include <Uefi.h>
+#include <Library/DebugLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/OcMiscLib.h>
@@ -86,7 +87,7 @@ WaitForKeyIndex (
   //
   TimerEvent = NULL;
   if (Timeout > 0) {
-    Status = gBS->CreateEvent (EVT_TIMER, TPL_APPLICATION, NULL, NULL, &TimerEvent);
+    Status = gBS->CreateEvent (EVT_TIMER, TPL_CALLBACK, NULL, NULL, &TimerEvent);
     if (!EFI_ERROR (Status)) {
       Status = gBS->SetTimer (TimerEvent, TimerRelative, 10000000 * Timeout);
       if (EFI_ERROR (Status)) {
