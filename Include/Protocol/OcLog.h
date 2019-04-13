@@ -15,8 +15,14 @@
 #ifndef OC_LOG_PROTOCOL_H
 #define OC_LOG_PROTOCOL_H
 
-// The defines for the log flags.
+///
+/// Current supported log protocol revision.
+///
+#define OC_LOG_REVISION  0x01000A
 
+///
+/// The defines for the log flags.
+///
 #define OC_LOG_DISABLE      0
 #define OC_LOG_ENABLE       BIT0
 #define OC_LOG_CONSOLE      BIT1

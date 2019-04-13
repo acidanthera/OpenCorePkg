@@ -65,7 +65,7 @@ DebugPrint (
       (VOID **) &mOcLog
       );
 
-    if (EFI_ERROR (Status)) {
+    if (EFI_ERROR (Status) || mOcLog->Revision != OC_LOG_REVISION) {
       mOcLog = NULL;
     }
   }
