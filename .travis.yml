@@ -1,0 +1,41 @@
+language: cpp
+env:
+  global:
+  - FORCE_INSTALL=1
+  - secure: WPHaDUI0jTv7+l1R/5W3vzkP5+6/B7SM/VpF7PeVQAC5emWOC/BgNLurosjHUfYWE8Fs9sRYYsv6GXvU5n64gyMQhBQInmrEezfbc/LkP1cj+q5jUzFkJvlmFSIY+b570OPzXoIaR0ydmB80UgOezYvqjjDvI3TGXt+JY8Dp6oljqUuRy647UUkH52E7LKW/+Zh7Yq5sx3VJoBeSLrnl/CVUff4T6onITz2jHYNAf0kK/Yo5whcWpz0L+EGwhHUb8TJfQXMyL2PBQRZMbOBwfhFzFDC+j5uaJ4PYEqSRn+cemQhazDAUbNx7kVi1hMsLZZMRIG56zPJPV7DRM2ggCYaFSf0S/Ifm4e5Dj7TyM3uNqs55tGaJd/fHrNcr95bge/kn9yhqc0Lvm+oIiAKGhMnwwFymqLXxWRWYGCSp5zb8BAdUTrVZaLOA/siyNu6I+y0uPbdF8FFTgmJzKGEI09fRnn2o50Ott087E+hr7Xqr1g4OCmHdNX26uAS5gIwTfMVDLL86+gyY2gDBa9yN3HQrJKmppWjt02sR+1McvZY8Z6CjnlwiAUcMudJc9p2f5W3Mnxxv9Snz+fMGSmgCtc3uSWCrHegHHSm70+0/BDN88WLBY5X35cs821GXuFxvOndisZebjiunCtlRu0W0xQISCQ+Dw20xFhgN7aZiN34=
+
+matrix:
+  include:
+  - os: osx
+    compiler: clang
+
+    script:
+    - "./macbuild.tool"
+
+    deploy:
+      provider: releases
+      skip_cleanup: true
+      file:
+      - Binaries/RELEASE/*.zip
+      - Binaries/DEBUG/*.zip
+      file_glob: true
+      on:
+        tags: true
+      api_key:
+        secure: BCsj6FO40+02MPylXhIrUqS0KmwoUsd3y+iS5mwcBo16dqTbgF/emsApptKKgLCrb83sgmedkdEI1tkMTw7kAP8341E4Xmo0DVRQcJ/zDMXMtutmN5f0j1sMsiHhZ6wnaFhVIOvysSiuIal5vRX04rG/2UPnrM2CIv3s1jQPMhuMJGWPGOg76UoFQVo+1Mx7AtDTLJoJhymtIldbrH30h77HDdJbyCT+VPBtFmNbBJvTwVTyyVOuKkUX5JI0P1qNayEY6aFURLvOR6ZR7CSqIFXOiQmWEbFulxGp3Ss+HD+Ule94DXEeuK7xF1NKYHubUBF8BDk3eJcSfbA0vFvE6SbB1OJHItVnXliLb/pR3TlJiY11+XtT3N2YFHTEFOVSUxplyQpmXZDwhiIgn7sZRZQGL6Eqs4CtjKj8Lu/EJEFRIbJZCdlVkznFebSwMjvRaK9Anj1vW5gFs+Wsw5lUZOJPYI8jiHdzGszsDFpOex2PVixwLfVscM7fa5Sgsk4FgV0EzGpzmbcH9jc7AurbyRUgCSnDxhOuH/m4TJLdS8xL3XS+MiB8wZ4bTStqjMWK6fKy13IrmLChJUVPBYoyyqgOjHjtOBYYEcChpDbUqiLh6UCpFyZmkiph8uElgolgGuDZkEIGwcuquap2Ih4q9x1CX5eMri/ukzAqaHz506o=
+
+  - os: osx
+    compiler: clang
+
+    script:
+      - echo "This script runs coverity..."
+
+    addons:
+      coverity_scan:
+        project:
+          name: "acidanthera/OpenCorePkg"
+          description: "OpenCorePkg"
+        notification_email: $NOTIFICATION_EMAIL
+        build_command_prepend: "./macbuild.tool --skip-build --skip-package && cd UDK ; src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/Lilu/master/Lilu/Scripts/covstrap.sh) && eval \"$src\" || exit 1"
+        build_command: "../macbuild.tool --skip-tests --skip-package RELEASE"
+        branch_pattern: master

@@ -19,6 +19,8 @@
 #include <Library/OcCpuLib.h>
 #include <Library/OcStorageLib.h>
 
+#define OPEN_CORE_VERSION          L"0.1"
+
 #define OPEN_CORE_IMAGE_PATH       L"EFI\\OC\\OpenCore.efi"
 
 #define OPEN_CORE_ROOT_PATH        L"EFI\\OC\\"
