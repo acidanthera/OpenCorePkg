@@ -370,6 +370,10 @@
 		<dict>
 			<key>HaltLevel</key>
 			<integer>2147483648</integer>
+			<key>RequireSignature</key>
+			<true/>
+			<key>RequireVault</key>
+			<true/>
 		</dict>
 	</dict>
 	<key>NVRAM</key>
