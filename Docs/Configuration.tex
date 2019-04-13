@@ -2254,6 +2254,55 @@ tweaks for the onboard firmware.
 
 \section{Troubleshooting}\label{troubleshooting}
 
-Good luck.
+\subsection{Tips and Tricks}\label{troubleshootingtricks}
+
+\begin{enumerate}
+\item
+  \textbf{How to debug boot failure?}
+
+  Normally it is enough to obtain the actual error message. For this
+  ensure that:
+  \begin{itemize}
+  \tightlist
+  \item You have a \texttt{DEBUG} or \texttt{NOOPT} version of OpenCore.
+  \item Logging is enabled (\texttt{1}) and shown onscreen (\texttt{2}):
+  \texttt{Misc} $\rightarrow$ \texttt{Debug} $\rightarrow$ \texttt{Target}
+  $=$ \texttt{3}.
+  \item Logged messages from at least \texttt{DEBUG\_ERROR}
+  (\texttt{0x80000000}), \texttt{DEBUG\_WARN} (\texttt{0x00000002}), and
+  \texttt{DEBUG\_INFO} (\texttt{0x00000040}) levels are visible onscreen:
+  \texttt{Misc} $\rightarrow$ \texttt{Debug} $\rightarrow$ \texttt{DisplayLevel}
+  $=$ \texttt{0x80000042}.
+  \item Critical error messages, like \texttt{DEBUG\_ERROR}, stop booting:
+  \texttt{Misc} $\rightarrow$ \texttt{Security}
+  $\rightarrow$ \texttt{HaltLevel} $=$ \texttt{0x80000000}.
+  \item Boot Picker (entry selector) is enabled: \texttt{Misc}
+  $\rightarrow$ \texttt{Boot} $\rightarrow$ \texttt{ShowPicker} $=$ \texttt{true}.
+  \end{itemize}
+
+  If there is no obvious error, check the available hacks in \texttt{Quirks} sections
+  one by one.
+
+\item
+  \textbf{How to customise boot entries?}
+
+  OpenCore follows standard Apple Bless model and extracts the entry name
+  from \texttt{.contentDetails} and \texttt{.disk\_label.contentDetails} files in the
+  booter directory if present. These files contain an ASCII string with an entry title,
+  which may then be customised by the user.
+
+\item
+  \textbf{What is the simplest way to install macOS?}
+
+  Copy online recovery image (\texttt{BaseSystem.dmg} and
+  \texttt{BaseSystem.chunklist} files) to \texttt{com.apple.recovery.boot} directory
+  on a FAT32 partition with OpenCore. Load OpenCore Boot Picker and choose the entry,
+  it will have a \texttt{(dmg)} suffix. Custom name may be created by providing
+  \texttt{.contentDetails} file.
+
+  FIXME: dmg boot is not yet accessible and recovery download script is
+  not open-sourced.
+
+\end{enumerate}
 
 \end{document}
