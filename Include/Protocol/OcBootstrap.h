@@ -15,6 +15,8 @@
 #ifndef OC_BOOTSTRAP_PROTOCOL_H
 #define OC_BOOTSTRAP_PROTOCOL_H
 
+#include <Library/OcCryptoLib.h>
+
 #include <Protocol/SimpleFileSystem.h>
 
 ///
@@ -28,7 +30,7 @@
 ///
 /// OC_BOOTSTRAP_PROTOCOL revision
 ///
-#define OC_BOOTSTRAP_PROTOCOL_REVISION 3
+#define OC_BOOTSTRAP_PROTOCOL_REVISION 4
 
 ///
 /// Forward declaration of OC_BOOTSTRAP_PROTOCOL structure.
@@ -56,6 +58,7 @@ VOID
 struct OC_BOOTSTRAP_PROTOCOL_ {
   UINTN               Revision;
   UINTN               NestedCount;
+  RSA_PUBLIC_KEY      *VaultKey;
   OC_BOOTSTRAP_RERUN  ReRun;
 };
 

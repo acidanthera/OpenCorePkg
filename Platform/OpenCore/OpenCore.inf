@@ -42,6 +42,7 @@
   OpenCoreNvram.c
   OpenCorePlatform.c
   OpenCoreUefi.c
+  OpenCoreVault.c
 
 [Packages]
   EfiPkg/EfiPkg.dec

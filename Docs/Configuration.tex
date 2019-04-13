@@ -1317,6 +1317,54 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \textbf{Description}: EDK II debug level bitmask (sum) causing CPU to
   halt (stop execution) after obtaining a message of \texttt{HaltLevel}.
   Possible values match \texttt{DisplayLevel} values.
+
+\item
+  \texttt{RequireSignature}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{true}\\
+  \textbf{Description}: Require \texttt{vault.sig} signature file for
+  \texttt{vault.plist} in \texttt{OC} directory.
+
+  This file should contain a raw 256 byte RSA-2048 signature from SHA-256
+  hash of \texttt{vault.plist}. The signature is verified against the public
+  key embedded into \texttt{OpenCore.efi}.
+
+  To embed the public key you should do either of the following:
+
+  \begin{itemize}
+  \tightlist
+  \item Provide public key during the \texttt{OpenCore.efi} compilation in
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Platform/OpenCore/OpenCoreVault.c}{\texttt{OpenCoreVault.c}} file.
+  \item Binary patch \texttt{OpenCore.efi} replacing zeroes with the public key
+  between \texttt{=BEGIN OC VAULT=} and \texttt{==END OC VAULT==} ASCII markers.
+  \end{itemize}
+
+  RSA public key 520 byte format description can be found in Chromium OS documentation.
+  To convert public key from X.509 certificate or from PEM file use
+  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/RsaTool}{RsaTool}.
+
+  \emph{Note}: \texttt{vault.sig} is used regardless of this option when public key
+  is embedded into \texttt{OpenCore.efi}. Setting it to \texttt{true} will only ensure
+  configuration sanity, and abort the boot process when public key is not set but
+  was supposed to be used for verification.
+
+\item
+  \texttt{RequireVault}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{true}\\
+  \textbf{Description}: Require \texttt{vault.plist} file present
+  in \texttt{OC} directory.
+
+  This file should contain SHA-256 hashes for all files used by OpenCore.
+  Presence of this file is highly recommended to ensure that unintentional
+  file modifications (including filesystem corruption) do not happen unnoticed.
+  To create this file automatically use
+  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/Vault}{\texttt{create\_vault.sh}} script.
+
+  \emph{Note}: \texttt{vault.plist} is tried to be read regardless of the value
+  of this option, but setting it to \texttt{true} will ensure configuration
+  sanity, and abort the boot process.
+
 \end{enumerate}
 
 \section{NVRAM}\label{nvram}
@@ -2276,6 +2324,9 @@ tweaks for the onboard firmware.
   \item Critical error messages, like \texttt{DEBUG\_ERROR}, stop booting:
   \texttt{Misc} $\rightarrow$ \texttt{Security}
   $\rightarrow$ \texttt{HaltLevel} $=$ \texttt{0x80000000}.
+  \item Watch Dog is disabled to prevent automatic reboot:
+  \texttt{Uefi} $\rightarrow$ \texttt{Quirks} $\rightarrow$
+  \texttt{DisableWatchDog} $=$ \texttt{true}.
   \item Boot Picker (entry selector) is enabled: \texttt{Misc}
   $\rightarrow$ \texttt{Boot} $\rightarrow$ \texttt{ShowPicker} $=$ \texttt{true}.
   \end{itemize}

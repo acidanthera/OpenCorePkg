@@ -7,6 +7,11 @@ OpenCorePkg
 
 OpenCore bootloader front end.
 
+## Discussion
+
+- [Hackintosh-Forum.de](https://www.hackintosh-forum.de/forum/thread/42353-opencore-bootloader) in German
+- [AppleLife.ru](https://applelife.ru/threads/razrabotka-opencore.2943955) in Russian
+
 ## Credits
 
 - The HermitCrabs Lab

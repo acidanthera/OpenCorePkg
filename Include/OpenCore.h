@@ -17,7 +17,10 @@
 
 #include <Library/OcConfigurationLib.h>
 #include <Library/OcCpuLib.h>
+#include <Library/OcCryptoLib.h>
 #include <Library/OcStorageLib.h>
+
+#include <Protocol/OcBootstrap.h>
 
 #define OPEN_CORE_VERSION          L"0.1"
 
@@ -34,6 +37,18 @@
 #define OPEN_CORE_KEXT_PATH        L"Kexts\\"
 
 #define OPEN_CORE_NVRAM_ATTR       (EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS)
+
+/**
+  Obtain cryptographic key if it was installed.
+
+  @param[in]  Bootstrap  bootstrap protocol.
+
+  @return public key or NULL.
+**/
+RSA_PUBLIC_KEY *
+OcGetVaultKey (
+  IN  OC_BOOTSTRAP_PROTOCOL *Bootstrap
+  );
 
 /**
   Load ACPI compatibility support like custom tables.

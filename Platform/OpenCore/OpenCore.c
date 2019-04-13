@@ -54,6 +54,10 @@ UINT32
 mOpenCoreStartImageNest;
 
 STATIC
+RSA_PUBLIC_KEY *
+mOpenCoreVaultKey;
+
+STATIC
 EFI_STATUS
 EFIAPI
 OcEfiStartImage (
@@ -218,6 +222,21 @@ OcMain (
     DEBUG ((DEBUG_ERROR, "OC: Failed to load configuration!\n"));
   }
 
+  //
+  // Sanity check that the configuration is adequate.
+  //
+  if (!Storage->HasVault && mOpenCoreConfiguration.Misc.Security.RequireVault) {
+    DEBUG ((DEBUG_ERROR, "OC: Configuration requires vault but no vault provided!\n"));
+    CpuDeadLoop ();
+    return; ///< Should be unreachable.
+  }
+
+  if (mOpenCoreVaultKey == NULL && mOpenCoreConfiguration.Misc.Security.RequireSignature) {
+    DEBUG ((DEBUG_ERROR, "OC: Configuration requires signed vault but no public key provided!\n"));
+    CpuDeadLoop ();
+    return; ///< Should be unreachable.
+  }
+
   OcConfigureLogProtocol (
     mOpenCoreConfiguration.Misc.Debug.Target,
     mOpenCoreConfiguration.Misc.Debug.Delay,
@@ -225,7 +244,14 @@ OcMain (
     (UINTN) mOpenCoreConfiguration.Misc.Security.HaltLevel
     );
 
-  DEBUG ((DEBUG_INFO, "OC: OpenCore is now loading...\n"));
+  DEBUG ((
+    DEBUG_INFO,
+    "OC: OpenCore is now loading (Vault: %d/%d, Sign %d/%d)...\n",
+    Storage->HasVault,
+    mOpenCoreConfiguration.Misc.Security.RequireVault,
+    mOpenCoreVaultKey != NULL,
+    mOpenCoreConfiguration.Misc.Security.RequireSignature
+    ));
 
   if (mOpenCoreConfiguration.Misc.Debug.ExposeBootPath) {
     OcStoreLoadPath (LoadPath);
@@ -292,15 +318,13 @@ OcBootstrapRerun (
   ++This->NestedCount;
 
   if (This->NestedCount == 1) {
-    //
-    // FIXME: Key should not be NULL, but be a statically defined RSA key
-    // updated via bin patching prior to signing OpenCore.efi.
-    //
+    mOpenCoreVaultKey = OcGetVaultKey (This);
+
     Status = OcStorageInitFromFs (
       &mOpenCoreStorage,
       FileSystem,
       OPEN_CORE_ROOT_PATH,
-      NULL
+      mOpenCoreVaultKey
       );
 
     if (!EFI_ERROR (Status)) {
@@ -319,9 +343,10 @@ OcBootstrapRerun (
 STATIC
 OC_BOOTSTRAP_PROTOCOL
 mOpenCoreBootStrap = {
-  OC_BOOTSTRAP_PROTOCOL_REVISION,
-  0,
-  OcBootstrapRerun
+  .Revision    = OC_BOOTSTRAP_PROTOCOL_REVISION,
+  .NestedCount = 0,
+  .VaultKey    = NULL,
+  .ReRun       = OcBootstrapRerun
 };
 
 EFI_STATUS

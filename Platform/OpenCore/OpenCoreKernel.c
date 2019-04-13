@@ -98,6 +98,7 @@ OcKernelLoadKextsAndReserve (
       PlistPath      = OC_BLOB_GET (&Kext->PlistPath);
       if (BundlePath[0] == '\0' || PlistPath[0] == '\0') {
         DEBUG ((DEBUG_ERROR, "OC: Your config has improper for kext info\n"));
+        Kext->Enabled = FALSE;
         continue;
       }
 
@@ -119,6 +120,7 @@ OcKernelLoadKextsAndReserve (
 
       if (Kext->PlistData == NULL) {
         DEBUG ((DEBUG_ERROR, "OC: Plist %s is missing for kext %s\n", FullPath, BundlePath));
+        Kext->Enabled = FALSE;
         continue;
       }
 
@@ -142,9 +144,8 @@ OcKernelLoadKextsAndReserve (
 
         if (Kext->ImageData == NULL) {
           DEBUG ((DEBUG_ERROR, "OC: Image %s is missing for kext %s\n", FullPath, BundlePath));
-          //
-          // Still continue loading?
-          //
+          Kext->Enabled = FALSE;
+          continue;
         }
       }
     }
