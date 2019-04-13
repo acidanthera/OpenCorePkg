@@ -1371,6 +1371,9 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   To create this file automatically use
   \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/Vault}{\texttt{create\_vault.sh}} script.
 
+  Regardless of the underlying filesystem, path name and case must match
+  between \texttt{config.plist} and \texttt{vault.plist}.
+
   \emph{Note}: \texttt{vault.plist} is tried to be read regardless of the value
   of this option, but setting it to \texttt{true} will ensure configuration
   sanity, and abort the boot process.
@@ -1380,7 +1383,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \begin{itemize}
   \tightlist
   \item Create \texttt{vault.plist}.
-  \item Create a new RSA key.
+  \item Create a new RSA key (always do this to avoid loading old configuration).
   \item Embed RSA key into \texttt{OpenCore.efi}.
   \item Create \texttt{vault.sig}.
   \end{itemize}
@@ -1394,6 +1397,14 @@ off=$(($(strings -a -t d OpenCore.efi | grep "=BEGIN OC VAULT=" | cut -f1 -d' ')
 dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=520 conv=notrunc
 rm vault.pub
 \end{lstlisting}
+
+  \emph{Note}: While it may appear obvious, but you have to use an external
+  method to verify \texttt{OpenCore.efi} and \texttt{BOOTx64.efi} for
+  secure boot path. For this you are recommended to at least enable UEFI SecureBoot
+  with a custom certificate, and sign \texttt{OpenCore.efi} and \texttt{BOOTx64.efi}
+  with your custom key. More details on customising secure boot on modern firmwares
+  can be found in \href{https://habr.com/post/273497/}{Taming UEFI SecureBoot}
+  paper (in Russian).
 
 \end{enumerate}
 
