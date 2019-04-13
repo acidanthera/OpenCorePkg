@@ -15,7 +15,6 @@ TestsUser/Serialized/Serialized
 TestsUser/Smbios/Smbios
 Tools/EfiResTool/EfiResTool
 Tools/AppleEfiSignTool/AppleEfiSignTool
-Tools/AppleEfiSignTool/RsaPkGen/RsaTool
 Tools/readlabel/readlabel
 *.o
 DICT
