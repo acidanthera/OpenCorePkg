@@ -31,7 +31,7 @@
   frame=tb,
   columns=fullflexible,
   captionpos=b,
-  morekeywords={git, make, build, ioreg, grep, nvram, sort, sudo, diskutil, gfxutil},
+  morekeywords={git, make, build, ioreg, grep, nvram, sort, sudo, diskutil, gfxutil, strings, dd, cut},
   literate =
     {"}{{\textquotedbl}}1
     {'}{{\textquotesingle}}1
@@ -1381,19 +1381,18 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \tightlist
   \item Create \texttt{vault.plist}.
   \item Create a new RSA key.
-  \item Embed it into \texttt{OpenCore.efi}.
+  \item Embed RSA key into \texttt{OpenCore.efi}.
   \item Create \texttt{vault.sig}.
   \end{itemize}
 
   Can look as follows:
-
-  FIXME!
-
 \begin{lstlisting}[label=createvault, style=ocbash]
-ioreg -lw0 -p IODeviceTree -n efi -r -x | grep device-properties |
-  sed 's/.*<//;s/>.*//' > /tmp/device-properties.hex &&
-  gfxutil /tmp/device-properties.hex /tmp/device-properties.plist &&
-  cat /tmp/device-properties.plist
+cd /Volumes/EFI/EFI/OC
+~/create_vault.sh .
+~/RsaTool -sign vault.plist vault.sig vault.pub
+off=$(($(strings -a -t d OpenCore.efi | grep "=BEGIN OC VAULT=" | cut -f1 -d' ')+16))
+dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=520 conv=notrunc
+rm vault.pub
 \end{lstlisting}
 
 \end{enumerate}

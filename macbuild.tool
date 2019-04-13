@@ -45,6 +45,8 @@ package() {
   cp BOOTx64.efi tmp  || exit 1
   cp "${selfdir}/Docs/Configuration.pdf" tmp || exit 1
   cp "${selfdir}/Docs/Sample.plist" tmp || exit 1
+  cp "${selfdir}/UDK/OcSupportPkg/Tools/RsaTool/RsaTool" tmp || exit 1
+  cp "${selfdir}/UDK/OcSupportPkg/Tools/Vault/create_vault.sh" tmp || exit 1
   pushd tmp || exit 1
   zip -qry ../"OpenCore-v${ver}-${2}.zip" * || exit 1
   popd || exit 1
