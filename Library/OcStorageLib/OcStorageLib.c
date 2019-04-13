@@ -31,11 +31,7 @@ OC_STRUCTORS (OC_STORAGE_VAULT, ())
 
 STATIC
 OC_SCHEMA
-mVaultFilesEntrySchema = OC_SCHEMA_DATAF (NULL, UINT8 [SHA256_DIGEST_SIZE]);
-
-STATIC
-OC_SCHEMA
-mVaultFilesSchema = OC_SCHEMA_MAP (NULL, &mVaultFilesEntrySchema);
+mVaultFilesSchema = OC_SCHEMA_DATAF (NULL, UINT8 [SHA256_DIGEST_SIZE]);
 
 ///
 /// WARNING: Field list must be alpabetically ordered here!
@@ -269,7 +265,7 @@ OcStorageReadFileUnicode (
   VaultDigest = OcStorageGetDigest (Context, FilePath);
 
   if (Context->HasVault && VaultDigest == NULL) {
-    DEBUG ((DEBUG_ERROR, "OCS: Aborting %s file access not present in vault", FilePath));
+    DEBUG ((DEBUG_ERROR, "OCS: Aborting %s file access not present in vault\n", FilePath));
     return NULL;
   }
 
@@ -314,7 +310,7 @@ OcStorageReadFileUnicode (
   if (VaultDigest != 0) {
     Sha256 (FileDigest, FileBuffer, Size);
     if (CompareMem (FileDigest, VaultDigest, SHA256_DIGEST_SIZE) != 0) {
-      DEBUG ((DEBUG_ERROR, "OCS: Aborting corrupted %s file access", FilePath));
+      DEBUG ((DEBUG_ERROR, "OCS: Aborting corrupted %s file access\n", FilePath));
       FreePool (FileBuffer);
       return NULL;
     }

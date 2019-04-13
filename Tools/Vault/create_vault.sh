@@ -17,7 +17,7 @@ if [ ! -d "${OCPath}" ]; then
   exit 1
 fi
 
-if [ ! -x /usr/bin/find ] || [ ! -x /bin/rm ] || [ ! -x /usr/bin/sed ]; then
+if [ ! -x /usr/bin/find ] || [ ! -x /bin/rm ] || [ ! -x /usr/bin/sed ] || [ ! -x /usr/bin/xxd ]; then
   echo "Unix environment is broken!"
   exit 1
 fi
@@ -33,7 +33,7 @@ if [ ! -x /usr/bin/shasum ]; then
 fi
 
 abort() {
-  /bin/rm -rf vault.plist vault.sig
+  /bin/rm -rf vault.plist vault.sig /tmp/vault_hash
   echo "Fatal error: ${1}!"
   exit 1
 }
@@ -59,8 +59,12 @@ echo "Hashing files in ${OCPath}..."
   fi
 
   echo "${wname}: ${sha}"
-  /usr/libexec/PlistBuddy -c "Add Files:'${wname}' data ${sha}" vault.plist || abort "Failed to append vault.plist!"
+
+  echo "${sha}" | /usr/bin/xxd -r -p > /tmp/vault_hash || abort "Hashing failure"
+  /usr/libexec/PlistBuddy -c "Import Files:'${wname}' /tmp/vault_hash" vault.plist || abort "Failed to append vault.plist!"
 done
+
+/bin/rm -rf /tmp/vault_hash
 
 echo "All done!"
 exit 0
