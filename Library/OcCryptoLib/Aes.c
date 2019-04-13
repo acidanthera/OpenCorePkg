@@ -629,7 +629,7 @@ AesCbcEncryptBuffer (
 }
 
 VOID
-AESCbcDecryptBuffer (
+AesCbcDecryptBuffer (
   AES_CONTEXT  *Context,
   UINT8        *Data,
   UINT32       Len

@@ -15,11 +15,19 @@
 #ifndef OC_APPLE_KEYS_LIB_H
 #define OC_APPLE_KEYS_LIB_H
 
+#include <Library/OcGuardLib.h>
+#include <Library/OcCryptoLib.h>
+
 #define NUM_OF_PK 2
 
+OC_GLOBAL_STATIC_ASSERT (
+  sizeof (RSA_PUBLIC_KEY) == 520,
+  "Incompatible configured RSA key size"
+  );
+
 typedef struct APPLE_PK_ENTRY_ {
-  UINT8 Hash[32];
-  UINT8 PublicKey[520];
+  UINT8 Hash[SHA256_DIGEST_SIZE];
+  UINT8 PublicKey[sizeof (RSA_PUBLIC_KEY)];
 } APPLE_PK_ENTRY;
 
 extern CONST APPLE_PK_ENTRY PkDataBase[NUM_OF_PK];

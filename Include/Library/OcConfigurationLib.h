@@ -207,6 +207,8 @@
   OC_DECLARE (OC_MISC_DEBUG)
 
 #define OC_MISC_SECURITY_FIELDS(_, __) \
+  _(BOOLEAN                     , RequireVault                ,     , TRUE         , ()) \
+  _(BOOLEAN                     , RequireSignature            ,     , TRUE         , ()) \
   _(UINT64                      , HaltLevel                   ,     , 0x80000000   , ())
   OC_DECLARE (OC_MISC_SECURITY)
 

@@ -22,8 +22,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Default to 2048-bit key length for RSA.
 //
-#ifndef CONFIG_RSA_KEY_SIZE
-#define CONFIG_RSA_KEY_SIZE 2048
+#ifndef CONFIG_RSA_KEY_BIT_SIZE
+#define CONFIG_RSA_KEY_BIT_SIZE 2048
+#define CONFIG_RSA_KEY_SIZE (CONFIG_RSA_KEY_BIT_SIZE / 8)
 #endif
 
 //
@@ -43,8 +44,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Derived parameters.
 //
-#define RSANUMBYTES ((CONFIG_RSA_KEY_SIZE) / 8)
-#define RSANUMWORDS (RSANUMBYTES / sizeof (UINT32))
+#define RSANUMWORDS (CONFIG_RSA_KEY_SIZE / sizeof (UINT32))
 #define AES_BLOCK_SIZE 16
 
 //
@@ -63,9 +63,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // For now abort on anything but 2048, but we can support 1024 and 4096 at least.
 //
-#if CONFIG_RSA_KEY_SIZE != 2048
+#if CONFIG_RSA_KEY_BIT_SIZE != 2048 || CONFIG_RSA_KEY_SIZE != 256
 #error "Only RSA-2048 is supported"
 #endif
+
+#pragma pack(push, 1)
 
 typedef struct RSA_PUBLIC_KEY_ {
   UINT32  Size;
@@ -73,6 +75,8 @@ typedef struct RSA_PUBLIC_KEY_ {
   UINT32  N[RSANUMWORDS];
   UINT32  Rr[RSANUMWORDS];
 } RSA_PUBLIC_KEY;
+
+#pragma pack(pop)
 
 typedef struct AES_CONTEXT_ {
   UINT8 RoundKey[AES_KEY_EXP_SIZE];
@@ -138,7 +142,7 @@ AesCbcEncryptBuffer (
   );
 
 VOID
-AESCbcDecryptBuffer (
+AesCbcDecryptBuffer (
   AES_CONTEXT  *Context,
   UINT8        *Data,
   UINT32       Len
@@ -233,4 +237,4 @@ Sha256 (
   UINTN  Len
   );
 
-#endif //OC_CRYPTO_LIB_H
+#endif // OC_CRYPTO_LIB_H

@@ -45,7 +45,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
   PS: octet string consisting of {Length(RSA Key) - Length(T) - 3} 0xFF
  **/
-#define PKCS_PAD_SIZE (RSANUMBYTES - SHA256_DIGEST_SIZE)
+#define PKCS_PAD_SIZE (CONFIG_RSA_KEY_SIZE - SHA256_DIGEST_SIZE)
 
 STATIC  UINT8 mSha256Tail[] = {
   0x00, 0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60,
@@ -171,7 +171,7 @@ MontMul (
 {
   UINT32 Index;
 
-  ZeroMem (C, RSANUMBYTES);
+  ZeroMem (C, CONFIG_RSA_KEY_SIZE);
 
   for (Index = 0; Index < RSANUMWORDS; ++Index)
     MontMulAdd (Key, C, A[Index], B);
@@ -299,12 +299,12 @@ RsaVerify (
   UINT8           *Sha256
   )
 {
-  UINT8 Buf[RSANUMBYTES];
+  UINT8 Buf[CONFIG_RSA_KEY_SIZE];
 
   //
   // Copy input to local workspace
   //
-  CopyMem (Buf, Signature, RSANUMBYTES);
+  CopyMem (Buf, Signature, CONFIG_RSA_KEY_SIZE);
 
   //
   // In-place exponentiation
