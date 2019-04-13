@@ -31,7 +31,7 @@
   frame=tb,
   columns=fullflexible,
   captionpos=b,
-  morekeywords={git, make, build, ioreg, grep, nvram, sort, sudo, diskutil},
+  morekeywords={git, make, build, ioreg, grep, nvram, sort, sudo, diskutil, gfxutil},
   literate =
     {"}{{\textquotedbl}}1
     {'}{{\textquotesingle}}1
@@ -364,7 +364,7 @@ entries include:
   \break
   Main booter driver responsible for operating system loading.
 \item
-  \texttt{config.hash}
+  \texttt{vault.plist}
   \break
   Hashes for all files potentially loadable by \texttt{OC Config}.
 \item
@@ -372,9 +372,9 @@ entries include:
   \break
   \texttt{OC Config}.
 \item
-  \texttt{config.sig}
+  \texttt{vault.sig}
   \break
-  Signature for \texttt{config.hash}.
+  Signature for \texttt{vault.plist}.
 \end{itemize}
 
 \begin{center}
@@ -412,9 +412,9 @@ entries include:
       child [missing] {}
       child [missing] {}
       child { node [selected] {OpenCore.efi}}
-      child { node [optional] {config.hash}}
+      child { node [optional] {vault.plist}}
       child { node {config.plist}}
-      child { node [optional] {config.sig}}
+      child { node [optional] {vault.sig}}
     };
 \end{tikzpicture}
 \break
@@ -788,6 +788,16 @@ source file may help understanding ACPI opcodes.
 Device configuration is provided to macOS with a dedicated buffer,
 called \texttt{EfiDevicePropertyDatabase}. This buffer is a serialised
 map of DevicePaths to a map of property names and their values.
+
+Property data can be debugged with
+\href{https://github.com/acidanthera/gfxutil}{gfxutil}.
+To obtain current property data use the following command in macOS:
+\begin{lstlisting}[label=gfxutil, style=ocbash]
+ioreg -lw0 -p IODeviceTree -n efi -r -x | grep device-properties |
+  sed 's/.*<//;s/>.*//' > /tmp/device-properties.hex &&
+  gfxutil /tmp/device-properties.hex /tmp/device-properties.plist &&
+  cat /tmp/device-properties.plist
+\end{lstlisting}
 
 \subsection{Properties}\label{devpropsprops}
 
@@ -1364,6 +1374,27 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \emph{Note}: \texttt{vault.plist} is tried to be read regardless of the value
   of this option, but setting it to \texttt{true} will ensure configuration
   sanity, and abort the boot process.
+
+  The complete set of commands to:
+
+  \begin{itemize}
+  \tightlist
+  \item Create \texttt{vault.plist}.
+  \item Create a new RSA key.
+  \item Embed it into \texttt{OpenCore.efi}.
+  \item Create \texttt{vault.sig}.
+  \end{itemize}
+
+  Can look as follows:
+
+  FIXME!
+
+\begin{lstlisting}[label=createvault, style=ocbash]
+ioreg -lw0 -p IODeviceTree -n efi -r -x | grep device-properties |
+  sed 's/.*<//;s/>.*//' > /tmp/device-properties.hex &&
+  gfxutil /tmp/device-properties.hex /tmp/device-properties.plist &&
+  cat /tmp/device-properties.plist
+\end{lstlisting}
 
 \end{enumerate}
 

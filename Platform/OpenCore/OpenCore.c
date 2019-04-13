@@ -215,11 +215,15 @@ OcMain (
     Status = OcConfigurationInit (&mOpenCoreConfiguration, Config, ConfigSize);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OC: Failed to parse configuration!\n"));
+      CpuDeadLoop ();
+      return; ///< Should be unreachable.
     }
 
     FreePool (Config);
   } else {
     DEBUG ((DEBUG_ERROR, "OC: Failed to load configuration!\n"));
+    CpuDeadLoop ();
+    return; ///< Should be unreachable.
   }
 
   //
@@ -332,6 +336,9 @@ OcBootstrapRerun (
       OcStorageFree (&mOpenCoreStorage);
     } else {
       DEBUG ((DEBUG_ERROR, "OC: Failed to open root FS - %r!\n", Status));
+      if (Status == EFI_SECURITY_VIOLATION) {
+        CpuDeadLoop (); ///< Should not return.
+      }
     }
   } else {
     DEBUG ((DEBUG_ERROR, "OC: Nested ReRun is not supported\n"));

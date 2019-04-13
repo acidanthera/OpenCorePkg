@@ -48,7 +48,7 @@ OcGetVaultKey (
     //
 
     AllZero = TRUE;
-    for (Index = 0; sizeof (RSA_PUBLIC_KEY); ++Index) {
+    for (Index = 0; Index < sizeof (RSA_PUBLIC_KEY); ++Index) {
       if (((UINT8 *) &mOpenCoreVaultKey.VaultKey)[Index] != 0) {
         AllZero = FALSE;
         break;
