@@ -31,6 +31,17 @@ typedef struct {
     APPLE_DISK_IMAGE_BLOCK_DATA     **Blocks;
 } OC_APPLE_DISK_IMAGE_CONTEXT;
 
+VOID *
+OcAppleDiskImageAllocateBuffer (
+  IN UINTN  BufferSize
+  );
+
+VOID
+OcAppleDiskImageFreeBuffer (
+  IN VOID   *Buffer,
+  IN UINTN  BufferSize
+  );
+
 BOOLEAN
 OcAppleDiskImageInitializeContext (
   OUT OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
@@ -40,8 +51,13 @@ OcAppleDiskImageInitializeContext (
   );
 
 VOID
-OcAppleDiskImageFreeContext(
+OcAppleDiskImageFreeContext (
   IN OC_APPLE_DISK_IMAGE_CONTEXT *Context
+  );
+
+VOID
+OcAppleDiskImageFreeContextAndBuffer (
+  IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context
   );
 
 BOOLEAN
@@ -65,7 +81,7 @@ OcAppleDiskImageInstallBlockIo (
   OUT UINTN                           *DevicePathSize OPTIONAL
   );
 
-BOOLEAN
+VOID
 OcAppleDiskImageUninstallBlockIo (
   IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
   IN VOID                         *BlockIoHandle

@@ -20,8 +20,47 @@
 #include <Library/OcAppleDiskImageLib.h>
 #include <Library/OcCompressionLib.h>
 #include <Library/OcGuardLib.h>
+#include <Library/UefiBootServicesTableLib.h>
 
 #include "OcAppleDiskImageLibInternal.h"
+
+VOID *
+OcAppleDiskImageAllocateBuffer (
+  IN UINTN  BufferSize
+  )
+{
+  EFI_STATUS           Status;
+  EFI_PHYSICAL_ADDRESS BufferAddress;
+
+  ASSERT (BufferSize > 0);
+
+  Status = gBS->AllocatePages (
+                  AllocateAnyPages,
+                  EfiACPIMemoryNVS,
+                  EFI_SIZE_TO_PAGES (BufferSize),
+                  &BufferAddress
+                  );
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
+
+  return (VOID *)(UINTN)BufferAddress;
+}
+
+VOID
+OcAppleDiskImageFreeBuffer (
+  IN VOID   *Buffer,
+  IN UINTN  BufferSize
+  )
+{
+  ASSERT (Buffer != NULL);
+  ASSERT (BufferSize > 0);
+
+  gBS->FreePages (
+         (EFI_PHYSICAL_ADDRESS)(UINTN)Buffer,
+         EFI_SIZE_TO_PAGES (BufferSize)
+         );
+}
 
 BOOLEAN
 OcAppleDiskImageInitializeContext (
@@ -200,6 +239,15 @@ OcAppleDiskImageFreeContext (
   }
 
   FreePool (Context->Blocks);
+}
+
+VOID
+OcAppleDiskImageFreeContextAndBuffer (
+  IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context
+  )
+{
+  OcAppleDiskImageFreeBuffer (Context->Buffer, Context->Length);
+  OcAppleDiskImageFreeContext (Context);
 }
 
 BOOLEAN

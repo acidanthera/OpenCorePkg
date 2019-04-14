@@ -71,11 +71,10 @@ typedef PACKED struct {
   SIGNATURE_32('D','m','g','I')
 
 #define OC_APPLE_DISK_IMAGE_MOUNTED_DATA_FROM_THIS(This)  \
-  CR (                                                    \
+  BASE_CR (                                               \
     (This),                                               \
     OC_APPLE_DISK_IMAGE_MOUNTED_DATA,                     \
-    BlockIo,                                              \
-    OC_APPLE_DISK_IMAGE_MOUNTED_DATA_SIGNATURE            \
+    BlockIo                                               \
     )
 
 typedef struct {
@@ -126,6 +125,11 @@ DiskImageBlockIoReadBlocks (
   }
 
   DiskImageData = OC_APPLE_DISK_IMAGE_MOUNTED_DATA_FROM_THIS (This);
+  if (DiskImageData->Signature == 0) {
+    return EFI_UNSUPPORTED;
+  }
+
+  ASSERT (DiskImageData->Signature == OC_APPLE_DISK_IMAGE_MOUNTED_DATA_SIGNATURE);
 
   if (Lba >= DiskImageData->ImageContext->SectorCount) {
     return EFI_INVALID_PARAMETER;
@@ -331,7 +335,7 @@ OcAppleDiskImageInstallBlockIo (
   return BlockIoHandle;
 }
 
-BOOLEAN
+VOID
 OcAppleDiskImageUninstallBlockIo (
   IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
   IN VOID                         *BlockIoHandle
@@ -350,15 +354,16 @@ OcAppleDiskImageUninstallBlockIo (
                   (VOID **)&BlockIo
                   );
   if (EFI_ERROR (Status)) {
-    return FALSE;
-  }
-
-  Status = gBS->DisconnectController (BlockIoHandle, NULL, NULL);
-  if (EFI_ERROR (Status)) {
-    return FALSE;
+    return;
   }
 
   DiskImageData = OC_APPLE_DISK_IMAGE_MOUNTED_DATA_FROM_THIS (BlockIo);
+
+  gBS->FreePages (
+         (EFI_PHYSICAL_ADDRESS)(UINTN)DiskImageData->RamDmgHeader,
+         EFI_SIZE_TO_PAGES (sizeof (*DiskImageData->RamDmgHeader))
+         );
+
   Status = gBS->UninstallMultipleProtocolInterfaces (
                   BlockIoHandle,
                   &gEfiBlockIoProtocolGuid,
@@ -367,16 +372,10 @@ OcAppleDiskImageUninstallBlockIo (
                   &DiskImageData->DevicePath,
                   NULL
                   );
-  if (EFI_ERROR (Status)) {
-    return FALSE;
+  Status |= gBS->DisconnectController (BlockIoHandle, NULL, NULL);
+  if (!EFI_ERROR (Status)) {
+    FreePool (DiskImageData);
+  } else {
+    DiskImageData->Signature = 0;
   }
-
-  gBS->FreePages (
-         (EFI_PHYSICAL_ADDRESS)(UINTN)DiskImageData->RamDmgHeader,
-         EFI_SIZE_TO_PAGES (sizeof (*DiskImageData->RamDmgHeader))
-         );
-
-  FreePool (DiskImageData);
-
-  return TRUE;
 }

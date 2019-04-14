@@ -223,6 +223,7 @@ OcShowSimpleBootMenu (
 /**
   Load boot entry loader image with given options and return its handle.
 
+  @param[in]  BootPolicy     Apple Boot Policy Protocol.
   @param[in]  BootEntry      Located boot entry.
   @param[in]  Policy         Load policy.
   @param[in]  ParentHandle   Parent image handle.
@@ -232,6 +233,7 @@ OcShowSimpleBootMenu (
 **/
 EFI_STATUS
 OcLoadBootEntry (
+  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
   IN  OC_BOOT_ENTRY               *BootEntry,
   IN  UINT32                      Policy,
   IN  EFI_HANDLE                  ParentHandle,

@@ -40,6 +40,13 @@
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
+#include <Library/FileHandleLib.h>
+
+typedef struct {
+  EFI_DEVICE_PATH_PROTOCOL *DevicePath;
+  OC_APPLE_DISK_IMAGE_CONTEXT    DmgContext;
+  EFI_HANDLE                     BlockIoHandle;
+} INTERNAL_DMG_LOAD_CONTEXT;
 
 STATIC
 CHAR16 *
@@ -554,23 +561,17 @@ OcFillBootEntry (
 }
 
 STATIC
-BOOLEAN
-InternalBootAppleDiskImage (
+EFI_DEVICE_PATH_PROTOCOL *
+InternalGetFirstDeviceBootFilePath (
   IN APPLE_BOOT_POLICY_PROTOCOL      *BootPolicy,
-  IN UINT32                          Policy,
-  IN OC_IMAGE_START                  StartImage,
   IN CONST EFI_DEVICE_PATH_PROTOCOL  *DmgDevicePath,
   IN UINTN                           DmgDevicePathSize
   )
 {
-  BOOLEAN                        Result;
+  EFI_DEVICE_PATH_PROTOCOL       *BootDevicePath;
 
   EFI_STATUS                     Status;
   INTN                           CmpResult;
-
-  UINTN                          NumBootEntries;
-  OC_BOOT_ENTRY                  BootEntry;
-  EFI_HANDLE                     BooterHandle;
 
   CONST EFI_DEVICE_PATH_PROTOCOL *FsDevicePath;
   UINTN                          FsDevicePathSize;
@@ -579,7 +580,11 @@ InternalBootAppleDiskImage (
   EFI_HANDLE                     *HandleBuffer;
   UINTN                          Index;
 
-  Result = FALSE;
+  ASSERT (BootPolicy != NULL);
+  ASSERT (DmgDevicePath != NULL);
+  ASSERT (DmgDevicePathSize >= END_DEVICE_PATH_LENGTH);
+
+  BootDevicePath = NULL;
 
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
@@ -589,7 +594,7 @@ InternalBootAppleDiskImage (
                   &HandleBuffer
                   );
   if (EFI_ERROR (Status)) {
-    return FALSE;
+    return NULL;
   }
 
   for (Index = 0; Index < NumHandles; ++Index) {
@@ -617,85 +622,62 @@ InternalBootAppleDiskImage (
       continue;
     }
 
-    NumBootEntries = OcFillBootEntry (
-                       BootPolicy,
-                       Policy,
-                       &HandleBuffer[Index],
-                       &BootEntry,
-                       NULL
-                       );
-    if (NumBootEntries == 0) {
-      continue;
-    }
-
-    Status = OcLoadBootEntry (
-               &BootEntry,
-               Policy,
-               gImageHandle,
-               &BooterHandle
-               );
+    Status = BootPolicy->GetBootFileEx (
+                           &HandleBuffer[Index],
+                           APPLE_BOOT_POLICY_MODE_1,
+                           &BootDevicePath
+                           );
     if (!EFI_ERROR (Status)) {
-      Status = StartImage (&BootEntry, BooterHandle, NULL, NULL);
-      if (!EFI_ERROR (Status)) {
-        Result = TRUE;
-      } else {
-        DEBUG ((DEBUG_ERROR, "StartImage failed - %r\n", Status));
-      }
-    } else {
-      DEBUG ((DEBUG_ERROR, "LoadImage failed - %r\n", Status));
+      break;
     }
 
-    break;
+    BootDevicePath = NULL;
   }
 
   FreePool (HandleBuffer);
 
-  return Result;
+  return BootDevicePath;
 }
 
-BOOLEAN
-OcLoadAppleDiskImage (
+STATIC
+EFI_DEVICE_PATH_PROTOCOL *
+InternalGetDiskImageBootFile (
+  OUT INTERNAL_DMG_LOAD_CONTEXT   *Context,
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
   IN  UINT32                      Policy,
-  IN  OC_IMAGE_START              StartImage,
   IN  VOID                        *DmgBuffer,
   IN  UINTN                       DmgBufferSize,
   IN  VOID                        *ChunklistBuffer OPTIONAL,
   IN  UINT32                      ChunklistBufferSize OPTIONAL
   )
 {
-  BOOLEAN                        Result;
+  EFI_DEVICE_PATH_PROTOCOL       *DevPath;
 
-  OC_APPLE_DISK_IMAGE_CONTEXT    DmgContext;
+  BOOLEAN                        Result;
   OC_APPLE_CHUNKLIST_CONTEXT     ChunklistContext;
-  EFI_HANDLE                     BlockIoHandle;
 
   CONST EFI_DEVICE_PATH_PROTOCOL *DmgDevicePath;
   UINTN                          DmgDevicePathSize;
 
+  ASSERT (Context != NULL);
   ASSERT (BootPolicy != NULL);
-  ASSERT (StartImage != NULL);
   ASSERT (DmgBuffer != NULL);
   ASSERT (DmgBufferSize > 0);
 
-  if ((Policy & OC_LOAD_ALLOW_DMG_BOOT) == 0) {
-    return FALSE;
-  }
-
   Result = OcAppleDiskImageInitializeContext (
-             &DmgContext,
+             &Context->DmgContext,
              DmgBuffer,
              DmgBufferSize,
              FALSE
              );
   if (!Result) {
-    return FALSE;
+    return NULL;
   }
 
   if (ChunklistBuffer == NULL) {
     if ((Policy & OC_LOAD_REQUIRE_APPLE_SIGN) != 0) {
-      Result = FALSE;
-      goto Done;
+      OcAppleDiskImageFreeContext (&Context->DmgContext);
+      return NULL;
     }
   } else if ((Policy & (OC_LOAD_VERIFY_APPLE_SIGN | OC_LOAD_REQUIRE_TRUSTED_KEY)) != 0) {
     ASSERT (ChunklistBufferSize > 0);
@@ -706,7 +688,8 @@ OcLoadAppleDiskImage (
                 ChunklistBufferSize
                 );
     if (!Result) {
-      goto Done;
+      OcAppleDiskImageFreeContext (&Context->DmgContext);
+      return NULL;
     }
 
     if ((Policy & OC_LOAD_REQUIRE_TRUSTED_KEY) != 0) {
@@ -729,48 +712,303 @@ OcLoadAppleDiskImage (
       }
 
       if (!Result) {
-        goto Done;
+        OcAppleDiskImageFreeContext (&Context->DmgContext);
+        return NULL;
       }
     }
 
-    Result = OcAppleDiskImageVerifyData (&DmgContext, &ChunklistContext);
+    Result = OcAppleDiskImageVerifyData (
+               &Context->DmgContext,
+               &ChunklistContext
+               );
     if (!Result) {
       //
       // FIXME: Warn user instead of aborting when OC_LOAD_REQUIRE_TRUSTED_KEY
       //        is not set.
       //
-      goto Done;
+      OcAppleDiskImageFreeContext (&Context->DmgContext);
+      return NULL;
     }
   }
 
-  BlockIoHandle = OcAppleDiskImageInstallBlockIo (
-                    &DmgContext,
-                    &DmgDevicePath,
-                    &DmgDevicePathSize
-                    );
-  if (BlockIoHandle == NULL) {
-    Result = FALSE;
-    goto Done;
+  Context->BlockIoHandle = OcAppleDiskImageInstallBlockIo (
+                             &Context->DmgContext,
+                             &DmgDevicePath,
+                             &DmgDevicePathSize
+                             );
+  if (Context->BlockIoHandle == NULL) {
+    OcAppleDiskImageFreeContext (&Context->DmgContext);
+    return NULL;
   }
 
-  Result = InternalBootAppleDiskImage (
-             BootPolicy,
-             Policy,
-             StartImage,
-             DmgDevicePath,
-             DmgDevicePathSize
+  DevPath = InternalGetFirstDeviceBootFilePath (
+              BootPolicy,
+              DmgDevicePath,
+              DmgDevicePathSize
+              );
+  if (DevPath != NULL) {
+    return DevPath;
+  }
+
+  OcAppleDiskImageUninstallBlockIo (
+    &Context->DmgContext,
+    Context->BlockIoHandle
+    );
+  OcAppleDiskImageFreeContext (&Context->DmgContext);
+
+  return NULL;
+}
+
+STATIC
+EFI_FILE_INFO *
+InternalFindFirstDmgFileName (
+  IN  EFI_FILE_PROTOCOL  *Directory,
+  OUT UINTN              *FileNameLen
+  )
+{
+  EFI_STATUS    Status;
+  EFI_FILE_INFO *FileInfo;
+  BOOLEAN       NoFile;
+  UINTN         ExtOffset;
+  INTN          Result;
+
+  ASSERT (Directory != NULL);
+
+  for (
+    Status = FileHandleFindFirstFile (Directory, &FileInfo), NoFile = FALSE;
+    (!EFI_ERROR (Status) && !NoFile);
+    Status = FileHandleFindNextFile (Directory, FileInfo, &NoFile)
+    ) {
+    if ((FileInfo->Attribute & EFI_FILE_DIRECTORY) != 0) {
+      continue;
+    }
+
+    ExtOffset = (StrLen (FileInfo->FileName) - L_STR_LEN (L".dmg"));
+    Result    = StrCmp (&FileInfo->FileName[ExtOffset], L".dmg");
+    if (Result == 0) {
+      if (FileNameLen != NULL) {
+        *FileNameLen = ExtOffset;
+      }
+
+      return FileInfo;
+    }
+  }
+
+  return NULL;
+}
+
+STATIC
+EFI_FILE_INFO *
+InternalFindDmgChunklist (
+  IN EFI_FILE_PROTOCOL  *Directory,
+  IN CONST CHAR16       *DmgFileName,
+  IN UINTN              DmgFileNameLen
+  )
+{
+  EFI_STATUS    Status;
+  EFI_FILE_INFO *FileInfo;
+  BOOLEAN       NoFile;
+  UINTN         NameLen;
+  INTN          Result;
+  UINTN         ChunklistFileNameLen;
+
+  ChunklistFileNameLen = (DmgFileNameLen + L_STR_LEN (".chunklist"));
+
+  for (
+    Status = FileHandleFindFirstFile (Directory, &FileInfo), NoFile = FALSE;
+    (!EFI_ERROR (Status) && !NoFile);
+    Status = FileHandleFindNextFile (Directory, FileInfo, &NoFile)
+    ) {
+    if ((FileInfo->Attribute & EFI_FILE_DIRECTORY) != 0) {
+      continue;
+    }
+
+    NameLen = StrLen (FileInfo->FileName);
+
+    if (NameLen != ChunklistFileNameLen) {
+      continue;
+    }
+
+    Result = StrnCmp (FileInfo->FileName, DmgFileName, DmgFileNameLen);
+    if (Result != 0) {
+      continue;
+    }
+
+    Result = StrCmp (&FileInfo->FileName[DmgFileNameLen], L".chunklist");
+    if (Result == 0) {
+      return FileInfo;
+    }
+  }
+
+  return NULL;
+}
+
+STATIC
+EFI_DEVICE_PATH_PROTOCOL *
+InternalLoadDmg (
+  IN OUT INTERNAL_DMG_LOAD_CONTEXT   *Context,
+  IN     APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
+  IN     UINT32                      Policy
+  )
+{
+  EFI_DEVICE_PATH_PROTOCOL *DevPath;
+
+  EFI_STATUS               Status;
+
+  EFI_FILE_PROTOCOL        *DmgDir;
+
+  UINTN                    DmgFileNameLen;
+  EFI_FILE_INFO            *DmgFileInfo;
+  EFI_FILE_PROTOCOL        *DmgFile;
+  UINTN                    DmgFileSize;
+  VOID                     *DmgBuffer;
+
+  EFI_FILE_INFO            *ChunklistFileInfo;
+  EFI_FILE_PROTOCOL        *ChunklistFile;
+  UINTN                    ChunklistFileSize;
+  VOID                     *ChunklistBuffer;
+
+  ASSERT (Context != NULL);
+  ASSERT (BootPolicy != NULL);
+
+  Status = EfiOpenFileByDevicePath (
+             &Context->DevicePath,
+             &DmgDir,
+             EFI_FILE_MODE_READ,
+             EFI_FILE_DIRECTORY
              );
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
 
-  //
-  // If we reach here, booting from the DMG has been unsuccessful.
-  //
+  DmgFileInfo = InternalFindFirstDmgFileName (DmgDir, &DmgFileNameLen);
+  if (DmgFileInfo == NULL) {
+    DmgDir->Close (DmgDir);
+    return NULL;
+  }
 
-  OcAppleDiskImageUninstallBlockIo (&DmgContext, BlockIoHandle);
+  Status = DmgDir->Open (
+                     DmgDir,
+                     &DmgFile,
+                     DmgFileInfo->FileName,
+                     EFI_FILE_MODE_READ,
+                     0
+                     );
+  if (EFI_ERROR (Status)) {
+    FreePool (DmgFileInfo);
+    DmgDir->Close (DmgDir);
+    return NULL;
+  }
 
-Done:
-  OcAppleDiskImageFreeContext (&DmgContext);
+  DmgFileSize = 0;
+  Status = DmgFile->Read (DmgFile, &DmgFileSize, NULL);
 
-  return Result;
+  if (Status != EFI_BUFFER_TOO_SMALL) {
+    FreePool (DmgFileInfo);
+    DmgDir->Close (DmgDir);
+    DmgFile->Close (DmgFile);
+    return NULL;
+  }
+
+  DmgBuffer = OcAppleDiskImageAllocateBuffer (DmgFileSize);
+  if (DmgBuffer == NULL) {
+    FreePool (DmgFileInfo);
+    DmgDir->Close (DmgDir);
+    DmgFile->Close (DmgFile);
+    return NULL;
+  }
+
+  Status = DmgFile->Read (DmgFile, &DmgFileSize, DmgBuffer);
+
+  DmgFile->Close (DmgFile);
+
+  if (EFI_ERROR (Status)) {
+    FreePool (DmgFileInfo);
+    DmgDir->Close (DmgDir);
+    OcAppleDiskImageFreeBuffer (DmgBuffer, DmgFileSize);
+    return NULL;
+  }
+
+  ChunklistBuffer   = NULL;
+  ChunklistFileSize = 0;
+
+  ChunklistFileInfo = InternalFindDmgChunklist (
+                        DmgDir,
+                        DmgFileInfo->FileName,
+                        DmgFileNameLen
+                        );
+  if (ChunklistFileInfo != NULL) {
+    Status = DmgDir->Open (
+                       DmgDir,
+                       &ChunklistFile,
+                       ChunklistFileInfo->FileName,
+                       EFI_FILE_MODE_READ,
+                       0
+                       );
+    if (!EFI_ERROR (Status)) {
+      Status = ChunklistFile->Read (ChunklistFile, &ChunklistFileSize, NULL);
+      if (Status == EFI_BUFFER_TOO_SMALL) {
+        ChunklistBuffer = AllocatePool (ChunklistFileSize);
+
+        if (ChunklistBuffer == NULL) {
+          ChunklistFileSize = 0;
+        } else {
+          Status = ChunklistFile->Read (
+                                    ChunklistFile,
+                                    &ChunklistFileSize,
+                                    ChunklistBuffer
+                                    );
+          if (EFI_ERROR (Status)) {
+            FreePool (ChunklistBuffer);
+            ChunklistBuffer   = NULL;
+            ChunklistFileSize = 0;
+          }
+        }
+      }
+
+      ChunklistFile->Close (ChunklistFile);
+    }
+
+    FreePool (ChunklistFileInfo);
+  }
+
+  FreePool (DmgFileInfo);
+
+  DmgDir->Close (DmgDir);
+
+  DevPath = InternalGetDiskImageBootFile (
+              Context,
+              BootPolicy,
+              Policy,
+              DmgBuffer,
+              DmgFileSize,
+              ChunklistBuffer,
+              ChunklistFileSize
+              );
+  Context->DevicePath = DevPath;
+
+  if (DevPath == NULL) {
+    OcAppleDiskImageFreeBuffer (DmgBuffer, DmgFileSize);
+  }
+
+  if (ChunklistBuffer != NULL) {
+    FreePool (ChunklistBuffer);
+  }
+
+  return DevPath;
+}
+
+VOID
+InternalUnloadDmg (
+  IN INTERNAL_DMG_LOAD_CONTEXT  *DmgLoadContext
+  )
+{
+  FreePool (DmgLoadContext->DevicePath);
+  OcAppleDiskImageUninstallBlockIo (
+    &DmgLoadContext->DmgContext,
+    DmgLoadContext->BlockIoHandle
+    );
+  OcAppleDiskImageFreeContextAndBuffer (&DmgLoadContext->DmgContext);
 }
 
 EFI_STATUS
@@ -958,6 +1196,7 @@ OcShowSimpleBootMenu (
 
 EFI_STATUS
 OcLoadBootEntry (
+  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
   IN  OC_BOOT_ENTRY               *BootEntry,
   IN  UINT32                      Policy,
   IN  EFI_HANDLE                  ParentHandle,
@@ -966,21 +1205,35 @@ OcLoadBootEntry (
 {
   EFI_STATUS                Status;
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
+  INTERNAL_DMG_LOAD_CONTEXT DmgLoadContext;
 
   //
   // TODO: support Apple loaded image, policy, and dmg boot.
   //
 
   if (BootEntry->IsFolder) {
-    DevicePath = AppendFileNameDevicePath (BootEntry->DevicePath, L"boot.efi");
-    DEBUG ((DEBUG_WARN, "HACK! HACK! HACK! Using boot.efi for dmg boot!\n"));
+    if ((Policy & OC_LOAD_ALLOW_DMG_BOOT) == 0) {
+      return EFI_SECURITY_VIOLATION;
+    }
+
+    DmgLoadContext.DevicePath = BootEntry->DevicePath;
+    DevicePath = InternalLoadDmg (
+                   &DmgLoadContext,
+                   BootPolicy,
+                   Policy
+                   );
+    if (DevicePath == NULL) {
+      return EFI_UNSUPPORTED;
+    }
   } else {
-    DevicePath = DuplicateDevicePath (BootEntry->DevicePath);
+    DevicePath = BootEntry->DevicePath;
   }
 
   Status = gBS->LoadImage (FALSE, ParentHandle, DevicePath, NULL, 0, EntryHandle);
 
-  FreePool (DevicePath);
+  if (BootEntry->IsFolder) {
+    InternalUnloadDmg (&DmgLoadContext);
+  }
 
   return Status;
 }
@@ -1067,7 +1320,7 @@ OcRunSimpleBootPicker (
     }
 
     if (!EFI_ERROR (Status)) {
-      Status = OcLoadBootEntry (Chosen, BootPolicy, gImageHandle, &BooterHandle);
+      Status = OcLoadBootEntry (AppleBootPolicy, Chosen, BootPolicy, gImageHandle, &BooterHandle);
       if (!EFI_ERROR (Status)) {
         Status = StartImage (Chosen, BooterHandle, NULL, NULL);
         if (EFI_ERROR (Status)) {
