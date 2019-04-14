@@ -397,8 +397,8 @@ TrailedBooterDevicePath (
           return NULL;
         }
 
-        CopyMem (NewDevicePath, DevicePath, Size - sizeof (CHAR16));
-        NewFilePath = (FILEPATH_DEVICE_PATH *) (DevicePathWalker - DevicePath + NewDevicePath);
+        CopyMem (NewDevicePath, DevicePath, Size - sizeof (CHAR16) - END_DEVICE_PATH_LENGTH);
+        NewFilePath = (FILEPATH_DEVICE_PATH *) ((UINT8 *)DevicePathWalker - (UINT8 *)DevicePath + (UINT8 *)NewDevicePath);
         Size        = DevicePathNodeLength (NewFilePath) + sizeof (CHAR16);
         SetDevicePathNodeLength (NewFilePath, Size);
         NewFilePath->PathName[Length]   = L'\\';
