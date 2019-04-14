@@ -388,18 +388,20 @@ TrailedBooterDevicePath (
         // PciRoot(0x0)/Pci(...)/Pci(...)/Sata(...)/HD(...)/\com.apple.recovery.boot
         //
 
-        Size          = GetDevicePathSize (DevicePath) + sizeof (CHAR16);
-        NewDevicePath = (EFI_DEVICE_PATH_PROTOCOL *) AllocatePool (Size);
+        Size          = GetDevicePathSize (DevicePath);
+        NewDevicePath = (EFI_DEVICE_PATH_PROTOCOL *) AllocatePool (Size + sizeof (CHAR16));
         if (NewDevicePath == NULL) {
           //
           // Allocation failure, just ignore.
           //
           return NULL;
         }
-
+        //
+        // Strip the string termination and DP end node, which will get re-set
+        //
         CopyMem (NewDevicePath, DevicePath, Size - sizeof (CHAR16) - END_DEVICE_PATH_LENGTH);
         NewFilePath = (FILEPATH_DEVICE_PATH *) ((UINT8 *)DevicePathWalker - (UINT8 *)DevicePath + (UINT8 *)NewDevicePath);
-        Size        = DevicePathNodeLength (NewFilePath) + sizeof (CHAR16);
+        Size        = DevicePathNodeLength (DevicePathWalker) + sizeof (CHAR16);
         SetDevicePathNodeLength (NewFilePath, Size);
         NewFilePath->PathName[Length]   = L'\\';
         NewFilePath->PathName[Length+1] = L'\0';
