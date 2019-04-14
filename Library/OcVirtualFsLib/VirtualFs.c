@@ -125,7 +125,7 @@ DisableVirtualFs (
   IN OUT EFI_BOOT_SERVICES       *BootServices
   )
 {
-  if (mOriginalHandleProtocol != NULL
+  if (mOriginalHandleProtocol == NULL
     || BootServices->HandleProtocol != VirtualFsHandleProtocol) {
     return EFI_ALREADY_STARTED;
   }
