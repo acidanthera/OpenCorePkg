@@ -385,7 +385,7 @@
 				<key>boot-args</key>
 				<string>-v keepsyms=1</string>
 				<key>csr-active-config</key>
-				<data>dwAAAA==</data>
+				<data>AAAAAA==</data>
 				<key>nvda_drv</key>
 				<data>MQ==</data>
 				<key>prev-lang:kbd</key>
