@@ -196,8 +196,8 @@ InternalConstructDmgDevicePath (
   DevPath->MemMap.EndingAddress   = (RamDmgAddress + sizeof (RAM_DMG_HEADER));
   SetDevicePathNodeLength (&DevPath->MemMap, sizeof (DevPath->MemMap));
 
-  DevPath->FilePath.Header.Type = MEDIA_DEVICE_PATH;
-  DevPath->FilePath.Header.Type = MEDIA_FILEPATH_DP;
+  DevPath->FilePath.Header.Type    = MEDIA_DEVICE_PATH;
+  DevPath->FilePath.Header.SubType = MEDIA_FILEPATH_DP;
   SetDevicePathNodeLength (&DevPath->FilePath, sizeof (DevPath->FilePath));
   UnicodeSPrint (
     DevPath->FilePath.PathName,
