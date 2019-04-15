@@ -299,6 +299,7 @@ OcMain (
     mOpenCoreConfiguration.Misc.Boot.Timeout,
     OcStartImage,
     mOpenCoreConfiguration.Misc.Boot.ShowPicker,
+    mOpenCoreConfiguration.Misc.Debug.Target,
     LoadHandle
     );
   if (EFI_ERROR (Status)) {
