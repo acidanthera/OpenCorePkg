@@ -26,6 +26,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcDebugLogLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConfigurationLib.h>
 #include <Library/OcCpuLib.h>
@@ -54,8 +55,62 @@ UINT32
 mOpenCoreStartImageNest;
 
 STATIC
+BOOLEAN
+mOpenCoreStartImageIsWindows;
+
+STATIC
 RSA_PUBLIC_KEY *
 mOpenCoreVaultKey;
+
+STATIC
+VOID
+OcEfiStartImagePrologue (
+  IN BOOLEAN  IsUnknown,
+  IN BOOLEAN  IsWindows
+  )
+{
+  ++mOpenCoreStartImageNest;
+
+  if (mOpenCoreStartImageNest == 1) {
+    if (IsUnknown) {
+      IsWindows = mOpenCoreStartImageIsWindows;
+    } else {
+      mOpenCoreStartImageIsWindows = IsWindows;
+    }
+
+    //
+    // Some people make their ACPI tables incompatible with Windows after modding them for macOS.
+    // While obviously it is their fault, here we provide a quick and dirty workaround.
+    //
+    if (!mOpenCoreConfiguration.Acpi.Quirks.IgnoreForWindows || !IsWindows) {
+      OcLoadAcpiSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
+    }
+
+    //
+    // Do not waste time for kext injection, when we are in Windows.
+    //
+    if (!IsWindows) {
+      OcLoadKernelSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
+    }
+  }
+}
+
+STATIC
+VOID
+OcEfiStartImageEpilogue (
+  VOID
+  )
+{
+  if (mOpenCoreStartImageNest == 1) {
+    if (!mOpenCoreStartImageIsWindows) {
+      OcUnloadKernelSupport ();
+    }
+
+    mOpenCoreStartImageIsWindows = FALSE;
+  }
+
+  --mOpenCoreStartImageNest;
+}
 
 STATIC
 EFI_STATUS
@@ -68,16 +123,10 @@ OcEfiStartImage (
 {
   EFI_STATUS   Status;
 
-  ++mOpenCoreStartImageNest;
-
   //
-  // We do not know what OS is that, probably booted macOS from shell.
-  // Apply all the fixtures once, they are harmless for any OS.
+  // We do not know what OS is that, could be macOS booted from shell.
   //
-  if (mOpenCoreStartImageNest == 1) {
-    OcLoadAcpiSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
-    OcLoadKernelSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
-  }
+  OcEfiStartImagePrologue (TRUE, FALSE);
 
   Status = mOcOriginalStartImage (
     ImageHandle,
@@ -89,11 +138,7 @@ OcEfiStartImage (
     DEBUG ((DEBUG_WARN, "OC: Boot failed - %r\n", Status));
   }
 
-  if (mOpenCoreStartImageNest == 1) {
-    OcUnloadKernelSupport ();
-  }
-
-  --mOpenCoreStartImageNest;
+  OcEfiStartImageEpilogue ();
 
   return Status;
 }
@@ -110,24 +155,7 @@ OcStartImage (
 {
   EFI_STATUS   Status;
 
-  ++mOpenCoreStartImageNest;
-
-  if (mOpenCoreStartImageNest == 1) {
-    //
-    // Some make their ACPI tables incompatible with Windows after modding them for macOS.
-    // While obviously it is their fault, here we provide a quick and dirty workaround.
-    //
-    if (!Chosen->IsWindows || !mOpenCoreConfiguration.Acpi.Quirks.IgnoreForWindows) {
-      OcLoadAcpiSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
-    }
-
-    //
-    // Do not waste time for kext injection, when we are Windows.
-    //
-    if (!Chosen->IsWindows) {
-      OcLoadKernelSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
-    }
-  }
+  OcEfiStartImagePrologue (FALSE, Chosen->IsWindows);
 
   Status = mOcOriginalStartImage (
     ImageHandle,
@@ -139,11 +167,7 @@ OcStartImage (
     DEBUG ((DEBUG_WARN, "OC: Boot failed - %r\n", Status));
   }
 
-  if (mOpenCoreStartImageNest == 1 && !Chosen->IsWindows) {
-    OcUnloadKernelSupport ();
-  }
-
-  --mOpenCoreStartImageNest;
+  OcEfiStartImageEpilogue ();
 
   return Status;
 }
@@ -191,17 +215,15 @@ OcStoreLoadPath (
 }
 
 STATIC
-VOID
-OcMain (
+EFI_STATUS
+OcMiscEarlyInit (
   IN OC_STORAGE_CONTEXT        *Storage,
-  IN EFI_DEVICE_PATH_PROTOCOL  *LoadPath OPTIONAL
+  IN OC_GLOBAL_CONFIG          *Configuration
   )
 {
   EFI_STATUS                Status;
   CHAR8                     *Config;
   UINT32                    ConfigSize;
-  OC_CPU_INFO               CpuInfo;
-  EFI_HANDLE                LoadHandle;
 
   Config = OcStorageReadFileUnicode (
     Storage,
@@ -212,63 +234,69 @@ OcMain (
   if (Config != NULL) {
     DEBUG ((DEBUG_INFO, "OC: Loaded configuration of %u bytes\n", ConfigSize));
 
-    Status = OcConfigurationInit (&mOpenCoreConfiguration, Config, ConfigSize);
+    Status = OcConfigurationInit (Configuration, Config, ConfigSize);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OC: Failed to parse configuration!\n"));
       CpuDeadLoop ();
-      return; ///< Should be unreachable.
+      return EFI_UNSUPPORTED; ///< Should be unreachable.
     }
 
     FreePool (Config);
   } else {
     DEBUG ((DEBUG_ERROR, "OC: Failed to load configuration!\n"));
     CpuDeadLoop ();
-    return; ///< Should be unreachable.
+    return EFI_UNSUPPORTED; ///< Should be unreachable.
   }
 
   //
   // Sanity check that the configuration is adequate.
   //
-  if (!Storage->HasVault && mOpenCoreConfiguration.Misc.Security.RequireVault) {
+  if (!Storage->HasVault && Configuration->Misc.Security.RequireVault) {
     DEBUG ((DEBUG_ERROR, "OC: Configuration requires vault but no vault provided!\n"));
     CpuDeadLoop ();
-    return; ///< Should be unreachable.
+    return EFI_SECURITY_VIOLATION; ///< Should be unreachable.
   }
 
-  if (mOpenCoreVaultKey == NULL && mOpenCoreConfiguration.Misc.Security.RequireSignature) {
+  if (mOpenCoreVaultKey == NULL && Configuration->Misc.Security.RequireSignature) {
     DEBUG ((DEBUG_ERROR, "OC: Configuration requires signed vault but no public key provided!\n"));
     CpuDeadLoop ();
-    return; ///< Should be unreachable.
+    return EFI_SECURITY_VIOLATION; ///< Should be unreachable.
   }
 
   OcConfigureLogProtocol (
-    mOpenCoreConfiguration.Misc.Debug.Target,
-    mOpenCoreConfiguration.Misc.Debug.Delay,
-    (UINTN) mOpenCoreConfiguration.Misc.Debug.DisplayLevel,
-    (UINTN) mOpenCoreConfiguration.Misc.Security.HaltLevel
+    Configuration->Misc.Debug.Target,
+    Configuration->Misc.Debug.Delay,
+    (UINTN) Configuration->Misc.Debug.DisplayLevel,
+    (UINTN) Configuration->Misc.Security.HaltLevel
     );
 
   DEBUG ((
     DEBUG_INFO,
     "OC: OpenCore is now loading (Vault: %d/%d, Sign %d/%d)...\n",
     Storage->HasVault,
-    mOpenCoreConfiguration.Misc.Security.RequireVault,
+    Configuration->Misc.Security.RequireVault,
     mOpenCoreVaultKey != NULL,
-    mOpenCoreConfiguration.Misc.Security.RequireSignature
+    Configuration->Misc.Security.RequireSignature
     ));
 
-  if (mOpenCoreConfiguration.Misc.Debug.ExposeBootPath) {
-    OcStoreLoadPath (LoadPath);
-  }
+  return EFI_SUCCESS;
+}
 
-  LoadHandle = NULL;
-  if (LoadPath != NULL) {
-    Status = gBS->LocateDevicePath (
-      &gEfiSimpleFileSystemProtocolGuid,
-      &LoadPath,
-      &LoadHandle
-      );
-    DEBUG ((DEBUG_INFO, "OC: LoadHandle is %p - %r\n", LoadHandle, Status));
+STATIC
+VOID
+OcMain (
+  IN OC_STORAGE_CONTEXT        *Storage,
+  IN EFI_DEVICE_PATH_PROTOCOL  *LoadPath OPTIONAL
+  )
+{
+  EFI_STATUS                Status;
+
+  OC_CPU_INFO               CpuInfo;
+  EFI_HANDLE                LoadHandle;
+
+  Status = OcMiscEarlyInit (Storage, &mOpenCoreConfiguration);
+  if (EFI_ERROR (Status)) {
+    return;
   }
 
   OcCpuScanProcessor (&CpuInfo);
@@ -281,6 +309,26 @@ OcMain (
   OcLoadDevPropsSupport (&mOpenCoreConfiguration);
   DEBUG ((DEBUG_INFO, "OC: OcLoadNvramSupport...\n"));
   OcLoadNvramSupport (&mOpenCoreConfiguration);
+
+  if (mOpenCoreConfiguration.Misc.Debug.ExposeBootPath) {
+    OcStoreLoadPath (LoadPath);
+  }
+
+  if (mOpenCoreConfiguration.Misc.Boot.ReinstallProtocol) {
+    if (OcAppleBootPolicyInstallProtocol (TRUE) == NULL) {
+      DEBUG ((DEBUG_ERROR, "OC: Failed to reinstall boot policy protocol\n"));
+    }
+  }
+
+  LoadHandle = NULL;
+  if (LoadPath != NULL) {
+    Status = gBS->LocateDevicePath (
+      &gEfiSimpleFileSystemProtocolGuid,
+      &LoadPath,
+      &LoadHandle
+      );
+    DEBUG ((DEBUG_INFO, "OC: LoadHandle is %p - %r\n", LoadHandle, Status));
+  }
 
   //
   // This is required to catch UEFI Shell boot if any.

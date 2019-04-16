@@ -26,6 +26,8 @@
 
 \renewcommand{\dateseparator}{.}
 
+% Newer LaTeX versions should not add ligatures to listings, but for some reason
+% it is not the case for me. As a result select PDF viewers copy wrong data.
 \lstdefinestyle{ocbash}{
   language=bash,
   frame=tb,
@@ -38,6 +40,8 @@
     {-}{{-}}1
     {~}{{\texttildelow}}1
     {*}{{*}}1
+    {fl}{{f{}l}}2
+    {fi}{{f{}i}}2
     ,
 }
 
@@ -436,7 +440,7 @@ Required external package dependencies include \href{https://github.com/acidanth
 
 To compile with \texttt{XCODE5}, besides \href{https://developer.apple.com/xcode}{Xcode},
 one should also install \href{https://www.nasm.us}{NASM} and
-\href{https://github.com/acidanthera/AppleSupportPkg/blob/master/External/mtoc-mac64.zip}{MTOC}. Example command sequence may look as follows:
+\href{https://github.com/acidanthera/ocbuild/raw/master/external/mtoc-mac64.zip}{MTOC}. Example command sequence may look as follows:
 
 \begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
 git clone https://github.com/tianocore/edk2 -b UDK2018 UDK
@@ -1207,6 +1211,13 @@ behaviour that does not go to any other sections
 \begin{enumerate}
 
 \item
+  \texttt{ReinstallProtocol}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Reinstalls apple boot policy protocol with a builtin
+  version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
+
+\item
   \texttt{ShowPicker}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
@@ -1391,8 +1402,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   Can look as follows:
 \begin{lstlisting}[label=createvault, style=ocbash]
 cd /Volumes/EFI/EFI/OC
-~/create_vault.sh .
-~/RsaTool -sign vault.plist vault.sig vault.pub
+/path/to/create_vault.sh .
+/path/to/RsaTool -sign vault.plist vault.sig vault.pub
 off=$(($(strings -a -t d OpenCore.efi | grep "=BEGIN OC VAULT=" | cut -f1 -d' ')+16))
 dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=520 conv=notrunc
 rm vault.pub

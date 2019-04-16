@@ -350,6 +350,8 @@
 	<dict>
 		<key>Boot</key>
 		<dict>
+			<key>ReinstallProtocol</key>
+			<true/>
 			<key>ShowPicker</key>
 			<true/>
 			<key>Timeout</key>
