@@ -826,23 +826,12 @@ ioreg -lw0 -p IODeviceTree -n efi -r -x | grep device-properties |
   \texttt{plist\ string} format.
 
 \item
-  \texttt{Quirks}\\
-  \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Description}: Apply individual device property quirks described
-  in \hyperref[devpropsquirks]{Quirks Properties} section below.
-
-\end{enumerate}
-
-\subsection{Quirks Properties}\label{devpropsquirks}
-
-\begin{enumerate}
-
-\item
   \texttt{ReinstallProtocol}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Reinstalls device property protocol (and drops all previous
-  properties) if it was already installed.
+  \textbf{Description}: Reinstalls device property protocol with a builtin
+  version. This will drop all previous properties if it was already installed.
+  This may be used to ensure full compatibility on VMs or legacy Macs.
 
 \end{enumerate}
 

@@ -143,11 +143,8 @@
 				<string>MaximumBootBeepVolume</string>
 			</array>
 		</dict>
-		<key>Quirks</key>
-		<dict>
-			<key>ReinstallProtocol</key>
-			<false/>
-		</dict>
+		<key>ReinstallProtocol</key>
+		<false/>
 	</dict>
 	<key>Kernel</key>
 	<dict>
