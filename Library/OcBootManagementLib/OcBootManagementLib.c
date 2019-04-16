@@ -256,6 +256,7 @@ GetRecoveryOsBooter (
   EFI_FILE_PROTOCOL                *Recovery;
   UINTN                            FilePathSize;
   EFI_DEVICE_PATH_PROTOCOL         *TmpPath;
+  UINTN                            TmpPathSize;
 
   Status = gBS->HandleProtocol (
     Device,
@@ -282,14 +283,39 @@ GetRecoveryOsBooter (
   if (*FilePath != NULL) {
     if (IsDevicePathValid (*FilePath, FilePathSize)) {
       //
-      // This entry should point to a folder with recovery.
-      // Apple never adds trailing slashes to blessed folder paths.
-      // However, we do rely on trailing slashes in folder paths and add them here.
+      // We skip alternate entry when current one is the same.
+      // This is to prevent recovery and volume duplicates on HFS+ systems.
       //
-      TmpPath = TrailedBooterDevicePath (*FilePath);
+
+      TmpPath = (EFI_DEVICE_PATH_PROTOCOL *) GetFileInfo (
+        Root,
+        &gAppleBlessedSystemFolderInfoGuid,
+        sizeof (EFI_DEVICE_PATH_PROTOCOL),
+        &TmpPathSize
+        );
+
       if (TmpPath != NULL) {
-        FreePool (*FilePath);
-        *FilePath = TmpPath;
+        if (IsDevicePathValid (TmpPath, TmpPathSize)
+          && IsDevicePathEqual (TmpPath, *FilePath)) {
+          DEBUG ((DEBUG_INFO, "Skipping equal alternate device path %p\n", Device));
+          Status = EFI_ALREADY_STARTED;
+          FreePool (*FilePath);
+          *FilePath = NULL;
+        }
+        FreePool (TmpPath);
+      }
+
+      if (!EFI_ERROR (Status)) {
+        //
+        // This entry should point to a folder with recovery.
+        // Apple never adds trailing slashes to blessed folder paths.
+        // However, we do rely on trailing slashes in folder paths and add them here.
+        //
+        TmpPath = TrailedBooterDevicePath (*FilePath);
+        if (TmpPath != NULL) {
+          FreePool (*FilePath);
+          *FilePath = TmpPath;
+        }
       }
     } else {
       FreePool (*FilePath);
@@ -531,11 +557,7 @@ OcFillBootEntry (
   BootEntry->DevicePath = DevicePath;
   SetBootEntryFlags (BootEntry);
 
-  //
-  // We skip alternate entry when current one is actually a recovery.
-  // This is to prevent recovery duplicates on HFS+ systems.
-  //
-  if (AlternateBootEntry != NULL && !BootEntry->IsRecovery) {
+  if (AlternateBootEntry != NULL) {
     Status = BootPolicy->GetPathNameOnApfsRecovery (
       DevicePath,
       L"\\",
