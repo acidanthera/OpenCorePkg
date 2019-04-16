@@ -103,13 +103,12 @@
   OC_DECLARE (OC_DEV_PROP_BLOCK_MAP)
 
 #define OC_DEV_PROP_QUIRKS_FIELDS(_, __) \
-  _(BOOLEAN                   , ReinstallProtocol,     , FALSE  , ())
   OC_DECLARE (OC_DEV_PROP_QUIRKS)
 
 #define OC_DEV_PROP_CONFIG_FIELDS(_, __) \
   _(OC_DEV_PROP_ADD_MAP       , Add              ,     , OC_CONSTR2 (OC_DEV_PROP_ADD_MAP, _, __)   , OC_DESTR (OC_DEV_PROP_ADD_MAP)) \
   _(OC_DEV_PROP_BLOCK_MAP     , Block            ,     , OC_CONSTR2 (OC_DEV_PROP_BLOCK_MAP, _, __) , OC_DESTR (OC_DEV_PROP_BLOCK_MAP)) \
-  _(OC_DEV_PROP_QUIRKS        , Quirks           ,     , OC_CONSTR2 (OC_DEV_PROP_QUIRKS, _, __)    , OC_DESTR (OC_DEV_PROP_QUIRKS))
+  _(BOOLEAN                   , ReinstallProtocol,     , FALSE  , ())
   OC_DECLARE (OC_DEV_PROP_CONFIG)
 
 /**

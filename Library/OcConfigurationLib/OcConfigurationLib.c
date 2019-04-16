@@ -25,7 +25,6 @@ OC_STRUCTORS       (OC_ACPI_CONFIG, ())
 OC_MAP_STRUCTORS   (OC_DEV_PROP_ADD_MAP)
 OC_STRUCTORS       (OC_DEV_PROP_BLOCK_ENTRY, ())
 OC_MAP_STRUCTORS   (OC_DEV_PROP_BLOCK_MAP)
-OC_STRUCTORS       (OC_DEV_PROP_QUIRKS, ())
 OC_STRUCTORS       (OC_DEV_PROP_CONFIG, ())
 
 OC_STRUCTORS       (OC_KERNEL_ADD_ENTRY, ())
@@ -145,16 +144,10 @@ mDevicePropertiesBlockSchema = OC_SCHEMA_ARRAY (NULL, &mDevicePropertiesBlockEnt
 
 STATIC
 OC_SCHEMA
-mDevicePropertiesQuirksSchema[] = {
-  OC_SCHEMA_BOOLEAN_IN  ("ReinstallProtocol",  OC_GLOBAL_CONFIG, DeviceProperties.Quirks.ReinstallProtocol),
-};
-
-STATIC
-OC_SCHEMA
 mDevicePropertiesSchema[] = {
   OC_SCHEMA_MAP_IN      ("Add",                OC_GLOBAL_CONFIG, DeviceProperties.Add, &mDevicePropertiesAddSchema),
   OC_SCHEMA_MAP_IN      ("Block",              OC_GLOBAL_CONFIG, DeviceProperties.Block, &mDevicePropertiesBlockSchema),
-  OC_SCHEMA_DICT        ("Quirks",             mDevicePropertiesQuirksSchema)
+  OC_SCHEMA_BOOLEAN_IN  ("ReinstallProtocol",  OC_GLOBAL_CONFIG, DeviceProperties.ReinstallProtocol),
 };
 
 //
