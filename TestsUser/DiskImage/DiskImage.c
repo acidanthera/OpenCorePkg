@@ -45,6 +45,10 @@ uint8_t *readFile(const char *str, long *size) {
 #include <CommonCrypto/CommonDigest.h>
 #endif
 
+EFI_STATUS NilInstallConfigurationTable(EFI_GUID *Guid, VOID *Table) {
+  return EFI_SUCCESS;
+}
+
 int main (int argc, char *argv[]) {
   if (argc < 2) {
     printf ("Please provide a valid Disk Image path.\n");

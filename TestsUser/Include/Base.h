@@ -520,7 +520,7 @@ struct _LIST_ENTRY {
 #define ASSERT(x) assert(x)
 #define DebugCodeEnabled() true
 #define DebugAssertEnabled() true
-#define FreePages(a,b) do {} while (0)
+static inline void FreePages(void *p,UINTN s) {}
 #define UnicodeSPrint(...) assert(false)
 #define CompareGuid(a, b) ((memcmp)((a), (b), sizeof (EFI_GUID)) == 0)
 #define CopyGuid(a, b) (memcpy)((a), (b), sizeof (EFI_GUID))
@@ -1584,6 +1584,7 @@ CalculateCrc32(
 struct EFI_BOOT_SERVICES_ {
   EFI_STATUS (*LocateProtocol)(EFI_GUID *ProtocolGuid, VOID *Registration, VOID **Interface);
   EFI_STATUS (*AllocatePages)(EFI_ALLOCATE_TYPE Type, EFI_MEMORY_TYPE MemoryType, UINTN Pages, EFI_PHYSICAL_ADDRESS *Memory);
+  EFI_STATUS (*FreePages)(EFI_PHYSICAL_ADDRESS Memory, UINTN Pages);
   EFI_STATUS (*InstallConfigurationTable)(EFI_GUID *Guid, VOID *Table);
   EFI_STATUS (*LocateHandleBuffer) (EFI_LOCATE_SEARCH_TYPE SearchType, EFI_GUID * Protocol, VOID *SearchKey, UINTN *NumberHandles, EFI_HANDLE **Buffer);
   EFI_STATUS (*HandleProtocol)(EFI_HANDLE Handle, EFI_GUID *Protocol, VOID **Interface);
@@ -1607,12 +1608,22 @@ extern _Thread_local uint32_t externalUsedPages;
 extern _Thread_local uint8_t externalBlob[EFI_PAGE_SIZE*TOTAL_PAGES];
 
 STATIC EFI_STATUS NilAllocatePages(EFI_ALLOCATE_TYPE Type, EFI_MEMORY_TYPE MemoryType, UINTN Pages, EFI_PHYSICAL_ADDRESS *Memory) {
+#if 0
   if (TOTAL_PAGES - externalUsedPages >= Pages) {
     *Memory = (EFI_PHYSICAL_ADDRESS)(externalBlob + externalUsedPages * EFI_PAGE_SIZE);
     externalUsedPages += Pages;
     return EFI_SUCCESS;
   }
   return EFI_OUT_OF_RESOURCES;
+#else
+  *Memory = (EFI_PHYSICAL_ADDRESS) malloc (Pages * EFI_PAGE_SIZE);
+  assert(Memory != NULL);
+  return EFI_SUCCESS;
+#endif
+}
+
+STATIC EFI_STATUS NilFreePages(EFI_PHYSICAL_ADDRESS Page, UINTN Pages) {
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS NilInstallConfigurationTable(EFI_GUID *Guid, VOID *Table);
@@ -1641,6 +1652,7 @@ STATIC EFI_STATUS NilInstallProtocolInterface (EFI_HANDLE *Handle, EFI_GUID *Pro
 STATIC EFI_BOOT_SERVICES gNilBS = {
   .LocateProtocol = NilLocateProtocol,
   .AllocatePages = NilAllocatePages,
+  .FreePages = NilFreePages,
   .InstallConfigurationTable = NilInstallConfigurationTable,
   .LocateHandleBuffer = NilLocateHandleBuffer,
   .HandleProtocol = NilHandleProtocol,
