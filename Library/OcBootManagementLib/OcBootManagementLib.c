@@ -430,14 +430,18 @@ OcDescribeBootEntry (
     }
   }
 
-  if (BootEntry->Name == NULL) {
-    DEBUG ((DEBUG_INFO, "Trying to detect Microsoft BCD\n"));
-    Status = ReadFileSize (FileSystem, L"\\EFI\\Microsoft\\Boot\\BCD", &BcdSize);
-    if (!EFI_ERROR (Status)) {
-      BootEntry->IsWindows = TRUE;
+  //
+  // Windows boot entry may have a custom name, so ensure IsWindows is set correctly.
+  //
+  DEBUG ((DEBUG_INFO, "Trying to detect Microsoft BCD\n"));
+  Status = ReadFileSize (FileSystem, L"\\EFI\\Microsoft\\Boot\\BCD", &BcdSize);
+  if (!EFI_ERROR (Status)) {
+    BootEntry->IsWindows = TRUE;
+    if (BootEntry->Name == NULL) {
       BootEntry->Name      = AllocateCopyPool(sizeof (L"BOOTCAMP Windows"), L"BOOTCAMP Windows");
     }
-  }  
+  }
+
   if (BootEntry->Name == NULL) {
     BootEntry->Name = GetVolumeLabel (FileSystem);
     if (BootEntry->Name != NULL 
