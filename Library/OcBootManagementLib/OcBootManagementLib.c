@@ -1003,20 +1003,10 @@ OcRunSimpleBootPicker (
   EFI_HANDLE                  BooterHandle;
   UINT32                      DefaultEntry;
 
-  Status = OcAppleBootPolicyInstallProtocol (gImageHandle, gST);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "AppleBootPolicy install failure - %r\n", Status));
-  }
-
-  Status = gBS->LocateProtocol (
-    &gAppleBootPolicyProtocolGuid,
-    NULL,
-    (VOID **) &AppleBootPolicy
-    );
-
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "AppleBootPolicy locate failure - %r\n", Status));
-    return Status;
+  AppleBootPolicy = OcAppleBootPolicyInstallProtocol (FALSE);
+  if (AppleBootPolicy == NULL) {
+    DEBUG ((DEBUG_ERROR, "AppleBootPolicy locate failure\n"));
+    return EFI_NOT_FOUND;
   }
 
   while (TRUE) {

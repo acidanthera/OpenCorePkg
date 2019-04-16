@@ -58,23 +58,13 @@ TestBless (
 
   Print (L"TestBless\n");
 
-  Status = UninstallAllProtocolInstances (&gAppleBootPolicyProtocolGuid);
+  AppleBootPolicy = OcAppleBootPolicyInstallProtocol (TRUE);
 
-  Print (L"UninstallAllProtocolInstances is %r\n", Status);
+  Print (L"OcAppleBootPolicyInstallProtocol is %p\n", AppleBootPolicy);
 
-  Status = OcAppleBootPolicyInstallProtocol (ImageHandle, SystemTable);
-
-  Print (L"OcAppleBootPolicyInstallProtocol is %r\n", Status);
-
-  Status = gBS->LocateProtocol (
-    &gAppleBootPolicyProtocolGuid,
-    NULL,
-    (VOID **) &AppleBootPolicy
-    );
-
-  if (EFI_ERROR (Status)) {
-    Print (L"Locate gAppleBootPolicyProtocolGuid failed %r\n", Status);
-    return Status;
+  if (AppleBootPolicy == NULL) {
+    Print (L"Locate gAppleBootPolicyProtocolGuid failed\n");
+    return EFI_NOT_FOUND;
   }
 
   TimeoutSeconds = 5;

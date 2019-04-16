@@ -18,16 +18,15 @@
 #include <Protocol/AppleBootPolicy.h>
 
 /**
-  @param[in] ImageHandle  The firmware allocated handle for the EFI image.
-  @param[in] SystemTable  A pointer to the EFI System Table.
+  Install and initialise Apple Boot policy protocol.
 
-  @retval EFI_SUCCESS          The entry point is executed successfully.
-  @retval EFI_ALREADY_STARTED  The protocol has already been installed.
+  @param[in] Overwrite  Overwrite installed protocol.
+
+  @retval installed or located protocol or NULL.
 **/
-EFI_STATUS
+APPLE_BOOT_POLICY_PROTOCOL *
 OcAppleBootPolicyInstallProtocol (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+  IN BOOLEAN  Reinstall
   );
 
 #endif // OC_APPLE_BOOT_POLICY_LIB_H

@@ -971,12 +971,15 @@ OcDevicePathPropertyInstallProtocol (
 
   Handle = NULL;
   Status = gBS->InstallProtocolInterface (
-                  &Handle,
-                  &gEfiDevicePathPropertyDatabaseProtocolGuid,
-                  EFI_NATIVE_INTERFACE,
-                  &DevicePathPropertyData->Protocol
-                  );
+    &Handle,
+    &gEfiDevicePathPropertyDatabaseProtocolGuid,
+    EFI_NATIVE_INTERFACE,
+    &DevicePathPropertyData->Protocol
+    );
 
-  ASSERT_EFI_ERROR (Status);
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
+
   return &DevicePathPropertyData->Protocol;
 }

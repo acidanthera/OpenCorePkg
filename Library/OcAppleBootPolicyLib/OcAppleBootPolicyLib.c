@@ -23,6 +23,7 @@
 
 #include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcFileLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DevicePathLib.h>
@@ -1290,34 +1291,41 @@ BootPolicyGetApfsRecoveryVolumes (
   @retval EFI_ALREADY_STARTED  The protocol has already been installed.
 
 **/
-EFI_STATUS
+APPLE_BOOT_POLICY_PROTOCOL *
 OcAppleBootPolicyInstallProtocol (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+  IN BOOLEAN  Reinstall
   )
 {
   EFI_STATUS Status;
 
-  VOID        *Interface;
-  EFI_HANDLE  Handle;
+  APPLE_BOOT_POLICY_PROTOCOL  *Protocol;
+  EFI_HANDLE                  Handle;
 
-  Status = gBS->LocateProtocol (
-                  &gAppleBootPolicyProtocolGuid,
-                  NULL,
-                  &Interface
-                  );
-
-  if (EFI_ERROR (Status)) {
-    Handle = NULL;
-    Status = gBS->InstallProtocolInterface (
-                    &Handle,
-                    &gAppleBootPolicyProtocolGuid,
-                    EFI_NATIVE_INTERFACE,
-                    (VOID **) &mAppleBootPolicyProtocol
-                    );
-  } else {
-    Status = EFI_ALREADY_STARTED;
+  if (Reinstall) {
+    UninstallAllProtocolInstances (&gAppleBootPolicyProtocolGuid);
   }
 
-  return Status;
+  Status = gBS->LocateProtocol (
+    &gAppleBootPolicyProtocolGuid,
+    NULL,
+    (VOID *) &Protocol
+    );
+
+  if (!EFI_ERROR (Status)) {
+    return Protocol;
+  }
+
+  Handle = NULL;
+  Status = gBS->InstallProtocolInterface (
+    &Handle,
+    &gAppleBootPolicyProtocolGuid,
+    EFI_NATIVE_INTERFACE,
+    (VOID **) &mAppleBootPolicyProtocol
+    );
+
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
+
+  return &mAppleBootPolicyProtocol;
 }

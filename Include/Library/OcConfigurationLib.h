@@ -195,6 +195,7 @@
 **/
 
 #define OC_MISC_BOOT_FIELDS(_, __) \
+  _(BOOLEAN                     , ReinstallProtocol           ,     , FALSE        , ()) \
   _(BOOLEAN                     , ShowPicker                  ,     , FALSE        , ()) \
   _(UINT32                      , Timeout                     ,     , 0            , ())
   OC_DECLARE (OC_MISC_BOOT)
