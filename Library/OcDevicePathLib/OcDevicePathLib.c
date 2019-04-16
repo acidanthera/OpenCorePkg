@@ -418,3 +418,82 @@ TrailedBooterDevicePath (
   //
   return NULL;
 }
+
+STATIC
+EFI_DEVICE_PATH_PROTOCOL *
+InternalApplyAppleDevicePathFixes (
+  IN OUT EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+  EFI_DEV_PATH_PTR DevPath;
+
+  ASSERT (DevicePath != NULL);
+
+  DevPath.DevPath = FindDevicePathNodeWithType (
+                      DevicePath,
+                      MESSAGING_DEVICE_PATH,
+                      MSG_SATA_DP
+                      );
+  if (DevPath.DevPath != NULL) {
+    //
+    // Must be set to 0xFFFF if the device is directly connected to the HBA.
+    //
+    DevPath.Sata->PortMultiplierPortNumber = 0xFFFF;
+    return DevicePath;
+  }
+  //
+  // FIXME: Add SASEx -> NVMe fix.
+  //
+  FreePool (DevicePath);
+  return NULL;
+}
+
+/**
+  Fix Apple Boot Device Path to be compatible with usual UEFI implementations.
+
+  @param[in,out] DevicePath  The Device Path to fix.
+
+  @retval DevicePath       DevicePath has been fixed.
+  @retval new Device Path  DevicePath has been copied, fixed and freed.
+  @retval NULL             DevicePath could not be fixed up and has been freed.
+
+**/
+EFI_DEVICE_PATH_PROTOCOL *
+OcFixAppleBootDevicePath (
+  IN OUT EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+  EFI_STATUS               Status;
+  EFI_DEVICE_PATH_PROTOCOL *DevPath;
+  EFI_HANDLE               Device;
+
+  ASSERT (DevicePath != NULL);
+
+  DevPath = DevicePath;
+  Status = gBS->LocateDevicePath (
+                  &gEfiDevicePathProtocolGuid,
+                  &DevPath,
+                  &Device
+                  );
+  if (!EFI_ERROR (Status)) {
+    return DevicePath;
+  }
+
+  DevicePath = InternalApplyAppleDevicePathFixes (DevicePath);
+  if (DevicePath == NULL) {
+    return NULL;
+  }
+
+  DevPath = DevicePath;
+  Status = gBS->LocateDevicePath (
+                  &gEfiDevicePathProtocolGuid,
+                  &DevPath,
+                  &Device
+                  );
+  if (!EFI_ERROR (Status)) {
+    return DevicePath;
+  }
+
+  FreePool (DevicePath);
+  return NULL;
+}
