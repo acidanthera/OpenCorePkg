@@ -625,7 +625,7 @@ InternalGetFirstDeviceBootFilePath (
 
   for (Index = 0; Index < NumHandles; ++Index) {
     Status = gBS->HandleProtocol (
-                    &HandleBuffer[Index],
+                    HandleBuffer[Index],
                     &gEfiDevicePathProtocolGuid,
                     (VOID **)&FsDevicePath
                     );
@@ -649,7 +649,7 @@ InternalGetFirstDeviceBootFilePath (
     }
 
     Status = BootPolicy->GetBootFileEx (
-                           &HandleBuffer[Index],
+                           HandleBuffer[Index],
                            APPLE_BOOT_POLICY_MODE_1,
                            &BootDevicePath
                            );
@@ -1025,12 +1025,12 @@ InternalLoadDmg (
   UINTN                    DmgFileNameLen;
   EFI_FILE_INFO            *DmgFileInfo;
   EFI_FILE_PROTOCOL        *DmgFile;
-  UINTN                    DmgFileSize;
+  UINT32                   DmgFileSize;
   VOID                     *DmgBuffer;
 
   EFI_FILE_INFO            *ChunklistFileInfo;
   EFI_FILE_PROTOCOL        *ChunklistFile;
-  UINTN                    ChunklistFileSize;
+  UINT32                   ChunklistFileSize;
   VOID                     *ChunklistBuffer;
 
   ASSERT (Context != NULL);
@@ -1066,9 +1066,9 @@ InternalLoadDmg (
   }
 
   DmgFileSize = 0;
-  Status = DmgFile->Read (DmgFile, &DmgFileSize, NULL);
+  Status = GetFileSize (DmgFile, &DmgFileSize);
 
-  if (Status != EFI_BUFFER_TOO_SMALL) {
+  if (Status != EFI_SUCCESS) {
     FreePool (DmgFileInfo);
     DmgDir->Close (DmgDir);
     DmgFile->Close (DmgFile);
@@ -1083,7 +1083,7 @@ InternalLoadDmg (
     return NULL;
   }
 
-  Status = DmgFile->Read (DmgFile, &DmgFileSize, DmgBuffer);
+  Status = GetFileData (DmgFile, 0, DmgFileSize, DmgBuffer);
 
   DmgFile->Close (DmgFile);
 
@@ -1111,18 +1111,14 @@ InternalLoadDmg (
                        0
                        );
     if (!EFI_ERROR (Status)) {
-      Status = ChunklistFile->Read (ChunklistFile, &ChunklistFileSize, NULL);
-      if (Status == EFI_BUFFER_TOO_SMALL) {
+      Status = GetFileSize (ChunklistFile, &ChunklistFileSize);
+      if (Status == EFI_SUCCESS) {
         ChunklistBuffer = AllocatePool (ChunklistFileSize);
 
         if (ChunklistBuffer == NULL) {
           ChunklistFileSize = 0;
         } else {
-          Status = ChunklistFile->Read (
-                                    ChunklistFile,
-                                    &ChunklistFileSize,
-                                    ChunklistBuffer
-                                    );
+          Status = GetFileData (ChunklistFile, 0, ChunklistFileSize, ChunklistBuffer);
           if (EFI_ERROR (Status)) {
             FreePool (ChunklistBuffer);
             ChunklistBuffer   = NULL;
@@ -1368,9 +1364,10 @@ OcLoadBootEntry (
   OUT EFI_HANDLE                  *EntryHandle
   )
 {
-  EFI_STATUS                Status;
-  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
-  INTERNAL_DMG_LOAD_CONTEXT DmgLoadContext;
+  EFI_STATUS                 Status;
+  EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
+  INTERNAL_DMG_LOAD_CONTEXT  DmgLoadContext;
+  CHAR16                     *UnicodeDevicePath;
 
   //
   // TODO: support Apple loaded image, policy, and dmg boot.
@@ -1390,15 +1387,27 @@ OcLoadBootEntry (
     if (DevicePath == NULL) {
       return EFI_UNSUPPORTED;
     }
+
+    UnicodeDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
+    if (UnicodeDevicePath != NULL) {
+      DEBUG ((
+        DEBUG_INFO,
+        "Dmg boot %s to dp %s\n",
+        BootEntry->Name,
+        UnicodeDevicePath
+        ));
+      FreePool (UnicodeDevicePath);
+    }
+
   } else {
     DevicePath = BootEntry->DevicePath;
   }
 
   Status = gBS->LoadImage (FALSE, ParentHandle, DevicePath, NULL, 0, EntryHandle);
 
-  if (BootEntry->IsFolder) {
-    InternalUnloadDmg (&DmgLoadContext);
-  }
+  //
+  // Please note that you cannot unload dmg after loading, as we still are booting from it.
+  //
 
   return Status;
 }

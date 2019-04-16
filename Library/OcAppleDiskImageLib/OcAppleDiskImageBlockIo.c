@@ -217,6 +217,8 @@ InternalConstructDmgDevicePath (
   SetDevicePathNodeLength (&DevPath->Size, sizeof (DevPath->Size));
 
   SetDevicePathEndNode (&DevPath->End);
+
+  ASSERT (IsDevicePathValid ((EFI_DEVICE_PATH_PROTOCOL *) DevPath, 0));
 }
 
 STATIC CONST EFI_BLOCK_IO_PROTOCOL mDiskImageBlockIo = {
@@ -295,6 +297,7 @@ OcAppleDiskImageInstallBlockIo (
 
   InternalConstructDmgDevicePath (DiskImageData, RamDmgAddress);
 
+  BlockIoHandle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
                   &BlockIoHandle,
                   &gEfiBlockIoProtocolGuid,
