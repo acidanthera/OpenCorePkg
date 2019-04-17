@@ -322,15 +322,19 @@ OcAppleDiskImageInstallBlockIo (
 
   Status = gBS->ConnectController (BlockIoHandle, NULL, NULL, TRUE);
   if (EFI_ERROR (Status)) {
-    gBS->UninstallMultipleProtocolInterfaces (
-           BlockIoHandle,
-           &gEfiBlockIoProtocolGuid,
-           &DiskImageData->BlockIo,
-           &gEfiDevicePathProtocolGuid,
-           &DiskImageData->DevicePath,
-           NULL
-           );
-    FreePool (DiskImageData);
+    Status = gBS->UninstallMultipleProtocolInterfaces (
+                    BlockIoHandle,
+                    &gEfiDevicePathProtocolGuid,
+                    &DiskImageData->DevicePath,
+                    &gEfiBlockIoProtocolGuid,
+                    &DiskImageData->BlockIo,
+                    NULL
+                    );
+    if (!EFI_ERROR (Status)) {
+      FreePool (DiskImageData);
+    } else {
+      DiskImageData->Signature = 0;
+    }
     gBS->FreePages (RamDmgAddress, NumRamDmgPages);
     return NULL;
   }
