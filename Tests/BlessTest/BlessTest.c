@@ -103,7 +103,7 @@ TestBless (
     // TODO: This should properly handle folder boot entries.
     //
     if (!EFI_ERROR (Status)) {
-      Status = OcLoadBootEntry (Chosen, OC_LOAD_DEFAULT_POLICY, ImageHandle, &BooterHandle);
+      Status = OcLoadBootEntry (AppleBootPolicy, Chosen, OC_LOAD_DEFAULT_POLICY, ImageHandle, &BooterHandle);
       if (!EFI_ERROR (Status)) {
         Status = gBS->StartImage (BooterHandle, NULL, NULL);
         if (EFI_ERROR (Status)) {
