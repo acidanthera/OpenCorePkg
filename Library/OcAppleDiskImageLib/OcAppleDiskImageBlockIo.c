@@ -38,15 +38,13 @@
 #pragma pack(1)
 
 typedef PACKED struct {
-  EFI_DEVICE_PATH_PROTOCOL Header;
-  EFI_GUID                 Guid;
-  UINT32                   Key;
+  VENDOR_DEVICE_PATH Vendor;
+  UINT32             Key;
 } DMG_CONTROLLER_DEVICE_PATH;
 
 typedef PACKED struct {
-  EFI_DEVICE_PATH_PROTOCOL Header;
-  EFI_GUID                 Guid;
-  UINT64                   Length;
+  VENDOR_DEFINED_DEVICE_PATH Vendor;
+  UINT64                     Length;
 } DMG_SIZE_DEVICE_PATH;
 
 typedef PACKED struct {
@@ -187,11 +185,15 @@ InternalConstructDmgDevicePath (
   DmgSize = DiskImageData->ImageContext->Length;
   DevPath = &DiskImageData->DevicePath;
 
-  DevPath->Controller.Header.Type    = HARDWARE_DEVICE_PATH;
-  DevPath->Controller.Header.SubType = HW_VENDOR_DP;
-  DevPath->Controller.Key            = 0;
-  CopyMem (&DevPath->Controller.Guid, &mDmgControllerDpGuid, sizeof (DevPath->Controller.Guid));
+  DevPath->Controller.Vendor.Header.Type    = HARDWARE_DEVICE_PATH;
+  DevPath->Controller.Vendor.Header.SubType = HW_VENDOR_DP;
+  DevPath->Controller.Key                   = 0;
   SetDevicePathNodeLength (&DevPath->Controller, sizeof (DevPath->Controller));
+  CopyMem (
+    &DevPath->Controller.Vendor.Guid,
+    &mDmgControllerDpGuid,
+    sizeof (DevPath->Controller.Vendor.Guid)
+    );
 
   DevPath->MemMap.Header.Type     = HARDWARE_DEVICE_PATH;
   DevPath->MemMap.Header.SubType  = HW_MEMMAP_DP;
@@ -210,15 +212,21 @@ InternalConstructDmgDevicePath (
     DmgSize
     );
 
-  DevPath->Size.Header.Type    = MESSAGING_DEVICE_PATH;
-  DevPath->Size.Header.SubType = MSG_VENDOR_DP;
-  DevPath->Size.Length         = DmgSize;
-  CopyMem (&DevPath->Size.Guid, &mDmgSizeDpGuid, sizeof (DevPath->Size.Guid));
+  DevPath->Size.Vendor.Header.Type    = MESSAGING_DEVICE_PATH;
+  DevPath->Size.Vendor.Header.SubType = MSG_VENDOR_DP;
+  DevPath->Size.Length                = DmgSize;
   SetDevicePathNodeLength (&DevPath->Size, sizeof (DevPath->Size));
+  CopyMem (
+    &DevPath->Size.Vendor.Guid,
+    &mDmgSizeDpGuid,
+    sizeof (DevPath->Size.Vendor.Guid)
+    );
 
   SetDevicePathEndNode (&DevPath->End);
 
-  ASSERT (IsDevicePathValid ((EFI_DEVICE_PATH_PROTOCOL *) DevPath, 0));
+  ASSERT (
+    IsDevicePathValid ((EFI_DEVICE_PATH_PROTOCOL *)DevPath, sizeof (*DevPath))
+    );
 }
 
 STATIC CONST EFI_BLOCK_IO_PROTOCOL mDiskImageBlockIo = {
