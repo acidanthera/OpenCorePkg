@@ -67,10 +67,12 @@ STATIC
 BOOLEAN
 InternalSwapBlockData (
   IN OUT APPLE_DISK_IMAGE_BLOCK_DATA  *BlockData,
-  IN  UINT64                          DataForkOffset,
-  IN  UINT64                          DataForkSize
+  IN     UINT32                       MaxSize,
+  IN     UINT64                       DataForkOffset,
+  IN     UINT64                       DataForkSize
   )
 {
+  UINT32                 ChunksSize;
   UINT64                 MaxOffset;
   BOOLEAN                Result;
   APPLE_DISK_IMAGE_CHUNK *Chunk;
@@ -78,6 +80,19 @@ InternalSwapBlockData (
   UINT64                 BlockSectorTop;
   UINT64                 ChunkSectorTop;
   UINT64                 OffsetTop;
+
+  ASSERT (MaxSize >= sizeof (*BlockData));
+
+  BlockData->ChunkCount = SwapBytes32 (BlockData->ChunkCount);
+
+  Result = OcOverflowMulU32 (
+             BlockData->ChunkCount,
+             sizeof (*BlockData->Chunks),
+             &ChunksSize
+             );
+  if (Result || (ChunksSize > (MaxSize - sizeof (*BlockData)))) {
+    return FALSE;
+  }
 
   MaxOffset = (DataForkOffset + DataForkSize);
 
@@ -110,8 +125,6 @@ InternalSwapBlockData (
                                         BlockData->Checksum.Data[Index]
                                         );
   }
-
-  BlockData->ChunkCount = SwapBytes32 (BlockData->ChunkCount);
 
   for (Index = 0; Index < BlockData->ChunkCount; ++Index) {
     Chunk = &BlockData->Chunks[Index];
@@ -171,7 +184,7 @@ InternalParsePlist (
   UINT32                      BlockDictChildDataSize;
 
   UINT32                      NumDmgBlocks;
-  UINTN                       DmgBlocksSize;
+  UINT32                      DmgBlocksSize;
   APPLE_DISK_IMAGE_BLOCK_DATA **DmgBlocks;
   APPLE_DISK_IMAGE_BLOCK_DATA *Block;
 
@@ -230,7 +243,7 @@ InternalParsePlist (
     goto DONE_ERROR;
   }
 
-  Result = OcOverflowMulUN (NumDmgBlocks, sizeof (*DmgBlocks), &DmgBlocksSize);
+  Result = OcOverflowMulU32 (NumDmgBlocks, sizeof (*DmgBlocks), &DmgBlocksSize);
   if (Result) {
     return FALSE;
   }
@@ -255,7 +268,7 @@ InternalParsePlist (
     }
 
     Result = PlistDataSize (BlockDictChildValue, &BlockDictChildDataSize);
-    if (!Result) {
+    if (!Result || (BlockDictChildDataSize < sizeof (*Block))) {
       goto DONE_ERROR;
     }
 
@@ -265,18 +278,23 @@ InternalParsePlist (
       goto DONE_ERROR;
     }
 
+    DmgBlocks[Index] = Block;
+
     Result = PlistDataValue (
                BlockDictChildValue,
                (UINT8 *)Block,
                &BlockDictChildDataSize
                );
     if (!Result) {
-      FreePool (Block);
       goto DONE_ERROR;
     }
 
-    InternalSwapBlockData (Block, DataForkOffset, DataForkSize);
-    DmgBlocks[Index] = Block;
+    InternalSwapBlockData (
+      Block,
+      BlockDictChildDataSize,
+      DataForkOffset,
+      DataForkSize
+      );
   }
 
   *BlockCount = NumDmgBlocks;
