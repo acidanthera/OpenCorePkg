@@ -384,7 +384,8 @@ OcAppleDiskImageUninstallBlockIo (
          EFI_SIZE_TO_PAGES (sizeof (*DiskImageData->RamDmgHeader))
          );
 
-  Status = gBS->UninstallMultipleProtocolInterfaces (
+  Status  = gBS->DisconnectController (BlockIoHandle, NULL, NULL);
+  Status |= gBS->UninstallMultipleProtocolInterfaces (
                   BlockIoHandle,
                   &gEfiBlockIoProtocolGuid,
                   &DiskImageData->BlockIo,
@@ -392,7 +393,6 @@ OcAppleDiskImageUninstallBlockIo (
                   &DiskImageData->DevicePath,
                   NULL
                   );
-  Status |= gBS->DisconnectController (BlockIoHandle, NULL, NULL);
   if (!EFI_ERROR (Status)) {
     FreePool (DiskImageData);
   } else {
