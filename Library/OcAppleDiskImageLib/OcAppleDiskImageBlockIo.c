@@ -199,7 +199,12 @@ InternalConstructDmgDevicePath (
   DevPath->MemMap.Header.SubType  = HW_MEMMAP_DP;
   DevPath->MemMap.MemoryType      = EfiACPIMemoryNVS;
   DevPath->MemMap.StartingAddress = RamDmgAddress;
-  DevPath->MemMap.EndingAddress   = (RamDmgAddress + sizeof (RAM_DMG_HEADER) - 1);
+  //
+  // EndingAddress, per UEFI specification and edk2 implementation, is supposed
+  // to be the top usable address, not the top of the buffer.
+  // However, Apple uses latter for DMG Device Paths.
+  //
+  DevPath->MemMap.EndingAddress   = (RamDmgAddress + sizeof (RAM_DMG_HEADER));
   SetDevicePathNodeLength (&DevPath->MemMap, sizeof (DevPath->MemMap));
 
   DevPath->FilePath.Header.Type    = MEDIA_DEVICE_PATH;
