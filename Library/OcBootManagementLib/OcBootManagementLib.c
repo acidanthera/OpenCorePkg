@@ -43,8 +43,8 @@
 #include <Library/FileHandleLib.h>
 
 typedef struct {
-  EFI_DEVICE_PATH_PROTOCOL *DevicePath;
-  OC_APPLE_DISK_IMAGE_CONTEXT    DmgContext;
+  EFI_DEVICE_PATH_PROTOCOL       *DevicePath;
+  OC_APPLE_DISK_IMAGE_CONTEXT    *DmgContext;
   EFI_HANDLE                     BlockIoHandle;
 } INTERNAL_DMG_LOAD_CONTEXT;
 
@@ -690,19 +690,26 @@ InternalGetDiskImageBootFile (
   ASSERT (DmgBuffer != NULL);
   ASSERT (DmgBufferSize > 0);
 
+  Context->DmgContext = AllocatePool (sizeof (*Context->DmgContext));
+  if (Context->DmgContext == NULL) {
+    return NULL;
+  }
+
   Result = OcAppleDiskImageInitializeContext (
-             &Context->DmgContext,
+             Context->DmgContext,
              DmgBuffer,
              DmgBufferSize,
              FALSE
              );
   if (!Result) {
+    FreePool (Context->DmgContext);
     return NULL;
   }
 
   if (ChunklistBuffer == NULL) {
     if ((Policy & OC_LOAD_REQUIRE_APPLE_SIGN) != 0) {
-      OcAppleDiskImageFreeContext (&Context->DmgContext);
+      OcAppleDiskImageFreeContext (Context->DmgContext);
+      FreePool (Context->DmgContext);
       return NULL;
     }
   } else if ((Policy & (OC_LOAD_VERIFY_APPLE_SIGN | OC_LOAD_REQUIRE_TRUSTED_KEY)) != 0) {
@@ -714,7 +721,8 @@ InternalGetDiskImageBootFile (
                 ChunklistBufferSize
                 );
     if (!Result) {
-      OcAppleDiskImageFreeContext (&Context->DmgContext);
+      OcAppleDiskImageFreeContext (Context->DmgContext);
+      FreePool (Context->DmgContext);
       return NULL;
     }
 
@@ -738,13 +746,14 @@ InternalGetDiskImageBootFile (
       }
 
       if (!Result) {
-        OcAppleDiskImageFreeContext (&Context->DmgContext);
+        OcAppleDiskImageFreeContext (Context->DmgContext);
+        FreePool (Context->DmgContext);
         return NULL;
       }
     }
 
     Result = OcAppleDiskImageVerifyData (
-               &Context->DmgContext,
+               Context->DmgContext,
                &ChunklistContext
                );
     if (!Result) {
@@ -752,18 +761,20 @@ InternalGetDiskImageBootFile (
       // FIXME: Warn user instead of aborting when OC_LOAD_REQUIRE_TRUSTED_KEY
       //        is not set.
       //
-      OcAppleDiskImageFreeContext (&Context->DmgContext);
+      OcAppleDiskImageFreeContext (Context->DmgContext);
+      FreePool (Context->DmgContext);
       return NULL;
     }
   }
 
   Context->BlockIoHandle = OcAppleDiskImageInstallBlockIo (
-                             &Context->DmgContext,
+                             Context->DmgContext,
                              &DmgDevicePath,
                              &DmgDevicePathSize
                              );
   if (Context->BlockIoHandle == NULL) {
-    OcAppleDiskImageFreeContext (&Context->DmgContext);
+    OcAppleDiskImageFreeContext (Context->DmgContext);
+    FreePool (Context->DmgContext);
     return NULL;
   }
 
@@ -777,10 +788,11 @@ InternalGetDiskImageBootFile (
   }
 
   OcAppleDiskImageUninstallBlockIo (
-    &Context->DmgContext,
+    Context->DmgContext,
     Context->BlockIoHandle
     );
-  OcAppleDiskImageFreeContext (&Context->DmgContext);
+  OcAppleDiskImageFreeContext (Context->DmgContext);
+  FreePool (Context->DmgContext);
 
   return NULL;
 }
@@ -1166,10 +1178,11 @@ InternalUnloadDmg (
 {
   FreePool (DmgLoadContext->DevicePath);
   OcAppleDiskImageUninstallBlockIo (
-    &DmgLoadContext->DmgContext,
+    DmgLoadContext->DmgContext,
     DmgLoadContext->BlockIoHandle
     );
-  OcAppleDiskImageFreeContextAndBuffer (&DmgLoadContext->DmgContext);
+  OcAppleDiskImageFreeContextAndBuffer (DmgLoadContext->DmgContext);
+  FreePool (DmgLoadContext->DmgContext);
 }
 
 EFI_STATUS
@@ -1378,6 +1391,7 @@ OcLoadBootEntry (
       return EFI_SECURITY_VIOLATION;
     }
 
+    ZeroMem (&DmgLoadContext, sizeof (DmgLoadContext));
     DmgLoadContext.DevicePath = BootEntry->DevicePath;
     DevicePath = InternalLoadDmg (
                    &DmgLoadContext,

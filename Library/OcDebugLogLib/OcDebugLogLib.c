@@ -75,7 +75,7 @@ DebugPrint (
   if (mOcLog != NULL) {
     mOcLog->AddEntry (mOcLog, ErrorLevel, Format, Marker);
   } else if ((ErrorLevel & GetDebugPrintErrorLevel ()) != 0) {
-    UnicodeVSPrintAsciiFormat (Buffer, sizeof (Buffer),  Format, Marker);
+    UnicodeVSPrintAsciiFormat (Buffer, sizeof (Buffer), Format, Marker);
     gST->ConOut->OutputString (gST->ConOut, Buffer);
   }
 
