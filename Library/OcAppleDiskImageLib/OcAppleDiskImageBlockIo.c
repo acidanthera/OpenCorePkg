@@ -199,7 +199,7 @@ InternalConstructDmgDevicePath (
   DevPath->MemMap.Header.SubType  = HW_MEMMAP_DP;
   DevPath->MemMap.MemoryType      = EfiACPIMemoryNVS;
   DevPath->MemMap.StartingAddress = RamDmgAddress;
-  DevPath->MemMap.EndingAddress   = (RamDmgAddress + sizeof (RAM_DMG_HEADER));
+  DevPath->MemMap.EndingAddress   = (RamDmgAddress + sizeof (RAM_DMG_HEADER) - 1);
   SetDevicePathNodeLength (&DevPath->MemMap, sizeof (DevPath->MemMap));
 
   DevPath->FilePath.Header.Type    = MEDIA_DEVICE_PATH;
