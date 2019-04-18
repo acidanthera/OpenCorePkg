@@ -21,6 +21,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleBootPolicyLib.h>
+#include <Library/OcConsoleLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -143,7 +144,11 @@ OcMiscLateInit (
   OUT EFI_HANDLE                *LoadHandle OPTIONAL
   )
 {
-  EFI_STATUS  Status;
+  EFI_STATUS   Status;
+  UINT32       Width;
+  UINT32       Height;
+  UINT32       Bpp;
+  BOOLEAN      SetMax;
 
   if (Config->Misc.Debug.ExposeBootPath) {
     OcStoreLoadPath (LoadPath);
@@ -170,6 +175,25 @@ OcMiscLateInit (
         );
       DEBUG ((DEBUG_INFO, "OC: LoadHandle is %p - %r\n", *LoadHandle, Status));
     }
+  }
+
+  ParseScreenResolution (
+    OC_BLOB_GET (&Config->Misc.Boot.Resolution),
+    &Width,
+    &Height,
+    &Bpp,
+    &SetMax
+    );
+
+  if (SetMax || (Width > 0 && Height > 0)) {
+    Status = SetConsoleResolution (Width, Height, Bpp);
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: Changed resolution to %u:%u@%u (max: %d)\n",
+      Width,
+      Height,
+      Bpp
+      ));
   }
 
   return Status;

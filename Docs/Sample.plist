@@ -357,6 +357,8 @@
 			<true/>
 			<key>ReinstallProtocol</key>
 			<true/>
+			<key>Resolution</key>
+			<string></string>
 			<key>ShowPicker</key>
 			<true/>
 			<key>Timeout</key>

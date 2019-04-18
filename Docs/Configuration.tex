@@ -1222,6 +1222,20 @@ behaviour that does not go to any other sections
   version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
 
 \item
+  \texttt{Resolution}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Default value}: Empty string\\
+  \textbf{Description}: Sets console output screen resolution as specified
+  with the \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) or
+  \texttt{WxH} (e.g. \texttt{1920x1080}) formatted string. Set to empty string
+  not to change screen resolution. Set to \texttt{Max} to try to use largest
+  available screen resolution.
+
+  \emph{Note}: This will fail when console handle has no GOP protocol. When
+  the firmware does not provide it, it can be added with \texttt{ProvideConsoleGop}
+  UEFI quirk set to \texttt{true}.
+
+\item
   \texttt{ShowPicker}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
