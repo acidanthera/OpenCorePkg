@@ -347,6 +347,8 @@
 	<dict>
 		<key>Boot</key>
 		<dict>
+			<key>HideSelf</key>
+			<true/>
 			<key>ReinstallProtocol</key>
 			<true/>
 			<key>ShowPicker</key>
