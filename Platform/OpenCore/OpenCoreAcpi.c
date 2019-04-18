@@ -99,7 +99,8 @@ OcAcpiBlockTables (
       Context,
       Signature,
       Table->TableLength,
-      OemTableId
+      OemTableId,
+      Table->All
       );
 
     if (EFI_ERROR (Status)) {
