@@ -14,6 +14,7 @@
 
 #include <Protocol/BlockIo.h>
 #include <Protocol/AppleRamDisk.h>
+#include <Protocol/AppleDiskImage.h>
 
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
@@ -25,10 +26,6 @@
 #include <Library/UefiBootServicesTableLib.h>
 
 #include "OcAppleDiskImageLibInternal.h"
-
-#define DMG_SIZE_DP_GUID         \
-  { 0x004B07E8, 0x0B9C, 0x427E,  \
-    { 0xB0, 0xD4, 0xA4, 0x66, 0xE6, 0xE5, 0x7A, 0x62 } }
 
 #define DMG_FILE_PATH_LEN  (L_STR_LEN (L"DMG_.dmg") + 16 + 1)
 
@@ -81,8 +78,6 @@ typedef struct {
   OC_APPLE_DISK_IMAGE_CONTEXT *ImageContext;
   APPLE_RAM_DISK_EXTENT_TABLE *RamDmgHeader;
 } OC_APPLE_DISK_IMAGE_MOUNTED_DATA;
-
-STATIC CONST EFI_GUID mDmgSizeDpGuid       = DMG_SIZE_DP_GUID;
 
 STATIC
 EFI_STATUS
@@ -218,7 +213,7 @@ InternalConstructDmgDevicePath (
   SetDevicePathNodeLength (&DevPath->Size, sizeof (DevPath->Size));
   CopyMem (
     &DevPath->Size.Vendor.Guid,
-    &mDmgSizeDpGuid,
+    &gAppleDiskImageProtocolGuid,
     sizeof (DevPath->Size.Vendor.Guid)
     );
 
