@@ -341,6 +341,13 @@ OcMain (
 
   DEBUG ((DEBUG_INFO, "OC: OpenCore is loaded, showing boot menu...\n"));
 
+  //
+  // Do not hide self entry unless asked.
+  //
+  if (!mOpenCoreConfiguration.Misc.Boot.HideSelf) {
+    LoadHandle = NULL;
+  }
+
   Status = OcRunSimpleBootPicker (
     OC_SCAN_DEFAULT_POLICY,
     OC_LOAD_DEFAULT_POLICY,

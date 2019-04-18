@@ -1200,6 +1200,14 @@ behaviour that does not go to any other sections
 \begin{enumerate}
 
 \item
+  \texttt{HideSelf}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Hides own boot entry from boot picker. This
+  may potentially hide other entries, for instance, when another UEFI OS is
+  installed on the same volume and driver boot is used.
+
+\item
   \texttt{ReinstallProtocol}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
@@ -2386,14 +2394,14 @@ tweaks for the onboard firmware.
 \item
   \textbf{What is the simplest way to install macOS?}
 
-  Copy online recovery image (\texttt{BaseSystem.dmg} and
-  \texttt{BaseSystem.chunklist} files) to \texttt{com.apple.recovery.boot} directory
-  on a FAT32 partition with OpenCore. Load OpenCore Boot Picker and choose the entry,
-  it will have a \texttt{(dmg)} suffix. Custom name may be created by providing
-  \texttt{.contentDetails} file.
+  Copy online recovery image (\texttt{*.dmg} and \texttt{*.chunklist} files)
+  to \texttt{com.apple.recovery.boot} directory on a FAT32 partition with OpenCore.
+  Load OpenCore Boot Picker and choose the entry, it will have a \texttt{(dmg)} suffix.
+  Custom name may be created by providing \texttt{.contentDetails} file.
 
-  FIXME: dmg boot is not yet accessible and recovery download script is
-  not open-sourced.
+  To download recovery online you may use
+  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/Recovery}{Recovery} 
+  tool from \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}.
 
 \end{enumerate}
 
