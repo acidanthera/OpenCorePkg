@@ -33,6 +33,7 @@
 /// ACPI table blocks.
 ///
 #define OC_ACPI_BLOCK_ENTRY_FIELDS(_, __) \
+  _(BOOLEAN                     , All              ,     , FALSE   , () ) \
   _(BOOLEAN                     , Enabled          ,     , FALSE   , () ) \
   _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(UINT8                       , OemTableId       , [8] , {0}     , () ) \

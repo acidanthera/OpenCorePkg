@@ -707,7 +707,8 @@ AcpiDropTable (
   IN OUT OC_ACPI_CONTEXT  *Context,
   IN     UINT32           Signature,
   IN     UINT32           Length,
-  IN     UINT64           OemTableId
+  IN     UINT64           OemTableId,
+  IN     BOOLEAN          All
   )
 {
   UINT32  Index;
@@ -743,7 +744,10 @@ AcpiDropTable (
         (Context->NumberOfTables - Index - 1) * sizeof (Context->Tables[0])
         );
       --Context->NumberOfTables;
-      return EFI_SUCCESS;
+
+      if (!All) {
+        return EFI_SUCCESS;
+      }
     }
   }
 

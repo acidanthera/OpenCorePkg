@@ -191,13 +191,15 @@ AcpiApplyContext (
   @param Signature   Table signature or 0.
   @param Length      Table length or 0.
   @param OemTableId  Table Id or 0.
+  @param All         Drop all tables or first matched.
 **/
 EFI_STATUS
 AcpiDropTable (
   IN OUT OC_ACPI_CONTEXT  *Context,
   IN     UINT32           Signature,
   IN     UINT32           Length,
-  IN     UINT64           OemTableId
+  IN     UINT64           OemTableId,
+  IN     BOOLEAN          All
   );
 
 /**
