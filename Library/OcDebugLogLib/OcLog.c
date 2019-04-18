@@ -194,7 +194,7 @@ OcLogAddEntry  (
           Entry->ValueSize = DataSize;
 
           UnicodeSPrint (
-            (CHAR16 *) &Entry->Key[0],
+            (CHAR16 *) &Entry->Data[0],
             Entry->KeySize,
             L"%s%05u",
             OC_LOG_VARIABLE_NAME,
@@ -202,13 +202,13 @@ OcLogAddEntry  (
             );
 
           CopyMem (
-            &Entry->Key[Entry->KeySize],
+            &Entry->Data[Entry->KeySize],
             Private->TimingTxt,
             TimingLength
             );
 
           CopyMem (
-            &Entry->Key[Entry->KeySize + TimingLength],
+            &Entry->Data[Entry->KeySize + TimingLength],
             Private->LineBuffer,
             LineLength + 1
             );

@@ -210,8 +210,8 @@ SetDataHubEntry (
   Entry->KeySize   = KeySize;
   Entry->ValueSize = DataSize;
 
-  CopyMem (&Entry->Key[0], Key, KeySize);
-  CopyMem (&Entry->Key[Entry->KeySize], Data, DataSize);
+  CopyMem (&Entry->Data[0], Key, KeySize);
+  CopyMem (&Entry->Data[Entry->KeySize], Data, DataSize);
 
   Status = DataHub->LogData (
     DataHub,
