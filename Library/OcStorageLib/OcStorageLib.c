@@ -163,6 +163,7 @@ OcStorageInitFromFs (
 
   Status = FileSystem->OpenVolume (FileSystem, &RootVolume);
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCS: FileSystem volume cannot be opened - %r\n", Status));
     return Status;
   }
 
@@ -176,50 +177,58 @@ OcStorageInitFromFs (
 
   RootVolume->Close (RootVolume);
 
-  if (!EFI_ERROR (Status)) {
-    if (StorageKey) {
-      Signature = OcStorageReadFileUnicode (
-        Context,
-        OC_STORAGE_VAULT_SIGNATURE_PATH,
-        &DataSize
-        );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCS: Directory %s cannot be opened - %r\n", Path, Status));
+    return Status;
+  }
 
-      if (Signature == NULL) {
-        DEBUG ((DEBUG_ERROR, "OCS: Missing vault signature\n"));
-        OcStorageFree (Context);
-        return EFI_SECURITY_VIOLATION;
-      }
-
-      if (DataSize != CONFIG_RSA_KEY_SIZE) {
-        DEBUG ((
-          DEBUG_ERROR,
-          "OCS: Vault signature size mismatch: %u vs %u\n",
-          DataSize,
-          CONFIG_RSA_KEY_SIZE
-          ));
-        FreePool (Signature);
-        OcStorageFree (Context);
-        return EFI_SECURITY_VIOLATION;
-      }
-    } else {
-      Signature = NULL;
-    }
-
-    Vault = OcStorageReadFileUnicode (
+  if (StorageKey) {
+    Signature = OcStorageReadFileUnicode (
       Context,
-      OC_STORAGE_VAULT_PATH,
+      OC_STORAGE_VAULT_SIGNATURE_PATH,
       &DataSize
       );
 
-    Status = OcStorageInitializeVault (Context, Vault, DataSize, StorageKey, Signature);
+    if (Signature == NULL) {
+      DEBUG ((DEBUG_ERROR, "OCS: Missing vault signature\n"));
+      OcStorageFree (Context);
+      return EFI_SECURITY_VIOLATION;
+    }
 
-    if (Signature != NULL) {
+    if (DataSize != CONFIG_RSA_KEY_SIZE) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "OCS: Vault signature size mismatch: %u vs %u\n",
+        DataSize,
+        CONFIG_RSA_KEY_SIZE
+        ));
       FreePool (Signature);
+      OcStorageFree (Context);
+      return EFI_SECURITY_VIOLATION;
     }
+  } else {
+    Signature = NULL;
+  }
 
-    if (Vault != NULL) {
-      FreePool (Vault);
-    }
+  DataSize = 0;
+  Vault = OcStorageReadFileUnicode (
+    Context,
+    OC_STORAGE_VAULT_PATH,
+    &DataSize
+    );
+
+  Status = OcStorageInitializeVault (Context, Vault, DataSize, StorageKey, Signature);
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCS: Vault init failure %p (%u) - %r\n", Vault, DataSize, Status));
+  }
+
+  if (Signature != NULL) {
+    FreePool (Signature);
+  }
+
+  if (Vault != NULL) {
+    FreePool (Vault);
   }
 
   return Status;

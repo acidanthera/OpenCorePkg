@@ -20,6 +20,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
@@ -31,13 +32,25 @@ LocateFileSystem (
 {
   EFI_STATUS                       Status;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  CHAR16                           *UnicodeFilePath;
+
+  DEBUG_CODE_BEGIN();
+  DEBUG ((DEBUG_INFO, "OCF: Trying to locate filesystem on %p %p\n", DeviceHandle, FilePath));
+  if (FilePath != NULL) {
+    UnicodeFilePath = DevicePathToText (FilePath, FALSE, FALSE);
+    if (UnicodeFilePath != NULL) {
+      DEBUG ((DEBUG_INFO, "OCF: Filesystem DP is %s\n", UnicodeFilePath));
+      FreePool (UnicodeFilePath);
+    }
+  }
+  DEBUG_CODE_END();
 
   if (DeviceHandle == NULL) {
     //
     // Locate DeviceHandle if we have none (idea by dmazar).
     //
     if (FilePath == NULL) {
-      DEBUG ((DEBUG_WARN, "No device handle or path to proceed\n"));
+      DEBUG ((DEBUG_WARN, "OCF: No device handle or path to proceed\n"));
       return NULL;
     }
 
@@ -48,7 +61,7 @@ LocateFileSystem (
       );
 
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "Failed to locate device handle over path - %r\n", Status));
+      DEBUG ((DEBUG_WARN, "OCF: Failed to locate device handle over path - %r\n", Status));
       return NULL;
     }
   }
@@ -60,6 +73,7 @@ LocateFileSystem (
     );
 
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCF: No filesystem on device handle %p\n", DeviceHandle));
     return NULL;
   }
 
