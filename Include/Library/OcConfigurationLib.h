@@ -194,6 +194,7 @@
 **/
 
 #define OC_MISC_BOOT_FIELDS(_, __) \
+  _(BOOLEAN                     , HideSelf                    ,     , FALSE        , ()) \
   _(BOOLEAN                     , ReinstallProtocol           ,     , FALSE        , ()) \
   _(BOOLEAN                     , ShowPicker                  ,     , FALSE        , ()) \
   _(UINT32                      , Timeout                     ,     , 0            , ())
