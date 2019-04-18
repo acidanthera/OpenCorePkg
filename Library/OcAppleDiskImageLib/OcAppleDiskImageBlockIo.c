@@ -13,6 +13,7 @@
 #include <Uefi.h>
 
 #include <Protocol/BlockIo.h>
+#include <Protocol/AppleRamDisk.h>
 
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
@@ -24,10 +25,6 @@
 #include <Library/UefiBootServicesTableLib.h>
 
 #include "OcAppleDiskImageLibInternal.h"
-
-#define DMG_CONTROLLER_DP_GUID   \
-  { 0x957932CC, 0x7E8E, 0x433B,  \
-    { 0x8F, 0x41, 0xD3, 0x91, 0xEA, 0x3C, 0x10, 0xF8 } }
 
 #define DMG_SIZE_DP_GUID         \
   { 0x004B07E8, 0x0B9C, 0x427E,  \
@@ -56,8 +53,7 @@ typedef PACKED struct {
 } DMG_FILEPATH_DEVICE_PATH;
 
 typedef PACKED struct {
-  DMG_CONTROLLER_DEVICE_PATH Controller;
-  MEMMAP_DEVICE_PATH         MemMap;
+  APPLE_RAM_DISK_DP          RamDisk;
   DMG_FILEPATH_DEVICE_PATH   FilePath;
   DMG_SIZE_DEVICE_PATH       Size;
   EFI_DEVICE_PATH_PROTOCOL   End;
@@ -83,10 +79,9 @@ typedef struct {
   DMG_DEVICE_PATH             DevicePath;
 
   OC_APPLE_DISK_IMAGE_CONTEXT *ImageContext;
-  RAM_DMG_HEADER              *RamDmgHeader;
+  APPLE_RAM_DISK_EXTENT_TABLE *RamDmgHeader;
 } OC_APPLE_DISK_IMAGE_MOUNTED_DATA;
 
-STATIC CONST EFI_GUID mDmgControllerDpGuid = DMG_CONTROLLER_DP_GUID;
 STATIC CONST EFI_GUID mDmgSizeDpGuid       = DMG_SIZE_DP_GUID;
 
 STATIC
@@ -170,6 +165,8 @@ DiskImageBlockIoFlushBlocks (
   return EFI_SUCCESS;
 }
 
+STATIC UINT32 mDmgCounter; ///< FIXME: This should exist on a protocol basis!
+
 STATIC
 VOID
 InternalConstructDmgDevicePath (
@@ -185,27 +182,25 @@ InternalConstructDmgDevicePath (
   DmgSize = DiskImageData->ImageContext->Length;
   DevPath = &DiskImageData->DevicePath;
 
-  DevPath->Controller.Vendor.Header.Type    = HARDWARE_DEVICE_PATH;
-  DevPath->Controller.Vendor.Header.SubType = HW_VENDOR_DP;
-  DevPath->Controller.Key                   = 0;
-  SetDevicePathNodeLength (&DevPath->Controller, sizeof (DevPath->Controller));
+  DevPath->RamDisk.Vendor.Header.Type    = HARDWARE_DEVICE_PATH;
+  DevPath->RamDisk.Vendor.Header.SubType = HW_VENDOR_DP;
   CopyMem (
-    &DevPath->Controller.Vendor.Guid,
-    &mDmgControllerDpGuid,
-    sizeof (DevPath->Controller.Vendor.Guid)
+    &DevPath->RamDisk.Vendor.Guid,
+    &gAppleRamDiskProtocolGuid,
+    sizeof (DevPath->RamDisk.Vendor.Guid)
+    );
+  DevPath->RamDisk.Counter               = mDmgCounter++;
+  SetDevicePathNodeLength (
+    &DevPath->RamDisk.Vendor,
+    sizeof (DevPath->RamDisk.Vendor) + sizeof (DevPath->RamDisk.Counter)
     );
 
-  DevPath->MemMap.Header.Type     = HARDWARE_DEVICE_PATH;
-  DevPath->MemMap.Header.SubType  = HW_MEMMAP_DP;
-  DevPath->MemMap.MemoryType      = EfiACPIMemoryNVS;
-  DevPath->MemMap.StartingAddress = RamDmgAddress;
-  //
-  // EndingAddress, per UEFI specification and edk2 implementation, is supposed
-  // to be the top usable address, not the top of the buffer.
-  // However, Apple uses latter for DMG Device Paths.
-  //
-  DevPath->MemMap.EndingAddress   = (RamDmgAddress + sizeof (RAM_DMG_HEADER));
-  SetDevicePathNodeLength (&DevPath->MemMap, sizeof (DevPath->MemMap));
+  DevPath->RamDisk.MemMap.Header.Type     = HARDWARE_DEVICE_PATH;
+  DevPath->RamDisk.MemMap.Header.SubType  = HW_MEMMAP_DP;
+  DevPath->RamDisk.MemMap.MemoryType      = EfiACPIMemoryNVS;
+  DevPath->RamDisk.MemMap.StartingAddress = RamDmgAddress;
+  DevPath->RamDisk.MemMap.EndingAddress   = RamDmgAddress + sizeof (APPLE_RAM_DISK_EXTENT);
+  SetDevicePathNodeLength (&DevPath->RamDisk.MemMap, sizeof (DevPath->RamDisk.MemMap));
 
   DevPath->FilePath.Header.Type    = MEDIA_DEVICE_PATH;
   DevPath->FilePath.Header.SubType = MEDIA_FILEPATH_DP;
@@ -256,7 +251,7 @@ OcAppleDiskImageInstallBlockIo (
   OC_APPLE_DISK_IMAGE_MOUNTED_DATA *DiskImageData;
   UINTN                            NumRamDmgPages;
   EFI_PHYSICAL_ADDRESS             RamDmgAddress;
-  RAM_DMG_HEADER                   *RamDmgHeader;
+  APPLE_RAM_DISK_EXTENT_TABLE      *RamDmgHeader;
 
   ASSERT (Context != NULL);
 
@@ -271,20 +266,20 @@ OcAppleDiskImageInstallBlockIo (
     return NULL;
   }
 
-  RamDmgHeader = (RAM_DMG_HEADER *)(UINTN)RamDmgAddress;
+  RamDmgHeader = (APPLE_RAM_DISK_EXTENT_TABLE *)(UINTN)RamDmgAddress;
   ZeroMem (RamDmgHeader, sizeof (*RamDmgHeader));
 
-  RamDmgHeader->Signature            = RAM_DMG_SIGNATURE;
-  RamDmgHeader->Signature2           = RAM_DMG_SIGNATURE;
-  RamDmgHeader->Version              = RAM_DMG_VERSION;
+  RamDmgHeader->Signature            = APPLE_RAM_DISK_EXTENT_SIGNATURE;
+  RamDmgHeader->Signature2           = APPLE_RAM_DISK_EXTENT_SIGNATURE;
+  RamDmgHeader->Version              = APPLE_RAM_DISK_EXTENT_VERSION;
   RamDmgHeader->ExtentCount          = 1;
-  RamDmgHeader->ExtentInfo[0].Start  = (UINT64)(UINTN)Context->Buffer;
-  RamDmgHeader->ExtentInfo[0].Length = Context->Length;
+  RamDmgHeader->Extents[0].Start     = Context->Buffer;
+  RamDmgHeader->Extents[0].Length    = Context->Length;
   DEBUG ((
-    DEBUG_INFO,
-    "DMG extent @ 0x%lx, length 0x%lx\n",
-    RamDmgHeader->ExtentInfo[0].Start,
-    RamDmgHeader->ExtentInfo[0].Length
+    DEBUG_VERBOSE,
+    "DMG extent @ %p, length 0x%lx\n",
+    RamDmgHeader->Extents[0].Start,
+    RamDmgHeader->Extents[0].Length
     ));
 
   DiskImageData = AllocateZeroPool (sizeof (*DiskImageData));

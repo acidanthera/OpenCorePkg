@@ -39,6 +39,7 @@
 [Protocols]
     gEfiDevicePathProtocolGuid  # PRODUCES
     gEfiBlockIoProtocolGuid     # PRODUCES
+    gAppleRamDiskProtocolGuid   # CONSUMES
 
 [Sources]
     OcAppleDiskImageBlockIo.c
