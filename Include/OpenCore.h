@@ -128,4 +128,36 @@ OcLoadUefiSupport (
   IN OC_CPU_INFO         *CpuInfo
   );
 
+/**
+  Load early miscellaneous support like configuration.
+
+  @param[in]  Storage   OpenCore storage.
+  @param[out] Config    OpenCore configuration.
+  @param[in]  VaultKey  Vault key.
+
+  @retval EFI_SUCCESS when allowed to continue.
+**/
+EFI_STATUS
+OcMiscEarlyInit (
+  IN  OC_STORAGE_CONTEXT *Storage,
+  OUT OC_GLOBAL_CONFIG   *Config,
+  IN  RSA_PUBLIC_KEY     *VaultKey  OPTIONAL
+  );
+
+/**
+  Load late miscellaneous support like boot screen config.
+
+  @param[in]  Config     OpenCore configuration.
+  @param[in]  LoadPath   OpenCore loading path.
+  @param[out] LoadHandle OpenCore loading handle.
+
+  @retval EFI_SUCCESS on success, informational.
+**/
+EFI_STATUS
+OcMiscLateInit (
+  IN  OC_GLOBAL_CONFIG          *Config,
+  IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath  OPTIONAL,
+  OUT EFI_HANDLE                *LoadHandle OPTIONAL
+  );
+
 #endif // OPEN_CORE_H

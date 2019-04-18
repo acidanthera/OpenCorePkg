@@ -174,116 +174,6 @@ OcStartImage (
 
 STATIC
 VOID
-OcStoreLoadPath (
-  IN EFI_DEVICE_PATH_PROTOCOL  *LoadPath OPTIONAL
-  )
-{
-  EFI_STATUS  Status;
-  CHAR16      *DevicePath;
-  CHAR8       OutPath[256];
-
-  if (LoadPath != NULL) {
-    DevicePath = ConvertDevicePathToText (LoadPath, FALSE, FALSE);
-    if (DevicePath != NULL) {
-      AsciiSPrint (OutPath, sizeof (OutPath), "%s", DevicePath);
-      FreePool (DevicePath);
-    } else {
-      LoadPath = NULL;
-    }
-  }
-
-  if (LoadPath == NULL) {
-    AsciiSPrint (OutPath, sizeof (OutPath), "Unknown");
-  }
-
-  Status = gRT->SetVariable (
-    OC_LOG_VARIABLE_PATH,
-    &gOcLogVariableGuid,
-    OPEN_CORE_NVRAM_ATTR,
-    AsciiStrSize (OutPath),
-    OutPath
-    );
-
-  DEBUG ((
-    EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-    "OC: Setting NVRAM %g:%a = %a - %r\n",
-    &gOcLogVariableGuid,
-    OC_LOG_VARIABLE_PATH,
-    OutPath,
-    Status
-    ));
-}
-
-STATIC
-EFI_STATUS
-OcMiscEarlyInit (
-  IN OC_STORAGE_CONTEXT        *Storage,
-  IN OC_GLOBAL_CONFIG          *Configuration
-  )
-{
-  EFI_STATUS                Status;
-  CHAR8                     *Config;
-  UINT32                    ConfigSize;
-
-  Config = OcStorageReadFileUnicode (
-    Storage,
-    OPEN_CORE_CONFIG_PATH,
-    &ConfigSize
-    );
-
-  if (Config != NULL) {
-    DEBUG ((DEBUG_INFO, "OC: Loaded configuration of %u bytes\n", ConfigSize));
-
-    Status = OcConfigurationInit (Configuration, Config, ConfigSize);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OC: Failed to parse configuration!\n"));
-      CpuDeadLoop ();
-      return EFI_UNSUPPORTED; ///< Should be unreachable.
-    }
-
-    FreePool (Config);
-  } else {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to load configuration!\n"));
-    CpuDeadLoop ();
-    return EFI_UNSUPPORTED; ///< Should be unreachable.
-  }
-
-  //
-  // Sanity check that the configuration is adequate.
-  //
-  if (!Storage->HasVault && Configuration->Misc.Security.RequireVault) {
-    DEBUG ((DEBUG_ERROR, "OC: Configuration requires vault but no vault provided!\n"));
-    CpuDeadLoop ();
-    return EFI_SECURITY_VIOLATION; ///< Should be unreachable.
-  }
-
-  if (mOpenCoreVaultKey == NULL && Configuration->Misc.Security.RequireSignature) {
-    DEBUG ((DEBUG_ERROR, "OC: Configuration requires signed vault but no public key provided!\n"));
-    CpuDeadLoop ();
-    return EFI_SECURITY_VIOLATION; ///< Should be unreachable.
-  }
-
-  OcConfigureLogProtocol (
-    Configuration->Misc.Debug.Target,
-    Configuration->Misc.Debug.Delay,
-    (UINTN) Configuration->Misc.Debug.DisplayLevel,
-    (UINTN) Configuration->Misc.Security.HaltLevel
-    );
-
-  DEBUG ((
-    DEBUG_INFO,
-    "OC: OpenCore is now loading (Vault: %d/%d, Sign %d/%d)...\n",
-    Storage->HasVault,
-    Configuration->Misc.Security.RequireVault,
-    mOpenCoreVaultKey != NULL,
-    Configuration->Misc.Security.RequireSignature
-    ));
-
-  return EFI_SUCCESS;
-}
-
-STATIC
-VOID
 OcMain (
   IN OC_STORAGE_CONTEXT        *Storage,
   IN EFI_DEVICE_PATH_PROTOCOL  *LoadPath OPTIONAL
@@ -294,7 +184,13 @@ OcMain (
   OC_CPU_INFO               CpuInfo;
   EFI_HANDLE                LoadHandle;
 
-  Status = OcMiscEarlyInit (Storage, &mOpenCoreConfiguration);
+  DEBUG ((DEBUG_INFO, "OC: OcMiscEarlyInit...\n"));
+  Status = OcMiscEarlyInit (
+    Storage,
+    &mOpenCoreConfiguration,
+    mOpenCoreVaultKey
+    );
+
   if (EFI_ERROR (Status)) {
     return;
   }
@@ -309,26 +205,8 @@ OcMain (
   OcLoadDevPropsSupport (&mOpenCoreConfiguration);
   DEBUG ((DEBUG_INFO, "OC: OcLoadNvramSupport...\n"));
   OcLoadNvramSupport (&mOpenCoreConfiguration);
-
-  if (mOpenCoreConfiguration.Misc.Debug.ExposeBootPath) {
-    OcStoreLoadPath (LoadPath);
-  }
-
-  if (mOpenCoreConfiguration.Misc.Boot.ReinstallProtocol) {
-    if (OcAppleBootPolicyInstallProtocol (TRUE) == NULL) {
-      DEBUG ((DEBUG_ERROR, "OC: Failed to reinstall boot policy protocol\n"));
-    }
-  }
-
-  LoadHandle = NULL;
-  if (LoadPath != NULL) {
-    Status = gBS->LocateDevicePath (
-      &gEfiSimpleFileSystemProtocolGuid,
-      &LoadPath,
-      &LoadHandle
-      );
-    DEBUG ((DEBUG_INFO, "OC: LoadHandle is %p - %r\n", LoadHandle, Status));
-  }
+  DEBUG ((DEBUG_INFO, "OC: OcMiscLateInit...\n"));
+  OcMiscLateInit (&mOpenCoreConfiguration, LoadPath, &LoadHandle);
 
   //
   // This is required to catch UEFI Shell boot if any.
@@ -340,13 +218,6 @@ OcMain (
   gBS->CalculateCrc32 (gBS, gBS->Hdr.HeaderSize, &gBS->Hdr.CRC32);
 
   DEBUG ((DEBUG_INFO, "OC: OpenCore is loaded, showing boot menu...\n"));
-
-  //
-  // Do not hide self entry unless asked.
-  //
-  if (!mOpenCoreConfiguration.Misc.Boot.HideSelf) {
-    LoadHandle = NULL;
-  }
 
   Status = OcRunSimpleBootPicker (
     OC_SCAN_DEFAULT_POLICY,
