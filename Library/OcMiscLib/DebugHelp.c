@@ -129,7 +129,9 @@ WaitForKeyIndex (
   // Using loop to allow OC_INPUT_STR changes.
   //
   for (Index = 0; Index < OC_INPUT_MAX; ++Index) {
-    if (OC_INPUT_STR[Index] == Key.UnicodeChar) {
+    if (OC_INPUT_STR[Index] == Key.UnicodeChar
+      || (OC_INPUT_STR[Index] >= 'A' && OC_INPUT_STR[Index] <= 'Z'
+        && (OC_INPUT_STR[Index] | 0x20U) == Key.UnicodeChar))  {
       return Index;
     }
   }
