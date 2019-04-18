@@ -106,10 +106,11 @@ OcAcpiBlockTables (
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_WARN,
-        "OC: Failed to drop ACPI %08X %016LX %u - %r\n",
+        "OC: Failed to drop ACPI %08X %016LX %u (%d) - %r\n",
         Signature,
         OemTableId,
         Table->TableLength,
+        Table->All,
         Status
         ));
     }
