@@ -169,8 +169,9 @@ InternalConstructDmgDevicePath (
   IN     EFI_PHYSICAL_ADDRESS              RamDmgAddress
   )
 {
-  UINT64          DmgSize;
-  DMG_DEVICE_PATH *DevPath;
+  UINT64           DmgSize;
+  DMG_DEVICE_PATH  *DevPath;
+  CHAR16           *UnicodeDevPath;
 
   ASSERT (DiskImageData != NULL);
 
@@ -219,8 +220,16 @@ InternalConstructDmgDevicePath (
 
   SetDevicePathEndNode (&DevPath->End);
 
+  DEBUG_CODE_BEGIN ();
+  UnicodeDevPath = ConvertDevicePathToText ((EFI_DEVICE_PATH_PROTOCOL *)DevPath, FALSE, FALSE);
+  DEBUG ((DEBUG_INFO, "Built DMG DP: %s\n", UnicodeDevPath != NULL ? UnicodeDevPath : L"<NULL>"));
+  if (UnicodeDevPath != NULL) {
+    FreePool (UnicodeDevPath);
+  }
+  DEBUG_CODE_END ();
+
   ASSERT (
-    IsDevicePathValid ((EFI_DEVICE_PATH_PROTOCOL *)DevPath, sizeof (*DevPath))
+    IsDevicePathValid ((EFI_DEVICE_PATH_PROTOCOL *) DevPath, sizeof (*DevPath))
     );
 }
 

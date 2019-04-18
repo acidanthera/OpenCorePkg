@@ -34,7 +34,7 @@ LocateFileSystem (
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
   CHAR16                           *UnicodeFilePath;
 
-  DEBUG_CODE_BEGIN();
+  DEBUG_CODE_BEGIN ();
   DEBUG ((DEBUG_INFO, "OCF: Trying to locate filesystem on %p %p\n", DeviceHandle, FilePath));
   if (FilePath != NULL) {
     UnicodeFilePath = DevicePathToText (FilePath, FALSE, FALSE);
@@ -43,7 +43,7 @@ LocateFileSystem (
       FreePool (UnicodeFilePath);
     }
   }
-  DEBUG_CODE_END();
+  DEBUG_CODE_END ();
 
   if (DeviceHandle == NULL) {
     //

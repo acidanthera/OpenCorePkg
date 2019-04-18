@@ -711,10 +711,13 @@ AcpiDropTable (
   IN     BOOLEAN          All
   )
 {
-  UINT32  Index;
-  UINT64  CurrOemTableId;
+  UINT32   Index;
+  UINT64   CurrOemTableId;
+  BOOLEAN  Found;
 
-  for (Index = 0; Index < Context->NumberOfTables; ++Index) {
+  Index = 0; 
+
+  while (Index < Context->NumberOfTables) {
     if ((Signature == 0 || Context->Tables[Index]->Signature == Signature)
       && (Length == 0 || Context->Tables[Index]->Length == Length)) {
 
@@ -724,31 +727,38 @@ AcpiDropTable (
         CurrOemTableId = 0;
       }
 
-      if (OemTableId != 0 && CurrOemTableId != OemTableId) {
-        continue;
-      }
+      if (OemTableId == 0 || CurrOemTableId == OemTableId) {
+        DEBUG ((
+          DEBUG_INFO,
+          "Dropping table %08x (%016Lx) of %u bytes with %016Lx ID at index %u\n",
+          Context->Tables[Index]->Signature,
+          AcpiReadOemTableId (Context->Tables[Index]),
+          Context->Tables[Index]->Length,
+          CurrOemTableId,
+          Index
+          ));
 
-      DEBUG ((
-        DEBUG_INFO,
-        "Dropping table %08x (%016Lx) of %u bytes with %016Lx ID at index %u\n",
-        Context->Tables[Index]->Signature,
-        AcpiReadOemTableId (Context->Tables[Index]),
-        Context->Tables[Index]->Length,
-        CurrOemTableId,
-        Index
-        ));
+        CopyMem (
+          &Context->Tables[Index],
+          &Context->Tables[Index+1],
+          (Context->NumberOfTables - Index - 1) * sizeof (Context->Tables[0])
+          );
+        --Context->NumberOfTables;
 
-      CopyMem (
-        &Context->Tables[Index],
-        &Context->Tables[Index+1],
-        (Context->NumberOfTables - Index - 1) * sizeof (Context->Tables[0])
-        );
-      --Context->NumberOfTables;
-
-      if (!All) {
-        return EFI_SUCCESS;
+        if (All) {
+          Found = TRUE;
+          continue;
+        } else {
+          return EFI_SUCCESS;
+        }
       }
     }
+
+    ++Index;
+  }
+
+  if (Found) {
+    return EFI_SUCCESS;
   }
 
   return EFI_NOT_FOUND;
