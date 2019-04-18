@@ -105,14 +105,14 @@ OcLogAddEntry  (
 {
   EFI_STATUS             Status;
 
-  OC_LOG_PRIVATE_DATA    *Private;
-  UINT32                 Attributes;
-  UINT32                 TimingLength;
-  UINT32                 LineLength;
-  PLATFORM_DATA_HEADER   *Entry;
-  UINT32                 KeySize;
-  UINT32                 DataSize;
-  UINT32                 TotalSize;
+  OC_LOG_PRIVATE_DATA         *Private;
+  UINT32                      Attributes;
+  UINT32                      TimingLength;
+  UINT32                      LineLength;
+  APPLE_PLATFORM_DATA_RECORD  *Entry;
+  UINT32                      KeySize;
+  UINT32                      DataSize;
+  UINT32                      TotalSize;
 
   Private = OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog);
 
@@ -190,11 +190,11 @@ OcLogAddEntry  (
 
         if (Entry != NULL) {
           ZeroMem (Entry, sizeof (*Entry));
-          Entry->KeySize  = KeySize;
-          Entry->DataSize = DataSize;
+          Entry->KeySize   = KeySize;
+          Entry->ValueSize = DataSize;
 
           UnicodeSPrint (
-            (CHAR16 *) &Entry->Data[0],
+            (CHAR16 *) &Entry->Key[0],
             Entry->KeySize,
             L"%s%05u",
             OC_LOG_VARIABLE_NAME,
@@ -202,13 +202,13 @@ OcLogAddEntry  (
             );
 
           CopyMem (
-            &Entry->Data[Entry->KeySize],
+            &Entry->Key[Entry->KeySize],
             Private->TimingTxt,
             TimingLength
             );
 
           CopyMem (
-            &Entry->Data[Entry->KeySize + TimingLength],
+            &Entry->Key[Entry->KeySize + TimingLength],
             Private->LineBuffer,
             LineLength + 1
             );

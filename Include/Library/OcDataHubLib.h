@@ -15,6 +15,7 @@
 #ifndef OC_DATA_HUB_LIB_H
 #define OC_DATA_HUB_LIB_H
 
+#include <Guid/AppleDataHub.h>
 #include <Library/OcCpuLib.h>
 #include <Protocol/DataHub.h>
 
@@ -40,13 +41,6 @@
 #define OC_SMC_REVISION_SIZE         6U
 #define OC_SMC_BRANCH_SIZE           8U
 #define OC_SMC_PLATFORM_SIZE         8U
-
-typedef struct {
-  CHAR16 Reserved[8];
-  UINT32 KeySize;
-  UINT32 DataSize;
-  UINT8  Data[];
-} PLATFORM_DATA_HEADER;
 
 typedef struct {
   CONST CHAR8   *PlatformName;

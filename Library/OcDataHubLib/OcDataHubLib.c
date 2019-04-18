@@ -177,12 +177,12 @@ SetDataHubEntry (
   IN UINT32                 DataSize
   )
 {
-  EFI_STATUS            Status;
+  EFI_STATUS                  Status;
   
-  PLATFORM_DATA_HEADER  *Entry;
-  UINT32                KeySize;
-  UINT32                TotalSize;
-  BOOLEAN               Result;
+  APPLE_PLATFORM_DATA_RECORD  *Entry;
+  UINT32                      KeySize;
+  UINT32                      TotalSize;
+  BOOLEAN                     Result;
 
   KeySize = (UINT32) StrSize (Key);
   Result  = OcOverflowTriAddU32 (
@@ -203,11 +203,15 @@ SetDataHubEntry (
 
   Status    = EFI_OUT_OF_RESOURCES;
 
-  Entry->KeySize  = KeySize;
-  Entry->DataSize = DataSize;
+  //
+  // TODO: We may want to fill header some day.
+  // Currently it is not important.
+  //
+  Entry->KeySize   = KeySize;
+  Entry->ValueSize = DataSize;
 
-  CopyMem (&Entry->Data[0], Key, KeySize);
-  CopyMem (&Entry->Data[Entry->KeySize], Data, DataSize);
+  CopyMem (&Entry->Key[0], Key, KeySize);
+  CopyMem (&Entry->Key[Entry->KeySize], Data, DataSize);
 
   Status = DataHub->LogData (
     DataHub,
