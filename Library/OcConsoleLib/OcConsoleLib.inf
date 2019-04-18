@@ -29,6 +29,8 @@
 
 [Protocols]
   gEfiConsoleControlProtocolGuid
+  gEfiGraphicsOutputProtocolGuid
+  gEfiSimpleTextOutProtocolGuid
 
 [Sources]
   OcConsoleLib.c

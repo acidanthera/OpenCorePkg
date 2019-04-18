@@ -232,6 +232,7 @@ OC_SCHEMA
 mMiscConfigurationBootSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("HideSelf",          OC_GLOBAL_CONFIG, Misc.Boot.HideSelf),
   OC_SCHEMA_BOOLEAN_IN ("ReinstallProtocol", OC_GLOBAL_CONFIG, Misc.Boot.ReinstallProtocol),
+  OC_SCHEMA_BOOLEAN_IN ("Resolution",        OC_GLOBAL_CONFIG, Misc.Boot.Resolution),
   OC_SCHEMA_BOOLEAN_IN ("ShowPicker",        OC_GLOBAL_CONFIG, Misc.Boot.ShowPicker),
   OC_SCHEMA_INTEGER_IN ("Timeout",           OC_GLOBAL_CONFIG, Misc.Boot.Timeout)
 };
