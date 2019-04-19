@@ -389,10 +389,11 @@ SetConsoleResolution (
 
     FreePool (HandleBuffer);
 
-    Status = gST->ConOut->SetMode (gST->ConOut, 0);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "OCS: Mode set on ConOut failed after reconnect\n"));
-    }
+    //
+    // It is implementation defined, which console mode is used by ConOut.
+    // Assume the implementation chooses most sensible value based on GOP resolution.
+    // If it does not, there is a separate ConsoleMode param, which expands to SetConsoleMode.
+    //
   } else {
     DEBUG ((DEBUG_WARN, "OCS: Failed to find any text output handles\n"));
   }
