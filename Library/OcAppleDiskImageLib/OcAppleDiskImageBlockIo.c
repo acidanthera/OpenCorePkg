@@ -277,7 +277,7 @@ OcAppleDiskImageInstallBlockIo (
   RamDmgHeader->Signature2           = APPLE_RAM_DISK_EXTENT_SIGNATURE;
   RamDmgHeader->Version              = APPLE_RAM_DISK_EXTENT_VERSION;
   RamDmgHeader->ExtentCount          = 1;
-  RamDmgHeader->Extents[0].Start     = Context->Buffer;
+  RamDmgHeader->Extents[0].Start     = (UINTN)Context->Buffer;
   RamDmgHeader->Extents[0].Length    = Context->Length;
   DEBUG ((
     DEBUG_VERBOSE,
