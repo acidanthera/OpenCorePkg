@@ -187,7 +187,7 @@ OcMiscLateInit (
 
   DEBUG ((
     DEBUG_INFO,
-    "OC: Requested resolution is %u:%u@%u (max: %d) from %a\n",
+    "OC: Requested resolution is %ux%u@%u (max: %d) from %a\n",
     Width,
     Height,
     Bpp,
@@ -199,7 +199,7 @@ OcMiscLateInit (
     Status = SetConsoleResolution (Width, Height, Bpp);
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-      "OC: Changed resolution to %u:%u@%u (max: %d) from %a - %r\n",
+      "OC: Changed resolution to %ux%u@%u (max: %d) from %a - %r\n",
       Width,
       Height,
       Bpp,
@@ -218,10 +218,9 @@ OcMiscLateInit (
 
   DEBUG ((
     DEBUG_INFO,
-    "OC: Requested console mode is %u:%u@%u (max: %d) from %a\n",
+    "OC: Requested console mode is %ux%u (max: %d) from %a\n",
     Width,
     Height,
-    Bpp,
     SetMax,
     OC_BLOB_GET (&Config->Misc.Boot.ConsoleMode)
     ));
@@ -230,10 +229,9 @@ OcMiscLateInit (
     Status = SetConsoleMode (Width, Height);
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-      "OC: Changed console mode to %u:%u@%u (max: %d) from %a - %r\n",
+      "OC: Changed console mode to %ux%u (max: %d) from %a - %r\n",
       Width,
       Height,
-      Bpp,
       SetMax,
       OC_BLOB_GET (&Config->Misc.Boot.ConsoleMode),
       Status
