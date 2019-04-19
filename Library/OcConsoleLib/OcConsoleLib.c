@@ -350,8 +350,9 @@ SetConsoleResolution (
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_WARN,
-      "OCC: Failed to set mode %u with %ux%u resolution\n",
+      "OCC: Failed to set mode %u (prev %u) with %ux%u resolution\n",
       (UINT32) ModeNumber,
+      (UINT32) GraphicsOutput->Mode->Mode,
       Width,
       Height
       ));
@@ -477,8 +478,9 @@ SetConsoleMode (
   //
   DEBUG ((
     DEBUG_INFO,
-    "OCC: Setting mode %u with %ux%u console mode\n",
+    "OCC: Setting mode %u (prev %u) with %ux%u console mode\n",
     (UINT32) ModeNumber,
+    (UINT32) gST->ConOut->Mode->Mode,
     Width,
     Height
     ));
