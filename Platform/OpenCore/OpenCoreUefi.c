@@ -182,7 +182,7 @@ OcProvideConsoleGop (
   Status = gBS->HandleProtocol (gST->ConsoleOutHandle, &gEfiGraphicsOutputProtocolGuid, &Gop);
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "Missing GOP on ConsoleOutHandle - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OC: Missing GOP on ConsoleOutHandle, will install - %r\n", Status));
     Status = gBS->LocateProtocol (&gEfiGraphicsOutputProtocolGuid, NULL, &Gop);
 
     if (!EFI_ERROR (Status)) {
@@ -193,10 +193,10 @@ OcProvideConsoleGop (
         NULL
         );
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_WARN, "Failed to install GOP on ConsoleOutHandle - %r\n", Status));
+        DEBUG ((DEBUG_WARN, "OC: Failed to install GOP on ConsoleOutHandle - %r\n", Status));
       }
     } else {
-      DEBUG ((DEBUG_WARN, "Missing GOP entirely - %r\n", Status));
+      DEBUG ((DEBUG_WARN, "OC: Missing GOP entirely - %r\n", Status));
     }
   }
 }
@@ -224,7 +224,7 @@ OcReleaseUsbOwnership (
 
   Status = ReleaseUsbOwnership ();
 
-  DEBUG ((DEBUG_INFO, "ReleaseUsbOwnership status - %r\n", Status));
+  DEBUG ((DEBUG_INFO, "OC: ReleaseUsbOwnership status - %r\n", Status));
 }
 
 VOID

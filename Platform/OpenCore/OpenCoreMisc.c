@@ -185,14 +185,25 @@ OcMiscLateInit (
     &SetMax
     );
 
+  DEBUG ((
+    DEBUG_INFO,
+    "OC: Requested resolution is %u:%u@%u (max: %d)\n",
+    Width,
+    Height,
+    Bpp,
+    SetMax
+    ));
+
   if (SetMax || (Width > 0 && Height > 0)) {
     Status = SetConsoleResolution (Width, Height, Bpp);
     DEBUG ((
       DEBUG_INFO,
-      "OC: Changed resolution to %u:%u@%u (max: %d)\n",
+      "OC: Changed resolution to %u:%u@%u (max: %d) - %r\n",
       Width,
       Height,
-      Bpp
+      Bpp,
+      SetMax,
+      Status
       ));
   }
 
