@@ -353,6 +353,8 @@
 	<dict>
 		<key>Boot</key>
 		<dict>
+			<key>ConsoleMode</key>
+			<string></string>
 			<key>HideSelf</key>
 			<true/>
 			<key>ReinstallProtocol</key>

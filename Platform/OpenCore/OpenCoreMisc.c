@@ -209,5 +209,36 @@ OcMiscLateInit (
       ));
   }
 
+  ParseConsoleMode (
+    OC_BLOB_GET (&Config->Misc.Boot.ConsoleMode),
+    &Width,
+    &Height,
+    &SetMax
+    );
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OC: Requested console mode is %u:%u@%u (max: %d) from %a\n",
+    Width,
+    Height,
+    Bpp,
+    SetMax,
+    OC_BLOB_GET (&Config->Misc.Boot.ConsoleMode)
+    ));
+
+  if (SetMax || (Width > 0 && Height > 0)) {
+    Status = SetConsoleMode (Width, Height);
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Changed console mode to %u:%u@%u (max: %d) from %a - %r\n",
+      Width,
+      Height,
+      Bpp,
+      SetMax,
+      OC_BLOB_GET (&Config->Misc.Boot.ConsoleMode),
+      Status
+      ));
+  }
+
   return Status;
 }
