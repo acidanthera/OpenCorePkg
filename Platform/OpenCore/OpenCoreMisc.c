@@ -187,22 +187,24 @@ OcMiscLateInit (
 
   DEBUG ((
     DEBUG_INFO,
-    "OC: Requested resolution is %u:%u@%u (max: %d)\n",
+    "OC: Requested resolution is %u:%u@%u (max: %d) from %a\n",
     Width,
     Height,
     Bpp,
-    SetMax
+    SetMax,
+    OC_BLOB_GET (&Config->Misc.Boot.Resolution)
     ));
 
   if (SetMax || (Width > 0 && Height > 0)) {
     Status = SetConsoleResolution (Width, Height, Bpp);
     DEBUG ((
-      DEBUG_INFO,
-      "OC: Changed resolution to %u:%u@%u (max: %d) - %r\n",
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Changed resolution to %u:%u@%u (max: %d) from %a - %r\n",
       Width,
       Height,
       Bpp,
       SetMax,
+      OC_BLOB_GET (&Config->Misc.Boot.Resolution),
       Status
       ));
   }
