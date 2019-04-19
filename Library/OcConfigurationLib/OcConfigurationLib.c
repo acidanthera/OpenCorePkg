@@ -230,6 +230,7 @@ mKernelConfigurationSchema[] = {
 STATIC
 OC_SCHEMA
 mMiscConfigurationBootSchema[] = {
+  OC_SCHEMA_STRING_IN  ("ConsoleMode",       OC_GLOBAL_CONFIG, Misc.Boot.ConsoleMode),
   OC_SCHEMA_BOOLEAN_IN ("HideSelf",          OC_GLOBAL_CONFIG, Misc.Boot.HideSelf),
   OC_SCHEMA_BOOLEAN_IN ("ReinstallProtocol", OC_GLOBAL_CONFIG, Misc.Boot.ReinstallProtocol),
   OC_SCHEMA_STRING_IN  ("Resolution",        OC_GLOBAL_CONFIG, Misc.Boot.Resolution),

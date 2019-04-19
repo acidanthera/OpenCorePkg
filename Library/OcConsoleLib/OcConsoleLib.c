@@ -129,12 +129,22 @@ ConfigureConsoleControl (
   return Status;
 }
 
+/**
+  Parse resolution string.
+
+  @param[in]   String   Resolution in WxH@Bpp or WxH format.
+  @param[out]  Width    Parsed width or 0.
+  @param[out]  Height   Parsed height or 0.
+  @param[out]  Bpp      Parsed Bpp or 0, optional to force WxH format.
+  @param[out]  Max      Set to TRUE when String equals to Max.
+**/
+STATIC
 VOID
-ParseScreenResolution (
+ParseResolution (
   IN  CONST CHAR8         *String,
   OUT UINT32              *Width,
   OUT UINT32              *Height,
-  OUT UINT32              *Bpp,
+  OUT UINT32              *Bpp OPTIONAL,
   OUT BOOLEAN             *Max
   )
 {
@@ -151,7 +161,7 @@ ParseScreenResolution (
     return;
   }
 
-  if (String[0] == '\0' || *String < '0' || *String > '9') {
+  if (*String == '\0' || *String < '0' || *String > '9') {
     return;
   }
 
@@ -173,14 +183,14 @@ ParseScreenResolution (
     }
   }
 
-  if (*String != '\0' && *String != '@') {
+  if (*String != '\0' && (*String != '@' || Bpp == NULL)) {
     return;
   }
 
   *Width  = TmpWidth;
   *Height = TmpHeight;
 
-  if (*String++ != '@') {
+  if (*String == '\0' || Bpp == NULL) {
     return;
   }
 
@@ -196,6 +206,40 @@ ParseScreenResolution (
   }
 
   *Bpp = TmpWidth;
+}
+
+VOID
+ParseScreenResolution (
+  IN  CONST CHAR8         *String,
+  OUT UINT32              *Width,
+  OUT UINT32              *Height,
+  OUT UINT32              *Bpp,
+  OUT BOOLEAN             *Max
+  )
+{
+  ASSERT (String != NULL);
+  ASSERT (Width != NULL);
+  ASSERT (Height != NULL);
+  ASSERT (Bpp != NULL);
+  ASSERT (Max != NULL);
+
+  ParseResolution (String, Width, Height, Bpp, Max);
+}
+
+VOID
+ParseConsoleMode (
+  IN  CONST CHAR8         *String,
+  OUT UINT32              *Width,
+  OUT UINT32              *Height,
+  OUT BOOLEAN             *Max
+  )
+{
+  ASSERT (String != NULL);
+  ASSERT (Width != NULL);
+  ASSERT (Height != NULL);
+  ASSERT (Max != NULL);
+
+  ParseResolution (String, Width, Height, NULL, Max);
 }
 
 EFI_STATUS
@@ -219,8 +263,8 @@ SetConsoleResolution (
   BOOLEAN                               SetMax;
 
   Status = gBS->HandleProtocol (
-    &gEfiGraphicsOutputProtocolGuid,
     gST->ConsoleOutHandle,
+    &gEfiGraphicsOutputProtocolGuid,
     (VOID **) &GraphicsOutput
     );
 
@@ -229,15 +273,15 @@ SetConsoleResolution (
     return Status;
   }
 
-  SetMax       = Width == 0 && Height == 0;
-  ModeNumber   = -1;
+  SetMax = Width == 0 && Height == 0;
 
   DEBUG ((DEBUG_INFO, "OCC: Requesting %ux%u@%u (max: %d) resolution\n", Width, Height, Bpp, SetMax));
 
   //
   // Find the resolution we need.
   //
-  MaxMode = GraphicsOutput->Mode->MaxMode;
+  ModeNumber = -1;
+  MaxMode    = GraphicsOutput->Mode->MaxMode;
   for (ModeIndex = 0; ModeIndex < MaxMode; ++ModeIndex) {
     Status = GraphicsOutput->QueryMode (
       GraphicsOutput,
@@ -320,8 +364,11 @@ SetConsoleResolution (
   // new resolution.
   //
   // Vit: Needy reports that boot.efi seems to work fine without this block of code.
-  // Should we try to stay safe and have it? Or is it in fact mad design wise?
-  // Best to later check actual behaviour, firmware code, and EDK II...
+  // However, I believe that UEFI specification does not provide any standard way
+  // to inform TextOut protocol about resolution change, which means the firmware
+  // may not be aware of the change, especially when custom GOP is used.
+  // We can move this to quirks if it causes problems, but I believe the code below
+  // is legit.
   //
 
   Status = gBS->LocateHandleBuffer (
@@ -351,4 +398,101 @@ SetConsoleResolution (
   }
 
   return Status;
+}
+
+EFI_STATUS
+SetConsoleMode (
+  IN  UINT32              Width,
+  IN  UINT32              Height
+  )
+{
+  EFI_STATUS                            Status;
+
+  UINT32                                MaxMode;
+  UINT32                                ModeIndex;
+  INT64                                 ModeNumber;
+  UINTN                                 Columns;
+  UINTN                                 Rows;
+  BOOLEAN                               SetMax;
+
+  SetMax       = Width == 0 && Height == 0;
+
+  DEBUG ((DEBUG_INFO, "OCC: Requesting %ux%u (max: %d) console mode\n", Width, Height, SetMax));
+
+  //
+  // Find the resolution we need.
+  //
+  ModeNumber = -1;
+  MaxMode    = gST->ConOut->Mode->MaxMode;
+  for (ModeIndex = 0; ModeIndex < MaxMode; ++ModeIndex) {
+    Status = gST->ConOut->QueryMode (
+      gST->ConOut,
+      ModeIndex,
+      &Columns,
+      &Rows
+      );
+
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    DEBUG ((
+      DEBUG_INFO,
+      "OCC: Mode %u has %ux%u console mode\n",
+      ModeIndex,
+      (UINT32) Columns,
+      (UINT32) Rows
+      ));
+
+    if (!SetMax) {
+      //
+      // Custom mode is requested.
+      //
+      if (Columns == Width && Rows == Height) {
+        ModeNumber = ModeIndex;
+        break;
+      }
+    } else if ((UINT32) Columns > Width
+      || ((UINT32) Columns == Width && (UINT32) Rows > Height)) {
+      Width      = (UINT32) Columns;
+      Height     = (UINT32) Rows;
+      ModeNumber = ModeIndex;
+    }
+  }
+
+  if (ModeNumber < 0) {
+    DEBUG ((DEBUG_WARN, "OCC: No compatible mode for %ux%u (max: %u) console mode\n", Width, Height, SetMax));
+    return EFI_NOT_FOUND;
+  }
+
+  if (ModeNumber == gST->ConOut->Mode->Mode) {
+    DEBUG ((DEBUG_INFO, "OCC: Current console mode matches desired mode %u\n", (UINT32) ModeNumber));
+    return EFI_SUCCESS;
+  }
+
+  //
+  // Current graphics mode is not set, or is not set to the mode found above.
+  // Set the new graphics mode.
+  //
+  DEBUG ((
+    DEBUG_INFO,
+    "OCC: Setting mode %u with %ux%u console mode\n",
+    (UINT32) ModeNumber,
+    Width,
+    Height
+    ));
+
+  Status = gST->ConOut->SetMode (gST->ConOut, (UINTN) ModeNumber);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_WARN,
+      "OCC: Failed to set mode %u with %ux%u console mode\n",
+      (UINT32) ModeNumber,
+      Width,
+      Height
+      ));
+    return Status;
+  }
+
+  return EFI_SUCCESS;
 }

@@ -46,6 +46,22 @@ ParseScreenResolution (
   );
 
 /**
+  Parse console mode from string.
+
+  @param[in]   String   Resolution in WxH format.
+  @param[out]  Width    Parsed mode width or 0.
+  @param[out]  Height   Parsed mode height or 0.
+  @param[out]  Max      Set to TRUE when String equals to Max.
+**/
+VOID
+ParseConsoleMode (
+  IN  CONST CHAR8         *String,
+  OUT UINT32              *Width,
+  OUT UINT32              *Height,
+  OUT BOOLEAN             *Max
+  );
+
+/**
   Set screen resolution on console handle.
 
   @param[in]  Width     Resolution width or 0 for Max.
@@ -59,6 +75,20 @@ SetConsoleResolution (
   IN  UINT32              Width,
   IN  UINT32              Height,
   IN  UINT32              Bpp    OPTIONAL
+  );
+
+/**
+  Set console mode.
+
+  @param[in]  Width     Resolution width or 0 for Max.
+  @param[in]  Height    Resolution height or 0 for Max.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+SetConsoleMode (
+  IN  UINT32              Width,
+  IN  UINT32              Height
   );
 
 #endif // OC_CONSOLE_LIB_H

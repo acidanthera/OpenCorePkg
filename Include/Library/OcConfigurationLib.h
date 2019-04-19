@@ -197,9 +197,10 @@
 #define OC_MISC_BOOT_FIELDS(_, __) \
   _(BOOLEAN                     , HideSelf                    ,     , FALSE                       , ())                   \
   _(BOOLEAN                     , ReinstallProtocol           ,     , FALSE                       , ())                   \
-  _(OC_STRING                   , Resolution                  ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
   _(BOOLEAN                     , ShowPicker                  ,     , FALSE                       , ())                   \
-  _(UINT32                      , Timeout                     ,     , 0                           , ())
+  _(UINT32                      , Timeout                     ,     , 0                           , ())                   \
+  _(OC_STRING                   , Resolution                  ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , ConsoleMode                 ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING))
   OC_DECLARE (OC_MISC_BOOT)
 
 #define OC_MISC_DEBUG_FIELDS(_, __) \
