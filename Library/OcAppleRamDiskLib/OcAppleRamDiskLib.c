@@ -217,7 +217,7 @@ InternalAllocateRemaining (
   return Result;
 }
 
-APPLE_RAM_DISK_EXTENT_TABLE *
+CONST APPLE_RAM_DISK_EXTENT_TABLE *
 OcAppleRamDiskAllocate (
   IN UINTN            Size,
   IN EFI_MEMORY_TYPE  MemoryType
@@ -318,35 +318,36 @@ OcAppleRamDiskAllocate (
              EFI_SIZE_TO_PAGES (Size),
              MemoryType
              );
+
+  FreePool (MemoryMap);
+
   if (!Result) {
     gBS->FreePages (
            ExtentTableMemory,
            EFI_SIZE_TO_PAGES (sizeof (*ExtentTable))
            );
-    ExtentTable = NULL;
+    return NULL;
   }
-
-  FreePool (MemoryMap);
 
   return ExtentTable;
 }
 
 BOOLEAN
 OcAppleRamDiskRead (
-  IN  APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
-  IN  UINT64                       Offset,
-  IN  UINTN                        Size,
-  OUT VOID                         *Buffer
+  IN  CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
+  IN  UINT64                             Offset,
+  IN  UINTN                              Size,
+  OUT VOID                               *Buffer
   )
 {
-  UINT8                 *BufferBytes;
+  UINT8                       *BufferBytes;
 
-  UINT32                Index;
-  APPLE_RAM_DISK_EXTENT *Extent;
+  UINT32                      Index;
+  CONST APPLE_RAM_DISK_EXTENT *Extent;
 
-  UINT64                CurrentOffset;
-  UINT64                LocalOffset;
-  UINTN                 LocalSize;
+  UINT64                      CurrentOffset;
+  UINT64                      LocalOffset;
+  UINTN                       LocalSize;
 
   ASSERT (ExtentTable != NULL);
   INTERNAL_ASSERT_EXTENT_TABLE_VALID (ExtentTable);
@@ -386,20 +387,20 @@ OcAppleRamDiskRead (
 
 BOOLEAN
 OcAppleRamDiskWrite (
-  IN APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
-  IN UINT64                       Offset,
-  IN UINTN                        Size,
-  IN CONST VOID                   *Buffer
+  IN CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
+  IN UINT64                             Offset,
+  IN UINTN                              Size,
+  IN CONST VOID                         *Buffer
   )
 {
-  CONST UINT8           *BufferBytes;
+  CONST UINT8                 *BufferBytes;
 
-  UINT32                Index;
-  APPLE_RAM_DISK_EXTENT *Extent;
+  UINT32                      Index;
+  CONST APPLE_RAM_DISK_EXTENT *Extent;
 
-  UINT64                CurrentOffset;
-  UINT64                LocalOffset;
-  UINTN                 LocalSize;
+  UINT64                      CurrentOffset;
+  UINT64                      LocalOffset;
+  UINTN                       LocalSize;
 
   ASSERT (ExtentTable != NULL);
   INTERNAL_ASSERT_EXTENT_TABLE_VALID (ExtentTable);
@@ -439,9 +440,9 @@ OcAppleRamDiskWrite (
 
 BOOLEAN
 OcAppleRamDiskLoadFile (
-  IN OUT APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
-  IN     EFI_FILE_PROTOCOL            *File,
-  IN     UINTN                        FileSize
+  IN CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
+  IN EFI_FILE_PROTOCOL                  *File,
+  IN UINTN                              FileSize
   )
 {
   EFI_STATUS Status;
@@ -503,7 +504,7 @@ OcAppleRamDiskLoadFile (
 
 VOID
 OcAppleRamDiskFree (
-  IN APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable
+  IN CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable
   )
 {
   UINT32 Index;

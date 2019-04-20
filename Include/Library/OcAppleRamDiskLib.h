@@ -16,8 +16,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_APPLE_RAM_DISK_LIB_H
 
 #include <Protocol/AppleRamDisk.h>
+#include <Protocol/SimpleFileSystem.h>
 
-APPLE_RAM_DISK_EXTENT_TABLE *
+CONST APPLE_RAM_DISK_EXTENT_TABLE *
 OcAppleRamDiskAllocate (
   IN UINTN            Size,
   IN EFI_MEMORY_TYPE  MemoryType
@@ -25,30 +26,30 @@ OcAppleRamDiskAllocate (
 
 BOOLEAN
 OcAppleRamDiskRead (
-  IN  APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
-  IN  UINT64                       Offset,
-  IN  UINTN                        Size,
-  OUT VOID                         *Buffer
+  IN  CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
+  IN  UINT64                             Offset,
+  IN  UINTN                              Size,
+  OUT VOID                               *Buffer
   );
 
 BOOLEAN
 OcAppleRamDiskWrite (
-  IN APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
-  IN UINT64                       Offset,
-  IN UINTN                        Size,
-  IN CONST VOID                   *Buffer
+  IN CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
+  IN UINT64                             Offset,
+  IN UINTN                              Size,
+  IN CONST VOID                         *Buffer
   );
 
 BOOLEAN
 OcAppleRamDiskLoadFile (
-  IN OUT APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
-  IN     EFI_FILE_PROTOCOL            *File,
-  IN     UINTN                        FileSize
+  IN OUT CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
+  IN     EFI_FILE_PROTOCOL                  *File,
+  IN     UINTN                              FileSize
   );
 
 VOID
 OcAppleRamDiskFree (
-  IN APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable
+  IN CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable
   );
 
 #endif // OC_APPLE_RAM_DISK_LIB_H
