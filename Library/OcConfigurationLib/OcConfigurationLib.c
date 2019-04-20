@@ -14,6 +14,7 @@
 
 #include <Library/OcConfigurationLib.h>
 
+OC_STRUCTORS       (OC_ACPI_ADD_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_ACPI_ADD_ARRAY)
 OC_STRUCTORS       (OC_ACPI_BLOCK_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_ACPI_BLOCK_ARRAY)
@@ -64,7 +65,15 @@ OC_STRUCTORS       (OC_GLOBAL_CONFIG, ())
 
 STATIC
 OC_SCHEMA
-mAcpiAddSchema = OC_SCHEMA_STRING (NULL);
+mAcpiAddSchemaEntry[] = {
+  OC_SCHEMA_STRING_IN    ("Comment",        OC_ACPI_ADD_ENTRY, Comment),
+  OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_ACPI_ADD_ENTRY, Enabled),
+  OC_SCHEMA_STRING_IN    ("Path",           OC_ACPI_ADD_ENTRY, Path)
+};
+
+STATIC
+OC_SCHEMA
+mAcpiAddSchema = OC_SCHEMA_DICT (NULL, mAcpiAddSchemaEntry);
 
 STATIC
 OC_SCHEMA

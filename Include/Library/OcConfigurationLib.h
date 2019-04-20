@@ -25,8 +25,14 @@
 ///
 /// ACPI added tables.
 ///
+#define OC_ACPI_ADD_ENTRY_FIELDS(_, __) \
+  _(BOOLEAN                     , Enabled          ,     , FALSE   , () ) \
+  _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Path             ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
+  OC_DECLARE (OC_ACPI_ADD_ENTRY)
+
 #define OC_ACPI_ADD_ARRAY_FIELDS(_, __) \
-  OC_ARRAY (OC_STRING, _, __)
+  OC_ARRAY (OC_ACPI_ADD_ENTRY, _, __)
   OC_DECLARE (OC_ACPI_ADD_ARRAY)
 
 ///
