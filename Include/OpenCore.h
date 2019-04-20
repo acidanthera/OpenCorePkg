@@ -26,7 +26,18 @@
 
 #define OPEN_CORE_IMAGE_PATH       L"EFI\\OC\\OpenCore.efi"
 
-#define OPEN_CORE_ROOT_PATH        L"EFI\\OC\\"
+/**
+  Multiple boards, namely ASUS P8H61-M and P8H61-M LX2 will not
+  open directories with trailing slash. It is irrelevant whether
+  front slash is present for them.
+
+  This means L"EFI\\OC\\" and L"\\EFI\\OC\\" will both fail to open,
+  while L"EFI\\OC" and L"\\EFI\\OC" will open fine.
+
+  We do not open any directories except root path and dmg, so the
+  hack lives here.
+**/
+#define OPEN_CORE_ROOT_PATH        L"EFI\\OC"
 
 #define OPEN_CORE_CONFIG_PATH      L"config.plist"
 
