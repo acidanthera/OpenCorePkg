@@ -396,13 +396,11 @@ OcAppleRamDiskLoadFile (
   )
 {
   EFI_STATUS Status;
-  BOOLEAN    Result;
-
   UINTN      FileBufferSize;
-  VOID       *FileBuffer;
-
-  UINTN      CurrentSize;
   UINT64     FilePosition;
+  UINT32     Index;
+  UINTN      RequestedSize;
+  UINTN      ReadSize;
 
   ASSERT (ExtentTable != NULL);
   INTERNAL_ASSERT_EXTENT_TABLE_VALID (ExtentTable);
@@ -411,43 +409,22 @@ OcAppleRamDiskLoadFile (
 
   FileBufferSize = FileSize;
 
-  while (TRUE) {
-    FileBuffer = AllocatePool (FileBufferSize);
-    if (FileBuffer != NULL) {
-      break;
-    }
-
-    if (FileBufferSize <= 2) {
-      return FALSE;
-    }
-
-    FileBufferSize = ((FileBufferSize / 2) + 1);
-  }
-
   FilePosition = 0;
-  CurrentSize  = FileBufferSize;
-  do {
-    Status = GetFileData (File, FilePosition, CurrentSize, FileBuffer);
-    if (!EFI_ERROR (Status)) {
-      FreePool (FileBuffer);
+  for (Index = 0; FileSize > 0 && Index < ExtentTable->ExtentCount; ++Index) {
+    RequestedSize = ReadSize = MIN (FileSize, ExtentTable->Extents[Index].Length);
+
+    Status = File->Read (
+      File,
+      &RequestedSize,
+      (VOID *) ExtentTable->Extents[Index].Start
+      );
+
+    if (EFI_ERROR (Status) || RequestedSize != ReadSize) {
       return FALSE;
     }
 
-    Result = OcAppleRamDiskWrite (
-               ExtentTable,
-               FilePosition,
-               CurrentSize,
-               FileBuffer
-               );
-    if (!Result) {
-      FreePool (FileBuffer);
-      return FALSE;
-    }
-
-    FilePosition += CurrentSize;
-    FileSize     -= CurrentSize;
-    CurrentSize   = MIN (FileSize, FileBufferSize);
-  } while (FileSize != 0);
+    FileSize -= RequestedSize;
+  }
 
   return TRUE;
 }
