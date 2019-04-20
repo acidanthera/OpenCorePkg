@@ -52,6 +52,7 @@
   Base64Decode.c
   DataPatcher.c
   DebugHelp.c
+  GetMemoryMap.c
   LegacyRegionLock.c
   LegacyRegionUnLock.c
   LogBootOrder.c
