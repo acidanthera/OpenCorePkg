@@ -35,17 +35,20 @@ OcAcpiAddTables (
   UINT8                *TableData;
   UINT32               TableDataLength;
   UINT32               Index;
-  CONST CHAR8          *Table;
+  OC_ACPI_ADD_ENTRY    *Table;
+  CONST CHAR8          *TablePath;
   CHAR16               FullPath[128];
 
   for (Index = 0; Index < Config->Acpi.Add.Count; ++Index) {
-    Table = OC_BLOB_GET (Config->Acpi.Add.Values[Index]);
+    Table = Config->Acpi.Add.Values[Index];
+    TablePath = OC_BLOB_GET (&Table->Path);
 
-    if (Table[0] == '\0') {
+    if (!Table->Enabled || TablePath[0] == '\0') {
+      DEBUG ((DEBUG_INFO, "OC: Skipping add ACPI %a (%d)\n", TablePath, Table->Enabled));
       continue;
     }
 
-    UnicodeSPrint (FullPath, sizeof (FullPath), OPEN_CORE_ACPI_PATH "%a", Table);
+    UnicodeSPrint (FullPath, sizeof (FullPath), OPEN_CORE_ACPI_PATH "%a", TablePath);
     UnicodeUefiSlashes (FullPath);
 
     TableData = OcStorageReadFileUnicode (Storage, FullPath, &TableDataLength);
@@ -54,7 +57,7 @@ OcAcpiAddTables (
       DEBUG ((
         DEBUG_WARN,
         "OC: Failed to find ACPI %a\n",
-        Table
+        TablePath
         ));
       continue;
     }
@@ -65,7 +68,7 @@ OcAcpiAddTables (
       DEBUG ((
         DEBUG_WARN,
         "OC: Failed to add ACPI %a - %r\n",
-        Table,
+        TablePath,
         Status
         ));
     }

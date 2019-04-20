@@ -234,6 +234,70 @@ OcMain (
 
 STATIC
 VOID
+RunStorageTests (
+  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem
+  )
+{
+  EFI_STATUS         Status;
+  EFI_FILE_PROTOCOL  *RootVolume;
+  EFI_FILE_PROTOCOL  *FileHandle;
+
+  DEBUG ((DEBUG_WARN, "Running FS tests...\n"));
+
+  Status = FileSystem->OpenVolume (FileSystem, &RootVolume);
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Cannot open root volume - %r\n", Status));
+    return;
+  }
+
+  STATIC CONST CHAR16 *Paths[] = {
+    L"EFI",
+    L"\\EFI",
+    L"EFI\\",
+    L"\\EFI\\",
+    L"EFI\\OC",
+    L"\\EFI\\OC",
+    L"EFI\\OC\\",
+    L"\\EFI\\OC\\",
+    L"EFI\\OC\\config.plist",
+    L"\\EFI\\OC\\config.plist",
+  };
+
+  for (UINTN Index = 0; Index < ARRAY_SIZE (Paths); ++Index) {
+    FileHandle = NULL;
+    Status = RootVolume->Open (
+      RootVolume,
+      &FileHandle,
+      (CHAR16 *) Paths[Index],
+      EFI_FILE_MODE_READ,
+      0
+      );
+
+    DEBUG ((
+      DEBUG_WARN,
+      "Testing (%u/%u) %s - %r (%p)\n",
+      (UINT32) Index+1,
+      (UINT32) ARRAY_SIZE (Paths),
+      Paths[Index],
+      Status,
+      FileHandle
+      ));
+
+    if (!EFI_ERROR (Status)) {
+      FileHandle->Close (FileHandle);
+    }
+  }
+
+  RootVolume->Close (RootVolume);
+
+  DEBUG ((DEBUG_WARN, "Done tests, waiting 5 seconds.\n"));
+
+  gBS->Stall (5000000);
+}
+
+STATIC
+VOID
 EFIAPI
 OcBootstrapRerun (
   IN OC_BOOTSTRAP_PROTOCOL            *This,
@@ -244,6 +308,8 @@ OcBootstrapRerun (
   EFI_STATUS          Status;
 
   DEBUG ((DEBUG_INFO, "OC: ReRun executed!\n"));
+
+  RunStorageTests (FileSystem);
 
   ++This->NestedCount;
 

@@ -513,12 +513,9 @@ some of those are provided as a part of OpenCore.
   \textbf{Description}: Load selected tables from \texttt{OC/ACPI/Custom}
   directory.
 
-  Designed to be filled with string filenames meant to be loaded as ACPI
-  tables. Example values include \texttt{DSDT.aml}, \texttt{SSDT-8.aml},
-  \texttt{SSDT-USBX.aml}, etc. ACPI table load order follows the item order in the array.
+  Designed to be filled with \texttt{plist\ dict} values, describing each block entry.
+  See \hyperref[acpipropsadd]{Add Properties} section below.
 
-  \textbf{Note}: All values but \texttt{DSDT.aml} insert new tables into ACPI stack.
-  \texttt{DSDT.aml}, unlike the rest, performs replacement of DSDT table.
 \item
   \texttt{Block}\\
   \textbf{Type}: \texttt{plist\ array}\\
@@ -543,6 +540,41 @@ some of those are provided as a part of OpenCore.
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Apply individual ACPI quirks described
   in \hyperref[acpipropsquirks]{Quirks Properties} section below.
+
+\end{enumerate}
+
+\subsection{Add Properties}\label{acpipropsadd}
+
+\begin{enumerate}
+\item
+  \texttt{Comment}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Default value}: Empty string\\
+  \textbf{Description}: Arbitrary ASCII string used to provide human readable
+  reference for the entry. It is implementation defined whether this value is
+  used.
+
+\item
+  \texttt{Enabled}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: This ACPI table will not be removed unless set to
+  \texttt{true}.
+
+\item
+  \texttt{Path}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Default value}: Empty string\\
+  \textbf{Description}: File paths meant to be loaded as ACPI tables.
+  Example values include \texttt{DSDT.aml}, \texttt{SubDir/SSDT-8.aml},
+  \texttt{SSDT-USBX.aml}, etc.
+
+  ACPI table load order follows the item order in the array. All ACPI tables
+  load from \texttt{OC/ACPI/Custom} directory.
+
+  \textbf{Note}: All tables but tables with \texttt{DSDT} table identifier
+  (determined by parsing data not by filename) insert new tables into ACPI stack.
+  \texttt{DSDT}, unlike the rest, performs replacement of DSDT table.
 
 \end{enumerate}
 

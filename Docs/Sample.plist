@@ -10,10 +10,38 @@
 	<dict>
 		<key>Add</key>
 		<array>
-			<string>DSDT.aml</string>
-			<string>SSDT.aml</string>
-			<string>SSDT-1.aml</string>
-			<string>SSDT-ACPI.aml</string>
+			<dict>
+				<key>Enabled</key>
+				<true/>
+				<key>Comment</key>
+				<string>DSDT</string>
+				<key>Path</key>
+				<string>DSDT.aml</string>
+			</dict>
+			<dict>
+				<key>Enabled</key>
+				<true/>
+				<key>Comment</key>
+				<string>Fix 123</string>
+				<key>Path</key>
+				<string>SSDT.aml</string>
+			</dict>
+			<dict>
+				<key>Enabled</key>
+				<false/>
+				<key>Comment</key>
+				<string>Fix 456</string>
+				<key>Path</key>
+				<string>SSDT-1.aml</string>
+			</dict>
+			<dict>
+				<key>Enabled</key>
+				<false/>
+				<key>Comment</key>
+				<string></string>
+				<key>Path</key>
+				<string>SSDT-ACPI.aml</string>
+			</dict>
 		</array>
 		<key>Block</key>
 		<array>
