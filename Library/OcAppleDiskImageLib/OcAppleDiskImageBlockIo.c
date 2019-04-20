@@ -195,7 +195,7 @@ InternalConstructDmgDevicePath (
   DevPath->RamDisk.MemMap.Header.SubType  = HW_MEMMAP_DP;
   DevPath->RamDisk.MemMap.MemoryType      = EfiACPIMemoryNVS;
   DevPath->RamDisk.MemMap.StartingAddress = RamDmgAddress;
-  DevPath->RamDisk.MemMap.EndingAddress   = RamDmgAddress + sizeof (APPLE_RAM_DISK_EXTENT);
+  DevPath->RamDisk.MemMap.EndingAddress   = RamDmgAddress + sizeof (APPLE_RAM_DISK_EXTENT_TABLE);
   SetDevicePathNodeLength (&DevPath->RamDisk.MemMap, sizeof (DevPath->RamDisk.MemMap));
 
   DevPath->FilePath.Header.Type    = MEDIA_DEVICE_PATH;
