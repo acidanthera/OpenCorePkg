@@ -247,7 +247,8 @@ STATIC
 EFI_STATUS
 GetRecoveryOsBooter (
   IN  EFI_HANDLE                Device,
-  OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
+  OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath,
+  IN  BOOLEAN                   Basic
   )
 {
   EFI_STATUS                       Status;
@@ -273,12 +274,21 @@ GetRecoveryOsBooter (
   }
 
   FilePathSize = 0;
-  *FilePath = (EFI_DEVICE_PATH_PROTOCOL *) GetFileInfo (
-                Root,
-                &gAppleBlessedOsxFolderInfoGuid,
-                sizeof (EFI_DEVICE_PATH_PROTOCOL),
-                &FilePathSize
-                );
+
+  if (!Basic) {
+    *FilePath = (EFI_DEVICE_PATH_PROTOCOL *) GetFileInfo (
+                  Root,
+                  &gAppleBlessedOsxFolderInfoGuid,
+                  sizeof (EFI_DEVICE_PATH_PROTOCOL),
+                  &FilePathSize
+                  );
+  } else {
+    //
+    // Requested basic recovery support, i.e. only com.apple.recovery.boot folder check.
+    // This is useful for locating empty USB sticks with just a dmg in them.
+    //
+    *FilePath = NULL;
+  }
 
   if (*FilePath != NULL) {
     if (IsDevicePathValid (*FilePath, FilePathSize)) {
@@ -324,7 +334,7 @@ GetRecoveryOsBooter (
     }
   } else {
     //
-    // Ok, this one can still be FileVault 2 HFS+ recovery.
+    // Ok, this one can still be FileVault 2 HFS+ recovery or just a hardcoded basic recovery.
     // Apple does add its path to so called "Alternate OS blessed file/folder", but this
     // path is not accessible from HFSPlus.efi driver. Just why???
     // Their SlingShot.efi app just bruteforces com.apple.recovery.boot directory existence,
@@ -534,7 +544,8 @@ OcFillBootEntry (
   IN  UINT32                      Policy,
   IN  EFI_HANDLE                  Handle,
   OUT OC_BOOT_ENTRY               *BootEntry,
-  OUT OC_BOOT_ENTRY               *AlternateBootEntry OPTIONAL
+  OUT OC_BOOT_ENTRY               *AlternateBootEntry OPTIONAL,
+  IN  BOOLEAN                     IsLoadHandle
   )
 {
   EFI_STATUS                Status;
@@ -543,19 +554,40 @@ OcFillBootEntry (
   VOID                      *Reserved;
   EFI_FILE_PROTOCOL         *RecoveryRoot;
   EFI_HANDLE                RecoveryDeviceHandle;
+  UINTN                     Count;
 
-  Status = BootPolicy->GetBootFileEx (
-    Handle,
-    APPLE_BOOT_POLICY_MODE_1,
-    &DevicePath
-    );
+  Count = 0;
 
+  //
+  // Do not do normal scanning on load handle.
+  // We only allow recovery there.
+  //
+  if (!IsLoadHandle) {
+    Status = BootPolicy->GetBootFileEx (
+      Handle,
+      APPLE_BOOT_POLICY_MODE_1,
+      &DevicePath
+      );
+  } else {
+    Status = EFI_UNSUPPORTED;
+  }
+
+  //
+  // Detect recovery on load handle and on a partition without
+  // any bootloader. Never allow alternate in this case.
+  //
   if (EFI_ERROR (Status)) {
-    return 0;
+    Status = GetRecoveryOsBooter (Handle, &DevicePath, TRUE);
+    AlternateBootEntry = NULL;
+    if (EFI_ERROR (Status)) {
+      return Count;
+    }
   }
 
   BootEntry->DevicePath = DevicePath;
   SetBootEntryFlags (BootEntry);
+
+  ++Count;
 
   if (AlternateBootEntry != NULL) {
     Status = BootPolicy->GetPathNameOnApfsRecovery (
@@ -572,18 +604,18 @@ OcFillBootEntry (
       FreePool (RecoveryPath);
       RecoveryRoot->Close (RecoveryRoot);
     } else {
-      Status = GetRecoveryOsBooter (Handle, &DevicePath);
+      Status = GetRecoveryOsBooter (Handle, &DevicePath, FALSE);
       if (EFI_ERROR (Status)) {
-        return 1;
+        return Count;
       }
     }
 
     AlternateBootEntry->DevicePath = DevicePath;
     SetBootEntryFlags (AlternateBootEntry);
-    return 2;
+    ++Count;
   }
 
-  return 1;
+  return Count;
 }
 
 STATIC
@@ -997,18 +1029,22 @@ InternalLoadDmg (
   return DevPath;
 }
 
+STATIC
 VOID
 InternalUnloadDmg (
   IN INTERNAL_DMG_LOAD_CONTEXT  *DmgLoadContext
   )
 {
-  FreePool (DmgLoadContext->DevicePath);
-  OcAppleDiskImageUninstallBlockIo (
-    DmgLoadContext->DmgContext,
-    DmgLoadContext->BlockIoHandle
-    );
-  OcAppleDiskImageFreeContext (DmgLoadContext->DmgContext);
-  FreePool (DmgLoadContext->DmgContext);
+  if (DmgLoadContext->DevicePath != NULL) {
+    FreePool (DmgLoadContext->DevicePath);
+    OcAppleDiskImageUninstallBlockIo (
+      DmgLoadContext->DmgContext,
+      DmgLoadContext->BlockIoHandle
+      );
+    OcAppleDiskImageFreeContext (DmgLoadContext->DmgContext);
+    FreePool (DmgLoadContext->DmgContext);
+    DmgLoadContext->DevicePath = NULL;
+  }
 }
 
 EFI_STATUS
@@ -1062,18 +1098,9 @@ OcScanForBootEntries (
       Policy,
       Handles[Index],
       &Entries[EntryIndex],
-      &Entries[EntryIndex+1]
+      &Entries[EntryIndex+1],
+      LoadHandle == Handles[Index]
       );
-
-    if (LoadHandle == Handles[Index] && EntryCount > 0) {
-      DEBUG ((DEBUG_INFO, "Skipping self load handle entry %p\n", LoadHandle));
-      --EntryCount;
-      CopyMem (
-        &Entries[EntryIndex+1],
-        &Entries[EntryIndex],
-        sizeof (Entries[EntryIndex]) * EntryCount
-        );
-    }
 
     EntryIndex += EntryCount;
   }
@@ -1194,33 +1221,35 @@ OcShowSimpleBootMenu (
   ASSERT (FALSE);
 }
 
+STATIC
 EFI_STATUS
-OcLoadBootEntry (
+InternalLoadBootEntry (
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
   IN  OC_BOOT_ENTRY               *BootEntry,
   IN  UINT32                      Policy,
   IN  EFI_HANDLE                  ParentHandle,
-  OUT EFI_HANDLE                  *EntryHandle
+  OUT EFI_HANDLE                  *EntryHandle,
+  OUT INTERNAL_DMG_LOAD_CONTEXT   *DmgLoadContext
   )
 {
   EFI_STATUS                 Status;
   EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
-  INTERNAL_DMG_LOAD_CONTEXT  DmgLoadContext;
   CHAR16                     *UnicodeDevicePath;
 
   //
   // TODO: support Apple loaded image, policy, and dmg boot.
   //
 
+  ZeroMem (DmgLoadContext, sizeof (*DmgLoadContext));
+
   if (BootEntry->IsFolder) {
     if ((Policy & OC_LOAD_ALLOW_DMG_BOOT) == 0) {
       return EFI_SECURITY_VIOLATION;
     }
 
-    ZeroMem (&DmgLoadContext, sizeof (DmgLoadContext));
-    DmgLoadContext.DevicePath = BootEntry->DevicePath;
+    DmgLoadContext->DevicePath = BootEntry->DevicePath;
     DevicePath = InternalLoadDmg (
-                   &DmgLoadContext,
+                   DmgLoadContext,
                    BootPolicy,
                    Policy
                    );
@@ -1228,6 +1257,7 @@ OcLoadBootEntry (
       return EFI_UNSUPPORTED;
     }
 
+    DEBUG_CODE_BEGIN ();
     UnicodeDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
     if (UnicodeDevicePath != NULL) {
       DEBUG ((
@@ -1238,6 +1268,7 @@ OcLoadBootEntry (
         ));
       FreePool (UnicodeDevicePath);
     }
+    DEBUG_CODE_END ();
 
   } else {
     DevicePath = BootEntry->DevicePath;
@@ -1245,11 +1276,35 @@ OcLoadBootEntry (
 
   Status = gBS->LoadImage (FALSE, ParentHandle, DevicePath, NULL, 0, EntryHandle);
 
-  //
-  // Please note that you cannot unload dmg after loading, as we still are booting from it.
-  //
+  if (EFI_ERROR (Status)) {
+    InternalUnloadDmg (DmgLoadContext);
+  }
 
   return Status;
+}
+
+EFI_STATUS
+OcLoadBootEntry (
+  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
+  IN  OC_BOOT_ENTRY               *BootEntry,
+  IN  UINT32                      Policy,
+  IN  EFI_HANDLE                  ParentHandle,
+  OUT EFI_HANDLE                  *EntryHandle
+  )
+{
+  //
+  // FIXME: Think of something when starting dmg fails.
+  //
+  INTERNAL_DMG_LOAD_CONTEXT  DmgLoadContext;
+
+  return InternalLoadBootEntry (
+    BootPolicy,
+    BootEntry,
+    Policy,
+    ParentHandle,
+    EntryHandle,
+    &DmgLoadContext
+    );
 }
 
 EFI_STATUS
@@ -1269,6 +1324,7 @@ OcRunSimpleBootPicker (
   UINTN                       EntryCount;
   EFI_HANDLE                  BooterHandle;
   UINT32                      DefaultEntry;
+  INTERNAL_DMG_LOAD_CONTEXT   DmgLoadContext;
 
   AppleBootPolicy = OcAppleBootPolicyInstallProtocol (FALSE);
   if (AppleBootPolicy == NULL) {
@@ -1334,11 +1390,22 @@ OcRunSimpleBootPicker (
     }
 
     if (!EFI_ERROR (Status)) {
-      Status = OcLoadBootEntry (AppleBootPolicy, Chosen, BootPolicy, gImageHandle, &BooterHandle);
+      Status = InternalLoadBootEntry (
+        AppleBootPolicy,
+        Chosen,
+        BootPolicy,
+        gImageHandle,
+        &BooterHandle,
+        &DmgLoadContext
+        );
       if (!EFI_ERROR (Status)) {
         Status = StartImage (Chosen, BooterHandle, NULL, NULL);
         if (EFI_ERROR (Status)) {
           DEBUG ((DEBUG_ERROR, "StartImage failed - %r\n", Status));
+          //
+          // Unload dmg if any.
+          //
+          InternalUnloadDmg (&DmgLoadContext);
         }
       } else {
         DEBUG ((DEBUG_ERROR, "LoadImage failed - %r\n", Status));

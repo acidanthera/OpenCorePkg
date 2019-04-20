@@ -100,6 +100,7 @@ OcFreeBootEntries (
   @param[in]  Handle              Device handle (with EfiSimpleFileSystem protocol).
   @param[out] BootEntry           Resulting boot entry.
   @param[out] AlternateBootEntry  Resulting alternate boot entry (e.g. recovery).
+  @param[in]  IsLoadHandle        OpenCore load handle, try skipping OC entry.
 
   @retval 0  no entries were filled.
   @retval 1  boot entry was filled.
@@ -111,7 +112,8 @@ OcFillBootEntry (
   IN  UINT32                      Policy,
   IN  EFI_HANDLE                  Handle,
   OUT OC_BOOT_ENTRY               *BootEntry,
-  OUT OC_BOOT_ENTRY               *AlternateBootEntry OPTIONAL
+  OUT OC_BOOT_ENTRY               *AlternateBootEntry OPTIONAL,
+  IN  BOOLEAN                     IsLoadHandle
   );
 
 /**
