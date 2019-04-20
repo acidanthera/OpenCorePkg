@@ -50,7 +50,7 @@ typedef PACKED struct {
 } DMG_FILEPATH_DEVICE_PATH;
 
 typedef PACKED struct {
-  APPLE_RAM_DISK_DP          RamDisk;
+  APPLE_RAM_DISK_DP_HEADER   RamDisk;
   DMG_FILEPATH_DEVICE_PATH   FilePath;
   DMG_SIZE_DEVICE_PATH       Size;
   EFI_DEVICE_PATH_PROTOCOL   End;
@@ -179,17 +179,16 @@ InternalConstructDmgDevicePath (
 
   DevPath = &DiskImageData->DevicePath;
 
-  DevPath->RamDisk.Vendor.Header.Type    = HARDWARE_DEVICE_PATH;
-  DevPath->RamDisk.Vendor.Header.SubType = HW_VENDOR_DP;
-  CopyMem (
-    &DevPath->RamDisk.Vendor.Guid,
-    &gAppleRamDiskProtocolGuid,
-    sizeof (DevPath->RamDisk.Vendor.Guid)
+  DevPath->RamDisk.Vendor.Vendor.Header.Type    = HARDWARE_DEVICE_PATH;
+  DevPath->RamDisk.Vendor.Vendor.Header.SubType = HW_VENDOR_DP;
+  CopyGuid (
+    &DevPath->RamDisk.Vendor.Vendor.Guid,
+    &gAppleRamDiskProtocolGuid
     );
-  DevPath->RamDisk.Counter               = mDmgCounter++;
+  DevPath->RamDisk.Vendor.Counter               = mDmgCounter++;
   SetDevicePathNodeLength (
     &DevPath->RamDisk.Vendor,
-    sizeof (DevPath->RamDisk.Vendor) + sizeof (DevPath->RamDisk.Counter)
+    sizeof (DevPath->RamDisk.Vendor)
     );
 
   DevPath->RamDisk.MemMap.Header.Type     = HARDWARE_DEVICE_PATH;
@@ -222,16 +221,16 @@ InternalConstructDmgDevicePath (
   SetDevicePathEndNode (&DevPath->End);
 
   DEBUG_CODE_BEGIN ();
+  ASSERT (
+    IsDevicePathValid ((EFI_DEVICE_PATH_PROTOCOL *) DevPath, sizeof (*DevPath))
+    );
+
   UnicodeDevPath = ConvertDevicePathToText ((EFI_DEVICE_PATH_PROTOCOL *)DevPath, FALSE, FALSE);
   DEBUG ((DEBUG_INFO, "Built DMG DP: %s\n", UnicodeDevPath != NULL ? UnicodeDevPath : L"<NULL>"));
   if (UnicodeDevPath != NULL) {
     FreePool (UnicodeDevPath);
   }
   DEBUG_CODE_END ();
-
-  ASSERT (
-    IsDevicePathValid ((EFI_DEVICE_PATH_PROTOCOL *) DevPath, sizeof (*DevPath))
-    );
 }
 
 STATIC CONST EFI_BLOCK_IO_PROTOCOL mDiskImageBlockIo = {
