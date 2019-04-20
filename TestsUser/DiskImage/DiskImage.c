@@ -2,14 +2,15 @@
 
 #include <Library/OcAppleChunklistLib.h>
 #include <Library/OcAppleDiskImageLib.h>
+#include <Library/OcAppleRamDiskLib.h>
 #include <Library/OcAppleKeysLib.h>
 #include <Library/OcCompressionLib.h>
 
 /**
 
-clang -g -fsanitize=undefined,address -Wno-incompatible-pointer-types-discards-qualifiers -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h DiskImage.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLibInternal.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcCompressionLib/zlib/zlib_uefi.c ../../Library/OcCompressionLib/zlib/adler32.c ../../Library/OcCompressionLib/zlib/deflate.c ../../Library/OcCompressionLib/zlib/crc32.c  ../../Library/OcCompressionLib/zlib/compress.c ../../Library/OcCompressionLib/zlib/infback.c ../../Library/OcCompressionLib/zlib/inffast.c  ../../Library/OcCompressionLib/zlib/inflate.c  ../../Library/OcCompressionLib/zlib/inftrees.c ../../Library/OcCompressionLib/zlib/trees.c ../../Library/OcCompressionLib/zlib/uncompr.c ../../Library/OcCryptoLib/Sha256.c  ../../Library/OcCryptoLib/Rsa2048Sha256.c ../../Library/OcAppleKeysLib/OcAppleKeysLib.c ../../Library/OcAppleChunklistLib/OcAppleChunklistLib.c -o DiskImage
+clang -g -fsanitize=undefined,address -Wno-incompatible-pointer-types-discards-qualifiers -fshort-wchar -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h DiskImage.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLibInternal.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcCompressionLib/zlib/zlib_uefi.c ../../Library/OcCompressionLib/zlib/adler32.c ../../Library/OcCompressionLib/zlib/deflate.c ../../Library/OcCompressionLib/zlib/crc32.c  ../../Library/OcCompressionLib/zlib/compress.c ../../Library/OcCompressionLib/zlib/infback.c ../../Library/OcCompressionLib/zlib/inffast.c  ../../Library/OcCompressionLib/zlib/inflate.c  ../../Library/OcCompressionLib/zlib/inftrees.c ../../Library/OcCompressionLib/zlib/trees.c ../../Library/OcCompressionLib/zlib/uncompr.c ../../Library/OcCryptoLib/Sha256.c  ../../Library/OcCryptoLib/Rsa2048Sha256.c ../../Library/OcAppleKeysLib/OcAppleKeysLib.c ../../Library/OcAppleChunklistLib/OcAppleChunklistLib.c ../../Library/OcAppleRamDiskLib/OcAppleRamDiskLib.c ../../Library/OcFileLib/ReadFile.c ../../Library/OcFileLib/FileProtocol.c -o DiskImage
 
-clang-mp-7.0 -DFUZZING_TEST=1 -g -fsanitize=undefined,address,fuzzer -Wno-incompatible-pointer-types-discards-qualifiers -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h DiskImage.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLibInternal.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcCompressionLib/zlib/zlib_uefi.c ../../Library/OcCompressionLib/zlib/adler32.c ../../Library/OcCompressionLib/zlib/deflate.c ../../Library/OcCompressionLib/zlib/crc32.c  ../../Library/OcCompressionLib/zlib/compress.c ../../Library/OcCompressionLib/zlib/infback.c ../../Library/OcCompressionLib/zlib/inffast.c  ../../Library/OcCompressionLib/zlib/inflate.c  ../../Library/OcCompressionLib/zlib/inftrees.c ../../Library/OcCompressionLib/zlib/trees.c ../../Library/OcCompressionLib/zlib/uncompr.c ../../Library/OcCryptoLib/Sha256.c  ../../Library/OcCryptoLib/Rsa2048Sha256.c ../../Library/OcAppleKeysLib/OcAppleKeysLib.c ../../Library/OcAppleChunklistLib/OcAppleChunklistLib.c -o DiskImage
+clang-mp-7.0 -DFUZZING_TEST=1 -g -fsanitize=undefined,address,fuzzer -Wno-incompatible-pointer-types-discards-qualifiers -fshort-wchar -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h DiskImage.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLibInternal.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcCompressionLib/zlib/zlib_uefi.c ../../Library/OcCompressionLib/zlib/adler32.c ../../Library/OcCompressionLib/zlib/deflate.c ../../Library/OcCompressionLib/zlib/crc32.c  ../../Library/OcCompressionLib/zlib/compress.c ../../Library/OcCompressionLib/zlib/infback.c ../../Library/OcCompressionLib/zlib/inffast.c  ../../Library/OcCompressionLib/zlib/inflate.c  ../../Library/OcCompressionLib/zlib/inftrees.c ../../Library/OcCompressionLib/zlib/trees.c ../../Library/OcCompressionLib/zlib/uncompr.c ../../Library/OcCryptoLib/Sha256.c  ../../Library/OcCryptoLib/Rsa2048Sha256.c ../../Library/OcAppleKeysLib/OcAppleKeysLib.c ../../Library/OcAppleChunklistLib/OcAppleChunklistLib.c ../../Library/OcAppleRamDiskLib/OcAppleRamDiskLib.c../../Library/OcFileLib/ReadFile.c ../../Library/OcFileLib/FileProtocol.c -o DiskImage
 rm -rf DICT fuzz*.log ; mkdir DICT ; UBSAN_OPTIONS='halt_on_error=1' ./DiskImage -jobs=4 DICT -rss_limit_mb=4096
 
 **/
@@ -78,7 +79,27 @@ int main (int argc, char *argv[]) {
     BOOLEAN Result;
 
     OC_APPLE_DISK_IMAGE_CONTEXT DmgContext;
-    Result = OcAppleDiskImageInitializeContext (&DmgContext, Dmg, DmgSize, TRUE);
+    APPLE_RAM_DISK_EXTENT_TABLE ExtentTable;
+
+#define NUM_EXTENTS 20
+
+    ExtentTable.Signature   = APPLE_RAM_DISK_EXTENT_SIGNATURE;
+    ExtentTable.Version     = APPLE_RAM_DISK_EXTENT_VERSION;
+    ExtentTable.Reserved    = 0;
+    ExtentTable.Signature2  = APPLE_RAM_DISK_EXTENT_SIGNATURE;
+
+    ExtentTable.ExtentCount = MIN (NUM_EXTENTS, ARRAY_SIZE (ExtentTable.Extents));
+
+    UINT32 Index;
+    for (Index = 0; Index < ExtentTable.ExtentCount; ++Index) {
+      ExtentTable.Extents[Index].Start = (uintptr_t)Dmg + (Index * (DmgSize / ExtentTable.ExtentCount));
+      ExtentTable.Extents[Index].Length = (DmgSize / ExtentTable.ExtentCount);
+    }
+    if (Index != 0) {
+      ExtentTable.Extents[Index - 1].Length += (DmgSize - (Index * (DmgSize / ExtentTable.ExtentCount)));
+    }
+
+    Result = OcAppleDiskImageInitializeContext (&DmgContext, &ExtentTable, DmgSize);
     if (!Result) {
       printf ("DMG Context initialization error\n");
       goto ContinueDmgLoop;
@@ -96,21 +117,18 @@ int main (int argc, char *argv[]) {
       Result = OcAppleChunklistInitializeContext (&ChunklistContext, Chunklist, ChunklistSize);
       if (!Result) {
         printf ("Chunklist Context initialization error\n");
-        OcAppleDiskImageFreeContext (&DmgContext);
         goto ContinueDmgLoop;
       }
 
       Result = OcAppleChunklistVerifySignature (&ChunklistContext, (RSA_PUBLIC_KEY *)PkDataBase[0].PublicKey);
       if (!Result) {
         printf ("Chunklist signature verification error\n");
-        OcAppleDiskImageFreeContext (&DmgContext);
         goto ContinueDmgLoop;
       }
 
       Result = OcAppleDiskImageVerifyData (&DmgContext, &ChunklistContext);
       if (!Result) {
         printf ("Chunklist chunk verification error\n");
-        OcAppleDiskImageFreeContext (&DmgContext);
         goto ContinueDmgLoop;
       }
     }
@@ -119,14 +137,12 @@ int main (int argc, char *argv[]) {
     UncompDmg  = malloc (UncompSize);
     if (UncompDmg == NULL) {
       printf ("DMG data allocation failed.\n");
-      OcAppleDiskImageFreeContext (&DmgContext);
       goto ContinueDmgLoop;
     }
 
     Result = OcAppleDiskImageRead (&DmgContext, 0, UncompSize, UncompDmg);
     if (!Result) {
       printf ("DMG read error\n");
-      OcAppleDiskImageFreeContext (&DmgContext);
       goto ContinueDmgLoop;
     }
 

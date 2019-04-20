@@ -27,6 +27,7 @@
 [LibraryClasses]
     BaseMemoryLib
     DebugLib
+	OcAppleRamDiskLib
     OcCryptoLib
     UefiLib
 

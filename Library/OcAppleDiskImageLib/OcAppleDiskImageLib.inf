@@ -23,17 +23,16 @@
     EfiPkg/EfiPkg.dec
     MdePkg/MdePkg.dec
     OcSupportPkg/OcSupportPkg.dec
-    StdLib/StdLib.dec
 
 [LibraryClasses]
     BaseMemoryLib
     DebugLib
     DevicePathLib
     MemoryAllocationLib
+	OcAppleRamDiskLib
     OcCompressionLib
     OcGuardLib
     OcXmlLib
-    UefiBootServicesTableLib
     PrintLib
 
 [Protocols]

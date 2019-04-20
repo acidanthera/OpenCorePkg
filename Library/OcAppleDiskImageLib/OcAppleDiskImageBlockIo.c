@@ -12,9 +12,9 @@
 
 #include <Uefi.h>
 
-#include <Protocol/BlockIo.h>
-#include <Protocol/AppleRamDisk.h>
 #include <Protocol/AppleDiskImage.h>
+#include <Protocol/AppleRamDisk.h>
+#include <Protocol/BlockIo.h>
 
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
@@ -76,7 +76,6 @@ typedef struct {
   DMG_DEVICE_PATH             DevicePath;
 
   OC_APPLE_DISK_IMAGE_CONTEXT *ImageContext;
-  APPLE_RAM_DISK_EXTENT_TABLE *RamDmgHeader;
 } OC_APPLE_DISK_IMAGE_MOUNTED_DATA;
 
 STATIC
@@ -166,16 +165,18 @@ STATIC
 VOID
 InternalConstructDmgDevicePath (
   IN OUT OC_APPLE_DISK_IMAGE_MOUNTED_DATA  *DiskImageData,
-  IN     EFI_PHYSICAL_ADDRESS              RamDmgAddress
+  IN     UINTN                             FileSize
   )
 {
-  UINT64           DmgSize;
-  DMG_DEVICE_PATH  *DevPath;
-  CHAR16           *UnicodeDevPath;
+  UINT64          RamDmgAddress;
+  DMG_DEVICE_PATH *DevPath;
+  CHAR16          *UnicodeDevPath;
 
   ASSERT (DiskImageData != NULL);
+  ASSERT (DiskImageData->ImageContext);
 
-  DmgSize = DiskImageData->ImageContext->Length;
+  RamDmgAddress = (UINTN)DiskImageData->ImageContext->ExtentTable;
+
   DevPath = &DiskImageData->DevicePath;
 
   DevPath->RamDisk.Vendor.Header.Type    = HARDWARE_DEVICE_PATH;
@@ -205,12 +206,12 @@ InternalConstructDmgDevicePath (
     DevPath->FilePath.PathName,
     sizeof (DevPath->FilePath.PathName),
     L"DMG_%16X.dmg",
-    DmgSize
+    FileSize
     );
 
   DevPath->Size.Vendor.Header.Type    = MESSAGING_DEVICE_PATH;
   DevPath->Size.Vendor.Header.SubType = MSG_VENDOR_DP;
-  DevPath->Size.Length                = DmgSize;
+  DevPath->Size.Length                = FileSize;
   SetDevicePathNodeLength (&DevPath->Size, sizeof (DevPath->Size));
   CopyMem (
     &DevPath->Size.Vendor.Guid,
@@ -245,6 +246,7 @@ STATIC CONST EFI_BLOCK_IO_PROTOCOL mDiskImageBlockIo = {
 EFI_HANDLE
 OcAppleDiskImageInstallBlockIo (
   IN  OC_APPLE_DISK_IMAGE_CONTEXT     *Context,
+  IN  UINTN                           FileSize,
   OUT CONST EFI_DEVICE_PATH_PROTOCOL  **DevicePath OPTIONAL,
   OUT UINTN                           *DevicePathSize OPTIONAL
   )
@@ -253,48 +255,17 @@ OcAppleDiskImageInstallBlockIo (
 
   EFI_STATUS                       Status;
   OC_APPLE_DISK_IMAGE_MOUNTED_DATA *DiskImageData;
-  UINTN                            NumRamDmgPages;
-  EFI_PHYSICAL_ADDRESS             RamDmgAddress;
-  APPLE_RAM_DISK_EXTENT_TABLE      *RamDmgHeader;
 
   ASSERT (Context != NULL);
-
-  NumRamDmgPages = EFI_SIZE_TO_PAGES (sizeof (*RamDmgHeader));
-  Status = gBS->AllocatePages (
-                  AllocateAnyPages,
-                  EfiACPIMemoryNVS,
-                  NumRamDmgPages,
-                  &RamDmgAddress
-                  );
-  if (EFI_ERROR (Status)) {
-    return NULL;
-  }
-
-  RamDmgHeader = (APPLE_RAM_DISK_EXTENT_TABLE *)(UINTN)RamDmgAddress;
-  ZeroMem (RamDmgHeader, sizeof (*RamDmgHeader));
-
-  RamDmgHeader->Signature            = APPLE_RAM_DISK_EXTENT_SIGNATURE;
-  RamDmgHeader->Signature2           = APPLE_RAM_DISK_EXTENT_SIGNATURE;
-  RamDmgHeader->Version              = APPLE_RAM_DISK_EXTENT_VERSION;
-  RamDmgHeader->ExtentCount          = 1;
-  RamDmgHeader->Extents[0].Start     = (UINTN)Context->Buffer;
-  RamDmgHeader->Extents[0].Length    = Context->Length;
-  DEBUG ((
-    DEBUG_VERBOSE,
-    "DMG extent @ %p, length 0x%lx\n",
-    RamDmgHeader->Extents[0].Start,
-    RamDmgHeader->Extents[0].Length
-    ));
+  ASSERT (FileSize > 0);
 
   DiskImageData = AllocateZeroPool (sizeof (*DiskImageData));
   if (DiskImageData == NULL) {
-    gBS->FreePages (RamDmgAddress, NumRamDmgPages);
     return NULL;
   }
 
   DiskImageData->Signature    = OC_APPLE_DISK_IMAGE_MOUNTED_DATA_SIGNATURE;
   DiskImageData->ImageContext = Context;
-  DiskImageData->RamDmgHeader = RamDmgHeader;
   CopyMem (
     &DiskImageData->BlockIo,
     &mDiskImageBlockIo,
@@ -307,7 +278,7 @@ OcAppleDiskImageInstallBlockIo (
   DiskImageData->BlockIoMedia.BlockSize    = APPLE_DISK_IMAGE_SECTOR_SIZE;
   DiskImageData->BlockIoMedia.LastBlock    = (Context->SectorCount - 1);
 
-  InternalConstructDmgDevicePath (DiskImageData, RamDmgAddress);
+  InternalConstructDmgDevicePath (DiskImageData, FileSize);
 
   BlockIoHandle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
@@ -320,7 +291,6 @@ OcAppleDiskImageInstallBlockIo (
                   );
   if (EFI_ERROR (Status)) {
     FreePool (DiskImageData);
-    gBS->FreePages (RamDmgAddress, NumRamDmgPages);
     return NULL;
   }
 
@@ -339,7 +309,6 @@ OcAppleDiskImageInstallBlockIo (
     } else {
       DiskImageData->Signature = 0;
     }
-    gBS->FreePages (RamDmgAddress, NumRamDmgPages);
     return NULL;
   }
 
@@ -377,11 +346,6 @@ OcAppleDiskImageUninstallBlockIo (
   }
 
   DiskImageData = OC_APPLE_DISK_IMAGE_MOUNTED_DATA_FROM_THIS (BlockIo);
-
-  gBS->FreePages (
-         (EFI_PHYSICAL_ADDRESS)(UINTN)DiskImageData->RamDmgHeader,
-         EFI_SIZE_TO_PAGES (sizeof (*DiskImageData->RamDmgHeader))
-         );
 
   Status  = gBS->DisconnectController (BlockIoHandle, NULL, NULL);
   Status |= gBS->UninstallMultipleProtocolInterfaces (

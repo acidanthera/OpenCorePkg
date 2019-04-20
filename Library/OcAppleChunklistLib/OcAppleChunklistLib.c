@@ -10,11 +10,13 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include <Base.h>
+#include <Uefi.h>
 
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleChunklistLib.h>
+#include <Library/OcAppleRamDiskLib.h>
 #include <Library/OcCryptoLib.h>
 #include <Library/OcGuardLib.h>
 
@@ -117,57 +119,69 @@ OcAppleChunklistVerifySignature (
 
 BOOLEAN
 OcAppleChunklistVerifyData (
-  IN OUT OC_APPLE_CHUNKLIST_CONTEXT  *Context,
-  IN     VOID                        *Buffer,
-  IN     UINTN                       BufferSize
+  IN OUT OC_APPLE_CHUNKLIST_CONTEXT         *Context,
+  IN     CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable
   )
 {
+  BOOLEAN                     Result;
+
   UINT64                      Index;
-  UINTN                       RemainingLength;
-  UINT8                       *BufferCurrent;
   UINT8                       ChunkHash[SHA256_DIGEST_SIZE];
-  UINT64                      ChunkCount;
   CONST APPLE_CHUNKLIST_CHUNK *CurrentChunk;
+  UINT64                      CurrentOffset;
+
+  UINTN                       ChunkDataSize;
+  VOID                        *ChunkData;
 
   ASSERT (Context != NULL);
-  ASSERT (Buffer != NULL);
-  ASSERT (BufferSize > 0);
   ASSERT (Context->Chunks != NULL);
+  ASSERT (ExtentTable != NULL);
 
   DEBUG_CODE (
     ASSERT (Context->Signature == NULL);
     );
 
-  RemainingLength = BufferSize;
-  BufferCurrent   = (UINT8 *) Buffer;
-  ChunkCount      = Context->ChunkCount;
-  CurrentChunk    = &Context->Chunks[0];
+  ChunkDataSize = 0;
+  for (Index = 0; Index < Context->ChunkCount; ++Index) {
+    CurrentChunk = &Context->Chunks[Index];
+    if (ChunkDataSize < CurrentChunk->Length) {
+      ChunkDataSize = CurrentChunk->Length;
+    }
+  }
 
-  for (Index = 0; Index < ChunkCount; Index++) {
-    //
-    // Ensure length of chunk is valid.
-    //
-    if (RemainingLength < CurrentChunk->Length) {
+  ChunkData = AllocatePool (ChunkDataSize);
+  if (ChunkData == NULL) {
+    return FALSE;
+  }
+
+  CurrentOffset = 0;
+  for (Index = 0; Index < Context->ChunkCount; Index++) {
+    CurrentChunk = &Context->Chunks[Index];
+
+    Result = OcAppleRamDiskRead (
+               ExtentTable,
+               CurrentOffset,
+               CurrentChunk->Length,
+               ChunkData
+               );
+    if (!Result) {
+      FreePool (ChunkData);
       return FALSE;
     }
-
     //
     // Calculate checksum of data and ensure they match.
     //
     DEBUG ((DEBUG_VERBOSE, "AppleChunklistVerifyData(): Validating chunk %lu of %lu\n",
-      Index, ChunkCount));
-    Sha256 (ChunkHash, BufferCurrent, CurrentChunk->Length);
+      Index, Context->ChunkCount));
+    Sha256 (ChunkHash, ChunkData, CurrentChunk->Length);
     if (CompareMem (ChunkHash, CurrentChunk->Checksum, SHA256_DIGEST_SIZE) != 0) {
+      FreePool (ChunkData);
       return FALSE;
     }
 
-    //
-    // Move to next chunk.
-    //
-    BufferCurrent   += CurrentChunk->Length;
-    RemainingLength -= CurrentChunk->Length;
-    CurrentChunk++;
+    CurrentOffset += CurrentChunk->Length;
   }
 
+  FreePool (ChunkData);
   return TRUE;
 }

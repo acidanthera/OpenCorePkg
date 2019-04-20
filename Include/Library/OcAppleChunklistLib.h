@@ -15,6 +15,7 @@
 
 #include <IndustryStandard/AppleChunklist.h>
 
+#include <Library/OcAppleRamDiskLib.h>
 #include <Library/OcCryptoLib.h>
 
 //
@@ -51,16 +52,16 @@ OcAppleChunklistInitializeContext (
 
 BOOLEAN
 OcAppleChunklistVerifySignature (
-  IN OC_APPLE_CHUNKLIST_CONTEXT  *Context,
-  IN RSA_PUBLIC_KEY              *PublicKey
+  IN OUT OC_APPLE_CHUNKLIST_CONTEXT  *Context,
+  IN     RSA_PUBLIC_KEY              *PublicKey
   );
 
 /**
   Verifies the specified data against a chunklist context.
 
   @param[in] Context            The Context to verify against.
-  @param[in] Buffer             A pointer to a buffer containing the data to be verified.
-  @param[in] BufferSize         The size of the buffer specified in Buffer.
+  @param[in] ExtentTable        A pointer to the RAM disk extent table to be
+                                verified.
 
   @retval EFI_SUCCESS           The data was verified successfully.
   @retval EFI_INVALID_PARAMETER One or more parameters are invalid.
@@ -69,9 +70,8 @@ OcAppleChunklistVerifySignature (
 **/
 BOOLEAN
 OcAppleChunklistVerifyData (
-  IN OUT OC_APPLE_CHUNKLIST_CONTEXT  *Context,
-  IN     VOID                        *Buffer,
-  IN     UINTN                       BufferSize
+  IN OUT OC_APPLE_CHUNKLIST_CONTEXT         *Context,
+  IN     CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable
   );
 
 #endif // APPLE_CHUNKLIST_LIB_H

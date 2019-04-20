@@ -12,6 +12,8 @@
 
 #include <Uefi.h>
 
+#include <Protocol/SimpleFileSystem.h>
+
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
@@ -19,65 +21,23 @@
 #include <Library/OcAppleChunklistLib.h>
 #include <Library/OcAppleDiskImageLib.h>
 #include <Library/OcCompressionLib.h>
+#include <Library/OcFileLib.h>
 #include <Library/OcGuardLib.h>
-#include <Library/UefiBootServicesTableLib.h>
 
 #include "OcAppleDiskImageLibInternal.h"
 
-VOID *
-OcAppleDiskImageAllocateBuffer (
-  IN UINTN  BufferSize
-  )
-{
-  EFI_STATUS           Status;
-  EFI_PHYSICAL_ADDRESS BufferAddress;
-
-  ASSERT (BufferSize > 0);
-
-  Status = gBS->AllocatePages (
-                  AllocateAnyPages,
-                  EfiACPIMemoryNVS,
-                  EFI_SIZE_TO_PAGES (BufferSize),
-                  &BufferAddress
-                  );
-  if (EFI_ERROR (Status)) {
-    return NULL;
-  }
-
-  return (VOID *)(UINTN)BufferAddress;
-}
-
-VOID
-OcAppleDiskImageFreeBuffer (
-  IN VOID   *Buffer,
-  IN UINTN  BufferSize
-  )
-{
-  ASSERT (Buffer != NULL);
-  ASSERT (BufferSize > 0);
-
-  gBS->FreePages (
-         (EFI_PHYSICAL_ADDRESS)(UINTN)Buffer,
-         EFI_SIZE_TO_PAGES (BufferSize)
-         );
-}
-
 BOOLEAN
 OcAppleDiskImageInitializeContext (
-  OUT OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
-  IN  VOID                         *Buffer,
-  IN  UINTN                        BufferSize,
-  IN  BOOLEAN                      VerifyChecksum
+  OUT OC_APPLE_DISK_IMAGE_CONTEXT        *Context,
+  IN  CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
+  IN  UINTN                              FileSize
   )
 {
   BOOLEAN                     Result;
   UINTN                       TrailerOffset;
-  UINT8                       *BufferBytes;
-  UINT8                       *BufferBytesCurrent;
-  APPLE_DISK_IMAGE_TRAILER    *Trailer;
+  APPLE_DISK_IMAGE_TRAILER    Trailer;
   UINT32                      DmgBlockCount;
   APPLE_DISK_IMAGE_BLOCK_DATA **DmgBlocks;
-  UINT32                      Crc32;
   UINT32                      SwappedSig;
   UINT64                      OffsetTop;
 
@@ -90,50 +50,44 @@ OcAppleDiskImageInitializeContext (
   UINT64                      XmlLength;
   UINT64                      SectorCount;
 
-  ASSERT (Context != NULL);
-  ASSERT (Buffer != NULL);
-  ASSERT (BufferSize > 0);
+  CHAR8                       *PlistData;
 
-  if (BufferSize <= sizeof (*Trailer)) {
+  ASSERT (Context != NULL);
+  ASSERT (ExtentTable != NULL);
+  ASSERT (FileSize > 0);
+
+  if (FileSize <= sizeof (Trailer)) {
     return FALSE;
   }
 
   SwappedSig = SwapBytes32 (APPLE_DISK_IMAGE_MAGIC);
 
-  BufferBytes = (UINT8 *)Buffer;
+  TrailerOffset = (FileSize - sizeof (Trailer));
 
-  Trailer       = NULL;
-  TrailerOffset = 0;
-
-  for (
-    BufferBytesCurrent = (BufferBytes + (BufferSize - sizeof (*Trailer)));
-    BufferBytesCurrent >= BufferBytes;
-    --BufferBytesCurrent
-    ) {
-    Trailer = (APPLE_DISK_IMAGE_TRAILER *)BufferBytesCurrent;
-    if (Trailer->Signature == SwappedSig) {
-      TrailerOffset = (BufferBytesCurrent - BufferBytes);
-      break;
-    }
-  }
-
-  if (TrailerOffset == 0) {
+  Result = OcAppleRamDiskRead (
+             ExtentTable,
+             TrailerOffset,
+             sizeof (Trailer),
+             &Trailer
+             );
+  if (!Result || (Trailer.Signature != SwappedSig)) {
     return FALSE;
   }
 
-  HeaderSize            = SwapBytes32 (Trailer->HeaderSize);
-  DataForkOffset        = SwapBytes64 (Trailer->DataForkOffset);
-  DataForkLength        = SwapBytes64 (Trailer->DataForkLength);
-  SegmentCount          = SwapBytes32 (Trailer->SegmentCount);
-  XmlOffset             = SwapBytes64 (Trailer->XmlOffset);
-  XmlLength             = SwapBytes64 (Trailer->XmlLength);
-  SectorCount           = SwapBytes64 (Trailer->SectorCount);
-  DataForkChecksum.Size = SwapBytes32 (Trailer->DataForkChecksum.Size);
+  HeaderSize            = SwapBytes32 (Trailer.HeaderSize);
+  DataForkOffset        = SwapBytes64 (Trailer.DataForkOffset);
+  DataForkLength        = SwapBytes64 (Trailer.DataForkLength);
+  SegmentCount          = SwapBytes32 (Trailer.SegmentCount);
+  XmlOffset             = SwapBytes64 (Trailer.XmlOffset);
+  XmlLength             = SwapBytes64 (Trailer.XmlLength);
+  SectorCount           = SwapBytes64 (Trailer.SectorCount);
+  DataForkChecksum.Size = SwapBytes32 (Trailer.DataForkChecksum.Size);
 
-  if ((HeaderSize != sizeof (*Trailer))
+  if ((HeaderSize != sizeof (Trailer))
    || (XmlLength == 0)
    || (XmlLength > MAX_UINT32)
-   || (DataForkChecksum.Size > (sizeof (DataForkChecksum.Data) * 8))) {
+   || (DataForkChecksum.Size > (sizeof (DataForkChecksum.Data) * 8))
+   || (SectorCount == 0)) {
     return FALSE;
   }
 
@@ -160,51 +114,76 @@ OcAppleDiskImageInitializeContext (
     return FALSE;
   }
 
-  if (VerifyChecksum) {
-    DataForkChecksum.Type = SwapBytes32 (Trailer->DataForkChecksum.Type);
+  PlistData = AllocatePool (XmlLength);
+  if (PlistData == NULL) {
+    return FALSE;
+  }
 
-    if (DataForkChecksum.Type == APPLE_DISK_IMAGE_CHECKSUM_TYPE_CRC32) {
-      if (DataForkChecksum.Size != 32) {
-        return FALSE;
-      }
-
-      DataForkChecksum.Data[0] = SwapBytes32 (
-                                   Trailer->DataForkChecksum.Data[0]
-                                   );
-      Crc32 = CalculateCrc32 (
-                (BufferBytes + DataForkOffset),
-                DataForkLength
-                );
-      if (Crc32 != DataForkChecksum.Data[0]) {
-        return FALSE;
-      }
-    } else {
-      DEBUG ((
-        DEBUG_ERROR,
-        "DMG checksum algorithm %x unsupported.\n",
-        DataForkChecksum.Type
-        ));
-      return FALSE;
-    }
+  Result = OcAppleRamDiskRead (ExtentTable, XmlOffset, XmlLength, PlistData);
+  if (!Result) {
+    FreePool (PlistData);
+    return FALSE;
   }
 
   Result = InternalParsePlist (
-             ((CHAR8 *)Buffer + XmlOffset),
+             PlistData,
              (UINT32)XmlLength,
              DataForkOffset,
              DataForkLength,
              &DmgBlockCount,
              &DmgBlocks
              );
+
+  FreePool (PlistData);
+
   if (!Result) {
     return FALSE;
   }
 
-  Context->Buffer      = BufferBytes;
-  Context->Length      = (TrailerOffset + sizeof (*Trailer));
+  Context->ExtentTable = ExtentTable;
   Context->BlockCount  = DmgBlockCount;
   Context->Blocks      = DmgBlocks;
   Context->SectorCount = SectorCount;
+
+  return TRUE;
+}
+
+BOOLEAN
+OcAppleDiskImageInitializeFromFile (
+  OUT OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
+  IN  EFI_FILE_PROTOCOL            *File
+  )
+{
+  EFI_STATUS                        Status;
+  BOOLEAN                           Result;
+
+  UINT32                            FileSize;
+  CONST APPLE_RAM_DISK_EXTENT_TABLE *ExtentTable;
+
+  ASSERT (Context != NULL);
+  ASSERT (File != NULL);
+
+  Status = GetFileSize (File, &FileSize);
+  if (EFI_ERROR (Status)) {
+    return FALSE;
+  }
+
+  ExtentTable = OcAppleRamDiskAllocate (FileSize, EfiACPIMemoryNVS);
+  if (ExtentTable == NULL) {
+    return FALSE;
+  }
+
+  Result = OcAppleRamDiskLoadFile (ExtentTable, File, FileSize);
+  if (!Result) {
+    OcAppleRamDiskFree (ExtentTable);
+    return FALSE;
+  }
+
+  Result = OcAppleDiskImageInitializeContext (Context, ExtentTable, FileSize);
+  if (!Result) {
+    OcAppleRamDiskFree (ExtentTable);
+    return FALSE;
+  }
 
   return TRUE;
 }
@@ -220,8 +199,7 @@ OcAppleDiskImageVerifyData (
 
   return OcAppleChunklistVerifyData (
            ChunklistContext,
-           Context->Buffer,
-           Context->Length
+           Context->ExtentTable
            );
 }
 
@@ -242,11 +220,11 @@ OcAppleDiskImageFreeContext (
 }
 
 VOID
-OcAppleDiskImageFreeContextAndBuffer (
+OcAppleDiskImageFreeFile (
   IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context
   )
 {
-  OcAppleDiskImageFreeBuffer (Context->Buffer, Context->Length);
+  OcAppleRamDiskFree (Context->ExtentTable);
   OcAppleDiskImageFreeContext (Context);
 }
 
@@ -266,7 +244,7 @@ OcAppleDiskImageRead (
   UINT64                      ChunkLength;
   UINT64                      ChunkOffset;
   UINT8                       *ChunkData;
-  UINT8                       *ChunkDataCurrent;
+  UINT8                       *ChunkDataCompressed;
 
   UINT64                      LbaCurrent;
   UINT64                      LbaOffset;
@@ -326,25 +304,42 @@ OcAppleDiskImageRead (
 
       case APPLE_DISK_IMAGE_CHUNK_TYPE_RAW:
       {
-        ChunkData = (Context->Buffer + Chunk->CompressedOffset);
-        ChunkDataCurrent = (ChunkData + ChunkOffset);
+        Result = OcAppleRamDiskRead (
+                   Context->ExtentTable,
+                   (Chunk->CompressedOffset + ChunkOffset),
+                   BufferChunkSize,
+                   BufferCurrent
+                   );
+        if (!Result) {
+          return FALSE;
+        }
 
-        CopyMem (BufferCurrent, ChunkDataCurrent, BufferChunkSize);
         break;
       }
 
       case APPLE_DISK_IMAGE_CHUNK_TYPE_ZLIB:
       {
-        ChunkData = AllocatePool (ChunkTotalLength);
+        ChunkData = AllocatePool (ChunkTotalLength + Chunk->CompressedLength);
         if (ChunkData == NULL) {
           return FALSE;
         }
 
-        ChunkDataCurrent = ChunkData + ChunkOffset;
+        ChunkDataCompressed = (ChunkData + ChunkTotalLength);
+        Result = OcAppleRamDiskRead (
+                   Context->ExtentTable,
+                   Chunk->CompressedOffset,
+                   Chunk->CompressedLength,
+                   ChunkDataCompressed
+                   );
+        if (!Result) {
+          FreePool (ChunkData);
+          return FALSE;
+        }
+
         OutSize = DecompressZLIB (
                     ChunkData,
                     ChunkTotalLength,
-                    (Context->Buffer + Chunk->CompressedOffset),
+                    ChunkDataCompressed,
                     Chunk->CompressedLength
                     );
         if (OutSize != ChunkTotalLength) {
@@ -352,7 +347,7 @@ OcAppleDiskImageRead (
           return FALSE;
         }
 
-        CopyMem (BufferCurrent, ChunkDataCurrent, BufferChunkSize);
+        CopyMem (BufferCurrent, (ChunkData + ChunkOffset), BufferChunkSize);
         FreePool (ChunkData);
         break;
       }

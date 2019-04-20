@@ -160,7 +160,7 @@ InternalSwapBlockData (
 
 BOOLEAN
 InternalParsePlist (
-  IN  CONST CHAR8                  *Plist,
+  IN  CHAR8                        *Plist,
   IN  UINT32                       PlistSize,
   IN  UINT64                       DataForkOffset,
   IN  UINT64                       DataForkSize,
@@ -170,7 +170,6 @@ InternalParsePlist (
 {
   BOOLEAN                     Result;
 
-  CHAR8                       *XmlPlistBuffer;
   XML_DOCUMENT                *XmlPlistDoc;
   XML_NODE                    *NodeRoot;
   XML_NODE                    *NodeResourceForkKey;
@@ -199,13 +198,7 @@ InternalParsePlist (
 
   XmlPlistDoc = NULL;
 
-  XmlPlistBuffer = AllocateCopyPool (PlistSize, Plist);
-  if (XmlPlistBuffer == NULL) {
-    Result = FALSE;
-    goto DONE_ERROR;
-  }
-
-  XmlPlistDoc = XmlDocumentParse (XmlPlistBuffer, PlistSize, FALSE);
+  XmlPlistDoc = XmlDocumentParse (Plist, PlistSize, FALSE);
   if (XmlPlistDoc == NULL) {
     Result = FALSE;
     goto DONE_ERROR;
@@ -312,10 +305,6 @@ DONE_ERROR:
 
   if (XmlPlistDoc != NULL) {
     XmlDocumentFree (XmlPlistDoc);
-  }
-
-  if (XmlPlistBuffer != NULL) {
-    FreePool (XmlPlistBuffer);
   }
 
   return Result;

@@ -15,48 +15,42 @@
 
 #include <IndustryStandard/AppleDiskImage.h>
 
+#include <Protocol/SimpleFileSystem.h>
+
 #include <Library/OcAppleChunklistLib.h>
+#include <Library/OcAppleRamDiskLib.h>
 
 //
 // Disk image context.
 //
 typedef struct {
-    // Source buffer.
-    UINT8                           *Buffer;
-    UINTN                           Length;
+    CONST APPLE_RAM_DISK_EXTENT_TABLE *ExtentTable;
 
-    UINT64                          SectorCount;
+    UINT64                            SectorCount;
 
-    UINT32                          BlockCount;
-    APPLE_DISK_IMAGE_BLOCK_DATA     **Blocks;
+    UINT32                            BlockCount;
+    APPLE_DISK_IMAGE_BLOCK_DATA       **Blocks;
 } OC_APPLE_DISK_IMAGE_CONTEXT;
-
-VOID *
-OcAppleDiskImageAllocateBuffer (
-  IN UINTN  BufferSize
-  );
-
-VOID
-OcAppleDiskImageFreeBuffer (
-  IN VOID   *Buffer,
-  IN UINTN  BufferSize
-  );
 
 BOOLEAN
 OcAppleDiskImageInitializeContext (
+  OUT OC_APPLE_DISK_IMAGE_CONTEXT        *Context,
+  IN  CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
+  IN  UINTN                              FileSize
+  );
+
+BOOLEAN
+OcAppleDiskImageInitializeFromFile (
   OUT OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
-  IN  VOID                         *Buffer,
-  IN  UINTN                        BufferSize,
-  IN  BOOLEAN                      VerifyChecksum
+  IN  EFI_FILE_PROTOCOL            *File
   );
 
 VOID
 OcAppleDiskImageFreeContext (
   IN OC_APPLE_DISK_IMAGE_CONTEXT *Context
   );
-
 VOID
-OcAppleDiskImageFreeContextAndBuffer (
+OcAppleDiskImageFreeFile (
   IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context
   );
 
@@ -76,7 +70,8 @@ OcAppleDiskImageRead (
 
 EFI_HANDLE
 OcAppleDiskImageInstallBlockIo (
-  IN OC_APPLE_DISK_IMAGE_CONTEXT      *Context,
+  IN  OC_APPLE_DISK_IMAGE_CONTEXT     *Context,
+  IN  UINTN                           FileSize,
   OUT CONST EFI_DEVICE_PATH_PROTOCOL  **DevicePath OPTIONAL,
   OUT UINTN                           *DevicePathSize OPTIONAL
   );

@@ -671,8 +671,7 @@ InternalGetDiskImageBootFile (
   OUT INTERNAL_DMG_LOAD_CONTEXT   *Context,
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
   IN  UINT32                      Policy,
-  IN  VOID                        *DmgBuffer,
-  IN  UINTN                       DmgBufferSize,
+  IN  UINTN                       DmgFileSize,
   IN  VOID                        *ChunklistBuffer OPTIONAL,
   IN  UINT32                      ChunklistBufferSize OPTIONAL
   )
@@ -687,29 +686,10 @@ InternalGetDiskImageBootFile (
 
   ASSERT (Context != NULL);
   ASSERT (BootPolicy != NULL);
-  ASSERT (DmgBuffer != NULL);
-  ASSERT (DmgBufferSize > 0);
-
-  Context->DmgContext = AllocatePool (sizeof (*Context->DmgContext));
-  if (Context->DmgContext == NULL) {
-    return NULL;
-  }
-
-  Result = OcAppleDiskImageInitializeContext (
-             Context->DmgContext,
-             DmgBuffer,
-             DmgBufferSize,
-             FALSE
-             );
-  if (!Result) {
-    FreePool (Context->DmgContext);
-    return NULL;
-  }
+  ASSERT (DmgFileSize > 0);
 
   if (ChunklistBuffer == NULL) {
     if ((Policy & OC_LOAD_REQUIRE_APPLE_SIGN) != 0) {
-      OcAppleDiskImageFreeContext (Context->DmgContext);
-      FreePool (Context->DmgContext);
       return NULL;
     }
   } else if ((Policy & (OC_LOAD_VERIFY_APPLE_SIGN | OC_LOAD_REQUIRE_TRUSTED_KEY)) != 0) {
@@ -721,8 +701,6 @@ InternalGetDiskImageBootFile (
                 ChunklistBufferSize
                 );
     if (!Result) {
-      OcAppleDiskImageFreeContext (Context->DmgContext);
-      FreePool (Context->DmgContext);
       return NULL;
     }
 
@@ -746,8 +724,6 @@ InternalGetDiskImageBootFile (
       }
 
       if (!Result) {
-        OcAppleDiskImageFreeContext (Context->DmgContext);
-        FreePool (Context->DmgContext);
         return NULL;
       }
     }
@@ -761,20 +737,17 @@ InternalGetDiskImageBootFile (
       // FIXME: Warn user instead of aborting when OC_LOAD_REQUIRE_TRUSTED_KEY
       //        is not set.
       //
-      OcAppleDiskImageFreeContext (Context->DmgContext);
-      FreePool (Context->DmgContext);
       return NULL;
     }
   }
 
   Context->BlockIoHandle = OcAppleDiskImageInstallBlockIo (
                              Context->DmgContext,
+                             DmgFileSize,
                              &DmgDevicePath,
                              &DmgDevicePathSize
                              );
   if (Context->BlockIoHandle == NULL) {
-    OcAppleDiskImageFreeContext (Context->DmgContext);
-    FreePool (Context->DmgContext);
     return NULL;
   }
 
@@ -783,18 +756,15 @@ InternalGetDiskImageBootFile (
               DmgDevicePath,
               DmgDevicePathSize
               );
-  if (DevPath != NULL) {
-    return DevPath;
+  if (DevPath == NULL) {
+    OcAppleDiskImageUninstallBlockIo (
+      Context->DmgContext,
+      Context->BlockIoHandle
+      );
+    return NULL;
   }
 
-  OcAppleDiskImageUninstallBlockIo (
-    Context->DmgContext,
-    Context->BlockIoHandle
-    );
-  OcAppleDiskImageFreeContext (Context->DmgContext);
-  FreePool (Context->DmgContext);
-
-  return NULL;
+  return DevPath;
 }
 
 STATIC
@@ -1031,6 +1001,7 @@ InternalLoadDmg (
   EFI_DEVICE_PATH_PROTOCOL *DevPath;
 
   EFI_STATUS               Status;
+  BOOLEAN                  Result;
 
   EFI_FILE_PROTOCOL        *DmgDir;
 
@@ -1038,7 +1009,6 @@ InternalLoadDmg (
   EFI_FILE_INFO            *DmgFileInfo;
   EFI_FILE_PROTOCOL        *DmgFile;
   UINT32                   DmgFileSize;
-  VOID                     *DmgBuffer;
 
   EFI_FILE_INFO            *ChunklistFileInfo;
   EFI_FILE_PROTOCOL        *ChunklistFile;
@@ -1077,32 +1047,27 @@ InternalLoadDmg (
     return NULL;
   }
 
-  DmgFileSize = 0;
   Status = GetFileSize (DmgFile, &DmgFileSize);
-
-  if (Status != EFI_SUCCESS) {
-    FreePool (DmgFileInfo);
-    DmgDir->Close (DmgDir);
-    DmgFile->Close (DmgFile);
-    return NULL;
-  }
-
-  DmgBuffer = OcAppleDiskImageAllocateBuffer (DmgFileSize);
-  if (DmgBuffer == NULL) {
-    FreePool (DmgFileInfo);
-    DmgDir->Close (DmgDir);
-    DmgFile->Close (DmgFile);
-    return NULL;
-  }
-
-  Status = GetFileData (DmgFile, 0, DmgFileSize, DmgBuffer);
-
-  DmgFile->Close (DmgFile);
-
   if (EFI_ERROR (Status)) {
     FreePool (DmgFileInfo);
     DmgDir->Close (DmgDir);
-    OcAppleDiskImageFreeBuffer (DmgBuffer, DmgFileSize);
+    DmgFile->Close (DmgFile);
+    return NULL;
+  }
+
+  Context->DmgContext = AllocatePool (sizeof (*Context->DmgContext));
+  if (Context->DmgContext == NULL) {
+    return NULL;
+  }
+
+  Result = OcAppleDiskImageInitializeFromFile (Context->DmgContext, DmgFile);
+
+  DmgFile->Close (DmgFile);
+
+  if (!Result) {
+    FreePool (DmgFileInfo);
+    FreePool (Context->DmgContext);
+    DmgDir->Close (DmgDir);
     return NULL;
   }
 
@@ -1153,7 +1118,6 @@ InternalLoadDmg (
               Context,
               BootPolicy,
               Policy,
-              DmgBuffer,
               DmgFileSize,
               ChunklistBuffer,
               ChunklistFileSize
@@ -1161,7 +1125,8 @@ InternalLoadDmg (
   Context->DevicePath = DevPath;
 
   if (DevPath == NULL) {
-    OcAppleDiskImageFreeBuffer (DmgBuffer, DmgFileSize);
+    OcAppleDiskImageFreeFile (Context->DmgContext);
+    FreePool (Context->DmgContext);
   }
 
   if (ChunklistBuffer != NULL) {
@@ -1181,7 +1146,7 @@ InternalUnloadDmg (
     DmgLoadContext->DmgContext,
     DmgLoadContext->BlockIoHandle
     );
-  OcAppleDiskImageFreeContextAndBuffer (DmgLoadContext->DmgContext);
+  OcAppleDiskImageFreeContext (DmgLoadContext->DmgContext);
   FreePool (DmgLoadContext->DmgContext);
 }
 

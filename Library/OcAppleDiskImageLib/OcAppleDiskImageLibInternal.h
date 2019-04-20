@@ -28,7 +28,7 @@
 
 BOOLEAN
 InternalParsePlist (
-  IN  CONST CHAR8                  *Plist,
+  IN  CHAR8                        *Plist,
   IN  UINT32                       PlistSize,
   IN  UINT64                       DataForkOffset,
   IN  UINT64                       DataForkSize,

@@ -172,6 +172,19 @@ struct _LIST_ENTRY {
   LIST_ENTRY  *BackLink;
 };
 
+typedef struct {
+  UINT32                Type;
+  EFI_PHYSICAL_ADDRESS  PhysicalStart;
+  EFI_VIRTUAL_ADDRESS   VirtualStart;
+  UINT64                NumberOfPages;
+  UINT64                Attribute;
+} EFI_MEMORY_DESCRIPTOR;
+
+#ifndef NEXT_MEMORY_DESCRIPTOR
+#define NEXT_MEMORY_DESCRIPTOR(MemoryDescriptor, Size) \
+  ((EFI_MEMORY_DESCRIPTOR *)((UINT8 *)(MemoryDescriptor) + (Size)))
+#endif
+
 #define MAX_ADDRESS   0xFFFFFFFFFFFFFFFFULL
 
 #define IN
@@ -503,7 +516,7 @@ struct _LIST_ENTRY {
 #define AllocatePool(x) (malloc)(x)
 #define AllocateZeroPool(x) (calloc)(1, x)
 #define ReallocatePool(a,b,c) (realloc)(c,b)
-#define FreePool(x) (free)(x)
+STATIC inline EFI_STATUS FreePool(void *x) { free (x); return EFI_SUCCESS; }
 #define CompareMem(a,b,c) (memcmp)((a),(b),(c))
 #define CopyMem(a,b,c) (memmove)((a),(b),(c))
 #define ZeroMem(a,b) (memset)(a, 0, b)
@@ -1589,6 +1602,8 @@ struct EFI_BOOT_SERVICES_ {
   EFI_STATUS (*LocateHandleBuffer) (EFI_LOCATE_SEARCH_TYPE SearchType, EFI_GUID * Protocol, VOID *SearchKey, UINTN *NumberHandles, EFI_HANDLE **Buffer);
   EFI_STATUS (*HandleProtocol)(EFI_HANDLE Handle, EFI_GUID *Protocol, VOID **Interface);
   EFI_STATUS (*InstallProtocolInterface) (EFI_HANDLE *Handle, EFI_GUID *Protocol, EFI_INTERFACE_TYPE InterfaceType, VOID *Interface);
+  EFI_STATUS (*GetMemoryMap) (UINTN *MemoryMapSize, EFI_MEMORY_DESCRIPTOR *MemoryMap, UINTN *MapKey, UINTN *DescriptorSize, UINT32 *DescriptorVersion);
+  EFI_STATUS (*FreePool) (void *x);
 };
 
 struct EFI_RUNTIME_SERVICES_ {
@@ -1648,6 +1663,10 @@ STATIC EFI_STATUS NilInstallProtocolInterface (EFI_HANDLE *Handle, EFI_GUID *Pro
   return EFI_SUCCESS;
 }
 
+STATIC EFI_STATUS NilGetMemoryMap (UINTN *MemoryMapSize, EFI_MEMORY_DESCRIPTOR *MemoryMap, UINTN *MapKey, UINTN *DescriptorSize, UINT32 *DescriptorVersion) {
+  return EFI_UNSUPPORTED;
+}
+
 
 STATIC EFI_BOOT_SERVICES gNilBS = {
   .LocateProtocol = NilLocateProtocol,
@@ -1656,7 +1675,9 @@ STATIC EFI_BOOT_SERVICES gNilBS = {
   .InstallConfigurationTable = NilInstallConfigurationTable,
   .LocateHandleBuffer = NilLocateHandleBuffer,
   .HandleProtocol = NilHandleProtocol,
-  .InstallProtocolInterface = NilInstallProtocolInterface
+  .InstallProtocolInterface = NilInstallProtocolInterface,
+  .GetMemoryMap = NilGetMemoryMap,
+  .FreePool = FreePool
 };
 
 STATIC EFI_BOOT_SERVICES *gBS = &gNilBS;
@@ -1680,5 +1701,8 @@ STATIC EFI_RUNTIME_SERVICES *gRT = &gNilRT;
 #ifndef ABS
 #define ABS(x) (((x)<0) ? -(x) : (x))
 #endif
+
+STATIC EFI_GUID gEfiFileInfoGuid;
+STATIC EFI_GUID gEfiSimpleFileSystemProtocolGuid;
 
 #endif
