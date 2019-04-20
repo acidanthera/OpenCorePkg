@@ -196,4 +196,29 @@ FindWritableFileSystem (
   IN OUT EFI_FILE_PROTOCOL  **WritableFs
   );
 
+/**
+  Open a file or directory by device path. This is a modified
+  version of EfiOpenFileByDevicePath function, which handles paths
+  with trailing slashes, that cause Open failure on old firmwares.
+  EfiOpenFileByDevicePath is additionally not available in UDK.
+
+  See more details at:
+  https://github.com/tianocore/edk2/commit/768b611136d0f2b99a99e446c089d1a30c3fa5d5
+
+  @param[in,out]  FilePath    Device path protocol.
+  @param[out]     File        Resulting file protocol.
+  @param[in]      OpenMode    File open mode.
+  @param[in]      Attributes  File attributes.
+
+  @retval EFI_SUCCESS on succesful open.
+**/
+EFI_STATUS
+EFIAPI
+OcOpenFileByDevicePath (
+  IN OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath,
+  OUT    EFI_FILE_PROTOCOL         **File,
+  IN     UINT64                    OpenMode,
+  IN     UINT64                    Attributes
+  );
+
 #endif // OC_FILE_LIB_H

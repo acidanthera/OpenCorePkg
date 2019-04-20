@@ -31,6 +31,7 @@
   GetFileInfo.c
   GetVolumeLabel.c
   LocateFileSystem.c
+  OpenFileByDp.c
   ReadFile.c
 
 [Packages]
