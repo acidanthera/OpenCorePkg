@@ -396,7 +396,6 @@ OcAppleRamDiskLoadFile (
   )
 {
   EFI_STATUS Status;
-  UINTN      FileBufferSize;
   UINT64     FilePosition;
   UINT32     Index;
   UINTN      RequestedSize;
@@ -407,9 +406,13 @@ OcAppleRamDiskLoadFile (
   ASSERT (File != NULL);
   ASSERT (FileSize > 0);
 
-  FileBufferSize = FileSize;
-
   FilePosition = 0;
+
+  Status = File->SetPosition (File, FilePosition);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
   for (Index = 0; FileSize > 0 && Index < ExtentTable->ExtentCount; ++Index) {
     RequestedSize = ReadSize = MIN (FileSize, ExtentTable->Extents[Index].Length);
 
