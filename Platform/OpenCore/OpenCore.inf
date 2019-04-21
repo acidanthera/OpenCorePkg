@@ -50,6 +50,7 @@
   IntelFrameworkPkg/IntelFrameworkPkg.dec
   OpenCorePkg/OpenCorePkg.dec
   OcSupportPkg/OcSupportPkg.dec
+  MacInfoPkg/MacInfoPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
 
@@ -81,6 +82,7 @@
   OcSmbiosLib
   OcStorageLib
   OcVirtualFsLib
+  MacInfoLib
   PcdLib
   PrintLib
   UefiBootServicesTableLib

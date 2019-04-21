@@ -16,6 +16,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
+#include <Library/MacInfoLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
 #include <Library/OcCpuLib.h>
@@ -31,81 +32,113 @@ STATIC
 VOID
 OcPlatformUpdateDataHub (
   IN OC_GLOBAL_CONFIG    *Config,
-  IN OC_CPU_INFO         *CpuInfo
+  IN OC_CPU_INFO         *CpuInfo,
+  IN MAC_INFO_DATA       *MacInfo
   )
 {
   EFI_STATUS        Status;
   OC_DATA_HUB_DATA  Data;
   EFI_GUID          Uuid;
+  UINT64            StartupPowerEvents;
 
   ZeroMem (&Data, sizeof (Data));
 
-  if (OC_BLOB_GET (&Config->PlatformInfo.DataHub.PlatformName)[0] != '\0') {
-    Data.PlatformName = OC_BLOB_GET (&Config->PlatformInfo.DataHub.PlatformName);
-  }
+  if (MacInfo == NULL) {
+    //
+    // Manual mode, read data from DataHub.
+    //
+    if (OC_BLOB_GET (&Config->PlatformInfo.DataHub.PlatformName)[0] != '\0') {
+      Data.PlatformName = OC_BLOB_GET (&Config->PlatformInfo.DataHub.PlatformName);
+    }
 
-  if (OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemProductName)[0] != '\0') {
-    Data.SystemProductName = OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemProductName);
-  }
+    if (OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemProductName)[0] != '\0') {
+      Data.SystemProductName = OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemProductName);
+    }
 
-  if (OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemSerialNumber)[0] != '\0') {
-    Data.SystemSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemSerialNumber);
-  }
+    if (OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemSerialNumber)[0] != '\0') {
+      Data.SystemSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemSerialNumber);
+    }
 
-  if (Config->PlatformInfo.DataHub.SystemUuid.Size == GUID_STRING_LENGTH + 1
-    && !EFI_ERROR (AsciiStrToGuid (OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemUuid), &Uuid))) {
-    Data.SystemUUID         = &Uuid;
-  }
+    if (Config->PlatformInfo.DataHub.SystemUuid.Size == GUID_STRING_LENGTH + 1
+      && !EFI_ERROR (AsciiStrToGuid (OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemUuid), &Uuid))) {
+      Data.SystemUUID         = &Uuid;
+    }
 
-  if (OC_BLOB_GET (&Config->PlatformInfo.DataHub.BoardProduct)[0] != '\0') {
-    Data.BoardProduct = OC_BLOB_GET (&Config->PlatformInfo.DataHub.BoardProduct);
-  }
+    if (OC_BLOB_GET (&Config->PlatformInfo.DataHub.BoardProduct)[0] != '\0') {
+      Data.BoardProduct = OC_BLOB_GET (&Config->PlatformInfo.DataHub.BoardProduct);
+    }
 
-  Data.BoardRevision      = &Config->PlatformInfo.DataHub.BoardRevision[0];
-  Data.StartupPowerEvents = &Config->PlatformInfo.DataHub.StartupPowerEvents;
-  Data.InitialTSC         = &Config->PlatformInfo.DataHub.InitialTSC;
+    Data.BoardRevision      = &Config->PlatformInfo.DataHub.BoardRevision[0];
+    Data.StartupPowerEvents = &Config->PlatformInfo.DataHub.StartupPowerEvents;
+    Data.InitialTSC         = &Config->PlatformInfo.DataHub.InitialTSC;
 
-  if (Config->PlatformInfo.DataHub.FSBFrequency != 0) {
-    Data.FSBFrequency     = &Config->PlatformInfo.DataHub.FSBFrequency;
-  }
+    if (Config->PlatformInfo.DataHub.FSBFrequency != 0) {
+      Data.FSBFrequency     = &Config->PlatformInfo.DataHub.FSBFrequency;
+    }
 
-  if (Config->PlatformInfo.DataHub.ARTFrequency != 0) {
-    Data.ARTFrequency     = &Config->PlatformInfo.DataHub.ARTFrequency;
-  }
+    if (Config->PlatformInfo.DataHub.ARTFrequency != 0) {
+      Data.ARTFrequency     = &Config->PlatformInfo.DataHub.ARTFrequency;
+    }
 
-  if (Config->PlatformInfo.DataHub.DevicePathsSupported[0] != 0) {
-    Data.DevicePathsSupported = &Config->PlatformInfo.DataHub.DevicePathsSupported[0];
-  }
+    if (Config->PlatformInfo.DataHub.DevicePathsSupported[0] != 0) {
+      Data.DevicePathsSupported = &Config->PlatformInfo.DataHub.DevicePathsSupported[0];
+    }
 
-  if (Config->PlatformInfo.DataHub.SmcRevision[0] != 0
-    || Config->PlatformInfo.DataHub.SmcRevision[1] != 0
-    || Config->PlatformInfo.DataHub.SmcRevision[2] != 0
-    || Config->PlatformInfo.DataHub.SmcRevision[3] != 0
-    || Config->PlatformInfo.DataHub.SmcRevision[4] != 0
-    || Config->PlatformInfo.DataHub.SmcRevision[5] != 0) {
-    Data.SmcRevision      = &Config->PlatformInfo.DataHub.SmcRevision[0];
-  }
+    if (Config->PlatformInfo.DataHub.SmcRevision[0] != 0
+      || Config->PlatformInfo.DataHub.SmcRevision[1] != 0
+      || Config->PlatformInfo.DataHub.SmcRevision[2] != 0
+      || Config->PlatformInfo.DataHub.SmcRevision[3] != 0
+      || Config->PlatformInfo.DataHub.SmcRevision[4] != 0
+      || Config->PlatformInfo.DataHub.SmcRevision[5] != 0) {
+      Data.SmcRevision      = &Config->PlatformInfo.DataHub.SmcRevision[0];
+    }
 
-  if (Config->PlatformInfo.DataHub.SmcBranch[0] != 0
-    || Config->PlatformInfo.DataHub.SmcBranch[1] != 0
-    || Config->PlatformInfo.DataHub.SmcBranch[2] != 0
-    || Config->PlatformInfo.DataHub.SmcBranch[3] != 0
-    || Config->PlatformInfo.DataHub.SmcBranch[4] != 0
-    || Config->PlatformInfo.DataHub.SmcBranch[5] != 0
-    || Config->PlatformInfo.DataHub.SmcBranch[6] != 0
-    || Config->PlatformInfo.DataHub.SmcBranch[7] != 0) {
-    Data.SmcBranch        = &Config->PlatformInfo.DataHub.SmcBranch[0];
-  }
+    if (Config->PlatformInfo.DataHub.SmcBranch[0] != 0
+      || Config->PlatformInfo.DataHub.SmcBranch[1] != 0
+      || Config->PlatformInfo.DataHub.SmcBranch[2] != 0
+      || Config->PlatformInfo.DataHub.SmcBranch[3] != 0
+      || Config->PlatformInfo.DataHub.SmcBranch[4] != 0
+      || Config->PlatformInfo.DataHub.SmcBranch[5] != 0
+      || Config->PlatformInfo.DataHub.SmcBranch[6] != 0
+      || Config->PlatformInfo.DataHub.SmcBranch[7] != 0) {
+      Data.SmcBranch        = &Config->PlatformInfo.DataHub.SmcBranch[0];
+    }
 
-  if (Config->PlatformInfo.DataHub.SmcPlatform[0] != 0
-    || Config->PlatformInfo.DataHub.SmcPlatform[1] != 0
-    || Config->PlatformInfo.DataHub.SmcPlatform[2] != 0
-    || Config->PlatformInfo.DataHub.SmcPlatform[3] != 0
-    || Config->PlatformInfo.DataHub.SmcPlatform[4] != 0
-    || Config->PlatformInfo.DataHub.SmcPlatform[5] != 0
-    || Config->PlatformInfo.DataHub.SmcPlatform[6] != 0
-    || Config->PlatformInfo.DataHub.SmcPlatform[7] != 0) {
-    Data.SmcPlatform      = &Config->PlatformInfo.DataHub.SmcPlatform[0];
+    if (Config->PlatformInfo.DataHub.SmcPlatform[0] != 0
+      || Config->PlatformInfo.DataHub.SmcPlatform[1] != 0
+      || Config->PlatformInfo.DataHub.SmcPlatform[2] != 0
+      || Config->PlatformInfo.DataHub.SmcPlatform[3] != 0
+      || Config->PlatformInfo.DataHub.SmcPlatform[4] != 0
+      || Config->PlatformInfo.DataHub.SmcPlatform[5] != 0
+      || Config->PlatformInfo.DataHub.SmcPlatform[6] != 0
+      || Config->PlatformInfo.DataHub.SmcPlatform[7] != 0) {
+      Data.SmcPlatform      = &Config->PlatformInfo.DataHub.SmcPlatform[0];
+    }
+  } else {
+    //
+    // Automatic mode read data from Generic & MacInfo.
+    //
+    Data.PlatformName = MacInfo->DataHub.PlatformName;
+    Data.SystemProductName = MacInfo->DataHub.SystemProductName;
+  
+    if (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemSerialNumber)[0] != '\0') {
+      Data.SystemSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemSerialNumber);
+    }
+
+    if (Config->PlatformInfo.Generic.SystemUuid.Size == GUID_STRING_LENGTH + 1
+      && !EFI_ERROR (AsciiStrToGuid (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid), &Uuid))) {
+      Data.SystemUUID         = &Uuid;
+    }
+
+    Data.BoardProduct  = MacInfo->DataHub.BoardProduct;
+    Data.BoardRevision = &Config->PlatformInfo.DataHub.BoardRevision[0];
+    StartupPowerEvents = 0;
+    Data.StartupPowerEvents = &StartupPowerEvents;
+    Data.DevicePathsSupported = &MacInfo->DataHub.DevicePathsSupported[0];
+
+    Data.SmcRevision      = &MacInfo->DataHub.SmcRevision[0];
+    Data.SmcBranch        = &MacInfo->DataHub.SmcBranch[0];
+    Data.SmcPlatform      = &MacInfo->DataHub.SmcPlatform[0];
   }
 
   Status = UpdateDataHub (&Data, CpuInfo);
@@ -119,6 +152,7 @@ VOID
 OcPlatformUpdateSmbios (
   IN OC_GLOBAL_CONFIG       *Config,
   IN OC_CPU_INFO            *CpuInfo,
+  IN MAC_INFO_DATA          *MacInfo,
   IN OC_SMBIOS_UPDATE_MODE  UpdateMode
   )
 {
@@ -128,107 +162,151 @@ OcPlatformUpdateSmbios (
 
   ZeroMem (&Data, sizeof (Data));
 
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSVendor)[0] != '\0') {
-    Data.BIOSVendor = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSVendor);
+  if (MacInfo == NULL) {
+    //
+    // Manual mode, read data from SMBIOS.
+    //
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSVendor)[0] != '\0') {
+      Data.BIOSVendor = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSVendor);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSVersion)[0] != '\0') {
+      Data.BIOSVersion = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSVersion);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSReleaseDate)[0] != '\0') {
+      Data.BIOSReleaseDate = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSReleaseDate);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemManufacturer)[0] != '\0') {
+      Data.SystemManufacturer = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemManufacturer);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemProductName)[0] != '\0') {
+      Data.SystemProductName = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemProductName);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemVersion)[0] != '\0') {
+      Data.SystemVersion = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemVersion);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemSerialNumber)[0] != '\0') {
+      Data.SystemSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemSerialNumber);
+    }
+
+    if (Config->PlatformInfo.DataHub.SystemUuid.Size == GUID_STRING_LENGTH + 1
+      && !EFI_ERROR (AsciiStrToGuid (OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemUuid), &Uuid))) {
+      Data.SystemUUID         = &Uuid;
+    }
+
+    if (Config->PlatformInfo.Smbios.BoardType != 0) {
+      Data.BoardType = &Config->PlatformInfo.Smbios.BoardType;
+    }
+
+    if (Config->PlatformInfo.Smbios.ChassisType != 0) {
+      Data.ChassisType = &Config->PlatformInfo.Smbios.ChassisType;
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemSKUNumber)[0] != '\0') {
+      Data.SystemSKUNumber = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemSKUNumber);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemFamily)[0] != '\0') {
+      Data.SystemFamily = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemFamily);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardManufacturer)[0] != '\0') {
+      Data.BoardManufacturer = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardManufacturer);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardProduct)[0] != '\0') {
+      Data.BoardProduct = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardProduct);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardVersion)[0] != '\0') {
+      Data.BoardVersion = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardVersion);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardSerialNumber)[0] != '\0') {
+      Data.BoardSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardSerialNumber);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardAssetTag)[0] != '\0') {
+      Data.BoardAssetTag = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardAssetTag);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardLocationInChassis)[0] != '\0') {
+      Data.BoardLocationInChassis = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardLocationInChassis);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisManufacturer)[0] != '\0') {
+      Data.ChassisManufacturer = OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisManufacturer);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisVersion)[0] != '\0') {
+      Data.ChassisVersion = OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisVersion);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisSerialNumber)[0] != '\0') {
+      Data.ChassisSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisSerialNumber);
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisAssetTag)[0] != '\0') {
+      Data.ChassisAssetTag = OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisAssetTag);
+    }
+
+    if (Config->PlatformInfo.Smbios.MemoryFormFactor != 0) {
+      Data.MemoryFormFactor = &Config->PlatformInfo.Smbios.MemoryFormFactor;
+    }
+
+    Data.FirmwareFeatures     = Config->PlatformInfo.Smbios.FirmwareFeatures;
+    Data.FirmwareFeaturesMask = Config->PlatformInfo.Smbios.FirmwareFeaturesMask;
+
+    if (Config->PlatformInfo.Smbios.ProcessorType != 0) {
+      Data.ProcessorType = &Config->PlatformInfo.Smbios.ProcessorType;
+    }
+
+    Data.PlatformFeature = Config->PlatformInfo.Smbios.PlatformFeature;
+  } else {
+    //
+    // Automatic mode read data from Generic & MacInfo.
+    //
+    Data.BIOSVersion = MacInfo->Smbios.BIOSVersion;
+    Data.BIOSReleaseDate = MacInfo->Smbios.BIOSReleaseDate;
+    Data.SystemProductName = MacInfo->Smbios.SystemProductName;
+    Data.SystemVersion = MacInfo->Smbios.SystemVersion;
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemSerialNumber)[0] != '\0') {
+      Data.SystemSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemSerialNumber);
+    }
+
+    if (Config->PlatformInfo.Generic.SystemUuid.Size == GUID_STRING_LENGTH + 1
+      && !EFI_ERROR (AsciiStrToGuid (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid), &Uuid))) {
+      Data.SystemUUID = &Uuid;
+    }
+
+    Data.BoardType              = MacInfo->Smbios.BoardType;
+    Data.ChassisType            = MacInfo->Smbios.ChassisType;
+    Data.SystemSKUNumber        = MacInfo->Smbios.SystemSKUNumber;
+    Data.SystemFamily           = MacInfo->Smbios.SystemFamily;
+    Data.BoardProduct           = MacInfo->Smbios.BoardProduct;
+    Data.BoardVersion           = MacInfo->Smbios.BoardVersion;
+    Data.BoardSerialNumber      = MacInfo->Smbios.BoardSerialNumber;
+    Data.BoardAssetTag          = MacInfo->Smbios.BoardAssetTag;
+    Data.BoardLocationInChassis = MacInfo->Smbios.BoardLocationInChassis;
+    Data.ChassisVersion         = MacInfo->Smbios.ChassisVersion;
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemSerialNumber)[0] != '\0') {
+      Data.ChassisSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemSerialNumber);
+    }
+
+    Data.ChassisAssetTag      = MacInfo->Smbios.ChassisAssetTag;
+    Data.MemoryFormFactor     = MacInfo->Smbios.MemoryFormFactor;
+    Data.FirmwareFeatures     = MacInfo->Smbios.FirmwareFeatures;
+    Data.FirmwareFeaturesMask = MacInfo->Smbios.FirmwareFeaturesMask;
+    Data.ProcessorType        = NULL;
+    Data.PlatformFeature      = MacInfo->Smbios.PlatformFeature;
   }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSVersion)[0] != '\0') {
-    Data.BIOSVersion = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSVersion);
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSReleaseDate)[0] != '\0') {
-    Data.BIOSReleaseDate = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BIOSReleaseDate);
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemManufacturer)[0] != '\0') {
-    Data.SystemManufacturer = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemManufacturer);
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemProductName)[0] != '\0') {
-    Data.SystemProductName = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemProductName);
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemVersion)[0] != '\0') {
-    Data.SystemVersion = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemVersion);
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemSerialNumber)[0] != '\0') {
-    Data.SystemSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemSerialNumber);
-  }
-
-  if (Config->PlatformInfo.DataHub.SystemUuid.Size == GUID_STRING_LENGTH + 1
-    && !EFI_ERROR (AsciiStrToGuid (OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemUuid), &Uuid))) {
-    Data.SystemUUID         = &Uuid;
-  }
-
-  if (Config->PlatformInfo.Smbios.BoardType != 0) {
-    Data.BoardType = &Config->PlatformInfo.Smbios.BoardType;
-  }
-
-  if (Config->PlatformInfo.Smbios.ChassisType != 0) {
-    Data.ChassisType = &Config->PlatformInfo.Smbios.ChassisType;
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemSKUNumber)[0] != '\0') {
-    Data.SystemSKUNumber = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemSKUNumber);
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemFamily)[0] != '\0') {
-    Data.SystemFamily = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemFamily);
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardManufacturer)[0] != '\0') {
-    Data.BoardManufacturer = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardManufacturer);
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardProduct)[0] != '\0') {
-    Data.BoardProduct = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardProduct);
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardVersion)[0] != '\0') {
-    Data.BoardVersion = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardVersion);
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardSerialNumber)[0] != '\0') {
-    Data.BoardSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardSerialNumber);
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardAssetTag)[0] != '\0') {
-    Data.BoardAssetTag = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardAssetTag);
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardLocationInChassis)[0] != '\0') {
-    Data.BoardLocationInChassis = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardLocationInChassis);
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisManufacturer)[0] != '\0') {
-    Data.ChassisManufacturer = OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisManufacturer);
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisVersion)[0] != '\0') {
-    Data.ChassisVersion = OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisVersion);
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisSerialNumber)[0] != '\0') {
-    Data.ChassisSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisSerialNumber);
-  }
-
-  if (OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisAssetTag)[0] != '\0') {
-    Data.ChassisAssetTag = OC_BLOB_GET (&Config->PlatformInfo.Smbios.ChassisAssetTag);
-  }
-
-  if (Config->PlatformInfo.Smbios.MemoryFormFactor != 0) {
-    Data.MemoryFormFactor = &Config->PlatformInfo.Smbios.MemoryFormFactor;
-  }
-
-  Data.FirmwareFeatures     = Config->PlatformInfo.Smbios.FirmwareFeatures;
-  Data.FirmwareFeaturesMask = Config->PlatformInfo.Smbios.FirmwareFeaturesMask;
-
-  if (Config->PlatformInfo.Smbios.ProcessorType != 0) {
-    Data.ProcessorType      = &Config->PlatformInfo.Smbios.ProcessorType;
-  }
-
-  Data.PlatformFeature      = Config->PlatformInfo.Smbios.PlatformFeature;
 
   Status = CreateSmbios (&Data, UpdateMode, CpuInfo);
   if (EFI_ERROR (Status)) {
@@ -239,23 +317,33 @@ OcPlatformUpdateSmbios (
 STATIC
 VOID
 OcPlatformUpdateNvram (
-  IN OC_GLOBAL_CONFIG    *Config
+  IN OC_GLOBAL_CONFIG    *Config,
+  IN MAC_INFO_DATA       *MacInfo
   )
 {
   EFI_STATUS   Status;
-  CHAR8        *Bid;
-  CHAR8        *Mlb;
-  UINT8        *Rom;
+  CONST CHAR8  *Bid;
+  CONST CHAR8  *Mlb;
+  CONST  UINT8 *Rom;
   UINT64       ExFeatures;
   UINT64       ExFeaturesMask;
   UINT32       Features;
   UINT32       FeaturesMask;
 
-  Bid            = OC_BLOB_GET (&Config->PlatformInfo.Nvram.Bid);
-  Mlb            = OC_BLOB_GET (&Config->PlatformInfo.Nvram.Mlb);
-  Rom            = &Config->PlatformInfo.Nvram.Rom[0];
-  ExFeatures     = Config->PlatformInfo.Nvram.FirmwareFeatures;
-  ExFeaturesMask = Config->PlatformInfo.Nvram.FirmwareFeaturesMask;
+  if (MacInfo == NULL) {
+    Bid            = OC_BLOB_GET (&Config->PlatformInfo.Nvram.Bid);
+    Mlb            = OC_BLOB_GET (&Config->PlatformInfo.Nvram.Mlb);
+    Rom            = &Config->PlatformInfo.Nvram.Rom[0];
+    ExFeatures     = Config->PlatformInfo.Nvram.FirmwareFeatures;
+    ExFeaturesMask = Config->PlatformInfo.Nvram.FirmwareFeaturesMask;
+  } else {
+    Bid            = MacInfo->Smbios.BoardProduct;
+    Mlb            = OC_BLOB_GET (&Config->PlatformInfo.Generic.Mlb);
+    Rom            = &Config->PlatformInfo.Generic.Rom[0];
+    ExFeatures     = MacInfo->Smbios.FirmwareFeatures;
+    ExFeaturesMask = MacInfo->Smbios.FirmwareFeaturesMask;
+  }
+
   Features       = (UINT32) ExFeatures;
   FeaturesMask   = (UINT32) ExFeaturesMask;
 
@@ -265,7 +353,7 @@ OcPlatformUpdateNvram (
       &gAppleVendorVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
       Config->PlatformInfo.Nvram.Bid.Size - 1,
-      Bid
+      (CHAR8 *) Bid
       );
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
@@ -281,7 +369,7 @@ OcPlatformUpdateNvram (
       &gAppleVendorVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
       sizeof (Config->PlatformInfo.Nvram.Rom),
-      Rom
+      (UINT8 *) Rom
       );
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
@@ -295,7 +383,7 @@ OcPlatformUpdateNvram (
       &gAppleVendorVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
       sizeof (Config->PlatformInfo.Nvram.Rom),
-      Rom
+      (UINT8 *) Rom
       );
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
@@ -311,7 +399,7 @@ OcPlatformUpdateNvram (
       &gAppleVendorVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
       Config->PlatformInfo.Nvram.Mlb.Size - 1,
-      Mlb
+      (CHAR8 *) Mlb
       );
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
@@ -325,7 +413,7 @@ OcPlatformUpdateNvram (
       &gAppleVendorVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
       Config->PlatformInfo.Nvram.Mlb.Size - 1,
-      Mlb
+      (CHAR8 *) Mlb
       );
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
@@ -402,17 +490,18 @@ OcLoadPlatformSupport (
 {
   CONST CHAR8            *SmbiosUpdateStr;
   OC_SMBIOS_UPDATE_MODE  SmbiosUpdateMode;
+  MAC_INFO_DATA          InfoData;
+  MAC_INFO_DATA          *UsedMacInfo;
 
-  //
-  // TODO: implement
-  //
   if (Config->PlatformInfo.Automatic) {
-    DEBUG ((DEBUG_ERROR, "OC: Automatic platform information is unsupported\n"));
-    return;
+    GetMacInfo (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemProductName), &InfoData);
+    UsedMacInfo = &InfoData;
+  } else {
+    UsedMacInfo = NULL;
   }
 
   if (Config->PlatformInfo.UpdateDataHub) {
-    OcPlatformUpdateDataHub (Config, CpuInfo);
+    OcPlatformUpdateDataHub (Config, CpuInfo, UsedMacInfo);
   }
 
   if (Config->PlatformInfo.UpdateSmbios) {
@@ -431,10 +520,10 @@ OcLoadPlatformSupport (
       SmbiosUpdateMode = OcSmbiosUpdateAuto;
     }
 
-    OcPlatformUpdateSmbios (Config, CpuInfo, SmbiosUpdateMode);
+    OcPlatformUpdateSmbios (Config, CpuInfo, UsedMacInfo, SmbiosUpdateMode);
   }
 
   if (Config->PlatformInfo.UpdateNvram) {
-    OcPlatformUpdateNvram (Config);
+    OcPlatformUpdateNvram (Config, UsedMacInfo);
   }
 }

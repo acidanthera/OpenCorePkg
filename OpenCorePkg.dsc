@@ -16,7 +16,7 @@
 
 [Defines]
   PLATFORM_NAME           = OpenCorePkg
-  PLATFORM_GUID           = 6B1D3AB4-5C85-462D-9DC5-480F8B17D5CB
+  PLATFORM_GUID           = C46F121D-ABC6-42A3-A241-91B09224C357
   PLATFORM_VERSION        = 1.0
   SUPPORTED_ARCHITECTURES = X64
   BUILD_TARGETS           = RELEASE|DEBUG|NOOPT
@@ -50,6 +50,7 @@
   SerialPortLib|MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf
   PlatformHookLib|MdeModulePkg/Library/BasePlatformHookLibNull/BasePlatformHookLibNull.inf
   HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
+  MacInfoLib|MacInfoPkg/Library/MacInfoLib/MacInfoLib.inf
   OcAcpiLib|OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
   OcAppleBootPolicyLib|OcSupportPkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
   OcAppleChunklistLib|OcSupportPkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
@@ -115,4 +116,4 @@
   MSFT:RELEASE_*_*_CC_FLAGS  = $(OCPKG_BUILD_OPTIONS_GEN)
   XCODE:DEBUG_*_*_CC_FLAGS   = $(OCPKG_BUILD_OPTIONS_GEN)
   XCODE:NOOPT_*_*_CC_FLAGS   = $(OCPKG_BUILD_OPTIONS_GEN)
-  XCODE:RELEASE_*_*_CC_FLAGS = -Wno-error -flto $(OCPKG_BUILD_OPTIONS_GEN)
+  XCODE:RELEASE_*_*_CC_FLAGS = -flto $(OCPKG_BUILD_OPTIONS_GEN)

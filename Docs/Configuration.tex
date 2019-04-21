@@ -476,6 +476,7 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -I/UefiPackages/OpenCorePkg/Include
 -I/UefiPackages/OcSupportPkg/Include
 -I/UefiPackages/IntelFrameworkPkg/Include
+-I/UefiPackages/MacInfoPkg/Include
 -IInclude
 -include
 /UefiPackages/MdePkg/Include/Uefi.h
@@ -1701,7 +1702,8 @@ troubleshooting:
 
 Platform information is comprised of several identification fields
 generated or filled manually to be compatible with macOS services. The
-base part of the configuration may be obtained from \texttt{MacInfoPkg}
+base part of the configuration may be obtained from
+\href{https://github.com/acidanthera/MacInfoPkg}{\texttt{MacInfoPkg}}
 package, which itself generates a set of interfaces based on a database
 in \href{https://yaml.org/spec/1.2/spec.html}{YAML} format. These fields
 are written to three select destinations:
@@ -1739,9 +1741,8 @@ for system configuration.
   and \texttt{SMBIOS} sections.
 
   Enabling this option is useful when \texttt{Generic} section is flexible
-  enough. When enabled \texttt{SMBIOS} and \texttt{DataHub} data is unused.
-
-  FIXME: Currently unsupported.
+  enough. When enabled \texttt{SMBIOS}, \texttt{DataHub}, and
+  \texttt{PlatformNVRAM} data is unused.
 \item
   \texttt{UpdateDataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -1801,21 +1802,25 @@ for system configuration.
 \item
   \texttt{Generic}\\
   \textbf{Type}: \texttt{plist\ dictonary}\\
+  \textbf{Optional}: When \texttt{Automatic} is \texttt{false}\\
   \textbf{Description}: Update all fields. This section is read only
   when \texttt{Automatic} is active.
 \item
   \texttt{DataHub}\\
   \textbf{Type}: \texttt{plist\ dictonary}\\
+  \textbf{Optional}: When \texttt{Automatic} is \texttt{true}\\
   \textbf{Description}: Update Data Hub fields. This section is read
   only when \texttt{Automatic} is not active.
 \item
   \texttt{PlatformNVRAM}\\
   \textbf{Type}: \texttt{plist\ dictonary}\\
+  \textbf{Optional}: When \texttt{Automatic} is \texttt{true}\\
   \textbf{Description}: Update platform NVRAM fields. This section is
   read only when \texttt{Automatic} is not active.
 \item
   \texttt{SMBIOS}\\
   \textbf{Type}: \texttt{plist\ dictonary}\\
+  \textbf{Optional}: When \texttt{Automatic} is \texttt{true}\\
   \textbf{Description}: Update SMBIOS fields. This section is read only
   when \texttt{Automatic} is not active.
 \end{enumerate}
