@@ -494,12 +494,16 @@ PrelinkedInjectKext (
   IN     UINT32             ExecutableSize OPTIONAL
   )
 {
-  RETURN_STATUS        Status;
+  RETURN_STATUS     Status;
+
   XML_DOCUMENT      *InfoPlistDocument;
   XML_NODE          *InfoPlistRoot;
   CHAR8             *TmpInfoPlist;
   CHAR8             *NewInfoPlist;
   OC_MACHO_CONTEXT  ExecutableContext;
+  CONST CHAR8       *TmpKeyValue;
+  UINT32            FieldCount;
+  UINT32            FieldIndex;
   UINT32            NewInfoPlistSize;
   UINT32            NewPrelinkedSize;
   UINT32            AlignedExecutableSize;
@@ -521,7 +525,7 @@ PrelinkedInjectKext (
   if (Executable != NULL) {
     ASSERT (ExecutableSize > 0);
     if (!MachoInitializeContext (&ExecutableContext, (UINT8 *)Executable, ExecutableSize)) {
-      DEBUG ((DEBUG_INFO, "Injected kext %a/%a is not a supported executable\n", BundlePath, ExecutablePath));
+      DEBUG ((DEBUG_INFO, "OCK: Injected kext %a/%a is not a supported executable\n", BundlePath, ExecutablePath));
       return RETURN_INVALID_PARAMETER;
     }
 
@@ -575,6 +579,29 @@ PrelinkedInjectKext (
     FreePool (TmpInfoPlist);
     return RETURN_INVALID_PARAMETER;
   }
+
+  //
+  // We are not supposed to check for this, it is XNU responsibility, which reliably panics.
+  // However, to avoid certain users making this kind of mistake, we still provide some
+  // code in debug mode to diagnose it.
+  //
+  DEBUG_CODE_BEGIN ();
+  if (Executable == NULL) {
+    FieldCount = PlistDictChildren (InfoPlistRoot);
+    for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
+      TmpKeyValue = PlistKeyValue (PlistDictChild (InfoPlistRoot, FieldIndex, NULL));
+      if (TmpKeyValue == NULL) {
+        continue;
+      }
+
+      if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_EXECUTABLE_KEY) == 0) {
+        DEBUG ((DEBUG_ERROR, "OCK: Plist-only kext has %a key\n", INFO_BUNDLE_EXECUTABLE_KEY));
+        ASSERT (FALSE);
+        CpuDeadLoop ();
+      }
+    }
+  }
+  DEBUG_CODE_END ();
 
   Failed = FALSE;
   Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_BUNDLE_PATH_KEY) == NULL;
