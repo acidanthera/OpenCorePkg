@@ -77,7 +77,9 @@ GetAppleDiskLabel (
 
   if (AsciiDiskLabel != NULL) {
     UnicodeDiskLabel = AsciiStrCopyToUnicode (AsciiDiskLabel, DiskLabelLength);
-    UnicodeFilterString (UnicodeDiskLabel, TRUE);
+    if (UnicodeDiskLabel != NULL) {
+      UnicodeFilterString (UnicodeDiskLabel, TRUE);
+    }
     FreePool (AsciiDiskLabel);
   } else {
     UnicodeDiskLabel = NULL;
