@@ -327,8 +327,11 @@ OcPlatformUpdateNvram (
 {
   EFI_STATUS   Status;
   CONST CHAR8  *Bid;
+  UINTN        BidSize;
   CONST CHAR8  *Mlb;
+  UINTN        MlbSize;
   CONST  UINT8 *Rom;
+  UINTN        RomSize;
   UINT64       ExFeatures;
   UINT64       ExFeaturesMask;
   UINT32       Features;
@@ -336,14 +339,20 @@ OcPlatformUpdateNvram (
 
   if (MacInfo == NULL) {
     Bid            = OC_BLOB_GET (&Config->PlatformInfo.Nvram.Bid);
+    BidSize        = Config->PlatformInfo.Nvram.Bid.Size - 1;
     Mlb            = OC_BLOB_GET (&Config->PlatformInfo.Nvram.Mlb);
+    MlbSize        = Config->PlatformInfo.Nvram.Mlb.Size - 1;
     Rom            = &Config->PlatformInfo.Nvram.Rom[0];
+    RomSize        = sizeof (Config->PlatformInfo.Nvram.Rom);
     ExFeatures     = Config->PlatformInfo.Nvram.FirmwareFeatures;
     ExFeaturesMask = Config->PlatformInfo.Nvram.FirmwareFeaturesMask;
   } else {
     Bid            = MacInfo->Smbios.BoardProduct;
+    BidSize        = AsciiStrLen (Bid);
     Mlb            = OC_BLOB_GET (&Config->PlatformInfo.Generic.Mlb);
+    MlbSize        = Config->PlatformInfo.Generic.Mlb.Size - 1;
     Rom            = &Config->PlatformInfo.Generic.Rom[0];
+    RomSize        = sizeof (Config->PlatformInfo.Generic.Rom);
     ExFeatures     = MacInfo->Smbios.FirmwareFeatures;
     ExFeaturesMask = MacInfo->Smbios.FirmwareFeaturesMask;
   }
@@ -356,7 +365,7 @@ OcPlatformUpdateNvram (
       L"HW_BID",
       &gAppleVendorVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-      Config->PlatformInfo.Nvram.Bid.Size - 1,
+      BidSize,
       (CHAR8 *) Bid
       );
     DEBUG ((
@@ -372,7 +381,7 @@ OcPlatformUpdateNvram (
       L"HW_ROM",
       &gAppleVendorVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-      sizeof (Config->PlatformInfo.Nvram.Rom),
+      RomSize,
       (UINT8 *) Rom
       );
     DEBUG ((
@@ -386,7 +395,7 @@ OcPlatformUpdateNvram (
       L"ROM",
       &gAppleVendorVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-      sizeof (Config->PlatformInfo.Nvram.Rom),
+      RomSize,
       (UINT8 *) Rom
       );
     DEBUG ((
@@ -402,7 +411,7 @@ OcPlatformUpdateNvram (
       L"HW_MLB",
       &gAppleVendorVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-      Config->PlatformInfo.Nvram.Mlb.Size - 1,
+      MlbSize,
       (CHAR8 *) Mlb
       );
     DEBUG ((
@@ -416,7 +425,7 @@ OcPlatformUpdateNvram (
       L"MLB",
       &gAppleVendorVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-      Config->PlatformInfo.Nvram.Mlb.Size - 1,
+      MlbSize,
       (CHAR8 *) Mlb
       );
     DEBUG ((
