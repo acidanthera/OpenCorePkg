@@ -291,7 +291,11 @@ OcPlatformUpdateSmbios (
     Data.SystemFamily           = MacInfo->Smbios.SystemFamily;
     Data.BoardProduct           = MacInfo->Smbios.BoardProduct;
     Data.BoardVersion           = MacInfo->Smbios.BoardVersion;
-    Data.BoardSerialNumber      = MacInfo->Smbios.BoardSerialNumber;
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Generic.Mlb)[0] != '\0') {
+      Data.BoardSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Generic.Mlb);
+    }
+
     Data.BoardAssetTag          = MacInfo->Smbios.BoardAssetTag;
     Data.BoardLocationInChassis = MacInfo->Smbios.BoardLocationInChassis;
     Data.ChassisVersion         = MacInfo->Smbios.ChassisVersion;
