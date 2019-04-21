@@ -436,7 +436,10 @@ might work, but are neither supported, nor recommended. Contribution of clean
 patches is welcome. Please do follow
 \href{https://github.com/tianocore/tianocore.github.io/wiki/Code-Style-C}{EDK II C Codestyle}.
 
-Required external package dependencies include \href{https://github.com/acidanthera/OcSupportPkg}{EfiPkg} and \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}.
+Required external package dependencies include
+\href{https://github.com/acidanthera/OcSupportPkg}{EfiPkg},
+\href{https://github.com/acidanthera/OcSupportPkg}{MacInfoPkg}, and
+\href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}.
 
 To compile with \texttt{XCODE5}, besides \href{https://developer.apple.com/xcode}{Xcode},
 one should also install \href{https://www.nasm.us}{NASM} and
@@ -446,6 +449,7 @@ one should also install \href{https://www.nasm.us}{NASM} and
 git clone https://github.com/tianocore/edk2 -b UDK2018 UDK
 cd UDK
 git clone https://github.com/acidanthera/EfiPkg
+git clone https://github.com/acidanthera/MacInfoPkg
 git clone https://github.com/acidanthera/OcSupportPkg
 git clone https://github.com/acidanthera/OpenCorePkg
 source edksetup.sh
