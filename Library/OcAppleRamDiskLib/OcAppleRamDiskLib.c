@@ -410,7 +410,7 @@ OcAppleRamDiskLoadFile (
 
   Status = File->SetPosition (File, FilePosition);
   if (EFI_ERROR (Status)) {
-    return Status;
+    return FALSE;
   }
 
   for (Index = 0; FileSize > 0 && Index < ExtentTable->ExtentCount; ++Index) {
