@@ -350,6 +350,7 @@ void EFIAPI tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
                 goto abort;
             case 'u':
                 p.base = 10;
+                p.uc = 0;
 #ifdef PRINTF_LONG_SUPPORT
 #ifdef PRINTF_LONG_LONG_SUPPORT
                 if (2 == lng)
