@@ -41,6 +41,7 @@
 
 [LibraryClasses]
   BaseLib
+  OcDevicePathLib
   OcGuardLib
   MemoryAllocationLib
 
