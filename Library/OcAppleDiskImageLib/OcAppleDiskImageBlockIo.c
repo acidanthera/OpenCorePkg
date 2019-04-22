@@ -213,7 +213,7 @@ InternalConstructDmgDevicePath (
   DevPath->Size.Length                = FileSize;
   SetDevicePathNodeLength (&DevPath->Size, sizeof (DevPath->Size));
   CopyGuid (
-    &DevPath->Size.Vendor.Guid,
+    (VOID *)&DevPath->Size.Vendor.Guid,
     &gAppleDiskImageProtocolGuid
     );
 
