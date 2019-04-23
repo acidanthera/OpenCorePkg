@@ -26,6 +26,7 @@ matrix:
 
   - os: osx
     compiler: clang
+    osx_image: xcode10.2
 
     script:
       - echo "This script runs coverity..."
