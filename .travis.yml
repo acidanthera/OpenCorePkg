@@ -28,14 +28,11 @@ matrix:
     compiler: clang
     
     before_install:
-      - set -e
-      - curl -Ls https://entrust.com/root-certificates/entrust_l1k.cer -o ~/entrust_l1k.crt
-      - curl -LS https://curl.haxx.se/ca/cacert.pem -o ~/cacert.pem
-      - cat ~/entrust_l1k.crt >> ~/cacert.pem
-      - if [ -f ~/.curlrc ]; then echo "Dropping old ~/.curlrc:" ; cat ~/.curlrc ; fi
-      - echo "cacert=\"$HOME/cacert.pem\"" > ~/.curlrc
-      - if [ -f ~/.wgetrc ]; then echo "Dropping old ~/.wgetrc:" ; cat ~/.wgetrc ; fi
-      - echo "ca_certificate=$HOME/cacert.pem" > ~/.wgetrc
+      - curl -Ls https://entrust.com/root-certificates/entrust_l1k.cer -o ~/entrust_l1k.crt || exit 1
+      - curl -LS https://curl.haxx.se/ca/cacert.pem -o ~/cacert.pem || exit 1
+      - cat ~/entrust_l1k.crt >> ~/cacert.pem || exit 1
+      - echo "cacert=\"$HOME/cacert.pem\"" > ~/.curlrc || exit 1
+      - echo "ca_certificate=$HOME/cacert.pem" > ~/.wgetrc || exit 1
 
     script:
       - echo "This script runs coverity..."
