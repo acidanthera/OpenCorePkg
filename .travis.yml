@@ -26,16 +26,17 @@ matrix:
 
   - os: osx
     compiler: clang
-    osx_image: xcode10.2
     
     before_install:
-      - curl -s -L https://entrust.com/root-certificates/entrust_l1k.cer -o entrust_l1k.crt
-      - echo "--cacert entrust_l1k.crt" >> ~/.curlrc
+      - set -e
+      - curl -Ls https://entrust.com/root-certificates/entrust_l1k.cer -o ~/entrust_l1k.crt
+      - curl -LS https://curl.haxx.se/ca/cacert.pem -o ~/cacert.pem
+      - cat ~/entrust_l1k.crt >> ~/cacert.pem
+      - touch ~/.curlrc
+      - echo "--cacert '$HOME/cacert.pem'" >> ~/.curlrc
 
     script:
       - echo "This script runs coverity..."
-      - curl -s -L https://entrust.com/root-certificates/entrust_l1k.cer -o entrust_l1k.crt
-      - echo "--cacert entrust_l1k.crt" >> ~/.curlrc
 
     addons:
       coverity_scan:
