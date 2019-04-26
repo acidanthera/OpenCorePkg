@@ -35,7 +35,7 @@ matrix:
       - if [ -f ~/.curlrc ]; then echo "Dropping old ~/.curlrc:" ; cat ~/.curlrc ; fi
       - echo "cacert=\"$HOME/cacert.pem\"" > ~/.curlrc
       - if [ -f ~/.wgetrc ]; then echo "Dropping old ~/.wgetrc:" ; cat ~/.wgetrc ; fi
-      - echo "ca_certificate=\"$HOME/cacert.pem\"" > ~/.wgetrc
+      - echo "ca_certificate=$HOME/cacert.pem" > ~/.wgetrc
 
     script:
       - echo "This script runs coverity..."
