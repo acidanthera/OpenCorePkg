@@ -31,7 +31,7 @@ matrix:
     script:
       - echo "This script runs coverity..."
       - curl -s -L https://entrust.com/root-certificates/entrust_l1k.cer -o entrust_l1k.crt
-      - echo "ca_certificate=$(pwd)/entrust_l1k.crt" >> ~/.wgetrc
+      - echo "--cacert entrust_l1k.crt" >> ~/.curlrc
 
     addons:
       coverity_scan:
