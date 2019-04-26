@@ -32,8 +32,8 @@ matrix:
       - curl -Ls https://entrust.com/root-certificates/entrust_l1k.cer -o ~/entrust_l1k.crt
       - curl -LS https://curl.haxx.se/ca/cacert.pem -o ~/cacert.pem
       - cat ~/entrust_l1k.crt >> ~/cacert.pem
-      - touch ~/.curlrc
-      - echo "cacert=\"$HOME/cacert.pem\"" >> ~/.curlrc
+      - if [ -f ~/.curlrc ]; then echo "Dropping old ~/.curlrc:" ; cat ~/.curlrc ; fi
+      - echo "cacert=\"$HOME/cacert.pem\"" > ~/.curlrc
 
     script:
       - echo "This script runs coverity..."
