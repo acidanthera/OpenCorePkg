@@ -33,7 +33,7 @@ matrix:
       - curl -LS https://curl.haxx.se/ca/cacert.pem -o ~/cacert.pem
       - cat ~/entrust_l1k.crt >> ~/cacert.pem
       - touch ~/.curlrc
-      - echo "--cacert '$HOME/cacert.pem'" >> ~/.curlrc
+      - echo "cacert=\"$HOME/cacert.pem\"" >> ~/.curlrc
 
     script:
       - echo "This script runs coverity..."
