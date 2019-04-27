@@ -1034,6 +1034,64 @@ StrCmp (
 }
 
 STATIC
+CHAR16
+CharToUpper (
+  IN      CHAR16                    Char
+  )
+{
+  if (Char >= L'a' && Char <= L'z') {
+    return (CHAR16) (Char - (L'a' - L'A'));
+  }
+
+  return Char;
+}
+
+STATIC
+CHAR16 *
+StrStr (
+  IN      CONST CHAR16              *String,
+  IN      CONST CHAR16              *SearchString
+  )
+{
+  CONST CHAR16 *FirstMatch;
+  CONST CHAR16 *SearchStringTmp;
+
+  //
+  // ASSERT both strings are less long than PcdMaximumUnicodeStringLength.
+  // Length tests are performed inside StrLen().
+  //
+  ASSERT (StrSize (String) != 0);
+  ASSERT (StrSize (SearchString) != 0);
+
+  if (*SearchString == L'\0') {
+    return (CHAR16 *) String;
+  }
+
+  while (*String != L'\0') {
+    SearchStringTmp = SearchString;
+    FirstMatch = String;
+
+    while ((*String == *SearchStringTmp)
+            && (*String != L'\0')) {
+      String++;
+      SearchStringTmp++;
+    }
+
+    if (*SearchStringTmp == L'\0') {
+      return (CHAR16 *) FirstMatch;
+    }
+
+    if (*String == L'\0') {
+      return NULL;
+    }
+
+    String = FirstMatch + 1;
+  }
+
+  return NULL;
+}
+
+STATIC
 VOID
 InitializeListHead (
   LIST_ENTRY       *List
@@ -1589,6 +1647,29 @@ CalculateCrc32(
   return Crc ^ 0xffffffff;
 }
 
+#include <Protocol/DevicePath.h>
+
+#define END_DEVICE_PATH_LENGTH               (sizeof (EFI_DEVICE_PATH_PROTOCOL))
+
+STATIC CONST EFI_DEVICE_PATH_PROTOCOL  mUefiDevicePathLibEndDevicePath = {
+  END_DEVICE_PATH_TYPE,
+  END_ENTIRE_DEVICE_PATH_SUBTYPE,
+  {
+    END_DEVICE_PATH_LENGTH,
+    0
+  }
+};
+
+STATIC
+VOID
+SetDevicePathEndNode (
+  OUT VOID  *Node
+  )
+{
+  ASSERT (Node != NULL);
+  CopyMem (Node, &mUefiDevicePathLibEndDevicePath, sizeof (mUefiDevicePathLibEndDevicePath));
+}
+
 
 //
 // Services
@@ -1604,6 +1685,7 @@ struct EFI_BOOT_SERVICES_ {
   EFI_STATUS (*InstallProtocolInterface) (EFI_HANDLE *Handle, EFI_GUID *Protocol, EFI_INTERFACE_TYPE InterfaceType, VOID *Interface);
   EFI_STATUS (*GetMemoryMap) (UINTN *MemoryMapSize, EFI_MEMORY_DESCRIPTOR *MemoryMap, UINTN *MapKey, UINTN *DescriptorSize, UINT32 *DescriptorVersion);
   EFI_STATUS (*FreePool) (void *x);
+  EFI_STATUS (*LocateDevicePath) (EFI_GUID *Protocol, EFI_DEVICE_PATH_PROTOCOL **DevicePath, EFI_HANDLE *Device);
 };
 
 struct EFI_RUNTIME_SERVICES_ {
@@ -1641,7 +1723,9 @@ STATIC EFI_STATUS NilFreePages(EFI_PHYSICAL_ADDRESS Page, UINTN Pages) {
   return EFI_SUCCESS;
 }
 
-EFI_STATUS NilInstallConfigurationTable(EFI_GUID *Guid, VOID *Table);
+STATIC EFI_STATUS NilInstallConfigurationTable(EFI_GUID *Guid, VOID *Table) {
+  return EFI_UNSUPPORTED;
+}
 
 STATIC EFI_STATUS NilLocateHandleBuffer (EFI_LOCATE_SEARCH_TYPE SearchType, EFI_GUID * Protocol, VOID *SearchKey, UINTN *NumberHandles, EFI_HANDLE **Buffer) {
   return EFI_NOT_FOUND;
@@ -1667,6 +1751,10 @@ STATIC EFI_STATUS NilGetMemoryMap (UINTN *MemoryMapSize, EFI_MEMORY_DESCRIPTOR *
   return EFI_UNSUPPORTED;
 }
 
+STATIC EFI_STATUS NilLocateDevicePath (EFI_GUID *Protocol, EFI_DEVICE_PATH_PROTOCOL **DevicePath, EFI_HANDLE *Device) {
+  return EFI_UNSUPPORTED;
+}
+
 
 STATIC EFI_BOOT_SERVICES gNilBS = {
   .LocateProtocol = NilLocateProtocol,
@@ -1677,7 +1765,8 @@ STATIC EFI_BOOT_SERVICES gNilBS = {
   .HandleProtocol = NilHandleProtocol,
   .InstallProtocolInterface = NilInstallProtocolInterface,
   .GetMemoryMap = NilGetMemoryMap,
-  .FreePool = FreePool
+  .FreePool = FreePool,
+  .LocateDevicePath = NilLocateDevicePath
 };
 
 STATIC EFI_BOOT_SERVICES *gBS = &gNilBS;
@@ -1695,8 +1784,7 @@ STATIC EFI_RUNTIME_SERVICES *gRT = &gNilRT;
 #define _PCD_GET_MODE_BOOL_PcdEnableAppleThunderboltSync false
 #define _PCD_GET_MODE_BOOL_PcNvramInitDevicePropertyDatabase false
 #define _PCD_GET_MODE_32_PcdMaximumDevicePathNodeCount 11
-
-#include <Protocol/DevicePath.h>
+#define _PCD_GET_MODE_32_PcdMaximumUnicodeStringLength 0xFFFFFFFF
 
 #ifndef ABS
 #define ABS(x) (((x)<0) ? -(x) : (x))
