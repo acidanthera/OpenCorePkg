@@ -468,7 +468,7 @@ OcFixAppleBootDevicePath (
         // Must be set to 0xFFFF if the device is directly connected to the
         // HBA. This rule has been established by UEFI 2.5 via an Erratum and
         // has not been followed by Apple thus far.
-        // Reference: appendSATADevicePathNodeForIOMedia
+        // Reference: AppleACPIPlatform.kext, appendSATADevicePathNodeForIOMedia
         //
         DevPath.Sata->PortMultiplierPortNumber = 0xFFFF;
       }
@@ -485,7 +485,7 @@ OcFixAppleBootDevicePath (
       //
       // Apple uses SubType 0x16 (SasEx) for NVMe, while the UEFI Specification
       // defines it as SubType 0x17. The structures are identical.
-      // Reference: appendNVMeDevicePathNodeForIOMedia
+      // Reference: AppleACPIPlatform.kext, appendNVMeDevicePathNodeForIOMedia
       //
       if (DevicePathNodeLength (DevPath.DevPath) == sizeof (NVME_NAMESPACE_DEVICE_PATH)) {
         DevPath.DevPath->SubType = MSG_NVME_NAMESPACE_DP;
@@ -509,8 +509,10 @@ OcFixAppleBootDevicePath (
                     );
     if (EFI_ERROR (Status) || !IsDevicePathEnd (RemainingDevPath)) {
       DevicePathText = DevicePathToText (DevicePath, FALSE, FALSE);
-      DEBUG ((DEBUG_ERROR, "Malformed Device Path: %s\n", DevicePathText));
-      FreePool (DevicePathText);
+      if (DevicePathText != NULL) {
+        DEBUG ((DEBUG_ERROR, "Malformed Device Path: %s\n", DevicePathText));
+        FreePool (DevicePathText);
+      }
     }
   );
 }
