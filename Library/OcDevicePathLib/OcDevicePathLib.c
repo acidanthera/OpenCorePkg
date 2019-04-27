@@ -22,6 +22,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcGuardLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -419,83 +420,99 @@ TrailedBooterDevicePath (
   return NULL;
 }
 
-STATIC
-EFI_DEVICE_PATH_PROTOCOL *
-InternalApplyAppleDevicePathFixes (
+/**
+  Fix Apple Boot Device Path to be compatible with conventional UEFI
+  implementations.
+
+  @param[in,out] DevicePath  The Device Path to fix.
+
+**/
+VOID
+OcFixAppleBootDevicePath (
   IN OUT EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   )
 {
-  EFI_DEV_PATH_PTR DevPath;
+  EFI_DEV_PATH_PTR         DevPath;
+
+  EFI_STATUS               Status;
+  EFI_DEVICE_PATH_PROTOCOL *RemainingDevPath;
+  EFI_HANDLE               Device;
+
+  CHAR16                   *DevicePathText;
 
   ASSERT (DevicePath != NULL);
 
   DevPath.DevPath = FindDevicePathNodeWithType (
                       DevicePath,
                       MESSAGING_DEVICE_PATH,
-                      MSG_SATA_DP
+                      0
                       );
-  if (DevPath.DevPath != NULL) {
-    //
-    // Must be set to 0xFFFF if the device is directly connected to the HBA.
-    //
-    DevPath.Sata->PortMultiplierPortNumber = 0xFFFF;
-    return DevicePath;
-  }
-  //
-  // FIXME: Add SASEx -> NVMe fix.
-  //
-  FreePool (DevicePath);
-  return NULL;
-}
-
-/**
-  Fix Apple Boot Device Path to be compatible with usual UEFI implementations.
-
-  @param[in,out] DevicePath  The Device Path to fix.
-
-  @retval DevicePath       DevicePath has been fixed.
-  @retval new Device Path  DevicePath has been copied, fixed and freed.
-  @retval NULL             DevicePath could not be fixed up and has been freed.
-
-**/
-EFI_DEVICE_PATH_PROTOCOL *
-OcFixAppleBootDevicePath (
-  IN OUT EFI_DEVICE_PATH_PROTOCOL  *DevicePath
-  )
-{
-  EFI_STATUS               Status;
-  EFI_DEVICE_PATH_PROTOCOL *DevPath;
-  EFI_HANDLE               Device;
-
-  ASSERT (DevicePath != NULL);
-
-  DevPath = DevicePath;
-  Status = gBS->LocateDevicePath (
-                  &gEfiDevicePathProtocolGuid,
-                  &DevPath,
-                  &Device
-                  );
-  if (!EFI_ERROR (Status)) {
-    return DevicePath;
+  if (DevPath.DevPath == NULL) {
+    return;
   }
 
-  DevicePath = InternalApplyAppleDevicePathFixes (DevicePath);
-  if (DevicePath == NULL) {
-    return NULL;
+  switch (DevicePathSubType (DevPath.DevPath)) {
+    case MSG_SATA_DP:
+    {
+      //
+      // Check whether the Device Path is invalid in the first place.
+      //
+      RemainingDevPath = DevicePath;
+      Status = gBS->LocateDevicePath (
+                      &gEfiDevicePathProtocolGuid,
+                      &RemainingDevPath,
+                      &Device
+                      );
+      if (EFI_ERROR (Status) || !IsDevicePathEnd (RemainingDevPath)) {
+        //
+        // Must be set to 0xFFFF if the device is directly connected to the
+        // HBA. This rule has been established by UEFI 2.5 via an Erratum and
+        // has not been followed by Apple thus far.
+        // Reference: appendSATADevicePathNodeForIOMedia
+        //
+        DevPath.Sata->PortMultiplierPortNumber = 0xFFFF;
+      }
+
+      break;
+    }
+
+    case MSG_SASEX_DP:
+    {
+      OC_INLINE_STATIC_ASSERT (
+        (sizeof (SASEX_DEVICE_PATH) != sizeof (NVME_NAMESPACE_DEVICE_PATH)),
+        "SasEx and NVMe DPs must differ in size for fixing to be accurate."
+        );
+      //
+      // Apple uses SubType 0x16 (SasEx) for NVMe, while the UEFI Specification
+      // defines it as SubType 0x17. The structures are identical.
+      // Reference: appendNVMeDevicePathNodeForIOMedia
+      //
+      if (DevicePathNodeLength (DevPath.DevPath) == sizeof (NVME_NAMESPACE_DEVICE_PATH)) {
+        DevPath.DevPath->SubType = MSG_NVME_NAMESPACE_DP;
+      }
+
+      break;
+    }
+
+    default:
+    {
+      break;
+    }
   }
 
-  DevPath = DevicePath;
-  Status = gBS->LocateDevicePath (
-                  &gEfiDevicePathProtocolGuid,
-                  &DevPath,
-                  &Device
-                  );
-  if (!EFI_ERROR (Status)) {
-    return DevicePath;
-  }
-
-  FreePool (DevicePath);
-  return NULL;
+  DEBUG_CODE (
+    RemainingDevPath = DevicePath;
+    Status = gBS->LocateDevicePath (
+                    &gEfiDevicePathProtocolGuid,
+                    &RemainingDevPath,
+                    &Device
+                    );
+    if (EFI_ERROR (Status) || !IsDevicePathEnd (RemainingDevPath)) {
+      DevicePathText = DevicePathToText (DevicePath, FALSE, FALSE);
+      DEBUG ((DEBUG_ERROR, "Malformed Device Path: %s\n", DevicePathText));
+      FreePool (DevicePathText);
+    }
+  );
 }
 
 STATIC
