@@ -219,7 +219,7 @@ IsDevicePathEqual (
         FilePath2++;
       }
 
-      if (StrCmpiBasic (FilePath1, FilePath2) != 0) {
+      if (StriCmp (FilePath1, FilePath2) != 0) {
         // Not equal
         break;
       }

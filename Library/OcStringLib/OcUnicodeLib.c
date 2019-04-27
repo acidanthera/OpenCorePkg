@@ -15,461 +15,145 @@
 #include <Base.h>
 
 #include <Library/BaseLib.h>
-#include <Library/BaseMemoryLib.h>
-#include <Library/MemoryAllocationLib.h>
+#include <Library/DebugLib.h>
 #include <Library/OcStringLib.h>
+#include <Library/PcdLib.h>
 
-// IsPrint
-/** Check if character is printable
-
-  @param[in] Char  The unicode character to check if is printable.
-
-  @retval  TRUE, if character is printable.
-**/
-BOOLEAN
-IsPrint (
-  IN CHAR16  Char
-  )
-{
-  return ((Char >= L' ') && (Char < L'~'));
-}
-
-// IsDecimalDigitCharacter
-/** Check if character is a decimal digit
-
-  @param[in] Char  The unicode character to check if is printable.
-
-  @retval  TRUE, if character is a decimal digit.
-**/
-BOOLEAN
-IsDecimalDigitCharacter (
-  IN CHAR16  Char
-  )
-{
-  return ((Char >= L'0') && (Char <= L'9'));
-}
-
-// IsSpace
-/** Check if character is a white space character
-
-  @param[in] Char  The unicode character to check if is white space.
-
-  @retval  TRUE, if character is a white space character
-**/
-INTN
-IsSpace (
-  IN CHAR16  Char
-  )
-{
-  return ((Char == L' ')
-       || (Char == L'\t')
-       || (Char == L'\v')
-       || (Char == L'\f')
-       || (Char == L'\r'));
-}
-
-// HexCharToUintn
-/** Convert unicode hexadecimal character to unsigned integer.
-
-  @param[in] Char  The unicode character to convert to integer.
-
-  @retval  Integer value of character representation.
-**/
-UINTN
-HexCharToUintn (
-  IN CHAR16  Char
-  )
-{
-  UINTN Result;
-
-  if (IsDecimalDigitCharacter (Char)) {
-    Result = (Char - L'0');
-  } else {
-    Result = (UINTN)((10 + ToUpperChar (Char)) - L'A');
-  }
-
-  return Result;
-}
-
-// StrnIntegerCmp
 /**
+  Performs a case insensitive comparison of two Null-terminated Unicode strings,
+  and returns the difference between the first mismatched Unicode characters.
 
-  @param[in] String1  A pointer to a buffer containing the first unicode string to compare.
-  @param[in] String2  A pointer to a buffer containing the second unicode string to compare.
-  @param[in] Length   The number of characters to compare.
+  This function performs a case insensitive comparison of the Null-terminated
+  Unicode string FirstString to the Null-terminated Unicode string
+  SecondString. If FirstString is identical to SecondString, then 0 is
+  returned. Otherwise, the value returned is the first mismatched upper case
+  Unicode character in SecondString subtracted from the first mismatched upper
+  case Unicode character in FirstString.
 
-  @retval  Integer value of character representation.
+  If FirstString is NULL, then ASSERT().
+  If SecondString is NULL, then ASSERT().
+  If PcdMaximumUnicodeStringLength is not zero and FirstString contains more
+  than PcdMaximumUnicodeStringLength Unicode characters, not including the
+  Null-terminator, then ASSERT().
+  If PcdMaximumUnicodeStringLength is not zero and SecondString contains more
+  than PcdMaximumUnicodeStringLength Unicode characters, not including the
+  Null-terminator, then ASSERT().
+
+  @param  FirstString   A pointer to a Null-terminated Unicode string.
+  @param  SecondString  A pointer to a Null-terminated Unicode string.
+
+  @retval ==0    FirstString is identical to SecondString using case
+                 insensitiv comparisons.
+  @retval !=0    FirstString is not identical to SecondString using case
+                 insensitive comparisons.
+
 **/
 INTN
-StrnIntegerCmp (
-  IN CHAR16  *String1,
-  IN CHAR16  *String2,
-  IN UINTN   Length
+EFIAPI
+StriCmp (
+  IN CHAR16  *FirstString,
+  IN CHAR16  *SecondString
   )
 {
-  INTN  Result;
+  CHAR16  UpperFirstString;
+  CHAR16  UpperSecondString;
 
-  UINTN Index;
+  //
+  // ASSERT both strings are less long than PcdMaximumUnicodeStringLength
+  //
+  ASSERT (StrSize (FirstString) != 0);
+  ASSERT (StrSize (SecondString) != 0);
 
-  Result = 0;
-
-  for (Index = 0; Index < Length; ++Index) {
-    if (String1[Index] != String2[Index]) {
-      Result = (String1[Index] - String2[Index]);
-
-      break;
-    }
-
-    if (String1[Index] == L'\0') {
-      break;
-    }
+  UpperFirstString  = CharToUpper (*FirstString);
+  UpperSecondString = CharToUpper (*SecondString);
+  while ((*FirstString != '\0') && (*SecondString != '\0') && (UpperFirstString == UpperSecondString)) {
+    FirstString++;
+    SecondString++;
+    UpperFirstString  = CharToUpper (*FirstString);
+    UpperSecondString = CharToUpper (*SecondString);
   }
 
-  return Result;
+  return UpperFirstString - UpperSecondString;
 }
 
-// StrToInteger
-/** Convert unicode string to unsigned integer.
-
-  @param[in] Char  The null terminated unicode string to convert to integer.
-
-  @retval  Integer value of the unicode string.
-**/
-INTN
-StrToInteger (
-  IN CHAR16  *Start
-  )
-{
-  UINTN   Base;
-  INTN    Sum;
-
-  BOOLEAN Negative;
-
-  Sum = 0;
-
-  if (Start != NULL) {
-    while (IsSpace ((CHAR8)*Start) && (*Start != L'\0')) {
-      ++Start;
-    }
-
-    Base     = 10;
-    Negative = FALSE;
-
-    if (*Start == '-') {
-      Negative = TRUE;
-      ++Start;
-    } else if (*Start == L'0') {
-      ++Start;
-
-      if ((*Start == L'x') || (*Start == L'X')) {
-        Base = 16;
-        ++Start;
-      }
-    } else if (*Start == L'#') {
-      Base = 16;
-      ++Start;
-    }
-
-    if (Base == 10) {
-      while ((*Start >= L'0') && (*Start <= L'9')) {
-        Sum *= 10;
-        Sum += (*Start - L'0');
-
-        ++Start;
-      }
-
-      if (Negative) {
-        Sum = -Sum;
-      }
-    } else if (Base == 16) {
-      Sum = (INTN)StrHexToUint64 (Start);
-    }
-  }
-
-  return Sum;
-}
-
-// ToUpperChar
-/** Convert unicode character to upper case
-
-  @param[in] Char  The unicode character to convert to upperase.
-
-  @retval  Upper case representation of the unicode character.
-**/
-CHAR16
-ToUpperChar (
-  IN CHAR16  Char
-  )
-{
-  if ((Char <= MAX_UINT8) && ((Char >= 'a') && (Char <= 'z'))) {
-    Char -= ('a' - 'A');
-  }
-
-  return Char;
-}
-
-// OcStrToAscii
-/** Convert null terminated unicode string to ascii.
-
-  @param[in] String1   A pointer to the unicode string to convert to ascii.
-  @param[out] String2  A pointer to the converted ascii string.
-
-  @retval  A pointer to the converted ascii string.
-**/
-CHAR8 *
-OcStrToAscii (
-  IN CHAR16  *String1,
-  IN CHAR8   *String2
-  )
-{
-  CHAR8 *Start;
-
-  Start = NULL;
-
-  if ((String1 != NULL) && (String2 != NULL)) {
-    Start = String2;
-
-    while (*String1 != L'\0') {
-      *String2 = (CHAR8)*String1;
-
-      ++String1;
-      ++String2;
-    }
-
-    *String2 = '\0';
-  }
-
-  return Start;
-}
-
-// StrCmpiAscii
-/** Compare unicode string with ascii string ignoring case
-
-  @param[in] String1  A pointer to a unicode string to compare.
-  @param[in] String2  A pointer to a ascii string to compare.
-
-  @retval  A pointer to the converted ascii string.
-**/
-UINTN
-StrCmpiAscii (
-  IN CHAR16  *String1,
-  IN CHAR8   *String2
-  )
-{
-  UINTN  Result;
-
-  CHAR16 Chr1;
-  CHAR16 Chr2;
-
-  if ((String1 == NULL) || (String2 == NULL)) {
-    Result = 1;
-  } else if ((*String1 == L'\0') && (*String2 == '\0')) {
-    Result = 0;
-  } else if ((*String1 == L'\0') || (*String2 == '\0')) {
-    Result = 1;
-  } else {
-    do {
-      Chr1 = ToUpperChar (*String1);
-      Chr2 = ToUpperChar ((CHAR16)*String2);
-
-      ++String1;
-      ++String2;
-    } while ((String1[-1] != L'\0') && (Chr1 == Chr2));
-
-    Result = (Chr1 - Chr2);
-  }
-
-  return Result;
-}
-
-// StrCmpiBasic
-/** Compare unicode strings ignoring case
-
-  @param[in] String1  A pointer to a unicode string to compare.
-  @param[in] String2  A pointer to a unicode string to compare.
-
-  @retval  A pointer to the converted ascii string.
-**/
-UINTN
-StrCmpiBasic (
-  IN CHAR16  *String1,
-  IN CHAR16  *String2
-  )
-{
-  UINTN  Result;
-
-  CHAR16 Chr1;
-  CHAR16 Chr2;
-
-  if ((String1 == NULL) || (String2 == NULL)) {
-    Result = 1;
-  } else if ((*String1 == L'\0') && (*String2 == L'\0')) {
-    Result = 0;
-  } else if ((*String1 == L'\0') || (*String2 == L'\0')) {
-    Result = 1;
-  } else {
-    do {
-      Chr1 = ToUpperChar (*String1);
-      Chr2 = ToUpperChar (*String2);
-
-      ++String1;
-      ++String2;
-    } while ((String1[-1] != L'\0') && (Chr1 == Chr2));
-
-    Result = (Chr1 - Chr2);
-  }
-
-  return Result;
-}
-
-// UnicodeBaseName
-/** Return the filename element of a pathname
-
-  @param[in] FullPath  A pointer to a unicode path
-
-  @retval  A pointer to the converted ascii string.
-**/
-CHAR16 *
-UnicodeBaseName (
-  IN CHAR16  *FullPath
-  )
-{
-  CHAR16 *BaseName;
-
-  BaseName = NULL;
-
-  if ((FullPath != NULL) && (*FullPath != L'\0')) {
-    BaseName = ((FullPath + StrLen (FullPath)) - 1);
-
-    while ((BaseName > FullPath) && (BaseName[-1] != L'\\') && (BaseName[-1] != L'/')) {
-      --BaseName;
-    }
-  }
-
-  return BaseName;
-}
-
-// UnicodeDirName
-/** Return the folder element of a pathname
-
-  @param[in] FullPath  A pointer to a unicode path
-
-  @retval  A pointer to the converted ascii string.
-**/
-CHAR16 *
-UnicodeDirName (
-  IN CHAR16  *FullPath
-)
-{
-  CHAR16 *DirName;
-
-  if ((FullPath != NULL) && (*FullPath != L'\0')) {
-    DirName = FullPath + StrLen (FullPath) - 1;
-
-    if ((*(DirName) != L'\\') && (*(DirName) != L'/')) {
-      while ((DirName > FullPath) && (DirName[-1] != L'\\') && (DirName[-1] != L'/')) {
-        --DirName;
-      }
-
-      DirName[-1] = L'\0';
-    }
-  }
-
-  return FullPath;
-}
-
-// UnicodeParseString
 /**
+  Compares up to a specified length the contents of two Null-terminated Unicode
+  strings using case insensitive comparisons, and returns the difference
+  between the first mismatched Unicode characters.
 
-  @param[in] String    A pointer to a unicode string
-  @param[in] Variable  A pointer to a unicode string variable name to parse for
+  This function compares the Null-terminated Unicode string FirstString to the
+  Null-terminated Unicode string SecondString using case insensitive
+  comparisons.  At most, Length Unicode characters will be compared. If Length
+  is 0, then 0 is returned. If FirstString is identical to SecondString, then 0
+  is returned. Otherwise, the value returned is the first mismatched upper case
+  Unicode character in SecondString subtracted from the first mismatched upper
+  case Unicode character in FirstString.
 
-  @retval  A pointer to the variable value
+  If Length > 0 and FirstString is NULL, then ASSERT().
+  If Length > 0 and FirstString is not aligned on a 16-bit boundary, then
+  ASSERT().
+  If Length > 0 and SecondString is NULL, then ASSERT().
+  If Length > 0 and SecondString is not aligned on a 16-bit boundary, then
+  ASSERT().
+  If PcdMaximumUnicodeStringLength is not zero, and Length is greater than
+  PcdMaximumUnicodeStringLength, then ASSERT().
+  If PcdMaximumUnicodeStringLength is not zero, and FirstString contains more
+  than PcdMaximumUnicodeStringLength Unicode characters, not including the
+  Null-terminator, then ASSERT().
+  If PcdMaximumUnicodeStringLength is not zero, and SecondString contains more
+  than PcdMaximumUnicodeStringLength Unicode characters, not including the
+  Null-terminator, then ASSERT().
+
+  @param  FirstString   A pointer to a Null-terminated Unicode string.
+  @param  SecondString  A pointer to a Null-terminated Unicode string.
+  @param  Length        The maximum number of Unicode characters to compare.
+
+  @retval ==0    FirstString is identical to SecondString using case
+                 insensitive comparisons.
+  @retval others FirstString is not identical to SecondString using case
+                 insensitive comparisons.
+
 **/
-CHAR16 *
-UnicodeParseString (
-  IN  CHAR16    *String,
-  IN  CHAR16    *Variable
+INTN
+EFIAPI
+StrniCmp (
+  IN CONST CHAR16  *FirstString,
+  IN CONST CHAR16  *SecondString,
+  IN UINTN         Length
   )
 {
-  CHAR16  *Start;
-  CHAR16  *Data;
-  CHAR16  *Value;
+  CHAR16  UpperFirstString;
+  CHAR16  UpperSecondString;
 
-  if (String == NULL || Variable == NULL) {
-    return NULL;
+  if (Length == 0) {
+    return 0;
   }
 
-  // Check string contains variable
-  Start = StrStr (String, Variable);
+  //
+  // ASSERT both strings are less long than PcdMaximumUnicodeStringLength.
+  // Length tests are performed inside StrLen().
+  //
+  ASSERT (StrSize (FirstString) != 0);
+  ASSERT (StrSize (SecondString) != 0);
 
-  if (Start == NULL) {
-    return NULL;
+  if (PcdGet32 (PcdMaximumUnicodeStringLength) != 0) {
+    ASSERT (Length <= PcdGet32 (PcdMaximumUnicodeStringLength));
   }
 
-  // locate Variable= in string
-  while (*Start != L'\0') {
-    if (*Start == L'=') {
-      break;
-    }
-    Start++;
+  UpperFirstString  = CharToUpper (*FirstString);
+  UpperSecondString = CharToUpper (*SecondString);
+  while ((*FirstString != L'\0') &&
+         (*SecondString != L'\0') &&
+         (UpperFirstString == UpperSecondString) &&
+         (Length > 1)) {
+    FirstString++;
+    SecondString++;
+    UpperFirstString  = CharToUpper (*FirstString);
+    UpperSecondString = CharToUpper (*SecondString);
+    Length--;
   }
 
-  // Extra sanity check
-  if (*Start++ != L'=') {
-    return NULL;
-  }
-
-  Data = AllocateZeroPool (StrSize (Start));
-
-  if (Data == NULL) {
-    return NULL;
-  }
-
-  Value = Data;
-
-  // copy filtering any " from data
-  while (*Start != L'\0') {
-    if (*Start != L'"') {
-      *(Data++) = *Start;
-    }
-    Start++;
-  }
-
-  return Value;
-}
-
-// TrimWhiteSpace
-/** Remove any leading or trailing space in the string
-
-  @param[in] Start  A pointer to the unicode string
-
-  @retval  A pointer to the converted unicode string.
-**/
-CHAR16 *
-TrimWhiteSpace (
-  IN  CHAR16   *String
-  )
-{
-  CHAR16 *End;
-
-  if ((String != NULL) && (*String != L'\0')) {
-
-    // Trim leading white space
-    while (IsSpace (*String)) {
-      String++;
-    }
-
-    // Trim trailing white space
-    End = String + StrLen (String);
-
-    while (End != String && IsSpace (*--End));
-
-    // Write new null terminator
-    *(++End) = L'\0';
-  }
-
-  return String;
+  return UpperFirstString - UpperSecondString;
 }
 
 VOID
@@ -480,7 +164,7 @@ UnicodeUefiSlashes (
   CHAR16  *Needle;
 
   while ((Needle = StrStr (String, L"/")) != NULL) {
-    *Needle = '\\';
+    *Needle = L'\\';
   }
 }
 
@@ -490,23 +174,23 @@ UnicodeFilterString (
   IN     BOOLEAN  SingleLine
   )
 {
-  while (*String != '\0') {
+  while (*String != L'\0') {
     if ((*String & 0x7FU) != *String) {
       //
       // Remove all unicode characters.
       //
-      *String = '_';
-    } else if (SingleLine && (*String == '\r' || *String == '\n')) {
+      *String = L'_';
+    } else if (SingleLine && (*String == L'\r' || *String == L'\n')) {
       //
       // Stop after printing one line.
       //
-      *String = '\0';
+      *String = L'\0';
       break;
     } else if (*String < 0x20 || *String == 0x7F) {
       //
       // Drop all unprintable spaces but space including tabs.
       //
-      *String = '_';
+      *String = L'_';
     }
 
     ++String;

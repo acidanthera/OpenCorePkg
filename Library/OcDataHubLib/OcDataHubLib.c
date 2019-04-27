@@ -96,7 +96,7 @@ DataHubSetAppleMiscUnicode (
   Status = EFI_SUCCESS;
 
   if (Value != NULL) {
-    UnicodeValue = AsciiStrCopyToUnicode (Value, AsciiStrLen (Value));
+    UnicodeValue = AsciiStrCopyToUnicode (Value, 0);
     if (UnicodeValue == NULL) {
       DEBUG ((DEBUG_WARN, "Data Hub failed to allocate %s\n", Key));
       return EFI_OUT_OF_RESOURCES;

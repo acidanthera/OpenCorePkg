@@ -133,8 +133,7 @@ listed here.
 * OcStringLib  
     **Summary**: String handling and management  
     **Status**: functional  
-    **Issues**:
-    1. Several functions are duplicates of UDK or are insecurely designed and are subject for removal.
+    **Issues**: none
 * OcTemplateLib  
     **Summary**: Data description and resource management  
     **Status**: functional  

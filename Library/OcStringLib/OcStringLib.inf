@@ -43,6 +43,9 @@
 
 [Protocols]
 
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdMaximumUnicodeStringLength   ## SOMETIMES_CONSUMES
+
 [LibraryClasses]
   BaseLib
   BaseMemoryLib

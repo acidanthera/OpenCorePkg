@@ -52,18 +52,6 @@ IsAsciiPrint (
   IN CHAR8  Char
   );
 
-// IsAsciiDecimalDigitCharacter
-/** Check if character is a decimal digit
-
-  @param[in] Char  The ascii character to check if is printable.
-
-  @retval  TRUE, if character is a decimal digit.
-**/
-BOOLEAN
-IsAsciiDecimalDigitCharacter (
-  IN CHAR8  Char
-  );
-
 /** Check if character is a white space character
 
   @param[in] Char  The ascii character to check if is white space.
@@ -72,55 +60,6 @@ IsAsciiDecimalDigitCharacter (
 **/
 INTN
 IsAsciiSpace (
-  IN CHAR8  Char
-  );
-
-// AsciiHexCharToUintn
-/** Convert ascii hexadecimal character to unsigned integer.
-
-  @param[in] Char  The ascii character to convert to integer.
-
-  @retval  Integer value of character representation.
-**/
-UINTN
-AsciiHexCharToUintn (
-  IN CHAR8  Char
-  );
-
-/**
-
-  @param[in] String1  A pointer to a buffer containing the first ascii string to compare.
-  @param[in] String2  A pointer to a buffer containing the second ascii string to compare.
-  @param[in] Length   The number of characters to compare.
-
-  @retval  Integer value of character representation.
-**/
-INTN
-AsciiStrnIntegerCmp (
-  IN CHAR8  *String1,
-  IN CHAR8  *String2,
-  IN UINTN  Length
-  );
-
-/** Convert ascii string to unsigned integer.
-
-  @param[in] Char  The null terminated ascii string to convert to integer.
-
-  @retval  Integer value of the ascii string.
-**/
-INTN
-AsciiStrToInteger (
-  IN CHAR8  *Start
-  );
-
-/** Convert ascii character to upper case
-
-  @param[in] Char  The ascii character to convert to upperase.
-
-  @retval  Upper case representation of the ascii character.
-**/
-CHAR8
-AsciiToUpperChar (
   IN CHAR8  Char
   );
 
@@ -137,205 +76,6 @@ AsciiStrCopyToUnicode (
   IN  UINTN         Length
   );
 
-/** Remove leading and trailing spaces in the string
-
-  @param[in] Start  A pointer to the ascii string
-
-  @retval  A pointer to the converted ascii string.
-**/
-CHAR8 *
-AsciiTrimWhiteSpace (
-  IN  CHAR8   *String
-  );
-
-/** Return the filename element of a pathname
-
-  @param[in] FullPath  A pointer to a ascii path
-
-  @retval  A pointer to the converted ascii string.
-**/
-CHAR8 *
-AsciiBaseName (
-  IN CHAR8  *FullPath
-  );
-
-/** Return the folder element of a pathname
-
-  @param[in] FullPath  A pointer to a ascii path
-
-  @retval  A pointer to the converted ascii string.
-**/
-CHAR8 *
-AsciiDirName (
-  IN CHAR8  *FullPath
-  );
-
-/** Check if character is printable
-
-  @param[in] Char  The unicode character to check if is printable.
-
-  @retval  TRUE, if character is printable.
-**/
-BOOLEAN
-IsPrint (
-  IN CHAR16  Char
-  );
-
-/** Check if character is a decimal digit
-
-  @param[in] Char  The unicode character to check if is printable.
-
-  @retval  TRUE, if character is a decimal digit.
-**/
-BOOLEAN
-IsDecimalDigitCharacter (
-  IN CHAR16  Char
-  );
-
-/** Check if character is a white space character
-
-  @param[in] Char  The unicode character to check if is white space.
-
-  @retval  TRUE, if character is a white space character
-**/
-INTN
-IsSpace (
-    IN CHAR16  Char
-  );
-
-/** Convert unicode hexadecimal character to unsigned integer.
-
-  @param[in] Char  The unicode character to convert to integer.
-
-  @retval  Integer value of character representation.
-**/
-UINTN
-HexCharToUintn (
-  IN CHAR16  Char
-  );
-
-/**
-
-  @param[in] String1  A pointer to a buffer containing the first unicode string to compare.
-  @param[in] String2  A pointer to a buffer containing the second unicode string to compare.
-  @param[in] Length   The number of characters to compare.
-
-  @retval  Integer value of character representation.
-**/
-INTN
-StrnIntegerCmp (
-  IN CHAR16  *String1,
-  IN CHAR16  *String2,
-  IN UINTN   Length
-  );
-
-/** Convert unicode string to unsigned integer.
-
-  @param[in] Char  The null terminated unicode string to convert to integer.
-
-  @retval  Integer value of the unicode string.
-**/
-INTN
-StrToInteger (
-  IN CHAR16  *Start
-  );
-
-/** Convert unicode character to upper case
-
-  @param[in] Char  The unicode character to convert to upperase.
-
-  @retval  Upper case representation of the unicode character.
-**/
-CHAR16
-ToUpperChar (
-  IN CHAR16  Char
-  );
-
-/** Convert null terminated unicode string to ascii.
-
-  @param[in]  String1  A pointer to the unicode string to convert to ascii.
-  @param[out] String2  A pointer to the converted ascii string.
-
-  @retval  A pointer to the converted ascii string.
-**/
-CHAR8 *
-OcStrToAscii (
-  IN CHAR16  *String1,
-  IN CHAR8   *String2
-  );
-
-/** Compare unicode string with ascii string ignoring case
-
-  @param[in] String1  A pointer to a unicode string to compare.
-  @param[in] String2  A pointer to a ascii string to compare.
-
-  @retval  A pointer to the converted ascii string.
-**/
-UINTN
-StrCmpiAscii (
-  IN CHAR16  *String1,
-  IN CHAR8   *String2
-  );
-
-/** Compare unicode strings ignoring case
-
-  @param[in] String1  A pointer to a unicode string to compare.
-  @param[in] String2  A pointer to a unicode string to compare.
-
-  @retval  A pointer to the converted ascii string.
-**/
-UINTN
-StrCmpiBasic (
-  IN CHAR16  *String1,
-  IN CHAR16  *String2
-  );
-
-/** Return the filename element of a pathname
-
-  @param[in] FullPath  A pointer to a unicode path
-
-  @retval  A pointer to the converted ascii string.
-**/
-CHAR16 *
-UnicodeBaseName (
-  IN CHAR16  *FullPath
-  );
-
-/** Return the folder element of a pathname
-
-  @param[in] FullPath  A pointer to a unicode path
-
-  @retval  A pointer to the converted ascii string.
-**/
-CHAR16 *
-UnicodeDirName (
-  IN CHAR16  *FullPath
-  );
-
-/**
-
-  @param[in] String    A pointer to a unicode string
-  @param[in] Variable  A pointer to a unicode string variable name to parse for
-
-  @retval  A pointer to the variable value
-**/
-CHAR16 *
-UnicodeParseString (
-  IN  CHAR16    *String,
-  IN  CHAR16    *Variable
-  );
-
-/** Remove leading and trailing spaces in the string
-
-  @param[in] Start  A pointer to the unicode string
-
-  @retval  A pointer to the converted unicode string.
-**/
-CHAR16 *
-TrimWhiteSpace (
-  IN  CHAR16   *String
-  );
-
 /**
   Convert 64-bit unsigned integer to a nul-termianted hex string.
 
@@ -348,6 +88,88 @@ AsciiUint64ToLowerHex (
   OUT CHAR8   *Buffer,
   IN  UINT32  BufferSize,
   IN  UINT64  Value
+  );
+
+/**
+  Performs a case insensitive comparison of two Null-terminated Unicode strings,
+  and returns the difference between the first mismatched Unicode characters.
+
+  This function performs a case insensitive comparison of the Null-terminated
+  Unicode string FirstString to the Null-terminated Unicode string
+  SecondString. If FirstString is identical to SecondString, then 0 is
+  returned. Otherwise, the value returned is the first mismatched upper case
+  Unicode character in SecondString subtracted from the first mismatched upper
+  case Unicode character in FirstString.
+
+  If FirstString is NULL, then ASSERT().
+  If SecondString is NULL, then ASSERT().
+  If PcdMaximumUnicodeStringLength is not zero and FirstString contains more
+  than PcdMaximumUnicodeStringLength Unicode characters, not including the
+  Null-terminator, then ASSERT().
+  If PcdMaximumUnicodeStringLength is not zero and SecondString contains more
+  than PcdMaximumUnicodeStringLength Unicode characters, not including the
+  Null-terminator, then ASSERT().
+
+  @param  FirstString   A pointer to a Null-terminated Unicode string.
+  @param  SecondString  A pointer to a Null-terminated Unicode string.
+
+  @retval ==0    FirstString is identical to SecondString using case
+                 insensitiv comparisons.
+  @retval !=0    FirstString is not identical to SecondString using case
+                 insensitive comparisons.
+
+**/
+INTN
+EFIAPI
+StriCmp (
+  IN CHAR16  *FirstString,
+  IN CHAR16  *SecondString
+  );
+
+/**
+  Compares up to a specified length the contents of two Null-terminated Unicode
+  strings using case insensitive comparisons, and returns the difference
+  between the first mismatched Unicode characters.
+
+  This function compares the Null-terminated Unicode string FirstString to the
+  Null-terminated Unicode string SecondString using case insensitive
+  comparisons.  At most, Length Unicode characters will be compared. If Length
+  is 0, then 0 is returned. If FirstString is identical to SecondString, then 0
+  is returned. Otherwise, the value returned is the first mismatched upper case
+  Unicode character in SecondString subtracted from the first mismatched upper
+  case Unicode character in FirstString.
+
+  If Length > 0 and FirstString is NULL, then ASSERT().
+  If Length > 0 and FirstString is not aligned on a 16-bit boundary, then
+  ASSERT().
+  If Length > 0 and SecondString is NULL, then ASSERT().
+  If Length > 0 and SecondString is not aligned on a 16-bit boundary, then
+  ASSERT().
+  If PcdMaximumUnicodeStringLength is not zero, and Length is greater than
+  PcdMaximumUnicodeStringLength, then ASSERT().
+  If PcdMaximumUnicodeStringLength is not zero, and FirstString contains more
+  than PcdMaximumUnicodeStringLength Unicode characters, not including the
+  Null-terminator, then ASSERT().
+  If PcdMaximumUnicodeStringLength is not zero, and SecondString contains more
+  than PcdMaximumUnicodeStringLength Unicode characters, not including the
+  Null-terminator, then ASSERT().
+
+  @param  FirstString   A pointer to a Null-terminated Unicode string.
+  @param  SecondString  A pointer to a Null-terminated Unicode string.
+  @param  Length        The maximum number of Unicode characters to compare.
+
+  @retval ==0    FirstString is identical to SecondString using case
+                 insensitive comparisons.
+  @retval others FirstString is not identical to SecondString using case
+                 insensitive comparisons.
+
+**/
+INTN
+EFIAPI
+StrniCmp (
+  IN CONST CHAR16  *FirstString,
+  IN CONST CHAR16  *SecondString,
+  IN UINTN         Length
   );
 
 /**
