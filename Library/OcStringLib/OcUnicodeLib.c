@@ -41,6 +41,9 @@ InternalCharToUpper (
   IN      CHAR16                    Char
   )
 {
+  //
+  // FIXME: Drop this function once new UDK lands and brings native CharToUpper.
+  //
   if (Char >= L'a' && Char <= L'z') {
     return (CHAR16) (Char - (L'a' - L'A'));
   }
