@@ -88,6 +88,21 @@ IsDevicePathEqual (
   );
 
 /**
+  Check whether File Device Paths are equal.
+
+  @param[in] FilePath1  The first device path protocol to compare.
+  @param[in] FilePath2  The second device path protocol to compare.
+
+  @retval TRUE         The device paths matched
+  @retval FALSE        The device paths were different
+**/
+BOOLEAN
+FileDevicePathsEqual (
+  IN FILEPATH_DEVICE_PATH  *FilePath1,
+  IN FILEPATH_DEVICE_PATH  *FilePath2
+  );
+
+/**
   Check whether one device path exists in the other.
 
   @param[in] ParentPath  The parent device path protocol to check against.
