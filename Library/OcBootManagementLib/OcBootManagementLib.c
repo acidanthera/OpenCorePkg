@@ -629,6 +629,92 @@ InternalGetBootOptionData (
   return FilePathList;
 }
 
+STATIC
+VOID
+InternalDebugBootEnvironment (
+  IN UINT16                   *BootOrder,
+  IN UINTN                    BootOrderSize
+  )
+{
+  EFI_STATUS                Status;
+  EFI_DEVICE_PATH_PROTOCOL  *UefiDevicePath;
+  CHAR16                    *DevicePathText;
+  UINTN                     Index;
+  INT32                     Predefined;
+
+  STATIC CONST CHAR16 *AppleDebugVariables[] = {
+    L"efi-boot-device-data",
+    L"efi-backup-boot-device-data",
+    L"efi-apple-recovery-data"
+  };
+
+  STATIC UINT16  ApplePredefinedVariables[] = {
+    80, 81, 82
+  };
+
+  for (Index = 0; Index < ARRAY_SIZE (AppleDebugVariables); ++Index) {
+    Status = GetVariable2 (
+               AppleDebugVariables[Index],
+               &gAppleBootVariableGuid,
+               (VOID **)&UefiDevicePath,
+               NULL
+               );
+    if (!EFI_ERROR (Status)) {
+      DevicePathText = ConvertDevicePathToText (UefiDevicePath, FALSE, FALSE);
+      if (DevicePathText != NULL) {
+        DEBUG ((DEBUG_INFO, "OCB: %s = %s\n", AppleDebugVariables[Index], DevicePathText));
+        FreePool (DevicePathText);
+        continue;
+      }
+    }
+    DEBUG ((DEBUG_INFO, "OCB: %s - %r\n", AppleDebugVariables[Index], Status));
+  }
+
+  DEBUG ((DEBUG_INFO, "OCB: Dumping BootOrder\n"));
+  
+  for (Predefined = 0; Predefined < 2; ++Predefined) {
+    for (Index = 0; Index < (BootOrderSize / sizeof (*BootOrder)); ++Index) {
+      UefiDevicePath = InternalGetBootOptionData (
+                         BootOrder[Index],
+                         NULL,
+                         NULL,
+                         NULL
+                         );
+      if (UefiDevicePath == NULL) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCB: %u -> Boot%04x - failed to read\n",
+          (UINT32) Index,
+          BootOrder[Index],
+          DevicePathText
+          ));
+        continue;
+      }
+
+      DevicePathText = ConvertDevicePathToText (UefiDevicePath, FALSE, FALSE);
+      DEBUG ((
+        DEBUG_INFO,
+        "OCB: %u -> Boot%04x = %s\n",
+        (UINT32) Index,
+        BootOrder[Index],
+        DevicePathText
+        ));
+      if (DevicePathText != NULL) {
+        FreePool (DevicePathText);
+      }
+
+      FreePool (UefiDevicePath);
+    }
+
+    //
+    // Redo with predefined.
+    //
+    BootOrder     = &ApplePredefinedVariables[0];
+    BootOrderSize = sizeof (ApplePredefinedVariables);
+    DEBUG ((DEBUG_INFO, "OCB: Predefined list\n"));
+  }
+}
+
 OC_BOOT_ENTRY *
 InternalGetDefaultBootEntry (
   IN OUT OC_BOOT_ENTRY  *BootEntries,
@@ -695,47 +781,9 @@ InternalGetDefaultBootEntry (
       return NULL;
     }
 
-    Status = GetVariable2 (
-               L"efi-boot-device-data",
-               &gAppleBootVariableGuid,
-               (VOID **)&UefiDevicePath,
-               &RootDevicePathSize
-               );
-    if (!EFI_ERROR (Status)) {
-      DevicePathText = ConvertDevicePathToText (UefiDevicePath, FALSE, FALSE);
-      if (DevicePathText != NULL) {
-        DEBUG ((DEBUG_INFO, "OCB: efi-boot-device-data = %s\n", DevicePathText));
-        FreePool (DevicePathText);
-      }
-    }
-
-    DEBUG_CODE (
-      for (Index = 0; Index < (BootOrderSize / sizeof (*BootOrder)); ++Index) {
-        UefiDevicePath = InternalGetBootOptionData (
-                           BootOrder[Index],
-                           NULL,
-                           NULL,
-                           NULL
-                           );
-        if (UefiDevicePath == NULL) {
-          continue;
-        }
-
-        DevicePathText = ConvertDevicePathToText (UefiDevicePath, FALSE, FALSE);
-        DEBUG ((
-          DEBUG_INFO,
-          "OCB: %d -> Boot%04x = %s\n",
-          Index,
-          BootOrder[Index],
-          DevicePathText
-          ));
-        if (DevicePathText != NULL) {
-          FreePool (DevicePathText);
-        }
-
-        FreePool (UefiDevicePath);
-      }
-      );
+    DEBUG_CODE_BEGIN ();
+    InternalDebugBootEnvironment (BootOrder, BootOrderSize);
+    DEBUG_CODE_END ();
 
     UefiDevicePath = InternalGetBootOptionData (
                        BootOrder[0],
@@ -809,13 +857,13 @@ InternalGetDefaultBootEntry (
 
   OcFixAppleBootDevicePath (UefiDevicePath);
 
-  DEBUG_CODE (
-    DevicePathText = ConvertDevicePathToText (UefiDevicePath, FALSE, FALSE);
-    if (DevicePathText != NULL) {
-      DEBUG ((DEBUG_INFO, "OCB: Default boot Device Path: %s\n", DevicePathText));
-      FreePool (DevicePathText);
-    }
-    );
+  DEBUG_CODE_BEGIN ();
+  DevicePathText = ConvertDevicePathToText (UefiDevicePath, FALSE, FALSE);
+  if (DevicePathText != NULL) {
+    DEBUG ((DEBUG_INFO, "OCB: Default boot Device Path: %s\n", DevicePathText));
+    FreePool (DevicePathText);
+  }
+  DEBUG_CODE_END ();
 
   UefiRemainingDevicePath = UefiDevicePath;
   Status = gBS->LocateDevicePath (
