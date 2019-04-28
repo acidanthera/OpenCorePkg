@@ -328,7 +328,12 @@ OcFixAppleBootDevicePath (
     if (EFI_ERROR (Status) || !IsDevicePathEnd (RemainingDevPath)) {
       DevicePathText = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
       if (DevicePathText != NULL) {
-        DEBUG ((DEBUG_ERROR, "Malformed Device Path: %s\n", DevicePathText));
+        DEBUG ((
+          DEBUG_WARN,
+          "Malformed Device Path: %s - %r\n",
+          DevicePathText,
+          Status
+          ));
         FreePool (DevicePathText);
       }
     }
