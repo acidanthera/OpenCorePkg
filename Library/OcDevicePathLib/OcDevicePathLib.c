@@ -139,142 +139,6 @@ FindDevicePathNodeWithType (
   return DevicePathNode;
 }
 
-BOOLEAN
-EFIAPI
-IsDevicePathEqual (
-  IN  EFI_DEVICE_PATH_PROTOCOL      *DevicePath1,
-  IN  EFI_DEVICE_PATH_PROTOCOL      *DevicePath2
-  )
-{
-  BOOLEAN         Equal;
-  UINT8           Type1;
-  UINT8           SubType1;
-  UINTN           Len1;
-  CHAR16          *FilePath1;
-  CHAR16          *FilePath2;
-
-  // TODO: Compare Normal & Short Device Paths
-
-  Equal = FALSE;
-
-  while (TRUE) {
-
-    Type1 = DevicePathType (DevicePath1);
-    SubType1 = DevicePathSubType (DevicePath1);
-    Len1 = DevicePathNodeLength (DevicePath1);
-
-    if (Type1 != DevicePathType (DevicePath2) ||
-        SubType1 != DevicePathSubType (DevicePath2) ||
-        Len1 != DevicePathNodeLength (DevicePath2))
-    {
-
-      // Compare short HD paths
-      if (DevicePathType (DevicePath1) == MEDIA_DEVICE_PATH &&
-          DevicePathSubType(DevicePath1) == MEDIA_HARDDRIVE_DP) {
-
-        DevicePath2 = FindDevicePathNodeWithType (
-                        DevicePath2,
-                        MEDIA_DEVICE_PATH,
-                        MEDIA_HARDDRIVE_DP);
-
-      } else if (DevicePathType (DevicePath2) == MEDIA_DEVICE_PATH &&
-                 DevicePathSubType (DevicePath2) == MEDIA_HARDDRIVE_DP) {
-
-        DevicePath1 = FindDevicePathNodeWithType (
-                        DevicePath1,
-                        MEDIA_DEVICE_PATH,
-                        MEDIA_HARDDRIVE_DP);
-      } else {
-
-        // Not equal
-        break;
-
-      }
-
-      // Fall through with short HD paths to check
-
-    }
-
-    // Same type/subtype/len ...
-
-    if (IsDevicePathEnd (DevicePath1) &&
-        IsDevicePathEnd (DevicePath2))
-    {
-      // END node - they are the same
-      Equal = TRUE;
-      break;
-    }
-
-    // Do mem compare of nodes or special compare for selected types/subtypes
-    if (Type1 == MEDIA_DEVICE_PATH && SubType1 == MEDIA_FILEPATH_DP) {
-
-      // Special compare: case insensitive file path compare + skip leading \ char
-      FilePath1 = &((FILEPATH_DEVICE_PATH *)DevicePath1)->PathName[0];
-
-      if (FilePath1[0] == L'\\') {
-        FilePath1++;
-      }
-
-      FilePath2 = &((FILEPATH_DEVICE_PATH *)DevicePath2)->PathName[0];
-      if (FilePath2[0] == L'\\') {
-        FilePath2++;
-      }
-
-      if (StriCmp (FilePath1, FilePath2) != 0) {
-        // Not equal
-        break;
-      }
-
-    } else {
-
-      if (CompareMem (DevicePath1, DevicePath2, DevicePathNodeLength (DevicePath1)) != 0) {
-        // Not equal
-        break;
-      }
-    }
-
-    // Advance to next node
-    DevicePath1 =  NextDevicePathNode (DevicePath1);
-    DevicePath2 =  NextDevicePathNode (DevicePath2);
-  }
-
-  return Equal;
-}
-
-BOOLEAN
-EFIAPI
-IsDeviceChild (
-  IN  EFI_DEVICE_PATH_PROTOCOL      *ParentPath,
-  IN  EFI_DEVICE_PATH_PROTOCOL      *ChildPath,
-  IN  UINT8                         EndPathType
-  )
-{
-  EFI_DEVICE_PATH_PROTOCOL    *DevicePath;
-  EFI_DEVICE_PATH_PROTOCOL    *ChildPathEndNode;
-
-  BOOLEAN   Matched;
-
-  DevicePath = DuplicateDevicePath (ChildPath);
-
-  ChildPathEndNode = DevicePath;
-
-  while (!IsDevicePathEndType (ChildPathEndNode) &&
-         !(DevicePathType (ChildPathEndNode) == MEDIA_DEVICE_PATH &&
-           DevicePathSubType (ChildPathEndNode) == EndPathType))
-
-  {
-    ChildPathEndNode = NextDevicePathNode (ChildPathEndNode);
-  }
-
-  SetDevicePathEndNode (ChildPathEndNode);
-
-  Matched = IsDevicePathEqual (ParentPath, DevicePath);
-
-  FreePool (DevicePath);
-
-  return Matched;
-}
-
 VOID
 DebugPrintDevicePath (
   IN UINTN                     ErrorLevel,
@@ -700,4 +564,128 @@ FileDevicePathsEqual (
   ASSERT (FilePath2 != NULL);
 
   return InternalFileDevicePathsEqualWorker (&FilePath1, &FilePath2);
+}
+
+STATIC
+BOOLEAN
+InternalDevicePathCmpWorker (
+  IN EFI_DEVICE_PATH_PROTOCOL  *ParentPath,
+  IN EFI_DEVICE_PATH_PROTOCOL  *ChildPath,
+  IN BOOLEAN                   CheckChild
+  )
+{
+  BOOLEAN          Result;
+  INTN             CmpResult;
+
+  EFI_DEV_PATH_PTR ChildPathPtr;
+  EFI_DEV_PATH_PTR ParentPathPtr;
+
+  UINT8            NodeType;
+  UINT8            NodeSubType;
+  UINTN            NodeSize;
+
+  ASSERT (ParentPath != NULL);
+  ASSERT (IsDevicePathValid (ParentPath, 0));
+  ASSERT (ChildPath != NULL);
+  ASSERT (IsDevicePathValid (ChildPath, 0));
+
+  ParentPathPtr.DevPath = ParentPath;
+  ChildPathPtr.DevPath  = ChildPath;
+
+  while (TRUE) {
+    NodeType    = DevicePathType (ChildPathPtr.DevPath);
+    NodeSubType = DevicePathSubType (ChildPathPtr.DevPath);
+
+    if (NodeType == END_DEVICE_PATH_TYPE) {
+      //
+      // We only support single-instance Device Paths.
+      //
+      ASSERT (NodeSubType == END_ENTIRE_DEVICE_PATH_SUBTYPE);
+      return (CheckChild
+          || (DevicePathType (ParentPathPtr.DevPath) == END_ENTIRE_DEVICE_PATH_SUBTYPE));
+    }
+
+    if ((DevicePathType (ParentPathPtr.DevPath) != NodeType)
+     || (DevicePathSubType (ParentPathPtr.DevPath) != NodeSubType)) {
+      return FALSE;
+    }
+
+    if ((NodeType == MEDIA_DEVICE_PATH)
+     && (NodeSubType == MEDIA_FILEPATH_DP)) {
+      //
+      // File Paths need special consideration for prepended and appended
+      // terminators, as well as multiple nodes.
+      //
+      Result = InternalFileDevicePathsEqualWorker (
+                 &ParentPathPtr.FilePath,
+                 &ChildPathPtr.FilePath
+                 );
+      if (!Result) {
+        return FALSE;
+      }
+      //
+      // InternalFileDevicePathsEqualWorker advances the nodes.
+      //
+    } else {
+      NodeSize = DevicePathNodeLength (ChildPathPtr.DevPath);
+      if (DevicePathNodeLength (ParentPathPtr.DevPath) != NodeSize) {
+        return FALSE;
+      }
+
+      OC_INLINE_STATIC_ASSERT (
+        (sizeof (*ChildPathPtr.DevPath) == 4),
+        "The Device Path comparison logic depends on the entire header being checked"
+        );
+
+      CmpResult = CompareMem (
+                    (ChildPathPtr.DevPath + 1),
+                    (ParentPathPtr.DevPath + 1),
+                    (NodeSize - sizeof (*ChildPathPtr.DevPath))
+                    );
+      if (CmpResult != 0) {
+        return FALSE;
+      }
+
+      ParentPathPtr.DevPath = NextDevicePathNode (ParentPathPtr.DevPath);
+      ChildPathPtr.DevPath  = NextDevicePathNode (ChildPathPtr.DevPath);
+    }
+  }
+}
+
+/**
+  Check whether device paths are equal.
+
+  @param[in] DevicePath1  The first device path protocol to compare.
+  @param[in] DevicePath2  The second device path protocol to compare.
+
+  @retval TRUE         The device paths matched
+  @retval FALSE        The device paths were different
+**/
+BOOLEAN
+EFIAPI
+IsDevicePathEqual (
+  IN  EFI_DEVICE_PATH_PROTOCOL      *DevicePath1,
+  IN  EFI_DEVICE_PATH_PROTOCOL      *DevicePath2
+  )
+{
+  return InternalDevicePathCmpWorker (DevicePath1, DevicePath2, FALSE);
+}
+
+/**
+  Check whether one device path exists in the other.
+
+  @param[in] ParentPath  The parent device path protocol to check against.
+  @param[in] ChildPath   The device path protocol of the child device to compare.
+
+  @retval TRUE         The child device path contains the parent device path.
+  @retval FALSE        The device paths were different
+**/
+BOOLEAN
+EFIAPI
+IsDevicePathChild (
+  IN  EFI_DEVICE_PATH_PROTOCOL      *ParentPath,
+  IN  EFI_DEVICE_PATH_PROTOCOL      *ChildPath
+  )
+{
+  return InternalDevicePathCmpWorker (ParentPath, ChildPath, TRUE);
 }

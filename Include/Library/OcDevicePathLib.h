@@ -74,8 +74,8 @@ FindDevicePathNodeWithType (
 /**
   Check whether device paths are equal.
 
-  @param[in] DevicePath1 The first device path protocol to compare.
-  @param[in] DevicePath2 The second device path protocol to compare.
+  @param[in] DevicePath1  The first device path protocol to compare.
+  @param[in] DevicePath2  The second device path protocol to compare.
 
   @retval TRUE         The device paths matched
   @retval FALSE        The device paths were different
@@ -113,10 +113,9 @@ FileDevicePathsEqual (
 **/
 BOOLEAN
 EFIAPI
-IsDeviceChild (
+IsDevicePathChild (
   IN  EFI_DEVICE_PATH_PROTOCOL      *ParentPath,
-  IN  EFI_DEVICE_PATH_PROTOCOL      *ChildPath,
-  IN  UINT8                         EndPathType
+  IN  EFI_DEVICE_PATH_PROTOCOL      *ChildPath
   );
 
 /**
