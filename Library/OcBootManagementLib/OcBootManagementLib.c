@@ -793,7 +793,12 @@ InternalGetDefaultBootEntry (
     if (CmpResult != 0) {
       continue;
     }
-
+    //
+    // FIXME: Ensure that all the entries get properly filtered against any
+    // malicious sources. The drive itself should already be safe, but it is
+    // unclear whether a potentially safe device path can be transformed into
+    // an unsafe one.
+    //
     OcRemainingDevicePath = (EFI_DEVICE_PATH_PROTOCOL *)(
                               (UINT8 *)OcDevicePath + RootDevicePathSize
                               );
@@ -814,6 +819,7 @@ InternalGetDefaultBootEntry (
       //
       // BootNext is allowed to override both the exact file path as well as
       // the used load options.
+      // TODO: Investigate whether Apple uses OptionalData, and exploit ways.
       //
       BootEntry->LoadOptionsSize = OptionalDataSize;
       BootEntry->LoadOptions     = OptionalData;
@@ -821,6 +827,10 @@ InternalGetDefaultBootEntry (
       // Only use the BootNext path when it has a file path.
       //
       if (!IsDevicePathEnd (UefiRemainingDevicePath)) {
+        //
+        // TODO: Investigate whether macOS adds BootNext entries that are not
+        //       possibly located by bless.
+        //
         FreePool (BootEntry->DevicePath);
         BootEntry->DevicePath = UefiDevicePath;
       } else {
