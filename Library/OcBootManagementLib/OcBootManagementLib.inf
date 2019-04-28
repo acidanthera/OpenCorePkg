@@ -45,10 +45,12 @@
   gAppleBlessedSystemFolderInfoGuid  ## SOMETIMES_CONSUMES
   gAppleBlessedOsxFolderInfoGuid     ## SOMETIMES_CONSUMES
   gEfiFileInfoGuid                   ## SOMETIMES_CONSUMES
+  gEfiGlobalVariableGuid             ## SOMETIMES_CONSUMES
 
 [Protocols]
   gAppleBootPolicyProtocolGuid      ## PRODUCES
   gEfiSimpleFileSystemProtocolGuid  ## SOMETIMES_CONSUMES
+  gEfiLoadedImageProtocolGuid       ## SOMETIMES_CONSUMES
 
 [LibraryClasses]
   BaseLib

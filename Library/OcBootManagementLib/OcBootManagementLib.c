@@ -18,6 +18,7 @@
 #include <Guid/AppleApfsInfo.h>
 #include <Guid/AppleBless.h>
 #include <Guid/FileInfo.h>
+#include <Guid/GlobalVariable.h>
 
 #include <Protocol/AppleBootPolicy.h>
 #include <Protocol/SimpleFileSystem.h>
@@ -41,6 +42,8 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/FileHandleLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Protocol/LoadedImage.h>
 
 typedef struct {
   EFI_DEVICE_PATH_PROTOCOL       *DevicePath;
@@ -502,6 +505,343 @@ OcDescribeBootEntry (
   BootEntry->PathName = BootDirectoryName;
 
   return EFI_SUCCESS;
+}
+
+/**
+  Retrieves booting relevant data from an UEFI Boot#### option.
+  If BootName is NULL, a BDS-style process is assumed and inactive as well as
+  non-Boot type applications are ignored.
+
+  @param[in]  BootOption        The boot option's index.
+  @param[out] BootName          On output, the boot option's description.
+  @param[out] OptionalDataSize  On output, the optional data size.
+  @param[out] OptionalData      On output, a pointer to the optional data.
+
+**/
+STATIC
+EFI_DEVICE_PATH_PROTOCOL *
+InternalGetBootOptionData (
+  IN  UINT16   BootOption,
+  OUT CHAR16   **BootName  OPTIONAL,
+  OUT UINT32   *OptionalDataSize  OPTIONAL,
+  OUT VOID     **OptionalData  OPTIONAL
+  )
+{
+  EFI_STATUS               Status;
+  CHAR16                   BootVarName[L_STR_LEN (L"Boot####") + 1];
+
+  UINTN                    LoadOptionSize;
+  EFI_LOAD_OPTION          *LoadOption;
+  UINT8                    *LoadOptionPtr;
+
+  UINT32                   Attributes;
+  CONST CHAR16             *Description;
+  UINTN                    DescriptionSize;
+  UINT16                   FilePathListSize;
+  EFI_DEVICE_PATH_PROTOCOL *FilePathList;
+
+  CHAR16                   *BootOptionName;
+  VOID                     *OptionalDataBuffer;
+
+  UnicodeSPrint (BootVarName, sizeof (BootVarName), L"Boot%04x", BootOption);
+
+  Status = GetEfiGlobalVariable2 (
+             BootVarName,
+             (VOID **)&LoadOption,
+             &LoadOptionSize
+             );
+  if (EFI_ERROR (Status) || (LoadOptionSize < sizeof (*LoadOption))) {
+    return NULL;
+  }
+
+  Attributes = LoadOption->Attributes;
+  if ((BootName == NULL)
+   && (((Attributes & LOAD_OPTION_ACTIVE) == 0)
+    || ((Attributes & LOAD_OPTION_CATEGORY) != LOAD_OPTION_CATEGORY_BOOT))) {
+    FreePool (LoadOption);
+    return NULL;
+  }
+
+  FilePathListSize = LoadOption->FilePathListLength;
+
+  LoadOptionPtr   = (UINT8 *)(LoadOption + 1);
+  LoadOptionSize -= sizeof (*LoadOption);
+
+  if (FilePathListSize > LoadOptionSize) {
+    FreePool (LoadOption);
+    return NULL;
+  }
+
+  LoadOptionSize -= FilePathListSize;
+
+  Description     = (CHAR16 *)LoadOptionPtr;
+  DescriptionSize = StrnSizeS (Description, (LoadOptionSize / sizeof (CHAR16)));
+  if (DescriptionSize > LoadOptionSize) {
+    FreePool (LoadOption);
+    return NULL;
+  }
+
+  LoadOptionPtr  += DescriptionSize;
+  LoadOptionSize -= DescriptionSize;
+
+  FilePathList = (EFI_DEVICE_PATH_PROTOCOL *)LoadOptionPtr;
+  if (!IsDevicePathValid (FilePathList, FilePathListSize)) {
+    FreePool (LoadOption);
+    return NULL;
+  }
+
+  LoadOptionPtr += FilePathListSize;
+
+  BootOptionName = NULL;
+
+  if (BootName != NULL) {
+    BootOptionName = AllocateCopyPool (DescriptionSize, Description);
+  }
+
+  OptionalDataBuffer = NULL;
+
+  if (OptionalDataSize != NULL) {
+    ASSERT (OptionalData != NULL);
+    if (LoadOptionSize > 0) {
+      OptionalDataBuffer = AllocateCopyPool (LoadOptionSize, LoadOptionPtr);
+      if (OptionalDataBuffer == NULL) {
+        LoadOptionSize = 0;
+      }
+    }
+
+    *OptionalDataSize = (UINT32)LoadOptionSize;
+  }
+  //
+  // Use the allocated Load Option buffer for the Device Path.
+  //
+  CopyMem (LoadOption, FilePathList, FilePathListSize);
+  FilePathList = (EFI_DEVICE_PATH_PROTOCOL *)LoadOption;
+
+  if (BootName != NULL) {
+    *BootName = BootOptionName;
+  }
+
+  if (OptionalData != NULL) {
+    *OptionalData = OptionalDataBuffer;
+  }
+
+  return FilePathList;
+}
+
+OC_BOOT_ENTRY *
+InternalGetDefaultBootEntry (
+  IN OUT OC_BOOT_ENTRY  *BootEntries,
+  IN     UINTN          NumBootEntries,
+  IN     EFI_HANDLE     LoadHandle  OPTIONAL
+  )
+{
+  EFI_STATUS               Status;
+  INTN                     CmpResult;
+
+  UINT32                   BootNextAttributes;
+  UINTN                    BootNextSize;
+  BOOLEAN                  IsBootNext;
+
+  UINT16                   *BootOrder;
+  UINTN                    BootOrderSize;
+
+  UINTN                    RootDevicePathSize;
+  EFI_DEVICE_PATH_PROTOCOL *UefiDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL *UefiRemainingDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL *OcDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL *OcRemainingDevicePath;
+  UINT32                   OptionalDataSize;
+  VOID                     *OptionalData;
+  CHAR16                   *DefaultDevicePathText;
+
+  EFI_DEVICE_PATH_PROTOCOL *DevicePath;
+  EFI_HANDLE               DeviceHandle;
+
+  UINT16                   BootNextOptionIndex;
+
+  OC_BOOT_ENTRY            *BootEntry;
+  UINTN                    Index;
+
+  ASSERT (BootEntries != NULL);
+  ASSERT (NumBootEntries > 0);
+
+  IsBootNext   = FALSE;
+  OptionalData = NULL;
+
+  BootNextSize = sizeof (BootNextOptionIndex);
+  Status = gRT->GetVariable (
+                  EFI_BOOT_NEXT_VARIABLE_NAME,
+                  &gEfiGlobalVariableGuid,
+                  &BootNextAttributes,
+                  &BootNextSize,
+                  &BootNextOptionIndex
+                  );
+  if (Status == EFI_NOT_FOUND) {
+    Status = GetEfiGlobalVariable2 (
+               EFI_BOOT_ORDER_VARIABLE_NAME,
+               (VOID **)&BootOrder,
+               &BootOrderSize
+               );
+    if (EFI_ERROR (Status)) {
+      return NULL;
+    }
+
+    if (BootOrderSize < sizeof (*BootOrder)) {
+      FreePool (BootOrder);
+      return NULL;
+    }
+
+    UefiDevicePath = InternalGetBootOptionData (
+                       BootOrder[0],
+                       NULL,
+                       NULL,
+                       NULL
+                       );
+    if (UefiDevicePath == NULL) {
+      FreePool (BootOrder);
+      return NULL;
+    }
+
+    DevicePath = UefiDevicePath;
+    Status = gBS->LocateDevicePath (
+                    &gEfiSimpleFileSystemProtocolGuid,
+                    &DevicePath,
+                    &DeviceHandle
+                    );
+    if (!EFI_ERROR (Status) && (DeviceHandle == LoadHandle)) {
+      //
+      // Skip BOOTx64.EFI at BootOrder[0].
+      //
+      FreePool (UefiDevicePath);
+
+      if (BootOrderSize < (2 * sizeof (*BootOrder))) {
+        FreePool (BootOrder);
+        return NULL;
+      }
+
+      UefiDevicePath = InternalGetBootOptionData (
+                         BootOrder[1],
+                         NULL,
+                         NULL,
+                         NULL
+                         );
+      if (UefiDevicePath == NULL) {
+        FreePool (BootOrder);
+        return NULL;
+      }
+    }
+
+    FreePool (BootOrder);
+  } else if (!EFI_ERROR (Status)) {
+    //
+    // BootNext must be deleted before attempting to start the image - delete
+    // it here because not attempting to boot the image implies user's choice.
+    //
+    gRT->SetVariable (
+           EFI_BOOT_NEXT_VARIABLE_NAME,
+           &gEfiGlobalVariableGuid,
+           BootNextAttributes,
+           0,
+           NULL
+           );
+    IsBootNext = TRUE;
+
+    UefiDevicePath = InternalGetBootOptionData (
+                       BootNextOptionIndex,
+                       NULL,
+                       &OptionalDataSize,
+                       &OptionalData
+                       );
+    if (UefiDevicePath == NULL) {
+      return NULL;
+    }
+  } else {
+    return NULL;
+  }
+
+  OcFixAppleBootDevicePath (UefiDevicePath);
+
+  DEBUG_CODE (
+    DefaultDevicePathText = ConvertDevicePathToText (UefiDevicePath, FALSE, FALSE);
+    if (DefaultDevicePathText != NULL) {
+      DEBUG ((DEBUG_INFO, "Default boot Device Path: %s\n", DefaultDevicePathText));
+      FreePool (DefaultDevicePathText);
+    }
+    );
+
+  UefiRemainingDevicePath = UefiDevicePath;
+  Status = gBS->LocateDevicePath (
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  &UefiRemainingDevicePath,
+                  &DeviceHandle
+                  );
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
+
+  RootDevicePathSize = ((UINT8 *)UefiRemainingDevicePath - (UINT8 *)UefiDevicePath);
+
+  for (Index = 0; Index < NumBootEntries; ++Index) {
+    BootEntry    = &BootEntries[Index];
+    OcDevicePath = BootEntry->DevicePath;
+
+    if ((GetDevicePathSize (OcDevicePath) - END_DEVICE_PATH_LENGTH) < RootDevicePathSize) {
+      continue;
+    }
+
+    CmpResult = CompareMem (OcDevicePath, UefiDevicePath, RootDevicePathSize);
+    if (CmpResult != 0) {
+      continue;
+    }
+
+    OcRemainingDevicePath = (EFI_DEVICE_PATH_PROTOCOL *)(
+                              (UINT8 *)OcDevicePath + RootDevicePathSize
+                              );
+    if (!IsBootNext) {
+      //
+      // For non-BootNext boot, the File Paths must match for the entries to be
+      // matched. Startup Disk however only stores the drive's Device Path
+      // excluding the booter path, which we treat as a match as well.
+      //
+      if (!IsDevicePathEnd (UefiRemainingDevicePath)
+       && !IsDevicePathEqual (UefiRemainingDevicePath, OcRemainingDevicePath)
+        ) {
+        continue;
+      }
+
+      FreePool (UefiDevicePath);
+    } else {
+      //
+      // BootNext is allowed to override both the exact file path as well as
+      // the used load options.
+      //
+      BootEntry->LoadOptionsSize = OptionalDataSize;
+      BootEntry->LoadOptions     = OptionalData;
+      //
+      // Only use the BootNext path when it has a file path.
+      //
+      if (!IsDevicePathEnd (UefiRemainingDevicePath)) {
+        FreePool (BootEntry->DevicePath);
+        BootEntry->DevicePath = UefiDevicePath;
+      } else {
+        FreePool (UefiDevicePath);
+      }
+    }
+
+    DEBUG ((DEBUG_INFO, "Matched default boot option: %s\n", BootEntry->Name));
+
+    return BootEntry;
+  }
+
+  if (OptionalData != NULL) {
+    FreePool (OptionalData);
+  }
+
+  FreePool (UefiDevicePath);
+
+  DEBUG ((DEBUG_INFO, "Failed to match a default boot option\n"));
+
+  return NULL;
 }
 
 VOID
@@ -1235,8 +1575,10 @@ InternalLoadBootEntry (
   )
 {
   EFI_STATUS                 Status;
+  EFI_STATUS                 OptionalStatus;
   EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
   CHAR16                     *UnicodeDevicePath;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
 
   //
   // TODO: support Apple loaded image, policy, and dmg boot.
@@ -1278,7 +1620,17 @@ InternalLoadBootEntry (
 
   Status = gBS->LoadImage (FALSE, ParentHandle, DevicePath, NULL, 0, EntryHandle);
 
-  if (EFI_ERROR (Status)) {
+  if (!EFI_ERROR (Status)) {
+    OptionalStatus = gBS->HandleProtocol (
+                            ParentHandle,
+                            &gEfiLoadedImageProtocolGuid,
+                            (VOID **)&LoadedImage
+                            );
+    if (!EFI_ERROR (OptionalStatus)) {
+      LoadedImage->LoadOptionsSize = BootEntry->LoadOptionsSize;
+      LoadedImage->LoadOptions     = BootEntry->LoadOptions;
+    }
+  } else {
     InternalUnloadDmg (DmgLoadContext);
   }
 
@@ -1323,6 +1675,7 @@ OcRunSimpleBootPicker (
   APPLE_BOOT_POLICY_PROTOCOL  *AppleBootPolicy;
   OC_BOOT_ENTRY               *Chosen;
   OC_BOOT_ENTRY               *Entries;
+  OC_BOOT_ENTRY               *Entry;
   UINTN                       EntryCount;
   EFI_HANDLE                  BooterHandle;
   UINT32                      DefaultEntry;
@@ -1354,10 +1707,11 @@ OcRunSimpleBootPicker (
 
     DEBUG ((DEBUG_INFO, "Performing OcShowSimpleBootMenu...\n"));
 
-    //
-    // TODO: obtain default entry!
-    //
     DefaultEntry = 0;
+    Entry = InternalGetDefaultBootEntry (Entries, EntryCount, LoadHandle);
+    if (Entry != NULL) {
+      DefaultEntry = (UINT32)(Entry - Entries);
+    }
 
     if (ShowPicker) {
       Status = OcShowSimpleBootMenu (

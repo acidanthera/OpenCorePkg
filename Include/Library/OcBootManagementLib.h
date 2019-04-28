@@ -46,6 +46,11 @@ typedef struct OC_BOOT_ENTRY_ {
   // Heuristical value signalising about Windows os (otherwise macOS).
   //
   BOOLEAN                   IsWindows;
+  //
+  // Load option data (usually "boot args")
+  //
+  UINT32                    LoadOptionsSize;
+  VOID                      *LoadOptions;
 } OC_BOOT_ENTRY;
 
 /**
