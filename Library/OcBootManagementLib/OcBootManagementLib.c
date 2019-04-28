@@ -632,7 +632,7 @@ InternalGetBootOptionData (
 STATIC
 VOID
 InternalDebugBootEnvironment (
-  IN UINT16                   *BootOrder,
+  IN CONST UINT16             *BootOrder,
   IN UINTN                    BootOrderSize
   )
 {
@@ -648,8 +648,8 @@ InternalDebugBootEnvironment (
     L"efi-apple-recovery-data"
   };
 
-  STATIC UINT16  ApplePredefinedVariables[] = {
-    80, 81, 82
+  STATIC CONST UINT16  ApplePredefinedVariables[] = {
+    0x80, 0x81, 0x82
   };
 
   for (Index = 0; Index < ARRAY_SIZE (AppleDebugVariables); ++Index) {
