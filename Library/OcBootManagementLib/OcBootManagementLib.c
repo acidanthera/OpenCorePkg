@@ -638,6 +638,7 @@ InternalDebugBootEnvironment (
 {
   EFI_STATUS                Status;
   EFI_DEVICE_PATH_PROTOCOL  *UefiDevicePath;
+  UINTN                     UefiDevicePathSize;
   CHAR16                    *DevicePathText;
   UINTN                     Index;
   INT32                     Predefined;
@@ -657,15 +658,18 @@ InternalDebugBootEnvironment (
                AppleDebugVariables[Index],
                &gAppleBootVariableGuid,
                (VOID **)&UefiDevicePath,
-               NULL
+               &UefiDevicePathSize
                );
-    if (!EFI_ERROR (Status)) {
+    if (!EFI_ERROR (Status) && IsDevicePathValid (UefiDevicePath, UefiDevicePathSize)) {
       DevicePathText = ConvertDevicePathToText (UefiDevicePath, FALSE, FALSE);
       if (DevicePathText != NULL) {
         DEBUG ((DEBUG_INFO, "OCB: %s = %s\n", AppleDebugVariables[Index], DevicePathText));
         FreePool (DevicePathText);
+        FreePool (UefiDevicePath);
         continue;
       }
+
+      FreePool (UefiDevicePath);
     }
     DEBUG ((DEBUG_INFO, "OCB: %s - %r\n", AppleDebugVariables[Index], Status));
   }
