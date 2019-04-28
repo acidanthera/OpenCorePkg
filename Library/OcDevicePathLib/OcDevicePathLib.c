@@ -68,52 +68,6 @@ AppendFileNameDevicePath (
   return AppendedDevicePath;
 }
 
-CHAR16 *
-DevicePathToText (
-  IN EFI_DEVICE_PATH_PROTOCOL       *DevicePath,
-  IN BOOLEAN                        DisplayOnly,
-  IN BOOLEAN                        AllowShortcuts
-  )
-{
-  CHAR16                           *DevicePathString;
-  EFI_DEVICE_PATH_PROTOCOL         *ShortDevicePath  = NULL;
-  EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevicePathToText = NULL;
-  EFI_STATUS                       Status;
-
-  Status = gBS->LocateProtocol (
-                  &gEfiDevicePathToTextProtocolGuid,
-                  NULL,
-                  (VOID **)&DevicePathToText
-                  );
-
-  // TODO: Shorten the device path to the last node ?
-
-  if (DisplayOnly == TRUE && AllowShortcuts == TRUE) {
-
-    ShortDevicePath = FindDevicePathNodeWithType (
-                        DevicePath,
-                        MEDIA_DEVICE_PATH,
-                        MEDIA_HARDDRIVE_DP);
-
-  }
-
-  if (ShortDevicePath == NULL) {
-    ShortDevicePath = DevicePath;
-  }
-
-  DevicePathString = NULL;
-
-  if (!EFI_ERROR (Status)) {
-    DevicePathString  = DevicePathToText->ConvertDevicePathToText (
-                                            ShortDevicePath,
-                                            DisplayOnly,
-                                            AllowShortcuts
-                                            );
-  }
-
-  return DevicePathString;
-}
-
 EFI_DEVICE_PATH_PROTOCOL *
 FindDevicePathNodeWithType (
   IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
@@ -372,7 +326,7 @@ OcFixAppleBootDevicePath (
                     &Device
                     );
     if (EFI_ERROR (Status) || !IsDevicePathEnd (RemainingDevPath)) {
-      DevicePathText = DevicePathToText (DevicePath, FALSE, FALSE);
+      DevicePathText = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
       if (DevicePathText != NULL) {
         DEBUG ((DEBUG_ERROR, "Malformed Device Path: %s\n", DevicePathText));
         FreePool (DevicePathText);

@@ -32,30 +32,6 @@ AppendFileNameDevicePath (
   );
 
 /**
-  Converts a device path structure to its string representative.
-
-  @param[in] StorageDevicePath  The device path to convert to unicode string.
-  @param[in] DisplayOnly        If DisplayOnly is TRUE, then the shorter text
-                                representation of the display node is used,
-                                where applicable.  If DisplayOnly is FALSE,
-                                then the longer text representation of the
-                                display node is used.
-  @param[in] AllowShortcuts     If AllowShortcuts is TRUE, then the shortcut
-                                forms of text representation for a device node
-                                can be used, where applicable.
-
-  @retval EFI_SUCCESS            The defaults were initialized successfully.
-  @retval EFI_INVALID_PARAMETER  The parameters passed were invalid.
-  @retval EFI_OUT_OF_RESOURCES   The system ran out of memory.
-**/
-CHAR16 *
-DevicePathToText (
-  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
-  IN BOOLEAN                   DisplayOnly,
-  IN BOOLEAN                   AllowShortcuts
-  );
-
-/**
   Locate the node inside the device path specified by Type an SubType values.
 
   @param[in] DevicePath  The device path used in the search.
