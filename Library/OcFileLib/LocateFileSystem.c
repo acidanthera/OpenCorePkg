@@ -21,6 +21,7 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DevicePathLib.h>
+#include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
@@ -101,4 +102,74 @@ LocateRootVolume (
   }
 
   return RootVolume;
+}
+
+EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *
+LocateFileSystemByGuid (
+  IN CONST GUID  *Guid
+  )
+{
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *SimpleFs;
+
+  EFI_STATUS                      Status;
+
+  UINTN                           NumHandles;
+  EFI_HANDLE                      *HandleBuffer;
+  UINTN                           Index;
+
+  EFI_DEVICE_PATH_PROTOCOL        *DevicePath;
+  CONST HARDDRIVE_DEVICE_PATH     *HardDrive;
+
+  ASSERT (Guid != NULL);
+
+  Status = gBS->LocateHandleBuffer (
+                  ByProtocol,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  NULL,
+                  &NumHandles,
+                  &HandleBuffer
+                  );
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
+
+  SimpleFs = NULL;
+
+  for (Index = 0; Index < NumHandles; ++Index) {
+    Status = gBS->HandleProtocol (
+                    HandleBuffer[Index],
+                    &gEfiDevicePathProtocolGuid,
+                    (VOID **)&DevicePath
+                    );
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    HardDrive = (HARDDRIVE_DEVICE_PATH *)(
+                  FindDevicePathNodeWithType (
+                    DevicePath,
+                    MEDIA_DEVICE_PATH,
+                    MEDIA_HARDDRIVE_DP
+                    )
+                  );
+    if ((HardDrive == NULL) || (HardDrive->SignatureType != 0x02)) {
+      continue;
+    }
+
+    if (CompareGuid (Guid, (GUID *)HardDrive->Signature)) {
+      Status = gBS->HandleProtocol (
+                      HandleBuffer[Index],
+                      &gEfiSimpleFileSystemProtocolGuid,
+                      (VOID **)&SimpleFs
+                      );
+      if (EFI_ERROR (Status)) {
+        SimpleFs = NULL;
+      }
+
+      break;
+    }
+  }
+
+  FreePool (HandleBuffer);
+  return SimpleFs;
 }

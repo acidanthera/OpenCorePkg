@@ -56,6 +56,18 @@ LocateRootVolume (
   );
 
 /**
+  Locate file system from GUID.
+
+  @param[in]  Guid  GUID of the volume to locate.
+
+  @retval  simple file system protocol or NULL.
+**/
+EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *
+LocateFileSystemByGuid (
+  IN CONST GUID  *Guid
+  );
+
+/**
 
   @param[in]  FileSystem   A pointer to the file system protocol of the volume.
 
