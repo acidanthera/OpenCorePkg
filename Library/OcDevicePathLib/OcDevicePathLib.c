@@ -602,7 +602,7 @@ InternalDevicePathCmpWorker (
       //
       ASSERT (NodeSubType == END_ENTIRE_DEVICE_PATH_SUBTYPE);
       return (CheckChild
-          || (DevicePathType (ParentPathPtr.DevPath) == END_ENTIRE_DEVICE_PATH_SUBTYPE));
+          || (DevicePathType (ParentPathPtr.DevPath) == END_DEVICE_PATH_TYPE));
     }
 
     if ((DevicePathType (ParentPathPtr.DevPath) != NodeType)
