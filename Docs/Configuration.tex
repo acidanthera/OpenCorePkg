@@ -1985,8 +1985,10 @@ for system configuration.
   \textbf{Type}: \texttt{plist\ data}, 1 byte\\
   \textbf{Default value}: Not installed\\
   \textbf{Description}: Sets \texttt{DevicePathsSupported} in
-  \texttt{gEfiMiscSubClassGuid}. Value found on Macs is \texttt{01}.
-  Read by AppleACPIPlatform.kext.
+  \texttt{gEfiMiscSubClassGuid}. Must be set to \texttt{01} for
+  AppleACPIPlatform.kext to append SATA device paths to
+  \texttt{Boot\#\#\#\#} and \texttt{efi-boot-device-data} variables.
+  Set to \texttt{01} on all modern Macs.
 \item
   \texttt{SmcRevision}\\
   \textbf{Type}: \texttt{plist\ data}, 6 bytes\\
