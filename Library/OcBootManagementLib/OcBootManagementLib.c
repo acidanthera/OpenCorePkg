@@ -677,7 +677,7 @@ InternalGetDefaultBootEntry (
                   &BootNextOptionIndex
                   );
   if (Status == EFI_NOT_FOUND) {
-    DEBUG ((DEBUG_VERBOSE, "BootNext has not been found.\n"));
+    DEBUG ((DEBUG_INFO, "OCB: BootNext has not been found.\n"));
 
     Status = GetEfiGlobalVariable2 (
                EFI_BOOT_ORDER_VARIABLE_NAME,
@@ -689,7 +689,7 @@ InternalGetDefaultBootEntry (
     }
 
     if (BootOrderSize < sizeof (*BootOrder)) {
-      DEBUG ((DEBUG_WARN, "Bootorder is malformed.\n"));
+      DEBUG ((DEBUG_WARN, "OCB: BootOrder is malformed.\n"));
       FreePool (BootOrder);
       return NULL;
     }
@@ -712,7 +712,7 @@ InternalGetDefaultBootEntry (
                     &DeviceHandle
                     );
     if (!EFI_ERROR (Status) && (DeviceHandle == LoadHandle)) {
-      DEBUG ((DEBUG_VERBOSE, "Skipping OC bootstrap application.\n"));
+      DEBUG ((DEBUG_INFO, "OCB: Skipping OC bootstrap application.\n"));
       //
       // Skip BOOTx64.EFI at BootOrder[0].
       //
@@ -737,7 +737,7 @@ InternalGetDefaultBootEntry (
 
     FreePool (BootOrder);
   } else if (!EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "BootNext: %x.\n", BootNextOptionIndex));
+    DEBUG ((DEBUG_INFO, "OCB: BootNext: %x.\n", BootNextOptionIndex));
     //
     // BootNext must be deleted before attempting to start the image - delete
     // it here because not attempting to boot the image implies user's choice.
@@ -769,7 +769,7 @@ InternalGetDefaultBootEntry (
   DEBUG_CODE (
     DefaultDevicePathText = ConvertDevicePathToText (UefiDevicePath, FALSE, FALSE);
     if (DefaultDevicePathText != NULL) {
-      DEBUG ((DEBUG_INFO, "Default boot Device Path: %s\n", DefaultDevicePathText));
+      DEBUG ((DEBUG_INFO, "OCB: Default boot Device Path: %s\n", DefaultDevicePathText));
       FreePool (DefaultDevicePathText);
     }
     );
@@ -781,7 +781,7 @@ InternalGetDefaultBootEntry (
                   &DeviceHandle
                   );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "Invalid default boot Device Path.\n"));
+    DEBUG ((DEBUG_WARN, "OCB: Invalid default boot Device Path.\n"));
     return NULL;
   }
 
@@ -844,7 +844,7 @@ InternalGetDefaultBootEntry (
       }
     }
 
-    DEBUG ((DEBUG_INFO, "Matched default boot option: %s\n", BootEntry->Name));
+    DEBUG ((DEBUG_INFO, "OCB: Matched default boot option: %s\n", BootEntry->Name));
 
     return BootEntry;
   }
@@ -855,7 +855,7 @@ InternalGetDefaultBootEntry (
 
   FreePool (UefiDevicePath);
 
-  DEBUG ((DEBUG_WARN, "Failed to match a default boot option\n"));
+  DEBUG ((DEBUG_WARN, "OCB: Failed to match a default boot option\n"));
 
   return NULL;
 }
