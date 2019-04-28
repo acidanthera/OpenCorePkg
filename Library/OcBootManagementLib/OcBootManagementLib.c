@@ -677,6 +677,8 @@ InternalGetDefaultBootEntry (
                   &BootNextOptionIndex
                   );
   if (Status == EFI_NOT_FOUND) {
+    DEBUG ((DEBUG_VERBOSE, "BootNext has not been found.\n"));
+
     Status = GetEfiGlobalVariable2 (
                EFI_BOOT_ORDER_VARIABLE_NAME,
                (VOID **)&BootOrder,
@@ -687,6 +689,7 @@ InternalGetDefaultBootEntry (
     }
 
     if (BootOrderSize < sizeof (*BootOrder)) {
+      DEBUG ((DEBUG_WARN, "Bootorder is malformed.\n"));
       FreePool (BootOrder);
       return NULL;
     }
@@ -709,6 +712,7 @@ InternalGetDefaultBootEntry (
                     &DeviceHandle
                     );
     if (!EFI_ERROR (Status) && (DeviceHandle == LoadHandle)) {
+      DEBUG ((DEBUG_VERBOSE, "Skipping OC bootstrap application.\n"));
       //
       // Skip BOOTx64.EFI at BootOrder[0].
       //
@@ -733,6 +737,7 @@ InternalGetDefaultBootEntry (
 
     FreePool (BootOrder);
   } else if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "BootNext: %x.\n", BootNextOptionIndex));
     //
     // BootNext must be deleted before attempting to start the image - delete
     // it here because not attempting to boot the image implies user's choice.
@@ -776,6 +781,7 @@ InternalGetDefaultBootEntry (
                   &DeviceHandle
                   );
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "Invalid default boot Device Path.\n"));
     return NULL;
   }
 
@@ -849,7 +855,7 @@ InternalGetDefaultBootEntry (
 
   FreePool (UefiDevicePath);
 
-  DEBUG ((DEBUG_INFO, "Failed to match a default boot option\n"));
+  DEBUG ((DEBUG_WARN, "Failed to match a default boot option\n"));
 
   return NULL;
 }
