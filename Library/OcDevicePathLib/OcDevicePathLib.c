@@ -281,7 +281,7 @@ OcFixAppleBootDevicePath (
                       &RemainingDevPath,
                       &Device
                       );
-      if (EFI_ERROR (Status) || !IsDevicePathEnd (RemainingDevPath)) {
+      if (EFI_ERROR (Status) || (RemainingDevPath == DevPath.DevPath)) {
         //
         // Must be set to 0xFFFF if the device is directly connected to the
         // HBA. This rule has been established by UEFI 2.5 via an Erratum and
