@@ -261,95 +261,107 @@ OcFixAppleBootDevicePath (
   IN OUT EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   )
 {
-  EFI_DEV_PATH_PTR         DevPath;
+  EFI_DEV_PATH_PTR         InvalidNode;
+  UINTN                    NodeSize;
 
   EFI_STATUS               Status;
   EFI_DEVICE_PATH_PROTOCOL *RemainingDevPath;
   EFI_HANDLE               Device;
 
   CHAR16                   *DevicePathText;
+  CHAR16                   *DevicePathText2;
 
   ASSERT (DevicePath != NULL);
-
-  DevPath.DevPath = FindDevicePathNodeWithType (
-                      DevicePath,
-                      MESSAGING_DEVICE_PATH,
-                      0
-                      );
-  if (DevPath.DevPath == NULL) {
-    return;
+  //
+  // NOTE: This code should work iteratively when nodes are handled which are
+  //       not mutually exclusive. Consider embedding LocateDevicePath logic
+  //       to boost performance then.
+  //
+  RemainingDevPath = DevicePath;
+  Status = gBS->LocateDevicePath (
+                  &gEfiDevicePathProtocolGuid,
+                  &RemainingDevPath,
+                  &Device
+                  );
+  if (!EFI_ERROR (Status)) {
+    if (IsDevicePathEnd (RemainingDevPath)) {
+      return;
+    }
+  } else {
+    RemainingDevPath = DevicePath;
   }
 
-  switch (DevicePathSubType (DevPath.DevPath)) {
-    case MSG_SATA_DP:
-    {
-      //
-      // Check whether the Device Path is invalid in the first place.
-      //
-      RemainingDevPath = DevicePath;
-      Status = gBS->LocateDevicePath (
-                      &gEfiDevicePathProtocolGuid,
-                      &RemainingDevPath,
-                      &Device
-                      );
-      if (EFI_ERROR (Status) || (RemainingDevPath == DevPath.DevPath)) {
+  InvalidNode.DevPath = RemainingDevPath;
+
+  if (DevicePathType (InvalidNode.DevPath) == MEDIA_DEVICE_PATH) {
+    switch (DevicePathSubType (InvalidNode.DevPath)) {
+      case MSG_SATA_DP:
+      {
         //
         // Must be set to 0xFFFF if the device is directly connected to the
         // HBA. This rule has been established by UEFI 2.5 via an Erratum and
         // has not been followed by Apple thus far.
-        // Reference: AppleACPIPlatform.kext, appendSATADevicePathNodeForIOMedia
+        // Reference: AppleACPIPlatform.kext,
+        //            appendSATADevicePathNodeForIOMedia
         //
-        DevPath.Sata->PortMultiplierPortNumber = 0xFFFF;
+        InvalidNode.Sata->PortMultiplierPortNumber = 0xFFFF;
+        break;
       }
 
-      break;
-    }
-
-    case MSG_SASEX_DP:
-    {
-      OC_INLINE_STATIC_ASSERT (
-        (sizeof (SASEX_DEVICE_PATH) != sizeof (NVME_NAMESPACE_DEVICE_PATH)),
-        "SasEx and NVMe DPs must differ in size for fixing to be accurate."
-        );
-      //
-      // Apple uses SubType 0x16 (SasEx) for NVMe, while the UEFI Specification
-      // defines it as SubType 0x17. The structures are identical.
-      // Reference: AppleACPIPlatform.kext, appendNVMeDevicePathNodeForIOMedia
-      //
-      if (DevicePathNodeLength (DevPath.DevPath) == sizeof (NVME_NAMESPACE_DEVICE_PATH)) {
-        DevPath.DevPath->SubType = MSG_NVME_NAMESPACE_DP;
+      case MSG_SASEX_DP:
+      {
+        OC_INLINE_STATIC_ASSERT (
+          (sizeof (SASEX_DEVICE_PATH) != sizeof (NVME_NAMESPACE_DEVICE_PATH)),
+          "SasEx and NVMe DPs must differ in size for fixing to be accurate."
+          );
+        //
+        // Apple uses SubType 0x16 (SasEx) for NVMe, while the UEFI
+        // Specification defines it as SubType 0x17. The structures are
+        // identical.
+        // Reference: AppleACPIPlatform.kext,
+        //            appendNVMeDevicePathNodeForIOMedia
+        //
+        NodeSize = DevicePathNodeLength (InvalidNode.DevPath);
+        if (NodeSize == sizeof (NVME_NAMESPACE_DEVICE_PATH)) {
+          InvalidNode.SasEx->Header.SubType = MSG_NVME_NAMESPACE_DP;
+          break;
+        }
+        //
+        // Fall through as we did not fix the node.
+        //
       }
 
-      break;
-    }
-
-    default:
-    {
-      break;
-    }
-  }
-
-  DEBUG_CODE (
-    RemainingDevPath = DevicePath;
-    Status = gBS->LocateDevicePath (
-                    &gEfiDevicePathProtocolGuid,
-                    &RemainingDevPath,
-                    &Device
-                    );
-    if (EFI_ERROR (Status)
-     || (!InternalLocateDevicePathValidEnd (RemainingDevPath))) {
-      DevicePathText = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
-      if (DevicePathText != NULL) {
+      default:
+      {
+        DevicePathText = ConvertDevicePathToText (
+                           DevicePath,
+                           FALSE,
+                           FALSE
+                           );
+        DevicePathText2 = ConvertDevicePathToText (
+                            InvalidNode.DevPath,
+                            FALSE,
+                            FALSE
+                            );
         DEBUG ((
           DEBUG_WARN,
-          "Malformed Device Path: %s - %r\n",
+          "DevicePath %s malformed at node %s\n",
           DevicePathText,
-          Status
+          DevicePathText2
           ));
-        FreePool (DevicePathText);
+
+        if (DevicePathText != NULL) {
+          FreePool (DevicePathText);
+        }
+
+        if (DevicePathText2 != NULL) {
+          FreePool (DevicePathText2);
+        }
+
+        return;
       }
     }
-  );
+  }
 }
 
 STATIC
