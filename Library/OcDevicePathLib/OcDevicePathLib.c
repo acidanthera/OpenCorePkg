@@ -238,17 +238,6 @@ TrailedBooterDevicePath (
   return NULL;
 }
 
-STATIC
-BOOLEAN
-InternalLocateDevicePathValidEnd (
-  IN OUT EFI_DEVICE_PATH_PROTOCOL  *DevicePath
-  )
-{
-  return (IsDevicePathEnd (DevicePath)
-       || ((DevicePathType (DevicePath) == MEDIA_DEVICE_PATH)
-        && (DevicePathSubType (DevicePath) == MEDIA_FILEPATH_DP)));
-}
-
 /**
   Fix Apple Boot Device Path to be compatible with conventional UEFI
   implementations.
@@ -329,6 +318,13 @@ OcFixAppleBootDevicePath (
         //
         // Fall through as we did not fix the node.
         //
+      }
+      //
+      // These nodes cannot be located, but this is considered valid.
+      //
+      case MEDIA_FILEPATH_DP:
+      {
+        return;
       }
 
       default:
