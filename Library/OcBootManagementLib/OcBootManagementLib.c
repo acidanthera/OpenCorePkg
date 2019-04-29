@@ -727,6 +727,7 @@ InternalGetDefaultBootEntry (
   )
 {
   EFI_STATUS               Status;
+  BOOLEAN                  Result;
   INTN                     CmpResult;
 
   UINT32                   BootNextAttributes;
@@ -743,7 +744,8 @@ InternalGetDefaultBootEntry (
   EFI_DEVICE_PATH_PROTOCOL *OcRemainingDevicePath;
   UINT32                   OptionalDataSize;
   VOID                     *OptionalData;
-  CHAR16                   *DevicePathText;
+  CHAR16                   *DevicePathText1;
+  CHAR16                   *DevicePathText2;
 
   EFI_DEVICE_PATH_PROTOCOL *DevicePath;
   EFI_HANDLE               DeviceHandle;
@@ -859,24 +861,39 @@ InternalGetDefaultBootEntry (
     return NULL;
   }
 
-  OcFixAppleBootDevicePath (UefiDevicePath);
+  UefiRemainingDevicePath = UefiDevicePath;
+  Result = OcFixAppleBootDevicePath (&UefiRemainingDevicePath);
 
   DEBUG_CODE_BEGIN ();
-  DevicePathText = ConvertDevicePathToText (UefiDevicePath, FALSE, FALSE);
-  if (DevicePathText != NULL) {
-    DEBUG ((DEBUG_INFO, "OCB: Default boot Device Path: %s\n", DevicePathText));
-    FreePool (DevicePathText);
+  DevicePathText1 = ConvertDevicePathToText (
+                      UefiDevicePath,
+                      FALSE,
+                      FALSE
+                      );
+  DevicePathText2 = ConvertDevicePathToText (
+                      UefiRemainingDevicePath,
+                      FALSE,
+                      FALSE
+                      );
+  
+  DEBUG ((
+    DEBUG_INFO,
+    "OCB: Default boot device path: %s | remainder: %s | %s\n",
+    DevicePathText1,
+    DevicePathText2,
+    (Result ? L"success" : L"failure")
+    ));
+
+  if (DevicePathText1 != NULL) {
+    FreePool (DevicePathText1);
+  }
+
+  if (DevicePathText2 != NULL) {
+    FreePool (DevicePathText2);
   }
   DEBUG_CODE_END ();
 
-  UefiRemainingDevicePath = UefiDevicePath;
-  Status = gBS->LocateDevicePath (
-                  &gEfiSimpleFileSystemProtocolGuid,
-                  &UefiRemainingDevicePath,
-                  &DeviceHandle
-                  );
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OCB: Invalid default boot Device Path.\n"));
+  if (!Result) {
     return NULL;
   }
 

@@ -139,12 +139,16 @@ TrailedBooterDevicePath (
   Fix Apple Boot Device Path to be compatible with conventional UEFI
   implementations.
 
-  @param[in,out] DevicePath  The Device Path to fix.
+  @param[in,out] DevicePath  On input, a pointer to the device path to fix.
+                             On output, the device path pointer is modified to
+                             point to the remaining part of the device path.
+
+  @returns  Whether the device path has been fixed successfully.
 
 **/
-VOID
+BOOLEAN
 OcFixAppleBootDevicePath (
-  IN OUT EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath
   );
 
 #endif // OC_DEVICE_PATH_LIB_H

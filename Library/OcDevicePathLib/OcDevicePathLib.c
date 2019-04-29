@@ -242,121 +242,149 @@ TrailedBooterDevicePath (
   Fix Apple Boot Device Path to be compatible with conventional UEFI
   implementations.
 
-  @param[in,out] DevicePath  The Device Path to fix.
+  @param[in,out] DevicePath  On input, a pointer to the device path to fix.
+                             On output, the device path pointer is modified to
+                             point to the remaining part of the device path.
+
+  @returns  Whether the device path has been fixed successfully.
 
 **/
-VOID
+BOOLEAN
 OcFixAppleBootDevicePath (
-  IN OUT EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath
   )
 {
+  EFI_DEVICE_PATH_PROTOCOL *OriginalDevPath;
+
   EFI_DEV_PATH_PTR         InvalidNode;
+  UINT8                    NodeType;
+  UINT8                    NodeSubType;
   UINTN                    NodeSize;
 
-  EFI_STATUS               Status;
   EFI_DEVICE_PATH_PROTOCOL *RemainingDevPath;
   EFI_HANDLE               Device;
 
-  CHAR16                   *DevicePathText;
-  CHAR16                   *DevicePathText2;
-
   ASSERT (DevicePath != NULL);
-  //
-  // NOTE: This code should work iteratively when nodes are handled which are
-  //       not mutually exclusive. Consider embedding LocateDevicePath logic
-  //       to boost performance then.
-  //
-  RemainingDevPath = DevicePath;
-  Status = gBS->LocateDevicePath (
-                  &gEfiDevicePathProtocolGuid,
-                  &RemainingDevPath,
-                  &Device
-                  );
-  if (!EFI_ERROR (Status)) {
-    if (IsDevicePathEnd (RemainingDevPath)) {
-      return;
-    }
-  } else {
-    RemainingDevPath = DevicePath;
-  }
+  ASSERT (*DevicePath != NULL);
+  ASSERT (IsDevicePathValid (*DevicePath, 0));
 
-  InvalidNode.DevPath = RemainingDevPath;
+  OriginalDevPath = *DevicePath;
 
-  if (DevicePathType (InvalidNode.DevPath) == MEDIA_DEVICE_PATH) {
-    switch (DevicePathSubType (InvalidNode.DevPath)) {
-      case MSG_SATA_DP:
-      {
-        //
-        // Must be set to 0xFFFF if the device is directly connected to the
-        // HBA. This rule has been established by UEFI 2.5 via an Erratum and
-        // has not been followed by Apple thus far.
-        // Reference: AppleACPIPlatform.kext,
-        //            appendSATADevicePathNodeForIOMedia
-        //
-        InvalidNode.Sata->PortMultiplierPortNumber = 0xFFFF;
-        break;
-      }
+  while (TRUE) {
+    RemainingDevPath = OriginalDevPath;
+    gBS->LocateDevicePath (
+           &gEfiDevicePathProtocolGuid,
+           &RemainingDevPath,
+           &Device
+           );
 
-      case MSG_SASEX_DP:
-      {
-        OC_INLINE_STATIC_ASSERT (
-          (sizeof (SASEX_DEVICE_PATH) != sizeof (NVME_NAMESPACE_DEVICE_PATH)),
-          "SasEx and NVMe DPs must differ in size for fixing to be accurate."
-          );
-        //
-        // Apple uses SubType 0x16 (SasEx) for NVMe, while the UEFI
-        // Specification defines it as SubType 0x17. The structures are
-        // identical.
-        // Reference: AppleACPIPlatform.kext,
-        //            appendNVMeDevicePathNodeForIOMedia
-        //
-        NodeSize = DevicePathNodeLength (InvalidNode.DevPath);
-        if (NodeSize == sizeof (NVME_NAMESPACE_DEVICE_PATH)) {
-          InvalidNode.SasEx->Header.SubType = MSG_NVME_NAMESPACE_DP;
+    *DevicePath = RemainingDevPath;
+
+    InvalidNode.DevPath = RemainingDevPath;
+    NodeType    = DevicePathType (InvalidNode.DevPath);
+    NodeSubType = DevicePathSubType (InvalidNode.DevPath);
+
+    if (NodeType == MEDIA_DEVICE_PATH) {
+      switch (NodeSubType) {
+        case MSG_SATA_DP:
+        {
+          if (InvalidNode.Sata->PortMultiplierPortNumber != 0xFFFF) {
+            //
+            // Must be set to 0xFFFF if the device is directly connected to the
+            // HBA. This rule has been established by UEFI 2.5 via an Erratum
+            // and has not been followed by Apple thus far.
+            // Reference: AppleACPIPlatform.kext,
+            //            appendSATADevicePathNodeForIOMedia
+            //
+            InvalidNode.Sata->PortMultiplierPortNumber = 0xFFFF;
+            continue;
+          }
+
+          return FALSE;
+        }
+
+        case MSG_SASEX_DP:
+        {
+          OC_INLINE_STATIC_ASSERT (
+            (sizeof (SASEX_DEVICE_PATH) != sizeof (NVME_NAMESPACE_DEVICE_PATH)),
+            "SasEx and NVMe DPs must differ in size for fixing to be accurate."
+            );
+          //
+          // Apple uses SubType 0x16 (SasEx) for NVMe, while the UEFI
+          // Specification defines it as SubType 0x17. The structures are
+          // identical.
+          // Reference: AppleACPIPlatform.kext,
+          //            appendNVMeDevicePathNodeForIOMedia
+          //
+          NodeSize = DevicePathNodeLength (InvalidNode.DevPath);
+          if (NodeSize == sizeof (NVME_NAMESPACE_DEVICE_PATH)) {
+            InvalidNode.SasEx->Header.SubType = MSG_NVME_NAMESPACE_DP;
+            continue;
+          }
+
+          return FALSE;
+        }
+
+        default:
+        {
           break;
         }
-        //
-        // Fall through as we did not fix the node.
-        //
       }
+    } else if (NodeType == ACPI_DEVICE_PATH) {
       //
-      // These nodes cannot be located, but this is considered valid.
+      // Apple uses PciRoot (EISA 0x0A03) nodes while some firmwares might use
+      // PcieRoot (EISA 0x0A08).
       //
-      case MEDIA_FILEPATH_DP:
-      {
-        return;
-      }
+      switch (NodeSubType) {
+        case ACPI_DP:
+        {
+          if (EISA_ID_TO_NUM (InvalidNode.Acpi->HID) == 0x0A03) {
+            InvalidNode.Acpi->HID = BitFieldWrite32 (
+                                      InvalidNode.Acpi->HID,
+                                      16,
+                                      31,
+                                      0x0A08
+                                      );
+            continue;
+          }
 
-      default:
-      {
-        DevicePathText = ConvertDevicePathToText (
-                           DevicePath,
-                           FALSE,
-                           FALSE
-                           );
-        DevicePathText2 = ConvertDevicePathToText (
-                            InvalidNode.DevPath,
-                            FALSE,
-                            FALSE
-                            );
-        DEBUG ((
-          DEBUG_WARN,
-          "DevicePath %s malformed at node %s\n",
-          DevicePathText,
-          DevicePathText2
-          ));
-
-        if (DevicePathText != NULL) {
-          FreePool (DevicePathText);
+          return FALSE;
         }
 
-        if (DevicePathText2 != NULL) {
-          FreePool (DevicePathText2);
+        case ACPI_EXTENDED_DP:
+        {
+          if (EISA_ID_TO_NUM (InvalidNode.ExtendedAcpi->HID) == 0x0A03) {
+            InvalidNode.ExtendedAcpi->HID = BitFieldWrite32 (
+                                              InvalidNode.ExtendedAcpi->HID,
+                                              16,
+                                              31,
+                                              0x0A08
+                                              );
+            continue;
+          }
+          
+          if (((EISA_ID_TO_NUM (InvalidNode.ExtendedAcpi->CID) == 0x0A03)
+            && (EISA_ID_TO_NUM (InvalidNode.ExtendedAcpi->HID) != 0x0A08))) {
+            InvalidNode.ExtendedAcpi->CID = BitFieldWrite32 (
+                                              InvalidNode.ExtendedAcpi->CID,
+                                              16,
+                                              31,
+                                              0x0A08
+                                              );
+            continue;
+          }
+
+          return FALSE;
         }
 
-        return;
+        default:
+        {
+          break;
+        }
       }
     }
+
+    return TRUE;
   }
 }
 
