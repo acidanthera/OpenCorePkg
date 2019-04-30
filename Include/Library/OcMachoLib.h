@@ -745,4 +745,17 @@ MachoExpandImage64 (
   IN  BOOLEAN            Strip
   );
 
+/**
+  Find Mach-O entry point from LC_UNIXTHREAD loader command.
+  This command does not verify Mach-O and assumes it is valid.
+
+  @param[in]  Image  Loaded Mach-O image.
+
+  @returns  Entry point or 0.
+**/
+UINTN
+MachoRuntimeGetEntryAddress (
+  IN VOID  *Image
+  );
+
 #endif // OC_MACHO_LIB_H_

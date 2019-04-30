@@ -1392,3 +1392,58 @@ MachoExpandImage64 (
 
   return (UINT32) CurrentSize;
 }
+
+UINTN
+MachoRuntimeGetEntryAddress (
+  IN VOID  *Image
+  )
+{
+  MACH_HEADER_ANY         *Header;
+  BOOLEAN                 Is64Bit;
+  UINT32                  NumCmds;
+  MACH_LOAD_COMMAND       *Cmd;
+  UINTN                   Index;
+  MACH_THREAD_COMMAND     *ThreadCmd;
+  MACH_X86_THREAD_STATE   *ThreadState;
+  UINTN                   Address;
+
+  Address = 0;
+  Header  = (MACH_HEADER_ANY *) Image;
+
+  if (Header->Signature == MACH_HEADER_SIGNATURE) {
+    //
+    // 32-bit header.
+    //
+    Is64Bit = FALSE;
+    NumCmds = Header->Header32.NumCommands;
+    Cmd     = &Header->Header32.Commands[0];
+  } else if (Header->Signature == MACH_HEADER_64_SIGNATURE) {
+    //
+    // 64-bit header.
+    //
+    Is64Bit = TRUE;
+    NumCmds = Header->Header64.NumCommands;
+    Cmd     = &Header->Header64.Commands[0];
+  } else {
+    //
+    // Invalid Mach-O image.
+    //
+    return Address;
+  }
+
+  //
+  // Iterate over load commands.
+  //
+  for (Index = 0; Index < NumCmds; ++Index) {
+    if (Cmd->CommandType == MACH_LOAD_COMMAND_UNIX_THREAD) {
+      ThreadCmd     = (MACH_THREAD_COMMAND *) Cmd;
+      ThreadState   = (MACH_X86_THREAD_STATE *) &ThreadCmd->ThreadState[0];
+      Address       = Is64Bit ? ThreadState->State64.rip : ThreadState->State32.eip;
+      break;
+    }
+
+    Cmd = NEXT_MACH_LOAD_COMMAND (Cmd);
+  }
+
+  return Address;
+}
