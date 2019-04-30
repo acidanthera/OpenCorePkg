@@ -190,7 +190,7 @@ ParseResolution (
   *Width  = TmpWidth;
   *Height = TmpHeight;
 
-  if (*String == '\0' || Bpp == NULL) {
+  if (*String == '\0') {
     return;
   }
 

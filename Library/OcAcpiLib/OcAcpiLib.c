@@ -715,7 +715,8 @@ AcpiDropTable (
   UINT64   CurrOemTableId;
   BOOLEAN  Found;
 
-  Index = 0; 
+  Index = 0;
+  Found = FALSE;
 
   while (Index < Context->NumberOfTables) {
     if ((Signature == 0 || Context->Tables[Index]->Signature == Signature)

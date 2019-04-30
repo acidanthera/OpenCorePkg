@@ -689,8 +689,7 @@ InternalDebugBootEnvironment (
           DEBUG_INFO,
           "OCB: %u -> Boot%04x - failed to read\n",
           (UINT32) Index,
-          BootOrder[Index],
-          DevicePathText
+          BootOrder[Index]
           ));
         continue;
       }
