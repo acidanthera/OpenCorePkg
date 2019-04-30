@@ -34,7 +34,7 @@
 
 [Guids]
   gEfiMiscSubClassGuid
-  gOcLogVariableGuid
+  gOcVendorVariableGuid
   gApplePlatformProducerNameGuid
 
 [Protocols]

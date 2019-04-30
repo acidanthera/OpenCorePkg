@@ -14,7 +14,7 @@
 
 #include <Uefi.h>
 
-#include <Guid/OcLogVariable.h>
+#include <Guid/OcVariables.h>
 
 #include <Protocol/OcLog.h>
 
@@ -258,7 +258,7 @@ OcLogAddEntry  (
 
       gRT->SetVariable (
         OC_LOG_VARIABLE_NAME,
-        &gOcLogVariableGuid,
+        &gOcVendorVariableGuid,
         Attributes,
         AsciiStrSize (Private->AsciiBuffer),
         Private->AsciiBuffer
