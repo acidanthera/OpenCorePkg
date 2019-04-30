@@ -94,69 +94,6 @@ GetAppleDiskLabel (
 
 STATIC
 CHAR16 *
-GetAppleRootedName (
-  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
-  IN  CONST CHAR16                     *BootDirectoryName
-  )
-{
-  EFI_STATUS  Status;
-  CHAR16      *RootedDiskPath;
-  UINTN       RootedDiskPathSize;
-  EFI_GUID    RootUuid;
-  CHAR8       *AsciiRootUuid;
-  CHAR16      *UnicodeRootUuid;
-  CHAR16      *UnicodeRootedName;
-  UINT32      AsciiRootUuidLength;
-
-  RootedDiskPathSize = StrSize (BootDirectoryName) + L_STR_SIZE_NT (L".root_uuid");
-  RootedDiskPath     = AllocatePool (RootedDiskPathSize);
-
-  if (RootedDiskPath == NULL) {
-    return NULL;
-  }
-
-  UnicodeSPrint (RootedDiskPath, RootedDiskPathSize, L"%s%a", BootDirectoryName, ".root_uuid");
-  DEBUG ((DEBUG_INFO, "Trying to get root from %s\n", RootedDiskPath));
-  //
-  // Permit a few new lines afterwards, though I doubt Apple has them anywhere.
-  //
-  AsciiRootUuid = (CHAR8 *) ReadFile (FileSystem, RootedDiskPath, &AsciiRootUuidLength, GUID_STRING_LENGTH + 4);
-  FreePool (RootedDiskPath);
-
-  if (AsciiRootUuid == NULL) {
-    DEBUG ((DEBUG_INFO, "Failed!\n"));
-    return NULL;
-  }
-
-  if (AsciiRootUuidLength >= GUID_STRING_LENGTH) {
-    UnicodeRootUuid = AsciiStrCopyToUnicode (AsciiRootUuid, GUID_STRING_LENGTH);
-  }
-
-  FreePool (AsciiRootUuid);
-
-  if (AsciiRootUuidLength < GUID_STRING_LENGTH || UnicodeRootUuid == NULL) {
-    return NULL;
-  }
-
-  Status = StrToGuid (UnicodeRootUuid, &RootUuid);
-  FreePool (UnicodeRootUuid);  
-  if (EFI_ERROR (Status)) {
-    return NULL;
-  }
-
-  //
-  // FIXME: Obtain actual partition label once Apple Partition Info is ready.
-  //
-  UnicodeRootedName = AllocatePool (128);
-  if (UnicodeRootedName != NULL) {
-    UnicodeSPrint (UnicodeRootedName, 128, L"Blessed %g", &RootUuid);
-  }
-
-  return UnicodeRootedName;
-}
-
-STATIC
-CHAR16 *
 GetAppleRecoveryNameFromPlist (
   IN CHAR8   *SystemVersionData,
   IN UINT32  SystemVersionDataSize
@@ -460,17 +397,16 @@ OcDescribeBootEntry (
   // With FV2 encryption on HFS+ the actual boot happens from "Recovery HD/S/L/CoreServices".
   // For some reason "Recovery HD/S/L/CoreServices/.disk_label" may not get updated immediately,
   // and will contain "Recovery HD" despite actually pointing to "Macintosh HD".
-  // In this case we should prioritise .root_uuid, which contains real partition UUID in ASCII.
-  // TODO: I *think* later we can use this by default, but only when GetAppleRootedName
-  // starts to return proper volume label.
+  // This also spontaneously happens with renamed APFS volumes. The workaround is to manually
+  // edit the file or sometimes choose the boot volume once more in preferences.
   //
-  if (BootEntry->Name != NULL && !BootEntry->IsRecovery && StrCmp (BootEntry->Name, L"Recovery HD") == 0) {
-    RecoveryBootName = GetAppleRootedName (FileSystem, BootDirectoryName);
-    if (RecoveryBootName != NULL) {
-      FreePool (BootEntry->Name);
-      BootEntry->Name = RecoveryBootName;
-    }
-  }
+  // TODO: Bugreport this to Apple, as this is clearly their bug, which should be reproducible
+  // on original hardware.
+  //
+  // There exists .root_uuid, which contains real partition UUID in ASCII, however, Apple
+  // BootPicker only uses it for entry deduplication, and we cannot figure out the name
+  // on an encrypted volume anyway.
+  //
 
   //
   // Windows boot entry may have a custom name, so ensure IsWindows is set correctly.
