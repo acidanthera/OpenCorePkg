@@ -98,6 +98,7 @@
   OcSupportPkg/Library/OcDebugLogLib/OcDebugLogLib.inf
   OcSupportPkg/Library/OcDevicePathLib/OcDevicePathLib.inf
   OcSupportPkg/Library/OcDevicePropertyLib/OcDevicePropertyLib.inf
+  OcSupportPkg/Library/OcDeviceTreeLib/OcDeviceTreeLib.inf
   OcSupportPkg/Library/OcFileLib/OcFileLib.inf
   OcSupportPkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
   OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf

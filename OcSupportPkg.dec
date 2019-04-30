@@ -102,6 +102,9 @@
   OcDevicePropertyLib|Include/Library/OcDevicePropertyLib.h
 
   ##  @libraryclass
+  OcDeviceTreeLib|Include/Library/OcDeviceTreeLib.h
+
+  ##  @libraryclass
   OcFileLib|Include/Library/OcFileLib.h
 
   ##  @libraryclass
