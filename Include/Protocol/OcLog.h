@@ -34,15 +34,17 @@
 
 typedef UINT32 OC_LOG_OPTIONS;
 
-// OC_LOG_PROTOCOL_GUID
-/// The GUID of the OC_LOG_PROTOCOL.
+/**
+  The GUID of the OC_LOG_PROTOCOL.
+**/
 #define OC_LOG_PROTOCOL_GUID                                                        \
   {                                                                                 \
     0xDBB6008F, 0x89E4, 0x4272, { 0x98, 0x81, 0xCE, 0x3A, 0xFD, 0x97, 0x24, 0xD0 }  \
   }
 
-// OC_LOG_PROTOCOL
-/// The forward declaration for the protocol for the OC_LOG_PROTOCOL.
+/**
+  The forward declaration for the protocol for the OC_LOG_PROTOCOL.
+**/
 typedef struct OC_LOG_PROTOCOL_ OC_LOG_PROTOCOL;
 
 /**
@@ -109,7 +111,9 @@ EFI_STATUS
   IN EFI_DEVICE_PATH_PROTOCOL  *FilePath OPTIONAL
   );
 
-/// The structure exposed by the OC_LOG_PROTOCOL.
+/**
+  The structure exposed by the OC_LOG_PROTOCOL.
+**/
 struct OC_LOG_PROTOCOL_ {
   UINT32              Revision;     ///< The revision of the installed protocol.
   UINTN               Reserved;     ///< Reserved for future extension.
@@ -118,7 +122,7 @@ struct OC_LOG_PROTOCOL_ {
   OC_LOG_SAVE_LOG     SaveLog;      ///< A pointer to the SaveLog function.
   OC_LOG_RESET_TIMERS ResetTimers;  ///< A pointer to the ResetTimers function.
   OC_LOG_OPTIONS      Options;      ///< The current options of the installed protocol.
-  UINT32              Delay;        ///< The delay after printed message in microseconds.
+  UINT32              DisplayDelay; ///< The delay after visible onscreen message in microseconds.
   UINTN               DisplayLevel; ///< The error level visible onscreen.
   UINTN               HaltLevel;    ///< The error level causing CPU dead loop.
 };

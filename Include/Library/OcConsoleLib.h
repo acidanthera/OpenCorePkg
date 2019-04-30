@@ -16,15 +16,28 @@
 #define OC_CONSOLE_LIB_H
 
 /**
+  Possible console control behaviour.
+**/
+typedef enum {
+  OcConsoleControlDefault,
+  OcConsoleControlGraphics,
+  OcConsoleControlText,
+  OcConsoleControlForceGraphics,
+  OcConsoleControlForceText,
+} OC_CONSOLE_CONTROL_BEHAVIOUR;
+
+/**
   Configure console control protocol with given options.
 
-  @param[in] WrapExisting  Wrap existing protocol.
+  @param[in] Behaviour          Custom console behaviour.
+  @param[in] IgnoreTextOutput   Skip console output in text mode.
 
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
 ConfigureConsoleControl (
-  IN BOOLEAN              WrapExisting
+  IN OC_CONSOLE_CONTROL_BEHAVIOUR  Behaviour,
+  IN BOOLEAN                       IgnoreTextOutput
   );
 
 /**
@@ -59,6 +72,18 @@ ParseConsoleMode (
   OUT UINT32              *Width,
   OUT UINT32              *Height,
   OUT BOOLEAN             *Max
+  );
+
+/**
+  Parse console control behaviour from string.
+
+  @paran[in]   String  Console control behaviour.
+
+  @retval OC_CONSOLE_CONTROL_BEHAVIOUR.
+**/
+OC_CONSOLE_CONTROL_BEHAVIOUR
+ParseConsoleControlBehaviour (
+  IN  CONST CHAR8        *Behaviour
   );
 
 /**

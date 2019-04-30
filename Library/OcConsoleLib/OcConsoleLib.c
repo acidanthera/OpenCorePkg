@@ -14,19 +14,42 @@
 
 #include <Protocol/ConsoleControl.h>
 #include <Protocol/GraphicsOutput.h>
+#include <Protocol/SimpleTextOut.h>
 
 #include <Library/BaseMemoryLib.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcConsoleLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE mConsoleMode = EfiConsoleControlScreenText;
+STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE mConsoleMode   = EfiConsoleControlScreenText;
+
+STATIC OC_CONSOLE_CONTROL_BEHAVIOUR mConsoleBehaviour = OcConsoleControlDefault;
+
+STATIC
+EFI_TEXT_STRING
+mOriginalOutputString;
 
 STATIC
 EFI_CONSOLE_CONTROL_PROTOCOL
 mOriginalConsoleControlProtocol;
+
+STATIC
+EFI_STATUS
+EFIAPI
+ControlledOutputString (
+  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *This,
+  IN CHAR16                           *String
+  )
+{
+  if (mConsoleMode == EfiConsoleControlScreenText) {
+    return mOriginalOutputString (This, String);
+  }
+
+  return EFI_UNSUPPORTED;
+}
 
 STATIC
 EFI_STATUS
@@ -38,6 +61,26 @@ ConsoleControlGetMode (
   OUT  BOOLEAN                         *StdInLocked  OPTIONAL
   )
 {
+  EFI_STATUS  Status;
+
+  if (mOriginalConsoleControlProtocol.GetMode != NULL
+    && mConsoleBehaviour != OcConsoleControlForceGraphics
+    && mConsoleBehaviour != OcConsoleControlForceText) {
+
+    Status = mOriginalConsoleControlProtocol.GetMode (
+      This,
+      Mode,
+      GopUgaExists,
+      StdInLocked
+      );
+
+    if (!EFI_ERROR (Status)) {
+      mConsoleMode = *Mode;
+    }
+
+    return Status;
+  }
+
   *Mode = mConsoleMode;
 
   if (GopUgaExists) {
@@ -61,6 +104,16 @@ ConsoleControlSetMode (
 {
   mConsoleMode = Mode;
 
+  if (mOriginalConsoleControlProtocol.SetMode != NULL
+    && mConsoleBehaviour != OcConsoleControlForceGraphics
+    && mConsoleBehaviour != OcConsoleControlForceText) {
+
+    return mOriginalConsoleControlProtocol.SetMode (
+      This,
+      Mode
+      );
+  }
+
   return EFI_SUCCESS;
 }
 
@@ -72,7 +125,14 @@ ConsoleControlLockStdIn (
   IN CHAR16                       *Password
   )
 {
-  return EFI_SUCCESS;
+  if (mOriginalConsoleControlProtocol.LockStdIn != NULL) {
+    return mOriginalConsoleControlProtocol.LockStdIn (
+      This,
+      Password
+      );
+  }
+
+  return EFI_DEVICE_ERROR;
 }
 
 STATIC
@@ -85,18 +145,42 @@ mConsoleControlProtocol = {
 
 EFI_STATUS
 ConfigureConsoleControl (
-  IN BOOLEAN              WrapExisting
+  IN OC_CONSOLE_CONTROL_BEHAVIOUR  Behaviour,
+  IN BOOLEAN                       IgnoreTextOutput
   )
 {
   EFI_STATUS                    Status;
   EFI_CONSOLE_CONTROL_PROTOCOL  *ConsoleControl;
   EFI_HANDLE                    NewHandle;
+  BOOLEAN                       WrapExisting;
+
+  WrapExisting      = Behaviour != OcConsoleControlDefault || IgnoreTextOutput;
+  mConsoleBehaviour = Behaviour;
+
+  if (Behaviour == OcConsoleControlGraphics || Behaviour == OcConsoleControlForceGraphics) {
+    mConsoleMode = EfiConsoleControlScreenGraphics;
+  } else if (Behaviour == OcConsoleControlText || Behaviour == OcConsoleControlForceText) {
+    mConsoleMode = EfiConsoleControlScreenText;
+  }
 
   Status = gBS->LocateProtocol (
     &gEfiConsoleControlProtocolGuid,
     NULL,
     (VOID *) &ConsoleControl
     );
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCC: Configuring behaviour %u ignore %d curr %r\n",
+    Behaviour,
+    IgnoreTextOutput,
+    Status
+    ));
+
+  if (IgnoreTextOutput) {
+    mOriginalOutputString     = gST->ConOut->OutputString;
+    gST->ConOut->OutputString = ControlledOutputString;
+  }
 
   //
   // Native implementation exists, ignore.
@@ -109,10 +193,14 @@ ConfigureConsoleControl (
         sizeof (mOriginalConsoleControlProtocol)
         );
       CopyMem (
-        &ConsoleControl,
+        ConsoleControl,
         &mConsoleControlProtocol,
         sizeof (mOriginalConsoleControlProtocol)
         );
+    }
+
+    if (mConsoleBehaviour != OcConsoleControlDefault) {
+      mOriginalConsoleControlProtocol.SetMode (ConsoleControl, mConsoleMode);
     }
 
     return EFI_SUCCESS;
@@ -240,6 +328,34 @@ ParseConsoleMode (
   ASSERT (Max != NULL);
 
   ParseResolution (String, Width, Height, NULL, Max);
+}
+
+OC_CONSOLE_CONTROL_BEHAVIOUR
+ParseConsoleControlBehaviour (
+  IN  CONST CHAR8        *Behaviour
+  )
+{
+  if (Behaviour[0] == '\0') {
+    return OcConsoleControlDefault;
+  }
+
+  if (AsciiStrCmp (Behaviour, "Graphics") == 0) {
+    return OcConsoleControlGraphics;
+  }
+
+  if (AsciiStrCmp (Behaviour, "Text") == 0) {
+    return OcConsoleControlText;
+  }
+
+  if (AsciiStrCmp (Behaviour, "ForceGraphics") == 0) {
+    return OcConsoleControlForceGraphics;
+  }
+
+  if (AsciiStrCmp (Behaviour, "ForceText") == 0) {
+    return OcConsoleControlForceText;
+  }
+
+  return OcConsoleControlDefault;
 }
 
 EFI_STATUS

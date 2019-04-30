@@ -150,6 +150,10 @@ OcLogAddEntry  (
         Private->LineBuffer
         );
       gST->ConOut->OutputString (gST->ConOut, Private->UnicodeLineBuffer);
+
+      if (OcLog->DisplayDelay > 0) {
+        gBS->Stall (OcLog->DisplayDelay);
+      }
     }
 
     TimingLength = (UINT32) AsciiStrLen (Private->TimingTxt);
@@ -225,10 +229,6 @@ OcLogAddEntry  (
           FreePool (Entry);
         }
       }
-    }
-
-    if (OcLog->Delay > 0) {
-      gBS->Stall (OcLog->Delay);
     }
 
     //
@@ -345,7 +345,7 @@ OcLogResetTimers (
   Install or update the OcLog protocol with specified options.
 
   @param[in] Options       Logging options.
-  @param[in] Delay         Delay in microseconds after each log entry.
+  @param[in] DisplayDelay  Delay in microseconds after each displayed log entry.
   @param[in] DisplayLevel  Console visible error level.
   @param[in] HaltLevel     Error level causing CPU halt.
 
@@ -354,7 +354,7 @@ OcLogResetTimers (
 EFI_STATUS
 OcConfigureLogProtocol (
   IN OC_LOG_OPTIONS      Options,
-  IN UINT32              Delay,
+  IN UINT32              DisplayDelay,
   IN UINTN               DisplayLevel,
   IN UINTN               HaltLevel
   )
@@ -382,7 +382,7 @@ OcConfigureLogProtocol (
     // Set desired options in existing protocol.
     //
     OcLog->Options      = Options;
-    OcLog->Delay        = Delay;
+    OcLog->DisplayDelay = DisplayDelay;
     OcLog->DisplayLevel = DisplayLevel;
     OcLog->HaltLevel    = HaltLevel;
 
@@ -407,7 +407,7 @@ OcConfigureLogProtocol (
       Private->OcLog.SaveLog      = OcLogSaveLog;
       Private->OcLog.ResetTimers  = OcLogResetTimers;
       Private->OcLog.Options      = Options;
-      Private->OcLog.Delay        = Delay;
+      Private->OcLog.DisplayDelay = DisplayDelay;
       Private->OcLog.DisplayLevel = DisplayLevel;
       Private->OcLog.HaltLevel    = HaltLevel;
 

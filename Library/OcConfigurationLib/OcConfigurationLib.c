@@ -250,7 +250,7 @@ mMiscConfigurationBootSchema[] = {
 STATIC
 OC_SCHEMA
 mMiscConfigurationDebugSchema[] = {
-  OC_SCHEMA_INTEGER_IN ("Delay",            OC_GLOBAL_CONFIG, Misc.Debug.Delay),
+  OC_SCHEMA_INTEGER_IN ("DisplayDelay",     OC_GLOBAL_CONFIG, Misc.Debug.DisplayDelay),
   OC_SCHEMA_INTEGER_IN ("DisplayLevel",     OC_GLOBAL_CONFIG, Misc.Debug.DisplayLevel),
   OC_SCHEMA_BOOLEAN_IN ("ExposeBootPath",   OC_GLOBAL_CONFIG, Misc.Debug.ExposeBootPath),
   OC_SCHEMA_INTEGER_IN ("Target",           OC_GLOBAL_CONFIG, Misc.Debug.Target)
@@ -400,9 +400,12 @@ OC_SCHEMA
 mUefiQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("DisableWatchDog",        OC_GLOBAL_CONFIG, Uefi.Quirks.DisableWatchDog),
   OC_SCHEMA_BOOLEAN_IN ("IgnoreInvalidFlexRatio", OC_GLOBAL_CONFIG, Uefi.Quirks.IgnoreInvalidFlexRatio),
+  OC_SCHEMA_BOOLEAN_IN ("IgnoreTextInGraphics",   OC_GLOBAL_CONFIG, Uefi.Quirks.IgnoreTextInGraphics),
   OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleControl",  OC_GLOBAL_CONFIG, Uefi.Quirks.ProvideConsoleControl),
   OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop",      OC_GLOBAL_CONFIG, Uefi.Quirks.ProvideConsoleGop),
-  OC_SCHEMA_BOOLEAN_IN ("ReleaseUsbOwnership",    OC_GLOBAL_CONFIG, Uefi.Quirks.ReleaseUsbOwnership)
+  OC_SCHEMA_BOOLEAN_IN ("ReleaseUsbOwnership",    OC_GLOBAL_CONFIG, Uefi.Quirks.ReleaseUsbOwnership),
+  OC_SCHEMA_BOOLEAN_IN ("RequestBootVarRouting",  OC_GLOBAL_CONFIG, Uefi.Quirks.RequestBootVarRouting),
+  OC_SCHEMA_STRING_IN  ("SetConsoleControl",      OC_GLOBAL_CONFIG, Uefi.Quirks.SetConsoleControl),
 };
 
 STATIC

@@ -210,7 +210,7 @@
   OC_DECLARE (OC_MISC_BOOT)
 
 #define OC_MISC_DEBUG_FIELDS(_, __) \
-  _(UINT32                      , Delay                       ,     , 0            , ()) \
+  _(UINT32                      , DisplayDelay                ,     , 0            , ()) \
   _(UINT64                      , DisplayLevel                ,     , 0            , ()) \
   _(BOOLEAN                     , ExposeBootPath              ,     , FALSE        , ()) \
   _(UINT32                      , Target                      ,     , 0            , ())
@@ -270,9 +270,12 @@
 #define OC_UEFI_QUIRKS_FIELDS(_, __) \
   _(BOOLEAN                     , DisableWatchDog             ,     , FALSE  , ()) \
   _(BOOLEAN                     , IgnoreInvalidFlexRatio      ,     , FALSE  , ()) \
+  _(BOOLEAN                     , IgnoreTextInGraphics        ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReleaseUsbOwnership         ,     , FALSE  , ()) \
+  _(BOOLEAN                     , RequestBootVarRouting       ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProvideConsoleControl       ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ProvideConsoleGop           ,     , FALSE  , ())
+  _(BOOLEAN                     , ProvideConsoleGop           ,     , FALSE  , ()) \
+  _(OC_STRING                   , SetConsoleControl           ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
   OC_DECLARE (OC_UEFI_QUIRKS)
 
 /**
