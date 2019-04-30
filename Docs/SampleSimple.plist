@@ -484,12 +484,16 @@
 			<false/>
 			<key>IgnoreInvalidFlexRatio</key>
 			<false/>
+			<key>IgnoreTextInGraphics</key>
+			<false/>
 			<key>ProvideConsoleControl</key>
 			<false/>
 			<key>ProvideConsoleGop</key>
 			<false/>
 			<key>ReleaseUsbOwnership</key>
 			<false/>
+			<key>SetConsoleControl</key>
+			<string></string>
 		</dict>
 	</dict>
 </dict>

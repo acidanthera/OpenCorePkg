@@ -1301,12 +1301,11 @@ behaviour that does not go to any other sections
 \begin{enumerate}
 
 \item
-  \texttt{Delay}\\
+  \texttt{DisplayDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Default value}: \texttt{0}\\
   \textbf{Description}: Delay in microseconds performed after
-  every printed line of visible logging output like console,
-  Data Hub, or serial port.
+  every printed line visible onscreen (i.e. console).
 
 \item
   \texttt{DisplayLevel}\\
@@ -2390,11 +2389,26 @@ tweaks for the onboard firmware.
   its usage is not recommended when it is not required.
 
 \item
+  \texttt{IgnoreTextInGraphics}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{NO}\\
+  \textbf{Description}: Select firmwares output text onscreen in both graphics and
+  text mode. This is normally unexpected, because random text may appear over
+  graphical images and cause UI corruption. Setting this option to \texttt{true} will
+  discard all text output when console control is in mode different from \texttt{Text}.
+
+  \emph{Note}: While the option is not supposed to induce harm on unaffected firmwares,
+  its usage is not recommended when it is not required. This option may hide
+  onscreen error messages.
+
+\item
   \texttt{ProvideConsoleControl}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{NO}\\
   \textbf{Description}: macOS bootloader requires console control protocol
-  for text output, some firmwares miss it.
+  for text output, some firmwares miss it. This option is required to be set
+  when other console control quirks are used (\texttt{IgnoreTextInGraphics}
+  and \texttt{SetConsoleControl}).
 
   \emph{Note}: Some drivers, like AppleUiSupport, may provide equivalent functionality.
   These drivers are not guaranteed to adhere to the same logic, and if a quirk is
@@ -2419,6 +2433,41 @@ tweaks for the onboard firmware.
   the firmware driver. While most firmwares manage to properly do that,
   or at least have an option for, select firmwares do not. As a result,
   operating system may freeze upon boot. Not recommended unless required.
+
+\item
+  \texttt{SetConsoleControl}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Default value}: Empty string\\
+  \textbf{Description}: Set console control behaviour upon boot.
+
+  Different firmwares implement console control differently or do not implement
+  it at all. For the latter case it is enough to install a dummy console control
+  and hide all onscreen text in graphics mode. However, it is often not enough
+  for other firmwares, which do not show text in text mode, or display visual
+  glitches during text/graphics console control mode switching. Possible
+  behaviours include:
+
+  \begin{itemize}
+  \tightlist
+  \item Empty string --- Do not modify console control mode.
+  \item \texttt{Graphics} --- Switch to graphics mode.
+  \item \texttt{Text} --- Switch to text mode.
+  \item \texttt{ForceGraphics} --- Switch to graphics mode and never change.
+  \item \texttt{ForceText} --- Switch to text mode and never change.
+  \end{itemize}
+
+  Hints (assuming \texttt{ProvideConsoleControl} is \texttt{true}):
+  \begin{itemize}
+  \tightlist
+  \item On Insyde and Phoenix laptops, which do not show boot menu, try
+    \texttt{SetConsoleControl} \texttt{Text} and \texttt{IgnoreTextInGraphics}
+    \texttt{false}.
+  \item On APTIO IV and V with verbose output that cannot be disabled try
+    \texttt{SetConsoleControl} \texttt{ForceText} and \texttt{IgnoreTextInGraphics}
+    \texttt{true}.
+  \item On Duet with similar to APTIO issues try \texttt{SetConsoleControl}
+  empty string and \texttt{IgnoreTextInGraphics} \texttt{true}.
+  \end{itemize}
 
 \end{enumerate}
 

@@ -120,7 +120,7 @@ OcMiscEarlyInit (
 
   OcConfigureLogProtocol (
     Config->Misc.Debug.Target,
-    Config->Misc.Debug.Delay,
+    Config->Misc.Debug.DisplayDelay,
     (UINTN) Config->Misc.Debug.DisplayLevel,
     (UINTN) Config->Misc.Security.HaltLevel
     );
