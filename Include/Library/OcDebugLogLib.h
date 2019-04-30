@@ -36,4 +36,18 @@ OcConfigureLogProtocol (
   IN UINTN               HaltLevel
   );
 
+/**
+  Prints via gST->ConOut without any pool allocations.
+  Otherwise equivalent to Print.
+  Note: EFIAPI must be present for VA_ARGS forwarding (causes bugs with gcc).
+
+  @param[in]  Format  Formatted string.
+**/
+VOID
+EFIAPI
+OcPrintScreen (
+  IN  CONST CHAR16   *Format,
+  ...
+  );
+
 #endif // OC_DEBUG_LOG_LIB_H

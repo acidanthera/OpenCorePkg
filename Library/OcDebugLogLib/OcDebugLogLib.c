@@ -267,3 +267,34 @@ DebugPrintLevelEnabled (
 {
   return (BOOLEAN) ((ErrorLevel & PcdGet32 (PcdFixedDebugPrintErrorLevel)) != 0);
 }
+
+/**
+  Prints via gST->ConOut without any pool allocations.
+  Otherwise equivalent to Print.
+  Note: EFIAPI must be present for VA_ARGS forwarding (causes bugs with gcc).
+
+  @param[in]  Format  Formatted string.
+**/
+VOID
+EFIAPI
+OcPrintScreen (
+  IN  CONST CHAR16   *Format,
+  ...
+  )
+{
+  CHAR16 Buffer[1024];
+  VA_LIST Marker;
+
+  VA_START (Marker, Format);
+  UnicodeVSPrint (Buffer, sizeof (Buffer), Format, Marker);
+  VA_END (Marker);
+
+  //
+  // It is safe to call gST->ConOut->OutputString, because in crtitical areas
+  // AptioMemoryFix is responsible for overriding gBS->AllocatePool with its own
+  // implementation that uses a custom allocator.
+  //
+  if (gST->ConOut) {
+    gST->ConOut->OutputString (gST->ConOut, Buffer);
+  }
+}

@@ -18,7 +18,11 @@
 #include <Uefi.h>
 #include <Library/OcStringLib.h>
 
-// Base64Decode
+/**
+  Convert seconds to microseconds for use in e.g. gBS->Stall.
+**/
+#define SECONDS_TO_MICROSECONDS(x) ((x)*1000000)
+
 /**
 
   TODO: edk2 now has its implementation in BaseLib, review it and use once it appears in UDK.
