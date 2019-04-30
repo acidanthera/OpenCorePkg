@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <OpenCore.h>
 
-#include <Guid/OcLogVariable.h>
+#include <Guid/OcVariables.h>
 
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
@@ -53,7 +53,7 @@ OcStoreLoadPath (
 
   Status = gRT->SetVariable (
     OC_LOG_VARIABLE_PATH,
-    &gOcLogVariableGuid,
+    &gOcVendorVariableGuid,
     OPEN_CORE_NVRAM_ATTR,
     AsciiStrSize (OutPath),
     OutPath
@@ -62,7 +62,7 @@ OcStoreLoadPath (
   DEBUG ((
     EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
     "OC: Setting NVRAM %g:%a = %a - %r\n",
-    &gOcLogVariableGuid,
+    &gOcVendorVariableGuid,
     OC_LOG_VARIABLE_PATH,
     OutPath,
     Status

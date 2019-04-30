@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <OpenCore.h>
 #include <Uefi.h>
 
-#include <Guid/OcLogVariable.h>
+#include <Guid/OcVariables.h>
 
 #include <Protocol/DevicePath.h>
 #include <Protocol/LoadedImage.h>
