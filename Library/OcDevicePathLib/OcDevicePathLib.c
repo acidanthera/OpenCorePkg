@@ -284,7 +284,7 @@ OcFixAppleBootDevicePath (
     NodeType    = DevicePathType (InvalidNode.DevPath);
     NodeSubType = DevicePathSubType (InvalidNode.DevPath);
 
-    if (NodeType == MEDIA_DEVICE_PATH) {
+    if (NodeType == MESSAGING_DEVICE_PATH) {
       switch (NodeSubType) {
         case MSG_SATA_DP:
         {
