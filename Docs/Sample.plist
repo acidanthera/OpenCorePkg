@@ -600,6 +600,8 @@
 			<false/>
 			<key>ReleaseUsbOwnership</key>
 			<false/>
+			<key>SanitiseClearScreen</key>
+			<false/>
 		</dict>
 	</dict>
 </dict>

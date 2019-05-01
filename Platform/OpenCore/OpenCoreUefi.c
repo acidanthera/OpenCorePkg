@@ -257,7 +257,8 @@ OcLoadUefiSupport (
 
   if (Config->Uefi.Quirks.ProvideConsoleControl) {
     ConsoleControlConfigure (
-      Config->Uefi.Quirks.IgnoreTextInGraphics
+      Config->Uefi.Quirks.IgnoreTextInGraphics,
+      Config->Uefi.Quirks.SanitiseClearScreen
       );
   }
 

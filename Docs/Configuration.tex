@@ -2464,7 +2464,8 @@ tweaks for the onboard firmware.
 
   \emph{Note}: While the option is not supposed to induce harm on unaffected firmwares,
   its usage is not recommended when it is not required. This option may hide
-  onscreen error messages.
+  onscreen error messages. \texttt{ProvideConsoleControl} is required to be set to
+  \texttt{true} for this to work.
 
 \item
   \texttt{ProvideConsoleControl}\\
@@ -2472,8 +2473,9 @@ tweaks for the onboard firmware.
   \textbf{Default value}: \texttt{NO}\\
   \textbf{Description}: macOS bootloader requires console control protocol
   for text output, some firmwares miss it. This option is required to be set
-  when other console control options are used (\texttt{IgnoreTextInGraphics},
-  and sometimes \texttt{ConsoleBehaviourOs} and \texttt{ConsoleBehaviourUi}).
+  when other console control options are used, such as \texttt{IgnoreTextInGraphics},
+  \texttt{SanitiseClearScreen}, and sometimes \texttt{ConsoleBehaviourOs} with
+  \texttt{ConsoleBehaviourUi}).
 
 \item
   \texttt{ProvideConsoleGop}\\
@@ -2494,6 +2496,19 @@ tweaks for the onboard firmware.
   the firmware driver. While most firmwares manage to properly do that,
   or at least have an option for, select firmwares do not. As a result,
   operating system may freeze upon boot. Not recommended unless required.
+
+\item
+  \texttt{SanitiseClearScreen}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Some firmwares reset screen resolution to a failsafe
+  value (like \texttt{1024x768}) on the attempts to clear screen contents
+  when large display (e.g. 2K or 4K) is used. This option attempts to apply
+  a workaround.
+
+  \emph{Note}: \texttt{ProvideConsoleControl} is required to be set to
+  \texttt{true} for this to work. On all known affected systems
+  \texttt{ConsoleMode} had to be set to empty string for this to work.
 
 \end{enumerate}
 
