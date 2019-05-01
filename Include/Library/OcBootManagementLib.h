@@ -268,6 +268,7 @@ EFI_STATUS
   @param[in]  TimeOutSeconds   Default entry selection timeout (pass 0 to ignore).
   @param[in]  StartImage       Image starting routine used.
   @param[in]  ShowPicker       Show boot menu or just boot the default option.
+  @param[in]  CustomBootGuid   Use custom (gOcVendorVariableGuid) for Boot#### variables.
   @param[in]  LoadHandle       Load handle, skips main handle on this handle.
 
   @retval does not return unless a fatal error happened.
@@ -279,6 +280,7 @@ OcRunSimpleBootPicker (
   IN  UINT32           TimeoutSeconds,
   IN  OC_IMAGE_START   StartImage,
   IN  BOOLEAN          ShowPicker,
+  IN  BOOLEAN          CustomBootGuid,
   IN  EFI_HANDLE       LoadHandle  OPTIONAL
   );
 

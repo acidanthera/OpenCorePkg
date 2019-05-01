@@ -20,6 +20,7 @@
 #include <Guid/AppleVariable.h>
 #include <Guid/FileInfo.h>
 #include <Guid/GlobalVariable.h>
+#include <Guid/OcVariables.h>
 
 #include <Protocol/AppleBootPolicy.h>
 #include <Protocol/SimpleFileSystem.h>
@@ -459,6 +460,7 @@ STATIC
 EFI_DEVICE_PATH_PROTOCOL *
 InternalGetBootOptionData (
   IN  UINT16   BootOption,
+  IN  EFI_GUID *BootGud,
   OUT CHAR16   **BootName  OPTIONAL,
   OUT UINT32   *OptionalDataSize  OPTIONAL,
   OUT VOID     **OptionalData  OPTIONAL
@@ -482,8 +484,9 @@ InternalGetBootOptionData (
 
   UnicodeSPrint (BootVarName, sizeof (BootVarName), L"Boot%04x", BootOption);
 
-  Status = GetEfiGlobalVariable2 (
+  Status = GetVariable2 (
              BootVarName,
+             BootGud,
              (VOID **)&LoadOption,
              &LoadOptionSize
              );
@@ -569,6 +572,7 @@ STATIC
 VOID
 InternalDebugBootEnvironment (
   IN CONST UINT16             *BootOrder,
+  IN EFI_GUID                 *BootGuid,
   IN UINTN                    BootOrderSize
   )
 {
@@ -616,6 +620,7 @@ InternalDebugBootEnvironment (
     for (Index = 0; Index < (BootOrderSize / sizeof (*BootOrder)); ++Index) {
       UefiDevicePath = InternalGetBootOptionData (
                          BootOrder[Index],
+                         BootGuid,
                          NULL,
                          NULL,
                          NULL
@@ -658,6 +663,7 @@ OC_BOOT_ENTRY *
 InternalGetDefaultBootEntry (
   IN OUT OC_BOOT_ENTRY  *BootEntries,
   IN     UINTN          NumBootEntries,
+  IN     BOOLEAN        CustomBootGuid,
   IN     EFI_HANDLE     LoadHandle  OPTIONAL
   )
 {
@@ -681,6 +687,7 @@ InternalGetDefaultBootEntry (
   VOID                     *OptionalData;
   CHAR16                   *DevicePathText1;
   CHAR16                   *DevicePathText2;
+  EFI_GUID                 *BootVariableGuid;
 
   EFI_DEVICE_PATH_PROTOCOL *DevicePath;
   EFI_HANDLE               DeviceHandle;
@@ -696,10 +703,16 @@ InternalGetDefaultBootEntry (
   IsBootNext   = FALSE;
   OptionalData = NULL;
 
+  if (CustomBootGuid) {
+    BootVariableGuid = &gOcVendorVariableGuid;
+  } else {
+    BootVariableGuid = &gEfiGlobalVariableGuid;
+  }
+
   BootNextSize = sizeof (BootNextOptionIndex);
   Status = gRT->GetVariable (
                   EFI_BOOT_NEXT_VARIABLE_NAME,
-                  &gEfiGlobalVariableGuid,
+                  BootVariableGuid,
                   &BootNextAttributes,
                   &BootNextSize,
                   &BootNextOptionIndex
@@ -707,8 +720,9 @@ InternalGetDefaultBootEntry (
   if (Status == EFI_NOT_FOUND) {
     DEBUG ((DEBUG_INFO, "OCB: BootNext has not been found.\n"));
 
-    Status = GetEfiGlobalVariable2 (
+    Status = GetVariable2 (
                EFI_BOOT_ORDER_VARIABLE_NAME,
+               BootVariableGuid,
                (VOID **)&BootOrder,
                &BootOrderSize
                );
@@ -723,11 +737,12 @@ InternalGetDefaultBootEntry (
     }
 
     DEBUG_CODE_BEGIN ();
-    InternalDebugBootEnvironment (BootOrder, BootOrderSize);
+    InternalDebugBootEnvironment (BootOrder, BootVariableGuid, BootOrderSize);
     DEBUG_CODE_END ();
 
     UefiDevicePath = InternalGetBootOptionData (
                        BootOrder[0],
+                       BootVariableGuid,
                        NULL,
                        NULL,
                        NULL
@@ -757,6 +772,7 @@ InternalGetDefaultBootEntry (
 
       UefiDevicePath = InternalGetBootOptionData (
                          BootOrder[1],
+                         BootVariableGuid,
                          NULL,
                          NULL,
                          NULL
@@ -776,7 +792,7 @@ InternalGetDefaultBootEntry (
     //
     gRT->SetVariable (
            EFI_BOOT_NEXT_VARIABLE_NAME,
-           &gEfiGlobalVariableGuid,
+           BootVariableGuid,
            BootNextAttributes,
            0,
            NULL
@@ -785,6 +801,7 @@ InternalGetDefaultBootEntry (
 
     UefiDevicePath = InternalGetBootOptionData (
                        BootNextOptionIndex,
+                       BootVariableGuid,
                        NULL,
                        &OptionalDataSize,
                        &OptionalData
@@ -1731,6 +1748,7 @@ OcRunSimpleBootPicker (
   IN  UINT32           TimeoutSeconds,
   IN  OC_IMAGE_START   StartImage,
   IN  BOOLEAN          ShowPicker,
+  IN  BOOLEAN          CustomBootGuid,
   IN  EFI_HANDLE       LoadHandle  OPTIONAL
   )
 {
@@ -1771,7 +1789,7 @@ OcRunSimpleBootPicker (
     DEBUG ((DEBUG_INFO, "Performing OcShowSimpleBootMenu...\n"));
 
     DefaultEntry = 0;
-    Entry = InternalGetDefaultBootEntry (Entries, EntryCount, LoadHandle);
+    Entry = InternalGetDefaultBootEntry (Entries, EntryCount, CustomBootGuid, LoadHandle);
     if (Entry != NULL) {
       DefaultEntry = (UINT32)(Entry - Entries);
     }
