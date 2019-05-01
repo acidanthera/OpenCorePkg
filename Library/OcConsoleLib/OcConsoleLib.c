@@ -24,14 +24,30 @@
 #include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE mConsoleMode   = EfiConsoleControlScreenText;
+//
+// Current reported console mode.
+//
+STATIC
+EFI_CONSOLE_CONTROL_SCREEN_MODE
+mConsoleMode = EfiConsoleControlScreenText;
 
-STATIC OC_CONSOLE_CONTROL_BEHAVIOUR mConsoleBehaviour = OcConsoleControlDefault;
+//
+// Stick to previously set console mode.
+//
+STATIC
+BOOLEAN
+mForceConsoleMode = FALSE;
 
+//
+// Original text output function.
+//
 STATIC
 EFI_TEXT_STRING
 mOriginalOutputString;
 
+//
+// Original console control protocol functions.
+//
 STATIC
 EFI_CONSOLE_CONTROL_PROTOCOL
 mOriginalConsoleControlProtocol;
@@ -63,10 +79,7 @@ ConsoleControlGetMode (
 {
   EFI_STATUS  Status;
 
-  if (mOriginalConsoleControlProtocol.GetMode != NULL
-    && mConsoleBehaviour != OcConsoleControlForceGraphics
-    && mConsoleBehaviour != OcConsoleControlForceText) {
-
+  if (mOriginalConsoleControlProtocol.GetMode != NULL && !mForceConsoleMode) {
     Status = mOriginalConsoleControlProtocol.GetMode (
       This,
       Mode,
@@ -102,12 +115,11 @@ ConsoleControlSetMode (
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode
   )
 {
+  DEBUG ((DEBUG_INFO, "Setting mode %d -> %d\n", mConsoleMode, Mode));
+
   mConsoleMode = Mode;
 
-  if (mOriginalConsoleControlProtocol.SetMode != NULL
-    && mConsoleBehaviour != OcConsoleControlForceGraphics
-    && mConsoleBehaviour != OcConsoleControlForceText) {
-
+  if (mOriginalConsoleControlProtocol.SetMode != NULL && !mForceConsoleMode) {
     return mOriginalConsoleControlProtocol.SetMode (
       This,
       Mode
@@ -144,24 +156,13 @@ mConsoleControlProtocol = {
 };
 
 EFI_STATUS
-ConfigureConsoleControl (
-  IN OC_CONSOLE_CONTROL_BEHAVIOUR  Behaviour,
-  IN BOOLEAN                       IgnoreTextOutput
+ConsoleControlConfigure (
+  IN BOOLEAN                      IgnoreTextOutput
   )
 {
   EFI_STATUS                    Status;
   EFI_CONSOLE_CONTROL_PROTOCOL  *ConsoleControl;
   EFI_HANDLE                    NewHandle;
-  BOOLEAN                       WrapExisting;
-
-  WrapExisting      = Behaviour != OcConsoleControlDefault || IgnoreTextOutput;
-  mConsoleBehaviour = Behaviour;
-
-  if (Behaviour == OcConsoleControlGraphics || Behaviour == OcConsoleControlForceGraphics) {
-    mConsoleMode = EfiConsoleControlScreenGraphics;
-  } else if (Behaviour == OcConsoleControlText || Behaviour == OcConsoleControlForceText) {
-    mConsoleMode = EfiConsoleControlScreenText;
-  }
 
   Status = gBS->LocateProtocol (
     &gEfiConsoleControlProtocolGuid,
@@ -171,10 +172,9 @@ ConfigureConsoleControl (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCC: Configuring behaviour %u ignore %d curr %r\n",
-    Behaviour,
-    IgnoreTextOutput,
-    Status
+    "OCC: Configuring console (%r) ignore %d\n",
+    Status,
+    IgnoreTextOutput
     ));
 
   if (IgnoreTextOutput) {
@@ -186,22 +186,16 @@ ConfigureConsoleControl (
   // Native implementation exists, ignore.
   //
   if (!EFI_ERROR (Status)) {
-    if (WrapExisting) {
-      CopyMem (
-        &mOriginalConsoleControlProtocol,
-        ConsoleControl,
-        sizeof (mOriginalConsoleControlProtocol)
-        );
-      CopyMem (
-        ConsoleControl,
-        &mConsoleControlProtocol,
-        sizeof (mOriginalConsoleControlProtocol)
-        );
-    }
-
-    if (mConsoleBehaviour != OcConsoleControlDefault) {
-      mOriginalConsoleControlProtocol.SetMode (ConsoleControl, mConsoleMode);
-    }
+    CopyMem (
+      &mOriginalConsoleControlProtocol,
+      ConsoleControl,
+      sizeof (mOriginalConsoleControlProtocol)
+      );
+    CopyMem (
+      ConsoleControl,
+      &mConsoleControlProtocol,
+      sizeof (mOriginalConsoleControlProtocol)
+      );
 
     return EFI_SUCCESS;
   }
@@ -213,6 +207,66 @@ ConfigureConsoleControl (
     &mConsoleControlProtocol,
     NULL
     );
+
+  return Status;
+}
+
+EFI_STATUS
+ConsoleControlSetBehaviour (
+  IN OC_CONSOLE_CONTROL_BEHAVIOUR  Behaviour
+  )
+{
+  EFI_STATUS                    Status;
+  EFI_CONSOLE_CONTROL_PROTOCOL  *ConsoleControl;
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCC: Configuring behaviour %u\n",
+    Behaviour
+    ));
+
+  if (Behaviour == OcConsoleControlDefault) {
+    return EFI_SUCCESS;
+  }
+
+  Status = gBS->LocateProtocol (
+    &gEfiConsoleControlProtocolGuid,
+    NULL,
+    (VOID *) &ConsoleControl
+    );
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  if (Behaviour == OcConsoleControlText) {
+    return ConsoleControl->SetMode (ConsoleControl, EfiConsoleControlScreenText);
+  }
+
+  if (Behaviour == OcConsoleControlGraphics) {
+    return ConsoleControl->SetMode (ConsoleControl, EfiConsoleControlScreenGraphics);
+  }
+
+  //
+  // We are setting a forced mode, do not let console changes.
+  //
+  mForceConsoleMode = TRUE;
+
+  if (Behaviour == OcConsoleControlForceText) {
+    mConsoleMode = EfiConsoleControlScreenText;
+  } else {
+    mConsoleMode = EfiConsoleControlScreenGraphics;
+  }
+
+  //
+  // Ensure that the mode is changed if original protocol is available.
+  //
+  if (mOriginalConsoleControlProtocol.SetMode != NULL) {
+    Status = mOriginalConsoleControlProtocol.SetMode (
+      ConsoleControl,
+      mConsoleMode
+      );
+  }
 
   return Status;
 }

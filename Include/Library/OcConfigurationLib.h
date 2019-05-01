@@ -206,7 +206,9 @@
   _(BOOLEAN                     , ShowPicker                  ,     , FALSE                       , ())                   \
   _(UINT32                      , Timeout                     ,     , 0                           , ())                   \
   _(OC_STRING                   , Resolution                  ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
-  _(OC_STRING                   , ConsoleMode                 ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING))
+  _(OC_STRING                   , ConsoleMode                 ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , ConsoleBehaviourOs          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , ConsoleBehaviourUi          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING))
   OC_DECLARE (OC_MISC_BOOT)
 
 #define OC_MISC_DEBUG_FIELDS(_, __) \
@@ -274,8 +276,7 @@
   _(BOOLEAN                     , ReleaseUsbOwnership         ,     , FALSE  , ()) \
   _(BOOLEAN                     , RequestBootVarRouting       ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProvideConsoleControl       ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ProvideConsoleGop           ,     , FALSE  , ()) \
-  _(OC_STRING                   , SetConsoleControl           ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
+  _(BOOLEAN                     , ProvideConsoleGop           ,     , FALSE  , ())
   OC_DECLARE (OC_UEFI_QUIRKS)
 
 /**

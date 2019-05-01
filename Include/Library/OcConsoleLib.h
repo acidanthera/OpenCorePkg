@@ -20,24 +20,34 @@
 **/
 typedef enum {
   OcConsoleControlDefault,
-  OcConsoleControlGraphics,
   OcConsoleControlText,
-  OcConsoleControlForceGraphics,
+  OcConsoleControlGraphics,
   OcConsoleControlForceText,
+  OcConsoleControlForceGraphics,
 } OC_CONSOLE_CONTROL_BEHAVIOUR;
 
 /**
   Configure console control protocol with given options.
 
-  @param[in] Behaviour          Custom console behaviour.
   @param[in] IgnoreTextOutput   Skip console output in text mode.
 
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-ConfigureConsoleControl (
-  IN OC_CONSOLE_CONTROL_BEHAVIOUR  Behaviour,
+ConsoleControlConfigure (
   IN BOOLEAN                       IgnoreTextOutput
+  );
+
+/**
+  Configure console control behaviour.
+
+  @param[in] Behaviour          Custom console behaviour.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+ConsoleControlSetBehaviour (
+  IN OC_CONSOLE_CONTROL_BEHAVIOUR  Behaviour
   );
 
 /**

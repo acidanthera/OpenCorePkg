@@ -240,6 +240,8 @@ STATIC
 OC_SCHEMA
 mMiscConfigurationBootSchema[] = {
   OC_SCHEMA_STRING_IN  ("ConsoleMode",       OC_GLOBAL_CONFIG, Misc.Boot.ConsoleMode),
+  OC_SCHEMA_STRING_IN  ("ConsoleBehaviourOs",OC_GLOBAL_CONFIG, Misc.Boot.ConsoleBehaviourOs),
+  OC_SCHEMA_STRING_IN  ("ConsoleBehaviourUi",OC_GLOBAL_CONFIG, Misc.Boot.ConsoleBehaviourUi),
   OC_SCHEMA_BOOLEAN_IN ("HideSelf",          OC_GLOBAL_CONFIG, Misc.Boot.HideSelf),
   OC_SCHEMA_BOOLEAN_IN ("ReinstallProtocol", OC_GLOBAL_CONFIG, Misc.Boot.ReinstallProtocol),
   OC_SCHEMA_STRING_IN  ("Resolution",        OC_GLOBAL_CONFIG, Misc.Boot.Resolution),
@@ -404,8 +406,7 @@ mUefiQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleControl",  OC_GLOBAL_CONFIG, Uefi.Quirks.ProvideConsoleControl),
   OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop",      OC_GLOBAL_CONFIG, Uefi.Quirks.ProvideConsoleGop),
   OC_SCHEMA_BOOLEAN_IN ("ReleaseUsbOwnership",    OC_GLOBAL_CONFIG, Uefi.Quirks.ReleaseUsbOwnership),
-  OC_SCHEMA_BOOLEAN_IN ("RequestBootVarRouting",  OC_GLOBAL_CONFIG, Uefi.Quirks.RequestBootVarRouting),
-  OC_SCHEMA_STRING_IN  ("SetConsoleControl",      OC_GLOBAL_CONFIG, Uefi.Quirks.SetConsoleControl),
+  OC_SCHEMA_BOOLEAN_IN ("RequestBootVarRouting",  OC_GLOBAL_CONFIG, Uefi.Quirks.RequestBootVarRouting)
 };
 
 STATIC
