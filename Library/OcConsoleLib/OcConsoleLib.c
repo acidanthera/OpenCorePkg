@@ -115,7 +115,7 @@ ConsoleControlSetMode (
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode
   )
 {
-  DEBUG ((DEBUG_INFO, "Setting mode %d -> %d\n", mConsoleMode, Mode));
+  DEBUG ((DEBUG_INFO, "OCC: Setting cc mode %d -> %d\n", mConsoleMode, Mode));
 
   mConsoleMode = Mode;
 
@@ -124,6 +124,14 @@ ConsoleControlSetMode (
       This,
       Mode
       );
+  }
+
+  //
+  // Disable and hide flashing cursor.
+  //
+  if (Mode == EfiConsoleControlScreenGraphics && mOriginalOutputString != NULL) {
+    gST->ConOut->SetCursorPosition (gST->ConOut, 0, 0);
+    gST->ConOut->EnableCursor (gST->ConOut, FALSE);
   }
 
   return EFI_SUCCESS;
@@ -445,7 +453,15 @@ SetConsoleResolution (
 
   SetMax = Width == 0 && Height == 0;
 
-  DEBUG ((DEBUG_INFO, "OCC: Requesting %ux%u@%u (max: %d) resolution\n", Width, Height, Bpp, SetMax));
+  DEBUG ((
+    DEBUG_INFO,
+    "OCC: Requesting %ux%u@%u (max: %d) resolution, curr %u\n",
+    Width,
+    Height,
+    Bpp,
+    SetMax,
+    (UINT32) GraphicsOutput->Mode->Mode
+    ));
 
   //
   // Find the resolution we need.
@@ -529,6 +545,8 @@ SetConsoleResolution (
     return Status;
   }
 
+  DEBUG ((DEBUG_INFO, "OCC: Changed resolution mode to %u\n", (UINT32) GraphicsOutput->Mode->Mode));
+
   //
   // On some firmwares When we change mode on GOP, we need to reconnect the drivers
   // which produce simple text out. Otherwise, they won't produce text based on the
@@ -589,7 +607,14 @@ SetConsoleMode (
 
   SetMax       = Width == 0 && Height == 0;
 
-  DEBUG ((DEBUG_INFO, "OCC: Requesting %ux%u (max: %d) console mode\n", Width, Height, SetMax));
+  DEBUG ((
+    DEBUG_INFO,
+    "OCC: Requesting %ux%u (max: %d) console mode, curr %u\n",
+    Width,
+    Height,
+    SetMax,
+    (UINT32) gST->ConOut->Mode->Mode
+    ));
 
   //
   // Find the resolution we need.
@@ -638,8 +663,15 @@ SetConsoleMode (
   }
 
   if (ModeNumber == gST->ConOut->Mode->Mode) {
-    DEBUG ((DEBUG_INFO, "OCC: Current console mode matches desired mode %u\n", (UINT32) ModeNumber));
-    return EFI_SUCCESS;
+    //
+    // This does not seem to affect systems anyhow, but for safety reasons
+    // we should refresh console mode after changing GOP resolution.
+    //
+    DEBUG ((
+      DEBUG_INFO,
+      "OCC: Current console mode matches desired mode %u, forcing update\n",
+      (UINT32) ModeNumber
+      ));
   }
 
   //
@@ -666,6 +698,8 @@ SetConsoleMode (
       ));
     return Status;
   }
+
+  DEBUG ((DEBUG_INFO, "OCC: Changed console mode to %u\n", (UINT32) gST->ConOut->Mode->Mode));
 
   return EFI_SUCCESS;
 }
