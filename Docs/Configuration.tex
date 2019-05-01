@@ -869,14 +869,6 @@ ioreg -lw0 -p IODeviceTree -n efi -r -x | grep device-properties |
   of deivce paths to an array (\texttt{plist\ array}) of variable names in
   \texttt{plist\ string} format.
 
-\item
-  \texttt{ReinstallProtocol}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Reinstalls device property protocol with a builtin
-  version. This will drop all previous properties if it was already installed.
-  This may be used to ensure full compatibility on VMs or legacy Macs.
-
 \end{enumerate}
 
 \subsection{Common Properties}\label{devpropscommon}
@@ -1301,13 +1293,6 @@ behaviour that does not go to any other sections
   \textbf{Description}: Hides own boot entry from boot picker. This
   may potentially hide other entries, for instance, when another UEFI OS is
   installed on the same volume and driver boot is used.
-
-\item
-  \texttt{ReinstallProtocol}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Reinstalls apple boot policy protocol with a builtin
-  version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
 
 \item
   \texttt{Resolution}\\
@@ -2395,12 +2380,41 @@ tweaks for the onboard firmware.
   even cause permanent firmware damage. Some of the known drivers include:
 
   FIXME: Write
+
+\item
+  \texttt{Protocols}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Default value}: None\\
+  \textbf{Description}: Force builtin versions of select protocols described
+  in \hyperref[uefiprotoprops]{Protocols Properties} section below.
+
 \item
   \texttt{Quirks}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Default value}: None\\
   \textbf{Description}: Apply individual firmware quirks described in
   \hyperref[uefiquirkprops]{Quirks Properties} section below.
+
+\end{enumerate}
+
+\subsection{Protocols Properties}\label{uefiprotoprops}
+
+\begin{enumerate}
+
+\item
+  \texttt{AppleBootPolicy}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Reinstalls apple boot policy protocol with a builtin
+  version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
+
+\item
+  \texttt{DeviceProperties}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Reinstalls device property protocol with a builtin
+  version. This will drop all previous properties if it was already installed.
+  This may be used to ensure full compatibility on VMs or legacy Macs.
 
 \end{enumerate}
 
@@ -2449,8 +2463,8 @@ tweaks for the onboard firmware.
   \textbf{Default value}: \texttt{NO}\\
   \textbf{Description}: macOS bootloader requires console control protocol
   for text output, some firmwares miss it. This option is required to be set
-  when other console control quirks are used (\texttt{IgnoreTextInGraphics}
-  and \texttt{SetConsoleControl}).
+  when other console control options are used (\texttt{IgnoreTextInGraphics},
+  and sometimes \texttt{ConsoleBehaviourOs} and \texttt{ConsoleBehaviourUi}).
 
 \item
   \texttt{ProvideConsoleGop}\\

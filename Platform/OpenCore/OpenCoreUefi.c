@@ -17,8 +17,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
+#include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcCpuLib.h>
+#include <Library/OcDevicePropertyLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
@@ -216,6 +218,21 @@ OcReleaseUsbOwnership (
   DEBUG ((DEBUG_INFO, "OC: ReleaseUsbOwnership status - %r\n", Status));
 }
 
+STATIC
+VOID
+OcReinstallProtocols (
+  IN OC_GLOBAL_CONFIG    *Config
+  )
+{
+  if (OcAppleBootPolicyInstallProtocol (Config->Uefi.Protocols.AppleBootPolicy) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install boot policy protocol\n"));
+  }
+
+  if (OcDevicePathPropertyInstallProtocol (Config->Uefi.Protocols.DeviceProperties) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install device properties protocol\n"));
+  }
+}
+
 VOID
 OcLoadUefiSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
@@ -253,6 +270,8 @@ OcLoadUefiSupport (
       &mReleaseUsbOwnershipEvent
       );
   }
+
+  OcReinstallProtocols (Config);
 
   OcLoadDrivers (Storage, Config);
 

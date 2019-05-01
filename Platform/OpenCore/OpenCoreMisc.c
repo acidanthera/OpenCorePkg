@@ -154,12 +154,6 @@ OcMiscLateInit (
     OcStoreLoadPath (LoadPath);
   }
 
-  if (Config->Misc.Boot.ReinstallProtocol) {
-    if (OcAppleBootPolicyInstallProtocol (TRUE) == NULL) {
-      DEBUG ((DEBUG_ERROR, "OC: Failed to reinstall boot policy protocol\n"));
-    }
-  }
-
   Status = EFI_SUCCESS;
 
   if (LoadHandle != NULL) {

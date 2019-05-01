@@ -177,8 +177,6 @@
 				<string>MaximumBootBeepVolume</string>
 			</array>
 		</dict>
-		<key>ReinstallProtocol</key>
-		<false/>
 	</dict>
 	<key>Kernel</key>
 	<dict>
@@ -389,8 +387,6 @@
 			<string></string>
 			<key>HideSelf</key>
 			<true/>
-			<key>ReinstallProtocol</key>
-			<true/>
 			<key>Resolution</key>
 			<string></string>
 			<key>ShowPicker</key>
@@ -400,7 +396,7 @@
 		</dict>
 		<key>Debug</key>
 		<dict>
-			<key>Delay</key>
+			<key>DisplayDelay</key>
 			<integer>0</integer>
 			<key>DisplayLevel</key>
 			<integer>2147483650</integer>
@@ -482,6 +478,13 @@
 			<string>AptioMemoryFix.efi</string>
 			<string>VirtualSmc.efi</string>
 		</array>
+		<key>Protocols</key>
+		<dict>
+			<key>AppleBootPolicy</key>
+			<false/>
+			<key>DeviceProperties</key>
+			<false/>
+		</dict>
 		<key>Quirks</key>
 		<dict>
 			<key>DisableWatchDog</key>
