@@ -1271,10 +1271,19 @@ behaviour that does not go to any other sections
   (require \texttt{ProvideConsoleControl}).
   \end{itemize}
 
-  On most firmwares it is reasonable to set \texttt{ConsoleBehaviourOs}
-  to \texttt{Graphics} and \texttt{ConsoleBehaviourUi} to \texttt{Text}.
-  On APTIO firmwares \texttt{ConsoleBehaviourUi} is best set to
-  \texttt{ForceText} to avoid visual glitches.
+  Hints:
+  \begin{itemize}
+  \tightlist
+  \item Unless empty works, firstly try to set
+  \texttt{ConsoleBehaviourOs} to \texttt{Graphics} and
+  \texttt{ConsoleBehaviourUi} to \texttt{Text}.
+  \item On APTIO IV (Haswell and earlier) it is usually enough to have
+  \texttt{ConsoleBehaviourOs} set to \texttt{Graphics} and
+  \texttt{ConsoleBehaviourUi} set to \texttt{ForceText} to avoid visual glitches.
+  \item On APTIO V (Broadwell and newer) \texttt{ConsoleBehaviourOs}
+  set to \texttt{ForceGraphics} and \texttt{ConsoleBehaviourUi} set to
+  \texttt{Text} usually works best.
+  \end{itemize}
 
   \emph{Note}: \texttt{IgnoreTextInGraphics} may need to be enabled for select
   firmware implementations.

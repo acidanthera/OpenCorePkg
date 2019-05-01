@@ -271,6 +271,8 @@ OcLoadUefiSupport (
       );
   }
 
+  OcMiscUefiQuirksLoaded (Config);
+
   OcReinstallProtocols (Config);
 
   OcLoadDrivers (Storage, Config);

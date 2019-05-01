@@ -171,4 +171,14 @@ OcMiscLateInit (
   OUT EFI_HANDLE                *LoadHandle OPTIONAL
   );
 
+/**
+  Load miscellaneous support after UEFI quirks.
+
+  @param[in]  Config     OpenCore configuration.
+**/
+VOID
+OcMiscUefiQuirksLoaded (
+  IN OC_GLOBAL_CONFIG   *Config
+  );
+
 #endif // OPEN_CORE_H
