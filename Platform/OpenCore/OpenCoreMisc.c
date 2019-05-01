@@ -79,6 +79,7 @@ OcMiscEarlyInit (
   EFI_STATUS                Status;
   CHAR8                     *ConfigData;
   UINT32                    ConfigDataSize;
+  EFI_TIME                  BootTime;
 
   ConfigData = OcStorageReadFileUnicode (
     Storage,
@@ -133,6 +134,26 @@ OcMiscEarlyInit (
     VaultKey != NULL,
     Config->Misc.Security.RequireSignature
     ));
+
+  Status = gRT->GetTime (&BootTime, NULL);
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: Boot timestamp: - %04u.%02u.%02u %02u:%02u:%02u\n",
+      BootTime.Year,
+      BootTime.Month,
+      BootTime.Day,
+      BootTime.Hour,
+      BootTime.Minute,
+      BootTime.Second
+      ));
+  } else {
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: Boot timestamp: - %r\n",
+      Status
+      ));
+  }
 
   return EFI_SUCCESS;
 }
