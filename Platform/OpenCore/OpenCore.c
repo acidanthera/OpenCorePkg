@@ -29,6 +29,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConfigurationLib.h>
+#include <Library/OcConsoleLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcStorageLib.h>
@@ -92,6 +93,15 @@ OcEfiStartImagePrologue (
     if (!IsWindows) {
       OcLoadKernelSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
     }
+
+    //
+    // Request OS mode.
+    //
+    ConsoleControlSetBehaviour (
+      ParseConsoleControlBehaviour (
+        OC_BLOB_GET (&mOpenCoreConfiguration.Misc.Boot.ConsoleBehaviourOs)
+        )
+      );
   }
 }
 
@@ -102,6 +112,15 @@ OcEfiStartImageEpilogue (
   )
 {
   if (mOpenCoreStartImageNest == 1) {
+    //
+    // Restore ui mode.
+    //
+    ConsoleControlSetBehaviour (
+      ParseConsoleControlBehaviour (
+        OC_BLOB_GET (&mOpenCoreConfiguration.Misc.Boot.ConsoleBehaviourUi)
+        )
+      );
+
     if (!mOpenCoreStartImageIsWindows) {
       OcUnloadKernelSupport ();
     }

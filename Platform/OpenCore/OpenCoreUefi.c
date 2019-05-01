@@ -223,8 +223,6 @@ OcLoadUefiSupport (
   IN OC_CPU_INFO         *CpuInfo
   )
 {
-  OC_CONSOLE_CONTROL_BEHAVIOUR  Behaviour;
-
   if (Config->Uefi.Quirks.DisableWatchDog) {
     //
     // boot.efi kills watchdog only in FV2 UI.
@@ -241,11 +239,7 @@ OcLoadUefiSupport (
   }
 
   if (Config->Uefi.Quirks.ProvideConsoleControl) {
-    Behaviour = ParseConsoleControlBehaviour (
-      OC_BLOB_GET (&Config->Uefi.Quirks.SetConsoleControl)
-      );
-    ConfigureConsoleControl (
-      Behaviour,
+    ConsoleControlConfigure (
       Config->Uefi.Quirks.IgnoreTextInGraphics
       );
   }

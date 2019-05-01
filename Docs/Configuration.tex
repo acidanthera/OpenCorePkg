@@ -1253,6 +1253,48 @@ behaviour that does not go to any other sections
   to try to use largest available console mode.
 
 \item
+  \texttt{ConsoleBehaviourOs}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Default value}: Empty string\\
+  \textbf{Description}: Set console control behaviour upon operating system load.
+
+  Console control is a legacy protocol used for switching between text and graphics
+  screen output. Some firmwares do not provide it, yet select operating systems
+  require its presence, which is what \texttt{ProvideConsoleControl} UEFI quirk is for.
+
+  When console control is available, OpenCore can be made console control aware, and
+  and set different modes for the operating system booter (\texttt{ConsoleBehaviourOs}),
+  which normally runs in graphics mode, and its own user interface
+  (\texttt{ConsoleBehaviourUi}), which normally runs in text mode. Possible
+  behaviours, set as values of these options, include:
+
+  \begin{itemize}
+  \tightlist
+  \item Empty string --- Do not modify console control mode.
+  \item \texttt{Text} --- Switch to text mode.
+  \item \texttt{Graphics} --- Switch to graphics mode.
+  \item \texttt{ForceText} --- Switch to text mode and preserve it
+  (requires \texttt{ProvideConsoleControl}).
+  \item \texttt{ForceGraphics} --- Switch to graphics mode and preserve it
+  (require \texttt{ProvideConsoleControl}).
+  \end{itemize}
+
+  On most firmwares it is reasonable to set \texttt{ConsoleBehaviourOs}
+  to \texttt{Graphics} and \texttt{ConsoleBehaviourUi} to \texttt{Text}.
+  On APTIO firmwares \texttt{ConsoleBehaviourUi} is best set to
+  \texttt{ForceText} to avoid visual glitches.
+
+  \emph{Note}: \texttt{IgnoreTextInGraphics} may need to be enabled for select
+  firmware implementations.
+
+\item
+  \texttt{ConsoleBehaviourUi}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Default value}: Empty string\\
+  \textbf{Description}: Set console control behaviour upon OpenCore user
+  interface load. Refer to \texttt{ConsoleBehaviourOs} description for details.
+
+\item
   \texttt{HideSelf}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
@@ -2410,10 +2452,6 @@ tweaks for the onboard firmware.
   when other console control quirks are used (\texttt{IgnoreTextInGraphics}
   and \texttt{SetConsoleControl}).
 
-  \emph{Note}: Some drivers, like AppleUiSupport, may provide equivalent functionality.
-  These drivers are not guaranteed to adhere to the same logic, and if a quirk is
-  necessary, this option is preferred.
-
 \item
   \texttt{ProvideConsoleGop}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -2433,41 +2471,6 @@ tweaks for the onboard firmware.
   the firmware driver. While most firmwares manage to properly do that,
   or at least have an option for, select firmwares do not. As a result,
   operating system may freeze upon boot. Not recommended unless required.
-
-\item
-  \texttt{SetConsoleControl}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
-  \textbf{Description}: Set console control behaviour upon boot.
-
-  Different firmwares implement console control differently or do not implement
-  it at all. For the latter case it is enough to install a dummy console control
-  and hide all onscreen text in graphics mode. However, it is often not enough
-  for other firmwares, which do not show text in text mode, or display visual
-  glitches during text/graphics console control mode switching. Possible
-  behaviours include:
-
-  \begin{itemize}
-  \tightlist
-  \item Empty string --- Do not modify console control mode.
-  \item \texttt{Graphics} --- Switch to graphics mode.
-  \item \texttt{Text} --- Switch to text mode.
-  \item \texttt{ForceGraphics} --- Switch to graphics mode and never change.
-  \item \texttt{ForceText} --- Switch to text mode and never change.
-  \end{itemize}
-
-  Hints (assuming \texttt{ProvideConsoleControl} is \texttt{true}):
-  \begin{itemize}
-  \tightlist
-  \item On Insyde and Phoenix laptops, which do not show boot menu, try
-    \texttt{SetConsoleControl} \texttt{Text} and \texttt{IgnoreTextInGraphics}
-    \texttt{false}.
-  \item On APTIO IV and V with verbose output that cannot be disabled try
-    \texttt{SetConsoleControl} \texttt{ForceText} and \texttt{IgnoreTextInGraphics}
-    \texttt{true}.
-  \item On Duet with similar to APTIO issues try \texttt{SetConsoleControl}
-  empty string and \texttt{IgnoreTextInGraphics} \texttt{true}.
-  \end{itemize}
 
 \end{enumerate}
 
