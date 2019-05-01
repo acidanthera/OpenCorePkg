@@ -383,6 +383,10 @@
 		<dict>
 			<key>ConsoleMode</key>
 			<string></string>
+			<key>ConsoleBehaviourOs</key>
+			<string></string>
+			<key>ConsoleBehaviourUi</key>
+			<string></string>
 			<key>HideSelf</key>
 			<true/>
 			<key>ReinstallProtocol</key>
@@ -492,8 +496,6 @@
 			<false/>
 			<key>ReleaseUsbOwnership</key>
 			<false/>
-			<key>SetConsoleControl</key>
-			<string></string>
 		</dict>
 	</dict>
 </dict>
