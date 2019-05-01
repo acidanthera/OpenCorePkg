@@ -14,6 +14,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <OpenCore.h>
 
+#include <Guid/OcVariables.h>
+
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
@@ -23,6 +25,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcDevicePropertyLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
 
 #include <Protocol/DevicePath.h>
 #include <Protocol/GraphicsOutput.h>
@@ -261,6 +264,17 @@ OcLoadUefiSupport (
       Config->Uefi.Quirks.SanitiseClearScreen
       );
   }
+
+  //
+  // Inform AMF whether we want Boot#### routing or not.
+  //
+  gRT->SetVariable (
+    OC_BOOT_REDIRECT_VARIABLE_NAME,
+    &gOcVendorVariableGuid,
+    OPEN_CORE_NVRAM_ATTR,
+    sizeof (Config->Uefi.Quirks.RequestBootVarRouting),
+    &Config->Uefi.Quirks.RequestBootVarRouting
+    );
 
   if (Config->Uefi.Quirks.ReleaseUsbOwnership) {
     gBS->CreateEvent (

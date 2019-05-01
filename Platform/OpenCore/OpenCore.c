@@ -244,6 +244,7 @@ OcMain (
     mOpenCoreConfiguration.Misc.Boot.Timeout,
     OcStartImage,
     mOpenCoreConfiguration.Misc.Boot.ShowPicker,
+    mOpenCoreConfiguration.Uefi.Quirks.RequestBootVarRouting,
     LoadHandle
     );
   if (EFI_ERROR (Status)) {

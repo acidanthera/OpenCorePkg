@@ -1545,6 +1545,9 @@ several GUIDs, including but not limited to:
 \item
   \texttt{8BE4DF61-93CA-11D2-AA0D-00E098032B8C}
   (\texttt{EFI\_GLOBAL\_VARIABLE\_GUID})
+\item
+  \texttt{4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102}
+  (\texttt{OC\_VENDOR\_VARIABLE\_GUID})
 \end{itemize}
 
 \emph{Note}: Some of the variables may be added by
@@ -2496,6 +2499,18 @@ tweaks for the onboard firmware.
   the firmware driver. While most firmwares manage to properly do that,
   or at least have an option for, select firmwares do not. As a result,
   operating system may freeze upon boot. Not recommended unless required.
+
+\item
+  \texttt{RequestBootVarRouting}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Request NVRAM driver (or AptioMemoryFix) to redirect
+  \texttt{Boot} prefixed variables from \texttt{EFI\_GLOBAL\_VARIABLE\_GUID}
+  to \texttt{OC\_VENDOR\_VARIABLE\_GUID}.
+
+  This will set special \texttt{boot-redirect} variable, which a compatible
+  driver will abide after booter start. The quirk lets default boot entry
+  preservation at times when firmwares delete incompatible boot entries.
 
 \item
   \texttt{SanitiseClearScreen}\\
