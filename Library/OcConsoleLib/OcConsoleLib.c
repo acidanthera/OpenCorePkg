@@ -46,6 +46,13 @@ EFI_TEXT_STRING
 mOriginalOutputString;
 
 //
+// Original clear screen function.
+//
+STATIC
+EFI_TEXT_CLEAR_SCREEN
+mOriginalClearScreen;
+
+//
 // Original console control protocol functions.
 //
 STATIC
@@ -65,6 +72,46 @@ ControlledOutputString (
   }
 
   return EFI_UNSUPPORTED;
+}
+
+STATIC
+EFI_STATUS
+EFIAPI
+ControlledClearScreen (
+  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *This
+  )
+{
+  EFI_STATUS                            Status;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL          *GraphicsOutput;
+  UINT32                                Mode;
+
+  Status = gBS->HandleProtocol (
+    gST->ConsoleOutHandle,
+    &gEfiGraphicsOutputProtocolGuid,
+    (VOID **) &GraphicsOutput
+    );
+
+  if (!EFI_ERROR (Status)) {
+    Mode = GraphicsOutput->Mode->Mode;
+  } else {
+    GraphicsOutput = NULL;
+  }
+
+  //
+  // On APTIO V with large resolution (e.g. 2K or 4K) ClearScreen
+  // invocation resets resolution to 1024x768. We restore it here.
+  // This is probably the safest approach. Other ways include:
+  // - Change SetMode function to some No-op in GOP.
+  // - Cleanup the screen manually.
+  // None of these are tested as I am tired and do not want to risk.
+  //
+  Status = mOriginalClearScreen (This);
+
+  if (GraphicsOutput != NULL) {
+    GraphicsOutput->SetMode (GraphicsOutput, Mode);
+  }
+
+  return Status;
 }
 
 STATIC
@@ -165,7 +212,8 @@ mConsoleControlProtocol = {
 
 EFI_STATUS
 ConsoleControlConfigure (
-  IN BOOLEAN                      IgnoreTextOutput
+  IN BOOLEAN                      IgnoreTextOutput,
+  IN BOOLEAN                      SanitiseClearScreen
   )
 {
   EFI_STATUS                    Status;
@@ -180,14 +228,20 @@ ConsoleControlConfigure (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCC: Configuring console (%r) ignore %d\n",
+    "OCC: Configuring console (%r) ignore %d san clear %d\n",
     Status,
-    IgnoreTextOutput
+    IgnoreTextOutput,
+    SanitiseClearScreen
     ));
 
   if (IgnoreTextOutput) {
     mOriginalOutputString     = gST->ConOut->OutputString;
     gST->ConOut->OutputString = ControlledOutputString;
+  }
+
+  if (SanitiseClearScreen) {
+    mOriginalClearScreen      = gST->ConOut->ClearScreen;
+    gST->ConOut->ClearScreen  = ControlledClearScreen;
   }
 
   //
@@ -455,12 +509,13 @@ SetConsoleResolution (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCC: Requesting %ux%u@%u (max: %d) resolution, curr %u\n",
+    "OCC: Requesting %ux%u@%u (max: %d) resolution, curr %u, total %u\n",
     Width,
     Height,
     Bpp,
     SetMax,
-    (UINT32) GraphicsOutput->Mode->Mode
+    (UINT32) GraphicsOutput->Mode->Mode,
+    (UINT32) GraphicsOutput->Mode->MaxMode
     ));
 
   //
@@ -609,11 +664,12 @@ SetConsoleMode (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCC: Requesting %ux%u (max: %d) console mode, curr %u\n",
+    "OCC: Requesting %ux%u (max: %d) console mode, curr %u, max %u\n",
     Width,
     Height,
     SetMax,
-    (UINT32) gST->ConOut->Mode->Mode
+    (UINT32) gST->ConOut->Mode->Mode,
+    (UINT32) gST->ConOut->Mode->MaxMode
     ));
 
   //

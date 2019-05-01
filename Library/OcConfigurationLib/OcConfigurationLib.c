@@ -405,7 +405,8 @@ mUefiQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleControl",  OC_GLOBAL_CONFIG, Uefi.Quirks.ProvideConsoleControl),
   OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop",      OC_GLOBAL_CONFIG, Uefi.Quirks.ProvideConsoleGop),
   OC_SCHEMA_BOOLEAN_IN ("ReleaseUsbOwnership",    OC_GLOBAL_CONFIG, Uefi.Quirks.ReleaseUsbOwnership),
-  OC_SCHEMA_BOOLEAN_IN ("RequestBootVarRouting",  OC_GLOBAL_CONFIG, Uefi.Quirks.RequestBootVarRouting)
+  OC_SCHEMA_BOOLEAN_IN ("RequestBootVarRouting",  OC_GLOBAL_CONFIG, Uefi.Quirks.RequestBootVarRouting),
+  OC_SCHEMA_BOOLEAN_IN ("SanitiseClearScreen",    OC_GLOBAL_CONFIG, Uefi.Quirks.SanitiseClearScreen)
 };
 
 STATIC

@@ -362,7 +362,8 @@
   _(BOOLEAN                     , ReleaseUsbOwnership         ,     , FALSE  , ()) \
   _(BOOLEAN                     , RequestBootVarRouting       ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProvideConsoleControl       ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ProvideConsoleGop           ,     , FALSE  , ())
+  _(BOOLEAN                     , ProvideConsoleGop           ,     , FALSE  , ()) \
+  _(BOOLEAN                     , SanitiseClearScreen         ,     , FALSE  , ())
   OC_DECLARE (OC_UEFI_QUIRKS)
 
 ///

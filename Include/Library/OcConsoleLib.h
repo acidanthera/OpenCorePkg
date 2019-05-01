@@ -29,13 +29,15 @@ typedef enum {
 /**
   Configure console control protocol with given options.
 
-  @param[in] IgnoreTextOutput   Skip console output in text mode.
+  @param[in] IgnoreTextOutput     Skip console output in text mode.
+  @param[in] SanitiseClearScreen  Workaround ClearScreen breaking resolution.
 
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
 ConsoleControlConfigure (
-  IN BOOLEAN                       IgnoreTextOutput
+  IN BOOLEAN                       IgnoreTextOutput,
+  IN BOOLEAN                       SanitiseClearScreen
   );
 
 /**
