@@ -727,12 +727,12 @@ InternalGetDefaultBootEntry (
                &BootOrderSize
                );
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCB: BootOrder is unavailable - %r\n"));
+      DEBUG ((DEBUG_INFO, "OCB: BootOrder is unavailable - %r\n", Status));
       return NULL;
     }
 
     if (BootOrderSize < sizeof (*BootOrder)) {
-      DEBUG ((DEBUG_WARN, "OCB: BootOrder is malformed - %r\n"));
+      DEBUG ((DEBUG_WARN, "OCB: BootOrder is malformed - %x\n", (UINT32) BootOrderSize));
       FreePool (BootOrder);
       return NULL;
     }

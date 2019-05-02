@@ -32,6 +32,12 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_BOOT_REDIRECT_VARIABLE_NAME  L"boot-redirect"
 
 //
+// Variable used to report OpenCore version in the following format:
+// REL-001-2019-01-01. This follows versioning style of Lilu and plugins.
+//
+#define OC_VERSION_VARIABLE_NAME  L"opencore-version"
+
+//
 // 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102
 // This GUID is specifically used for normal variable access by Lilu kernel extension and its plugins.
 //
