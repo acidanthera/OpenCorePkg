@@ -24,14 +24,37 @@
 #include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE mConsoleMode   = EfiConsoleControlScreenText;
+//
+// Current reported console mode.
+//
+STATIC
+EFI_CONSOLE_CONTROL_SCREEN_MODE
+mConsoleMode = EfiConsoleControlScreenText;
 
-STATIC OC_CONSOLE_CONTROL_BEHAVIOUR mConsoleBehaviour = OcConsoleControlDefault;
+//
+// Stick to previously set console mode.
+//
+STATIC
+BOOLEAN
+mForceConsoleMode = FALSE;
 
+//
+// Original text output function.
+//
 STATIC
 EFI_TEXT_STRING
 mOriginalOutputString;
 
+//
+// Original clear screen function.
+//
+STATIC
+EFI_TEXT_CLEAR_SCREEN
+mOriginalClearScreen;
+
+//
+// Original console control protocol functions.
+//
 STATIC
 EFI_CONSOLE_CONTROL_PROTOCOL
 mOriginalConsoleControlProtocol;
@@ -54,6 +77,46 @@ ControlledOutputString (
 STATIC
 EFI_STATUS
 EFIAPI
+ControlledClearScreen (
+  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *This
+  )
+{
+  EFI_STATUS                            Status;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL          *GraphicsOutput;
+  UINT32                                Mode;
+
+  Status = gBS->HandleProtocol (
+    gST->ConsoleOutHandle,
+    &gEfiGraphicsOutputProtocolGuid,
+    (VOID **) &GraphicsOutput
+    );
+
+  if (!EFI_ERROR (Status)) {
+    Mode = GraphicsOutput->Mode->Mode;
+  } else {
+    GraphicsOutput = NULL;
+  }
+
+  //
+  // On APTIO V with large resolution (e.g. 2K or 4K) ClearScreen
+  // invocation resets resolution to 1024x768. We restore it here.
+  // This is probably the safest approach. Other ways include:
+  // - Change SetMode function to some No-op in GOP.
+  // - Cleanup the screen manually.
+  // None of these are tested as I am tired and do not want to risk.
+  //
+  Status = mOriginalClearScreen (This);
+
+  if (GraphicsOutput != NULL) {
+    GraphicsOutput->SetMode (GraphicsOutput, Mode);
+  }
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
+EFIAPI
 ConsoleControlGetMode (
   IN   EFI_CONSOLE_CONTROL_PROTOCOL    *This,
   OUT  EFI_CONSOLE_CONTROL_SCREEN_MODE *Mode,
@@ -63,10 +126,7 @@ ConsoleControlGetMode (
 {
   EFI_STATUS  Status;
 
-  if (mOriginalConsoleControlProtocol.GetMode != NULL
-    && mConsoleBehaviour != OcConsoleControlForceGraphics
-    && mConsoleBehaviour != OcConsoleControlForceText) {
-
+  if (mOriginalConsoleControlProtocol.GetMode != NULL && !mForceConsoleMode) {
     Status = mOriginalConsoleControlProtocol.GetMode (
       This,
       Mode,
@@ -102,16 +162,23 @@ ConsoleControlSetMode (
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode
   )
 {
+  DEBUG ((DEBUG_INFO, "OCC: Setting cc mode %d -> %d\n", mConsoleMode, Mode));
+
   mConsoleMode = Mode;
 
-  if (mOriginalConsoleControlProtocol.SetMode != NULL
-    && mConsoleBehaviour != OcConsoleControlForceGraphics
-    && mConsoleBehaviour != OcConsoleControlForceText) {
-
+  if (mOriginalConsoleControlProtocol.SetMode != NULL && !mForceConsoleMode) {
     return mOriginalConsoleControlProtocol.SetMode (
       This,
       Mode
       );
+  }
+
+  //
+  // Disable and hide flashing cursor.
+  //
+  if (Mode == EfiConsoleControlScreenGraphics && mOriginalOutputString != NULL) {
+    gST->ConOut->SetCursorPosition (gST->ConOut, 0, 0);
+    gST->ConOut->EnableCursor (gST->ConOut, FALSE);
   }
 
   return EFI_SUCCESS;
@@ -144,24 +211,14 @@ mConsoleControlProtocol = {
 };
 
 EFI_STATUS
-ConfigureConsoleControl (
-  IN OC_CONSOLE_CONTROL_BEHAVIOUR  Behaviour,
-  IN BOOLEAN                       IgnoreTextOutput
+ConsoleControlConfigure (
+  IN BOOLEAN                      IgnoreTextOutput,
+  IN BOOLEAN                      SanitiseClearScreen
   )
 {
   EFI_STATUS                    Status;
   EFI_CONSOLE_CONTROL_PROTOCOL  *ConsoleControl;
   EFI_HANDLE                    NewHandle;
-  BOOLEAN                       WrapExisting;
-
-  WrapExisting      = Behaviour != OcConsoleControlDefault || IgnoreTextOutput;
-  mConsoleBehaviour = Behaviour;
-
-  if (Behaviour == OcConsoleControlGraphics || Behaviour == OcConsoleControlForceGraphics) {
-    mConsoleMode = EfiConsoleControlScreenGraphics;
-  } else if (Behaviour == OcConsoleControlText || Behaviour == OcConsoleControlForceText) {
-    mConsoleMode = EfiConsoleControlScreenText;
-  }
 
   Status = gBS->LocateProtocol (
     &gEfiConsoleControlProtocolGuid,
@@ -171,10 +228,10 @@ ConfigureConsoleControl (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCC: Configuring behaviour %u ignore %d curr %r\n",
-    Behaviour,
+    "OCC: Configuring console (%r) ignore %d san clear %d\n",
+    Status,
     IgnoreTextOutput,
-    Status
+    SanitiseClearScreen
     ));
 
   if (IgnoreTextOutput) {
@@ -182,26 +239,25 @@ ConfigureConsoleControl (
     gST->ConOut->OutputString = ControlledOutputString;
   }
 
+  if (SanitiseClearScreen) {
+    mOriginalClearScreen      = gST->ConOut->ClearScreen;
+    gST->ConOut->ClearScreen  = ControlledClearScreen;
+  }
+
   //
   // Native implementation exists, ignore.
   //
   if (!EFI_ERROR (Status)) {
-    if (WrapExisting) {
-      CopyMem (
-        &mOriginalConsoleControlProtocol,
-        ConsoleControl,
-        sizeof (mOriginalConsoleControlProtocol)
-        );
-      CopyMem (
-        ConsoleControl,
-        &mConsoleControlProtocol,
-        sizeof (mOriginalConsoleControlProtocol)
-        );
-    }
-
-    if (mConsoleBehaviour != OcConsoleControlDefault) {
-      mOriginalConsoleControlProtocol.SetMode (ConsoleControl, mConsoleMode);
-    }
+    CopyMem (
+      &mOriginalConsoleControlProtocol,
+      ConsoleControl,
+      sizeof (mOriginalConsoleControlProtocol)
+      );
+    CopyMem (
+      ConsoleControl,
+      &mConsoleControlProtocol,
+      sizeof (mOriginalConsoleControlProtocol)
+      );
 
     return EFI_SUCCESS;
   }
@@ -213,6 +269,66 @@ ConfigureConsoleControl (
     &mConsoleControlProtocol,
     NULL
     );
+
+  return Status;
+}
+
+EFI_STATUS
+ConsoleControlSetBehaviour (
+  IN OC_CONSOLE_CONTROL_BEHAVIOUR  Behaviour
+  )
+{
+  EFI_STATUS                    Status;
+  EFI_CONSOLE_CONTROL_PROTOCOL  *ConsoleControl;
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCC: Configuring behaviour %u\n",
+    Behaviour
+    ));
+
+  if (Behaviour == OcConsoleControlDefault) {
+    return EFI_SUCCESS;
+  }
+
+  Status = gBS->LocateProtocol (
+    &gEfiConsoleControlProtocolGuid,
+    NULL,
+    (VOID *) &ConsoleControl
+    );
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  if (Behaviour == OcConsoleControlText) {
+    return ConsoleControl->SetMode (ConsoleControl, EfiConsoleControlScreenText);
+  }
+
+  if (Behaviour == OcConsoleControlGraphics) {
+    return ConsoleControl->SetMode (ConsoleControl, EfiConsoleControlScreenGraphics);
+  }
+
+  //
+  // We are setting a forced mode, do not let console changes.
+  //
+  mForceConsoleMode = TRUE;
+
+  if (Behaviour == OcConsoleControlForceText) {
+    mConsoleMode = EfiConsoleControlScreenText;
+  } else {
+    mConsoleMode = EfiConsoleControlScreenGraphics;
+  }
+
+  //
+  // Ensure that the mode is changed if original protocol is available.
+  //
+  if (mOriginalConsoleControlProtocol.SetMode != NULL) {
+    Status = mOriginalConsoleControlProtocol.SetMode (
+      ConsoleControl,
+      mConsoleMode
+      );
+  }
 
   return Status;
 }
@@ -391,7 +507,16 @@ SetConsoleResolution (
 
   SetMax = Width == 0 && Height == 0;
 
-  DEBUG ((DEBUG_INFO, "OCC: Requesting %ux%u@%u (max: %d) resolution\n", Width, Height, Bpp, SetMax));
+  DEBUG ((
+    DEBUG_INFO,
+    "OCC: Requesting %ux%u@%u (max: %d) resolution, curr %u, total %u\n",
+    Width,
+    Height,
+    Bpp,
+    SetMax,
+    (UINT32) GraphicsOutput->Mode->Mode,
+    (UINT32) GraphicsOutput->Mode->MaxMode
+    ));
 
   //
   // Find the resolution we need.
@@ -475,6 +600,8 @@ SetConsoleResolution (
     return Status;
   }
 
+  DEBUG ((DEBUG_INFO, "OCC: Changed resolution mode to %u\n", (UINT32) GraphicsOutput->Mode->Mode));
+
   //
   // On some firmwares When we change mode on GOP, we need to reconnect the drivers
   // which produce simple text out. Otherwise, they won't produce text based on the
@@ -535,7 +662,15 @@ SetConsoleMode (
 
   SetMax       = Width == 0 && Height == 0;
 
-  DEBUG ((DEBUG_INFO, "OCC: Requesting %ux%u (max: %d) console mode\n", Width, Height, SetMax));
+  DEBUG ((
+    DEBUG_INFO,
+    "OCC: Requesting %ux%u (max: %d) console mode, curr %u, max %u\n",
+    Width,
+    Height,
+    SetMax,
+    (UINT32) gST->ConOut->Mode->Mode,
+    (UINT32) gST->ConOut->Mode->MaxMode
+    ));
 
   //
   // Find the resolution we need.
@@ -584,8 +719,15 @@ SetConsoleMode (
   }
 
   if (ModeNumber == gST->ConOut->Mode->Mode) {
-    DEBUG ((DEBUG_INFO, "OCC: Current console mode matches desired mode %u\n", (UINT32) ModeNumber));
-    return EFI_SUCCESS;
+    //
+    // This does not seem to affect systems anyhow, but for safety reasons
+    // we should refresh console mode after changing GOP resolution.
+    //
+    DEBUG ((
+      DEBUG_INFO,
+      "OCC: Current console mode matches desired mode %u, forcing update\n",
+      (UINT32) ModeNumber
+      ));
   }
 
   //
@@ -612,6 +754,8 @@ SetConsoleMode (
       ));
     return Status;
   }
+
+  DEBUG ((DEBUG_INFO, "OCC: Changed console mode to %u\n", (UINT32) gST->ConOut->Mode->Mode));
 
   return EFI_SUCCESS;
 }

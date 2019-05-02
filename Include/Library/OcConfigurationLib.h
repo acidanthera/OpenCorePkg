@@ -114,8 +114,7 @@
 
 #define OC_DEV_PROP_CONFIG_FIELDS(_, __) \
   _(OC_DEV_PROP_ADD_MAP       , Add              ,     , OC_CONSTR2 (OC_DEV_PROP_ADD_MAP, _, __)   , OC_DESTR (OC_DEV_PROP_ADD_MAP)) \
-  _(OC_DEV_PROP_BLOCK_MAP     , Block            ,     , OC_CONSTR2 (OC_DEV_PROP_BLOCK_MAP, _, __) , OC_DESTR (OC_DEV_PROP_BLOCK_MAP)) \
-  _(BOOLEAN                   , ReinstallProtocol,     , FALSE  , ())
+  _(OC_DEV_PROP_BLOCK_MAP     , Block            ,     , OC_CONSTR2 (OC_DEV_PROP_BLOCK_MAP, _, __) , OC_DESTR (OC_DEV_PROP_BLOCK_MAP))
   OC_DECLARE (OC_DEV_PROP_CONFIG)
 
 /**
@@ -202,11 +201,12 @@
 
 #define OC_MISC_BOOT_FIELDS(_, __) \
   _(BOOLEAN                     , HideSelf                    ,     , FALSE                       , ())                   \
-  _(BOOLEAN                     , ReinstallProtocol           ,     , FALSE                       , ())                   \
   _(BOOLEAN                     , ShowPicker                  ,     , FALSE                       , ())                   \
   _(UINT32                      , Timeout                     ,     , 0                           , ())                   \
   _(OC_STRING                   , Resolution                  ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
-  _(OC_STRING                   , ConsoleMode                 ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING))
+  _(OC_STRING                   , ConsoleMode                 ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , ConsoleBehaviourOs          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , ConsoleBehaviourUi          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING))
   OC_DECLARE (OC_MISC_BOOT)
 
 #define OC_MISC_DEBUG_FIELDS(_, __) \
@@ -252,31 +252,6 @@
   _(OC_NVRAM_BLOCK_MAP         , Block             ,     , OC_CONSTR2 (OC_NVRAM_BLOCK_MAP, _, __)      , OC_DESTR (OC_NVRAM_BLOCK_MAP))
   /* _(OC_NVRAM_QUIRKS         , Quirks            ,     , OC_CONSTR2 (OC_NVRAM_QUIRKS, _, __)         , OC_DESTR (OC_NVRAM_QUIRKS)) */
   OC_DECLARE (OC_NVRAM_CONFIG)
-
-/**
-  Uefi section
-**/
-
-///
-/// Drivers is a sorted array of strings containing driver paths.
-///
-#define OC_UEFI_DRIVER_ARRAY_FIELDS(_, __) \
-  OC_ARRAY (OC_STRING, _, __)
-  OC_DECLARE (OC_UEFI_DRIVER_ARRAY)
-
-///
-/// Quirks is a set of hacks for different firmwares.
-///
-#define OC_UEFI_QUIRKS_FIELDS(_, __) \
-  _(BOOLEAN                     , DisableWatchDog             ,     , FALSE  , ()) \
-  _(BOOLEAN                     , IgnoreInvalidFlexRatio      ,     , FALSE  , ()) \
-  _(BOOLEAN                     , IgnoreTextInGraphics        ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ReleaseUsbOwnership         ,     , FALSE  , ()) \
-  _(BOOLEAN                     , RequestBootVarRouting       ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ProvideConsoleControl       ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ProvideConsoleGop           ,     , FALSE  , ()) \
-  _(OC_STRING                   , SetConsoleControl           ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
-  OC_DECLARE (OC_UEFI_QUIRKS)
 
 /**
   Platform information configuration
@@ -357,12 +332,47 @@
   _(OC_PLATFORM_SMBIOS_CONFIG   , Smbios           ,     , OC_CONSTR2 (OC_PLATFORM_SMBIOS_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_SMBIOS_CONFIG))
   OC_DECLARE (OC_PLATFORM_CONFIG)
 
+
+/**
+  Uefi section
+**/
+
+///
+/// Drivers is a sorted array of strings containing driver paths.
+///
+#define OC_UEFI_DRIVER_ARRAY_FIELDS(_, __) \
+  OC_ARRAY (OC_STRING, _, __)
+  OC_DECLARE (OC_UEFI_DRIVER_ARRAY)
+
+///
+/// Prefer own protocol implementation for these protocols.
+///
+#define OC_UEFI_PROTOCOLS_FIELDS(_, __) \
+  _(BOOLEAN                     , AppleBootPolicy             ,     , FALSE  , ()) \
+  _(BOOLEAN                     , DeviceProperties            ,     , FALSE  , ())
+  OC_DECLARE (OC_UEFI_PROTOCOLS)
+
+///
+/// Quirks is a set of hacks for different firmwares.
+///
+#define OC_UEFI_QUIRKS_FIELDS(_, __) \
+  _(BOOLEAN                     , DisableWatchDog             ,     , FALSE  , ()) \
+  _(BOOLEAN                     , IgnoreInvalidFlexRatio      ,     , FALSE  , ()) \
+  _(BOOLEAN                     , IgnoreTextInGraphics        ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ReleaseUsbOwnership         ,     , FALSE  , ()) \
+  _(BOOLEAN                     , RequestBootVarRouting       ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ProvideConsoleControl       ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ProvideConsoleGop           ,     , FALSE  , ()) \
+  _(BOOLEAN                     , SanitiseClearScreen         ,     , FALSE  , ())
+  OC_DECLARE (OC_UEFI_QUIRKS)
+
 ///
 /// Uefi contains firmware tweaks and extra drivers.
 ///
 #define OC_UEFI_CONFIG_FIELDS(_, __) \
   _(BOOLEAN                     , ConnectDrivers   ,     , FALSE                                    , ()) \
   _(OC_UEFI_DRIVER_ARRAY        , Drivers          ,     , OC_CONSTR2 (OC_UEFI_DRIVER_ARRAY, _, __) , OC_DESTR (OC_UEFI_DRIVER_ARRAY)) \
+  _(OC_UEFI_PROTOCOLS           , Protocols        ,     , OC_CONSTR2 (OC_UEFI_PROTOCOLS, _, __)    , OC_DESTR (OC_UEFI_PROTOCOLS)) \
   _(OC_UEFI_QUIRKS              , Quirks           ,     , OC_CONSTR2 (OC_UEFI_QUIRKS, _, __)       , OC_DESTR (OC_UEFI_QUIRKS))
   OC_DECLARE (OC_UEFI_CONFIG)
 
