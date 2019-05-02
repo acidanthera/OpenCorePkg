@@ -18,11 +18,30 @@
 #include <Library/OcConfigurationLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcCryptoLib.h>
+#include <Library/OcGuardLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/OcStorageLib.h>
 
 #include <Protocol/OcBootstrap.h>
 
-#define OPEN_CORE_VERSION          L"0.1"
+/**
+  OpenCore version reported to log and NVRAM.
+  OPEN_CORE_VERSION must follow X.Y.Z format, where X.Y.Z are single digits.
+**/
+#define OPEN_CORE_VERSION          "0.0.1"
+
+/**
+  OpenCore build type reported to log and NVRAM.
+**/
+#if defined (OC_RELEASE_TARGET)
+#define OPEN_CORE_TARGET           "REL" ///< Release.
+#elif defined (OC_DEBUG_TARGET)
+#define OPEN_CORE_TARGET           "DBG" ///< Debug with compiler optimisations.
+#elif defined (OC_NOOPT_TARGET)
+#define OPEN_CORE_TARGET           "NPT" ///< Debug with no compiler optimisations.
+#else
+#define OPEN_CORE_TARGET           "UNK" ///< This one should not happen in public builds.
+#endif
 
 #define OPEN_CORE_IMAGE_PATH       L"EFI\\OC\\OpenCore.efi"
 

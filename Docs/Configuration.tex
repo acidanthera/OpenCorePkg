@@ -1422,6 +1422,13 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   awk '{gsub(/%0d%0a%00/,"");gsub(/%0d%0a/,"\n")}1'
 \end{lstlisting}
 
+  While OpenCore boot log already contains basic version information with build type and
+  date, this data may also be found in NVRAM in \texttt{opencore-version} variable
+  even with boot log disabled:
+\begin{lstlisting}[label=nvramver, style=ocbash]
+nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
+\end{lstlisting}
+
   \emph{Note}: File logging is currently not implemented.
 
 \end{enumerate}
