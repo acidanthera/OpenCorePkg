@@ -1483,14 +1483,16 @@ OcScanForBootEntries (
   IN  BOOLEAN                     Describe
   )
 {
-  EFI_STATUS                Status;
-  UINTN                     NoHandles;
-  EFI_HANDLE                *Handles;
-  UINTN                     Index;
-  OC_BOOT_ENTRY             *Entries;
-  UINTN                     EntryIndex;
-  CHAR16                    *DevicePath;
-  UINTN                     EntryCount;
+  EFI_STATUS                       Status;
+  UINTN                            NoHandles;
+  EFI_HANDLE                       *Handles;
+  UINTN                            Index;
+  OC_BOOT_ENTRY                    *Entries;
+  UINTN                            EntryIndex;
+  CHAR16                           *DevicePath;
+  CHAR16                           *VolumeLabel;
+  UINTN                            EntryCount;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *SimpleFs;
 
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
@@ -1529,7 +1531,30 @@ OcScanForBootEntries (
       LoadHandle == Handles[Index]
       );
 
-    DEBUG ((DEBUG_INFO, "OCB: Filesystem %u has %u entries\n", (UINT32) Index, (UINT32) EntryCount));
+    DEBUG_CODE_BEGIN ();
+    Status = gBS->HandleProtocol (
+      Handles[Index],
+      &gEfiSimpleFileSystemProtocolGuid,
+      (VOID **) &SimpleFs
+      );
+    if (!EFI_ERROR (Status)) {
+      VolumeLabel = GetVolumeLabel (SimpleFs);
+    } else {
+      VolumeLabel = NULL;
+    }
+    DEBUG ((
+      DEBUG_INFO,
+      "OCB: Filesystem %u (%p) named %s (%r) has %u entries\n",
+      (UINT32) Index,
+      Handles[Index],
+      VolumeLabel != NULL ? VolumeLabel : L"<Null>",
+      Status,
+      (UINT32) EntryCount
+      ));
+    if (VolumeLabel != NULL) {
+      FreePool (VolumeLabel);
+    }
+    DEBUG_CODE_END ();
 
     EntryIndex += EntryCount;
   }
