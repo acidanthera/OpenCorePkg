@@ -37,9 +37,9 @@ TestRsa2048Sha256Verify (
   VOID
   )
 {
-  EFI_STATUS Status = EFI_INVALID_PARAMETER;
-  UINT8  DataSha256Hash[SHA256_DIGEST_SIZE];
-  BOOLEAN SignatureVerified = FALSE;
+  EFI_STATUS Status;
+  UINT8      DataSha256Hash[SHA256_DIGEST_SIZE];
+  BOOLEAN    SignatureVerified = FALSE;
 
   Sha256 (
     DataSha256Hash,
@@ -70,6 +70,7 @@ TestAesCtr (
   VOID
   )
 {
+  EFI_STATUS   Status;
   AES_CONTEXT  Ctx;
   UINT8        PlainText[AES_SAMPLE_DATA_SIZE];
   UINT8        CipherText[AES_SAMPLE_DATA_SIZE];
@@ -125,10 +126,12 @@ TestAesCtr (
   ZeroMem (&Ctx, sizeof (Ctx));
 
   if (AesTestPassed) {
-    return EFI_SUCCESS;
+    Status = EFI_SUCCESS;
   } else {
-    return EFI_INVALID_PARAMETER;
+    Status = EFI_INVALID_PARAMETER;
   }
+
+  return Status;
 }
 
 EFI_STATUS
@@ -137,6 +140,7 @@ TestAesCbc (
   VOID
   )
 {
+  EFI_STATUS   Status;
   AES_CONTEXT  Ctx;
   UINT8        PlainText[AES_SAMPLE_DATA_SIZE];
   UINT8        CipherText[AES_SAMPLE_DATA_SIZE];
@@ -192,10 +196,12 @@ TestAesCbc (
   ZeroMem (&Ctx, sizeof (Ctx));
 
   if (AesTestPassed) {
-    return EFI_SUCCESS;
+    Status = EFI_SUCCESS;
   } else {
-    return EFI_INVALID_PARAMETER;
+    Status = EFI_INVALID_PARAMETER;
   }
+
+  return Status;
 }
 
 
@@ -208,17 +214,10 @@ TestHash (
   EFI_STATUS   Status          = EFI_INVALID_PARAMETER;
   UINTN        Index           = 0;
   UINTN        Index2          = 0;
-  UINT8        *Md5Hash        = NULL;
-  UINT8        *Sha1Hash       = NULL;
-  UINT8        *Sha256Hash     = NULL;
   BOOLEAN      HashTestPassed  = TRUE;
-
-  //
-  // Allocate buffers
-  //
-  Md5Hash = AllocateZeroPool(MD5_DIGEST_SIZE);
-  Sha1Hash = AllocateZeroPool(SHA1_DIGEST_SIZE);
-  Sha256Hash = AllocateZeroPool(SHA256_DIGEST_SIZE);
+  UINT8        Md5Hash[MD5_DIGEST_SIZE];
+  UINT8        Sha1Hash[SHA1_DIGEST_SIZE];
+  UINT8        Sha256Hash[SHA256_DIGEST_SIZE];
 
   //
   // Iterate through hash samples
@@ -289,10 +288,6 @@ TestHash (
   ZeroMem (Md5Hash, MD5_DIGEST_SIZE);
   ZeroMem (Sha1Hash, SHA1_DIGEST_SIZE);
   ZeroMem (Sha256Hash, SHA256_DIGEST_SIZE);
-
-  FreePool (Md5Hash);
-  FreePool (Sha1Hash);
-  FreePool (Sha256Hash);
 
   return Status;
 }
