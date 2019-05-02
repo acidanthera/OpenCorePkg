@@ -718,7 +718,7 @@ InternalGetDefaultBootEntry (
                   &BootNextOptionIndex
                   );
   if (Status == EFI_NOT_FOUND) {
-    DEBUG ((DEBUG_INFO, "OCB: BootNext has not been found.\n"));
+    DEBUG ((DEBUG_INFO, "OCB: BootNext has not been found\n"));
 
     Status = GetVariable2 (
                EFI_BOOT_ORDER_VARIABLE_NAME,
@@ -727,11 +727,12 @@ InternalGetDefaultBootEntry (
                &BootOrderSize
                );
     if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCB: BootOrder is unavailable - %r\n"));
       return NULL;
     }
 
     if (BootOrderSize < sizeof (*BootOrder)) {
-      DEBUG ((DEBUG_WARN, "OCB: BootOrder is malformed.\n"));
+      DEBUG ((DEBUG_WARN, "OCB: BootOrder is malformed - %r\n"));
       FreePool (BootOrder);
       return NULL;
     }
@@ -759,7 +760,7 @@ InternalGetDefaultBootEntry (
                     &DeviceHandle
                     );
     if (!EFI_ERROR (Status) && (DeviceHandle == LoadHandle)) {
-      DEBUG ((DEBUG_INFO, "OCB: Skipping OC bootstrap application.\n"));
+      DEBUG ((DEBUG_INFO, "OCB: Skipping OC bootstrap application\n"));
       //
       // Skip BOOTx64.EFI at BootOrder[0].
       //
@@ -785,7 +786,7 @@ InternalGetDefaultBootEntry (
 
     FreePool (BootOrder);
   } else if (!EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCB: BootNext: %x.\n", BootNextOptionIndex));
+    DEBUG ((DEBUG_INFO, "OCB: BootNext: %x\n", BootNextOptionIndex));
     //
     // BootNext must be deleted before attempting to start the image - delete
     // it here because not attempting to boot the image implies user's choice.
@@ -993,6 +994,8 @@ OcFillBootEntry (
   } else {
     Status = EFI_UNSUPPORTED;
   }
+
+  DEBUG ((DEBUG_INFO, "OCB: Bless result for load (%d) - %r\n", IsLoadHandle, Status));
 
   //
   // Detect recovery on load handle and on a partition without
@@ -1501,6 +1504,8 @@ OcScanForBootEntries (
     return Status;
   }
 
+  DEBUG ((DEBUG_INFO, "OCB: Found %u potentially bootable filesystems\n", (UINT32) NoHandles));
+
   if (NoHandles == 0) {
     FreePool (Handles);
     return EFI_NOT_FOUND;
@@ -1523,6 +1528,8 @@ OcScanForBootEntries (
       &Entries[EntryIndex+1],
       LoadHandle == Handles[Index]
       );
+
+    DEBUG ((DEBUG_INFO, "OCB: Filesystem %u has %u entries\n", (UINT32) Index, (UINT32) EntryCount));
 
     EntryIndex += EntryCount;
   }
