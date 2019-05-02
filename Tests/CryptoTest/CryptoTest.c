@@ -72,12 +72,12 @@ TestAesCtr (
 {
   EFI_STATUS   Status;
   AES_CONTEXT  Ctx;
-  UINT8        PlainText[AES_SAMPLE_DATA_SIZE];
-  UINT8        CipherText[AES_SAMPLE_DATA_SIZE];
+  UINT8        PlainText[AES_SAMPLE_DATA_LEN];
+  UINT8        CipherText[AES_SAMPLE_DATA_LEN];
   BOOLEAN      AesTestPassed = TRUE;
 
-  CopyMem(PlainText, AesCtrSample.PlainText, AES_SAMPLE_DATA_SIZE);
-  CopyMem(CipherText, AesCtrSample.CipherText, AES_SAMPLE_DATA_SIZE);
+  CopyMem(PlainText, AesCtrSample.PlainText, AES_SAMPLE_DATA_LEN);
+  CopyMem(CipherText, AesCtrSample.CipherText, AES_SAMPLE_DATA_LEN);
 
   //
   // Init AES context
@@ -87,12 +87,12 @@ TestAesCtr (
   //
   // Encrypt plain text data sample
   //
-  AesCtrXcryptBuffer (&Ctx, PlainText, AES_SAMPLE_DATA_SIZE);
+  AesCtrXcryptBuffer (&Ctx, PlainText, AES_SAMPLE_DATA_LEN);
 
   //
   // Compare data
   //
-  if (CompareMem (PlainText, AesCtrSample.CipherText, AES_SAMPLE_DATA_SIZE) == 0) {
+  if (CompareMem (PlainText, AesCtrSample.CipherText, AES_SAMPLE_DATA_LEN) == 0) {
     Print (L"AES-128 CTR encryption test passed\n");
   } else {
     Print (L"AES-128 CTR encryption test failed\n");
@@ -108,12 +108,12 @@ TestAesCtr (
   //
   // Decrypt cipher text data sample
   //
-  AesCtrXcryptBuffer (&Ctx, CipherText, AES_SAMPLE_DATA_SIZE);
+  AesCtrXcryptBuffer (&Ctx, CipherText, AES_SAMPLE_DATA_LEN);
 
   //
   // Compare data
   //
-  if (CompareMem (CipherText, AesCtrSample.PlainText, AES_SAMPLE_DATA_SIZE) == 0) {
+  if (CompareMem (CipherText, AesCtrSample.PlainText, AES_SAMPLE_DATA_LEN) == 0) {
     Print (L"AES-128 CTR decryption test passed\n");
   } else {
     Print (L"AES-128 CTR decryption test failed\n");
@@ -142,12 +142,12 @@ TestAesCbc (
 {
   EFI_STATUS   Status;
   AES_CONTEXT  Ctx;
-  UINT8        PlainText[AES_SAMPLE_DATA_SIZE];
-  UINT8        CipherText[AES_SAMPLE_DATA_SIZE];
+  UINT8        PlainText[AES_SAMPLE_DATA_LEN];
+  UINT8        CipherText[AES_SAMPLE_DATA_LEN];
   BOOLEAN      AesTestPassed = TRUE;
 
-  CopyMem(PlainText, AesCbcSample.PlainText, AES_SAMPLE_DATA_SIZE);
-  CopyMem(CipherText, AesCbcSample.CipherText, AES_SAMPLE_DATA_SIZE);
+  CopyMem(PlainText, AesCbcSample.PlainText, AES_SAMPLE_DATA_LEN);
+  CopyMem(CipherText, AesCbcSample.CipherText, AES_SAMPLE_DATA_LEN);
 
   //
   // Init AES context
@@ -157,12 +157,12 @@ TestAesCbc (
   //
   // Encrypt plain text data sample
   //
-  AesCbcEncryptBuffer (&Ctx, PlainText, AES_SAMPLE_DATA_SIZE);
+  AesCbcEncryptBuffer (&Ctx, PlainText, AES_SAMPLE_DATA_LEN);
 
   //
   // Compare data
   //
-  if (CompareMem (PlainText, AesCbcSample.CipherText, AES_SAMPLE_DATA_SIZE) == 0) {
+  if (CompareMem (PlainText, AesCbcSample.CipherText, AES_SAMPLE_DATA_LEN) == 0) {
     Print (L"AES-128 CBC encryption test passed\n");
   } else {
     Print (L"AES-128 CBC encryption test failed\n");
@@ -178,12 +178,12 @@ TestAesCbc (
   //
   // Decrypt cipher text data sample
   //
-  AesCbcDecryptBuffer (&Ctx, CipherText, AES_SAMPLE_DATA_SIZE);
+  AesCbcDecryptBuffer (&Ctx, CipherText, AES_SAMPLE_DATA_LEN);
 
   //
   // Compare data
   //
-  if (CompareMem (CipherText, AesCbcSample.PlainText, AES_SAMPLE_DATA_SIZE) == 0) {
+  if (CompareMem (CipherText, AesCbcSample.PlainText, AES_SAMPLE_DATA_LEN) == 0) {
     Print (L"AES-128 CBC decryption test passed\n");
   } else {
     Print (L"AES-128 CBC decryption test failed\n");
