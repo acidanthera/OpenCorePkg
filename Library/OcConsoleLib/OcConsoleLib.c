@@ -357,8 +357,11 @@ ParseResolution (
 
   *Width  = 0;
   *Height = 0;
-  *Bpp    = 0;
   *Max    = FALSE;
+
+  if (Bpp != NULL) {
+    *Bpp    = 0;
+  }
 
   if (AsciiStrCmp (String, "Max") == 0) {
     *Max = TRUE;
