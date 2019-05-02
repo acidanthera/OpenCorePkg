@@ -27,11 +27,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DebugLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiDriverEntryPoint.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
-#include <Protocol/GraphicsOutput.h>
 #include <Protocol/SimpleTextInEx.h>
-#include <Protocol/SimpleFileSystem.h>
 
 #include "CryptoSamples.h"
 
@@ -86,11 +82,11 @@ TestAesCtr (
   // Init AES context
   //
   AesInitCtxIv (&Ctx, AesCtrSample.Key, AesCtrSample.IV);
-  
+
   //
   // Encrypt plain text data sample
   //
-  AesCtrXcryptBuffer (&Ctx, PlainText, AES_SAMPLE_DATA_SIZE);  
+  AesCtrXcryptBuffer (&Ctx, PlainText, AES_SAMPLE_DATA_SIZE);
 
   //
   // Compare data
@@ -110,7 +106,7 @@ TestAesCtr (
 
   //
   // Decrypt cipher text data sample
-  //  
+  //
   AesCtrXcryptBuffer (&Ctx, CipherText, AES_SAMPLE_DATA_SIZE);
 
   //
@@ -127,7 +123,7 @@ TestAesCtr (
   // Clean context on exit
   //
   ZeroMem (&Ctx, sizeof (Ctx));
-  
+
   if (AesTestPassed) {
     return EFI_SUCCESS;
   } else {
@@ -153,11 +149,11 @@ TestAesCbc (
   // Init AES context
   //
   AesInitCtxIv (&Ctx, AesCbcSample.Key, AesCbcSample.IV);
-  
+
   //
   // Encrypt plain text data sample
   //
-  AesCbcEncryptBuffer (&Ctx, PlainText, AES_SAMPLE_DATA_SIZE);  
+  AesCbcEncryptBuffer (&Ctx, PlainText, AES_SAMPLE_DATA_SIZE);
 
   //
   // Compare data
@@ -177,7 +173,7 @@ TestAesCbc (
 
   //
   // Decrypt cipher text data sample
-  //  
+  //
   AesCbcDecryptBuffer (&Ctx, CipherText, AES_SAMPLE_DATA_SIZE);
 
   //
@@ -194,7 +190,7 @@ TestAesCbc (
   // Clean context on exit
   //
   ZeroMem (&Ctx, sizeof (Ctx));
-  
+
   if (AesTestPassed) {
     return EFI_SUCCESS;
   } else {
@@ -216,7 +212,7 @@ TestHash (
   UINT8        *Sha1Hash       = NULL;
   UINT8        *Sha256Hash     = NULL;
   BOOLEAN      HashTestPassed  = TRUE;
-  
+
   //
   // Allocate buffers
   //
@@ -243,7 +239,7 @@ TestHash (
       HashSamples[Index].PlainText,
       HashSamples[Index].PlainTextLen
       );
-    
+
     Sha1 (
       Sha1Hash,
       HashSamples[Index].PlainText,
@@ -278,7 +274,7 @@ TestHash (
     }
     ZeroMem (Md5Hash, MD5_DIGEST_SIZE);
     ZeroMem (Sha1Hash, SHA1_DIGEST_SIZE);
-    ZeroMem (Sha256Hash, SHA256_DIGEST_SIZE);    
+    ZeroMem (Sha256Hash, SHA256_DIGEST_SIZE);
   }
 
   if (HashTestPassed) {
@@ -289,10 +285,10 @@ TestHash (
 
   //
   // Zeroes buffers
-  //   
+  //
   ZeroMem (Md5Hash, MD5_DIGEST_SIZE);
   ZeroMem (Sha1Hash, SHA1_DIGEST_SIZE);
-  ZeroMem (Sha256Hash, SHA256_DIGEST_SIZE); 
+  ZeroMem (Sha256Hash, SHA256_DIGEST_SIZE);
 
   FreePool (Md5Hash);
   FreePool (Sha1Hash);
@@ -342,13 +338,13 @@ UefiDriverMain (
 
   //
   // Test Rsa2048Sha256 signature
-  // 
+  //
   Status = TestRsa2048Sha256Verify ();
   if (EFI_ERROR(Status)) {
     Print(L"Rsa2048Sha256 failed!\n");
   } else {
     Print(L"Rsa2048Sha256 passed!\n");
-  }  
+  }
 
   return Status;
 }
@@ -403,13 +399,13 @@ UefiAppMain (
 
   //
   // Test Rsa2048Sha256 signature
-  // 
+  //
   Status = TestRsa2048Sha256Verify ();
   if (EFI_ERROR(Status)) {
     Print(L"Rsa2048Sha256 failed!\n");
   } else {
     Print(L"Rsa2048Sha256 passed!\n");
-  }  
+  }
   WaitForKeyPress (L"Press any key to exit");
 
 
