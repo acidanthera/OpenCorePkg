@@ -1,0 +1,418 @@
+/** @file
+  Test crypto algos support.
+
+Copyright (c) 2018, savvas. All rights reserved.<BR>
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+
+**/
+
+#include <Uefi.h>
+#include <PiDxe.h>
+#include <Library/PcdLib.h>
+#include <Library/UefiLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library/UefiApplicationEntryPoint.h>
+#include <Library/OcCryptoLib.h>
+
+#include <Library/OcMiscLib.h>
+#include <Library/DebugLib.h>
+#include <Library/PrintLib.h>
+#include <Library/UefiDriverEntryPoint.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Protocol/GraphicsOutput.h>
+#include <Protocol/SimpleTextInEx.h>
+#include <Protocol/SimpleFileSystem.h>
+
+#include "CryptoSamples.h"
+
+EFI_STATUS
+EFIAPI
+TestRsa2048Sha256Verify (
+  VOID
+  )
+{
+  EFI_STATUS Status = EFI_INVALID_PARAMETER;
+  UINT8  DataSha256Hash[SHA256_DIGEST_SIZE];
+  BOOLEAN SignatureVerified = FALSE;
+
+  Sha256 (
+    DataSha256Hash,
+    Rsa2048Sha256Sample.Data,
+    SIGNED_DATA_LEN
+    );
+
+  SignatureVerified = RsaVerify (
+    (RSA_PUBLIC_KEY *) Rsa2048Sha256Sample.PublicKey,
+    Rsa2048Sha256Sample.Signature,
+    DataSha256Hash
+    );
+
+  if (SignatureVerified) {
+    Status = EFI_SUCCESS;
+    Print(L"Rsa2048Sha256 signature verifying passed!\n");
+  } else {
+    Status = EFI_INVALID_PARAMETER;
+    Print(L"Rsa2048Sha256 signature verifying failed!\n");
+  }
+
+  return Status;
+}
+
+EFI_STATUS
+EFIAPI
+TestAesCtr (
+  VOID
+  )
+{
+  AES_CONTEXT  Ctx;
+  UINT8        PlainText[AES_SAMPLE_DATA_SIZE];
+  UINT8        CipherText[AES_SAMPLE_DATA_SIZE];
+  BOOLEAN      AesTestPassed = TRUE;
+
+  CopyMem(PlainText, AesCtrSample.PlainText, AES_SAMPLE_DATA_SIZE);
+  CopyMem(CipherText, AesCtrSample.CipherText, AES_SAMPLE_DATA_SIZE);
+
+  //
+  // Init AES context
+  //
+  AesInitCtxIv (&Ctx, AesCtrSample.Key, AesCtrSample.IV);
+  
+  //
+  // Encrypt plain text data sample
+  //
+  AesCtrXcryptBuffer (&Ctx, PlainText, AES_SAMPLE_DATA_SIZE);  
+
+  //
+  // Compare data
+  //
+  if (CompareMem (PlainText, AesCtrSample.CipherText, AES_SAMPLE_DATA_SIZE) == 0) {
+    Print (L"AES-128 CTR encryption test passed\n");
+  } else {
+    Print (L"AES-128 CTR encryption test failed\n");
+    AesTestPassed = FALSE;
+  }
+
+  //
+  // Reinit context
+  //
+  ZeroMem (&Ctx, sizeof (Ctx));
+  AesInitCtxIv (&Ctx, AesCtrSample.Key, AesCtrSample.IV);
+
+  //
+  // Decrypt cipher text data sample
+  //  
+  AesCtrXcryptBuffer (&Ctx, CipherText, AES_SAMPLE_DATA_SIZE);
+
+  //
+  // Compare data
+  //
+  if (CompareMem (CipherText, AesCtrSample.PlainText, AES_SAMPLE_DATA_SIZE) == 0) {
+    Print (L"AES-128 CTR decryption test passed\n");
+  } else {
+    Print (L"AES-128 CTR decryption test failed\n");
+    AesTestPassed = FALSE;
+  }
+
+  //
+  // Clean context on exit
+  //
+  ZeroMem (&Ctx, sizeof (Ctx));
+  
+  if (AesTestPassed) {
+    return EFI_SUCCESS;
+  } else {
+    return EFI_INVALID_PARAMETER;
+  }
+}
+
+EFI_STATUS
+EFIAPI
+TestAesCbc (
+  VOID
+  )
+{
+  AES_CONTEXT  Ctx;
+  UINT8        PlainText[AES_SAMPLE_DATA_SIZE];
+  UINT8        CipherText[AES_SAMPLE_DATA_SIZE];
+  BOOLEAN      AesTestPassed = TRUE;
+
+  CopyMem(PlainText, AesCbcSample.PlainText, AES_SAMPLE_DATA_SIZE);
+  CopyMem(CipherText, AesCbcSample.CipherText, AES_SAMPLE_DATA_SIZE);
+
+  //
+  // Init AES context
+  //
+  AesInitCtxIv (&Ctx, AesCbcSample.Key, AesCbcSample.IV);
+  
+  //
+  // Encrypt plain text data sample
+  //
+  AesCbcEncryptBuffer (&Ctx, PlainText, AES_SAMPLE_DATA_SIZE);  
+
+  //
+  // Compare data
+  //
+  if (CompareMem (PlainText, AesCbcSample.CipherText, AES_SAMPLE_DATA_SIZE) == 0) {
+    Print (L"AES-128 CBC encryption test passed\n");
+  } else {
+    Print (L"AES-128 CBC encryption test failed\n");
+    AesTestPassed = FALSE;
+  }
+
+  //
+  // Reinit context
+  //
+  ZeroMem (&Ctx, sizeof (Ctx));
+  AesInitCtxIv (&Ctx, AesCbcSample.Key, AesCbcSample.IV);
+
+  //
+  // Decrypt cipher text data sample
+  //  
+  AesCbcDecryptBuffer (&Ctx, CipherText, AES_SAMPLE_DATA_SIZE);
+
+  //
+  // Compare data
+  //
+  if (CompareMem (CipherText, AesCbcSample.PlainText, AES_SAMPLE_DATA_SIZE) == 0) {
+    Print (L"AES-128 CBC decryption test passed\n");
+  } else {
+    Print (L"AES-128 CBC decryption test failed\n");
+    AesTestPassed = FALSE;
+  }
+
+  //
+  // Clean context on exit
+  //
+  ZeroMem (&Ctx, sizeof (Ctx));
+  
+  if (AesTestPassed) {
+    return EFI_SUCCESS;
+  } else {
+    return EFI_INVALID_PARAMETER;
+  }
+}
+
+
+EFI_STATUS
+EFIAPI
+TestHash (
+  VOID
+  )
+{
+  EFI_STATUS   Status          = EFI_INVALID_PARAMETER;
+  UINTN        Index           = 0;
+  UINTN        Index2          = 0;
+  UINT8        *Md5Hash        = NULL;
+  UINT8        *Sha1Hash       = NULL;
+  UINT8        *Sha256Hash     = NULL;
+  BOOLEAN      HashTestPassed  = TRUE;
+  
+  //
+  // Allocate buffers
+  //
+  Md5Hash = AllocateZeroPool(MD5_DIGEST_SIZE);
+  Sha1Hash = AllocateZeroPool(SHA1_DIGEST_SIZE);
+  Sha256Hash = AllocateZeroPool(SHA256_DIGEST_SIZE);
+
+  //
+  // Iterate through hash samples
+  //
+  for (Index = 0; Index < HASH_SAMPLES_NUM; Index++) {
+    Print(L"#########################\n");
+    Print(L"Running hash test №%lu\n", Index);
+    Print(L"Test data:\n");
+    for (Index2 = 0; Index2 < HashSamples[Index].PlainTextLen; Index2++) {
+      if (Index2 % 8 == 0 && Index2 > 0) {
+        Print(L"\n");
+      }
+      Print(L"%02x ",HashSamples[Index].PlainText[Index2]);
+    }
+    Print(L"\n-------------------------\n");
+    Md5 (
+      Md5Hash,
+      HashSamples[Index].PlainText,
+      HashSamples[Index].PlainTextLen
+      );
+    
+    Sha1 (
+      Sha1Hash,
+      HashSamples[Index].PlainText,
+      HashSamples[Index].PlainTextLen
+      );
+
+    Sha256 (
+      Sha256Hash,
+      HashSamples[Index].PlainText,
+      HashSamples[Index].PlainTextLen
+      );
+
+    if (CompareMem ( Md5Hash, HashSamples[Index].Md5Hash, MD5_DIGEST_SIZE) == 0) {
+      Print (L"Md5 hash test passed\n");
+    } else {
+      Print (L"Md5 hash test failed\n");
+      HashTestPassed = FALSE;
+    }
+
+    if (CompareMem ( Sha1Hash, HashSamples[Index].Sha1Hash, SHA1_DIGEST_SIZE) == 0) {
+      Print (L"Sha1 hash test passed\n");
+    } else {
+      Print (L"Sha1 hash test failed\n");
+      HashTestPassed = FALSE;
+    }
+
+    if (CompareMem ( Sha256Hash, HashSamples[Index].Sha256Hash, SHA256_DIGEST_SIZE) == 0) {
+      Print (L"Sha256 hash test passed\n");
+    } else {
+      Print (L"Sha256 hash test failed\n");
+      HashTestPassed = FALSE;
+    }
+    ZeroMem (Md5Hash, MD5_DIGEST_SIZE);
+    ZeroMem (Sha1Hash, SHA1_DIGEST_SIZE);
+    ZeroMem (Sha256Hash, SHA256_DIGEST_SIZE);    
+  }
+
+  if (HashTestPassed) {
+    Status = EFI_SUCCESS;
+  } else {
+    Status = EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // Zeroes buffers
+  //   
+  ZeroMem (Md5Hash, MD5_DIGEST_SIZE);
+  ZeroMem (Sha1Hash, SHA1_DIGEST_SIZE);
+  ZeroMem (Sha256Hash, SHA256_DIGEST_SIZE); 
+
+  FreePool (Md5Hash);
+  FreePool (Sha1Hash);
+  FreePool (Sha256Hash);
+
+  return Status;
+}
+
+EFI_STATUS
+EFIAPI
+UefiDriverMain (
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
+  )
+{
+  EFI_STATUS Status;
+
+  //
+  // Test hash algorithms
+  //
+  Status = TestHash ();
+  if (EFI_ERROR(Status)) {
+    Print(L"HashTest failed!\n");
+  } else {
+    Print(L"All hash tests passed!\n");
+  }
+
+  //
+  // Test AES-128-CBC
+  //
+  Status = TestAesCbc ();
+  if (EFI_ERROR(Status)) {
+    Print(L"AES-128-CBC failed!\n");
+  } else {
+    Print(L"AES-128-CBC passed!\n");
+  }
+
+  //
+  // Test AES-128-CTR
+  //
+  Status = TestAesCtr ();
+  if (EFI_ERROR(Status)) {
+    Print(L"AES-128-CTR failed!\n");
+  } else {
+    Print(L"AES-128-CTR passed!\n");
+  }
+
+  //
+  // Test Rsa2048Sha256 signature
+  // 
+  Status = TestRsa2048Sha256Verify ();
+  if (EFI_ERROR(Status)) {
+    Print(L"Rsa2048Sha256 failed!\n");
+  } else {
+    Print(L"Rsa2048Sha256 passed!\n");
+  }  
+
+  return Status;
+}
+
+EFI_STATUS
+EFIAPI
+UefiAppMain (
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
+  )
+{
+  EFI_STATUS Status;
+
+  WaitForKeyPress (L"Press any key...");
+  Print (L"This is test app...\n");
+
+  //
+  // Test hash algorithms
+  //
+  Status = TestHash ();
+  if (EFI_ERROR(Status)) {
+    Print(L"HashTest failed!\n");
+  } else {
+    Print(L"All hash tests passed!\n");
+  }
+
+  WaitForKeyPress (L"Press any key...");
+
+  //
+  // Test AES-128-CBC
+  //
+  Status = TestAesCbc ();
+  if (EFI_ERROR(Status)) {
+    Print(L"AES-128-CBC failed!\n");
+  } else {
+    Print(L"AES-128-CBC passed!\n");
+  }
+
+  WaitForKeyPress (L"Press any key...");
+
+  //
+  // Test AES-128-CTR
+  //
+  Status = TestAesCtr ();
+  if (EFI_ERROR(Status)) {
+    Print(L"AES-128-CTR failed!\n");
+  } else {
+    Print(L"AES-128-CTR passed!\n");
+  }
+
+  WaitForKeyPress (L"Press any key...");
+
+  //
+  // Test Rsa2048Sha256 signature
+  // 
+  Status = TestRsa2048Sha256Verify ();
+  if (EFI_ERROR(Status)) {
+    Print(L"Rsa2048Sha256 failed!\n");
+  } else {
+    Print(L"Rsa2048Sha256 passed!\n");
+  }  
+  WaitForKeyPress (L"Press any key to exit");
+
+
+  return Status;
+}
+

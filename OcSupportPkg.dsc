@@ -114,6 +114,8 @@
   OcSupportPkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
   OcSupportPkg/Debug/GdbSyms/GdbSyms.inf
+  OcSupportPkg/Tests/CryptoTest/CryptoTest.inf
+  OcSupportPkg/Tests/CryptoTest/CryptoTestApp.inf
   OcSupportPkg/Tests/AcpiTest/AcpiTest.inf
   OcSupportPkg/Tests/AcpiTest/AcpiTestApp.inf
   OcSupportPkg/Tests/BlessTest/BlessTest.inf
