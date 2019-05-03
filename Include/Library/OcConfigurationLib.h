@@ -357,6 +357,7 @@
 /// Quirks is a set of hacks for different firmwares.
 ///
 #define OC_UEFI_QUIRKS_FIELDS(_, __) \
+  _(UINT32                      , ExitBootServicesDelay       ,     , 0      , ()) \
   _(BOOLEAN                     , IgnoreInvalidFlexRatio      ,     , FALSE  , ()) \
   _(BOOLEAN                     , IgnoreTextInGraphics        ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReleaseUsbOwnership         ,     , FALSE  , ()) \
