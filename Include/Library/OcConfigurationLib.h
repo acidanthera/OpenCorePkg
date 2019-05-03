@@ -210,6 +210,7 @@
   OC_DECLARE (OC_MISC_BOOT)
 
 #define OC_MISC_DEBUG_FIELDS(_, __) \
+  _(BOOLEAN                     , DisableWatchDog             ,     , FALSE        , ()) \
   _(UINT32                      , DisplayDelay                ,     , 0            , ()) \
   _(UINT64                      , DisplayLevel                ,     , 0            , ()) \
   _(BOOLEAN                     , ExposeBootPath              ,     , FALSE        , ()) \
@@ -356,7 +357,6 @@
 /// Quirks is a set of hacks for different firmwares.
 ///
 #define OC_UEFI_QUIRKS_FIELDS(_, __) \
-  _(BOOLEAN                     , DisableWatchDog             ,     , FALSE  , ()) \
   _(BOOLEAN                     , IgnoreInvalidFlexRatio      ,     , FALSE  , ()) \
   _(BOOLEAN                     , IgnoreTextInGraphics        ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReleaseUsbOwnership         ,     , FALSE  , ()) \
