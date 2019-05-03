@@ -261,9 +261,14 @@ OcLogAddEntry  (
     //
     if (ErrorLevel != DEBUG_BULK_INFO && (OcLog->Options & (OC_LOG_VARIABLE | OC_LOG_NONVOLATILE)) != 0) {
       //
-      // Do not log timing information to NVRAM, it is already large...
+      // Do not log timing information to NVRAM, it is already large.
+      // This check is here, because Microsoft is retarded and asserts.
       //
-      Status = AsciiStrCatS (Private->NvramBuffer, Private->NvramBufferSize, Private->LineBuffer);
+      if (Private->NvramBufferSize - AsciiStrSize (Private->NvramBuffer) >= AsciiStrLen (Private->LineBuffer)) {
+        Status = AsciiStrCatS (Private->NvramBuffer, Private->NvramBufferSize, Private->LineBuffer);
+      } else {
+        Status = EFI_BUFFER_TOO_SMALL;
+      }
       if (!EFI_ERROR (Status)) {
         Attributes = EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS;
         if ((OcLog->Options & OC_LOG_NONVOLATILE) != 0) {
@@ -288,6 +293,10 @@ OcLogAddEntry  (
           gBS->Stall (SECONDS_TO_MICROSECONDS (1));
           OcLog->Options &= ~(OC_LOG_VARIABLE | OC_LOG_NONVOLATILE);
         }
+      } else {
+        gST->ConOut->OutputString (gST->ConOut, L"NVRAM log size exceeded, cannot log!\r\n");
+        gBS->Stall (SECONDS_TO_MICROSECONDS (1));
+        OcLog->Options &= ~(OC_LOG_VARIABLE | OC_LOG_NONVOLATILE);
       }
     }
   }
