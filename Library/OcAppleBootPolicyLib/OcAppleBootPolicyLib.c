@@ -325,25 +325,63 @@ EFI_STATUS
 InternalGetBooterFromPredefinedNameList (
   IN     EFI_HANDLE                Device,
   IN     EFI_FILE_PROTOCOL         *Root,
-  IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath  OPTIONAL
+  IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath  OPTIONAL,
+  IN     CHAR16                    *Prefix       OPTIONAL
   )
 {
   UINTN         Index;
+  UINTN         FullPathSize;
+  CHAR16        *FullPath;
   CONST CHAR16  *PathName;
   EFI_STATUS    Status;
 
   for (Index = 0; Index < ARRAY_SIZE (mBootPathNames); ++Index) {
     PathName = mBootPathNames[Index];
 
-    Status = InternalFileExists (Root, PathName);
+    //
+    // For relative paths (i.e. when Prefix is a volume GUID) we must
+    // not use leading slash. This is what AppleBootPolicy does.
+    //
+    ASSERT (PathName[0] == L'\\');
+    Status = InternalFileExists (
+      Root,
+      Prefix != NULL ? &PathName[1] : &PathName[0]
+      );
     if (!EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_BULK_INFO, "OCBP: Predefined %s was found\n", PathName));
+      DEBUG ((
+        DEBUG_BULK_INFO,
+        "OCBP: Predefined [%s] %s was found\n",
+        Prefix != NULL ? Prefix : L"",
+        PathName
+        ));
       if (DevicePath != NULL) {
-        *DevicePath = FileDevicePath (Device, PathName);
+        //
+        // Append volume directory prefix if any.
+        //
+        if (Prefix != NULL) {
+          ASSERT (Prefix[0] != L'\\');
+          FullPathSize = StrSize (Prefix) + StrSize (PathName);
+          FullPath     = AllocatePool (FullPathSize);
+          if (FullPath != NULL) {
+            UnicodeSPrint (FullPath, FullPathSize, L"\\%s%s", Prefix, PathName);
+            *DevicePath = FileDevicePath (Device, FullPath);
+            FreePool (FullPath);
+          } else {
+            return EFI_OUT_OF_RESOURCES;
+          }
+        } else {
+          *DevicePath = FileDevicePath (Device, PathName);
+        }
       }
       return EFI_SUCCESS;
     } else {
-      DEBUG ((DEBUG_BULK_INFO, "OCBP: Predefined %s is missing - %r\n", PathName, Status));
+      DEBUG ((
+        DEBUG_BULK_INFO,
+        "OCBP: Predefined [%s] %s is missing - %r\n",
+        Prefix != NULL ? Prefix : L"",
+        PathName,
+        Status
+        ));
     }
   }
 
@@ -461,7 +499,8 @@ InternalGetBooterFromApfsVolumePredefinedNameList (
     Status = InternalGetBooterFromPredefinedNameList (
       Device,
       VolumeDirectoryHandle,
-      DevicePath != NULL ? &BooterPath : NULL
+      DevicePath != NULL ? &BooterPath : NULL,
+      VolumeDirectoryName
       );
   }
 
@@ -472,7 +511,7 @@ InternalGetBooterFromApfsVolumePredefinedNameList (
     return Status;
   }
 
-  *DevicePath = AppendDevicePathInstance (*DevicePath, BooterPath);
+  *DevicePath = AppendDevicePath (*DevicePath, BooterPath);
   FreePool (BooterPath);
 
   return EFI_SUCCESS;
@@ -621,7 +660,7 @@ InternalGetBooterFromApfsPredefinedNameList (
 
   DEBUG ((
     DEBUG_BULK_INFO,
-    "OCBP: Apfs bless for %g:%g is %r\n",
+    "OCBP: Apfs bless for %g:%s is %r\n",
     ContainerUuid,
     VolumeUuid,
     Status
@@ -839,7 +878,7 @@ BootPolicyGetBootFile (
   if (EFI_ERROR (Status)) {
     Status = InternalGetBooterFromBlessedSystemFolderPath (Device, Root, FilePath);
     if (EFI_ERROR (Status)) {
-      Status = InternalGetBooterFromPredefinedNameList (Device, Root, FilePath);
+      Status = InternalGetBooterFromPredefinedNameList (Device, Root, FilePath, NULL);
     }
   }
 
@@ -909,7 +948,7 @@ BootPolicyGetBootFileEx (
     if (EFI_ERROR (Status)) {
       Status = InternalGetBooterFromBlessedSystemFolderPath (Device, Root, FilePath);
       if (EFI_ERROR (Status)) {
-        Status = InternalGetBooterFromPredefinedNameList (Device, Root, FilePath);
+        Status = InternalGetBooterFromPredefinedNameList (Device, Root, FilePath, NULL);
       }
     }
   }
