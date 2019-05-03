@@ -15,7 +15,7 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -673,7 +673,7 @@ AcpiApplyContext (
       Context->Rsdt->Tables[Index] = (UINT32)(UINTN) Context->Tables[Index];
 
       DEBUG ((
-        DEBUG_INFO,
+        Context->Xsdt != NULL ? DEBUG_BULK_INFO : DEBUG_INFO,
         "OCA: Exposing RSDT table %08x (%016Lx) at %p of %u bytes at index %u\n",
         Context->Tables[Index]->Signature,
         AcpiReadOemTableId (Context->Tables[Index]),
@@ -905,13 +905,6 @@ AcpiApplyPatch (
     && (Patch->TableSignature == 0 || Patch->TableSignature == EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE)
     && (Patch->TableLength == 0 || Context->Dsdt->Length == Patch->TableLength)
     && (Patch->OemTableId == 0 || Context->Dsdt->OemTableId == Patch->OemTableId)) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OCA: Patching DSDT of %u bytes with %016Lx ID\n",
-      Patch->TableLength,
-      Patch->OemTableId
-      ));
-
     ReplaceLimit = Patch->Limit;
     if (ReplaceLimit == 0) {
       ReplaceLimit = Context->Dsdt->Length;
@@ -929,9 +922,14 @@ AcpiApplyPatch (
       Patch->Skip
       );
 
-    if (ReplaceCount) {
-      DEBUG ((DEBUG_INFO, "OCA: Replaced %u matches out of requested %u in DSDT\n", ReplaceCount, Patch->Count));
-    }
+    DEBUG ((
+      ReplaceCount > 0 ? DEBUG_INFO : DEBUG_BULK_INFO,
+      "OCA: Patching DSDT of %u bytes with %016Lx ID replaced %u of %u\n",
+      ReplaceLimit,
+      Patch->OemTableId,
+      ReplaceCount,
+      Patch->Count
+      ));
 
     if (ReplaceCount > 0) {
       Context->Dsdt->Checksum = 0;
@@ -962,16 +960,6 @@ AcpiApplyPatch (
         continue;
       }
 
-      DEBUG ((
-        DEBUG_INFO,
-        "OCA: Patching table %08x (%016Lx) of %u bytes with %016Lx ID at index %u\n",
-        Context->Tables[Index]->Signature,
-        AcpiReadOemTableId (Context->Tables[Index]),
-        Context->Tables[Index]->Length,
-        CurrOemTableId,
-        Index
-        ));
-
       ReplaceLimit = Patch->Limit;
       if (ReplaceLimit == 0) {
         ReplaceLimit = Context->Tables[Index]->Length;
@@ -989,9 +977,17 @@ AcpiApplyPatch (
         Patch->Skip
         );
 
-      if (ReplaceCount > 0) {
-        DEBUG ((DEBUG_INFO, "OCA: Replaced %u matches out of requested %u\n", ReplaceCount, Patch->Count));
-      }
+      DEBUG ((
+        ReplaceCount > 0 ? DEBUG_INFO : DEBUG_BULK_INFO,
+        "OCA: Patching %08x (%016Lx, %u) with %016Lx ID at %u replaced %u of %u\n",
+        Context->Tables[Index]->Signature,
+        AcpiReadOemTableId (Context->Tables[Index]),
+        Context->Tables[Index]->Length,
+        CurrOemTableId,
+        Index,
+        ReplaceCount,
+        Patch->Count
+        ));
 
       if (ReplaceCount > 0 && Context->Tables[Index]->Length >= sizeof (EFI_ACPI_DESCRIPTION_HEADER)) {
         ((EFI_ACPI_DESCRIPTION_HEADER *)Context->Tables[Index])->Checksum = 0;
