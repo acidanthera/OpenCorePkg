@@ -26,7 +26,7 @@
 #include <Library/OcMiscLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
@@ -166,12 +166,12 @@ InternalGetApfsSpecialFileInfo (
       );
 
     if (*VolumeInfo == NULL) {
-      DEBUG ((DEBUG_INFO, "OCBP: Apfs Volume Info is missing\n"));
+      DEBUG ((DEBUG_BULK_INFO, "OCBP: Apfs Volume Info is missing\n"));
       return EFI_NOT_FOUND;
     }
 
     DEBUG ((
-      DEBUG_INFO,
+      DEBUG_BULK_INFO,
       "OCBP: Apfs Volume Info - %p (%u, %g, %u)\n",
       *VolumeInfo,
       (*VolumeInfo)->Always1,
@@ -189,7 +189,7 @@ InternalGetApfsSpecialFileInfo (
       );
 
     if (*ContainerInfo == NULL) {
-      DEBUG ((DEBUG_INFO, "OCBP: Apfs Container Info is missing\n"));
+      DEBUG ((DEBUG_BULK_INFO, "OCBP: Apfs Container Info is missing\n"));
       if (VolumeInfo != NULL) {
         FreePool (*VolumeInfo);
       }
@@ -197,7 +197,7 @@ InternalGetApfsSpecialFileInfo (
     }
 
     DEBUG ((
-      DEBUG_INFO,
+      DEBUG_BULK_INFO,
       "OCBP: Apfs Container Info - %p (%u, %g)\n",
       *ContainerInfo,
       (*ContainerInfo)->Always1,
@@ -225,18 +225,18 @@ InternalGetBooterFromBlessedSystemFilePath (
                 );
 
   if (*FilePath == NULL) {
-    DEBUG ((DEBUG_INFO, "OCBP: Blessed file is missing\n"));
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed file is missing\n"));
     return EFI_NOT_FOUND;
   }
 
   if (!IsDevicePathValid (*FilePath, FilePathSize)) {
-    DEBUG ((DEBUG_INFO, "OCBP: Blessed file is invalid\n"));
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed file is invalid\n"));
     FreePool (*FilePath);
     *FilePath = NULL;
     return EFI_NOT_FOUND;
   }
 
-  DEBUG ((DEBUG_INFO, "OCBP: Blessed file is valid\n"));
+  DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed file is valid\n"));
 
   return EFI_SUCCESS;
 }
@@ -268,12 +268,12 @@ InternalGetBooterFromBlessedSystemFolderPath (
                   );
 
   if (DevicePath == NULL) {
-    DEBUG ((DEBUG_INFO, "OCBP: Blessed folder is missing\n"));
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed folder is missing\n"));
     return Status;
   }
 
   if (!IsDevicePathValid (DevicePath, DevicePathSize)) {
-    DEBUG ((DEBUG_INFO, "OCBP: Blessed folder is invalid\n"));
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed folder is invalid\n"));
     FreePool (DevicePath);
     return EFI_NOT_FOUND;
   }
@@ -306,12 +306,12 @@ InternalGetBooterFromBlessedSystemFolderPath (
   FreePool (DevicePath);
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCBP: Blessed folder append failed - %r\n", Status));
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed folder append failed - %r\n", Status));
     return Status;
   }
 
   if (!InternalFileExists (Root, BooterPath)) {
-    DEBUG ((DEBUG_INFO, "OCBP: Blessed folder %s is missing\n", BooterPath));
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed folder %s is missing\n", BooterPath));
     return EFI_NOT_FOUND;
   }
 
@@ -334,13 +334,13 @@ InternalGetBooterFromPredefinedNameList (
     PathName = mBootPathNames[Index];
 
     if (InternalFileExists (Root, PathName)) {
-      DEBUG ((DEBUG_INFO, "OCBP: Predefined %s was found\n", PathName));
+      DEBUG ((DEBUG_BULK_INFO, "OCBP: Predefined %s was found\n", PathName));
       if (DevicePath != NULL) {
         *DevicePath = FileDevicePath (Device, PathName);
       }
       return EFI_SUCCESS;
     } else {
-      DEBUG ((DEBUG_INFO, "OCBP: Predefined %s is missing\n", PathName));
+      DEBUG ((DEBUG_BULK_INFO, "OCBP: Predefined %s is missing\n", PathName));
     }
   }
 
@@ -428,7 +428,7 @@ InternalGetBooterFromApfsVolumePredefinedNameList (
                      );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCBP: Missing partition %s on preboot - %r\n", VolumeDirectoryName, Status));
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: Missing partition %s on preboot - %r\n", VolumeDirectoryName, Status));
     return Status;
   }
 
@@ -440,7 +440,7 @@ InternalGetBooterFromApfsVolumePredefinedNameList (
                           );
 
   if (VolumeDirectoryInfo == NULL) {
-    DEBUG ((DEBUG_INFO, "OCBP: Missing volume file info %s - %r\n", VolumeDirectoryName, Status));
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: Missing volume file info %s - %r\n", VolumeDirectoryName, Status));
     VolumeDirectoryHandle->Close (VolumeDirectoryHandle);
     return EFI_NOT_FOUND;
   }
@@ -448,7 +448,7 @@ InternalGetBooterFromApfsVolumePredefinedNameList (
   Status = EFI_NOT_FOUND;
 
   DEBUG ((
-    DEBUG_INFO,
+    DEBUG_BULK_INFO,
     "OCBP: Want predefined list for APFS %u at %s\n",
     VolumeDirectoryInfo->Attribute,
     VolumeDirectoryName
@@ -512,7 +512,7 @@ InternalGetBooterFromApfsPredefinedNameList (
                    &HandleBuffer
                    );
 
-  DEBUG ((DEBUG_INFO, "OCBP: %u filesystems for APFS - %r\n", (UINT32) NumberOfHandles, Status));
+  DEBUG ((DEBUG_BULK_INFO, "OCBP: %u filesystems for APFS - %r\n", (UINT32) NumberOfHandles, Status));
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -528,7 +528,7 @@ InternalGetBooterFromApfsPredefinedNameList (
                     );
     if (EFI_ERROR (Status)) {
       DEBUG ((
-        DEBUG_INFO,
+        DEBUG_BULK_INFO,
         "OCBP: Borked filesystem %u of %u for APFS - %r\n",
         (UINT32) Index,
         (UINT32) NumberOfHandles,
@@ -540,7 +540,7 @@ InternalGetBooterFromApfsPredefinedNameList (
     Status = FileSystem->OpenVolume (FileSystem, &HandleRoot);
     if (EFI_ERROR (Status)) {
       DEBUG ((
-        DEBUG_INFO,
+        DEBUG_BULK_INFO,
         "OCBP: Borked root volume %u of %u for APFS - %r\n",
         (UINT32) Index,
         (UINT32) NumberOfHandles,
@@ -555,7 +555,7 @@ InternalGetBooterFromApfsPredefinedNameList (
 
     if (EFI_ERROR (Status)) {
       DEBUG ((
-        DEBUG_INFO,
+        DEBUG_BULK_INFO,
         "OCBP: No apfs info %u of %u for APFS - %r\n",
         (UINT32) Index,
         (UINT32) NumberOfHandles,
@@ -565,7 +565,7 @@ InternalGetBooterFromApfsPredefinedNameList (
     }
 
     DEBUG ((
-      DEBUG_INFO,
+      DEBUG_BULK_INFO,
       "OCBP: Trying to match container %g vs %g for APFS\n",
       &ContainerInfo->Uuid,
       ContainerUuid,
@@ -603,7 +603,7 @@ InternalGetBooterFromApfsPredefinedNameList (
 
     if (EFI_ERROR (Status)) {
       DEBUG ((
-        DEBUG_INFO,
+        DEBUG_BULK_INFO,
         "OCBP: No apfs booter %u of %u for APFS - %r\n",
         (UINT32) Index,
         (UINT32) NumberOfHandles,
@@ -617,7 +617,7 @@ InternalGetBooterFromApfsPredefinedNameList (
   FreePool (HandleBuffer);
 
   DEBUG ((
-    DEBUG_INFO,
+    DEBUG_BULK_INFO,
     "OCBP: Apfs bless for %g:%g is %r\n",
     ContainerUuid,
     VolumeUuid,
@@ -869,13 +869,13 @@ BootPolicyGetBootFileEx (
                   (VOID **) &FileSystem
                   );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCBP: Missing filesystem - %r\n", Status));
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: Missing filesystem - %r\n", Status));
     return Status;
   }
 
   Status = FileSystem->OpenVolume (FileSystem, &Root);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCBP: Invalid root volume - %r\n", Status));
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: Invalid root volume - %r\n", Status));
     return Status;
   }
 
