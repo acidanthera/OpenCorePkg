@@ -396,6 +396,8 @@
 		</dict>
 		<key>Debug</key>
 		<dict>
+			<key>DisableWatchDog</key>
+			<false/>
 			<key>DisplayDelay</key>
 			<integer>0</integer>
 			<key>DisplayLevel</key>
@@ -588,8 +590,6 @@
 		</dict>
 		<key>Quirks</key>
 		<dict>
-			<key>DisableWatchDog</key>
-			<false/>
 			<key>IgnoreInvalidFlexRatio</key>
 			<false/>
 			<key>IgnoreTextInGraphics</key>

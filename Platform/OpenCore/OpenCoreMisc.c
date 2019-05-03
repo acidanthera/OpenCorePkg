@@ -119,6 +119,13 @@ OcMiscEarlyInit (
     return EFI_SECURITY_VIOLATION; ///< Should be unreachable.
   }
 
+  if (Config->Misc.Debug.DisableWatchDog) {
+    //
+    // boot.efi kills watchdog only in FV2 UI.
+    //
+    gBS->SetWatchdogTimer (0, 0, 0, NULL);
+  }
+
   OcConfigureLogProtocol (
     Config->Misc.Debug.Target,
     Config->Misc.Debug.DisplayDelay,

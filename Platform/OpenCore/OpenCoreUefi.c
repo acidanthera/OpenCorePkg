@@ -243,13 +243,6 @@ OcLoadUefiSupport (
   IN OC_CPU_INFO         *CpuInfo
   )
 {
-  if (Config->Uefi.Quirks.DisableWatchDog) {
-    //
-    // boot.efi kills watchdog only in FV2 UI.
-    //
-    gBS->SetWatchdogTimer (0, 0, 0, NULL);
-  }
-
   if (Config->Uefi.Quirks.IgnoreInvalidFlexRatio) {
     OcCpuCorrectFlexRatio (CpuInfo);
   }

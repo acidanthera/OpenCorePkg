@@ -1336,6 +1336,14 @@ behaviour that does not go to any other sections
 \begin{enumerate}
 
 \item
+  \texttt{DisableWatchDog}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{NO}\\
+  \textbf{Description}: Select firmwares may not succeed in quickly booting
+  the operating system, especially in debug mode, which results in watch dog
+  timer aborting the process. This option turns off watch dog timer.
+
+\item
   \texttt{DisplayDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Default value}: \texttt{0}\\
@@ -2514,17 +2522,6 @@ build -a X64 -b RELEASE -t XCODE5 -p IntelFrameworkModulePkg/IntelFrameworkModul
 \subsection{Quirks Properties}\label{uefiquirkprops}
 
 \begin{enumerate}
-\item
-  \texttt{DisableWatchDog}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{NO}\\
-  \textbf{Description}: Select firmwares may not succeed in quickly booting
-  the operating system, which results in watch dog timer aborting the process.
-  This option turns off watch dog timer.
-
-  \emph{Note}: This option is believed to be unnecessary on modern firmwares,
-  yet may be safer to turn on as system performance across the boots is not
-  constant.
 
 \item
   \texttt{IgnoreInvalidFlexRatio}\\
