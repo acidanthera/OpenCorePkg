@@ -129,14 +129,6 @@ OcLoadDevPropsSupport (
         &OriginalSize
         );
 
-      DEBUG ((
-        DEBUG_INFO,
-        "OC: Getting devprop %a:%a - %r (will skip on too small)\n",
-        AsciiDevicePath,
-        AsciiProperty,
-        Status
-        ));
-
       if (Status != EFI_BUFFER_TOO_SMALL) {
         Status = PropertyDatabase->SetProperty (
           PropertyDatabase,
@@ -149,6 +141,14 @@ OcLoadDevPropsSupport (
         DEBUG ((
           EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
           "OC: Setting devprop %a:%a - %r\n",
+          AsciiDevicePath,
+          AsciiProperty,
+          Status
+          ));
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "OC: Setting devprop %a:%a - ignored, exists\n",
           AsciiDevicePath,
           AsciiProperty,
           Status

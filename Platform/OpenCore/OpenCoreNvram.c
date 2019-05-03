@@ -190,14 +190,6 @@ OcLoadNvramSupport (
         NULL
         );
 
-      DEBUG ((
-        DEBUG_INFO,
-        "OC: Getting NVRAM %g:%a - %r (will skip on too small)\n",
-        &VariableGuid,
-        AsciiVariableName,
-        Status
-        ));
-
       if (Status != EFI_BUFFER_TOO_SMALL) {
         Status = gRT->SetVariable (
           UnicodeVariableName,
@@ -209,6 +201,14 @@ OcLoadNvramSupport (
         DEBUG ((
           EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
           "OC: Setting NVRAM %g:%a - %r\n",
+          &VariableGuid,
+          AsciiVariableName,
+          Status
+          ));
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "OC: Setting NVRAM %g:%a - ignored, exists\n",
           &VariableGuid,
           AsciiVariableName,
           Status
