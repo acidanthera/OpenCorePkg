@@ -350,8 +350,8 @@ InternalGetBooterFromPredefinedNameList (
     if (!EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_BULK_INFO,
-        "OCBP: Predefined [%s] %s was found\n",
-        Prefix != NULL ? Prefix : L"",
+        "OCBP: Predefined %s %s was found\n",
+        Prefix != NULL ? Prefix : L"<nil>",
         PathName
         ));
       if (DevicePath != NULL) {
@@ -377,8 +377,8 @@ InternalGetBooterFromPredefinedNameList (
     } else {
       DEBUG ((
         DEBUG_BULK_INFO,
-        "OCBP: Predefined [%s] %s is missing - %r\n",
-        Prefix != NULL ? Prefix : L"",
+        "OCBP: Predefined %s %s is missing - %r\n",
+        Prefix != NULL ? Prefix : L"<nil>",
         PathName,
         Status
         ));
