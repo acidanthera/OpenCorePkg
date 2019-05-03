@@ -495,6 +495,14 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -Wno-unused-const-variable
 \end{lstlisting}
 
+\textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
+files must ensure that their tool checks for \texttt{opencore-version} NVRAM variable
+(see \hyperref[miscdebugprops]{Debug Properties} section below) and warn the user
+if the version listed is unsupported or prerelease. OpenCore configuration may change
+across the releases and the tool shall ensure that it carefully follows this document.
+Failure to do so may result in this tool to be considered as malware and blocked with
+all possible means.
+
 \section{ACPI}\label{acpi}
 
 \subsection{Introduction}\label{acpiintro}
