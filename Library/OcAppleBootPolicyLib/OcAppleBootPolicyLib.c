@@ -120,7 +120,7 @@ STATIC APPLE_BOOT_POLICY_PROTOCOL mAppleBootPolicyProtocol = {
 
 **/
 STATIC
-BOOLEAN
+EFI_STATUS
 InternalFileExists (
   IN EFI_FILE_HANDLE  Root,
   IN CONST CHAR16     *FileName
@@ -139,10 +139,10 @@ InternalFileExists (
 
   if (!EFI_ERROR (Status)) {
     FileHandle->Close (FileHandle);
-    return TRUE;
+    return EFI_SUCCESS;
   }
 
-  return FALSE;
+  return Status;
 }
 
 STATIC
@@ -249,7 +249,7 @@ InternalGetBooterFromBlessedSystemFolderPath (
   OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
   )
 {
-  EFI_STATUS           Status;
+  EFI_STATUS                Status;
 
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
   EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
@@ -310,8 +310,9 @@ InternalGetBooterFromBlessedSystemFolderPath (
     return Status;
   }
 
-  if (!InternalFileExists (Root, BooterPath)) {
-    DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed folder %s is missing\n", BooterPath));
+  Status = InternalFileExists (Root, BooterPath);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed folder %s is missing - %r\n", BooterPath, Status));
     return EFI_NOT_FOUND;
   }
 
@@ -329,18 +330,20 @@ InternalGetBooterFromPredefinedNameList (
 {
   UINTN         Index;
   CONST CHAR16  *PathName;
+  EFI_STATUS    Status;
 
   for (Index = 0; Index < ARRAY_SIZE (mBootPathNames); ++Index) {
     PathName = mBootPathNames[Index];
 
-    if (InternalFileExists (Root, PathName)) {
+    Status = InternalFileExists (Root, PathName);
+    if (!EFI_ERROR (Status)) {
       DEBUG ((DEBUG_BULK_INFO, "OCBP: Predefined %s was found\n", PathName));
       if (DevicePath != NULL) {
         *DevicePath = FileDevicePath (Device, PathName);
       }
       return EFI_SUCCESS;
     } else {
-      DEBUG ((DEBUG_BULK_INFO, "OCBP: Predefined %s is missing\n", PathName));
+      DEBUG ((DEBUG_BULK_INFO, "OCBP: Predefined %s is missing - %r\n", PathName, Status));
     }
   }
 

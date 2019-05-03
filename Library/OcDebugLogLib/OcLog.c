@@ -252,7 +252,7 @@ OcLogAddEntry  (
         OcLog->FileSystem,
         OcLog->FilePath,
         Private->AsciiBuffer,
-        Private->AsciiBufferSize
+        (UINT32) Private->AsciiBufferSize
         );
     }
 
@@ -496,7 +496,7 @@ OcConfigureLogProtocol (
         LogRoot,
         LogPath,
         OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBuffer,
-        OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBufferSize
+        (UINT32) OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBufferSize
         );
     } else {
       LogRoot->Close (LogRoot);
