@@ -1413,9 +1413,10 @@ u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\
 ioreg -lw0 -p IODeviceTree | grep boot-log | sort | sed 's/.*<\(.*\)>.*/\1/' | xxd -r -p
 \end{lstlisting}
 
-  UEFI variable log may get truncated on some firmwares.
-  Using non-volatile flag will write the log to NVRAM flash after every
-  printed line. To obtain UEFI variable log use the following command
+  UEFI variable log does not include some messages and has no performance data. For safety
+  reasons log size is limited to 32 kilobytes. Some firmwares may truncate it much earlier
+  or drop completely if they have no memory. Using non-volatile flag will write the log to
+  NVRAM flash after every printed line. To obtain UEFI variable log use the following command
   in macOS:
 \begin{lstlisting}[label=nvramlog, style=ocbash]
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
@@ -1429,7 +1430,11 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 \end{lstlisting}
 
-  \emph{Note}: File logging is currently not implemented.
+  File logging will create a file named \texttt{opencore.log} at EFI volume root with
+  log contents. Please be warned that some file system drivers present in firmwares are
+  not reliable, and may corrupt data when writing files through UEFI. Log is attempted
+  to be written in the safest manner, and thus is very slow. Ensure that
+  \texttt{DisableWatchDog} is set to \texttt{true} when you use a slow drive.
 
 \end{enumerate}
 

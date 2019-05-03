@@ -60,6 +60,8 @@
 
 #define OPEN_CORE_CONFIG_PATH      L"config.plist"
 
+#define OPEN_CORE_LOG_PATH         L"opencore.log"
+
 #define OPEN_CORE_ACPI_PATH        L"ACPI\\Custom\\"
 
 #define OPEN_CORE_UEFI_DRIVER_PATH L"Drivers\\"

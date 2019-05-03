@@ -93,7 +93,7 @@ OcReportVersion (
     OC_VERSION_VARIABLE_NAME,
     &gOcVendorVariableGuid,
     OPEN_CORE_NVRAM_ATTR,
-    sizeof (mOpenCoreVersion),
+    AsciiStrLen (mOpenCoreVersion),
     &mOpenCoreVersion[0]
     );
 }
