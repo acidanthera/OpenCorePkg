@@ -540,7 +540,7 @@ SetConsoleResolution (
 
     DEBUG ((
       DEBUG_INFO,
-      "OCC: Mode %u has %ux%u:%u resolution\n",
+      "OCC: Mode %u - %ux%u:%u\n",
       ModeIndex,
       Info->HorizontalResolution,
       Info->VerticalResolution,
@@ -694,7 +694,7 @@ SetConsoleMode (
 
     DEBUG ((
       DEBUG_INFO,
-      "OCC: Mode %u has %ux%u console mode\n",
+      "OCC: Mode %u - %ux%u\n",
       ModeIndex,
       (UINT32) Columns,
       (UINT32) Rows

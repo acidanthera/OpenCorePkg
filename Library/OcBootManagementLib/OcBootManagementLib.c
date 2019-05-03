@@ -995,8 +995,6 @@ OcFillBootEntry (
     Status = EFI_UNSUPPORTED;
   }
 
-  DEBUG ((DEBUG_INFO, "OCB: Bless result for load (%d) - %r\n", IsLoadHandle, Status));
-
   //
   // Detect recovery on load handle and on a partition without
   // any bootloader. Never allow alternate in this case.

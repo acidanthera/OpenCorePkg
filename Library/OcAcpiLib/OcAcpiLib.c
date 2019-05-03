@@ -100,7 +100,7 @@ AcpiFindRsdp (
     //
     if (CompareGuid (&gST->ConfigurationTable[Index].VendorGuid, &gEfiAcpi20TableGuid)) {
       Rsdp = (EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER *) gST->ConfigurationTable[Index].VendorTable;
-      DEBUG ((DEBUG_VERBOSE, "Found ACPI 2.0 RSDP table %p\n", Rsdp));
+      DEBUG ((DEBUG_VERBOSE, "OCA: Found ACPI 2.0 RSDP table %p\n", Rsdp));
       break;
     }
 
@@ -109,7 +109,7 @@ AcpiFindRsdp (
     //
     if (CompareGuid (&gST->ConfigurationTable[Index].VendorGuid, &gEfiAcpi10TableGuid)) {
       Rsdp = (EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER *) gST->ConfigurationTable[Index].VendorTable;
-      DEBUG ((DEBUG_VERBOSE, "Found ACPI 1.0 RSDP table %p\n", Rsdp));
+      DEBUG ((DEBUG_VERBOSE, "OCA: Found ACPI 1.0 RSDP table %p\n", Rsdp));
     }
   }
 
@@ -119,12 +119,12 @@ AcpiFindRsdp (
   if (Rsdp == NULL) {
     Rsdp = AcpiFindLegacyRsdp ();
     if (Rsdp != NULL) {
-      DEBUG ((DEBUG_VERBOSE, "Found ACPI legacy RSDP table %p\n", Rsdp));
+      DEBUG ((DEBUG_VERBOSE, "OCA: Found ACPI legacy RSDP table %p\n", Rsdp));
     }
   }
 
   if (Rsdp == NULL) {
-    DEBUG ((DEBUG_WARN, "Failed to find ACPI RSDP table\n"));
+    DEBUG ((DEBUG_WARN, "OCA: Failed to find ACPI RSDP table\n"));
   }
 
   return Rsdp;
@@ -300,7 +300,7 @@ AcpiLoadTableRegions (
         if (Context->AllocatedRegions == Context->NumberOfRegions) {
           NewRegions = AllocatePool ((Context->AllocatedRegions + 2) * sizeof (Context->Regions[0]));
           if (NewRegions == NULL) {
-            DEBUG ((DEBUG_WARN, "Failed to allocate memory for %u regions\n", Context->AllocatedRegions+2));
+            DEBUG ((DEBUG_WARN, "OCA: Failed to allocate memory for %u regions\n", Context->AllocatedRegions+2));
             return EFI_OUT_OF_RESOURCES;
           }
           CopyMem (NewRegions, Context->Regions, Context->NumberOfRegions * sizeof (Context->Regions[0]));
@@ -310,7 +310,7 @@ AcpiLoadTableRegions (
           Context->AllocatedRegions += 2;
         }
 
-        DEBUG ((DEBUG_INFO, "Found OperationRegion %a at %08X\n", Name, Address));
+        DEBUG ((DEBUG_INFO, "OCA: Found OperationRegion %a at %08X\n", Name, Address));
         Context->Regions[Context->NumberOfRegions].Address = Address;
         CopyMem (&Context->Regions[Context->NumberOfRegions].Name[0], &Name[0], sizeof (Name));
         ++Context->NumberOfRegions;
@@ -390,7 +390,7 @@ AcpiRelocateTableRegions (
           if (Modified && OldAddress != Context->Regions[RegionIndex].Address) {
             DEBUG ((
               DEBUG_INFO,
-              "Region %a address relocated from %08X to %08X\n",
+              "OCA: Region %a address relocated from %08X to %08X\n",
               Context->Regions[RegionIndex].Name,
               OldAddress,
               Context->Regions[RegionIndex].Address
@@ -500,18 +500,18 @@ AcpiInitContext (
   // Support RSDT on ACPI 1.0 and newer.
   //
   Context->Rsdt = (OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE *)(UINTN) Context->Rsdp->RsdtAddress;
-  DEBUG ((DEBUG_VERBOSE, "Found ACPI RSDT table %p", Context->Rsdt));
+  DEBUG ((DEBUG_VERBOSE, "OCA: Found ACPI RSDT table %p", Context->Rsdt));
 
   //
   // ACPI 2.0 and newer have XSDT as well.
   //
   if (Context->Rsdp->Revision > 0) {
     Context->Xsdt = (OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE *)(UINTN) Context->Rsdp->XsdtAddress;
-    DEBUG ((DEBUG_VERBOSE, "Found ACPI XSDT table %p", Context->Xsdt));
+    DEBUG ((DEBUG_VERBOSE, "OCA: Found ACPI XSDT table %p", Context->Xsdt));
   }
 
   if (Context->Rsdt == NULL && Context->Xsdt == NULL) {
-    DEBUG ((DEBUG_WARN, "Failed to find ACPI RSDT or XSDT tables\n"));
+    DEBUG ((DEBUG_WARN, "OCA: Failed to find ACPI RSDT or XSDT tables\n"));
     return EFI_NOT_FOUND;
   }
 
@@ -523,16 +523,16 @@ AcpiInitContext (
       / sizeof (Context->Rsdt->Tables[0]);
   }
 
-  DEBUG ((DEBUG_INFO, "Found %u ACPI tables\n", Context->NumberOfTables));
+  DEBUG ((DEBUG_INFO, "OCA: Found %u ACPI tables\n", Context->NumberOfTables));
 
   if (Context->NumberOfTables == 0) {
-    DEBUG ((DEBUG_WARN, "No ACPI tables are available\n"));
+    DEBUG ((DEBUG_WARN, "OCA: No ACPI tables are available\n"));
     return EFI_INVALID_PARAMETER;
   }
 
   Context->Tables = AllocatePool (Context->NumberOfTables * sizeof (Context->Tables[0]));
   if (Context->Tables == NULL) {
-    DEBUG ((DEBUG_WARN, "Cannot allocate space for %u ACPI tables\n", Context->NumberOfTables));
+    DEBUG ((DEBUG_WARN, "OCA: Cannot allocate space for %u ACPI tables\n", Context->NumberOfTables));
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -553,7 +553,7 @@ AcpiInitContext (
 
     DEBUG ((
       DEBUG_INFO,
-      "Detected table %08x (%016Lx) at %p of %u bytes at index %u\n",
+      "OCA: Detected table %08x (%016Lx) at %p of %u bytes at index %u\n",
       Context->Tables[DstIndex]->Signature,
       AcpiReadOemTableId (Context->Tables[DstIndex]),
       Context->Tables[DstIndex],
@@ -575,16 +575,16 @@ AcpiInitContext (
   }
 
   if (Context->NumberOfTables != DstIndex) {
-    DEBUG ((DEBUG_WARN, "Only %u ACPI tables out of %u were valid\n", DstIndex, Context->NumberOfTables));
+    DEBUG ((DEBUG_WARN, "OCA: Only %u ACPI tables out of %u were valid\n", DstIndex, Context->NumberOfTables));
     Context->NumberOfTables = DstIndex;
   }
 
   if (Context->Fadt == NULL) {
-    DEBUG ((DEBUG_WARN, "Failed to find ACPI FADT table\n"));
+    DEBUG ((DEBUG_WARN, "OCA: Failed to find ACPI FADT table\n"));
   }
 
   if (Context->Dsdt == NULL) {
-    DEBUG ((DEBUG_WARN, "Failed to find ACPI DSDT table\n"));
+    DEBUG ((DEBUG_WARN, "OCA: Failed to find ACPI DSDT table\n"));
   }
 
   return EFI_SUCCESS;
@@ -631,7 +631,7 @@ AcpiApplyContext (
           );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "Failed to allocate %u bytes for ACPI system tables\n", Size));
+    DEBUG ((DEBUG_WARN, "OCA: Failed to allocate %u bytes for ACPI system tables\n", Size));
     return Status;
   }
 
@@ -645,7 +645,7 @@ AcpiApplyContext (
 
       DEBUG ((
         DEBUG_INFO,
-        "Exposing XSDT table %08x (%016Lx) at %p of %u bytes at index %u\n",
+        "OCA: Exposing XSDT table %08x (%016Lx) at %p of %u bytes at index %u\n",
         Context->Tables[Index]->Signature,
         AcpiReadOemTableId (Context->Tables[Index]),
         Context->Tables[Index],
@@ -674,7 +674,7 @@ AcpiApplyContext (
 
       DEBUG ((
         DEBUG_INFO,
-        "Exposing RSDT table %08x (%016Lx) at %p of %u bytes at index %u\n",
+        "OCA: Exposing RSDT table %08x (%016Lx) at %p of %u bytes at index %u\n",
         Context->Tables[Index]->Signature,
         AcpiReadOemTableId (Context->Tables[Index]),
         Context->Tables[Index],
@@ -731,7 +731,7 @@ AcpiDropTable (
       if (OemTableId == 0 || CurrOemTableId == OemTableId) {
         DEBUG ((
           DEBUG_INFO,
-          "Dropping table %08x (%016Lx) of %u bytes with %016Lx ID at index %u\n",
+          "OCA: Dropping table %08x (%016Lx) of %u bytes with %016Lx ID at index %u\n",
           Context->Tables[Index]->Signature,
           AcpiReadOemTableId (Context->Tables[Index]),
           Context->Tables[Index]->Length,
@@ -779,27 +779,27 @@ AcpiInsertTable (
   BOOLEAN                   ReplaceDsdt;
 
   if (Length < sizeof (EFI_ACPI_COMMON_HEADER)) {
-    DEBUG ((DEBUG_WARN, "Inserted ACPI table is only %u bytes, ignoring\n", Length));
+    DEBUG ((DEBUG_WARN, "OCA: Inserted ACPI table is only %u bytes, ignoring\n", Length));
     return EFI_INVALID_PARAMETER;
   }
 
   Common = (EFI_ACPI_COMMON_HEADER *) Data;
   if (Common->Length != Length) {
-    DEBUG ((DEBUG_WARN, "Inserted ACPI table has length mismatch %u vs %u, ignoring\n", Length, Common->Length));
+    DEBUG ((DEBUG_WARN, "OCA: Inserted ACPI table has length mismatch %u vs %u, ignoring\n", Length, Common->Length));
     return EFI_INVALID_PARAMETER;
   }
 
   ReplaceDsdt = Common->Signature == EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE;
 
   if (ReplaceDsdt && (Context->Dsdt == NULL || Context->Fadt == NULL)) {
-    DEBUG ((DEBUG_WARN, "We do not have DSDT to replace\n"));
+    DEBUG ((DEBUG_WARN, "OCA: We do not have DSDT to replace\n"));
     return EFI_INVALID_PARAMETER;
   }
 
   if (!ReplaceDsdt && Context->NumberOfTables == Context->AllocatedTables) {
     NewTables = AllocatePool ((Context->NumberOfTables + 2) * sizeof (Context->Tables[0]));
     if (NewTables == NULL) {
-      DEBUG ((DEBUG_WARN, "Cannot allocate space for new %u ACPI tables\n", Context->NumberOfTables+2));
+      DEBUG ((DEBUG_WARN, "OCA: Cannot allocate space for new %u ACPI tables\n", Context->NumberOfTables+2));
       return EFI_OUT_OF_RESOURCES;
     }
 
@@ -819,7 +819,7 @@ AcpiInsertTable (
           );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "Failed to allocate %u bytes for inserted ACPI table\n", Length));
+    DEBUG ((DEBUG_WARN, "OCA: Failed to allocate %u bytes for inserted ACPI table\n", Length));
     return Status;
   }
 
@@ -829,7 +829,7 @@ AcpiInsertTable (
   if (ReplaceDsdt) {
     DEBUG ((
       DEBUG_INFO,
-      "Replaced DSDT of %u bytes into ACPI\n",
+      "OCA: Replaced DSDT of %u bytes into ACPI\n",
       Common->Length
       ));
     Context->Dsdt = (EFI_ACPI_DESCRIPTION_HEADER *) Table;
@@ -847,7 +847,7 @@ AcpiInsertTable (
   } else {
     DEBUG ((
       DEBUG_INFO,
-      "Inserted table %08x (%016Lx) of %u bytes into ACPI at index %u\n",
+      "OCA: Inserted table %08x (%016Lx) of %u bytes into ACPI at index %u\n",
       Common->Signature,
       AcpiReadOemTableId (Common),
       Common->Length,
@@ -870,7 +870,7 @@ AcpiNormalizeHeaders (
 
   if (Context->Dsdt != NULL) {
     if (AcpiNormalizeTableHeaders (Context->Dsdt)) {
-      DEBUG ((DEBUG_INFO, "Normalized DSDT of %u bytes headers\n", Context->Dsdt->Length));
+      DEBUG ((DEBUG_INFO, "OCA: Normalized DSDT of %u bytes headers\n", Context->Dsdt->Length));
     }
   }
 
@@ -878,7 +878,7 @@ AcpiNormalizeHeaders (
     if (AcpiNormalizeTableHeaders ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Tables[Index])) {
       DEBUG ((
         DEBUG_INFO,
-        "Normalized %08x (%08Lx) of %u bytes headers at index %u\n",
+        "OCA: Normalized %08x (%08Lx) of %u bytes headers at index %u\n",
         Context->Tables[Index]->Signature,
         AcpiReadOemTableId (Context->Tables[Index]),
         Context->Tables[Index]->Length,
@@ -899,7 +899,7 @@ AcpiApplyPatch (
   UINT32  ReplaceCount;
   UINT32  ReplaceLimit;
 
-  DEBUG ((DEBUG_INFO, "Applying %u byte ACPI patch skip %u, count %u\n", Patch->Size, Patch->Skip, Patch->Count));
+  DEBUG ((DEBUG_INFO, "OCA: Applying %u byte ACPI patch skip %u, count %u\n", Patch->Size, Patch->Skip, Patch->Count));
 
   if (Context->Dsdt != NULL
     && (Patch->TableSignature == 0 || Patch->TableSignature == EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE)
@@ -907,7 +907,7 @@ AcpiApplyPatch (
     && (Patch->OemTableId == 0 || Context->Dsdt->OemTableId == Patch->OemTableId)) {
     DEBUG ((
       DEBUG_INFO,
-      "Patching DSDT of %u bytes with %016Lx ID\n",
+      "OCA: Patching DSDT of %u bytes with %016Lx ID\n",
       Patch->TableLength,
       Patch->OemTableId
       ));
@@ -929,8 +929,9 @@ AcpiApplyPatch (
       Patch->Skip
       );
 
-    (VOID) ReplaceCount;
-    DEBUG ((DEBUG_INFO, "Replaced %u matches out of requested %u in DSDT\n", ReplaceCount, Patch->Count));
+    if (ReplaceCount) {
+      DEBUG ((DEBUG_INFO, "OCA: Replaced %u matches out of requested %u in DSDT\n", ReplaceCount, Patch->Count));
+    }
 
     if (ReplaceCount > 0) {
       Context->Dsdt->Checksum = 0;
@@ -941,7 +942,7 @@ AcpiApplyPatch (
 
       DEBUG ((
         DEBUG_INFO,
-        "Refreshed DSDT checksum to %02x\n",
+        "OCA: Refreshed DSDT checksum to %02x\n",
         Context->Dsdt->Checksum
         ));
     }
@@ -963,7 +964,7 @@ AcpiApplyPatch (
 
       DEBUG ((
         DEBUG_INFO,
-        "Patching table %08x (%016Lx) of %u bytes with %016Lx ID at index %u\n",
+        "OCA: Patching table %08x (%016Lx) of %u bytes with %016Lx ID at index %u\n",
         Context->Tables[Index]->Signature,
         AcpiReadOemTableId (Context->Tables[Index]),
         Context->Tables[Index]->Length,
@@ -988,8 +989,9 @@ AcpiApplyPatch (
         Patch->Skip
         );
 
-      (VOID) ReplaceCount;
-      DEBUG ((DEBUG_INFO, "Replaced %u matches out of requested %u\n", ReplaceCount, Patch->Count));
+      if (ReplaceCount > 0) {
+        DEBUG ((DEBUG_INFO, "OCA: Replaced %u matches out of requested %u\n", ReplaceCount, Patch->Count));
+      }
 
       if (ReplaceCount > 0 && Context->Tables[Index]->Length >= sizeof (EFI_ACPI_DESCRIPTION_HEADER)) {
         ((EFI_ACPI_DESCRIPTION_HEADER *)Context->Tables[Index])->Checksum = 0;
@@ -1000,7 +1002,7 @@ AcpiApplyPatch (
 
         DEBUG ((
           DEBUG_INFO,
-          "Refreshed checksum to %02x\n",
+          "OCA: Refreshed checksum to %02x\n",
           ((EFI_ACPI_DESCRIPTION_HEADER *)Context->Tables[Index])->Checksum
           ));
       }
@@ -1031,7 +1033,7 @@ AcpiLoadRegions (
   Context->Regions = AllocatePool (sizeof (Context->Regions[0]) * Context->AllocatedRegions);
 
   if (Context->Regions == NULL) {
-    DEBUG ((DEBUG_WARN, "Failed to allocate memory for %u regions\n", Context->NumberOfRegions));
+    DEBUG ((DEBUG_WARN, "OCA: Failed to allocate memory for %u regions\n", Context->NumberOfRegions));
     return EFI_OUT_OF_RESOURCES;
   }
 
