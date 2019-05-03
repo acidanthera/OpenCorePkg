@@ -1137,6 +1137,7 @@ blocking.
 \subsection{Quirks Properties}\label{kernelpropsquirks}
 
 \begin{enumerate}
+
 \item
   \texttt{AppleCpuPmCfgLock}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -2522,6 +2523,19 @@ build -a X64 -b RELEASE -t XCODE5 -p IntelFrameworkModulePkg/IntelFrameworkModul
 \subsection{Quirks Properties}\label{uefiquirkprops}
 
 \begin{enumerate}
+
+\item
+  \texttt{ExitBootServicesDelay}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Default value}: \texttt{0}\\
+  \textbf{Description}: Adds delay in microseconds after \texttt{EXIT\_BOOT\_SERVICES}
+  event.
+
+  This is a very ugly quirk to circumvent "Still waiting for root device" message
+  on select APTIO IV firmwares, namely ASUS Z87-Pro, when using FileVault 2 in particular.
+  It seems that for some reason they execute code in parallel to \texttt{EXIT\_BOOT\_SERVICES},
+  which results in SATA controller being inaccessible from macOS. A better approach should be
+  found in some future. Expect 3-5 seconds to be enough in case the quirk is needed.
 
 \item
   \texttt{IgnoreInvalidFlexRatio}\\

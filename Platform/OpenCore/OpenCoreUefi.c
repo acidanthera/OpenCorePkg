@@ -30,7 +30,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/DevicePath.h>
 #include <Protocol/GraphicsOutput.h>
 
-STATIC EFI_EVENT mReleaseUsbOwnershipEvent;
+STATIC EFI_EVENT mOcExitBootServicesEvent;
 
 STATIC
 VOID
@@ -209,16 +209,33 @@ OcProvideConsoleGop (
 STATIC
 VOID
 EFIAPI
-OcReleaseUsbOwnership (
+OcExitBootServicesHandler (
   IN EFI_EVENT  Event,
   IN VOID       *Context
   )
 {
-  EFI_STATUS  Status;
+  EFI_STATUS         Status;
+  OC_GLOBAL_CONFIG   *Config;
 
-  Status = ReleaseUsbOwnership ();
+  Config = (OC_GLOBAL_CONFIG *) Context;
 
-  DEBUG ((DEBUG_INFO, "OC: ReleaseUsbOwnership status - %r\n", Status));
+  if (Config->Uefi.Quirks.ReleaseUsbOwnership) {
+    Status = ReleaseUsbOwnership ();
+    DEBUG ((DEBUG_INFO, "OC: ReleaseUsbOwnership status - %r\n", Status));
+  }
+
+  //
+  // FIXME: This is a very ugly hack for (at least) ASUS Z87-Pro.
+  // This board results in still waiting for root devices due to firmware
+  // performing some timer(?) actions in parallel to ExitBootServices.
+  // Some day we should figure out what exactly happens there.
+  // It is not the first time I face this, check AptioInputFix timer code:
+  // https://github.com/acidanthera/AptioFixPkg/blob/e54c185/Platform/AptioInputFix/Timer/AIT.c#L72-L73
+  // Roughly 5 seconds is good enough.
+  //
+  if (Config->Uefi.Quirks.ExitBootServicesDelay > 0) {
+    gBS->Stall (Config->Uefi.Quirks.ExitBootServicesDelay);
+  }
 }
 
 STATIC
@@ -269,13 +286,14 @@ OcLoadUefiSupport (
     &Config->Uefi.Quirks.RequestBootVarRouting
     );
 
-  if (Config->Uefi.Quirks.ReleaseUsbOwnership) {
+  if (Config->Uefi.Quirks.ReleaseUsbOwnership
+    || Config->Uefi.Quirks.ExitBootServicesDelay > 0) {
     gBS->CreateEvent (
       EVT_SIGNAL_EXIT_BOOT_SERVICES,
       TPL_NOTIFY,
-      OcReleaseUsbOwnership,
-      NULL,
-      &mReleaseUsbOwnershipEvent
+      OcExitBootServicesHandler,
+      Config,
+      &mOcExitBootServicesEvent
       );
   }
 
