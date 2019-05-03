@@ -19,21 +19,30 @@
 #include <Protocol/OcLog.h>
 
 /**
+  Debug information that is not logged when NVRAM logging is on.
+**/
+#define DEBUG_BULK_INFO (DEBUG_VERBOSE|DEBUG_INFO)
+
+/**
   Install or update the OcLog protocol with specified options.
 
   @param[in] Options       Logging options.
   @param[in] Delay         Delay in microseconds after each log entry.
   @param[in] DisplayLevel  Console visible error level.
   @param[in] HaltLevel     Error level causing CPU halt.
+  @param[in] LogPath       Log path.
+  @param[in] LogFileSystem Log filesystem, optional.
 
   @retval EFI_SUCCESS  The entry point is executed successfully.
 **/
 EFI_STATUS
 OcConfigureLogProtocol (
-  IN OC_LOG_OPTIONS      Options,
-  IN UINT32              Delay,
-  IN UINTN               DisplayLevel,
-  IN UINTN               HaltLevel
+  IN OC_LOG_OPTIONS                   Options,
+  IN UINT32                           DisplayDelay,
+  IN UINTN                            DisplayLevel,
+  IN UINTN                            HaltLevel,
+  IN CHAR16                           *LogPath,
+  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *LogFileSystem  OPTIONAL
   );
 
 /**

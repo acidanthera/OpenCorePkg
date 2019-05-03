@@ -161,6 +161,8 @@ OcStorageInitFromFs (
 
   ZeroMem (Context, sizeof (*Context));
 
+  Context->FileSystem = FileSystem;
+
   Status = FileSystem->OpenVolume (FileSystem, &RootVolume);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCS: FileSystem volume cannot be opened - %r\n", Status));

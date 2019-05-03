@@ -64,17 +64,21 @@ OC_GLOBAL_STATIC_ASSERT (
 **/
 typedef struct {
   ///
+  /// Storage file system if any.
+  ///
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  ///
   /// Storage root owned by context.
   ///
-  EFI_FILE_PROTOCOL  *StorageRoot;
+  EFI_FILE_PROTOCOL                *StorageRoot;
   ///
   /// Vault context.
   ///
-  OC_STORAGE_VAULT   Vault;
+  OC_STORAGE_VAULT                 Vault;
   ///
   /// Vault status.
   ///
-  BOOLEAN            HasVault;
+  BOOLEAN                          HasVault;
 } OC_STORAGE_CONTEXT;
 
 /**

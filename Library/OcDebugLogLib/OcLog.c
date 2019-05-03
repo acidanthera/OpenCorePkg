@@ -24,8 +24,10 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PcdLib.h>
 #include <Library/PrintLib.h>
-#include <Library/DebugLib.h>
 #include <Library/OcDataHubLib.h>
+#include <Library/OcDebugLogLib.h>
+#include <Library/OcFileLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcTimerLib.h>
 #include <Library/SerialPortLib.h>
@@ -103,7 +105,7 @@ OcLogAddEntry  (
   IN VA_LIST            Marker
   )
 {
-  EFI_STATUS             Status;
+  EFI_STATUS                  Status;
 
   OC_LOG_PRIVATE_DATA         *Private;
   UINT32                      Attributes;
@@ -241,34 +243,58 @@ OcLogAddEntry  (
     }
 
     //
-    // TODO: Write to a file.
+    // Write to a file.
+    // Always overwriting file completely is most reliable.
+    // I know it is slow, but fixed size write is more reliable with broken FAT32 driver.
     //
-    if ((OcLog->Options & OC_LOG_FILE) != 0) {
-      OcLog->Options &= ~OC_LOG_FILE;
+    if ((OcLog->Options & OC_LOG_FILE) != 0 && OcLog->FileSystem != NULL) {
+      SetFileData (
+        OcLog->FileSystem,
+        OcLog->FilePath,
+        Private->AsciiBuffer,
+        Private->AsciiBufferSize
+        );
     }
 
     //
     // Write to a variable.
     //
-    if (!EFI_ERROR (Status) && (OcLog->Options & (OC_LOG_VARIABLE | OC_LOG_NONVOLATILE)) != 0) {
-      Attributes = EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS;
-      if ((OcLog->Options & OC_LOG_NONVOLATILE) != 0) {
-        Attributes |= EFI_VARIABLE_NON_VOLATILE;
-      }
+    if (ErrorLevel != DEBUG_BULK_INFO && (OcLog->Options & (OC_LOG_VARIABLE | OC_LOG_NONVOLATILE)) != 0) {
+      //
+      // Do not log timing information to NVRAM, it is already large...
+      //
+      Status = AsciiStrCatS (Private->NvramBuffer, Private->NvramBufferSize, Private->LineBuffer);
+      if (!EFI_ERROR (Status)) {
+        Attributes = EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS;
+        if ((OcLog->Options & OC_LOG_NONVOLATILE) != 0) {
+          Attributes |= EFI_VARIABLE_NON_VOLATILE;
+        }
 
-      gRT->SetVariable (
-        OC_LOG_VARIABLE_NAME,
-        &gOcVendorVariableGuid,
-        Attributes,
-        AsciiStrSize (Private->AsciiBuffer),
-        Private->AsciiBuffer
-        );
+        Status = gRT->SetVariable (
+          OC_LOG_VARIABLE_NAME,
+          &gOcVendorVariableGuid,
+          Attributes,
+          AsciiStrLen (Private->NvramBuffer),
+          Private->NvramBuffer
+          );
+
+        if (EFI_ERROR (Status)) {
+          //
+          // On APTIO V this may not even get printed. Regardless of volatile or not
+          // it will firstly start discarding NVRAM data silently, and then will borks
+          // NVRAM support completely till reboot. Let's stop on first error at least.
+          //
+          gST->ConOut->OutputString (gST->ConOut, L"NVRAM is full, cannot log!\r\n");
+          gBS->Stall (SECONDS_TO_MICROSECONDS (1));
+          OcLog->Options &= ~(OC_LOG_VARIABLE | OC_LOG_NONVOLATILE);
+        }
+      }
     }
   }
 
   if ((ErrorLevel & OcLog->HaltLevel) != 0) {
     gST->ConOut->OutputString (gST->ConOut, L"Halting on critical error\r\n");
-    gBS->Stall (1000000);
+    gBS->Stall (SECONDS_TO_MICROSECONDS (1));
     CpuDeadLoop ();
   }
 
@@ -348,15 +374,19 @@ OcLogResetTimers (
   @param[in] DisplayDelay  Delay in microseconds after each displayed log entry.
   @param[in] DisplayLevel  Console visible error level.
   @param[in] HaltLevel     Error level causing CPU halt.
+  @param[in] LogPath       Log path.
+  @param[in] LogFileSystem Log filesystem, optional.
 
   @retval EFI_SUCCESS  The entry point is executed successfully.
 **/
 EFI_STATUS
 OcConfigureLogProtocol (
-  IN OC_LOG_OPTIONS      Options,
-  IN UINT32              DisplayDelay,
-  IN UINTN               DisplayLevel,
-  IN UINTN               HaltLevel
+  IN OC_LOG_OPTIONS                   Options,
+  IN UINT32                           DisplayDelay,
+  IN UINTN                            DisplayLevel,
+  IN UINTN                            HaltLevel,
+  IN CHAR16                           *LogPath,
+  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *LogFileSystem  OPTIONAL
   )
 {
   EFI_STATUS            Status;
@@ -364,7 +394,26 @@ OcConfigureLogProtocol (
   OC_LOG_PROTOCOL       *OcLog;
   OC_LOG_PRIVATE_DATA   *Private;
   EFI_HANDLE            Handle;
+  EFI_FILE_PROTOCOL     *LogRoot;
 
+  LogRoot = NULL;
+
+  if ((Options & OC_LOG_FILE) != 0) {
+    if (LogFileSystem != NULL) {
+      Status = LogFileSystem->OpenVolume (LogFileSystem, &LogRoot);
+      if (EFI_ERROR (Status)) {
+        LogRoot = NULL;
+      }
+    }
+
+    if (LogRoot == NULL) {
+      Status = FindWritableFileSystem (&LogRoot);
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_ERROR, "OCL: There is no place to write log file to - %r\n", Status));
+        LogRoot = NULL;
+      }
+    }
+  }
 
   //
   // Check if protocol already exists.
@@ -381,10 +430,17 @@ OcConfigureLogProtocol (
     //
     // Set desired options in existing protocol.
     //
+
+    if (OcLog->FileSystem != NULL) {
+      OcLog->FileSystem->Close (OcLog->FileSystem);
+    }
+
     OcLog->Options      = Options;
     OcLog->DisplayDelay = DisplayDelay;
     OcLog->DisplayLevel = DisplayLevel;
     OcLog->HaltLevel    = HaltLevel;
+    OcLog->FileSystem   = LogRoot;
+    OcLog->FilePath     = LogPath;
 
     //
     // Keep EFI_SUCCESS...
@@ -395,12 +451,8 @@ OcConfigureLogProtocol (
 
     if (Private != NULL) {
       Private->Signature = OC_LOG_PRIVATE_DATA_SIGNATURE;
-
-      //
-      // TODO: Dynamically resizeable buffer.
-      //
-
       Private->AsciiBufferSize    = OC_LOG_BUFFER_SIZE;
+      Private->NvramBufferSize    = OC_LOG_NVRAM_BUFFER_SIZE;
       Private->OcLog.Revision     = OC_LOG_REVISION;
       Private->OcLog.AddEntry     = OcLogAddEntry;
       Private->OcLog.GetLog       = OcLogGetLog;
@@ -410,6 +462,8 @@ OcConfigureLogProtocol (
       Private->OcLog.DisplayDelay = DisplayDelay;
       Private->OcLog.DisplayLevel = DisplayLevel;
       Private->OcLog.HaltLevel    = HaltLevel;
+      Private->OcLog.FileSystem   = LogRoot;
+      Private->OcLog.FilePath     = LogPath;
 
       Handle = NULL;
       Status = gBS->InstallProtocolInterface (
@@ -419,9 +473,24 @@ OcConfigureLogProtocol (
         &Private->OcLog
         );
 
-      if (EFI_ERROR (Status)) {
+      if (!EFI_ERROR (Status)) {
+        OcLog = &Private->OcLog;
+      } else {
         FreePool (Private);
       }
+    }
+  }
+
+  if (LogRoot != NULL) {
+    if (!EFI_ERROR (Status)) {
+      SetFileData (
+        LogRoot,
+        LogPath,
+        OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBuffer,
+        OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBufferSize
+        );
+    } else {
+      LogRoot->Close (LogRoot);
     }
   }
 
