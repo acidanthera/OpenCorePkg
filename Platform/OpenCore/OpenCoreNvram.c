@@ -39,25 +39,13 @@ OC_GLOBAL_STATIC_ASSERT (
   );
 
 STATIC CHAR8 mOpenCoreVersion[] = {
-  /* [0]  = */ OPEN_CORE_TARGET[0],
-  /* [1]  = */ OPEN_CORE_TARGET[1],
-  /* [2]  = */ OPEN_CORE_TARGET[2],
-  /* [3]  = */ '-',
-  /* [4]  = */ OPEN_CORE_VERSION[0],
-  /* [5]  = */ OPEN_CORE_VERSION[2],
-  /* [6]  = */ OPEN_CORE_VERSION[4],
-  /* [7]  = */ '-',
-  /* [8]  = */ __DATE__[7],
-  /* [9]  = */ __DATE__[8],
-  /* [10] = */ __DATE__[9],
-  /* [11] = */ __DATE__[10],
-  /* [12] = */ '-',
-  /* [13] = */ 'M',
-  /* [14] = */ 'M',
-  /* [15] = */ '-',
-  /* [16] = */ 'D',
-  /* [17] = */ 'D',
-  /* [18] = */ '\0'
+  /* [2]:[0]    = */ OPEN_CORE_TARGET
+  /* [3]        = */ "-"
+  /* [6]:[4]    = */ OPEN_CORE_VERSION
+  /* [7]        = */ "-"
+  /* [12]:[8]   = */ "YYYY-"
+  /* [15]:[13]  = */ "MM-"
+  /* [17]:[16]  = */ "DD"
 };
 
 STATIC
@@ -67,6 +55,11 @@ OcReportVersion (
   )
 {
   UINT32  Month;
+
+  mOpenCoreVersion[8]  = __DATE__[7];
+  mOpenCoreVersion[9]  = __DATE__[8];
+  mOpenCoreVersion[10] = __DATE__[9];
+  mOpenCoreVersion[11] = __DATE__[10];
 
   Month =
     (__DATE__[0] == 'J' && __DATE__[1] == 'a' && __DATE__[2] == 'n') ?  1 :
