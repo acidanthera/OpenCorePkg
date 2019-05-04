@@ -41,7 +41,7 @@ OC_GLOBAL_STATIC_ASSERT (
 STATIC CHAR8 mOpenCoreVersion[] = {
   /* [2]:[0]    = */ OPEN_CORE_TARGET
   /* [3]        = */ "-"
-  /* [6]:[4]    = */ OPEN_CORE_VERSION
+  /* [6]:[4]    = */ "XXX"
   /* [7]        = */ "-"
   /* [12]:[8]   = */ "YYYY-"
   /* [15]:[13]  = */ "MM-"
@@ -55,6 +55,10 @@ OcReportVersion (
   )
 {
   UINT32  Month;
+
+  mOpenCoreVersion[4] = OPEN_CORE_VERSION[0];
+  mOpenCoreVersion[5] = OPEN_CORE_VERSION[2];
+  mOpenCoreVersion[6] = OPEN_CORE_VERSION[4];
 
   mOpenCoreVersion[8]  = __DATE__[7];
   mOpenCoreVersion[9]  = __DATE__[8];
@@ -86,7 +90,7 @@ OcReportVersion (
     OC_VERSION_VARIABLE_NAME,
     &gOcVendorVariableGuid,
     OPEN_CORE_NVRAM_ATTR,
-    AsciiStrLen (mOpenCoreVersion),
+    L_STR_SIZE_NT (mOpenCoreVersion),
     &mOpenCoreVersion[0]
     );
 }
