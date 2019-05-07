@@ -518,15 +518,20 @@ DetectAppleProcessorType (
         return AppleProcessorTypeCorei5Type9; // 0x0609
       }
       if (AppleMajorType == AppleProcessorMajorI7) {
-        // FIXME: used by Apple, but not sure what to use...
-        // 0x0709 is used on MBP151 (i7-8850H),
-        // 0x0705 is not confirmed, just an ideal one comparing to 0x0605 (AppleProcessorTypeCorei5Type5)
-        // using 0x0705 for now
-        return AppleProcessorTypeCorei7Type5; // 0x0705
+        // Kaby has 0x9 stepping, and Coffee use 0xA / 0xB stepping.
+        if (Stepping == 9) {
+          // FIXME: used by Apple, but not sure what to use...
+          // 0x0709 is used on MBP151 (i7-8850H),
+          // 0x0705 is not confirmed, just an ideal one comparing to 0x0605 (AppleProcessorTypeCorei5Type5)
+          // using 0x0705 for now
+          return AppleProcessorTypeCorei7Type5; // 0x0705
+        }
+        // MM81 (i7-8700B)
+        return AppleProcessorTypeCorei7Type9; // 0x0709
       }
       if (AppleMajorType == AppleProcessorMajorI9) {
         // FIXME: find a dump from MBP151 with i9-8950HK,
-        // for now using an ideal value (0x1009), comparing to 0x0709 (used on MBP151, i7-8850H)
+        // for now using an ideal value (0x1009), comparing to 0x0709 (used on MBP151, i7-8850H and MM81, i7-8700B)
         return AppleProcessorTypeCorei9Type9; // 0x1009
       }
       if (AppleMajorType == AppleProcessorMajorI3) {
