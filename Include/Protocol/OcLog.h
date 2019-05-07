@@ -25,7 +25,6 @@
 ///
 /// The defines for the log flags.
 ///
-#define OC_LOG_DISABLE      0
 #define OC_LOG_ENABLE       BIT0
 #define OC_LOG_CONSOLE      BIT1
 #define OC_LOG_DATA_HUB     BIT2

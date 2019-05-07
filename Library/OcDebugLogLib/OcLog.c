@@ -118,7 +118,7 @@ OcLogAddEntry  (
 
   Private = OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog);
 
-  if (OcLog->Options == OC_LOG_DISABLE) {
+  if ((OcLog->Options & OC_LOG_ENABLE) == 0) {
     //
     // Silently ignore when disabled.
     //
