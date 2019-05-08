@@ -180,7 +180,7 @@ OcMiscLateInit (
   UINT32       Bpp;
   BOOLEAN      SetMax;
 
-  if (Config->Misc.Debug.ExposeBootPath) {
+  if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_BOOT_PATH) != 0) {
     OcStoreLoadPath (LoadPath);
   }
 

@@ -51,7 +51,7 @@ STATIC CHAR8 mOpenCoreVersion[] = {
 STATIC
 VOID
 OcReportVersion (
-  VOID
+  IN OC_GLOBAL_CONFIG    *Config
   )
 {
   UINT32  Month;
@@ -86,13 +86,15 @@ OcReportVersion (
 
   DEBUG ((DEBUG_INFO, "OC: Current version is %a\n", mOpenCoreVersion));
 
-  gRT->SetVariable (
-    OC_VERSION_VARIABLE_NAME,
-    &gOcVendorVariableGuid,
-    OPEN_CORE_NVRAM_ATTR,
-    L_STR_SIZE_NT (mOpenCoreVersion),
-    &mOpenCoreVersion[0]
-    );
+  if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_VERSION) != 0) {
+    gRT->SetVariable (
+      OC_VERSION_VARIABLE_NAME,
+      &gOcVendorVariableGuid,
+      OPEN_CORE_NVRAM_ATTR,
+      L_STR_SIZE_NT (mOpenCoreVersion),
+      &mOpenCoreVersion[0]
+      );
+  }
 }
 
 VOID
@@ -216,5 +218,5 @@ OcLoadNvramSupport (
     }
   }
 
-  OcReportVersion ();
+  OcReportVersion (Config);
 }

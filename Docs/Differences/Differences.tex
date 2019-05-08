@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May  3 12:13:06 2019
-%DIF ADD ../Configuration.tex        Wed May  8 22:34:08 2019
+%DIF ADD ../Configuration.tex        Wed May  8 22:55:04 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1478,26 +1478,53 @@ behaviour that does not go to any other sections
   \end{itemize}
 
 \item
-  \texttt{ExposeBootPath}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Expose printable booter path to OpenCore.efi or its booter
+  \DIFdelbegin \texttt{\DIFdel{ExposeBootPath}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Default value}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Expose printable booter path to OpenCore.efi or its booter
   (depending on the load order) as an UEFI variable.
+}%DIFDELCMD < 
 
-  To obtain booter path use the following command in macOS:
-\begin{lstlisting}[label=nvrampath, style=ocbash]
-nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path
+%DIFDELCMD <   %%%
+\DIFdel{To obtain booter path use the following command in macOS:
+}%DIFDELCMD < \begin{lstlisting}[label=nvrampath, style=ocbash]
+%DIFDELCMD < %%%
+%DIFAUXCMD NEXT
+\DIFmodbegin
+\begin{lstlisting}[label=nvrampath, style=ocbash,alsolanguage=DIFcode]
+%DIF < nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path
 \end{lstlisting}
+\DIFmodend %DIFAUXCMD
+%DIFDELCMD < \end{lstlisting}
+%DIFDELCMD < 
 
-  To use booter path for mounting booter volume use the following command in macOS:
-\begin{lstlisting}[label=nvrampathmount, style=ocbash]
-u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\),.*/\1/'); \
-  if [ "$u" != "" ]; then sudo diskutil mount $u ; fi
+%DIFDELCMD <   %%%
+\DIFdel{To use booter path for mounting booter volume use the following command in macOS:
+}%DIFDELCMD < \begin{lstlisting}[label=nvrampathmount, style=ocbash]
+%DIFDELCMD < %%%
+%DIFAUXCMD NEXT
+\DIFmodbegin
+\begin{lstlisting}[label=nvrampathmount, style=ocbash,alsolanguage=DIFcode]
+%DIF < u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\),.*/\1/'); \
+%DIF <   if [ "$u" != "" ]; then sudo diskutil mount $u ; fi
 \end{lstlisting}
+\DIFmodend %DIFAUXCMD
+%DIFDELCMD < \end{lstlisting}
+%DIFDELCMD < 
 
-
-\item
-  \texttt{Target}\\
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdelend \texttt{Target}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Default value}: \texttt{0}\\
   \textbf{Description}: A bitmask (sum) of enabled logging targets.
@@ -1544,10 +1571,19 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 
   \DIFaddend While OpenCore boot log already contains basic version information with build type and
   date, this data may also be found in NVRAM in \texttt{opencore-version} variable
-  even with boot log disabled:
-\begin{lstlisting}[label=nvramver, style=ocbash]
-nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
+  even with boot log disabled\DIFdelbegin \DIFdel{:
+}%DIFDELCMD < \begin{lstlisting}[label=nvramver, style=ocbash]
+%DIFDELCMD < %%%
+%DIFAUXCMD NEXT
+\DIFmodbegin
+\begin{lstlisting}[label=nvramver, style=ocbash,alsolanguage=DIFcode]
+%DIF < nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 \end{lstlisting}
+\DIFmodend %DIFAUXCMD
+%DIFDELCMD < \end{lstlisting}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \DIFadd{.
+}\DIFaddend 
 
   File logging will create a file named \texttt{opencore.log} at EFI volume root with
   log contents. Please be warned that some file system drivers present in firmwares are
@@ -1560,8 +1596,46 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 \subsection{Security Properties}\label{miscsecurityprops}
 
 \begin{enumerate}
+\DIFaddbegin 
+
+\DIFaddend \item
+  \DIFaddbegin \texttt{\DIFadd{ExposeSensitiveData}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: }\texttt{\DIFadd{2}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Sensitive data exposure bitmask (sum) to operating system.
+}
+
+  \begin{itemize}
+  \tightlist
+    \item \texttt{\DIFadd{0x01}} \DIFadd{--- Expose printable booter path as an UEFI variable.
+    }\item \texttt{\DIFadd{0x02}} \DIFadd{--- Expose OpenCore version as an UEFI variable.
+  }\end{itemize}
+
+  \DIFadd{Exposed booter path points to OpenCore.efi or its booter depending on the load order.
+  To obtain booter path use the following command in macOS:
+}\DIFmodbegin
+\begin{lstlisting}[label=nvrampath, style=ocbash,alsolanguage=DIFcode]
+%DIF > nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path
+\end{lstlisting}
+\DIFmodend
+
+  \DIFadd{To use booter path for mounting booter volume use the following command in macOS:
+}\DIFmodbegin
+\begin{lstlisting}[label=nvrampathmount, style=ocbash,alsolanguage=DIFcode]
+%DIF > u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\),.*/\1/'); \
+%DIF >   if [ "$u" != "" ]; then sudo diskutil mount $u ; fi
+\end{lstlisting}
+\DIFmodend
+
+  \DIFadd{To obtain OpenCore version use the following command in macOS:
+}\DIFmodbegin
+\begin{lstlisting}[label=nvramver, style=ocbash,alsolanguage=DIFcode]
+%DIF > nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
+\end{lstlisting}
+\DIFmodend
+
 \item
-  \texttt{HaltLevel}\\
+  \DIFaddend \texttt{HaltLevel}\\
   \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
   \textbf{Default value}: \texttt{0x80000000} (\texttt{DEBUG\_ERROR})\\
   \textbf{Description}: EDK II debug level bitmask (sum) causing CPU to

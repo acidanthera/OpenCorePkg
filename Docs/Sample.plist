@@ -404,13 +404,13 @@
 			<integer>0</integer>
 			<key>DisplayLevel</key>
 			<integer>2147483650</integer>
-			<key>ExposeBootPath</key>
-			<false/>
 			<key>Target</key>
 			<integer>19</integer>
 		</dict>
 		<key>Security</key>
 		<dict>
+			<key>ExposeSensitiveData</key>
+			<integer>2</integer>
 			<key>HaltLevel</key>
 			<integer>2147483648</integer>
 			<key>RequireSignature</key>

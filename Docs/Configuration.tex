@@ -1396,25 +1396,6 @@ behaviour that does not go to any other sections
   \end{itemize}
 
 \item
-  \texttt{ExposeBootPath}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Expose printable booter path to OpenCore.efi or its booter
-  (depending on the load order) as an UEFI variable.
-
-  To obtain booter path use the following command in macOS:
-\begin{lstlisting}[label=nvrampath, style=ocbash]
-nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path
-\end{lstlisting}
-
-  To use booter path for mounting booter volume use the following command in macOS:
-\begin{lstlisting}[label=nvrampathmount, style=ocbash]
-u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\),.*/\1/'); \
-  if [ "$u" != "" ]; then sudo diskutil mount $u ; fi
-\end{lstlisting}
-
-
-\item
   \texttt{Target}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Default value}: \texttt{0}\\
@@ -1461,10 +1442,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 
   While OpenCore boot log already contains basic version information with build type and
   date, this data may also be found in NVRAM in \texttt{opencore-version} variable
-  even with boot log disabled:
-\begin{lstlisting}[label=nvramver, style=ocbash]
-nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
-\end{lstlisting}
+  even with boot log disabled.
 
   File logging will create a file named \texttt{opencore.log} at EFI volume root with
   log contents. Please be warned that some file system drivers present in firmwares are
@@ -1477,6 +1455,36 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 \subsection{Security Properties}\label{miscsecurityprops}
 
 \begin{enumerate}
+
+\item
+  \texttt{ExposeSensitiveData}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Default value}: \texttt{2}\\
+  \textbf{Description}: Sensitive data exposure bitmask (sum) to operating system.
+
+  \begin{itemize}
+  \tightlist
+    \item \texttt{0x01} --- Expose printable booter path as an UEFI variable.
+    \item \texttt{0x02} --- Expose OpenCore version as an UEFI variable.
+  \end{itemize}
+
+  Exposed booter path points to OpenCore.efi or its booter depending on the load order.
+  To obtain booter path use the following command in macOS:
+\begin{lstlisting}[label=nvrampath, style=ocbash]
+nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path
+\end{lstlisting}
+
+  To use booter path for mounting booter volume use the following command in macOS:
+\begin{lstlisting}[label=nvrampathmount, style=ocbash]
+u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\),.*/\1/'); \
+  if [ "$u" != "" ]; then sudo diskutil mount $u ; fi
+\end{lstlisting}
+
+  To obtain OpenCore version use the following command in macOS:
+\begin{lstlisting}[label=nvramver, style=ocbash]
+nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
+\end{lstlisting}
+
 \item
   \texttt{HaltLevel}\\
   \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
