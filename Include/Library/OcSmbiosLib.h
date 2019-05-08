@@ -34,6 +34,13 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 extern EFI_GUID       gOcCustomSmbiosTableGuid;
 
+//
+// We use this vendor name to spoof SMBIOS data on request.
+// Note, never use Apple or similar on non apple instances (e.g. VMs).
+// This breaks many internal and external os mechanisms.
+//
+#define OC_SMBIOS_VENDOR_NAME "Acidanthera"
+
 typedef struct OC_SMBIOS_DATA_ {
   //
   // Type 0

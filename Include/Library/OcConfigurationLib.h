@@ -264,7 +264,8 @@
   _(OC_STRING                   , SystemSerialNumber ,     , OC_STRING_CONSTR ("OPENCORE_SN1", _, __)     , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , SystemUuid         ,     , OC_STRING_CONSTR ("", _, __)                 , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Mlb                ,     , OC_STRING_CONSTR ("OPENCORE_MLB_SN11", _, __), OC_DESTR (OC_STRING) ) \
-  _(UINT8                       , Rom                , [6] , {0}                                          , () )
+  _(UINT8                       , Rom                , [6] , {0}                                          , () )                   \
+  _(BOOLEAN                     , SpoofVendor        ,     , FALSE                                        , () )
   OC_DECLARE (OC_PLATFORM_GENERIC_CONFIG)
 
 #define OC_PLATFORM_DATA_HUB_CONFIG_FIELDS(_, __) \
