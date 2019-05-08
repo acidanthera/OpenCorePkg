@@ -153,6 +153,8 @@
 			<false/>
 			<key>RebaseRegions</key>
 			<false/>
+			<key>ResetLogoStatus</key>
+			<false/>
 		</dict>
 	</dict>
 	<key>DeviceProperties</key>

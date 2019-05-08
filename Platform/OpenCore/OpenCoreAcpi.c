@@ -211,6 +211,10 @@ OcLoadAcpiSupport (
     AcpiFadtEnableReset (&Context);
   }
 
+  if (Config->Acpi.Quirks.ResetLogoStatus) {
+    AcpiResetLogoStatus (&Context);
+  }
+
   if (Config->Acpi.Quirks.RebaseRegions) {
     AcpiRelocateRegions (&Context);
   }

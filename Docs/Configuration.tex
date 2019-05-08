@@ -828,6 +828,16 @@ source file may help understanding ACPI opcodes.
   attempting to fix the ACPI addresses. It does not do magic, and only
   works with most common cases. Do not use unless absolutely required.
 
+\item
+  \texttt{ResetLogoStatus}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Reset \texttt{BGRT} table \texttt{Displayed}
+  status field to \texttt{false}.
+
+  This works around firmwares that provide \texttt{BGRT} table but
+  fail to handle screen updates afterwards.
+
 \end{enumerate}
 
 

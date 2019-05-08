@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May  3 12:13:06 2019
-%DIF ADD ../Configuration.tex        Wed May  8 19:47:54 2019
+%DIF ADD ../Configuration.tex        Wed May  8 21:43:05 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -903,7 +903,19 @@ source file may help understanding ACPI opcodes.
   attempting to fix the ACPI addresses. It does not do magic, and only
   works with most common cases. Do not use unless absolutely required.
 
-\end{enumerate}
+\DIFaddbegin \item
+  \texttt{\DIFadd{ResetLogoStatus}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Reset }\texttt{\DIFadd{BGRT}} \DIFadd{table }\texttt{\DIFadd{Displayed}}
+  \DIFadd{status field to }\texttt{\DIFadd{false}}\DIFadd{.
+}
+
+  \DIFadd{This works around firmwares that provide }\texttt{\DIFadd{BGRT}} \DIFadd{table but
+  fail to handle screen updates afterwards.
+}
+
+\DIFaddend \end{enumerate}
 
 
 \section{DeviceProperties}\label{devprops}
