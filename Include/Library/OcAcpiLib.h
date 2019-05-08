@@ -271,4 +271,14 @@ AcpiFadtEnableReset (
   IN OUT OC_ACPI_CONTEXT  *Context
   );
 
+/**
+  Reset BGRT Displayed status.
+
+  @param Context     ACPI library context.
+**/
+VOID
+AcpiResetLogoStatus (
+  IN OUT OC_ACPI_CONTEXT  *Context
+  );
+
 #endif // OC_ACPI_LIB_H

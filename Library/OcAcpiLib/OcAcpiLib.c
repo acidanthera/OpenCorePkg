@@ -1118,3 +1118,21 @@ AcpiFadtEnableReset (
 
   return EFI_SUCCESS;
 }
+
+VOID
+AcpiResetLogoStatus (
+  IN OUT OC_ACPI_CONTEXT  *Context
+  )
+{
+  UINT32  Index;
+
+  for (Index = 0; Index < Context->NumberOfTables; ++Index) {
+    if (Context->Tables[Index]->Signature == EFI_ACPI_6_2_BOOT_GRAPHICS_RESOURCE_TABLE_SIGNATURE) {
+      if (Context->Tables[Index]->Length >= sizeof (EFI_ACPI_6_2_BOOT_GRAPHICS_RESOURCE_TABLE)) {
+        ((EFI_ACPI_6_2_BOOT_GRAPHICS_RESOURCE_TABLE *)Context->Tables[Index])->Status
+          &= ~EFI_ACPI_6_2_BGRT_STATUS_DISPLAYED;
+      }
+      break;
+    }
+  }
+}

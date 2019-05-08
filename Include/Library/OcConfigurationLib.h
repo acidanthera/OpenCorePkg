@@ -80,7 +80,8 @@
   _(BOOLEAN                     , FadtEnableReset     ,     , FALSE  , ()) \
   _(BOOLEAN                     , IgnoreForWindows    ,     , FALSE  , ()) \
   _(BOOLEAN                     , NormalizeHeaders    ,     , FALSE  , ()) \
-  _(BOOLEAN                     , RebaseRegions       ,     , FALSE  , ())
+  _(BOOLEAN                     , RebaseRegions       ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ResetLogoStatus     ,     , FALSE  , ())
   OC_DECLARE (OC_ACPI_QUIRKS)
 
 #define OC_ACPI_CONFIG_FIELDS(_, __) \
