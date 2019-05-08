@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May  3 12:13:06 2019
-%DIF ADD ../Configuration.tex        Wed May  8 21:43:05 2019
+%DIF ADD ../Configuration.tex        Wed May  8 22:34:08 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2018,7 +2018,17 @@ for system configuration.
 \subsection{Generic Properties}\label{platforminfogeneric}
 
 \begin{enumerate}
-\item
+\DIFaddbegin \item
+  \texttt{\DIFadd{SpoofVendor}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Sets SMBIOS vendor fields to }\texttt{\DIFadd{Acidanthera}}\DIFadd{.
+}
+
+  \DIFadd{It is dangerous to use Apple in SMBIOS vendor fields for reasons given
+  in }\texttt{\DIFadd{SystemManufacturer}} \DIFadd{description. However, certain firmwares
+  may not provide valid values otherwise, which could break some software.
+}\DIFaddend \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Default value}: \texttt{MacPro6,1}\\

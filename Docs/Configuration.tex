@@ -1933,6 +1933,15 @@ for system configuration.
 
 \begin{enumerate}
 \item
+  \texttt{SpoofVendor}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Sets SMBIOS vendor fields to \texttt{Acidanthera}.
+
+  It is dangerous to use Apple in SMBIOS vendor fields for reasons given
+  in \texttt{SystemManufacturer} description. However, certain firmwares
+  may not provide valid values otherwise, which could break some software.
+\item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Default value}: \texttt{MacPro6,1}\\

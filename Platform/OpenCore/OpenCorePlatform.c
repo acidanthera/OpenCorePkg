@@ -271,6 +271,13 @@ OcPlatformUpdateSmbios (
     //
     // Automatic mode read data from Generic & MacInfo.
     //
+    if (Config->PlatformInfo.Generic.SpoofVendor) {
+      Data.BIOSVendor          = OC_SMBIOS_VENDOR_NAME;
+      Data.SystemManufacturer  = OC_SMBIOS_VENDOR_NAME;
+      Data.ChassisManufacturer = OC_SMBIOS_VENDOR_NAME;
+      Data.BoardManufacturer   = OC_SMBIOS_VENDOR_NAME;
+    }
+
     Data.BIOSVersion = MacInfo->Smbios.BIOSVersion;
     Data.BIOSReleaseDate = MacInfo->Smbios.BIOSReleaseDate;
     Data.SystemProductName = MacInfo->Smbios.SystemProductName;
