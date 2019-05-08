@@ -2528,6 +2528,10 @@ tweaks for the onboard firmware.
   a closed source \texttt{HFSPlus} driver commonly found in Apple firmwares. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
   a security audit.
+  \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{XhciDxe}}
+  --- XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
+  included in most firmwares starting with Sandy Bridge generation. For earlier firmwares
+  or legacy systems it may be used to support external USB 3.0 PCI cards.
   \end{itemize}
 
   To compile the drivers from TianoCore UDK use the same command you do normally use

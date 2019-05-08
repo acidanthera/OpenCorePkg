@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May  3 12:13:06 2019
-%DIF ADD ../Configuration.tex        Wed May  8 22:55:04 2019
+%DIF ADD ../Configuration.tex        Thu May  9 00:34:14 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2092,8 +2092,8 @@ for system configuration.
 \subsection{Generic Properties}\label{platforminfogeneric}
 
 \begin{enumerate}
-\DIFaddbegin \item
-  \texttt{\DIFadd{SpoofVendor}}\\
+\item
+  \DIFaddbegin \texttt{\DIFadd{SpoofVendor}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
   \textbf{\DIFadd{Default value}}\DIFadd{: }\texttt{\DIFadd{false}}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Sets SMBIOS vendor fields to }\texttt{\DIFadd{Acidanthera}}\DIFadd{.
@@ -2102,8 +2102,8 @@ for system configuration.
   \DIFadd{It is dangerous to use Apple in SMBIOS vendor fields for reasons given
   in }\texttt{\DIFadd{SystemManufacturer}} \DIFadd{description. However, certain firmwares
   may not provide valid values otherwise, which could break some software.
-}\DIFaddend \item
-  \texttt{SystemProductName}\\
+}\item
+  \DIFaddend \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Default value}: \texttt{MacPro6,1}\\
   \textbf{Description}: Refer to SMBIOS \texttt{SystemProductName}.
@@ -2680,7 +2680,11 @@ tweaks for the onboard firmware.
   --- HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HFSPlus} driver commonly found in Apple firmwares. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
-  a security audit.
+  a security audit\DIFaddbegin \DIFadd{.
+  }\item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{XhciDxe}}
+  \DIFadd{--- XHCI USB controller support driver from }\texttt{\DIFadd{MdeModulePkg}}\DIFadd{. This driver is
+  included in most firmwares starting with Sandy Bridge generation. For earlier firmwares
+  or legacy systems it may be used to support external USB 3.0 PCI cards}\DIFaddend .
   \end{itemize}
 
   To compile the drivers from TianoCore UDK use the same command you do normally use
