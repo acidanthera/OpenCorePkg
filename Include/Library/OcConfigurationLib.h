@@ -214,14 +214,17 @@
   _(BOOLEAN                     , DisableWatchDog             ,     , FALSE        , ()) \
   _(UINT32                      , DisplayDelay                ,     , 0            , ()) \
   _(UINT64                      , DisplayLevel                ,     , 0            , ()) \
-  _(BOOLEAN                     , ExposeBootPath              ,     , FALSE        , ()) \
   _(UINT32                      , Target                      ,     , 0            , ())
   OC_DECLARE (OC_MISC_DEBUG)
 
+#define OCS_EXPOSE_BOOT_PATH 1U
+#define OCS_EXPOSE_VERSION   2U
+
 #define OC_MISC_SECURITY_FIELDS(_, __) \
-  _(BOOLEAN                     , RequireVault                ,     , TRUE         , ()) \
-  _(BOOLEAN                     , RequireSignature            ,     , TRUE         , ()) \
-  _(UINT64                      , HaltLevel                   ,     , 0x80000000   , ())
+  _(BOOLEAN                     , ExposeSensitiveData         ,     , OCS_EXPOSE_VERSION, ()) \
+  _(BOOLEAN                     , RequireVault                ,     , TRUE              , ()) \
+  _(BOOLEAN                     , RequireSignature            ,     , TRUE              , ()) \
+  _(UINT64                      , HaltLevel                   ,     , 0x80000000        , ())
   OC_DECLARE (OC_MISC_SECURITY)
 
 #define OC_MISC_CONFIG_FIELDS(_, __) \

@@ -255,16 +255,16 @@ mMiscConfigurationDebugSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("DisableWatchDog",  OC_GLOBAL_CONFIG, Misc.Debug.DisableWatchDog),
   OC_SCHEMA_INTEGER_IN ("DisplayDelay",     OC_GLOBAL_CONFIG, Misc.Debug.DisplayDelay),
   OC_SCHEMA_INTEGER_IN ("DisplayLevel",     OC_GLOBAL_CONFIG, Misc.Debug.DisplayLevel),
-  OC_SCHEMA_BOOLEAN_IN ("ExposeBootPath",   OC_GLOBAL_CONFIG, Misc.Debug.ExposeBootPath),
   OC_SCHEMA_INTEGER_IN ("Target",           OC_GLOBAL_CONFIG, Misc.Debug.Target)
 };
 
 STATIC
 OC_SCHEMA
 mMiscConfigurationSecuritySchema[] = {
-  OC_SCHEMA_INTEGER_IN ("HaltLevel",        OC_GLOBAL_CONFIG, Misc.Security.HaltLevel),
-  OC_SCHEMA_BOOLEAN_IN ("RequireSignature", OC_GLOBAL_CONFIG, Misc.Security.RequireSignature),
-  OC_SCHEMA_BOOLEAN_IN ("RequireVault",     OC_GLOBAL_CONFIG, Misc.Security.RequireVault)
+  OC_SCHEMA_INTEGER_IN ("ExposeSensitiveData",  OC_GLOBAL_CONFIG, Misc.Security.ExposeSensitiveData),
+  OC_SCHEMA_INTEGER_IN ("HaltLevel",            OC_GLOBAL_CONFIG, Misc.Security.HaltLevel),
+  OC_SCHEMA_BOOLEAN_IN ("RequireSignature",     OC_GLOBAL_CONFIG, Misc.Security.RequireSignature),
+  OC_SCHEMA_BOOLEAN_IN ("RequireVault",         OC_GLOBAL_CONFIG, Misc.Security.RequireVault),
 };
 
 STATIC
