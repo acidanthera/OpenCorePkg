@@ -1,4 +1,7 @@
 \documentclass[]{article}
+%DIF LATEXDIFF DIFFERENCE FILE
+%DIF DEL PreviousConfiguration.tex   Fri May  3 12:13:06 2019
+%DIF ADD ../Configuration.tex        Wed May  8 19:47:54 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -59,6 +62,63 @@
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 \newcommand{\sectionbreak}{\clearpage}
+%DIF PREAMBLE EXTENSION ADDED BY LATEXDIFF
+%DIF UNDERLINE PREAMBLE %DIF PREAMBLE
+\RequirePackage[normalem]{ulem} %DIF PREAMBLE
+\RequirePackage{color}\definecolor{RED}{rgb}{1,0,0}\definecolor{BLUE}{rgb}{0,0,1} %DIF PREAMBLE
+\providecommand{\DIFaddtex}[1]{{\protect\color{blue}\uwave{#1}}} %DIF PREAMBLE
+\providecommand{\DIFdeltex}[1]{{\protect\color{red}\sout{#1}}}                      %DIF PREAMBLE
+%DIF ONLYCHANGEDPAGE PREAMBLE %DIF PREAMBLE
+\RequirePackage{atbegshi} %DIF PREAMBLE
+\RequirePackage{etoolbox} %DIF PREAMBLE
+\RequirePackage{zref} %DIF PREAMBLE
+% redefine label command to write immediately to aux file - page references will be lost %DIF PREAMBLE
+\makeatletter \let\oldlabel\label% Store \label  %DIF PREAMBLE
+\renewcommand{\label}[1]{% Update \label to write to the .aux immediately  %DIF PREAMBLE
+\zref@wrapper@immediate{\oldlabel{#1}}}  %DIF PREAMBLE
+\makeatother  %DIF PREAMBLE
+\newbool{DIFkeeppage} %DIF PREAMBLE
+\newbool{DIFchange} %DIF PREAMBLE
+\boolfalse{DIFkeeppage} %DIF PREAMBLE
+\boolfalse{DIFchange} %DIF PREAMBLE
+\AtBeginShipout{% %DIF PREAMBLE
+  \ifbool{DIFkeeppage} %DIF PREAMBLE
+        {\global\boolfalse{DIFkeeppage}}  % True DIFkeeppage %DIF PREAMBLE
+         {\ifbool{DIFchange}{\global\boolfalse{DIFkeeppage}}{\global\boolfalse{DIFkeeppage}\AtBeginShipoutDiscard}} % False DIFkeeppage %DIF PREAMBLE
+} %DIF PREAMBLE
+\providecommand{\DIFaddbegin}{\global\booltrue{DIFkeeppage}\global\booltrue{DIFchange}} %DIF PREAMBLE
+\providecommand{\DIFaddend}{\global\booltrue{DIFkeeppage}\global\boolfalse{DIFchange}} %DIF PREAMBLE
+\providecommand{\DIFdelbegin}{\global\booltrue{DIFkeeppage}\global\booltrue{DIFchange}} %DIF PREAMBLE
+\providecommand{\DIFdelend}{\global\booltrue{DIFkeeppage}\global\boolfalse{DIFchange}} %DIF PREAMBLE
+\providecommand{\DIFmodbegin}{\global\booltrue{DIFkeeppage}\global\booltrue{DIFchange}} %DIF PREAMBLE
+\providecommand{\DIFmodend}{\global\booltrue{DIFkeeppage}\global\boolfalse{DIFchange}} %DIF PREAMBLE
+%DIF IDENTICAL PREAMBLE %DIF PREAMBLE
+\providecommand{\DIFaddFL}[1]{\DIFadd{#1}} %DIF PREAMBLE
+\providecommand{\DIFdelFL}[1]{\DIFdel{#1}} %DIF PREAMBLE
+\providecommand{\DIFaddbeginFL}{\DIFaddbegin} %DIF PREAMBLE
+\providecommand{\DIFaddendFL}{\DIFaddend} %DIF PREAMBLE
+\providecommand{\DIFdelbeginFL}{\DIFdelbegin} %DIF PREAMBLE
+\providecommand{\DIFdelendFL}{\DIFdelend} %DIF PREAMBLE
+%DIF HYPERREF PREAMBLE %DIF PREAMBLE
+\providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
+\providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
+%DIF LISTINGS PREAMBLE %DIF PREAMBLE
+\RequirePackage{listings} %DIF PREAMBLE
+\RequirePackage{color} %DIF PREAMBLE
+\lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
+%DIF DIFCODE_UNDERLINE %DIF PREAMBLE
+  moredelim=[il][\color{red}\sout]{\%DIF\ <\ }, %DIF PREAMBLE
+  moredelim=[il][\color{blue}\uwave]{\%DIF\ >\ } %DIF PREAMBLE
+} %DIF PREAMBLE
+\lstdefinestyle{DIFverbatimstyle}{ %DIF PREAMBLE
+	language=DIFcode, %DIF PREAMBLE
+	basicstyle=\ttfamily, %DIF PREAMBLE
+	columns=fullflexible, %DIF PREAMBLE
+	keepspaces=true %DIF PREAMBLE
+} %DIF PREAMBLE
+\lstnewenvironment{DIFverbatim}{\lstset{style=DIFverbatimstyle}}{} %DIF PREAMBLE
+\lstnewenvironment{DIFverbatim*}{\lstset{style=DIFverbatimstyle,showspaces=true}}{} %DIF PREAMBLE
+%DIF END PREAMBLE EXTENSION ADDED BY LATEXDIFF
 
 \begin{document}
 
@@ -72,7 +132,8 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.0.2)
+       Reference Manual \DIFaddbegin \DIFadd{(0.0.2)
+}\DIFaddend 
 
        \vspace{0.2in}
 
@@ -100,8 +161,22 @@ operating system.
 
 For OpenCore issues please refer to
 \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
+\DIFdelbegin \DIFdel{Currently this file has the following entries not completed:
+}\DIFdelend 
 
-\section{Generic Terms}\label{generic-terms}
+\DIFdelbegin %DIFDELCMD < \begin{itemize}
+\begin{itemize}%DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdel{Not all }\texttt{\DIFdel{NVRAM}} %DIFAUXCMD
+\DIFdel{variables are properly described (e.g. boot-args).
+}
+\end{itemize}%DIFAUXCMD
+%DIFDELCMD < \end{itemize}
+%DIFDELCMD < 
+
+%DIFDELCMD < %%%
+\DIFdelend \section{Generic Terms}\label{generic-terms}
 
 \begin{itemize}
 \item
@@ -1310,23 +1385,28 @@ behaviour that does not go to any other sections
   \texttt{Resolution}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Default value}: Empty string\\
-  \textbf{Description}: Sets console output screen resolution.
+  \textbf{Description}: Sets console output screen resolution\DIFdelbegin \DIFdel{as specified
+  with the }\DIFdelend \DIFaddbegin \DIFadd{.
+}
 
   \begin{itemize}
   \tightlist
-  \item Set to \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) \texttt{WxH}
-  (e.g. \texttt{1920x1080}) formatted string to request custom resolution
+  \item \DIFadd{Set to }\DIFaddend \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) \DIFdelbegin \DIFdel{or
+  }\DIFdelend \texttt{WxH}
+  (e.g. \texttt{1920x1080}) formatted string \DIFdelbegin \DIFdel{. }\DIFdelend \DIFaddbegin \DIFadd{to request custom resolution
   from GOP if available.
-  \item Set to empty string not to change screen resolution.
-  \item Set to \texttt{Max} to try to use largest available screen resolution.
-  \end{itemize}
+  }\item \DIFaddend Set to empty string not to change screen resolution.
+  \DIFaddbegin \item \DIFaddend Set to \texttt{Max} to try to use largest available screen resolution.
+  \DIFaddbegin \end{itemize}
+\DIFaddend 
 
-  On HiDPI screens \texttt{APPLE\_VENDOR\_VARIABLE\_GUID} \texttt{UIScale}
-  NVRAM variable may need to be set to \texttt{02} to enable HiDPI scaling
+  \DIFaddbegin \DIFadd{On HiDPI screens }\texttt{\DIFadd{APPLE\_VENDOR\_VARIABLE\_GUID}} \texttt{\DIFadd{UIScale}}
+  \DIFadd{NVRAM variable may need to be set to }\texttt{\DIFadd{02}} \DIFadd{to enable HiDPI scaling
   in FileVault 2 UEFI password interface and boot screen logo. Refer to
-  \hyperref[nvramvarsrec]{Recommended Variables} section for more details.
+  }\hyperref[nvramvarsrec]{Recommended Variables} \DIFadd{section for more details.
+}
 
-  \emph{Note}: This will fail when console handle has no GOP protocol. When
+  \DIFaddend \emph{Note}: This will fail when console handle has no GOP protocol. When
   the firmware does not provide it, it can be added with \texttt{ProvideConsoleGop}
   UEFI quirk set to \texttt{true}.
 
@@ -1445,11 +1525,12 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   awk '{gsub(/%0d%0a%00/,"");gsub(/%0d%0a/,"\n")}1'
 \end{lstlisting}
 
-  \emph{Warning}: Some firmwares are reported to have broken NVRAM garbage collection.
+  \DIFaddbegin \emph{\DIFadd{Warning}}\DIFadd{: Some firmwares are reported to have broken NVRAM garbage collection.
   This means that they may not be able to always free space after variable deletion.
   Do not use non-volatile NVRAM logging without extra need on such devices.
+}
 
-  While OpenCore boot log already contains basic version information with build type and
+  \DIFaddend While OpenCore boot log already contains basic version information with build type and
   date, this data may also be found in NVRAM in \texttt{opencore-version} variable
   even with boot log disabled:
 \begin{lstlisting}[label=nvramver, style=ocbash]
@@ -1734,26 +1815,29 @@ troubleshooting:
   Kernel arguments, used to pass configuration to Apple kernel and drivers.
   There are many arguments, which may be found by looking for the use of
   \texttt{PE\_parse\_boot\_argn} function in the kernel or driver code.
-  Some of the known boot arguments include:
+  \DIFaddbegin \DIFadd{Some of the known boot arguments include:
+}\DIFaddend 
 
   \begin{itemize}
-  \item \texttt{acpi\_layer=0xFFFFFFFF}
-  \item \texttt{acpi\_level=0xFFFF5F} (implies
-    \href{https://github.com/acpica/acpica/blob/master/source/include/acoutput.h}
-    {\texttt{ACPI\_ALL\_COMPONENTS}})
-  \item \texttt{cpus=VALUE}
-  \item \texttt{debug=VALUE}
-  \item \texttt{io=VALUE}
-  \item \texttt{keepsyms=1}
-  \item \texttt{kextlog=VALUE}
-  \item \texttt{nvda\_drv=1}
-  \item \texttt{slide=VALUE}
-  \item \texttt{-nehalem\_error\_disable}
-  \item \texttt{-no\_compat\_check}
-  \item \texttt{-s}
-  \item \texttt{-v}
-  \item \texttt{-x}
-  \end{itemize}
+  \item \DIFdelbegin \DIFdel{FIXME: document several known values! debug, keepsyms, slide, -v, -s,
+  -x, cpus=x, io=x, kextlog=x, -nehalem\_error\_disable -no\_compat\_check nvda\_drv=1, etc?
+  }\DIFdelend \DIFaddbegin \texttt{\DIFadd{acpi\_layer=0xFFFFFFFF}}
+  \item \texttt{\DIFadd{acpi\_level=0xFFFF5F}} \DIFadd{(implies
+    }\href{https://github.com/acpica/acpica/blob/master/source/include/acoutput.h}
+    {\texttt{\DIFadd{ACPI\_ALL\_COMPONENTS}}}\DIFadd{)
+  }\item \texttt{\DIFadd{cpus=VALUE}}
+  \item \texttt{\DIFadd{debug=VALUE}}
+  \item \texttt{\DIFadd{io=VALUE}}
+  \item \texttt{\DIFadd{keepsyms=1}}
+  \item \texttt{\DIFadd{kextlog=VALUE}}
+  \item \texttt{\DIFadd{nvda\_drv=1}}
+  \item \texttt{\DIFadd{slide=VALUE}}
+  \item \texttt{\DIFadd{-nehalem\_error\_disable}}
+  \item \texttt{\DIFadd{-no\_compat\_check}}
+  \item \texttt{\DIFadd{-s}}
+  \item \texttt{\DIFadd{-v}}
+  \item \texttt{\DIFadd{-x}}
+  \DIFaddend \end{itemize}
 
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg}

@@ -72,7 +72,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.0.2)
+       Reference Manual
 
        \vspace{0.2in}
 
@@ -100,6 +100,11 @@ operating system.
 
 For OpenCore issues please refer to
 \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
+Currently this file has the following entries not completed:
+
+\begin{itemize}
+\item Not all \texttt{NVRAM} variables are properly described (e.g. boot-args).
+\end{itemize}
 
 \section{Generic Terms}\label{generic-terms}
 
@@ -1310,21 +1315,11 @@ behaviour that does not go to any other sections
   \texttt{Resolution}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Default value}: Empty string\\
-  \textbf{Description}: Sets console output screen resolution.
-
-  \begin{itemize}
-  \tightlist
-  \item Set to \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) \texttt{WxH}
-  (e.g. \texttt{1920x1080}) formatted string to request custom resolution
-  from GOP if available.
-  \item Set to empty string not to change screen resolution.
-  \item Set to \texttt{Max} to try to use largest available screen resolution.
-  \end{itemize}
-
-  On HiDPI screens \texttt{APPLE\_VENDOR\_VARIABLE\_GUID} \texttt{UIScale}
-  NVRAM variable may need to be set to \texttt{02} to enable HiDPI scaling
-  in FileVault 2 UEFI password interface and boot screen logo. Refer to
-  \hyperref[nvramvarsrec]{Recommended Variables} section for more details.
+  \textbf{Description}: Sets console output screen resolution as specified
+  with the \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) or
+  \texttt{WxH} (e.g. \texttt{1920x1080}) formatted string. Set to empty string
+  not to change screen resolution. Set to \texttt{Max} to try to use largest
+  available screen resolution.
 
   \emph{Note}: This will fail when console handle has no GOP protocol. When
   the firmware does not provide it, it can be added with \texttt{ProvideConsoleGop}
@@ -1444,10 +1439,6 @@ ioreg -lw0 -p IODeviceTree | grep boot-log | sort | sed 's/.*<\(.*\)>.*/\1/' | x
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   awk '{gsub(/%0d%0a%00/,"");gsub(/%0d%0a/,"\n")}1'
 \end{lstlisting}
-
-  \emph{Warning}: Some firmwares are reported to have broken NVRAM garbage collection.
-  This means that they may not be able to always free space after variable deletion.
-  Do not use non-volatile NVRAM logging without extra need on such devices.
 
   While OpenCore boot log already contains basic version information with build type and
   date, this data may also be found in NVRAM in \texttt{opencore-version} variable
@@ -1734,25 +1725,10 @@ troubleshooting:
   Kernel arguments, used to pass configuration to Apple kernel and drivers.
   There are many arguments, which may be found by looking for the use of
   \texttt{PE\_parse\_boot\_argn} function in the kernel or driver code.
-  Some of the known boot arguments include:
 
   \begin{itemize}
-  \item \texttt{acpi\_layer=0xFFFFFFFF}
-  \item \texttt{acpi\_level=0xFFFF5F} (implies
-    \href{https://github.com/acpica/acpica/blob/master/source/include/acoutput.h}
-    {\texttt{ACPI\_ALL\_COMPONENTS}})
-  \item \texttt{cpus=VALUE}
-  \item \texttt{debug=VALUE}
-  \item \texttt{io=VALUE}
-  \item \texttt{keepsyms=1}
-  \item \texttt{kextlog=VALUE}
-  \item \texttt{nvda\_drv=1}
-  \item \texttt{slide=VALUE}
-  \item \texttt{-nehalem\_error\_disable}
-  \item \texttt{-no\_compat\_check}
-  \item \texttt{-s}
-  \item \texttt{-v}
-  \item \texttt{-x}
+  \item FIXME: document several known values! debug, keepsyms, slide, -v, -s,
+  -x, cpus=x, io=x, kextlog=x, -nehalem\_error\_disable -no\_compat\_check nvda\_drv=1, etc?
   \end{itemize}
 
 \item
@@ -2702,7 +2678,7 @@ build -a X64 -b RELEASE -t XCODE5 -p IntelFrameworkModulePkg/IntelFrameworkModul
   Custom name may be created by providing \texttt{.contentDetails} file.
 
   To download recovery online you may use
-  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/Recovery}{Recovery}
+  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/Recovery}{Recovery} 
   tool from \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}.
 
 \end{enumerate}

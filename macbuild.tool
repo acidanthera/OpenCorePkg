@@ -47,6 +47,7 @@ package() {
   cp OpenCore.efi tmp/OC/ || exit 1
   cp BOOTx64.efi tmp/BOOT/ || exit 1
   cp "${selfdir}/Docs/Configuration.pdf" tmp/Docs/ || exit 1
+  cp "${selfdir}/Docs/Differences/Differences.pdf" tmp/Docs/ || exit 1
   cp "${selfdir}/Docs/Sample.plist" tmp/Docs/ || exit 1
   cp "${selfdir}/Docs/SampleFull.plist" tmp/Docs/ || exit 1
   cp "${selfdir}/Changelog.md" tmp/Docs/ || exit 1
