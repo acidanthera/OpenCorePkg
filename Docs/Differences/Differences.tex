@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May  3 12:13:06 2019
-%DIF ADD ../Configuration.tex        Thu May  9 00:34:14 2019
+%DIF ADD ../Configuration.tex        Thu May  9 03:35:46 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1869,10 +1869,12 @@ improvements:
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:prev-lang:kbd}
   \break
   ASCII string defining default keyboard layout. Format is \texttt{lang-COUNTRY:keyboard},
-  e.g. \texttt{ru-RU:19456} for Mac keyboard. Also accepts short forms: \texttt{ru:19456}
-  or \texttt{ru:0}. Full decoded list of keyboards in \texttt{AppleKeyboardLayouts-L.dat}
-  can be found on \href{https://www.applelife.ru/posts/763537}{AppleLife}.
-\item
+  e.g. \texttt{ru-RU:\DIFdelbegin \DIFdel{19456}\DIFdelend \DIFaddbegin \DIFadd{252}\DIFaddend } for \DIFdelbegin \DIFdel{Mac }\DIFdelend \DIFaddbegin \DIFadd{Russian locale and ABC }\DIFaddend keyboard. Also accepts short forms:
+  \texttt{ru:\DIFdelbegin \DIFdel{19456}\DIFdelend \DIFaddbegin \DIFadd{252}\DIFaddend } or \texttt{ru:0} \DIFdelbegin \DIFdel{. Full decoded list of keyboards in }\DIFdelend \DIFaddbegin \DIFadd{(U.S. keyboard, compatible with 10.9). Full decoded
+  keyboard list from }\DIFaddend \texttt{AppleKeyboardLayouts-L.dat} can be found on
+  \href{https://www.applelife.ru/posts/763537}{AppleLife}. \DIFaddbegin \DIFadd{Using non-latin keyboard on 10.14
+  will not enable ABC keyboard, unlike previous macOS versions, and is thus not recommended.
+}\DIFaddend \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:security-mode}
   \break
   ASCII string defining FireWire security mode. Legacy, can be found in IOFireWireFamily
