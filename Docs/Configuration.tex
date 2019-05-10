@@ -420,6 +420,39 @@ entries include:
 Figure 1. Directory Structure
 \end{center}
 
+\subsection{Installation and Upgrade}\label{configuration-install}
+
+To install OpenCore reflect the
+\hyperref[configuration-structure]{Configuration Structure} described
+in the previous section on a EFI volume of a GPT partition. While
+corresponding sections of this document do provide some information
+in regards to external resources like ACPI tables, UEFI drivers,
+or kernel extensions (kexts), completeness of the matter is out of
+the scope of this document. Extra information about particular kernel
+extensions may be found in Lilu's
+\href{https://github.com/acidanthera/Lilu/blob/master/KnownPlugins.md}{Known Plugins}
+table. Vaulting information is provided in
+\hyperref[miscsecurityprops]{Security Properties} section of this document.
+
+\texttt{OC\ config}, just like any property lists can be edited with any
+stock textual editor (e.g. nano, vim), but specialised software may provide
+better experience. On macOS the preferred GUI application is
+\href{https://developer.apple.com/xcode}{Xcode}. For a lightweight
+cross-platform and open-source alternative
+\href{https://github.com/corpnewt/ProperTree}{ProperTree} editor can be
+utilised.
+
+For BIOS booting a third-party UEFI environment provider will have to
+be used. \texttt{DuetPkg} is one of the known UEFI environment providers
+for legacy systems. While it is known to be possible to run OpenCore
+on such a legacy system, configuration and use of \texttt{DuetPkg} is
+currently out of the scope of this document.
+
+For upgrade purposes refer to \texttt{Differences.pdf} document, providing
+the information about the changes affecting the configuration compared
+to the previous release, and \texttt{Changelog.md} document, containing
+the list of modifications across all published updates.
+
 \subsection{Contribution}\label{configuration-comp}
 
 OpenCore can be compiled as an ordinary EDK II package with
@@ -437,7 +470,9 @@ Required external package dependencies include
 
 To compile with \texttt{XCODE5}, besides \href{https://developer.apple.com/xcode}{Xcode},
 one should also install \href{https://www.nasm.us}{NASM} and
-\href{https://github.com/acidanthera/ocbuild/raw/master/external/mtoc-mac64.zip}{MTOC}. Example command sequence may look as follows:
+\href{https://github.com/acidanthera/ocbuild/raw/master/external/mtoc-mac64.zip}{MTOC}.
+The latest Xcode version is recommended for use despite the toolchain name. Example
+command sequence may look as follows:
 
 \begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
 git clone https://github.com/tianocore/edk2 -b UDK2018 UDK

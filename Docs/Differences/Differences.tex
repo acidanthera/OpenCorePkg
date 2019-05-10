@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May  3 12:13:06 2019
-%DIF ADD ../Configuration.tex        Thu May  9 03:35:46 2019
+%DIF ADD ../Configuration.tex        Fri May 10 14:58:12 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -495,7 +495,44 @@ entries include:
 Figure 1. Directory Structure
 \end{center}
 
-\subsection{Contribution}\label{configuration-comp}
+\DIFaddbegin \subsection{\DIFadd{Installation and Upgrade}}\label{configuration-install}
+
+\DIFadd{To install OpenCore reflect the
+}\hyperref[configuration-structure]{Configuration Structure} \DIFadd{described
+in the previous section on a EFI volume of a GPT partition. While
+corresponding sections of this document do provide some information
+in regards to external resources like ACPI tables, UEFI drivers,
+or kernel extensions (kexts), completeness of the matter is out of
+the scope of this document. Extra information about particular kernel
+extensions may be found in Lilu's
+}\href{https://github.com/acidanthera/Lilu/blob/master/KnownPlugins.md}{Known Plugins}
+\DIFadd{table. Vaulting information is provided in
+}\hyperref[miscsecurityprops]{Security Properties} \DIFadd{section of this document.
+}
+
+\texttt{\DIFadd{OC\ config}}\DIFadd{, just like any property lists can be edited with any
+stock textual editor (e.g. nano, vim), but specialised software may provide
+better experience. On macOS the preferred GUI application is
+}\href{https://developer.apple.com/xcode}{Xcode}\DIFadd{. For a lightweight
+cross-platform and open-source alternative
+}\href{https://github.com/corpnewt/ProperTree}{ProperTree} \DIFadd{editor can be
+utilised.
+}
+
+\DIFadd{For BIOS booting a third-party UEFI environment provider will have to
+be used. }\texttt{\DIFadd{DuetPkg}} \DIFadd{is one of the known UEFI environment providers
+for legacy systems. While it is known to be possible to run OpenCore
+on such a legacy system, configuration and use of }\texttt{\DIFadd{DuetPkg}} \DIFadd{is
+currently out of the scope of this document.
+}
+
+\DIFadd{For upgrade purposes refer to }\texttt{\DIFadd{Differences.pdf}} \DIFadd{document, providing
+the information about the changes affecting the configuration compared
+to the previous release, and }\texttt{\DIFadd{Changelog.md}} \DIFadd{document, containing
+the list of modifications across all published updates.
+}
+
+\DIFaddend \subsection{Contribution}\label{configuration-comp}
 
 OpenCore can be compiled as an ordinary EDK II package with
 \href{https://github.com/tianocore/tianocore.github.io/wiki/UDK2018}{UDK 2018}.
@@ -512,7 +549,9 @@ Required external package dependencies include
 
 To compile with \texttt{XCODE5}, besides \href{https://developer.apple.com/xcode}{Xcode},
 one should also install \href{https://www.nasm.us}{NASM} and
-\href{https://github.com/acidanthera/ocbuild/raw/master/external/mtoc-mac64.zip}{MTOC}. Example command sequence may look as follows:
+\href{https://github.com/acidanthera/ocbuild/raw/master/external/mtoc-mac64.zip}{MTOC}.
+\DIFaddbegin \DIFadd{The latest Xcode version is recommended for use despite the toolchain name. }\DIFaddend Example
+command sequence may look as follows:
 
 \begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
 git clone https://github.com/tianocore/edk2 -b UDK2018 UDK
