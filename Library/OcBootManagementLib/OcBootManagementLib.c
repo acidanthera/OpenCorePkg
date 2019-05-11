@@ -949,19 +949,25 @@ InternalDevicePathIsTrailed (
   )
 {
   CONST FILEPATH_DEVICE_PATH *FilePath;
+  CONST FILEPATH_DEVICE_PATH *FilePathWalker;
   UINTN                      PathNameSize;
   UINTN                      PathNameLength;
 
   ASSERT (DevicePath != NULL);
   ASSERT (IsDevicePathValid (DevicePath, 0));
 
-  FilePath = (FILEPATH_DEVICE_PATH *)(
-               FindDevicePathNodeWithType (
-                 DevicePath,
-                 MEDIA_DEVICE_PATH,
-                 MEDIA_FILEPATH_DP
-                 )
-               );
+  FilePathWalker = NULL;
+  do {
+    FilePath = FilePathWalker;
+    FilePathWalker = (FILEPATH_DEVICE_PATH *)(
+                       FindDevicePathNodeWithType (
+                         DevicePath,
+                         MEDIA_DEVICE_PATH,
+                         MEDIA_FILEPATH_DP
+                         )
+                       );
+  } while (FilePathWalker != NULL);
+
   if (FilePath != NULL) {
     PathNameSize   = DevicePathNodeLength (FilePath);
     PathNameSize  -= SIZE_OF_FILEPATH_DEVICE_PATH;
