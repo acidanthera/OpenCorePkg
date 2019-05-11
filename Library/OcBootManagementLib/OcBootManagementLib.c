@@ -1044,11 +1044,11 @@ OcFillBootEntry (
 
   if (AlternateBootEntry != NULL) {
     //
-    // This function is guaranteed to never return a non-folder path.
+    // This function call is guaranteed to never return a non-folder path.
     //
     Status = BootPolicy->GetPathNameOnApfsRecovery (
       DevicePath,
-      L"\\",
+      L"",
       &RecoveryPath,
       &Reserved,
       &RecoveryRoot,
