@@ -47,7 +47,6 @@
 
 [Packages]
   EfiPkg/EfiPkg.dec
-  IntelFrameworkPkg/IntelFrameworkPkg.dec
   OpenCorePkg/OpenCorePkg.dec
   OcSupportPkg/OcSupportPkg.dec
   MacInfoPkg/MacInfoPkg.dec
