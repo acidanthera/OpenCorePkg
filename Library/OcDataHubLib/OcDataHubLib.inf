@@ -28,7 +28,6 @@
 
 [Packages]
   OcSupportPkg/OcSupportPkg.dec
-  IntelFrameworkPkg/IntelFrameworkPkg.dec
   EfiPkg/EfiPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
@@ -49,3 +48,5 @@
 
 [Sources]
   OcDataHubLib.c
+  DataHub.h
+  DataHub.c

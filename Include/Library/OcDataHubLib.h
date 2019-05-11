@@ -64,8 +64,8 @@ typedef struct {
   @retval Data Hub protocol instance or NULL.
 **/
 EFI_DATA_HUB_PROTOCOL *
-LocateDataHubProtocol (
-  VOID
+OcDataHubInstallProtocol (
+  IN BOOLEAN  Reinstall
   );
 
 /** Set Data Hub entry.
@@ -95,8 +95,9 @@ SetDataHubEntry (
 **/
 EFI_STATUS
 UpdateDataHub (
-  IN OC_DATA_HUB_DATA  *Data,
-  IN OC_CPU_INFO       *CpuInfo
+  IN EFI_DATA_HUB_PROTOCOL  *DataHub,
+  IN OC_DATA_HUB_DATA       *Data,
+  IN OC_CPU_INFO            *CpuInfo
   );
 
 #endif // OC_DATA_HUB_LIB_H

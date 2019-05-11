@@ -21,10 +21,10 @@
 /*
 TODO: ...
 
- clang -g -fsanitize=undefined,address -fshort-wchar -I../Include -I../../Include -I../../../EfiPkg/Include/ -I../../../EfiPkg/Include/X64 -I../../../MdePkg/Include/ -I../../../IntelFrameworkPkg/Include/ -I../../../UefiCpuPkg/Include/ -include ../Include/Base.h Props.c ../../Library/OcDevicePropertyLib/OcDevicePropertyLib.c ../../Library/OcStringLib/OcAsciiLib.c ../../../MdePkg/Library/UefiDevicePathLib/DevicePathUtilities.c ../../../MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.c ../../../MdePkg/Library/UefiDevicePathLib/DevicePathToText.c -o Props
+ clang -g -fsanitize=undefined,address -fshort-wchar -I../Include -I../../Include -I../../../EfiPkg/Include/ -I../../../EfiPkg/Include/X64 -I../../../MdePkg/Include/ -I../../../UefiCpuPkg/Include/ -include ../Include/Base.h Props.c ../../Library/OcDevicePropertyLib/OcDevicePropertyLib.c ../../Library/OcStringLib/OcAsciiLib.c ../../../MdePkg/Library/UefiDevicePathLib/DevicePathUtilities.c ../../../MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.c ../../../MdePkg/Library/UefiDevicePathLib/DevicePathToText.c -o Props
 
  for fuzzing:
- clang-mp-7.0 -Dmain=__main -g -fsanitize=undefined,address,fuzzer -fshort-wchar -I../Include -I../../Include -I../../../EfiPkg/Include/ -I../../../EfiPkg/Include/X64 -I../../../MdePkg/Include/ -I../../../IntelFrameworkPkg/Include/ -I../../../UefiCpuPkg/Include/ -include ../Include/Base.h Props.c ../../Library/OcDevicePropertyLib/OcDevicePropertyLib.c ../../Library/OcStringLib/OcAsciiLib.c ../../../MdePkg/Library/UefiDevicePathLib/DevicePathUtilities.c ../../../MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.c ../../../MdePkg/Library/UefiDevicePathLib/DevicePathToText.c -o Props
+ clang-mp-7.0 -Dmain=__main -g -fsanitize=undefined,address,fuzzer -fshort-wchar -I../Include -I../../Include -I../../../EfiPkg/Include/ -I../../../EfiPkg/Include/X64 -I../../../MdePkg/Include/ -I../../../UefiCpuPkg/Include/ -include ../Include/Base.h Props.c ../../Library/OcDevicePropertyLib/OcDevicePropertyLib.c ../../Library/OcStringLib/OcAsciiLib.c ../../../MdePkg/Library/UefiDevicePathLib/DevicePathUtilities.c ../../../MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.c ../../../MdePkg/Library/UefiDevicePathLib/DevicePathToText.c -o Props
 
  rm -rf DICT fuzz*.log ; mkdir DICT ; cp Props.bin DICT ; ./Props -jobs=4 DICT
 

@@ -77,9 +77,15 @@ TestDataHub (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  OC_CPU_INFO  CpuInfo;
+  OC_CPU_INFO           CpuInfo;
+  EFI_DATA_HUB_PROTOCOL *DataHub;
+  DataHub = OcDataHubInstallProtocol (TRUE);
+  if (DataHub == NULL) {
+    DEBUG ((DEBUG_WARN, "OC: Failed to install Data Hub\n"));
+    return EFI_NOT_FOUND;
+  }
   OcCpuScanProcessor (&CpuInfo);
-  UpdateDataHub (&Data, &CpuInfo);
+  UpdateDataHub (DataHub , &Data, &CpuInfo);
 
   //TODO: put elsewhere
   {

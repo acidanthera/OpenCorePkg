@@ -34,13 +34,26 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
+/**
+  Driver's Entry point routine that install Driver to produce Data Hub protocol.
+
+**/
 EFI_DATA_HUB_PROTOCOL *
-LocateDataHubProtocol (
+DataHubInstall (
   VOID
+  );
+
+EFI_DATA_HUB_PROTOCOL *
+OcDataHubInstallProtocol (
+  IN BOOLEAN  Reinstall
   )
 {
   EFI_STATUS             Status;
   EFI_DATA_HUB_PROTOCOL  *DataHub;
+
+  if (Reinstall) {
+    UninstallAllProtocolInstances (&gEfiDataHubProtocolGuid);
+  }
 
   DataHub = NULL;
   Status  = gBS->LocateProtocol (
@@ -50,8 +63,7 @@ LocateDataHubProtocol (
     );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "Data Hub failed to locate protocol - %r\n", Status));
-    return NULL;
+    return DataHubInstall ();
   }
 
   return DataHub;
@@ -238,18 +250,12 @@ SetDataHubEntry (
 
 EFI_STATUS
 UpdateDataHub (
-  IN OC_DATA_HUB_DATA  *Data,
-  IN OC_CPU_INFO       *CpuInfo
+  IN EFI_DATA_HUB_PROTOCOL  *DataHub,
+  IN OC_DATA_HUB_DATA       *Data,
+  IN OC_CPU_INFO            *CpuInfo
   )
 {
-  EFI_DATA_HUB_PROTOCOL  *DataHub;
   GUID                   SystemId;
-
-  DataHub = LocateDataHubProtocol ();
-
-  if (DataHub == NULL) {
-    return EFI_NOT_FOUND;
-  }
 
   DataHubSetAppleMiscAscii (DataHub, OC_PLATFORM_NAME, Data->PlatformName);
   DataHubSetAppleMiscUnicode (DataHub, OC_SYSTEM_PRODUCT_NAME, Data->SystemProductName);
