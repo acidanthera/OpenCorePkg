@@ -272,7 +272,7 @@ GetRecoveryOsBooter (
     // and we have to copy.
     //
 
-    Status = Root->Open (Root, &Recovery, L"\\com.apple.recovery.boot\\", EFI_FILE_MODE_READ, 0);
+    Status = Root->Open (Root, &Recovery, L"\\com.apple.recovery.boot", EFI_FILE_MODE_READ, 0);
     if (!EFI_ERROR (Status)) {
       //
       // Do not do any extra checks for simplicity, as they will be done later either way.
@@ -282,7 +282,7 @@ GetRecoveryOsBooter (
       TmpPath   = DevicePathFromHandle (Device);
 
       if (TmpPath != NULL) {
-        *FilePath = AppendFileNameDevicePath (TmpPath, L"\\com.apple.recovery.boot\\");
+        *FilePath = AppendFileNameDevicePath (TmpPath, L"\\com.apple.recovery.boot");
         if (*FilePath != NULL) {
           Status = EFI_SUCCESS;
         }
@@ -942,6 +942,38 @@ OcFreeBootEntries (
   FreePool (BootEntries);
 }
 
+STATIC
+BOOLEAN
+InternalDevicePathIsTrailed (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+  CONST FILEPATH_DEVICE_PATH *FilePath;
+  UINTN                      PathNameSize;
+  UINTN                      PathNameLength;
+
+  ASSERT (DevicePath != NULL);
+  ASSERT (IsDevicePathValid (DevicePath, 0));
+
+  FilePath = (FILEPATH_DEVICE_PATH *)(
+               FindDevicePathNodeWithType (
+                 DevicePath,
+                 MEDIA_DEVICE_PATH,
+                 MEDIA_FILEPATH_DP
+                 )
+               );
+  if (FilePath != NULL) {
+    PathNameSize   = DevicePathNodeLength (FilePath);
+    PathNameSize  -= SIZE_OF_FILEPATH_DEVICE_PATH;
+    PathNameLength = ((PathNameSize / sizeof (*FilePath->PathName)) - 1);
+    if (PathNameLength > 0) {
+      return (FilePath->PathName[PathNameLength - 1] == L'\\');
+    }
+  }
+
+  return FALSE;
+}
+
 UINTN
 OcFillBootEntry (
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
@@ -1035,6 +1067,15 @@ OcFillBootEntry (
     AlternateBootEntry->IsFolder   = TRUE;
     SetBootEntryFlags (AlternateBootEntry);
     ++Count;
+  }
+  //
+  // These are asserted because of firmwares not supporting opening filepaths
+  // (directories) with a trailing slash in the end.
+  // More details in a852f85986c1fe23fc3a429605e3c560ea800c54 OpenCorePkg commit.
+  //
+  ASSERT (!InternalDevicePathIsTrailed (BootEntry->DevicePath));
+  if (Count > 1) {
+    ASSERT (!InternalDevicePathIsTrailed (AlternateBootEntry->DevicePath));
   }
 
   return Count;
