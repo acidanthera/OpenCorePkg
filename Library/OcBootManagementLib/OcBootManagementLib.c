@@ -966,7 +966,12 @@ InternalDevicePathIsTrailed (
                          MEDIA_FILEPATH_DP
                          )
                        );
-  } while (FilePathWalker != NULL);
+    if (FilePathWalker == NULL) {
+      break;
+    }
+
+    DevicePath = NextDevicePathNode (FilePathWalker);
+  } while (TRUE);
 
   if (FilePath != NULL) {
     PathNameSize   = DevicePathNodeLength (FilePath);
