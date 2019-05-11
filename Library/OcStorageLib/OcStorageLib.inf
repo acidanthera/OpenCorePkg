@@ -32,7 +32,6 @@
 [Packages]
   OcSupportPkg/OcSupportPkg.dec
   MdePkg/MdePkg.dec
-  IntelFrameworkPkg/IntelFrameworkPkg.dec
 
 [LibraryClasses]
   BaseLib

@@ -28,8 +28,6 @@
 
 [Packages]
   OcSupportPkg/OcSupportPkg.dec
-  IntelFrameworkPkg/IntelFrameworkPkg.dec
-  IntelFrameworkModulePkg/IntelFrameworkModulePkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
 

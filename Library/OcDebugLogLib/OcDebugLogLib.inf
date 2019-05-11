@@ -28,7 +28,6 @@
 
 [Packages]
   EfiPkg/EfiPkg.dec
-  IntelFrameworkPkg/IntelFrameworkPkg.dec
   OcSupportPkg/OcSupportPkg.dec
   MdePkg/MdePkg.dec
 
