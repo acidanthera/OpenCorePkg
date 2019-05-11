@@ -407,7 +407,7 @@ OcConfigureLogProtocol (
 
   LogRoot = NULL;
 
-  if ((Options & OC_LOG_FILE) != 0) {
+  if ((Options & (OC_LOG_FILE | OC_LOG_ENABLE)) == (OC_LOG_FILE | OC_LOG_ENABLE)) {
     if (LogFileSystem != NULL) {
       Status = LogFileSystem->OpenVolume (LogFileSystem, &LogRoot);
       if (EFI_ERROR (Status)) {
