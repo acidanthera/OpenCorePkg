@@ -37,6 +37,10 @@
 [Protocols]
   gOcLogProtocolGuid          = { 0xDBB6008F, 0x89E4, 0x4272, { 0x98, 0x81, 0xCE, 0x3A, 0xFD, 0x97, 0x24, 0xD0 }}
 
+
+  ## Include/Protocol/LegacyRegion.h
+  gEfiLegacyRegionProtocolGuid   = { 0x0fc9013a, 0x0568, 0x4ba9, { 0x9b, 0x7e, 0xc9, 0xc3, 0x90, 0xa6, 0x60, 0x9b }}
+
 [PcdsFeatureFlag]
   ## Indicates if Apple Thunderbolt NHI protocol is called during device property export.<BR><BR>
   #   TRUE  - Apple Thunderbolt NHI protocol will be called.<BR>

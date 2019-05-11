@@ -19,10 +19,10 @@
 #include <sys/time.h>
 
 /*
- clang -g -fsanitize=undefined,address -I../Include -I../../Include -I../../../EfiPkg/Include/ -I../../../MdePkg/Include/ -I../../../IntelFrameworkPkg/Include/ -I../../../UefiCpuPkg/Include/ -include ../Include/Base.h Smbios.c ../../Library/OcSmbiosLib/DebugSmbios.c ../../Library/OcSmbiosLib/SmbiosInternal.c ../../Library/OcSmbiosLib/SmbiosPatch.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMiscLib/LegacyRegionLock.c ../../Library/OcMiscLib/LegacyRegionUnlock.c ../../Library/OcCpuLib/OcCpuLib.c -o Smbios
+ clang -g -fsanitize=undefined,address -I../Include -I../../Include -I../../../EfiPkg/Include/ -I../../../MdePkg/Include/ -I../../../UefiCpuPkg/Include/ -include ../Include/Base.h Smbios.c ../../Library/OcSmbiosLib/DebugSmbios.c ../../Library/OcSmbiosLib/SmbiosInternal.c ../../Library/OcSmbiosLib/SmbiosPatch.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMiscLib/LegacyRegionLock.c ../../Library/OcMiscLib/LegacyRegionUnlock.c ../../Library/OcCpuLib/OcCpuLib.c -o Smbios
 
  for fuzzing:
- clang-mp-7.0 -Dmain=__main -g -fsanitize=undefined,address,fuzzer -I../Include -I../../Include -I../../../EfiPkg/Include/ -I../../../MdePkg/Include/ -I../../../IntelFrameworkPkg/Include/ -I../../../UefiCpuPkg/Include/ -include ../Include/Base.h Smbios.c ../../Library/OcSmbiosLib/DebugSmbios.c ../../Library/OcSmbiosLib/SmbiosInternal.c ../../Library/OcSmbiosLib/SmbiosPatch.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMiscLib/LegacyRegionLock.c ../../Library/OcMiscLib/LegacyRegionUnlock.c ../../Library/OcCpuLib/OcCpuLib.c -o Smbios
+ clang-mp-7.0 -Dmain=__main -g -fsanitize=undefined,address,fuzzer -I../Include -I../../Include -I../../../EfiPkg/Include/ -I../../../MdePkg/Include/ -I../../../UefiCpuPkg/Include/ -include ../Include/Base.h Smbios.c ../../Library/OcSmbiosLib/DebugSmbios.c ../../Library/OcSmbiosLib/SmbiosInternal.c ../../Library/OcSmbiosLib/SmbiosPatch.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMiscLib/LegacyRegionLock.c ../../Library/OcMiscLib/LegacyRegionUnlock.c ../../Library/OcCpuLib/OcCpuLib.c -o Smbios
 
  rm -rf DICT fuzz*.log ; mkdir DICT ; cp Smbios.bin DICT ; ./Smbios -jobs=4 DICT
 
