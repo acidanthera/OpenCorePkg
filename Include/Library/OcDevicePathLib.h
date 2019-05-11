@@ -123,19 +123,6 @@ AbsoluteDevicePath (
   );
 
 /**
-  Get trailed (slash-appended) device path for booter paths.
-  This way \\smth.efi gets NULL and \\smth gives \\smth\\.
-
-  @param[in] DevicePath    Device path.
-
-  @retval  New device path or NULL.
-**/
-EFI_DEVICE_PATH_PROTOCOL *
-TrailedBooterDevicePath (
-  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
-  );
-
-/**
   Fix Apple Boot Device Path to be compatible with conventional UEFI
   implementations.
 

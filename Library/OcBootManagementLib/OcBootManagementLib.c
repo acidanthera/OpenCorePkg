@@ -258,19 +258,6 @@ GetRecoveryOsBooter (
         }
         FreePool (TmpPath);
       }
-
-      if (!EFI_ERROR (Status)) {
-        //
-        // This entry should point to a folder with recovery.
-        // Apple never adds trailing slashes to blessed folder paths.
-        // However, we do rely on trailing slashes in folder paths and add them here.
-        //
-        TmpPath = TrailedBooterDevicePath (*FilePath);
-        if (TmpPath != NULL) {
-          FreePool (*FilePath);
-          *FilePath = TmpPath;
-        }
-      }
     } else {
       FreePool (*FilePath);
       *FilePath = NULL;
@@ -322,7 +309,6 @@ SetBootEntryFlags (
   EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
   CONST CHAR16              *Path;
 
-  BootEntry->IsFolder   = FALSE;
   BootEntry->IsRecovery = FALSE;
   BootEntry->IsWindows  = FALSE;
 
@@ -336,14 +322,9 @@ SetBootEntryFlags (
     if ((DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
      && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)) {
       Path   = ((FILEPATH_DEVICE_PATH *) DevicePathWalker)->PathName;
-      if (Path[StrLen (Path) - 1] == L'\\') {
-        BootEntry->IsFolder = TRUE;
-      }
       if (StrStr (Path, L"com.apple.recovery.boot") != NULL) {
         BootEntry->IsRecovery = TRUE;
       }
-    } else {
-      BootEntry->IsFolder = FALSE;
     }
 
     DevicePathWalker = NextDevicePathNode (DevicePathWalker);
@@ -986,6 +967,11 @@ OcFillBootEntry (
   // We only allow recovery there.
   //
   if (!IsLoadHandle) {
+    //
+    // This function is supposed to never return a folder path.
+    // If it does, we are not supposed to treat it as such and hence just fail
+    // on image load.
+    //
     Status = BootPolicy->GetBootFileEx (
       Handle,
       APPLE_BOOT_POLICY_MODE_1,
@@ -995,16 +981,22 @@ OcFillBootEntry (
     Status = EFI_UNSUPPORTED;
   }
 
+  BootEntry->IsFolder = FALSE;
   //
   // Detect recovery on load handle and on a partition without
   // any bootloader. Never allow alternate in this case.
   //
   if (EFI_ERROR (Status)) {
+    //
+    // This function is guaranteed to never return a non-folder path.
+    //
     Status = GetRecoveryOsBooter (Handle, &DevicePath, TRUE);
     AlternateBootEntry = NULL;
     if (EFI_ERROR (Status)) {
       return Count;
     }
+
+    BootEntry->IsFolder = TRUE;
   }
 
   BootEntry->DevicePath = DevicePath;
@@ -1013,6 +1005,9 @@ OcFillBootEntry (
   ++Count;
 
   if (AlternateBootEntry != NULL) {
+    //
+    // This function is guaranteed to never return a non-folder path.
+    //
     Status = BootPolicy->GetPathNameOnApfsRecovery (
       DevicePath,
       L"\\",
@@ -1027,6 +1022,9 @@ OcFillBootEntry (
       FreePool (RecoveryPath);
       RecoveryRoot->Close (RecoveryRoot);
     } else {
+      //
+      // This function is guaranteed to never return a non-folder path.
+      //
       Status = GetRecoveryOsBooter (Handle, &DevicePath, FALSE);
       if (EFI_ERROR (Status)) {
         return Count;
@@ -1034,6 +1032,7 @@ OcFillBootEntry (
     }
 
     AlternateBootEntry->DevicePath = DevicePath;
+    AlternateBootEntry->IsFolder   = TRUE;
     SetBootEntryFlags (AlternateBootEntry);
     ++Count;
   }
