@@ -170,6 +170,74 @@ AbsoluteDevicePath (
   return NewPath;
 }
 
+EFI_DEVICE_PATH_PROTOCOL *
+TrailedBooterDevicePath (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
+  EFI_DEVICE_PATH_PROTOCOL  *NewDevicePath;
+  FILEPATH_DEVICE_PATH      *FilePath;
+  FILEPATH_DEVICE_PATH      *NewFilePath;
+  CHAR16                    *Path;
+  UINTN                     Length;
+  UINTN                     Size;
+
+  DevicePathWalker = DevicePath;
+
+  while (!IsDevicePathEnd (DevicePathWalker)) {
+    if ((DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
+     && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)
+     && IsDevicePathEnd (NextDevicePathNode (DevicePathWalker))) {
+      FilePath = (FILEPATH_DEVICE_PATH *) DevicePathWalker;
+      Path     = FilePath->PathName;
+      Length   = StrLen (Path);
+
+      if (Path[Length - 1] == L'\\') {
+        //
+        // Already appended, good. It should never be true with Apple entries though.
+        //
+        return NULL;
+      } else if (Length > 4 &&        (Path[Length - 4] != '.'
+        || (Path[Length - 3] != 'e' && Path[Length - 3] != 'E')
+        || (Path[Length - 2] != 'f' && Path[Length - 2] != 'F')
+        || (Path[Length - 1] != 'i' && Path[Length - 1] != 'I'))) {
+        //
+        // Found! We should have gotten something like:
+        // PciRoot(0x0)/Pci(...)/Pci(...)/Sata(...)/HD(...)/\com.apple.recovery.boot
+        //
+
+        Size          = GetDevicePathSize (DevicePath);
+        NewDevicePath = (EFI_DEVICE_PATH_PROTOCOL *) AllocatePool (Size + sizeof (CHAR16));
+        if (NewDevicePath == NULL) {
+          //
+          // Allocation failure, just ignore.
+          //
+          return NULL;
+        }
+        //
+        // Strip the string termination and DP end node, which will get re-set
+        //
+        CopyMem (NewDevicePath, DevicePath, Size - sizeof (CHAR16) - END_DEVICE_PATH_LENGTH);
+        NewFilePath = (FILEPATH_DEVICE_PATH *) ((UINT8 *)DevicePathWalker - (UINT8 *)DevicePath + (UINT8 *)NewDevicePath);
+        Size        = DevicePathNodeLength (DevicePathWalker) + sizeof (CHAR16);
+        SetDevicePathNodeLength (NewFilePath, Size);
+        NewFilePath->PathName[Length]   = L'\\';
+        NewFilePath->PathName[Length+1] = L'\0';
+        SetDevicePathEndNode ((UINT8 *) NewFilePath + Size);
+        return NewDevicePath;
+      }
+    }
+
+    DevicePathWalker = NextDevicePathNode (DevicePathWalker);
+  }
+
+  //
+  // Has .efi suffix or unsupported format.
+  //
+  return NULL;
+}
+
 /**
   Fix Apple Boot Device Path to be compatible with conventional UEFI
   implementations.
