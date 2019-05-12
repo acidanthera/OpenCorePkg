@@ -988,7 +988,7 @@ OcFillBootEntry (
   if (!IsLoadHandle) {
     Status = BootPolicy->GetBootFileEx (
       Handle,
-      APPLE_BOOT_POLICY_MODE_1,
+      BootPolicyOk,
       &DevicePath
       );
   } else {
@@ -1105,7 +1105,7 @@ InternalGetFirstDeviceBootFilePath (
 
     Status = BootPolicy->GetBootFileEx (
                            HandleBuffer[Index],
-                           APPLE_BOOT_POLICY_MODE_1,
+                           BootPolicyOk,
                            &BootDevicePath
                            );
     if (!EFI_ERROR (Status)) {
