@@ -331,7 +331,7 @@
   _(BOOLEAN                     , UpdateDataHub    ,     , FALSE                                           , ()) \
   _(BOOLEAN                     , UpdateNvram      ,     , FALSE                                           , ()) \
   _(BOOLEAN                     , UpdateSmbios     ,     , FALSE                                           , ()) \
-  _(OC_STRING                   , UpdateSmbiosMode ,     , OC_STRING_CONSTR ("Auto", _, __)                , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , UpdateSmbiosMode ,     , OC_STRING_CONSTR ("Create", _, __)              , OC_DESTR (OC_STRING) ) \
   _(OC_PLATFORM_GENERIC_CONFIG  , Generic          ,     , OC_CONSTR2 (OC_PLATFORM_GENERIC_CONFIG, _, __)  , OC_DESTR (OC_PLATFORM_GENERIC_CONFIG)) \
   _(OC_PLATFORM_DATA_HUB_CONFIG , DataHub          ,     , OC_CONSTR2 (OC_PLATFORM_DATA_HUB_CONFIG, _, __) , OC_DESTR (OC_PLATFORM_DATA_HUB_CONFIG)) \
   _(OC_PLATFORM_NVRAM_CONFIG    , Nvram            ,     , OC_CONSTR2 (OC_PLATFORM_NVRAM_CONFIG, _, __)    , OC_DESTR (OC_PLATFORM_NVRAM_CONFIG)) \
