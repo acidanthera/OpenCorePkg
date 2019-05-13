@@ -536,8 +536,8 @@ OcLoadPlatformSupport (
   if (Config->PlatformInfo.UpdateSmbios) {
     SmbiosUpdateStr  = OC_BLOB_GET (&Config->PlatformInfo.UpdateSmbiosMode);
 
-    if (AsciiStrCmp (SmbiosUpdateStr, "Auto") == 0) {
-      SmbiosUpdateMode = OcSmbiosUpdateAuto;
+    if (AsciiStrCmp (SmbiosUpdateStr, "TryOverwrite") == 0) {
+      SmbiosUpdateMode = OcSmbiosUpdateTryOverwrite;
     } else if (AsciiStrCmp (SmbiosUpdateStr, "Create") == 0) {
       SmbiosUpdateMode = OcSmbiosUpdateCreate;
     } else if (AsciiStrCmp (SmbiosUpdateStr, "Overwrite") == 0) {
@@ -546,7 +546,7 @@ OcLoadPlatformSupport (
       SmbiosUpdateMode = OcSmbiosUpdateCustom;
     } else {
       DEBUG ((DEBUG_WARN, "OC: Invalid SMBIOS update mode %a\n", SmbiosUpdateStr));
-      SmbiosUpdateMode = OcSmbiosUpdateAuto;
+      SmbiosUpdateMode = OcSmbiosUpdateCreate;
     }
 
     OcPlatformUpdateSmbios (Config, CpuInfo, UsedMacInfo, SmbiosUpdateMode);

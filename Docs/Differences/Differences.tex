@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May  3 12:13:06 2019
-%DIF ADD ../Configuration.tex        Fri May 10 14:58:12 2019
+%DIF ADD ../Configuration.tex        Mon May 13 22:08:08 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -576,7 +576,8 @@ approach could be \href{https://www.sublimetext.com}{Sublime Text} with
 \href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
 Add \texttt{.clang\_complete} file with similar content to your UDK root:
 
-\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash]
+\DIFmodbegin
+\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash,alsolanguage=DIFcode]
 -I/UefiPackages/MdePkg
 -I/UefiPackages/MdePkg/Include
 -I/UefiPackages/MdePkg/Include/X64
@@ -587,7 +588,7 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -I/UefiPackages/AppleSupportPkg/Include
 -I/UefiPackages/OpenCorePkg/Include
 -I/UefiPackages/OcSupportPkg/Include
--I/UefiPackages/IntelFrameworkPkg/Include
+%DIF < -I/UefiPackages/IntelFrameworkPkg/Include
 -I/UefiPackages/MacInfoPkg/Include
 -IInclude
 -include
@@ -603,6 +604,7 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -Wno-varargs
 -Wno-unused-const-variable
 \end{lstlisting}
+\DIFmodend
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
 files must ensure that their tool checks for \texttt{opencore-version} NVRAM variable
@@ -2018,9 +2020,12 @@ are written to three select destinations:
 \item
   \href{https://www.dmtf.org/standards/smbios}{SMBIOS}
 \item
-  \href{https://github.com/freebsd/uefi-edk2/blob/master/IntelFrameworkModulePkg/Universal/DataHubDxe/DataHubDxe.uni}{Data
+  \DIFdelbegin %DIFDELCMD < \href{https://github.com/freebsd/uefi-edk2/blob/master/IntelFrameworkModulePkg/Universal/DataHubDxe/DataHubDxe.uni}{Data
+%DIFDELCMD <   Hub}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/DataHub.h}{Data
   Hub}
-\item
+\DIFaddend \item
   NVRAM
 \end{itemize}
 
@@ -2079,16 +2084,16 @@ for system configuration.
 \item
   \texttt{UpdateSMBIOSMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: \texttt{Auto}\\
+  \textbf{Default value}: \texttt{\DIFdelbegin \DIFdel{Auto}\DIFdelend \DIFaddbegin \DIFadd{Create}\DIFaddend }\\
   \textbf{Description}: Update SMBIOS fields approach:
 
   \begin{itemize}
   \tightlist
   \item
-    \texttt{Auto} --- \texttt{Overwrite} if new size is \textless{}= than
+    \texttt{\DIFdelbegin \DIFdel{Auto}\DIFdelend \DIFaddbegin \DIFadd{TryOverwrite}\DIFaddend } --- \texttt{Overwrite} if new size is \textless{}= than
     the page-aligned original and there are no issues with legacy region
-    unlock. \texttt{Create} otherwise.
-  \item
+    unlock. \texttt{Create} otherwise. \DIFaddbegin \DIFadd{Has issues with some firmwares.
+  }\DIFaddend \item
     \texttt{Create} --- Replace the tables with newly allocated
     EfiReservedMemoryType at AllocateMaxAddress without any fallbacks.
   \item
@@ -2685,10 +2690,13 @@ tweaks for the onboard firmware.
   are hibernation support, KASLR, Lilu NVRAM security enhancements, NVRAM, and UEFI
   Boot entry preservation.
   \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{DataHubDxe}}
-  --- Intel DataHub driver from \texttt{IntelFrameworkModulePkg}. It is believed
+  --- \DIFdelbegin \DIFdel{Intel DataHub driver from }\texttt{\DIFdel{IntelFrameworkModulePkg}}%DIFAUXCMD
+\DIFdel{. It is believed
   that this driver is included in all UEFI firmwares, and is not required.
-  \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{EmuVariableRuntimeDxe}}
-  --- NVRAM emulation driver from \texttt{MdeModulePkg}. NVRAM is supported by most
+  }%DIFDELCMD < \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{EmuVariableRuntimeDxe}}
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdel{--- }\DIFdelend NVRAM emulation driver from \texttt{MdeModulePkg}. NVRAM is supported by most
   modern firmwares. For firmwares with macOS incompatible NVRAM implementation an
   emulated driver may be used. This driver will not preserve NVRAM contents across the
   reboots.
@@ -2721,24 +2729,26 @@ tweaks for the onboard firmware.
   --- HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HFSPlus} driver commonly found in Apple firmwares. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
-  a security audit\DIFaddbegin \DIFadd{.
-  }\item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{XhciDxe}}
+  a security audit.
+  \DIFaddbegin \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{XhciDxe}}
   \DIFadd{--- XHCI USB controller support driver from }\texttt{\DIFadd{MdeModulePkg}}\DIFadd{. This driver is
   included in most firmwares starting with Sandy Bridge generation. For earlier firmwares
-  or legacy systems it may be used to support external USB 3.0 PCI cards}\DIFaddend .
-  \end{itemize}
+  or legacy systems it may be used to support external USB 3.0 PCI cards.
+  }\DIFaddend \end{itemize}
 
   To compile the drivers from TianoCore UDK use the same command you do normally use
   for OpenCore compilation, but choose a corresponding package:
-\begin{lstlisting}[label=compileudk, style=ocbash]
+\DIFmodbegin
+\begin{lstlisting}[label=compileudk, style=ocbash,alsolanguage=DIFcode]
 git clone https://github.com/tianocore/edk2 -b UDK2018 UDK
 cd UDK
 source edksetup.sh
 make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p FatPkg/FatPkg.dsc
 build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
-build -a X64 -b RELEASE -t XCODE5 -p IntelFrameworkModulePkg/IntelFrameworkModulePkg.dsc
+%DIF < build -a X64 -b RELEASE -t XCODE5 -p IntelFrameworkModulePkg/IntelFrameworkModulePkg.dsc
 \end{lstlisting}
+\DIFmodend
 
 \item
   \texttt{Protocols}\\

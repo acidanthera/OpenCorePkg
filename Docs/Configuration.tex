@@ -508,7 +508,6 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -I/UefiPackages/AppleSupportPkg/Include
 -I/UefiPackages/OpenCorePkg/Include
 -I/UefiPackages/OcSupportPkg/Include
--I/UefiPackages/IntelFrameworkPkg/Include
 -I/UefiPackages/MacInfoPkg/Include
 -IInclude
 -include
@@ -1862,7 +1861,7 @@ are written to three select destinations:
 \item
   \href{https://www.dmtf.org/standards/smbios}{SMBIOS}
 \item
-  \href{https://github.com/freebsd/uefi-edk2/blob/master/IntelFrameworkModulePkg/Universal/DataHubDxe/DataHubDxe.uni}{Data
+  \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/DataHub.h}{Data
   Hub}
 \item
   NVRAM
@@ -1923,15 +1922,15 @@ for system configuration.
 \item
   \texttt{UpdateSMBIOSMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: \texttt{Auto}\\
+  \textbf{Default value}: \texttt{Create}\\
   \textbf{Description}: Update SMBIOS fields approach:
 
   \begin{itemize}
   \tightlist
   \item
-    \texttt{Auto} --- \texttt{Overwrite} if new size is \textless{}= than
+    \texttt{TryOverwrite} --- \texttt{Overwrite} if new size is \textless{}= than
     the page-aligned original and there are no issues with legacy region
-    unlock. \texttt{Create} otherwise.
+    unlock. \texttt{Create} otherwise. Has issues with some firmwares.
   \item
     \texttt{Create} --- Replace the tables with newly allocated
     EfiReservedMemoryType at AllocateMaxAddress without any fallbacks.
@@ -2528,9 +2527,6 @@ tweaks for the onboard firmware.
   are hibernation support, KASLR, Lilu NVRAM security enhancements, NVRAM, and UEFI
   Boot entry preservation.
   \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{DataHubDxe}}
-  --- Intel DataHub driver from \texttt{IntelFrameworkModulePkg}. It is believed
-  that this driver is included in all UEFI firmwares, and is not required.
-  \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{EmuVariableRuntimeDxe}}
   --- NVRAM emulation driver from \texttt{MdeModulePkg}. NVRAM is supported by most
   modern firmwares. For firmwares with macOS incompatible NVRAM implementation an
   emulated driver may be used. This driver will not preserve NVRAM contents across the
@@ -2580,7 +2576,6 @@ source edksetup.sh
 make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p FatPkg/FatPkg.dsc
 build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
-build -a X64 -b RELEASE -t XCODE5 -p IntelFrameworkModulePkg/IntelFrameworkModulePkg.dsc
 \end{lstlisting}
 
 \item

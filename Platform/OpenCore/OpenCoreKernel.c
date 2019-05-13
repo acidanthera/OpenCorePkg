@@ -277,7 +277,7 @@ OcKernelApplyPatches (
 
     Status = PatcherApplyGenericPatch (&Patcher, &Patch);
     DEBUG ((
-      EFI_ERROR (Status) ? DEBUG_INFO : DEBUG_WARN,
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
       "OC: Kernel patcher result %u for %a - %r\n",
       Index,
       Target,
