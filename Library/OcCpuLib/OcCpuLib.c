@@ -56,32 +56,35 @@ DetectAppleMajorType (
       ++BrandInfix;
     }
 
-    if (AsciiStrnCmp (BrandInfix, "i7", L_STR_LEN("i7")) == 0) {
+    if (AsciiStrnCmp (BrandInfix, "i7", L_STR_LEN ("i7")) == 0) {
       return AppleProcessorMajorI7;
     }
-    if (AsciiStrnCmp (BrandInfix, "i5", L_STR_LEN("i5")) == 0) {
+    if (AsciiStrnCmp (BrandInfix, "i5", L_STR_LEN ("i5")) == 0) {
       return AppleProcessorMajorI5;
     }
-    if (AsciiStrnCmp (BrandInfix, "i3", L_STR_LEN("i3")) == 0) {
+    if (AsciiStrnCmp (BrandInfix, "i3", L_STR_LEN ("i3")) == 0) {
       return AppleProcessorMajorI3;
     }
-    if (AsciiStrnCmp (BrandInfix, "i9", L_STR_LEN("i9")) == 0) {
+    if (AsciiStrnCmp (BrandInfix, "i9", L_STR_LEN ("i9")) == 0) {
       return AppleProcessorMajorI9;
     }
-    if (AsciiStrnCmp (BrandInfix, "m3", L_STR_LEN("m3")) == 0) {
+    if (AsciiStrnCmp (BrandInfix, "m3", L_STR_LEN ("m3")) == 0) {
       return AppleProcessorMajorM3;
     }
-    if (AsciiStrnCmp (BrandInfix, "m5", L_STR_LEN("m5")) == 0) {
+    if (AsciiStrnCmp (BrandInfix, "m5", L_STR_LEN ("m5")) == 0) {
       return AppleProcessorMajorM5;
     }
-    if (AsciiStrnCmp (BrandInfix, "m7", L_STR_LEN("m7")) == 0) {
+    if (AsciiStrnCmp (BrandInfix, "m7", L_STR_LEN ("m7")) == 0) {
       return AppleProcessorMajorM7;
     }
-    if (AsciiStrnCmp (BrandInfix, "M", L_STR_LEN("M")) == 0) {
+    if (AsciiStrnCmp (BrandInfix, "M", L_STR_LEN ("M")) == 0) {
       return AppleProcessorMajorM;
     }
-    if (AsciiStrnCmp (BrandInfix, "2 Duo", L_STR_LEN("2 Duo")) == 0) {
+    if (AsciiStrnCmp (BrandInfix, "Duo", L_STR_LEN ("Duo")) == 0) {
       return AppleProcessorMajorCore2;
+    }
+    if (AsciiStrnCmp (BrandInfix, "Quad", L_STR_LEN ("Quad")) == 0) {
+      return AppleProcessorMajorXeonPenryn;
     }
     return AppleProcessorMajorCore;
   }
@@ -96,10 +99,20 @@ DetectAppleMajorType (
       ++BrandInfix;
     }
 
-    if (AsciiStrnCmp (BrandInfix, "E5", L_STR_LEN("E5")) == 0) {
+    //
+    // Support both variants: Xeon(R) E5-1234 and Xeon(R) CPU E5-1234
+    //
+    if (AsciiStrnCmp (BrandInfix, "CPU", L_STR_LEN ("CPU")) == 0) {
+      BrandInfix += L_STR_LEN ("CPU");
+      while (*BrandInfix == ' ') {
+        ++BrandInfix;
+      }
+    }
+
+    if (AsciiStrnCmp (BrandInfix, "E5", L_STR_LEN ("E5")) == 0) {
       return AppleProcessorMajorXeonE5;
     }
-    if (AsciiStrnCmp (BrandInfix, "W", L_STR_LEN("W")) == 0) {
+    if (AsciiStrnCmp (BrandInfix, "W", L_STR_LEN ("W")) == 0) {
       return AppleProcessorMajorXeonW;
     }
     return AppleProcessorMajorXeonNehalem;
