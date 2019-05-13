@@ -1755,12 +1755,17 @@ STATIC EFI_STATUS NilLocateDevicePath (EFI_GUID *Protocol, EFI_DEVICE_PATH_PROTO
   return EFI_UNSUPPORTED;
 }
 
+extern EFI_STATUS NilInstallConfigurationTableCustom(EFI_GUID *Guid, VOID *Table);
+
+#ifndef CONFIG_TABLE_INSTALLER
+#define CONFIG_TABLE_INSTALLER NilInstallConfigurationTable
+#endif
 
 STATIC EFI_BOOT_SERVICES gNilBS = {
   .LocateProtocol = NilLocateProtocol,
   .AllocatePages = NilAllocatePages,
   .FreePages = NilFreePages,
-  .InstallConfigurationTable = NilInstallConfigurationTable,
+  .InstallConfigurationTable = CONFIG_TABLE_INSTALLER,
   .LocateHandleBuffer = NilLocateHandleBuffer,
   .HandleProtocol = NilHandleProtocol,
   .InstallProtocolInterface = NilInstallProtocolInterface,

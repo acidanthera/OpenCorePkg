@@ -103,7 +103,7 @@ typedef enum OC_SMBIOS_UPDATE_MODE_ {
   // OcSmbiosUpdateOverwrite if new size is <= than the page-aligned original and
   // there are no issues with legacy region unlock. OcSmbiosUpdateCreate otherwise.
   //
-  OcSmbiosUpdateAuto       = 0,
+  OcSmbiosUpdateTryOverwrite = 0,
   //
   // Replace the tables with newly allocated. Normally it is in EfiRuntimeData (EDK 2), but
   // boot.efi relocates EfiRuntimeData unless AptioMemoryFix is used, so it is incorrect.
@@ -117,19 +117,19 @@ typedef enum OC_SMBIOS_UPDATE_MODE_ {
   // UEFI 2.7A specification (page 166).
   // * We allocate EfiReservedMemoryType at AllocateMaxAddress without any fallbacks.
   //
-  OcSmbiosUpdateCreate     = 1,
+  OcSmbiosUpdateCreate       = 1,
   //
   // Overwrite existing gEfiSmbiosTableGuid and gEfiSmbiosTable3Guid data if it fits new size.
   // Abort with unspecified state otherwise.
   //
-  OcSmbiosUpdateOverwrite  = 2,
+  OcSmbiosUpdateOverwrite    = 2,
   //
   // Writes first SMBIOS table (gEfiSmbiosTableGuid) to gOcCustomSmbiosTableGuid to workaround
   // firmwares overwriting SMBIOS contents at ExitBootServices. Otherwise equivalent to
   // OcSmbiosUpdateCreate. Requires patching AppleSmbios.kext and AppleACPIPlatform.kext to read
   // from another GUID: "EB9D2D31" -> "EB9D2D35" (in ASCII).
   //
-  OcSmbiosUpdateCustom     = 3,
+  OcSmbiosUpdateCustom       = 3,
 } OC_SMBIOS_UPDATE_MODE;
 
 EFI_STATUS

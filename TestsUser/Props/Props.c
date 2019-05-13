@@ -53,10 +53,6 @@ EFI_GUID gEfiVirtualDiskGuid;
 _Thread_local uint32_t externalUsedPages = 0;
 _Thread_local uint8_t externalBlob[EFI_PAGE_SIZE*TOTAL_PAGES];
 
-EFI_STATUS NilInstallConfigurationTable(EFI_GUID *Guid, VOID *Table) {
-  return EFI_SUCCESS;
-}
-
 int main(int argc, char** argv) {
 
   return 0;

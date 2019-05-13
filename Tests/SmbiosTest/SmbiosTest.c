@@ -85,7 +85,7 @@ TestSmbios (
 {
   OC_CPU_INFO  CpuInfo;
   OcCpuScanProcessor (&CpuInfo);
-  CreateSmbios (&Data, OcSmbiosUpdateAuto, &CpuInfo);
+  CreateSmbios (&Data, OcSmbiosUpdateCreate, &CpuInfo);
   return EFI_SUCCESS;
 }
 

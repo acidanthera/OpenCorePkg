@@ -25,6 +25,7 @@
 #include <Library/OcSmbiosLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcGuardLib.h>
+#include <Library/OcFileLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -405,7 +406,9 @@ PatchCacheInformation (
 
   NumberEntries = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_CACHE_INFORMATION);
 
-  for (EntryNo = 1; EntryNo <= NumberEntries; EntryNo++) {
+  DEBUG ((DEBUG_INFO, "OCSMB: Number of CPU cache entries is %u\n", (UINT32) NumberEntries));
+
+  for (EntryNo = 1; EntryNo <= NumberEntries; ++EntryNo) {
     Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_CACHE_INFORMATION, EntryNo);
     if (Original.Raw == NULL || !SMBIOS_ACCESSIBLE (Original, Standard.Type7->CacheConfiguration)) {
       continue;
@@ -790,7 +793,7 @@ PatchMemoryMappedAddress (
       //
       // The value is reasonably large enough for this to never happen, yet just in case.
       //
-      DEBUG ((DEBUG_WARN, "OC_SMBIOS_MAX_MAPPING exceeded\n"));
+      DEBUG ((DEBUG_WARN, "OCSMB: OC_SMBIOS_MAX_MAPPING exceeded\n"));
     }
 
     SmbiosFinaliseStruct (Table);
@@ -1091,7 +1094,7 @@ SmbiosHandleLegacyRegion (
         );
 
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_INFO, "LegacyRegionUnlock DMI anchor failure - %r\n", Status));
+        DEBUG ((DEBUG_INFO, "OCSMB: LegacyRegionUnlock DMI anchor failure - %r\n", Status));
         return Status;
       }
     }
@@ -1106,7 +1109,7 @@ SmbiosHandleLegacyRegion (
         );
 
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_INFO, "LegacyRegionUnlock DMI table failure - %r\n", Status));
+        DEBUG ((DEBUG_INFO, "OCSMB: LegacyRegionUnlock DMI table failure - %r\n", Status));
         return Status;
       }
     }
@@ -1121,7 +1124,7 @@ SmbiosHandleLegacyRegion (
         );
 
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_INFO, "LegacyRegionLock DMI table failure - %r\n", Status));
+        DEBUG ((DEBUG_INFO, "OCSMB: LegacyRegionLock DMI table failure - %r\n", Status));
         return Status;
       }
     }
@@ -1136,7 +1139,7 @@ SmbiosHandleLegacyRegion (
         );
 
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_INFO, "LegacyRegionLock DMI anchor failure - %r\n", Status));
+        DEBUG ((DEBUG_INFO, "OCSMB: LegacyRegionLock DMI anchor failure - %r\n", Status));
         return Status;
       }
     }
@@ -1178,7 +1181,7 @@ SmbiosPrepareTable (
   //
   if (!EFI_ERROR (Status)) {
     if (mOriginalSmbios->EntryPointLength < sizeof (SMBIOS_TABLE_ENTRY_POINT)) {
-      DEBUG ((DEBUG_WARN, "SmbiosLookupHost entry is too small - %u/%u bytes\n",
+      DEBUG ((DEBUG_WARN, "OCSMB: SmbiosLookupHost entry is too small - %u/%u bytes\n",
         mOriginalSmbios->EntryPointLength, (UINT32) sizeof (SMBIOS_TABLE_ENTRY_POINT)));
       mOriginalSmbios = NULL;
     } else if (mOriginalSmbios->TableAddress == 0 || mOriginalSmbios->TableLength == 0) {
@@ -1187,12 +1190,12 @@ SmbiosPrepareTable (
         && SMBIOS_TABLE_MAX_LENGTH == MAX_UINT16,
         "mOriginalTable->TableLength may exceed SMBIOS_TABLE_MAX_LENGTH"
         );
-      DEBUG ((DEBUG_WARN, "SmbiosLookupHost entry has invalid table - %08X of %u bytes\n",
+      DEBUG ((DEBUG_WARN, "OCSMB: SmbiosLookupHost entry has invalid table - %08X of %u bytes\n",
         mOriginalSmbios->TableAddress, mOriginalSmbios->TableLength));
       mOriginalSmbios = NULL;
     }
   } else {
-    DEBUG ((DEBUG_WARN, "SmbiosLookupHost failed to lookup SMBIOSv1 - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "OCSMB: SmbiosLookupHost failed to lookup SMBIOSv1 - %r\n", Status));
   }
 
   //
@@ -1205,7 +1208,7 @@ SmbiosPrepareTable (
 
   if (!EFI_ERROR (Status)) {
     if (mOriginalSmbios3->EntryPointLength < sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT)) {
-      DEBUG ((DEBUG_INFO, "SmbiosLookupHost v3 entry is too small - %u/%u bytes\n",
+      DEBUG ((DEBUG_INFO, "OCSMB: SmbiosLookupHost v3 entry is too small - %u/%u bytes\n",
         mOriginalSmbios3->EntryPointLength, (UINT32) sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT)));
       mOriginalSmbios3 = NULL;
     } else if (mOriginalSmbios3->TableAddress == 0 || mOriginalSmbios3->TableMaximumSize == 0) {
@@ -1214,21 +1217,18 @@ SmbiosPrepareTable (
         && SMBIOS_3_0_TABLE_MAX_LENGTH == MAX_UINT32,
         "mOriginalSmbios3->TableMaximumSize may exceed SMBIOS_3_0_TABLE_MAX_LENGTH"
         );
-      DEBUG ((DEBUG_INFO, "SmbiosLookupHost v3 entry has invalid table - %016LX of %u bytes\n",
+      DEBUG ((DEBUG_INFO, "OCSMB: SmbiosLookupHost v3 entry has invalid table - %016LX of %u bytes\n",
         mOriginalSmbios3->TableAddress, mOriginalSmbios3->TableMaximumSize));
       mOriginalSmbios3 = NULL;
     }
   } else {
-    DEBUG ((DEBUG_INFO, "SmbiosLookupHost failed to lookup SMBIOSv3 - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCSMB: SmbiosLookupHost failed to lookup SMBIOSv3 - %r\n", Status));
   }
 
   //
   // TODO: I think we may want to try harder.
   //
 
-  //
-  // Pad the table length to a page and calculate byte size.
-  //
   if (mOriginalSmbios != NULL) {
     mOriginalTableSize = mOriginalSmbios->TableLength;
     mOriginalTable.Raw = (UINT8 *)(UINTN) mOriginalSmbios->TableAddress;
@@ -1240,7 +1240,7 @@ SmbiosPrepareTable (
   if (mOriginalSmbios != NULL) {
     DEBUG ((
       DEBUG_INFO,
-      "Found DMI Anchor %08LX v%u.%u Table Address %08LX Length %04X\n",
+      "OCSMB: Found DMI Anchor %08LX v%u.%u Table Address %08LX Length %04X\n",
       (UINT64) mOriginalSmbios,
       mOriginalSmbios->MajorVersion,
       mOriginalSmbios->MinorVersion,
@@ -1252,7 +1252,7 @@ SmbiosPrepareTable (
   if (mOriginalSmbios3 != NULL) {
     DEBUG ((
       DEBUG_INFO,
-      "Found DMI Anchor %08LX v%u.%u Table Address %08LX Length %04X\n",
+      "OCSMB: Found DMI Anchor %08LX v%u.%u Table Address %08LX Length %04X\n",
       (UINT64) mOriginalSmbios3,
       mOriginalSmbios3->MajorVersion,
       mOriginalSmbios3->MinorVersion,
@@ -1263,7 +1263,7 @@ SmbiosPrepareTable (
 
   Status = SmbiosExtendTable (SmbiosTable, 1);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_VERBOSE, "SmbiosLookupHost failed to initialise smbios table - %r\n", Status));
+    DEBUG ((DEBUG_VERBOSE, "OCSMB: SmbiosLookupHost failed to initialise smbios table - %r\n", Status));
   }
 
   return Status;
@@ -1309,8 +1309,8 @@ SmbiosTableAllocate (
   }
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "SmbiosTableAllocate aborts as it cannot allocate SMBIOS pages with %d %d %d\n",
-      *TableEntryPoint != NULL, *TableAddress != NULL, *TableEntryPoint3 != NULL));
+    DEBUG ((DEBUG_WARN, "OCSMB: SmbiosTableAllocate aborts as it cannot allocate SMBIOS pages with %d %d %d - %r\n",
+      *TableEntryPoint != NULL, *TableAddress != NULL, *TableEntryPoint3 != NULL, Status));
     if (*TableEntryPoint != NULL) {
       FreePages (*TableEntryPoint, 1);
     }
@@ -1349,7 +1349,7 @@ SmbiosTableApply (
   ASSERT (Mode == OcSmbiosUpdateCreate
     || Mode == OcSmbiosUpdateOverwrite
     || Mode == OcSmbiosUpdateCustom
-    || Mode == OcSmbiosUpdateAuto
+    || Mode == OcSmbiosUpdateTryOverwrite
     );
 
   //
@@ -1357,11 +1357,24 @@ SmbiosTableApply (
   //
   TableLength = (UINT16) (SmbiosTable->CurrentPtr.Raw - SmbiosTable->Table);
 
-  if (Mode == OcSmbiosUpdateAuto || Mode == OcSmbiosUpdateOverwrite) {
+  DEBUG ((
+    DEBUG_INFO,
+    "OCSMB: Applying %u (%d) prev %p (%u/%u), %p (%u/%u)\n",
+    (UINT32) TableLength,
+    Mode,
+    mOriginalSmbios,
+    (UINT32) (mOriginalSmbios != NULL ? mOriginalSmbios->TableLength : 0),
+    (UINT32) (mOriginalSmbios != NULL ? mOriginalSmbios->EntryPointLength : 0),
+    mOriginalSmbios3,
+    (UINT32) (mOriginalSmbios3 != NULL ? mOriginalSmbios3->TableMaximumSize : 0),
+    (UINT32) (mOriginalSmbios3 != NULL ? mOriginalSmbios3->EntryPointLength : 0)
+    ));
+
+  if (Mode == OcSmbiosUpdateTryOverwrite || Mode == OcSmbiosUpdateOverwrite) {
     Status = SmbiosHandleLegacyRegion (TRUE);
 
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "SmbiosTableApply(%u) cannot handle legacy region - %r\n", Mode, Status));
+      DEBUG ((DEBUG_WARN, "OCSMB: Apply(%u) cannot handle legacy region - %r\n", Mode, Status));
       if (Mode == OcSmbiosUpdateOverwrite) {
         return Status;
       }
@@ -1372,7 +1385,7 @@ SmbiosTableApply (
       Mode = OcSmbiosUpdateCreate;
     } else if (mOriginalSmbios == NULL || TableLength > mOriginalSmbios->TableLength
       || mOriginalSmbios->EntryPointLength < sizeof (SMBIOS_TABLE_ENTRY_POINT)) {
-      DEBUG ((DEBUG_WARN, "SmbiosTableApply(%u) cannot update old SMBIOS (%p, %u, %u) with %u\n",
+      DEBUG ((DEBUG_WARN, "OCSMB: Apply(%u) cannot update old SMBIOS (%p, %u, %u) with %u\n",
         Mode, mOriginalSmbios, mOriginalSmbios != NULL ? mOriginalSmbios->TableLength : 0,
         mOriginalSmbios != NULL ? mOriginalSmbios->EntryPointLength : 0, TableLength));
       if (Mode == OcSmbiosUpdateOverwrite) {
@@ -1384,15 +1397,18 @@ SmbiosTableApply (
       Mode = OcSmbiosUpdateCreate;
     } else if (mOriginalSmbios3 != NULL && (TableLength > mOriginalSmbios3->TableMaximumSize
       || mOriginalSmbios3->EntryPointLength < sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT))) {
-      DEBUG ((DEBUG_INFO, "SmbiosTableApply(%u) cannot fit SMBIOSv3 (%p, %u, %u) with %u\n",
+      DEBUG ((DEBUG_INFO, "OCSMB: Apply(%u) cannot fit SMBIOSv3 (%p, %u, %u) with %u\n",
         Mode, mOriginalSmbios3, mOriginalSmbios3->EntryPointLength, mOriginalSmbios3->TableMaximumSize, TableLength));
+      if (Mode == OcSmbiosUpdateOverwrite) {
+        return EFI_OUT_OF_RESOURCES;
+      }
       Mode = OcSmbiosUpdateCreate;
     } else {
       Mode = OcSmbiosUpdateOverwrite;
     }
   }
 
-  ASSERT (Mode != OcSmbiosUpdateAuto);
+  ASSERT (Mode != OcSmbiosUpdateTryOverwrite);
 
   if (Mode != OcSmbiosUpdateOverwrite) {
     Status = SmbiosTableAllocate (
@@ -1410,9 +1426,11 @@ SmbiosTableApply (
     TableEntryPoint3 = mOriginalSmbios3;
     TableAddress = (VOID *)(UINTN) TableEntryPoint->TableAddress;
     ZeroMem (TableEntryPoint, sizeof (SMBIOS_TABLE_ENTRY_POINT));
+    ZeroMem (TableAddress, TableEntryPoint->TableLength);
     if (TableEntryPoint3 != NULL) {
       TableAddress3 = (VOID *)(UINTN) TableEntryPoint3->TableAddress;
       ZeroMem (TableEntryPoint3, sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT));
+      ZeroMem (TableAddress3, TableEntryPoint3->TableMaximumSize);
     } else {
       TableAddress3 = NULL;
     }
@@ -1478,7 +1496,7 @@ SmbiosTableApply (
 
   DEBUG ((
     DEBUG_INFO,
-    "Patched %08LX v%d.%d Table Address %08LX Length %04X %X %X\n",
+    "OCSMB: Patched %08LX v%d.%d Table Address %08LX Length %04X %X %X\n",
     (UINT64) TableEntryPoint,
     TableEntryPoint->MajorVersion,
     TableEntryPoint->MinorVersion,
@@ -1498,7 +1516,7 @@ SmbiosTableApply (
         );
 
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_WARN, "Failed to install v3 table - %r\n", Status));
+        DEBUG ((DEBUG_WARN, "OCSMB: Failed to install v3 table - %r\n", Status));
       }
     }
 
@@ -1508,7 +1526,7 @@ SmbiosTableApply (
       );
 
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "Failed to install v1 table - %r\n", Status));
+      DEBUG ((DEBUG_WARN, "OCSMB: Failed to install v1 table - %r\n", Status));
       return Status;
     }
   }
@@ -1548,7 +1566,7 @@ CreateSmbios (
 
   Mapping = AllocatePool (OC_SMBIOS_MAX_MAPPING * sizeof (*Mapping));
   if (Mapping == NULL) {
-    DEBUG ((DEBUG_WARN, "Cannot allocate mapping table\n"));
+    DEBUG ((DEBUG_WARN, "OCSMB: Cannot allocate mapping table\n"));
     return EFI_OUT_OF_RESOURCES;
   }
 
