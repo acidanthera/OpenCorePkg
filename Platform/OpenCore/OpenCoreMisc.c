@@ -119,11 +119,20 @@ OcMiscEarlyInit (
     return EFI_SECURITY_VIOLATION; ///< Should be unreachable.
   }
 
+  if (Config->Misc.Debug.DisableWatchDog) {
+    //
+    // boot.efi kills watchdog only in FV2 UI.
+    //
+    gBS->SetWatchdogTimer (0, 0, 0, NULL);
+  }
+
   OcConfigureLogProtocol (
     Config->Misc.Debug.Target,
     Config->Misc.Debug.DisplayDelay,
     (UINTN) Config->Misc.Debug.DisplayLevel,
-    (UINTN) Config->Misc.Security.HaltLevel
+    (UINTN) Config->Misc.Security.HaltLevel,
+    OPEN_CORE_LOG_PATH,
+    Storage->FileSystem
     );
 
   DEBUG ((
@@ -171,7 +180,7 @@ OcMiscLateInit (
   UINT32       Bpp;
   BOOLEAN      SetMax;
 
-  if (Config->Misc.Debug.ExposeBootPath) {
+  if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_BOOT_PATH) != 0) {
     OcStoreLoadPath (LoadPath);
   }
 

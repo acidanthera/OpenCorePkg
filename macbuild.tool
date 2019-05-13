@@ -40,15 +40,22 @@ package() {
   selfdir=$(pwd)
   pushd "$1" || exit 1
   rm -rf tmp || exit 1
-  mkdir -p tmp
-  cp OpenCore.efi tmp || exit 1
-  cp BOOTx64.efi tmp  || exit 1
-  cp "${selfdir}/Docs/Configuration.pdf" tmp || exit 1
-  cp "${selfdir}/Docs/Sample.plist" tmp || exit 1
-  cp "${selfdir}/UDK/OcSupportPkg/Tools/RsaTool/RsaTool" tmp || exit 1
-  cp "${selfdir}/UDK/OcSupportPkg/Tools/Vault/create_vault.sh" tmp || exit 1
-  cp "${selfdir}/UDK/OcSupportPkg/Tools/Recovery/obtain_recovery.php" tmp || exit 1
-  cp "${selfdir}/UDK/OcSupportPkg/Tools/Recovery/recovery_urls.txt" tmp || exit 1
+  mkdir -p tmp/OC || exit 1
+  mkdir -p tmp/BOOT || exit 1
+  mkdir -p tmp/Docs/AcpiSamples || exit 1
+  mkdir -p tmp/Tools || exit 1
+  cp OpenCore.efi tmp/OC/ || exit 1
+  cp BOOTx64.efi tmp/BOOT/ || exit 1
+  cp "${selfdir}/Docs/Configuration.pdf" tmp/Docs/ || exit 1
+  cp "${selfdir}/Docs/Differences/Differences.pdf" tmp/Docs/ || exit 1
+  cp "${selfdir}/Docs/Sample.plist" tmp/Docs/ || exit 1
+  cp "${selfdir}/Docs/SampleFull.plist" tmp/Docs/ || exit 1
+  cp "${selfdir}/Changelog.md" tmp/Docs/ || exit 1
+  cp -r "${selfdir}/Docs/AcpiSamples/" tmp/Docs/AcpiSamples/ || exit 1
+  cp "${selfdir}/UDK/OcSupportPkg/Tools/RsaTool/RsaTool" tmp/Tools/ || exit 1
+  cp "${selfdir}/UDK/OcSupportPkg/Tools/Vault/create_vault.sh" tmp/Tools/ || exit 1
+  cp "${selfdir}/UDK/OcSupportPkg/Tools/Recovery/obtain_recovery.php" tmp/Tools/ || exit 1
+  cp "${selfdir}/UDK/OcSupportPkg/Tools/Recovery/recovery_urls.txt" tmp/Tools/ || exit 1
   pushd tmp || exit 1
   zip -qry ../"OpenCore-v${ver}-${2}.zip" * || exit 1
   popd || exit 1

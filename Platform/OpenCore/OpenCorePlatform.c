@@ -14,6 +14,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <OpenCore.h>
 
+#include <Protocol/DataHub.h>
+
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MacInfoLib.h>
@@ -36,10 +38,17 @@ OcPlatformUpdateDataHub (
   IN MAC_INFO_DATA       *MacInfo
   )
 {
-  EFI_STATUS        Status;
-  OC_DATA_HUB_DATA  Data;
-  EFI_GUID          Uuid;
-  UINT64            StartupPowerEvents;
+  EFI_STATUS            Status;
+  OC_DATA_HUB_DATA      Data;
+  EFI_GUID              Uuid;
+  UINT64                StartupPowerEvents;
+  EFI_DATA_HUB_PROTOCOL *DataHub;
+
+  DataHub = OcDataHubInstallProtocol (FALSE);
+  if (DataHub == NULL) {
+    DEBUG ((DEBUG_WARN, "OC: Failed to install Data Hub\n"));
+    return;
+  }
 
   ZeroMem (&Data, sizeof (Data));
 
@@ -141,7 +150,7 @@ OcPlatformUpdateDataHub (
     Data.SmcPlatform      = &MacInfo->DataHub.SmcPlatform[0];
   }
 
-  Status = UpdateDataHub (&Data, CpuInfo);
+  Status = UpdateDataHub (DataHub , &Data, CpuInfo);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OC: Failed to update Data Hub - %r\n", Status));
   }
@@ -271,6 +280,13 @@ OcPlatformUpdateSmbios (
     //
     // Automatic mode read data from Generic & MacInfo.
     //
+    if (Config->PlatformInfo.Generic.SpoofVendor) {
+      Data.BIOSVendor          = OC_SMBIOS_VENDOR_NAME;
+      Data.SystemManufacturer  = OC_SMBIOS_VENDOR_NAME;
+      Data.ChassisManufacturer = OC_SMBIOS_VENDOR_NAME;
+      Data.BoardManufacturer   = OC_SMBIOS_VENDOR_NAME;
+    }
+
     Data.BIOSVersion = MacInfo->Smbios.BIOSVersion;
     Data.BIOSReleaseDate = MacInfo->Smbios.BIOSReleaseDate;
     Data.SystemProductName = MacInfo->Smbios.SystemProductName;

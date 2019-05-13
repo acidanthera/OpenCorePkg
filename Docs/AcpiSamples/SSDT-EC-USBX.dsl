@@ -5,23 +5,22 @@
  * 
  * Disassembling to symbolic ASL+ operators
  *
- * Disassembly of iASLtpfpGZ.aml, Wed Apr 10 10:40:54 2019
+ * Disassembly of iASLTtGlr6.aml, Thu May  9 02:09:20 2019
  *
  * Original Table Header:
  *     Signature        "SSDT"
- *     Length           0x00000125 (293)
+ *     Length           0x000000F4 (244)
  *     Revision         0x02
- *     Checksum         0x1E
+ *     Checksum         0x2F
  *     OEM ID           "APPLE "
  *     OEM Table ID     "SsdtEC"
  *     OEM Revision     0x00001000 (4096)
  *     Compiler ID      "INTL"
- *     Compiler Version 0x20161210 (538317328)
+ *     Compiler Version 0x20190215 (538509845)
  */
 DefinitionBlock ("", "SSDT", 2, "APPLE ", "SsdtEC", 0x00001000)
 {
     External (_SB_.PCI0.LPCB, DeviceObj)
-    External (UMAP, IntObj)
 
     Scope (\_SB)
     {
@@ -57,23 +56,6 @@ DefinitionBlock ("", "SSDT", 2, "APPLE ", "SsdtEC", 0x00001000)
             Device (EC)
             {
                 Name (_HID, EisaId ("PNP0C09") /* Embedded Controller Device */)  // _HID: Hardware ID
-                Name (_UID, Zero)  // _UID: Unique ID
-                Name (_CRS, ResourceTemplate ()  // _CRS: Current Resource Settings
-                {
-                    IO (Decode16,
-                        0x0062,             // Range Minimum
-                        0x0062,             // Range Maximum
-                        0x00,               // Alignment
-                        0x01,               // Length
-                        )
-                    IO (Decode16,
-                        0x0066,             // Range Minimum
-                        0x0066,             // Range Maximum
-                        0x00,               // Alignment
-                        0x01,               // Length
-                        )
-                })
-                Name (_GPE, 0x17)  // _GPE: General Purpose Events
             }
         }
     }
