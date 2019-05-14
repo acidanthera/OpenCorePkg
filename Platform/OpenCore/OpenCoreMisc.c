@@ -270,7 +270,7 @@ OcMiscUefiQuirksLoaded (
   IN OC_GLOBAL_CONFIG   *Config
   )
 {
-  ConsoleControlSetBehaviour (
+  OcConsoleControlSetBehaviour (
     ParseConsoleControlBehaviour (
       OC_BLOB_GET (&Config->Misc.Boot.ConsoleBehaviourUi)
       )

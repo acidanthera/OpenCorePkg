@@ -11,6 +11,7 @@ OpenCore Changelog
 - Added builtin implimentation of DataHub protocol
 - Dropped `UpdateSMBIOSMode` `Auto` mode in favour of `Create`
 - Fixed SMBIOS CPU detection for Xeon and Core models
+- Moved `ConsoleControl` configuration to `Protocols`
 
 #### v0.0.1
 - Initial developer preview release

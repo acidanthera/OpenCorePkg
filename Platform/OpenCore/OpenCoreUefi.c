@@ -22,6 +22,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcCpuLib.h>
+#include <Library/OcDataHubLib.h>
 #include <Library/OcDevicePropertyLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -248,6 +249,14 @@ OcReinstallProtocols (
     DEBUG ((DEBUG_ERROR, "OC: Failed to install boot policy protocol\n"));
   }
 
+  if (OcConsoleControlInstallProtocol (Config->Uefi.Protocols.ConsoleControl) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install console control protocol\n"));
+  }
+
+  if (OcDataHubInstallProtocol (Config->Uefi.Protocols.DataHub) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install data hub protocol\n"));
+  }
+
   if (OcDevicePathPropertyInstallProtocol (Config->Uefi.Protocols.DeviceProperties) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install device properties protocol\n"));
   }
@@ -260,6 +269,8 @@ OcLoadUefiSupport (
   IN OC_CPU_INFO         *CpuInfo
   )
 {
+  OcReinstallProtocols (Config);
+
   if (Config->Uefi.Quirks.IgnoreInvalidFlexRatio) {
     OcCpuCorrectFlexRatio (CpuInfo);
   }
@@ -268,12 +279,10 @@ OcLoadUefiSupport (
     OcProvideConsoleGop ();
   }
 
-  if (Config->Uefi.Quirks.ProvideConsoleControl) {
-    ConsoleControlConfigure (
-      Config->Uefi.Quirks.IgnoreTextInGraphics,
-      Config->Uefi.Quirks.SanitiseClearScreen
-      );
-  }
+  OcConsoleControlConfigure (
+    Config->Uefi.Quirks.IgnoreTextInGraphics,
+    Config->Uefi.Quirks.SanitiseClearScreen
+    );
 
   //
   // Inform AMF whether we want Boot#### routing or not.
@@ -298,8 +307,6 @@ OcLoadUefiSupport (
   }
 
   OcMiscUefiQuirksLoaded (Config);
-
-  OcReinstallProtocols (Config);
 
   OcLoadDrivers (Storage, Config);
 

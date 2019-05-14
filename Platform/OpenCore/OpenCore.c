@@ -97,7 +97,7 @@ OcEfiStartImagePrologue (
     //
     // Request OS mode.
     //
-    ConsoleControlSetBehaviour (
+    OcConsoleControlSetBehaviour (
       ParseConsoleControlBehaviour (
         OC_BLOB_GET (&mOpenCoreConfiguration.Misc.Boot.ConsoleBehaviourOs)
         )
@@ -115,7 +115,7 @@ OcEfiStartImageEpilogue (
     //
     // Restore ui mode.
     //
-    ConsoleControlSetBehaviour (
+    OcConsoleControlSetBehaviour (
       ParseConsoleControlBehaviour (
         OC_BLOB_GET (&mOpenCoreConfiguration.Misc.Boot.ConsoleBehaviourUi)
         )

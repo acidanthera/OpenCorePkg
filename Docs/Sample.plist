@@ -497,6 +497,10 @@
 		<dict>
 			<key>AppleBootPolicy</key>
 			<false/>
+			<key>ConsoleControl</key>
+			<false/>
+			<key>DataHub</key>
+			<false/>
 			<key>DeviceProperties</key>
 			<false/>
 		</dict>
@@ -507,8 +511,6 @@
 			<key>IgnoreInvalidFlexRatio</key>
 			<false/>
 			<key>IgnoreTextInGraphics</key>
-			<false/>
-			<key>ProvideConsoleControl</key>
 			<false/>
 			<key>ProvideConsoleGop</key>
 			<false/>

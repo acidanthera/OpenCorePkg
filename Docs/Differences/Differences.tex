@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May  3 12:13:06 2019
-%DIF ADD ../Configuration.tex        Mon May 13 22:08:08 2019
+%DIF ADD ../Configuration.tex        Tue May 14 07:48:46 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1383,7 +1383,7 @@ behaviour that does not go to any other sections
 
   Console control is a legacy protocol used for switching between text and graphics
   screen output. Some firmwares do not provide it, yet select operating systems
-  require its presence, which is what \texttt{ProvideConsoleControl} UEFI quirk is for.
+  require its presence, which is what \texttt{\DIFdelbegin \DIFdel{ProvideConsoleControl}\DIFdelend \DIFaddbegin \DIFadd{ConsoleControl}\DIFaddend } UEFI \DIFdelbegin \DIFdel{quirk }\DIFdelend \DIFaddbegin \DIFadd{protocol }\DIFaddend is for.
 
   When console control is available, OpenCore can be made console control aware, and
   and set different modes for the operating system booter (\texttt{ConsoleBehaviourOs}),
@@ -1397,9 +1397,9 @@ behaviour that does not go to any other sections
   \item \texttt{Text} --- Switch to text mode.
   \item \texttt{Graphics} --- Switch to graphics mode.
   \item \texttt{ForceText} --- Switch to text mode and preserve it
-  (requires \texttt{ProvideConsoleControl}).
+  (requires \texttt{\DIFdelbegin \DIFdel{ProvideConsoleControl}\DIFdelend \DIFaddbegin \DIFadd{ConsoleControl}\DIFaddend }).
   \item \texttt{ForceGraphics} --- Switch to graphics mode and preserve it
-  (require \texttt{ProvideConsoleControl}).
+  (require \texttt{\DIFdelbegin \DIFdel{ProvideConsoleControl}\DIFdelend \DIFaddbegin \DIFadd{ConsoleControl}\DIFaddend }).
   \end{itemize}
 
   Hints:
@@ -2057,7 +2057,7 @@ for system configuration.
   \texttt{UpdateDataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Update DataHub fields. These fields are read
+  \textbf{Description}: Update \DIFdelbegin \DIFdel{DataHub }\DIFdelend \DIFaddbegin \DIFadd{Data Hub }\DIFaddend fields. These fields are read
   from \texttt{Generic} or \texttt{DataHub} sections depending on
   \texttt{Automatic} value.
 \item
@@ -2689,14 +2689,15 @@ tweaks for the onboard firmware.
   firmwares, other firmwares may be compatible as well. Among the resolved issues
   are hibernation support, KASLR, Lilu NVRAM security enhancements, NVRAM, and UEFI
   Boot entry preservation.
-  \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{DataHubDxe}}
-  --- \DIFdelbegin \DIFdel{Intel DataHub driver from }\texttt{\DIFdel{IntelFrameworkModulePkg}}%DIFAUXCMD
+  \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{DataHubDxe}}
+%DIFDELCMD <   %%%
+\DIFdel{--- Intel DataHub driver from }\texttt{\DIFdel{IntelFrameworkModulePkg}}%DIFAUXCMD
 \DIFdel{. It is believed
   that this driver is included in all UEFI firmwares, and is not required.
-  }%DIFDELCMD < \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{EmuVariableRuntimeDxe}}
+  }%DIFDELCMD < \item %%%
 \item%DIFAUXCMD
-%DIFDELCMD <   %%%
-\DIFdel{--- }\DIFdelend NVRAM emulation driver from \texttt{MdeModulePkg}. NVRAM is supported by most
+\DIFdelend \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{EmuVariableRuntimeDxe}}
+  --- NVRAM emulation driver from \texttt{MdeModulePkg}. NVRAM is supported by most
   modern firmwares. For firmwares with macOS incompatible NVRAM implementation an
   emulated driver may be used. This driver will not preserve NVRAM contents across the
   reboots.
@@ -2774,14 +2775,36 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{AppleBootPolicy}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Reinstalls apple boot policy protocol with a builtin
+  \textbf{Description}: Reinstalls \DIFdelbegin \DIFdel{apple boot policy }\DIFdelend \DIFaddbegin \DIFadd{Apple Boot Policy }\DIFaddend protocol with a builtin
   version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
 
 \item
-  \texttt{DeviceProperties}\\
+  \DIFaddbegin \texttt{\DIFadd{ConsoleControl}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: }\texttt{\DIFadd{NO}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Replaces Console Control protocol with a builtin version.
+}
+
+  \DIFadd{macOS bootloader requires console control protocol for text output, which some firmwares
+  miss. This option is required to be set when the protocol is already available in the
+  firmware, and other console control options are used, such as }\texttt{\DIFadd{IgnoreTextInGraphics}}\DIFadd{,
+  }\texttt{\DIFadd{SanitiseClearScreen}}\DIFadd{, and sometimes }\texttt{\DIFadd{ConsoleBehaviourOs}} \DIFadd{with
+  }\texttt{\DIFadd{ConsoleBehaviourUi}}\DIFadd{).
+}
+
+\item
+  \texttt{\DIFadd{DataHub}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Reinstalls Data Hub protocol with a builtin version.
+  This will drop all previous properties if the protocol was already installed.
+}
+
+\item
+  \DIFaddend \texttt{DeviceProperties}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Reinstalls device property protocol with a builtin
+  \textbf{Description}: Reinstalls \DIFdelbegin \DIFdel{device property }\DIFdelend \DIFaddbegin \DIFadd{Device Property }\DIFaddend protocol with a builtin
   version. This will drop all previous properties if it was already installed.
   This may be used to ensure full compatibility on VMs or legacy Macs.
 
@@ -2826,21 +2849,37 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 
   \emph{Note}: While the option is not supposed to induce harm on unaffected firmwares,
   its usage is not recommended when it is not required. This option may hide
-  onscreen error messages. \texttt{ProvideConsoleControl} is required to be set to
+  onscreen error messages. \texttt{\DIFdelbegin \DIFdel{ProvideConsoleControl}\DIFdelend \DIFaddbegin \DIFadd{ConsoleControl}\DIFaddend } \DIFdelbegin \DIFdel{is required }\DIFdelend \DIFaddbegin \DIFadd{may need }\DIFaddend to be set to
   \texttt{true} for this to work.
 
 \item
-  \texttt{ProvideConsoleControl}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{NO}\\
-  \textbf{Description}: macOS bootloader requires console control protocol
+  \DIFdelbegin \texttt{\DIFdel{ProvideConsoleControl}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Default value}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{NO}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: macOS bootloader requires console control protocol
   for text output, some firmwares miss it. This option is required to be set
-  when other console control options are used, such as \texttt{IgnoreTextInGraphics},
-  \texttt{SanitiseClearScreen}, and sometimes \texttt{ConsoleBehaviourOs} with
-  \texttt{ConsoleBehaviourUi}).
+  when other console control options are used, such as }\texttt{\DIFdel{IgnoreTextInGraphics}}%DIFAUXCMD
+\DIFdel{,
+  }\texttt{\DIFdel{SanitiseClearScreen}}%DIFAUXCMD
+\DIFdel{, and sometimes }\texttt{\DIFdel{ConsoleBehaviourOs}} %DIFAUXCMD
+\DIFdel{with
+  }\texttt{\DIFdel{ConsoleBehaviourUi}}%DIFAUXCMD
+\DIFdel{).
+}%DIFDELCMD < 
 
-\item
-  \texttt{ProvideConsoleGop}\\
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdelend \texttt{ProvideConsoleGop}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{NO}\\
   \textbf{Description}: macOS bootloader requires GOP (Graphics Output Protocol)
@@ -2880,7 +2919,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   when large display (e.g. 2K or 4K) is used. This option attempts to apply
   a workaround.
 
-  \emph{Note}: \texttt{ProvideConsoleControl} is required to be set to
+  \emph{Note}: \texttt{\DIFdelbegin \DIFdel{ProvideConsoleControl}\DIFdelend \DIFaddbegin \DIFadd{ConsoleControl}\DIFaddend } \DIFdelbegin \DIFdel{is required }\DIFdelend \DIFaddbegin \DIFadd{may need }\DIFaddend to be set to
   \texttt{true} for this to work. On all known affected systems
   \texttt{ConsoleMode} had to be set to empty string for this to work.
 

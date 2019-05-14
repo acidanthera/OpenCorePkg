@@ -1299,7 +1299,7 @@ behaviour that does not go to any other sections
 
   Console control is a legacy protocol used for switching between text and graphics
   screen output. Some firmwares do not provide it, yet select operating systems
-  require its presence, which is what \texttt{ProvideConsoleControl} UEFI quirk is for.
+  require its presence, which is what \texttt{ConsoleControl} UEFI protocol is for.
 
   When console control is available, OpenCore can be made console control aware, and
   and set different modes for the operating system booter (\texttt{ConsoleBehaviourOs}),
@@ -1313,9 +1313,9 @@ behaviour that does not go to any other sections
   \item \texttt{Text} --- Switch to text mode.
   \item \texttt{Graphics} --- Switch to graphics mode.
   \item \texttt{ForceText} --- Switch to text mode and preserve it
-  (requires \texttt{ProvideConsoleControl}).
+  (requires \texttt{ConsoleControl}).
   \item \texttt{ForceGraphics} --- Switch to graphics mode and preserve it
-  (require \texttt{ProvideConsoleControl}).
+  (require \texttt{ConsoleControl}).
   \end{itemize}
 
   Hints:
@@ -1895,7 +1895,7 @@ for system configuration.
   \texttt{UpdateDataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Update DataHub fields. These fields are read
+  \textbf{Description}: Update Data Hub fields. These fields are read
   from \texttt{Generic} or \texttt{DataHub} sections depending on
   \texttt{Automatic} value.
 \item
@@ -2526,7 +2526,7 @@ tweaks for the onboard firmware.
   firmwares, other firmwares may be compatible as well. Among the resolved issues
   are hibernation support, KASLR, Lilu NVRAM security enhancements, NVRAM, and UEFI
   Boot entry preservation.
-  \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{DataHubDxe}}
+  \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{EmuVariableRuntimeDxe}}
   --- NVRAM emulation driver from \texttt{MdeModulePkg}. NVRAM is supported by most
   modern firmwares. For firmwares with macOS incompatible NVRAM implementation an
   emulated driver may be used. This driver will not preserve NVRAM contents across the
@@ -2602,14 +2602,33 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{AppleBootPolicy}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Reinstalls apple boot policy protocol with a builtin
+  \textbf{Description}: Reinstalls Apple Boot Policy protocol with a builtin
   version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
+
+\item
+  \texttt{ConsoleControl}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{NO}\\
+  \textbf{Description}: Replaces Console Control protocol with a builtin version.
+
+  macOS bootloader requires console control protocol for text output, which some firmwares
+  miss. This option is required to be set when the protocol is already available in the
+  firmware, and other console control options are used, such as \texttt{IgnoreTextInGraphics},
+  \texttt{SanitiseClearScreen}, and sometimes \texttt{ConsoleBehaviourOs} with
+  \texttt{ConsoleBehaviourUi}).
+
+\item
+  \texttt{DataHub}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Data Hub protocol with a builtin version.
+  This will drop all previous properties if the protocol was already installed.
 
 \item
   \texttt{DeviceProperties}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Reinstalls device property protocol with a builtin
+  \textbf{Description}: Reinstalls Device Property protocol with a builtin
   version. This will drop all previous properties if it was already installed.
   This may be used to ensure full compatibility on VMs or legacy Macs.
 
@@ -2654,18 +2673,8 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 
   \emph{Note}: While the option is not supposed to induce harm on unaffected firmwares,
   its usage is not recommended when it is not required. This option may hide
-  onscreen error messages. \texttt{ProvideConsoleControl} is required to be set to
+  onscreen error messages. \texttt{ConsoleControl} may need to be set to
   \texttt{true} for this to work.
-
-\item
-  \texttt{ProvideConsoleControl}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{NO}\\
-  \textbf{Description}: macOS bootloader requires console control protocol
-  for text output, some firmwares miss it. This option is required to be set
-  when other console control options are used, such as \texttt{IgnoreTextInGraphics},
-  \texttt{SanitiseClearScreen}, and sometimes \texttt{ConsoleBehaviourOs} with
-  \texttt{ConsoleBehaviourUi}).
 
 \item
   \texttt{ProvideConsoleGop}\\
@@ -2708,7 +2717,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   when large display (e.g. 2K or 4K) is used. This option attempts to apply
   a workaround.
 
-  \emph{Note}: \texttt{ProvideConsoleControl} is required to be set to
+  \emph{Note}: \texttt{ConsoleControl} may need to be set to
   \texttt{true} for this to work. On all known affected systems
   \texttt{ConsoleMode} had to be set to empty string for this to work.
 
