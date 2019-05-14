@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May  3 12:13:06 2019
-%DIF ADD ../Configuration.tex        Tue May 14 07:48:46 2019
+%DIF ADD ../Configuration.tex        Wed May 15 01:27:22 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1359,7 +1359,6 @@ behaviour that does not go to any other sections
   \textbf{Description}: Apply security configuration described in
   \hyperref[miscsecurityprops]{Security Properties} section below.
 
-
 \end{enumerate}
 
 \subsection{Boot Properties}\label{miscbootprops}
@@ -1761,7 +1760,75 @@ rm vault.pub
   can be found in \href{https://habr.com/post/273497/}{Taming UEFI SecureBoot}
   paper (in Russian).
 
-\end{enumerate}
+\DIFaddbegin \item
+  \texttt{\DIFadd{ScanPolicy}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\DIFadd{, 32 bit}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: }\texttt{\DIFadd{0xF0103}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Define operating system detection policy.
+}
+
+  \DIFadd{This value allows to prevent scanning (and booting) from untrusted
+  source based on a bitmask (sum) of select flags. As it is not possible
+  to reliably detect every file system or device type, this feature
+  cannot be fully relied upon in open environments, and the additional
+  measures are to be applied.
+}
+
+  \DIFadd{Third party drivers may introduce additional security (and performance)
+  measures following the provided scan policy. Scan policy is exposed
+  in }\texttt{\DIFadd{scan-policy}} \DIFadd{variable of }\texttt{\DIFadd{4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102}}
+  \DIFadd{GUID for UEFI Boot Services only.
+}
+
+  \begin{itemize}
+  \tightlist
+    \item \texttt{\DIFadd{0x00000001}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_FILE\_SYSTEM\_LOCK}}\DIFadd{, restricts
+    scanning to only known file systems defined as a part of this policy. File system
+    drivers may not be aware of this policy, and to avoid mounting of undesired file
+    systems it is best not to load its driver. This bit does not affect dmg mounting,
+    which may have any file system. Known file systems are prefixed with
+    }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_FS\_}}\DIFadd{.
+    }\item \texttt{\DIFadd{0x00000002}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_DEVICE\_LOCK}}\DIFadd{, restricts scanning
+    to only known device types defined as a part of this policy. This is not always possible
+    to detect protocol tunneling, so be aware that on some systems it may be possible for
+    e.g. USB HDDs to be recognised as SATA. Cases like this must be reported. Known device
+    types are prefixed with }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_}}\DIFadd{.
+    }\item \texttt{\DIFadd{0x00000100}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_FS\_APFS}}\DIFadd{, allows scanning
+    of APFS file system.
+    }\item \texttt{\DIFadd{0x00010000}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_SATA}}\DIFadd{, allow
+    scanning SATA devices.
+    }\item \texttt{\DIFadd{0x00020000}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_SASEX}}\DIFadd{, allow
+    scanning SAS and Mac NVMe devices.
+    }\item \texttt{\DIFadd{0x00040000}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_SCSI}}\DIFadd{, allow
+    scanning SCSI devices.
+    }\item \texttt{\DIFadd{0x00080000}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_NVME}}\DIFadd{, allow
+    scanning NVMe devices.
+    }\item \texttt{\DIFadd{0x00100000}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_ATAPI}}\DIFadd{, allow
+    scanning CD/DVD devices.
+    }\item \texttt{\DIFadd{0x00200000}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_USB}}\DIFadd{, allow
+    scanning USB devices.
+    }\item \texttt{\DIFadd{0x00400000}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_FIREWIRE}}\DIFadd{, allow
+    scanning FireWire devices.
+    }\item \texttt{\DIFadd{0x00800000}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_SDCARD}}\DIFadd{, allow
+    scanning card reader devices.
+  }\end{itemize}
+
+  \emph{\DIFadd{Note}}\DIFadd{: Given the above description, }\texttt{\DIFadd{0xF0103}} \DIFadd{value is expected to allow
+  scanning of SATA, SAS, SCSI, and NVMe devices with APFS file system, and prevent scanning
+  of any devices with HFS or FAT32 file systems in addition to not scanning APFS file systems
+  on USB, CD, USB, and FireWire drives. The combination reads as:
+  }\begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{OC\_SCAN\_FILE\_SYSTEM\_LOCK}}
+  \item \texttt{\DIFadd{OC\_SCAN\_DEVICE\_LOCK}}
+  \item \texttt{\DIFadd{OC\_SCAN\_ALLOW\_FS\_APFS}}
+  \item \texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_SATA}}
+  \item \texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_SASEX}}
+  \item \texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_SCSI}}
+  \item \texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_NVME}}
+  \end{itemize}
+
+\DIFaddend \end{enumerate}
 
 \section{NVRAM}\label{nvram}
 

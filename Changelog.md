@@ -12,6 +12,7 @@ OpenCore Changelog
 - Dropped `UpdateSMBIOSMode` `Auto` mode in favour of `Create`
 - Fixed SMBIOS CPU detection for Xeon and Core models
 - Moved `ConsoleControl` configuration to `Protocols`
+- Added `Security` -> `ScanPolicy` preference
 
 #### v0.0.1
 - Initial developer preview release

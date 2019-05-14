@@ -290,7 +290,7 @@ OcLoadUefiSupport (
   gRT->SetVariable (
     OC_BOOT_REDIRECT_VARIABLE_NAME,
     &gOcVendorVariableGuid,
-    OPEN_CORE_NVRAM_ATTR,
+    OPEN_CORE_INT_NVRAM_ATTR,
     sizeof (Config->Uefi.Quirks.RequestBootVarRouting),
     &Config->Uefi.Quirks.RequestBootVarRouting
     );

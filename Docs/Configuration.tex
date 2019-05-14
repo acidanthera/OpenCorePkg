@@ -1275,7 +1275,6 @@ behaviour that does not go to any other sections
   \textbf{Description}: Apply security configuration described in
   \hyperref[miscsecurityprops]{Security Properties} section below.
 
-
 \end{enumerate}
 
 \subsection{Boot Properties}\label{miscbootprops}
@@ -1604,6 +1603,71 @@ rm vault.pub
   with your custom key. More details on customising secure boot on modern firmwares
   can be found in \href{https://habr.com/post/273497/}{Taming UEFI SecureBoot}
   paper (in Russian).
+
+\item
+  \texttt{ScanPolicy}\\
+  \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
+  \textbf{Default value}: \texttt{0xF0103}\\
+  \textbf{Description}: Define operating system detection policy.
+
+  This value allows to prevent scanning (and booting) from untrusted
+  source based on a bitmask (sum) of select flags. As it is not possible
+  to reliably detect every file system or device type, this feature
+  cannot be fully relied upon in open environments, and the additional
+  measures are to be applied.
+
+  Third party drivers may introduce additional security (and performance)
+  measures following the provided scan policy. Scan policy is exposed
+  in \texttt{scan-policy} variable of \texttt{4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102}
+  GUID for UEFI Boot Services only.
+
+  \begin{itemize}
+  \tightlist
+    \item \texttt{0x00000001} --- \texttt{OC\_SCAN\_FILE\_SYSTEM\_LOCK}, restricts
+    scanning to only known file systems defined as a part of this policy. File system
+    drivers may not be aware of this policy, and to avoid mounting of undesired file
+    systems it is best not to load its driver. This bit does not affect dmg mounting,
+    which may have any file system. Known file systems are prefixed with
+    \texttt{OC\_SCAN\_ALLOW\_FS\_}.
+    \item \texttt{0x00000002} --- \texttt{OC\_SCAN\_DEVICE\_LOCK}, restricts scanning
+    to only known device types defined as a part of this policy. This is not always possible
+    to detect protocol tunneling, so be aware that on some systems it may be possible for
+    e.g. USB HDDs to be recognised as SATA. Cases like this must be reported. Known device
+    types are prefixed with \texttt{OC\_SCAN\_ALLOW\_DEVICE\_}.
+    \item \texttt{0x00000100} --- \texttt{OC\_SCAN\_ALLOW\_FS\_APFS}, allows scanning
+    of APFS file system.
+    \item \texttt{0x00010000} --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SATA}, allow
+    scanning SATA devices.
+    \item \texttt{0x00020000} --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SASEX}, allow
+    scanning SAS and Mac NVMe devices.
+    \item \texttt{0x00040000} --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SCSI}, allow
+    scanning SCSI devices.
+    \item \texttt{0x00080000} --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_NVME}, allow
+    scanning NVMe devices.
+    \item \texttt{0x00100000} --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_ATAPI}, allow
+    scanning CD/DVD devices.
+    \item \texttt{0x00200000} --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_USB}, allow
+    scanning USB devices.
+    \item \texttt{0x00400000} --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_FIREWIRE}, allow
+    scanning FireWire devices.
+    \item \texttt{0x00800000} --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SDCARD}, allow
+    scanning card reader devices.
+  \end{itemize}
+
+  \emph{Note}: Given the above description, \texttt{0xF0103} value is expected to allow
+  scanning of SATA, SAS, SCSI, and NVMe devices with APFS file system, and prevent scanning
+  of any devices with HFS or FAT32 file systems in addition to not scanning APFS file systems
+  on USB, CD, USB, and FireWire drives. The combination reads as:
+  \begin{itemize}
+  \tightlist
+  \item \texttt{OC\_SCAN\_FILE\_SYSTEM\_LOCK}
+  \item \texttt{OC\_SCAN\_DEVICE\_LOCK}
+  \item \texttt{OC\_SCAN\_ALLOW\_FS\_APFS}
+  \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SATA}
+  \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SASEX}
+  \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SCSI}
+  \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_NVME}
+  \end{itemize}
 
 \end{enumerate}
 

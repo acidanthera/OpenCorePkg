@@ -239,7 +239,7 @@ OcMain (
   DEBUG ((DEBUG_INFO, "OC: OpenCore is loaded, showing boot menu...\n"));
 
   Status = OcRunSimpleBootPicker (
-    OC_SCAN_DEFAULT_POLICY,
+    mOpenCoreConfiguration.Misc.Security.ScanPolicy,
     OC_LOAD_DEFAULT_POLICY,
     mOpenCoreConfiguration.Misc.Boot.Timeout,
     OcStartImage,

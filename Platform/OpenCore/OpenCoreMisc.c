@@ -270,6 +270,17 @@ OcMiscUefiQuirksLoaded (
   IN OC_GLOBAL_CONFIG   *Config
   )
 {
+  //
+  // Inform drivers about our scan policy.
+  //
+  gRT->SetVariable (
+    OC_SCAN_POLICY_VARIABLE_NAME,
+    &gOcVendorVariableGuid,
+    OPEN_CORE_INT_NVRAM_ATTR,
+    sizeof (Config->Misc.Security.ScanPolicy),
+    &Config->Misc.Security.ScanPolicy
+    );
+
   OcConsoleControlSetBehaviour (
     ParseConsoleControlBehaviour (
       OC_BLOB_GET (&Config->Misc.Boot.ConsoleBehaviourUi)
