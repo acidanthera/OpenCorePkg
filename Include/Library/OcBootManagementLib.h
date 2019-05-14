@@ -90,19 +90,80 @@ OcFreeBootEntries (
   );
 
 /**
-  TODO: Implement scanning policy.
-  We would like to load from:
-  - select filesystems (APFS, HFS, FAT).
-  - select devices (internal, pcie, USB).
+  Perform filtering based on file system basis.
+  Ignores all filesystems by default.
+  Remove this bit to allow any file system.
 **/
-#define OC_SCAN_DEFAULT_POLICY 0
+#define OC_SCAN_FILE_SYSTEM_LOCK         BIT0
+
+/**
+  Perform filtering based on device basis.
+  Ignores all devices by default.
+  Remove this bit to allow any device type.
+**/
+#define OC_SCAN_DEVICE_LOCK              BIT1
+
+/**
+  Allow scanning APFS filesystems.
+**/
+#define OC_SCAN_ALLOW_FS_APFS            BIT8
+
+/**
+  Allow scanning SATA devices.
+**/
+#define OC_SCAN_ALLOW_DEVICE_SATA        BIT16
+
+/**
+  Allow scanning SAS and Mac NVMe devices.
+**/
+#define OC_SCAN_ALLOW_DEVICE_SASEX       BIT17
+
+/**
+  Allow scanning SCSI devices.
+**/
+#define OC_SCAN_ALLOW_DEVICE_SCSI        BIT18
+
+/**
+  Allow scanning NVMe devices.
+**/
+#define OC_SCAN_ALLOW_DEVICE_NVME        BIT19
+
+/**
+  Allow scanning ATAPI devices.
+**/
+#define OC_SCAN_ALLOW_DEVICE_ATAPI       BIT20
+
+/**
+  Allow scanning USB devices.
+**/
+#define OC_SCAN_ALLOW_DEVICE_USB         BIT21
+
+/**
+  Allow scanning FireWire devices.
+**/
+#define OC_SCAN_ALLOW_DEVICE_FIREWIRE    BIT22
+
+/**
+  Allow scanning SD card devices.
+**/
+#define OC_SCAN_ALLOW_DEVICE_SDCARD      BIT23
+
+/**
+  By default allow booting from APFS from internal drives.
+**/
+#define OC_SCAN_DEFAULT_POLICY   ( \
+  OC_SCAN_FILE_SYSTEM_LOCK   | OC_SCAN_DEVICE_LOCK | \
+  OC_SCAN_ALLOW_FS_APFS      | OC_SCAN_ALLOW_DEVICE_SATA | \
+  OC_SCAN_ALLOW_DEVICE_SASEX | OC_SCAN_ALLOW_DEVICE_SCSI | \
+  OC_SCAN_ALLOW_DEVICE_NVME)
 
 /**
   Fill boot entry from device handle.
 
   @param[in]  BootPolicy          Apple Boot Policy Protocol.
-  @param[in]  Policy              Lookup policy.
+  @param[in]  Policy              Scan policy.
   @param[in]  Handle              Device handle (with EfiSimpleFileSystem protocol).
+  @param[in]  SimpleFs            Simple file system protocol of the device handle.
   @param[out] BootEntry           Resulting boot entry.
   @param[out] AlternateBootEntry  Resulting alternate boot entry (e.g. recovery).
   @param[in]  IsLoadHandle        OpenCore load handle, try skipping OC entry.
@@ -113,19 +174,20 @@ OcFreeBootEntries (
 **/
 UINTN
 OcFillBootEntry (
-  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN  UINT32                      Policy,
-  IN  EFI_HANDLE                  Handle,
-  OUT OC_BOOT_ENTRY               *BootEntry,
-  OUT OC_BOOT_ENTRY               *AlternateBootEntry OPTIONAL,
-  IN  BOOLEAN                     IsLoadHandle
+  IN  APPLE_BOOT_POLICY_PROTOCOL      *BootPolicy,
+  IN  UINT32                          Policy,
+  IN  EFI_HANDLE                      Handle,
+  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *SimpleFs,
+  OUT OC_BOOT_ENTRY                   *BootEntry,
+  OUT OC_BOOT_ENTRY                   *AlternateBootEntry OPTIONAL,
+  IN  BOOLEAN                         IsLoadHandle
   );
 
 /**
   Scan system for boot entries.
 
   @param[in]  BootPolicy     Apple Boot Policy Protocol.
-  @param[in]  Policy         Lookup policy.
+  @param[in]  Policy         Scan policy.
   @param[out] BootEntries    List of boot entries (allocated from pool).
   @param[out] Count          Number of boot entries.
   @param[out] AllocCount     Number of allocated boot entries.
@@ -263,7 +325,7 @@ EFI_STATUS
 /**
   Install missing boot policy, scan, and show simple boot menu.
 
-  @param[in]  LookupPolicy     Lookup policy.
+  @param[in]  ScanPolicy       Scan policy.
   @param[in]  BootPolicy       Boot policy.
   @param[in]  TimeOutSeconds   Default entry selection timeout (pass 0 to ignore).
   @param[in]  StartImage       Image starting routine used.
@@ -275,7 +337,7 @@ EFI_STATUS
 **/
 EFI_STATUS
 OcRunSimpleBootPicker (
-  IN  UINT32           LookupPolicy,
+  IN  UINT32           ScanPolicy,
   IN  UINT32           BootPolicy,
   IN  UINT32           TimeoutSeconds,
   IN  OC_IMAGE_START   StartImage,

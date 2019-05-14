@@ -17,6 +17,7 @@
 
 #include <Library/DebugLib.h>
 #include <Library/OcSerializeLib.h>
+#include <Library/OcBootManagementLib.h>
 
 /**
   ACPI section
@@ -221,10 +222,11 @@
 #define OCS_EXPOSE_VERSION   2U
 
 #define OC_MISC_SECURITY_FIELDS(_, __) \
-  _(BOOLEAN                     , ExposeSensitiveData         ,     , OCS_EXPOSE_VERSION, ()) \
-  _(BOOLEAN                     , RequireVault                ,     , TRUE              , ()) \
-  _(BOOLEAN                     , RequireSignature            ,     , TRUE              , ()) \
-  _(UINT64                      , HaltLevel                   ,     , 0x80000000        , ())
+  _(UINT32                      , ScanPolicy                  ,     , OC_SCAN_DEFAULT_POLICY , ()) \
+  _(BOOLEAN                     , ExposeSensitiveData         ,     , OCS_EXPOSE_VERSION     , ()) \
+  _(BOOLEAN                     , RequireVault                ,     , TRUE                   , ()) \
+  _(BOOLEAN                     , RequireSignature            ,     , TRUE                   , ()) \
+  _(UINT64                      , HaltLevel                   ,     , 0x80000000             , ())
   OC_DECLARE (OC_MISC_SECURITY)
 
 #define OC_MISC_CONFIG_FIELDS(_, __) \

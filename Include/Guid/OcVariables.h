@@ -27,9 +27,22 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 //
 // Variable used for OpenCore request to redirect NVRAM Boot variable write.
+// Boot Services only.
 // See: https://github.com/acidanthera/bugtracker/issues/308.
 //
 #define OC_BOOT_REDIRECT_VARIABLE_NAME  L"boot-redirect"
+
+//
+// Variable used for exposing OpenCore Security -> BootPolicy.
+// Boot Services only.
+//
+#define OC_BOOT_POLICY_VARIABLE_NAME    L"boot-policy"
+
+//
+// Variable used for exposing OpenCore Security -> ScanPolicy.
+// Boot Services only.
+//
+#define OC_SCAN_POLICY_VARIABLE_NAME    L"scan-policy"
 
 //
 // Variable used to report OpenCore version in the following format:

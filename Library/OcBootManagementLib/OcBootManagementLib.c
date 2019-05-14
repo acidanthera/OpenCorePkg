@@ -23,8 +23,10 @@
 #include <Guid/OcVariables.h>
 
 #include <Protocol/AppleBootPolicy.h>
+#include <Protocol/ApfsEfiBootRecordInfo.h>
 #include <Protocol/SimpleFileSystem.h>
 #include <Protocol/SimpleTextOut.h>
+#include <Protocol/UsbIo.h>
 
 #include <Library/OcAppleChunklistLib.h>
 #include <Library/OcAppleDiskImageLib.h>
@@ -52,6 +54,112 @@ typedef struct {
   OC_APPLE_DISK_IMAGE_CONTEXT    *DmgContext;
   EFI_HANDLE                     BlockIoHandle;
 } INTERNAL_DMG_LOAD_CONTEXT;
+
+STATIC
+EFI_STATUS
+InternalCheckScanPolicy (
+  IN  EFI_HANDLE                       Handle,
+  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *SimpleFs,
+  IN  UINT32                           Policy
+  )
+{
+  EFI_STATUS                Status;
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
+  EFI_FILE_PROTOCOL         *Root;
+  UINTN                     BufferSize;
+
+  Status = EFI_SUCCESS;
+
+
+  if ((Policy & OC_SCAN_DEVICE_LOCK) != 0) {
+    Status = gBS->HandleProtocol (Handle, &gEfiDevicePathProtocolGuid, (VOID **) &DevicePath);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+
+    Status = EFI_SECURITY_VIOLATION;
+
+    while (!IsDevicePathEnd (DevicePath)) {
+      if (DevicePathType (DevicePath) == MESSAGING_DEVICE_PATH) {
+        if ((Policy & OC_SCAN_ALLOW_DEVICE_SATA) != 0
+          && DevicePathSubType (DevicePath) == MSG_SATA_DP) {
+          Status = EFI_SUCCESS;
+        } else if ((Policy & OC_SCAN_ALLOW_DEVICE_SASEX) != 0
+          && DevicePathSubType (DevicePath) == MSG_SASEX_DP) {
+          Status = EFI_SUCCESS;
+        } else if ((Policy & OC_SCAN_ALLOW_DEVICE_SCSI) != 0
+          && DevicePathSubType (DevicePath) == MSG_SCSI_DP) {
+          Status = EFI_SUCCESS;
+        } else if ((Policy & OC_SCAN_ALLOW_DEVICE_NVME) != 0
+          && DevicePathSubType (DevicePath) == MSG_NVME_NAMESPACE_DP) {
+          Status = EFI_SUCCESS;
+        } else if ((Policy & OC_SCAN_ALLOW_DEVICE_ATAPI) != 0
+          && DevicePathSubType (DevicePath) == MSG_ATAPI_DP) {
+          Status = EFI_SUCCESS;
+        } else if ((Policy & OC_SCAN_ALLOW_DEVICE_USB) != 0
+          && DevicePathSubType (DevicePath) == MSG_USB_DP) {
+          Status = EFI_SUCCESS;
+        } else if ((Policy & OC_SCAN_ALLOW_DEVICE_FIREWIRE) != 0
+          && DevicePathSubType (DevicePath) == MSG_1394_DP) {
+          Status = EFI_SUCCESS;
+        } else if ((Policy & OC_SCAN_ALLOW_DEVICE_SDCARD) != 0
+          && (DevicePathSubType (DevicePath) == MSG_EMMC_DP
+            || DevicePathSubType (DevicePath) == MSG_SD_DP)) {
+          Status = EFI_SUCCESS;
+        }
+
+        //
+        // We do not have good protection against device tunneling.
+        // These things must be considered:
+        // - Thunderbolt 2 PCI-e pass-through
+        // - Thunderbolt 3 PCI-e pass-through (Type-C, may be different from 2)
+        // - FireWire devices
+        // For now we hope that first messaging type protects us, and all
+        // subsequent messaging types are tunneled.
+        //
+
+        break;
+      }
+
+      DevicePath = NextDevicePathNode (DevicePath);
+    }
+
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+  }
+
+  if ((Policy & OC_SCAN_FILE_SYSTEM_LOCK) != 0) {
+    Status = SimpleFs->OpenVolume (SimpleFs, &Root);
+
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+
+    Status = EFI_SECURITY_VIOLATION;
+
+    //
+    // FIXME: We cannot use EfiPartitionInfo protocol, as it is not
+    // widely available, and when it is, it is not guaranteed to be spec compliant.
+    // For this reason we would really like to implement ApplePartitionInfo protocol,
+    // but currently it is not a priority.
+    //
+    if ((Policy & OC_SCAN_ALLOW_FS_APFS) != 0 && EFI_ERROR (Status)) {
+      Status = Root->GetInfo (Root, &gAppleApfsVolumeInfoGuid, &BufferSize, NULL);
+      if (Status == EFI_BUFFER_TOO_SMALL) {
+        Status = EFI_SUCCESS;
+      }
+    }
+
+    Root->Close (Root);
+
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+  }
+
+  return EFI_SUCCESS;
+}
 
 STATIC
 CHAR16 *
@@ -963,12 +1071,13 @@ OcFreeBootEntries (
 
 UINTN
 OcFillBootEntry (
-  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN  UINT32                      Policy,
-  IN  EFI_HANDLE                  Handle,
-  OUT OC_BOOT_ENTRY               *BootEntry,
-  OUT OC_BOOT_ENTRY               *AlternateBootEntry OPTIONAL,
-  IN  BOOLEAN                     IsLoadHandle
+  IN  APPLE_BOOT_POLICY_PROTOCOL      *BootPolicy,
+  IN  UINT32                          Policy,
+  IN  EFI_HANDLE                      Handle,
+  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *SimpleFs,
+  OUT OC_BOOT_ENTRY                   *BootEntry,
+  OUT OC_BOOT_ENTRY                   *AlternateBootEntry OPTIONAL,
+  IN  BOOLEAN                         IsLoadHandle
   )
 {
   EFI_STATUS                Status;
@@ -980,6 +1089,12 @@ OcFillBootEntry (
   UINTN                     Count;
 
   Count = 0;
+
+  Status = InternalCheckScanPolicy (Handle, SimpleFs, Policy);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCB: Skipping handle %p due to scan policy %x\n", Handle, Policy));
+    return 0;
+  }
 
   //
   // Do not do normal scanning on load handle.
@@ -1520,26 +1635,28 @@ OcScanForBootEntries (
   EntryIndex = 0;
 
   for (Index = 0; Index < NoHandles; ++Index) {
+    Status = gBS->HandleProtocol (
+      Handles[Index],
+      &gEfiSimpleFileSystemProtocolGuid,
+      (VOID **) &SimpleFs
+      );
+
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
     EntryCount = OcFillBootEntry (
       BootPolicy,
       Policy,
       Handles[Index],
+      SimpleFs,
       &Entries[EntryIndex],
       &Entries[EntryIndex+1],
       LoadHandle == Handles[Index]
       );
 
     DEBUG_CODE_BEGIN ();
-    Status = gBS->HandleProtocol (
-      Handles[Index],
-      &gEfiSimpleFileSystemProtocolGuid,
-      (VOID **) &SimpleFs
-      );
-    if (!EFI_ERROR (Status)) {
-      VolumeLabel = GetVolumeLabel (SimpleFs);
-    } else {
-      VolumeLabel = NULL;
-    }
+    VolumeLabel = GetVolumeLabel (SimpleFs);
     DEBUG ((
       DEBUG_INFO,
       "OCB: Filesystem %u (%p) named %s (%r) has %u entries\n",
@@ -1579,7 +1696,7 @@ OcScanForBootEntries (
         Entries[Index].IsFolder
         ));
 
-      DevicePath = ConvertDevicePathToText(Entries[Index].DevicePath, FALSE, FALSE);
+      DevicePath = ConvertDevicePathToText (Entries[Index].DevicePath, FALSE, FALSE);
       if (DevicePath != NULL) {
         DEBUG ((
           DEBUG_INFO,
@@ -1773,7 +1890,7 @@ OcLoadBootEntry (
 
 EFI_STATUS
 OcRunSimpleBootPicker (
-  IN  UINT32           LookupPolicy,
+  IN  UINT32           ScanPolicy,
   IN  UINT32           BootPolicy,
   IN  UINT32           TimeoutSeconds,
   IN  OC_IMAGE_START   StartImage,
@@ -1803,7 +1920,7 @@ OcRunSimpleBootPicker (
 
     Status = OcScanForBootEntries (
       AppleBootPolicy,
-      LookupPolicy,
+      ScanPolicy,
       &Entries,
       &EntryCount,
       NULL,
@@ -1814,6 +1931,11 @@ OcRunSimpleBootPicker (
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OcScanForBootEntries failure - %r\n", Status));
       return Status;
+    }
+
+    if (EntryCount == 0) {
+      DEBUG ((DEBUG_WARN, "OcScanForBootEntries has no entries\n"));
+      return EFI_NOT_FOUND;
     }
 
     DEBUG ((DEBUG_INFO, "Performing OcShowSimpleBootMenu...\n"));

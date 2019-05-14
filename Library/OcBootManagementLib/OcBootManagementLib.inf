@@ -49,9 +49,10 @@
   gAppleBootVariableGuid             ## SOMETIMES_CONSUMES
 
 [Protocols]
-  gAppleBootPolicyProtocolGuid      ## PRODUCES
-  gEfiSimpleFileSystemProtocolGuid  ## SOMETIMES_CONSUMES
-  gEfiLoadedImageProtocolGuid       ## SOMETIMES_CONSUMES
+  gAppleBootPolicyProtocolGuid       ## PRODUCES
+  gEfiSimpleFileSystemProtocolGuid   ## SOMETIMES_CONSUMES
+  gEfiLoadedImageProtocolGuid        ## SOMETIMES_CONSUMES
+  gEfiUsbIoProtocolGuid              ## SOMETIMES_CONSUMES
 
 [LibraryClasses]
   BaseLib
