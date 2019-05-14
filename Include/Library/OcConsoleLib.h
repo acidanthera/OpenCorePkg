@@ -15,6 +15,8 @@
 #ifndef OC_CONSOLE_LIB_H
 #define OC_CONSOLE_LIB_H
 
+#include <Protocol/ConsoleControl.h>
+
 /**
   Possible console control behaviour.
 **/
@@ -27,15 +29,25 @@ typedef enum {
 } OC_CONSOLE_CONTROL_BEHAVIOUR;
 
 /**
+  Locate Console Control protocol.
+
+  @param[in] Reinstall       Force local Console Control instance.
+
+  @retval Console Control protocol instance or NULL.
+**/
+EFI_CONSOLE_CONTROL_PROTOCOL *
+OcConsoleControlInstallProtocol (
+  IN BOOLEAN  Reinstall
+  );
+
+/**
   Configure console control protocol with given options.
 
   @param[in] IgnoreTextOutput     Skip console output in text mode.
   @param[in] SanitiseClearScreen  Workaround ClearScreen breaking resolution.
-
-  @retval EFI_SUCCESS on success.
 **/
-EFI_STATUS
-ConsoleControlConfigure (
+VOID
+OcConsoleControlConfigure (
   IN BOOLEAN                       IgnoreTextOutput,
   IN BOOLEAN                       SanitiseClearScreen
   );
@@ -48,7 +60,7 @@ ConsoleControlConfigure (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-ConsoleControlSetBehaviour (
+OcConsoleControlSetBehaviour (
   IN OC_CONSOLE_CONTROL_BEHAVIOUR  Behaviour
   );
 

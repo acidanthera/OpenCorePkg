@@ -355,6 +355,8 @@
 ///
 #define OC_UEFI_PROTOCOLS_FIELDS(_, __) \
   _(BOOLEAN                     , AppleBootPolicy             ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ConsoleControl              ,     , FALSE  , ()) \
+  _(BOOLEAN                     , DataHub                     ,     , FALSE  , ()) \
   _(BOOLEAN                     , DeviceProperties            ,     , FALSE  , ())
   OC_DECLARE (OC_UEFI_PROTOCOLS)
 
@@ -367,7 +369,6 @@
   _(BOOLEAN                     , IgnoreTextInGraphics        ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReleaseUsbOwnership         ,     , FALSE  , ()) \
   _(BOOLEAN                     , RequestBootVarRouting       ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ProvideConsoleControl       ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProvideConsoleGop           ,     , FALSE  , ()) \
   _(BOOLEAN                     , SanitiseClearScreen         ,     , FALSE  , ())
   OC_DECLARE (OC_UEFI_QUIRKS)

@@ -405,7 +405,6 @@ mUefiQuirksSchema[] = {
   OC_SCHEMA_INTEGER_IN ("ExitBootServicesDelay",  OC_GLOBAL_CONFIG, Uefi.Quirks.ExitBootServicesDelay),
   OC_SCHEMA_BOOLEAN_IN ("IgnoreInvalidFlexRatio", OC_GLOBAL_CONFIG, Uefi.Quirks.IgnoreInvalidFlexRatio),
   OC_SCHEMA_BOOLEAN_IN ("IgnoreTextInGraphics",   OC_GLOBAL_CONFIG, Uefi.Quirks.IgnoreTextInGraphics),
-  OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleControl",  OC_GLOBAL_CONFIG, Uefi.Quirks.ProvideConsoleControl),
   OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop",      OC_GLOBAL_CONFIG, Uefi.Quirks.ProvideConsoleGop),
   OC_SCHEMA_BOOLEAN_IN ("ReleaseUsbOwnership",    OC_GLOBAL_CONFIG, Uefi.Quirks.ReleaseUsbOwnership),
   OC_SCHEMA_BOOLEAN_IN ("RequestBootVarRouting",  OC_GLOBAL_CONFIG, Uefi.Quirks.RequestBootVarRouting),
@@ -416,6 +415,8 @@ STATIC
 OC_SCHEMA
 mUefiProtocolsSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("AppleBootPolicy",        OC_GLOBAL_CONFIG, Uefi.Protocols.AppleBootPolicy),
+  OC_SCHEMA_BOOLEAN_IN ("ConsoleControl",         OC_GLOBAL_CONFIG, Uefi.Protocols.ConsoleControl),
+  OC_SCHEMA_BOOLEAN_IN ("DataHub",                OC_GLOBAL_CONFIG, Uefi.Protocols.DataHub),
   OC_SCHEMA_BOOLEAN_IN ("DeviceProperties",       OC_GLOBAL_CONFIG, Uefi.Protocols.DeviceProperties),
 };
 

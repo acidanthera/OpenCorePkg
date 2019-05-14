@@ -59,7 +59,10 @@ typedef struct {
   CONST UINT8   *SmcPlatform;
 } OC_DATA_HUB_DATA;
 
-/** Locate Data Hub protocol.
+/**
+  Locate Data Hub protocol.
+
+  @param[in] Reinstall       Force local Data Hub instance.
 
   @retval Data Hub protocol instance or NULL.
 **/
@@ -68,7 +71,8 @@ OcDataHubInstallProtocol (
   IN BOOLEAN  Reinstall
   );
 
-/** Set Data Hub entry.
+/**
+  Set Data Hub entry.
 
   @param[in] DataHub         Data Hub protocol instance.
   @param[in] DataRecordGuid  The guid of the record to use.
@@ -87,7 +91,8 @@ SetDataHubEntry (
   IN UINT32                 DataSize
   );
 
-/** Update DataHub entries.
+/**
+  Update DataHub entries.
 
   @param[in] Data         Data to be used for updating.
 

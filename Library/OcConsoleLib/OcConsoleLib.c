@@ -210,10 +210,14 @@ mConsoleControlProtocol = {
   ConsoleControlLockStdIn
 };
 
-EFI_STATUS
-ConsoleControlConfigure (
-  IN BOOLEAN                      IgnoreTextOutput,
-  IN BOOLEAN                      SanitiseClearScreen
+/**
+  Locate Console Control protocol.
+
+  @retval Data Hub protocol instance or NULL.
+**/
+EFI_CONSOLE_CONTROL_PROTOCOL *
+OcConsoleControlInstallProtocol (
+  IN BOOLEAN  Reinstall
   )
 {
   EFI_STATUS                    Status;
@@ -228,8 +232,52 @@ ConsoleControlConfigure (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCC: Configuring console (%r) ignore %d san clear %d\n",
+    "OCC: Install console control %d - %r\n",
     Status,
+    Reinstall
+    ));
+
+  //
+  // Native implementation exists, overwrite on force.
+  //
+
+  if (!EFI_ERROR (Status)) {
+    if (Reinstall) {
+      CopyMem (
+        &mOriginalConsoleControlProtocol,
+        ConsoleControl,
+        sizeof (mOriginalConsoleControlProtocol)
+        );
+      CopyMem (
+        ConsoleControl,
+        &mConsoleControlProtocol,
+        sizeof (mOriginalConsoleControlProtocol)
+        );
+    }
+
+    return ConsoleControl;
+  }
+
+  NewHandle = NULL;
+  Status = gBS->InstallMultipleProtocolInterfaces (
+    &NewHandle,
+    &gEfiConsoleControlProtocolGuid,
+    &mConsoleControlProtocol,
+    NULL
+    );
+
+  return &mConsoleControlProtocol;
+}
+
+VOID
+OcConsoleControlConfigure (
+  IN BOOLEAN                      IgnoreTextOutput,
+  IN BOOLEAN                      SanitiseClearScreen
+  )
+{
+  DEBUG ((
+    DEBUG_INFO,
+    "OCC: Configuring console ignore %d san clear %d\n",
     IgnoreTextOutput,
     SanitiseClearScreen
     ));
@@ -243,38 +291,10 @@ ConsoleControlConfigure (
     mOriginalClearScreen      = gST->ConOut->ClearScreen;
     gST->ConOut->ClearScreen  = ControlledClearScreen;
   }
-
-  //
-  // Native implementation exists, ignore.
-  //
-  if (!EFI_ERROR (Status)) {
-    CopyMem (
-      &mOriginalConsoleControlProtocol,
-      ConsoleControl,
-      sizeof (mOriginalConsoleControlProtocol)
-      );
-    CopyMem (
-      ConsoleControl,
-      &mConsoleControlProtocol,
-      sizeof (mOriginalConsoleControlProtocol)
-      );
-
-    return EFI_SUCCESS;
-  }
-
-  NewHandle = NULL;
-  Status = gBS->InstallMultipleProtocolInterfaces (
-    &NewHandle,
-    &gEfiConsoleControlProtocolGuid,
-    &mConsoleControlProtocol,
-    NULL
-    );
-
-  return Status;
 }
 
 EFI_STATUS
-ConsoleControlSetBehaviour (
+OcConsoleControlSetBehaviour (
   IN OC_CONSOLE_CONTROL_BEHAVIOUR  Behaviour
   )
 {
