@@ -145,6 +145,7 @@ InternalCheckScanPolicy (
     // but currently it is not a priority.
     //
     if ((Policy & OC_SCAN_ALLOW_FS_APFS) != 0 && EFI_ERROR (Status)) {
+      BufferSize = 0;
       Status = Root->GetInfo (Root, &gAppleApfsVolumeInfoGuid, &BufferSize, NULL);
       if (Status == EFI_BUFFER_TOO_SMALL) {
         Status = EFI_SUCCESS;
