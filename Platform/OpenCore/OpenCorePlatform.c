@@ -140,7 +140,7 @@ OcPlatformUpdateDataHub (
     }
 
     Data.BoardProduct  = MacInfo->DataHub.BoardProduct;
-    Data.BoardRevision = &Config->PlatformInfo.DataHub.BoardRevision[0];
+    Data.BoardRevision = &MacInfo->DataHub.BoardRevision[0];
     StartupPowerEvents = 0;
     Data.StartupPowerEvents = &StartupPowerEvents;
     Data.DevicePathsSupported = &MacInfo->DataHub.DevicePathsSupported[0];
