@@ -1129,8 +1129,14 @@ AcpiResetLogoStatus (
   for (Index = 0; Index < Context->NumberOfTables; ++Index) {
     if (Context->Tables[Index]->Signature == EFI_ACPI_6_2_BOOT_GRAPHICS_RESOURCE_TABLE_SIGNATURE) {
       if (Context->Tables[Index]->Length >= sizeof (EFI_ACPI_6_2_BOOT_GRAPHICS_RESOURCE_TABLE)) {
-        ((EFI_ACPI_6_2_BOOT_GRAPHICS_RESOURCE_TABLE *)Context->Tables[Index])->Status
-          &= ~EFI_ACPI_6_2_BGRT_STATUS_DISPLAYED;
+        EFI_ACPI_6_2_BOOT_GRAPHICS_RESOURCE_TABLE *Bgrt =
+          (EFI_ACPI_6_2_BOOT_GRAPHICS_RESOURCE_TABLE *)Context->Tables[Index];
+        Bgrt->Status &= ~EFI_ACPI_6_2_BGRT_STATUS_DISPLAYED;
+        Bgrt->Header.Checksum = 0;
+        Bgrt->Header.Checksum = CalculateCheckSum8 (
+          (UINT8 *) Bgrt,
+          Bgrt->Header.Length
+          );
       }
       break;
     }
