@@ -39,9 +39,9 @@ RecalculateTSC (
   UINT32   TimerAddr;
   UINT64   Tsc0;
   UINT64   Tsc1;
-  UINT64   AcpiTick0;
-  UINT64   AcpiTick1;
-  UINT64   AcpiTicksDelta;
+  UINT32   AcpiTick0;
+  UINT32   AcpiTick1;
+  UINT32   AcpiTicksDelta;
   UINT32   AcpiTicksTarget;
   UINT32   TimerResolution;
   EFI_TPL  PrevTpl;
@@ -92,7 +92,7 @@ RecalculateTSC (
         //
         // 357954 clocks of ACPI timer (100ms)
         //
-        AcpiTicksTarget = (V_ACPI_TMR_FREQUENCY / TimerResolution);
+        AcpiTicksTarget = V_ACPI_TMR_FREQUENCY / TimerResolution;
 
         //
         // Disable all events to ensure that nobody interrupts us.
@@ -132,8 +132,16 @@ RecalculateTSC (
           //
         } while (AcpiTicksDelta < AcpiTicksTarget);
 
-        Tsc1                         = AsmReadTsc ();
-        mPerformanceCounterFrequency = MultU64x32 ((Tsc1 - Tsc0), TimerResolution);
+        Tsc1 = AsmReadTsc ();
+
+        //
+        // On some systems we may end up waiting for notably longer than 100ms,
+        // despite disabling all events. Divide by actual time passed as suggested
+        // by asava's Clover patch r2668.
+        //
+        mPerformanceCounterFrequency = DivU64x32 (
+          MultU64x32 (Tsc1 - Tsc0, V_ACPI_TMR_FREQUENCY), AcpiTicksDelta
+          );
 
         //
         // Restore to normal TPL.

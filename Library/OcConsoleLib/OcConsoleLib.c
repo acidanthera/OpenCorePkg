@@ -233,8 +233,8 @@ OcConsoleControlInstallProtocol (
   DEBUG ((
     DEBUG_INFO,
     "OCC: Install console control %d - %r\n",
-    Status,
-    Reinstall
+    Reinstall,
+    Status
     ));
 
   //
