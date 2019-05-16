@@ -271,9 +271,6 @@ UpdateDataHub (
     DataHubSetAppleMiscData (DataHub, OC_SYSTEM_UUID, &SystemId, sizeof (SystemId));
   }
   DataHubSetAppleMiscAscii (DataHub, OC_BOARD_PRODUCT, Data->BoardProduct);
-  //
-  // TODO: Clover uses DataHubSetAppleProcessorData equivalent here, check if legit.
-  //
   DataHubSetAppleMiscData (DataHub, OC_BOARD_REVISION, Data->BoardRevision, sizeof (*Data->BoardRevision));
   DataHubSetAppleMiscData (DataHub, OC_STARTUP_POWER_EVENTS, Data->StartupPowerEvents, sizeof (*Data->StartupPowerEvents));
   DataHubSetAppleProcessorData (DataHub, OC_INITIAL_TSC, Data->InitialTSC, sizeof (*Data->InitialTSC));
