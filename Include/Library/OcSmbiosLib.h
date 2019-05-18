@@ -41,6 +41,12 @@ extern EFI_GUID       gOcCustomSmbiosTableGuid;
 //
 #define OC_SMBIOS_VENDOR_NAME "Acidanthera"
 
+//
+// Some Macs do not support Type 133 table.
+// This is the reserved value used to disable its creation.
+//
+#define PLATFORM_FEATURE_MISSING 0xFFFFFFFFU
+
 typedef struct OC_SMBIOS_DATA_ {
   //
   // Type 0

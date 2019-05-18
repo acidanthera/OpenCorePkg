@@ -104,9 +104,7 @@ SmbiosGetOriginalStructureCount (
 /** Type 0
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-
-  @retval
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -147,9 +145,7 @@ PatchBiosInformation (
 /** Type 1
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-
-  @retval
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -185,9 +181,7 @@ PatchSystemInformation (
 /** Type 2
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-
-  @retval
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -237,9 +231,7 @@ PatchBaseboardInformation (
 /** Type 3
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-
-  @retval
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -303,10 +295,8 @@ PatchSystemEnclosure (
 /** Type 4
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
   @param[in] CpuInfo                Pointer to a valid pico cpu info structure.
-
-  @retval
 **/
 STATIC
 VOID
@@ -383,9 +373,7 @@ PatchProcessorInformation (
 /** Type 7
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-
-  @retval
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -452,9 +440,7 @@ PatchCacheInformation (
 /** Type 8
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-
-  @retval
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -497,9 +483,7 @@ PatchSystemPorts (
 /** Type 9
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-
-  @retval
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -624,9 +608,7 @@ PatchSystemSlots (
 /** Type 16
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-
-  @retval
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -662,9 +644,7 @@ PatchMemoryArray (
 /** Type 17
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-
-  @retval
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -744,9 +724,7 @@ PatchMemoryDevice (
 /** Type 19
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-
-  @retval
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -803,9 +781,7 @@ PatchMemoryMappedAddress (
 /** Type 20
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-
-  @retval
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -855,9 +831,7 @@ PatchMemoryMappedDevice (
 /** Type 22
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-
-  @retval
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -907,9 +881,7 @@ PatchPortableBatteryDevice (
 /** Type 32
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-
-  @retval
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -937,9 +909,7 @@ PatchBootInformation (
 /** Type 128
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-
-  @retval
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -967,10 +937,8 @@ CreateAppleFirmwareVolume (
 /** Type 131
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
   @param[in] CpuInfo                Pointer to a valid pico cpu info structure.
-
-  @retval
 **/
 STATIC
 VOID
@@ -998,10 +966,8 @@ CreateAppleProcessorType (
 /** Type 132
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
   @param[in] CpuInfo                Pointer to a valid pico cpu info structure.
-
-  @retval
 **/
 STATIC
 VOID
@@ -1038,12 +1004,43 @@ CreateAppleProcessorSpeed (
 #endif
 }
 
+/** Type 133
+
+  @param[in] Table                  Pointer to location containing the current address within the buffer.
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+**/
+STATIC
+VOID
+CreateApplePlatformFeature (
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data
+  )
+{
+  UINT8                           MinLength;
+
+  //
+  // Older Macs do not support PlatformFeature table.
+  //
+  if (Data->PlatformFeature == PLATFORM_FEATURE_MISSING) {
+    return;
+  }
+
+  MinLength   = sizeof (*Table->CurrentPtr.Type133);
+
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, APPLE_SMBIOS_TYPE_PLATFORM_FEATURE, MinLength, 1))) {
+    return;
+  }
+
+  Table->CurrentPtr.Type133->PlatformFeature = Data->PlatformFeature;
+
+  SmbiosFinaliseStruct (Table);
+}
+
+
 /** Type 127
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Handle                 Pointer to tocation containing the current handle value.
-
-  @retval
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -1630,6 +1627,7 @@ CreateSmbios (
   CreateAppleProcessorType (&SmbiosTable, Data, CpuInfo);
   CreateAppleProcessorSpeed (&SmbiosTable, Data, CpuInfo);
   CreateAppleFirmwareVolume (&SmbiosTable, Data);
+  CreateApplePlatformFeature (&SmbiosTable, Data);
   CreateSmBiosEndOfTable (&SmbiosTable, Data);
 
   FreePool (Mapping);
