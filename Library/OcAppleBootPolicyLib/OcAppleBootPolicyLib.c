@@ -66,7 +66,7 @@ EFI_STATUS
 EFIAPI
 BootPolicyGetBootFileEx (
   IN  EFI_HANDLE                Device,
-  IN  UINT32                    Unused OPTIONAL,
+  IN  BOOT_POLICY_ACTION        Action,
   OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
   );
 
@@ -891,7 +891,7 @@ EFI_STATUS
 EFIAPI
 BootPolicyGetBootFileEx (
   IN  EFI_HANDLE                      Device,
-  IN  UINT32                          Mode,
+  IN  BOOT_POLICY_ACTION              Action,
   OUT EFI_DEVICE_PATH_PROTOCOL        **FilePath
   )
 {
