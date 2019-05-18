@@ -14,6 +14,7 @@ OpenCore Changelog
 - Moved `ConsoleControl` configuration to `Protocols`
 - Added `Security` -> `ScanPolicy` preference
 - Fixed invalid `board-rev` exposure in Data Hub
+- Fixed SMBIOS Type 133 table exposure
 
 #### v0.0.1
 - Initial developer preview release
