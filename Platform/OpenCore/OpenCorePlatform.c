@@ -325,6 +325,12 @@ OcPlatformUpdateSmbios (
     Data.FirmwareFeatures     = MacInfo->Smbios.FirmwareFeatures;
     Data.FirmwareFeaturesMask = MacInfo->Smbios.FirmwareFeaturesMask;
     Data.ProcessorType        = NULL;
+
+    OC_INLINE_STATIC_ASSERT (
+      MAC_INFO_PLATFORM_FEATURE_MISSING == PLATFORM_FEATURE_MISSING,
+      "MacInfoPkg and OcSupportPkg have inconsistent data!"
+      );
+
     Data.PlatformFeature      = MacInfo->Smbios.PlatformFeature;
   }
 
