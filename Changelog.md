@@ -15,6 +15,7 @@ OpenCore Changelog
 - Added `Security` -> `ScanPolicy` preference
 - Fixed invalid `board-rev` exposure in Data Hub
 - Fixed SMBIOS Type 133 table exposure
+- Added support for SMBIOS Type 134 table exposure
 
 #### v0.0.1
 - Initial developer preview release

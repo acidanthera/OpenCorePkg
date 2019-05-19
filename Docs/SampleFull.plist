@@ -573,6 +573,8 @@
 			<integer>0</integer>
 			<key>MemoryFormFactor</key>
 			<integer>9</integer>
+			<key>SmcVersion</key>
+			<data>AAAAAAAAAAAAAAAAAAAAAA==</data>
 		</dict>
 		<key>UpdateDataHub</key>
 		<true/>

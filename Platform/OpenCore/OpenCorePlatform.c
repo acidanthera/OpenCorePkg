@@ -28,6 +28,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
+#include <IndustryStandard/AppleSmBios.h>
+
 #include <Guid/AppleVariable.h>
 
 STATIC
@@ -168,6 +170,7 @@ OcPlatformUpdateSmbios (
   EFI_STATUS       Status;
   OC_SMBIOS_DATA   Data;
   EFI_GUID         Uuid;
+  UINT8            SmcVersion[APPLE_SMBIOS_SMC_VERSION_SIZE];
 
   ZeroMem (&Data, sizeof (Data));
 
@@ -275,7 +278,13 @@ OcPlatformUpdateSmbios (
       Data.ProcessorType = &Config->PlatformInfo.Smbios.ProcessorType;
     }
 
-    Data.PlatformFeature = Config->PlatformInfo.Smbios.PlatformFeature;
+    if (Config->PlatformInfo.Smbios.PlatformFeature != MAC_INFO_PLATFORM_FEATURE_MISSING) {
+      Data.PlatformFeature      = &Config->PlatformInfo.Smbios.PlatformFeature;
+    }
+
+    if (Config->PlatformInfo.Smbios.SmcVersion[0] != '\0') {
+      Data.SmcVersion = &Config->PlatformInfo.Smbios.SmcVersion[0];
+    }
   } else {
     //
     // Automatic mode read data from Generic & MacInfo.
@@ -326,12 +335,14 @@ OcPlatformUpdateSmbios (
     Data.FirmwareFeaturesMask = MacInfo->Smbios.FirmwareFeaturesMask;
     Data.ProcessorType        = NULL;
 
-    OC_INLINE_STATIC_ASSERT (
-      MAC_INFO_PLATFORM_FEATURE_MISSING == PLATFORM_FEATURE_MISSING,
-      "MacInfoPkg and OcSupportPkg have inconsistent data!"
-      );
+    if (MacInfo->Smbios.PlatformFeature != MAC_INFO_PLATFORM_FEATURE_MISSING) {
+      Data.PlatformFeature      = &MacInfo->Smbios.PlatformFeature;
+    }
 
-    Data.PlatformFeature      = MacInfo->Smbios.PlatformFeature;
+    if (MacInfo->DataHub.SmcRevision != NULL) {
+      SmbiosGetSmcVersion (MacInfo->DataHub.SmcRevision, SmcVersion);
+      Data.SmcVersion           = SmcVersion;
+    }
   }
 
   Status = CreateSmbios (&Data, UpdateMode, CpuInfo);

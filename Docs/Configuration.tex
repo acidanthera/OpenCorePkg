@@ -2491,13 +2491,20 @@ Apple ROM Version
   \texttt{MacBook-Aluminum}.
 \item
   \texttt{PlatformFeature}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
+  \textbf{Default value}: \texttt{0xFFFFFFFF}\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE133} -
   \texttt{PlatformFeature}\\
   \textbf{Description}: Platform features bitmask. Refer to
   \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
-  for more details.
+  for more details. Use \texttt{0xFFFFFFFF} value to not provide this table.
+\item
+  \texttt{SmcVersion}\\
+  \textbf{Type}: \texttt{plist\ data}, 16 bytes\\
+  \textbf{Default value}: All zero\\
+  \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE134} - \texttt{Version}\\
+  \textbf{Description}: ASCII string containing SMC version in upper case.
+  Missing on T2 based Macs. Ignored when zero.
 \item
   \texttt{FirmwareFeatures}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\

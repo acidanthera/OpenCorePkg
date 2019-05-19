@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May  3 12:13:06 2019
-%DIF ADD ../Configuration.tex        Wed May 15 01:27:22 2019
+%DIF ADD ../Configuration.tex        Sun May 19 09:05:08 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2657,15 +2657,22 @@ Apple ROM Version
   \texttt{MacBook-Aluminum}.
 \item
   \texttt{PlatformFeature}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Type}: \texttt{plist\ integer}\DIFaddbegin \DIFadd{, 32-bit}\DIFaddend \\
+  \textbf{Default value}: \texttt{\DIFdelbegin \DIFdel{0}\DIFdelend \DIFaddbegin \DIFadd{0xFFFFFFFF}\DIFaddend }\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE133} -
   \texttt{PlatformFeature}\\
   \textbf{Description}: Platform features bitmask. Refer to
   \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
-  for more details.
-\item
-  \texttt{FirmwareFeatures}\\
+  for more details. \DIFaddbegin \DIFadd{Use }\texttt{\DIFadd{0xFFFFFFFF}} \DIFadd{value to not provide this table.
+}\DIFaddend \item
+  \DIFaddbegin \texttt{\DIFadd{SmcVersion}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ data}}\DIFadd{, 16 bytes}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: All zero}\\
+  \textbf{\DIFadd{SMBIOS}}\DIFadd{: }\texttt{\DIFadd{APPLE\_SMBIOS\_TABLE\_TYPE134}} \DIFadd{- }\texttt{\DIFadd{Version}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: ASCII string containing SMC version in upper case.
+  Missing on T2 based Macs. Ignored when zero.
+}\item
+  \DIFaddend \texttt{FirmwareFeatures}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
   \textbf{Default value}: \texttt{0}\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE128} -
