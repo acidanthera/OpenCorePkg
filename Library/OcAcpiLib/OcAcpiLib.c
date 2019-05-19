@@ -22,7 +22,7 @@
 #include <Library/OcMiscLib.h>
 
 #include <IndustryStandard/AcpiAml.h>
-#include <IndustryStandard/Acpi62.h>
+#include <IndustryStandard/Acpi.h>
 
 #include <Guid/Acpi.h>
 
