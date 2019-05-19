@@ -278,8 +278,8 @@ OcPlatformUpdateSmbios (
       Data.ProcessorType = &Config->PlatformInfo.Smbios.ProcessorType;
     }
 
-    if (Config->PlatformInfo.Smbios.PlatformFeature != MAC_INFO_PLATFORM_FEATURE_MISSING) {
-      Data.PlatformFeature      = &Config->PlatformInfo.Smbios.PlatformFeature;
+    if (Config->PlatformInfo.Smbios.PlatformFeature != 0xFFFFFFFFU) {
+      Data.PlatformFeature    = &Config->PlatformInfo.Smbios.PlatformFeature;
     }
 
     if (Config->PlatformInfo.Smbios.SmcVersion[0] != '\0') {
@@ -334,10 +334,7 @@ OcPlatformUpdateSmbios (
     Data.FirmwareFeatures     = MacInfo->Smbios.FirmwareFeatures;
     Data.FirmwareFeaturesMask = MacInfo->Smbios.FirmwareFeaturesMask;
     Data.ProcessorType        = NULL;
-
-    if (MacInfo->Smbios.PlatformFeature != MAC_INFO_PLATFORM_FEATURE_MISSING) {
-      Data.PlatformFeature      = &MacInfo->Smbios.PlatformFeature;
-    }
+    Data.PlatformFeature      = MacInfo->Smbios.PlatformFeature;
 
     if (MacInfo->DataHub.SmcRevision != NULL) {
       SmbiosGetSmcVersion (MacInfo->DataHub.SmcRevision, SmcVersion);
