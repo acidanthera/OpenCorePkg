@@ -1021,7 +1021,7 @@ CreateApplePlatformFeature (
   //
   // Older Macs do not support PlatformFeature table.
   //
-  if (Data->PlatformFeature == PLATFORM_FEATURE_MISSING) {
+  if (Data->PlatformFeature == NULL) {
     return;
   }
 
@@ -1031,11 +1031,46 @@ CreateApplePlatformFeature (
     return;
   }
 
-  Table->CurrentPtr.Type133->PlatformFeature = Data->PlatformFeature;
+  Table->CurrentPtr.Type133->PlatformFeature = *Data->PlatformFeature;
 
   SmbiosFinaliseStruct (Table);
 }
 
+/** Type 134
+
+  @param[in] Table                  Pointer to location containing the current address within the buffer.
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+**/
+STATIC
+VOID
+CreateAppleSmcInformation (
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data
+  )
+{
+  UINT8                           MinLength;
+
+  //
+  // Newer Macs do not support SmcVersion table.
+  //
+  if (Data->SmcVersion == NULL) {
+    return;
+  }
+
+  MinLength   = sizeof (*Table->CurrentPtr.Type134);
+
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, APPLE_SMBIOS_TYPE_SMC_INFORMATION, MinLength, 1))) {
+    return;
+  }
+
+  CopyMem (
+    Table->CurrentPtr.Type134->SmcVersion,
+    Data->SmcVersion,
+    sizeof (Table->CurrentPtr.Type134->SmcVersion)
+    );
+
+  SmbiosFinaliseStruct (Table);
+}
 
 /** Type 127
 
@@ -1628,6 +1663,7 @@ CreateSmbios (
   CreateAppleProcessorSpeed (&SmbiosTable, Data, CpuInfo);
   CreateAppleFirmwareVolume (&SmbiosTable, Data);
   CreateApplePlatformFeature (&SmbiosTable, Data);
+  CreateAppleSmcInformation (&SmbiosTable, Data);
   CreateSmBiosEndOfTable (&SmbiosTable, Data);
 
   FreePool (Mapping);
