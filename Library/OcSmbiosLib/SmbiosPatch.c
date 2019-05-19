@@ -1566,6 +1566,117 @@ SmbiosTableApply (
   return EFI_SUCCESS;
 }
 
+VOID
+SmbiosGetSmcVersion (
+  IN  CONST UINT8  *SmcRevision,
+  OUT UINT8        *SmcVersion
+  )
+{
+  UINT8                 Temp;
+  UINT8                 Index;
+
+  ZeroMem (SmcVersion, APPLE_SMBIOS_SMC_VERSION_SIZE);
+
+  Temp  = SmcRevision[0];
+  Index = 0;
+
+  if (Temp < 0x10) {
+    SmcVersion[Index] = (Temp + 0x30);
+    ++Index;
+  } else {
+    SmcVersion[Index] = ((Temp >> 4) | 0x30);
+    ++Index;
+
+    SmcVersion[Index + 1] = ((Temp & 0x0F) | 0x30);
+    ++Index;
+  }
+
+  SmcVersion[Index] = 0x2E;
+  ++Index;
+
+  Temp = SmcRevision[1];
+
+  if (Temp < 0x10) {
+    SmcVersion[Index] = (Temp + 0x30);
+    ++Index;
+  } else {
+    SmcVersion[Index] = ((Temp >> 4) | 0x30);
+    ++Index;
+
+    SmcVersion[Index] = ((Temp & 0x0F) | 0x30);
+    ++Index;
+  }
+
+  Temp = SmcRevision[2];
+
+  if ((Temp & 0xF0) != 0) {
+    if (Temp >= 0xA0) {
+      SmcVersion[Index] = ((Temp >> 4) + 0x37);
+      ++Index;
+    } else {
+      SmcVersion[Index] = ((Temp >> 4) | 0x30);
+      ++Index;
+    }
+
+    Temp &= 0x0F;
+
+    if (Temp >= 0x0A) {
+      SmcVersion[Index] = (Temp + 0x37);
+      ++Index;
+    } else {
+      SmcVersion[Index] = (Temp | 0x30);
+      ++Index;
+    }
+  } else {
+    if (Temp >= 0x0A) {
+      SmcVersion[Index] = (Temp + 0x37);
+      ++Index;
+    } else {
+      SmcVersion[Index] = (Temp + 0x30);
+      ++Index;
+    }
+  }
+
+  Temp = SmcRevision[4];
+
+  if (Temp < 0x10) {
+    SmcVersion[Index] = (Temp + 0x30);
+    ++Index;
+  } else {
+    SmcVersion[Index] = ((Temp >> 4) | 0x30);
+    ++Index;
+
+    SmcVersion[Index] = ((Temp & 0x0F) | 0x30);
+    ++Index;
+  }
+
+  Temp = SmcRevision[4];
+
+  if (Temp < 0x10) {
+    SmcVersion[Index] = (Temp + 0x30);
+    ++Index;
+  } else {
+    SmcVersion[Index] = ((Temp >> 4) | 0x30);
+    ++Index;
+
+    SmcVersion[Index] = ((Temp & 0x0F) | 0x30);
+    ++Index;
+  }
+
+  Temp = SmcRevision[5];
+
+  if (Temp < 0x10) {
+    SmcVersion[Index] = (Temp + 0x30);
+    ++Index;
+  } else {
+    SmcVersion[Index] = ((Temp >> 4) | 0x30);
+    ++Index;
+
+    SmcVersion[Index] = ((Temp & 0x0F) | 0x30);
+    ++Index;
+  }
+}
+
 /**
 
   @retval EFI_SUCCESS               The smbios tables were generated successfully

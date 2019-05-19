@@ -136,6 +136,12 @@ typedef enum OC_SMBIOS_UPDATE_MODE_ {
   OcSmbiosUpdateCustom       = 3,
 } OC_SMBIOS_UPDATE_MODE;
 
+VOID
+SmbiosGetSmcVersion (
+  IN  CONST UINT8  *SmcRevision,
+  OUT UINT8        *SmcVersion
+  );
+
 EFI_STATUS
 CreateSmbios (
   IN OC_SMBIOS_DATA         *Data,
