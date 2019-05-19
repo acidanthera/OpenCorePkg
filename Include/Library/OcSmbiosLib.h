@@ -99,7 +99,7 @@ typedef struct OC_SMBIOS_DATA_ {
   //
   // Type 134
   //
-  CONST CHAR8     *SmcVersion;
+  CONST UINT8     *SmcVersion;
 } OC_SMBIOS_DATA;
 
 typedef enum OC_SMBIOS_UPDATE_MODE_ {

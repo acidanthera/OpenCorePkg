@@ -321,9 +321,10 @@
   _(OC_STRING                    , ChassisVersion        ,  , OC_STRING_CONSTR ("", _, __)     , ()                   ) \
   _(OC_STRING                    , ChassisSerialNumber   ,  , OC_STRING_CONSTR ("", _, __)     , ()                   ) \
   _(OC_STRING                    , ChassisAssetTag       ,  , OC_STRING_CONSTR ("", _, __)     , ()                   ) \
-  _(UINT32                       , PlatformFeature       ,  , 0                                , ()                   ) \
+  _(UINT32                       , PlatformFeature       ,  , 0xFFFFFFFFU                      , ()                   ) \
   _(UINT64                       , FirmwareFeatures      ,  , 0                                , ()                   ) \
   _(UINT64                       , FirmwareFeaturesMask  ,  , 0                                , ()                   ) \
+  _(UINT8                        , SmcVersion            , [16] , {0}                          , ()                   ) \
   _(UINT16                       , ProcessorType         ,  , 0                                , ()                   ) \
   _(UINT8                        , MemoryFormFactor      ,  , 0                                , ()                   )
   OC_DECLARE (OC_PLATFORM_SMBIOS_CONFIG)

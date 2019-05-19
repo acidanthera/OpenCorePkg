@@ -369,6 +369,7 @@ mPlatformConfigurationSmbiosSchema[] = {
   OC_SCHEMA_INTEGER_IN ("MemoryFormFactor",       OC_GLOBAL_CONFIG, PlatformInfo.Smbios.MemoryFormFactor),
   OC_SCHEMA_INTEGER_IN ("PlatformFeature",        OC_GLOBAL_CONFIG, PlatformInfo.Smbios.PlatformFeature),
   OC_SCHEMA_INTEGER_IN ("ProcessorType",          OC_GLOBAL_CONFIG, PlatformInfo.Smbios.ProcessorType),
+  OC_SCHEMA_DATAF_IN   ("SmcVersion",             OC_GLOBAL_CONFIG, PlatformInfo.Smbios.SmcVersion),
   OC_SCHEMA_STRING_IN  ("SystemFamily",           OC_GLOBAL_CONFIG, PlatformInfo.Smbios.SystemFamily),
   OC_SCHEMA_STRING_IN  ("SystemManufacturer",     OC_GLOBAL_CONFIG, PlatformInfo.Smbios.SystemManufacturer),
   OC_SCHEMA_STRING_IN  ("SystemProductName",      OC_GLOBAL_CONFIG, PlatformInfo.Smbios.SystemProductName),
