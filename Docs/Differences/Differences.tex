@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May  3 12:13:06 2019
-%DIF ADD ../Configuration.tex        Sun May 19 09:05:08 2019
+%DIF ADD ../Configuration.tex        Tue May 21 19:03:28 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1508,12 +1508,12 @@ behaviour that does not go to any other sections
 
   \begin{itemize}
   \tightlist
-    \item \texttt{0x00000002} --- \texttt{DEBUG\_WARN} in \texttt{DEBUG},
+    \item \texttt{0x00000002} \DIFaddbegin \DIFadd{(bit }\texttt{\DIFadd{1}}\DIFadd{) }\DIFaddend --- \texttt{DEBUG\_WARN} in \texttt{DEBUG},
       \texttt{NOOPT}, \texttt{RELEASE}.
-    \item \texttt{0x00000040} --- \texttt{DEBUG\_INFO} in \texttt{DEBUG},
+    \item \texttt{0x00000040} \DIFaddbegin \DIFadd{(bit }\texttt{\DIFadd{6}}\DIFadd{) }\DIFaddend --- \texttt{DEBUG\_INFO} in \texttt{DEBUG},
       \texttt{NOOPT}.
-    \item \texttt{0x00400000} --- \texttt{DEBUG\_VERBOSE} in custom builds.
-    \item \texttt{0x80000000} --- \texttt{DEBUG\_ERROR} in \texttt{DEBUG},
+    \item \texttt{0x00400000} \DIFaddbegin \DIFadd{(bit }\texttt{\DIFadd{22}}\DIFadd{) }\DIFaddend --- \texttt{DEBUG\_VERBOSE} in custom builds.
+    \item \texttt{0x80000000} \DIFaddbegin \DIFadd{(bit }\texttt{\DIFadd{31}}\DIFadd{) }\DIFaddend --- \texttt{DEBUG\_ERROR} in \texttt{DEBUG},
       \texttt{NOOPT}, \texttt{RELEASE}.
   \end{itemize}
 
@@ -1575,13 +1575,13 @@ behaviour that does not go to any other sections
 
   \begin{itemize}
   \tightlist
-    \item \texttt{0x01} --- Enable logging, otherwise all log is discarded.
-    \item \texttt{0x02} --- Enable basic console (onscreen) logging.
-    \item \texttt{0x04} --- Enable logging to Data Hub.
-    \item \texttt{0x08} --- Enable serial port logging.
-    \item \texttt{0x10} --- Enable UEFI variable logging.
-    \item \texttt{0x20} --- Enable non-volatile UEFI variable logging.
-    \item \texttt{0x40} --- Enable logging to file.
+    \item \texttt{0x01} \DIFaddbegin \DIFadd{(bit }\texttt{\DIFadd{0}}\DIFadd{) }\DIFaddend --- Enable logging, otherwise all log is discarded.
+    \item \texttt{0x02} \DIFaddbegin \DIFadd{(bit }\texttt{\DIFadd{1}}\DIFadd{) }\DIFaddend --- Enable basic console (onscreen) logging.
+    \item \texttt{0x04} \DIFaddbegin \DIFadd{(bit }\texttt{\DIFadd{2}}\DIFadd{) }\DIFaddend --- Enable logging to Data Hub.
+    \item \texttt{0x08} \DIFaddbegin \DIFadd{(bit }\texttt{\DIFadd{3}}\DIFadd{) }\DIFaddend --- Enable serial port logging.
+    \item \texttt{0x10} \DIFaddbegin \DIFadd{(bit }\texttt{\DIFadd{4}}\DIFadd{) }\DIFaddend --- Enable UEFI variable logging.
+    \item \texttt{0x20} \DIFaddbegin \DIFadd{(bit }\texttt{\DIFadd{5}}\DIFadd{) }\DIFaddend --- Enable non-volatile UEFI variable logging.
+    \item \texttt{0x40} \DIFaddbegin \DIFadd{(bit }\texttt{\DIFadd{6}}\DIFadd{) }\DIFaddend --- Enable logging to file.
   \end{itemize}
 
   Console logging prints less than all the other variants.
@@ -1782,34 +1782,34 @@ rm vault.pub
 
   \begin{itemize}
   \tightlist
-    \item \texttt{\DIFadd{0x00000001}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_FILE\_SYSTEM\_LOCK}}\DIFadd{, restricts
+    \item \texttt{\DIFadd{0x00000001}} \DIFadd{(bit }\texttt{\DIFadd{0}}\DIFadd{) --- }\texttt{\DIFadd{OC\_SCAN\_FILE\_SYSTEM\_LOCK}}\DIFadd{, restricts
     scanning to only known file systems defined as a part of this policy. File system
     drivers may not be aware of this policy, and to avoid mounting of undesired file
     systems it is best not to load its driver. This bit does not affect dmg mounting,
     which may have any file system. Known file systems are prefixed with
     }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_FS\_}}\DIFadd{.
-    }\item \texttt{\DIFadd{0x00000002}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_DEVICE\_LOCK}}\DIFadd{, restricts scanning
+    }\item \texttt{\DIFadd{0x00000002}} \DIFadd{(bit }\texttt{\DIFadd{1}}\DIFadd{) --- }\texttt{\DIFadd{OC\_SCAN\_DEVICE\_LOCK}}\DIFadd{, restricts scanning
     to only known device types defined as a part of this policy. This is not always possible
     to detect protocol tunneling, so be aware that on some systems it may be possible for
     e.g. USB HDDs to be recognised as SATA. Cases like this must be reported. Known device
     types are prefixed with }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_}}\DIFadd{.
-    }\item \texttt{\DIFadd{0x00000100}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_FS\_APFS}}\DIFadd{, allows scanning
+    }\item \texttt{\DIFadd{0x00000100}} \DIFadd{(bit }\texttt{\DIFadd{8}}\DIFadd{) --- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_FS\_APFS}}\DIFadd{, allows scanning
     of APFS file system.
-    }\item \texttt{\DIFadd{0x00010000}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_SATA}}\DIFadd{, allow
+    }\item \texttt{\DIFadd{0x00010000}} \DIFadd{(bit }\texttt{\DIFadd{16}}\DIFadd{) --- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_SATA}}\DIFadd{, allow
     scanning SATA devices.
-    }\item \texttt{\DIFadd{0x00020000}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_SASEX}}\DIFadd{, allow
+    }\item \texttt{\DIFadd{0x00020000}} \DIFadd{(bit }\texttt{\DIFadd{17}}\DIFadd{) --- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_SASEX}}\DIFadd{, allow
     scanning SAS and Mac NVMe devices.
-    }\item \texttt{\DIFadd{0x00040000}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_SCSI}}\DIFadd{, allow
+    }\item \texttt{\DIFadd{0x00040000}} \DIFadd{(bit }\texttt{\DIFadd{18}}\DIFadd{) --- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_SCSI}}\DIFadd{, allow
     scanning SCSI devices.
-    }\item \texttt{\DIFadd{0x00080000}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_NVME}}\DIFadd{, allow
+    }\item \texttt{\DIFadd{0x00080000}} \DIFadd{(bit }\texttt{\DIFadd{19}}\DIFadd{) --- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_NVME}}\DIFadd{, allow
     scanning NVMe devices.
-    }\item \texttt{\DIFadd{0x00100000}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_ATAPI}}\DIFadd{, allow
+    }\item \texttt{\DIFadd{0x00100000}} \DIFadd{(bit }\texttt{\DIFadd{20}}\DIFadd{) --- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_ATAPI}}\DIFadd{, allow
     scanning CD/DVD devices.
-    }\item \texttt{\DIFadd{0x00200000}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_USB}}\DIFadd{, allow
+    }\item \texttt{\DIFadd{0x00200000}} \DIFadd{(bit }\texttt{\DIFadd{21}}\DIFadd{) --- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_USB}}\DIFadd{, allow
     scanning USB devices.
-    }\item \texttt{\DIFadd{0x00400000}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_FIREWIRE}}\DIFadd{, allow
+    }\item \texttt{\DIFadd{0x00400000}} \DIFadd{(bit }\texttt{\DIFadd{22}}\DIFadd{) --- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_FIREWIRE}}\DIFadd{, allow
     scanning FireWire devices.
-    }\item \texttt{\DIFadd{0x00800000}} \DIFadd{--- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_SDCARD}}\DIFadd{, allow
+    }\item \texttt{\DIFadd{0x00800000}} \DIFadd{(bit }\texttt{\DIFadd{23}}\DIFadd{) --- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_SDCARD}}\DIFadd{, allow
     scanning card reader devices.
   }\end{itemize}
 

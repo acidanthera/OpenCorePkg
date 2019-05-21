@@ -1419,12 +1419,12 @@ behaviour that does not go to any other sections
 
   \begin{itemize}
   \tightlist
-    \item \texttt{0x00000002} --- \texttt{DEBUG\_WARN} in \texttt{DEBUG},
+    \item \texttt{0x00000002} (bit \texttt{1}) --- \texttt{DEBUG\_WARN} in \texttt{DEBUG},
       \texttt{NOOPT}, \texttt{RELEASE}.
-    \item \texttt{0x00000040} --- \texttt{DEBUG\_INFO} in \texttt{DEBUG},
+    \item \texttt{0x00000040} (bit \texttt{6}) --- \texttt{DEBUG\_INFO} in \texttt{DEBUG},
       \texttt{NOOPT}.
-    \item \texttt{0x00400000} --- \texttt{DEBUG\_VERBOSE} in custom builds.
-    \item \texttt{0x80000000} --- \texttt{DEBUG\_ERROR} in \texttt{DEBUG},
+    \item \texttt{0x00400000} (bit \texttt{22}) --- \texttt{DEBUG\_VERBOSE} in custom builds.
+    \item \texttt{0x80000000} (bit \texttt{31}) --- \texttt{DEBUG\_ERROR} in \texttt{DEBUG},
       \texttt{NOOPT}, \texttt{RELEASE}.
   \end{itemize}
 
@@ -1440,13 +1440,13 @@ behaviour that does not go to any other sections
 
   \begin{itemize}
   \tightlist
-    \item \texttt{0x01} --- Enable logging, otherwise all log is discarded.
-    \item \texttt{0x02} --- Enable basic console (onscreen) logging.
-    \item \texttt{0x04} --- Enable logging to Data Hub.
-    \item \texttt{0x08} --- Enable serial port logging.
-    \item \texttt{0x10} --- Enable UEFI variable logging.
-    \item \texttt{0x20} --- Enable non-volatile UEFI variable logging.
-    \item \texttt{0x40} --- Enable logging to file.
+    \item \texttt{0x01} (bit \texttt{0}) --- Enable logging, otherwise all log is discarded.
+    \item \texttt{0x02} (bit \texttt{1}) --- Enable basic console (onscreen) logging.
+    \item \texttt{0x04} (bit \texttt{2}) --- Enable logging to Data Hub.
+    \item \texttt{0x08} (bit \texttt{3}) --- Enable serial port logging.
+    \item \texttt{0x10} (bit \texttt{4}) --- Enable UEFI variable logging.
+    \item \texttt{0x20} (bit \texttt{5}) --- Enable non-volatile UEFI variable logging.
+    \item \texttt{0x40} (bit \texttt{6}) --- Enable logging to file.
   \end{itemize}
 
   Console logging prints less than all the other variants.
@@ -1623,34 +1623,34 @@ rm vault.pub
 
   \begin{itemize}
   \tightlist
-    \item \texttt{0x00000001} --- \texttt{OC\_SCAN\_FILE\_SYSTEM\_LOCK}, restricts
+    \item \texttt{0x00000001} (bit \texttt{0}) --- \texttt{OC\_SCAN\_FILE\_SYSTEM\_LOCK}, restricts
     scanning to only known file systems defined as a part of this policy. File system
     drivers may not be aware of this policy, and to avoid mounting of undesired file
     systems it is best not to load its driver. This bit does not affect dmg mounting,
     which may have any file system. Known file systems are prefixed with
     \texttt{OC\_SCAN\_ALLOW\_FS\_}.
-    \item \texttt{0x00000002} --- \texttt{OC\_SCAN\_DEVICE\_LOCK}, restricts scanning
+    \item \texttt{0x00000002} (bit \texttt{1}) --- \texttt{OC\_SCAN\_DEVICE\_LOCK}, restricts scanning
     to only known device types defined as a part of this policy. This is not always possible
     to detect protocol tunneling, so be aware that on some systems it may be possible for
     e.g. USB HDDs to be recognised as SATA. Cases like this must be reported. Known device
     types are prefixed with \texttt{OC\_SCAN\_ALLOW\_DEVICE\_}.
-    \item \texttt{0x00000100} --- \texttt{OC\_SCAN\_ALLOW\_FS\_APFS}, allows scanning
+    \item \texttt{0x00000100} (bit \texttt{8}) --- \texttt{OC\_SCAN\_ALLOW\_FS\_APFS}, allows scanning
     of APFS file system.
-    \item \texttt{0x00010000} --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SATA}, allow
+    \item \texttt{0x00010000} (bit \texttt{16}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SATA}, allow
     scanning SATA devices.
-    \item \texttt{0x00020000} --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SASEX}, allow
+    \item \texttt{0x00020000} (bit \texttt{17}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SASEX}, allow
     scanning SAS and Mac NVMe devices.
-    \item \texttt{0x00040000} --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SCSI}, allow
+    \item \texttt{0x00040000} (bit \texttt{18}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SCSI}, allow
     scanning SCSI devices.
-    \item \texttt{0x00080000} --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_NVME}, allow
+    \item \texttt{0x00080000} (bit \texttt{19}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_NVME}, allow
     scanning NVMe devices.
-    \item \texttt{0x00100000} --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_ATAPI}, allow
+    \item \texttt{0x00100000} (bit \texttt{20}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_ATAPI}, allow
     scanning CD/DVD devices.
-    \item \texttt{0x00200000} --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_USB}, allow
+    \item \texttt{0x00200000} (bit \texttt{21}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_USB}, allow
     scanning USB devices.
-    \item \texttt{0x00400000} --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_FIREWIRE}, allow
+    \item \texttt{0x00400000} (bit \texttt{22}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_FIREWIRE}, allow
     scanning FireWire devices.
-    \item \texttt{0x00800000} --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SDCARD}, allow
+    \item \texttt{0x00800000} (bit \texttt{23}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SDCARD}, allow
     scanning card reader devices.
   \end{itemize}
 
