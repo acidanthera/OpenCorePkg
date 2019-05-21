@@ -46,6 +46,7 @@ STATIC GUID SystemUUID = {0x5BC82C38, 0x4DB6, 0x4883, {0x85, 0x2E, 0xE7, 0x8D, 0
 STATIC UINT8 BoardType = 0xA; // Motherboard (BaseBoardTypeMotherBoard)
 STATIC UINT8 MemoryFormFactor = 0xD; // SODIMM, 0x9 for DIMM (MemoryFormFactorSodimm)
 STATIC UINT8 ChassisType = 0xD; // All in one (MiscChassisTypeAllInOne)
+STATIC UINT32 PlatformFeature = 1;
 STATIC OC_SMBIOS_DATA Data = {
   .BIOSVendor = NULL, // Do not change BIOS Vendor
   .BIOSVersion = "134.0.0.0.0",
@@ -73,7 +74,7 @@ STATIC OC_SMBIOS_DATA Data = {
   .FirmwareFeatures = 0xE00FE137,
   .FirmwareFeaturesMask = 0xFF1FFF3F,
   .ProcessorType = NULL, // Will be calculated automatically
-  .PlatformFeature = 1
+  .PlatformFeature = &PlatformFeature
 };
 
 EFI_STATUS
