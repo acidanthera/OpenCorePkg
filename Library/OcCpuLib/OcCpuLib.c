@@ -522,8 +522,10 @@ DetectAppleProcessorType (
       if (AppleMajorType == AppleProcessorMajorI5) {
         // Kaby has 0x9 stepping, and Coffee use 0xA / 0xB stepping.
         if (Stepping == 9) {
-          // IM181 (i5-7360U), IM182  (i5-7400), IM183 (i5-7600)
+          // IM181 (i5-7360U), IM182  (i5-7400), IM183 (i5-7600), IM191 (i5-8600) [NOTE 1]
           // MBP141 (i5-7360U), MBP142 (i5-7267U)
+          //
+          // NOTE 1: IM191 is Coffee and thus 0x0609 will be used, TODO.
           return AppleProcessorTypeCorei5Type5; // 0x0605
         }
         // MM81 (i5-8500B)
