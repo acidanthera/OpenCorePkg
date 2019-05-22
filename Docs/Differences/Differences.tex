@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May  3 12:13:06 2019
-%DIF ADD ../Configuration.tex        Wed May 22 18:00:23 2019
+%DIF ADD ../Configuration.tex        Thu May 23 00:20:25 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2070,9 +2070,14 @@ troubleshooting:
   Booter arguments override removed after first launch. Otherwise equivalent to \texttt{bootercfg}.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:fmm-computer-name}
-\item
+  \DIFaddbegin \break
+  \DIFadd{Current saved host name. ASCII string.
+}\DIFaddend \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:nvda\_drv}
-\end{itemize}
+  \DIFaddbegin \break
+  \DIFadd{NVIDIA Web Driver control variable. Takes ASCII digit }\texttt{\DIFadd{1}} \DIFadd{or }\texttt{\DIFadd{0}}
+  \DIFadd{to enable or disable installed driver.
+}\DIFaddend \end{itemize}
 
 \section{PlatformInfo}\label{platforminfo}
 
