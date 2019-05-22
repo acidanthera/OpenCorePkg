@@ -270,6 +270,14 @@ OcMiscUefiQuirksLoaded (
   IN OC_GLOBAL_CONFIG   *Config
   )
 {
+  if (((Config->Misc.Security.ScanPolicy & OC_SCAN_FILE_SYSTEM_LOCK) == 0
+    && (Config->Misc.Security.ScanPolicy & OC_SCAN_FILE_SYSTEM_BITS) != 0)
+    || ((Config->Misc.Security.ScanPolicy & OC_SCAN_DEVICE_LOCK) == 0
+    && (Config->Misc.Security.ScanPolicy & OC_SCAN_DEVICE_BITS) != 0)) {
+    DEBUG ((DEBUG_ERROR, "OC: Invalid ScanPolicy %X\n", Config->Misc.Security.ScanPolicy));
+    CpuDeadLoop ();
+  }
+
   //
   // Inform drivers about our scan policy.
   //
