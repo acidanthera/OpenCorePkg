@@ -109,6 +109,11 @@ OcFreeBootEntries (
 #define OC_SCAN_ALLOW_FS_APFS            BIT8
 
 /**
+  Allow scanning HFS filesystems.
+**/
+#define OC_SCAN_ALLOW_FS_HFS             BIT9
+
+/**
   Allow scanning SATA devices.
 **/
 #define OC_SCAN_ALLOW_DEVICE_SATA        BIT16
@@ -149,9 +154,24 @@ OcFreeBootEntries (
 #define OC_SCAN_ALLOW_DEVICE_SDCARD      BIT23
 
 /**
+  All device bits used by OC_SCAN_DEVICE_LOCK.
+**/
+#define OC_SCAN_DEVICE_BITS ( \
+  OC_SCAN_ALLOW_DEVICE_SATA     | OC_SCAN_ALLOW_DEVICE_SASEX | \
+  OC_SCAN_ALLOW_DEVICE_SCSI     | OC_SCAN_ALLOW_DEVICE_NVME  | \
+  OC_SCAN_ALLOW_DEVICE_ATAPI    | OC_SCAN_ALLOW_DEVICE_USB   | \
+  OC_SCAN_ALLOW_DEVICE_FIREWIRE | OC_SCAN_ALLOW_DEVICE_SDCARD)
+
+/**
+  All device bits used by OC_SCAN_DEVICE_LOCK.
+**/
+#define OC_SCAN_FILE_SYSTEM_BITS ( \
+  OC_SCAN_ALLOW_FS_APFS | OC_SCAN_ALLOW_FS_HFS)
+
+/**
   By default allow booting from APFS from internal drives.
 **/
-#define OC_SCAN_DEFAULT_POLICY   ( \
+#define OC_SCAN_DEFAULT_POLICY ( \
   OC_SCAN_FILE_SYSTEM_LOCK   | OC_SCAN_DEVICE_LOCK | \
   OC_SCAN_ALLOW_FS_APFS      | OC_SCAN_ALLOW_DEVICE_SATA | \
   OC_SCAN_ALLOW_DEVICE_SASEX | OC_SCAN_ALLOW_DEVICE_SCSI | \

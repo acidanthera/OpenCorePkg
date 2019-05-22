@@ -152,6 +152,28 @@ InternalCheckScanPolicy (
       }
     }
 
+    //
+    // FIXME: This is even worse but works for testing the concept purposes.
+    // Current logic is blessed but not APFS.
+    //
+    if ((Policy & OC_SCAN_ALLOW_FS_HFS) != 0 && EFI_ERROR (Status)) {
+      BufferSize = 0;
+      Status = Root->GetInfo (Root, &gAppleApfsVolumeInfoGuid, &BufferSize, NULL);
+      if (Status != EFI_BUFFER_TOO_SMALL) {
+        BufferSize = 0;
+        Status = Root->GetInfo (Root, &gAppleBlessedSystemFileInfoGuid, &BufferSize, NULL);
+        if (Status == EFI_BUFFER_TOO_SMALL) {
+          Status = EFI_SUCCESS;
+        } else {
+          BufferSize = 0;
+          Status = Root->GetInfo (Root, &gAppleBlessedSystemFolderInfoGuid, &BufferSize, NULL);
+          if (Status == EFI_BUFFER_TOO_SMALL) {
+            Status = EFI_SUCCESS;
+          }
+        }
+      }
+    }
+
     Root->Close (Root);
 
     if (EFI_ERROR (Status)) {
