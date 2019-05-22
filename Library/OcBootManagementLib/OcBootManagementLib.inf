@@ -31,6 +31,11 @@
 #
 
 [Sources]
+  BootEntryInfo.c
+  BootManagementInternal.h
+  DefaultEntryChoice.c
+  DmgBootSupport.c
+  PolicyManagement.c
   OcBootManagementLib.c
 
 [Packages]
