@@ -57,6 +57,13 @@
   # @Prompt Register a protocol installation notify for Apple KeyMap Database when not found initially.
   gOcSupportPkgTokenSpaceGuid.PcNvramInitDevicePropertyDatabase|FALSE|BOOLEAN|0x00000001
 
+[PcdsFixedAtBuild]
+  ## Defines the Console Control initialization mode set on entry.<BR><BR>
+  #   0 - EfiConsoleControlScreenText<BR>
+  #   1 - EfiConsoleControlScreenGraphics<BR>
+  # @Prompt Initialize the console to the specified mode on entry.
+  gOcSupportPkgTokenSpaceGuid.PcdConsoleControlEntryMode|0|UINT8|0x00000100
+
 [LibraryClasses]
   ##  @libraryclass
   OcAcpiLib|Include/Library/OcAcpiLib.h
