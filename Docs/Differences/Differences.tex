@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May  3 12:13:06 2019
-%DIF ADD ../Configuration.tex        Tue May 21 19:03:28 2019
+%DIF ADD ../Configuration.tex        Wed May 22 17:42:47 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2832,7 +2832,10 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Description}: Force builtin versions of select protocols described
   in \hyperref[uefiprotoprops]{Protocols Properties} section below.
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: all protocol instances are installed prior to driver loading.
+}
+
+\DIFaddend \item
   \texttt{Quirks}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Default value}: None\\
@@ -3051,7 +3054,19 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 
   To download recovery online you may use
   \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/Recovery}{Recovery}
-  tool from \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}.
+  tool from \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}\DIFaddbegin \DIFadd{.
+}
+
+\item
+  \textbf{\DIFadd{Can I install Windows?}}
+
+  \DIFadd{While no official Windows support is provided, 64-bit UEFI Windows installations (Windows 8 and
+  above) prepared with Boot Camp are supposed to work in general. Third-party UEFI installations
+  as well as systems partially supporting UEFI boot, like Windows 7, might work with
+  some extra precautions. Be warned that macOS requires first partition to be EFI System
+  Partition, and does not support the default Windows layout.
+  Other than that, all the modifications applied (to ACPI, NVRAM, SMBIOS, etc.) are supposed
+  to be operating system agnostic, i.e. apply equally regardless of the OS booted}\DIFaddend .
 
 \end{enumerate}
 
