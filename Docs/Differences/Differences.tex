@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May  3 12:13:06 2019
-%DIF ADD ../Configuration.tex        Thu May 23 00:20:25 2019
+%DIF ADD ../Configuration.tex        Thu May 23 04:06:17 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -626,7 +626,12 @@ and various methods (e.g. \texttt{\_DSM}, \texttt{\_PWR}) for implementation.
 Modern hardware needs little changes to maintain ACPI compatibility, yet
 some of those are provided as a part of OpenCore.
 
-\subsection{Properties}\label{acpiprops}
+\DIFaddbegin \DIFadd{To compile and disassemble ACPI tables }\href{https://github.com/acpica/acpica}{iASL compiler}
+\DIFadd{can be used developed by }\href{https://www.acpica.org}{ACPICA}\DIFadd{. GUI front-end to iASL compiler
+can be downloaded from }\href{https://github.com/acidanthera/MaciASL/releases}{Acidanthera/MaciASL}\DIFadd{.
+}
+
+\DIFaddend \subsection{Properties}\label{acpiprops}
 
 \begin{enumerate}
 \item
@@ -2113,7 +2118,12 @@ manual, where one specifies all the values (the default), and semi-automatic,
 where (\texttt{Automatic}) only select values are specified, and later used
 for system configuration.
 
-\subsection{Properties}\label{platforminfoprops}
+\DIFaddbegin \DIFadd{To inspect SMBIOS contents }\href{http://www.nongnu.org/dmidecode}{dmidecode} \DIFadd{utility can
+be used. Version with macOS specific enhancements can be downloaded from
+}\href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidecode}\DIFadd{.
+}
+
+\DIFaddend \subsection{Properties}\label{platforminfoprops}
 
 \begin{enumerate}
 \item
@@ -2723,7 +2733,10 @@ Apple ROM Version
 \href{https://uefi.org/specifications}{UEFI} (Unified Extensible Firmware Interface)
 is a specification that defines a software interface between an operating system and
 platform firmware. This section allows to load additional UEFI modules and/or apply
-tweaks for the onboard firmware.
+tweaks for the onboard firmware. \DIFaddbegin \DIFadd{To inspect firmware contents, apply modifications
+and perform upgrades }\href{https://github.com/LongSoft/UEFITool/releases}{UEFITool}
+\DIFadd{and supplementary utilities can be used.
+}\DIFaddend 
 
 \subsection{Properties}\label{uefiprops}
 

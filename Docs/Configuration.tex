@@ -544,6 +544,10 @@ and various methods (e.g. \texttt{\_DSM}, \texttt{\_PWR}) for implementation.
 Modern hardware needs little changes to maintain ACPI compatibility, yet
 some of those are provided as a part of OpenCore.
 
+To compile and disassemble ACPI tables \href{https://github.com/acpica/acpica}{iASL compiler}
+can be used developed by \href{https://www.acpica.org}{ACPICA}. GUI front-end to iASL compiler
+can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Acidanthera/MaciASL}.
+
 \subsection{Properties}\label{acpiprops}
 
 \begin{enumerate}
@@ -1948,6 +1952,10 @@ manual, where one specifies all the values (the default), and semi-automatic,
 where (\texttt{Automatic}) only select values are specified, and later used
 for system configuration.
 
+To inspect SMBIOS contents \href{http://www.nongnu.org/dmidecode}{dmidecode} utility can
+be used. Version with macOS specific enhancements can be downloaded from
+\href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidecode}.
+
 \subsection{Properties}\label{platforminfoprops}
 
 \begin{enumerate}
@@ -2557,7 +2565,9 @@ Apple ROM Version
 \href{https://uefi.org/specifications}{UEFI} (Unified Extensible Firmware Interface)
 is a specification that defines a software interface between an operating system and
 platform firmware. This section allows to load additional UEFI modules and/or apply
-tweaks for the onboard firmware.
+tweaks for the onboard firmware. To inspect firmware contents, apply modifications
+and perform upgrades \href{https://github.com/LongSoft/UEFITool/releases}{UEFITool}
+and supplementary utilities can be used.
 
 \subsection{Properties}\label{uefiprops}
 
