@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May  3 12:13:06 2019
-%DIF ADD ../Configuration.tex        Thu May 23 04:06:17 2019
+%DIF ADD ../Configuration.tex        Fri May 24 02:34:39 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2382,13 +2382,13 @@ be used. Version with macOS specific enhancements can be downloaded from
   and newer.
 \item
   \texttt{DevicePathsSupported}\\
-  \textbf{Type}: \texttt{plist\ data}, 1 byte\\
+  \textbf{Type}: \texttt{plist\ \DIFdelbegin \DIFdel{data}\DIFdelend \DIFaddbegin \DIFadd{integer}\DIFaddend }, \DIFdelbegin \DIFdel{1 byte}\DIFdelend \DIFaddbegin \DIFadd{32-bit}\DIFaddend \\
   \textbf{Default value}: Not installed\\
   \textbf{Description}: Sets \texttt{DevicePathsSupported} in
-  \texttt{gEfiMiscSubClassGuid}. Must be set to \texttt{01} for
+  \texttt{gEfiMiscSubClassGuid}. Must be set to \texttt{\DIFdelbegin \DIFdel{01}\DIFdelend \DIFaddbegin \DIFadd{1}\DIFaddend } for
   AppleACPIPlatform.kext to append SATA device paths to
   \texttt{Boot\#\#\#\#} and \texttt{efi-boot-device-data} variables.
-  Set to \texttt{01} on all modern Macs.
+  Set to \texttt{\DIFdelbegin \DIFdel{01}\DIFdelend \DIFaddbegin \DIFadd{1}\DIFaddend } on all modern Macs.
 \item
   \texttt{SmcRevision}\\
   \textbf{Type}: \texttt{plist\ data}, 6 bytes\\

@@ -91,8 +91,8 @@ OcPlatformUpdateDataHub (
       Data.ARTFrequency     = &Config->PlatformInfo.DataHub.ARTFrequency;
     }
 
-    if (Config->PlatformInfo.DataHub.DevicePathsSupported[0] != 0) {
-      Data.DevicePathsSupported = &Config->PlatformInfo.DataHub.DevicePathsSupported[0];
+    if (Config->PlatformInfo.DataHub.DevicePathsSupported != 0) {
+      Data.DevicePathsSupported = &Config->PlatformInfo.DataHub.DevicePathsSupported;
     }
 
     if (Config->PlatformInfo.DataHub.SmcRevision[0] != 0

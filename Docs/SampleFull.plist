@@ -467,7 +467,7 @@
 			<key>BoardRevision</key>
 			<data>AQ==</data>
 			<key>DevicePathsSupported</key>
-			<data>AQ==</data>
+			<integer>1</integer>
 			<key>FSBFrequency</key>
 			<integer>0</integer>
 			<key>InitialTSC</key>
