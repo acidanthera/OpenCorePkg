@@ -312,7 +312,7 @@ mPlatformConfigurationDataHubSchema[] = {
   OC_SCHEMA_INTEGER_IN ("ARTFrequency",         OC_GLOBAL_CONFIG, PlatformInfo.DataHub.ARTFrequency),
   OC_SCHEMA_STRING_IN  ("BoardProduct",         OC_GLOBAL_CONFIG, PlatformInfo.DataHub.BoardProduct),
   OC_SCHEMA_DATAF_IN   ("BoardRevision",        OC_GLOBAL_CONFIG, PlatformInfo.DataHub.BoardRevision),
-  OC_SCHEMA_DATAF_IN   ("DevicePathsSupported", OC_GLOBAL_CONFIG, PlatformInfo.DataHub.DevicePathsSupported),
+  OC_SCHEMA_INTEGER_IN ("DevicePathsSupported", OC_GLOBAL_CONFIG, PlatformInfo.DataHub.DevicePathsSupported),
   OC_SCHEMA_INTEGER_IN ("FSBFrequency",         OC_GLOBAL_CONFIG, PlatformInfo.DataHub.FSBFrequency),
   OC_SCHEMA_INTEGER_IN ("InitialTSC",           OC_GLOBAL_CONFIG, PlatformInfo.DataHub.InitialTSC),
   OC_SCHEMA_STRING_IN  ("PlatformName",         OC_GLOBAL_CONFIG, PlatformInfo.DataHub.PlatformName),

@@ -284,7 +284,7 @@
   _(UINT64                      , InitialTSC          ,     , 0                                , () )                   \
   _(UINT64                      , FSBFrequency        ,     , 0                                , () )                   \
   _(UINT64                      , ARTFrequency        ,     , 0                                , () )                   \
-  _(UINT8                       , DevicePathsSupported, [1] , {0}                              , () )                   \
+  _(UINT32                      , DevicePathsSupported,     , 0                                , () )                   \
   _(UINT8                       , SmcRevision         , [6] , {0}                              , () )                   \
   _(UINT8                       , SmcBranch           , [8] , {0}                              , () )                   \
   _(UINT8                       , SmcPlatform         , [8] , {0}                              , () )

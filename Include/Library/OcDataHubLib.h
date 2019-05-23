@@ -53,7 +53,7 @@ typedef struct {
   CONST UINT64  *InitialTSC;
   CONST UINT64  *FSBFrequency;
   CONST UINT64  *ARTFrequency;
-  CONST UINT8   *DevicePathsSupported;
+  CONST UINT32  *DevicePathsSupported;
   CONST UINT8   *SmcRevision;
   CONST UINT8   *SmcBranch;
   CONST UINT8   *SmcPlatform;
