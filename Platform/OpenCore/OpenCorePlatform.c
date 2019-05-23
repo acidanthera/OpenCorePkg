@@ -44,6 +44,7 @@ OcPlatformUpdateDataHub (
   OC_DATA_HUB_DATA      Data;
   EFI_GUID              Uuid;
   UINT64                StartupPowerEvents;
+  UINT64                InitialTSC;
   EFI_DATA_HUB_PROTOCOL *DataHub;
 
   DataHub = OcDataHubInstallProtocol (FALSE);
@@ -145,6 +146,8 @@ OcPlatformUpdateDataHub (
     Data.BoardRevision = &MacInfo->DataHub.BoardRevision[0];
     StartupPowerEvents = 0;
     Data.StartupPowerEvents = &StartupPowerEvents;
+    InitialTSC = 0;
+    Data.InitialTSC = &InitialTSC;
     Data.DevicePathsSupported = &MacInfo->DataHub.DevicePathsSupported[0];
 
     Data.SmcRevision      = &MacInfo->DataHub.SmcRevision[0];
