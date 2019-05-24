@@ -11,34 +11,34 @@
 		<key>Add</key>
 		<array>
 			<dict>
-				<key>Enabled</key>
-				<true/>
 				<key>Comment</key>
 				<string>DSDT</string>
+				<key>Enabled</key>
+				<true/>
 				<key>Path</key>
 				<string>DSDT.aml</string>
 			</dict>
 			<dict>
-				<key>Enabled</key>
-				<true/>
 				<key>Comment</key>
 				<string>Fix 123</string>
+				<key>Enabled</key>
+				<true/>
 				<key>Path</key>
 				<string>SSDT.aml</string>
 			</dict>
 			<dict>
-				<key>Enabled</key>
-				<false/>
 				<key>Comment</key>
 				<string>Fix 456</string>
+				<key>Enabled</key>
+				<false/>
 				<key>Path</key>
 				<string>SSDT-1.aml</string>
 			</dict>
 			<dict>
-				<key>Enabled</key>
-				<false/>
 				<key>Comment</key>
 				<string></string>
+				<key>Enabled</key>
+				<false/>
 				<key>Path</key>
 				<string>SSDT-ACPI.aml</string>
 			</dict>
@@ -161,15 +161,15 @@
 	<dict>
 		<key>Add</key>
 		<dict>
-			<key>PciRoot(0x0)/Pci(0x2,0x0)</key>
-			<dict>
-				<key>AAPL,ig-platform-id</key>
-				<data></data>
-			</dict>
 			<key>PciRoot(0x0)/Pci(0x1b,0x0)</key>
 			<dict>
 				<key>layout-id</key>
 				<data>AQAAAA==</data>
+			</dict>
+			<key>PciRoot(0x0)/Pci(0x2,0x0)</key>
+			<dict>
+				<key>AAPL,ig-platform-id</key>
+				<data></data>
 			</dict>
 		</dict>
 		<key>Block</key>
@@ -242,13 +242,13 @@
 			</dict>
 			<dict>
 				<key>BundlePath</key>
-				<string>IntelMausiEthernet.kext</string>
+				<string>IntelMausi.kext</string>
 				<key>Comment</key>
 				<string></string>
 				<key>Enabled</key>
 				<false/>
 				<key>ExecutablePath</key>
-				<string>Contents/MacOS/IntelMausiEthernet</string>
+				<string>Contents/MacOS/IntelMausi</string>
 				<key>MatchKernel</key>
 				<string></string>
 				<key>PlistPath</key>
@@ -381,11 +381,11 @@
 	<dict>
 		<key>Boot</key>
 		<dict>
-			<key>ConsoleMode</key>
-			<string></string>
 			<key>ConsoleBehaviourOs</key>
 			<string></string>
 			<key>ConsoleBehaviourUi</key>
+			<string></string>
+			<key>ConsoleMode</key>
 			<string></string>
 			<key>HideSelf</key>
 			<true/>
@@ -425,6 +425,11 @@
 	<dict>
 		<key>Add</key>
 		<dict>
+			<key>4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14</key>
+			<dict>
+				<key>UIScale</key>
+				<data>AQ==</data>
+			</dict>
 			<key>7C436110-AB2A-4BBB-A880-FE41995C9F82</key>
 			<dict>
 				<key>boot-args</key>
@@ -434,23 +439,18 @@
 				<key>nvda_drv</key>
 				<data>MQ==</data>
 				<key>prev-lang:kbd</key>
-				<data>cnU6MTk0NTY=</data>
-			</dict>
-			<key>4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14</key>
-			<dict>
-				<key>UIScale</key>
-				<data>AQ==</data>
+				<data>cnUtUlU6MjUy</data>
 			</dict>
 		</dict>
 		<key>Block</key>
 		<dict>
-			<key>7C436110-AB2A-4BBB-A880-FE41995C9F82</key>
-			<array>
-				<string>boot-args</string>
-			</array>
 			<key>4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14</key>
 			<array>
 				<string>UIScale</string>
+			</array>
+			<key>7C436110-AB2A-4BBB-A880-FE41995C9F82</key>
+			<array>
+				<string>boot-args</string>
 			</array>
 		</dict>
 	</dict>
@@ -491,90 +491,90 @@
 		</dict>
 		<key>Generic</key>
 		<dict>
-			<key>SpoofVendor</key>
-			<true/>
-			<key>SystemUUID</key>
-			<string>00000000-0000-0000-0000-000000000000</string>
 			<key>MLB</key>
 			<string>M000000000001</string>
 			<key>ROM</key>
 			<data>ESIzAAAA</data>
+			<key>SpoofVendor</key>
+			<true/>
 			<key>SystemProductName</key>
 			<string>MacPro5,1</string>
 			<key>SystemSerialNumber</key>
 			<string>W0000000001</string>
+			<key>SystemUUID</key>
+			<string>00000000-0000-0000-0000-000000000000</string>
 		</dict>
 		<key>PlatformNVRAM</key>
 		<dict>
 			<key>BID</key>
 			<string>Mac-F221BEC8</string>
+			<key>FirmwareFeatures</key>
+			<data>N+EP6AAAAAA=</data>
+			<key>FirmwareFeaturesMask</key>
+			<data>P/8f/wAAAAA=</data>
 			<key>MLB</key>
 			<string>M000000000001</string>
 			<key>ROM</key>
 			<data>ESIzAAAA</data>
-			<key>FirmwareFeatures</key>
-			<data>N+EP6AAAAAA=</data>
-			<key>FirmwareFeaturesMask</key>
-			<data>P/8f/wAAAAA=</data>
 		</dict>
 		<key>SMBIOS</key>
 		<dict>
+			<key>BIOSReleaseDate</key>
+			<string>02/14/2019</string>
 			<key>BIOSVendor</key>
 			<string></string>
 			<key>BIOSVersion</key>
 			<string>142.0.0.0.0</string>
-			<key>BIOSReleaseDate</key>
-			<string>02/14/2019</string>
-			<key>SystemManufacturer</key>
+			<key>BoardAssetTag</key>
 			<string></string>
-			<key>SystemProductName</key>
-			<string>MacPro5,1</string>
-			<key>SystemVersion</key>
-			<string>1.1</string>
-			<key>SystemSerialNumber</key>
-			<string>W0000000001</string>
-			<key>SystemUUID</key>
-			<string>00000000-0000-0000-0000-000000000000</string>
-			<key>SystemSKUNumber</key>
-			<string>Mac-F221BEC8</string>
-			<key>SystemFamily</key>
-			<string>MacPro</string>
+			<key>BoardLocationInChassis</key>
+			<string>Part Component</string>
 			<key>BoardManufacturer</key>
 			<string></string>
 			<key>BoardProduct</key>
 			<string>Mac-F221BEC8</string>
-			<key>BoardVersion</key>
-			<string>MacPro5,1</string>
 			<key>BoardSerialNumber</key>
 			<string>M000000000001</string>
-			<key>BoardAssetTag</key>
-			<string></string>
 			<key>BoardType</key>
 			<integer>11</integer>
-			<key>BoardLocationInChassis</key>
-			<string>Part Component</string>
+			<key>BoardVersion</key>
+			<string>MacPro5,1</string>
+			<key>ChassisAssetTag</key>
+			<string></string>
 			<key>ChassisManufacturer</key>
 			<string></string>
+			<key>ChassisSerialNumber</key>
+			<string>W0000000001</string>
 			<key>ChassisType</key>
 			<integer>7</integer>
 			<key>ChassisVersion</key>
 			<string>Mac-F221BEC8</string>
-			<key>ChassisSerialNumber</key>
-			<string>W0000000001</string>
-			<key>ChassisAssetTag</key>
-			<string></string>
-			<key>PlatformFeature</key>
-			<integer>0</integer>
 			<key>FirmwareFeatures</key>
 			<data>N+EP6AAAAAA=</data>
 			<key>FirmwareFeaturesMask</key>
 			<data>P/8f/wAAAAA=</data>
-			<key>ProcessorType</key>
-			<integer>0</integer>
 			<key>MemoryFormFactor</key>
 			<integer>9</integer>
+			<key>PlatformFeature</key>
+			<integer>0</integer>
+			<key>ProcessorType</key>
+			<integer>0</integer>
 			<key>SmcVersion</key>
 			<data>AAAAAAAAAAAAAAAAAAAAAA==</data>
+			<key>SystemFamily</key>
+			<string>MacPro</string>
+			<key>SystemManufacturer</key>
+			<string></string>
+			<key>SystemProductName</key>
+			<string>MacPro5,1</string>
+			<key>SystemSKUNumber</key>
+			<string>Mac-F221BEC8</string>
+			<key>SystemSerialNumber</key>
+			<string>W0000000001</string>
+			<key>SystemUUID</key>
+			<string>00000000-0000-0000-0000-000000000000</string>
+			<key>SystemVersion</key>
+			<string>1.1</string>
 		</dict>
 		<key>UpdateDataHub</key>
 		<true/>
