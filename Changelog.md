@@ -8,7 +8,7 @@ OpenCore Changelog
 - Added `ResetLogoStatus` ACPI quirk
 - Added `SpoofVendor` PlatformInfo feature
 - Replaced `ExposeBootPath` with `ExposeSensitiveData`
-- Added builtin implimentation of DataHub protocol
+- Added builtin implementation of Data Hub protocol
 - Dropped `UpdateSMBIOSMode` `Auto` mode in favour of `Create`
 - Fixed SMBIOS CPU detection for Xeon and Core models
 - Moved `ConsoleControl` configuration to `Protocols`
