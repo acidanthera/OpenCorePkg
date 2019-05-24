@@ -72,7 +72,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual
+       Reference Manual (0.0.2)
 
        \vspace{0.2in}
 
@@ -100,11 +100,6 @@ operating system.
 
 For OpenCore issues please refer to
 \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
-Currently this file has the following entries not completed:
-
-\begin{itemize}
-\item Not all \texttt{NVRAM} variables are properly described (e.g. boot-args).
-\end{itemize}
 
 \section{Generic Terms}\label{generic-terms}
 
@@ -425,6 +420,39 @@ entries include:
 Figure 1. Directory Structure
 \end{center}
 
+\subsection{Installation and Upgrade}\label{configuration-install}
+
+To install OpenCore reflect the
+\hyperref[configuration-structure]{Configuration Structure} described
+in the previous section on a EFI volume of a GPT partition. While
+corresponding sections of this document do provide some information
+in regards to external resources like ACPI tables, UEFI drivers,
+or kernel extensions (kexts), completeness of the matter is out of
+the scope of this document. Extra information about particular kernel
+extensions may be found in Lilu's
+\href{https://github.com/acidanthera/Lilu/blob/master/KnownPlugins.md}{Known Plugins}
+table. Vaulting information is provided in
+\hyperref[miscsecurityprops]{Security Properties} section of this document.
+
+\texttt{OC\ config}, just like any property lists can be edited with any
+stock textual editor (e.g. nano, vim), but specialised software may provide
+better experience. On macOS the preferred GUI application is
+\href{https://developer.apple.com/xcode}{Xcode}. For a lightweight
+cross-platform and open-source alternative
+\href{https://github.com/corpnewt/ProperTree}{ProperTree} editor can be
+utilised.
+
+For BIOS booting a third-party UEFI environment provider will have to
+be used. \texttt{DuetPkg} is one of the known UEFI environment providers
+for legacy systems. While it is known to be possible to run OpenCore
+on such a legacy system, configuration and use of \texttt{DuetPkg} is
+currently out of the scope of this document.
+
+For upgrade purposes refer to \texttt{Differences.pdf} document, providing
+the information about the changes affecting the configuration compared
+to the previous release, and \texttt{Changelog.md} document, containing
+the list of modifications across all published updates.
+
 \subsection{Contribution}\label{configuration-comp}
 
 OpenCore can be compiled as an ordinary EDK II package with
@@ -442,7 +470,9 @@ Required external package dependencies include
 
 To compile with \texttt{XCODE5}, besides \href{https://developer.apple.com/xcode}{Xcode},
 one should also install \href{https://www.nasm.us}{NASM} and
-\href{https://github.com/acidanthera/ocbuild/raw/master/external/mtoc-mac64.zip}{MTOC}. Example command sequence may look as follows:
+\href{https://github.com/acidanthera/ocbuild/raw/master/external/mtoc-mac64.zip}{MTOC}.
+The latest Xcode version is recommended for use despite the toolchain name. Example
+command sequence may look as follows:
 
 \begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
 git clone https://github.com/tianocore/edk2 -b UDK2018 UDK
@@ -478,7 +508,6 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -I/UefiPackages/AppleSupportPkg/Include
 -I/UefiPackages/OpenCorePkg/Include
 -I/UefiPackages/OcSupportPkg/Include
--I/UefiPackages/IntelFrameworkPkg/Include
 -I/UefiPackages/MacInfoPkg/Include
 -IInclude
 -include
@@ -514,6 +543,10 @@ standard tables (e.g.~\texttt{DSDT}, \texttt{SSDT}, \texttt{FACS}, \texttt{DMAR}
 and various methods (e.g. \texttt{\_DSM}, \texttt{\_PWR}) for implementation.
 Modern hardware needs little changes to maintain ACPI compatibility, yet
 some of those are provided as a part of OpenCore.
+
+To compile and disassemble ACPI tables \href{https://github.com/acpica/acpica}{iASL compiler}
+can be used developed by \href{https://www.acpica.org}{ACPICA}. GUI front-end to iASL compiler
+can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Acidanthera/MaciASL}.
 
 \subsection{Properties}\label{acpiprops}
 
@@ -832,6 +865,16 @@ source file may help understanding ACPI opcodes.
   \texttt{PCI\ Configuration\ Begin} phase of macOS booting by
   attempting to fix the ACPI addresses. It does not do magic, and only
   works with most common cases. Do not use unless absolutely required.
+
+\item
+  \texttt{ResetLogoStatus}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Reset \texttt{BGRT} table \texttt{Displayed}
+  status field to \texttt{false}.
+
+  This works around firmwares that provide \texttt{BGRT} table but
+  fail to handle screen updates afterwards.
 
 \end{enumerate}
 
@@ -1236,7 +1279,6 @@ behaviour that does not go to any other sections
   \textbf{Description}: Apply security configuration described in
   \hyperref[miscsecurityprops]{Security Properties} section below.
 
-
 \end{enumerate}
 
 \subsection{Boot Properties}\label{miscbootprops}
@@ -1260,7 +1302,7 @@ behaviour that does not go to any other sections
 
   Console control is a legacy protocol used for switching between text and graphics
   screen output. Some firmwares do not provide it, yet select operating systems
-  require its presence, which is what \texttt{ProvideConsoleControl} UEFI quirk is for.
+  require its presence, which is what \texttt{ConsoleControl} UEFI protocol is for.
 
   When console control is available, OpenCore can be made console control aware, and
   and set different modes for the operating system booter (\texttt{ConsoleBehaviourOs}),
@@ -1274,9 +1316,9 @@ behaviour that does not go to any other sections
   \item \texttt{Text} --- Switch to text mode.
   \item \texttt{Graphics} --- Switch to graphics mode.
   \item \texttt{ForceText} --- Switch to text mode and preserve it
-  (requires \texttt{ProvideConsoleControl}).
+  (requires \texttt{ConsoleControl}).
   \item \texttt{ForceGraphics} --- Switch to graphics mode and preserve it
-  (require \texttt{ProvideConsoleControl}).
+  (require \texttt{ConsoleControl}).
   \end{itemize}
 
   Hints:
@@ -1315,11 +1357,21 @@ behaviour that does not go to any other sections
   \texttt{Resolution}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Default value}: Empty string\\
-  \textbf{Description}: Sets console output screen resolution as specified
-  with the \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) or
-  \texttt{WxH} (e.g. \texttt{1920x1080}) formatted string. Set to empty string
-  not to change screen resolution. Set to \texttt{Max} to try to use largest
-  available screen resolution.
+  \textbf{Description}: Sets console output screen resolution.
+
+  \begin{itemize}
+  \tightlist
+  \item Set to \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) \texttt{WxH}
+  (e.g. \texttt{1920x1080}) formatted string to request custom resolution
+  from GOP if available.
+  \item Set to empty string not to change screen resolution.
+  \item Set to \texttt{Max} to try to use largest available screen resolution.
+  \end{itemize}
+
+  On HiDPI screens \texttt{APPLE\_VENDOR\_VARIABLE\_GUID} \texttt{UIScale}
+  NVRAM variable may need to be set to \texttt{02} to enable HiDPI scaling
+  in FileVault 2 UEFI password interface and boot screen logo. Refer to
+  \hyperref[nvramvarsrec]{Recommended Variables} section for more details.
 
   \emph{Note}: This will fail when console handle has no GOP protocol. When
   the firmware does not provide it, it can be added with \texttt{ProvideConsoleGop}
@@ -1371,33 +1423,14 @@ behaviour that does not go to any other sections
 
   \begin{itemize}
   \tightlist
-    \item \texttt{0x00000002} --- \texttt{DEBUG\_WARN} in \texttt{DEBUG},
+    \item \texttt{0x00000002} (bit \texttt{1}) --- \texttt{DEBUG\_WARN} in \texttt{DEBUG},
       \texttt{NOOPT}, \texttt{RELEASE}.
-    \item \texttt{0x00000040} --- \texttt{DEBUG\_INFO} in \texttt{DEBUG},
+    \item \texttt{0x00000040} (bit \texttt{6}) --- \texttt{DEBUG\_INFO} in \texttt{DEBUG},
       \texttt{NOOPT}.
-    \item \texttt{0x00400000} --- \texttt{DEBUG\_VERBOSE} in custom builds.
-    \item \texttt{0x80000000} --- \texttt{DEBUG\_ERROR} in \texttt{DEBUG},
+    \item \texttt{0x00400000} (bit \texttt{22}) --- \texttt{DEBUG\_VERBOSE} in custom builds.
+    \item \texttt{0x80000000} (bit \texttt{31}) --- \texttt{DEBUG\_ERROR} in \texttt{DEBUG},
       \texttt{NOOPT}, \texttt{RELEASE}.
   \end{itemize}
-
-\item
-  \texttt{ExposeBootPath}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Expose printable booter path to OpenCore.efi or its booter
-  (depending on the load order) as an UEFI variable.
-
-  To obtain booter path use the following command in macOS:
-\begin{lstlisting}[label=nvrampath, style=ocbash]
-nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path
-\end{lstlisting}
-
-  To use booter path for mounting booter volume use the following command in macOS:
-\begin{lstlisting}[label=nvrampathmount, style=ocbash]
-u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\),.*/\1/'); \
-  if [ "$u" != "" ]; then sudo diskutil mount $u ; fi
-\end{lstlisting}
-
 
 \item
   \texttt{Target}\\
@@ -1411,13 +1444,13 @@ u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\
 
   \begin{itemize}
   \tightlist
-    \item \texttt{0x01} --- Enable logging, otherwise all log is discarded.
-    \item \texttt{0x02} --- Enable basic console (onscreen) logging.
-    \item \texttt{0x04} --- Enable logging to Data Hub.
-    \item \texttt{0x08} --- Enable serial port logging.
-    \item \texttt{0x10} --- Enable UEFI variable logging.
-    \item \texttt{0x20} --- Enable non-volatile UEFI variable logging.
-    \item \texttt{0x40} --- Enable logging to file.
+    \item \texttt{0x01} (bit \texttt{0}) --- Enable logging, otherwise all log is discarded.
+    \item \texttt{0x02} (bit \texttt{1}) --- Enable basic console (onscreen) logging.
+    \item \texttt{0x04} (bit \texttt{2}) --- Enable logging to Data Hub.
+    \item \texttt{0x08} (bit \texttt{3}) --- Enable serial port logging.
+    \item \texttt{0x10} (bit \texttt{4}) --- Enable UEFI variable logging.
+    \item \texttt{0x20} (bit \texttt{5}) --- Enable non-volatile UEFI variable logging.
+    \item \texttt{0x40} (bit \texttt{6}) --- Enable logging to file.
   \end{itemize}
 
   Console logging prints less than all the other variants.
@@ -1440,12 +1473,13 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   awk '{gsub(/%0d%0a%00/,"");gsub(/%0d%0a/,"\n")}1'
 \end{lstlisting}
 
+  \emph{Warning}: Some firmwares are reported to have broken NVRAM garbage collection.
+  This means that they may not be able to always free space after variable deletion.
+  Do not use non-volatile NVRAM logging without extra need on such devices.
+
   While OpenCore boot log already contains basic version information with build type and
   date, this data may also be found in NVRAM in \texttt{opencore-version} variable
-  even with boot log disabled:
-\begin{lstlisting}[label=nvramver, style=ocbash]
-nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
-\end{lstlisting}
+  even with boot log disabled.
 
   File logging will create a file named \texttt{opencore.log} at EFI volume root with
   log contents. Please be warned that some file system drivers present in firmwares are
@@ -1458,6 +1492,36 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 \subsection{Security Properties}\label{miscsecurityprops}
 
 \begin{enumerate}
+
+\item
+  \texttt{ExposeSensitiveData}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Default value}: \texttt{2}\\
+  \textbf{Description}: Sensitive data exposure bitmask (sum) to operating system.
+
+  \begin{itemize}
+  \tightlist
+    \item \texttt{0x01} --- Expose printable booter path as an UEFI variable.
+    \item \texttt{0x02} --- Expose OpenCore version as an UEFI variable.
+  \end{itemize}
+
+  Exposed booter path points to OpenCore.efi or its booter depending on the load order.
+  To obtain booter path use the following command in macOS:
+\begin{lstlisting}[label=nvrampath, style=ocbash]
+nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path
+\end{lstlisting}
+
+  To use booter path for mounting booter volume use the following command in macOS:
+\begin{lstlisting}[label=nvrampathmount, style=ocbash]
+u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\),.*/\1/'); \
+  if [ "$u" != "" ]; then sudo diskutil mount $u ; fi
+\end{lstlisting}
+
+  To obtain OpenCore version use the following command in macOS:
+\begin{lstlisting}[label=nvramver, style=ocbash]
+nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
+\end{lstlisting}
+
 \item
   \texttt{HaltLevel}\\
   \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
@@ -1543,6 +1607,73 @@ rm vault.pub
   with your custom key. More details on customising secure boot on modern firmwares
   can be found in \href{https://habr.com/post/273497/}{Taming UEFI SecureBoot}
   paper (in Russian).
+
+\item
+  \texttt{ScanPolicy}\\
+  \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
+  \textbf{Default value}: \texttt{0xF0103}\\
+  \textbf{Description}: Define operating system detection policy.
+
+  This value allows to prevent scanning (and booting) from untrusted
+  source based on a bitmask (sum) of select flags. As it is not possible
+  to reliably detect every file system or device type, this feature
+  cannot be fully relied upon in open environments, and the additional
+  measures are to be applied.
+
+  Third party drivers may introduce additional security (and performance)
+  measures following the provided scan policy. Scan policy is exposed
+  in \texttt{scan-policy} variable of \texttt{4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102}
+  GUID for UEFI Boot Services only.
+
+  \begin{itemize}
+  \tightlist
+    \item \texttt{0x00000001} (bit \texttt{0}) --- \texttt{OC\_SCAN\_FILE\_SYSTEM\_LOCK}, restricts
+    scanning to only known file systems defined as a part of this policy. File system
+    drivers may not be aware of this policy, and to avoid mounting of undesired file
+    systems it is best not to load its driver. This bit does not affect dmg mounting,
+    which may have any file system. Known file systems are prefixed with
+    \texttt{OC\_SCAN\_ALLOW\_FS\_}.
+    \item \texttt{0x00000002} (bit \texttt{1}) --- \texttt{OC\_SCAN\_DEVICE\_LOCK}, restricts scanning
+    to only known device types defined as a part of this policy. This is not always possible
+    to detect protocol tunneling, so be aware that on some systems it may be possible for
+    e.g. USB HDDs to be recognised as SATA. Cases like this must be reported. Known device
+    types are prefixed with \texttt{OC\_SCAN\_ALLOW\_DEVICE\_}.
+    \item \texttt{0x00000100} (bit \texttt{8}) --- \texttt{OC\_SCAN\_ALLOW\_FS\_APFS}, allows scanning
+    of APFS file system.
+    \item \texttt{0x00000200} (bit \texttt{9}) --- \texttt{OC\_SCAN\_ALLOW\_FS\_HFS}, allows scanning
+    of HFS file system (must be blessed).
+    \item \texttt{0x00010000} (bit \texttt{16}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SATA}, allow
+    scanning SATA devices.
+    \item \texttt{0x00020000} (bit \texttt{17}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SASEX}, allow
+    scanning SAS and Mac NVMe devices.
+    \item \texttt{0x00040000} (bit \texttt{18}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SCSI}, allow
+    scanning SCSI devices.
+    \item \texttt{0x00080000} (bit \texttt{19}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_NVME}, allow
+    scanning NVMe devices.
+    \item \texttt{0x00100000} (bit \texttt{20}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_ATAPI}, allow
+    scanning CD/DVD devices.
+    \item \texttt{0x00200000} (bit \texttt{21}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_USB}, allow
+    scanning USB devices.
+    \item \texttt{0x00400000} (bit \texttt{22}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_FIREWIRE}, allow
+    scanning FireWire devices.
+    \item \texttt{0x00800000} (bit \texttt{23}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SDCARD}, allow
+    scanning card reader devices.
+  \end{itemize}
+
+  \emph{Note}: Given the above description, \texttt{0xF0103} value is expected to allow
+  scanning of SATA, SAS, SCSI, and NVMe devices with APFS file system, and prevent scanning
+  of any devices with HFS or FAT32 file systems in addition to not scanning APFS file systems
+  on USB, CD, USB, and FireWire drives. The combination reads as:
+  \begin{itemize}
+  \tightlist
+  \item \texttt{OC\_SCAN\_FILE\_SYSTEM\_LOCK}
+  \item \texttt{OC\_SCAN\_DEVICE\_LOCK}
+  \item \texttt{OC\_SCAN\_ALLOW\_FS\_APFS}
+  \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SATA}
+  \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SASEX}
+  \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SCSI}
+  \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_NVME}
+  \end{itemize}
 
 \end{enumerate}
 
@@ -1693,9 +1824,11 @@ improvements:
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:prev-lang:kbd}
   \break
   ASCII string defining default keyboard layout. Format is \texttt{lang-COUNTRY:keyboard},
-  e.g. \texttt{ru-RU:19456} for Mac keyboard. Also accepts short forms: \texttt{ru:19456}
-  or \texttt{ru:0}. Full decoded list of keyboards in \texttt{AppleKeyboardLayouts-L.dat}
-  can be found on \href{https://www.applelife.ru/posts/763537}{AppleLife}.
+  e.g. \texttt{ru-RU:252} for Russian locale and ABC keyboard. Also accepts short forms:
+  \texttt{ru:252} or \texttt{ru:0} (U.S. keyboard, compatible with 10.9). Full decoded
+  keyboard list from \texttt{AppleKeyboardLayouts-L.dat} can be found on
+  \href{https://www.applelife.ru/posts/763537}{AppleLife}. Using non-latin keyboard on 10.14
+  will not enable ABC keyboard, unlike previous macOS versions, and is thus not recommended.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:security-mode}
   \break
@@ -1725,10 +1858,25 @@ troubleshooting:
   Kernel arguments, used to pass configuration to Apple kernel and drivers.
   There are many arguments, which may be found by looking for the use of
   \texttt{PE\_parse\_boot\_argn} function in the kernel or driver code.
+  Some of the known boot arguments include:
 
   \begin{itemize}
-  \item FIXME: document several known values! debug, keepsyms, slide, -v, -s,
-  -x, cpus=x, io=x, kextlog=x, -nehalem\_error\_disable -no\_compat\_check nvda\_drv=1, etc?
+  \item \texttt{acpi\_layer=0xFFFFFFFF}
+  \item \texttt{acpi\_level=0xFFFF5F} (implies
+    \href{https://github.com/acpica/acpica/blob/master/source/include/acoutput.h}
+    {\texttt{ACPI\_ALL\_COMPONENTS}})
+  \item \texttt{cpus=VALUE}
+  \item \texttt{debug=VALUE}
+  \item \texttt{io=VALUE}
+  \item \texttt{keepsyms=1}
+  \item \texttt{kextlog=VALUE}
+  \item \texttt{nvda\_drv=1}
+  \item \texttt{slide=VALUE}
+  \item \texttt{-nehalem\_error\_disable}
+  \item \texttt{-no\_compat\_check}
+  \item \texttt{-s}
+  \item \texttt{-v}
+  \item \texttt{-x}
   \end{itemize}
 
 \item
@@ -1764,8 +1912,13 @@ troubleshooting:
   Booter arguments override removed after first launch. Otherwise equivalent to \texttt{bootercfg}.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:fmm-computer-name}
+  \break
+  Current saved host name. ASCII string.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:nvda\_drv}
+  \break
+  NVIDIA Web Driver control variable. Takes ASCII digit \texttt{1} or \texttt{0}
+  to enable or disable installed driver.
 \end{itemize}
 
 \section{PlatformInfo}\label{platforminfo}
@@ -1783,7 +1936,7 @@ are written to three select destinations:
 \item
   \href{https://www.dmtf.org/standards/smbios}{SMBIOS}
 \item
-  \href{https://github.com/freebsd/uefi-edk2/blob/master/IntelFrameworkModulePkg/Universal/DataHubDxe/DataHubDxe.uni}{Data
+  \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/DataHub.h}{Data
   Hub}
 \item
   NVRAM
@@ -1798,6 +1951,10 @@ destination, so there are two ways to control their update process:
 manual, where one specifies all the values (the default), and semi-automatic,
 where (\texttt{Automatic}) only select values are specified, and later used
 for system configuration.
+
+To inspect SMBIOS contents \href{http://www.nongnu.org/dmidecode}{dmidecode} utility can
+be used. Version with macOS specific enhancements can be downloaded from
+\href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidecode}.
 
 \subsection{Properties}\label{platforminfoprops}
 
@@ -1817,7 +1974,7 @@ for system configuration.
   \texttt{UpdateDataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Update DataHub fields. These fields are read
+  \textbf{Description}: Update Data Hub fields. These fields are read
   from \texttt{Generic} or \texttt{DataHub} sections depending on
   \texttt{Automatic} value.
 \item
@@ -1844,15 +2001,15 @@ for system configuration.
 \item
   \texttt{UpdateSMBIOSMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: \texttt{Auto}\\
+  \textbf{Default value}: \texttt{Create}\\
   \textbf{Description}: Update SMBIOS fields approach:
 
   \begin{itemize}
   \tightlist
   \item
-    \texttt{Auto} --- \texttt{Overwrite} if new size is \textless{}= than
+    \texttt{TryOverwrite} --- \texttt{Overwrite} if new size is \textless{}= than
     the page-aligned original and there are no issues with legacy region
-    unlock. \texttt{Create} otherwise.
+    unlock. \texttt{Create} otherwise. Has issues with some firmwares.
   \item
     \texttt{Create} --- Replace the tables with newly allocated
     EfiReservedMemoryType at AllocateMaxAddress without any fallbacks.
@@ -1898,6 +2055,15 @@ for system configuration.
 \subsection{Generic Properties}\label{platforminfogeneric}
 
 \begin{enumerate}
+\item
+  \texttt{SpoofVendor}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Sets SMBIOS vendor fields to \texttt{Acidanthera}.
+
+  It is dangerous to use Apple in SMBIOS vendor fields for reasons given
+  in \texttt{SystemManufacturer} description. However, certain firmwares
+  may not provide valid values otherwise, which could break some software.
 \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -2048,13 +2214,13 @@ for system configuration.
   and newer.
 \item
   \texttt{DevicePathsSupported}\\
-  \textbf{Type}: \texttt{plist\ data}, 1 byte\\
+  \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
   \textbf{Default value}: Not installed\\
   \textbf{Description}: Sets \texttt{DevicePathsSupported} in
-  \texttt{gEfiMiscSubClassGuid}. Must be set to \texttt{01} for
+  \texttt{gEfiMiscSubClassGuid}. Must be set to \texttt{1} for
   AppleACPIPlatform.kext to append SATA device paths to
   \texttt{Boot\#\#\#\#} and \texttt{efi-boot-device-data} variables.
-  Set to \texttt{01} on all modern Macs.
+  Set to \texttt{1} on all modern Macs.
 \item
   \texttt{SmcRevision}\\
   \textbf{Type}: \texttt{plist\ data}, 6 bytes\\
@@ -2340,13 +2506,20 @@ Apple ROM Version
   \texttt{MacBook-Aluminum}.
 \item
   \texttt{PlatformFeature}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
+  \textbf{Default value}: \texttt{0xFFFFFFFF}\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE133} -
   \texttt{PlatformFeature}\\
   \textbf{Description}: Platform features bitmask. Refer to
   \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
-  for more details.
+  for more details. Use \texttt{0xFFFFFFFF} value to not provide this table.
+\item
+  \texttt{SmcVersion}\\
+  \textbf{Type}: \texttt{plist\ data}, 16 bytes\\
+  \textbf{Default value}: All zero\\
+  \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE134} - \texttt{Version}\\
+  \textbf{Description}: ASCII string containing SMC version in upper case.
+  Missing on T2 based Macs. Ignored when zero.
 \item
   \texttt{FirmwareFeatures}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
@@ -2392,7 +2565,9 @@ Apple ROM Version
 \href{https://uefi.org/specifications}{UEFI} (Unified Extensible Firmware Interface)
 is a specification that defines a software interface between an operating system and
 platform firmware. This section allows to load additional UEFI modules and/or apply
-tweaks for the onboard firmware.
+tweaks for the onboard firmware. To inspect firmware contents, apply modifications
+and perform upgrades \href{https://github.com/LongSoft/UEFITool/releases}{UEFITool}
+and supplementary utilities can be used.
 
 \subsection{Properties}\label{uefiprops}
 
@@ -2439,9 +2614,6 @@ tweaks for the onboard firmware.
   firmwares, other firmwares may be compatible as well. Among the resolved issues
   are hibernation support, KASLR, Lilu NVRAM security enhancements, NVRAM, and UEFI
   Boot entry preservation.
-  \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{DataHubDxe}}
-  --- Intel DataHub driver from \texttt{IntelFrameworkModulePkg}. It is believed
-  that this driver is included in all UEFI firmwares, and is not required.
   \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{EmuVariableRuntimeDxe}}
   --- NVRAM emulation driver from \texttt{MdeModulePkg}. NVRAM is supported by most
   modern firmwares. For firmwares with macOS incompatible NVRAM implementation an
@@ -2477,6 +2649,10 @@ tweaks for the onboard firmware.
   a closed source \texttt{HFSPlus} driver commonly found in Apple firmwares. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
   a security audit.
+  \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{XhciDxe}}
+  --- XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
+  included in most firmwares starting with Sandy Bridge generation. For earlier firmwares
+  or legacy systems it may be used to support external USB 3.0 PCI cards.
   \end{itemize}
 
   To compile the drivers from TianoCore UDK use the same command you do normally use
@@ -2488,7 +2664,6 @@ source edksetup.sh
 make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p FatPkg/FatPkg.dsc
 build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
-build -a X64 -b RELEASE -t XCODE5 -p IntelFrameworkModulePkg/IntelFrameworkModulePkg.dsc
 \end{lstlisting}
 
 \item
@@ -2497,6 +2672,8 @@ build -a X64 -b RELEASE -t XCODE5 -p IntelFrameworkModulePkg/IntelFrameworkModul
   \textbf{Default value}: None\\
   \textbf{Description}: Force builtin versions of select protocols described
   in \hyperref[uefiprotoprops]{Protocols Properties} section below.
+
+  \emph{Note}: all protocol instances are installed prior to driver loading.
 
 \item
   \texttt{Quirks}\\
@@ -2515,14 +2692,33 @@ build -a X64 -b RELEASE -t XCODE5 -p IntelFrameworkModulePkg/IntelFrameworkModul
   \texttt{AppleBootPolicy}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Reinstalls apple boot policy protocol with a builtin
+  \textbf{Description}: Reinstalls Apple Boot Policy protocol with a builtin
   version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
+
+\item
+  \texttt{ConsoleControl}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{NO}\\
+  \textbf{Description}: Replaces Console Control protocol with a builtin version.
+
+  macOS bootloader requires console control protocol for text output, which some firmwares
+  miss. This option is required to be set when the protocol is already available in the
+  firmware, and other console control options are used, such as \texttt{IgnoreTextInGraphics},
+  \texttt{SanitiseClearScreen}, and sometimes \texttt{ConsoleBehaviourOs} with
+  \texttt{ConsoleBehaviourUi}).
+
+\item
+  \texttt{DataHub}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Data Hub protocol with a builtin version.
+  This will drop all previous properties if the protocol was already installed.
 
 \item
   \texttt{DeviceProperties}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Reinstalls device property protocol with a builtin
+  \textbf{Description}: Reinstalls Device Property protocol with a builtin
   version. This will drop all previous properties if it was already installed.
   This may be used to ensure full compatibility on VMs or legacy Macs.
 
@@ -2567,18 +2763,8 @@ build -a X64 -b RELEASE -t XCODE5 -p IntelFrameworkModulePkg/IntelFrameworkModul
 
   \emph{Note}: While the option is not supposed to induce harm on unaffected firmwares,
   its usage is not recommended when it is not required. This option may hide
-  onscreen error messages. \texttt{ProvideConsoleControl} is required to be set to
+  onscreen error messages. \texttt{ConsoleControl} may need to be set to
   \texttt{true} for this to work.
-
-\item
-  \texttt{ProvideConsoleControl}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{NO}\\
-  \textbf{Description}: macOS bootloader requires console control protocol
-  for text output, some firmwares miss it. This option is required to be set
-  when other console control options are used, such as \texttt{IgnoreTextInGraphics},
-  \texttt{SanitiseClearScreen}, and sometimes \texttt{ConsoleBehaviourOs} with
-  \texttt{ConsoleBehaviourUi}).
 
 \item
   \texttt{ProvideConsoleGop}\\
@@ -2621,7 +2807,7 @@ build -a X64 -b RELEASE -t XCODE5 -p IntelFrameworkModulePkg/IntelFrameworkModul
   when large display (e.g. 2K or 4K) is used. This option attempts to apply
   a workaround.
 
-  \emph{Note}: \texttt{ProvideConsoleControl} is required to be set to
+  \emph{Note}: \texttt{ConsoleControl} may need to be set to
   \texttt{true} for this to work. On all known affected systems
   \texttt{ConsoleMode} had to be set to empty string for this to work.
 
@@ -2678,8 +2864,19 @@ build -a X64 -b RELEASE -t XCODE5 -p IntelFrameworkModulePkg/IntelFrameworkModul
   Custom name may be created by providing \texttt{.contentDetails} file.
 
   To download recovery online you may use
-  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/Recovery}{Recovery} 
+  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/Recovery}{Recovery}
   tool from \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}.
+
+\item
+  \textbf{Can I install Windows?}
+
+  While no official Windows support is provided, 64-bit UEFI Windows installations (Windows 8 and
+  above) prepared with Boot Camp are supposed to work in general. Third-party UEFI installations
+  as well as systems partially supporting UEFI boot, like Windows 7, might work with
+  some extra precautions. Be warned that macOS requires first partition to be EFI System
+  Partition, and does not support the default Windows layout.
+  Other than that, all the modifications applied (to ACPI, NVRAM, SMBIOS, etc.) are supposed
+  to be operating system agnostic, i.e. apply equally regardless of the OS booted.
 
 \end{enumerate}
 
