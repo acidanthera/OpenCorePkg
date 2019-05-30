@@ -1,22 +1,5 @@
 /*
- * Intel ACPI Component Architecture
- * AML/ASL+ Disassembler version 20190215 (64-bit version)
- * Copyright (c) 2000 - 2019 Intel Corporation
- * 
- * Disassembling to symbolic ASL+ operators
- *
- * Disassembly of iASLspH90v.aml, Wed Apr 10 10:41:25 2019
- *
- * Original Table Header:
- *     Signature        "SSDT"
- *     Length           0x000000A6 (166)
- *     Revision         0x02
- *     Checksum         0xF0
- *     OEM ID           "CpuRef"
- *     OEM Table ID     "CpuPlug"
- *     OEM Revision     0x00003000 (12288)
- *     Compiler ID      "INTL"
- *     Compiler Version 0x20160729 (538314537)
+ * XCPM power management compatibility table.
  */
 DefinitionBlock ("", "SSDT", 2, "CpuRef", "CpuPlug", 0x00003000)
 {

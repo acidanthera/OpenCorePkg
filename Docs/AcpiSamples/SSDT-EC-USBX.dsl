@@ -1,26 +1,53 @@
 /*
- * Intel ACPI Component Architecture
- * AML/ASL+ Disassembler version 20190215 (64-bit version)
- * Copyright (c) 2000 - 2019 Intel Corporation
- * 
- * Disassembling to symbolic ASL+ operators
+ * AppleUsbPower compatibility table for Skylake+.
  *
- * Disassembly of iASLTtGlr6.aml, Thu May  9 02:09:20 2019
+ * Be warned that power supply values can be different
+ * for different systems. Depending on the configuration
+ * these values must match injected IOKitPersonalities
+ * for com.apple.driver.AppleUSBMergeNub. iPad remains
+ * being the most reliable device for testing USB port
+ * charging support.
  *
- * Original Table Header:
- *     Signature        "SSDT"
- *     Length           0x000000F4 (244)
- *     Revision         0x02
- *     Checksum         0x2F
- *     OEM ID           "APPLE "
- *     OEM Table ID     "SsdtEC"
- *     OEM Revision     0x00001000 (4096)
- *     Compiler ID      "INTL"
- *     Compiler Version 0x20190215 (538509845)
+ * Try NOT to rename EC0, H_EC, etc. to EC.
+ * These devices are incompatible with macOS and may break
+ * at any time. AppleACPIEC kext must NOT load.
+ * See the disable code below.
+ *
+ * Reference USB: https://applelife.ru/posts/550233
+ * Reference EC: https://applelife.ru/posts/807985
  */
 DefinitionBlock ("", "SSDT", 2, "APPLE ", "SsdtEC", 0x00001000)
 {
     External (_SB_.PCI0.LPCB, DeviceObj)
+
+    /*
+     * Uncomment replacing EC0 with your own value in case your
+     * motherboard has an existing embedded controller of PNP0C09 type.
+     *
+     * While renaming EC0 to EC might potentially work initially,
+     * it connects an incompatible driver (AppleACPIEC) to your hardware.
+     * This can make your system unbootable at any time or hide bugs that
+     * could trigger randomly.
+     */
+
+    /**
+    External (_SB_.PCI0.LPCB.EC0, DeviceObj)
+
+    Scope (\_SB.PCI0.LPCB.EC0)
+    {
+        Method (_STA, 0, NotSerialized)  // _STA: Status
+        {
+            If (_OSI ("Darwin"))
+            {
+                Return (0)
+            }
+            Else
+            {
+                Return (0x0F)
+            }
+        }
+    }
+    **/
 
     Scope (\_SB)
     {
@@ -39,14 +66,14 @@ DefinitionBlock ("", "SSDT", 2, "APPLE ", "SsdtEC", 0x00001000)
 
                 Return (Package (0x08)
                 {
-                    "kUSBSleepPowerSupply", 
-                    0x0640, 
-                    "kUSBSleepPortCurrentLimit", 
-                    0x0A8C, 
-                    "kUSBWakePowerSupply", 
-                    0x0640, 
-                    "kUSBWakePortCurrentLimit", 
-                    0x0A8C
+                    "kUSBSleepPowerSupply",
+                    0x13EC,
+                    "kUSBSleepPortCurrentLimit",
+                    0x0834,
+                    "kUSBWakePowerSupply",
+                    0x13EC,
+                    "kUSBWakePortCurrentLimit",
+                    0x0834
                 })
             }
         }
@@ -54,20 +81,20 @@ DefinitionBlock ("", "SSDT", 2, "APPLE ", "SsdtEC", 0x00001000)
         Scope (\_SB.PCI0.LPCB)
         {
             Device (EC)
-        {
-            Name (_HID, EisaId ("PNP0C09") /* Embedded Controller Device */)  // _HID: Hardware ID
-            Method (_STA, 0, NotSerialized)  // _STA: Status
             {
-                If (_OSI ("Darwin"))
+                Name (_HID, "ACID0001")  // _HID: Hardware ID
+                Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (0x0F)
-                }
-                Else
-                {
-                    Return (Zero)
+                    If (_OSI ("Darwin"))
+                    {
+                        Return (0x0F)
+                    }
+                    Else
+                    {
+                        Return (Zero)
+                    }
                 }
             }
-        }
         }
     }
 }
