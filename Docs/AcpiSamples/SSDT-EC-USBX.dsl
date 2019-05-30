@@ -54,9 +54,20 @@ DefinitionBlock ("", "SSDT", 2, "APPLE ", "SsdtEC", 0x00001000)
         Scope (\_SB.PCI0.LPCB)
         {
             Device (EC)
+        {
+            Name (_HID, EisaId ("PNP0C09") /* Embedded Controller Device */)  // _HID: Hardware ID
+            Method (_STA, 0, NotSerialized)  // _STA: Status
             {
-                Name (_HID, EisaId ("PNP0C09") /* Embedded Controller Device */)  // _HID: Hardware ID
+                If (_OSI ("Darwin"))
+                {
+                    Return (0x0F)
+                }
+                Else
+                {
+                    Return (Zero)
+                }
             }
+        }
         }
     }
 }
