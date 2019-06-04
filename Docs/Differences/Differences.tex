@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May 24 02:34:39 2019
-%DIF ADD ../Configuration.tex        Fri May 24 16:38:34 2019
+%DIF ADD ../Configuration.tex        Tue Jun  4 16:30:55 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1392,7 +1392,10 @@ behaviour that does not go to any other sections
   \texttt{ConsoleBehaviourUi} set to \texttt{ForceText} to avoid visual glitches.
   \item On APTIO V (Broadwell and newer) \texttt{ConsoleBehaviourOs}
   set to \texttt{ForceGraphics} and \texttt{ConsoleBehaviourUi} set to
-  \texttt{Text} usually works best.
+  \texttt{\DIFdelbegin \DIFdel{Text}\DIFdelend \DIFaddbegin \DIFadd{ForceText}\DIFaddend } usually works \DIFaddbegin \DIFadd{best.
+  }\item \DIFadd{On Apple firmwares }\texttt{\DIFadd{ConsoleBehaviourOs}}
+  \DIFadd{set to }\texttt{\DIFadd{Graphics}} \DIFadd{and }\texttt{\DIFadd{ConsoleBehaviourUi}} \DIFadd{set to
+  }\texttt{\DIFadd{Text}} \DIFadd{is supposed to work }\DIFaddend best.
   \end{itemize}
 
   \emph{Note}: \texttt{IgnoreTextInGraphics} may need to be enabled for select

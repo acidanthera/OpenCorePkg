@@ -1332,7 +1332,10 @@ behaviour that does not go to any other sections
   \texttt{ConsoleBehaviourUi} set to \texttt{ForceText} to avoid visual glitches.
   \item On APTIO V (Broadwell and newer) \texttt{ConsoleBehaviourOs}
   set to \texttt{ForceGraphics} and \texttt{ConsoleBehaviourUi} set to
-  \texttt{Text} usually works best.
+  \texttt{ForceText} usually works best.
+  \item On Apple firmwares \texttt{ConsoleBehaviourOs}
+  set to \texttt{Graphics} and \texttt{ConsoleBehaviourUi} set to
+  \texttt{Text} is supposed to work best.
   \end{itemize}
 
   \emph{Note}: \texttt{IgnoreTextInGraphics} may need to be enabled for select
