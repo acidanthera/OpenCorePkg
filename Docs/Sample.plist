@@ -147,8 +147,6 @@
 		<dict>
 			<key>FadtEnableReset</key>
 			<false/>
-			<key>IgnoreForWindows</key>
-			<false/>
 			<key>NormalizeHeaders</key>
 			<false/>
 			<key>RebaseRegions</key>

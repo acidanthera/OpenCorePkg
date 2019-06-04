@@ -48,119 +48,8 @@ OC_STORAGE_CONTEXT
 mOpenCoreStorage;
 
 STATIC
-EFI_IMAGE_START
-mOcOriginalStartImage;
-
-STATIC
-UINT32
-mOpenCoreStartImageNest;
-
-STATIC
-BOOLEAN
-mOpenCoreStartImageIsWindows;
-
-STATIC
 RSA_PUBLIC_KEY *
 mOpenCoreVaultKey;
-
-STATIC
-VOID
-OcEfiStartImagePrologue (
-  IN BOOLEAN  IsUnknown,
-  IN BOOLEAN  IsWindows
-  )
-{
-  ++mOpenCoreStartImageNest;
-
-  if (mOpenCoreStartImageNest == 1) {
-    if (IsUnknown) {
-      IsWindows = mOpenCoreStartImageIsWindows;
-    } else {
-      mOpenCoreStartImageIsWindows = IsWindows;
-    }
-
-    //
-    // Some people make their ACPI tables incompatible with Windows after modding them for macOS.
-    // While obviously it is their fault, here we provide a quick and dirty workaround.
-    //
-    if (!mOpenCoreConfiguration.Acpi.Quirks.IgnoreForWindows || !IsWindows) {
-      OcLoadAcpiSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
-    }
-
-    //
-    // Do not waste time for kext injection, when we are in Windows.
-    //
-    if (!IsWindows) {
-      OcLoadKernelSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
-    }
-
-    //
-    // Request OS mode.
-    //
-    OcConsoleControlSetBehaviour (
-      ParseConsoleControlBehaviour (
-        OC_BLOB_GET (&mOpenCoreConfiguration.Misc.Boot.ConsoleBehaviourOs)
-        )
-      );
-  }
-}
-
-STATIC
-VOID
-OcEfiStartImageEpilogue (
-  VOID
-  )
-{
-  if (mOpenCoreStartImageNest == 1) {
-    //
-    // Restore ui mode.
-    //
-    OcConsoleControlSetBehaviour (
-      ParseConsoleControlBehaviour (
-        OC_BLOB_GET (&mOpenCoreConfiguration.Misc.Boot.ConsoleBehaviourUi)
-        )
-      );
-
-    if (!mOpenCoreStartImageIsWindows) {
-      OcUnloadKernelSupport ();
-    }
-
-    mOpenCoreStartImageIsWindows = FALSE;
-  }
-
-  --mOpenCoreStartImageNest;
-}
-
-STATIC
-EFI_STATUS
-EFIAPI
-OcEfiStartImage (
-  IN  EFI_HANDLE                  ImageHandle,
-  OUT UINTN                       *ExitDataSize,
-  OUT CHAR16                      **ExitData    OPTIONAL
-  )
-{
-  EFI_STATUS   Status;
-
-  //
-  // We do not know what OS is that, could be macOS booted from shell.
-  //
-  OcEfiStartImagePrologue (TRUE, FALSE);
-
-  Status = mOcOriginalStartImage (
-    ImageHandle,
-    ExitDataSize,
-    ExitData
-    );
-
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OC: Boot failed - %r\n", Status));
-  }
-
-  OcEfiStartImageEpilogue ();
-
-  return Status;
-}
 
 STATIC
 EFI_STATUS
@@ -174,9 +63,16 @@ OcStartImage (
 {
   EFI_STATUS   Status;
 
-  OcEfiStartImagePrologue (FALSE, Chosen->IsWindows);
+  //
+  // Request OS mode.
+  //
+  OcConsoleControlSetBehaviour (
+    ParseConsoleControlBehaviour (
+      OC_BLOB_GET (&mOpenCoreConfiguration.Misc.Boot.ConsoleBehaviourOs)
+      )
+    );
 
-  Status = mOcOriginalStartImage (
+  Status = gBS->StartImage (
     ImageHandle,
     ExitDataSize,
     ExitData
@@ -186,7 +82,14 @@ OcStartImage (
     DEBUG ((DEBUG_WARN, "OC: Boot failed - %r\n", Status));
   }
 
-  OcEfiStartImageEpilogue ();
+  //
+  // Restore ui mode.
+  //
+  OcConsoleControlSetBehaviour (
+    ParseConsoleControlBehaviour (
+      OC_BLOB_GET (&mOpenCoreConfiguration.Misc.Boot.ConsoleBehaviourUi)
+      )
+    );
 
   return Status;
 }
@@ -218,6 +121,8 @@ OcMain (
 
   DEBUG ((DEBUG_INFO, "OC: OcLoadUefiSupport...\n"));
   OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &CpuInfo);
+  DEBUG ((DEBUG_INFO, "OC: OcLoadAcpiSupport...\n"));
+  OcLoadAcpiSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
   DEBUG ((DEBUG_INFO, "OC: OcLoadPlatformSupport...\n"));
   OcLoadPlatformSupport (&mOpenCoreConfiguration, &CpuInfo);
   DEBUG ((DEBUG_INFO, "OC: OcLoadDevPropsSupport...\n"));
@@ -226,15 +131,8 @@ OcMain (
   OcLoadNvramSupport (&mOpenCoreConfiguration);
   DEBUG ((DEBUG_INFO, "OC: OcMiscLateInit...\n"));
   OcMiscLateInit (&mOpenCoreConfiguration, LoadPath, &LoadHandle);
-
-  //
-  // This is required to catch UEFI Shell boot if any.
-  // We do it as late as possible to let other drivers install their hooks.
-  //
-  mOcOriginalStartImage = gBS->StartImage;
-  gBS->StartImage       = OcEfiStartImage;
-  gBS->Hdr.CRC32        = 0;
-  gBS->CalculateCrc32 (gBS, gBS->Hdr.HeaderSize, &gBS->Hdr.CRC32);
+  DEBUG ((DEBUG_INFO, "OC: OcLoadKernelSupport...\n"));
+  OcLoadKernelSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
 
   DEBUG ((DEBUG_INFO, "OC: OpenCore is loaded, showing boot menu...\n"));
 
