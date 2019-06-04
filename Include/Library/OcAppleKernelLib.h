@@ -454,5 +454,17 @@ PatchForceInternalDiskIcons (
   IN OUT PRELINKED_CONTEXT  *Context
   );
 
+/**
+  Apply VT-d disabling patches to AppleACPIPlatform kext to disable IOMapper in macOS.
+
+  @param Context  Prelinked kernel context.
+
+  @return  EFI_SUCCESS on success.
+**/
+RETURN_STATUS
+PatchAppleIoMapperSupport (
+  IN OUT PRELINKED_CONTEXT  *Context
+  );
+
 #endif // OC_APPLE_KERNEL_LIB_H
 
