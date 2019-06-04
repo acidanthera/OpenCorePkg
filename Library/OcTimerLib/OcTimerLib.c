@@ -16,6 +16,7 @@
 
 #include <IndustryStandard/GenericIch.h>
 #include <IndustryStandard/Pci.h>
+#include <IndustryStandard/CpuId.h>
 
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
@@ -37,6 +38,7 @@ RecalculateTSC (
   )
 {
   UINT32   TimerAddr;
+  UINT32   CpuVendor;
   UINT64   Tsc0;
   UINT64   Tsc1;
   UINT32   AcpiTick0;
@@ -45,6 +47,8 @@ RecalculateTSC (
   UINT32   AcpiTicksTarget;
   UINT32   TimerResolution;
   EFI_TPL  PrevTpl;
+
+  TimerAddr = 0;
 
   //
   // Intel timer support.
@@ -72,82 +76,99 @@ RecalculateTSC (
         DEBUG ((DEBUG_VERBOSE, "Acpi Timer Addr 0x%0x (SMB)\n", TimerAddr));
       }
     }
+  }
 
-    if (TimerAddr != 0) {
-      mPerformanceCounterFrequency = 0;
+  //
+  // AMD timer support.
+  //
+  if (TimerAddr == 0) {
+    //
+    // In an ideal world I believe we should detect AMD SMBus controller...
+    //
+    CpuVendor = 0;
+    AsmCpuid (CPUID_SIGNATURE, NULL, &CpuVendor, NULL, NULL);
+
+    if (CpuVendor == CPUID_VENDOR_AMD) {
+      TimerAddr = IoRead32 (
+        R_AMD_ACPI_MMIO_BASE + R_AMD_ACPI_MMIO_PMIO_BASE + R_AMD_ACPI_PM_TMR_BLOCK
+        );
+    }
+  }
+
+  if (TimerAddr != 0) {
+    mPerformanceCounterFrequency = 0;
+
+    //
+    // Check that timer is advancing (it does not on some virtual machines).
+    //
+    AcpiTick0 = IoRead32 (TimerAddr);
+    gBS->Stall (500);
+    AcpiTick1 = IoRead32 (TimerAddr);
+
+    if (AcpiTick0 != AcpiTick1) {
+      //
+      // ACPI PM timers are usually of 24-bit length, but there are some less common cases of 32-bit length also.
+      // When the maximal number is reached, it overflows.
+      // The code below can handle overflow with AcpiTicksTarget of up to 24-bit size,
+      // on both available sizes of ACPI PM Timers (24-bit and 32-bit).
+      //
+      // 357954 clocks of ACPI timer (100ms)
+      //
+      AcpiTicksTarget = V_ACPI_TMR_FREQUENCY / TimerResolution;
 
       //
-      // Check that timer is advancing (it does not on some virtual machines).
+      // Disable all events to ensure that nobody interrupts us.
       //
+      PrevTpl   = gBS->RaiseTPL (TPL_HIGH_LEVEL);
+
       AcpiTick0 = IoRead32 (TimerAddr);
-      gBS->Stall (500);
-      AcpiTick1 = IoRead32 (TimerAddr);
+      Tsc0      = AsmReadTsc ();
 
-      if (AcpiTick0 != AcpiTick1) {
-        //
-        // ACPI PM timers are usually of 24-bit length, but there are some less common cases of 32-bit length also.
-        // When the maximal number is reached, it overflows.
-        // The code below can handle overflow with AcpiTicksTarget of up to 24-bit size,
-        // on both available sizes of ACPI PM Timers (24-bit and 32-bit).
-        //
-        // 357954 clocks of ACPI timer (100ms)
-        //
-        AcpiTicksTarget = V_ACPI_TMR_FREQUENCY / TimerResolution;
+      do {
+        CpuPause ();
 
         //
-        // Disable all events to ensure that nobody interrupts us.
+        // Check how many AcpiTicks have passed since we started.
         //
-        PrevTpl   = gBS->RaiseTPL (TPL_HIGH_LEVEL);
+        AcpiTick1 = IoRead32 (TimerAddr);
 
-        AcpiTick0 = IoRead32 (TimerAddr);
-        Tsc0      = AsmReadTsc ();
-
-        do {
-          CpuPause ();
-
+        if (AcpiTick0 <= AcpiTick1) {
           //
-          // Check how many AcpiTicks have passed since we started.
+          // No overflow.
           //
-          AcpiTick1 = IoRead32 (TimerAddr);
-
-          if (AcpiTick0 <= AcpiTick1) {
-            //
-            // No overflow.
-            //
-            AcpiTicksDelta = AcpiTick1 - AcpiTick0;
-          } else if (AcpiTick0 - AcpiTick1 <= 0x00FFFFFF) {
-            //
-            // Overflow, 24-bit timer.
-            //
-            AcpiTicksDelta = 0x00FFFFFF - AcpiTick0 + AcpiTick1;
-          } else {
-            //
-            // Overflow, 32-bit timer.
-            //
-            AcpiTicksDelta = MAX_UINT32 - AcpiTick0 + AcpiTick1;
-          }
-
+          AcpiTicksDelta = AcpiTick1 - AcpiTick0;
+        } else if (AcpiTick0 - AcpiTick1 <= 0x00FFFFFF) {
           //
-          // Keep checking AcpiTicks until target is reached.
+          // Overflow, 24-bit timer.
           //
-        } while (AcpiTicksDelta < AcpiTicksTarget);
-
-        Tsc1 = AsmReadTsc ();
-
-        //
-        // On some systems we may end up waiting for notably longer than 100ms,
-        // despite disabling all events. Divide by actual time passed as suggested
-        // by asava's Clover patch r2668.
-        //
-        mPerformanceCounterFrequency = DivU64x32 (
-          MultU64x32 (Tsc1 - Tsc0, V_ACPI_TMR_FREQUENCY), AcpiTicksDelta
-          );
+          AcpiTicksDelta = 0x00FFFFFF - AcpiTick0 + AcpiTick1;
+        } else {
+          //
+          // Overflow, 32-bit timer.
+          //
+          AcpiTicksDelta = MAX_UINT32 - AcpiTick0 + AcpiTick1;
+        }
 
         //
-        // Restore to normal TPL.
+        // Keep checking AcpiTicks until target is reached.
         //
-        gBS->RestoreTPL (PrevTpl);
-      }
+      } while (AcpiTicksDelta < AcpiTicksTarget);
+
+      Tsc1 = AsmReadTsc ();
+
+      //
+      // On some systems we may end up waiting for notably longer than 100ms,
+      // despite disabling all events. Divide by actual time passed as suggested
+      // by asava's Clover patch r2668.
+      //
+      mPerformanceCounterFrequency = DivU64x32 (
+        MultU64x32 (Tsc1 - Tsc0, V_ACPI_TMR_FREQUENCY), AcpiTicksDelta
+        );
+
+      //
+      // Restore to normal TPL.
+      //
+      gBS->RestoreTPL (PrevTpl);
     }
   }
 

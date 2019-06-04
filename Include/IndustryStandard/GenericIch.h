@@ -12,8 +12,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef GENERIC_ICH_H_
-#define GENERIC_ICH_H_
+#ifndef GENERIC_ICH_H
+#define GENERIC_ICH_H
 
 // GenericIchDefs  Generic ICH Definitions.
 //
@@ -50,6 +50,11 @@
 #define R_ICH_SMBUS_ACPI_CNT          R_ICH_ACPI_CNT
 #define B_ICH_SMBUS_ACPI_CNT_ACPI_EN  B_ICH_ACPI_CNT_ACPI_EN
 
+// AMD Bolton (AMD Bolton Register Reference Guide 3.03)
+
+#define R_AMD_ACPI_MMIO_BASE          0xFED80000 ///< AcpiMMioAddr (3-268)
+#define R_AMD_ACPI_MMIO_PMIO_BASE     0x300      ///< PMIO (3-268)
+#define R_AMD_ACPI_PM_TMR_BLOCK       0x64       ///< AcpiPmTmrBlk (3-289)
 
 // IchAcpiTimer  The ICH's ACPI Timer.
 
@@ -67,4 +72,4 @@
 #define PCI_ICH_SMBUS_ADDRESS(Register) \
   ((UINTN)(PCI_LIB_ADDRESS (PCI_BUS_NUMBER_ICH, PCI_DEVICE_NUMBER_ICH, PCI_FUNCTION_NUMBER_ICH_SMBUS, (Register))))
 
-#endif // GENERIC_ICH_H_
+#endif // GENERIC_ICH_H

@@ -12,8 +12,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef CPUID_H_
-#define CPUID_H_
+#ifndef CPUID_H
+#define CPUID_H
 
 #include <Register/Cpuid.h>
 
@@ -212,4 +212,7 @@ enum {
   CpuIdCachePrefetch128    = 0xF1,  ///< 128-Byte Prefetching
 };
 
-#endif // CPUID_H_
+#define CPUID_VENDOR_INTEL  0x756E6547
+#define CPUID_VENDOR_AMD    0x68747541
+
+#endif // CPUID_H

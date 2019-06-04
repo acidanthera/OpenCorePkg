@@ -12,11 +12,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef OC_PROCESSOR_INFO_H_
-#define OC_PROCESSOR_INFO_H_
-
-#define CPUID_VENDOR_INTEL  0x756E6547
-#define CPUID_VENDOR_AMD    0x68747541
+#ifndef OC_PROCESSOR_INFO_H
+#define OC_PROCESSOR_INFO_H
 
 // SandyBridge/IvyBridge bus clock is fixed at 100MHz
 
@@ -207,4 +204,4 @@ typedef enum {
   CpuPStateCoordinationHardwareAll = 0xFE
 } CPU_P_STATE_COORDINATION;
 
-#endif // OC_PROCESSOR_INFO_H_
+#endif // OC_PROCESSOR_INFO_H
