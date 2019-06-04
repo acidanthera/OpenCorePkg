@@ -23,10 +23,12 @@ updaterepo() {
   fi
   pushd "$2" >/dev/null
   git pull
-  sym=$(find . -not -type d -exec file "{}" ";" | grep CRLF)
-  if [ "${sym}" != "" ]; then
-    echo "Repository $1 named $2 contains CRLF line endings"
-    exit 1
+  if [ "$2" != "UDK" ]; then
+    sym=$(find . -not -type d -exec file "{}" ";" | grep CRLF)
+    if [ "${sym}" != "" ]; then
+      echo "Repository $1 named $2 contains CRLF line endings"
+      exit 1
+    fi
   fi
   popd >/dev/null
 }
