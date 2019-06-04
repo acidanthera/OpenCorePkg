@@ -23,6 +23,11 @@ updaterepo() {
   fi
   pushd "$2" >/dev/null
   git pull
+  sym=$(find . -not -type d -exec file "{}" ";" | grep CRLF)
+  if [ "${sym}" != "" ]; then
+    echo "Repository $1 named $2 contains CRLF line endings"
+    exit 1
+  fi
   popd >/dev/null
 }
 
@@ -136,6 +141,12 @@ fi
 
 if [ ! -f UDK/UDK.ready ]; then
   rm -rf UDK
+
+  sym=$(find . -not -type d -exec file "{}" ";" | grep CRLF)
+  if [ "${sym}" != "" ]; then
+    echo "Repository CRLF line endings"
+    exit 1
+  fi
 fi
 
 updaterepo "https://github.com/tianocore/edk2" UDK UDK2018 || exit 1
