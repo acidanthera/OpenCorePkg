@@ -301,6 +301,10 @@ OcKernelApplyPatches (
     if (Config->Kernel.Quirks.XhciPortLimit) {
       PatchUsbXhciPortLimit (Context);
     }
+
+    if (Config->Kernel.Quirks.DisableIoMapper) {
+      PatchAppleIoMapperSupport (Context);
+    }
   } else {
     if (Config->Kernel.Quirks.AppleXcpmCfgLock) {
       PatchAppleXcpmCfgLock (&Patcher);

@@ -1216,6 +1216,17 @@ blocking.
   \href{https://github.com/acidanthera/AptioFixPkg#verifymsre2}{VerifyMsrE2} notes.
 
 \item
+  \texttt{DisableIoMapper}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Disables \texttt{IOMapper} support in XNU (VT-d),
+  which may conflict with the firmware implementation.
+
+  \emph{Note}: This option is a preferred alternative to dropping \texttt{DMAR}
+  ACPI table and disabling VT-d in firmware preferences, which does not break
+  VT-d support in other systems in case they need it.
+
+\item
   \texttt{ExternalDiskIcons}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
