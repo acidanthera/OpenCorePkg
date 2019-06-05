@@ -769,6 +769,122 @@ ScanIntelProcessor (
     ));
 }
 
+VOID
+ScanAmdProcessor (
+  IN OUT OC_CPU_INFO  *Cpu
+  )
+{
+  UINT32 CpuidEbx;
+  UINT32 CpuidEcx;
+  UINT64 CofVid;
+  UINT64 CoreFrequencyID;
+  UINT64 CoreDivisorID;
+  UINT64 Divisor;
+  //
+  // Faking an Intel Core i5 Processor.
+  // This value is purely cosmetic, but it makes sense to fake something
+  // that is somewhat representative of the kind of Processor that's actually
+  // in the system
+  //
+  Cpu->AppleProcessorType = AppleProcessorTypeCorei5Type5;
+  //
+  // get TSC Frequency calculated in OcTimerLib
+  //
+  Cpu->TSCFrequency = GetPerformanceCounterProperties (NULL, NULL);
+  Cpu->CPUFrequency = Cpu->TSCFrequency;
+  //
+  // Get core and thread count from CPUID
+  //
+  if (Cpu->MaxExtId >= 0x80000008) {
+    AsmCpuid (0x80000008, NULL, NULL, &CpuidEcx, NULL);
+    Cpu->ThreadCount = (UINT16) (BitFieldRead32 (CpuidEcx, 0, 7) + 1);
+  }
+  //
+  // CPUPM is not supported on AMD, meaning the current
+  // and minimum bus ratio are equal to the maximum bus ratio
+  //
+  Cpu->CurBusRatio = Cpu->MaxBusRatio;
+  Cpu->MinBusRatio = Cpu->MaxBusRatio;
+
+  if (Cpu->Family == 0x0F) {
+    switch (Cpu->ExtFamily) {
+      case 0x08:
+      {
+        CofVid           = AsmReadMsr64 (K10_PSTATE_STATUS);
+        CoreFrequencyID  = BitFieldRead64 (CofVid, 0, 7);
+        CoreDivisorID    = BitFieldRead64 (CofVid, 8, 13);
+        Cpu->MaxBusRatio = (UINT8) (CoreFrequencyID / CoreDivisorID * 2);
+        //
+        // Get core count from CPUID
+        //
+        if (Cpu->MaxExtId >= 0x8000001E) {
+          AsmCpuid (0x8000001E, NULL, &CpuidEbx, NULL, NULL);
+          Cpu->CoreCount =
+            (UINT16) DivU64x32 (
+              Cpu->ThreadCount,
+              (BitFieldRead32 (CpuidEbx, 8, 15) + 1)
+            );
+        }
+        break;
+      }
+      case 0x06:
+      case 0x07:
+      {
+        CofVid           = AsmReadMsr64 (K10_COFVID_STATUS);
+        CoreFrequencyID  = BitFieldRead64 (CofVid, 0, 5);
+        CoreDivisorID    = CofVid & BIT6;
+        Divisor          = 1U << CoreDivisorID;
+        Cpu->MaxBusRatio = (CoreFrequencyID + 16) / Divisor + 1;
+        //
+        // AMD 15h and 16h CPUs don't support hyperthreading,
+        // so the core count is equal to the thread count
+        Cpu->CoreCount = Cpu->ThreadCount;
+        break;
+      }
+      default:
+      {
+        break;
+      }
+    }
+    Cpu->FSBFrequency = DivU64x32 (Cpu->TSCFrequency, Cpu->MaxBusRatio);
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "%a %a %11lld %5dMHz\n",
+    "TSC",
+    "Frequency",
+    Cpu->TSCFrequency,
+    DivU64x32 (Cpu->TSCFrequency, 1000000)
+    ));
+
+  DEBUG ((
+    DEBUG_INFO,
+    "%a %a %11lld %5dMHz\n",
+    "CPU",
+    "Frequency",
+    Cpu->CPUFrequency,
+    DivU64x32 (Cpu->CPUFrequency, 1000000)
+    ));
+
+  DEBUG ((
+    DEBUG_INFO,
+    "%a %a %11lld %5dMHz\n",
+    "FSB",
+    "Frequency",
+    Cpu->FSBFrequency,
+    DivU64x32 (Cpu->FSBFrequency, 1000000)
+    ));
+
+  DEBUG ((
+    DEBUG_INFO,
+    "Pkg %u Cores %u Threads %u\n",
+    Cpu->PackageCount,
+    Cpu->CoreCount,
+    Cpu->ThreadCount
+    ));
+}
+
 /** Scan the processor and fill the cpu info structure with results
 
   @param[in] Cpu  A pointer to the cpu info structure to fill with results
@@ -879,6 +995,11 @@ OcCpuScanProcessor (
 
   if (Cpu->Vendor[0] == CPUID_VENDOR_INTEL) {
     ScanIntelProcessor (Cpu);
+  } else if (Cpu->Vendor[0] == CPUID_VENDOR_AMD) {
+    ScanAmdProcessor (Cpu);
+  } else {
+    DEBUG ((DEBUG_WARN, "Found unsupported CPU vendor: %0X", Cpu->Vendor[0]));
+    return;
   }
 }
 

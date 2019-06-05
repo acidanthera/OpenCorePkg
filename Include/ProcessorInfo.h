@@ -135,6 +135,7 @@ enum {
 
 #define K8_FIDVID_STATUS   0xC0010042
 #define K10_COFVID_STATUS  0xC0010071
+#define K10_PSTATE_STATUS  0xC0010064
 
 #define CPU_MODEL_DOTHAN         0x0D  ///< Dothan
 #define CPU_MODEL_YONAH          0x0E  ///< Sossaman, Yonah
