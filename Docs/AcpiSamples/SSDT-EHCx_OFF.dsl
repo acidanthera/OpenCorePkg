@@ -27,7 +27,7 @@ DefinitionBlock ("", "SSDT", 2, "APPLE ", "EHCx_OFF", 0x00001000)
         Method (_INI, 0, NotSerialized)  // _INI: Initialize
         {
             // In most cases this patch does benefit all operating systems,
-            // yet on select 7-series chipset it may cause Windows issues.
+            // yet on select pre-Windows 10 it may cause issues.
             // Remove If (_OSI ("Darwin")) in case you have none.
             If (_OSI ("Darwin")) {
                 EH1D = One  // Disable EHC1
