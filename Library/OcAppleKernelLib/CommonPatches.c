@@ -470,15 +470,13 @@ PatchForceInternalDiskIcons (
 STATIC
 UINT8
 mAppleIoMapperPatchFind[] = {
-  0x49, 0x4F, 0x50, 0x6C, 0x61, 0x74, 0x66, 0x6F, 0x72, 0x6D, 0x4D, 0x61, 0x70, 0x70, 0x65, 0x72,
-  0x50, 0x72, 0x65, 0x73, 0x65, 0x6E, 0x74 // IOPlatformPresent
+  0x44, 0x4D, 0x41, 0x52, 0x00 // DMAR\0
 };
 
 STATIC
 UINT8
 mAppleIoMapperPatchReplace[] = {
-  0x49, 0x4F, 0x50, 0x6C, 0x61, 0x74, 0x66, 0x6F, 0x72, 0x6D, 0x4D, 0x61, 0x70, 0x70, 0x65, 0x72,
-  0x4D, 0x69, 0x73, 0x73, 0x69, 0x6E, 0x67 // IOPlatformMissing
+  0x52, 0x41, 0x4D, 0x44, 0x00 // RAMD\0
 };
 
 STATIC
@@ -505,18 +503,18 @@ PatchAppleIoMapperSupport (
   Status = PatcherInitContextFromPrelinked (
     &Patcher,
     Context,
-    "com.apple.driver.AppleACPIPlatform"
+    "com.apple.iokit.IOPCIFamily"
     );
 
   if (!RETURN_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &mAppleIoMapperPatch);
     if (RETURN_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.AppleACPIPlatform - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.iokit.IOPCIFamily - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "Patch success com.apple.driver.AppleACPIPlatform\n"));
+      DEBUG ((DEBUG_INFO, "Patch success com.apple.iokit.IOPCIFamily\n"));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "Failed to find com.apple.driver.AppleACPIPlatform - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "Failed to find com.apple.iokit.IOPCIFamily - %r\n", Status));
   }
 
   return Status;
