@@ -79,8 +79,10 @@ OcAppleDiskImageInitializeContext (
   if (!Result || (Trailer.Signature != SwappedSig)) {
     DEBUG ((
       DEBUG_INFO,
-      "Dmg trailer error: %d - %X/%X.\n",
+      "Dmg trailer error: %d - %Lx/%Lx - %X/%X.\n",
       Result,
+      (UINT64) TrailerOffset,
+      (UINT64) FileSize,
       SwappedSig,
       Trailer.Signature
       ));
