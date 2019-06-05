@@ -89,7 +89,7 @@ RecalculateTSC (
     AsmCpuid (CPUID_SIGNATURE, NULL, &CpuVendor, NULL, NULL);
 
     if (CpuVendor == CPUID_VENDOR_AMD) {
-      TimerAddr = IoRead32 (
+      TimerAddr = MmioRead32 (
         R_AMD_ACPI_MMIO_BASE + R_AMD_ACPI_MMIO_PMIO_BASE + R_AMD_ACPI_PM_TMR_BLOCK
         );
     }
