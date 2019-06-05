@@ -132,6 +132,7 @@ InternalGetDiskImageBootFile (
 
   if (ChunklistBuffer == NULL) {
     if ((Policy & OC_LOAD_REQUIRE_APPLE_SIGN) != 0) {
+      DEBUG ((DEBUG_WARN, "Missing DMG signature, aborting.\n"));
       return NULL;
     }
   } else if ((Policy & (OC_LOAD_VERIFY_APPLE_SIGN | OC_LOAD_REQUIRE_TRUSTED_KEY)) != 0) {
@@ -143,6 +144,10 @@ InternalGetDiskImageBootFile (
                 ChunklistBufferSize
                 );
     if (!Result) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCB: Failed to initialise DMG Chunklist context.\n"
+        ));
       return NULL;
     }
 
@@ -166,6 +171,7 @@ InternalGetDiskImageBootFile (
       }
 
       if (!Result) {
+        DEBUG ((DEBUG_WARN, "DMG is not trusted, aborting.\n"));
         return NULL;
       }
     }
@@ -175,6 +181,7 @@ InternalGetDiskImageBootFile (
                &ChunklistContext
                );
     if (!Result) {
+      DEBUG ((DEBUG_WARN, "DMG has been altered.\n"));
       //
       // FIXME: Warn user instead of aborting when OC_LOAD_REQUIRE_TRUSTED_KEY
       //        is not set.
@@ -190,6 +197,7 @@ InternalGetDiskImageBootFile (
                              &DmgDevicePathSize
                              );
   if (Context->BlockIoHandle == NULL) {
+    DEBUG ((DEBUG_INFO, "OCB: Failed to install DMG Block I/O.\n"));
     return NULL;
   }
 
@@ -199,6 +207,8 @@ InternalGetDiskImageBootFile (
               DmgDevicePathSize
               );
   if (DevPath == NULL) {
+    DEBUG ((DEBUG_INFO, "OCB: Failed to get bootable file off DMG.\n"));
+
     OcAppleDiskImageUninstallBlockIo (
       Context->DmgContext,
       Context->BlockIoHandle
@@ -286,10 +296,23 @@ InternalFindDmgChunklist (
 
     Result = StrCmp (&FileInfo->FileName[DmgFileNameLen], L".chunklist");
     if (Result == 0) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCB: Found chunklist %s for DMG %s[%d]\n",
+        FileInfo->FileName,
+        DmgFileName,
+        DmgFileNameLen
+        ));
       return FileInfo;
     }
   }
 
+  DEBUG ((
+    DEBUG_INFO,
+    "OCB: Found no chunklist for DMG %s[%d]\n",
+    DmgFileName,
+    DmgFileNameLen
+    ));
   return NULL;
 }
 
@@ -317,6 +340,8 @@ InternalLoadDmg (
   UINT32                   ChunklistFileSize;
   VOID                     *ChunklistBuffer;
 
+  CHAR16 *DevPathText;
+
   ASSERT (Context != NULL);
   ASSERT (BootPolicy != NULL);
 
@@ -327,11 +352,23 @@ InternalLoadDmg (
              EFI_FILE_DIRECTORY
              );
   if (EFI_ERROR (Status)) {
+    DevPathText = ConvertDevicePathToText (Context->DevicePath, FALSE, FALSE);
+    DEBUG ((DEBUG_INFO, "OCB: Failed to open DMG directory %s\n", DevPathText));
+    if (DevPathText != NULL) {
+      FreePool (DevPathText);
+    }
+
     return NULL;
   }
 
   DmgFileInfo = InternalFindFirstDmgFileName (DmgDir, &DmgFileNameLen);
   if (DmgFileInfo == NULL) {
+    DevPathText = ConvertDevicePathToText (Context->DevicePath, FALSE, FALSE);
+    DEBUG ((DEBUG_INFO, "OCB: Unable to find any DMG at %s\n"));
+    if (DevPathText != NULL) {
+      FreePool (DevPathText);
+    }
+
     DmgDir->Close (DmgDir);
     return NULL;
   }
@@ -344,6 +381,13 @@ InternalLoadDmg (
                      0
                      );
   if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCB: Failed to open DMG file %s - %r.\n",
+      DmgFileInfo->FileName,
+      Status
+      ));
+
     FreePool (DmgFileInfo);
     DmgDir->Close (DmgDir);
     return NULL;
@@ -351,6 +395,12 @@ InternalLoadDmg (
 
   Status = GetFileSize (DmgFile, &DmgFileSize);
   if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCB: Failed to retrieve DMG file size - %r.\n",
+      Status
+      ));
+
     FreePool (DmgFileInfo);
     DmgDir->Close (DmgDir);
     DmgFile->Close (DmgFile);
@@ -359,6 +409,7 @@ InternalLoadDmg (
 
   Context->DmgContext = AllocatePool (sizeof (*Context->DmgContext));
   if (Context->DmgContext == NULL) {
+    DEBUG ((DEBUG_INFO, "OCB: Failed to allocate DMG context.\n"));
     return NULL;
   }
 
@@ -367,6 +418,8 @@ InternalLoadDmg (
   DmgFile->Close (DmgFile);
 
   if (!Result) {
+    DEBUG ((DEBUG_INFO, "OCB: Failed to initialise DMG from file.\n"));
+
     FreePool (DmgFileInfo);
     FreePool (Context->DmgContext);
     DmgDir->Close (DmgDir);
@@ -427,6 +480,8 @@ InternalLoadDmg (
   Context->DevicePath = DevPath;
 
   if (DevPath == NULL) {
+    DEBUG ((DEBUG_INFO, "OCB: Failed to retrieve boot file from DMG.\n"));
+
     OcAppleDiskImageFreeFile (Context->DmgContext);
     FreePool (Context->DmgContext);
   }
