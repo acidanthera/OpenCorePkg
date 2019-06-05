@@ -679,15 +679,6 @@ ScanIntelProcessor (
   Cpu->TSCFrequency = GetPerformanceCounterProperties (NULL, NULL);
 
   if (Cpu->CPUFrequency == 0) {
-    DEBUG ((
-      DEBUG_INFO,
-      "%a %a %11lld %5dMHz\n",
-      "TSC",
-      "Frequency",
-      Cpu->TSCFrequency,
-      DivU64x32 (Cpu->TSCFrequency, 1000000)
-      ));
-
     //
     // There may be some quirks with virtual CPUs (VMware is fine).
     // Formerly we checked Cpu->MinBusRatio > 0, but we have no MinBusRatio on Penryn.
@@ -700,25 +691,6 @@ ScanIntelProcessor (
       Cpu->FSBFrequency = 100000000;
     }
   }
-
-  DEBUG ((
-    DEBUG_INFO,
-    "%a %a %11lld %5dMHz\n",
-    "CPU",
-    "Frequency",
-    Cpu->CPUFrequency,
-    DivU64x32 (Cpu->CPUFrequency, 1000000)
-    ));
-
-  DEBUG ((
-    DEBUG_INFO,
-    "%a %a %11lld %5dMHz\n",
-    "FSB",
-    "Frequency",
-    Cpu->FSBFrequency,
-    DivU64x32 (Cpu->FSBFrequency, 1000000)
-    ));
-
   //
   // Calculate number of cores
   //
@@ -759,14 +731,6 @@ ScanIntelProcessor (
   //
   // TODO: handle package count...
   //
-
-  DEBUG ((
-    DEBUG_INFO,
-    "Pkg %u Cores %u Threads %u\n",
-    Cpu->PackageCount,
-    Cpu->CoreCount,
-    Cpu->ThreadCount
-    ));
 }
 
 VOID
@@ -848,41 +812,6 @@ ScanAmdProcessor (
     }
     Cpu->FSBFrequency = DivU64x32 (Cpu->TSCFrequency, Cpu->MaxBusRatio);
   }
-
-  DEBUG ((
-    DEBUG_INFO,
-    "%a %a %11lld %5dMHz\n",
-    "TSC",
-    "Frequency",
-    Cpu->TSCFrequency,
-    DivU64x32 (Cpu->TSCFrequency, 1000000)
-    ));
-
-  DEBUG ((
-    DEBUG_INFO,
-    "%a %a %11lld %5dMHz\n",
-    "CPU",
-    "Frequency",
-    Cpu->CPUFrequency,
-    DivU64x32 (Cpu->CPUFrequency, 1000000)
-    ));
-
-  DEBUG ((
-    DEBUG_INFO,
-    "%a %a %11lld %5dMHz\n",
-    "FSB",
-    "Frequency",
-    Cpu->FSBFrequency,
-    DivU64x32 (Cpu->FSBFrequency, 1000000)
-    ));
-
-  DEBUG ((
-    DEBUG_INFO,
-    "Pkg %u Cores %u Threads %u\n",
-    Cpu->PackageCount,
-    Cpu->CoreCount,
-    Cpu->ThreadCount
-    ));
 }
 
 /** Scan the processor and fill the cpu info structure with results
@@ -1001,6 +930,41 @@ OcCpuScanProcessor (
     DEBUG ((DEBUG_WARN, "Found unsupported CPU vendor: %0X", Cpu->Vendor[0]));
     return;
   }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "%a %a %11lld %5dMHz\n",
+    "TSC",
+    "Frequency",
+    Cpu->TSCFrequency,
+    DivU64x32 (Cpu->TSCFrequency, 1000000)
+    ));
+
+  DEBUG ((
+    DEBUG_INFO,
+    "%a %a %11lld %5dMHz\n",
+    "CPU",
+    "Frequency",
+    Cpu->CPUFrequency,
+    DivU64x32 (Cpu->CPUFrequency, 1000000)
+    ));
+
+  DEBUG ((
+    DEBUG_INFO,
+    "%a %a %11lld %5dMHz\n",
+    "FSB",
+    "Frequency",
+    Cpu->FSBFrequency,
+    DivU64x32 (Cpu->FSBFrequency, 1000000)
+    ));
+
+  DEBUG ((
+    DEBUG_INFO,
+    "Pkg %u Cores %u Threads %u\n",
+    Cpu->PackageCount,
+    Cpu->CoreCount,
+    Cpu->ThreadCount
+    ));
 }
 
 VOID
