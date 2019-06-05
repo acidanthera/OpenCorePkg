@@ -57,6 +57,12 @@ OcAppleDiskImageInitializeContext (
   ASSERT (FileSize > 0);
 
   if (FileSize <= sizeof (Trailer)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "Dmg file size error: %u/%u.\n",
+      FileSize,
+      (UINT32) sizeof (Trailer)
+      ));
     return FALSE;
   }
 
@@ -88,6 +94,14 @@ OcAppleDiskImageInitializeContext (
    || (XmlLength > MAX_UINT32)
    || (DataForkChecksum.Size > (sizeof (DataForkChecksum.Data) * 8))
    || (SectorCount == 0)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "Dmg context error: %u/%Lu/%Lu/%u/%u.\n",
+      HeaderSize,
+      XmlLength,
+      SectorCount,
+      DataForkChecksum.Size
+      ));
     return FALSE;
   }
 
@@ -102,6 +116,7 @@ OcAppleDiskImageInitializeContext (
              &OffsetTop
              );
   if (Result || (OffsetTop > TrailerOffset)) {
+    DEBUG ((DEBUG_INFO, "Dmg xml error: %Lu %Lu %Lu %Lu\n", XmlOffset, XmlLength, OffsetTop, TrailerOffset));
     return FALSE;
   }
 
@@ -111,16 +126,19 @@ OcAppleDiskImageInitializeContext (
              &OffsetTop
              );
   if (Result || (OffsetTop > TrailerOffset)) {
+    DEBUG ((DEBUG_INFO, "Dmg data error: %Lu %Lu %Lu %Lu\n", DataForkOffset, DataForkLength, OffsetTop, TrailerOffset));
     return FALSE;
   }
 
   PlistData = AllocatePool (XmlLength);
   if (PlistData == NULL) {
+    DEBUG ((DEBUG_INFO, "Dmg plist alloc error: %Lu\n", XmlLength));
     return FALSE;
   }
 
   Result = OcAppleRamDiskRead (ExtentTable, XmlOffset, XmlLength, PlistData);
   if (!Result) {
+    DEBUG ((DEBUG_INFO, "Dmg plist read error: %Lu %Lu\n", XmlOffset, XmlLength));
     FreePool (PlistData);
     return FALSE;
   }
@@ -137,6 +155,7 @@ OcAppleDiskImageInitializeContext (
   FreePool (PlistData);
 
   if (!Result) {
+    DEBUG ((DEBUG_INFO, "Dmg plist parse error: %Lu %Lu\n", XmlOffset, XmlLength));
     return FALSE;
   }
 
