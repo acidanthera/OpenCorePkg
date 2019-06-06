@@ -791,8 +791,8 @@ ScanAmdProcessor (
         CofVid           = AsmReadMsr64 (K10_COFVID_STATUS);
         CoreFrequencyID  = BitFieldRead64 (CofVid, 0, 5);
         CoreDivisorID    = CofVid & BIT6;
-        Divisor          = 1U << CoreDivisorID;
-        Cpu->MaxBusRatio = (CoreFrequencyID + 16) / Divisor + 1;
+        Divisor          = LShiftU64 (1, CoreDivisorID);
+        Cpu->MaxBusRatio = (UINT8)(((CoreFrequencyID + 16) / Divisor) + 1);
         //
         // AMD 15h and 16h CPUs don't support hyperthreading,
         // so the core count is equal to the thread count
