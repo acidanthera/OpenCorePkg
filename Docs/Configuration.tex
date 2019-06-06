@@ -1277,6 +1277,14 @@ behaviour that does not go to any other sections
   \textbf{Description}: Apply security configuration described in
   \hyperref[miscsecurityprops]{Security Properties} section below.
 
+\item
+  \texttt{Tools}\\
+  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Description}: Add new entries to boot picker.
+  
+  Designed to be filled with \texttt{plist\ dict} values, describing each block entry.
+  See \hyperref[misctoolprops]{Tools Properties} section below.
+
 \end{enumerate}
 
 \subsection{Boot Properties}\label{miscbootprops}
@@ -1677,6 +1685,33 @@ rm vault.pub
   \end{itemize}
 
 \end{enumerate}
+
+\subsection{Tools Properties}\label{misctoolprops}
+
+\begin{enumerate}
+\item
+  \texttt{Comment}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Default value}: Empty string\\
+  \textbf{Description}: Arbitrary ASCII string used to provide human readable
+  reference for the entry. It is implementation defined whether this value is
+  used.
+
+\item
+  \texttt{Name}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Default value}: Empty string\\
+  \textbf{Description}: Human readable tool name displayed in boot picker.
+
+\item
+  \texttt{Path}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Default value}: Empty string\\
+  \textbf{Description}: File path to select UEFI tool relative to \texttt{OC/Tools}
+  directory.
+
+\end{enumerate}
+
 
 \section{NVRAM}\label{nvram}
 

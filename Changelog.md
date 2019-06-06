@@ -5,6 +5,9 @@ OpenCore Changelog
 - Added complete modern platform database (2012+)
 - Added `DisableIoMapper` kernel quirk
 - Fixed ACPI modification failures with nested multiboot
+- Dropped `IgnoreForWindows` quirk legacy
+- Added basic AMD Zen CPU support
+- Added `Misc` -> `Tools` section to add third-party tools
 
 #### v0.0.2
 - Documentation improvements (see Differences.pdf)

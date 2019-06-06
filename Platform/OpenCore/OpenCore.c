@@ -136,18 +136,13 @@ OcMain (
 
   DEBUG ((DEBUG_INFO, "OC: OpenCore is loaded, showing boot menu...\n"));
 
-  Status = OcRunSimpleBootPicker (
-    mOpenCoreConfiguration.Misc.Security.ScanPolicy,
-    OC_LOAD_DEFAULT_POLICY,
-    mOpenCoreConfiguration.Misc.Boot.Timeout,
+  OcMiscBoot (
+    &mOpenCoreStorage,
+    &mOpenCoreConfiguration,
     OcStartImage,
-    mOpenCoreConfiguration.Misc.Boot.ShowPicker,
     mOpenCoreConfiguration.Uefi.Quirks.RequestBootVarRouting,
     LoadHandle
     );
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to show boot menu!\n"));
-  }
 }
 
 STATIC

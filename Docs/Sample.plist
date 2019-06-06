@@ -406,6 +406,25 @@
 			<key>ScanPolicy</key>
 			<integer>983299</integer>
 		</dict>
+		<key>Tools</key>
+		<array>
+			<dict>
+				<key>Name</key>
+				<string>UEFI Shell</string>
+				<key>Comment</key>
+				<string>Not signed for security reasons</string>
+				<key>Path</key>
+				<string>Shell.efi</string>
+			</dict>
+			<dict>
+				<key>Name</key>
+				<string>memcheck</string>
+				<key>Comment</key>
+				<string>Memory testing utility</string>
+				<key>Path</key>
+				<string>memcheck/memcheck.efi</string>
+			</dict>
+		</array>
 	</dict>
 	<key>NVRAM</key>
 	<dict>

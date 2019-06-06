@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May 24 02:34:39 2019
-%DIF ADD ../Configuration.tex        Tue Jun  4 17:56:08 2019
+%DIF ADD ../Configuration.tex        Thu Jun  6 14:25:10 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1369,7 +1369,17 @@ behaviour that does not go to any other sections
   \textbf{Description}: Apply security configuration described in
   \hyperref[miscsecurityprops]{Security Properties} section below.
 
-\end{enumerate}
+\DIFaddbegin \item
+  \texttt{\DIFadd{Tools}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ array}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Add new entries to boot picker.
+  }
+
+  \DIFadd{Designed to be filled with }\texttt{\DIFadd{plist\ dict}} \DIFadd{values, describing each block entry.
+  See }\hyperref[misctoolprops]{Tools Properties} \DIFadd{section below.
+}
+
+\DIFaddend \end{enumerate}
 
 \subsection{Boot Properties}\label{miscbootprops}
 
@@ -1422,11 +1432,11 @@ behaviour that does not go to any other sections
   \texttt{ConsoleBehaviourUi} set to \texttt{ForceText} to avoid visual glitches.
   \item On APTIO V (Broadwell and newer) \texttt{ConsoleBehaviourOs}
   set to \texttt{ForceGraphics} and \texttt{ConsoleBehaviourUi} set to
-  \texttt{\DIFdelbegin \DIFdel{Text}\DIFdelend \DIFaddbegin \DIFadd{ForceText}\DIFaddend } usually works \DIFaddbegin \DIFadd{best.
-  }\item \DIFadd{On Apple firmwares }\texttt{\DIFadd{ConsoleBehaviourOs}}
+  \texttt{\DIFdelbegin \DIFdel{Text}\DIFdelend \DIFaddbegin \DIFadd{ForceText}\DIFaddend } usually works best.
+  \DIFaddbegin \item \DIFadd{On Apple firmwares }\texttt{\DIFadd{ConsoleBehaviourOs}}
   \DIFadd{set to }\texttt{\DIFadd{Graphics}} \DIFadd{and }\texttt{\DIFadd{ConsoleBehaviourUi}} \DIFadd{set to
-  }\texttt{\DIFadd{Text}} \DIFadd{is supposed to work }\DIFaddend best.
-  \end{itemize}
+  }\texttt{\DIFadd{Text}} \DIFadd{is supposed to work best.
+  }\DIFaddend \end{itemize}
 
   \emph{Note}: \texttt{IgnoreTextInGraphics} may need to be enabled for select
   firmware implementations.
@@ -1767,8 +1777,39 @@ rm vault.pub
   \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SCSI}
   \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_NVME}
   \end{itemize}
+\DIFaddbegin 
 
 \end{enumerate}
+
+\subsection{\DIFadd{Tools Properties}}\label{misctoolprops}
+
+\begin{enumerate}
+\item
+  \texttt{\DIFadd{Comment}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Arbitrary ASCII string used to provide human readable
+  reference for the entry. It is implementation defined whether this value is
+  used.
+}
+
+\item
+  \texttt{\DIFadd{Name}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Human readable tool name displayed in boot picker.
+}
+
+\item
+  \texttt{\DIFadd{Path}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: File path to select UEFI tool relative to }\texttt{\DIFadd{OC/Tools}}
+  \DIFadd{directory.
+}\DIFaddend 
+
+\end{enumerate}
+
 
 \section{NVRAM}\label{nvram}
 

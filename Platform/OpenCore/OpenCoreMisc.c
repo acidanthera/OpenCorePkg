@@ -266,6 +266,51 @@ OcMiscLateInit (
 }
 
 VOID
+OcMiscBoot (
+  IN  OC_STORAGE_CONTEXT        *Storage,
+  IN  OC_GLOBAL_CONFIG          *Config,
+  IN  OC_IMAGE_START            StartImage,
+  IN  BOOLEAN                   CustomBootGuid,
+  IN  EFI_HANDLE                LoadHandle OPTIONAL
+  )
+{
+  EFI_STATUS         Status;
+  OC_PICKER_CONTEXT  *Context;
+  UINTN              ContextSize;
+
+  if (!OcOverflowMulAddUN (
+    sizeof (OC_PICKER_ENTRY),
+    Config->Misc.Tools.Count,
+    sizeof (OC_PICKER_CONTEXT),
+    &ContextSize))
+  {
+    Context = AllocateZeroPool (ContextSize);
+  } else {
+    Context = NULL;
+  }
+
+  if (Context == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to allocate boot picker context!\n"));
+    return;
+  }
+
+  Context->ScanPolicy     = Config->Misc.Security.ScanPolicy;
+  Context->LoadPolicy     = OC_LOAD_DEFAULT_POLICY;
+  Context->TimeoutSeconds = Config->Misc.Boot.Timeout;
+  Context->StartImage     = StartImage;
+  Context->ShowPicker     = Config->Misc.Boot.ShowPicker;
+  Context->CustomBootGuid = CustomBootGuid;
+  Context->ExcludeHandle  = LoadHandle;
+
+  Status = OcRunSimpleBootPicker (
+    Context
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to show boot menu!\n"));
+  }
+}
+
+VOID
 OcMiscUefiQuirksLoaded (
   IN OC_GLOBAL_CONFIG   *Config
   )
