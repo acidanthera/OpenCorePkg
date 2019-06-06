@@ -229,10 +229,21 @@
   _(UINT64                      , HaltLevel                   ,     , 0x80000000             , ())
   OC_DECLARE (OC_MISC_SECURITY)
 
+#define OC_MISC_TOOLS_ENTRY_FIELDS(_, __) \
+  _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Name             ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Path             ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
+  OC_DECLARE (OC_MISC_TOOLS_ENTRY)
+
+#define OC_MISC_TOOLS_ARRAY_FIELDS(_, __) \
+  OC_ARRAY (OC_MISC_TOOLS_ENTRY, _, __)
+  OC_DECLARE (OC_MISC_TOOLS_ARRAY)
+
 #define OC_MISC_CONFIG_FIELDS(_, __) \
   _(OC_MISC_BOOT               , Boot            ,     , OC_CONSTR2 (OC_MISC_BOOT, _, __)         , OC_DESTR (OC_MISC_BOOT)) \
   _(OC_MISC_DEBUG              , Debug           ,     , OC_CONSTR2 (OC_MISC_DEBUG, _, __)        , OC_DESTR (OC_MISC_DEBUG)) \
-  _(OC_MISC_SECURITY           , Security        ,     , OC_CONSTR2 (OC_MISC_SECURITY, _, __)     , OC_DESTR (OC_MISC_SECURITY))
+  _(OC_MISC_SECURITY           , Security        ,     , OC_CONSTR2 (OC_MISC_SECURITY, _, __)     , OC_DESTR (OC_MISC_SECURITY)) \
+  _(OC_MISC_TOOLS_ARRAY        , Tools           ,     , OC_CONSTR2 (OC_MISC_TOOLS_ARRAY, _, __)  , OC_DESTR (OC_MISC_TOOLS_ARRAY))
   OC_DECLARE (OC_MISC_CONFIG)
 
 /**
