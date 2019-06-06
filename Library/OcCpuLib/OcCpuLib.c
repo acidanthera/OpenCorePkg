@@ -763,12 +763,6 @@ ScanAmdProcessor (
     AsmCpuid (0x80000008, NULL, NULL, &CpuidEcx, NULL);
     Cpu->ThreadCount = (UINT16) (BitFieldRead32 (CpuidEcx, 0, 7) + 1);
   }
-  //
-  // CPUPM is not supported on AMD, meaning the current
-  // and minimum bus ratio are equal to the maximum bus ratio
-  //
-  Cpu->CurBusRatio = Cpu->MaxBusRatio;
-  Cpu->MinBusRatio = Cpu->MaxBusRatio;
 
   if (Cpu->Family == 0x0F) {
     switch (Cpu->ExtFamily) {
@@ -807,9 +801,16 @@ ScanAmdProcessor (
       }
       default:
       {
-        break;
+        return;
       }
     }
+    //
+    // CPUPM is not supported on AMD, meaning the current
+    // and minimum bus ratio are equal to the maximum bus ratio
+    //
+    Cpu->CurBusRatio = Cpu->MaxBusRatio;
+    Cpu->MinBusRatio = Cpu->MaxBusRatio;
+
     Cpu->FSBFrequency = DivU64x32 (Cpu->TSCFrequency, Cpu->MaxBusRatio);
   }
 }
