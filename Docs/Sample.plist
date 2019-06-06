@@ -49,20 +49,6 @@
 				<key>All</key>
 				<false/>
 				<key>Comment</key>
-				<string>Drop DMAR</string>
-				<key>Enabled</key>
-				<false/>
-				<key>OemTableId</key>
-				<data></data>
-				<key>TableLength</key>
-				<integer>0</integer>
-				<key>TableSignature</key>
-				<data>RE1BUg==</data>
-			</dict>
-			<dict>
-				<key>All</key>
-				<false/>
-				<key>Comment</key>
 				<string>Drop CpuPm</string>
 				<key>Enabled</key>
 				<false/>
