@@ -554,13 +554,7 @@ OcLoadBootEntry (
 
 EFI_STATUS
 OcRunSimpleBootPicker (
-  IN  UINT32           ScanPolicy,
-  IN  UINT32           BootPolicy,
-  IN  UINT32           TimeoutSeconds,
-  IN  OC_IMAGE_START   StartImage,
-  IN  BOOLEAN          ShowPicker,
-  IN  BOOLEAN          CustomBootGuid,
-  IN  EFI_HANDLE       LoadHandle  OPTIONAL
+  IN OC_PICKER_CONTEXT  *Context
   )
 {
   EFI_STATUS                  Status;
@@ -584,11 +578,11 @@ OcRunSimpleBootPicker (
 
     Status = OcScanForBootEntries (
       AppleBootPolicy,
-      ScanPolicy,
+      Context->ScanPolicy,
       &Entries,
       &EntryCount,
       NULL,
-      LoadHandle,
+      Context->ExcludeHandle,
       TRUE
       );
 
@@ -605,17 +599,17 @@ OcRunSimpleBootPicker (
     DEBUG ((DEBUG_INFO, "Performing OcShowSimpleBootMenu...\n"));
 
     DefaultEntry = 0;
-    Entry = InternalGetDefaultBootEntry (Entries, EntryCount, CustomBootGuid, LoadHandle);
+    Entry = InternalGetDefaultBootEntry (Entries, EntryCount, Context->CustomBootGuid, Context->ExcludeHandle);
     if (Entry != NULL) {
       DefaultEntry = (UINT32)(Entry - Entries);
     }
 
-    if (ShowPicker) {
+    if (Context->ShowPicker) {
       Status = OcShowSimpleBootMenu (
         Entries,
         EntryCount,
         DefaultEntry,
-        TimeoutSeconds,
+        Context->TimeoutSeconds,
         &Chosen
         );
     } else {
@@ -629,7 +623,7 @@ OcRunSimpleBootPicker (
       return Status;
     }
 
-    TimeoutSeconds = 0;
+    Context->TimeoutSeconds = 0;
 
     if (!EFI_ERROR (Status)) {
       DEBUG ((
@@ -646,13 +640,13 @@ OcRunSimpleBootPicker (
       Status = InternalLoadBootEntry (
         AppleBootPolicy,
         Chosen,
-        BootPolicy,
+        Context->LoadPolicy,
         gImageHandle,
         &BooterHandle,
         &DmgLoadContext
         );
       if (!EFI_ERROR (Status)) {
-        Status = StartImage (Chosen, BooterHandle, NULL, NULL);
+        Status = Context->StartImage (Chosen, BooterHandle, NULL, NULL);
         if (EFI_ERROR (Status)) {
           DEBUG ((DEBUG_ERROR, "StartImage failed - %r\n", Status));
           //
