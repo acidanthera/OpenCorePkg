@@ -69,6 +69,42 @@ OcStoreLoadPath (
     ));
 }
 
+STATIC
+EFI_STATUS
+EFIAPI
+OcToolLoadEntry (
+  IN  VOID                        *Context,
+  IN  OC_BOOT_ENTRY               *ChosenEntry,
+  OUT VOID                        **Data,
+  OUT UINT32                      *DataSize
+  )
+{
+  CHAR16    ToolPath[64];
+
+  UnicodeSPrint (
+    ToolPath,
+    sizeof (ToolPath),
+    OPEN_CORE_TOOL_PATH "%s",
+    ChosenEntry->PathName
+    );
+
+  *Data = OcStorageReadFileUnicode (
+    (OC_STORAGE_CONTEXT *) Context,
+    ToolPath,
+    DataSize
+    );
+  if (*Data == NULL) {
+    DEBUG ((
+      DEBUG_ERROR,
+      "OC: Tool %s cannot be found!\n",
+      ToolPath
+      ));
+    return EFI_NOT_FOUND;
+  }
+
+  return EFI_SUCCESS;
+}
+
 EFI_STATUS
 OcMiscEarlyInit (
   IN  OC_STORAGE_CONTEXT *Storage,
@@ -277,6 +313,7 @@ OcMiscBoot (
   EFI_STATUS         Status;
   OC_PICKER_CONTEXT  *Context;
   UINTN              ContextSize;
+  UINT32             Index;
 
   if (!OcOverflowMulAddUN (
     sizeof (OC_PICKER_ENTRY),
@@ -294,13 +331,21 @@ OcMiscBoot (
     return;
   }
 
-  Context->ScanPolicy     = Config->Misc.Security.ScanPolicy;
-  Context->LoadPolicy     = OC_LOAD_DEFAULT_POLICY;
-  Context->TimeoutSeconds = Config->Misc.Boot.Timeout;
-  Context->StartImage     = StartImage;
-  Context->ShowPicker     = Config->Misc.Boot.ShowPicker;
-  Context->CustomBootGuid = CustomBootGuid;
-  Context->ExcludeHandle  = LoadHandle;
+  Context->ScanPolicy         = Config->Misc.Security.ScanPolicy;
+  Context->LoadPolicy         = OC_LOAD_DEFAULT_POLICY;
+  Context->TimeoutSeconds     = Config->Misc.Boot.Timeout;
+  Context->StartImage         = StartImage;
+  Context->ShowPicker         = Config->Misc.Boot.ShowPicker;
+  Context->CustomBootGuid     = CustomBootGuid;
+  Context->ExcludeHandle      = LoadHandle;
+  Context->CustomEntryCount   = Config->Misc.Tools.Count;
+  Context->CustomEntryContext = Storage;
+  Context->CustomRead         = OcToolLoadEntry;
+
+  for (Index = 0; Index < Context->CustomEntryCount; ++Index) {
+    Context->CustomEntries[Index].Name = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Name);
+    Context->CustomEntries[Index].Path = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Path);
+  }
 
   Status = OcRunSimpleBootPicker (
     Context

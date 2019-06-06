@@ -68,6 +68,8 @@
 
 #define OPEN_CORE_KEXT_PATH        L"Kexts\\"
 
+#define OPEN_CORE_TOOL_PATH        L"Tools\\"
+
 #define OPEN_CORE_NVRAM_ATTR       (EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS)
 
 #define OPEN_CORE_INT_NVRAM_ATTR   EFI_VARIABLE_BOOTSERVICE_ACCESS
@@ -197,6 +199,7 @@ OcMiscLateInit (
 /**
   Load late miscellaneous support like boot screen config.
 
+  @param[in]  Storage         OpenCore storage.
   @param[in]  Config          OpenCore configuration.
   @param[in]  StartImage      Image starting routine used.
   @param[in]  LoadHandle      OpenCore loading handle.
