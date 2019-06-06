@@ -22,6 +22,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
+#include <Library/OcGuardLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcFileLib.h>
@@ -35,8 +36,8 @@ STATIC
 EFI_STATUS
 InternalLoadBootEntry (
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
+  IN  OC_PICKER_CONTEXT           *Context,
   IN  OC_BOOT_ENTRY               *BootEntry,
-  IN  UINT32                      Policy,
   IN  EFI_HANDLE                  ParentHandle,
   OUT EFI_HANDLE                  *EntryHandle,
   OUT INTERNAL_DMG_LOAD_CONTEXT   *DmgLoadContext
@@ -47,6 +48,8 @@ InternalLoadBootEntry (
   EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
   CHAR16                     *UnicodeDevicePath;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  VOID                       *EntryData;
+  UINT32                     EntryDataSize;
 
   //
   // TODO: support Apple loaded image, policy, and dmg boot.
@@ -55,7 +58,7 @@ InternalLoadBootEntry (
   ZeroMem (DmgLoadContext, sizeof (*DmgLoadContext));
 
   if (BootEntry->IsFolder) {
-    if ((Policy & OC_LOAD_ALLOW_DMG_BOOT) == 0) {
+    if ((Context->LoadPolicy & OC_LOAD_ALLOW_DMG_BOOT) == 0) {
       return EFI_SECURITY_VIOLATION;
     }
 
@@ -63,7 +66,7 @@ InternalLoadBootEntry (
     DevicePath = InternalLoadDmg (
                    DmgLoadContext,
                    BootPolicy,
-                   Policy
+                   Context->LoadPolicy
                    );
     if (DevicePath == NULL) {
       return EFI_UNSUPPORTED;
@@ -82,11 +85,27 @@ InternalLoadBootEntry (
     }
     DEBUG_CODE_END ();
 
-  } else {
-    DevicePath = BootEntry->DevicePath;
-  }
+    Status = gBS->LoadImage (FALSE, ParentHandle, DevicePath, NULL, 0, EntryHandle);
+  } else if (BootEntry->IsCustom) {
+    ASSERT (Context->CustomRead != NULL);
 
-  Status = gBS->LoadImage (FALSE, ParentHandle, DevicePath, NULL, 0, EntryHandle);
+    EntryData    = NULL;
+    EntryDataSize = 0;
+
+    Status = Context->CustomRead (
+      Context->CustomEntryContext,
+      BootEntry,
+      &EntryData,
+      &EntryDataSize
+      );
+
+    if (!EFI_ERROR (Status)) {
+      Status = gBS->LoadImage (FALSE, ParentHandle, NULL, EntryData, EntryDataSize, EntryHandle);
+      FreePool (EntryData);
+    }
+  } else {
+    Status = gBS->LoadImage (FALSE, ParentHandle, BootEntry->DevicePath, NULL, 0, EntryHandle);
+  }
 
   if (!EFI_ERROR (Status)) {
     OptionalStatus = gBS->HandleProtocol (
@@ -118,6 +137,13 @@ OcDescribeBootEntry (
   EFI_HANDLE                       ApfsVolumeHandle;
   UINT32                           BcdSize;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+
+  //
+  // Custom entries need no special description.
+  //
+  if (BootEntry->IsCustom) {
+    return EFI_SUCCESS;
+  }
 
   Status = BootPolicy->GetBootInfo (
     BootEntry->DevicePath,
@@ -178,7 +204,7 @@ OcDescribeBootEntry (
 
   if (BootEntry->Name == NULL) {
     BootEntry->Name = GetVolumeLabel (FileSystem);
-    if (BootEntry->Name != NULL 
+    if (BootEntry->Name != NULL
       && (!StrCmp (BootEntry->Name, L"Recovery HD")
        || !StrCmp (BootEntry->Name, L"Recovery"))) {
       BootEntry->IsRecovery = TRUE;
@@ -326,11 +352,10 @@ OcFillBootEntry (
 EFI_STATUS
 OcScanForBootEntries (
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN  UINT32                      Policy,
+  IN  OC_PICKER_CONTEXT           *Context,
   OUT OC_BOOT_ENTRY               **BootEntries,
   OUT UINTN                       *Count,
   OUT UINTN                       *AllocCount OPTIONAL,
-  IN  EFI_HANDLE                  LoadHandle  OPTIONAL,
   IN  BOOLEAN                     Describe
   )
 {
@@ -339,6 +364,7 @@ OcScanForBootEntries (
   EFI_HANDLE                       *Handles;
   UINTN                            Index;
   OC_BOOT_ENTRY                    *Entries;
+  UINTN                            EntriesSize;
   UINTN                            EntryIndex;
   CHAR16                           *DevicePath;
   CHAR16                           *VolumeLabel;
@@ -364,7 +390,12 @@ OcScanForBootEntries (
     return EFI_NOT_FOUND;
   }
 
-  Entries = AllocateZeroPool (NoHandles * 2 * sizeof (OC_BOOT_ENTRY));
+  if (!OcOverflowAddMulUN (NoHandles * 2, Context->CustomEntryCount, sizeof (OC_BOOT_ENTRY), &EntriesSize)) {
+    Entries = AllocateZeroPool (EntriesSize);
+  } else {
+    Entries = NULL;
+  }
+
   if (Entries == NULL) {
     FreePool (Handles);
     return EFI_OUT_OF_RESOURCES;
@@ -385,12 +416,12 @@ OcScanForBootEntries (
 
     EntryCount = OcFillBootEntry (
       BootPolicy,
-      Policy,
+      Context->ScanPolicy,
       Handles[Index],
       SimpleFs,
       &Entries[EntryIndex],
       &Entries[EntryIndex+1],
-      LoadHandle == Handles[Index]
+      Context->ExcludeHandle == Handles[Index]
       );
 
     DEBUG_CODE_BEGIN ();
@@ -453,11 +484,21 @@ OcScanForBootEntries (
     }
   }
 
+  for (Index = 0; Index < Context->CustomEntryCount; ++Index, ++EntryIndex) {
+    Entries[EntryIndex].Name     = AsciiStrCopyToUnicode (Context->CustomEntries[Index].Name, 0);
+    Entries[EntryIndex].PathName = AsciiStrCopyToUnicode (Context->CustomEntries[Index].Path, 0);
+    if (Entries[EntryIndex].Name == NULL || Entries[EntryIndex].PathName == NULL) {
+      OcFreeBootEntries (Entries, EntryIndex + 1);
+      return EFI_OUT_OF_RESOURCES;
+    }
+    Entries[EntryIndex].IsCustom = TRUE;
+  }
+
   *BootEntries = Entries;
   *Count       = EntryIndex;
 
   if (AllocCount != NULL) {
-    *AllocCount = NoHandles * 2;
+    *AllocCount = EntriesSize / sizeof (OC_BOOT_ENTRY);
   }
 
   return EFI_SUCCESS;
@@ -531,25 +572,37 @@ OcShowSimpleBootMenu (
 EFI_STATUS
 OcLoadBootEntry (
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
+  IN  OC_PICKER_CONTEXT           *Context,
   IN  OC_BOOT_ENTRY               *BootEntry,
-  IN  UINT32                      Policy,
-  IN  EFI_HANDLE                  ParentHandle,
-  OUT EFI_HANDLE                  *EntryHandle
+  IN  EFI_HANDLE                  ParentHandle
   )
 {
-  //
-  // FIXME: Think of something when starting dmg fails.
-  //
+  EFI_STATUS                 Status;
+  EFI_HANDLE                 EntryHandle;
   INTERNAL_DMG_LOAD_CONTEXT  DmgLoadContext;
 
-  return InternalLoadBootEntry (
+  Status = InternalLoadBootEntry (
     BootPolicy,
+    Context,
     BootEntry,
-    Policy,
     ParentHandle,
-    EntryHandle,
+    &EntryHandle,
     &DmgLoadContext
     );
+  if (!EFI_ERROR (Status)) {
+    Status = Context->StartImage (BootEntry, ParentHandle, NULL, NULL);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OCB: StartImage failed - %r\n", Status));
+      //
+      // Unload dmg if any.
+      //
+      InternalUnloadDmg (&DmgLoadContext);
+    }
+  } else {
+    DEBUG ((DEBUG_ERROR, "OCB: LoadImage failed - %r\n", Status));
+  }
+
+  return Status;
 }
 
 EFI_STATUS
@@ -563,9 +616,7 @@ OcRunSimpleBootPicker (
   OC_BOOT_ENTRY               *Entries;
   OC_BOOT_ENTRY               *Entry;
   UINTN                       EntryCount;
-  EFI_HANDLE                  BooterHandle;
   UINT32                      DefaultEntry;
-  INTERNAL_DMG_LOAD_CONTEXT   DmgLoadContext;
 
   AppleBootPolicy = OcAppleBootPolicyInstallProtocol (FALSE);
   if (AppleBootPolicy == NULL) {
@@ -578,11 +629,10 @@ OcRunSimpleBootPicker (
 
     Status = OcScanForBootEntries (
       AppleBootPolicy,
-      Context->ScanPolicy,
+      Context,
       &Entries,
       &EntryCount,
       NULL,
-      Context->ExcludeHandle,
       TRUE
       );
 
@@ -637,26 +687,12 @@ OcRunSimpleBootPicker (
     }
 
     if (!EFI_ERROR (Status)) {
-      Status = InternalLoadBootEntry (
+      Status = OcLoadBootEntry (
         AppleBootPolicy,
+        Context,
         Chosen,
-        Context->LoadPolicy,
-        gImageHandle,
-        &BooterHandle,
-        &DmgLoadContext
+        gImageHandle
         );
-      if (!EFI_ERROR (Status)) {
-        Status = Context->StartImage (Chosen, BooterHandle, NULL, NULL);
-        if (EFI_ERROR (Status)) {
-          DEBUG ((DEBUG_ERROR, "StartImage failed - %r\n", Status));
-          //
-          // Unload dmg if any.
-          //
-          InternalUnloadDmg (&DmgLoadContext);
-        }
-      } else {
-        DEBUG ((DEBUG_ERROR, "LoadImage failed - %r\n", Status));
-      }
 
       gBS->Stall (5000000);
     }

@@ -53,8 +53,8 @@ TestBless (
   OC_BOOT_ENTRY                               *Entries;
   OC_BOOT_ENTRY                               *Chosen;
   UINTN                                       EntryCount;
-  EFI_HANDLE                                  BooterHandle;
   UINT32                                      TimeoutSeconds;
+  OC_PICKER_CONTEXT                           PickerContext;
 
   Print (L"TestBless\n");
 
@@ -69,13 +69,15 @@ TestBless (
 
   TimeoutSeconds = 5;
 
+  ZeroMem (&PickerContext, sizeof (PickerContext));
+
   while (TRUE) {
+
     Status = OcScanForBootEntries (
       AppleBootPolicy,
-      0,
+      &PickerContext,
       &Entries,
       &EntryCount,
-      NULL,
       NULL,
       TRUE
       );
@@ -97,22 +99,6 @@ TestBless (
 
     if (!EFI_ERROR (Status)) {
       Print (L"Should boot from %s\n", Chosen->Name);
-    }
-
-    //
-    // TODO: This should properly handle folder boot entries.
-    //
-    if (!EFI_ERROR (Status)) {
-      Status = OcLoadBootEntry (AppleBootPolicy, Chosen, OC_LOAD_DEFAULT_POLICY, ImageHandle, &BooterHandle);
-      if (!EFI_ERROR (Status)) {
-        Status = gBS->StartImage (BooterHandle, NULL, NULL);
-        if (EFI_ERROR (Status)) {
-          Print (L"StartImage failed - %r\n", Status);
-        }
-      } else {
-        Print (L"LoadImage failed - %r\n", Status);
-      }
-
       gBS->Stall (5000000);
     }
 

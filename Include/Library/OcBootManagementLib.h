@@ -24,6 +24,7 @@
 typedef struct OC_BOOT_ENTRY_ {
   //
   // Device path to booter or its directory.
+  // Can be NULL, for example, for custom entries.
   //
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
   //
@@ -32,8 +33,13 @@ typedef struct OC_BOOT_ENTRY_ {
   CHAR16                    *Name;
   //
   // Obtained boot path directory.
+  // For custom entries this contains tool path.
   //
   CHAR16                    *PathName;
+  //
+  // Set when this entry is a custom externally loadable tool entry.
+  //
+  BOOLEAN                   IsCustom;
   //
   // Should try booting from first dmg found in DevicePath.
   //
@@ -44,12 +50,16 @@ typedef struct OC_BOOT_ENTRY_ {
   BOOLEAN                   IsRecovery;
   //
   // Heuristical value signalising about Windows os (otherwise macOS).
+  // WARNING: This is only for debug purposes.
   //
   BOOLEAN                   IsWindows;
   //
-  // Load option data (usually "boot args")
+  // Load option data (usually "boot args") size.
   //
   UINT32                    LoadOptionsSize;
+  //
+  // Load option data (usually "boot args").
+  //
   VOID                      *LoadOptions;
 } OC_BOOT_ENTRY;
 
@@ -216,10 +226,30 @@ EFI_STATUS
   );
 
 /**
+  Exposed custom entry load interface.
+  Must return allocated file buffer from pool.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *OC_CUSTOM_READ) (
+  IN  VOID                        *Context,
+  IN  OC_BOOT_ENTRY               *ChosenEntry,
+  OUT VOID                        **Data,
+  OUT UINT32                      *DataSize
+  );
+
+/**
   Custom picker entry
 **/
 typedef struct {
-  VOID *Smth;
+  //
+  // Entry name.
+  //
+  CONST CHAR8  *Name;
+  //
+  // Entry path.
+  //
+  CONST CHAR8  *Path;
 } OC_PICKER_ENTRY;
 
 /**
@@ -246,6 +276,14 @@ typedef struct {
   // Use custom (gOcVendorVariableGuid) for Boot#### variables.
   //
   BOOLEAN          CustomBootGuid;
+  //
+  // Custom entry reading routine, optional for no custom entries.
+  //
+  OC_CUSTOM_READ   CustomRead;
+  //
+  // Context to pass to CustomRead, optional.
+  //
+  VOID             *CustomEntryContext;
   //
   // Image starting routine used, required.
   //
@@ -330,7 +368,7 @@ OcFillBootEntry (
   Scan system for boot entries.
 
   @param[in]  BootPolicy     Apple Boot Policy Protocol.
-  @param[in]  Policy         Scan policy.
+  @param[in]  Context        Picker context.
   @param[out] BootEntries    List of boot entries (allocated from pool).
   @param[out] Count          Number of boot entries.
   @param[out] AllocCount     Number of allocated boot entries.
@@ -342,11 +380,10 @@ OcFillBootEntry (
 EFI_STATUS
 OcScanForBootEntries (
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN  UINT32                      Policy,
+  IN  OC_PICKER_CONTEXT           *Context,
   OUT OC_BOOT_ENTRY               **BootEntries,
   OUT UINTN                       *Count,
   OUT UINTN                       *AllocCount OPTIONAL,
-  IN  EFI_HANDLE                  LoadHandle  OPTIONAL,
   IN  BOOLEAN                     Describe
   );
 
@@ -372,23 +409,21 @@ OcShowSimpleBootMenu (
   );
 
 /**
-  Load boot entry loader image with given options and return its handle.
+  Load & start boot entry loader image with given options.
 
   @param[in]  BootPolicy     Apple Boot Policy Protocol.
+  @param[in]  Context        Picker context.
   @param[in]  BootEntry      Located boot entry.
-  @param[in]  Policy         Load policy.
   @param[in]  ParentHandle   Parent image handle.
-  @param[out] EntryHandle    Loaded image handle.
 
-  @retval EFI_SUCCESS        The image was found and loaded succesfully.
+  @retval EFI_SUCCESS        The image was found, started, and ended succesfully.
 **/
 EFI_STATUS
 OcLoadBootEntry (
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
+  IN  OC_PICKER_CONTEXT           *Context,
   IN  OC_BOOT_ENTRY               *BootEntry,
-  IN  UINT32                      Policy,
-  IN  EFI_HANDLE                  ParentHandle,
-  OUT EFI_HANDLE                  *EntryHandle
+  IN  EFI_HANDLE                  ParentHandle
   );
 
 /**
