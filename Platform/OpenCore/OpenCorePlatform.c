@@ -29,6 +29,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiRuntimeServicesTableLib.h>
 
 #include <IndustryStandard/AppleSmBios.h>
+#include <IndustryStandard/AppleFeatures.h>
 
 #include <Guid/AppleVariable.h>
 
@@ -336,6 +337,19 @@ OcPlatformUpdateSmbios (
     Data.MemoryFormFactor     = MacInfo->Smbios.MemoryFormFactor;
     Data.FirmwareFeatures     = MacInfo->Smbios.FirmwareFeatures;
     Data.FirmwareFeaturesMask = MacInfo->Smbios.FirmwareFeaturesMask;
+
+    //
+    // Adopt to arbitrary hardware specifics. This bit allows the use
+    // of legacy Windows installation in boot selector preference pane.
+    // We need it because Windows systems with EFI partition not being 1st
+    // are recognised as legacy. See:
+    // https://github.com/acidanthera/bugtracker/issues/327
+    // https://sourceforge.net/p/cloverefiboot/tickets/435
+    // I could imagine this being configurable, but see no issue otherwise.
+    //
+    Data.FirmwareFeatures     |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE;
+    Data.FirmwareFeaturesMask |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE;
+
     Data.ProcessorType        = NULL;
     Data.PlatformFeature      = MacInfo->Smbios.PlatformFeature;
 
