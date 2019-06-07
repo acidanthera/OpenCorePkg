@@ -471,8 +471,9 @@ PatchAppleIoMapperSupport (
   Apply modification to CPUID 1.
 
   @param Patcher  Patcher context.
+  @param CpuInfo  CPU information.
   @param Data     4 32-bit integers with CPUID data.
-  @param Data     4 32-bit integers with CPUID enabled overrides data.
+  @param DataMask 4 32-bit integers with CPUID enabled overrides data.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -494,6 +495,18 @@ PatchKernelCpuId (
 RETURN_STATUS
 PatchCustomSmbiosGuid (
   IN OUT PRELINKED_CONTEXT  *Context
+  );
+
+/**
+  Apply kernel patches to remove kext dumping in the panic log.
+
+  @param Patcher  Patcher context.
+
+  @return  EFI_SUCCESS on success.
+**/
+RETURN_STATUS
+PatchPanicKextDump (
+  IN OUT PATCHER_CONTEXT  *Patcher
   );
 
 #endif // OC_APPLE_KERNEL_LIB_H

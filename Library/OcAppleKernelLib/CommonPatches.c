@@ -797,3 +797,69 @@ PatchCustomSmbiosGuid (
 
   return Status;
 }
+
+STATIC
+UINT8
+mPanicKextDumpPatchFind[] = {
+  0x00, 0x25, 0x2E, 0x2A, 0x73, 0x00 ///< \0%.*s\0
+};
+
+STATIC
+UINT8
+mPanicKextDumpPatchReplace[] = {
+  0x00, 0x00, 0x2E, 0x2A, 0x73, 0x00
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mPanicKextDumpPatch = {
+  .Base    = NULL,
+  .Find    = mPanicKextDumpPatchFind,
+  .Mask    = NULL,
+  .Replace = mPanicKextDumpPatchReplace,
+  .ReplaceMask = NULL,
+  .Size    = sizeof (mPanicKextDumpPatchFind),
+  .Count   = 1,
+  .Skip    = 0
+};
+
+RETURN_STATUS
+PatchPanicKextDump (
+  IN OUT PATCHER_CONTEXT  *Patcher
+  )
+{
+  RETURN_STATUS       Status;
+  UINT8               *Record;
+  UINT8               *Last;
+
+  Last = ((UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext)
+    + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE);
+
+  //
+  // This should work on 10.15 and all debug kernels.
+  //
+  Status = PatcherGetSymbolAddress (
+    Patcher,
+    "__ZN6OSKext19printKextPanicListsEPFiPKczE",
+    (UINT8 **) &Record
+    );
+  if (RETURN_ERROR (Status) || Record >= Last) {
+    DEBUG ((DEBUG_WARN, "Failed to locate printKextPanicLists (%p) - %r\n", Record, Status));
+    return EFI_NOT_FOUND;
+  }
+
+  *Record = 0xC3;
+
+  //
+  // This one is for 10.13~10.14 release kernels, which do dumping inline.
+  // A bit risky, but let's hope it works well.
+  //
+  Status = PatcherApplyGenericPatch (Patcher, &mPanicKextDumpPatch);
+  if (RETURN_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "Failed to apply kext dump patch - %r\n", Status));
+  } else {
+    DEBUG ((DEBUG_INFO, "Patch success kext dump \n"));
+  }
+
+  return RETURN_SUCCESS;
+}
