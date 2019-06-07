@@ -15,6 +15,7 @@
 #ifndef OC_APPLE_KERNEL_LIB_H
 #define OC_APPLE_KERNEL_LIB_H
 
+#include <Library/OcCpuLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/OcXmlLib.h>
 #include <Protocol/SimpleFileSystem.h>
@@ -464,6 +465,23 @@ PatchForceInternalDiskIcons (
 RETURN_STATUS
 PatchAppleIoMapperSupport (
   IN OUT PRELINKED_CONTEXT  *Context
+  );
+
+/**
+  Apply modification to CPUID 1.
+
+  @param Patcher  Patcher context.
+  @param Data     4 32-bit integers with CPUID data.
+  @param Data     4 32-bit integers with CPUID enabled overrides data.
+
+  @return  EFI_SUCCESS on success.
+**/
+RETURN_STATUS
+PatchKernelCpuId (
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     OC_CPU_INFO      *CpuInfo,
+  IN     UINT32           *Data,
+  IN     UINT32           *DataMask
   );
 
 #endif // OC_APPLE_KERNEL_LIB_H

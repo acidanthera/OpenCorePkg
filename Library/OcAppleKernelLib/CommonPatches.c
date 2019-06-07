@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Base.h>
 
+#include <IndustryStandard/AppleIntelCpuInfo.h>
 #include <Library/DebugLib.h>
 #include <Library/OcAppleKernelLib.h>
 
@@ -518,4 +519,17 @@ PatchAppleIoMapperSupport (
   }
 
   return Status;
+}
+
+RETURN_STATUS
+PatchKernelCpuId (
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     OC_CPU_INFO      *CpuInfo,
+  IN     UINT32           *Data,
+  IN     UINT32           *DataMask
+  )
+{
+
+
+  return RETURN_UNSUPPORTED;
 }
