@@ -272,10 +272,23 @@ mMiscConfigurationSecuritySchema[] = {
 
 STATIC
 OC_SCHEMA
+mMiscToolsSchemaEntry[] = {
+  OC_SCHEMA_STRING_IN ("Comment",  OC_MISC_TOOLS_ENTRY, Comment),
+  OC_SCHEMA_STRING_IN ("Name",     OC_MISC_TOOLS_ENTRY, Name),
+  OC_SCHEMA_STRING_IN ("Path",     OC_MISC_TOOLS_ENTRY, Path),
+};
+
+STATIC
+OC_SCHEMA
+mMiscToolsSchema = OC_SCHEMA_DICT (NULL, mMiscToolsSchemaEntry);
+
+STATIC
+OC_SCHEMA
 mMiscConfigurationSchema[] = {
   OC_SCHEMA_DICT       ("Boot",             mMiscConfigurationBootSchema),
   OC_SCHEMA_DICT       ("Debug",            mMiscConfigurationDebugSchema),
   OC_SCHEMA_DICT       ("Security",         mMiscConfigurationSecuritySchema),
+  OC_SCHEMA_ARRAY_IN   ("Tools",            OC_GLOBAL_CONFIG, Misc.Tools, &mMiscToolsSchema),
 };
 
 //
