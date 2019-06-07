@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May 24 02:34:39 2019
-%DIF ADD ../Configuration.tex        Thu Jun  6 14:25:10 2019
+%DIF ADD ../Configuration.tex        Fri Jun  7 16:08:06 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -557,7 +557,8 @@ approach could be \href{https://www.sublimetext.com}{Sublime Text} with
 \href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
 Add \texttt{.clang\_complete} file with similar content to your UDK root:
 
-\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash]
+\DIFmodbegin
+\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash,alsolanguage=DIFcode]
 -I/UefiPackages/MdePkg
 -I/UefiPackages/MdePkg/Include
 -I/UefiPackages/MdePkg/Include/X64
@@ -569,6 +570,7 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -I/UefiPackages/OpenCorePkg/Include
 -I/UefiPackages/OcSupportPkg/Include
 -I/UefiPackages/MacInfoPkg/Include
+%DIF > -I/UefiPackages/UefiCpuPkg/Include
 -IInclude
 -include
 /UefiPackages/MdePkg/Include/Uefi.h
@@ -583,6 +585,7 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -Wno-varargs
 -Wno-unused-const-variable
 \end{lstlisting}
+\DIFmodend
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
 files must ensure that their tool checks for \texttt{opencore-version} NVRAM variable
@@ -1377,6 +1380,12 @@ behaviour that does not go to any other sections
 
   \DIFadd{Designed to be filled with }\texttt{\DIFadd{plist\ dict}} \DIFadd{values, describing each block entry.
   See }\hyperref[misctoolprops]{Tools Properties} \DIFadd{section below.
+  }
+
+  \emph{\DIFadd{Note}}\DIFadd{: Select tools, for example, UEFI Shell or NVRAM cleaning are very
+  dangerous and }\textbf{\DIFadd{MUST NOT}} \DIFadd{appear in production configurations, especially
+  in vaulted ones and protected with secure boot, as they may be used to easily
+  bypass secure boot chain.
 }
 
 \DIFaddend \end{enumerate}

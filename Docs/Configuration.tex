@@ -509,6 +509,7 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -I/UefiPackages/OpenCorePkg/Include
 -I/UefiPackages/OcSupportPkg/Include
 -I/UefiPackages/MacInfoPkg/Include
+-I/UefiPackages/UefiCpuPkg/Include
 -IInclude
 -include
 /UefiPackages/MdePkg/Include/Uefi.h
@@ -1284,6 +1285,11 @@ behaviour that does not go to any other sections
   
   Designed to be filled with \texttt{plist\ dict} values, describing each block entry.
   See \hyperref[misctoolprops]{Tools Properties} section below.
+  
+  \emph{Note}: Select tools, for example, UEFI Shell or NVRAM cleaning are very
+  dangerous and \textbf{MUST NOT} appear in production configurations, especially
+  in vaulted ones and protected with secure boot, as they may be used to easily
+  bypass secure boot chain.
 
 \end{enumerate}
 
