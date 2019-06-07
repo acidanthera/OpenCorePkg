@@ -228,6 +228,7 @@ OC_SCHEMA
 mKernelQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("AppleCpuPmCfgLock", OC_GLOBAL_CONFIG, Kernel.Quirks.AppleCpuPmCfgLock),
   OC_SCHEMA_BOOLEAN_IN ("AppleXcpmCfgLock",  OC_GLOBAL_CONFIG, Kernel.Quirks.AppleXcpmCfgLock),
+  OC_SCHEMA_BOOLEAN_IN ("CustomSMBIOSGuid",  OC_GLOBAL_CONFIG, Kernel.Quirks.CustomSmbiosGuid),
   OC_SCHEMA_BOOLEAN_IN ("DisableIoMapper",   OC_GLOBAL_CONFIG, Kernel.Quirks.DisableIoMapper),
   OC_SCHEMA_BOOLEAN_IN ("ExternalDiskIcons", OC_GLOBAL_CONFIG, Kernel.Quirks.ExternalDiskIcons),
   OC_SCHEMA_BOOLEAN_IN ("ThirdPartyTrim",    OC_GLOBAL_CONFIG, Kernel.Quirks.ThirdPartyTrim),

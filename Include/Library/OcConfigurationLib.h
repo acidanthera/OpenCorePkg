@@ -192,6 +192,7 @@
 #define OC_KERNEL_QUIRKS_FIELDS(_, __) \
   _(BOOLEAN                     , AppleCpuPmCfgLock           ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleXcpmCfgLock            ,     , FALSE  , ()) \
+  _(BOOLEAN                     , CustomSmbiosGuid            ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableIoMapper             ,     , FALSE  , ()) \
   _(BOOLEAN                     , ExternalDiskIcons           ,     , FALSE  , ()) \
   _(BOOLEAN                     , ThirdPartyTrim              ,     , FALSE  , ()) \

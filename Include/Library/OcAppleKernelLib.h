@@ -484,5 +484,16 @@ PatchKernelCpuId (
   IN     UINT32           *DataMask
   );
 
-#endif // OC_APPLE_KERNEL_LIB_H
+/**
+  Apply custom AppleSMBIOS kext GUID patch for Custom UpdateSMBIOSMode.
 
+  @param Context  Prelinked kernel context.
+
+  @return  EFI_SUCCESS on success.
+**/
+RETURN_STATUS
+PatchCustomSmbiosGuid (
+  IN OUT PRELINKED_CONTEXT  *Context
+  );
+
+#endif // OC_APPLE_KERNEL_LIB_H

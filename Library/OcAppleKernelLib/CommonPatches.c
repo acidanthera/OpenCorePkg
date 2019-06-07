@@ -531,7 +531,7 @@ mKernelCpuIdFindRelNew[] = {
 STATIC
 CONST UINT8
 mKernelCpuIdFindRelOld[] = {
-  0xB9, 0x8B, 0x00, 0x00, 0x00, 0x31, 0xD2, 0x0F, 0x30, 0xB8, 0x01, 0x00, 0x00, 0x00, 0x31, 0xDB, 0x31, 0xC9, 0x31, 0xD2, 0x0F, 0xA2 
+  0xB9, 0x8B, 0x00, 0x00, 0x00, 0x31, 0xD2, 0x0F, 0x30, 0xB8, 0x01, 0x00, 0x00, 0x00, 0x31, 0xDB, 0x31, 0xC9, 0x31, 0xD2, 0x0F, 0xA2
 };
 
 STATIC
@@ -743,4 +743,57 @@ PatchKernelCpuId (
   DEBUG ((DEBUG_WARN, "Failed to find either CPUID patch (%u)\n", FoundSize));
 
   return RETURN_UNSUPPORTED;
+}
+
+STATIC
+UINT8
+mCustomSmbiosGuidPatchFind[] = {
+  0x45, 0x42, 0x39, 0x44, 0x32, 0x44, 0x33, 0x31
+};
+
+STATIC
+UINT8
+mCustomSmbiosGuidPatchReplace[] = {
+  0x45, 0x42, 0x39, 0x44, 0x32, 0x44, 0x33, 0x35
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mCustomSmbiosGuidPatch = {
+  .Base    = NULL,
+  .Find    = mCustomSmbiosGuidPatchFind,
+  .Mask    = NULL,
+  .Replace = mCustomSmbiosGuidPatchReplace,
+  .ReplaceMask = NULL,
+  .Size    = sizeof (mCustomSmbiosGuidPatchFind),
+  .Count   = 1,
+  .Skip    = 0
+};
+
+RETURN_STATUS
+PatchCustomSmbiosGuid (
+  IN OUT PRELINKED_CONTEXT  *Context
+  )
+{
+  RETURN_STATUS       Status;
+  PATCHER_CONTEXT     Patcher;
+
+  Status = PatcherInitContextFromPrelinked (
+    &Patcher,
+    Context,
+    "com.apple.driver.AppleSMBIOS"
+    );
+
+  if (!RETURN_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (&Patcher, &mCustomSmbiosGuidPatch);
+    if (RETURN_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.AppleSMBIOS - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_INFO, "Patch success com.apple.driver.AppleSMBIOS\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_INFO, "Failed to find com.apple.driver.AppleSMBIOS - %r\n", Status));
+  }
+
+  return Status;
 }
