@@ -26,6 +26,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 STATIC OC_STORAGE_CONTEXT  *mOcStorage;
 STATIC OC_GLOBAL_CONFIG    *mOcConfiguration;
+STATIC OC_CPU_INFO         *mOcCpuInfo;
 
 STATIC
 VOID
@@ -309,6 +310,18 @@ OcKernelApplyPatches (
     if (Config->Kernel.Quirks.AppleXcpmCfgLock) {
       PatchAppleXcpmCfgLock (&Patcher);
     }
+
+    if (Config->Kernel.Emulate.Cpuid1Data[0] != 0
+      || Config->Kernel.Emulate.Cpuid1Data[1] != 0
+      || Config->Kernel.Emulate.Cpuid1Data[2] != 0
+      || Config->Kernel.Emulate.Cpuid1Data[3] != 0) {
+      PatchKernelCpuId (
+        &Patcher,
+        mOcCpuInfo,
+        Config->Kernel.Emulate.Cpuid1Data,
+        Config->Kernel.Emulate.Cpuid1Mask
+        );
+    }
   }
 }
 
@@ -576,7 +589,8 @@ OcKernelFileOpen (
 VOID
 OcLoadKernelSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
-  IN OC_GLOBAL_CONFIG    *Config
+  IN OC_GLOBAL_CONFIG    *Config,
+  IN OC_CPU_INFO         *CpuInfo
   )
 {
   EFI_STATUS  Status;
@@ -586,6 +600,7 @@ OcLoadKernelSupport (
   if (!EFI_ERROR (Status)) {
     mOcStorage       = Storage;
     mOcConfiguration = Config;
+    mOcCpuInfo       = CpuInfo;
   } else {
     DEBUG ((DEBUG_ERROR, "OC: Failed to enable vfs - %r\n", Status));
   }

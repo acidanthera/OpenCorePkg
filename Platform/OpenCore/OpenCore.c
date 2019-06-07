@@ -48,6 +48,10 @@ OC_STORAGE_CONTEXT
 mOpenCoreStorage;
 
 STATIC
+OC_CPU_INFO
+mOpenCoreCpuInfo;
+
+STATIC
 RSA_PUBLIC_KEY *
 mOpenCoreVaultKey;
 
@@ -102,8 +106,6 @@ OcMain (
   )
 {
   EFI_STATUS                Status;
-
-  OC_CPU_INFO               CpuInfo;
   EFI_HANDLE                LoadHandle;
 
   DEBUG ((DEBUG_INFO, "OC: OcMiscEarlyInit...\n"));
@@ -117,14 +119,14 @@ OcMain (
     return;
   }
 
-  OcCpuScanProcessor (&CpuInfo);
+  OcCpuScanProcessor (&mOpenCoreCpuInfo);
 
   DEBUG ((DEBUG_INFO, "OC: OcLoadUefiSupport...\n"));
-  OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &CpuInfo);
+  OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &mOpenCoreCpuInfo);
   DEBUG ((DEBUG_INFO, "OC: OcLoadAcpiSupport...\n"));
   OcLoadAcpiSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
   DEBUG ((DEBUG_INFO, "OC: OcLoadPlatformSupport...\n"));
-  OcLoadPlatformSupport (&mOpenCoreConfiguration, &CpuInfo);
+  OcLoadPlatformSupport (&mOpenCoreConfiguration, &mOpenCoreCpuInfo);
   DEBUG ((DEBUG_INFO, "OC: OcLoadDevPropsSupport...\n"));
   OcLoadDevPropsSupport (&mOpenCoreConfiguration);
   DEBUG ((DEBUG_INFO, "OC: OcLoadNvramSupport...\n"));
@@ -132,7 +134,7 @@ OcMain (
   DEBUG ((DEBUG_INFO, "OC: OcMiscLateInit...\n"));
   OcMiscLateInit (&mOpenCoreConfiguration, LoadPath, &LoadHandle);
   DEBUG ((DEBUG_INFO, "OC: OcLoadKernelSupport...\n"));
-  OcLoadKernelSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
+  OcLoadKernelSupport (&mOpenCoreStorage, &mOpenCoreConfiguration, &mOpenCoreCpuInfo);
 
   DEBUG ((DEBUG_INFO, "OC: OpenCore is loaded, showing boot menu...\n"));
 

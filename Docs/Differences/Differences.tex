@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May 24 02:34:39 2019
-%DIF ADD ../Configuration.tex        Fri Jun  7 16:08:06 2019
+%DIF ADD ../Configuration.tex        Fri Jun  7 16:53:47 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1065,7 +1065,14 @@ blocking.
   blocked driver. See \hyperref[kernelpropsblock]{Block Properties} section below.
 
 \item
-  \texttt{Patch}\\
+  \DIFaddbegin \texttt{\DIFadd{Emulate}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ dict}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Emulate select hardware in kernelspace via parameters
+  described in }\hyperref[kernelpropsemu]{Emulate Properties} \DIFadd{section below.
+}
+
+\item
+  \DIFaddend \texttt{Patch}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Default value}: Empty\\
   \textbf{Description}: Perform binary patches in kernel and drivers prior to
@@ -1168,7 +1175,30 @@ blocking.
 
 \end{enumerate}
 
-\subsection{Patch Properties}\label{kernelpropspatch}
+\DIFaddbegin \subsection{\DIFadd{Emulate Properties}}\label{kernelpropsemu}
+
+\begin{enumerate}
+\item
+  \texttt{\DIFadd{Cpuid1Data}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ data}}\DIFadd{, 32 bytes}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: All zero}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Sequence of }\texttt{\DIFadd{EAX}}\DIFadd{, }\texttt{\DIFadd{EBX}}\DIFadd{, }\texttt{\DIFadd{ECX}}\DIFadd{,
+  }\texttt{\DIFadd{EDX}} \DIFadd{values in Little Endian order to replace }\texttt{\DIFadd{CPUID (1)}}
+  \DIFadd{call in XNU kernel.
+}
+
+\item
+  \texttt{\DIFadd{Cpuid1Mask}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ data}}\DIFadd{, 32 bytes}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: All zero}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Bit mask of active bits in }\texttt{\DIFadd{Cpuid1Data}}\DIFadd{. When
+  each }\texttt{\DIFadd{Cpuid1Mask}} \DIFadd{is set to 0, the original CPU bit is used, otherwise
+  .
+}
+
+\end{enumerate}
+
+\DIFaddend \subsection{Patch Properties}\label{kernelpropspatch}
 
 \begin{enumerate}
 \item

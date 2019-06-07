@@ -973,6 +973,12 @@ blocking.
   blocked driver. See \hyperref[kernelpropsblock]{Block Properties} section below.
 
 \item
+  \texttt{Emulate}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Description}: Emulate select hardware in kernelspace via parameters
+  described in \hyperref[kernelpropsemu]{Emulate Properties} section below.
+
+\item
   \texttt{Patch}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Default value}: Empty\\
@@ -1073,6 +1079,27 @@ blocking.
   The selection happens based on prefix match with the kernel version, i.e.
   \texttt{16.7.0} will match macOS 10.12.6 and \texttt{16.} will match
   any macOS 10.12.x version.
+
+\end{enumerate}
+
+\subsection{Emulate Properties}\label{kernelpropsemu}
+
+\begin{enumerate}
+\item
+  \texttt{Cpuid1Data}\\
+  \textbf{Type}: \texttt{plist\ data}, 32 bytes\\
+  \textbf{Default value}: All zero\\
+  \textbf{Description}: Sequence of \texttt{EAX}, \texttt{EBX}, \texttt{ECX},
+  \texttt{EDX} values in Little Endian order to replace \texttt{CPUID (1)}
+  call in XNU kernel.
+
+\item
+  \texttt{Cpuid1Mask}\\
+  \textbf{Type}: \texttt{plist\ data}, 32 bytes\\
+  \textbf{Default value}: All zero\\
+  \textbf{Description}: Bit mask of active bits in \texttt{Cpuid1Data}. When
+  each \texttt{Cpuid1Mask} is set to 0, the original CPU bit is used, otherwise
+  .
 
 \end{enumerate}
 

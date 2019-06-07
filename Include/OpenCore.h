@@ -113,11 +113,13 @@ OcLoadDevPropsSupport (
 
   @param[in]  Storage   OpenCore storage.
   @param[in]  Config    OpenCore configuration.
+  @param[in]  CpuInfo   CPU information.
 **/
 VOID
 OcLoadKernelSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
-  IN OC_GLOBAL_CONFIG    *Config
+  IN OC_GLOBAL_CONFIG    *Config,
+  IN OC_CPU_INFO         *CpuInfo
   );
 
 /**

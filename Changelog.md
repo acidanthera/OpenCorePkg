@@ -8,6 +8,7 @@ OpenCore Changelog
 - Dropped `IgnoreForWindows` quirk legacy
 - Added basic AMD Zen CPU support
 - Added `Misc` -> `Tools` section to add third-party tools
+- Added `Kernel` -> `Emulate` section for CPUID patches
 
 #### v0.0.2
 - Documentation improvements (see Differences.pdf)
