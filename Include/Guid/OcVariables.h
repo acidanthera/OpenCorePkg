@@ -33,10 +33,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_BOOT_REDIRECT_VARIABLE_NAME  L"boot-redirect"
 
 //
-// Variable used for exposing OpenCore Security -> BootPolicy.
+// Variable used for exposing OpenCore Security -> LoadPolicy.
 // Boot Services only.
 //
-#define OC_BOOT_POLICY_VARIABLE_NAME    L"boot-policy"
+#define OC_LOAD_POLICY_VARIABLE_NAME    L"load-policy"
 
 //
 // Variable used for exposing OpenCore Security -> ScanPolicy.
