@@ -82,7 +82,7 @@ LoadOpenCore (
     );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "BS: Failed to start OpenCore image - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "BS: Failed to start OpenCore image - %r\n", Status));
     gBS->UnloadImage (*ImageHandle);
   }
 
@@ -192,12 +192,12 @@ UefiMain (
   DEBUG ((DEBUG_INFO, "BS: Trying to load OpenCore image...\n"));
   Status = LoadOpenCore (FileSystem, ImageHandle, &OcImageHandle);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "BS: Failed to load OpenCore from disk - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "BS: Failed to load OpenCore from disk - %r\n", Status));
     return EFI_NOT_FOUND;
   }
 
   StartOpenCore (FileSystem, LoadedImage->DeviceHandle, LoadedImage->FilePath);
-  DEBUG ((DEBUG_ERROR, "BS: Failed to start OpenCore image...\n"));
+  DEBUG ((DEBUG_WARN, "BS: Failed to start OpenCore image...\n"));
 
   return EFI_NOT_FOUND;
 }

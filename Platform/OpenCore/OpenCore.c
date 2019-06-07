@@ -182,7 +182,7 @@ OcBootstrapRerun (
       }
     }
   } else {
-    DEBUG ((DEBUG_ERROR, "OC: Nested ReRun is not supported\n"));
+    DEBUG ((DEBUG_WARN, "OC: Nested ReRun is not supported\n"));
   }
 
   --This->NestedCount;

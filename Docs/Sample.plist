@@ -253,6 +253,13 @@
 				<string>Contents/Info.plist</string>
 			</dict>
 		</array>
+		<key>Emulate</key>
+		<dict>
+			<key>Cpuid1Data</key>
+			<data></data>
+			<key>Cpuid1Mask</key>
+			<data></data>
+		</dict>
 		<key>Block</key>
 		<array>
 			<dict>
