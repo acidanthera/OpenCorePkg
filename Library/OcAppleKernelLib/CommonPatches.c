@@ -619,7 +619,7 @@ PatchKernelCpuId (
     CpuidPatch->EaxCmd  = 0xB8;
     CpuidPatch->EaxVal  = (Data[0] & DataMask[0]) | (CpuInfo->CpuidVerEax.Uint32 & ~DataMask[0]);
     CpuidPatch->EbxCmd  = 0xBB;
-    CpuidPatch->EaxVal  = (Data[1] & DataMask[1]) | (CpuInfo->CpuidVerEbx.Uint32 & ~DataMask[1]);
+    CpuidPatch->EbxVal  = (Data[1] & DataMask[1]) | (CpuInfo->CpuidVerEbx.Uint32 & ~DataMask[1]);
     CpuidPatch->EcxCmd  = 0xB9;
     CpuidPatch->EcxVal  = (Data[2] & DataMask[2]) | (CpuInfo->CpuidVerEcx.Uint32 & ~DataMask[2]);
     CpuidPatch->EdxCmd  = 0xBA;
