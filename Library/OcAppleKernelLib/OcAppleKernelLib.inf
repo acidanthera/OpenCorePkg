@@ -49,6 +49,7 @@
   BaseMemoryLib
   MemoryAllocationLib
   OcCompressionLib
+  OcCpuLib
   OcFileLib
   OcMachoLib
   OcXmlLib

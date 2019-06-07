@@ -1001,3 +1001,61 @@ OcCpuCorrectFlexRatio (
     }
   }
 }
+
+UINT32
+OcCpuModelToAppleFamily (
+  IN UINT32      VersionEax
+  )
+{
+  CPUID_VERSION_INFO_EAX  Eax;
+  UINT8                   Model;
+
+  Eax.Uint32  = VersionEax;
+
+  if (Eax.Bits.FamilyId != 6) {
+    return CPUFAMILY_UNKNOWN;
+  }
+
+  //
+  // This MUST be 1 to 1 with Apple XNU kernel implemenation.
+  //
+
+  Model = (UINT8) Eax.Bits.Model | (UINT8) (Eax.Bits.ExtendedModelId << 4U);
+
+  switch (Model) {
+    case CPU_MODEL_PENRYN:
+      return CPUFAMILY_INTEL_PENRYN;
+    case CPU_MODEL_NEHALEM:
+    case CPU_MODEL_FIELDS:
+    case CPU_MODEL_DALES:
+    case CPU_MODEL_NEHALEM_EX:
+      return CPUFAMILY_INTEL_NEHALEM;
+    case CPU_MODEL_DALES_32NM:
+    case CPU_MODEL_WESTMERE:
+    case CPU_MODEL_WESTMERE_EX:
+      return CPUFAMILY_INTEL_WESTMERE;
+    case CPU_MODEL_SANDYBRIDGE:
+    case CPU_MODEL_JAKETOWN:
+      return CPUFAMILY_INTEL_SANDYBRIDGE;
+    case CPU_MODEL_IVYBRIDGE:
+    case CPU_MODEL_IVYBRIDGE_EP:
+      return CPUFAMILY_INTEL_IVYBRIDGE;
+    case CPU_MODEL_HASWELL:
+    case CPU_MODEL_HASWELL_EP:
+    case CPU_MODEL_HASWELL_ULT:
+    case CPU_MODEL_CRYSTALWELL:
+      return CPUFAMILY_INTEL_HASWELL;
+    case CPU_MODEL_BROADWELL:
+    case CPU_MODEL_BRYSTALWELL:
+      return CPUFAMILY_INTEL_BROADWELL;
+    case CPU_MODEL_SKYLAKE:
+    case CPU_MODEL_SKYLAKE_DT:
+    case CPU_MODEL_SKYLAKE_W:
+      return CPUFAMILY_INTEL_SKYLAKE;
+    case CPU_MODEL_KABYLAKE:
+    case CPU_MODEL_KABYLAKE_DT:
+      return CPUFAMILY_INTEL_KABYLAKE;
+    default:
+      return CPUFAMILY_UNKNOWN;
+  }
+}

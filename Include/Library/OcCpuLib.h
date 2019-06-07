@@ -16,6 +16,7 @@
 #define OC_CPU_LIB_H
 
 #include <IndustryStandard/CpuId.h>
+#include <IndustryStandard/AppleIntelCpuInfo.h>
 
 //
 // External clock value on Sandy Bridge and above (in MHz).
@@ -70,7 +71,6 @@ typedef struct {
   UINT64                  TSCFrequency;
   UINT64                  CPUFrequency;
   UINT64                  FSBFrequency;
-
 } OC_CPU_INFO;
 
 /**
@@ -92,6 +92,20 @@ OcCpuScanProcessor (
 VOID
 OcCpuCorrectFlexRatio (
   IN OC_CPU_INFO  *Cpu
+  );
+
+/**
+  Converts CPUID Family and Model extracted from EAX
+  CPUID (1) call to AppleFamily value. This implements
+  cpuid_set_cpufamily functionality as it is in XNU.
+
+  @param[in] VersionEax  CPUID (1) EAX value.
+
+  @return Apple Family (e.g. CPUFAMILY_UNKNOWN)
+**/
+UINT32
+OcCpuModelToAppleFamily (
+  IN UINT32      VersionEax
   );
 
 #endif // OC_CPU_LIB_H_
