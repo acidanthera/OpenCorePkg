@@ -9,6 +9,7 @@ OpenCore Changelog
 - Added basic AMD Zen CPU support
 - Added `Misc` -> `Tools` section to add third-party tools
 - Added `Kernel` -> `Emulate` section for CPUID patches
+- Added `CustomSMBIOSGuid` quirk for Custom SMBIOS update mode
 
 #### v0.0.2
 - Documentation improvements (see Differences.pdf)

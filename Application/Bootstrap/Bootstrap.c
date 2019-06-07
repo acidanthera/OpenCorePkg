@@ -117,7 +117,7 @@ StartOpenCore (
 
   if (Bootstrap->Revision != OC_BOOTSTRAP_PROTOCOL_REVISION) {
     DEBUG ((
-      DEBUG_ERROR,
+      DEBUG_WARN,
       "BS: Unsupported bootstrap protocol %u vs %u\n",
       Bootstrap->Revision,
       OC_BOOTSTRAP_PROTOCOL_REVISION

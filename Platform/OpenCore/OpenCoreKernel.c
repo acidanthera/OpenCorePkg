@@ -306,6 +306,10 @@ OcKernelApplyPatches (
     if (Config->Kernel.Quirks.DisableIoMapper) {
       PatchAppleIoMapperSupport (Context);
     }
+
+    if (Config->Kernel.Quirks.CustomSmbiosGuid) {
+      PatchCustomSmbiosGuid (Context);
+    }
   } else {
     if (Config->Kernel.Quirks.AppleXcpmCfgLock) {
       PatchAppleXcpmCfgLock (&Patcher);

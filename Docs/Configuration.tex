@@ -1231,6 +1231,13 @@ blocking.
   \href{https://github.com/acidanthera/AptioFixPkg#verifymsre2}{VerifyMsrE2} notes.
 
 \item
+  \texttt{CustomSMBIOSGuid}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Performs GUID patching for \texttt{UpdateSMBIOSMode}
+  \texttt{Custom} mode. Usually relevant for Dell laptops.
+
+\item
   \texttt{DisableIoMapper}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
@@ -2092,8 +2099,8 @@ be used. Version with macOS specific enhancements can be downloaded from
     to workaround firmwares overwriting SMBIOS contents at
     ExitBootServices. Otherwise equivalent to \texttt{Create}. Requires
     patching AppleSmbios.kext and AppleACPIPlatform.kext to read from
-    another GUID: \texttt{"EB9D2D31"} -\textgreater{}
-    \texttt{"EB9D2D35"} (in ASCII).
+    another GUID: \texttt{"EB9D2D31"} - \texttt{"EB9D2D35"} (in ASCII),
+    done automatically by \texttt{CustomSMBIOSGuid} quirk.
   \end{itemize}
 \item
   \texttt{Generic}\\

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May 24 02:34:39 2019
-%DIF ADD ../Configuration.tex        Fri Jun  7 16:53:47 2019
+%DIF ADD ../Configuration.tex        Fri Jun  7 21:56:18 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1326,7 +1326,15 @@ blocking.
   \href{https://github.com/acidanthera/AptioFixPkg#verifymsre2}{VerifyMsrE2} notes.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{DisableIoMapper}}\\
+  \DIFaddbegin \texttt{\DIFadd{CustomSMBIOSGuid}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Performs GUID patching for }\texttt{\DIFadd{UpdateSMBIOSMode}}
+  \texttt{\DIFadd{Custom}} \DIFadd{mode. Usually relevant for Dell laptops.
+}
+
+\item
+  \texttt{\DIFadd{DisableIoMapper}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
   \textbf{\DIFadd{Default value}}\DIFadd{: }\texttt{\DIFadd{false}}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Disables }\texttt{\DIFadd{IOMapper}} \DIFadd{support in XNU (VT-d),
@@ -1816,11 +1824,10 @@ rm vault.pub
   \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SCSI}
   \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_NVME}
   \end{itemize}
-\DIFaddbegin 
 
 \end{enumerate}
 
-\subsection{\DIFadd{Tools Properties}}\label{misctoolprops}
+\DIFaddbegin \subsection{\DIFadd{Tools Properties}}\label{misctoolprops}
 
 \begin{enumerate}
 \item
@@ -1845,12 +1852,12 @@ rm vault.pub
   \textbf{\DIFadd{Default value}}\DIFadd{: Empty string}\\
   \textbf{\DIFadd{Description}}\DIFadd{: File path to select UEFI tool relative to }\texttt{\DIFadd{OC/Tools}}
   \DIFadd{directory.
-}\DIFaddend 
+}
 
 \end{enumerate}
 
 
-\section{NVRAM}\label{nvram}
+\DIFaddend \section{NVRAM}\label{nvram}
 
 \subsection{Introduction}\label{nvramintro}
 
@@ -2196,8 +2203,9 @@ be used. Version with macOS specific enhancements can be downloaded from
     to workaround firmwares overwriting SMBIOS contents at
     ExitBootServices. Otherwise equivalent to \texttt{Create}. Requires
     patching AppleSmbios.kext and AppleACPIPlatform.kext to read from
-    another GUID: \texttt{"EB9D2D31"} -\textgreater{}
-    \texttt{"EB9D2D35"} (in ASCII).
+    another GUID: \texttt{"EB9D2D31"} - \DIFdelbegin \DIFdel{\textgreater{}
+    }\DIFdelend \texttt{"EB9D2D35"} (in ASCII)\DIFaddbegin \DIFadd{,
+    done automatically by }\texttt{\DIFadd{CustomSMBIOSGuid}} \DIFadd{quirk}\DIFaddend .
   \end{itemize}
 \item
   \texttt{Generic}\\
