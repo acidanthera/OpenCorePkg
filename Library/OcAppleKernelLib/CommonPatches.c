@@ -15,6 +15,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Base.h>
 
 #include <IndustryStandard/AppleIntelCpuInfo.h>
+#include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcAppleKernelLib.h>
 
@@ -521,6 +522,44 @@ PatchAppleIoMapperSupport (
   return Status;
 }
 
+STATIC
+CONST UINT8
+mKernelCpuIdFindRelNew[] = {
+  0xB9, 0x8B, 0x00, 0x00, 0x00, 0x31, 0xC0, 0x31, 0xD2, 0x0F, 0x30, 0xB8, 0x01, 0x00, 0x00, 0x00, 0x31, 0xDB, 0x31, 0xC9, 0x31, 0xD2, 0x0F, 0xA2
+};
+
+STATIC
+CONST UINT8
+mKernelCpuIdFindRelOld[] = {
+  0xB9, 0x8B, 0x00, 0x00, 0x00, 0x31, 0xD2, 0x0F, 0x30, 0xB8, 0x01, 0x00, 0x00, 0x00, 0x31, 0xDB, 0x31, 0xC9, 0x31, 0xD2, 0x0F, 0xA2 
+};
+
+STATIC
+CONST UINT8
+mKernelCpuidFindMcRel[] = {
+  0xB9, 0x8B, 0x00, 0x00, 0x00, 0x00, 0x0F, 0x32
+};
+
+#pragma pack(push, 1)
+
+typedef struct {
+  UINT8   EaxCmd;
+  UINT32  EaxVal;
+  UINT8   EbxCmd;
+  UINT32  EbxVal;
+  UINT8   EcxCmd;
+  UINT32  EcxVal;
+  UINT8   EdxCmd;
+  UINT32  EdxVal;
+} INTERNAL_CPUID_PATCH;
+
+typedef struct {
+  UINT8   EdxCmd;
+  UINT32  EdxVal;
+} INTERNAL_MICROCODE_PATCH;
+
+#pragma pack(pop)
+
 RETURN_STATUS
 PatchKernelCpuId (
   IN OUT PATCHER_CONTEXT  *Patcher,
@@ -529,7 +568,83 @@ PatchKernelCpuId (
   IN     UINT32           *DataMask
   )
 {
+  RETURN_STATUS             Status;
+  UINT8                     *Record;
+  UINT8                     *Last;
+  UINT32                    Index;
+  UINT32                    FoundSize;
+  INTERNAL_CPUID_PATCH      *CpuidPatch;
+  INTERNAL_MICROCODE_PATCH  *McPatch;
 
+  OC_INLINE_STATIC_ASSERT (
+    sizeof (mKernelCpuIdFindRelNew) > sizeof (mKernelCpuIdFindRelOld),
+    "Kernel CPUID patch seems wrong"
+    );
+
+  ASSERT (mKernelCpuIdFindRelNew[0] == mKernelCpuIdFindRelOld[1]
+    && mKernelCpuIdFindRelNew[1] == mKernelCpuIdFindRelOld[2]
+    && mKernelCpuIdFindRelNew[2] == mKernelCpuIdFindRelOld[3]
+    && mKernelCpuIdFindRelNew[3] == mKernelCpuIdFindRelOld[4]
+    );
+
+  Last = ((UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext)
+    + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE*2 - sizeof (mKernelCpuIdFindRelNew));
+
+  Status = PatcherGetSymbolAddress (Patcher, "_cpuid_set_info", (UINT8 **) &Record);
+  if (RETURN_ERROR (Status) || Record >= Last) {
+    DEBUG ((DEBUG_WARN, "Failed to locate _cpuid_set_info (%p) - %r\n", Record, Status));
+    return EFI_NOT_FOUND;
+  }
+
+  FoundSize = 0;
+
+  for (Index = 0; Index < EFI_PAGE_SIZE; ++Index, ++Record) {
+    if (Record[0] == mKernelCpuIdFindRelNew[0]
+      && Record[1] == mKernelCpuIdFindRelNew[1]
+      && Record[2] == mKernelCpuIdFindRelNew[2]
+      && Record[3] == mKernelCpuIdFindRelNew[3]) {
+
+      if (CompareMem (Record, mKernelCpuIdFindRelNew, sizeof (mKernelCpuIdFindRelNew)) == 0) {
+        FoundSize = sizeof (mKernelCpuIdFindRelNew);
+        break;
+      } else if (CompareMem (Record, mKernelCpuIdFindRelOld, sizeof (mKernelCpuIdFindRelOld)) == 0) {
+        FoundSize = sizeof (mKernelCpuIdFindRelOld);
+        break;
+      }
+    }
+  }
+
+  if (FoundSize > 0) {
+    CpuidPatch          = (INTERNAL_CPUID_PATCH *) Record;
+    CpuidPatch->EaxCmd  = 0xB8;
+    CpuidPatch->EaxVal  = (Data[0] & DataMask[0]) | (CpuInfo->CpuidVerEax.Uint32 & ~DataMask[0]);
+    CpuidPatch->EbxCmd  = 0xBB;
+    CpuidPatch->EaxVal  = (Data[1] & DataMask[1]) | (CpuInfo->CpuidVerEbx.Uint32 & ~DataMask[1]);
+    CpuidPatch->EcxCmd  = 0xB9;
+    CpuidPatch->EcxVal  = (Data[2] & DataMask[2]) | (CpuInfo->CpuidVerEcx.Uint32 & ~DataMask[2]);
+    CpuidPatch->EdxCmd  = 0xBA;
+    CpuidPatch->EdxVal  = (Data[3] & DataMask[3]) | (CpuInfo->CpuidVerEdx.Uint32 & ~DataMask[3]);
+    SetMem (Record + sizeof (INTERNAL_CPUID_PATCH), FoundSize - sizeof (INTERNAL_CPUID_PATCH), 0x90);
+    Record += FoundSize;
+
+    for (Index = 0; Index < EFI_PAGE_SIZE - sizeof (mKernelCpuidFindMcRel); ++Index, ++Record) {
+      if (CompareMem (Record, mKernelCpuidFindMcRel, sizeof (mKernelCpuidFindMcRel)) == 0) {
+        McPatch         = (INTERNAL_MICROCODE_PATCH *) Record;
+        McPatch->EdxCmd = 0xBA;
+        McPatch->EdxVal = CpuInfo->MicrocodeRevision;
+        SetMem (
+          Record + sizeof (INTERNAL_MICROCODE_PATCH),
+          sizeof (mKernelCpuidFindMcRel) - sizeof (INTERNAL_MICROCODE_PATCH),
+          0x90
+          );
+        return EFI_SUCCESS;
+      }
+    }
+  } else {
+    //
+    // TODO: Implement debug kernel support.
+    //
+  }
 
   return RETURN_UNSUPPORTED;
 }
