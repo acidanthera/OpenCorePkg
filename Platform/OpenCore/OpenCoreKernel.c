@@ -315,6 +315,10 @@ OcKernelApplyPatches (
       PatchAppleXcpmCfgLock (&Patcher);
     }
 
+    if (Config->Kernel.Quirks.PanicNoKextDump) {
+      PatchPanicKextDump (&Patcher);      
+    }
+
     if (Config->Kernel.Emulate.Cpuid1Data[0] != 0
       || Config->Kernel.Emulate.Cpuid1Data[1] != 0
       || Config->Kernel.Emulate.Cpuid1Data[2] != 0

@@ -10,6 +10,7 @@ OpenCore Changelog
 - Added `Misc` -> `Tools` section to add third-party tools
 - Added `Kernel` -> `Emulate` section for CPUID patches
 - Added `CustomSMBIOSGuid` quirk for Custom SMBIOS update mode
+- Added `PanicNoKextDump` quirk to avoid kext dump in panics
 
 #### v0.0.2
 - Documentation improvements (see Differences.pdf)

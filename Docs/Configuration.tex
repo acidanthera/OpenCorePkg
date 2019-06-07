@@ -1259,6 +1259,13 @@ blocking.
   usually have compatible AHCI controllers.
 
 \item
+  \texttt{PanicNoKextDump}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Prevent kernel from printing kext dump in the panic
+  log preventing from observing panic details. Affects 10.13 and above.
+
+\item
   \texttt{ThirdPartyTrim}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
@@ -1947,6 +1954,7 @@ troubleshooting:
   \item \texttt{keepsyms=1}
   \item \texttt{kextlog=VALUE}
   \item \texttt{nvda\_drv=1}
+  \item \texttt{lapic\_dont\_panic=1}
   \item \texttt{slide=VALUE}
   \item \texttt{-nehalem\_error\_disable}
   \item \texttt{-no\_compat\_check}

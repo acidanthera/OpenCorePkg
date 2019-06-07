@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May 24 02:34:39 2019
-%DIF ADD ../Configuration.tex        Fri Jun  7 21:56:18 2019
+%DIF ADD ../Configuration.tex        Fri Jun  7 23:49:45 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1357,7 +1357,15 @@ blocking.
   usually have compatible AHCI controllers.
 
 \item
-  \texttt{ThirdPartyTrim}\\
+  \DIFaddbegin \texttt{\DIFadd{PanicNoKextDump}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Prevent kernel from printing kext dump in the panic
+  log preventing from observing panic details. Affects 10.13 and above.
+}
+
+\item
+  \DIFaddend \texttt{ThirdPartyTrim}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
   \textbf{Description}: Patch IOAHCIFamily.kext to force TRIM command support
@@ -2051,7 +2059,8 @@ troubleshooting:
   \item \texttt{keepsyms=1}
   \item \texttt{kextlog=VALUE}
   \item \texttt{nvda\_drv=1}
-  \item \texttt{slide=VALUE}
+  \item \DIFaddbegin \texttt{\DIFadd{lapic\_dont\_panic=1}}
+  \item \DIFaddend \texttt{slide=VALUE}
   \item \texttt{-nehalem\_error\_disable}
   \item \texttt{-no\_compat\_check}
   \item \texttt{-s}
