@@ -491,6 +491,7 @@ OcScanForBootEntries (
       OcFreeBootEntries (Entries, EntryIndex + 1);
       return EFI_OUT_OF_RESOURCES;
     }
+    UnicodeUefiSlashes (Entries[EntryIndex].PathName);
     Entries[EntryIndex].IsCustom = TRUE;
   }
 
