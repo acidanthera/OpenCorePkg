@@ -15,6 +15,8 @@
 #ifndef OC_CPU_LIB_H
 #define OC_CPU_LIB_H
 
+#include <IndustryStandard/CpuId.h>
+
 //
 // External clock value on Sandy Bridge and above (in MHz).
 // Rounded FSB * 4.
@@ -25,43 +27,50 @@ typedef struct {
   //
   // Note, Vendor and BrandString are reordered for proper alignment.
   //
-  UINT32               Vendor[4];
-  CHAR8                BrandString[48];
-  UINT8                Type;
+  UINT32                  Vendor[4];
+  CHAR8                   BrandString[48];
 
-  UINT8                Family;
-  UINT8                Model;
-  UINT8                ExtModel;
-  UINT8                ExtFamily;
-  UINT8                Stepping;
-  UINT64               Features;
-  UINT64               ExtFeatures;
-  UINT32               Signature;
-  UINT8                Brand;
-  UINT16               AppleProcessorType;
-  BOOLEAN              CstConfigLock;
+  CPUID_VERSION_INFO_EAX  CpuidVerEax;
+  CPUID_VERSION_INFO_EBX  CpuidVerEbx;
+  CPUID_VERSION_INFO_ECX  CpuidVerEcx;
+  CPUID_VERSION_INFO_EDX  CpuidVerEdx;
 
-  UINT32               MaxExtId;
+  UINT32                  MicrocodeRevision;
 
-  UINT8                MaxDiv;
-  UINT8                CurBusRatio;  ///< Current Multiplier
-  UINT8                MinBusRatio;  ///< Min Bus Ratio
-  UINT8                MaxBusRatio;  ///< Max Bus Ratio
+  UINT8                   Type;
+  UINT8                   Family;
+  UINT8                   Model;
+  UINT8                   ExtModel;
+  UINT8                   ExtFamily;
+  UINT8                   Stepping;
+  UINT64                  Features;
+  UINT64                  ExtFeatures;
+  UINT32                  Signature;
+  UINT8                   Brand;
+  UINT16                  AppleProcessorType;
+  BOOLEAN                 CstConfigLock;
 
-  UINT8                TurboBusRatio1;
-  UINT8                TurboBusRatio2;
-  UINT8                TurboBusRatio3;
-  UINT8                TurboBusRatio4;
+  UINT32                  MaxExtId;
 
-  UINT16               PackageCount;
-  UINT16               CoreCount;
-  UINT16               ThreadCount;
+  UINT8                   MaxDiv;
+  UINT8                   CurBusRatio;  ///< Current Multiplier
+  UINT8                   MinBusRatio;  ///< Min Bus Ratio
+  UINT8                   MaxBusRatio;  ///< Max Bus Ratio
 
-  UINT64               ARTFrequency;
-  UINT64               TSCFrequency;
-  UINT64               CPUFrequency;
-  UINT64               FSBFrequency;
-  
+  UINT8                   TurboBusRatio1;
+  UINT8                   TurboBusRatio2;
+  UINT8                   TurboBusRatio3;
+  UINT8                   TurboBusRatio4;
+
+  UINT16                  PackageCount;
+  UINT16                  CoreCount;
+  UINT16                  ThreadCount;
+
+  UINT64                  ARTFrequency;
+  UINT64                  TSCFrequency;
+  UINT64                  CPUFrequency;
+  UINT64                  FSBFrequency;
+
 } OC_CPU_INFO;
 
 /**

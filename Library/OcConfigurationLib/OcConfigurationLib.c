@@ -32,6 +32,7 @@ OC_STRUCTORS       (OC_KERNEL_ADD_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_KERNEL_ADD_ARRAY)
 OC_STRUCTORS       (OC_KERNEL_BLOCK_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_KERNEL_BLOCK_ARRAY)
+OC_STRUCTORS       (OC_KERNEL_EMULATE, ())
 OC_STRUCTORS       (OC_KERNEL_PATCH_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_KERNEL_PATCH_ARRAY)
 OC_STRUCTORS       (OC_KERNEL_QUIRKS, ())
@@ -196,6 +197,13 @@ mKernelBlockSchema = OC_SCHEMA_DICT (NULL, mKernelBlockSchemaEntry);
 
 STATIC
 OC_SCHEMA
+mKernelEmulateSchema[] = {
+  OC_SCHEMA_DATAF_IN   ("Cpuid1Data",       OC_GLOBAL_CONFIG, Kernel.Emulate.Cpuid1Data),
+  OC_SCHEMA_DATAF_IN   ("Cpuid1Mask",       OC_GLOBAL_CONFIG, Kernel.Emulate.Cpuid1Mask),
+};
+
+STATIC
+OC_SCHEMA
 mKernelPatchSchemaEntry[] = {
   OC_SCHEMA_STRING_IN    ("Base",           OC_KERNEL_PATCH_ENTRY, Base),
   OC_SCHEMA_STRING_IN    ("Comment",        OC_KERNEL_PATCH_ENTRY, Comment),
@@ -229,10 +237,11 @@ mKernelQuirksSchema[] = {
 STATIC
 OC_SCHEMA
 mKernelConfigurationSchema[] = {
-  OC_SCHEMA_ARRAY_IN   ("Add",    OC_GLOBAL_CONFIG, Kernel.Add, &mKernelAddSchema),
-  OC_SCHEMA_ARRAY_IN   ("Block",  OC_GLOBAL_CONFIG, Kernel.Block, &mKernelBlockSchema),
-  OC_SCHEMA_ARRAY_IN   ("Patch",  OC_GLOBAL_CONFIG, Kernel.Patch, &mKernelPatchSchema),
-  OC_SCHEMA_DICT       ("Quirks", mKernelQuirksSchema),
+  OC_SCHEMA_ARRAY_IN   ("Add",     OC_GLOBAL_CONFIG, Kernel.Add, &mKernelAddSchema),
+  OC_SCHEMA_ARRAY_IN   ("Block",   OC_GLOBAL_CONFIG, Kernel.Block, &mKernelBlockSchema),
+  OC_SCHEMA_DICT       ("Emulate", mKernelEmulateSchema),
+  OC_SCHEMA_ARRAY_IN   ("Patch",   OC_GLOBAL_CONFIG, Kernel.Patch, &mKernelPatchSchema),
+  OC_SCHEMA_DICT       ("Quirks",  mKernelQuirksSchema),
 };
 
 //

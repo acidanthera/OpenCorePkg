@@ -157,6 +157,14 @@
   OC_DECLARE (OC_KERNEL_BLOCK_ARRAY)
 
 ///
+/// Kernel emulation preferences.
+///
+#define OC_KERNEL_EMULATE_FIELDS(_,__) \
+  _(UINT32                      , Cpuid1Data       , [4] , {0}                                          , () ) \
+  _(UINT32                      , Cpuid1Mask       , [4] , {0}                                          , () )
+  OC_DECLARE (OC_KERNEL_EMULATE)
+
+///
 /// KernelSpace patches.
 ///
 #define OC_KERNEL_PATCH_ENTRY_FIELDS(_, __) \
@@ -193,6 +201,7 @@
 #define OC_KERNEL_CONFIG_FIELDS(_, __) \
   _(OC_KERNEL_ADD_ARRAY         , Add              ,     , OC_CONSTR2 (OC_KERNEL_ADD_ARRAY, _, __)     , OC_DESTR (OC_KERNEL_ADD_ARRAY)) \
   _(OC_KERNEL_BLOCK_ARRAY       , Block            ,     , OC_CONSTR2 (OC_KERNEL_BLOCK_ARRAY, _, __)   , OC_DESTR (OC_KERNEL_BLOCK_ARRAY)) \
+  _(OC_KERNEL_EMULATE           , Emulate          ,     , OC_CONSTR2 (OC_KERNEL_EMULATE, _, __)       , OC_DESTR (OC_KERNEL_EMULATE)) \
   _(OC_KERNEL_PATCH_ARRAY       , Patch            ,     , OC_CONSTR2 (OC_KERNEL_PATCH_ARRAY, _, __)   , OC_DESTR (OC_KERNEL_PATCH_ARRAY)) \
   _(OC_KERNEL_QUIRKS            , Quirks           ,     , OC_CONSTR2 (OC_KERNEL_QUIRKS, _, __)        , OC_DESTR (OC_KERNEL_QUIRKS))
   OC_DECLARE (OC_KERNEL_CONFIG)

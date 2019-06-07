@@ -767,7 +767,6 @@ ScanAmdProcessor (
   if (Cpu->Family == 0x0F) {
     switch (Cpu->ExtFamily) {
       case 0x08:
-      {
         CofVid           = AsmReadMsr64 (K10_PSTATE_STATUS);
         CoreFrequencyID  = BitFieldRead64 (CofVid, 0, 7);
         CoreDivisorID    = BitFieldRead64 (CofVid, 8, 13);
@@ -784,10 +783,8 @@ ScanAmdProcessor (
             );
         }
         break;
-      }
       case 0x06:
       case 0x07:
-      {
         CofVid           = AsmReadMsr64 (K10_COFVID_STATUS);
         CoreFrequencyID  = BitFieldRead64 (CofVid, 0, 5);
         CoreDivisorID    = CofVid & BIT6;
@@ -798,11 +795,8 @@ ScanAmdProcessor (
         // so the core count is equal to the thread count
         Cpu->CoreCount = Cpu->ThreadCount;
         break;
-      }
       default:
-      {
         return;
-      }
     }
     //
     // CPUPM is not supported on AMD, meaning the current
@@ -830,10 +824,6 @@ OcCpuScanProcessor (
   UINT32                  CpuidEbx;
   UINT32                  CpuidEcx;
   UINT32                  CpuidEdx;
-  CPUID_VERSION_INFO_EAX  CpuidVerEax;
-  CPUID_VERSION_INFO_EBX  CpuidVerEbx;
-  CPUID_VERSION_INFO_ECX  CpuidVerEcx;
-  CPUID_VERSION_INFO_EDX  CpuidVerEdx;
 
   ASSERT (Cpu != NULL);
 
@@ -893,19 +883,38 @@ OcCpuScanProcessor (
   // Get processor signature and decode
   //
   if (Cpu->MaxExtId >= CPUID_VERSION_INFO) {
-    AsmCpuid (CPUID_VERSION_INFO, &CpuidVerEax.Uint32, &CpuidVerEbx.Uint32, &CpuidVerEcx.Uint32, &CpuidVerEdx.Uint32);
+    //
+    // Intel SDM requires us issuing CPUID 1 read during microcode
+    // version read, so let's do it here for simplicity.
+    //
 
-    Cpu->Signature = (UINT8) CpuidVerEax.Uint32;
-    Cpu->Stepping  = (UINT8) CpuidVerEax.Bits.SteppingId;
-    Cpu->ExtModel  = (UINT8) CpuidVerEax.Bits.ExtendedModelId;
-    Cpu->Model     = (UINT8) CpuidVerEax.Bits.Model | (UINT8) (CpuidVerEax.Bits.ExtendedModelId << 4U);
-    Cpu->Family    = (UINT8) CpuidVerEax.Bits.FamilyId;
-    Cpu->Type      = (UINT8) CpuidVerEax.Bits.ProcessorType;
-    Cpu->ExtFamily = (UINT8) CpuidVerEax.Bits.ExtendedFamilyId;
-    Cpu->Brand     = (UINT8) CpuidVerEbx.Bits.BrandIndex;
-    Cpu->Features  = (((UINT64) CpuidVerEcx.Uint32) << 32ULL) | CpuidVerEdx.Uint32;
+    if (Cpu->Vendor[0] == CPUID_VENDOR_INTEL) {
+      AsmWriteMsr64 (MSR_IA32_BIOS_SIGN_ID, 0);
+    }
+
+    AsmCpuid (
+      CPUID_VERSION_INFO,
+      &Cpu->CpuidVerEax.Uint32,
+      &Cpu->CpuidVerEbx.Uint32,
+      &Cpu->CpuidVerEcx.Uint32,
+      &Cpu->CpuidVerEdx.Uint32
+      );
+
+    if (Cpu->Vendor[0] == CPUID_VENDOR_INTEL) {
+      Cpu->MicrocodeRevision = AsmReadMsr32 (MSR_IA32_BIOS_SIGN_ID);
+    }
+
+    Cpu->Signature = (UINT8) Cpu->CpuidVerEax.Uint32;
+    Cpu->Stepping  = (UINT8) Cpu->CpuidVerEax.Bits.SteppingId;
+    Cpu->ExtModel  = (UINT8) Cpu->CpuidVerEax.Bits.ExtendedModelId;
+    Cpu->Model     = (UINT8) Cpu->CpuidVerEax.Bits.Model | (UINT8) (Cpu->CpuidVerEax.Bits.ExtendedModelId << 4U);
+    Cpu->Family    = (UINT8) Cpu->CpuidVerEax.Bits.FamilyId;
+    Cpu->Type      = (UINT8) Cpu->CpuidVerEax.Bits.ProcessorType;
+    Cpu->ExtFamily = (UINT8) Cpu->CpuidVerEax.Bits.ExtendedFamilyId;
+    Cpu->Brand     = (UINT8) Cpu->CpuidVerEbx.Bits.BrandIndex;
+    Cpu->Features  = (((UINT64) Cpu->CpuidVerEcx.Uint32) << 32ULL) | Cpu->CpuidVerEdx.Uint32;
     if (Cpu->Features & CPUID_FEATURE_HTT) {
-      Cpu->ThreadCount = (UINT16) CpuidVerEbx.Bits.MaximumAddressableIdsForLogicalProcessors;
+      Cpu->ThreadCount = (UINT16) Cpu->CpuidVerEbx.Bits.MaximumAddressableIdsForLogicalProcessors;
     }
   }
 

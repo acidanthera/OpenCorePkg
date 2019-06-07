@@ -36,6 +36,7 @@
   EfiPkg/EfiPkg.dec
   MdePkg/MdePkg.dec
   OcSupportPkg/OcSupportPkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
 
 [Guids]
   gEfiEndOfDxeEventGroupGuid

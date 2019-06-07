@@ -30,6 +30,7 @@
   EfiPkg/EfiPkg.dec
   OcSupportPkg/OcSupportPkg.dec
   MdePkg/MdePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
 
 [Guids]
   gEfiMiscSubClassGuid
