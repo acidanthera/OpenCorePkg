@@ -52,6 +52,7 @@
   MacInfoPkg/MacInfoPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
 
 [Guids]
   gOcVendorVariableGuid

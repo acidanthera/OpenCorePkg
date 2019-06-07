@@ -40,6 +40,7 @@
   EfiPkg/EfiPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
 
 [Protocols]
   gEfiDevicePathProtocolGuid          ## CONSUMES
