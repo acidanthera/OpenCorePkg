@@ -537,10 +537,65 @@ mKernelCpuIdFindRelOld[] = {
 STATIC
 CONST UINT8
 mKernelCpuidFindMcRel[] = {
-  0xB9, 0x8B, 0x00, 0x00, 0x00, 0x00, 0x0F, 0x32
+  0xB9, 0x8B, 0x00, 0x00, 0x00, 0x0F, 0x32
+};
+
+/**
+  cpu->cpuid_signature           = 0x11111111;
+  cpu->cpuid_stepping            = 0x22;
+  cpu->cpuid_model               = 0x33;
+  cpu->cpuid_family              = 0x44;
+  cpu->cpuid_type                = 0x55555555;
+  cpu->cpuid_extmodel            = 0x66;
+  cpu->cpuid_extfamily           = 0x77;
+  cpu->cpuid_features            = 0x8888888888888888;
+  cpu->cpuid_logical_per_package = 0x99999999;
+  cpu->cpuid_cpufamily           = 0xAAAAAAAA;
+  return 0xAAAAAAAA;
+**/
+STATIC
+CONST UINT8
+mKernelCpuidReplaceDbg[] = {
+  0xC7, 0x47, 0x68, 0x11, 0x11, 0x11, 0x11,                   ///< mov dword ptr [rdi+68h], 11111111h
+  0xC6, 0x47, 0x50, 0x22,                                     ///< mov byte ptr [rdi+50h], 22h
+  0x48, 0xB8, 0x55, 0x55, 0x55, 0x55, 0x44, 0x33, 0x66, 0x77, ///< mov rax, 7766334455555555h
+  0x48, 0x89, 0x47, 0x48,                                     ///< mov [rdi+48h], rax
+  0x48, 0xB8, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, ///< mov rax, 8888888888888888h
+  0x48, 0x89, 0x47, 0x58,                                     ///< mov [rdi+58h], rax
+  0xC7, 0x87, 0xCC, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, ///< mov dword ptr [rdi+0CCh], 99999999h
+  0xC7, 0x87, 0x88, 0x01, 0x00, 0x00, 0xAA, 0xAA, 0xAA, 0xAA, ///< mov dword ptr [rdi+188h], 0AAAAAAAAh
+  0xB8, 0xAA, 0xAA, 0xAA, 0xAA,                               ///< mov eax, 0AAAAAAAAh
+  0xC3                                                        ///< retn
 };
 
 #pragma pack(push, 1)
+
+typedef struct {
+  UINT8   Code1[3];
+  UINT32  Signature;
+  UINT8   Code2[3];
+  UINT8   Stepping;
+  UINT8   Code3[2];
+  UINT32  Type;
+  UINT8   Family;
+  UINT8   Model;
+  UINT8   ExtModel;
+  UINT8   ExtFamily;
+  UINT8   Code4[6];
+  UINT64  Features;
+  UINT8   Code5[10];
+  UINT32  LogicalPerPkg;
+  UINT8   Code6[6];
+  UINT32  AppleFamily1;
+  UINT8   Code7;
+  UINT32  AppleFamily2;
+  UINT8   Code8;
+} INTERNAL_CPUID_FN_PATCH;
+
+OC_GLOBAL_STATIC_ASSERT (
+  sizeof (INTERNAL_CPUID_FN_PATCH) == sizeof (mKernelCpuidReplaceDbg),
+  "Check your CPUID patch layout"
+  );
 
 typedef struct {
   UINT8   EaxCmd;
@@ -575,16 +630,21 @@ PatchKernelCpuId (
   UINT32                    FoundSize;
   INTERNAL_CPUID_PATCH      *CpuidPatch;
   INTERNAL_MICROCODE_PATCH  *McPatch;
+  INTERNAL_CPUID_FN_PATCH   *FnPatch;
+  CPUID_VERSION_INFO_EAX    Eax;
+  CPUID_VERSION_INFO_EBX    Ebx;
+  CPUID_VERSION_INFO_ECX    Ecx;
+  CPUID_VERSION_INFO_EDX    Edx;
 
   OC_INLINE_STATIC_ASSERT (
     sizeof (mKernelCpuIdFindRelNew) > sizeof (mKernelCpuIdFindRelOld),
     "Kernel CPUID patch seems wrong"
     );
 
-  ASSERT (mKernelCpuIdFindRelNew[0] == mKernelCpuIdFindRelOld[1]
-    && mKernelCpuIdFindRelNew[1] == mKernelCpuIdFindRelOld[2]
-    && mKernelCpuIdFindRelNew[2] == mKernelCpuIdFindRelOld[3]
-    && mKernelCpuIdFindRelNew[3] == mKernelCpuIdFindRelOld[4]
+  ASSERT (mKernelCpuIdFindRelNew[0] == mKernelCpuIdFindRelOld[0]
+    && mKernelCpuIdFindRelNew[1] == mKernelCpuIdFindRelOld[1]
+    && mKernelCpuIdFindRelNew[2] == mKernelCpuIdFindRelOld[2]
+    && mKernelCpuIdFindRelNew[3] == mKernelCpuIdFindRelOld[3]
     );
 
   Last = ((UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext)
@@ -614,17 +674,26 @@ PatchKernelCpuId (
     }
   }
 
+  Eax.Uint32 = (Data[0] & DataMask[0]) | (CpuInfo->CpuidVerEax.Uint32 & ~DataMask[0]);
+  Ebx.Uint32 = (Data[1] & DataMask[1]) | (CpuInfo->CpuidVerEbx.Uint32 & ~DataMask[1]);
+  Ecx.Uint32 = (Data[2] & DataMask[2]) | (CpuInfo->CpuidVerEcx.Uint32 & ~DataMask[2]);
+  Edx.Uint32 = (Data[3] & DataMask[3]) | (CpuInfo->CpuidVerEdx.Uint32 & ~DataMask[3]);
+
   if (FoundSize > 0) {
-    CpuidPatch          = (INTERNAL_CPUID_PATCH *) Record;
-    CpuidPatch->EaxCmd  = 0xB8;
-    CpuidPatch->EaxVal  = (Data[0] & DataMask[0]) | (CpuInfo->CpuidVerEax.Uint32 & ~DataMask[0]);
-    CpuidPatch->EbxCmd  = 0xBB;
-    CpuidPatch->EbxVal  = (Data[1] & DataMask[1]) | (CpuInfo->CpuidVerEbx.Uint32 & ~DataMask[1]);
-    CpuidPatch->EcxCmd  = 0xB9;
-    CpuidPatch->EcxVal  = (Data[2] & DataMask[2]) | (CpuInfo->CpuidVerEcx.Uint32 & ~DataMask[2]);
-    CpuidPatch->EdxCmd  = 0xBA;
-    CpuidPatch->EdxVal  = (Data[3] & DataMask[3]) | (CpuInfo->CpuidVerEdx.Uint32 & ~DataMask[3]);
-    SetMem (Record + sizeof (INTERNAL_CPUID_PATCH), FoundSize - sizeof (INTERNAL_CPUID_PATCH), 0x90);
+    CpuidPatch         = (INTERNAL_CPUID_PATCH *) Record;
+    CpuidPatch->EaxCmd = 0xB8;
+    CpuidPatch->EaxVal = Eax.Uint32;
+    CpuidPatch->EbxCmd = 0xBB;
+    CpuidPatch->EbxVal = Ebx.Uint32;
+    CpuidPatch->EcxCmd = 0xB9;
+    CpuidPatch->EcxVal = Ecx.Uint32;
+    CpuidPatch->EdxCmd = 0xBA;
+    CpuidPatch->EdxVal = Edx.Uint32;
+    SetMem (
+      Record + sizeof (INTERNAL_CPUID_PATCH),
+      FoundSize - sizeof (INTERNAL_CPUID_PATCH),
+      0x90
+      );
     Record += FoundSize;
 
     for (Index = 0; Index < EFI_PAGE_SIZE - sizeof (mKernelCpuidFindMcRel); ++Index, ++Record) {
@@ -642,9 +711,36 @@ PatchKernelCpuId (
     }
   } else {
     //
-    // TODO: Implement debug kernel support.
+    // Handle debug kernel here...
     //
+    Status = PatcherGetSymbolAddress (Patcher, "_cpuid_set_cpufamily", (UINT8 **) &Record);
+    if (RETURN_ERROR (Status) || Record >= Last) {
+      DEBUG ((DEBUG_WARN, "Failed to locate _cpuid_set_cpufamily (%p) - %r\n", Record, Status));
+      return EFI_NOT_FOUND;
+    }
+
+    CopyMem (Record, mKernelCpuidReplaceDbg, sizeof (mKernelCpuidReplaceDbg));
+    FnPatch = (INTERNAL_CPUID_FN_PATCH *) Record;
+    FnPatch->Signature     = Eax.Uint32;
+    FnPatch->Stepping      = (UINT8) Eax.Bits.SteppingId;
+    FnPatch->ExtModel      = (UINT8) Eax.Bits.ExtendedModelId;
+    FnPatch->Model         = Eax.Bits.Model | (UINT8) (Eax.Bits.ExtendedModelId << 4U);
+    FnPatch->Family        = (UINT8) Eax.Bits.FamilyId;
+    FnPatch->Type          = (UINT8) Eax.Bits.ProcessorType;
+    FnPatch->ExtFamily     = (UINT8) Eax.Bits.ExtendedFamilyId;
+    FnPatch->Features      = ((UINT64) Ecx.Uint32 << 32ULL) | (UINT64) Edx.Uint32;
+    if (FnPatch->Features & CPUID_FEATURE_HTT) {
+      FnPatch->LogicalPerPkg = (UINT16) Ebx.Bits.MaximumAddressableIdsForLogicalProcessors;
+    } else {
+      FnPatch->LogicalPerPkg = 1;
+    }
+
+    FnPatch->AppleFamily1 = FnPatch->AppleFamily2 = OcCpuModelToAppleFamily (Eax);
+
+    return EFI_SUCCESS;
   }
+
+  DEBUG ((DEBUG_WARN, "Failed to find either CPUID patch (%u)\n", FoundSize));
 
   return RETURN_UNSUPPORTED;
 }

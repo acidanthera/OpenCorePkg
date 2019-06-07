@@ -105,7 +105,7 @@ OcCpuCorrectFlexRatio (
 **/
 UINT32
 OcCpuModelToAppleFamily (
-  IN UINT32      VersionEax
+  IN CPUID_VERSION_INFO_EAX  VersionEax
   );
 
 #endif // OC_CPU_LIB_H_

@@ -904,7 +904,7 @@ OcCpuScanProcessor (
       Cpu->MicrocodeRevision = AsmReadMsr32 (MSR_IA32_BIOS_SIGN_ID);
     }
 
-    Cpu->Signature = (UINT8) Cpu->CpuidVerEax.Uint32;
+    Cpu->Signature = Cpu->CpuidVerEax.Uint32;
     Cpu->Stepping  = (UINT8) Cpu->CpuidVerEax.Bits.SteppingId;
     Cpu->ExtModel  = (UINT8) Cpu->CpuidVerEax.Bits.ExtendedModelId;
     Cpu->Model     = (UINT8) Cpu->CpuidVerEax.Bits.Model | (UINT8) (Cpu->CpuidVerEax.Bits.ExtendedModelId << 4U);
@@ -1004,15 +1004,12 @@ OcCpuCorrectFlexRatio (
 
 UINT32
 OcCpuModelToAppleFamily (
-  IN UINT32      VersionEax
+  IN CPUID_VERSION_INFO_EAX   VersionEax
   )
 {
-  CPUID_VERSION_INFO_EAX  Eax;
   UINT8                   Model;
 
-  Eax.Uint32  = VersionEax;
-
-  if (Eax.Bits.FamilyId != 6) {
+  if (VersionEax.Bits.FamilyId != 6) {
     return CPUFAMILY_UNKNOWN;
   }
 
@@ -1020,7 +1017,7 @@ OcCpuModelToAppleFamily (
   // This MUST be 1 to 1 with Apple XNU kernel implemenation.
   //
 
-  Model = (UINT8) Eax.Bits.Model | (UINT8) (Eax.Bits.ExtendedModelId << 4U);
+  Model = (UINT8) VersionEax.Bits.Model | (UINT8) (VersionEax.Bits.ExtendedModelId << 4U);
 
   switch (Model) {
     case CPU_MODEL_PENRYN:
