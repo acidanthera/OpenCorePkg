@@ -143,6 +143,58 @@ typedef struct XCPM_MSR_RECORD_ {
 
 #pragma pack(pop)
 
+STATIC
+UINT8
+mXcpmCfgLockRelFind[] = {
+  0xB9, 0xE2, 0x00, 0x00, 0x00, 0x0F, 0x30 // mov ecx, 0xE2 ; wrmsr
+};
+
+STATIC
+UINT8
+mXcpmCfgLockRelReplace[] = {
+  0xB9, 0xE2, 0x00, 0x00, 0x00, 0x90, 0x90 // mov ecx, 0xE2 ; nop
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mXcpmCfgLockRelPatch = {
+  .Base        = "_xcpm_idle",
+  .Find        = mXcpmCfgLockRelFind,
+  .Mask        = NULL,
+  .Replace     = mXcpmCfgLockRelReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mXcpmCfgLockRelFind),
+  .Count       = 2,
+  .Skip        = 0,
+  .Limit       = 4096
+};
+
+STATIC
+UINT8
+mXcpmCfgLockDbgFind[] = {
+  0xBF, 0xE2, 0x00, 0x00, 0x00, 0xE8 // mov edi, 0xE2 ; call (wrmsr64)
+};
+
+STATIC
+UINT8
+mXcpmCfgLockDbgReplace[] = {
+  0xEB, 0x08, 0x90, 0x90, 0x90, 0xE8 // jmp LBL ; nop; nop; nop; call (wrmsr64); LBL:
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mXcpmCfgLockDbgPatch = {
+  .Base        = "_xcpm_cst_control_evaluate",
+  .Find        = mXcpmCfgLockDbgFind,
+  .Mask        = NULL,
+  .Replace     = mXcpmCfgLockDbgReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mXcpmCfgLockDbgFind),
+  .Count       = 2,
+  .Skip        = 0,
+  .Limit       = 4096
+};
+
 RETURN_STATUS
 PatchAppleXcpmCfgLock (
   IN OUT PATCHER_CONTEXT  *Patcher
@@ -181,6 +233,24 @@ PatchAppleXcpmCfgLock (
         break;
       }
       ++Record;
+    }
+
+    //
+    // Now the HWP patch.
+    //
+    Status = PatcherApplyGenericPatch (
+      Patcher,
+      &mXcpmCfgLockRelPatch
+      );
+    if (RETURN_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "Failed to locate _xcpm_idle release patch - %r, trying dbg\n", Status));
+      Status = PatcherApplyGenericPatch (
+        Patcher,
+        &mXcpmCfgLockDbgPatch
+        );
+      if (RETURN_ERROR (Status)) {
+        DEBUG ((DEBUG_WARN, "Failed to locate _xcpm_idle patches - %r\n", Status));
+      }
     }
   } else {
     DEBUG ((DEBUG_WARN, "Failed to locate _xcpm_core_scope_msrs - %r\n", Status));
