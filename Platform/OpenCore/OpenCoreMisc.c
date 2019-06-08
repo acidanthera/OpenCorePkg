@@ -76,10 +76,12 @@ OcToolLoadEntry (
   IN  VOID                        *Context,
   IN  OC_BOOT_ENTRY               *ChosenEntry,
   OUT VOID                        **Data,
-  OUT UINT32                      *DataSize
+  OUT UINT32                      *DataSize,
+  OUT EFI_DEVICE_PATH_PROTOCOL    **DevicePath OPTIONAL
   )
 {
-  CHAR16    ToolPath[64];
+  CHAR16              ToolPath[64];
+  OC_STORAGE_CONTEXT  *Storage;
 
   UnicodeSPrint (
     ToolPath,
@@ -88,8 +90,10 @@ OcToolLoadEntry (
     ChosenEntry->PathName
     );
 
+  Storage = (OC_STORAGE_CONTEXT *) Context;
+
   *Data = OcStorageReadFileUnicode (
-    (OC_STORAGE_CONTEXT *) Context,
+    Storage,
     ToolPath,
     DataSize
     );
@@ -100,6 +104,10 @@ OcToolLoadEntry (
       ToolPath
       ));
     return EFI_NOT_FOUND;
+  }
+
+  if (DevicePath != NULL) {
+    *DevicePath = Storage->DummyDevicePath;
   }
 
   return EFI_SUCCESS;
