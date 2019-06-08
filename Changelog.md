@@ -11,6 +11,10 @@ OpenCore Changelog
 - Added `Kernel` -> `Emulate` section for CPUID patches
 - Added `CustomSMBIOSGuid` quirk for Custom SMBIOS update mode
 - Added `PanicNoKextDump` quirk to avoid kext dump in panics
+- Switched to EDK II stable and reduced image size
+- Added `LapicKernelPanic` kernel quirk
+- Added `AppleXcpmExtraMsrs` quirk and improved XCPM patches
+- Added `(external)` suffix for external drives in boot menu
 
 #### v0.0.2
 - Documentation improvements (see Differences.pdf)

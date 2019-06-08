@@ -310,9 +310,17 @@ OcKernelApplyPatches (
     if (Config->Kernel.Quirks.CustomSmbiosGuid) {
       PatchCustomSmbiosGuid (Context);
     }
+
+    if (Config->Kernel.Quirks.LapicKernelPanic) {
+      PatchLapicKernelPanic (&Patcher);
+    }
   } else {
     if (Config->Kernel.Quirks.AppleXcpmCfgLock) {
       PatchAppleXcpmCfgLock (&Patcher);
+    }
+
+    if (Config->Kernel.Quirks.AppleXcpmExtraMsrs) {
+      PatchAppleXcpmExtraMsrs (&Patcher);
     }
 
     if (Config->Kernel.Quirks.PanicNoKextDump) {

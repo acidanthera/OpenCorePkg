@@ -1236,6 +1236,15 @@ blocking.
   \href{https://github.com/acidanthera/AptioFixPkg#verifymsre2}{VerifyMsrE2} notes.
 
 \item
+  \texttt{AppleXcpmExtraMsrs}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Disables multiple MSR access critical for select CPUs,
+  which have no native XCPM support. This is normally used in conjunction with
+  \texttt{Emulate}. More details on the XCPM patches are outlined in
+  \href{https://github.com/acidanthera/bugtracker/issues/365}{acidanthera/bugtracker\#365}.
+
+\item
   \texttt{CustomSMBIOSGuid}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
@@ -1262,6 +1271,14 @@ blocking.
 
   \emph{Note}: This option should avoided whenever possible. Modern firmwares
   usually have compatible AHCI controllers.
+
+\item
+  \texttt{LapicKernelPanic}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Disables kernel panic on AP core lapic interrupt. For
+  BSP core lapic interrupt \texttt{lapic\_dont\_panic=1} kernel boot argument is to
+  be used when \texttt{debug} kernel boot argument is present.
 
 \item
   \texttt{PanicNoKextDump}\\
