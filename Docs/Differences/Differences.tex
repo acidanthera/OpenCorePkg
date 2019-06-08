@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May 24 02:34:39 2019
-%DIF ADD ../Configuration.tex        Fri Jun  7 23:49:45 2019
+%DIF ADD ../Configuration.tex        Sat Jun  8 19:46:51 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -515,8 +515,14 @@ the list of modifications across all published updates.
 
 \subsection{Contribution}\label{configuration-comp}
 
-OpenCore can be compiled as an ordinary EDK II package with
-\href{https://github.com/tianocore/tianocore.github.io/wiki/UDK2018}{UDK 2018}.
+OpenCore can be compiled as an ordinary
+\DIFdelbegin \DIFdel{EDK II package with }%DIFDELCMD < \href{https://github.com/tianocore/tianocore.github.io/wiki/UDK2018}{UDK 2018}%%%
+\DIFdelend \DIFaddbegin \href{https://github.com/tianocore/tianocore.github.io/wiki/EDK-II}{EDK II}\DIFadd{.
+Since }\href{https://github.com/tianocore/tianocore.github.io/wiki/UDK}{UDK}
+\DIFadd{development was abandoned by TianoCore, OpenCore requires the use of
+}\href{https://github.com/tianocore/tianocore.github.io/wiki/EDK-II#stable-tags}{EDK II Stable}\DIFadd{.
+Currently supported EDK II release (potentially with patches enhancing the experience)
+is hosted in }\href{https://github.com/acidanthera/audk}{acidanthera/audk}\DIFaddend .
 
 The only officially supported toolchain is \texttt{XCODE5}. Other toolchains
 might work, but are neither supported, nor recommended. Contribution of clean
@@ -534,8 +540,10 @@ one should also install \href{https://www.nasm.us}{NASM} and
 The latest Xcode version is recommended for use despite the toolchain name. Example
 command sequence may look as follows:
 
-\begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
-git clone https://github.com/tianocore/edk2 -b UDK2018 UDK
+\DIFmodbegin
+\begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash,alsolanguage=DIFcode]
+%DIF < git clone https://github.com/tianocore/edk2 -b UDK2018 UDK
+%DIF > git clone https://github.com/acidanthera/audk UDK
 cd UDK
 git clone https://github.com/acidanthera/EfiPkg
 git clone https://github.com/acidanthera/MacInfoPkg
@@ -545,6 +553,7 @@ source edksetup.sh
 make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
+\DIFmodend
 
 \texttt{NOOPT} or \texttt{DEBUG} build modes instead of \texttt{RELEASE}
 can produce a lot more debug output. With \texttt{NOOPT} source level debugging with

@@ -455,8 +455,13 @@ the list of modifications across all published updates.
 
 \subsection{Contribution}\label{configuration-comp}
 
-OpenCore can be compiled as an ordinary EDK II package with
-\href{https://github.com/tianocore/tianocore.github.io/wiki/UDK2018}{UDK 2018}.
+OpenCore can be compiled as an ordinary
+\href{https://github.com/tianocore/tianocore.github.io/wiki/EDK-II}{EDK II}.
+Since \href{https://github.com/tianocore/tianocore.github.io/wiki/UDK}{UDK}
+development was abandoned by TianoCore, OpenCore requires the use of
+\href{https://github.com/tianocore/tianocore.github.io/wiki/EDK-II#stable-tags}{EDK II Stable}.
+Currently supported EDK II release (potentially with patches enhancing the experience)
+is hosted in \href{https://github.com/acidanthera/audk}{acidanthera/audk}.
 
 The only officially supported toolchain is \texttt{XCODE5}. Other toolchains
 might work, but are neither supported, nor recommended. Contribution of clean
@@ -475,7 +480,7 @@ The latest Xcode version is recommended for use despite the toolchain name. Exam
 command sequence may look as follows:
 
 \begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
-git clone https://github.com/tianocore/edk2 -b UDK2018 UDK
+git clone https://github.com/acidanthera/audk UDK
 cd UDK
 git clone https://github.com/acidanthera/EfiPkg
 git clone https://github.com/acidanthera/MacInfoPkg
