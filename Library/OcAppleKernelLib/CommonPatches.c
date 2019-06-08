@@ -928,8 +928,64 @@ PatchPanicKextDump (
   if (RETURN_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "Failed to apply kext dump patch - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "Patch success kext dump \n"));
+    DEBUG ((DEBUG_INFO, "Patch success kext dump\n"));
   }
 
   return RETURN_SUCCESS;
+}
+
+STATIC
+UINT8
+mLapicKernelPanicPatchFind[] = {
+  // mov eax, gs:1Ch
+  // cmp eax, cs:_master_cpu <- address masked out
+  0x65, 0x8B, 0x04, 0x25, 0x1C, 0x00, 0x00, 0x00, 0x3B, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+STATIC
+UINT8
+mLapicKernelPanicPatchMask[] = {
+  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+STATIC
+UINT8
+mLapicKernelPanicPatchReplace[] = {
+  // xor eax, eax ; nop further
+  0x31, 0xC0, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mLapicKernelPanicPatch = {
+  .Base    = "_lapic_interrupt",
+  .Find    = mLapicKernelPanicPatchFind,
+  .Mask    = mLapicKernelPanicPatchMask,
+  .Replace = mLapicKernelPanicPatchReplace,
+  .ReplaceMask = NULL,
+  .Size    = sizeof (mLapicKernelPanicPatchReplace),
+  .Count   = 1,
+  .Skip    = 0,
+  .Limit   = 4096
+};
+
+RETURN_STATUS
+PatchLapicKernelPanic (
+  IN OUT PATCHER_CONTEXT  *Patcher
+  )
+{
+  RETURN_STATUS  Status;
+
+  //
+  // This one is for <= 10.15 release kernels.
+  // TODO: Fix debug kernels and check whether we want more patches.
+  //
+  Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicPatch);
+  if (RETURN_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "Failed to apply lapic patch - %r\n", Status));
+  } else {
+    DEBUG ((DEBUG_INFO, "Patch success lapic\n"));
+  }
+
+  return Status;
 }
