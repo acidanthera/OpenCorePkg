@@ -72,6 +72,14 @@ typedef struct {
   ///
   EFI_FILE_PROTOCOL                *StorageRoot;
   ///
+  /// Device handle with storage (dummy) device path for loading.
+  ///
+  EFI_HANDLE                       StorageHandle;
+  ///
+  /// Dummy file path for file storage.
+  ///
+  EFI_DEVICE_PATH_PROTOCOL         *DummyDevicePath;
+  ///
   /// Vault context.
   ///
   OC_STORAGE_VAULT                 Vault;

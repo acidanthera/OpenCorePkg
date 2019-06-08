@@ -19,6 +19,7 @@
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcStorageLib.h>
@@ -28,6 +29,74 @@ OC_STRUCTORS (OC_STORAGE_VAULT_HASH, ())
 OC_MAP_STRUCTORS (OC_STORAGE_VAULT_FILES)
 OC_STRUCTORS (OC_STORAGE_VAULT, ())
 
+#pragma pack(push, 1)
+
+typedef PACKED struct {
+  VENDOR_DEFINED_DEVICE_PATH Vendor;
+  EFI_DEVICE_PATH_PROTOCOL   End;
+} DUMMY_BOOT_DEVICE_PATH;
+
+typedef PACKED struct {
+  VENDOR_DEFINED_DEVICE_PATH Vendor;
+  VENDOR_DEFINED_DEVICE_PATH VendorFile;
+  EFI_DEVICE_PATH_PROTOCOL   End;
+} DUMMY_BOOT_DEVICE_FILE_PATH;
+
+#pragma pack(pop)
+
+//
+// We do not want to expose these for the time being!.
+//
+
+#define INTERNAL_STORAGE_GUID \
+  { 0x33B5C65A, 0x5B82, 0x403D, {0x87, 0xA5, 0xD4, 0x67, 0x62, 0x50, 0xEC, 0x59} }
+
+#define INTERNAL_STORAGE_FILE_GUID \
+  { 0x1237EC17, 0xD3CE, 0x401D, {0xA8, 0x41, 0xB1, 0xD8, 0x18, 0xF8, 0xAF, 0x1A} }
+
+STATIC
+DUMMY_BOOT_DEVICE_PATH
+mDummyBootDevicePath = {
+  .Vendor = {
+    .Header = {
+      .Type    = HARDWARE_DEVICE_PATH,
+      .SubType = HW_VENDOR_DP,
+      .Length  = {sizeof (VENDOR_DEFINED_DEVICE_PATH), 0}
+    },
+    .Guid = INTERNAL_STORAGE_GUID
+  },
+  .End = {
+    .Type    = END_DEVICE_PATH_TYPE,
+    .SubType = END_ENTIRE_DEVICE_PATH_SUBTYPE,
+    .Length  = {END_DEVICE_PATH_LENGTH, 0}
+  }
+};
+
+STATIC
+DUMMY_BOOT_DEVICE_FILE_PATH
+mDummyBootDeviceFilePath = {
+  .Vendor = {
+    .Header = {
+      .Type    = HARDWARE_DEVICE_PATH,
+      .SubType = HW_VENDOR_DP,
+      .Length  = {sizeof (VENDOR_DEFINED_DEVICE_PATH), 0}
+    },
+    .Guid = INTERNAL_STORAGE_GUID
+  },
+  .VendorFile = {
+    .Header = {
+      .Type    = HARDWARE_DEVICE_PATH,
+      .SubType = HW_VENDOR_DP,
+      .Length  = {sizeof (VENDOR_DEFINED_DEVICE_PATH), 0}
+    },
+    .Guid = INTERNAL_STORAGE_FILE_GUID
+  },
+  .End = {
+    .Type    = END_DEVICE_PATH_TYPE,
+    .SubType = END_ENTIRE_DEVICE_PATH_SUBTYPE,
+    .Length  = {END_DEVICE_PATH_LENGTH, 0}
+  }
+};
 
 STATIC
 OC_SCHEMA
@@ -100,6 +169,15 @@ OcStorageInitializeVault (
       ));
     return EFI_UNSUPPORTED;
   }
+
+  Context->StorageHandle = NULL;
+  gBS->InstallProtocolInterface (
+    &Context->StorageHandle,
+    &gEfiDevicePathProtocolGuid,
+    EFI_NATIVE_INTERFACE,
+    &mDummyBootDevicePath
+    );
+  Context->DummyDevicePath = (EFI_DEVICE_PATH_PROTOCOL *) &mDummyBootDeviceFilePath;
 
   Context->HasVault = TRUE;
 

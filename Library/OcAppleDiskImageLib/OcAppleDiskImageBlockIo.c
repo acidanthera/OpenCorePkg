@@ -29,12 +29,7 @@
 
 #define DMG_FILE_PATH_LEN  (L_STR_LEN (L"DMG_.dmg") + 16 + 1)
 
-#pragma pack(1)
-
-typedef PACKED struct {
-  VENDOR_DEVICE_PATH Vendor;
-  UINT32             Key;
-} DMG_CONTROLLER_DEVICE_PATH;
+#pragma pack(push, 1)
 
 typedef PACKED struct {
   VENDOR_DEFINED_DEVICE_PATH Vendor;
@@ -56,7 +51,7 @@ typedef PACKED struct {
   EFI_DEVICE_PATH_PROTOCOL   End;
 } DMG_DEVICE_PATH;
 
-#pragma pack()
+#pragma pack(pop)
 
 #define OC_APPLE_DISK_IMAGE_MOUNTED_DATA_SIGNATURE  \
   SIGNATURE_32('D','m','g','I')

@@ -235,7 +235,8 @@ EFI_STATUS
   IN  VOID                        *Context,
   IN  OC_BOOT_ENTRY               *ChosenEntry,
   OUT VOID                        **Data,
-  OUT UINT32                      *DataSize
+  OUT UINT32                      *DataSize,
+  OUT EFI_DEVICE_PATH_PROTOCOL    **DevicePath OPTIONAL
   );
 
 /**

@@ -77,7 +77,7 @@ InternalLoadBootEntry (
     if (UnicodeDevicePath != NULL) {
       DEBUG ((
         DEBUG_INFO,
-        "Dmg boot %s to dp %s\n",
+        "OCB: Dmg boot %s to dp %s\n",
         BootEntry->Name,
         UnicodeDevicePath
         ));
@@ -96,11 +96,19 @@ InternalLoadBootEntry (
       Context->CustomEntryContext,
       BootEntry,
       &EntryData,
-      &EntryDataSize
+      &EntryDataSize,
+      &DevicePath
       );
 
     if (!EFI_ERROR (Status)) {
-      Status = gBS->LoadImage (FALSE, ParentHandle, NULL, EntryData, EntryDataSize, EntryHandle);
+      Status = gBS->LoadImage (
+        FALSE,
+        ParentHandle,
+        DevicePath,
+        EntryData,
+        EntryDataSize,
+        EntryHandle
+        );
       FreePool (EntryData);
     }
   } else {
@@ -116,6 +124,15 @@ InternalLoadBootEntry (
     if (!EFI_ERROR (OptionalStatus)) {
       LoadedImage->LoadOptionsSize = BootEntry->LoadOptionsSize;
       LoadedImage->LoadOptions     = BootEntry->LoadOptions;
+
+      if (BootEntry->IsCustom) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCB: Custom DeviceHandle %p FilePath %p\n",
+          LoadedImage->DeviceHandle,
+          LoadedImage->FilePath
+          ));
+      }
     }
   } else {
     InternalUnloadDmg (DmgLoadContext);
@@ -198,7 +215,7 @@ OcDescribeBootEntry (
   if (!EFI_ERROR (Status)) {
     BootEntry->IsWindows = TRUE;
     if (BootEntry->Name == NULL) {
-      BootEntry->Name      = AllocateCopyPool(sizeof (L"BOOTCAMP Windows"), L"BOOTCAMP Windows");
+      BootEntry->Name = AllocateCopyPool (sizeof (L"BOOTCAMP Windows"), L"BOOTCAMP Windows");
     }
   }
 
