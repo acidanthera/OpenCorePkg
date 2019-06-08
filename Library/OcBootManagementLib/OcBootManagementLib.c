@@ -140,11 +140,6 @@ InternalLoadBootEntry (
           LoadedImage->DeviceHandle,
           LoadedImage->FilePath
           ));
-
-        HandleFilePath = DevicePath;
-        DeviceHandle   = NULL;
-        Status = gBS->LocateDevicePath (&gEfiDevicePathProtocolGuid, &HandleFilePath, &DeviceHandle);
-        DEBUG ((DEBUG_INFO, "OCB: LDP (%r) %p vs %p %p\n", Status, DeviceHandle, DevicePath, HandleFilePath));
       }
     }
   } else {
