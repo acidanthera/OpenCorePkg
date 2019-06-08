@@ -46,8 +46,10 @@ InternalLoadBootEntry (
   EFI_STATUS                 Status;
   EFI_STATUS                 OptionalStatus;
   EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
+  EFI_DEVICE_PATH_PROTOCOL   *HandleFilePath;
   CHAR16                     *UnicodeDevicePath;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  EFI_HANDLE                 DeviceHandle;
   VOID                       *EntryData;
   UINT32                     EntryDataSize;
 
@@ -56,6 +58,9 @@ InternalLoadBootEntry (
   //
 
   ZeroMem (DmgLoadContext, sizeof (*DmgLoadContext));
+
+  EntryData    = NULL;
+  EntryDataSize = 0;
 
   if (BootEntry->IsFolder) {
     if ((Context->LoadPolicy & OC_LOAD_ALLOW_DMG_BOOT) == 0) {
@@ -71,26 +76,8 @@ InternalLoadBootEntry (
     if (DevicePath == NULL) {
       return EFI_UNSUPPORTED;
     }
-
-    DEBUG_CODE_BEGIN ();
-    UnicodeDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
-    if (UnicodeDevicePath != NULL) {
-      DEBUG ((
-        DEBUG_INFO,
-        "OCB: Dmg boot %s to dp %s\n",
-        BootEntry->Name,
-        UnicodeDevicePath
-        ));
-      FreePool (UnicodeDevicePath);
-    }
-    DEBUG_CODE_END ();
-
-    Status = gBS->LoadImage (FALSE, ParentHandle, DevicePath, NULL, 0, EntryHandle);
   } else if (BootEntry->IsCustom) {
     ASSERT (Context->CustomRead != NULL);
-
-    EntryData    = NULL;
-    EntryDataSize = 0;
 
     Status = Context->CustomRead (
       Context->CustomEntryContext,
@@ -100,26 +87,47 @@ InternalLoadBootEntry (
       &DevicePath
       );
 
-    if (!EFI_ERROR (Status)) {
-      Status = gBS->LoadImage (
-        FALSE,
-        ParentHandle,
-        DevicePath,
-        EntryData,
-        EntryDataSize,
-        EntryHandle
-        );
-      FreePool (EntryData);
+    if (EFI_ERROR (Status)) {
+      return Status;
     }
   } else {
-    Status = gBS->LoadImage (FALSE, ParentHandle, BootEntry->DevicePath, NULL, 0, EntryHandle);
+    DevicePath = BootEntry->DevicePath;
+  }
+
+  DEBUG_CODE_BEGIN ();
+  ASSERT (DevicePath != NULL);
+  UnicodeDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
+  DEBUG ((
+    DEBUG_INFO,
+    "OCB: Perform boot %s to dp %s (%p/%u)\n",
+    BootEntry->Name,
+    UnicodeDevicePath != NULL ? UnicodeDevicePath : L"<null>",
+    EntryData,
+    EntryDataSize
+    ));
+  if (UnicodeDevicePath != NULL) {
+    FreePool (UnicodeDevicePath);
+  }
+  DEBUG_CODE_END ();
+
+  Status = gBS->LoadImage (
+    FALSE,
+    ParentHandle,
+    DevicePath,
+    EntryData,
+    EntryDataSize,
+    EntryHandle
+    );
+
+  if (EntryData != NULL) {
+    FreePool (EntryData);
   }
 
   if (!EFI_ERROR (Status)) {
     OptionalStatus = gBS->HandleProtocol (
                             ParentHandle,
                             &gEfiLoadedImageProtocolGuid,
-                            (VOID **)&LoadedImage
+                            (VOID **) &LoadedImage
                             );
     if (!EFI_ERROR (OptionalStatus)) {
       LoadedImage->LoadOptionsSize = BootEntry->LoadOptionsSize;
@@ -132,6 +140,11 @@ InternalLoadBootEntry (
           LoadedImage->DeviceHandle,
           LoadedImage->FilePath
           ));
+
+        HandleFilePath = DevicePath;
+        DeviceHandle   = NULL;
+        Status = gBS->LocateDevicePath (&gEfiDevicePathProtocolGuid, &HandleFilePath, &DeviceHandle);
+        DEBUG ((DEBUG_INFO, "OCB: LDP (%r) %p vs %p %p\n", Status, DeviceHandle, DevicePath, HandleFilePath));
       }
     }
   } else {

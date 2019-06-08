@@ -170,15 +170,6 @@ OcStorageInitializeVault (
     return EFI_UNSUPPORTED;
   }
 
-  Context->StorageHandle = NULL;
-  gBS->InstallProtocolInterface (
-    &Context->StorageHandle,
-    &gEfiDevicePathProtocolGuid,
-    EFI_NATIVE_INTERFACE,
-    &mDummyBootDevicePath
-    );
-  Context->DummyDevicePath = (EFI_DEVICE_PATH_PROTOCOL *) &mDummyBootDeviceFilePath;
-
   Context->HasVault = TRUE;
 
   return EFI_SUCCESS;
@@ -302,6 +293,14 @@ OcStorageInitFromFs (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCS: Vault init failure %p (%u) - %r\n", Vault, DataSize, Status));
   }
+
+  gBS->InstallProtocolInterface (
+    &Context->StorageHandle,
+    &gEfiDevicePathProtocolGuid,
+    EFI_NATIVE_INTERFACE,
+    &mDummyBootDevicePath
+    );
+  Context->DummyDevicePath = (EFI_DEVICE_PATH_PROTOCOL *) &mDummyBootDeviceFilePath;
 
   if (Signature != NULL) {
     FreePool (Signature);
