@@ -15,6 +15,7 @@ OpenCore Changelog
 - Added `LapicKernelPanic` kernel quirk
 - Added `AppleXcpmExtraMsrs` quirk and improved XCPM patches
 - Added `(external)` suffix for external drives in boot menu
+- Added `UsePicker` option, do enable for OC boot management
 
 #### v0.0.2
 - Documentation improvements (see Differences.pdf)

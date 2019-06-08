@@ -396,6 +396,8 @@
 			<true/>
 			<key>Timeout</key>
 			<integer>5</integer>
+			<key>UsePicker</key>
+			<true/>
 		</dict>
 		<key>Debug</key>
 		<dict>

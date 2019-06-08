@@ -1468,6 +1468,20 @@ behaviour that does not go to any other sections
   \textbf{Description}: Timeout in seconds in boot picker before
   automatic booting of the default boot entry.
 
+\item
+  \texttt{UsePicker}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Use OpenCore built-in boot picker for boot management.
+
+  \texttt{UsePicker} set to \texttt{false} entirely disables all boot management
+  in OpenCore except policy enforcement. In this case a custom user interface may
+  utilise \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}
+  \texttt{OcBootManagementLib} to implement a user friendly boot picker oneself.
+
+  \emph{Note}: By default OpenCore built-in boot picker loads the default discovered
+  option, this can be changed by setting \texttt{ShowPicker} to \texttt{true}.
+
 \end{enumerate}
 
 \subsection{Debug Properties}\label{miscdebugprops}

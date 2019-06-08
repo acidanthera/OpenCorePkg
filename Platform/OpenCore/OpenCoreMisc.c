@@ -323,6 +323,14 @@ OcMiscBoot (
   UINTN              ContextSize;
   UINT32             Index;
 
+  //
+  // Do not use our boot picker unless asked.
+  //
+  if (!Config->Misc.Boot.UsePicker) {
+    DEBUG ((DEBUG_INFO, "OC: Handing off to external boot controller\n"));
+    return;
+  }
+
   if (!OcOverflowMulAddUN (
     sizeof (OC_PICKER_ENTRY),
     Config->Misc.Tools.Count,
