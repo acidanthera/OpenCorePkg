@@ -724,7 +724,7 @@ PatchKernelCpuId (
     FnPatch->Signature     = Eax.Uint32;
     FnPatch->Stepping      = (UINT8) Eax.Bits.SteppingId;
     FnPatch->ExtModel      = (UINT8) Eax.Bits.ExtendedModelId;
-    FnPatch->Model         = Eax.Bits.Model | (UINT8) (Eax.Bits.ExtendedModelId << 4U);
+    FnPatch->Model         = (UINT8) Eax.Bits.Model | (UINT8) (Eax.Bits.ExtendedModelId << 4U);
     FnPatch->Family        = (UINT8) Eax.Bits.FamilyId;
     FnPatch->Type          = (UINT8) Eax.Bits.ProcessorType;
     FnPatch->ExtFamily     = (UINT8) Eax.Bits.ExtendedFamilyId;
