@@ -438,7 +438,14 @@ InternalGetDefaultBootEntry (
 
   for (Index = 0; Index < NumBootEntries; ++Index) {
     BootEntry    = &BootEntries[Index];
+
+    if (BootEntry->IsCustom) {
+      continue;
+    }
+
     OcDevicePath = BootEntry->DevicePath;
+
+    ASSERT (OcDevicePath != NULL);
 
     if ((GetDevicePathSize (OcDevicePath) - END_DEVICE_PATH_LENGTH) < RootDevicePathSize) {
       continue;
