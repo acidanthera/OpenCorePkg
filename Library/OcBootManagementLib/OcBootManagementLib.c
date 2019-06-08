@@ -306,7 +306,7 @@ OcFillBootEntry (
 
   Count = 0;
 
-  Status = InternalCheckScanPolicy (Handle, SimpleFs, Policy);
+  Status = InternalCheckScanPolicy (Handle, SimpleFs, Policy, &BootEntry->IsExternal);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCB: Skipping handle %p due to scan policy %x\n", Handle, Policy));
     return 0;
@@ -553,6 +553,9 @@ OcShowSimpleBootMenu (
       gST->ConOut->OutputString (gST->ConOut, Code);
       gST->ConOut->OutputString (gST->ConOut, L". ");
       gST->ConOut->OutputString (gST->ConOut, BootEntries[Index].Name);
+      if (BootEntries[Index].IsExternal) {
+        gST->ConOut->OutputString (gST->ConOut, L" (external)");
+      }
       if (BootEntries[Index].IsFolder) {
         gST->ConOut->OutputString (gST->ConOut, L" (dmg)");
       }

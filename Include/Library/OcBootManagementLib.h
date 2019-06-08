@@ -41,6 +41,10 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   BOOLEAN                   IsCustom;
   //
+  // Set when this entry is an externally available entry (e.g. USB).
+  //
+  BOOLEAN                   IsExternal;
+  //
   // Should try booting from first dmg found in DevicePath.
   //
   BOOLEAN                   IsFolder;

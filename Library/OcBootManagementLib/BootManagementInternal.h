@@ -34,7 +34,8 @@ EFI_STATUS
 InternalCheckScanPolicy (
   IN  EFI_HANDLE                       Handle,
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *SimpleFs,
-  IN  UINT32                           Policy
+  IN  UINT32                           Policy,
+  OUT BOOLEAN                          *External OPTIONAL
   );
 
 EFI_DEVICE_PATH_PROTOCOL *

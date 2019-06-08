@@ -32,78 +32,99 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
-EFI_STATUS
-InternalCheckScanPolicy (
-  IN  EFI_HANDLE                       Handle,
-  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *SimpleFs,
-  IN  UINT32                           Policy
+STATIC
+UINT32
+InternalGetRequestedPolicyType (
+  IN  EFI_HANDLE   Handle,
+  OUT BOOLEAN      *External  OPTIONAL
   )
 {
   EFI_STATUS                Status;
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
-  EFI_FILE_PROTOCOL         *Root;
-  UINTN                     BufferSize;
+  UINT8                     SubType;
 
-  Status = EFI_SUCCESS;
+  if (External != NULL) {
+    *External = FALSE;
+  }
 
+  Status = gBS->HandleProtocol (Handle, &gEfiDevicePathProtocolGuid, (VOID **) &DevicePath);
+  if (EFI_ERROR (Status)) {
+    return 0;
+  }
 
-  if ((Policy & OC_SCAN_DEVICE_LOCK) != 0) {
-    Status = gBS->HandleProtocol (Handle, &gEfiDevicePathProtocolGuid, (VOID **) &DevicePath);
-    if (EFI_ERROR (Status)) {
-      return Status;
-    }
-
-    Status = EFI_SECURITY_VIOLATION;
-
-    while (!IsDevicePathEnd (DevicePath)) {
-      if (DevicePathType (DevicePath) == MESSAGING_DEVICE_PATH) {
-        if ((Policy & OC_SCAN_ALLOW_DEVICE_SATA) != 0
-          && DevicePathSubType (DevicePath) == MSG_SATA_DP) {
-          Status = EFI_SUCCESS;
-        } else if ((Policy & OC_SCAN_ALLOW_DEVICE_SASEX) != 0
-          && DevicePathSubType (DevicePath) == MSG_SASEX_DP) {
-          Status = EFI_SUCCESS;
-        } else if ((Policy & OC_SCAN_ALLOW_DEVICE_SCSI) != 0
-          && DevicePathSubType (DevicePath) == MSG_SCSI_DP) {
-          Status = EFI_SUCCESS;
-        } else if ((Policy & OC_SCAN_ALLOW_DEVICE_NVME) != 0
-          && DevicePathSubType (DevicePath) == MSG_NVME_NAMESPACE_DP) {
-          Status = EFI_SUCCESS;
-        } else if ((Policy & OC_SCAN_ALLOW_DEVICE_ATAPI) != 0
-          && DevicePathSubType (DevicePath) == MSG_ATAPI_DP) {
-          Status = EFI_SUCCESS;
-        } else if ((Policy & OC_SCAN_ALLOW_DEVICE_USB) != 0
-          && DevicePathSubType (DevicePath) == MSG_USB_DP) {
-          Status = EFI_SUCCESS;
-        } else if ((Policy & OC_SCAN_ALLOW_DEVICE_FIREWIRE) != 0
-          && DevicePathSubType (DevicePath) == MSG_1394_DP) {
-          Status = EFI_SUCCESS;
-        } else if ((Policy & OC_SCAN_ALLOW_DEVICE_SDCARD) != 0
-          && (DevicePathSubType (DevicePath) == MSG_EMMC_DP
-            || DevicePathSubType (DevicePath) == MSG_SD_DP)) {
-          Status = EFI_SUCCESS;
-        }
-
-        //
-        // We do not have good protection against device tunneling.
-        // These things must be considered:
-        // - Thunderbolt 2 PCI-e pass-through
-        // - Thunderbolt 3 PCI-e pass-through (Type-C, may be different from 2)
-        // - FireWire devices
-        // For now we hope that first messaging type protects us, and all
-        // subsequent messaging types are tunneled.
-        //
-
-        break;
+  while (!IsDevicePathEnd (DevicePath)) {
+    if (DevicePathType (DevicePath) == MESSAGING_DEVICE_PATH) {
+      SubType = DevicePathSubType (DevicePath);
+      switch (SubType) {
+        case MSG_SATA_DP:
+          return OC_SCAN_ALLOW_DEVICE_SATA;
+        case MSG_SASEX_DP:
+          return OC_SCAN_ALLOW_DEVICE_SASEX;
+        case MSG_SCSI_DP:
+          return OC_SCAN_ALLOW_DEVICE_SCSI;
+        case MSG_NVME_NAMESPACE_DP:
+          return OC_SCAN_ALLOW_DEVICE_NVME;
+        case MSG_ATAPI_DP:
+          if (External != NULL) {
+            *External = TRUE;
+          }
+          return OC_SCAN_ALLOW_DEVICE_ATAPI;
+        case MSG_USB_DP:
+          if (External != NULL) {
+            *External = TRUE;
+          }
+          return OC_SCAN_ALLOW_DEVICE_USB;
+        case MSG_1394_DP:
+          if (External != NULL) {
+            *External = TRUE;
+          }
+          return OC_SCAN_ALLOW_DEVICE_FIREWIRE;
+        case MSG_SD_DP:
+        case MSG_EMMC_DP:
+          if (External != NULL) {
+            *External = TRUE;
+          }
+          return OC_SCAN_ALLOW_DEVICE_SDCARD;
       }
 
-      DevicePath = NextDevicePathNode (DevicePath);
+      //
+      // We do not have good protection against device tunneling.
+      // These things must be considered:
+      // - Thunderbolt 2 PCI-e pass-through
+      // - Thunderbolt 3 PCI-e pass-through (Type-C, may be different from 2)
+      // - FireWire devices
+      // For now we hope that first messaging type protects us, and all
+      // subsequent messaging types are tunneled.
+      //
+
+      break;
     }
 
-    if (EFI_ERROR (Status)) {
-      return Status;
-    }
+    DevicePath = NextDevicePathNode (DevicePath);
   }
+
+  return 0;
+}
+
+EFI_STATUS
+InternalCheckScanPolicy (
+  IN  EFI_HANDLE                       Handle,
+  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *SimpleFs,
+  IN  UINT32                           Policy,
+  OUT BOOLEAN                          *External OPTIONAL
+  )
+{
+  EFI_STATUS                Status;
+  EFI_FILE_PROTOCOL         *Root;
+  UINTN                     BufferSize;
+  UINT32                    RequestedPolicy;
+
+  RequestedPolicy = InternalGetRequestedPolicyType (Handle, External);
+  if ((Policy & OC_SCAN_DEVICE_LOCK) != 0 && (Policy & RequestedPolicy) == 0) {
+    return EFI_SECURITY_VIOLATION;
+  }
+
+  Status = EFI_SUCCESS;
 
   if ((Policy & OC_SCAN_FILE_SYSTEM_LOCK) != 0) {
     Status = SimpleFs->OpenVolume (SimpleFs, &Root);
