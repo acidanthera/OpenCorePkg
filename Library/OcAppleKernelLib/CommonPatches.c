@@ -259,6 +259,80 @@ PatchAppleXcpmCfgLock (
   return Replacements > 0 ? EFI_SUCCESS : EFI_NOT_FOUND;
 }
 
+
+RETURN_STATUS
+PatchAppleXcpmExtraMsrs (
+  IN OUT PATCHER_CONTEXT  *Patcher
+  )
+{
+  RETURN_STATUS       Status;
+  XCPM_MSR_RECORD     *Record;
+  XCPM_MSR_RECORD     *Last;
+  UINT32              Replacements;
+
+  Last = (XCPM_MSR_RECORD *) ((UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext)
+    + MachoGetFileSize (&Patcher->MachContext) - sizeof (XCPM_MSR_RECORD));
+
+  Replacements = 0;
+
+  Status = PatcherGetSymbolAddress (Patcher, "_xcpm_pkg_scope_msrs", (UINT8 **) &Record);
+  if (!RETURN_ERROR (Status)) {
+    while (Record < Last) {
+      if (Record->xcpm_msr_applicable_cpus == 0x33DC) {
+        DEBUG ((
+          DEBUG_INFO,
+          "Replacing _xcpm_pkg_scope_msrs data %u %u\n",
+          Record->xcpm_msr_num,
+          Record->xcpm_msr_applicable_cpus
+          ));
+        Record->xcpm_msr_applicable_cpus = 0;
+        ++Replacements;
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "Not matching _xcpm_pkg_scope_msrs data %u %u\n",
+          Record->xcpm_msr_num,
+          Record->xcpm_msr_applicable_cpus
+          ));
+        break;
+      }
+      ++Record;
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "Failed to locate _xcpm_pkg_scope_msrs - %r\n", Status));
+  }
+
+  Status = PatcherGetSymbolAddress (Patcher, "_xcpm_SMT_scope_msrs", (UINT8 **) &Record);
+  if (!RETURN_ERROR (Status)) {
+    while (Record < Last) {
+      if (Record->xcpm_msr_flag_p == NULL) {
+        DEBUG ((
+          DEBUG_INFO,
+          "Replacing _xcpm_SMT_scope_msrs data %u %u\n",
+          Record->xcpm_msr_num,
+          Record->xcpm_msr_applicable_cpus
+          ));
+        Record->xcpm_msr_applicable_cpus = 0;
+        ++Replacements;
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "Not matching _xcpm_SMT_scope_msrs data %u %u %p\n",
+          Record->xcpm_msr_num,
+          Record->xcpm_msr_applicable_cpus,
+          Record->xcpm_msr_flag_p
+          ));
+        break;
+      }
+      ++Record;
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "Failed to locate _xcpm_SMT_scope_msrs - %r\n", Status));
+  }
+
+  return Replacements > 0 ? EFI_SUCCESS : EFI_NOT_FOUND;
+}
+
 STATIC
 UINT8
 mRemoveUsbLimitV1Find[] = {

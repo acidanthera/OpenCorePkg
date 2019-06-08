@@ -420,6 +420,18 @@ PatchAppleXcpmCfgLock (
   );
 
 /**
+  Apply extra MSR patches to XNU kernel (XCPM).
+
+  @param Patcher  Patcher context.
+
+  @return  RETURN_SUCCESS on success.
+**/
+RETURN_STATUS
+PatchAppleXcpmExtraMsrs (
+  IN OUT PATCHER_CONTEXT  *Patcher
+  );
+
+/**
   Apply port limit patches to AppleUSBXHCI and AppleUSBXHCIPCI kexts.
 
   @param Context  Prelinked kernel context.
