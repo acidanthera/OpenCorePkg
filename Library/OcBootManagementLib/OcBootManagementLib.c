@@ -46,10 +46,8 @@ InternalLoadBootEntry (
   EFI_STATUS                 Status;
   EFI_STATUS                 OptionalStatus;
   EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
-  EFI_DEVICE_PATH_PROTOCOL   *HandleFilePath;
   CHAR16                     *UnicodeDevicePath;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
-  EFI_HANDLE                 DeviceHandle;
   VOID                       *EntryData;
   UINT32                     EntryDataSize;
 
