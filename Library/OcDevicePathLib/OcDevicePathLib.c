@@ -102,42 +102,12 @@ DebugPrintDevicePath (
 {
   DEBUG_CODE_BEGIN();
 
-  CHAR16   *TextDevicePath;
-  BOOLEAN  PrintedOnce;
-  BOOLEAN  EndsWithSlash;
-  UINTN    Length;
+  CHAR16 *TextDevicePath;
 
-  DEBUG ((ErrorLevel, "%a - ", Message));
-
-  if (DevicePath == NULL) {
-    DEBUG ((ErrorLevel, "<missing>\n", Message));
-    return;
-  }
-
-  PrintedOnce = FALSE;
-  EndsWithSlash = FALSE;
-  while (!IsDevicePathEnd (DevicePath)) {
-    TextDevicePath = ConvertDeviceNodeToText (DevicePath, TRUE, FALSE);
-    if (TextDevicePath != NULL) {
-      if (PrintedOnce && !EndsWithSlash) {
-        DEBUG ((ErrorLevel, "\\%s", TextDevicePath));
-      } else {
-        DEBUG ((ErrorLevel, "%s", TextDevicePath));
-      }
-
-      Length = StrLen (TextDevicePath);
-      EndsWithSlash = Length > 0 && TextDevicePath[Length - 1] == '\\';
-      PrintedOnce = TRUE;
-      FreePool (TextDevicePath);
-    }
-
-    DevicePath = NextDevicePathNode (DevicePath);
-  }
-
-  if (!PrintedOnce) {
-    DEBUG ((ErrorLevel, "<unconversible>\n"));
-  } else {
-    DEBUG ((ErrorLevel, "\n"));
+  TextDevicePath = ConvertDevicePathToText (DevicePath, TRUE, FALSE);
+  DEBUG ((ErrorLevel, "%a - %s\n", Message, TextDevicePath));
+  if (TextDevicePath != NULL) {
+    FreePool (TextDevicePath);
   }
 
   DEBUG_CODE_END();
