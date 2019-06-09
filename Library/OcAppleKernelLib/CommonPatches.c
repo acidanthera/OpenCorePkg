@@ -278,7 +278,7 @@ PatchAppleXcpmExtraMsrs (
   Status = PatcherGetSymbolAddress (Patcher, "_xcpm_pkg_scope_msrs", (UINT8 **) &Record);
   if (!RETURN_ERROR (Status)) {
     while (Record < Last) {
-      if (Record->xcpm_msr_applicable_cpus == 0x33DC) {
+      if ((Record->xcpm_msr_applicable_cpus & 0xFF0000FDU) == 0xDC) {
         DEBUG ((
           DEBUG_INFO,
           "Replacing _xcpm_pkg_scope_msrs data %u %u\n",
