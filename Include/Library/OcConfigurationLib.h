@@ -279,10 +279,19 @@
   OC_MAP (OC_STRING, OC_NVRAM_BLOCK_ENTRY, _, __)
   OC_DECLARE (OC_NVRAM_BLOCK_MAP)
 
+#define OC_NVRAM_LEGACY_ENTRY_FIELDS(_, __) \
+  OC_ARRAY (OC_STRING, _, __)
+  OC_DECLARE (OC_NVRAM_LEGACY_ENTRY)
+
+#define OC_NVRAM_LEGACY_MAP_FIELDS(_, __) \
+  OC_MAP (OC_STRING, OC_NVRAM_LEGACY_ENTRY, _, __)
+  OC_DECLARE (OC_NVRAM_LEGACY_MAP)
+
 #define OC_NVRAM_CONFIG_FIELDS(_, __) \
   _(OC_NVRAM_ADD_MAP           , Add               ,     , OC_CONSTR2 (OC_NVRAM_ADD_MAP, _, __)        , OC_DESTR (OC_NVRAM_ADD_MAP)) \
-  _(OC_NVRAM_BLOCK_MAP         , Block             ,     , OC_CONSTR2 (OC_NVRAM_BLOCK_MAP, _, __)      , OC_DESTR (OC_NVRAM_BLOCK_MAP))
-  /* _(OC_NVRAM_QUIRKS         , Quirks            ,     , OC_CONSTR2 (OC_NVRAM_QUIRKS, _, __)         , OC_DESTR (OC_NVRAM_QUIRKS)) */
+  _(OC_NVRAM_BLOCK_MAP         , Block             ,     , OC_CONSTR2 (OC_NVRAM_BLOCK_MAP, _, __)      , OC_DESTR (OC_NVRAM_BLOCK_MAP)) \
+  _(OC_NVRAM_LEGACY_MAP        , Legacy            ,     , OC_CONSTR2 (OC_NVRAM_LEGACY_MAP, _, __)     , OC_DESTR (OC_NVRAM_LEGACY_MAP)) \
+  _(BOOLEAN                    , UseLegacy         ,     , FALSE                                       , () )
   OC_DECLARE (OC_NVRAM_CONFIG)
 
 /**

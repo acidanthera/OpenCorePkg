@@ -48,6 +48,8 @@ OC_STRUCTORS       (OC_MISC_CONFIG, ())
 OC_MAP_STRUCTORS   (OC_NVRAM_ADD_MAP)
 OC_STRUCTORS       (OC_NVRAM_BLOCK_ENTRY, ())
 OC_MAP_STRUCTORS   (OC_NVRAM_BLOCK_MAP)
+OC_STRUCTORS       (OC_NVRAM_LEGACY_ENTRY, ())
+OC_MAP_STRUCTORS   (OC_NVRAM_LEGACY_MAP)
 OC_STRUCTORS       (OC_NVRAM_CONFIG, ())
 
 OC_STRUCTORS       (OC_PLATFORM_GENERIC_CONFIG, ())
@@ -327,9 +329,20 @@ mNvramBlockSchema = OC_SCHEMA_ARRAY (NULL, &mNvramBlockEntrySchema);
 
 STATIC
 OC_SCHEMA
+mNvramLegacyEntrySchema = OC_SCHEMA_STRING (NULL);
+
+STATIC
+OC_SCHEMA
+mNvramLegacySchema = OC_SCHEMA_ARRAY (NULL, &mNvramLegacyEntrySchema);
+
+STATIC
+OC_SCHEMA
 mNvramConfigurationSchema[] = {
-  OC_SCHEMA_MAP_IN   ("Add",    OC_GLOBAL_CONFIG, Nvram.Add, &mNvramAddSchema),
-  OC_SCHEMA_MAP_IN   ("Block",  OC_GLOBAL_CONFIG, Nvram.Block, &mNvramBlockSchema)
+  OC_SCHEMA_MAP_IN     ("Add",           OC_GLOBAL_CONFIG, Nvram.Add, &mNvramAddSchema),
+  OC_SCHEMA_MAP_IN     ("Block",         OC_GLOBAL_CONFIG, Nvram.Block, &mNvramBlockSchema),
+  OC_SCHEMA_MAP_IN     ("Block",         OC_GLOBAL_CONFIG, Nvram.Block, &mNvramBlockSchema),
+  OC_SCHEMA_BOOLEAN_IN ("LegacyEnable",  OC_GLOBAL_CONFIG, Nvram.UseLegacy),
+  OC_SCHEMA_MAP_IN     ("LegacySchema",  OC_GLOBAL_CONFIG, Nvram.Legacy, &mNvramLegacySchema),
 };
 
 //
