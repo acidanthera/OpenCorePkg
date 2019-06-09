@@ -21,13 +21,60 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
 #include <Library/OcCpuLib.h>
+#include <Library/OcFileLib.h>
+#include <Library/OcSerializeLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
-//
-// Force the assertions in case we forget about them.
-//
+/**
+  Safe version check, documented in config.
+**/
+#define OC_NVRAM_STORAGE_VERSION 1
+
+/**
+  Structure declaration for nvram file.
+**/
+#define OC_NVRAM_STORAGE_MAP_FIELDS(_, __) \
+  OC_MAP (OC_STRING, OC_ASSOC, _, __)
+  OC_DECLARE (OC_NVRAM_STORAGE_MAP)
+
+#define OC_NVRAM_STORAGE_FIELDS(_, __) \
+  _(UINT32                      , Version  ,     , 0                                       , () ) \
+  _(OC_NVRAM_STORAGE_MAP        , Add      ,     , OC_CONSTR (OC_NVRAM_STORAGE_MAP, _, __) , OC_DESTR (OC_NVRAM_STORAGE_MAP))
+  OC_DECLARE (OC_NVRAM_STORAGE)
+
+OC_MAP_STRUCTORS (OC_NVRAM_STORAGE_MAP)
+OC_STRUCTORS (OC_NVRAM_STORAGE, ())
+
+/**
+  Schema definition for nvram file.
+**/
+
+STATIC
+OC_SCHEMA
+mNvramStorageEntrySchema = OC_SCHEMA_MDATA (NULL);
+
+STATIC
+OC_SCHEMA
+mNvramStorageAddSchema = OC_SCHEMA_MAP (NULL, &mNvramStorageEntrySchema);
+
+STATIC
+OC_SCHEMA
+mNvramStorageNodesSchema[] = {
+  OC_SCHEMA_MAP_IN     ("Add",     OC_STORAGE_VAULT, Files, &mNvramStorageAddSchema),
+  OC_SCHEMA_INTEGER_IN ("Version", OC_STORAGE_VAULT, Version),
+};
+
+STATIC
+OC_SCHEMA_INFO
+mNvramStorageRootSchema = {
+  .Dict = {mNvramStorageNodesSchema, ARRAY_SIZE (mNvramStorageNodesSchema)}
+};
+
+/**
+  Force the assertions in case we forget about them.
+**/
 OC_GLOBAL_STATIC_ASSERT (
   L_STR_LEN (OPEN_CORE_VERSION) == 5,
   "OPEN_CORE_VERSION must follow X.Y.Z format, where X.Y.Z are single digits."
@@ -97,36 +144,220 @@ OcReportVersion (
   }
 }
 
+STATIC
+EFI_STATUS
+OcProcessVariableGuid (
+  IN  CONST CHAR8            *AsciiVariableGuid,
+  OUT GUID                   *VariableGuid,
+  IN  OC_NVRAM_LEGACY_MAP    *Schema  OPTIONAL,
+  OUT OC_NVRAM_LEGACY_ENTRY  **SchemaEntry  OPTIONAL
+  )
+{
+  EFI_STATUS  Status;
+  UINT32      GuidIndex;
+
+  //
+  // FIXME: Checking string length manually is due to inadequate assertions.
+  //
+  if (AsciiStrLen (AsciiVariableGuid) == GUID_STRING_LENGTH) {
+    Status = AsciiStrToGuid (AsciiVariableGuid, VariableGuid);
+  } else {
+    Status = EFI_BUFFER_TOO_SMALL;
+  }
+
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OC: Failed to convert NVRAM GUID %a - %r\n", AsciiVariableGuid, Status));
+  }
+
+  if (!EFI_ERROR (Status) && Schema != NULL) {
+    for (GuidIndex = 0; GuidIndex < Schema->Count; ++GuidIndex) {
+      if (AsciiStrCmp (AsciiVariableGuid, OC_BLOB_GET (Schema->Keys[GuidIndex])) == 0) {
+        *SchemaEntry = Schema->Values[GuidIndex];
+        return Status;
+      }
+    }
+
+    DEBUG ((DEBUG_INFO, "OC: Ignoring NVRAM GUID %a\n", AsciiVariableGuid));
+    Status = EFI_SECURITY_VIOLATION;
+  }
+
+  return Status;
+}
+
+STATIC
 VOID
-OcLoadNvramSupport (
+OcSetNvramVariable (
+  IN CONST CHAR8            *AsciiVariableName,
+  IN EFI_GUID               *VariableGuid,
+  IN UINT32                 VariableSize,
+  IN VOID                   *VariableData,
+  IN OC_NVRAM_LEGACY_ENTRY  *SchemaEntry
+  )
+{
+  EFI_STATUS            Status;
+  UINTN                 OriginalVariableSize;
+  CHAR16                *UnicodeVariableName;
+  BOOLEAN               IsAllowed;
+  UINT32                VariableIndex;
+
+
+  if (SchemaEntry != NULL) {
+    IsAllowed = FALSE;
+
+    //
+    // TODO: Consider optimising lookup if it causes problems...
+    //
+    for (VariableIndex = 0; VariableIndex < SchemaEntry->Count; ++VariableIndex) {
+      if (VariableIndex == 0 && AsciiStrCmp ("*", OC_BLOB_GET (SchemaEntry->Values[VariableIndex])) == 0) {
+        IsAllowed = TRUE;
+        break;
+      }
+
+      if (AsciiStrCmp (AsciiVariableName, OC_BLOB_GET (SchemaEntry->Values[VariableIndex])) == 0) {
+        IsAllowed = TRUE;
+        break;
+      }
+    }
+
+    if (!IsAllowed) {
+      DEBUG ((DEBUG_INFO, "OC: Setting NVRAM %g:%a is not permitted\n", VariableGuid, AsciiVariableName));
+      return;
+    }
+  }
+
+  UnicodeVariableName = AsciiStrCopyToUnicode (AsciiVariableName, 0);
+
+  if (UnicodeVariableName == NULL) {
+    DEBUG ((DEBUG_WARN, "OC: Failed to convert NVRAM variable name %a\n", AsciiVariableName));
+    return;
+  }
+
+  OriginalVariableSize = 0;
+  Status = gRT->GetVariable (
+    UnicodeVariableName,
+    VariableGuid,
+    NULL,
+    &OriginalVariableSize,
+    NULL
+    );
+
+  if (Status != EFI_BUFFER_TOO_SMALL) {
+    Status = gRT->SetVariable (
+      UnicodeVariableName,
+      VariableGuid,
+      OPEN_CORE_NVRAM_ATTR,
+      VariableSize,
+      VariableData
+      );
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Setting NVRAM %g:%a - %r\n",
+      VariableGuid,
+      AsciiVariableName,
+      Status
+      ));
+  } else {
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: Setting NVRAM %g:%a - ignored, exists\n",
+      VariableGuid,
+      AsciiVariableName,
+      Status
+      ));
+  }
+
+  FreePool (UnicodeVariableName);
+}
+
+STATIC
+VOID
+OcLoadLegacyNvram (
+  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem,
+  IN OC_NVRAM_LEGACY_MAP             *Schema
+  )
+{
+  UINT8                 *FileBuffer;
+  UINT32                FileSize;
+  OC_NVRAM_STORAGE      Nvram;
+  BOOLEAN               IsValid;
+  EFI_STATUS            Status;
+  UINT32                GuidIndex;
+  UINT32                VariableIndex;
+  GUID                  VariableGuid;
+  OC_ASSOC              *VariableMap;
+  OC_NVRAM_LEGACY_ENTRY *SchemaEntry;
+
+  FileBuffer = ReadFile (FileSystem, OPEN_CORE_NVRAM_PATH, &FileSize, BASE_1MB);
+  if (FileBuffer == NULL) {
+    DEBUG ((DEBUG_INFO, "OC: Invalid nvram data\n"));
+    return;
+  }
+
+  OC_NVRAM_STORAGE_CONSTRUCT (&Nvram, sizeof (Nvram));
+  IsValid = ParseSerialized (&Nvram, &mNvramStorageRootSchema, FileBuffer, FileSize);
+  FreePool (FileBuffer);
+
+  if (!IsValid || Nvram.Version != OC_NVRAM_STORAGE_VERSION) {
+    DEBUG ((
+      DEBUG_WARN,
+      "OC: Incompatible nvram data, version %u vs %d\n",
+      Nvram.Version,
+      OC_NVRAM_STORAGE_VERSION
+      ));
+    OC_NVRAM_STORAGE_DESTRUCT (&Nvram, sizeof (Nvram));
+    return;
+  }
+
+  for (GuidIndex = 0; GuidIndex < Nvram.Add.Count; ++GuidIndex) {
+    Status = OcProcessVariableGuid (
+      OC_BLOB_GET (Nvram.Add.Keys[GuidIndex]),
+      &VariableGuid,
+      Schema,
+      &SchemaEntry
+      );
+
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    VariableMap = Nvram.Add.Values[GuidIndex];
+
+    for (VariableIndex = 0; VariableIndex < VariableMap->Count; ++VariableIndex) {
+      OcSetNvramVariable (
+        OC_BLOB_GET (VariableMap->Keys[VariableIndex]),
+        &VariableGuid,
+        VariableMap->Values[VariableIndex]->Size,
+        OC_BLOB_GET (VariableMap->Values[VariableIndex]),
+        SchemaEntry
+        );
+    }
+  }
+
+  OC_NVRAM_STORAGE_DESTRUCT (&Nvram, sizeof (Nvram));
+}
+
+STATIC
+VOID
+OcBlockNvram (
   IN OC_GLOBAL_CONFIG    *Config
   )
 {
   EFI_STATUS    Status;
   UINT32        GuidIndex;
   UINT32        VariableIndex;
-  CONST CHAR8   *AsciiVariableGuid;
   CONST CHAR8   *AsciiVariableName;
   CHAR16        *UnicodeVariableName;
   GUID          VariableGuid;
-  OC_ASSOC      *VariableMap;
-  UINT8         *VariableData;
-  UINT32        VariableSize;
-  UINTN         OriginalVariableSize;
 
   for (GuidIndex = 0; GuidIndex < Config->Nvram.Block.Count; ++GuidIndex) {
-    //
-    // FIXME: Checking string length manually is due to inadequate assertions.
-    //
-    AsciiVariableGuid = OC_BLOB_GET (Config->Nvram.Block.Keys[GuidIndex]);
-    if (AsciiStrLen (AsciiVariableGuid) == GUID_STRING_LENGTH) {
-      Status = AsciiStrToGuid (AsciiVariableGuid, &VariableGuid);
-    } else {
-      Status = EFI_BUFFER_TOO_SMALL;
-    }
+    Status = OcProcessVariableGuid (
+      OC_BLOB_GET (Config->Nvram.Block.Keys[GuidIndex]),
+      &VariableGuid,
+      NULL,
+      NULL
+      );
 
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "OC: Failed to convert NVRAM GUID %a - %r\n", AsciiVariableGuid, Status));
       continue;
     }
 
@@ -151,72 +382,59 @@ OcLoadNvramSupport (
       FreePool (UnicodeVariableName);
     }
   }
+}
+
+STATIC
+VOID
+OcAddNvram (
+  IN OC_GLOBAL_CONFIG    *Config
+  )
+{
+  EFI_STATUS    Status;
+  UINT32        GuidIndex;
+  UINT32        VariableIndex;
+  GUID          VariableGuid;
+  OC_ASSOC      *VariableMap;
 
   for (GuidIndex = 0; GuidIndex < Config->Nvram.Add.Count; ++GuidIndex) {
-    VariableMap       = Config->Nvram.Add.Values[GuidIndex];
-    //
-    // FIXME: Checking string length manually is due to inadequate assertions.
-    //
-    AsciiVariableGuid = OC_BLOB_GET (Config->Nvram.Add.Keys[GuidIndex]);
-    if (AsciiStrLen (AsciiVariableGuid) == GUID_STRING_LENGTH) {
-      Status = AsciiStrToGuid (AsciiVariableGuid, &VariableGuid);
-    } else {
-      Status = EFI_BUFFER_TOO_SMALL;
-    }
+    Status = OcProcessVariableGuid (
+      OC_BLOB_GET (Config->Nvram.Add.Keys[GuidIndex]),
+      &VariableGuid,
+      NULL,
+      NULL
+      );
 
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "OC: Failed to convert NVRAM GUID %a - %r\n", AsciiVariableGuid, Status));
       continue;
     }
 
+    VariableMap       = Config->Nvram.Add.Values[GuidIndex];
+    
     for (VariableIndex = 0; VariableIndex < VariableMap->Count; ++VariableIndex) {
-      AsciiVariableName   = OC_BLOB_GET (VariableMap->Keys[VariableIndex]);
-      VariableData        = OC_BLOB_GET (VariableMap->Values[VariableIndex]);
-      VariableSize        = VariableMap->Values[VariableIndex]->Size;
-      UnicodeVariableName = AsciiStrCopyToUnicode (AsciiVariableName, 0);
-
-      if (UnicodeVariableName == NULL) {
-        DEBUG ((DEBUG_WARN, "OC: Failed to convert NVRAM variable name %a\n", AsciiVariableName));
-        continue;
-      }
-
-      OriginalVariableSize = 0;
-      Status = gRT->GetVariable (
-        UnicodeVariableName,
+      OcSetNvramVariable (
+        OC_BLOB_GET (VariableMap->Keys[VariableIndex]),
         &VariableGuid,
-        NULL,
-        &OriginalVariableSize,
+        VariableMap->Values[VariableIndex]->Size,
+        OC_BLOB_GET (VariableMap->Values[VariableIndex]),
         NULL
         );
-
-      if (Status != EFI_BUFFER_TOO_SMALL) {
-        Status = gRT->SetVariable (
-          UnicodeVariableName,
-          &VariableGuid,
-          OPEN_CORE_NVRAM_ATTR,
-          VariableSize,
-          VariableData
-          );
-        DEBUG ((
-          EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-          "OC: Setting NVRAM %g:%a - %r\n",
-          &VariableGuid,
-          AsciiVariableName,
-          Status
-          ));
-      } else {
-        DEBUG ((
-          DEBUG_INFO,
-          "OC: Setting NVRAM %g:%a - ignored, exists\n",
-          &VariableGuid,
-          AsciiVariableName,
-          Status
-          ));
-      }
-
-      FreePool (UnicodeVariableName);
     }
   }
+}
+
+VOID
+OcLoadNvramSupport (
+  IN OC_STORAGE_CONTEXT  *Storage,
+  IN OC_GLOBAL_CONFIG    *Config
+  )
+{
+  if (Config->Nvram.UseLegacy && Storage->FileSystem != NULL) {
+    OcLoadLegacyNvram (Storage->FileSystem, &Config->Nvram.Legacy);
+  }
+
+  OcBlockNvram (Config);
+
+  OcAddNvram (Config);
 
   OcReportVersion (Config);
 }

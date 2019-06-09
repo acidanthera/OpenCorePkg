@@ -62,6 +62,8 @@
 
 #define OPEN_CORE_LOG_PATH         L"opencore.log"
 
+#define OPEN_CORE_NVRAM_PATH       L"nvram.plist"
+
 #define OPEN_CORE_ACPI_PATH        L"ACPI\\Custom\\"
 
 #define OPEN_CORE_UEFI_DRIVER_PATH L"Drivers\\"
@@ -133,10 +135,12 @@ OcUnloadKernelSupport (
 /**
   Load NVRAM compatibility support.
 
+  @param[in]  Storage   OpenCore storage.
   @param[in]  Config    OpenCore configuration.
 **/
 VOID
 OcLoadNvramSupport (
+  IN OC_STORAGE_CONTEXT  *Storage,
   IN OC_GLOBAL_CONFIG    *Config
   );
 

@@ -130,7 +130,7 @@ OcMain (
   DEBUG ((DEBUG_INFO, "OC: OcLoadDevPropsSupport...\n"));
   OcLoadDevPropsSupport (&mOpenCoreConfiguration);
   DEBUG ((DEBUG_INFO, "OC: OcLoadNvramSupport...\n"));
-  OcLoadNvramSupport (&mOpenCoreConfiguration);
+  OcLoadNvramSupport (Storage, &mOpenCoreConfiguration);
   DEBUG ((DEBUG_INFO, "OC: OcMiscLateInit...\n"));
   OcMiscLateInit (&mOpenCoreConfiguration, LoadPath, &LoadHandle);
   DEBUG ((DEBUG_INFO, "OC: OcLoadKernelSupport...\n"));

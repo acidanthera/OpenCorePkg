@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May 24 02:34:39 2019
-%DIF ADD ../Configuration.tex        Sun Jun  9 00:41:39 2019
+%DIF ADD ../Configuration.tex        Sun Jun  9 16:31:33 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -418,7 +418,11 @@ entries include:
   Directory used for storing supplemental kernel information
   for \hyperref[kernel]{\texttt{Kernel}} section.
 \item
-  \texttt{OpenCore.efi}
+  \DIFaddbegin \texttt{\DIFadd{Tools}}
+  \break
+  \DIFadd{Directory used for storing supplemental tools.
+}\item
+  \DIFaddend \texttt{OpenCore.efi}
   \break
   Main booter driver responsible for operating system loading.
 \item
@@ -433,49 +437,126 @@ entries include:
   \texttt{vault.sig}
   \break
   Signature for \texttt{vault.plist}.
-\end{itemize}
+\DIFaddbegin \item
+  \texttt{\DIFadd{nvram.plist}}
+  \break
+  \DIFadd{OpenCore variable import file.
+}\item
+  \texttt{\DIFadd{opencore.log}}
+  \break
+  \DIFadd{OpenCore log file.
+}\DIFaddend \end{itemize}
 
 \begin{center}
-\begin{tikzpicture}[%
+\DIFdelbegin %DIFDELCMD < \begin{tikzpicture}[%
+%DIFDELCMD <   grow via three points={one child at (0.5,-0.7) and
+%DIFDELCMD <   two children at (0.5,-0.7) and (0.5,-1.4)},
+%DIFDELCMD <   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
+%DIFDELCMD <   \node {EFI}
+%DIFDELCMD <     child { node {BOOT}
+%DIFDELCMD <       child { node [selected] {BOOTx64.efi}}
+%DIFDELCMD <     }
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child { node {OC}
+%DIFDELCMD <       child { node {ACPI}
+%DIFDELCMD <         child { node {Custom}
+%DIFDELCMD <           child { node [optional] {DSDT.aml}}
+%DIFDELCMD <           child { node [optional] {SSDT-1.aml}}
+%DIFDELCMD <           child { node [optional] {MYTABLE.aml}}
+%DIFDELCMD <         }
+%DIFDELCMD <       }
+%DIFDELCMD <       child [missing] {}
+%DIFDELCMD <       child [missing] {}
+%DIFDELCMD <       child [missing] {}
+%DIFDELCMD <       child [missing] {}
+%DIFDELCMD <       child { node {Drivers}
+%DIFDELCMD <         child { node [optional] {MyDriver.efi}}
+%DIFDELCMD <         child { node [optional] {OtherDriver.efi}}
+%DIFDELCMD <       }
+%DIFDELCMD <       child [missing] {}
+%DIFDELCMD <       child [missing] {}
+%DIFDELCMD <       child { node {Kexts}
+%DIFDELCMD <         child { node [optional] {MyKext.kext}}
+%DIFDELCMD <         child { node [optional] {OtherKext.kext}}
+%DIFDELCMD <       }
+%DIFDELCMD <       child [missing] {}
+%DIFDELCMD <       child [missing] {}
+%DIFDELCMD <       child { node [selected] {OpenCore.efi}}
+%DIFDELCMD <       child { node [optional] {vault.plist}}
+%DIFDELCMD <       child { node {config.plist}}
+%DIFDELCMD <       child { node [optional] {vault.sig}}
+%DIFDELCMD <     };
+%DIFDELCMD < \end{tikzpicture}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \begin{tikzpicture}[%
   grow via three points={one child at (0.5,-0.7) and
   two children at (0.5,-0.7) and (0.5,-1.4)},
   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
-  \node {EFI}
-    child { node {BOOT}
-      child { node [selected] {BOOTx64.efi}}
+  \node {ESP}
+    child { node {EFI}
+      child { node {BOOT}
+        child { node [selected] {BOOTx64.efi}}
+      }
+      child [missing] {}
+      child { node {OC}
+        child { node {ACPI}
+          child { node {Custom}
+            child { node [optional] {DSDT.aml}}
+            child { node [optional] {SSDT-1.aml}}
+            child { node [optional] {MYTABLE.aml}}
+          }
+        }
+        child [missing] {}
+        child [missing] {}
+        child [missing] {}
+        child [missing] {}
+        child { node {Drivers}
+          child { node [optional] {MyDriver.efi}}
+          child { node [optional] {OtherDriver.efi}}
+        }
+        child [missing] {}
+        child [missing] {}
+        child { node {Kexts}
+          child { node [optional] {MyKext.kext}}
+          child { node [optional] {OtherKext.kext}}
+        }
+        child [missing] {}
+        child [missing] {}
+        child { node  {Tools}
+          child { node [optional] {Tool.efi}}
+        }
+        child [missing] {}
+        child { node [selected] {OpenCore.efi}}
+        child { node [optional] {vault.plist}}
+        child { node {config.plist}}
+        child { node [optional] {vault.sig}}
+      }
     }
     child [missing] {}
-    child { node {OC}
-      child { node {ACPI}
-        child { node {Custom}
-          child { node [optional] {DSDT.aml}}
-          child { node [optional] {SSDT-1.aml}}
-          child { node [optional] {MYTABLE.aml}}
-        }
-      }
-      child [missing] {}
-      child [missing] {}
-      child [missing] {}
-      child [missing] {}
-      child { node {Drivers}
-        child { node [optional] {MyDriver.efi}}
-        child { node [optional] {OtherDriver.efi}}
-      }
-      child [missing] {}
-      child [missing] {}
-      child { node {Kexts}
-        child { node [optional] {MyKext.kext}}
-        child { node [optional] {OtherKext.kext}}
-      }
-      child [missing] {}
-      child [missing] {}
-      child { node [selected] {OpenCore.efi}}
-      child { node [optional] {vault.plist}}
-      child { node {config.plist}}
-      child { node [optional] {vault.sig}}
-    };
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child { node [optional] {nvram.plist}}
+    child { node [optional] {opencore.log}}
+  ;
 \end{tikzpicture}
-\break
+\DIFaddend \break
 \label{fig:DS}
 Figure 1. Directory Structure
 \end{center}
@@ -1339,9 +1420,16 @@ blocking.
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
   \textbf{\DIFadd{Default value}}\DIFadd{: }\texttt{\DIFadd{false}}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Disables multiple MSR access critical for select CPUs,
-  which have no native XCPM support. This is normally used in conjunction with
-  }\texttt{\DIFadd{Emulate}}\DIFadd{. More details on the XCPM patches are outlined in
+  which have no native XCPM support.
+  }
+
+  \DIFadd{This is normally used in conjunction with }\texttt{\DIFadd{Emulate}} \DIFadd{section on Haswell-E,
+  Broadwell-E, Skylake-X, and similar CPUs. More details on the XCPM patches are outlined in
   }\href{https://github.com/acidanthera/bugtracker/issues/365}{acidanthera/bugtracker\#365}\DIFadd{.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: Additional not provided patches will be required for Ivy Bridge or Pentium
+  CPUs. It is recommended to use }\texttt{\DIFadd{AppleIntelCpuPowerManagement.kext}} \DIFadd{for the former.
 }
 
 \item
@@ -1976,7 +2064,52 @@ as behaviour is undefined otherwise.
   of GUIDs to an array (\texttt{plist\ array}) of variable names in
   \texttt{plist\ string} format.
 
-\end{enumerate}
+\DIFaddbegin \item
+  \texttt{\DIFadd{LegacyEnable}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Enables loading of NVRAM variable file named }\texttt{\DIFadd{nvram.plist}}
+  \DIFadd{from EFI volume root.
+}
+
+  \DIFadd{This file must have root }\texttt{\DIFadd{plist\ dictionary}} \DIFadd{type and contain two fields:
+  }\begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{Version}} \DIFadd{--- }\texttt{\DIFadd{plist\ integer}}\DIFadd{, file version, must be set to 1.
+  }\item \texttt{\DIFadd{Add}} \DIFadd{--- }\texttt{\DIFadd{plist\ dictionary}}\DIFadd{, equivalent to }\texttt{\DIFadd{Add}} \DIFadd{from
+  }\texttt{\DIFadd{config.plist}}\DIFadd{.
+  }\end{itemize}
+
+  \DIFadd{Variable loading happens prior to }\texttt{\DIFadd{Block}} \DIFadd{(and }\texttt{\DIFadd{Add}}\DIFadd{) phases, and will not
+  overwrite any existing variable. Variables allowed to be set must be specified in
+  }\texttt{\DIFadd{LegacySchema}}\DIFadd{. Third-party scripts may be used to create }\texttt{\DIFadd{nvram.plist}}
+  \DIFadd{file. Example can be found in }\texttt{\DIFadd{Tools}}\DIFadd{. The use of third-party scripts may
+  require }\texttt{\DIFadd{ExposeSensitiveData}} \DIFadd{set to }\texttt{\DIFadd{0x3}} \DIFadd{to provide }\texttt{\DIFadd{boot-path}}
+  \DIFadd{variable with OpenCore EFI partition UUID.
+}
+
+  \textbf{\DIFadd{WARNING}}\DIFadd{: This feature is very dangerous as it passes unprotected data to your
+  firmware variable services. Use it only when no hardware NVRAM implementation is provided
+  by the firmware or it is incompatible.
+ }
+
+\item
+  \texttt{\DIFadd{LegacySchema}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ dict}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Allows setting select NVRAM variables from a map
+  (}\texttt{\DIFadd{plist\ dict}}\DIFadd{) of GUIDs to an array (}\texttt{\DIFadd{plist\ array}}\DIFadd{) of
+  variable names in }\texttt{\DIFadd{plist\ string}} \DIFadd{format.
+}
+
+  \DIFadd{You can use }\texttt{\DIFadd{*}} \DIFadd{value to accept all variables for select GUID.
+}
+
+  \textbf{\DIFadd{WARNING}}\DIFadd{: Choose variables very carefully, as nvram.plist is not vaulted.
+  For instance, do not put }\texttt{\DIFadd{boot-args}} \DIFadd{or }\texttt{\DIFadd{csr-active-config}}\DIFadd{, as
+  this can bypass SIP. 
+}
+
+\DIFaddend \end{enumerate}
 
 To read NVRAM variable value from macOS one could use \texttt{nvram}
 by concatenating variable GUID and name separated by \texttt{:} symbol.
