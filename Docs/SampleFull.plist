@@ -430,6 +430,8 @@
 				<string>UEFI Shell</string>
 				<key>Comment</key>
 				<string>Not signed for security reasons</string>
+				<key>Enabled</key>
+				<false/>
 				<key>Path</key>
 				<string>Shell.efi</string>
 			</dict>
@@ -438,6 +440,8 @@
 				<string>memcheck</string>
 				<key>Comment</key>
 				<string>Memory testing utility</string>
+				<key>Enabled</key>
+				<false/>
 				<key>Path</key>
 				<string>memcheck/memcheck.efi</string>
 			</dict>
