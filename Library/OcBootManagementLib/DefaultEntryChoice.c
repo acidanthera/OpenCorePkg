@@ -44,7 +44,7 @@ STATIC
 EFI_DEVICE_PATH_PROTOCOL *
 InternalGetBootOptionData (
   IN  UINT16   BootOption,
-  IN  EFI_GUID *BootGud,
+  IN  EFI_GUID *BootGuid,
   OUT CHAR16   **BootName  OPTIONAL,
   OUT UINT32   *OptionalDataSize  OPTIONAL,
   OUT VOID     **OptionalData  OPTIONAL
@@ -70,7 +70,7 @@ InternalGetBootOptionData (
 
   Status = GetVariable2 (
              BootVarName,
-             BootGud,
+             BootGuid,
              (VOID **)&LoadOption,
              &LoadOptionSize
              );
@@ -243,6 +243,85 @@ InternalDebugBootEnvironment (
   }
 }
 
+STATIC
+OC_BOOT_ENTRY *
+InternalGetBootEntryByDevicePath (
+  IN OUT OC_BOOT_ENTRY             *BootEntries,
+  IN     UINTN                     NumBootEntries,
+  IN     EFI_DEVICE_PATH_PROTOCOL  *UefiDevicePath,
+  IN     EFI_DEVICE_PATH_PROTOCOL  *UefiRemainingDevicePath,
+  IN     BOOLEAN                   IsBootNext
+  )
+{
+  INTN                     CmpResult;
+
+  UINTN                    RootDevicePathSize;
+
+  EFI_DEVICE_PATH_PROTOCOL *OcDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL *OcRemainingDevicePath;
+
+  OC_BOOT_ENTRY            *BootEntry;
+  UINTN                    Index;
+
+  RootDevicePathSize = ((UINT8 *)UefiRemainingDevicePath - (UINT8 *)UefiDevicePath);
+
+  for (Index = 0; Index < NumBootEntries; ++Index) {
+    BootEntry = &BootEntries[Index];
+    if (BootEntry->IsCustom) {
+      continue;
+    }
+
+    OcDevicePath = BootEntry->DevicePath;
+    ASSERT (OcDevicePath != NULL);
+
+    if ((GetDevicePathSize (OcDevicePath) - END_DEVICE_PATH_LENGTH) < RootDevicePathSize) {
+      continue;
+    }
+
+    CmpResult = CompareMem (OcDevicePath, UefiDevicePath, RootDevicePathSize);
+    if (CmpResult != 0) {
+      continue;
+    }
+    //
+    // FIXME: Ensure that all the entries get properly filtered against any
+    // malicious sources. The drive itself should already be safe, but it is
+    // unclear whether a potentially safe device path can be transformed into
+    // an unsafe one.
+    //
+    OcRemainingDevicePath = (EFI_DEVICE_PATH_PROTOCOL *)(
+                              (UINT8 *)OcDevicePath + RootDevicePathSize
+                              );
+    if (!IsBootNext) {
+      //
+      // For non-BootNext boot, the File Paths must match for the entries to be
+      // matched. Startup Disk however only stores the drive's Device Path
+      // excluding the booter path, which we treat as a match as well.
+      //
+      if (!IsDevicePathEnd (UefiRemainingDevicePath)
+       && !IsDevicePathEqual (UefiRemainingDevicePath, OcRemainingDevicePath)
+        ) {
+        continue;
+      }
+    } else {
+      //
+      // Only use the BootNext path when it has a file path.
+      //
+      if (!IsDevicePathEnd (UefiRemainingDevicePath)) {
+        //
+        // TODO: Investigate whether macOS adds BootNext entries that are not
+        //       possibly located by bless.
+        //
+        FreePool (BootEntry->DevicePath);
+        BootEntry->DevicePath = UefiDevicePath;
+      }
+    }
+
+    return BootEntry;
+  }
+
+  return NULL;
+}
+
 OC_BOOT_ENTRY *
 InternalGetDefaultBootEntry (
   IN OUT OC_BOOT_ENTRY  *BootEntries,
@@ -251,9 +330,10 @@ InternalGetDefaultBootEntry (
   IN     EFI_HANDLE     LoadHandle  OPTIONAL
   )
 {
+  OC_BOOT_ENTRY            *BootEntry;
+
   EFI_STATUS               Status;
   BOOLEAN                  Result;
-  INTN                     CmpResult;
 
   UINT32                   BootNextAttributes;
   UINTN                    BootNextSize;
@@ -262,24 +342,18 @@ InternalGetDefaultBootEntry (
   UINT16                   *BootOrder;
   UINTN                    BootOrderSize;
 
-  UINTN                    RootDevicePathSize;
   EFI_DEVICE_PATH_PROTOCOL *UefiDevicePath;
   EFI_DEVICE_PATH_PROTOCOL *UefiRemainingDevicePath;
-  EFI_DEVICE_PATH_PROTOCOL *OcDevicePath;
-  EFI_DEVICE_PATH_PROTOCOL *OcRemainingDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL *FullDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL *PrevDevicePath;
   UINT32                   OptionalDataSize;
   VOID                     *OptionalData;
-  CHAR16                   *DevicePathText1;
-  CHAR16                   *DevicePathText2;
   EFI_GUID                 *BootVariableGuid;
 
   EFI_DEVICE_PATH_PROTOCOL *DevicePath;
   EFI_HANDLE               DeviceHandle;
 
   UINT16                   BootNextOptionIndex;
-
-  OC_BOOT_ENTRY            *BootEntry;
-  UINTN                    Index;
 
   ASSERT (BootEntries != NULL);
   ASSERT (NumBootEntries > 0);
@@ -398,86 +472,77 @@ InternalGetDefaultBootEntry (
     return NULL;
   }
 
+  DebugPrintDevicePath (DEBUG_INFO, "OCB: Default DP pre-fix", UefiDevicePath);
+
   UefiRemainingDevicePath = UefiDevicePath;
   Result = OcFixAppleBootDevicePath (&UefiRemainingDevicePath);
 
-  DEBUG_CODE_BEGIN ();
-  DevicePathText1 = ConvertDevicePathToText (
-                      UefiDevicePath,
-                      FALSE,
-                      FALSE
-                      );
-  DevicePathText2 = ConvertDevicePathToText (
-                      UefiRemainingDevicePath,
-                      FALSE,
-                      FALSE
-                      );
-  
-  DEBUG ((
+  DebugPrintDevicePath (
     DEBUG_INFO,
-    "OCB: Default boot device path: %s | remainder: %s | %s\n",
-    DevicePathText1,
-    DevicePathText2,
-    (Result ? L"success" : L"failure")
-    ));
-
-  if (DevicePathText1 != NULL) {
-    FreePool (DevicePathText1);
-  }
-
-  if (DevicePathText2 != NULL) {
-    FreePool (DevicePathText2);
-  }
-  DEBUG_CODE_END ();
+    "OCB: Default DP post-fix",
+    UefiDevicePath
+    );
+  DebugPrintDevicePath (
+    DEBUG_INFO,
+    "OCB: Default DP post-fix remainder",
+    UefiRemainingDevicePath
+    );
 
   if (!Result) {
+    DEBUG ((DEBUG_WARN, "OCB: Failed to fix the default boot Device Path,\n"));
     return NULL;
   }
 
-  RootDevicePathSize = ((UINT8 *)UefiRemainingDevicePath - (UINT8 *)UefiDevicePath);
-
-  for (Index = 0; Index < NumBootEntries; ++Index) {
-    BootEntry    = &BootEntries[Index];
-
-    if (BootEntry->IsCustom) {
-      continue;
-    }
-
-    OcDevicePath = BootEntry->DevicePath;
-
-    ASSERT (OcDevicePath != NULL);
-
-    if ((GetDevicePathSize (OcDevicePath) - END_DEVICE_PATH_LENGTH) < RootDevicePathSize) {
-      continue;
-    }
-
-    CmpResult = CompareMem (OcDevicePath, UefiDevicePath, RootDevicePathSize);
-    if (CmpResult != 0) {
-      continue;
-    }
+  if (UefiDevicePath != UefiRemainingDevicePath) {
     //
-    // FIXME: Ensure that all the entries get properly filtered against any
-    // malicious sources. The drive itself should already be safe, but it is
-    // unclear whether a potentially safe device path can be transformed into
-    // an unsafe one.
+    // If the Device Path node was advanced, it cannot be a short-form.
     //
-    OcRemainingDevicePath = (EFI_DEVICE_PATH_PROTOCOL *)(
-                              (UINT8 *)OcDevicePath + RootDevicePathSize
-                              );
-    if (!IsBootNext) {
-      //
-      // For non-BootNext boot, the File Paths must match for the entries to be
-      // matched. Startup Disk however only stores the drive's Device Path
-      // excluding the booter path, which we treat as a match as well.
-      //
-      if (!IsDevicePathEnd (UefiRemainingDevicePath)
-       && !IsDevicePathEqual (UefiRemainingDevicePath, OcRemainingDevicePath)
-        ) {
-        continue;
+    BootEntry = InternalGetBootEntryByDevicePath (
+                   BootEntries,
+                   NumBootEntries,
+                   UefiDevicePath,
+                   UefiRemainingDevicePath,
+                   IsBootNext
+                   );
+  } else {
+    //
+    // If the Device Path node was not advanced, it might be a short-form.
+    //
+    PrevDevicePath = NULL;
+    do {
+      FullDevicePath = OcGetNextLoadOptionDevicePath (
+                         UefiDevicePath,
+                         PrevDevicePath
+                         );
+
+      if (PrevDevicePath != NULL) {
+        FreePool (PrevDevicePath);
       }
 
-      FreePool (UefiDevicePath);
-    } else {
+      if (FullDevicePath == NULL) {
+        DEBUG ((DEBUG_INFO, "OCB: Short-form DP could not be expanded.\n"));
+        BootEntry = NULL;
+        break;
+      }
+
+      DebugPrintDevicePath (DEBUG_INFO, "OCB: Expanded DP", FullDevicePath);
+
+      PrevDevicePath = FullDevicePath;
+      BootEntry = InternalGetBootEntryByDevicePath (
+                    BootEntries,
+                    NumBootEntries,
+                    UefiDevicePath,
+                    UefiRemainingDevicePath,
+                    IsBootNext
+                    );
+    } while (BootEntry == NULL);
+
+    FreePool (UefiDevicePath);
+    UefiDevicePath = FullDevicePath;
+  }
+
+  if (BootEntry != NULL) {
+    if (IsBootNext) {
       //
       // BootNext is allowed to override both the exact file path as well as
       // the used load options.
@@ -485,22 +550,21 @@ InternalGetDefaultBootEntry (
       //
       BootEntry->LoadOptionsSize = OptionalDataSize;
       BootEntry->LoadOptions     = OptionalData;
-      //
-      // Only use the BootNext path when it has a file path.
-      //
-      if (!IsDevicePathEnd (UefiRemainingDevicePath)) {
-        //
-        // TODO: Investigate whether macOS adds BootNext entries that are not
-        //       possibly located by bless.
-        //
-        FreePool (BootEntry->DevicePath);
-        BootEntry->DevicePath = UefiDevicePath;
-      } else {
-        FreePool (UefiDevicePath);
-      }
+    } else if (OptionalData != NULL) {
+      FreePool (OptionalData);
     }
 
-    DEBUG ((DEBUG_INFO, "OCB: Matched default boot option: %s\n", BootEntry->Name));
+    if (BootEntry->DevicePath != UefiDevicePath) {
+      FreePool (UefiDevicePath);
+    } else {
+      ASSERT (IsBootNext);
+    }
+
+    DEBUG ((
+      DEBUG_INFO,
+      "OCB: Matched default boot option: %s\n",
+      BootEntry->Name
+      ));
 
     return BootEntry;
   }
