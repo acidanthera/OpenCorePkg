@@ -20,38 +20,6 @@
 #include <Library/PcdLib.h>
 
 /**
-  Convert a Unicode character to upper case only if
-  it maps to a valid small-case ASCII character.
-
-  This internal function only deal with Unicode character
-  which maps to a valid small-case ASII character, i.e.
-  L'a' to L'z'. For other Unicode character, the input character
-  is returned directly.
-
-
-  @param  Char  The character to convert.
-
-  @retval LowerCharacter   If the Char is with range L'a' to L'z'.
-  @retval Unchanged        Otherwise.
-
-**/
-STATIC
-CHAR16
-InternalCharToUpper (
-  IN      CHAR16                    Char
-  )
-{
-  //
-  // FIXME: Drop this function once new UDK lands and brings native CharToUpper.
-  //
-  if (Char >= L'a' && Char <= L'z') {
-    return (CHAR16) (Char - (L'a' - L'A'));
-  }
-
-  return Char;
-}
-
-/**
   Performs a case insensitive comparison of two Null-terminated Unicode strings,
   and returns the difference between the first mismatched Unicode characters.
 
@@ -96,13 +64,13 @@ StriCmp (
   ASSERT (StrSize (FirstString) != 0);
   ASSERT (StrSize (SecondString) != 0);
 
-  UpperFirstString  = InternalCharToUpper (*FirstString);
-  UpperSecondString = InternalCharToUpper (*SecondString);
+  UpperFirstString  = CharToUpper (*FirstString);
+  UpperSecondString = CharToUpper (*SecondString);
   while ((*FirstString != '\0') && (*SecondString != '\0') && (UpperFirstString == UpperSecondString)) {
     FirstString++;
     SecondString++;
-    UpperFirstString  = InternalCharToUpper (*FirstString);
-    UpperSecondString = InternalCharToUpper (*SecondString);
+    UpperFirstString  = CharToUpper (*FirstString);
+    UpperSecondString = CharToUpper (*SecondString);
   }
 
   return UpperFirstString - UpperSecondString;
@@ -172,16 +140,16 @@ StrniCmp (
     ASSERT (Length <= PcdGet32 (PcdMaximumUnicodeStringLength));
   }
 
-  UpperFirstString  = InternalCharToUpper (*FirstString);
-  UpperSecondString = InternalCharToUpper (*SecondString);
+  UpperFirstString  = CharToUpper (*FirstString);
+  UpperSecondString = CharToUpper (*SecondString);
   while ((*FirstString != L'\0') &&
          (*SecondString != L'\0') &&
          (UpperFirstString == UpperSecondString) &&
          (Length > 1)) {
     FirstString++;
     SecondString++;
-    UpperFirstString  = InternalCharToUpper (*FirstString);
-    UpperSecondString = InternalCharToUpper (*SecondString);
+    UpperFirstString  = CharToUpper (*FirstString);
+    UpperSecondString = CharToUpper (*SecondString);
     Length--;
   }
 
