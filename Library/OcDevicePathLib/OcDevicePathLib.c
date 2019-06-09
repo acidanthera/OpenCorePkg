@@ -267,7 +267,10 @@ OcFixAppleBootDevicePath (
   ASSERT (DevicePath != NULL);
   ASSERT (*DevicePath != NULL);
   ASSERT (IsDevicePathValid (*DevicePath, 0));
-
+  //
+  // CAUTION: When adding new fixes, ensure short-form device paths are not
+  //          modified and success is returned.
+  //
   OriginalDevPath = *DevicePath;
 
   while (TRUE) {
