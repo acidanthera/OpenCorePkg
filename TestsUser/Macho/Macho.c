@@ -18,10 +18,10 @@
 #include <sys/time.h>
 
 /*
- clang -g -fsanitize=undefined,address -I../Include -I../../Include -I../../../MdePkg/Include/ -include ../Include/Base.h -I../../../EfiPkg/Include/ Macho.c  ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c  ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c -o Macho
+ clang -g -fsanitize=undefined,address -I../Include -I../../Include -I../../../MdePkg/Include/ -include ../Include/Base.h -I../../../EfiPkg/Include/ Macho.c ../../Library/OcStringLib/OcAsciiLib.c  ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c -o Macho
 
  for fuzzing:
- clang-mp-7.0 -Dmain=__main -g -fsanitize=undefined,address,fuzzer -I../Include -I../../Include -I../../../MdePkg/Include/ -include ../Include/Base.h -I../../../EfiPkg/Include/ Macho.c  ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c  ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c -o Macho
+ clang-mp-7.0 -Dmain=__main -g -fsanitize=undefined,address,fuzzer -I../Include -I../../Include -I../../../MdePkg/Include/ -include ../Include/Base.h -I../../../EfiPkg/Include/ Macho.c ../../Library/OcStringLib/OcAsciiLib.c  ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c -o Macho
  rm -rf DICT fuzz*.log ; mkdir DICT ; cp /System/Library/Kernels/kernel DICT ; ./Macho -rss_limit_mb=4096M -jobs=4 DICT
 
  rm -rf fuzz*.log ; mkdir -p DICT ; cp /System/Library/Kernels/kernel DICT/kernel ; ./Macho -jobs=4 -rss_limit_mb=4096M DICT

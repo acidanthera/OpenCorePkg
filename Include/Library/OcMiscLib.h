@@ -23,26 +23,6 @@
 **/
 #define SECONDS_TO_MICROSECONDS(x) ((x)*1000000)
 
-/**
-
-  TODO: edk2 now has its implementation in BaseLib, review it and use once it appears in UDK.
-
-  @param[in] EncodedData        A pointer to the data to convert.
-  @param[in] EncodedLength      The length of data to convert.
-  @param[in] DecodedData        A pointer to location to store the decoded data.
-  @param[in] DecodedSize        A pointer to location to store the decoded size.
-
-  @retval  TRUE on success.
-**/
-RETURN_STATUS
-EFIAPI
-OcBase64Decode (
-  IN     CONST CHAR8  *EncodedData,
-  IN     UINTN        EncodedLength,
-     OUT UINT8        *DecodedData,
-  IN OUT UINTN        *DecodedLength
-  );
-
 // LegacyRegionlock
 /** Lock the legacy region specified to enable modification.
 

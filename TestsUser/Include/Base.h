@@ -1647,6 +1647,188 @@ CalculateCrc32(
   return Crc ^ 0xffffffff;
 }
 
+STATIC
+RETURN_STATUS
+EFIAPI
+Base64Decode (
+  IN  CONST CHAR8  *Source,
+  IN        UINTN   SourceLength,
+  OUT       UINT8  *Destination  OPTIONAL,
+  IN OUT    UINTN  *DestinationSize
+  )
+{
+  #define BAD_V  99
+
+  STATIC CHAR8 EncodingTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                  "abcdefghijklmnopqrstuvwxyz"
+                                  "0123456789+/";
+
+  STATIC UINT8 DecodingTable[] = {
+    //
+    // Valid characters ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/
+    // Also, set '=' as a zero for decoding
+    // 0  ,            1,           2,           3,            4,           5,            6,           7,           8,            9,           a,            b,            c,           d,            e,            f
+    BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,   //   0
+    BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,   //  10
+    BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,     62,  BAD_V,  BAD_V,  BAD_V,     63,   //  20
+       52,     53,     54,     55,     56,     57,     58,     59,     60,     61,  BAD_V,  BAD_V,  BAD_V,      0,  BAD_V,  BAD_V,   //  30
+    BAD_V,      0,      1,      2,      3,      4,      5,      6,      7,      8,      9,     10,     11,     12,     13,     14,   //  40
+       15,     16,     17,     18,     19,     20,     21,     22,     23,     24,     25,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,   //  50
+    BAD_V,     26,     27,     28,     29,     30,     31,     32,     33,     34,     35,     36,     37,     38,     39,     40,   //  60
+       41,     42,     43,     44,     45,     46,     47,     48,     49,     50,     51,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,   //  70
+    BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,   //  80
+    BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,   //  90
+    BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,   //  a0
+    BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,   //  b0
+    BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,   //  c0
+    BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,   //  d0
+    BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,   //  d0
+    BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V,  BAD_V    //  f0
+  };
+
+  UINT32   Value;
+  CHAR8    Chr;
+  INTN     BufferSize;
+  UINTN    SourceIndex;
+  UINTN    DestinationIndex;
+  UINTN    Index;
+  UINTN    ActualSourceLength;
+
+  //
+  // Check pointers are not NULL
+  //
+  if ((Source == NULL) || (DestinationSize == NULL)) {
+    return RETURN_INVALID_PARAMETER;
+  }
+
+  //
+  // Check if SourceLength or  DestinationSize is valid
+  //
+  if ((SourceLength >= (MAX_ADDRESS - (UINTN)Source)) || (*DestinationSize >= (MAX_ADDRESS - (UINTN)Destination))){
+    return RETURN_INVALID_PARAMETER;
+  }
+
+  ActualSourceLength = 0;
+  BufferSize = 0;
+
+  //
+  // Determine the actual number of valid characters in the string.
+  // All invalid characters except selected white space characters,
+  // will cause the Base64 string to be rejected. White space to allow
+  // properly formatted XML will be ignored.
+  //
+  // See section 3.3 of RFC 4648.
+  //
+  for (SourceIndex = 0; SourceIndex < SourceLength; SourceIndex++) {
+
+    //
+    // '=' is part of the quantum
+    //
+    if (Source[SourceIndex] == '=') {
+      ActualSourceLength++;
+      BufferSize--;
+
+      //
+      // Only two '=' characters can be valid.
+      //
+      if (BufferSize < -2) {
+        return RETURN_INVALID_PARAMETER;
+      }
+    }
+    else {
+      Chr = Source[SourceIndex];
+      if (BAD_V != DecodingTable[(UINT8) Chr]) {
+
+        //
+        // The '=' characters are only valid at the end, so any
+        // valid character after an '=', will be flagged as an error.
+        //
+        if (BufferSize < 0) {
+          return RETURN_INVALID_PARAMETER;
+        }
+          ActualSourceLength++;
+      }
+        else {
+
+        //
+        // The reset of the decoder will ignore all invalid characters allowed here.
+        // Ignoring selected white space is useful.  In this case, the decoder will
+        // ignore ' ', '\t', '\n', and '\r'.
+        //
+        if ((Chr != ' ') &&(Chr != '\t') &&(Chr != '\n') &&(Chr != '\r')) {
+          return RETURN_INVALID_PARAMETER;
+        }
+      }
+    }
+  }
+
+  //
+  // The Base64 character string must be a multiple of 4 character quantums.
+  //
+  if (ActualSourceLength % 4 != 0) {
+    return RETURN_INVALID_PARAMETER;
+  }
+
+  BufferSize += ActualSourceLength / 4 * 3;
+    if (BufferSize < 0) {
+      return RETURN_INVALID_PARAMETER;
+  }
+
+  //
+  // BufferSize is >= 0
+  //
+  if ((Destination == NULL) || (*DestinationSize < (UINTN) BufferSize)) {
+    *DestinationSize = BufferSize;
+    return RETURN_BUFFER_TOO_SMALL;
+  }
+
+  //
+  // If no decodable characters, return a size of zero. RFC 4686 test vector 1.
+  //
+  if (ActualSourceLength == 0) {
+    *DestinationSize = 0;
+    return RETURN_SUCCESS;
+  }
+
+  //
+  // Input data is verified to be a multiple of 4 valid charcters.  Process four
+  // characters at a time. Uncounted (ie. invalid)  characters will be ignored.
+  //
+  for (SourceIndex = 0, DestinationIndex = 0; (SourceIndex < SourceLength) && (DestinationIndex < *DestinationSize); ) {
+    Value = 0;
+
+    //
+    // Get 24 bits of data from 4 input characters, each character representing 6 bits
+    //
+    for (Index = 0; Index < 4; Index++) {
+      do {
+      Chr = DecodingTable[(UINT8) Source[SourceIndex++]];
+      } while (Chr == BAD_V);
+      Value <<= 6;
+      Value |= (UINT32)Chr;
+    }
+
+    //
+    // Store 3 bytes of binary data (24 bits)
+    //
+    *Destination++ = (UINT8) (Value >> 16);
+    DestinationIndex++;
+
+    //
+    // Due to the '=' special cases for the two bytes at the end,
+    // we have to check the length and not store the padding data
+    //
+    if (DestinationIndex++ < *DestinationSize) {
+      *Destination++ = (UINT8) (Value >>  8);
+    }
+    if (DestinationIndex++ < *DestinationSize) {
+      *Destination++ = (UINT8) Value;
+    }
+  }
+
+  return RETURN_SUCCESS;
+}
+
 #include <Protocol/DevicePath.h>
 
 #define END_DEVICE_PATH_LENGTH               (sizeof (EFI_DEVICE_PATH_PROTOCOL))

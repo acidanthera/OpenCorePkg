@@ -51,7 +51,6 @@
   OcTimerLib
 
 [Sources]
-  Base64Decode.c
   DataPatcher.c
   DebugHelp.c
   GetMemoryMap.c
