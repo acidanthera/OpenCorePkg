@@ -341,7 +341,6 @@ OC_SCHEMA
 mNvramConfigurationSchema[] = {
   OC_SCHEMA_MAP_IN     ("Add",           OC_GLOBAL_CONFIG, Nvram.Add, &mNvramAddSchema),
   OC_SCHEMA_MAP_IN     ("Block",         OC_GLOBAL_CONFIG, Nvram.Block, &mNvramBlockSchema),
-  OC_SCHEMA_MAP_IN     ("Block",         OC_GLOBAL_CONFIG, Nvram.Block, &mNvramBlockSchema),
   OC_SCHEMA_BOOLEAN_IN ("LegacyEnable",  OC_GLOBAL_CONFIG, Nvram.UseLegacy),
   OC_SCHEMA_MAP_IN     ("LegacySchema",  OC_GLOBAL_CONFIG, Nvram.Legacy, &mNvramLegacySchema),
 };
