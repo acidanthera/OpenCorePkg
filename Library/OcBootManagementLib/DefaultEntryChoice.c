@@ -537,8 +537,10 @@ InternalGetDefaultBootEntry (
                     );
     } while (BootEntry == NULL);
 
-    FreePool (UefiDevicePath);
-    UefiDevicePath = FullDevicePath;
+    if (FullDevicePath != NULL) {
+      FreePool (UefiDevicePath);
+      UefiDevicePath = FullDevicePath;
+    }
   }
 
   if (BootEntry != NULL) {
