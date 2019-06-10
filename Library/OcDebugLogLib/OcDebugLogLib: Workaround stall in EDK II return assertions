@@ -301,7 +301,9 @@ OcLogAddEntry  (
     }
   }
 
-  if ((ErrorLevel & OcLog->HaltLevel) != 0) {
+  if ((ErrorLevel & OcLog->HaltLevel) != 0
+    && AsciiStrnCmp (FormatString, "\nASSERT_RETURN_ERROR", L_STR_LEN ("\nASSERT_RETURN_ERROR")) != 0
+    && AsciiStrnCmp (FormatString, "\nASSERT_EFI_ERROR", L_STR_LEN ("\nASSERT_EFI_ERROR")) != 0) {
     gST->ConOut->OutputString (gST->ConOut, L"Halting on critical error\r\n");
     gBS->Stall (SECONDS_TO_MICROSECONDS (1));
     CpuDeadLoop ();
