@@ -165,7 +165,7 @@ OcProcessVariableGuid (
     Status = EFI_BUFFER_TOO_SMALL;
   }
 
-  if (!EFI_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OC: Failed to convert NVRAM GUID %a - %r\n", AsciiVariableGuid, Status));
   }
 
