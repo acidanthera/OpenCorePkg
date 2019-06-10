@@ -322,7 +322,7 @@ OcMiscBoot (
   OC_PICKER_CONTEXT  *Context;
   UINTN              ContextSize;
   UINT32             Index;
-  UINT32             ToolCount;
+  UINT32             ToolIndex;
 
   //
   // Do not use our boot picker unless asked.
@@ -358,17 +358,15 @@ OcMiscBoot (
   Context->CustomEntryContext = Storage;
   Context->CustomRead         = OcToolLoadEntry;
 
-  ToolCount = 0;
-
-  for (Index = 0; Index < Context->CustomEntryCount; ++Index) {
+  for (Index = 0, ToolIndex = 0; Index < Config->Misc.Tools.Count; ++Index) {
     if (Config->Misc.Tools.Values[Index]->Enabled) {
-      Context->CustomEntries[Index].Name = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Name);
-      Context->CustomEntries[Index].Path = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Path);
-      ++ToolCount;
+      Context->CustomEntries[ToolIndex].Name = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Name);
+      Context->CustomEntries[ToolIndex].Path = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Path);
+      ++ToolIndex;
     }
   }
 
-  Context->CustomEntryCount = ToolCount;
+  Context->CustomEntryCount = ToolIndex;
 
   Status = OcRunSimpleBootPicker (
     Context
