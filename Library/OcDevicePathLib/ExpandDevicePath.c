@@ -642,18 +642,15 @@ BmExpandLoadFiles (
   //
   Node = FilePath;
   Status = gBS->LocateDevicePath (&gEfiLoadFileProtocolGuid, &Node, &Handle);
-  if (!EFI_ERROR (Status) && IsDevicePathEnd (Node)) {
-    //
-    // When wide match happens, pass full device path to LoadFile (),
-    // otherwise, pass remaining device path to LoadFile ().
-    //
-    FilePath = Node;
-  }
   // CHANGE: Removed HTTP support.
-
-  if (Handle == NULL) {
+  if (EFI_ERROR (Status) || !IsDevicePathEnd (Node)) {
     return NULL;
   }
+  //
+  // When wide match happens, pass full device path to LoadFile (),
+  // otherwise, pass remaining device path to LoadFile ().
+  //
+  FilePath = Node;
 
   return BmExpandLoadFile (Handle, FilePath);
 }
