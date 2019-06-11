@@ -291,6 +291,7 @@ InternalSetBootEntryFlags (
 {
   EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
   CONST CHAR16              *Path;
+  UINTN                     Len;
 
   BootEntry->IsFolder   = FALSE;
   BootEntry->IsRecovery = FALSE;
@@ -306,7 +307,8 @@ InternalSetBootEntryFlags (
     if ((DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
      && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)) {
       Path   = ((FILEPATH_DEVICE_PATH *) DevicePathWalker)->PathName;
-      if (Path[StrLen (Path) - 1] == L'\\') {
+      Len    = StrLen (Path);
+      if ((Len > 0) && (Path[Len - 1] == L'\\')) {
         BootEntry->IsFolder = TRUE;
       }
       if (StrStr (Path, L"com.apple.recovery.boot") != NULL) {
