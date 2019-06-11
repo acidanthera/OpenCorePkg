@@ -260,6 +260,7 @@ mMiscConfigurationBootSchema[] = {
   OC_SCHEMA_STRING_IN  ("ConsoleBehaviourOs",OC_GLOBAL_CONFIG, Misc.Boot.ConsoleBehaviourOs),
   OC_SCHEMA_STRING_IN  ("ConsoleBehaviourUi",OC_GLOBAL_CONFIG, Misc.Boot.ConsoleBehaviourUi),
   OC_SCHEMA_STRING_IN  ("ConsoleMode",       OC_GLOBAL_CONFIG, Misc.Boot.ConsoleMode),
+  OC_SCHEMA_STRING_IN  ("HibernateMode",     OC_GLOBAL_CONFIG, Misc.Boot.HibernateMode),
   OC_SCHEMA_BOOLEAN_IN ("HideSelf",          OC_GLOBAL_CONFIG, Misc.Boot.HideSelf),
   OC_SCHEMA_STRING_IN  ("Resolution",        OC_GLOBAL_CONFIG, Misc.Boot.Resolution),
   OC_SCHEMA_BOOLEAN_IN ("ShowPicker",        OC_GLOBAL_CONFIG, Misc.Boot.ShowPicker),

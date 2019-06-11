@@ -74,5 +74,6 @@
   OcDevicePathLib
   OcGuardLib
   OcFileLib
+  OcRtcLib
   OcXmlLib
   FileHandleLib

@@ -215,14 +215,15 @@
 **/
 
 #define OC_MISC_BOOT_FIELDS(_, __) \
-  _(BOOLEAN                     , HideSelf                    ,     , FALSE                       , ())                   \
-  _(BOOLEAN                     , ShowPicker                  ,     , FALSE                       , ())                   \
-  _(BOOLEAN                     , UsePicker                   ,     , FALSE                       , ())                   \
-  _(UINT32                      , Timeout                     ,     , 0                           , ())                   \
-  _(OC_STRING                   , Resolution                  ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
-  _(OC_STRING                   , ConsoleMode                 ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
-  _(OC_STRING                   , ConsoleBehaviourOs          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
-  _(OC_STRING                   , ConsoleBehaviourUi          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING))
+  _(BOOLEAN                     , HideSelf                    ,     , FALSE                       ,     ())                   \
+  _(BOOLEAN                     , ShowPicker                  ,     , FALSE                       ,     ())                   \
+  _(BOOLEAN                     , UsePicker                   ,     , FALSE                       ,     ())                   \
+  _(UINT32                      , Timeout                     ,     , 0                           ,     ())                   \
+  _(OC_STRING                   , HibernateMode               ,     , OC_STRING_CONSTR ("None", _, __), OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , Resolution                  ,     , OC_STRING_CONSTR ("", _, __),     OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , ConsoleMode                 ,     , OC_STRING_CONSTR ("", _, __),     OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , ConsoleBehaviourOs          ,     , OC_STRING_CONSTR ("", _, __),     OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , ConsoleBehaviourUi          ,     , OC_STRING_CONSTR ("", _, __),     OC_DESTR (OC_STRING))
   OC_DECLARE (OC_MISC_BOOT)
 
 #define OC_MISC_DEBUG_FIELDS(_, __) \

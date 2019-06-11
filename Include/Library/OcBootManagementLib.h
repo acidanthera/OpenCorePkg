@@ -308,6 +308,13 @@ typedef struct {
 } OC_PICKER_CONTEXT;
 
 /**
+  Hibernate detection bit mask for hibernate source usage.
+**/
+#define HIBERNATE_MODE_NONE   0U
+#define HIBERNATE_MODE_RTC    1U
+#define HIBERNATE_MODE_NVRAM  2U
+
+/**
   Describe boot entry contents by setting fields other than DevicePath.
 
   @param[in]  BootPolicy     Apple Boot Policy Protocol.
@@ -429,6 +436,18 @@ OcLoadBootEntry (
   IN  OC_PICKER_CONTEXT           *Context,
   IN  OC_BOOT_ENTRY               *BootEntry,
   IN  EFI_HANDLE                  ParentHandle
+  );
+
+/**
+  Handle hibernation detection for later loading.
+
+  @param[in]  HibernateMask  Hibernate detection mask.
+
+  @retval EFI_SUCCESS        Hibernation mode was found and activated.
+**/
+EFI_STATUS
+ActivateHibernateWake (
+  IN UINT32                       HibernateMask
   );
 
 /**
