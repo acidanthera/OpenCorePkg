@@ -18,6 +18,8 @@ OpenCore Changelog
 - Added `UsePicker` option, do enable for OC boot management
 - Added nvram.plist loading for legacy and incompatible platforms
 - Improved instructions for legacy and Windows installation
+- Added Windows Boot Camp switching support
+- Added basic hibernation detection
 
 #### v0.0.2
 - Documentation improvements (see Differences.pdf)
