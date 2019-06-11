@@ -46,3 +46,4 @@
     OcAppleDiskImageBlockIo.c
     OcAppleDiskImageLib.c
     OcAppleDiskImageLibInternal.c
+    OcAppleDiskImageLibInternal.h

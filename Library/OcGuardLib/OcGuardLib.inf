@@ -35,6 +35,7 @@
   TripleOverflow.c
   UbsanPrintf.c
   Ubsan.c
+  Ubsan.h
 
 [Packages]
   MdePkg/MdePkg.dec

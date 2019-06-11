@@ -30,7 +30,8 @@
   OcGuardLib
 
 [Sources]
-  Header.c
-  Symbols.c
   CxxSymbols.c
+  Header.c
+  OcMachoLibInternal.h
   Relocations.c
+  Symbols.c

@@ -33,6 +33,7 @@
 
 [Sources]
   CryptoTest.c
+  CryptoSamples.h
 
 [Packages]
   OcSupportPkg/OcSupportPkg.dec

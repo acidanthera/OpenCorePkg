@@ -28,6 +28,7 @@
 
 [Sources]
   DebugSmbios.c
+  DebugSmbios.h
   SmbiosPatch.c
   SmbiosInternal.c
   SmbiosInternal.h
