@@ -61,8 +61,8 @@ package() {
   cp -r "${selfdir}/Docs/AcpiSamples/" tmp/Docs/AcpiSamples/ || exit 1
   cp "${selfdir}/UDK/OcSupportPkg/Tools/RsaTool/RsaTool" tmp/Tools/ || exit 1
   cp "${selfdir}/UDK/OcSupportPkg/Tools/Vault/create_vault.sh" tmp/Tools/ || exit 1
-  cp "${selfdir}/UDK/OcSupportPkg/Tools/Recovery/obtain_recovery.php" tmp/Tools/ || exit 1
-  cp "${selfdir}/UDK/OcSupportPkg/Tools/Recovery/recovery_urls.txt" tmp/Tools/ || exit 1
+  cp -r "${selfdir}/UDK/OcSupportPkg/Tools/Recovery" tmp/Tools/ || exit 1
+  cp -r "${selfdir}/UDK/OcSupportPkg/Tools/BootInstall" tmp/Tools/ || exit 1
   pushd tmp || exit 1
   zip -qry ../"OpenCore-v${ver}-${2}.zip" * || exit 1
   popd || exit 1

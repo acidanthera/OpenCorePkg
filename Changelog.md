@@ -17,6 +17,7 @@ OpenCore Changelog
 - Added `(external)` suffix for external drives in boot menu
 - Added `UsePicker` option, do enable for OC boot management
 - Added nvram.plist loading for legacy and incompatible platforms
+- Improved instructions for legacy and Windows installation
 
 #### v0.0.2
 - Documentation improvements (see Differences.pdf)

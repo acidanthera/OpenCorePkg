@@ -485,9 +485,9 @@ utilised.
 
 For BIOS booting a third-party UEFI environment provider will have to
 be used. \texttt{DuetPkg} is one of the known UEFI environment providers
-for legacy systems. While it is known to be possible to run OpenCore
-on such a legacy system, configuration and use of \texttt{DuetPkg} is
-currently out of the scope of this document.
+for legacy systems. To run OpenCore on such a legacy system you can install
+\texttt{DuetPkg} with a dedicated tool: 
+\href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/BootInstall}{BootInstall}.
 
 For upgrade purposes refer to \texttt{Differences.pdf} document, providing
 the information about the changes affecting the configuration compared
@@ -3089,6 +3089,12 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   Partition, and does not support the default Windows layout.
   Other than that, all the modifications applied (to ACPI, NVRAM, SMBIOS, etc.) are supposed
   to be operating system agnostic, i.e. apply equally regardless of the OS booted.
+
+  Loading Windows from OpenCore may lead to the need of reactivation. To avoid it consider
+  leaving SystemUUID field empty, so that the original firmware UUID is used. Be warned,
+  on old firmwares it may be invalid, i.e. not random. In case you still have issues,
+  consider using HWID or KMS38 license, the nuances of Windows activation are out of the
+  scope of this document and can be found online.
 
 \end{enumerate}
 
