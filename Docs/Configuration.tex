@@ -1470,6 +1470,20 @@ behaviour that does not go to any other sections
   interface load. Refer to \texttt{ConsoleBehaviourOs} description for details.
 
 \item
+  \texttt{HibernateMode}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Default value}: \texttt{None}\\
+  \textbf{Description}: Hibernation detection mode. The following modes are supported:
+
+  \begin{itemize}
+  \tightlist
+    \item \texttt{None} --- Avoid hibernation for your own good.
+    \item \texttt{Auto} --- Use RTC and NVRAM detection.
+    \item \texttt{RTC} --- Use RTC detection.
+    \item \texttt{NVRAM} --- Use NVRAM detection.
+  \end{itemize}
+
+\item
   \texttt{HideSelf}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\

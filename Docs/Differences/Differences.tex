@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May 24 02:34:39 2019
-%DIF ADD ../Configuration.tex        Tue Jun 11 09:12:02 2019
+%DIF ADD ../Configuration.tex        Wed Jun 12 00:44:07 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1621,7 +1621,22 @@ behaviour that does not go to any other sections
   interface load. Refer to \texttt{ConsoleBehaviourOs} description for details.
 
 \item
-  \texttt{HideSelf}\\
+  \DIFaddbegin \texttt{\DIFadd{HibernateMode}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: }\texttt{\DIFadd{None}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Hibernation detection mode. The following modes are supported:
+}
+
+  \begin{itemize}
+  \tightlist
+    \item \texttt{\DIFadd{None}} \DIFadd{--- Avoid hibernation for your own good.
+    }\item \texttt{\DIFadd{Auto}} \DIFadd{--- Use RTC and NVRAM detection.
+    }\item \texttt{\DIFadd{RTC}} \DIFadd{--- Use RTC detection.
+    }\item \texttt{\DIFadd{NVRAM}} \DIFadd{--- Use NVRAM detection.
+  }\end{itemize}
+
+\item
+  \DIFaddend \texttt{HideSelf}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
   \textbf{Description}: Hides own boot entry from boot picker. This

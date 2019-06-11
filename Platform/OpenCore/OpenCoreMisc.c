@@ -219,10 +219,13 @@ OcMiscLateInit (
   )
 {
   EFI_STATUS   Status;
+  EFI_STATUS   HibernateStatus;
   UINT32       Width;
   UINT32       Height;
   UINT32       Bpp;
   BOOLEAN      SetMax;
+  CONST CHAR8  *HibernateMode;
+  UINT32       HibernateMask;
 
   if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_BOOT_PATH) != 0) {
     OcStoreLoadPath (LoadPath);
@@ -305,6 +308,27 @@ OcMiscLateInit (
       Status
       ));
   }
+
+  HibernateMode = OC_BLOB_GET (&Config->Misc.Boot.HibernateMode);
+
+  if (AsciiStrCmp (HibernateMode, "None") == 0) {
+    HibernateMask = HIBERNATE_MODE_NONE;
+  } else if (AsciiStrCmp (HibernateMode, "Auto") == 0) {
+    HibernateMask = HIBERNATE_MODE_RTC | HIBERNATE_MODE_NVRAM;
+  } else if (AsciiStrCmp (HibernateMode, "RTC") == 0) {
+    HibernateMask = HIBERNATE_MODE_RTC;
+  } else if (AsciiStrCmp (HibernateMode, "NVRAM") == 0) {
+    HibernateMask = HIBERNATE_MODE_NVRAM;
+  } else {
+    DEBUG ((DEBUG_INFO, "OC: Invalid HibernateMode: %a\n", HibernateMode));
+    HibernateMask = HIBERNATE_MODE_NONE;
+  }
+
+  DEBUG ((DEBUG_INFO, "OC: Translated HibernateMode %a to %u\n", HibernateMode, HibernateMask));
+
+  HibernateStatus = ActivateHibernateWake (HibernateMask);
+  DEBUG ((DEBUG_INFO, "OC: Hibernation detection status is %r\n", HibernateStatus));
+  (VOID) HibernateStatus;
 
   return Status;
 }

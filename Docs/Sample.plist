@@ -388,6 +388,8 @@
 			<string></string>
 			<key>ConsoleMode</key>
 			<string></string>
+			<key>HibernateMode</key>
+			<string>None</string>
 			<key>HideSelf</key>
 			<true/>
 			<key>Resolution</key>
