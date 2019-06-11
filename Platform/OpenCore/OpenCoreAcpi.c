@@ -215,6 +215,11 @@ OcLoadAcpiSupport (
     AcpiResetLogoStatus (&Context);
   }
 
+  //
+  // Log hardware signature.
+  //
+  AcpiHandleHardwareSignature (&Context, Config->Acpi.Quirks.ResetHwSig);
+
   if (Config->Acpi.Quirks.RebaseRegions) {
     AcpiRelocateRegions (&Context);
   }

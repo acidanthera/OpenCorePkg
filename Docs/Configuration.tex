@@ -901,6 +901,16 @@ source file may help understanding ACPI opcodes.
   works with most common cases. Do not use unless absolutely required.
 
 \item
+  \texttt{ResetHwSig}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Default value}: \texttt{false}\\
+  \textbf{Description}: Reset \texttt{FACS} table \texttt{HardwareSignature}
+  value to \texttt{0}.
+
+  This works around firmwares that fail to maintain hardware signature across
+  the reboots and cause issues with waking from hibernation.
+
+\item
   \texttt{ResetLogoStatus}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\

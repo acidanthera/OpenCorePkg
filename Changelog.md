@@ -20,6 +20,7 @@ OpenCore Changelog
 - Improved instructions for legacy and Windows installation
 - Added Windows Boot Camp switching support
 - Added basic hibernation detection
+- Added `ResetHwSig` ACPI quirk to workaround hibernation
 
 #### v0.0.2
 - Documentation improvements (see Differences.pdf)

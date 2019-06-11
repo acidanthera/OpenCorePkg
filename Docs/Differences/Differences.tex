@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May 24 02:34:39 2019
-%DIF ADD ../Configuration.tex        Wed Jun 12 00:44:07 2019
+%DIF ADD ../Configuration.tex        Wed Jun 12 01:58:02 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1038,7 +1038,19 @@ source file may help understanding ACPI opcodes.
   works with most common cases. Do not use unless absolutely required.
 
 \item
-  \texttt{ResetLogoStatus}\\
+  \DIFaddbegin \texttt{\DIFadd{ResetHwSig}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Default value}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Reset }\texttt{\DIFadd{FACS}} \DIFadd{table }\texttt{\DIFadd{HardwareSignature}}
+  \DIFadd{value to }\texttt{\DIFadd{0}}\DIFadd{.
+}
+
+  \DIFadd{This works around firmwares that fail to maintain hardware signature across
+  the reboots and cause issues with waking from hibernation.
+}
+
+\item
+  \DIFaddend \texttt{ResetLogoStatus}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
   \textbf{Description}: Reset \texttt{BGRT} table \texttt{Displayed}

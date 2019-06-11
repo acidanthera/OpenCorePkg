@@ -137,6 +137,8 @@
 			<false/>
 			<key>RebaseRegions</key>
 			<false/>
+			<key>ResetHwSig</key>
+			<false/>
 			<key>ResetLogoStatus</key>
 			<false/>
 		</dict>
