@@ -307,6 +307,10 @@ InternalSetBootEntryFlags (
     if ((DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
      && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)) {
       Path   = ((FILEPATH_DEVICE_PATH *) DevicePathWalker)->PathName;
+      //
+      // FIXME: Create an aligned copy.
+      //
+      ASSERT (((UINTN)Path & BIT0) == 0);
       Len    = StrLen (Path);
       if ((Len > 0) && (Path[Len - 1] == L'\\')) {
         BootEntry->IsFolder = TRUE;

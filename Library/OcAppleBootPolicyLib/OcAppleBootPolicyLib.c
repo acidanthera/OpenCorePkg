@@ -285,6 +285,10 @@ InternalGetBooterFromBlessedSystemFolderPath (
      && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)) {
 
       FolderDevicePath  = (FILEPATH_DEVICE_PATH *) DevicePathWalker;
+      //
+      // FIXME: Create an aligned copy.
+      //
+      ASSERT (((UINTN)FolderDevicePath->PathName & BIT0) == 0);
       BooterPathSize    = StrSize (&FolderDevicePath->PathName[0])
                           + StrSize (APPLE_BOOTER_ROOT_FILE_NAME) - sizeof (CHAR16);
       BooterPath        = AllocateZeroPool (BooterPathSize);
@@ -733,6 +737,10 @@ InternalGetBootPathName (
       Size - SIZE_OF_FILEPATH_DEVICE_PATH
       );
 
+    //
+    // FIXME: Create an aligned copy.
+    //
+    ASSERT (((UINTN)FilePath->PathName & BIT0) == 0);
     Slash = StrStr (FilePath->PathName, L"\\");
 
     if (Slash != NULL) {

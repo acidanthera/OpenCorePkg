@@ -161,6 +161,10 @@ TrailedBooterDevicePath (
      && IsDevicePathEnd (NextDevicePathNode (DevicePathWalker))) {
       FilePath = (FILEPATH_DEVICE_PATH *) DevicePathWalker;
       Path     = FilePath->PathName;
+      //
+      // FIXME: Create an aligned copy.
+      //
+      ASSERT (((UINTN)Path & BIT0) == 0);
       Length   = StrLen (Path);
 
       if (Path[Length - 1] == L'\\') {
@@ -415,6 +419,10 @@ InternalFileDevicePathsEqualClipNode (
     }
 
     Start  = DevPath.FilePath->PathName;
+    //
+    // FIXME: Create an aligned copy.
+    //
+    ASSERT (((UINTN)Start & BIT0) == 0);
     Length = StrLen (Start);
     if (Length > 0) {
       InternalFileDevicePathsEqualClipBottom (&Length, &Start);
