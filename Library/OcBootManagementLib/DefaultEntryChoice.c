@@ -525,13 +525,31 @@ InternalGetDefaultBootEntry (
         break;
       }
 
+      PrevDevicePath = FullDevicePath;
+
       DebugPrintDevicePath (DEBUG_INFO, "OCB: Expanded DP", FullDevicePath);
 
-      PrevDevicePath = FullDevicePath;
+      UefiRemainingDevicePath = FullDevicePath;
+      Status = gBS->LocateDevicePath (
+                      &gEfiDevicePathProtocolGuid,
+                      &UefiRemainingDevicePath,
+                      &DeviceHandle
+                      );
+
+      if (EFI_ERROR (Status)) {
+        continue;
+      }
+
+      DebugPrintDevicePath (
+        DEBUG_INFO,
+        "OCB: Expanded DP remainder",
+        UefiRemainingDevicePath
+        );
+
       BootEntry = InternalGetBootEntryByDevicePath (
                     BootEntries,
                     NumBootEntries,
-                    UefiDevicePath,
+                    FullDevicePath,
                     UefiRemainingDevicePath,
                     IsBootNext
                     );
