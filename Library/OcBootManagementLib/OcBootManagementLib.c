@@ -543,7 +543,6 @@ ActivateHibernateWake (
   UINTN                   Size;
   VOID                    *Value;
   AppleRTCHibernateVars   RtcVars;
-  BOOLEAN                 HasIORTCVariables;
   BOOLEAN                 HasHibernateInfo;
   BOOLEAN                 HasHibernateInfoInRTC;
   UINT8                   Index;
@@ -553,7 +552,6 @@ ActivateHibernateWake (
     return EFI_NOT_FOUND;
   }
 
-  HasIORTCVariables = FALSE;
   HasHibernateInfo = FALSE;
   HasHibernateInfoInRTC = FALSE;
 
@@ -567,6 +565,7 @@ ActivateHibernateWake (
     //
     ZeroMem (Value, Size);
     FreePool (Value);
+    DEBUG ((DEBUG_INFO, "OCB: Found legacy boot-switch-vars\n"));
     return EFI_SUCCESS;
   }
 
@@ -584,6 +583,11 @@ ActivateHibernateWake (
                          && RtcVars.signature[2] == 'P'
                          && RtcVars.signature[3] == 'L';
     HasHibernateInfo = HasHibernateInfoInRTC;
+
+    DEBUG ((DEBUG_INFO, "OCB: RTC hibernation is %d\n", HasHibernateInfoInRTC));
+  }
+
+  if (HibernateMask & HIBERNATE_MODE_NVRAM) {
     //
     // If RTC variables is still written to NVRAM (and RTC is broken).
     // Prior to 10.13.6.
@@ -597,6 +601,14 @@ ActivateHibernateWake (
                       && RtcVars.signature[3] == 'L';
     }
 
+    DEBUG ((
+      DEBUG_INFO,
+      "OCB: NVRAM hibernation is %d / %r / %u\n",
+      HasHibernateInfo,
+      Status,
+      (UINT32) Size
+      ));
+
     //
     // Erase RTC variables in NVRAM.
     //
@@ -609,110 +621,53 @@ ActivateHibernateWake (
         NULL
         );
       ZeroMem (Value, Size);
-      gBS->FreePool (Value);
-    }
-
-    //
-    // Convert RTC data to boot-key and boot-signature
-    //
-    if (HasHibernateInfo) {
-      gRT->SetVariable (
-        L"boot-image-key",
-        &gAppleBootVariableGuid,
-        EFI_VARIABLE_BOOTSERVICE_ACCESS,
-        sizeof (RtcVars.wiredCryptKey),
-        RtcVars.wiredCryptKey
-        );
-      gRT->SetVariable (
-        L"boot-signature",
-        &gAppleBootVariableGuid,
-        EFI_VARIABLE_BOOTSERVICE_ACCESS,
-        sizeof (RtcVars.booterSignature),
-        RtcVars.booterSignature
-        );
-    }
-
-    //
-    // Erase RTC memory similarly to AppleBds.
-    //
-    if (HasHibernateInfoInRTC) {
-      ZeroMem (RtcRawVars, sizeof(AppleRTCHibernateVars));
-      RtcVars.signature[0] = 'D';
-      RtcVars.signature[1] = 'E';
-      RtcVars.signature[2] = 'A';
-      RtcVars.signature[3] = 'D';
-
-      for (Index = 0; Index < sizeof(AppleRTCHibernateVars); Index++) {
-        OcRtcWrite (Index + 128, RtcRawVars[Index]);
-      }
-    }
-
-    //
-    // We have everything we need now.
-    //
-    if (HasHibernateInfo) {
-      return EFI_SUCCESS;
+      FreePool (Value);
     }
   }
 
-  if ((HibernateMask & HIBERNATE_MODE_NVRAM) == 0) {
-    return EFI_NOT_FOUND;
-  }
-
   //
-  // Fallback to legacy hibernation support if any.
-  // if IOHibernateRTCVariables exists (NVRAM working), then copy it to boot-switch-vars
-  // else (no NVRAM) set boot-switch-vars to dummy one.
+  // Convert RTC data to boot-key and boot-signature
   //
-  Status = GetVariable2 (
-    L"IOHibernateRTCVariables",
-    &gAppleBootVariableGuid,
-    &Value,
-    &Size
-    );
-  if (!EFI_ERROR (Status)) {
-    //
-    // Delete IOHibernateRTCVariables.
-    //
-    Status = gRT->SetVariable (
-      L"IOHibernateRTCVariables",
+  if (HasHibernateInfo) {
+    gRT->SetVariable (
+      L"boot-image-key",
       &gAppleBootVariableGuid,
-      EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-      0,
-      NULL
+      EFI_VARIABLE_BOOTSERVICE_ACCESS,
+      sizeof (RtcVars.wiredCryptKey),
+      RtcVars.wiredCryptKey
       );
-    HasIORTCVariables = TRUE;
-  } else {
-    //
-    // No NVRAM support, trying unencrypted.
-    //
-    Size = sizeof(RtcVars);
-    Value = &RtcVars;
-    ZeroMem (&RtcVars, Size);
-    RtcVars.signature[0] = 'A';
-    RtcVars.signature[1] = 'A';
-    RtcVars.signature[2] = 'P';
-    RtcVars.signature[3] = 'L';
-    RtcVars.revision     = 1;
+    gRT->SetVariable (
+      L"boot-signature",
+      &gAppleBootVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS,
+      sizeof (RtcVars.booterSignature),
+      RtcVars.booterSignature
+      );
   }
 
-  Status = gRT->SetVariable (
-    L"boot-switch-vars",
-    &gAppleBootVariableGuid,
-    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-    Size,
-    Value
-    );
+  //
+  // Erase RTC memory similarly to AppleBds.
+  //
+  if (HasHibernateInfoInRTC) {
+    ZeroMem (RtcRawVars, sizeof(AppleRTCHibernateVars));
+    RtcVars.signature[0] = 'D';
+    RtcVars.signature[1] = 'E';
+    RtcVars.signature[2] = 'A';
+    RtcVars.signature[3] = 'D';
 
-  //
-  // Erase written boot-switch-vars buffer.
-  //
-  ZeroMem (Value, Size);
-  if (HasIORTCVariables) {
-    gBS->FreePool (Value);
+    for (Index = 0; Index < sizeof(AppleRTCHibernateVars); Index++) {
+      OcRtcWrite (Index + 128, RtcRawVars[Index]);
+    }
   }
 
-  return Status;
+  //
+  // We have everything we need now.
+  //
+  if (HasHibernateInfo) {
+    return EFI_SUCCESS;
+  }
+
+  return EFI_NOT_FOUND;
 }
 
 EFI_STATUS
