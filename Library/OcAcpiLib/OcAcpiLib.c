@@ -1142,3 +1142,47 @@ AcpiResetLogoStatus (
     }
   }
 }
+
+VOID
+AcpiHandleHardwareSignature (
+  IN OUT OC_ACPI_CONTEXT  *Context,
+  IN     BOOLEAN          Reset
+  )
+{
+  EFI_ACPI_6_2_FIRMWARE_ACPI_CONTROL_STRUCTURE  *Facs;
+
+  if (Context->Fadt == NULL) {
+    return;
+  }
+
+  if (Context->Fadt->Header.Length >= OFFSET_OF (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE, XFirmwareCtrl) + sizeof (Context->Fadt->XFirmwareCtrl)) {
+    Facs = (EFI_ACPI_6_2_FIRMWARE_ACPI_CONTROL_STRUCTURE *)(UINTN) Context->Fadt->XFirmwareCtrl;
+  } else {
+    Facs = NULL;
+  }
+
+  if (Facs == NULL && Context->Fadt->Header.Length >= OFFSET_OF (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE, FirmwareCtrl) + sizeof (Context->Fadt->FirmwareCtrl)) {
+    Facs = (EFI_ACPI_6_2_FIRMWARE_ACPI_CONTROL_STRUCTURE *)(UINTN) Context->Fadt->FirmwareCtrl;
+  }
+
+  if (Facs != NULL && Facs->Length >= OFFSET_OF (EFI_ACPI_6_2_FIRMWARE_ACPI_CONTROL_STRUCTURE, Flags) + sizeof (Facs->HardwareSignature)) {
+    DEBUG ((DEBUG_INFO, "OCA: FACS signature is %X (%d)\n", Facs->Flags, Reset));
+
+    if (Reset) {
+      //
+      // TODO: We might also want to unset S4BIOS_F flag in Facs->Flags.
+      //
+      Facs->HardwareSignature = 0x0;
+    }
+  } else {
+    //
+    // For macOS this is just fine.
+    //
+    DEBUG ((
+      DEBUG_INFO,
+      "OCA: FACS signature is too far %d / %u\n",
+      Facs != NULL,
+      Facs != NULL ? Facs->Length : 0
+      ));
+  }
+}

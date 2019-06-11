@@ -569,6 +569,11 @@ ActivateHibernateWake (
     return EFI_SUCCESS;
   }
 
+  Size = 0;
+  Status = gRT->GetVariable (L"boot-image", &gAppleBootVariableGuid, NULL, &Size, NULL);
+  (VOID) Status;
+  DEBUG ((DEBUG_INFO, "OCB: boot-image is %u bytes - %r\n", (UINT32) Size, Status));
+
   //
   // Work with RTC memory if allowed.
   //

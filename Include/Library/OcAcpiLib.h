@@ -281,4 +281,16 @@ AcpiResetLogoStatus (
   IN OUT OC_ACPI_CONTEXT  *Context
   );
 
+/**
+  Log and reset FACS hardware signature.
+
+  @param Context     ACPI library context.
+  @param Reset       Perform reset.
+**/
+VOID
+AcpiHandleHardwareSignature (
+  IN OUT OC_ACPI_CONTEXT  *Context,
+  IN     BOOLEAN          Reset
+  );
+
 #endif // OC_ACPI_LIB_H

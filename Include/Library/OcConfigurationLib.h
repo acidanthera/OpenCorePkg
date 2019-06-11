@@ -81,6 +81,7 @@
   _(BOOLEAN                     , FadtEnableReset     ,     , FALSE  , ()) \
   _(BOOLEAN                     , NormalizeHeaders    ,     , FALSE  , ()) \
   _(BOOLEAN                     , RebaseRegions       ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ResetHwSig          ,     , FALSE  , ()) \
   _(BOOLEAN                     , ResetLogoStatus     ,     , FALSE  , ())
   OC_DECLARE (OC_ACPI_QUIRKS)
 
