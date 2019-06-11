@@ -310,10 +310,6 @@ OcKernelApplyPatches (
     if (Config->Kernel.Quirks.CustomSmbiosGuid) {
       PatchCustomSmbiosGuid (Context);
     }
-
-    if (Config->Kernel.Quirks.LapicKernelPanic) {
-      PatchLapicKernelPanic (&Patcher);
-    }
   } else {
     if (Config->Kernel.Quirks.AppleXcpmCfgLock) {
       PatchAppleXcpmCfgLock (&Patcher);
@@ -337,6 +333,10 @@ OcKernelApplyPatches (
         Config->Kernel.Emulate.Cpuid1Data,
         Config->Kernel.Emulate.Cpuid1Mask
         );
+    }
+
+    if (Config->Kernel.Quirks.LapicKernelPanic) {
+      PatchLapicKernelPanic (&Patcher);
     }
   }
 }
