@@ -1798,4 +1798,9 @@ STATIC EFI_RUNTIME_SERVICES *gRT = &gNilRT;
 STATIC EFI_GUID gEfiFileInfoGuid;
 STATIC EFI_GUID gEfiSimpleFileSystemProtocolGuid;
 
+STATIC VOID CpuDeadLoop(VOID) {
+  volatile int i = 0;
+  while (i == 0) {}
+}
+
 #endif

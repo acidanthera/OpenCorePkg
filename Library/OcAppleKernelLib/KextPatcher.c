@@ -134,6 +134,7 @@ PatcherApplyGenericPatch (
   if (Patch->Base != NULL) {
     Status = PatcherGetSymbolAddress (Context, Patch->Base, &Base);
     if (RETURN_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "Base lookup failure %r\n", Status));
       return Status;
     }
 
@@ -142,6 +143,7 @@ PatcherApplyGenericPatch (
 
   if (Patch->Find == NULL) {
     if (Size < Patch->Size) {
+      DEBUG ((DEBUG_INFO, "Patch is borked  - n/f\n"));
       return RETURN_NOT_FOUND;
     }
     CopyMem (Base, Patch->Replace, Patch->Size);
@@ -163,6 +165,8 @@ PatcherApplyGenericPatch (
     Patch->Count,
     Patch->Skip
     );
+
+  DEBUG ((DEBUG_INFO, "ReplaceCount - %u\n", ReplaceCount));
 
   if (ReplaceCount > 0 && Patch->Count > 0 && ReplaceCount != Patch->Count) {
     DEBUG ((

@@ -18,6 +18,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcAppleKernelLib.h>
+#include <Library/PrintLib.h>
+#include <Library/OcFileLib.h>
+#include <Library/UefiLib.h>
 
 STATIC
 UINT8
@@ -1043,6 +1046,40 @@ mLapicKernelPanicPatch = {
   .Limit   = 4096
 };
 
+STATIC
+UINT8
+mLapicKernelPanicMasterPatchFind[] = {
+  // cmp cs:_debug_boot_arg, 0 <- address masked out
+  0x83, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+STATIC
+UINT8
+mLapicKernelPanicMasterPatchMask[] = {
+  0xFF, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF
+};
+
+STATIC
+UINT8
+mLapicKernelPanicMasterPatchReplace[] = {
+  // xor eax, eax ; nop further
+  0x31, 0xC0, 0x90, 0x90, 0x90, 0x90, 0x90
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mLapicKernelPanicMasterPatch = {
+  .Base    = "_lapic_interrupt",
+  .Find    = mLapicKernelPanicMasterPatchFind,
+  .Mask    = mLapicKernelPanicMasterPatchMask,
+  .Replace = mLapicKernelPanicMasterPatchReplace,
+  .ReplaceMask = NULL,
+  .Size    = sizeof (mLapicKernelPanicMasterPatchFind),
+  .Count   = 1,
+  .Skip    = 0,
+  .Limit   = 4096
+};
+
 RETURN_STATUS
 PatchLapicKernelPanic (
   IN OUT PATCHER_CONTEXT  *Patcher
@@ -1059,6 +1096,17 @@ PatchLapicKernelPanic (
     DEBUG ((DEBUG_INFO, "Failed to apply lapic patch - %r\n", Status));
   } else {
     DEBUG ((DEBUG_INFO, "Patch success lapic\n"));
+
+    //
+    // Also patch away the master core check to never require lapic_dont_panic=1.
+    // This one is optional, and seems to never be required in real world.
+    //
+    Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicMasterPatch);
+    if (RETURN_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "Failed to apply extended lapic patch - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_INFO, "Patch success extended lapic\n"));
+    }
   }
 
   return Status;
