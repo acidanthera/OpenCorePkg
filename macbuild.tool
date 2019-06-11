@@ -61,6 +61,7 @@ package() {
   cp -r "${selfdir}/Docs/AcpiSamples/" tmp/Docs/AcpiSamples/ || exit 1
   cp "${selfdir}/UDK/OcSupportPkg/Tools/RsaTool/RsaTool" tmp/Tools/ || exit 1
   cp "${selfdir}/UDK/OcSupportPkg/Tools/Vault/create_vault.sh" tmp/Tools/ || exit 1
+  cp "${selfdir}/UDK/OcSupportPkg/Tools/Vault/sign.command" tmp/Tools/ || exit 1
   cp -r "${selfdir}/UDK/OcSupportPkg/Tools/Recovery" tmp/Tools/ || exit 1
   cp -r "${selfdir}/UDK/OcSupportPkg/Tools/BootInstall" tmp/Tools/ || exit 1
   pushd tmp || exit 1
