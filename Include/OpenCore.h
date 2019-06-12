@@ -64,7 +64,7 @@
 
 #define OPEN_CORE_NVRAM_PATH       L"nvram.plist"
 
-#define OPEN_CORE_ACPI_PATH        L"ACPI\\Custom\\"
+#define OPEN_CORE_ACPI_PATH        L"ACPI\\"
 
 #define OPEN_CORE_UEFI_DRIVER_PATH L"Drivers\\"
 

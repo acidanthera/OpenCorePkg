@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Jun  8 06:32:07 2019
-%DIF ADD ../Configuration.tex        Wed Jun 12 17:27:25 2019
+%DIF DEL PreviousConfiguration.tex   Fri May 24 02:34:39 2019
+%DIF ADD ../Configuration.tex        Wed Jun 12 20:29:14 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -500,13 +500,10 @@ entries include:
       child [missing] {}
       child { node {OC}
         child { node {ACPI}
-          child { node {Custom}
-            child { node [optional] {DSDT.aml}}
-            child { node [optional] {SSDT-1.aml}}
-            child { node [optional] {MYTABLE.aml}}
-          }
+          child { node [optional] {DSDT.aml}}
+          child { node [optional] {SSDT-1.aml}}
+          child { node [optional] {MYTABLE.aml}}
         }
-        child [missing] {}
         child [missing] {}
         child [missing] {}
         child [missing] {}
@@ -532,7 +529,6 @@ entries include:
         child { node [optional] {vault.sig}}
       }
     }
-    child [missing] {}
     child [missing] {}
     child [missing] {}
     child [missing] {}
@@ -709,7 +705,7 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
   \texttt{Add}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Default value}: Empty\\
-  \textbf{Description}: Load selected tables from \texttt{OC/ACPI/Custom}
+  \textbf{Description}: Load selected tables from \texttt{OC/ACPI\DIFdelbegin \DIFdel{/Custom}\DIFdelend }
   directory.
 
   Designed to be filled with \texttt{plist\ dict} values, describing each block entry.
@@ -769,7 +765,7 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
   \texttt{SSDT-USBX.aml}, etc.
 
   ACPI table load order follows the item order in the array. All ACPI tables
-  load from \texttt{OC/ACPI/Custom} directory.
+  load from \texttt{OC/ACPI\DIFdelbegin \DIFdel{/Custom}\DIFdelend } directory.
 
   \textbf{Note}: All tables but tables with \texttt{DSDT} table identifier
   (determined by parsing data not by filename) insert new tables into ACPI stack.

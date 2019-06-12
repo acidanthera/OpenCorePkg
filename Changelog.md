@@ -21,6 +21,7 @@ OpenCore Changelog
 - Added Windows Boot Camp switching support
 - Added basic hibernation detection
 - Added `ResetHwSig` ACPI quirk to workaround hibernation
+- Removed `Custom` subfolder requirement from `ACPI` tables
 
 #### v0.0.2
 - Documentation improvements (see Differences.pdf)
