@@ -333,7 +333,7 @@ InternalGetDefaultBootEntry (
   OC_BOOT_ENTRY            *BootEntry;
 
   EFI_STATUS               Status;
-  BOOLEAN                  Result;
+  INTN                     NumPatchedNodes;
 
   UINT32                   BootNextAttributes;
   UINTN                    BootNextSize;
@@ -475,7 +475,7 @@ InternalGetDefaultBootEntry (
   DebugPrintDevicePath (DEBUG_INFO, "OCB: Default DP pre-fix", UefiDevicePath);
 
   UefiRemainingDevicePath = UefiDevicePath;
-  Result = OcFixAppleBootDevicePath (&UefiRemainingDevicePath);
+  NumPatchedNodes = OcFixAppleBootDevicePath (&UefiRemainingDevicePath);
 
   DebugPrintDevicePath (
     DEBUG_INFO,
@@ -488,7 +488,7 @@ InternalGetDefaultBootEntry (
     UefiRemainingDevicePath
     );
 
-  if (!Result) {
+  if (NumPatchedNodes == -1) {
     DEBUG ((DEBUG_WARN, "OCB: Failed to fix the default boot Device Path,\n"));
     return NULL;
   }
@@ -535,7 +535,6 @@ InternalGetDefaultBootEntry (
                       &UefiRemainingDevicePath,
                       &DeviceHandle
                       );
-
       if (EFI_ERROR (Status)) {
         continue;
       }

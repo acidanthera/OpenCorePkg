@@ -143,10 +143,11 @@ TrailedBooterDevicePath (
                              On output, the device path pointer is modified to
                              point to the remaining part of the device path.
 
-  @returns  Whether the device path has been fixed successfully.
+  @retval -1     DevicePath could not be fixed.
+  @retval other  The number of fixed nodes in DevicePath.
 
 **/
-BOOLEAN
+INTN
 OcFixAppleBootDevicePath (
   IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath
   );

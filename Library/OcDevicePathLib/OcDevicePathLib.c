@@ -220,14 +220,17 @@ TrailedBooterDevicePath (
                              On output, the device path pointer is modified to
                              point to the remaining part of the device path.
 
-  @returns  Whether the device path has been fixed successfully.
+  @retval -1     DevicePath could not be fixed.
+  @retval other  The number of fixed nodes in DevicePath.
 
 **/
-BOOLEAN
+INTN
 OcFixAppleBootDevicePath (
   IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath
   )
 {
+  INTN                     Result;
+
   EFI_DEVICE_PATH_PROTOCOL *OriginalDevPath;
 
   EFI_DEV_PATH_PTR         InvalidNode;
@@ -246,8 +249,18 @@ OcFixAppleBootDevicePath (
   //          modified and success is returned.
   //
   OriginalDevPath = *DevicePath;
-
+  //
+  // Failure will be returned explicitly within the loop.  If this loop is run
+  // only once, it means the Device Path had already been valid.  Hence, Result
+  // will be 0 on termination.  Shall any switch-case continue, which it needs
+  // to in order to patch subsequent nodes, Result will be incremented.
+  //
+  Result = -1;
   while (TRUE) {
+    if (Result != MAX_INTN) {
+      ++Result;
+    }
+
     RemainingDevPath = OriginalDevPath;
     gBS->LocateDevicePath (
            &gEfiDevicePathProtocolGuid,
@@ -277,7 +290,7 @@ OcFixAppleBootDevicePath (
             continue;
           }
 
-          return FALSE;
+          return -1;
         }
 
         case MSG_SASEX_DP:
@@ -299,7 +312,7 @@ OcFixAppleBootDevicePath (
             continue;
           }
 
-          return FALSE;
+          return -1;
         }
 
         default:
@@ -325,7 +338,7 @@ OcFixAppleBootDevicePath (
             continue;
           }
 
-          return FALSE;
+          return -1;
         }
 
         case ACPI_EXTENDED_DP:
@@ -351,7 +364,7 @@ OcFixAppleBootDevicePath (
             continue;
           }
 
-          return FALSE;
+          return -1;
         }
 
         default:
@@ -361,7 +374,7 @@ OcFixAppleBootDevicePath (
       }
     }
 
-    return TRUE;
+    return Result;
   }
 }
 
