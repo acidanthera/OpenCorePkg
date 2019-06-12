@@ -33,6 +33,7 @@
   LocateFileSystem.c
   OpenFileByDp.c
   ReadFile.c
+  GptPartitionEntry.c
 
 [Packages]
   OcSupportPkg/OcSupportPkg.dec

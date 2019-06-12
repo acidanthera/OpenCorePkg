@@ -233,4 +233,15 @@ OcOpenFileByDevicePath (
   IN     UINT64                    Attributes
   );
 
+/**
+  Retrieve the partition's GPT information, if applicable
+
+  @param[in] FsHandle  The device handle of the partition to retrieve info of.
+
+**/
+CONST EFI_PARTITION_ENTRY *
+OcGetGptPartitionEntry (
+  IN EFI_HANDLE  FsHandle
+  );
+
 #endif // OC_FILE_LIB_H
