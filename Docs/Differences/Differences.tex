@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri May 24 02:34:39 2019
-%DIF ADD ../Configuration.tex        Wed Jun 12 01:58:02 2019
+%DIF DEL PreviousConfiguration.tex   Sat Jun  8 06:32:07 2019
+%DIF ADD ../Configuration.tex        Wed Jun 12 17:24:24 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1470,7 +1470,7 @@ blocking.
   \DIFaddend \texttt{ExternalDiskIcons}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Apply icon type patches to IOAHCIPort.kext to force
+  \textbf{Description}: Apply icon type patches to \DIFdelbegin \DIFdel{IOAHCIPort}\DIFdelend \DIFaddbegin \DIFadd{AppleAHCIPort}\DIFaddend .kext to force
   internal disk icons for all AHCI disks.
 
   \emph{Note}: This option should avoided whenever possible. Modern firmwares
@@ -1497,7 +1497,7 @@ blocking.
   \DIFaddend \texttt{ThirdPartyTrim}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Patch IOAHCIFamily.kext to force TRIM command support
+  \textbf{Description}: Patch \DIFdelbegin \DIFdel{IOAHCIFamily}\DIFdelend \DIFaddbegin \DIFadd{IOAHCIBlockStorage}\DIFaddend .kext to force TRIM command support
   on AHCI SSDs.
 
   \emph{Note}: This option should avoided whenever possible. NVMe SSDs are

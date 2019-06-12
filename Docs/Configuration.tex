@@ -1322,7 +1322,7 @@ blocking.
   \texttt{ExternalDiskIcons}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Apply icon type patches to IOAHCIPort.kext to force
+  \textbf{Description}: Apply icon type patches to AppleAHCIPort.kext to force
   internal disk icons for all AHCI disks.
 
   \emph{Note}: This option should avoided whenever possible. Modern firmwares
@@ -1347,7 +1347,7 @@ blocking.
   \texttt{ThirdPartyTrim}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Patch IOAHCIFamily.kext to force TRIM command support
+  \textbf{Description}: Patch IOAHCIBlockStorage.kext to force TRIM command support
   on AHCI SSDs.
 
   \emph{Note}: This option should avoided whenever possible. NVMe SSDs are
