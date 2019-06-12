@@ -29,6 +29,7 @@
 #include <Library/OcGuardLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcBootManagementLib.h>
+#include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcRtcLib.h>
@@ -539,14 +540,18 @@ ActivateHibernateWake (
   IN UINT32                       HibernateMask
   )
 {
-  EFI_STATUS              Status;
-  UINTN                   Size;
-  VOID                    *Value;
-  AppleRTCHibernateVars   RtcVars;
-  BOOLEAN                 HasHibernateInfo;
-  BOOLEAN                 HasHibernateInfoInRTC;
-  UINT8                   Index;
-  UINT8                   *RtcRawVars;
+  EFI_STATUS               Status;
+  UINTN                    Size;
+  UINT32                   Attributes;
+  VOID                     *Value;
+  AppleRTCHibernateVars    RtcVars;
+  BOOLEAN                  HasHibernateInfo;
+  BOOLEAN                  HasHibernateInfoInRTC;
+  UINT8                    Index;
+  UINT8                    *RtcRawVars;
+  EFI_DEVICE_PATH_PROTOCOL *BootImagePath;
+  EFI_DEVICE_PATH_PROTOCOL *RemainingPath;
+  INTN                     NumPatchedNodes;
 
   if (HibernateMask == HIBERNATE_MODE_NONE) {
     return EFI_NOT_FOUND;
@@ -569,9 +574,53 @@ ActivateHibernateWake (
     return EFI_SUCCESS;
   }
 
-  Size = 0;
-  Status = gRT->GetVariable (L"boot-image", &gAppleBootVariableGuid, NULL, &Size, NULL);
-  (VOID) Status;
+  Status = GetVariable3 (
+             L"boot-image",
+             &gAppleBootVariableGuid,
+             (VOID **)&BootImagePath,
+             &Size,
+             &Attributes
+             );
+  if (!EFI_ERROR (Status)) {
+    if (IsDevicePathValid (BootImagePath, Size)) {
+      DebugPrintDevicePath (
+        DEBUG_INFO,
+        "OCB: boot-image pre-fix",
+        BootImagePath
+        );
+
+      RemainingPath   = BootImagePath;
+      NumPatchedNodes = OcFixAppleBootDevicePath (&RemainingPath);
+      if (NumPatchedNodes > 0) {
+        DebugPrintDevicePath (
+          DEBUG_INFO,
+          "OCB: boot-image post-fix",
+          BootImagePath
+          );
+
+        Status = gRT->SetVariable (
+                        L"boot-image",
+                        &gAppleBootVariableGuid,
+                        Attributes,
+                        Size,
+                        BootImagePath
+                        );
+      }
+      if (NumPatchedNodes >= 0) {
+        DebugPrintDevicePath (
+          DEBUG_INFO,
+          "OCB: boot-image post-fix remainder",
+          RemainingPath
+          );
+      }
+    } else {
+      DEBUG ((DEBUG_INFO, "OCB: Invalid boot-image variable\n"));
+    }
+
+    ZeroMem (BootImagePath, Size);
+    FreePool (BootImagePath);
+  }
+
   DEBUG ((DEBUG_INFO, "OCB: boot-image is %u bytes - %r\n", (UINT32) Size, Status));
 
   //
