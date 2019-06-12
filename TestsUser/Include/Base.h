@@ -1803,4 +1803,70 @@ STATIC VOID CpuDeadLoop(VOID) {
   while (i == 0) {}
 }
 
+///
+/// GPT Partition Entry.
+///
+typedef struct {
+  ///
+  /// Unique ID that defines the purpose and type of this Partition. A value of
+  /// zero defines that this partition entry is not being used.
+  ///
+  EFI_GUID  PartitionTypeGUID;
+  ///
+  /// GUID that is unique for every partition entry. Every partition ever
+  /// created will have a unique GUID.
+  /// This GUID must be assigned when the GUID Partition Entry is created.
+  ///
+  EFI_GUID  UniquePartitionGUID;
+  ///
+  /// Starting LBA of the partition defined by this entry
+  ///
+  EFI_LBA   StartingLBA;
+  ///
+  /// Ending LBA of the partition defined by this entry.
+  ///
+  EFI_LBA   EndingLBA;
+  ///
+  /// Attribute bits, all bits reserved by UEFI
+  /// Bit 0:      If this bit is set, the partition is required for the platform to function. The owner/creator of the
+  ///             partition indicates that deletion or modification of the contents can result in loss of platform
+  ///             features or failure for the platform to boot or operate. The system cannot function normally if
+  ///             this partition is removed, and it should be considered part of the hardware of the system.
+  ///             Actions such as running diagnostics, system recovery, or even OS install or boot, could
+  ///             potentially stop working if this partition is removed. Unless OS software or firmware
+  ///             recognizes this partition, it should never be removed or modified as the UEFI firmware or
+  ///             platform hardware may become non-functional.
+  /// Bit 1:      If this bit is set, then firmware must not produce an EFI_BLOCK_IO_PROTOCOL device for
+  ///             this partition. By not producing an EFI_BLOCK_IO_PROTOCOL partition, file system
+  ///             mappings will not be created for this partition in UEFI.
+  /// Bit 2:      This bit is set aside to let systems with traditional PC-AT BIOS firmware implementations
+  ///             inform certain limited, special-purpose software running on these systems that a GPT
+  ///             partition may be bootable. The UEFI boot manager must ignore this bit when selecting
+  ///             a UEFI-compliant application, e.g., an OS loader.
+  /// Bits 3-47:  Undefined and must be zero. Reserved for expansion by future versions of the UEFI
+  ///             specification.
+  /// Bits 48-63: Reserved for GUID specific use. The use of these bits will vary depending on the
+  ///             PartitionTypeGUID. Only the owner of the PartitionTypeGUID is allowed
+  ///             to modify these bits. They must be preserved if Bits 0-47 are modified..
+  ///
+  UINT64    Attributes;
+  ///
+  /// Null-terminated name of the partition.
+  ///
+  CHAR16    PartitionName[36];
+} EFI_PARTITION_ENTRY;
+
+STATIC
+EFI_MEMORY_DESCRIPTOR *
+GetCurrentMemoryMap (
+  OUT UINTN   *MemoryMapSize,
+  OUT UINTN   *DescriptorSize,
+  OUT UINTN   *MapKey             OPTIONAL,
+  OUT UINT32  *DescriptorVersion  OPTIONAL
+  )
+{
+  ASSERT (FALSE);
+  return NULL;
+}
+
 #endif
