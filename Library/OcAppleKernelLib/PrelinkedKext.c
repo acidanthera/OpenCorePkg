@@ -168,7 +168,7 @@ InternalCreatePrelinkedKext (
 
 STATIC
 RETURN_STATUS
-InternalScanCurrentPrelinkedKext (
+InternalScanCurrentPrelinkedKextLinkedEdit (
   IN OUT PRELINKED_KEXT  *Kext
   )
 {
@@ -456,25 +456,7 @@ InternalInsertPrelinkedKextDependency (
     return RETURN_OUT_OF_RESOURCES;
   }
 
-  Status = InternalScanPrelinkedKext (DependencyKext, Context);
-  if (RETURN_ERROR (Status)) {
-    return Status;
-  }
-
-  Status = InternalScanBuildLinkedSymbolTable (DependencyKext, Context);
-  if (RETURN_ERROR (Status)) {
-    return Status;
-  }
-  //
-  // Allocate the LinkBuffer from the size cached during the initial
-  // function recursion.
-  //
-  Status = InternalUpdateLinkBuffer (DependencyKext, Context);
-  if (RETURN_ERROR (Status)) {
-    return Status;
-  }
-
-  Status = InternalScanBuildLinkedVtables (DependencyKext, Context);
+  Status = InternalScanPrelinkedKext (DependencyKext, Context, TRUE);
   if (RETURN_ERROR (Status)) {
     return Status;
   }
@@ -624,41 +606,45 @@ InternalCachedPrelinkedKernel (
 RETURN_STATUS
 InternalScanPrelinkedKext (
   IN OUT PRELINKED_KEXT     *Kext,
-  IN OUT PRELINKED_CONTEXT  *Context
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     BOOLEAN            Dependency
   )
 {
-  RETURN_STATUS      Status;
+  RETURN_STATUS   Status;
+  RETURN_STATUS   LinkedEditStatus;
   UINT32          FieldCount;
   UINT32          FieldIndex;
   UINT32          DependencyIndex;
   CONST CHAR8     *DependencyId;
   PRELINKED_KEXT  *DependencyKext;
+  //
+  // __LINKEDIT may validly not be present, as seen for 10.7.5's
+  // com.apple.kpi.unsupported.
+  //
+  LinkedEditStatus = InternalScanCurrentPrelinkedKextLinkedEdit (Kext);
+  if (!RETURN_ERROR (LinkedEditStatus)) {
+    //
+    // Find the biggest __LINKEDIT size down the first dependency tree walk to
+    // possibly save a few re-allocations.
+    //
+    if ((Context->LinkBuffer == NULL)
+     && (Context->LinkBufferSize < Kext->LinkEditSegment->FileSize)) {
+      Context->LinkBufferSize = (UINT32)Kext->LinkEditSegment->FileSize;
+    }
 
-  Status = InternalScanCurrentPrelinkedKext (Kext);
-  if (RETURN_ERROR (Status)) {
-    return Status;
-  }
-  //
-  // Find the biggest __LINKEDIT size down the first dependency tree walk to
-  // possibly save a few re-allocations.
-  //
-  if ((Context->LinkBuffer == NULL)
-   && (Context->LinkBufferSize < Kext->LinkEditSegment->FileSize)) {
-    Context->LinkBufferSize = (UINT32)Kext->LinkEditSegment->FileSize;
-  }
+    //
+    // Always add kernel dependency.
+    //
+    DependencyKext = InternalCachedPrelinkedKernel (Context);
+    if (DependencyKext == NULL) {
+      return RETURN_NOT_FOUND;
+    }
 
-  //
-  // Always add kernel dependency.
-  //
-  DependencyKext = InternalCachedPrelinkedKernel (Context);
-  if (DependencyKext == NULL) {
-    return RETURN_NOT_FOUND;
-  }
-
-  if (DependencyKext != Kext) {
-    Status = InternalInsertPrelinkedKextDependency (Kext, Context, 0, DependencyKext);
-    if (RETURN_ERROR (Status)) {
-      return Status;
+    if (DependencyKext != Kext) {
+      Status = InternalInsertPrelinkedKextDependency (Kext, Context, 0, DependencyKext);
+      if (RETURN_ERROR (Status)) {
+        return Status;
+      }
     }
   }
 
@@ -715,12 +701,28 @@ InternalScanPrelinkedKext (
     Kext->BundleLibraries = NULL;
   }
 
-  //
-  // Extend or allocate LinkBuffer in case there are no dependencies (kernel).
-  //
-  Status = InternalUpdateLinkBuffer (Kext, Context);
-  if (RETURN_ERROR (Status)) {
-    return Status;
+  if (!RETURN_ERROR (LinkedEditStatus)) {
+    //
+    // Extend or allocate LinkBuffer in case there are no dependencies (kernel).
+    //
+    Status = InternalUpdateLinkBuffer (Kext, Context);
+    if (RETURN_ERROR (Status)) {
+      return Status;
+    }
+    //
+    // Collect data to enable linking against this KEXT.
+    //
+    if (Dependency) {
+      Status = InternalScanBuildLinkedSymbolTable (Kext, Context);
+      if (RETURN_ERROR (Status)) {
+        return Status;
+      }
+
+      Status = InternalScanBuildLinkedVtables (Kext, Context);
+      if (RETURN_ERROR (Status)) {
+        return Status;
+      }
+    }
   }
 
   return RETURN_SUCCESS;
@@ -757,7 +759,7 @@ InternalLinkPrelinkedKext (
     return NULL;
   }
 
-  Status = InternalScanPrelinkedKext (Kext, Context);
+  Status = InternalScanPrelinkedKext (Kext, Context, FALSE);
   if (RETURN_ERROR (Status)) {
     InternalFreePrelinkedKext (Kext);
     return NULL;

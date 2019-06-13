@@ -181,7 +181,8 @@ InternalCachedPrelinkedKernel (
 RETURN_STATUS
 InternalScanPrelinkedKext (
   IN OUT PRELINKED_KEXT     *Kext,
-  IN OUT PRELINKED_CONTEXT  *Context
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     BOOLEAN            Dependency
   );
 
 /**
