@@ -31,7 +31,6 @@ Kexts
 - [VoodooI2C.kext](https://github.com/alexandred/VoodooI2C)
 - [VoodooPS2Controller.kext](https://github.com/acidanthera/VoodooPS2)
 - [VoodooPS2Controller.kext](https://github.com/RehabMan/OS-X-Voodoo-PS2-Controller)
-- [VoodooPS2Controller.kext](https://applelife.ru/threads/voodoops2-for-alps-touchpad.1913250/)
 
 ## Video and audio
 
