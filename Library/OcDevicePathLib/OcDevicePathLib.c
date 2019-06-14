@@ -160,40 +160,41 @@ TrailedBooterDevicePath (
      && IsDevicePathEnd (NextDevicePathNode (DevicePathWalker))) {
       FilePath = (FILEPATH_DEVICE_PATH *) DevicePathWalker;
       Length   = OcFileDevicePathNameLen (FilePath);
-
-      if (FilePath->PathName[Length - 1] == L'\\') {
-        //
-        // Already appended, good. It should never be true with Apple entries though.
-        //
-        return NULL;
-      } else if (Length > 4 &&                      (FilePath->PathName[Length - 4] != '.'
-        || (FilePath->PathName[Length - 3] != 'e' && FilePath->PathName[Length - 3] != 'E')
-        || (FilePath->PathName[Length - 2] != 'f' && FilePath->PathName[Length - 2] != 'F')
-        || (FilePath->PathName[Length - 1] != 'i' && FilePath->PathName[Length - 1] != 'I'))) {
-        //
-        // Found! We should have gotten something like:
-        // PciRoot(0x0)/Pci(...)/Pci(...)/Sata(...)/HD(...)/\com.apple.recovery.boot
-        //
-
-        Size          = GetDevicePathSize (DevicePath);
-        NewDevicePath = (EFI_DEVICE_PATH_PROTOCOL *) AllocatePool (Size + sizeof (CHAR16));
-        if (NewDevicePath == NULL) {
+      if (Length > 0) {
+        if (FilePath->PathName[Length - 1] == L'\\') {
           //
-          // Allocation failure, just ignore.
+          // Already appended, good. It should never be true with Apple entries though.
           //
           return NULL;
+        } else if (Length > 4 &&                      (FilePath->PathName[Length - 4] != '.'
+          || (FilePath->PathName[Length - 3] != 'e' && FilePath->PathName[Length - 3] != 'E')
+          || (FilePath->PathName[Length - 2] != 'f' && FilePath->PathName[Length - 2] != 'F')
+          || (FilePath->PathName[Length - 1] != 'i' && FilePath->PathName[Length - 1] != 'I'))) {
+          //
+          // Found! We should have gotten something like:
+          // PciRoot(0x0)/Pci(...)/Pci(...)/Sata(...)/HD(...)/\com.apple.recovery.boot
+          //
+
+          Size          = GetDevicePathSize (DevicePath);
+          NewDevicePath = (EFI_DEVICE_PATH_PROTOCOL *) AllocatePool (Size + sizeof (CHAR16));
+          if (NewDevicePath == NULL) {
+            //
+            // Allocation failure, just ignore.
+            //
+            return NULL;
+          }
+          //
+          // Strip the string termination and DP end node, which will get re-set
+          //
+          CopyMem (NewDevicePath, DevicePath, Size - sizeof (CHAR16) - END_DEVICE_PATH_LENGTH);
+          NewFilePath = (FILEPATH_DEVICE_PATH *) ((UINT8 *)DevicePathWalker - (UINT8 *)DevicePath + (UINT8 *)NewDevicePath);
+          Size        = DevicePathNodeLength (DevicePathWalker) + sizeof (CHAR16);
+          SetDevicePathNodeLength (NewFilePath, Size);
+          NewFilePath->PathName[Length]   = L'\\';
+          NewFilePath->PathName[Length+1] = L'\0';
+          SetDevicePathEndNode ((UINT8 *) NewFilePath + Size);
+          return NewDevicePath;
         }
-        //
-        // Strip the string termination and DP end node, which will get re-set
-        //
-        CopyMem (NewDevicePath, DevicePath, Size - sizeof (CHAR16) - END_DEVICE_PATH_LENGTH);
-        NewFilePath = (FILEPATH_DEVICE_PATH *) ((UINT8 *)DevicePathWalker - (UINT8 *)DevicePath + (UINT8 *)NewDevicePath);
-        Size        = DevicePathNodeLength (DevicePathWalker) + sizeof (CHAR16);
-        SetDevicePathNodeLength (NewFilePath, Size);
-        NewFilePath->PathName[Length]   = L'\\';
-        NewFilePath->PathName[Length+1] = L'\0';
-        SetDevicePathEndNode ((UINT8 *) NewFilePath + Size);
-        return NewDevicePath;
       }
     }
 
