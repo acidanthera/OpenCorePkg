@@ -11,7 +11,7 @@ fi
 
 cd "$(/usr/bin/dirname "$0")" || abort "Failed to enter working directory!"
 
-OCPath=../../OC
+OCPath=../../../OC
 KeyPath="${OCPath}/Keys"
 OCBin="${OCPath}/OpenCore.efi"
 RootCA="${KeyPath}/ca.pem"
