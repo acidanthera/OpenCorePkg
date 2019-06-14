@@ -71,10 +71,7 @@ WaitForKeyIndex (
   EFI_STATUS        Status;
   EFI_INPUT_KEY     Key;
   INTN              Index;
-  UINTN             EventIndex;
   EFI_EVENT         TimerEvent;
-  EFI_EVENT         WaitList[2];
-  EFI_TPL           SavedTpl;
 
   //
   // Skip previously pressed characters.
@@ -101,28 +98,35 @@ WaitForKeyIndex (
   //
   // Wait for the keystroke event or the timer
   //
-  SavedTpl = gBS->RaiseTPL (TPL_APPLICATION);
-  WaitList[0] = gST->ConIn->WaitForKey;
-  WaitList[1] = TimerEvent;
-  Status      = gBS->WaitForEvent (TimerEvent != NULL ? 2 : 1, WaitList, &EventIndex);
-  gBS->RestoreTPL (SavedTpl);
   if (TimerEvent != NULL) {
+    do {
+      //
+      // Read our key otherwise.
+      //
+      Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &Key);
+      if (!EFI_ERROR (Status)) {
+        break;
+      }
+
+      Status = gBS->CheckEvent (TimerEvent);
+      //
+      // Check for the timer expiration
+      //
+      if (!EFI_ERROR (Status)) {
+        gBS->CloseEvent (TimerEvent);
+        return OC_INPUT_TIMEOUT;
+      }
+    } while (Status == EFI_NOT_READY);
+
     gBS->CloseEvent (TimerEvent);
+  } else {
+    //
+    // Read our key otherwise.
+    //
+    do {
+      Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &Key);
+    } while (EFI_ERROR (Status));
   }
-
-  //
-  // Check for the timer expiration
-  //
-  if (!EFI_ERROR (Status) && EventIndex == 1) {
-    return OC_INPUT_TIMEOUT;
-  }
-
-  //
-  // Read our key otherwise.
-  //
-  do {
-    Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &Key);
-  } while (EFI_ERROR (Status));
 
   if (Key.ScanCode == SCAN_ESC || Key.UnicodeChar == '0') {
     return OC_INPUT_ABORTED;
