@@ -22,6 +22,7 @@
 #include <Protocol/AppleBootPolicy.h>
 
 #include <Library/OcAppleBootPolicyLib.h>
+#include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/BaseLib.h>
@@ -285,12 +286,8 @@ InternalGetBooterFromBlessedSystemFolderPath (
      && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)) {
 
       FolderDevicePath  = (FILEPATH_DEVICE_PATH *) DevicePathWalker;
-      //
-      // FIXME: Create an aligned copy.
-      //
-      ASSERT (((UINTN)FolderDevicePath->PathName & BIT0) == 0);
-      BooterPathSize    = StrSize (&FolderDevicePath->PathName[0])
-                          + StrSize (APPLE_BOOTER_ROOT_FILE_NAME) - sizeof (CHAR16);
+      BooterPathSize    = OcFileDevicePathNameSize (FolderDevicePath)
+                          + L_STR_SIZE (APPLE_BOOTER_ROOT_FILE_NAME) - sizeof (CHAR16);
       BooterPath        = AllocateZeroPool (BooterPathSize);
 
       if (BooterPath != NULL) {
@@ -722,26 +719,18 @@ InternalGetBootPathName (
    && (DevicePathSubType (DevicePath) == MEDIA_FILEPATH_DP)) {
     FilePath = (FILEPATH_DEVICE_PATH *) DevicePath;
 
-    Size = DevicePathNodeLength (DevicePath);
+    Size = OcFileDevicePathNameSize (FilePath);
 
-    PathNameSize = Size - SIZE_OF_FILEPATH_DEVICE_PATH + sizeof (CHAR16);
+    PathNameSize = Size + sizeof (CHAR16);
     PathName = AllocateZeroPool (PathNameSize);
 
     if (PathName == NULL) {
       return EFI_OUT_OF_RESOURCES;
     }
 
-    CopyMem (
-      PathName,
-      FilePath->PathName,
-      Size - SIZE_OF_FILEPATH_DEVICE_PATH
-      );
+    CopyMem (PathName, FilePath->PathName, Size);
 
-    //
-    // FIXME: Create an aligned copy.
-    //
-    ASSERT (((UINTN)FilePath->PathName & BIT0) == 0);
-    Slash = StrStr (FilePath->PathName, L"\\");
+    Slash = StrStr (PathName, L"\\");
 
     if (Slash != NULL) {
       Len = StrLen (PathName);
