@@ -19,9 +19,10 @@ OpenCore Changelog
 - Added nvram.plist loading for legacy and incompatible platforms
 - Improved instructions for legacy and Windows installation
 - Added Windows Boot Camp switching support
-- Added basic hibernation detection
+- Added basic hibernation detection & support
 - Added `ResetHwSig` ACPI quirk to workaround hibernation
 - Removed `Custom` subfolder requirement from `ACPI` tables
+- Fixed kext injection in 10.7.x and 10.8.x
 
 #### v0.0.2
 - Documentation improvements (see Differences.pdf)

@@ -465,10 +465,10 @@ in the previous section on a EFI volume of a GPT partition. While
 corresponding sections of this document do provide some information
 in regards to external resources like ACPI tables, UEFI drivers,
 or kernel extensions (kexts), completeness of the matter is out of
-the scope of this document. Extra information about particular kernel
-extensions may be found in Lilu's
-\href{https://github.com/acidanthera/Lilu/blob/master/KnownPlugins.md}{Known Plugins}
-table. Vaulting information is provided in
+the scope of this document. Information about kernel extensions may
+be found in a separate
+\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Kexts.md}{Kext List}
+document available in OpenCore repository. Vaulting information is provided in
 \hyperref[miscsecurityprops]{Security Properties} section of this document.
 
 \texttt{OC\ config}, just like any property lists can be edited with any
@@ -1328,7 +1328,7 @@ blocking.
   \texttt{LapicKernelPanic}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Default value}: \texttt{false}\\
-  \textbf{Description}: Disables kernel panic on AP core lapic interrupt.
+  \textbf{Description}: Disables kernel panic on LAPIC interrupts.
 
 \item
   \texttt{PanicNoKextDump}\\
