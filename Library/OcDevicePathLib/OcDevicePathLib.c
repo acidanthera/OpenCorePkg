@@ -149,7 +149,6 @@ TrailedBooterDevicePath (
   EFI_DEVICE_PATH_PROTOCOL  *NewDevicePath;
   FILEPATH_DEVICE_PATH      *FilePath;
   FILEPATH_DEVICE_PATH      *NewFilePath;
-  CHAR16                    *Path;
   UINTN                     Length;
   UINTN                     Size;
 
@@ -160,22 +159,17 @@ TrailedBooterDevicePath (
      && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)
      && IsDevicePathEnd (NextDevicePathNode (DevicePathWalker))) {
       FilePath = (FILEPATH_DEVICE_PATH *) DevicePathWalker;
-      Path     = FilePath->PathName;
-      //
-      // FIXME: Create an aligned copy.
-      //
-      ASSERT (((UINTN)Path & BIT0) == 0);
-      Length   = StrLen (Path);
+      Length   = OcFileDevicePathNameLen (FilePath);
 
-      if (Path[Length - 1] == L'\\') {
+      if (FilePath->PathName[Length - 1] == L'\\') {
         //
         // Already appended, good. It should never be true with Apple entries though.
         //
         return NULL;
-      } else if (Length > 4 &&        (Path[Length - 4] != '.'
-        || (Path[Length - 3] != 'e' && Path[Length - 3] != 'E')
-        || (Path[Length - 2] != 'f' && Path[Length - 2] != 'F')
-        || (Path[Length - 1] != 'i' && Path[Length - 1] != 'I'))) {
+      } else if (Length > 4 &&                      (FilePath->PathName[Length - 4] != '.'
+        || (FilePath->PathName[Length - 3] != 'e' && FilePath->PathName[Length - 3] != 'E')
+        || (FilePath->PathName[Length - 2] != 'f' && FilePath->PathName[Length - 2] != 'F')
+        || (FilePath->PathName[Length - 1] != 'i' && FilePath->PathName[Length - 1] != 'I'))) {
         //
         // Found! We should have gotten something like:
         // PciRoot(0x0)/Pci(...)/Pci(...)/Sata(...)/HD(...)/\com.apple.recovery.boot
