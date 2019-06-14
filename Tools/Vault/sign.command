@@ -53,11 +53,11 @@ if [ ! -f "${RootCA}" ]; then
   fi
 fi
 
-/bin/rm -rfP "${PrivKey}" || abort "Failed to remove ${PrivKey}"
+/bin/rm -fP "${PrivKey}" || abort "Failed to remove ${PrivKey}"
 echo "Issuing a new private key..."
 /usr/bin/openssl req -new -x509 -key "${RootCA}" -out "${PrivKey}" -days 1825 -subj "/C=WO/L=127.0.0.1/O=Acidanthera/OU=Acidanthera OpenCore/CN=Greetings from Acidanthera and WWHC" || abort "Failed to issue private key!"
 
-/bin/rm -rfP "${PubKey}" || abort "Failed to remove ${PubKey}"
+/bin/rm -fP "${PubKey}" || abort "Failed to remove ${PubKey}"
 echo "Getting public key based off private key..."
 ./RsaTool -cert "${PrivKey}" > "${PubKey}" || abort "Failed to get public key"
 
