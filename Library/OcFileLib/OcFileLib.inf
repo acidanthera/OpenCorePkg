@@ -53,3 +53,7 @@
 
 [Protocols]
   gEfiFirmwareVolume2ProtocolGuid
+  gEfiBlockIo2ProtocolGuid
+  gEfiBlockIoProtocolGuid
+  gEfiDiskIo2ProtocolGuid
+  gEfiDiskIoProtocolGuid
