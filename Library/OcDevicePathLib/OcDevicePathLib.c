@@ -690,3 +690,35 @@ IsDevicePathChild (
 {
   return InternalDevicePathCmpWorker (ParentPath, ChildPath, TRUE);
 }
+
+/**
+  Returns the size of PathName.
+
+  @param[in] FilePath  The file Device Path node to inspect.
+
+**/
+UINTN
+OcFileDevicePathNameSize (
+  IN CONST FILEPATH_DEVICE_PATH  *FilePath
+  )
+{
+  ASSERT (FilePath != NULL);
+
+  return (DevicePathNodeLength (FilePath) - SIZE_OF_FILEPATH_DEVICE_PATH);
+}
+
+/**
+  Returns the length of PathName.
+
+  @param[in] FilePath  The file Device Path node to inspect.
+
+**/
+UINTN
+OcFileDevicePathNameLen (
+  IN CONST FILEPATH_DEVICE_PATH  *FilePath
+  )
+{
+  ASSERT (FilePath != NULL);
+
+  return (OcFileDevicePathNameSize (FilePath) / sizeof (CHAR16)) - 1;
+}

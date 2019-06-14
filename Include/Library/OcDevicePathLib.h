@@ -136,6 +136,28 @@ TrailedBooterDevicePath (
   );
 
 /**
+  Returns the size of PathName.
+
+  @param[in] FilePath  The file Device Path node to inspect.
+
+**/
+UINTN
+OcFileDevicePathNameSize (
+  IN CONST FILEPATH_DEVICE_PATH  *FilePath
+  );
+
+/**
+  Returns the length of PathName.
+
+  @param[in] FilePath  The file Device Path node to inspect.
+
+**/
+UINTN
+OcFileDevicePathNameLen (
+  IN CONST FILEPATH_DEVICE_PATH  *FilePath
+  );
+
+/**
   Fix Apple Boot Device Path to be compatible with conventional UEFI
   implementations.
 
