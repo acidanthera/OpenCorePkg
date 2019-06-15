@@ -254,6 +254,7 @@ OcAppleDiskImageInstallBlockIo (
 
   DiskImageData = AllocateZeroPool (sizeof (*DiskImageData));
   if (DiskImageData == NULL) {
+    DEBUG ((DEBUG_INFO, "OCDI: Failed to allocate DMG mount context\n"));
     return NULL;
   }
 
@@ -283,12 +284,15 @@ OcAppleDiskImageInstallBlockIo (
                   NULL
                   );
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCDI: Failed to install protocols %r\n", Status));
     FreePool (DiskImageData);
     return NULL;
   }
 
   Status = gBS->ConnectController (BlockIoHandle, NULL, NULL, TRUE);
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCDI: Failed to connect DMG handle %r\n", Status));
+
     Status = gBS->UninstallMultipleProtocolInterfaces (
                     BlockIoHandle,
                     &gEfiDevicePathProtocolGuid,
@@ -300,6 +304,7 @@ OcAppleDiskImageInstallBlockIo (
     if (!EFI_ERROR (Status)) {
       FreePool (DiskImageData);
     } else {
+      DEBUG ((DEBUG_INFO, "OCDI: Failed to uninstall protocols %r\n", Status));
       DiskImageData->Signature = 0;
     }
     return NULL;
@@ -335,6 +340,7 @@ OcAppleDiskImageUninstallBlockIo (
                   (VOID **)&BlockIo
                   );
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCDI: Invalid handle for Block I/O uninstall\n"));
     return;
   }
 
@@ -352,6 +358,10 @@ OcAppleDiskImageUninstallBlockIo (
   if (!EFI_ERROR (Status)) {
     FreePool (DiskImageData);
   } else {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCDI: Failed to disconnect DMG controller or uninstal protocols\n"
+      ));
     DiskImageData->Signature = 0;
   }
 }
