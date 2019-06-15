@@ -345,8 +345,9 @@ InternalLoadDmg (
   ASSERT (Context != NULL);
   ASSERT (BootPolicy != NULL);
 
+  DevPath = Context->DevicePath;
   Status = OcOpenFileByDevicePath (
-             &Context->DevicePath,
+             &DevPath,
              &DmgDir,
              EFI_FILE_MODE_READ,
              EFI_FILE_DIRECTORY
