@@ -697,9 +697,19 @@ OcFileDevicePathNameSize (
   IN CONST FILEPATH_DEVICE_PATH  *FilePath
   )
 {
+  UINTN Size;
+
   ASSERT (FilePath != NULL);
 
-  return (DevicePathNodeLength (FilePath) - SIZE_OF_FILEPATH_DEVICE_PATH);
+  Size = (DevicePathNodeLength (FilePath) - SIZE_OF_FILEPATH_DEVICE_PATH);
+  //
+  // Account for more than one termination character.
+  //
+  while (Size >= 2 && FilePath->PathName[Size - 2] == L'\0') {
+    --Size;
+  }
+
+  return Size;
 }
 
 /**
