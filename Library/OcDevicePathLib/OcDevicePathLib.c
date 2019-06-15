@@ -376,19 +376,21 @@ OcFixAppleBootDevicePath (
 STATIC
 BOOLEAN
 InternalFileDevicePathsEqualClipBottom (
-  IN OUT UINTN   *FilePathLength,
-  IN OUT CHAR16  **FilePath
+  IN     CONST FILEPATH_DEVICE_PATH  *FilePath,
+  IN OUT UINTN                       *FilePathLength,
+  IN OUT UINTN                       *ClipIndex
   )
 {
-  CHAR16 *Start;
+  UINTN Index;
 
   ASSERT (FilePathLength != NULL);
   ASSERT (*FilePathLength != 0);
   ASSERT (FilePath != NULL);
+  ASSERT (ClipIndex != NULL);
 
-  Start = *FilePath;
-  if (*Start == L'\\') {
-    *FilePath = (Start + 1);
+  Index = *ClipIndex;
+  if (FilePath->PathName[Index] == L'\\') {
+    *ClipIndex = Index + 1;
     --(*FilePathLength);
     return TRUE;
   }
@@ -400,17 +402,17 @@ STATIC
 UINTN
 InternalFileDevicePathsEqualClipNode (
   IN  FILEPATH_DEVICE_PATH  **FilePath,
-  OUT CHAR16                **PathName
+  OUT UINTN                 *ClipIndex
   )
 {
   EFI_DEV_PATH_PTR         DevPath;
-  CHAR16                   *Start;
+  UINTN                    Index;
 
   UINTN                    Length;
   EFI_DEVICE_PATH_PROTOCOL *NextNode;
 
   ASSERT (FilePath != NULL);
-  ASSERT (PathName != NULL);
+  ASSERT (ClipIndex != NULL);
   //
   // It is unlikely to be encountered, but empty nodes are not forbidden.
   //
@@ -426,22 +428,20 @@ InternalFileDevicePathsEqualClipNode (
       return 0;
     }
 
-    Start  = DevPath.FilePath->PathName;
-    //
-    // FIXME: Create an aligned copy.
-    //
-    ASSERT (((UINTN)Start & BIT0) == 0);
-    Length = StrLen (Start);
+    Length = OcFileDevicePathNameLen (DevPath.FilePath);
     if (Length > 0) {
-      InternalFileDevicePathsEqualClipBottom (&Length, &Start);
-      if ((Length > 0) && Start[Length - 1] == L'\\') {
+      Index = 0;
+      InternalFileDevicePathsEqualClipBottom (DevPath.FilePath, &Length, &Index);
+      if ((Length > 0)
+       && DevPath.FilePath->PathName[Index + Length - 1] == L'\\') {
         --Length;
       }
+
+      *ClipIndex = Index;
     }
   }
 
   *FilePath = DevPath.FilePath;
-  *PathName = Start;
   return Length;
 }
 
@@ -449,14 +449,14 @@ STATIC
 UINTN
 InternalFileDevicePathsEqualClipNextNode (
   IN  FILEPATH_DEVICE_PATH  **FilePath,
-  OUT CHAR16                **PathName
+  OUT UINTN                 *ClipIndex
   )
 {
   ASSERT (FilePath != NULL);
-  ASSERT (PathName != NULL);
+  ASSERT (ClipIndex != NULL);
 
   *FilePath = (FILEPATH_DEVICE_PATH *)NextDevicePathNode (*FilePath);
-  return InternalFileDevicePathsEqualClipNode (FilePath, PathName);
+  return InternalFileDevicePathsEqualClipNode (FilePath, ClipIndex);
 }
 
 BOOLEAN
@@ -465,12 +465,14 @@ InternalFileDevicePathsEqualWorker (
   IN FILEPATH_DEVICE_PATH  **FilePath2
   )
 {
-  CHAR16  *Clip1;
-  CHAR16  *Clip2;
+  UINTN   Clip1Index;
+  UINTN   Clip2Index;
   UINTN   Len1;
   UINTN   Len2;
   UINTN   CurrentLen;
-  INTN    CmpResult;
+  UINTN   Index;
+  CHAR16  Char1;
+  CHAR16  Char2;
   BOOLEAN Result;
 
   ASSERT (FilePath1 != NULL);
@@ -481,8 +483,8 @@ InternalFileDevicePathsEqualWorker (
   ASSERT (IsDevicePathValid (&(*FilePath1)->Header, 0));
   ASSERT (IsDevicePathValid (&(*FilePath2)->Header, 0));
 
-  Len1 = InternalFileDevicePathsEqualClipNode (FilePath1, &Clip1);
-  Len2 = InternalFileDevicePathsEqualClipNode (FilePath2, &Clip2);
+  Len1 = InternalFileDevicePathsEqualClipNode (FilePath1, &Clip1Index);
+  Len2 = InternalFileDevicePathsEqualClipNode (FilePath2, &Clip2Index);
 
   do {
     if ((Len1 == 0) && (Len2 == 0)) {
@@ -497,43 +499,46 @@ InternalFileDevicePathsEqualWorker (
     // FIXME: Discuss case sensitivity.  For UEFI FAT, case insensitivity is
     //        guaranteed.
     //
-    CmpResult = StrniCmp (Clip1, Clip2, CurrentLen);
-    if (CmpResult != 0) {
-      return FALSE;
+    for (Index = 0; Index < CurrentLen; ++Index) {
+      Char1 = CharToUpper ((*FilePath1)->PathName[Clip1Index + Index]);
+      Char2 = CharToUpper ((*FilePath2)->PathName[Clip2Index + Index]);
+      if (Char1 != Char2) {
+        return FALSE;
+      }
     }
 
     if (Len1 == Len2) {
-      Len1 = InternalFileDevicePathsEqualClipNextNode (FilePath1, &Clip1);
-      Len2 = InternalFileDevicePathsEqualClipNextNode (FilePath2, &Clip2);
+      Len1 = InternalFileDevicePathsEqualClipNextNode (FilePath1, &Clip1Index);
+      Len2 = InternalFileDevicePathsEqualClipNextNode (FilePath2, &Clip2Index);
     } else if (Len1 < Len2) {
-      Len1 = InternalFileDevicePathsEqualClipNextNode (FilePath1, &Clip1);
+      Len1 = InternalFileDevicePathsEqualClipNextNode (FilePath1, &Clip1Index);
       if (Len1 == 0) {
         return FALSE;
       }
 
-      Len2  -= CurrentLen;
-      Clip2 += CurrentLen;
+      Len2       -= CurrentLen;
+      Clip2Index += CurrentLen;
       //
       // Switching to the next node for the other Device Path implies a path
       // separator.  Verify we hit such in the currently walked path too.
       //
-      Result = InternalFileDevicePathsEqualClipBottom (&Len2, &Clip2);
+      Result = InternalFileDevicePathsEqualClipBottom (*FilePath2, &Len2, &Clip2Index);
       if (!Result) {
         return FALSE;
       }
     } else {
-      Len2 = InternalFileDevicePathsEqualClipNextNode (FilePath2, &Clip2);
+      Len2 = InternalFileDevicePathsEqualClipNextNode (FilePath2, &Clip2Index);
       if (Len2 == 0) {
         return FALSE;
       }
 
-      Len1  -= CurrentLen;
-      Clip1 += CurrentLen;
+      Len1       -= CurrentLen;
+      Clip1Index += CurrentLen;
       //
       // Switching to the next node for the other Device Path implies a path
       // separator.  Verify we hit such in the currently walked path too.
       //
-      Result = InternalFileDevicePathsEqualClipBottom (&Len1, &Clip1);
+      Result = InternalFileDevicePathsEqualClipBottom (*FilePath1, &Len1, &Clip1Index);
       if (!Result) {
         return FALSE;
       }
