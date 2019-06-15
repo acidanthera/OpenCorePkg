@@ -17,6 +17,7 @@
 #include <Guid/AppleBless.h>
 
 #include <Library/BaseLib.h>
+#include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
@@ -290,8 +291,11 @@ InternalSetBootEntryFlags (
   )
 {
   EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
-  CONST CHAR16              *Path;
+  FILEPATH_DEVICE_PATH      *FilePath;
   UINTN                     Len;
+  UINTN                     Index;
+  BOOLEAN                   Result;
+  INTN                      CmpResult;
 
   BootEntry->IsFolder   = FALSE;
   BootEntry->IsRecovery = FALSE;
@@ -306,17 +310,31 @@ InternalSetBootEntryFlags (
   while (!IsDevicePathEnd (DevicePathWalker)) {
     if ((DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
      && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)) {
-      Path   = ((FILEPATH_DEVICE_PATH *) DevicePathWalker)->PathName;
-      //
-      // FIXME: Create an aligned copy.
-      //
-      ASSERT (((UINTN)Path & BIT0) == 0);
-      Len    = StrLen (Path);
-      if ((Len > 0) && (Path[Len - 1] == L'\\')) {
+      FilePath = (FILEPATH_DEVICE_PATH *)DevicePathWalker;
+      Len      = OcFileDevicePathNameLen (FilePath);
+      if ((Len > 0) && (FilePath->PathName[Len - 1] == L'\\')) {
         BootEntry->IsFolder = TRUE;
       }
-      if (StrStr (Path, L"com.apple.recovery.boot") != NULL) {
-        BootEntry->IsRecovery = TRUE;
+
+      if (!BootEntry->IsRecovery) {
+        Result = OcOverflowSubUN (
+                   Len,
+                   L_STR_LEN (L"com.apple.recovery.boot"),
+                   &Len
+                   );
+        if (!Result) {
+          for (Index = 0; Index < Len; ++Index) {
+            CmpResult = CompareMem (
+                          &FilePath->PathName[Index],
+                          L"com.apple.recovery.boot",
+                          L_STR_SIZE_NT (L"com.apple.recovery.boot")
+                          );
+            if (CmpResult == 0) {
+              BootEntry->IsRecovery = TRUE;
+              break;
+            }
+          }
+        }
       }
     } else {
       BootEntry->IsFolder = FALSE;
