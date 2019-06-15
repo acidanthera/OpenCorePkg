@@ -234,6 +234,28 @@ OcOpenFileByDevicePath (
   );
 
 /**
+  Retrieve the disk's device handle from a partition's Device Path.
+
+  @param[in] HdDevicePath  The Device Path of the partition.
+
+**/
+EFI_HANDLE
+OcPartitionGetDiskHandle (
+  IN EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
+  );
+
+/**
+  Locate the disk's EFI System Partition.
+
+  @param[in] DiskDevicePath  The Device Path of the disk to scan.
+
+**/
+EFI_DEVICE_PATH_PROTOCOL *
+OcDiskFindSystemPartitionPath (
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath
+  );
+
+/**
   Retrieve the partition's GPT information, if applicable
 
   @param[in] FsHandle  The device handle of the partition to retrieve info of.

@@ -12,16 +12,20 @@
 
 #include <Uefi.h>
 
+#include <Guid/Gpt.h>
+
 #include <Protocol/BlockIo.h>
 #include <Protocol/BlockIo2.h>
 #include <Protocol/DiskIo.h>
 #include <Protocol/DiskIo2.h>
 
 #include <Library/BaseLib.h>
+#include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcDevicePathLib.h>
+#include <Library/OcFileLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
@@ -64,6 +68,197 @@ InternalReadDisk (
   }
 
   return DiskIo->ReadDisk (DiskIo, MediaId, Offset, BufferSize, Buffer);
+}
+
+STATIC
+EFI_HANDLE
+InternalPartitionGetDiskHandle (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath,
+  IN  UINTN                     HdNodeOffset,
+  OUT BOOLEAN                   *HasBlockIo2
+  )
+{
+  EFI_HANDLE               DiskHandle;
+
+  EFI_STATUS               Status;
+
+  EFI_DEVICE_PATH_PROTOCOL *PrefixPath;
+  EFI_DEVICE_PATH_PROTOCOL *TempPath;
+
+  ASSERT (HdDevicePath != NULL);
+  ASSERT (HdNodeOffset < GetDevicePathSize (HdDevicePath));
+  ASSERT (HasBlockIo2 != NULL);
+
+  PrefixPath = DuplicateDevicePath (HdDevicePath);
+  if (PrefixPath == NULL) {
+    DEBUG ((DEBUG_INFO, "OCPI: DP allocation error\n"));
+    return NULL;
+  }
+  //
+  // Strip the HD node in order to retrieve the last node supporting Block I/O
+  // before it, which is going to be its disk.
+  //
+  TempPath = (EFI_DEVICE_PATH_PROTOCOL *)((UINTN)PrefixPath + HdNodeOffset);
+  SetDevicePathEndNode (TempPath);
+  
+  TempPath = PrefixPath;
+  Status = gBS->LocateDevicePath (
+                  &gEfiBlockIo2ProtocolGuid,
+                  &TempPath,
+                  &DiskHandle
+                  );
+  *HasBlockIo2 = !EFI_ERROR (Status);
+
+  if (EFI_ERROR (Status)) {
+    TempPath = PrefixPath;
+    Status = gBS->LocateDevicePath (
+                    &gEfiBlockIoProtocolGuid,
+                    &TempPath,
+                    &DiskHandle
+                    );
+  }
+
+  if (EFI_ERROR (Status)) {
+    DebugPrintDevicePath (
+      DEBUG_INFO,
+      "OCPI: Failed to locate disk",
+      PrefixPath
+      );
+
+    DiskHandle = NULL;
+  }
+
+  FreePool (PrefixPath);
+
+  return DiskHandle;
+}
+
+/**
+  Retrieve the disk's device handle from a partition's Device Path.
+
+  @param[in] HdDevicePath  The Device Path of the partition.
+
+**/
+EFI_HANDLE
+OcPartitionGetDiskHandle (
+  IN EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
+  )
+{
+  CONST HARDDRIVE_DEVICE_PATH *HdNode;
+  BOOLEAN                     Dummy;
+
+  ASSERT (HdDevicePath != NULL);
+
+  HdNode = (HARDDRIVE_DEVICE_PATH *)(
+             FindDevicePathNodeWithType (
+               HdDevicePath,
+               MEDIA_DEVICE_PATH,
+               MEDIA_HARDDRIVE_DP
+               )
+             );
+  if (HdNode == NULL) {
+    return NULL;
+  }
+
+  return InternalPartitionGetDiskHandle (
+           HdDevicePath,
+           (UINTN)HdNode - (UINTN)HdDevicePath,
+           &Dummy
+           );
+}
+
+/**
+  Locate the disk's EFI System Partition.
+
+  @param[in] DiskDevicePath  The Device Path of the disk to scan.
+
+**/
+EFI_DEVICE_PATH_PROTOCOL *
+OcDiskFindSystemPartitionPath (
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath
+  )
+{
+  EFI_DEVICE_PATH_PROTOCOL  *EspDevicePath;
+
+  EFI_STATUS                Status;
+  BOOLEAN                   Result;
+  INTN                      CmpResult;
+
+  UINTN                     Index;
+  UINTN                     NumHandles;
+  EFI_HANDLE                *Handles;
+  EFI_HANDLE                Handle;
+
+  UINTN                     DiskDpSize;
+  UINTN                     DiskDpCmpSize;
+  EFI_DEVICE_PATH_PROTOCOL *HdDevicePath;
+  UINTN                     HdDpSize;
+
+  CONST EFI_PARTITION_ENTRY *PartEntry;
+
+  ASSERT (DiskDevicePath != NULL);
+
+  Status = gBS->LocateHandleBuffer (
+                  ByProtocol,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  NULL,
+                  &NumHandles,
+                  &Handles
+                  );
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
+
+  EspDevicePath = NULL;
+
+  DiskDpSize = GetDevicePathSize (DiskDevicePath);
+  //
+  // The partition's Device Path must be at least as big as the disk's (prefix)
+  // plus an additional HardDrive node.
+  //
+  Result = OcOverflowAddUN (
+             DiskDpSize,
+             sizeof (HARDDRIVE_DEVICE_PATH),
+             &DiskDpCmpSize
+             );
+  if (Result) {
+    return NULL;
+  }
+
+  for (Index = 0; Index < NumHandles; ++Index) {
+    Handle = Handles[Index];
+
+    HdDevicePath = DevicePathFromHandle (Handle);
+    if (HdDevicePath == NULL) {
+      continue;
+    }
+
+    HdDpSize = GetDevicePathSize (HdDevicePath);
+    if (HdDpSize < DiskDpCmpSize) {
+      continue;
+    }
+    //
+    // Verify the partition's Device Path has the disk's prefixed.
+    //
+    CmpResult = CompareMem (HdDevicePath, DiskDevicePath, DiskDpSize);
+    if (CmpResult != 0) {
+      continue;
+    }
+
+    PartEntry = OcGetGptPartitionEntry (Handle);
+    if (PartEntry == NULL) {
+      continue;
+    }
+
+    if (CompareGuid (&PartEntry->PartitionTypeGUID, &gEfiPartTypeSystemPartGuid)) {
+      EspDevicePath = HdDevicePath;
+      break;
+    }
+  }
+
+  FreePool (Handles);
+
+  return EspDevicePath;
 }
 
 STATIC
@@ -271,9 +466,6 @@ OcGetGptPartitionEntry (
   EFI_STATUS                       Status;
   EFI_DEVICE_PATH_PROTOCOL         *FsDevicePath;
   CONST HARDDRIVE_DEVICE_PATH      *HdNode;
-  EFI_DEVICE_PATH_PROTOCOL         *PrefixPath;
-  EFI_DEVICE_PATH_PROTOCOL         *TempPath;
-  UINTN                            HdNodeOffset;
   EFI_HANDLE                       DiskHandle;
   BOOLEAN                          HasBlockIo2;
   UINTN                            Offset;
@@ -306,48 +498,21 @@ OcGetGptPartitionEntry (
                )
              );
   if (HdNode == NULL) {
+    DEBUG ((DEBUG_INFO, "OCPI: Device Path does not describe a partition\n"));
     return NULL;
   }
 
-  PrefixPath = DuplicateDevicePath (FsDevicePath);
-  if (PrefixPath == NULL) {
-    DEBUG ((DEBUG_INFO, "OCPI: DP allocation error\n"));
-    return NULL;
-  }
-  //
-  // Strip the HD node in order to retrieve the last node supporting Block I/O
-  // before it, which is going to be its disk.
-  //
-  HdNodeOffset = ((UINTN)HdNode - (UINTN)FsDevicePath);
-  TempPath = (EFI_DEVICE_PATH_PROTOCOL *)((UINTN)PrefixPath + HdNodeOffset);
-  SetDevicePathEndNode (TempPath);
-  
-  TempPath = PrefixPath;
-  Status = gBS->LocateDevicePath (
-                  &gEfiBlockIo2ProtocolGuid,
-                  &TempPath,
-                  &DiskHandle
-                  );
-  HasBlockIo2 = !EFI_ERROR (Status);
-  if (!HasBlockIo2) {
-    TempPath = PrefixPath;
-    Status = gBS->LocateDevicePath (
-                    &gEfiBlockIoProtocolGuid,
-                    &TempPath,
-                    &DiskHandle
-                    );
-  }
-  if (EFI_ERROR (Status)) {
+  DiskHandle = InternalPartitionGetDiskHandle (
+                 FsDevicePath,
+                 (UINTN)HdNode - (UINTN)FsDevicePath,
+                 &HasBlockIo2
+                 );
+  if (DiskHandle == NULL) {
     DebugPrintDevicePath (
       DEBUG_INFO,
-      "OCPI: Failed to locate disk",
-      PrefixPath
+      "OCPI: Could not locate partition's disk",
+      FsDevicePath
       );
-  }
-
-  FreePool (PrefixPath);
-
-  if (EFI_ERROR (Status)) {
     return NULL;
   }
   //

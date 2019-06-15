@@ -50,6 +50,7 @@
   gEfiFileInfoGuid                     ## CONSUMES
   gEfiFileSystemInfoGuid               ## CONSUMES
   gEfiFileSystemVolumeLabelInfoIdGuid  ## CONSUMES
+  gEfiPartTypeSystemPartGuid           ## CONSUMES
 
 [Protocols]
   gEfiFirmwareVolume2ProtocolGuid
