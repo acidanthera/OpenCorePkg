@@ -312,26 +312,29 @@ InternalSetBootEntryFlags (
      && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)) {
       FilePath = (FILEPATH_DEVICE_PATH *)DevicePathWalker;
       Len      = OcFileDevicePathNameLen (FilePath);
-      if ((Len > 0) && (FilePath->PathName[Len - 1] == L'\\')) {
-        BootEntry->IsFolder = TRUE;
-      }
+      if (Len > 0) {
+        //
+        // Only the trailer of the last (non-empty) FilePath node matters.
+        //
+        BootEntry->IsFolder = (FilePath->PathName[Len - 1] == L'\\');
 
-      if (!BootEntry->IsRecovery) {
-        Result = OcOverflowSubUN (
-                   Len,
-                   L_STR_LEN (L"com.apple.recovery.boot"),
-                   &Len
-                   );
-        if (!Result) {
-          for (Index = 0; Index < Len; ++Index) {
-            CmpResult = CompareMem (
-                          &FilePath->PathName[Index],
-                          L"com.apple.recovery.boot",
-                          L_STR_SIZE_NT (L"com.apple.recovery.boot")
-                          );
-            if (CmpResult == 0) {
-              BootEntry->IsRecovery = TRUE;
-              break;
+        if (!BootEntry->IsRecovery) {
+          Result = OcOverflowSubUN (
+                     Len,
+                     L_STR_LEN (L"com.apple.recovery.boot"),
+                     &Len
+                     );
+          if (!Result) {
+            for (Index = 0; Index < Len; ++Index) {
+              CmpResult = CompareMem (
+                            &FilePath->PathName[Index],
+                            L"com.apple.recovery.boot",
+                            L_STR_SIZE_NT (L"com.apple.recovery.boot")
+                            );
+              if (CmpResult == 0) {
+                BootEntry->IsRecovery = TRUE;
+                break;
+              }
             }
           }
         }
