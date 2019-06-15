@@ -276,10 +276,10 @@ OcAppleDiskImageInstallBlockIo (
   BlockIoHandle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
                   &BlockIoHandle,
-                  &gEfiBlockIoProtocolGuid,
-                  &DiskImageData->BlockIo,
                   &gEfiDevicePathProtocolGuid,
                   &DiskImageData->DevicePath,
+                  &gEfiBlockIoProtocolGuid,
+                  &DiskImageData->BlockIo,
                   NULL
                   );
   if (EFI_ERROR (Status)) {
