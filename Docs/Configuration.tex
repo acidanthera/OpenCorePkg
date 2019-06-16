@@ -1555,7 +1555,7 @@ behaviour that does not go to any other sections
 \item
   \texttt{DisableWatchDog}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{NO}\\
+  \textbf{Default value}: \texttt{false}\\
   \textbf{Description}: Select firmwares may not succeed in quickly booting
   the operating system, especially in debug mode, which results in watch dog
   timer aborting the process. This option turns off watch dog timer.
@@ -2805,7 +2805,7 @@ and supplementary utilities can be used.
 \item
   \texttt{ConnectDrivers}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{NO}\\
+  \textbf{Default value}: \texttt{false}\\
   \textbf{Description}: Perform UEFI controller connection after driver
   loading. This option is useful for loading filesystem drivers, which
   usually follow UEFI driver model, and may not start by themselves.
@@ -2928,7 +2928,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{ConsoleControl}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{NO}\\
+  \textbf{Default value}: \texttt{false}\\
   \textbf{Description}: Replaces Console Control protocol with a builtin version.
 
   macOS bootloader requires console control protocol for text output, which some firmwares
@@ -2974,7 +2974,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{IgnoreInvalidFlexRatio}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{NO}\\
+  \textbf{Default value}: \texttt{false}\\
   \textbf{Description}: Select firmwares, namely APTIO IV, may contain invalid values in
   \texttt{MSR\_FLEX\_RATIO} (\texttt{0x194}) MSR register. These values may cause
   macOS boot failure on Intel platforms.
@@ -2985,7 +2985,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{IgnoreTextInGraphics}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{NO}\\
+  \textbf{Default value}: \texttt{false}\\
   \textbf{Description}: Select firmwares output text onscreen in both graphics and
   text mode. This is normally unexpected, because random text may appear over
   graphical images and cause UI corruption. Setting this option to \texttt{true} will
@@ -2999,7 +2999,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{ProvideConsoleGop}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{NO}\\
+  \textbf{Default value}: \texttt{false}\\
   \textbf{Description}: macOS bootloader requires GOP (Graphics Output Protocol)
   to be present on console handle. This option will install it if missing.
 
