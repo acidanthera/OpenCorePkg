@@ -48,6 +48,7 @@ Kexts
 - [AsusSMC.kext](https://github.com/hieplpvip/AsusSMC)
 - [CPUFriend.kext](https://github.com/acidanthera/CPUFriend)
 - [FakeSMC.kext and sensors](https://sourceforge.net/projects/hwsensors3.hwsensors.p/)
+- [HWPEnabler.kext](https://github.com/goodwin/HWPEnable)
 - [NullCPUPowerManagement.kext](https://github.com/corpnewt/NullCPUPowerManagement) for AMD only (also some virtual machines)
 - [OpcodeEmulator.kext](https://www.insanelymac.com/forum/topic/329704-opcode-emulator-opemu-plug-in-project/)
 - [VirtualSMC.kext and sensors](https://github.com/acidanthera/VirtualSMC)
@@ -65,7 +66,6 @@ Kexts
 
 - [AppleIntelInfo.kext](https://github.com/headkaze/AppleIntelInfo)
 - [HibernationFixup.kext](https://github.com/acidanthera/HibernationFixup)
-- [HWPEnabler.kext](https://github.com/goodwin/HWPEnable)
 - [Lilu.kext](https://github.com/acidanthera/Lilu)
 - [LiluFriend.kext](https://github.com/PMheart/LiluFriend)
 - [RTCMemoryFixup.kext](https://github.com/lvs1974/RTCMemoryFixup)
