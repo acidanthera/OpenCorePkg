@@ -702,19 +702,9 @@ OcFileDevicePathNameSize (
   IN CONST FILEPATH_DEVICE_PATH  *FilePath
   )
 {
-  UINTN Size;
-
   ASSERT (FilePath != NULL);
-
-  Size = (DevicePathNodeLength (FilePath) - SIZE_OF_FILEPATH_DEVICE_PATH);
-  //
-  // Account for more than one termination character.
-  //
-  while (Size >= 2 && FilePath->PathName[Size - 2] == L'\0') {
-    --Size;
-  }
-
-  return Size;
+  ASSERT (IsDevicePathValid (&FilePath->Header, 0));
+  return (OcFileDevicePathNameLen (FilePath) + 1) * sizeof (*FilePath->PathName);
 }
 
 /**
@@ -728,7 +718,20 @@ OcFileDevicePathNameLen (
   IN CONST FILEPATH_DEVICE_PATH  *FilePath
   )
 {
-  ASSERT (FilePath != NULL);
+  UINTN Size;
+  UINTN Len;
 
-  return (OcFileDevicePathNameSize (FilePath) / sizeof (CHAR16)) - 1;
+  ASSERT (FilePath != NULL);
+  ASSERT (IsDevicePathValid (&FilePath->Header, 0));
+
+  Size = DevicePathNodeLength (FilePath) - SIZE_OF_FILEPATH_DEVICE_PATH;
+  //
+  // Account for more than one termination character.
+  //
+  Len = (Size / sizeof (*FilePath->PathName)) - 1;
+  while (Len > 0 && FilePath->PathName[Len - 1] == L'\0') {
+    --Len;
+  }
+
+  return Len;
 }
