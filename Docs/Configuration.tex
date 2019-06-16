@@ -597,7 +597,7 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
 \item
   \texttt{Add}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Default value}: Empty\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Load selected tables from \texttt{OC/ACPI}
   directory.
 
@@ -607,7 +607,7 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
 \item
   \texttt{Block}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Default value}: Empty\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Remove selected tables from ACPI stack.
 
   Designed to be filled with \texttt{plist\ dict} values, describing each block entry.
@@ -616,7 +616,7 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
 \item
   \texttt{Patch}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Default value}: Empty\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Perform binary patches in ACPI tables before
   table addition or removal.
 
@@ -637,7 +637,7 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -645,14 +645,14 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
 \item
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: This ACPI table will not be added unless set to
   \texttt{true}.
 
 \item
   \texttt{Path}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: File paths meant to be loaded as ACPI tables.
   Example values include \texttt{DSDT.aml}, \texttt{SubDir/SSDT-8.aml},
   \texttt{SSDT-USBX.aml}, etc.
@@ -672,14 +672,14 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
 \item
   \texttt{All}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: If set to \texttt{true}, all ACPI tables matching the
   condition will be dropped. Otherwise only first matched table.
 
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -687,28 +687,28 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
 \item
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: This ACPI table will not be removed unless set to
   \texttt{true}.
 
 \item
   \texttt{OemTableId}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Default value}: All zero\\
+  \textbf{Failsafe}: All zero\\
   \textbf{Description}: Match table OEM ID to be equal to this value
   unless all zero.
 
 \item
   \texttt{TableLength}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Match table size to be equal to this value
   unless \texttt{0}.
 
 \item
   \texttt{TableSignature}\\
   \textbf{Type}: \texttt{plist\ data}, 4 bytes\\
-  \textbf{Default value}: All zero\\
+  \textbf{Failsafe}: All zero\\
   \textbf{Description}: Match table signature to be equal to this value
   unless all zero.
 
@@ -721,7 +721,7 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -729,34 +729,34 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
 \item
   \texttt{Count}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Number of patch occurrences to apply. \texttt{0} applies
   the patch to all occurrences found.
 
 \item
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: This ACPI patch will not be used unless set to
   \texttt{true}.
 
 \item
   \texttt{Find}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Default value}: Empty data\\
+  \textbf{Failsafe}: Empty data\\
   \textbf{Description}: Data to find. Must equal to \texttt{Replace} in size.
 
 \item
   \texttt{Limit}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Maximum number of bytes to search for. Can be set to
   \texttt{0} to look through the whole ACPI table.
 
 \item
   \texttt{Mask}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Default value}: Empty data\\
+  \textbf{Failsafe}: Empty data\\
   \textbf{Description}: Data bitwise mask used during find comparison.
   Allows fuzzy search by ignoring not masked (set to zero) bits. Can be
   set to empty data to be ignored. Must equal to \texttt{Replace} in size
@@ -765,20 +765,20 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
 \item
   \texttt{OemTableId}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Default value}: All zero\\
+  \textbf{Failsafe}: All zero\\
   \textbf{Description}: Match table OEM ID to be equal to this value
   unless all zero.
 
 \item
   \texttt{Replace}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Default value}: Empty data\\
+  \textbf{Failsafe}: Empty data\\
   \textbf{Description}: Replacement data of one or more bytes.
 
 \item
   \texttt{ReplaceMask}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Default value}: Empty data\\
+  \textbf{Failsafe}: Empty data\\
   \textbf{Description}: Data bitwise mask used during replacement.
   Allows fuzzy replacement by updating masked (set to non-zero) bits. Can be
   set to empty data to be ignored. Must equal to \texttt{Replace} in size
@@ -787,21 +787,21 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
 \item
   \texttt{Skip}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Number of found occurrences to be skipped before replacement
   is done.
 
 \item
   \texttt{TableLength}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Match table size to be equal to this value
   unless \texttt{0}.
 
 \item
   \texttt{TableSignature}\\
   \textbf{Type}: \\texttt{plist\ data}, 4 bytes\\
-  \textbf{Default value}: All zero\\
+  \textbf{Failsafe}: All zero\\
   \textbf{Description}: Match table signature to be equal to this value
   unless all zero.
 
@@ -853,14 +853,14 @@ source file may help understanding ACPI opcodes.
 \item
   \texttt{FadtEnableReset}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Provide reset register and flag in FADT table to enable
   reboot and shutdown on legacy hardware. Not recommended unless required.
 
 \item
   \texttt{NormalizeHeaders}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Cleanup ACPI header fields to workaround macOS
   ACPI implementation bug causing boot crashes. Reference:
   \href{https://alextjam.es/debugging-appleacpiplatform/}{Debugging
@@ -870,7 +870,7 @@ source file may help understanding ACPI opcodes.
 \item
   \texttt{RebaseRegions}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Attempt to heuristically relocate ACPI memory
   regions. Not recommended.
 
@@ -899,7 +899,7 @@ source file may help understanding ACPI opcodes.
 \item
   \texttt{ResetHwSig}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reset \texttt{FACS} table \texttt{HardwareSignature}
   value to \texttt{0}.
 
@@ -909,7 +909,7 @@ source file may help understanding ACPI opcodes.
 \item
   \texttt{ResetLogoStatus}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reset \texttt{BGRT} table \texttt{Displayed}
   status field to \texttt{false}.
 
@@ -1007,7 +1007,7 @@ blocking.
 \item
   \texttt{Add}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Default value}: Empty\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Load selected kernel drivers from \texttt{OC/Kexts} directory.
 
   Designed to be filled with \texttt{plist\ dict} values, describing each driver.
@@ -1018,7 +1018,7 @@ blocking.
 \item
   \texttt{Block}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Default value}: Empty\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Remove selected kernel drivers from prelinked kernel.
 
   Designed to be filled with \texttt{plist\ dictionary} values, describing each
@@ -1033,7 +1033,7 @@ blocking.
 \item
   \texttt{Patch}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Default value}: Empty\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Perform binary patches in kernel and drivers prior to
   driver addition and removal.
 
@@ -1054,14 +1054,14 @@ blocking.
 \item
   \texttt{BundlePath}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Kext bundle path (e.g. \texttt{Lilu.kext}
   or \texttt{MyKext.kext/Contents/PlugIns/MySubKext.kext}).
 
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -1069,21 +1069,21 @@ blocking.
 \item
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: This kernel driver will not be added unless set to
   \texttt{true}.
 
 \item
   \texttt{ExecutablePath}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Kext executable path relative to bundle
   (e.g. \texttt{Contents/MacOS/Lilu}).
 
 \item
   \texttt{MatchKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Blocks kernel driver on selected macOS version only.
   The selection happens based on prefix match with the kernel version, i.e.
   \texttt{16.7.0} will match macOS 10.12.6 and \texttt{16.} will match
@@ -1092,7 +1092,7 @@ blocking.
 \item
   \texttt{PlistPath}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Kext \texttt{Info.plist} path relative to bundle
   (e.g. \texttt{Contents/Info.plist}).
 
@@ -1104,7 +1104,7 @@ blocking.
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -1112,21 +1112,21 @@ blocking.
 \item
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: This kernel driver will not be blocked unless set to
   \texttt{true}.
 
 \item
   \texttt{Identifier}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Kext bundle identifier
     (e.g. \texttt{com.apple.driver.AppleTyMCEDriver}).
 
 \item
   \texttt{MatchKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Blocks kernel driver on selected macOS version only.
   The selection happens based on prefix match with the kernel version, i.e.
   \texttt{16.7.0} will match macOS 10.12.6 and \texttt{16.} will match
@@ -1140,7 +1140,7 @@ blocking.
 \item
   \texttt{Cpuid1Data}\\
   \textbf{Type}: \texttt{plist\ data}, 32 bytes\\
-  \textbf{Default value}: All zero\\
+  \textbf{Failsafe}: All zero\\
   \textbf{Description}: Sequence of \texttt{EAX}, \texttt{EBX}, \texttt{ECX},
   \texttt{EDX} values in Little Endian order to replace \texttt{CPUID (1)}
   call in XNU kernel.
@@ -1148,7 +1148,7 @@ blocking.
 \item
   \texttt{Cpuid1Mask}\\
   \textbf{Type}: \texttt{plist\ data}, 32 bytes\\
-  \textbf{Default value}: All zero\\
+  \textbf{Failsafe}: All zero\\
   \textbf{Description}: Bit mask of active bits in \texttt{Cpuid1Data}. When
   each \texttt{Cpuid1Mask} is set to 0, the original CPU bit is used, otherwise
   .
@@ -1161,7 +1161,7 @@ blocking.
 \item
   \texttt{Base}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Selects symbol-matched base for patch lookup (or immediate
   replacement) by obtaining the address of provided symbol name. Can be set to
   empty string to be ignored.
@@ -1169,7 +1169,7 @@ blocking.
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -1177,21 +1177,21 @@ blocking.
 \item
   \texttt{Count}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Number of patch occurrences to apply. \texttt{0} applies
   the patch to all occurrences found.
 
 \item
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: This kernel patch will not be used unless set to
   \texttt{true}.
 
 \item
   \texttt{Find}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Default value}: Empty data\\
+  \textbf{Failsafe}: Empty data\\
   \textbf{Description}: Data to find. Can be set to empty for immediate
   replacement at \texttt{Base}. Must equal to \texttt{Replace} in size
   otherwise.
@@ -1199,21 +1199,21 @@ blocking.
 \item
   \texttt{Identifier}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Kext bundle identifier (e.g. \texttt{com.apple.driver.AppleHDA})
   or \texttt{kernel} for kernel patch.
 
 \item
   \texttt{Limit}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Maximum number of bytes to search for. Can be set to
   \texttt{0} to look through the whole kext or kernel.
 
 \item
   \texttt{Mask}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Default value}: Empty data\\
+  \textbf{Failsafe}: Empty data\\
   \textbf{Description}: Data bitwise mask used during find comparison.
   Allows fuzzy search by ignoring not masked (set to zero) bits. Can be
   set to empty data to be ignored. Must equal to \texttt{Replace} in size
@@ -1222,7 +1222,7 @@ blocking.
 \item
   \texttt{MatchKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Adds kernel driver to selected macOS version only.
   The selection happens based on prefix match with the kernel version, i.e.
   \texttt{16.7.0} will match macOS 10.12.6 and \texttt{16.} will match
@@ -1231,13 +1231,13 @@ blocking.
 \item
   \texttt{Replace}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Default value}: Empty data\\
+  \textbf{Failsafe}: Empty data\\
   \textbf{Description}: Replacement data of one or more bytes.
 
 \item
   \texttt{ReplaceMask}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Default value}: Empty data\\
+  \textbf{Failsafe}: Empty data\\
   \textbf{Description}: Data bitwise mask used during replacement.
   Allows fuzzy replacement by updating masked (set to non-zero) bits. Can be
   set to empty data to be ignored. Must equal to \texttt{Replace} in size
@@ -1246,7 +1246,7 @@ blocking.
 \item
   \texttt{Skip}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Number of found occurrences to be skipped before replacement
   is done.
 
@@ -1259,7 +1259,7 @@ blocking.
 \item
   \texttt{AppleCpuPmCfgLock}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Disables \texttt{PKG\_CST\_CONFIG\_CONTROL} (\texttt{0xE2})
   MSR modification in AppleIntelCPUPowerManagement.kext, commonly causing early
   kernel panic, when it is locked from writing.
@@ -1272,7 +1272,7 @@ blocking.
 \item
   \texttt{AppleXcpmCfgLock}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Disables \texttt{PKG\_CST\_CONFIG\_CONTROL} (\texttt{0xE2})
   MSR modification in XNU kernel, commonly causing early kernel panic, when it is
   locked from writing (XCPM power management).
@@ -1285,7 +1285,7 @@ blocking.
 \item
   \texttt{AppleXcpmExtraMsrs}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Disables multiple MSR access critical for select CPUs,
   which have no native XCPM support.
   
@@ -1299,14 +1299,14 @@ blocking.
 \item
   \texttt{CustomSMBIOSGuid}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Performs GUID patching for \texttt{UpdateSMBIOSMode}
   \texttt{Custom} mode. Usually relevant for Dell laptops.
 
 \item
   \texttt{DisableIoMapper}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Disables \texttt{IOMapper} support in XNU (VT-d),
   which may conflict with the firmware implementation.
 
@@ -1317,7 +1317,7 @@ blocking.
 \item
   \texttt{ExternalDiskIcons}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Apply icon type patches to AppleAHCIPort.kext to force
   internal disk icons for all AHCI disks.
 
@@ -1327,20 +1327,20 @@ blocking.
 \item
   \texttt{LapicKernelPanic}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Disables kernel panic on LAPIC interrupts.
 
 \item
   \texttt{PanicNoKextDump}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Prevent kernel from printing kext dump in the panic
   log preventing from observing panic details. Affects 10.13 and above.
 
 \item
   \texttt{ThirdPartyTrim}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Patch IOAHCIBlockStorage.kext to force TRIM command support
   on AHCI SSDs.
 
@@ -1351,7 +1351,7 @@ blocking.
 \item
   \texttt{XhciPortLimit}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Patch various kexts (AppleUSBXHCI.kext, AppleUSBXHCIPCI.kext,
   IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 
@@ -1413,7 +1413,7 @@ behaviour that does not go to any other sections
 \item
   \texttt{ConsoleMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Sets console output mode as specified
   with the \texttt{WxH} (e.g. \texttt{80x24}) formatted string.
   Set to empty string not to change console mode. Set to \texttt{Max}
@@ -1422,7 +1422,7 @@ behaviour that does not go to any other sections
 \item
   \texttt{ConsoleBehaviourOs}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Set console control behaviour upon operating system load.
 
   Console control is a legacy protocol used for switching between text and graphics
@@ -1469,14 +1469,14 @@ behaviour that does not go to any other sections
 \item
   \texttt{ConsoleBehaviourUi}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Set console control behaviour upon OpenCore user
   interface load. Refer to \texttt{ConsoleBehaviourOs} description for details.
 
 \item
   \texttt{HibernateMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: \texttt{None}\\
+  \textbf{Failsafe}: \texttt{None}\\
   \textbf{Description}: Hibernation detection mode. The following modes are supported:
 
   \begin{itemize}
@@ -1490,7 +1490,7 @@ behaviour that does not go to any other sections
 \item
   \texttt{HideSelf}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Hides own boot entry from boot picker. This
   may potentially hide other entries, for instance, when another UEFI OS is
   installed on the same volume and driver boot is used.
@@ -1498,7 +1498,7 @@ behaviour that does not go to any other sections
 \item
   \texttt{Resolution}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Sets console output screen resolution.
 
   \begin{itemize}
@@ -1522,20 +1522,20 @@ behaviour that does not go to any other sections
 \item
   \texttt{ShowPicker}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Show simple boot picker to allow boot entry selection.
 
 \item
   \texttt{Timeout}\\
   \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Timeout in seconds in boot picker before
   automatic booting of the default boot entry.
 
 \item
   \texttt{UsePicker}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Use OpenCore built-in boot picker for boot management.
 
   \texttt{UsePicker} set to \texttt{false} entirely disables all boot management
@@ -1555,7 +1555,7 @@ behaviour that does not go to any other sections
 \item
   \texttt{DisableWatchDog}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Select firmwares may not succeed in quickly booting
   the operating system, especially in debug mode, which results in watch dog
   timer aborting the process. This option turns off watch dog timer.
@@ -1563,14 +1563,14 @@ behaviour that does not go to any other sections
 \item
   \texttt{DisplayDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Delay in microseconds performed after
   every printed line visible onscreen (i.e. console).
 
 \item
   \texttt{DisplayLevel}\\
   \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: EDK II debug level bitmask (sum) showed onscreen.
   Unless \texttt{Target} enables console (onscreen) printing,
   onscreen debug output will not be visible. The following levels
@@ -1591,7 +1591,7 @@ behaviour that does not go to any other sections
 \item
   \texttt{Target}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: A bitmask (sum) of enabled logging targets.
   By default all the logging output is hidden, so this option is
   required to be set when debugging is necessary.
@@ -1652,7 +1652,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 \item
   \texttt{ExposeSensitiveData}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: \texttt{2}\\
+  \textbf{Failsafe}: \texttt{2}\\
   \textbf{Description}: Sensitive data exposure bitmask (sum) to operating system.
 
   \begin{itemize}
@@ -1681,7 +1681,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 \item
   \texttt{HaltLevel}\\
   \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
-  \textbf{Default value}: \texttt{0x80000000} (\texttt{DEBUG\_ERROR})\\
+  \textbf{Failsafe}: \texttt{0x80000000} (\texttt{DEBUG\_ERROR})\\
   \textbf{Description}: EDK II debug level bitmask (sum) causing CPU to
   halt (stop execution) after obtaining a message of \texttt{HaltLevel}.
   Possible values match \texttt{DisplayLevel} values.
@@ -1689,7 +1689,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 \item
   \texttt{RequireSignature}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{true}\\
+  \textbf{Failsafe}: \texttt{true}\\
   \textbf{Description}: Require \texttt{vault.sig} signature file for
   \texttt{vault.plist} in \texttt{OC} directory.
 
@@ -1719,7 +1719,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 \item
   \texttt{RequireVault}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{true}\\
+  \textbf{Failsafe}: \texttt{true}\\
   \textbf{Description}: Require \texttt{vault.plist} file present
   in \texttt{OC} directory.
 
@@ -1767,7 +1767,7 @@ rm vault.pub
 \item
   \texttt{ScanPolicy}\\
   \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
-  \textbf{Default value}: \texttt{0xF0103}\\
+  \textbf{Failsafe}: \texttt{0xF0103}\\
   \textbf{Description}: Define operating system detection policy.
 
   This value allows to prevent scanning (and booting) from untrusted
@@ -1839,7 +1839,7 @@ rm vault.pub
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -1847,20 +1847,20 @@ rm vault.pub
 \item
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: This tool will not be listed unless set to
   \texttt{true}.
 
 \item
   \texttt{Name}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Human readable tool name displayed in boot picker.
 
 \item
   \texttt{Path}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Empty string\\
+  \textbf{Failsafe}: Empty string\\
   \textbf{Description}: File path to select UEFI tool relative to \texttt{OC/Tools}
   directory.
 
@@ -1936,7 +1936,7 @@ as behaviour is undefined otherwise.
 \item
   \texttt{LegacyEnable}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Enables loading of NVRAM variable file named \texttt{nvram.plist}
   from EFI volume root.
 
@@ -2192,7 +2192,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{Automatic}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Generate PlatformInfo based on \texttt{Generic}
   section instead of using values from \texttt{DataHub}, \texttt{NVRAM},
   and \texttt{SMBIOS} sections.
@@ -2203,14 +2203,14 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{UpdateDataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Update Data Hub fields. These fields are read
   from \texttt{Generic} or \texttt{DataHub} sections depending on
   \texttt{Automatic} value.
 \item
   \texttt{UpdateNVRAM}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Update NVRAM fields related to platform information.
 
   These fields are read from \texttt{Generic} or \texttt{PlatformNVRAM} sections
@@ -2224,14 +2224,14 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{UpdateSMBIOS}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Update SMBIOS fields. These fields are read from
   \texttt{Generic} or \texttt{SMBIOS} sections depending on
   \texttt{Automatic} value.
 \item
   \texttt{UpdateSMBIOSMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: \texttt{Create}\\
+  \textbf{Failsafe}: \texttt{Create}\\
   \textbf{Description}: Update SMBIOS fields approach:
 
   \begin{itemize}
@@ -2288,7 +2288,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{SpoofVendor}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Sets SMBIOS vendor fields to \texttt{Acidanthera}.
 
   It is dangerous to use Apple in SMBIOS vendor fields for reasons given
@@ -2297,27 +2297,27 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: \texttt{MacPro6,1}\\
+  \textbf{Failsafe}: \texttt{MacPro6,1}\\
   \textbf{Description}: Refer to SMBIOS \texttt{SystemProductName}.
 \item
   \texttt{SystemSerialNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: \texttt{OPENCORE\_SN1}\\
+  \textbf{Failsafe}: \texttt{OPENCORE\_SN1}\\
   \textbf{Description}: Refer to SMBIOS \texttt{SystemSerialNumber}.
 \item
   \texttt{SystemUUID}\\
   \textbf{Type}: \texttt{plist\ string}, GUID\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{Description}: Refer to SMBIOS \texttt{SystemUUID}.
 \item
   \texttt{MLB}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: \texttt{OPENCORE\_MLB\_SN11}\\
+  \textbf{Failsafe}: \texttt{OPENCORE\_MLB\_SN11}\\
   \textbf{Description}: Refer to SMBIOS \texttt{BoardSerialNumber}.
 \item
   \texttt{ROM}\\
   \textbf{Type}: \texttt{plist\ data}, 6 bytes\\
-  \textbf{Default value}: all zero\\
+  \textbf{Failsafe}: all zero\\
   \textbf{Description}: Refer to
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}.
 
@@ -2329,49 +2329,49 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{PlatformName}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Not installed\\
+  \textbf{Failsafe}: Not installed\\
   \textbf{Description}: Sets \texttt{name} in
   \texttt{gEfiMiscSubClassGuid}. Value found on Macs is
   \texttt{platform} in ASCII.
 \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Not installed\\
+  \textbf{Failsafe}: Not installed\\
   \textbf{Description}: Sets \texttt{Model} in
   \texttt{gEfiMiscSubClassGuid}. Value found on Macs is equal to SMBIOS
   \texttt{SystemProductName} in Unicode.
 \item
   \texttt{SystemSerialNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Not installed\\
+  \textbf{Failsafe}: Not installed\\
   \textbf{Description}: Sets \texttt{SystemSerialNumber} in
   \texttt{gEfiMiscSubClassGuid}. Value found on Macs is equal to SMBIOS
   \texttt{SystemSerialNumber} in Unicode.
 \item
   \texttt{SystemUUID}\\
   \textbf{Type}: \texttt{plist\ string}, GUID\\
-  \textbf{Default value}: Not installed\\
+  \textbf{Failsafe}: Not installed\\
   \textbf{Description}: Sets \texttt{system-id} in
   \texttt{gEfiMiscSubClassGuid}. Value found on Macs is equal to SMBIOS
   \texttt{SystemUUID}.
 \item
   \texttt{BoardProduct}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Not installed\\
+  \textbf{Failsafe}: Not installed\\
   \textbf{Description}: Sets \texttt{board-id} in
   \texttt{gEfiMiscSubClassGuid}. Value found on Macs is equal to SMBIOS
   \texttt{BoardProduct} in ASCII.
 \item
   \texttt{BoardRevision}\\
   \textbf{Type}: \texttt{plist\ data}, 1 byte\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Sets \texttt{board-rev} in
   \texttt{gEfiMiscSubClassGuid}. Value found on Macs seems to correspond
   to internal board revision (e.g. \texttt{01}).
 \item
   \texttt{StartupPowerEvents}\\
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Sets \texttt{StartupPowerEvents} in
   \texttt{gEfiMiscSubClassGuid}. Value found on Macs is power management
   state bitmask, normally 0. Known bits read by
@@ -2425,27 +2425,27 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{InitialTSC}\\
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Sets \texttt{InitialTSC} in
   \texttt{gEfiProcessorSubClassGuid}. Sets initial TSC value, normally
   0.
 \item
   \texttt{FSBFrequency}\\
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
-  \textbf{Default value}: Automatic\\
+  \textbf{Failsafe}: Automatic\\
   \textbf{Description}: Sets \texttt{FSBFrequency} in
   \texttt{gEfiProcessorSubClassGuid}. Sets CPU FSB frequency.
 \item
   \texttt{ARTFrequency}\\
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
-  \textbf{Default value}: Not installed\\
+  \textbf{Failsafe}: Not installed\\
   \textbf{Description}: Sets \texttt{ARTFrequency} in
   \texttt{gEfiProcessorSubClassGuid}. Sets CPU ART frequency, Skylake
   and newer.
 \item
   \texttt{DevicePathsSupported}\\
   \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
-  \textbf{Default value}: Not installed\\
+  \textbf{Failsafe}: Not installed\\
   \textbf{Description}: Sets \texttt{DevicePathsSupported} in
   \texttt{gEfiMiscSubClassGuid}. Must be set to \texttt{1} for
   AppleACPIPlatform.kext to append SATA device paths to
@@ -2454,7 +2454,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{SmcRevision}\\
   \textbf{Type}: \texttt{plist\ data}, 6 bytes\\
-  \textbf{Default value}: Not installed\\
+  \textbf{Failsafe}: Not installed\\
   \textbf{Description}: Sets \texttt{REV} in
   \texttt{gEfiMiscSubClassGuid}. Custom property read by
   \texttt{VirtualSMC} or \texttt{FakeSMC} to generate SMC \texttt{REV}
@@ -2462,7 +2462,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{SmcBranch}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Default value}: Not installed\\
+  \textbf{Failsafe}: Not installed\\
   \textbf{Description}: Sets \texttt{RBr} in
   \texttt{gEfiMiscSubClassGuid}. Custom property read by
   \texttt{VirtualSMC} or \texttt{FakeSMC} to generate SMC \texttt{RBr}
@@ -2470,7 +2470,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{SmcPlatform}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Default value}: Not installed\\
+  \textbf{Failsafe}: Not installed\\
   \textbf{Description}: Sets \texttt{RPlt} in
   \texttt{gEfiMiscSubClassGuid}. Custom property read by
   \texttt{VirtualSMC} or \texttt{FakeSMC} to generate SMC \texttt{RPlt}
@@ -2483,14 +2483,14 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{BID}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Not installed\\
+  \textbf{Failsafe}: Not installed\\
   \textbf{Description}: Specifies the value of NVRAM variable
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_BID}.
 
 \item
   \texttt{ROM}\\
   \textbf{Type}: \texttt{plist\ data}, 6 bytes\\
-  \textbf{Default value}: Not installed\\
+  \textbf{Failsafe}: Not installed\\
   \textbf{Description}: Specifies the values of NVRAM variables
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_ROM} and
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}.
@@ -2498,7 +2498,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{MLB}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: Not installed\\
+  \textbf{Failsafe}: Not installed\\
   \textbf{Description}: Specifies the values of NVRAM variables
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_MLB} and
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:MLB}.
@@ -2506,7 +2506,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{FirmwareFeatures}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Default value}: Not installed\\
+  \textbf{Failsafe}: Not installed\\
   \textbf{Description}: This variable comes in pair with \texttt{FirmwareFeaturesMask}.
   Specifies the values of NVRAM variables:
   \begin{itemize}
@@ -2518,7 +2518,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{FirmwareFeaturesMask}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Default value}: Not installed\\
+  \textbf{Failsafe}: Not installed\\
   \textbf{Description}: This variable comes in pair with \texttt{FirmwareFeatures}.
   Specifies the values of NVRAM variables:
   \begin{itemize}
@@ -2535,14 +2535,14 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{BIOSVendor}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: BIOS Information (Type 0) --- Vendor\\
   \textbf{Description}: BIOS Vendor. All rules of
   \texttt{SystemManufacturer} do apply.
 \item
   \texttt{BIOSVersion}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: BIOS Information (Type 0) --- BIOS Version\\
   \textbf{Description}: Firmware version. This value gets updated and
   takes part in update delivery configuration and macOS version
@@ -2572,14 +2572,14 @@ Apple ROM Version
 \item
   \texttt{BIOSReleaseDate}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: BIOS Information (Type 0) --- BIOS Release Date\\
   \textbf{Description}: Firmware release date. Similar to
   \texttt{BIOSVersion}. May look like \texttt{12/08/2017}.
 \item
   \texttt{SystemManufacturer}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: System Information (Type 1) --- Manufacturer\\
   \textbf{Description}: OEM manufacturer of the particular board. Shall
   not be specified unless strictly required. Should \emph{not} contain
@@ -2590,7 +2590,7 @@ Apple ROM Version
 \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: System Information (Type 1), Product Name\\
   \textbf{Description}: Preferred Mac model used to mark the device as
   supported by the operating system. This value must be specified by any
@@ -2607,14 +2607,14 @@ Apple ROM Version
 \item
   \texttt{SystemVersion}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: System Information (Type 1) --- Version\\
   \textbf{Description}: Product iteration version number. May look like
   \texttt{1.1}.
 \item
   \texttt{SystemSerialNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: System Information (Type 1) --- Serial Number\\
   \textbf{Description}: Product serial number in defined format. Known
   formats are described in
@@ -2622,7 +2622,7 @@ Apple ROM Version
 \item
   \texttt{SystemUUID}\\
   \textbf{Type}: \texttt{plist\ string}, GUID\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: System Information (Type 1) --- UUID\\
   \textbf{Description}: A UUID is an identifier that is designed to be
   unique across both time and space. It requires no central registration
@@ -2630,7 +2630,7 @@ Apple ROM Version
 \item
   \texttt{SystemSKUNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: System Information (Type 1) --- SKU Number\\
   \textbf{Description}: Mac Board ID (\texttt{board-id}). May look like
   \texttt{Mac-7BA5B2D9E42DDD94} or \texttt{Mac-F221BEC8} in older
@@ -2638,13 +2638,13 @@ Apple ROM Version
 \item
   \texttt{SystemFamily}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: System Information (Type 1) --- Family\\
   \textbf{Description}: Family name. May look like \texttt{iMac\ Pro}.
 \item
   \texttt{BoardManufacturer}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) -
   Manufacturer\\
   \textbf{Description}: Board manufacturer. All rules of
@@ -2652,7 +2652,7 @@ Apple ROM Version
 \item
   \texttt{BoardProduct}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) -
   Product\\
   \textbf{Description}: Mac Board ID (\texttt{board-id}). May look like
@@ -2661,7 +2661,7 @@ Apple ROM Version
 \item
   \texttt{BoardVersion}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) -
   Version\\
   \textbf{Description}: Board version number. Varies, may match
@@ -2669,7 +2669,7 @@ Apple ROM Version
 \item
   \texttt{BoardSerialNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Serial
   Number\\
   \textbf{Description}: Board serial number in defined format. Known
@@ -2678,7 +2678,7 @@ Apple ROM Version
 \item
   \texttt{BoardAssetTag}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Asset
   Tag\\
   \textbf{Description}: Asset tag number. Varies, may be empty or
@@ -2686,7 +2686,7 @@ Apple ROM Version
 \item
   \texttt{BoardType}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Board
   Type\\
   \textbf{Description}: Either \texttt{0xA} (Motherboard (includes
@@ -2695,7 +2695,7 @@ Apple ROM Version
 \item
   \texttt{BoardLocationInChassis}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Location
   in Chassis\\
   \textbf{Description}: Varies, may be empty or
@@ -2703,33 +2703,33 @@ Apple ROM Version
 \item
   \texttt{ChassisManufacturer}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Manufacturer\\
   \textbf{Description}: Board manufacturer. All rules of
   \texttt{SystemManufacturer} do apply.
 \item
   \texttt{ChassisType}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Type\\
   \textbf{Description}: Chassis type, refer to Table 17 --- System
   Enclosure or Chassis Types for more details.
 \item
   \texttt{ChassisVersion}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Version\\
   \textbf{Description}: Should match \texttt{BoardProduct}.
 \item
   \texttt{ChassisSerialNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Version\\
   \textbf{Description}: Should match \texttt{SystemSerialNumber}.
 \item
   \texttt{ChassisAssetTag}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Asset Tag
   Number\\
   \textbf{Description}: Chassis type name. Varies, could be empty or
@@ -2737,7 +2737,7 @@ Apple ROM Version
 \item
   \texttt{PlatformFeature}\\
   \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
-  \textbf{Default value}: \texttt{0xFFFFFFFF}\\
+  \textbf{Failsafe}: \texttt{0xFFFFFFFF}\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE133} -
   \texttt{PlatformFeature}\\
   \textbf{Description}: Platform features bitmask. Refer to
@@ -2746,14 +2746,14 @@ Apple ROM Version
 \item
   \texttt{SmcVersion}\\
   \textbf{Type}: \texttt{plist\ data}, 16 bytes\\
-  \textbf{Default value}: All zero\\
+  \textbf{Failsafe}: All zero\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE134} - \texttt{Version}\\
   \textbf{Description}: ASCII string containing SMC version in upper case.
   Missing on T2 based Macs. Ignored when zero.
 \item
   \texttt{FirmwareFeatures}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE128} -
   \texttt{FirmwareFeatures} and \texttt{ExtendedFirmwareFeatures}\\
   \textbf{Description}: 64-bit firmware features bitmask. Refer to
@@ -2763,7 +2763,7 @@ Apple ROM Version
 \item
   \texttt{FirmwareFeaturesMask}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE128} -
   \texttt{FirmwareFeaturesMask} and
   \texttt{ExtendedFirmwareFeaturesMask}\\
@@ -2775,14 +2775,14 @@ Apple ROM Version
 \item
   \texttt{ProcessorType}\\
   \textbf{Type}: \texttt{plist\ integer}, 16-bit\\
-  \textbf{Default value}: Automatic\\
+  \textbf{Failsafe}: Automatic\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE131} -
   \texttt{ProcessorType}\\
   \textbf{Description}: Combined of Processor Major and Minor types.
 \item
   \texttt{MemoryFormFactor}\\
   \textbf{Type}: \texttt{plist\ integer}, 8-bit\\
-  \textbf{Default value}: OEM specified\\
+  \textbf{Failsafe}: OEM specified\\
   \textbf{SMBIOS}: Memory Device (Type 17) --- Form Factor\\
   \textbf{Description}: Memory form factor. On Macs it should be DIMM or
   SODIMM.
@@ -2805,7 +2805,7 @@ and supplementary utilities can be used.
 \item
   \texttt{ConnectDrivers}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Perform UEFI controller connection after driver
   loading. This option is useful for loading filesystem drivers, which
   usually follow UEFI driver model, and may not start by themselves.
@@ -2815,7 +2815,7 @@ and supplementary utilities can be used.
 \item
   \texttt{Drivers}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Default value}: None\\
+  \textbf{Failsafe}: None\\
   \textbf{Description}: Load selected drivers from \texttt{OC/Drivers}
   directory.
 
@@ -2899,7 +2899,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{Protocols}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Default value}: None\\
+  \textbf{Failsafe}: None\\
   \textbf{Description}: Force builtin versions of select protocols described
   in \hyperref[uefiprotoprops]{Protocols Properties} section below.
 
@@ -2908,7 +2908,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{Quirks}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Default value}: None\\
+  \textbf{Failsafe}: None\\
   \textbf{Description}: Apply individual firmware quirks described in
   \hyperref[uefiquirkprops]{Quirks Properties} section below.
 
@@ -2921,14 +2921,14 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{AppleBootPolicy}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Apple Boot Policy protocol with a builtin
   version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
 
 \item
   \texttt{ConsoleControl}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Replaces Console Control protocol with a builtin version.
 
   macOS bootloader requires console control protocol for text output, which some firmwares
@@ -2940,14 +2940,14 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{DataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Data Hub protocol with a builtin version.
   This will drop all previous properties if the protocol was already installed.
 
 \item
   \texttt{DeviceProperties}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Device Property protocol with a builtin
   version. This will drop all previous properties if it was already installed.
   This may be used to ensure full compatibility on VMs or legacy Macs.
@@ -2961,7 +2961,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{ExitBootServicesDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Default value}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Adds delay in microseconds after \texttt{EXIT\_BOOT\_SERVICES}
   event.
 
@@ -2974,7 +2974,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{IgnoreInvalidFlexRatio}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Select firmwares, namely APTIO IV, may contain invalid values in
   \texttt{MSR\_FLEX\_RATIO} (\texttt{0x194}) MSR register. These values may cause
   macOS boot failure on Intel platforms.
@@ -2985,7 +2985,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{IgnoreTextInGraphics}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Select firmwares output text onscreen in both graphics and
   text mode. This is normally unexpected, because random text may appear over
   graphical images and cause UI corruption. Setting this option to \texttt{true} will
@@ -2999,7 +2999,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{ProvideConsoleGop}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: macOS bootloader requires GOP (Graphics Output Protocol)
   to be present on console handle. This option will install it if missing.
 
@@ -3010,7 +3010,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{ReleaseUsbOwnership}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Attempt to detach USB controller ownership from
   the firmware driver. While most firmwares manage to properly do that,
   or at least have an option for, select firmwares do not. As a result,
@@ -3019,7 +3019,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{RequestBootVarRouting}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Request NVRAM driver (or AptioMemoryFix) to redirect
   \texttt{Boot} prefixed variables from \texttt{EFI\_GLOBAL\_VARIABLE\_GUID}
   to \texttt{OC\_VENDOR\_VARIABLE\_GUID}.
@@ -3031,7 +3031,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{SanitiseClearScreen}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Default value}: \texttt{false}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Some firmwares reset screen resolution to a failsafe
   value (like \texttt{1024x768}) on the attempts to clear screen contents
   when large display (e.g. 2K or 4K) is used. This option attempts to apply
