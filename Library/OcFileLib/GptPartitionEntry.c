@@ -44,6 +44,35 @@ STATIC EFI_GUID mInternalPartitionEntryProtocolGuid = {
 };
 
 STATIC
+VOID
+InternalDebugPrintPartitionEntry (
+  IN UINTN                      ErrorLevel,
+  IN CONST CHAR8                *Message,
+  IN CONST EFI_PARTITION_ENTRY  *PartitionEntry
+  )
+{
+  ASSERT (PartitionEntry != NULL);
+
+  DEBUG ((
+    ErrorLevel,
+    "%a:\n"
+    "- PartitionTypeGUID: %g"
+    "- UniquePartitionGUID: %g"
+    "- StartingLBA: %lx"
+    "- EndingLBA: %lx"
+    "- Attributes: %lx"
+    "- PartitionName: %s",
+    Message,
+    PartitionEntry->PartitionTypeGUID,
+    PartitionEntry->UniquePartitionGUID,
+    PartitionEntry->StartingLBA,
+    PartitionEntry->EndingLBA,
+    PartitionEntry->Attributes,
+    PartitionEntry->PartitionName
+    ));
+}
+
+STATIC
 EFI_STATUS
 InternalReadDisk (
   IN  EFI_DISK_IO_PROTOCOL   *DiskIo,
@@ -198,6 +227,12 @@ OcDiskFindSystemPartitionPath (
 
   ASSERT (DiskDevicePath != NULL);
 
+  DebugPrintDevicePath (
+    DEBUG_INFO,
+    "OCPI: Locating disk's ESP",
+    (EFI_DEVICE_PATH_PROTOCOL *)DiskDevicePath
+    );
+
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
                   &gEfiSimpleFileSystemProtocolGuid,
@@ -206,6 +241,7 @@ OcDiskFindSystemPartitionPath (
                   &Handles
                   );
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCPI: Failed to locate FS handles\n"));
     return NULL;
   }
 
@@ -222,6 +258,7 @@ OcDiskFindSystemPartitionPath (
              &DiskDpCmpSize
              );
   if (Result) {
+    DEBUG ((DEBUG_INFO, "OCPI: HD node would overflow DP\n"));
     return NULL;
   }
 
@@ -245,10 +282,18 @@ OcDiskFindSystemPartitionPath (
       continue;
     }
 
+    DebugPrintDevicePath (DEBUG_INFO, "OCPI: Discovered HD DP", HdDevicePath);
+
     PartEntry = OcGetGptPartitionEntry (Handle);
     if (PartEntry == NULL) {
       continue;
     }
+
+    InternalDebugPrintPartitionEntry (
+      DEBUG_INFO,
+      "OCPI: Discovered PartEntry",
+      PartEntry
+      );
 
     if (CompareGuid (&PartEntry->PartitionTypeGUID, &gEfiPartTypeSystemPartGuid)) {
       EspDevicePath = HdDevicePath;

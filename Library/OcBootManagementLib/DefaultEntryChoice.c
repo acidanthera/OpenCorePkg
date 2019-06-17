@@ -505,6 +505,7 @@ InternalGetDefaultBootEntry (
 
   IsAppleLegacy = InternalIsAppleLegacyLoadApp (UefiDevicePath);
   if (IsAppleLegacy) {
+    DEBUG ((DEBUG_INFO, "OCB: Default is AppleLegacyLoadApp\n"));
     FreePool (UefiDevicePath);
     Status = GetVariable2 (
                L"BootCampHD",
@@ -548,6 +549,7 @@ InternalGetDefaultBootEntry (
     FreePool (UefiDevicePath);
 
     if (EspDevicePath == NULL) {
+      DEBUG ((DEBUG_INFO, "Failed to locate the disk's ESP\n"));
       if (OptionalData != NULL) {
         FreePool (OptionalData);
       }
