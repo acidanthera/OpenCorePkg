@@ -14,6 +14,7 @@
 
 #include "BootManagementInternal.h"
 
+#include <Guid/AppleFile.h>
 #include <Guid/AppleVariable.h>
 #include <Guid/GlobalVariable.h>
 #include <Guid/OcVariables.h>
@@ -24,6 +25,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
 #include <Library/OcDevicePathLib.h>
+#include <Library/OcFileLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
@@ -322,6 +324,31 @@ InternalGetBootEntryByDevicePath (
   return NULL;
 }
 
+STATIC
+BOOLEAN
+InternalIsAppleLegacyLoadApp (
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+  EFI_DEV_PATH_PTR FwVolDevPath;
+
+  ASSERT (DevicePath != NULL);
+
+  if (DevicePath->Type == HARDWARE_DEVICE_PATH
+   && DevicePath->SubType == HW_MEMMAP_DP) {
+    FwVolDevPath.DevPath = NextDevicePathNode (DevicePath);
+    if (FwVolDevPath.DevPath->Type == MEDIA_VENDOR_DP
+     && FwVolDevPath.DevPath->SubType == MEDIA_PIWG_FW_FILE_DP) {
+      return CompareGuid (
+               &FwVolDevPath.FirmwareFile->FvFileName,
+               &gAppleLegacyLoadAppFileGuid
+               );
+    }
+  }
+
+  return FALSE;
+}
+
 OC_BOOT_ENTRY *
 InternalGetDefaultBootEntry (
   IN OUT OC_BOOT_ENTRY  *BootEntries,
@@ -350,10 +377,13 @@ InternalGetDefaultBootEntry (
   VOID                     *OptionalData;
   EFI_GUID                 *BootVariableGuid;
 
-  EFI_DEVICE_PATH_PROTOCOL *DevicePath;
   EFI_HANDLE               DeviceHandle;
 
   UINT16                   BootNextOptionIndex;
+
+  BOOLEAN                  IsAppleLegacy;
+  UINTN                    DevPathSize;
+  EFI_DEVICE_PATH_PROTOCOL *EspDevicePath;
 
   ASSERT (BootEntries != NULL);
   ASSERT (NumBootEntries > 0);
@@ -411,10 +441,10 @@ InternalGetDefaultBootEntry (
       return NULL;
     }
 
-    DevicePath = UefiDevicePath;
+    UefiRemainingDevicePath = UefiDevicePath;
     Status = gBS->LocateDevicePath (
                     &gEfiSimpleFileSystemProtocolGuid,
-                    &DevicePath,
+                    &UefiRemainingDevicePath,
                     &DeviceHandle
                     );
     if (!EFI_ERROR (Status) && (DeviceHandle == LoadHandle)) {
@@ -469,7 +499,26 @@ InternalGetDefaultBootEntry (
       return NULL;
     }
   } else {
+    DEBUG ((DEBUG_INFO, "OCB: BootNext retrieval failed - %r", Status));
     return NULL;
+  }
+
+  IsAppleLegacy = InternalIsAppleLegacyLoadApp (UefiDevicePath);
+  if (IsAppleLegacy) {
+    FreePool (UefiDevicePath);
+    Status = GetVariable2 (
+               L"BootCampHD",
+               NULL,
+               (VOID **)&UefiDevicePath,
+               &DevPathSize
+               );
+    if (EFI_ERROR (Status) || !IsDevicePathValid (UefiDevicePath, DevPathSize)) {
+      if (OptionalData != NULL) {
+        FreePool (OptionalData);
+      }
+
+      return NULL;
+    }
   }
 
   DebugPrintDevicePath (DEBUG_INFO, "OCB: Default DP pre-fix", UefiDevicePath);
@@ -489,8 +538,41 @@ InternalGetDefaultBootEntry (
     );
 
   if (NumPatchedNodes == -1) {
-    DEBUG ((DEBUG_WARN, "OCB: Failed to fix the default boot Device Path,\n"));
+    DEBUG ((DEBUG_WARN, "OCB: Failed to fix the default boot Device Path\n"));
     return NULL;
+  }
+
+  if (IsAppleLegacy) {
+    EspDevicePath = OcDiskFindSystemPartitionPath (UefiDevicePath);
+
+    FreePool (UefiDevicePath);
+
+    if (EspDevicePath == NULL) {
+      if (OptionalData != NULL) {
+        FreePool (OptionalData);
+      }
+
+      return NULL;
+    }
+    //
+    // CAUTION: This must NOT be freed!
+    //
+    UefiDevicePath = EspDevicePath;
+    //
+    // The Device Path must be entirely locatable as
+    // OcDiskFindSystemPartitionPath() guarantees to only return valid paths.
+    //
+    UefiRemainingDevicePath = FindDevicePathNodeWithType (
+                                UefiDevicePath,
+                                END_DEVICE_PATH_TYPE,
+                                END_ENTIRE_DEVICE_PATH_SUBTYPE
+                                );
+
+    DebugPrintDevicePath (
+      DEBUG_INFO,
+      "OCB: Default DP post-loc",
+      UefiDevicePath
+      );
   }
 
   if (UefiDevicePath != UefiRemainingDevicePath) {
@@ -555,7 +637,9 @@ InternalGetDefaultBootEntry (
     } while (BootEntry == NULL);
 
     if (FullDevicePath != NULL) {
-      FreePool (UefiDevicePath);
+      if (!IsAppleLegacy) {
+        FreePool (UefiDevicePath);
+      }
       UefiDevicePath = FullDevicePath;
     }
   }
@@ -574,7 +658,9 @@ InternalGetDefaultBootEntry (
     }
 
     if (BootEntry->DevicePath != UefiDevicePath) {
-      FreePool (UefiDevicePath);
+      if (!IsAppleLegacy) {
+        FreePool (UefiDevicePath);
+      }
     } else {
       ASSERT (IsBootNext);
     }
@@ -592,7 +678,9 @@ InternalGetDefaultBootEntry (
     FreePool (OptionalData);
   }
 
-  FreePool (UefiDevicePath);
+  if (!IsAppleLegacy) {
+    FreePool (UefiDevicePath);
+  }
 
   DEBUG ((DEBUG_WARN, "OCB: Failed to match a default boot option\n"));
 

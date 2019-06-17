@@ -11,6 +11,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <IndustryStandard/Pci.h>
 
+#include <Guid/Gpt.h>
+
 #include <Protocol/BlockIo.h>
 #include <Protocol/LoadFile.h>
 #include <Protocol/PciIo.h>
@@ -22,6 +24,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcFileLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 // CHANGE: Track InternalConnectAll() execution status.
@@ -725,9 +728,11 @@ BmExpandUriDevicePath (
   Check whether there is a instance in BlockIoDevicePath, which contain multi device path
   instances, has the same partition node with HardDriveDevicePath device path
 
+  @param  Handle                 The partition's device handle
   @param  BlockIoDevicePath      Multi device path instances which need to check
   @param  HardDriveDevicePath    A device path which starts with a hard drive media
                                  device path.
+  @param  LocateEsp              Use ESP- instead of PartitionNumber-matching.
 
   @retval TRUE                   There is a matched device path instance.
   @retval FALSE                  There is no matched device path instance.
@@ -736,13 +741,23 @@ BmExpandUriDevicePath (
 STATIC
 BOOLEAN
 BmMatchPartitionDevicePathNode (
+  IN  EFI_HANDLE                 Handle,
   IN  EFI_DEVICE_PATH_PROTOCOL   *BlockIoDevicePath,
-  IN  HARDDRIVE_DEVICE_PATH      *HardDriveDevicePath
+  IN  HARDDRIVE_DEVICE_PATH      *HardDriveDevicePath,
+  IN  BOOLEAN                    LocateEsp
   )
 {
   HARDDRIVE_DEVICE_PATH     *Node;
+  CONST EFI_PARTITION_ENTRY *PartEntry;
 
   if ((BlockIoDevicePath == NULL) || (HardDriveDevicePath == NULL)) {
+    return FALSE;
+  }
+
+  // CHANGE: Abort early if partition cannot be an ESP while it was requested.
+  if (LocateEsp
+   && (HardDriveDevicePath->MBRType != MBR_TYPE_EFI_PARTITION_TABLE_HEADER
+    || HardDriveDevicePath->SignatureType != SIGNATURE_TYPE_GUID)) {
     return FALSE;
   }
 
@@ -762,11 +777,21 @@ BmMatchPartitionDevicePathNode (
       // Match Signature and PartitionNumber.
       // Unused bytes in Signature are initiaized with zeros.
       //
-      if ((Node->PartitionNumber == HardDriveDevicePath->PartitionNumber) &&
-          (Node->MBRType == HardDriveDevicePath->MBRType) &&
+      if ((Node->MBRType == HardDriveDevicePath->MBRType) &&
           (Node->SignatureType == HardDriveDevicePath->SignatureType) &&
           (CompareMem (Node->Signature, HardDriveDevicePath->Signature, sizeof (Node->Signature)) == 0)) {
-        return TRUE;
+        // CHANGE: Allow ESP location when PartitionNumber mismatches.
+        if (!LocateEsp) {
+          if (Node->PartitionNumber == HardDriveDevicePath->PartitionNumber) {
+            return TRUE;
+          }
+        } else {
+          PartEntry = OcGetGptPartitionEntry (Handle);
+          if (PartEntry != NULL
+            && CompareGuid (&PartEntry->PartitionTypeGUID, &gEfiPartTypeSystemPartGuid)) {
+            return TRUE;
+          }
+        }
       }
     }
 
@@ -802,6 +827,7 @@ BmExpandPartitionDevicePath (
   UINTN                     Index;
   EFI_DEVICE_PATH_PROTOCOL  *TempDevicePath;
   EFI_DEVICE_PATH_PROTOCOL  *FullPath;
+  BOOLEAN                   LocateEsp;
 
   // CHANGE: Remove HDDP variable code.
 
@@ -819,34 +845,48 @@ BmExpandPartitionDevicePath (
   }
   //
   // Loop through all the device handles that support the BLOCK_IO Protocol
+  // CHANGE: Locate ESP when failing to find an exact match
   //
-  for (Index = 0; Index < BlockIoHandleCount; Index++) {
-    BlockIoDevicePath = DevicePathFromHandle (BlockIoBuffer[Index]);
-    if (BlockIoDevicePath == NULL) {
-      continue;
-    }
+  LocateEsp = FALSE;
+  do {
+    for (Index = 0; Index < BlockIoHandleCount; Index++) {
+      BlockIoDevicePath = DevicePathFromHandle (BlockIoBuffer[Index]);
+      if (BlockIoDevicePath == NULL) {
+        continue;
+      }
 
-    if (BmMatchPartitionDevicePathNode (BlockIoDevicePath, (HARDDRIVE_DEVICE_PATH *) FilePath)) {
-      //
-      // Find the matched partition device path
-      //
-      TempDevicePath = AppendDevicePath (BlockIoDevicePath, NextDevicePathNode (FilePath));
-      FullPath = OcGetNextLoadOptionDevicePath (TempDevicePath, NULL);
-      FreePool (TempDevicePath);
+      if (BmMatchPartitionDevicePathNode (BlockIoBuffer[Index], BlockIoDevicePath, (HARDDRIVE_DEVICE_PATH *) FilePath, LocateEsp)) {
+        //
+        // Find the matched partition device path
+        //
+        TempDevicePath = AppendDevicePath (BlockIoDevicePath, NextDevicePathNode (FilePath));
+        FullPath = OcGetNextLoadOptionDevicePath (TempDevicePath, NULL);
+        FreePool (TempDevicePath);
 
-      if (FullPath != NULL) {
-        break;
+        if (FullPath != NULL) {
+          break;
+        }
       }
     }
-  }
+
+    if (FullPath != NULL) {
+      break;
+    }
+
+    if (!mConnectAllExecuted) {
+      InternalConnectAll ();
+      FullPath = BmExpandPartitionDevicePath (FilePath);
+      break;
+    }
+
+    if (LocateEsp) {
+      break;
+    }
+    LocateEsp = TRUE;
+  } while (TRUE);
 
   if (BlockIoBuffer != NULL) {
     FreePool (BlockIoBuffer);
-  }
-
-  if ((FullPath == NULL) && !mConnectAllExecuted) {
-    InternalConnectAll ();
-    return BmExpandPartitionDevicePath (FilePath);
   }
 
   return FullPath;

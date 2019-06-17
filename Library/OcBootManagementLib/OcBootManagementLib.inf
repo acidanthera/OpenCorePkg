@@ -52,6 +52,7 @@
   gEfiFileInfoGuid                   ## SOMETIMES_CONSUMES
   gEfiGlobalVariableGuid             ## SOMETIMES_CONSUMES
   gAppleBootVariableGuid             ## SOMETIMES_CONSUMES
+  gAppleLegacyLoadAppFileGuid        ## SOMETIMES_CONSUMES
 
 [Protocols]
   gAppleBootPolicyProtocolGuid       ## PRODUCES

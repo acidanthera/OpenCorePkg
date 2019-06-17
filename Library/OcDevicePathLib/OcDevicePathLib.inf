@@ -39,6 +39,16 @@
   MdePkg/MdePkg.dec
 
 [LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  DevicePathLib
+  MemoryAllocationLib
+  OcFileLib
+  UefiBootServicesTableLib
+
+[Guids]
+  gEfiPartTypeSystemPartGuid
 
 [Protocols]
   gEfiDevicePathToTextProtocolGuid
