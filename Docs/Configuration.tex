@@ -1359,7 +1359,7 @@ blocking.
   is imposed by the amount of used bits in locationID format and there is no
   possible way to workaround this without heavy OS modification. The only
   valid solution is to limit the amount of used ports to 15 (discarding some).
-  More details can be found \href{https://github.com/acidanthera/OcSupportPkg/blob/master/Tools/AppleKeyboardLayouts/AppleKeyboardLayouts.txt}{here}.
+  More details can be found on \href{https://applelife.ru/posts/550233}{AppleLife.ru}.
 
 \end{enumerate}
 
@@ -1709,7 +1709,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 
   RSA public key 520 byte format description can be found in Chromium OS documentation.
   To convert public key from X.509 certificate or from PEM file use
-  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/RsaTool}{RsaTool}.
+  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/CreateVault}{RsaTool}.
 
   \emph{Note}: \texttt{vault.sig} is used regardless of this option when public key
   is embedded into \texttt{OpenCore.efi}. Setting it to \texttt{true} will only ensure
@@ -1727,7 +1727,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
   Presence of this file is highly recommended to ensure that unintentional
   file modifications (including filesystem corruption) do not happen unnoticed.
   To create this file automatically use
-  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/Vault}{\texttt{create\_vault.sh}} script.
+  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/CreateVault}{\texttt{create\_vault.sh}} script.
 
   Regardless of the underlying filesystem, path name and case must match
   between \texttt{config.plist} and \texttt{vault.plist}.
@@ -2056,7 +2056,7 @@ improvements:
   e.g. \texttt{ru-RU:252} for Russian locale and ABC keyboard. Also accepts short forms:
   \texttt{ru:252} or \texttt{ru:0} (U.S. keyboard, compatible with 10.9). Full decoded
   keyboard list from \texttt{AppleKeyboardLayouts-L.dat} can be found
-  \href{https://github.com/acidanthera/OcSupportPkg/blob/master/Tools/AppleKeyboardLayouts/AppleKeyboardLayouts.txt}{here}. Using non-latin keyboard on 10.14
+  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/AppleKeyboardLayouts}{here}. Using non-latin keyboard on 10.14
   will not enable ABC keyboard, unlike previous macOS versions, and is thus not recommended.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:security-mode}
