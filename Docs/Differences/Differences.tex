@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Jun  8 06:32:07 2019
-%DIF ADD ../Configuration.tex        Sun Jun 16 18:02:24 2019
+%DIF DEL PreviousConfiguration.tex   Sun Jun 16 17:36:08 2019
+%DIF ADD ../Configuration.tex        Mon Jun 17 09:31:31 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1512,7 +1512,8 @@ blocking.
   is imposed by the amount of used bits in locationID format and there is no
   possible way to workaround this without heavy OS modification. The only
   valid solution is to limit the amount of used ports to 15 (discarding some).
-  More details can be found on \href{https://applelife.ru/posts/550233}{AppleLife.ru}.
+  More details can be found \DIFdelbegin \DIFdel{on }%DIFDELCMD < \href{https://applelife.ru/posts/550233}{AppleLife.ru}%%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OcSupportPkg/blob/master/Tools/AppleKeyboardLayouts/AppleKeyboardLayouts.txt}{here}\DIFaddend .
 
 \end{enumerate}
 
@@ -2225,8 +2226,10 @@ improvements:
   ASCII string defining default keyboard layout. Format is \texttt{lang-COUNTRY:keyboard},
   e.g. \texttt{ru-RU:252} for Russian locale and ABC keyboard. Also accepts short forms:
   \texttt{ru:252} or \texttt{ru:0} (U.S. keyboard, compatible with 10.9). Full decoded
-  keyboard list from \texttt{AppleKeyboardLayouts-L.dat} can be found on
-  \href{https://www.applelife.ru/posts/763537}{AppleLife}. Using non-latin keyboard on 10.14
+  keyboard list from \texttt{AppleKeyboardLayouts-L.dat} can be found
+  \DIFdelbegin \DIFdel{on
+  }%DIFDELCMD < \href{https://www.applelife.ru/posts/763537}{AppleLife}%%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OcSupportPkg/blob/master/Tools/AppleKeyboardLayouts/AppleKeyboardLayouts.txt}{here}\DIFaddend . Using non-latin keyboard on 10.14
   will not enable ABC keyboard, unlike previous macOS versions, and is thus not recommended.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:security-mode}
