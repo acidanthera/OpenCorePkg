@@ -509,7 +509,7 @@ OcGetDefaultBootEntry (
     FreePool (UefiDevicePath);
     Status = GetVariable2 (
                L"BootCampHD",
-               NULL,
+               &gAppleBootVariableGuid,
                (VOID **)&UefiDevicePath,
                &DevPathSize
                );
