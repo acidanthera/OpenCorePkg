@@ -49,14 +49,6 @@ InternalUnloadDmg (
   IN INTERNAL_DMG_LOAD_CONTEXT  *DmgLoadContext
   );
 
-OC_BOOT_ENTRY *
-InternalGetDefaultBootEntry (
-  IN OUT OC_BOOT_ENTRY  *BootEntries,
-  IN     UINTN          NumBootEntries,
-  IN     BOOLEAN        CustomBootGuid,
-  IN     EFI_HANDLE     LoadHandle  OPTIONAL
-  );
-
 CHAR16 *
 InternalGetAppleDiskLabel (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,

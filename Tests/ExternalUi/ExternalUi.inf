@@ -1,5 +1,5 @@
 ## @file
-#  General purpose test application.
+#  External OpenCore GUI application.
 #
 #  Copyright (c) 2019, vit9696. All rights reserved.<BR>
 #
@@ -14,14 +14,14 @@
 
 [Defines]
   INF_VERSION                         = 0x00010005
-  BASE_NAME                           = KernelTest
+  BASE_NAME                           = ExternalUi
   FILE_GUID                           = 34773042-6AED-4617-BCDB-AD3DF0592EE9
   MODULE_TYPE                         = UEFI_DRIVER
   VERSION_STRING                      = 1.0
   INF_VERSION                         = 0x00010005
   EDK_RELEASE_VERSION                 = 0x00020000
   EFI_SPECIFICATION_VERSION           = 0x00010000
-  ENTRY_POINT                         = TestKernel
+  ENTRY_POINT                         = UefiMain
 
 #
 #  This flag specifies whether HII resource section is generated into PE image.
@@ -35,9 +35,7 @@
 #
 
 [Sources]
-  KernelTest.c
-  Lilu.c
-  Vsmc.c
+  ExternalUi.c
 
 [Packages]
   OcSupportPkg/OcSupportPkg.dec
@@ -47,22 +45,9 @@
   EfiPkg/EfiPkg.dec
 
 [Protocols]
-  gEfiMpServiceProtocolGuid                 ## CONSUMES
+  gOcInterfaceProtocolGuid                 ## SOMETIMES_PRODUCES
 
 [LibraryClasses]
-  UefiDriverEntryPoint
-  UefiRuntimeServicesTableLib
+  OcBootManagementLib
   UefiBootServicesTableLib
-  UefiLib
-  PcdLib
-  IoLib
-  PrintLib
-  OcGuardLib
-  DevicePathLib
-  OcDevicePropertyLib
-  OcMiscLib
-  OcAppleBootPolicyLib
-  OcAppleKernelLib
-  OcSmbiosLib
-  OcDataHubLib
-  OcVirtualFsLib
+  UefiDriverEntryPoint

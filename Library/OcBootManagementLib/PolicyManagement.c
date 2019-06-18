@@ -158,7 +158,7 @@ InternalCheckScanPolicy (
   //
   DevicePolicy = OcGetDevicePolicyType (Handle, External);
   if ((Policy & OC_SCAN_DEVICE_LOCK) != 0 && (Policy & DevicePolicy) == 0) {
-    DEBUG ((DEBUG_INFO, "OCB: invalid device policy (%u/%u) for %p\n", DevicePolicy, Policy, Handle));
+    DEBUG ((DEBUG_INFO, "OCB: Invalid device policy (%x/%x) for %p\n", DevicePolicy, Policy, Handle));
     return EFI_SECURITY_VIOLATION;
   }
 
@@ -166,7 +166,7 @@ InternalCheckScanPolicy (
     FileSystemPolicy = OcGetFileSystemPolicyType (Handle);
 
     if ((Policy & FileSystemPolicy) == 0) {
-      DEBUG ((DEBUG_INFO, "OCB: invalid file system policy (%u/%u) for %p\n", FileSystemPolicy, Policy, Handle));
+      DEBUG ((DEBUG_INFO, "OCB: Invalid file system policy (%x/%x) for %p\n", FileSystemPolicy, Policy, Handle));
       return EFI_SECURITY_VIOLATION;
     }
   }

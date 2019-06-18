@@ -350,7 +350,7 @@ InternalIsAppleLegacyLoadApp (
 }
 
 OC_BOOT_ENTRY *
-InternalGetDefaultBootEntry (
+OcGetDefaultBootEntry (
   IN OUT OC_BOOT_ENTRY  *BootEntries,
   IN     UINTN          NumBootEntries,
   IN     BOOLEAN        CustomBootGuid,

@@ -123,6 +123,7 @@
   OcSupportPkg/Tests/BlessTest/BlessTestApp.inf
   OcSupportPkg/Tests/DataHubTest/DataHubTest.inf
   OcSupportPkg/Tests/DataHubTest/DataHubTestApp.inf
+  OcSupportPkg/Tests/ExternalUi/ExternalUi.inf
   OcSupportPkg/Tests/KernelTest/KernelTest.inf
   OcSupportPkg/Tests/KernelTest/KernelTestApp.inf
   OcSupportPkg/Tests/PropertyTest/PropertyTest.inf

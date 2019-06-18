@@ -403,6 +403,24 @@ OcScanForBootEntries (
   );
 
 /**
+  Obtain default entry from the list.
+
+  @param[in,out]  BootEntries      Described list of entries, may get updated.
+  @param[in]      NumBootEntries   Positive number of boot entries.
+  @param[in]      CustomBootGuid   Use custom GUID for Boot#### lookup.
+  @param[in]      LoadHandle       Handle to skip (potential OpenCore handle).
+
+  @retval  boot entry or NULL.
+**/
+OC_BOOT_ENTRY *
+OcGetDefaultBootEntry (
+  IN OUT OC_BOOT_ENTRY  *BootEntries,
+  IN     UINTN          NumBootEntries,
+  IN     BOOLEAN        CustomBootGuid,
+  IN     EFI_HANDLE     LoadHandle  OPTIONAL
+  );
+
+/**
   Show simple boot entry selection menu and return chosen entry.
 
   @param[in]  BootEntries      Described list of entries.

@@ -38,10 +38,9 @@ typedef UINT32 OC_LOG_OPTIONS;
 /**
   The GUID of the OC_LOG_PROTOCOL.
 **/
-#define OC_LOG_PROTOCOL_GUID                                                        \
-  {                                                                                 \
-    0xDBB6008F, 0x89E4, 0x4272, { 0x98, 0x81, 0xCE, 0x3A, 0xFD, 0x97, 0x24, 0xD0 }  \
-  }
+#define OC_LOG_PROTOCOL_GUID      \
+  { 0xDBB6008F, 0x89E4, 0x4272,   \
+    { 0x98, 0x81, 0xCE, 0x3A, 0xFD, 0x97, 0x24, 0xD0 } }
 
 /**
   The forward declaration for the protocol for the OC_LOG_PROTOCOL.

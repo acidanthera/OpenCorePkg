@@ -870,7 +870,7 @@ OcRunSimpleBootPicker (
     DEBUG ((DEBUG_INFO, "Performing OcShowSimpleBootMenu...\n"));
 
     DefaultEntry = 0;
-    Entry = InternalGetDefaultBootEntry (Entries, EntryCount, Context->CustomBootGuid, Context->ExcludeHandle);
+    Entry = OcGetDefaultBootEntry (Entries, EntryCount, Context->CustomBootGuid, Context->ExcludeHandle);
     if (Entry != NULL) {
       DefaultEntry = (UINT32)(Entry - Entries);
     }
