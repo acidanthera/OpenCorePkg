@@ -337,7 +337,7 @@ InternalIsAppleLegacyLoadApp (
   if (DevicePath->Type == HARDWARE_DEVICE_PATH
    && DevicePath->SubType == HW_MEMMAP_DP) {
     FwVolDevPath.DevPath = NextDevicePathNode (DevicePath);
-    if (FwVolDevPath.DevPath->Type == MEDIA_VENDOR_DP
+    if (FwVolDevPath.DevPath->Type == MEDIA_DEVICE_PATH
      && FwVolDevPath.DevPath->SubType == MEDIA_PIWG_FW_FILE_DP) {
       return CompareGuid (
                &FwVolDevPath.FirmwareFile->FvFileName,
