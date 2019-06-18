@@ -23,6 +23,7 @@ OpenCore Changelog
 - Added `ResetHwSig` ACPI quirk to workaround hibernation
 - Removed `Custom` subfolder requirement from `ACPI` tables
 - Fixed kext injection in 10.7.x and 10.8.x
+- Added ESP partition type detection to ScanPolicy
 
 #### v0.0.2
 - Documentation improvements (see Differences.pdf)
