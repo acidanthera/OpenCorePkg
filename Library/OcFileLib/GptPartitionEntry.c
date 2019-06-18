@@ -574,7 +574,8 @@ OcGetGptPartitionEntry (
     return NULL;
   }
 
-  Offset = ((UINTN)HdNode->PartitionNumber * Partitions->PartitionEntrySize);
+  ASSERT (HdNode->PartitionNumber > 0);
+  Offset = ((UINTN)(HdNode->PartitionNumber - 1) * Partitions->PartitionEntrySize);
   PartEntry = (EFI_PARTITION_ENTRY *)((UINTN)Partitions->FirstEntry + Offset);
   //
   // FIXME: This causes the handle to be dangling if the device is detached.
