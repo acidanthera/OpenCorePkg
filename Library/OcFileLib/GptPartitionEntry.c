@@ -277,7 +277,11 @@ OcDiskFindSystemPartitionPath (
     //
     // Verify the partition's Device Path has the disk's prefixed.
     //
-    CmpResult = CompareMem (HdDevicePath, DiskDevicePath, DiskDpSize);
+    CmpResult = CompareMem (
+                  HdDevicePath,
+                  DiskDevicePath,
+                  DiskDpSize - END_DEVICE_PATH_LENGTH
+                  );
     if (CmpResult != 0) {
       continue;
     }
