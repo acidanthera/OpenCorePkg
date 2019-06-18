@@ -248,13 +248,14 @@ OcPartitionGetDiskHandle (
 /**
   Locate the disk's EFI System Partition.
 
-  @param[in] DiskDevicePath  The Device Path of the disk to scan.
+  @param[in]  DiskDevicePath     The Device Path of the disk to scan.
+  @param[out] EspDevicePathSize  The size of the returned Device Path.
 
-  @retval device path or NULL
 **/
 EFI_DEVICE_PATH_PROTOCOL *
 OcDiskFindSystemPartitionPath (
-  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath
+  IN  CONST EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath,
+  OUT UINTN                           *EspDevicePathSize
   );
 
 /**

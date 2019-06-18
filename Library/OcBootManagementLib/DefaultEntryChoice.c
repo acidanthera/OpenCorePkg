@@ -544,7 +544,10 @@ OcGetDefaultBootEntry (
   }
 
   if (IsAppleLegacy) {
-    EspDevicePath = OcDiskFindSystemPartitionPath (UefiDevicePath);
+    EspDevicePath = OcDiskFindSystemPartitionPath (
+                      UefiDevicePath,
+                      &DevPathSize
+                      );
 
     FreePool (UefiDevicePath);
 
@@ -564,10 +567,10 @@ OcGetDefaultBootEntry (
     // The Device Path must be entirely locatable as
     // OcDiskFindSystemPartitionPath() guarantees to only return valid paths.
     //
-    UefiRemainingDevicePath = FindDevicePathNodeWithType (
-                                UefiDevicePath,
-                                END_DEVICE_PATH_TYPE,
-                                END_ENTIRE_DEVICE_PATH_SUBTYPE
+    ASSERT (DevPathSize > END_DEVICE_PATH_LENGTH);
+    DevPathSize -= END_DEVICE_PATH_LENGTH;
+    UefiRemainingDevicePath = (EFI_DEVICE_PATH_PROTOCOL *)(
+                                (UINTN)EspDevicePath + DevPathSize
                                 );
 
     DebugPrintDevicePath (

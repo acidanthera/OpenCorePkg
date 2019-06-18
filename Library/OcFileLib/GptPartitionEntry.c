@@ -56,12 +56,12 @@ InternalDebugPrintPartitionEntry (
   DEBUG ((
     ErrorLevel,
     "%a:\n"
-    "- PartitionTypeGUID: %g"
-    "- UniquePartitionGUID: %g"
-    "- StartingLBA: %lx"
-    "- EndingLBA: %lx"
-    "- Attributes: %lx"
-    "- PartitionName: %s",
+    "- PartitionTypeGUID: %g\n"
+    "- UniquePartitionGUID: %g\n"
+    "- StartingLBA: %lx\n"
+    "- EndingLBA: %lx\n"
+    "- Attributes: %lx\n"
+    "- PartitionName: %s\n",
     Message,
     PartitionEntry->PartitionTypeGUID,
     PartitionEntry->UniquePartitionGUID,
@@ -199,12 +199,14 @@ OcPartitionGetDiskHandle (
 /**
   Locate the disk's EFI System Partition.
 
-  @param[in] DiskDevicePath  The Device Path of the disk to scan.
+  @param[in]  DiskDevicePath     The Device Path of the disk to scan.
+  @param[out] EspDevicePathSize  The size of the returned Device Path.
 
 **/
 EFI_DEVICE_PATH_PROTOCOL *
 OcDiskFindSystemPartitionPath (
-  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath
+  IN  CONST EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath,
+  OUT UINTN                           *EspDevicePathSize
   )
 {
   EFI_DEVICE_PATH_PROTOCOL  *EspDevicePath;
@@ -226,6 +228,7 @@ OcDiskFindSystemPartitionPath (
   CONST EFI_PARTITION_ENTRY *PartEntry;
 
   ASSERT (DiskDevicePath != NULL);
+  ASSERT (EspDevicePathSize != NULL);
 
   DebugPrintDevicePath (
     DEBUG_INFO,
@@ -301,6 +304,7 @@ OcDiskFindSystemPartitionPath (
 
     if (CompareGuid (&PartEntry->PartitionTypeGUID, &gEfiPartTypeSystemPartGuid)) {
       EspDevicePath = HdDevicePath;
+      *EspDevicePathSize = HdDpSize;
       break;
     }
   }
