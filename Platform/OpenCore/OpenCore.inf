@@ -63,6 +63,7 @@
   gEfiLoadedImageProtocolGuid         ## CONSUMES
   gEfiSimpleFileSystemProtocolGuid    ## CONSUMES
   gOcBootstrapProtocolGuid            ## CONSUMES
+  gOcInterfaceProtocolGuid            ## SOMETIMES_CONSUMES
 
 [LibraryClasses]
   DevicePathLib

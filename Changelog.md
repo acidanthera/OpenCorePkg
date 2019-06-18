@@ -24,6 +24,7 @@ OpenCore Changelog
 - Removed `Custom` subfolder requirement from `ACPI` tables
 - Fixed kext injection in 10.7.x and 10.8.x
 - Added ESP partition type detection to ScanPolicy
+- Added support for third-party user interfaces
 
 #### v0.0.2
 - Documentation improvements (see Differences.pdf)

@@ -27,6 +27,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
+#include <Protocol/OcInterface.h>
+
 STATIC
 VOID
 OcStoreLoadPath (
@@ -342,18 +344,40 @@ OcMiscBoot (
   IN  EFI_HANDLE                LoadHandle OPTIONAL
   )
 {
-  EFI_STATUS         Status;
-  OC_PICKER_CONTEXT  *Context;
-  UINTN              ContextSize;
-  UINT32             Index;
-  UINT32             ToolIndex;
+  EFI_STATUS             Status;
+  OC_PICKER_CONTEXT      *Context;
+  UINTN                  ContextSize;
+  UINT32                 Index;
+  UINT32                 ToolIndex;
+  OC_INTERFACE_PROTOCOL  *Interface;
 
   //
   // Do not use our boot picker unless asked.
   //
   if (!Config->Misc.Boot.UsePicker) {
     DEBUG ((DEBUG_INFO, "OC: Handing off to external boot controller\n"));
-    return;
+
+    Status = gBS->LocateProtocol (
+      &gOcInterfaceProtocolGuid,
+      NULL,
+      (VOID **) &Interface
+      );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OC: Missing external GUI protocol - %r\n", Status));
+      return;
+    }
+
+    if (Interface->Revision != OC_INTERFACE_REVISION) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: Incompatible external GUI protocol - %u vs %u\n",
+        Interface->Revision,
+        OC_INTERFACE_REVISION
+        ));
+      return;
+    }
+  } else {
+    Interface = NULL;
   }
 
   if (!OcOverflowMulAddUN (
@@ -392,9 +416,11 @@ OcMiscBoot (
 
   Context->CustomEntryCount = ToolIndex;
 
-  Status = OcRunSimpleBootPicker (
-    Context
-    );
+  if (Interface != NULL) {
+    Status = Interface->ShowInteface (Interface, Storage, Context);
+  } else {
+    Status = OcRunSimpleBootPicker (Context);
+  }
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to show boot menu!\n"));
   }
