@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Jun 16 23:48:44 2019
-%DIF ADD ../Configuration.tex        Mon Jun 17 10:56:35 2019
+%DIF DEL PreviousConfiguration.tex   Fri May 24 02:34:39 2019
+%DIF ADD ../Configuration.tex        Tue Jun 18 11:21:04 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1959,8 +1959,10 @@ rm vault.pub
     \item \texttt{0x00000100} (bit \texttt{8}) --- \texttt{OC\_SCAN\_ALLOW\_FS\_APFS}, allows scanning
     of APFS file system.
     \item \texttt{0x00000200} (bit \texttt{9}) --- \texttt{OC\_SCAN\_ALLOW\_FS\_HFS}, allows scanning
-    of HFS file system (must be blessed).
-    \item \texttt{0x00010000} (bit \texttt{16}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SATA}, allow
+    of HFS file system\DIFdelbegin \DIFdel{(must be blessed) }\DIFdelend .
+    \item \DIFaddbegin \texttt{\DIFadd{0x00000400}} \DIFadd{(bit }\texttt{\DIFadd{10}}\DIFadd{) --- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_FS\_ESP}}\DIFadd{, allows scanning
+    of EFI System Partition file system.
+    }\item \DIFaddend \texttt{0x00010000} (bit \texttt{16}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SATA}, allow
     scanning SATA devices.
     \item \texttt{0x00020000} (bit \texttt{17}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SASEX}, allow
     scanning SAS and Mac NVMe devices.

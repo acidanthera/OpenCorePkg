@@ -326,7 +326,7 @@ OcMiscLateInit (
 
   DEBUG ((DEBUG_INFO, "OC: Translated HibernateMode %a to %u\n", HibernateMode, HibernateMask));
 
-  HibernateStatus = ActivateHibernateWake (HibernateMask);
+  HibernateStatus = OcActivateHibernateWake (HibernateMask);
   DEBUG ((DEBUG_INFO, "OC: Hibernation detection status is %r\n", HibernateStatus));
   (VOID) HibernateStatus;
 
