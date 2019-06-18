@@ -16,7 +16,9 @@
 
 #include <Guid/AppleApfsInfo.h>
 #include <Guid/AppleBless.h>
+#include <Guid/AppleHfsInfo.h>
 #include <Guid/AppleVariable.h>
+#include <Guid/Gpt.h>
 #include <Guid/FileInfo.h>
 #include <Guid/GlobalVariable.h>
 #include <Guid/OcVariables.h>
@@ -26,15 +28,17 @@
 #include <Protocol/SimpleFileSystem.h>
 #include <Protocol/SimpleTextOut.h>
 
+#include <Library/BaseMemoryLib.h>
+#include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/OcBootManagementLib.h>
+#include <Library/OcFileLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
-STATIC
 UINT32
-InternalGetRequestedPolicyType (
+OcGetDevicePolicyType (
   IN  EFI_HANDLE   Handle,
   OUT BOOLEAN      *External  OPTIONAL
   )
@@ -106,77 +110,66 @@ InternalGetRequestedPolicyType (
   return 0;
 }
 
-EFI_STATUS
+UINT32
+OcGetFileSystemPolicyType (
+  IN  EFI_HANDLE   Handle
+  )
+{
+  CONST EFI_PARTITION_ENTRY  *PartitionEntry;
+
+  PartitionEntry = OcGetGptPartitionEntry (Handle);
+
+  if (PartitionEntry == NULL) {
+    DEBUG ((DEBUG_INFO, "OCB: missing partition info for %p\n", Handle));
+    return 0;
+  }
+
+  if (CompareGuid (&PartitionEntry->PartitionTypeGUID, &gAppleApfsPartitionTypeGuid)) {
+    return OC_SCAN_ALLOW_FS_APFS;
+  }
+
+  if (CompareGuid (&PartitionEntry->PartitionTypeGUID, &gEfiPartTypeSystemPartGuid)) {
+    return OC_SCAN_ALLOW_FS_ESP;
+  }
+
+  //
+  // Unsure whether these two should be separate, likely not.
+  //
+  if (CompareGuid (&PartitionEntry->PartitionTypeGUID, &gAppleHfsPartitionTypeGuid)
+    || CompareGuid (&PartitionEntry->PartitionTypeGUID, &gAppleHfsBootPartitionTypeGuid)) {
+    return OC_SCAN_ALLOW_FS_HFS;
+  }
+
+  return 0;
+}
+
+RETURN_STATUS
 InternalCheckScanPolicy (
   IN  EFI_HANDLE                       Handle,
-  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *SimpleFs,
   IN  UINT32                           Policy,
   OUT BOOLEAN                          *External OPTIONAL
   )
 {
-  EFI_STATUS                Status;
-  EFI_FILE_PROTOCOL         *Root;
-  UINTN                     BufferSize;
-  UINT32                    RequestedPolicy;
+  UINT32                     DevicePolicy;
+  UINT32                     FileSystemPolicy;
 
-  RequestedPolicy = InternalGetRequestedPolicyType (Handle, External);
-  if ((Policy & OC_SCAN_DEVICE_LOCK) != 0 && (Policy & RequestedPolicy) == 0) {
+  //
+  // Always request policy type due to external checks.
+  //
+  DevicePolicy = OcGetDevicePolicyType (Handle, External);
+  if ((Policy & OC_SCAN_DEVICE_LOCK) != 0 && (Policy & DevicePolicy) == 0) {
+    DEBUG ((DEBUG_INFO, "OCB: invalid device policy (%u/%u) for %p\n", DevicePolicy, Policy, Handle));
     return EFI_SECURITY_VIOLATION;
   }
 
-  Status = EFI_SUCCESS;
-
   if ((Policy & OC_SCAN_FILE_SYSTEM_LOCK) != 0) {
-    Status = SimpleFs->OpenVolume (SimpleFs, &Root);
+    FileSystemPolicy = OcGetFileSystemPolicyType (Handle);
 
-    if (EFI_ERROR (Status)) {
-      return Status;
-    }
-
-    Status = EFI_SECURITY_VIOLATION;
-
-    //
-    // FIXME: We cannot use EfiPartitionInfo protocol, as it is not
-    // widely available, and when it is, it is not guaranteed to be spec compliant.
-    // For this reason we would really like to implement ApplePartitionInfo protocol,
-    // but currently it is not a priority.
-    //
-    if ((Policy & OC_SCAN_ALLOW_FS_APFS) != 0 && EFI_ERROR (Status)) {
-      BufferSize = 0;
-      Status = Root->GetInfo (Root, &gAppleApfsVolumeInfoGuid, &BufferSize, NULL);
-      if (Status == EFI_BUFFER_TOO_SMALL) {
-        Status = EFI_SUCCESS;
-      }
-    }
-
-    //
-    // FIXME: This is even worse but works for testing the concept purposes.
-    // Current logic is blessed but not APFS.
-    //
-    if ((Policy & OC_SCAN_ALLOW_FS_HFS) != 0 && EFI_ERROR (Status)) {
-      BufferSize = 0;
-      Status = Root->GetInfo (Root, &gAppleApfsVolumeInfoGuid, &BufferSize, NULL);
-      if (Status != EFI_BUFFER_TOO_SMALL) {
-        BufferSize = 0;
-        Status = Root->GetInfo (Root, &gAppleBlessedSystemFileInfoGuid, &BufferSize, NULL);
-        if (Status == EFI_BUFFER_TOO_SMALL) {
-          Status = EFI_SUCCESS;
-        } else {
-          BufferSize = 0;
-          Status = Root->GetInfo (Root, &gAppleBlessedSystemFolderInfoGuid, &BufferSize, NULL);
-          if (Status == EFI_BUFFER_TOO_SMALL) {
-            Status = EFI_SUCCESS;
-          }
-        }
-      }
-    }
-
-    Root->Close (Root);
-
-    if (EFI_ERROR (Status)) {
-      return Status;
+    if ((Policy & FileSystemPolicy) == 0) {
+      DEBUG ((DEBUG_INFO, "OCB: invalid file system policy (%u/%u) for %p\n", FileSystemPolicy, Policy, Handle));
+      return EFI_SECURITY_VIOLATION;
     }
   }
 
-  return EFI_SUCCESS;
+  return RETURN_SUCCESS;
 }

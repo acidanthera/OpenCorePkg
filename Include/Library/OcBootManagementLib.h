@@ -92,6 +92,11 @@ typedef struct OC_BOOT_ENTRY_ {
 #define OC_SCAN_ALLOW_FS_HFS             BIT9
 
 /**
+  Allow scanning ESP filesystems.
+**/
+#define OC_SCAN_ALLOW_FS_ESP             BIT10
+
+/**
   Allow scanning SATA devices.
 **/
 #define OC_SCAN_ALLOW_DEVICE_SATA        BIT16
@@ -144,7 +149,7 @@ typedef struct OC_BOOT_ENTRY_ {
   All device bits used by OC_SCAN_DEVICE_LOCK.
 **/
 #define OC_SCAN_FILE_SYSTEM_BITS ( \
-  OC_SCAN_ALLOW_FS_APFS | OC_SCAN_ALLOW_FS_HFS)
+  OC_SCAN_ALLOW_FS_APFS | OC_SCAN_ALLOW_FS_HFS | OC_SCAN_ALLOW_FS_ESP)
 
 /**
   By default allow booting from APFS from internal drives.
@@ -356,7 +361,6 @@ OcFreeBootEntries (
   @param[in]  BootPolicy          Apple Boot Policy Protocol.
   @param[in]  Policy              Scan policy.
   @param[in]  Handle              Device handle (with EfiSimpleFileSystem protocol).
-  @param[in]  SimpleFs            Simple file system protocol of the device handle.
   @param[out] BootEntry           Resulting boot entry.
   @param[out] AlternateBootEntry  Resulting alternate boot entry (e.g. recovery).
   @param[in]  IsLoadHandle        OpenCore load handle, try skipping OC entry.
@@ -370,7 +374,6 @@ OcFillBootEntry (
   IN  APPLE_BOOT_POLICY_PROTOCOL      *BootPolicy,
   IN  UINT32                          Policy,
   IN  EFI_HANDLE                      Handle,
-  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *SimpleFs,
   OUT OC_BOOT_ENTRY                   *BootEntry,
   OUT OC_BOOT_ENTRY                   *AlternateBootEntry OPTIONAL,
   IN  BOOLEAN                         IsLoadHandle
@@ -446,7 +449,7 @@ OcLoadBootEntry (
   @retval EFI_SUCCESS        Hibernation mode was found and activated.
 **/
 EFI_STATUS
-ActivateHibernateWake (
+OcActivateHibernateWake (
   IN UINT32                       HibernateMask
   );
 
@@ -460,6 +463,32 @@ ActivateHibernateWake (
 EFI_STATUS
 OcRunSimpleBootPicker (
   IN  OC_PICKER_CONTEXT  *Context
+  );
+
+/**
+  Get device scan policy type.
+
+  @param[in]  Handle        Device/partition handle.
+  @param[out] External      Check whether device is external.
+
+  @retval required policy or 0 on mismatch.
+**/
+UINT32
+OcGetDevicePolicyType (
+  IN  EFI_HANDLE   Handle,
+  OUT BOOLEAN      *External  OPTIONAL
+  );
+
+/**
+  Get file system scan policy type.
+
+  @param[in]  Handle        Partition handle.
+
+  @retval required policy or 0 on mismatch.
+**/
+UINT32
+OcGetFileSystemPolicyType (
+  IN  EFI_HANDLE   Handle
   );
 
 #endif // OC_BOOT_MANAGEMENT_LIB_H

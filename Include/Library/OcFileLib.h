@@ -238,6 +238,7 @@ OcOpenFileByDevicePath (
 
   @param[in] HdDevicePath  The Device Path of the partition.
 
+  @retval device handle or NULL
 **/
 EFI_HANDLE
 OcPartitionGetDiskHandle (
@@ -249,6 +250,7 @@ OcPartitionGetDiskHandle (
 
   @param[in] DiskDevicePath  The Device Path of the disk to scan.
 
+  @retval device path or NULL
 **/
 EFI_DEVICE_PATH_PROTOCOL *
 OcDiskFindSystemPartitionPath (
@@ -256,10 +258,12 @@ OcDiskFindSystemPartitionPath (
   );
 
 /**
-  Retrieve the partition's GPT information, if applicable
+  Retrieve the partition's GPT information, if applicable.
+  Calls to this function undergo internal lazy caching.
 
   @param[in] FsHandle  The device handle of the partition to retrieve info of.
 
+  @retval partition entry or NULL
 **/
 CONST EFI_PARTITION_ENTRY *
 OcGetGptPartitionEntry (

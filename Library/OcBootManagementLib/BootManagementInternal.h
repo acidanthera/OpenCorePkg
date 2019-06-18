@@ -30,10 +30,9 @@ typedef struct {
   EFI_HANDLE                     BlockIoHandle;
 } INTERNAL_DMG_LOAD_CONTEXT;
 
-EFI_STATUS
+RETURN_STATUS
 InternalCheckScanPolicy (
   IN  EFI_HANDLE                       Handle,
-  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *SimpleFs,
   IN  UINT32                           Policy,
   OUT BOOLEAN                          *External OPTIONAL
   );

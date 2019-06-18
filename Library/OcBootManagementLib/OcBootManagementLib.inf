@@ -51,7 +51,11 @@
   gAppleBlessedOsxFolderInfoGuid     ## SOMETIMES_CONSUMES
   gEfiFileInfoGuid                   ## SOMETIMES_CONSUMES
   gEfiGlobalVariableGuid             ## SOMETIMES_CONSUMES
+  gEfiPartTypeSystemPartGuid         ## SOMETIMES_CONSUMES
+  gAppleApfsPartitionTypeGuid        ## SOMETIMES_CONSUMES
   gAppleBootVariableGuid             ## SOMETIMES_CONSUMES
+  gAppleHfsPartitionTypeGuid         ## SOMETIMES_CONSUMES
+  gAppleHfsBootPartitionTypeGuid     ## SOMETIMES_CONSUMES
   gAppleLegacyLoadAppFileGuid        ## SOMETIMES_CONSUMES
 
 [Protocols]

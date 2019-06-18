@@ -297,7 +297,6 @@ OcFillBootEntry (
   IN  APPLE_BOOT_POLICY_PROTOCOL      *BootPolicy,
   IN  UINT32                          Policy,
   IN  EFI_HANDLE                      Handle,
-  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *SimpleFs,
   OUT OC_BOOT_ENTRY                   *BootEntry,
   OUT OC_BOOT_ENTRY                   *AlternateBootEntry OPTIONAL,
   IN  BOOLEAN                         IsLoadHandle
@@ -313,7 +312,7 @@ OcFillBootEntry (
 
   Count = 0;
 
-  Status = InternalCheckScanPolicy (Handle, SimpleFs, Policy, &BootEntry->IsExternal);
+  Status = InternalCheckScanPolicy (Handle, Policy, &BootEntry->IsExternal);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCB: Skipping handle %p due to scan policy %x\n", Handle, Policy));
     return 0;
@@ -448,7 +447,6 @@ OcScanForBootEntries (
       BootPolicy,
       Context->ScanPolicy,
       Handles[Index],
-      SimpleFs,
       &Entries[EntryIndex],
       &Entries[EntryIndex+1],
       Context->ExcludeHandle == Handles[Index]
@@ -536,7 +534,7 @@ OcScanForBootEntries (
 }
 
 EFI_STATUS
-ActivateHibernateWake (
+OcActivateHibernateWake (
   IN UINT32                       HibernateMask
   )
 {
