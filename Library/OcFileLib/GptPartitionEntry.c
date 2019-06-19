@@ -368,21 +368,25 @@ InternalGetDiskPartitions (
                     );
   }
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCPI: Block I/O protocol is not present\n"));
+    DEBUG ((
+      DEBUG_INFO,
+      "OCPI: Block I/O protocol is not present %r(%d)\n",
+      Status,
+      HasBlockIo2
+      ));
     return NULL;
   }
   //
   // Retrieve the Disk I/O protocol.
   //
-  if (HasBlockIo2) {
-    DiskIo = NULL;
+  DiskIo = NULL;
 
-    Status = gBS->HandleProtocol (
-                    DiskHandle,
-                    &gEfiDiskIo2ProtocolGuid,
-                    (VOID **)&DiskIo2
-                    );
-  } else {
+  Status = gBS->HandleProtocol (
+                  DiskHandle,
+                  &gEfiDiskIo2ProtocolGuid,
+                  (VOID **)&DiskIo2
+                  );
+  if (EFI_ERROR (Status)) {
     DiskIo2 = NULL;
 
     Status = gBS->HandleProtocol (
@@ -392,7 +396,12 @@ InternalGetDiskPartitions (
                     );
   }
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCPI: Disk I/O protocol is not present\n"));
+    DEBUG ((
+      DEBUG_INFO,
+      "OCPI: Disk I/O protocol is not present %r(%d)\n",
+      Status,
+      HasBlockIo2
+      ));
     return NULL;
   }
   //
