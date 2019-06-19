@@ -120,7 +120,7 @@ OcGetFileSystemPolicyType (
   PartitionEntry = OcGetGptPartitionEntry (Handle);
 
   if (PartitionEntry == NULL) {
-    DEBUG ((DEBUG_INFO, "OCB: missing partition info for %p\n", Handle));
+    DEBUG ((DEBUG_INFO, "OCB: Missing partition info for %p\n", Handle));
     return 0;
   }
 
