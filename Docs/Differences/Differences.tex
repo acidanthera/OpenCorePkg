@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May 24 02:34:39 2019
-%DIF ADD ../Configuration.tex        Tue Jun 18 13:10:40 2019
+%DIF ADD ../Configuration.tex        Wed Jun 19 15:29:39 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -36,6 +36,10 @@
   frame=tb,
   columns=fullflexible,
   captionpos=b,
+%DIF 36a36-37
+  basicstyle=\ttfamily\normalsize, %DIF > 
+  keepspaces=true, %DIF > 
+%DIF -------
   morekeywords={git, make, build, ioreg, grep, nvram, sort, sudo, diskutil, gfxutil, strings, dd, cut},
   literate =
     {"}{{\textquotedbl}}1
@@ -586,7 +590,7 @@ For BIOS booting a third-party UEFI environment provider will have to
 be used. \texttt{DuetPkg} is one of the known UEFI environment providers
 for legacy systems. \DIFdelbegin \DIFdel{While it is known to be possible to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend run OpenCore on such a legacy system \DIFdelbegin \DIFdel{, configuration and use of }\DIFdelend \DIFaddbegin \DIFadd{you can install
 }\DIFaddend \texttt{DuetPkg} \DIFdelbegin \DIFdel{is
-currently out of the scope of this document}\DIFdelend \DIFaddbegin \DIFadd{with a dedicated tool: 
+currently out of the scope of this document}\DIFdelend \DIFaddbegin \DIFadd{with a dedicated tool:
 }\href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/BootInstall}{BootInstall}\DIFaddend .
 
 For upgrade purposes refer to \texttt{Differences.pdf} document, providing
@@ -1433,7 +1437,7 @@ blocking.
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Disables multiple MSR access critical for select CPUs,
   which have no native XCPM support.
-  }
+}
 
   \DIFadd{This is normally used in conjunction with }\texttt{\DIFadd{Emulate}} \DIFadd{section on Haswell-E,
   Broadwell-E, Skylake-X, and similar CPUs. More details on the XCPM patches are outlined in
@@ -1548,11 +1552,11 @@ behaviour that does not go to any other sections
   \texttt{\DIFadd{Tools}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ array}}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Add new entries to boot picker.
-  }
+}
 
   \DIFadd{Designed to be filled with }\texttt{\DIFadd{plist\ dict}} \DIFadd{values, describing each block entry.
   See }\hyperref[misctoolprops]{Tools Properties} \DIFadd{section below.
-  }
+}
 
   \emph{\DIFadd{Note}}\DIFadd{: Select tools, for example, UEFI Shell or NVRAM cleaning are very
   dangerous and }\textbf{\DIFadd{MUST NOT}} \DIFadd{appear in production configurations, especially
@@ -2131,7 +2135,7 @@ as behaviour is undefined otherwise.
   \textbf{\DIFadd{WARNING}}\DIFadd{: This feature is very dangerous as it passes unprotected data to your
   firmware variable services. Use it only when no hardware NVRAM implementation is provided
   by the firmware or it is incompatible.
- }
+}
 
 \item
   \texttt{\DIFadd{LegacySchema}}\\
@@ -2146,7 +2150,7 @@ as behaviour is undefined otherwise.
 
   \textbf{\DIFadd{WARNING}}\DIFadd{: Choose variables very carefully, as nvram.plist is not vaulted.
   For instance, do not put }\texttt{\DIFadd{boot-args}} \DIFadd{or }\texttt{\DIFadd{csr-active-config}}\DIFadd{, as
-  this can bypass SIP. 
+  this can bypass SIP.
 }
 
 \DIFaddend \end{enumerate}
@@ -3286,14 +3290,68 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   some extra precautions. Be warned that macOS requires first partition to be EFI System
   Partition, and does not support the default Windows layout.
   Other than that, all the modifications applied (to ACPI, NVRAM, SMBIOS, etc.) are supposed
-  to be operating system agnostic, i.e. apply equally regardless of the OS booted\DIFaddbegin \DIFadd{.
-}
+  to be operating system agnostic, i.e. apply equally regardless of the OS booted.
+\DIFaddbegin 
 
   \DIFadd{Loading Windows from OpenCore may lead to the need of reactivation. To avoid it consider
   leaving SystemUUID field empty, so that the original firmware UUID is used. Be warned,
   on old firmwares it may be invalid, i.e. not random. In case you still have issues,
   consider using HWID or KMS38 license, the nuances of Windows activation are out of the
-  scope of this document and can be found online}\DIFaddend .
+  scope of this document and can be found online.
+}
+
+  \DIFadd{To enable operating system switching and install relevant drivers in the majority of
+  cases you will need Windows support software from
+  }\href{https://support.apple.com/boot-camp}{Boot Camp}\DIFadd{. For simplicity of the download
+  process or when configuring an already installed Windows version a third-party utility,
+  }\href{https://github.com/timsutton/brigadier}{Brigadier}\DIFadd{, can be used successfully.
+}
+
+\item
+  \textbf{\DIFadd{Why do I see }\texttt{\DIFadd{Basic data partition}} \DIFadd{in Boot Camp Control panel?}}
+
+  \DIFadd{Boot Camp control panel uses GPT partition table to obtain each boot option name.
+  After installing Windows separately you will have to relabel the partition manually.
+  This can be done with many tools including open-source
+  }\href{https://sourceforge.net/projects/gptfdisk}{gdisk} \DIFadd{utility. Reference example:
+}
+
+\DIFmodbegin
+\begin{lstlisting}[caption=Relabeling Windows volume, label=relabel, style=ocbash,alsolanguage=DIFcode]
+%DIF > PS C:\gdisk> .\gdisk64.exe \\.\physicaldrive0
+%DIF > GPT fdisk (gdisk) version 1.0.4
+%DIF > 
+%DIF > Command (? for help): p
+%DIF > Disk \\.\physicaldrive0: 419430400 sectors, 200.0 GiB
+%DIF > Sector size (logical): 512 bytes
+%DIF > Disk identifier (GUID): DEC57EB1-B3B5-49B2-95F5-3B8C4D3E4E12
+%DIF > Partition table holds up to 128 entries
+%DIF > Main partition table begins at sector 2 and ends at sector 33
+%DIF > First usable sector is 34, last usable sector is 419430366
+%DIF > Partitions will be aligned on 2048-sector boundaries
+%DIF > Total free space is 4029 sectors (2.0 MiB)
+%DIF > 
+%DIF > Number  Start (sector)    End (sector)  Size       Code  Name
+%DIF >    1            2048         1023999   499.0 MiB   2700  Basic data partition
+%DIF >    2         1024000         1226751   99.0 MiB    EF00  EFI system partition
+%DIF >    3         1226752         1259519   16.0 MiB    0C01  Microsoft reserved ...
+%DIF >    4         1259520       419428351   199.4 GiB   0700  Basic data partition
+%DIF > 
+%DIF > Command (? for help): c
+%DIF > Partition number (1-4): 4
+%DIF > Enter name: BOOTCAMP
+%DIF > 
+%DIF > Command (? for help): w
+%DIF > 
+%DIF > Final checks complete. About to write GPT data. THIS WILL OVERWRITE EXISTING PARTITIONS!!
+%DIF > 
+%DIF > Do you want to proceed? (Y/N): Y
+%DIF > OK; writing new GUID partition table (GPT) to \\.\physicaldrive0.
+%DIF > Disk synchronization succeeded! The computer should now use the new partition table.
+%DIF > The operation has completed successfully.
+\end{lstlisting}
+\DIFmodend
+\DIFaddend 
 
 \end{enumerate}
 

@@ -33,6 +33,8 @@
   frame=tb,
   columns=fullflexible,
   captionpos=b,
+  basicstyle=\ttfamily\normalsize,
+  keepspaces=true,
   morekeywords={git, make, build, ioreg, grep, nvram, sort, sudo, diskutil, gfxutil, strings, dd, cut},
   literate =
     {"}{{\textquotedbl}}1
@@ -482,7 +484,7 @@ utilised.
 For BIOS booting a third-party UEFI environment provider will have to
 be used. \texttt{DuetPkg} is one of the known UEFI environment providers
 for legacy systems. To run OpenCore on such a legacy system you can install
-\texttt{DuetPkg} with a dedicated tool: 
+\texttt{DuetPkg} with a dedicated tool:
 \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/BootInstall}{BootInstall}.
 
 For upgrade purposes refer to \texttt{Differences.pdf} document, providing
@@ -1288,7 +1290,7 @@ blocking.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Disables multiple MSR access critical for select CPUs,
   which have no native XCPM support.
-  
+
   This is normally used in conjunction with \texttt{Emulate} section on Haswell-E,
   Broadwell-E, Skylake-X, and similar CPUs. More details on the XCPM patches are outlined in
   \href{https://github.com/acidanthera/bugtracker/issues/365}{acidanthera/bugtracker\#365}.
@@ -1395,10 +1397,10 @@ behaviour that does not go to any other sections
   \texttt{Tools}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Description}: Add new entries to boot picker.
-  
+
   Designed to be filled with \texttt{plist\ dict} values, describing each block entry.
   See \hyperref[misctoolprops]{Tools Properties} section below.
-  
+
   \emph{Note}: Select tools, for example, UEFI Shell or NVRAM cleaning are very
   dangerous and \textbf{MUST NOT} appear in production configurations, especially
   in vaulted ones and protected with secure boot, as they may be used to easily
@@ -1963,7 +1965,7 @@ as behaviour is undefined otherwise.
   \textbf{WARNING}: This feature is very dangerous as it passes unprotected data to your
   firmware variable services. Use it only when no hardware NVRAM implementation is provided
   by the firmware or it is incompatible.
- 
+
 \item
   \texttt{LegacySchema}\\
   \textbf{Type}: \texttt{plist\ dict}\\
@@ -1975,7 +1977,7 @@ as behaviour is undefined otherwise.
 
   \textbf{WARNING}: Choose variables very carefully, as nvram.plist is not vaulted.
   For instance, do not put \texttt{boot-args} or \texttt{csr-active-config}, as
-  this can bypass SIP. 
+  this can bypass SIP.
 
 \end{enumerate}
 
@@ -3118,6 +3120,54 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   on old firmwares it may be invalid, i.e. not random. In case you still have issues,
   consider using HWID or KMS38 license, the nuances of Windows activation are out of the
   scope of this document and can be found online.
+
+  To enable operating system switching and install relevant drivers in the majority of
+  cases you will need Windows support software from
+  \href{https://support.apple.com/boot-camp}{Boot Camp}. For simplicity of the download
+  process or when configuring an already installed Windows version a third-party utility,
+  \href{https://github.com/timsutton/brigadier}{Brigadier}, can be used successfully.
+
+\item
+  \textbf{Why do I see \texttt{Basic data partition} in Boot Camp Control panel?}
+
+  Boot Camp control panel uses GPT partition table to obtain each boot option name.
+  After installing Windows separately you will have to relabel the partition manually.
+  This can be done with many tools including open-source
+  \href{https://sourceforge.net/projects/gptfdisk}{gdisk} utility. Reference example:
+
+\begin{lstlisting}[caption=Relabeling Windows volume, label=relabel, style=ocbash]
+PS C:\gdisk> .\gdisk64.exe \\.\physicaldrive0
+GPT fdisk (gdisk) version 1.0.4
+
+Command (? for help): p
+Disk \\.\physicaldrive0: 419430400 sectors, 200.0 GiB
+Sector size (logical): 512 bytes
+Disk identifier (GUID): DEC57EB1-B3B5-49B2-95F5-3B8C4D3E4E12
+Partition table holds up to 128 entries
+Main partition table begins at sector 2 and ends at sector 33
+First usable sector is 34, last usable sector is 419430366
+Partitions will be aligned on 2048-sector boundaries
+Total free space is 4029 sectors (2.0 MiB)
+
+Number  Start (sector)    End (sector)  Size       Code  Name
+   1            2048         1023999   499.0 MiB   2700  Basic data partition
+   2         1024000         1226751   99.0 MiB    EF00  EFI system partition
+   3         1226752         1259519   16.0 MiB    0C01  Microsoft reserved ...
+   4         1259520       419428351   199.4 GiB   0700  Basic data partition
+
+Command (? for help): c
+Partition number (1-4): 4
+Enter name: BOOTCAMP
+
+Command (? for help): w
+
+Final checks complete. About to write GPT data. THIS WILL OVERWRITE EXISTING PARTITIONS!!
+
+Do you want to proceed? (Y/N): Y
+OK; writing new GUID partition table (GPT) to \\.\physicaldrive0.
+Disk synchronization succeeded! The computer should now use the new partition table.
+The operation has completed successfully.
+\end{lstlisting}
 
 \end{enumerate}
 
