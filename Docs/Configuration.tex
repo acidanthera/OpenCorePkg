@@ -3126,6 +3126,15 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \href{https://support.apple.com/boot-camp}{Boot Camp}. For simplicity of the download
   process or when configuring an already installed Windows version a third-party utility,
   \href{https://github.com/timsutton/brigadier}{Brigadier}, can be used successfully.
+  Note, that you may have to download and install \href{https://www.7-zip.org}{7-Zip}
+  prior to using Brigadier.
+
+  While Windows support software from Boot Camp solves most of compatibility problems,
+  sometimes you may have to address some of them manually. To invert mouse wheel scroll
+  direction \texttt{FlipFlopWheel} must be set to \texttt{1} as explained on
+  \href{https://superuser.com/a/364353}{SuperUser}. Similarly \texttt{RealTimeIsUniversal}
+  must be set to \texttt{1} to avoid time desync between Windows and macOS as explained
+  on \href{https://superuser.com/q/494432}{SuperUser} (this one is usually not needed).
 
 \item
   \textbf{Why do I see \texttt{Basic data partition} in Boot Camp Control panel?}

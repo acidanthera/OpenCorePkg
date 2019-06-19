@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May 24 02:34:39 2019
-%DIF ADD ../Configuration.tex        Wed Jun 19 15:29:39 2019
+%DIF ADD ../Configuration.tex        Wed Jun 19 23:48:12 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3305,6 +3305,16 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   }\href{https://support.apple.com/boot-camp}{Boot Camp}\DIFadd{. For simplicity of the download
   process or when configuring an already installed Windows version a third-party utility,
   }\href{https://github.com/timsutton/brigadier}{Brigadier}\DIFadd{, can be used successfully.
+  Note, that you may have to download and install }\href{https://www.7-zip.org}{7-Zip}
+  \DIFadd{prior to using Brigadier.
+}
+
+  \DIFadd{While Windows support software from Boot Camp solves most of compatibility problems,
+  sometimes you may have to address some of them manually. To invert mouse wheel scroll
+  direction }\texttt{\DIFadd{FlipFlopWheel}} \DIFadd{must be set to }\texttt{\DIFadd{1}} \DIFadd{as explained on
+  }\href{https://superuser.com/a/364353}{SuperUser}\DIFadd{. Similarly }\texttt{\DIFadd{RealTimeIsUniversal}}
+  \DIFadd{must be set to }\texttt{\DIFadd{1}} \DIFadd{to avoid time desync between Windows and macOS as explained
+  on }\href{https://superuser.com/q/494432}{SuperUser} \DIFadd{(this one is usually not needed).
 }
 
 \item
