@@ -2593,7 +2593,8 @@ Apple ROM Version
   \texttt{Apple\ Inc.}, as this confuses numerous services present in
   the operating system, such as firmware updates, eficheck, as well as
   kernel extensions developed in Acidanthera, such as Lilu and its
-  plugins.
+  plugins. In addition it will also make some operating systems
+  like Linux unbootable.
 \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -3052,6 +3053,113 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 
 \section{Troubleshooting}\label{troubleshooting}
 
+\subsection{Windows support}\label{troubleshootingwin}
+
+  \textbf{Can I install Windows?}
+
+  While no official Windows support is provided, 64-bit UEFI Windows installations (Windows 8 and
+  above) prepared with Boot Camp are supposed to work. Third-party UEFI installations
+  as well as systems partially supporting UEFI boot, like Windows 7, might work with
+  some extra precautions. Things to keep in mind:
+  
+  \begin{itemize}
+  \item MBR (Master Boot Record) installations are legacy and will not be supported.
+  \item Installing Windows and macOS on the same drive is currently unsupported but
+  will be addressed later.
+  \item All the modifications applied (to ACPI, NVRAM, SMBIOS, etc.) are supposed
+  to be operating system agnostic, i.e. apply equally regardless of the OS booted.
+  This enables Boot Camp software experience on Windows.
+  \item macOS requires the first partition to be EFI System Partition, and does
+  not support the default Windows layout. While OpenCore does have a
+  \href{https://github.com/acidanthera/bugtracker/issues/327}{workaround}
+  for this, it is highly recommend not to rely on it and install properly.
+  \item Windows may need to be reactivated. To avoid it consider
+  leaving SystemUUID field empty, so that the original firmware UUID is used. Be warned,
+  on old firmwares it may be invalid, i.e. not random. In case you still have issues,
+  consider using HWID or KMS38 license. The nuances of Windows activation are out of the
+  scope of this document and can be found online.
+  \end{itemize}
+
+  \textbf{What additional software do I need?}
+
+  To enable operating system switching and install relevant drivers in the majority of
+  cases you will need Windows support software from
+  \href{https://support.apple.com/boot-camp}{Boot Camp}. For simplicity of the download
+  process or when configuring an already installed Windows version a third-party utility,
+  \href{https://github.com/timsutton/brigadier}{Brigadier}, can be used successfully.
+  Note, that you may have to download and install \href{https://www.7-zip.org}{7-Zip}
+  prior to using Brigadier.
+
+  Remember to always use the latest version of Windows support software from Boot Camp,
+  as versions prior to 6.1 do not support APFS, and thus will not function correctly.
+  To download newest software pass most recent Mac model to Brigadier, for example
+  \texttt{./brigadier.exe -m iMac19,1}. To install Boot Camp on an unsupported Mac model
+  afterwards run PowerShell as Administrator and enter \texttt{msiexec /i BootCamp.msi}.
+  In case you already have a previous version of Boot Camp installed you will have to
+  remove it first by running \texttt{msiexec /x BootCamp.msi} command. \texttt{BootCamp.msi}
+  file is located in \texttt{BootCamp/Drivers/Apple} directory and can be reached through
+  Windows Explorer.
+
+  While Windows support software from Boot Camp solves most of compatibility problems,
+  sometimes you may have to address some of them manually:
+  
+  \begin{itemize}
+  \item To invert mouse wheel scroll direction \texttt{FlipFlopWheel} must be set
+  to \texttt{1} as explained on \href{https://superuser.com/a/364353}{SuperUser}.
+  \item \texttt{RealTimeIsUniversal} must be set to \texttt{1} to avoid time
+  desync between Windows and macOS as explained on
+  \href{https://superuser.com/q/494432}{SuperUser} (this one is usually not needed).
+  \item To access Apple filesystems like HFS and APFS separate software may need to
+  be installed. Some of the known tools are:
+  \href{https://forums.macrumors.com/threads/apple-hfs-windows-driver-download.1368010/}{Apple HFS+ driver}
+  (\href{https://forums.macrumors.com/threads/apple-hfs-windows-driver-download.1368010/page-4#post-24180079}{hack for Windows 10}),
+  \href{http://www.catacombae.org/hfsexplorer}{HFSExplorer}, MacDrive, Paragon APFS,
+  Paragon HFS+, TransMac, etc. Remember to never ever attempt to modify Apple file systems
+  from Windows as this often leads to irrecoverable data loss.
+  \end{itemize}
+
+  \textbf{Why do I see \texttt{Basic data partition} in Boot Camp Control panel?}
+
+  Boot Camp control panel uses GPT partition table to obtain each boot option name.
+  After installing Windows separately you will have to relabel the partition manually.
+  This can be done with many tools including open-source
+  \href{https://sourceforge.net/projects/gptfdisk}{gdisk} utility. Reference example:
+
+\begin{lstlisting}[caption=Relabeling Windows volume, label=relabel, style=ocbash]
+PS C:\gdisk> .\gdisk64.exe \\.\physicaldrive0
+GPT fdisk (gdisk) version 1.0.4
+
+Command (? for help): p
+Disk \\.\physicaldrive0: 419430400 sectors, 200.0 GiB
+Sector size (logical): 512 bytes
+Disk identifier (GUID): DEC57EB1-B3B5-49B2-95F5-3B8C4D3E4E12
+Partition table holds up to 128 entries
+Main partition table begins at sector 2 and ends at sector 33
+First usable sector is 34, last usable sector is 419430366
+Partitions will be aligned on 2048-sector boundaries
+Total free space is 4029 sectors (2.0 MiB)
+
+Number  Start (sector)    End (sector)  Size       Code  Name
+   1            2048         1023999   499.0 MiB   2700  Basic data partition
+   2         1024000         1226751   99.0 MiB    EF00  EFI system partition
+   3         1226752         1259519   16.0 MiB    0C01  Microsoft reserved ...
+   4         1259520       419428351   199.4 GiB   0700  Basic data partition
+
+Command (? for help): c
+Partition number (1-4): 4
+Enter name: BOOTCAMP
+
+Command (? for help): w
+
+Final checks complete. About to write GPT data. THIS WILL OVERWRITE EXISTING PARTITIONS!!
+
+Do you want to proceed? (Y/N): Y
+OK; writing new GUID partition table (GPT) to \\.\physicaldrive0.
+Disk synchronization succeeded! The computer should now use the new partition table.
+The operation has completed successfully.
+\end{lstlisting}
+
+
 \subsection{Tips and Tricks}\label{troubleshootingtricks}
 
 \begin{enumerate}
@@ -3105,78 +3213,12 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   tool from \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}.
 
 \item
-  \textbf{Can I install Windows?}
+  \textbf{Can I use this on Apple hardware or virtual machines?}
 
-  While no official Windows support is provided, 64-bit UEFI Windows installations (Windows 8 and
-  above) prepared with Boot Camp are supposed to work in general. Third-party UEFI installations
-  as well as systems partially supporting UEFI boot, like Windows 7, might work with
-  some extra precautions. Be warned that macOS requires first partition to be EFI System
-  Partition, and does not support the default Windows layout.
-  Other than that, all the modifications applied (to ACPI, NVRAM, SMBIOS, etc.) are supposed
-  to be operating system agnostic, i.e. apply equally regardless of the OS booted.
-
-  Loading Windows from OpenCore may lead to the need of reactivation. To avoid it consider
-  leaving SystemUUID field empty, so that the original firmware UUID is used. Be warned,
-  on old firmwares it may be invalid, i.e. not random. In case you still have issues,
-  consider using HWID or KMS38 license, the nuances of Windows activation are out of the
-  scope of this document and can be found online.
-
-  To enable operating system switching and install relevant drivers in the majority of
-  cases you will need Windows support software from
-  \href{https://support.apple.com/boot-camp}{Boot Camp}. For simplicity of the download
-  process or when configuring an already installed Windows version a third-party utility,
-  \href{https://github.com/timsutton/brigadier}{Brigadier}, can be used successfully.
-  Note, that you may have to download and install \href{https://www.7-zip.org}{7-Zip}
-  prior to using Brigadier.
-
-  While Windows support software from Boot Camp solves most of compatibility problems,
-  sometimes you may have to address some of them manually. To invert mouse wheel scroll
-  direction \texttt{FlipFlopWheel} must be set to \texttt{1} as explained on
-  \href{https://superuser.com/a/364353}{SuperUser}. Similarly \texttt{RealTimeIsUniversal}
-  must be set to \texttt{1} to avoid time desync between Windows and macOS as explained
-  on \href{https://superuser.com/q/494432}{SuperUser} (this one is usually not needed).
-
-\item
-  \textbf{Why do I see \texttt{Basic data partition} in Boot Camp Control panel?}
-
-  Boot Camp control panel uses GPT partition table to obtain each boot option name.
-  After installing Windows separately you will have to relabel the partition manually.
-  This can be done with many tools including open-source
-  \href{https://sourceforge.net/projects/gptfdisk}{gdisk} utility. Reference example:
-
-\begin{lstlisting}[caption=Relabeling Windows volume, label=relabel, style=ocbash]
-PS C:\gdisk> .\gdisk64.exe \\.\physicaldrive0
-GPT fdisk (gdisk) version 1.0.4
-
-Command (? for help): p
-Disk \\.\physicaldrive0: 419430400 sectors, 200.0 GiB
-Sector size (logical): 512 bytes
-Disk identifier (GUID): DEC57EB1-B3B5-49B2-95F5-3B8C4D3E4E12
-Partition table holds up to 128 entries
-Main partition table begins at sector 2 and ends at sector 33
-First usable sector is 34, last usable sector is 419430366
-Partitions will be aligned on 2048-sector boundaries
-Total free space is 4029 sectors (2.0 MiB)
-
-Number  Start (sector)    End (sector)  Size       Code  Name
-   1            2048         1023999   499.0 MiB   2700  Basic data partition
-   2         1024000         1226751   99.0 MiB    EF00  EFI system partition
-   3         1226752         1259519   16.0 MiB    0C01  Microsoft reserved ...
-   4         1259520       419428351   199.4 GiB   0700  Basic data partition
-
-Command (? for help): c
-Partition number (1-4): 4
-Enter name: BOOTCAMP
-
-Command (? for help): w
-
-Final checks complete. About to write GPT data. THIS WILL OVERWRITE EXISTING PARTITIONS!!
-
-Do you want to proceed? (Y/N): Y
-OK; writing new GUID partition table (GPT) to \\.\physicaldrive0.
-Disk synchronization succeeded! The computer should now use the new partition table.
-The operation has completed successfully.
-\end{lstlisting}
+  Sure, most relatively modern Mac models including \texttt{MacPro5,1} and virtual machines
+  are fully supported. Even though there are little to none specific details relevant to
+  Mac hardware, some ongoing instructions can be found in
+  \href{https://github.com/acidanthera/bugtracker/issues/377}{acidanthera/bugtracker\#377}.
 
 \end{enumerate}
 
