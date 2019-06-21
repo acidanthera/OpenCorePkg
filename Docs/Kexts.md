@@ -51,6 +51,7 @@ Kexts
 - [HWPEnabler.kext](https://github.com/goodwin/HWPEnable)
 - [NullCPUPowerManagement.kext](https://github.com/corpnewt/NullCPUPowerManagement) for AMD only (also some virtual machines)
 - [OpcodeEmulator.kext](https://www.insanelymac.com/forum/topic/329704-opcode-emulator-opemu-plug-in-project/)
+- [TSCAdjustReset.kext](https://github.com/interferenc/TSCAdjustReset)
 - [VirtualSMC.kext and sensors](https://github.com/acidanthera/VirtualSMC)
 - [VoodooTSCSync.kext](https://github.com/RehabMan/VoodooTSCSync)
 
