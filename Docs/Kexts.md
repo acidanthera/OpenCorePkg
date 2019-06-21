@@ -59,6 +59,7 @@ Kexts
 - [IOElectrify.kext](https://github.com/the-darkvoid/macOS-IOElectrify)
 - [Legacy_InternalHub-EHCx.kext](https://applelife.ru/posts/537459)
 - [Legacy_USB3.kext](https://applelife.ru/posts/537459)
+- [SASMegaRAID.kext](https://github.com/dukzcry/osx-goodies)
 - [Sinetek-rtsx.kext](https://www.insanelymac.com/forum/topic/321080-sineteks-driver-for-realtek-rtsx-sdhc-card-readers/?do=findComment&comment=2376387)
 - [VoodooSDHC.kext](https://github.com/lvs1974/VoodooSDHCMod)
 
