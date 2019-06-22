@@ -19,6 +19,8 @@
 #include <Guid/GlobalVariable.h>
 #include <Guid/OcVariables.h>
 
+#include <Protocol/LoadedImage.h>
+
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
@@ -690,4 +692,215 @@ OcGetDefaultBootEntry (
   DEBUG ((DEBUG_WARN, "OCB: Failed to match a default boot option\n"));
 
   return NULL;
+}
+
+STATIC
+VOID
+InternalReportLoadOption (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN EFI_GUID                  *BootGuid
+  )
+{
+  EFI_STATUS          Status;
+  UINTN               DevicePathSize;
+  UINTN               LoadOptionSize;
+  EFI_LOAD_OPTION     *LoadOption;
+  UINT16              LoadOptionNo;
+  EFI_LOAD_OPTION     *CurrLoadOption;
+  CONST CHAR16        *LoadOptionName;
+  UINTN               LoadOptionNameSize;
+  UINTN               CurrLoadOptionSize;
+
+  //
+  // Always report valid option in BootCurrent.
+  // Unless done there is no way for Windows to properly hibernate.
+  //
+
+  LoadOptionName     = L"OC Boot";
+  LoadOptionNameSize = L_STR_SIZE (L"OC Boot");
+  DevicePathSize     = GetDevicePathSize (DevicePath);
+  LoadOptionSize     = sizeof (EFI_LOAD_OPTION) + LoadOptionNameSize + DevicePathSize;
+
+  LoadOption = AllocatePool (LoadOptionSize);
+  if (LoadOption == NULL) {
+    DEBUG ((DEBUG_INFO, "OCB: Failed to allocate BootFFFF (%u)\n", (UINT32) LoadOptionSize));
+    return;
+  }
+
+  LoadOption->Attributes         = LOAD_OPTION_HIDDEN;
+  LoadOption->FilePathListLength = DevicePathSize;
+  CopyMem (LoadOption + 1, LoadOptionName, LoadOptionNameSize);
+  CopyMem ((UINT8 *) (LoadOption + 1) + LoadOptionNameSize, DevicePath, DevicePathSize);
+
+  CurrLoadOption = NULL;
+  CurrLoadOptionSize = 0;
+  Status = GetVariable2 (
+    L"BootFFFF",
+    BootGuid,
+    (VOID **) &CurrLoadOption,
+    &CurrLoadOptionSize
+    );
+  if (EFI_ERROR (Status)
+    || CurrLoadOptionSize != LoadOptionSize
+    || CompareMem (CurrLoadOption, LoadOption, LoadOptionSize) != 0) {
+
+    DEBUG ((
+      DEBUG_INFO,
+      "OCB: Overwriting BootFFFF (%r/%u)\n",
+      Status,
+      (UINT32) CurrLoadOptionSize,
+      (UINT32) LoadOptionSize
+      ));
+
+    gRT->SetVariable (
+      L"BootFFFF",
+      BootGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS
+        | EFI_VARIABLE_RUNTIME_ACCESS
+        | EFI_VARIABLE_NON_VOLATILE,
+      LoadOptionSize,
+      LoadOption
+      );
+  } else {
+    DEBUG ((DEBUG_INFO, "OCB: Accepting same BootFFFF\n"));
+  }
+
+  if (CurrLoadOption != NULL) {
+    FreePool (CurrLoadOption);
+  }
+  FreePool (LoadOption);
+
+  LoadOptionNo = 0xFFFF;
+  gRT->SetVariable (
+    L"BootCurrent",
+    BootGuid,
+    EFI_VARIABLE_BOOTSERVICE_ACCESS
+      | EFI_VARIABLE_RUNTIME_ACCESS,
+    sizeof (LoadOptionNo),
+    &LoadOptionNo
+    );
+}
+
+EFI_STATUS
+InternalLoadBootEntry (
+  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
+  IN  OC_PICKER_CONTEXT           *Context,
+  IN  OC_BOOT_ENTRY               *BootEntry,
+  IN  EFI_HANDLE                  ParentHandle,
+  OUT EFI_HANDLE                  *EntryHandle,
+  OUT INTERNAL_DMG_LOAD_CONTEXT   *DmgLoadContext
+  )
+{
+  EFI_STATUS                 Status;
+  EFI_STATUS                 OptionalStatus;
+  EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
+  CHAR16                     *UnicodeDevicePath;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  VOID                       *EntryData;
+  UINT32                     EntryDataSize;
+
+  ASSERT (BootPolicy != NULL);
+  ASSERT (BootEntry != NULL);
+  ASSERT (Context != NULL);
+  ASSERT (DmgLoadContext != NULL);
+
+  //
+  // TODO: support Apple loaded image, policy, and dmg boot.
+  //
+
+  ZeroMem (DmgLoadContext, sizeof (*DmgLoadContext));
+
+  EntryData    = NULL;
+  EntryDataSize = 0;
+
+  if (BootEntry->IsFolder) {
+    if ((Context->LoadPolicy & OC_LOAD_ALLOW_DMG_BOOT) == 0) {
+      return EFI_SECURITY_VIOLATION;
+    }
+
+    DmgLoadContext->DevicePath = BootEntry->DevicePath;
+    DevicePath = InternalLoadDmg (
+                   DmgLoadContext,
+                   BootPolicy,
+                   Context->LoadPolicy
+                   );
+    if (DevicePath == NULL) {
+      return EFI_UNSUPPORTED;
+    }
+  } else if (BootEntry->IsCustom) {
+    ASSERT (Context->CustomRead != NULL);
+
+    Status = Context->CustomRead (
+      Context->CustomEntryContext,
+      BootEntry,
+      &EntryData,
+      &EntryDataSize,
+      &DevicePath
+      );
+
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+  } else {
+    DevicePath = BootEntry->DevicePath;
+  }
+
+  DEBUG_CODE_BEGIN ();
+  ASSERT (DevicePath != NULL);
+  UnicodeDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
+  DEBUG ((
+    DEBUG_INFO,
+    "OCB: Perform boot %s to dp %s (%p/%u)\n",
+    BootEntry->Name,
+    UnicodeDevicePath != NULL ? UnicodeDevicePath : L"<null>",
+    EntryData,
+    EntryDataSize
+    ));
+  if (UnicodeDevicePath != NULL) {
+    FreePool (UnicodeDevicePath);
+  }
+  DEBUG_CODE_END ();
+
+  Status = gBS->LoadImage (
+    FALSE,
+    ParentHandle,
+    DevicePath,
+    EntryData,
+    EntryDataSize,
+    EntryHandle
+    );
+
+  if (EntryData != NULL) {
+    FreePool (EntryData);
+  }
+
+  if (!EFI_ERROR (Status)) {
+    InternalReportLoadOption (
+      DevicePath,
+      Context->CustomBootGuid ? &gOcVendorVariableGuid : &gEfiGlobalVariableGuid
+      );
+
+    OptionalStatus = gBS->HandleProtocol (
+                            ParentHandle,
+                            &gEfiLoadedImageProtocolGuid,
+                            (VOID **) &LoadedImage
+                            );
+    if (!EFI_ERROR (OptionalStatus)) {
+      LoadedImage->LoadOptionsSize = BootEntry->LoadOptionsSize;
+      LoadedImage->LoadOptions     = BootEntry->LoadOptions;
+
+      if (BootEntry->IsCustom) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCB: Custom DeviceHandle %p FilePath %p\n",
+          LoadedImage->DeviceHandle,
+          LoadedImage->FilePath
+          ));
+      }
+    }
+  } else {
+    InternalUnloadDmg (DmgLoadContext);
+  }
+
+  return Status;
 }

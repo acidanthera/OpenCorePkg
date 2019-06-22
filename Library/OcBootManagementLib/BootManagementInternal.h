@@ -74,4 +74,14 @@ InternalSetBootEntryFlags (
   IN OUT OC_BOOT_ENTRY   *BootEntry
   );
 
+EFI_STATUS
+InternalLoadBootEntry (
+  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
+  IN  OC_PICKER_CONTEXT           *Context,
+  IN  OC_BOOT_ENTRY               *BootEntry,
+  IN  EFI_HANDLE                  ParentHandle,
+  OUT EFI_HANDLE                  *EntryHandle,
+  OUT INTERNAL_DMG_LOAD_CONTEXT   *DmgLoadContext
+  );
+
 #endif // BOOT_MANAGEMENET_INTERNAL_H
