@@ -694,6 +694,7 @@ OcGetDefaultBootEntry (
   return NULL;
 }
 
+#if 0
 STATIC
 VOID
 InternalReportLoadOption (
@@ -780,6 +781,7 @@ InternalReportLoadOption (
     &LoadOptionNo
     );
 }
+#endif
 
 EFI_STATUS
 InternalLoadBootEntry (
@@ -875,10 +877,12 @@ InternalLoadBootEntry (
   }
 
   if (!EFI_ERROR (Status)) {
+#if 0
     InternalReportLoadOption (
       DevicePath,
       Context->CustomBootGuid ? &gOcVendorVariableGuid : &gEfiGlobalVariableGuid
       );
+#endif
 
     OptionalStatus = gBS->HandleProtocol (
                             ParentHandle,
