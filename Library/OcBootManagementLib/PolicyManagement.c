@@ -27,12 +27,15 @@
 #include <Protocol/ApfsEfiBootRecordInfo.h>
 #include <Protocol/SimpleFileSystem.h>
 #include <Protocol/SimpleTextOut.h>
+#include <Protocol/LoadedImage.h>
 
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/OcBootManagementLib.h>
+#include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -178,4 +181,46 @@ InternalCheckScanPolicy (
   }
 
   return RETURN_SUCCESS;
+}
+
+EFI_LOADED_IMAGE_PROTOCOL *
+OcGetAppleBootLoadedImage (
+  IN EFI_HANDLE  ImageHandle
+  )
+{
+  EFI_STATUS                  Status;
+  EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage;
+  EFI_DEVICE_PATH_PROTOCOL    *CurrNode;
+  FILEPATH_DEVICE_PATH        *LastNode;
+  BOOLEAN                     IsMacOS;
+  UINTN                       PathLen;
+  UINTN                       Index;
+
+  IsMacOS = FALSE;
+
+  Status = gBS->HandleProtocol (ImageHandle, &gEfiLoadedImageProtocolGuid, (VOID **)&LoadedImage);
+
+  if (!EFI_ERROR (Status) && LoadedImage->FilePath) {
+    LastNode = NULL;
+
+    for (CurrNode = LoadedImage->FilePath; !IsDevicePathEnd (CurrNode); CurrNode = NextDevicePathNode (CurrNode)) {
+      if (DevicePathType (CurrNode) == MEDIA_DEVICE_PATH && DevicePathSubType (CurrNode) == MEDIA_FILEPATH_DP) {
+        LastNode = (FILEPATH_DEVICE_PATH *) CurrNode;
+      }
+    }
+
+    if (LastNode != NULL) {
+      //
+      // Detect macOS by boot.efi in the bootloader name.
+      //
+      PathLen = OcFileDevicePathNameLen (LastNode);
+      if (PathLen >= L_STR_LEN ("boot.efi")) {
+        Index = PathLen - L_STR_LEN ("boot.efi");
+        IsMacOS = (Index == 0 || LastNode->PathName[Index - 1] == L'\\')
+          && CompareMem (&LastNode->PathName[Index], L"boot.efi", L_STR_SIZE (L"boot.efi")) == 0;
+      }
+    }
+  }
+
+  return IsMacOS ? LoadedImage : NULL;
 }

@@ -17,6 +17,8 @@
 
 #include <Library/OcAppleBootPolicyLib.h>
 
+#include <Protocol/LoadedImage.h>
+
 /**
   Discovered boot entry.
   Note, inner resources must be freed with OcResetBootEntry.
@@ -507,6 +509,18 @@ OcGetDevicePolicyType (
 UINT32
 OcGetFileSystemPolicyType (
   IN  EFI_HANDLE   Handle
+  );
+
+/**
+  Get loaded image protocol for Apple bootloader.
+
+  @param[in]  Handle        Image handle.
+
+  @retval loaded image protocol or NULL for non Apple images.
+**/
+EFI_LOADED_IMAGE_PROTOCOL *
+OcGetAppleBootLoadedImage (
+  IN EFI_HANDLE  ImageHandle
   );
 
 #endif // OC_BOOT_MANAGEMENT_LIB_H
