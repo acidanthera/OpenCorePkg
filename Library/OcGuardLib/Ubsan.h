@@ -171,6 +171,15 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define __arraycount(a) ARRAY_SIZE (a)
 #endif
 
+// Support unreachable where possible
+#ifndef __unreachable
+#ifdef __GNUC__
+#define __unreachable() __builtin_unreachable()
+#else
+#define __unreachable()
+#endif
+#endif
+
 // C-style printing support.
 #define TINYPRINTF_DEFINE_TFP_SPRINTF 1
 typedef void (*putcf) (void *, char);
