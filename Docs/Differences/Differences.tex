@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Jun  8 06:32:07 2019
-%DIF ADD ../Configuration.tex        Tue Jun 25 15:56:08 2019
+%DIF DEL PreviousConfiguration.tex   Thu Jun 27 09:46:12 2019
+%DIF ADD ../Configuration.tex        Sat Jun 29 23:39:10 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1286,7 +1286,7 @@ blocking.
 \begin{enumerate}
 \item
   \texttt{\DIFadd{Cpuid1Data}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ data}}\DIFadd{, 32 bytes}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ data}}\DIFadd{, 16 bytes}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: All zero}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Sequence of }\texttt{\DIFadd{EAX}}\DIFadd{, }\texttt{\DIFadd{EBX}}\DIFadd{, }\texttt{\DIFadd{ECX}}\DIFadd{,
   }\texttt{\DIFadd{EDX}} \DIFadd{values in Little Endian order to replace }\texttt{\DIFadd{CPUID (1)}}
@@ -1295,7 +1295,7 @@ blocking.
 
 \item
   \texttt{\DIFadd{Cpuid1Mask}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ data}}\DIFadd{, 32 bytes}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ data}}\DIFadd{, 16 bytes}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: All zero}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Bit mask of active bits in }\texttt{\DIFadd{Cpuid1Data}}\DIFadd{. When
   each }\texttt{\DIFadd{Cpuid1Mask}} \DIFadd{is set to 0, the original CPU bit is used, otherwise

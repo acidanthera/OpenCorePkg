@@ -1141,7 +1141,7 @@ blocking.
 \begin{enumerate}
 \item
   \texttt{Cpuid1Data}\\
-  \textbf{Type}: \texttt{plist\ data}, 32 bytes\\
+  \textbf{Type}: \texttt{plist\ data}, 16 bytes\\
   \textbf{Failsafe}: All zero\\
   \textbf{Description}: Sequence of \texttt{EAX}, \texttt{EBX}, \texttt{ECX},
   \texttt{EDX} values in Little Endian order to replace \texttt{CPUID (1)}
@@ -1149,7 +1149,7 @@ blocking.
 
 \item
   \texttt{Cpuid1Mask}\\
-  \textbf{Type}: \texttt{plist\ data}, 32 bytes\\
+  \textbf{Type}: \texttt{plist\ data}, 16 bytes\\
   \textbf{Failsafe}: All zero\\
   \textbf{Description}: Bit mask of active bits in \texttt{Cpuid1Data}. When
   each \texttt{Cpuid1Mask} is set to 0, the original CPU bit is used, otherwise
