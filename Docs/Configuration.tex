@@ -485,7 +485,7 @@ For BIOS booting a third-party UEFI environment provider will have to
 be used. \texttt{DuetPkg} is one of the known UEFI environment providers
 for legacy systems. To run OpenCore on such a legacy system you can install
 \texttt{DuetPkg} with a dedicated tool:
-\href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/BootInstall}{BootInstall}.
+\href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/BootInstall}{BootInstall}.
 
 For upgrade purposes refer to \texttt{Differences.pdf} document, providing
 the information about the changes affecting the configuration compared
@@ -1714,7 +1714,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 
   RSA public key 520 byte format description can be found in Chromium OS documentation.
   To convert public key from X.509 certificate or from PEM file use
-  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/CreateVault}{RsaTool}.
+  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/CreateVault}{RsaTool}.
 
   \emph{Note}: \texttt{vault.sig} is used regardless of this option when public key
   is embedded into \texttt{OpenCore.efi}. Setting it to \texttt{true} will only ensure
@@ -1732,7 +1732,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
   Presence of this file is highly recommended to ensure that unintentional
   file modifications (including filesystem corruption) do not happen unnoticed.
   To create this file automatically use
-  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/CreateVault}{\texttt{create\_vault.sh}} script.
+  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/CreateVault}{\texttt{create\_vault.sh}} script.
 
   Regardless of the underlying filesystem, path name and case must match
   between \texttt{config.plist} and \texttt{vault.plist}.
@@ -2063,7 +2063,7 @@ improvements:
   e.g. \texttt{ru-RU:252} for Russian locale and ABC keyboard. Also accepts short forms:
   \texttt{ru:252} or \texttt{ru:0} (U.S. keyboard, compatible with 10.9). Full decoded
   keyboard list from \texttt{AppleKeyboardLayouts-L.dat} can be found
-  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/AppleKeyboardLayouts}{here}. Using non-latin keyboard on 10.14
+  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/AppleKeyboardLayouts}{here}. Using non-latin keyboard on 10.14
   will not enable ABC keyboard, unlike previous macOS versions, and is thus not recommended.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:security-mode}
@@ -3209,7 +3209,7 @@ The operation has completed successfully.
   Custom name may be created by providing \texttt{.contentDetails} file.
 
   To download recovery online you may use
-  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/Recovery}{Recovery}
+  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/Recovery}{Recovery}
   tool from \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}.
 
 \item

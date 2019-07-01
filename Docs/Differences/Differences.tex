@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu Jun 27 09:46:12 2019
-%DIF ADD ../Configuration.tex        Sat Jun 29 23:39:10 2019
+%DIF DEL PreviousConfiguration.tex   Sat Jun  8 06:32:07 2019
+%DIF ADD ../Configuration.tex        Tue Jul  2 04:33:16 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -591,7 +591,7 @@ be used. \texttt{DuetPkg} is one of the known UEFI environment providers
 for legacy systems. \DIFdelbegin \DIFdel{While it is known to be possible to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend run OpenCore on such a legacy system \DIFdelbegin \DIFdel{, configuration and use of }\DIFdelend \DIFaddbegin \DIFadd{you can install
 }\DIFaddend \texttt{DuetPkg} \DIFdelbegin \DIFdel{is
 currently out of the scope of this document}\DIFdelend \DIFaddbegin \DIFadd{with a dedicated tool:
-}\href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/BootInstall}{BootInstall}\DIFaddend .
+}\href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/BootInstall}{BootInstall}\DIFaddend .
 
 For upgrade purposes refer to \texttt{Differences.pdf} document, providing
 the information about the changes affecting the configuration compared
@@ -1877,7 +1877,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
   RSA public key 520 byte format description can be found in Chromium OS documentation.
   To convert public key from X.509 certificate or from PEM file use
   \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/RsaTool}{RsaTool}%%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/CreateVault}{RsaTool}\DIFaddend .
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/CreateVault}{RsaTool}\DIFaddend .
 
   \emph{Note}: \texttt{vault.sig} is used regardless of this option when public key
   is embedded into \texttt{OpenCore.efi}. Setting it to \texttt{true} will only ensure
@@ -1896,7 +1896,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
   file modifications (including filesystem corruption) do not happen unnoticed.
   To create this file automatically use
   \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/Vault}{\texttt{create\_vault.sh}} %%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/CreateVault}{\texttt{create\_vault.sh}} \DIFaddend script.
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/CreateVault}{\texttt{create\_vault.sh}} \DIFaddend script.
 
   Regardless of the underlying filesystem, path name and case must match
   between \texttt{config.plist} and \texttt{vault.plist}.
@@ -2239,7 +2239,7 @@ improvements:
   keyboard list from \texttt{AppleKeyboardLayouts-L.dat} can be found
   \DIFdelbegin \DIFdel{on
   }%DIFDELCMD < \href{https://www.applelife.ru/posts/763537}{AppleLife}%%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/AppleKeyboardLayouts}{here}\DIFaddend . Using non-latin keyboard on 10.14
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/AppleKeyboardLayouts}{here}\DIFaddend . Using non-latin keyboard on 10.14
   will not enable ABC keyboard, unlike previous macOS versions, and is thus not recommended.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:security-mode}
@@ -3393,8 +3393,10 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   Custom name may be created by providing \texttt{.contentDetails} file.
 
   To download recovery online you may use
-  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/Recovery}{Recovery}
-  tool from \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}.
+  \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tools/Recovery}{Recovery}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/Recovery}{Recovery}
+  \DIFaddend tool from \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}.
 
 \item
   \textbf{Can I \DIFdelbegin \DIFdel{install Windows}\DIFdelend \DIFaddbegin \DIFadd{use this on Apple hardware or virtual machines}\DIFaddend ?}
