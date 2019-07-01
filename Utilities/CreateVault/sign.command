@@ -11,13 +11,7 @@ fi
 
 cd "$(/usr/bin/dirname "$0")" || abort "Failed to enter working directory!"
 
-OCPath1=../../../OC
-OCPath2=../../OC
-if [ -d "${OCPath1}" ]; then
-  OCPath="${OCPath1}"
-else
-  OCPath="${OCPath2}"
-fi
+OCPath=../../OC
 KeyPath="${OCPath}/Keys"
 OCBin="${OCPath}/OpenCore.efi"
 RootCA="${KeyPath}/ca.pem"
