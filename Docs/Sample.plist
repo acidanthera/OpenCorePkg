@@ -483,7 +483,7 @@
 			<key>RequireVault</key>
 			<true/>
 			<key>ScanPolicy</key>
-			<integer>983</integer>
+			<integer>983299</integer>
 		</dict>
 		<key>Tools</key>
 		<array>
