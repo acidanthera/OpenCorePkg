@@ -12,23 +12,15 @@
 		<array>
 			<dict>
 				<key>Comment</key>
-				<string>DSDT</string>
+				<string>My custom DSDT</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>Path</key>
 				<string>DSDT.aml</string>
 			</dict>
 			<dict>
 				<key>Comment</key>
-				<string>Fix 123</string>
-				<key>Enabled</key>
-				<true/>
-				<key>Path</key>
-				<string>SSDT.aml</string>
-			</dict>
-			<dict>
-				<key>Comment</key>
-				<string>Fix 456</string>
+				<string>My custom SSDT</string>
 				<key>Enabled</key>
 				<false/>
 				<key>Path</key>
@@ -36,11 +28,51 @@
 			</dict>
 			<dict>
 				<key>Comment</key>
+				<string>plugin-type=1</string>
+				<key>Enabled</key>
+				<false/>
+				<key>Path</key>
+				<string>SSDT-PLUG.aml</string>
+			</dict>
+			<dict>
+				<key>Comment</key>
 				<string></string>
 				<key>Enabled</key>
 				<false/>
 				<key>Path</key>
-				<string>SSDT-ACPI.aml</string>
+				<string>SSDT-SBUS-MCHC.aml</string>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Notebook brightness</string>
+				<key>Enabled</key>
+				<false/>
+				<key>Path</key>
+				<string>SSDT-PNLF.aml</string>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string></string>
+				<key>Enabled</key>
+				<false/>
+				<key>Path</key>
+				<string>SSDT-EC.aml</string>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string></string>
+				<key>Enabled</key>
+				<false/>
+				<key>Path</key>
+				<string>SSDT-EC-USBX.aml</string>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string></string>
+				<key>Enabled</key>
+				<false/>
+				<key>Path</key>
+				<string>SSDT-EHCx_OFF.aml</string>
 			</dict>
 		</array>
 		<key>Block</key>
@@ -451,7 +483,7 @@
 			<key>RequireVault</key>
 			<true/>
 			<key>ScanPolicy</key>
-			<integer>983299</integer>
+			<integer>983</integer>
 		</dict>
 		<key>Tools</key>
 		<array>
