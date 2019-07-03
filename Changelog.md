@@ -1,6 +1,8 @@
 OpenCore Changelog
 ==================
 
+#### v0.0.4
+
 #### v0.0.3
 - Added complete modern platform database (2012+)
 - Added `DisableIoMapper` kernel quirk
