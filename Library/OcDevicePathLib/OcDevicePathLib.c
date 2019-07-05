@@ -44,14 +44,14 @@ AppendFileNameDevicePath (
 
   if (DevicePath != NULL && FileName != NULL) {
     FileNameSize           = StrSize (FileName);
-    FileDevicePathNodeSize = (FileNameSize + sizeof (*FilePathNode) + sizeof (*DevicePath));
+    FileDevicePathNodeSize = (FileNameSize + SIZE_OF_FILEPATH_DEVICE_PATH + END_DEVICE_PATH_LENGTH);
     FilePathNode           = AllocateZeroPool (FileDevicePathNodeSize);
 
     if (FilePathNode != NULL) {
       FilePathNode->Header.Type    = MEDIA_DEVICE_PATH;
       FilePathNode->Header.SubType = MEDIA_FILEPATH_DP;
 
-      SetDevicePathNodeLength (&FilePathNode->Header, FileNameSize + sizeof (*FilePathNode));
+      SetDevicePathNodeLength (&FilePathNode->Header, FileNameSize + SIZE_OF_FILEPATH_DEVICE_PATH);
 
       CopyMem (FilePathNode->PathName, FileName, FileNameSize);
 
