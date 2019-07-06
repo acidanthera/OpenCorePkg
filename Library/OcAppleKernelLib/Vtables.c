@@ -851,7 +851,7 @@ InternalPatchByVtables64 (
                  Context,
                  Kext,
                  SuperVtable,
-                 EntryWalker->Vtable,
+                 EntryWalker->MetaVtable,
                  EntryWalker->MetaVtableData,
                  (EntryWalker->NumSolveSymbols - EntryWalker->MetaSymsIndex),
                  &EntryWalker->SolveSymbols[EntryWalker->MetaSymsIndex],
