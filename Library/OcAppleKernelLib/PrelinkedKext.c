@@ -813,6 +813,17 @@ InternalLinkPrelinkedKext (
   Kext->SymbolTable     = NULL;
   Kext->StringTable     = NULL;
   Kext->NumberOfSymbols = 0;
+  //
+  // FIXME: VTable and entry names are not updated after relocating StringTable
+  //        Decide whether to keep re-constructing VTables, recalculate
+  //        addresses after linking has finished or store the name's offset and
+  //        access via a StringTable pointer.
+  //
+  if (Kext->LinkedVtables != NULL) {
+    FreePool (Kext->LinkedVtables);
+    Kext->LinkedVtables   = NULL;
+    Kext->NumberOfVtables = 0;
+  }
 
   return Kext;
 }

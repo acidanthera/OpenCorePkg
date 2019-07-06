@@ -107,7 +107,6 @@ InternalConstructVtablePrelinked64 (
 
   VtableData   = VtableLookup->Vtable.Data;
   Vtable->Name = VtableLookup->Name;
-  Vtable->NumEntries = 0;
 
   //
   // Initialize the VTable by entries.
