@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Jul  3 23:30:18 2019
-%DIF ADD ../Configuration.tex        Wed Jul  3 23:31:09 2019
+%DIF ADD ../Configuration.tex        Sat Jul  6 14:41:08 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3178,7 +3178,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   from Windows as this often leads to irrecoverable data loss.
   \end{itemize}
 
-  \textbf{Why do I see \texttt{Basic data partition} in Boot Camp Control panel?}
+  \textbf{Why do I see \texttt{Basic data partition} in Boot Camp \DIFdelbegin \DIFdel{Control }\DIFdelend \DIFaddbegin \DIFadd{Startup Disk control }\DIFaddend panel?}
 
   Boot Camp control panel uses GPT partition table to obtain each boot option name.
   After installing Windows separately you will have to relabel the partition manually.
@@ -3218,7 +3218,23 @@ OK; writing new GUID partition table (GPT) to \\.\physicaldrive0.
 Disk synchronization succeeded! The computer should now use the new partition table.
 The operation has completed successfully.
 \end{lstlisting}
+\DIFaddbegin 
 
+
+  \textbf{\DIFadd{How to choose Windows BOOTCAMP with custom NTFS drivers?}}
+
+  \DIFadd{Third-party drivers providing NTFS support, such as
+  }\href{https://www.tuxera.com/community/open-source-ntfs-3g}{NTFS-3G}\DIFadd{, Paragon NTFS,
+  or Tuxera NTFS break certain macOS functionality, including
+  }\href{https://support.apple.com/HT202796}{Startup Disk} \DIFadd{preference
+  pane normally used for operating system selection. While the recommended option
+  remains not to use such drivers as they commonly corrupt the filesystem, and prefer
+  the driver bundled with macOS (with
+  }\href{http://osxdaily.com/2013/10/02/enable-ntfs-write-support-mac-os-x}{optional write support}\DIFadd{),
+  there still exist vendor-specific workarounds for their products:
+  }\href{https://www.tuxera.com/products/tuxera-ntfs-for-mac/faq}{Tuxera}\DIFadd{,
+  }\href{https://kb.paragon-software.com/article/6604}{Paragon}\DIFadd{, etc.
+}\DIFaddend 
 
 \subsection{Tips and Tricks}\label{troubleshootingtricks}
 

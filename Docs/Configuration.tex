@@ -3118,7 +3118,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   from Windows as this often leads to irrecoverable data loss.
   \end{itemize}
 
-  \textbf{Why do I see \texttt{Basic data partition} in Boot Camp Control panel?}
+  \textbf{Why do I see \texttt{Basic data partition} in Boot Camp Startup Disk control panel?}
 
   Boot Camp control panel uses GPT partition table to obtain each boot option name.
   After installing Windows separately you will have to relabel the partition manually.
@@ -3159,6 +3159,20 @@ Disk synchronization succeeded! The computer should now use the new partition ta
 The operation has completed successfully.
 \end{lstlisting}
 
+
+  \textbf{How to choose Windows BOOTCAMP with custom NTFS drivers?}
+
+  Third-party drivers providing NTFS support, such as
+  \href{https://www.tuxera.com/community/open-source-ntfs-3g}{NTFS-3G}, Paragon NTFS,
+  or Tuxera NTFS break certain macOS functionality, including
+  \href{https://support.apple.com/HT202796}{Startup Disk} preference
+  pane normally used for operating system selection. While the recommended option
+  remains not to use such drivers as they commonly corrupt the filesystem, and prefer
+  the driver bundled with macOS (with
+  \href{http://osxdaily.com/2013/10/02/enable-ntfs-write-support-mac-os-x}{optional write support}),
+  there still exist vendor-specific workarounds for their products:
+  \href{https://www.tuxera.com/products/tuxera-ntfs-for-mac/faq}{Tuxera},
+  \href{https://kb.paragon-software.com/article/6604}{Paragon}, etc.
 
 \subsection{Tips and Tricks}\label{troubleshootingtricks}
 
