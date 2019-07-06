@@ -681,6 +681,21 @@ InternalScanPrelinkedKext (
             DependencyKext != NULL ? "succeeded" : "failed"
             ));
         }
+        //
+        // FIXME: In macOS Catalina (verified with Beta 3),
+        //        com.apple.iokit.IOUSBHostFamily depends on the PLIST-only
+        //        KEXT com.apple.driver.usb.AppleUSBHostPlatformProperties.
+        //        As it will not be embedded into prelinkedkernel as described
+        //        above, and does currently not declare own dependencies, just
+        //        skip it.
+        //        Discuss whether dependencies that cannot be found should be
+        //        ignored in general, relying that linking is going to fail
+        //        when there is an actual problem.
+        //
+        if (AsciiStrCmp (DependencyId, "com.apple.driver.usb.AppleUSBHostPlatformProperties") == 0) {
+          continue;
+        }
+
         if (DependencyKext == NULL) {
           return RETURN_NOT_FOUND;
         }
