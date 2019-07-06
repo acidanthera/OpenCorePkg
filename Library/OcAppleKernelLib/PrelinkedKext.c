@@ -814,10 +814,12 @@ InternalLinkPrelinkedKext (
   Kext->StringTable     = NULL;
   Kext->NumberOfSymbols = 0;
   //
-  // FIXME: VTable and entry names are not updated after relocating StringTable
-  //        Decide whether to keep re-constructing VTables, recalculate
-  //        addresses after linking has finished or store the name's offset and
-  //        access via a StringTable pointer.
+  // TODO: VTable and entry names are not updated after relocating StringTable,
+  // which means that to avoid linkage issues for plugins we must either continue
+  // re-constructing VTables (as done below) or implement some optimisations.
+  // For example, we could recalculate addresses after linking has finished.
+  // We could also store the name's offset and access via a StringTable pointer,
+  // yet it was prone to errors and was already removed once.
   //
   if (Kext->LinkedVtables != NULL) {
     FreePool (Kext->LinkedVtables);
