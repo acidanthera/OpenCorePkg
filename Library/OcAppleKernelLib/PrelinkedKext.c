@@ -603,6 +603,38 @@ InternalCachedPrelinkedKernel (
   return NewKext;
 }
 
+PRELINKED_KEXT *
+InternalGetQuirkDependencyKext (
+  IN     CONST CHAR8        *DependencyId,
+  IN OUT PRELINKED_CONTEXT  *Context
+  )
+{
+  PRELINKED_KEXT *DependencyKext;
+
+  ASSERT (DependencyId != NULL);
+  ASSERT (Context != NULL);
+
+  DependencyKext = NULL;
+  //
+  // Some kexts, notably VoodooPS2 forks, link against IOHIDSystem.kext, which is a plist-only
+  // dummy, macOS does not add to the prelinkedkernel. This cannot succeed as /S/L/E directory
+  // is not accessible (and can be encrypted). Normally kext's Info.plist is to be fixed, but
+  // we also put a hack here to let some common kexts work.
+  //
+  if (AsciiStrCmp (DependencyId, "com.apple.iokit.IOHIDSystem") == 0) {
+    DependencyKext = InternalCachedPrelinkedKext (Context, "com.apple.iokit.IOHIDFamily");
+    DEBUG ((
+      DEBUG_WARN,
+      "Dependency %a fallback to %a %a. Please fix your kext!\n",
+      DependencyId,
+      "com.apple.iokit.IOHIDSystem",
+      DependencyKext != NULL ? "succeeded" : "failed"
+      ));
+  }
+
+  return DependencyKext;
+}
+
 RETURN_STATUS
 InternalScanPrelinkedKext (
   IN OUT PRELINKED_KEXT     *Kext,
@@ -665,39 +697,16 @@ InternalScanPrelinkedKext (
       DependencyKext = InternalCachedPrelinkedKext (Context, DependencyId);
       if (DependencyKext == NULL) {
         DEBUG ((DEBUG_INFO, "Dependency %a was not found for kext %a\n", DependencyId, Kext->Identifier));
-        //
-        // Some kexts, notably VoodooPS2 forks, link against IOHIDSystem.kext, which is a plist-only
-        // dummy, macOS does not add to the prelinkedkernel. This cannot succeed as /S/L/E directory
-        // is not accessible (and can be encrypted). Normally kext's Info.plist is to be fixed, but
-        // we also put a hack here to let some common kexts work.
-        //
-        if (AsciiStrCmp (DependencyId, "com.apple.iokit.IOHIDSystem") == 0) {
-          DependencyKext = InternalCachedPrelinkedKext (Context, "com.apple.iokit.IOHIDFamily");
-          DEBUG ((
-            DEBUG_WARN,
-            "Dependency %a fallback to %a %a. Please fix your kext!\n",
-            DependencyId,
-            "com.apple.iokit.IOHIDSystem",
-            DependencyKext != NULL ? "succeeded" : "failed"
-            ));
-        }
-        //
-        // FIXME: In macOS Catalina (verified with Beta 3),
-        //        com.apple.iokit.IOUSBHostFamily depends on the PLIST-only
-        //        KEXT com.apple.driver.usb.AppleUSBHostPlatformProperties.
-        //        As it will not be embedded into prelinkedkernel as described
-        //        above, and does currently not declare own dependencies, just
-        //        skip it.
-        //        Discuss whether dependencies that cannot be found should be
-        //        ignored in general, relying that linking is going to fail
-        //        when there is an actual problem.
-        //
-        if (AsciiStrCmp (DependencyId, "com.apple.driver.usb.AppleUSBHostPlatformProperties") == 0) {
-          continue;
-        }
 
+        DependencyKext = InternalGetQuirkDependencyKext (DependencyId, Context);
         if (DependencyKext == NULL) {
-          return RETURN_NOT_FOUND;
+          //
+          // Skip missing dependencies.  PLIST-only dependencies, such as used
+          // in macOS Catalina, will not be found in prelinkedkernel and are
+          // assumed to be safe to ignore.  Any actual problems will be found
+          // during linking.
+          //
+          continue;
         }
       }
 
