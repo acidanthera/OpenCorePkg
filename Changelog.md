@@ -2,6 +2,9 @@ OpenCore Changelog
 ==================
 
 #### v0.0.4
+- Fixed kext injection issues with dummy dependencies
+- Fixed kext injection issues with reused vtables
+- Fixed Custom SMBIOS table update patches
 
 #### v0.0.3
 - Added complete modern platform database (2012+)
