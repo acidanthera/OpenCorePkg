@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Jul  3 23:30:18 2019
-%DIF ADD ../Configuration.tex        Sat Jul  6 14:41:08 2019
+%DIF DEL PreviousConfiguration.tex   Sat Jul  6 19:38:55 2019
+%DIF ADD ../Configuration.tex        Tue Jul  9 19:34:27 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -645,7 +645,7 @@ ACPI (Advanced Configuration and Power Interface) is an open standard to
 discover and configure computer hardware.
 \href{https://uefi.org/specifications}{ACPI specification} defines the
 standard tables (e.g.~\texttt{DSDT}, \texttt{SSDT}, \texttt{FACS}, \texttt{DMAR})
-and various methods (e.g. \texttt{\_DSM}, \texttt{\_PWR}) for implementation.
+and various methods (e.g. \texttt{\_DSM}, \texttt{\_\DIFdelbegin \DIFdel{PWR}\DIFdelend \DIFaddbegin \DIFadd{PRW}\DIFaddend }) for implementation.
 Modern hardware needs little changes to maintain ACPI compatibility, yet
 some of those are provided as a part of OpenCore.
 
@@ -886,7 +886,7 @@ In the majority of the cases ACPI patches are not useful and harmful:
   generally do not need it at all, and those that do are fine with much
   smaller patches.
 \item
-  Try to avoid hacky changes like renaming \texttt{\_PWR} or \texttt{\_DSM}
+  Try to avoid hacky changes like renaming \texttt{\_\DIFdelbegin \DIFdel{PWR}\DIFdelend \DIFaddbegin \DIFadd{PRW}\DIFaddend } or \texttt{\_DSM}
   whenever possible.
 \end{itemize}
 
