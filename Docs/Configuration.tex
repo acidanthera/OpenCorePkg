@@ -585,7 +585,7 @@ ACPI (Advanced Configuration and Power Interface) is an open standard to
 discover and configure computer hardware.
 \href{https://uefi.org/specifications}{ACPI specification} defines the
 standard tables (e.g.~\texttt{DSDT}, \texttt{SSDT}, \texttt{FACS}, \texttt{DMAR})
-and various methods (e.g. \texttt{\_DSM}, \texttt{\_PWR}) for implementation.
+and various methods (e.g. \texttt{\_DSM}, \texttt{\_PRW}) for implementation.
 Modern hardware needs little changes to maintain ACPI compatibility, yet
 some of those are provided as a part of OpenCore.
 
@@ -826,7 +826,7 @@ In the majority of the cases ACPI patches are not useful and harmful:
   generally do not need it at all, and those that do are fine with much
   smaller patches.
 \item
-  Try to avoid hacky changes like renaming \texttt{\_PWR} or \texttt{\_DSM}
+  Try to avoid hacky changes like renaming \texttt{\_PRW} or \texttt{\_DSM}
   whenever possible.
 \end{itemize}
 
