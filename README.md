@@ -1,4 +1,3 @@
-![](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Logos/Logo_small.png)  
 OpenCorePkg
 ===========
 
