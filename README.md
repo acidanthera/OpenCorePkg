@@ -4,7 +4,7 @@ OpenCorePkg
 [![Build Status](https://travis-ci.org/acidanthera/OpenCorePkg.svg?branch=master)](https://travis-ci.org/acidanthera/OpenCorePkg) [![Scan Status](https://scan.coverity.com/projects/18169/badge.svg?flat=1)](https://scan.coverity.com/projects/18169)
 
 -----
-
+![](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Logos/Logo_small.png)  
 OpenCore bootloader front end.
 
 ## Discussion
