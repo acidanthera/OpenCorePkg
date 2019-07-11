@@ -66,9 +66,15 @@
 
 \begin{titlepage}
    \begin{center}
-       \vspace*{3.5in}
+       \vspace*{2.0in}
 
        \Huge
+
+       \IfFileExists{Logos/Logo.pdf}
+         {\includegraphics[width=160pt, height=160pt]{Logos/Logo.pdf}}
+         {\includegraphics[width=160pt, height=160pt]{../Logos/Logo.pdf}}
+
+       \sffamily
 
        \textbf{OpenCore}
 
@@ -83,6 +89,8 @@
        \normalsize
 
        \vfill
+
+       \rmfamily
 
        Copyright \textcopyright 2018-2019 vit9696
 

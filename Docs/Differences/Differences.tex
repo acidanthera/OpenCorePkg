@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Jul  6 19:38:55 2019
-%DIF ADD ../Configuration.tex        Tue Jul  9 19:34:27 2019
+%DIF DEL PreviousConfiguration.tex   Wed Jul  3 23:30:18 2019
+%DIF ADD ../Configuration.tex        Thu Jul 11 21:28:10 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -126,11 +126,20 @@
 
 \begin{titlepage}
    \begin{center}
-       \vspace*{3.5in}
+       \DIFdelbegin %DIFDELCMD < \vspace*{3.5in}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \vspace*{2.0in}
+\DIFaddend 
 
        \Huge
 
-       \textbf{OpenCore}
+       \DIFaddbegin \IfFileExists{Logos/Logo.pdf}
+         {\includegraphics[width=160pt, height=160pt]{Logos/Logo.pdf}}
+         {\includegraphics[width=160pt, height=160pt]{../Logos/Logo.pdf}}
+
+       \sffamily
+
+       \DIFaddend \textbf{OpenCore}
 
        \vspace{0.2in}
 
@@ -144,7 +153,9 @@
 
        \vfill
 
-       Copyright \textcopyright 2018-2019 vit9696
+       \DIFaddbegin \rmfamily
+
+       \DIFaddend Copyright \textcopyright 2018-2019 vit9696
 
    \end{center}
 \end{titlepage}
