@@ -233,6 +233,8 @@ OcKernelApplyPatches (
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_WARN, "OC: Kernel patcher %a init failure - %r\n", Target, Status));
         continue;
+      } else {
+        DEBUG ((DEBUG_INFO, "OC: Kernel patcher %a init succeed\n", Target));
       }
     }
 
