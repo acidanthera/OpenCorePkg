@@ -47,12 +47,17 @@ package() {
   selfdir=$(pwd)
   pushd "$1" || exit 1
   rm -rf tmp || exit 1
-  mkdir -p tmp/OC || exit 1
-  mkdir -p tmp/BOOT || exit 1
+  mkdir -p tmp/EFI || exit 1
+  mkdir -p tmp/EFI/OC || exit 1
+  mkdir -p tmp/EFI/OC/ACPI || exit 1
+  mkdir -p tmp/EFI/OC/Drivers || exit 1
+  mkdir -p tmp/EFI/OC/Kexts || exit 1
+  mkdir -p tmp/EFI/OC/Tools || exit 1
+  mkdir -p tmp/EFI/BOOT || exit 1
   mkdir -p tmp/Docs/AcpiSamples || exit 1
   mkdir -p tmp/Utilities || exit 1
-  cp OpenCore.efi tmp/OC/ || exit 1
-  cp BOOTx64.efi tmp/BOOT/ || exit 1
+  cp OpenCore.efi tmp/EFI/OC/ || exit 1
+  cp BOOTx64.efi tmp/EFI/BOOT/ || exit 1
   cp "${selfdir}/Docs/Configuration.pdf" tmp/Docs/ || exit 1
   cp "${selfdir}/Docs/Differences/Differences.pdf" tmp/Docs/ || exit 1
   cp "${selfdir}/Docs/Sample.plist" tmp/Docs/ || exit 1
