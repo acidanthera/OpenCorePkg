@@ -64,9 +64,10 @@ package() {
   cp "${selfdir}/Docs/SampleFull.plist" tmp/Docs/ || exit 1
   cp "${selfdir}/Changelog.md" tmp/Docs/ || exit 1
   cp -r "${selfdir}/Docs/AcpiSamples/" tmp/Docs/AcpiSamples/ || exit 1
-  cp -r "${selfdir}/UDK/OcSupportPkg/Utilities/CreateVault" tmp/Utilities/ || exit 1
-  cp -r "${selfdir}/UDK/OcSupportPkg/Utilities/Recovery" tmp/Utilities/ || exit 1
   cp -r "${selfdir}/UDK/OcSupportPkg/Utilities/BootInstall" tmp/Utilities/ || exit 1
+  cp -r "${selfdir}/UDK/OcSupportPkg/Utilities/CreateVault" tmp/Utilities/ || exit 1
+  cp -r "${selfdir}/UDK/OcSupportPkg/Utilities/LogoutHook" tmp/Utilities/ || exit 1
+  cp -r "${selfdir}/UDK/OcSupportPkg/Utilities/Recovery" tmp/Utilities/ || exit 1
   pushd tmp || exit 1
   zip -qry -FS ../"OpenCore-${ver}-${2}.zip" * || exit 1
   popd || exit 1
