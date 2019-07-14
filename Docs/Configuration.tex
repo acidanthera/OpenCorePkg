@@ -111,7 +111,7 @@ operating system.
 For OpenCore issues please refer to
 \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
 
-\section{Generic Terms}\label{generic-terms}
+\subsection{Generic Terms}\label{generic-terms}
 
 \begin{itemize}
 \item
@@ -177,7 +177,7 @@ For OpenCore issues please refer to
   larger integers invoke undefined behaviour.
 \end{itemize}
 
-\section{Overview}\label{configuration-overview}
+\section{Configuration}\label{configuration-overview}
 
 \subsection{Configuration Terms}\label{configuration-terms}
 
@@ -339,63 +339,9 @@ Root configuration entries consist of the following:
 specified in the configuration for safety reasons. This behaviour should not
 be relied upon, and all fields must be properly specified in the configuration.
 
+\section{Setup}\label{setup-overview}
+
 \subsection{Directory Structure}\label{directory-structure}
-
-When directory boot is used the directory structure used should follow
-the description on \hyperref[fig:DS]{Directory Structure} figure. Available
-entries include:
-
-\begin{itemize}
-\tightlist
-\item
-  \texttt{BOOTx64.efi}
-  \break
-  Initial booter, which loads \texttt{OpenCore.efi} unless it was
-  already started as a driver.
-\item
-  \texttt{ACPI}
-  \break
-  Directory used for storing supplemental ACPI information
-  for \hyperref[acpi]{\texttt{ACPI}} section.
-\item
-  \texttt{Drivers}
-  \break
-  Directory used for storing supplemental \texttt{UEFI}
-  drivers for \hyperref[uefi]{\texttt{UEFI}} section.
-\item
-  \texttt{Kexts}
-  \break
-  Directory used for storing supplemental kernel information
-  for \hyperref[kernel]{\texttt{Kernel}} section.
-\item
-  \texttt{Tools}
-  \break
-  Directory used for storing supplemental tools.
-\item
-  \texttt{OpenCore.efi}
-  \break
-  Main booter driver responsible for operating system loading.
-\item
-  \texttt{vault.plist}
-  \break
-  Hashes for all files potentially loadable by \texttt{OC Config}.
-\item
-  \texttt{config.plist}
-  \break
-  \texttt{OC Config}.
-\item
-  \texttt{vault.sig}
-  \break
-  Signature for \texttt{vault.plist}.
-\item
-  \texttt{nvram.plist}
-  \break
-  OpenCore variable import file.
-\item
-  \texttt{opencore.log}
-  \break
-  OpenCore log file.
-\end{itemize}
 
 \begin{center}
 \begin{tikzpicture}[%
@@ -467,6 +413,62 @@ entries include:
 Figure 1. Directory Structure
 \end{center}
 
+When directory boot is used the directory structure used should follow
+the description on \hyperref[fig:DS]{Directory Structure} figure. Available
+entries include:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{BOOTx64.efi}
+  \break
+  Initial booter, which loads \texttt{OpenCore.efi} unless it was
+  already started as a driver.
+\item
+  \texttt{ACPI}
+  \break
+  Directory used for storing supplemental ACPI information
+  for \hyperref[acpi]{\texttt{ACPI}} section.
+\item
+  \texttt{Drivers}
+  \break
+  Directory used for storing supplemental \texttt{UEFI}
+  drivers for \hyperref[uefi]{\texttt{UEFI}} section.
+\item
+  \texttt{Kexts}
+  \break
+  Directory used for storing supplemental kernel information
+  for \hyperref[kernel]{\texttt{Kernel}} section.
+\item
+  \texttt{Tools}
+  \break
+  Directory used for storing supplemental tools.
+\item
+  \texttt{OpenCore.efi}
+  \break
+  Main booter driver responsible for operating system loading.
+\item
+  \texttt{vault.plist}
+  \break
+  Hashes for all files potentially loadable by \texttt{OC Config}.
+\item
+  \texttt{config.plist}
+  \break
+  \texttt{OC Config}.
+\item
+  \texttt{vault.sig}
+  \break
+  Signature for \texttt{vault.plist}.
+\item
+  \texttt{nvram.plist}
+  \break
+  OpenCore variable import file.
+\item
+  \texttt{opencore.log}
+  \break
+  OpenCore log file.
+\end{itemize}
+
 \subsection{Installation and Upgrade}\label{configuration-install}
 
 To install OpenCore reflect the
@@ -537,12 +539,6 @@ source edksetup.sh
 make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
-
-\texttt{NOOPT} or \texttt{DEBUG} build modes instead of \texttt{RELEASE}
-can produce a lot more debug output. With \texttt{NOOPT} source level debugging with
-GDB or IDA Pro is also available. For GDB check
-\href{https://github.com/acidanthera/OcSupportPkg/tree/master/Debug}{OcSupport Debug}
-page. For IDA Pro you will need IDA Pro 7.3 or newer.
 
 For IDE usage Xcode projects are available in the root of the repositories. Another
 approach could be \href{https://www.sublimetext.com}{Sublime Text} with
@@ -3181,6 +3177,27 @@ The operation has completed successfully.
   there still exist vendor-specific workarounds for their products:
   \href{https://www.tuxera.com/products/tuxera-ntfs-for-mac/faq}{Tuxera},
   \href{https://kb.paragon-software.com/article/6604}{Paragon}, etc.
+
+\subsection{Debugging}\label{troubleshootingdebug}
+
+Similar to other projects working with hardware OpenCore supports auditing and debugging.
+The use of \texttt{NOOPT} or \texttt{DEBUG} build modes instead of \texttt{RELEASE}
+can produce a lot more debug output. With \texttt{NOOPT} source level debugging with
+GDB or IDA Pro is also available. For GDB check
+\href{https://github.com/acidanthera/OcSupportPkg/tree/master/Debug}{OcSupport Debug}
+page. For IDA Pro you will need IDA Pro 7.3 or newer.
+
+To obtain the log during boot you can make the use of serial port debugging. Serial port
+debugging is enabled in \texttt{Target}, e.g. \texttt{0xB} for onscreen with serial. OpenCore
+uses \texttt{115200} baud rate, \texttt{8} data bits, no parity, and \texttt{1} stop bit.
+For macOS your best choice are CP2102-based UART devices. Connect motherboard \texttt{TX}
+to USB UART \texttt{GND}, and motherboard \texttt{GND} to USB UART \texttt{RX}. Use
+\texttt{screen} utility to get the output, or download GUI software, such as
+\href{https://freeware.the-meiers.org}{CoolTerm}.
+
+Remember to enable \texttt{COM} port in firmware settings, and never use USB cables longer
+than 1 meter to avoid output corruption. To additionally enable XNU kernel serial output
+you will need \texttt{debug=0x8} boot argument.
 
 \subsection{Tips and Tricks}\label{troubleshootingtricks}
 

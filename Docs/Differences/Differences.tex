@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Jul  3 23:30:18 2019
-%DIF ADD ../Configuration.tex        Thu Jul 11 21:28:10 2019
+%DIF ADD ../Configuration.tex        Sun Jul 14 22:54:45 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -174,7 +174,9 @@ operating system.
 For OpenCore issues please refer to
 \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
 
-\section{Generic Terms}\label{generic-terms}
+\DIFdelbegin \section{\DIFdel{Generic Terms}}%DIFAUXCMD
+\addtocounter{section}{-1}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \subsection{\DIFadd{Generic Terms}}\DIFaddend \label{generic-terms}
 
 \begin{itemize}
 \item
@@ -240,7 +242,7 @@ For OpenCore issues please refer to
   larger integers invoke undefined behaviour.
 \end{itemize}
 
-\section{Overview}\label{configuration-overview}
+\section{\DIFdelbegin \DIFdel{Overview}\DIFdelend \DIFaddbegin \DIFadd{Configuration}\DIFaddend }\label{configuration-overview}
 
 \subsection{Configuration Terms}\label{configuration-terms}
 
@@ -402,65 +404,11 @@ Root configuration entries consist of the following:
 specified in the configuration for safety reasons. This behaviour should not
 be relied upon, and all fields must be properly specified in the configuration.
 
-\subsection{Directory Structure}\label{directory-structure}
+\DIFaddbegin \section{\DIFadd{Setup}}\label{setup-overview}
 
-When directory boot is used the directory structure used should follow
-the description on \hyperref[fig:DS]{Directory Structure} figure. Available
-entries include:
+\DIFaddend \subsection{Directory Structure}\label{directory-structure}
 
-\begin{itemize}
-\tightlist
-\item
-  \texttt{BOOTx64.efi}
-  \break
-  Initial booter, which loads \texttt{OpenCore.efi} unless it was
-  already started as a driver.
-\item
-  \texttt{ACPI}
-  \break
-  Directory used for storing supplemental ACPI information
-  for \hyperref[acpi]{\texttt{ACPI}} section.
-\item
-  \texttt{Drivers}
-  \break
-  Directory used for storing supplemental \texttt{UEFI}
-  drivers for \hyperref[uefi]{\texttt{UEFI}} section.
-\item
-  \texttt{Kexts}
-  \break
-  Directory used for storing supplemental kernel information
-  for \hyperref[kernel]{\texttt{Kernel}} section.
-\item
-  \texttt{Tools}
-  \break
-  Directory used for storing supplemental tools.
-\item
-  \texttt{OpenCore.efi}
-  \break
-  Main booter driver responsible for operating system loading.
-\item
-  \texttt{vault.plist}
-  \break
-  Hashes for all files potentially loadable by \texttt{OC Config}.
-\item
-  \texttt{config.plist}
-  \break
-  \texttt{OC Config}.
-\item
-  \texttt{vault.sig}
-  \break
-  Signature for \texttt{vault.plist}.
-\item
-  \texttt{nvram.plist}
-  \break
-  OpenCore variable import file.
-\item
-  \texttt{opencore.log}
-  \break
-  OpenCore log file.
-\end{itemize}
-
-\begin{center}
+\DIFaddbegin \begin{center}
 \begin{tikzpicture}[%
   grow via three points={one child at (0.5,-0.7) and
   two children at (0.5,-0.7) and (0.5,-1.4)},
@@ -527,10 +475,139 @@ entries include:
 \end{tikzpicture}
 \break
 \label{fig:DS}
-Figure 1. Directory Structure
-\end{center}
+\DIFadd{Figure 1. Directory Structure
+}\end{center}
 
-\subsection{Installation and Upgrade}\label{configuration-install}
+\DIFaddend When directory boot is used the directory structure used should follow
+the description on \hyperref[fig:DS]{Directory Structure} figure. Available
+entries include:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{BOOTx64.efi}
+  \break
+  Initial booter, which loads \texttt{OpenCore.efi} unless it was
+  already started as a driver.
+\item
+  \texttt{ACPI}
+  \break
+  Directory used for storing supplemental ACPI information
+  for \hyperref[acpi]{\texttt{ACPI}} section.
+\item
+  \texttt{Drivers}
+  \break
+  Directory used for storing supplemental \texttt{UEFI}
+  drivers for \hyperref[uefi]{\texttt{UEFI}} section.
+\item
+  \texttt{Kexts}
+  \break
+  Directory used for storing supplemental kernel information
+  for \hyperref[kernel]{\texttt{Kernel}} section.
+\item
+  \texttt{Tools}
+  \break
+  Directory used for storing supplemental tools.
+\item
+  \texttt{OpenCore.efi}
+  \break
+  Main booter driver responsible for operating system loading.
+\item
+  \texttt{vault.plist}
+  \break
+  Hashes for all files potentially loadable by \texttt{OC Config}.
+\item
+  \texttt{config.plist}
+  \break
+  \texttt{OC Config}.
+\item
+  \texttt{vault.sig}
+  \break
+  Signature for \texttt{vault.plist}.
+\item
+  \texttt{nvram.plist}
+  \break
+  OpenCore variable import file.
+\item
+  \texttt{opencore.log}
+  \break
+  OpenCore log file.
+\end{itemize}
+
+\DIFdelbegin %DIFDELCMD < \begin{center}
+%DIFDELCMD < \begin{tikzpicture}[%
+%DIFDELCMD <   grow via three points={one child at (0.5,-0.7) and
+%DIFDELCMD <   two children at (0.5,-0.7) and (0.5,-1.4)},
+%DIFDELCMD <   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
+%DIFDELCMD <   \node {ESP}
+%DIFDELCMD <     child { node {EFI}
+%DIFDELCMD <       child { node {BOOT}
+%DIFDELCMD <         child { node [selected] {BOOTx64.efi}}
+%DIFDELCMD <       }
+%DIFDELCMD <       child [missing] {}
+%DIFDELCMD <       child { node {OC}
+%DIFDELCMD <         child { node {ACPI}
+%DIFDELCMD <           child { node [optional] {DSDT.aml}}
+%DIFDELCMD <           child { node [optional] {SSDT-1.aml}}
+%DIFDELCMD <           child { node [optional] {MYTABLE.aml}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node {Drivers}
+%DIFDELCMD <           child { node [optional] {MyDriver.efi}}
+%DIFDELCMD <           child { node [optional] {OtherDriver.efi}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node {Kexts}
+%DIFDELCMD <           child { node [optional] {MyKext.kext}}
+%DIFDELCMD <           child { node [optional] {OtherKext.kext}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node  {Tools}
+%DIFDELCMD <           child { node [optional] {Tool.efi}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node [selected] {OpenCore.efi}}
+%DIFDELCMD <         child { node [optional] {vault.plist}}
+%DIFDELCMD <         child { node {config.plist}}
+%DIFDELCMD <         child { node [optional] {vault.sig}}
+%DIFDELCMD <       }
+%DIFDELCMD <     }
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child { node [optional] {nvram.plist}}
+%DIFDELCMD <     child { node [optional] {opencore.log}}
+%DIFDELCMD <   ;
+%DIFDELCMD < \end{tikzpicture}
+%DIFDELCMD < \break
+%DIFDELCMD < \label{fig:DS}
+%DIFDELCMD < %%%
+\DIFdel{Figure 1. Directory Structure
+}%DIFDELCMD < \end{center}
+%DIFDELCMD < 
+
+%DIFDELCMD < %%%
+\DIFdelend \subsection{Installation and Upgrade}\label{configuration-install}
 
 To install OpenCore reflect the
 \hyperref[configuration-structure]{Configuration Structure} described
@@ -601,13 +678,20 @@ make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
 
-\texttt{NOOPT} or \texttt{DEBUG} build modes instead of \texttt{RELEASE}
-can produce a lot more debug output. With \texttt{NOOPT} source level debugging with
+\DIFdelbegin \texttt{\DIFdel{NOOPT}} %DIFAUXCMD
+\DIFdel{or }\texttt{\DIFdel{DEBUG}} %DIFAUXCMD
+\DIFdel{build modes instead of }\texttt{\DIFdel{RELEASE}}
+%DIFAUXCMD
+\DIFdel{can produce a lot more debug output. With }\texttt{\DIFdel{NOOPT}} %DIFAUXCMD
+\DIFdel{source level debugging with
 GDB or IDA Pro is also available. For GDB check
-\href{https://github.com/acidanthera/OcSupportPkg/tree/master/Debug}{OcSupport Debug}
-page. For IDA Pro you will need IDA Pro 7.3 or newer.
+}%DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Debug}{OcSupport Debug}
+%DIFDELCMD < %%%
+\DIFdel{page. For IDA Pro you will need IDA Pro 7.3 or newer.
+}%DIFDELCMD < 
 
-For IDE usage Xcode projects are available in the root of the repositories. Another
+%DIFDELCMD < %%%
+\DIFdelend For IDE usage Xcode projects are available in the root of the repositories. Another
 approach could be \href{https://www.sublimetext.com}{Sublime Text} with
 \href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
 Add \texttt{.clang\_complete} file with similar content to your UDK root:
@@ -3245,6 +3329,30 @@ The operation has completed successfully.
   there still exist vendor-specific workarounds for their products:
   }\href{https://www.tuxera.com/products/tuxera-ntfs-for-mac/faq}{Tuxera}\DIFadd{,
   }\href{https://kb.paragon-software.com/article/6604}{Paragon}\DIFadd{, etc.
+}
+
+\subsection{\DIFadd{Debugging}}\label{troubleshootingdebug}
+
+\DIFadd{Similar to other projects working with hardware OpenCore supports auditing and debugging.
+The use of }\texttt{\DIFadd{NOOPT}} \DIFadd{or }\texttt{\DIFadd{DEBUG}} \DIFadd{build modes instead of }\texttt{\DIFadd{RELEASE}}
+\DIFadd{can produce a lot more debug output. With }\texttt{\DIFadd{NOOPT}} \DIFadd{source level debugging with
+GDB or IDA Pro is also available. For GDB check
+}\href{https://github.com/acidanthera/OcSupportPkg/tree/master/Debug}{OcSupport Debug}
+\DIFadd{page. For IDA Pro you will need IDA Pro 7.3 or newer.
+}
+
+\DIFadd{To obtain the log during boot you can make the use of serial port debugging. Serial port
+debugging is enabled in }\texttt{\DIFadd{Target}}\DIFadd{, e.g. }\texttt{\DIFadd{0xB}} \DIFadd{for onscreen with serial. OpenCore
+uses }\texttt{\DIFadd{115200}} \DIFadd{baud rate, }\texttt{\DIFadd{8}} \DIFadd{data bits, no parity, and }\texttt{\DIFadd{1}} \DIFadd{stop bit.
+For macOS your best choice are CP2102-based UART devices. Connect motherboard }\texttt{\DIFadd{TX}}
+\DIFadd{to USB UART }\texttt{\DIFadd{GND}}\DIFadd{, and motherboard }\texttt{\DIFadd{GND}} \DIFadd{to USB UART }\texttt{\DIFadd{RX}}\DIFadd{. Use
+}\texttt{\DIFadd{screen}} \DIFadd{utility to get the output, or download GUI software, such as
+}\href{https://freeware.the-meiers.org}{CoolTerm}\DIFadd{.
+}
+
+\DIFadd{Remember to enable }\texttt{\DIFadd{COM}} \DIFadd{port in firmware settings, and never use USB cables longer
+than 1 meter to avoid output corruption. To additionally enable XNU kernel serial output
+you will need }\texttt{\DIFadd{debug=0x8}} \DIFadd{boot argument.
 }\DIFaddend 
 
 \subsection{Tips and Tricks}\label{troubleshootingtricks}
