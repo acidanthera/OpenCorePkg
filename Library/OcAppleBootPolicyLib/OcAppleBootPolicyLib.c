@@ -528,6 +528,7 @@ InternalGetBooterFromApfsPredefinedNameList (
   )
 {
   EFI_STATUS                      Status;
+  EFI_STATUS                      TmpStatus;
 
   UINTN                           NumberOfHandles;
   EFI_HANDLE                      *HandleBuffer;
@@ -537,6 +538,8 @@ InternalGetBooterFromApfsPredefinedNameList (
   APPLE_APFS_CONTAINER_INFO       *ContainerInfo;
   APPLE_APFS_VOLUME_INFO          *VolumeInfo;
   CHAR16                          VolumeDirectoryName[GUID_STRING_LENGTH+1];
+  EFI_DEVICE_PATH_PROTOCOL        *VolumeDevPath;
+  EFI_DEVICE_PATH_PROTOCOL        *TempDevPath;
 
   NumberOfHandles = 0;
   Status =  gBS->LocateHandleBuffer (
@@ -556,45 +559,45 @@ InternalGetBooterFromApfsPredefinedNameList (
   Status = EFI_NOT_FOUND;
 
   for (Index = 0; Index < NumberOfHandles; ++Index) {
-    Status = gBS->HandleProtocol (
-                    HandleBuffer[Index],
-                    &gEfiSimpleFileSystemProtocolGuid,
-                    (VOID **) &FileSystem
-                    );
-    if (EFI_ERROR (Status)) {
+    TmpStatus = gBS->HandleProtocol (
+                       HandleBuffer[Index],
+                       &gEfiSimpleFileSystemProtocolGuid,
+                       (VOID **) &FileSystem
+                       );
+    if (EFI_ERROR (TmpStatus)) {
       DEBUG ((
         DEBUG_BULK_INFO,
         "OCBP: Borked filesystem %u of %u for APFS - %r\n",
         (UINT32) Index,
         (UINT32) NumberOfHandles,
-        Status
+        TmpStatus
         ));
       continue;
     }
 
-    Status = FileSystem->OpenVolume (FileSystem, &HandleRoot);
-    if (EFI_ERROR (Status)) {
+    TmpStatus = FileSystem->OpenVolume (FileSystem, &HandleRoot);
+    if (EFI_ERROR (TmpStatus)) {
       DEBUG ((
         DEBUG_BULK_INFO,
         "OCBP: Borked root volume %u of %u for APFS - %r\n",
         (UINT32) Index,
         (UINT32) NumberOfHandles,
-        Status
+        TmpStatus
         ));
       continue;
     }
 
-    Status = InternalGetApfsSpecialFileInfo (HandleRoot, &VolumeInfo, &ContainerInfo);
+    TmpStatus = InternalGetApfsSpecialFileInfo (HandleRoot, &VolumeInfo, &ContainerInfo);
 
     HandleRoot->Close (HandleRoot);
 
-    if (EFI_ERROR (Status)) {
+    if (EFI_ERROR (TmpStatus)) {
       DEBUG ((
         DEBUG_BULK_INFO,
         "OCBP: No apfs info %u of %u for APFS - %r\n",
         (UINT32) Index,
         (UINT32) NumberOfHandles,
-        Status
+        TmpStatus
         ));
       continue;
     }
@@ -603,11 +606,8 @@ InternalGetBooterFromApfsPredefinedNameList (
       DEBUG_BULK_INFO,
       "OCBP: Trying to match container %g vs %g for APFS\n",
       &ContainerInfo->Uuid,
-      ContainerUuid,
-      Status
+      ContainerUuid
       ));
-
-    Status = EFI_NOT_FOUND;
 
     if (!CompareGuid (&ContainerInfo->Uuid, ContainerUuid)) {
       FreePool (ContainerInfo);
@@ -629,23 +629,36 @@ InternalGetBooterFromApfsPredefinedNameList (
       *VolumeHandle = HandleBuffer[Index];
     }
 
-    Status = InternalGetBooterFromApfsVolumePredefinedNameList (
+    TmpStatus = InternalGetBooterFromApfsVolumePredefinedNameList (
       Device,
       PrebootRoot,
       VolumeDirectoryName,
-      DevicePath
+      DevicePath != NULL ? &VolumeDevPath : NULL
       );
 
-    if (EFI_ERROR (Status)) {
+    if (EFI_ERROR (TmpStatus)) {
       DEBUG ((
         DEBUG_BULK_INFO,
         "OCBP: No apfs booter %u of %u for APFS - %r\n",
         (UINT32) Index,
         (UINT32) NumberOfHandles,
-        Status
+        TmpStatus
         ));
     } else {
-      break;
+      Status = EFI_SUCCESS;
+
+      if (DevicePath == NULL) {
+        break;
+      }
+
+      TempDevPath = *DevicePath;
+      *DevicePath = OcAppendDevicePathInstanceDedupe (
+                      TempDevPath,
+                      VolumeDevPath
+                      );
+      if (TempDevPath != NULL) {
+        FreePool (TempDevPath);
+      }
     }
   }
 
