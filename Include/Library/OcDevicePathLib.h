@@ -157,6 +157,12 @@ OcFileDevicePathNameLen (
   IN CONST FILEPATH_DEVICE_PATH  *FilePath
   );
 
+EFI_DEVICE_PATH_PROTOCOL *
+OcAppendDevicePathInstanceDedupe (
+  IN EFI_DEVICE_PATH_PROTOCOL        *DevicePath OPTIONAL,
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePathInstance OPTIONAL
+  );
+
 /**
   Fix Apple Boot Device Path to be compatible with conventional UEFI
   implementations.

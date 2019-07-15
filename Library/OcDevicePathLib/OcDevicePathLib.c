@@ -735,3 +735,48 @@ OcFileDevicePathNameLen (
 
   return Len;
 }
+
+EFI_DEVICE_PATH_PROTOCOL *
+OcAppendDevicePathInstanceDedupe (
+  IN EFI_DEVICE_PATH_PROTOCOL        *DevicePath OPTIONAL,
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePathInstance OPTIONAL
+  )
+{
+  INTN                           CmpResult;
+
+  EFI_DEVICE_PATH_PROTOCOL       *DevPathWalker;
+  CONST EFI_DEVICE_PATH_PROTOCOL *CurrentInstance;
+
+  UINTN                          AppendInstanceSize;
+  UINTN                          CurrentInstanceSize;
+
+  if (DevicePath != NULL && DevicePathInstance != NULL) {
+    AppendInstanceSize = GetDevicePathSize (DevicePathInstance);
+    DevPathWalker = DevicePath;
+
+    while (TRUE) {
+      CurrentInstance = GetNextDevicePathInstance (
+                          &DevPathWalker,
+                          &CurrentInstanceSize
+                          );
+      if (CurrentInstance == NULL) {
+        break;
+      }
+
+      if (CurrentInstanceSize != AppendInstanceSize) {
+        continue;
+      }
+
+      CmpResult = CompareMem (
+                    CurrentInstance,
+                    DevicePathInstance,
+                    CurrentInstanceSize
+                    );
+      if (CmpResult == 0) {
+        return DuplicateDevicePath (DevicePath);
+      }
+    }
+  }
+
+  return AppendDevicePathInstance (DevicePath, DevicePathInstance);
+}
