@@ -1962,9 +1962,9 @@ as behaviour is undefined otherwise.
   Variable loading happens prior to \texttt{Block} (and \texttt{Add}) phases, and will not
   overwrite any existing variable. Variables allowed to be set must be specified in
   \texttt{LegacySchema}. Third-party scripts may be used to create \texttt{nvram.plist}
-  file. Example can be found in \texttt{Tools}. The use of third-party scripts may
-  require \texttt{ExposeSensitiveData} set to \texttt{0x3} to provide \texttt{boot-path}
-  variable with OpenCore EFI partition UUID.
+  file. An example of such script can be found in \texttt{Utilities}. The use of third-party
+  scripts may require \texttt{ExposeSensitiveData} set to \texttt{0x3} to provide
+  \texttt{boot-path} variable with OpenCore EFI partition UUID.
 
   \textbf{WARNING}: This feature is very dangerous as it passes unprotected data to your
   firmware variable services. Use it only when no hardware NVRAM implementation is provided
