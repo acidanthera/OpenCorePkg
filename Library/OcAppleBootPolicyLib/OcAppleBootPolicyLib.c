@@ -456,10 +456,9 @@ InternalGetBooterFromApfsVolumePredefinedNameList (
   IN OUT EFI_DEVICE_PATH_PROTOCOL        **DevicePath  OPTIONAL
   )
 {
-  EFI_STATUS                Status;
-  EFI_FILE_PROTOCOL         *VolumeDirectoryHandle;
-  EFI_FILE_INFO             *VolumeDirectoryInfo;
-  EFI_DEVICE_PATH_PROTOCOL  *BooterPath;
+  EFI_STATUS        Status;
+  EFI_FILE_PROTOCOL *VolumeDirectoryHandle;
+  EFI_FILE_INFO     *VolumeDirectoryInfo;
 
   Status = PrebootRoot->Open (
                      PrebootRoot,
@@ -500,7 +499,7 @@ InternalGetBooterFromApfsVolumePredefinedNameList (
     Status = InternalGetBooterFromPredefinedNameList (
       Device,
       VolumeDirectoryHandle,
-      DevicePath != NULL ? &BooterPath : NULL,
+      DevicePath,
       VolumeDirectoryName
       );
   }
@@ -508,14 +507,7 @@ InternalGetBooterFromApfsVolumePredefinedNameList (
   FreePool (VolumeDirectoryInfo);
   VolumeDirectoryHandle->Close (VolumeDirectoryHandle);
 
-  if (EFI_ERROR (Status) || DevicePath == NULL) {
-    return Status;
-  }
-
-  *DevicePath = AppendDevicePath (*DevicePath, BooterPath);
-  FreePool (BooterPath);
-
-  return EFI_SUCCESS;
+  return Status;
 }
 
 /**
