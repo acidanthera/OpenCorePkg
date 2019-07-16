@@ -512,7 +512,7 @@ HandleImplicitConversion(bool isFatal, struct CImplicitConversionData *pData, un
 	DeserializeNumber(szLocation, szFrom, NUMBER_MAXLEN, pData->mFromType, ulFrom);
 	DeserializeNumber(szLocation, szTo, NUMBER_MAXLEN, pData->mToType, ulTo);
 
-	Report(isFatal, "UBSAN: Undefined Behavior in %s, %s from %s to %s\n",
+	Report(isFatal, "UBSan: Undefined Behavior in %s, %s from %s to %s\n",
 	       szLocation, DeserializeImplicitConversionCheckKind(pData->mKind), pData->mFromType->mTypeName, pData->mToType->mTypeName);
 }
 
