@@ -177,7 +177,7 @@ OcMiscEarlyInit (
     Config->Misc.Debug.DisplayDelay,
     (UINTN) Config->Misc.Debug.DisplayLevel,
     (UINTN) Config->Misc.Security.HaltLevel,
-    OPEN_CORE_LOG_PATH,
+    OPEN_CORE_LOG_PREFIX_PATH,
     Storage->FileSystem
     );
 

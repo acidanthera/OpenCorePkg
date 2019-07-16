@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Jul  3 23:30:18 2019
-%DIF ADD ../Configuration.tex        Mon Jul 15 15:43:27 2019
+%DIF DEL PreviousConfiguration.tex   Tue Jul 16 19:24:07 2019
+%DIF ADD ../Configuration.tex        Tue Jul 16 19:50:26 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -470,7 +470,7 @@ be relied upon, and all fields must be properly specified in the configuration.
     child [missing] {}
     child [missing] {}
     child { node [optional] {nvram.plist}}
-    child { node [optional] {opencore.log}}
+    child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
   ;
 \end{tikzpicture}
 \break
@@ -529,7 +529,7 @@ entries include:
   \break
   OpenCore variable import file.
 \item
-  \texttt{opencore.log}
+  \texttt{\DIFdelbegin \DIFdel{opencore}\DIFdelend \DIFaddbegin \DIFadd{opencore-YYYY-MM-DD-HHMMSS}\DIFaddend .\DIFdelbegin \DIFdel{log}\DIFdelend \DIFaddbegin \DIFadd{txt}\DIFaddend }
   \break
   OpenCore log file.
 \end{itemize}
@@ -1797,10 +1797,11 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   date, this data may also be found in NVRAM in \texttt{opencore-version} variable
   even with boot log disabled.
 
-  File logging will create a file named \texttt{opencore.log} at EFI volume root with
-  log contents. Please be warned that some file system drivers present in firmwares are
-  not reliable, and may corrupt data when writing files through UEFI. Log is attempted
-  to be written in the safest manner, and thus is very slow. Ensure that
+  File logging will create a file named \texttt{\DIFdelbegin \DIFdel{opencore}\DIFdelend \DIFaddbegin \DIFadd{opencore-YYYY-MM-DD-HHMMSS}\DIFaddend .\DIFdelbegin \DIFdel{log}\DIFdelend \DIFaddbegin \DIFadd{txt}\DIFaddend } at EFI
+  volume root with log contents \DIFaddbegin \DIFadd{(the upper case letter sequence is replaced with date
+  and time from the firmware)}\DIFaddend . Please be warned that some file system drivers present
+  in firmwares are not reliable, and may corrupt data when writing files through UEFI.
+  Log is attempted to be written in the safest manner, and thus is very slow. Ensure that
   \texttt{DisableWatchDog} is set to \texttt{true} when you use a slow drive.
 
 \end{enumerate}
