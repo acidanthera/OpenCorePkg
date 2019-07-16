@@ -5,20 +5,21 @@
 # Slight optimizations by PMheart and vit9696.
 #
 
-abort() {
-  echo "Fatal error: ${1}"
-  exit 1
-}
-
 if [ ! -x /usr/bin/dirname ] || [ ! -x /usr/sbin/nvram ] || [ ! -x /usr/bin/grep ] || [ ! -x /bin/chmod ] || [ ! -x /usr/bin/sed ] || [ ! -x /usr/bin/base64 ] || [ ! -x /bin/rm ] || [ ! -x /bin/mkdir ] || [ ! -x /bin/cat ] || [ ! -x /bin/dd ] || [ ! -x /usr/bin/stat ] || [ ! -x /usr/libexec/PlistBuddy ] || [ ! -x /usr/sbin/ioreg ] || [ ! -x /usr/bin/xxd ] || [ ! -x /usr/sbin/diskutil ] || [ ! -x /bin/cp ] || [ ! -x /usr/bin/wc ]; then
   abort "Unix environment is broken!"
 fi
+
+abort() {
+  echo "Fatal error: ${1}"
+  /bin/rm -rf dumps
+  exit 1
+}
 
 cd "$(/usr/bin/dirname "${0}")" || abort "Failed to enter working directory!"
 
 nvram=/usr/sbin/nvram
 if [ -z "$("${nvram}" -x '8BE4DF61-93CA-11D2-AA0D-00E098032B8C:BootOrder' | /usr/bin/grep 'xml')" ]; then
-  nvram=./nvram.mojave
+  nvram="$(pwd)/nvram.mojave"
   if [ ! -f "${nvram}" ]; then
     abort "${nvram} does NOT exist!"
   elif [ ! -x "${nvram}" ]; then
