@@ -30,7 +30,7 @@
   @param[in] Delay         Delay in microseconds after each log entry.
   @param[in] DisplayLevel  Console visible error level.
   @param[in] HaltLevel     Error level causing CPU halt.
-  @param[in] LogPath       Log path.
+  @param[in] LogPrefixPath Log path (without timestamp).
   @param[in] LogFileSystem Log filesystem, optional.
 
   @retval EFI_SUCCESS  The entry point is executed successfully.
@@ -41,7 +41,7 @@ OcConfigureLogProtocol (
   IN UINT32                           DisplayDelay,
   IN UINTN                            DisplayLevel,
   IN UINTN                            HaltLevel,
-  IN CHAR16                           *LogPath,
+  IN CONST CHAR16                     *LogPrefixPath  OPTIONAL,
   IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *LogFileSystem  OPTIONAL
   );
 

@@ -96,6 +96,49 @@ GetTiming  (
   return Private->TimingTxt;
 }
 
+STATIC
+CHAR16 *
+GetLogPath (
+  IN CONST CHAR16  *LogPrefixPath
+  )
+{
+  EFI_STATUS  Status;
+  EFI_TIME    Date;
+  CHAR16      *LogPath;
+  UINTN       Size;
+
+  if (LogPrefixPath == NULL) {
+    return NULL;
+  }
+
+  Status = gRT->GetTime (&Date, NULL);
+  if (EFI_ERROR (Status)) {
+    ZeroMem (&Date, sizeof (Date));
+  }
+
+  Size = StrSize (LogPrefixPath) + L_STR_SIZE (L"-0000-00-00-000000.txt");
+
+  LogPath = AllocatePool (Size);
+  if (LogPath == NULL) {
+    return NULL;
+  }
+
+  UnicodeSPrint (
+    LogPath,
+    Size,
+    L"%s-%04u-%02u-%02u-%02u%02u%02u.txt",
+    LogPrefixPath,
+    (UINT32) Date.Year,
+    (UINT32) Date.Month,
+    (UINT32) Date.Day,
+    (UINT32) Date.Hour,
+    (UINT32) Date.Minute,
+    (UINT32) Date.Second
+    );
+
+  return LogPath;
+}
+
 EFI_STATUS
 EFIAPI
 OcLogAddEntry  (
@@ -385,7 +428,7 @@ OcLogResetTimers (
   @param[in] DisplayDelay  Delay in microseconds after each displayed log entry.
   @param[in] DisplayLevel  Console visible error level.
   @param[in] HaltLevel     Error level causing CPU halt.
-  @param[in] LogPath       Log path.
+  @param[in] LogPrefixPath Log path (without timestamp).
   @param[in] LogFileSystem Log filesystem, optional.
 
   @retval EFI_SUCCESS  The entry point is executed successfully.
@@ -396,7 +439,7 @@ OcConfigureLogProtocol (
   IN UINT32                           DisplayDelay,
   IN UINTN                            DisplayLevel,
   IN UINTN                            HaltLevel,
-  IN CHAR16                           *LogPath,
+  IN CONST CHAR16                     *LogPrefixPath  OPTIONAL,
   IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *LogFileSystem  OPTIONAL
   )
 {
@@ -406,11 +449,13 @@ OcConfigureLogProtocol (
   OC_LOG_PRIVATE_DATA   *Private;
   EFI_HANDLE            Handle;
   EFI_FILE_PROTOCOL     *LogRoot;
+  CHAR16                *LogPath;
 
   LogRoot = NULL;
+  LogPath = GetLogPath (LogPrefixPath);
 
   if ((Options & (OC_LOG_FILE | OC_LOG_ENABLE)) == (OC_LOG_FILE | OC_LOG_ENABLE)) {
-    if (LogFileSystem != NULL) {
+    if (LogFileSystem != NULL && LogPath != NULL) {
       Status = LogFileSystem->OpenVolume (LogFileSystem, &LogRoot);
       if (EFI_ERROR (Status)) {
         LogRoot = NULL;
@@ -444,6 +489,9 @@ OcConfigureLogProtocol (
 
     if (OcLog->FileSystem != NULL) {
       OcLog->FileSystem->Close (OcLog->FileSystem);
+    }
+    if (OcLog->FilePath != NULL) {
+      FreePool (OcLog->FilePath);
     }
 
     OcLog->Options      = Options;
@@ -503,6 +551,10 @@ OcConfigureLogProtocol (
     } else {
       LogRoot->Close (LogRoot);
     }
+  }
+
+  if (EFI_ERROR (Status) && LogPath != NULL) {
+    FreePool (LogPath);
   }
 
   return Status;
