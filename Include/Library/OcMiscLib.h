@@ -44,85 +44,6 @@ OcBase64Decode (
   IN OUT UINTN        *DecodedLength
   );
 
-// LegacyRegionlock
-/** Lock the legacy region specified to enable modification.
-
-  @param[in] LegacyAddress  The address of the region to lock.
-  @param[in] LegacyLength   The size of the region to lock.
-
-  @retval EFI_SUCCESS  The region was locked successfully.
-**/
-EFI_STATUS
-LegacyRegionLock (
-  IN UINT32  LegacyAddress,
-  IN UINT32  LegacyLength
-  );
-
-// LegacyRegionUnlock
-/** Unlock the legacy region specified to enable modification.
-
-  @param[in] LegacyAddress  The address of the region to unlock.
-  @param[in] LegacyLength   The size of the region to unlock.
-
-  @retval EFI_SUCCESS  The region was unlocked successfully.
-**/
-EFI_STATUS
-LegacyRegionUnlock (
-  IN UINT32  LegacyAddress,
-  IN UINT32  LegacyLength
-  );
-
-/** Log the boot options passed
-
-  @param[in] BootOrder        A pointer to the boot order list.
-  @param[in] BootOrderLength  Size of the boot order list.
-
-  @retval EFI_SUCCESS  The entry point is executed successfully.
-**/
-EFI_STATUS
-LogBootOrder (
-  IN  INT16   *BootOrder,
-  IN  UINTN   BootOrderSize
-  );
-
-// LogHexDump
-/** Convert memory locations into hex strings and output to the boot log
-
-  @param[in] Address       The address of the region to dump hex from.
-  @param[in] Address2      The address to show when dumping hex.
-  @param[in] Length        The length of the string to show.
-  @param[in] LineSize      How many bytes to show per line.
-  @param[in] DisplayAscii  Flag to show ascii charater also.
-
-  @retval EFI_SUCCESS  The region was unlocked successfully.
-**/
-EFI_STATUS
-LogHexDump (
-  IN VOID     *Address,
-  IN VOID     *Address2,
-  IN UINTN    Length,
-  IN UINTN    LineSize,
-  IN BOOLEAN  DisplayAscii
-  );
-
-// SetPlatformData
-/**
-
-  @param[in] DataRecordGuid  The guid of the record to use.
-  @param[in] Key             A pointer to the ascii key string.
-  @param[in] Data            A pointer to the data to store.
-  @param[in] DataSize        The length of the data to store.
-
-  @retval EFI_SUCCESS  The datahub  was updated successfully.
-**/
-EFI_STATUS
-SetPlatformData (
-  IN EFI_GUID  *DataRecordGuid,
-  IN CHAR8     *Key,
-  IN VOID      *Data,
-  IN UINT32    DataSize
-  );
-
 /**
   Allocate new System Table with disabled text output.
 
@@ -133,45 +54,6 @@ SetPlatformData (
 EFI_SYSTEM_TABLE *
 AllocateNullTextOutSystemTable (
   EFI_SYSTEM_TABLE  *SystemTable
-  );
-
-/**
-  Dummy function that debuggers may break on.
-**/
-VOID
-DebugBreak (
-  VOID
-  );
-
-/**
-  Wait for user input after printing message.
-
-  @param[in] Message   Message to print.
-**/
-VOID
-WaitForKeyPress (
-  CONST CHAR16 *Message
-  );
-
-/**
-  Default index mapping macros.
-**/
-#define OC_INPUT_STR      "123456789ABCDEFGHIJKLMNOPQRSTUVXWZ"
-#define OC_INPUT_MAX      L_STR_LEN (OC_INPUT_STR)
-#define OC_INPUT_ABORTED  -1 ///< Esc or 0
-#define OC_INPUT_INVALID  -2 ///< Some other key
-#define OC_INPUT_TIMEOUT  -3 ///< Timeout
-
-/**
-  Obtains key index from user input.
-
-  @param TimeOutSeconds  Timeout to wait for.
-
-  @returns key index [0, OC_INPUT_MAX), OC_INPUT_ABORTED, or OC_INPUT_INVALID.
-**/
-INTN
-WaitForKeyIndex (
-  UINTN  TimeOutSeconds
   );
 
 INT32

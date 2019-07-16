@@ -141,6 +141,9 @@
   OcMachoLib|Include/Library/OcMachoLib.h
 
   ##  @libraryclass
+  OcMemoryLib|Include/Library/OcMemoryLib.h
+
+  ##  @libraryclass
   OcMiscLib|Include/Library/OcMiscLib.h
 
   ##  @libraryclass

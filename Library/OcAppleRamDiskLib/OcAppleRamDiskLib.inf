@@ -29,6 +29,7 @@
   BaseMemoryLib
   DebugLib
   MemoryAllocationLib
+  OcMemoryLib
   UefiBootServicesTableLib
 
 [Sources]

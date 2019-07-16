@@ -53,3 +53,5 @@
   BaseMemoryLib
   MemoryAllocationLib
   OcCpuLib
+  OcMemoryLib
+

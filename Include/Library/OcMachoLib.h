@@ -12,8 +12,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#ifndef OC_MACHO_LIB_H_
-#define OC_MACHO_LIB_H_
+#ifndef OC_MACHO_LIB_H
+#define OC_MACHO_LIB_H
 
 #include <IndustryStandard/AppleMachoImage.h>
 
@@ -758,4 +758,4 @@ MachoRuntimeGetEntryAddress (
   IN VOID  *Image
   );
 
-#endif // OC_MACHO_LIB_H_
+#endif // OC_MACHO_LIB_H

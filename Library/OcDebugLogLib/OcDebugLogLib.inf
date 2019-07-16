@@ -55,3 +55,4 @@
   OcDebugLogLib.c
   OcLog.c
   OcLogInternal.h
+  DebugHelp.c

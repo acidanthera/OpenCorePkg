@@ -24,6 +24,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcDevicePropertyLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcSmbiosLib.h>
 
@@ -32,7 +33,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 
 #include <Uefi.h>
-#include <Library/DebugLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiDriverEntryPoint.h>
 #include <Library/UefiBootServicesTableLib.h>

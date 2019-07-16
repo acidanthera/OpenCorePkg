@@ -1,6 +1,6 @@
 ## @file
 #
-#  Component description file for OcMisclibrary.
+#  Component description file for OcMemoryLib.
 #
 #  Copyright (C) 2016 - 2018, The HermitCrabs Lab. All rights reserved.<BR>
 #
@@ -18,11 +18,11 @@
 
 [Defines]
   INF_VERSION    = 0x00010005
-  BASE_NAME      = OcMiscLib
-  FILE_GUID      = E9DF6F29-95AC-429A-8E42-FCE1F5B81148
+  BASE_NAME      = OcMemoryLib
+  FILE_GUID      = EADEF108-EFA4-4425-A2C3-4682118B888B
   MODULE_TYPE    = BASE
   VERSION_STRING = 1.0
-  LIBRARY_CLASS  = OcMiscLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+  LIBRARY_CLASS  = OcMemoryLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
 
 # VALID_ARCHITECTURES = IA32 X64
 
@@ -33,19 +33,15 @@
   MdeModulePkg/MdeModulePkg.dec
 
 [Protocols]
-  gEfiPciIoProtocolGuid
+  gEfiLegacyRegionProtocolGuid
 
 [LibraryClasses]
   BaseLib
   UefiLib
-  OcFileLib
   OcGuardLib
   OcStringLib
-  OcTimerLib
 
 [Sources]
-  Base64Decode.c
-  DataPatcher.c
-  ReleaseUsbOwnership.c
-  NullTextOutput.c
-  UninstallAllProtocolInterfaces.c
+  GetMemoryMap.c
+  LegacyRegionLock.c
+  LegacyRegionUnLock.c

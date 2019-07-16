@@ -23,6 +23,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcSmbiosLib.h>
+#include <Library/OcMemoryLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/OcFileLib.h>

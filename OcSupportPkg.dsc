@@ -71,6 +71,7 @@
   OcFirmwarePasswordLib|OcSupportPkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
   OcGuardLib|OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf
   OcMachoLib|OcSupportPkg/Library/OcMachoLib/OcMachoLib.inf
+  OcMemoryLib|OcSupportPkg/Library/OcMemoryLib/OcMemoryLib.inf
   OcMiscLib|OcSupportPkg/Library/OcMiscLib/OcMiscLib.inf
   OcPngLib|OcSupportPkg/Library/OcPngLib/OcPngLib.inf
   OcRtcLib|OcSupportPkg/Library/OcRtcLib/OcRtcLib.inf
@@ -104,6 +105,7 @@
   OcSupportPkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
   OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf
   OcSupportPkg/Library/OcMachoLib/OcMachoLib.inf
+  OcSupportPkg/Library/OcMemoryLib/OcMemoryLib.inf
   OcSupportPkg/Library/OcMiscLib/OcMiscLib.inf
   OcSupportPkg/Library/OcPngLib/OcPngLib.inf
   OcSupportPkg/Library/OcSerializeLib/OcSerializeLib.inf

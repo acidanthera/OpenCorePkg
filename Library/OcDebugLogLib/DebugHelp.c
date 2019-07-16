@@ -16,6 +16,7 @@
 #include <Library/DebugLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/OcMiscLib.h>
 
 VOID
