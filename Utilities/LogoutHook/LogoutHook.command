@@ -5,20 +5,27 @@
 # Slight optimizations by PMheart and vit9696.
 #
 
-if [ ! -x /usr/bin/dirname ] || [ ! -x /usr/sbin/nvram ] || [ ! -x /usr/bin/grep ] || [ ! -x /bin/chmod ] || [ ! -x /usr/bin/sed ] || [ ! -x /usr/bin/base64 ] || [ ! -x /bin/rm ] || [ ! -x /bin/mkdir ] || [ ! -x /bin/cat ] || [ ! -x /bin/dd ] || [ ! -x /usr/bin/stat ] || [ ! -x /usr/libexec/PlistBuddy ] || [ ! -x /usr/sbin/ioreg ] || [ ! -x /usr/bin/xxd ] || [ ! -x /usr/sbin/diskutil ] || [ ! -x /bin/cp ] || [ ! -x /usr/bin/wc ]; then
+if [ ! -x /usr/bin/dirname ] || [ ! -x /usr/sbin/nvram ] || [ ! -x /usr/bin/grep ] || [ ! -x /bin/chmod ] || [ ! -x /usr/bin/sed ] || [ ! -x /usr/bin/base64 ] || [ ! -x /bin/rm ] || [ ! -x /bin/mkdir ] || [ ! -x /bin/cat ] || [ ! -x /bin/dd ] || [ ! -x /usr/bin/stat ] || [ ! -x /usr/libexec/PlistBuddy ] || [ ! -x /usr/sbin/ioreg ] || [ ! -x /usr/bin/xxd ] || [ ! -x /usr/sbin/diskutil ] || [ ! -x /bin/cp ] || [ ! -x /usr/bin/wc ] || [ ! -x /usr/bin/uuidgen ]; then
   abort "Unix environment is broken!"
 fi
 
+thisDir="$(/usr/bin/dirname "${0}")"
+uuidDump="${thisDir}/$(/usr/bin/uuidgen)"
+if [ "${thisDir}/" = "${uuidDump}" ]; then
+  echo "uuidgen returns null!"
+  exit 1
+fi
+cd "${thisDir}" || abort "Failed to enter working directory!"
+
 abort() {
   echo "Fatal error: ${1}"
-  /bin/rm -rf dumps
+  /bin/rm -rf "${uuidDump}"
   exit 1
 }
 
-cd "$(/usr/bin/dirname "${0}")" || abort "Failed to enter working directory!"
-
 nvram=/usr/sbin/nvram
-if [ -z "$("${nvram}" -x '8BE4DF61-93CA-11D2-AA0D-00E098032B8C:BootOrder' | /usr/bin/grep 'xml')" ]; then
+# FIXME: find an nvram key that is mandatory
+if [ -z "$("${nvram}" -x 'efi-boot-device' | /usr/bin/grep 'xml')" ]; then
   nvram="$(pwd)/nvram.mojave"
   if [ ! -f "${nvram}" ]; then
     abort "${nvram} does NOT exist!"
@@ -32,9 +39,9 @@ getKey() {
   "${nvram}" -x "${key}" | /usr/bin/sed '/\<data\>/,/\<\/data\>/!d;//d' | /usr/bin/base64 --decode
 }
 
-/bin/rm -rf dumps
-/bin/mkdir dumps || abort "Failed to create dumps directory!"
-cd dumps         || abort "Failed to enter dumps directory!"
+/bin/rm -rf "${uuidDump}"
+/bin/mkdir "${uuidDump}" || abort "Failed to create dump directory!"
+cd "${uuidDump}"         || abort "Failed to enter dump directory!"
 
 "${nvram}" -xp > ./nvram1.plist || abort "Failed to dump nvram!"
 
@@ -65,4 +72,4 @@ else
   abort "Illegal UUID or unknown loader!"
 fi
 
-/bin/rm -rf dumps
+/bin/rm -rf "${uuidDump}"
