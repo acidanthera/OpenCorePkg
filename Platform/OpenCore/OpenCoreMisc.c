@@ -194,7 +194,7 @@ OcMiscEarlyInit (
   if (!EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,
-      "OC: Boot timestamp: - %04u.%02u.%02u %02u:%02u:%02u\n",
+      "OC: Boot timestamp - %04u.%02u.%02u %02u:%02u:%02u\n",
       BootTime.Year,
       BootTime.Month,
       BootTime.Day,
@@ -205,7 +205,7 @@ OcMiscEarlyInit (
   } else {
     DEBUG ((
       DEBUG_INFO,
-      "OC: Boot timestamp: - %r\n",
+      "OC: Boot timestamp - %r\n",
       Status
       ));
   }
