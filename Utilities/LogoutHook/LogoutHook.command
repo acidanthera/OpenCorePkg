@@ -67,6 +67,7 @@ UUID="$("${nvram}" 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | /usr/bin/sed
 if [ "$(printf "${UUID}" | /usr/bin/wc -c)" -eq 36 ] && [ -z "$(echo "${UUID}" | /usr/bin/sed 's/[-0-9A-F]//g')" ]; then
   /usr/sbin/diskutil mount "${UUID}" || abort "Failed to mount ${UUID}!"
   /bin/cp ./nvram.plist "$(/usr/sbin/diskutil info "${UUID}" | /usr/bin/sed -n 's/.*Mount Point: *//p')" || abort "Failed to copy nvram.plist!"
+  /usr/sbin/diskutil unmount "${UUID}" || abort "Failed to unmount ${UUID}!"
   exit 0
 else
   abort "Illegal UUID or unknown loader!"
