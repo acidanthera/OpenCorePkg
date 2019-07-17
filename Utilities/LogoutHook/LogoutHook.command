@@ -25,7 +25,7 @@ abort() {
 
 nvram=/usr/sbin/nvram
 # FIXME: find an nvram key that is mandatory
-if [ -z "$("${nvram}" -x 'efi-boot-device' | /usr/bin/grep 'xml')" ]; then
+if [ -z "$("${nvram}" -x '4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path' | /usr/bin/grep 'xml')" ]; then
   nvram="$(pwd)/nvram.mojave"
   if [ ! -f "${nvram}" ]; then
     abort "${nvram} does NOT exist!"
