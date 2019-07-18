@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jul 16 19:24:07 2019
-%DIF ADD ../Configuration.tex        Tue Jul 16 19:50:26 2019
+%DIF ADD ../Configuration.tex        Thu Jul 18 15:48:16 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1307,8 +1307,8 @@ blocking.
   \textbf{Type}: \texttt{plist\ data}, 16 bytes\\
   \textbf{Failsafe}: All zero\\
   \textbf{Description}: Bit mask of active bits in \texttt{Cpuid1Data}. When
-  each \texttt{Cpuid1Mask} is set to 0, the original CPU bit is used, otherwise
-  .
+  each \texttt{Cpuid1Mask} \DIFaddbegin \DIFadd{bit }\DIFaddend is set to 0, the original CPU bit is used,
+  otherwise \DIFaddbegin \DIFadd{set bits take the value of }\texttt{\DIFadd{Cpuid1Data}}\DIFaddend .
 
 \end{enumerate}
 
