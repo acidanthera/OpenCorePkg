@@ -177,16 +177,6 @@ OcFreeBootEntries (
   FreePool (BootEntries);
 }
 
-typedef struct {
-  UINTN                    HdPrefixSize;
-  UINTN                    NumBootInstances;
-  EFI_HANDLE               Device;
-  EFI_DEVICE_PATH_PROTOCOL *HdDevicePath;
-  EFI_DEVICE_PATH_PROTOCOL *BootDevicePath;
-  BOOLEAN                  IsExternal;
-  BOOLEAN                  SkipRecovery;
-} OC_DEV_PATH_SCAN_INFO;
-
 EFI_STATUS
 OcScanForBootEntries (
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
@@ -207,21 +197,16 @@ OcScanForBootEntries (
   UINTN                            EntriesSize;
   UINTN                            EntryIndex;
   CHAR16                           *DevicePathText;
-  CHAR16                           *VolumeLabel;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *SimpleFs;
 
   UINTN                            DevPathScanInfoSize;
-  OC_DEV_PATH_SCAN_INFO            *DevPathScanInfo;
-  OC_DEV_PATH_SCAN_INFO            *DevPathScanInfos;
-  EFI_DEVICE_PATH_PROTOCOL         *DevicePath;
+  INTERNAL_DEV_PATH_SCAN_INFO      *DevPathScanInfo;
+  INTERNAL_DEV_PATH_SCAN_INFO      *DevPathScanInfos;
   EFI_DEVICE_PATH_PROTOCOL         *DevicePathWalker;
-  UINTN                            DevPathSize;
-  INTN                             CmpResult;
 
-  CHAR16                           *RecoveryPath;
-  VOID                             *Reserved;
-  EFI_FILE_PROTOCOL                *RecoveryRoot;
-  EFI_HANDLE                       RecoveryDeviceHandle;
+  Result = OcOverflowMulUN (Context->CustomEntryCount, sizeof (OC_BOOT_ENTRY), &EntriesSize);
+  if (Result) {
+    return EFI_OUT_OF_RESOURCES;
+  }
 
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
@@ -242,12 +227,6 @@ OcScanForBootEntries (
     return EFI_NOT_FOUND;
   }
 
-  Result = OcOverflowMulUN (Context->CustomEntryCount, sizeof (OC_BOOT_ENTRY), &EntriesSize);
-  if (Result) {
-    FreePool (Handles);
-    return EFI_OUT_OF_RESOURCES;
-  }
-
   Result = OcOverflowMulUN (
              NoHandles,
              sizeof (*DevPathScanInfos),
@@ -258,7 +237,7 @@ OcScanForBootEntries (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  DevPathScanInfos = AllocatePool (DevPathScanInfoSize);
+  DevPathScanInfos = AllocatePool (DevPathScanInfoSize); ///< WARN Non zero
   if (DevPathScanInfos == NULL) {
     FreePool (Handles);
     return EFI_OUT_OF_RESOURCES;
@@ -267,114 +246,39 @@ OcScanForBootEntries (
   for (Index = 0; Index < NoHandles; ++Index) {
     DevPathScanInfo = &DevPathScanInfos[Index];
 
-    DevPathScanInfo->Device         = Handles[Index];
-    DevPathScanInfo->BootDevicePath = NULL;
-
-    Status = gBS->HandleProtocol (
-      DevPathScanInfo->Device,
-      &gEfiSimpleFileSystemProtocolGuid,
-      (VOID **) &SimpleFs
+    Status = InternalPrepareScanInfo (
+      BootPolicy,
+      Context,
+      Handles,
+      Index,
+      DevPathScanInfo
       );
 
     if (EFI_ERROR (Status)) {
       continue;
     }
 
-    Status = InternalCheckScanPolicy (
-               DevPathScanInfo->Device,
-               Context->ScanPolicy,
-               &DevPathScanInfo->IsExternal
+    ASSERT (DevPathScanInfo->NumBootInstances > 0);
+
+    Result = OcOverflowMulAddUN (
+               DevPathScanInfo->NumBootInstances,
+               2 * sizeof (OC_BOOT_ENTRY),
+               EntriesSize,
+               &EntriesSize
                );
-    if (EFI_ERROR (Status)) {
-      DEBUG ((
-        DEBUG_INFO,
-        "OCB: Skipping handle %p due to scan policy %x\n",
-        DevPathScanInfo->Device,
-        Context->ScanPolicy
-        ));
-      continue;
+    if (Result) {
+      FreePool (Handles);
+      FreePool (DevPathScanInfos);
+      return EFI_OUT_OF_RESOURCES;
     }
-
-    //
-    // Do not do normal scanning on load handle.
-    // We only allow recovery there.
-    //
-    if (Context->ExcludeHandle != DevPathScanInfo->Device) {
-      Status = BootPolicy->GetBootFileEx (
-        DevPathScanInfo->Device,
-        BootPolicyOk,
-        &DevPathScanInfo->BootDevicePath
-        );
-    } else {
-      Status = EFI_UNSUPPORTED;
-    }
-
-    DevPathScanInfo->SkipRecovery = FALSE;
-
-    if (EFI_ERROR (Status)) {
-      Status = InternalGetRecoveryOsBooter (
-                 DevPathScanInfo->Device,
-                 &DevPathScanInfo->BootDevicePath,
-                 TRUE
-                 );
-      if (!EFI_ERROR (Status)) {
-        DevPathScanInfo->SkipRecovery = TRUE;
-      }
-    } 
-    
-    if (!EFI_ERROR (Status)) {
-      ASSERT (DevPathScanInfo->BootDevicePath != NULL);
-
-      DevPathScanInfo->NumBootInstances = OcGetNumDevicePathInstances (
-                                            DevPathScanInfo->BootDevicePath
-                                            );
-
-      Result = OcOverflowMulAddUN (
-                 DevPathScanInfo->NumBootInstances,
-                 2 * sizeof (OC_BOOT_ENTRY),
-                 EntriesSize,
-                 &EntriesSize
-                 );
-      if (Result) {
-        FreePool (Handles);
-        FreePool (DevPathScanInfos);
-        return EFI_OUT_OF_RESOURCES;
-      }
-
-      Status = gBS->HandleProtocol (
-                      DevPathScanInfo->Device,
-                      &gEfiDevicePathProtocolGuid,
-                      (VOID **)&DevPathScanInfo->HdDevicePath
-                      );
-      if (EFI_ERROR (Status)) {
-        FreePool (DevPathScanInfo->BootDevicePath);
-        DevPathScanInfo->BootDevicePath = NULL;
-        continue;
-      }
-
-      DevPathScanInfo->HdPrefixSize = GetDevicePathSize (
-                                        DevPathScanInfo->HdDevicePath
-                                        ) - END_DEVICE_PATH_LENGTH;
-    }
-
-    DEBUG_CODE_BEGIN ();
-    VolumeLabel = GetVolumeLabel (SimpleFs);
-    DEBUG ((
-      DEBUG_INFO,
-      "OCB: Filesystem %u (%p) named %s (%r) has %u entries\n",
-      (UINT32) Index,
-      DevPathScanInfo->Device,
-      VolumeLabel != NULL ? VolumeLabel : L"<Null>",
-      Status,
-      DevPathScanInfo->BootDevicePath == NULL ? 0 : (UINT32) DevPathScanInfo->NumBootInstances
-      ));
-    if (VolumeLabel != NULL) {
-      FreePool (VolumeLabel);
-    }
-    DEBUG_CODE_END ();
   }
 
   FreePool (Handles);
+
+  if (EntriesSize == 0) {
+    FreePool (DevPathScanInfos);
+    return EFI_NOT_FOUND;
+  }
 
   Entries = AllocatePool (EntriesSize);
   if (Entries == NULL) {
@@ -391,84 +295,14 @@ OcScanForBootEntries (
       continue;
     }
 
-    while (TRUE) {
-      DevicePath = GetNextDevicePathInstance (&DevicePathWalker, &DevPathSize);
-      if (DevicePath == NULL) {
-        break;
-      }
-
-      if ((DevPathSize - END_DEVICE_PATH_LENGTH) < DevPathScanInfo->HdPrefixSize) {
-        FreePool (DevicePath);
-        continue;
-      }
-
-      if ((Context->ScanPolicy & OC_SCAN_SELF_TRUST_LOCK) != 0) {
-        CmpResult = CompareMem (
-                      DevicePath,
-                      DevPathScanInfo->HdDevicePath,
-                      DevPathScanInfo->HdPrefixSize
-                      );
-        if (CmpResult != 0) {
-          DEBUG ((
-            DEBUG_INFO,
-            "OCB: Skipping handle %p instance due to self trust violation",
-            DevPathScanInfo->Device
-            ));
-
-          DebugPrintDevicePath (
-            DEBUG_INFO,
-            "  Disk DP",
-            DevPathScanInfo->HdDevicePath
-            );
-          DebugPrintDevicePath (
-            DEBUG_INFO,
-            "  Instance DP",
-            DevicePath
-            );
-
-          FreePool (DevicePath);
-          continue;
-        }
-      }
-
-      Entries[EntryIndex].DevicePath = DevicePath;
-      Entries[EntryIndex].IsExternal = DevPathScanInfo->IsExternal;
-      InternalSetBootEntryFlags (&Entries[EntryIndex]);
-      ++EntryIndex;
-
-      if (DevPathScanInfo->SkipRecovery) {
-        continue;
-      }
-
-      Status = BootPolicy->GetPathNameOnApfsRecovery (
-        DevicePath,
-        L"\\",
-        &RecoveryPath,
-        &Reserved,
-        &RecoveryRoot,
-        &RecoveryDeviceHandle
-        );
-
-      if (!EFI_ERROR (Status)) {
-        DevicePath = FileDevicePath (RecoveryDeviceHandle, RecoveryPath);
-        FreePool (RecoveryPath);
-        RecoveryRoot->Close (RecoveryRoot);
-      } else {
-        Status = InternalGetRecoveryOsBooter (
-                   DevPathScanInfo->Device,
-                   &DevicePath,
-                   FALSE
-                   );
-        if (EFI_ERROR (Status)) {
-          continue;
-        }
-      }
-
-      Entries[EntryIndex].DevicePath = DevicePath;
-      Entries[EntryIndex].IsExternal = DevPathScanInfo->IsExternal;
-      InternalSetBootEntryFlags (&Entries[EntryIndex]);
-      ++EntryIndex;
-    }
+    EntryIndex = InternalFillValidBootEntries (
+      BootPolicy,
+      Context,
+      DevPathScanInfo,
+      DevicePathWalker,
+      Entries,
+      EntryIndex
+      );
 
     FreePool (DevPathScanInfo->BootDevicePath);
   }
@@ -484,6 +318,7 @@ OcScanForBootEntries (
         break;
       }
 
+      DEBUG_CODE_BEGIN ();
       DEBUG ((
         DEBUG_INFO,
         "Entry %u is %s at %s (W:%d|R:%d|F:%d)\n",
@@ -506,6 +341,7 @@ OcScanForBootEntries (
           ));
         FreePool (DevicePathText);
       }
+      DEBUG_CODE_END ();
     }
 
     if (EFI_ERROR (Status)) {
@@ -527,6 +363,8 @@ OcScanForBootEntries (
 
   *BootEntries = Entries;
   *Count       = EntryIndex;
+
+  ASSERT (*Count <= EntriesSize / sizeof (OC_BOOT_ENTRY));
 
   if (AllocCount != NULL) {
     *AllocCount = EntriesSize / sizeof (OC_BOOT_ENTRY);

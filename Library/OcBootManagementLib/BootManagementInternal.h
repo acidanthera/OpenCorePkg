@@ -30,6 +30,16 @@ typedef struct {
   EFI_HANDLE                     BlockIoHandle;
 } INTERNAL_DMG_LOAD_CONTEXT;
 
+typedef struct {
+  UINTN                    HdPrefixSize;
+  UINTN                    NumBootInstances;
+  EFI_HANDLE               Device;
+  EFI_DEVICE_PATH_PROTOCOL *HdDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL *BootDevicePath;
+  BOOLEAN                  IsExternal;
+  BOOLEAN                  SkipRecovery;
+} INTERNAL_DEV_PATH_SCAN_INFO;
+
 RETURN_STATUS
 InternalCheckScanPolicy (
   IN  EFI_HANDLE                       Handle,
@@ -82,6 +92,25 @@ InternalLoadBootEntry (
   IN  EFI_HANDLE                  ParentHandle,
   OUT EFI_HANDLE                  *EntryHandle,
   OUT INTERNAL_DMG_LOAD_CONTEXT   *DmgLoadContext
+  );
+
+EFI_STATUS
+InternalPrepareScanInfo (
+  IN     APPLE_BOOT_POLICY_PROTOCOL       *BootPolicy,
+  IN     OC_PICKER_CONTEXT                *Context,
+  IN     EFI_HANDLE                       *Handles,
+  IN     UINTN                            Index,
+  IN OUT INTERNAL_DEV_PATH_SCAN_INFO      *DevPathScanInfo
+  );
+
+UINTN
+InternalFillValidBootEntries (
+  IN     APPLE_BOOT_POLICY_PROTOCOL   *BootPolicy,
+  IN     OC_PICKER_CONTEXT            *Context,
+  IN     INTERNAL_DEV_PATH_SCAN_INFO  *DevPathScanInfo,
+  IN     EFI_DEVICE_PATH_PROTOCOL     *DevicePathWalker,
+  IN OUT OC_BOOT_ENTRY                *Entries,
+  IN     UINTN                        EntryIndex
   );
 
 #endif // BOOT_MANAGEMENET_INTERNAL_H
