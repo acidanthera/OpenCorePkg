@@ -140,6 +140,7 @@ TrailedBooterDevicePath (
 
   @param[in] FilePath  The file Device Path node to inspect.
 
+  @retval  Name size in bytes.
 **/
 UINTN
 OcFileDevicePathNameSize (
@@ -151,18 +152,34 @@ OcFileDevicePathNameSize (
 
   @param[in] FilePath  The file Device Path node to inspect.
 
+  @retval  Name length in characters (without trailing zero).
 **/
 UINTN
 OcFileDevicePathNameLen (
   IN CONST FILEPATH_DEVICE_PATH  *FilePath
   );
 
+/**
+  Duplicate device path with DevicePathInstance appended if it is not present.
+
+  @param[in] DevicePath          Device Path to append new instance to, optional.
+  @param[in] DevicePathInstance  Device Path instance to append.
+
+  @retval  New Device Path or NULL.
+**/
 EFI_DEVICE_PATH_PROTOCOL *
 OcAppendDevicePathInstanceDedupe (
   IN EFI_DEVICE_PATH_PROTOCOL        *DevicePath OPTIONAL,
-  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePathInstance OPTIONAL
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePathInstance
   );
 
+/**
+  Calculate number of device path instances.
+
+  @param[in]  DevicePath  Device Path to calculate instances in.
+
+  @retval  Number of instances in device path.
+**/
 UINTN
 OcGetNumDevicePathInstances (
   IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath

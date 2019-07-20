@@ -207,18 +207,6 @@ TrailedBooterDevicePath (
   return NULL;
 }
 
-/**
-  Fix Apple Boot Device Path to be compatible with conventional UEFI
-  implementations.
-
-  @param[in,out] DevicePath  On input, a pointer to the device path to fix.
-                             On output, the device path pointer is modified to
-                             point to the remaining part of the device path.
-
-  @retval -1     DevicePath could not be fixed.
-  @retval other  The number of fixed nodes in DevicePath.
-
-**/
 INTN
 OcFixAppleBootDevicePath (
   IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath
@@ -653,15 +641,6 @@ InternalDevicePathCmpWorker (
   }
 }
 
-/**
-  Check whether device paths are equal.
-
-  @param[in] DevicePath1  The first device path protocol to compare.
-  @param[in] DevicePath2  The second device path protocol to compare.
-
-  @retval TRUE         The device paths matched
-  @retval FALSE        The device paths were different
-**/
 BOOLEAN
 EFIAPI
 IsDevicePathEqual (
@@ -672,15 +651,6 @@ IsDevicePathEqual (
   return InternalDevicePathCmpWorker (DevicePath1, DevicePath2, FALSE);
 }
 
-/**
-  Check whether one device path exists in the other.
-
-  @param[in] ParentPath  The parent device path protocol to check against.
-  @param[in] ChildPath   The device path protocol of the child device to compare.
-
-  @retval TRUE         The child device path contains the parent device path.
-  @retval FALSE        The device paths were different
-**/
 BOOLEAN
 EFIAPI
 IsDevicePathChild (
@@ -691,12 +661,6 @@ IsDevicePathChild (
   return InternalDevicePathCmpWorker (ParentPath, ChildPath, TRUE);
 }
 
-/**
-  Returns the size of PathName.
-
-  @param[in] FilePath  The file Device Path node to inspect.
-
-**/
 UINTN
 OcFileDevicePathNameSize (
   IN CONST FILEPATH_DEVICE_PATH  *FilePath
@@ -707,12 +671,6 @@ OcFileDevicePathNameSize (
   return (OcFileDevicePathNameLen (FilePath) + 1) * sizeof (*FilePath->PathName);
 }
 
-/**
-  Returns the length of PathName.
-
-  @param[in] FilePath  The file Device Path node to inspect.
-
-**/
 UINTN
 OcFileDevicePathNameLen (
   IN CONST FILEPATH_DEVICE_PATH  *FilePath
@@ -739,39 +697,45 @@ OcFileDevicePathNameLen (
 EFI_DEVICE_PATH_PROTOCOL *
 OcAppendDevicePathInstanceDedupe (
   IN EFI_DEVICE_PATH_PROTOCOL        *DevicePath OPTIONAL,
-  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePathInstance OPTIONAL
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePathInstance
   )
 {
   INTN                           CmpResult;
 
   EFI_DEVICE_PATH_PROTOCOL       *DevPathWalker;
-  CONST EFI_DEVICE_PATH_PROTOCOL *CurrentInstance;
+  EFI_DEVICE_PATH_PROTOCOL       *CurrentInstance;
 
   UINTN                          AppendInstanceSize;
   UINTN                          CurrentInstanceSize;
 
-  if (DevicePath != NULL && DevicePathInstance != NULL) {
+  ASSERT (DevicePathInstance != NULL);
+
+  if (DevicePath != NULL) {
     AppendInstanceSize = GetDevicePathSize (DevicePathInstance);
     DevPathWalker = DevicePath;
 
     while (TRUE) {
       CurrentInstance = GetNextDevicePathInstance (
-                          &DevPathWalker,
-                          &CurrentInstanceSize
-                          );
+        &DevPathWalker,
+        &CurrentInstanceSize
+        );
       if (CurrentInstance == NULL) {
         break;
       }
 
       if (CurrentInstanceSize != AppendInstanceSize) {
+        FreePool (CurrentInstance);
         continue;
       }
 
       CmpResult = CompareMem (
-                    CurrentInstance,
-                    DevicePathInstance,
-                    CurrentInstanceSize
-                    );
+        CurrentInstance,
+        DevicePathInstance,
+        CurrentInstanceSize
+        );
+
+      FreePool (CurrentInstance);
+
       if (CmpResult == 0) {
         return DuplicateDevicePath (DevicePath);
       }
