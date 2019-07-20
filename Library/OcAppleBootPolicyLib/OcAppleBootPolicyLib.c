@@ -471,6 +471,8 @@ InternalGetBooterFromApfsVolumePredefinedNameList (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_BULK_INFO, "OCBP: Missing partition %s on preboot - %r\n", VolumeDirectoryName, Status));
     return Status;
+  } else {
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: Found partition %s on preboot\n", VolumeDirectoryName));
   }
 
   VolumeDirectoryInfo = GetFileInfo (
@@ -540,6 +542,7 @@ InternalGetBooterFromApfsPredefinedNameList (
   CHAR16                          VolumeDirectoryName[GUID_STRING_LENGTH+1];
   EFI_DEVICE_PATH_PROTOCOL        *VolumeDevPath;
   EFI_DEVICE_PATH_PROTOCOL        *TempDevPath;
+  BOOLEAN                         ContainerMatch;
 
   NumberOfHandles = 0;
   Status =  gBS->LocateHandleBuffer (
@@ -567,7 +570,7 @@ InternalGetBooterFromApfsPredefinedNameList (
     if (EFI_ERROR (TmpStatus)) {
       DEBUG ((
         DEBUG_BULK_INFO,
-        "OCBP: Borked filesystem %u of %u for APFS - %r\n",
+        "OCBP: Borked APFS filesystem %u of %u - %r\n",
         (UINT32) Index,
         (UINT32) NumberOfHandles,
         TmpStatus
@@ -579,7 +582,7 @@ InternalGetBooterFromApfsPredefinedNameList (
     if (EFI_ERROR (TmpStatus)) {
       DEBUG ((
         DEBUG_BULK_INFO,
-        "OCBP: Borked root volume %u of %u for APFS - %r\n",
+        "OCBP: Borked APFS root volume %u of %u - %r\n",
         (UINT32) Index,
         (UINT32) NumberOfHandles,
         TmpStatus
@@ -594,7 +597,7 @@ InternalGetBooterFromApfsPredefinedNameList (
     if (EFI_ERROR (TmpStatus)) {
       DEBUG ((
         DEBUG_BULK_INFO,
-        "OCBP: No apfs info %u of %u for APFS - %r\n",
+        "OCBP: No APFS info %u of %u - %r\n",
         (UINT32) Index,
         (UINT32) NumberOfHandles,
         TmpStatus
@@ -602,14 +605,19 @@ InternalGetBooterFromApfsPredefinedNameList (
       continue;
     }
 
+    ContainerMatch = CompareGuid (&ContainerInfo->Uuid, ContainerUuid);
+
     DEBUG ((
       DEBUG_BULK_INFO,
-      "OCBP: Trying to match container %g vs %g for APFS\n",
+      "OCBP: APFS match container %g vs %g for %u of %u - %d\n",
       &ContainerInfo->Uuid,
-      ContainerUuid
+      ContainerUuid,
+      (UINT32) Index,
+      (UINT32) NumberOfHandles,
+      ContainerMatch
       ));
 
-    if (!CompareGuid (&ContainerInfo->Uuid, ContainerUuid)) {
+    if (!ContainerMatch) {
       FreePool (ContainerInfo);
       FreePool (VolumeInfo);
       continue;
