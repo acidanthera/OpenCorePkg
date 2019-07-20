@@ -347,6 +347,8 @@ OcScanForBootEntries (
                       (VOID **)&DevPathScanInfo->HdDevicePath
                       );
       if (EFI_ERROR (Status)) {
+        FreePool (DevPathScanInfo->BootDevicePath);
+        DevPathScanInfo->BootDevicePath = NULL;
         continue;
       }
 
