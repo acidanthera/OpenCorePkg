@@ -639,13 +639,23 @@ InternalGetBooterFromApfsPredefinedNameList (
     if (EFI_ERROR (TmpStatus)) {
       DEBUG ((
         DEBUG_BULK_INFO,
-        "OCBP: No apfs booter %u of %u for APFS - %r\n",
+        "OCBP: No APFS booter %u of %u for %s - %r\n",
         (UINT32) Index,
         (UINT32) NumberOfHandles,
+        VolumeDirectoryName,
         TmpStatus
         ));
     } else {
       Status = EFI_SUCCESS;
+
+      DEBUG ((
+        DEBUG_BULK_INFO,
+        "OCBP: Found APFS booter %u of %u for %s (%p)\n",
+        (UINT32) Index,
+        (UINT32) NumberOfHandles,
+        VolumeDirectoryName,
+        DevicePath
+        ));
 
       if (DevicePath == NULL) {
         break;
