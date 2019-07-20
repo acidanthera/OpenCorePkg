@@ -995,9 +995,8 @@ BootPolicyGetBootInfo (
   *Device       = DeviceHandle;
   *BootPathName = PathName;
 
-  InternalGetApfsVolumeHandle (DeviceHandle, PathName, ApfsVolumeHandle);
-
-  return EFI_SUCCESS;
+  // CHANGE: Apple always returns success here.
+  return InternalGetApfsVolumeHandle (DeviceHandle, PathName, ApfsVolumeHandle);
 }
 
 EFI_STATUS
