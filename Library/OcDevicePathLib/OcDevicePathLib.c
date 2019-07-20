@@ -780,3 +780,23 @@ OcAppendDevicePathInstanceDedupe (
 
   return AppendDevicePathInstance (DevicePath, DevicePathInstance);
 }
+
+UINTN
+OcGetNumDevicePathInstances (
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+  UINTN NumInstances;
+
+  NumInstances = 1;
+
+  while (!IsDevicePathEnd (DevicePath)) {
+    if (IsDevicePathEndInstance (DevicePath)) {
+      ++NumInstances;
+    }
+
+    DevicePath = NextDevicePathNode (DevicePath);
+  }
+
+  return NumInstances;
+}

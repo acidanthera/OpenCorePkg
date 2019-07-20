@@ -84,6 +84,13 @@ typedef struct OC_BOOT_ENTRY_ {
 #define OC_SCAN_DEVICE_LOCK              BIT1
 
 /**
+  Perform filtering based on booter origin.
+  Ignores all blessed options not on the same partition.
+  Remove this bit to allow foreign booters.
+**/
+#define OC_SCAN_SELF_TRUST_LOCK          BIT2
+
+/**
   Allow scanning APFS filesystems.
 **/
 #define OC_SCAN_ALLOW_FS_APFS            BIT8
@@ -158,9 +165,9 @@ typedef struct OC_BOOT_ENTRY_ {
 **/
 #define OC_SCAN_DEFAULT_POLICY ( \
   OC_SCAN_FILE_SYSTEM_LOCK   | OC_SCAN_DEVICE_LOCK | \
-  OC_SCAN_ALLOW_FS_APFS      | OC_SCAN_ALLOW_DEVICE_SATA | \
-  OC_SCAN_ALLOW_DEVICE_SASEX | OC_SCAN_ALLOW_DEVICE_SCSI | \
-  OC_SCAN_ALLOW_DEVICE_NVME)
+  OC_SCAN_SELF_TRUST_LOCK    | OC_SCAN_ALLOW_FS_APFS | \
+  OC_SCAN_ALLOW_DEVICE_SATA  | OC_SCAN_ALLOW_DEVICE_SASEX | \
+  OC_SCAN_ALLOW_DEVICE_SCSI  | OC_SCAN_ALLOW_DEVICE_NVME)
 
 /**
   OcLoadBootEntry Mode policy bits allow to configure OcLoadBootEntry behaviour.
@@ -355,30 +362,6 @@ VOID
 OcFreeBootEntries (
   IN OUT OC_BOOT_ENTRY              *BootEntries,
   IN     UINTN                      Count
-  );
-
-/**
-  Fill boot entry from device handle.
-
-  @param[in]  BootPolicy          Apple Boot Policy Protocol.
-  @param[in]  Policy              Scan policy.
-  @param[in]  Handle              Device handle (with EfiSimpleFileSystem protocol).
-  @param[out] BootEntry           Resulting boot entry.
-  @param[out] AlternateBootEntry  Resulting alternate boot entry (e.g. recovery).
-  @param[in]  IsLoadHandle        OpenCore load handle, try skipping OC entry.
-
-  @retval 0  no entries were filled.
-  @retval 1  boot entry was filled.
-  @retval 2  boot entry and alternate entry were filled.
-**/
-UINTN
-OcFillBootEntry (
-  IN  APPLE_BOOT_POLICY_PROTOCOL      *BootPolicy,
-  IN  UINT32                          Policy,
-  IN  EFI_HANDLE                      Handle,
-  OUT OC_BOOT_ENTRY                   *BootEntry,
-  OUT OC_BOOT_ENTRY                   *AlternateBootEntry OPTIONAL,
-  IN  BOOLEAN                         IsLoadHandle
   );
 
 /**

@@ -163,6 +163,11 @@ OcAppendDevicePathInstanceDedupe (
   IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePathInstance OPTIONAL
   );
 
+UINTN
+OcGetNumDevicePathInstances (
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  );
+
 /**
   Fix Apple Boot Device Path to be compatible with conventional UEFI
   implementations.
