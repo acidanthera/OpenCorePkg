@@ -237,7 +237,7 @@ OcScanForBootEntries (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  DevPathScanInfos = AllocatePool (DevPathScanInfoSize); ///< WARN Non zero
+  DevPathScanInfos = AllocateZeroPool (DevPathScanInfoSize);
   if (DevPathScanInfos == NULL) {
     FreePool (Handles);
     return EFI_OUT_OF_RESOURCES;
@@ -280,7 +280,7 @@ OcScanForBootEntries (
     return EFI_NOT_FOUND;
   }
 
-  Entries = AllocatePool (EntriesSize);
+  Entries = AllocateZeroPool (EntriesSize);
   if (Entries == NULL) {
     FreePool (DevPathScanInfos);
     return EFI_OUT_OF_RESOURCES;

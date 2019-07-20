@@ -31,9 +31,9 @@ typedef struct {
 } INTERNAL_DMG_LOAD_CONTEXT;
 
 typedef struct {
-  UINTN                    HdPrefixSize;
-  UINTN                    NumBootInstances;
   EFI_HANDLE               Device;
+  UINTN                    NumBootInstances;
+  UINTN                    HdPrefixSize;
   EFI_DEVICE_PATH_PROTOCOL *HdDevicePath;
   EFI_DEVICE_PATH_PROTOCOL *BootDevicePath;
   BOOLEAN                  IsExternal;
