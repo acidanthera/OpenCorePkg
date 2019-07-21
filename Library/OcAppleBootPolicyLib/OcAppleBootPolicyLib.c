@@ -230,7 +230,7 @@ InternalGetBooterFromBlessedSystemFilePath (
     return EFI_NOT_FOUND;
   }
 
-  DebugPrintHexDump (DEBUG_BULK_INFO, "BlessedFileHEX", (UINT8 *) *FilePath, FilePathSize);
+  DebugPrintHexDump (DEBUG_BULK_INFO, "OCBP: BlessedFileHEX", (UINT8 *) *FilePath, FilePathSize);
 
   if (!IsDevicePathValid (*FilePath, FilePathSize)) {
     DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed file is invalid\n"));
@@ -239,7 +239,7 @@ InternalGetBooterFromBlessedSystemFilePath (
     return EFI_NOT_FOUND;
   }
 
-  DebugPrintDevicePath (DEBUG_BULK_INFO, "BlessedFileDP", *FilePath);
+  DebugPrintDevicePath (DEBUG_BULK_INFO, "OCBP: BlessedFileDP", *FilePath);
 
   DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed file is valid\n"));
 
@@ -277,7 +277,7 @@ InternalGetBooterFromBlessedSystemFolderPath (
     return Status;
   }
 
-  DebugPrintHexDump (DEBUG_BULK_INFO, "BlessedFolderHEX", (UINT8 *) DevicePath, DevicePathSize);
+  DebugPrintHexDump (DEBUG_BULK_INFO, "OCBP: BlessedFolderHEX", (UINT8 *) DevicePath, DevicePathSize);
 
   if (!IsDevicePathValid (DevicePath, DevicePathSize)) {
     DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed folder is invalid\n"));
@@ -285,7 +285,7 @@ InternalGetBooterFromBlessedSystemFolderPath (
     return EFI_NOT_FOUND;
   }
 
-  DebugPrintDevicePath (DEBUG_BULK_INFO, "BlessedFolderDP", DevicePath);
+  DebugPrintDevicePath (DEBUG_BULK_INFO, "OCBP: BlessedFolderDP", DevicePath);
 
   DevicePathWalker = DevicePath;
 
@@ -382,6 +382,7 @@ InternalGetBooterFromPredefinedNameList (
           *DevicePath = FileDevicePath (Device, PathName);
         }
       }
+      ASSERT (DevicePath == NULL || *DevicePath != NULL);
       return EFI_SUCCESS;
     } else {
       DEBUG ((
@@ -532,7 +533,7 @@ InternalGetBooterFromApfsPredefinedNameList (
   IN  EFI_HANDLE                      Device,
   IN  EFI_FILE_PROTOCOL               *PrebootRoot,
   IN  CONST GUID                      *ContainerUuid,
-  IN  CONST CHAR16                    *VolumeUuid,
+  IN  CONST CHAR16                    *VolumeUuid  OPTIONAL,
   OUT EFI_DEVICE_PATH_PROTOCOL        **DevicePath  OPTIONAL,
   OUT EFI_HANDLE                      *VolumeHandle  OPTIONAL
   )
@@ -551,6 +552,8 @@ InternalGetBooterFromApfsPredefinedNameList (
   EFI_DEVICE_PATH_PROTOCOL        *VolumeDevPath;
   EFI_DEVICE_PATH_PROTOCOL        *TempDevPath;
   BOOLEAN                         ContainerMatch;
+
+  ASSERT (VolumeUuid == NULL || (VolumeUuid != NULL && VolumeHandle != NULL && *VolumeHandle == NULL));
 
   NumberOfHandles = 0;
   Status =  gBS->LocateHandleBuffer (
@@ -673,17 +676,15 @@ InternalGetBooterFromApfsPredefinedNameList (
         DevicePath
         ));
 
-      if (DevicePath == NULL) {
-        break;
-      }
-
-      TempDevPath = *DevicePath;
-      *DevicePath = OcAppendDevicePathInstanceDedupe (
-                      TempDevPath,
-                      VolumeDevPath
-                      );
-      if (TempDevPath != NULL) {
-        FreePool (TempDevPath);
+      if (DevicePath != NULL) {
+        TempDevPath = *DevicePath;
+        *DevicePath = OcAppendDevicePathInstanceDedupe (
+                        TempDevPath,
+                        VolumeDevPath
+                        );
+        if (TempDevPath != NULL) {
+          FreePool (TempDevPath);
+        }
       }
     }
   }
@@ -1099,12 +1100,13 @@ BootPolicyGetPathNameOnApfsRecovery (
     return EFI_NOT_FOUND;
   }
 
-  FreePool (BootPathName);
-
   if (VolumeHandle == NULL) {
-    DEBUG ((DEBUG_BULK_INFO, "OCBP: APFS recovery volume handle missing\n"));
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: APFS recovery volume handle missing - %s\n", BootPathName));
+    FreePool (BootPathName);
     return EFI_NOT_FOUND;
   }
+
+  FreePool (BootPathName);
 
   Status = InternalGetApfsVolumeInfo (
              VolumeHandle,
