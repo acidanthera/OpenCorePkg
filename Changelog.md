@@ -6,7 +6,8 @@ OpenCore Changelog
 - Fixed kext injection issues with reused vtables
 - Fixed Custom SMBIOS table update patches
 - Added timestamp to the log file and changed extension to txt
-- Enhanced script `LogoutHook`
+- Enhanced `LogoutHook` script used for emulated NVRAM saving
+- Fixed multiple operating system support in APFS containers
 
 #### v0.0.3
 - Added complete modern platform database (2012+)
