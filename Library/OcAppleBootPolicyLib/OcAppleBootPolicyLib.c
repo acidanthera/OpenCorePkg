@@ -924,6 +924,7 @@ BootPolicyGetBootFileEx (
   )
 {
   EFI_STATUS                      Status;
+  EFI_STATUS                      TmpStatus;
 
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem;
   EFI_FILE_PROTOCOL               *Root;
@@ -953,19 +954,24 @@ BootPolicyGetBootFileEx (
   if (!EFI_ERROR (Status)) {
     Status = EFI_NOT_FOUND;
     if ((VolumeInfo->Role & APPLE_APFS_VOLUME_ROLE_PREBOOT) != 0) {
-      Status = InternalGetBooterFromBlessedSystemFilePath (Root, FilePath);
-      if (EFI_ERROR (Status)) {
-        Status = InternalGetBooterFromBlessedSystemFolderPath (Device, Root, FilePath);
-        if (EFI_ERROR (Status)) {
-          Status = InternalGetBooterFromApfsPredefinedNameList (
-                     Device,
-                     Root,
-                     &ContainerInfo->Uuid,
-                     NULL,
-                     FilePath,
-                     NULL
-                     );
-        }
+      TmpStatus = InternalGetBooterFromBlessedSystemFilePath (Root, FilePath);
+      if (EFI_ERROR (TmpStatus)) {
+        TmpStatus = InternalGetBooterFromBlessedSystemFolderPath (Device, Root, FilePath);
+      }
+
+      //
+      // Blessed entry is always first, and subsequent entries are added with deduplication.
+      //
+      Status = InternalGetBooterFromApfsPredefinedNameList (
+                 Device,
+                 Root,
+                 &ContainerInfo->Uuid,
+                 NULL,
+                 FilePath,
+                 NULL
+                 );
+      if (!EFI_ERROR (TmpStatus)) {
+        Status = TmpStatus;
       }
     }
 
