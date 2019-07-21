@@ -167,13 +167,13 @@ InternalGetApfsSpecialFileInfo (
       );
 
     if (*VolumeInfo == NULL) {
-      DEBUG ((DEBUG_BULK_INFO, "OCBP: Apfs Volume Info is missing\n"));
+      DEBUG ((DEBUG_BULK_INFO, "OCBP: APFS Volume Info is missing\n"));
       return EFI_NOT_FOUND;
     }
 
     DEBUG ((
       DEBUG_BULK_INFO,
-      "OCBP: Apfs Volume Info - %p (%u, %g, %u)\n",
+      "OCBP: APFS Volume Info - %p (%u, %g, %u)\n",
       *VolumeInfo,
       (*VolumeInfo)->Always1,
       &(*VolumeInfo)->Uuid,
@@ -190,7 +190,7 @@ InternalGetApfsSpecialFileInfo (
       );
 
     if (*ContainerInfo == NULL) {
-      DEBUG ((DEBUG_BULK_INFO, "OCBP: Apfs Container Info is missing\n"));
+      DEBUG ((DEBUG_BULK_INFO, "OCBP: APFS Container Info is missing\n"));
       if (VolumeInfo != NULL) {
         FreePool (*VolumeInfo);
       }
@@ -199,7 +199,7 @@ InternalGetApfsSpecialFileInfo (
 
     DEBUG ((
       DEBUG_BULK_INFO,
-      "OCBP: Apfs Container Info - %p (%u, %g)\n",
+      "OCBP: APFS Container Info - %p (%u, %g)\n",
       *ContainerInfo,
       (*ContainerInfo)->Always1,
       &(*ContainerInfo)->Uuid
@@ -692,7 +692,7 @@ InternalGetBooterFromApfsPredefinedNameList (
 
   DEBUG ((
     DEBUG_BULK_INFO,
-    "OCBP: Apfs bless for %g:%s is %r\n",
+    "OCBP: APFS bless for %g:%s is %r\n",
     ContainerUuid,
     VolumeUuid,
     Status
@@ -1095,12 +1095,14 @@ BootPolicyGetPathNameOnApfsRecovery (
              );
 
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: APFS recovery boot info failed - %r\n", Status));
     return EFI_NOT_FOUND;
   }
 
   FreePool (BootPathName);
 
   if (VolumeHandle == NULL) {
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: APFS recovery volume handle missing\n"));
     return EFI_NOT_FOUND;
   }
 
@@ -1112,6 +1114,7 @@ BootPolicyGetPathNameOnApfsRecovery (
              );
 
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: APFS recovery volume info missing\n"));
     return EFI_NOT_FOUND;
   }
 
@@ -1124,6 +1127,7 @@ BootPolicyGetPathNameOnApfsRecovery (
             );
 
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_BULK_INFO, "OCBP: APFS recovery simple fs missing - %r\n", Status));
     return Status;
   }
 
@@ -1136,6 +1140,18 @@ BootPolicyGetPathNameOnApfsRecovery (
                &VolumeGuid2,
                &VolumeRole2
                );
+
+    DEBUG ((
+      DEBUG_BULK_INFO,
+      "OCBP: APFS recovery info %u/%u due to %g/%g/%X - %r\n",
+      (UINT32) Index,
+      (UINT32) NoHandles,
+      &ContainerGuid2,
+      &ContainerGuid,
+      (UINT32) VolumeRole2,
+      Status
+      ));
+
     if (EFI_ERROR (Status)
       || VolumeRole2 != APPLE_APFS_VOLUME_ROLE_RECOVERY
       || !CompareGuid (&ContainerGuid2, &ContainerGuid)) {

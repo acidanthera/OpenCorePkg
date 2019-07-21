@@ -519,6 +519,15 @@ InternalFillValidBootEntries (
       }
     }
 
+    DEBUG ((
+      DEBUG_BULK_INFO,
+      "OCB: Adding entry %u, external - %d, skip recovery - %d\n",
+      (UINT32) EntryIndex,
+      Entries[EntryIndex].IsExternal,
+      DevPathScanInfo->SkipRecovery
+      ));
+    DebugPrintDevicePath (DEBUG_BULK_INFO, "DevicePath", DevicePath);
+
     Entries[EntryIndex].DevicePath = DevicePath;
     Entries[EntryIndex].IsExternal = DevPathScanInfo->IsExternal;
     InternalSetBootEntryFlags (&Entries[EntryIndex]);
@@ -528,6 +537,7 @@ InternalFillValidBootEntries (
       continue;
     }
 
+    RecoveryPath = NULL;
     Status = BootPolicy->GetPathNameOnApfsRecovery (
       DevicePath,
       L"\\",
@@ -536,6 +546,14 @@ InternalFillValidBootEntries (
       &RecoveryRoot,
       &RecoveryDeviceHandle
       );
+
+    DEBUG ((
+      DEBUG_BULK_INFO,
+      "OCB: Adding entry %u recovery (%s) - %r\n",
+      Entries[EntryIndex].IsExternal,
+      RecoveryPath != NULL ? RecoveryPath : L"<null>",
+      Status
+      ));
 
     if (!EFI_ERROR (Status)) {
       DevicePath = FileDevicePath (RecoveryDeviceHandle, RecoveryPath);
