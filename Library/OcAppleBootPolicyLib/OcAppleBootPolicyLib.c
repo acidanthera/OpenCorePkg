@@ -230,12 +230,16 @@ InternalGetBooterFromBlessedSystemFilePath (
     return EFI_NOT_FOUND;
   }
 
+  DebugPrintHexDump (DEBUG_BULK_INFO, "BlessedFileHEX", (UINT8 *) *FilePath, FilePathSize);
+
   if (!IsDevicePathValid (*FilePath, FilePathSize)) {
     DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed file is invalid\n"));
     FreePool (*FilePath);
     *FilePath = NULL;
     return EFI_NOT_FOUND;
   }
+
+  DebugPrintDevicePath (DEBUG_BULK_INFO, "BlessedFileDP", *FilePath);
 
   DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed file is valid\n"));
 
@@ -273,11 +277,15 @@ InternalGetBooterFromBlessedSystemFolderPath (
     return Status;
   }
 
+  DebugPrintHexDump (DEBUG_BULK_INFO, "BlessedFolderHEX", (UINT8 *) DevicePath, DevicePathSize);
+
   if (!IsDevicePathValid (DevicePath, DevicePathSize)) {
     DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed folder is invalid\n"));
     FreePool (DevicePath);
     return EFI_NOT_FOUND;
   }
+
+  DebugPrintDevicePath (DEBUG_BULK_INFO, "BlessedFolderDP", DevicePath);
 
   DevicePathWalker = DevicePath;
 
