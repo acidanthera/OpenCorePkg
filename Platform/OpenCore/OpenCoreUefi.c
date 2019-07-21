@@ -285,7 +285,7 @@ OcLoadUefiSupport (
     );
 
   //
-  // Inform AMF whether we want Boot#### routing or not.
+  // Inform platform support whether we want Boot#### routing or not.
   //
   gRT->SetVariable (
     OC_BOOT_REDIRECT_VARIABLE_NAME,
@@ -293,6 +293,17 @@ OcLoadUefiSupport (
     OPEN_CORE_INT_NVRAM_ATTR,
     sizeof (Config->Uefi.Quirks.RequestBootVarRouting),
     &Config->Uefi.Quirks.RequestBootVarRouting
+    );
+
+  //
+  // Inform allocations when we want to use lower memory only.
+  //
+  gRT->SetVariable (
+    OC_AVOID_HIGH_ALLOC_VARIABLE_NAME,
+    &gOcVendorVariableGuid,
+    OPEN_CORE_INT_NVRAM_ATTR,
+    sizeof (Config->Uefi.Quirks.AvoidHighAlloc),
+    &Config->Uefi.Quirks.AvoidHighAlloc
     );
 
   if (Config->Uefi.Quirks.ReleaseUsbOwnership

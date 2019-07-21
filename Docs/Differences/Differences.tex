@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Jul  3 23:30:18 2019
-%DIF ADD ../Configuration.tex        Sun Jul 21 01:08:29 2019
+%DIF ADD ../Configuration.tex        Sun Jul 21 18:28:42 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3123,7 +3123,19 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \begin{enumerate}
 
 \item
-  \texttt{ExitBootServicesDelay}\\
+  \DIFaddbegin \texttt{\DIFadd{AvoidHighAlloc}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Advises allocators to avoid allocations above first 4 GBs of RAM.
+}
+
+  \DIFadd{This is a workaround for select board firmwares, namely GA-Z77P-D3 (rev. 1.1), failing
+  to properly access higher memory in UEFI Boot Services. Not recommended unless required
+  for booting. May cause recovery boot failures on unaffected boards.
+}
+
+\item
+  \DIFaddend \texttt{ExitBootServicesDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Adds delay in microseconds after \texttt{EXIT\_BOOT\_SERVICES}

@@ -8,6 +8,7 @@ OpenCore Changelog
 - Added timestamp to the log file and changed extension to txt
 - Enhanced `LogoutHook` script used for emulated NVRAM saving
 - Fixed multiple operating system support in APFS containers
+- Added `AvoidHighAlloc` UEFI quirk to avoid high memory allocs
 
 #### v0.0.3
 - Added complete modern platform database (2012+)
