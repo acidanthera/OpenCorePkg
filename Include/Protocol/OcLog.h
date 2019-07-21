@@ -15,6 +15,7 @@
 #ifndef OC_LOG_PROTOCOL_H
 #define OC_LOG_PROTOCOL_H
 
+#include <Uefi.h>
 #include <Protocol/SimpleFileSystem.h>
 
 ///

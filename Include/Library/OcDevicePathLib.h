@@ -95,20 +95,6 @@ IsDevicePathChild (
   );
 
 /**
-  Print debug path to log.
-
-  @param[in] ErrorLevel  Debug error level.
-  @param[in] ChildPath   Prefixed message.
-  @param[in] DevicePath  Device path to print.
-**/
-VOID
-DebugPrintDevicePath (
-  IN UINTN                     ErrorLevel,
-  IN CONST CHAR8               *Message,
-  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
-  );
-
-/**
   Get absolute device path.
 
   @param[in] Handle        Device handle.

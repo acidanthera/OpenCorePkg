@@ -93,26 +93,6 @@ FindDevicePathNodeWithType (
   return DevicePathNode;
 }
 
-VOID
-DebugPrintDevicePath (
-  IN UINTN                     ErrorLevel,
-  IN CONST CHAR8               *Message,
-  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
-  )
-{
-  DEBUG_CODE_BEGIN();
-
-  CHAR16 *TextDevicePath;
-
-  TextDevicePath = ConvertDevicePathToText (DevicePath, TRUE, FALSE);
-  DEBUG ((ErrorLevel, "%a - %s\n", Message, TextDevicePath));
-  if (TextDevicePath != NULL) {
-    FreePool (TextDevicePath);
-  }
-
-  DEBUG_CODE_END();
-}
-
 EFI_DEVICE_PATH_PROTOCOL *
 AbsoluteDevicePath (
   IN EFI_HANDLE                Handle,

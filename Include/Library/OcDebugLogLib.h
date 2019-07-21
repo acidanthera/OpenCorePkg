@@ -18,6 +18,9 @@
 #include <Library/DebugLib.h>
 #include <Protocol/OcLog.h>
 
+#define OC_HEX_LOWER(x) "0123456789ABCDEF"[(UINT32) (x) >> 4U]
+#define OC_HEX_UPPER(x) "0123456789ABCDEF"[((UINT32) (x) & 0xF0U) >> 4U]
+
 /**
   Debug information that is not logged when NVRAM logging is on.
 **/
@@ -96,6 +99,36 @@ WaitForKeyPress (
 INTN
 WaitForKeyIndex (
   UINTN  TimeOutSeconds
+  );
+
+/**
+  Print Device Path to log.
+
+  @param[in] ErrorLevel  Debug error level.
+  @param[in] Message     Prefixed message.
+  @param[in] DevicePath  Device path to print.
+**/
+VOID
+DebugPrintDevicePath (
+  IN UINTN                     ErrorLevel,
+  IN CONST CHAR8               *Message,
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  );
+
+/**
+  Print hex dump to log.
+
+  @param[in] ErrorLevel  Debug error level.
+  @param[in] Message     Prefixed message.
+  @param[in] Bytes       Byte sequence.
+  @param[in] Size        Byte sequence size.
+**/
+VOID
+DebugPrintHexDump (
+  IN UINTN                     ErrorLevel,
+  IN CONST CHAR8               *Message,
+  IN UINT8                     *Bytes,
+  IN UINTN                     Size
   );
 
 #endif // OC_DEBUG_LOG_LIB_H
