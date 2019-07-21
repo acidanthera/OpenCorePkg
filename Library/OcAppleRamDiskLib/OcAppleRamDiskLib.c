@@ -19,7 +19,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/AppleRamDisk.h>
 
 #include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleRamDiskLib.h>
 #include <Library/OcFileLib.h>
@@ -138,7 +138,7 @@ InternalAllocateRemainingSize (
 
       if (EntryWalker->Type != EfiConventionalMemory
         || EntryWalker->PhysicalStart < BaseAddress
-        || TopAddress >= EntryWalker->PhysicalStart) {
+        || EntryWalker->PhysicalStart >= TopAddress) {
         continue;
       }
 
@@ -320,6 +320,15 @@ OcAppleRamDiskAllocate (
     //
     ExtentTable = InternalAppleRamDiskAllocate (Size, MemoryType, FALSE, AvoidHighMem);
   }
+
+  DEBUG ((
+    DEBUG_BULK_INFO,
+    "OCRAM: Extent allocation of %u bytes (%x) gave %p (avoid high %d)\n",
+    (UINT32) Size,
+    (UINT32) MemoryType,
+    ExtentTable,
+    AvoidHighMem
+    ));
 
   return ExtentTable;
 }
