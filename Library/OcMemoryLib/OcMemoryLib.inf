@@ -42,6 +42,6 @@
   OcStringLib
 
 [Sources]
-  GetMemoryMap.c
+  MemoryMap.c
   LegacyRegionLock.c
   LegacyRegionUnLock.c
