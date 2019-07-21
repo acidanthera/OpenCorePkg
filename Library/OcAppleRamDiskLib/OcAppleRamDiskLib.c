@@ -14,6 +14,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Uefi.h>
 
+#include <Guid/OcVariables.h>
+
 #include <Protocol/AppleRamDisk.h>
 
 #include <Library/BaseMemoryLib.h>
@@ -22,8 +24,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcAppleRamDiskLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcGuardLib.h>
+#include <Library/OcMemoryLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiLib.h>
 
 #define INTERNAL_ASSERT_EXTENT_TABLE_VALID(ExtentTable)                        \
@@ -91,6 +95,7 @@ InternalAddAllocatedArea (
   extent.
 
   @param[in]     BaseAddress    Starting allocation address.
+  @param[in]     TopAddress     Ending allocation address.
   @param[in]     MemoryType     Requested memory type.
   @param[in,out] MemoryMap      Current memory map modified as we go.
   @param[in]     MemoryMapSize  Current memory map size.
@@ -104,6 +109,7 @@ STATIC
 UINTN
 InternalAllocateRemainingSize (
   IN     EFI_PHYSICAL_ADDRESS         BaseAddress,
+  IN     EFI_PHYSICAL_ADDRESS         TopAddress,
   IN     EFI_MEMORY_TYPE              MemoryType,
   IN OUT EFI_MEMORY_DESCRIPTOR        *MemoryMap,
   IN     UINTN                        MemoryMapSize,
@@ -116,32 +122,42 @@ InternalAllocateRemainingSize (
   EFI_MEMORY_DESCRIPTOR  *EntryWalker;
   EFI_MEMORY_DESCRIPTOR  *BiggestEntry;
   EFI_PHYSICAL_ADDRESS   AllocatedArea;
+  UINTN                  BiggestSize;
   UINTN                  UsedSize;
 
   while (RemainingSize > 0 && (*ExtentTable == NULL
     || (*ExtentTable)->ExtentCount < ARRAY_SIZE ((*ExtentTable)->Extents))) {
 
     BiggestEntry = NULL;
+    BiggestSize = 0;
 
     for (
       EntryWalker = MemoryMap;
       (UINT8 *)EntryWalker < ((UINT8 *)MemoryMap + MemoryMapSize);
       EntryWalker = NEXT_MEMORY_DESCRIPTOR (EntryWalker, DescriptorSize)) {
 
-      if (EntryWalker->Type != EfiConventionalMemory || EntryWalker->PhysicalStart < BaseAddress) {
+      if (EntryWalker->Type != EfiConventionalMemory
+        || EntryWalker->PhysicalStart < BaseAddress
+        || TopAddress >= EntryWalker->PhysicalStart) {
         continue;
       }
 
-      if (BiggestEntry == NULL || EntryWalker->NumberOfPages > BiggestEntry->NumberOfPages) {
+      UsedSize = EFI_PAGES_TO_SIZE (EntryWalker->NumberOfPages);
+      if (EntryWalker->PhysicalStart + UsedSize > TopAddress) {
+        UsedSize = TopAddress - EntryWalker->PhysicalStart;
+      }
+
+      if (BiggestEntry == NULL || UsedSize > BiggestSize) {
         BiggestEntry = EntryWalker;
+        BiggestSize  = UsedSize;
       }
     }
 
-    if (BiggestEntry == NULL || BiggestEntry->NumberOfPages == 0) {
+    if (BiggestEntry == NULL || BiggestSize == 0) {
       return FALSE;
     }
 
-    UsedSize = MIN (EFI_PAGES_TO_SIZE (BiggestEntry->NumberOfPages), RemainingSize);
+    UsedSize = MIN (BiggestSize, RemainingSize);
 
     AllocatedArea = BiggestEntry->PhysicalStart;
     Status = gBS->AllocatePages (
@@ -185,7 +201,8 @@ CONST APPLE_RAM_DISK_EXTENT_TABLE *
 InternalAppleRamDiskAllocate (
   IN UINTN            Size,
   IN EFI_MEMORY_TYPE  MemoryType,
-  IN BOOLEAN          PreferHighMem
+  IN BOOLEAN          PreferHighMem,
+  IN BOOLEAN          AvoidHighMem
   )
 {
   UINTN                        MemoryMapSize;
@@ -212,9 +229,10 @@ InternalAppleRamDiskAllocate (
   // in the lower addresses (see more detail in AptioMemoryFix) depending on
   // KASLR offset generated randomly or with slide boot argument.
   //
-  if (PreferHighMem) {
+  if (PreferHighMem && !AvoidHighMem) {
     RemainingSize = InternalAllocateRemainingSize (
       BASE_4GB,
+      BASE_8EB,
       MemoryType,
       MemoryMap,
       MemoryMapSize,
@@ -242,6 +260,7 @@ InternalAppleRamDiskAllocate (
   //
   RemainingSize = InternalAllocateRemainingSize (
     0,
+    AvoidHighMem ? BASE_4GB : BASE_8EB,
     MemoryType,
     MemoryMap,
     MemoryMapSize,
@@ -265,18 +284,41 @@ OcAppleRamDiskAllocate (
   IN EFI_MEMORY_TYPE  MemoryType
   )
 {
-  CONST APPLE_RAM_DISK_EXTENT_TABLE *ExtentTable;
+  CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable;
+  UINTN                              AvoidHighMemSize;
+  EFI_STATUS                         Status;
+  BOOLEAN                            AvoidHighMem;
 
   //
-  // Try to allocate preferrably above BASE_4GB to avoid colliding with the kernel.
+  // Respect OpenCore recommendation of memory usage.
   //
-  ExtentTable = InternalAppleRamDiskAllocate (Size, MemoryType, TRUE);
+  AvoidHighMemSize = sizeof (AvoidHighMem);
+  Status = gRT->GetVariable (
+    OC_AVOID_HIGH_ALLOC_VARIABLE_NAME,
+    &gOcVendorVariableGuid,
+    NULL,
+    &AvoidHighMemSize,
+    &AvoidHighMem
+    );
+  if (EFI_ERROR (Status)) {
+    AvoidHighMem = FALSE;
+  }
+
+  if (!AvoidHighMem) {
+    //
+    // Try to allocate preferrably above BASE_4GB to avoid colliding with the kernel.
+    //
+    ExtentTable = InternalAppleRamDiskAllocate (Size, MemoryType, TRUE, FALSE);
+  } else {
+    ExtentTable = NULL;
+  }
+
   if (ExtentTable == NULL) {
     //
     // Being here means that we exceeded entry amount in the extent table.
     // Retry with any addresses. Should never happen in reality.
     //
-    ExtentTable = InternalAppleRamDiskAllocate (Size, MemoryType, FALSE);
+    ExtentTable = InternalAppleRamDiskAllocate (Size, MemoryType, FALSE, AvoidHighMem);
   }
 
   return ExtentTable;

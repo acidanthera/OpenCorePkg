@@ -43,4 +43,22 @@ LegacyRegionUnlock (
   IN UINT32  LegacyLength
   );
 
+/**
+  Get current memory map allocated on pool.
+
+  @param[out]  MemoryMapSize      Resulting memory map size in bytes.
+  @param[out]  DescriptorSize     Resulting memory map descriptor size in bytes.
+  @param[out]  MapKey             Memory map key, optional.
+  @param[out]  DescriptorVersion  Memory map version, optional.
+
+  @retval current memory map or NULL.
+**/
+EFI_MEMORY_DESCRIPTOR *
+GetCurrentMemoryMap (
+  OUT UINTN   *MemoryMapSize,
+  OUT UINTN   *DescriptorSize,
+  OUT UINTN   *MapKey             OPTIONAL,
+  OUT UINT32  *DescriptorVersion  OPTIONAL
+  );
+
 #endif // OC_MEMORY_LIB_H
