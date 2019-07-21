@@ -18,7 +18,7 @@
 #include <Library/DebugLib.h>
 #include <Protocol/OcLog.h>
 
-#define OC_HEX_LOWER(x) "0123456789ABCDEF"[(UINT32) (x) >> 4U]
+#define OC_HEX_LOWER(x) "0123456789ABCDEF"[((UINT32) (x) & 0x0FU)]
 #define OC_HEX_UPPER(x) "0123456789ABCDEF"[((UINT32) (x) & 0xF0U) >> 4U]
 
 /**

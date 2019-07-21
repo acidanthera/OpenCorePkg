@@ -49,6 +49,7 @@ DebugPrintHexDump (
   UINTN  Index;
   UINTN  Index2;
   UINTN  Count;
+  UINTN  SizeLeft;
   UINTN  MaxPerLine;
   CHAR8  *HexLine;
   CHAR8  *HexLineCurrent;
@@ -61,17 +62,19 @@ DebugPrintHexDump (
     return;
   }
 
+  SizeLeft = Size;
+
   for (Index = 0; Index < Count; ++Index) {
     HexLineCurrent = HexLine;
 
-    for (Index2 = 0; Size > 0 && Index2 < MaxPerLine; ++Index) {
+    for (Index2 = 0; SizeLeft > 0 && Index2 < MaxPerLine; ++Index2) {
       if (Index2 > 0) {
         *HexLineCurrent++ = ' ';
       }
 
       *HexLineCurrent++ = OC_HEX_UPPER (*Bytes);
       *HexLineCurrent++ = OC_HEX_LOWER (*Bytes);
-      --Size;
+      --SizeLeft;
       ++Bytes;
     }
 
@@ -80,6 +83,7 @@ DebugPrintHexDump (
     DEBUG ((
       ErrorLevel,
       "%a (%u/%u %u) - %a\n",
+      Message,
       (UINT32) Index + 1,
       (UINT32) Count,
       (UINT32) Size,
