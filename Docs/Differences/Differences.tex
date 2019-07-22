@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Jul  3 23:30:18 2019
-%DIF ADD ../Configuration.tex        Sun Jul 21 18:28:42 2019
+%DIF ADD ../Configuration.tex        Mon Jul 22 20:31:30 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3326,10 +3326,9 @@ OK; writing new GUID partition table (GPT) to \\.\physicaldrive0.
 Disk synchronization succeeded! The computer should now use the new partition table.
 The operation has completed successfully.
 \end{lstlisting}
-\DIFaddbegin 
 
 
-  \textbf{\DIFadd{How to choose Windows BOOTCAMP with custom NTFS drivers?}}
+  \DIFaddbegin \textbf{\DIFadd{How to choose Windows BOOTCAMP with custom NTFS drivers?}}
 
   \DIFadd{Third-party drivers providing NTFS support, such as
   }\href{https://www.tuxera.com/community/open-source-ntfs-3g}{NTFS-3G}\DIFadd{, Paragon NTFS,
@@ -3368,9 +3367,9 @@ For macOS your best choice are CP2102-based UART devices. Connect motherboard }\
 \DIFadd{Remember to enable }\texttt{\DIFadd{COM}} \DIFadd{port in firmware settings, and never use USB cables longer
 than 1 meter to avoid output corruption. To additionally enable XNU kernel serial output
 you will need }\texttt{\DIFadd{debug=0x8}} \DIFadd{boot argument.
-}\DIFaddend 
+}
 
-\subsection{Tips and Tricks}\label{troubleshootingtricks}
+\DIFaddend \subsection{Tips and Tricks}\label{troubleshootingtricks}
 
 \begin{enumerate}
 \item
@@ -3420,7 +3419,15 @@ you will need }\texttt{\DIFadd{debug=0x8}} \DIFadd{boot argument.
 
   To download recovery online you may use
   \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/Recovery}{Recovery}
-  tool from \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}.
+  tool from \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}\DIFaddbegin \DIFadd{.
+}
+
+\item
+  \textbf{\DIFadd{Why do online recovery images (}\texttt{\DIFadd{*.dmg}} \DIFadd{fail to load?}}
+
+  \DIFadd{This may be caused by missing HFS+ driver, as all presently known recovery volumes
+  have HFS+ filesystem. Another cause may be buggy firmware allocator, which can be
+  worked around with }\texttt{\DIFadd{AvoidHighAlloc}} \DIFadd{UEFI quirk}\DIFaddend .
 
 \item
   \textbf{Can I use this on Apple hardware or virtual machines?}
