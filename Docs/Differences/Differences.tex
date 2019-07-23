@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Jul  3 23:30:18 2019
-%DIF ADD ../Configuration.tex        Mon Jul 22 20:31:30 2019
+%DIF DEL PreviousConfiguration.tex   Mon Jul 22 10:33:06 2019
+%DIF ADD ../Configuration.tex        Tue Jul 23 15:05:56 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3392,7 +3392,7 @@ you will need }\texttt{\DIFadd{debug=0x8}} \DIFadd{boot argument.
   \texttt{Misc} $\rightarrow$ \texttt{Security}
   $\rightarrow$ \texttt{HaltLevel} $=$ \texttt{0x80000000}.
   \item Watch Dog is disabled to prevent automatic reboot:
-  \texttt{Uefi} $\rightarrow$ \texttt{Quirks} $\rightarrow$
+  \texttt{\DIFdelbegin \DIFdel{Uefi}\DIFdelend \DIFaddbegin \DIFadd{Misc}\DIFaddend } $\rightarrow$ \texttt{\DIFdelbegin \DIFdel{Quirks}\DIFdelend \DIFaddbegin \DIFadd{Debug}\DIFaddend } $\rightarrow$
   \texttt{DisableWatchDog} $=$ \texttt{true}.
   \item Boot Picker (entry selector) is enabled: \texttt{Misc}
   $\rightarrow$ \texttt{Boot} $\rightarrow$ \texttt{ShowPicker} $=$ \texttt{true}.
