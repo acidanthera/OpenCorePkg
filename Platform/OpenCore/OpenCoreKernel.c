@@ -144,7 +144,7 @@ OcKernelLoadKextsAndReserve (
           );
 
         if (Kext->ImageData == NULL) {
-          DEBUG ((DEBUG_ERROR, "OC: Image %s is missing for kext %s\n", FullPath, BundlePath));
+          DEBUG ((DEBUG_ERROR, "OC: Image %s is missing for kext %a\n", FullPath, BundlePath));
           Kext->Enabled = FALSE;
           continue;
         }
