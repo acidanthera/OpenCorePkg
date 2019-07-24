@@ -24,3 +24,5 @@ oom-*
 slow-unit-*
 out.bin
 prelinkedkernel.unpack
+.gdb_history
+
