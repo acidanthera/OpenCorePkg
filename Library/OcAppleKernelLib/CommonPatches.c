@@ -111,22 +111,26 @@ PatchAppleCpuPmCfgLock (
 
   if (!RETURN_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &mAppleIntelCPUPowerManagementPatch);
-    if (RETURN_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_INFO, "Patch success com.apple.driver.AppleIntelCPUPowerManagement\n"));
+    if (!RETURN_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "Patch v1 success com.apple.driver.AppleIntelCPUPowerManagement\n"));
     }
+
     Status2 = PatcherApplyGenericPatch (&Patcher, &mAppleIntelCPUPowerManagementPatch2);
-    if (RETURN_ERROR (Status2)) {
-      DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status2));
-    } else {
-      DEBUG ((DEBUG_INFO, "Patch success com.apple.driver.AppleIntelCPUPowerManagement\n"));
+    if (!RETURN_ERROR (Status2)) {
+      DEBUG ((DEBUG_INFO, "Patch v2 success com.apple.driver.AppleIntelCPUPowerManagement\n"));
+    }
+
+    if (RETURN_ERROR (Status) && RETURN_ERROR (Status2)) {
+      DEBUG ((DEBUG_INFO, "Failed to apply patches com.apple.driver.AppleIntelCPUPowerManagement - %r/%r\n", Status, Status2));
     }
   } else {
     DEBUG ((DEBUG_INFO, "Failed to find com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
   }
 
-  return RETURN_ERROR (Status) ? Status : Status2;
+  //
+  // At least one patch must be successful for this to work (e.g. first for 10.14).
+  //
+  return !RETURN_ERROR (Status) ? Status : Status2;
 }
 
 #pragma pack(push, 1)
