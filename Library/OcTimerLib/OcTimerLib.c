@@ -49,13 +49,12 @@ RecalculateTSC (
   EFI_TPL  PrevTpl;
 
   TimerAddr = 0;
+  TimerResolution = 10;
 
   //
   // Intel timer support.
   //
   if (PciRead16 (PCI_ICH_LPC_ADDRESS (0)) == CPUID_VENDOR_INTEL) {
-    TimerResolution = 10;
-
     //
     // Check if ACPI I/O Space Is Enabled On LPC device.
     //
