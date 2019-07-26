@@ -213,8 +213,6 @@ SetDataHubEntry (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Status    = EFI_OUT_OF_RESOURCES;
-
   //
   // TODO: We may want to fill header some day.
   // Currently it is not important.
