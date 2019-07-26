@@ -15,8 +15,9 @@
 #ifndef OC_BOOT_MANAGEMENT_LIB_H
 #define OC_BOOT_MANAGEMENT_LIB_H
 
+#include <Uefi.h>
+#include <IndustryStandard/AppleBootArgs.h>
 #include <Library/OcAppleBootPolicyLib.h>
-
 #include <Protocol/LoadedImage.h>
 
 /**
@@ -516,6 +517,78 @@ OcGetFileSystemPolicyType (
 EFI_LOADED_IMAGE_PROTOCOL *
 OcGetAppleBootLoadedImage (
   IN EFI_HANDLE  ImageHandle
+  );
+
+/**
+  Unified structure to hold macOS kernel boot arguments to make the code
+  independent of their format version. Several values need changing
+  by other libraries, so values are often pointers to original fields.
+**/
+typedef struct OC_BOOT_ARGUMENTS_ {
+  UINT32  *MemoryMap;
+  UINT32  *MemoryMapSize;
+  UINT32  *MemoryMapDescriptorSize;
+  UINT32  *MemoryMapDescriptorVersion;
+  CHAR8   *CommandLine;
+  UINT32  *DeviceTreeP;
+  UINT32  *DeviceTreeLength;
+  UINT32  *CsrActiveConfig;
+} OC_BOOT_ARGUMENTS;
+
+/**
+  Parse macOS kernel into unified boot arguments structure.
+
+  @param[out]  Arguments  Unified boot arguments structure.
+  @param[in]   BootArgs   Kernel boot arguments strucutre.
+**/
+VOID
+OcParseBootArgs (
+  OUT OC_BOOT_ARGUMENTS *Arguments,
+  IN  VOID              *BootArgs
+  );
+
+/**
+  Get argument value from command line.
+
+  @param[in]  CommandLine     Argument command line, e.g. for boot.efi.
+  @param[in]  Argument        Argument, e.g. -v, slide=, debug=, etc.
+  @param[in]  ArgumentLength  Argument length, e.g. L_STR_LEN ("-v").
+
+  @retval pointer to argument value or NULL.
+**/
+CONST CHAR8 *
+OcGetArgumentFromCmd (
+  IN CONST CHAR8  *CommandLine,
+  IN CONST CHAR8  *Argument,
+  IN CONST UINTN  ArgumentLength
+  );
+
+/**
+  Remove argument from command line if present.
+
+  @param[in, out] CommandLine  Argument command line, e.g. for boot.efi.
+  @param[in]      Argument     Argument, e.g. -v, slide=, debug=, etc.
+**/
+VOID
+OcRemoveArgumentFromCmd (
+  IN OUT CHAR8        *CommandLine,
+  IN     CONST CHAR8  *Argument
+  );
+
+/**
+  Append argument to command line without deduplication.
+
+  @param[in, out] CommandLine     Argument command line of BOOT_LINE_LENGTH bytes.
+  @param[in]      Argument        Argument, e.g. -v, slide=0, debug=0x100, etc.
+  @param[in]      ArgumentLength  Argument length, e.g. L_STR_LEN ("-v").
+
+  @retval TRUE on success.
+**/
+BOOLEAN
+OcAppendArgumentToCmd (
+  IN OUT CHAR8        *CommandLine,
+  IN     CONST CHAR8  *Argument,
+  IN     CONST UINTN  ArgumentLength
   );
 
 #endif // OC_BOOT_MANAGEMENT_LIB_H
