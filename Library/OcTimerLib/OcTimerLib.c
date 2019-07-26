@@ -53,7 +53,7 @@ RecalculateTSC (
   //
   // Intel timer support.
   //
-  if (PciRead16 (PCI_ICH_LPC_ADDRESS (0)) == 0x8086) {
+  if (PciRead16 (PCI_ICH_LPC_ADDRESS (0)) == CPUID_VENDOR_INTEL) {
     TimerAddr       = 0;
     TimerResolution = 10;
 
