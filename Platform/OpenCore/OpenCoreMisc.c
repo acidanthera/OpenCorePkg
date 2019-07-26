@@ -348,7 +348,7 @@ OcMiscBoot (
   OC_PICKER_CONTEXT      *Context;
   UINTN                  ContextSize;
   UINT32                 Index;
-  UINT32                 ToolIndex;
+  UINT32                 EntryIndex;
   OC_INTERFACE_PROTOCOL  *Interface;
 
   //
@@ -379,10 +379,13 @@ OcMiscBoot (
   } else {
     Interface = NULL;
   }
-
+  //
+  // Due to the file size and sanity guarantees OcXmlLib makes,
+  // adding Counts cannot overflow.
+  //
   if (!OcOverflowMulAddUN (
     sizeof (OC_PICKER_ENTRY),
-    Config->Misc.Tools.Count,
+    Config->Misc.BootEntries.Count + Config->Misc.Tools.Count,
     sizeof (OC_PICKER_CONTEXT),
     &ContextSize))
   {
@@ -406,15 +409,28 @@ OcMiscBoot (
   Context->CustomEntryContext = Storage;
   Context->CustomRead         = OcToolLoadEntry;
 
-  for (Index = 0, ToolIndex = 0; Index < Config->Misc.Tools.Count; ++Index) {
-    if (Config->Misc.Tools.Values[Index]->Enabled) {
-      Context->CustomEntries[ToolIndex].Name = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Name);
-      Context->CustomEntries[ToolIndex].Path = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Path);
-      ++ToolIndex;
+  for (Index = 0, EntryIndex = 0; Index < Config->Misc.BootEntries.Count; ++Index) {
+    if (Config->Misc.BootEntries.Values[Index]->Enabled) {
+      Context->CustomEntries[EntryIndex].Name = OC_BLOB_GET (&Config->Misc.BootEntries.Values[Index]->Name);
+      Context->CustomEntries[EntryIndex].Path = OC_BLOB_GET (&Config->Misc.BootEntries.Values[Index]->Path);
+      ++EntryIndex;
     }
   }
 
-  Context->CustomEntryCount = ToolIndex;
+  Context->AbsoluteEntryCount = EntryIndex;
+  //
+  // Due to the file size and sanity guarantees OcXmlLib makes,
+  // EntryIndex cannot overflow.
+  //
+  for (Index = 0; Index < Config->Misc.Tools.Count; ++Index) {
+    if (Config->Misc.Tools.Values[Index]->Enabled) {
+      Context->CustomEntries[EntryIndex].Name = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Name);
+      Context->CustomEntries[EntryIndex].Path = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Path);
+      ++EntryIndex;
+    }
+  }
+
+  Context->AllCustomEntryCount = EntryIndex;
 
   if (Interface != NULL) {
     Status = Interface->ShowInteface (Interface, Storage, Context);
