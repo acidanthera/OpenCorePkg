@@ -196,14 +196,16 @@ OcScanForBootEntries (
   OC_BOOT_ENTRY                    *Entries;
   UINTN                            EntriesSize;
   UINTN                            EntryIndex;
+  CHAR16                           *PathName;
   CHAR16                           *DevicePathText;
 
   UINTN                            DevPathScanInfoSize;
   INTERNAL_DEV_PATH_SCAN_INFO      *DevPathScanInfo;
   INTERNAL_DEV_PATH_SCAN_INFO      *DevPathScanInfos;
   EFI_DEVICE_PATH_PROTOCOL         *DevicePathWalker;
+  CONST FILEPATH_DEVICE_PATH       *FilePath;
 
-  Result = OcOverflowMulUN (Context->CustomEntryCount, sizeof (OC_BOOT_ENTRY), &EntriesSize);
+  Result = OcOverflowMulUN (Context->AllCustomEntryCount, sizeof (OC_BOOT_ENTRY), &EntriesSize);
   if (Result) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -350,15 +352,52 @@ OcScanForBootEntries (
     }
   }
 
-  for (Index = 0; Index < Context->CustomEntryCount; ++Index, ++EntryIndex) {
-    Entries[EntryIndex].Name     = AsciiStrCopyToUnicode (Context->CustomEntries[Index].Name, 0);
-    Entries[EntryIndex].PathName = AsciiStrCopyToUnicode (Context->CustomEntries[Index].Path, 0);
-    if (Entries[EntryIndex].Name == NULL || Entries[EntryIndex].PathName == NULL) {
+  for (Index = 0; Index < Context->AllCustomEntryCount; ++Index) {
+    Entries[EntryIndex].Name = AsciiStrCopyToUnicode (Context->CustomEntries[Index].Name, 0);
+    PathName                 = AsciiStrCopyToUnicode (Context->CustomEntries[Index].Path, 0);
+    if (Entries[EntryIndex].Name == NULL || PathName == NULL) {
       OcFreeBootEntries (Entries, EntryIndex + 1);
       return EFI_OUT_OF_RESOURCES;
     }
-    UnicodeUefiSlashes (Entries[EntryIndex].PathName);
+
     Entries[EntryIndex].IsCustom = TRUE;
+ 
+    if (Index < Context->AbsoluteEntryCount) {
+      Entries[EntryIndex].DevicePath = ConvertTextToDevicePath (PathName);
+      FreePool (PathName);
+      if (Entries[EntryIndex].DevicePath == NULL) {
+        FreePool (Entries[EntryIndex].Name);
+        continue;
+      }
+
+      FilePath = (FILEPATH_DEVICE_PATH *)(
+                   FindDevicePathNodeWithType (
+                     Entries[EntryIndex].DevicePath,
+                     MEDIA_DEVICE_PATH,
+                     MEDIA_FILEPATH_DP
+                     )
+                   );
+      if (FilePath == NULL) {
+        FreePool (Entries[EntryIndex].Name);
+        FreePool (Entries[EntryIndex].DevicePath);
+        continue;
+      }
+
+      Entries[EntryIndex].PathName = AllocateCopyPool (
+                                       OcFileDevicePathNameSize (FilePath),
+                                       FilePath->PathName
+                                       );
+      if (Entries[EntryIndex].PathName == NULL) {
+        FreePool (Entries[EntryIndex].Name);
+        FreePool (Entries[EntryIndex].DevicePath);
+        continue;
+      }
+    } else {
+      UnicodeUefiSlashes (PathName);
+      Entries[EntryIndex].PathName = PathName;
+    }
+
+    ++EntryIndex;
   }
 
   *BootEntries = Entries;

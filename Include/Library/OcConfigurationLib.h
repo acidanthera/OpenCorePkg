@@ -260,6 +260,7 @@
   _(OC_MISC_BOOT               , Boot            ,     , OC_CONSTR2 (OC_MISC_BOOT, _, __)         , OC_DESTR (OC_MISC_BOOT)) \
   _(OC_MISC_DEBUG              , Debug           ,     , OC_CONSTR2 (OC_MISC_DEBUG, _, __)        , OC_DESTR (OC_MISC_DEBUG)) \
   _(OC_MISC_SECURITY           , Security        ,     , OC_CONSTR2 (OC_MISC_SECURITY, _, __)     , OC_DESTR (OC_MISC_SECURITY)) \
+  _(OC_MISC_TOOLS_ARRAY        , BootEntries     ,     , OC_CONSTR2 (OC_MISC_TOOLS_ARRAY, _, __)  , OC_DESTR (OC_MISC_TOOLS_ARRAY)) \
   _(OC_MISC_TOOLS_ARRAY        , Tools           ,     , OC_CONSTR2 (OC_MISC_TOOLS_ARRAY, _, __)  , OC_DESTR (OC_MISC_TOOLS_ARRAY))
   OC_DECLARE (OC_MISC_CONFIG)
 

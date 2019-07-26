@@ -312,11 +312,15 @@ typedef struct {
   //
   EFI_HANDLE       ExcludeHandle;
   //
-  // Number of custom entries.
+  // Number of absolute custom entries.
   //
-  UINT32           CustomEntryCount;
+  UINT32           AbsoluteEntryCount;
   //
-  // Custom picker entries.
+  // Number of total custom entries (absolute and tools).
+  //
+  UINT32           AllCustomEntryCount;
+  //
+  // Custom picker entries.  Absolute entries come first.
   //
   OC_PICKER_ENTRY  CustomEntries[];
 } OC_PICKER_CONTEXT;

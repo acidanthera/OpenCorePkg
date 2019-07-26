@@ -305,6 +305,7 @@ STATIC
 OC_SCHEMA
 mMiscConfigurationSchema[] = {
   OC_SCHEMA_DICT       ("Boot",             mMiscConfigurationBootSchema),
+  OC_SCHEMA_ARRAY_IN   ("BootEntries",      OC_GLOBAL_CONFIG, Misc.BootEntries, &mMiscToolsSchema),
   OC_SCHEMA_DICT       ("Debug",            mMiscConfigurationDebugSchema),
   OC_SCHEMA_DICT       ("Security",         mMiscConfigurationSecuritySchema),
   OC_SCHEMA_ARRAY_IN   ("Tools",            OC_GLOBAL_CONFIG, Misc.Tools, &mMiscToolsSchema),

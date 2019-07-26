@@ -830,7 +830,7 @@ InternalLoadBootEntry (
     if (DevicePath == NULL) {
       return EFI_UNSUPPORTED;
     }
-  } else if (BootEntry->IsCustom) {
+  } else if (BootEntry->IsCustom && BootEntry->DevicePath == NULL) {
     ASSERT (Context->CustomRead != NULL);
 
     Status = Context->CustomRead (
