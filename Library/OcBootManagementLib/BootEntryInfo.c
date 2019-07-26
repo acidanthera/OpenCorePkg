@@ -358,6 +358,7 @@ InternalPrepareScanInfo (
 {
   EFI_STATUS                       Status;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *SimpleFs;
+  EFI_FILE_PROTOCOL                *Root;
   CHAR16                           *VolumeLabel;
 
   DevPathScanInfo->Device         = Handles[Index];
@@ -393,11 +394,31 @@ InternalPrepareScanInfo (
   // We only allow recovery there.
   //
   if (Context->ExcludeHandle != DevPathScanInfo->Device) {
-    Status = BootPolicy->GetBootFileEx (
-      DevPathScanInfo->Device,
-      BootPolicyOk,
-      &DevPathScanInfo->BootDevicePath
-      );
+    Status = EFI_NOT_FOUND;
+
+    if (Context->NumCustomBootPaths > 0) {
+      Status = SimpleFs->OpenVolume (SimpleFs, &Root);
+      if (!EFI_ERROR (Status)) {
+        Status = OcGetBooterFromPredefinedNameList (
+                   DevPathScanInfo->Device,
+                   Root,
+                   Context->CustomBootPaths,
+                   Context->NumCustomBootPaths,
+                   &DevPathScanInfo->BootDevicePath,
+                   NULL
+                   );
+
+        Root->Close (Root);
+      }
+    }
+
+    if (EFI_ERROR (Status)) {
+      Status = BootPolicy->GetBootFileEx (
+        DevPathScanInfo->Device,
+        BootPolicyOk,
+        &DevPathScanInfo->BootDevicePath
+        );
+    }
   } else {
     Status = EFI_UNSUPPORTED;
   }

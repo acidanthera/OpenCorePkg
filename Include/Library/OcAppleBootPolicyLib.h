@@ -29,4 +29,14 @@ OcAppleBootPolicyInstallProtocol (
   IN BOOLEAN  Reinstall
   );
 
+EFI_STATUS
+OcGetBooterFromPredefinedNameList (
+  IN  EFI_HANDLE                Device,
+  IN  EFI_FILE_PROTOCOL         *Root,
+  IN  CONST CHAR16              **BootPathNames,
+  IN  UINTN                     NumBootPathNames,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath  OPTIONAL,
+  IN  CHAR16                    *Prefix       OPTIONAL
+  );
+
 #endif // OC_APPLE_BOOT_POLICY_LIB_H

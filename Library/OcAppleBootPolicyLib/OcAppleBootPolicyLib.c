@@ -329,13 +329,14 @@ InternalGetBooterFromBlessedSystemFolderPath (
   return EFI_SUCCESS;
 }
 
-STATIC
 EFI_STATUS
-InternalGetBooterFromPredefinedNameList (
-  IN     EFI_HANDLE                Device,
-  IN     EFI_FILE_PROTOCOL         *Root,
-  IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath  OPTIONAL,
-  IN     CHAR16                    *Prefix       OPTIONAL
+OcGetBooterFromPredefinedNameList (
+  IN  EFI_HANDLE                Device,
+  IN  EFI_FILE_PROTOCOL         *Root,
+  IN  CONST CHAR16              **BootPathNames,
+  IN  UINTN                     NumBootPathNames,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath  OPTIONAL,
+  IN  CHAR16                    *Prefix       OPTIONAL
   )
 {
   UINTN         Index;
@@ -344,8 +345,8 @@ InternalGetBooterFromPredefinedNameList (
   CONST CHAR16  *PathName;
   EFI_STATUS    Status;
 
-  for (Index = 0; Index < ARRAY_SIZE (mBootPathNames); ++Index) {
-    PathName = mBootPathNames[Index];
+  for (Index = 0; Index < NumBootPathNames; ++Index) {
+    PathName = BootPathNames[Index];
 
     //
     // For relative paths (i.e. when Prefix is a volume GUID) we must
@@ -507,9 +508,11 @@ InternalGetBooterFromApfsVolumePredefinedNameList (
     ));
 
   if ((VolumeDirectoryInfo->Attribute & EFI_FILE_DIRECTORY) != 0) {
-    Status = InternalGetBooterFromPredefinedNameList (
+    Status = OcGetBooterFromPredefinedNameList (
       Device,
       VolumeDirectoryHandle,
+      mBootPathNames,
+      ARRAY_SIZE (mBootPathNames),
       DevicePath,
       VolumeDirectoryName
       );
@@ -907,7 +910,14 @@ BootPolicyGetBootFile (
   if (EFI_ERROR (Status)) {
     Status = InternalGetBooterFromBlessedSystemFolderPath (Device, Root, FilePath);
     if (EFI_ERROR (Status)) {
-      Status = InternalGetBooterFromPredefinedNameList (Device, Root, FilePath, NULL);
+      Status = OcGetBooterFromPredefinedNameList (
+                 Device,
+                 Root,
+                 mBootPathNames,
+                 ARRAY_SIZE (mBootPathNames),
+                 FilePath,
+                 NULL
+                 );
     }
   }
 
@@ -983,7 +993,14 @@ BootPolicyGetBootFileEx (
     if (EFI_ERROR (Status)) {
       Status = InternalGetBooterFromBlessedSystemFolderPath (Device, Root, FilePath);
       if (EFI_ERROR (Status)) {
-        Status = InternalGetBooterFromPredefinedNameList (Device, Root, FilePath, NULL);
+        Status = OcGetBooterFromPredefinedNameList (
+                   Device,
+                   Root,
+                   mBootPathNames,
+                   ARRAY_SIZE (mBootPathNames),
+                   FilePath,
+                   NULL
+                   );
       }
     }
   }
