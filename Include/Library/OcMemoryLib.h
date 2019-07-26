@@ -15,6 +15,7 @@
 #ifndef OC_MEMORY_LIB_H
 #define OC_MEMORY_LIB_H
 
+#include <Uefi.h>
 #include <IndustryStandard/VirtualMemory.h>
 
 /**
@@ -260,6 +261,53 @@ VmMapVirtualPages (
 VOID
 VmFlushCaches (
   VOID
+  );
+
+/**
+  Check whether built-in allocator is initialized.
+
+  @retval TRUE on success.
+**/
+BOOLEAN
+UmmInitialized (
+  VOID
+  );
+
+/**
+  Initialize built-in allocator.
+
+  @param[in]  Heap  Memory pool used for allocations.
+  @param[in]  Size  Memory pool size.
+**/
+VOID
+UmmSetHeap (
+  IN VOID    *Heap,
+  IN UINT32  Size
+  );
+
+/**
+  Perform allocation from built-in allocator.
+
+  @param[in]  Size  Allocation size.
+
+  @retval allocated memory on success.
+**/
+VOID *
+UmmMalloc (
+  IN UINT32  Size
+  );
+
+/**
+  Perform free of allocated memory. Accepts NULL pointer
+  and checks whether memory belongs to itself.
+
+  @param[in]  Ptr  Memory to free.
+
+  @retval TRUE on success
+**/
+BOOLEAN
+UmmFree (
+  IN VOID  *Ptr
   );
 
 #endif // OC_MEMORY_LIB_H

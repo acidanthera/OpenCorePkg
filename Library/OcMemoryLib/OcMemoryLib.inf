@@ -45,4 +45,5 @@
   MemoryMap.c
   LegacyRegionLock.c
   LegacyRegionUnLock.c
+  UmmMalloc.c
   VirtualMemory.c
