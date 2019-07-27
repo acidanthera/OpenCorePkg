@@ -54,7 +54,7 @@ RecalculateTSC (
   //
   // Intel timer support.
   //
-  if (PciRead16 (PCI_ICH_LPC_ADDRESS (0)) == CPUID_VENDOR_INTEL) {
+  if (PciRead16 (PCI_ICH_LPC_ADDRESS (0)) == 0x8086) {
     //
     // Check if ACPI I/O Space Is Enabled On LPC device.
     //
