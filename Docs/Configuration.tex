@@ -1273,7 +1273,7 @@ blocking.
   \emph{Note}: This option should avoided whenever possible. Modern firmwares provide
   \texttt{CFG Lock} setting, disabling which is much cleaner. More details
   about the issue can be found in
-  \href{https://github.com/acidanthera/AptioFixPkg#verifymsre2}{VerifyMsrE2} notes.
+  \href{https://github.com/acidanthera/AppleSupportPkg#verifymsre2}{VerifyMsrE2} notes.
 
 \item
   \texttt{AppleXcpmCfgLock}\\
@@ -1286,7 +1286,7 @@ blocking.
   \emph{Note}: This option should avoided whenever possible. Modern firmwares provide
   \texttt{CFG Lock} setting, disabling which is much cleaner. More details
   about the issue can be found in
-  \href{https://github.com/acidanthera/AptioFixPkg#verifymsre2}{VerifyMsrE2} notes.
+  \href{https://github.com/acidanthera/AppleSupportPkg#verifymsre2}{VerifyMsrE2} notes.
 
 \item
   \texttt{AppleXcpmExtraMsrs}\\
@@ -1405,7 +1405,9 @@ behaviour that does not go to any other sections
   Designed to be filled with \texttt{plist\ dict} values, describing each block entry.
   See \hyperref[misctoolprops]{Tools Properties} section below.
 
-  \emph{Note}: Select tools, for example, UEFI Shell or NVRAM cleaning are very
+  \emph{Note}: Select tools, for example,
+  \href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} or
+  \href{https://github.com/acidanthera/AppleSupportPkg#cleannvram}{CleanNvram} are very
   dangerous and \textbf{MUST NOT} appear in production configurations, especially
   in vaulted ones and protected with secure boot, as they may be used to easily
   bypass secure boot chain.
@@ -2847,7 +2849,7 @@ and supplementary utilities can be used.
   for FileVault 2 GUI, hotkey parsing (shift, cmd+v, etc.), language collation support,
   and certain other features important for normal macOS functioning. For hotkey support
   \texttt{AppleKeyMapAggregator}-compatible driver is required.
-  \item \href{https://github.com/acidanthera/AptioFixPkg}{\texttt{AptioInputFix}}
+  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AppleGenericInput}}
   --- user input driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of different UEFI input protocols. Additionally resolves mouse input issues
   on select firmwares. This is an alternative to \texttt{UsbKbDxe}, which may work
@@ -3278,6 +3280,15 @@ you will need \texttt{debug=0x8} boot argument.
   are fully supported. Even though there are little to none specific details relevant to
   Mac hardware, some ongoing instructions can be found in
   \href{https://github.com/acidanthera/bugtracker/issues/377}{acidanthera/bugtracker\#377}.
+
+\item
+  \textbf{Why do Find\&Replace patches must equal in length?}
+
+  For machine code (x86 code) it is not possible to do such replacements due to
+  \href{https://en.wikipedia.org/w/index.php?title=Relative_addressing}{relative addressing}.
+  For ACPI code this is risky, and is technically equivalent to ACPI table replacement,
+  thus not implemented. More detailed explanation can be found on
+  \href{https://applelife.ru/posts/819790}{AppleLife.ru}.
 
 \end{enumerate}
 
