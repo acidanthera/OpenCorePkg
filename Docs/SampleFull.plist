@@ -74,6 +74,14 @@
 				<key>Path</key>
 				<string>SSDT-EHCx_OFF.aml</string>
 			</dict>
+			<dict>
+				<key>Comment</key>
+				<string></string>
+				<key>Enabled</key>
+				<false/>
+				<key>Path</key>
+				<string>SSDT-AWAC.aml</string>
+			</dict>
 		</array>
 		<key>Block</key>
 		<array>
@@ -706,10 +714,10 @@
 		<true/>
 		<key>Drivers</key>
 		<array>
-			<string>HFSPlus.efi</string>
+			<string>HfsPlus.efi</string>
 			<string>ApfsDriverLoader.efi</string>
 			<string>AppleUiSupport.efi</string>
-			<string>AptioInputFix.efi</string>
+			<string>AppleGenericInput.efi</string>
 			<string>AptioMemoryFix.efi</string>
 			<string>VirtualSmc.efi</string>
 		</array>
