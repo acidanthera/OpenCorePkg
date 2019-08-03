@@ -9,7 +9,7 @@ OpenCore Changelog
 - Enhanced `LogoutHook` script used for emulated NVRAM saving
 - Fixed multiple operating system support in APFS containers
 - Added `AvoidHighAlloc` UEFI quirk to avoid high memory allocs
-- Updated builtin firmware versions for 10.15 support
+- Updated builtin firmware versions for 10.15 beta support
 
 #### v0.0.3
 - Added complete modern platform database (2012+)
