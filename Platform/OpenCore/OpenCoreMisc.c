@@ -350,6 +350,8 @@ OcMiscBoot (
   UINT32                 Index;
   UINT32                 EntryIndex;
   OC_INTERFACE_PROTOCOL  *Interface;
+  UINTN                  BlessOverrideSize;
+  CHAR16                 **BlessOverride;
 
   //
   // Do not use our boot picker unless asked.
@@ -397,6 +399,45 @@ OcMiscBoot (
   if (Context == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to allocate boot picker context!\n"));
     return;
+  }
+
+  if (Config->Misc.BlessOverride.Count > 0) {
+    if (!OcOverflowMulUN (
+      Config->Misc.BlessOverride.Count,
+      sizeof (*BlessOverride),
+      &BlessOverrideSize))
+    {
+      BlessOverride = AllocateZeroPool (BlessOverrideSize);
+    } else {
+      BlessOverride = NULL;
+    }
+
+    if (BlessOverride == NULL) {
+      FreePool (Context);
+      DEBUG ((DEBUG_ERROR, "OC: Failed to allocate bless overrides!\n"));
+      return;
+    }
+
+    for (Index = 0; Index < Config->Misc.BlessOverride.Count; ++Index) {
+      BlessOverride[Index] = AsciiStrCopyToUnicode (
+                               OC_BLOB_GET (
+                                 Config->Misc.BlessOverride.Values[Index]
+                                 ),
+                               0
+                               );
+      if (BlessOverride[Index] == NULL) {
+        for (EntryIndex = 0; EntryIndex < Index; ++EntryIndex) {
+          FreePool (BlessOverride[EntryIndex]);
+        }
+        FreePool (BlessOverride);
+        FreePool (Context);
+        DEBUG ((DEBUG_ERROR, "OC: Failed to allocate bless overrides!\n"));
+        return;
+      }
+    }
+
+    Context->NumCustomBootPaths = Config->Misc.BlessOverride.Count;
+    Context->CustomBootPaths    = BlessOverride;
   }
 
   Context->ScanPolicy         = Config->Misc.Security.ScanPolicy;
