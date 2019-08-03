@@ -319,7 +319,7 @@ typedef struct {
   //
   // Custom boot paths (bless override).  Must start with '\'.
   //
-  CONST CHAR16     **CustomBootPaths;
+  CHAR16           **CustomBootPaths;
   //
   // Number of absolute custom entries.
   //

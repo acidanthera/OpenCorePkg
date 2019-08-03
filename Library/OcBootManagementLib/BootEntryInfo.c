@@ -402,7 +402,7 @@ InternalPrepareScanInfo (
         Status = OcGetBooterFromPredefinedNameList (
                    DevPathScanInfo->Device,
                    Root,
-                   Context->CustomBootPaths,
+                   (CONST CHAR16 **)Context->CustomBootPaths,
                    Context->NumCustomBootPaths,
                    &DevPathScanInfo->BootDevicePath,
                    NULL
