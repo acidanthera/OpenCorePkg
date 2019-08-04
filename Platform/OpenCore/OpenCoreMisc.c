@@ -387,7 +387,7 @@ OcMiscBoot (
   //
   if (!OcOverflowMulAddUN (
     sizeof (OC_PICKER_ENTRY),
-    Config->Misc.BootEntries.Count + Config->Misc.Tools.Count,
+    Config->Misc.Entries.Count + Config->Misc.Tools.Count,
     sizeof (OC_PICKER_CONTEXT),
     &ContextSize))
   {
@@ -401,9 +401,9 @@ OcMiscBoot (
     return;
   }
 
-  if (Config->Misc.BlessOverride.Count > 0) {
+  if (Config->Misc.Boot.BlessOverride.Count > 0) {
     if (!OcOverflowMulUN (
-      Config->Misc.BlessOverride.Count,
+      Config->Misc.Boot.BlessOverride.Count,
       sizeof (*BlessOverride),
       &BlessOverrideSize))
     {
@@ -418,10 +418,10 @@ OcMiscBoot (
       return;
     }
 
-    for (Index = 0; Index < Config->Misc.BlessOverride.Count; ++Index) {
+    for (Index = 0; Index < Config->Misc.Boot.BlessOverride.Count; ++Index) {
       BlessOverride[Index] = AsciiStrCopyToUnicode (
                                OC_BLOB_GET (
-                                 Config->Misc.BlessOverride.Values[Index]
+                                 Config->Misc.Boot.BlessOverride.Values[Index]
                                  ),
                                0
                                );
@@ -436,7 +436,7 @@ OcMiscBoot (
       }
     }
 
-    Context->NumCustomBootPaths = Config->Misc.BlessOverride.Count;
+    Context->NumCustomBootPaths = Config->Misc.Boot.BlessOverride.Count;
     Context->CustomBootPaths    = BlessOverride;
   }
 
@@ -450,10 +450,10 @@ OcMiscBoot (
   Context->CustomEntryContext = Storage;
   Context->CustomRead         = OcToolLoadEntry;
 
-  for (Index = 0, EntryIndex = 0; Index < Config->Misc.BootEntries.Count; ++Index) {
-    if (Config->Misc.BootEntries.Values[Index]->Enabled) {
-      Context->CustomEntries[EntryIndex].Name = OC_BLOB_GET (&Config->Misc.BootEntries.Values[Index]->Name);
-      Context->CustomEntries[EntryIndex].Path = OC_BLOB_GET (&Config->Misc.BootEntries.Values[Index]->Path);
+  for (Index = 0, EntryIndex = 0; Index < Config->Misc.Entries.Count; ++Index) {
+    if (Config->Misc.Entries.Values[Index]->Enabled) {
+      Context->CustomEntries[EntryIndex].Name = OC_BLOB_GET (&Config->Misc.Entries.Values[Index]->Name);
+      Context->CustomEntries[EntryIndex].Path = OC_BLOB_GET (&Config->Misc.Entries.Values[Index]->Path);
       ++EntryIndex;
     }
   }
