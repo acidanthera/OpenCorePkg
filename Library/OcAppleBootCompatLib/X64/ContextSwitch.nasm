@@ -88,8 +88,8 @@ SECTION .text
 ;   );
 ;------------------------------------------------------------------------------
 align 8
-global ASM_PFX(AsmAppleMapSaveState)
-ASM_PFX(AsmAppleMapSaveState):
+global ASM_PFX(AsmAppleMapPlatformSaveState)
+ASM_PFX(AsmAppleMapPlatformSaveState):
 BITS  64
   sgdt  [rcx + ASM_SUPPORT_STATE.SavedGDTR]
   sidt  [rcx + ASM_SUPPORT_STATE.SavedIDTR]

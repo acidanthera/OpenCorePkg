@@ -46,7 +46,8 @@ ProtectRtMemoryFromRelocation (
   IN     UINTN                  MemoryMapSize,
   IN     UINTN                  DescriptorSize,
   IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
-  IN     EFI_PHYSICAL_ADDRESS   SysTableArea
+  IN     EFI_PHYSICAL_ADDRESS   SysTableArea,
+  IN     UINTN                  SysTableAreaSize
   )
 {
   //
@@ -87,19 +88,16 @@ ProtectRtMemoryFromRelocation (
   EFI_MEMORY_DESCRIPTOR   *Desc;
   RT_RELOC_PROTECT_INFO   *RelocInfo;
 
+  Desc                = MemoryMap;
   RtReloc->NumEntries = 0;
   RelocInfo           = &RtReloc->RelocInfo[0];
   NumEntries          = MemoryMapSize / DescriptorSize;
 
   for (Index = 0; Index < NumEntries; ++Index) {
-    if ((Desc->Attribute & EFI_MEMORY_RUNTIME) == 0
-      || Desc->NumberOfPages == 0) {
-      continue;
-    }
-
-    if (Desc->Type == EfiRuntimeServicesCode
-      || (Desc->Type == EfiRuntimeServicesData
-        && Desc->PhysicalStart != SysTableArea)) {
+    if ((Desc->Attribute & EFI_MEMORY_RUNTIME) != 0
+      && Desc->NumberOfPages > 0
+      && (Desc->Type == EfiRuntimeServicesCode || Desc->Type == EfiRuntimeServicesData)
+      && !AREA_WITHIN_DESCRIPTOR (Desc, SysTableArea, SysTableAreaSize)) {
 
       if (RtReloc->NumEntries == ARRAY_SIZE (RtReloc->RelocInfo)) {
         RUNTIME_DEBUG ((
@@ -112,7 +110,7 @@ ProtectRtMemoryFromRelocation (
       }
 
       RelocInfo->PhysicalStart = Desc->PhysicalStart;
-      RelocInfo->PhysicalEnd   = Desc->PhysicalStart + (EFI_PAGES_TO_SIZE (Desc->NumberOfPages) - 1);
+      RelocInfo->PhysicalEnd   = LAST_DESCRIPTOR_ADDR (Desc);
       RelocInfo->Type          = Desc->Type;
       Desc->Type               = EfiMemoryMappedIO;
       ++RelocInfo;
@@ -170,7 +168,6 @@ PerformRtMemoryVirtualMapping (
   EFI_MEMORY_DESCRIPTOR           *VirtualDesc;
   EFI_STATUS                      Status;
   PAGE_MAP_AND_DIRECTORY_POINTER  *PageTable;
-  UINTN                           Flags;
 
   Desc                       = MemoryMap;
   NumEntries                 = MemoryMapSize / DescriptorSize;
@@ -179,27 +176,27 @@ PerformRtMemoryVirtualMapping (
   KernelState->VmMapDescSize = DescriptorSize;
 
   //
-  // Get current VM page table
+  // Get current VM page table.
   //
-  GetCurrentPageTable (&PageTable, &Flags);
+  PageTable = GetCurrentPageTable (NULL);
 
   for (Index = 0; Index < NumEntries; ++Index) {
     //
-    // Some UEFIs end up with "reserved" area with EFI_MEMORY_RUNTIME flag set when Intel HD3000 or HD4000 is used.
-    // For example, on GA-H81N-D2H there is a single 1 GB descriptor:
+    // Legacy note. Some UEFIs end up with "reserved" area with EFI_MEMORY_RUNTIME flag set when
+    // Intel HD3000 or HD4000 is used. For example, on GA-H81N-D2H there is a single 1 GB descriptor:
     // 000000009F800000-00000000DF9FFFFF 0000000000040200 8000000000000000
     //
-    // All known boot.efi starting from at least 10.5.8 properly handle this flag and do not assign virtual addresses
-    // to reserved descriptors.
-    // However, the issue was with AptioFix itself, which did not check for EfiReservedMemoryType and replaced
-    // it by EfiMemoryMappedIO to prevent boot.efi relocations.
+    // All known boot.efi starting from at least 10.5.8 properly handle this flag and do not assign
+    // virtual addresses to reserved descriptors. However, our legacy code had a bug, and did not
+    // check for EfiReservedMemoryType. Therefore it replaced such entries by EfiMemoryMappedIO
+    // to "prevent" boot.efi relocations.
     //
     // The relevant discussion and the original fix can be found here:
     // http://web.archive.org/web/20141111124211/http://www.projectosx.com:80/forum/lofiversion/index.php/t2428-450.html
     // https://sourceforge.net/p/cloverefiboot/code/605/
     //
-    // Since it is not the bug in boot.efi, AptioMemoryFix only needs to properly handle EfiReservedMemoryType with
-    // EFI_MEMORY_RUNTIME attribute set, and there is no reason to mess with the memory map passed to boot.efi.
+    // The correct approach is to properly handle EfiReservedMemoryType with EFI_MEMORY_RUNTIME
+    // attribute set, and not mess with the memory map passed to boot.efi. As done here.
     //
     if (Desc->Type != EfiReservedMemoryType && (Desc->Attribute & EFI_MEMORY_RUNTIME) != 0) {
       //
@@ -279,16 +276,14 @@ RestoreProtectedRtMemoryTypes (
   EFI_PHYSICAL_ADDRESS   PhysicalStart;
   EFI_PHYSICAL_ADDRESS   PhysicalEnd;
   EFI_MEMORY_DESCRIPTOR  *Desc;
-  BOOLEAN                Found;
 
   NumEntriesLeft = RtReloc->NumEntries;
   NumEntries     = MemoryMapSize / DescriptorSize;
   Desc           = MemoryMap;
 
   for (Index = 0; Index < NumEntries && NumEntriesLeft > 0; ++Index) {
-    Found         = FALSE;
     PhysicalStart = Desc->PhysicalStart;
-    PhysicalEnd   = PhysicalStart + (EFI_PAGES_TO_SIZE (Desc->NumberOfPages) - 1);
+    PhysicalEnd   = LAST_DESCRIPTOR_ADDR (Desc);
 
     for (Index2 = 0; Index2 < RtReloc->NumEntries; ++Index2) {
       //
@@ -299,12 +294,9 @@ RestoreProtectedRtMemoryTypes (
       if (PhysicalStart <= RtReloc->RelocInfo[Index2].PhysicalEnd
         && RtReloc->RelocInfo[Index2].PhysicalStart <= PhysicalEnd)  {
         Desc->Type = RtReloc->RelocInfo[Index2].Type;
-        Found      = TRUE;
+        --NumEntriesLeft;
+        break;
       }
-    }
-
-    if (Found) {
-      --NumEntriesLeft;
     }
 
     Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
@@ -415,14 +407,14 @@ AppleMapPrepareForHibernateWake (
         //
 
         if (BootCompat->KernelState.VmMapDescSize == 0) {
-          RUNTIME_DEBUG (("OCABC: Saved descriptor size cannot be 0\n"));
-          BootCompat->KernelState.VmMapDescSize = sizeof (EFI_MEMORY_DESCRIPTOR);
+          RUNTIME_DEBUG ((DEBUG_ERROR, "OCABC: Saved descriptor size cannot be 0\n"));
+          return;
         }
 
         RestoreProtectedRtMemoryTypes (
           &BootCompat->RtReloc,
           Handoff->bytecount,
-          MIN (BootCompat->KernelState.VmMapDescSize, sizeof (EFI_MEMORY_DESCRIPTOR)),
+          BootCompat->KernelState.VmMapDescSize,
           (EFI_MEMORY_DESCRIPTOR *)(UINTN) Handoff->data
           );
       }
@@ -470,15 +462,16 @@ AppleMapPrepareBooterState (
       );
 
     //
-    // Allocate 1 RT data page for copy of UEFI system table for kernel.
+    // Allocate RT data pages for copy of UEFI system table for kernel.
     // This one also has to be 32-bit due to XNU BootArgs structure.
     // The reason for this allocation to be required is because XNU uses static
     // mapping for directly passed pointers (see ProtectRtMemoryFromRelocation).
     //
-    BootCompat->KernelState.SysTableRtArea = BASE_4GB;
+    BootCompat->KernelState.SysTableRtArea     = BASE_4GB;
+    BootCompat->KernelState.SysTableRtAreaSize = gST->Hdr.HeaderSize;
     Status = AllocatePagesFromTop (
       EfiRuntimeServicesData,
-      1,
+      EFI_SIZE_TO_PAGES (gST->Hdr.HeaderSize),
       &BootCompat->KernelState.SysTableRtArea,
       GetMemoryMap,
       NULL
@@ -496,17 +489,10 @@ AppleMapPrepareBooterState (
     //
     // Copy UEFI system table to the new location.
     //
-    if (gST->Hdr.HeaderSize > EFI_PAGE_SIZE) {
-      DEBUG ((
-        DEBUG_ERROR,
-        "OCABC: EFI_SYSTEM_TABLE is too large - %u bytes\n",
-        (UINT32) gST->Hdr.HeaderSize
-        ));
-    }
     CopyMem (
       (VOID *)(UINTN) BootCompat->KernelState.SysTableRtArea,
       gST,
-      MIN (gST->Hdr.HeaderSize, EFI_PAGE_SIZE)
+      gST->Hdr.HeaderSize
       );
   }
 
@@ -524,35 +510,43 @@ AppleMapPrepareKernelJump (
   IN     BOOLEAN                AppleHibernateWake
   )
 {
-  UINT8                    *KernelEntry;
-  UINTN                    SlideAddr;
-  VOID                     *MachOImage;
+  UINTN                    KernelEntryVaddr;
+  UINT32                   KernelEntry;
   IOHibernateImageHeader   *ImageHeader;
 
   if (!AppleHibernateWake) {
     //
-    // Read kernel entry from Mach-O load command and patch it with jump.
+    // ImageAddress points to the first kernel segment, __HIB.
+    // Kernel image header is located in __TEXT, which follows __HIB.
     //
-    SlideAddr  = ImageAddress - BASE_KERNEL_ADDR;
-    MachOImage = (VOID*) (SlideAddr + SLIDE_GRANULARITY);
-    KernelEntry = (UINT8*) MachoRuntimeGetEntryAddress (MachOImage);
-    if (KernelEntry != 0) {
-      KernelEntry += SlideAddr;
+    ImageAddress += KERNEL_TEXT_VADDR - KERNEL_HIB_VADDR;
+
+    //
+    // Cut higher virtual address bits.
+    //
+    KernelEntryVaddr = MachoRuntimeGetEntryAddress (
+      (VOID*) ImageAddress
+      );
+    if (KernelEntryVaddr == 0) {
+      RUNTIME_DEBUG ((DEBUG_ERROR, "Kernel entry point was not found!"));
+      return;
     }
+
+    //
+    // Perform virtual to physical address conversion by subtracting __TEXT base
+    // and adding current physical kernel location.
+    //
+    KernelEntry = (UINT32) (KernelEntryVaddr - KERNEL_TEXT_VADDR + ImageAddress);
   } else {
     //
     // Read kernel entry from hibernation image and patch it with jump.
     // At this stage HIB section is not yet copied from sleep image to it's
     // proper memory destination. so we'll patch entry point in sleep image.
+    // Note the virtual -> physical conversion through truncation.
     //
     ImageHeader = (IOHibernateImageHeader *) ImageAddress;
-    KernelEntry = (UINT8 *) &ImageHeader->fileExtentMap[0]
+    KernelEntry = ((UINT32)(UINTN) &ImageHeader->fileExtentMap[0])
       + ImageHeader->fileExtentMapSize + ImageHeader->restore1CodeOffset;
-  }
-
-  if (KernelEntry == 0) {
-    RUNTIME_DEBUG ((DEBUG_ERROR, "KernelEntry must be found!"));
-    return;
   }
 
   //
@@ -560,7 +554,7 @@ AppleMapPrepareKernelJump (
   //
   CopyMem (
     &BootCompat->KernelState.KernelOrg[0],
-    KernelEntry,
+    (VOID *)(UINTN) KernelEntry,
     sizeof (BootCompat->KernelState.KernelOrg)
     );
 
@@ -568,7 +562,7 @@ AppleMapPrepareKernelJump (
   // Copy kernel jump code to kernel entry address.
   //
   CopyMem (
-    KernelEntry,
+    (VOID *)(UINTN) KernelEntry,
     &BootCompat->KernelState.KernelJump,
     sizeof (BootCompat->KernelState.KernelJump)
     );
@@ -593,7 +587,8 @@ AppleMapPrepareVmState (
     MemoryMapSize,
     DescriptorSize,
     MemoryMap,
-    BootCompat->KernelState.SysTableRtArea
+    BootCompat->KernelState.SysTableRtArea,
+    BootCompat->KernelState.SysTableRtAreaSize
     );
 
   //

@@ -20,21 +20,23 @@
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcMemoryLib.h>
 
-VOID
+PAGE_MAP_AND_DIRECTORY_POINTER  *
 GetCurrentPageTable (
-  OUT PAGE_MAP_AND_DIRECTORY_POINTER  **PageTable,
   OUT UINTN                           *Flags  OPTIONAL
   )
 {
-  UINTN   CR3;
+  PAGE_MAP_AND_DIRECTORY_POINTER  *PageTable;
+  UINTN                           CR3;
 
   CR3 = AsmReadCr3 ();
 
-  *PageTable = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN) (CR3 & CR3_ADDR_MASK);
+  PageTable = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN) (CR3 & CR3_ADDR_MASK);
 
   if (Flags != NULL) {
     *Flags = CR3 & (CR3_FLAG_PWT | CR3_FLAG_PCD);
   }
+
+  return PageTable;
 }
 
 EFI_STATUS
@@ -56,7 +58,7 @@ GetPhysicalAddress (
   PAGE_TABLE_1G_ENTRY             *PTE1G;
 
   if (PageTable == NULL) {
-    GetCurrentPageTable (&PageTable, NULL);
+    PageTable = GetCurrentPageTable (NULL);
   }
 
   VA.Uint64 = (UINT64) VirtualAddr;
@@ -206,7 +208,7 @@ VmMapVirtualPage (
   UINTN                           Index;
 
   if (PageTable == NULL) {
-    GetCurrentPageTable (&PageTable, NULL);
+    PageTable = GetCurrentPageTable (NULL);
   }
 
   VA.Uint64 = (UINT64) VirtualAddr;
@@ -381,7 +383,7 @@ VmMapVirtualPages (
   EFI_STATUS  Status;
 
   if (PageTable == NULL) {
-    GetCurrentPageTable (&PageTable, NULL);
+    PageTable = GetCurrentPageTable (NULL);
   }
 
   Status = EFI_SUCCESS;

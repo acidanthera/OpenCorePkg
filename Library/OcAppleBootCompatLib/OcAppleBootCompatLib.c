@@ -99,16 +99,23 @@ OcAbcInitialize (
   IN OC_ABC_SETTINGS  *Settings
   )
 {
-  EFI_STATUS  Status;
+  EFI_STATUS           Status;
+  BOOT_COMPAT_CONTEXT  *BootCompat;
 
   Status = InstallAbcProtocol ();
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
-  InstallServiceOverrides (
-    GetBootCompatContext ()
+  BootCompat = GetBootCompatContext ();
+
+  CopyMem (
+    &BootCompat->Settings,
+    Settings,
+    sizeof (BootCompat->Settings)
     );
+
+  InstallServiceOverrides (BootCompat);
 
   return EFI_SUCCESS;
 }

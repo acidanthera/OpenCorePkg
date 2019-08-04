@@ -141,12 +141,12 @@ AllocatePagesFromTop (
 /**
   Return pointer to PML4 table in PageTable and PWT and PCD flags in Flags.
 
-  @param[out]  PageTable  Current page table address.
   @param[out]  Flags      Current page table PWT and PCT flags.
+
+  @retval Current page table address.
 **/
-VOID
+PAGE_MAP_AND_DIRECTORY_POINTER  *
 GetCurrentPageTable (
-  OUT PAGE_MAP_AND_DIRECTORY_POINTER  **PageTable,
   OUT UINTN                           *Flags  OPTIONAL
   );
 

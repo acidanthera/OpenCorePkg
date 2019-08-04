@@ -40,10 +40,14 @@
 #define RT_DESC_ENTRY_NUM        ((UINTN) 64)
 
 /**
-  Base kernel address.
+  Kernel __HIB segment virtual address.
 **/
-#define BASE_KERNEL_ADDR       ((UINTN)0x100000)
+#define KERNEL_HIB_VADDR       ((UINTN)0xFFFFFF8000100000ULL)
 
+/**
+  Kernel __TEXT segment virtual address.
+**/
+#define KERNEL_TEXT_VADDR      ((UINTN)0xFFFFFF8000200000ULL)
 /**
   Slide offset per slide entry
 **/
@@ -53,6 +57,20 @@
   Total possible number of KASLR slide offsets.
 **/
 #define TOTAL_SLIDE_NUM        256
+
+/**
+  Get last descriptor address.
+  It is assumed that the descriptor contains pages.
+**/
+#define LAST_DESCRIPTOR_ADDR(Desc) \
+  ((Desc)->PhysicalStart + (EFI_PAGES_TO_SIZE ((UINTN) (Desc)->NumberOfPages) - 1))
+
+/**
+  Check if area is within the specified descriptor.
+  It is assumed that the descriptor contains pages and AreaSize is not 0.
+**/
+#define AREA_WITHIN_DESCRIPTOR(Desc, Area, AreaSize) \
+  ((Area) >= (Desc)->PhysicalStart && ((Area) + ((AreaSize) - 1)) <= LAST_DESCRIPTOR_ADDR (Desc))
 
 /**
   Preserved relocation entry.
@@ -182,6 +200,10 @@ typedef struct KERNEL_SUPPORT_STATE_ {
   /// Custom kernel UEFI System Table.
   ///
   EFI_PHYSICAL_ADDRESS     SysTableRtArea;
+  ///
+  /// Custom kernel UEFI System Table size in bytes.
+  ///
+  UINTN                    SysTableRtAreaSize;
   ///
   /// Virtual memory mapper context.
   ///

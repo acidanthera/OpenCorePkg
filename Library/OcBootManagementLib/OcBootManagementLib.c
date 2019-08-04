@@ -651,7 +651,7 @@ OcIsAppleHibernateWake (
     }
   }
 
-  return TRUE;
+  return FALSE;
 }
 
 EFI_STATUS

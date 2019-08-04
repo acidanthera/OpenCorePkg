@@ -20,13 +20,15 @@
 // Keep these definitions in sync with ContextSwitch.nasm!
 //
 
+#pragma pack(push, 1)
+
 /**
   Assembly support state.
   This state is used as an intermediate structure to hold UEFI environment
   context and kernel environment context for switching between 32-bit
   and 64-bit modes during booting as normal XNU boot still happens in 32-bit.
 **/
-typedef struct ASM_SUPPORT_STATE_ {
+typedef PACKED struct ASM_SUPPORT_STATE_ {
   UINT64  SavedGDTR;
   UINT16  SavedGDTRLimit;
   UINT64  SavedIDTR;
@@ -60,11 +62,13 @@ typedef struct ASM_SUPPORT_STATE_ {
   code to UEFI code through AsmAppleMapPlatformPrepareKernelState
   intermediate handler.
 **/
-typedef struct ASM_KERNEL_JUMP_ {
+typedef PACKED struct ASM_KERNEL_JUMP_ {
   UINT8   MovInst;
   UINT32  Addr;
   UINT16  CallInst;
 } ASM_KERNEL_JUMP;
+
+#pragma pack(pop)
 
 VOID
 EFIAPI
