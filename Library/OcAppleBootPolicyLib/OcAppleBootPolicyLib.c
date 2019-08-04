@@ -352,7 +352,9 @@ OcGetBooterFromPredefinedNameList (
     // For relative paths (i.e. when Prefix is a volume GUID) we must
     // not use leading slash. This is what AppleBootPolicy does.
     //
-    ASSERT (PathName[0] == L'\\');
+    if (Prefix != NULL) {
+      ASSERT (PathName[0] == L'\\');
+    }
     Status = InternalFileExists (
       Root,
       Prefix != NULL ? &PathName[1] : &PathName[0]
