@@ -1783,6 +1783,12 @@ STATIC EFI_RUNTIME_SERVICES gNilRT = {
 
 STATIC EFI_RUNTIME_SERVICES *gRT = &gNilRT;
 
+typedef
+EFI_STATUS
+(EFIAPI* EFI_IMAGE_UNLOAD)(
+  IN  EFI_HANDLE                   ImageHandle
+  );
+
 //
 // Specific
 //
