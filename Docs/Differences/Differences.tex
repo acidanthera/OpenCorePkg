@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Jul  3 23:30:18 2019
-%DIF ADD ../Configuration.tex        Sat Jul 27 15:30:24 2019
+%DIF DEL PreviousConfiguration.tex   Sun Aug  4 13:51:59 2019
+%DIF ADD ../Configuration.tex        Sun Aug  4 17:27:59 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1625,8 +1625,9 @@ behaviour that does not go to any other sections
   \texttt{Text} is supposed to work best.
   \end{itemize}
 
-  \emph{Note}: \texttt{IgnoreTextInGraphics} may need to be enabled for select
-  firmware implementations.
+  \emph{Note}: \texttt{IgnoreTextInGraphics} \DIFaddbegin \DIFadd{and }\texttt{\DIFadd{SanitiseClearScreen}} \DIFaddend may need to be enabled for select
+  firmware implementations. \DIFaddbegin \DIFadd{Particularly APTIO firmwares.
+}\DIFaddend 
 
 \item
   \texttt{ConsoleBehaviourUi}\\
@@ -3339,12 +3340,14 @@ The operation has completed successfully.
 
   \DIFadd{Third-party drivers providing NTFS support, such as
   }\href{https://www.tuxera.com/community/open-source-ntfs-3g}{NTFS-3G}\DIFadd{, Paragon NTFS,
-  or Tuxera NTFS break certain macOS functionality, including
+  Tuxera NTFS or }\href{https://www.seagate.com/support/software/paragon}{Seagate Paragon Driver}
+  \DIFadd{break certain macOS functionality, including
   }\href{https://support.apple.com/HT202796}{Startup Disk} \DIFadd{preference
   pane normally used for operating system selection. While the recommended option
   remains not to use such drivers as they commonly corrupt the filesystem, and prefer
-  the driver bundled with macOS (with
-  }\href{http://osxdaily.com/2013/10/02/enable-ntfs-write-support-mac-os-x}{optional write support}\DIFadd{),
+  the driver bundled with macOS with optional write support (
+  }\href{http://osxdaily.com/2013/10/02/enable-ntfs-write-support-mac-os-x}{command} \DIFadd{or
+  }\href{https://mounty.app}{GUI}\DIFadd{),
   there still exist vendor-specific workarounds for their products:
   }\href{https://www.tuxera.com/products/tuxera-ntfs-for-mac/faq}{Tuxera}\DIFadd{,
   }\href{https://kb.paragon-software.com/article/6604}{Paragon}\DIFadd{, etc.

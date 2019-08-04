@@ -1471,8 +1471,8 @@ behaviour that does not go to any other sections
   \texttt{Text} is supposed to work best.
   \end{itemize}
 
-  \emph{Note}: \texttt{IgnoreTextInGraphics} may need to be enabled for select
-  firmware implementations.
+  \emph{Note}: \texttt{IgnoreTextInGraphics} and \texttt{SanitiseClearScreen} may need to be enabled for select
+  firmware implementations. Particularly APTIO firmwares.
 
 \item
   \texttt{ConsoleBehaviourUi}\\
@@ -3181,12 +3181,14 @@ The operation has completed successfully.
 
   Third-party drivers providing NTFS support, such as
   \href{https://www.tuxera.com/community/open-source-ntfs-3g}{NTFS-3G}, Paragon NTFS,
-  or Tuxera NTFS break certain macOS functionality, including
+  Tuxera NTFS or \href{https://www.seagate.com/support/software/paragon}{Seagate Paragon Driver}
+  break certain macOS functionality, including
   \href{https://support.apple.com/HT202796}{Startup Disk} preference
   pane normally used for operating system selection. While the recommended option
   remains not to use such drivers as they commonly corrupt the filesystem, and prefer
-  the driver bundled with macOS (with
-  \href{http://osxdaily.com/2013/10/02/enable-ntfs-write-support-mac-os-x}{optional write support}),
+  the driver bundled with macOS with optional write support (
+  \href{http://osxdaily.com/2013/10/02/enable-ntfs-write-support-mac-os-x}{command} or
+  \href{https://mounty.app}{GUI}),
   there still exist vendor-specific workarounds for their products:
   \href{https://www.tuxera.com/products/tuxera-ntfs-for-mac/faq}{Tuxera},
   \href{https://kb.paragon-software.com/article/6604}{Paragon}, etc.
