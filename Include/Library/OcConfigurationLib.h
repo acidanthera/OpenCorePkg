@@ -215,15 +215,16 @@
   Misc section
 **/
 
-#define OC_MISC_BLESS_OVER_ENTRY_FIELDS(_, __) \
+#define OC_MISC_BLESS_ARRAY_FIELDS(_, __) \
   OC_ARRAY (OC_STRING, _, __)
-  OC_DECLARE (OC_MISC_BLESS_OVER_ENTRY)
+  OC_DECLARE (OC_MISC_BLESS_ARRAY)
 
 #define OC_MISC_BOOT_FIELDS(_, __) \
   _(BOOLEAN                     , HideSelf                    ,     , FALSE                       ,     ())                   \
   _(BOOLEAN                     , ShowPicker                  ,     , FALSE                       ,     ())                   \
   _(BOOLEAN                     , UsePicker                   ,     , FALSE                       ,     ())                   \
   _(UINT32                      , Timeout                     ,     , 0                           ,     ())                   \
+  _(OC_MISC_BLESS_ARRAY         , BlessOverride               ,     , OC_CONSTR3 (OC_MISC_BLESS_ARRAY, _, __), OC_DESTR (OC_MISC_BLESS_ARRAY)) \
   _(OC_STRING                   , HibernateMode               ,     , OC_STRING_CONSTR ("None", _, __), OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , Resolution                  ,     , OC_STRING_CONSTR ("", _, __),     OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , ConsoleMode                 ,     , OC_STRING_CONSTR ("", _, __),     OC_DESTR (OC_STRING)) \
@@ -261,12 +262,11 @@
   OC_DECLARE (OC_MISC_TOOLS_ARRAY)
 
 #define OC_MISC_CONFIG_FIELDS(_, __) \
-  _(OC_MISC_BLESS_OVER_ENTRY   , BlessOverride   ,     , OC_CONSTR2 (OC_MISC_BLESS_OVER_ENTRY, _, __), OC_DESTR (OC_MISC_BLESS_OVER_ENTRY)) \
-  _(OC_MISC_BOOT               , Boot            ,     , OC_CONSTR2 (OC_MISC_BOOT, _, __)            , OC_DESTR (OC_MISC_BOOT)) \
-  _(OC_MISC_TOOLS_ARRAY        , BootEntries     ,     , OC_CONSTR2 (OC_MISC_TOOLS_ARRAY, _, __)     , OC_DESTR (OC_MISC_TOOLS_ARRAY)) \
-  _(OC_MISC_DEBUG              , Debug           ,     , OC_CONSTR2 (OC_MISC_DEBUG, _, __)           , OC_DESTR (OC_MISC_DEBUG)) \
-  _(OC_MISC_SECURITY           , Security        ,     , OC_CONSTR2 (OC_MISC_SECURITY, _, __)        , OC_DESTR (OC_MISC_SECURITY)) \
-  _(OC_MISC_TOOLS_ARRAY        , Tools           ,     , OC_CONSTR2 (OC_MISC_TOOLS_ARRAY, _, __)     , OC_DESTR (OC_MISC_TOOLS_ARRAY))
+  _(OC_MISC_BOOT               , Boot            ,     , OC_CONSTR2 (OC_MISC_BOOT, _, __)         , OC_DESTR (OC_MISC_BOOT)) \
+  _(OC_MISC_DEBUG              , Debug           ,     , OC_CONSTR2 (OC_MISC_DEBUG, _, __)        , OC_DESTR (OC_MISC_DEBUG)) \
+  _(OC_MISC_SECURITY           , Security        ,     , OC_CONSTR2 (OC_MISC_SECURITY, _, __)     , OC_DESTR (OC_MISC_SECURITY)) \
+  _(OC_MISC_TOOLS_ARRAY        , Entries         ,     , OC_CONSTR2 (OC_MISC_TOOLS_ARRAY, _, __)  , OC_DESTR (OC_MISC_TOOLS_ARRAY)) \
+  _(OC_MISC_TOOLS_ARRAY        , Tools           ,     , OC_CONSTR2 (OC_MISC_TOOLS_ARRAY, _, __)  , OC_DESTR (OC_MISC_TOOLS_ARRAY))
   OC_DECLARE (OC_MISC_CONFIG)
 
 /**

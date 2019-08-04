@@ -38,7 +38,7 @@ OC_ARRAY_STRUCTORS (OC_KERNEL_PATCH_ARRAY)
 OC_STRUCTORS       (OC_KERNEL_QUIRKS, ())
 OC_STRUCTORS       (OC_KERNEL_CONFIG, ())
 
-OC_STRUCTORS       (OC_MISC_BLESS_OVER_ENTRY, ())
+OC_ARRAY_STRUCTORS (OC_MISC_BLESS_ARRAY)
 OC_STRUCTORS       (OC_MISC_BOOT, ())
 OC_STRUCTORS       (OC_MISC_DEBUG, ())
 OC_STRUCTORS       (OC_MISC_SECURITY, ())
@@ -258,15 +258,12 @@ mKernelConfigurationSchema[] = {
 
 STATIC
 OC_SCHEMA
-mMiscBlessOverrideEntrySchema = OC_SCHEMA_STRING (NULL);
-
-STATIC
-OC_SCHEMA
-mMiscBlessOverrideSchema = OC_SCHEMA_ARRAY (NULL, &mMiscBlessOverrideEntrySchema);
+mMiscBlessOverrideSchema = OC_SCHEMA_STRING (NULL);
 
 STATIC
 OC_SCHEMA
 mMiscConfigurationBootSchema[] = {
+  OC_SCHEMA_ARRAY_IN   ("BlessOverride",     OC_GLOBAL_CONFIG, Misc.Boot.BlessOverride, &mMiscBlessOverrideSchema),
   OC_SCHEMA_STRING_IN  ("ConsoleBehaviourOs",OC_GLOBAL_CONFIG, Misc.Boot.ConsoleBehaviourOs),
   OC_SCHEMA_STRING_IN  ("ConsoleBehaviourUi",OC_GLOBAL_CONFIG, Misc.Boot.ConsoleBehaviourUi),
   OC_SCHEMA_STRING_IN  ("ConsoleMode",       OC_GLOBAL_CONFIG, Misc.Boot.ConsoleMode),
@@ -313,10 +310,9 @@ mMiscToolsSchema = OC_SCHEMA_DICT (NULL, mMiscToolsSchemaEntry);
 STATIC
 OC_SCHEMA
 mMiscConfigurationSchema[] = {
-  OC_SCHEMA_ARRAY_IN   ("BlessOverride",    OC_GLOBAL_CONFIG, Misc.BlessOverride, &mMiscBlessOverrideSchema),
   OC_SCHEMA_DICT       ("Boot",             mMiscConfigurationBootSchema),
-  OC_SCHEMA_ARRAY_IN   ("BootEntries",      OC_GLOBAL_CONFIG, Misc.BootEntries, &mMiscToolsSchema),
   OC_SCHEMA_DICT       ("Debug",            mMiscConfigurationDebugSchema),
+  OC_SCHEMA_ARRAY_IN   ("Entries",          OC_GLOBAL_CONFIG, Misc.Entries, &mMiscToolsSchema),
   OC_SCHEMA_DICT       ("Security",         mMiscConfigurationSecuritySchema),
   OC_SCHEMA_ARRAY_IN   ("Tools",            OC_GLOBAL_CONFIG, Misc.Tools, &mMiscToolsSchema),
 };
