@@ -601,6 +601,59 @@ OcActivateHibernateWake (
   return EFI_NOT_FOUND;
 }
 
+BOOLEAN
+OcIsAppleHibernateWake (
+  VOID
+  )
+{
+  EFI_STATUS   Status;
+  UINTN        ValueSize;
+
+  //
+  // This is reverse engineered from boot.efi.
+  // To cancel hibernate wake it is enough to delete the variables.
+  // Starting with 10.13.6 boot-switch-vars is no longer supported.
+  //
+  ValueSize = 0;
+  Status = gRT->GetVariable (
+    L"boot-signature",
+    &gAppleBootVariableGuid,
+    NULL,
+    &ValueSize,
+    NULL
+    );
+
+  if (Status == EFI_BUFFER_TOO_SMALL) {
+    ValueSize = 0;
+    Status = gRT->GetVariable (
+      L"boot-image-key",
+      &gAppleBootVariableGuid,
+      NULL,
+      &ValueSize,
+      NULL
+      );
+
+    if (Status == EFI_BUFFER_TOO_SMALL) {
+      return TRUE;
+    }
+  } else {
+    ValueSize = 0;
+    Status = gRT->GetVariable (
+      L"boot-switch-vars",
+      &gAppleBootVariableGuid,
+      NULL,
+      &ValueSize,
+      NULL
+      );
+
+    if (Status == EFI_BUFFER_TOO_SMALL) {
+      return TRUE;
+    }
+  }
+
+  return TRUE;
+}
+
 EFI_STATUS
 OcShowSimpleBootMenu (
   IN OC_BOOT_ENTRY                *BootEntries,

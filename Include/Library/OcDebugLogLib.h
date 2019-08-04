@@ -27,6 +27,11 @@
 #define DEBUG_BULK_INFO (DEBUG_VERBOSE|DEBUG_INFO)
 
 /**
+  This is a place print debug messages when they happen after ExitBootServices.
+**/
+#define RUNTIME_DEBUG(x) do { } while (0)
+
+/**
   Install or update the OcLog protocol with specified options.
 
   @param[in] Options       Logging options.

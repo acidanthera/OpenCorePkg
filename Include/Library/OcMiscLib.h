@@ -98,4 +98,13 @@ ReleaseUsbOwnership (
   VOID
   );
 
+/**
+  Perform cold reboot directly bypassing UEFI services. Does not return.
+  Supposed to work in any modern physical or virtual environment.
+**/
+VOID
+DirectRestCold (
+  VOID
+  );
+
 #endif // OC_MISC_LIB_H

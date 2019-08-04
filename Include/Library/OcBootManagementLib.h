@@ -470,6 +470,16 @@ OcActivateHibernateWake (
   );
 
 /**
+  Check if active hibernation is happening.
+
+  @retval TRUE on waking from hibernation.
+**/
+BOOLEAN
+OcIsAppleHibernateWake (
+  VOID
+  );
+
+/**
   Install missing boot policy, scan, and show simple boot menu.
 
   @param[in]  Context       Picker context.
@@ -545,6 +555,24 @@ VOID
 OcParseBootArgs (
   OUT OC_BOOT_ARGUMENTS *Arguments,
   IN  VOID              *BootArgs
+  );
+
+/**
+  Check if boot argument is currently passed (via image options or NVRAM).
+
+  @param[in]  LoadImage    UEFI loaded image protocol instance, optional.
+  @param[in]  GetVariable  Preferred UEFI NVRAM reader, optional.
+  @param[in]  Argument        Argument, e.g. -v, slide=, debug=, etc.
+  @param[in]  ArgumentLength  Argument length, e.g. L_STR_LEN ("-v").
+
+  @retval TRUE if argument is present.
+**/
+BOOLEAN
+OcCheckArgumentFromEnv (
+  IN EFI_LOADED_IMAGE  *LoadedImage  OPTIONAL,
+  IN EFI_GET_VARIABLE  GetVariable  OPTIONAL,
+  IN CONST CHAR8       *Argument,
+  IN CONST UINTN       ArgumentLength
   );
 
 /**

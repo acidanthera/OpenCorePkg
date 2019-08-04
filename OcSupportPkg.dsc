@@ -51,6 +51,7 @@
   HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
   FileHandleLib|MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
   OcAcpiLib|OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
+  OcAppleBootCompatLib|OcSupportPkg/Library/OcAppleBootCompatLib/OcAppleBootCompatLib.inf
   OcAppleBootPolicyLib|OcSupportPkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
   OcAppleChunklistLib|OcSupportPkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
   OcAppleDiskImageLib|OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
@@ -85,6 +86,7 @@
 
 [Components]
   OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
+  OcSupportPkg/Library/OcAppleBootCompatLib/OcAppleBootCompatLib.inf
   OcSupportPkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
   OcSupportPkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
   OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf

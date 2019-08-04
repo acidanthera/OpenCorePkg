@@ -41,6 +41,9 @@
   ## Include/Protocol/OcLog.h
   gOcLogProtocolGuid             = { 0xDBB6008F, 0x89E4, 0x4272, { 0x98, 0x81, 0xCE, 0x3A, 0xFD, 0x97, 0x24, 0xD0 }}
 
+  # Include/Protocol/OcAppleBootCompat.h
+  gOcAppleBootCompatProtocolGuid = { 0xC7CBA84E, 0xCC77, 0x461D, { 0x9E, 0x3C, 0x6B, 0xE0, 0xCB, 0x79, 0xA7, 0xC1 } }
+
   ## Include/Protocol/OcFirmwareRuntime.h
   gOcFirmwareRuntimeProtocolGuid = { 0x9C820F96, 0xF16C, 0x4FFD, { 0xB2, 0x66, 0xDF, 0x0A, 0x8F, 0xDF, 0xC4, 0x55 }}
 
@@ -73,6 +76,9 @@
 [LibraryClasses]
   ##  @libraryclass
   OcAcpiLib|Include/Library/OcAcpiLib.h
+
+  ##  @libraryclass
+  OcAppleBootCompatLib|Include/Library/OcAppleBootCompatLib.h
 
   ##  @libraryclass
   OcAppleBootPolicyLib|Include/Library/OcAppleBootPolicyLib.h

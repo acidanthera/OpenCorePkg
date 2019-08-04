@@ -46,6 +46,7 @@
 [Sources]
   Base64Decode.c
   DataPatcher.c
+  DirectReset.c
   ReleaseUsbOwnership.c
   NullTextOutput.c
   UninstallAllProtocolInterfaces.c

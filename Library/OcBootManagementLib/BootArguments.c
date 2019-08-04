@@ -12,11 +12,14 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include <Guid/AppleVariable.h>
+
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
 
 VOID
 OcParseBootArgs (
@@ -150,4 +153,77 @@ OcAppendArgumentToCmd (
 
   AsciiStrnCpyS (CommandLine, ArgumentLength + 1, Argument, ArgumentLength + 1);
   return TRUE;
+}
+
+BOOLEAN
+OcCheckArgumentFromEnv (
+  IN EFI_LOADED_IMAGE  *LoadedImage  OPTIONAL,
+  IN EFI_GET_VARIABLE  GetVariable  OPTIONAL,
+  IN CONST CHAR8       *Argument,
+  IN CONST UINTN       ArgumentLength
+  )
+{
+  CHAR16      *Options;
+  UINTN       OptionsSize;
+  CHAR8       BootArgsVar[BOOT_LINE_LENGTH];
+  UINTN       BootArgsVarLen;
+  EFI_STATUS  Status;
+  UINTN       LastIndex;
+  CHAR16      Last;
+  BOOLEAN     HasArgument;
+
+  HasArgument = FALSE;
+
+  if (LoadedImage != NULL) {
+    Options     = (CHAR16 *) LoadedImage->LoadOptions;
+    OptionsSize = LoadedImage->LoadOptionsSize / sizeof (CHAR16);
+
+    if (Options != NULL && OptionsSize > 0) {
+      //
+      // Just in case we do not have 0-termination.
+      // This may cut some data with unexpected options, but it is not like we care.
+      //
+      LastIndex = OptionsSize - 1;
+      Last = Options[LastIndex];
+      Options[LastIndex] = '\0';
+
+      UnicodeStrToAsciiStrS (Options, BootArgsVar, BOOT_LINE_LENGTH);
+
+      if (OcGetArgumentFromCmd (BootArgsVar, Argument, ArgumentLength)) {
+        HasArgument = TRUE;
+      }
+
+      //
+      // Options do not belong to us, restore the changed value.
+      //
+      Options[LastIndex] = Last;
+    }
+  }
+
+  if (!HasArgument) {
+    //
+    // Important to avoid triggering boot-args wrapper too early if we have any.
+    //
+    BootArgsVarLen = sizeof (BootArgsVar);
+    Status = (GetVariable != NULL ? GetVariable : gRT->GetVariable) (
+      L"boot-args",
+      &gAppleBootVariableGuid,
+      NULL,
+      &BootArgsVarLen,
+      BootArgsVar
+      );
+
+    if (!EFI_ERROR (Status) && BootArgsVarLen > 0) {
+      //
+      // Just in case we do not have 0-termination
+      //
+      BootArgsVar[BootArgsVarLen-1] = '\0';
+
+      if (OcGetArgumentFromCmd (BootArgsVar, Argument, ArgumentLength)) {
+        HasArgument = TRUE;
+      }
+    }
+  }
+
+  return HasArgument;
 }

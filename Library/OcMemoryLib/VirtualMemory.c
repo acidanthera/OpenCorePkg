@@ -160,8 +160,6 @@ VmAllocateMemoryPool (
   if (!EFI_ERROR (Status)) {
     Context->MemoryPool = (UINT8 *) Addr;
     Context->FreePages  = NumPages;
-  } else {
-    DEBUG ((DEBUG_ERROR, "OCVM: memory pool allocation failure - %r\n", Status));
   }
 
   return Status;
@@ -181,8 +179,6 @@ VmAllocatePages (
     AllocatedPages = Context->MemoryPool;
     Context->MemoryPool += EFI_PAGES_TO_SIZE (NumPages);
     Context->FreePages  -= NumPages;
-  } else {
-    DEBUG ((DEBUG_ERROR, "OCVM: memory pool out of free pages\n"));
   }
 
   return AllocatedPages;
