@@ -24,6 +24,7 @@
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
 #include <Protocol/OcFirmwareRuntime.h>
@@ -105,6 +106,63 @@ ForceExitBootServices (
 }
 
 /**
+  Protect CSM region in memory map from relocation.
+
+  @param[in,out]  MemoryMapSize      Memory map size in bytes, updated on shrink.
+  @param[in,out]  MemoryMap          Memory map to shrink.
+  @param[in]      DescriptorSize     Memory map descriptor size in bytes.
+**/
+STATIC
+VOID
+ProtectCsmRegion (
+  IN     UINTN                  MemoryMapSize,
+  IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN     UINTN                  DescriptorSize
+  )
+{
+  UINTN                   NumEntries;
+  UINTN                   Index;
+  EFI_MEMORY_DESCRIPTOR   *Desc;
+  UINTN                   PhysicalEnd;
+
+  //
+  // AMI CSM module allocates up to two regions for legacy video output.
+  // 1. For PMM and EBDA areas.
+  //    On Ivy Bridge and below it ends at 0xA0000-0x1000-0x1 and has EfiBootServicesCode type.
+  //    On Haswell and above it is allocated below 0xA0000 address with the same type.
+  // 2. For Intel RC S3 reserved area, fixed from 0x9F000 to 0x9FFFF.
+  //    On Sandy Bridge and below it is not present in memory map.
+  //    On Ivy Bridge and newer it is present as EfiRuntimeServicesData.
+  //    Starting from at least SkyLake it is present as EfiReservedMemoryType.
+  //
+  // Prior to AptioMemoryFix EfiRuntimeServicesData could have been relocated by boot.efi,
+  // and the 2nd region could have been overwritten by the kernel. Now it is no longer the
+  // case, and only the 1st region may need special handling.
+  // For the 1st region there appear to be (unconfirmed) reports that it may still be accessed
+  // after waking from sleep. This does not seem to be valid according to AMI code, but we still
+  // protect it in case such systems really exist.
+  //
+  // Initially researched and fixed on GIGABYTE boards by Slice.
+  //
+
+  Desc       = MemoryMap;
+  NumEntries = MemoryMapSize / DescriptorSize;
+
+  for (Index = 0; Index < NumEntries; ++Index) {
+    if (Desc->NumberOfPages > 0 && Desc->Type == EfiBootServicesData) {
+      PhysicalEnd = LAST_DESCRIPTOR_ADDR (Desc) + 1;
+
+      if (PhysicalEnd >= 0x9E000 && PhysicalEnd < 0xA0000) {
+        Desc->Type = EfiACPIMemoryNVS;
+        break;
+      }
+    }
+
+    Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
+  }
+}
+
+/**
   UEFI Boot Services StartImage override. Called to start an efi image.
   If this is boot.efi, then our overrides are enabled.
 **/
@@ -128,7 +186,6 @@ OcStartImage (
   // Clear monitoring vars
   //
   BootCompat->ServiceState.MinAllocatedAddr = 0;
-  BootCompat->ServiceState.MaxAllocatedAddr = 0;
 
   if (AppleLoadedImage != NULL) {
     //
@@ -191,7 +248,6 @@ OcAllocatePages (
   )
 {
   EFI_STATUS              Status;
-  EFI_PHYSICAL_ADDRESS    UpperAddr;
   BOOT_COMPAT_CONTEXT     *BootCompat;
 
   BootCompat = GetBootCompatContext ();
@@ -206,21 +262,12 @@ OcAllocatePages (
   if (!EFI_ERROR (Status) && BootCompat->ServiceState.AppleBootNestedCount > 0) {
     if (Type == AllocateAddress && MemoryType == EfiLoaderData) {
       //
-      // Called from boot.efi
-      //
-      UpperAddr = *Memory + EFI_PAGES_TO_SIZE (NumberOfPages);
-
-      //
-      // Store min and max mem: they can be used later to determine
-      // start and end of kernel boot or hibernation images.
+      // Called from boot.efi.
+      // Store minimally allocated address to find kernel image start.
       //
       if (BootCompat->ServiceState.MinAllocatedAddr == 0
         || *Memory < BootCompat->ServiceState.MinAllocatedAddr) {
         BootCompat->ServiceState.MinAllocatedAddr = *Memory;
-      }
-
-      if (UpperAddr > BootCompat->ServiceState.MaxAllocatedAddr) {
-        BootCompat->ServiceState.MaxAllocatedAddr = UpperAddr;
       }
     } else if (BootCompat->ServiceState.AppleHibernateWake
       && Type == AllocateAnyPages && MemoryType == EfiLoaderData
@@ -271,12 +318,11 @@ OcGetMemoryMap (
 
   if (BootCompat->ServiceState.AppleBootNestedCount > 0) {
     if (BootCompat->Settings.ProtectCsmRegion) {
-      // FIXME: Implement.
-      //ProtectCsmRegion (
-      //  *MemoryMapSize,
-      //  MemoryMap,
-      //  *DescriptorSize
-      //  );
+      ProtectCsmRegion (
+        *MemoryMapSize,
+        MemoryMap,
+        *DescriptorSize
+        );
     }
 
     if (BootCompat->Settings.ShrinkMemoryMap) {
@@ -504,8 +550,11 @@ InstallServiceOverrides (
   EFI_STATUS              Status;
   VOID                    *Registration;
   UEFI_SERVICES_POINTERS  *ServicePtrs;
+  EFI_TPL                 OriginalTpl;
 
   ServicePtrs = &BootCompat->ServicePtrs;
+
+  OriginalTpl = gBS->RaiseTPL (TPL_HIGH_LEVEL);
 
   ServicePtrs->AllocatePages        = gBS->AllocatePages;
   ServicePtrs->GetMemoryMap         = gBS->GetMemoryMap;
@@ -524,6 +573,8 @@ InstallServiceOverrides (
 
   gRT->Hdr.CRC32 = 0;
   gRT->Hdr.CRC32 = CalculateCrc32 (gRT, gRT->Hdr.HeaderSize);
+
+  gBS->RestoreTPL (OriginalTpl);
 
   //
   // Allocate memory pool if needed.

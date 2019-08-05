@@ -39,7 +39,6 @@ typedef PACKED struct ASM_SUPPORT_STATE_ {
   UINT16  SavedES;
   UINT16  SavedFS;
   UINT16  SavedGS;
-  UINT16  SavedSS;
 
   UINT64  SavedGDTR32;
   UINT16  SavedGDTR32Limit;
@@ -50,8 +49,6 @@ typedef PACKED struct ASM_SUPPORT_STATE_ {
   UINT16  SavedES32;
   UINT16  SavedFS32;
   UINT16  SavedGS32;
-  UINT16  SavedSS32;
-  UINT32  SavedESP32;
 
   VOID    *KernelEntry;
 } ASM_SUPPORT_STATE;

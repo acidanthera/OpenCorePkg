@@ -15,6 +15,7 @@
 
 #include "BootCompatInternal.h"
 
+#include <Guid/OcVariables.h>
 #include <IndustryStandard/AppleHibernate.h>
 
 #include <Library/BaseLib.h>
@@ -25,6 +26,7 @@
 #include <Library/OcMemoryLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
+#include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>

@@ -155,10 +155,6 @@ typedef struct SERVICES_OVERRIDE_STATE_ {
   ///
   EFI_PHYSICAL_ADDRESS  MinAllocatedAddr;
   ///
-  /// Maximum address allocated by AlocatePages.
-  ///
-  EFI_PHYSICAL_ADDRESS  MaxAllocatedAddr;
-  ///
   /// Apple hibernate image address allocated by AlocatePages.
   ///
   EFI_PHYSICAL_ADDRESS  HibernateImageAddress;

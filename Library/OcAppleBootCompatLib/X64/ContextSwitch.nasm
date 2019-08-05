@@ -37,7 +37,6 @@ struc ASM_SUPPORT_STATE
   .SavedES            resw 1
   .SavedFS            resw 1
   .SavedGS            resw 1
-  .SavedSS            resw 1
 
   ;------------------------------------------------------------------------------
   ; 32-bit state
@@ -52,8 +51,6 @@ struc ASM_SUPPORT_STATE
   .SavedES32          resw 1
   .SavedFS32          resw 1
   .SavedGS32          resw 1
-  .SavedSS32          resw 1
-  .SavedESP32         resd 1
 
   ;------------------------------------------------------------------------------
   ; Kernel entry address.
@@ -100,8 +97,70 @@ BITS  64
   mov   word [rcx + ASM_SUPPORT_STATE.SavedES], es
   mov   word [rcx + ASM_SUPPORT_STATE.SavedFS], fs
   mov   word [rcx + ASM_SUPPORT_STATE.SavedGS], gs
-  mov   word [rcx + ASM_SUPPORT_STATE.SavedSS], ss
   ret
+
+;------------------------------------------------------------------------------
+; Apple kernel starts through call gate, an assembly structure allocated in
+; 32-bit high memory, that transitions to 32-bit mode and then calls the kernel
+; with 32-bit GDT and UEFI stack.
+;
+; KernelCallGate:
+;   lea     rax, StartKernelIn32Bit
+;   mov     cs:gKernelBooter32, eax
+;   lea     rax, gKernelGdtTable
+;   mov     cs:gKernelGdtBase, rax
+;   lgdt    fword ptr cs:gKernelGdtLimit
+;   mov     ax, 10h
+;   mov     ds, ax
+;   mov     es, ax
+;   mov     gs, ax
+;   mov     fs, ax
+;   lea     rax, gKernelBooter32
+;   jmp     fword ptr [rax]
+;
+; StartKernelIn32Bit:
+;   mov     rax, cr0
+;   btr     eax, 1Fh
+;   mov     cr0, rax
+;   mov     ebx, ecx        ; ebx = boot-args
+;   mov     edi, edx
+;   ; Disable long mode
+;   mov     ecx, 0C0000080h ; EFER MSR number.
+;   rdmsr
+;   btr     eax, 8          ; Set LME=0.
+;   wrmsr
+;   jmp     short SwitchTo32Bit
+;
+; SwitchTo32Bit:
+;   mov     eax, ebx
+;   jmp     rdi             ; Jump to kernel
+;   hlt
+;   ret
+;
+; gKernelBooter32:
+;   dd 0
+;   dw 8                    ; New CS value
+; gKernelGdtLimit:          ; IA32_DESCRIPTOR
+;   dw 18h
+; gKernelGdtBase:
+;   dq 0
+; gKernelGdtTable:          ; Array of IA32_GDT.
+;   dw 0                    ; [0] = LimitLow
+;   dw 0                    ; [0] = BaseLow
+;   db 0                    ; [0] = BaseMid
+;   dw 0                    ; [0] = Flags
+;   db 0                    ; [0] = BaseHigh
+;   dw 0FFFFh               ; [1] = LimitLow
+;   dw 0                    ; [1] = BaseLow
+;   db 0                    ; [1] = BaseMid
+;   dw 0CF9Eh               ; [1] - Flags
+;   db 0                    ; [1] = BaseHigh
+;   dw 0FFFFh               ; [2] = LimitLow
+;   dw 0                    ; [2] = BaseLow
+;   db 0                    ; [2] = BaseMid
+;   dw 0CF92h               ; [2] = Flags
+;   db 0                    ; [2] = BaseHigh
+;------------------------------------------------------------------------------
 
 ;------------------------------------------------------------------------------
 ; Long (far) return.
@@ -178,12 +237,10 @@ ASM_PFX(gOcAbcAsmStateAddr32):
   mov  word [ebx + ASM_SUPPORT_STATE.SavedES32], es
   mov  word [ebx + ASM_SUPPORT_STATE.SavedFS32], fs
   mov  word [ebx + ASM_SUPPORT_STATE.SavedGS32], gs
-  mov  word [ebx + ASM_SUPPORT_STATE.SavedSS32], ss
-  mov  dword [ebx + ASM_SUPPORT_STATE.SavedESP32], esp
 
   ;
   ; Transition to 64-bit mode...
-  ; FIXME: we should ensure interrupts are disabled here.
+  ; boot.efi disables interrupts for us, so we are safe.
   ;
 
   ; Load saved UEFI GDT and IDT.
@@ -232,10 +289,9 @@ BITS 64
   mov   fs, ax
   mov   ax, word [rbx + ASM_SUPPORT_STATE.SavedGS]
   mov   gs, ax
-  mov   ax, word [rbx + ASM_SUPPORT_STATE.SavedSS]
-  mov   ss, ax
 
-  ; Assume the stack is useasble but potentially misaligned.
+  ; boot.efi preserves ss selector from UEFI GDT to just use UEFI stack (and memory) as is.
+  ; For this reason just assume the stack is useable but align it for definite 64-bit compat.
   and   rsp, 0FFFFFFFFFFFFFFF0h
 
   ; Call AppleMapPrepareKernelState (rcx = rax = bootArgs, rdx = 0 = 32 bit kernel jump).
@@ -287,6 +343,8 @@ AsmJumpFromKernel32Compatibility:
   ;
 
   ; Reload saved 32 bit state data.
+  ; Since boot.efi relies on segment registers shadow part and preserves ss value,
+  ; which contains previously read GDT data, we are not allowed to later update it.
   lidt  [ebx + ASM_SUPPORT_STATE.SavedIDTR32]
   mov   ax, word [ebx + ASM_SUPPORT_STATE.SavedDS32]
   mov   ds, ax
@@ -296,9 +354,6 @@ AsmJumpFromKernel32Compatibility:
   mov   fs, ax
   mov   ax, word [ebx + ASM_SUPPORT_STATE.SavedGS32]
   mov   gs, ax
-  mov   ax, word [ebx + ASM_SUPPORT_STATE.SavedSS32]
-  mov   ss, ax  ; disables interrupts for 1 instruction to load esp
-  mov   esp, dword [ebx + ASM_SUPPORT_STATE.SavedESP32]
 
   ; Jump back to the kernel passing boot arguments in eax.
   mov   eax, edi
