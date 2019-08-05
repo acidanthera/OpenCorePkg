@@ -67,6 +67,11 @@ typedef PACKED struct ASM_KERNEL_JUMP_ {
 
 #pragma pack(pop)
 
+/**
+  Assembly interface to save UEFI environment state in specific way.
+
+  @param[in,out]  AsmState      Assembly state to update, can be preserved.
+**/
 VOID
 EFIAPI
 AsmAppleMapPlatformSaveState (

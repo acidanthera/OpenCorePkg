@@ -16,9 +16,14 @@
 #define BOOT_COMPAT_INTERNAL_H
 
 #include <Uefi.h>
+
+#include <IndustryStandard/AppleBootArgs.h>
+
 #include <Library/OcAppleBootCompatLib.h>
+#include <Library/OcBootManagementLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcMemoryLib.h>
+
 #include <Protocol/LoadedImage.h>
 
 #ifdef MDE_CPU_X64
@@ -42,35 +47,42 @@
 /**
   Kernel __HIB segment virtual address.
 **/
-#define KERNEL_HIB_VADDR       ((UINTN)0xFFFFFF8000100000ULL)
+#define KERNEL_HIB_VADDR         ((UINTN) 0xFFFFFF8000100000ULL)
 
 /**
   Kernel __TEXT segment virtual address.
 **/
-#define KERNEL_TEXT_VADDR      ((UINTN)0xFFFFFF8000200000ULL)
+#define KERNEL_TEXT_VADDR        ((UINTN) 0xFFFFFF8000200000ULL)
+
+/**
+  Kernel physical base address.
+**/
+#define KERNEL_BASE_PADDR        (KERNEL_TEXT_VADDR - KERNEL_HIB_VADDR)
+
 /**
   Slide offset per slide entry
 **/
-#define SLIDE_GRANULARITY      ((UINTN)0x200000)
+#define SLIDE_GRANULARITY        ((UINTN) 0x200000)
 
 /**
   Total possible number of KASLR slide offsets.
 **/
-#define TOTAL_SLIDE_NUM        256
+#define TOTAL_SLIDE_NUM          ((UINTN) 0x100)
 
 /**
-  Get last descriptor address.
-  It is assumed that the descriptor contains pages.
+  Slide errate number to skip range from.
 **/
-#define LAST_DESCRIPTOR_ADDR(Desc) \
-  ((Desc)->PhysicalStart + (EFI_PAGES_TO_SIZE ((UINTN) (Desc)->NumberOfPages) - 1))
+#define SLIDE_ERRATA_NUM         ((UINTN) 0x80)
 
 /**
-  Check if area is within the specified descriptor.
-  It is assumed that the descriptor contains pages and AreaSize is not 0.
+  Sandy/Ivy skip slide range for Intel HD graphics.
 **/
-#define AREA_WITHIN_DESCRIPTOR(Desc, Area, AreaSize) \
-  ((Area) >= (Desc)->PhysicalStart && ((Area) + ((AreaSize) - 1)) <= LAST_DESCRIPTOR_ADDR (Desc))
+#define SLIDE_ERRATA_SKIP_RANGE  ((UINTN) 0x10200000)
+
+/**
+  Assume the kernel is roughly 128 MBs.
+**/
+#define ESTIMATED_KERNEL_SIZE    ((UINTN) 0x8000000)
 
 /**
   Preserved relocation entry.
@@ -221,6 +233,53 @@ typedef struct KERNEL_SUPPORT_STATE_ {
 } KERNEL_SUPPORT_STATE;
 
 /**
+  Apple booter KASLR slide support internal state.
+**/
+typedef struct SLIDE_SUPPORT_STATE_ {
+  ///
+  /// Memory map analysis status determining slide usage.
+  ///
+  BOOLEAN                  HasMemoryMapAnalysis;
+  ///
+  /// TRUE if we are running on Intel Sandy or Ivy bridge.
+  ///
+  BOOLEAN                  HasSandyOrIvy;
+  ///
+  /// TRUE if CsrActiveConfig was set.
+  ///
+  BOOLEAN                  HasCsrActiveConfig;
+  ///
+  /// TRUE if BootArgs was set.
+  ///
+  BOOLEAN                  HasBootArgs;
+  ///
+  /// Read or assumed csr-arctive-config variable value.
+  ///
+  UINT32                   CsrActiveConfig;
+  ///
+  /// Valid slides to choose from when using custom slide.
+  ///
+  UINT8                    ValidSlides[TOTAL_SLIDE_NUM];
+  ///
+  /// Number of entries in ValidSlides.
+  ///
+  UINT32                   ValidSlideCount;
+  ///
+  /// Apple kernel boot arguments read from boot-args variable and then
+  /// modified with an additional slide parameter in case custom slide is used.
+  ///
+  CHAR8                    BootArgs[BOOT_LINE_LENGTH];
+  ///
+  /// BootArgs data size.
+  ///
+  UINTN                    BootArgsSize;
+  ///
+  /// Estimated size for kernel itself, device tree, memory map, and rt pages.
+  ///
+  UINTN                    EstimatedKernelArea;
+} SLIDE_SUPPORT_STATE;
+
+/**
   Apple Boot Compatibility context.
 **/
 typedef struct BOOT_COMPAT_CONTEXT_ {
@@ -244,6 +303,10 @@ typedef struct BOOT_COMPAT_CONTEXT_ {
   /// Apple kernel support internal state.
   ///
   KERNEL_SUPPORT_STATE     KernelState;
+  ///
+  /// Apple booter KASLR slide support internal state.
+  ///
+  SLIDE_SUPPORT_STATE      SlideSupport;
 } BOOT_COMPAT_CONTEXT;
 
 /**
@@ -348,6 +411,59 @@ EFIAPI
 AppleMapPrepareKernelState (
   IN UINTN    Args,
   IN BOOLEAN  ModeX64
+  );
+
+/**
+  Patch boot.efi to support random and passed slide values in safe mode.
+
+  @param[in,out]  ImageBase  Apple booter image base.
+  @param[in]      ImageSize  Apple booter image size.
+**/
+VOID
+AppleSlideUnlockForSafeMode (
+  IN OUT UINT8  *ImageBase,
+  IN     UINTN  ImageSize
+  );
+
+/**
+  Primary custom KASLR support handler. This gets called on every
+  UEFI RuntimeServices GetVariable call and thus is useful to
+  perform KASLR slide injection through boot-args.
+
+  @param[in,out]  BootCompat    Boot compatibility context.
+  @param[in]      GetVariable   Original UEFI GetVariable service.
+  @param[in]      GetMemoryMap  Unmodified GetMemoryMap pointer, optional.
+  @param[in]      VariableName  GetVariable variable name argument.
+  @param[in]      VendorGuid    GetVariable vendor GUID argument.
+  @param[out]     Attributes    GetVariable attributes argument.
+  @param[in,out]  DataSize      GetVariable data size argument.
+  @param[out]     Data          GetVariable data argument.
+
+  @retval GetVariable status code.
+**/
+EFI_STATUS
+AppleSlideGetVariable (
+  IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
+  IN     EFI_GET_VARIABLE      GetVariable,
+  IN     EFI_GET_MEMORY_MAP    GetMemoryMap  OPTIONAL,
+  IN     CHAR16                *VariableName,
+  IN     EFI_GUID              *VendorGuid,
+     OUT UINT32                *Attributes OPTIONAL,
+  IN OUT UINTN                 *DataSize,
+     OUT VOID                  *Data
+  );
+
+/**
+  Ensures that the original csr-active-config is passed to the kernel,
+  and removes customised slide value for security reasons.
+
+  @param[in,out]  BootCompat    Boot compatibility context.
+  @param[in,out]  BootArgs      Apple kernel boot arguments.
+**/
+VOID
+AppleSlideRestore (
+  IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
+  IN OUT OC_BOOT_ARGUMENTS     *BootArgs
   );
 
 #endif // BOOT_COMPAT_INTERNAL_H

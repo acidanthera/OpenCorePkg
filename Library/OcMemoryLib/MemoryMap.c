@@ -22,12 +22,6 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 
-/**
- *  Reverse equivalent of NEXT_MEMORY_DESCRIPTOR.
- */
-#define PREV_MEMORY_DESCRIPTOR(MemoryDescriptor, Size) \
-  ((EFI_MEMORY_DESCRIPTOR *)((UINT8 *)(MemoryDescriptor) - (Size)))
-
 EFI_MEMORY_DESCRIPTOR *
 GetCurrentMemoryMap (
   OUT UINTN   *MemoryMapSize,
@@ -346,4 +340,40 @@ AllocatePagesFromTop (
   FreePool (MemoryMap);
 
   return Status;
+}
+
+UINTN
+CountRuntimePages (
+  IN  UINTN                  MemoryMapSize,
+  IN  EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN  UINTN                  DescriptorSize,
+  OUT UINTN                  *DescriptorCount OPTIONAL
+  )
+{
+  UINTN                  DescNum;
+  UINTN                  PageNum;
+  UINTN                  NumEntries;
+  UINTN                  Index;
+  EFI_MEMORY_DESCRIPTOR  *Desc;
+
+  DescNum    = 0;
+  PageNum    = 0;
+  NumEntries = MemoryMapSize / DescriptorSize;
+  Desc       = MemoryMap;
+
+  for (Index = 0; Index < NumEntries; ++Index) {
+    if (Desc->Type != EfiReservedMemoryType
+      && (Desc->Attribute & EFI_MEMORY_RUNTIME) != 0) {
+      ++DescNum;
+      PageNum += Desc->NumberOfPages;
+    }
+
+    Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
+  }
+
+  if (DescriptorCount != NULL) {
+    *DescriptorCount = DescNum;
+  }
+
+  return PageNum;
 }

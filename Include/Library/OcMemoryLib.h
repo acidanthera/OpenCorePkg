@@ -19,6 +19,32 @@
 #include <IndustryStandard/VirtualMemory.h>
 
 /**
+  Reverse equivalent of NEXT_MEMORY_DESCRIPTOR.
+**/
+#define PREV_MEMORY_DESCRIPTOR(MemoryDescriptor, Size) \
+  ((EFI_MEMORY_DESCRIPTOR *)((UINT8 *)(MemoryDescriptor) - (Size)))
+
+
+/**
+  Get last descriptor address.
+  It is assumed that the descriptor contains pages.
+**/
+#define LAST_DESCRIPTOR_ADDR(Desc) \
+  ((Desc)->PhysicalStart + (EFI_PAGES_TO_SIZE ((UINTN) (Desc)->NumberOfPages) - 1))
+
+/**
+  Check if area is within the specified descriptor.
+  It is assumed that the descriptor contains pages and AreaSize is not 0.
+**/
+#define AREA_WITHIN_DESCRIPTOR(Desc, Area, AreaSize) \
+  ((Area) >= (Desc)->PhysicalStart && ((Area) + ((AreaSize) - 1)) <= LAST_DESCRIPTOR_ADDR (Desc))
+
+/**
+  Reasonable default virtual memory page pool size (2 MB).
+**/
+#define OC_DEFAULT_VMEM_PAGE_COUNT 0x200
+
+/**
   Lock the legacy region specified to enable modification.
 
   @param[in] LegacyAddress  The address of the region to lock.
@@ -139,6 +165,24 @@ AllocatePagesFromTop (
   );
 
 /**
+  Calculate number of runtime pages in the memory map.
+
+  @param[in]     MemoryMapSize      Memory map size in bytes.
+  @param[in]     MemoryMap          Memory map to inspect.
+  @param[in]     DescriptorSize     Memory map descriptor size in bytes.
+  @param[out]    DescriptorCount    Number of relevant descriptors, optional.
+
+  @retval Number of runtime pages.
+**/
+UINTN
+CountRuntimePages (
+  IN  UINTN                  MemoryMapSize,
+  IN  EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN  UINTN                  DescriptorSize,
+  OUT UINTN                  *DescriptorCount OPTIONAL
+  );
+
+/**
   Return pointer to PML4 table in PageTable and PWT and PCD flags in Flags.
 
   @param[out]  Flags      Current page table PWT and PCT flags.
@@ -179,11 +223,6 @@ typedef struct OC_VMEM_CONTEXT_ {
   ///
   UINTN  FreePages;
 } OC_VMEM_CONTEXT;
-
-/**
-  Reasonable default virtual memory page pool size (2 MB).
-**/
-#define OC_DEFAULT_VMEM_PAGE_COUNT 0x200
 
 /**
   Allocate EfiBootServicesData virtual memory pool from boot services

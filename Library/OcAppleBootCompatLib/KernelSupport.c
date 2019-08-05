@@ -335,9 +335,9 @@ AppleMapPrepareForBooting (
   OcParseBootArgs (&BA, BootArgs);
 
   //
-  // FIXME: Restore the variables we tempered with to support custom slides.
+  // Restore the variables we tampered with to support custom slides.
   //
-  // RestoreCustomSlideOverrides (&BA);
+  AppleSlideRestore (BootCompat, &BA);
 
   MemoryMapSize  = *BA.MemoryMapSize;
   MemoryMap      = (EFI_MEMORY_DESCRIPTOR *)(UINTN) (*BA.MemoryMap);
@@ -401,6 +401,7 @@ AppleMapPrepareForHibernateWake (
       if (BootCompat->Settings.DiscardAppleS4Map) {
         //
         // Route 1. Discard the new memory map here, and let XNU use what it had.
+        // It is unknown whether there still are any firmwares that need this.
         //
         Handoff->type = kIOHibernateHandoffType;
       } else {
@@ -521,7 +522,7 @@ AppleMapPrepareKernelJump (
     // ImageAddress points to the first kernel segment, __HIB.
     // Kernel image header is located in __TEXT, which follows __HIB.
     //
-    ImageAddress += KERNEL_TEXT_VADDR - KERNEL_HIB_VADDR;
+    ImageAddress += KERNEL_BASE_PADDR;
 
     //
     // Cut higher virtual address bits.

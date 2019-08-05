@@ -101,11 +101,21 @@ OcCpuCorrectFlexRatio (
 
   @param[in] VersionEax  CPUID (1) EAX value.
 
-  @return Apple Family (e.g. CPUFAMILY_UNKNOWN)
+  @retval Apple Family (e.g. CPUFAMILY_UNKNOWN)
 **/
 UINT32
 OcCpuModelToAppleFamily (
   IN CPUID_VERSION_INFO_EAX  VersionEax
+  );
+
+/**
+  Special Intel Sandy Bridge and Ivy Bridge detection code.
+
+  @retval TRUE when running with Sandy Bridge or Ivy Bridge CPU.
+**/
+BOOLEAN
+OcIsSandyOrIvy (
+  VOID
   );
 
 #endif // OC_CPU_LIB_H_

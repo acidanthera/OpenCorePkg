@@ -26,6 +26,7 @@ typedef struct OC_ABC_SETTINGS_ {
   BOOLEAN  SetupAppleMap;
   ///
   /// Provide custom Apple KASLR slide calculation for firmwares with polluted low memory ranges.
+  /// This also ensures that slide= argument is never passed to the operating system.
   ///
   BOOLEAN  SetupAppleSlide;
   ///

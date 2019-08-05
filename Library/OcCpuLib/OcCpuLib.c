@@ -34,6 +34,7 @@
 #include <Library/UefiLib.h>
 
 #include <ProcessorInfo.h>
+#include <Register/Microcode.h>
 #include <Register/Msr.h>
 #include <Register/Msr/SandyBridgeMsr.h>
 #include <Register/Msr/NehalemMsr.h>
@@ -591,7 +592,7 @@ ScanIntelProcessor (
   AppleMajorType = DetectAppleMajorType (Cpu->BrandString);
   Cpu->AppleProcessorType = DetectAppleProcessorType (Cpu->Model, Cpu->Stepping, AppleMajorType);
 
-  DEBUG ((DEBUG_INFO, "Detected Apple Processor Type: %02X -> %04X\n", AppleMajorType, Cpu->AppleProcessorType));
+  DEBUG ((DEBUG_INFO, "OCCPU: Detected Apple Processor Type: %02X -> %04X\n", AppleMajorType, Cpu->AppleProcessorType));
 
   if ((Cpu->Family != 0x06 || Cpu->Model < 0x0c)
     && (Cpu->Family != 0x0f || Cpu->Model < 0x03)) {
@@ -637,7 +638,7 @@ ScanIntelProcessor (
 
   DEBUG ((
     DEBUG_INFO,
-    "Ratio Min %d Max %d Current %d Turbo %d %d %d %d\n",
+    "OCCPU: Ratio Min %d Max %d Current %d Turbo %d %d %d %d\n",
     Cpu->MinBusRatio,
     Cpu->MaxBusRatio,
     Cpu->CurBusRatio,
@@ -658,7 +659,7 @@ ScanIntelProcessor (
 
       DEBUG ((
         DEBUG_INFO,
-        "%a %a %11lld %5dMHz %u * %u / %u = %ld\n",
+        "OCCPU: %a %a %11lld %5dMHz %u * %u / %u = %ld\n",
         "ART",
         "Frequency",
         Cpu->CPUFrequency,
@@ -918,11 +919,11 @@ OcCpuScanProcessor (
     }
   }
 
-  DEBUG ((DEBUG_INFO, "%a %a\n", "Found", Cpu->BrandString));
+  DEBUG ((DEBUG_INFO, "OCCPU: %a %a\n", "Found", Cpu->BrandString));
 
   DEBUG ((
     DEBUG_INFO,
-    "Signature %0X Stepping %0X Model %0X Family %0X Type %0X ExtModel %0X ExtFamily %0X\n",
+    "OCCPU: Signature %0X Stepping %0X Model %0X Family %0X Type %0X ExtModel %0X ExtFamily %0X\n",
     Cpu->Signature,
     Cpu->Stepping,
     Cpu->Model,
@@ -943,7 +944,7 @@ OcCpuScanProcessor (
 
   DEBUG ((
     DEBUG_INFO,
-    "%a %a %11lld %5dMHz\n",
+    "OCCPU: %a %a %11lld %5dMHz\n",
     "TSC",
     "Frequency",
     Cpu->TSCFrequency,
@@ -952,7 +953,7 @@ OcCpuScanProcessor (
 
   DEBUG ((
     DEBUG_INFO,
-    "%a %a %11lld %5dMHz\n",
+    "OCCPU: %a %a %11lld %5dMHz\n",
     "CPU",
     "Frequency",
     Cpu->CPUFrequency,
@@ -961,7 +962,7 @@ OcCpuScanProcessor (
 
   DEBUG ((
     DEBUG_INFO,
-    "%a %a %11lld %5dMHz\n",
+    "OCCPU: %a %a %11lld %5dMHz\n",
     "FSB",
     "Frequency",
     Cpu->FSBFrequency,
@@ -970,7 +971,7 @@ OcCpuScanProcessor (
 
   DEBUG ((
     DEBUG_INFO,
-    "Pkg %u Cores %u Threads %u\n",
+    "OCCPU: Pkg %u Cores %u Threads %u\n",
     Cpu->PackageCount,
     Cpu->CoreCount,
     Cpu->ThreadCount
@@ -1055,4 +1056,41 @@ OcCpuModelToAppleFamily (
     default:
       return CPUFAMILY_UNKNOWN;
   }
+}
+
+BOOLEAN
+OcIsSandyOrIvy (
+  VOID
+  )
+{
+  CPU_MICROCODE_PROCESSOR_SIGNATURE  Sig;
+  BOOLEAN                            SandyOrIvy;
+  UINT32                             CpuFamily;
+  UINT32                             CpuModel;
+
+  Sig.Uint32 = 0;
+
+  AsmCpuid (1, &Sig.Uint32, NULL, NULL, NULL);
+
+  CpuFamily = Sig.Bits.Family;
+  if (CpuFamily == 15) {
+    CpuFamily += Sig.Bits.ExtendedFamily;
+  }
+
+  CpuModel = Sig.Bits.Model;
+  if (CpuFamily == 15 || CpuFamily == 6) {
+    CpuModel |= Sig.Bits.ExtendedModel << 4;
+  }
+
+  SandyOrIvy = CpuFamily == 6 && (CpuModel == 0x2A || CpuModel == 0x3A);
+
+  DEBUG ((
+    DEBUG_VERBOSE,
+    "OCCPU: Discovered CpuFamily %d CpuModel %d SandyOrIvy %d\n",
+    CpuFamily,
+    CpuModel,
+    SandyOrIvy
+    ));
+
+  return SandyOrIvy;
 }

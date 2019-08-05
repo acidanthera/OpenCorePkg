@@ -32,6 +32,7 @@
 
 [Sources]
   BootCompatInternal.h
+  CustomSlide.c
   KernelSupport.c
   OcAppleBootCompatLib.c
   ServiceOverrides.c
@@ -42,9 +43,10 @@
   X64/ContextSwitchSupport.c
 
 [Packages]
-  OcSupportPkg/OcSupportPkg.dec
-  MdePkg/MdePkg.dec
   EfiPkg/EfiPkg.dec
+  MdePkg/MdePkg.dec
+  OcSupportPkg/OcSupportPkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
 
 [Guids]
   gAppleBootVariableGuid        ## SOMETIMES_CONSUMES
@@ -62,5 +64,8 @@
   PrintLib
   UefiBootServicesTableLib
   UefiRuntimeServicesTableLib
+  OcCpuLib
+  OcDeviceTreeLib
   OcGuardLib
   OcMemoryLib
+  OcRngLib

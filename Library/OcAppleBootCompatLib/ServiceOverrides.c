@@ -201,11 +201,10 @@ OcStartImage (
       );
 
     if (BootCompat->Settings.EnableAppleSmSlide) {
-      // FIXME: Implement.
-      //UnlockSlideSupportForSafeMode (
-      //  (UINT8 *) AppleLoadedImage->ImageBase,
-      //  AppleLoadedImage->ImageSize
-      //  );
+      AppleSlideUnlockForSafeMode (
+        (UINT8 *) AppleLoadedImage->ImageBase,
+        AppleLoadedImage->ImageSize
+        );
     }
 
     if (BootCompat->Settings.SetupAppleMap) {
@@ -493,17 +492,27 @@ OcGetVariable (
 
   BootCompat = GetBootCompatContext ();
 
-  if (BootCompat->Settings.SetupAppleSlide) {
-    // FIXME: Implement
+  if (BootCompat->ServiceState.AppleBootNestedCount > 0
+    && BootCompat->Settings.SetupAppleSlide) {
+    Status = AppleSlideGetVariable (
+      BootCompat,
+      BootCompat->ServicePtrs.GetVariable,
+      BootCompat->ServicePtrs.GetMemoryMap,
+      VariableName,
+      VendorGuid,
+      Attributes,
+      DataSize,
+      Data
+      );
+  } else {
+    Status = BootCompat->ServicePtrs.GetVariable (
+      VariableName,
+      VendorGuid,
+      Attributes,
+      DataSize,
+      Data
+      );
   }
-
-  Status = BootCompat->ServicePtrs.GetVariable (
-    VariableName,
-    VendorGuid,
-    Attributes,
-    DataSize,
-    Data
-    );
 
   return Status;
 }
