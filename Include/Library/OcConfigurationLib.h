@@ -93,6 +93,30 @@
   OC_DECLARE (OC_ACPI_CONFIG)
 
 /**
+  Apple bootloader section
+**/
+
+///
+/// Apple bootloader quirks.
+///
+#define OC_BOOTER_QUIRKS_FIELDS(_, __) \
+  _(BOOLEAN                     , SetupAppleMap               ,     , FALSE  , ()) \
+  _(BOOLEAN                     , SetupAppleSlide             ,     , FALSE  , ()) \
+  _(BOOLEAN                     , DiscardAppleS4Map           ,     , FALSE  , ()) \
+  _(BOOLEAN                     , EnableAppleSmSlide          ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ProtectCsmRegion            ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ShrinkMemoryMap             ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ForceExitBootServices       ,     , FALSE  , ())
+  OC_DECLARE (OC_BOOTER_QUIRKS)
+
+///
+/// Apple bootloader section.
+///
+#define OC_BOOTER_CONFIG_FIELDS(_, __) \
+  _(OC_BOOTER_QUIRKS            , Quirks           ,     , OC_CONSTR2 (OC_BOOTER_QUIRKS, _, __)        , OC_DESTR (OC_BOOTER_QUIRKS))
+  OC_DECLARE (OC_BOOTER_CONFIG)
+
+/**
   DeviceProperties section
 **/
 
@@ -110,9 +134,6 @@
 #define OC_DEV_PROP_BLOCK_MAP_FIELDS(_, __) \
   OC_MAP (OC_STRING, OC_DEV_PROP_BLOCK_ENTRY, _, __)
   OC_DECLARE (OC_DEV_PROP_BLOCK_MAP)
-
-#define OC_DEV_PROP_QUIRKS_FIELDS(_, __) \
-  OC_DECLARE (OC_DEV_PROP_QUIRKS)
 
 #define OC_DEV_PROP_CONFIG_FIELDS(_, __) \
   _(OC_DEV_PROP_ADD_MAP       , Add              ,     , OC_CONSTR2 (OC_DEV_PROP_ADD_MAP, _, __)   , OC_DESTR (OC_DEV_PROP_ADD_MAP)) \
@@ -436,6 +457,7 @@
 
 #define OC_GLOBAL_CONFIG_FIELDS(_, __) \
   _(OC_ACPI_CONFIG              , Acpi              ,     , OC_CONSTR1 (OC_ACPI_CONFIG, _, __)      , OC_DESTR (OC_ACPI_CONFIG)) \
+  _(OC_BOOTER_CONFIG            , Booter            ,     , OC_CONSTR1 (OC_BOOTER_CONFIG, _, __)    , OC_DESTR (OC_BOOTER_CONFIG)) \
   _(OC_DEV_PROP_CONFIG          , DeviceProperties  ,     , OC_CONSTR1 (OC_DEV_PROP_CONFIG, _, __)  , OC_DESTR (OC_DEV_PROP_CONFIG)) \
   _(OC_KERNEL_CONFIG            , Kernel            ,     , OC_CONSTR1 (OC_KERNEL_CONFIG, _, __)    , OC_DESTR (OC_KERNEL_CONFIG)) \
   _(OC_MISC_CONFIG              , Misc              ,     , OC_CONSTR1 (OC_MISC_CONFIG, _, __)      , OC_DESTR (OC_MISC_CONFIG)) \

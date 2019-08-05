@@ -23,6 +23,9 @@ OC_ARRAY_STRUCTORS (OC_ACPI_PATCH_ARRAY)
 OC_STRUCTORS       (OC_ACPI_QUIRKS, ())
 OC_STRUCTORS       (OC_ACPI_CONFIG, ())
 
+OC_STRUCTORS       (OC_BOOTER_QUIRKS, ())
+OC_STRUCTORS       (OC_BOOTER_CONFIG, ())
+
 OC_MAP_STRUCTORS   (OC_DEV_PROP_ADD_MAP)
 OC_STRUCTORS       (OC_DEV_PROP_BLOCK_ENTRY, ())
 OC_MAP_STRUCTORS   (OC_DEV_PROP_BLOCK_MAP)
@@ -137,6 +140,27 @@ mAcpiConfigurationSchema[] = {
   OC_SCHEMA_DICT       ("Quirks", mAcpiQuirksSchema),
 };
 
+//
+// Apple bootloader configuration
+//
+
+STATIC
+OC_SCHEMA
+mBooterQuirksSchema[] = {
+  OC_SCHEMA_BOOLEAN_IN ("DiscardAppleS4Map",     OC_GLOBAL_CONFIG, Booter.Quirks.DiscardAppleS4Map),
+  OC_SCHEMA_BOOLEAN_IN ("EnableAppleSmSlide",    OC_GLOBAL_CONFIG, Booter.Quirks.EnableAppleSmSlide),
+  OC_SCHEMA_BOOLEAN_IN ("ForceExitBootServices", OC_GLOBAL_CONFIG, Booter.Quirks.ForceExitBootServices),
+  OC_SCHEMA_BOOLEAN_IN ("ProtectCsmRegion",      OC_GLOBAL_CONFIG, Booter.Quirks.ProtectCsmRegion),
+  OC_SCHEMA_BOOLEAN_IN ("SetupAppleMap",         OC_GLOBAL_CONFIG, Booter.Quirks.SetupAppleMap),
+  OC_SCHEMA_BOOLEAN_IN ("SetupAppleSlide",       OC_GLOBAL_CONFIG, Booter.Quirks.SetupAppleSlide),
+  OC_SCHEMA_BOOLEAN_IN ("ShrinkMemoryMap",       OC_GLOBAL_CONFIG, Booter.Quirks.ShrinkMemoryMap),
+};
+
+STATIC
+OC_SCHEMA
+mBooterConfigurationSchema[] = {
+  OC_SCHEMA_DICT       ("Quirks", mBooterQuirksSchema),
+};
 
 
 //
@@ -491,6 +515,7 @@ STATIC
 OC_SCHEMA
 mRootConfigurationNodes[] = {
   OC_SCHEMA_DICT    ("ACPI",             mAcpiConfigurationSchema),
+  OC_SCHEMA_DICT    ("Booter",           mBooterConfigurationSchema),
   OC_SCHEMA_DICT    ("DeviceProperties", mDevicePropertiesSchema),
   OC_SCHEMA_DICT    ("Kernel",           mKernelConfigurationSchema),
   OC_SCHEMA_DICT    ("Misc",             mMiscConfigurationSchema),
