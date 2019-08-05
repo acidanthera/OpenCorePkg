@@ -401,9 +401,9 @@ OcMiscBoot (
     return;
   }
 
-  if (Config->Misc.Boot.BlessOverride.Count > 0) {
+  if (Config->Misc.BlessOverride.Count > 0) {
     if (!OcOverflowMulUN (
-      Config->Misc.Boot.BlessOverride.Count,
+      Config->Misc.BlessOverride.Count,
       sizeof (*BlessOverride),
       &BlessOverrideSize))
     {
@@ -418,10 +418,10 @@ OcMiscBoot (
       return;
     }
 
-    for (Index = 0; Index < Config->Misc.Boot.BlessOverride.Count; ++Index) {
+    for (Index = 0; Index < Config->Misc.BlessOverride.Count; ++Index) {
       BlessOverride[Index] = AsciiStrCopyToUnicode (
                                OC_BLOB_GET (
-                                 Config->Misc.Boot.BlessOverride.Values[Index]
+                                 Config->Misc.BlessOverride.Values[Index]
                                  ),
                                0
                                );
@@ -436,7 +436,7 @@ OcMiscBoot (
       }
     }
 
-    Context->NumCustomBootPaths = Config->Misc.Boot.BlessOverride.Count;
+    Context->NumCustomBootPaths = Config->Misc.BlessOverride.Count;
     Context->CustomBootPaths    = BlessOverride;
   }
 

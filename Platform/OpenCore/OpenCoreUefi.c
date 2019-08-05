@@ -18,13 +18,14 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/PrintLib.h>
+#include <Library/OcAppleBootCompatLib.h>
 #include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcDataHubLib.h>
 #include <Library/OcDevicePropertyLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
@@ -263,6 +264,26 @@ OcReinstallProtocols (
 }
 
 VOID
+OcLoadBooterUefiSupport (
+  IN OC_GLOBAL_CONFIG  *Config
+  )
+{
+  OC_ABC_SETTINGS  AbcSettings;
+
+  ZeroMem (&AbcSettings, sizeof (AbcSettings));
+
+  AbcSettings.SetupAppleMap         = Config->Booter.Quirks.SetupAppleMap;
+  AbcSettings.SetupAppleSlide       = Config->Booter.Quirks.SetupAppleSlide;
+  AbcSettings.DiscardAppleS4Map     = Config->Booter.Quirks.DiscardAppleS4Map;
+  AbcSettings.EnableAppleSmSlide    = Config->Booter.Quirks.EnableAppleSmSlide;
+  AbcSettings.ProtectCsmRegion      = Config->Booter.Quirks.ProtectCsmRegion;
+  AbcSettings.ShrinkMemoryMap       = Config->Booter.Quirks.ShrinkMemoryMap;
+  AbcSettings.ForceExitBootServices = Config->Booter.Quirks.ForceExitBootServices;
+
+  OcAbcInitialize (&AbcSettings);
+}
+
+VOID
 OcLoadUefiSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
   IN OC_GLOBAL_CONFIG    *Config,
@@ -270,6 +291,11 @@ OcLoadUefiSupport (
   )
 {
   OcReinstallProtocols (Config);
+
+  //
+  // Setup Apple bootloader specific UEFI features.
+  //
+  OcLoadBooterUefiSupport (Config);
 
   if (Config->Uefi.Quirks.IgnoreInvalidFlexRatio) {
     OcCpuCorrectFlexRatio (CpuInfo);

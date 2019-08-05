@@ -52,6 +52,7 @@
   HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
   MacInfoLib|MacInfoPkg/Library/MacInfoLib/MacInfoLib.inf
   OcAcpiLib|OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
+  OcAppleBootCompatLib|OcSupportPkg/Library/OcAppleBootCompatLib/OcAppleBootCompatLib.inf
   OcAppleBootPolicyLib|OcSupportPkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
   OcAppleChunklistLib|OcSupportPkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
   OcAppleDiskImageLib|OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
@@ -60,6 +61,7 @@
   OcAppleKeysLib|OcSupportPkg/Library/OcAppleKeysLib/OcAppleKeysLib.inf
   OcAppleRamDiskLib|OcSupportPkg/Library/OcAppleRamDiskLib/OcAppleRamDiskLib.inf
   OcBootManagementLib|OcSupportPkg/Library/OcBootManagementLib/OcBootManagementLib.inf
+  OcDeviceTreeLib|OcSupportPkg/Library/OcDeviceTreeLib/OcDeviceTreeLib.inf
   OcConsoleLib|OcSupportPkg/Library/OcConsoleLib/OcConsoleLib.inf
   OcCpuLib|OcSupportPkg/Library/OcCpuLib/OcCpuLib.inf
   OcCryptoLib|OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
@@ -76,6 +78,7 @@
   OcMemoryLib|OcSupportPkg/Library/OcMemoryLib/OcMemoryLib.inf
   OcMiscLib|OcSupportPkg/Library/OcMiscLib/OcMiscLib.inf
   OcPngLib|OcSupportPkg/Library/OcPngLib/OcPngLib.inf
+  OcRngLib|OcSupportPkg/Library/OcRngLib/OcRngLib.inf
   OcRtcLib|OcSupportPkg/Library/OcRtcLib/OcRtcLib.inf
   OcSerializeLib|OcSupportPkg/Library/OcSerializeLib/OcSerializeLib.inf
   OcSmbiosLib|OcSupportPkg/Library/OcSmbiosLib/OcSmbiosLib.inf

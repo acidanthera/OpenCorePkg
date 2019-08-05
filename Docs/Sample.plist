@@ -183,6 +183,26 @@
 			<false/>
 		</dict>
 	</dict>
+	<key>Booter</key>
+	<dict>
+		<key>Quirks</key>
+		<dict>
+			<key>DiscardAppleS4Map</key>
+			<false/>
+			<key>EnableAppleSmSlide</key>
+			<false/>
+			<key>ForceExitBootServices</key>
+			<false/>
+			<key>ProtectCsmRegion</key>
+			<false/>
+			<key>SetupAppleMap</key>
+			<true/>
+			<key>SetupAppleSlide</key>
+			<true/>
+			<key>ShrinkMemoryMap</key>
+			<false/>
+		</dict>
+	</dict>
 	<key>DeviceProperties</key>
 	<dict>
 		<key>Add</key>
@@ -448,6 +468,8 @@
 	</dict>
 	<key>Misc</key>
 	<dict>
+		<key>BlessOverride</key>
+		<array/>
 		<key>Boot</key>
 		<dict>
 			<key>ConsoleBehaviourOs</key>
@@ -514,6 +536,19 @@
 				<false/>
 				<key>Path</key>
 				<string>memcheck/memcheck.efi</string>
+			</dict>
+		</array>
+		<key>Entries</key>
+		<array>
+			<dict>
+				<key>Name</key>
+				<string>CustomOS</string>
+				<key>Comment</key>
+				<string>Not signed for security reasons</string>
+				<key>Enabled</key>
+				<false/>
+				<key>Path</key>
+				<string>PciRoot(0x0)/Pci(0x1,0x1)/Pci(0x0,0x0)/NVMe(0x1,11-22-33-44-55-66-77-88)/HD(1,GPT,00000000-0000-0000-0000-000000000000,0x800,0x64000)/\EFI\BOOT\BOOTX64.EFI</string>
 			</dict>
 		</array>
 	</dict>
