@@ -287,7 +287,6 @@ mMiscBlessOverrideSchema = OC_SCHEMA_STRING (NULL);
 STATIC
 OC_SCHEMA
 mMiscConfigurationBootSchema[] = {
-  OC_SCHEMA_ARRAY_IN   ("BlessOverride",     OC_GLOBAL_CONFIG, Misc.Boot.BlessOverride, &mMiscBlessOverrideSchema),
   OC_SCHEMA_STRING_IN  ("ConsoleBehaviourOs",OC_GLOBAL_CONFIG, Misc.Boot.ConsoleBehaviourOs),
   OC_SCHEMA_STRING_IN  ("ConsoleBehaviourUi",OC_GLOBAL_CONFIG, Misc.Boot.ConsoleBehaviourUi),
   OC_SCHEMA_STRING_IN  ("ConsoleMode",       OC_GLOBAL_CONFIG, Misc.Boot.ConsoleMode),
@@ -334,6 +333,7 @@ mMiscToolsSchema = OC_SCHEMA_DICT (NULL, mMiscToolsSchemaEntry);
 STATIC
 OC_SCHEMA
 mMiscConfigurationSchema[] = {
+  OC_SCHEMA_ARRAY_IN   ("BlessOverride",    OC_GLOBAL_CONFIG, Misc.BlessOverride, &mMiscBlessOverrideSchema),
   OC_SCHEMA_DICT       ("Boot",             mMiscConfigurationBootSchema),
   OC_SCHEMA_DICT       ("Debug",            mMiscConfigurationDebugSchema),
   OC_SCHEMA_ARRAY_IN   ("Entries",          OC_GLOBAL_CONFIG, Misc.Entries, &mMiscToolsSchema),
