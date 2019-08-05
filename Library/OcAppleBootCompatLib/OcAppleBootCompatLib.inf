@@ -37,6 +37,7 @@
   ServiceOverrides.c
 
 [Sources.X64]
+  X64/ContextSwitch.h
   X64/ContextSwitch.nasm
   X64/ContextSwitchSupport.c
 
