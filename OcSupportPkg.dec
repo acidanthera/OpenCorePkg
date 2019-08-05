@@ -156,6 +156,9 @@
   OcPngLib|Include/Library/OcPngLib.h
 
   ##  @libraryclass
+  OcRngLib|Include/Library/OcRngLib.h
+
+  ##  @libraryclass
   OcSerializeLib|Include/Library/OcSerializeLib.h
 
   ##  @libraryclass

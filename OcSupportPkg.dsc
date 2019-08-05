@@ -75,6 +75,7 @@
   OcMemoryLib|OcSupportPkg/Library/OcMemoryLib/OcMemoryLib.inf
   OcMiscLib|OcSupportPkg/Library/OcMiscLib/OcMiscLib.inf
   OcPngLib|OcSupportPkg/Library/OcPngLib/OcPngLib.inf
+  OcRngLib|OcSupportPkg/Library/OcRngLib/OcRngLib.inf
   OcRtcLib|OcSupportPkg/Library/OcRtcLib/OcRtcLib.inf
   OcSerializeLib|OcSupportPkg/Library/OcSerializeLib/OcSerializeLib.inf
   OcSmbiosLib|OcSupportPkg/Library/OcSmbiosLib/OcSmbiosLib.inf
@@ -110,6 +111,7 @@
   OcSupportPkg/Library/OcMemoryLib/OcMemoryLib.inf
   OcSupportPkg/Library/OcMiscLib/OcMiscLib.inf
   OcSupportPkg/Library/OcPngLib/OcPngLib.inf
+  OcSupportPkg/Library/OcRngLib/OcRngLib.inf
   OcSupportPkg/Library/OcSerializeLib/OcSerializeLib.inf
   OcSupportPkg/Library/OcSmbiosLib/OcSmbiosLib.inf
   OcSupportPkg/Library/OcStorageLib/OcStorageLib.inf
