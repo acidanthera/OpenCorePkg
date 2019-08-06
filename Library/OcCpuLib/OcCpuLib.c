@@ -100,6 +100,15 @@ DetectAppleMajorType (
       ++BrandInfix;
     }
 
+    // Support Xeon Scalable chips: Xeon(R) Gold 6136 CPU
+    if (AsciiStrnCmp (BrandInfix, "Bronze", L_STR_LEN ("Bronze")) == 0 ||
+        AsciiStrnCmp (BrandInfix, "Silver", L_STR_LEN ("Silver")) == 0 ||
+        AsciiStrnCmp (BrandInfix, "Gold", L_STR_LEN ("Gold")) == 0 ||
+        AsciiStrnCmp (BrandInfix, "Platinum", L_STR_LEN ("Platinum")) == 0) {
+      // Treat Xeon Scalable chips as their closest relatives, Xeon W
+      return AppleProcessorMajorXeonW;
+    }
+
     //
     // Support both variants: Xeon(R) E5-1234 and Xeon(R) CPU E5-1234
     //
