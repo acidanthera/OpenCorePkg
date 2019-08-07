@@ -113,6 +113,10 @@ ShouldUseCustomSlideOffsetDecision (
   // All slides are available.
   //
   if (SlideSupport->ValidSlideCount == TOTAL_SLIDE_NUM) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCABC: All slides are usable! You can disable ProvideCustomSlide!\n"
+      ));
     return FALSE;
   }
 
@@ -121,7 +125,7 @@ ShouldUseCustomSlideOffsetDecision (
   //
   if (SlideSupport->ValidSlideCount == 0) {
     DEBUG ((
-      DEBUG_WARN,
+      DEBUG_INFO,
       "OCABC: No slide values are usable! Falling back to %u with 0x%08X bytes!\n",
       (UINT32) FallbackSlide,
       MaxAvailableSize
@@ -138,7 +142,7 @@ ShouldUseCustomSlideOffsetDecision (
   // For example, 1, 2, 3, 4, 5 will become 1-5.
   //
   DEBUG ((
-    DEBUG_WARN,
+    DEBUG_INFO,
     "OCABC: Only %u/%u slide values are usable!\n",
     (UINT32) SlideSupport->ValidSlideCount,
     (UINT32) TOTAL_SLIDE_NUM
@@ -193,7 +197,7 @@ ShouldUseCustomSlideOffsetDecision (
     }
   }
 
-  DEBUG ((DEBUG_WARN, "OCABC: %a\n", SlideList));
+  DEBUG ((DEBUG_INFO, "OCABC: %a\n", SlideList));
 
   return TRUE;
 }
