@@ -322,6 +322,8 @@ Root configuration entries consist of the following:
 \item
   \hyperref[acpi]{\texttt{ACPI}}
 \item
+  \hyperref[booter]{\texttt{Booter}}
+\item
   \hyperref[devprops]{\texttt{DeviceProperties}}
 \item
   \hyperref[kernel]{\texttt{Kernel}}
@@ -924,6 +926,177 @@ source file may help understanding ACPI opcodes.
 
 \end{enumerate}
 
+
+\section{Booter}\label{booter}
+
+\subsection{Introduction}\label{booterintro}
+
+This section allows to apply different kinds of UEFI modifications on
+Apple bootloader (\texttt{boot.efi}). The modifications currently provide
+various patches and environment alterations for different firmwares. Some
+of these features were originally implemented as a part of
+\href{https://github.com/acidanthera/AptioFixPkg}{\text{AptioMemoryFix.efi}},
+which is no longer maintained. See \hyperref[troubleshootingtricks]{Tips and Tricks}
+section for migration steps.
+
+\subsection{Properties}\label{booterprops}
+
+\begin{enumerate}
+
+\item
+  \texttt{Quirks}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Description}: Apply individual booter quirks described
+  in \hyperref[booterpropsquirks]{Quirks Properties} section below.
+
+\end{enumerate}
+
+\subsection{Quirks Properties}\label{booterpropsquirks}
+
+\begin{enumerate}
+
+\item
+  \texttt{AvoidRuntimeDefrag}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Protect from boot.efi runtime memory defragmentation.
+
+  This option fixes UEFI runtime services (date, time, NVRAM, power control, etc.)
+  support on many firmwares using SMM backing for select services like variable
+  storage. SMM may try to access physical addresses, but they get moved by boot.efi.
+
+  \emph{Note}: Most but Apple and VMware firmwares need this quirk.
+
+\item
+  \texttt{DisableVariableWrite}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Protect from macOS NVRAM write access.
+
+  This is a security option allowing one to restrict NVRAM access in macOS.
+  This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented
+  in \texttt{FwRuntimeServices.efi}.
+
+  \emph{Note}: This quirk can also be used as an ugly workaround to buggy UEFI
+  runtime services implementations that fail to write variables to NVRAM and
+  break the rest of the operating system.
+
+\item
+  \texttt{DiscardHibernateMap}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reuse original hibernate memory map.
+
+  This option forces XNU kernel to ignore newly supplied memory map and assume
+  that it did not change after waking from hibernation. This behaviour is required
+  to work by Windows, which mandates to
+  \href{https://docs.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-uefi#hibernation-state-s4-transition-requirements}{preserve}
+  runtime memory size and location after S4 wake.
+
+  \emph{Note}: This may be used to workaround buggy memory maps on older hardware,
+  and is now considered rare legacy. Do not use this unless you fully understand
+  the consequences.
+
+\item
+  \texttt{EnableSafeModeSlide}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Patch bootloader to have KASLR enabled in safe mode.
+
+  This option is relevant to the users that have issues booting to safe mode
+  (e.g. by holding \texttt{shift} or using \texttt{-x} boot argument). By default
+  safe mode forces \texttt{0} slide as if the system was launched with \texttt{slide=0}
+  boot argument. This quirk tries to patch \texttt{boot.efi} to lift that limitation
+  and let some other value (from \texttt{1} to \texttt{255}) be used. This quirk requires
+  \texttt{ProvideCustomSlide} to be enabled.
+
+  \emph{Note}: The necessity of this quirk is determined by safe mode availability. If
+  booting to safe mode fails, this option can be tried to be enabled.
+
+\item
+  \texttt{EnableWriteUnprotector}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Permit write access to UEFI runtime services code.
+
+  This option bypasses \texttt{R\^X} permissions in code pages of UEFI runtime
+  services by removing write protection (\texttt{WP}) bit from \texttt{CR0}
+  register during their execution. This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME}
+  protocol implemented in \texttt{FwRuntimeServices.efi}.
+
+  \emph{Note}: The necessity of this quirk is determined by early boot crashes
+  of the firmware.
+
+\item
+  \texttt{ForceExitBootServices}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Retry \texttt{ExitBootServices} with new memory map on failure.
+
+  Try to ensure that \texttt{ExitBootServices} call succeeds even with outdated MemoryMap
+  key argument by obtaining current memory map and retrying \texttt{ExitBootServices} call.
+
+  \emph{Note}: The necessity of this quirk is determined by early boot crashes
+  of the firmware. Do not use this unless you fully understand the consequences.
+
+\item
+  \texttt{ProtectCsmRegion}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Protect CSM region areas from relocation.
+
+  Ensure that CSM memory regions are marked as ACPI NVS to prevent boot.efi or XNU from
+  relocating or using them.
+
+  \emph{Note}: The necessity of this quirk is determined by artifacts and sleep wake issues.
+  As \texttt{AvoidRuntimeDefrag} resolves a similar problem, no known firmwares should need
+  this quirk. Do not use this unless you fully understand the consequences.
+
+\item
+  \texttt{ProvideCustomSlide}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Provide custom KASLR slide on low memory.
+
+  This option performs memory map analysis of your firmware and checks whether
+  all slides (from \texttt{1} to \texttt{255}) can be used. As \texttt{boot.efi}
+  generates this value randomly with \texttt{rdrand} or pseudo randomly \texttt{rdtsc},
+  there is a chance of boot failure when it chooses a conflicting slide. In case
+  potential conflicts exist, this option forces macOS to use a pseudo random value
+  among the available ones. This also ensures that \texttt{slide=} argument is never
+  passed to the operating system for security reasons.
+
+  \emph{Note}: The necessity of this quirk is determined by \texttt{OCABC: Only N/256
+  slide values are usable!} message in the debug log. If the message is present,
+  this option is to be enabled.
+
+\item
+  \texttt{SetupVirtualMap}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Setup virtual memory at \texttt{SetVirtualAddresses}.
+
+  Select firmwares access memory by virtual addresses after \texttt{SetVirtualAddresses}
+  call, which results in early boot crashes. This quirk workarounds the problem by
+  performing early boot identity mapping of assigned virtual addresses to physical
+  memory.
+
+  \emph{Note}: The necessity of this quirk is determined by early boot failures.
+
+\item
+  \texttt{ShrinkMemoryMap}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Attempt to join similar memory map entries.
+
+  Select firmwares have very large memory maps, which do not fit Apple kernel,
+  permitting up to \texttt{64} slots for runtime memory. This quirk attempts to unify
+  contiguous slots of similar types to prevent boot failures.
+
+  \emph{Note}: The necessity of this quirk is determined by early boot failures.
+  Do not use this unless you fully understand the consequences.
+
+\end{enumerate}
 
 \section{DeviceProperties}\label{devprops}
 
@@ -2854,11 +3027,12 @@ and supplementary utilities can be used.
   on top of different UEFI input protocols. Additionally resolves mouse input issues
   on select firmwares. This is an alternative to \texttt{UsbKbDxe}, which may work
   better or worse depending on the firmware.
-  \item \href{https://github.com/acidanthera/AptioFixPkg}{\texttt{AptioMemoryFix}}
-  --- a set of quirks for various firmwares. While it primarily targets APTIO
-  firmwares, other firmwares may be compatible as well. Among the resolved issues
-  are hibernation support, KASLR, Lilu NVRAM security enhancements, NVRAM, and UEFI
-  Boot entry preservation.
+  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{FwRuntimeServices}}
+  --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
+  of OpenCore and Lilu by supporting read-only and write-only NVRAM variables. Some
+  quirks, like \texttt{RequestBootVarRouting}, require this driver for proper function.
+  Due to the nature of being a runtime driver, i.e. functioning in parallel with the
+  target operating system, it cannot be implemented within OpenCore itself.
   \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{EmuVariableRuntimeDxe}}
   --- NVRAM emulation driver from \texttt{MdeModulePkg}. NVRAM is supported by most
   modern firmwares. For firmwares with macOS incompatible NVRAM implementation an
@@ -3028,10 +3202,6 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Description}: macOS bootloader requires GOP (Graphics Output Protocol)
   to be present on console handle. This option will install it if missing.
 
-  \emph{Note}: Some drivers, like AptioMemoryFix, may provide equivalent functionality.
-  These drivers are not guaranteed to adhere to the same logic, and if a quirk is
-  necessary, this option is preferred.
-
 \item
   \texttt{ReleaseUsbOwnership}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -3045,12 +3215,11 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{RequestBootVarRouting}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Request NVRAM driver (or AptioMemoryFix) to redirect
-  \texttt{Boot} prefixed variables from \texttt{EFI\_GLOBAL\_VARIABLE\_GUID}
-  to \texttt{OC\_VENDOR\_VARIABLE\_GUID}.
+  \textbf{Description}: Request redirect\texttt{Boot} prefixed variables from
+  \texttt{EFI\_GLOBAL\_VARIABLE\_GUID} to \texttt{OC\_VENDOR\_VARIABLE\_GUID}.
 
-  This will set special \texttt{boot-redirect} variable, which a compatible
-  driver will abide after booter start. The quirk lets default boot entry
+  This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented
+  in \texttt{FwRuntimeServices.efi}. The quirk lets default boot entry
   preservation at times when firmwares delete incompatible boot entries.
 
 \item
