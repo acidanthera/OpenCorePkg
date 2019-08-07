@@ -477,13 +477,22 @@ OcSetVirtualAddressMap (
   gRT->Hdr.CRC32 = 0;
   gRT->Hdr.CRC32 = CalculateCrc32 (gRT, gRT->Hdr.HeaderSize);
 
-  Status = AppleMapPrepareMemState (
-    BootCompat,
-    MemoryMapSize,
-    DescriptorSize,
-    DescriptorVersion,
-    MemoryMap
-    );
+  if (BootCompat->ServiceState.AppleBootNestedCount == 0) {
+    Status = gRT->SetVirtualAddressMap (
+      MemoryMapSize,
+      DescriptorSize,
+      DescriptorVersion,
+      MemoryMap
+      );
+  } else {
+    Status = AppleMapPrepareMemState (
+      BootCompat,
+      MemoryMapSize,
+      DescriptorSize,
+      DescriptorVersion,
+      MemoryMap
+      );
+  }
 
   return Status;
 }
