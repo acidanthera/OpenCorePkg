@@ -272,13 +272,16 @@ OcLoadBooterUefiSupport (
 
   ZeroMem (&AbcSettings, sizeof (AbcSettings));
 
-  AbcSettings.SetupAppleMap         = Config->Booter.Quirks.SetupAppleMap;
-  AbcSettings.SetupAppleSlide       = Config->Booter.Quirks.SetupAppleSlide;
-  AbcSettings.DiscardAppleS4Map     = Config->Booter.Quirks.DiscardAppleS4Map;
-  AbcSettings.EnableAppleSmSlide    = Config->Booter.Quirks.EnableAppleSmSlide;
-  AbcSettings.ProtectCsmRegion      = Config->Booter.Quirks.ProtectCsmRegion;
-  AbcSettings.ShrinkMemoryMap       = Config->Booter.Quirks.ShrinkMemoryMap;
-  AbcSettings.ForceExitBootServices = Config->Booter.Quirks.ForceExitBootServices;
+  AbcSettings.AvoidRuntimeDefrag     = Config->Booter.Quirks.AvoidRuntimeDefrag;
+  AbcSettings.DisableVariableWrite   = Config->Booter.Quirks.DisableVariableWrite;
+  AbcSettings.DiscardHibernateMap    = Config->Booter.Quirks.DiscardHibernateMap;
+  AbcSettings.EnableSafeModeSlide    = Config->Booter.Quirks.EnableSafeModeSlide;
+  AbcSettings.EnableWriteUnprotector = Config->Booter.Quirks.EnableWriteUnprotector;
+  AbcSettings.ForceExitBootServices  = Config->Booter.Quirks.ForceExitBootServices;
+  AbcSettings.ProtectCsmRegion       = Config->Booter.Quirks.ProtectCsmRegion;
+  AbcSettings.ProvideCustomSlide     = Config->Booter.Quirks.ProvideCustomSlide;
+  AbcSettings.SetupVirtualMap        = Config->Booter.Quirks.SetupVirtualMap;
+  AbcSettings.ShrinkMemoryMap        = Config->Booter.Quirks.ShrinkMemoryMap;
 
   OcAbcInitialize (&AbcSettings);
 }

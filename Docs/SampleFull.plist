@@ -187,17 +187,23 @@
 	<dict>
 		<key>Quirks</key>
 		<dict>
-			<key>DiscardAppleS4Map</key>
+			<key>AvoidRuntimeDefrag</key>
 			<false/>
-			<key>EnableAppleSmSlide</key>
+			<key>DisableVariableWrite</key>
+			<false/>
+			<key>DiscardHibernateMap</key>
+			<false/>
+			<key>EnableSafeModeSlide</key>
+			<false/>
+			<key>EnableWriteUnprotector</key>
 			<false/>
 			<key>ForceExitBootServices</key>
 			<false/>
 			<key>ProtectCsmRegion</key>
 			<false/>
-			<key>SetupAppleMap</key>
+			<key>ProvideCustomSlide</key>
 			<true/>
-			<key>SetupAppleSlide</key>
+			<key>SetupVirtualMap</key>
 			<true/>
 			<key>ShrinkMemoryMap</key>
 			<false/>
