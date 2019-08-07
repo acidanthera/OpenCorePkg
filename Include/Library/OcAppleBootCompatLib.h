@@ -20,25 +20,31 @@
 **/
 typedef struct OC_ABC_SETTINGS_ {
   ///
-  /// Protect from boot.efi from defragmenting runtime memory and setup virtual memory
-  /// early mapping. This fixes NVRAM support on many firmwares.
+  /// Protect from boot.efi from defragmenting runtime memory. This fixes UEFI runtime services
+  /// (date and time, NVRAM, power control, etc.) support on many firmwares.
+  /// Needed basically by everyone that uses SMM implementation of variable services.
   ///
-  BOOLEAN  SetupAppleMap;
+  BOOLEAN  AvoidRuntimeDefrag;
+  ///
+  /// Setup virtual memory mapping after SetVirtualAddresses call. This fixes crashes in many
+  /// firmwares at early boot as they accidentally access virtual addresses after ExitBootServices.
+  ///
+  BOOLEAN  SetupVirtualMap;
   ///
   /// Provide custom Apple KASLR slide calculation for firmwares with polluted low memory ranges.
   /// This also ensures that slide= argument is never passed to the operating system.
   ///
-  BOOLEAN  SetupAppleSlide;
+  BOOLEAN  ProvideCustomSlide;
   ///
   /// Discard UEFI memory map after waking from hibernation and preserve the original mapping.
   ///
-  BOOLEAN  DiscardAppleS4Map;
+  BOOLEAN  DiscardHibernateMap;
   ///
   /// Try to patch Apple bootloader to have KASLR enabled even in SafeMode.
   ///
-  BOOLEAN  EnableAppleSmSlide;
+  BOOLEAN  EnableSafeModeSlide;
   ///
-  /// Attempt to protect certain CSM memory regions from being used by the kernel .
+  /// Attempt to protect certain CSM memory regions from being used by the kernel.
   /// On older firmwares this caused wake issues.
   ///
   BOOLEAN  ProtectCsmRegion;
@@ -50,6 +56,16 @@ typedef struct OC_ABC_SETTINGS_ {
   /// Ensure that ExitBootServices call succeeds even with outdated MemoryMap key.
   ///
   BOOLEAN  ForceExitBootServices;
+  ///
+  /// Disable NVRAM variable write support to protect from malware or to prevent
+  /// buggy NVRAM implementations cause system issues.
+  ///
+  BOOLEAN  DisableVariableWrite;
+  ///
+  /// Permit writing to executable memory in UEFI runtime services. Fixes crashes
+  /// on many APTIO V firmwares.
+  ///
+  BOOLEAN  EnableWriteUnprotector;
 } OC_ABC_SETTINGS;
 
 /**

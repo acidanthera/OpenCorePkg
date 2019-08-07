@@ -25,6 +25,7 @@
 #include <Library/OcMemoryLib.h>
 
 #include <Protocol/LoadedImage.h>
+#include <Protocol/OcFirmwareRuntime.h>
 
 #ifdef MDE_CPU_X64
 #include "X64/ContextSwitch.h"
@@ -161,31 +162,35 @@ typedef struct SERVICES_OVERRIDE_STATE_ {
   ///
   /// GetVariable arrival event.
   ///
-  EFI_EVENT             GetVariableEvent;
+  EFI_EVENT                     GetVariableEvent;
+  ///
+  /// Firmware runtime protocol instance.
+  ///
+  OC_FIRMWARE_RUNTIME_PROTOCOL  *FwRuntime;
   ///
   /// Minimum address allocated by AlocatePages.
   ///
-  EFI_PHYSICAL_ADDRESS  MinAllocatedAddr;
+  EFI_PHYSICAL_ADDRESS          MinAllocatedAddr;
   ///
   /// Apple hibernate image address allocated by AlocatePages.
   ///
-  EFI_PHYSICAL_ADDRESS  HibernateImageAddress;
+  EFI_PHYSICAL_ADDRESS          HibernateImageAddress;
   ///
   /// Last descriptor size obtained from GetMemoryMap.
   ///
-  UINTN                 MemoryMapDescriptorSize;
+  UINTN                         MemoryMapDescriptorSize;
   ///
   /// Amount of nested boot.efi detected.
   ///
-  UINTN                 AppleBootNestedCount;
+  UINTN                         AppleBootNestedCount;
   ///
   /// TRUE if we are doing boot.efi hibernate wake.
   ///
-  BOOLEAN               AppleHibernateWake;
+  BOOLEAN                       AppleHibernateWake;
   ///
   /// TRUE if we are using custom KASLR slide (via boot arg).
   ///
-  BOOLEAN               AppleCustomSlide;
+  BOOLEAN                       AppleCustomSlide;
 } SERVICES_OVERRIDE_STATE;
 
 /**
@@ -328,7 +333,7 @@ GetBootCompatContext (
 **/
 VOID
 InstallServiceOverrides (
-  IN OUT BOOT_COMPAT_CONTEXT  *ServicePtrs
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat
   );
 
 /**
@@ -382,14 +387,16 @@ AppleMapPrepareKernelJump (
   );
 
 /**
-  Patch kernel entry point with KernelJump to later land in AppleMapPrepareKernelState.
+  Prepare memory state and perform virtual address translation.
 
   @param[in,out]  BootCompat          Boot compatibility context.
-  @param[in]      ImageAddress        Kernel or hibernation image address.
-  @param[in]      AppleHibernateWake  TRUE when ImageAddress points to hibernation image.
+  @param[in]      MemoryMapSize       SetVirtualAddresses memory map size argument.
+  @param[in]      DescriptorSize      SetVirtualAddresses descriptor size argument.
+  @param[in]      DescriptorVersion   SetVirtualAddresses descriptor version argument.
+  @param[in]      MemoryMap           SetVirtualAddresses memory map argument.
 **/
 EFI_STATUS
-AppleMapPrepareVmState (
+AppleMapPrepareMemState (
   IN OUT BOOT_COMPAT_CONTEXT    *BootCompat,
   IN     UINTN                  MemoryMapSize,
   IN     UINTN                  DescriptorSize,

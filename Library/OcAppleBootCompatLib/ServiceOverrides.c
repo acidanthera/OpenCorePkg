@@ -15,9 +15,12 @@
 
 #include "BootCompatInternal.h"
 
+#include <Guid/OcVariables.h>
+
 #include <IndustryStandard/AppleHibernate.h>
 
 #include <Library/BaseLib.h>
+#include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcMemoryLib.h>
@@ -178,6 +181,8 @@ OcStartImage (
   EFI_STATUS                  Status;
   EFI_LOADED_IMAGE_PROTOCOL   *AppleLoadedImage;
   BOOT_COMPAT_CONTEXT         *BootCompat;
+  OC_FWRT_CONFIG              Config;
+  UINTN                       DataSize;
 
   BootCompat        = GetBootCompatContext ();
   AppleLoadedImage  = OcGetAppleBootLoadedImage (ImageHandle);
@@ -200,20 +205,57 @@ OcStartImage (
       L_STR_LEN ("slide=")
       );
 
-    if (BootCompat->Settings.EnableAppleSmSlide) {
+    if (BootCompat->Settings.EnableSafeModeSlide) {
       AppleSlideUnlockForSafeMode (
         (UINT8 *) AppleLoadedImage->ImageBase,
         AppleLoadedImage->ImageSize
         );
     }
 
-    if (BootCompat->Settings.SetupAppleMap) {
-      AppleMapPrepareBooterState (
-        BootCompat,
-        AppleLoadedImage,
-        BootCompat->ServicePtrs.GetMemoryMap
-        );
+    AppleMapPrepareBooterState (
+      BootCompat,
+      AppleLoadedImage,
+      BootCompat->ServicePtrs.GetMemoryMap
+      );
+  }
+
+  if (BootCompat->ServiceState.FwRuntime != NULL) {
+    BootCompat->ServiceState.FwRuntime->GetCurrent (&Config);
+
+    //
+    // Support for ReadOnly and WriteOnly variables is OpenCore & Lilu security basics.
+    // For now always enable it.
+    //
+    Config.RestrictedVariables = TRUE;
+
+    //
+    // Enable Boot#### variable redirection if OpenCore requested it.
+    // Do NOT disable it once enabled for stability reasons.
+    //
+    DataSize = sizeof (Config.BootVariableRedirect);
+    BootCompat->ServicePtrs.GetVariable (
+      OC_BOOT_REDIRECT_VARIABLE_NAME,
+      &gOcVendorVariableGuid,
+      NULL,
+      &DataSize,
+      &Config.BootVariableRedirect
+      );
+
+    //
+    // Enable Apple-specific changes if requested.
+    // Disable them when this is no longer Apple.
+    //
+    if (BootCompat->ServiceState.AppleBootNestedCount > 0) {
+      Config.WriteProtection  = BootCompat->Settings.DisableVariableWrite;
+      Config.WriteUnprotector = BootCompat->Settings.EnableWriteUnprotector;
+    } else {
+      Config.WriteProtection  = FALSE;
+      Config.WriteUnprotector = FALSE;
     }
+
+    BootCompat->ServiceState.FwRuntime->SetMain (
+      &Config
+      );
   }
 
   Status = BootCompat->ServicePtrs.StartImage (
@@ -369,18 +411,6 @@ OcExitBootServices (
       );
   }
 
-  //
-  // We need hibernate image address for wake, check it quickly before
-  // killing boot services to be able to print the error.
-  //
-  if (BootCompat->Settings.SetupAppleMap
-    && BootCompat->ServiceState.AppleHibernateWake
-    && BootCompat->ServiceState.HibernateImageAddress == 0) {
-    DEBUG ((DEBUG_ERROR, "OCABC: Failed to find hibernate image address\n"));
-    gBS->Stall (SECONDS_TO_MICROSECONDS (5));
-    return EFI_INVALID_PARAMETER;
-  }
-
   if (BootCompat->Settings.ForceExitBootServices) {
     Status = ForceExitBootServices (
       ImageHandle,
@@ -396,9 +426,9 @@ OcExitBootServices (
   }
 
   //
-  // Abort on error or when we are not supposed to do extra mapping.
+  // Abort on error.
   //
-  if (EFI_ERROR (Status) || !BootCompat->Settings.SetupAppleMap) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 
@@ -447,27 +477,13 @@ OcSetVirtualAddressMap (
   gRT->Hdr.CRC32 = 0;
   gRT->Hdr.CRC32 = CalculateCrc32 (gRT, gRT->Hdr.HeaderSize);
 
-  //
-  // For non-macOS operating systems return directly.
-  // Also do nothing for custom mapping.
-  //
-  if (BootCompat->ServiceState.AppleBootNestedCount == 0
-    || !BootCompat->Settings.SetupAppleMap) {
-    Status = gRT->SetVirtualAddressMap (
-      MemoryMapSize,
-      DescriptorSize,
-      DescriptorVersion,
-      MemoryMap
-      );
-  } else {
-    Status = AppleMapPrepareVmState (
-      BootCompat,
-      MemoryMapSize,
-      DescriptorSize,
-      DescriptorVersion,
-      MemoryMap
-      );
-  }
+  Status = AppleMapPrepareMemState (
+    BootCompat,
+    MemoryMapSize,
+    DescriptorSize,
+    DescriptorVersion,
+    MemoryMap
+    );
 
   return Status;
 }
@@ -493,7 +509,7 @@ OcGetVariable (
   BootCompat = GetBootCompatContext ();
 
   if (BootCompat->ServiceState.AppleBootNestedCount > 0
-    && BootCompat->Settings.SetupAppleSlide) {
+    && BootCompat->Settings.ProvideCustomSlide) {
     Status = AppleSlideGetVariable (
       BootCompat,
       BootCompat->ServicePtrs.GetVariable,
@@ -522,7 +538,7 @@ OcGetVariable (
   We do not override GetVariable ourselves but let our runtime do that.
 
   @param[in]  Event    Event handle.
-  @param[in]  Context  Services pointers context.
+  @param[in]  Context  Apple boot compatibility context.
 **/
 STATIC
 VOID
@@ -534,11 +550,11 @@ SetGetVariableHookHandler (
 {
   EFI_STATUS                    Status;
   OC_FIRMWARE_RUNTIME_PROTOCOL  *FwRuntime;
-  UEFI_SERVICES_POINTERS        *ServicePtrs;
+  BOOT_COMPAT_CONTEXT           *BootCompat;
 
-  ServicePtrs = (UEFI_SERVICES_POINTERS *) Context;
+  BootCompat = (BOOT_COMPAT_CONTEXT *) Context;
 
-  if (ServicePtrs->GetVariable == NULL) {
+  if (BootCompat->ServicePtrs.GetVariable == NULL) {
     Status = gBS->LocateProtocol (
       &gOcFirmwareRuntimeProtocolGuid,
       NULL,
@@ -546,7 +562,16 @@ SetGetVariableHookHandler (
       );
 
     if (!EFI_ERROR (Status) && FwRuntime->Revision == OC_FIRMWARE_RUNTIME_REVISION) {
-      FwRuntime->OnGetVariable (OcGetVariable, &ServicePtrs->GetVariable);
+      Status = FwRuntime->OnGetVariable (OcGetVariable, &BootCompat->ServicePtrs.GetVariable);
+    } else {
+      Status = EFI_UNSUPPORTED;
+    }
+
+    //
+    // Mark protocol as useable.
+    //
+    if (!EFI_ERROR (Status)) {
+      BootCompat->ServiceState.FwRuntime = FwRuntime;
     }
   }
 }
@@ -588,7 +613,7 @@ InstallServiceOverrides (
   //
   // Allocate memory pool if needed.
   //
-  if (BootCompat->Settings.SetupAppleMap) {
+  if (BootCompat->Settings.SetupVirtualMap) {
     AppleMapPrepareMemoryPool (
       BootCompat
       );
@@ -597,9 +622,9 @@ InstallServiceOverrides (
   //
   // Update GetVariable handle with the help of external runtime services.
   //
-  SetGetVariableHookHandler (NULL, ServicePtrs);
+  SetGetVariableHookHandler (NULL, BootCompat);
 
-  if (ServicePtrs->GetVariable != NULL) {
+  if (BootCompat->ServicePtrs.GetVariable != NULL) {
     return;
   }
 
@@ -607,7 +632,7 @@ InstallServiceOverrides (
     EVT_NOTIFY_SIGNAL,
     TPL_NOTIFY,
     SetGetVariableHookHandler,
-    ServicePtrs,
+    BootCompat,
     &BootCompat->ServiceState.GetVariableEvent
     );
 

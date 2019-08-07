@@ -15,46 +15,110 @@
 #ifndef OC_FIRMWARE_RUNTIME_PROTOCOL_H
 #define OC_FIRMWARE_RUNTIME_PROTOCOL_H
 
-#define OC_FIRMWARE_RUNTIME_REVISION 1
+#include <Uefi.h>
 
-//
-// OC_FIRMWARE_RUNTIME_PROTOCOL_GUID
-// 9C820F96-F16C-4FFD-B266-DF0A8FDFC455
-//
+#define OC_FIRMWARE_RUNTIME_REVISION 2
+
+/**
+  OC_FIRMWARE_RUNTIME_PROTOCOL_GUID
+  570332E4-FC50-4B21-ABE8-AE72F05B4FF7
+**/
 #define OC_FIRMWARE_RUNTIME_PROTOCOL_GUID   \
-  { 0x9C820F96, 0xF16C, 0x4FFD,             \
-    { 0xB2, 0x66, 0xDF, 0x0A, 0x8F, 0xDF, 0xC4, 0x55 } }
+  { 0x570332E4, 0xFC50, 0x4B21,             \
+    { 0xAB, 0xE8, 0xAE, 0x72, 0xF0, 0x5B, 0x4F, 0xF7 } }
+/**
+  Configuration request to change firmware runtime behaviour.
+**/
+typedef struct OC_FWRT_CONFIG_ {
+  ///
+  /// Enforce restricted access to OpenCore read-only and write-only GUIDs.
+  ///
+  BOOLEAN  RestrictedVariables;
+  ///
+  /// Enforce BootXXXX variable redirection to OpenCore vendor GUID.
+  ///
+  BOOLEAN  BootVariableRedirect;
+  ///
+  /// Make SetVariable do nothing and always return EFI_SECURITY_VIOLATION.
+  /// When we do not want variables to be stored in NVRAM or NVRAM implementation
+  /// is buggy we can disable variable writing.
+  ///
+  BOOLEAN  WriteProtection;
+  ///
+  /// Make UEFI runtime services drop CR0 WP bit on calls to allow writing
+  /// to read only memory. This workarounds a bug in many APTIO firmwares
+  /// that do not survive W^X.
+  /// Latest Windows brings Virtualization-based security and monitors
+  /// CR0 by launching itself under a hypevisor. Since we need WP disable
+  /// on macOS to let NVRAM work, and for the time being no other OS
+  /// requires it, here we decide to use it for macOS exclusively.
+  ///
+  BOOLEAN  WriteUnprotector;
+} OC_FWRT_CONFIG;
 
-//
-// Set NVRAM routing, returns previous value.
-//
+/**
+  Get current used configuration data.
+
+  @param[out]  Config      Current configuration to store.
+**/
 typedef
-BOOLEAN
-EFIAPI
-(*OC_FWRT_NVRAM_REDIRECT) (
-  IN BOOLEAN  NewValue
+VOID
+(EFIAPI *OC_FWRT_GET_CURRENT_CONFIG) (
+  OUT OC_FWRT_CONFIG  *Config
   );
 
-//
-// Set GetVariable override for customising values.
-//
+/**
+  Set main configuration.
+
+  @param[in]  Config        Runtime services configuration to apply.
+**/
+typedef
+VOID
+(EFIAPI *OC_FWRT_SET_MAIN_CONFIG) (
+  IN CONST OC_FWRT_CONFIG  *Config
+  );
+
+/**
+  Perform configuration override, NULL Config implies disable override.
+
+  @param[in]  Config        Runtime services configuration to apply, optional.
+**/
+typedef
+VOID
+(EFIAPI *OC_FWRT_SET_OVERRIDE_CONFIG) (
+  IN CONST OC_FWRT_CONFIG  *Config OPTIONAL
+  );
+
+/**
+  Set GetVariable override for customising values.
+
+  @param[in]   GetVariable     GetVariable to call on each call.
+  @param[out]  OrgGetVariable  Original GetVariable to call from GetVariable.
+
+  @retval EFI_SUCCESS on successful override.
+**/
 typedef
 EFI_STATUS
-EFIAPI
-(*OC_FWRT_ON_GET_VARIABLE) (
+(EFIAPI *OC_FWRT_ON_GET_VARIABLE) (
   IN  EFI_GET_VARIABLE  GetVariable,
   OUT EFI_GET_VARIABLE  *OrgGetVariable  OPTIONAL
   );
 
-//
-// Check for revision to ensure binary compatibility.
-//
+/**
+  Firmware runtime protocol instance.
+  Check for revision to ensure binary compatibility.
+**/
 typedef struct {
-  UINTN                    Revision;
-  OC_FWRT_NVRAM_REDIRECT   SetNvram;
-  OC_FWRT_ON_GET_VARIABLE  OnGetVariable;
+  UINTN                        Revision;
+  OC_FWRT_GET_CURRENT_CONFIG   GetCurrent;
+  OC_FWRT_SET_MAIN_CONFIG      SetMain;
+  OC_FWRT_SET_OVERRIDE_CONFIG  SetOverride;
+  OC_FWRT_ON_GET_VARIABLE      OnGetVariable;
 } OC_FIRMWARE_RUNTIME_PROTOCOL;
 
+/**
+  Firmware runtime protocol GUID.
+**/
 extern EFI_GUID gOcFirmwareRuntimeProtocolGuid;
 
 #endif // OC_FIRMWARE_RUNTIME_PROTOCOL_H

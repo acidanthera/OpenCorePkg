@@ -100,13 +100,16 @@
 /// Apple bootloader quirks.
 ///
 #define OC_BOOTER_QUIRKS_FIELDS(_, __) \
-  _(BOOLEAN                     , SetupAppleMap               ,     , FALSE  , ()) \
-  _(BOOLEAN                     , SetupAppleSlide             ,     , FALSE  , ()) \
-  _(BOOLEAN                     , DiscardAppleS4Map           ,     , FALSE  , ()) \
-  _(BOOLEAN                     , EnableAppleSmSlide          ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ProtectCsmRegion            ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ShrinkMemoryMap             ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ForceExitBootServices       ,     , FALSE  , ())
+  _(BOOLEAN                     , AvoidRuntimeDefrag        ,     , FALSE  , ()) \
+  _(BOOLEAN                     , DisableVariableWrite      ,     , FALSE  , ()) \
+  _(BOOLEAN                     , DiscardHibernateMap       ,     , FALSE  , ()) \
+  _(BOOLEAN                     , EnableSafeModeSlide       ,     , FALSE  , ()) \
+  _(BOOLEAN                     , EnableWriteUnprotector    ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ForceExitBootServices     ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ProtectCsmRegion          ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ProvideCustomSlide        ,     , FALSE  , ()) \
+  _(BOOLEAN                     , SetupVirtualMap           ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ShrinkMemoryMap           ,     , FALSE  , ())
   OC_DECLARE (OC_BOOTER_QUIRKS)
 
 ///

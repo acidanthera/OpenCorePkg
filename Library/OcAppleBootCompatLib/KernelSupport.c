@@ -334,25 +334,29 @@ AppleMapPrepareForBooting (
 
   OcParseBootArgs (&BA, BootArgs);
 
-  //
-  // Restore the variables we tampered with to support custom slides.
-  //
-  AppleSlideRestore (BootCompat, &BA);
+  if (BootCompat->Settings.ProvideCustomSlide) {
+    //
+    // Restore the variables we tampered with to support custom slides.
+    //
+    AppleSlideRestore (BootCompat, &BA);
+  }
 
-  MemoryMapSize  = *BA.MemoryMapSize;
-  MemoryMap      = (EFI_MEMORY_DESCRIPTOR *)(UINTN) (*BA.MemoryMap);
-  DescriptorSize = *BA.MemoryMapDescriptorSize;
+  if (BootCompat->Settings.AvoidRuntimeDefrag) {
+    MemoryMapSize  = *BA.MemoryMapSize;
+    MemoryMap      = (EFI_MEMORY_DESCRIPTOR *)(UINTN) (*BA.MemoryMap);
+    DescriptorSize = *BA.MemoryMapDescriptorSize;
 
-  //
-  // We must restore EfiRuntimeServicesCode memory area types, because otherwise
-  // RuntimeServices won't be mapped.
-  //
-  RestoreProtectedRtMemoryTypes (
-    &BootCompat->RtReloc,
-    MemoryMapSize,
-    DescriptorSize,
-    MemoryMap
-    );
+    //
+    // We must restore EfiRuntimeServicesCode memory area types, because otherwise
+    // RuntimeServices won't be mapped.
+    //
+    RestoreProtectedRtMemoryTypes (
+      &BootCompat->RtReloc,
+      MemoryMapSize,
+      DescriptorSize,
+      MemoryMap
+      );
+  }
 }
 
 /**
@@ -398,7 +402,7 @@ AppleMapPrepareForHibernateWake (
   Handoff = (IOHibernateHandoff *) EFI_PAGES_TO_SIZE ((UINTN) ImageHeader->handoffPages);
   while (Handoff->type != kIOHibernateHandoffTypeEnd) {
     if (Handoff->type == kIOHibernateHandoffTypeMemoryMap) {
-      if (BootCompat->Settings.DiscardAppleS4Map) {
+      if (BootCompat->Settings.DiscardHibernateMap) {
         //
         // Route 1. Discard the new memory map here, and let XNU use what it had.
         // It is unknown whether there still are any firmwares that need this.
@@ -414,12 +418,17 @@ AppleMapPrepareForHibernateWake (
           return;
         }
 
-        RestoreProtectedRtMemoryTypes (
-          &BootCompat->RtReloc,
-          Handoff->bytecount,
-          BootCompat->KernelState.VmMapDescSize,
-          (EFI_MEMORY_DESCRIPTOR *)(UINTN) Handoff->data
-          );
+        if (BootCompat->Settings.AvoidRuntimeDefrag) {
+          //
+          // I think we should not be there, but ideally all quirks are relatively independent.
+          //
+          RestoreProtectedRtMemoryTypes (
+            &BootCompat->RtReloc,
+            Handoff->bytecount,
+            BootCompat->KernelState.VmMapDescSize,
+            (EFI_MEMORY_DESCRIPTOR *)(UINTN) Handoff->data
+            );
+        }
       }
 
       break;
@@ -458,52 +467,54 @@ AppleMapPrepareBooterState (
   //
   // This function may be called twice, do not redo in this case.
   //
-  if (BootCompat->KernelState.SysTableRtArea == 0) {
-    AppleMapPlatformSaveState (
-      &BootCompat->KernelState.AsmState,
-      &BootCompat->KernelState.KernelJump
-      );
+  AppleMapPlatformSaveState (
+    &BootCompat->KernelState.AsmState,
+    &BootCompat->KernelState.KernelJump
+    );
 
-    //
-    // Allocate RT data pages for copy of UEFI system table for kernel.
-    // This one also has to be 32-bit due to XNU BootArgs structure.
-    // The reason for this allocation to be required is because XNU uses static
-    // mapping for directly passed pointers (see ProtectRtMemoryFromRelocation).
-    //
-    BootCompat->KernelState.SysTableRtArea     = BASE_4GB;
-    BootCompat->KernelState.SysTableRtAreaSize = gST->Hdr.HeaderSize;
-    Status = AllocatePagesFromTop (
-      EfiRuntimeServicesData,
-      EFI_SIZE_TO_PAGES (gST->Hdr.HeaderSize),
-      &BootCompat->KernelState.SysTableRtArea,
-      GetMemoryMap,
-      NULL
-      );
-    if (EFI_ERROR (Status)) {
-      DEBUG ((
-        DEBUG_ERROR,
-        "OCABC: Failed to allocate system table memory - %r\n",
-        Status
-        ));
-      BootCompat->KernelState.SysTableRtArea = 0;
-      return;
+  if (BootCompat->Settings.AvoidRuntimeDefrag) {
+    if (BootCompat->KernelState.SysTableRtArea == 0) {
+      //
+      // Allocate RT data pages for copy of UEFI system table for kernel.
+      // This one also has to be 32-bit due to XNU BootArgs structure.
+      // The reason for this allocation to be required is because XNU uses static
+      // mapping for directly passed pointers (see ProtectRtMemoryFromRelocation).
+      //
+      BootCompat->KernelState.SysTableRtArea     = BASE_4GB;
+      BootCompat->KernelState.SysTableRtAreaSize = gST->Hdr.HeaderSize;
+      Status = AllocatePagesFromTop (
+        EfiRuntimeServicesData,
+        EFI_SIZE_TO_PAGES (gST->Hdr.HeaderSize),
+        &BootCompat->KernelState.SysTableRtArea,
+        GetMemoryMap,
+        NULL
+        );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((
+          DEBUG_ERROR,
+          "OCABC: Failed to allocate system table memory - %r\n",
+          Status
+          ));
+        BootCompat->KernelState.SysTableRtArea = 0;
+        return;
+      }
+
+      //
+      // Copy UEFI system table to the new location.
+      //
+      CopyMem (
+        (VOID *)(UINTN) BootCompat->KernelState.SysTableRtArea,
+        gST,
+        gST->Hdr.HeaderSize
+        );
     }
 
     //
-    // Copy UEFI system table to the new location.
+    // Assign loaded image with custom system table.
     //
-    CopyMem (
-      (VOID *)(UINTN) BootCompat->KernelState.SysTableRtArea,
-      gST,
-      gST->Hdr.HeaderSize
-      );
+    LoadedImage->SystemTable =
+      (EFI_SYSTEM_TABLE *)(UINTN) BootCompat->KernelState.SysTableRtArea;
   }
-
-  //
-  // Assign loaded image with custom system table.
-  //
-  LoadedImage->SystemTable =
-    (EFI_SYSTEM_TABLE *)(UINTN) BootCompat->KernelState.SysTableRtArea;
 }
 
 VOID
@@ -516,6 +527,21 @@ AppleMapPrepareKernelJump (
   UINTN                    KernelEntryVaddr;
   UINT32                   KernelEntry;
   IOHibernateImageHeader   *ImageHeader;
+
+  //
+  // There is no reason to patch the kernel when we do not need it.
+  //
+  if (!BootCompat->Settings.AvoidRuntimeDefrag && !BootCompat->Settings.DiscardHibernateMap) {
+    return;
+  }
+
+  //
+  // Check whether we have image address and abort if not.
+  //
+  if (ImageAddress == 0) {
+    RUNTIME_DEBUG ((DEBUG_ERROR, "OCABC: Failed to find image address, hibernate %d\n", AppleHibernateWake));
+    return;
+  }
 
   if (!AppleHibernateWake) {
     //
@@ -572,7 +598,7 @@ AppleMapPrepareKernelJump (
 }
 
 EFI_STATUS
-AppleMapPrepareVmState (
+AppleMapPrepareMemState (
   IN OUT BOOT_COMPAT_CONTEXT    *BootCompat,
   IN     UINTN                  MemoryMapSize,
   IN     UINTN                  DescriptorSize,
@@ -585,34 +611,47 @@ AppleMapPrepareVmState (
   //
   // Protect RT areas from relocation by marking then MemMapIO.
   //
-  ProtectRtMemoryFromRelocation (
-    &BootCompat->RtReloc,
-    MemoryMapSize,
-    DescriptorSize,
-    MemoryMap,
-    BootCompat->KernelState.SysTableRtArea,
-    BootCompat->KernelState.SysTableRtAreaSize
-    );
+  if (BootCompat->Settings.AvoidRuntimeDefrag) {
+    ProtectRtMemoryFromRelocation (
+      &BootCompat->RtReloc,
+      MemoryMapSize,
+      DescriptorSize,
+      MemoryMap,
+      BootCompat->KernelState.SysTableRtArea,
+      BootCompat->KernelState.SysTableRtAreaSize
+      );
+  }
 
   //
   // Virtualize RT services with all needed fixes.
   //
-  Status = PerformRtMemoryVirtualMapping (
-    &BootCompat->KernelState,
-    MemoryMapSize,
-    DescriptorSize,
-    DescriptorVersion,
-    MemoryMap
-    );
+  if (BootCompat->Settings.SetupVirtualMap) {
+    Status = PerformRtMemoryVirtualMapping (
+      &BootCompat->KernelState,
+      MemoryMapSize,
+      DescriptorSize,
+      DescriptorVersion,
+      MemoryMap
+      );
+  } else {
+    Status = gRT->SetVirtualAddressMap (
+      MemoryMapSize,
+      DescriptorSize,
+      DescriptorVersion,
+      MemoryMap
+      );
+  }
 
   //
   // Copy now virtualized UEFI system table for boot.efi to hand it to the kernel.
   //
-  CopyMem (
-    (VOID *)(UINTN) BootCompat->KernelState.SysTableRtArea,
-    gST,
-    gST->Hdr.HeaderSize
-    );
+  if (BootCompat->Settings.AvoidRuntimeDefrag) {
+    CopyMem (
+      (VOID *)(UINTN) BootCompat->KernelState.SysTableRtArea,
+      gST,
+      gST->Hdr.HeaderSize
+      );
+  }
 
   return Status;
 }

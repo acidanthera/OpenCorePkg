@@ -147,13 +147,16 @@ mAcpiConfigurationSchema[] = {
 STATIC
 OC_SCHEMA
 mBooterQuirksSchema[] = {
-  OC_SCHEMA_BOOLEAN_IN ("DiscardAppleS4Map",     OC_GLOBAL_CONFIG, Booter.Quirks.DiscardAppleS4Map),
-  OC_SCHEMA_BOOLEAN_IN ("EnableAppleSmSlide",    OC_GLOBAL_CONFIG, Booter.Quirks.EnableAppleSmSlide),
-  OC_SCHEMA_BOOLEAN_IN ("ForceExitBootServices", OC_GLOBAL_CONFIG, Booter.Quirks.ForceExitBootServices),
-  OC_SCHEMA_BOOLEAN_IN ("ProtectCsmRegion",      OC_GLOBAL_CONFIG, Booter.Quirks.ProtectCsmRegion),
-  OC_SCHEMA_BOOLEAN_IN ("SetupAppleMap",         OC_GLOBAL_CONFIG, Booter.Quirks.SetupAppleMap),
-  OC_SCHEMA_BOOLEAN_IN ("SetupAppleSlide",       OC_GLOBAL_CONFIG, Booter.Quirks.SetupAppleSlide),
-  OC_SCHEMA_BOOLEAN_IN ("ShrinkMemoryMap",       OC_GLOBAL_CONFIG, Booter.Quirks.ShrinkMemoryMap),
+  OC_SCHEMA_BOOLEAN_IN ("AvoidRuntimeDefrag",     OC_GLOBAL_CONFIG, Booter.Quirks.AvoidRuntimeDefrag),
+  OC_SCHEMA_BOOLEAN_IN ("DisableVariableWrite",   OC_GLOBAL_CONFIG, Booter.Quirks.DisableVariableWrite),
+  OC_SCHEMA_BOOLEAN_IN ("DiscardHibernateMap",    OC_GLOBAL_CONFIG, Booter.Quirks.DiscardHibernateMap),
+  OC_SCHEMA_BOOLEAN_IN ("EnableSafeModeSlide",    OC_GLOBAL_CONFIG, Booter.Quirks.EnableSafeModeSlide),
+  OC_SCHEMA_BOOLEAN_IN ("EnableWriteUnprotector", OC_GLOBAL_CONFIG, Booter.Quirks.EnableWriteUnprotector),
+  OC_SCHEMA_BOOLEAN_IN ("ForceExitBootServices",  OC_GLOBAL_CONFIG, Booter.Quirks.ForceExitBootServices),
+  OC_SCHEMA_BOOLEAN_IN ("ProtectCsmRegion",       OC_GLOBAL_CONFIG, Booter.Quirks.ProtectCsmRegion),
+  OC_SCHEMA_BOOLEAN_IN ("ProvideCustomSlide",     OC_GLOBAL_CONFIG, Booter.Quirks.ProvideCustomSlide),
+  OC_SCHEMA_BOOLEAN_IN ("SetupVirtualMap",        OC_GLOBAL_CONFIG, Booter.Quirks.SetupVirtualMap),
+  OC_SCHEMA_BOOLEAN_IN ("ShrinkMemoryMap",        OC_GLOBAL_CONFIG, Booter.Quirks.ShrinkMemoryMap),
 };
 
 STATIC
