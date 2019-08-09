@@ -67,9 +67,46 @@ typedef struct {
   UINT16                  CoreCount;
   UINT16                  ThreadCount;
 
+  //
+  // Platform-dependent frequency for the Always Running Timer (ART), normally
+  // 24Mhz. Firmwares may choose to override this. Some CPUs like Xeon Scalable
+  // use a different frequency. CPUs report the frequency through CPUID.15H.ECX.
+  // If unreported, the frequency is looked up based on the model and family.
+  //
+  // Nominal Core Crystal Clock Frequency for known processor families:
+  //   Intel Xeon Scalable with CPUID signature 0x0655: 25 Mhz
+  //   6th and 7th generation Intel Core & Xeon W: 24 Mhz
+  //   Nex Generation Intel Atom with CPUID 0x065C: 19.2 Mhz
+  //
   UINT64                  ARTFrequency;
-  UINT64                  TSCFrequency;
+
+  //
+  // The CPU frequency derived from either CPUFrequencyFromTSC (legacy) or
+  // CPUFrequencyFromART (preferred for Skylake and presumably newer processors
+  // that have an Always Running Timer).
+  //
+  // CPUFrequencyFromTSC should approximate equal CPUFrequencyFromART. If not,
+  // there is likely a bug or miscalculation.
+  //
   UINT64                  CPUFrequency;
+
+  //
+  // The CPU frequency as reported by the Time Stamp Counter (TSC).
+  //
+  UINT64                  CPUFrequencyFromTSC;
+
+  //
+  // The CPU frequency derived from the Always Running Timer (ART) frequency:
+  //   TSC_Value = (ART_Value * CPUID.15H:EBX[31:0]) / CPUID.15H:EAX[31:0] + K
+  //
+  // 0 if ART is not present.
+  //
+  UINT64                  CPUFrequencyFromART;
+
+  //
+  // The Front Side Bus (FSB) frequency calculated from dividing the CPU
+  // frequency by the Max Ratio.
+  //
   UINT64                  FSBFrequency;
 } OC_CPU_INFO;
 

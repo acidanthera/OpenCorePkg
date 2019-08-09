@@ -457,7 +457,7 @@ DetectAppleProcessorType (
     //
     case CPU_MODEL_SKYLAKE:     // 0x4E
     case CPU_MODEL_SKYLAKE_DT:  // 0x5E
-    case CPU_MODEL_SKYLAKE_W:   // 0x55, also SKL-X
+    case CPU_MODEL_SKYLAKE_W:   // 0x55, also SKL-X and SKL-SP
       if (AppleMajorType == AppleProcessorMajorXeonW) {
         // IMP11 (Xeon W 2140B)
         return AppleProcessorTypeXeonW;       // 0x0F01
@@ -588,7 +588,9 @@ ScanIntelProcessor (
 {
   UINT32                                            CpuidEax;
   UINT32                                            CpuidEbx;
+  UINT32                                            CpuidEcx;
   UINT64                                            Msr;
+  UINT64                                            TscAdjust;
   CPUID_CACHE_PARAMS_EAX                            CpuidCacheEax;
   CPUID_CACHE_PARAMS_EBX                            CpuidCacheEbx;
   UINT8                                             AppleMajorType;
@@ -661,46 +663,70 @@ ScanIntelProcessor (
   // SkyLake and later have an Always Running Timer
   //
   if (Cpu->Model >= CPU_MODEL_SKYLAKE) {
-    AsmCpuid (CPUID_TIME_STAMP_COUNTER, &CpuidEax, &CpuidEbx, NULL, NULL);
+    AsmCpuid (CPUID_TIME_STAMP_COUNTER, &CpuidEax, &CpuidEbx, &CpuidEcx, NULL);
+    if (CpuidEcx > 0) {
+      Cpu->ARTFrequency = CpuidEcx;
+      DEBUG ((DEBUG_INFO, "OCCPU: Core Crystal Clock Frequency %u\n", CpuidEcx));
+    } else {
+      //
+      // Fall back to identifying ART frequency based on model
+      //
+      if (Cpu->Family == 0x6 && Cpu->Model == CPU_MODEL_SKYLAKE_W) {
+        //
+        // TODO: Xeon Ws share the same CPUID but I believe they have 24 Mhz ART
+        //
+        Cpu->ARTFrequency = 25000000ULL; // 25 Mhz
+      } else if (Cpu->Family == 0x6 && Cpu->Model == CPU_MODEL_GOLDMONT){
+        Cpu->ARTFrequency = 19200000ULL; // 19.2 Mhz
+      } else {
+        Cpu->ARTFrequency = 24000000ULL; // 24 Mhz
+      }
+    }
 
     if (CpuidEax > 0 && CpuidEbx > 0) {
-      Cpu->CPUFrequency = MultU64x32 (BASE_ART_CLOCK_SOURCE, (UINT32) DivU64x32 (CpuidEbx, CpuidEax));
+      TscAdjust = AsmReadMsr64 (MSR_IA32_TSC_ADJUST);
+      DEBUG ((DEBUG_INFO, "OCCPU: TSC Adjust %llu\n", TscAdjust ));
+      ASSERT (Cpu->ARTFrequency > 0ULL);
+      Cpu->CPUFrequencyFromART = MultU64x32 (Cpu->ARTFrequency, (UINT32) DivU64x32 (CpuidEbx, CpuidEax)) + TscAdjust;
 
       DEBUG ((
         DEBUG_INFO,
-        "OCCPU: %a %a %11lld %5dMHz %u * %u / %u = %ld\n",
+        "OCCPU: %a %a %11llu %5dMHz = %u * %u / %u + %u\n",
         "ART",
         "Frequency",
-        Cpu->CPUFrequency,
-        DivU64x32 (Cpu->CPUFrequency, 1000000),
-        BASE_ART_CLOCK_SOURCE,
+        Cpu->CPUFrequencyFromART,
+        DivU64x32 (Cpu->CPUFrequencyFromART, 1000000),
+        Cpu->ARTFrequency,
         CpuidEbx,
         CpuidEax,
-        Cpu->CPUFrequency
+        TscAdjust
         ));
-
-      Cpu->FSBFrequency = DivU64x32 (Cpu->CPUFrequency, Cpu->MaxBusRatio);
     }
   }
 
   //
   // Calculate the Tsc frequency
   //
-  Cpu->TSCFrequency = GetPerformanceCounterProperties (NULL, NULL);
+  Cpu->CPUFrequencyFromTSC = GetPerformanceCounterProperties (NULL, NULL);
 
-  if (Cpu->CPUFrequency == 0) {
+  //
+  // Calculate CPU frequency based on ART if present, otherwise TSC
+  //
+  Cpu->CPUFrequency = Cpu->CPUFrequencyFromART > 0 ? Cpu->CPUFrequencyFromART : Cpu->CPUFrequencyFromTSC;
+
+  //
+  // There may be some quirks with virtual CPUs (VMware is fine).
+  // Formerly we checked Cpu->MinBusRatio > 0, but we have no MinBusRatio on Penryn.
+  //
+  if (Cpu->CPUFrequency > 0 && Cpu->MaxBusRatio > Cpu->MinBusRatio) {
+    Cpu->FSBFrequency = DivU64x32 (Cpu->CPUFrequency, Cpu->MaxBusRatio);
+  } else {
     //
-    // There may be some quirks with virtual CPUs (VMware is fine).
-    // Formerly we checked Cpu->MinBusRatio > 0, but we have no MinBusRatio on Penryn.
+    // TODO: It seems to be possible that CPU frequency == 0 here...
     //
-    if (Cpu->TSCFrequency > 0 && Cpu->MaxBusRatio > Cpu->MinBusRatio) {
-      Cpu->FSBFrequency = DivU64x32 (Cpu->TSCFrequency, Cpu->MaxBusRatio);
-      Cpu->CPUFrequency = MultU64x32 (Cpu->FSBFrequency, Cpu->MaxBusRatio);
-    } else {
-      Cpu->CPUFrequency = Cpu->TSCFrequency;
-      Cpu->FSBFrequency = 100000000;
-    }
+    Cpu->FSBFrequency = 100000000; // 100 Mhz
   }
+
   //
   // Calculate number of cores
   //
@@ -764,8 +790,8 @@ ScanAmdProcessor (
   //
   // get TSC Frequency calculated in OcTimerLib
   //
-  Cpu->TSCFrequency = GetPerformanceCounterProperties (NULL, NULL);
-  Cpu->CPUFrequency = Cpu->TSCFrequency;
+  Cpu->CPUFrequencyFromTSC = GetPerformanceCounterProperties (NULL, NULL);
+  Cpu->CPUFrequency = Cpu->CPUFrequencyFromTSC;
   //
   // Get core and thread count from CPUID
   //
@@ -815,7 +841,7 @@ ScanAmdProcessor (
     Cpu->CurBusRatio = Cpu->MaxBusRatio;
     Cpu->MinBusRatio = Cpu->MaxBusRatio;
 
-    Cpu->FSBFrequency = DivU64x32 (Cpu->TSCFrequency, Cpu->MaxBusRatio);
+    Cpu->FSBFrequency = DivU64x32 (Cpu->CPUFrequency, Cpu->MaxBusRatio);
   }
 }
 
@@ -956,8 +982,8 @@ OcCpuScanProcessor (
     "OCCPU: %a %a %11lld %5dMHz\n",
     "TSC",
     "Frequency",
-    Cpu->TSCFrequency,
-    DivU64x32 (Cpu->TSCFrequency, 1000000)
+    Cpu->CPUFrequencyFromTSC,
+    DivU64x32 (Cpu->CPUFrequencyFromTSC, 1000000)
     ));
 
   DEBUG ((
