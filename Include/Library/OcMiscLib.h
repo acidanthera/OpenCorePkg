@@ -107,4 +107,23 @@ DirectRestCold (
   VOID
   );
 
+/**
+ Return the result of (Multiplicand * Multiplier / Divisor).
+
+ @param Multiplicand A 64-bit unsigned value.
+ @param Multiplier   A 64-bit unsigned value.
+ @param Divisor      A 32-bit unsigned value.
+ @param Remainder    A pointer to a 32-bit unsigned value. This parameter is
+ optional and may be NULL.
+
+ @return Multiplicand * Multiplier / Divisor.
+ **/
+UINT64
+MultThenDivU64x64x32 (
+  IN  UINT64  Multiplicand,
+  IN  UINT64  Multiplier,
+  IN  UINT32  Divisor,
+  OUT UINT32  *Remainder  OPTIONAL
+  );
+
 #endif // OC_MISC_LIB_H

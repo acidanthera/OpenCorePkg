@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		35113D9822FDE20100BA1748 /* Math.c in Sources */ = {isa = PBXBuildFile; fileRef = 35113D9722FDE20000BA1748 /* Math.c */; };
 		352190E5224D4B67002A2CA6 /* Prelinked.c in Sources */ = {isa = PBXBuildFile; fileRef = 35218FA8224D4AE2002A2CA6 /* Prelinked.c */; };
 		352190E6224D4B67002A2CA6 /* Macho.c in Sources */ = {isa = PBXBuildFile; fileRef = 35218FAA224D4AE2002A2CA6 /* Macho.c */; };
 		352190E7224D4B67002A2CA6 /* Props.c in Sources */ = {isa = PBXBuildFile; fileRef = 35218FAD224D4AE2002A2CA6 /* Props.c */; };
@@ -24,12 +25,6 @@
 		35219109224D4B67002A2CA6 /* Symbols.c in Sources */ = {isa = PBXBuildFile; fileRef = 35219048224D4AE2002A2CA6 /* Symbols.c */; };
 		3521910A224D4B67002A2CA6 /* Relocations.c in Sources */ = {isa = PBXBuildFile; fileRef = 35219049224D4AE2002A2CA6 /* Relocations.c */; };
 		3521910B224D4B67002A2CA6 /* CxxSymbols.c in Sources */ = {isa = PBXBuildFile; fileRef = 3521904A224D4AE2002A2CA6 /* CxxSymbols.c */; };
-		3521910C224D4B67002A2CA6 /* SafeLocateProtocol.c in Sources */ = {isa = PBXBuildFile; fileRef = 3521904C224D4AE2002A2CA6 /* SafeLocateProtocol.c */; };
-		3521910D224D4B67002A2CA6 /* SafeInstallProtocolInterface.c in Sources */ = {isa = PBXBuildFile; fileRef = 3521904D224D4AE2002A2CA6 /* SafeInstallProtocolInterface.c */; };
-		3521910E224D4B67002A2CA6 /* UninstallAllProtocolInterfaces.c in Sources */ = {isa = PBXBuildFile; fileRef = 3521904E224D4AE2002A2CA6 /* UninstallAllProtocolInterfaces.c */; };
-		3521910F224D4B67002A2CA6 /* SafeHandleProtocol.c in Sources */ = {isa = PBXBuildFile; fileRef = 3521904F224D4AE2002A2CA6 /* SafeHandleProtocol.c */; };
-		35219110224D4B67002A2CA6 /* SignalProtocolEvent.c in Sources */ = {isa = PBXBuildFile; fileRef = 35219050224D4AE2002A2CA6 /* SignalProtocolEvent.c */; };
-		35219111224D4B67002A2CA6 /* RegisterProtocolCallback.c in Sources */ = {isa = PBXBuildFile; fileRef = 35219051224D4AE2002A2CA6 /* RegisterProtocolCallback.c */; };
 		35219112224D4B67002A2CA6 /* OcUnicodeLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35219055224D4AE2002A2CA6 /* OcUnicodeLib.c */; };
 		35219113224D4B67002A2CA6 /* OcAsciiLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35219056224D4AE2002A2CA6 /* OcAsciiLib.c */; };
 		35219114224D4B67002A2CA6 /* OcPng.c in Sources */ = {isa = PBXBuildFile; fileRef = 3521905A224D4AE2002A2CA6 /* OcPng.c */; };
@@ -44,14 +39,8 @@
 		3521911D224D4B67002A2CA6 /* Rsa2048Sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 35219070224D4AE2002A2CA6 /* Rsa2048Sha256.c */; };
 		3521911E224D4B67002A2CA6 /* Sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 35219071224D4AE2002A2CA6 /* Sha256.c */; };
 		3521911F224D4B67002A2CA6 /* Md5.c in Sources */ = {isa = PBXBuildFile; fileRef = 35219072224D4AE2002A2CA6 /* Md5.c */; };
-		35219120224D4B67002A2CA6 /* LegacyRegionLock.c in Sources */ = {isa = PBXBuildFile; fileRef = 35219074224D4AE2002A2CA6 /* LegacyRegionLock.c */; };
-		35219121224D4B67002A2CA6 /* DebugHelp.c in Sources */ = {isa = PBXBuildFile; fileRef = 35219075224D4AE2002A2CA6 /* DebugHelp.c */; };
-		35219122224D4B67002A2CA6 /* LegacyRegionUnLock.c in Sources */ = {isa = PBXBuildFile; fileRef = 35219076224D4AE2002A2CA6 /* LegacyRegionUnLock.c */; };
-		35219123224D4B67002A2CA6 /* ConvertDataToString.c in Sources */ = {isa = PBXBuildFile; fileRef = 35219077224D4AE2002A2CA6 /* ConvertDataToString.c */; };
 		35219124224D4B67002A2CA6 /* NullTextOutput.c in Sources */ = {isa = PBXBuildFile; fileRef = 35219078224D4AE2002A2CA6 /* NullTextOutput.c */; };
 		35219125224D4B67002A2CA6 /* Base64Decode.c in Sources */ = {isa = PBXBuildFile; fileRef = 35219079224D4AE2002A2CA6 /* Base64Decode.c */; };
-		35219126224D4B67002A2CA6 /* LogHexDump.c in Sources */ = {isa = PBXBuildFile; fileRef = 3521907A224D4AE2002A2CA6 /* LogHexDump.c */; };
-		35219127224D4B67002A2CA6 /* LogBootOrder.c in Sources */ = {isa = PBXBuildFile; fileRef = 3521907B224D4AE2002A2CA6 /* LogBootOrder.c */; };
 		35219128224D4B67002A2CA6 /* DataPatcher.c in Sources */ = {isa = PBXBuildFile; fileRef = 3521907D224D4AE2002A2CA6 /* DataPatcher.c */; };
 		35219129224D4B67002A2CA6 /* OcTimerLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 3521907F224D4AE2002A2CA6 /* OcTimerLib.c */; };
 		3521912A224D4B67002A2CA6 /* lzss.c in Sources */ = {isa = PBXBuildFile; fileRef = 35219083224D4AE2002A2CA6 /* lzss.c */; };
@@ -93,6 +82,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		35113D9622FDE1E700BA1748 /* lib__index_OcSupportPkg.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = lib__index_OcSupportPkg.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		35113D9722FDE20000BA1748 /* Math.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Math.c; sourceTree = "<group>"; };
 		35218FA2224D4AE2002A2CA6 /* OcSupportPkg.dec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcSupportPkg.dec; sourceTree = "<group>"; };
 		35218FA7224D4AE2002A2CA6 /* Prelinked.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Prelinked.xml; sourceTree = "<group>"; };
 		35218FA8224D4AE2002A2CA6 /* Prelinked.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Prelinked.c; sourceTree = "<group>"; };
@@ -171,12 +162,6 @@
 		35219048224D4AE2002A2CA6 /* Symbols.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Symbols.c; sourceTree = "<group>"; };
 		35219049224D4AE2002A2CA6 /* Relocations.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Relocations.c; sourceTree = "<group>"; };
 		3521904A224D4AE2002A2CA6 /* CxxSymbols.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CxxSymbols.c; sourceTree = "<group>"; };
-		3521904C224D4AE2002A2CA6 /* SafeLocateProtocol.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SafeLocateProtocol.c; sourceTree = "<group>"; };
-		3521904D224D4AE2002A2CA6 /* SafeInstallProtocolInterface.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SafeInstallProtocolInterface.c; sourceTree = "<group>"; };
-		3521904E224D4AE2002A2CA6 /* UninstallAllProtocolInterfaces.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = UninstallAllProtocolInterfaces.c; sourceTree = "<group>"; };
-		3521904F224D4AE2002A2CA6 /* SafeHandleProtocol.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SafeHandleProtocol.c; sourceTree = "<group>"; };
-		35219050224D4AE2002A2CA6 /* SignalProtocolEvent.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SignalProtocolEvent.c; sourceTree = "<group>"; };
-		35219051224D4AE2002A2CA6 /* RegisterProtocolCallback.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RegisterProtocolCallback.c; sourceTree = "<group>"; };
 		35219054224D4AE2002A2CA6 /* OcStringLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcStringLib.inf; sourceTree = "<group>"; };
 		35219055224D4AE2002A2CA6 /* OcUnicodeLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcUnicodeLib.c; sourceTree = "<group>"; };
 		35219056224D4AE2002A2CA6 /* OcAsciiLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAsciiLib.c; sourceTree = "<group>"; };
@@ -201,14 +186,8 @@
 		35219070224D4AE2002A2CA6 /* Rsa2048Sha256.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Rsa2048Sha256.c; sourceTree = "<group>"; };
 		35219071224D4AE2002A2CA6 /* Sha256.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Sha256.c; sourceTree = "<group>"; };
 		35219072224D4AE2002A2CA6 /* Md5.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Md5.c; sourceTree = "<group>"; };
-		35219074224D4AE2002A2CA6 /* LegacyRegionLock.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LegacyRegionLock.c; sourceTree = "<group>"; };
-		35219075224D4AE2002A2CA6 /* DebugHelp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DebugHelp.c; sourceTree = "<group>"; };
-		35219076224D4AE2002A2CA6 /* LegacyRegionUnLock.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LegacyRegionUnLock.c; sourceTree = "<group>"; };
-		35219077224D4AE2002A2CA6 /* ConvertDataToString.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ConvertDataToString.c; sourceTree = "<group>"; };
 		35219078224D4AE2002A2CA6 /* NullTextOutput.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NullTextOutput.c; sourceTree = "<group>"; };
 		35219079224D4AE2002A2CA6 /* Base64Decode.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Base64Decode.c; sourceTree = "<group>"; };
-		3521907A224D4AE2002A2CA6 /* LogHexDump.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LogHexDump.c; sourceTree = "<group>"; };
-		3521907B224D4AE2002A2CA6 /* LogBootOrder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LogBootOrder.c; sourceTree = "<group>"; };
 		3521907C224D4AE2002A2CA6 /* OcMiscLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcMiscLib.inf; sourceTree = "<group>"; };
 		3521907D224D4AE2002A2CA6 /* DataPatcher.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DataPatcher.c; sourceTree = "<group>"; };
 		3521907F224D4AE2002A2CA6 /* OcTimerLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcTimerLib.c; sourceTree = "<group>"; };
@@ -280,7 +259,6 @@
 		352190DB224D4AE2002A2CA6 /* gdb_uefi.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = gdb_uefi.py; sourceTree = "<group>"; };
 		3521914E224E0E6F002A2CA6 /* build.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = build.sh; sourceTree = "<group>"; };
 		3521951A224E14D8002A2CA6 /* X64 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = X64; path = ../Build/OcSupportPkg/RELEASE_XCODE5/X64; sourceTree = "<group>"; };
-		3521951B224E155D002A2CA6 /* lib__index_OcSupportPkg.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = lib__index_OcSupportPkg.dylib; path = "$(SRCROOT)/build/Debug/lib__index_OcSupportPkg.dylib"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -299,6 +277,7 @@
 			children = (
 				35218FA1224D4AE2002A2CA6 /* OcSupportPkg */,
 				3521951A224E14D8002A2CA6 /* X64 */,
+				35113D9622FDE1E700BA1748 /* lib__index_OcSupportPkg.dylib */,
 			);
 			sourceTree = "<group>";
 		};
@@ -676,16 +655,11 @@
 		35219073224D4AE2002A2CA6 /* OcMiscLib */ = {
 			isa = PBXGroup;
 			children = (
-				35219074224D4AE2002A2CA6 /* LegacyRegionLock.c */,
-				35219075224D4AE2002A2CA6 /* DebugHelp.c */,
-				35219076224D4AE2002A2CA6 /* LegacyRegionUnLock.c */,
-				35219077224D4AE2002A2CA6 /* ConvertDataToString.c */,
 				35219078224D4AE2002A2CA6 /* NullTextOutput.c */,
 				35219079224D4AE2002A2CA6 /* Base64Decode.c */,
-				3521907A224D4AE2002A2CA6 /* LogHexDump.c */,
-				3521907B224D4AE2002A2CA6 /* LogBootOrder.c */,
 				3521907C224D4AE2002A2CA6 /* OcMiscLib.inf */,
 				3521907D224D4AE2002A2CA6 /* DataPatcher.c */,
+				35113D9722FDE20000BA1748 /* Math.c */,
 			);
 			path = OcMiscLib;
 			sourceTree = "<group>";
@@ -965,7 +939,7 @@
 			);
 			name = __index_OcSupportPkg;
 			productName = __index_OcSupportPkg;
-			productReference = 3521951B224E155D002A2CA6 /* lib__index_OcSupportPkg.dylib */;
+			productReference = 35113D9622FDE1E700BA1748 /* lib__index_OcSupportPkg.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
@@ -1025,12 +999,6 @@
 				35219109224D4B67002A2CA6 /* Symbols.c in Sources */,
 				3521910A224D4B67002A2CA6 /* Relocations.c in Sources */,
 				3521910B224D4B67002A2CA6 /* CxxSymbols.c in Sources */,
-				3521910C224D4B67002A2CA6 /* SafeLocateProtocol.c in Sources */,
-				3521910D224D4B67002A2CA6 /* SafeInstallProtocolInterface.c in Sources */,
-				3521910E224D4B67002A2CA6 /* UninstallAllProtocolInterfaces.c in Sources */,
-				3521910F224D4B67002A2CA6 /* SafeHandleProtocol.c in Sources */,
-				35219110224D4B67002A2CA6 /* SignalProtocolEvent.c in Sources */,
-				35219111224D4B67002A2CA6 /* RegisterProtocolCallback.c in Sources */,
 				35219112224D4B67002A2CA6 /* OcUnicodeLib.c in Sources */,
 				35219113224D4B67002A2CA6 /* OcAsciiLib.c in Sources */,
 				35219114224D4B67002A2CA6 /* OcPng.c in Sources */,
@@ -1045,14 +1013,8 @@
 				3521911D224D4B67002A2CA6 /* Rsa2048Sha256.c in Sources */,
 				3521911E224D4B67002A2CA6 /* Sha256.c in Sources */,
 				3521911F224D4B67002A2CA6 /* Md5.c in Sources */,
-				35219120224D4B67002A2CA6 /* LegacyRegionLock.c in Sources */,
-				35219121224D4B67002A2CA6 /* DebugHelp.c in Sources */,
-				35219122224D4B67002A2CA6 /* LegacyRegionUnLock.c in Sources */,
-				35219123224D4B67002A2CA6 /* ConvertDataToString.c in Sources */,
 				35219124224D4B67002A2CA6 /* NullTextOutput.c in Sources */,
 				35219125224D4B67002A2CA6 /* Base64Decode.c in Sources */,
-				35219126224D4B67002A2CA6 /* LogHexDump.c in Sources */,
-				35219127224D4B67002A2CA6 /* LogBootOrder.c in Sources */,
 				35219128224D4B67002A2CA6 /* DataPatcher.c in Sources */,
 				35219129224D4B67002A2CA6 /* OcTimerLib.c in Sources */,
 				3521912A224D4B67002A2CA6 /* lzss.c in Sources */,
@@ -1061,6 +1023,7 @@
 				3521912D224D4B67002A2CA6 /* SmbiosInternal.c in Sources */,
 				3521912E224D4B67002A2CA6 /* SmbiosPatch.c in Sources */,
 				3521912F224D4B67002A2CA6 /* UbsanPrintf.c in Sources */,
+				35113D9822FDE20100BA1748 /* Math.c in Sources */,
 				35219130224D4B67002A2CA6 /* BitOverflow.c in Sources */,
 				35219131224D4B67002A2CA6 /* TripleOverflow.c in Sources */,
 				35219132224D4B67002A2CA6 /* Ubsan.c in Sources */,

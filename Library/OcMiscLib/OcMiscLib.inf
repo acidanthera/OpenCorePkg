@@ -50,3 +50,4 @@
   ReleaseUsbOwnership.c
   NullTextOutput.c
   UninstallAllProtocolInterfaces.c
+  Math.c
