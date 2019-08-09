@@ -97,7 +97,7 @@ typedef struct {
 
   //
   // The CPU frequency derived from the Always Running Timer (ART) frequency:
-  //   TSC_Value = (ART_Value * CPUID.15H:EBX[31:0]) / CPUID.15H:EAX[31:0] + K
+  //   TSC Freq = (ART Freq * CPUID.15H:EBX[31:0]) / CPUID.15H:EAX[31:0]
   //
   // 0 if ART is not present.
   //

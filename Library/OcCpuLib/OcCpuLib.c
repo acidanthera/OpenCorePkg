@@ -28,6 +28,7 @@
 #include <Library/IoLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/PciLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcTimerLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -106,7 +107,7 @@ DetectAppleMajorType (
         AsciiStrnCmp (BrandInfix, "Gold", L_STR_LEN ("Gold")) == 0 ||
         AsciiStrnCmp (BrandInfix, "Platinum", L_STR_LEN ("Platinum")) == 0) {
       // Treat Xeon Scalable chips as their closest relatives, Xeon W
-      return AppleProcessorMajorXeonW;
+      return AppleProcessorMajorXeonScalable;
     }
 
     //
@@ -458,7 +459,7 @@ DetectAppleProcessorType (
     case CPU_MODEL_SKYLAKE:     // 0x4E
     case CPU_MODEL_SKYLAKE_DT:  // 0x5E
     case CPU_MODEL_SKYLAKE_W:   // 0x55, also SKL-X and SKL-SP
-      if (AppleMajorType == AppleProcessorMajorXeonW) {
+      if (AppleMajorType == AppleProcessorMajorXeonW || AppleMajorType == AppleProcessorMajorXeonScalable) {
         // IMP11 (Xeon W 2140B)
         return AppleProcessorTypeXeonW;       // 0x0F01
       }
@@ -671,9 +672,10 @@ ScanIntelProcessor (
       //
       // Fall back to identifying ART frequency based on model
       //
-      if (Cpu->Family == 0x6 && Cpu->Model == CPU_MODEL_SKYLAKE_W) {
+      if (Cpu->Family == 0x6 && Cpu->Model == CPU_MODEL_SKYLAKE_W &&
+          AppleMajorType == AppleProcessorMajorXeonScalable) {
         //
-        // TODO: Xeon Ws share the same CPUID but I believe they have 24 Mhz ART
+        // Only Xeon Scalable has a 25 Mhz core crystal clock frequency.
         //
         Cpu->ARTFrequency = 25000000ULL; // 25 Mhz
       } else if (Cpu->Family == 0x6 && Cpu->Model == CPU_MODEL_GOLDMONT){
@@ -685,21 +687,21 @@ ScanIntelProcessor (
 
     if (CpuidEax > 0 && CpuidEbx > 0) {
       TscAdjust = AsmReadMsr64 (MSR_IA32_TSC_ADJUST);
-      DEBUG ((DEBUG_INFO, "OCCPU: TSC Adjust %llu\n", TscAdjust ));
+      DEBUG ((DEBUG_INFO, "OCCPU: TSC Adjust %Lu\n", TscAdjust ));
+
       ASSERT (Cpu->ARTFrequency > 0ULL);
-      Cpu->CPUFrequencyFromART = MultU64x32 (Cpu->ARTFrequency, (UINT32) DivU64x32 (CpuidEbx, CpuidEax)) + TscAdjust;
+      Cpu->CPUFrequencyFromART = MultThenDivU64x64x32 (Cpu->ARTFrequency, CpuidEbx, (UINT32) CpuidEax, NULL);
 
       DEBUG ((
         DEBUG_INFO,
-        "OCCPU: %a %a %11llu %5dMHz = %u * %u / %u + %u\n",
+        "OCCPU: %a %a %11,LuHz %5LuMHz = %Lu * %u / %u\n",
         "ART",
         "Frequency",
         Cpu->CPUFrequencyFromART,
         DivU64x32 (Cpu->CPUFrequencyFromART, 1000000),
         Cpu->ARTFrequency,
         CpuidEbx,
-        CpuidEax,
-        TscAdjust
+        CpuidEax
         ));
     }
   }
@@ -979,7 +981,7 @@ OcCpuScanProcessor (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCCPU: %a %a %11lld %5dMHz\n",
+    "OCCPU: %a %a %11,LuHz %5LuMHz\n",
     "TSC",
     "Frequency",
     Cpu->CPUFrequencyFromTSC,
@@ -988,7 +990,7 @@ OcCpuScanProcessor (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCCPU: %a %a %11lld %5dMHz\n",
+    "OCCPU: %a %a %11,LuHz %5LuMHz\n",
     "CPU",
     "Frequency",
     Cpu->CPUFrequency,
@@ -997,7 +999,7 @@ OcCpuScanProcessor (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCCPU: %a %a %11lld %5dMHz\n",
+    "OCCPU: %a %a %11,LuHz %5LuMHz\n",
     "FSB",
     "Frequency",
     Cpu->FSBFrequency,
@@ -1121,7 +1123,7 @@ OcIsSandyOrIvy (
 
   DEBUG ((
     DEBUG_VERBOSE,
-    "OCCPU: Discovered CpuFamily %d CpuModel %d SandyOrIvy %d\n",
+    "OCCPU: Discovered CpuFamily %d CpuModel %d SandyOrIvy %a\n",
     CpuFamily,
     CpuModel,
     SandyOrIvy
