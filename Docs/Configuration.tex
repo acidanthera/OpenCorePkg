@@ -3312,6 +3312,9 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented
   in \texttt{FwRuntimeServices.efi}. The quirk lets default boot entry
   preservation at times when firmwares delete incompatible boot entries.
+  Simply said, you are required to enable this quirk to be able to reliably
+  use \href{https://support.apple.com/HT202796}{Startup Disk} preference
+  pane in a firmware that is not compatible with macOS boot entries by design.
 
 \item
   \texttt{SanitiseClearScreen}\\

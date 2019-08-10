@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Jul  3 23:30:18 2019
-%DIF ADD ../Configuration.tex        Sat Aug 10 23:04:20 2019
+%DIF ADD ../Configuration.tex        Sun Aug 11 01:57:12 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3555,6 +3555,10 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   driver will abide after booter start}\DIFdelend \DIFaddbegin \DIFadd{protocol implemented
   in }\texttt{\DIFadd{FwRuntimeServices.efi}}\DIFaddend . The quirk lets default boot entry
   preservation at times when firmwares delete incompatible boot entries.
+  \DIFaddbegin \DIFadd{Simply said, you are required to enable this quirk to be able to reliably
+  use }\href{https://support.apple.com/HT202796}{Startup Disk} \DIFadd{preference
+  pane in a firmware that is not compatible with macOS boot entries by design.
+}\DIFaddend 
 
 \item
   \texttt{SanitiseClearScreen}\\
