@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jul 16 19:24:07 2019
-%DIF ADD ../Configuration.tex        Wed Aug  7 21:30:05 2019
+%DIF DEL PreviousConfiguration.tex   Wed Jul  3 23:30:18 2019
+%DIF ADD ../Configuration.tex        Sat Aug 10 23:04:20 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -698,14 +698,15 @@ approach could be \href{https://www.sublimetext.com}{Sublime Text} with
 \href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
 Add \texttt{.clang\_complete} file with similar content to your UDK root:
 
-\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash]
+\DIFmodbegin
+\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash,alsolanguage=DIFcode]
 -I/UefiPackages/MdePkg
 -I/UefiPackages/MdePkg/Include
 -I/UefiPackages/MdePkg/Include/X64
 -I/UefiPackages/EfiPkg
 -I/UefiPackages/EfiPkg/Include
 -I/UefiPackages/EfiPkg/Include/X64
--I/UefiPackages/AptioFixPkg/Include
+%DIF < -I/UefiPackages/AptioFixPkg/Include
 -I/UefiPackages/AppleSupportPkg/Include
 -I/UefiPackages/OpenCorePkg/Include
 -I/UefiPackages/OcSupportPkg/Include
@@ -725,6 +726,7 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -Wno-varargs
 -Wno-unused-const-variable
 \end{lstlisting}
+\DIFmodend
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
 files must ensure that their tool checks for \texttt{opencore-version} NVRAM variable
@@ -1091,6 +1093,63 @@ which is no longer maintained. See }\hyperref[troubleshootingtricks]{Tips and Tr
 \DIFadd{section for migration steps.
 }
 
+\DIFadd{If you are using this for the first time on a customised firmware, there is a
+list of checks to do first. Prior to starting please ensure that you have:
+}
+
+\begin{itemize}
+\tightlist
+\item \DIFadd{Most up-to-date UEFI firmware (check your motherboard vendor website).
+}\item \texttt{\DIFadd{Fast Boot}} \DIFadd{and }\texttt{\DIFadd{Hardware Fast Boot}} \DIFadd{disabled in firmware
+  settings if present.
+}\item \texttt{\DIFadd{Above 4G Decoding}} \DIFadd{or similar enabled in firmware
+  settings if present. Note, that on some motherboards (notably ASUS WS-X299-PRO) this
+  option causes adverse effects, and must be disabled. While no other motherboards
+  with the same issue are known, consider this option to be first to check if you
+  have erratic boot failures.
+}\item \texttt{\DIFadd{DisableIoMapper}} \DIFadd{quirk enabled, or }\texttt{\DIFadd{VT-d}} \DIFadd{disabled in
+  firmware settings if present, or ACPI DMAR table dropped.
+}\item \textbf{\DIFadd{No}} \DIFadd{`slide` boot argument present in NVRAM or anywhere else.
+  It is not necessary unless you cannot boot at all or see
+  }\texttt{\DIFadd{No slide values are usable! Use custom slide!}} \DIFadd{message in the log.
+}\item \texttt{\DIFadd{CFG Lock}} \DIFadd{(MSR }\texttt{\DIFadd{0xE2}} \DIFadd{write protection) disabled in
+  firmware settings if present. Cconsider
+}\href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{patching it}
+  \DIFadd{if you have enough skills and no option is available. See
+}\href{https://github.com/acidanthera/AppleSupportPkg#verifymsre2}{VerifyMsrE2}
+  \DIFadd{nots for more details.
+}\item \texttt{\DIFadd{CSM}} \DIFadd{(Compatibility Support Module) disabled in firmware settings
+  if present. You may need to flash GOP ROM on NVIDIA 6xx/AMD 2xx or older. Use
+  }\href{https://www.win-raid.com/t892f16-AMD-and-Nvidia-GOP-update-No-requests-DIY.html#msg15730}{GopUpdate}
+  \DIFadd{or }\href{http://www.insanelymac.com/forum/topic/299614-asus-eah6450-video-bios-uefi-gop-upgrade-and-gop-uefi-binary-in-efi-for-many-ati-cards/page-1#entry2042163}{AMD UEFI GOP MAKER}
+  \DIFadd{in case you are not sure how.
+}\item \texttt{\DIFadd{EHCI/XHCI Hand-off}} \DIFadd{enabled in firmware settings }\texttt{\DIFadd{only}} \DIFadd{if boot
+  stalls unless USB devices are disconnected.
+}\item \texttt{\DIFadd{VT-x}}\DIFadd{, }\texttt{\DIFadd{Hyper Threading}}\DIFadd{, }\texttt{\DIFadd{Execute Disable Bit}} \DIFadd{enabled
+  in firmware settings if present.
+}\item \DIFadd{While it may not be required, sometimes you have to disable
+  }\texttt{\DIFadd{Thunderbolt support}}\DIFadd{, }\texttt{\DIFadd{Intel SGX}}\DIFadd{, and }\texttt{\DIFadd{Intel Platform Trust}}
+  \DIFadd{in firmware settings present.
+}\end{itemize}
+
+\DIFadd{When debugging sleep issues you may want to (temporarily) disable Power Nap and
+automatic power off, which appear to sometimes cause wake to black screen or boot loop
+issues on older platforms. The particular issues may vary, but in general you should
+check ACPI tables first. Here is an example of a bug found in some
+}\href{http://www.insanelymac.com/forum/topic/329624-need-cmos-reset-after-sleep-only-after-login/#entry2534645}{Z68 motherboards}\DIFadd{.
+To turn Power Nap and the others off run the following commands in Terminal:
+}\DIFmodbegin
+\begin{lstlisting}[label=powernap, style=ocbash,alsolanguage=DIFcode]
+%DIF > sudo pmset autopoweroff 0
+%DIF > sudo pmset powernap 0
+%DIF > sudo pmset standby 0
+\end{lstlisting}
+\DIFmodend
+
+\emph{\DIFadd{Note}}\DIFadd{: these settings may reset at hardware change and in certain other circumstances.
+To view their current state use }\texttt{\DIFadd{pmset -g}} \DIFadd{command in Terminal.
+}
+
 \subsection{\DIFadd{Properties}}\label{booterprops}
 
 \begin{enumerate}
@@ -1276,7 +1335,8 @@ which is no longer maintained. See }\hyperref[troubleshootingtricks]{Tips and Tr
 }
 
   \emph{\DIFadd{Note}}\DIFadd{: The necessity of this quirk is determined by early boot failures.
-  Do not use this unless you fully understand the consequences.
+  It is rare to need this quirk on Haswell or newer. Do not use unless you fully
+  understand the consequences.
 }
 
 \end{enumerate}
@@ -1446,7 +1506,7 @@ blocking.
   \texttt{MatchKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Blocks kernel driver on selected macOS version only.
+  \textbf{Description}: \DIFdelbegin \DIFdel{Blocks }\DIFdelend \DIFaddbegin \DIFadd{Adds }\DIFaddend kernel driver on selected macOS version only.
   The selection happens based on prefix match with the kernel version, i.e.
   \texttt{16.7.0} will match macOS 10.12.6 and \texttt{16.} will match
   any macOS 10.12.x version.
@@ -1744,13 +1804,38 @@ behaviour that does not go to any other sections
   \hyperref[miscbootprops]{Boot Properties} section below.
 
 \item
-  \texttt{Debug}\\
+  \DIFaddbegin \texttt{\DIFadd{BlessOverride}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ array}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Add custom scanning paths through bless model.
+}
+
+  \DIFadd{Designed to be filled with }\texttt{\DIFadd{plist\ string}} \DIFadd{entries containing
+  absolute UEFI paths to customised bootloaders, for example,
+  }\texttt{\DIFadd{\textbackslash EFI\textbackslash Microsoft\textbackslash bootmgfw.efi}}
+  \DIFadd{for Microsoft bootloader. This allows unusual boot paths to be automaticlly
+  discovered by the boot picker. Designwise they are equivalent to predefined blessed path, such as
+  }\texttt{\DIFadd{\textbackslash System\textbackslash Library\textbackslash CoreServices\textbackslash boot.efi}}\DIFadd{,
+  but unlike predefined bless paths they have highest priority.
+}
+
+\item
+  \DIFaddend \texttt{Debug}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Apply debug configuration described in
   \hyperref[miscdebugprops]{Debug Properties} section below.
 
 \item
-  \texttt{Security}\\
+  \DIFaddbegin \texttt{\DIFadd{Entries}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ array}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Add boot entries to boot picker.
+}
+
+  \DIFadd{Designed to be filled with }\texttt{\DIFadd{plist\ dict}} \DIFadd{values, describing each load entry.
+  See }\hyperref[miscentryprops]{Entry Properties} \DIFadd{section below.
+}
+
+\item
+  \DIFaddend \texttt{Security}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Apply security configuration described in
   \hyperref[miscsecurityprops]{Security Properties} section below.
@@ -1758,10 +1843,11 @@ behaviour that does not go to any other sections
 \item
   \texttt{Tools}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Description}: Add new entries to boot picker.
+  \textbf{Description}: Add \DIFdelbegin \DIFdel{new }\DIFdelend \DIFaddbegin \DIFadd{tool }\DIFaddend entries to boot picker.
 
-  Designed to be filled with \texttt{plist\ dict} values, describing each block entry.
-  See \hyperref[misctoolprops]{Tools Properties} section below.
+  Designed to be filled with \texttt{plist\ dict} values, describing each \DIFdelbegin \DIFdel{block }\DIFdelend \DIFaddbegin \DIFadd{load }\DIFaddend entry.
+  See \DIFdelbegin %DIFDELCMD < \hyperref[misctoolprops]{Tools Properties} %%%
+\DIFdelend \DIFaddbegin \hyperref[miscentryprops]{Entry Properties} \DIFaddend section below.
 
   \emph{Note}: Select tools, for example,
   \DIFdelbegin \DIFdel{UEFI Shell or
@@ -1871,7 +1957,7 @@ behaviour that does not go to any other sections
 
   \begin{itemize}
   \tightlist
-  \item Set to \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) \texttt{WxH}
+  \item Set to \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) \DIFaddbegin \DIFadd{or }\DIFaddend \texttt{WxH}
   (e.g. \texttt{1920x1080}) formatted string to request custom resolution
   from GOP if available.
   \item Set to empty string not to change screen resolution.
@@ -2207,7 +2293,10 @@ rm vault.pub
 
 \end{enumerate}
 
-\subsection{Tools Properties}\label{misctoolprops}
+\subsection{\DIFdelbegin \DIFdel{Tools }\DIFdelend \DIFaddbegin \DIFadd{Entry }\DIFaddend Properties}\DIFdelbegin %DIFDELCMD < \label{misctoolprops}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \label{miscentryprops}
+\DIFaddend 
 
 \begin{enumerate}
 \item
@@ -2222,21 +2311,32 @@ rm vault.pub
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: This tool will not be listed unless set to
+  \textbf{Description}: This \DIFdelbegin \DIFdel{tool }\DIFdelend \DIFaddbegin \DIFadd{entry }\DIFaddend will not be listed unless set to
   \texttt{true}.
 
 \item
   \texttt{Name}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Human readable tool name displayed in boot picker.
+  \textbf{Description}: Human readable \DIFdelbegin \DIFdel{tool }\DIFdelend \DIFaddbegin \DIFadd{entry }\DIFaddend name displayed in boot picker.
 
 \item
   \texttt{Path}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: File path to select UEFI tool relative to \texttt{OC/Tools}
-  directory.
+  \textbf{Description}: \DIFdelbegin \DIFdel{File path to select UEFI tool }\DIFdelend \DIFaddbegin \DIFadd{Entry location depending on entry type.
+}
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{Entries}} \DIFadd{specify external boot options, and therefore take device
+  paths in }\texttt{\DIFadd{Path}} \DIFadd{key. These values are not checked, thus be extremely careful.
+  Example: }\texttt{\DIFadd{PciRoot(0x0)/Pci(0x1,0x1)/.../\textbackslash EFI\textbackslash COOL.EFI}}
+  \item \texttt{\DIFadd{Tools}} \DIFadd{specify internal boot options, which are part of bootloader
+  vault, and therefore take file paths }\DIFaddend relative to \texttt{OC/Tools} directory.
+  \DIFaddbegin \DIFadd{Example: }\texttt{\DIFadd{CleanNvram.efi}}\DIFadd{.
+  }\end{itemize}
+\DIFaddend 
 
 \end{enumerate}
 
@@ -2468,22 +2568,33 @@ troubleshooting:
   \item \texttt{acpi\_level=0xFFFF5F} (implies
     \href{https://github.com/acpica/acpica/blob/master/source/include/acoutput.h}
     {\texttt{ACPI\_ALL\_COMPONENTS}})
-  \item \texttt{cpus=VALUE}
-  \item \texttt{debug=VALUE}
-  \item \texttt{io=VALUE}
-  \item \texttt{keepsyms=1}
-  \item \texttt{kextlog=VALUE}
-  \item \texttt{nvda\_drv=1}
-  \item \texttt{lapic\_dont\_panic=1}
-  \item \texttt{slide=VALUE}
-  \item \texttt{-nehalem\_error\_disable}
-  \item \texttt{-no\_compat\_check}
-  \item \texttt{-s}
-  \item \texttt{-v}
-  \item \texttt{-x}
-  \end{itemize}
+  \item \DIFaddbegin \texttt{\DIFadd{batman=VALUE}} \DIFadd{(}\texttt{\DIFadd{AppleSmartBatteryManager}} \DIFadd{debug mask)
+  }\item \texttt{\DIFadd{batman-nosmc=1}} \DIFadd{(disable }\texttt{\DIFadd{AppleSmartBatteryManager}} \DIFadd{SMC interface)
+  }\item \DIFaddend \texttt{cpus=VALUE} \DIFaddbegin \DIFadd{(maximum number of CPUs used)
+  }\DIFaddend \item \texttt{debug=VALUE} \DIFaddbegin \DIFadd{(debug mask)
+  }\DIFaddend \item \texttt{io=VALUE} \DIFaddbegin \DIFadd{(}\texttt{\DIFadd{IOKit}} \DIFadd{debug mask)
+  }\DIFaddend \item \texttt{keepsyms=1} \DIFaddbegin \DIFadd{(show panic log debug symbols)
+  }\DIFaddend \item \texttt{kextlog=VALUE} \DIFaddbegin \DIFadd{(kernel extension loading debug mask)
+  }\DIFaddend \item \DIFaddbegin \texttt{\DIFadd{nv\_disable=1}} \DIFadd{(disables NVIDIA GPU acceleration)
+  }\item \DIFaddend \texttt{nvda\_drv=1} \DIFaddbegin \DIFadd{(legacy way to enable NVIDIA web driver, removed in 10.12)
+  }\DIFaddend \item \DIFaddbegin \texttt{\DIFadd{npci=0x2000}} \DIFadd{(}\href{https://www.insanelymac.com/forum/topic/260539-1068-officially-released/?do=findComment&comment=1707972}{legacy}\DIFadd{, disables }\texttt{\DIFadd{kIOPCIConfiguratorPFM64}}\DIFadd{)
+  }\item \DIFaddend \texttt{lapic\_dont\_panic=1}
+  \item \texttt{slide=VALUE} \DIFaddbegin \DIFadd{(manually set KASLR slide)
+  }\DIFaddend \item \DIFaddbegin \texttt{\DIFadd{smcdebug=VALUE}} \DIFadd{(}\texttt{\DIFadd{AppleSMC}} \DIFadd{debug mask)
+  }\item \texttt{\DIFadd{-amd\_no\_dgpu\_accel}} \DIFadd{(alternative to }\href{https://github.com/acidanthera/WhateverGreen}{WhateverGreen}\DIFadd{'s }\texttt{\DIFadd{-radvesa}} \DIFadd{for new GPUs)
+  }\item \DIFaddend \texttt{-nehalem\_error\_disable}
+  \item \texttt{-no\_compat\_check} \DIFaddbegin \DIFadd{(disable model checking)
+  }\DIFaddend \item \texttt{-s} \DIFaddbegin \DIFadd{(single mode)
+  }\DIFaddend \item \texttt{-v} \DIFaddbegin \DIFadd{(verbose mode)
+  }\DIFaddend \item \texttt{-x} \DIFaddbegin \DIFadd{(safe mode)
+  }\DIFaddend \end{itemize}
 
-\item
+  \DIFaddbegin \DIFadd{There are multiple external places summarising macOS argument lists:
+  }\href{https://osxeon.wordpress.com/2015/08/10/boot-argument-options-in-os-x}{example 1}\DIFadd{,
+  }\href{https://superuser.com/questions/255176/is-there-a-list-of-available-boot-args-for-darwin-os-x}{example 2}\DIFadd{.
+}
+
+\DIFaddend \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg}
   \break
   Booter arguments, similar to \texttt{boot-args} but for boot.efi. Accepts a set of
@@ -3219,34 +3330,43 @@ and supplementary utilities can be used.
   \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/AptioFixPkg}{\texttt{AptioMemoryFix}}
 %DIFDELCMD <   %%%
 \DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{FwRuntimeServices}}
-  \DIFaddend --- \DIFdelbegin \DIFdel{a set of quirks for various firmwares.
-  While it primarily targets APTIO
-  firmwares, other firmwares may be compatible as well.Among the
-  resolved issues
+  \DIFaddend --- \DIFdelbegin \DIFdel{a set of quirks for various firmwares. While it primarily targets APTIO
+  firmwares, other firmwares may be compatible as well. Among the resolved issues
   are hibernation support, KASLR, Lilu NVRAM security enhancements, NVRAM, and UEFI
-  Boot entry preservation}\DIFdelend \DIFaddbegin \texttt{\DIFadd{OC\_FIRMWARE\_RUNTIME}} \DIFadd{protocol implementation that increases the security
+  Boot entry preservation.
+  }\DIFdelend \DIFaddbegin \texttt{\DIFadd{OC\_FIRMWARE\_RUNTIME}} \DIFadd{protocol implementation that increases the security
   of OpenCore and Lilu by supporting read-only and write-only NVRAM variables. Some
   quirks, like }\texttt{\DIFadd{RequestBootVarRouting}}\DIFadd{, require this driver for proper function.
   Due to the nature of being a runtime driver, i.e. functioning in parallel with the
-  target operating system, it cannot be implemented within OpenCore itself}\DIFaddend .
-  \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{EmuVariableRuntimeDxe}}
-  --- NVRAM emulation driver from \texttt{MdeModulePkg}. NVRAM is supported by most
+  target operating system, it cannot be implemented within OpenCore itself.
+  }\DIFaddend \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{EmuVariableRuntimeDxe}}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/audk}{\texttt{EnglishDxe}}
+  \DIFaddend --- \DIFdelbegin \DIFdel{NVRAM emulation driverfrom }\texttt{\DIFdel{MdeModulePkg}}%DIFAUXCMD
+\DIFdel{.NVRAM is supported by most
   modern firmwares. For firmwares with macOS incompatible NVRAM implementation an
-  emulated driver may be used. This driver will not preserve NVRAM contents across the
+  emulated driver may be used.
+  This driver will not preserve NVRAM contents across the
   reboots.
-  \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{EnglishDxe}}
-  --- Unicode collation driver from \texttt{MdeModulePkg}. This driver is a lightweight
+  }%DIFDELCMD < \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{EnglishDxe}}
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdel{--- }\DIFdelend Unicode collation driver from \texttt{MdeModulePkg}. This driver is a lightweight
   alternative to \texttt{AppleUiSupport}, which contains no Apple-specific code, and
   only provides unicode collation support. The driver is not recommended for use
   on any hardware but few original Macs.
-  \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{EnhancedFatDxe}}
-  --- FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
+  \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{EnhancedFatDxe}}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
+  \DIFaddend --- FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
   UEFI firmwares, and cannot be used from OpenCore. It is known that multiple firmwares
   have a bug in their FAT support implementation, which leads to corrupted filesystems
   on write attempt.  Embedding this driver within the firmware may be required in case
   writing to EFI partition is needed during the boot process.
-  \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{NvmExpressDxe}}
-  --- NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
+  \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{NvmExpressDxe}}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}
+  \DIFaddend --- NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
   firmwares starting with Broadwell generation. For Haswell and earlier embedding it
   within the firmware may be more favourable in case a NVMe SSD drive is installed.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{UsbKbDxe}}
@@ -3264,22 +3384,27 @@ and supplementary utilities can be used.
   a closed source \texttt{HFSPlus} driver commonly found in Apple firmwares. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
   a security audit.
-  \item \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{XhciDxe}}
-  --- XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
+  \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/tianocore/edk2/tree/UDK2018}{\texttt{XhciDxe}}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}}
+  \DIFaddend --- XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
   included in most firmwares starting with Sandy Bridge generation. For earlier firmwares
   or legacy systems it may be used to support external USB 3.0 PCI cards.
   \end{itemize}
 
-  To compile the drivers from TianoCore UDK use the same command you do normally use
+  To compile the drivers from \DIFdelbegin \DIFdel{TianoCore UDK }\DIFdelend \DIFaddbegin \DIFadd{UDK (EDK II) }\DIFaddend use the same command you do normally use
   for OpenCore compilation, but choose a corresponding package:
-\begin{lstlisting}[label=compileudk, style=ocbash]
-git clone https://github.com/tianocore/edk2 -b UDK2018 UDK
+\DIFmodbegin
+\begin{lstlisting}[label=compileudk, style=ocbash,alsolanguage=DIFcode]
+%DIF < git clone https://github.com/tianocore/edk2 -b UDK2018 UDK
+%DIF > git clone https://github.com/acidanthera/audk UDK
 cd UDK
 source edksetup.sh
 make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p FatPkg/FatPkg.dsc
 build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \end{lstlisting}
+\DIFmodend
 
 \item
   \texttt{Protocols}\\
@@ -3351,8 +3476,11 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 }
 
   \DIFadd{This is a workaround for select board firmwares, namely GA-Z77P-D3 (rev. 1.1), failing
-  to properly access higher memory in UEFI Boot Services. Not recommended unless required
-  for booting. May cause recovery boot failures on unaffected boards.
+  to properly access higher memory in UEFI Boot Services. On these boards this quirk is
+  required for booting entries that need to allocate large memory chunks, such as macOS DMG
+  recovery entries. On unaffected boards it may cause boot failures, and thus strongly not
+  recommended. For known issues refer to
+  }\href{https://github.com/acidanthera/bugtracker/issues/449}{\texttt{acidanthera/bugtracker\#449}}\DIFadd{.
 }
 
 \item
@@ -3456,8 +3584,11 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 
   \begin{itemize}
   \item MBR (Master Boot Record) installations are legacy and will not be supported.
-  \item Installing Windows and macOS on the same drive is currently unsupported but
-  will be addressed later.
+  \item \DIFdelbegin \DIFdel{Installing Windowsand macOS}\DIFdelend \DIFaddbegin \DIFadd{To install Windows, macOS, and OpenCore }\DIFaddend on the same drive \DIFdelbegin \DIFdel{is currently unsupported but
+  will be addressed later}\DIFdelend \DIFaddbegin \DIFadd{you can specify
+  Windows bootloader path
+  (}\texttt{\DIFadd{\textbackslash EFI\textbackslash Microsoft\textbackslash bootmgfw.efi}}\DIFadd{)
+  in }\texttt{\DIFadd{BlessOverride}} \DIFadd{section}\DIFaddend .
   \item All the modifications applied (to ACPI, NVRAM, SMBIOS, etc.) are supposed
   to be operating system agnostic, i.e. apply equally regardless of the OS booted.
   This enables Boot Camp software experience on Windows.
@@ -3661,8 +3792,8 @@ you will need }\texttt{\DIFadd{debug=0x8}} \DIFadd{boot argument.
   Sure, most relatively modern Mac models including \texttt{MacPro5,1} and virtual machines
   are fully supported. Even though there are little to none specific details relevant to
   Mac hardware, some ongoing instructions can be found in
-  \href{https://github.com/acidanthera/bugtracker/issues/377}{acidanthera/bugtracker\#377}\DIFaddbegin \DIFadd{.
-}
+  \href{https://github.com/acidanthera/bugtracker/issues/377}{acidanthera/bugtracker\#377}.
+\DIFaddbegin 
 
 \item
   \textbf{\DIFadd{Why do Find\&Replace patches must equal in length?}}
@@ -3671,7 +3802,30 @@ you will need }\texttt{\DIFadd{debug=0x8}} \DIFadd{boot argument.
   }\href{https://en.wikipedia.org/w/index.php?title=Relative_addressing}{relative addressing}\DIFadd{.
   For ACPI code this is risky, and is technically equivalent to ACPI table replacement,
   thus not implemented. More detailed explanation can be found on
-  }\href{https://applelife.ru/posts/819790}{AppleLife.ru}\DIFaddend .
+  }\href{https://applelife.ru/posts/819790}{AppleLife.ru}\DIFadd{.
+}
+
+\item
+  \textbf{\DIFadd{How can I migrate from }\texttt{\DIFadd{AptioMemoryFix}}\DIFadd{?}}
+
+  \DIFadd{Behaviour similar to that of }\texttt{\DIFadd{AptioMemoryFix}} \DIFadd{can be obtained by
+  installing }\texttt{\DIFadd{FwRuntimeServices}} \DIFadd{driver and enabling the quirks listed below.
+  Please note, that most of these are not necessary to be enabled. Refer to their
+  individual descriptions in this document for more details.
+  }\begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{ProvideConsoleGop}} \DIFadd{(UEFI quirk)
+  }\item \texttt{\DIFadd{AvoidRuntimeDefrag}}
+  \item \texttt{\DIFadd{DiscardHibernateMap}}
+  \item \texttt{\DIFadd{EnableSafeModeSlide}}
+  \item \texttt{\DIFadd{EnableWriteUnprotector}}
+  \item \texttt{\DIFadd{ForceExitBootServices}}
+  \item \texttt{\DIFadd{ProtectCsmRegion}}
+  \item \texttt{\DIFadd{ProvideCustomSlide}}
+  \item \texttt{\DIFadd{SetupVirtualMap}}
+  \item \texttt{\DIFadd{ShrinkMemoryMap}}
+  \end{itemize}
+\DIFaddend 
 
 \end{enumerate}
 

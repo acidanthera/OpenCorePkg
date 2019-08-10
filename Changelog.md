@@ -16,6 +16,7 @@ OpenCore Changelog
 - Significantly improved boot stability on APTIO
 - Added support for Windows & OpenCore on the same drive through `BlessOverride`
 - Added advanced user-specified boot entries through `Misc` -> `Entries`
+- Added `DisableVariableWrite` quirk to disable hardware NVRAM write in macOS
 
 #### v0.0.3
 - Added complete modern platform database (2012+)
