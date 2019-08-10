@@ -23,11 +23,11 @@
  **/
 UINT64
 MultThenDivU64x64x32 (
-                      IN      UINT64                    Multiplicand,
-                      IN      UINT64                    Multiplier,
-                      IN      UINT32                    Divisor,
-                      OUT     UINT32                    *Remainder  OPTIONAL
-                      )
+  IN  UINT64  Multiplicand,
+  IN  UINT64  Multiplier,
+  IN  UINT32  Divisor,
+  OUT UINT32  *Remainder  OPTIONAL
+  )
 {
   UINT64                            Uint64;
   UINT32                            LocalRemainder;
