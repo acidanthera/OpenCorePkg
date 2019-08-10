@@ -687,10 +687,10 @@ ScanIntelProcessor (
 
     if (CpuidEax > 0 && CpuidEbx > 0) {
       TscAdjust = AsmReadMsr64 (MSR_IA32_TSC_ADJUST);
-      DEBUG ((DEBUG_INFO, "OCCPU: TSC Adjust %Lu\n", TscAdjust ));
+      DEBUG ((DEBUG_INFO, "OCCPU: TSC Adjust %Lu\n", TscAdjust));
 
       ASSERT (Cpu->ARTFrequency > 0ULL);
-      Cpu->CPUFrequencyFromART = MultThenDivU64x64x32 (Cpu->ARTFrequency, CpuidEbx, (UINT32) CpuidEax, NULL);
+      Cpu->CPUFrequencyFromART = MultThenDivU64x64x32 (Cpu->ARTFrequency, CpuidEbx, CpuidEax, NULL);
 
       DEBUG ((
         DEBUG_INFO,
@@ -1126,7 +1126,7 @@ OcIsSandyOrIvy (
     "OCCPU: Discovered CpuFamily %d CpuModel %d SandyOrIvy %a\n",
     CpuFamily,
     CpuModel,
-    SandyOrIvy
+    SandyOrIvy ? "YES" : "NO"
     ));
 
   return SandyOrIvy;
