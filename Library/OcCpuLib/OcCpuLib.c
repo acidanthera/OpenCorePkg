@@ -43,10 +43,15 @@
 STATIC
 UINT8
 DetectAppleMajorType (
-  CONST CHAR8  *BrandString
+  IN  CONST CHAR8  *BrandString,
+  OUT BOOLEAN      *IsXeonScalable  OPTIONAL
   )
 {
   CONST CHAR8  *BrandInfix;
+
+  if (IsXeonScalable) {
+    *IsXeonScalable = FALSE;
+  }
 
   BrandInfix = AsciiStrStr (BrandString, "Core");
   if (BrandInfix != NULL) {
@@ -101,13 +106,16 @@ DetectAppleMajorType (
       ++BrandInfix;
     }
 
+    //
     // Support Xeon Scalable chips: Xeon(R) Gold 6136 CPU
+    //
     if (AsciiStrnCmp (BrandInfix, "Bronze", L_STR_LEN ("Bronze")) == 0 ||
         AsciiStrnCmp (BrandInfix, "Silver", L_STR_LEN ("Silver")) == 0 ||
         AsciiStrnCmp (BrandInfix, "Gold", L_STR_LEN ("Gold")) == 0 ||
         AsciiStrnCmp (BrandInfix, "Platinum", L_STR_LEN ("Platinum")) == 0) {
       // Treat Xeon Scalable chips as their closest relatives, Xeon W
-      return AppleProcessorMajorXeonScalable;
+      *IsXeonScalable = TRUE;
+      return AppleProcessorMajorXeonW;
     }
 
     //
@@ -453,13 +461,13 @@ DetectAppleProcessorType (
     // Not used by Apple:
     //   Core i3,
     //   all high-end models (Core i9, i7 Extreme): see https://en.wikipedia.org/wiki/Skylake_(microarchitecture)#High-end_desktop_processors
-    //   Xeon E3 v5,
+    //   Xeon E3 v5, Xeon Scalable
     //   Pentium, Celeron
     //
     case CPU_MODEL_SKYLAKE:     // 0x4E
     case CPU_MODEL_SKYLAKE_DT:  // 0x5E
     case CPU_MODEL_SKYLAKE_W:   // 0x55, also SKL-X and SKL-SP
-      if (AppleMajorType == AppleProcessorMajorXeonW || AppleMajorType == AppleProcessorMajorXeonScalable) {
+      if (AppleMajorType == AppleProcessorMajorXeonW) {
         // IMP11 (Xeon W 2140B)
         return AppleProcessorTypeXeonW;       // 0x0F01
       }
@@ -600,8 +608,9 @@ ScanIntelProcessor (
   MSR_NEHALEM_PLATFORM_INFO_REGISTER                PlatformInfo;
   MSR_NEHALEM_TURBO_RATIO_LIMIT_REGISTER            TurboLimit;
   UINT16                                            CoreCount;
+  BOOLEAN                                           IsXeonScalable;
 
-  AppleMajorType = DetectAppleMajorType (Cpu->BrandString);
+  AppleMajorType = DetectAppleMajorType (Cpu->BrandString, &IsXeonScalable);
   Cpu->AppleProcessorType = DetectAppleProcessorType (Cpu->Model, Cpu->Stepping, AppleMajorType);
 
   DEBUG ((DEBUG_INFO, "OCCPU: Detected Apple Processor Type: %02X -> %04X\n", AppleMajorType, Cpu->AppleProcessorType));
@@ -672,8 +681,7 @@ ScanIntelProcessor (
       //
       // Fall back to identifying ART frequency based on model
       //
-      if (Cpu->Family == 0x6 && Cpu->Model == CPU_MODEL_SKYLAKE_W &&
-          AppleMajorType == AppleProcessorMajorXeonScalable) {
+      if (Cpu->Family == 0x6 && Cpu->Model == CPU_MODEL_SKYLAKE_W && IsXeonScalable) {
         //
         // Only Xeon Scalable has a 25 Mhz core crystal clock frequency.
         //
