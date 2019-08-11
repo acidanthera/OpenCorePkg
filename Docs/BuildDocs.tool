@@ -15,12 +15,16 @@ if [ "$(which pdflatex)" = "" ]; then
   abort "pdflatex is missing, check your TeX Live installation"
 fi
 
+rm -f *.aux *.log *.out *.pdf *.toc
+
 pdflatex Configuration.tex || \
   abort "Unable to create configuration pdf"
 pdflatex Configuration.tex || \
   abort "Unable to create configuration pdf with TOC"
 
 cd Differences || abort "Unable to process annotations"
+
+rm -f *.aux *.log *.out *.pdf *.toc
 
 latexdiff -s ONLYCHANGEDPAGE PreviousConfiguration.tex ../Configuration.tex \
   > Differences.tex || \

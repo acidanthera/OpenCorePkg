@@ -1,6 +1,8 @@
 OpenCore Changelog
 ==================
 
+#### v0.5.0
+
 #### v0.0.4
 - Fixed kext injection issues with dummy dependencies
 - Fixed kext injection issues with reused vtables
