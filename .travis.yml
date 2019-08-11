@@ -7,6 +7,8 @@ env:
 matrix:
   include:
   - os: osx
+    name: "Build"
+    osx_image: xcode10.2
     compiler: clang
 
     script:
@@ -25,6 +27,8 @@ matrix:
         secure: BCsj6FO40+02MPylXhIrUqS0KmwoUsd3y+iS5mwcBo16dqTbgF/emsApptKKgLCrb83sgmedkdEI1tkMTw7kAP8341E4Xmo0DVRQcJ/zDMXMtutmN5f0j1sMsiHhZ6wnaFhVIOvysSiuIal5vRX04rG/2UPnrM2CIv3s1jQPMhuMJGWPGOg76UoFQVo+1Mx7AtDTLJoJhymtIldbrH30h77HDdJbyCT+VPBtFmNbBJvTwVTyyVOuKkUX5JI0P1qNayEY6aFURLvOR6ZR7CSqIFXOiQmWEbFulxGp3Ss+HD+Ule94DXEeuK7xF1NKYHubUBF8BDk3eJcSfbA0vFvE6SbB1OJHItVnXliLb/pR3TlJiY11+XtT3N2YFHTEFOVSUxplyQpmXZDwhiIgn7sZRZQGL6Eqs4CtjKj8Lu/EJEFRIbJZCdlVkznFebSwMjvRaK9Anj1vW5gFs+Wsw5lUZOJPYI8jiHdzGszsDFpOex2PVixwLfVscM7fa5Sgsk4FgV0EzGpzmbcH9jc7AurbyRUgCSnDxhOuH/m4TJLdS8xL3XS+MiB8wZ4bTStqjMWK6fKy13IrmLChJUVPBYoyyqgOjHjtOBYYEcChpDbUqiLh6UCpFyZmkiph8uElgolgGuDZkEIGwcuquap2Ih4q9x1CX5eMri/ukzAqaHz506o=
 
   - os: osx
+    name: "Analyze Coverity"
+    osx_image: xcode10.2
     compiler: clang
     
     before_install:
