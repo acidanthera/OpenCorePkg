@@ -702,7 +702,7 @@ ScanIntelProcessor (
 
       DEBUG ((
         DEBUG_INFO,
-        "OCCPU: %a %a %11,LuHz %5LuMHz = %Lu * %u / %u\n",
+        "OCCPU: %a %a %11LuHz %5LuMHz = %Lu * %u / %u\n",
         "ART",
         "Frequency",
         Cpu->CPUFrequencyFromART,
@@ -989,7 +989,7 @@ OcCpuScanProcessor (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCCPU: %a %a %11,LuHz %5LuMHz\n",
+    "OCCPU: %a %a %11LuHz %5LuMHz\n",
     "TSC",
     "Frequency",
     Cpu->CPUFrequencyFromTSC,
@@ -998,7 +998,7 @@ OcCpuScanProcessor (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCCPU: %a %a %11,LuHz %5LuMHz\n",
+    "OCCPU: %a %a %11LuHz %5LuMHz\n",
     "CPU",
     "Frequency",
     Cpu->CPUFrequency,
@@ -1007,7 +1007,7 @@ OcCpuScanProcessor (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCCPU: %a %a %11,LuHz %5LuMHz\n",
+    "OCCPU: %a %a %11LuHz %5LuMHz\n",
     "FSB",
     "Frequency",
     Cpu->FSBFrequency,
