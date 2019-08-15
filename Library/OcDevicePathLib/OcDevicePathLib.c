@@ -736,7 +736,7 @@ OcFileDevicePathFullName (
 
   ASSERT (PathName != NULL);
   ASSERT (FilePath != NULL);
-  ASSERT (IsDevicePathValid (FilePath, 0));
+  ASSERT (IsDevicePathValid (&FilePath->Header, 0));
   ASSERT (PathNameSize == OcFileDevicePathFullNameSize (&FilePath->Header));
 
   do {
@@ -748,7 +748,7 @@ OcFileDevicePathFullName (
       );
     PathName += PathLen;
 
-    FilePath = NextDevicePathNode (FilePath);
+    FilePath = (CONST FILEPATH_DEVICE_PATH *)NextDevicePathNode (FilePath);
   } while (!IsDevicePathEnd (FilePath));
   *PathName = CHAR_NULL;
 }

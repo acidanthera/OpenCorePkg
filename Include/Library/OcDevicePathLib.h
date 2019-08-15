@@ -173,9 +173,9 @@ OcFileDevicePathFullNameSize (
 **/
 VOID
 OcFileDevicePathFullName (
-  OUT CHAR16                          *PathName,
-  IN  CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
-  IN  UINTN                           PathNameSize
+  OUT CHAR16                      *PathName,
+  IN  CONST FILEPATH_DEVICE_PATH  *FilePath,
+  IN  UINTN                       PathNameSize
   );
 
 /**
