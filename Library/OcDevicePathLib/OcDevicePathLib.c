@@ -695,12 +695,12 @@ OcFileDevicePathFullNameSize (
   ASSERT (DevicePath != NULL);
   ASSERT (IsDevicePathValid (DevicePath, 0));
 
-  if (IsDevicePathEnd (DevicePath)) {
-    return 0;
-  }
-
   PathSize = 1;
   do {
+    //
+    // On the first iteration, this ensures the path is not immediately
+    // terminated.
+    //
     if (DevicePath->Type    != MEDIA_DEVICE_PATH
      || DevicePath->SubType != MEDIA_FILEPATH_DP) {
       return 0;
