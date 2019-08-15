@@ -674,6 +674,85 @@ OcFileDevicePathNameLen (
   return Len;
 }
 
+/**
+  Retrieve the size of the full file path described by DevicePath.
+
+  @param[in] DevicePath  The Device Path to inspect.
+
+  @returns   The size of the full file path.
+  @retval 0  DevicePath does not start with a File Path node or contains
+             non-terminating nodes that are not File Path nodes.
+
+**/
+UINTN
+OcFileDevicePathFullNameSize (
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+  UINTN                      PathSize;
+  CONST FILEPATH_DEVICE_PATH *FilePath;
+
+  ASSERT (DevicePath != NULL);
+  ASSERT (IsDevicePathValid (DevicePath, 0));
+
+  if (IsDevicePathEnd (DevicePath)) {
+    return 0;
+  }
+
+  PathSize = 1;
+  do {
+    if (DevicePath->Type    != MEDIA_DEVICE_PATH
+     || DevicePath->SubType != MEDIA_FILEPATH_DP) {
+      return 0;
+    }
+
+    FilePath  = (FILEPATH_DEVICE_PATH *)DevicePath;
+    PathSize += OcFileDevicePathNameLen (FilePath);
+
+    DevicePath = NextDevicePathNode (DevicePath);
+  } while (!IsDevicePathEnd (DevicePath));
+  return PathSize * sizeof (*FilePath->PathName);
+}
+
+/**
+  Retrieve the full file path described by FilePath.
+  The caller is expected to call OcFileDevicePathFullNameSize() or ensure its
+  guarantees are met.
+
+  @param[out] PathName      On output, the full file path of FilePath.
+  @param[in]  FilePath      The File Device Path to inspect.
+  @param[in]  PathNameSize  The size, in bytes, of PathnName.  Must equal the
+                            actual fill file path size.
+
+**/
+VOID
+OcFileDevicePathFullName (
+  OUT CHAR16                      *PathName,
+  IN  CONST FILEPATH_DEVICE_PATH  *FilePath,
+  IN  UINTN                       PathNameSize
+  )
+{
+  UINTN                          PathLen;
+
+  ASSERT (PathName != NULL);
+  ASSERT (FilePath != NULL);
+  ASSERT (IsDevicePathValid (FilePath, 0));
+  ASSERT (PathNameSize == OcFileDevicePathFullNameSize (&FilePath->Header));
+
+  do {
+    PathLen = OcFileDevicePathNameLen (FilePath);
+    CopyMem (
+      PathName,
+      FilePath->PathName,
+      PathLen * sizeof (*FilePath->PathName)
+      );
+    PathName += PathLen;
+
+    FilePath = NextDevicePathNode (FilePath);
+  } while (!IsDevicePathEnd (FilePath));
+  *PathName = CHAR_NULL;
+}
+
 EFI_DEVICE_PATH_PROTOCOL *
 OcAppendDevicePathInstanceDedupe (
   IN EFI_DEVICE_PATH_PROTOCOL        *DevicePath OPTIONAL,

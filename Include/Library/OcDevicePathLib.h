@@ -146,6 +146,39 @@ OcFileDevicePathNameLen (
   );
 
 /**
+  Retrieve the size of the full file path described by DevicePath.
+
+  @param[in] DevicePath  The Device Path to inspect.
+
+  @returns   The size of the full file path.
+  @retval 0  DevicePath does not start with a File Path node or contains
+             non-terminating nodes that are not File Path nodes.
+
+**/
+UINTN
+OcFileDevicePathFullNameSize (
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  );
+
+/**
+  Retrieve the full file path described by FilePath.
+  The caller is expected to call OcFileDevicePathFullNameSize() or ensure its
+  guarantees are met.
+
+  @param[out] PathName      On output, the full file path of FilePath.
+  @param[in]  FilePath      The File Device Path to inspect.
+  @param[in]  PathNameSize  The size, in bytes, of PathnName.  Must equal the
+                            actual fill file path size.
+
+**/
+VOID
+OcFileDevicePathFullName (
+  OUT CHAR16                          *PathName,
+  IN  CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN  UINTN                           PathNameSize
+  );
+
+/**
   Duplicate device path with DevicePathInstance appended if it is not present.
 
   @param[in] DevicePath          Device Path to append new instance to, optional.
