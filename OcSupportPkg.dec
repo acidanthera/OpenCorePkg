@@ -102,6 +102,9 @@
   OcAppleRamDiskLib|Include/Library/OcAppleRamDiskLib.h
 
   ##  @libraryclass
+  OcAppleSecureBootLib|Include/Library/OcAppleSecureBootLib.h
+
+  ##  @libraryclass
   OcBootManagementLib|Include/Library/OcBootManagementLib.h
 
   ##  @libraryclass
