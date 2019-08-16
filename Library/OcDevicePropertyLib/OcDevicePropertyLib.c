@@ -796,17 +796,21 @@ OcDevicePathPropertyInstallProtocol (
   EFI_HANDLE                                  Handle;
 
   if (Reinstall) {
-    UninstallAllProtocolInstances (&gEfiDevicePathPropertyDatabaseProtocolGuid);
-  }
+    Status = UninstallAllProtocolInstances (&gEfiDevicePathPropertyDatabaseProtocolGuid);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OCDP: Uninstall failed: %r\n", Status));
+      return NULL;
+    }
+  } else {
+    Status = gBS->LocateProtocol (
+                    &gEfiDevicePathPropertyDatabaseProtocolGuid,
+                    NULL,
+                    (VOID *)&Protocol
+                    );
 
-  Status = gBS->LocateProtocol (
-                  &gEfiDevicePathPropertyDatabaseProtocolGuid,
-                  NULL,
-                  (VOID *)&Protocol
-                  );
-
-  if (!EFI_ERROR (Status)) {
-    return Protocol;
+    if (!EFI_ERROR (Status)) {
+      return Protocol;
+    }
   }
   
   DevicePathPropertyData = AllocateZeroPool (sizeof (*DevicePathPropertyData));

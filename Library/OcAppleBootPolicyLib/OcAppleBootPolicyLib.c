@@ -1509,17 +1509,21 @@ OcAppleBootPolicyInstallProtocol (
   EFI_HANDLE                  Handle;
 
   if (Reinstall) {
-    UninstallAllProtocolInstances (&gAppleBootPolicyProtocolGuid);
-  }
+    Status = UninstallAllProtocolInstances (&gAppleBootPolicyProtocolGuid);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OCBP: Uninstall failed: %r\n", Status));
+      return NULL;
+    }
+  } else {
+    Status = gBS->LocateProtocol (
+      &gAppleBootPolicyProtocolGuid,
+      NULL,
+      (VOID *) &Protocol
+      );
 
-  Status = gBS->LocateProtocol (
-    &gAppleBootPolicyProtocolGuid,
-    NULL,
-    (VOID *) &Protocol
-    );
-
-  if (!EFI_ERROR (Status)) {
-    return Protocol;
+    if (!EFI_ERROR (Status)) {
+      return Protocol;
+    }
   }
 
   Handle = NULL;

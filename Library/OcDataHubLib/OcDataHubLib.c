@@ -52,21 +52,24 @@ OcDataHubInstallProtocol (
   EFI_DATA_HUB_PROTOCOL  *DataHub;
 
   if (Reinstall) {
-    UninstallAllProtocolInstances (&gEfiDataHubProtocolGuid);
+    Status = UninstallAllProtocolInstances (&gEfiDataHubProtocolGuid);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OCDH: Uninstall failed: %r\n", Status));
+      return NULL;
+    }
+  } else {
+    Status  = gBS->LocateProtocol (
+      &gEfiDataHubProtocolGuid,
+      NULL,
+      (VOID **) &DataHub
+      );
+
+    if (!EFI_ERROR (Status)) {
+      return DataHub;
+    }
   }
 
-  DataHub = NULL;
-  Status  = gBS->LocateProtocol (
-    &gEfiDataHubProtocolGuid,
-    NULL,
-    (VOID **) &DataHub
-    );
-
-  if (EFI_ERROR (Status)) {
-    return DataHubInstall ();
-  }
-
-  return DataHub;
+  return DataHubInstall ();
 }
 
 STATIC

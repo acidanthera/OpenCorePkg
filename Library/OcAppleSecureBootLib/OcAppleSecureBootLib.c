@@ -604,7 +604,7 @@ InternalVerifyImg4ByPathWorker (
 
   STATIC CONST UINTN ManifestSuffixMaxSize =
     (((ARRAY_SIZE (HwModel) - 1 + (2 * sizeof (Ecid))) * sizeof (CHAR16))
-      + L_STR_SIZE (L"...im4m"));
+      + L_STR_SIZE_NT (L"...im4m"));
 
   Status = gBS->LocateDevicePath (
                   &gEfiSimpleFileSystemProtocolGuid,
@@ -1011,16 +1011,20 @@ OcAppleSecureBootInstallProtocol (
   EFI_HANDLE                 Handle;
 
   if (Reinstall) {
-    UninstallAllProtocolInstances (&gAppleSecureBootProtocolGuid);
-  }
-
-  Status = gBS->LocateProtocol (
-                  &gAppleSecureBootProtocolGuid,
-                  NULL,
-                  (VOID **)&Protocol
-                  );
-  if (!EFI_ERROR (Status)) {
-    return Protocol;
+    Status = UninstallAllProtocolInstances (&gAppleSecureBootProtocolGuid);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OCSB: Uninstall failed: %r\n", Status));
+      return NULL;
+    }
+  } else {
+    Status = gBS->LocateProtocol (
+                    &gAppleSecureBootProtocolGuid,
+                    NULL,
+                    (VOID **)&Protocol
+                    );
+    if (!EFI_ERROR (Status)) {
+      return Protocol;
+    }
   }
 
   Handle = NULL;
