@@ -192,6 +192,9 @@
   OcTimerLib|Include/Library/OcTimerLib.h
 
   ##  @libraryclass
+  OcUnicodeCollationEngLib|Include/Library/OcUnicodeCollationEngLib.h
+
+  ##  @libraryclass
   OcVirtualFsLib|Include/Library/OcVirtualFsLib.h
 
   ##  @libraryclass

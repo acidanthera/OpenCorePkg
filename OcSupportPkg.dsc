@@ -88,6 +88,7 @@
   OcStringLib|OcSupportPkg/Library/OcStringLib/OcStringLib.inf
   OcTemplateLib|OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
   OcTimerLib|OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
+  OcUnicodeCollationEngLib|OcSupportPkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngLib.inf
   OcVirtualFsLib|OcSupportPkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OcXmlLib|OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
 
@@ -130,6 +131,7 @@
   OcSupportPkg/Library/OcStringLib/OcStringLib.inf
   OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
   OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
+  OcSupportPkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngLib.inf
   OcSupportPkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
   OcSupportPkg/Debug/GdbSyms/GdbSyms.inf
