@@ -108,6 +108,9 @@
   OcAppleSecureBootLib|Include/Library/OcAppleSecureBootLib.h
 
   ##  @libraryclass
+  OcAppleUserInterfaceThemeLib|Include/Library/OcAppleUserInterfaceThemeLib.h
+
+  ##  @libraryclass
   OcBootManagementLib|Include/Library/OcBootManagementLib.h
 
   ##  @libraryclass
