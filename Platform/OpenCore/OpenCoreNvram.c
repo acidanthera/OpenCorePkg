@@ -75,12 +75,12 @@ mNvramStorageRootSchema = {
 /**
   Force the assertions in case we forget about them.
 **/
-OC_GLOBAL_STATIC_ASSERT (
+OC_STATIC_ASSERT (
   L_STR_LEN (OPEN_CORE_VERSION) == 5,
   "OPEN_CORE_VERSION must follow X.Y.Z format, where X.Y.Z are single digits."
   );
 
-OC_GLOBAL_STATIC_ASSERT (
+OC_STATIC_ASSERT (
   L_STR_LEN (OPEN_CORE_TARGET) == 3,
   "OPEN_CORE_TARGET must XYZ format, where XYZ is build target."
   );
