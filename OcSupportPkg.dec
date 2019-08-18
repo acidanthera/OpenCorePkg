@@ -141,6 +141,9 @@
   OcFileLib|Include/Library/OcFileLib.h
 
   ##  @libraryclass
+  OcFirmwareVolumeLib|Include/Library/OcFirmwareVolumeLib.h
+
+  ##  @libraryclass
   OcFirmwarePasswordLib|Include/Library/OcFirmwarePasswordLib.h
 
   ##  @libraryclass
