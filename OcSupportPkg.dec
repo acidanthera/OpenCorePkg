@@ -90,6 +90,9 @@
   OcAppleDiskImageLib|Include/Library/OcAppleDiskImageLib.h
 
   ##  @libraryclass
+  OcAppleImageConversionLib|Include/Library/OcAppleImageConversionLib.h
+
+  ##  @libraryclass
   OcAppleImageVerificationLib|Include/Library/OcAppleImageVerificationLib.h
 
   ##  @libraryclass
