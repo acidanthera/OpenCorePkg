@@ -156,6 +156,9 @@
   OcGuardLib|Include/Library/OcGuardLib.h
 
   ##  @libraryclass
+  OcHashServicesLib|Include/Library/OcHashServicesLib.h
+
+  ##  @libraryclass
   OcMachoLib|Include/Library/OcMachoLib.h
 
   ##  @libraryclass
