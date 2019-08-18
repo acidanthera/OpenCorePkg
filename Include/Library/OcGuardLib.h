@@ -19,43 +19,18 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #ifndef OC_GUARD_LIB_H
 #define OC_GUARD_LIB_H
 
-//
-// The macros below provide compile-time assertions.
-// This is important, as UDK only has VERIFY_SIZE_OF, which is limited and broken.
-// Since it is implemented as an extern, it neither lets one to verify array size and array
-// element size (due to variable redeclaration) at the same time,  nor allows macro use
-// within a .c file (due to unused variable warnings).
-// The reason for split declarations exists due to MSVC legacy.
-//
-#if defined(__GUNC__) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201100L)
-//
-// Any supported GCC-compatible implements _Static_assert.
-// So do any C11-compliant compilers.
-//
-#define OC_GLOBAL_STATIC_ASSERT(Expr, Message) _Static_assert (Expr, Message)
-#define OC_INLINE_STATIC_ASSERT(Expr, Message) _Static_assert (Expr, Message)
-#elif defined(_MSC_VER) && _MSC_VER >= 1600
-//
-// Starting from VS 2010 MSVC supports static_assert in both C and C++ modes.
-//
-#define OC_GLOBAL_STATIC_ASSERT(Expr, Message) static_assert (Expr, Message)
-#define OC_INLINE_STATIC_ASSERT(Expr, Message) static_assert (Expr, Message)
+/**
+  Portable definition for compile time assertions.
+  Equivalent to C11 static_assert macro from assert.h.
+
+  @param  Expression  Boolean expression.
+  @param  Message     Raised compiler diagnostic message when expression is false.
+
+**/
+#ifdef _MSC_EXTENSIONS
+  #define OC_STATIC_ASSERT static_assert
 #else
-//
-// For MSVC we implement static assertions via switch, as they do not have compile-time
-// offsetof implementation, yet it pointer arithmetics works fine for them in switch.
-// The struct declaration is here to avoid a warning for extra ;.
-// The concatenation indirection does not permit for multiple assertions on one line
-// or within a macro.
-//
-#define OC_STATIC_ASSERT_CONCAT2(Left, Right) Left ## Right
-#define OC_STATIC_ASSERT_CONCAT(Left, Right) OC_STATIC_ASSERT_CONCAT2 (Left, Right)
-#define OC_GLOBAL_STATIC_ASSERT(Expr, Message) \
-  VOID OC_STATIC_ASSERT_CONCAT(OC_STATIC_ASSERT__, __LINE__) (VOID) { \
-  switch (0) { case 0: case (Expr):; } } \
-  struct OC_STATIC_ASSERT_CONCAT(OC_STATIC_ASSERT_T__, __LINE__) { UINT32 Dummy; }
-#define OC_INLINE_STATIC_ASSERT(Expr, Message) \
-  do { switch (0) { case 0: case (Expr):; } } while(0)
+  #define OC_STATIC_ASSERT _Static_assert
 #endif
 
 //
@@ -483,8 +458,8 @@ OcOverflowMulAddSN (
 //
 #if defined(MDE_CPU_AARCH64) || defined(MDE_CPU_ARM) || defined(MDE_CPU_X64) || defined(MDE_CPU_IA32)
 
-VERIFY_SIZE_OF (int, 4);
-VERIFY_SIZE_OF (unsigned, 4);
+OC_STATIC_ASSERT (sizeof (int) == 4,      "int is expected to be 4 bytes");
+OC_STATIC_ASSERT (sizeof (unsigned) == 4, "unsigned is expected to be 4 bytes");
 
 #define OcOverflowAddU32(A, B, Res) __builtin_uadd_overflow((UINT32)(A), (UINT32)(B), (UINT32 *)(Res))
 #define OcOverflowSubU32(A, B, Res) __builtin_usub_overflow((UINT32)(A), (UINT32)(B), (UINT32 *)(Res))
@@ -501,11 +476,8 @@ VERIFY_SIZE_OF (unsigned, 4);
 //
 #if defined(MDE_CPU_AARCH64) || defined(MDE_CPU_ARM) || defined(MDE_CPU_X64) || defined(MDE_CPU_IA32)
 
-typedef long long oc_guard_long_long;
-typedef unsigned long long oc_guard_unsigned_long_long;
-
-VERIFY_SIZE_OF (oc_guard_long_long, 8);
-VERIFY_SIZE_OF (oc_guard_unsigned_long_long, 8);
+OC_STATIC_ASSERT (sizeof (long long) == 8,          "long long is expected to be 8 bytes");
+OC_STATIC_ASSERT (sizeof (unsigned long long) == 8, "unsigned long long is expected to be 8 bytes");
 
 #define OcOverflowAddU64(A, B, Res) __builtin_uaddll_overflow((UINT64)(A), (UINT64)(B), (UINT64 *)(Res))
 #define OcOverflowSubU64(A, B, Res) __builtin_usubll_overflow((UINT64)(A), (UINT64)(B), (UINT64 *)(Res))
@@ -521,8 +493,8 @@ VERIFY_SIZE_OF (oc_guard_unsigned_long_long, 8);
 //
 #if defined(MDE_CPU_AARCH64) || defined(MDE_CPU_X64)
 
-VERIFY_SIZE_OF (INTN, 8);
-VERIFY_SIZE_OF (UINTN, 8);
+OC_STATIC_ASSERT (sizeof (INTN) == 8,  "UINTN is expected to be 8 bytes");
+OC_STATIC_ASSERT (sizeof (UINTN) == 8, "UINTN is expected to be 8 bytes");
 
 #define OcOverflowAddUN(A, B, Res) OcOverflowAddU64((A), (B), (Res))
 #define OcOverflowSubUN(A, B, Res) OcOverflowSubU64((A), (B), (Res))
@@ -533,8 +505,8 @@ VERIFY_SIZE_OF (UINTN, 8);
 
 #elif defined(MDE_CPU_ARM) || defined(MDE_CPU_IA32)
 
-VERIFY_SIZE_OF (INTN, 4);
-VERIFY_SIZE_OF (UINTN, 4);
+OC_STATIC_ASSERT (sizeof (INTN) == 4,  "UINTN is expected to be 4 bytes");
+OC_STATIC_ASSERT (sizeof (UINTN) == 4, "UINTN is expected to be 4 bytes");
 
 #define OcOverflowAddUN(A, B, Res) OcOverflowAddU32((A), (B), (Res))
 #define OcOverflowSubUN(A, B, Res) OcOverflowSubU32((A), (B), (Res))

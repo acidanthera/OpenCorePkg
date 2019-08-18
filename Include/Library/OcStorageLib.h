@@ -23,7 +23,7 @@
 /**
   Ensure that we actually use RSA 2048.
 **/
-OC_GLOBAL_STATIC_ASSERT (
+OC_STATIC_ASSERT (
   CONFIG_RSA_KEY_BIT_SIZE == 2048 && CONFIG_RSA_KEY_SIZE == 256,
   "Unsupported RSA key size"
   );

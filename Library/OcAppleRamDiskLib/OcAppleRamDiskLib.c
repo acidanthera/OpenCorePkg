@@ -73,7 +73,7 @@ InternalAddAllocatedArea (
     AllocatedArea     += EFI_PAGE_SIZE;
     AllocatedAreaSize -= EFI_PAGE_SIZE;
 
-    OC_INLINE_STATIC_ASSERT (
+    OC_STATIC_ASSERT (
       sizeof (APPLE_RAM_DISK_EXTENT_TABLE) == EFI_PAGE_SIZE,
       "Extent table different from EFI_PAGE_SIZE is unsupported!"
       );
@@ -216,7 +216,7 @@ InternalAppleRamDiskAllocate (
     return NULL;
   }
 
-  OC_INLINE_STATIC_ASSERT (
+  OC_STATIC_ASSERT (
     sizeof (APPLE_RAM_DISK_EXTENT_TABLE) == EFI_PAGE_SIZE,
     "Extent table different from EFI_PAGE_SIZE is unsupported!"
     );

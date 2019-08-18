@@ -20,7 +20,7 @@
 
 #define NUM_OF_PK 2
 
-OC_GLOBAL_STATIC_ASSERT (
+OC_STATIC_ASSERT (
   sizeof (RSA_PUBLIC_KEY) == 520,
   "Incompatible configured RSA key size"
   );

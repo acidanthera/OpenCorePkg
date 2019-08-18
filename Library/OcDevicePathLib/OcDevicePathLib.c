@@ -258,7 +258,7 @@ OcFixAppleBootDevicePath (
 
         case MSG_SASEX_DP:
         {
-          OC_INLINE_STATIC_ASSERT (
+          OC_STATIC_ASSERT (
             (sizeof (SASEX_DEVICE_PATH) != sizeof (NVME_NAMESPACE_DEVICE_PATH)),
             "SasEx and NVMe DPs must differ in size for fixing to be accurate."
             );
@@ -601,7 +601,7 @@ InternalDevicePathCmpWorker (
         return FALSE;
       }
 
-      OC_INLINE_STATIC_ASSERT (
+      OC_STATIC_ASSERT (
         (sizeof (*ChildPathPtr.DevPath) == 4),
         "The Device Path comparison logic depends on the entire header being checked"
         );

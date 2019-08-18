@@ -743,7 +743,7 @@ typedef struct {
   UINT8   Code8;
 } INTERNAL_CPUID_FN_PATCH;
 
-OC_GLOBAL_STATIC_ASSERT (
+OC_STATIC_ASSERT (
   sizeof (INTERNAL_CPUID_FN_PATCH) == sizeof (mKernelCpuidReplaceDbg),
   "Check your CPUID patch layout"
   );
@@ -787,7 +787,7 @@ PatchKernelCpuId (
   CPUID_VERSION_INFO_ECX    Ecx;
   CPUID_VERSION_INFO_EDX    Edx;
 
-  OC_INLINE_STATIC_ASSERT (
+  OC_STATIC_ASSERT (
     sizeof (mKernelCpuIdFindRelNew) > sizeof (mKernelCpuIdFindRelOld),
     "Kernel CPUID patch seems wrong"
     );

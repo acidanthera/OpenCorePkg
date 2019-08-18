@@ -283,7 +283,7 @@ VirtualFileGetInfo (
 
   if (Data->OriginalProtocol == NULL) {
     if (CompareGuid (InformationType, &gEfiFileInfoGuid)) {
-      OC_INLINE_STATIC_ASSERT (
+      OC_STATIC_ASSERT (
         sizeof (FileInfo->FileName) == sizeof (CHAR16),
         "Header changed, flexible array member is now supported"
         );

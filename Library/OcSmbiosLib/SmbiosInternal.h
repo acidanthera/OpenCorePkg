@@ -97,7 +97,7 @@ enum {
   OcSmbiosAutomaticHandle = 128,
 };
 
-OC_GLOBAL_STATIC_ASSERT (OcSmbiosAutomaticHandle > OcSmbiosLastReservedHandle, "Inconsistent handle IDs");
+OC_STATIC_ASSERT (OcSmbiosAutomaticHandle > OcSmbiosLastReservedHandle, "Inconsistent handle IDs");
 
 //
 // Growing SMBIOS table data.
