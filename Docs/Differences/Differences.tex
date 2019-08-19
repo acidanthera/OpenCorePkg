@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sun Aug 11 01:57:12 2019
-%DIF ADD ../Configuration.tex        Sun Aug 11 18:56:42 2019
+%DIF ADD ../Configuration.tex        Mon Aug 19 22:31:00 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -164,12 +164,29 @@
 This document provides information on
 \href{https://github.com/acidanthera/OpenCorePkg}{OpenCore} user
 configuration file format used to setup the correct functioning of macOS
-operating system.
+operating system. \DIFaddbegin \DIFadd{It is to be read as the official clarification of expected
+OpenCore behaviour. All deviations, if found in published OpenCore releases,
+shall be considered documentation or implementation bugs, and are requested to be
+reported through }\href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}\DIFadd{.
+All other sources or translations of this document are unofficial and may contain errors.
+}\DIFaddend 
 
-\subsection{Known defects}\label{reported-defects}
+\DIFdelbegin \subsection{\DIFdel{Known defects}}%DIFAUXCMD
+\addtocounter{subsection}{-1}%DIFAUXCMD
+%DIFDELCMD < \label{reported-defects}
+%DIFDELCMD < 
 
-For OpenCore issues please refer to
-\href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
+%DIFDELCMD < %%%
+\DIFdel{For OpenCore issues please refer to }\DIFdelend \DIFaddbegin \DIFadd{This document is structured as a specification, and is not meant to provide a step by
+step algorithm for configuring end-user board support package (BSP). Any third-party
+articles, tools, books, etc., providing such material are prone to their authors'
+preferences, tastes, this document misinterpretation, and essential obsolescence.
+In case you still use these sources, for example, 
+}\href{https://khronokernel-2.gitbook.io/opencore-vanilla-desktop-guide}{Opencore Vanilla Desktop Guide}\DIFadd{,
+please ensure following this document for every made decision and judging its consequences.
+Regardless of the sources used you are required to fully understand every dedicated OpenCore
+configuration option and concept prior to reporting any issues in
+}\DIFaddend \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
 
 \subsection{Generic Terms}\label{generic-terms}
 
@@ -3582,7 +3599,22 @@ you will need \texttt{debug=0x8} boot argument.
   which may then be customised by the user.
 
 \item
-  \textbf{What is the simplest way to install macOS?}
+  \DIFaddbegin \textbf{\DIFadd{How to choose the default boot entry?}}
+
+  \DIFadd{OpenCore uses the primary UEFI boot option to select the default entry. This choice
+  can be altered from UEFI Setup, with the macOS
+  }\href{https://support.apple.com/HT202796}{Startup Disk} \DIFadd{preference, or the Windows
+  }\href{https://support.apple.com/guide/bootcamp-control-panel/start-up-your-mac-in-windows-or-macos-bcmp29b8ac66/mac}{Boot Camp} \DIFadd{Control Panel.
+  Since choosing OpenCore's }\texttt{\DIFadd{BOOTx64.EFI}} \DIFadd{as a primary boot option limits this
+  functionality in addition to several firmwares deleting incompatible boot options,
+  potentially including those created by macOS, you are strongly encouraged to use the
+  }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{quirk, which will preserve your selection made in
+  the operating system within the OpenCore variable space. Note, that }\texttt{\DIFadd{RequestBootVarRouting}}
+  \DIFadd{requires a separate driver for functioning.
+}
+
+\item
+  \DIFaddend \textbf{What is the simplest way to install macOS?}
 
   Copy online recovery image (\texttt{*.dmg} and \texttt{*.chunklist} files)
   to \texttt{com.apple.recovery.boot} directory on a FAT32 partition with OpenCore.
@@ -3593,8 +3625,13 @@ you will need \texttt{debug=0x8} boot argument.
   \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/Recovery}{Recovery}
   tool from \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}.
 
-\item
-  \textbf{Why do online recovery images (\texttt{*.dmg} fail to load?}
+  \DIFaddbegin \DIFadd{For offline installation refer to
+  }\href{https://support.apple.com/HT201372}{How to create a bootable installer for macOS}
+  \DIFadd{article.
+}
+
+\DIFaddend \item
+  \textbf{Why do online recovery images (\texttt{*.dmg}\DIFaddbegin \DIFadd{) }\DIFaddend fail to load?}
 
   This may be caused by missing HFS+ driver, as all presently known recovery volumes
   have HFS+ filesystem. Another cause may be buggy firmware allocator, which can be
