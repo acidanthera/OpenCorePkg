@@ -40,18 +40,19 @@
 #include <Register/Msr/SandyBridgeMsr.h>
 #include <Register/Msr/NehalemMsr.h>
 
+//
+// Tolerance within which we consider two frequency values to be roughly
+// equivalent.
+//
+#define OC_CPU_FREQUENCY_TOLERANCE 50000000ULL // 50 Mhz
+
 STATIC
 UINT8
 DetectAppleMajorType (
-  IN  CONST CHAR8  *BrandString,
-  OUT BOOLEAN      *IsXeonScalable  OPTIONAL
+  IN  CONST CHAR8  *BrandString
   )
 {
   CONST CHAR8  *BrandInfix;
-
-  if (IsXeonScalable) {
-    *IsXeonScalable = FALSE;
-  }
 
   BrandInfix = AsciiStrStr (BrandString, "Core");
   if (BrandInfix != NULL) {
@@ -114,7 +115,6 @@ DetectAppleMajorType (
         AsciiStrnCmp (BrandInfix, "Gold", L_STR_LEN ("Gold")) == 0 ||
         AsciiStrnCmp (BrandInfix, "Platinum", L_STR_LEN ("Platinum")) == 0) {
       // Treat Xeon Scalable chips as their closest relatives, Xeon W
-      *IsXeonScalable = TRUE;
       return AppleProcessorMajorXeonW;
     }
 
@@ -595,9 +595,10 @@ ScanIntelProcessor (
   IN OUT OC_CPU_INFO  *Cpu
   )
 {
-  UINT32                                            CpuidEax;
-  UINT32                                            CpuidEbx;
-  UINT32                                            CpuidEcx;
+  UINT32                                            CpuidDenominatorEax;
+  UINT32                                            CpuidNumeratorEbx;
+  UINT32                                            CpuidARTFrequencyEcx;
+  CPUID_PROCESSOR_FREQUENCY_EAX                     CpuidFrequencyEax;
   UINT64                                            Msr;
   UINT64                                            TscAdjust;
   CPUID_CACHE_PARAMS_EAX                            CpuidCacheEax;
@@ -608,9 +609,8 @@ ScanIntelProcessor (
   MSR_NEHALEM_PLATFORM_INFO_REGISTER                PlatformInfo;
   MSR_NEHALEM_TURBO_RATIO_LIMIT_REGISTER            TurboLimit;
   UINT16                                            CoreCount;
-  BOOLEAN                                           IsXeonScalable;
 
-  AppleMajorType = DetectAppleMajorType (Cpu->BrandString, &IsXeonScalable);
+  AppleMajorType = DetectAppleMajorType (Cpu->BrandString);
   Cpu->AppleProcessorType = DetectAppleProcessorType (Cpu->Model, Cpu->Stepping, AppleMajorType);
 
   DEBUG ((DEBUG_INFO, "OCCPU: Detected Apple Processor Type: %02X -> %04X\n", AppleMajorType, Cpu->AppleProcessorType));
@@ -670,35 +670,86 @@ ScanIntelProcessor (
     ));
 
   //
-  // SkyLake and later have an Always Running Timer
+  // Determine our core crystal clock frequency
   //
-  if (Cpu->Model >= CPU_MODEL_SKYLAKE) {
-    AsmCpuid (CPUID_TIME_STAMP_COUNTER, &CpuidEax, &CpuidEbx, &CpuidEcx, NULL);
-    if (CpuidEcx > 0) {
-      Cpu->ARTFrequency = CpuidEcx;
-      DEBUG ((DEBUG_INFO, "OCCPU: Core Crystal Clock Frequency %u\n", CpuidEcx));
+  if (Cpu->MaxId >= CPUID_TIME_STAMP_COUNTER) {
+    AsmCpuid (
+      CPUID_TIME_STAMP_COUNTER,
+      &CpuidDenominatorEax,
+      &CpuidNumeratorEbx,
+      &CpuidARTFrequencyEcx,
+      NULL
+      );
+    if (CpuidARTFrequencyEcx > 0) {
+      Cpu->ARTFrequency = CpuidARTFrequencyEcx;
+      DEBUG ((DEBUG_INFO, "OCCPU: Queried Core Crystal Clock Frequency %11LuHz\n", Cpu->ARTFrequency));
     } else {
       //
-      // Fall back to identifying ART frequency based on model
+      // Fall back to identifying ART frequency based on known models
       //
-      if (Cpu->Family == 0x6 && Cpu->Model == CPU_MODEL_SKYLAKE_W && IsXeonScalable) {
-        //
-        // Only Xeon Scalable has a 25 Mhz core crystal clock frequency.
-        //
-        Cpu->ARTFrequency = 25000000ULL; // 25 Mhz
-      } else if (Cpu->Family == 0x6 && Cpu->Model == CPU_MODEL_GOLDMONT){
-        Cpu->ARTFrequency = 19200000ULL; // 19.2 Mhz
-      } else {
-        Cpu->ARTFrequency = 24000000ULL; // 24 Mhz
+      switch (Cpu->Model) {
+        case CPU_MODEL_SKYLAKE:
+        case CPU_MODEL_SKYLAKE_DT:
+        case CPU_MODEL_KABYLAKE:
+        case CPU_MODEL_KABYLAKE_DT:
+          Cpu->ARTFrequency = 24000000ULL; // 24 Mhz
+          break;
+        case CPU_MODEL_DENVERTON:
+          Cpu->ARTFrequency = 25000000ULL; // 25 Mhz
+          break;
+        case CPU_MODEL_GOLDMONT:
+          Cpu->ARTFrequency = 19200000ULL; // 19.2 Mhz
+          break;
+      }
+      if (Cpu->ARTFrequency > 0) {
+        DEBUG ((DEBUG_INFO, "OCCPU: Known Model Core Crystal Clock Frequency %11LuHz\n", Cpu->ARTFrequency));
       }
     }
 
-    if (CpuidEax > 0 && CpuidEbx > 0) {
+    if (CpuidDenominatorEax > 0 && CpuidNumeratorEbx > 0) {
+      //
+      // Some Intel chips don't report their core crystal clock frequency.
+      // Calculate it by dividing the TSC frequency by the TSC ratio.
+      //
+      if (Cpu->ARTFrequency == 0 && Cpu->MaxId >= CPUID_PROCESSOR_FREQUENCY) {
+        AsmCpuid (CPUID_PROCESSOR_FREQUENCY, &CpuidFrequencyEax.Uint32, NULL, NULL, NULL);
+        Cpu->ARTFrequency = MultThenDivU64x64x32(
+          MultU64x32 (CpuidFrequencyEax.Bits.ProcessorBaseFrequency, 1000000),
+          CpuidDenominatorEax,
+          CpuidNumeratorEbx,
+          NULL
+          );
+        if (Cpu->ARTFrequency > 0) {
+          DEBUG ((
+            DEBUG_INFO,
+            "OCCPU: Core Crystal Clock Frequency from Base Frequency %5LuMhz = %LuMhz * %u / %u\n",
+            DivU64x32 (Cpu->ARTFrequency, 1000000),
+            CpuidFrequencyEax.Bits.ProcessorBaseFrequency,
+            CpuidDenominatorEax,
+            CpuidNumeratorEbx
+            ));
+        }
+      }
+
+      //
+      // If we still can't determine the core crystal clock frequency, assume
+      // it's 24 Mhz like most Intel chips to date.
+      //
+      if (Cpu->ARTFrequency == 0) {
+        Cpu->ARTFrequency = 24000000ULL; // 24 Mhz
+        DEBUG ((DEBUG_INFO, "OCCPU: Fallback Core Crystal Clock Frequency %LuHz\n", Cpu->ARTFrequency));
+      }
+
       TscAdjust = AsmReadMsr64 (MSR_IA32_TSC_ADJUST);
       DEBUG ((DEBUG_INFO, "OCCPU: TSC Adjust %Lu\n", TscAdjust));
 
       ASSERT (Cpu->ARTFrequency > 0ULL);
-      Cpu->CPUFrequencyFromART = MultThenDivU64x64x32 (Cpu->ARTFrequency, CpuidEbx, CpuidEax, NULL);
+      Cpu->CPUFrequencyFromART = MultThenDivU64x64x32 (
+        Cpu->ARTFrequency,
+        CpuidNumeratorEbx,
+        CpuidDenominatorEax,
+        NULL
+        );
 
       DEBUG ((
         DEBUG_INFO,
@@ -708,8 +759,8 @@ ScanIntelProcessor (
         Cpu->CPUFrequencyFromART,
         DivU64x32 (Cpu->CPUFrequencyFromART, 1000000),
         Cpu->ARTFrequency,
-        CpuidEbx,
-        CpuidEax
+        CpuidNumeratorEbx,
+        CpuidDenominatorEax
         ));
     }
   }
@@ -723,6 +774,19 @@ ScanIntelProcessor (
   // Calculate CPU frequency based on ART if present, otherwise TSC
   //
   Cpu->CPUFrequency = Cpu->CPUFrequencyFromART > 0 ? Cpu->CPUFrequencyFromART : Cpu->CPUFrequencyFromTSC;
+
+  //
+  // Verify that our two CPU frequency calculations do not differ substantially.
+  //
+  if (Cpu->CPUFrequencyFromART > 0
+    && ABS((INT64)Cpu->CPUFrequencyFromART - (INT64)Cpu->CPUFrequencyFromTSC) > OC_CPU_FREQUENCY_TOLERANCE) {
+    DEBUG ((
+      DEBUG_WARN,
+      "OCCPU: ART CPU frequency differs substantially from TSC: %11LuHz != %11LuHzX\n",
+      Cpu->CPUFrequencyFromART,
+      Cpu->CPUFrequencyFromTSC
+      ));
+  }
 
   //
   // There may be some quirks with virtual CPUs (VMware is fine).
@@ -740,7 +804,7 @@ ScanIntelProcessor (
   //
   // Calculate number of cores
   //
-  if (Cpu->MaxExtId >= CPUID_CACHE_PARAMS && Cpu->Model <= CPU_MODEL_PENRYN) {
+  if (Cpu->MaxId >= CPUID_CACHE_PARAMS && Cpu->Model <= CPU_MODEL_PENRYN) {
     AsmCpuidEx (CPUID_CACHE_PARAMS, 0, &CpuidCacheEax.Uint32, &CpuidCacheEbx.Uint32, NULL, NULL);
     if (CpuidCacheEax.Bits.CacheType != CPUID_CACHE_PARAMS_CACHE_TYPE_NULL) {
       CoreCount = (UINT16)GetPowerOfTwo32 (CpuidCacheEax.Bits.MaximumAddressableIdsForProcessorCores + 1);
@@ -880,6 +944,8 @@ OcCpuScanProcessor (
   //
   AsmCpuid (CPUID_SIGNATURE, &CpuidEax, &Cpu->Vendor[0], &Cpu->Vendor[2], &Cpu->Vendor[1]);
 
+  Cpu->MaxId = CpuidEax;
+
   //
   // Get extended CPUID 0x80000000
   //
@@ -928,7 +994,7 @@ OcCpuScanProcessor (
   //
   // Get processor signature and decode
   //
-  if (Cpu->MaxExtId >= CPUID_VERSION_INFO) {
+  if (Cpu->MaxId >= CPUID_VERSION_INFO) {
     //
     // Intel SDM requires us issuing CPUID 1 read during microcode
     // version read, so let's do it here for simplicity.

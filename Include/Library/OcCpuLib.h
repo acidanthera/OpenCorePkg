@@ -51,6 +51,7 @@ typedef struct {
   UINT16                  AppleProcessorType;
   BOOLEAN                 CstConfigLock;
 
+  UINT32                  MaxId;
   UINT32                  MaxExtId;
 
   UINT8                   MaxDiv;
