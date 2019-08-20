@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Aug 11 01:57:12 2019
-%DIF ADD ../Configuration.tex        Mon Aug 19 22:31:00 2019
+%DIF DEL PreviousConfiguration.tex   Tue Aug 20 14:26:36 2019
+%DIF ADD ../Configuration.tex        Tue Aug 20 14:45:30 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2791,15 +2791,27 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
   \textbf{Failsafe}: Automatic\\
   \textbf{Description}: Sets \texttt{FSBFrequency} in
-  \texttt{gEfiProcessorSubClassGuid}. Sets CPU FSB frequency.
-\item
+  \texttt{gEfiProcessorSubClassGuid}.
+\DIFaddbegin 
+
+  \DIFaddend Sets CPU FSB frequency. \DIFaddbegin \DIFadd{This value equals to CPU nominal frequency divided
+  by CPU maximum bus ratio and is specified in Hz. Refer to
+  }\texttt{\DIFadd{MSR\_NEHALEM\_PLATFORM\_INFO}}\DIFadd{~(}\texttt{\DIFadd{CEh}}\DIFadd{) MSR value to determine
+  maximum bus ratio on modern Intel CPUs.
+}\DIFaddend \item
   \texttt{ARTFrequency}\\
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Automatic}\DIFaddend \\
   \textbf{Description}: Sets \texttt{ARTFrequency} in
-  \texttt{gEfiProcessorSubClassGuid}. Sets CPU ART frequency, Skylake
-  and newer.
-\item
+  \texttt{gEfiProcessorSubClassGuid}.
+  \DIFdelbegin \DIFdel{Sets }\DIFdelend \DIFaddbegin 
+
+  \DIFadd{This value contains }\DIFaddend CPU ART frequency, \DIFdelbegin \DIFdel{Skylake
+  }\DIFdelend \DIFaddbegin \DIFadd{also known as crystal clock frequency.
+  Its existence is exclusive to Skylake generation }\DIFaddend and newer. \DIFaddbegin \DIFadd{The value is specified
+  in Hz, and is normally 24 MHz for client Intel segment, 25 MHz for server Intel segment,
+  and 19.2 MHz for Intel Atom CPUs. macOS till 10.15 inclusive assumes 24 MHz by default.
+}\DIFaddend \item
   \texttt{DevicePathsSupported}\\
   \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
   \textbf{Failsafe}: Not installed\\

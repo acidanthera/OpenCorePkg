@@ -4,6 +4,8 @@ OpenCore Changelog
 #### v0.5.0
 - Added builtin firmware versions for new models 2019
 - Fixed LogoutHook leaving random directories in `$HOME`
+- Fixed FSBFrequency calculation on Xeon Scalable CPUs (thx @mrmiller)
+- Fixed ARTFrequency specifying on Intel server and atom models
 
 #### v0.0.4
 - Fixed kext injection issues with dummy dependencies
