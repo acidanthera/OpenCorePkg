@@ -68,6 +68,7 @@ if [ "$(printf "${UUID}" | /usr/bin/wc -c)" -eq 36 ] && [ -z "$(echo "${UUID}" |
   /usr/sbin/diskutil mount "${UUID}" || abort "Failed to mount ${UUID}!"
   /bin/cp ./nvram.plist "$(/usr/sbin/diskutil info "${UUID}" | /usr/bin/sed -n 's/.*Mount Point: *//p')" || abort "Failed to copy nvram.plist!"
   /usr/sbin/diskutil unmount "${UUID}" || abort "Failed to unmount ${UUID}!"
+  /bin/rm -rf "${uuidDump}"
   exit 0
 else
   abort "Illegal UUID or unknown loader!"
