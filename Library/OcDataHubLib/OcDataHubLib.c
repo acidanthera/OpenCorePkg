@@ -14,6 +14,7 @@
 
 #include <Uefi.h>
 
+#include <ProcessorInfo.h>
 #include <IndustryStandard/Pci.h>
 
 #include <Guid/ApplePlatformInfo.h>
@@ -279,6 +280,9 @@ UpdateDataHub (
     Data->FSBFrequency = &CpuInfo->FSBFrequency;
   }
   DataHubSetAppleProcessorData (DataHub, OC_FSB_FREQUENCY, Data->FSBFrequency, sizeof (*Data->FSBFrequency));
+  if (Data->ARTFrequency == NULL && CpuInfo->ARTFrequency > 0 && CpuInfo->ARTFrequency != DEFAULT_ART_CLOCK_SOURCE) {
+    Data->ARTFrequency = &CpuInfo->ARTFrequency;
+  }
   DataHubSetAppleProcessorData (DataHub, OC_ART_FREQUENCY, Data->ARTFrequency, sizeof (*Data->ARTFrequency));
   DataHubSetAppleMiscData (DataHub, OC_DEVICE_PATHS_SUPPORTED, Data->DevicePathsSupported, sizeof (*Data->DevicePathsSupported));
   DataHubSetAppleMiscData (DataHub, OC_SMC_REVISION, Data->SmcRevision, OC_SMC_REVISION_SIZE);

@@ -692,13 +692,13 @@ ScanIntelProcessor (
         case CPU_MODEL_SKYLAKE_DT:
         case CPU_MODEL_KABYLAKE:
         case CPU_MODEL_KABYLAKE_DT:
-          Cpu->ARTFrequency = 24000000ULL; // 24 Mhz
+          Cpu->ARTFrequency = CLIENT_ART_CLOCK_SOURCE; // 24 Mhz
           break;
         case CPU_MODEL_DENVERTON:
-          Cpu->ARTFrequency = 25000000ULL; // 25 Mhz
+          Cpu->ARTFrequency = SERVER_ART_CLOCK_SOURCE; // 25 Mhz
           break;
         case CPU_MODEL_GOLDMONT:
-          Cpu->ARTFrequency = 19200000ULL; // 19.2 Mhz
+          Cpu->ARTFrequency = ATOM_ART_CLOCK_SOURCE; // 19.2 Mhz
           break;
       }
       if (Cpu->ARTFrequency > 0) {
@@ -736,7 +736,7 @@ ScanIntelProcessor (
       // it's 24 Mhz like most Intel chips to date.
       //
       if (Cpu->ARTFrequency == 0) {
-        Cpu->ARTFrequency = 24000000ULL; // 24 Mhz
+        Cpu->ARTFrequency = DEFAULT_ART_CLOCK_SOURCE;
         DEBUG ((DEBUG_INFO, "OCCPU: Fallback Core Crystal Clock Frequency %LuHz\n", Cpu->ARTFrequency));
       }
 

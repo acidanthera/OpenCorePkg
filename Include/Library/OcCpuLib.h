@@ -75,9 +75,9 @@ typedef struct {
   // If unreported, the frequency is looked up based on the model and family.
   //
   // Nominal Core Crystal Clock Frequency for known processor families:
-  //   Intel Xeon Scalable with CPUID signature 0x0655: 25 Mhz
-  //   6th and 7th generation Intel Core & Xeon W: 24 Mhz
-  //   Nex Generation Intel Atom with CPUID 0x065C: 19.2 Mhz
+  //   Intel Xeon Scalable with CPUID signature 0x0655: 25 Mhz     (server segment)
+  //   6th and 7th generation Intel Core & Xeon W:      24 Mhz     (client segment)
+  //   Nex Generation Intel Atom with CPUID 0x065C:     19.2 Mhz   (atom segment)
   //
   UINT64                  ARTFrequency;
 
