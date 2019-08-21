@@ -310,7 +310,9 @@ OcLoadUefiSupport (
 
   OcConsoleControlConfigure (
     Config->Uefi.Quirks.IgnoreTextInGraphics,
-    Config->Uefi.Quirks.SanitiseClearScreen
+    Config->Uefi.Quirks.SanitiseClearScreen,
+    Config->Uefi.Quirks.ClearScreenOnModeSwitch,
+    Config->Uefi.Quirks.ReplaceTabWithSpace
     );
 
   //
