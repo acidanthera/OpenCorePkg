@@ -6,6 +6,7 @@ OpenCore Changelog
 - Fixed LogoutHook leaving random directories in `$HOME`
 - Fixed FSBFrequency calculation on Xeon Scalable CPUs (thx @mrmiller)
 - Fixed ARTFrequency specifying on Intel server and atom models
+- Increased log size to 256 KB by default
 
 #### v0.0.4
 - Fixed kext injection issues with dummy dependencies
