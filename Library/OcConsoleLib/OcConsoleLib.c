@@ -39,6 +39,27 @@ BOOLEAN
 mForceConsoleMode = FALSE;
 
 //
+// Disable text output in graphics mode.
+//
+STATIC
+BOOLEAN
+mIgnoreTextInGraphics = FALSE;
+
+//
+// Clear screen when switching from graphics mode to text mode.
+//
+STATIC
+BOOLEAN
+mClearScreenOnModeSwitch = FALSE;
+
+//
+// Replace tab character with a space in output.
+//
+STATIC
+BOOLEAN
+mReplaceTabWithSpace = FALSE;
+
+//
 // Original text output function.
 //
 STATIC
@@ -67,8 +88,38 @@ ControlledOutputString (
   IN CHAR16                           *String
   )
 {
-  if (mConsoleMode == EfiConsoleControlScreenText) {
-    return mOriginalOutputString (This, String);
+  UINTN       Index;
+  UINTN       Length;
+  CHAR16      *StringCopy;
+  EFI_STATUS  Status;
+
+  if (mConsoleMode == EfiConsoleControlScreenText || !mIgnoreTextInGraphics) {
+    if (mReplaceTabWithSpace) {
+      Length = StrLen(String);
+      if (Length == MAX_UINTN) {
+        return EFI_UNSUPPORTED;
+      }
+
+      StringCopy = AllocatePool((Length + 1) * sizeof(CHAR16));
+      if (StringCopy == NULL) {
+        return mOriginalOutputString (This, String);
+      }
+      for (Index = 0; Index < Length; Index++) {
+        if (String[Index] == '\t') {
+          StringCopy[Index] = ' ';
+        }
+        else {
+          StringCopy[Index] = String[Index];
+        }
+      }
+      StringCopy[Length] = 0;
+      Status = mOriginalOutputString (This, StringCopy);
+      FreePool(StringCopy);
+      return Status;
+    }
+    else {
+      return mOriginalOutputString (This, String);
+    }
   }
 
   return EFI_UNSUPPORTED;
@@ -162,9 +213,41 @@ ConsoleControlSetMode (
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode
   )
 {
+  EFI_STATUS                    Status;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL Background;
+
   DEBUG ((DEBUG_INFO, "OCC: Setting cc mode %d -> %d\n", mConsoleMode, Mode));
 
   mConsoleMode = Mode;
+
+  if (mClearScreenOnModeSwitch && Mode == EfiConsoleControlScreenText) {
+    Status = gBS->HandleProtocol (
+      gST->ConsoleOutHandle,
+      &gEfiGraphicsOutputProtocolGuid,
+      (VOID **) &GraphicsOutput
+      );
+
+    if (!EFI_ERROR (Status)) {
+      Background.Red   = 0;
+      Background.Green = 0;
+      Background.Blue  = 0;
+
+      Status = GraphicsOutput->Blt (
+        GraphicsOutput,
+        &Background,
+        EfiBltVideoFill,
+        0,
+        0,
+        0,
+        0,
+        GraphicsOutput->Mode->Info->HorizontalResolution,
+        GraphicsOutput->Mode->Info->VerticalResolution,
+        0
+        );
+    }
+
+  }
 
   if (mOriginalConsoleControlProtocol.SetMode != NULL && !mForceConsoleMode) {
     return mOriginalConsoleControlProtocol.SetMode (
@@ -272,17 +355,25 @@ OcConsoleControlInstallProtocol (
 VOID
 OcConsoleControlConfigure (
   IN BOOLEAN                      IgnoreTextOutput,
-  IN BOOLEAN                      SanitiseClearScreen
+  IN BOOLEAN                      SanitiseClearScreen,
+  IN BOOLEAN                      ClearScreenOnModeSwitch,
+  IN BOOLEAN                      ReplaceTabWithSpace
   )
 {
   DEBUG ((
     DEBUG_INFO,
-    "OCC: Configuring console ignore %d san clear %d\n",
+    "OCC: Configuring console ignore %d san clear %d clear switch %d replace tab %ds\n",
     IgnoreTextOutput,
-    SanitiseClearScreen
+    SanitiseClearScreen,
+    ClearScreenOnModeSwitch,
+    ReplaceTabWithSpace
     ));
 
-  if (IgnoreTextOutput) {
+  mIgnoreTextInGraphics    = IgnoreTextOutput;
+  mClearScreenOnModeSwitch = ClearScreenOnModeSwitch;
+  mReplaceTabWithSpace     = ReplaceTabWithSpace;
+
+  if (IgnoreTextOutput || ReplaceTabWithSpace) {
     mOriginalOutputString     = gST->ConOut->OutputString;
     gST->ConOut->OutputString = ControlledOutputString;
   }

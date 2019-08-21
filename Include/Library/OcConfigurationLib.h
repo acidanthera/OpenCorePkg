@@ -441,7 +441,9 @@
   _(BOOLEAN                     , ReleaseUsbOwnership         ,     , FALSE  , ()) \
   _(BOOLEAN                     , RequestBootVarRouting       ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProvideConsoleGop           ,     , FALSE  , ()) \
-  _(BOOLEAN                     , SanitiseClearScreen         ,     , FALSE  , ())
+  _(BOOLEAN                     , SanitiseClearScreen         ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ClearScreenOnModeSwitch     ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ReplaceTabWithSpace         ,     , FALSE  , ())
   OC_DECLARE (OC_UEFI_QUIRKS)
 
 ///

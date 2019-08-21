@@ -43,13 +43,17 @@ OcConsoleControlInstallProtocol (
 /**
   Configure console control protocol with given options.
 
-  @param[in] IgnoreTextOutput     Skip console output in text mode.
-  @param[in] SanitiseClearScreen  Workaround ClearScreen breaking resolution.
+  @param[in] IgnoreTextOutput         Skip console output in text mode.
+  @param[in] SanitiseClearScreen      Workaround ClearScreen breaking resolution.
+  @param[in] ClearScreenOnModeSwitch  Clear graphic screen when switching to text mode.
+  @param[in] ReplaceTabWithSpace      Replace invisible tab characters with spaces in OutputString.
 **/
 VOID
 OcConsoleControlConfigure (
-  IN BOOLEAN                       IgnoreTextOutput,
-  IN BOOLEAN                       SanitiseClearScreen
+  IN BOOLEAN                      IgnoreTextOutput,
+  IN BOOLEAN                      SanitiseClearScreen,
+  IN BOOLEAN                      ClearScreenOnModeSwitch,
+  IN BOOLEAN                      ReplaceTabWithSpace
   );
 
 /**
@@ -101,7 +105,7 @@ ParseConsoleMode (
 /**
   Parse console control behaviour from string.
 
-  @paran[in]   String  Console control behaviour.
+  @param[in]   Behaviour  Console control behaviour.
 
   @retval OC_CONSOLE_CONTROL_BEHAVIOUR.
 **/
