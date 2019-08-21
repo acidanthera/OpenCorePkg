@@ -95,7 +95,7 @@ function setup_session() {
 	return $cookie;
 }
 
-function obtain_images($session, $mlb, $board) {
+function obtain_images($session, $board, $mlb, $diag = false) {
 	$headersReq = [
 		'Host: osrecovery.apple.com',
 		'Connection: close',
@@ -120,8 +120,11 @@ function obtain_images($session, $mlb, $board) {
 
 	$images = [ 'image' => [], 'chunklist' => [] ];
 
-	// /InstallationPayload/Diagnostics
-	run_query($headersReq, 'http://osrecovery.apple.com/InstallationPayload/RecoveryImage', $headers, $output, $postvars);
+	if ($diag) {
+	 run_query($headersReq, 'http://osrecovery.apple.com/InstallationPayload/Diagnostics', $headers, $output, $postvars);
+	} else {
+		run_query($headersReq, 'http://osrecovery.apple.com/InstallationPayload/RecoveryImage', $headers, $output, $postvars);
+	}
 	dump_query('obtain_images', $headers, $output);
 
 	$fields = explode("\n", $output);
@@ -151,7 +154,7 @@ function obtain_images($session, $mlb, $board) {
 	return $images;
 }
 
-function download_images($images) {
+function download_images($images, $diag = false) {
 	foreach ($images as $imagename => $imagefields) {
 		$headersReq = [
 			'Host: ' . parse_url($imagefields['link'], PHP_URL_HOST),
@@ -160,13 +163,20 @@ function download_images($images) {
 			'Cookie: AssetToken=' . $imagefields['cookie']
 		];
 
-		if ($imagename == 'image')
-			$filename = 'RecoveryImage.dmg';
+		if ($diag)
+			$type = 'Diagnostics';
 		else
-			$filename = 'RecoveryImage.chunklist';
+			$type = 'Recovery';
+
+		if ($imagename == 'image')
+			$filename = $type . 'Image.dmg';
+		else
+			$filename = $type . 'Image.chunklist';
 
 		$headers = [];
 		$output = fopen($filename, 'w+');
+
+		print $imagefields['link'] . ' ' . $filename . PHP_EOL;
 
 		run_query($headersReq, $imagefields['link'], $headers, $output);
 
@@ -174,9 +184,22 @@ function download_images($images) {
 	}
 }
 
-if ($argc != 3) {
-	print 'Usage: php obtain_recovery.php MLB board-id' . PHP_EOL;
+if ($argc < 2) {
+	print 'Usage: php obtain_recovery.php board-id [MLB] [--diag]' . PHP_EOL;
 	exit(1);
+}
+
+$board = $argv[1];
+$mlb   = '00000000000000000';
+$diag  = false;
+
+if ($argc > 2) {
+	if ($argv[2] == '--diag') {
+		$diag = true;
+	} else {
+		$mlb  = $argv[2];
+		$diag = $argc > 3 && $argv[3] == '--diag';
+	}
 }
 
 $sess = setup_session();
@@ -185,11 +208,11 @@ if ($sess == '') {
 	exit(1);
 }
 
-$images = obtain_images($sess, $argv[1], $argv[2]);
+$images = obtain_images($sess, $board, $mlb, $diag);
 
 if (count($images['image']) == 0 || count($images['chunklist']) == 0) {
 	print 'Failed to obtain images!' . PHP_EOL;
 	exit(1);
 }
 
-download_images($images);
+download_images($images, $diag);
