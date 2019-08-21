@@ -49,44 +49,39 @@ RecalculateTSC (
   UINT32   AcpiTicksTarget;
   UINT32   TimerResolution;
   EFI_TPL  PrevTpl;
-  MSR_SKYLAKE_TRACE_HUB_STH_ACPIBAR_BASE_REGISTER  AcpiBaseMsr;
 
   TimerAddr = 0;
   TimerResolution = 10;
 
   //
   // Intel timer support.
+  // Here we obtain the address of 24-bit or 32-bit PM1_TMR.
+  // TODO: I believe that there is little reason to enforce our timer lib to calculate
+  // CPU frequency through ACPI PM timer on modern Intel CPUs. Starting from Skylake
+  // we have crystal clock, which allows us to get quite reliable values. Perhaps
+  // this code should be put to OcCpuLib, and the best available source is to be used.
   //
-  if (PciRead16 (PCI_ICH_LPC_ADDRESS (0)) == 0x8086) {
+  if (PciRead16 (PCI_ICH_LPC_ADDRESS (0)) == V_ICH_PCI_DEVICE_ID) {
     //
-    // Check if ACPI I/O Space Is Enabled On LPC device.
+    // On legacy platforms PM1_TMR can be found in ACPI I/O space.
+    // 1. For platforms prior to Intel Skylake (Sunrisepoint PCH) iTCO watchdog
+    //    resources reside in LPC device (D31:F0).
+    // 2. For platforms from Intel Skylake till Intel Kaby Lake inclusive they reside in
+    //    PMC controller (D31:F2).
+    // Checking whether ACPI I/O space is enabled is done via ACPI_CNTL register bit 0.
     //
-    if ((PciRead8 (PCI_ICH_LPC_ADDRESS (R_ICH_LPC_ACPI_CNT)) & B_ICH_LPC_ACPI_CNT_ACPI_EN) != 0) {
-      TimerAddr = ((PciRead16 (PCI_ICH_LPC_ADDRESS (R_ICH_LPC_ACPI_BASE)) & B_ICH_LPC_ACPI_BASE_BAR) + R_ACPI_PM1_TMR);
-      DEBUG ((DEBUG_VERBOSE, "Acpi Timer Addr 0x%0x (LPC)\n", TimerAddr));
-    } else {
-      //
-      // Starting from Intel Sunrisepoint (Skylake PCH) the iTCO watchdog resources
-      // have been moved to reside under the i801 SMBus host controller whereas
-      // previously they were under the LPC device.
-      //
-      // Check if ACPI I/O space is enabled on SMBUS device
-      //
-      if ((PciRead8 (PCI_ICH_SMBUS_ADDRESS (R_ICH_SMBUS_ACPI_CNT)) & B_ICH_SMBUS_ACPI_CNT_ACPI_EN) != 0) {
-        TimerAddr = ((PciRead16 (PCI_ICH_SMBUS_ADDRESS (R_ICH_SMBUS_ACPI_BASE)) & B_ICH_SMBUS_ACPI_BASE_BAR) + R_ACPI_PM1_TMR);
-        DEBUG ((DEBUG_VERBOSE, "Acpi Timer Addr 0x%0x (SMB)\n", TimerAddr));
-      }
-    }
-
+    // On modern platforms, starting from Intel Coffee Lake, the space is roughly the same,
+    // but it is referred to as PMC I/O space, and the addressing is done through BAR2.
     //
-    // At least some Kaby Lake chipsets support MSR register with ACPI Base.
-    //
-    if (TimerAddr == 0) {
-      AcpiBaseMsr.Uint64 = AsmReadMsr64 (MSR_SKYLAKE_TRACE_HUB_STH_ACPIBAR_BASE);
-      if (AcpiBaseMsr.Bits.ACPIBAR_BASE_ADDRESS != 0) {
-        TimerAddr = AcpiBaseMsr.Bits.ACPIBAR_BASE_ADDRESS + R_ACPI_PM1_TMR;
-        DEBUG ((DEBUG_VERBOSE, "Acpi Timer Addr 0x%0x (MSR)\n", TimerAddr));
-      }
+    if ((PciRead8 (PCI_ICH_LPC_ADDRESS (R_ICH_LPC_ACPI_CNTL)) & B_ICH_LPC_ACPI_CNTL_ACPI_EN) != 0) {
+      TimerAddr = (PciRead16 (PCI_ICH_LPC_ADDRESS (R_ICH_LPC_ACPI_BASE)) & B_ICH_LPC_ACPI_BASE_BAR) + R_ACPI_PM1_TMR;
+      DEBUG ((DEBUG_VERBOSE, "OCTR: Acpi Timer Addr 0x%0x (LPC)\n", TimerAddr));
+    } else if ((PciRead8 (PCI_ICH_PMC_ADDRESS (R_ICH_PMC_ACPI_CNTL)) & B_ICH_PMC_ACPI_CNTL_ACPI_EN) != 0) {
+      TimerAddr = (PciRead16 (PCI_ICH_PMC_ADDRESS (R_ICH_PMC_ACPI_BASE)) & B_ICH_PMC_ACPI_BASE_BAR) + R_ACPI_PM1_TMR;
+      DEBUG ((DEBUG_VERBOSE, "OCTR: Acpi Timer Addr 0x%0x (PMC)\n", TimerAddr));
+    } else if ((PciRead16 (PCI_ICH_PMC_ADDRESS (R_ICH_PMC_BAR2_BASE)) & B_ICH_PMC_BAR2_BASE_BAR) != 0) {
+      TimerAddr = (PciRead16 (PCI_ICH_PMC_ADDRESS (R_ICH_PMC_BAR2_BASE)) & B_ICH_PMC_BAR2_BASE_BAR) + R_ACPI_PM1_TMR;
+      DEBUG ((DEBUG_VERBOSE, "OCTR: Acpi Timer Addr 0x%0x (BAR2)\n", TimerAddr));
     }
   }
 
