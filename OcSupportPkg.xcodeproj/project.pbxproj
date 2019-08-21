@@ -79,6 +79,9 @@
 		3521914B224D4B68002A2CA6 /* OcTemplateLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 352190C9224D4AE2002A2CA6 /* OcTemplateLib.c */; };
 		3521914C224D4B68002A2CA6 /* ocbuild.config in Sources */ = {isa = PBXBuildFile; fileRef = 352190D0224D4AE2002A2CA6 /* ocbuild.config */; };
 		3521914D224D4B68002A2CA6 /* GdbSyms.c in Sources */ = {isa = PBXBuildFile; fileRef = 352190D6224D4AE2002A2CA6 /* GdbSyms.c */; };
+		35737BAE230D515800681E79 /* OcConfigurationLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35737BAD230D515800681E79 /* OcConfigurationLib.c */; };
+		35A92167230C723200A4B8D0 /* OcConsoleLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35A92163230C723100A4B8D0 /* OcConsoleLib.c */; };
+		35A92168230C723200A4B8D0 /* OcConsoleControlEntryModeLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35A92165230C723200A4B8D0 /* OcConsoleControlEntryModeLib.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -259,6 +262,12 @@
 		352190DB224D4AE2002A2CA6 /* gdb_uefi.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = gdb_uefi.py; sourceTree = "<group>"; };
 		3521914E224E0E6F002A2CA6 /* build.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = build.sh; sourceTree = "<group>"; };
 		3521951A224E14D8002A2CA6 /* X64 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = X64; path = ../Build/OcSupportPkg/RELEASE_XCODE5/X64; sourceTree = "<group>"; };
+		35737BAC230D515800681E79 /* OcConfigurationLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcConfigurationLib.inf; sourceTree = "<group>"; };
+		35737BAD230D515800681E79 /* OcConfigurationLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcConfigurationLib.c; sourceTree = "<group>"; };
+		35A92162230C723100A4B8D0 /* OcConsoleLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcConsoleLib.inf; sourceTree = "<group>"; };
+		35A92163230C723100A4B8D0 /* OcConsoleLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcConsoleLib.c; sourceTree = "<group>"; };
+		35A92165230C723200A4B8D0 /* OcConsoleControlEntryModeLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcConsoleControlEntryModeLib.c; sourceTree = "<group>"; };
+		35A92166230C723200A4B8D0 /* OcConsoleControlEntryModeLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcConsoleControlEntryModeLib.inf; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -529,6 +538,9 @@
 		35219043224D4AE2002A2CA6 /* Library */ = {
 			isa = PBXGroup;
 			children = (
+				35737BAB230D515800681E79 /* OcConfigurationLib */,
+				35A92164230C723200A4B8D0 /* OcConsoleControlEntryModeLib */,
+				35A92161230C723100A4B8D0 /* OcConsoleLib */,
 				35219044224D4AE2002A2CA6 /* OcMachoLib */,
 				35219053224D4AE2002A2CA6 /* OcStringLib */,
 				35219057224D4AE2002A2CA6 /* OcPngLib */,
@@ -895,6 +907,33 @@
 			path = Scripts;
 			sourceTree = "<group>";
 		};
+		35737BAB230D515800681E79 /* OcConfigurationLib */ = {
+			isa = PBXGroup;
+			children = (
+				35737BAC230D515800681E79 /* OcConfigurationLib.inf */,
+				35737BAD230D515800681E79 /* OcConfigurationLib.c */,
+			);
+			path = OcConfigurationLib;
+			sourceTree = "<group>";
+		};
+		35A92161230C723100A4B8D0 /* OcConsoleLib */ = {
+			isa = PBXGroup;
+			children = (
+				35A92162230C723100A4B8D0 /* OcConsoleLib.inf */,
+				35A92163230C723100A4B8D0 /* OcConsoleLib.c */,
+			);
+			path = OcConsoleLib;
+			sourceTree = "<group>";
+		};
+		35A92164230C723200A4B8D0 /* OcConsoleControlEntryModeLib */ = {
+			isa = PBXGroup;
+			children = (
+				35A92165230C723200A4B8D0 /* OcConsoleControlEntryModeLib.c */,
+				35A92166230C723200A4B8D0 /* OcConsoleControlEntryModeLib.inf */,
+			);
+			path = OcConsoleControlEntryModeLib;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -991,6 +1030,7 @@
 				35219101224D4B67002A2CA6 /* AcpiTest.c in Sources */,
 				35219102224D4B67002A2CA6 /* SmbiosTest.c in Sources */,
 				35219103224D4B67002A2CA6 /* Lilu.c in Sources */,
+				35737BAE230D515800681E79 /* OcConfigurationLib.c in Sources */,
 				35219104224D4B67002A2CA6 /* Vsmc.c in Sources */,
 				35219105224D4B67002A2CA6 /* KernelTest.c in Sources */,
 				35219106224D4B67002A2CA6 /* DataHubTest.c in Sources */,
@@ -1031,6 +1071,7 @@
 				35219134224D4B67002A2CA6 /* OcAppleBootPolicyLib.c in Sources */,
 				35219135224D4B67002A2CA6 /* OcSupportBootPolicy.c in Sources */,
 				35219136224D4B67002A2CA6 /* OcAcpiLib.c in Sources */,
+				35A92167230C723200A4B8D0 /* OcConsoleLib.c in Sources */,
 				35219137224D4B67002A2CA6 /* OcFirmwarePasswordLib.c in Sources */,
 				35219138224D4B67002A2CA6 /* OcDevicePathLib.c in Sources */,
 				35219139224D4B67002A2CA6 /* OcDebugLogLib.c in Sources */,
@@ -1038,6 +1079,7 @@
 				3521913B224D4B67002A2CA6 /* VirtualVolume.c in Sources */,
 				3521913C224D4B67002A2CA6 /* VirtualFs.c in Sources */,
 				3521913D224D4B67002A2CA6 /* PrelinkedKext.c in Sources */,
+				35A92168230C723200A4B8D0 /* OcConsoleControlEntryModeLib.c in Sources */,
 				3521913E224D4B67002A2CA6 /* PrelinkedContext.c in Sources */,
 				3521913F224D4B67002A2CA6 /* Link.c in Sources */,
 				35219140224D4B67002A2CA6 /* KextPatcher.c in Sources */,
@@ -1198,8 +1240,13 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = MACH_LITTLE_ENDIAN;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/../**";
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				OTHER_CFLAGS = (
+					"-include",
+					"$(SRCROOT)/../MdePkg/Include/Uefi.h",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -1214,8 +1261,13 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = MACH_LITTLE_ENDIAN;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/../**";
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				OTHER_CFLAGS = (
+					"-include",
+					"$(SRCROOT)/../MdePkg/Include/Uefi.h",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
