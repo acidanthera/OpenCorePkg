@@ -18,7 +18,7 @@
 #include <Protocol/OcLog.h>
 #include <Protocol/DataHub.h>
 
-#define OC_LOG_BUFFER_SIZE            BASE_128KB
+#define OC_LOG_BUFFER_SIZE            BASE_256KB
 #define OC_LOG_LINE_BUFFER_SIZE       BASE_1KB
 #define OC_LOG_NVRAM_BUFFER_SIZE      BASE_32KB
 #define OC_LOG_FILE_PATH_BUFFER_SIZE  256
