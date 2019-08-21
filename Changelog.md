@@ -7,6 +7,8 @@ OpenCore Changelog
 - Fixed FSBFrequency calculation on Xeon Scalable CPUs (thx @mrmiller)
 - Fixed ARTFrequency specifying on Intel server and atom models
 - Increased log size to 256 KB by default
+- Added `ReplaceTabWithSpace` quirk to improve Shell experience
+- Added `ClearScreenOnModeSwitch` quirk to avoid visual glitches
 
 #### v0.0.4
 - Fixed kext injection issues with dummy dependencies

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Aug 20 14:26:36 2019
-%DIF ADD ../Configuration.tex        Tue Aug 20 14:45:30 2019
+%DIF DEL PreviousConfiguration.tex   Sun Aug 11 01:57:12 2019
+%DIF ADD ../Configuration.tex        Wed Aug 21 16:39:04 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3376,7 +3376,21 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{true} for this to work.
 
 \item
-  \texttt{ProvideConsoleGop}\\
+  \DIFaddbegin \texttt{\DIFadd{ReplaceTabWithSpace}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Some firmwares do not print tab characters or even everything 
+  that follows them, causing difficulties or inability to use the UEFI Shell builtin 
+  text editor to edit property lists and other documents. This option makes the console
+  output spaces instead of tabs. 
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: }\texttt{\DIFadd{ConsoleControl}} \DIFadd{may need to be set to
+  }\texttt{\DIFadd{true}} \DIFadd{for this to work.
+}
+
+\item
+  \DIFaddend \texttt{ProvideConsoleGop}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: macOS bootloader requires GOP (Graphics Output Protocol)
@@ -3418,7 +3432,21 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{true} for this to work. On all known affected systems
   \texttt{ConsoleMode} had to be set to empty string for this to work.
 
-\end{enumerate}
+\DIFaddbegin \item
+  \texttt{\DIFadd{ClearScreenOnModeSwitch}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Some firmwares clear only part of screen when switching
+  from graphics to text mode, leaving a fragment of previously drawn image visible.
+  This option fills the entire graphics screen with black color before switching to
+  text mode.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: }\texttt{\DIFadd{ConsoleControl}} \DIFadd{should be set to
+  }\texttt{\DIFadd{true}} \DIFadd{for this to work.
+}
+
+\DIFaddend \end{enumerate}
 
 \section{Troubleshooting}\label{troubleshooting}
 
