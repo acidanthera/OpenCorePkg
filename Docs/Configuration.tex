@@ -3306,6 +3306,18 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{true} for this to work.
 
 \item
+  \texttt{ReplaceTabWithSpace}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Some firmwares do not print tab characters or even everything 
+  that follows them, causing difficulties or inability to use the UEFI Shell builtin 
+  text editor to edit property lists and other documents. This option makes the console
+  output spaces instead of tabs. 
+
+  \emph{Note}: \texttt{ConsoleControl} may need to be set to
+  \texttt{true} for this to work.
+
+\item
   \texttt{ProvideConsoleGop}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -3347,6 +3359,18 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \emph{Note}: \texttt{ConsoleControl} may need to be set to
   \texttt{true} for this to work. On all known affected systems
   \texttt{ConsoleMode} had to be set to empty string for this to work.
+  
+\item
+  \texttt{ClearScreenOnModeSwitch}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Some firmwares clear only part of screen when switching
+  from graphics to text mode, leaving a fragment of previously drawn image visible.
+  This option fills the entire graphics screen with black color before switching to
+  text mode.
+
+  \emph{Note}: \texttt{ConsoleControl} should be set to
+  \texttt{true} for this to work.
 
 \end{enumerate}
 
