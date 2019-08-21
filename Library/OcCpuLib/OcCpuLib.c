@@ -753,9 +753,7 @@ ScanIntelProcessor (
 
       DEBUG ((
         DEBUG_INFO,
-        "OCCPU: %a %a %11LuHz %5LuMHz = %Lu * %u / %u\n",
-        "ART",
-        "Frequency",
+        "OCCPU: CPUFrequencyFromART %11LuHz %5LuMHz = %Lu * %u / %u\n",
         Cpu->CPUFrequencyFromART,
         DivU64x32 (Cpu->CPUFrequencyFromART, 1000000),
         Cpu->ARTFrequency,
@@ -778,11 +776,11 @@ ScanIntelProcessor (
   //
   // Verify that our two CPU frequency calculations do not differ substantially.
   //
-  if (Cpu->CPUFrequencyFromART > 0
-    && ABS((INT64)Cpu->CPUFrequencyFromART - (INT64)Cpu->CPUFrequencyFromTSC) > OC_CPU_FREQUENCY_TOLERANCE) {
+  if (Cpu->CPUFrequencyFromART > 0 && Cpu->CPUFrequencyFromTSC > 0
+    && ABS((INT64) Cpu->CPUFrequencyFromART - (INT64) Cpu->CPUFrequencyFromTSC) > OC_CPU_FREQUENCY_TOLERANCE) {
     DEBUG ((
       DEBUG_WARN,
-      "OCCPU: ART CPU frequency differs substantially from TSC: %11LuHz != %11LuHzX\n",
+      "OCCPU: ART based CPU frequency differs substantially from TSC: %11LuHz != %11LuHz\n",
       Cpu->CPUFrequencyFromART,
       Cpu->CPUFrequencyFromTSC
       ));
@@ -1055,27 +1053,21 @@ OcCpuScanProcessor (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCCPU: %a %a %11LuHz %5LuMHz\n",
-    "TSC",
-    "Frequency",
+    "OCCPU: CPUFrequencyFromTSC %11LuHz %5LuMHz\n",
     Cpu->CPUFrequencyFromTSC,
     DivU64x32 (Cpu->CPUFrequencyFromTSC, 1000000)
     ));
 
   DEBUG ((
     DEBUG_INFO,
-    "OCCPU: %a %a %11LuHz %5LuMHz\n",
-    "CPU",
-    "Frequency",
+    "OCCPU: CPUFrequency %11LuHz %5LuMHz\n",
     Cpu->CPUFrequency,
     DivU64x32 (Cpu->CPUFrequency, 1000000)
     ));
 
   DEBUG ((
     DEBUG_INFO,
-    "OCCPU: %a %a %11LuHz %5LuMHz\n",
-    "FSB",
-    "Frequency",
+    "OCCPU: FSBFrequency %11LuHz %5LuMHz\n",
     Cpu->FSBFrequency,
     DivU64x32 (Cpu->FSBFrequency, 1000000)
     ));
