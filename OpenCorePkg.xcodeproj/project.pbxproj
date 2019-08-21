@@ -12,6 +12,7 @@
 		354F741122573F0A00AB1A9B /* OcBootstrap.h in Headers */ = {isa = PBXBuildFile; fileRef = 354F740722573F0A00AB1A9B /* OcBootstrap.h */; };
 		354F741222573F0A00AB1A9B /* OpenCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 354F740822573F0A00AB1A9B /* OpenCore.h */; };
 		354F741322573F0A00AB1A9B /* Bootstrap.c in Sources */ = {isa = PBXBuildFile; fileRef = 354F740E22573F0A00AB1A9B /* Bootstrap.c */; };
+		358D567D230D403D00F2894B /* lib__index_OcSupportPkg.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 358D567C230D403D00F2894B /* lib__index_OcSupportPkg.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		354F740A22573F0A00AB1A9B /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		354F740D22573F0A00AB1A9B /* Bootstrap.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Bootstrap.inf; sourceTree = "<group>"; };
 		354F740E22573F0A00AB1A9B /* Bootstrap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Bootstrap.c; sourceTree = "<group>"; };
+		358D567C230D403D00F2894B /* lib__index_OcSupportPkg.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = lib__index_OcSupportPkg.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,6 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				358D567D230D403D00F2894B /* lib__index_OcSupportPkg.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -53,6 +56,7 @@
 				354F740022573F0A00AB1A9B /* Platform */,
 				354F73FF22573F0A00AB1A9B /* README.md */,
 				354F73F922573EBF00AB1A9B /* Products */,
+				358D567B230D403D00F2894B /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -114,6 +118,14 @@
 				354F740E22573F0A00AB1A9B /* Bootstrap.c */,
 			);
 			path = Bootstrap;
+			sourceTree = "<group>";
+		};
+		358D567B230D403D00F2894B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				358D567C230D403D00F2894B /* lib__index_OcSupportPkg.dylib */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -352,8 +364,13 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = MACH_LITTLE_ENDIAN;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/../**";
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				OTHER_CFLAGS = (
+					"-include",
+					"$(SRCROOT)/../MdePkg/Include/Uefi.h",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -368,8 +385,13 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = MACH_LITTLE_ENDIAN;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/../**";
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				OTHER_CFLAGS = (
+					"-include",
+					"$(SRCROOT)/../MdePkg/Include/Uefi.h",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
