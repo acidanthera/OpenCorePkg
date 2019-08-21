@@ -18,6 +18,8 @@
 #include <IndustryStandard/Pci.h>
 #include <IndustryStandard/CpuId.h>
 
+#include <Register/Msr/SkylakeMsr.h>
+
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
@@ -47,6 +49,7 @@ RecalculateTSC (
   UINT32   AcpiTicksTarget;
   UINT32   TimerResolution;
   EFI_TPL  PrevTpl;
+  MSR_SKYLAKE_TRACE_HUB_STH_ACPIBAR_BASE_REGISTER  AcpiBaseMsr;
 
   TimerAddr = 0;
   TimerResolution = 10;
@@ -72,6 +75,17 @@ RecalculateTSC (
       if ((PciRead8 (PCI_ICH_SMBUS_ADDRESS (R_ICH_SMBUS_ACPI_CNT)) & B_ICH_SMBUS_ACPI_CNT_ACPI_EN) != 0) {
         TimerAddr = ((PciRead16 (PCI_ICH_SMBUS_ADDRESS (R_ICH_SMBUS_ACPI_BASE)) & B_ICH_SMBUS_ACPI_BASE_BAR) + R_ACPI_PM1_TMR);
         DEBUG ((DEBUG_VERBOSE, "Acpi Timer Addr 0x%0x (SMB)\n", TimerAddr));
+      }
+    }
+
+    //
+    // At least some Kaby Lake chipsets support MSR register with ACPI Base.
+    //
+    if (TimerAddr == 0) {
+      AcpiBaseMsr.Uint64 = AsmReadMsr64 (MSR_SKYLAKE_TRACE_HUB_STH_ACPIBAR_BASE);
+      if (AcpiBaseMsr.Bits.ACPIBAR_BASE_ADDRESS != 0) {
+        TimerAddr = AcpiBaseMsr.Bits.ACPIBAR_BASE_ADDRESS + R_ACPI_PM1_TMR;
+        DEBUG ((DEBUG_VERBOSE, "Acpi Timer Addr 0x%0x (MSR)\n", TimerAddr));
       }
     }
   }
