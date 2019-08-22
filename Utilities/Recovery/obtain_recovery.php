@@ -95,7 +95,7 @@ function setup_session() {
 	return $cookie;
 }
 
-function obtain_images($session, $board, $mlb, $diag = false) {
+function obtain_images($session, $board, $mlb, $type = 'default', $diag = false) {
 	$headersReq = [
 		'Host: osrecovery.apple.com',
 		'Connection: close',
@@ -108,23 +108,63 @@ function obtain_images($session, $board, $mlb, $diag = false) {
 	$output = '';
 	$headers = [];
 
+	// Recovery latest:
+	// cid=3076CE439155BA14
+	// sn=...
+	// bid=Mac-E43C1C25D4880AD6
+	// k=4BE523BB136EB12B1758C70DB43BDD485EBCB6A457854245F9E9FF0587FB790C
+	// os=latest
+	// fg=B2E6AA07DB9088BE5BDB38DB2EA824FDDFB6C3AC5272203B32D89F9D8E3528DC
+	//
+	// Recovery default:
+	// cid=4A35CB95FF396EE7
+	// sn=...
+	// bid=Mac-E43C1C25D4880AD6
+	// k=0A385E6FFC3DDD990A8A1F4EC8B98C92CA5E19C9FF1DD26508C54936D8523121
+	// os=default
+	// fg=B2E6AA07DB9088BE5BDB38DB2EA824FDDFB6C3AC5272203B32D89F9D8E3528DC
+	//
+	// Diagnostics:
+	// cid=050C59B51497CEC8
+	// sn=...
+	// bid=Mac-E43C1C25D4880AD6
+	// k=37D42A8282FE04A12A7D946304F403E56A2155B9622B385F3EB959A2FBAB8C93
+	// fg=B2E6AA07DB9088BE5BDB38DB2EA824FDDFB6C3AC5272203B32D89F9D8E3528DC
+	//
+	// Server logic for recovery:
+	// if not valid(bid):
+	//   return error()
+	// ppp = get_ppp(sn)
+	// if not valid(ppp):
+	//   return latest_recovery(bid = bid)             # Returns newest for bid.
+	// if valid(sn):
+	//   if os == 'default':
+	//     return default_recovery(sn = sn, ppp = ppp) # Returns oldest for sn.
+	//   else:
+	//     return latest_recovery(sn = sn, ppp = ppp)  # Returns newest for sn.
+	// return default_recovery(ppp = ppp)              # Returns oldest.
+
 	$postvars =
+		// Context ID, should be random
 		'cid=F4FDBCCF36190DD4' . PHP_EOL .
 		// MLB, board serial number
 		'sn=' . $mlb . PHP_EOL .
 		// board-id
 		'bid=' . $board . PHP_EOL .
+		// FIXME: Should be random
 		'k=6E7D753C11E1F9652B99D3DB8C80A49E82143EA027CBA516E3E18B3A4FFDCD58' . PHP_EOL .
+		($diag ? '' : 'os=' . $type . PHP_EOL) .
 		'fg=80F6E802A09B8B553202EE0D37AE64662ACFAF30B111E1984C01F64551BB7EFE'
 	;
 
+	if ($diag)
+		$url = 'http://osrecovery.apple.com/InstallationPayload/Diagnostics';
+	else
+		$url = 'http://osrecovery.apple.com/InstallationPayload/RecoveryImage';
+
 	$images = [ 'image' => [], 'chunklist' => [] ];
 
-	if ($diag) {
-	 run_query($headersReq, 'http://osrecovery.apple.com/InstallationPayload/Diagnostics', $headers, $output, $postvars);
-	} else {
-		run_query($headersReq, 'http://osrecovery.apple.com/InstallationPayload/RecoveryImage', $headers, $output, $postvars);
-	}
+	run_query($headersReq, $url, $headers, $output, $postvars);
 	dump_query('obtain_images', $headers, $output);
 
 	$fields = explode("\n", $output);
@@ -185,22 +225,30 @@ function download_images($images, $diag = false) {
 }
 
 if ($argc < 2) {
-	print 'Usage: php obtain_recovery.php board-id [MLB] [--diag]' . PHP_EOL;
+	print 'Usage: php obtain_recovery.php board-id [MLB] [--diag] [--latest]' . PHP_EOL;
 	exit(1);
 }
 
 $board = $argv[1];
 $mlb   = '00000000000000000';
-$diag  = false;
+$type  = 'default';
 
 if ($argc > 2) {
 	if ($argv[2] == '--diag') {
 		$diag = true;
+	} else if ($argv[2] == '--latest') {
+		$type = 'latest';
 	} else {
 		$mlb  = $argv[2];
-		$diag = $argc > 3 && $argv[3] == '--diag';
+		$diag = $argc > 3 && $argv[3] == '--diag'
+		  || $argc > 4 && $argv[4] == '--diag';
+		if ($argc > 3 && $argv[3] == '--latest'
+		  || $argc > 4 && $argv[4] == '--latest')
+		  $type = 'latest';
 	}
 }
+
+print 'Downloading '.$type.' '.($diag ? 'diagnostics' : 'recovery').' for '.$board.' with '.$mlb.PHP_EOL;
 
 $sess = setup_session();
 if ($sess == '') {
@@ -208,7 +256,7 @@ if ($sess == '') {
 	exit(1);
 }
 
-$images = obtain_images($sess, $board, $mlb, $diag);
+$images = obtain_images($sess, $board, $mlb, $type, $diag);
 
 if (count($images['image']) == 0 || count($images['chunklist']) == 0) {
 	print 'Failed to obtain images!' . PHP_EOL;
