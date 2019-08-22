@@ -537,7 +537,7 @@ GetVariableBootArgs (
   Erases customised slide value from everywhere accessible
   for security purposes.
 
-  @param[in,out]  BootCompat    Boot compatibility context.
+  @param[in,out]  SlideSupport  Slide support state.
   @param[in,out]  BootArgs      Apple kernel boot arguments.
 **/
 STATIC
