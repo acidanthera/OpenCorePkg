@@ -35,9 +35,11 @@
   OcTimerLib.c
 
 [Packages]
+  EfiPkg/EfiPkg.dec
   OcSupportPkg/OcSupportPkg.dec
   MdePkg/MdePkg.dec
   UefiCpuPkg/UefiCpuPkg.dec
 
 [LibraryClasses]
   PciLib
+  OcCpuLib

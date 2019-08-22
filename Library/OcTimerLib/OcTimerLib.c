@@ -18,9 +18,8 @@
 #include <IndustryStandard/Pci.h>
 #include <IndustryStandard/CpuId.h>
 
-#include <Register/Msr/SkylakeMsr.h>
-
 #include <Library/BaseLib.h>
+#include <Library/OcCpuLib.h>
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
 #include <Library/PciLib.h>
@@ -39,8 +38,7 @@ RecalculateTSC (
   VOID
   )
 {
-  UINT32   TimerAddr;
-  UINT32   CpuVendor;
+  UINTN    TimerAddr;
   UINT64   Tsc0;
   UINT64   Tsc1;
   UINT32   AcpiTick0;
@@ -50,57 +48,8 @@ RecalculateTSC (
   UINT32   TimerResolution;
   EFI_TPL  PrevTpl;
 
-  TimerAddr = 0;
+  TimerAddr       = OcGetPmTimerAddr (NULL);
   TimerResolution = 10;
-
-  //
-  // Intel timer support.
-  // Here we obtain the address of 24-bit or 32-bit PM1_TMR.
-  // TODO: I believe that there is little reason to enforce our timer lib to calculate
-  // CPU frequency through ACPI PM timer on modern Intel CPUs. Starting from Skylake
-  // we have crystal clock, which allows us to get quite reliable values. Perhaps
-  // this code should be put to OcCpuLib, and the best available source is to be used.
-  //
-  if (PciRead16 (PCI_ICH_LPC_ADDRESS (0)) == V_ICH_PCI_DEVICE_ID) {
-    //
-    // On legacy platforms PM1_TMR can be found in ACPI I/O space.
-    // 1. For platforms prior to Intel Skylake (Sunrisepoint PCH) iTCO watchdog
-    //    resources reside in LPC device (D31:F0).
-    // 2. For platforms from Intel Skylake till Intel Kaby Lake inclusive they reside in
-    //    PMC controller (D31:F2).
-    // Checking whether ACPI I/O space is enabled is done via ACPI_CNTL register bit 0.
-    //
-    // On modern platforms, starting from Intel Coffee Lake, the space is roughly the same,
-    // but it is referred to as PMC I/O space, and the addressing is done through BAR2.
-    //
-    if ((PciRead8 (PCI_ICH_LPC_ADDRESS (R_ICH_LPC_ACPI_CNTL)) & B_ICH_LPC_ACPI_CNTL_ACPI_EN) != 0) {
-      TimerAddr = (PciRead16 (PCI_ICH_LPC_ADDRESS (R_ICH_LPC_ACPI_BASE)) & B_ICH_LPC_ACPI_BASE_BAR) + R_ACPI_PM1_TMR;
-      DEBUG ((DEBUG_VERBOSE, "OCTR: Acpi Timer Addr 0x%0x (LPC)\n", TimerAddr));
-    } else if ((PciRead8 (PCI_ICH_PMC_ADDRESS (R_ICH_PMC_ACPI_CNTL)) & B_ICH_PMC_ACPI_CNTL_ACPI_EN) != 0) {
-      TimerAddr = (PciRead16 (PCI_ICH_PMC_ADDRESS (R_ICH_PMC_ACPI_BASE)) & B_ICH_PMC_ACPI_BASE_BAR) + R_ACPI_PM1_TMR;
-      DEBUG ((DEBUG_VERBOSE, "OCTR: Acpi Timer Addr 0x%0x (PMC)\n", TimerAddr));
-    } else if ((PciRead16 (PCI_ICH_PMC_ADDRESS (R_ICH_PMC_BAR2_BASE)) & B_ICH_PMC_BAR2_BASE_BAR) != 0) {
-      TimerAddr = (PciRead16 (PCI_ICH_PMC_ADDRESS (R_ICH_PMC_BAR2_BASE)) & B_ICH_PMC_BAR2_BASE_BAR) + R_ACPI_PM1_TMR;
-      DEBUG ((DEBUG_VERBOSE, "OCTR: Acpi Timer Addr 0x%0x (BAR2)\n", TimerAddr));
-    }
-  }
-
-  //
-  // AMD timer support.
-  //
-  if (TimerAddr == 0) {
-    //
-    // In an ideal world I believe we should detect AMD SMBus controller...
-    //
-    CpuVendor = 0;
-    AsmCpuid (CPUID_SIGNATURE, NULL, &CpuVendor, NULL, NULL);
-
-    if (CpuVendor == CPUID_VENDOR_AMD) {
-      TimerAddr = MmioRead32 (
-        R_AMD_ACPI_MMIO_BASE + R_AMD_ACPI_MMIO_PMIO_BASE + R_AMD_ACPI_PM_TMR_BLOCK
-        );
-    }
-  }
 
   if (TimerAddr != 0) {
     mPerformanceCounterFrequency = 0;
