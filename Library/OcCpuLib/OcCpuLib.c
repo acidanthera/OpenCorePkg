@@ -867,6 +867,10 @@ ScanAmdProcessor (
   Cpu->AppleProcessorType = AppleProcessorTypeCorei5Type5;
   //
   // get TSC Frequency calculated in OcTimerLib
+  // FIXME(1): This code assumes the CPU operates in P0.  Either ensure it does
+  //           and raise the mode on demand, or adapt the logic to consider
+  //           both the operating and the nominal frequency, latter for
+  //           the invariant TSC.
   //
   Cpu->CPUFrequencyFromTSC = GetPerformanceCounterProperties (NULL, NULL);
   Cpu->CPUFrequency = Cpu->CPUFrequencyFromTSC;
@@ -899,11 +903,17 @@ ScanAmdProcessor (
         break;
       case 0x06:
       case 0x07:
+        // FIXME: Please refer to FIXME(1) for the MSR used here.
         CofVid           = AsmReadMsr64 (K10_COFVID_STATUS);
         CoreFrequencyID  = BitFieldRead64 (CofVid, 0, 5);
-        CoreDivisorID    = CofVid & BIT6;
+        CoreDivisorID    = BitFieldRead64 (CofVid, 6, 8);
         Divisor          = LShiftU64 (1, CoreDivisorID);
-        Cpu->MaxBusRatio = (UINT8)(((CoreFrequencyID + 16) / Divisor) + 1);
+        //
+        // BKDG for AMD Family 15h Models 10h-1Fh Processors (42300 Rev 3.12)
+        // Core current operating frequency in MHz. CoreCOF = 100 *
+        // (MSRC001_00[6B:64][CpuFid] + 10h) / (2 ^ MSRC001_00[6B:64][CpuDid]).
+        //
+        Cpu->MaxBusRatio = (UINT8)((CoreFrequencyID + 0x10) / Divisor);
         //
         // AMD 15h and 16h CPUs don't support hyperthreading,
         // so the core count is equal to the thread count
