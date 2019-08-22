@@ -28,6 +28,91 @@
 
 STATIC UINT64 mPerformanceCounterFrequency = 0;
 
+UINTN
+OcGetPmTimerAddr (
+  OUT CONST CHAR8 **Type  OPTIONAL
+  )
+{
+  UINTN   TimerAddr;
+  UINT32  CpuVendor;
+
+  TimerAddr = 0;
+
+  if (Type != NULL) {
+    *Type = "Failure";
+  }
+
+  //
+  // Intel timer support.
+  // Here we obtain the address of 24-bit or 32-bit PM1_TMR.
+  // TODO: I believe that there is little reason to enforce our timer lib to calculate
+  // CPU frequency through ACPI PM timer on modern Intel CPUs. Starting from Skylake
+  // we have crystal clock, which allows us to get quite reliable values. Perhaps
+  // this code should be put to OcCpuLib, and the best available source is to be used.
+  //
+  if (PciRead16 (PCI_ICH_LPC_ADDRESS (0)) == V_ICH_PCI_DEVICE_ID) {
+    //
+    // On legacy platforms PM1_TMR can be found in ACPI I/O space.
+    // 1. For platforms prior to Intel Skylake (Sunrisepoint PCH) iTCO watchdog
+    //    resources reside in LPC device (D31:F0).
+    // 2. For platforms from Intel Skylake till Intel Kaby Lake inclusive they reside in
+    //    PMC controller (D31:F2).
+    // Checking whether ACPI I/O space is enabled is done via ACPI_CNTL register bit 0.
+    //
+    // On modern platforms, starting from Intel Coffee Lake, the space is roughly the same,
+    // but it is referred to as PMC I/O space, and the addressing is done through BAR2.
+    // In addition to that on B360 and friends PMC controller may be just missing.
+    //
+    if ((PciRead8 (PCI_ICH_LPC_ADDRESS (R_ICH_LPC_ACPI_CNTL)) & B_ICH_LPC_ACPI_CNTL_ACPI_EN) != 0) {
+      TimerAddr = (PciRead16 (PCI_ICH_LPC_ADDRESS (R_ICH_LPC_ACPI_BASE)) & B_ICH_LPC_ACPI_BASE_BAR) + R_ACPI_PM1_TMR;
+      if (Type != NULL) {
+        *Type = "LPC";
+      }
+    } else if (PciRead16 (PCI_ICH_PMC_ADDRESS (0)) == V_ICH_PCI_DEVICE_ID) {
+      if ((PciRead8 (PCI_ICH_PMC_ADDRESS (R_ICH_PMC_ACPI_CNTL)) & B_ICH_PMC_ACPI_CNTL_ACPI_EN) != 0) {
+        TimerAddr = (PciRead16 (PCI_ICH_PMC_ADDRESS (R_ICH_PMC_ACPI_BASE)) & B_ICH_PMC_ACPI_BASE_BAR) + R_ACPI_PM1_TMR;
+        if (Type != NULL) {
+          *Type = "PMC ACPI";
+        }
+      } else if ((PciRead16 (PCI_ICH_PMC_ADDRESS (R_ICH_PMC_BAR2_BASE)) & B_ICH_PMC_BAR2_BASE_BAR_EN) != 0) {
+        TimerAddr = (PciRead16 (PCI_ICH_PMC_ADDRESS (R_ICH_PMC_BAR2_BASE)) & B_ICH_PMC_BAR2_BASE_BAR) + R_ACPI_PM1_TMR;
+        if (Type != NULL) {
+          *Type = "PMC BAR2";
+        }
+      } else if (Type != NULL) {
+        *Type = "Invalid INTEL PMC";
+      }
+    } else if (Type != NULL) {
+      //
+      // This is currently the case for Z390 and B360 boards.
+      //
+      *Type = "Unknown INTEL";
+    }
+  }
+
+  //
+  // AMD timer support.
+  //
+  if (TimerAddr == 0) {
+    //
+    // In an ideal world I believe we should detect AMD SMBus controller...
+    //
+    CpuVendor = 0;
+    AsmCpuid (CPUID_SIGNATURE, NULL, &CpuVendor, NULL, NULL);
+
+    if (CpuVendor == CPUID_VENDOR_AMD) {
+      TimerAddr = MmioRead32 (
+        R_AMD_ACPI_MMIO_BASE + R_AMD_ACPI_MMIO_PMIO_BASE + R_AMD_ACPI_PM_TMR_BLOCK
+        );
+      if (Type != NULL) {
+        *Type = "AMD";
+      }
+    }
+  }
+
+  return TimerAddr;
+}
+
 /**
   Calculate the TSC frequency
 

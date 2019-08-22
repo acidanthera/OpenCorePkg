@@ -39,6 +39,7 @@
 
 #define R_ICH_BAR2_BASE         0x20
 #define B_ICH_BAR2_BASE_BAR     0x0000FFC0
+#define B_ICH_BAR2_BASE_BAR_EN  0x1
 
 // Pre Intel Sunrisepoint
 
@@ -58,6 +59,7 @@
 
 #define R_ICH_PMC_BAR2_BASE         R_ICH_BAR2_BASE
 #define B_ICH_PMC_BAR2_BASE_BAR     B_ICH_BAR2_BASE_BAR
+#define B_ICH_PMC_BAR2_BASE_BAR_EN  B_ICH_BAR2_BASE_BAR_EN
 
 // AMD Bolton (AMD Bolton Register Reference Guide 3.03)
 
