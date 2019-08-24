@@ -12,6 +12,7 @@ OpenCore bootloader front end.
 - [InsanelyMac](https://www.insanelymac.com/forum/topic/338527-opencore-development/) in English
 - [macOS86.it](https://www.macos86.it/viewtopic.php?p=32103) in Italian
 - [PCbeta.com](http://bbs.pcbeta.com/viewthread-1815623-1-1.html) in Chinese
+- [Sixflow.kr](https://sixflow.kr/opencore_bootloader/62711) in Korean
 
 ## Credits
 
