@@ -112,19 +112,19 @@ PatchAppleCpuPmCfgLock (
   if (!RETURN_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &mAppleIntelCPUPowerManagementPatch);
     if (!RETURN_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "Patch v1 success com.apple.driver.AppleIntelCPUPowerManagement\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: Patch v1 success com.apple.driver.AppleIntelCPUPowerManagement\n"));
     }
 
     Status2 = PatcherApplyGenericPatch (&Patcher, &mAppleIntelCPUPowerManagementPatch2);
     if (!RETURN_ERROR (Status2)) {
-      DEBUG ((DEBUG_INFO, "Patch v2 success com.apple.driver.AppleIntelCPUPowerManagement\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: Patch v2 success com.apple.driver.AppleIntelCPUPowerManagement\n"));
     }
 
     if (RETURN_ERROR (Status) && RETURN_ERROR (Status2)) {
-      DEBUG ((DEBUG_INFO, "Failed to apply patches com.apple.driver.AppleIntelCPUPowerManagement - %r/%r\n", Status, Status2));
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patches com.apple.driver.AppleIntelCPUPowerManagement - %r/%r\n", Status, Status2));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "Failed to find com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
   }
 
   //
@@ -224,7 +224,7 @@ PatchAppleXcpmCfgLock (
       if (Record->xcpm_msr_num == 0xE2) {
         DEBUG ((
           DEBUG_INFO,
-          "Replacing _xcpm_core_scope_msrs data %u %u\n",
+          "OCAK: Replacing _xcpm_core_scope_msrs data %u %u\n",
           Record->xcpm_msr_num,
           Record->xcpm_msr_applicable_cpus
           ));
@@ -233,7 +233,7 @@ PatchAppleXcpmCfgLock (
       } else {
         DEBUG ((
           DEBUG_INFO,
-          "Not matching _xcpm_core_scope_msrs data %u %u\n",
+          "OCAK: Not matching _xcpm_core_scope_msrs data %u %u\n",
           Record->xcpm_msr_num,
           Record->xcpm_msr_applicable_cpus
           ));
@@ -250,17 +250,17 @@ PatchAppleXcpmCfgLock (
       &mXcpmCfgLockRelPatch
       );
     if (RETURN_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "Failed to locate _xcpm_idle release patch - %r, trying dbg\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to locate _xcpm_idle release patch - %r, trying dbg\n", Status));
       Status = PatcherApplyGenericPatch (
         Patcher,
         &mXcpmCfgLockDbgPatch
         );
       if (RETURN_ERROR (Status)) {
-        DEBUG ((DEBUG_WARN, "Failed to locate _xcpm_idle patches - %r\n", Status));
+        DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _xcpm_idle patches - %r\n", Status));
       }
     }
   } else {
-    DEBUG ((DEBUG_WARN, "Failed to locate _xcpm_core_scope_msrs - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _xcpm_core_scope_msrs - %r\n", Status));
   }
 
   return Replacements > 0 ? EFI_SUCCESS : EFI_NOT_FOUND;
@@ -288,7 +288,7 @@ PatchAppleXcpmExtraMsrs (
       if ((Record->xcpm_msr_applicable_cpus & 0xFF0000FDU) == 0xDC) {
         DEBUG ((
           DEBUG_INFO,
-          "Replacing _xcpm_pkg_scope_msrs data %u %u\n",
+          "OCAK: Replacing _xcpm_pkg_scope_msrs data %u %u\n",
           Record->xcpm_msr_num,
           Record->xcpm_msr_applicable_cpus
           ));
@@ -297,7 +297,7 @@ PatchAppleXcpmExtraMsrs (
       } else {
         DEBUG ((
           DEBUG_INFO,
-          "Not matching _xcpm_pkg_scope_msrs data %u %u\n",
+          "OCAK: Not matching _xcpm_pkg_scope_msrs data %u %u\n",
           Record->xcpm_msr_num,
           Record->xcpm_msr_applicable_cpus
           ));
@@ -306,7 +306,7 @@ PatchAppleXcpmExtraMsrs (
       ++Record;
     }
   } else {
-    DEBUG ((DEBUG_WARN, "Failed to locate _xcpm_pkg_scope_msrs - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _xcpm_pkg_scope_msrs - %r\n", Status));
   }
 
   Status = PatcherGetSymbolAddress (Patcher, "_xcpm_SMT_scope_msrs", (UINT8 **) &Record);
@@ -315,7 +315,7 @@ PatchAppleXcpmExtraMsrs (
       if (Record->xcpm_msr_flag_p == NULL) {
         DEBUG ((
           DEBUG_INFO,
-          "Replacing _xcpm_SMT_scope_msrs data %u %u\n",
+          "OCAK: Replacing _xcpm_SMT_scope_msrs data %u %u\n",
           Record->xcpm_msr_num,
           Record->xcpm_msr_applicable_cpus
           ));
@@ -324,7 +324,7 @@ PatchAppleXcpmExtraMsrs (
       } else {
         DEBUG ((
           DEBUG_INFO,
-          "Not matching _xcpm_SMT_scope_msrs data %u %u %p\n",
+          "OCAK: Not matching _xcpm_SMT_scope_msrs data %u %u %p\n",
           Record->xcpm_msr_num,
           Record->xcpm_msr_applicable_cpus,
           Record->xcpm_msr_flag_p
@@ -334,7 +334,7 @@ PatchAppleXcpmExtraMsrs (
       ++Record;
     }
   } else {
-    DEBUG ((DEBUG_WARN, "Failed to locate _xcpm_SMT_scope_msrs - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _xcpm_SMT_scope_msrs - %r\n", Status));
   }
 
   return Replacements > 0 ? EFI_SUCCESS : EFI_NOT_FOUND;
@@ -439,12 +439,12 @@ PatchUsbXhciPortLimit (
   if (!RETURN_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &mRemoveUsbLimitIoP1Patch);
     if (RETURN_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "Failed to apply P1 patch com.apple.iokit.IOUSBHostFamily - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply P1 patch com.apple.iokit.IOUSBHostFamily - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "Patch success com.apple.iokit.IOUSBHostFamily\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOUSBHostFamily\n"));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "Failed to find com.apple.iokit.IOUSBHostFamily - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.iokit.IOUSBHostFamily - %r\n", Status));
   }
 
   //
@@ -482,13 +482,13 @@ PatchUsbXhciPortLimit (
       // We do not need to patch com.apple.driver.usb.AppleUSBXHCI if this patch was successful.
       // Only legacy systems require com.apple.driver.usb.AppleUSBXHCI to be patched.
       //
-      DEBUG ((DEBUG_INFO, "Patch success com.apple.driver.usb.AppleUSBXHCI\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.usb.AppleUSBXHCI\n"));
       return RETURN_SUCCESS;
     }
 
-    DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "Failed to find com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
   }
 
   //
@@ -503,12 +503,12 @@ PatchUsbXhciPortLimit (
   if (!RETURN_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &mRemoveUsbLimitV1Patch);
     if (RETURN_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "Patch success com.apple.driver.usb.AppleUSBXHCIPCI\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.usb.AppleUSBXHCIPCI\n"));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "Failed to find com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
   }
 
   return Status;
@@ -556,12 +556,12 @@ PatchThirdPartySsdTrim (
   if (!RETURN_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &mIOAHCIBlockStoragePatch);
     if (RETURN_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.iokit.IOAHCIBlockStorage - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOAHCIBlockStorage - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "Patch success com.apple.iokit.IOAHCIBlockStorage\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOAHCIBlockStorage\n"));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "Failed to find com.apple.iokit.IOAHCIBlockStorage - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.iokit.IOAHCIBlockStorage - %r\n", Status));
   }
 
   return Status;
@@ -609,12 +609,12 @@ PatchForceInternalDiskIcons (
   if (!RETURN_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &mIOAHCIPortPatch);
     if (RETURN_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.driver.AppleAHCIPort - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.AppleAHCIPort - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "Patch success com.apple.driver.AppleAHCIPort\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.AppleAHCIPort\n"));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "Failed to find com.apple.driver.AppleAHCIPort - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.driver.AppleAHCIPort - %r\n", Status));
   }
 
   return Status;
@@ -662,12 +662,12 @@ PatchAppleIoMapperSupport (
   if (!RETURN_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &mAppleIoMapperPatch);
     if (RETURN_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "Failed to apply patch com.apple.iokit.IOPCIFamily - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOPCIFamily - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "Patch success com.apple.iokit.IOPCIFamily\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOPCIFamily\n"));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "Failed to find com.apple.iokit.IOPCIFamily - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.iokit.IOPCIFamily - %r\n", Status));
   }
 
   return Status;
@@ -803,7 +803,7 @@ PatchKernelCpuId (
 
   Status = PatcherGetSymbolAddress (Patcher, "_cpuid_set_info", (UINT8 **) &Record);
   if (RETURN_ERROR (Status) || Record >= Last) {
-    DEBUG ((DEBUG_WARN, "Failed to locate _cpuid_set_info (%p) - %r\n", Record, Status));
+    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _cpuid_set_info (%p) - %r\n", Record, Status));
     return EFI_NOT_FOUND;
   }
 
@@ -866,7 +866,7 @@ PatchKernelCpuId (
     //
     Status = PatcherGetSymbolAddress (Patcher, "_cpuid_set_cpufamily", (UINT8 **) &Record);
     if (RETURN_ERROR (Status) || Record >= Last) {
-      DEBUG ((DEBUG_WARN, "Failed to locate _cpuid_set_cpufamily (%p) - %r\n", Record, Status));
+      DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _cpuid_set_cpufamily (%p) - %r\n", Record, Status));
       return EFI_NOT_FOUND;
     }
 
@@ -891,7 +891,7 @@ PatchKernelCpuId (
     return EFI_SUCCESS;
   }
 
-  DEBUG ((DEBUG_WARN, "Failed to find either CPUID patch (%u)\n", FoundSize));
+  DEBUG ((DEBUG_WARN, "OCAK: Failed to find either CPUID patch (%u)\n", FoundSize));
 
   return RETURN_UNSUPPORTED;
 }
@@ -945,12 +945,12 @@ PatchCustomSmbiosGuid (
     if (!RETURN_ERROR (Status)) {
       Status = PatcherApplyGenericPatch (&Patcher, &mCustomSmbiosGuidPatch);
       if (!RETURN_ERROR (Status)) {
-        DEBUG ((DEBUG_INFO, "SMBIOS Patch success %a\n", Kexts[Index]));
+        DEBUG ((DEBUG_INFO, "OCAK: SMBIOS Patch success %a\n", Kexts[Index]));
       } else {
-        DEBUG ((DEBUG_INFO, "Failed to apply SMBIOS patch %a - %r\n", Kexts[Index], Status));
+        DEBUG ((DEBUG_INFO, "OCAK: Failed to apply SMBIOS patch %a - %r\n", Kexts[Index], Status));
       }
     } else {
-      DEBUG ((DEBUG_INFO, "Failed to find SMBIOS kext %a - %r\n", Kexts[Index], Status));
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to find SMBIOS kext %a - %r\n", Kexts[Index], Status));
     }
   }
 
@@ -1003,7 +1003,7 @@ PatchPanicKextDump (
     (UINT8 **) &Record
     );
   if (RETURN_ERROR (Status) || Record >= Last) {
-    DEBUG ((DEBUG_WARN, "Failed to locate printKextPanicLists (%p) - %r\n", Record, Status));
+    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate printKextPanicLists (%p) - %r\n", Record, Status));
     return EFI_NOT_FOUND;
   }
 
@@ -1015,9 +1015,9 @@ PatchPanicKextDump (
   //
   Status = PatcherApplyGenericPatch (Patcher, &mPanicKextDumpPatch);
   if (RETURN_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "Failed to apply kext dump patch - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply kext dump patch - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "Patch success kext dump\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success kext dump\n"));
   }
 
   return RETURN_SUCCESS;
@@ -1105,9 +1105,9 @@ PatchLapicKernelPanic (
   //
   Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicPatch);
   if (RETURN_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "Failed to apply lapic patch - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply lapic patch - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "Patch success lapic\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success lapic\n"));
 
     //
     // Also patch away the master core check to never require lapic_dont_panic=1.
@@ -1115,9 +1115,9 @@ PatchLapicKernelPanic (
     //
     Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicMasterPatch);
     if (RETURN_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "Failed to apply extended lapic patch - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply extended lapic patch - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "Patch success extended lapic\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success extended lapic\n"));
     }
   }
 
