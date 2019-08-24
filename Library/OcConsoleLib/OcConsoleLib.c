@@ -296,7 +296,7 @@ mConsoleControlProtocol = {
 /**
   Locate Console Control protocol.
 
-  @retval Data Hub protocol instance or NULL.
+  @retval Console control protocol instance or NULL.
 **/
 EFI_CONSOLE_CONTROL_PROTOCOL *
 OcConsoleControlInstallProtocol (
