@@ -928,39 +928,30 @@ PatchCustomSmbiosGuid (
 {
   RETURN_STATUS       Status;
   PATCHER_CONTEXT     Patcher;
-
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.driver.AppleSMBIOS"
-    );
-
-  if (!RETURN_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &mCustomSmbiosGuidPatch);
-    if (RETURN_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "Failed to apply SMBIOS patch com.apple.driver.AppleSMBIOS - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_INFO, "SMBIOS Patch success com.apple.driver.AppleSMBIOS\n"));
-    }
-  } else {
-    DEBUG ((DEBUG_INFO, "Failed to SMBIOS find com.apple.driver.AppleSMBIOS - %r\n", Status));
-  }
-
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
+  UINT32              Index;
+  
+  STATIC CONST CHAR8 *Kexts[] = {
+    "com.apple.driver.AppleSMBIOS",
     "com.apple.driver.AppleACPIPlatform"
-    );
-
-  if (!RETURN_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &mCustomSmbiosGuidPatch);
-    if (RETURN_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "Failed to apply SMBIOS patch com.apple.driver.AppleACPIPlatform - %r\n", Status));
+  };
+  
+  for (Index = 0; Index < ARRAY_SIZE (Kexts); ++Index) {
+    Status = PatcherInitContextFromPrelinked (
+      &Patcher,
+      Context,
+      Kexts[Index]
+      );
+    
+    if (!RETURN_ERROR (Status)) {
+      Status = PatcherApplyGenericPatch (&Patcher, &mCustomSmbiosGuidPatch);
+      if (!RETURN_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "SMBIOS Patch success %a\n", Kexts[Index]));
+      } else {
+        DEBUG ((DEBUG_INFO, "Failed to apply SMBIOS patch %a - %r\n", Kexts[Index], Status));
+      }
     } else {
-      DEBUG ((DEBUG_INFO, "Patch success SMBIOS com.apple.driver.AppleACPIPlatform\n"));
+      DEBUG ((DEBUG_INFO, "Failed to find SMBIOS kext %a - %r\n", Kexts[Index], Status));
     }
-  } else {
-    DEBUG ((DEBUG_INFO, "Failed to find SMBIOS com.apple.driver.AppleACPIPlatform - %r\n", Status));
   }
 
   return Status;
