@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sun Aug 11 01:57:12 2019
-%DIF ADD ../Configuration.tex        Wed Aug 21 16:39:04 2019
+%DIF ADD ../Configuration.tex        Sun Aug 25 02:43:40 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3662,8 +3662,11 @@ you will need \texttt{debug=0x8} boot argument.
   Custom name may be created by providing \texttt{.contentDetails} file.
 
   To download recovery online you may use
-  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/Recovery}{Recovery}
-  tool from \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}.
+  \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/Recovery}{Recovery}
+%DIFDELCMD <   %%%
+\DIFdel{tool from }%DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}%%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/MacInfoPkg/blob/master/macrecovery/macrecovery.py}{macrecovery.py}
+  \DIFadd{tool from }\href{https://github.com/acidanthera/MacInfoPkg/releases}{MacInfoPkg}\DIFaddend .
 
   \DIFaddbegin \DIFadd{For offline installation refer to
   }\href{https://support.apple.com/HT201372}{How to create a bootable installer for macOS}
