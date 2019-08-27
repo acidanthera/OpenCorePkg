@@ -308,6 +308,11 @@ mMiscPwrMgmtDbgReplace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mMiscPwrMgmtDbgPatch = {
+  //
+  // NOTE: This substitution is going to take place
+  //       at both _xcpm_hwp_enable()
+  //       and _xcpm_enable_hw_coordination() (which is inlined in Release XNU).
+  //
   .Base        = NULL,
   .Find        = mMiscPwrMgmtDbgFind,
   .Mask        = NULL,
