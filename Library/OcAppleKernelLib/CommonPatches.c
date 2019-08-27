@@ -266,6 +266,58 @@ PatchAppleXcpmCfgLock (
   return Replacements > 0 ? EFI_SUCCESS : EFI_NOT_FOUND;
 }
 
+STATIC
+UINT8
+mMiscPwrMgmtRelFind[] = {
+  0xB9, 0xAA, 0x01, 0x00, 0x00, 0x0F, 0x30 // mov ecx, 0x1aa; wrmsr
+};
+
+STATIC
+UINT8
+mMiscPwrMgmtRelReplace[] = {
+  0xB9, 0xAA, 0x01, 0x00, 0x00, 0x90, 0x90 // mov ecx, 0x1aa; nop
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mMiscPwrMgmtRelPatch = {
+  .Base        = NULL,
+  .Find        = mMiscPwrMgmtRelFind,
+  .Mask        = NULL,
+  .Replace     = mMiscPwrMgmtRelReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mMiscPwrMgmtRelFind),
+  .Count       = 0,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+
+STATIC
+UINT8
+mMiscPwrMgmtDbgFind[] = {
+  0xBF, 0xAA, 0x01, 0x00, 0x00, 0xE8 // mov edi, 0x1AA ; call (wrmsr64)
+};
+
+STATIC
+UINT8
+mMiscPwrMgmtDbgReplace[] = {
+  0xEB, 0x08, 0x90, 0x90, 0x90, 0xE8 // jmp LBL ; nop; nop; nop; call (wrmsr64); LBL:
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mMiscPwrMgmtDbgPatch = {
+  .Base        = NULL,
+  .Find        = mMiscPwrMgmtDbgFind,
+  .Mask        = NULL,
+  .Replace     = mMiscPwrMgmtDbgReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mMiscPwrMgmtDbgFind),
+  .Count       = 0,
+  .Skip        = 0,
+  .Limit       = 0
+};
 
 RETURN_STATUS
 PatchAppleXcpmExtraMsrs (
@@ -335,6 +387,22 @@ PatchAppleXcpmExtraMsrs (
     }
   } else {
     DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _xcpm_SMT_scope_msrs - %r\n", Status));
+  }
+
+  //
+  // Now patch writes to MSR_MISC_PWR_MGMT
+  //
+  Status = PatcherApplyGenericPatch (Patcher, &mMiscPwrMgmtRelPatch);
+  if (RETURN_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to patch writes to MSR_MISC_PWR_MGMT - %r, trying dbg\n", Status));
+    Status = PatcherApplyGenericPatch (Patcher, &mMiscPwrMgmtDbgPatch);
+  }
+
+  if (!RETURN_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Patched writes to MSR_MISC_PWR_MGMT\n"));
+    ++Replacements;
+  } else {
+    DEBUG ((DEBUG_WARN, "OCAK: Failed to patch writes to MSR_MISC_PWR_MGMT - %r\n", Status));
   }
 
   return Replacements > 0 ? EFI_SUCCESS : EFI_NOT_FOUND;

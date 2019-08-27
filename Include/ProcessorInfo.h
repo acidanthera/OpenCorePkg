@@ -63,6 +63,7 @@
 #define MSR_TEMPERATURE_TARGET            0x1A2
 #define MSR_MISC_PWR_MGMT                 0x1AA
 #define MISC_PWR_MGMT_EIST_HW_DIS         (1 << 0)
+#define MISC_PWR_MGMT_LOCK                (1 << 13)
 #define MAX_RATIO_LIMIT_8C_OFFSET         56
 #define MAX_RATIO_LIMIT_7C_OFFSET         48
 #define MAX_RATIO_LIMIT_6C_OFFSET         40
