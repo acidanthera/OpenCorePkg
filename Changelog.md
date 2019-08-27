@@ -9,6 +9,7 @@ OpenCore Changelog
 - Increased log size to 256 KB by default
 - Added `ReplaceTabWithSpace` quirk to improve Shell experience
 - Added `ClearScreenOnModeSwitch` quirk to avoid visual glitches
+- Added `MISC_PWR_MGMT` patch to `AppleXcpmExtraMsrs` quirk (thx @mrmiller)
 
 #### v0.0.4
 - Fixed kext injection issues with dummy dependencies
