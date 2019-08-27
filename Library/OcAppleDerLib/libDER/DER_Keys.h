@@ -24,7 +24,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERAlgorithmId */
 extern const DERItemSpec DERAlgorithmIdItemSpecs[];
-extern const DERSize DERNumAlgorithmIdItemSpecs;
+extern const DERShort DERNumAlgorithmIdItemSpecs;
 
 /* X509 SubjectPublicKeyInfo */
 typedef struct {
@@ -34,7 +34,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERSubjPubKeyInfo */
 extern const DERItemSpec DERSubjPubKeyInfoItemSpecs[];
-extern const DERSize DERNumSubjPubKeyInfoItemSpecs;
+extern const DERShort DERNumSubjPubKeyInfoItemSpecs;
 
 /* 
  * RSA public key in PKCS1 format; this is inside the BIT_STRING in 
@@ -47,7 +47,7 @@ typedef struct {
 
 /* DERItemSpecs to decode/encode into/from a DERRSAPubKeyPKCS1 */
 extern const DERItemSpec DERRSAPubKeyPKCS1ItemSpecs[];
-extern const DERSize DERNumRSAPubKeyPKCS1ItemSpecs;
+extern const DERShort DERNumRSAPubKeyPKCS1ItemSpecs;
 
 /* 
  * RSA public key in custom (to this library) format, including
@@ -61,7 +61,7 @@ typedef struct {
 
 /* DERItemSpecs to decode/encode into/from a DERRSAPubKeyApple */
 extern const DERItemSpec DERRSAPubKeyAppleItemSpecs[];
-extern const DERSize DERNumRSAPubKeyAppleItemSpecs;
+extern const DERShort DERNumRSAPubKeyAppleItemSpecs;
 
 /* 
  * RSA Private key, PKCS1 format, CRT option.
@@ -77,7 +77,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERRSAPrivKeyCRT */
 extern const DERItemSpec DERRSAPrivKeyCRTItemSpecs[];
-extern const DERSize DERNumRSAPrivKeyCRTItemSpecs;
+extern const DERShort DERNumRSAPrivKeyCRTItemSpecs;
 
 /* Fully formed RSA key pair, for generating a PKCS1 private key */
 typedef struct {
@@ -94,7 +94,7 @@ typedef struct {
 
 /* DERItemSpecs to encode a DERRSAKeyPair */
 extern const DERItemSpec DERRSAKeyPairItemSpecs[];
-extern const DERSize DERNumRSAKeyPairItemSpecs;
+extern const DERShort DERNumRSAKeyPairItemSpecs;
 
 #ifdef __cplusplus
 }

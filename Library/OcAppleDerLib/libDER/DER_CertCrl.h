@@ -28,7 +28,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERSignedCertCrl */
 extern const DERItemSpec DERSignedCertCrlItemSpecs[];
-extern const DERSize DERNumSignedCertCrlItemSpecs;
+extern const DERShort DERNumSignedCertCrlItemSpecs;
 
 /* TBS cert components */
 typedef struct {
@@ -46,7 +46,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERTBSCert */
 extern const DERItemSpec DERTBSCertItemSpecs[];
-extern const DERSize DERNumTBSCertItemSpecs;
+extern const DERShort DERNumTBSCertItemSpecs;
 
 /* 
  * validity - components can be either UTC or generalized time.
@@ -59,7 +59,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERValidity */
 extern const DERItemSpec DERValidityItemSpecs[];
-extern const DERSize DERNumValidityItemSpecs;
+extern const DERShort DERNumValidityItemSpecs;
 
 /* AttributeTypeAndValue components. */
 typedef struct {
@@ -69,7 +69,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into DERAttributeTypeAndValue */
 extern const DERItemSpec DERAttributeTypeAndValueItemSpecs[];
-extern const DERSize DERNumAttributeTypeAndValueItemSpecs;
+extern const DERShort DERNumAttributeTypeAndValueItemSpecs;
 
 /* Extension components */
 typedef struct {
@@ -80,7 +80,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into DERExtension */
 extern const DERItemSpec DERExtensionItemSpecs[];
-extern const DERSize DERNumExtensionItemSpecs;
+extern const DERShort DERNumExtensionItemSpecs;
 
 /* BasicConstraints components. */
 typedef struct {
@@ -90,7 +90,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into DERBasicConstraints */
 extern const DERItemSpec DERBasicConstraintsItemSpecs[];
-extern const DERSize DERNumBasicConstraintsItemSpecs;
+extern const DERShort DERNumBasicConstraintsItemSpecs;
 
 /* PrivateKeyUsagePeriod components. */
 typedef struct {
@@ -100,7 +100,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERPrivateKeyUsagePeriod */
 extern const DERItemSpec DERPrivateKeyUsagePeriodItemSpecs[];
-extern const DERSize DERNumPrivateKeyUsagePeriodItemSpecs;
+extern const DERShort DERNumPrivateKeyUsagePeriodItemSpecs;
 
 /* DistributionPoint components. */
 typedef struct {
@@ -111,7 +111,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERDistributionPoint */
 extern const DERItemSpec DERDistributionPointItemSpecs[];
-extern const DERSize DERNumDistributionPointItemSpecs;
+extern const DERShort DERNumDistributionPointItemSpecs;
 
 /* PolicyInformation components. */
 typedef struct {
@@ -121,7 +121,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERPolicyInformation */
 extern const DERItemSpec DERPolicyInformationItemSpecs[];
-extern const DERSize DERNumPolicyInformationItemSpecs;
+extern const DERShort DERNumPolicyInformationItemSpecs;
 
 /* PolicyQualifierInfo components. */
 typedef struct {
@@ -131,7 +131,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERPolicyQualifierInfo */
 extern const DERItemSpec DERPolicyQualifierInfoItemSpecs[];
-extern const DERSize DERNumPolicyQualifierInfoItemSpecs;
+extern const DERShort DERNumPolicyQualifierInfoItemSpecs;
 
 /* UserNotice components. */
 typedef struct {
@@ -141,7 +141,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERUserNotice */
 extern const DERItemSpec DERUserNoticeItemSpecs[];
-extern const DERSize DERNumUserNoticeItemSpecs;
+extern const DERShort DERNumUserNoticeItemSpecs;
 
 /* NoticeReference components. */
 typedef struct {
@@ -151,7 +151,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERNoticeReference */
 extern const DERItemSpec DERNoticeReferenceItemSpecs[];
-extern const DERSize DERNumNoticeReferenceItemSpecs;
+extern const DERShort DERNumNoticeReferenceItemSpecs;
 
 /* PolicyMapping components. */
 typedef struct {
@@ -161,7 +161,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERPolicyMapping */
 extern const DERItemSpec DERPolicyMappingItemSpecs[];
-extern const DERSize DERNumPolicyMappingItemSpecs;
+extern const DERShort DERNumPolicyMappingItemSpecs;
 
 /* AccessDescription components. */
 typedef struct {
@@ -171,7 +171,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERAccessDescription */
 extern const DERItemSpec DERAccessDescriptionItemSpecs[];
-extern const DERSize DERNumAccessDescriptionItemSpecs;
+extern const DERShort DERNumAccessDescriptionItemSpecs;
 
 /* AuthorityKeyIdentifier components. */
 typedef struct {
@@ -182,7 +182,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERAuthorityKeyIdentifier */
 extern const DERItemSpec DERAuthorityKeyIdentifierItemSpecs[];
-extern const DERSize DERNumAuthorityKeyIdentifierItemSpecs;
+extern const DERShort DERNumAuthorityKeyIdentifierItemSpecs;
 
 /* OtherName components. */
 typedef struct {
@@ -192,7 +192,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DEROtherName */
 extern const DERItemSpec DEROtherNameItemSpecs[];
-extern const DERSize DERNumOtherNameItemSpecs;
+extern const DERShort DERNumOtherNameItemSpecs;
 
 /* PolicyConstraints components. */
 typedef struct {
@@ -202,7 +202,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERPolicyConstraints */
 extern const DERItemSpec DERPolicyConstraintsItemSpecs[];
-extern const DERSize DERNumPolicyConstraintsItemSpecs;
+extern const DERShort DERNumPolicyConstraintsItemSpecs;
 
 /* TBS CRL */
 typedef struct {
@@ -217,7 +217,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERTBSCrl */
 extern const DERItemSpec DERTBSCrlItemSpecs[];
-extern const DERSize DERNumTBSCrlItemSpecs;
+extern const DERShort DERNumTBSCrlItemSpecs;
 
 typedef struct {
 	DERItem		serialNum;		/* integer */
@@ -227,7 +227,7 @@ typedef struct {
 
 /* DERItemSpecs to decode into a DERRevokedCert */
 extern const DERItemSpec DERRevokedCertItemSpecs[];
-extern const DERSize DERNumRevokedCertItemSpecs;
+extern const DERShort DERNumRevokedCertItemSpecs;
 
 #ifdef __cplusplus
 }

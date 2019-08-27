@@ -51,7 +51,7 @@ static DERReturn DEREncodeTag(
 
     if(outLen == 1) {
 		/* short form */
-		*buf = tag1 | tagNumber;
+		*buf = (DERByte)(tag1 | tagNumber);
 	}
 	else {
         /* long form */
@@ -109,7 +109,7 @@ DERReturn DEREncodeLength(
 	}
 	
 	/* long form */
-	*buf = (outLen - 1) | 0x80;		// length of length, long form indicator
+	*buf = (DERByte)((outLen - 1) | 0x80);		// length of length, long form indicator
 	lenBytes = buf + outLen - 1;	// l.s. digit of length 
 	while(length != 0) {
 		*lenBytes-- = (DERByte)length;

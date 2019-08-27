@@ -28,7 +28,7 @@ const DERItemSpec DERSignedCertCrlItemSpecs[] =
 			DER_DEC_NO_OPTS }	
 };
 
-const DERSize DERNumSignedCertCrlItemSpecs = 
+const DERShort DERNumSignedCertCrlItemSpecs = 
 	sizeof(DERSignedCertCrlItemSpecs) / sizeof(DERItemSpec);
 
 /* TBS cert */
@@ -68,7 +68,7 @@ const DERItemSpec DERTBSCertItemSpecs[] =
 			ASN1_CONSTRUCTED | ASN1_CONTEXT_SPECIFIC | 3,
 			DER_DEC_OPTIONAL }
 };
-const DERSize DERNumTBSCertItemSpecs = sizeof(DERTBSCertItemSpecs) / sizeof(DERItemSpec);
+const DERShort DERNumTBSCertItemSpecs = sizeof(DERTBSCertItemSpecs) / sizeof(DERItemSpec);
 
 /* DERValidity */
 const DERItemSpec DERValidityItemSpecs[] = 
@@ -80,7 +80,7 @@ const DERItemSpec DERValidityItemSpecs[] =
 			0,					/* no tag - ANY */
 			DER_DEC_ASN_ANY | DER_DEC_SAVE_DER }
 };
-const DERSize DERNumValidityItemSpecs = 
+const DERShort DERNumValidityItemSpecs = 
 	sizeof(DERValidityItemSpecs) / sizeof(DERItemSpec);
 
 /* DERAttributeTypeAndValue */
@@ -93,7 +93,7 @@ const DERItemSpec DERAttributeTypeAndValueItemSpecs[] = {
 			DER_DEC_ASN_ANY | DER_DEC_SAVE_DER }
 };
 
-const DERSize DERNumAttributeTypeAndValueItemSpecs =
+const DERShort DERNumAttributeTypeAndValueItemSpecs =
 	sizeof(DERAttributeTypeAndValueItemSpecs) / sizeof(DERItemSpec);
 
 /* DERExtension */
@@ -109,7 +109,7 @@ const DERItemSpec DERExtensionItemSpecs[] =
 			ASN1_OCTET_STRING,
             DER_DEC_NO_OPTS }
 };
-const DERSize DERNumExtensionItemSpecs = 
+const DERShort DERNumExtensionItemSpecs = 
 	sizeof(DERExtensionItemSpecs) / sizeof(DERItemSpec);
 
 /* DERBasicConstraints */
@@ -122,7 +122,7 @@ const DERItemSpec DERBasicConstraintsItemSpecs[] =
 			ASN1_INTEGER,
 			DER_DEC_OPTIONAL }
 };
-const DERSize DERNumBasicConstraintsItemSpecs = 
+const DERShort DERNumBasicConstraintsItemSpecs = 
 	sizeof(DERBasicConstraintsItemSpecs) / sizeof(DERItemSpec);
 
 /* DERPrivateKeyUsagePeriod. */
@@ -135,7 +135,7 @@ const DERItemSpec DERPrivateKeyUsagePeriodItemSpecs[] =
 			ASN1_CONTEXT_SPECIFIC | 1,
 			DER_DEC_OPTIONAL }
 };
-const DERSize DERNumPrivateKeyUsagePeriodItemSpecs = 
+const DERShort DERNumPrivateKeyUsagePeriodItemSpecs = 
 	sizeof(DERPrivateKeyUsagePeriodItemSpecs) / sizeof(DERItemSpec);
 
 /* DERDistributionPoint. */
@@ -151,7 +151,7 @@ const DERItemSpec DERDistributionPointItemSpecs[] =
 			ASN1_CONTEXT_SPECIFIC | ASN1_CONSTRUCTED | 2,
 			DER_DEC_OPTIONAL }
 };
-const DERSize DERNumDistributionPointItemSpecs = 
+const DERShort DERNumDistributionPointItemSpecs = 
 	sizeof(DERDistributionPointItemSpecs) / sizeof(DERItemSpec);
 
 /* DERPolicyInformation. */
@@ -164,7 +164,7 @@ const DERItemSpec DERPolicyInformationItemSpecs[] =
 			ASN1_CONSTR_SEQUENCE,
 			DER_DEC_OPTIONAL }
 };
-const DERSize DERNumPolicyInformationItemSpecs = 
+const DERShort DERNumPolicyInformationItemSpecs = 
 	sizeof(DERPolicyInformationItemSpecs) / sizeof(DERItemSpec);
 
 /* DERPolicyQualifierInfo. */
@@ -177,7 +177,7 @@ const DERItemSpec DERPolicyQualifierInfoItemSpecs[] =
 			0,					/* no tag - ANY */
 			DER_DEC_ASN_ANY | DER_DEC_SAVE_DER }
 };
-const DERSize DERNumPolicyQualifierInfoItemSpecs = 
+const DERShort DERNumPolicyQualifierInfoItemSpecs = 
 	sizeof(DERPolicyQualifierInfoItemSpecs) / sizeof(DERItemSpec);
 
 /* DERUserNotice. */
@@ -190,7 +190,7 @@ const DERItemSpec DERUserNoticeItemSpecs[] =
 			0,					/* no tag - ANY */
 			DER_DEC_ASN_ANY | DER_DEC_OPTIONAL | DER_DEC_SAVE_DER }
 };
-const DERSize DERNumUserNoticeItemSpecs = 
+const DERShort DERNumUserNoticeItemSpecs = 
 	sizeof(DERUserNoticeItemSpecs) / sizeof(DERItemSpec);
 
 /* DERNoticeReference. */
@@ -203,7 +203,7 @@ const DERItemSpec DERNoticeReferenceItemSpecs[] =
 			ASN1_CONSTR_SEQUENCE,
 			DER_DEC_NO_OPTS }	
 };
-const DERSize DERNumNoticeReferenceItemSpecs = 
+const DERShort DERNumNoticeReferenceItemSpecs = 
 	sizeof(DERNoticeReferenceItemSpecs) / sizeof(DERItemSpec);
 
 /* DERPolicyMapping. */
@@ -216,7 +216,7 @@ const DERItemSpec DERPolicyMappingItemSpecs[] =
 			ASN1_OBJECT_ID,
 			DER_DEC_NO_OPTS }
 };
-const DERSize DERNumPolicyMappingItemSpecs = 
+const DERShort DERNumPolicyMappingItemSpecs = 
 	sizeof(DERPolicyMappingItemSpecs) / sizeof(DERItemSpec);
 
 /* DERAccessDescription. */
@@ -229,7 +229,7 @@ const DERItemSpec DERAccessDescriptionItemSpecs[] =
 			0,					/* no tag - ANY */
 			DER_DEC_ASN_ANY | DER_DEC_SAVE_DER }
 };
-const DERSize DERNumAccessDescriptionItemSpecs = 
+const DERShort DERNumAccessDescriptionItemSpecs = 
 	sizeof(DERAccessDescriptionItemSpecs) / sizeof(DERItemSpec);
 
 /* DERAuthorityKeyIdentifier. */
@@ -245,7 +245,7 @@ const DERItemSpec DERAuthorityKeyIdentifierItemSpecs[] =
 			ASN1_CONTEXT_SPECIFIC | 2,
 			DER_DEC_OPTIONAL }
 };
-const DERSize DERNumAuthorityKeyIdentifierItemSpecs = 
+const DERShort DERNumAuthorityKeyIdentifierItemSpecs = 
 	sizeof(DERAuthorityKeyIdentifierItemSpecs) / sizeof(DERItemSpec);
 
 /* DEROtherName. */
@@ -258,7 +258,7 @@ const DERItemSpec DEROtherNameItemSpecs[] =
 			ASN1_CONTEXT_SPECIFIC | ASN1_CONSTRUCTED | 0,
 			DER_DEC_NO_OPTS },
 };
-const DERSize DERNumOtherNameItemSpecs = 
+const DERShort DERNumOtherNameItemSpecs = 
 	sizeof(DEROtherNameItemSpecs) / sizeof(DERItemSpec);
 
 /* DERPolicyConstraints. */
@@ -271,7 +271,7 @@ const DERItemSpec DERPolicyConstraintsItemSpecs[] =
 			ASN1_CONTEXT_SPECIFIC | 1,
 			DER_DEC_OPTIONAL }
 };
-const DERSize DERNumPolicyConstraintsItemSpecs = 
+const DERShort DERNumPolicyConstraintsItemSpecs = 
 	sizeof(DERPolicyConstraintsItemSpecs) / sizeof(DERItemSpec);
 
 /* DERTBSCrl */
@@ -299,7 +299,7 @@ const DERItemSpec DERTBSCrlItemSpecs[] =
 			ASN1_CONSTRUCTED | ASN1_CONTEXT_SPECIFIC | 0,
 			DER_DEC_OPTIONAL }
 };
-const DERSize DERNumTBSCrlItemSpecs = sizeof(DERTBSCrlItemSpecs) / sizeof(DERItemSpec);
+const DERShort DERNumTBSCrlItemSpecs = sizeof(DERTBSCrlItemSpecs) / sizeof(DERItemSpec);
 
 /* DERRevokedCert */
 const DERItemSpec DERRevokedCertItemSpecs[] = 
@@ -315,5 +315,5 @@ const DERItemSpec DERRevokedCertItemSpecs[] =
 			DER_DEC_OPTIONAL }
 };
 
-const DERSize DERNumRevokedCertItemSpecs = 
+const DERShort DERNumRevokedCertItemSpecs = 
 	sizeof(DERRevokedCertItemSpecs) / sizeof(DERItemSpec);

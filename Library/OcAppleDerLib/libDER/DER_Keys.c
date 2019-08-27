@@ -31,7 +31,7 @@ const DERItemSpec DERAlgorithmIdItemSpecs[] =
 			0,				/* no tag - any */
 			DER_DEC_ASN_ANY | DER_DEC_OPTIONAL | DER_DEC_SAVE_DER }
 };
-const DERSize DERNumAlgorithmIdItemSpecs = 
+const DERShort DERNumAlgorithmIdItemSpecs = 
 	sizeof(DERAlgorithmIdItemSpecs) / sizeof(DERItemSpec);
 
 /* X509 SubjectPublicKeyInfo */
@@ -45,7 +45,7 @@ const DERItemSpec DERSubjPubKeyInfoItemSpecs[] =
 			DER_DEC_NO_OPTS },		
 
 };
-const DERSize DERNumSubjPubKeyInfoItemSpecs = 
+const DERShort DERNumSubjPubKeyInfoItemSpecs = 
 	sizeof(DERSubjPubKeyInfoItemSpecs) / sizeof(DERItemSpec);
 
 /* 
@@ -83,7 +83,7 @@ const DERItemSpec DERRSAPrivKeyCRTItemSpecs[] =
 			DER_DEC_NO_OPTS },		
 	/* ignore the (optional) rest */
 };
-const DERSize DERNumRSAPrivKeyCRTItemSpecs = 
+const DERShort DERNumRSAPrivKeyCRTItemSpecs = 
 	sizeof(DERRSAPrivKeyCRTItemSpecs) / sizeof(DERItemSpec);
 
 #endif	/* DER_DECODE_ENABLE */
@@ -100,7 +100,7 @@ const DERItemSpec DERRSAPubKeyPKCS1ItemSpecs[] =
 			ASN1_INTEGER,	
 			DER_DEC_NO_OPTS | DER_ENC_SIGNED_INT },		
 };
-const DERSize DERNumRSAPubKeyPKCS1ItemSpecs = 
+const DERShort DERNumRSAPubKeyPKCS1ItemSpecs = 
 	sizeof(DERRSAPubKeyPKCS1ItemSpecs) / sizeof(DERItemSpec);
 
 /* RSA public key in Apple custome format with reciprocal - encode and decode */
@@ -116,7 +116,7 @@ const DERItemSpec DERRSAPubKeyAppleItemSpecs[] =
 			ASN1_INTEGER,	
 			DER_DEC_NO_OPTS | DER_ENC_SIGNED_INT },		
 };
-const DERSize DERNumRSAPubKeyAppleItemSpecs = 
+const DERShort DERNumRSAPubKeyAppleItemSpecs = 
 	sizeof(DERRSAPubKeyAppleItemSpecs) / sizeof(DERItemSpec);
 
 
@@ -160,7 +160,7 @@ const DERItemSpec DERRSAKeyPairItemSpecs[] =
 			DER_ENC_SIGNED_INT },		
 };
 
-const DERSize DERNumRSAKeyPairItemSpecs = 
+const DERShort DERNumRSAKeyPairItemSpecs = 
 	sizeof(DERRSAKeyPairItemSpecs) / sizeof(DERItemSpec);
 
 #endif	/* DER_ENCODE_ENABLE */
