@@ -288,13 +288,8 @@ MachoGetClassNameFromMetaClassPointer (
 
   PrefixSize = L_STR_LEN (OSOBJ_PREFIX);
   SuffixSize = L_STR_LEN (METACLASS_TOKEN);
-  BodySize   = AsciiStrLen (MetaClassName);
 
-  if (PrefixSize + SuffixSize > BodySize) {
-    return FALSE;
-  }
-
-  ClassNameLength = (BodySize - PrefixSize - SuffixSize);
+  ClassNameLength = (AsciiStrLen (MetaClassName) - PrefixSize - SuffixSize);
   if ((ClassNameLength + 1) > ClassNameSize) {
     return FALSE;
   }
