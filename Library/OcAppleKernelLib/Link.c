@@ -1137,8 +1137,8 @@ InternalProcessSymbolPointers (
   UINT32                FirstSym;
   BOOLEAN               Result;
   UINT32                OffsetTop;
-  CONST UINT32          *SymIndex;
-  CHAR8                 *SymPtr;
+  CONST UINT32          *SymIndices;
+  UINT64                *IndirectSymPtr;
   UINT32                Index;
   CONST MACH_NLIST_64   *Symbol;
 
@@ -1153,7 +1153,7 @@ InternalProcessSymbolPointers (
     return TRUE;
   }
 
-  NumSymbols = (UINT32)(Section->Size / sizeof (MACH_NLIST_64));
+  NumSymbols = (UINT32)(Section->Size / sizeof (*IndirectSymPtr));
   FirstSym   = Section->Reserved1;
 
   Result = OcOverflowAddU32 (FirstSym, NumSymbols, &OffsetTop);
@@ -1164,7 +1164,7 @@ InternalProcessSymbolPointers (
   MachSize = MachoGetFileSize (MachoContext);
   Result = OcOverflowMulAddU32 (
              DySymtab->NumIndirectSymbols,
-             sizeof (MACH_NLIST_64),
+             sizeof (*IndirectSymPtr),
              DySymtab->IndirectSymbolsOffset,
              &OffsetTop
              );
@@ -1188,27 +1188,28 @@ InternalProcessSymbolPointers (
   if (!OC_TYPE_ALIGNED (UINT32, Tmp)) {
     return FALSE;
   }
-  SymIndex = (UINT32 *)Tmp + FirstSym;
+  SymIndices = (UINT32 *)Tmp + FirstSym;
 
-  SymPtr = (CHAR8 *)((UINTN)MachHeader + Section->Offset);
-  if (!OC_TYPE_ALIGNED (UINT64, SymPtr)) {
+  Tmp = (VOID *)((UINTN)MachHeader + Section->Offset);
+  if (!OC_TYPE_ALIGNED (UINT64, Tmp)) {
     return FALSE;
   }
+  IndirectSymPtr = (UINT64 *)Tmp;
 
-  for (Index = 0; Index < NumSymbols; ++Index, SymPtr += sizeof (MACH_NLIST_64)) {
-    if ((*SymIndex & MACH_INDIRECT_SYMBOL_LOCAL) != 0) {
-      if ((*SymIndex & MACH_INDIRECT_SYMBOL_ABS) != 0) {
+  for (Index = 0; Index < NumSymbols; ++Index) {
+    if ((SymIndices[Index] & MACH_INDIRECT_SYMBOL_LOCAL) != 0) {
+      if ((SymIndices[Index] & MACH_INDIRECT_SYMBOL_ABS) != 0) {
         continue;
       }
 
-      *(UINT64 *)SymPtr += LoadAddress;
+      IndirectSymPtr[Index] += LoadAddress;
     } else {
-      Symbol = MachoGetSymbolByIndex64 (MachoContext, *SymIndex);
+      Symbol = MachoGetSymbolByIndex64 (MachoContext, SymIndices[Index]);
       if (Symbol == NULL) {
         return FALSE;
       }
 
-      *(UINT64 *)SymPtr += Symbol->Value;
+      IndirectSymPtr[Index] += Symbol->Value;
     }
   }
 

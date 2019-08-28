@@ -342,6 +342,26 @@ InternalGetSymbolByValue (
   return NULL;
 }
 
+BOOLEAN
+InternalGetSymbolByExternRelocationOffset64 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address,
+  OUT    MACH_NLIST_64     **Symbol
+  )
+{
+  CONST MACH_RELOCATION_INFO *Relocation;
+
+  ASSERT (Context != NULL);
+
+  Relocation = InternalGetExternRelocationByOffset (Context, Address);
+  if (Relocation != NULL) {
+    *Symbol = MachoGetSymbolByIndex64 (Context, Relocation->SymbolNumber);
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
 /**
   Retrieves the symbol referenced by the extern Relocation targeting Address.
 
@@ -361,17 +381,15 @@ MachoGetSymbolByExternRelocationOffset64 (
   OUT    MACH_NLIST_64     **Symbol
   )
 {
-  CONST MACH_RELOCATION_INFO *Relocation;
-
-  ASSERT (Context != NULL);
-
-  Relocation = InternalGetExternRelocationByOffset (Context, Address);
-  if (Relocation != NULL) {
-    *Symbol = MachoGetSymbolByIndex64 (Context, Relocation->SymbolNumber);
-    return TRUE;
+  if (Address >= MachoGetFileSize (Context)) {
+    return FALSE;
   }
 
-  return FALSE;
+  return InternalGetSymbolByExternRelocationOffset64 (
+           Context,
+           Address,
+           Symbol
+           );
 }
 
 /**
@@ -397,12 +415,22 @@ MachoGetSymbolByRelocationOffset64 (
   CONST MACH_RELOCATION_INFO *Relocation;
   CONST UINT64               *Data;
   MACH_NLIST_64              *Sym;
+  UINT64                     AddressTop;
 
   VOID                       *Tmp;
 
   ASSERT (Context != NULL);
 
-  Result = MachoGetSymbolByExternRelocationOffset64 (Context, Address, Symbol);
+  Result = OcOverflowAddU64 (Address, sizeof (UINT64), &AddressTop);
+  if (Result || AddressTop > MachoGetFileSize (Context)) {
+    return FALSE;
+  }
+
+  Result = InternalGetSymbolByExternRelocationOffset64 (
+             Context,
+             Address,
+             Symbol
+             );
   if (Result) {
     return TRUE;
   }
