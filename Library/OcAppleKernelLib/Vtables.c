@@ -477,6 +477,8 @@ InternalInitializeVtablePatchData (
   UINT32               MaxSymbols;
   MACH_NLIST_64        *Symbol;
 
+  VOID                 *Tmp;
+
   Result = MachoSymbolGetFileOffset64 (
              MachoContext,
              VtableSymbol,
@@ -490,10 +492,11 @@ InternalInitializeVtablePatchData (
   MachHeader = MachoGetMachHeader64 (MachoContext);
   ASSERT (MachHeader != NULL);
 
-  VtableData = (UINT64 *)((UINTN)MachHeader + VtableOffset);
-  if (!OC_ALIGNED (VtableData)) {
+  Tmp = (VOID *)((UINTN)MachHeader + VtableOffset);
+  if (!OC_TYPE_ALIGNED (UINT64, Tmp)) {
     return FALSE;
   }
+  VtableData = (UINT64 *)Tmp;
   //
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.

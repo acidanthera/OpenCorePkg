@@ -41,21 +41,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Ptr      - raw pointer value, must fit into UINTN, meant to be uintptr_t equivalent.
 //
 
-#if defined(OC_FORCE_ALIGN_SUPPORT) || defined(MDE_CPU_AARCH64) || defined(MDE_CPU_X64) || defined(MDE_CPU_ARM) || defined(MDE_CPU_IA32)
-
-#define OC_ALIGNED(TypedPtr) (0ULL == (((UINTN) (TypedPtr)) & \
-  (sizeof (*(TypedPtr)) > sizeof (UINTN) ? (sizeof (UINTN) - 1U) : (sizeof (*(TypedPtr)) - 1U))))
-
-#define OC_POT_ALIGNED(Align, Ptr) (0ULL == (((UINTN) (Ptr)) & (Align-1)))
-
-#define OC_TYPE_ALIGNED(Type, Ptr) (0ULL == (((UINTN) (Ptr)) & \
-  (sizeof (Type) > sizeof(UINTN) ? (sizeof (UINTN) - 1U) : (sizeof (Type) - 1U))))
-
-#else
-
-#error "Unknown target platform. Alignment macros are not applicable."
-
-#endif
+#define OC_ALIGNOF(Type)           (_Alignof (Type))
+#define OC_POT_ALIGNED(Align, Ptr) (0ULL == (((UINTN) (Ptr)) & (Align-1U)))
+#define OC_TYPE_ALIGNED(Type, Ptr) (OC_POT_ALIGNED (OC_ALIGNOF (Type), Ptr))
 
 //
 // The interfaces below provide base safe arithmetics, reporting

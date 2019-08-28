@@ -121,13 +121,13 @@ MachoFilterFatArchitecture64 (
   UINT32            Index;
   UINT32            Size;
 
-  FatHeader = (MACH_FAT_HEADER *) *FileData;
-
-  if (!OC_ALIGNED (FatHeader)
-    || *FileSize < sizeof (MACH_FAT_HEADER)
-    || (FatHeader->Signature != MACH_FAT_BINARY_INVERT_SIGNATURE
-      && FatHeader->Signature != MACH_FAT_BINARY_SIGNATURE))
-  {
+  if (*FileSize < sizeof (MACH_FAT_HEADER)
+   || !OC_TYPE_ALIGNED (MACH_FAT_HEADER, *FileData)) {
+    return FALSE;
+  }
+  FatHeader = (MACH_FAT_HEADER *)* FileData;
+  if (FatHeader->Signature != MACH_FAT_BINARY_INVERT_SIGNATURE
+   && FatHeader->Signature != MACH_FAT_BINARY_SIGNATURE) {
     return FALSE;
   }
 
@@ -203,16 +203,17 @@ MachoInitializeContext (
   ASSERT (FileSize > 0);
   ASSERT (Context != NULL);
 
+  TopOfFile = ((UINTN)FileData + FileSize);
+  ASSERT (TopOfFile > (UINTN)FileData);
+
   MachoFilterFatArchitecture64 ((UINT8 **) &FileData, &FileSize);
 
-  MachHeader = (MACH_HEADER_64 *) FileData;
-  TopOfFile  = ((UINTN)MachHeader + FileSize);
-
-  ASSERT (TopOfFile > (UINTN)MachHeader);
-
   if (FileSize < sizeof (*MachHeader)
-    || !OC_ALIGNED (MachHeader)
-    || MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
+    || !OC_TYPE_ALIGNED (MACH_HEADER_64, FileData)) {
+    return FALSE;
+  }
+  MachHeader = (MACH_HEADER_64 *)FileData;
+  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
     return FALSE;
   }
 
@@ -325,15 +326,15 @@ MachoGetLastAddress64 (
 
 **/
 STATIC
-CONST MACH_LOAD_COMMAND *
+MACH_LOAD_COMMAND *
 InternalGetNextCommand64 (
   IN OUT OC_MACHO_CONTEXT         *Context,
   IN     MACH_LOAD_COMMAND_TYPE   LoadCommandType,
   IN     CONST MACH_LOAD_COMMAND  *LoadCommand  OPTIONAL
   )
 {
-  CONST MACH_LOAD_COMMAND *Command;
-  CONST MACH_HEADER_64    *MachHeader;
+  MACH_LOAD_COMMAND       *Command;
+  MACH_HEADER_64          *MachHeader;
   UINTN                   TopOfCommands;
 
   ASSERT (Context != NULL);
@@ -381,23 +382,24 @@ MachoGetUuid64 (
 {
   MACH_UUID_COMMAND *UuidCommand;
 
+  VOID              *Tmp;
+
   ASSERT (Context != NULL);
 
-  UuidCommand = (MACH_UUID_COMMAND *)(
-                  InternalGetNextCommand64 (
-                    Context,
-                    MACH_LOAD_COMMAND_UUID,
-                    NULL
-                    )
-                  );
-
-  if ((UuidCommand != NULL)
-   && OC_ALIGNED (UuidCommand)
-   && (UuidCommand->CommandSize == sizeof (*UuidCommand))) {
-    return UuidCommand;
+  Tmp = InternalGetNextCommand64 (
+          Context,
+          MACH_LOAD_COMMAND_UUID,
+          NULL
+          );
+  if (Tmp == NULL || !OC_TYPE_ALIGNED (MACH_UUID_COMMAND, Tmp)) {
+    return NULL;
+  }
+  UuidCommand = (MACH_UUID_COMMAND *)Tmp;
+  if (UuidCommand->CommandSize != sizeof (*UuidCommand)) {
+    return NULL;
   }
 
-  return NULL;
+  return UuidCommand;
 }
 
 /**
@@ -612,6 +614,8 @@ MachoGetNextSegment64 (
   UINT64                  TopOfSegment;
   UINTN                   TopOfSections;
 
+  VOID                    *Tmp;
+
   ASSERT (Context != NULL);
 
   ASSERT (Context->MachHeader != NULL);
@@ -626,16 +630,16 @@ MachoGetNextSegment64 (
       );
   }
 
-  NextSegment = (MACH_SEGMENT_COMMAND_64 *)(
-                  InternalGetNextCommand64 (
-                    Context,
-                    MACH_LOAD_COMMAND_SEGMENT_64,
-                    (MACH_LOAD_COMMAND *) Segment
-                    )
-                  );
-  if ((NextSegment == NULL)
-   || !OC_ALIGNED (NextSegment)
-   || (NextSegment->CommandSize < sizeof (*NextSegment))) {
+  Tmp = InternalGetNextCommand64 (
+          Context,
+          MACH_LOAD_COMMAND_SEGMENT_64,
+          (MACH_LOAD_COMMAND *)Segment
+          );
+  if (Tmp == NULL || !OC_TYPE_ALIGNED (MACH_SEGMENT_COMMAND_64, Tmp)) {
+    return NULL;
+  }
+  NextSegment = (MACH_SEGMENT_COMMAND_64 *)Tmp;
+  if (NextSegment->CommandSize < sizeof (*NextSegment)) {
     return NULL;
   }
 
@@ -829,6 +833,8 @@ InternalRetrieveSymtabs64 (
   MACH_RELOCATION_INFO  *LocalRelocations;
   MACH_RELOCATION_INFO  *ExternRelocations;
 
+  VOID                  *Tmp;
+
   ASSERT (Context != NULL);
   ASSERT (Context->MachHeader != NULL);
   ASSERT (Context->FileSize > 0);
@@ -839,16 +845,16 @@ InternalRetrieveSymtabs64 (
   //
   // Retrieve SYMTAB.
   //
-  Symtab = (MACH_SYMTAB_COMMAND *)(
-             InternalGetNextCommand64 (
-               Context,
-               MACH_LOAD_COMMAND_SYMTAB,
-               NULL
-               )
-             );
-  if ((Symtab == NULL)
-   || !OC_ALIGNED (Symtab)
-   || (Symtab->CommandSize != sizeof (*Symtab))) {
+  Tmp = InternalGetNextCommand64 (
+          Context,
+          MACH_LOAD_COMMAND_SYMTAB,
+          NULL
+          );
+  if (Tmp == NULL || !OC_TYPE_ALIGNED (MACH_SYMTAB_COMMAND, Tmp)) {
+    return FALSE;
+  }
+  Symtab = (MACH_SYMTAB_COMMAND *)Tmp;
+  if (Symtab->CommandSize != sizeof (*Symtab)) {
     return FALSE;
   }
 
@@ -880,10 +886,11 @@ InternalRetrieveSymtabs64 (
     return FALSE;
   }
 
-  SymbolTable = (MACH_NLIST_64 *)(MachoAddress + Symtab->SymbolsOffset);
-  if (!OC_ALIGNED (SymbolTable)) {
+  Tmp = (VOID *)(MachoAddress + Symtab->SymbolsOffset);
+  if (!OC_TYPE_ALIGNED (MACH_NLIST_64, Tmp)) {
     return FALSE;
   }
+  SymbolTable = (MACH_NLIST_64 *)Tmp;
 
   DySymtab          = NULL;
   IndirectSymtab    = NULL;
@@ -894,16 +901,16 @@ InternalRetrieveSymtabs64 (
     //
     // Retrieve DYSYMTAB.
     //
-    DySymtab = (MACH_DYSYMTAB_COMMAND *)(
-                 InternalGetNextCommand64 (
-                   Context,
-                   MACH_LOAD_COMMAND_DYSYMTAB,
-                   NULL
-                   )
-                 );
-    if ((DySymtab == NULL)
-     || !OC_ALIGNED (DySymtab)
-     || (DySymtab->CommandSize != sizeof (*DySymtab))) {
+    Tmp = InternalGetNextCommand64 (
+            Context,
+            MACH_LOAD_COMMAND_DYSYMTAB,
+            NULL
+            );
+    if (Tmp == NULL || !OC_TYPE_ALIGNED (MACH_DYSYMTAB_COMMAND, Tmp)) {
+      return FALSE;
+    }
+    DySymtab = (MACH_DYSYMTAB_COMMAND *)Tmp;
+    if (DySymtab->CommandSize != sizeof (*DySymtab)) {
       return FALSE;
     }
 
@@ -964,20 +971,23 @@ InternalRetrieveSymtabs64 (
       return FALSE;
     }
 
-    IndirectSymtab = (MACH_NLIST_64 *)(
-                       MachoAddress + DySymtab->IndirectSymbolsOffset
-                       );
-    LocalRelocations = (MACH_RELOCATION_INFO *)(
-                         MachoAddress + DySymtab->LocalRelocationsOffset
-                         );
-    ExternRelocations = (MACH_RELOCATION_INFO *)(
-                          MachoAddress + DySymtab->ExternalRelocationsOffset
-                          );
-    if (!OC_ALIGNED (IndirectSymtab)
-     || !OC_ALIGNED (LocalRelocations)
-     || !OC_ALIGNED (ExternRelocations)) {
+    Tmp = (VOID *)(MachoAddress + DySymtab->IndirectSymbolsOffset);
+    if (!OC_TYPE_ALIGNED (MACH_NLIST_64, Tmp)) {
       return FALSE;
     }
+    IndirectSymtab = (MACH_NLIST_64 *)Tmp;
+
+    Tmp = (VOID *)(MachoAddress + DySymtab->LocalRelocationsOffset);
+    if (!OC_TYPE_ALIGNED (MACH_RELOCATION_INFO, Tmp)) {
+      return FALSE;
+    }
+    LocalRelocations = (MACH_RELOCATION_INFO *)Tmp;
+
+    Tmp = (VOID *)(MachoAddress + DySymtab->ExternalRelocationsOffset);
+    if (!OC_TYPE_ALIGNED (MACH_RELOCATION_INFO, Tmp)) {
+      return FALSE;
+    }
+    ExternRelocations = (MACH_RELOCATION_INFO *)Tmp;
   }
 
   //

@@ -1142,6 +1142,8 @@ InternalProcessSymbolPointers (
   UINT32                Index;
   CONST MACH_NLIST_64   *Symbol;
 
+  VOID                  *Tmp;
+
   Section = MachoGetSegmentSectionByName64 (
               MachoContext,
               "__DATA",
@@ -1182,14 +1184,14 @@ InternalProcessSymbolPointers (
   //   3) An INDIRECT_SYMBOL_ABS - prepopulated absolute symbols.  No
   //      action is required.
   //
-  SymIndex = (UINT32 *)((UINTN)MachHeader + DySymtab->IndirectSymbolsOffset);
-  if (!OC_ALIGNED (SymIndex)) {
+  Tmp = (VOID *)((UINTN)MachHeader + DySymtab->IndirectSymbolsOffset);
+  if (!OC_TYPE_ALIGNED (UINT32, Tmp)) {
     return FALSE;
   }
-  SymIndex += FirstSym;
+  SymIndex = (UINT32 *)Tmp + FirstSym;
 
   SymPtr = (CHAR8 *)((UINTN)MachHeader + Section->Offset);
-  if (!OC_ALIGNED ((UINT64 *)SymPtr)) {
+  if (!OC_TYPE_ALIGNED (UINT64, SymPtr)) {
     return FALSE;
   }
 

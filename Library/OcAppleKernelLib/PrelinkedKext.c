@@ -342,6 +342,8 @@ InternalScanBuildLinkedVtables (
   CONST UINT64                     *VtableData;
   PRELINKED_VTABLE                 *LinkedVtables;
 
+  VOID                             *Tmp;
+
   if (Kext->LinkedVtables != NULL) {
     return RETURN_SUCCESS;
   }
@@ -367,14 +369,15 @@ InternalScanBuildLinkedVtables (
     //       need to abort anyway when the value is out of its bounds, we can
     //       just locate it by address in the first place.
     //
-    VtableData = MachoGetFilePointerByAddress64 (
-                   &Kext->Context.MachContext,
-                   VtableLookups[Index].Vtable.Value,
-                   &VtableMaxSize
-                   );
-    if ((VtableData == NULL) || !OC_ALIGNED (VtableData)) {
+    Tmp = MachoGetFilePointerByAddress64 (
+            &Kext->Context.MachContext,
+            VtableLookups[Index].Vtable.Value,
+            &VtableMaxSize
+            );
+    if (Tmp == NULL || !OC_TYPE_ALIGNED (UINT64, Tmp)) {
       return RETURN_UNSUPPORTED;
     }
+    VtableData = (UINT64 *)Tmp;
 
     Result = InternalGetVtableEntries64 (
                VtableData,

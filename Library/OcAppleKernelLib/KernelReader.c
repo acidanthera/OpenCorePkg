@@ -226,11 +226,11 @@ ReadAppleKernelImage (
   Compressed = FALSE;
 
   while (TRUE) {
-    MagicPtr = (UINT32 *)*Buffer;
-    if (!OC_ALIGNED (MagicPtr)) {
+    if (!OC_TYPE_ALIGNED (UINT32 , *Buffer)) {
       DEBUG ((DEBUG_INFO, "Misaligned kernel header %p at %08X\n", MagicPtr, Offset));
       return RETURN_INVALID_PARAMETER;
     }
+    MagicPtr = (UINT32 *)* Buffer;
 
     switch (*MagicPtr) {
       case MACH_HEADER_64_SIGNATURE:
