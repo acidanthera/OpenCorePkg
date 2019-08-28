@@ -474,6 +474,7 @@ InternalInitializeVtablePatchData (
   UINT64               *VtableData;
   UINT32               SymIndex;
   UINT32               EntryOffset;
+  UINT64               FileOffset;
   UINT32               MaxSymbols;
   MACH_NLIST_64        *Symbol;
 
@@ -512,9 +513,18 @@ InternalInitializeVtablePatchData (
     ++EntryOffset
     ) {
     if (VtableData[EntryOffset] == 0) {
+      Result = OcOverflowAddU64 (
+                 VtableSymbol->Value,
+                 (EntryOffset * VTABLE_ENTRY_SIZE_64),
+                 &FileOffset
+                 );
+      if (Result) {
+        return FALSE;
+      }
+
       Result = MachoGetSymbolByExternRelocationOffset64 (
                  MachoContext,
-                 (VtableSymbol->Value + (EntryOffset * sizeof (*VtableData))),
+                 FileOffset,
                  &Symbol
                  );
       if (!Result) {
