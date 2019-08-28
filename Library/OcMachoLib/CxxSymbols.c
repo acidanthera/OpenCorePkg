@@ -273,7 +273,6 @@ MachoGetClassNameFromMetaClassPointer (
   )
 {
   UINTN                  PrefixSize;
-  UINTN                  BodySize;
   UINTN                  SuffixSize;
   UINTN                  ClassNameLength;
 
