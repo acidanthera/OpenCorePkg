@@ -243,7 +243,7 @@ PatchAppleXcpmCfgLock (
     }
 
     //
-    // Now the HWP patch.
+    // Now the HWP patch at _xcpm_idle() for Release XNU.
     //
     Status = PatcherApplyGenericPatch (
       Patcher,
@@ -291,7 +291,6 @@ mMiscPwrMgmtRelPatch = {
   .Skip        = 0,
   .Limit       = 0
 };
-
 
 STATIC
 UINT8
@@ -342,6 +341,11 @@ PatchAppleXcpmExtraMsrs (
   Status = PatcherGetSymbolAddress (Patcher, "_xcpm_pkg_scope_msrs", (UINT8 **) &Record);
   if (!RETURN_ERROR (Status)) {
     while (Record < Last) {
+      //
+      // Most Record->xcpm_msr_applicable_cpus has
+      // 0xDC or 0xDE in its lower 16-bit and thus here we
+      // AND 0xFF0000FDU in order to match both. (The result will be 0xDC)
+      //
       if ((Record->xcpm_msr_applicable_cpus & 0xFF0000FDU) == 0xDC) {
         DEBUG ((
           DEBUG_INFO,
