@@ -440,6 +440,7 @@ AppleSlideUnlockForSafeMode (
   @param[in,out]  BootCompat    Boot compatibility context.
   @param[in]      GetVariable   Original UEFI GetVariable service.
   @param[in]      GetMemoryMap  Unmodified GetMemoryMap pointer, optional.
+  @param[in]      FilterMap     GetMemoryMap result filter, optional.
   @param[in]      VariableName  GetVariable variable name argument.
   @param[in]      VendorGuid    GetVariable vendor GUID argument.
   @param[out]     Attributes    GetVariable attributes argument.
@@ -453,9 +454,10 @@ AppleSlideGetVariable (
   IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
   IN     EFI_GET_VARIABLE      GetVariable,
   IN     EFI_GET_MEMORY_MAP    GetMemoryMap  OPTIONAL,
+  IN     OC_MEMORY_FILTER      FilterMap     OPTIONAL,
   IN     CHAR16                *VariableName,
   IN     EFI_GUID              *VendorGuid,
-     OUT UINT32                *Attributes OPTIONAL,
+     OUT UINT32                *Attributes   OPTIONAL,
   IN OUT UINTN                 *DataSize,
      OUT VOID                  *Data
   );

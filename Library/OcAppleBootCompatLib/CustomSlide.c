@@ -207,8 +207,8 @@ ShouldUseCustomSlideOffsetDecision (
   whether to use custom slide for reliable kernel booting or not.
 
   @param[in,out]  SlideSupport      Slide support state.
-  @param[in]      FallbackSlide     Fallback slide number with largest area.
-  @param[in]      MaxAvailableSize  Maximum available contiguous area.
+  @param[in]      GetMemoryMap      Function to get current memory map for analysis. optional.
+  @param[in]      FilterMap         Function to filter returned memory map, optional.
 
   @retval  TRUE in case custom slide is to be used.
 **/
@@ -216,7 +216,8 @@ STATIC
 BOOLEAN
 ShouldUseCustomSlideOffset (
   IN OUT SLIDE_SUPPORT_STATE   *SlideSupport,
-  IN     EFI_GET_MEMORY_MAP    GetMemoryMap  OPTIONAL
+  IN     EFI_GET_MEMORY_MAP    GetMemoryMap  OPTIONAL,
+  IN     OC_MEMORY_FILTER      FilterMap     OPTIONAL
   )
 {
   UINTN                  AllocatedMapPages;
@@ -260,6 +261,10 @@ ShouldUseCustomSlideOffset (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCABC: Failed to obtain memory map for KASLR - %r\n", Status));
     return FALSE;
+  }
+
+  if (FilterMap != NULL) {
+    FilterMap (MemoryMapSize, MemoryMap, DescriptorSize);
   }
 
   SlideSupport->HasSandyOrIvy       = OcIsSandyOrIvy ();
@@ -705,9 +710,10 @@ AppleSlideGetVariable (
   IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
   IN     EFI_GET_VARIABLE      GetVariable,
   IN     EFI_GET_MEMORY_MAP    GetMemoryMap  OPTIONAL,
+  IN     OC_MEMORY_FILTER      FilterMap     OPTIONAL,
   IN     CHAR16                *VariableName,
   IN     EFI_GUID              *VendorGuid,
-     OUT UINT32                *Attributes  OPTIONAL,
+     OUT UINT32                *Attributes   OPTIONAL,
   IN OUT UINTN                 *DataSize,
      OUT VOID                  *Data
   )
@@ -733,7 +739,7 @@ AppleSlideGetVariable (
         );
     } else if (StrCmp (VariableName, L"boot-args") == 0
       && !BootCompat->ServiceState.AppleCustomSlide
-      && ShouldUseCustomSlideOffset (&BootCompat->SlideSupport, GetMemoryMap)) {
+      && ShouldUseCustomSlideOffset (&BootCompat->SlideSupport, GetMemoryMap, FilterMap)) {
       //
       // When we cannot allow some KASLR values due to used address we generate
       // a random slide value among the valid options, which we we pass via boot-args.

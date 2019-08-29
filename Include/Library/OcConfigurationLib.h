@@ -101,6 +101,7 @@
 ///
 #define OC_BOOTER_QUIRKS_FIELDS(_, __) \
   _(BOOLEAN                     , AvoidRuntimeDefrag        ,     , FALSE  , ()) \
+  _(BOOLEAN                     , DevirtualiseMmio          ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableVariableWrite      ,     , FALSE  , ()) \
   _(BOOLEAN                     , DiscardHibernateMap       ,     , FALSE  , ()) \
   _(BOOLEAN                     , EnableSafeModeSlide       ,     , FALSE  , ()) \

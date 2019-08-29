@@ -143,6 +143,22 @@ BOOLEAN
   IN UINTN                 Size
   );
 
+
+/**
+  Filter memory map entries.
+
+  @param[in,out]  MemoryMapSize      Memory map size in bytes.
+  @param[in,out]  MemoryMap          Memory map to filter.
+  @param[in]      DescriptorSize     Memory map descriptor size in bytes.
+**/
+typedef
+VOID
+(*OC_MEMORY_FILTER) (
+  IN     UINTN                  MemoryMapSize,
+  IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN     UINTN                  DescriptorSize
+  );
+
 /**
   Allocate pages from the top of physical memory up to address specified in Memory.
   Unlike AllocateMaxAddress, this method guarantees to choose top most address.

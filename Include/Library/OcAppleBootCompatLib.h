@@ -36,6 +36,12 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   BOOLEAN  ProvideCustomSlide;
   ///
+  /// Remove runtime flag from MMIO areas and prevent virtual address assignment for known
+  /// MMIO regions. This may improve the amount of slides available, but may not work on
+  /// unknown configurations.
+  ///
+  BOOLEAN  DevirtualiseMmio;
+  ///
   /// Discard UEFI memory map after waking from hibernation and preserve the original mapping.
   ///
   BOOLEAN  DiscardHibernateMap;

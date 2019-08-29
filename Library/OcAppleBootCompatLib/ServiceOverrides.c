@@ -166,6 +166,99 @@ ProtectCsmRegion (
 }
 
 /**
+  Mark MMIO virtual memory regions as non-runtime to reduce the amount
+  of virtual memory required by boot.efi.
+
+  @param[in,out]  MemoryMapSize      Memory map size in bytes, updated on devirtualisation.
+  @param[in,out]  MemoryMap          Memory map to devirtualise.
+  @param[in]      DescriptorSize     Memory map descriptor size in bytes.
+**/
+STATIC
+VOID
+DevirtualiseMmio (
+  IN     UINTN                  MemoryMapSize,
+  IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN     UINTN                  DescriptorSize
+  )
+{
+  UINTN                   NumEntries;
+  UINTN                   Index;
+  UINTN                   Index2;
+  EFI_MEMORY_DESCRIPTOR   *Desc;
+  BOOLEAN                 Reset;
+
+  //
+  // This is the list of known addresses that need virtual addresses
+  // due to their firmware implementations to access NVRAM.
+  // To simplify this code, as it changes anyway every new generation we just
+  // hardcode the list of known values.
+  //
+  STATIC EFI_PHYSICAL_ADDRESS  Exceptions[] = {
+    //
+    // Intel Haswell and below.
+    // 0xFED1C000 (SB_RCBA) is a 4 page memory region, containing SPI_BASE at 0x3800 (SPI_BASE_ADDRESS).
+    //
+    0xFED1C000,
+    //
+    // Intel Atoms (Braswell, Bay Trail, Gemini).
+    // 0xFED01000 (SPI_BASE) can be read from LPC (device 31, function 0) at offset 0x10 (R_SPI_CFG_BAR0).
+    //
+    0xFED01000,
+    //
+    // Intel Skylake and newer.
+    // 0xFE010000 (SPI_BASE) can be read from SPI (device 31, function 0) at offset 0x54 (R_PCH_LPC_SPI_BASE).
+    //
+    0xFE010000
+  };
+
+  STATIC UINTN                 MaxExceptionSize = 16;
+
+  Desc       = MemoryMap;
+  NumEntries = MemoryMapSize / DescriptorSize;
+
+  DEBUG ((DEBUG_INFO, "OCABC: MMIO devirt start\n"));
+
+  for (Index = 0; Index < NumEntries; ++Index) {
+    if (Desc->NumberOfPages > 0
+      && Desc->Type == EfiMemoryMappedIO
+      && (Desc->Attribute & EFI_MEMORY_RUNTIME) != 0) {
+      Reset = TRUE;
+      if (Desc->NumberOfPages <= MaxExceptionSize) {
+        for (Index2 = 0; Index2 < ARRAY_SIZE (Exceptions); ++Index2) {
+          if (AREA_WITHIN_DESCRIPTOR (Desc, Exceptions[Index2], 1)) {
+            Reset = FALSE;
+            break;
+          }
+        }
+      }
+
+      if (Reset) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCABC: MMIO devirt 0x%Lx (0x%Lx pages, 0x%Lx)\n",
+          (UINT64) Desc->PhysicalStart,
+          (UINT64) Desc->NumberOfPages,
+          (UINT64) Desc->Attribute
+          ));
+        Desc->Attribute &= ~EFI_MEMORY_RUNTIME;
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCABC: MMIO ignore devirt 0x%Lx (0x%Lx pages, 0x%Lx)\n",
+          (UINT64) Desc->PhysicalStart,
+          (UINT64) Desc->NumberOfPages,
+          (UINT64) Desc->Attribute
+          ));
+      }
+    }
+
+    Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
+  }
+
+  DEBUG ((DEBUG_INFO, "OCABC: MMIO devirt end\n"));
+}
+
+/**
   UEFI Boot Services StartImage override. Called to start an efi image.
   If this is boot.efi, then our overrides are enabled.
 **/
@@ -366,6 +459,14 @@ OcGetMemoryMap (
         );
     }
 
+    if (BootCompat->Settings.DevirtualiseMmio) {
+      DevirtualiseMmio (
+        *MemoryMapSize,
+        MemoryMap,
+        *DescriptorSize
+        );
+    }
+
     if (BootCompat->Settings.ShrinkMemoryMap) {
       ShrinkMemoryMap (
         MemoryMapSize,
@@ -523,6 +624,7 @@ OcGetVariable (
       BootCompat,
       BootCompat->ServicePtrs.GetVariable,
       BootCompat->ServicePtrs.GetMemoryMap,
+      BootCompat->Settings.DevirtualiseMmio ? DevirtualiseMmio : NULL,
       VariableName,
       VendorGuid,
       Attributes,
