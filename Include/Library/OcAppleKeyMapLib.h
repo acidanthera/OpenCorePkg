@@ -18,19 +18,25 @@
 #include <Protocol/AppleKeyMapAggregator.h>
 
 /**
+  Returns the previously install Apple Key Map Database protocol.
+
+  @retval installed or located protocol or NULL
+**/
+APPLE_KEY_MAP_DATABASE_PROTOCOL *
+OcAppleKeyMapGetDatabase (
+  VOID
+  );
+
+/**
   Install and initialise Apple Key Map protocols.
 
-  @param[out] KeyMapDatabase    On success, installed or located protocol.
-  @param[out] KeyMapAggregator  On success, installed or located protocol.
-  @param[in]  Reinstall         Overwrite installed protocols.
+  @param[in] Reinstall  Overwrite installed protocols.
 
-  @returns Success status
+  @retval installed or located protocol or NULL
 **/
-BOOLEAN
+APPLE_KEY_MAP_AGGREGATOR_PROTOCOL *
 OcAppleKeyMapInstallProtocols (
-  OUT APPLE_KEY_MAP_DATABASE_PROTOCOL    **KeyMapDatabase,
-  OUT APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  **KeyMapAggregator,
-  IN  BOOLEAN                            Reinstall
+  IN BOOLEAN  Reinstall
   );
 
 #endif // OC_APPLE_KEY_MAP_LIB_H

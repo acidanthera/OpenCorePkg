@@ -509,20 +509,31 @@ InternalSetKeyStrokeBufferKeys (
   return Status;
 }
 
+STATIC APPLE_KEY_MAP_DATABASE_PROTOCOL *mKeyMapDatabase = NULL;
+
+/**
+  Returns the previously install Apple Key Map Database protocol.
+
+  @retval installed or located protocol or NULL
+**/
+APPLE_KEY_MAP_DATABASE_PROTOCOL *
+OcAppleKeyMapGetDatabase (
+  VOID
+  )
+{
+  return mKeyMapDatabase;
+}
+
 /**
   Install and initialise Apple Key Map protocols.
 
-  @param[out] KeyMapDatabase    On success, installed or located protocol.
-  @param[out] KeyMapAggregator  On success, installed or located protocol.
-  @param[in]  Reinstall         Overwrite installed protocols.
+  @param[in] Reinstall  Overwrite installed protocols.
 
-  @returns Success status
+  @retval installed or located protocol or NULL
 **/
-BOOLEAN
+APPLE_KEY_MAP_AGGREGATOR_PROTOCOL *
 OcAppleKeyMapInstallProtocols (
-  OUT APPLE_KEY_MAP_DATABASE_PROTOCOL    **KeyMapDatabase,
-  OUT APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  **KeyMapAggregator,
-  IN  BOOLEAN                            Reinstall
+  IN BOOLEAN  Reinstall
   )
 {
   EFI_STATUS                        Status;
@@ -531,15 +542,12 @@ OcAppleKeyMapInstallProtocols (
   APPLE_KEY_MAP_DATABASE_PROTOCOL   *Database;
   APPLE_KEY_MAP_AGGREGATOR_PROTOCOL *Aggregator;
 
-  ASSERT (KeyMapDatabase != NULL);
-  ASSERT (KeyMapAggregator != NULL);
-
   if (Reinstall) {
     Status = UninstallAllProtocolInstances (&gAppleKeyMapDatabaseProtocolGuid);
     Status2 = UninstallAllProtocolInstances (&gAppleKeyMapAggregatorProtocolGuid);
     if (EFI_ERROR (Status) || EFI_ERROR (Status2)) {
       DEBUG ((DEBUG_ERROR, "OCKM: Uninstall failed: %r/%r\n", Status, Status2));
-      return FALSE;
+      return NULL;
     }
   } else {
     Status = gBS->LocateProtocol (
@@ -551,21 +559,20 @@ OcAppleKeyMapInstallProtocols (
       &gAppleKeyMapAggregatorProtocolGuid,
       NULL,
       (VOID *)&Aggregator
-    );
+      );
 
     if (!EFI_ERROR (Status) && !EFI_ERROR (Status2)) {
-      *KeyMapDatabase   = Database;
-      *KeyMapAggregator = Aggregator;
-      return TRUE;
+      mKeyMapDatabase = Database;
+      return Aggregator;
     } else if (!EFI_ERROR (Status) || !EFI_ERROR (Status2)) {
-      return FALSE;
+      return NULL;
     }
   }
 
   KeyMapAggregatorData = AllocateZeroPool (sizeof (*KeyMapAggregatorData));
 
   if (KeyMapAggregatorData == NULL) {
-    return FALSE;
+    return NULL;
   }
 
   KeyMapAggregatorData->Signature          = KEY_MAP_AGGREGATOR_DATA_SIGNATURE;
@@ -592,10 +599,9 @@ OcAppleKeyMapInstallProtocols (
     );
   if (EFI_ERROR (Status)) {
     FreePool (KeyMapAggregatorData);
-    return FALSE;
+    return NULL;
   }
 
-  *KeyMapDatabase   = &KeyMapAggregatorData->Database;
-  *KeyMapAggregator = &KeyMapAggregatorData->Aggregator;
-  return TRUE;
+  mKeyMapDatabase = &KeyMapAggregatorData->Database;
+  return &KeyMapAggregatorData->Aggregator;
 }
