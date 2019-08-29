@@ -273,6 +273,7 @@ OcLoadBooterUefiSupport (
   ZeroMem (&AbcSettings, sizeof (AbcSettings));
 
   AbcSettings.AvoidRuntimeDefrag     = Config->Booter.Quirks.AvoidRuntimeDefrag;
+  AbcSettings.DevirtualiseMmio       = Config->Booter.Quirks.DevirtualiseMmio;
   AbcSettings.DisableVariableWrite   = Config->Booter.Quirks.DisableVariableWrite;
   AbcSettings.DiscardHibernateMap    = Config->Booter.Quirks.DiscardHibernateMap;
   AbcSettings.EnableSafeModeSlide    = Config->Booter.Quirks.EnableSafeModeSlide;

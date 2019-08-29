@@ -1030,6 +1030,17 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \emph{Note}: Most but Apple and VMware firmwares need this quirk.
 
 \item
+  \texttt{DevirtualiseMmio}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Remove runtime attribute from select MMIO regions.
+
+  This option reduces stolen memory footprint from the memory map by removing
+  runtime bit for known memory regions. This quirk may result in the increase
+  of KASLR slides available, but is not necessarily compatible with the target
+  board.
+
+\item
   \texttt{DisableVariableWrite}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

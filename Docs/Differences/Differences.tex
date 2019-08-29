@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Aug 11 01:57:12 2019
-%DIF ADD ../Configuration.tex        Tue Aug 27 11:19:40 2019
+%DIF DEL PreviousConfiguration.tex   Tue Aug 20 14:26:36 2019
+%DIF ADD ../Configuration.tex        Thu Aug 29 13:38:28 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1097,7 +1097,20 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \emph{Note}: Most but Apple and VMware firmwares need this quirk.
 
 \item
-  \texttt{DisableVariableWrite}\\
+  \DIFaddbegin \texttt{\DIFadd{DevirtualiseMmio}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Remove runtime attribute from select MMIO regions.
+}
+
+  \DIFadd{This option reduces stolen memory footprint from the memory map by removing
+  runtime bit for known memory regions. This quirk may result in the increase
+  of KASLR slides available, but is not necessarily compatible with the target
+  board.
+}
+
+\item
+  \DIFaddend \texttt{DisableVariableWrite}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Protect from macOS NVRAM write access.
