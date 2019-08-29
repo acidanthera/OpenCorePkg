@@ -90,6 +90,9 @@
   OcAppleDiskImageLib|Include/Library/OcAppleDiskImageLib.h
 
   ##  @libraryclass
+  OcAppleEventLib|Include/Library/OcAppleEventLib.h
+
+  ##  @libraryclass
   OcAppleImageConversionLib|Include/Library/OcAppleImageConversionLib.h
 
   ##  @libraryclass
@@ -97,6 +100,9 @@
 
   ##  @libraryclass
   OcAppleKernelLib|Include/Library/OcAppleKernelLib.h
+
+  ##  @libraryclass
+  OcAppleKeyMapLib|Include/Library/OcAppleKeyMapLib.h
 
   ##  @libraryclass
   OcAppleKeysLib|Include/Library/OcAppleKeysLib.h

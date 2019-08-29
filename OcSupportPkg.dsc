@@ -56,9 +56,11 @@
   OcAppleChunklistLib|OcSupportPkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
   OcAppleDerLib|OcSupportPkg/Library/OcAppleDerLib/OcAppleDerLib.inf
   OcAppleDiskImageLib|OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
+  OcAppleEventLib|OcSupportPkg/Library/OcAppleEventLib/OcAppleEventLib.inf
   OcAppleImageConversionLib|OcSupportPkg/Library/OcAppleImageConversionLib/OcAppleImageConversionLib.inf
   OcAppleImageVerificationLib|OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcAppleKernelLib|OcSupportPkg/Library/OcAppleKernelLib/OcAppleKernelLib.inf
+  OcAppleKeyMapLib|OcSupportPkg/Library/OcAppleKeyMapLib/OcAppleKeyMapLib.inf
   OcAppleKeysLib|OcSupportPkg/Library/OcAppleKeysLib/OcAppleKeysLib.inf
   OcAppleRamDiskLib|OcSupportPkg/Library/OcAppleRamDiskLib/OcAppleRamDiskLib.inf
   OcAppleSecureBootLib|OcSupportPkg/Library/OcAppleSecureBootLib/OcAppleSecureBootLib.inf
@@ -99,9 +101,11 @@
   OcSupportPkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
   OcSupportPkg/Library/OcAppleDerLib/OcAppleDerLib.inf
   OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
+  OcSupportPkg/Library/OcAppleEventLib/OcAppleEventLib.inf
   OcSupportPkg/Library/OcAppleImageConversionLib/OcAppleImageConversionLib.inf
   OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcSupportPkg/Library/OcAppleKernelLib/OcAppleKernelLib.inf
+  OcSupportPkg/Library/OcAppleKeyMapLib/OcAppleKeyMapLib.inf
   OcSupportPkg/Library/OcAppleRamDiskLib/OcAppleRamDiskLib.inf
   OcSupportPkg/Library/OcAppleSecureBootLib/OcAppleSecureBootLib.inf
   OcSupportPkg/Library/OcAppleUserInterfaceThemeLib/OcAppleUserInterfaceThemeLib.inf
