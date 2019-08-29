@@ -195,23 +195,26 @@ DevirtualiseMmio (
   //
   STATIC EFI_PHYSICAL_ADDRESS  Exceptions[] = {
     //
-    // Intel Haswell and below.
+    // Intel Haswell and below. Bugged.
     // 0xFED1C000 (SB_RCBA) is a 4 page memory region, containing SPI_BASE at 0x3800 (SPI_BASE_ADDRESS).
     //
     0xFED1C000,
+#if 0
     //
-    // Intel Atoms (Braswell, Bay Trail, Gemini).
+    // Intel Atoms (Braswell, Bay Trail, Gemini). Not bugged?
     // 0xFED01000 (SPI_BASE) can be read from LPC (device 31, function 0) at offset 0x10 (R_SPI_CFG_BAR0).
     //
     0xFED01000,
     //
-    // Intel Skylake and newer.
+    // Intel Skylake and newer. Not bugged.
     // 0xFE010000 (SPI_BASE) can be read from SPI (device 31, function 0) at offset 0x54 (R_PCH_LPC_SPI_BASE).
+    // This region normally contains 17 pages.
     //
-    0xFE010000
+    0xFE010000,
+#endif
   };
 
-  STATIC UINTN                 MaxExceptionSize = 16;
+  STATIC UINTN                 MaxExceptionSize = 128;
 
   Desc       = MemoryMap;
   NumEntries = MemoryMapSize / DescriptorSize;
