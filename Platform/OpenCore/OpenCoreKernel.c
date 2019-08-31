@@ -255,6 +255,10 @@ OcKernelApplyPatches (
 
     ZeroMem (&Patch, sizeof (Patch));
 
+    if (OC_BLOB_GET (&UserPatch->Comment)[0] != '\0') {
+      Patch.Comment  = OC_BLOB_GET (&UserPatch->Comment);
+    }
+
     if (OC_BLOB_GET (&UserPatch->Base)[0] != '\0') {
       Patch.Base  = OC_BLOB_GET (&UserPatch->Base);
     }

@@ -33,14 +33,14 @@
 /**
   OpenCore build type reported to log and NVRAM.
 **/
-#if defined (OC_RELEASE_TARGET)
+#if defined (OC_TARGET_RELEASE)
 #define OPEN_CORE_TARGET           "REL" ///< Release.
-#elif defined (OC_DEBUG_TARGET)
+#elif defined (OC_TARGET_DEBUG)
 #define OPEN_CORE_TARGET           "DBG" ///< Debug with compiler optimisations.
-#elif defined (OC_NOOPT_TARGET)
+#elif defined (OC_TARGET_NOOPT)
 #define OPEN_CORE_TARGET           "NPT" ///< Debug with no compiler optimisations.
 #else
-#define OPEN_CORE_TARGET           "UNK" ///< This one should not happen in public builds.
+#error "Unknown target definition"
 #endif
 
 #define OPEN_CORE_IMAGE_PATH       L"EFI\\OC\\OpenCore.efi"

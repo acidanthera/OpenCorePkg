@@ -12,6 +12,7 @@ OpenCore Changelog
 - Added `MISC_PWR_MGMT` patch to `AppleXcpmExtraMsrs` quirk (thx @mrmiller)
 - Added `DevirtualiseMmio` quirk to `Booter` section
 - Added FileVault 2 user interface protocols formerly in AppleUiSupport
+- Improved kernel patch logging to include configuration comments
 
 #### v0.0.4
 - Fixed kext injection issues with dummy dependencies

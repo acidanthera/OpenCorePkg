@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sun Aug 11 01:57:12 2019
-%DIF ADD ../Configuration.tex        Sat Aug 31 12:31:30 2019
+%DIF ADD ../Configuration.tex        Sat Aug 31 22:14:59 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -624,7 +624,8 @@ approach could be \href{https://www.sublimetext.com}{Sublime Text} with
 \href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
 Add \texttt{.clang\_complete} file with similar content to your UDK root:
 
-\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash]
+\DIFmodbegin
+\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash,alsolanguage=DIFcode]
 -I/UefiPackages/MdePkg
 -I/UefiPackages/MdePkg/Include
 -I/UefiPackages/MdePkg/Include/X64
@@ -649,7 +650,9 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -Wno-sign-compare
 -Wno-varargs
 -Wno-unused-const-variable
+%DIF > -DOC_TARGET_NOOPT=1
 \end{lstlisting}
+\DIFmodend
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
 files must ensure that their tool checks for \texttt{opencore-version} NVRAM variable
