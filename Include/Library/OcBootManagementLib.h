@@ -107,6 +107,16 @@ typedef struct OC_BOOT_ENTRY_ {
 #define OC_SCAN_ALLOW_FS_ESP             BIT10
 
 /**
+  Allow scanning NTFS filesystems.
+**/
+#define OC_SCAN_ALLOW_FS_NTFS            BIT11
+
+/**
+  Allow scanning EXT filesystems (e.g. EXT4).
+**/
+#define OC_SCAN_ALLOW_FS_EXT             BIT12
+
+/**
   Allow scanning SATA devices.
 **/
 #define OC_SCAN_ALLOW_DEVICE_SATA        BIT16
@@ -159,7 +169,8 @@ typedef struct OC_BOOT_ENTRY_ {
   All device bits used by OC_SCAN_DEVICE_LOCK.
 **/
 #define OC_SCAN_FILE_SYSTEM_BITS ( \
-  OC_SCAN_ALLOW_FS_APFS | OC_SCAN_ALLOW_FS_HFS | OC_SCAN_ALLOW_FS_ESP)
+  OC_SCAN_ALLOW_FS_APFS | OC_SCAN_ALLOW_FS_HFS | OC_SCAN_ALLOW_FS_ESP | \
+  OC_SCAN_ALLOW_FS_NTFS | OC_SCAN_ALLOW_FS_EXT)
 
 /**
   By default allow booting from APFS from internal drives.

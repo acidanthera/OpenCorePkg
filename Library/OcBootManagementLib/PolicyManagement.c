@@ -119,6 +119,34 @@ OcGetDevicePolicyType (
   return 0;
 }
 
+/**
+  Microsoft partitions.
+  https://docs.microsoft.com/ru-ru/windows/win32/api/vds/ns-vds-create_partition_parameters
+**/
+EFI_GUID mMsftBasicDataPartitionTypeGuid = {
+  0xEBD0A0A2, 0xB9E5, 0x4433, {0x87, 0xC0, 0x68, 0xB6, 0xB7, 0x26, 0x99, 0xC7}
+};
+
+EFI_GUID mMsftReservedPartitionTypeGuid = {
+  0xE3C9E316, 0x0B5C, 0x4DB8, {0x81, 0x7D, 0xF9, 0x2D, 0xF0, 0x02, 0x15, 0xAE}
+};
+
+EFI_GUID mMsftRecoveryPartitionTypeGuid = {
+  0xDE94BBA4, 0x06D1, 0x4D40, {0xA1, 0x6A, 0xBF, 0xD5, 0x01, 0x79, 0xD6, 0xAC}
+};
+
+/**
+  Linux partitions.
+  https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs
+**/
+EFI_GUID mLinuxRootX86PartitionTypeGuid = {
+  0x44479540, 0xF297, 0x41B2, {0x9A, 0xF7, 0xD1, 0x31, 0xD5, 0xF0, 0x45, 0x8A}
+};
+
+EFI_GUID mLinuxRootX8664PartitionTypeGuid = {
+  0x4F68BCE3, 0xE8CD, 0x4DB1, {0x96, 0xE7, 0xFB, 0xCA, 0xF9, 0x84, 0xB7, 0x09}
+};
+
 UINT32
 OcGetFileSystemPolicyType (
   IN  EFI_HANDLE   Handle
@@ -147,6 +175,15 @@ OcGetFileSystemPolicyType (
   if (CompareGuid (&PartitionEntry->PartitionTypeGUID, &gAppleHfsPartitionTypeGuid)
     || CompareGuid (&PartitionEntry->PartitionTypeGUID, &gAppleHfsBootPartitionTypeGuid)) {
     return OC_SCAN_ALLOW_FS_HFS;
+  }
+
+  if (CompareGuid (&PartitionEntry->PartitionTypeGUID, &mMsftBasicDataPartitionTypeGuid)) {
+    return OC_SCAN_ALLOW_FS_NTFS;
+  }
+
+  if (CompareGuid (&PartitionEntry->PartitionTypeGUID, &mLinuxRootX86PartitionTypeGuid)
+    || CompareGuid (&PartitionEntry->PartitionTypeGUID, &mLinuxRootX8664PartitionTypeGuid)) {
+    return OC_SCAN_ALLOW_FS_EXT;
   }
 
   return 0;
