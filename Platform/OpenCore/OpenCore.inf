@@ -71,18 +71,25 @@
   OcAcpiLib
   OcAppleBootCompatLib
   OcAppleBootPolicyLib
+  OcAppleEventLib
+  OcAppleImageConversionLib
   OcAppleKernelLib
+  OcAppleKeyMapLib
+  OcAppleUserInterfaceThemeLib
   OcBootManagementLib
   OcConfigurationLib
   OcConsoleLib
   OcDataHubLib
   OcDevicePathLib
   OcDevicePropertyLib
+  OcFirmwareVolumeLib
   OcGuardLib
+  OcHashServicesLib
   OcMachoLib
   OcMiscLib
   OcSmbiosLib
   OcStorageLib
+  OcUnicodeCollationEngLib
   OcVirtualFsLib
   MacInfoLib
   PcdLib

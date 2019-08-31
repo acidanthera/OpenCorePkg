@@ -768,11 +768,25 @@
 		<dict>
 			<key>AppleBootPolicy</key>
 			<false/>
+			<key>AppleEvent</key>
+			<false/>
+			<key>AppleImageConversion</key>
+			<false/>
+			<key>AppleKeyMap</key>
+			<false/>
+			<key>AppleUserInterfaceTheme</key>
+			<false/>
 			<key>ConsoleControl</key>
 			<false/>
 			<key>DataHub</key>
 			<false/>
 			<key>DeviceProperties</key>
+			<false/>
+			<key>FirmwareVolume</key>
+			<false/>
+			<key>HashServices</key>
+			<false/>
+			<key>UnicodeCollation</key>
 			<false/>
 		</dict>
 		<key>Quirks</key>

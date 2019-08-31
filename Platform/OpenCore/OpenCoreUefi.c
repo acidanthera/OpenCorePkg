@@ -20,11 +20,18 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleBootCompatLib.h>
 #include <Library/OcAppleBootPolicyLib.h>
+#include <Library/OcAppleEventLib.h>
+#include <Library/OcAppleImageConversionLib.h>
+#include <Library/OcAppleKeyMapLib.h>
+#include <Library/OcAppleUserInterfaceThemeLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcDataHubLib.h>
 #include <Library/OcDevicePropertyLib.h>
+#include <Library/OcFirmwareVolumeLib.h>
+#include <Library/OcHashServicesLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcUnicodeCollationEngLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -260,6 +267,34 @@ OcReinstallProtocols (
 
   if (OcDevicePathPropertyInstallProtocol (Config->Uefi.Protocols.DeviceProperties) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install device properties protocol\n"));
+  }
+
+  if (OcAppleImageConversionInstallProtocol (Config->Uefi.Protocols.AppleImageConversion) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install image conversion protocol\n"));
+  }
+
+  if (OcAppleUserInterfaceThemeInstallProtocol (Config->Uefi.Protocols.AppleUserInterfaceTheme) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install user interface theme protocol\n"));
+  }
+
+  if (OcUnicodeCollationEngInstallProtocol (Config->Uefi.Protocols.UnicodeCollation) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install unicode collation protocol\n"));
+  }
+
+  if (OcHashServicesInstallProtocol (Config->Uefi.Protocols.HashServices) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install hash services protocol\n"));
+  }
+
+  if (OcAppleKeyMapInstallProtocols (Config->Uefi.Protocols.AppleKeyMap) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install key map protocols\n"));
+  }
+
+  if (OcAppleEventInstallProtocol (Config->Uefi.Protocols.AppleEvent) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install key event protocol\n"));
+  }
+
+  if (OcFirmwareVolumeInstallProtocol (Config->Uefi.Protocols.FirmwareVolume) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install firmware volume protocol\n"));
   }
 }
 

@@ -56,10 +56,14 @@
   OcAppleBootPolicyLib|OcSupportPkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
   OcAppleChunklistLib|OcSupportPkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
   OcAppleDiskImageLib|OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
+  OcAppleEventLib|OcSupportPkg/Library/OcAppleEventLib/OcAppleEventLib.inf
+  OcAppleImageConversionLib|OcSupportPkg/Library/OcAppleImageConversionLib/OcAppleImageConversionLib.inf
   OcAppleImageVerificationLib|OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcAppleKernelLib|OcSupportPkg/Library/OcAppleKernelLib/OcAppleKernelLib.inf
+  OcAppleKeyMapLib|OcSupportPkg/Library/OcAppleKeyMapLib/OcAppleKeyMapLib.inf
   OcAppleKeysLib|OcSupportPkg/Library/OcAppleKeysLib/OcAppleKeysLib.inf
   OcAppleRamDiskLib|OcSupportPkg/Library/OcAppleRamDiskLib/OcAppleRamDiskLib.inf
+  OcAppleUserInterfaceThemeLib|OcSupportPkg/Library/OcAppleUserInterfaceThemeLib/OcAppleUserInterfaceThemeLib.inf
   OcBootManagementLib|OcSupportPkg/Library/OcBootManagementLib/OcBootManagementLib.inf
   OcDeviceTreeLib|OcSupportPkg/Library/OcDeviceTreeLib/OcDeviceTreeLib.inf
   OcConsoleLib|OcSupportPkg/Library/OcConsoleLib/OcConsoleLib.inf
@@ -73,7 +77,9 @@
   OcDevicePropertyLib|OcSupportPkg/Library/OcDevicePropertyLib/OcDevicePropertyLib.inf
   OcFileLib|OcSupportPkg/Library/OcFileLib/OcFileLib.inf
   OcFirmwarePasswordLib|OcSupportPkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
+  OcFirmwareVolumeLib|OcSupportPkg/Library/OcFirmwareVolumeLib/OcFirmwareVolumeLib.inf
   OcGuardLib|OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf
+  OcHashServicesLib|OcSupportPkg/Library/OcHashServicesLib/OcHashServicesLib.inf
   OcMachoLib|OcSupportPkg/Library/OcMachoLib/OcMachoLib.inf
   OcMemoryLib|OcSupportPkg/Library/OcMemoryLib/OcMemoryLib.inf
   OcMiscLib|OcSupportPkg/Library/OcMiscLib/OcMiscLib.inf
@@ -86,6 +92,7 @@
   OcStringLib|OcSupportPkg/Library/OcStringLib/OcStringLib.inf
   OcTemplateLib|OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
   OcTimerLib|OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
+  OcUnicodeCollationEngLib|OcSupportPkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngLib.inf
   OcVirtualFsLib|OcSupportPkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OcXmlLib|OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
 

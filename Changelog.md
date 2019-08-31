@@ -11,6 +11,7 @@ OpenCore Changelog
 - Added `ClearScreenOnModeSwitch` quirk to avoid visual glitches
 - Added `MISC_PWR_MGMT` patch to `AppleXcpmExtraMsrs` quirk (thx @mrmiller)
 - Added `DevirtualiseMmio` quirk to `Booter` section
+- Added FileVault 2 user interface protocols formerly in AppleUiSupport
 
 #### v0.0.4
 - Fixed kext injection issues with dummy dependencies
