@@ -195,6 +195,11 @@ enum {
 #define CPU_SOCKET_LGA1156  0x1D
 #define CPU_SOCKET_LGA1366  0x19
 
+#define AMD_CPU_FAMILY          0xF
+#define AMD_CPU_EXT_FAMILY_15H  0x6
+#define AMD_CPU_EXT_FAMILY_16H  0x7
+#define AMD_CPU_EXT_FAMILY_17H  0x8
+
 // CPU_P_STATE_COORDINATION
 /// P-State Coordination
 typedef enum {

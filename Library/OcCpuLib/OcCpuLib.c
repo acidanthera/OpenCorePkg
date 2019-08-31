@@ -882,9 +882,9 @@ ScanAmdProcessor (
     Cpu->ThreadCount = (UINT16) (BitFieldRead32 (CpuidEcx, 0, 7) + 1);
   }
 
-  if (Cpu->Family == 0x0F) {
+  if (Cpu->Family == AMD_CPU_FAMILY) {
     switch (Cpu->ExtFamily) {
-      case 0x08:
+      case AMD_CPU_EXT_FAMILY_17H:
         CofVid           = AsmReadMsr64 (K10_PSTATE_STATUS);
         CoreFrequencyID  = BitFieldRead64 (CofVid, 0, 7);
         CoreDivisorID    = BitFieldRead64 (CofVid, 8, 13);
@@ -901,8 +901,8 @@ ScanAmdProcessor (
             );
         }
         break;
-      case 0x06:
-      case 0x07:
+      case AMD_CPU_EXT_FAMILY_15H:
+      case AMD_CPU_EXT_FAMILY_16H:
         // FIXME: Please refer to FIXME(1) for the MSR used here.
         CofVid           = AsmReadMsr64 (K10_COFVID_STATUS);
         CoreFrequencyID  = BitFieldRead64 (CofVid, 0, 5);
@@ -917,11 +917,22 @@ ScanAmdProcessor (
         //
         // AMD 15h and 16h CPUs don't support hyperthreading,
         // so the core count is equal to the thread count
+        //
         Cpu->CoreCount = Cpu->ThreadCount;
         break;
       default:
         return;
     }
+
+    DEBUG ((
+      DEBUG_INFO,
+      "OCCPU: FID %Lu DID %Lu Divisor %Lu MaxBR %u\n",
+      CoreFrequencyID,
+      CoreDivisorID,
+      Divisor,
+      Cpu->MaxBusRatio
+      ));
+
     //
     // CPUPM is not supported on AMD, meaning the current
     // and minimum bus ratio are equal to the maximum bus ratio
