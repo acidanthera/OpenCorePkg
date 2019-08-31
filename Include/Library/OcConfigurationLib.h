@@ -426,9 +426,16 @@
 ///
 #define OC_UEFI_PROTOCOLS_FIELDS(_, __) \
   _(BOOLEAN                     , AppleBootPolicy             ,     , FALSE  , ()) \
+  _(BOOLEAN                     , AppleEvent                  ,     , FALSE  , ()) \
+  _(BOOLEAN                     , AppleImageConversion        ,     , FALSE  , ()) \
+  _(BOOLEAN                     , AppleKeyMap                 ,     , FALSE  , ()) \
+  _(BOOLEAN                     , AppleUserInterfaceTheme     ,     , FALSE  , ()) \
   _(BOOLEAN                     , ConsoleControl              ,     , FALSE  , ()) \
   _(BOOLEAN                     , DataHub                     ,     , FALSE  , ()) \
-  _(BOOLEAN                     , DeviceProperties            ,     , FALSE  , ())
+  _(BOOLEAN                     , DeviceProperties            ,     , FALSE  , ()) \
+  _(BOOLEAN                     , FirmwareVolume              ,     , FALSE  , ()) \
+  _(BOOLEAN                     , HashServices                ,     , FALSE  , ()) \
+  _(BOOLEAN                     , UnicodeCollation            ,     , FALSE  , ())
   OC_DECLARE (OC_UEFI_PROTOCOLS)
 
 ///

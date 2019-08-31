@@ -498,10 +498,17 @@ mUefiQuirksSchema[] = {
 STATIC
 OC_SCHEMA
 mUefiProtocolsSchema[] = {
-  OC_SCHEMA_BOOLEAN_IN ("AppleBootPolicy",        OC_GLOBAL_CONFIG, Uefi.Protocols.AppleBootPolicy),
-  OC_SCHEMA_BOOLEAN_IN ("ConsoleControl",         OC_GLOBAL_CONFIG, Uefi.Protocols.ConsoleControl),
-  OC_SCHEMA_BOOLEAN_IN ("DataHub",                OC_GLOBAL_CONFIG, Uefi.Protocols.DataHub),
-  OC_SCHEMA_BOOLEAN_IN ("DeviceProperties",       OC_GLOBAL_CONFIG, Uefi.Protocols.DeviceProperties),
+  OC_SCHEMA_BOOLEAN_IN ("AppleBootPolicy",         OC_GLOBAL_CONFIG, Uefi.Protocols.AppleBootPolicy),
+  OC_SCHEMA_BOOLEAN_IN ("AppleEvent",              OC_GLOBAL_CONFIG, Uefi.Protocols.AppleEvent),
+  OC_SCHEMA_BOOLEAN_IN ("AppleImageConversion",    OC_GLOBAL_CONFIG, Uefi.Protocols.AppleImageConversion),
+  OC_SCHEMA_BOOLEAN_IN ("AppleKeyMap",             OC_GLOBAL_CONFIG, Uefi.Protocols.AppleKeyMap),
+  OC_SCHEMA_BOOLEAN_IN ("AppleUserInterfaceTheme", OC_GLOBAL_CONFIG, Uefi.Protocols.AppleUserInterfaceTheme),
+  OC_SCHEMA_BOOLEAN_IN ("ConsoleControl",          OC_GLOBAL_CONFIG, Uefi.Protocols.ConsoleControl),
+  OC_SCHEMA_BOOLEAN_IN ("DataHub",                 OC_GLOBAL_CONFIG, Uefi.Protocols.DataHub),
+  OC_SCHEMA_BOOLEAN_IN ("DeviceProperties",        OC_GLOBAL_CONFIG, Uefi.Protocols.DeviceProperties),
+  OC_SCHEMA_BOOLEAN_IN ("FirmwareVolume",          OC_GLOBAL_CONFIG, Uefi.Protocols.FirmwareVolume),
+  OC_SCHEMA_BOOLEAN_IN ("HashServices",            OC_GLOBAL_CONFIG, Uefi.Protocols.HashServices),
+  OC_SCHEMA_BOOLEAN_IN ("UnicodeCollation",        OC_GLOBAL_CONFIG, Uefi.Protocols.UnicodeCollation)
 };
 
 STATIC
