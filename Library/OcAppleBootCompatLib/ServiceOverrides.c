@@ -183,38 +183,17 @@ DevirtualiseMmio (
 {
   UINTN                   NumEntries;
   UINTN                   Index;
-  UINTN                   Index2;
   EFI_MEMORY_DESCRIPTOR   *Desc;
-  BOOLEAN                 Reset;
 
   //
-  // This is the list of known addresses that need virtual addresses
-  // due to their firmware implementations to access NVRAM.
-  // To simplify this code, as it changes anyway every new generation we just
-  // hardcode the list of known values.
+  // Some firmwares (normally Haswell and earlier) need certain MMIO areas to have
+  // virtual addresses due to their firmware implementations to access NVRAM.
+  // For example, on Intel Haswell with APTIO that would be:
+  // 0xFED1C000 (SB_RCBA) is a 0x4 page memory region, containing SPI_BASE at 0x3800 (SPI_BASE_ADDRESS).
+  // 0xFF000000 (PCI root) is a 0x1000 page memory region.
+  // Initially we wanted to make address exceptions, but later we decided to simply not care,
+  // as this quirk works best on newer firmwares anyway.
   //
-  STATIC EFI_PHYSICAL_ADDRESS  Exceptions[] = {
-    //
-    // Intel Haswell and below. Bugged.
-    // 0xFED1C000 (SB_RCBA) is a 4 page memory region, containing SPI_BASE at 0x3800 (SPI_BASE_ADDRESS).
-    //
-    0xFED1C000,
-#if 0
-    //
-    // Intel Atoms (Braswell, Bay Trail, Gemini). Not bugged?
-    // 0xFED01000 (SPI_BASE) can be read from LPC (device 31, function 0) at offset 0x10 (R_SPI_CFG_BAR0).
-    //
-    0xFED01000,
-    //
-    // Intel Skylake and newer. Not bugged.
-    // 0xFE010000 (SPI_BASE) can be read from SPI (device 31, function 0) at offset 0x54 (R_PCH_LPC_SPI_BASE).
-    // This region normally contains 17 pages.
-    //
-    0xFE010000,
-#endif
-  };
-
-  STATIC UINTN                 MaxExceptionSize = 128;
 
   Desc       = MemoryMap;
   NumEntries = MemoryMapSize / DescriptorSize;
@@ -225,34 +204,14 @@ DevirtualiseMmio (
     if (Desc->NumberOfPages > 0
       && Desc->Type == EfiMemoryMappedIO
       && (Desc->Attribute & EFI_MEMORY_RUNTIME) != 0) {
-      Reset = TRUE;
-      if (Desc->NumberOfPages <= MaxExceptionSize) {
-        for (Index2 = 0; Index2 < ARRAY_SIZE (Exceptions); ++Index2) {
-          if (AREA_WITHIN_DESCRIPTOR (Desc, Exceptions[Index2], 1)) {
-            Reset = FALSE;
-            break;
-          }
-        }
-      }
-
-      if (Reset) {
-        DEBUG ((
-          DEBUG_INFO,
-          "OCABC: MMIO devirt 0x%Lx (0x%Lx pages, 0x%Lx)\n",
-          (UINT64) Desc->PhysicalStart,
-          (UINT64) Desc->NumberOfPages,
-          (UINT64) Desc->Attribute
-          ));
-        Desc->Attribute &= ~EFI_MEMORY_RUNTIME;
-      } else {
-        DEBUG ((
-          DEBUG_INFO,
-          "OCABC: MMIO ignore devirt 0x%Lx (0x%Lx pages, 0x%Lx)\n",
-          (UINT64) Desc->PhysicalStart,
-          (UINT64) Desc->NumberOfPages,
-          (UINT64) Desc->Attribute
-          ));
-      }
+      DEBUG ((
+        DEBUG_INFO,
+        "OCABC: MMIO devirt 0x%Lx (0x%Lx pages, 0x%Lx)\n",
+        (UINT64) Desc->PhysicalStart,
+        (UINT64) Desc->NumberOfPages,
+        (UINT64) Desc->Attribute
+        ));
+      Desc->Attribute &= ~EFI_MEMORY_RUNTIME;
     }
 
     Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
