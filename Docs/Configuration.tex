@@ -1040,6 +1040,8 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   of KASLR slides available, but is not necessarily compatible with the target
   board.
 
+  \emph{Note}: This option is generally useful on APTIO V firmwares (Broadwell and newer).
+
 \item
   \texttt{DisableVariableWrite}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -3148,11 +3150,6 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
   --- APFS file system bootstrap driver adding the support of embedded APFS drivers
   in bootable APFS containers in UEFI firmwares.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AppleUiSupport}}
-  --- Apple-specific user interface support driver. This driver brings the support
-  for FileVault 2 GUI, hotkey parsing (shift, cmd+v, etc.), language collation support,
-  and certain other features important for normal macOS functioning. For hotkey support
-  \texttt{AppleKeyMapAggregator}-compatible driver is required.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AppleGenericInput}}
   --- user input driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of different UEFI input protocols. Additionally resolves mouse input issues
@@ -3164,11 +3161,6 @@ and supplementary utilities can be used.
   quirks, like \texttt{RequestBootVarRouting}, require this driver for proper function.
   Due to the nature of being a runtime driver, i.e. functioning in parallel with the
   target operating system, it cannot be implemented within OpenCore itself.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{EnglishDxe}}
-  --- Unicode collation driver from \texttt{MdeModulePkg}. This driver is a lightweight
-  alternative to \texttt{AppleUiSupport}, which contains no Apple-specific code, and
-  only provides unicode collation support. The driver is not recommended for use
-  on any hardware but few original Macs.
   \item \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
   --- FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
   UEFI firmwares, and cannot be used from OpenCore. It is known that multiple firmwares
@@ -3241,6 +3233,35 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
 
 \item
+  \texttt{AppleEvent}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple Event protocol with a builtin
+  version. This may be used to ensure File Vault 2 compatibility on VMs or legacy Macs.
+
+
+\item
+  \texttt{AppleImageConversion}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple Image Conversion protocol with a builtin
+  version.
+
+\item
+  \texttt{AppleKeyMap}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple Key Map protocols with builtin
+  versions.
+
+\item
+  \texttt{AppleUserInterfaceTheme}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple User Interface Theme protocol with a builtin
+  version.
+
+\item
   \texttt{ConsoleControl}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -3266,6 +3287,33 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Description}: Reinstalls Device Property protocol with a builtin
   version. This will drop all previous properties if it was already installed.
   This may be used to ensure full compatibility on VMs or legacy Macs.
+
+\item
+  \texttt{FirmwareVolume}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Forcibly wraps Firmware Volume protocols or installs new
+  to support custom cursor images for File Vault 2. Should be set to \texttt{true}
+  to ensure File Vault 2 compatibility on everything but VMs and legacy Macs.
+
+\item
+  \texttt{HashServices}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Forcibly reinstalls Hash Services protocols with builtin
+  versions. Should be set to \texttt{true} to ensure File Vault 2 compatibility
+  on platforms providing broken SHA-1 hashing. Can be diagnosed by invalid
+  cursor size with \texttt{UIScale} set to \texttt{02}, in general platforms
+  prior to APTIO V (Haswell and older) are affected.
+
+\item
+  \texttt{UnicodeCollation}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Forcibly reinstalls unicode collation services with builtin
+  version. Should be set to \texttt{true} to ensure UEFI Shell compatibility
+  on platforms providing broken unicode collation. In general legacy Insyde and APTIO
+  platforms on Ivy Bridge and earlier are affected.
 
 \end{enumerate}
 
