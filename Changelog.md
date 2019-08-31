@@ -13,6 +13,7 @@ OpenCore Changelog
 - Added `DevirtualiseMmio` quirk to `Booter` section
 - Added FileVault 2 user interface protocols formerly in AppleUiSupport
 - Improved kernel patch logging to include configuration comments
+- Added MSFT basic data and Linux root fs recognition to `ScanPolicy`
 
 #### v0.0.4
 - Fixed kext injection issues with dummy dependencies
