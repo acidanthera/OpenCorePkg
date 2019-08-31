@@ -44,6 +44,7 @@
   EfiPkg/EfiPkg.dec
 
 [Protocols]
+  gAppleEventProtocolGuid             ## SOMETIMES_PRODUCES
   gAppleKeyMapDatabaseProtocolGuid    ## SOMETIMES_CONSUMES
   gAppleKeyMapAggregatorProtocolGuid  ## SOMETIMES_CONSUMES
   gEfiConsoleControlProtocolGuid      ## SOMETIMES_CONSUMES
