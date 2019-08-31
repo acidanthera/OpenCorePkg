@@ -37,8 +37,8 @@
 #include <ProcessorInfo.h>
 #include <Register/Microcode.h>
 #include <Register/Msr.h>
-#include <Register/Msr/SandyBridgeMsr.h>
-#include <Register/Msr/NehalemMsr.h>
+#include <Register/Intel/Msr/SandyBridgeMsr.h>
+#include <Register/Intel/Msr/NehalemMsr.h>
 
 //
 // Tolerance within which we consider two frequency values to be roughly
