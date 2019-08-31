@@ -153,6 +153,10 @@ typedef struct {
 //
 typedef struct {
   //
+  // Comment or NULL (0 base is used then).
+  //
+  CONST CHAR8  *Comment;
+  //
   // Symbol base or NULL (0 base is used then).
   //
   CONST CHAR8  *Base;

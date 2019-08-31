@@ -125,16 +125,21 @@ PatcherApplyGenericPatch (
   )
 {
   RETURN_STATUS  Status;
-  UINT8       *Base;
-  UINT32      Size;
-  UINT32      ReplaceCount;
+  UINT8          *Base;
+  UINT32         Size;
+  UINT32         ReplaceCount;
 
   Base = (UINT8 *)MachoGetMachHeader64 (&Context->MachContext);
   Size = MachoGetFileSize (&Context->MachContext);
   if (Patch->Base != NULL) {
     Status = PatcherGetSymbolAddress (Context, Patch->Base, &Base);
     if (RETURN_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "Base lookup failure %r\n", Status));
+      DEBUG ((
+        DEBUG_INFO,
+        "OCAK: %a base lookup failure %r\n",
+        Patch->Comment != NULL ? Patch->Comment : "Patch",
+        Status
+        ));
       return Status;
     }
 
@@ -143,7 +148,11 @@ PatcherApplyGenericPatch (
 
   if (Patch->Find == NULL) {
     if (Size < Patch->Size) {
-      DEBUG ((DEBUG_INFO, "Patch is borked  - n/f\n"));
+      DEBUG ((
+        DEBUG_INFO,
+        "OCAK: %a is borked, not found\n",
+        Patch->Comment != NULL ? Patch->Comment : "Patch"
+        ));
       return RETURN_NOT_FOUND;
     }
     CopyMem (Base, Patch->Replace, Patch->Size);
@@ -166,12 +175,18 @@ PatcherApplyGenericPatch (
     Patch->Skip
     );
 
-  DEBUG ((DEBUG_INFO, "ReplaceCount - %u\n", ReplaceCount));
+  DEBUG ((
+    DEBUG_INFO,
+    "OCAK: %a replace count - %u\n",
+    Patch->Comment != NULL ? Patch->Comment : "Patch",
+    ReplaceCount
+    ));
 
   if (ReplaceCount > 0 && Patch->Count > 0 && ReplaceCount != Patch->Count) {
     DEBUG ((
       DEBUG_INFO,
-      "Performed only %u replacements out of %u\n",
+      "OCAK: %a performed only %u replacements out of %u\n",
+      Patch->Comment != NULL ? Patch->Comment : "Patch",
       ReplaceCount,
       Patch->Count
       ));

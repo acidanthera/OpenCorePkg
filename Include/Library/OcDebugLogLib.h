@@ -32,6 +32,17 @@
 #define RUNTIME_DEBUG(x) do { } while (0)
 
 /**
+  Pointer debug kit.
+**/
+#if defined(OC_TARGET_DEBUG) || defined(OC_TARGET_NOOPT)
+#define DEBUG_POINTER(x) x
+#elif defined(OC_TARGET_RELEASE)
+#define DEBUG_POINTER(x) NULL
+#else
+#error "Define target macro: OC_TARGET_<TARGET>!"
+#endif
+
+/**
   Install or update the OcLog protocol with specified options.
 
   @param[in] Options       Logging options.

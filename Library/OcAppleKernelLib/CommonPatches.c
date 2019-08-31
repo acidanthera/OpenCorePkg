@@ -16,7 +16,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <IndustryStandard/AppleIntelCpuInfo.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/OcAppleKernelLib.h>
 #include <Library/PrintLib.h>
 #include <Library/OcFileLib.h>
@@ -39,6 +39,7 @@ mAppleIntelCPUPowerManagementPatchReplace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mAppleIntelCPUPowerManagementPatch = {
+  .Comment     = DEBUG_POINTER ("AppleCpuPmCfgLock v1"),
   .Base        = NULL,
   .Find        = mAppleIntelCPUPowerManagementPatchFind,
   .Mask        = NULL,
@@ -84,6 +85,7 @@ mAppleIntelCPUPowerManagementPatch2ReplaceMask[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mAppleIntelCPUPowerManagementPatch2 = {
+  .Comment     = DEBUG_POINTER ("AppleCpuPmCfgLock v2"),
   .Base        = NULL,
   .Find        = mAppleIntelCPUPowerManagementPatch2Find,
   .Mask        = mAppleIntelCPUPowerManagementPatch2FindMask,
@@ -165,6 +167,7 @@ mXcpmCfgLockRelReplace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mXcpmCfgLockRelPatch = {
+  .Comment     = DEBUG_POINTER ("XcpmCfgLockRel"),
   .Base        = "_xcpm_idle",
   .Find        = mXcpmCfgLockRelFind,
   .Mask        = NULL,
@@ -191,6 +194,7 @@ mXcpmCfgLockDbgReplace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mXcpmCfgLockDbgPatch = {
+  .Comment     = DEBUG_POINTER ("XcpmCfgLockDbg"),
   .Base        = "_xcpm_cst_control_evaluate",
   .Find        = mXcpmCfgLockDbgFind,
   .Mask        = NULL,
@@ -281,6 +285,7 @@ mMiscPwrMgmtRelReplace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mMiscPwrMgmtRelPatch = {
+  .Comment     = DEBUG_POINTER ("MiscPwrMgmtRel"),
   .Base        = NULL,
   .Find        = mMiscPwrMgmtRelFind,
   .Mask        = NULL,
@@ -312,6 +317,7 @@ mMiscPwrMgmtDbgPatch = {
   //       at both _xcpm_hwp_enable()
   //       and _xcpm_enable_hw_coordination() (which is inlined in Release XNU).
   //
+  .Comment     = DEBUG_POINTER ("MiscPwrMgmtDbg"),
   .Base        = NULL,
   .Find        = mMiscPwrMgmtDbgFind,
   .Mask        = NULL,
@@ -432,6 +438,7 @@ mRemoveUsbLimitV1Replace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mRemoveUsbLimitV1Patch = {
+  .Comment     = DEBUG_POINTER ("RemoveUsbLimitV1"),
   .Base        = "__ZN15AppleUSBXHCIPCI11createPortsEv",
   .Find        = mRemoveUsbLimitV1Find,
   .Mask        = NULL,
@@ -458,6 +465,7 @@ mRemoveUsbLimitV2Replace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mRemoveUsbLimitV2Patch = {
+  .Comment     = DEBUG_POINTER ("RemoveUsbLimitV2"),
   .Base        = "__ZN12AppleUSBXHCI11createPortsEv",
   .Find        = mRemoveUsbLimitV2Find,
   .Mask        = NULL,
@@ -484,6 +492,7 @@ mRemoveUsbLimitIoP1Replace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mRemoveUsbLimitIoP1Patch = {
+  .Comment     = DEBUG_POINTER ("RemoveUsbLimitIoP1"),
   .Base        = "__ZN16AppleUSBHostPort15setPortLocationEj",
   .Find        = mRemoveUsbLimitIoP1Find,
   .Mask        = NULL,
@@ -606,6 +615,7 @@ mIOAHCIBlockStoragePatchReplace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mIOAHCIBlockStoragePatch = {
+  .Comment     = DEBUG_POINTER ("IOAHCIBlockStorage"),
   .Base        = NULL,
   .Find        = mIOAHCIBlockStoragePatchFind,
   .Mask        = NULL,
@@ -659,6 +669,7 @@ mIOAHCIPortPatchReplace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mIOAHCIPortPatch = {
+  .Comment     = DEBUG_POINTER ("IOAHCIPort"),
   .Base    = NULL,
   .Find    = mIOAHCIPortPatchFind,
   .Mask    = NULL,
@@ -712,6 +723,7 @@ mAppleIoMapperPatchReplace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mAppleIoMapperPatch = {
+  .Comment     = DEBUG_POINTER ("AppleIoMapper"),
   .Base        = NULL,
   .Find        = mAppleIoMapperPatchFind,
   .Mask        = NULL,
@@ -988,6 +1000,7 @@ mCustomSmbiosGuidPatchReplace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mCustomSmbiosGuidPatch = {
+  .Comment     = DEBUG_POINTER ("CustomSmbiosGuid"),
   .Base    = NULL,
   .Find    = mCustomSmbiosGuidPatchFind,
   .Mask    = NULL,
@@ -1049,6 +1062,7 @@ mPanicKextDumpPatchReplace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mPanicKextDumpPatch = {
+  .Comment = DEBUG_POINTER ("PanicKextDump"),
   .Base    = NULL,
   .Find    = mPanicKextDumpPatchFind,
   .Mask    = NULL,
@@ -1124,6 +1138,7 @@ mLapicKernelPanicPatchReplace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mLapicKernelPanicPatch = {
+  .Comment = DEBUG_POINTER ("LapicKernelPanic"),
   .Base    = "_lapic_interrupt",
   .Find    = mLapicKernelPanicPatchFind,
   .Mask    = mLapicKernelPanicPatchMask,
@@ -1158,6 +1173,7 @@ mLapicKernelPanicMasterPatchReplace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mLapicKernelPanicMasterPatch = {
+  .Comment = DEBUG_POINTER ("LapicKernelPanicMaster"),
   .Base    = "_lapic_interrupt",
   .Find    = mLapicKernelPanicMasterPatchFind,
   .Mask    = mLapicKernelPanicMasterPatchMask,
