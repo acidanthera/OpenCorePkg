@@ -272,7 +272,7 @@ InternalGetBootEntryByDevicePath (
 
   for (Index = 0; Index < NumBootEntries; ++Index) {
     BootEntry = &BootEntries[Index];
-    if (BootEntry->IsCustom) {
+    if (BootEntry->Type == OcBootCustom) {
       continue;
     }
 
@@ -352,8 +352,19 @@ InternalIsAppleLegacyLoadApp (
   return FALSE;
 }
 
+/**
+  Obtain default entry from the list.
+
+  @param[in,out]  BootEntries      Described list of entries, may get updated.
+  @param[in]      NumBootEntries   Positive number of boot entries.
+  @param[in]      CustomBootGuid   Use custom GUID for Boot#### lookup.
+  @param[in]      LoadHandle       Handle to skip (potential OpenCore handle).
+
+  @retval  boot entry or NULL.
+**/
+STATIC
 OC_BOOT_ENTRY *
-OcGetDefaultBootEntry (
+InternalGetDefaultBootEntry (
   IN OUT OC_BOOT_ENTRY  *BootEntries,
   IN     UINTN          NumBootEntries,
   IN     BOOLEAN        CustomBootGuid,
@@ -695,6 +706,63 @@ OcGetDefaultBootEntry (
   return NULL;
 }
 
+UINT32
+OcGetDefaultBootEntry (
+  IN     OC_PICKER_CONTEXT  *Context,
+  IN OUT OC_BOOT_ENTRY      *BootEntries,
+  IN     UINTN              NumBootEntries
+  )
+{
+  UINT32          BootEntryIndex;
+  OC_BOOT_ENTRY   *BootEntry;
+  UINTN           Index;
+
+  BootEntry = InternalGetDefaultBootEntry (
+    BootEntries,
+    NumBootEntries,
+    Context->CustomBootGuid,
+    Context->ExcludeHandle
+    );
+
+  if (BootEntry != NULL) {
+    BootEntryIndex = (UINT32) (BootEntry - BootEntries);
+    DEBUG ((DEBUG_INFO, "OCB: Initial default is %u\n", BootEntryIndex));
+  } else {
+    BootEntryIndex = 0;
+    DEBUG ((DEBUG_INFO, "OCB: Initial default is 0, fallback\n"));
+  }
+
+  if (Context->PickerCommand == OcPickerBootApple) {
+    if (BootEntries[BootEntryIndex].Type != OcBootApple) {
+      for (Index = 0; Index < NumBootEntries; ++Index) {
+        if (BootEntries[Index].Type == OcBootApple) {
+          BootEntryIndex = (UINT32) Index;
+          DEBUG ((DEBUG_INFO, "OCB: Override default to Apple %u\n", BootEntryIndex));
+          break;
+        }
+      }
+    }
+  } else if (Context->PickerCommand == OcPickerBootAppleRecovery) {
+    if (BootEntries[BootEntryIndex].Type != OcBootAppleRecovery) {
+      if (BootEntryIndex + 1 < NumBootEntries
+        && BootEntries[BootEntryIndex + 1].Type == OcBootAppleRecovery) {
+        BootEntryIndex = BootEntryIndex + 1;
+        DEBUG ((DEBUG_INFO, "OCB: Override default to Apple Recovery %u, next\n", BootEntryIndex));
+      } else {
+        for (Index = 0; Index < NumBootEntries; ++Index) {
+          if (BootEntries[Index].Type == OcBootAppleRecovery) {
+            BootEntryIndex = (UINT32) Index;
+            DEBUG ((DEBUG_INFO, "OCB: Override default option to Apple Recovery %u\n", BootEntryIndex));
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  return BootEntryIndex;
+}
+
 #if 0
 STATIC
 VOID
@@ -830,7 +898,7 @@ InternalLoadBootEntry (
     if (DevicePath == NULL) {
       return EFI_UNSUPPORTED;
     }
-  } else if (BootEntry->IsCustom && BootEntry->DevicePath == NULL) {
+  } else if (BootEntry->Type == OcBootCustom && BootEntry->DevicePath == NULL) {
     ASSERT (Context->CustomRead != NULL);
 
     Status = Context->CustomRead (
@@ -894,7 +962,7 @@ InternalLoadBootEntry (
       LoadedImage->LoadOptionsSize = BootEntry->LoadOptionsSize;
       LoadedImage->LoadOptions     = BootEntry->LoadOptions;
 
-      if (BootEntry->IsCustom) {
+      if (BootEntry->Type == OcBootCustom) {
         DEBUG ((
           DEBUG_INFO,
           "OCB: Custom DeviceHandle %p FilePath %p\n",

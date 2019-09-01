@@ -61,6 +61,7 @@
 
 [Protocols]
   gAppleBootPolicyProtocolGuid       ## PRODUCES
+  gAppleKeyMapAggregatorProtocolGuid ## SOMETIMES_CONSUMES
   gEfiSimpleFileSystemProtocolGuid   ## SOMETIMES_CONSUMES
   gEfiLoadedImageProtocolGuid        ## SOMETIMES_CONSUMES
   gEfiUsbIoProtocolGuid              ## SOMETIMES_CONSUMES

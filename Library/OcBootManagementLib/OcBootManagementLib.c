@@ -19,6 +19,7 @@
 #include <IndustryStandard/AppleHibernate.h>
 
 #include <Protocol/AppleBootPolicy.h>
+#include <Protocol/AppleKeyMapAggregator.h>
 #include <Protocol/LoadedImage.h>
 #include <Protocol/SimpleTextOut.h>
 
@@ -56,7 +57,7 @@ OcDescribeBootEntry (
   //
   // Custom entries need no special description.
   //
-  if (BootEntry->IsCustom) {
+  if (BootEntry->Type == OcBootCustom) {
     return EFI_SUCCESS;
   }
 
@@ -106,14 +107,16 @@ OcDescribeBootEntry (
   //
 
   //
-  // Windows boot entry may have a custom name, so ensure IsWindows is set correctly.
+  // Windows boot entry may have a custom name, so ensure OcBootWindows is set correctly.
   //
-  DEBUG ((DEBUG_INFO, "Trying to detect Microsoft BCD\n"));
-  Status = ReadFileSize (FileSystem, L"\\EFI\\Microsoft\\Boot\\BCD", &BcdSize);
-  if (!EFI_ERROR (Status)) {
-    BootEntry->IsWindows = TRUE;
-    if (BootEntry->Name == NULL) {
-      BootEntry->Name = AllocateCopyPool (sizeof (L"BOOTCAMP Windows"), L"BOOTCAMP Windows");
+  if (BootEntry->Type == OcBootUnknown) {
+    DEBUG ((DEBUG_INFO, "Trying to detect Microsoft BCD\n"));
+    Status = ReadFileSize (FileSystem, L"\\EFI\\Microsoft\\Boot\\BCD", &BcdSize);
+    if (!EFI_ERROR (Status)) {
+      BootEntry->Type = OcBootWindows;
+      if (BootEntry->Name == NULL) {
+        BootEntry->Name = AllocateCopyPool (sizeof (L"BOOTCAMP Windows"), L"BOOTCAMP Windows");
+      }
     }
   }
 
@@ -122,7 +125,9 @@ OcDescribeBootEntry (
     if (BootEntry->Name != NULL
       && (!StrCmp (BootEntry->Name, L"Recovery HD")
        || !StrCmp (BootEntry->Name, L"Recovery"))) {
-      BootEntry->IsRecovery = TRUE;
+      if (BootEntry->Type == OcBootUnknown || BootEntry->Type == OcBootApple) {
+        BootEntry->Type = OcBootAppleRecovery;
+      }
       RecoveryBootName = InternalGetAppleRecoveryName (FileSystem, BootDirectoryName);
       if (RecoveryBootName != NULL) {
         FreePool (BootEntry->Name);
@@ -323,12 +328,11 @@ OcScanForBootEntries (
       DEBUG_CODE_BEGIN ();
       DEBUG ((
         DEBUG_INFO,
-        "Entry %u is %s at %s (W:%d|R:%d|F:%d)\n",
+        "Entry %u is %s at %s (T:%d|F:%d)\n",
         (UINT32) Index,
         Entries[Index].Name,
         Entries[Index].PathName,
-        Entries[Index].IsWindows,
-        Entries[Index].IsRecovery,
+        Entries[Index].Type,
         Entries[Index].IsFolder
         ));
 
@@ -360,7 +364,7 @@ OcScanForBootEntries (
       return EFI_OUT_OF_RESOURCES;
     }
 
-    Entries[EntryIndex].IsCustom = TRUE;
+    Entries[EntryIndex].Type = OcBootCustom;
  
     if (Index < Context->AbsoluteEntryCount) {
       Entries[EntryIndex].DevicePath = ConvertTextToDevicePath (PathName);
@@ -758,6 +762,131 @@ OcLoadBootEntry (
   return Status;
 }
 
+STATIC
+BOOLEAN
+OcKeyMapHasModifier (
+  IN APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMapAggregator,
+  IN APPLE_MODIFIER_MAP                 ModifierLeft,
+  IN APPLE_MODIFIER_MAP                 ModifierRight  OPTIONAL
+  )
+{
+  EFI_STATUS  Status;
+
+  Status = KeyMapAggregator->ContainsKeyStrokes (
+    KeyMapAggregator,
+    ModifierLeft,
+    0,
+    NULL,
+    FALSE
+    );
+
+  if (EFI_ERROR (Status) && ModifierRight != 0) {
+    Status = KeyMapAggregator->ContainsKeyStrokes (
+      KeyMapAggregator,
+      ModifierRight,
+      0,
+      NULL,
+      FALSE
+      );
+  }
+
+  return !EFI_ERROR (Status);
+}
+
+STATIC
+BOOLEAN
+OcKeyMapHasKey (
+  IN APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMapAggregator,
+  IN APPLE_KEY_CODE                     KeyCode
+  )
+{
+  EFI_STATUS  Status;
+
+  Status = KeyMapAggregator->ContainsKeyStrokes (
+      KeyMapAggregator,
+      0,
+      1,
+      &KeyCode,
+      FALSE
+      );
+
+  return !EFI_ERROR (Status);
+}
+
+VOID
+OcLoadPickerHotkeys (
+  IN OUT OC_PICKER_CONTEXT  *Context
+  )
+{
+  EFI_STATUS                         Status;
+  APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
+  BOOLEAN                            HasCommand;
+  BOOLEAN                            HasOption;
+  BOOLEAN                            HasShift;
+  BOOLEAN                            HasKeyP;
+  BOOLEAN                            HasKeyR;
+  BOOLEAN                            HasKeyX;
+
+  Status = gBS->LocateProtocol (
+    &gAppleKeyMapAggregatorProtocolGuid,
+    NULL,
+    (VOID **) &KeyMap
+    );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "OCB: Missing AppleKeyMapAggregator - %r\n", Status));
+    return;
+  }
+
+  //
+  // I do not like this code a little, as it is prone to race conditions during key presses.
+  // For the good false positives are not too critical here, and in reality users are not that fast.
+  //
+  // Reference key list:
+  // https://support.apple.com/HT201255
+  // https://support.apple.com/HT204904
+  //
+  // We are slightly more permissive than AppleBds, as we permit combining keys.
+  //
+
+  HasCommand = OcKeyMapHasModifier (KeyMap, APPLE_MODIFIER_LEFT_COMMAND, APPLE_MODIFIER_RIGHT_COMMAND);
+  HasOption  = OcKeyMapHasModifier (KeyMap, APPLE_MODIFIER_LEFT_OPTION, APPLE_MODIFIER_RIGHT_OPTION);
+  HasShift   = OcKeyMapHasModifier (KeyMap, APPLE_MODIFIER_LEFT_SHIFT, APPLE_MODIFIER_RIGHT_SHIFT);
+  HasKeyP    = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyP);
+  HasKeyR    = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyP);
+  HasKeyX    = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyX);
+
+  if (HasOption && HasCommand && HasKeyP && HasKeyR) {
+    //
+    // TODO: Protect this with some policy?
+    //
+    DEBUG ((DEBUG_INFO, "OCB: CMD+OPT+P+R causes NVRAM reset\n"));
+    Context->PickerCommand = OcPickerResetNvram;
+  } else if (HasCommand && HasKeyR) {
+    DEBUG ((DEBUG_INFO, "OCB: CMD+R causes recovery to boot\n"));
+    Context->PickerCommand = OcPickerBootAppleRecovery;
+  } else if (HasKeyX) {
+    DEBUG ((DEBUG_INFO, "OCB: X causes macOS to boot\n"));
+    Context->PickerCommand = OcPickerBootApple;
+  } else if (HasOption) {
+    DEBUG ((DEBUG_INFO, "OCB: OPT causes picker to show\n"));
+    Context->PickerCommand = OcPickerShowPicker;
+  } else {
+    //
+    // In addition to these overrides we always have ShowPicker = YES in config.
+    // The following keys are not implemented:
+    // C - CD/DVD boot, legacy that is gone now.
+    // D - Diagnostics, could implement dumping stuff here in some future,
+    //     but we will need to store the data before handling the key.
+    //     Should also be DEBUG only for security reasons.
+    // N - Network boot, simply not supported (and bad for security).
+    // T - Target disk mode, simply not supported (and bad for security).
+    //
+  }
+
+
+}
+
 EFI_STATUS
 OcRunSimpleBootPicker (
   IN OC_PICKER_CONTEXT  *Context
@@ -767,9 +896,8 @@ OcRunSimpleBootPicker (
   APPLE_BOOT_POLICY_PROTOCOL  *AppleBootPolicy;
   OC_BOOT_ENTRY               *Chosen;
   OC_BOOT_ENTRY               *Entries;
-  OC_BOOT_ENTRY               *Entry;
   UINTN                       EntryCount;
-  UINT32                      DefaultEntry;
+  INTN                        DefaultEntry;
 
   AppleBootPolicy = OcAppleBootPolicyInstallProtocol (FALSE);
   if (AppleBootPolicy == NULL) {
@@ -801,13 +929,9 @@ OcRunSimpleBootPicker (
 
     DEBUG ((DEBUG_INFO, "Performing OcShowSimpleBootMenu...\n"));
 
-    DefaultEntry = 0;
-    Entry = OcGetDefaultBootEntry (Entries, EntryCount, Context->CustomBootGuid, Context->ExcludeHandle);
-    if (Entry != NULL) {
-      DefaultEntry = (UINT32)(Entry - Entries);
-    }
+    DefaultEntry = OcGetDefaultBootEntry (Context, Entries, EntryCount);
 
-    if (Context->ShowPicker) {
+    if (Context->PickerCommand == OcPickerShowPicker) {
       Status = OcShowSimpleBootMenu (
         Entries,
         EntryCount,
@@ -831,10 +955,9 @@ OcRunSimpleBootPicker (
     if (!EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
-        "Should boot from %s (W:%d|R:%d|F:%d)\n",
+        "Should boot from %s (T:%d|F:%d)\n",
         Chosen->Name,
-        Chosen->IsWindows,
-        Chosen->IsRecovery,
+        Chosen->Type,
         Chosen->IsFolder
         ));
     }

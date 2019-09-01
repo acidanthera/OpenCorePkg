@@ -297,9 +297,8 @@ InternalSetBootEntryFlags (
   BOOLEAN                   Result;
   INTN                      CmpResult;
 
+  BootEntry->Type       = OcBootUnknown;
   BootEntry->IsFolder   = FALSE;
-  BootEntry->IsRecovery = FALSE;
-  BootEntry->IsWindows  = FALSE;
 
   DevicePathWalker = BootEntry->DevicePath;
 
@@ -307,6 +306,9 @@ InternalSetBootEntryFlags (
     return;
   }
 
+  //
+  // TODO: Move this to a new OcIsAppleRecoveryBootDevicePath function.
+  //
   while (!IsDevicePathEnd (DevicePathWalker)) {
     if ((DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
      && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)) {
@@ -318,7 +320,7 @@ InternalSetBootEntryFlags (
         //
         BootEntry->IsFolder = (FilePath->PathName[Len - 1] == L'\\');
 
-        if (!BootEntry->IsRecovery) {
+        if (BootEntry->Type == OcBootUnknown) {
           Result = OcOverflowSubUN (
                      Len,
                      L_STR_LEN (L"com.apple.recovery.boot"),
@@ -332,7 +334,7 @@ InternalSetBootEntryFlags (
                             L_STR_SIZE_NT (L"com.apple.recovery.boot")
                             );
               if (CmpResult == 0) {
-                BootEntry->IsRecovery = TRUE;
+                BootEntry->Type = OcBootAppleRecovery;
                 break;
               }
             }
@@ -344,6 +346,10 @@ InternalSetBootEntryFlags (
     }
 
     DevicePathWalker = NextDevicePathNode (DevicePathWalker);
+  }
+
+  if (BootEntry->Type == OcBootUnknown && OcIsAppleBootDevicePath (BootEntry->DevicePath)) { 
+    BootEntry->Type = OcBootApple;
   }
 }
 
@@ -544,7 +550,7 @@ InternalFillValidBootEntries (
       DEBUG_BULK_INFO,
       "OCB: Adding entry %u, external - %d, skip recovery - %d\n",
       (UINT32) EntryIndex,
-      Entries[EntryIndex].IsExternal,
+      DevPathScanInfo->IsExternal,
       DevPathScanInfo->SkipRecovery
       ));
     DebugPrintDevicePath (DEBUG_BULK_INFO, "DevicePath", DevicePath);
@@ -571,7 +577,7 @@ InternalFillValidBootEntries (
     DEBUG ((
       DEBUG_BULK_INFO,
       "OCB: Adding entry %u recovery (%s) - %r\n",
-      Entries[EntryIndex].IsExternal,
+      DevPathScanInfo->IsExternal,
       RecoveryPath != NULL ? RecoveryPath : L"<null>",
       Status
       ));

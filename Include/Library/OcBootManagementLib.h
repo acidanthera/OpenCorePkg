@@ -21,6 +21,18 @@
 #include <Protocol/LoadedImage.h>
 
 /**
+  Operating system boot type.
+  WARNING: This is only for debug purposes.
+**/
+typedef enum OC_BOOT_ENTRY_TYPE_ {
+  OcBootUnknown,
+  OcBootApple,
+  OcBootAppleRecovery,
+  OcBootWindows,
+  OcBootCustom
+} OC_BOOT_ENTRY_TYPE;
+
+/**
   Discovered boot entry.
   Note, inner resources must be freed with OcResetBootEntry.
 **/
@@ -40,9 +52,10 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   CHAR16                    *PathName;
   //
-  // Set when this entry is a custom externally loadable tool entry.
+  // Heuristical value signalising about booted os.
+  // WARNING: This is only for debug purposes.
   //
-  BOOLEAN                   IsCustom;
+  OC_BOOT_ENTRY_TYPE        Type;
   //
   // Set when this entry is an externally available entry (e.g. USB).
   //
@@ -51,15 +64,6 @@ typedef struct OC_BOOT_ENTRY_ {
   // Should try booting from first dmg found in DevicePath.
   //
   BOOLEAN                   IsFolder;
-  //
-  // Heuristical value signalising about recovery os.
-  //
-  BOOLEAN                   IsRecovery;
-  //
-  // Heuristical value signalising about Windows os (otherwise macOS).
-  // WARNING: This is only for debug purposes.
-  //
-  BOOLEAN                   IsWindows;
   //
   // Load option data (usually "boot args") size.
   //
@@ -270,7 +274,7 @@ EFI_STATUS
   );
 
 /**
-  Custom picker entry
+  Custom picker entry.
 **/
 typedef struct {
   //
@@ -282,6 +286,17 @@ typedef struct {
   //
   CONST CHAR8  *Path;
 } OC_PICKER_ENTRY;
+
+/**
+  Picker behaviour action.
+**/
+typedef enum {
+  OcPickerDefault           = 0,
+  OcPickerShowPicker        = 1,
+  OcPickerResetNvram        = 2,
+  OcPickerBootApple         = 3,
+  OcPickerBootAppleRecovery = 4,
+} OC_PICKER_CMD;
 
 /**
   Boot picker context describing picker behaviour.
@@ -300,9 +315,10 @@ typedef struct {
   //
   UINT32           TimeoutSeconds;
   //
-  // Show boot menu or just boot the default option.
+  // Define picker behaviour.
+  // For example, show boot menu or just boot the default option.
   //
-  BOOLEAN          ShowPicker;
+  OC_PICKER_CMD    PickerCommand;
   //
   // Use custom (gOcVendorVariableGuid) for Boot#### variables.
   //
@@ -412,21 +428,19 @@ OcScanForBootEntries (
   );
 
 /**
-  Obtain default entry from the list.
+  Obtain default entry from picker context.
 
+  @param[in]      Context          Picker context.
   @param[in,out]  BootEntries      Described list of entries, may get updated.
   @param[in]      NumBootEntries   Positive number of boot entries.
-  @param[in]      CustomBootGuid   Use custom GUID for Boot#### lookup.
-  @param[in]      LoadHandle       Handle to skip (potential OpenCore handle).
 
-  @retval  boot entry or NULL.
+  @retval  boot entry or 0.
 **/
-OC_BOOT_ENTRY *
+UINT32
 OcGetDefaultBootEntry (
-  IN OUT OC_BOOT_ENTRY  *BootEntries,
-  IN     UINTN          NumBootEntries,
-  IN     BOOLEAN        CustomBootGuid,
-  IN     EFI_HANDLE     LoadHandle  OPTIONAL
+  IN     OC_PICKER_CONTEXT  *Context,
+  IN OUT OC_BOOT_ENTRY      *BootEntries,
+  IN     UINTN              NumBootEntries
   );
 
 /**
@@ -491,6 +505,16 @@ OcIsAppleHibernateWake (
   );
 
 /**
+  Check pressed hotkeys and update booter context based on this.
+
+  @param[in,out]  Context       Picker context.
+**/
+VOID
+OcLoadPickerHotkeys (
+  IN OUT OC_PICKER_CONTEXT  *Context
+  );
+
+/**
   Install missing boot policy, scan, and show simple boot menu.
 
   @param[in]  Context       Picker context.
@@ -526,6 +550,18 @@ OcGetDevicePolicyType (
 UINT32
 OcGetFileSystemPolicyType (
   IN  EFI_HANDLE   Handle
+  );
+
+/**
+  Check if supplied device path contains Apple bootloader.
+
+  @param[in]  DevicePath        Device path.
+
+  @retval TRUE for potentially Apple images.
+**/
+BOOLEAN
+OcIsAppleBootDevicePath (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   );
 
 /**

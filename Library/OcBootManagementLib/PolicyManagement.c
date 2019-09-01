@@ -220,6 +220,39 @@ InternalCheckScanPolicy (
   return RETURN_SUCCESS;
 }
 
+BOOLEAN
+OcIsAppleBootDevicePath (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+  EFI_DEVICE_PATH_PROTOCOL    *CurrNode;
+  FILEPATH_DEVICE_PATH        *LastNode;
+  UINTN                       PathLen;
+  UINTN                       Index;
+ 
+  LastNode = NULL;
+
+  for (CurrNode = DevicePath; !IsDevicePathEnd (CurrNode); CurrNode = NextDevicePathNode (CurrNode)) {
+    if (DevicePathType (CurrNode) == MEDIA_DEVICE_PATH && DevicePathSubType (CurrNode) == MEDIA_FILEPATH_DP) {
+      LastNode = (FILEPATH_DEVICE_PATH *) CurrNode;
+    }
+  }
+
+  if (LastNode != NULL) {
+    //
+    // Detect macOS by boot.efi in the bootloader name.
+    //
+    PathLen = OcFileDevicePathNameLen (LastNode);
+    if (PathLen >= L_STR_LEN ("boot.efi")) {
+      Index = PathLen - L_STR_LEN ("boot.efi");
+      return (Index == 0 || LastNode->PathName[Index - 1] == L'\\')
+        && CompareMem (&LastNode->PathName[Index], L"boot.efi", L_STR_SIZE (L"boot.efi")) == 0;
+    }
+  }
+
+  return FALSE;
+}
+
 EFI_LOADED_IMAGE_PROTOCOL *
 OcGetAppleBootLoadedImage (
   IN EFI_HANDLE  ImageHandle
@@ -227,37 +260,18 @@ OcGetAppleBootLoadedImage (
 {
   EFI_STATUS                  Status;
   EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage;
-  EFI_DEVICE_PATH_PROTOCOL    *CurrNode;
-  FILEPATH_DEVICE_PATH        *LastNode;
-  BOOLEAN                     IsMacOS;
-  UINTN                       PathLen;
-  UINTN                       Index;
 
-  IsMacOS = FALSE;
+  Status = gBS->HandleProtocol (
+    ImageHandle,
+    &gEfiLoadedImageProtocolGuid,
+    (VOID **)&LoadedImage
+    );
 
-  Status = gBS->HandleProtocol (ImageHandle, &gEfiLoadedImageProtocolGuid, (VOID **)&LoadedImage);
-
-  if (!EFI_ERROR (Status) && LoadedImage->FilePath) {
-    LastNode = NULL;
-
-    for (CurrNode = LoadedImage->FilePath; !IsDevicePathEnd (CurrNode); CurrNode = NextDevicePathNode (CurrNode)) {
-      if (DevicePathType (CurrNode) == MEDIA_DEVICE_PATH && DevicePathSubType (CurrNode) == MEDIA_FILEPATH_DP) {
-        LastNode = (FILEPATH_DEVICE_PATH *) CurrNode;
-      }
-    }
-
-    if (LastNode != NULL) {
-      //
-      // Detect macOS by boot.efi in the bootloader name.
-      //
-      PathLen = OcFileDevicePathNameLen (LastNode);
-      if (PathLen >= L_STR_LEN ("boot.efi")) {
-        Index = PathLen - L_STR_LEN ("boot.efi");
-        IsMacOS = (Index == 0 || LastNode->PathName[Index - 1] == L'\\')
-          && CompareMem (&LastNode->PathName[Index], L"boot.efi", L_STR_SIZE (L"boot.efi")) == 0;
-      }
-    }
+  if (!EFI_ERROR (Status)
+    && LoadedImage->FilePath != NULL
+    && OcIsAppleBootDevicePath (LoadedImage->FilePath)) {
+    return LoadedImage;
   }
 
-  return IsMacOS ? LoadedImage : NULL;
+  return NULL;
 }
