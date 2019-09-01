@@ -959,8 +959,28 @@ InternalLoadBootEntry (
                             (VOID **) &LoadedImage
                             );
     if (!EFI_ERROR (OptionalStatus)) {
-      LoadedImage->LoadOptionsSize = BootEntry->LoadOptionsSize;
-      LoadedImage->LoadOptions     = BootEntry->LoadOptions;
+      DEBUG ((
+        DEBUG_INFO,
+        "OCB: Matching <%a> args on type %u %p\n",
+        Context->AppleBootArgs,
+        BootEntry->Type,
+        BootEntry->LoadOptions
+        ));
+
+      if (BootEntry->LoadOptions == NULL
+        && (BootEntry->Type == OcBootApple || BootEntry->Type == OcBootAppleRecovery)) {
+        LoadedImage->LoadOptionsSize = AsciiStrLen (Context->AppleBootArgs);
+        if (LoadedImage->LoadOptionsSize > 0) {
+          LoadedImage->LoadOptionsSize += 1;
+          LoadedImage->LoadOptions      = Context->AppleBootArgs;
+        } else {
+          LoadedImage->LoadOptionsSize = 0;
+          LoadedImage->LoadOptions     = NULL;
+        }
+      } else {
+        LoadedImage->LoadOptionsSize = BootEntry->LoadOptionsSize;
+        LoadedImage->LoadOptions     = BootEntry->LoadOptions;
+      }
 
       if (BootEntry->Type == OcBootCustom) {
         DEBUG ((

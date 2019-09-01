@@ -38,6 +38,7 @@
   DmgBootSupport.c
   PolicyManagement.c
   OcBootManagementLib.c
+  VariableManagement.c
 
 [Packages]
   OcSupportPkg/OcSupportPkg.dec
@@ -45,19 +46,31 @@
   EfiPkg/EfiPkg.dec
 
 [Guids]
-  gAppleApfsContainerInfoGuid        ## SOMETIMES_CONSUMES
-  gAppleApfsVolumeInfoGuid           ## SOMETIMES_CONSUMES
-  gAppleBlessedSystemFileInfoGuid    ## SOMETIMES_CONSUMES
-  gAppleBlessedSystemFolderInfoGuid  ## SOMETIMES_CONSUMES
-  gAppleBlessedOsxFolderInfoGuid     ## SOMETIMES_CONSUMES
-  gEfiFileInfoGuid                   ## SOMETIMES_CONSUMES
-  gEfiGlobalVariableGuid             ## SOMETIMES_CONSUMES
-  gEfiPartTypeSystemPartGuid         ## SOMETIMES_CONSUMES
-  gAppleApfsPartitionTypeGuid        ## SOMETIMES_CONSUMES
-  gAppleBootVariableGuid             ## SOMETIMES_CONSUMES
-  gAppleHfsPartitionTypeGuid         ## SOMETIMES_CONSUMES
-  gAppleHfsBootPartitionTypeGuid     ## SOMETIMES_CONSUMES
-  gAppleLegacyLoadAppFileGuid        ## SOMETIMES_CONSUMES
+  gAppleApfsContainerInfoGuid                   ## SOMETIMES_CONSUMES
+  gAppleApfsVolumeInfoGuid                      ## SOMETIMES_CONSUMES
+  gAppleBlessedSystemFileInfoGuid               ## SOMETIMES_CONSUMES
+  gAppleBlessedSystemFolderInfoGuid             ## SOMETIMES_CONSUMES
+  gAppleBlessedOsxFolderInfoGuid                ## SOMETIMES_CONSUMES
+  gEfiFileInfoGuid                              ## SOMETIMES_CONSUMES
+  gEfiGlobalVariableGuid                        ## SOMETIMES_CONSUMES
+  gEfiPartTypeSystemPartGuid                    ## SOMETIMES_CONSUMES
+  gAppleApfsPartitionTypeGuid                   ## SOMETIMES_CONSUMES
+  gAppleBootVariableGuid                        ## SOMETIMES_CONSUMES
+  gAppleHfsPartitionTypeGuid                    ## SOMETIMES_CONSUMES
+  gAppleHfsBootPartitionTypeGuid                ## SOMETIMES_CONSUMES
+  gAppleLegacyLoadAppFileGuid                   ## SOMETIMES_CONSUMES
+  gAppleVendorVariableGuid                      ## SOMETIMES_CONSUMES
+  gAppleCoreStorageVariableGuid                 ## SOMETIMES_CONSUMES
+  gAppleTamperResistantBootVariableGuid         ## SOMETIMES_CONSUMES
+  gAppleWirelessNetworkVariableGuid             ## SOMETIMES_CONSUMES
+  gApplePersonalizationVariableGuid             ## SOMETIMES_CONSUMES
+  gAppleNetbootVariableGuid                     ## SOMETIMES_CONSUMES
+  gAppleSecureBootVariableGuid                  ## SOMETIMES_CONSUMES
+  gAppleTamperResistantBootSecureVariableGuid   ## SOMETIMES_CONSUMES
+  gAppleTamperResistantBootEfiUserVariableGuid  ## SOMETIMES_CONSUMES
+  gOcVendorVariableGuid                         ## SOMETIMES_CONSUMES
+  gOcReadOnlyVariableGuid                       ## SOMETIMES_CONSUMES
+  gOcWriteOnlyVariableGuid                      ## SOMETIMES_CONSUMES
 
 [Protocols]
   gAppleBootPolicyProtocolGuid       ## PRODUCES
@@ -65,6 +78,7 @@
   gEfiSimpleFileSystemProtocolGuid   ## SOMETIMES_CONSUMES
   gEfiLoadedImageProtocolGuid        ## SOMETIMES_CONSUMES
   gEfiUsbIoProtocolGuid              ## SOMETIMES_CONSUMES
+  gOcFirmwareRuntimeProtocolGuid     ## SOMETIMES_CONSUMES
 
 [LibraryClasses]
   BaseLib
@@ -77,6 +91,7 @@
   OcAppleBootPolicyLib
   OcAppleChunklistLib
   OcAppleDiskImageLib
+  OcAppleKeyMapLib
   OcAppleKeysLib
   OcDevicePathLib
   OcGuardLib

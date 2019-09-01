@@ -605,3 +605,53 @@ OcAppleKeyMapInstallProtocols (
   mKeyMapDatabase = &KeyMapAggregatorData->Database;
   return &KeyMapAggregatorData->Aggregator;
 }
+
+
+BOOLEAN
+OcKeyMapHasModifier (
+  IN APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMapAggregator,
+  IN APPLE_MODIFIER_MAP                 ModifierLeft,
+  IN APPLE_MODIFIER_MAP                 ModifierRight  OPTIONAL
+  )
+{
+  EFI_STATUS  Status;
+
+  Status = KeyMapAggregator->ContainsKeyStrokes (
+    KeyMapAggregator,
+    ModifierLeft,
+    0,
+    NULL,
+    FALSE
+    );
+
+  if (EFI_ERROR (Status) && ModifierRight != 0) {
+    Status = KeyMapAggregator->ContainsKeyStrokes (
+      KeyMapAggregator,
+      ModifierRight,
+      0,
+      NULL,
+      FALSE
+      );
+  }
+
+  return !EFI_ERROR (Status);
+}
+
+BOOLEAN
+OcKeyMapHasKey (
+  IN APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMapAggregator,
+  IN APPLE_KEY_CODE                     KeyCode
+  )
+{
+  EFI_STATUS  Status;
+
+  Status = KeyMapAggregator->ContainsKeyStrokes (
+      KeyMapAggregator,
+      0,
+      1,
+      &KeyCode,
+      FALSE
+      );
+
+  return !EFI_ERROR (Status);
+}

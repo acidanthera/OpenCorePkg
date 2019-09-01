@@ -39,4 +39,34 @@ OcAppleKeyMapInstallProtocols (
   IN BOOLEAN  Reinstall
   );
 
+/**
+  Checks for key modifier presence.
+
+  @param[in]  KeyMapAggregator  Apple Key Map Aggregator protocol.
+  @param[in]  ModifierLeft      Primary key modifer.
+  @param[in]  ModifierRight     Secondary key modifer, optional.
+
+  @retval  TRUE if either modifier is set.
+**/
+BOOLEAN
+OcKeyMapHasModifier (
+  IN APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMapAggregator,
+  IN APPLE_MODIFIER_MAP                 ModifierLeft,
+  IN APPLE_MODIFIER_MAP                 ModifierRight  OPTIONAL
+  );
+
+/**
+  Checks for key presence.
+
+  @param[in]  KeyMapAggregator  Apple Key Map Aggregator protocol.
+  @param[in]  KeyCode           Key code.
+
+  @retval  TRUE if key code is set.
+**/
+BOOLEAN
+OcKeyMapHasKey (
+  IN APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMapAggregator,
+  IN APPLE_KEY_CODE                     KeyCode
+  );
+
 #endif // OC_APPLE_KEY_MAP_LIB_H

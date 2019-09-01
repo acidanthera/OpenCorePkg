@@ -15,8 +15,10 @@
 #include "BootManagementInternal.h"
 
 #include <Guid/AppleVariable.h>
+#include <Guid/OcVariables.h>
 
 #include <IndustryStandard/AppleHibernate.h>
+#include <IndustryStandard/AppleCsrConfig.h>
 
 #include <Protocol/AppleBootPolicy.h>
 #include <Protocol/AppleKeyMapAggregator.h>
@@ -28,7 +30,9 @@
 #include <Library/OcDebugLogLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/OcGuardLib.h>
+#include <Library/OcTimerLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcAppleKeyMapLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
@@ -660,18 +664,21 @@ OcIsAppleHibernateWake (
 
 EFI_STATUS
 OcShowSimpleBootMenu (
+  IN OC_PICKER_CONTEXT            *Context,
   IN OC_BOOT_ENTRY                *BootEntries,
   IN UINTN                        Count,
   IN UINTN                        DefaultEntry,
-  IN UINTN                        TimeOutSeconds,
   OUT OC_BOOT_ENTRY               **ChosenBootEntry
   )
 {
   UINTN   Index;
   INTN    KeyIndex;
   CHAR16  Code[2];
+  UINT32  TimeOutSeconds;
 
   Code[1] = '\0';
+
+  TimeOutSeconds = Context->TimeoutSeconds;
 
   while (TRUE) {
     gST->ConOut->ClearScreen (gST->ConOut);
@@ -699,7 +706,11 @@ OcShowSimpleBootMenu (
     gST->ConOut->OutputString (gST->ConOut, L"\r\nChoose boot entry: ");
 
     while (TRUE) {
-      KeyIndex = WaitForKeyIndex (TimeOutSeconds);
+      if (Context->PollAppleHotKeys) {
+        KeyIndex = OcWaitForAppleKeyIndex (Context, TimeOutSeconds);
+      } else {
+        KeyIndex = WaitForKeyIndex (TimeOutSeconds);
+      }
       if (KeyIndex == OC_INPUT_TIMEOUT) {
         *ChosenBootEntry = &BootEntries[DefaultEntry];
         gST->ConOut->OutputString (gST->ConOut, L"Timeout\r\n");
@@ -708,7 +719,7 @@ OcShowSimpleBootMenu (
         gST->ConOut->OutputString (gST->ConOut, L"Aborted\r\n");
         return EFI_ABORTED;
       } else if (KeyIndex != OC_INPUT_INVALID && (UINTN)KeyIndex < Count) {
-	    ASSERT (KeyIndex >= 0);
+        ASSERT (KeyIndex >= 0);
         *ChosenBootEntry = &BootEntries[KeyIndex];
         Code[0] = OC_INPUT_STR[KeyIndex];
         gST->ConOut->OutputString (gST->ConOut, Code);
@@ -762,59 +773,8 @@ OcLoadBootEntry (
   return Status;
 }
 
-STATIC
-BOOLEAN
-OcKeyMapHasModifier (
-  IN APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMapAggregator,
-  IN APPLE_MODIFIER_MAP                 ModifierLeft,
-  IN APPLE_MODIFIER_MAP                 ModifierRight  OPTIONAL
-  )
-{
-  EFI_STATUS  Status;
-
-  Status = KeyMapAggregator->ContainsKeyStrokes (
-    KeyMapAggregator,
-    ModifierLeft,
-    0,
-    NULL,
-    FALSE
-    );
-
-  if (EFI_ERROR (Status) && ModifierRight != 0) {
-    Status = KeyMapAggregator->ContainsKeyStrokes (
-      KeyMapAggregator,
-      ModifierRight,
-      0,
-      NULL,
-      FALSE
-      );
-  }
-
-  return !EFI_ERROR (Status);
-}
-
-STATIC
-BOOLEAN
-OcKeyMapHasKey (
-  IN APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMapAggregator,
-  IN APPLE_KEY_CODE                     KeyCode
-  )
-{
-  EFI_STATUS  Status;
-
-  Status = KeyMapAggregator->ContainsKeyStrokes (
-      KeyMapAggregator,
-      0,
-      1,
-      &KeyCode,
-      FALSE
-      );
-
-  return !EFI_ERROR (Status);
-}
-
 VOID
-OcLoadPickerHotkeys (
+OcLoadPickerHotKeys (
   IN OUT OC_PICKER_CONTEXT  *Context
   )
 {
@@ -822,7 +782,6 @@ OcLoadPickerHotkeys (
   APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
   BOOLEAN                            HasCommand;
   BOOLEAN                            HasOption;
-  BOOLEAN                            HasShift;
   BOOLEAN                            HasKeyP;
   BOOLEAN                            HasKeyR;
   BOOLEAN                            HasKeyX;
@@ -851,15 +810,11 @@ OcLoadPickerHotkeys (
 
   HasCommand = OcKeyMapHasModifier (KeyMap, APPLE_MODIFIER_LEFT_COMMAND, APPLE_MODIFIER_RIGHT_COMMAND);
   HasOption  = OcKeyMapHasModifier (KeyMap, APPLE_MODIFIER_LEFT_OPTION, APPLE_MODIFIER_RIGHT_OPTION);
-  HasShift   = OcKeyMapHasModifier (KeyMap, APPLE_MODIFIER_LEFT_SHIFT, APPLE_MODIFIER_RIGHT_SHIFT);
   HasKeyP    = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyP);
   HasKeyR    = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyP);
   HasKeyX    = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyX);
 
   if (HasOption && HasCommand && HasKeyP && HasKeyR) {
-    //
-    // TODO: Protect this with some policy?
-    //
     DEBUG ((DEBUG_INFO, "OCB: CMD+OPT+P+R causes NVRAM reset\n"));
     Context->PickerCommand = OcPickerResetNvram;
   } else if (HasCommand && HasKeyR) {
@@ -883,8 +838,166 @@ OcLoadPickerHotkeys (
     // T - Target disk mode, simply not supported (and bad for security).
     //
   }
+}
 
+INTN
+OcWaitForAppleKeyIndex (
+  IN OUT OC_PICKER_CONTEXT  *Context,
+  IN UINTN                  Timeout
+  )
+{
+  EFI_STATUS                         Status;
+  APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
+  APPLE_KEY_CODE                     KeyCode;
+  BOOLEAN                            HasCommand;
+  BOOLEAN                            HasShift;
+  BOOLEAN                            HasKeyC;
+  BOOLEAN                            HasKeyK;
+  BOOLEAN                            HasKeyS;
+  BOOLEAN                            HasKeyV;
+  BOOLEAN                            HasKeyMinus;
+  UINT32                             CsrActiveConfig;
+  UINT64                             CurrTime;
+  UINT64                             EndTime;
+  UINTN                              CsrActiveConfigSize;
 
+  //
+  // These hotkeys are normally parsed by boot.efi, and they work just fine
+  // when ShowPicker is disabled. On some BSPs, however, they may fail badly
+  // when ShowPicker is enabled, and for this reason we support these hotkeys
+  // within picker itself.
+  //
+  Status = gBS->LocateProtocol (
+    &gAppleKeyMapAggregatorProtocolGuid,
+    NULL,
+    (VOID **) &KeyMap
+    );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "OCB: Missing AppleKeyMapAggregator - %r\n", Status));
+    return OC_INPUT_INVALID;
+  }
+
+  CurrTime  = GetTimeInNanoSecond (GetPerformanceCounter ());
+  EndTime   = CurrTime + Timeout * 1000000000ULL;
+
+  while (Timeout == 0 || CurrTime == 0 || CurrTime < EndTime) {
+    CurrTime    = GetTimeInNanoSecond (GetPerformanceCounter ());
+
+    HasCommand  = OcKeyMapHasModifier (KeyMap, APPLE_MODIFIER_LEFT_COMMAND, APPLE_MODIFIER_RIGHT_COMMAND);
+    HasShift    = OcKeyMapHasModifier (KeyMap, APPLE_MODIFIER_LEFT_SHIFT, APPLE_MODIFIER_RIGHT_SHIFT);
+    HasKeyC     = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyC);
+    HasKeyK     = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyK);
+    HasKeyS     = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyS);
+    HasKeyV     = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyV);
+    //
+    // Checking for PAD minus is our extension to support more keyboards.
+    //
+    HasKeyMinus = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyMinus)
+      || OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyPadMinus);
+
+    //
+    // Shift is always valid and enables Safe Mode.
+    //
+    if (HasShift) {
+      if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-x", L_STR_LEN ("-x")) == NULL) {
+        DEBUG ((DEBUG_INFO, "OCB: Shift means -x\n"));
+        OcAppendArgumentToCmd (Context->AppleBootArgs, "-x", L_STR_LEN ("-x"));
+      }
+      continue;
+    }
+
+    //
+    // CMD+V is always valid and enables Verbose Mode.
+    //
+    if (HasCommand && HasKeyV) {
+      if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-v", L_STR_LEN ("-v")) == NULL) {
+        DEBUG ((DEBUG_INFO, "OCB: CMD+V means -v\n"));
+        OcAppendArgumentToCmd (Context->AppleBootArgs, "-v", L_STR_LEN ("-v"));
+      }
+      continue;
+    }
+
+    //
+    // CMD+C+MINUS is always valid and disables compatibility check.
+    //
+    if (HasCommand && HasKeyC && HasKeyMinus) {
+      if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-no_compat_check", L_STR_LEN ("-no_compat_check")) == NULL) {
+        DEBUG ((DEBUG_INFO, "OCB: CMD+C+MINUS means -no_compat_check\n"));
+        OcAppendArgumentToCmd (Context->AppleBootArgs, "-no_compat_check", L_STR_LEN ("-no_compat_check"));
+      }
+      continue;
+    }
+
+    //
+    // CMD+K is always valid for new macOS and means force boot to release kernel.
+    //
+    if (HasCommand && HasKeyK) {
+      if (AsciiStrStr (Context->AppleBootArgs, "kcsuffix=release") == NULL) {
+        DEBUG ((DEBUG_INFO, "OCB: CMD+K means kcsuffix=release\n"));
+        OcAppendArgumentToCmd (Context->AppleBootArgs, "kcsuffix=release", L_STR_LEN ("kcsuffix=release"));
+      }
+      continue;
+    }
+
+    //
+    // boot.efi also checks for CMD+X, but I have no idea what it is for.
+    //
+
+    //
+    // boot.efi requires unrestricted NVRAM just for CMD+S+MINUS,
+    // but we will require it for CMD+S as well, as CMD+S does not work on T2 macs.
+    // Ref: https://support.apple.com/HT201573
+    //
+    if (HasCommand && HasKeyS) {
+      CsrActiveConfig     = 0;
+      CsrActiveConfigSize = sizeof (CsrActiveConfig);
+      Status = gRT->GetVariable (
+        L"csr-active-config",
+        &gAppleBootVariableGuid,
+        NULL,
+        &CsrActiveConfigSize,
+        &CsrActiveConfig
+        );
+      if (!EFI_ERROR (Status) && (CsrActiveConfig & CSR_ALLOW_UNRESTRICTED_NVRAM) != 0) {
+        if (HasKeyMinus) {
+          if (OcGetArgumentFromCmd (Context->AppleBootArgs, "slide=", L_STR_LEN ("slide=")) == NULL) {
+            DEBUG ((DEBUG_INFO, "OCB: CMD+S+MINUS means slide=0\n"));
+            OcAppendArgumentToCmd (Context->AppleBootArgs, "slide=0", L_STR_LEN ("slide=0"));
+          }
+        } else if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-s", L_STR_LEN ("-s")) == NULL) {
+          DEBUG ((DEBUG_INFO, "OCB: CMD+S means -s\n"));
+          OcAppendArgumentToCmd (Context->AppleBootArgs, "-s", L_STR_LEN ("-s"));
+        }
+      } else {
+        DEBUG ((DEBUG_INFO, "OCB: Ignore CMD+S due to restricted NVRAM\n"));
+      }
+      continue;
+    }
+
+    //
+    // Check exact match on index strokes.
+    //
+    OC_STATIC_ASSERT (AppleHidUsbKbUsageKeyOne + 8 == AppleHidUsbKbUsageKeyNine, "Unexpected encoding");
+    for (KeyCode = AppleHidUsbKbUsageKeyOne; KeyCode <= AppleHidUsbKbUsageKeyNine; ++KeyCode) {
+      Status = KeyMap->ContainsKeyStrokes (KeyMap, 0, 1, &KeyCode, TRUE);
+      if (!EFI_ERROR (Status)) {
+        return (INTN) (KeyCode - AppleHidUsbKbUsageKeyOne);
+      }
+    }
+
+    OC_STATIC_ASSERT (AppleHidUsbKbUsageKeyA + 25 == AppleHidUsbKbUsageKeyZ, "Unexpected encoding");
+    for (KeyCode = AppleHidUsbKbUsageKeyA; KeyCode <= AppleHidUsbKbUsageKeyZ; ++KeyCode) {
+      Status = KeyMap->ContainsKeyStrokes (KeyMap, 0, 1, &KeyCode, TRUE);
+      if (!EFI_ERROR (Status)) {
+        return (INTN) (KeyCode - AppleHidUsbKbUsageKeyA + 10);
+      }
+    }
+
+    MicroSecondDelay (10);
+  }
+
+  return OC_INPUT_TIMEOUT;
 }
 
 EFI_STATUS
@@ -901,12 +1014,12 @@ OcRunSimpleBootPicker (
 
   AppleBootPolicy = OcAppleBootPolicyInstallProtocol (FALSE);
   if (AppleBootPolicy == NULL) {
-    DEBUG ((DEBUG_ERROR, "AppleBootPolicy locate failure\n"));
+    DEBUG ((DEBUG_ERROR, "OCB: AppleBootPolicy locate failure\n"));
     return EFI_NOT_FOUND;
   }
 
   while (TRUE) {
-    DEBUG ((DEBUG_INFO, "Performing OcScanForBootEntries...\n"));
+    DEBUG ((DEBUG_INFO, "OCB: Performing OcScanForBootEntries...\n"));
 
     Status = OcScanForBootEntries (
       AppleBootPolicy,
@@ -918,34 +1031,42 @@ OcRunSimpleBootPicker (
       );
 
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OcScanForBootEntries failure - %r\n", Status));
+      DEBUG ((DEBUG_ERROR, "OCB: OcScanForBootEntries failure - %r\n", Status));
       return Status;
     }
 
     if (EntryCount == 0) {
-      DEBUG ((DEBUG_WARN, "OcScanForBootEntries has no entries\n"));
+      DEBUG ((DEBUG_WARN, "OCB: OcScanForBootEntries has no entries\n"));
       return EFI_NOT_FOUND;
     }
 
-    DEBUG ((DEBUG_INFO, "Performing OcShowSimpleBootMenu...\n"));
+    DEBUG ((
+      DEBUG_INFO,
+      "OCB: Performing OcShowSimpleBootMenu... %d\n",
+      Context->PollAppleHotKeys
+      ));
 
     DefaultEntry = OcGetDefaultBootEntry (Context, Entries, EntryCount);
 
     if (Context->PickerCommand == OcPickerShowPicker) {
       Status = OcShowSimpleBootMenu (
+        Context,
         Entries,
         EntryCount,
         DefaultEntry,
-        Context->TimeoutSeconds,
         &Chosen
         );
+    } else if (Context->PickerCommand == OcPickerResetNvram) {
+      OcDeleteVariables ();
+      DirectRestCold ();
+      return EFI_DEVICE_ERROR;
     } else {
       Chosen = &Entries[DefaultEntry];
       Status = EFI_SUCCESS;
     }
 
     if (EFI_ERROR (Status) && Status != EFI_ABORTED) {
-      DEBUG ((DEBUG_ERROR, "OcShowSimpleBootMenu failed - %r\n", Status));
+      DEBUG ((DEBUG_ERROR, "OCB: OcShowSimpleBootMenu failed - %r\n", Status));
       OcFreeBootEntries (Entries, EntryCount);
       return Status;
     }
@@ -955,7 +1076,7 @@ OcRunSimpleBootPicker (
     if (!EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
-        "Should boot from %s (T:%d|F:%d)\n",
+        "OCB: Should boot from %s (T:%d|F:%d)\n",
         Chosen->Name,
         Chosen->Type,
         Chosen->IsFolder

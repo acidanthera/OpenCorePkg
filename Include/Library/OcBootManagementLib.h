@@ -340,6 +340,14 @@ typedef struct {
   //
   EFI_HANDLE       ExcludeHandle;
   //
+  // Enable polling boot arguments.
+  //
+  BOOLEAN          PollAppleHotKeys;
+  //
+  // Additional boot arguments for Apple loaders.
+  //
+  CHAR8            AppleBootArgs[BOOT_LINE_LENGTH];
+  //
   // Number of custom boot paths (bless override).
   //
   UINTN            NumCustomBootPaths;
@@ -446,10 +454,10 @@ OcGetDefaultBootEntry (
 /**
   Show simple boot entry selection menu and return chosen entry.
 
+  @param[in]  Context          Picker context.
   @param[in]  BootEntries      Described list of entries.
   @param[in]  Count            Positive number of boot entries.
   @param[in]  DefaultEntry     Default boot entry (DefaultEntry < Count).
-  @param[in]  TimeOutSeconds   Default entry selection timeout (pass 0 to ignore).
   @param[in]  ChosenBootEntry  Chosen boot entry from BootEntries on success.
 
   @retval EFI_SUCCESS          Executed successfully and picked up an entry.
@@ -457,10 +465,10 @@ OcGetDefaultBootEntry (
 **/
 EFI_STATUS
 OcShowSimpleBootMenu (
+  IN  OC_PICKER_CONTEXT           *Context,
   IN  OC_BOOT_ENTRY               *BootEntries,
   IN  UINTN                       Count,
   IN  UINTN                       DefaultEntry,
-  IN  UINTN                       TimeOutSeconds,
   OUT OC_BOOT_ENTRY               **ChosenBootEntry
   );
 
@@ -510,8 +518,22 @@ OcIsAppleHibernateWake (
   @param[in,out]  Context       Picker context.
 **/
 VOID
-OcLoadPickerHotkeys (
+OcLoadPickerHotKeys (
   IN OUT OC_PICKER_CONTEXT  *Context
+  );
+
+/**
+  Obtains key index from user input.
+
+  @param[in,out]  Context   Picker context.
+  @param[in]      Time      Timeout to wait for.
+
+  @returns key index [0, OC_INPUT_MAX), OC_INPUT_ABORTED, or OC_INPUT_INVALID.
+**/
+INTN
+OcWaitForAppleKeyIndex (
+  IN OUT OC_PICKER_CONTEXT  *Context,
+  IN     UINTN              Timeout
   );
 
 /**
@@ -664,6 +686,14 @@ OcAppendArgumentToCmd (
   IN OUT CHAR8        *CommandLine,
   IN     CONST CHAR8  *Argument,
   IN     CONST UINTN  ArgumentLength
+  );
+
+/**
+  Perform NVRAM UEFI variable deletion.
+**/
+VOID
+OcDeleteVariables (
+  VOID
   );
 
 #endif // OC_BOOT_MANAGEMENT_LIB_H

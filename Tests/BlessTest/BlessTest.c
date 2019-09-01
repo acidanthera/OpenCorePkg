@@ -87,7 +87,7 @@ TestBless (
       return Status;
     }
 
-    Status = OcShowSimpleBootMenu (Entries, EntryCount, OC_SCAN_DEFAULT_POLICY, TimeoutSeconds, &Chosen);
+    Status = OcShowSimpleBootMenu (&PickerContext, Entries, EntryCount, OC_SCAN_DEFAULT_POLICY, &Chosen);
 
     if (EFI_ERROR (Status) && Status != EFI_ABORTED) {
       Print (L"OcShowSimpleBootMenu failed - %r\n", Status);
