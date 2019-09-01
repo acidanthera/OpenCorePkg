@@ -108,13 +108,13 @@ WaitForKeyPress (
 /**
   Obtains key index from user input.
 
-  @param TimeOutSeconds  Timeout to wait for.
+  @param[in]  Time  Timeout to wait for.
 
-  @returns key index [0, OC_INPUT_MAX), OC_INPUT_ABORTED, or OC_INPUT_INVALID.
+  @returns key index [0, OC_INPUT_MAX), OC_INPUT_ABORTED, or OC_INPUT_INVALID, OC_INPUT_MAX.
 **/
 INTN
 WaitForKeyIndex (
-  UINTN  TimeOutSeconds
+  IN UINTN  Timeout
   );
 
 /**

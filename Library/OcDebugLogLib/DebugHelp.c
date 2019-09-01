@@ -66,7 +66,7 @@ WaitForKeyPress (
 
 INTN
 WaitForKeyIndex (
-  UINTN  Timeout
+  IN UINTN  Timeout
   )
 {
   EFI_STATUS        Status;
