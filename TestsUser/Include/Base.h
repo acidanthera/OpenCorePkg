@@ -52,6 +52,11 @@
 #define EFI_PAGE_MASK  0xFFF
 #define EFI_PAGE_SHIFT 12
 
+#define MIN_INT8   (((INT8)  -127) - 1)
+#define MIN_INT16  (((INT16) -32767) - 1)
+#define MIN_INT32  (((INT32) -2147483647) - 1)
+#define MIN_INT64  (((INT64) -9223372036854775807LL) - 1)
+
 #define MDE_CPU_X64
 #define VOID void
 #define CONST const
