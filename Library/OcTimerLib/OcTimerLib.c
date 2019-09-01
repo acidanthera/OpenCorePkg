@@ -218,14 +218,68 @@ RecalculateTSC (
   return mPerformanceCounterFrequency;
 }
 
+/**
+  Stalls the CPU for at least the given number of ticks.
+
+  Stalls the CPU for at least the given number of ticks. It's invoked by
+  MicroSecondDelay() and NanoSecondDelay().
+
+  @param  Delay     A period of time to delay in ticks.
+
+**/
+STATIC
+VOID
+InternalCpuDelay (
+  IN UINT64  Delay
+  )
+{
+  UINT64  Ticks;
+
+  //
+  // The target timer count is calculated here
+  //
+  Ticks = AsmReadTsc () + Delay;
+
+  //
+  // Wait until time out
+  // Timer wrap-arounds are NOT handled correctly by this function.
+  // Thus, this function must be called within 10 years of reset since
+  // Intel guarantees a minimum of 10 years before the TSC wraps.
+  //
+  while (AsmReadTsc () <= Ticks) {
+    CpuPause ();
+  }
+}
+
+/**
+  Stalls the CPU for at least the given number of microseconds.
+
+  Stalls the CPU for the number of microseconds specified by MicroSeconds.
+
+  @param[in]  MicroSeconds  The minimum number of microseconds to delay.
+
+  @return MicroSeconds
+
+**/
 UINTN
 EFIAPI
 MicroSecondDelay (
   IN      UINTN                     MicroSeconds
   )
 {
-  (VOID) MicroSeconds;
-  return EFI_UNSUPPORTED;
+  if (mPerformanceCounterFrequency > 0) {
+    InternalCpuDelay (
+      DivU64x32 (
+        MultU64x64 (
+          MicroSeconds,
+          mPerformanceCounterFrequency
+          ),
+        1000000u
+      )
+    );
+  }
+
+  return MicroSeconds;
 }
 
 /**
@@ -244,8 +298,19 @@ NanoSecondDelay (
   IN      UINTN                     NanoSeconds
   )
 {
-  (VOID) NanoSeconds;
-  return EFI_UNSUPPORTED;
+  if (mPerformanceCounterFrequency > 0) {
+    InternalCpuDelay (
+      DivU64x32 (
+        MultU64x64 (
+          NanoSeconds,
+          mPerformanceCounterFrequency
+          ),
+        1000000000u
+      )
+    );
+  }
+
+  return NanoSeconds;
 }
 
 /**
