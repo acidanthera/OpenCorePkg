@@ -292,9 +292,10 @@ RestoreProtectedRtMemoryTypes (
       // I would expect PhysicalStart and PhysicalEnd to always match here, but
       // the region can be merged with a nearby one, thus we check for overlap
       // rather than full match. "Desc contains RtReloc" should also do.
+      // FIXME: Check with Sniki why fuzzy match fails for him and whether
+      // it is needed at all.
       //
-      if (PhysicalStart <= RtReloc->RelocInfo[Index2].PhysicalEnd
-        && RtReloc->RelocInfo[Index2].PhysicalStart <= PhysicalEnd)  {
+      if (PhysicalStart == RtReloc->RelocInfo[Index2].PhysicalStart)  {
         Desc->Type = RtReloc->RelocInfo[Index2].Type;
         --NumEntriesLeft;
         break;
