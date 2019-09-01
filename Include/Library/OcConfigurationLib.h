@@ -246,6 +246,7 @@
 
 #define OC_MISC_BOOT_FIELDS(_, __) \
   _(BOOLEAN                     , HideSelf                    ,     , FALSE                       ,     ())                   \
+  _(BOOLEAN                     , PollAppleHotKeys            ,     , FALSE                       ,     ())                   \
   _(BOOLEAN                     , ShowPicker                  ,     , FALSE                       ,     ())                   \
   _(BOOLEAN                     , UsePicker                   ,     , FALSE                       ,     ())                   \
   _(UINT32                      , Timeout                     ,     , 0                           ,     ())                   \
@@ -268,6 +269,7 @@
 
 #define OC_MISC_SECURITY_FIELDS(_, __) \
   _(UINT32                      , ScanPolicy                  ,     , OC_SCAN_DEFAULT_POLICY , ()) \
+  _(BOOLEAN                     , AllowNvramReset             ,     , FALSE                  , ()) \
   _(BOOLEAN                     , ExposeSensitiveData         ,     , OCS_EXPOSE_VERSION     , ()) \
   _(BOOLEAN                     , RequireVault                ,     , TRUE                   , ()) \
   _(BOOLEAN                     , RequireSignature            ,     , TRUE                   , ()) \

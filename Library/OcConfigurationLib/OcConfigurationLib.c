@@ -296,6 +296,7 @@ mMiscConfigurationBootSchema[] = {
   OC_SCHEMA_STRING_IN  ("ConsoleMode",       OC_GLOBAL_CONFIG, Misc.Boot.ConsoleMode),
   OC_SCHEMA_STRING_IN  ("HibernateMode",     OC_GLOBAL_CONFIG, Misc.Boot.HibernateMode),
   OC_SCHEMA_BOOLEAN_IN ("HideSelf",          OC_GLOBAL_CONFIG, Misc.Boot.HideSelf),
+  OC_SCHEMA_BOOLEAN_IN ("PollAppleHotKeys",  OC_GLOBAL_CONFIG, Misc.Boot.PollAppleHotKeys),
   OC_SCHEMA_STRING_IN  ("Resolution",        OC_GLOBAL_CONFIG, Misc.Boot.Resolution),
   OC_SCHEMA_BOOLEAN_IN ("ShowPicker",        OC_GLOBAL_CONFIG, Misc.Boot.ShowPicker),
   OC_SCHEMA_INTEGER_IN ("Timeout",           OC_GLOBAL_CONFIG, Misc.Boot.Timeout),
@@ -314,6 +315,7 @@ mMiscConfigurationDebugSchema[] = {
 STATIC
 OC_SCHEMA
 mMiscConfigurationSecuritySchema[] = {
+  OC_SCHEMA_BOOLEAN_IN ("AllowNvramReset",      OC_GLOBAL_CONFIG, Misc.Security.AllowNvramReset),
   OC_SCHEMA_INTEGER_IN ("ExposeSensitiveData",  OC_GLOBAL_CONFIG, Misc.Security.ExposeSensitiveData),
   OC_SCHEMA_INTEGER_IN ("HaltLevel",            OC_GLOBAL_CONFIG, Misc.Security.HaltLevel),
   OC_SCHEMA_BOOLEAN_IN ("RequireSignature",     OC_GLOBAL_CONFIG, Misc.Security.RequireSignature),
