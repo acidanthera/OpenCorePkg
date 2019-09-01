@@ -444,7 +444,9 @@ OcMiscBoot (
   Context->LoadPolicy         = OC_LOAD_DEFAULT_POLICY;
   Context->TimeoutSeconds     = Config->Misc.Boot.Timeout;
   Context->StartImage         = StartImage;
-  Context->ShowPicker         = Config->Misc.Boot.ShowPicker;
+  if (Config->Misc.Boot.ShowPicker) {
+    Context->PickerCommand    = OcPickerShowPicker;
+  }
   Context->CustomBootGuid     = CustomBootGuid;
   Context->ExcludeHandle      = LoadHandle;
   Context->CustomEntryContext = Storage;
@@ -472,6 +474,8 @@ OcMiscBoot (
   }
 
   Context->AllCustomEntryCount = EntryIndex;
+
+  OcLoadPickerHotkeys (Context);
 
   if (Interface != NULL) {
     Status = Interface->ShowInteface (Interface, Storage, Context);
