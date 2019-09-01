@@ -3179,7 +3179,7 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{UsbKbDxe}}
   --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
-  \texttt{AptioInputFix}, which may work better or worse depending on the firmware.
+  \texttt{AppleGenericInput}, which may work better or worse depending on the firmware.
   \item \href{https://github.com/acidanthera/VirtualSMC}{\texttt{VirtualSmc}}
   --- UEFI SMC driver, required for proper FileVault 2 functionality and potentially
   other macOS specifics. An alternative, named \texttt{SMCHelper}, is not compatible
@@ -3701,6 +3701,7 @@ you will need \texttt{debug=0x8} boot argument.
   \tightlist
   \item \texttt{ProvideConsoleGop} (UEFI quirk)
   \item \texttt{AvoidRuntimeDefrag}
+  \item \texttt{DevirtualiseMmio}
   \item \texttt{DiscardHibernateMap}
   \item \texttt{EnableSafeModeSlide}
   \item \texttt{EnableWriteUnprotector}
