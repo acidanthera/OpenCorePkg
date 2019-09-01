@@ -32,4 +32,7 @@ typedef struct APPLE_PK_ENTRY_ {
 
 extern CONST APPLE_PK_ENTRY PkDataBase[NUM_OF_PK];
 
+extern CONST UINT8 gAppleX86SecureBootRootCaCert[];
+extern CONST UINTN gAppleX86SecureBootRootCaCertSize;
+
 #endif // OC_APPLE_KEYS_LIB_H
