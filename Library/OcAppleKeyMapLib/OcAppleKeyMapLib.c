@@ -306,7 +306,7 @@ InternalContainsKeyStrokes (
       return EFI_NOT_FOUND;
     }
   } else {
-    if ((DbModifiers & Modifiers) == Modifiers) {
+    if ((DbModifiers & Modifiers) != Modifiers) {
       return EFI_NOT_FOUND;
     }
 
