@@ -811,7 +811,7 @@ OcLoadPickerHotKeys (
   HasCommand = OcKeyMapHasModifier (KeyMap, APPLE_MODIFIER_LEFT_COMMAND, APPLE_MODIFIER_RIGHT_COMMAND);
   HasOption  = OcKeyMapHasModifier (KeyMap, APPLE_MODIFIER_LEFT_OPTION, APPLE_MODIFIER_RIGHT_OPTION);
   HasKeyP    = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyP);
-  HasKeyR    = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyP);
+  HasKeyR    = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyR);
   HasKeyX    = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyX);
 
   if (HasOption && HasCommand && HasKeyP && HasKeyR) {
