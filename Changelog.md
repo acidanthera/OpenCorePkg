@@ -14,6 +14,9 @@ OpenCore Changelog
 - Added FileVault 2 user interface protocols formerly in AppleUiSupport
 - Improved kernel patch logging to include configuration comments
 - Added MSFT basic data and Linux root fs recognition to `ScanPolicy`
+- Fixed RT region protection restoration regression (thx Sniki)
+- Added `OPT`, `CMD+R`, `CMD+OPT+P+R` boot action hotkey support
+- Added `PollAppleHotKeys` to register boot.efi hotkeys in the picker
 
 #### v0.0.4
 - Fixed kext injection issues with dummy dependencies

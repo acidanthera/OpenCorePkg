@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sun Aug 11 01:57:12 2019
-%DIF ADD ../Configuration.tex        Sat Aug 31 23:37:01 2019
+%DIF ADD ../Configuration.tex        Sun Sep  1 23:29:20 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3275,7 +3275,7 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{UsbKbDxe}}
   --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
-  \texttt{AptioInputFix}, which may work better or worse depending on the firmware.
+  \texttt{\DIFdelbegin \DIFdel{AptioInputFix}\DIFdelend \DIFaddbegin \DIFadd{AppleGenericInput}\DIFaddend }, which may work better or worse depending on the firmware.
   \item \href{https://github.com/acidanthera/VirtualSMC}{\texttt{VirtualSmc}}
   --- UEFI SMC driver, required for proper FileVault 2 functionality and potentially
   other macOS specifics. An alternative, named \texttt{SMCHelper}, is not compatible

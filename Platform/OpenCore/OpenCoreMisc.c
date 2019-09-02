@@ -346,6 +346,7 @@ OcMiscBoot (
 {
   EFI_STATUS             Status;
   OC_PICKER_CONTEXT      *Context;
+  OC_PICKER_CMD          PickerCommand;
   UINTN                  ContextSize;
   UINT32                 Index;
   UINT32                 EntryIndex;
@@ -444,13 +445,16 @@ OcMiscBoot (
   Context->LoadPolicy         = OC_LOAD_DEFAULT_POLICY;
   Context->TimeoutSeconds     = Config->Misc.Boot.Timeout;
   Context->StartImage         = StartImage;
-  if (Config->Misc.Boot.ShowPicker) {
-    Context->PickerCommand    = OcPickerShowPicker;
-  }
   Context->CustomBootGuid     = CustomBootGuid;
   Context->ExcludeHandle      = LoadHandle;
   Context->CustomEntryContext = Storage;
   Context->CustomRead         = OcToolLoadEntry;
+
+  if (Config->Misc.Boot.ShowPicker) {
+    PickerCommand = Context->PickerCommand = OcPickerShowPicker;
+  } else {
+    PickerCommand = Context->PickerCommand = OcPickerDefault;
+  }
 
   for (Index = 0, EntryIndex = 0; Index < Config->Misc.Entries.Count; ++Index) {
     if (Config->Misc.Entries.Values[Index]->Enabled) {
@@ -474,8 +478,13 @@ OcMiscBoot (
   }
 
   Context->AllCustomEntryCount = EntryIndex;
+  Context->PollAppleHotKeys    = Config->Misc.Boot.PollAppleHotKeys;
 
-  OcLoadPickerHotkeys (Context);
+  OcLoadPickerHotKeys (Context);
+
+  if (!Config->Misc.Security.AllowNvramReset && Context->PickerCommand == OcPickerResetNvram) {
+    Context->PickerCommand = PickerCommand;
+  }
 
   if (Interface != NULL) {
     Status = Interface->ShowInteface (Interface, Storage, Context);
