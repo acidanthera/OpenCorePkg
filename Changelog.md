@@ -17,6 +17,7 @@ OpenCore Changelog
 - Fixed RT region protection restoration regression (thx Sniki)
 - Added `OPT`, `CMD+R`, `CMD+OPT+P+R` boot action hotkey support
 - Added `PollAppleHotKeys` to register boot.efi hotkeys in the picker
+- Added `DisableSingleUser` quirk to prohibit single user mode
 
 #### v0.0.4
 - Fixed kext injection issues with dummy dependencies

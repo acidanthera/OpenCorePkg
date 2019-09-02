@@ -193,6 +193,8 @@
 			<false/>
 			<key>DisableVariableWrite</key>
 			<false/>
+			<key>DisableSingleUser</key>
+			<false/>
 			<key>DiscardHibernateMap</key>
 			<false/>
 			<key>EnableSafeModeSlide</key>

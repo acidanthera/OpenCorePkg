@@ -191,6 +191,8 @@
 			<true/>
 			<key>DevirtualiseMmio</key>
 			<false/>
+			<key>DisableSingleUser</key>
+			<false/>
 			<key>DisableVariableWrite</key>
 			<false/>
 			<key>DiscardHibernateMap</key>
