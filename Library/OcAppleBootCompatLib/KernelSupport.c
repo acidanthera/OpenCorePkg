@@ -290,13 +290,13 @@ RestoreProtectedRtMemoryTypes (
 
     for (Index2 = 0; Index2 < RtReloc->NumEntries; ++Index2) {
       //
-      // I would expect PhysicalStart and PhysicalEnd to always match here, but
-      // the region can be merged with a nearby one, thus we check for overlap
-      // rather than full match. "Desc contains RtReloc" should also do.
-      // FIXME: Check with Sniki why fuzzy match fails for him and whether
-      // it is needed at all.
+      // PhysicalStart match is enough, but just in case.
+      // Select firmwares, like Lenovo ThinkPad X240, have insane reserved areas.
+      // For example 0000000000000000-FFFFFFFFFFFFFFFF 0000000000000000 0000000000000000.
+      // Any fuzzy matching is prone to errors, so just do exact comparison.
       //
-      if (PhysicalStart == RtReloc->RelocInfo[Index2].PhysicalStart)  {
+      if (PhysicalStart == RtReloc->RelocInfo[Index2].PhysicalStart
+        && PhysicalEnd == RtReloc->RelocInfo[Index2].PhysicalEnd)  {
         Desc->Type = RtReloc->RelocInfo[Index2].Type;
         --NumEntriesLeft;
         break;
