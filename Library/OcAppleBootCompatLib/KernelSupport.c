@@ -22,6 +22,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcBootManagementLib.h>
+#include <Library/OcDeviceTreeLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/OcMemoryLib.h>
 #include <Library/OcMiscLib.h>
@@ -328,6 +329,10 @@ AppleMapPrepareForBooting (
   IN OUT VOID                 *BootArgs
   )
 {
+  EFI_STATUS              Status;
+  DTEntry                 Chosen;
+  CHAR8                   *ArgsStr;
+  UINT32                  ArgsSize;
   OC_BOOT_ARGUMENTS       BA;
   UINTN                   MemoryMapSize;
   EFI_MEMORY_DESCRIPTOR   *MemoryMap;
@@ -340,6 +345,25 @@ AppleMapPrepareForBooting (
     // Restore the variables we tampered with to support custom slides.
     //
     AppleSlideRestore (BootCompat, &BA);
+  }
+
+  if (BootCompat->Settings.DisableSingleUser) {
+    //
+    // First, there is a BootArgs entry for XNU.
+    //
+    OcRemoveArgumentFromCmd (BA.CommandLine, "-s");
+
+    //
+    // Second, there is a DT entry.
+    //
+    DTInit ((VOID *)(UINTN) *BA.DeviceTreeP, BA.DeviceTreeLength);
+    Status = DTLookupEntry (NULL, "/chosen", &Chosen);
+    if (!EFI_ERROR (Status)) {
+      Status = DTGetProperty (Chosen, "boot-args", (VOID **) &ArgsStr, &ArgsSize);
+      if (!EFI_ERROR (Status) && ArgsSize > 0) {
+        OcRemoveArgumentFromCmd (ArgsStr, "-s");
+      }
+    }
   }
 
   if (BootCompat->Settings.AvoidRuntimeDefrag) {

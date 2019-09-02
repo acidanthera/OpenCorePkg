@@ -42,6 +42,11 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   BOOLEAN  DevirtualiseMmio;
   ///
+  /// Disable passing -s to operating system through key presses, to simulate T2 Mac behaviour.
+  /// Ref: https://support.apple.com/HT201573
+  ///
+  BOOLEAN  DisableSingleUser;
+  ///
   /// Discard UEFI memory map after waking from hibernation and preserve the original mapping.
   ///
   BOOLEAN  DiscardHibernateMap;
