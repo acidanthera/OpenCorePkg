@@ -856,6 +856,7 @@ OcWaitForAppleKeyIndex (
   BOOLEAN                            HasKeyS;
   BOOLEAN                            HasKeyV;
   BOOLEAN                            HasKeyMinus;
+  BOOLEAN                            WantsZeroSlide;
   UINT32                             CsrActiveConfig;
   UINT64                             CurrTime;
   UINT64                             EndTime;
@@ -945,32 +946,35 @@ OcWaitForAppleKeyIndex (
     //
 
     //
-    // boot.efi requires unrestricted NVRAM just for CMD+S+MINUS,
-    // but we will require it for CMD+S as well, as CMD+S does not work on T2 macs.
+    // boot.efi requires unrestricted NVRAM just for CMD+S+MINUS, and CMD+S
+    // does not work at all on T2 macs. For CMD+S we simulate T2 behaviour with
+    // DisableSingleUser Booter quirk if necessary.
     // Ref: https://support.apple.com/HT201573
     //
     if (HasCommand && HasKeyS) {
-      CsrActiveConfig     = 0;
-      CsrActiveConfigSize = sizeof (CsrActiveConfig);
-      Status = gRT->GetVariable (
-        L"csr-active-config",
-        &gAppleBootVariableGuid,
-        NULL,
-        &CsrActiveConfigSize,
-        &CsrActiveConfig
-        );
-      if (!EFI_ERROR (Status) && (CsrActiveConfig & CSR_ALLOW_UNRESTRICTED_NVRAM) != 0) {
-        if (HasKeyMinus) {
-          if (OcGetArgumentFromCmd (Context->AppleBootArgs, "slide=", L_STR_LEN ("slide=")) == NULL) {
-            DEBUG ((DEBUG_INFO, "OCB: CMD+S+MINUS means slide=0\n"));
-            OcAppendArgumentToCmd (Context->AppleBootArgs, "slide=0", L_STR_LEN ("slide=0"));
-          }
-        } else if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-s", L_STR_LEN ("-s")) == NULL) {
-          DEBUG ((DEBUG_INFO, "OCB: CMD+S means -s\n"));
-          OcAppendArgumentToCmd (Context->AppleBootArgs, "-s", L_STR_LEN ("-s"));
+      WantsZeroSlide = HasKeyMinus;
+
+      if (WantsZeroSlide) {
+        CsrActiveConfig     = 0;
+        CsrActiveConfigSize = sizeof (CsrActiveConfig);
+        Status = gRT->GetVariable (
+          L"csr-active-config",
+          &gAppleBootVariableGuid,
+          NULL,
+          &CsrActiveConfigSize,
+          &CsrActiveConfig
+          );
+        WantsZeroSlide = !EFI_ERROR (Status) && (CsrActiveConfig & CSR_ALLOW_UNRESTRICTED_NVRAM) != 0;
+      }
+
+      if (WantsZeroSlide) {
+        if (AsciiStrStr (Context->AppleBootArgs, "slide=0") == NULL) {
+          DEBUG ((DEBUG_INFO, "OCB: CMD+S+MINUS means slide=0\n"));
+          OcAppendArgumentToCmd (Context->AppleBootArgs, "slide=0", L_STR_LEN ("slide=0"));
         }
-      } else {
-        DEBUG ((DEBUG_INFO, "OCB: Ignore CMD+S due to restricted NVRAM\n"));
+      } else if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-s", L_STR_LEN ("-s")) == NULL) {
+        DEBUG ((DEBUG_INFO, "OCB: CMD+S means -s\n"));
+        OcAppendArgumentToCmd (Context->AppleBootArgs, "-s", L_STR_LEN ("-s"));
       }
       continue;
     }
