@@ -1,7 +1,7 @@
 /*
  * SMBus compatibility table.
  */
-DefinitionBlock ("", "SSDT", 2, "hack", "MCHCSBUS", 0x00000000)
+DefinitionBlock ("", "SSDT", 2, "ACDT", "MCHCSBUS", 0x00000000)
 {
     External (_SB_.PCI0, DeviceObj)
     External (_SB_.PCI0.SBUS.BUS0, DeviceObj)

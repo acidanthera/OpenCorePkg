@@ -16,7 +16,7 @@
  * Reference USB: https://applelife.ru/posts/550233
  * Reference EC: https://applelife.ru/posts/807985
  */
-DefinitionBlock ("", "SSDT", 2, "APPLE ", "SsdtEC", 0x00001000)
+DefinitionBlock ("", "SSDT", 2, "ACDT", "SsdtEC", 0x00001000)
 {
     External (_SB_.PCI0.LPCB, DeviceObj)
 

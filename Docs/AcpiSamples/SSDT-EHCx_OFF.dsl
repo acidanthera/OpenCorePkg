@@ -11,7 +11,7 @@
  * WARN: for 7-series you need to use either "EH1D = One" or "EH2D = One" but not both!
  * This is because only one of the devices (EHC1 or EHC2) is used by macOS. Check the IOReg.
  */
-DefinitionBlock ("", "SSDT", 2, "APPLE ", "EHCx_OFF", 0x00001000)
+DefinitionBlock ("", "SSDT", 2, "ACDT", "EHCx_OFF", 0x00001000)
 {
     Scope (\)
     {

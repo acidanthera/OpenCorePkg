@@ -7,7 +7,7 @@
 * In comparison with the Real Time Clock (RTC) Alarm, the Time and Alarm device provides a larger scale of flexibility in the operation of the wake timers,
 * and allows the implementation of the time source to be abstracted from the OSPM.
 */
-DefinitionBlock ("", "SSDT", 2, "ALASKA", "AWAC", 0x00000000)
+DefinitionBlock ("", "SSDT", 2, "ACDT", "AWAC", 0x00000000)
 {
     External (STAS, IntObj)
 
