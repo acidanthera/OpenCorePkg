@@ -482,6 +482,7 @@ OcMiscBoot (
 
   OcLoadPickerHotKeys (Context);
 
+  Context->ShowNvramReset = Config->Misc.Security.AllowNvramReset;
   if (!Config->Misc.Security.AllowNvramReset && Context->PickerCommand == OcPickerResetNvram) {
     Context->PickerCommand = PickerCommand;
   }
