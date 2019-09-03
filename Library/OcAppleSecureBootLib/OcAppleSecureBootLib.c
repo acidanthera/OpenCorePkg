@@ -522,7 +522,7 @@ InternalVerifyImg4Worker (
   IN UINTN                       ImageSize,
   IN CONST VOID                  *ManifestBuffer,
   IN UINTN                       ManifestSize,
-  IN UINT32                      Type,
+  IN UINT32                      ObjType,
   IN BOOLEAN                     SetFailureReason,
   IN UINT8                       SbPolicy
   )
@@ -555,7 +555,7 @@ InternalVerifyImg4Worker (
 
   Status = Img4Verify->Verify (
                          Img4Verify,
-                         Type,
+                         ObjType,
                          ImageBuffer,
                          ImageSize,
                          SbPolicy,
@@ -577,7 +577,7 @@ EFIAPI
 InternalVerifyImg4ByPathWorker (
   IN APPLE_SECURE_BOOT_PROTOCOL  *This,
   IN EFI_DEVICE_PATH_PROTOCOL    *DevicePath,
-  IN UINT32                      Type,
+  IN UINT32                      ObjType,
   IN BOOLEAN                     SetFailureReason,
   IN UINT8                       SbPolicy
   )
@@ -706,7 +706,7 @@ InternalVerifyImg4ByPathWorker (
              ImageSize,
              ManifestBuffer,
              ManifestSize,
-             Type,
+             ObjType,
              SetFailureReason,
              SbPolicy
              );
@@ -723,7 +723,7 @@ InternalVerifyImg4ByPathWorker (
 
   @param[in] This              A pointer to the current protocol instance.
   @param[in] DevicePath        The device path to the image to validate.
-  @param[in] Type              The IMG4 Manifest type to validate against.
+  @param[in] ObjType           The IMG4 object type to validate against.
   @param[in] SetFailureReason  Whether to set the failure reason.
 
   @retval EFI_SUCCESS             The file at DevicePath is correctly signed.
@@ -743,7 +743,7 @@ EFIAPI
 AppleSbVerifyImg4ByPath (
   IN APPLE_SECURE_BOOT_PROTOCOL  *This,
   IN EFI_DEVICE_PATH_PROTOCOL    *DevicePath,
-  IN UINT32                      Type,
+  IN UINT32                      ObjType,
   IN BOOLEAN                     SetFailureReason
   )
 {
@@ -762,7 +762,7 @@ AppleSbVerifyImg4ByPath (
     Status = InternalVerifyImg4ByPathWorker (
                This,
                DevicePath,
-               Type,
+               ObjType,
                SetFailureReason,
                SbPolicy
                );
@@ -777,14 +777,14 @@ AppleSbVerifyImg4ByPath (
 }
 
 /**
-  Verify the signature of ImageBuffer against Type within a IMG4 Manifest.
+  Verify the signature of ImageBuffer against ObjType within a IMG4 Manifest.
 
   @param[in] This              The pointer to the current protocol instance.
   @param[in] ImageBuffer       The buffer to validate.
   @param[in] ImageSize         The size, in bytes, of ImageBuffer.
   @param[in] ManifestBuffer    The buffer of the IMG4 Manifest.
   @param[in] ManifestSize      The size, in bytes, of ManifestBuffer.
-  @param[in] Type              The IMG4 Manifest type to validate against.
+  @param[in] ObjType           The IMG4 object type to validate against.
   @param[in] SetFailureReason  Whether to set the failure reason.
 
   @retval EFI_SUCCESS             ImageBuffer is correctly signed.
@@ -805,7 +805,7 @@ AppleSbVerifyImg4 (
   IN UINTN                       ImageSize,
   IN CONST VOID                  *ManifestBuffer,
   IN UINTN                       ManifestSize,
-  IN UINT32                      Type,
+  IN UINT32                      ObjType,
   IN BOOLEAN                     SetFailureReason
   )
 {
@@ -831,7 +831,7 @@ AppleSbVerifyImg4 (
                ImageSize,
                ManifestBuffer,
                ManifestSize,
-               Type,
+               ObjType,
                SetFailureReason,
                SbPolicy
                );
@@ -839,8 +839,8 @@ AppleSbVerifyImg4 (
 
   if (SetFailureReason) {
     Reason = InternalImg4GetFailureReason (This, SbPolicy, Status);
-    if (Type == SIGNATURE_32 ('n', 'r', 'k', 'm')
-     || Type == SIGNATURE_32 ('d', 'r', 'k', 'm')) {
+    if (ObjType == APPLE_SB_OBJ_KERNEL
+     || ObjType == APPLE_SB_OBJ_KERNEL_DEBUG) {
       AppleSbSetKernelFailureReason (This, Reason);
     } else {
       AppleSbSetFailureReason (This, Reason);
