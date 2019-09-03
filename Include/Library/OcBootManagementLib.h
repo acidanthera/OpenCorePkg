@@ -29,8 +29,18 @@ typedef enum OC_BOOT_ENTRY_TYPE_ {
   OcBootApple,
   OcBootAppleRecovery,
   OcBootWindows,
-  OcBootCustom
+  OcBootCustom,
+  OcBootSystem
 } OC_BOOT_ENTRY_TYPE;
+
+/**
+  Action to perform as part of executing a system boot entry.
+**/
+typedef
+EFI_STATUS
+(*OC_BOOT_SYSTEM_ACTION)(
+  VOID
+  );
 
 /**
   Discovered boot entry.
@@ -39,9 +49,13 @@ typedef enum OC_BOOT_ENTRY_TYPE_ {
 typedef struct OC_BOOT_ENTRY_ {
   //
   // Device path to booter or its directory.
-  // Can be NULL, for example, for custom entries.
+  // Can be NULL, for example, for custom or system entries.
   //
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
+  //
+  // Action to perform on execution. Only valid for system entries.
+  //
+  OC_BOOT_SYSTEM_ACTION     SystemAction;
   //
   // Obtained human visible name.
   //
@@ -343,6 +357,10 @@ typedef struct {
   // Enable polling boot arguments.
   //
   BOOLEAN          PollAppleHotKeys;
+  //
+  // Append the "Reset NVRAM" option to the boot entry list.
+  //
+  BOOLEAN          ShowNvramReset;
   //
   // Additional boot arguments for Apple loaders.
   //

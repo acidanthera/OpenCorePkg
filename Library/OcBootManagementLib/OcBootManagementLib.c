@@ -186,6 +186,20 @@ OcFreeBootEntries (
   FreePool (BootEntries);
 }
 
+/**
+  Resets selected NVRAM variables and reboots the system.
+
+**/
+EFI_STATUS
+InternalSystemActionResetNvram (
+  VOID
+  )
+{
+  OcDeleteVariables ();
+  DirectRestCold ();
+  return EFI_DEVICE_ERROR;
+}
+
 EFI_STATUS
 OcScanForBootEntries (
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
@@ -217,6 +231,13 @@ OcScanForBootEntries (
   Result = OcOverflowMulUN (Context->AllCustomEntryCount, sizeof (OC_BOOT_ENTRY), &EntriesSize);
   if (Result) {
     return EFI_OUT_OF_RESOURCES;
+  }
+
+  if (Context->ShowNvramReset) {
+    Result = OcOverflowAddUN (EntriesSize, sizeof (OC_BOOT_ENTRY), &EntriesSize);
+    if (Result) {
+      return EFI_OUT_OF_RESOURCES;
+    }
   }
 
   Status = gBS->LocateHandleBuffer (
@@ -405,6 +426,21 @@ OcScanForBootEntries (
       Entries[EntryIndex].PathName = PathName;
     }
 
+    ++EntryIndex;
+  }
+
+  if (Context->ShowNvramReset) {
+    Entries[EntryIndex].Name = AllocateCopyPool (
+                                 L_STR_SIZE (L"Reset NVRAM"),
+                                 L"Reset NVRAM"
+                                 );
+    if (Entries[EntryIndex].Name == NULL) {
+      OcFreeBootEntries (Entries, EntryIndex + 1);
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    Entries[EntryIndex].Type         = OcBootSystem;
+    Entries[EntryIndex].SystemAction = InternalSystemActionResetNvram;
     ++EntryIndex;
   }
 
@@ -749,6 +785,11 @@ OcLoadBootEntry (
   EFI_HANDLE                 EntryHandle;
   INTERNAL_DMG_LOAD_CONTEXT  DmgLoadContext;
 
+  if (BootEntry->Type == OcBootSystem) {
+    ASSERT (BootEntry->SystemAction != NULL);
+    return BootEntry->SystemAction ();
+  }
+
   Status = InternalLoadBootEntry (
     BootPolicy,
     Context,
@@ -1061,9 +1102,7 @@ OcRunSimpleBootPicker (
         &Chosen
         );
     } else if (Context->PickerCommand == OcPickerResetNvram) {
-      OcDeleteVariables ();
-      DirectRestCold ();
-      return EFI_DEVICE_ERROR;
+      return InternalSystemActionResetNvram ();
     } else {
       Chosen = &Entries[DefaultEntry];
       Status = EFI_SUCCESS;

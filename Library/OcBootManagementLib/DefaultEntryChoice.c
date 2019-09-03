@@ -272,7 +272,7 @@ InternalGetBootEntryByDevicePath (
 
   for (Index = 0; Index < NumBootEntries; ++Index) {
     BootEntry = &BootEntries[Index];
-    if (BootEntry->Type == OcBootCustom) {
+    if (BootEntry->Type == OcBootCustom || BootEntry->Type == OcBootSystem) {
       continue;
     }
 
@@ -872,6 +872,10 @@ InternalLoadBootEntry (
 
   ASSERT (BootPolicy != NULL);
   ASSERT (BootEntry != NULL);
+  //
+  // System entries are not loaded but called directly.
+  //
+  ASSERT (BootEntry->Type != OcBootSystem);
   ASSERT (Context != NULL);
   ASSERT (DmgLoadContext != NULL);
 
