@@ -35,7 +35,7 @@
   libDER/DER_Decode.h
   libDER/DER_Digest.c
   libDER/DER_Digest.h
-  libDER/DER_Encode.c
+  #libDER/DER_Encode.c
   libDER/DER_Encode.h
   libDER/DER_Keys.c
   libDER/DER_Keys.h

@@ -18,13 +18,20 @@ extern "C" {
 //
 #include <Base.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/DebugLib.h>
 
 typedef UINT8   uint8_t;
 typedef UINT16  uint16_t;
 typedef UINT32  uint32_t;
 typedef UINT64  uint64_t;
 typedef UINTN   size_t;
+#ifndef bool
 typedef BOOLEAN bool;
+#endif
+#ifndef assert
+#define assert ASSERT
+#endif
+#define DER_ENCODE_ENABLE  0
 
 #define memset(ptr, c, len)    SetMem(ptr, len, c)
 #define memmove(dst, src, len) CopyMem(dst, src, len)
@@ -56,11 +63,16 @@ typedef size_t DERSize;
  *** Compile time options to trim size of the library. 
  ***/
  
+// CHANGE: conditionally define
 /* enable general DER encode */
+#ifndef DER_ENCODE_ENABLE
 #define DER_ENCODE_ENABLE		1
+#endif
 
+#ifndef DER_MULTIBYTE_TAGS
 /* enable general DER decode */
 #define DER_DECODE_ENABLE		1
+#endif
 
 #ifndef DER_MULTIBYTE_TAGS
 /* enable multibyte tag support. */
