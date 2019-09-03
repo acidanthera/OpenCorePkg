@@ -969,7 +969,7 @@ InternalLoadBootEntry (
 
       if (BootEntry->LoadOptions == NULL
         && (BootEntry->Type == OcBootApple || BootEntry->Type == OcBootAppleRecovery)) {
-        LoadedImage->LoadOptionsSize = AsciiStrLen (Context->AppleBootArgs);
+        LoadedImage->LoadOptionsSize = (UINT32)AsciiStrLen (Context->AppleBootArgs);
         if (LoadedImage->LoadOptionsSize > 0) {
           LoadedImage->LoadOptionsSize += 1;
           LoadedImage->LoadOptions      = Context->AppleBootArgs;
