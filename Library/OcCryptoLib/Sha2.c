@@ -38,7 +38,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 
 #define UNPACK64(x, str)                      \
-{                                             \
+do {                                          \
     *((str) + 7) = (UINT8) ((x)      );       \
     *((str) + 6) = (UINT8) ((x) >>  8);       \
     *((str) + 5) = (UINT8) ((x) >> 16);       \
@@ -47,10 +47,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
     *((str) + 2) = (UINT8) ((x) >> 40);       \
     *((str) + 1) = (UINT8) ((x) >> 48);       \
     *((str) + 0) = (UINT8) ((x) >> 56);       \
-}
+} while(0)
 
 #define PACK64(str, x)                        \
-{                                             \
+do {                                          \
     *(x) =   ((UINT64) *((str) + 7)      )    \
            | ((UINT64) *((str) + 6) <<  8)    \
            | ((UINT64) *((str) + 5) << 16)    \
@@ -59,18 +59,18 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
            | ((UINT64) *((str) + 2) << 40)    \
            | ((UINT64) *((str) + 1) << 48)    \
            | ((UINT64) *((str) + 0) << 56);   \
-}
+} while (0)
 
 #define PACK32(str, x)                        \
-{                                             \
+do {                                          \
     *(x) =   ((UINT32) *((str) + 3)      )    \
            | ((UINT32) *((str) + 2) <<  8)    \
            | ((UINT32) *((str) + 1) << 16)    \
            | ((UINT32) *((str) + 0) << 24);   \
-}
+} while(0)
 
 #define UNPACK64(x, str)                      \
-{                                             \
+do {                                          \
     *((str) + 7) = (UINT8) ((x)      );       \
     *((str) + 6) = (UINT8) ((x) >>  8);       \
     *((str) + 5) = (UINT8) ((x) >> 16);       \
@@ -79,7 +79,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
     *((str) + 2) = (UINT8) ((x) >> 40);       \
     *((str) + 1) = (UINT8) ((x) >> 48);       \
     *((str) + 0) = (UINT8) ((x) >> 56);       \
-}
+} while(0)
 
 #define SHFR(x, n)    (x >> n)
 #define ROTLEFT(a, b) (((a) << (b)) | ((a) >> (32-(b))))
@@ -104,19 +104,19 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define SHA512_SIG1(x) (ROTRIGHT(x, 19) ^ ROTRIGHT(x, 61) ^ SHFR(x,  6))
 
 #define SHA512_SCR(Index)                                   \
-{                                                           \
+do {                                                        \
     W[Index] =  SHA512_SIG1(W[Index -  2]) + W[Index -  7]  \
           + SHA512_SIG0(W[Index - 15]) + W[Index - 16];     \
-}
+} while(0)
 
 #define SHA512_EXP(a, b, c, d, e, f, g ,h, j)               \
-{                                                           \
+do {                                                        \
     T1 = Wv[h] + SHA512_EP1(Wv[e]) + CH(Wv[e], Wv[f], Wv[g])\
          + SHA512_K[j] + W[j];                              \
     T2 = SHA512_EP0(Wv[a]) + MAJ(Wv[a], Wv[b], Wv[c]);      \
     Wv[d] += T1;                                            \
     Wv[h] = T1 + T2;                                        \
-}
+} while(0)
 
 
 STATIC CONST UINT32 SHA256_K[64] = {
