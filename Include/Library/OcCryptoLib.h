@@ -282,7 +282,7 @@ Sha512 (
 
 VOID
 Sha384Init (
-  SHA384_CONTEXT *Context
+  SHA384_CONTEXT  *Context
   );
 
 VOID 

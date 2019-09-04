@@ -493,7 +493,7 @@ Sha512 (
 //
 VOID
 Sha384Init (
-  SHA384_CONTEXT *Context
+  SHA384_CONTEXT  *Context
   )
 {
     INTN Index;
@@ -556,6 +556,12 @@ Sha384Final (
 
     BlockNb = ((SHA384_BLOCK_SIZE - 17) < (Context->Length % SHA384_BLOCK_SIZE)) + 1;
 
+    //
+    // @TODO: Using 32 bit integer for data len doesn't work for a big memory blocks.
+    // Also there are possible integer overflow
+    // Context->TotalLength + Context->Length
+    // Same thing for 512-bit implementation above
+    //
     LenB = (Context->TotalLength + Context->Length) << 3;
     PmLen = BlockNb << 7;
     
