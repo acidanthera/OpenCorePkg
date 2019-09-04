@@ -218,6 +218,8 @@ TestHash (
   UINT8        Md5Hash[MD5_DIGEST_SIZE];
   UINT8        Sha1Hash[SHA1_DIGEST_SIZE];
   UINT8        Sha256Hash[SHA256_DIGEST_SIZE];
+  UINT8        Sha512Hash[SHA512_DIGEST_SIZE];
+  UINT8        Sha384Hash[SHA384_DIGEST_SIZE];
 
   //
   // Iterate through hash samples
@@ -251,6 +253,19 @@ TestHash (
       HashSamples[Index].PlainTextLen
       );
 
+    Sha512 (
+      Sha512Hash,
+      HashSamples[Index].PlainText,
+      HashSamples[Index].PlainTextLen
+      );
+
+    Sha384 (
+      Sha384Hash,
+      HashSamples[Index].PlainText,
+      HashSamples[Index].PlainTextLen
+      );
+
+
     if (CompareMem ( Md5Hash, HashSamples[Index].Md5Hash, MD5_DIGEST_SIZE) == 0) {
       Print (L"Md5 hash test passed\n");
     } else {
@@ -271,9 +286,26 @@ TestHash (
       Print (L"Sha256 hash test failed\n");
       HashTestPassed = FALSE;
     }
+
+    if (CompareMem ( Sha512Hash, HashSamples[Index].Sha512Hash, SHA512_DIGEST_SIZE) == 0) {
+      Print (L"Sha512 hash test passed\n");
+    } else {
+      Print (L"Sha512 hash test failed\n");
+      HashTestPassed = FALSE;
+    }
+
+    if (CompareMem ( Sha384Hash, HashSamples[Index].Sha384Hash, SHA384_DIGEST_SIZE) == 0) {
+      Print (L"Sha384 hash test passed\n");
+    } else {
+      Print (L"Sha384 hash test failed\n");
+      HashTestPassed = FALSE;
+    }
+
     ZeroMem (Md5Hash, MD5_DIGEST_SIZE);
     ZeroMem (Sha1Hash, SHA1_DIGEST_SIZE);
     ZeroMem (Sha256Hash, SHA256_DIGEST_SIZE);
+    ZeroMem (Sha512Hash, SHA512_DIGEST_SIZE);
+    ZeroMem (Sha384Hash, SHA384_DIGEST_SIZE);
   }
 
   if (HashTestPassed) {
@@ -288,6 +320,8 @@ TestHash (
   ZeroMem (Md5Hash, MD5_DIGEST_SIZE);
   ZeroMem (Sha1Hash, SHA1_DIGEST_SIZE);
   ZeroMem (Sha256Hash, SHA256_DIGEST_SIZE);
+  ZeroMem (Sha512Hash, SHA256_DIGEST_SIZE);
+  ZeroMem (Sha384Hash, SHA256_DIGEST_SIZE);
 
   return Status;
 }
