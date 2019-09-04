@@ -338,7 +338,7 @@ Sha512Transform (
 
     for (Index1 = 0; Index1 < (INTN) BlockNb; Index1++) {
         SubBlock = Data + (Index1 << 7);
-        
+
         //
         // Convert from big-endian byte order to host byte order
         //
@@ -514,7 +514,7 @@ Sha384Init (
     Context->TotalLength = 0;
 }
 
-VOID 
+VOID
 Sha384Update (
   SHA384_CONTEXT  *Context,
   CONST UINT8     *Data,
@@ -554,7 +554,7 @@ Sha384Update (
     Context->TotalLength += (BlockNb + 1) << 7;
 }
 
-VOID 
+VOID
 Sha384Final (
   SHA384_CONTEXT  *Context,
   UINT8           *HashDigest
@@ -569,7 +569,7 @@ Sha384Final (
 
     LenB = (Context->TotalLength + Context->Length) << 3;
     PmLen = BlockNb << 7;
-    
+
     ZeroMem (Context->Block + Context->Length, PmLen - Context->Length);
 
     Context->Block[Context->Length] = 0x80;
@@ -582,7 +582,7 @@ Sha384Final (
     }
 }
 
-VOID 
+VOID
 Sha384 (
   UINT8        *Hash,
   CONST UINT8  *Data,
@@ -595,5 +595,3 @@ Sha384 (
     Sha384Update (&Context, Data, Len);
     Sha384Final (&Context, Hash);
 }
-
-
