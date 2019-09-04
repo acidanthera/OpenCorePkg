@@ -40,6 +40,15 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define MD5_DIGEST_SIZE     16
 #define SHA1_DIGEST_SIZE    20
 #define SHA256_DIGEST_SIZE  32
+#define SHA384_DIGEST_SIZE  48
+#define SHA512_DIGEST_SIZE  64
+
+//
+// Block sizes.
+//
+#define SHA256_BLOCK_SIZE  64
+#define SHA512_BLOCK_SIZE  128
+#define SHA384_BLOCK_SIZE  SHA512_BLOCK_SIZE
 
 //
 // Derived parameters.
@@ -104,6 +113,13 @@ typedef struct SHA256_CONTEXT_ {
   UINT64  BitLen;
   UINT32  State[8];
 } SHA256_CONTEXT;
+
+typedef struct SHA512_CONTEXT_ {
+  UINT32 TotalLength;
+  UINT32 Length;
+  UINT8  Block[2 * SHA512_BLOCK_SIZE];
+  UINT64 State[8];
+} SHA512_CONTEXT;
 
 //
 // Functions prototypes
@@ -235,6 +251,31 @@ Sha256 (
   UINT8  *Hash,
   UINT8  *Data,
   UINTN  Len
+  );
+
+VOID
+Sha512Init (
+  SHA512_CONTEXT  *Context
+  );
+
+VOID
+Sha512Update (
+  SHA512_CONTEXT  *Context,
+  CONST UINT8     *Data,
+  UINT32          Len
+  );
+
+VOID
+Sha512Final (
+  SHA512_CONTEXT  *Context,
+  UINT8           *HashDigest
+  );
+
+VOID
+Sha512 (
+  UINT8        *Hash,
+  CONST UINT8  *Data,
+  UINT32       Len
   );
 
 #endif // OC_CRYPTO_LIB_H
