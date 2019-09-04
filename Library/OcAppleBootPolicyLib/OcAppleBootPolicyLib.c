@@ -73,7 +73,7 @@ BootPolicyGetBootFileEx (
 
 EFI_STATUS
 EFIAPI
-BootPolicyGetBootInfo (
+BootPolicyDevicePathToDirPath (
   IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
   OUT CHAR16                    **BootPathName,
   OUT EFI_HANDLE                *Device,
@@ -82,7 +82,7 @@ BootPolicyGetBootInfo (
 
 EFI_STATUS
 EFIAPI
-BootPolicyGetPathNameOnApfsRecovery (
+BootPolicyGetApfsRecoveryFilePath (
   IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
   IN  CONST CHAR16              *PathName,
   OUT CHAR16                    **FullPathName,
@@ -93,7 +93,7 @@ BootPolicyGetPathNameOnApfsRecovery (
 
 EFI_STATUS
 EFIAPI
-BootPolicyGetApfsRecoveryVolumes (
+BootPolicyGetAllApfsRecoveryFilePath (
   IN  EFI_HANDLE  Handle,
   OUT VOID        **Volumes,
   OUT UINTN       *NumberOfEntries
@@ -106,9 +106,9 @@ STATIC APPLE_BOOT_POLICY_PROTOCOL mAppleBootPolicyProtocol = {
   APPLE_BOOT_POLICY_PROTOCOL_REVISION,
   BootPolicyGetBootFile,
   BootPolicyGetBootFileEx,
-  BootPolicyGetBootInfo,
-  BootPolicyGetPathNameOnApfsRecovery,
-  BootPolicyGetApfsRecoveryVolumes
+  BootPolicyDevicePathToDirPath,
+  BootPolicyGetApfsRecoveryFilePath,
+  BootPolicyGetAllApfsRecoveryFilePath
 };
 
 /**
@@ -1014,7 +1014,7 @@ BootPolicyGetBootFileEx (
 
 EFI_STATUS
 EFIAPI
-BootPolicyGetBootInfo (
+BootPolicyDevicePathToDirPath (
   IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
   OUT CHAR16                    **BootPathName,
   OUT EFI_HANDLE                *Device,
@@ -1058,7 +1058,7 @@ BootPolicyGetBootInfo (
 
 EFI_STATUS
 EFIAPI
-BootPolicyGetPathNameOnApfsRecovery (
+BootPolicyGetApfsRecoveryFilePath (
   IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
   IN  CONST CHAR16              *PathName,
   OUT CHAR16                    **FullPathName,
@@ -1107,7 +1107,7 @@ BootPolicyGetPathNameOnApfsRecovery (
     return EFI_NOT_FOUND;
   }
 
-  Status = BootPolicyGetBootInfo (
+  Status = BootPolicyDevicePathToDirPath (
              DevicePath,
              &BootPathName,
              &Device,
@@ -1262,7 +1262,7 @@ BootPolicyGetPathNameOnApfsRecovery (
 
 EFI_STATUS
 EFIAPI
-BootPolicyGetApfsRecoveryVolumes (
+BootPolicyGetAllApfsRecoveryFilePath (
   IN  EFI_HANDLE  Handle,
   OUT VOID        **Volumes,
   OUT UINTN       *NumberOfEntries

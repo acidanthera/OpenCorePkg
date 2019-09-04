@@ -565,7 +565,7 @@ InternalFillValidBootEntries (
     }
 
     RecoveryPath = NULL;
-    Status = BootPolicy->GetPathNameOnApfsRecovery (
+    Status = BootPolicy->GetApfsRecoveryFilePath (
       DevicePath,
       L"\\",
       &RecoveryPath,

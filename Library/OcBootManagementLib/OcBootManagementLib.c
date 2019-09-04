@@ -65,7 +65,7 @@ OcDescribeBootEntry (
     return EFI_SUCCESS;
   }
 
-  Status = BootPolicy->GetBootInfo (
+  Status = BootPolicy->DevicePathToDirPath (
     BootEntry->DevicePath,
     &BootDirectoryName,
     &Device,
