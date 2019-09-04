@@ -115,8 +115,8 @@ typedef struct SHA256_CONTEXT_ {
 } SHA256_CONTEXT;
 
 typedef struct SHA512_CONTEXT_ {
-  UINT32 TotalLength;
-  UINT32 Length;
+  UINT64 TotalLength;
+  UINTN  Length;
   UINT8  Block[2 * SHA512_BLOCK_SIZE];
   UINT64 State[8];
 } SHA512_CONTEXT;
@@ -264,7 +264,7 @@ VOID
 Sha512Update (
   SHA512_CONTEXT  *Context,
   CONST UINT8     *Data,
-  UINT32          Len
+  UINTN           Len
   );
 
 VOID
@@ -277,7 +277,7 @@ VOID
 Sha512 (
   UINT8        *Hash,
   CONST UINT8  *Data,
-  UINT32       Len
+  UINTN        Len
   );
 
 VOID
@@ -289,7 +289,7 @@ VOID
 Sha384Update (
   SHA384_CONTEXT  *Context,
   CONST UINT8     *Data,
-  UINT32          Len
+  UINTN           Len
   );
 
 VOID 
@@ -302,7 +302,7 @@ VOID
 Sha384 (
   UINT8        *Hash,
   CONST UINT8  *Data,
-  UINT32       Len,
+  UINTN        Len,
   );
 
 #endif // OC_CRYPTO_LIB_H
