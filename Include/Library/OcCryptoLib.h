@@ -121,6 +121,8 @@ typedef struct SHA512_CONTEXT_ {
   UINT64 State[8];
 } SHA512_CONTEXT;
 
+typedef SHA512_CONTEXT SHA384_CONTEXT;
+
 //
 // Functions prototypes
 //
@@ -276,6 +278,31 @@ Sha512 (
   UINT8        *Hash,
   CONST UINT8  *Data,
   UINT32       Len
+  );
+
+VOID
+Sha384Init (
+  SHA384_CONTEXT *Context
+  );
+
+VOID 
+Sha384Update (
+  SHA384_CONTEXT  *Context,
+  CONST UINT8     *Data,
+  UINT32          Len
+  );
+
+VOID 
+Sha384Final (
+  SHA384_CONTEXT  *Context,
+  UINT8           *HashDigest
+  );
+
+VOID 
+Sha384 (
+  UINT8        *Hash,
+  CONST UINT8  *Data,
+  UINT32       Len,
   );
 
 #endif // OC_CRYPTO_LIB_H

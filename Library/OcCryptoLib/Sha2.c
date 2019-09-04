@@ -37,6 +37,22 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcCryptoLib.h>
 
 
+#define UNPACK32(x, str)                      \
+do {                                          \
+    *((str) + 3) = (uint8) ((x)      );       \
+    *((str) + 2) = (uint8) ((x) >>  8);       \
+    *((str) + 1) = (uint8) ((x) >> 16);       \
+    *((str) + 0) = (uint8) ((x) >> 24);       \
+} while(0)
+
+#define PACK32(str, x)                        \
+do {                                          \
+    *(x) =   ((UINT32) *((str) + 3)      )    \
+           | ((UINT32) *((str) + 2) <<  8)    \
+           | ((UINT32) *((str) + 1) << 16)    \
+           | ((UINT32) *((str) + 0) << 24);   \
+} while(0)
+
 #define UNPACK64(x, str)                      \
 do {                                          \
     *((str) + 7) = (UINT8) ((x)      );       \
@@ -61,25 +77,6 @@ do {                                          \
            | ((UINT64) *((str) + 0) << 56);   \
 } while (0)
 
-#define PACK32(str, x)                        \
-do {                                          \
-    *(x) =   ((UINT32) *((str) + 3)      )    \
-           | ((UINT32) *((str) + 2) <<  8)    \
-           | ((UINT32) *((str) + 1) << 16)    \
-           | ((UINT32) *((str) + 0) << 24);   \
-} while(0)
-
-#define UNPACK64(x, str)                      \
-do {                                          \
-    *((str) + 7) = (UINT8) ((x)      );       \
-    *((str) + 6) = (UINT8) ((x) >>  8);       \
-    *((str) + 5) = (UINT8) ((x) >> 16);       \
-    *((str) + 4) = (UINT8) ((x) >> 24);       \
-    *((str) + 3) = (UINT8) ((x) >> 32);       \
-    *((str) + 2) = (UINT8) ((x) >> 40);       \
-    *((str) + 1) = (UINT8) ((x) >> 48);       \
-    *((str) + 0) = (UINT8) ((x) >> 56);       \
-} while(0)
 
 #define SHFR(x, n)    (x >> n)
 #define ROTLEFT(a, b) (((a) << (b)) | ((a) >> (32-(b))))
@@ -163,7 +160,7 @@ STATIC UINT64 SHA512_K[80] = {
 
 
 //
-// Sha 384 State
+// Sha 384 Init State
 //
 STATIC CONST UINT64 SHA384_H0[8] = {
   0xcbbb9d5dc1059ed8ULL, 0x629a292a367cd507ULL,
@@ -173,7 +170,7 @@ STATIC CONST UINT64 SHA384_H0[8] = {
 };
 
 //
-// Sha 512 State
+// Sha 512 Init State
 //
 STATIC CONST UINT64 SHA512_H0[8] = {
   0x6a09e667f3bcc908ULL, 0xbb67ae8584caa73bULL,
@@ -489,3 +486,103 @@ Sha512 (
     Sha512Update (&Context, Data, Len);
     Sha512Final (&Context, Digest);
 }
+
+
+//
+// Sha 384 functions
+//
+VOID
+Sha384Init (
+  SHA384_CONTEXT *Context
+  )
+{
+    INTN Index;
+    for (Index = 0; Index < 8; Index++) {
+        Context->State[Index] = SHA384_H0[Index];
+    }
+
+    Context->Length = 0;
+    Context->TotalLength = 0;
+}
+
+VOID 
+Sha384Update (
+  SHA384_CONTEXT  *Context,
+  CONST UINT8     *Data,
+  UINT32          Len
+  )
+{
+    UINT32 BlockNb;
+    UINT32 NewLen, RemLen, TmpLen;
+    CONST UINT8 *ShiftedMessage;
+
+    TmpLen = SHA384_BLOCK_SIZE - Context->Length;
+    RemLen = Len < TmpLen ? Len : TmpLen;
+
+    CopyMem (&Context->Block[Context->Length], Data, RemLen);
+
+    if (Context->Length + Len < SHA384_BLOCK_SIZE) {
+        Context->Length += Len;
+        return;
+    }
+
+    NewLen = Len - RemLen;
+    BlockNb = NewLen / SHA384_BLOCK_SIZE;
+
+    ShiftedMessage = Data + RemLen;
+
+    Sha512Transform (Context, Context->Block, 1);
+    Sha512Transform (Context, ShiftedMessage, BlockNb);
+
+    RemLen = NewLen % SHA384_BLOCK_SIZE;
+
+    CopyMem (Context->Block, &ShiftedMessage[BlockNb << 7],
+           RemLen);
+
+    Context->Length = RemLen;
+    Context->TotalLength += (BlockNb + 1) << 7;
+}
+
+VOID 
+Sha384Final (
+  SHA384_CONTEXT  *Context,
+  UINT8           *HashDigest
+  )
+{
+    UINT32  BlockNb = 0;
+    UINT32  PmLen   = 0;
+    UINT32  LenB    = 0;
+    INTN    Index   = 0;
+
+    BlockNb = ((SHA384_BLOCK_SIZE - 17) < (Context->Length % SHA384_BLOCK_SIZE)) + 1;
+
+    LenB = (Context->TotalLength + Context->Length) << 3;
+    PmLen = BlockNb << 7;
+    
+    ZeroMem (Context->Block + Context->Length, PmLen - Context->Length);
+
+    Context->Block[Context->Length] = 0x80;
+    UNPACK32 (LenB, Context->Block + PmLen - 4);
+
+    Sha512Transform (Context, Context->Block, BlockNb);
+
+    for (Index = 0 ; Index < 6; Index++) {
+        UNPACK64 (Context->State[Index], &HashDigest[Index << 3]);
+    }
+}
+
+VOID 
+Sha384 (
+  UINT8        *Hash,
+  CONST UINT8  *Data,
+  UINT32       Len,
+  )
+{
+    SHA384_CONTEXT Context;
+
+    Sha384Init (&Context);
+    Sha384Update (&Context, Data, Len);
+    Sha384Final (&Context, Hash);
+}
+
+
