@@ -1043,6 +1043,19 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   \emph{Note}: This option is generally useful on APTIO V firmwares (Broadwell and newer).
 
+
+\item
+  \texttt{DisableSingleUser}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Disable single user mode.
+
+  This is a security option allowing one to restrict single user mode usage
+  by ignoring \texttt{CMD+S} hotkey and \texttt{-s} boot argument. The
+  behaviour with this quirk enabled is supposed to match T2-based model
+  behaviour. Read \href{https://support.apple.com/HT201573}{this article}
+  to understand how to use single user mode with this quirk enabled.
+
 \item
   \texttt{DisableVariableWrite}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -1607,7 +1620,9 @@ blocking.
 
   \emph{Note}: This option should avoided whenever possible. NVMe SSDs are
   compatible without the change. For AHCI SSDs on modern macOS version there
-  is a dedicated built-in utility called \texttt{trimforce}.
+  is a dedicated built-in utility called \texttt{trimforce}. Starting from 10.15
+  this utility creates \texttt{EnableTRIM} variable in \texttt{APPLE\_BOOT\_VARIABLE\_GUID}
+  namespace with \texttt{01 00 00 00} value.
 
 \item
   \texttt{XhciPortLimit}\\
@@ -1780,6 +1795,33 @@ behaviour that does not go to any other sections
   installed on the same volume and driver boot is used.
 
 \item
+  \texttt{PollAppleHotKeys}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable modifier hotkey handling in boot picker.
+
+  In addition to action hotkeys, which are partially described in \texttt{UsePicker}
+  section and are normally handled by Apple BDS, there exist modifier keys, which are
+  handled by operating system bootloader, namely \texttt{boot.efi}. These keys
+  allow to change operating system behaviour by providing different boot modes.
+
+  On some firmwares it may be problematic to use modifier keys due to driver incompatibilities.
+  To workaround this problem this option allows registering select hotkeys in a more
+  permissive manner from within boot picker. Such extensions include the support
+  of tapping on keys in addition to holding and pressing \texttt{Shift} along with
+  other keys instead of just \texttt{Shift} alone, which is not detectible on many
+  PS/2 keyboards. This list of known hotkeys includes:
+  \begin{itemize}
+  \tightlist
+  \item \texttt{CMD+C+MINUS} --- disable board compatibility checking.
+  \item \texttt{CMD+K} --- boot release kernel, similar to \texttt{kcsuffix=release}.
+  \item \texttt{CMD+S} --- single user mode.
+  \item \texttt{CMD+S+MINUS} --- disable KASLR slide, requires disabled SIP.
+  \item \texttt{CMD+V} --- verbose mode.
+  \item \texttt{Shift} --- safe mode.
+  \end{itemize} 
+
+\item
   \texttt{Resolution}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
@@ -1830,8 +1872,38 @@ behaviour that does not go to any other sections
   \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tests/ExternalUi}{ExternalUi}
   test driver.
 
-  \emph{Note}: By default OpenCore built-in boot picker loads the default discovered
-  option, this can be changed by setting \texttt{ShowPicker} to \texttt{true}.
+  OpenCore built-in boot picker contains a set of actions chosen during the boot process.
+  The list of supported actions is similar to Apple BDS and currently consists of the following
+  options:
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Default} --- this is the default option, and it lets OpenCore built-in
+  boot picker to loads the default boot option as specified in
+  \href{https://support.apple.com/HT202796}{Startup Disk} preference pane.
+  \item \texttt{ShowPicker} --- this option forces picker to show. Normally it can be
+  achieved by holding \texttt{OPT} key during boot. Setting \texttt{ShowPicker} to
+  \texttt{true} will make \texttt{ShowPicker} the default option.
+  \item \texttt{ResetNvram} --- this option performs select UEFI variable erase and is
+  normally achieved by holding \texttt{CMD+OPT+P+R} key combination during boot.
+  Another way to erase UEFI variables is to choose \texttt{Reset NVRAM} in the picker.
+  This option requires \texttt{AllowNvramReset} to be set to \texttt{true}.
+  \item \texttt{BootApple} --- this options performs booting to the first found Apple
+  operating system unless the default chosen operating system is already made by Apple.
+  Hold \texttt{X} key to choose this option.
+  \item \texttt{BootAppleRecovery} --- this option performs booting to Apple operating
+  system recovery. Either the one related to the default default chosen operating system,
+  or first found in case default chosen operating system is not made by Apple or has no
+  recovery. Hold \texttt{CMD+R} key combination to choose this option.
+  \end{itemize}
+
+  \emph{Note}: \texttt{AppleGenericInput}, \texttt{UsbKbDxe}, or similar driver is required
+  for key handling to work. On many firmwares it is not possible to get all the keys function.
+
+  In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key
+  \texttt{ShowPicker}. This key exists for firmwares with PS/2 keyboards that
+  fail to report held \texttt{OPT} key and require continual presses of \texttt{Escape}
+  key to enter the boot menu.
 
 \end{enumerate}
 
@@ -1936,6 +2008,13 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 \subsection{Security Properties}\label{miscsecurityprops}
 
 \begin{enumerate}
+
+\item
+  \texttt{AllowNvramReset}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Allow \texttt{CMD+OPT+P+R} handling and enable
+  showing \texttt{NVRAM Reset} entry in boot picker.
 
 \item
   \texttt{ExposeSensitiveData}\\
@@ -2360,7 +2439,7 @@ improvements:
   \texttt{ru:252} or \texttt{ru:0} (U.S. keyboard, compatible with 10.9). Full decoded
   keyboard list from \texttt{AppleKeyboardLayouts-L.dat} can be found
   \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/AppleKeyboardLayouts}{here}. Using non-latin keyboard on 10.14
-  will not enable ABC keyboard, unlike previous macOS versions, and is thus not recommended.
+  will not enable ABC keyboard, unlike previous and subsequent macOS versions, and is thus not recommended in case you need 10.14.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:security-mode}
   \break
@@ -2767,6 +2846,10 @@ be used. Version with macOS specific enhancements can be downloaded from
   Its existence is exclusive to Skylake generation and newer. The value is specified
   in Hz, and is normally 24 MHz for client Intel segment, 25 MHz for server Intel segment,
   and 19.2 MHz for Intel Atom CPUs. macOS till 10.15 inclusive assumes 24 MHz by default.
+  
+  \emph{Note}: On Intel Skylake X ART frequency may be a little less (approx. 0.25\%) than
+  24 or 25 MHz due to special EMI-reduction circuit as described in
+  \href{https://github.com/acidanthera/bugtracker/issues/448#issuecomment-524914166}{Acidanthera Bugtracker}.
 \item
   \texttt{DevicePathsSupported}\\
   \textbf{Type}: \texttt{plist\ integer}, 32-bit\\

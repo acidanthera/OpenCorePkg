@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sun Aug 11 01:57:12 2019
-%DIF ADD ../Configuration.tex        Sun Sep  1 23:29:20 2019
+%DIF ADD ../Configuration.tex        Wed Sep  4 14:45:11 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1115,6 +1115,21 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \emph{\DIFadd{Note}}\DIFadd{: This option is generally useful on APTIO V firmwares (Broadwell and newer).
 }
 
+
+\item
+  \texttt{\DIFadd{DisableSingleUser}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Disable single user mode.
+}
+
+  \DIFadd{This is a security option allowing one to restrict single user mode usage
+  by ignoring }\texttt{\DIFadd{CMD+S}} \DIFadd{hotkey and }\texttt{\DIFadd{-s}} \DIFadd{boot argument. The
+  behaviour with this quirk enabled is supposed to match T2-based model
+  behaviour. Read }\href{https://support.apple.com/HT201573}{this article}
+  \DIFadd{to understand how to use single user mode with this quirk enabled.
+}
+
 \item
   \DIFaddend \texttt{DisableVariableWrite}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -1680,7 +1695,10 @@ blocking.
 
   \emph{Note}: This option should avoided whenever possible. NVMe SSDs are
   compatible without the change. For AHCI SSDs on modern macOS version there
-  is a dedicated built-in utility called \texttt{trimforce}.
+  is a dedicated built-in utility called \texttt{trimforce}. \DIFaddbegin \DIFadd{Starting from 10.15
+  this utility creates }\texttt{\DIFadd{EnableTRIM}} \DIFadd{variable in }\texttt{\DIFadd{APPLE\_BOOT\_VARIABLE\_GUID}}
+  \DIFadd{namespace with }\texttt{\DIFadd{01 00 00 00}} \DIFadd{value.
+}\DIFaddend 
 
 \item
   \texttt{XhciPortLimit}\\
@@ -1853,7 +1871,36 @@ behaviour that does not go to any other sections
   installed on the same volume and driver boot is used.
 
 \item
-  \texttt{Resolution}\\
+  \DIFaddbegin \texttt{\DIFadd{PollAppleHotKeys}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Enable modifier hotkey handling in boot picker.
+}
+
+  \DIFadd{In addition to action hotkeys, which are partially described in }\texttt{\DIFadd{UsePicker}}
+  \DIFadd{section and are normally handled by Apple BDS, there exist modifier keys, which are
+  handled by operating system bootloader, namely }\texttt{\DIFadd{boot.efi}}\DIFadd{. These keys
+  allow to change operating system behaviour by providing different boot modes.
+}
+
+  \DIFadd{On some firmwares it may be problematic to use modifier keys due to driver incompatibilities.
+  To workaround this problem this option allows registering select hotkeys in a more
+  permissive manner from within boot picker. Such extensions include the support
+  of tapping on keys in addition to holding and pressing }\texttt{\DIFadd{Shift}} \DIFadd{along with
+  other keys instead of just }\texttt{\DIFadd{Shift}} \DIFadd{alone, which is not detectible on many
+  PS/2 keyboards. This list of known hotkeys includes:
+  }\begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{CMD+C+MINUS}} \DIFadd{--- disable board compatibility checking.
+  }\item \texttt{\DIFadd{CMD+K}} \DIFadd{--- boot release kernel, similar to }\texttt{\DIFadd{kcsuffix=release}}\DIFadd{.
+  }\item \texttt{\DIFadd{CMD+S}} \DIFadd{--- single user mode.
+  }\item \texttt{\DIFadd{CMD+S+MINUS}} \DIFadd{--- disable KASLR slide, requires disabled SIP.
+  }\item \texttt{\DIFadd{CMD+V}} \DIFadd{--- verbose mode.
+  }\item \texttt{\DIFadd{Shift}} \DIFadd{--- safe mode.
+  }\end{itemize} 
+
+\item
+  \DIFaddend \texttt{Resolution}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Sets console output screen resolution.
@@ -1903,10 +1950,47 @@ behaviour that does not go to any other sections
   \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tests/ExternalUi}{ExternalUi}
   test driver.
 
-  \emph{Note}: By default OpenCore built-in boot picker loads the default discovered
-  option, this can be changed by setting \texttt{ShowPicker} to \texttt{true}.
+  \DIFdelbegin \emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{:
+By default }\DIFdelend OpenCore built-in \DIFaddbegin \DIFadd{boot picker contains a set of actions chosen during the boot process.
+  The list of supported actions is similar to Apple BDS and currently consists of the following
+  options:
+}
 
-\end{enumerate}
+  \begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{Default}} \DIFadd{--- this is the default option, and it lets OpenCore built-in
+  }\DIFaddend boot picker \DIFaddbegin \DIFadd{to }\DIFaddend loads the default \DIFdelbegin \DIFdel{discovered
+  option , this can be changed by setting }\DIFdelend \DIFaddbegin \DIFadd{boot option as specified in
+  }\href{https://support.apple.com/HT202796}{Startup Disk} \DIFadd{preference pane.
+  }\item \DIFaddend \texttt{ShowPicker} \DIFaddbegin \DIFadd{--- this option forces picker to show. Normally it can be
+  achieved by holding }\texttt{\DIFadd{OPT}} \DIFadd{key during boot. Setting }\texttt{\DIFadd{ShowPicker}} \DIFaddend to
+  \texttt{true} \DIFaddbegin \DIFadd{will make }\texttt{\DIFadd{ShowPicker}} \DIFadd{the default option.
+  }\item \texttt{\DIFadd{ResetNvram}} \DIFadd{--- this option performs select UEFI variable erase and is
+  normally achieved by holding }\texttt{\DIFadd{CMD+OPT+P+R}} \DIFadd{key combination during boot.
+  Another way to erase UEFI variables is to choose }\texttt{\DIFadd{Reset NVRAM}} \DIFadd{in the picker.
+  This option requires }\texttt{\DIFadd{AllowNvramReset}} \DIFadd{to be set to }\texttt{\DIFadd{true}}\DIFaddend .
+  \DIFaddbegin \item \texttt{\DIFadd{BootApple}} \DIFadd{--- this options performs booting to the first found Apple
+  operating system unless the default chosen operating system is already made by Apple.
+  Hold }\texttt{\DIFadd{X}} \DIFadd{key to choose this option.
+  }\item \texttt{\DIFadd{BootAppleRecovery}} \DIFadd{--- this option performs booting to Apple operating
+  system recovery. Either the one related to the default default chosen operating system,
+  or first found in case default chosen operating system is not made by Apple or has no
+  recovery. Hold }\texttt{\DIFadd{CMD+R}} \DIFadd{key combination to choose this option.
+  }\end{itemize}
+\DIFaddend 
+
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: }\texttt{\DIFadd{AppleGenericInput}}\DIFadd{, }\texttt{\DIFadd{UsbKbDxe}}\DIFadd{, or similar driver is required
+  for key handling to work. On many firmwares it is not possible to get all the keys function.
+}
+
+  \DIFadd{In addition to }\texttt{\DIFadd{OPT}} \DIFadd{OpenCore supports }\texttt{\DIFadd{Escape}} \DIFadd{key
+  }\texttt{\DIFadd{ShowPicker}}\DIFadd{. This key exists for firmwares with PS/2 keyboards that
+  fail to report held }\texttt{\DIFadd{OPT}} \DIFadd{key and require continual presses of }\texttt{\DIFadd{Escape}}
+  \DIFadd{key to enter the boot menu.
+}
+
+\DIFaddend \end{enumerate}
 
 \subsection{Debug Properties}\label{miscdebugprops}
 
@@ -2011,7 +2095,15 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 \begin{enumerate}
 
 \item
-  \texttt{ExposeSensitiveData}\\
+  \DIFaddbegin \texttt{\DIFadd{AllowNvramReset}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Allow }\texttt{\DIFadd{CMD+OPT+P+R}} \DIFadd{handling and enable
+  showing }\texttt{\DIFadd{NVRAM Reset}} \DIFadd{entry in boot picker.
+}
+
+\item
+  \DIFaddend \texttt{ExposeSensitiveData}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{2}\\
   \textbf{Description}: Sensitive data exposure bitmask (sum) to operating system.
@@ -2433,7 +2525,7 @@ improvements:
   \texttt{ru:252} or \texttt{ru:0} (U.S. keyboard, compatible with 10.9). Full decoded
   keyboard list from \texttt{AppleKeyboardLayouts-L.dat} can be found
   \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/AppleKeyboardLayouts}{here}. Using non-latin keyboard on 10.14
-  will not enable ABC keyboard, unlike previous macOS versions, and is thus not recommended.
+  will not enable ABC keyboard, unlike previous \DIFaddbegin \DIFadd{and subsequent }\DIFaddend macOS versions, and is thus not recommended \DIFaddbegin \DIFadd{in case you need 10.14}\DIFaddend .
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:security-mode}
   \break
@@ -2844,6 +2936,11 @@ be used. Version with macOS specific enhancements can be downloaded from
   Its existence is exclusive to Skylake generation }\DIFaddend and newer. \DIFaddbegin \DIFadd{The value is specified
   in Hz, and is normally 24 MHz for client Intel segment, 25 MHz for server Intel segment,
   and 19.2 MHz for Intel Atom CPUs. macOS till 10.15 inclusive assumes 24 MHz by default.
+  }
+
+  \emph{\DIFadd{Note}}\DIFadd{: On Intel Skylake X ART frequency may be a little less (approx. 0.25\%) than
+  24 or 25 MHz due to special EMI-reduction circuit as described in
+  }\href{https://github.com/acidanthera/bugtracker/issues/448#issuecomment-524914166}{Acidanthera Bugtracker}\DIFadd{.
 }\DIFaddend \item
   \texttt{DevicePathsSupported}\\
   \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
