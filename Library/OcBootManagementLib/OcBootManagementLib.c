@@ -822,6 +822,7 @@ OcLoadPickerHotKeys (
   EFI_STATUS                         Status;
   APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
   BOOLEAN                            HasCommand;
+  BOOLEAN                            HasEscape;
   BOOLEAN                            HasOption;
   BOOLEAN                            HasKeyP;
   BOOLEAN                            HasKeyR;
@@ -851,6 +852,7 @@ OcLoadPickerHotKeys (
 
   HasCommand = OcKeyMapHasModifier (KeyMap, APPLE_MODIFIER_LEFT_COMMAND, APPLE_MODIFIER_RIGHT_COMMAND);
   HasOption  = OcKeyMapHasModifier (KeyMap, APPLE_MODIFIER_LEFT_OPTION, APPLE_MODIFIER_RIGHT_OPTION);
+  HasEscape  = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyEscape);
   HasKeyP    = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyP);
   HasKeyR    = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyR);
   HasKeyX    = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyX);
@@ -866,6 +868,9 @@ OcLoadPickerHotKeys (
     Context->PickerCommand = OcPickerBootApple;
   } else if (HasOption) {
     DEBUG ((DEBUG_INFO, "OCB: OPT causes picker to show\n"));
+    Context->PickerCommand = OcPickerShowPicker;
+  } else if (HasEscape) {
+    DEBUG ((DEBUG_INFO, "OCB: ESC causes picker to show as OC extension\n"));
     Context->PickerCommand = OcPickerShowPicker;
   } else {
     //
