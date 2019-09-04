@@ -37,22 +37,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcCryptoLib.h>
 
 
-#define UNPACK32(x, str)                      \
-do {                                          \
-    *((str) + 3) = (uint8) ((x)      );       \
-    *((str) + 2) = (uint8) ((x) >>  8);       \
-    *((str) + 1) = (uint8) ((x) >> 16);       \
-    *((str) + 0) = (uint8) ((x) >> 24);       \
-} while(0)
-
-#define PACK32(str, x)                        \
-do {                                          \
-    *(x) =   ((UINT32) *((str) + 3)      )    \
-           | ((UINT32) *((str) + 2) <<  8)    \
-           | ((UINT32) *((str) + 1) << 16)    \
-           | ((UINT32) *((str) + 0) << 24);   \
-} while(0)
-
 #define UNPACK64(x, str)                      \
 do {                                          \
     *((str) + 7) = (UINT8) ((x)      );       \
@@ -106,14 +90,6 @@ do {                                                        \
           + SHA512_SIG0(W[Index - 15]) + W[Index - 16];     \
 } while(0)
 
-#define SHA512_EXP(a, b, c, d, e, f, g ,h, j)               \
-do {                                                        \
-    T1 = Wv[h] + SHA512_EP1(Wv[e]) + CH(Wv[e], Wv[f], Wv[g])\
-         + SHA512_K[j] + W[j];                              \
-    T2 = SHA512_EP0(Wv[a]) + MAJ(Wv[a], Wv[b], Wv[c]);      \
-    Wv[d] += T1;                                            \
-    Wv[h] = T1 + T2;                                        \
-} while(0)
 
 
 STATIC CONST UINT32 SHA256_K[64] = {
@@ -158,6 +134,13 @@ STATIC UINT64 SHA512_K[80] = {
   0x5fcb6fab3ad6faecULL, 0x6c44198c4a475817ULL
 };
 
+//
+// Sha 256 Init State
+//
+STATIC CONST UINT32 SHA256_H0[8] = {
+  0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+  0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+};
 
 //
 // Sha 384 Init State
@@ -178,7 +161,6 @@ STATIC CONST UINT64 SHA512_H0[8] = {
   0x510e527fade682d1ULL, 0x9b05688c2b3e6c1fULL,
   0x1f83d9abfb41bd6bULL, 0x5be0cd19137e2179ULL
 };
-
 
 //
 // Sha 256 functions
@@ -240,16 +222,12 @@ Sha256Init (
   SHA256_CONTEXT *Context
   )
 {
+  UINTN Index;
+  for (Index = 0; Index < 8; Index++) {
+    Context->State[Index] = SHA256_H0[Index];
+  }
   Context->DataLen = 0;
   Context->BitLen = 0;
-  Context->State[0] = 0x6A09E667;
-  Context->State[1] = 0xBB67AE85;
-  Context->State[2] = 0x3C6EF372;
-  Context->State[3] = 0xA54FF53A;
-  Context->State[4] = 0x510E527F;
-  Context->State[5] = 0x9B05688C;
-  Context->State[6] = 0x1F83D9AB;
-  Context->State[7] = 0X5BE0CD19;
 }
 
 VOID
