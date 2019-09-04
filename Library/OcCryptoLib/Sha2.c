@@ -62,9 +62,9 @@ do {                                          \
 } while (0)
 
 
-#define SHFR(x, n)    (x >> n)
-#define ROTLEFT(a, b) (((a) << (b)) | ((a) >> (32-(b))))
-#define ROTRIGHT(a, b) (((a) >> (b)) | ((a) << (32-(b))))
+#define SHFR(a, b)    (a >> b)
+#define ROTLEFT(a, b) ((a << b) | (a >> ((sizeof(a) << 3) - b)))
+#define ROTRIGHT(a, b) ((a >> b) | (a << ((sizeof(a) << 3) - b)))
 #define CH(x, y, z) (((x) & (y)) ^ (~(x) & (z)))
 #define MAJ(x, y, z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
 
@@ -73,8 +73,8 @@ do {                                          \
 //
 #define SHA256_EP0(x)  (ROTRIGHT(x, 2)  ^ ROTRIGHT(x, 13) ^ ROTRIGHT(x, 22))
 #define SHA256_EP1(x)  (ROTRIGHT(x, 6)  ^ ROTRIGHT(x, 11) ^ ROTRIGHT(x, 25))
-#define SHA256_SIG0(x) (ROTRIGHT(x, 7)  ^ ROTRIGHT(x, 18) ^ ((x) >> 3))
-#define SHA256_SIG1(x) (ROTRIGHT(x, 17) ^ ROTRIGHT(x, 19) ^ ((x) >> 10))
+#define SHA256_SIG0(x) (ROTRIGHT(x, 7)  ^ ROTRIGHT(x, 18) ^ SHFR(x, 3))
+#define SHA256_SIG1(x) (ROTRIGHT(x, 17) ^ ROTRIGHT(x, 19) ^ SHFR(x, 10))
 
 //
 // Sha 512
@@ -429,13 +429,13 @@ Sha512Update (
     UINTN        TmpLen;
     CONST UINT8  *ShiftedMsg;
 
-    TmpLen = SHA512_BLOCK_SIZE - Context->Len;
+    TmpLen = SHA512_BLOCK_SIZE - Context->Length;
     RemLen = Len < TmpLen ? Len : TmpLen;
 
-    CopyMem (&Context->Block[Context->Len], Data, RemLen);
+    CopyMem (&Context->Block[Context->Length], Data, RemLen);
 
-    if (Context->Len + Len < SHA512_BLOCK_SIZE) {
-        Context->Len += Len;
+    if (Context->Length + Len < SHA512_BLOCK_SIZE) {
+        Context->Length += Len;
         return;
     }
 
@@ -451,7 +451,7 @@ Sha512Update (
 
     CopyMem (Context->Block, &ShiftedMsg[BlockNb << 7], RemLen);
 
-    Context->Len = RemLen;
+    Context->Length = RemLen;
     Context->TotalLength += (BlockNb + 1) << 7;
 }
 
@@ -493,7 +493,7 @@ Sha512 (
 
     Sha512Init (&Context);
     Sha512Update (&Context, Data, Len);
-    Sha512Final (&Context, Digest);
+    Sha512Final (&Context, Hash);
 }
 
 
