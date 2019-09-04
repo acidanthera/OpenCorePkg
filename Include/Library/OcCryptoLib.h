@@ -302,7 +302,7 @@ VOID
 Sha384 (
   UINT8        *Hash,
   CONST UINT8  *Data,
-  UINTN        Len,
+  UINTN        Len
   );
 
 #endif // OC_CRYPTO_LIB_H

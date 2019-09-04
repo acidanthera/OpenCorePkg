@@ -333,8 +333,8 @@ Sha512Transform (
     UINT64       T1;
     UINT64       T2;
     CONST UINT8  *SubBlock;
-    UINTN         Index1;
-    UINTN         Index2;
+    UINTN        Index1;
+    UINTN        Index2;
 
     for (Index1 = 0; Index1 < (INTN) BlockNb; Index1++) {
         SubBlock = Data + (Index1 << 7);
@@ -518,14 +518,14 @@ VOID
 Sha384Update (
   SHA384_CONTEXT  *Context,
   CONST UINT8     *Data,
-  UINTN          Len
+  UINTN           Len
   )
 {
-    UINTN BlockNb;
-    UINTN NewLen;
-    UINTN RemLen;
-    UINTN TmpLen;
-    CONST UINT8 *ShiftedMessage;
+    UINTN        BlockNb;
+    UINTN        NewLen;
+    UINTN        RemLen;
+    UINTN        TmpLen;
+    CONST UINT8  *ShiftedMessage;
 
     TmpLen = SHA384_BLOCK_SIZE - Context->Length;
     RemLen = Len < TmpLen ? Len : TmpLen;
@@ -560,9 +560,9 @@ Sha384Final (
   UINT8           *HashDigest
   )
 {
-    UINTN  BlockNb;
-    UINTN  PmLen;
-    UINT64  LenB;
+    UINTN    BlockNb;
+    UINTN    PmLen;
+    UINT64   LenB;
     UINTN    Index;
 
     BlockNb = ((SHA384_BLOCK_SIZE - 17) < (Context->Length % SHA384_BLOCK_SIZE)) + 1;
@@ -586,7 +586,7 @@ VOID
 Sha384 (
   UINT8        *Hash,
   CONST UINT8  *Data,
-  UINTN        Len,
+  UINTN        Len
   )
 {
     SHA384_CONTEXT Context;
