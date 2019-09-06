@@ -673,12 +673,11 @@ InternalGetDefaultBootEntry (
       //
       BootEntry->LoadOptionsSize = OptionalDataSize;
       BootEntry->LoadOptions     = OptionalData;
-    } else if (OptionalData != NULL) {
+    } else
+#endif
+    if (OptionalData != NULL) {
       FreePool (OptionalData);
     }
-#else
-    FreePool (OptionalData);
-#endif
 
     if (BootEntry->DevicePath != UefiDevicePath) {
       if (!IsAppleLegacy) {
