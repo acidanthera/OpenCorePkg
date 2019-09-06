@@ -664,6 +664,7 @@ InternalGetDefaultBootEntry (
   }
 
   if (BootEntry != NULL) {
+#if 0
     if (IsBootNext) {
       //
       // BootNext is allowed to override both the exact file path as well as
@@ -675,6 +676,9 @@ InternalGetDefaultBootEntry (
     } else if (OptionalData != NULL) {
       FreePool (OptionalData);
     }
+#else
+    FreePool (OptionalData);
+#endif
 
     if (BootEntry->DevicePath != UefiDevicePath) {
       if (!IsAppleLegacy) {
