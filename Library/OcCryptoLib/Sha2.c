@@ -338,7 +338,7 @@ Sha512Transform (
   UINTN        Index1;
   UINTN        Index2;
 
-  for (Index1 = 0; Index1 < (INTN) BlockNb; ++Index1) {
+  for (Index1 = 0; Index1 < BlockNb; ++Index1) {
     SubBlock = Data + (Index1 << 7);
 
     //
