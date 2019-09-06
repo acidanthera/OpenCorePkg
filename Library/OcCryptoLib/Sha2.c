@@ -315,6 +315,7 @@ Sha256 (
   Sha256Init (&Ctx);
   Sha256Update (&Ctx, Data, Len);
   Sha256Final (&Ctx, Hash);
+  ZeroMem (&Ctx, sizeof (Ctx));
 }
 
 
@@ -494,6 +495,7 @@ Sha512 (
     Sha512Init (&Context);
     Sha512Update (&Context, Data, Len);
     Sha512Final (&Context, Hash);
+    ZeroMem (&Context, sizeof (Context));
 }
 
 
@@ -594,4 +596,5 @@ Sha384 (
     Sha384Init (&Context);
     Sha384Update (&Context, Data, Len);
     Sha384Final (&Context, Hash);
+    ZeroMem (&Context, sizeof (Context));
 }
