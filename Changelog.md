@@ -18,6 +18,8 @@ OpenCore Changelog
 - Added `OPT`, `CMD+R`, `CMD+OPT+P+R` boot action hotkey support
 - Added `PollAppleHotKeys` to register boot.efi hotkeys in the picker
 - Added `DisableSingleUser` quirk to prohibit single user mode
+- Upgraded EDK II base package to edk2-stable201908
+- Prohibited argument changing by BootNext
 
 #### v0.0.4
 - Fixed kext injection issues with dummy dependencies
