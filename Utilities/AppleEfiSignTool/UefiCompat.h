@@ -17,12 +17,14 @@ typedef uint32_t UINT32;
 typedef uint64_t UINT64;
 typedef bool     BOOLEAN;
 typedef void     VOID;
+typedef intptr_t INTN;
 typedef size_t   UINTN;
 
 #define CONST    const
 #define STATIC   static
 #define TRUE     true
 #define FALSE    false
+#define GLOBAL_REMOVE_IF_UNREFERENCED
 
 #define ZeroMem(Dst, Size) (memset)((Dst), 0, (Size))
 #define CopyMem(Dst, Src, Size) (memcpy)((Dst), (Src), (Size))
