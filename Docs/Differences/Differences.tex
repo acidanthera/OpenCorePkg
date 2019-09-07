@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Aug 14 17:47:32 2019
-%DIF ADD ../Configuration.tex        Fri Sep  6 17:50:33 2019
+%DIF DEL PreviousConfiguration.tex   Fri Sep  6 23:59:43 2019
+%DIF ADD ../Configuration.tex        Sat Sep  7 17:24:42 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -140,7 +140,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (\DIFdelbegin \DIFdel{0.0.4}\DIFdelend \DIFaddbegin \DIFadd{0.5.0}\DIFaddend )
+       Reference Manual (0.5\DIFdelbegin \DIFdel{.0}\DIFdelend \DIFaddbegin \DIFadd{.1}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -164,29 +164,22 @@
 This document provides information on
 \href{https://github.com/acidanthera/OpenCorePkg}{OpenCore} user
 configuration file format used to setup the correct functioning of macOS
-operating system. \DIFaddbegin \DIFadd{It is to be read as the official clarification of expected
+operating system. It is to be read as the official clarification of expected
 OpenCore behaviour. All deviations, if found in published OpenCore releases,
 shall be considered documentation or implementation bugs, and are requested to be
-reported through }\href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}\DIFadd{.
+reported through \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
 All other sources or translations of this document are unofficial and may contain errors.
-}\DIFaddend 
 
-\DIFdelbegin \subsection{\DIFdel{Known defects}}%DIFAUXCMD
-\addtocounter{subsection}{-1}%DIFAUXCMD
-%DIFDELCMD < \label{reported-defects}
-%DIFDELCMD < 
-
-%DIFDELCMD < %%%
-\DIFdel{For OpenCore issues please refer to }\DIFdelend \DIFaddbegin \DIFadd{This document is structured as a specification, and is not meant to provide a step by
+This document is structured as a specification, and is not meant to provide a step by
 step algorithm for configuring end-user board support package (BSP). Any third-party
 articles, tools, books, etc., providing such material are prone to their authors'
 preferences, tastes, this document misinterpretation, and essential obsolescence.
 In case you still use these sources, for example, 
-}\href{https://khronokernel-2.gitbook.io/opencore-vanilla-desktop-guide}{Opencore Vanilla Desktop Guide}\DIFadd{,
+\href{https://khronokernel-2.gitbook.io/opencore-vanilla-desktop-guide}{Opencore Vanilla Desktop Guide},
 please ensure following this document for every made decision and judging its consequences.
 Regardless of the sources used you are required to fully understand every dedicated OpenCore
 configuration option and concept prior to reporting any issues in
-}\DIFaddend \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
+\href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
 
 \subsection{Generic Terms}\label{generic-terms}
 
@@ -624,8 +617,7 @@ approach could be \href{https://www.sublimetext.com}{Sublime Text} with
 \href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
 Add \texttt{.clang\_complete} file with similar content to your UDK root:
 
-\DIFmodbegin
-\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash,alsolanguage=DIFcode]
+\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash]
 -I/UefiPackages/MdePkg
 -I/UefiPackages/MdePkg/Include
 -I/UefiPackages/MdePkg/Include/X64
@@ -650,9 +642,8 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -Wno-sign-compare
 -Wno-varargs
 -Wno-unused-const-variable
-%DIF > -DOC_TARGET_NOOPT=1
+-DOC_TARGET_NOOPT=1
 \end{lstlisting}
-\DIFmodend
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
 files must ensure that their tool checks for \texttt{opencore-version} NVRAM variable
@@ -1100,38 +1091,33 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \emph{Note}: Most but Apple and VMware firmwares need this quirk.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{DevirtualiseMmio}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Remove runtime attribute from select MMIO regions.
-}
+  \texttt{DevirtualiseMmio}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Remove runtime attribute from select MMIO regions.
 
-  \DIFadd{This option reduces stolen memory footprint from the memory map by removing
+  This option reduces stolen memory footprint from the memory map by removing
   runtime bit for known memory regions. This quirk may result in the increase
   of KASLR slides available, but is not necessarily compatible with the target
   board.
-}
 
-  \emph{\DIFadd{Note}}\DIFadd{: This option is generally useful on APTIO V firmwares (Broadwell and newer).
-}
+  \emph{Note}: This option is generally useful on APTIO V firmwares (Broadwell and newer).
 
 
 \item
-  \texttt{\DIFadd{DisableSingleUser}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Disable single user mode.
-}
+  \texttt{DisableSingleUser}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Disable single user mode.
 
-  \DIFadd{This is a security option allowing one to restrict single user mode usage
-  by ignoring }\texttt{\DIFadd{CMD+S}} \DIFadd{hotkey and }\texttt{\DIFadd{-s}} \DIFadd{boot argument. The
+  This is a security option allowing one to restrict single user mode usage
+  by ignoring \texttt{CMD+S} hotkey and \texttt{-s} boot argument. The
   behaviour with this quirk enabled is supposed to match T2-based model
-  behaviour. Read }\href{https://support.apple.com/HT201573}{this article}
-  \DIFadd{to understand how to use single user mode with this quirk enabled.
-}
+  behaviour. Read \href{https://support.apple.com/HT201573}{this article}
+  to understand how to use single user mode with this quirk enabled.
 
 \item
-  \DIFaddend \texttt{DisableVariableWrite}\\
+  \texttt{DisableVariableWrite}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Protect from macOS NVRAM write access.
@@ -1486,13 +1472,12 @@ blocking.
   \textbf{Failsafe}: All zero\\
   \textbf{Description}: Sequence of \texttt{EAX}, \texttt{EBX}, \texttt{ECX},
   \texttt{EDX} values in Little Endian order to replace \texttt{CPUID (1)}
-  call in XNU kernel. \DIFaddbegin \DIFadd{Normally it is only the value of }\texttt{\DIFadd{EAX}} \DIFadd{that needs to be taken care of,
+  call in XNU kernel. Normally it is only the value of \texttt{EAX} that needs to be taken care of,
   which represents the exact CPUID. And the remainders are to be left as zeroes.
-  For instance, }\texttt{\DIFadd{A9 06 03 00}} \DIFadd{stands for CPUID }\texttt{\DIFadd{0x0306A9}} \DIFadd{(Ivy Bridge).
+  For instance, \texttt{A9 06 03 00} stands for CPUID \texttt{0x0306A9} (Ivy Bridge).
   A good example can be found at
-  }\href{https://github.com/acidanthera/bugtracker/issues/365}{acidanthera/bugtracker\#365}\DIFadd{.
-  (See }\texttt{\DIFadd{Special NOTES for Haswell+ low-end}}\DIFadd{)  
-}\DIFaddend 
+  \href{https://github.com/acidanthera/bugtracker/issues/365}{acidanthera/bugtracker\#365}.
+  (See \texttt{Special NOTES for Haswell+ low-end})  
 
 \item
   \texttt{Cpuid1Mask}\\
@@ -1695,10 +1680,9 @@ blocking.
 
   \emph{Note}: This option should avoided whenever possible. NVMe SSDs are
   compatible without the change. For AHCI SSDs on modern macOS version there
-  is a dedicated built-in utility called \texttt{trimforce}. \DIFaddbegin \DIFadd{Starting from 10.15
-  this utility creates }\texttt{\DIFadd{EnableTRIM}} \DIFadd{variable in }\texttt{\DIFadd{APPLE\_BOOT\_VARIABLE\_GUID}}
-  \DIFadd{namespace with }\texttt{\DIFadd{01 00 00 00}} \DIFadd{value.
-}\DIFaddend 
+  is a dedicated built-in utility called \texttt{trimforce}. Starting from 10.15
+  this utility creates \texttt{EnableTRIM} variable in \texttt{APPLE\_BOOT\_VARIABLE\_GUID}
+  namespace with \texttt{01 00 00 00} value.
 
 \item
   \texttt{XhciPortLimit}\\
@@ -1792,7 +1776,10 @@ behaviour that does not go to any other sections
   \textbf{Description}: Sets console output mode as specified
   with the \texttt{WxH} (e.g. \texttt{80x24}) formatted string.
   Set to empty string not to change console mode. Set to \texttt{Max}
-  to try to use largest available console mode.
+  to try to use largest available console mode\DIFaddbegin \DIFadd{.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This field is best to be left empty on most firmwares}\DIFaddend .
 
 \item
   \texttt{ConsoleBehaviourOs}\\
@@ -1871,36 +1858,34 @@ behaviour that does not go to any other sections
   installed on the same volume and driver boot is used.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{PollAppleHotKeys}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Enable modifier hotkey handling in boot picker.
-}
+  \texttt{PollAppleHotKeys}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable modifier hotkey handling in boot picker.
 
-  \DIFadd{In addition to action hotkeys, which are partially described in }\texttt{\DIFadd{UsePicker}}
-  \DIFadd{section and are normally handled by Apple BDS, there exist modifier keys, which are
-  handled by operating system bootloader, namely }\texttt{\DIFadd{boot.efi}}\DIFadd{. These keys
+  In addition to action hotkeys, which are partially described in \texttt{UsePicker}
+  section and are normally handled by Apple BDS, there exist modifier keys, which are
+  handled by operating system bootloader, namely \texttt{boot.efi}. These keys
   allow to change operating system behaviour by providing different boot modes.
-}
 
-  \DIFadd{On some firmwares it may be problematic to use modifier keys due to driver incompatibilities.
+  On some firmwares it may be problematic to use modifier keys due to driver incompatibilities.
   To workaround this problem this option allows registering select hotkeys in a more
   permissive manner from within boot picker. Such extensions include the support
-  of tapping on keys in addition to holding and pressing }\texttt{\DIFadd{Shift}} \DIFadd{along with
-  other keys instead of just }\texttt{\DIFadd{Shift}} \DIFadd{alone, which is not detectible on many
+  of tapping on keys in addition to holding and pressing \texttt{Shift} along with
+  other keys instead of just \texttt{Shift} alone, which is not detectible on many
   PS/2 keyboards. This list of known hotkeys includes:
-  }\begin{itemize}
+  \begin{itemize}
   \tightlist
-  \item \texttt{\DIFadd{CMD+C+MINUS}} \DIFadd{--- disable board compatibility checking.
-  }\item \texttt{\DIFadd{CMD+K}} \DIFadd{--- boot release kernel, similar to }\texttt{\DIFadd{kcsuffix=release}}\DIFadd{.
-  }\item \texttt{\DIFadd{CMD+S}} \DIFadd{--- single user mode.
-  }\item \texttt{\DIFadd{CMD+S+MINUS}} \DIFadd{--- disable KASLR slide, requires disabled SIP.
-  }\item \texttt{\DIFadd{CMD+V}} \DIFadd{--- verbose mode.
-  }\item \texttt{\DIFadd{Shift}} \DIFadd{--- safe mode.
-  }\end{itemize} 
+  \item \texttt{CMD+C+MINUS} --- disable board compatibility checking.
+  \item \texttt{CMD+K} --- boot release kernel, similar to \texttt{kcsuffix=release}.
+  \item \texttt{CMD+S} --- single user mode.
+  \item \texttt{CMD+S+MINUS} --- disable KASLR slide, requires disabled SIP.
+  \item \texttt{CMD+V} --- verbose mode.
+  \item \texttt{Shift} --- safe mode.
+  \end{itemize} 
 
 \item
-  \DIFaddend \texttt{Resolution}\\
+  \texttt{Resolution}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Sets console output screen resolution.
@@ -1950,47 +1935,40 @@ behaviour that does not go to any other sections
   \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tests/ExternalUi}{ExternalUi}
   test driver.
 
-  \DIFdelbegin \emph{\DIFdel{Note}}%DIFAUXCMD
-\DIFdel{:
-By default }\DIFdelend OpenCore built-in \DIFaddbegin \DIFadd{boot picker contains a set of actions chosen during the boot process.
+  OpenCore built-in boot picker contains a set of actions chosen during the boot process.
   The list of supported actions is similar to Apple BDS and currently consists of the following
   options:
-}
 
   \begin{itemize}
   \tightlist
-  \item \texttt{\DIFadd{Default}} \DIFadd{--- this is the default option, and it lets OpenCore built-in
-  }\DIFaddend boot picker \DIFaddbegin \DIFadd{to }\DIFaddend loads the default \DIFdelbegin \DIFdel{discovered
-  option , this can be changed by setting }\DIFdelend \DIFaddbegin \DIFadd{boot option as specified in
-  }\href{https://support.apple.com/HT202796}{Startup Disk} \DIFadd{preference pane.
-  }\item \DIFaddend \texttt{ShowPicker} \DIFaddbegin \DIFadd{--- this option forces picker to show. Normally it can be
-  achieved by holding }\texttt{\DIFadd{OPT}} \DIFadd{key during boot. Setting }\texttt{\DIFadd{ShowPicker}} \DIFaddend to
-  \texttt{true} \DIFaddbegin \DIFadd{will make }\texttt{\DIFadd{ShowPicker}} \DIFadd{the default option.
-  }\item \texttt{\DIFadd{ResetNvram}} \DIFadd{--- this option performs select UEFI variable erase and is
-  normally achieved by holding }\texttt{\DIFadd{CMD+OPT+P+R}} \DIFadd{key combination during boot.
-  Another way to erase UEFI variables is to choose }\texttt{\DIFadd{Reset NVRAM}} \DIFadd{in the picker.
-  This option requires }\texttt{\DIFadd{AllowNvramReset}} \DIFadd{to be set to }\texttt{\DIFadd{true}}\DIFaddend .
-  \DIFaddbegin \item \texttt{\DIFadd{BootApple}} \DIFadd{--- this options performs booting to the first found Apple
+  \item \texttt{Default} --- this is the default option, and it lets OpenCore built-in
+  boot picker to loads the default boot option as specified in
+  \href{https://support.apple.com/HT202796}{Startup Disk} preference pane.
+  \item \texttt{ShowPicker} --- this option forces picker to show. Normally it can be
+  achieved by holding \texttt{OPT} key during boot. Setting \texttt{ShowPicker} to
+  \texttt{true} will make \texttt{ShowPicker} the default option.
+  \item \texttt{ResetNvram} --- this option performs select UEFI variable erase and is
+  normally achieved by holding \texttt{CMD+OPT+P+R} key combination during boot.
+  Another way to erase UEFI variables is to choose \texttt{Reset NVRAM} in the picker.
+  This option requires \texttt{AllowNvramReset} to be set to \texttt{true}.
+  \item \texttt{BootApple} --- this options performs booting to the first found Apple
   operating system unless the default chosen operating system is already made by Apple.
-  Hold }\texttt{\DIFadd{X}} \DIFadd{key to choose this option.
-  }\item \texttt{\DIFadd{BootAppleRecovery}} \DIFadd{--- this option performs booting to Apple operating
+  Hold \texttt{X} key to choose this option.
+  \item \texttt{BootAppleRecovery} --- this option performs booting to Apple operating
   system recovery. Either the one related to the default chosen operating system,
   or first found in case default chosen operating system is not made by Apple or has no
-  recovery. Hold }\texttt{\DIFadd{CMD+R}} \DIFadd{key combination to choose this option.
-  }\end{itemize}
-\DIFaddend 
+  recovery. Hold \texttt{CMD+R} key combination to choose this option.
+  \end{itemize}
 
-  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: }\texttt{\DIFadd{AppleGenericInput}}\DIFadd{, }\texttt{\DIFadd{UsbKbDxe}}\DIFadd{, or similar driver is required
+  \emph{Note}: \texttt{AppleGenericInput}, \texttt{UsbKbDxe}, or similar driver is required
   for key handling to work. On many firmwares it is not possible to get all the keys function.
-}
 
-  \DIFadd{In addition to }\texttt{\DIFadd{OPT}} \DIFadd{OpenCore supports }\texttt{\DIFadd{Escape}} \DIFadd{key
-  }\texttt{\DIFadd{ShowPicker}}\DIFadd{. This key exists for firmwares with PS/2 keyboards that
-  fail to report held }\texttt{\DIFadd{OPT}} \DIFadd{key and require continual presses of }\texttt{\DIFadd{Escape}}
-  \DIFadd{key to enter the boot menu.
-}
+  In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key
+  \texttt{ShowPicker}. This key exists for firmwares with PS/2 keyboards that
+  fail to report held \texttt{OPT} key and require continual presses of \texttt{Escape}
+  key to enter the boot menu.
 
-\DIFaddend \end{enumerate}
+\end{enumerate}
 
 \subsection{Debug Properties}\label{miscdebugprops}
 
@@ -2095,15 +2073,14 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 \begin{enumerate}
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{AllowNvramReset}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Allow }\texttt{\DIFadd{CMD+OPT+P+R}} \DIFadd{handling and enable
-  showing }\texttt{\DIFadd{NVRAM Reset}} \DIFadd{entry in boot picker.
-}
+  \texttt{AllowNvramReset}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Allow \texttt{CMD+OPT+P+R} handling and enable
+  showing \texttt{NVRAM Reset} entry in boot picker.
 
 \item
-  \DIFaddend \texttt{ExposeSensitiveData}\\
+  \texttt{ExposeSensitiveData}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{2}\\
   \textbf{Description}: Sensitive data exposure bitmask (sum) to operating system.
@@ -2253,11 +2230,11 @@ rm vault.pub
     of HFS file system.
     \item \texttt{0x00000400} (bit \texttt{10}) --- \texttt{OC\_SCAN\_ALLOW\_FS\_ESP}, allows scanning
     of EFI System Partition file system.
-    \item \DIFaddbegin \texttt{\DIFadd{0x00000800}} \DIFadd{(bit }\texttt{\DIFadd{11}}\DIFadd{) --- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_FS\_NTFS}}\DIFadd{, allows scanning
+    \item \texttt{0x00000800} (bit \texttt{11}) --- \texttt{OC\_SCAN\_ALLOW\_FS\_NTFS}, allows scanning
     of NTFS (Msft Basic Data) file system.
-    }\item \texttt{\DIFadd{0x00001000}} \DIFadd{(bit }\texttt{\DIFadd{12}}\DIFadd{) --- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_FS\_EXT}}\DIFadd{, allows scanning
+    \item \texttt{0x00001000} (bit \texttt{12}) --- \texttt{OC\_SCAN\_ALLOW\_FS\_EXT}, allows scanning
     of EXT (Linux Root) file system.
-    }\item \DIFaddend \texttt{0x00010000} (bit \texttt{16}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SATA}, allow
+    \item \texttt{0x00010000} (bit \texttt{16}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SATA}, allow
     scanning SATA devices.
     \item \texttt{0x00020000} (bit \texttt{17}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SASEX}, allow
     scanning SAS and Mac NVMe devices.
@@ -2525,7 +2502,7 @@ improvements:
   \texttt{ru:252} or \texttt{ru:0} (U.S. keyboard, compatible with 10.9). Full decoded
   keyboard list from \texttt{AppleKeyboardLayouts-L.dat} can be found
   \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/AppleKeyboardLayouts}{here}. Using non-latin keyboard on 10.14
-  will not enable ABC keyboard, unlike previous \DIFaddbegin \DIFadd{and subsequent }\DIFaddend macOS versions, and is thus not recommended \DIFaddbegin \DIFadd{in case you need 10.14}\DIFaddend .
+  will not enable ABC keyboard, unlike previous and subsequent macOS versions, and is thus not recommended in case you need 10.14.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:security-mode}
   \break
@@ -2913,35 +2890,30 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Failsafe}: Automatic\\
   \textbf{Description}: Sets \texttt{FSBFrequency} in
   \texttt{gEfiProcessorSubClassGuid}.
-\DIFaddbegin 
 
-  \DIFaddend Sets CPU FSB frequency. \DIFaddbegin \DIFadd{This value equals to CPU nominal frequency divided
+  Sets CPU FSB frequency. This value equals to CPU nominal frequency divided
   by CPU maximum bus ratio and is specified in Hz. Refer to
-  }\texttt{\DIFadd{MSR\_NEHALEM\_PLATFORM\_INFO}}\DIFadd{~(}\texttt{\DIFadd{CEh}}\DIFadd{) MSR value to determine
+  \texttt{MSR\_NEHALEM\_PLATFORM\_INFO}~(\texttt{CEh}) MSR value to determine
   maximum bus ratio on modern Intel CPUs.
-  }
 
-  \emph{\DIFadd{Note}}\DIFadd{: This value is not used on Skylake and newer but is still provided
+  \emph{Note}: This value is not used on Skylake and newer but is still provided
   to follow suit.
-}\DIFaddend \item
+\item
   \texttt{ARTFrequency}\\
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
-  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Automatic}\DIFaddend \\
+  \textbf{Failsafe}: Automatic\\
   \textbf{Description}: Sets \texttt{ARTFrequency} in
   \texttt{gEfiProcessorSubClassGuid}.
-  \DIFdelbegin \DIFdel{Sets }\DIFdelend \DIFaddbegin 
 
-  \DIFadd{This value contains }\DIFaddend CPU ART frequency, \DIFdelbegin \DIFdel{Skylake
-  }\DIFdelend \DIFaddbegin \DIFadd{also known as crystal clock frequency.
-  Its existence is exclusive to Skylake generation }\DIFaddend and newer. \DIFaddbegin \DIFadd{The value is specified
+  This value contains CPU ART frequency, also known as crystal clock frequency.
+  Its existence is exclusive to Skylake generation and newer. The value is specified
   in Hz, and is normally 24 MHz for client Intel segment, 25 MHz for server Intel segment,
   and 19.2 MHz for Intel Atom CPUs. macOS till 10.15 inclusive assumes 24 MHz by default.
-  }
 
-  \emph{\DIFadd{Note}}\DIFadd{: On Intel Skylake X ART frequency may be a little less (approx. 0.25\%) than
+  \emph{Note}: On Intel Skylake X ART frequency may be a little less (approx. 0.25\%) than
   24 or 25 MHz due to special EMI-reduction circuit as described in
-  }\href{https://github.com/acidanthera/bugtracker/issues/448#issuecomment-524914166}{Acidanthera Bugtracker}\DIFadd{.
-}\DIFaddend \item
+  \href{https://github.com/acidanthera/bugtracker/issues/448#issuecomment-524914166}{Acidanthera Bugtracker}.
+\item
   \texttt{DevicePathsSupported}\\
   \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
   \textbf{Failsafe}: Not installed\\
@@ -3329,16 +3301,7 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
   --- APFS file system bootstrap driver adding the support of embedded APFS drivers
   in bootable APFS containers in UEFI firmwares.
-  \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AppleUiSupport}}
-%DIFDELCMD <   %%%
-\DIFdel{--- Apple-specific user interface support driver. This driver brings the support
-  for FileVault 2 GUI, hotkey parsing (shift, cmd+v, etc.), language collation support,
-  and certain other features important for normal macOS functioning. For hotkey support
-  }\texttt{\DIFdel{AppleKeyMapAggregator}}%DIFAUXCMD
-\DIFdel{-compatible driver is required.
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdelend \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AppleGenericInput}}
+  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AppleGenericInput}}
   --- user input driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of different UEFI input protocols. Additionally resolves mouse input issues
   on select firmwares. This is an alternative to \texttt{UsbKbDxe}, which may work
@@ -3349,17 +3312,7 @@ and supplementary utilities can be used.
   quirks, like \texttt{RequestBootVarRouting}, require this driver for proper function.
   Due to the nature of being a runtime driver, i.e. functioning in parallel with the
   target operating system, it cannot be implemented within OpenCore itself.
-  \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/audk}{\texttt{EnglishDxe}}
-%DIFDELCMD <   %%%
-\DIFdel{--- Unicode collation driver from }\texttt{\DIFdel{MdeModulePkg}}%DIFAUXCMD
-\DIFdel{. This driver is a lightweight
-  alternative to }\texttt{\DIFdel{AppleUiSupport}}%DIFAUXCMD
-\DIFdel{, which contains no Apple-specific code, and
-  only provides unicode collation support. The driver is not recommended for use
-  on any hardware but few original Macs.
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdelend \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
+  \item \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
   --- FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
   UEFI firmwares, and cannot be used from OpenCore. It is known that multiple firmwares
   have a bug in their FAT support implementation, which leads to corrupted filesystems
@@ -3372,7 +3325,7 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{UsbKbDxe}}
   --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
-  \texttt{\DIFdelbegin \DIFdel{AptioInputFix}\DIFdelend \DIFaddbegin \DIFadd{AppleGenericInput}\DIFaddend }, which may work better or worse depending on the firmware.
+  \texttt{AppleGenericInput}, which may work better or worse depending on the firmware.
   \item \href{https://github.com/acidanthera/VirtualSMC}{\texttt{VirtualSmc}}
   --- UEFI SMC driver, required for proper FileVault 2 functionality and potentially
   other macOS specifics. An alternative, named \texttt{SMCHelper}, is not compatible
@@ -3431,40 +3384,36 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{AppleEvent}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Reinstalls Apple Event protocol with a builtin
+  \texttt{AppleEvent}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple Event protocol with a builtin
   version. This may be used to ensure File Vault 2 compatibility on VMs or legacy Macs.
-}
 
 
 \item
-  \texttt{\DIFadd{AppleImageConversion}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Reinstalls Apple Image Conversion protocol with a builtin
+  \texttt{AppleImageConversion}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple Image Conversion protocol with a builtin
   version.
-}
 
 \item
-  \texttt{\DIFadd{AppleKeyMap}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Reinstalls Apple Key Map protocols with builtin
+  \texttt{AppleKeyMap}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple Key Map protocols with builtin
   versions.
-}
 
 \item
-  \texttt{\DIFadd{AppleUserInterfaceTheme}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Reinstalls Apple User Interface Theme protocol with a builtin
+  \texttt{AppleUserInterfaceTheme}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple User Interface Theme protocol with a builtin
   version.
-}
 
 \item
-  \DIFaddend \texttt{ConsoleControl}\\
+  \texttt{ConsoleControl}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Replaces Console Control protocol with a builtin version.
@@ -3490,37 +3439,34 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   version. This will drop all previous properties if it was already installed.
   This may be used to ensure full compatibility on VMs or legacy Macs.
 
-\DIFaddbegin \item
-  \texttt{\DIFadd{FirmwareVolume}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Forcibly wraps Firmware Volume protocols or installs new
-  to support custom cursor images for File Vault 2. Should be set to }\texttt{\DIFadd{true}}
-  \DIFadd{to ensure File Vault 2 compatibility on everything but VMs and legacy Macs.
-}
+\item
+  \texttt{FirmwareVolume}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Forcibly wraps Firmware Volume protocols or installs new
+  to support custom cursor images for File Vault 2. Should be set to \texttt{true}
+  to ensure File Vault 2 compatibility on everything but VMs and legacy Macs.
 
 \item
-  \texttt{\DIFadd{HashServices}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Forcibly reinstalls Hash Services protocols with builtin
-  versions. Should be set to }\texttt{\DIFadd{true}} \DIFadd{to ensure File Vault 2 compatibility
+  \texttt{HashServices}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Forcibly reinstalls Hash Services protocols with builtin
+  versions. Should be set to \texttt{true} to ensure File Vault 2 compatibility
   on platforms providing broken SHA-1 hashing. Can be diagnosed by invalid
-  cursor size with }\texttt{\DIFadd{UIScale}} \DIFadd{set to }\texttt{\DIFadd{02}}\DIFadd{, in general platforms
+  cursor size with \texttt{UIScale} set to \texttt{02}, in general platforms
   prior to APTIO V (Haswell and older) are affected.
-}
 
 \item
-  \texttt{\DIFadd{UnicodeCollation}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Forcibly reinstalls unicode collation services with builtin
-  version. Should be set to }\texttt{\DIFadd{true}} \DIFadd{to ensure UEFI Shell compatibility
+  \texttt{UnicodeCollation}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Forcibly reinstalls unicode collation services with builtin
+  version. Should be set to \texttt{true} to ensure UEFI Shell compatibility
   on platforms providing broken unicode collation. In general legacy Insyde and APTIO
   platforms on Ivy Bridge and earlier are affected.
-}
 
-\DIFaddend \end{enumerate}
+\end{enumerate}
 
 \subsection{Quirks Properties}\label{uefiquirkprops}
 
@@ -3578,21 +3524,19 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{true} for this to work.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{ReplaceTabWithSpace}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Some firmwares do not print tab characters or even everything 
+  \texttt{ReplaceTabWithSpace}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Some firmwares do not print tab characters or even everything 
   that follows them, causing difficulties or inability to use the UEFI Shell builtin 
   text editor to edit property lists and other documents. This option makes the console
   output spaces instead of tabs. 
-}
 
-  \emph{\DIFadd{Note}}\DIFadd{: }\texttt{\DIFadd{ConsoleControl}} \DIFadd{may need to be set to
-  }\texttt{\DIFadd{true}} \DIFadd{for this to work.
-}
+  \emph{Note}: \texttt{ConsoleControl} may need to be set to
+  \texttt{true} for this to work.
 
 \item
-  \DIFaddend \texttt{ProvideConsoleGop}\\
+  \texttt{ProvideConsoleGop}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: macOS bootloader requires GOP (Graphics Output Protocol)
@@ -3634,21 +3578,19 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{true} for this to work. On all known affected systems
   \texttt{ConsoleMode} had to be set to empty string for this to work.
 
-\DIFaddbegin \item
-  \texttt{\DIFadd{ClearScreenOnModeSwitch}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Some firmwares clear only part of screen when switching
+\item
+  \texttt{ClearScreenOnModeSwitch}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Some firmwares clear only part of screen when switching
   from graphics to text mode, leaving a fragment of previously drawn image visible.
   This option fills the entire graphics screen with black color before switching to
   text mode.
-}
 
-  \emph{\DIFadd{Note}}\DIFadd{: }\texttt{\DIFadd{ConsoleControl}} \DIFadd{should be set to
-  }\texttt{\DIFadd{true}} \DIFadd{for this to work.
-}
+  \emph{Note}: \texttt{ConsoleControl} should be set to
+  \texttt{true} for this to work.
 
-\DIFaddend \end{enumerate}
+\end{enumerate}
 
 \section{Troubleshooting}\label{troubleshooting}
 
@@ -3841,22 +3783,21 @@ you will need \texttt{debug=0x8} boot argument.
   which may then be customised by the user.
 
 \item
-  \DIFaddbegin \textbf{\DIFadd{How to choose the default boot entry?}}
+  \textbf{How to choose the default boot entry?}
 
-  \DIFadd{OpenCore uses the primary UEFI boot option to select the default entry. This choice
+  OpenCore uses the primary UEFI boot option to select the default entry. This choice
   can be altered from UEFI Setup, with the macOS
-  }\href{https://support.apple.com/HT202796}{Startup Disk} \DIFadd{preference, or the Windows
-  }\href{https://support.apple.com/guide/bootcamp-control-panel/start-up-your-mac-in-windows-or-macos-bcmp29b8ac66/mac}{Boot Camp} \DIFadd{Control Panel.
-  Since choosing OpenCore's }\texttt{\DIFadd{BOOTx64.EFI}} \DIFadd{as a primary boot option limits this
+  \href{https://support.apple.com/HT202796}{Startup Disk} preference, or the Windows
+  \href{https://support.apple.com/guide/bootcamp-control-panel/start-up-your-mac-in-windows-or-macos-bcmp29b8ac66/mac}{Boot Camp} Control Panel.
+  Since choosing OpenCore's \texttt{BOOTx64.EFI} as a primary boot option limits this
   functionality in addition to several firmwares deleting incompatible boot options,
   potentially including those created by macOS, you are strongly encouraged to use the
-  }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{quirk, which will preserve your selection made in
-  the operating system within the OpenCore variable space. Note, that }\texttt{\DIFadd{RequestBootVarRouting}}
-  \DIFadd{requires a separate driver for functioning.
-}
+  \texttt{RequestBootVarRouting} quirk, which will preserve your selection made in
+  the operating system within the OpenCore variable space. Note, that \texttt{RequestBootVarRouting}
+  requires a separate driver for functioning.
 
 \item
-  \DIFaddend \textbf{What is the simplest way to install macOS?}
+  \textbf{What is the simplest way to install macOS?}
 
   Copy online recovery image (\texttt{*.dmg} and \texttt{*.chunklist} files)
   to \texttt{com.apple.recovery.boot} directory on a FAT32 partition with OpenCore.
@@ -3864,19 +3805,15 @@ you will need \texttt{debug=0x8} boot argument.
   Custom name may be created by providing \texttt{.contentDetails} file.
 
   To download recovery online you may use
-  \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/Recovery}{Recovery}
-%DIFDELCMD <   %%%
-\DIFdel{tool from }%DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}%%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/MacInfoPkg/blob/master/macrecovery/macrecovery.py}{macrecovery.py}
-  \DIFadd{tool from }\href{https://github.com/acidanthera/MacInfoPkg/releases}{MacInfoPkg}\DIFaddend .
+  \href{https://github.com/acidanthera/MacInfoPkg/blob/master/macrecovery/macrecovery.py}{macrecovery.py}
+  tool from \href{https://github.com/acidanthera/MacInfoPkg/releases}{MacInfoPkg}.
 
-  \DIFaddbegin \DIFadd{For offline installation refer to
-  }\href{https://support.apple.com/HT201372}{How to create a bootable installer for macOS}
-  \DIFadd{article.
-}
+  For offline installation refer to
+  \href{https://support.apple.com/HT201372}{How to create a bootable installer for macOS}
+  article.
 
-\DIFaddend \item
-  \textbf{Why do online recovery images (\texttt{*.dmg}\DIFaddbegin \DIFadd{) }\DIFaddend fail to load?}
+\item
+  \textbf{Why do online recovery images (\texttt{*.dmg}) fail to load?}
 
   This may be caused by missing HFS+ driver, as all presently known recovery volumes
   have HFS+ filesystem. Another cause may be buggy firmware allocator, which can be

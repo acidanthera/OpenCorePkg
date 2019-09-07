@@ -80,7 +80,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.0.4)
+       Reference Manual (0.5.0)
 
        \vspace{0.2in}
 
@@ -104,11 +104,21 @@
 This document provides information on
 \href{https://github.com/acidanthera/OpenCorePkg}{OpenCore} user
 configuration file format used to setup the correct functioning of macOS
-operating system.
+operating system. It is to be read as the official clarification of expected
+OpenCore behaviour. All deviations, if found in published OpenCore releases,
+shall be considered documentation or implementation bugs, and are requested to be
+reported through \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
+All other sources or translations of this document are unofficial and may contain errors.
 
-\subsection{Known defects}\label{reported-defects}
-
-For OpenCore issues please refer to
+This document is structured as a specification, and is not meant to provide a step by
+step algorithm for configuring end-user board support package (BSP). Any third-party
+articles, tools, books, etc., providing such material are prone to their authors'
+preferences, tastes, this document misinterpretation, and essential obsolescence.
+In case you still use these sources, for example, 
+\href{https://khronokernel-2.gitbook.io/opencore-vanilla-desktop-guide}{Opencore Vanilla Desktop Guide},
+please ensure following this document for every made decision and judging its consequences.
+Regardless of the sources used you are required to fully understand every dedicated OpenCore
+configuration option and concept prior to reporting any issues in
 \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
 
 \subsection{Generic Terms}\label{generic-terms}
@@ -572,6 +582,7 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -Wno-sign-compare
 -Wno-varargs
 -Wno-unused-const-variable
+-DOC_TARGET_NOOPT=1
 \end{lstlisting}
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
@@ -1020,6 +1031,32 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \emph{Note}: Most but Apple and VMware firmwares need this quirk.
 
 \item
+  \texttt{DevirtualiseMmio}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Remove runtime attribute from select MMIO regions.
+
+  This option reduces stolen memory footprint from the memory map by removing
+  runtime bit for known memory regions. This quirk may result in the increase
+  of KASLR slides available, but is not necessarily compatible with the target
+  board.
+
+  \emph{Note}: This option is generally useful on APTIO V firmwares (Broadwell and newer).
+
+
+\item
+  \texttt{DisableSingleUser}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Disable single user mode.
+
+  This is a security option allowing one to restrict single user mode usage
+  by ignoring \texttt{CMD+S} hotkey and \texttt{-s} boot argument. The
+  behaviour with this quirk enabled is supposed to match T2-based model
+  behaviour. Read \href{https://support.apple.com/HT201573}{this article}
+  to understand how to use single user mode with this quirk enabled.
+
+\item
   \texttt{DisableVariableWrite}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -1375,7 +1412,12 @@ blocking.
   \textbf{Failsafe}: All zero\\
   \textbf{Description}: Sequence of \texttt{EAX}, \texttt{EBX}, \texttt{ECX},
   \texttt{EDX} values in Little Endian order to replace \texttt{CPUID (1)}
-  call in XNU kernel.
+  call in XNU kernel. Normally it is only the value of \texttt{EAX} that needs to be taken care of,
+  which represents the exact CPUID. And the remainders are to be left as zeroes.
+  For instance, \texttt{A9 06 03 00} stands for CPUID \texttt{0x0306A9} (Ivy Bridge).
+  A good example can be found at
+  \href{https://github.com/acidanthera/bugtracker/issues/365}{acidanthera/bugtracker\#365}.
+  (See \texttt{Special NOTES for Haswell+ low-end})  
 
 \item
   \texttt{Cpuid1Mask}\\
@@ -1578,7 +1620,9 @@ blocking.
 
   \emph{Note}: This option should avoided whenever possible. NVMe SSDs are
   compatible without the change. For AHCI SSDs on modern macOS version there
-  is a dedicated built-in utility called \texttt{trimforce}.
+  is a dedicated built-in utility called \texttt{trimforce}. Starting from 10.15
+  this utility creates \texttt{EnableTRIM} variable in \texttt{APPLE\_BOOT\_VARIABLE\_GUID}
+  namespace with \texttt{01 00 00 00} value.
 
 \item
   \texttt{XhciPortLimit}\\
@@ -1751,6 +1795,33 @@ behaviour that does not go to any other sections
   installed on the same volume and driver boot is used.
 
 \item
+  \texttt{PollAppleHotKeys}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable modifier hotkey handling in boot picker.
+
+  In addition to action hotkeys, which are partially described in \texttt{UsePicker}
+  section and are normally handled by Apple BDS, there exist modifier keys, which are
+  handled by operating system bootloader, namely \texttt{boot.efi}. These keys
+  allow to change operating system behaviour by providing different boot modes.
+
+  On some firmwares it may be problematic to use modifier keys due to driver incompatibilities.
+  To workaround this problem this option allows registering select hotkeys in a more
+  permissive manner from within boot picker. Such extensions include the support
+  of tapping on keys in addition to holding and pressing \texttt{Shift} along with
+  other keys instead of just \texttt{Shift} alone, which is not detectible on many
+  PS/2 keyboards. This list of known hotkeys includes:
+  \begin{itemize}
+  \tightlist
+  \item \texttt{CMD+C+MINUS} --- disable board compatibility checking.
+  \item \texttt{CMD+K} --- boot release kernel, similar to \texttt{kcsuffix=release}.
+  \item \texttt{CMD+S} --- single user mode.
+  \item \texttt{CMD+S+MINUS} --- disable KASLR slide, requires disabled SIP.
+  \item \texttt{CMD+V} --- verbose mode.
+  \item \texttt{Shift} --- safe mode.
+  \end{itemize} 
+
+\item
   \texttt{Resolution}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
@@ -1801,8 +1872,38 @@ behaviour that does not go to any other sections
   \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tests/ExternalUi}{ExternalUi}
   test driver.
 
-  \emph{Note}: By default OpenCore built-in boot picker loads the default discovered
-  option, this can be changed by setting \texttt{ShowPicker} to \texttt{true}.
+  OpenCore built-in boot picker contains a set of actions chosen during the boot process.
+  The list of supported actions is similar to Apple BDS and currently consists of the following
+  options:
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Default} --- this is the default option, and it lets OpenCore built-in
+  boot picker to loads the default boot option as specified in
+  \href{https://support.apple.com/HT202796}{Startup Disk} preference pane.
+  \item \texttt{ShowPicker} --- this option forces picker to show. Normally it can be
+  achieved by holding \texttt{OPT} key during boot. Setting \texttt{ShowPicker} to
+  \texttt{true} will make \texttt{ShowPicker} the default option.
+  \item \texttt{ResetNvram} --- this option performs select UEFI variable erase and is
+  normally achieved by holding \texttt{CMD+OPT+P+R} key combination during boot.
+  Another way to erase UEFI variables is to choose \texttt{Reset NVRAM} in the picker.
+  This option requires \texttt{AllowNvramReset} to be set to \texttt{true}.
+  \item \texttt{BootApple} --- this options performs booting to the first found Apple
+  operating system unless the default chosen operating system is already made by Apple.
+  Hold \texttt{X} key to choose this option.
+  \item \texttt{BootAppleRecovery} --- this option performs booting to Apple operating
+  system recovery. Either the one related to the default chosen operating system,
+  or first found in case default chosen operating system is not made by Apple or has no
+  recovery. Hold \texttt{CMD+R} key combination to choose this option.
+  \end{itemize}
+
+  \emph{Note}: \texttt{AppleGenericInput}, \texttt{UsbKbDxe}, or similar driver is required
+  for key handling to work. On many firmwares it is not possible to get all the keys function.
+
+  In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key
+  \texttt{ShowPicker}. This key exists for firmwares with PS/2 keyboards that
+  fail to report held \texttt{OPT} key and require continual presses of \texttt{Escape}
+  key to enter the boot menu.
 
 \end{enumerate}
 
@@ -1907,6 +2008,13 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 \subsection{Security Properties}\label{miscsecurityprops}
 
 \begin{enumerate}
+
+\item
+  \texttt{AllowNvramReset}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Allow \texttt{CMD+OPT+P+R} handling and enable
+  showing \texttt{NVRAM Reset} entry in boot picker.
 
 \item
   \texttt{ExposeSensitiveData}\\
@@ -2059,6 +2167,10 @@ rm vault.pub
     of HFS file system.
     \item \texttt{0x00000400} (bit \texttt{10}) --- \texttt{OC\_SCAN\_ALLOW\_FS\_ESP}, allows scanning
     of EFI System Partition file system.
+    \item \texttt{0x00000800} (bit \texttt{11}) --- \texttt{OC\_SCAN\_ALLOW\_FS\_NTFS}, allows scanning
+    of NTFS (Msft Basic Data) file system.
+    \item \texttt{0x00001000} (bit \texttt{12}) --- \texttt{OC\_SCAN\_ALLOW\_FS\_EXT}, allows scanning
+    of EXT (Linux Root) file system.
     \item \texttt{0x00010000} (bit \texttt{16}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SATA}, allow
     scanning SATA devices.
     \item \texttt{0x00020000} (bit \texttt{17}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SASEX}, allow
@@ -2327,7 +2439,7 @@ improvements:
   \texttt{ru:252} or \texttt{ru:0} (U.S. keyboard, compatible with 10.9). Full decoded
   keyboard list from \texttt{AppleKeyboardLayouts-L.dat} can be found
   \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/AppleKeyboardLayouts}{here}. Using non-latin keyboard on 10.14
-  will not enable ABC keyboard, unlike previous macOS versions, and is thus not recommended.
+  will not enable ABC keyboard, unlike previous and subsequent macOS versions, and is thus not recommended in case you need 10.14.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:security-mode}
   \break
@@ -2714,14 +2826,30 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
   \textbf{Failsafe}: Automatic\\
   \textbf{Description}: Sets \texttt{FSBFrequency} in
-  \texttt{gEfiProcessorSubClassGuid}. Sets CPU FSB frequency.
+  \texttt{gEfiProcessorSubClassGuid}.
+
+  Sets CPU FSB frequency. This value equals to CPU nominal frequency divided
+  by CPU maximum bus ratio and is specified in Hz. Refer to
+  \texttt{MSR\_NEHALEM\_PLATFORM\_INFO}~(\texttt{CEh}) MSR value to determine
+  maximum bus ratio on modern Intel CPUs.
+  
+  \emph{Note}: This value is not used on Skylake and newer but is still provided
+  to follow suit.
 \item
   \texttt{ARTFrequency}\\
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: Automatic\\
   \textbf{Description}: Sets \texttt{ARTFrequency} in
-  \texttt{gEfiProcessorSubClassGuid}. Sets CPU ART frequency, Skylake
-  and newer.
+  \texttt{gEfiProcessorSubClassGuid}.
+  
+  This value contains CPU ART frequency, also known as crystal clock frequency.
+  Its existence is exclusive to Skylake generation and newer. The value is specified
+  in Hz, and is normally 24 MHz for client Intel segment, 25 MHz for server Intel segment,
+  and 19.2 MHz for Intel Atom CPUs. macOS till 10.15 inclusive assumes 24 MHz by default.
+  
+  \emph{Note}: On Intel Skylake X ART frequency may be a little less (approx. 0.25\%) than
+  24 or 25 MHz due to special EMI-reduction circuit as described in
+  \href{https://github.com/acidanthera/bugtracker/issues/448#issuecomment-524914166}{Acidanthera Bugtracker}.
 \item
   \texttt{DevicePathsSupported}\\
   \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
@@ -3110,11 +3238,6 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
   --- APFS file system bootstrap driver adding the support of embedded APFS drivers
   in bootable APFS containers in UEFI firmwares.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AppleUiSupport}}
-  --- Apple-specific user interface support driver. This driver brings the support
-  for FileVault 2 GUI, hotkey parsing (shift, cmd+v, etc.), language collation support,
-  and certain other features important for normal macOS functioning. For hotkey support
-  \texttt{AppleKeyMapAggregator}-compatible driver is required.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AppleGenericInput}}
   --- user input driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of different UEFI input protocols. Additionally resolves mouse input issues
@@ -3126,11 +3249,6 @@ and supplementary utilities can be used.
   quirks, like \texttt{RequestBootVarRouting}, require this driver for proper function.
   Due to the nature of being a runtime driver, i.e. functioning in parallel with the
   target operating system, it cannot be implemented within OpenCore itself.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{EnglishDxe}}
-  --- Unicode collation driver from \texttt{MdeModulePkg}. This driver is a lightweight
-  alternative to \texttt{AppleUiSupport}, which contains no Apple-specific code, and
-  only provides unicode collation support. The driver is not recommended for use
-  on any hardware but few original Macs.
   \item \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
   --- FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
   UEFI firmwares, and cannot be used from OpenCore. It is known that multiple firmwares
@@ -3144,7 +3262,7 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{UsbKbDxe}}
   --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
-  \texttt{AptioInputFix}, which may work better or worse depending on the firmware.
+  \texttt{AppleGenericInput}, which may work better or worse depending on the firmware.
   \item \href{https://github.com/acidanthera/VirtualSMC}{\texttt{VirtualSmc}}
   --- UEFI SMC driver, required for proper FileVault 2 functionality and potentially
   other macOS specifics. An alternative, named \texttt{SMCHelper}, is not compatible
@@ -3203,6 +3321,35 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
 
 \item
+  \texttt{AppleEvent}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple Event protocol with a builtin
+  version. This may be used to ensure File Vault 2 compatibility on VMs or legacy Macs.
+
+
+\item
+  \texttt{AppleImageConversion}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple Image Conversion protocol with a builtin
+  version.
+
+\item
+  \texttt{AppleKeyMap}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple Key Map protocols with builtin
+  versions.
+
+\item
+  \texttt{AppleUserInterfaceTheme}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple User Interface Theme protocol with a builtin
+  version.
+
+\item
   \texttt{ConsoleControl}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -3228,6 +3375,33 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Description}: Reinstalls Device Property protocol with a builtin
   version. This will drop all previous properties if it was already installed.
   This may be used to ensure full compatibility on VMs or legacy Macs.
+
+\item
+  \texttt{FirmwareVolume}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Forcibly wraps Firmware Volume protocols or installs new
+  to support custom cursor images for File Vault 2. Should be set to \texttt{true}
+  to ensure File Vault 2 compatibility on everything but VMs and legacy Macs.
+
+\item
+  \texttt{HashServices}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Forcibly reinstalls Hash Services protocols with builtin
+  versions. Should be set to \texttt{true} to ensure File Vault 2 compatibility
+  on platforms providing broken SHA-1 hashing. Can be diagnosed by invalid
+  cursor size with \texttt{UIScale} set to \texttt{02}, in general platforms
+  prior to APTIO V (Haswell and older) are affected.
+
+\item
+  \texttt{UnicodeCollation}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Forcibly reinstalls unicode collation services with builtin
+  version. Should be set to \texttt{true} to ensure UEFI Shell compatibility
+  on platforms providing broken unicode collation. In general legacy Insyde and APTIO
+  platforms on Ivy Bridge and earlier are affected.
 
 \end{enumerate}
 
@@ -3287,6 +3461,18 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{true} for this to work.
 
 \item
+  \texttt{ReplaceTabWithSpace}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Some firmwares do not print tab characters or even everything 
+  that follows them, causing difficulties or inability to use the UEFI Shell builtin 
+  text editor to edit property lists and other documents. This option makes the console
+  output spaces instead of tabs. 
+
+  \emph{Note}: \texttt{ConsoleControl} may need to be set to
+  \texttt{true} for this to work.
+
+\item
   \texttt{ProvideConsoleGop}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -3328,6 +3514,18 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \emph{Note}: \texttt{ConsoleControl} may need to be set to
   \texttt{true} for this to work. On all known affected systems
   \texttt{ConsoleMode} had to be set to empty string for this to work.
+  
+\item
+  \texttt{ClearScreenOnModeSwitch}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Some firmwares clear only part of screen when switching
+  from graphics to text mode, leaving a fragment of previously drawn image visible.
+  This option fills the entire graphics screen with black color before switching to
+  text mode.
+
+  \emph{Note}: \texttt{ConsoleControl} should be set to
+  \texttt{true} for this to work.
 
 \end{enumerate}
 
@@ -3522,6 +3720,20 @@ you will need \texttt{debug=0x8} boot argument.
   which may then be customised by the user.
 
 \item
+  \textbf{How to choose the default boot entry?}
+
+  OpenCore uses the primary UEFI boot option to select the default entry. This choice
+  can be altered from UEFI Setup, with the macOS
+  \href{https://support.apple.com/HT202796}{Startup Disk} preference, or the Windows
+  \href{https://support.apple.com/guide/bootcamp-control-panel/start-up-your-mac-in-windows-or-macos-bcmp29b8ac66/mac}{Boot Camp} Control Panel.
+  Since choosing OpenCore's \texttt{BOOTx64.EFI} as a primary boot option limits this
+  functionality in addition to several firmwares deleting incompatible boot options,
+  potentially including those created by macOS, you are strongly encouraged to use the
+  \texttt{RequestBootVarRouting} quirk, which will preserve your selection made in
+  the operating system within the OpenCore variable space. Note, that \texttt{RequestBootVarRouting}
+  requires a separate driver for functioning.
+
+\item
   \textbf{What is the simplest way to install macOS?}
 
   Copy online recovery image (\texttt{*.dmg} and \texttt{*.chunklist} files)
@@ -3530,11 +3742,15 @@ you will need \texttt{debug=0x8} boot argument.
   Custom name may be created by providing \texttt{.contentDetails} file.
 
   To download recovery online you may use
-  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/Recovery}{Recovery}
-  tool from \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}.
+  \href{https://github.com/acidanthera/MacInfoPkg/blob/master/macrecovery/macrecovery.py}{macrecovery.py}
+  tool from \href{https://github.com/acidanthera/MacInfoPkg/releases}{MacInfoPkg}.
+
+  For offline installation refer to
+  \href{https://support.apple.com/HT201372}{How to create a bootable installer for macOS}
+  article.
 
 \item
-  \textbf{Why do online recovery images (\texttt{*.dmg} fail to load?}
+  \textbf{Why do online recovery images (\texttt{*.dmg}) fail to load?}
 
   This may be caused by missing HFS+ driver, as all presently known recovery volumes
   have HFS+ filesystem. Another cause may be buggy firmware allocator, which can be

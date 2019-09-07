@@ -1,6 +1,8 @@
 OpenCore Changelog
 ==================
 
+#### v0.5.1
+
 #### v0.5.0
 - Added builtin firmware versions for new models 2019
 - Fixed LogoutHook leaving random directories in `$HOME`
