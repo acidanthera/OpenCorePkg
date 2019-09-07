@@ -1316,7 +1316,7 @@ InternalPrelinkKext64 (
                  &NumUndefinedSymbols
                  );
   if (NumSymbols == 0) {
-    return FALSE;
+    return RETURN_UNSUPPORTED;
   }
 
   Symtab = MachoContext->Symtab;
@@ -1354,7 +1354,7 @@ InternalPrelinkKext64 (
   LinkEditSize = (SymbolTableSize + RelocationsSize + StringTableSize);
 
   if (LinkEditSize > LinkEditSegment->FileSize) {
-    return FALSE;
+    return RETURN_UNSUPPORTED;
   }
 
   SymbolTableSize -= (NumUndefinedSymbols * sizeof (MACH_NLIST_64));
