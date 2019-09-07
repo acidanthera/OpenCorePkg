@@ -18,7 +18,10 @@
 /**
   Install and initialise the Apple Secure Boot protocol.
 
-  @param[in] Reinstall  Replace any installed protocol.
+  @param[in] Reinstall          Replace any installed protocol.
+  @param[in] SbPolicy           Apple Secure Boot Policy to install.
+  @param[in] SbWinPolicy        Apple Secure Boot Windows Policy to install.
+  @param[in] SbWinPolicyValid   Whether SbWinPolicy should be installed.
 
   @returns Installed or located protocol.
   @retval NULL  There was an error locating or installing the protocol.
@@ -26,7 +29,10 @@
 **/
 APPLE_SECURE_BOOT_PROTOCOL *
 OcAppleSecureBootInstallProtocol (
-  IN BOOLEAN  Reinstall
+  IN BOOLEAN  Reinstall,
+  IN UINT8    SbPolicy,
+  IN UINT8    SbWinPolicy OPTIONAL,
+  IN BOOLEAN  SbWinPolicyValid
   );
 
 #endif // OC_APPLE_SECURE_BOOT_LIB_H

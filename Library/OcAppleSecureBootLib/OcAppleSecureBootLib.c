@@ -34,6 +34,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 STATIC BOOLEAN mSbAvailable = TRUE;
 
+STATIC UINT32  mSbPolicy             = AppleImg4SbModeMedium;
+STATIC UINT32  mSbWindowsPolicy      = 1;
+STATIC BOOLEAN mSbWindowsPolicyValid = TRUE;
+
 STATIC
 UINT8
 InternalImg4GetFailureReason (
@@ -169,10 +173,6 @@ AppleSbGetWindowsPolicy (
   OUT UINT8                       *Policy
   )
 {
-  EFI_STATUS Status;
-  UINTN      DataSize;
-  UINT8      SbPolicy;
-
   if (Policy == NULL) {
     return EFI_INVALID_PARAMETER;
   }
@@ -182,19 +182,11 @@ AppleSbGetWindowsPolicy (
     return EFI_SUCCESS;
   }
 
-  DataSize = sizeof (SbPolicy);
-  Status = gRT->GetVariable (
-                  L"AppleSecureBootWindowsPolicy",
-                  &gAppleSecureBootVariableGuid,
-                  NULL,
-                  &DataSize,
-                  &SbPolicy
-                  );
-  if (EFI_ERROR (Status)) {
+  if (!mSbWindowsPolicyValid) {
     return EFI_NOT_FOUND;
   }
 
-  *Policy = SbPolicy;
+  *Policy = mSbWindowsPolicy;
   return EFI_SUCCESS;
 }
 
@@ -483,10 +475,6 @@ AppleSbGetPolicy (
   OUT UINT8                       *Policy
   )
 {
-  EFI_STATUS Status;
-  UINTN      DataSize;
-  UINT8      SbPolicy;
-
   if (Policy == NULL) {
     return EFI_INVALID_PARAMETER;
   }
@@ -496,21 +484,7 @@ AppleSbGetPolicy (
     return EFI_SUCCESS;
   }
 
-  *Policy = 2;
-
-  DataSize = sizeof (SbPolicy);
-  Status = gRT->GetVariable (
-                  L"AppleSecureBootPolicy",
-                  &gAppleSecureBootVariableGuid,
-                  NULL,
-                  &DataSize,
-                  &SbPolicy
-                  );
-  if (EFI_ERROR (Status)) {
-    return EFI_NOT_FOUND;
-  }
-
-  *Policy = SbPolicy;
+  *Policy = mSbPolicy;
   return EFI_SUCCESS;
 }
 
@@ -978,7 +952,10 @@ AppleSbVerifyWindows (
 /**
   Install and initialise the Apple Secure Boot protocol.
 
-  @param[in] Reinstall  Replace any installed protocol.
+  @param[in] Reinstall          Replace any installed protocol.
+  @param[in] SbPolicy           Apple Secure Boot Policy to install.
+  @param[in] SbWinPolicy        Apple Secure Boot Windows Policy to install.
+  @param[in] SbWinPolicyValid   Whether SbWinPolicy should be installed.
 
   @returns Installed or located protocol.
   @retval NULL  There was an error locating or installing the protocol.
@@ -986,7 +963,10 @@ AppleSbVerifyWindows (
 **/
 APPLE_SECURE_BOOT_PROTOCOL *
 OcAppleSecureBootInstallProtocol (
-  IN BOOLEAN  Reinstall
+  IN BOOLEAN  Reinstall,
+  IN UINT8    SbPolicy,
+  IN UINT8    SbWinPolicy OPTIONAL,
+  IN BOOLEAN  SbWinPolicyValid
   )
 {
   STATIC APPLE_SECURE_BOOT_PROTOCOL SecureBoot = {
@@ -1009,6 +989,7 @@ OcAppleSecureBootInstallProtocol (
   EFI_STATUS                 Status;
   APPLE_SECURE_BOOT_PROTOCOL *Protocol;
   EFI_HANDLE                 Handle;
+  UINTN                      DataSize;
 
   if (Reinstall) {
     Status = UninstallAllProtocolInstances (&gAppleSecureBootProtocolGuid);
@@ -1036,6 +1017,29 @@ OcAppleSecureBootInstallProtocol (
                   );
   if (EFI_ERROR (Status)) {
     return NULL;
+  }
+
+  mSbPolicy             = SbPolicy;
+  mSbWindowsPolicy      = SbWinPolicy;
+  mSbWindowsPolicyValid = SbWinPolicyValid;
+
+  DataSize = sizeof (SbPolicy);
+  gRT->SetVariable (
+          L"AppleSecureBootPolicy",
+          &gAppleSecureBootVariableGuid,
+          EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+          DataSize,
+          &SbPolicy
+          );
+  if (SbWinPolicyValid) {
+    DataSize = sizeof (SbWinPolicy);
+    gRT->SetVariable (
+           L"AppleSecureBootWindowsPolicy",
+           &gAppleSecureBootVariableGuid,
+           EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+           DataSize,
+           &SbWinPolicy
+           );
   }
 
   return &SecureBoot;
