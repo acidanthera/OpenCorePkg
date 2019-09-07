@@ -1395,6 +1395,28 @@ MachoExpandImage64 (
 
     CurrentDelta = OriginalDelta + (UINT32)(Segment->Size - Segment->FileSize);
   }
+  //
+  // CurrentSize will only be 0 if there are no valid segments, which is the
+  // case for Kernel Resource KEXTs.  In this case, try to use the raw file.
+  //
+  if (CurrentSize == 0) {
+    CurrentSize = MachoGetFileSize (Context);
+    //
+    // HeaderSize must be at most as big as the file size by OcMachoLib
+    // guarantees. It's sanity-checked to ensure the safety of the subtraction.
+    //
+    ASSERT (CurrentSize >= HeaderSize);
+
+    if (CurrentSize > DestinationSize) {
+      return 0;
+    }
+
+    CopyMem (
+      Destination + HeaderSize,
+      (UINT8 *)Header + HeaderSize,
+      CurrentSize - HeaderSize
+      );
+  }
 
   if (Strip) {
     InternalStripLoadCommands64 ((MACH_HEADER_64 *) Destination);

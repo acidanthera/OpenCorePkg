@@ -1301,6 +1301,10 @@ InternalPrelinkKext64 (
   if ((MachHeader->Flags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) == 0) {
     return RETURN_SUCCESS;
   }
+
+  if (Kext->Context.VirtualKmod == 0) {
+    return RETURN_UNSUPPORTED;
+  }
   //
   // Retrieve the symbol tables required for most following operations.
   //
