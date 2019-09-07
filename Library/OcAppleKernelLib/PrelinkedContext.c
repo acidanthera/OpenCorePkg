@@ -87,11 +87,12 @@ PrelinkedFindLastLoadAddress (
 }
 
 STATIC
-UINT64
+BOOLEAN
 PrelinkedFindKmodAddress (
-  IN OC_MACHO_CONTEXT  *ExecutableContext,
-  IN UINT64            LoadAddress,
-  IN UINT32            Size
+  IN  OC_MACHO_CONTEXT  *ExecutableContext,
+  IN  UINT64            LoadAddress,
+  IN  UINT32            Size,
+  OUT UINT64            *Kmod
   )
 {
   MACH_NLIST_64            *Symbol;
@@ -104,14 +105,15 @@ PrelinkedFindKmodAddress (
   while (TRUE) {
     Symbol = MachoGetSymbolByIndex64 (ExecutableContext, Index);
     if (Symbol == NULL) {
-      return 0;
+      *Kmod = 0;
+      return TRUE;
     }
 
     if ((Symbol->Type & MACH_N_TYPE_STAB) == 0) {
       SymbolName = MachoGetSymbolName64 (ExecutableContext, Symbol);
       if (SymbolName && AsciiStrCmp (SymbolName, "_kmod_info") == 0) {
         if (!MachoIsSymbolValueInRange64 (ExecutableContext, Symbol)) {
-          return 0;
+          return FALSE;
         }
         break;
       }
@@ -122,16 +124,17 @@ PrelinkedFindKmodAddress (
 
   TextSegment = MachoGetSegmentByName64 (ExecutableContext, "__TEXT");
   if (TextSegment == NULL || TextSegment->FileOffset > TextSegment->VirtualAddress) {
-    return 0;
+    return FALSE;
   }
 
   Address = TextSegment->VirtualAddress - TextSegment->FileOffset;
   if (OcOverflowTriAddU64 (Address, LoadAddress, Symbol->Value, &Address)
     || Address > LoadAddress + Size - sizeof (KMOD_INFO_64_V1)) {
-    return 0;
+    return FALSE;
   }
 
-  return Address;
+  *Kmod = Address;
+  return TRUE;
 }
 
 RETURN_STATUS
@@ -495,6 +498,7 @@ PrelinkedInjectKext (
   )
 {
   RETURN_STATUS     Status;
+  BOOLEAN           Result;
 
   XML_DOCUMENT      *InfoPlistDocument;
   XML_NODE          *InfoPlistRoot;
@@ -553,8 +557,8 @@ PrelinkedInjectKext (
       return RETURN_INVALID_PARAMETER;
     }
 
-    KmodAddress = PrelinkedFindKmodAddress (&ExecutableContext, Context->PrelinkedLastLoadAddress, ExecutableSize);
-    if (KmodAddress == 0) {
+    Result = PrelinkedFindKmodAddress (&ExecutableContext, Context->PrelinkedLastLoadAddress, ExecutableSize, &KmodAddress);
+    if (!Result) {
       return RETURN_INVALID_PARAMETER;
     }
   }
