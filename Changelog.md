@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 
 #### v0.5.1
+- Added support of kernel resource kext injection
 
 #### v0.5.0
 - Added builtin firmware versions for new models 2019
