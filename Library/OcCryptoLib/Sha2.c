@@ -306,9 +306,9 @@ Sha256Final (
 
 VOID
 Sha256 (
-  UINT8  *Hash,
-  UINT8  *Data,
-  UINTN  Len
+  UINT8        *Hash,
+  CONST UINT8  *Data,
+  UINTN        Len
   )
 {
   SHA256_CONTEXT  Ctx;
