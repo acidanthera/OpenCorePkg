@@ -1730,7 +1730,7 @@ behaviour that does not go to any other sections
   screen output. Some firmwares do not provide it, yet select operating systems
   require its presence, which is what \texttt{ConsoleControl} UEFI protocol is for.
 
-  When console control is available, OpenCore can be made console control aware, and
+  When console control is available, OpenCore can be made console control aware,
   and set different modes for the operating system booter (\texttt{ConsoleBehaviourOs}),
   which normally runs in graphics mode, and its own user interface
   (\texttt{ConsoleBehaviourUi}), which normally runs in text mode. Possible
@@ -3673,9 +3673,14 @@ To obtain the log during boot you can make the use of serial port debugging. Ser
 debugging is enabled in \texttt{Target}, e.g. \texttt{0xB} for onscreen with serial. OpenCore
 uses \texttt{115200} baud rate, \texttt{8} data bits, no parity, and \texttt{1} stop bit.
 For macOS your best choice are CP2102-based UART devices. Connect motherboard \texttt{TX}
-to USB UART \texttt{GND}, and motherboard \texttt{GND} to USB UART \texttt{RX}. Use
+to USB UART \texttt{RX}, and motherboard \texttt{GND} to USB UART \texttt{GND}. Use
 \texttt{screen} utility to get the output, or download GUI software, such as
 \href{https://freeware.the-meiers.org}{CoolTerm}.
+
+\emph{Note}: On several motherboards (and possibly USB UART dongles) PIN naming may be
+incorrect. It is very common to have \texttt{GND} swapped with \texttt{RX}, thus you have
+to connect motherboard ``\texttt{TX}'' to USB UART \texttt{GND}, and motherboard ``\texttt{GND}''
+to USB UART \texttt{RX}.
 
 Remember to enable \texttt{COM} port in firmware settings, and never use USB cables longer
 than 1 meter to avoid output corruption. To additionally enable XNU kernel serial output

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Sep  6 23:59:43 2019
-%DIF ADD ../Configuration.tex        Sat Sep  7 17:24:42 2019
+%DIF ADD ../Configuration.tex        Tue Sep 10 02:08:46 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1776,12 +1776,12 @@ behaviour that does not go to any other sections
   \textbf{Description}: Sets console output mode as specified
   with the \texttt{WxH} (e.g. \texttt{80x24}) formatted string.
   Set to empty string not to change console mode. Set to \texttt{Max}
-  to try to use largest available console mode\DIFaddbegin \DIFadd{.
+  to try to use largest available console mode.
+
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: This field is best to be left empty on most firmwares.
 }
 
-  \emph{\DIFadd{Note}}\DIFadd{: This field is best to be left empty on most firmwares}\DIFaddend .
-
-\item
+\DIFaddend \item
   \texttt{ConsoleBehaviourOs}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
@@ -1791,8 +1791,8 @@ behaviour that does not go to any other sections
   screen output. Some firmwares do not provide it, yet select operating systems
   require its presence, which is what \texttt{ConsoleControl} UEFI protocol is for.
 
-  When console control is available, OpenCore can be made console control aware, and
-  and set different modes for the operating system booter (\texttt{ConsoleBehaviourOs}),
+  When console control is available, OpenCore can be made console control aware,
+  and \DIFdelbegin \DIFdel{and }\DIFdelend set different modes for the operating system booter (\texttt{ConsoleBehaviourOs}),
   which normally runs in graphics mode, and its own user interface
   (\texttt{ConsoleBehaviourUi}), which normally runs in text mode. Possible
   behaviours, set as values of these options, include:
@@ -3734,9 +3734,15 @@ To obtain the log during boot you can make the use of serial port debugging. Ser
 debugging is enabled in \texttt{Target}, e.g. \texttt{0xB} for onscreen with serial. OpenCore
 uses \texttt{115200} baud rate, \texttt{8} data bits, no parity, and \texttt{1} stop bit.
 For macOS your best choice are CP2102-based UART devices. Connect motherboard \texttt{TX}
-to USB UART \texttt{GND}, and motherboard \texttt{GND} to USB UART \texttt{RX}. Use
+to USB UART \texttt{\DIFdelbegin \DIFdel{GND}\DIFdelend \DIFaddbegin \DIFadd{RX}\DIFaddend }, and motherboard \texttt{GND} to USB UART \texttt{\DIFdelbegin \DIFdel{RX}\DIFdelend \DIFaddbegin \DIFadd{GND}\DIFaddend }. Use
 \texttt{screen} utility to get the output, or download GUI software, such as
-\href{https://freeware.the-meiers.org}{CoolTerm}.
+\href{https://freeware.the-meiers.org}{CoolTerm}\DIFaddbegin \DIFadd{.
+}
+
+\emph{\DIFadd{Note}}\DIFadd{: On several motherboards (and possibly USB UART dongles) PIN naming may be
+incorrect. It is very common to have }\texttt{\DIFadd{GND}} \DIFadd{swapped with }\texttt{\DIFadd{RX}}\DIFadd{, thus you have
+to connect motherboard ``}\texttt{\DIFadd{TX}}\DIFadd{'' to USB UART }\texttt{\DIFadd{GND}}\DIFadd{, and motherboard ``}\texttt{\DIFadd{GND}}\DIFadd{''
+to USB UART }\texttt{\DIFadd{RX}}\DIFaddend .
 
 Remember to enable \texttt{COM} port in firmware settings, and never use USB cables longer
 than 1 meter to avoid output corruption. To additionally enable XNU kernel serial output
