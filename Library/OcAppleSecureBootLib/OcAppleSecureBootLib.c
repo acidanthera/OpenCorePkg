@@ -34,15 +34,15 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 STATIC BOOLEAN mSbAvailable = TRUE;
 
-STATIC UINT32  mSbPolicy             = AppleImg4SbModeMedium;
-STATIC UINT32  mSbWindowsPolicy      = 1;
+STATIC UINT8   mSbPolicy             = AppleImg4SbModeMedium;
+STATIC UINT8   mSbWindowsPolicy      = 1;
 STATIC BOOLEAN mSbWindowsPolicyValid = TRUE;
 
 STATIC
 UINT8
 InternalImg4GetFailureReason (
   IN APPLE_SECURE_BOOT_PROTOCOL  *This,
-  IN UINT32                      SbPolicy,
+  IN UINT8                       SbPolicy,
   IN EFI_STATUS                  Status
   )
 {
