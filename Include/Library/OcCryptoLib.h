@@ -305,4 +305,55 @@ Sha384 (
   UINTN        Len
   );
 
+/**
+  Performs a cryptographically secure comparison of the contents of two
+  buffers.
+
+  This function compares Length bytes of SourceBuffer to Length bytes of
+  DestinationBuffer in a cryptographically secure fashion. This especially
+  implies that different lengths of the longest shared prefix do not change
+  execution time in a way relevant to security.
+
+  If Length > 0 and DestinationBuffer is NULL, then ASSERT().
+  If Length > 0 and SourceBuffer is NULL, then ASSERT().
+  If Length is greater than (MAX_ADDRESS - DestinationBuffer + 1), then ASSERT().
+  If Length is greater than (MAX_ADDRESS - SourceBuffer + 1), then ASSERT().
+
+  @param  DestinationBuffer The pointer to the destination buffer to compare.
+  @param  SourceBuffer      The pointer to the source buffer to compare.
+  @param  Length            The number of bytes to compare.
+
+  @return 0                 All Length bytes of the two buffers are identical.
+  @retval -1                The two buffers are not identical within Length
+                            bytes.
+**/
+INTN
+SecureCompareMem (
+  IN CONST VOID  *DestinationBuffer,
+  IN CONST VOID  *SourceBuffer,
+  IN UINTN       Length
+  );
+
+/**
+  Verify Password and Salt against RefHash.  The used hash function is SHA-512,
+  thus the caller must ensure RefHash is at least 64 bytes in size.
+
+  @param[in] Password      The entered password to verify.
+  @param[in] PasswordSize  The size, in bytes, of Password.
+  @param[in] Salt          The cryptographic salt appended to Password on hash.
+  @param[in] SaltSize      The size, in bytes, of Salt.
+  @param[in] RefHash       The SHA-512 hash of the reference password and Salt.
+
+  @returns Whether Password and Salt cryptographically match RefHash.
+
+**/
+BOOLEAN
+OcVerifyPasswordSha512 (
+  IN CONST UINT8  *Password,
+  IN UINT32       PasswordSize,
+  IN CONST UINT8  *Salt,
+  IN UINT32       SaltSize,
+  IN CONST UINT8  *RefHash
+  );
+
 #endif // OC_CRYPTO_LIB_H
