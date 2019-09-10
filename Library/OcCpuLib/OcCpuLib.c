@@ -672,6 +672,18 @@ ScanIntelProcessor (
     ));
 
   //
+  // Calculate the Tsc frequency
+  //
+  DEBUG_CODE_BEGIN ();
+  TimerAddr = OcGetPmTimerAddr (&TimerSourceType);
+  DEBUG ((DEBUG_INFO, "OCCPU: Timer address is %Lx from %a\n", (UINT64) TimerAddr, TimerSourceType));
+  DEBUG_CODE_END ();
+  Cpu->CPUFrequencyFromTSC = GetPerformanceCounterProperties (NULL, NULL);
+
+  TscAdjust = AsmReadMsr64 (MSR_IA32_TSC_ADJUST);
+  DEBUG ((DEBUG_INFO, "OCCPU: TSC Adjust %Lu\n", TscAdjust));
+
+  //
   // Determine our core crystal clock frequency
   //
   if (Cpu->MaxId >= CPUID_TIME_STAMP_COUNTER) {
@@ -714,22 +726,26 @@ ScanIntelProcessor (
       // Calculate it by dividing the TSC frequency by the TSC ratio.
       //
       if (Cpu->ARTFrequency == 0 && Cpu->MaxId >= CPUID_PROCESSOR_FREQUENCY) {
-        AsmCpuid (CPUID_PROCESSOR_FREQUENCY, &CpuidFrequencyEax.Uint32, NULL, NULL, NULL);
         Cpu->ARTFrequency = MultThenDivU64x64x32(
-          MultU64x32 (CpuidFrequencyEax.Bits.ProcessorBaseFrequency, 1000000),
+          Cpu->CPUFrequencyFromTSC,
           CpuidDenominatorEax,
           CpuidNumeratorEbx,
           NULL
           );
-        if (Cpu->ARTFrequency > 0) {
+        if (Cpu->ARTFrequency > 0ULL) {
           DEBUG ((
             DEBUG_INFO,
-            "OCCPU: Core Crystal Clock Frequency from Base Frequency %5LuMhz = %LuMhz * %u / %u\n",
-            DivU64x32 (Cpu->ARTFrequency, 1000000),
-            CpuidFrequencyEax.Bits.ProcessorBaseFrequency,
+            "OCCPU: Core Crystal Clock Frequency from TSC %11LuHz = %11LuHz * %u / %u\n",
+            Cpu->ARTFrequency,
+            Cpu->CPUFrequencyFromTSC,
             CpuidDenominatorEax,
             CpuidNumeratorEbx
             ));
+          //
+          // Use the reported CPU frequency rather than deriving it from ARTFrequency
+          //
+          AsmCpuid (CPUID_PROCESSOR_FREQUENCY, &CpuidFrequencyEax.Uint32, NULL, NULL, NULL);
+          Cpu->CPUFrequencyFromART = MultU64x32 (CpuidFrequencyEax.Bits.ProcessorBaseFrequency, 1000000);
         }
       }
 
@@ -737,22 +753,21 @@ ScanIntelProcessor (
       // If we still can't determine the core crystal clock frequency, assume
       // it's 24 Mhz like most Intel chips to date.
       //
-      if (Cpu->ARTFrequency == 0) {
+      if (Cpu->ARTFrequency == 0ULL) {
         Cpu->ARTFrequency = DEFAULT_ART_CLOCK_SOURCE;
-        DEBUG ((DEBUG_INFO, "OCCPU: Fallback Core Crystal Clock Frequency %LuHz\n", Cpu->ARTFrequency));
+        DEBUG ((DEBUG_INFO, "OCCPU: Fallback Core Crystal Clock Frequency %11LuHz\n", Cpu->ARTFrequency));
       }
 
-      TscAdjust = AsmReadMsr64 (MSR_IA32_TSC_ADJUST);
-      DEBUG ((DEBUG_INFO, "OCCPU: TSC Adjust %Lu\n", TscAdjust));
-
       ASSERT (Cpu->ARTFrequency > 0ULL);
-      Cpu->CPUFrequencyFromART = MultThenDivU64x64x32 (
-        Cpu->ARTFrequency,
-        CpuidNumeratorEbx,
-        CpuidDenominatorEax,
-        NULL
-        );
-
+      if (Cpu->CPUFrequencyFromART == 0ULL) {
+        Cpu->CPUFrequencyFromART = MultThenDivU64x64x32 (
+          Cpu->ARTFrequency,
+          CpuidNumeratorEbx,
+          CpuidDenominatorEax,
+          NULL
+          );
+      }
+      ASSERT (Cpu->CPUFrequencyFromART > 0ULL);
       DEBUG ((
         DEBUG_INFO,
         "OCCPU: CPUFrequencyFromART %11LuHz %5LuMHz = %Lu * %u / %u\n",
@@ -764,15 +779,6 @@ ScanIntelProcessor (
         ));
     }
   }
-
-  //
-  // Calculate the Tsc frequency
-  //
-  DEBUG_CODE_BEGIN ();
-  TimerAddr = OcGetPmTimerAddr (&TimerSourceType);
-  DEBUG ((DEBUG_INFO, "OCCPU: Timer address is %Lx from %a\n", (UINT64) TimerAddr, TimerSourceType));
-  DEBUG_CODE_END ();
-  Cpu->CPUFrequencyFromTSC = GetPerformanceCounterProperties (NULL, NULL);
 
   //
   // Calculate CPU frequency based on ART if present, otherwise TSC
