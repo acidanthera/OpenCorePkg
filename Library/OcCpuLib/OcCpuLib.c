@@ -680,13 +680,13 @@ ScanIntelProcessor (
   DEBUG_CODE_END ();
   Cpu->CPUFrequencyFromTSC = GetPerformanceCounterProperties (NULL, NULL);
 
-  TscAdjust = AsmReadMsr64 (MSR_IA32_TSC_ADJUST);
-  DEBUG ((DEBUG_INFO, "OCCPU: TSC Adjust %Lu\n", TscAdjust));
-
   //
   // Determine our core crystal clock frequency
   //
   if (Cpu->MaxId >= CPUID_TIME_STAMP_COUNTER) {
+    TscAdjust = AsmReadMsr64 (MSR_IA32_TSC_ADJUST);
+    DEBUG ((DEBUG_INFO, "OCCPU: TSC Adjust %Lu\n", TscAdjust));
+
     AsmCpuid (
       CPUID_TIME_STAMP_COUNTER,
       &CpuidDenominatorEax,
