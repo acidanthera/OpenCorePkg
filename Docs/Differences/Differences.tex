@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Sep  6 23:59:43 2019
-%DIF ADD ../Configuration.tex        Tue Sep 10 02:08:46 2019
+%DIF DEL PreviousConfiguration.tex   Wed Sep 18 03:30:18 2019
+%DIF ADD ../Configuration.tex        Wed Sep 18 22:13:33 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1757,8 +1757,9 @@ behaviour that does not go to any other sections
   See \hyperref[miscentryprops]{Entry Properties} section below.
 
   \emph{Note}: Select tools, for example,
-  \href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} or
-  \href{https://github.com/acidanthera/AppleSupportPkg#cleannvram}{CleanNvram} are very
+  \href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} \DIFdelbegin \DIFdel{or
+  }%DIFDELCMD < \href{https://github.com/acidanthera/AppleSupportPkg#cleannvram}{CleanNvram} %%%
+\DIFdelend are very
   dangerous and \textbf{MUST NOT} appear in production configurations, especially
   in vaulted ones and protected with secure boot, as they may be used to easily
   bypass secure boot chain.
@@ -2306,7 +2307,7 @@ rm vault.pub
   Example: \texttt{PciRoot(0x0)/Pci(0x1,0x1)/.../\textbackslash EFI\textbackslash COOL.EFI}
   \item \texttt{Tools} specify internal boot options, which are part of bootloader
   vault, and therefore take file paths relative to \texttt{OC/Tools} directory.
-  Example: \texttt{CleanNvram.efi}.
+  Example: \texttt{\DIFdelbegin \DIFdel{CleanNvram}\DIFdelend \DIFaddbegin \DIFadd{Shell}\DIFaddend .efi}.
   \end{itemize}
 
 \end{enumerate}

@@ -1697,8 +1697,7 @@ behaviour that does not go to any other sections
   See \hyperref[miscentryprops]{Entry Properties} section below.
 
   \emph{Note}: Select tools, for example,
-  \href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} or
-  \href{https://github.com/acidanthera/AppleSupportPkg#cleannvram}{CleanNvram} are very
+  \href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} are very
   dangerous and \textbf{MUST NOT} appear in production configurations, especially
   in vaulted ones and protected with secure boot, as they may be used to easily
   bypass secure boot chain.
@@ -2245,7 +2244,7 @@ rm vault.pub
   Example: \texttt{PciRoot(0x0)/Pci(0x1,0x1)/.../\textbackslash EFI\textbackslash COOL.EFI}
   \item \texttt{Tools} specify internal boot options, which are part of bootloader
   vault, and therefore take file paths relative to \texttt{OC/Tools} directory.
-  Example: \texttt{CleanNvram.efi}.
+  Example: \texttt{Shell.efi}.
   \end{itemize}
 
 \end{enumerate}
