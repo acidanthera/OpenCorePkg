@@ -5,6 +5,7 @@ OpenCore Changelog
 - Added support of kernel resource kext injection
 - Added support for 0.25% clock slowdown on Xeon Scalable CPUs (thx @mrmiller)
 - Replaced `MatchKernel` with `MinKernel` and `MaxKernel`
+- Added `Arguments` to `Tools` and `Entries` sections
 
 #### v0.5.0
 - Added builtin firmware versions for new models 2019
