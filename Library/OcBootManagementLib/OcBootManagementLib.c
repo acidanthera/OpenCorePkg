@@ -169,6 +169,12 @@ OcResetBootEntry (
     FreePool (BootEntry->PathName);
     BootEntry->PathName = NULL;
   }
+
+  if (BootEntry->LoadOptions != NULL) {
+    FreePool (BootEntry->LoadOptions);
+    BootEntry->LoadOptions     = NULL;
+    BootEntry->LoadOptionsSize = 0;
+  }
 }
 
 VOID
@@ -390,7 +396,7 @@ OcScanForBootEntries (
     }
 
     Entries[EntryIndex].Type = OcBootCustom;
- 
+
     if (Index < Context->AbsoluteEntryCount) {
       Entries[EntryIndex].DevicePath = ConvertTextToDevicePath (PathName);
       FreePool (PathName);
@@ -424,6 +430,17 @@ OcScanForBootEntries (
     } else {
       UnicodeUefiSlashes (PathName);
       Entries[EntryIndex].PathName = PathName;
+    }
+
+    Entries[EntryIndex].LoadOptionsSize = AsciiStrLen (Context->CustomEntries[Index].Arguments);
+    if (Entries[EntryIndex].LoadOptionsSize > 0) {
+      Entries[EntryIndex].LoadOptions = AllocateCopyPool (
+        Entries[EntryIndex].LoadOptionsSize + 1,
+        Context->CustomEntries[Index].Arguments
+        );
+      if (Entries[EntryIndex].LoadOptions == NULL) {
+        Entries[EntryIndex].LoadOptionsSize = 0;
+      }
     }
 
     ++EntryIndex;

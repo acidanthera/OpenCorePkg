@@ -299,6 +299,10 @@ typedef struct {
   // Entry path.
   //
   CONST CHAR8  *Path;
+  //
+  // Entry boot arguments.
+  //
+  CONST CHAR8  *Arguments;
 } OC_PICKER_ENTRY;
 
 /**

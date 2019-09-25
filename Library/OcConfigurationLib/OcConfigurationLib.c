@@ -330,10 +330,11 @@ mMiscConfigurationSecuritySchema[] = {
 STATIC
 OC_SCHEMA
 mMiscToolsSchemaEntry[] = {
-  OC_SCHEMA_STRING_IN  ("Comment",  OC_MISC_TOOLS_ENTRY, Comment),
-  OC_SCHEMA_BOOLEAN_IN ("Enabled",  OC_MISC_TOOLS_ENTRY, Enabled),
-  OC_SCHEMA_STRING_IN  ("Name",     OC_MISC_TOOLS_ENTRY, Name),
-  OC_SCHEMA_STRING_IN  ("Path",     OC_MISC_TOOLS_ENTRY, Path),
+  OC_SCHEMA_STRING_IN  ("Comment",   OC_MISC_TOOLS_ENTRY, Comment),
+  OC_SCHEMA_STRING_IN  ("Arguments", OC_MISC_TOOLS_ENTRY, Arguments),
+  OC_SCHEMA_BOOLEAN_IN ("Enabled",   OC_MISC_TOOLS_ENTRY, Enabled),
+  OC_SCHEMA_STRING_IN  ("Name",      OC_MISC_TOOLS_ENTRY, Name),
+  OC_SCHEMA_STRING_IN  ("Path",      OC_MISC_TOOLS_ENTRY, Path),
 };
 
 STATIC
