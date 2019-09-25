@@ -249,7 +249,9 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/Lilu</string>
-				<key>MatchKernel</key>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
 				<string></string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
@@ -263,7 +265,9 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VirtualSMC</string>
-				<key>MatchKernel</key>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
 				<string></string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
@@ -277,7 +281,9 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/WhateverGreen</string>
-				<key>MatchKernel</key>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
 				<string></string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
@@ -291,7 +297,9 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/AppleALC</string>
-				<key>MatchKernel</key>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
 				<string></string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
@@ -305,7 +313,9 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/IntelMausi</string>
-				<key>MatchKernel</key>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
 				<string></string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
@@ -319,7 +329,9 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string></string>
-				<key>MatchKernel</key>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
 				<string></string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
@@ -341,7 +353,9 @@
 				<false/>
 				<key>Identifier</key>
 				<string>com.apple.driver.AppleTyMCEDriver</string>
-				<key>MatchKernel</key>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
 				<string></string>
 			</dict>
 		</array>
@@ -364,7 +378,9 @@
 				<integer>0</integer>
 				<key>Mask</key>
 				<data></data>
-				<key>MatchKernel</key>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
 				<string></string>
 				<key>Replace</key>
 				<data>6y4Ptg==</data>
@@ -390,7 +406,9 @@
 				<integer>0</integer>
 				<key>Mask</key>
 				<data></data>
-				<key>MatchKernel</key>
+				<key>MaxKernel</key>
+				<string>18.5.0</string>
+				<key>MinKernel</key>
 				<string>18.5.0</string>
 				<key>Replace</key>
 				<data>6zMPtw==</data>
@@ -416,7 +434,9 @@
 				<integer>0</integer>
 				<key>Mask</key>
 				<data></data>
-				<key>MatchKernel</key>
+				<key>MaxKernel</key>
+				<string>18.5.0</string>
+				<key>MinKernel</key>
 				<string>18.5.0</string>
 				<key>Replace</key>
 				<data>ww==</data>
@@ -442,7 +462,9 @@
 				<integer>0</integer>
 				<key>Mask</key>
 				<data>/wAA////////////</data>
-				<key>MatchKernel</key>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
 				<string></string>
 				<key>Replace</key>
 				<data>uLQWAABmiYMABQAA</data>
