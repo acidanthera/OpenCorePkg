@@ -12,6 +12,7 @@
 \usepackage{longtable,booktabs}
 \usepackage{footnote}
 \usepackage{listings}
+\usepackage{mathtools}
 \usepackage{parskip}
 \usepackage[margin=0.7in]{geometry}
 \usepackage{titlesec}
@@ -25,6 +26,14 @@
 \tikzstyle{optional}=[dashed,fill=gray!50]
 
 \renewcommand{\dateseparator}{.}
+
+\makeatletter
+\newcommand*{\bdiv}{%
+  \nonscript\mskip-\medmuskip\mkern5mu%
+  \mathbin{\operator@font div}\penalty900\mkern5mu%
+  \nonscript\mskip-\medmuskip
+}
+\makeatother
 
 % Newer LaTeX versions should not add ligatures to listings, but for some reason
 % it is not the case for me. As a result select PDF viewers copy wrong data.
@@ -730,6 +739,10 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
   \textbf{Description}: Match table signature to be equal to this value
   unless all zero.
 
+  \emph{Note}: Make sure not to specify table signature when the sequence
+  needs to be replaced in multiple places. Especially when performing
+  different kinds of renames.
+
 \end{enumerate}
 
 \subsection{Patch Properties}\label{acpipropspatch}
@@ -999,7 +1012,7 @@ sudo pmset powernap 0
 sudo pmset standby 0
 \end{lstlisting}
 
-\emph{Note}: these settings may reset at hardware change and in certain other circumstances.
+\emph{Note}: These settings may reset at hardware change and in certain other circumstances.
 To view their current state use \texttt{pmset -g} command in Terminal.
 
 \subsection{Properties}\label{booterprops}
@@ -1350,13 +1363,56 @@ blocking.
   (e.g. \texttt{Contents/MacOS/Lilu}).
 
 \item
-  \texttt{MatchKernel}\\
+  \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Adds kernel driver on selected macOS version only.
-  The selection happens based on prefix match with the kernel version, i.e.
-  \texttt{16.7.0} will match macOS 10.12.6 and \texttt{16.} will match
-  any macOS 10.12.x version.
+  \textbf{Description}: Adds kernel driver on specified macOS version or older.
+
+  \hypertarget{kernmatch}Kernel version interpretation is implemented as follows:
+  \begin{align*}
+    \begin{aligned}
+      ParseDarwinVersion(\kappa,\lambda,\mu)=&(\lfloor\frac{\kappa}{10}\rfloor\cdot10
+      + \kappa-\lfloor\frac{\kappa}{10}\rfloor\cdot10)\cdot10000 &&
+        \text{Where }\kappa\in(0,99)\text{ is kernel version major} \\
+      + &(\lfloor\frac{\lambda}{10}\rfloor\cdot10
+      + \lambda-\lfloor\frac{\lambda}{10}\rfloor\cdot10)\cdot100 &&
+        \text{Where }\lambda\in(0,99)\text{ is kernel version minor} \\
+      + &(\lfloor\frac{\mu}{10}\rfloor\cdot10
+      + \mu-\lfloor\frac{\mu}{10}\rfloor\cdot10) &&
+        \text{Where }\mu\in(0,99)\text{ is kernel version patch}
+    \end{aligned}
+  \end{align*}
+  Kernel version comparison is implemented as follows:
+  \begin{align*}
+    \alpha&=\begin{cases}
+      \vspace{-0.5cm}\mbox{\hspace{8cm}} & \mbox{\hspace{5cm}} \\
+      ParseDarwinVersion(\texttt{MinKernel}), & \text{If } \texttt{MinKernel} \text{ is valid} \\
+      0 & Otherwise
+    \end{cases} \\
+    \beta&=\begin{cases}
+      \vspace{-0.5cm}\mbox{\hspace{8cm}} & \mbox{\hspace{5cm}} \\
+      ParseDarwinVersion(\texttt{MaxKernel}), & \text{If } \texttt{MaxKernel} \text{ is valid} \\
+      \infty & Otherwise
+    \end{cases} \\
+    \gamma&=\begin{cases}
+      \vspace{-0.5cm}\mbox{\hspace{8cm}} & \mbox{\hspace{5cm}} \\
+      ParseDarwinVersion(FindDarwinVersion()), & \text{If valid } \texttt{"Darwin Kernel Version"} \text{ is found} \\
+      \infty & Otherwise
+    \end{cases} \\
+    & \hspace{5cm} f(\alpha,\beta,\gamma)=\alpha\leq\gamma\leq\beta
+  \end{align*}
+  Here $ParseDarwinVersion$ argument is assumed to be 3 integers obtained by splitting Darwin kernel version
+  string from left to right by the \texttt{.} symbol. $FindDarwinVersion$ function looks up
+  Darwin kernel version by locating \texttt{"Darwin Kernel Version $\kappa$.$\lambda$.$\mu$"} string
+  in the kernel image.
+
+\item
+  \texttt{MinKernel}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Adds kernel driver on specified macOS version or newer.
+
+  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
 
 \item
   \texttt{PlistPath}\\
@@ -1393,13 +1449,20 @@ blocking.
     (e.g. \texttt{com.apple.driver.AppleTyMCEDriver}).
 
 \item
-  \texttt{MatchKernel}\\
+  \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Blocks kernel driver on selected macOS version only.
-  The selection happens based on prefix match with the kernel version, i.e.
-  \texttt{16.7.0} will match macOS 10.12.6 and \texttt{16.} will match
-  any macOS 10.12.x version.
+  \textbf{Description}: Blocks kernel driver on specified macOS version or older.
+
+  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
+
+\item
+  \texttt{MinKernel}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Blocks kernel driver on specified macOS version or newer.
+
+  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
 
 \end{enumerate}
 
@@ -1494,13 +1557,20 @@ blocking.
   otherwise.
 
 \item
-  \texttt{MatchKernel}\\
+  \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Adds kernel driver to selected macOS version only.
-  The selection happens based on prefix match with the kernel version, i.e.
-  \texttt{16.7.0} will match macOS 10.12.6 and \texttt{16.} will match
-  any macOS 10.12.x version.
+  \textbf{Description}: Patches data on specified macOS version or older.
+
+  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
+
+\item
+  \texttt{MinKernel}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Patches data on specified macOS version or newer.
+
+  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
 
 \item
   \texttt{Replace}\\
