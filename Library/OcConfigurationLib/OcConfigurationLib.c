@@ -207,7 +207,8 @@ mKernelAddSchemaEntry[] = {
   OC_SCHEMA_STRING_IN    ("Comment",        OC_KERNEL_ADD_ENTRY, Comment),
   OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_KERNEL_ADD_ENTRY, Enabled),
   OC_SCHEMA_STRING_IN    ("ExecutablePath", OC_KERNEL_ADD_ENTRY, ExecutablePath),
-  OC_SCHEMA_STRING_IN    ("MatchKernel",    OC_KERNEL_ADD_ENTRY, MatchKernel),
+  OC_SCHEMA_STRING_IN    ("MaxKernel",      OC_KERNEL_ADD_ENTRY, MaxKernel),
+  OC_SCHEMA_STRING_IN    ("MinKernel",      OC_KERNEL_ADD_ENTRY, MinKernel),
   OC_SCHEMA_STRING_IN    ("PlistPath",      OC_KERNEL_ADD_ENTRY, PlistPath),
 };
 
@@ -221,7 +222,8 @@ mKernelBlockSchemaEntry[] = {
   OC_SCHEMA_STRING_IN    ("Comment",        OC_KERNEL_BLOCK_ENTRY, Comment),
   OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_KERNEL_BLOCK_ENTRY, Enabled),
   OC_SCHEMA_STRING_IN    ("Identifier",     OC_KERNEL_BLOCK_ENTRY, Identifier),
-  OC_SCHEMA_STRING_IN    ("MatchKernel",    OC_KERNEL_BLOCK_ENTRY, MatchKernel),
+  OC_SCHEMA_STRING_IN    ("MaxKernel",      OC_KERNEL_BLOCK_ENTRY, MaxKernel),
+  OC_SCHEMA_STRING_IN    ("MinKernel",      OC_KERNEL_BLOCK_ENTRY, MinKernel),
 };
 
 STATIC
@@ -246,7 +248,8 @@ mKernelPatchSchemaEntry[] = {
   OC_SCHEMA_STRING_IN    ("Identifier",     OC_KERNEL_PATCH_ENTRY, Identifier),
   OC_SCHEMA_INTEGER_IN   ("Limit",          OC_KERNEL_PATCH_ENTRY, Limit),
   OC_SCHEMA_DATA_IN      ("Mask",           OC_KERNEL_PATCH_ENTRY, Mask),
-  OC_SCHEMA_STRING_IN    ("MatchKernel",    OC_KERNEL_PATCH_ENTRY, MatchKernel),
+  OC_SCHEMA_STRING_IN    ("MaxKernel",      OC_KERNEL_PATCH_ENTRY, MaxKernel),
+  OC_SCHEMA_STRING_IN    ("MinKernel",      OC_KERNEL_PATCH_ENTRY, MinKernel),
   OC_SCHEMA_DATA_IN      ("Replace",        OC_KERNEL_PATCH_ENTRY, Replace),
   OC_SCHEMA_DATA_IN      ("ReplaceMask",    OC_KERNEL_PATCH_ENTRY, ReplaceMask),
   OC_SCHEMA_INTEGER_IN   ("Skip",           OC_KERNEL_PATCH_ENTRY, Skip)
