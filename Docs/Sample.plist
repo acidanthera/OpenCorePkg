@@ -554,6 +554,8 @@
 		<key>Tools</key>
 		<array>
 			<dict>
+				<key>Arguments</key>
+				<string></string>
 				<key>Name</key>
 				<string>UEFI Shell</string>
 				<key>Comment</key>
@@ -564,6 +566,8 @@
 				<string>Shell.efi</string>
 			</dict>
 			<dict>
+				<key>Arguments</key>
+				<string></string>
 				<key>Name</key>
 				<string>memcheck</string>
 				<key>Comment</key>
@@ -577,6 +581,8 @@
 		<key>Entries</key>
 		<array>
 			<dict>
+				<key>Arguments</key>
+				<string></string>
 				<key>Name</key>
 				<string>CustomOS</string>
 				<key>Comment</key>
