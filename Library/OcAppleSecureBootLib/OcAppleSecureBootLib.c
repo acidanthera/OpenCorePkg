@@ -946,7 +946,7 @@ AppleSbVerifyWindows (
     AppleSbSetWindowsFailureReason (This, Reason);
   }
 
-  return EFI_SUCCESS;
+  return Status;
 }
 
 /**
