@@ -142,7 +142,7 @@ OcKernelReadDarwinVersion (
     DarwinVersion[Index] = (CHAR8) Kernel[Offset];
   }
   DarwinVersion[Index] = '\0';
-  DarwinVersionInteger = OcParseDarwinVersion (DarwinVersion);
+  DarwinVersionInteger = (CHAR8) OcParseDarwinVersion (DarwinVersion);
 
   DEBUG ((
     DEBUG_INFO,
