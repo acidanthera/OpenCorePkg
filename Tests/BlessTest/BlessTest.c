@@ -53,7 +53,6 @@ TestBless (
   OC_BOOT_ENTRY                               *Entries;
   OC_BOOT_ENTRY                               *Chosen;
   UINTN                                       EntryCount;
-  UINT32                                      TimeoutSeconds;
   OC_PICKER_CONTEXT                           PickerContext;
 
   Print (L"TestBless\n");
@@ -66,8 +65,6 @@ TestBless (
     Print (L"Locate gAppleBootPolicyProtocolGuid failed\n");
     return EFI_NOT_FOUND;
   }
-
-  TimeoutSeconds = 5;
 
   ZeroMem (&PickerContext, sizeof (PickerContext));
 
@@ -94,8 +91,6 @@ TestBless (
       OcFreeBootEntries (Entries, EntryCount);
       return Status;
     }
-
-    TimeoutSeconds = 0;
 
     if (!EFI_ERROR (Status)) {
       Print (L"Should boot from %s\n", Chosen->Name);
