@@ -432,7 +432,7 @@ OcScanForBootEntries (
       Entries[EntryIndex].PathName = PathName;
     }
 
-    Entries[EntryIndex].LoadOptionsSize = AsciiStrLen (Context->CustomEntries[Index].Arguments);
+    Entries[EntryIndex].LoadOptionsSize = (UINT32) AsciiStrLen (Context->CustomEntries[Index].Arguments);
     if (Entries[EntryIndex].LoadOptionsSize > 0) {
       Entries[EntryIndex].LoadOptions = AllocateCopyPool (
         Entries[EntryIndex].LoadOptionsSize + 1,
