@@ -56,6 +56,10 @@ RSA_PUBLIC_KEY *
 mOpenCoreVaultKey;
 
 STATIC
+OC_PRIVILEGE_CONTEXT
+mOpenCorePrivilege;
+
+STATIC
 EFI_STATUS
 EFIAPI
 OcStartImage (
@@ -107,6 +111,7 @@ OcMain (
 {
   EFI_STATUS                Status;
   EFI_HANDLE                LoadHandle;
+  OC_PRIVILEGE_CONTEXT      *Privilege;
 
   DEBUG ((DEBUG_INFO, "OC: OcMiscEarlyInit...\n"));
   Status = OcMiscEarlyInit (
@@ -136,11 +141,23 @@ OcMain (
   DEBUG ((DEBUG_INFO, "OC: OcLoadKernelSupport...\n"));
   OcLoadKernelSupport (&mOpenCoreStorage, &mOpenCoreConfiguration, &mOpenCoreCpuInfo);
 
+  if (mOpenCoreConfiguration.Misc.Security.EnablePassword) {
+    mOpenCorePrivilege.CurrentLevel = OcPrivilegeUnauthorized;
+    mOpenCorePrivilege.Hash         = mOpenCoreConfiguration.Misc.Security.PasswordHash;
+    mOpenCorePrivilege.Salt         = OC_BLOB_GET (&mOpenCoreConfiguration.Misc.Security.PasswordSalt);
+    mOpenCorePrivilege.SaltSize     = mOpenCoreConfiguration.Misc.Security.PasswordSalt.Size;
+
+    Privilege = &mOpenCorePrivilege;
+  } else {
+    Privilege = NULL;
+  }
+
   DEBUG ((DEBUG_INFO, "OC: OpenCore is loaded, showing boot menu...\n"));
 
   OcMiscBoot (
     &mOpenCoreStorage,
     &mOpenCoreConfiguration,
+    Privilege,
     OcStartImage,
     mOpenCoreConfiguration.Uefi.Quirks.RequestBootVarRouting,
     LoadHandle

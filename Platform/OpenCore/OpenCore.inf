@@ -73,6 +73,7 @@
   OcAppleBootPolicyLib
   OcAppleEventLib
   OcAppleImageConversionLib
+  OcInputLib
   OcAppleKernelLib
   OcAppleKeyMapLib
   OcAppleUserInterfaceThemeLib

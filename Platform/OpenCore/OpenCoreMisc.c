@@ -339,6 +339,7 @@ VOID
 OcMiscBoot (
   IN  OC_STORAGE_CONTEXT        *Storage,
   IN  OC_GLOBAL_CONFIG          *Config,
+  IN  OC_PRIVILEGE_CONTEXT      *Privilege OPTIONAL,
   IN  OC_IMAGE_START            StartImage,
   IN  BOOLEAN                   CustomBootGuid,
   IN  EFI_HANDLE                LoadHandle OPTIONAL
@@ -449,6 +450,8 @@ OcMiscBoot (
   Context->ExcludeHandle      = LoadHandle;
   Context->CustomEntryContext = Storage;
   Context->CustomRead         = OcToolLoadEntry;
+  Context->PrivilegeContext   = Privilege;
+  Context->RequestPrivilege   = OcShowSimplePasswordRequest;
 
   if (Config->Misc.Boot.ShowPicker) {
     PickerCommand = Context->PickerCommand = OcPickerShowPicker;

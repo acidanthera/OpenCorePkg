@@ -207,6 +207,7 @@ OcMiscLateInit (
 
   @param[in]  Storage         OpenCore storage.
   @param[in]  Config          OpenCore configuration.
+  @param[in]  Privilege       OpenCore privilege context.
   @param[in]  StartImage      Image starting routine used.
   @param[in]  LoadHandle      OpenCore loading handle.
   @param[in]  CustomBootGuid  Use custom (gOcVendorVariableGuid) for Boot#### variables.
@@ -215,6 +216,7 @@ VOID
 OcMiscBoot (
   IN  OC_STORAGE_CONTEXT        *Storage,
   IN  OC_GLOBAL_CONFIG          *Config,
+  IN  OC_PRIVILEGE_CONTEXT      *Privilege OPTIONAL,
   IN  OC_IMAGE_START            StartImage,
   IN  BOOLEAN                   CustomBootGuid,
   IN  EFI_HANDLE                LoadHandle OPTIONAL

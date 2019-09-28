@@ -16,12 +16,14 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Guid/OcVariables.h>
 
+#include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleBootCompatLib.h>
 #include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcAppleEventLib.h>
 #include <Library/OcAppleImageConversionLib.h>
+#include <Library/OcInputLib.h>
 #include <Library/OcAppleKeyMapLib.h>
 #include <Library/OcAppleUserInterfaceThemeLib.h>
 #include <Library/OcConsoleLib.h>
@@ -245,6 +247,32 @@ OcExitBootServicesHandler (
   if (Config->Uefi.Quirks.ExitBootServicesDelay > 0) {
     gBS->Stall (Config->Uefi.Quirks.ExitBootServicesDelay);
   }
+
+  if (Config->Uefi.Input.TimerResolution != 0) {
+    Status = OcAppleGenericInputTimerQuirkExit ();
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: OcAppleGenericInputTimerQuirkExit status - %r\n",
+      Status
+      ));
+  }
+
+  if (Config->Uefi.Input.PointerSupport) {
+    Status = OcAppleGenericInputPointerExit ();
+    DEBUG ((DEBUG_INFO,
+      "OC: OcAppleGenericInputPointerExit status - %r\n",
+      Status
+      ));
+  }
+
+  if (Config->Uefi.Input.KeySupport) {
+    Status = OcAppleGenericInputKeycodeExit ();
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: OcAppleGenericInputKeycodeExit status - %r\n",
+      Status
+      ));
+  }
 }
 
 STATIC
@@ -298,6 +326,82 @@ OcReinstallProtocols (
   }
 }
 
+BOOLEAN
+OcLoadUefiInputSupport (
+  IN OC_GLOBAL_CONFIG  *Config
+  )
+{
+  BOOLEAN               ExitBs;
+  EFI_STATUS            Status;
+  UINT32                TimerResolution;
+  CONST CHAR8           *PointerSupportStr;
+  OC_INPUT_POINTER_MODE PointerMode;
+  OC_INPUT_KEY_MODE     KeyMode;
+  CONST CHAR8           *KeySupportStr;
+
+  ExitBs = FALSE;
+
+  TimerResolution = Config->Uefi.Input.TimerResolution;
+  if (TimerResolution != 0) {
+    Status = OcAppleGenericInputTimerQuirkInit (TimerResolution);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OCGI: Failed to initialize timer quirk\n"));
+    } else {
+      ExitBs = TRUE;
+    }
+  }
+
+  if (Config->Uefi.Input.PointerSupport) {
+    PointerSupportStr = OC_BLOB_GET (&Config->Uefi.Input.PointerSupportMode);
+    PointerMode = OcInputPointerModeMax;
+    if (AsciiStrCmp (PointerSupportStr, "ASUS") == 0) {
+      PointerMode = OcInputPointerModeAsus;
+    } else {
+      DEBUG ((DEBUG_WARN, "OC: Invalid input pointer mode %a\n", PointerSupportStr));
+    }
+
+    if (PointerMode != OcInputPointerModeMax) {
+      Status = OcAppleGenericInputPointerInit (PointerMode);
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_ERROR, "OCGI: Failed to initialize pointer\n"));
+      } else {
+        ExitBs = TRUE;
+      }
+    }
+  }
+
+  if (Config->Uefi.Input.KeySupport) {
+    KeySupportStr = OC_BLOB_GET (&Config->Uefi.Input.KeySupportMode);
+    KeyMode = OcInputKeyModeMax;
+    if (AsciiStrCmp (KeySupportStr, "Auto") == 0) {
+      KeyMode = OcInputKeyModeAuto;
+    } else if (AsciiStrCmp (KeySupportStr, "V1") == 0) {
+      KeyMode = OcInputKeyModeV1;
+    } else if (AsciiStrCmp (KeySupportStr, "V2") == 0) {
+      KeyMode = OcInputKeyModeV2;
+    } else if (AsciiStrCmp (KeySupportStr, "AMI") == 0) {
+      KeyMode = OcInputKeyModeAmi;
+    } else {
+      DEBUG ((DEBUG_WARN, "OC: Invalid input key mode %a\n", KeySupportStr));
+    }
+
+    if (KeyMode != OcInputKeyModeMax) {
+      Status = OcAppleGenericInputKeycodeInit (
+                 KeyMode,
+                 Config->Uefi.Input.KeyForgetThreshold,
+                 Config->Uefi.Input.KeyMergeThreshold
+                 );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_ERROR, "OCGI: Failed to initialize keycode\n"));
+      } else {
+        ExitBs = TRUE;
+      }
+    }
+  }
+
+  return ExitBs;
+}
+
 VOID
 OcLoadBooterUefiSupport (
   IN OC_GLOBAL_CONFIG  *Config
@@ -330,8 +434,11 @@ OcLoadUefiSupport (
   IN OC_CPU_INFO         *CpuInfo
   )
 {
+  BOOLEAN AgiExitBs;
+
   OcReinstallProtocols (Config);
 
+  AgiExitBs = OcLoadUefiInputSupport (Config);
   //
   // Setup Apple bootloader specific UEFI features.
   //
@@ -375,7 +482,8 @@ OcLoadUefiSupport (
     );
 
   if (Config->Uefi.Quirks.ReleaseUsbOwnership
-    || Config->Uefi.Quirks.ExitBootServicesDelay > 0) {
+    || Config->Uefi.Quirks.ExitBootServicesDelay > 0
+    || AgiExitBs) {
     gBS->CreateEvent (
       EVT_SIGNAL_EXIT_BOOT_SERVICES,
       TPL_NOTIFY,
