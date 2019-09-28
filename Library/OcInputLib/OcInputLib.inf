@@ -1,0 +1,86 @@
+## @file
+# Copyright (c) 2016, vit9696. All rights reserved.<BR>
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution.  The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OcInputLib
+  FILE_GUID                      = F39652DB-3D7E-49CC-A66B-E99AC74F5D37
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = OcInputLib|DXE_CORE DXE_SMM_CORE UEFI_DRIVER UEFI_APPLICATION DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SMM_DRIVER DXE_SAL_DRIVER
+
+[Sources]
+  Keycode/AIK.h
+  Keycode/AIK.c
+  Keycode/AIKData.c
+  Keycode/AIKData.h
+  Keycode/AIKMap.c
+  Keycode/AIKShim.c
+  Keycode/AIKShim.h
+  Keycode/AIKSource.c
+  Keycode/AIKSource.h
+  Keycode/AIKTarget.c
+  Keycode/AIKTarget.h
+  Keycode/AIKTranslate.c
+  Keycode/AIKTranslate.h
+  Pointer/AIM.h
+  Pointer/AIM.c
+  Timer/AIT.c
+
+[Packages]
+  EfiPkg/EfiPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  MdePkg/MdePkg.dec
+  OcSupportPkg/OcSupportPkg.dec
+
+[LibraryClasses]
+  BaseMemoryLib
+  DebugLib
+  HiiLib
+  MemoryAllocationLib
+  OcGuardLib
+  PcdLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  UefiLib
+  UefiRuntimeServicesTableLib
+  UefiUsbLib
+
+[Guids]
+  #
+  # Event registered to EFI_HII_SET_KEYBOARD_LAYOUT_EVENT_GUID group,
+  # which will be triggered by EFI_HII_DATABASE_PROTOCOL.SetKeyboardLayout().
+  #
+  gEfiHiiKeyBoardLayoutGuid                     ## SOMETIMES_CONSUMES ## Event
+  gUsbKeyboardLayoutPackageGuid                 ## SOMETIMES_CONSUMES ## HII
+  gUsbKeyboardLayoutKeyGuid                     ## SOMETIMES_PRODUCES ## UNDEFINED
+  gAppleKeyboardPlatformInfoGuid                ## SOMETIMES_CONSUMES
+
+[Protocols]
+  gEfiUsbIoProtocolGuid                         ## TO_START
+  gEfiDevicePathProtocolGuid                    ## TO_START
+  gEfiSimpleTextInProtocolGuid                  ## BY_START
+  gEfiSimpleTextInputExProtocolGuid             ## BY_START
+  gEfiSimplePointerProtocolGuid                 ## BY_START
+  gEfiTimerArchProtocolGuid                     ## BY_START
+  #
+  # If HII Database Protocol exists, then keyboard layout from HII database is used.
+  # Otherwise, USB keyboard module tries to use its carried default layout.
+  #
+  gEfiHiiDatabaseProtocolGuid                   ## SOMETIMES_CONSUMES
+  gAppleKeyMapDatabaseProtocolGuid              ## SOMETIMES_CONSUMES
+  gApplePlatformInfoDatabaseProtocolGuid        ## SOMETMES_CONSUMES
+  gEfiKeyboardInfoProtocolGuid                  ## SOMETIMES_PRODUCES
+  gAmiEfiPointerProtocolGuid                    ## SOMETMES_CONSUMES
+  gAmiEfiKeycodeProtocolGuid                    ## SOMETMES_CONSUMES

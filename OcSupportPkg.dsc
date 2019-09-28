@@ -57,6 +57,7 @@
   OcAppleDerLib|OcSupportPkg/Library/OcAppleDerLib/OcAppleDerLib.inf
   OcAppleDiskImageLib|OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
   OcAppleEventLib|OcSupportPkg/Library/OcAppleEventLib/OcAppleEventLib.inf
+  OcInputLib|OcSupportPkg/Library/OcInputLib/OcInputLib.inf
   OcAppleImageConversionLib|OcSupportPkg/Library/OcAppleImageConversionLib/OcAppleImageConversionLib.inf
   OcAppleImageVerificationLib|OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcAppleKernelLib|OcSupportPkg/Library/OcAppleKernelLib/OcAppleKernelLib.inf
@@ -102,6 +103,7 @@
   OcSupportPkg/Library/OcAppleDerLib/OcAppleDerLib.inf
   OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
   OcSupportPkg/Library/OcAppleEventLib/OcAppleEventLib.inf
+  OcSupportPkg/Library/OcInputLib/OcInputLib.inf
   OcSupportPkg/Library/OcAppleImageConversionLib/OcAppleImageConversionLib.inf
   OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcSupportPkg/Library/OcAppleKernelLib/OcAppleKernelLib.inf

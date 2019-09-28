@@ -53,6 +53,13 @@
   ## Include/Protocol/FirmwareVolume.h
   gEfiFirmwareVolumeProtocolGuid = { 0x389F751F, 0x1838, 0x4388, { 0x83, 0x90, 0xcd, 0x81, 0x54, 0xbd, 0x27, 0xf8 }}
 
+  ##  Include/Protocol/AmiPointer.h
+  gAmiEfiPointerProtocolGuid  = { 0x15A10CE7, 0xEAB5, 0x43BF, { 0x90, 0x42, 0x74, 0x43, 0x2E, 0x69, 0x63, 0x77 } }
+  
+  
+  ##  Include/Protocol/AmiKeycode.h
+  gAmiEfiKeycodeProtocolGuid  = { 0x0ADFB62D, 0xFF74, 0x484C, { 0x89, 0x44, 0xF8, 0x5C, 0x4B, 0xEA, 0x87, 0xA8 } }
+
 [PcdsFeatureFlag]
   ## Indicates if Apple Thunderbolt NHI protocol is called during device property export.<BR><BR>
   #   TRUE  - Apple Thunderbolt NHI protocol will be called.<BR>

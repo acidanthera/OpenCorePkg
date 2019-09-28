@@ -63,6 +63,7 @@ OC_STRUCTORS       (OC_PLATFORM_SMBIOS_CONFIG, ())
 OC_STRUCTORS       (OC_PLATFORM_CONFIG, ())
 
 OC_ARRAY_STRUCTORS (OC_UEFI_DRIVER_ARRAY)
+OC_STRUCTORS       (OC_UEFI_INPUT, ())
 OC_STRUCTORS       (OC_UEFI_PROTOCOLS, ())
 OC_STRUCTORS       (OC_UEFI_QUIRKS, ())
 OC_STRUCTORS       (OC_UEFI_CONFIG, ())
@@ -520,9 +521,23 @@ mUefiProtocolsSchema[] = {
 
 STATIC
 OC_SCHEMA
+mUefiInputSchema[] = {
+  OC_SCHEMA_INTEGER_IN ("KeyForgetThreshold", OC_GLOBAL_CONFIG, Uefi.Input.KeyForgetThreshold),
+  OC_SCHEMA_INTEGER_IN ("KeyMergeThreshold",  OC_GLOBAL_CONFIG, Uefi.Input.KeyMergeThreshold),
+  OC_SCHEMA_BOOLEAN_IN ("KeySupport",         OC_GLOBAL_CONFIG, Uefi.Input.KeySupport),
+  OC_SCHEMA_STRING_IN  ("KeySupportMode",     OC_GLOBAL_CONFIG, Uefi.Input.KeySupportMode),
+  OC_SCHEMA_BOOLEAN_IN ("KeySwap",            OC_GLOBAL_CONFIG, Uefi.Input.KeySwap),
+  OC_SCHEMA_BOOLEAN_IN ("PointerSupport",     OC_GLOBAL_CONFIG, Uefi.Input.PointerSupport),
+  OC_SCHEMA_STRING_IN  ("PointerSupportMode", OC_GLOBAL_CONFIG, Uefi.Input.PointerSupportMode),
+  OC_SCHEMA_INTEGER_IN ("TimerResolution",    OC_GLOBAL_CONFIG, Uefi.Input.TimerResolution)
+};
+
+STATIC
+OC_SCHEMA
 mUefiConfigurationSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("ConnectDrivers", OC_GLOBAL_CONFIG, Uefi.ConnectDrivers),
   OC_SCHEMA_ARRAY_IN   ("Drivers",        OC_GLOBAL_CONFIG, Uefi.Drivers, &mUefiDriversSchema),
+  OC_SCHEMA_DICT       ("Input",          mUefiInputSchema),
   OC_SCHEMA_DICT       ("Protocols",      mUefiProtocolsSchema),
   OC_SCHEMA_DICT       ("Quirks",         mUefiQuirksSchema)
 };
