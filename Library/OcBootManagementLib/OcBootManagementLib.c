@@ -931,14 +931,9 @@ OcWaitForAppleKeyIndex (
   // when ShowPicker is enabled, and for this reason we support these hotkeys
   // within picker itself.
   //
-  Status = gBS->LocateProtocol (
-    &gAppleKeyMapAggregatorProtocolGuid,
-    NULL,
-    (VOID **) &KeyMap
-    );
-
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "OCB: Missing AppleKeyMapAggregator - %r\n", Status));
+  KeyMap = OcAppleKeyMapInstallProtocols (FALSE);
+  if (KeyMap == NULL) {
+    DEBUG ((DEBUG_ERROR, "OCB: Missing AppleKeyMapAggregator\n"));
     return OC_INPUT_INVALID;
   }
 
