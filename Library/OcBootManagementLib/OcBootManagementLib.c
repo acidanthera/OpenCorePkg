@@ -961,7 +961,7 @@ OcWaitForAppleKeyIndex (
     if (HasShift) {
       if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-x", L_STR_LEN ("-x")) == NULL) {
         DEBUG ((DEBUG_INFO, "OCB: Shift means -x\n"));
-        OcAppendArgumentToCmd (Context->AppleBootArgs, "-x", L_STR_LEN ("-x"));
+        OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-x", L_STR_LEN ("-x"));
       }
       continue;
     }
@@ -972,7 +972,7 @@ OcWaitForAppleKeyIndex (
     if (HasCommand && HasKeyV) {
       if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-v", L_STR_LEN ("-v")) == NULL) {
         DEBUG ((DEBUG_INFO, "OCB: CMD+V means -v\n"));
-        OcAppendArgumentToCmd (Context->AppleBootArgs, "-v", L_STR_LEN ("-v"));
+        OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-v", L_STR_LEN ("-v"));
       }
       continue;
     }
@@ -983,7 +983,7 @@ OcWaitForAppleKeyIndex (
     if (HasCommand && HasKeyC && HasKeyMinus) {
       if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-no_compat_check", L_STR_LEN ("-no_compat_check")) == NULL) {
         DEBUG ((DEBUG_INFO, "OCB: CMD+C+MINUS means -no_compat_check\n"));
-        OcAppendArgumentToCmd (Context->AppleBootArgs, "-no_compat_check", L_STR_LEN ("-no_compat_check"));
+        OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-no_compat_check", L_STR_LEN ("-no_compat_check"));
       }
       continue;
     }
@@ -994,7 +994,7 @@ OcWaitForAppleKeyIndex (
     if (HasCommand && HasKeyK) {
       if (AsciiStrStr (Context->AppleBootArgs, "kcsuffix=release") == NULL) {
         DEBUG ((DEBUG_INFO, "OCB: CMD+K means kcsuffix=release\n"));
-        OcAppendArgumentToCmd (Context->AppleBootArgs, "kcsuffix=release", L_STR_LEN ("kcsuffix=release"));
+        OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "kcsuffix=release", L_STR_LEN ("kcsuffix=release"));
       }
       continue;
     }
@@ -1028,11 +1028,11 @@ OcWaitForAppleKeyIndex (
       if (WantsZeroSlide) {
         if (AsciiStrStr (Context->AppleBootArgs, "slide=0") == NULL) {
           DEBUG ((DEBUG_INFO, "OCB: CMD+S+MINUS means slide=0\n"));
-          OcAppendArgumentToCmd (Context->AppleBootArgs, "slide=0", L_STR_LEN ("slide=0"));
+          OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "slide=0", L_STR_LEN ("slide=0"));
         }
       } else if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-s", L_STR_LEN ("-s")) == NULL) {
         DEBUG ((DEBUG_INFO, "OCB: CMD+S means -s\n"));
-        OcAppendArgumentToCmd (Context->AppleBootArgs, "-s", L_STR_LEN ("-s"));
+        OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-s", L_STR_LEN ("-s"));
       }
       continue;
     }
@@ -1063,6 +1063,140 @@ OcWaitForAppleKeyIndex (
 }
 
 EFI_STATUS
+EFIAPI
+OcShowSimplePasswordRequest (
+  IN VOID                *Context,
+  IN OC_PRIVILEGE_LEVEL  Level
+  )
+{
+  OC_PRIVILEGE_CONTEXT *Privilege;
+
+  BOOLEAN              Result;
+
+  UINT8                Password[32];
+  UINT32               PwIndex;
+
+  UINT8                Index;
+  EFI_STATUS           Status;
+  EFI_INPUT_KEY        Key;
+
+  if (Context == NULL) {
+    return EFI_SUCCESS;
+  }
+
+  Privilege = (OC_PRIVILEGE_CONTEXT *)Context;
+
+  if (Privilege->CurrentLevel >= Level) {
+    return EFI_SUCCESS;
+  }
+
+  gST->ConOut->ClearScreen (gST->ConOut);
+
+  for (Index = 0; Index < 3; ++Index) {
+    PwIndex = 0;
+    //
+    // Skip previously pressed characters.
+    //
+    do {
+      Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &Key);
+    } while (!EFI_ERROR (Status));
+
+    gST->ConOut->OutputString (gST->ConOut, L"Password: ");
+
+    while (TRUE) {
+      Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &Key);
+      if (Status == EFI_NOT_READY) {
+        continue;
+      } else if (EFI_ERROR (Status)) {
+        gST->ConOut->ClearScreen (gST->ConOut);
+        ZeroMem (Password, PwIndex);
+        ZeroMem (&Key.UnicodeChar, sizeof (Key.UnicodeChar));
+
+        DEBUG ((DEBUG_ERROR, "Input device error\r\n"));
+        return EFI_ABORTED;
+      }
+
+      if (Key.ScanCode == SCAN_ESC) {
+        gST->ConOut->ClearScreen (gST->ConOut);
+        ZeroMem (Password, PwIndex);
+        //
+        // ESC aborts the input.
+        //
+        return EFI_ABORTED;
+      } else if (Key.UnicodeChar == CHAR_CARRIAGE_RETURN) {
+        gST->ConOut->ClearScreen (gST->ConOut);
+        //
+        // RETURN finalizes the input.
+        //
+        break;
+      } else if (Key.UnicodeChar == CHAR_BACKSPACE) {
+        //
+        // Delete the last entered character, if such exists.
+        //
+        if (PwIndex != 0) {
+          --PwIndex;
+          Password[PwIndex] = 0;
+          //
+          // Overwrite current character with a space.
+          //
+          gST->ConOut->SetCursorPosition (
+                         gST->ConOut,
+                         gST->ConOut->Mode->CursorColumn - 1,
+                         gST->ConOut->Mode->CursorRow
+                         );
+          gST->ConOut->OutputString (gST->ConOut, L" ");
+          gST->ConOut->SetCursorPosition (
+                         gST->ConOut,
+                         gST->ConOut->Mode->CursorColumn - 1,
+                         gST->ConOut->Mode->CursorRow
+                         );
+        }
+
+        continue;
+      } else if (Key.UnicodeChar == CHAR_NULL
+       || (UINT8)Key.UnicodeChar != Key.UnicodeChar) {
+        //
+        // Only ASCII characters are supported.
+        //
+        continue;
+      }
+
+      if (PwIndex == ARRAY_SIZE (Password)) {
+        continue;
+      }
+
+      gST->ConOut->OutputString (gST->ConOut, L"*");
+
+      Password[PwIndex] = (UINT8)Key.UnicodeChar;
+      ++PwIndex;
+    }
+
+    Result = OcVerifyPasswordSha512 (
+               Password,
+               PwIndex,
+               Privilege->Salt,
+               Privilege->SaltSize,
+               Privilege->Hash
+               );
+
+    ZeroMem (Password, PwIndex);
+
+    if (Result) {
+      gST->ConOut->ClearScreen (gST->ConOut);
+      Privilege->CurrentLevel = Level;
+      return EFI_SUCCESS;
+    }
+  }
+
+  gST->ConOut->ClearScreen (gST->ConOut);
+  DEBUG ((DEBUG_WARN, "Password retry limit exceeded.\r\n"));
+
+  gBS->Stall (5000000);
+  gRT->ResetSystem (EfiResetWarm, EFI_SUCCESS, 0, NULL);
+  return EFI_ACCESS_DENIED;
+}
+
+EFI_STATUS
 OcRunSimpleBootPicker (
   IN OC_PICKER_CONTEXT  *Context
   )
@@ -1078,6 +1212,21 @@ OcRunSimpleBootPicker (
   if (AppleBootPolicy == NULL) {
     DEBUG ((DEBUG_ERROR, "OCB: AppleBootPolicy locate failure\n"));
     return EFI_NOT_FOUND;
+  }
+
+  if (Context->PickerCommand != OcPickerDefault) {
+    Status = Context->RequestPrivilege (
+                        Context->PrivilegeContext,
+                        OcPrivilegeAuthorized
+                        );
+    if (EFI_ERROR (Status)) {
+      if (Status != EFI_ABORTED) {
+        ASSERT (FALSE);
+        return Status;
+      }
+
+      Context->PickerCommand = OcPickerDefault;
+    }
   }
 
   while (TRUE) {

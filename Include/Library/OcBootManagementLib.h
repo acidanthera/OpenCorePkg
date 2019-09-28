@@ -306,6 +306,24 @@ typedef struct {
 } OC_PICKER_ENTRY;
 
 /**
+  Privilege levels to escalate to
+**/
+typedef enum {
+  OcPrivilegeUnauthorized = 0,
+  OcPrivilegeAuthorized   = 1
+} OC_PRIVILEGE_LEVEL;
+
+/**
+  Request a privilege escalation, for example by prompting for a password.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *OC_REQ_PRIVILEGE)(
+  IN VOID                *Context,
+  IN OC_PRIVILEGE_LEVEL  Level
+  );
+
+/**
   Picker behaviour action.
 **/
 typedef enum {
@@ -357,6 +375,14 @@ typedef struct {
   // Handle to exclude scanning from, optional.
   //
   EFI_HANDLE       ExcludeHandle;
+  //
+  // Privilege escalation requesting routine.
+  //
+  OC_REQ_PRIVILEGE RequestPrivilege;
+  //
+  // Context to pass to RequestPrivilege, optional.
+  //
+  VOID             *PrivilegeContext;
   //
   // Enable polling boot arguments.
   //
@@ -471,6 +497,31 @@ OcGetDefaultBootEntry (
   IN     OC_PICKER_CONTEXT  *Context,
   IN OUT OC_BOOT_ENTRY      *BootEntries,
   IN     UINTN              NumBootEntries
+  );
+
+typedef struct {
+  OC_PRIVILEGE_LEVEL CurrentLevel;
+  CONST UINT8        *Salt;
+  UINT32             SaltSize;
+  CONST UINT8        *Hash;
+} OC_PRIVILEGE_CONTEXT;
+
+/**
+  Show simple password prompt and return verification status.
+
+  @param[in] Context  Privilege context.
+  @param[in] Level    The privilege level to request escalating to.
+
+  @retval EFI_SUCCESS  The privilege level has been escalated successfully.
+  @retval EFI_ABORTED  The privilege escalation has been aborted.
+  @retval other        The system must be considered compromised.
+
+**/
+EFI_STATUS
+EFIAPI
+OcShowSimplePasswordRequest (
+  IN VOID                *Context,
+  IN OC_PRIVILEGE_LEVEL  Level
   );
 
 /**
@@ -697,6 +748,7 @@ OcRemoveArgumentFromCmd (
 /**
   Append argument to command line without deduplication.
 
+  @param[in, out] Context         Picker context. NULL, if a privilege escalation is not required.
   @param[in, out] CommandLine     Argument command line of BOOT_LINE_LENGTH bytes.
   @param[in]      Argument        Argument, e.g. -v, slide=0, debug=0x100, etc.
   @param[in]      ArgumentLength  Argument length, e.g. L_STR_LEN ("-v").
@@ -705,9 +757,10 @@ OcRemoveArgumentFromCmd (
 **/
 BOOLEAN
 OcAppendArgumentToCmd (
-  IN OUT CHAR8        *CommandLine,
-  IN     CONST CHAR8  *Argument,
-  IN     CONST UINTN  ArgumentLength
+  IN OUT OC_PICKER_CONTEXT  *Context OPTIONAL,
+  IN OUT CHAR8              *CommandLine,
+  IN     CONST CHAR8        *Argument,
+  IN     CONST UINTN        ArgumentLength
   );
 
 /**

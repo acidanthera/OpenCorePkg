@@ -272,12 +272,15 @@
 #define OCS_EXPOSE_VERSION   2U
 
 #define OC_MISC_SECURITY_FIELDS(_, __) \
-  _(UINT32                      , ScanPolicy                  ,     , OC_SCAN_DEFAULT_POLICY , ()) \
-  _(BOOLEAN                     , AllowNvramReset             ,     , FALSE                  , ()) \
-  _(BOOLEAN                     , ExposeSensitiveData         ,     , OCS_EXPOSE_VERSION     , ()) \
-  _(BOOLEAN                     , RequireVault                ,     , TRUE                   , ()) \
-  _(BOOLEAN                     , RequireSignature            ,     , TRUE                   , ()) \
-  _(UINT64                      , HaltLevel                   ,     , 0x80000000             , ())
+  _(UINT32                      , ScanPolicy                  ,      , OC_SCAN_DEFAULT_POLICY  , ()) \
+  _(BOOLEAN                     , AllowNvramReset             ,      , FALSE                   , ()) \
+  _(BOOLEAN                     , ExposeSensitiveData         ,      , OCS_EXPOSE_VERSION      , ()) \
+  _(BOOLEAN                     , EnablePassword              ,      , FALSE                   , ()) \
+  _(UINT8                       , PasswordHash                , [64] , {0}                     , ()) \
+  _(OC_DATA                     , PasswordSalt                ,      , OC_EDATA_CONSTR (_, __) , OC_DESTR (OC_DATA)) \
+  _(BOOLEAN                     , RequireVault                ,      , TRUE                    , ()) \
+  _(BOOLEAN                     , RequireSignature            ,      , TRUE                    , ()) \
+  _(UINT64                      , HaltLevel                   ,      , 0x80000000              , ())
   OC_DECLARE (OC_MISC_SECURITY)
 
 #define OC_MISC_TOOLS_ENTRY_FIELDS(_, __) \

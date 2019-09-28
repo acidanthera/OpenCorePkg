@@ -131,12 +131,29 @@ OcRemoveArgumentFromCmd (
 
 BOOLEAN
 OcAppendArgumentToCmd (
-  IN OUT CHAR8        *CommandLine,
-  IN     CONST CHAR8  *Argument,
-  IN     CONST UINTN  ArgumentLength
+  IN OUT OC_PICKER_CONTEXT  *Context OPTIONAL,
+  IN OUT CHAR8              *CommandLine,
+  IN     CONST CHAR8        *Argument,
+  IN     CONST UINTN        ArgumentLength
   )
 {
-  UINTN Len = AsciiStrLen (CommandLine);
+  EFI_STATUS Status;
+  UINTN      Len = AsciiStrLen (CommandLine);
+
+  if (Context != NULL) {
+    Status = Context->RequestPrivilege (
+                        Context->PrivilegeContext,
+                        OcPrivilegeAuthorized
+                        );
+    if (EFI_ERROR (Status)) {
+      if (Status != EFI_ABORTED) {
+        ASSERT (FALSE);
+        return FALSE;
+      }
+
+      return TRUE;
+    }
+  }
 
   //
   // Account for extra space.

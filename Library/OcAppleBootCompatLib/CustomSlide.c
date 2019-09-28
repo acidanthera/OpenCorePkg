@@ -499,7 +499,7 @@ GetVariableBootArgs (
     //
     AsciiSPrint (SlideArgument, ARRAY_SIZE (SlideArgument), "slide=%-03d", Slide);
 
-    if (!OcAppendArgumentToCmd (SlideSupport->BootArgs, SlideArgument, SlideArgumentLength)) {
+    if (!OcAppendArgumentToCmd (NULL, SlideSupport->BootArgs, SlideArgument, SlideArgumentLength)) {
       //
       // Broken boot-args, try to overwrite.
       //
