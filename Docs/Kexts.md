@@ -9,7 +9,7 @@ Kexts
 - [IntelMausi.kext](https://github.com/acidanthera/IntelMausi)
 - [IntelMausiEthernet.kext](https://github.com/Mieze/IntelMausiEthernet)
 - [NullEthernetInjector.kext](https://github.com/RehabMan/OS-X-Null-Ethernet)
-- [RealtekR1000SL.kext](https://www.insanelymac.com/forum/topic/286937-realtekr1000-v3/)
+- [RealtekR1000SL.kext](https://github.com/SergeySlice/RealtekLANv3)
 - [RealtekRTL8100.kext](https://github.com/Mieze/RealtekRTL8100)
 - [RealtekRTL8111.kext](https://github.com/Mieze/RTL8111_driver_for_OS_X)
 
