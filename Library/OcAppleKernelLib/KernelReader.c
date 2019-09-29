@@ -227,7 +227,7 @@ ReadAppleKernelImage (
 
   while (TRUE) {
     if (!OC_TYPE_ALIGNED (UINT32 , *Buffer)) {
-      DEBUG ((DEBUG_INFO, "Misaligned kernel header %p at %08X\n", MagicPtr, Offset));
+      DEBUG ((DEBUG_INFO, "Misaligned kernel header %p at %08X\n", *Buffer, Offset));
       return RETURN_INVALID_PARAMETER;
     }
     MagicPtr = (UINT32 *)* Buffer;
