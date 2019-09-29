@@ -18,6 +18,7 @@ Kexts
 - [AirPortAtheros40.kext](https://i.applelife.ru/2018/12/442854_AirPortAtheros40.kext.zip) from 10.13.6 for 10.14+
 - [AirportBrcmFixup.kext](https://github.com/acidanthera/AirportBrcmFixup)
 - [ATH9KFixup.kext](https://github.com/chunnann/ATH9KFixup)
+- [BrcmPatchRAM.kext](https://github.com/acidanthera/BrcmPatchRAM)
 - [BT4LEContinuityFixup.kext](https://github.com/acidanthera/BT4LEContinuityFixup)
 - [MT7610](https://d86o2zu8ugzlg.cloudfront.net/mediatek-craft/drivers/MT7612_7610U_D5.0.1.25_SDK1.0.2.18_UI5.0.0.27_20151209.zip)
 - [RT5370](https://d86o2zu8ugzlg.cloudfront.net/mediatek-craft/drivers/RTUSB_D2870-4.2.9.2_UI-4.0.9.6_2013_11_29.zip)
@@ -48,7 +49,7 @@ Kexts
 
 - [AsusSMC.kext](https://github.com/hieplpvip/AsusSMC)
 - [CPUFriend.kext](https://github.com/acidanthera/CPUFriend)
-- [FakeSMC.kext and sensors](https://sourceforge.net/projects/hwsensors3.hwsensors.p/)
+- [FakeSMC.kext and sensors](https://github.com/CloverHackyColor/FakeSMC3_with_plugins)
 - [HWPEnabler.kext](https://github.com/headkaze/HWPEnable)
 - [NullCPUPowerManagement.kext](https://github.com/corpnewt/NullCPUPowerManagement) for AMD only (also some virtual machines)
 - [OpcodeEmulator.kext](https://www.insanelymac.com/forum/topic/329704-opcode-emulator-opemu-plug-in-project/)
