@@ -62,7 +62,7 @@ GetTiming  (
   //
 
   if (Private->TscFrequency == 0)  {
-    Private->TscFrequency = GetPerformanceCounterProperties (NULL, NULL);
+    Private->TscFrequency = OcGetTSCFrequency ();
 
     if (Private->TscFrequency != 0) {
       CurrentTsc = AsmReadTsc ();

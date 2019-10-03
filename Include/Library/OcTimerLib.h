@@ -12,8 +12,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef OC_TIMER_LIB_H_
-#define OC_TIMER_LIB_H_
+#ifndef OC_TIMER_LIB_H
+#define OC_TIMER_LIB_H
 
 #include <Library/TimerLib.h>
 
@@ -39,4 +39,4 @@ OcGetPmTimerAddr (
   OUT CONST CHAR8 **Type  OPTIONAL
   );
 
-#endif // OC_TIMER_LIB_H_
+#endif // OC_TIMER_LIB_H

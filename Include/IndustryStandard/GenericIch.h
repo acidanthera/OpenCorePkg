@@ -28,7 +28,7 @@
 #define PCI_FUNCTION_NUMBER_ICH_LPC    0     ///< LPC is Function 0.
 #define PCI_FUNCTION_NUMBER_ICH_PMC    2     ///< PMC is Function 2.
 
-#define V_ICH_PCI_DEVICE_ID     0x8086  ///< Intel device-id
+#define V_ICH_PCI_VENDOR_ID     0x8086  ///< Intel vendor-id
 
 // IchAcpiCntr   Control for the ICH's ACPI Counter.
 

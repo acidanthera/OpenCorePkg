@@ -156,4 +156,14 @@ OcIsSandyOrIvy (
   VOID
   );
 
+/**
+  Obtain CPU's invariant TSC frequency.
+
+  @retval CPU's TSC frequency.
+**/
+UINT64
+OcGetTSCFrequency (
+  VOID
+  );
+
 #endif // OC_CPU_LIB_H_

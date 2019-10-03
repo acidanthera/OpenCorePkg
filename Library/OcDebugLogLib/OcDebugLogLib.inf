@@ -46,6 +46,7 @@
   DebugPrintErrorLevelLib
   DevicePathLib
   MemoryAllocationLib
+  OcCpuLib
   OcDataHubLib
   SerialPortLib
   UefiRuntimeServicesTableLib
