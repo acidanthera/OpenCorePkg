@@ -41,7 +41,6 @@
   OcFileLib
   OcGuardLib
   OcStringLib
-  OcTimerLib
 
 [Sources]
   Base64Decode.c

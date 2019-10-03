@@ -98,4 +98,5 @@
   OcFileLib
   OcRtcLib
   OcXmlLib
+  OcTimerLib
   FileHandleLib
