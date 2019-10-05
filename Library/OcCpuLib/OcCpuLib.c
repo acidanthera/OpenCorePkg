@@ -683,7 +683,7 @@ OcGetPmTimerAddr (
 STATIC
 UINT64
 OcCalculateTSCFromPMTimer (
-  VOID
+  IN BOOLEAN  Recalculate
   )
 {
   //
@@ -702,13 +702,10 @@ OcCalculateTSCFromPMTimer (
   UINT32   AcpiTicksTarget;
   UINT32   TimerResolution;
   EFI_TPL  PrevTpl;
-  //
-  // For logging purposes (the first call to this function might happen before
-  // logging is fully initialised), do not cache the results in DEBUG builds.
-  //
-  DEBUG_CODE_BEGIN ();
-  TSCFrequency = 0;
-  DEBUG_CODE_END ();
+  
+  if (Recalculate) {
+    TSCFrequency = 0;
+  }
 
   if (TSCFrequency == 0) {
     TimerAddr       = OcGetPmTimerAddr (NULL);
@@ -797,7 +794,8 @@ OcCalculateTSCFromPMTimer (
 
 UINT64
 OcCalcluateARTFrequencyIntel (
-  OUT UINT64  *CPUFrequency
+  OUT UINT64   *CPUFrequency,
+  IN  BOOLEAN  Recalculate
   )
 {
   //
@@ -819,14 +817,11 @@ OcCalcluateARTFrequencyIntel (
   UINT64                                            CPUFrequencyFromTSC;
   CPUID_VERSION_INFO_EAX                            CpuidVerEax;
   UINT8                                             Model;
-  //
-  // For logging purposes (the first call to this function might happen before
-  // logging is fully initialised), do not cache the results in DEBUG builds.
-  //
-  DEBUG_CODE_BEGIN ();
-  ARTFrequency        = 0;
-  CPUFrequencyFromART = 0;
-  DEBUG_CODE_END ();
+
+  if (Recalculate) {
+    ARTFrequency        = 0;
+    CPUFrequencyFromART = 0;
+  }
 
   if (ARTFrequency == 0) {
     //
@@ -881,7 +876,7 @@ OcCalcluateARTFrequencyIntel (
         // Calculate it by dividing the TSC frequency by the TSC ratio.
         //
         if (ARTFrequency == 0 && MaxId >= CPUID_PROCESSOR_FREQUENCY) {
-          CPUFrequencyFromTSC = OcCalculateTSCFromPMTimer ();
+          CPUFrequencyFromTSC = OcCalculateTSCFromPMTimer (Recalculate);
           ARTFrequency = MultThenDivU64x64x32(
             CPUFrequencyFromTSC,
             CpuidDenominatorEax,
@@ -953,9 +948,9 @@ OcGetTSCFrequency (
   // available (e.g. 300 series chipsets).
   // TODO: For AMD, the base clock can be determined from P-registers.
   //
-  OcCalcluateARTFrequencyIntel (&CPUFrequency);
+  OcCalcluateARTFrequencyIntel (&CPUFrequency, FALSE);
   if (CPUFrequency == 0) {
-    CPUFrequency = OcCalculateTSCFromPMTimer ();
+    CPUFrequency = OcCalculateTSCFromPMTimer (FALSE);
   }
   //
   // For all known models with an invariant TSC, its frequency is equal to the
@@ -980,6 +975,7 @@ ScanIntelProcessor (
   UINT16                                            CoreCount;
   CONST CHAR8                                       *TimerSourceType;
   UINTN                                             TimerAddr;
+  BOOLEAN                                           Recalculate;
 
   AppleMajorType = DetectAppleMajorType (Cpu->BrandString);
   Cpu->AppleProcessorType = DetectAppleProcessorType (Cpu->Model, Cpu->Stepping, AppleMajorType);
@@ -1041,18 +1037,29 @@ ScanIntelProcessor (
     ));
 
   //
+  // For logging purposes (the first call to these functions might happen
+  // before logging is fully initialised), do use the cached results in DEBUG
+  // builds.
+  //
+  Recalculate = FALSE;
+
+  DEBUG_CODE_BEGIN ();
+  Recalculate = TRUE;
+  DEBUG_CODE_END ();
+
+  //
   // Calculate the Tsc frequency
   //
   DEBUG_CODE_BEGIN ();
   TimerAddr = OcGetPmTimerAddr (&TimerSourceType);
   DEBUG ((DEBUG_INFO, "OCCPU: Timer address is %Lx from %a\n", (UINT64) TimerAddr, TimerSourceType));
   DEBUG_CODE_END ();
-  Cpu->CPUFrequencyFromTSC = OcCalculateTSCFromPMTimer ();
+  Cpu->CPUFrequencyFromTSC = OcCalculateTSCFromPMTimer (Recalculate);
 
   //
   // Determine our core crystal clock frequency
   //
-  Cpu->ARTFrequency = OcCalcluateARTFrequencyIntel (&Cpu->CPUFrequencyFromART);
+  Cpu->ARTFrequency = OcCalcluateARTFrequencyIntel (&Cpu->CPUFrequencyFromART, Recalculate);
 
   //
   // Calculate CPU frequency based on ART if present, otherwise TSC
@@ -1132,12 +1139,25 @@ ScanAmdProcessor (
   IN OUT OC_CPU_INFO  *Cpu
   )
 {
-  UINT32 CpuidEbx;
-  UINT32 CpuidEcx;
-  UINT64 CofVid;
-  UINT64 CoreFrequencyID;
-  UINT64 CoreDivisorID;
-  UINT64 Divisor;
+  UINT32  CpuidEbx;
+  UINT32  CpuidEcx;
+  UINT64  CofVid;
+  UINT64  CoreFrequencyID;
+  UINT64  CoreDivisorID;
+  UINT64  Divisor;
+  BOOLEAN Recalculate;
+
+  //
+  // For logging purposes (the first call to these functions might happen
+  // before logging is fully initialised), do use the cached results in DEBUG
+  // builds.
+  //
+  Recalculate = FALSE;
+
+  DEBUG_CODE_BEGIN ();
+  Recalculate = TRUE;
+  DEBUG_CODE_END ();
+
   //
   // Faking an Intel Core i5 Processor.
   // This value is purely cosmetic, but it makes sense to fake something
@@ -1152,7 +1172,7 @@ ScanAmdProcessor (
   //           both the operating and the nominal frequency, latter for
   //           the invariant TSC.
   //
-  Cpu->CPUFrequencyFromTSC = OcCalculateTSCFromPMTimer ();
+  Cpu->CPUFrequencyFromTSC = OcCalculateTSCFromPMTimer (Recalculate);
   Cpu->CPUFrequency = Cpu->CPUFrequencyFromTSC;
   //
   // Get core and thread count from CPUID
