@@ -1194,6 +1194,8 @@ ScanAmdProcessor (
   }
 
   if (Cpu->Family == AMD_CPU_FAMILY) {
+    Divisor = 0;
+
     switch (Cpu->ExtFamily) {
       case AMD_CPU_EXT_FAMILY_17H:
         CofVid           = AsmReadMsr64 (K10_PSTATE_STATUS);
