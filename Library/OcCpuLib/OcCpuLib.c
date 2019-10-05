@@ -676,7 +676,9 @@ OcGetPmTimerAddr (
 }
 
 /**
-  Calculate the TSC frequency
+  Calculate the TSC frequency via PM timer
+
+  @param[in] Recalculate  Do not re-use previously cached information.
 
   @retval  The calculated TSC frequency.
 **/
@@ -792,6 +794,15 @@ OcCalculateTSCFromPMTimer (
   return TSCFrequency;
 }
 
+/**
+  Calculate the ART frequency and derieve the CPU frequency for Intel CPUs
+
+  @param[out] CPUFrequency  The derieved CPU frequency.
+  @param[in]  Recalculate   Do not re-use previously cached information.
+
+  @retval  The calculated ART frequency.
+**/
+STATIC
 UINT64
 OcCalcluateARTFrequencyIntel (
   OUT UINT64   *CPUFrequency,
@@ -1038,8 +1049,8 @@ ScanIntelProcessor (
 
   //
   // For logging purposes (the first call to these functions might happen
-  // before logging is fully initialised), do use the cached results in DEBUG
-  // builds.
+  // before logging is fully initialised), do not use the cached results in
+  // DEBUG builds.
   //
   Recalculate = FALSE;
 
@@ -1149,8 +1160,8 @@ ScanAmdProcessor (
 
   //
   // For logging purposes (the first call to these functions might happen
-  // before logging is fully initialised), do use the cached results in DEBUG
-  // builds.
+  // before logging is fully initialised), do not use the cached results in
+  // DEBUG builds.
   //
   Recalculate = FALSE;
 
