@@ -961,7 +961,7 @@ InternalLoadBootEntry (
 #endif
 
     OptionalStatus = gBS->HandleProtocol (
-                            ParentHandle,
+                            *EntryHandle,
                             &gEfiLoadedImageProtocolGuid,
                             (VOID **) &LoadedImage
                             );
@@ -980,9 +980,6 @@ InternalLoadBootEntry (
         if (LoadedImage->LoadOptionsSize > 0) {
           LoadedImage->LoadOptionsSize += 1;
           LoadedImage->LoadOptions      = Context->AppleBootArgs;
-        } else {
-          LoadedImage->LoadOptionsSize = 0;
-          LoadedImage->LoadOptions     = NULL;
         }
       } else {
         LoadedImage->LoadOptionsSize = BootEntry->LoadOptionsSize;
