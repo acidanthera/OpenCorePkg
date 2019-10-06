@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Sep 25 12:29:43 2019
-%DIF ADD ../Configuration.tex        Wed Sep 25 18:18:55 2019
+%DIF DEL PreviousConfiguration.tex   Sun Oct  6 00:00:01 2019
+%DIF ADD ../Configuration.tex        Sun Oct  6 01:45:37 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -105,6 +105,8 @@
 \providecommand{\DIFaddend}{\global\booltrue{DIFkeeppage}\global\boolfalse{DIFchange}} %DIF PREAMBLE
 \providecommand{\DIFdelbegin}{\global\booltrue{DIFkeeppage}\global\booltrue{DIFchange}} %DIF PREAMBLE
 \providecommand{\DIFdelend}{\global\booltrue{DIFkeeppage}\global\boolfalse{DIFchange}} %DIF PREAMBLE
+\providecommand{\DIFmodbegin}{\global\booltrue{DIFkeeppage}\global\booltrue{DIFchange}} %DIF PREAMBLE
+\providecommand{\DIFmodend}{\global\booltrue{DIFkeeppage}\global\boolfalse{DIFchange}} %DIF PREAMBLE
 %DIF IDENTICAL PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFaddFL}[1]{\DIFadd{#1}} %DIF PREAMBLE
 \providecommand{\DIFdelFL}[1]{\DIFdel{#1}} %DIF PREAMBLE
@@ -116,17 +118,21 @@
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
 %DIF LISTINGS PREAMBLE %DIF PREAMBLE
-\lstdefinelanguage{codediff}{ %DIF PREAMBLE
-  moredelim=**[is][\color{red}]{*!----}{----!*}, %DIF PREAMBLE
-  moredelim=**[is][\color{blue}]{*!++++}{++++!*} %DIF PREAMBLE
+\RequirePackage{listings} %DIF PREAMBLE
+\RequirePackage{color} %DIF PREAMBLE
+\lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
+%DIF DIFCODE_UNDERLINE %DIF PREAMBLE
+  moredelim=[il][\color{red}\sout]{\%DIF\ <\ }, %DIF PREAMBLE
+  moredelim=[il][\color{blue}\uwave]{\%DIF\ >\ } %DIF PREAMBLE
 } %DIF PREAMBLE
-\lstdefinestyle{codediff}{ %DIF PREAMBLE
-	belowcaptionskip=.25\baselineskip, %DIF PREAMBLE
-	language=codediff, %DIF PREAMBLE
+\lstdefinestyle{DIFverbatimstyle}{ %DIF PREAMBLE
+	language=DIFcode, %DIF PREAMBLE
 	basicstyle=\ttfamily, %DIF PREAMBLE
 	columns=fullflexible, %DIF PREAMBLE
-	keepspaces=true, %DIF PREAMBLE
+	keepspaces=true %DIF PREAMBLE
 } %DIF PREAMBLE
+\lstnewenvironment{DIFverbatim}{\lstset{style=DIFverbatimstyle}}{} %DIF PREAMBLE
+\lstnewenvironment{DIFverbatim*}{\lstset{style=DIFverbatimstyle,showspaces=true}}{} %DIF PREAMBLE
 %DIF END PREAMBLE EXTENSION ADDED BY LATEXDIFF
 
 \begin{document}
@@ -890,7 +896,10 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
 
 \item
   \texttt{TableSignature}\\
-  \textbf{Type}: \\texttt{plist\ data}, 4 bytes\\
+  \textbf{Type}: \DIFdelbegin %DIFDELCMD < \\%%%
+\DIFdel{texttt}%DIFDELCMD < {%%%
+\DIFdel{plist\ data}%DIFDELCMD < }%%%
+\DIFdelend \DIFaddbegin \texttt{\DIFadd{plist\ data}}\DIFaddend , 4 bytes\\
   \textbf{Failsafe}: All zero\\
   \textbf{Description}: Match table signature to be equal to this value
   unless all zero.
