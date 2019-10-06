@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Sep  6 23:59:43 2019
-%DIF ADD ../Configuration.tex        Sun Oct  6 14:45:06 2019
+%DIF ADD ../Configuration.tex        Sun Oct  6 15:26:24 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2064,7 +2064,7 @@ behaviour that does not go to any other sections
   recovery. Hold \texttt{CMD+R} key combination to choose this option.
   \end{itemize}
 
-  \emph{Note}: \texttt{AppleGenericInput}, \texttt{UsbKbDxe}, or similar driver is required
+  \emph{Note}: \DIFaddbegin \DIFadd{activated }\DIFaddend \texttt{\DIFdelbegin \DIFdel{AppleGenericInput}\DIFdelend \DIFaddbegin \DIFadd{KeySupport}\DIFaddend }, \texttt{UsbKbDxe}, or similar driver is required
   for key handling to work. On many firmwares it is not possible to get all the keys function.
 
   In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key
@@ -3413,12 +3413,17 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
   --- APFS file system bootstrap driver adding the support of embedded APFS drivers
   in bootable APFS containers in UEFI firmwares.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AppleGenericInput}}
-  --- user input driver adding the support of \texttt{AppleKeyMapAggregator} protocols
+  \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AppleGenericInput}}
+%DIFDELCMD <   %%%
+\DIFdel{--- user input driver adding the support of }\texttt{\DIFdel{AppleKeyMapAggregator}} %DIFAUXCMD
+\DIFdel{protocols
   on top of different UEFI input protocols. Additionally resolves mouse input issues
-  on select firmwares. This is an alternative to \texttt{UsbKbDxe}, which may work
+  on select firmwares. This is an alternative to }\texttt{\DIFdel{UsbKbDxe}}%DIFAUXCMD
+\DIFdel{, which may work
   better or worse depending on the firmware.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{FwRuntimeServices}}
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdelend \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{FwRuntimeServices}}
   --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
   of OpenCore and Lilu by supporting read-only and write-only NVRAM variables. Some
   quirks, like \texttt{RequestBootVarRouting}, require this driver for proper function.
@@ -3437,7 +3442,7 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{UsbKbDxe}}
   --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
-  \texttt{AppleGenericInput}, which may work better or worse depending on the firmware.
+  \DIFaddbegin \DIFadd{builtin }\DIFaddend \texttt{\DIFdelbegin \DIFdel{AppleGenericInput}\DIFdelend \DIFaddbegin \DIFadd{KeySypport}\DIFaddend }, which may work better or worse depending on the firmware.
   \item \href{https://github.com/acidanthera/VirtualSMC}{\texttt{VirtualSmc}}
   --- UEFI SMC driver, required for proper FileVault 2 functionality and potentially
   other macOS specifics. An alternative, named \texttt{SMCHelper}, is not compatible
@@ -3510,7 +3515,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   subsequent submissions of this key with some defined time interval. As a result
   we use a timeout to remove once pressed keys from the buffer once the timeout
   expires and no new submission of this key happened.
-  }
+}
 
   \DIFadd{This option allows to set this timeout based on your platform. The recommended
   value that works on the majority of the platforms is }\texttt{\DIFadd{5}} \DIFadd{milliseconds.
@@ -3617,7 +3622,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \DIFadd{This option allows to update firmware architecture timer period with the specified value
   in }\texttt{\DIFadd{100}} \DIFadd{nanosecond units. Setting a lower value generally improves performance
   and responsiveness of the interface and input handling.
-  }
+}
 
   \DIFadd{The recommended value is }\texttt{\DIFadd{50000}} \DIFadd{(}\texttt{\DIFadd{5}} \DIFadd{milliseconds) or slightly higher. ASUS
   boards use }\texttt{\DIFadd{60000}} \DIFadd{for the interface. Apple boards use }\texttt{\DIFadd{100000}}\DIFadd{.

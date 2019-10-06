@@ -1970,7 +1970,7 @@ behaviour that does not go to any other sections
   recovery. Hold \texttt{CMD+R} key combination to choose this option.
   \end{itemize}
 
-  \emph{Note}: \texttt{AppleGenericInput}, \texttt{UsbKbDxe}, or similar driver is required
+  \emph{Note}: activated \texttt{KeySupport}, \texttt{UsbKbDxe}, or similar driver is required
   for key handling to work. On many firmwares it is not possible to get all the keys function.
 
   In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key
@@ -3318,11 +3318,6 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
   --- APFS file system bootstrap driver adding the support of embedded APFS drivers
   in bootable APFS containers in UEFI firmwares.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AppleGenericInput}}
-  --- user input driver adding the support of \texttt{AppleKeyMapAggregator} protocols
-  on top of different UEFI input protocols. Additionally resolves mouse input issues
-  on select firmwares. This is an alternative to \texttt{UsbKbDxe}, which may work
-  better or worse depending on the firmware.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{FwRuntimeServices}}
   --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
   of OpenCore and Lilu by supporting read-only and write-only NVRAM variables. Some
@@ -3342,7 +3337,7 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{UsbKbDxe}}
   --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
-  \texttt{AppleGenericInput}, which may work better or worse depending on the firmware.
+  builtin \texttt{KeySypport}, which may work better or worse depending on the firmware.
   \item \href{https://github.com/acidanthera/VirtualSMC}{\texttt{VirtualSmc}}
   --- UEFI SMC driver, required for proper FileVault 2 functionality and potentially
   other macOS specifics. An alternative, named \texttt{SMCHelper}, is not compatible
@@ -3413,7 +3408,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   subsequent submissions of this key with some defined time interval. As a result
   we use a timeout to remove once pressed keys from the buffer once the timeout
   expires and no new submission of this key happened.
-  
+
   This option allows to set this timeout based on your platform. The recommended
   value that works on the majority of the platforms is \texttt{5} milliseconds.
   For reference, holding one key on VMware will repeat it roughly every \texttt{2}
@@ -3505,7 +3500,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   This option allows to update firmware architecture timer period with the specified value
   in \texttt{100} nanosecond units. Setting a lower value generally improves performance
   and responsiveness of the interface and input handling.
-  
+
   The recommended value is \texttt{50000} (\texttt{5} milliseconds) or slightly higher. ASUS
   boards use \texttt{60000} for the interface. Apple boards use \texttt{100000}.
 
