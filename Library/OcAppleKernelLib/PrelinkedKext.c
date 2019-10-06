@@ -630,7 +630,7 @@ InternalGetQuirkDependencyKext (
       DEBUG_WARN,
       "Dependency %a fallback to %a %a. Please fix your kext!\n",
       DependencyId,
-      "com.apple.iokit.IOHIDSystem",
+      "com.apple.iokit.IOHIDFamily",
       DependencyKext != NULL ? "succeeded" : "failed"
       ));
   }
