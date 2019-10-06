@@ -7,6 +7,7 @@ OpenCore Changelog
 - Replaced `MatchKernel` with `MinKernel` and `MaxKernel`
 - Added `Arguments` to `Tools` and `Entries` sections
 - Fixed broken timer for 300 series Intel chipsets
+- Added `Input` section for mouse and keyboard aggregation
 
 #### v0.5.0
 - Added builtin firmware versions for new models 2019

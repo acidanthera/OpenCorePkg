@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Sep 25 12:29:43 2019
-%DIF ADD ../Configuration.tex        Wed Sep 25 18:18:55 2019
+%DIF DEL PreviousConfiguration.tex   Fri Sep  6 23:59:43 2019
+%DIF ADD ../Configuration.tex        Sun Oct  6 14:45:06 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -105,6 +105,8 @@
 \providecommand{\DIFaddend}{\global\booltrue{DIFkeeppage}\global\boolfalse{DIFchange}} %DIF PREAMBLE
 \providecommand{\DIFdelbegin}{\global\booltrue{DIFkeeppage}\global\booltrue{DIFchange}} %DIF PREAMBLE
 \providecommand{\DIFdelend}{\global\booltrue{DIFkeeppage}\global\boolfalse{DIFchange}} %DIF PREAMBLE
+\providecommand{\DIFmodbegin}{\global\booltrue{DIFkeeppage}\global\booltrue{DIFchange}} %DIF PREAMBLE
+\providecommand{\DIFmodend}{\global\booltrue{DIFkeeppage}\global\boolfalse{DIFchange}} %DIF PREAMBLE
 %DIF IDENTICAL PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFaddFL}[1]{\DIFadd{#1}} %DIF PREAMBLE
 \providecommand{\DIFdelFL}[1]{\DIFdel{#1}} %DIF PREAMBLE
@@ -116,17 +118,21 @@
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
 %DIF LISTINGS PREAMBLE %DIF PREAMBLE
-\lstdefinelanguage{codediff}{ %DIF PREAMBLE
-  moredelim=**[is][\color{red}]{*!----}{----!*}, %DIF PREAMBLE
-  moredelim=**[is][\color{blue}]{*!++++}{++++!*} %DIF PREAMBLE
+\RequirePackage{listings} %DIF PREAMBLE
+\RequirePackage{color} %DIF PREAMBLE
+\lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
+%DIF DIFCODE_UNDERLINE %DIF PREAMBLE
+  moredelim=[il][\color{red}\sout]{\%DIF\ <\ }, %DIF PREAMBLE
+  moredelim=[il][\color{blue}\uwave]{\%DIF\ >\ } %DIF PREAMBLE
 } %DIF PREAMBLE
-\lstdefinestyle{codediff}{ %DIF PREAMBLE
-	belowcaptionskip=.25\baselineskip, %DIF PREAMBLE
-	language=codediff, %DIF PREAMBLE
+\lstdefinestyle{DIFverbatimstyle}{ %DIF PREAMBLE
+	language=DIFcode, %DIF PREAMBLE
 	basicstyle=\ttfamily, %DIF PREAMBLE
 	columns=fullflexible, %DIF PREAMBLE
-	keepspaces=true, %DIF PREAMBLE
+	keepspaces=true %DIF PREAMBLE
 } %DIF PREAMBLE
+\lstnewenvironment{DIFverbatim}{\lstset{style=DIFverbatimstyle}}{} %DIF PREAMBLE
+\lstnewenvironment{DIFverbatim*}{\lstset{style=DIFverbatimstyle,showspaces=true}}{} %DIF PREAMBLE
 %DIF END PREAMBLE EXTENSION ADDED BY LATEXDIFF
 
 \begin{document}
@@ -890,7 +896,10 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
 
 \item
   \texttt{TableSignature}\\
-  \textbf{Type}: \\texttt{plist\ data}, 4 bytes\\
+  \textbf{Type}: \DIFdelbegin %DIFDELCMD < \\%%%
+\DIFdel{texttt}%DIFDELCMD < {%%%
+\DIFdel{plist\ data}%DIFDELCMD < }%%%
+\DIFdelend \DIFaddbegin \texttt{\DIFadd{plist\ data}}\DIFaddend , 4 bytes\\
   \textbf{Failsafe}: All zero\\
   \textbf{Description}: Match table signature to be equal to this value
   unless all zero.
@@ -1426,12 +1435,12 @@ blocking.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Adds kernel driver on \DIFdelbegin \DIFdel{selected macOS version only.
-The selection happens based on prefix match with the kernel version, i.
-e.
-  }\DIFdelend \DIFaddbegin \DIFadd{specified macOS version or older.
+The selection happens based on prefix match with }\DIFdelend \DIFaddbegin \DIFadd{specified macOS version or older.
 }
 
-  \hypertarget{kernmatch}\DIFadd{Kernel version interpretation is implemented as follows:
+  \hypertarget{kernmatch}\DIFadd{Kernel version can be obtained with }\texttt{\DIFadd{uname -r}} \DIFadd{command,
+  and should look like 3 numbers separated by dots, for example }\texttt{\DIFadd{18.7.0}} \DIFadd{is }\DIFaddend the
+  kernel version \DIFdelbegin \DIFdel{, i. e. }\DIFdelend \DIFaddbegin \DIFadd{for }\texttt{\DIFadd{10.14.6}}\DIFadd{. Kernel version interpretation is implemented as follows:
   }\begin{align*}
     \DIFadd{\begin{aligned}
       ParseDarwinVersion(\kappa,\lambda,\mu)=&(\lfloor\frac{\kappa}{10}\rfloor\cdot10
@@ -1466,14 +1475,15 @@ e.
   }\end{align*}
   \DIFadd{Here $ParseDarwinVersion$ argument is assumed to be 3 integers obtained by splitting Darwin kernel version
   string from left to right by the }\texttt{\DIFadd{.}} \DIFadd{symbol. $FindDarwinVersion$ function looks up
-  Darwin kernel version by locating }\texttt{\DIFadd{"Darwin Kernel Version $\kappa$.$\lambda$.$\mu$"}} \DIFadd{string
+  Darwin kernel version by locating }\DIFaddend \texttt{\DIFdelbegin \DIFdel{16.7.0}\DIFdelend \DIFaddbegin \DIFadd{"Darwin Kernel Version $\kappa$.$\lambda$.$\mu$"}\DIFaddend } \DIFdelbegin \DIFdel{will match macOS 10.12.6 and }\texttt{\DIFdel{16.}} %DIFAUXCMD
+\DIFdel{will match
+  any macOS 10.12.
+x version }\DIFdelend \DIFaddbegin \DIFadd{string
   in the kernel image.
 }
 
 \item
-  \DIFaddend \texttt{\DIFdelbegin \DIFdel{16.7.0}\DIFdelend \DIFaddbegin \DIFadd{MinKernel}\DIFaddend }\DIFdelbegin \DIFdel{will match macOS 10.12.6 and }\texttt{\DIFdel{16.}} %DIFAUXCMD
-\DIFdel{will match
-  any macOS 10.12.x version }\DIFdelend \DIFaddbegin \\
+  \texttt{\DIFadd{MinKernel}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Adds kernel driver on specified macOS version or newer}\DIFaddend .
@@ -3457,7 +3467,16 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \end{lstlisting}
 
 \item
-  \texttt{Protocols}\\
+  \DIFaddbegin \texttt{\DIFadd{Input}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ dict}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: None}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Apply individual settings designed for input (keyboard and mouse) in
+  }\hyperref[uefiinputprops]{Input Properties} \DIFadd{section below.
+}
+
+
+\item
+  \DIFaddend \texttt{Protocols}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Force builtin versions of select protocols described
@@ -3474,7 +3493,139 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 
 \end{enumerate}
 
-\subsection{Protocols Properties}\label{uefiprotoprops}
+\DIFaddbegin \subsection{\DIFadd{Input Properties}}\label{uefiinputprops}
+
+\begin{enumerate}
+
+\item
+  \texttt{\DIFadd{KeyForgetThreshold}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Remove key unless it was submitted during this timeout in milliseconds.
+}
+
+  \texttt{\DIFadd{AppleKeyMapAggregator}} \DIFadd{protocol is supposed to contain a fixed length buffer
+  of currently pressed keys. However, the majority of the drivers only report key
+  presses as interrupts and pressing and holding the key on the keyboard results in
+  subsequent submissions of this key with some defined time interval. As a result
+  we use a timeout to remove once pressed keys from the buffer once the timeout
+  expires and no new submission of this key happened.
+  }
+
+  \DIFadd{This option allows to set this timeout based on your platform. The recommended
+  value that works on the majority of the platforms is }\texttt{\DIFadd{5}} \DIFadd{milliseconds.
+  For reference, holding one key on VMware will repeat it roughly every }\texttt{\DIFadd{2}}
+  \DIFadd{milliseconds and the same value for APTIO V is }\texttt{\DIFadd{3-4}} \DIFadd{milliseconds. Thus
+  it is possible to set a slightly lower value on faster platforms
+  and slightly higher value on slower platforms for more responsive input.
+}
+
+\item
+  \texttt{\DIFadd{KeyMergeThreshold}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Assume simultaneous combination for keys submitted within
+  this timeout in milliseconds.
+}
+
+  \DIFadd{Similarly to }\texttt{\DIFadd{KeyForgetThreshold}}\DIFadd{, this option works around the sequential
+  nature of key submission. To be able to recognise simultaneously pressed keys
+  in the situation when all keys arrive sequentially, we are required to set
+  a timeout within which we assume the keys were pressed together.
+}
+
+  \DIFadd{Holding multiple keys results in reports every }\texttt{\DIFadd{2}} \DIFadd{and }\texttt{\DIFadd{1}} \DIFadd{milliseconds
+  for VMware and APTIO V respectively. Pressing keys one after the other results in
+  delays of at least }\texttt{\DIFadd{6}} \DIFadd{and }\texttt{\DIFadd{10}} \DIFadd{milliseconds for the same platforms.
+  The recommended value for this option is }\texttt{\DIFadd{2}} \DIFadd{milliseconds, but it may be
+  decreased for faster platforms and increased for slower.
+}
+
+\item
+  \texttt{\DIFadd{KeySupport}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Enable internal keyboard input translation to
+  }\texttt{\DIFadd{AppleKeyMapAggregator}} \DIFadd{protocol.
+}
+
+  \DIFadd{This option activates the internal keyboard interceptor driver, based on
+  }\texttt{\DIFadd{AppleGenericInput}} \DIFadd{aka }\texttt{\DIFadd{AptioIntputFix}}\DIFadd{), to fill
+  }\texttt{\DIFadd{AppleKeyMapAggregator}} \DIFadd{database for input functioning. In case
+  a separate driver is used, such as }\texttt{\DIFadd{UsbKbDxe}}\DIFadd{, this option
+  should never be enabled.
+}
+
+\item
+  \texttt{\DIFadd{KeySupportMode}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Set internal keyboard input translation to
+  }\texttt{\DIFadd{AppleKeyMapAggregator}} \DIFadd{protocol mode.
+}
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{Auto}} \DIFadd{--- Performs automatic choice as available with the following preference: }\texttt{\DIFadd{AMI}}\DIFadd{, }\texttt{\DIFadd{V2}}\DIFadd{, }\texttt{\DIFadd{V1}}\DIFadd{.
+  }\item \texttt{\DIFadd{V1}} \DIFadd{--- Uses UEFI standard legacy input protocol }\texttt{\DIFadd{EFI\_SIMPLE\_TEXT\_INPUT\_PROTOCOL}}\DIFadd{.
+  }\item \texttt{\DIFadd{V2}} \DIFadd{--- Uses UEFI standard modern input protocol }\texttt{\DIFadd{EFI\_SIMPLE\_TEXT\_INPUT\_EX\_PROTOCOL}}\DIFadd{.
+  }\item \texttt{\DIFadd{AMI}} \DIFadd{--- Uses APTIO input protocol }\texttt{\DIFadd{AMI\_EFIKEYCODE\_PROTOCOL}}\DIFadd{.
+  }\end{itemize}
+
+\item
+  \texttt{\DIFadd{KeySwap}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Swap }\texttt{\DIFadd{Command}} \DIFadd{and }\texttt{\DIFadd{Option}} \DIFadd{keys during submission.
+}
+
+  \DIFadd{This option may be useful for keyboard layouts with }\texttt{\DIFadd{Option}} \DIFadd{key situated to the right
+  of }\texttt{\DIFadd{Command}} \DIFadd{key.
+}
+
+\item
+  \texttt{\DIFadd{PointerSupport}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Enable internal pointer driver.
+}
+
+  \DIFadd{This option implements standard UEFI pointer protocol (}\texttt{\DIFadd{EFI\_SIMPLE\_POINTER\_PROTOCOL}}\DIFadd{)
+  through select OEM protocols. The option may be useful on Z87 ASUS boards, where
+  }\texttt{\DIFadd{EFI\_SIMPLE\_POINTER\_PROTOCOL}} \DIFadd{is broken.
+}
+
+\item
+  \texttt{\DIFadd{PointerSupportMode}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Set OEM protocol used for internal pointer driver.
+}
+
+  \DIFadd{Currently the only supported variant is }\texttt{\DIFadd{ASUS}}\DIFadd{, using specialised protocol available
+  on select Z87 and Z97 ASUS boards. More details can be found in
+  }\href{https://github.com/LongSoft/UEFITool/pull/116}{\texttt{LongSoft/UefiTool\#116}}\DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{TimerResolution}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Set architecture timer resolution.
+}
+
+  \DIFadd{This option allows to update firmware architecture timer period with the specified value
+  in }\texttt{\DIFadd{100}} \DIFadd{nanosecond units. Setting a lower value generally improves performance
+  and responsiveness of the interface and input handling.
+  }
+
+  \DIFadd{The recommended value is }\texttt{\DIFadd{50000}} \DIFadd{(}\texttt{\DIFadd{5}} \DIFadd{milliseconds) or slightly higher. ASUS
+  boards use }\texttt{\DIFadd{60000}} \DIFadd{for the interface. Apple boards use }\texttt{\DIFadd{100000}}\DIFadd{.
+}
+
+\end{enumerate}
+
+\DIFaddend \subsection{Protocols Properties}\label{uefiprotoprops}
 
 \begin{enumerate}
 

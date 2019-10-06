@@ -831,7 +831,7 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
 
 \item
   \texttt{TableSignature}\\
-  \textbf{Type}: \\texttt{plist\ data}, 4 bytes\\
+  \textbf{Type}: \texttt{plist\ data}, 4 bytes\\
   \textbf{Failsafe}: All zero\\
   \textbf{Description}: Match table signature to be equal to this value
   unless all zero.
@@ -1368,7 +1368,9 @@ blocking.
   \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Adds kernel driver on specified macOS version or older.
 
-  \hypertarget{kernmatch}Kernel version interpretation is implemented as follows:
+  \hypertarget{kernmatch}Kernel version can be obtained with \texttt{uname -r} command,
+  and should look like 3 numbers separated by dots, for example \texttt{18.7.0} is the
+  kernel version for \texttt{10.14.6}. Kernel version interpretation is implemented as follows:
   \begin{align*}
     \begin{aligned}
       ParseDarwinVersion(\kappa,\lambda,\mu)=&(\lfloor\frac{\kappa}{10}\rfloor\cdot10
@@ -3370,6 +3372,14 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \end{lstlisting}
 
 \item
+  \texttt{Input}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Failsafe}: None\\
+  \textbf{Description}: Apply individual settings designed for input (keyboard and mouse) in
+  \hyperref[uefiinputprops]{Input Properties} section below.
+
+
+\item
   \texttt{Protocols}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
@@ -3384,6 +3394,120 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Failsafe}: None\\
   \textbf{Description}: Apply individual firmware quirks described in
   \hyperref[uefiquirkprops]{Quirks Properties} section below.
+
+\end{enumerate}
+
+\subsection{Input Properties}\label{uefiinputprops}
+
+\begin{enumerate}
+
+\item
+  \texttt{KeyForgetThreshold}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Remove key unless it was submitted during this timeout in milliseconds.
+
+  \texttt{AppleKeyMapAggregator} protocol is supposed to contain a fixed length buffer
+  of currently pressed keys. However, the majority of the drivers only report key
+  presses as interrupts and pressing and holding the key on the keyboard results in
+  subsequent submissions of this key with some defined time interval. As a result
+  we use a timeout to remove once pressed keys from the buffer once the timeout
+  expires and no new submission of this key happened.
+  
+  This option allows to set this timeout based on your platform. The recommended
+  value that works on the majority of the platforms is \texttt{5} milliseconds.
+  For reference, holding one key on VMware will repeat it roughly every \texttt{2}
+  milliseconds and the same value for APTIO V is \texttt{3-4} milliseconds. Thus
+  it is possible to set a slightly lower value on faster platforms
+  and slightly higher value on slower platforms for more responsive input.
+
+\item
+  \texttt{KeyMergeThreshold}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Assume simultaneous combination for keys submitted within
+  this timeout in milliseconds.
+
+  Similarly to \texttt{KeyForgetThreshold}, this option works around the sequential
+  nature of key submission. To be able to recognise simultaneously pressed keys
+  in the situation when all keys arrive sequentially, we are required to set
+  a timeout within which we assume the keys were pressed together.
+
+  Holding multiple keys results in reports every \texttt{2} and \texttt{1} milliseconds
+  for VMware and APTIO V respectively. Pressing keys one after the other results in
+  delays of at least \texttt{6} and \texttt{10} milliseconds for the same platforms.
+  The recommended value for this option is \texttt{2} milliseconds, but it may be
+  decreased for faster platforms and increased for slower.
+
+\item
+  \texttt{KeySupport}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable internal keyboard input translation to
+  \texttt{AppleKeyMapAggregator} protocol.
+
+  This option activates the internal keyboard interceptor driver, based on
+  \texttt{AppleGenericInput} aka \texttt{AptioIntputFix}), to fill
+  \texttt{AppleKeyMapAggregator} database for input functioning. In case
+  a separate driver is used, such as \texttt{UsbKbDxe}, this option
+  should never be enabled.
+
+\item
+  \texttt{KeySupportMode}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: empty string\\
+  \textbf{Description}: Set internal keyboard input translation to
+  \texttt{AppleKeyMapAggregator} protocol mode.
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Auto} --- Performs automatic choice as available with the following preference: \texttt{AMI}, \texttt{V2}, \texttt{V1}.
+  \item \texttt{V1} --- Uses UEFI standard legacy input protocol \texttt{EFI\_SIMPLE\_TEXT\_INPUT\_PROTOCOL}.
+  \item \texttt{V2} --- Uses UEFI standard modern input protocol \texttt{EFI\_SIMPLE\_TEXT\_INPUT\_EX\_PROTOCOL}.
+  \item \texttt{AMI} --- Uses APTIO input protocol \texttt{AMI\_EFIKEYCODE\_PROTOCOL}.
+  \end{itemize}
+
+\item
+  \texttt{KeySwap}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Swap \texttt{Command} and \texttt{Option} keys during submission.
+
+  This option may be useful for keyboard layouts with \texttt{Option} key situated to the right
+  of \texttt{Command} key.
+
+\item
+  \texttt{PointerSupport}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable internal pointer driver.
+
+  This option implements standard UEFI pointer protocol (\texttt{EFI\_SIMPLE\_POINTER\_PROTOCOL})
+  through select OEM protocols. The option may be useful on Z87 ASUS boards, where
+  \texttt{EFI\_SIMPLE\_POINTER\_PROTOCOL} is broken.
+
+\item
+  \texttt{PointerSupportMode}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: empty string\\
+  \textbf{Description}: Set OEM protocol used for internal pointer driver.
+
+  Currently the only supported variant is \texttt{ASUS}, using specialised protocol available
+  on select Z87 and Z97 ASUS boards. More details can be found in
+  \href{https://github.com/LongSoft/UEFITool/pull/116}{\texttt{LongSoft/UefiTool\#116}}.
+
+\item
+  \texttt{TimerResolution}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Set architecture timer resolution.
+
+  This option allows to update firmware architecture timer period with the specified value
+  in \texttt{100} nanosecond units. Setting a lower value generally improves performance
+  and responsiveness of the interface and input handling.
+  
+  The recommended value is \texttt{50000} (\texttt{5} milliseconds) or slightly higher. ASUS
+  boards use \texttt{60000} for the interface. Apple boards use \texttt{100000}.
 
 \end{enumerate}
 
