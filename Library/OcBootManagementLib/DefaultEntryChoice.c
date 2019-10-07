@@ -872,6 +872,8 @@ InternalLoadBootEntry (
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
   VOID                       *EntryData;
   UINT32                     EntryDataSize;
+  CONST CHAR8                *Args;
+  UINT32                     ArgsLen;
 
   ASSERT (BootPolicy != NULL);
   ASSERT (BootEntry != NULL);
@@ -974,16 +976,24 @@ InternalLoadBootEntry (
         BootEntry->LoadOptions
         ));
 
+      LoadedImage->LoadOptionsSize = 0;
+      LoadedImage->LoadOptions     = NULL;
+
       if (BootEntry->LoadOptions == NULL
         && (BootEntry->Type == OcBootApple || BootEntry->Type == OcBootAppleRecovery)) {
-        LoadedImage->LoadOptionsSize = (UINT32)AsciiStrLen (Context->AppleBootArgs);
-        if (LoadedImage->LoadOptionsSize > 0) {
-          LoadedImage->LoadOptionsSize += 1;
-          LoadedImage->LoadOptions      = Context->AppleBootArgs;
-        }
+        Args    = Context->AppleBootArgs;
+        ArgsLen = (UINT32)AsciiStrLen (Args);
       } else {
-        LoadedImage->LoadOptionsSize = BootEntry->LoadOptionsSize;
-        LoadedImage->LoadOptions     = BootEntry->LoadOptions;
+        Args    = BootEntry->LoadOptions;
+        ArgsLen = BootEntry->LoadOptionsSize;
+        ASSERT (ArgsLen == AsciiStrLen (Args));
+      }
+
+      if (ArgsLen > 0) {
+        LoadedImage->LoadOptions = AsciiStrCopyToUnicode (Args, ArgsLen);
+        if (LoadedImage->LoadOptions != NULL) {
+          LoadedImage->LoadOptionsSize = ArgsLen * sizeof (CHAR16) + sizeof (CHAR16);
+        }
       }
 
       if (BootEntry->Type == OcBootCustom) {
