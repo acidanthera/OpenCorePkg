@@ -389,7 +389,8 @@ OcLoadUefiInputSupport (
       Status = OcAppleGenericInputKeycodeInit (
                  KeyMode,
                  Config->Uefi.Input.KeyForgetThreshold,
-                 Config->Uefi.Input.KeyMergeThreshold
+                 Config->Uefi.Input.KeyMergeThreshold,
+                 Config->Uefi.Input.KeySwap
                  );
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_ERROR, "OCGI: Failed to initialize keycode\n"));
