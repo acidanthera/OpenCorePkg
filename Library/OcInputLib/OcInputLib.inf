@@ -47,15 +47,12 @@
 [LibraryClasses]
   BaseMemoryLib
   DebugLib
-  HiiLib
   MemoryAllocationLib
   OcGuardLib
   PcdLib
   UefiBootServicesTableLib
-  UefiDriverEntryPoint
   UefiLib
   UefiRuntimeServicesTableLib
-  UefiUsbLib
 
 [Guids]
   #
