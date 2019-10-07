@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Sep  6 23:59:43 2019
-%DIF ADD ../Configuration.tex        Sun Oct  6 15:26:24 2019
+%DIF ADD ../Configuration.tex        Mon Oct  7 11:21:04 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2359,7 +2359,7 @@ rm vault.pub
   \emph{Note}: Given the above description, \texttt{0xF0103} value is expected to allow
   scanning of SATA, SAS, SCSI, and NVMe devices with APFS file system, and prevent scanning
   of any devices with HFS or FAT32 file systems in addition to not scanning APFS file systems
-  on USB, CD, USB, and FireWire drives. The combination reads as:
+  on USB, CD, \DIFdelbegin \DIFdel{USB, }\DIFdelend and FireWire drives. The combination reads as:
   \begin{itemize}
   \tightlist
   \item \texttt{OC\_SCAN\_FILE\_SYSTEM\_LOCK}
@@ -3994,15 +3994,15 @@ uses \texttt{115200} baud rate, \texttt{8} data bits, no parity, and \texttt{1} 
 For macOS your best choice are CP2102-based UART devices. Connect motherboard \texttt{TX}
 to USB UART \texttt{\DIFdelbegin \DIFdel{GND}\DIFdelend \DIFaddbegin \DIFadd{RX}\DIFaddend }, and motherboard \texttt{GND} to USB UART \texttt{\DIFdelbegin \DIFdel{RX}\DIFdelend \DIFaddbegin \DIFadd{GND}\DIFaddend }. Use
 \texttt{screen} utility to get the output, or download GUI software, such as
-\href{https://freeware.the-meiers.org}{CoolTerm}\DIFaddbegin \DIFadd{.
-}
+\href{https://freeware.the-meiers.org}{CoolTerm}.
 
-\emph{\DIFadd{Note}}\DIFadd{: On several motherboards (and possibly USB UART dongles) PIN naming may be
+\DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: On several motherboards (and possibly USB UART dongles) PIN naming may be
 incorrect. It is very common to have }\texttt{\DIFadd{GND}} \DIFadd{swapped with }\texttt{\DIFadd{RX}}\DIFadd{, thus you have
 to connect motherboard ``}\texttt{\DIFadd{TX}}\DIFadd{'' to USB UART }\texttt{\DIFadd{GND}}\DIFadd{, and motherboard ``}\texttt{\DIFadd{GND}}\DIFadd{''
-to USB UART }\texttt{\DIFadd{RX}}\DIFaddend .
+to USB UART }\texttt{\DIFadd{RX}}\DIFadd{.
+}
 
-Remember to enable \texttt{COM} port in firmware settings, and never use USB cables longer
+\DIFaddend Remember to enable \texttt{COM} port in firmware settings, and never use USB cables longer
 than 1 meter to avoid output corruption. To additionally enable XNU kernel serial output
 you will need \texttt{debug=0x8} boot argument.
 
@@ -4036,7 +4036,9 @@ you will need \texttt{debug=0x8} boot argument.
   \end{itemize}
 
   If there is no obvious error, check the available hacks in \texttt{Quirks} sections
-  one by one.
+  one by one\DIFaddbegin \DIFadd{. For early boot troubleshooting, for instance, when OpenCore menu does not appear,
+  using }\href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} \DIFadd{may help to see
+  early debug messages}\DIFaddend .
 
 \item
   \textbf{How to customise boot entries?}

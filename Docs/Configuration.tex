@@ -2265,7 +2265,7 @@ rm vault.pub
   \emph{Note}: Given the above description, \texttt{0xF0103} value is expected to allow
   scanning of SATA, SAS, SCSI, and NVMe devices with APFS file system, and prevent scanning
   of any devices with HFS or FAT32 file systems in addition to not scanning APFS file systems
-  on USB, CD, USB, and FireWire drives. The combination reads as:
+  on USB, CD, and FireWire drives. The combination reads as:
   \begin{itemize}
   \tightlist
   \item \texttt{OC\_SCAN\_FILE\_SYSTEM\_LOCK}
@@ -3911,7 +3911,9 @@ you will need \texttt{debug=0x8} boot argument.
   \end{itemize}
 
   If there is no obvious error, check the available hacks in \texttt{Quirks} sections
-  one by one.
+  one by one. For early boot troubleshooting, for instance, when OpenCore menu does not appear,
+  using \href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} may help to see
+  early debug messages.
 
 \item
   \textbf{How to customise boot entries?}
