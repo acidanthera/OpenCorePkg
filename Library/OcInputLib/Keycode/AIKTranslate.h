@@ -113,7 +113,7 @@ enum {
 
 VOID
 AIKTranslateConfigure (
-  VOID
+  IN BOOLEAN  KeySwap
   );
 
 VOID

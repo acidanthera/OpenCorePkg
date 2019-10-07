@@ -122,7 +122,7 @@ AIKTranslateNumpad (
 
 VOID
 AIKTranslateConfigure (
-  VOID
+  IN BOOLEAN  KeySwap
   )
 {
   UINTN                     Index;
@@ -137,15 +137,17 @@ AIKTranslateConfigure (
     USB_HID_KB_KP_MODIFIER_LEFT_GUI
   };
 
-  //TODO: This should be user-configurable, perhaps via a nvram variable.
+  UINTN DefaultModifierConfig[AIK_MODIFIER_MAX / 2];
 
-  // You can swap Alt with Gui, to get Apple layout on a PC keyboard
-  CONST UINTN DefaultModifierConfig[AIK_MODIFIER_MAX/2] = {
-    AIK_RIGHT_SHIFT,
-    AIK_RIGHT_CONTROL,
-    AIK_RIGHT_ALT,
-    AIK_RIGHT_GUI
-  };
+  DefaultModifierConfig[0] = AIK_RIGHT_SHIFT;
+  DefaultModifierConfig[1] = AIK_RIGHT_CONTROL;
+  if (!KeySwap) {
+    DefaultModifierConfig[2] = AIK_RIGHT_ALT;
+    DefaultModifierConfig[3] = AIK_RIGHT_GUI;
+  } else {
+    DefaultModifierConfig[2] = AIK_RIGHT_GUI;
+    DefaultModifierConfig[3] = AIK_RIGHT_ALT;
+  }
 
   for (Index = 0; Index < AIK_MODIFIER_MAX/2; Index++) {
     mModifierRemap[Index*2]   = DefaultModifierMap[DefaultModifierConfig[Index]];
