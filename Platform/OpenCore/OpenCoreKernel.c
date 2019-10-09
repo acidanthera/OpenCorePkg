@@ -310,12 +310,12 @@ OcKernelApplyPatches (
     }
 
     MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MaxKernel));
-    MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MaxKernel));
+    MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MinKernel));
 
     if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
       DEBUG ((
         DEBUG_INFO,
-        "OC: Kernel patcher skips %a (%a) patch at %u due to version %u <= %u <= %u",
+        "OC: Kernel patcher skips %a (%a) patch at %u due to version %u <= %u <= %u\n",
         Target,
         Comment,
         Index,
@@ -478,12 +478,12 @@ OcKernelBlockKexts (
     }
 
     MaxKernel = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
-    MinKernel = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
+    MinKernel = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
 
     if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
       DEBUG ((
         DEBUG_INFO,
-        "OC: Prelink blocker skips %a (%a) block at %u due to version %u <= %u <= %u",
+        "OC: Prelink blocker skips %a (%a) block at %u due to version %u <= %u <= %u\n",
         Target,
         Comment,
         Index,
@@ -558,12 +558,12 @@ OcKernelProcessPrelinked (
         BundlePath  = OC_BLOB_GET (&Kext->BundlePath);
         Comment     = OC_BLOB_GET (&Kext->Comment);
         MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
-        MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
+        MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
 
         if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
           DEBUG ((
             DEBUG_INFO,
-            "OC: Prelink injection skips %a (%a) kext at %u due to version %u <= %u <= %u",
+            "OC: Prelink injection skips %a (%a) kext at %u due to version %u <= %u <= %u\n",
             BundlePath,
             Comment,
             Index,
