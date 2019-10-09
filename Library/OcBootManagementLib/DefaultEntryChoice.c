@@ -986,7 +986,7 @@ InternalLoadBootEntry (
       } else {
         Args    = BootEntry->LoadOptions;
         ArgsLen = BootEntry->LoadOptionsSize;
-        ASSERT (ArgsLen == AsciiStrLen (Args));
+        ASSERT (ArgsLen == ((Args == NULL) ? 0 : (UINT32)AsciiStrLen (Args)));
       }
 
       if (ArgsLen > 0) {
