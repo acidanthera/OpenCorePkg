@@ -116,7 +116,7 @@ OcKernelReadDarwinVersion (
   INT32   Offset;
   UINT32  Index;
   CHAR8   DarwinVersion[32];
-  CHAR8   DarwinVersionInteger;
+  UINT32  DarwinVersionInteger;
 
 
   Offset = FindPattern (
@@ -142,7 +142,7 @@ OcKernelReadDarwinVersion (
     DarwinVersion[Index] = (CHAR8) Kernel[Offset];
   }
   DarwinVersion[Index] = '\0';
-  DarwinVersionInteger = (CHAR8) OcParseDarwinVersion (DarwinVersion);
+  DarwinVersionInteger = OcParseDarwinVersion (DarwinVersion);
 
   DEBUG ((
     DEBUG_INFO,
