@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.5.2
 - Fixed `MinKernel` and `MaxKernel` logic (thx @dhinakg)
+- Fixed ASSERT when booting non-Apple OSes without arguments from the DEBUG version.
 
 #### v0.5.1
 - Added support of kernel resource kext injection
