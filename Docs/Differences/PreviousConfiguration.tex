@@ -12,6 +12,7 @@
 \usepackage{longtable,booktabs}
 \usepackage{footnote}
 \usepackage{listings}
+\usepackage{mathtools}
 \usepackage{parskip}
 \usepackage[margin=0.7in]{geometry}
 \usepackage{titlesec}
@@ -25,6 +26,14 @@
 \tikzstyle{optional}=[dashed,fill=gray!50]
 
 \renewcommand{\dateseparator}{.}
+
+\makeatletter
+\newcommand*{\bdiv}{%
+  \nonscript\mskip-\medmuskip\mkern5mu%
+  \mathbin{\operator@font div}\penalty900\mkern5mu%
+  \nonscript\mskip-\medmuskip
+}
+\makeatother
 
 % Newer LaTeX versions should not add ligatures to listings, but for some reason
 % it is not the case for me. As a result select PDF viewers copy wrong data.
@@ -80,7 +89,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.5.0)
+       Reference Manual (0.5.1)
 
        \vspace{0.2in}
 
@@ -730,6 +739,10 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
   \textbf{Description}: Match table signature to be equal to this value
   unless all zero.
 
+  \emph{Note}: Make sure not to specify table signature when the sequence
+  needs to be replaced in multiple places. Especially when performing
+  different kinds of renames.
+
 \end{enumerate}
 
 \subsection{Patch Properties}\label{acpipropspatch}
@@ -818,7 +831,7 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
 
 \item
   \texttt{TableSignature}\\
-  \textbf{Type}: \\texttt{plist\ data}, 4 bytes\\
+  \textbf{Type}: \texttt{plist\ data}, 4 bytes\\
   \textbf{Failsafe}: All zero\\
   \textbf{Description}: Match table signature to be equal to this value
   unless all zero.
@@ -999,7 +1012,7 @@ sudo pmset powernap 0
 sudo pmset standby 0
 \end{lstlisting}
 
-\emph{Note}: these settings may reset at hardware change and in certain other circumstances.
+\emph{Note}: These settings may reset at hardware change and in certain other circumstances.
 To view their current state use \texttt{pmset -g} command in Terminal.
 
 \subsection{Properties}\label{booterprops}
@@ -1350,13 +1363,58 @@ blocking.
   (e.g. \texttt{Contents/MacOS/Lilu}).
 
 \item
-  \texttt{MatchKernel}\\
+  \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Adds kernel driver on selected macOS version only.
-  The selection happens based on prefix match with the kernel version, i.e.
-  \texttt{16.7.0} will match macOS 10.12.6 and \texttt{16.} will match
-  any macOS 10.12.x version.
+  \textbf{Description}: Adds kernel driver on specified macOS version or older.
+
+  \hypertarget{kernmatch}Kernel version can be obtained with \texttt{uname -r} command,
+  and should look like 3 numbers separated by dots, for example \texttt{18.7.0} is the
+  kernel version for \texttt{10.14.6}. Kernel version interpretation is implemented as follows:
+  \begin{align*}
+    \begin{aligned}
+      ParseDarwinVersion(\kappa,\lambda,\mu)=&(\lfloor\frac{\kappa}{10}\rfloor\cdot10
+      + \kappa-\lfloor\frac{\kappa}{10}\rfloor\cdot10)\cdot10000 &&
+        \text{Where }\kappa\in(0,99)\text{ is kernel version major} \\
+      + &(\lfloor\frac{\lambda}{10}\rfloor\cdot10
+      + \lambda-\lfloor\frac{\lambda}{10}\rfloor\cdot10)\cdot100 &&
+        \text{Where }\lambda\in(0,99)\text{ is kernel version minor} \\
+      + &(\lfloor\frac{\mu}{10}\rfloor\cdot10
+      + \mu-\lfloor\frac{\mu}{10}\rfloor\cdot10) &&
+        \text{Where }\mu\in(0,99)\text{ is kernel version patch}
+    \end{aligned}
+  \end{align*}
+  Kernel version comparison is implemented as follows:
+  \begin{align*}
+    \alpha&=\begin{cases}
+      \vspace{-0.5cm}\mbox{\hspace{8cm}} & \mbox{\hspace{5cm}} \\
+      ParseDarwinVersion(\texttt{MinKernel}), & \text{If } \texttt{MinKernel} \text{ is valid} \\
+      0 & Otherwise
+    \end{cases} \\
+    \beta&=\begin{cases}
+      \vspace{-0.5cm}\mbox{\hspace{8cm}} & \mbox{\hspace{5cm}} \\
+      ParseDarwinVersion(\texttt{MaxKernel}), & \text{If } \texttt{MaxKernel} \text{ is valid} \\
+      \infty & Otherwise
+    \end{cases} \\
+    \gamma&=\begin{cases}
+      \vspace{-0.5cm}\mbox{\hspace{8cm}} & \mbox{\hspace{5cm}} \\
+      ParseDarwinVersion(FindDarwinVersion()), & \text{If valid } \texttt{"Darwin Kernel Version"} \text{ is found} \\
+      \infty & Otherwise
+    \end{cases} \\
+    & \hspace{5cm} f(\alpha,\beta,\gamma)=\alpha\leq\gamma\leq\beta
+  \end{align*}
+  Here $ParseDarwinVersion$ argument is assumed to be 3 integers obtained by splitting Darwin kernel version
+  string from left to right by the \texttt{.} symbol. $FindDarwinVersion$ function looks up
+  Darwin kernel version by locating \texttt{"Darwin Kernel Version $\kappa$.$\lambda$.$\mu$"} string
+  in the kernel image.
+
+\item
+  \texttt{MinKernel}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Adds kernel driver on specified macOS version or newer.
+
+  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
 
 \item
   \texttt{PlistPath}\\
@@ -1393,13 +1451,20 @@ blocking.
     (e.g. \texttt{com.apple.driver.AppleTyMCEDriver}).
 
 \item
-  \texttt{MatchKernel}\\
+  \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Blocks kernel driver on selected macOS version only.
-  The selection happens based on prefix match with the kernel version, i.e.
-  \texttt{16.7.0} will match macOS 10.12.6 and \texttt{16.} will match
-  any macOS 10.12.x version.
+  \textbf{Description}: Blocks kernel driver on specified macOS version or older.
+
+  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
+
+\item
+  \texttt{MinKernel}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Blocks kernel driver on specified macOS version or newer.
+
+  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
 
 \end{enumerate}
 
@@ -1494,13 +1559,20 @@ blocking.
   otherwise.
 
 \item
-  \texttt{MatchKernel}\\
+  \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Adds kernel driver to selected macOS version only.
-  The selection happens based on prefix match with the kernel version, i.e.
-  \texttt{16.7.0} will match macOS 10.12.6 and \texttt{16.} will match
-  any macOS 10.12.x version.
+  \textbf{Description}: Patches data on specified macOS version or older.
+
+  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
+
+\item
+  \texttt{MinKernel}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Patches data on specified macOS version or newer.
+
+  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
 
 \item
   \texttt{Replace}\\
@@ -1697,8 +1769,7 @@ behaviour that does not go to any other sections
   See \hyperref[miscentryprops]{Entry Properties} section below.
 
   \emph{Note}: Select tools, for example,
-  \href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} or
-  \href{https://github.com/acidanthera/AppleSupportPkg#cleannvram}{CleanNvram} are very
+  \href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} are very
   dangerous and \textbf{MUST NOT} appear in production configurations, especially
   in vaulted ones and protected with secure boot, as they may be used to easily
   bypass secure boot chain.
@@ -1718,6 +1789,8 @@ behaviour that does not go to any other sections
   Set to empty string not to change console mode. Set to \texttt{Max}
   to try to use largest available console mode.
 
+  \emph{Note}: This field is best to be left empty on most firmwares.
+
 \item
   \texttt{ConsoleBehaviourOs}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -1728,7 +1801,7 @@ behaviour that does not go to any other sections
   screen output. Some firmwares do not provide it, yet select operating systems
   require its presence, which is what \texttt{ConsoleControl} UEFI protocol is for.
 
-  When console control is available, OpenCore can be made console control aware, and
+  When console control is available, OpenCore can be made console control aware,
   and set different modes for the operating system booter (\texttt{ConsoleBehaviourOs}),
   which normally runs in graphics mode, and its own user interface
   (\texttt{ConsoleBehaviourUi}), which normally runs in text mode. Possible
@@ -1897,7 +1970,7 @@ behaviour that does not go to any other sections
   recovery. Hold \texttt{CMD+R} key combination to choose this option.
   \end{itemize}
 
-  \emph{Note}: \texttt{AppleGenericInput}, \texttt{UsbKbDxe}, or similar driver is required
+  \emph{Note}: activated \texttt{KeySupport}, \texttt{UsbKbDxe}, or similar driver is required
   for key handling to work. On many firmwares it is not possible to get all the keys function.
 
   In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key
@@ -2192,7 +2265,7 @@ rm vault.pub
   \emph{Note}: Given the above description, \texttt{0xF0103} value is expected to allow
   scanning of SATA, SAS, SCSI, and NVMe devices with APFS file system, and prevent scanning
   of any devices with HFS or FAT32 file systems in addition to not scanning APFS file systems
-  on USB, CD, USB, and FireWire drives. The combination reads as:
+  on USB, CD, and FireWire drives. The combination reads as:
   \begin{itemize}
   \tightlist
   \item \texttt{OC\_SCAN\_FILE\_SYSTEM\_LOCK}
@@ -2209,6 +2282,13 @@ rm vault.pub
 \subsection{Entry Properties}\label{miscentryprops}
 
 \begin{enumerate}
+\item
+  \texttt{Arguments}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Arbitrary ASCII string used as boot arguments (load options)
+  of the specified entry.
+
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -2243,7 +2323,7 @@ rm vault.pub
   Example: \texttt{PciRoot(0x0)/Pci(0x1,0x1)/.../\textbackslash EFI\textbackslash COOL.EFI}
   \item \texttt{Tools} specify internal boot options, which are part of bootloader
   vault, and therefore take file paths relative to \texttt{OC/Tools} directory.
-  Example: \texttt{CleanNvram.efi}.
+  Example: \texttt{Shell.efi}.
   \end{itemize}
 
 \end{enumerate}
@@ -3238,11 +3318,6 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
   --- APFS file system bootstrap driver adding the support of embedded APFS drivers
   in bootable APFS containers in UEFI firmwares.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AppleGenericInput}}
-  --- user input driver adding the support of \texttt{AppleKeyMapAggregator} protocols
-  on top of different UEFI input protocols. Additionally resolves mouse input issues
-  on select firmwares. This is an alternative to \texttt{UsbKbDxe}, which may work
-  better or worse depending on the firmware.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{FwRuntimeServices}}
   --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
   of OpenCore and Lilu by supporting read-only and write-only NVRAM variables. Some
@@ -3262,7 +3337,7 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{UsbKbDxe}}
   --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
-  \texttt{AppleGenericInput}, which may work better or worse depending on the firmware.
+  builtin \texttt{KeySypport}, which may work better or worse depending on the firmware.
   \item \href{https://github.com/acidanthera/VirtualSMC}{\texttt{VirtualSmc}}
   --- UEFI SMC driver, required for proper FileVault 2 functionality and potentially
   other macOS specifics. An alternative, named \texttt{SMCHelper}, is not compatible
@@ -3292,6 +3367,14 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \end{lstlisting}
 
 \item
+  \texttt{Input}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Failsafe}: None\\
+  \textbf{Description}: Apply individual settings designed for input (keyboard and mouse) in
+  \hyperref[uefiinputprops]{Input Properties} section below.
+
+
+\item
   \texttt{Protocols}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
@@ -3306,6 +3389,120 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Failsafe}: None\\
   \textbf{Description}: Apply individual firmware quirks described in
   \hyperref[uefiquirkprops]{Quirks Properties} section below.
+
+\end{enumerate}
+
+\subsection{Input Properties}\label{uefiinputprops}
+
+\begin{enumerate}
+
+\item
+  \texttt{KeyForgetThreshold}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Remove key unless it was submitted during this timeout in milliseconds.
+
+  \texttt{AppleKeyMapAggregator} protocol is supposed to contain a fixed length buffer
+  of currently pressed keys. However, the majority of the drivers only report key
+  presses as interrupts and pressing and holding the key on the keyboard results in
+  subsequent submissions of this key with some defined time interval. As a result
+  we use a timeout to remove once pressed keys from the buffer once the timeout
+  expires and no new submission of this key happened.
+
+  This option allows to set this timeout based on your platform. The recommended
+  value that works on the majority of the platforms is \texttt{5} milliseconds.
+  For reference, holding one key on VMware will repeat it roughly every \texttt{2}
+  milliseconds and the same value for APTIO V is \texttt{3-4} milliseconds. Thus
+  it is possible to set a slightly lower value on faster platforms
+  and slightly higher value on slower platforms for more responsive input.
+
+\item
+  \texttt{KeyMergeThreshold}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Assume simultaneous combination for keys submitted within
+  this timeout in milliseconds.
+
+  Similarly to \texttt{KeyForgetThreshold}, this option works around the sequential
+  nature of key submission. To be able to recognise simultaneously pressed keys
+  in the situation when all keys arrive sequentially, we are required to set
+  a timeout within which we assume the keys were pressed together.
+
+  Holding multiple keys results in reports every \texttt{2} and \texttt{1} milliseconds
+  for VMware and APTIO V respectively. Pressing keys one after the other results in
+  delays of at least \texttt{6} and \texttt{10} milliseconds for the same platforms.
+  The recommended value for this option is \texttt{2} milliseconds, but it may be
+  decreased for faster platforms and increased for slower.
+
+\item
+  \texttt{KeySupport}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable internal keyboard input translation to
+  \texttt{AppleKeyMapAggregator} protocol.
+
+  This option activates the internal keyboard interceptor driver, based on
+  \texttt{AppleGenericInput} aka \texttt{AptioIntputFix}), to fill
+  \texttt{AppleKeyMapAggregator} database for input functioning. In case
+  a separate driver is used, such as \texttt{UsbKbDxe}, this option
+  should never be enabled.
+
+\item
+  \texttt{KeySupportMode}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: empty string\\
+  \textbf{Description}: Set internal keyboard input translation to
+  \texttt{AppleKeyMapAggregator} protocol mode.
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Auto} --- Performs automatic choice as available with the following preference: \texttt{AMI}, \texttt{V2}, \texttt{V1}.
+  \item \texttt{V1} --- Uses UEFI standard legacy input protocol \texttt{EFI\_SIMPLE\_TEXT\_INPUT\_PROTOCOL}.
+  \item \texttt{V2} --- Uses UEFI standard modern input protocol \texttt{EFI\_SIMPLE\_TEXT\_INPUT\_EX\_PROTOCOL}.
+  \item \texttt{AMI} --- Uses APTIO input protocol \texttt{AMI\_EFIKEYCODE\_PROTOCOL}.
+  \end{itemize}
+
+\item
+  \texttt{KeySwap}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Swap \texttt{Command} and \texttt{Option} keys during submission.
+
+  This option may be useful for keyboard layouts with \texttt{Option} key situated to the right
+  of \texttt{Command} key.
+
+\item
+  \texttt{PointerSupport}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable internal pointer driver.
+
+  This option implements standard UEFI pointer protocol (\texttt{EFI\_SIMPLE\_POINTER\_PROTOCOL})
+  through select OEM protocols. The option may be useful on Z87 ASUS boards, where
+  \texttt{EFI\_SIMPLE\_POINTER\_PROTOCOL} is broken.
+
+\item
+  \texttt{PointerSupportMode}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: empty string\\
+  \textbf{Description}: Set OEM protocol used for internal pointer driver.
+
+  Currently the only supported variant is \texttt{ASUS}, using specialised protocol available
+  on select Z87 and Z97 ASUS boards. More details can be found in
+  \href{https://github.com/LongSoft/UEFITool/pull/116}{\texttt{LongSoft/UefiTool\#116}}.
+
+\item
+  \texttt{TimerResolution}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Set architecture timer resolution.
+
+  This option allows to update firmware architecture timer period with the specified value
+  in \texttt{100} nanosecond units. Setting a lower value generally improves performance
+  and responsiveness of the interface and input handling.
+
+  The recommended value is \texttt{50000} (\texttt{5} milliseconds) or slightly higher. ASUS
+  boards use \texttt{60000} for the interface. Apple boards use \texttt{100000}.
 
 \end{enumerate}
 
@@ -3671,9 +3868,14 @@ To obtain the log during boot you can make the use of serial port debugging. Ser
 debugging is enabled in \texttt{Target}, e.g. \texttt{0xB} for onscreen with serial. OpenCore
 uses \texttt{115200} baud rate, \texttt{8} data bits, no parity, and \texttt{1} stop bit.
 For macOS your best choice are CP2102-based UART devices. Connect motherboard \texttt{TX}
-to USB UART \texttt{GND}, and motherboard \texttt{GND} to USB UART \texttt{RX}. Use
+to USB UART \texttt{RX}, and motherboard \texttt{GND} to USB UART \texttt{GND}. Use
 \texttt{screen} utility to get the output, or download GUI software, such as
 \href{https://freeware.the-meiers.org}{CoolTerm}.
+
+\emph{Note}: On several motherboards (and possibly USB UART dongles) PIN naming may be
+incorrect. It is very common to have \texttt{GND} swapped with \texttt{RX}, thus you have
+to connect motherboard ``\texttt{TX}'' to USB UART \texttt{GND}, and motherboard ``\texttt{GND}''
+to USB UART \texttt{RX}.
 
 Remember to enable \texttt{COM} port in firmware settings, and never use USB cables longer
 than 1 meter to avoid output corruption. To additionally enable XNU kernel serial output
@@ -3709,7 +3911,9 @@ you will need \texttt{debug=0x8} boot argument.
   \end{itemize}
 
   If there is no obvious error, check the available hacks in \texttt{Quirks} sections
-  one by one.
+  one by one. For early boot troubleshooting, for instance, when OpenCore menu does not appear,
+  using \href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} may help to see
+  early debug messages.
 
 \item
   \textbf{How to customise boot entries?}

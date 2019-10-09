@@ -1,5 +1,7 @@
 OpenCore Changelog
 ==================
+#### v0.5.2
+- Fixed `MinKernel` and `MaxKernel` logic (thx @dhinakg)
 
 #### v0.5.1
 - Added support of kernel resource kext injection
