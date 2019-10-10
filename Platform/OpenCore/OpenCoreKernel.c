@@ -35,6 +35,7 @@ OcParseDarwinVersion (
   )
 {
   UINT32  Version;
+  UINT32  VersionPart;
   UINT32  Index;
   UINT32  Index2;
 
@@ -45,14 +46,26 @@ OcParseDarwinVersion (
   Version = 0;
 
   for (Index = 0; Index < 3; ++Index) {
+    Version *= 100;
+
+    VersionPart = 0;
+
     for (Index2 = 0; Index2 < 2; ++Index2) {
-      Version *= 10;
+      //
+      // Handle single digit parts, i.e. parse 1.2.3 as 010203.
+      //
+      if (*String != '.' && *String != '\0') {
+        VersionPart *= 10;
+      }
+
       if (*String >= '0' && *String <= '9') {
-        Version += *String++ - '0';
+        VersionPart += *String++ - '0';
       } else if (*String != '.' && *String != '\0') {
         return 0;
       }
     }
+
+    Version += VersionPart;
 
     if (*String == '.') {
       ++String;
@@ -430,7 +443,7 @@ OcKernelApplyPatches (
     }
 
     if (Config->Kernel.Quirks.PanicNoKextDump) {
-      PatchPanicKextDump (&Patcher);      
+      PatchPanicKextDump (&Patcher);
     }
 
     if (Config->Kernel.Emulate.Cpuid1Data[0] != 0
