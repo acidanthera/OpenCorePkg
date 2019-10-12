@@ -1693,9 +1693,12 @@ struct EFI_BOOT_SERVICES_ {
   EFI_STATUS (*LocateDevicePath) (EFI_GUID *Protocol, EFI_DEVICE_PATH_PROTOCOL **DevicePath, EFI_HANDLE *Device);
 };
 
+typedef EFI_STATUS (*EFI_GET_VARIABLE)(CHAR16 *VariableName, EFI_GUID *VendorGuid, UINT32 *Attributes, UINTN *DataSize, VOID *Data);
+typedef EFI_STATUS (*EFI_SET_VARIABLE)(CHAR16 *VariableName, EFI_GUID *VendorGuid, UINT32 Attributes, UINTN DataSize, VOID *Data);
+
 struct EFI_RUNTIME_SERVICES_ {
-  EFI_STATUS (*GetVariable)(CHAR16 *VariableName, EFI_GUID *VendorGuid, UINT32 *Attributes, UINTN *DataSize, VOID *Data);
-  EFI_STATUS (*SetVariable)(CHAR16 *VariableName, EFI_GUID *VendorGuid, UINT32 Attributes, UINTN DataSize, VOID *Data);
+  EFI_GET_VARIABLE GetVariable;
+  EFI_SET_VARIABLE SetVariable;
 };
 
 STATIC EFI_STATUS NilLocateProtocol(EFI_GUID *ProtocolGuid, VOID *Registration, VOID **Interface) {
