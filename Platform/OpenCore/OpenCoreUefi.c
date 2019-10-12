@@ -345,7 +345,7 @@ OcLoadUefiInputSupport (
   if (TimerResolution != 0) {
     Status = OcAppleGenericInputTimerQuirkInit (TimerResolution);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCGI: Failed to initialize timer quirk\n"));
+      DEBUG ((DEBUG_ERROR, "OC: Failed to initialize timer quirk\n"));
     } else {
       ExitBs = TRUE;
     }
@@ -363,7 +363,7 @@ OcLoadUefiInputSupport (
     if (PointerMode != OcInputPointerModeMax) {
       Status = OcAppleGenericInputPointerInit (PointerMode);
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_ERROR, "OCGI: Failed to initialize pointer\n"));
+        DEBUG ((DEBUG_ERROR, "OC: Failed to initialize pointer\n"));
       } else {
         ExitBs = TRUE;
       }
@@ -393,7 +393,7 @@ OcLoadUefiInputSupport (
                  Config->Uefi.Input.KeySwap
                  );
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_ERROR, "OCGI: Failed to initialize keycode\n"));
+        DEBUG ((DEBUG_ERROR, "OC: Failed to initialize keycode\n"));
       } else {
         ExitBs = TRUE;
       }
@@ -409,6 +409,8 @@ OcLoadBooterUefiSupport (
   )
 {
   OC_ABC_SETTINGS  AbcSettings;
+  UINT32           Index;
+  UINT32           NextIndex;
 
   ZeroMem (&AbcSettings, sizeof (AbcSettings));
 
@@ -424,6 +426,29 @@ OcLoadBooterUefiSupport (
   AbcSettings.ProvideCustomSlide     = Config->Booter.Quirks.ProvideCustomSlide;
   AbcSettings.SetupVirtualMap        = Config->Booter.Quirks.SetupVirtualMap;
   AbcSettings.ShrinkMemoryMap        = Config->Booter.Quirks.ShrinkMemoryMap;
+
+  if (AbcSettings.DevirtualiseMmio && Config->Booter.Quirks.MmioWhitelist.Count > 0) {
+    AbcSettings.MmioWhitelist = AllocatePool (
+      Config->Booter.Quirks.MmioWhitelist.Count * sizeof (AbcSettings.MmioWhitelist[0])
+      );
+
+    if (AbcSettings.MmioWhitelist != NULL) {
+      NextIndex = 0;
+      for (Index = 0; Index < Config->Booter.Quirks.MmioWhitelist.Count; ++Index) {
+        if (Config->Booter.Quirks.MmioWhitelist.Values[Index]->Enabled) {
+          AbcSettings.MmioWhitelist[++NextIndex] = Config->Booter.Quirks.MmioWhitelist.Values[Index]->Address;
+        }
+      }
+      AbcSettings.MmioWhitelistSize = NextIndex;
+    } else {
+      DEBUG ((
+        DEBUG_ERROR,
+        "OC: Failed to allocate %u slots for mmio addresses\n",
+        (UINT32) Config->Booter.Quirks.MmioWhitelist.Count
+        ));
+    }
+
+  }
 
   OcAbcInitialize (&AbcSettings);
 }
