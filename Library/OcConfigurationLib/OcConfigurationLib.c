@@ -23,6 +23,8 @@ OC_ARRAY_STRUCTORS (OC_ACPI_PATCH_ARRAY)
 OC_STRUCTORS       (OC_ACPI_QUIRKS, ())
 OC_STRUCTORS       (OC_ACPI_CONFIG, ())
 
+OC_STRUCTORS       (OC_BOOTER_WL_ENTRY, ())
+OC_ARRAY_STRUCTORS (OC_BOOTER_WL_ARRAY)
 OC_STRUCTORS       (OC_BOOTER_QUIRKS, ())
 OC_STRUCTORS       (OC_BOOTER_CONFIG, ())
 
@@ -147,6 +149,10 @@ mAcpiConfigurationSchema[] = {
 
 STATIC
 OC_SCHEMA
+mBooterWhitelistEntrySchema = OC_SCHEMA_INTEGER (NULL, UINT64);
+
+STATIC
+OC_SCHEMA
 mBooterQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("AvoidRuntimeDefrag",     OC_GLOBAL_CONFIG, Booter.Quirks.AvoidRuntimeDefrag),
   OC_SCHEMA_BOOLEAN_IN ("DevirtualiseMmio",       OC_GLOBAL_CONFIG, Booter.Quirks.DevirtualiseMmio),
@@ -156,6 +162,7 @@ mBooterQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("EnableSafeModeSlide",    OC_GLOBAL_CONFIG, Booter.Quirks.EnableSafeModeSlide),
   OC_SCHEMA_BOOLEAN_IN ("EnableWriteUnprotector", OC_GLOBAL_CONFIG, Booter.Quirks.EnableWriteUnprotector),
   OC_SCHEMA_BOOLEAN_IN ("ForceExitBootServices",  OC_GLOBAL_CONFIG, Booter.Quirks.ForceExitBootServices),
+  OC_SCHEMA_ARRAY_IN   ("MmioWhitelist",          OC_GLOBAL_CONFIG, Booter.Quirks.MmioWhitelist, &mBooterWhitelistEntrySchema),
   OC_SCHEMA_BOOLEAN_IN ("ProtectCsmRegion",       OC_GLOBAL_CONFIG, Booter.Quirks.ProtectCsmRegion),
   OC_SCHEMA_BOOLEAN_IN ("ProvideCustomSlide",     OC_GLOBAL_CONFIG, Booter.Quirks.ProvideCustomSlide),
   OC_SCHEMA_BOOLEAN_IN ("SetupVirtualMap",        OC_GLOBAL_CONFIG, Booter.Quirks.SetupVirtualMap),

@@ -77,6 +77,14 @@ typedef struct OC_ABC_SETTINGS_ {
   /// on many APTIO V firmwares.
   ///
   BOOLEAN  EnableWriteUnprotector;
+  ///
+  /// List of physical addresses to not be devirtualised by DevirtualiseMmio.
+  ///
+  EFI_PHYSICAL_ADDRESS *MmioWhitelist;
+  ///
+  /// Size of list of physical addresses to not be devirtualised by DevirtualiseMmio.
+  ///
+  UINTN                MmioWhitelistSize;
 } OC_ABC_SETTINGS;
 
 /**

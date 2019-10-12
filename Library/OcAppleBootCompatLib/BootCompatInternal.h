@@ -450,15 +450,16 @@ AppleSlideUnlockForSafeMode (
   UEFI RuntimeServices GetVariable call and thus is useful to
   perform KASLR slide injection through boot-args.
 
-  @param[in,out]  BootCompat    Boot compatibility context.
-  @param[in]      GetVariable   Original UEFI GetVariable service.
-  @param[in]      GetMemoryMap  Unmodified GetMemoryMap pointer, optional.
-  @param[in]      FilterMap     GetMemoryMap result filter, optional.
-  @param[in]      VariableName  GetVariable variable name argument.
-  @param[in]      VendorGuid    GetVariable vendor GUID argument.
-  @param[out]     Attributes    GetVariable attributes argument.
-  @param[in,out]  DataSize      GetVariable data size argument.
-  @param[out]     Data          GetVariable data argument.
+  @param[in,out]  BootCompat       Boot compatibility context.
+  @param[in]      GetVariable      Original UEFI GetVariable service.
+  @param[in]      GetMemoryMap     Unmodified GetMemoryMap pointer, optional.
+  @param[in]      FilterMap        GetMemoryMap result filter, optional.
+  @param[in]      FilterMapContext FilterMap context, optional.
+  @param[in]      VariableName     GetVariable variable name argument.
+  @param[in]      VendorGuid       GetVariable vendor GUID argument.
+  @param[out]     Attributes       GetVariable attributes argument.
+  @param[in,out]  DataSize         GetVariable data size argument.
+  @param[out]     Data             GetVariable data argument.
 
   @retval GetVariable status code.
 **/
@@ -468,6 +469,7 @@ AppleSlideGetVariable (
   IN     EFI_GET_VARIABLE      GetVariable,
   IN     EFI_GET_MEMORY_MAP    GetMemoryMap  OPTIONAL,
   IN     OC_MEMORY_FILTER      FilterMap     OPTIONAL,
+  IN     VOID                  *FilterMapContext  OPTIONAL,
   IN     CHAR16                *VariableName,
   IN     EFI_GUID              *VendorGuid,
      OUT UINT32                *Attributes   OPTIONAL,

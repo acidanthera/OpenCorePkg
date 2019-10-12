@@ -147,6 +147,7 @@ BOOLEAN
 /**
   Filter memory map entries.
 
+  @param[in]      Context            Parameterised filter data.
   @param[in,out]  MemoryMapSize      Memory map size in bytes.
   @param[in,out]  MemoryMap          Memory map to filter.
   @param[in]      DescriptorSize     Memory map descriptor size in bytes.
@@ -154,9 +155,10 @@ BOOLEAN
 typedef
 VOID
 (*OC_MEMORY_FILTER) (
-  IN     UINTN                  MemoryMapSize,
-  IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
-  IN     UINTN                  DescriptorSize
+  IN     VOID                        *Context  OPTIONAL,
+  IN     UINTN                       MemoryMapSize,
+  IN OUT EFI_MEMORY_DESCRIPTOR       *MemoryMap,
+  IN     UINTN                       DescriptorSize
   );
 
 /**
