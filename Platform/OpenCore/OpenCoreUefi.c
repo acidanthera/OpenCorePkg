@@ -436,7 +436,8 @@ OcLoadBooterUefiSupport (
       NextIndex = 0;
       for (Index = 0; Index < Config->Booter.Quirks.MmioWhitelist.Count; ++Index) {
         if (Config->Booter.Quirks.MmioWhitelist.Values[Index]->Enabled) {
-          AbcSettings.MmioWhitelist[++NextIndex] = Config->Booter.Quirks.MmioWhitelist.Values[Index]->Address;
+          AbcSettings.MmioWhitelist[NextIndex] = Config->Booter.Quirks.MmioWhitelist.Values[Index]->Address;
+          ++NextIndex;
         }
       }
       AbcSettings.MmioWhitelistSize = NextIndex;
