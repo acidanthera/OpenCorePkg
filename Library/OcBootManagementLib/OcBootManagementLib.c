@@ -310,6 +310,10 @@ OcScanForBootEntries (
       return EFI_OUT_OF_RESOURCES;
     }
   }
+  //
+  // Errors from within the loop are not fatal.
+  //
+  Status = EFI_SUCCESS;
 
   FreePool (Handles);
 
