@@ -120,7 +120,6 @@
   _(BOOLEAN                     , EnableSafeModeSlide       ,     , FALSE  , ()) \
   _(BOOLEAN                     , EnableWriteUnprotector    ,     , FALSE  , ()) \
   _(BOOLEAN                     , ForceExitBootServices     ,     , FALSE  , ()) \
-  _(OC_BOOTER_WL_ARRAY          , MmioWhitelist             ,     , OC_CONSTR3 (OC_BOOTER_WL_ARRAY, _, __) , OC_DESTR (OC_BOOTER_WL_ARRAY)) \
   _(BOOLEAN                     , ProtectCsmRegion          ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProvideCustomSlide        ,     , FALSE  , ()) \
   _(BOOLEAN                     , SetupVirtualMap           ,     , FALSE  , ()) \
@@ -131,6 +130,7 @@
 /// Apple bootloader section.
 ///
 #define OC_BOOTER_CONFIG_FIELDS(_, __) \
+  _(OC_BOOTER_WL_ARRAY          , MmioWhitelist    ,     , OC_CONSTR2 (OC_BOOTER_WL_ARRAY, _, __)      , OC_DESTR (OC_BOOTER_WL_ARRAY)) \
   _(OC_BOOTER_QUIRKS            , Quirks           ,     , OC_CONSTR2 (OC_BOOTER_QUIRKS, _, __)        , OC_DESTR (OC_BOOTER_QUIRKS))
   OC_DECLARE (OC_BOOTER_CONFIG)
 

@@ -169,7 +169,7 @@ ProtectCsmRegion (
   Mark MMIO virtual memory regions as non-runtime to reduce the amount
   of virtual memory required by boot.efi.
 
-  @param[in]      Context            Settings context.
+  @param[in]      Context            Boot compatibility context.
   @param[in,out]  MemoryMapSize      Memory map size in bytes, updated on devirtualisation.
   @param[in,out]  MemoryMap          Memory map to devirtualise.
   @param[in]      DescriptorSize     Memory map descriptor size in bytes.
@@ -190,9 +190,10 @@ DevirtualiseMmio (
   CONST EFI_PHYSICAL_ADDRESS  *Whitelist;
   UINTN                       WhitelistSize;
   BOOLEAN                     Skipped;
+  UINT64                      PagesSaved;
 
-  Whitelist     = ((OC_ABC_SETTINGS *) Context)->MmioWhitelist;
-  WhitelistSize = ((OC_ABC_SETTINGS *) Context)->MmioWhitelistSize;
+  Whitelist     = ((BOOT_COMPAT_CONTEXT *) Context)->Settings.MmioWhitelist;
+  WhitelistSize = ((BOOT_COMPAT_CONTEXT *) Context)->Settings.MmioWhitelistSize;
 
   //
   // Some firmwares (normally Haswell and earlier) need certain MMIO areas to have
@@ -205,8 +206,11 @@ DevirtualiseMmio (
 
   Desc       = MemoryMap;
   NumEntries = MemoryMapSize / DescriptorSize;
+  PagesSaved = 0;
 
-  DEBUG ((DEBUG_INFO, "OCABC: MMIO devirt start\n"));
+  if (!((BOOT_COMPAT_CONTEXT *) Context)->ServiceState.ReportedMmio) {
+    DEBUG ((DEBUG_INFO, "OCABC: MMIO devirt start\n"));
+  }
 
   for (Index = 0; Index < NumEntries; ++Index) {
     if (Desc->NumberOfPages > 0
@@ -222,24 +226,34 @@ DevirtualiseMmio (
         }
       }
 
-      DEBUG ((
-        DEBUG_INFO,
-        "OCABC: MMIO devirt 0x%Lx (0x%Lx pages, 0x%Lx) skip %d\n",
-        (UINT64) Desc->PhysicalStart,
-        (UINT64) Desc->NumberOfPages,
-        (UINT64) Desc->Attribute,
-        Skipped
-        ));
+      if (!((BOOT_COMPAT_CONTEXT *) Context)->ServiceState.ReportedMmio) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCABC: MMIO devirt 0x%Lx (0x%Lx pages, 0x%Lx) skip %d\n",
+          (UINT64) Desc->PhysicalStart,
+          (UINT64) Desc->NumberOfPages,
+          (UINT64) Desc->Attribute,
+          Skipped
+          ));
+      }
 
       if (!Skipped) {
         Desc->Attribute &= ~EFI_MEMORY_RUNTIME;
+        PagesSaved      += Desc->NumberOfPages;
       }
     }
 
     Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
   }
 
-  DEBUG ((DEBUG_INFO, "OCABC: MMIO devirt end\n"));
+  if (!((BOOT_COMPAT_CONTEXT *) Context)->ServiceState.ReportedMmio) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCABC: MMIO devirt end, saved %Lu bytes\n",
+      EFI_PAGES_TO_SIZE (PagesSaved)
+      ));
+    ((BOOT_COMPAT_CONTEXT *) Context)->ServiceState.ReportedMmio = TRUE;
+  }
 }
 
 /**
@@ -445,7 +459,7 @@ OcGetMemoryMap (
 
     if (BootCompat->Settings.DevirtualiseMmio) {
       DevirtualiseMmio (
-        &BootCompat->Settings,
+        BootCompat,
         *MemoryMapSize,
         MemoryMap,
         *DescriptorSize
@@ -610,7 +624,7 @@ OcGetVariable (
       BootCompat->ServicePtrs.GetVariable,
       BootCompat->ServicePtrs.GetMemoryMap,
       BootCompat->Settings.DevirtualiseMmio ? DevirtualiseMmio : NULL,
-      &BootCompat->Settings,
+      BootCompat,
       VariableName,
       VendorGuid,
       Attributes,

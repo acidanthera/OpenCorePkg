@@ -170,7 +170,6 @@ mBooterQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("EnableSafeModeSlide",    OC_GLOBAL_CONFIG, Booter.Quirks.EnableSafeModeSlide),
   OC_SCHEMA_BOOLEAN_IN ("EnableWriteUnprotector", OC_GLOBAL_CONFIG, Booter.Quirks.EnableWriteUnprotector),
   OC_SCHEMA_BOOLEAN_IN ("ForceExitBootServices",  OC_GLOBAL_CONFIG, Booter.Quirks.ForceExitBootServices),
-  OC_SCHEMA_ARRAY_IN   ("MmioWhitelist",          OC_GLOBAL_CONFIG, Booter.Quirks.MmioWhitelist, &mBooterWhitelistSchema),
   OC_SCHEMA_BOOLEAN_IN ("ProtectCsmRegion",       OC_GLOBAL_CONFIG, Booter.Quirks.ProtectCsmRegion),
   OC_SCHEMA_BOOLEAN_IN ("ProvideCustomSlide",     OC_GLOBAL_CONFIG, Booter.Quirks.ProvideCustomSlide),
   OC_SCHEMA_BOOLEAN_IN ("SetupVirtualMap",        OC_GLOBAL_CONFIG, Booter.Quirks.SetupVirtualMap),
@@ -180,7 +179,8 @@ mBooterQuirksSchema[] = {
 STATIC
 OC_SCHEMA
 mBooterConfigurationSchema[] = {
-  OC_SCHEMA_DICT       ("Quirks", mBooterQuirksSchema),
+  OC_SCHEMA_ARRAY_IN   ("MmioWhitelist",   OC_GLOBAL_CONFIG, Booter.MmioWhitelist, &mBooterWhitelistSchema),
+  OC_SCHEMA_DICT       ("Quirks",          mBooterQuirksSchema),
 };
 
 

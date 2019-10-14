@@ -204,6 +204,10 @@ typedef struct SERVICES_OVERRIDE_STATE_ {
   /// TRUE if we are using custom KASLR slide (via boot arg).
   ///
   BOOLEAN                       AppleCustomSlide;
+  ///
+  /// TRUE if we are done reporting MMIO cleanup.
+  ///
+  BOOLEAN                       ReportedMmio;
 } SERVICES_OVERRIDE_STATE;
 
 /**
