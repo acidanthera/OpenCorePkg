@@ -249,8 +249,8 @@ DevirtualiseMmio (
   if (!((BOOT_COMPAT_CONTEXT *) Context)->ServiceState.ReportedMmio) {
     DEBUG ((
       DEBUG_INFO,
-      "OCABC: MMIO devirt end, saved %Lu bytes\n",
-      EFI_PAGES_TO_SIZE (PagesSaved)
+      "OCABC: MMIO devirt end, saved %Lu KB\n",
+      EFI_PAGES_TO_SIZE (PagesSaved) / BASE_1KB
       ));
     ((BOOT_COMPAT_CONTEXT *) Context)->ServiceState.ReportedMmio = TRUE;
   }
