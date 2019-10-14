@@ -10,7 +10,7 @@ OpenCore bootloader front end.
 - [AppleLife.ru](https://applelife.ru/threads/razrabotka-opencore.2943955) in Russian
 - [Hackintosh-Forum.de](https://www.hackintosh-forum.de/forum/thread/42353-opencore-bootloader) in German
 - [InsanelyMac](https://www.insanelymac.com/forum/topic/338527-opencore-development/) in English
-- [macOS86.it](https://www.macos86.it/viewtopic.php?p=32103) in Italian
+- [macOS86.it](https://www.macos86.it/showthread.php?4570-OpenCore-aka-OC-Nuovo-BootLoader) in Italian
 - [PCbeta.com](http://bbs.pcbeta.com/viewthread-1815623-1-1.html) in Chinese
 
 ## Credits
