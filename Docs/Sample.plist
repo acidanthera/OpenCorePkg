@@ -185,6 +185,25 @@
 	</dict>
 	<key>Booter</key>
 	<dict>
+		<key>MmioWhitelist</key>
+		<array>
+			<dict>
+				<key>Address</key>
+				<integer>4275159040</integer>
+				<key>Comment</key>
+				<string>Haswell: SB_RCBA is a 0x4 page memory region, containing SPI_BASE at 0x3800 (SPI_BASE_ADDRESS)</string>
+				<key>Enabled</key>
+				<false/>
+			</dict>
+			<dict>
+				<key>Address</key>
+				<integer>4278190080</integer>
+				<key>Comment</key>
+				<string>Generic: PCI root is a 0x1000 page memory region used by some firmwares</string>
+				<key>Enabled</key>
+				<false/>
+			</dict>
+		</array>
 		<key>Quirks</key>
 		<dict>
 			<key>AvoidRuntimeDefrag</key>
@@ -203,25 +222,6 @@
 			<true/>
 			<key>ForceExitBootServices</key>
 			<false/>
-			<key>MmioWhitelist</key>
-			<array>
-				<dict>
-					<key>Address</key>
-					<integer>4275159040</integer>
-					<key>Comment</key>
-					<string>Haswell: SB_RCBA is a 0x4 page memory region, containing SPI_BASE at 0x3800 (SPI_BASE_ADDRESS)</string>
-					<key>Enabled</key>
-					<false/>
-				</dict>
-				<dict>
-					<key>Address</key>
-					<integer>4278190080</integer>
-					<key>Comment</key>
-					<string>Generic: PCI root is a 0x1000 page memory region used by some firmwares</string>
-					<key>Enabled</key>
-					<false/>
-				</dict>
-			</array>
 			<key>ProtectCsmRegion</key>
 			<false/>
 			<key>ProvideCustomSlide</key>

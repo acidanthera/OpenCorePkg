@@ -427,16 +427,16 @@ OcLoadBooterUefiSupport (
   AbcSettings.SetupVirtualMap        = Config->Booter.Quirks.SetupVirtualMap;
   AbcSettings.ShrinkMemoryMap        = Config->Booter.Quirks.ShrinkMemoryMap;
 
-  if (AbcSettings.DevirtualiseMmio && Config->Booter.Quirks.MmioWhitelist.Count > 0) {
+  if (AbcSettings.DevirtualiseMmio && Config->Booter.MmioWhitelist.Count > 0) {
     AbcSettings.MmioWhitelist = AllocatePool (
-      Config->Booter.Quirks.MmioWhitelist.Count * sizeof (AbcSettings.MmioWhitelist[0])
+      Config->Booter.MmioWhitelist.Count * sizeof (AbcSettings.MmioWhitelist[0])
       );
 
     if (AbcSettings.MmioWhitelist != NULL) {
       NextIndex = 0;
-      for (Index = 0; Index < Config->Booter.Quirks.MmioWhitelist.Count; ++Index) {
-        if (Config->Booter.Quirks.MmioWhitelist.Values[Index]->Enabled) {
-          AbcSettings.MmioWhitelist[NextIndex] = Config->Booter.Quirks.MmioWhitelist.Values[Index]->Address;
+      for (Index = 0; Index < Config->Booter.MmioWhitelist.Count; ++Index) {
+        if (Config->Booter.MmioWhitelist.Values[Index]->Enabled) {
+          AbcSettings.MmioWhitelist[NextIndex] = Config->Booter.MmioWhitelist.Values[Index]->Address;
           ++NextIndex;
         }
       }
@@ -445,7 +445,7 @@ OcLoadBooterUefiSupport (
       DEBUG ((
         DEBUG_ERROR,
         "OC: Failed to allocate %u slots for mmio addresses\n",
-        (UINT32) Config->Booter.Quirks.MmioWhitelist.Count
+        (UINT32) Config->Booter.MmioWhitelist.Count
         ));
     }
 
