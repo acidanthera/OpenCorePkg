@@ -1020,10 +1020,51 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 \begin{enumerate}
 
 \item
+  \texttt{MmioWhitelist}\\
+  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Description}: Designed to be filled with \texttt{plist\ dict} values,
+  describing addresses critical for particular firmware functioning when
+  \texttt{DevirtualiseMmio} quirk is in use. See \hyperref[booterpropsmmio]{MmioWhitelist Properties}
+  section below.
+
+\item
   \texttt{Quirks}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Apply individual booter quirks described
   in \hyperref[booterpropsquirks]{Quirks Properties} section below.
+
+\end{enumerate}
+
+\subsection{MmioWhitelist Properties}\label{booterpropsmmio}
+
+\begin{enumerate}
+
+\item
+  \texttt{Address}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Exceptional MMIO address, which memory descriptor should be left
+  virtualised (unchanged) by \texttt{DevirtualiseMmio}. This means that the firmware will
+  be able to directly communicate with this memory region during operating system functioning,
+  because the region this value is in will be assigned a virtual address.
+
+  The addresses written here must be part of the memory map, have \texttt{EfiMemoryMappedIO}
+  type and \texttt{EFI\_MEMORY\_RUNTIME} attribute (highest bit) set. To find the list of the
+  candidates the debug log can be used.
+
+\item
+  \texttt{Comment}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Arbitrary ASCII string used to provide human readable
+  reference for the entry. It is implementation defined whether this value is
+  used.
+
+\item
+  \texttt{Enabled}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: This address will be devirtualised unless set to \texttt{true}.
 
 \end{enumerate}
 
@@ -1052,10 +1093,14 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   This option reduces stolen memory footprint from the memory map by removing
   runtime bit for known memory regions. This quirk may result in the increase
   of KASLR slides available, but is not necessarily compatible with the target
-  board.
+  board. In general this frees from 64 to 256 megabytes of memory (present in
+  the debug log), and on some platforms it is the only way to boot macOS, which
+  otherwise fails with allocation error at bootloader stage.
 
-  \emph{Note}: This option is generally useful on APTIO V firmwares (Broadwell and newer).
-
+  This option is generally useful on all firmwares except some very old ones,
+  like Sandy Bridge. On select firmwares it may require a list of exceptional
+  addresses that still need to get their virtual addresses for proper NVRAM and
+  hibernation functioning. Use \texttt{MmioWhitelist} section to do this.
 
 \item
   \texttt{DisableSingleUser}\\

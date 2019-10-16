@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Mon Oct  7 11:21:04 2019
-%DIF ADD ../Configuration.tex        Wed Oct  9 07:28:25 2019
+%DIF ADD ../Configuration.tex        Wed Oct 16 11:44:08 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1080,14 +1080,60 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 \begin{enumerate}
 
 \item
-  \texttt{Quirks}\\
+  \DIFaddbegin \texttt{\DIFadd{MmioWhitelist}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ array}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Designed to be filled with }\texttt{\DIFadd{plist\ dict}} \DIFadd{values,
+  describing addresses critical for particular firmware functioning when
+  }\texttt{\DIFadd{DevirtualiseMmio}} \DIFadd{quirk is in use. See }\hyperref[booterpropsmmio]{MmioWhitelist Properties}
+  \DIFadd{section below.
+}
+
+\item
+  \DIFaddend \texttt{Quirks}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Apply individual booter quirks described
   in \hyperref[booterpropsquirks]{Quirks Properties} section below.
 
 \end{enumerate}
 
-\subsection{Quirks Properties}\label{booterpropsquirks}
+\DIFaddbegin \subsection{\DIFadd{MmioWhitelist Properties}}\label{booterpropsmmio}
+
+\begin{enumerate}
+
+\item
+  \texttt{\DIFadd{Address}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Exceptional MMIO address, which memory descriptor should be left
+  virtualised (unchanged) by }\texttt{\DIFadd{DevirtualiseMmio}}\DIFadd{. This means that the firmware will
+  be able to directly communicate with this memory region during operating system functioning,
+  because the region this value is in will be assigned a virtual address.
+}
+
+  \DIFadd{The addresses written here must be part of the memory map, have }\texttt{\DIFadd{EfiMemoryMappedIO}}
+  \DIFadd{type and }\texttt{\DIFadd{EFI\_MEMORY\_RUNTIME}} \DIFadd{attribute (highest bit) set. To find the list of the
+  candidates the debug log can be used.
+}
+
+\item
+  \texttt{\DIFadd{Comment}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Arbitrary ASCII string used to provide human readable
+  reference for the entry. It is implementation defined whether this value is
+  used.
+}
+
+\item
+  \texttt{\DIFadd{Enabled}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: This address will be devirtualised unless set to }\texttt{\DIFadd{true}}\DIFadd{.
+}
+
+\end{enumerate}
+
+\DIFaddend \subsection{Quirks Properties}\label{booterpropsquirks}
 
 \begin{enumerate}
 
@@ -1112,10 +1158,17 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   This option reduces stolen memory footprint from the memory map by removing
   runtime bit for known memory regions. This quirk may result in the increase
   of KASLR slides available, but is not necessarily compatible with the target
-  board.
+  board. \DIFaddbegin \DIFadd{In general this frees from 64 to 256 megabytes of memory (present in
+  the debug log), and on some platforms it is the only way to boot macOS, which
+  otherwise fails with allocation error at bootloader stage.
+}\DIFaddend 
 
-  \emph{Note}: This option is generally useful on APTIO V firmwares (Broadwell and newer).
-
+  \DIFdelbegin \emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: }\DIFdelend This option is generally useful on \DIFdelbegin \DIFdel{APTIO V firmwares (Broadwell and
+  newer)}\DIFdelend \DIFaddbegin \DIFadd{all firmwares except some very old ones,
+  like Sandy Bridge. On select firmwares it may require a list of exceptional
+  addresses that still need to get their virtual addresses for proper NVRAM and
+  hibernation functioning. Use }\texttt{\DIFadd{MmioWhitelist}} \DIFadd{section to do this}\DIFaddend .
 
 \item
   \texttt{DisableSingleUser}\\
