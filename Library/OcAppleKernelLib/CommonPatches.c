@@ -1216,3 +1216,53 @@ PatchLapicKernelPanic (
 
   return Status;
 }
+
+STATIC
+UINT8
+mPowerStateTimeoutPanicFind[] = {
+  // com.apple\0__kernel__\0
+  0x63, 0x6F, 0x6D, 0x2E, 0x61, 0x70, 0x70, 0x6C, 0x65, 0x00, 0x5F, 0x5F, 0x6B, 0x65, 0x72, 0x6E, 0x65, 0x6C, 0x5F, 0x5F, 0x00
+};
+
+STATIC
+UINT8
+mPowerStateTimeoutPanicReplace[] = {
+  // not.apple\0__kernel__\0
+  0x6E, 0x6F, 0x74, 0x2E, 0x61, 0x70, 0x70, 0x6C, 0x65, 0x00, 0x5F, 0x5F, 0x6B, 0x65, 0x72, 0x6E, 0x65, 0x6C, 0x5F, 0x5F, 0x00
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mPowerStateTimeoutPanicMasterPatch = {
+  .Comment     = DEBUG_POINTER ("PowerStateTimeout"),
+  .Base        = NULL,
+  .Find        = mPowerStateTimeoutPanicFind,
+  .Mask        = NULL,
+  .Replace     = mPowerStateTimeoutPanicReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mPowerStateTimeoutPanicFind),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+RETURN_STATUS
+PatchPowerStateTimeout (
+  IN OUT PATCHER_CONTEXT   *Patcher
+  )
+{
+  RETURN_STATUS  Status;
+
+  Status = PatcherApplyGenericPatch (Patcher, &mPowerStateTimeoutPanicMasterPatch);
+  if (RETURN_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply power state patch - %r\n", Status));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success power state\n"));
+  }
+
+  //
+  // TODO: Implement a patch to not require setpowerstate_panic=0 on debug kernels.
+  //
+
+  return Status;
+}

@@ -241,6 +241,7 @@
   _(BOOLEAN                     , ExternalDiskIcons           ,     , FALSE  , ()) \
   _(BOOLEAN                     , LapicKernelPanic            ,     , FALSE  , ()) \
   _(BOOLEAN                     , PanicNoKextDump             ,     , FALSE  , ()) \
+  _(BOOLEAN                     , PowerTimeoutKernelPanic     ,     , FALSE  , ()) \
   _(BOOLEAN                     , ThirdPartyTrim              ,     , FALSE  , ()) \
   _(BOOLEAN                     , XhciPortLimit               ,     , FALSE  , ())
   OC_DECLARE (OC_KERNEL_QUIRKS)
