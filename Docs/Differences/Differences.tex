@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Oct  7 11:21:04 2019
-%DIF ADD ../Configuration.tex        Thu Oct 17 11:36:19 2019
+%DIF DEL PreviousConfiguration.tex   Thu Oct 17 01:43:10 2019
+%DIF ADD ../Configuration.tex        Thu Oct 17 20:15:30 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1795,11 +1795,10 @@ blocking.
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Prevent kernel from printing kext dump in the panic
-  log preventing from observing panic details. Affects 10.13 and above\DIFaddbegin \DIFadd{.
-}
+  log preventing from observing panic details. Affects 10.13 and above.
 
 \item
-  \texttt{\DIFadd{PowerTimeoutKernelPanic}}\\
+  \DIFaddbegin \texttt{\DIFadd{PowerTimeoutKernelPanic}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Disables kernel panic on setPowerState timeout.
@@ -1809,10 +1808,11 @@ blocking.
   kernel panic on power change timeout for Apple drivers. Sometimes it may cause
   issues on misconfigured hardware, notably digital audio, which sometimes fails
   to wake up. For debug kernels }\texttt{\DIFadd{setpowerstate\_panic=0}} \DIFadd{boot argument
-  should be used, which is otherwise equivalent to this quirk}\DIFaddend .
+  should be used, which is otherwise equivalent to this quirk.
+}
 
 \item
-  \texttt{ThirdPartyTrim}\\
+  \DIFaddend \texttt{ThirdPartyTrim}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Patch IOAHCIBlockStorage.kext to force TRIM command support
@@ -2057,7 +2057,7 @@ behaviour that does not go to any other sections
   \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Timeout in seconds in boot picker before
-  automatic booting of the default boot entry.
+  automatic booting of the default boot entry\DIFaddbegin \DIFadd{. Use 0 to disable timer}\DIFaddend .
 
 \item
   \texttt{UsePicker}\\
