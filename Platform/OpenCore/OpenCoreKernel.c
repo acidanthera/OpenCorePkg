@@ -461,6 +461,10 @@ OcKernelApplyPatches (
     if (Config->Kernel.Quirks.LapicKernelPanic) {
       PatchLapicKernelPanic (&Patcher);
     }
+
+    if (Config->Kernel.Quirks.PowerTimeoutKernelPanic) {
+      PatchPowerStateTimeout (&Patcher);
+    }
   }
 }
 

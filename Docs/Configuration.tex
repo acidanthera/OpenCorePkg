@@ -1729,6 +1729,18 @@ blocking.
   log preventing from observing panic details. Affects 10.13 and above.
 
 \item
+  \texttt{PowerTimeoutKernelPanic}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Disables kernel panic on setPowerState timeout.
+
+  An additional security measure was added to macOS Catalina (10.15) causing
+  kernel panic on power change timeout for Apple drivers. Sometimes it may cause
+  issues on misconfigured hardware, notably digital audio, which sometimes fails
+  to wake up. For debug kernels \texttt{setpowerstate\_panic=0} boot argument
+  should be used, which is otherwise equivalent to this quirk.
+
+\item
   \texttt{ThirdPartyTrim}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
