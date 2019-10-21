@@ -6,6 +6,12 @@
 	<string>This is just a sample. Do NOT try loading it.</string>
 	<key>#WARNING - 2</key>
 	<string>Ensure you understand EVERY field before booting.</string>
+	<key>#WARNING - 3</key>
+	<string>In most cases recommended to use Sample.plist</string>
+	<key>#WARNING - 4</key>
+	<string>Use SampleFull.plist for end of life models: 2011 and older.</string>
+	<key>#WARNING - 5</key>
+	<string>https://docs.google.com/spreadsheets/d/1kGFz3_kp5xCDRRQpfnIUOvbiHXTmxEgyx97u73ImXXE/edit#gid=0</string>
 	<key>ACPI</key>
 	<dict>
 		<key>Add</key>
@@ -81,6 +87,14 @@
 				<false/>
 				<key>Path</key>
 				<string>SSDT-AWAC.aml</string>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string></string>
+				<key>Enabled</key>
+				<false/>
+				<key>Path</key>
+				<string>SSDT-RTC0.aml</string>
 			</dict>
 		</array>
 		<key>Block</key>
