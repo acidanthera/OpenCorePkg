@@ -269,7 +269,12 @@ OcMiscLateInit (
     ));
 
   if (SetMax || (Width > 0 && Height > 0)) {
-    Status = SetConsoleResolution (Width, Height, Bpp);
+    Status = SetConsoleResolution (
+      Width,
+      Height,
+      Bpp,
+      OcShouldReconnectConsoleOnResolutionChange (Config)
+      );
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
       "OC: Changed resolution to %ux%u@%u (max: %d) from %a - %r\n",

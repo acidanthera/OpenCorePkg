@@ -326,6 +326,7 @@ OcReinstallProtocols (
   }
 }
 
+STATIC
 BOOLEAN
 OcLoadUefiInputSupport (
   IN OC_GLOBAL_CONFIG  *Config
@@ -401,6 +402,14 @@ OcLoadUefiInputSupport (
   }
 
   return ExitBs;
+}
+
+BOOLEAN
+OcShouldReconnectConsoleOnResolutionChange (
+  IN OC_GLOBAL_CONFIG  *Config
+  )
+{
+  return Config->Uefi.Quirks.ReconnectOnResChange;
 }
 
 VOID

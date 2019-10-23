@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu Oct 17 01:43:10 2019
-%DIF ADD ../Configuration.tex        Thu Oct 17 20:15:30 2019
+%DIF DEL PreviousConfiguration.tex   Mon Oct  7 11:21:04 2019
+%DIF ADD ../Configuration.tex        Thu Oct 24 00:48:16 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2057,7 +2057,8 @@ behaviour that does not go to any other sections
   \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Timeout in seconds in boot picker before
-  automatic booting of the default boot entry\DIFaddbegin \DIFadd{. Use 0 to disable timer}\DIFaddend .
+  automatic booting of the default boot entry. \DIFaddbegin \DIFadd{Use 0 to disable timer.
+}\DIFaddend 
 
 \item
   \texttt{UsePicker}\\
@@ -3802,7 +3803,24 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: macOS bootloader requires GOP (Graphics Output Protocol)
-  to be present on console handle. This option will install it if missing.
+  to be present on console handle. This option will install it if missing\DIFaddbegin \DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{ReconnectOnResChange}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Reconnect console controllers after changing screen resolution.
+}
+
+  \DIFadd{On some firmwares when screen resolution is changed via GOP, it is required to reconnect
+  the controllers, which produce the console protocols (simple text out). Otherwise they
+  will not produce text based on the new resolution.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: On several boards this logic may result in black screen when launching
+  OpenCore from Shell and thus it is optional. In versions prior to 0.5.2 this option
+  was mandatory and not configurable. Please do not use this unless required}\DIFaddend .
 
 \item
   \texttt{ReleaseUsbOwnership}\\

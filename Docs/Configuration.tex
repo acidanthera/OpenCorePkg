@@ -3734,6 +3734,20 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   to be present on console handle. This option will install it if missing.
 
 \item
+  \texttt{ReconnectOnResChange}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reconnect console controllers after changing screen resolution.
+
+  On some firmwares when screen resolution is changed via GOP, it is required to reconnect
+  the controllers, which produce the console protocols (simple text out). Otherwise they
+  will not produce text based on the new resolution.
+
+  \emph{Note}: On several boards this logic may result in black screen when launching
+  OpenCore from Shell and thus it is optional. In versions prior to 0.5.2 this option
+  was mandatory and not configurable. Please do not use this unless required.
+
+\item
   \texttt{ReleaseUsbOwnership}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

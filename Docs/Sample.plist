@@ -786,6 +786,8 @@
 			<false/>
 			<key>ProvideConsoleGop</key>
 			<false/>
+			<key>ReconnectOnResChange</key>
+			<false/>
 			<key>ReleaseUsbOwnership</key>
 			<false/>
 			<key>ReplaceTabWithSpace</key>

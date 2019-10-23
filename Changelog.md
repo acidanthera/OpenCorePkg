@@ -6,6 +6,7 @@ OpenCore Changelog
 - Added `MmioWhitelist` configuration option
 - Added `PowerTimeoutKernelPanic` kernel quirk
 - Fixed erratic cursor appearing in release builds
+- Moved `ReconnectOnResChange` to a user-configurable quirk to avoid freezes
 
 #### v0.5.1
 - Added support of kernel resource kext injection

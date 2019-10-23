@@ -171,6 +171,17 @@ OcLoadUefiSupport (
   );
 
 /**
+  Decide whether console controller reconnection is required
+  upon changing screen resolution.
+
+  @param[in]  Config    OpenCore configuration.
+**/
+BOOLEAN
+OcShouldReconnectConsoleOnResolutionChange (
+  IN OC_GLOBAL_CONFIG  *Config
+  );
+
+/**
   Load early miscellaneous support like configuration.
 
   @param[in]  Storage   OpenCore storage.
