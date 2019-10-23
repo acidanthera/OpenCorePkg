@@ -69,6 +69,14 @@ OcConsoleControlSetBehaviour (
   );
 
 /**
+  Disable and hide onscreen cursor.
+**/
+VOID
+OcConsoleDisableCursor (
+  VOID
+  );
+
+/**
   Parse screen resolution from string.
 
   @param[in]   String   Resolution in WxH@B or WxH format.

@@ -257,11 +257,14 @@ ConsoleControlSetMode (
   }
 
   //
-  // Disable and hide flashing cursor.
+  // Disable and hide flashing cursor when switching to graphics from text.
+  // This may be the case when we formerly handled text input or output.
+  // mOriginalOutputString check is here to signalise that the problem only exists
+  // on platforms that require IgnoreTextOutput quirk, and this is the extension
+  // of its implementation.
   //
   if (Mode == EfiConsoleControlScreenGraphics && mOriginalOutputString != NULL) {
-    gST->ConOut->SetCursorPosition (gST->ConOut, 0, 0);
-    gST->ConOut->EnableCursor (gST->ConOut, FALSE);
+    OcConsoleDisableCursor ();
   }
 
   return EFI_SUCCESS;
@@ -442,6 +445,17 @@ OcConsoleControlSetBehaviour (
   }
 
   return Status;
+}
+
+VOID
+OcConsoleDisableCursor (
+  VOID
+  )
+{
+  gST->ConOut->SetCursorPosition (gST->ConOut, 0, 0);
+  if (gST->ConOut->Mode->CursorVisible) {
+    gST->ConOut->EnableCursor (gST->ConOut, FALSE);
+  }
 }
 
 /**
