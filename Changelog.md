@@ -5,6 +5,7 @@ OpenCore Changelog
 - Fixed ASSERT when booting non-Apple OSes without arguments from the DEBUG version
 - Added `MmioWhitelist` configuration option
 - Added `PowerTimeoutKernelPanic` kernel quirk
+- Fixed erratic cursor appearing in release builds
 
 #### v0.5.1
 - Added support of kernel resource kext injection

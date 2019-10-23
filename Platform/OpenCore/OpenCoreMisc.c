@@ -526,9 +526,20 @@ OcMiscUefiQuirksLoaded (
     &Config->Misc.Security.ScanPolicy
     );
 
+  //
+  // Regardless of the mode ensure our cursor is disabled as we do not need it.
+  // This is a bit ugly, but works for most platforms we have:
+  // - Firstly disable it on platforms that start with it for whatever reason.
+  //   Generally Insyde laptops are happy with that.
+  // - Secondly change the mode, on APTIO it may reenable the cursor in Text mode.
+  // - Thirdly disable it again to ensure it is definitely disabled.
+  //
+
+  OcConsoleDisableCursor ();
   OcConsoleControlSetBehaviour (
     ParseConsoleControlBehaviour (
       OC_BLOB_GET (&Config->Misc.Boot.ConsoleBehaviourUi)
       )
     );
+  OcConsoleDisableCursor ();
 }
