@@ -606,7 +606,8 @@ EFI_STATUS
 SetConsoleResolution (
   IN  UINT32              Width,
   IN  UINT32              Height,
-  IN  UINT32              Bpp    OPTIONAL
+  IN  UINT32              Bpp    OPTIONAL,
+  IN  BOOLEAN             Reconnect
   )
 {
   EFI_STATUS                            Status;
@@ -735,13 +736,20 @@ SetConsoleResolution (
   // which produce simple text out. Otherwise, they won't produce text based on the
   // new resolution.
   //
-  // Vit: Needy reports that boot.efi seems to work fine without this block of code.
+  // Needy reports that boot.efi seems to work fine without this block of code.
   // However, I believe that UEFI specification does not provide any standard way
   // to inform TextOut protocol about resolution change, which means the firmware
   // may not be aware of the change, especially when custom GOP is used.
   // We can move this to quirks if it causes problems, but I believe the code below
   // is legit.
   //
+  // Note: on APTIO IV boards this block of code may result in black screen when launching
+  // OpenCore from Shell, thus it is optional.
+  //
+
+  if (!Reconnect) {
+    return Status;
+  }
 
   Status = gBS->LocateHandleBuffer (
     ByProtocol,
