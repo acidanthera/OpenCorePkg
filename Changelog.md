@@ -7,6 +7,7 @@ OpenCore Changelog
 - Added `PowerTimeoutKernelPanic` kernel quirk
 - Fixed erratic cursor appearing in release builds
 - Moved `ReconnectOnResChange` to a user-configurable quirk to avoid freezes
+- Added OpenCore version to picker ui, configured by `ExposeSensitiveData`
 
 #### v0.5.1
 - Added support of kernel resource kext injection

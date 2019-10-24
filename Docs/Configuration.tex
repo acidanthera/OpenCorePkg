@@ -2149,13 +2149,14 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 \item
   \texttt{ExposeSensitiveData}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{2}\\
+  \textbf{Failsafe}: \texttt{0x6}\\
   \textbf{Description}: Sensitive data exposure bitmask (sum) to operating system.
 
   \begin{itemize}
   \tightlist
     \item \texttt{0x01} --- Expose printable booter path as an UEFI variable.
     \item \texttt{0x02} --- Expose OpenCore version as an UEFI variable.
+    \item \texttt{0x02} --- Expose OpenCore version in boot picker menu title.
   \end{itemize}
 
   Exposed booter path points to OpenCore.efi or its booter depending on the load order.

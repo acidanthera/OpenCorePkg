@@ -182,6 +182,16 @@ OcShouldReconnectConsoleOnResolutionChange (
   );
 
 /**
+  Get human readable version string.
+
+  @retval null-terminated 7-bit ASCII version string.
+**/
+CONST CHAR8 *
+OcMiscGetVersionString (
+  VOID
+  );
+
+/**
   Load early miscellaneous support like configuration.
 
   @param[in]  Storage   OpenCore storage.
