@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Oct 14 18:48:10 2019
-%DIF ADD ../Configuration.tex        Thu Oct 24 18:27:13 2019
+%DIF DEL PreviousConfiguration.tex   Thu Oct 24 08:31:58 2019
+%DIF ADD ../Configuration.tex        Thu Oct 24 19:17:41 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2228,7 +2228,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \tightlist
     \item \texttt{0x01} --- Expose printable booter path as an UEFI variable.
     \item \texttt{0x02} --- Expose OpenCore version as an UEFI variable.
-    \DIFaddbegin \item \texttt{\DIFadd{0x02}} \DIFadd{--- Expose OpenCore version in boot picker menu title.
+    \DIFaddbegin \item \texttt{\DIFadd{0x04}} \DIFadd{--- Expose OpenCore version in boot picker menu title.
   }\DIFaddend \end{itemize}
 
   Exposed booter path points to OpenCore.efi or its booter depending on the load order.
