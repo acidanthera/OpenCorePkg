@@ -282,8 +282,10 @@
   _(UINT32                      , Target                      ,     , 0            , ())
   OC_DECLARE (OC_MISC_DEBUG)
 
-#define OCS_EXPOSE_BOOT_PATH 1U
-#define OCS_EXPOSE_VERSION   2U
+#define OCS_EXPOSE_BOOT_PATH   1U
+#define OCS_EXPOSE_VERSION_VAR 2U
+#define OCS_EXPOSE_VERSION_UI  4U
+#define OCS_EXPOSE_VERSION     (OCS_EXPOSE_VERSION_VAR | OCS_EXPOSE_VERSION_UI)
 
 #define OC_MISC_SECURITY_FIELDS(_, __) \
   _(UINT32                      , ScanPolicy                  ,      , OC_SCAN_DEFAULT_POLICY  , ()) \

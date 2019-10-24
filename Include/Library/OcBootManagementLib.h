@@ -384,6 +384,10 @@ typedef struct {
   //
   VOID             *PrivilegeContext;
   //
+  // Additional suffix to include by the interface.
+  //
+  CONST CHAR8      *TitleSuffix;
+  //
   // Enable polling boot arguments.
   //
   BOOLEAN          PollAppleHotKeys;
