@@ -288,6 +288,17 @@ EFI_STATUS
   );
 
 /**
+  Exposed allocation protector. This function is called when large memory allocations
+  need to happen on platforms where this logic is specialised.
+  Pass Allocate = TRUE when allocating and optionally Allocate = FALSE when failed to boot.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *OC_BALLOON_ALLOC) (
+  IN  BOOLEAN                    Allocate
+  );
+
+/**
   Custom picker entry.
 **/
 typedef struct {
@@ -383,6 +394,14 @@ typedef struct {
   // Context to pass to RequestPrivilege, optional.
   //
   VOID             *PrivilegeContext;
+  //
+  // Balloon allocator. On some firmwares (e.g. GA Z68/Z77) memory layout can be problematic:
+  // - They may only have lower 4 gigabytes useable.
+  // - They may have issues protecting kernel memory in these lower 4 gigabytes.
+  // When this function is set, you are required to allocate only in lower 4 gigabytes,
+  // and each attempt to allocate more than 100 MBs must invoke BalloonAllocator.
+  //
+  OC_BALLOON_ALLOC BalloonAllocator;
   //
   // Additional suffix to include by the interface.
   //

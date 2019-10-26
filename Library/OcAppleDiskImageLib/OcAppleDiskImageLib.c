@@ -195,7 +195,8 @@ OcAppleDiskImageInitializeContext (
 BOOLEAN
 OcAppleDiskImageInitializeFromFile (
   OUT OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
-  IN  EFI_FILE_PROTOCOL            *File
+  IN  EFI_FILE_PROTOCOL            *File,
+  IN  BOOLEAN                      AvoidHighMem
   )
 {
   EFI_STATUS                        Status;
@@ -213,7 +214,7 @@ OcAppleDiskImageInitializeFromFile (
     return FALSE;
   }
 
-  ExtentTable = OcAppleRamDiskAllocate (FileSize, EfiACPIMemoryNVS);
+  ExtentTable = OcAppleRamDiskAllocate (FileSize, EfiACPIMemoryNVS, AvoidHighMem);
   if (ExtentTable == NULL) {
     DEBUG ((DEBUG_INFO, "OCBD: Failed to allocate DMG data.\n"));
     return FALSE;

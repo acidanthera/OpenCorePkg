@@ -874,6 +874,7 @@ InternalLoadBootEntry (
   UINT32                     EntryDataSize;
   CONST CHAR8                *Args;
   UINT32                     ArgsLen;
+  BOOLEAN                    UseBallooning;
 
   ASSERT (BootPolicy != NULL);
   ASSERT (BootEntry != NULL);
@@ -890,6 +891,8 @@ InternalLoadBootEntry (
 
   ZeroMem (DmgLoadContext, sizeof (*DmgLoadContext));
 
+  UseBallooning = FALSE;
+
   EntryData    = NULL;
   EntryDataSize = 0;
 
@@ -898,13 +901,25 @@ InternalLoadBootEntry (
       return EFI_SECURITY_VIOLATION;
     }
 
+    //
+    // Assume that DMG load requires a lot of memory.
+    //
+    UseBallooning = Context->BalloonAllocator != NULL;
+    if (UseBallooning) {
+      Context->BalloonAllocator (TRUE);
+    }
+
     DmgLoadContext->DevicePath = BootEntry->DevicePath;
     DevicePath = InternalLoadDmg (
                    DmgLoadContext,
                    BootPolicy,
-                   Context->LoadPolicy
+                   Context->LoadPolicy,
+                   UseBallooning
                    );
     if (DevicePath == NULL) {
+      if (UseBallooning) {
+        Context->BalloonAllocator (FALSE);
+      }
       return EFI_UNSUPPORTED;
     }
   } else if (BootEntry->Type == OcBootCustom && BootEntry->DevicePath == NULL) {
@@ -1007,6 +1022,9 @@ InternalLoadBootEntry (
     }
   } else {
     InternalUnloadDmg (DmgLoadContext);
+    if (UseBallooning) {
+      Context->BalloonAllocator (FALSE);
+    }
   }
 
   return Status;

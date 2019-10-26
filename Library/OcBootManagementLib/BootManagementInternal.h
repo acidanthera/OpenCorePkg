@@ -51,7 +51,8 @@ EFI_DEVICE_PATH_PROTOCOL *
 InternalLoadDmg (
   IN OUT INTERNAL_DMG_LOAD_CONTEXT   *Context,
   IN     APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN     UINT32                      Policy
+  IN     UINT32                      Policy,
+  IN     BOOLEAN                     AvoidHighMem
   );
 
 VOID

@@ -288,28 +288,11 @@ InternalAppleRamDiskAllocate (
 CONST APPLE_RAM_DISK_EXTENT_TABLE *
 OcAppleRamDiskAllocate (
   IN UINTN            Size,
-  IN EFI_MEMORY_TYPE  MemoryType
+  IN EFI_MEMORY_TYPE  MemoryType,
+  IN BOOLEAN          AvoidHighMem
   )
 {
   CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable;
-  UINTN                              AvoidHighMemSize;
-  EFI_STATUS                         Status;
-  BOOLEAN                            AvoidHighMem;
-
-  //
-  // Respect OpenCore recommendation of memory usage.
-  //
-  AvoidHighMemSize = sizeof (AvoidHighMem);
-  Status = gRT->GetVariable (
-    OC_AVOID_HIGH_ALLOC_VARIABLE_NAME,
-    &gOcVendorVariableGuid,
-    NULL,
-    &AvoidHighMemSize,
-    &AvoidHighMem
-    );
-  if (EFI_ERROR (Status)) {
-    AvoidHighMem = FALSE;
-  }
 
   if (!AvoidHighMem) {
     //

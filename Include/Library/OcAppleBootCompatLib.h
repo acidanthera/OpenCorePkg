@@ -100,4 +100,20 @@ OcAbcInitialize (
   IN OC_ABC_SETTINGS  *Settings
   );
 
+/**
+  Allocate or deallocate kernel protection zone: a number of pages that reserve the memory
+  later used by kernel loader. This may also hardcode an ASLR slide, use with extra care.
+
+  @param[in]  Allocate  Pass TRUE to perform allocation protection and FALSE to release it.
+                        You should pass TRUE as many times as you need and passing FALSE is optional,
+                        as kernel protection zone is automatically released prior to image start.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+EFIAPI
+OcHandleKernelProtectionZone (
+  IN BOOLEAN          Allocate
+  );
+
 #endif // OC_APPLE_BOOT_COMPAT_LIB_H

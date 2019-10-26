@@ -45,14 +45,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_SCAN_POLICY_VARIABLE_NAME       L"scan-policy"
 
 //
-// Variable used for exposing OpenCore UEFI -> Quirks -> AvoidHighAlloc.
-// Prescribes not to use high memory allocation, as firmware has issues with it.
-// Boot Services only.
-// See: https://github.com/acidanthera/bugtracker/issues/389.
-//
-#define OC_AVOID_HIGH_ALLOC_VARIABLE_NAME  L"avoid-high-alloc"
-
-//
 // Variable used to report OpenCore version in the following format:
 // REL-001-2019-01-01. This follows versioning style of Lilu and plugins.
 //

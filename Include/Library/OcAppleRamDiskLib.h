@@ -21,15 +21,17 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 /**
   Request allocation of Size bytes in extents table.
 
-  @param[in]  Size        Requested memory size.
-  @param[in]  MemoryType  Requested memory type.
+  @param[in]  Size          Requested memory size.
+  @param[in]  MemoryType    Requested memory type.
+  @param[in]  AvoidHighMem  Allocate only in lower 4 GBs of memory.
 
   @retval Allocated extent table.
 **/
 CONST APPLE_RAM_DISK_EXTENT_TABLE *
 OcAppleRamDiskAllocate (
   IN UINTN            Size,
-  IN EFI_MEMORY_TYPE  MemoryType
+  IN EFI_MEMORY_TYPE  MemoryType,
+  IN BOOLEAN          AvoidHighMem
   );
 
 /**

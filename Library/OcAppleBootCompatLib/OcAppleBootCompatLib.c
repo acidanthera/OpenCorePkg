@@ -119,3 +119,15 @@ OcAbcInitialize (
 
   return EFI_SUCCESS;
 }
+
+EFI_STATUS
+EFIAPI
+OcHandleKernelProtectionZone (
+  IN BOOLEAN          Allocate
+  )
+{
+  //
+  // TODO: Implement.
+  //
+  return EFI_UNSUPPORTED;
+}

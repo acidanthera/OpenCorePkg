@@ -42,7 +42,8 @@ OcAppleDiskImageInitializeContext (
 BOOLEAN
 OcAppleDiskImageInitializeFromFile (
   OUT OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
-  IN  EFI_FILE_PROTOCOL            *File
+  IN  EFI_FILE_PROTOCOL            *File,
+  IN  BOOLEAN                      AvoidHighMem
   );
 
 VOID
