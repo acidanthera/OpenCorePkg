@@ -27,7 +27,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   @param  Message     Raised compiler diagnostic message when expression is false.
 
 **/
-#ifdef _MSC_EXTENSIONS
+#ifdef _MSC_VER
   #define OC_STATIC_ASSERT static_assert
 #else
   #define OC_STATIC_ASSERT _Static_assert
