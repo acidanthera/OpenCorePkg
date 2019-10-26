@@ -412,6 +412,18 @@ OcShouldReconnectConsoleOnResolutionChange (
   return Config->Uefi.Quirks.ReconnectOnResChange;
 }
 
+OC_BALLOON_ALLOC
+OcGetBallooningHandler (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  if (Config->Uefi.Quirks.AvoidHighAlloc) {
+    return OcHandleKernelProtectionZone;
+  }
+
+  return NULL;
+}
+
 VOID
 OcLoadBooterUefiSupport (
   IN OC_GLOBAL_CONFIG  *Config
@@ -504,17 +516,6 @@ OcLoadUefiSupport (
     OPEN_CORE_INT_NVRAM_ATTR,
     sizeof (Config->Uefi.Quirks.RequestBootVarRouting),
     &Config->Uefi.Quirks.RequestBootVarRouting
-    );
-
-  //
-  // Inform allocations when we want to use lower memory only.
-  //
-  gRT->SetVariable (
-    OC_AVOID_HIGH_ALLOC_VARIABLE_NAME,
-    &gOcVendorVariableGuid,
-    OPEN_CORE_INT_NVRAM_ATTR,
-    sizeof (Config->Uefi.Quirks.AvoidHighAlloc),
-    &Config->Uefi.Quirks.AvoidHighAlloc
     );
 
   if (Config->Uefi.Quirks.ReleaseUsbOwnership

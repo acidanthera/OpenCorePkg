@@ -15,6 +15,7 @@
 #ifndef OPEN_CORE_H
 #define OPEN_CORE_H
 
+#include <Library/OcBootManagementLib.h>
 #include <Library/OcConfigurationLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcCryptoLib.h>
@@ -175,6 +176,8 @@ OcLoadUefiSupport (
   upon changing screen resolution.
 
   @param[in]  Config    OpenCore configuration.
+
+  @retval TRUE when required.
 **/
 BOOLEAN
 OcShouldReconnectConsoleOnResolutionChange (
@@ -189,6 +192,18 @@ OcShouldReconnectConsoleOnResolutionChange (
 CONST CHAR8 *
 OcMiscGetVersionString (
   VOID
+  );
+
+/**
+  Get ballooning handler for memory allocation protections.
+
+  @param[in]  Config    OpenCore configuration.
+
+  @retval Handler address or NULL.
+**/
+OC_BALLOON_ALLOC
+OcGetBallooningHandler (
+  IN  OC_GLOBAL_CONFIG  *Config
   );
 
 /**

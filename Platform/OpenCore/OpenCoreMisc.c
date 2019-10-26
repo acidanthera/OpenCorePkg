@@ -525,6 +525,7 @@ OcMiscBoot (
   Context->CustomRead         = OcToolLoadEntry;
   Context->PrivilegeContext   = Privilege;
   Context->RequestPrivilege   = OcShowSimplePasswordRequest;
+  Context->BalloonAllocator   = OcGetBallooningHandler (Config);
 
   if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_VERSION_UI) != 0) {
     Context->TitleSuffix      = OcMiscGetVersionString ();
