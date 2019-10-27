@@ -74,7 +74,7 @@ typedef struct {
   DERTag  valueTag;
 } DERImg4Property;
 
-#define DERImg4PropertySpecInit {                                                 \
+#define DER_IMG4_PROPERTY_SPEC_INIT {                                                 \
   { DER_OFFSET (DERImg4Property, nameItem),  ASN1_IA5_STRING, DER_DEC_NO_OPTS },  \
   { DER_OFFSET (DERImg4Property, valueItem), 0,               DER_DEC_NO_OPTS }   \
 }

@@ -21,6 +21,10 @@
 extern "C" {
 #endif
 
+typedef enum {
+  DR_SecurityError = -1
+} DERImg4Return;
+
 typedef struct {
   uint64_t ecid;
   uint32_t boardId;

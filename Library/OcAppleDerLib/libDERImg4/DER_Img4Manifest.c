@@ -58,15 +58,13 @@ DERItemNull (
 {
   assert (Item != NULL);
 
-  if (Item->length == 2) {
-    if (Item->data[0] != ASN1_NULL || Item->data[1] != 0) {
-      return false;
-    }
-  } else if (Item->length != 0) {
-    return false;
+  if (Item->length == 2 && Item->data[0] == ASN1_NULL && Item->data[1] == 0) {
+    return true;
+  } else if (Item->length == 0) {
+    return true;
   }
 
-  return true;
+  return false;
 }
 
 DERReturn
@@ -92,7 +90,13 @@ DERImg4ParseInteger64 (
     *Result = Value;
     return DR_Success;
   }
-
+  //
+  // It is not perfectly clear why the different sizes are allowed in this way.
+  // The original libDER only supports 32-bit integers and I assume bit
+  // strings, which have their first byte signal the number of unused bits,
+  // might have been or are used to implement 64-bit integers. In this case,
+  // the number of unused bits must be 0 and this byte is discarded.
+  //
   if (Length > 9 || (Value != 0 && Length > 8)) {
     return DR_BufOverflow;
   }
@@ -156,7 +160,7 @@ DERVerifySignature (
   assert (PubKeyItem != NULL);
   assert (SigItem    != NULL);
   assert (DataItem   != NULL);
-  ASSERT (algoOid    != NULL);
+  assert (algoOid    != NULL);
 
   DerResult = DERParseSequence (
                 PubKeyItem,
@@ -198,7 +202,7 @@ DERVerifySignature (
              algoOid
              );
   if (!Result) {
-    return -1;
+    return (DERReturn)DR_SecurityError;
   }
 
   return DR_Success;
@@ -298,7 +302,7 @@ DERImg4ManifestCollectCertInfo (
 
   if (!DEROidCompare (&CertSigAlgoId.oid, &oidRsa)
    || !DERItemNull (&CertSigAlgoId.params)) {
-    return -1;
+    return (DERReturn)DR_SecurityError;
   }
 
   DerResult = DERParseBitString (
@@ -313,7 +317,12 @@ DERImg4ManifestCollectCertInfo (
   if (NumUnusedBits != 0) {
     return DR_DecodeError;
   }
-
+  //
+  // The Manifest Certificate Role is only required to be declared by the last
+  // certificate in the Manifest Certificate Chain.
+  //
+  CertInfo->manCertRoleItem.data   = NULL;
+  CertInfo->manCertRoleItem.length = 0;
   if (CertInfo->tbsCert.extensions.length != 0) {
     DerResult = DERDecodeSeqInit (
                   &CertInfo->tbsCert.extensions,
@@ -327,9 +336,6 @@ DERImg4ManifestCollectCertInfo (
     if (CertTbsTag != ASN1_CONSTR_SEQUENCE) {
       return DR_UnexpectedTag;
     }
-
-    CertInfo->manCertRoleItem.data   = NULL;
-    CertInfo->manCertRoleItem.length = 0;
 
     while (DERDecodeSeqNext (&CertTbsSeq, &CertTbsSeqInfo) == DR_Success) {
       if (CertTbsSeqInfo.tag != ASN1_CONSTR_SEQUENCE) {
@@ -382,14 +388,14 @@ DERImg4ManifestVerifyCertIssuer (
   DERByte        NumUnusedBits;
 
   assert (ChildCertInfo != NULL);
-  ASSERT (ParentCertInfo != NULL);
+  assert (ParentCertInfo != NULL);
 
   Result = DERItemCompare (
              &ChildCertInfo->tbsCert.issuer,
              &ParentCertInfo->tbsCert.subject
              );
   if (!Result) {
-    return -1;
+    return (DERReturn)DR_SecurityError;
   }
 
   DerResult = DERParseSequenceContent (
@@ -404,7 +410,7 @@ DERImg4ManifestVerifyCertIssuer (
   }
 
   if (!DERItemNull (&CertSigAlgoId.params)) {
-    return -1;
+    return (DERReturn)DR_SecurityError;
   }
 
   DerResult = DERParseBitString (
@@ -462,7 +468,10 @@ DERImg4ManifestVerifySignature (
   if (Manifest->certificates.length == 0) {
     return DR_DecodeError;
   }
-
+  //
+  // These pointers must be provided by the platform integrator, either by an
+  // external variable declaration or by a macro.
+  //
   assert (DERImg4RootCertificate != NULL);
   assert (DERImg4RootCertificateSize != NULL);
 
@@ -490,6 +499,9 @@ DERImg4ManifestVerifySignature (
 
     NextCert = &CertInfo.content.data[CertInfo.content.length];
     CertSize = NextCert - CertWalker;
+    //
+    // This is a guarantee libDER is supposed to make.
+    //
     assert (CertSize <= LeftCertSize);
     if (CertSize > DER_IMG4_MAX_CERT_SIZE) {
       return DR_DecodeError;
@@ -537,7 +549,7 @@ DERImg4ManifestVerifySignature (
   }
 
   if (!DERItemNull (&CertSigAlgoId.params)) {
-    return -1;
+    return (DERReturn)DR_SecurityError;
   }
 
   DerResult = DERVerifySignature (
@@ -598,7 +610,7 @@ DERImg4FindDecodeProperty (
   DERItem     PropItem;
   uint32_t    CurPropTag;
 
-  DERItemSpec PropertyItemSpec[] = DERImg4PropertySpecInit;
+  DERItemSpec PropertyItemSpec[] = DER_IMG4_PROPERTY_SPEC_INIT;
   PropertyItemSpec[1].tag = PropValueTag;
 
   assert (PropSetItem != NULL);
@@ -734,7 +746,7 @@ DERImg4ManifestDecodePropertyBoolean (
 
   if (Property.valueItem.length != 1
    || (*Property.valueItem.data != 0 && *Property.valueItem.data != 0xFF)) {
-    return -1;
+    return DR_DecodeError;
   }
 
   *Value = *Property.valueItem.data != 0;
@@ -808,6 +820,7 @@ DERImg4ValidateCertificateRole (
 {
   DERReturn       DerResult;
   DERReturn       LoopDerResult;
+  DERReturn       LoopDerResult2;
 
   DERTag          ManBodyCertTag;
   DERSequence     ManBodyCertSet;
@@ -871,7 +884,7 @@ DERImg4ValidateCertificateRole (
       return DerResult;
     }
 
-    while ((LoopDerResult = DERDecodeSeqNext (&CertPropSetSeq, &CertPropInfo)) == DR_Success) {
+    while ((LoopDerResult2 = DERDecodeSeqNext (&CertPropSetSeq, &CertPropInfo)) == DR_Success) {
       DerResult = DERImg4DecodeProperty (
                     &CertPropInfo.content,
                     CertPropInfo.tag,
@@ -889,25 +902,40 @@ DERImg4ValidateCertificateRole (
       if (CurCertProp.valueTag == ASN1_BOOLEAN
        || CurCertProp.valueTag == ASN1_INTEGER
        || CurCertProp.valueTag == ASN1_OCTET_STRING) {
+        //
+        // The specified key must be present with the exact role value.
+        //
         if (DerResult != DR_Success) {
           return DerResult;
         }
 
         if (!DERItemCompare (&CertPropInfo.content, &BodyPropItem)) {
-          return -1;
+          return (DERReturn)DR_SecurityError;
         }
       } else if (CurCertProp.valueTag == (ASN1_CONSTRUCTED | ASN1_CONTEXT_SPECIFIC | 0)) {
+        //
+        // The specified key must be present with an arbitrary value.
+        //
         if (DerResult != DR_Success) {
           return DerResult;
         }
-      } else if (CurCertProp.valueTag != (ASN1_CONSTRUCTED | ASN1_CONTEXT_SPECIFIC | 1)
-       || DerResult != DR_EndOfSequence) {
+      } else if (CurCertProp.valueTag == (ASN1_CONSTRUCTED | ASN1_CONTEXT_SPECIFIC | 1)) {
+        //
+        // The specified key must not be present.
+        //
+        if (DerResult != DR_EndOfSequence) {
+          return DR_UnexpectedTag;
+        }
+      } else {
+        //
+        // An unexpected tag has been encountered.
+        //
         return DR_UnexpectedTag;
       }
     }
 
-    if (LoopDerResult != DR_EndOfSequence) {
-      return -1;
+    if (LoopDerResult2 != DR_EndOfSequence) {
+      return DR_DecodeError;
     }
   }
 
@@ -995,10 +1023,16 @@ DERImg4ManifestDecodeProperty (
 
       default:
       {
+        //
+        // For forward compatibility, ignore unknown keys.
+        //
         return DR_Success;
       }
     }
   } else {
+    //
+    // The conditional branches must be modified when more types are added.
+    //
     assert (PropSetType == Img4ManifestPropSetTypeManp);
 
     switch (PropName) {
@@ -1097,12 +1131,15 @@ DERImg4ManifestDecodeProperty (
 
       default:
       {
+        //
+        // For forward compatibility, ignore unknown keys.
+        //
         return DR_Success;
       }
     }
   }
 
-  return -1;
+  return (DERReturn)DR_SecurityError;
 }
 
 DERReturn
@@ -1224,8 +1261,10 @@ DERImg4ParseManifest (
   if (ManifestInfo.tag != ASN1_CONSTR_SEQUENCE) {
     return DR_UnexpectedTag;
   }
-
-  assert ((void *)ManifestInfo.content.data >= ManBuffer);
+  //
+  // This is a guarantee libDER is supposed to make.
+  //
+  assert (ManifestInfo.content.data >= (DERByte *)ManBuffer);
 
   DerManifestSize  = (DERByte *)ManifestInfo.content.data - (DERByte *)ManBuffer;
   DerManifestSize += ManifestInfo.content.length;
