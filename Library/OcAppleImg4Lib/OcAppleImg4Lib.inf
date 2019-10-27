@@ -1,5 +1,5 @@
 ## @file
-# Component description file for OcAppleDerLib.
+# Component description file for OcAppleImg4Lib.
 #
 # Copyright (C) 2019, Download-Fritz. All rights reserved.<BR>
 #
@@ -15,17 +15,23 @@
 
 [Defines]
   INF_VERSION     = 0x00010005
-  BASE_NAME       = OcAppleDerLib
+  BASE_NAME       = OcAppleImg4Lib
   FILE_GUID       = 3AFDED15-4E18-4FF1-9C5C-0D1F259DCF56
   MODULE_TYPE     = BASE
   VERSION_STRING  = 1.0
-  LIBRARY_CLASS   = OcAppleDerLib
+  LIBRARY_CLASS   = OcAppleImg4Lib
 
 [Packages]
   MdePkg/MdePkg.dec
+  EfiPkg/EfiPkg.dec
+  OcSupportPkg/OcSupportPkg.dec
 
 [LibraryClasses]
   BaseMemoryLib
+  DebugLib
+  MemoryAllocationLib
+  OcAppleKeysLib
+  UefiRuntimeServicesTableLib
 
 [Sources]
   libDER/asn1Types.h
@@ -43,3 +49,9 @@
   libDER_config.h
   libDER/oids.c
   libDER/oids.h
+  libDERImg4/DER_Img4Manifest.c
+  libDERImg4/DER_Img4Manifest.h
+  libDERImg4/Img4oids.c
+  libDERImg4/Img4oids.h
+  libDERImg4/libDERImg4.h
+  libDERImg4/libDERImg4_config.h

@@ -54,7 +54,7 @@
   OcAppleBootCompatLib|OcSupportPkg/Library/OcAppleBootCompatLib/OcAppleBootCompatLib.inf
   OcAppleBootPolicyLib|OcSupportPkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
   OcAppleChunklistLib|OcSupportPkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
-  OcAppleDerLib|OcSupportPkg/Library/OcAppleDerLib/OcAppleDerLib.inf
+  OcAppleImg4Lib|OcSupportPkg/Library/OcAppleImg4Lib/OcAppleImg4Lib.inf
   OcAppleDiskImageLib|OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
   OcAppleEventLib|OcSupportPkg/Library/OcAppleEventLib/OcAppleEventLib.inf
   OcInputLib|OcSupportPkg/Library/OcInputLib/OcInputLib.inf
@@ -100,7 +100,7 @@
   OcSupportPkg/Library/OcAppleBootCompatLib/OcAppleBootCompatLib.inf
   OcSupportPkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
   OcSupportPkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
-  OcSupportPkg/Library/OcAppleDerLib/OcAppleDerLib.inf
+  OcSupportPkg/Library/OcAppleImg4Lib/OcAppleImg4Lib.inf
   OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
   OcSupportPkg/Library/OcAppleEventLib/OcAppleEventLib.inf
   OcSupportPkg/Library/OcInputLib/OcInputLib.inf
