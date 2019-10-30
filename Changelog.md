@@ -8,6 +8,7 @@ OpenCore Changelog
 - Fixed erratic cursor appearing in release builds
 - Moved `ReconnectOnResChange` to a user-configurable quirk to avoid freezes
 - Added OpenCore version to picker ui, configured by `ExposeSensitiveData`
+- Added hypervisor CPUID support to work with virtualization (thx @Leoyzen)
 
 #### v0.5.1
 - Added support of kernel resource kext injection
