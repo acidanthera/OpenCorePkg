@@ -37,6 +37,7 @@ typedef struct {
   CPUID_VERSION_INFO_EDX  CpuidVerEdx;
 
   UINT32                  MicrocodeRevision;
+  BOOLEAN                 Hypervisor;   //< indicate whether we are under virtualization
 
   UINT8                   Type;
   UINT8                   Family;
@@ -103,6 +104,13 @@ typedef struct {
   // 0 if ART is not present.
   //
   UINT64                  CPUFrequencyFromART;
+
+
+  //
+  // The CPU frequency derived from the CPUID VMWare Timing leaf.
+  // 0 if VMWare Timing leaf is not present.
+  //
+  UINT64                  CPUFrequencyFromVMT;
 
   //
   // The Front Side Bus (FSB) frequency calculated from dividing the CPU
