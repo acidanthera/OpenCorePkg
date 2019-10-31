@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.5.3
+- Update builtin firmware versions
+
 #### v0.5.2
 - Fixed `MinKernel` and `MaxKernel` logic (thx @dhinakg, @reitermarkus)
 - Fixed ASSERT when booting non-Apple OSes without arguments from the DEBUG version
