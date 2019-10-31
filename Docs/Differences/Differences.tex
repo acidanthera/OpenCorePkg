@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu Oct 24 09:22:44 2019
-%DIF ADD ../Configuration.tex        Sat Oct 26 15:45:30 2019
+%DIF DEL PreviousConfiguration.tex   Fri Nov  1 01:52:01 2019
+%DIF ADD ../Configuration.tex        Fri Nov  1 01:39:07 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -149,7 +149,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.5\DIFdelbegin \DIFdel{.1}\DIFdelend \DIFaddbegin \DIFadd{.2}\DIFaddend )
+       Reference Manual (0.5\DIFdelbegin \DIFdel{.2}\DIFdelend \DIFaddbegin \DIFadd{.3}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -3467,7 +3467,7 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{UsbKbDxe}}
   --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
-  builtin \texttt{KeySypport}, which may work better or worse depending on the firmware.
+  builtin \texttt{\DIFdelbegin \DIFdel{KeySypport}\DIFdelend \DIFaddbegin \DIFadd{KeySupport}\DIFaddend }, which may work better or worse depending on the firmware.
   \item \href{https://github.com/acidanthera/VirtualSMC}{\texttt{VirtualSmc}}
   --- UEFI SMC driver, required for proper FileVault 2 functionality and potentially
   other macOS specifics. An alternative, named \texttt{SMCHelper}, is not compatible
@@ -4118,7 +4118,7 @@ you will need \texttt{debug=0x8} boot argument.
 \item
   \textbf{Why do Find\&Replace patches must equal in length?}
 
-  For machine code (x86 code) it is not possible to do such replacements due to
+  For machine code (x86 code) it is not possible to do \DIFdelbegin \DIFdel{such }\DIFdelend \DIFaddbegin \DIFadd{differently sized }\DIFaddend replacements due to
   \href{https://en.wikipedia.org/w/index.php?title=Relative_addressing}{relative addressing}.
   For ACPI code this is risky, and is technically equivalent to ACPI table replacement,
   thus not implemented. More detailed explanation can be found on
