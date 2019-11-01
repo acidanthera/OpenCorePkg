@@ -1419,7 +1419,7 @@ blocking.
   kernel version for \texttt{10.14.6}. Kernel version interpretation is implemented as follows:
   \begin{align*}
     \begin{aligned}
-      ParseDarwinVersion(\kappa,\lambda,\mu)=&(\kappa \cdot10000 &&
+      ParseDarwinVersion(\kappa,\lambda,\mu)&=\kappa \cdot10000 &&
         \text{Where }\kappa\in(0,99)\text{ is kernel version major} \\
       &+ \lambda\cdot100 &&
         \text{Where }\lambda\in(0,99)\text{ is kernel version minor} \\
