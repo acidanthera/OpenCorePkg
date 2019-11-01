@@ -1093,9 +1093,10 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   This option reduces stolen memory footprint from the memory map by removing
   runtime bit for known memory regions. This quirk may result in the increase
   of KASLR slides available, but is not necessarily compatible with the target
-  board. In general this frees from 64 to 256 megabytes of memory (present in
-  the debug log), and on some platforms it is the only way to boot macOS, which
-  otherwise fails with allocation error at bootloader stage.
+  board without additional measures. In general this frees from 64 to 256
+  megabytes of memory (present in the debug log), and on some platforms it
+  is the only way to boot macOS, which otherwise fails with allocation
+  error at bootloader stage.
 
   This option is generally useful on all firmwares except some very old ones,
   like Sandy Bridge. On select firmwares it may require a list of exceptional
@@ -1418,14 +1419,11 @@ blocking.
   kernel version for \texttt{10.14.6}. Kernel version interpretation is implemented as follows:
   \begin{align*}
     \begin{aligned}
-      ParseDarwinVersion(\kappa,\lambda,\mu)=&(\lfloor\frac{\kappa}{10}\rfloor\cdot10
-      + \kappa-\lfloor\frac{\kappa}{10}\rfloor\cdot10)\cdot10000 &&
+      ParseDarwinVersion(\kappa,\lambda,\mu)=&(\kappa \cdot10000 &&
         \text{Where }\kappa\in(0,99)\text{ is kernel version major} \\
-      + &(\lfloor\frac{\lambda}{10}\rfloor\cdot10
-      + \lambda-\lfloor\frac{\lambda}{10}\rfloor\cdot10)\cdot100 &&
+      &+ \lambda\cdot100 &&
         \text{Where }\lambda\in(0,99)\text{ is kernel version minor} \\
-      + &(\lfloor\frac{\mu}{10}\rfloor\cdot10
-      + \mu-\lfloor\frac{\mu}{10}\rfloor\cdot10) &&
+      &+ \mu &&
         \text{Where }\mu\in(0,99)\text{ is kernel version patch}
     \end{aligned}
   \end{align*}
