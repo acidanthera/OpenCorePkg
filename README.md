@@ -13,6 +13,8 @@ OpenCore bootloader front end.
 - [macrumors.com](https://forums.macrumors.com/threads/opencore-on-the-mac-pro.2207814/) in English, legacy Apple hardware
 - [macOS86.it](https://www.macos86.it/showthread.php?4570-OpenCore-aka-OC-Nuovo-BootLoader) in Italian
 - [PCbeta.com](http://bbs.pcbeta.com/viewthread-1815623-1-1.html) in Chinese
+- [Macrumors.com](https://forums.macrumors.com/threads/opencore-on-the-mac-pro.2207814/) in English
+
 
 ## Credits
 
