@@ -30,6 +30,7 @@ BOOLEAN
 InternalParsePlist (
   IN  CHAR8                        *Plist,
   IN  UINT32                       PlistSize,
+  IN  UINTN                        SectorCount,
   IN  UINT64                       DataForkOffset,
   IN  UINT64                       DataForkSize,
   OUT UINT32                       *BlockCount,

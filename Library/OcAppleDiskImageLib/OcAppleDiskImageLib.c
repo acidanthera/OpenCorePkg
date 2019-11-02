@@ -119,6 +119,16 @@ OcAppleDiskImageInitializeContext (
     return FALSE;
   }
 
+  Result = OcOverflowMulU64 (
+             SectorCount,
+             APPLE_DISK_IMAGE_SECTOR_SIZE,
+             &OffsetTop
+             );
+  if (Result || (OffsetTop > MAX_UINTN)) {
+    DEBUG ((DEBUG_INFO, "Dmg sector error: %Lu %Lu\n", SectorCount, OffsetTop));
+    return FALSE;
+  }
+
   Result = OcOverflowAddU64 (
              XmlOffset,
              XmlLength,
@@ -155,6 +165,7 @@ OcAppleDiskImageInitializeContext (
   Result = InternalParsePlist (
              PlistData,
              (UINT32)XmlLength,
+             (UINTN)SectorCount,
              DataForkOffset,
              DataForkLength,
              &DmgBlockCount,

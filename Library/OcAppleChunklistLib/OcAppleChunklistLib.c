@@ -55,8 +55,6 @@ OcAppleChunklistInitializeContext (
     return FALSE;
   }
 
-  Context->ChunkCount = ChunklistHeader->ChunkCount;
-
   //
   // Ensure that chunk and signature addresses are valid in the first place.
   //
@@ -68,7 +66,13 @@ OcAppleChunklistInitializeContext (
   //
   // Ensure that chunks and signature reside within Buffer.
   //
-  if (OcOverflowMulAddUN (sizeof (APPLE_CHUNKLIST_CHUNK), ChunklistHeader->ChunkCount, (UINTN) Context->Chunks, &DataEnd)
+  if (ChunklistHeader->ChunkCount > MAX_UINTN) {
+    return FALSE;
+  }
+
+  Context->ChunkCount = (UINTN)ChunklistHeader->ChunkCount;
+
+  if (OcOverflowMulAddUN (sizeof (APPLE_CHUNKLIST_CHUNK), Context->ChunkCount, (UINTN) Context->Chunks, &DataEnd)
     || DataEnd > (UINTN) Buffer + BufferSize
     || OcOverflowAddUN (sizeof (APPLE_CHUNKLIST_SIG), (UINTN) Context->Signature, &DataEnd)
     || DataEnd != (UINTN) Buffer + BufferSize) {
@@ -172,7 +176,7 @@ OcAppleChunklistVerifyData (
     // Calculate checksum of data and ensure they match.
     //
     DEBUG ((DEBUG_VERBOSE, "AppleChunklistVerifyData(): Validating chunk %lu of %lu\n",
-      Index, Context->ChunkCount));
+      (UINT64)Index + 1, (UINT64)Context->ChunkCount));
     Sha256 (ChunkHash, ChunkData, CurrentChunk->Length);
     if (CompareMem (ChunkHash, CurrentChunk->Checksum, SHA256_DIGEST_SIZE) != 0) {
       FreePool (ChunkData);

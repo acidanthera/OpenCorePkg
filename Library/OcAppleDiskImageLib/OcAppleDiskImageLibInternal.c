@@ -68,6 +68,7 @@ BOOLEAN
 InternalSwapBlockData (
   IN OUT APPLE_DISK_IMAGE_BLOCK_DATA  *BlockData,
   IN     UINT32                       MaxSize,
+  IN     UINTN                        SectorCount,
   IN     UINT64                       DataForkOffset,
   IN     UINT64                       DataForkSize
   )
@@ -116,7 +117,8 @@ InternalSwapBlockData (
              BlockData->SectorCount,
              &BlockSectorTop
              );
-  if (Result) {
+  if (Result || BlockSectorTop > SectorCount) {
+    DEBUG ((DEBUG_ERROR, "OCDMG: Block sectors exceed DMG sectors %lu %lu\n", BlockSectorTop, SectorCount));
     return FALSE;
   }
 
@@ -162,6 +164,7 @@ BOOLEAN
 InternalParsePlist (
   IN  CHAR8                        *Plist,
   IN  UINT32                       PlistSize,
+  IN  UINTN                        SectorCount,
   IN  UINT64                       DataForkOffset,
   IN  UINT64                       DataForkSize,
   OUT UINT32                       *BlockCount,
@@ -279,15 +282,21 @@ InternalParsePlist (
                &BlockDictChildDataSize
                );
     if (!Result) {
+      FreePool (Block);
       goto DONE_ERROR;
     }
 
-    InternalSwapBlockData (
-      Block,
-      BlockDictChildDataSize,
-      DataForkOffset,
-      DataForkSize
-      );
+    Result = InternalSwapBlockData (
+               Block,
+               BlockDictChildDataSize,
+               SectorCount,
+               DataForkOffset,
+               DataForkSize
+               );
+    if (!Result) {
+      FreePool (Block);
+      goto DONE_ERROR;
+    }
   }
 
   *BlockCount = NumDmgBlocks;
