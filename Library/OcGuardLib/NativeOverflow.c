@@ -38,7 +38,7 @@ BOOLEAN
   )
 {
   if (sizeof (UINTN) == sizeof (UINT64)) {
-    return OcOverflowAddU64 (A, B, Result);
+    return OcOverflowAddU64 (A, B, (UINT64 *)Result);
   }
 
   return OcOverflowAddU32 ((UINT32)A, (UINT32)B, (UINT32 *)Result);
@@ -52,7 +52,7 @@ BOOLEAN
   )
 {
   if (sizeof (UINTN) == sizeof (UINT64)) {
-    return OcOverflowSubU64 (A, B, Result);
+    return OcOverflowSubU64 (A, B, (UINT64 *)Result);
   }
 
   return OcOverflowSubU32 ((UINT32)A, (UINT32)B, (UINT32 *)Result);
@@ -66,7 +66,7 @@ BOOLEAN
   )
 {
   if (sizeof (UINTN) == sizeof (UINT64)) {
-    return OcOverflowMulU64 (A, B, Result);
+    return OcOverflowMulU64 (A, B, (UINT64 *)Result);
   }
 
   return OcOverflowMulU32 ((UINT32)A, (UINT32)B, (UINT32 *)Result);
@@ -80,7 +80,7 @@ BOOLEAN
   )
 {
   if (sizeof (INTN) == sizeof (INT64)) {
-    return OcOverflowAddS64 (A, B, Result);
+    return OcOverflowAddS64 (A, B, (INT64 *)Result);
   }
 
   return OcOverflowAddS32 ((INT32)A, (INT32)B, (INT32 *)Result);
@@ -94,7 +94,7 @@ BOOLEAN
   )
 {
   if (sizeof (INTN) == sizeof (INT64)) {
-    return OcOverflowSubS64 (A, B, Result);
+    return OcOverflowSubS64 (A, B, (INT64 *)Result);
   }
 
   return OcOverflowSubS32 ((INT32)A, (INT32)B, (INT32 *)Result);
@@ -108,7 +108,7 @@ BOOLEAN
   )
 {
   if (sizeof (INTN) == sizeof (INT64)) {
-    return OcOverflowMulS64 (A, B, Result);
+    return OcOverflowMulS64 (A, B, (INT64 *)Result);
   }
 
   return OcOverflowMulS32 ((INT32)A, (INT32)B, (INT32 *)Result);

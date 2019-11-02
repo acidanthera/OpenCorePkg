@@ -439,10 +439,9 @@ MachoGetSymbolByRelocationOffset64 (
   if (Relocation != NULL) {
     Sym = NULL;
 
-    Tmp = (VOID *)((UINTN)Context->MachHeader + Address);
+    Tmp = (VOID *)((UINTN)Context->MachHeader + (UINTN)Address);
 
-    if (((Address + sizeof (UINT64)) <= Context->FileSize)
-     && OC_TYPE_ALIGNED (UINT64, Tmp)) {
+    if (OC_TYPE_ALIGNED (UINT64, Tmp)) {
       Data = (UINT64 *)Tmp;
 
       // FIXME: Only C++ symbols.

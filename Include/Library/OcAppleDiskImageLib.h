@@ -26,7 +26,7 @@
 typedef struct {
     CONST APPLE_RAM_DISK_EXTENT_TABLE *ExtentTable;
 
-    UINT64                            SectorCount;
+    UINTN                             SectorCount;
 
     UINT32                            BlockCount;
     APPLE_DISK_IMAGE_BLOCK_DATA       **Blocks;
@@ -63,7 +63,7 @@ OcAppleDiskImageVerifyData (
 BOOLEAN
 OcAppleDiskImageRead (
   IN  OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
-  IN  UINT64                       Lba,
+  IN  UINTN                        Lba,
   IN  UINTN                        BufferSize,
   OUT VOID                         *Buffer
   );

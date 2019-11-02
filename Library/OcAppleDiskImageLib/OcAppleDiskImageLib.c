@@ -149,13 +149,18 @@ OcAppleDiskImageInitializeContext (
     return FALSE;
   }
 
-  PlistData = AllocatePool (XmlLength);
+  PlistData = AllocatePool ((UINT32)XmlLength);
   if (PlistData == NULL) {
     DEBUG ((DEBUG_INFO, "Dmg plist alloc error: %Lu\n", XmlLength));
     return FALSE;
   }
 
-  Result = OcAppleRamDiskRead (ExtentTable, XmlOffset, XmlLength, PlistData);
+  Result = OcAppleRamDiskRead (
+             ExtentTable,
+             (UINTN)XmlOffset,
+             (UINTN)XmlLength,
+             PlistData
+             );
   if (!Result) {
     DEBUG ((DEBUG_INFO, "Dmg plist read error: %Lu %Lu\n", XmlOffset, XmlLength));
     FreePool (PlistData);
@@ -166,8 +171,8 @@ OcAppleDiskImageInitializeContext (
              PlistData,
              (UINT32)XmlLength,
              (UINTN)SectorCount,
-             DataForkOffset,
-             DataForkLength,
+             (UINTN)DataForkOffset,
+             (UINTN)DataForkLength,
              &DmgBlockCount,
              &DmgBlocks
              );
@@ -182,7 +187,7 @@ OcAppleDiskImageInitializeContext (
   Context->ExtentTable = ExtentTable;
   Context->BlockCount  = DmgBlockCount;
   Context->Blocks      = DmgBlocks;
-  Context->SectorCount = SectorCount;
+  Context->SectorCount = (UINTN)SectorCount;
 
   return TRUE;
 }
@@ -276,7 +281,7 @@ OcAppleDiskImageFreeFile (
 BOOLEAN
 OcAppleDiskImageRead (
   IN  OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
-  IN  UINT64                       Lba,
+  IN  UINTN                        Lba,
   IN  UINTN                        BufferSize,
   OUT VOID                         *Buffer
   )
@@ -291,9 +296,9 @@ OcAppleDiskImageRead (
   UINT8                       *ChunkData;
   UINT8                       *ChunkDataCompressed;
 
-  UINT64                      LbaCurrent;
-  UINT64                      LbaOffset;
-  UINT64                      LbaLength;
+  UINTN                       LbaCurrent;
+  UINTN                       LbaOffset;
+  UINTN                       LbaLength;
   UINTN                       RemainingBufferSize;
   UINTN                       BufferChunkSize;
   UINT8                       *BufferCurrent;
@@ -314,8 +319,8 @@ OcAppleDiskImageRead (
       return FALSE;
     }
 
-    LbaOffset = (LbaCurrent - DMG_SECTOR_START_ABS (BlockData, Chunk));
-    LbaLength = (Chunk->SectorCount - LbaOffset);
+    LbaOffset = (LbaCurrent - (UINTN)DMG_SECTOR_START_ABS (BlockData, Chunk));
+    LbaLength = ((UINTN)Chunk->SectorCount - LbaOffset);
 
     Result = OcOverflowMulU64 (
                LbaOffset,
@@ -351,7 +356,7 @@ OcAppleDiskImageRead (
       {
         Result = OcAppleRamDiskRead (
                    Context->ExtentTable,
-                   (Chunk->CompressedOffset + ChunkOffset),
+                   (UINTN)(Chunk->CompressedOffset + ChunkOffset),
                    BufferChunkSize,
                    BufferCurrent
                    );
@@ -364,16 +369,16 @@ OcAppleDiskImageRead (
 
       case APPLE_DISK_IMAGE_CHUNK_TYPE_ZLIB:
       {
-        ChunkData = AllocatePool (ChunkTotalLength + Chunk->CompressedLength);
+        ChunkData = AllocatePool ((UINTN)(ChunkTotalLength + Chunk->CompressedLength));
         if (ChunkData == NULL) {
           return FALSE;
         }
 
-        ChunkDataCompressed = (ChunkData + ChunkTotalLength);
+        ChunkDataCompressed = (ChunkData + (UINTN)ChunkTotalLength);
         Result = OcAppleRamDiskRead (
                    Context->ExtentTable,
-                   Chunk->CompressedOffset,
-                   Chunk->CompressedLength,
+                   (UINTN)Chunk->CompressedOffset,
+                   (UINTN)Chunk->CompressedLength,
                    ChunkDataCompressed
                    );
         if (!Result) {
@@ -383,11 +388,11 @@ OcAppleDiskImageRead (
 
         OutSize = DecompressZLIB (
                     ChunkData,
-                    ChunkTotalLength,
+                    (UINTN)ChunkTotalLength,
                     ChunkDataCompressed,
-                    Chunk->CompressedLength
+                    (UINTN)Chunk->CompressedLength
                     );
-        if (OutSize != ChunkTotalLength) {
+        if (OutSize != (UINTN)ChunkTotalLength) {
           FreePool (ChunkData);
           return FALSE;
         }

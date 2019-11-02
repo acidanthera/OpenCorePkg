@@ -119,7 +119,7 @@ DiskImageBlockIoReadBlocks (
 
   Result = OcAppleDiskImageRead (
              DiskImageData->ImageContext,
-             Lba,
+             (UINTN)Lba,
              BufferSize,
              Buffer
              );

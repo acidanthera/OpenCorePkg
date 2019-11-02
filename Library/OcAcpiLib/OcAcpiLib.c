@@ -540,7 +540,7 @@ AcpiInitContext (
 
   for (DstIndex = 0, Index = 0; Index < Context->NumberOfTables; ++Index) {
     Context->Tables[DstIndex] = (EFI_ACPI_COMMON_HEADER *)(Context->Xsdt != NULL
-      ? Context->Xsdt->Tables[Index] : (UINT64) Context->Rsdt->Tables[Index]);
+      ? (UINTN) Context->Xsdt->Tables[Index] : (UINTN) Context->Rsdt->Tables[Index]);
 
     //
     // Skip NULL table entries, DSDT, and RSDP if any.
@@ -636,8 +636,8 @@ AcpiApplyContext (
   }
 
   if (Context->Xsdt != NULL) {
-    CopyMem ((VOID *) Table, Context->Xsdt, sizeof (*Context->Xsdt));
-    Context->Xsdt = (OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE *) Table;
+    CopyMem ((VOID *)(UINTN)Table, Context->Xsdt, sizeof (*Context->Xsdt));
+    Context->Xsdt = (OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE *)(UINTN)Table;
     Context->Xsdt->Header.Length = XsdtSize;
 
     for (Index = 0; Index < Context->NumberOfTables; ++Index) {
@@ -665,8 +665,8 @@ AcpiApplyContext (
   }
 
   if (Context->Rsdt != NULL) {
-    CopyMem ((VOID *) Table, Context->Rsdt, sizeof (*Context->Rsdt));
-    Context->Rsdt = (OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE *) Table;
+    CopyMem ((VOID *)(UINTN)Table, Context->Rsdt, sizeof (*Context->Rsdt));
+    Context->Rsdt = (OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE *)(UINTN)Table;
     Context->Rsdt->Header.Length = RsdtSize;
 
     for (Index = 0; Index < Context->NumberOfTables; ++Index) {
@@ -823,8 +823,8 @@ AcpiInsertTable (
     return Status;
   }
 
-  CopyMem ((UINT8 *) Table, Data, Length);
-  ZeroMem ((UINT8 *) Table + Length, EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (Length)) - Length);
+  CopyMem ((UINT8 *)(UINTN)Table, Data, Length);
+  ZeroMem ((UINT8 *)(UINTN)Table + Length, EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (Length)) - Length);
 
   if (ReplaceDsdt) {
     DEBUG ((
@@ -832,7 +832,7 @@ AcpiInsertTable (
       "OCA: Replaced DSDT of %u bytes into ACPI\n",
       Common->Length
       ));
-    Context->Dsdt = (EFI_ACPI_DESCRIPTION_HEADER *) Table;
+    Context->Dsdt = (EFI_ACPI_DESCRIPTION_HEADER *)(UINTN)Table;
     if (Context->Fadt->Header.Length >= OFFSET_OF (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE, XDsdt) + sizeof (Context->Fadt->XDsdt)) {
       Context->Fadt->XDsdt = (UINT64)(UINTN) Context->Dsdt;
     }
@@ -854,7 +854,7 @@ AcpiInsertTable (
       Context->NumberOfTables
       ));
 
-    Context->Tables[Context->NumberOfTables] = (EFI_ACPI_COMMON_HEADER *) Table;
+    Context->Tables[Context->NumberOfTables] = (EFI_ACPI_COMMON_HEADER *)(UINTN)Table;
     ++Context->NumberOfTables;
   }
 

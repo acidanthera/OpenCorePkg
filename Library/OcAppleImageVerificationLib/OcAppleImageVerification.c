@@ -565,7 +565,7 @@ GetApplePeImageSha256 (
   APPLE_PE_COFF_LOADER_IMAGE_CONTEXT  *Context
   )
 {
-  UINT64                   HashSize           = 0;
+  UINTN                    HashSize           = 0;
   UINT8                    *HashBase          = NULL;
   SHA256_CONTEXT           HashContext;
 

@@ -702,7 +702,7 @@ InternalRelocateRelocationIntel64 (
   IN PRELINKED_CONTEXT           *Context,
   IN PRELINKED_KEXT              *Kext,
   IN UINT64                      LoadAddress,
-  IN UINTN                       RelocationBase,
+  IN UINT64                      RelocationBase,
   IN CONST MACH_RELOCATION_INFO  *Relocation,
   IN CONST MACH_RELOCATION_INFO  *NextRelocation  OPTIONAL
   )
@@ -962,7 +962,7 @@ InternalRelocateAndCopyRelocations64 (
   IN  PRELINKED_CONTEXT           *Context,
   IN  PRELINKED_KEXT              *Kext,
   IN  UINT64                      LoadAddress,
-  IN  UINTN                       RelocationBase,
+  IN  UINT64                      RelocationBase,
   IN  CONST MACH_RELOCATION_INFO  *SourceRelocations,
   IN  OUT UINT32                  *NumRelocations,
   OUT MACH_RELOCATION_INFO        *TargetRelocations
@@ -1572,7 +1572,7 @@ InternalPrelinkKext64 (
     );
   ZeroMem (
     (VOID *)((UINTN)MachHeader + (UINTN)LinkEditSegment->FileOffset + LinkEditSize),
-    (LinkEditSegment->FileSize - LinkEditSize)
+    (UINTN)(LinkEditSegment->FileSize - LinkEditSize)
     );
 
   LinkEditSize = MACHO_ALIGN (LinkEditSize);

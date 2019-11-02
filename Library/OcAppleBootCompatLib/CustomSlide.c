@@ -49,7 +49,7 @@ STATIC
 VOID
 GetSlideRangeForValue (
   IN  SLIDE_SUPPORT_STATE  *SlideSupport,
-  IN  UINTN                Slide,
+  IN  UINT8                Slide,
   OUT UINTN                *StartAddr,
   OUT UINTN                *EndAddr
   )
@@ -101,7 +101,7 @@ BOOLEAN
 ShouldUseCustomSlideOffsetDecision (
   IN OUT SLIDE_SUPPORT_STATE  *SlideSupport,
   IN     UINT8                FallbackSlide,
-  IN     UINTN                MaxAvailableSize
+  IN     UINT64               MaxAvailableSize
   )
 {
   UINTN  Index;
@@ -126,7 +126,7 @@ ShouldUseCustomSlideOffsetDecision (
   if (SlideSupport->ValidSlideCount == 0) {
     DEBUG ((
       DEBUG_INFO,
-      "OCABC: No slide values are usable! Falling back to %u with 0x%08X bytes!\n",
+      "OCABC: No slide values are usable! Falling back to %u with 0x%08LX bytes!\n",
       (UINT32) FallbackSlide,
       MaxAvailableSize
       ));
@@ -231,15 +231,15 @@ ShouldUseCustomSlideOffset (
   UINTN                  DescriptorSize;
   UINT32                 DescriptorVersion;
   UINTN                  Index;
-  UINTN                  Slide;
+  UINT8                  Slide;
   UINTN                  NumEntries;
-  UINTN                  MaxAvailableSize;
+  UINT64                 MaxAvailableSize;
   UINT8                  FallbackSlide;
   BOOLEAN                Supported;
   UINTN                  StartAddr;
   UINTN                  EndAddr;
   UINTN                  DescEndAddr;
-  UINTN                  AvailableSize;
+  UINT64                 AvailableSize;
 
   MaxAvailableSize = 0;
   FallbackSlide    = 0;
@@ -249,7 +249,6 @@ ShouldUseCustomSlideOffset (
       && SlideSupport->ValidSlideCount < TOTAL_SLIDE_NUM;
   }
 
-  AllocatedMapPages = BASE_4GB;
   Status = GetCurrentMemoryMapAlloc (
     &MemoryMapSize,
     &MemoryMap,
@@ -270,7 +269,7 @@ ShouldUseCustomSlideOffset (
   }
 
   SlideSupport->HasSandyOrIvy       = OcIsSandyOrIvy ();
-  SlideSupport->EstimatedKernelArea = EFI_PAGES_TO_SIZE (
+  SlideSupport->EstimatedKernelArea = (UINTN)EFI_PAGES_TO_SIZE (
     CountRuntimePages (MemoryMapSize, MemoryMap, DescriptorSize, NULL)
     ) + ESTIMATED_KERNEL_SIZE;
 
@@ -303,7 +302,8 @@ ShouldUseCustomSlideOffset (
         continue;
       }
 
-      DescEndAddr = LAST_DESCRIPTOR_ADDR (Desc) + 1;
+      ASSERT (LAST_DESCRIPTOR_ADDR (Desc) < MAX_UINTN);
+      DescEndAddr = (UINTN)(LAST_DESCRIPTOR_ADDR (Desc) + 1);
 
       if ((Desc->PhysicalStart < EndAddr) && (DescEndAddr > StartAddr)) {
         //
@@ -344,7 +344,7 @@ ShouldUseCustomSlideOffset (
 
     if (AvailableSize > MaxAvailableSize) {
       MaxAvailableSize = AvailableSize;
-      FallbackSlide    = (UINT8) Slide;
+      FallbackSlide    = Slide;
     }
 
     if ((StartAddr + AvailableSize) != EndAddr) {
@@ -355,7 +355,7 @@ ShouldUseCustomSlideOffset (
     }
 
     if (Supported) {
-      SlideSupport->ValidSlides[SlideSupport->ValidSlideCount++] = (UINT8) Slide;
+      SlideSupport->ValidSlides[SlideSupport->ValidSlideCount++] = Slide;
     }
   }
 
@@ -366,7 +366,7 @@ ShouldUseCustomSlideOffset (
   SlideSupport->HasMemoryMapAnalysis = TRUE;
 
   gBS->FreePages (
-    (EFI_PHYSICAL_ADDRESS) MemoryMap,
+    (EFI_PHYSICAL_ADDRESS)(UINTN)MemoryMap,
     AllocatedMapPages
     );
 

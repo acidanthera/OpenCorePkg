@@ -22,7 +22,7 @@
 // Chunklist context.
 //
 typedef struct OC_APPLE_CHUNKLIST_CONTEXT_ {
-  UINT64                      ChunkCount;
+  UINTN                       ChunkCount;
   CONST APPLE_CHUNKLIST_CHUNK *Chunks;
   APPLE_CHUNKLIST_SIG         *Signature;
   UINT8                       Hash[SHA256_DIGEST_SIZE];

@@ -43,9 +43,7 @@ freely, subject to the following restrictions:
 #define LODEPNG_NO_COMPILE_ANCILLARY_CHUNKS
 
 // Microsoft compiler has built-in size_t
-#if !defined(_MSC_VER)
 #define size_t UINTN
-#endif
 
 typedef UINT32 uint32_t;
 typedef UINT16 uint16_t;

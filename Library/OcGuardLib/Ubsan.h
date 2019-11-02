@@ -65,8 +65,15 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Try to provide a somewhat adequate size_t implementation.
 // Have to be careful about -Wformat warnings in Clang.
 #ifdef __GNUC__
+#if defined(MDE_CPU_X64)
 #define ssize_t long
 #define size_t unsigned long
+#elif defined(MDE_CPU_IA32)
+#define ssize_t int
+#define size_t unsigned int
+#else
+#error Unknown CPU arch
+#endif
 #else
 #define ssize_t INTN
 #define size_t UINTN

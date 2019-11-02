@@ -153,7 +153,8 @@ ProtectCsmRegion (
 
   for (Index = 0; Index < NumEntries; ++Index) {
     if (Desc->NumberOfPages > 0 && Desc->Type == EfiBootServicesData) {
-      PhysicalEnd = LAST_DESCRIPTOR_ADDR (Desc) + 1;
+      ASSERT (LAST_DESCRIPTOR_ADDR (Desc) < MAX_UINTN);
+      PhysicalEnd = (UINTN)LAST_DESCRIPTOR_ADDR (Desc) + 1;
 
       if (PhysicalEnd >= 0x9E000 && PhysicalEnd < 0xA0000) {
         Desc->Type = EfiACPIMemoryNVS;
@@ -297,9 +298,10 @@ OcStartImage (
       );
 
     if (BootCompat->Settings.EnableSafeModeSlide) {
+      ASSERT (AppleLoadedImage->ImageSize <= MAX_UINTN);
       AppleSlideUnlockForSafeMode (
         (UINT8 *) AppleLoadedImage->ImageBase,
-        AppleLoadedImage->ImageSize
+        (UINTN)AppleLoadedImage->ImageSize
         );
     }
 

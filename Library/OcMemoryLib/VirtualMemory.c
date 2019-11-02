@@ -82,7 +82,7 @@ GetPhysicalAddress (
   //
   // PDPE
   //
-  PDPE = (PAGE_MAP_AND_DIRECTORY_POINTER *) (PML4->Uint64 & PAGING_4K_ADDRESS_MASK_64);
+  PDPE = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN)(PML4->Uint64 & PAGING_4K_ADDRESS_MASK_64);
   PDPE += VA.Pg4K.PDPOffset;
   VAStart.Pg4K.PDPOffset = VA.Pg4K.PDPOffset;
   VAEnd.Pg4K.PDPOffset = VA.Pg4K.PDPOffset;
@@ -104,7 +104,7 @@ GetPhysicalAddress (
   //
   // PDE
   //
-  PDE = (PAGE_MAP_AND_DIRECTORY_POINTER *)(PDPE->Uint64 & PAGING_4K_ADDRESS_MASK_64);
+  PDE = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN)(PDPE->Uint64 & PAGING_4K_ADDRESS_MASK_64);
   PDE += VA.Pg4K.PDOffset;
   VAStart.Pg4K.PDOffset = VA.Pg4K.PDOffset;
   VAEnd.Pg4K.PDOffset = VA.Pg4K.PDOffset;
@@ -126,7 +126,7 @@ GetPhysicalAddress (
   //
   // PTE
   //
-  PTE4K = (PAGE_TABLE_4K_ENTRY *) (PDE->Uint64 & PAGING_4K_ADDRESS_MASK_64);
+  PTE4K = (PAGE_TABLE_4K_ENTRY *)(UINTN)(PDE->Uint64 & PAGING_4K_ADDRESS_MASK_64);
   PTE4K += VA.Pg4K.PTOffset;
   VAStart.Pg4K.PTOffset = VA.Pg4K.PTOffset;
   VAEnd.Pg4K.PTOffset = VA.Pg4K.PTOffset;
@@ -160,7 +160,7 @@ VmAllocateMemoryPool (
     );
 
   if (!EFI_ERROR (Status)) {
-    Context->MemoryPool = (UINT8 *) Addr;
+    Context->MemoryPool = (UINT8 *)(UINTN)Addr;
     Context->FreePages  = NumPages;
   }
 
@@ -271,7 +271,7 @@ VmMapVirtualPage (
   //
   // PDPE
   //
-  PDPE = (PAGE_MAP_AND_DIRECTORY_POINTER *) (PML4->Uint64 & PAGING_4K_ADDRESS_MASK_64);
+  PDPE = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN)(PML4->Uint64 & PAGING_4K_ADDRESS_MASK_64);
   PDPE += VA.Pg4K.PDPOffset;
   VAStart.Pg4K.PDPOffset = VA.Pg4K.PDPOffset;
   VAEnd.Pg4K.PDPOffset = VA.Pg4K.PDPOffset;
@@ -314,7 +314,7 @@ VmMapVirtualPage (
   //
   // PDE
   //
-  PDE = (PAGE_MAP_AND_DIRECTORY_POINTER *) (PDPE->Uint64 & PAGING_4K_ADDRESS_MASK_64);
+  PDE = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN)(PDPE->Uint64 & PAGING_4K_ADDRESS_MASK_64);
   PDE += VA.Pg4K.PDOffset;
   VAStart.Pg4K.PDOffset = VA.Pg4K.PDOffset;
   VAEnd.Pg4K.PDOffset = VA.Pg4K.PDOffset;
@@ -356,7 +356,7 @@ VmMapVirtualPage (
   //
   // PTE
   //
-  PTE4K = (PAGE_TABLE_4K_ENTRY *)(PDE->Uint64 & PAGING_4K_ADDRESS_MASK_64);
+  PTE4K = (PAGE_TABLE_4K_ENTRY *)(UINTN)(PDE->Uint64 & PAGING_4K_ADDRESS_MASK_64);
   PTE4K += VA.Pg4K.PTOffset;
   VAStart.Pg4K.PTOffset = VA.Pg4K.PTOffset;
   VAEnd.Pg4K.PTOffset = VA.Pg4K.PTOffset;
@@ -376,7 +376,7 @@ VmMapVirtualPages (
   IN OUT OC_VMEM_CONTEXT                 *Context,
   IN OUT PAGE_MAP_AND_DIRECTORY_POINTER  *PageTable  OPTIONAL,
   IN     EFI_VIRTUAL_ADDRESS             VirtualAddr,
-  IN     UINTN                           NumPages,
+  IN     UINT64                          NumPages,
   IN     EFI_PHYSICAL_ADDRESS            PhysicalAddr
   )
 {

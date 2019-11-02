@@ -129,12 +129,12 @@ OcAppleChunklistVerifyData (
 {
   BOOLEAN                     Result;
 
-  UINT64                      Index;
+  UINTN                       Index;
   UINT8                       ChunkHash[SHA256_DIGEST_SIZE];
   CONST APPLE_CHUNKLIST_CHUNK *CurrentChunk;
-  UINT64                      CurrentOffset;
+  UINTN                       CurrentOffset;
 
-  UINTN                       ChunkDataSize;
+  UINT32                      ChunkDataSize;
   VOID                        *ChunkData;
 
   ASSERT (Context != NULL);

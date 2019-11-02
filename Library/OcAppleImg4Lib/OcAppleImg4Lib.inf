@@ -49,7 +49,7 @@
   libDER_config.h
   libDER/oids.c
   libDER/oids.h
-  libDERImg4/DER_Img4Manifest.c
+  #libDERImg4/DER_Img4Manifest.c
   libDERImg4/DER_Img4Manifest.h
   libDERImg4/Img4oids.c
   libDERImg4/Img4oids.h

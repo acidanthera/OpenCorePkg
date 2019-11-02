@@ -549,7 +549,7 @@ AppleMapPrepareKernelJump (
   IN     BOOLEAN                AppleHibernateWake
   )
 {
-  UINTN                    KernelEntryVaddr;
+  UINT64                   KernelEntryVaddr;
   UINT32                   KernelEntry;
   IOHibernateImageHeader   *ImageHeader;
 

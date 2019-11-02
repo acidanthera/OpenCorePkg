@@ -45,7 +45,7 @@ OcAppleRamDiskAllocate (
 BOOLEAN
 OcAppleRamDiskRead (
   IN  CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
-  IN  UINT64                             Offset,
+  IN  UINTN                              Offset,
   IN  UINTN                              Size,
   OUT VOID                               *Buffer
   );
@@ -63,7 +63,7 @@ OcAppleRamDiskRead (
 BOOLEAN
 OcAppleRamDiskWrite (
   IN CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
-  IN UINT64                             Offset,
+  IN UINTN                              Offset,
   IN UINTN                              Size,
   IN CONST VOID                         *Buffer
   );

@@ -142,7 +142,8 @@ VirtualFileRead (
   )
 {
   VIRTUAL_FILE_DATA  *Data;
-  UINTN              ReadSize;
+  UINT64             ReadSize;
+  UINTN              ReadBufferSize;
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -154,17 +155,18 @@ VirtualFileRead (
       return EFI_DEVICE_ERROR;
     }
 
-    ReadSize = Data->FileSize - Data->FilePosition;
+    ReadSize = (Data->FileSize - Data->FilePosition);
 
     if (*BufferSize >= ReadSize) {
-      *BufferSize = ReadSize;
+      *BufferSize    = (UINTN)ReadSize;
+      ReadBufferSize = (UINTN)ReadSize;
     } else {
-      ReadSize = *BufferSize;
+      ReadBufferSize = *BufferSize;
     }
 
-    if (ReadSize > 0) {
-      CopyMem (Buffer, &Data->FileBuffer[Data->FilePosition], ReadSize);
-      Data->FilePosition += ReadSize;
+    if (ReadBufferSize > 0) {
+      CopyMem (Buffer, &Data->FileBuffer[Data->FilePosition], ReadBufferSize);
+      Data->FilePosition += ReadBufferSize;
     }
 
     return EFI_SUCCESS;

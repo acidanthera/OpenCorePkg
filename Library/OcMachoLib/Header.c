@@ -1236,6 +1236,7 @@ MachoExpandImage64 (
   UINT32                   CurrentDelta;
   UINT32                   OriginalDelta;
   UINT64                   CurrentSize;
+  UINT32                   FileSize;
   MACH_SEGMENT_COMMAND_64  *Segment;
   MACH_SEGMENT_COMMAND_64  *FirstSegment;
   MACH_SEGMENT_COMMAND_64  *DstSegment;
@@ -1307,9 +1308,10 @@ MachoExpandImage64 (
     //
     // Copy and zero fill file data. We can do this because only last sections can have 0 file size.
     //
+    ASSERT (CopyFileSize <= MAX_UINTN && CopyVmSize <= MAX_UINTN);
     ZeroMem (&Destination[CopyFileOffset + OriginalDelta], CurrentDelta - OriginalDelta);
-    CopyMem (&Destination[CopyFileOffset + CurrentDelta], &Source[CopyFileOffset], CopyFileSize);
-    ZeroMem (&Destination[CopyFileOffset + CurrentDelta + CopyFileSize], CopyVmSize - CopyFileSize);
+    CopyMem (&Destination[CopyFileOffset + CurrentDelta], &Source[CopyFileOffset], (UINTN)CopyFileSize);
+    ZeroMem (&Destination[CopyFileOffset + CurrentDelta + CopyFileSize], (UINTN)(CopyVmSize - CopyFileSize));
     //
     // Refresh destination segment size and offsets.
     //
@@ -1400,32 +1402,36 @@ MachoExpandImage64 (
   // case for Kernel Resource KEXTs.  In this case, try to use the raw file.
   //
   if (CurrentSize == 0) {
-    CurrentSize = MachoGetFileSize (Context);
+    FileSize = MachoGetFileSize (Context);
     //
     // HeaderSize must be at most as big as the file size by OcMachoLib
     // guarantees. It's sanity-checked to ensure the safety of the subtraction.
     //
-    ASSERT (CurrentSize >= HeaderSize);
+    ASSERT (FileSize >= HeaderSize);
 
-    if (CurrentSize > DestinationSize) {
+    if (FileSize > DestinationSize) {
       return 0;
     }
 
     CopyMem (
       Destination + HeaderSize,
       (UINT8 *)Header + HeaderSize,
-      CurrentSize - HeaderSize
+      FileSize - HeaderSize
       );
+
+    CurrentSize = FileSize;
   }
 
   if (Strip) {
     InternalStripLoadCommands64 ((MACH_HEADER_64 *) Destination);
   }
-
+  //
+  // This cast is safe because CurrentSize is verified against DestinationSize.
+  //
   return (UINT32) CurrentSize;
 }
 
-UINTN
+UINT64
 MachoRuntimeGetEntryAddress (
   IN VOID  *Image
   )
@@ -1437,7 +1443,7 @@ MachoRuntimeGetEntryAddress (
   UINTN                   Index;
   MACH_THREAD_COMMAND     *ThreadCmd;
   MACH_X86_THREAD_STATE   *ThreadState;
-  UINTN                   Address;
+  UINT64                  Address;
 
   Address = 0;
   Header  = (MACH_HEADER_ANY *) Image;

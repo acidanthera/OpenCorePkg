@@ -56,15 +56,16 @@ InternalAddAllocatedArea (
 {
   APPLE_RAM_DISK_EXTENT_TABLE  *Table;
 
+  ASSERT (AllocatedArea + AllocatedAreaSize - 1 <= MAX_UINTN);
   ASSERT (AllocatedAreaSize >= EFI_PAGE_SIZE);
 
   ZeroMem (
-    (VOID *) AllocatedArea,
+    (VOID *)(UINTN)AllocatedArea,
     EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (AllocatedAreaSize))
     );
 
   if (*ExtentTable == NULL) {
-    *ExtentTable = (APPLE_RAM_DISK_EXTENT_TABLE *) AllocatedArea;
+    *ExtentTable = (APPLE_RAM_DISK_EXTENT_TABLE *)(UINTN)AllocatedArea;
 
     (*ExtentTable)->Signature   = APPLE_RAM_DISK_EXTENT_SIGNATURE;
     (*ExtentTable)->Version     = APPLE_RAM_DISK_EXTENT_VERSION;
@@ -122,8 +123,9 @@ InternalAllocateRemainingSize (
   EFI_MEMORY_DESCRIPTOR  *EntryWalker;
   EFI_MEMORY_DESCRIPTOR  *BiggestEntry;
   EFI_PHYSICAL_ADDRESS   AllocatedArea;
-  UINTN                  BiggestSize;
-  UINTN                  UsedSize;
+  UINT64                 BiggestSize;
+  UINT64                 UsedSize;
+  UINTN                  FinalUsedSize;
 
   while (RemainingSize > 0 && (*ExtentTable == NULL
     || (*ExtentTable)->ExtentCount < ARRAY_SIZE ((*ExtentTable)->Extents))) {
@@ -157,13 +159,13 @@ InternalAllocateRemainingSize (
       return FALSE;
     }
 
-    UsedSize = MIN (BiggestSize, RemainingSize);
+    FinalUsedSize = (UINTN)MIN (BiggestSize, RemainingSize);
 
     AllocatedArea = BiggestEntry->PhysicalStart;
     Status = gBS->AllocatePages (
       AllocateAddress,
       MemoryType,
-      EFI_SIZE_TO_PAGES (UsedSize),
+      EFI_SIZE_TO_PAGES (FinalUsedSize),
       &AllocatedArea
       );
 
@@ -171,12 +173,12 @@ InternalAllocateRemainingSize (
       return FALSE;
     }
 
-    InternalAddAllocatedArea (ExtentTable, AllocatedArea, UsedSize);
+    InternalAddAllocatedArea (ExtentTable, AllocatedArea, FinalUsedSize);
 
-    RemainingSize -= UsedSize;
+    RemainingSize -= FinalUsedSize;
 
-    BiggestEntry->PhysicalStart += EFI_SIZE_TO_PAGES (UsedSize);
-    BiggestEntry->NumberOfPages -= EFI_SIZE_TO_PAGES (UsedSize);
+    BiggestEntry->PhysicalStart += EFI_SIZE_TO_PAGES (FinalUsedSize);
+    BiggestEntry->NumberOfPages -= EFI_SIZE_TO_PAGES (FinalUsedSize);
   }
 
   return RemainingSize;
@@ -205,6 +207,7 @@ InternalAppleRamDiskAllocate (
   IN BOOLEAN          AvoidHighMem
   )
 {
+  BOOLEAN                      Result;
   UINTN                        MemoryMapSize;
   EFI_MEMORY_DESCRIPTOR        *MemoryMap;
   UINTN                        DescriptorSize;
@@ -221,7 +224,11 @@ InternalAppleRamDiskAllocate (
     "Extent table different from EFI_PAGE_SIZE is unsupported!"
     );
 
-  RemainingSize  = Size + EFI_PAGE_SIZE;
+  Result = OcOverflowAddUN (Size, EFI_PAGE_SIZE, &RemainingSize);
+  if (Result) {
+    return NULL;
+  }
+
   ExtentTable    = NULL;
 
   //
@@ -322,7 +329,7 @@ OcAppleRamDiskAllocate (
   }
 
   DEBUG ((
-    DEBUG_BULK_INFO,
+    DEBUG_INFO,
     "OCRAM: Extent allocation of %u bytes (%x) gave %p (avoid high %d)\n",
     (UINT32) Size,
     (UINT32) MemoryType,
@@ -336,7 +343,7 @@ OcAppleRamDiskAllocate (
 BOOLEAN
 OcAppleRamDiskRead (
   IN  CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
-  IN  UINT64                             Offset,
+  IN  UINTN                              Offset,
   IN  UINTN                              Size,
   OUT VOID                               *Buffer
   )
@@ -346,8 +353,8 @@ OcAppleRamDiskRead (
   UINT32                      Index;
   CONST APPLE_RAM_DISK_EXTENT *Extent;
 
-  UINT64                      CurrentOffset;
-  UINT64                      LocalOffset;
+  UINTN                       CurrentOffset;
+  UINTN                       LocalOffset;
   UINTN                       LocalSize;
 
   ASSERT (ExtentTable != NULL);
@@ -356,11 +363,14 @@ OcAppleRamDiskRead (
   ASSERT (Buffer != NULL);
 
   BufferBytes = Buffer;
-
+  //
+  // As per the allocation algorithm, the sum over all Extent->Length must be
+  // smaller than MAX_UINTN.
+  //
   for (
     Index = 0, CurrentOffset = 0;
     Index < ExtentTable->ExtentCount;
-    ++Index, CurrentOffset += Extent->Length
+    ++Index, CurrentOffset += (UINTN)Extent->Length
     ) {
     Extent = &ExtentTable->Extents[Index];
 
@@ -389,7 +399,7 @@ OcAppleRamDiskRead (
 BOOLEAN
 OcAppleRamDiskWrite (
   IN CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable,
-  IN UINT64                             Offset,
+  IN UINTN                              Offset,
   IN UINTN                              Size,
   IN CONST VOID                         *Buffer
   )
@@ -399,8 +409,8 @@ OcAppleRamDiskWrite (
   UINT32                      Index;
   CONST APPLE_RAM_DISK_EXTENT *Extent;
 
-  UINT64                      CurrentOffset;
-  UINT64                      LocalOffset;
+  UINTN                       CurrentOffset;
+  UINTN                       LocalOffset;
   UINTN                       LocalSize;
 
   ASSERT (ExtentTable != NULL);
@@ -409,13 +419,18 @@ OcAppleRamDiskWrite (
   ASSERT (Buffer != NULL);
 
   BufferBytes = Buffer;
-
+  //
+  // As per the allocation algorithm, the sum over all Extent->Length must be
+  // smaller than MAX_UINTN.
+  //
   for (
     Index = 0, CurrentOffset = 0;
     Index < ExtentTable->ExtentCount;
-    ++Index, CurrentOffset += Extent->Length
+    ++Index, CurrentOffset += (UINTN)Extent->Length
     ) {
     Extent = &ExtentTable->Extents[Index];
+    ASSERT (Extent->Start <= MAX_UINTN);
+    ASSERT (Extent->Length <= MAX_UINTN);
 
     if (Offset >= CurrentOffset) {
       LocalOffset = (Offset - CurrentOffset);
@@ -465,12 +480,13 @@ OcAppleRamDiskLoadFile (
   }
 
   for (Index = 0; FileSize > 0 && Index < ExtentTable->ExtentCount; ++Index) {
-    RequestedSize = ReadSize = MIN (FileSize, ExtentTable->Extents[Index].Length);
+    RequestedSize = ReadSize = (UINTN)MIN (FileSize, ExtentTable->Extents[Index].Length);
 
+    ASSERT (ExtentTable->Extents[Index].Start <= MAX_UINTN);
     Status = File->Read (
       File,
       &RequestedSize,
-      (VOID *) ExtentTable->Extents[Index].Start
+      (VOID *)(UINTN)ExtentTable->Extents[Index].Start
       );
 
     if (EFI_ERROR (Status) || RequestedSize != ReadSize) {
@@ -492,14 +508,19 @@ OcAppleRamDiskFree (
 
   ASSERT (ExtentTable != NULL);
   INTERNAL_ASSERT_EXTENT_TABLE_VALID (ExtentTable);
+  ASSERT (ExtentTable->Extents[0].Start <= MAX_UINTN);
+  ASSERT (ExtentTable->Extents[0].Length <= MAX_UINTN);
 
   //
   // Extents are allocated in the first page.
   //
   for (Index = 1; Index < ExtentTable->ExtentCount; ++Index) {
+    ASSERT (ExtentTable->Extents[Index].Start <= MAX_UINTN);
+    ASSERT (ExtentTable->Extents[Index].Length <= MAX_UINTN);
+
     gBS->FreePages (
-      ExtentTable->Extents[Index].Start,
-      EFI_SIZE_TO_PAGES (ExtentTable->Extents[Index].Length)
+      (UINTN)ExtentTable->Extents[Index].Start,
+      (UINTN)EFI_SIZE_TO_PAGES (ExtentTable->Extents[Index].Length)
       );
   }
   //

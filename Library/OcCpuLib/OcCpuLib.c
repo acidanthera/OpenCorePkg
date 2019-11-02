@@ -1160,9 +1160,9 @@ ScanAmdProcessor (
   UINT32  CpuidEbx;
   UINT32  CpuidEcx;
   UINT64  CofVid;
-  UINT64  CoreFrequencyID;
-  UINT64  CoreDivisorID;
-  UINT64  Divisor;
+  UINT8   CoreFrequencyID;
+  UINT8   CoreDivisorID;
+  UINT8   Divisor;
   BOOLEAN Recalculate;
 
   //
@@ -1209,8 +1209,8 @@ ScanAmdProcessor (
       case AMD_CPU_EXT_FAMILY_17H:
         if (Cpu->CPUFrequencyFromVMT == 0) {
           CofVid           = AsmReadMsr64 (K10_PSTATE_STATUS);
-          CoreFrequencyID  = BitFieldRead64 (CofVid, 0, 7);
-          CoreDivisorID    = BitFieldRead64 (CofVid, 8, 13);
+          CoreFrequencyID  = (UINT8)BitFieldRead64 (CofVid, 0, 7);
+          CoreDivisorID    = (UINT8)BitFieldRead64 (CofVid, 8, 13);
           if (CoreDivisorID > 0ULL) {
             //
             // Sometimes incorrect hypervisor configuration will lead to dividing by zero,
@@ -1236,9 +1236,9 @@ ScanAmdProcessor (
         if (Cpu->CPUFrequencyFromVMT == 0) {
           // FIXME: Please refer to FIXME(1) for the MSR used here.
           CofVid           = AsmReadMsr64 (K10_COFVID_STATUS);
-          CoreFrequencyID  = BitFieldRead64 (CofVid, 0, 5);
-          CoreDivisorID    = BitFieldRead64 (CofVid, 6, 8);
-          Divisor          = LShiftU64 (1, CoreDivisorID);
+          CoreFrequencyID  = (UINT8)BitFieldRead64 (CofVid, 0, 5);
+          CoreDivisorID    = (UINT8)BitFieldRead64 (CofVid, 6, 8);
+          Divisor          = 1U << CoreDivisorID;
           //
           // BKDG for AMD Family 15h Models 10h-1Fh Processors (42300 Rev 3.12)
           // Core current operating frequency in MHz. CoreCOF = 100 *
@@ -1264,7 +1264,7 @@ ScanAmdProcessor (
 
     DEBUG ((
       DEBUG_INFO,
-      "OCCPU: FID %Lu DID %Lu Divisor %Lu MaxBR %u\n",
+      "OCCPU: FID %u DID %u Divisor %u MaxBR %u\n",
       CoreFrequencyID,
       CoreDivisorID,
       Divisor,
@@ -1453,7 +1453,7 @@ OcCpuScanProcessor (
       //
       // We can caculate Bus Ratio here
       //
-      Cpu->MaxBusRatio = DivU64x32 (Cpu->CPUFrequency, Cpu->FSBFrequency);
+      Cpu->MaxBusRatio = (UINT8)DivU64x32 (Cpu->CPUFrequency, (UINT32)Cpu->FSBFrequency);
       //
       // We don't have anything like turbo, so we just assign some variables here
       //

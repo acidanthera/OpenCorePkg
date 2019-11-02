@@ -230,7 +230,7 @@ PrelinkedContextInit (
   }
 
   Context->PrelinkedInfo = AllocateCopyPool (
-    Context->PrelinkedInfoSection->Size,
+    (UINTN)Context->PrelinkedInfoSection->Size,
     &Context->Prelinked[Context->PrelinkedInfoSection->Offset]
     );
   if (Context->PrelinkedInfo == NULL) {

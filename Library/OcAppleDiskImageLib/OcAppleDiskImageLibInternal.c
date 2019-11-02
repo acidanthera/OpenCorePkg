@@ -69,12 +69,12 @@ InternalSwapBlockData (
   IN OUT APPLE_DISK_IMAGE_BLOCK_DATA  *BlockData,
   IN     UINT32                       MaxSize,
   IN     UINTN                        SectorCount,
-  IN     UINT64                       DataForkOffset,
-  IN     UINT64                       DataForkSize
+  IN     UINTN                        DataForkOffset,
+  IN     UINTN                        DataForkSize
   )
 {
   UINT32                 ChunksSize;
-  UINT64                 MaxOffset;
+  UINTN                  MaxOffset;
   BOOLEAN                Result;
   APPLE_DISK_IMAGE_CHUNK *Chunk;
   UINT32                 Index;
@@ -165,8 +165,8 @@ InternalParsePlist (
   IN  CHAR8                        *Plist,
   IN  UINT32                       PlistSize,
   IN  UINTN                        SectorCount,
-  IN  UINT64                       DataForkOffset,
-  IN  UINT64                       DataForkSize,
+  IN  UINTN                        DataForkOffset,
+  IN  UINTN                        DataForkSize,
   OUT UINT32                       *BlockCount,
   OUT APPLE_DISK_IMAGE_BLOCK_DATA  ***Blocks
   )
@@ -322,7 +322,7 @@ DONE_ERROR:
 BOOLEAN
 InternalGetBlockChunk (
   IN  OC_APPLE_DISK_IMAGE_CONTEXT  *Context,
-  IN  UINT64                       Lba,
+  IN  UINTN                        Lba,
   OUT APPLE_DISK_IMAGE_BLOCK_DATA  **Data,
   OUT APPLE_DISK_IMAGE_CHUNK       **Chunk
   )

@@ -61,12 +61,12 @@
 /**
   Kernel __HIB segment virtual address.
 **/
-#define KERNEL_HIB_VADDR         ((UINTN) 0xFFFFFF8000100000ULL)
+#define KERNEL_HIB_VADDR         ((UINTN) (0xFFFFFF8000100000ULL & MAX_UINTN))
 
 /**
   Kernel __TEXT segment virtual address.
 **/
-#define KERNEL_TEXT_VADDR        ((UINTN) 0xFFFFFF8000200000ULL)
+#define KERNEL_TEXT_VADDR        ((UINTN) (0xFFFFFF8000200000ULL & MAX_UINTN))
 
 /**
   Kernel physical base address.

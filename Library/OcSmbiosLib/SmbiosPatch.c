@@ -1325,16 +1325,16 @@ SmbiosTableAllocate (
   TmpAddr = (BASE_4GB - 1);
   Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, TablePages, &TmpAddr);
   if (!EFI_ERROR (Status)) {
-    *TableAddress = (VOID *) TmpAddr;
+    *TableAddress = (VOID *)(UINTN)TmpAddr;
     TmpAddr = (BASE_4GB - 1);
     Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, 1,  &TmpAddr);
     if (!EFI_ERROR (Status)) {
-      *TableEntryPoint = (SMBIOS_TABLE_ENTRY_POINT *) TmpAddr;
+      *TableEntryPoint = (SMBIOS_TABLE_ENTRY_POINT *)(UINTN)TmpAddr;
       if (mOriginalSmbios3 != NULL) {
         TmpAddr = (BASE_4GB - 1);
         Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, 1, &TmpAddr);
         if (!EFI_ERROR (Status)) {
-          *TableEntryPoint3 = (SMBIOS_TABLE_3_0_ENTRY_POINT *) TmpAddr;
+          *TableEntryPoint3 = (SMBIOS_TABLE_3_0_ENTRY_POINT *)(UINTN)TmpAddr;
           *TableAddress3 = *TableAddress;
         }
       }

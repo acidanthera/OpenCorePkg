@@ -19,7 +19,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiLib.h>
 #include <Protocol/Timer.h>
 
-STATIC UINTN                    mOriginalTimerPeriod;
+STATIC UINT64                   mOriginalTimerPeriod;
 STATIC EFI_TIMER_ARCH_PROTOCOL  *mTimerProtocol;
 
 EFI_STATUS
