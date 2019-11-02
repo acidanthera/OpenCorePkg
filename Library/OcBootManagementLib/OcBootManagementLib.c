@@ -1069,7 +1069,7 @@ OcWaitForAppleKeyIndex (
     for (KeyCode = AppleHidUsbKbUsageKeyA; KeyCode <= AppleHidUsbKbUsageKeyZ; ++KeyCode) {
       Status = KeyMap->ContainsKeyStrokes (KeyMap, 0, 1, &KeyCode, TRUE);
       if (!EFI_ERROR (Status)) {
-        return (INTN) (KeyCode - AppleHidUsbKbUsageKeyA + 10);
+        return (INTN) (KeyCode - AppleHidUsbKbUsageKeyA + 9);
       }
     }
 
