@@ -502,9 +502,11 @@ OcAppleRamDiskFree (
       EFI_SIZE_TO_PAGES (ExtentTable->Extents[Index].Length)
       );
   }
-
+  //
+  // One page is added to account for the header.
+  //
   gBS->FreePages (
-    (UINTN) ExtentTable,
-    EFI_SIZE_TO_PAGES (ExtentTable->Extents[Index].Length) + 1
+    (UINTN)ExtentTable,
+    (UINTN)EFI_SIZE_TO_PAGES (ExtentTable->Extents[0].Length) + 1
     );
 }
