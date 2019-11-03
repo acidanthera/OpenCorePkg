@@ -207,6 +207,7 @@ typedef struct {
 #define EFI_D_VERBOSE stdout
 #define DEBUG_ERROR stderr
 #define DEBUG_INFO stdout
+#define DEBUG_BULK_INFO DEBUG_INFO
 #define DEBUG_VERBOSE stdout
 #define DEBUG_WARN stderr
 #define PACKED

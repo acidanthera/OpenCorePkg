@@ -24,7 +24,9 @@
 /**
   Debug information that is not logged when NVRAM logging is on.
 **/
-#define DEBUG_BULK_INFO (DEBUG_VERBOSE|DEBUG_INFO)
+#ifndef DEBUG_BULK_INFO
+  #define DEBUG_BULK_INFO (DEBUG_VERBOSE|DEBUG_INFO)
+#endif
 
 /**
   This is a place print debug messages when they happen after ExitBootServices.

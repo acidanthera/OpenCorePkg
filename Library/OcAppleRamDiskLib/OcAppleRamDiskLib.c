@@ -329,7 +329,7 @@ OcAppleRamDiskAllocate (
   }
 
   DEBUG ((
-    DEBUG_INFO,
+    DEBUG_BULK_INFO,
     "OCRAM: Extent allocation of %u bytes (%x) gave %p (avoid high %d)\n",
     (UINT32) Size,
     (UINT32) MemoryType,
