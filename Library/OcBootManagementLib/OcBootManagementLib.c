@@ -1039,6 +1039,11 @@ OcWaitForAppleKeyIndex (
           &CsrActiveConfigSize,
           &CsrActiveConfig
           );
+        //
+        // FIXME: CMD+S+Minus behaves as CMD+S when "slide=0" is not supported
+        //        by the SIP configuration. This might be an oversight, but is
+        //        consistent with the boot.efi implementation.
+        //
         WantsZeroSlide = !EFI_ERROR (Status) && (CsrActiveConfig & CSR_ALLOW_UNRESTRICTED_NVRAM) != 0;
       }
 

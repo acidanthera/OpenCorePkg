@@ -118,31 +118,6 @@ InternalGetKeyStrokesByIndex (
   return KeyStrokesInfo;
 }
 
-// InternalMinSort
-STATIC
-VOID
-InternalMinSort (
-  IN OUT UINT16  *Operand,
-  IN     UINTN   NumberOfChilds
-  )
-{
-
-  UINTN  Index;
-  UINTN  Index2;
-  UINT16 FirstChild;
-
-  for (Index = 0; Index < NumberOfChilds; ++Index) {
-    for (Index2 = (Index + 1); Index2 < NumberOfChilds; ++Index2) {
-      FirstChild = Operand[Index];
-
-      if (FirstChild > Operand[Index2]) {
-        Operand[Index]  = Operand[Index2];
-        Operand[Index2] = FirstChild;
-      }
-    }
-  }
-}
-
 // InternalGetKeyStrokes
 /** Returns all pressed keys and key modifiers into the appropiate buffers.
 
@@ -271,7 +246,6 @@ InternalContainsKeyStrokes (
   UINTN              DbNumberOfKeyCodes;
   APPLE_MODIFIER_MAP DbModifiers;
   APPLE_KEY_CODE     DbKeyCodes[8];
-  INTN               Result;
   UINTN              Index;
   UINTN              DbIndex;
 
@@ -292,34 +266,19 @@ InternalContainsKeyStrokes (
      || (DbNumberOfKeyCodes != NumberOfKeyCodes)) {
       return EFI_NOT_FOUND;
     }
+  } else if ((DbModifiers & Modifiers) != Modifiers) {
+    return EFI_NOT_FOUND;
+  }
 
-    InternalMinSort ((UINT16 *)KeyCodes, NumberOfKeyCodes);
-    InternalMinSort ((UINT16 *)DbKeyCodes, DbNumberOfKeyCodes);
-
-    Result = CompareMem (
-                (VOID *)KeyCodes,
-                (VOID *)DbKeyCodes,
-                (NumberOfKeyCodes * sizeof (*KeyCodes))
-                );
-
-    if (Result != 0) {
-      return EFI_NOT_FOUND;
-    }
-  } else {
-    if ((DbModifiers & Modifiers) != Modifiers) {
-      return EFI_NOT_FOUND;
+  for (Index = 0; Index < NumberOfKeyCodes; ++Index) {
+    for (DbIndex = 0; DbIndex < DbNumberOfKeyCodes; ++DbIndex) {
+      if (KeyCodes[Index] == DbKeyCodes[DbIndex]) {
+        break;
+      }
     }
 
-    for (Index = 0; Index < NumberOfKeyCodes; ++Index) {
-      for (DbIndex = 0; DbIndex < DbNumberOfKeyCodes; ++DbIndex) {
-        if (KeyCodes[Index] == DbKeyCodes[DbIndex]) {
-          break;
-        }
-      }
-
-      if (DbNumberOfKeyCodes == DbIndex) {
-        return EFI_NOT_FOUND;
-      }
+    if (DbNumberOfKeyCodes == DbIndex) {
+      return EFI_NOT_FOUND;
     }
   }
 
