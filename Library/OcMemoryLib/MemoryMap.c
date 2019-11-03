@@ -100,7 +100,7 @@ GetCurrentMemoryMapAlloc (
      OUT UINTN                  *DescriptorSize,
      OUT UINT32                 *DescriptorVersion,
   IN     EFI_GET_MEMORY_MAP     GetMemoryMap  OPTIONAL,
-  IN OUT UINTN                  *TopMemory  OPTIONAL
+  IN OUT EFI_PHYSICAL_ADDRESS   *TopMemory  OPTIONAL
   )
 {
   EFI_STATUS           Status;
@@ -137,12 +137,13 @@ GetCurrentMemoryMapAlloc (
     // This may be needed, because the pool memory may collide with the kernel.
     //
     if (TopMemory != NULL) {
-      MemoryMapAlloc = BASE_4GB;
+      MemoryMapAlloc = *TopMemory;
+      *TopMemory     = EFI_SIZE_TO_PAGES (*MemoryMapSize);
 
       Status = AllocatePagesFromTop (
         EfiBootServicesData,
-        EFI_SIZE_TO_PAGES (*MemoryMapSize),
-        TopMemory,
+        (UINTN) *TopMemory,
+        &MemoryMapAlloc,
         GetMemoryMap,
         NULL
         );
@@ -153,7 +154,7 @@ GetCurrentMemoryMapAlloc (
         return Status;
       }
 
-      *MemoryMap = (EFI_MEMORY_DESCRIPTOR *)(UINTN)MemoryMapAlloc;
+      *MemoryMap = (EFI_MEMORY_DESCRIPTOR *)(UINTN) MemoryMapAlloc;
     } else {
       *MemoryMap = AllocatePool (*MemoryMapSize);
       if (*MemoryMap == NULL) {
@@ -174,7 +175,7 @@ GetCurrentMemoryMapAlloc (
       if (TopMemory != NULL) {
         gBS->FreePages (
           (EFI_PHYSICAL_ADDRESS) *MemoryMap,
-          *TopMemory
+          (UINTN) *TopMemory
           );
       } else {
         FreePool (*MemoryMap);

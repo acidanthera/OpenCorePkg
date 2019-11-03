@@ -222,7 +222,7 @@ ShouldUseCustomSlideOffset (
   IN     VOID                  *FilterMapContext  OPTIONAL
   )
 {
-  UINTN                  AllocatedMapPages;
+  EFI_PHYSICAL_ADDRESS   AllocatedMapPages;
   UINTN                  MemoryMapSize;
   EFI_MEMORY_DESCRIPTOR  *MemoryMap;
   EFI_MEMORY_DESCRIPTOR  *Desc;
@@ -356,7 +356,7 @@ ShouldUseCustomSlideOffset (
     }
 
     if (Supported) {
-      SlideSupport->ValidSlides[SlideSupport->ValidSlideCount++] = Slide;
+      SlideSupport->ValidSlides[SlideSupport->ValidSlideCount++] = (UINT8) Slide;
     }
   }
 
@@ -367,8 +367,8 @@ ShouldUseCustomSlideOffset (
   SlideSupport->HasMemoryMapAnalysis = TRUE;
 
   gBS->FreePages (
-    (EFI_PHYSICAL_ADDRESS)(UINTN)MemoryMap,
-    AllocatedMapPages
+    (EFI_PHYSICAL_ADDRESS)(UINTN) MemoryMap,
+    (UINTN) AllocatedMapPages
     );
 
   return ShouldUseCustomSlideOffsetDecision (
