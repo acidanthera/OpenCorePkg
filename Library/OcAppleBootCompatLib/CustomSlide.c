@@ -238,7 +238,7 @@ ShouldUseCustomSlideOffset (
   BOOLEAN                Supported;
   UINTN                  StartAddr;
   UINTN                  EndAddr;
-  UINTN                  DescEndAddr;
+  EFI_PHYSICAL_ADDRESS   DescEndAddr;
   UINT64                 AvailableSize;
 
   MaxAvailableSize = 0;
@@ -303,8 +303,7 @@ ShouldUseCustomSlideOffset (
         continue;
       }
 
-      ASSERT (LAST_DESCRIPTOR_ADDR (Desc) < MAX_UINTN);
-      DescEndAddr = (UINTN)(LAST_DESCRIPTOR_ADDR (Desc) + 1);
+      DescEndAddr = LAST_DESCRIPTOR_ADDR (Desc) + 1;
 
       if ((Desc->PhysicalStart < EndAddr) && (DescEndAddr > StartAddr)) {
         //
