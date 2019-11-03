@@ -138,12 +138,11 @@ GetCurrentMemoryMapAlloc (
     //
     if (TopMemory != NULL) {
       MemoryMapAlloc = BASE_4GB;
-      *TopMemory  = EFI_SIZE_TO_PAGES (*MemoryMapSize);
 
       Status = AllocatePagesFromTop (
         EfiBootServicesData,
-        *TopMemory,
-        &MemoryMapAlloc,
+        EFI_SIZE_TO_PAGES (*MemoryMapSize),
+        TopMemory,
         GetMemoryMap,
         NULL
         );

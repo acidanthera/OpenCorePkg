@@ -249,6 +249,7 @@ ShouldUseCustomSlideOffset (
       && SlideSupport->ValidSlideCount < TOTAL_SLIDE_NUM;
   }
 
+  AllocatedMapPages = BASE_4GB;
   Status = GetCurrentMemoryMapAlloc (
     &MemoryMapSize,
     &MemoryMap,
