@@ -213,6 +213,47 @@ InternalGetKeyStrokes (
   return Status;
 }
 
+BOOLEAN
+OcKeyMapHasKeys (
+  IN CONST APPLE_KEY_CODE  *Keys,
+  IN UINTN                 NumKeys,
+  IN CONST APPLE_KEY_CODE  *CheckKeys,
+  IN UINTN                 NumCheckKeys,
+  IN BOOLEAN               ExactMatch
+  )
+{
+  UINTN CheckIndex;
+  UINTN Index;
+
+  if (ExactMatch && NumKeys != NumCheckKeys) {
+    return FALSE;
+  }
+
+  for (CheckIndex = 0; CheckIndex < NumCheckKeys; ++CheckIndex) {
+    for (Index = 0; Index < NumKeys; ++Index) {
+      if (CheckKeys[CheckIndex] == Keys[Index]) {
+        break;
+      }
+    }
+
+    if (NumKeys == Index) {
+      return FALSE;
+    }
+  }
+
+  return TRUE;
+}
+
+BOOLEAN
+OcKeyMapHasKey (
+  IN CONST APPLE_KEY_CODE  *Keys,
+  IN UINTN                 NumKeys,
+  IN CONST APPLE_KEY_CODE  KeyCode
+  )
+{
+  return OcKeyMapHasKeys (Keys, NumKeys, &KeyCode, 1, FALSE);
+}
+
 // InternalContainsKeyStrokes
 /** Returns whether or not a list of keys and their modifiers are part of the
     database of pressed keys.
@@ -242,12 +283,11 @@ InternalContainsKeyStrokes (
   )
 {
   EFI_STATUS         Status;
+  BOOLEAN            Result;
 
   UINTN              DbNumberOfKeyCodes;
   APPLE_MODIFIER_MAP DbModifiers;
   APPLE_KEY_CODE     DbKeyCodes[8];
-  UINTN              Index;
-  UINTN              DbIndex;
 
   DbNumberOfKeyCodes = ARRAY_SIZE (DbKeyCodes);
   Status             = This->GetKeyStrokes (
@@ -262,24 +302,22 @@ InternalContainsKeyStrokes (
   }
 
   if (ExactMatch) {
-    if ((DbModifiers != Modifiers)
-     || (DbNumberOfKeyCodes != NumberOfKeyCodes)) {
-      return EFI_NOT_FOUND;
+    if (DbModifiers != Modifiers) {
+      return FALSE;
     }
   } else if ((DbModifiers & Modifiers) != Modifiers) {
-    return EFI_NOT_FOUND;
+    return FALSE;
   }
 
-  for (Index = 0; Index < NumberOfKeyCodes; ++Index) {
-    for (DbIndex = 0; DbIndex < DbNumberOfKeyCodes; ++DbIndex) {
-      if (KeyCodes[Index] == DbKeyCodes[DbIndex]) {
-        break;
-      }
-    }
-
-    if (DbNumberOfKeyCodes == DbIndex) {
-      return EFI_NOT_FOUND;
-    }
+  Result = OcKeyMapHasKeys (
+             DbKeyCodes,
+             DbNumberOfKeyCodes,
+             KeyCodes,
+             NumberOfKeyCodes,
+             ExactMatch
+             );
+  if (!Result) {
+    return EFI_NOT_FOUND;
   }
 
   return EFI_SUCCESS;
@@ -563,54 +601,4 @@ OcAppleKeyMapInstallProtocols (
 
   mKeyMapDatabase = &KeyMapAggregatorData->Database;
   return &KeyMapAggregatorData->Aggregator;
-}
-
-
-BOOLEAN
-OcKeyMapHasModifier (
-  IN APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMapAggregator,
-  IN APPLE_MODIFIER_MAP                 ModifierLeft,
-  IN APPLE_MODIFIER_MAP                 ModifierRight  OPTIONAL
-  )
-{
-  EFI_STATUS  Status;
-
-  Status = KeyMapAggregator->ContainsKeyStrokes (
-    KeyMapAggregator,
-    ModifierLeft,
-    0,
-    NULL,
-    FALSE
-    );
-
-  if (EFI_ERROR (Status) && ModifierRight != 0) {
-    Status = KeyMapAggregator->ContainsKeyStrokes (
-      KeyMapAggregator,
-      ModifierRight,
-      0,
-      NULL,
-      FALSE
-      );
-  }
-
-  return !EFI_ERROR (Status);
-}
-
-BOOLEAN
-OcKeyMapHasKey (
-  IN APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMapAggregator,
-  IN APPLE_KEY_CODE                     KeyCode
-  )
-{
-  EFI_STATUS  Status;
-
-  Status = KeyMapAggregator->ContainsKeyStrokes (
-      KeyMapAggregator,
-      0,
-      1,
-      &KeyCode,
-      FALSE
-      );
-
-  return !EFI_ERROR (Status);
 }

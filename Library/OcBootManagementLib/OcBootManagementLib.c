@@ -855,6 +855,11 @@ OcLoadPickerHotKeys (
 {
   EFI_STATUS                         Status;
   APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
+
+  UINTN                              NumKeys;
+  APPLE_MODIFIER_MAP                 Modifiers;
+  APPLE_KEY_CODE                     Keys[8];
+
   BOOLEAN                            HasCommand;
   BOOLEAN                            HasEscape;
   BOOLEAN                            HasOption;
@@ -873,6 +878,19 @@ OcLoadPickerHotKeys (
     return;
   }
 
+  NumKeys = ARRAY_SIZE (Keys);
+  Status = KeyMap->GetKeyStrokes (
+                     KeyMap,
+                     &Modifiers,
+                     &NumKeys,
+                     Keys
+                     );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "OCB: GetKeyStrokes - %r\n", Status));
+    return;
+  }
+
   //
   // I do not like this code a little, as it is prone to race conditions during key presses.
   // For the good false positives are not too critical here, and in reality users are not that fast.
@@ -884,12 +902,12 @@ OcLoadPickerHotKeys (
   // We are slightly more permissive than AppleBds, as we permit combining keys.
   //
 
-  HasCommand = OcKeyMapHasModifier (KeyMap, APPLE_MODIFIER_LEFT_COMMAND, APPLE_MODIFIER_RIGHT_COMMAND);
-  HasOption  = OcKeyMapHasModifier (KeyMap, APPLE_MODIFIER_LEFT_OPTION, APPLE_MODIFIER_RIGHT_OPTION);
-  HasEscape  = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyEscape);
-  HasKeyP    = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyP);
-  HasKeyR    = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyR);
-  HasKeyX    = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyX);
+  HasCommand = (Modifiers & (APPLE_MODIFIER_LEFT_COMMAND | APPLE_MODIFIER_RIGHT_COMMAND)) != 0;
+  HasOption  = (Modifiers & (APPLE_MODIFIER_LEFT_OPTION  | APPLE_MODIFIER_RIGHT_OPTION)) != 0;
+  HasEscape  = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyEscape);
+  HasKeyP    = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyP);
+  HasKeyR    = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyR);
+  HasKeyX    = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyX);
 
   if (HasOption && HasCommand && HasKeyP && HasKeyR) {
     DEBUG ((DEBUG_INFO, "OCB: CMD+OPT+P+R causes NVRAM reset\n"));
@@ -929,6 +947,11 @@ OcWaitForAppleKeyIndex (
   EFI_STATUS                         Status;
   APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
   APPLE_KEY_CODE                     KeyCode;
+
+  UINTN                              NumKeys;
+  APPLE_MODIFIER_MAP                 Modifiers;
+  APPLE_KEY_CODE                     Keys[8];
+
   BOOLEAN                            HasCommand;
   BOOLEAN                            HasShift;
   BOOLEAN                            HasKeyC;
@@ -954,23 +977,36 @@ OcWaitForAppleKeyIndex (
     return OC_INPUT_INVALID;
   }
 
+  NumKeys = ARRAY_SIZE (Keys);
+  Status = KeyMap->GetKeyStrokes (
+                     KeyMap,
+                     &Modifiers,
+                     &NumKeys,
+                     Keys
+                     );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "OCB: GetKeyStrokes - %r\n", Status));
+    return OC_INPUT_INVALID;
+  }
+
   CurrTime  = GetTimeInNanoSecond (GetPerformanceCounter ());
   EndTime   = CurrTime + Timeout * 1000000000ULL;
 
   while (Timeout == 0 || CurrTime == 0 || CurrTime < EndTime) {
     CurrTime    = GetTimeInNanoSecond (GetPerformanceCounter ());
 
-    HasCommand  = OcKeyMapHasModifier (KeyMap, APPLE_MODIFIER_LEFT_COMMAND, APPLE_MODIFIER_RIGHT_COMMAND);
-    HasShift    = OcKeyMapHasModifier (KeyMap, APPLE_MODIFIER_LEFT_SHIFT, APPLE_MODIFIER_RIGHT_SHIFT);
-    HasKeyC     = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyC);
-    HasKeyK     = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyK);
-    HasKeyS     = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyS);
-    HasKeyV     = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyV);
+    HasCommand = (Modifiers & (APPLE_MODIFIER_LEFT_COMMAND | APPLE_MODIFIER_RIGHT_COMMAND)) != 0;
+    HasShift   = (Modifiers & (APPLE_MODIFIER_LEFT_SHIFT | APPLE_MODIFIER_RIGHT_SHIFT)) != 0;
+    HasKeyC    = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyC);
+    HasKeyK    = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyK);
+    HasKeyS    = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyS);
+    HasKeyV    = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyV);
     //
     // Checking for PAD minus is our extension to support more keyboards.
     //
-    HasKeyMinus = OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyMinus)
-      || OcKeyMapHasKey (KeyMap, AppleHidUsbKbUsageKeyPadMinus);
+    HasKeyMinus = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyMinus)
+      || OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyPadMinus);
 
     //
     // Shift is always valid and enables Safe Mode.
@@ -1064,16 +1100,14 @@ OcWaitForAppleKeyIndex (
     //
     OC_STATIC_ASSERT (AppleHidUsbKbUsageKeyOne + 8 == AppleHidUsbKbUsageKeyNine, "Unexpected encoding");
     for (KeyCode = AppleHidUsbKbUsageKeyOne; KeyCode <= AppleHidUsbKbUsageKeyNine; ++KeyCode) {
-      Status = KeyMap->ContainsKeyStrokes (KeyMap, 0, 1, &KeyCode, TRUE);
-      if (!EFI_ERROR (Status)) {
+      if (OcKeyMapHasKey (Keys, NumKeys, KeyCode)) {
         return (INTN) (KeyCode - AppleHidUsbKbUsageKeyOne);
       }
     }
 
     OC_STATIC_ASSERT (AppleHidUsbKbUsageKeyA + 25 == AppleHidUsbKbUsageKeyZ, "Unexpected encoding");
     for (KeyCode = AppleHidUsbKbUsageKeyA; KeyCode <= AppleHidUsbKbUsageKeyZ; ++KeyCode) {
-      Status = KeyMap->ContainsKeyStrokes (KeyMap, 0, 1, &KeyCode, TRUE);
-      if (!EFI_ERROR (Status)) {
+      if (OcKeyMapHasKey (Keys, NumKeys, KeyCode)) {
         return (INTN) (KeyCode - AppleHidUsbKbUsageKeyA + 9);
       }
     }

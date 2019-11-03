@@ -40,33 +40,41 @@ OcAppleKeyMapInstallProtocols (
   );
 
 /**
-  Checks for key modifier presence.
+  Checks whether or not a list of keys is contained within another.
 
-  @param[in]  KeyMapAggregator  Apple Key Map Aggregator protocol.
-  @param[in]  ModifierLeft      Primary key modifer.
-  @param[in]  ModifierRight     Secondary key modifer, optional.
+  @param[in] Keys            The reference keys.
+  @param[in] NumKeys         The number of keys in Keys.
+  @param[in] CheckKeys       The keys to locate in Keys.
+  @param[in] NumCheckKeys    The number of keys in CheckKeys.
+  @param[in] ExactMatch      Specifies whether matches must be exact.
 
-  @retval  TRUE if either modifier is set.
+  @returns  Whether the reference keys contain the checked keys.
+
 **/
 BOOLEAN
-OcKeyMapHasModifier (
-  IN APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMapAggregator,
-  IN APPLE_MODIFIER_MAP                 ModifierLeft,
-  IN APPLE_MODIFIER_MAP                 ModifierRight  OPTIONAL
+OcKeyMapHasKeys (
+  IN CONST APPLE_KEY_CODE  *Keys,
+  IN UINTN                 NumKeys,
+  IN CONST APPLE_KEY_CODE  *CheckKeys,
+  IN UINTN                 NumCheckKeys,
+  IN BOOLEAN               ExactMatch
   );
 
 /**
-  Checks for key presence.
+  Checks whether or not a KeyCode is contained within Keys.
 
-  @param[in]  KeyMapAggregator  Apple Key Map Aggregator protocol.
-  @param[in]  KeyCode           Key code.
+  @param[in] Keys            The reference keys.
+  @param[in] NumKeys         The number of keys in Keys.
+  @param[in] KeyCode         The key to locate in Keys.
 
-  @retval  TRUE if key code is set.
+  @returns  Whether the reference keys contain the checked key.
+
 **/
 BOOLEAN
 OcKeyMapHasKey (
-  IN APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMapAggregator,
-  IN APPLE_KEY_CODE                     KeyCode
+  IN CONST APPLE_KEY_CODE  *Keys,
+  IN UINTN                 NumKeys,
+  IN CONST APPLE_KEY_CODE  KeyCode
   );
 
 #endif // OC_APPLE_KEY_MAP_LIB_H
