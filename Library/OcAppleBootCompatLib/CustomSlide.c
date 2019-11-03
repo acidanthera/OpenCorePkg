@@ -231,7 +231,7 @@ ShouldUseCustomSlideOffset (
   UINTN                  DescriptorSize;
   UINT32                 DescriptorVersion;
   UINTN                  Index;
-  UINT8                  Slide;
+  UINTN                  Slide;
   UINTN                  NumEntries;
   UINT64                 MaxAvailableSize;
   UINT8                  FallbackSlide;
@@ -291,7 +291,7 @@ ShouldUseCustomSlideOffset (
 
     GetSlideRangeForValue (
       SlideSupport,
-      Slide,
+      (UINT8) Slide,
       &StartAddr,
       &EndAddr
       );
@@ -345,7 +345,7 @@ ShouldUseCustomSlideOffset (
 
     if (AvailableSize > MaxAvailableSize) {
       MaxAvailableSize = AvailableSize;
-      FallbackSlide    = Slide;
+      FallbackSlide    = (UINT8) Slide;
     }
 
     if ((StartAddr + AvailableSize) != EndAddr) {
