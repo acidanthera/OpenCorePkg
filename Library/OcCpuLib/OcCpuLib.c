@@ -1203,7 +1203,9 @@ ScanAmdProcessor (
   }
 
   if (Cpu->Family == AMD_CPU_FAMILY) {
-    Divisor = 0;
+    Divisor         = 0;
+    CoreFrequencyID = 0;
+    CoreDivisorID   = 0;
 
     switch (Cpu->ExtFamily) {
       case AMD_CPU_EXT_FAMILY_17H:
@@ -1458,7 +1460,7 @@ OcCpuScanProcessor (
       // We don't have anything like turbo, so we just assign some variables here
       //
       Cpu->MinBusRatio = Cpu->MaxBusRatio;
-      Cpu->CurBusRatio = Cpu->CurBusRatio;
+      Cpu->CurBusRatio = Cpu->MaxBusRatio;
 
       DEBUG ((
         DEBUG_INFO,
