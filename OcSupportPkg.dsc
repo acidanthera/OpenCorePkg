@@ -18,7 +18,7 @@
   PLATFORM_NAME           = OcSupportPkg
   PLATFORM_GUID           = C9F9C1B2-67ED-4496-97B6-3B24F083A2E6
   PLATFORM_VERSION        = 1.0
-  SUPPORTED_ARCHITECTURES = X64
+  SUPPORTED_ARCHITECTURES = X64|IA32
   BUILD_TARGETS           = RELEASE|DEBUG|NOOPT
   SKUID_IDENTIFIER        = DEFAULT
   DSC_SPECIFICATION       = 0x00010006
@@ -68,6 +68,7 @@
   OcAppleUserInterfaceThemeLib|OcSupportPkg/Library/OcAppleUserInterfaceThemeLib/OcAppleUserInterfaceThemeLib.inf
   OcBootManagementLib|OcSupportPkg/Library/OcBootManagementLib/OcBootManagementLib.inf
   OcConsoleLib|OcSupportPkg/Library/OcConsoleLib/OcConsoleLib.inf
+  OcConsoleControlEntryModeLib|OcSupportPkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeLib.inf
   OcCpuLib|OcSupportPkg/Library/OcCpuLib/OcCpuLib.inf
   OcCryptoLib|OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
   OcCompressionLib|OcSupportPkg/Library/OcCompressionLib/OcCompressionLib.inf
@@ -113,6 +114,8 @@
   OcSupportPkg/Library/OcAppleUserInterfaceThemeLib/OcAppleUserInterfaceThemeLib.inf
   OcSupportPkg/Library/OcBootManagementLib/OcBootManagementLib.inf
   OcSupportPkg/Library/OcConfigurationLib/OcConfigurationLib.inf
+  OcSupportPkg/Library/OcConsoleLib/OcConsoleLib.inf
+  OcSupportPkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeLib.inf
   OcSupportPkg/Library/OcCpuLib/OcCpuLib.inf
   OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
   OcSupportPkg/Library/OcCompressionLib/OcCompressionLib.inf
