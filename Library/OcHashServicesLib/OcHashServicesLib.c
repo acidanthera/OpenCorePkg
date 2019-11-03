@@ -65,9 +65,7 @@ HSHash (
   HS_PRIVATE_DATA  *PrivateData;
   HS_CONTEXT_DATA  CtxCopy;
 
-  ASSERT (MessageSize <= MAX_UINTN);
-
-  if (!This || !HashAlgorithm || !Message || !Hash || !MessageSize) {
+  if (!This || !HashAlgorithm || !Message || !Hash || !MessageSize || MessageSize > MAX_UINTN) {
     return EFI_INVALID_PARAMETER;
   }
 
