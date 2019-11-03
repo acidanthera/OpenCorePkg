@@ -113,7 +113,7 @@ AsciiUint64ToLowerHex (
   if (Value > 0) {
     BufferSize -= 2;
     for (Printed = FALSE, Index = MaxShifts; Index <= MaxShifts; Index -= 4) {
-      Curr     = (UINT8) ((Value >> Index) & 0xFU);
+      Curr     = (UINT8) (RShiftU64 (Value, Index) & 0xFU);
       Printed |= Curr > 0;
       if (Printed) {
         *Buffer++ = "0123456789abcdef"[Curr];
