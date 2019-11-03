@@ -1095,6 +1095,10 @@ OcWaitForAppleKeyIndex (
       continue;
     }
 
+    if (OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyEscape)
+     || OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyZero)) {
+      return OC_INPUT_ABORTED;
+    }
     //
     // Check exact match on index strokes.
     //
