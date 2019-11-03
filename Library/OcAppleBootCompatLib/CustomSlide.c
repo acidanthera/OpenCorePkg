@@ -40,15 +40,17 @@
   Obtain estimated kernel area start and end addresses for
   specified slide number.
 
-  @param[in]  SlideSupport  Slide support state.
-  @param[in]  Slide         Slide number.
-  @param[out] StartAddr     Starting address.
-  @param[out] EndAddr       Ending address (not inclusive).
+  @param[in]  EstimatedKernelArea  Estimated kernel area size.
+  @param[in]  HasSandyOrIvy        CPU type.
+  @param[in]  Slide                Slide number.
+  @param[out] StartAddr            Starting address.
+  @param[out] EndAddr              Ending address (not inclusive).
 **/
 STATIC
 VOID
 GetSlideRangeForValue (
-  IN  SLIDE_SUPPORT_STATE  *SlideSupport,
+  IN  UINTN                EstimatedKernelArea,
+  IN  BOOLEAN              HasSandyOrIvy,
   IN  UINT8                Slide,
   OUT UINTN                *StartAddr,
   OUT UINTN                *EndAddr
@@ -59,11 +61,11 @@ GetSlideRangeForValue (
   //
   // Skip ranges used by Intel HD 2000/3000.
   //
-  if (Slide >= SLIDE_ERRATA_NUM && SlideSupport->HasSandyOrIvy) {
+  if (Slide >= SLIDE_ERRATA_NUM && HasSandyOrIvy) {
     *StartAddr += SLIDE_ERRATA_SKIP_RANGE;
   }
 
-  *EndAddr = *StartAddr + SlideSupport->EstimatedKernelArea;
+  *EndAddr = *StartAddr + EstimatedKernelArea;
 }
 
 /**
@@ -270,7 +272,7 @@ ShouldUseCustomSlideOffset (
   }
 
   SlideSupport->HasSandyOrIvy       = OcIsSandyOrIvy ();
-  SlideSupport->EstimatedKernelArea = (UINTN)EFI_PAGES_TO_SIZE (
+  SlideSupport->EstimatedKernelArea = (UINTN) EFI_PAGES_TO_SIZE (
     CountRuntimePages (MemoryMapSize, MemoryMap, DescriptorSize, NULL)
     ) + ESTIMATED_KERNEL_SIZE;
 
@@ -290,7 +292,8 @@ ShouldUseCustomSlideOffset (
     Supported = TRUE;
 
     GetSlideRangeForValue (
-      SlideSupport,
+      SlideSupport->EstimatedKernelArea,
+      SlideSupport->HasSandyOrIvy,
       (UINT8) Slide,
       &StartAddr,
       &EndAddr
@@ -793,4 +796,123 @@ AppleSlideRestore (
   // this is especially important.
   //
   HideSlideFromOs (SlideSupport, BootArgs);
+}
+
+EFI_STATUS
+AppleSlideHandleBalloonState (
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
+  IN     BOOLEAN              Allocate
+  )
+{
+  EFI_PHYSICAL_ADDRESS   AllocatedMapPages;
+  UINTN                  MemoryMapSize;
+  EFI_MEMORY_DESCRIPTOR  *MemoryMap;
+  UINTN                  MapKey;
+  EFI_STATUS             Status;
+  UINTN                  Slide;
+  UINTN                  SlidesToReserve;
+  UINTN                  DescriptorSize;
+  UINTN                  StartAddr;
+  UINTN                  StartAddrTmp;
+  UINTN                  EndAddr;
+  UINT32                 DescriptorVersion;
+  BOOLEAN                HasSandyOrIvy;
+  UINTN                  EstimatedKernelArea;
+
+  if (!Allocate) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCABC: Freeing balloon area: 0x%Lx (%Lu pages)",
+      (UINT64) BootCompat->SlideSupport.BalloonArea,
+      (UINT64) BootCompat->SlideSupport.BalloonAreaPages
+      ));
+
+    if (BootCompat->SlideSupport.BalloonArea != 0) {
+      gBS->FreePages (
+        BootCompat->SlideSupport.BalloonArea,
+        BootCompat->SlideSupport.BalloonAreaPages
+        );
+      BootCompat->SlideSupport.BalloonArea = 0;
+      BootCompat->SlideSupport.BalloonAreaPages = 0;
+      return EFI_SUCCESS;
+    }
+
+    return EFI_NOT_FOUND;
+  }
+
+  AllocatedMapPages = BASE_4GB;
+  Status = GetCurrentMemoryMapAlloc (
+    &MemoryMapSize,
+    &MemoryMap,
+    &MapKey,
+    &DescriptorSize,
+    &DescriptorVersion,
+    BootCompat->ServicePtrs.GetMemoryMap, ///< I think it is not required...
+    &AllocatedMapPages
+    );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OCABC: Failed to obtain memory map for balloon - %r\n", Status));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  HasSandyOrIvy       = OcIsSandyOrIvy ();
+  EstimatedKernelArea = (UINTN) EFI_PAGES_TO_SIZE (
+    CountRuntimePages (MemoryMapSize, MemoryMap, DescriptorSize, NULL)
+    ) + ESTIMATED_KERNEL_SIZE;
+
+  gBS->FreePages (
+    (EFI_PHYSICAL_ADDRESS)(UINTN) MemoryMap,
+    (UINTN) AllocatedMapPages
+    );
+
+  //
+  // Reserve 5 contiguous slides for now.
+  //
+  SlidesToReserve = 5;
+
+  for (Slide = 0; Slide < TOTAL_SLIDE_NUM - SlidesToReserve; Slide += SlidesToReserve) {
+    GetSlideRangeForValue (
+      EstimatedKernelArea,
+      HasSandyOrIvy,
+      (UINT8) Slide,
+      &StartAddr,
+      &EndAddr
+      );
+
+    GetSlideRangeForValue (
+      EstimatedKernelArea,
+      HasSandyOrIvy,
+      (UINT8) (Slide + SlidesToReserve),
+      &StartAddrTmp,
+      &EndAddr
+      );
+
+    BootCompat->SlideSupport.BalloonArea      = StartAddr;
+    BootCompat->SlideSupport.BalloonAreaPages = (UINTN) EFI_SIZE_TO_PAGES (EndAddr - StartAddr);
+
+    Status = gBS->AllocatePages (
+      AllocateAddress,
+      EfiBootServicesData,
+      BootCompat->SlideSupport.BalloonAreaPages,
+      &BootCompat->SlideSupport.BalloonArea
+      );
+
+    if (!EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCABC: Created balloon at 0x%Lx (%Lu pages)\n",
+        (UINT64) BootCompat->SlideSupport.BalloonArea,
+        (UINT64) BootCompat->SlideSupport.BalloonAreaPages
+        ));
+      return EFI_SUCCESS;
+    }
+
+    BootCompat->SlideSupport.BalloonArea      = 0;
+    BootCompat->SlideSupport.BalloonAreaPages = 0;
+  }
+
+  DEBUG ((DEBUG_WARN, "OCABC: Failed to find memory for balloon\n"));
+
+  return EFI_NOT_FOUND;
 }

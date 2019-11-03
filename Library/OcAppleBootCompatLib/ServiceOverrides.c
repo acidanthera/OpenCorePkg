@@ -362,6 +362,10 @@ OcStartImage (
     // We failed but other operating systems should be loadable.
     //
     --BootCompat->ServiceState.AppleBootNestedCount;
+
+    if (BootCompat->ServiceState.AppleBootNestedCount == 0) {
+      AppleSlideHandleBalloonState (BootCompat, FALSE);
+    }
   }
 
   return Status;

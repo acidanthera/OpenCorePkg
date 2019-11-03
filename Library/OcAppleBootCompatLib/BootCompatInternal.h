@@ -299,6 +299,14 @@ typedef struct SLIDE_SUPPORT_STATE_ {
   /// Estimated size for kernel itself, device tree, memory map, and rt pages.
   ///
   UINTN                    EstimatedKernelArea;
+  ///
+  /// Future kernel area protecting it from other allocations by UEFI.
+  ///
+  EFI_PHYSICAL_ADDRESS     BalloonArea;
+  ///
+  /// Future kernel area size in pages.
+  ///
+  UINTN                    BalloonAreaPages;
 } SLIDE_SUPPORT_STATE;
 
 /**
@@ -492,6 +500,23 @@ VOID
 AppleSlideRestore (
   IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
   IN OUT OC_BOOT_ARGUMENTS     *BootArgs
+  );
+
+/**
+  Allocate or deallocate kernel protection zone: a number of pages that reserve the memory
+  later used by kernel loader. This may also hardcode an ASLR slide, use with extra care.
+
+  @param[in,out]  BootCompat   Boot compatibility context.
+  @param[in]      Allocate     Pass TRUE to perform allocation protection and FALSE to release it.
+                               You should pass TRUE as many times as you need and passing FALSE is optional,
+                               as kernel protection zone is automatically released prior to image start.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+AppleSlideHandleBalloonState (
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
+  IN     BOOLEAN              Allocate
   );
 
 #endif // BOOT_COMPAT_INTERNAL_H

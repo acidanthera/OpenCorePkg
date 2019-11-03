@@ -126,8 +126,12 @@ OcHandleKernelProtectionZone (
   IN BOOLEAN          Allocate
   )
 {
-  //
-  // TODO: Implement.
-  //
-  return EFI_UNSUPPORTED;
+  BOOT_COMPAT_CONTEXT  *BootCompat;
+
+  BootCompat = GetBootCompatContext ();
+
+  return AppleSlideHandleBalloonState (
+    BootCompat,
+    Allocate
+    );
 }
