@@ -127,6 +127,12 @@ InternalAllocateRemainingSize (
   UINT64                 UsedSize;
   UINTN                  FinalUsedSize;
 
+  //
+  // Require page aligned base and top addresses.
+  //
+  ASSERT (BaseAddress == EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (BaseAddress)));
+  ASSERT (TopAddress  == EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (TopAddress)));
+
   while (RemainingSize > 0 && (*ExtentTable == NULL
     || (*ExtentTable)->ExtentCount < ARRAY_SIZE ((*ExtentTable)->Extents))) {
 
@@ -138,6 +144,12 @@ InternalAllocateRemainingSize (
       (UINT8 *)EntryWalker < ((UINT8 *)MemoryMap + MemoryMapSize);
       EntryWalker = NEXT_MEMORY_DESCRIPTOR (EntryWalker, DescriptorSize)) {
 
+      //
+      // FIXME: This currently skips segments starting before BaseAddress but potentially lasting
+      // further: 0, PhysicalStart, BaseAddress, PhysicalEnd, infinity. This was done intentionally,
+      // to avoid splitting one entry into two, when TopAddress is before PhysicalEnd, but can still
+      // be improved.
+      //
       if (EntryWalker->Type != EfiConventionalMemory
         || EntryWalker->PhysicalStart < BaseAddress
         || EntryWalker->PhysicalStart >= TopAddress) {
@@ -146,6 +158,9 @@ InternalAllocateRemainingSize (
 
       UsedSize = EFI_PAGES_TO_SIZE (EntryWalker->NumberOfPages);
       if (EntryWalker->PhysicalStart + UsedSize > TopAddress) {
+        //
+        // Guaranteed to be page aligned as TopAddress is page aligned.
+        //
         UsedSize = TopAddress - EntryWalker->PhysicalStart;
       }
 
@@ -156,10 +171,10 @@ InternalAllocateRemainingSize (
     }
 
     if (BiggestEntry == NULL || BiggestSize == 0) {
-      return FALSE;
+      return RemainingSize;
     }
 
-    FinalUsedSize = (UINTN)MIN (BiggestSize, RemainingSize);
+    FinalUsedSize = (UINTN) MIN (BiggestSize, RemainingSize);
 
     AllocatedArea = BiggestEntry->PhysicalStart;
     Status = gBS->AllocatePages (
@@ -170,7 +185,14 @@ InternalAllocateRemainingSize (
       );
 
     if (EFI_ERROR (Status)) {
-      return FALSE;
+      DEBUG ((
+        DEBUG_INFO,
+        "OCRAM: Broken allocator for 0x%Lx in 0x%Lx bytes - %r\n",
+        (UINT64) BiggestEntry->PhysicalStart,
+        (UINT64) FinalUsedSize,
+        Status
+        ));
+      return RemainingSize;
     }
 
     InternalAddAllocatedArea (ExtentTable, AllocatedArea, FinalUsedSize);
