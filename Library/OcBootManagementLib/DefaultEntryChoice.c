@@ -621,7 +621,7 @@ InternalGetDefaultBootEntry (
       }
 
       if (FullDevicePath == NULL) {
-        DEBUG ((DEBUG_INFO, "OCB: Short-form DP could not be expanded.\n"));
+        DEBUG ((DEBUG_INFO, "OCB: Short-form DP could not be expanded\n"));
         BootEntry = NULL;
         break;
       }

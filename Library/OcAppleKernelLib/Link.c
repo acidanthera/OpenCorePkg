@@ -926,7 +926,7 @@ InternalRelocateRelocationIntel64 (
   }
 
   if (InvalidPcRel) {
-    DEBUG ((DEBUG_WARN, "Prelink: Relocation has invalid PC relative flag.\n"));
+    DEBUG ((DEBUG_WARN, "Prelink: Relocation has invalid PC relative flag\n"));
   }
 
   ReturnValue = (MachoPreserveRelocationIntel64 (Type) ? 1 : 0);

@@ -132,7 +132,7 @@ InternalGetDiskImageBootFile (
 
   if (ChunklistBuffer == NULL) {
     if ((Policy & OC_LOAD_REQUIRE_APPLE_SIGN) != 0) {
-      DEBUG ((DEBUG_WARN, "Missing DMG signature, aborting.\n"));
+      DEBUG ((DEBUG_WARN, "Missing DMG signature, aborting\n"));
       return NULL;
     }
   } else if ((Policy & (OC_LOAD_VERIFY_APPLE_SIGN | OC_LOAD_REQUIRE_TRUSTED_KEY)) != 0) {
@@ -146,7 +146,7 @@ InternalGetDiskImageBootFile (
     if (!Result) {
       DEBUG ((
         DEBUG_INFO,
-        "OCB: Failed to initialise DMG Chunklist context.\n"
+        "OCB: Failed to initialise DMG Chunklist context\n"
         ));
       return NULL;
     }
@@ -171,7 +171,7 @@ InternalGetDiskImageBootFile (
       }
 
       if (!Result) {
-        DEBUG ((DEBUG_WARN, "DMG is not trusted, aborting.\n"));
+        DEBUG ((DEBUG_WARN, "DMG is not trusted, aborting\n"));
         return NULL;
       }
     }
@@ -181,7 +181,7 @@ InternalGetDiskImageBootFile (
                &ChunklistContext
                );
     if (!Result) {
-      DEBUG ((DEBUG_WARN, "DMG has been altered.\n"));
+      DEBUG ((DEBUG_WARN, "DMG has been altered\n"));
       //
       // FIXME: Warn user instead of aborting when OC_LOAD_REQUIRE_TRUSTED_KEY
       //        is not set.
@@ -197,7 +197,7 @@ InternalGetDiskImageBootFile (
                              &DmgDevicePathSize
                              );
   if (Context->BlockIoHandle == NULL) {
-    DEBUG ((DEBUG_INFO, "OCB: Failed to install DMG Block I/O.\n"));
+    DEBUG ((DEBUG_INFO, "OCB: Failed to install DMG Block I/O\n"));
     return NULL;
   }
 
@@ -207,7 +207,7 @@ InternalGetDiskImageBootFile (
               DmgDevicePathSize
               );
   if (DevPath == NULL) {
-    DEBUG ((DEBUG_INFO, "OCB: Failed to get bootable file off DMG.\n"));
+    DEBUG ((DEBUG_INFO, "OCB: Failed to get bootable file off DMG\n"));
 
     OcAppleDiskImageUninstallBlockIo (
       Context->DmgContext,
@@ -385,7 +385,7 @@ InternalLoadDmg (
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,
-      "OCB: Failed to open DMG file %s - %r.\n",
+      "OCB: Failed to open DMG file %s - %r\n",
       DmgFileInfo->FileName,
       Status
       ));
@@ -399,7 +399,7 @@ InternalLoadDmg (
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,
-      "OCB: Failed to retrieve DMG file size - %r.\n",
+      "OCB: Failed to retrieve DMG file size - %r\n",
       Status
       ));
 
@@ -411,7 +411,7 @@ InternalLoadDmg (
 
   Context->DmgContext = AllocatePool (sizeof (*Context->DmgContext));
   if (Context->DmgContext == NULL) {
-    DEBUG ((DEBUG_INFO, "OCB: Failed to allocate DMG context.\n"));
+    DEBUG ((DEBUG_INFO, "OCB: Failed to allocate DMG context\n"));
     return NULL;
   }
 
@@ -420,7 +420,7 @@ InternalLoadDmg (
   DmgFile->Close (DmgFile);
 
   if (!Result) {
-    DEBUG ((DEBUG_INFO, "OCB: Failed to initialise DMG from file.\n"));
+    DEBUG ((DEBUG_INFO, "OCB: Failed to initialise DMG from file\n"));
 
     FreePool (DmgFileInfo);
     FreePool (Context->DmgContext);
@@ -482,7 +482,7 @@ InternalLoadDmg (
   Context->DevicePath = DevPath;
 
   if (DevPath == NULL) {
-    DEBUG ((DEBUG_INFO, "OCB: Failed to retrieve boot file from DMG.\n"));
+    DEBUG ((DEBUG_INFO, "OCB: Failed to retrieve boot file from DMG\n"));
 
     OcAppleDiskImageFreeFile (Context->DmgContext);
     FreePool (Context->DmgContext);

@@ -48,7 +48,7 @@ uint8_t *readFile(const char *str, long *size) {
 
 int main (int argc, char *argv[]) {
   if (argc < 2) {
-    printf ("Please provide a valid Disk Image path.\n");
+    printf ("Please provide a valid Disk Image path\n");
     return -1;
   }
   
@@ -132,7 +132,7 @@ int main (int argc, char *argv[]) {
     UncompSize = (DmgContext.SectorCount * APPLE_DISK_IMAGE_SECTOR_SIZE);
     UncompDmg  = malloc (UncompSize);
     if (UncompDmg == NULL) {
-      printf ("DMG data allocation failed.\n");
+      printf ("DMG data allocation failed\n");
       goto ContinueDmgLoop;
     }
 

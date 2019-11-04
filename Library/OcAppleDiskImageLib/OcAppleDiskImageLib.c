@@ -210,19 +210,19 @@ OcAppleDiskImageInitializeFromFile (
 
   Status = GetFileSize (File, &FileSize);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCBD: Failed to retrieve DMG file size.\n"));
+    DEBUG ((DEBUG_INFO, "OCBD: Failed to retrieve DMG file size\n"));
     return FALSE;
   }
 
   ExtentTable = OcAppleRamDiskAllocate (FileSize, EfiACPIMemoryNVS, AvoidHighMem);
   if (ExtentTable == NULL) {
-    DEBUG ((DEBUG_INFO, "OCBD: Failed to allocate DMG data.\n"));
+    DEBUG ((DEBUG_INFO, "OCBD: Failed to allocate DMG data\n"));
     return FALSE;
   }
 
   Result = OcAppleRamDiskLoadFile (ExtentTable, File, FileSize);
   if (!Result) {
-    DEBUG ((DEBUG_INFO, "OCBD: Failed to load DMG file.\n"));
+    DEBUG ((DEBUG_INFO, "OCBD: Failed to load DMG file\n"));
 
     OcAppleRamDiskFree (ExtentTable);
     return FALSE;
@@ -230,7 +230,7 @@ OcAppleDiskImageInitializeFromFile (
 
   Result = OcAppleDiskImageInitializeContext (Context, ExtentTable, FileSize);
   if (!Result) {
-    DEBUG ((DEBUG_INFO, "OCBD: Failed to initialise DMG context.\n"));
+    DEBUG ((DEBUG_INFO, "OCBD: Failed to initialise DMG context\n"));
 
     OcAppleRamDiskFree (ExtentTable);
     return FALSE;
@@ -407,7 +407,7 @@ OcAppleDiskImageRead (
       {
         DEBUG ((
           DEBUG_ERROR,
-          "Compression type %x unsupported.\n",
+          "Compression type %x unsupported\n",
           Chunk->Type
           ));
         return FALSE;

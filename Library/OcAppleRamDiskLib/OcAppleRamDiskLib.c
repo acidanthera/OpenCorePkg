@@ -171,6 +171,15 @@ InternalAllocateRemainingSize (
     }
 
     if (BiggestEntry == NULL || BiggestSize == 0) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCRAM: No entry for allocation %p / 0x%Lx bytes, rem 0x%Lx in 0x%Lx:0x%Lx\n",
+        BiggestEntry,
+        (UINT64) BiggestSize,
+        (UINT64) RemainingSize,
+        (UINT64) BaseAddress,
+        (UINT64) TopAddress
+        ));
       return RemainingSize;
     }
 
@@ -187,9 +196,10 @@ InternalAllocateRemainingSize (
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
-        "OCRAM: Broken allocator for 0x%Lx in 0x%Lx bytes - %r\n",
+        "OCRAM: Broken allocator for 0x%Lx in 0x%Lx bytes, rem 0x%Lx - %r\n",
         (UINT64) BiggestEntry->PhysicalStart,
         (UINT64) FinalUsedSize,
+        (UINT64) RemainingSize,
         Status
         ));
       return RemainingSize;
