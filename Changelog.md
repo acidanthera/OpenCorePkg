@@ -2,6 +2,11 @@ OpenCore Changelog
 ==================
 #### v0.5.3
 - Update builtin firmware versions
+- Fixed interpreting letters in boot menu
+- Fixed timeout abortion with PollAppleHotKeys quirk
+- Fixed rare kext injection failure due to plist-only kext in prelinkedkernel
+- Fixed error reporting for dmg loading
+- Added various debugging improvements
 
 #### v0.5.2
 - Fixed `MinKernel` and `MaxKernel` logic (thx @dhinakg, @reitermarkus)
