@@ -81,6 +81,13 @@ GenerateSlideValue (
 {
   UINT64  Slide;
 
+  //
+  // Handle 0 slide case.
+  //
+  if (SlideSupport->ValidSlideCount == 1) {
+    return SlideSupport->ValidSlides[0];
+  }
+
   do {
     Slide = GetPseudoRandomNumber64 () % SlideSupport->ValidSlideCount;
   } while (Slide == 0);
@@ -905,6 +912,11 @@ AppleSlideHandleBalloonState (
         (UINT64) BootCompat->SlideSupport.BalloonArea,
         (UINT64) BootCompat->SlideSupport.BalloonAreaPages
         ));
+
+      BootCompat->SlideSupport.HasMemoryMapAnalysis = TRUE;
+      BootCompat->SlideSupport.ValidSlideCount      = 1;
+      BootCompat->SlideSupport.ValidSlides[0]       = (UINT8) Slide;
+
       return EFI_SUCCESS;
     }
 
