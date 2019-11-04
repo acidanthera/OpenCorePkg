@@ -33,6 +33,7 @@ PrelinkedFindLastLoadAddress (
   )
 {
   UINT32       KextCount;
+  UINT32       KextIndex;
   UINT32       FieldIndex;
   UINT32       FieldCount;
   XML_NODE     *LastKext;
@@ -47,40 +48,47 @@ PrelinkedFindLastLoadAddress (
   }
 
   //
-  // Here we make an assumption that last kext has the highest load address.
+  // Here we make an assumption that last kext has the highest load address,
+  // yet there might be an arbitrary amount of trailing executable-less kexts.
   //
-  LastKext = PlistNodeCast (XmlNodeChild (KextList, KextCount - 1), PLIST_NODE_TYPE_DICT);
-  if (LastKext == NULL) {
-    return 0;
-  }
-
-  LoadAddress = 0;
-  LoadSize = 0;
-
-  FieldCount = PlistDictChildren (LastKext);
-  for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
-    KextPlistKey = PlistKeyValue (PlistDictChild (LastKext, FieldIndex, &KextPlistValue));
-    if (KextPlistKey == NULL) {
-      continue;
+  for (KextIndex = 1; KextIndex <= KextCount; ++KextIndex) {
+    LastKext = PlistNodeCast (XmlNodeChild (KextList, KextCount - KextIndex), PLIST_NODE_TYPE_DICT);
+    if (LastKext == NULL) {
+      return 0;
     }
 
-    if (LoadAddress == 0 && AsciiStrCmp (KextPlistKey, PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == 0) {
-      if (!PlistIntegerValue (KextPlistValue, &LoadAddress, sizeof (LoadAddress), TRUE)) {
-        return 0;
+    LoadAddress = 0;
+    LoadSize = 0;
+
+    FieldCount = PlistDictChildren (LastKext);
+    for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
+      KextPlistKey = PlistKeyValue (PlistDictChild (LastKext, FieldIndex, &KextPlistValue));
+      if (KextPlistKey == NULL) {
+        continue;
       }
-    } else if (LoadSize == 0 && AsciiStrCmp (KextPlistKey, PRELINK_INFO_EXECUTABLE_SIZE_KEY) == 0) {
-      if (!PlistIntegerValue (KextPlistValue, &LoadSize, sizeof (LoadSize), TRUE)) {
-        return 0;
+
+      if (LoadAddress == 0 && AsciiStrCmp (KextPlistKey, PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == 0) {
+        if (!PlistIntegerValue (KextPlistValue, &LoadAddress, sizeof (LoadAddress), TRUE)) {
+          return 0;
+        }
+      } else if (LoadSize == 0 && AsciiStrCmp (KextPlistKey, PRELINK_INFO_EXECUTABLE_SIZE_KEY) == 0) {
+        if (!PlistIntegerValue (KextPlistValue, &LoadSize, sizeof (LoadSize), TRUE)) {
+          return 0;
+        }
+      }
+
+      if (LoadSize != 0 && LoadAddress != 0) {
+        break;
       }
     }
 
-    if (LoadSize != 0 && LoadAddress != 0) {
+    if (OcOverflowAddU64 (LoadAddress, LoadSize, &LoadAddress)) {
+      return 0;
+    }
+
+    if (LoadAddress != 0) {
       break;
     }
-  }
-
-  if (OcOverflowAddU64 (LoadAddress, LoadSize, &LoadAddress)) {
-    return 0;
   }
 
   return LoadAddress;
