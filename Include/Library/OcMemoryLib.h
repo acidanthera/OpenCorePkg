@@ -201,6 +201,18 @@ CountRuntimePages (
   );
 
 /**
+  Calculate number of free pages in the memory map.
+
+  @param[out]    LowerMemory    Number of free pages below 4 GB, optional.
+
+  @retval Number of free pages.
+**/
+UINTN
+CountFreePages (
+  OUT UINTN                  *LowerMemory  OPTIONAL
+  );
+
+/**
   Return pointer to PML4 table in PageTable and PWT and PCD flags in Flags.
 
   @param[out]  Flags      Current page table PWT and PCT flags.

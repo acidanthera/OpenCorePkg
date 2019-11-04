@@ -101,11 +101,23 @@ OcAbcInitialize (
 {
   EFI_STATUS           Status;
   BOOT_COMPAT_CONTEXT  *BootCompat;
+  UINTN                LowMemory;
+  UINTN                TotalMemory;
 
   Status = InstallAbcProtocol ();
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
+  DEBUG_CODE_BEGIN ();
+  TotalMemory = CountFreePages (&LowMemory);
+  DEBUG ((
+    DEBUG_INFO,
+    "OCABC: Firmware has %Lu free pages (%Lu in lower 4 GB)\n",
+    (UINT64) TotalMemory,
+    (UINT64) LowMemory
+    ));
+  DEBUG_CODE_END ();
 
   BootCompat = GetBootCompatContext ();
 

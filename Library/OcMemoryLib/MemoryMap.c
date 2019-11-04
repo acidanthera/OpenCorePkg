@@ -380,3 +380,51 @@ CountRuntimePages (
 
   return PageNum;
 }
+
+UINTN
+CountFreePages (
+  OUT UINTN                  *LowerMemory  OPTIONAL
+  )
+{
+  UINTN                        MemoryMapSize;
+  UINTN                        DescriptorSize;
+  EFI_MEMORY_DESCRIPTOR        *MemoryMap;
+  EFI_MEMORY_DESCRIPTOR        *EntryWalker;
+  UINTN                        FreePages;
+
+  FreePages = 0;
+  if (LowerMemory != NULL) {
+    *LowerMemory = 0;
+  }
+
+  MemoryMap = GetCurrentMemoryMap (&MemoryMapSize, &DescriptorSize, NULL, NULL);
+  if (MemoryMap == NULL) {
+    return 0;
+  }
+
+  for (
+    EntryWalker = MemoryMap;
+    (UINT8 *) EntryWalker < ((UINT8 *) MemoryMap + MemoryMapSize);
+    EntryWalker = NEXT_MEMORY_DESCRIPTOR (EntryWalker, DescriptorSize)) {
+
+    if (EntryWalker->Type != EfiConventionalMemory) {
+      continue;
+    }
+
+    FreePages += EntryWalker->NumberOfPages;
+
+    if (LowerMemory == NULL || EntryWalker->PhysicalStart >= BASE_4GB) {
+      continue;
+    }
+
+    if (EntryWalker->PhysicalStart + EFI_PAGES_TO_SIZE (EntryWalker->NumberOfPages) > BASE_4GB) {
+      *LowerMemory += EFI_SIZE_TO_PAGES (BASE_4GB - EntryWalker->PhysicalStart);
+    } else {
+      *LowerMemory += EntryWalker->NumberOfPages;
+    }
+  }
+
+  FreePool (MemoryMap);
+
+  return FreePages;
+}
