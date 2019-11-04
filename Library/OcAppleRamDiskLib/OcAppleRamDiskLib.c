@@ -373,8 +373,10 @@ OcAppleRamDiskRead (
     ++Index, CurrentOffset += (UINTN)Extent->Length
     ) {
     Extent = &ExtentTable->Extents[Index];
+    ASSERT (Extent->Start <= MAX_UINTN);
+    ASSERT (Extent->Length <= MAX_UINTN);
 
-    if (Offset >= CurrentOffset) {
+    if (Offset >= CurrentOffset && (Offset - CurrentOffset) < Extent->Length) {
       LocalOffset = (Offset - CurrentOffset);
       LocalSize   = (UINTN)MIN ((Extent->Length - LocalOffset), Size);
       CopyMem (
@@ -432,7 +434,7 @@ OcAppleRamDiskWrite (
     ASSERT (Extent->Start <= MAX_UINTN);
     ASSERT (Extent->Length <= MAX_UINTN);
 
-    if (Offset >= CurrentOffset) {
+    if (Offset >= CurrentOffset && (Offset - CurrentOffset) < Extent->Length) {
       LocalOffset = (Offset - CurrentOffset);
       LocalSize   = (UINTN)MIN ((Extent->Length - LocalOffset), Size);
       CopyMem (
@@ -479,10 +481,11 @@ OcAppleRamDiskLoadFile (
     return FALSE;
   }
 
-  for (Index = 0; FileSize > 0 && Index < ExtentTable->ExtentCount; ++Index) {
-    RequestedSize = ReadSize = (UINTN)MIN (FileSize, ExtentTable->Extents[Index].Length);
-
+  for (Index = 0; Index < ExtentTable->ExtentCount; ++Index) {
     ASSERT (ExtentTable->Extents[Index].Start <= MAX_UINTN);
+    ASSERT (ExtentTable->Extents[Index].Length <= MAX_UINTN);
+
+    RequestedSize = ReadSize = (UINTN)MIN (FileSize, ExtentTable->Extents[Index].Length);
     Status = File->Read (
       File,
       &RequestedSize,
@@ -494,9 +497,12 @@ OcAppleRamDiskLoadFile (
     }
 
     FileSize -= RequestedSize;
+    if (FileSize == 0) {
+      return TRUE;
+    }
   }
 
-  return TRUE;
+  return FALSE;
 }
 
 VOID
