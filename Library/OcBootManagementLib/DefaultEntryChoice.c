@@ -945,11 +945,12 @@ InternalLoadBootEntry (
   UnicodeDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
   DEBUG ((
     DEBUG_INFO,
-    "OCB: Perform boot %s to dp %s (%p/%u)\n",
+    "OCB: Perform boot %s to dp %s (%p/%u), balloon %d\n",
     BootEntry->Name,
     UnicodeDevicePath != NULL ? UnicodeDevicePath : L"<null>",
     EntryData,
-    EntryDataSize
+    EntryDataSize,
+    UseBallooning
     ));
   if (UnicodeDevicePath != NULL) {
     FreePool (UnicodeDevicePath);

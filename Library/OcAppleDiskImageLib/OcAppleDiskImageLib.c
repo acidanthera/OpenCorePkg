@@ -59,7 +59,7 @@ OcAppleDiskImageInitializeContext (
   if (FileSize <= sizeof (Trailer)) {
     DEBUG ((
       DEBUG_INFO,
-      "Dmg file size error: %u/%u.\n",
+      "OCBD: DMG file size error: %u/%u\n",
       FileSize,
       (UINT32) sizeof (Trailer)
       ));
@@ -79,7 +79,7 @@ OcAppleDiskImageInitializeContext (
   if (!Result || (Trailer.Signature != SwappedSig)) {
     DEBUG ((
       DEBUG_INFO,
-      "Dmg trailer error: %d - %Lx/%Lx - %X/%X.\n",
+      "OCBD: DMG trailer error: %d - %Lx/%Lx - %X/%X\n",
       Result,
       (UINT64) TrailerOffset,
       (UINT64) FileSize,
@@ -105,7 +105,7 @@ OcAppleDiskImageInitializeContext (
    || (SectorCount == 0)) {
     DEBUG ((
       DEBUG_INFO,
-      "Dmg context error: %u/%Lu/%Lu/%u/%u.\n",
+      "OCBD: DMG context error: %u/%Lu/%Lu/%u/%u\n",
       HeaderSize,
       XmlLength,
       SectorCount,
@@ -115,7 +115,7 @@ OcAppleDiskImageInitializeContext (
   }
 
   if ((SegmentCount != 0) && (SegmentCount != 1)) {
-    DEBUG ((DEBUG_ERROR, "Multiple segments are unsupported.\n"));
+    DEBUG ((DEBUG_ERROR, "OCBD: Multiple segments are unsupported\n"));
     return FALSE;
   }
 
@@ -125,7 +125,7 @@ OcAppleDiskImageInitializeContext (
              &OffsetTop
              );
   if (Result || (OffsetTop > MAX_UINTN)) {
-    DEBUG ((DEBUG_INFO, "Dmg sector error: %Lu %Lu\n", SectorCount, OffsetTop));
+    DEBUG ((DEBUG_INFO, "OCBD: DMG sector error: %Lu %Lu\n", SectorCount, OffsetTop));
     return FALSE;
   }
 
@@ -135,7 +135,7 @@ OcAppleDiskImageInitializeContext (
              &OffsetTop
              );
   if (Result || (OffsetTop > TrailerOffset)) {
-    DEBUG ((DEBUG_INFO, "Dmg xml error: %Lu %Lu %Lu %Lu\n", XmlOffset, XmlLength, OffsetTop, TrailerOffset));
+    DEBUG ((DEBUG_INFO, "OCBD: DMG xml error: %Lu %Lu %Lu %Lu\n", XmlOffset, XmlLength, OffsetTop, TrailerOffset));
     return FALSE;
   }
 
@@ -145,13 +145,13 @@ OcAppleDiskImageInitializeContext (
              &OffsetTop
              );
   if (Result || (OffsetTop > TrailerOffset)) {
-    DEBUG ((DEBUG_INFO, "Dmg data error: %Lu %Lu %Lu %Lu\n", DataForkOffset, DataForkLength, OffsetTop, TrailerOffset));
+    DEBUG ((DEBUG_INFO, "OCBD: DMG data error: %Lu %Lu %Lu %Lu\n", DataForkOffset, DataForkLength, OffsetTop, TrailerOffset));
     return FALSE;
   }
 
   PlistData = AllocatePool ((UINT32)XmlLength);
   if (PlistData == NULL) {
-    DEBUG ((DEBUG_INFO, "Dmg plist alloc error: %Lu\n", XmlLength));
+    DEBUG ((DEBUG_INFO, "OCBD: DMG plist alloc error: %Lu\n", XmlLength));
     return FALSE;
   }
 
@@ -162,7 +162,7 @@ OcAppleDiskImageInitializeContext (
              PlistData
              );
   if (!Result) {
-    DEBUG ((DEBUG_INFO, "Dmg plist read error: %Lu %Lu\n", XmlOffset, XmlLength));
+    DEBUG ((DEBUG_INFO, "OCBD: DMG plist read error: %Lu %Lu\n", XmlOffset, XmlLength));
     FreePool (PlistData);
     return FALSE;
   }
@@ -180,7 +180,7 @@ OcAppleDiskImageInitializeContext (
   FreePool (PlistData);
 
   if (!Result) {
-    DEBUG ((DEBUG_INFO, "Dmg plist parse error: %Lu %Lu\n", XmlOffset, XmlLength));
+    DEBUG ((DEBUG_INFO, "OCBD: DMG plist parse error: %Lu %Lu\n", XmlOffset, XmlLength));
     return FALSE;
   }
 
