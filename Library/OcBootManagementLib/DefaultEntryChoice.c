@@ -905,9 +905,12 @@ InternalLoadBootEntry (
     // Assume that DMG load requires a lot of memory.
     //
     UseBallooning = Context->BalloonAllocator != NULL;
+
+#ifdef OC_ENABLE_BALLOONING
     if (UseBallooning) {
       Context->BalloonAllocator (TRUE);
     }
+#endif
 
     DmgLoadContext->DevicePath = BootEntry->DevicePath;
     DevicePath = InternalLoadDmg (
@@ -917,9 +920,11 @@ InternalLoadBootEntry (
                    UseBallooning
                    );
     if (DevicePath == NULL) {
+#ifdef OC_ENABLE_BALLOONING
       if (UseBallooning) {
         Context->BalloonAllocator (FALSE);
       }
+#endif
       return EFI_UNSUPPORTED;
     }
   } else if (BootEntry->Type == OcBootCustom && BootEntry->DevicePath == NULL) {
@@ -1023,9 +1028,11 @@ InternalLoadBootEntry (
     }
   } else {
     InternalUnloadDmg (DmgLoadContext);
+#ifdef OC_ENABLE_BALLOONING
     if (UseBallooning) {
       Context->BalloonAllocator (FALSE);
     }
+#endif
   }
 
   return Status;
