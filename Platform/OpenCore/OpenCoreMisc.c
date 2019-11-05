@@ -187,7 +187,7 @@ EFI_STATUS
 OcMiscEarlyInit (
   IN  OC_STORAGE_CONTEXT *Storage,
   OUT OC_GLOBAL_CONFIG   *Config,
-  IN  RSA_PUBLIC_KEY     *VaultKey  OPTIONAL
+  IN  OC_RSA_PUBLIC_KEY  *VaultKey  OPTIONAL
   )
 {
   EFI_STATUS                Status;

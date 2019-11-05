@@ -58,7 +58,7 @@ VOID
 struct OC_BOOTSTRAP_PROTOCOL_ {
   UINTN               Revision;
   UINTN               NestedCount;
-  RSA_PUBLIC_KEY      *VaultKey;
+  OC_RSA_PUBLIC_KEY   *VaultKey;
   OC_BOOTSTRAP_RERUN  ReRun;
 };
 

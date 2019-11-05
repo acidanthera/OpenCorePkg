@@ -20,6 +20,7 @@
 #include <Library/OcCpuLib.h>
 #include <Library/OcCryptoLib.h>
 #include <Library/OcGuardLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcStorageLib.h>
 
@@ -84,7 +85,7 @@
 
   @return public key or NULL.
 **/
-RSA_PUBLIC_KEY *
+OC_RSA_PUBLIC_KEY *
 OcGetVaultKey (
   IN  OC_BOOTSTRAP_PROTOCOL *Bootstrap
   );
@@ -219,7 +220,7 @@ EFI_STATUS
 OcMiscEarlyInit (
   IN  OC_STORAGE_CONTEXT *Storage,
   OUT OC_GLOBAL_CONFIG   *Config,
-  IN  RSA_PUBLIC_KEY     *VaultKey  OPTIONAL
+  IN  OC_RSA_PUBLIC_KEY  *VaultKey  OPTIONAL
   );
 
 /**

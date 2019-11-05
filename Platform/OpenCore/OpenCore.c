@@ -52,7 +52,7 @@ OC_CPU_INFO
 mOpenCoreCpuInfo;
 
 STATIC
-RSA_PUBLIC_KEY *
+OC_RSA_PUBLIC_KEY *
 mOpenCoreVaultKey;
 
 STATIC
