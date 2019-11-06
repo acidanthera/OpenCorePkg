@@ -34,6 +34,7 @@
   OpenFileByDp.c
   ReadFile.c
   GptPartitionEntry.c
+  FsConnectQuirk.c
 
 [Packages]
   OcSupportPkg/OcSupportPkg.dec

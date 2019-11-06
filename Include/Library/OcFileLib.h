@@ -271,4 +271,14 @@ OcGetGptPartitionEntry (
   IN EFI_HANDLE  FsHandle
   );
 
+/**
+  Unblocks all partition handles without a File System protocol attached from
+  driver connection, if applicable.
+
+**/
+VOID
+OcUnblockUnmountedPartitions (
+  VOID
+  );
+
 #endif // OC_FILE_LIB_H
