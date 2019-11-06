@@ -159,14 +159,14 @@ InternalGetDiskImageBootFile (
       if ((Policy & OC_LOAD_TRUST_APPLE_V1_KEY) != 0) {
         Result = OcAppleChunklistVerifySignature (
                    &ChunklistContext,
-                   (RSA_PUBLIC_KEY *)&PkDataBase[0].PublicKey
+                   PkDataBase[0].PublicKey
                    );
       }
 
       if (!Result && ((Policy & OC_LOAD_TRUST_APPLE_V2_KEY) != 0)) {
         Result = OcAppleChunklistVerifySignature (
                    &ChunklistContext,
-                   (RSA_PUBLIC_KEY *)&PkDataBase[1].PublicKey
+                   PkDataBase[1].PublicKey
                    );
       }
 

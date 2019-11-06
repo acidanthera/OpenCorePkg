@@ -123,14 +123,13 @@ STATIC
 EFI_STATUS
 OcStorageInitializeVault (
   IN OUT OC_STORAGE_CONTEXT  *Context,
-  IN     VOID                *Vault      OPTIONAL,
+  IN     VOID                *Vault        OPTIONAL,
   IN     UINT32              VaultSize,
-  IN     RSA_PUBLIC_KEY      *StorageKey OPTIONAL,
-  IN     VOID                *Signature  OPTIONAL
+  IN     OC_RSA_PUBLIC_KEY   *StorageKey   OPTIONAL,
+  IN     VOID                *Signature    OPTIONAL,
+  IN     UINT32              SignatureSize OPTIONAL
   )
 {
-  UINT8  Digest[SHA256_DIGEST_SIZE];
-
   if (Signature != NULL && Vault == NULL) {
     DEBUG ((DEBUG_ERROR, "OCS: Missing vault with signature\n"));
     return EFI_SECURITY_VIOLATION;
@@ -144,9 +143,7 @@ OcStorageInitializeVault (
   if (Signature != NULL) {
     ASSERT (StorageKey != NULL);
 
-    Sha256 (Digest, Vault, VaultSize);
-
-    if (!RsaVerify (StorageKey, Signature, Digest)) {
+    if (!RsaVerifySigDataFromKey (StorageKey, Signature, SignatureSize, Vault, VaultSize, OcSigHashTypeSha256)) {
       DEBUG ((DEBUG_ERROR, "OCS: Invalid vault signature\n"));
       return EFI_SECURITY_VIOLATION;
     }
@@ -219,7 +216,7 @@ OcStorageInitFromFs (
   OUT OC_STORAGE_CONTEXT               *Context,
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
   IN  CONST CHAR16                     *Path,
-  IN  RSA_PUBLIC_KEY                   *StorageKey OPTIONAL
+  IN  OC_RSA_PUBLIC_KEY                *StorageKey OPTIONAL
   )
 {
   EFI_STATUS         Status;
@@ -227,6 +224,7 @@ OcStorageInitFromFs (
   VOID               *Vault;
   VOID               *Signature;
   UINT32             DataSize;
+  UINT32             SignatureSize;
 
   ZeroMem (Context, sizeof (*Context));
 
@@ -253,27 +251,17 @@ OcStorageInitFromFs (
     return Status;
   }
 
+  SignatureSize = 0;
+
   if (StorageKey) {
     Signature = OcStorageReadFileUnicode (
       Context,
       OC_STORAGE_VAULT_SIGNATURE_PATH,
-      &DataSize
+      &SignatureSize
       );
 
     if (Signature == NULL) {
       DEBUG ((DEBUG_ERROR, "OCS: Missing vault signature\n"));
-      OcStorageFree (Context);
-      return EFI_SECURITY_VIOLATION;
-    }
-
-    if (DataSize != CONFIG_RSA_KEY_SIZE) {
-      DEBUG ((
-        DEBUG_ERROR,
-        "OCS: Vault signature size mismatch: %u vs %u\n",
-        DataSize,
-        CONFIG_RSA_KEY_SIZE
-        ));
-      FreePool (Signature);
       OcStorageFree (Context);
       return EFI_SECURITY_VIOLATION;
     }
@@ -288,7 +276,7 @@ OcStorageInitFromFs (
     &DataSize
     );
 
-  Status = OcStorageInitializeVault (Context, Vault, DataSize, StorageKey, Signature);
+  Status = OcStorageInitializeVault (Context, Vault, DataSize, StorageKey, Signature, SignatureSize);
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCS: Vault init failure %p (%u) - %r\n", Vault, DataSize, Status));

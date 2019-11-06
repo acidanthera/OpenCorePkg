@@ -20,14 +20,9 @@
 
 #define NUM_OF_PK 2
 
-OC_STATIC_ASSERT (
-  sizeof (RSA_PUBLIC_KEY) == 520,
-  "Incompatible configured RSA key size"
-  );
-
 typedef struct APPLE_PK_ENTRY_ {
-  UINT8 Hash[SHA256_DIGEST_SIZE];
-  UINT8 PublicKey[sizeof (RSA_PUBLIC_KEY)];
+  UINT8                   Hash[SHA256_DIGEST_SIZE];
+  CONST OC_RSA_PUBLIC_KEY *PublicKey;
 } APPLE_PK_ENTRY;
 
 extern CONST APPLE_PK_ENTRY PkDataBase[NUM_OF_PK];

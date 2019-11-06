@@ -99,7 +99,7 @@ OcAppleChunklistInitializeContext (
 BOOLEAN
 OcAppleChunklistVerifySignature (
   IN OUT OC_APPLE_CHUNKLIST_CONTEXT  *Context,
-  IN     RSA_PUBLIC_KEY              *PublicKey
+  IN     CONST OC_RSA_PUBLIC_KEY     *PublicKey
   )
 {
   BOOLEAN Result;
@@ -107,10 +107,13 @@ OcAppleChunklistVerifySignature (
   ASSERT (Context != NULL);
   ASSERT (Context->Signature != NULL);
 
-  Result = RsaVerify (
+  Result = RsaVerifySigHashFromKey (
              PublicKey,
              Context->Signature->Signature,
-             Context->Hash
+             sizeof (Context->Signature->Signature),
+             Context->Hash,
+             sizeof (Context->Hash),
+             OcSigHashTypeSha256
              );
   DEBUG_CODE (
     if (Result) {

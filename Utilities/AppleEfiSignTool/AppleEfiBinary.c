@@ -18,9 +18,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "AppleEfiPeImage.h"
 #include "AppleEfiFatBinary.h"
+#include <Library/OcCryptoLib.h>
 #include <Library/OcAppleKeysLib.h>
 
-#ifdef DEBUG
+#ifndef NDEBUG
 # define DEBUG_PRINT(x) printf x
 #else
 # define DEBUG_PRINT(x) do {} while (0)
@@ -428,7 +429,7 @@ VerifyApplePeImageSignature (
   uint8_t                            SigBe[256];
   uint8_t                            CalcucatedHash[32];
   uint8_t                            PkHash[32];
-  RSA_PUBLIC_KEY                     *Pk                      = NULL;
+  const OC_RSA_PUBLIC_KEY            *Pk                      = NULL;
   APPLE_PE_COFF_LOADER_IMAGE_CONTEXT *Context                 = NULL;
 
   Context = malloc (sizeof (APPLE_PE_COFF_LOADER_IMAGE_CONTEXT));
@@ -479,7 +480,7 @@ VerifyApplePeImageSignature (
       //
       // PublicKey valid. Extract prepared publickey from database
       //
-      Pk = (RSA_PUBLIC_KEY *) PkDataBase[Index].PublicKey;
+      Pk = PkDataBase[Index].PublicKey;
     }
   }
 
@@ -491,7 +492,7 @@ VerifyApplePeImageSignature (
   //
   // Verify signature
   //
-  if (RsaVerify (Pk, SigBe, CalcucatedHash) == 1 ) {
+  if (RsaVerifySigHashFromKey (Pk, SigBe, sizeof (SigBe), CalcucatedHash, sizeof (CalcucatedHash), OcSigHashTypeSha256) == 1 ) {
     puts ("Signature verified!\n");
     return 0;
   }

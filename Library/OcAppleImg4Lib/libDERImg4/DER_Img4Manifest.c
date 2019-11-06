@@ -1002,6 +1002,10 @@ DERImg4ManifestDecodeProperty (
           return DR_BufOverflow;
         }
 
+        if (Property.valueItem.length == 0) {
+          return DR_DecodeError;
+        }
+
         DERMemmove (
           ManInfo->imageDigest,
           Property.valueItem.data,

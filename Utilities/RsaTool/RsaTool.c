@@ -73,24 +73,25 @@ static void write_data(void* context, void* data, size_t size) {
 /* Pre-processes and outputs RSA public key to standard out.
  */
 static void output(RSA* key, t_data_printer printer, void *printer_ctx) {
-  int i, nwords;
+  uint64_t i, nwords;
   const BIGNUM *key_n;
   BIGNUM *N = NULL;
-  BIGNUM *Big1 = NULL, *Big2 = NULL, *Big32 = NULL, *BigMinus1 = NULL;
+  BIGNUM *Big1 = NULL, *Big2 = NULL, *Big64 = NULL, *BigMinus1 = NULL;
   BIGNUM *B = NULL;
   BIGNUM *N0inv= NULL, *R = NULL, *RR = NULL, *RRTemp = NULL, *NnumBits = NULL;
   BIGNUM *n = NULL, *rr = NULL;
   BN_CTX *bn_ctx = BN_CTX_new();
-  uint32_t n0invout;
-  /* Output size of RSA key in 32-bit words */
-  nwords = RSA_size(key) / 4;
+  uint64_t n0invout;
+  /* Output size of RSA key in 64-bit words */
+  nwords = RSA_size(key) / 8;
+  if (nwords > UINT16_MAX) return;
   printer(printer_ctx, &nwords, sizeof(nwords));
   /* Initialize BIGNUMs */
   RSA_get0_key(key, &key_n, NULL, NULL);
   N = BN_dup(key_n);
   Big1 = BN_new();
   Big2 = BN_new();
-  Big32 = BN_new();
+  Big64 = BN_new();
   BigMinus1 = BN_new();
   N0inv= BN_new();
   R = BN_new();
@@ -101,14 +102,16 @@ static void output(RSA* key, t_data_printer printer, void *printer_ctx) {
   rr = BN_new();
   BN_set_word(Big1, 1L);
   BN_set_word(Big2, 2L);
-  BN_set_word(Big32, 32L);
+  BN_set_word(Big64, 64L);
   BN_sub(BigMinus1, Big1, Big2);
   B = BN_new();
-  BN_exp(B, Big2, Big32, bn_ctx); /* B = 2^32 */
-  /* Calculate and output N0inv = -1 / N[0] mod 2^32 */
+  BN_exp(B, Big2, Big64, bn_ctx); /* B = 2^64 */
+  /* Calculate and output N0inv = -1 / N[0] mod 2^64 */
   BN_mod_inverse(N0inv, N, B, bn_ctx);
   BN_sub(N0inv, B, N0inv);
-  n0invout = BN_get_word(N0inv);
+  n0invout = (uint64_t) BN_get_word(N0inv);
+  BN_rshift(N0inv, N0inv, 32);
+  n0invout |= (uint64_t) BN_get_word(N0inv) << 32ULL;
   printer(printer_ctx, &n0invout, sizeof(n0invout));
   /* Calculate R = 2^(# of key bits) */
   BN_set_word(NnumBits, BN_num_bits(N));
@@ -118,20 +121,20 @@ static void output(RSA* key, t_data_printer printer, void *printer_ctx) {
   BN_mul(RRTemp, RR, R, bn_ctx);
   BN_mod(RR, RRTemp, N, bn_ctx);
   /* Write out modulus as little endian array of integers. */
-  for (i = 0; i < nwords; ++i) {
+  for (i = 0; i < nwords*2; ++i) {
     uint32_t nout;
     BN_mod(n, N, B, bn_ctx); /* n = N mod B */
     nout = BN_get_word(n);
-    printer(printer_ctx, &nout, sizeof(nout));
     BN_rshift(N, N, 32); /*  N = N/B */
+    printer(printer_ctx, &nout, sizeof(nout));
   }
   /* Write R^2 as little endian array of integers. */
-  for (i = 0; i < nwords; ++i) {
+  for (i = 0; i < nwords*2; ++i) {
     uint32_t rrout;
     BN_mod(rr, RR, B, bn_ctx); /* rr = RR mod B */
     rrout = BN_get_word(rr);
-    printer(printer_ctx, &rrout, sizeof(rrout));
     BN_rshift(RR, RR, 32); /* RR = RR/B */
+    printer(printer_ctx, &rrout, sizeof(rrout));
   }
   /* print terminator */
   printer(printer_ctx, NULL, 0);
@@ -139,7 +142,7 @@ static void output(RSA* key, t_data_printer printer, void *printer_ctx) {
   BN_free(N);
   BN_free(Big1);
   BN_free(Big2);
-  BN_free(Big32);
+  BN_free(Big64);
   BN_free(BigMinus1);
   BN_free(N0inv);
   BN_free(R);

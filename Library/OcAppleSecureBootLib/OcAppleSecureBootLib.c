@@ -86,6 +86,9 @@ InternalGetHardwareModel (
   OUT CHAR8  Model[16]
   )
 { 
+  //
+  // FIXME: Retrieve this value from trusted storage and expose the variable.
+  //
   EFI_STATUS Status;
   UINTN      DataSize;
   CHAR8      HwModel[16];
@@ -114,6 +117,9 @@ InternalGetApEcid (
   OUT UINT64  *Ecid
   )
 {
+  //
+  // FIXME: Retrieve this value from trusted storage and expose the variable.
+  //
   EFI_STATUS Status;
   UINTN      DataSize;
   UINT64     ApEcid;

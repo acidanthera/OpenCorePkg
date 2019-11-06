@@ -617,7 +617,7 @@ VerifyApplePeImageSignature (
 {
   UINTN                    Index                       = 0;
   APPLE_SIGNATURE_CONTEXT  *SignatureContext           = NULL;
-  RSA_PUBLIC_KEY           *Pk                         = NULL;
+  OC_RSA_PUBLIC_KEY        *Pk                         = NULL;
 
   //
   // Build context if not present
@@ -680,7 +680,7 @@ VerifyApplePeImageSignature (
       //
       // PublicKey valid. Extract prepared publickey from database
       //
-      Pk = (RSA_PUBLIC_KEY *) PkDataBase[Index].PublicKey;
+      Pk = (OC_RSA_PUBLIC_KEY *) PkDataBase[Index].PublicKey;
     }
   }
 
@@ -694,7 +694,7 @@ VerifyApplePeImageSignature (
   //
   // Verify signature
   //
-  if (RsaVerify (Pk, SignatureContext->Signature, Context->PeImageHash) == 1 ) {
+  if (RsaVerifySigHashFromKey (Pk, SignatureContext->Signature, sizeof (SignatureContext->Signature), Context->PeImageHash, sizeof (Context->PeImageHash), OcSigHashTypeSha256) == 1 ) {
     DEBUG ((DEBUG_INFO, "Signature verified!\n"));
     FreePool (SignatureContext);
     FreePool (Context);

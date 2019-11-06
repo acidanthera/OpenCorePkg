@@ -25,17 +25,31 @@
 
 
 #
-#  VALID_ARCHITECTURES           = X64
+#  VALID_ARCHITECTURES           = IA32 X64
 #
 
 [Sources]
   Aes.c
-  Rsa2048Sha256.c
+  RsaDigitalSign.c
   Md5.c
   Sha1.c
   Sha2.c
   SecureMem.c
   PasswordHash.c
+  BigNumLib.h
+  BigNumLibInternal.h
+  BigNumPrimitives.c
+  BigNumMontgomery.c
+
+[Sources.IA32]
+  IA32/BigNumWordMul64.c
+
+[Sources.X64]
+  IA32/BigNumWordMul64.c
+
+[FixedPcd]
+  gOcSupportPkgTokenSpaceGuid.PcdOcCryptoAllowedRsaModuli
+  gOcSupportPkgTokenSpaceGuid.PcdOcCryptoAllowedSigHashTypes
 
 [Packages]
   MdePkg/MdePkg.dec

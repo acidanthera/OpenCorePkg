@@ -68,13 +68,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define EFI_IMAGE_OS2_SIGNATURE_LE  SIGNATURE_16('L', 'E')
 #define EFI_IMAGE_NT_SIGNATURE      SIGNATURE_32('P', 'E', '\0', '\0')
 
-typedef struct {
-    uint32_t Data1;
-    uint16_t Data2;
-    uint16_t Data3;
-    uint8_t  Data4[8];
-} EFI_GUID;
-
 ///
 /// PE images can start with an optional DOS header, so if an image is run
 /// under DOS it can print an error message.

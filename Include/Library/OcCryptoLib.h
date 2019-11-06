@@ -19,13 +19,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #ifndef OC_CRYPTO_LIB_H
 #define OC_CRYPTO_LIB_H
 
-//
-// Default to 2048-bit key length for RSA.
-//
-#ifndef CONFIG_RSA_KEY_BIT_SIZE
-#define CONFIG_RSA_KEY_BIT_SIZE 2048
-#define CONFIG_RSA_KEY_SIZE (CONFIG_RSA_KEY_BIT_SIZE / 8)
-#endif
+#include <Library/OcGuardLib.h>
 
 //
 // Default to 128-bit key length for AES.
@@ -43,6 +37,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define SHA384_DIGEST_SIZE  48
 #define SHA512_DIGEST_SIZE  64
 
+#define OC_MAX_SHA_DIGEST_SIZE  SHA512_DIGEST_SIZE
+
 //
 // Block sizes.
 //
@@ -53,7 +49,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Derived parameters.
 //
-#define RSANUMWORDS (CONFIG_RSA_KEY_SIZE / sizeof (UINT32))
 #define AES_BLOCK_SIZE 16
 
 //
@@ -70,22 +65,16 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #endif
 
 //
-// For now abort on anything but 2048, but we can support 1024 and 4096 at least.
+// Possible RSA algorithm types supported by OcCryptoLib
+// for RSA digital signature verification
+// PcdOcCryptoAllowedSigHashTypes MUST be kept in sync with changes!
 //
-#if CONFIG_RSA_KEY_BIT_SIZE != 2048 || CONFIG_RSA_KEY_SIZE != 256
-#error "Only RSA-2048 is supported"
-#endif
-
-#pragma pack(push, 1)
-
-typedef struct RSA_PUBLIC_KEY_ {
-  UINT32  Size;
-  UINT32  N0Inv;
-  UINT32  N[RSANUMWORDS];
-  UINT32  Rr[RSANUMWORDS];
-} RSA_PUBLIC_KEY;
-
-#pragma pack(pop)
+typedef enum OC_SIG_HASH_TYPE_ {
+  OcSigHashTypeSha256,
+  OcSigHashTypeSha384, 
+  OcSigHashTypeSha512,
+  OcSigHashTypeMax
+} OC_SIG_HASH_TYPE;
 
 typedef struct AES_CONTEXT_ {
   UINT8 RoundKey[AES_KEY_EXP_SIZE];
@@ -123,15 +112,43 @@ typedef struct SHA512_CONTEXT_ {
 
 typedef SHA512_CONTEXT SHA384_CONTEXT;
 
+#pragma pack(push, 1)
+
+///
+/// The structure describing the RSA Public Key format.
+/// The exponent is always 65537.
+///
+typedef PACKED struct {
+  ///
+  /// The number of 64-bit values of N and RSqrMod each.
+  ///
+  UINT16 NumQwords;
+  ///
+  /// Padding for 64-bit alignment. Must be 0 to allow future extensions.
+  ///
+  UINT8  Reserved[6];
+  ///
+  /// The Montgomery Inverse in 64-bit space: -1 / N[0] mod 2^64.
+  ///
+  UINT64 N0Inv;
+} OC_RSA_PUBLIC_KEY_HDR;
+
+typedef PACKED struct {
+  ///
+  /// The RSA Public Key header structure.
+  ///
+  OC_RSA_PUBLIC_KEY_HDR Hdr;
+  ///
+  /// The Modulus and Montgomery's R^2 mod N in little endian byte order.
+  ///
+  UINT64                Data[];
+} OC_RSA_PUBLIC_KEY;
+
+#pragma pack(pop)
+
 //
 // Functions prototypes
 //
-BOOLEAN
-RsaVerify (
-  RSA_PUBLIC_KEY  *Key,
-  UINT8           *Signature,
-  UINT8           *Sha256
-  );
 
 VOID
 AesInitCtxIv (
@@ -148,7 +165,7 @@ AesSetCtxIv (
 
 //
 // Data size MUST be mutiple of AES_BLOCK_SIZE;
-// Suggest https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for padding scheme
+// Suggest https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for Padding scheme
 // NOTES: you need to set Iv in Context via AesInitCtxIv() or AesSetCtxIv()
 //        no Iv should ever be reused with the same key
 //
@@ -169,7 +186,7 @@ AesCbcDecryptBuffer (
 //
 // Same function for encrypting as for decrypting.
 // Iv is incremented for every block, and used after encryption as XOR-compliment for output
-// Suggesting https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for padding scheme
+// Suggesting https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for Padding scheme
 // NOTES: you need to set Iv in Context via AesInitCtxIv() or AesSetCtxIv()
 //        no Iv should ever be reused with the same key
 //
@@ -303,6 +320,107 @@ Sha384 (
   UINT8        *Hash,
   CONST UINT8  *Data,
   UINTN        Len
+  );
+
+/**
+  Verifies Data against Hash with the appropiate SHA2 algorithm for HashSize.
+
+  @param[in] Data      The data to verify the hash of.
+  @param[in] DataSize  The, in bytes, of Data.
+  @param[in] Hash      The reference hash to verify against.
+  @param[in] HashSize  The size, in bytes, of Hash.
+
+  @return 0         All HashSize bytes of the two buffers are identical.
+  @retval Non-zero  If HashSize is not a valid SHA2 digest size, -1. Otherwise,
+                    the first mismatched byte in Data's hash subtracted from
+                    the first mismatched byte in Hash.
+
+**/
+INTN
+SigVerifyShaHashBySize (
+  IN CONST VOID   *Data,
+  IN UINTN        DataSize,
+  IN CONST UINT8  *Hash,
+  IN UINTN        HashSize
+  );
+
+/**
+  Verify a RSA PKCS1.5 signature against an expected hash.
+  The exponent is always 65537 as per the format specification.
+
+  @param[in] Key            The RSA Public Key.
+  @param[in] Signature      The RSA signature to be verified.
+  @param[in] SignatureSize  Size, in bytes, of Signature.
+  @param[in] Hash           The Hash digest of the signed data.
+  @param[in] HashSize       Size, in bytes, of Hash.
+  @param[in] Algorithm      The RSA algorithm used.
+
+  @returns  Whether the signature has been successfully verified as valid.
+
+**/
+BOOLEAN
+RsaVerifySigHashFromKey (
+  IN CONST OC_RSA_PUBLIC_KEY  *Key,
+  IN CONST UINT8              *Signature,
+  IN UINTN                    SignatureSize,
+  IN CONST UINT8              *Hash,
+  IN UINTN                    HashSize,
+  IN OC_SIG_HASH_TYPE         Algorithm
+  );
+
+/**
+  Verify RSA PKCS1.5 signed data against its signature.
+  The modulus' size must be a multiple of the configured BIGNUM word size.
+  This will be true for any conventional RSA, which use two's potencies.
+
+  @param[in] Modulus        The RSA modulus byte array.
+  @param[in] ModulusSize    The size, in bytes, of Modulus.
+  @param[in] Exponent       The RSA exponent.
+  @param[in] Signature      The RSA signature to be verified.
+  @param[in] SignatureSize  Size, in bytes, of Signature.
+  @param[in] Data           The signed data to verify.
+  @param[in] DataSize       Size, in bytes, of Data.
+  @param[in] Algorithm      The RSA algorithm used.
+
+  @returns  Whether the signature has been successfully verified as valid.
+
+**/
+BOOLEAN
+RsaVerifySigDataFromData (
+  IN CONST UINT8       *Modulus,
+  IN UINTN             ModulusSize,
+  IN UINT32            Exponent,
+  IN CONST UINT8       *Signature,
+  IN UINTN             SignatureSize,
+  IN CONST UINT8       *Data,
+  IN UINTN             DataSize,
+  IN OC_SIG_HASH_TYPE  Algorithm
+  );
+
+/**
+  Verify RSA PKCS1.5 signed data against its signature.
+  The modulus' size must be a multiple of the configured BIGNUM word size.
+  This will be true for any conventional RSA, which use two's potencies.
+  The exponent is always 65537 as per the format specification.
+
+  @param[in] Key            The RSA Public Key.
+  @param[in] Signature      The RSA signature to be verified.
+  @param[in] SignatureSize  Size, in bytes, of Signature.
+  @param[in] Data           The signed data to verify.
+  @param[in] DataSize       Size, in bytes, of Data.
+  @param[in] Algorithm      The RSA algorithm used.
+
+  @returns  Whether the signature has been successfully verified as valid.
+
+**/
+BOOLEAN
+RsaVerifySigDataFromKey (
+  IN CONST OC_RSA_PUBLIC_KEY  *Key,
+  IN CONST UINT8              *Signature,
+  IN UINTN                    SignatureSize,
+  IN CONST UINT8              *Data,
+  IN UINTN                    DataSize,
+  IN OC_SIG_HASH_TYPE         Algorithm
   );
 
 /**

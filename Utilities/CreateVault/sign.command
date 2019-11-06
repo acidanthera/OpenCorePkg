@@ -11,7 +11,12 @@ fi
 
 cd "$(/usr/bin/dirname "$0")" || abort "Failed to enter working directory!"
 
-OCPath=../../EFI/OC
+OCPath="$1"
+
+if [ "$OCPath" = "" ]; then
+  OCPath=../../EFI/OC
+fi
+
 KeyPath="${OCPath}/Keys"
 OCBin="${OCPath}/OpenCore.efi"
 RootCA="${KeyPath}/ca.pem"
@@ -70,7 +75,7 @@ if [ "${off}" -le 16 ]; then
   abort "${OCBin} is borked"
 fi
 
-/bin/dd of="${OCBin}" if="${PubKey}" bs=1 seek="${off}" count=520 conv=notrunc || abort "Failed to bin-patch ${OCBin}"
+/bin/dd of="${OCBin}" if="${PubKey}" bs=1 seek="${off}" count=528 conv=notrunc || abort "Failed to bin-patch ${OCBin}"
 
 echo "All done!"
 exit 0

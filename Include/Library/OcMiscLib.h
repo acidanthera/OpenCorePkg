@@ -19,6 +19,11 @@
 #include <Library/OcStringLib.h>
 
 /**
+  The size, in Bits, of one Byte.
+**/
+#define OC_CHAR_BIT  8
+
+/**
   Convert seconds to microseconds for use in e.g. gBS->Stall.
 **/
 #define SECONDS_TO_MICROSECONDS(x) ((x)*1000000)

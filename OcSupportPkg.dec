@@ -80,6 +80,18 @@
   # @Prompt Initialize the console to the specified mode on entry.
   gOcSupportPkgTokenSpaceGuid.PcdConsoleControlEntryMode|0|UINT8|0x00000100
 
+  ## Defines the allowed OcCryptoLib RSA moduli by OR'ing the two's potencies in bytes.<BR><BR>
+  # @Prompt Allow these RSA moduli for cryptographic usage.
+  gOcSupportPkgTokenSpaceGuid.PcdOcCryptoAllowedRsaModuli|0x300|UINT16|0x00000500
+
+  ## Defines the allowed OcCryptoLib signature hashing algorihtms by OR'ing the
+  #  types' Bit indices.<BR><BR>
+  #   Bit 0 - OcSigHashTypeSha256
+  #   Bit 1 - OcSigHashTypeSha384
+  #   Bit 2 - OcSigHashTypeSha512
+  # @Prompt Allow these signature hashing algorithms for cryptographic usage.
+  gOcSupportPkgTokenSpaceGuid.PcdOcCryptoAllowedSigHashTypes|0x07|UINT16|0x00000501
+
 [LibraryClasses]
   ##  @libraryclass
   OcAcpiLib|Include/Library/OcAcpiLib.h
@@ -104,6 +116,9 @@
 
   ##  @libraryclass
   OcAppleImageVerificationLib|Include/Library/OcAppleImageVerificationLib.h
+
+  ##  @libraryclass
+  OcAppleImg4Lib|Include/Library/OcAppleImg4Lib.h
 
   ##  @libraryclass
   OcAppleKernelLib|Include/Library/OcAppleKernelLib.h

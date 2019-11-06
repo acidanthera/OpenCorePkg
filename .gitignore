@@ -13,6 +13,7 @@ TestsUser/Prelinked/Prelinked
 TestsUser/Prelinked/Result.xml
 TestsUser/Serialized/Serialized
 TestsUser/Smbios/Smbios
+Utilities/RsaTool/RsaTool
 Utilities/EfiResTool/EfiResTool
 Utilities/AppleEfiSignTool/AppleEfiSignTool
 Utilities/readlabel/readlabel

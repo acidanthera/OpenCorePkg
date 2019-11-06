@@ -21,6 +21,12 @@
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
 
+#if !defined(HAVE_RSA_GET0_KEY) && defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x1000100fL
+#define HAVE_RSA_GET0_KEY
+#define HAVE_RSA_SET0_KEY
+#define EVP_MD_CTX_cleanup EVP_MD_CTX_free
+#endif
+
 #ifndef HAVE_RSA_GET0_KEY
 /**
  * Get the RSA parameters

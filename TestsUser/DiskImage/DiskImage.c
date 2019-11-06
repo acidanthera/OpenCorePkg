@@ -15,6 +15,8 @@ rm -rf DICT fuzz*.log ; mkdir DICT ; UBSAN_OPTIONS='halt_on_error=1' ./DiskImage
 
 **/
 
+EFI_GUID gOcVendorVariableGuid;
+
 uint8_t *readFile(const char *str, long *size) {
   FILE *f = fopen(str, "rb");
 
@@ -116,7 +118,7 @@ int main (int argc, char *argv[]) {
         goto ContinueDmgLoop;
       }
 
-      Result = OcAppleChunklistVerifySignature (&ChunklistContext, (RSA_PUBLIC_KEY *)PkDataBase[0].PublicKey);
+      Result = OcAppleChunklistVerifySignature (&ChunklistContext, PkDataBase[0].PublicKey);
       if (!Result) {
         printf ("Chunklist signature verification error\n");
         goto ContinueDmgLoop;

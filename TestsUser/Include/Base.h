@@ -65,8 +65,6 @@ typedef char CHAR8;
 typedef unsigned short CHAR16;
 typedef signed char INT8;
 typedef unsigned char UINT8;
-typedef ssize_t INTN;
-typedef size_t UINTN;
 typedef bool BOOLEAN;
 typedef int32_t INT32;
 typedef uint32_t UINT32;
@@ -74,6 +72,12 @@ typedef int64_t INT64;
 typedef uint64_t UINT64;
 typedef int16_t INT16;
 typedef uint16_t UINT16;
+#if SIZE_MAX == UINT64_MAX
+typedef INT64 INTN;
+#elif SIZE_MAX == UINT32_MAX
+typedef INT32 INTN;
+#endif
+typedef size_t UINTN;
 typedef size_t EFI_STATUS;
 typedef UINTN RETURN_STATUS;
 typedef UINT64 EFI_PHYSICAL_ADDRESS;
@@ -1883,5 +1887,8 @@ GetCurrentMemoryMap (
   ASSERT (FALSE);
   return NULL;
 }
+
+#define _PCD_GET_MODE_16_PcdOcCryptoAllowedSigHashTypes (1U | 2U | 4U) // SHA256, SHA384, SHA512
+#define _PCD_GET_MODE_16_PcdOcCryptoAllowedRsaModuli    (512U | 256U)
 
 #endif
