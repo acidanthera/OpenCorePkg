@@ -530,6 +530,10 @@ OcLoadUefiSupport (
       );
   }
 
+  if (Config->Uefi.Quirks.UnblockFsConnect) {
+    OcUnblockUnmountedPartitions ();
+  }
+
   OcMiscUefiQuirksLoaded (Config);
 
   OcLoadDrivers (Storage, Config);
