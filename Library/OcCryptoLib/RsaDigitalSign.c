@@ -58,7 +58,7 @@ STATIC CONST UINT8 mPkcsDigestEncodingPrefixSha512[] = {
 STATIC
 BOOLEAN
 InternalRsaModulusSizeIsAllowed (
-  IN UINT16  ModulusSize
+  IN UINTN  ModulusSize
   )
 {
   //
@@ -390,7 +390,7 @@ STATIC
 BOOLEAN
 RsaVerifySigDataFromProcessed (
   IN CONST OC_BN_WORD  *N,
-  IN UINTN             NumWords,
+  IN OC_BN_NUM_WORDS   NumWords,
   IN OC_BN_WORD        N0Inv,
   IN CONST OC_BN_WORD  *RSqrMod,
   IN UINT32            Exponent,
@@ -476,14 +476,15 @@ RsaVerifySigDataFromData (
   IN OC_SIG_HASH_TYPE  Algorithm
   )
 {
-  UINTN      ModulusNumWords;
+  UINTN           ModulusNumWordsTmp;
+  OC_BN_NUM_WORDS ModulusNumWords;
 
-  VOID       *Memory;
-  OC_BN_WORD *N;
-  OC_BN_WORD *RSqrMod;
+  VOID            *Memory;
+  OC_BN_WORD      *N;
+  OC_BN_WORD      *RSqrMod;
 
-  OC_BN_WORD N0Inv;
-  BOOLEAN    Result;
+  OC_BN_WORD      N0Inv;
+  BOOLEAN         Result;
 
   ASSERT (Modulus != NULL);
   ASSERT (ModulusSize > 0);
@@ -493,11 +494,13 @@ RsaVerifySigDataFromData (
   ASSERT (Data != NULL);
   ASSERT (DataSize > 0);
 
-  ModulusNumWords = ModulusSize / OC_BN_WORD_SIZE;
-  if (ModulusNumWords > OC_BN_MAX_LEN
+  ModulusNumWordsTmp = ModulusSize / OC_BN_WORD_SIZE;
+  if (ModulusNumWordsTmp > OC_BN_MAX_LEN
    || (ModulusSize % OC_BN_WORD_SIZE) != 0) {
     return FALSE;
   }
+
+  ModulusNumWords = (OC_BN_NUM_WORDS)ModulusNumWordsTmp;
 
   OC_STATIC_ASSERT (
     OC_BN_MAX_SIZE <= MAX_UINTN / 2,

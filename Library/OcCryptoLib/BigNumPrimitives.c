@@ -458,7 +458,7 @@ BigNumMostSignificantWord (
 OC_BN_NUM_BITS
 BigNumSignificantBits (
   IN CONST OC_BN_WORD  *A,
-  IN UINTN             NumWords
+  IN OC_BN_NUM_WORDS   NumWords
   )
 {
   OC_BN_NUM_BITS Index;
