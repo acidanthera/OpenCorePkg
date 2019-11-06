@@ -492,7 +492,8 @@ OC_DECLARE (OC_UEFI_INPUT)
   _(BOOLEAN                     , ProvideConsoleGop           ,     , FALSE  , ()) \
   _(BOOLEAN                     , SanitiseClearScreen         ,     , FALSE  , ()) \
   _(BOOLEAN                     , ClearScreenOnModeSwitch     ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ReplaceTabWithSpace         ,     , FALSE  , ())
+  _(BOOLEAN                     , ReplaceTabWithSpace         ,     , FALSE  , ()) \
+  _(BOOLEAN                     , UnblockFsConnect            ,     , FALSE  , ())
   OC_DECLARE (OC_UEFI_QUIRKS)
 
 ///
