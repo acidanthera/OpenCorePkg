@@ -796,6 +796,8 @@
 			<true/>
 			<key>SanitiseClearScreen</key>
 			<false/>
+			<key>UnblockFsConnect</key>
+			<false/>
 		</dict>
 	</dict>
 </dict>

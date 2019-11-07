@@ -7,6 +7,8 @@ OpenCore Changelog
 - Fixed rare kext injection failure due to plist-only kext in prelinkedkernel
 - Fixed error reporting for dmg loading
 - Added various debugging improvements
+- Added new crypto stack resulting in vault key format changes
+- Added `UnblockFsConnect` UEFI quirk to fix missing filesystems on some laptops
 
 #### v0.5.2
 - Fixed `MinKernel` and `MaxKernel` logic (thx @dhinakg, @reitermarkus)

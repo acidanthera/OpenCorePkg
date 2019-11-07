@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Nov  1 12:48:55 2019
-%DIF ADD ../Configuration.tex        Fri Nov  1 12:59:01 2019
+%DIF DEL PreviousConfiguration.tex   Sun Nov  3 16:31:21 2019
+%DIF ADD ../Configuration.tex        Thu Nov  7 10:22:26 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -662,7 +662,110 @@ across the releases and the tool shall ensure that it carefully follows this doc
 Failure to do so may result in this tool to be considered as malware and blocked with
 all possible means.
 
-\section{ACPI}\label{acpi}
+\DIFaddbegin \subsection{\DIFadd{Coding conventions}}\label{configuration-conv}
+
+\DIFadd{Just like any other project we have conventions that we follow during the development.
+All third-party contributors are highly recommended to read and follow the conventions
+listed below before submitting their patches. In general it is also recommended to firstly
+discuss the issue in }\href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}
+\DIFadd{before sending the patch to ensure no double work and to avoid your patch being rejected.
+}
+
+\textbf{\DIFadd{Organisation}}\DIFadd{. The codebase is structured in multiple repositories
+which contain separate EDK II packages. }\texttt{\DIFadd{AppleSupportPkg}} \DIFadd{and }\texttt{\DIFadd{OpenCorePkg}}
+\DIFadd{are primary packages, and }\texttt{\DIFadd{EfiPkg}}\DIFadd{, }\texttt{\DIFadd{OcSupportPkg}}\DIFadd{, }\texttt{\DIFadd{MacInfoPkg.dsc}}\DIFadd{)
+are dependent packages.
+}\begin{itemize}
+\tightlist
+\item \DIFadd{Whenever changes are required in multiple repositories, separate pull requests should
+be sent to each.
+}\item \DIFadd{Committing the changes should happen firstly to dependent repositories, secondly to
+primary repositories to avoid automatic build errors.
+}\item \DIFadd{Each unique commit should compile with }\texttt{\DIFadd{XCODE5}} \DIFadd{and preferably with other
+toolchains. In the majority of the cases it can be checked by accessing the
+}\href{https://travis-ci.com/acidanthera}{CI interface}\DIFadd{. Ensuring that static analysis finds
+no warnings is preferred.
+}\item \DIFadd{External pull requests and tagged commits must be validated. That said, commits in
+master may build but may not necessarily work.
+}\item \DIFadd{Internal branches should be named as follows: }\texttt{\DIFadd{author-name-date}}\DIFadd{, e.g.
+}\texttt{\DIFadd{vit9696-ballooning-20191026}}\DIFadd{.
+}\item \DIFadd{Commit messages should be prefixed with the primary module (e.g. library or code module) the
+changes were made in. For example, }\texttt{\DIFadd{OcGuardLib: Add OC\_ALIGNED macro}}\DIFadd{. For non-library changes
+}\texttt{\DIFadd{Docs}} \DIFadd{or }\texttt{\DIFadd{Build}} \DIFadd{prefixes are used.
+}\end{itemize}
+
+\textbf{\DIFadd{Design}}\DIFadd{. The codebase is written in a subset of freestanding C11 (C17) supported by
+most modern toolchains used by EDK II. Applying common software development practices or requesting
+clarification is recommended if any particular case is not discussed below.
+}\begin{itemize}
+\tightlist
+\item \DIFadd{Never rely on undefined behaviour and try to avoid implementation defined behaviour unless
+explicitly covered below (feel free to create an issue when a relevant case is not present).
+}\item \DIFadd{Use }\texttt{\DIFadd{OcGuardLib}} \DIFadd{to ensure safe integral arithmetics avoiding overflows. Unsigned
+wraparound should be relied on with care and reduced to the necessary amount.
+}\item \DIFadd{Check pointers for correct alignment with }\texttt{\DIFadd{OcGuardLib}} \DIFadd{and do not rely on the architecture
+being able to dereference unaligned pointers.
+}\item \DIFadd{Use flexible array members instead of zero-length or one-length arrays where necessary.
+}\item \DIFadd{Use static assertions (}\texttt{\DIFadd{STATIC\_ASSERT}}\DIFadd{) for type and value assumptions, and runtime
+assertions (}\texttt{\DIFadd{ASSERT}}\DIFadd{) for precondition and invariant sanity checking. Do not use runtime
+assertions to check for errors as they should never alter control flow and potentially be excluded.
+}\item \DIFadd{Assume }\texttt{\DIFadd{UINT32}}\DIFadd{/}\texttt{\DIFadd{INT32}} \DIFadd{to be }\texttt{\DIFadd{int}}\DIFadd{-sized and use }\texttt{\DIFadd{\%u}}\DIFadd{,
+}\texttt{\DIFadd{\%d}}\DIFadd{, and }\texttt{\DIFadd{\%x}} \DIFadd{to print them.
+}\item \DIFadd{Assume }\texttt{\DIFadd{UINTN}}\DIFadd{/}\texttt{\DIFadd{INTN}} \DIFadd{to be of unspecified size, and cast them to
+}\texttt{\DIFadd{UINT64}}\DIFadd{/}\texttt{\DIFadd{INT64}} \DIFadd{for printing with }\texttt{\DIFadd{\%Lu}}\DIFadd{, }\texttt{\DIFadd{\%Ld}} \DIFadd{and so on as normal.
+}\item \DIFadd{Do not rely on integer promotions for numeric literals. Use explicit casts when the type is
+implementation-dependent or suffixes when type size is known. Assume }\texttt{\DIFadd{U}} \DIFadd{for }\texttt{\DIFadd{UINT32}}
+\DIFadd{and }\texttt{\DIFadd{ULL}} \DIFadd{for }\texttt{\DIFadd{UINT64}}\DIFadd{.
+}\item \DIFadd{Do ensure unsigned arithmetics especially in bitwise maths, shifts in particular.
+}\item \texttt{\DIFadd{sizeof}} \DIFadd{operator should take variables instead of types where possible to be error prone.
+Use }\texttt{\DIFadd{ARRAY\_SIZE}} \DIFadd{to obtain array size in elements. Use }\texttt{\DIFadd{L\_STR\_LEN}} \DIFadd{and
+}\texttt{\DIFadd{L\_STR\_SIZE}} \DIFadd{macros from }\texttt{\DIFadd{OcStringLib}} \DIFadd{to obtain string literal sizes to ensure compiler
+optimisation.
+}\item \DIFadd{Do not use }\texttt{\DIFadd{goto}} \DIFadd{keyword. Prefer early }\texttt{\DIFadd{return}}\DIFadd{, }\texttt{\DIFadd{break}}\DIFadd{, or }\texttt{\DIFadd{continue}}
+\DIFadd{after failing to pass error checking instead of nesting conditionals.
+}\item \DIFadd{Use }\texttt{\DIFadd{EFIAPI}}\DIFadd{, force UEFI calling convention, only in protocols, external callbacks between
+modules, and functions with variadic arguments.
+}\item \DIFadd{Provide inline documentation to every added function, at least describing its inputs, outputs,
+precondition, postcondition, and giving a brief description.
+}\item \DIFadd{Do not use }\texttt{\DIFadd{RETURN\_STATUS}}\DIFadd{. Assume }\texttt{\DIFadd{EFI\_STATUS}} \DIFadd{to be a matching superset that is
+to be always used when }\texttt{\DIFadd{BOOLEAN}} \DIFadd{is not enough.
+}\item \DIFadd{Security violations should halt the system or cause a forced reboot.
+}\end{itemize}
+
+\textbf{\DIFadd{Codestyle}}\DIFadd{. The codebase follows
+}\href{https://github.com/tianocore/tianocore.github.io/wiki/Code-Style-C}{EDK II codestyle} \DIFadd{with few changes
+and clarifications.
+}\begin{itemize}
+\tightlist
+\item \DIFadd{Write inline documentation for the functions and variables only once: in headers, where a header prototype
+is available, and inline for }\texttt{\DIFadd{static}} \DIFadd{variables and functions.
+}\item \DIFadd{Use line length of 120 characters or less, preferably 100 characters.
+}\item \DIFadd{Use spaces after casts, e.g. }\texttt{\DIFadd{(VOID *)(UINTN) Variable}}\DIFadd{.
+}\item \DIFadd{Use SPDX license headers as shown in
+}\href{https://github.com/acidanthera/bugtracker/issues/483}{acidanthera/bugtracker\#483}\DIFadd{.
+}\end{itemize}
+
+\textbf{\DIFadd{Debugging}}\DIFadd{. The codebase incorporates EDK II debugging and few custom features to improve the experience.
+}\begin{itemize}
+\tightlist
+\item \DIFadd{Use module prefixes, 2-5 letters followed by a colon (}\texttt{\DIFadd{:}}\DIFadd{), for debug messages. For }\texttt{\DIFadd{OpenCorePkg}}
+\DIFadd{use }\texttt{\DIFadd{OC:}}\DIFadd{, for libraries and drivers use their own unique prefixes.
+}\item \DIFadd{Do not use dots (}\texttt{\DIFadd{.}}\DIFadd{) in the end of debug messages and separate }\texttt{\DIFadd{EFI\_STATUS}}\DIFadd{, printed by
+}\texttt{\DIFadd{\%r}}\DIFadd{, with a hyphen (e.g. }\texttt{\DIFadd{OCRAM: Allocation of \%u bytes failed - \%r\textbackslash n}}\DIFadd{).
+}\item \DIFadd{Use }\texttt{\DIFadd{DEBUG\_CODE\_BEGIN ()}} \DIFadd{and }\texttt{\DIFadd{DEBUG\_CODE\_END ()}} \DIFadd{constructions to guard debug checks
+that may potentially reduce the performance of release builds and are otherwise unnecessary.
+}\item \DIFadd{Use }\texttt{\DIFadd{DEBUG}} \DIFadd{macro to print debug messages during normal functioning, and }\texttt{\DIFadd{RUNTIME\_DEBUG}} \DIFadd{for
+debugging after }\texttt{\DIFadd{EXIT\_BOOT\_SERVICES}}\DIFadd{. 
+}\item \DIFadd{Use }\texttt{\DIFadd{DEBUG\_VERBOSE}} \DIFadd{debug level to leave debug messages for future debugging of the code, which
+are currently not necessary. By default }\texttt{\DIFadd{DEBUG\_VERBOSE}} \DIFadd{messages are ignored even in }\texttt{\DIFadd{DEBUG}} \DIFadd{builds.
+}\item \DIFadd{Use }\texttt{\DIFadd{DEBUG\_INFO}} \DIFadd{debug level for all non critical messages (including errors) and }\texttt{\DIFadd{DEBUG\_BULK\_INFO}}
+\DIFadd{for extensive messages that should not appear in NVRAM log that is heavily limited in size. These messages are ignored in
+}\texttt{\DIFadd{RELEASE}} \DIFadd{builds.
+}\item \DIFadd{Use }\texttt{\DIFadd{DEBUG\_ERROR}} \DIFadd{to print critical human visible messages that may potentially halt the boot process, and
+}\texttt{\DIFadd{DEBUG\_WARN}} \DIFadd{for all other human visible errors, }\texttt{\DIFadd{RELEASE}} \DIFadd{builds included.
+}\end{itemize}
+
+\DIFaddend \section{ACPI}\label{acpi}
 
 \subsection{Introduction}\label{acpiintro}
 
@@ -1490,7 +1593,7 @@ blocking.
 %DIFDELCMD <         \text{Where }\mu\in(0,99)\text{ is kernel version patch}
 %DIFDELCMD <     \end{aligned}%%%
 \DIFdelend \DIFaddbegin \begin{aligned}
-      ParseDarwinVersion(\kappa,\lambda,\mu)=&(\kappa \cdot10000 &&
+      ParseDarwinVersion(\kappa,\lambda,\mu)&=\kappa \cdot10000 &&
         \text{Where }\kappa\in(0,99)\text{ is kernel version major} \\
       &+ \lambda\cdot100 &&
         \text{Where }\lambda\in(0,99)\text{ is kernel version minor} \\
@@ -3747,7 +3850,21 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \href{https://github.com/acidanthera/bugtracker/issues/449}{\texttt{acidanthera/bugtracker\#449}}.
 
 \item
-  \texttt{ExitBootServicesDelay}\\
+  \DIFaddbegin \texttt{\DIFadd{ClearScreenOnModeSwitch}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Some firmwares clear only part of screen when switching
+  from graphics to text mode, leaving a fragment of previously drawn image visible.
+  This option fills the entire graphics screen with black color before switching to
+  text mode.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: }\texttt{\DIFadd{ConsoleControl}} \DIFadd{should be set to
+  }\texttt{\DIFadd{true}} \DIFadd{for this to work.
+}
+
+\item
+  \DIFaddend \texttt{ExitBootServicesDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Adds delay in microseconds after \texttt{EXIT\_BOOT\_SERVICES}
@@ -3854,16 +3971,18 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{ConsoleMode} had to be set to empty string for this to work.
 
 \item
-  \texttt{ClearScreenOnModeSwitch}\\
+  \texttt{\DIFdelbegin \DIFdel{ClearScreenOnModeSwitch}\DIFdelend \DIFaddbegin \DIFadd{UnblockFsConnect}\DIFaddend }\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Some firmwares clear only part of screen when switching
+  \textbf{Description}: Some firmwares \DIFdelbegin \DIFdel{clear only part of screen when switching
   from graphics to text mode, leaving a fragment of previously drawn image visible.
-  This option fills the entire graphics screen with black color before switching to
-  text mode.
+  This option fills the entire graphics screen with black color before switching to text mode}\DIFdelend \DIFaddbegin \DIFadd{block partition handles by opening them
+  in By Driver mode, which results in File System protocols being unable to install}\DIFaddend .
 
-  \emph{Note}: \texttt{ConsoleControl} should be set to
-  \texttt{true} for this to work.
+  \emph{Note}: \DIFdelbegin \texttt{\DIFdel{ConsoleControl}} %DIFAUXCMD
+\DIFdel{should be set to
+  }\texttt{\DIFdel{true}} %DIFAUXCMD
+\DIFdel{for this to work}\DIFdelend \DIFaddbegin \DIFadd{The quirk is mostly relevant for select HP laptops with no drives listed}\DIFaddend .
 
 \end{enumerate}
 
