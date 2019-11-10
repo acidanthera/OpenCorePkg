@@ -69,4 +69,12 @@ typedef UINT32    z_crc_t;
 #undef MIN
 #endif
 
+#ifdef _WIN32
+#undef _WIN32
+#endif
+
+#ifdef _WIN64
+#undef _WIN64
+#endif
+
 #endif /* ZCONF_H */
