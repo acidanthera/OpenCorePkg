@@ -415,7 +415,7 @@ BigNumSignificantBitsWord (
   //
   NumBits = OC_BN_WORD_NUM_BITS;
   Mask    = (OC_BN_WORD)1U << (OC_BN_WORD_NUM_BITS - 1);
-  while ((Word & Mask) == 0) {
+  while (Mask != 0 && (Word & Mask) == 0) {
     --NumBits;
     Mask >>= 1U;
   }
