@@ -104,6 +104,7 @@ BigNumLeftShiftWords (
 
 /**
   Shifts A left by Exponent Bits for 0 < Exponent < #Bits(Word).
+  Result must have the exact precision to carry the result.
 
   @param[in,out] Result          The buffer to return the result into.
   @param[in]     NumWordsResult  The number of Words of Result.
@@ -130,18 +131,13 @@ BigNumLeftShiftWordsAndBits (
   ASSERT (NumWordsResult > 0);
   ASSERT (A != NULL);
   ASSERT (NumWordsA > 0);
-  ASSERT (NumWordsResult >= NumWords);
+  ASSERT (NumWordsResult == NumWordsA + NumWords + 1);
   //
   // NumBits must not be 0 because a shift of a Word by its Bit width or
   // larger is Undefined Behaviour.
   //
   ASSERT (NumBits > 0);
   ASSERT (NumBits < OC_BN_WORD_NUM_BITS);
-  //
-  // This, assuming below, is required to avoid overflows, which purely
-  // internal calls should never produce.
-  //
-  ASSERT (NumWordsResult - NumWords > NumWordsA);
   //
   // This is not an algorithmic requirement, but BigNumLeftShiftWords shall be
   // called if TRUE.
@@ -159,41 +155,83 @@ BigNumLeftShiftWordsAndBits (
   //
   // Zero everything outside of the previously set ranges.
   //
-  ZeroMem (&Result[NumWordsA + NumWords + 1], (NumWordsResult - NumWords - NumWordsA - 1) * OC_BN_WORD_SIZE);
   ZeroMem (Result, NumWords * OC_BN_WORD_SIZE);
 }
 
 /**
-  Shifts A left by Exponent Bits for 0 < Exponent < #Bits(Word).
+  Calculates the left-shift of A by Exponent Bits.
 
-  @param[in,out] A         The base.
-  @param[in]     NumWords  The number of Words of A.
-  @param[in]     Exponent  The Bit shift exponent.
+  @param[in,out] Result          The buffer to return the result into.
+  @param[in]     NumWordsResult  The number of Words of Result.
+  @param[in]     A               The number to shift.
+  @param[in]     NumWordsA       The number of Words of A.
+  @param[in]     Exponent        The amount of Bits to shift by.
 
 **/
 STATIC
 VOID
-BigNumLeftShiftBitsSmall (
-  IN OUT OC_BN_WORD       *A,
-  IN     OC_BN_NUM_WORDS  NumWords,
-  IN     UINT8            Exponent
+BigNumLeftShift (
+  IN OUT OC_BN_WORD        *Result,
+  IN     OC_BN_NUM_WORDS   NumWordsResult,
+  IN     CONST OC_BN_WORD  *A,
+  IN     OC_BN_NUM_WORDS   NumWordsA,
+  IN     UINTN             Exponent
   )
 {
-  UINTN Index;
+  UINTN NumWords;
+  UINT8 NumBits;
 
+  ASSERT (Result != NULL);
+  ASSERT (NumWordsResult > 0);
   ASSERT (A != NULL);
-  ASSERT (NumWords > 0);
-  //
-  // Exponent must not be 0 because a shift of a Word by its Bit width or
-  // larger is Undefined Behaviour.
-  //
-  ASSERT (Exponent > 0);
-  ASSERT (Exponent < OC_BN_WORD_NUM_BITS);
+  ASSERT (NumWordsA > 0);
 
-  for (Index = (NumWords - 1); Index > 0; --Index) {
-    A[Index] = (A[Index] << Exponent) | (A[Index - 1] >> (OC_BN_WORD_NUM_BITS - Exponent));
+  NumWords = Exponent / OC_BN_WORD_NUM_BITS;
+  NumBits  = Exponent % OC_BN_WORD_NUM_BITS;
+
+  if (NumBits != 0) {
+    BigNumLeftShiftWordsAndBits (
+      Result,
+      NumWordsResult,
+      A,
+      NumWordsA,
+      NumWords,
+      NumBits
+      );
+  } else {
+    BigNumLeftShiftWords (Result, NumWordsResult, A, NumWordsA, NumWords);
   }
-  A[0] <<= Exponent;
+}
+
+/**
+  Shifts A right by Exponent Words.
+
+  @param[in,out] Result          The buffer to return the result into.
+  @param[in]     NumWordsResult  The number of Words of Result.
+  @param[in,out] A               The number to be word-shifted.
+  @param[in]     NumWordsA       The number of Words of A.
+  @param[in]     Exponent        The Word shift exponent.
+
+**/
+STATIC 
+VOID
+BigNumRightShiftWords (
+  IN OUT OC_BN_WORD        *Result,
+  IN     OC_BN_NUM_WORDS   NumWordsResult,
+  IN     CONST OC_BN_WORD  *A,
+  IN     OC_BN_NUM_WORDS   NumWordsA,
+  IN     UINTN             Exponent
+  )
+{
+  ASSERT (Result != NULL);
+  ASSERT (NumWordsResult > 0);
+  ASSERT (A != NULL);
+  ASSERT (NumWordsA > 0);
+  ASSERT (Exponent < NumWordsResult);
+  ASSERT (NumWordsResult - Exponent >= NumWordsA);
+
+  CopyMem (Result, &A[Exponent], (NumWordsResult - Exponent) * OC_BN_WORD_SIZE);
+  ZeroMem (&Result[NumWordsResult - Exponent], Exponent * OC_BN_WORD_SIZE);
 }
 
 /**
@@ -229,12 +267,109 @@ BigNumRightShiftBitsSmall (
   A[Index] >>= Exponent;
 }
 
-OC_BN_WORD
-BigNumWordMul64 (
-  OUT OC_BN_WORD  *Hi,
-  IN  OC_BN_WORD  A,
-  IN  OC_BN_WORD  B
-  );
+/**
+  Shifts A right by Exponent Bits for 0 < Exponent < #Bits(Word).
+
+  @param[in,out] Result          The buffer to return the result into.
+  @param[in]     NumWordsResult  The number of Words of Result.
+  @param[in]     A               The base.
+  @param[in]     NumWordsA       The number of Words of A.
+  @param[in]     NumWords        The Word shift exponent.
+  @param[in]     NumBits         The Bit shift exponent.
+
+**/
+STATIC
+VOID
+BigNumRightShiftWordsAndBits (
+  IN OUT OC_BN_WORD        *Result,
+  IN     OC_BN_NUM_WORDS   NumWordsResult,
+  IN     CONST OC_BN_WORD  *A,
+  IN     OC_BN_NUM_WORDS   NumWordsA,
+  IN     UINTN             NumWords,
+  IN     UINT8             NumBits
+  )
+{
+  UINTN Index;
+
+  ASSERT (Result != NULL);
+  ASSERT (NumWordsResult > 0);
+  ASSERT (A != NULL);
+  ASSERT (NumWordsA > 0);
+  ASSERT (NumWordsA >= NumWords);
+  //
+  // NumBits must not be 0 because a shift of a Word by its Bit width or
+  // larger is Undefined Behaviour.
+  //
+  ASSERT (NumBits > 0);
+  ASSERT (NumBits < OC_BN_WORD_NUM_BITS);
+  //
+  // This, assuming below, is required to avoid overflows, which purely
+  // internal calls should never produce.
+  //
+  ASSERT (NumWordsA - NumWords >= NumWordsResult);
+  //
+  // This is not an algorithmic requirement, but BigNumRightShiftWords shall be
+  // called if FALSE.
+  //
+  //ASSERT (NumWords > 0);
+
+  for (Index = NumWords; Index < NumWordsA - 1; ++Index) {
+    Result[Index - NumWords] = (A[Index] >> NumBits) | (A[Index + 1] << (OC_BN_WORD_NUM_BITS - NumBits));
+  }
+  //
+  // Handle the edge-cases at the beginning and the end of the value.
+  //
+  Result[Index - NumWords] = (A[NumWordsA - 1] >> NumBits);
+  //
+  // Zero everything outside of the previously set ranges.
+  //
+  ZeroMem (&Result[Index - NumWords + 1], (NumWordsResult - (Index - NumWords + 1)) * OC_BN_WORD_SIZE);
+}
+
+/**
+  Calculates the right-shift of A by Exponent Bits.
+
+  @param[in,out] Result          The buffer to return the result into.
+  @param[in]     NumWordsResult  The number of Words of Result.
+  @param[in]     A               The number to shift.
+  @param[in]     NumWordsA       The number of Words of A.
+  @param[in]     Exponent        The amount of Bits to shift by.
+
+**/
+STATIC
+VOID
+BigNumRightShift (
+  IN OUT OC_BN_WORD        *Result,
+  IN     OC_BN_NUM_WORDS   NumWordsResult,
+  IN     CONST OC_BN_WORD  *A,
+  IN     OC_BN_NUM_WORDS   NumWordsA,
+  IN     UINTN             Exponent
+  )
+{
+  UINTN NumWords;
+  UINT8 NumBits;
+
+  ASSERT (Result != NULL);
+  ASSERT (NumWordsResult > 0);
+  ASSERT (A != NULL);
+  ASSERT (NumWordsA > 0);
+
+  NumWords = Exponent / OC_BN_WORD_NUM_BITS;
+  NumBits  = Exponent % OC_BN_WORD_NUM_BITS;
+
+  if (NumBits != 0) {
+    BigNumRightShiftWordsAndBits (
+      Result,
+      NumWordsResult,
+      A,
+      NumWordsA,
+      NumWords,
+      NumBits
+      );
+  } else {
+    BigNumRightShiftWords (Result, NumWordsResult, A, NumWordsA, NumWords);
+  }
+}
 
 /**
   Calculates the product of A and B.
@@ -271,56 +406,6 @@ BigNumWordMul (
   }
 }
 
-/**
-  Assigns A to Result.
-
-  @param[in,out] Result          The buffer to store the result in.
-  @param[in]     NumWordsResult  The number of Words of Result.
-  @param[in]     A               The number to assign.
-  @param[in]     NumWordsA       The number of Words of A.
-
-**/
-STATIC
-VOID
-BigNumAssign (
-  IN OUT OC_BN_WORD        *Result,
-  IN     OC_BN_NUM_WORDS   NumWordsResult,
-  IN     CONST OC_BN_WORD  *A,
-  IN     OC_BN_NUM_WORDS   NumWordsA
-  )
-{
-  UINTN NumWordsCopy;
-
-  ASSERT (Result != NULL);
-  ASSERT (NumWordsResult > 0);
-  ASSERT (A != NULL);
-  ASSERT (NumWordsA > 0);
-
-  if (NumWordsResult > NumWordsA) {
-    ZeroMem (
-      &Result[NumWordsA],
-      (NumWordsResult - NumWordsA) * OC_BN_WORD_SIZE
-      );
-    NumWordsCopy = NumWordsA;
-  } else {
-    NumWordsCopy = NumWordsResult;
-  }
-
-  CopyMem (Result, A, NumWordsCopy * OC_BN_WORD_SIZE);
-}
-
-VOID
-BigNumAssign0 (
-  IN OUT OC_BN_WORD       *A,
-  IN     OC_BN_NUM_WORDS  NumWords
-  )
-{
-  ASSERT (A != NULL);
-  ASSERT (NumWords > 0);
-
-  ZeroMem (A, NumWords * OC_BN_WORD_SIZE);
-}
-
 VOID
 BigNumSub (
   IN OUT OC_BN_WORD        *Result,
@@ -340,10 +425,8 @@ BigNumSub (
   ASSERT (A != NULL);
   ASSERT (B != NULL);
   //
-  // As the same indices are ever accessed at a step, the index is always
-  // increased per step, the preexisting values in c are unused and all are
-  // are set, it is safe to call this function with c = a or c = b
-  // ATTENTION: This might conflict with future "top" optimizations
+  // As only the same indices are ever accessed at a step, it is safe to call
+  // this function with Result = A or Result = B.
   //
   Borrow = 0;
   for (Index = 0; Index < NumWords; ++Index) {
@@ -356,40 +439,6 @@ BigNumSub (
     //
     Borrow = (Tmp2 < Borrow) | (Tmp1 < TmpResult);
     Result[Index] = TmpResult;
-  }
-}
-
-/**
-  Propagates multiplicative Carry from the result at Index - 1 within Result.
-
-  @param[in,out] A         The number to propagate Carry in.
-  @param[in]     NumWords  The number of Words of A.
-  @param[in]     Index     The index from which on to add Carry.
-  @param[in]     Carry     The carry from the multiplication of Index - 1.
-
-**/
-STATIC
-VOID
-BigNumMulPropagateCarry (
-  IN OUT OC_BN_WORD       *A,
-  IN     OC_BN_NUM_WORDS  NumWords,
-  IN     UINTN            Index,
-  IN     OC_BN_WORD       Carry
-  )
-{
-  OC_BN_WORD Tmp;
-
-  ASSERT (A != NULL);
-  ASSERT (NumWords > 0);
-
-  for (; Index < NumWords && Carry != 0; ++Index) {
-    Tmp = A[Index] + Carry;
-    //
-    // When an addition wraps around, the result must be smaller than either
-    // operand.
-    //
-    Carry    = (Tmp < Carry);
-    A[Index] = Tmp;
   }
 }
 
@@ -470,153 +519,6 @@ BigNumSignificantBits (
   return ((Index * OC_BN_WORD_NUM_BITS) + BigNumSignificantBitsWord (A[Index]));
 }
 
-/**
-  Calculates the product of A and B.
-
-  @param[in,out] Result          The buffer to store the result in.
-  @param[in]     NumWordsResult  The number of Words of Result.
-  @param[in]     A               The multiplicant.
-  @param[in]     NumWordsA       The number of Words of A.
-  @param[in]     B               The multiplier.
-  @param[in]     NumWordsB       The number of Words of B.
-
-**/
-STATIC
-VOID
-BigNumMul (
-  IN OUT OC_BN_WORD        *Result,
-  IN     OC_BN_NUM_WORDS   NumWordsResult,
-  IN     CONST OC_BN_WORD  *A,
-  IN     OC_BN_NUM_WORDS   NumWordsA,
-  IN     CONST OC_BN_WORD  *B,
-  IN     OC_BN_NUM_WORDS   NumWordsB
-  )
-{
-  //
-  // Given a better modulo function, this is subject for removal.
-  // This algorithm is based on a space-optimised version of the conventional
-  // Long Multiplication.
-  // https://en.wikipedia.org/wiki/Multiplication_algorithm#Optimizing_space_complexity
-  //
-  OC_BN_WORD CurWord;
-  OC_BN_WORD MulHi;
-  OC_BN_WORD MulLo;
-  OC_BN_WORD CurCarry;
-
-  UINTN      LengthA;
-  UINTN      LengthB;
-  UINTN      LengthTmp;
-
-  UINTN      IndexRes;
-  UINTN      IndexA;
-  UINTN      IndexB;
-
-  ASSERT (Result != NULL);
-  ASSERT (NumWordsResult > 0);
-  ASSERT (A != NULL);
-  ASSERT (NumWordsA > 0);
-  ASSERT (B != NULL);
-  ASSERT (NumWordsB > 0);
-  ASSERT (A != Result);
-  ASSERT (B != Result);
-
-  BigNumAssign0 (Result, NumWordsResult);
-  //
-  // These additions cannot overflow because NumWords fits UINTN.
-  //
-  LengthA = BigNumMostSignificantWord (A, NumWordsA) + 1;
-  LengthB = BigNumMostSignificantWord (B, NumWordsB) + 1;
-  //
-  // This cannot overflow for sane outputs due to the address space limitation.
-  //
-  ASSERT (LengthA + LengthB > LengthA);
-  //
-  // This is required to avoid overflows, which purely internal calls should
-  // never produce.
-  //
-  ASSERT (LengthA + LengthB - 1 < NumWordsResult);
-
-  CurCarry = 0;
-  for (IndexRes = 0; IndexRes < LengthA + LengthB - 1; ++IndexRes) {
-    //
-    // Add the carry from the last iteration.
-    //
-    CurWord  = Result[IndexRes] + CurCarry;
-    CurCarry = (CurWord < CurCarry);
-    //
-    // When IndexB is out of bounds for B, the value at the requested position
-    // would be 0 and hence no calculation would be performed.
-    //
-    if (IndexRes < LengthB) {
-      IndexA    = 0;
-      LengthTmp = IndexRes + 1;
-      IndexB    = IndexRes;
-    } else {
-      IndexA    = IndexRes - LengthB + 1;
-      LengthTmp = LengthA;
-      IndexB    = LengthB - 1;
-    }
-
-    for (; IndexA < LengthTmp; ++IndexA, --IndexB) {
-      //
-      // No arithmetics need to be performed when both operands are 0.
-      //
-      if ((A[IndexA] | B[IndexB]) == 0) {
-        continue;
-      }
-
-      MulLo = BigNumWordMul (&MulHi, A[IndexA], B[IndexB]);
-      //
-      // FIXME:
-      // This is hard to read and probably not optimal, however during
-      // simplification of various operations, it turned out multiplication
-      // itself is only required as part of the current modulo implementation.
-      // Instead of cleaning and tweaking this algorithm, an optimised modulo
-      // algorithm that does not depend on this multiplication algorithm should
-      // be found and imported, rendering this function subject for removal.
-      //
-      CurCarry += MulHi;
-      if (CurCarry < MulHi) {
-        //
-        // If the current Carry overflows, propagate a carry of maximum value
-        // upwards and start counting anew.
-        //
-        BigNumMulPropagateCarry (
-          Result,
-          NumWordsResult,
-          IndexRes + 1,
-          OC_BN_MAX_VAL
-          );
-        ++CurCarry;
-      }
-
-      CurWord += MulLo;
-      if (CurWord < MulLo) {
-        CurCarry += 1;
-        if (CurCarry < 1) {
-          //
-          // If the current Carry overflows, propagate a carry of maximum value
-          // upwards and start counting anew.
-          //
-          BigNumMulPropagateCarry (
-            Result,
-            NumWordsResult,
-            IndexRes + 1,
-            OC_BN_MAX_VAL
-            );
-          ++CurCarry;
-        }
-      }
-    }
-
-    Result[IndexRes] = CurWord;
-  }
-  //
-  // Set the MSB to the carry of the last iteration.
-  //
-  Result[IndexRes] = CurCarry;
-}
-
 VOID
 BigNumOrWord (
   IN OUT OC_BN_WORD       *A,
@@ -665,148 +567,6 @@ BigNumCmp (
   return 0;
 }
 
-/**
-  Calculates the left-shift of A by Exponent Bits.
-
-  @param[in,out] Result          The buffer to return the result into.
-  @param[in]     NumWordsResult  The number of Words of Result.
-  @param[in]     A               The number to shift.
-  @param[in]     NumWordsA       The number of Words of A.
-  @param[in]     Exponent        The amount of Bits to shift by.
-
-**/
-STATIC
-VOID
-BigNumLeftShift (
-  IN OUT OC_BN_WORD        *Result,
-  IN     OC_BN_NUM_WORDS   NumWordsResult,
-  IN     CONST OC_BN_WORD  *A,
-  IN     OC_BN_NUM_WORDS   NumWordsA,
-  IN     UINTN             Exponent
-  )
-{
-  UINTN NumWords;
-  UINT8 NumBits;
-
-  ASSERT (Result != NULL);
-  ASSERT (NumWordsResult > 0);
-  ASSERT (A != NULL);
-  ASSERT (NumWordsA > 0);
-
-  NumWords = Exponent / OC_BN_WORD_NUM_BITS;
-  NumBits  = Exponent % OC_BN_WORD_NUM_BITS;
-
-  if (NumBits != 0) {
-    BigNumLeftShiftWordsAndBits (
-      Result,
-      NumWordsResult,
-      A,
-      NumWordsA,
-      NumWords,
-      NumBits
-      );
-  } else {
-    BigNumLeftShiftWords (Result, NumWordsResult, A, NumWordsA, NumWords);
-  }
-}
-
-/**
-  Calculates the quotient of A and B.
-
-  @param[in,out] Result        The buffer to return the result into.
-  @param[in]     NumWordsRest  The number of Words of Result, A, DenonBuf and
-                               DividenBuf.
-  @param[in]     A             The dividend.
-  @param[in]     B             The divisor.
-  @param[in]     NumWordsB     The number of Words of B.
-  @param[in]     DenomBuf      A temporary denominator buffer.
-  @param[in]     DividendBuf   A temporary dividend buffer.
-
-  @returns  Whether the operation was completes successfully.
-
-**/
-STATIC
-VOID
-BigNumDiv (
-  IN OUT OC_BN_WORD        *Result,
-  IN     OC_BN_NUM_WORDS   NumWordsRest,
-  IN     CONST OC_BN_WORD  *A,
-  IN     CONST OC_BN_WORD  *B,
-  IN     OC_BN_NUM_WORDS   NumWordsB,
-  IN     OC_BN_WORD        *DenomBuf,
-  IN     OC_BN_WORD        *DividendBuf
-  )
-{
-  //
-  // As for multiplication, this is subject for removal.
-  //
-  UINTN   CurBitIndex;
-  BOOLEAN Overflow;
-
-  UINT32  NumBitsA;
-  UINT32  NumBitsB;
-
-  ASSERT (Result != NULL);
-  ASSERT (NumWordsRest > 0);
-  ASSERT (A != NULL);
-  ASSERT (B != NULL);
-  ASSERT (NumWordsB > 0);
-  ASSERT (DenomBuf != NULL);
-  ASSERT (DividendBuf != NULL);
-  //
-  // Use an integer of natural size to store the current Bit index as 'current'
-  // is always a 2's potency. While a BIGNUM can theoretically hold a
-  // 2's potency eight times larger than what can represent as Bit index with a
-  // natural integer (Bytes vs Bits), this cannot happen within this function
-  // as 'a' aligned to the next 2's potency would need to be just as big for
-  // this to be the case. This cannot happen due to the address space
-  // limitation.
-  //
-  CurBitIndex = 0;
-  Overflow    = FALSE;
-  //
-  // Shift b to the left so it has the same amount of significant bits as a.
-  // This would, without this speedup, be done on per-bit basis by the loop
-  // below.
-  //
-  NumBitsA = BigNumSignificantBits (A, NumWordsRest);
-  NumBitsB = BigNumSignificantBits (B, NumWordsB);
-  if (NumBitsA > NumBitsB) {
-    CurBitIndex = NumBitsA - NumBitsB;                                   // int Current = 1 << (numBitsA - numBitsB);
-    BigNumLeftShift (DenomBuf, NumWordsRest, B, NumWordsB, CurBitIndex); // Denom = B << CurBitIndex
-  } else {
-    CurBitIndex = 0;                                                     // int Current = 1;
-    BigNumAssign (DenomBuf, NumWordsRest, B, NumWordsB);                 // Denom = B
-  }
-
-  while (BigNumCmp (DenomBuf, NumWordsRest, A) <= 0) {                   // while (Denom <= a) {
-    if (DenomBuf[NumWordsRest - 1] > (OC_BN_MAX_VAL / 2U)) {
-      Overflow = TRUE;
-      break;
-    }
-    ++CurBitIndex;                                                       //   Current <<= 1;                 
-    BigNumLeftShiftBitsSmall (DenomBuf, NumWordsRest, 1);                //   Denom   <<= 1;
-  }
-  if (!Overflow) {
-    BigNumRightShiftBitsSmall (DenomBuf, NumWordsRest, 1);               // Denom   >>= 1;
-    --CurBitIndex;                                                       // Current >>= 1;                 
-  }
-  BigNumAssign0 (Result, NumWordsRest);                                  // int Result = 0;
-  BigNumAssign (DividendBuf, NumWordsRest, A, NumWordsRest);             // Dividend = A
-  //
-  // currentBitIndex cannot add-wraparound to reach this value as reasoned in
-  // the comment before.
-  //
-  while (CurBitIndex != (0ULL - 1ULL)) {                                 // while (Current != 0)
-    if (BigNumCmp (DividendBuf, NumWordsRest, DenomBuf) >= 0) {          //   if (Dividend >= Denom)
-      BigNumSub (DividendBuf, NumWordsRest, DividendBuf, DenomBuf);      //     Dividend -= denom;            
-      BigNumOrWord (Result, NumWordsRest, 1, CurBitIndex);               //     Result |= current;
-    }
-    --CurBitIndex;                                                       //   Current >>= 1;
-    BigNumRightShiftBitsSmall (DenomBuf, NumWordsRest, 1);               //   Denom >>= 1;
-  }                                                                      // return Result;
-}
-
 BOOLEAN
 BigNumMod (
   IN OUT OC_BN_WORD        *Result,
@@ -816,20 +576,20 @@ BigNumMod (
   IN     CONST OC_BN_WORD  *B
   )
 {
-  //
-  // FIXME:
-  // The algorithm is rather expensive and slow. It utilitises the current
-  // suboptimal multiplication and division algorithms. An optimised algorithm
-  // should be imported and formerly mentioned functions be removed as they'd
-  // be dead code.
-  //
-  UINTN TempsBnSize;
+  INTN            CmpResult;
 
-  VOID       *Memory;
-  OC_BN_WORD *TmpDiv;
-  OC_BN_WORD *TmpMod;
-  OC_BN_WORD *TmpDenom;
-  OC_BN_WORD *TmpDividend;
+  VOID            *Memory;
+
+  OC_BN_WORD      *ModTmp;
+  OC_BN_NUM_BITS  SigBitsModTmp;
+  OC_BN_NUM_WORDS SigWordsModTmp;
+
+  OC_BN_NUM_BITS  BigDivExp;
+  OC_BN_WORD      *BigDiv;
+  OC_BN_NUM_BITS  SigBitsBigDiv;
+  OC_BN_NUM_WORDS SigWordsBigDiv;
+
+  OC_BN_NUM_BITS  DeltaBits;
 
   ASSERT (Result != NULL);
   ASSERT (NumWordsRest > 0);
@@ -837,26 +597,163 @@ BigNumMod (
   ASSERT (NumWordsA > 0);
   ASSERT (B != NULL);
   ASSERT (NumWordsA >= NumWordsRest);
+  //
+  // SigBitsModTmp is calculated manually to avoid calculating SigWordsModTmp
+  // by modulo.
+  //
+  SigWordsModTmp = BigNumMostSignificantWord (A, NumWordsA);
+  SigBitsModTmp  = SigWordsModTmp * OC_BN_WORD_NUM_BITS + BigNumSignificantBitsWord (A[SigWordsModTmp]);
+  ++SigWordsModTmp;
+  ASSERT (SigBitsModTmp == BigNumSignificantBits (A, SigWordsModTmp));
 
   OC_STATIC_ASSERT (
-    OC_BN_MAX_SIZE <= MAX_UINTN / 4,
+    OC_BN_MAX_SIZE <= MAX_UINTN / 2,
     "An overflow verification must be added"
     );
 
-  TempsBnSize = NumWordsA * OC_BN_WORD_SIZE;
-  Memory      = AllocatePool (4 * TempsBnSize);
+  Memory = AllocatePool (2 * SigWordsModTmp * OC_BN_WORD_SIZE);
   if (Memory == NULL) {
     return FALSE;
   }
 
-  TmpDiv      = (OC_BN_WORD *)Memory;
-  TmpMod      = (OC_BN_WORD *)((UINTN)TmpDiv   + TempsBnSize);
-  TmpDenom    = (OC_BN_WORD *)((UINTN)TmpMod   + TempsBnSize);
-  TmpDividend = (OC_BN_WORD *)((UINTN)TmpDenom + TempsBnSize);
+  ModTmp         = Memory;
+  BigDiv         = &ModTmp[SigWordsModTmp];
+  SigWordsBigDiv = SigWordsModTmp;
+  //
+  // Invariant: BigDiv > ModTmp / 2
+  // The invariant implies ModTmp / BigDiv = 1.
+  //
+  // This loop iteratively subtracts multiples BigDiv of B from ModTmp := A [1],
+  // otherwise ModTmp is not modified. BigDiv is iteratively reduced such that
+  // ModTmp >= BigDiv [2]. The loop terminates once BigDiv < B yields true [3].
+  //
+  CopyMem (ModTmp, A, SigWordsModTmp * OC_BN_WORD_SIZE);
+  //
+  // Initialisation:
+  // A bit-shift by x is equal to multiplying the operand with 2^x.
+  // BigDiv := B << x so that its MSB is equal to the MSB of A implies:
+  // 2*BigDiv > A <=> BigDiv > ModTmp / 2 with ModTmp = A.
+  //
+  SigBitsBigDiv = BigNumSignificantBits (B, NumWordsRest);
+  ASSERT (SigBitsModTmp >= SigBitsBigDiv);
+  BigDivExp = SigBitsModTmp - SigBitsBigDiv;
 
-  BigNumDiv (TmpDiv, NumWordsA, A, B, NumWordsRest, TmpDenom, TmpDividend);
-  BigNumMul (TmpMod, NumWordsA, TmpDiv, NumWordsA, B, NumWordsRest);
-  BigNumSub (Result, NumWordsRest, A, TmpMod);
+  BigNumLeftShift (BigDiv, SigWordsBigDiv, B, NumWordsRest, BigDivExp);
+  SigBitsBigDiv = SigBitsModTmp;
+  ASSERT (SigBitsBigDiv == BigNumSignificantBits (BigDiv, SigWordsBigDiv));
+
+  while (TRUE) {
+    //
+    // Because the invariant is maintained optimally, the MSB of BigDiv is
+    // either the MSB of ModTmp or one below. SigWords* are maintained
+    // precisely during the loop's execution, so when SigWordsModTmp is larger
+    // than SigWordsBigDiv, ModTmp is larger than BigDiv.
+    //
+    ASSERT (SigWordsModTmp == SigWordsBigDiv || SigWordsModTmp == SigWordsBigDiv + 1);
+    if (SigWordsModTmp > SigWordsBigDiv) {
+      ASSERT (ModTmp[SigWordsModTmp - 1] != 0);
+      CmpResult = 1;
+    } else {
+      CmpResult = BigNumCmp (ModTmp, SigWordsBigDiv, BigDiv);
+    }
+
+    if (CmpResult >= 0) {
+      //
+      // Iteration 1: [1] ModTmp >= BigDiv means ModTmp is reduced.
+      //
+      // Subtract SigWordsModTmp words because the current divisor value may be
+      // shorter than the current modulus value. As both reside in buffers of
+      // equal length and no high word is stripped without being set to 0, this
+      // is safe.
+      //
+      BigNumSub (ModTmp, SigWordsModTmp, ModTmp, BigDiv);
+
+      if (BigDivExp == 0) {
+        //
+        // Iteration 1: [3] BigDiv = B implies BigDiv < B would yield true
+        //                  after executing the reduction below.
+        //
+        ASSERT (BigNumCmp (BigDiv, SigWordsBigDiv, B) == 0);
+        break;
+      }
+      //
+      // SigBitsModTmp is calculated manually to avoid calculating
+      // SigWordsModTmp by modulo.
+      //
+      SigWordsModTmp = BigNumMostSignificantWord (ModTmp, SigWordsModTmp);
+      SigBitsModTmp  = SigWordsModTmp * OC_BN_WORD_NUM_BITS + BigNumSignificantBitsWord (ModTmp[SigWordsModTmp]);
+      ++SigWordsModTmp;
+      ASSERT (SigBitsModTmp == BigNumSignificantBits (ModTmp, SigWordsModTmp));
+
+      ASSERT (SigBitsBigDiv >= SigBitsModTmp);
+      DeltaBits = SigBitsBigDiv - SigBitsModTmp;
+      if (DeltaBits > BigDivExp) {
+        //
+        // Iteration 1: [3] This implies BigDiv < B would yield true after
+        //                  executing the reduction below.
+        //
+        break;
+      }
+      //
+      // Iteration 1: [2] Please refer to Initialisation.
+      //
+      BigNumRightShift (BigDiv, SigWordsBigDiv, BigDiv, SigWordsBigDiv, DeltaBits);
+
+      SigWordsBigDiv = (SigBitsModTmp + (OC_BN_WORD_NUM_BITS - 1)) / OC_BN_WORD_NUM_BITS;
+      SigBitsBigDiv  = SigBitsModTmp;
+
+      BigDivExp -= DeltaBits;
+    } else {
+      //
+      // Iteration 2: [1] BigDiv > ModTmp means ModTmp will be reduced next
+      //                  iteration.
+      //
+      if (BigDivExp == 0) {
+        //
+        // Iteration 2: [3] BigDiv = B implies BigDiv < B would yield true
+        //                  after executing the reduction below.
+        //
+        ASSERT (BigNumCmp (BigDiv, SigWordsBigDiv, B) == 0);
+        break;
+      }
+      //
+      // Iteration 2: [2] BigDiv > ModTmp means BigDiv is reduced to more
+      //                  strictly maintain the invariant BigDiv / 2 > ModTmp.
+      //
+      BigNumRightShiftBitsSmall (BigDiv, SigWordsBigDiv, 1);
+
+      --SigBitsBigDiv;
+      --BigDivExp;
+
+      if (SigBitsBigDiv % OC_BN_WORD_NUM_BITS == 0) {
+        //
+        // Every time the subtraction by 1 yields a multiplie of the word
+        // length, the most significant Byte has become zero and is stripped.
+        //
+        ASSERT (BigDiv[SigWordsBigDiv - 1] == 0);
+        --SigWordsBigDiv;
+      }
+    }
+    //
+    // ASSERT both branches maintain SigBitsBigDiv correctly.
+    //
+    ASSERT (SigBitsBigDiv == BigNumSignificantBits (BigDiv, SigWordsBigDiv));
+  }
+  //
+  // Termination:
+  // Because BigDiv = B and, by invariant, BigDiv > ModTmp / 2 are true in the
+  // last iteration, B > ModTmp / 2 <=> 2 * B > ModTmp is true and thus
+  // conditionally subtracting B from ModTmp once more yields B > ModTmp, at
+  // which point ModTmp must carry the modulus of A / B. The final reduction
+  // of BigDiv yields BigDiv < B and thus the loop is terminated without
+  // further effects.
+  //
+
+  //
+  // Assuming correctness, the modulus cannot be larger than the divisor.
+  //
+  ASSERT (BigNumMostSignificantWord (ModTmp, SigWordsModTmp) + 1 <= NumWordsRest);
+  CopyMem (Result, ModTmp, NumWordsRest * OC_BN_WORD_SIZE);
 
   FreePool (Memory);
   return TRUE;
