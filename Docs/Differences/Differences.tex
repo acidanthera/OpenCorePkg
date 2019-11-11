@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sun Nov  3 16:31:21 2019
-%DIF ADD ../Configuration.tex        Thu Nov  7 10:22:26 2019
+%DIF ADD ../Configuration.tex        Mon Nov 11 11:23:31 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2417,14 +2417,17 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
   \end{itemize}
 
   Can look as follows:
-\begin{lstlisting}[label=createvault, style=ocbash]
+\DIFmodbegin
+\begin{lstlisting}[label=createvault, style=ocbash,alsolanguage=DIFcode]
 cd /Volumes/EFI/EFI/OC
 /path/to/create_vault.sh .
 /path/to/RsaTool -sign vault.plist vault.sig vault.pub
 off=$(($(strings -a -t d OpenCore.efi | grep "=BEGIN OC VAULT=" | cut -f1 -d' ')+16))
-dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=520 conv=notrunc
+%DIF < dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=520 conv=notrunc
+%DIF > dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=528 conv=notrunc
 rm vault.pub
 \end{lstlisting}
+\DIFmodend
 
   \emph{Note}: While it may appear obvious, but you have to use an external
   method to verify \texttt{OpenCore.efi} and \texttt{BOOTx64.efi} for
