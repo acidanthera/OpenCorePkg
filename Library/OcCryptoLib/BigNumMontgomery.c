@@ -212,7 +212,7 @@ BigNumCalculateMontParams (
   //
   // Calculate Montgomery's R^2 mod N.
   //
-  BigNumAssign0 (RSqr, NumWordsRSqr);
+  ZeroMem (RSqr, NumWordsRSqr * OC_BN_WORD_SIZE);
   //
   // 2 * NumBits cannot overflow as per above.
   //

@@ -27,6 +27,23 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 OC_BN_WORD
+BigNumWordMul64 (
+  OUT OC_BN_WORD  *Hi,
+  IN  OC_BN_WORD  A,
+  IN  OC_BN_WORD  B
+  );
+
+/**
+  Calculates the product of A and B.
+
+  @param[out] Hi  Buffer in which the high Word of the result is returned.
+  @param[in]  A   The multiplicant.
+  @param[in]  B   The multiplier.
+
+  @returns  The low Word of the result.
+
+**/
+OC_BN_WORD
 BigNumWordMul (
   OUT OC_BN_WORD  *Hi,
   IN  OC_BN_WORD  A,

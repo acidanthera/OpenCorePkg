@@ -621,7 +621,7 @@ BigNumMod (
   SigWordsBigDiv = SigWordsModTmp;
   //
   // Invariant: BigDiv > ModTmp / 2
-  // The invariant implies ModTmp / BigDiv = 1.
+  // The invariant implies ModTmp / BigDiv <= 1 (latter in the strictest case).
   //
   // This loop iteratively subtracts multiples BigDiv of B from ModTmp := A [1],
   // otherwise ModTmp is not modified. BigDiv is iteratively reduced such that

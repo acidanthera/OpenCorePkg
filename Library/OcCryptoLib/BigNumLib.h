@@ -42,19 +42,6 @@ typedef UINT32 OC_BN_NUM_BITS;
 //
 
 /**
-  Assigns A the value 0.
-
-  @param[in,out] A         The number to assign to.
-  @param[in]     NumWords  The number of Words of A.
-
-**/
-VOID
-BigNumAssign0 (
-  IN OUT OC_BN_WORD       *A,
-  IN     OC_BN_NUM_WORDS  NumWords
-  );
-
-/**
   Parses a data array into a number. The buffer size must be a multiple of the
   Word size. The length of Result must precisely fit the required size.
 
