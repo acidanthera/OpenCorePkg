@@ -16,6 +16,10 @@
 #ifndef UEFI_BASE_H
 #define UEFI_BASE_H
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#pragma clang diagnostic ignored "-Wlanguage-extension-token"
+
 //
 // Includes
 //
@@ -1890,5 +1894,7 @@ GetCurrentMemoryMap (
 
 #define _PCD_GET_MODE_16_PcdOcCryptoAllowedSigHashTypes (1U | 2U | 4U) // SHA256, SHA384, SHA512
 #define _PCD_GET_MODE_16_PcdOcCryptoAllowedRsaModuli    (512U | 256U)
+
+#pragma clang diagnostic pop
 
 #endif
