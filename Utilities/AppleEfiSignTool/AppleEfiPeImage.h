@@ -63,11 +63,6 @@ typedef struct APPLE_SIGNATURE_DIRECTORY_ {
 //
 // Function prototypes
 //
-uint16_t
-GetPeHeaderMagicValue (
-  EFI_IMAGE_OPTIONAL_HEADER_UNION *Hdr
-  );
-
 int
 BuildPeContext (
   void                               *Image,

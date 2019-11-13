@@ -54,11 +54,6 @@ typedef struct APPLE_SIGNATURE_CONTEXT_ {
 //
 // Function prototypes
 //
-UINT16
-GetPeHeaderMagicValue (
-  EFI_IMAGE_OPTIONAL_HEADER_UNION *Hdr
-  );
-
 EFI_STATUS
 BuildPeContext (
   VOID                                *Image,

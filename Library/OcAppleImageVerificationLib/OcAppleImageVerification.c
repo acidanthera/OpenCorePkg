@@ -39,28 +39,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <IndustryStandard/PeImage.h>
 #include <Guid/AppleCertificate.h>
 
-UINT16
-GetPeHeaderMagicValue (
-  EFI_IMAGE_OPTIONAL_HEADER_UNION  *Hdr
-  )
-{
-  /**
-     NOTE: Some versions of Linux ELILO for Itanium have an incorrect magic value
-           in the PE/COFF Header.  If the MachineType is Itanium(IA64) and the
-           Magic value in the OptionalHeader is  EFI_IMAGE_NT_OPTIONAL_HDR32_MAGIC
-           then override the returned value to EFI_IMAGE_NT_OPTIONAL_HDR64_MAGIC
-  **/
-  if (Hdr->Pe32.FileHeader.Machine == IMAGE_FILE_MACHINE_IA64 &&
-      Hdr->Pe32.OptionalHeader.Magic == EFI_IMAGE_NT_OPTIONAL_HDR32_MAGIC) {
-    return EFI_IMAGE_NT_OPTIONAL_HDR64_MAGIC;
-  }
-
-  //
-  // Return the magic value from the PC/COFF Optional Header
-  //
-  return Hdr->Pe32.OptionalHeader.Magic;
-}
-
 EFI_STATUS
 BuildPeContext (
   VOID                                *Image,
@@ -131,7 +109,7 @@ BuildPeContext (
     PeHdr = (EFI_IMAGE_OPTIONAL_HEADER_UNION *) Image;
   }
 
-  PeHdrMagic = GetPeHeaderMagicValue (PeHdr);
+  PeHdrMagic = PeHdr->Pe32.OptionalHeader.Magic;
 
   if (PeHdrMagic == EFI_IMAGE_NT_OPTIONAL_HDR32_MAGIC) {
     //
