@@ -614,6 +614,7 @@ VerifyApplePeImageSignature (
   SignatureContext = AllocateZeroPool (sizeof (APPLE_SIGNATURE_CONTEXT));
   if (SignatureContext == NULL) {
     DEBUG ((DEBUG_WARN, "Signature context allocation failure\n"));
+    FreePool (Context);
     return EFI_OUT_OF_RESOURCES;
   }
 
