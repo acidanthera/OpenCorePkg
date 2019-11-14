@@ -1,5 +1,5 @@
 /*
- * USB compatibility table.
+ * USB compatibility table for disable phantoms EHC1, EHC2.
  *
  * Attention!
  * Only for 7,8,9-series chipsets and 10.11 and newer!
