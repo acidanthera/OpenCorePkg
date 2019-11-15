@@ -423,10 +423,10 @@ HandleTypeMismatch(bool isFatal, struct CSourceLocation *mLocation, struct CType
 		       szLocation, DeserializeTypeCheckKind(mTypeCheckKind), mType->mTypeName);
 	} else if ((mLogAlignment - 1) & ulPointer) {
 		Report(isFatal, "UBSan: Undefined Behavior in %s, %s misaligned address %p for type %s which requires %ld byte alignment\n",
-		       szLocation, DeserializeTypeCheckKind(mTypeCheckKind), REINTERPRET_CAST(void *, ulPointer), mType->mTypeName, mLogAlignment);
+		       szLocation, DeserializeTypeCheckKind(mTypeCheckKind), REINTERPRET_CAST(void *, (uint64_t)ulPointer), mType->mTypeName, mLogAlignment);
 	} else {
 		Report(isFatal, "UBSan: Undefined Behavior in %s, %s address %p with insufficient space for an object of type %s\n",
-		       szLocation, DeserializeTypeCheckKind(mTypeCheckKind), REINTERPRET_CAST(void *, ulPointer), mType->mTypeName);
+		       szLocation, DeserializeTypeCheckKind(mTypeCheckKind), REINTERPRET_CAST(void *, (uint64_t)ulPointer), mType->mTypeName);
 	}
 }
 
@@ -1497,7 +1497,7 @@ llliGetNumber(char *szLocation, struct CTypeDescriptor *pType, unsigned long ulN
 		/* NOTREACHED */
 	case WIDTH_128:
 #ifdef __SIZEOF_INT128__
-		memcpy(&L, REINTERPRET_CAST(longest *, ulNumber), sizeof(longest));
+		memcpy(&L, REINTERPRET_CAST(longest *, (longest)ulNumber), sizeof(longest));
 		break;
 #else
 		Report(true, "UBSan: Unexpected 128-Bit Type in %s\n", szLocation);
@@ -1506,7 +1506,7 @@ llliGetNumber(char *szLocation, struct CTypeDescriptor *pType, unsigned long ulN
 #endif
 	case WIDTH_64:
 		if (sizeof(ulNumber) * CHAR_BIT < WIDTH_64) {
-			L = *REINTERPRET_CAST(int64_t *, ulNumber);
+			L = *REINTERPRET_CAST(int64_t *, (int64_t)ulNumber);
 		} else {
 			L = STATIC_CAST(int64_t, STATIC_CAST(uint64_t, ulNumber));
 		}
@@ -1541,7 +1541,7 @@ llluGetNumber(char *szLocation, struct CTypeDescriptor *pType, unsigned long ulN
 		/* NOTREACHED */
 	case WIDTH_128:
 #ifdef __SIZEOF_INT128__
-		memcpy(&UL, REINTERPRET_CAST(ulongest *, ulNumber), sizeof(ulongest));
+		memcpy(&UL, REINTERPRET_CAST(ulongest *, (ulongest)ulNumber), sizeof(ulongest));
 		break;
 #else
 		Report(true, "UBSan: Unexpected 128-Bit Type in %s\n", szLocation);
@@ -1550,7 +1550,7 @@ llluGetNumber(char *szLocation, struct CTypeDescriptor *pType, unsigned long ulN
 #endif
 	case WIDTH_64:
 		if (sizeof(ulNumber) * CHAR_BIT < WIDTH_64) {
-			UL = *REINTERPRET_CAST(uint64_t *, ulNumber);
+			UL = *REINTERPRET_CAST(uint64_t *, (uint64_t)ulNumber);
 			break;
 		}
 		/* FALLTHROUGH */
