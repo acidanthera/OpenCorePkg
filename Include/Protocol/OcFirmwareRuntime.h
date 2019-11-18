@@ -39,6 +39,15 @@ typedef struct OC_FWRT_CONFIG_ {
   ///
   BOOLEAN  BootVariableRedirect;
   ///
+  /// Route boot variables back to EfiGlobalVariable when they are compatible.
+  /// In general we do not want this, as this basically escapes OpenCore security
+  /// jail, and permits booting operating systems bypassing OpenCore.
+  /// However, some firmwares, namely ASUS APTIO V, will freeze/fail to boot
+  /// by manually adding boot entries for Windows after Windows itself did not
+  /// create them.
+  ///
+  BOOLEAN  BootVariableFallback;
+  ///
   /// Make SetVariable do nothing and always return EFI_SECURITY_VIOLATION.
   /// When we do not want variables to be stored in NVRAM or NVRAM implementation
   /// is buggy we can disable variable writing.
