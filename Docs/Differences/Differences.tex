@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sun Nov  3 16:31:21 2019
-%DIF ADD ../Configuration.tex        Mon Nov 11 11:23:31 2019
+%DIF ADD ../Configuration.tex        Tue Nov 19 13:06:47 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3947,11 +3947,58 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   operating system may freeze upon boot. Not recommended unless required.
 
 \item
-  \texttt{RequestBootVarRouting}\\
+  \DIFaddbegin \texttt{\DIFadd{RequestBootVarFallback}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Request fallback of some }\texttt{\DIFadd{Boot}} \DIFadd{prefixed variables from
+  }\texttt{\DIFadd{OC\_VENDOR\_VARIABLE\_GUID}} \DIFadd{to }\newline \texttt{\DIFadd{EFI\_GLOBAL\_VARIABLE\_GUID}}\DIFadd{.
+}
+
+  \DIFadd{This quirk requires }\DIFaddend \texttt{RequestBootVarRouting} \DIFaddbegin \DIFadd{to be enabled and therefore
+  }\texttt{\DIFadd{OC\_FIRMWARE\_RUNTIME}} \DIFadd{protocol implemented in }\texttt{\DIFadd{FwRuntimeServices.efi}}\DIFadd{.
+}
+
+  \DIFadd{By redirecting }\texttt{\DIFadd{Boot}} \DIFadd{prefixed variables to a separate GUID namespace we achieve
+  multiple goals:
+  }\begin{itemize}
+  \tightlist
+  \item \DIFadd{Operating systems are jailed and only controlled by OpenCore boot
+  environment to enhance security.
+  }\item \DIFadd{Operating systems do not mess with OpenCore boot priority, and guarantee
+  fluent updates and hibernation wakes for cases that require reboots with OpenCore
+  in the middle.
+  }\item \DIFadd{Potentially incompatible boot entries, such as macOS entries, are not deleted
+  or anyhow corrupted.
+  }\end{itemize}
+
+  \DIFadd{However, some firmwares do their own boot option scanning upon startup by checking
+  file presence on the available disks. Quite often this scanning includes non-standard
+  locations, such as Windows Bootloader paths. Normally it is not an issue, but some
+  firmwares, ASUS firmwares on APTIO V in particular, have bugs. For them scanning is
+  implemented improperly, and firmware preferences may get accidentally corrupted
+  due to }\texttt{\DIFadd{BootOrder}} \DIFadd{entry duplication (each option will be added twice) making
+  it impossible to boot without cleaning NVRAM.
+}
+
+  \DIFadd{To trigger the bug one should have some valid boot options (e.g. OpenCore) and then
+  install Windows with }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{enabled. As Windows bootloader
+  option will not be created by Windows installer, the firmware will attempt to create it
+  itself, and then corrupt its boot option list.
+}
+
+  \DIFadd{This quirk forwards all UEFI specification valid boot options, that are not related to
+  macOS, to the firmware into }\texttt{\DIFadd{BootF\#\#\#}} \DIFadd{and }\texttt{\DIFadd{BootOrder}} \DIFadd{variables upon
+  write. As the entries are added to the end of }\texttt{\DIFadd{BootOrder}}\DIFadd{, this does not
+  break boot priority, but ensures that the firmware does not try to append a new option
+  on its own after Windows installation for instance.
+}
+
+\item
+  \texttt{\DIFadd{RequestBootVarRouting}}\DIFaddend \\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Request redirect\texttt{Boot} prefixed variables from
-  \texttt{EFI\_GLOBAL\_VARIABLE\_GUID} to \texttt{OC\_VENDOR\_VARIABLE\_GUID}.
+  \textbf{Description}: Request redirect \DIFaddbegin \DIFadd{of all }\DIFaddend \texttt{Boot} prefixed variables from
+  \texttt{EFI\_GLOBAL\_VARIABLE\_GUID} to \DIFaddbegin \newline \DIFaddend \texttt{OC\_VENDOR\_VARIABLE\_GUID}.
 
   This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented
   in \texttt{FwRuntimeServices.efi}. The quirk lets default boot entry
