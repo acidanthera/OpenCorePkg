@@ -81,6 +81,7 @@ IsDeletableVariable (
     // Do not remove OpenCore critical variables.
     //
     if (StrCmp (Name, OC_BOOT_REDIRECT_VARIABLE_NAME) != 0
+      && StrCmp (Name, OC_BOOT_FALLBACK_VARIABLE_NAME) != 0
       && StrCmp (Name, OC_LOAD_POLICY_VARIABLE_NAME) != 0
       && StrCmp (Name, OC_SCAN_POLICY_VARIABLE_NAME) != 0) {
       return TRUE;

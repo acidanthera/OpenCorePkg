@@ -335,6 +335,18 @@ OcStartImage (
       );
 
     //
+    // Do the same thing for Boot#### variable fallback.
+    //
+    DataSize = sizeof (Config.BootVariableFallback);
+    BootCompat->ServicePtrs.GetVariable (
+      OC_BOOT_FALLBACK_VARIABLE_NAME,
+      &gOcVendorVariableGuid,
+      NULL,
+      &DataSize,
+      &Config.BootVariableFallback
+      );
+
+    //
     // Enable Apple-specific changes if requested.
     // Disable them when this is no longer Apple.
     //
