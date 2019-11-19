@@ -518,6 +518,14 @@ OcLoadUefiSupport (
     &Config->Uefi.Quirks.RequestBootVarRouting
     );
 
+  gRT->SetVariable (
+    OC_BOOT_FALLBACK_VARIABLE_NAME,
+    &gOcVendorVariableGuid,
+    OPEN_CORE_INT_NVRAM_ATTR,
+    sizeof (Config->Uefi.Quirks.RequestBootVarFallback),
+    &Config->Uefi.Quirks.RequestBootVarFallback
+    );
+
   if (Config->Uefi.Quirks.ReleaseUsbOwnership
     || Config->Uefi.Quirks.ExitBootServicesDelay > 0
     || AgiExitBs) {

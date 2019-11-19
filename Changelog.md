@@ -9,6 +9,7 @@ OpenCore Changelog
 - Added various debugging improvements
 - Added new crypto stack resulting in vault key format changes
 - Added `UnblockFsConnect` UEFI quirk to fix missing filesystems on some laptops
+- Added `RequestBootVarFallback` UEFI quirk to circumvent firmware boot option issues
 
 #### v0.5.2
 - Fixed `MinKernel` and `MaxKernel` logic (thx @dhinakg, @reitermarkus)
