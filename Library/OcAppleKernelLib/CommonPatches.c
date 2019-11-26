@@ -602,32 +602,58 @@ PatchUsbXhciPortLimit (
 
 STATIC
 UINT8
-mIOAHCIBlockStoragePatchFind[] = {
+mIOAHCIBlockStoragePatchV1Find[] = {
   0x41, 0x50, 0x50, 0x4C, 0x45, 0x20, 0x53, 0x53, 0x44, 0x00
 };
 
 STATIC
 UINT8
-mIOAHCIBlockStoragePatchReplace[] = {
+mIOAHCIBlockStoragePatchV1Replace[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mIOAHCIBlockStoragePatch = {
-  .Comment     = DEBUG_POINTER ("IOAHCIBlockStorage"),
+mIOAHCIBlockStoragePatchV1 = {
+  .Comment     = DEBUG_POINTER ("IOAHCIBlockStorageV1"),
   .Base        = NULL,
-  .Find        = mIOAHCIBlockStoragePatchFind,
+  .Find        = mIOAHCIBlockStoragePatchV1Find,
   .Mask        = NULL,
-  .Replace     = mIOAHCIBlockStoragePatchReplace,
+  .Replace     = mIOAHCIBlockStoragePatchV1Replace,
   .ReplaceMask = NULL,
-  .Size        = sizeof (mIOAHCIBlockStoragePatchFind),
+  .Size        = sizeof (mIOAHCIBlockStoragePatchV1Find),
+  .Count       = 1,
+  .Skip        = 0
+};
+
+STATIC
+UINT8
+mIOAHCIBlockStoragePatchV2Find[] = {
+  0x41, 0x50, 0x50, 0x4C, 0x45, 0x00
+};
+
+STATIC
+UINT8
+mIOAHCIBlockStoragePatchV2Replace[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mIOAHCIBlockStoragePatchV2 = {
+  .Comment     = DEBUG_POINTER ("IOAHCIBlockStorageV2"),
+  .Base        = NULL,
+  .Find        = mIOAHCIBlockStoragePatchV2Find,
+  .Mask        = NULL,
+  .Replace     = mIOAHCIBlockStoragePatchV2Replace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mIOAHCIBlockStoragePatchV2Find),
   .Count       = 1,
   .Skip        = 0
 };
 
 RETURN_STATUS
-PatchThirdPartySsdTrim (
+PatchThirdPartyDriveSupport (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
@@ -641,11 +667,18 @@ PatchThirdPartySsdTrim (
     );
 
   if (!RETURN_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &mIOAHCIBlockStoragePatch);
+    Status = PatcherApplyGenericPatch (&Patcher, &mIOAHCIBlockStoragePatchV1);
     if (RETURN_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOAHCIBlockStorage - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOAHCIBlockStorage V1 - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOAHCIBlockStorage\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOAHCIBlockStorage V2\n"));
+    }
+
+    Status = PatcherApplyGenericPatch (&Patcher, &mIOAHCIBlockStoragePatchV2);
+    if (RETURN_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOAHCIBlockStorage V2 - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOAHCIBlockStorage V2\n"));
     }
   } else {
     DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.iokit.IOAHCIBlockStorage - %r\n", Status));
