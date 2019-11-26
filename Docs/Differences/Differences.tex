@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sun Nov  3 16:31:21 2019
-%DIF ADD ../Configuration.tex        Tue Nov 19 13:06:47 2019
+%DIF ADD ../Configuration.tex        Wed Nov 27 01:41:16 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1913,13 +1913,15 @@ blocking.
   should be used, which is otherwise equivalent to this quirk.
 
 \item
-  \texttt{ThirdPartyTrim}\\
+  \texttt{\DIFdelbegin \DIFdel{ThirdPartyTrim}\DIFdelend \DIFaddbegin \DIFadd{ThirdPartyDrives}\DIFaddend }\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Patch IOAHCIBlockStorage.kext to force TRIM command support
-  on AHCI SSDs.
+  \textbf{Description}: \DIFdelbegin \DIFdel{Patch }\DIFdelend \DIFaddbegin \DIFadd{Apply vendor patches to }\DIFaddend IOAHCIBlockStorage.kext to \DIFdelbegin \DIFdel{force TRIM command support
+  on AHCI SSDs }\DIFdelend \DIFaddbegin \DIFadd{enable
+  native features for third-party drives, such as TRIM on SSDs or hibernation
+  support on 10.15 and newer}\DIFaddend .
 
-  \emph{Note}: This option should avoided whenever possible. NVMe SSDs are
+  \emph{Note}: This option \DIFdelbegin \DIFdel{should avoided whenever possible}\DIFdelend \DIFaddbegin \DIFadd{may be avoided on user preference}\DIFaddend . NVMe SSDs are
   compatible without the change. For AHCI SSDs on modern macOS version there
   is a dedicated built-in utility called \texttt{trimforce}. Starting from 10.15
   this utility creates \texttt{EnableTRIM} variable in \texttt{APPLE\_BOOT\_VARIABLE\_GUID}
@@ -1932,7 +1934,7 @@ blocking.
   \textbf{Description}: Patch various kexts (AppleUSBXHCI.kext, AppleUSBXHCIPCI.kext,
   IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 
-  \emph{Note}: This option should avoided whenever possible. USB port limit
+  \emph{Note}: This option should \DIFaddbegin \DIFadd{be }\DIFaddend avoided whenever possible. USB port limit
   is imposed by the amount of used bits in locationID format and there is no
   possible way to workaround this without heavy OS modification. The only
   valid solution is to limit the amount of used ports to 15 (discarding some).

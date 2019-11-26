@@ -1841,13 +1841,14 @@ blocking.
   should be used, which is otherwise equivalent to this quirk.
 
 \item
-  \texttt{ThirdPartyTrim}\\
+  \texttt{ThirdPartyDrives}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Patch IOAHCIBlockStorage.kext to force TRIM command support
-  on AHCI SSDs.
+  \textbf{Description}: Apply vendor patches to IOAHCIBlockStorage.kext to enable
+  native features for third-party drives, such as TRIM on SSDs or hibernation
+  support on 10.15 and newer.
 
-  \emph{Note}: This option should avoided whenever possible. NVMe SSDs are
+  \emph{Note}: This option may be avoided on user preference. NVMe SSDs are
   compatible without the change. For AHCI SSDs on modern macOS version there
   is a dedicated built-in utility called \texttt{trimforce}. Starting from 10.15
   this utility creates \texttt{EnableTRIM} variable in \texttt{APPLE\_BOOT\_VARIABLE\_GUID}
@@ -1860,7 +1861,7 @@ blocking.
   \textbf{Description}: Patch various kexts (AppleUSBXHCI.kext, AppleUSBXHCIPCI.kext,
   IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 
-  \emph{Note}: This option should avoided whenever possible. USB port limit
+  \emph{Note}: This option should be avoided whenever possible. USB port limit
   is imposed by the amount of used bits in locationID format and there is no
   possible way to workaround this without heavy OS modification. The only
   valid solution is to limit the amount of used ports to 15 (discarding some).

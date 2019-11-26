@@ -418,8 +418,8 @@ OcKernelApplyPatches (
       PatchForceInternalDiskIcons (Context);
     }
 
-    if (Config->Kernel.Quirks.ThirdPartyTrim) {
-      PatchThirdPartySsdTrim (Context);
+    if (Config->Kernel.Quirks.ThirdPartyDrives) {
+      PatchThirdPartyDriveSupport (Context);
     }
 
     if (Config->Kernel.Quirks.XhciPortLimit) {
