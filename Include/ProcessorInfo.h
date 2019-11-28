@@ -165,6 +165,7 @@ enum {
 #define CPU_MODEL_HASWELL_EP     0x3F  ///< Haswell MB
 #define CPU_MODEL_HASWELL_ULT    0x45  ///< Haswell ULT
 #define CPU_MODEL_BROADWELL      0x3D  ///< Broadwell
+#define CPU_MODEL_BROADWELL_EP   0x4F  ///< Broadwell_EP
 #define CPU_MODEL_BROADWELL_ULX  0x3D
 #define CPU_MODEL_BROADWELL_ULT  0x3D
 #define CPU_MODEL_BRYSTALWELL    0x47

@@ -413,6 +413,7 @@ DetectAppleProcessorType (
     //   Pentium, Celeron
     //
     case CPU_MODEL_BROADWELL:     // 0x3D
+    case CPU_MODEL_BROADWELL_EP:  // 0x4F
     case CPU_MODEL_CRYSTALWELL:   // 0x46
     case CPU_MODEL_BRYSTALWELL:   // 0x47
       if (AppleMajorType == AppleProcessorMajorM) {
@@ -1579,6 +1580,7 @@ OcCpuModelToAppleFamily (
     case CPU_MODEL_CRYSTALWELL:
       return CPUFAMILY_INTEL_HASWELL;
     case CPU_MODEL_BROADWELL:
+    case CPU_MODEL_BROADWELL_EP:
     case CPU_MODEL_BRYSTALWELL:
       return CPUFAMILY_INTEL_BROADWELL;
     case CPU_MODEL_SKYLAKE:
