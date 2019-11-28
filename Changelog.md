@@ -12,6 +12,7 @@ OpenCore Changelog
 - Added `RequestBootVarFallback` UEFI quirk to circumvent firmware boot option issues
 - Added `ThirdPartyDrives` kernel quirk fixing SSD trim and 10.15 SATA hibernation (thx @lvs1974)
 - Removed `ThirdPartyTrim` kernel quirk in favour of `ThirdPartyDrives`
+- Added Intel Xeon E5 (Broadwell-EP) support (thx @crazyi)
 
 #### v0.5.2
 - Fixed `MinKernel` and `MaxKernel` logic (thx @dhinakg, @reitermarkus)
