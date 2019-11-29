@@ -44,7 +44,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #define OC_BN_MAX_VAL  ((OC_BN_WORD)0U - 1U)
 
-OC_STATIC_ASSERT (
+STATIC_ASSERT (
   OC_BN_WORD_SIZE == sizeof (UINT32) || OC_BN_WORD_SIZE == sizeof (UINT64),
   "OC_BN_WORD_SIZE and OC_BN_WORD_NUM_BITS usages must be adapted."
   );
@@ -606,7 +606,7 @@ BigNumMod (
   ++SigWordsModTmp;
   ASSERT (SigBitsModTmp == BigNumSignificantBits (A, SigWordsModTmp));
 
-  OC_STATIC_ASSERT (
+  STATIC_ASSERT (
     OC_BN_MAX_SIZE <= MAX_UINTN / 2,
     "An overflow verification must be added"
     );

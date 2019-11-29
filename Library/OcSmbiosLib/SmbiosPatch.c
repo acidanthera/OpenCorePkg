@@ -203,7 +203,7 @@ PatchBaseboardInformation (
   // Hack for EDK 2 not using flexible array members adding extra data at struct end.
   //
   MinLength -= sizeof (Original.Standard.Type2->ContainedObjectHandles[0]);
-  OC_STATIC_ASSERT (
+  STATIC_ASSERT (
     sizeof (Original.Standard.Type2->ContainedObjectHandles) == sizeof (UINT16),
     "Please remove this hack, the structure should have been fixed by now."
     );
@@ -253,7 +253,7 @@ PatchSystemEnclosure (
   // Hack for EDK 2 not using flexible array members adding extra data at struct end.
   //
   MinLength -= sizeof (Original.Standard.Type3->ContainedElements[0]);
-  OC_STATIC_ASSERT (
+  STATIC_ASSERT (
     sizeof (Original.Standard.Type3->ContainedElements) == sizeof (UINT8)*3,
     "Please remove this hack, the structure should have been fixed by now."
     );
@@ -263,7 +263,7 @@ PatchSystemEnclosure (
   // Note, Apple just ignores this field and just writes Type3 as is.
   //
   MinLength += sizeof (SMBIOS_TABLE_STRING);
-  OC_STATIC_ASSERT (
+  STATIC_ASSERT (
     sizeof (*Original.Standard.Type3) == sizeof (UINT8) * 0x18,
     "The structure has changed, please fix this up."
     );
@@ -1218,7 +1218,7 @@ SmbiosPrepareTable (
         mOriginalSmbios->EntryPointLength, (UINT32) sizeof (SMBIOS_TABLE_ENTRY_POINT)));
       mOriginalSmbios = NULL;
     } else if (mOriginalSmbios->TableAddress == 0 || mOriginalSmbios->TableLength == 0) {
-      OC_STATIC_ASSERT (
+      STATIC_ASSERT (
         sizeof (mOriginalSmbios->TableLength) == sizeof (UINT16)
         && SMBIOS_TABLE_MAX_LENGTH == MAX_UINT16,
         "mOriginalTable->TableLength may exceed SMBIOS_TABLE_MAX_LENGTH"
@@ -1245,7 +1245,7 @@ SmbiosPrepareTable (
         mOriginalSmbios3->EntryPointLength, (UINT32) sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT)));
       mOriginalSmbios3 = NULL;
     } else if (mOriginalSmbios3->TableAddress == 0 || mOriginalSmbios3->TableMaximumSize == 0) {
-      OC_STATIC_ASSERT (
+      STATIC_ASSERT (
         sizeof (mOriginalSmbios3->TableMaximumSize) == sizeof (UINT32)
         && SMBIOS_3_0_TABLE_MAX_LENGTH == MAX_UINT32,
         "mOriginalSmbios3->TableMaximumSize may exceed SMBIOS_3_0_TABLE_MAX_LENGTH"

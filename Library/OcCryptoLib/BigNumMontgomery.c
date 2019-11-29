@@ -187,7 +187,7 @@ BigNumCalculateMontParams (
 
   NumBits = BigNumSignificantBits (N, NumWords);
 
-  OC_STATIC_ASSERT (
+  STATIC_ASSERT (
     OC_BN_MAX_SIZE * OC_CHAR_BIT <= ((MAX_UINTN - 1) / 2) - (OC_CHAR_BIT - 1),
     "An overflow verification must be added"
     );

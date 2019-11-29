@@ -194,7 +194,7 @@ RsaVerifySigHashFromProcessed (
   ASSERT (Hash != NULL);
   ASSERT (HashSize > 0);
 
-  OC_STATIC_ASSERT (
+  STATIC_ASSERT (
     OcSigHashTypeSha512 == OcSigHashTypeMax - 1,
     "New switch cases have to be added for every introduced algorithm."
     );
@@ -413,7 +413,7 @@ RsaVerifySigDataFromProcessed (
   ASSERT (Data != NULL);
   ASSERT (DataSize > 0);
 
-  OC_STATIC_ASSERT (
+  STATIC_ASSERT (
     OcSigHashTypeSha512 == OcSigHashTypeMax - 1,
     "New switch cases have to be added for every introduced algorithm."
     );
@@ -502,7 +502,7 @@ RsaVerifySigDataFromData (
 
   ModulusNumWords = (OC_BN_NUM_WORDS)ModulusNumWordsTmp;
 
-  OC_STATIC_ASSERT (
+  STATIC_ASSERT (
     OC_BN_MAX_SIZE <= MAX_UINTN / 2,
     "An overflow verification must be added"
     );
@@ -556,7 +556,7 @@ RsaVerifySigHashFromKey (
   ASSERT (Hash != NULL);
   ASSERT (HashSize > 0);
 
-  OC_STATIC_ASSERT (
+  STATIC_ASSERT (
     OC_BN_WORD_SIZE <= 8,
     "The parentheses need to be changed to avoid truncation."
     );
@@ -594,7 +594,7 @@ RsaVerifySigDataFromKey (
   ASSERT (Data != NULL);
   ASSERT (DataSize > 0);
 
-  OC_STATIC_ASSERT (
+  STATIC_ASSERT (
     OC_BN_WORD_SIZE <= 8,
     "The parentheses need to be changed to avoid truncation."
     );

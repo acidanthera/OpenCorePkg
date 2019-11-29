@@ -1103,14 +1103,14 @@ OcWaitForAppleKeyIndex (
     // Check exact match on index strokes.
     //
     if (Modifiers == 0 && NumKeys == 1) {
-      OC_STATIC_ASSERT (AppleHidUsbKbUsageKeyOne + 8 == AppleHidUsbKbUsageKeyNine, "Unexpected encoding");
+      STATIC_ASSERT (AppleHidUsbKbUsageKeyOne + 8 == AppleHidUsbKbUsageKeyNine, "Unexpected encoding");
       for (KeyCode = AppleHidUsbKbUsageKeyOne; KeyCode <= AppleHidUsbKbUsageKeyNine; ++KeyCode) {
         if (OcKeyMapHasKey (Keys, NumKeys, KeyCode)) {
           return (INTN) (KeyCode - AppleHidUsbKbUsageKeyOne);
         }
       }
 
-      OC_STATIC_ASSERT (AppleHidUsbKbUsageKeyA + 25 == AppleHidUsbKbUsageKeyZ, "Unexpected encoding");
+      STATIC_ASSERT (AppleHidUsbKbUsageKeyA + 25 == AppleHidUsbKbUsageKeyZ, "Unexpected encoding");
       for (KeyCode = AppleHidUsbKbUsageKeyA; KeyCode <= AppleHidUsbKbUsageKeyZ; ++KeyCode) {
         if (OcKeyMapHasKey (Keys, NumKeys, KeyCode)) {
           return (INTN) (KeyCode - AppleHidUsbKbUsageKeyA + 9);

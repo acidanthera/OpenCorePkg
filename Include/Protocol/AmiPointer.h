@@ -35,7 +35,7 @@ typedef struct {
   INT32        PositionZ;
 } AMI_POINTER_POSITION_STATE_DATA;
 
-OC_STATIC_ASSERT (
+STATIC_ASSERT (
   sizeof (AMI_POINTER_POSITION_STATE_DATA) == 16,
   "AMI_POINTER_POSITION_STATE_DATA is expected to be 16 bytes"
   );
@@ -48,7 +48,7 @@ typedef struct {
   UINT8        RightButton;
 } AMI_POINTER_BUTTON_STATE_DATA;
 
-OC_STATIC_ASSERT (
+STATIC_ASSERT (
   sizeof (AMI_POINTER_BUTTON_STATE_DATA) == 4,
   "AMI_POINTER_BUTTON_STATE_DATA is expected to be 4 bytes"
   );

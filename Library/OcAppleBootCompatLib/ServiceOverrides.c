@@ -433,6 +433,69 @@ OcAllocatePages (
   return Status;
 }
 
+STATIC
+EFI_STATUS
+EFIAPI
+OcGetMemoryMapOrg (
+  IN OUT UINTN                  *MemoryMapSize,
+  IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+     OUT UINTN                  *MapKey,
+     OUT UINTN                  *DescriptorSize,
+     OUT UINT32                 *DescriptorVersion
+  )
+{
+  UINTN                   NumEntries;
+  UINTN                   Index;
+  EFI_MEMORY_DESCRIPTOR   *Desc;
+  EFI_STATUS              Status;
+  BOOT_COMPAT_CONTEXT     *BootCompat;
+
+  BootCompat = GetBootCompatContext ();
+
+  Status = BootCompat->ServicePtrs.GetMemoryMapReal (
+    MemoryMapSize,
+    MemoryMap,
+    MapKey,
+    DescriptorSize,
+    DescriptorVersion
+    );
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Desc                = MemoryMap;
+  NumEntries          = *MemoryMapSize / *DescriptorSize;
+
+  DEBUG ((DEBUG_INFO, "OC: Fixing up memmap of %u\n", (UINT32) NumEntries));
+
+  for (Index = 0; Index < NumEntries; ++Index) {
+    if (Desc->Type == EfiBootServicesCode || Desc->Type == EfiLoaderCode) {
+      Desc->Type = EfiRuntimeServicesCode;
+      Desc->Attribute |= EFI_MEMORY_RUNTIME;
+    } else if (Desc->Type == EfiBootServicesData || Desc->Type == EfiLoaderData) {
+      Desc->Type = EfiRuntimeServicesData;
+      Desc->Attribute |= EFI_MEMORY_RUNTIME;
+    } else if (Desc->Type == EfiReservedMemoryType) {
+      Desc->Type = EfiRuntimeServicesData;
+      Desc->Attribute |= EFI_MEMORY_RUNTIME;
+    } else if (Desc->Type == EfiACPIMemoryNVS || Desc->Type == EfiACPIReclaimMemory) {
+      Desc->Type = EfiMemoryMappedIO;
+      Desc->Attribute |= EFI_MEMORY_RUNTIME;
+    } else if (Desc->Type == EfiMemoryMappedIO) {
+      Desc->Attribute |= EFI_MEMORY_RUNTIME;
+    }
+    ASSERT (Desc->Type < EfiMaxMemoryType);
+    ASSERT (Desc->Type != EfiUnusableMemory);
+    ASSERT (Desc->Type != EfiPalCode);
+    ASSERT (Desc->Type != EfiPersistentMemory);
+    ASSERT (Desc->Type != EfiMemoryMappedIOPortSpace);
+    Desc = NEXT_MEMORY_DESCRIPTOR (Desc, *DescriptorSize);
+  }
+
+  return Status;
+}
+
 /**
   UEFI Boot Services GetMemoryMap override.
   Returns shrinked memory map as XNU can handle up to PMAP_MEMORY_REGIONS_SIZE (128) entries.
@@ -720,7 +783,8 @@ InstallServiceOverrides (
   OriginalTpl = gBS->RaiseTPL (TPL_HIGH_LEVEL);
 
   ServicePtrs->AllocatePages        = gBS->AllocatePages;
-  ServicePtrs->GetMemoryMap         = gBS->GetMemoryMap;
+  ServicePtrs->GetMemoryMapReal     = gBS->GetMemoryMap;
+  ServicePtrs->GetMemoryMap         = OcGetMemoryMapOrg;
   ServicePtrs->ExitBootServices     = gBS->ExitBootServices;
   ServicePtrs->StartImage           = gBS->StartImage;
   ServicePtrs->SetVirtualAddressMap = gRT->SetVirtualAddressMap;

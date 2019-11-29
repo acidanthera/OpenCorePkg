@@ -63,7 +63,7 @@ GetVolumeLabel (
 
   Volume->Close (Volume);
 
-  OC_STATIC_ASSERT (
+  STATIC_ASSERT (
     OFFSET_OF(EFI_FILE_SYSTEM_VOLUME_LABEL, VolumeLabel) == 0,
     "Expected EFI_FILE_SYSTEM_VOLUME_LABEL to represent CHAR16 string!"
     );

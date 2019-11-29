@@ -260,7 +260,7 @@ typedef struct {
   } Vtable;
 } OC_PRELINKED_VTABLE_LOOKUP_ENTRY;
 
-OC_STATIC_ASSERT (
+STATIC_ASSERT (
   (sizeof (OC_PRELINKED_VTABLE_LOOKUP_ENTRY) <= sizeof (MACH_NLIST_64)),
   "Prelinked VTable lookup data might not safely fit LinkBuffer"
   );
@@ -281,7 +281,7 @@ typedef struct {
 // NLIST, has either 1 pointer or 2 UINT32s following in the struct.
 // Due to the location logic, the three symbols pointers will not be equal.
 //
-OC_STATIC_ASSERT (
+STATIC_ASSERT (
   ((sizeof (MACH_NLIST_64 *) + MAX ((2 * sizeof (UINT32)), sizeof (UINT64 *))) <= sizeof (MACH_NLIST_64)),
   "VTable Patch data might not safely fit LinkBuffer"
   );

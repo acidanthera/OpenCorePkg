@@ -142,7 +142,7 @@ OcUnicodeCollationEngInstallProtocol (
   // Workaround by appending the other language to the list of supported ones.
   //
   if (!OverwroteLang && AsciiStrnCmp (PlatformLang, "en", 2)) {
-    OC_STATIC_ASSERT (sizeof (UnicodeLanguages) == 6 && sizeof (UnicodeLanguages[0]) == 1,
+    STATIC_ASSERT (sizeof (UnicodeLanguages) == 6 && sizeof (UnicodeLanguages[0]) == 1,
       "UnicodeLanguages must contain one extra language");
     UnicodeLanguages[2] = ';';
     UnicodeLanguages[3] = PlatformLang[0];

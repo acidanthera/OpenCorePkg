@@ -19,20 +19,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #ifndef OC_GUARD_LIB_H
 #define OC_GUARD_LIB_H
 
-/**
-  Portable definition for compile time assertions.
-  Equivalent to C11 static_assert macro from assert.h.
-
-  @param  Expression  Boolean expression.
-  @param  Message     Raised compiler diagnostic message when expression is false.
-
-**/
-#if defined(_MSC_VER) && !defined(__clang__)
-  #define OC_STATIC_ASSERT static_assert
-#else
-  #define OC_STATIC_ASSERT _Static_assert
-#endif
-
 //
 // The macros below provide pointer alignment checking interfaces.
 // TypedPtr - pointer of a dedicated type, which alignment is to be checked.
@@ -446,8 +432,8 @@ OcOverflowMulAddSN (
 //
 #if defined(MDE_CPU_AARCH64) || defined(MDE_CPU_ARM) || defined(MDE_CPU_X64) || defined(MDE_CPU_IA32)
 
-OC_STATIC_ASSERT (sizeof (int) == 4,      "int is expected to be 4 bytes");
-OC_STATIC_ASSERT (sizeof (unsigned) == 4, "unsigned is expected to be 4 bytes");
+STATIC_ASSERT (sizeof (int) == 4,      "int is expected to be 4 bytes");
+STATIC_ASSERT (sizeof (unsigned) == 4, "unsigned is expected to be 4 bytes");
 
 #define OcOverflowAddU32(A, B, Res) __builtin_uadd_overflow((UINT32)(A), (UINT32)(B), (UINT32 *)(Res))
 #define OcOverflowSubU32(A, B, Res) __builtin_usub_overflow((UINT32)(A), (UINT32)(B), (UINT32 *)(Res))
@@ -464,8 +450,8 @@ OC_STATIC_ASSERT (sizeof (unsigned) == 4, "unsigned is expected to be 4 bytes");
 //
 #if defined(MDE_CPU_AARCH64) || defined(MDE_CPU_ARM) || defined(MDE_CPU_X64) || defined(MDE_CPU_IA32)
 
-OC_STATIC_ASSERT (sizeof (long long) == 8,          "long long is expected to be 8 bytes");
-OC_STATIC_ASSERT (sizeof (unsigned long long) == 8, "unsigned long long is expected to be 8 bytes");
+STATIC_ASSERT (sizeof (long long) == 8,          "long long is expected to be 8 bytes");
+STATIC_ASSERT (sizeof (unsigned long long) == 8, "unsigned long long is expected to be 8 bytes");
 
 #define OcOverflowAddU64(A, B, Res) __builtin_uaddll_overflow((UINT64)(A), (UINT64)(B), (UINT64 *)(Res))
 #define OcOverflowSubU64(A, B, Res) __builtin_usubll_overflow((UINT64)(A), (UINT64)(B), (UINT64 *)(Res))
@@ -481,8 +467,8 @@ OC_STATIC_ASSERT (sizeof (unsigned long long) == 8, "unsigned long long is expec
 //
 #if defined(MDE_CPU_AARCH64) || defined(MDE_CPU_X64)
 
-OC_STATIC_ASSERT (sizeof (INTN) == 8,  "UINTN is expected to be 8 bytes");
-OC_STATIC_ASSERT (sizeof (UINTN) == 8, "UINTN is expected to be 8 bytes");
+STATIC_ASSERT (sizeof (INTN) == 8,  "UINTN is expected to be 8 bytes");
+STATIC_ASSERT (sizeof (UINTN) == 8, "UINTN is expected to be 8 bytes");
 
 #define OcOverflowAddUN(A, B, Res) OcOverflowAddU64((A), (B), (Res))
 #define OcOverflowSubUN(A, B, Res) OcOverflowSubU64((A), (B), (Res))
@@ -493,8 +479,8 @@ OC_STATIC_ASSERT (sizeof (UINTN) == 8, "UINTN is expected to be 8 bytes");
 
 #elif defined(MDE_CPU_ARM) || defined(MDE_CPU_IA32)
 
-OC_STATIC_ASSERT (sizeof (INTN) == 4,  "UINTN is expected to be 4 bytes");
-OC_STATIC_ASSERT (sizeof (UINTN) == 4, "UINTN is expected to be 4 bytes");
+STATIC_ASSERT (sizeof (INTN) == 4,  "UINTN is expected to be 4 bytes");
+STATIC_ASSERT (sizeof (UINTN) == 4, "UINTN is expected to be 4 bytes");
 
 #define OcOverflowAddUN(A, B, Res) OcOverflowAddU32((A), (B), (Res))
 #define OcOverflowSubUN(A, B, Res) OcOverflowSubU32((A), (B), (Res))

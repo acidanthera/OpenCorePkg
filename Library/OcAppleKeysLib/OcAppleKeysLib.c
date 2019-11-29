@@ -44,7 +44,7 @@ typedef PACKED struct {
 // Verify the structure size equals to the header plus two times the key size
 // (N and R^2 mod N).
 //
-OC_STATIC_ASSERT (
+STATIC_ASSERT (
   sizeof (OC_RSA_PUBLIC_KEY_2048) == sizeof (OC_RSA_PUBLIC_KEY_HDR) + OC_RSA_PK_2048_NUM_BYTES,
   "The 2048-bit RSA PK struct is malformed."
   );
