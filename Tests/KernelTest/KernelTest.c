@@ -253,7 +253,7 @@ ApplyKextPatches (
 
   PatchUsbXhciPortLimit (Context);
 
-  PatchThirdPartySsdTrim (Context);
+  PatchThirdPartyDriveSupport (Context);
 
   PatchForceInternalDiskIcons (Context);
 
