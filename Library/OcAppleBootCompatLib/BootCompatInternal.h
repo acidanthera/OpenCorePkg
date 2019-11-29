@@ -50,13 +50,13 @@
   Maximum number of supported runtime reloc protection areas.
   Currently hardocded for simplicity.
 **/
-#define RT_RELOC_PROTECT_MAX_NUM ((UINTN) 128)
+#define RT_RELOC_PROTECT_MAX_NUM ((UINTN) 64)
 
 /**
   Runtime descriptor number to virtualise.
   Currently hardocded for simplicity.
 **/
-#define RT_DESC_ENTRY_NUM        ((UINTN) 128)
+#define RT_DESC_ENTRY_NUM        ((UINTN) 64)
 
 /**
   Kernel __HIB segment virtual address.
@@ -144,7 +144,6 @@ typedef struct UEFI_SERVICES_POINTERS_ {
   /// memory map shrinking and CSM region protection.
   ///
   EFI_GET_MEMORY_MAP          GetMemoryMap;
-  EFI_GET_MEMORY_MAP          GetMemoryMapReal;
   ///
   /// Original exit boot services function. We override it
   /// to ensure we always succeed exiting boot services.
