@@ -13,6 +13,7 @@ OpenCore Changelog
 - Added `ThirdPartyDrives` kernel quirk fixing SSD trim and 10.15 SATA hibernation (thx @lvs1974)
 - Removed `ThirdPartyTrim` kernel quirk in favour of `ThirdPartyDrives`
 - Added Intel Xeon E5 (Broadwell-EP) support (thx @crazyi)
+- Switched to edk2-stable201911, which is now the minimum supportd EDK II version
 
 #### v0.5.2
 - Fixed `MinKernel` and `MaxKernel` logic (thx @dhinakg, @reitermarkus)
