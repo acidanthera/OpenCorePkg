@@ -699,7 +699,7 @@ BigNumMod (
       //
       BigNumRightShift (BigDiv, SigWordsBigDiv, BigDiv, SigWordsBigDiv, DeltaBits);
 
-      SigWordsBigDiv = (SigBitsModTmp + (OC_BN_WORD_NUM_BITS - 1)) / OC_BN_WORD_NUM_BITS;
+      SigWordsBigDiv = (OC_BN_NUM_WORDS) ((SigBitsModTmp + (OC_BN_WORD_NUM_BITS - 1U)) / OC_BN_WORD_NUM_BITS);
       SigBitsBigDiv  = SigBitsModTmp;
 
       BigDivExp -= DeltaBits;

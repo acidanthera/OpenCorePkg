@@ -28,7 +28,7 @@ typedef UINTN OC_BN_WORD;
 // Declarations regarding the Word size.
 //
 #define OC_BN_WORD_SIZE      (sizeof (OC_BN_WORD))
-#define OC_BN_WORD_NUM_BITS  (OC_BN_WORD_SIZE * OC_CHAR_BIT)
+#define OC_BN_WORD_NUM_BITS  ((OC_BN_NUM_BITS) (OC_BN_WORD_SIZE * OC_CHAR_BIT))
 //
 // Declarations regarding the maximum size of OC_BN structures.
 //
