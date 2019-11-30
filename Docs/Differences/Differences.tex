@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sun Nov  3 16:31:21 2019
-%DIF ADD ../Configuration.tex        Wed Nov 27 01:41:16 2019
+%DIF ADD ../Configuration.tex        Sat Nov 30 23:55:09 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3677,7 +3677,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{AppleKeyMapAggregator} protocol.
 
   This option activates the internal keyboard interceptor driver, based on
-  \texttt{AppleGenericInput} aka \texttt{AptioIntputFix}), to fill
+  \texttt{AppleGenericInput} aka \DIFaddbegin \DIFadd{(}\DIFaddend \texttt{AptioIntputFix}), to fill
   \texttt{AppleKeyMapAggregator} database for input functioning. In case
   a separate driver is used, such as \texttt{UsbKbDxe}, this option
   should never be enabled.
