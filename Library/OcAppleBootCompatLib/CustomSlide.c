@@ -829,7 +829,7 @@ AppleSlideHandleBalloonState (
   if (!Allocate) {
     DEBUG ((
       DEBUG_INFO,
-      "OCABC: Freeing balloon area: 0x%Lx (%Lu pages)",
+      "OCABC: Freeing balloon area: 0x%Lx (%Lu pages)\n",
       (UINT64) BootCompat->SlideSupport.BalloonArea,
       (UINT64) BootCompat->SlideSupport.BalloonAreaPages
       ));
