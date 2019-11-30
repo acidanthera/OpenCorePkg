@@ -30,14 +30,14 @@ BOOLEAN
   UINT32  *Result
   )
 {
-  UINT64  Temp;
+  UINT32  Temp;
 
   //
   // I believe casting will be faster on X86 at least.
   //
-  Temp    = (UINT64) A + B;
-  *Result = (UINT32) Temp;
-  if (Temp <= MAX_UINT32) {
+  Temp    = A + B;
+  *Result = Temp;
+  if (Temp >= A) {
     return FALSE;
   }
 
@@ -138,8 +138,11 @@ BOOLEAN
   UINT64  *Result
   )
 {
-  *Result = A + B;
-  if (MAX_UINT64 - A >= B) {
+  UINT64  Temp;
+
+  Temp    = A + B;
+  *Result = Temp;
+  if (Temp >= A) {
     return FALSE;
   }
 
@@ -283,6 +286,8 @@ BOOLEAN
       return FALSE;
     }
   }
+
+#undef OC_ABS_64
 
   *Result = 0;
   return TRUE;
