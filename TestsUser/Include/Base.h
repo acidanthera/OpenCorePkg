@@ -37,6 +37,14 @@
 #define RSIZE_MAX (SIZE_MAX >> 1)
 #endif
 
+#ifdef MDE_CPU_EBC
+  #define STATIC_ASSERT(Expression, Message)
+#elif _MSC_EXTENSIONS
+  #define STATIC_ASSERT static_assert
+#else
+  #define STATIC_ASSERT _Static_assert
+#endif
+
 //
 // Types and limits
 //
