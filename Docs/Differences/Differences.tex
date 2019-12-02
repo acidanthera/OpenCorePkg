@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Nov  3 16:31:21 2019
-%DIF ADD ../Configuration.tex        Mon Dec  2 05:21:21 2019
+%DIF DEL PreviousConfiguration.tex   Mon Dec  2 06:57:32 2019
+%DIF ADD ../Configuration.tex        Mon Dec  2 18:02:45 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1304,12 +1304,10 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \href{https://docs.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-uefi#hibernation-state-s4-transition-requirements}{preserve}
   runtime memory size and location after S4 wake.
 
-  \emph{Note}: This \DIFdelbegin \DIFdel{may be used to workaround buggy memory maps on older hardware ,
-  and is now considered rare legacy. Do not use this unless you fully understand
-  the consequences}\DIFdelend \DIFaddbegin \DIFadd{option is deprecated and will be removed in the newer OpenCore
-  releases. There is no known hardware that needs this option, and its entire existence
-  appears to be a programmer error. Please report on
-  }\href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker} \DIFadd{if you need this option}\DIFaddend .
+  \emph{Note}: This may be used to workaround buggy memory maps on older hardware,
+  and is now considered rare legacy. \DIFaddbegin \DIFadd{Examples of such hardware are Ivy Bridge laptops
+  with Insyde firmware, like Acer V3-571G. }\DIFaddend Do not use this unless you fully understand
+  the consequences.
 
 \item
   \texttt{EnableSafeModeSlide}\\

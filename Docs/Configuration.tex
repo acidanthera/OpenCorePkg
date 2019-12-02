@@ -1243,10 +1243,10 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \href{https://docs.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-uefi#hibernation-state-s4-transition-requirements}{preserve}
   runtime memory size and location after S4 wake.
 
-  \emph{Note}: This option is deprecated and will be removed in the newer OpenCore
-  releases. There is no known hardware that needs this option, and its entire existence
-  appears to be a programmer error. Please report on
-  \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker} if you need this option.
+  \emph{Note}: This may be used to workaround buggy memory maps on older hardware,
+  and is now considered rare legacy. Examples of such hardware are Ivy Bridge laptops
+  with Insyde firmware, like Acer V3-571G. Do not use this unless you fully understand
+  the consequences.
 
 \item
   \texttt{EnableSafeModeSlide}\\
