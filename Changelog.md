@@ -14,6 +14,7 @@ OpenCore Changelog
 - Removed `ThirdPartyTrim` kernel quirk in favour of `ThirdPartyDrives`
 - Added Intel Xeon E5 (Broadwell-EP) support (thx @crazyi)
 - Switched to edk2-stable201911, which is now the minimum supportd EDK II version
+- Deprecated `DiscardHibernateMap`, which is now scheduled for removal
 
 #### v0.5.2
 - Fixed `MinKernel` and `MaxKernel` logic (thx @dhinakg, @reitermarkus)
