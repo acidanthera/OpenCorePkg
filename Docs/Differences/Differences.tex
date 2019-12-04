@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Dec  2 07:11:04 2019
-%DIF ADD ../Configuration.tex        Tue Dec  3 20:39:07 2019
+%DIF DEL PreviousConfiguration.tex   Sun Dec  1 18:22:58 2019
+%DIF ADD ../Configuration.tex        Wed Dec  4 15:38:42 2019
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -149,7 +149,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.5\DIFdelbegin \DIFdel{.2}\DIFdelend \DIFaddbegin \DIFadd{.3}\DIFaddend )
+       Reference Manual (0.5\DIFdelbegin \DIFdel{.3}\DIFdelend \DIFaddbegin \DIFadd{.4}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -662,110 +662,109 @@ across the releases and the tool shall ensure that it carefully follows this doc
 Failure to do so may result in this tool to be considered as malware and blocked with
 all possible means.
 
-\DIFaddbegin \subsection{\DIFadd{Coding conventions}}\label{configuration-conv}
+\subsection{Coding conventions}\label{configuration-conv}
 
-\DIFadd{Just like any other project we have conventions that we follow during the development.
+Just like any other project we have conventions that we follow during the development.
 All third-party contributors are highly recommended to read and follow the conventions
 listed below before submitting their patches. In general it is also recommended to firstly
-discuss the issue in }\href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}
-\DIFadd{before sending the patch to ensure no double work and to avoid your patch being rejected.
-}
+discuss the issue in \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}
+before sending the patch to ensure no double work and to avoid your patch being rejected.
 
-\textbf{\DIFadd{Organisation}}\DIFadd{. The codebase is structured in multiple repositories
-which contain separate EDK II packages. }\texttt{\DIFadd{AppleSupportPkg}} \DIFadd{and }\texttt{\DIFadd{OpenCorePkg}}
-\DIFadd{are primary packages, and }\texttt{\DIFadd{EfiPkg}}\DIFadd{, }\texttt{\DIFadd{OcSupportPkg}}\DIFadd{, }\texttt{\DIFadd{MacInfoPkg.dsc}}\DIFadd{)
+\textbf{Organisation}. The codebase is structured in multiple repositories
+which contain separate EDK II packages. \texttt{AppleSupportPkg} and \texttt{OpenCorePkg}
+are primary packages, and \texttt{EfiPkg}, \texttt{OcSupportPkg}, \texttt{MacInfoPkg.dsc})
 are dependent packages.
-}\begin{itemize}
+\begin{itemize}
 \tightlist
-\item \DIFadd{Whenever changes are required in multiple repositories, separate pull requests should
+\item Whenever changes are required in multiple repositories, separate pull requests should
 be sent to each.
-}\item \DIFadd{Committing the changes should happen firstly to dependent repositories, secondly to
+\item Committing the changes should happen firstly to dependent repositories, secondly to
 primary repositories to avoid automatic build errors.
-}\item \DIFadd{Each unique commit should compile with }\texttt{\DIFadd{XCODE5}} \DIFadd{and preferably with other
+\item Each unique commit should compile with \texttt{XCODE5} and preferably with other
 toolchains. In the majority of the cases it can be checked by accessing the
-}\href{https://travis-ci.com/acidanthera}{CI interface}\DIFadd{. Ensuring that static analysis finds
+\href{https://travis-ci.com/acidanthera}{CI interface}. Ensuring that static analysis finds
 no warnings is preferred.
-}\item \DIFadd{External pull requests and tagged commits must be validated. That said, commits in
+\item External pull requests and tagged commits must be validated. That said, commits in
 master may build but may not necessarily work.
-}\item \DIFadd{Internal branches should be named as follows: }\texttt{\DIFadd{author-name-date}}\DIFadd{, e.g.
-}\texttt{\DIFadd{vit9696-ballooning-20191026}}\DIFadd{.
-}\item \DIFadd{Commit messages should be prefixed with the primary module (e.g. library or code module) the
-changes were made in. For example, }\texttt{\DIFadd{OcGuardLib: Add OC\_ALIGNED macro}}\DIFadd{. For non-library changes
-}\texttt{\DIFadd{Docs}} \DIFadd{or }\texttt{\DIFadd{Build}} \DIFadd{prefixes are used.
-}\end{itemize}
+\item Internal branches should be named as follows: \texttt{author-name-date}, e.g.
+\texttt{vit9696-ballooning-20191026}.
+\item Commit messages should be prefixed with the primary module (e.g. library or code module) the
+changes were made in. For example, \texttt{OcGuardLib: Add OC\_ALIGNED macro}. For non-library changes
+\texttt{Docs} or \texttt{Build} prefixes are used.
+\end{itemize}
 
-\textbf{\DIFadd{Design}}\DIFadd{. The codebase is written in a subset of freestanding C11 (C17) supported by
+\textbf{Design}. The codebase is written in a subset of freestanding C11 (C17) supported by
 most modern toolchains used by EDK II. Applying common software development practices or requesting
 clarification is recommended if any particular case is not discussed below.
-}\begin{itemize}
+\begin{itemize}
 \tightlist
-\item \DIFadd{Never rely on undefined behaviour and try to avoid implementation defined behaviour unless
+\item Never rely on undefined behaviour and try to avoid implementation defined behaviour unless
 explicitly covered below (feel free to create an issue when a relevant case is not present).
-}\item \DIFadd{Use }\texttt{\DIFadd{OcGuardLib}} \DIFadd{to ensure safe integral arithmetics avoiding overflows. Unsigned
+\item Use \texttt{OcGuardLib} to ensure safe integral arithmetics avoiding overflows. Unsigned
 wraparound should be relied on with care and reduced to the necessary amount.
-}\item \DIFadd{Check pointers for correct alignment with }\texttt{\DIFadd{OcGuardLib}} \DIFadd{and do not rely on the architecture
+\item Check pointers for correct alignment with \texttt{OcGuardLib} and do not rely on the architecture
 being able to dereference unaligned pointers.
-}\item \DIFadd{Use flexible array members instead of zero-length or one-length arrays where necessary.
-}\item \DIFadd{Use static assertions (}\texttt{\DIFadd{STATIC\_ASSERT}}\DIFadd{) for type and value assumptions, and runtime
-assertions (}\texttt{\DIFadd{ASSERT}}\DIFadd{) for precondition and invariant sanity checking. Do not use runtime
+\item Use flexible array members instead of zero-length or one-length arrays where necessary.
+\item Use static assertions (\texttt{STATIC\_ASSERT}) for type and value assumptions, and runtime
+assertions (\texttt{ASSERT}) for precondition and invariant sanity checking. Do not use runtime
 assertions to check for errors as they should never alter control flow and potentially be excluded.
-}\item \DIFadd{Assume }\texttt{\DIFadd{UINT32}}\DIFadd{/}\texttt{\DIFadd{INT32}} \DIFadd{to be }\texttt{\DIFadd{int}}\DIFadd{-sized and use }\texttt{\DIFadd{\%u}}\DIFadd{,
-}\texttt{\DIFadd{\%d}}\DIFadd{, and }\texttt{\DIFadd{\%x}} \DIFadd{to print them.
-}\item \DIFadd{Assume }\texttt{\DIFadd{UINTN}}\DIFadd{/}\texttt{\DIFadd{INTN}} \DIFadd{to be of unspecified size, and cast them to
-}\texttt{\DIFadd{UINT64}}\DIFadd{/}\texttt{\DIFadd{INT64}} \DIFadd{for printing with }\texttt{\DIFadd{\%Lu}}\DIFadd{, }\texttt{\DIFadd{\%Ld}} \DIFadd{and so on as normal.
-}\item \DIFadd{Do not rely on integer promotions for numeric literals. Use explicit casts when the type is
-implementation-dependent or suffixes when type size is known. Assume }\texttt{\DIFadd{U}} \DIFadd{for }\texttt{\DIFadd{UINT32}}
-\DIFadd{and }\texttt{\DIFadd{ULL}} \DIFadd{for }\texttt{\DIFadd{UINT64}}\DIFadd{.
-}\item \DIFadd{Do ensure unsigned arithmetics especially in bitwise maths, shifts in particular.
-}\item \texttt{\DIFadd{sizeof}} \DIFadd{operator should take variables instead of types where possible to be error prone.
-Use }\texttt{\DIFadd{ARRAY\_SIZE}} \DIFadd{to obtain array size in elements. Use }\texttt{\DIFadd{L\_STR\_LEN}} \DIFadd{and
-}\texttt{\DIFadd{L\_STR\_SIZE}} \DIFadd{macros from }\texttt{\DIFadd{OcStringLib}} \DIFadd{to obtain string literal sizes to ensure compiler
+\item Assume \texttt{UINT32}/\texttt{INT32} to be \texttt{int}-sized and use \texttt{\%u},
+\texttt{\%d}, and \texttt{\%x} to print them.
+\item Assume \texttt{UINTN}/\texttt{INTN} to be of unspecified size, and cast them to
+\texttt{UINT64}/\texttt{INT64} for printing with \texttt{\%Lu}, \texttt{\%Ld} and so on as normal.
+\item Do not rely on integer promotions for numeric literals. Use explicit casts when the type is
+implementation-dependent or suffixes when type size is known. Assume \texttt{U} for \texttt{UINT32}
+and \texttt{ULL} for \texttt{UINT64}.
+\item Do ensure unsigned arithmetics especially in bitwise maths, shifts in particular.
+\item \texttt{sizeof} operator should take variables instead of types where possible to be error prone.
+Use \texttt{ARRAY\_SIZE} to obtain array size in elements. Use \texttt{L\_STR\_LEN} and
+\texttt{L\_STR\_SIZE} macros from \texttt{OcStringLib} to obtain string literal sizes to ensure compiler
 optimisation.
-}\item \DIFadd{Do not use }\texttt{\DIFadd{goto}} \DIFadd{keyword. Prefer early }\texttt{\DIFadd{return}}\DIFadd{, }\texttt{\DIFadd{break}}\DIFadd{, or }\texttt{\DIFadd{continue}}
-\DIFadd{after failing to pass error checking instead of nesting conditionals.
-}\item \DIFadd{Use }\texttt{\DIFadd{EFIAPI}}\DIFadd{, force UEFI calling convention, only in protocols, external callbacks between
+\item Do not use \texttt{goto} keyword. Prefer early \texttt{return}, \texttt{break}, or \texttt{continue}
+after failing to pass error checking instead of nesting conditionals.
+\item Use \texttt{EFIAPI}, force UEFI calling convention, only in protocols, external callbacks between
 modules, and functions with variadic arguments.
-}\item \DIFadd{Provide inline documentation to every added function, at least describing its inputs, outputs,
+\item Provide inline documentation to every added function, at least describing its inputs, outputs,
 precondition, postcondition, and giving a brief description.
-}\item \DIFadd{Do not use }\texttt{\DIFadd{RETURN\_STATUS}}\DIFadd{. Assume }\texttt{\DIFadd{EFI\_STATUS}} \DIFadd{to be a matching superset that is
-to be always used when }\texttt{\DIFadd{BOOLEAN}} \DIFadd{is not enough.
-}\item \DIFadd{Security violations should halt the system or cause a forced reboot.
-}\end{itemize}
+\item Do not use \texttt{RETURN\_STATUS}. Assume \texttt{EFI\_STATUS} to be a matching superset that is
+to be always used when \texttt{BOOLEAN} is not enough.
+\item Security violations should halt the system or cause a forced reboot.
+\end{itemize}
 
-\textbf{\DIFadd{Codestyle}}\DIFadd{. The codebase follows
-}\href{https://github.com/tianocore/tianocore.github.io/wiki/Code-Style-C}{EDK II codestyle} \DIFadd{with few changes
+\textbf{Codestyle}. The codebase follows
+\href{https://github.com/tianocore/tianocore.github.io/wiki/Code-Style-C}{EDK II codestyle} with few changes
 and clarifications.
-}\begin{itemize}
+\begin{itemize}
 \tightlist
-\item \DIFadd{Write inline documentation for the functions and variables only once: in headers, where a header prototype
-is available, and inline for }\texttt{\DIFadd{static}} \DIFadd{variables and functions.
-}\item \DIFadd{Use line length of 120 characters or less, preferably 100 characters.
-}\item \DIFadd{Use spaces after casts, e.g. }\texttt{\DIFadd{(VOID *)(UINTN) Variable}}\DIFadd{.
-}\item \DIFadd{Use SPDX license headers as shown in
-}\href{https://github.com/acidanthera/bugtracker/issues/483}{acidanthera/bugtracker\#483}\DIFadd{.
-}\end{itemize}
+\item Write inline documentation for the functions and variables only once: in headers, where a header prototype
+is available, and inline for \texttt{static} variables and functions.
+\item Use line length of 120 characters or less, preferably 100 characters.
+\item Use spaces after casts, e.g. \texttt{(VOID *)(UINTN) Variable}.
+\item Use SPDX license headers as shown in
+\href{https://github.com/acidanthera/bugtracker/issues/483}{acidanthera/bugtracker\#483}.
+\end{itemize}
 
-\textbf{\DIFadd{Debugging}}\DIFadd{. The codebase incorporates EDK II debugging and few custom features to improve the experience.
-}\begin{itemize}
+\textbf{Debugging}. The codebase incorporates EDK II debugging and few custom features to improve the experience.
+\begin{itemize}
 \tightlist
-\item \DIFadd{Use module prefixes, 2-5 letters followed by a colon (}\texttt{\DIFadd{:}}\DIFadd{), for debug messages. For }\texttt{\DIFadd{OpenCorePkg}}
-\DIFadd{use }\texttt{\DIFadd{OC:}}\DIFadd{, for libraries and drivers use their own unique prefixes.
-}\item \DIFadd{Do not use dots (}\texttt{\DIFadd{.}}\DIFadd{) in the end of debug messages and separate }\texttt{\DIFadd{EFI\_STATUS}}\DIFadd{, printed by
-}\texttt{\DIFadd{\%r}}\DIFadd{, with a hyphen (e.g. }\texttt{\DIFadd{OCRAM: Allocation of \%u bytes failed - \%r\textbackslash n}}\DIFadd{).
-}\item \DIFadd{Use }\texttt{\DIFadd{DEBUG\_CODE\_BEGIN ()}} \DIFadd{and }\texttt{\DIFadd{DEBUG\_CODE\_END ()}} \DIFadd{constructions to guard debug checks
+\item Use module prefixes, 2-5 letters followed by a colon (\texttt{:}), for debug messages. For \texttt{OpenCorePkg}
+use \texttt{OC:}, for libraries and drivers use their own unique prefixes.
+\item Do not use dots (\texttt{.}) in the end of debug messages and separate \texttt{EFI\_STATUS}, printed by
+\texttt{\%r}, with a hyphen (e.g. \texttt{OCRAM: Allocation of \%u bytes failed - \%r\textbackslash n}).
+\item Use \texttt{DEBUG\_CODE\_BEGIN ()} and \texttt{DEBUG\_CODE\_END ()} constructions to guard debug checks
 that may potentially reduce the performance of release builds and are otherwise unnecessary.
-}\item \DIFadd{Use }\texttt{\DIFadd{DEBUG}} \DIFadd{macro to print debug messages during normal functioning, and }\texttt{\DIFadd{RUNTIME\_DEBUG}} \DIFadd{for
-debugging after }\texttt{\DIFadd{EXIT\_BOOT\_SERVICES}}\DIFadd{. 
-}\item \DIFadd{Use }\texttt{\DIFadd{DEBUG\_VERBOSE}} \DIFadd{debug level to leave debug messages for future debugging of the code, which
-are currently not necessary. By default }\texttt{\DIFadd{DEBUG\_VERBOSE}} \DIFadd{messages are ignored even in }\texttt{\DIFadd{DEBUG}} \DIFadd{builds.
-}\item \DIFadd{Use }\texttt{\DIFadd{DEBUG\_INFO}} \DIFadd{debug level for all non critical messages (including errors) and }\texttt{\DIFadd{DEBUG\_BULK\_INFO}}
-\DIFadd{for extensive messages that should not appear in NVRAM log that is heavily limited in size. These messages are ignored in
-}\texttt{\DIFadd{RELEASE}} \DIFadd{builds.
-}\item \DIFadd{Use }\texttt{\DIFadd{DEBUG\_ERROR}} \DIFadd{to print critical human visible messages that may potentially halt the boot process, and
-}\texttt{\DIFadd{DEBUG\_WARN}} \DIFadd{for all other human visible errors, }\texttt{\DIFadd{RELEASE}} \DIFadd{builds included.
-}\end{itemize}
+\item Use \texttt{DEBUG} macro to print debug messages during normal functioning, and \texttt{RUNTIME\_DEBUG} for
+debugging after \texttt{EXIT\_BOOT\_SERVICES}. 
+\item Use \texttt{DEBUG\_VERBOSE} debug level to leave debug messages for future debugging of the code, which
+are currently not necessary. By default \texttt{DEBUG\_VERBOSE} messages are ignored even in \texttt{DEBUG} builds.
+\item Use \texttt{DEBUG\_INFO} debug level for all non critical messages (including errors) and \texttt{DEBUG\_BULK\_INFO}
+for extensive messages that should not appear in NVRAM log that is heavily limited in size. These messages are ignored in
+\texttt{RELEASE} builds.
+\item Use \texttt{DEBUG\_ERROR} to print critical human visible messages that may potentially halt the boot process, and
+\texttt{DEBUG\_WARN} for all other human visible errors, \texttt{RELEASE} builds included.
+\end{itemize}
 
-\DIFaddend \section{ACPI}\label{acpi}
+\section{ACPI}\label{acpi}
 
 \subsection{Introduction}\label{acpiintro}
 
@@ -1256,7 +1255,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   This option reduces stolen memory footprint from the memory map by removing
   runtime bit for known memory regions. This quirk may result in the increase
   of KASLR slides available, but is not necessarily compatible with the target
-  board \DIFaddbegin \DIFadd{without additional measures}\DIFaddend . In general this frees from 64 to 256
+  board without additional measures. In general this frees from 64 to 256
   megabytes of memory (present in the debug log), and on some platforms it
   is the only way to boot macOS, which otherwise fails with allocation
   error at bootloader stage.
@@ -1304,10 +1303,15 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \href{https://docs.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-uefi#hibernation-state-s4-transition-requirements}{preserve}
   runtime memory size and location after S4 wake.
 
-  \emph{Note}: This may be used to workaround buggy memory maps on older hardware,
-  and is now considered rare legacy. \DIFaddbegin \DIFadd{Examples of such hardware are Ivy Bridge laptops
-  with Insyde firmware, like Acer V3-571G. }\DIFaddend Do not use this unless you fully understand
-  the consequences.
+  \emph{Note}: This \DIFdelbegin \DIFdel{option is deprecated and will be removed in the newer OpenCore
+  releases. There is no known hardwarethat needs this option,
+  and its entire existence
+  appears to be a programmer error. Please report on
+  }%DIFDELCMD < \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker} %%%
+\DIFdel{if you need this option}\DIFdelend \DIFaddbegin \DIFadd{may be used to workaround buggy memory maps on older hardware,
+  and is now considered rare legacy. Examples of such hardware are Ivy Bridge laptops
+  with Insyde firmware, like Acer V3-571G. Do not use this unless you fully understand
+  the consequences}\DIFaddend .
 
 \item
   \texttt{EnableSafeModeSlide}\\
@@ -1582,25 +1586,14 @@ blocking.
   and should look like 3 numbers separated by dots, for example \texttt{18.7.0} is the
   kernel version for \texttt{10.14.6}. Kernel version interpretation is implemented as follows:
   \begin{align*}
-    \DIFdelbegin %DIFDELCMD < \begin{aligned}
-%DIFDELCMD <       ParseDarwinVersion(\kappa,\lambda,\mu)=&(\lfloor\frac{\kappa}{10}\rfloor\cdot10
-%DIFDELCMD <       + \kappa-\lfloor\frac{\kappa}{10}\rfloor\cdot10)\cdot10000 &&
-%DIFDELCMD <         \text{Where }\kappa\in(0,99)\text{ is kernel version major} \\
-%DIFDELCMD <       + &(\lfloor\frac{\lambda}{10}\rfloor\cdot10
-%DIFDELCMD <       + \lambda-\lfloor\frac{\lambda}{10}\rfloor\cdot10)\cdot100 &&
-%DIFDELCMD <         \text{Where }\lambda\in(0,99)\text{ is kernel version minor} \\
-%DIFDELCMD <       + &(\lfloor\frac{\mu}{10}\rfloor\cdot10
-%DIFDELCMD <       + \mu-\lfloor\frac{\mu}{10}\rfloor\cdot10) &&
-%DIFDELCMD <         \text{Where }\mu\in(0,99)\text{ is kernel version patch}
-%DIFDELCMD <     \end{aligned}%%%
-\DIFdelend \DIFaddbegin \begin{aligned}
+    \begin{aligned}
       ParseDarwinVersion(\kappa,\lambda,\mu)&=\kappa \cdot10000 &&
         \text{Where }\kappa\in(0,99)\text{ is kernel version major} \\
       &+ \lambda\cdot100 &&
         \text{Where }\lambda\in(0,99)\text{ is kernel version minor} \\
       &+ \mu &&
         \text{Where }\mu\in(0,99)\text{ is kernel version patch}
-    \end{aligned}\DIFaddend 
+    \end{aligned}
   \end{align*}
   Kernel version comparison is implemented as follows:
   \begin{align*}
@@ -1914,15 +1907,14 @@ blocking.
   should be used, which is otherwise equivalent to this quirk.
 
 \item
-  \texttt{\DIFdelbegin \DIFdel{ThirdPartyTrim}\DIFdelend \DIFaddbegin \DIFadd{ThirdPartyDrives}\DIFaddend }\\
+  \texttt{ThirdPartyDrives}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: \DIFdelbegin \DIFdel{Patch }\DIFdelend \DIFaddbegin \DIFadd{Apply vendor patches to }\DIFaddend IOAHCIBlockStorage.kext to \DIFdelbegin \DIFdel{force TRIM command support
-  on AHCI SSDs }\DIFdelend \DIFaddbegin \DIFadd{enable
+  \textbf{Description}: Apply vendor patches to IOAHCIBlockStorage.kext to enable
   native features for third-party drives, such as TRIM on SSDs or hibernation
-  support on 10.15 and newer}\DIFaddend .
+  support on 10.15 and newer.
 
-  \emph{Note}: This option \DIFdelbegin \DIFdel{should avoided whenever possible}\DIFdelend \DIFaddbegin \DIFadd{may be avoided on user preference}\DIFaddend . NVMe SSDs are
+  \emph{Note}: This option may be avoided on user preference. NVMe SSDs are
   compatible without the change. For AHCI SSDs on modern macOS version there
   is a dedicated built-in utility called \texttt{trimforce}. Starting from 10.15
   this utility creates \texttt{EnableTRIM} variable in \texttt{APPLE\_BOOT\_VARIABLE\_GUID}
@@ -1935,7 +1927,7 @@ blocking.
   \textbf{Description}: Patch various kexts (AppleUSBXHCI.kext, AppleUSBXHCIPCI.kext,
   IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 
-  \emph{Note}: This option should \DIFaddbegin \DIFadd{be }\DIFaddend avoided whenever possible. USB port limit
+  \emph{Note}: This option should be avoided whenever possible. USB port limit
   is imposed by the amount of used bits in locationID format and there is no
   possible way to workaround this without heavy OS modification. The only
   valid solution is to limit the amount of used ports to 15 (discarding some).
@@ -2420,17 +2412,14 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
   \end{itemize}
 
   Can look as follows:
-\DIFmodbegin
-\begin{lstlisting}[label=createvault, style=ocbash,alsolanguage=DIFcode]
+\begin{lstlisting}[label=createvault, style=ocbash]
 cd /Volumes/EFI/EFI/OC
 /path/to/create_vault.sh .
 /path/to/RsaTool -sign vault.plist vault.sig vault.pub
 off=$(($(strings -a -t d OpenCore.efi | grep "=BEGIN OC VAULT=" | cut -f1 -d' ')+16))
-%DIF < dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=520 conv=notrunc
-%DIF > dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=528 conv=notrunc
+dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=528 conv=notrunc
 rm vault.pub
 \end{lstlisting}
-\DIFmodend
 
   \emph{Note}: While it may appear obvious, but you have to use an external
   method to verify \texttt{OpenCore.efi} and \texttt{BOOTx64.efi} for
@@ -3573,7 +3562,7 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{UsbKbDxe}}
   --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
-  builtin \texttt{\DIFdelbegin \DIFdel{KeySypport}\DIFdelend \DIFaddbegin \DIFadd{KeySupport}\DIFaddend }, which may work better or worse depending on the firmware.
+  builtin \texttt{KeySupport}, which may work better or worse depending on the firmware.
   \item \href{https://github.com/acidanthera/VirtualSMC}{\texttt{VirtualSmc}}
   --- UEFI SMC driver, required for proper FileVault 2 functionality and potentially
   other macOS specifics. An alternative, named \texttt{SMCHelper}, is not compatible
@@ -3678,7 +3667,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{AppleKeyMapAggregator} protocol.
 
   This option activates the internal keyboard interceptor driver, based on
-  \texttt{AppleGenericInput} aka \DIFaddbegin \DIFadd{(}\DIFaddend \texttt{AptioIntputFix}), to fill
+  \texttt{AppleGenericInput} aka (\texttt{AptioIntputFix}), to fill
   \texttt{AppleKeyMapAggregator} database for input functioning. In case
   a separate driver is used, such as \texttt{UsbKbDxe}, this option
   should never be enabled.
@@ -3856,21 +3845,19 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \href{https://github.com/acidanthera/bugtracker/issues/449}{\texttt{acidanthera/bugtracker\#449}}.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{ClearScreenOnModeSwitch}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Some firmwares clear only part of screen when switching
+  \texttt{ClearScreenOnModeSwitch}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Some firmwares clear only part of screen when switching
   from graphics to text mode, leaving a fragment of previously drawn image visible.
   This option fills the entire graphics screen with black color before switching to
   text mode.
-}
 
-  \emph{\DIFadd{Note}}\DIFadd{: }\texttt{\DIFadd{ConsoleControl}} \DIFadd{should be set to
-  }\texttt{\DIFadd{true}} \DIFadd{for this to work.
-}
+  \emph{Note}: \texttt{ConsoleControl} should be set to
+  \texttt{true} for this to work.
 
 \item
-  \DIFaddend \texttt{ExitBootServicesDelay}\\
+  \texttt{ExitBootServicesDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Adds delay in microseconds after \texttt{EXIT\_BOOT\_SERVICES}
@@ -3950,58 +3937,53 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   operating system may freeze upon boot. Not recommended unless required.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{RequestBootVarFallback}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Request fallback of some }\texttt{\DIFadd{Boot}} \DIFadd{prefixed variables from
-  }\texttt{\DIFadd{OC\_VENDOR\_VARIABLE\_GUID}} \DIFadd{to }\newline \texttt{\DIFadd{EFI\_GLOBAL\_VARIABLE\_GUID}}\DIFadd{.
-}
+  \texttt{RequestBootVarFallback}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Request fallback of some \texttt{Boot} prefixed variables from
+  \texttt{OC\_VENDOR\_VARIABLE\_GUID} to \newline \texttt{EFI\_GLOBAL\_VARIABLE\_GUID}.
 
-  \DIFadd{This quirk requires }\DIFaddend \texttt{RequestBootVarRouting} \DIFaddbegin \DIFadd{to be enabled and therefore
-  }\texttt{\DIFadd{OC\_FIRMWARE\_RUNTIME}} \DIFadd{protocol implemented in }\texttt{\DIFadd{FwRuntimeServices.efi}}\DIFadd{.
-}
+  This quirk requires \texttt{RequestBootVarRouting} to be enabled and therefore
+  \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented in \texttt{FwRuntimeServices.efi}.
 
-  \DIFadd{By redirecting }\texttt{\DIFadd{Boot}} \DIFadd{prefixed variables to a separate GUID namespace we achieve
+  By redirecting \texttt{Boot} prefixed variables to a separate GUID namespace we achieve
   multiple goals:
-  }\begin{itemize}
+  \begin{itemize}
   \tightlist
-  \item \DIFadd{Operating systems are jailed and only controlled by OpenCore boot
+  \item Operating systems are jailed and only controlled by OpenCore boot
   environment to enhance security.
-  }\item \DIFadd{Operating systems do not mess with OpenCore boot priority, and guarantee
+  \item Operating systems do not mess with OpenCore boot priority, and guarantee
   fluent updates and hibernation wakes for cases that require reboots with OpenCore
   in the middle.
-  }\item \DIFadd{Potentially incompatible boot entries, such as macOS entries, are not deleted
+  \item Potentially incompatible boot entries, such as macOS entries, are not deleted
   or anyhow corrupted.
-  }\end{itemize}
+  \end{itemize}
 
-  \DIFadd{However, some firmwares do their own boot option scanning upon startup by checking
+  However, some firmwares do their own boot option scanning upon startup by checking
   file presence on the available disks. Quite often this scanning includes non-standard
   locations, such as Windows Bootloader paths. Normally it is not an issue, but some
   firmwares, ASUS firmwares on APTIO V in particular, have bugs. For them scanning is
   implemented improperly, and firmware preferences may get accidentally corrupted
-  due to }\texttt{\DIFadd{BootOrder}} \DIFadd{entry duplication (each option will be added twice) making
+  due to \texttt{BootOrder} entry duplication (each option will be added twice) making
   it impossible to boot without cleaning NVRAM.
-}
 
-  \DIFadd{To trigger the bug one should have some valid boot options (e.g. OpenCore) and then
-  install Windows with }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{enabled. As Windows bootloader
+  To trigger the bug one should have some valid boot options (e.g. OpenCore) and then
+  install Windows with \texttt{RequestBootVarRouting} enabled. As Windows bootloader
   option will not be created by Windows installer, the firmware will attempt to create it
   itself, and then corrupt its boot option list.
-}
 
-  \DIFadd{This quirk forwards all UEFI specification valid boot options, that are not related to
-  macOS, to the firmware into }\texttt{\DIFadd{BootF\#\#\#}} \DIFadd{and }\texttt{\DIFadd{BootOrder}} \DIFadd{variables upon
-  write. As the entries are added to the end of }\texttt{\DIFadd{BootOrder}}\DIFadd{, this does not
+  This quirk forwards all UEFI specification valid boot options, that are not related to
+  macOS, to the firmware into \texttt{BootF\#\#\#} and \texttt{BootOrder} variables upon
+  write. As the entries are added to the end of \texttt{BootOrder}, this does not
   break boot priority, but ensures that the firmware does not try to append a new option
   on its own after Windows installation for instance.
-}
 
 \item
-  \texttt{\DIFadd{RequestBootVarRouting}}\DIFaddend \\
+  \texttt{RequestBootVarRouting}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Request redirect \DIFaddbegin \DIFadd{of all }\DIFaddend \texttt{Boot} prefixed variables from
-  \texttt{EFI\_GLOBAL\_VARIABLE\_GUID} to \DIFaddbegin \newline \DIFaddend \texttt{OC\_VENDOR\_VARIABLE\_GUID}.
+  \textbf{Description}: Request redirect of all \texttt{Boot} prefixed variables from
+  \texttt{EFI\_GLOBAL\_VARIABLE\_GUID} to \newline \texttt{OC\_VENDOR\_VARIABLE\_GUID}.
 
   This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented
   in \texttt{FwRuntimeServices.efi}. The quirk lets default boot entry
@@ -4024,18 +4006,13 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{ConsoleMode} had to be set to empty string for this to work.
 
 \item
-  \texttt{\DIFdelbegin \DIFdel{ClearScreenOnModeSwitch}\DIFdelend \DIFaddbegin \DIFadd{UnblockFsConnect}\DIFaddend }\\
+  \texttt{UnblockFsConnect}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Some firmwares \DIFdelbegin \DIFdel{clear only part of screen when switching
-  from graphics to text mode, leaving a fragment of previously drawn image visible.
-  This option fills the entire graphics screen with black color before switching to text mode}\DIFdelend \DIFaddbegin \DIFadd{block partition handles by opening them
-  in By Driver mode, which results in File System protocols being unable to install}\DIFaddend .
+  \textbf{Description}: Some firmwares block partition handles by opening them
+  in By Driver mode, which results in File System protocols being unable to install.
 
-  \emph{Note}: \DIFdelbegin \texttt{\DIFdel{ConsoleControl}} %DIFAUXCMD
-\DIFdel{should be set to
-  }\texttt{\DIFdel{true}} %DIFAUXCMD
-\DIFdel{for this to work}\DIFdelend \DIFaddbegin \DIFadd{The quirk is mostly relevant for select HP laptops with no drives listed}\DIFaddend .
+  \emph{Note}: The quirk is mostly relevant for select HP laptops with no drives listed.
 
 \end{enumerate}
 
@@ -4284,7 +4261,7 @@ you will need \texttt{debug=0x8} boot argument.
 \item
   \textbf{Why do Find\&Replace patches must equal in length?}
 
-  For machine code (x86 code) it is not possible to do \DIFdelbegin \DIFdel{such }\DIFdelend \DIFaddbegin \DIFadd{differently sized }\DIFaddend replacements due to
+  For machine code (x86 code) it is not possible to do differently sized replacements due to
   \href{https://en.wikipedia.org/w/index.php?title=Relative_addressing}{relative addressing}.
   For ACPI code this is risky, and is technically equivalent to ACPI table replacement,
   thus not implemented. More detailed explanation can be found on
