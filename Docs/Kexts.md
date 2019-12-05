@@ -69,6 +69,7 @@ Kexts
 ## Other kexts
 
 - [AppleIntelInfo.kext](https://github.com/headkaze/AppleIntelInfo)
+- [DebugEnhancer.kext](https://github.com/acidanthera/DebugEnhancer)
 - [HibernationFixup.kext](https://github.com/acidanthera/HibernationFixup)
 - [Lilu.kext](https://github.com/acidanthera/Lilu)
 - [LiluFriend.kext](https://github.com/PMheart/LiluFriend)
