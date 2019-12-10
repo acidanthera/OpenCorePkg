@@ -133,6 +133,10 @@ WaitForKeyIndex (
     return OC_INPUT_ABORTED;
   }
 
+  if (Key.UnicodeChar == CHAR_CARRIAGE_RETURN) {
+    return OC_INPUT_CONTINUE;
+  }
+
   //
   // Using loop to allow OC_INPUT_STR changes.
   //

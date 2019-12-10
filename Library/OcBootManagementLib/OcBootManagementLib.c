@@ -785,6 +785,10 @@ OcShowSimpleBootMenu (
         *ChosenBootEntry = &BootEntries[DefaultEntry];
         gST->ConOut->OutputString (gST->ConOut, L"Timeout\r\n");
         return EFI_SUCCESS;
+      } else if (KeyIndex == OC_INPUT_CONTINUE) {
+        *ChosenBootEntry = &BootEntries[DefaultEntry];
+        gST->ConOut->OutputString (gST->ConOut, L"OK\r\n");
+        return EFI_SUCCESS;
       } else if (KeyIndex == OC_INPUT_ABORTED) {
         gST->ConOut->OutputString (gST->ConOut, L"Aborted\r\n");
         return EFI_ABORTED;
@@ -1103,6 +1107,10 @@ OcWaitForAppleKeyIndex (
     // Check exact match on index strokes.
     //
     if (Modifiers == 0 && NumKeys == 1) {
+      if (Keys[0] == AppleHidUsbKbUsageKeyReturn) {
+        return OC_INPUT_CONTINUE;
+      }
+
       STATIC_ASSERT (AppleHidUsbKbUsageKeyOne + 8 == AppleHidUsbKbUsageKeyNine, "Unexpected encoding");
       for (KeyCode = AppleHidUsbKbUsageKeyOne; KeyCode <= AppleHidUsbKbUsageKeyNine; ++KeyCode) {
         if (OcKeyMapHasKey (Keys, NumKeys, KeyCode)) {
