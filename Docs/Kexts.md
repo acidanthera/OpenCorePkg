@@ -31,6 +31,7 @@ Kexts
 - [SerialMouse.kext](https://github.com/Goldfish64/SerialMouse)
 - [VoodooI2C.kext](https://github.com/alexandred/VoodooI2C)
 - [VoodooPS2Controller.kext](https://github.com/acidanthera/VoodooPS2)
+- [VoodooInput.kext](https://github.com/acidanthera/VoodooInput)
 
 ## Video and audio
 
