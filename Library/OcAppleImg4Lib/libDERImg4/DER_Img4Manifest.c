@@ -1142,8 +1142,6 @@ DERImg4ManifestDecodeProperty (
       }
     }
   }
-
-  return (DERReturn)DR_SecurityError;
 }
 
 DERReturn
