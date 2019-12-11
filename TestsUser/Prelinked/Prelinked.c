@@ -506,6 +506,7 @@ int wrap_main(int argc, char** argv) {
     Status = PrelinkedInjectPrepare (&Context);
     if (EFI_ERROR (Status)) {
       printf("Prelink inject prepare error %zx\n", Status);
+      return -1;
     }
 
 #ifndef TEST_SLE
