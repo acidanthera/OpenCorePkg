@@ -2528,6 +2528,22 @@ several GUIDs, including but not limited to:
 Please ensure that variables of this section never collide with them,
 as behaviour is undefined otherwise.
 
+For proper macOS functioning it is often required to use \texttt{OC\_FIRMWARE\_RUNTIME}
+protocol implementation currently offered as a part of \texttt{FwRuntimeServices} driver.
+While it brings any benefits, there are certain limitations which arise depending on the
+use.
+
+\begin{enumerate}
+\item Not all tools may be aware of protected namespaces.\\
+  When \texttt{RequestBootVarRouting} is used \texttt{Boot}-prefixed variable access
+  is restricted and protected in a separate namespace. To access the original variables
+  tools have to be aware of \texttt{OC\_FIRMWARE\_RUNTIME} logic.
+\item Assigned NVRAM variables are not always allowed to exceed 512 bytes.\\
+  This is true for \texttt{Boot}-prefixed variables when \texttt{RequestBootVarFallback}
+  is used, and for overwriting volatile variables with non-volatile on UEFI 2.8
+  non-conformant firmwares.
+\end{enumerate}
+
 \subsection{Properties}\label{nvramprops}
 
 \begin{enumerate}
