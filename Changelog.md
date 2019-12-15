@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.5.4
 - Added Enter key handling in boot menu for quick proceed
+- Update builtin firmware versions
 
 #### v0.5.3
 - Update builtin firmware versions
