@@ -1478,6 +1478,26 @@ OcCpuScanProcessor (
     return;
   }
 
+  //
+  // SMBIOS Type4 ExternalClock field is assumed to have X*4 FSB frequency in MT/s.
+  // This value is cosmetics, but we still want to set it properly.
+  // Magic 4 value comes from 4 links in pretty much every modern Intel CPU.
+  // On modern CPUs this is now named Base clock (BCLK).
+  // Note, that this value was incorrect for most Macs since iMac12,x till iMac18,x inclusive.
+  // REF: https://github.com/acidanthera/bugtracker/issues/622#issuecomment-570811185
+  //
+  Cpu->ExternalClock = (UINT16) DivU64x32 (Cpu->FSBFrequency, 1000000);
+  //
+  // This is again cosmetics by errors in FSBFrequency calculation.
+  //
+  if (Cpu->ExternalClock >= 99 && Cpu->ExternalClock <= 101) {
+    Cpu->ExternalClock = 100;
+  } else if (Cpu->ExternalClock >= 132 && Cpu->ExternalClock <= 134) {
+    Cpu->ExternalClock = 133;
+  } else if (Cpu->ExternalClock >= 265 && Cpu->ExternalClock <= 267) {
+    Cpu->ExternalClock = 266;
+  }
+
   DEBUG ((
     DEBUG_INFO,
     "OCCPU: CPUFrequencyFromTSC %11LuHz %5LuMHz\n",

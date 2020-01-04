@@ -327,15 +327,7 @@ PatchProcessorInformation (
   SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorId, Original, NULL, NULL);
   SMBIOS_OVERRIDE_S (Table, Standard.Type4->ProcessorVersion, Original, NULL, &StringIndex, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type4->Voltage, Original, NULL, NULL);
-  //
-  // Models newer than Sandybridge require quad pumped bus value instead of a front side bus value.
-  //
-  if (CpuInfo->Model >= CPU_MODEL_SANDYBRIDGE) {
-    Table->CurrentPtr.Standard.Type4->ExternalClock = OC_CPU_SNB_QPB_CLOCK;
-  } else {
-    Table->CurrentPtr.Standard.Type4->ExternalClock = (UINT16) DivU64x32 (CpuInfo->FSBFrequency, 1000000);
-  }
-
+  Table->CurrentPtr.Standard.Type4->ExternalClock = CpuInfo->ExternalClock;
   Table->CurrentPtr.Standard.Type4->MaxSpeed = (UINT16) DivU64x32 (CpuInfo->CPUFrequency, 1000000);
   if (Table->CurrentPtr.Standard.Type4->MaxSpeed % 100 != 0) {
     Table->CurrentPtr.Standard.Type4->MaxSpeed = (UINT16) (((Table->CurrentPtr.Standard.Type4->MaxSpeed + 50) / 100) * 100);
@@ -980,8 +972,7 @@ CreateAppleProcessorSpeed (
 {
 #ifndef OC_PROVIDE_APPLE_PROCESSOR_BUS_SPEED
   //
-  // I believe this table is no longer used.
-  // The code below may be inaccurate as well, since it expects KHz.
+  // This table is not added in all modern Macs.
   //
   (VOID) Table;
   (VOID) Data;
@@ -995,11 +986,7 @@ CreateAppleProcessorSpeed (
     return;
   }
 
-  if (CpuInfo->Model >= CPU_MODEL_SANDYBRIDGE) {
-    Table->CurrentPtr.Type132->ProcessorBusSpeed = OC_CPU_SNB_QPB_CLOCK * 1000;
-  } else {
-    Table->CurrentPtr.Type132->ProcessorBusSpeed = (UINT16) DivU64x32 (CpuInfo->FSBFrequency, 1000);
-  }
+  Table->CurrentPtr.Type132->ProcessorBusSpeed = CpuInfo->ExternalClock * 4;
 
   SmbiosFinaliseStruct (Table);
 #endif

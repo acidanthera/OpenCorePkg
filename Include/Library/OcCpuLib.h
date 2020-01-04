@@ -18,12 +18,6 @@
 #include <IndustryStandard/CpuId.h>
 #include <IndustryStandard/AppleIntelCpuInfo.h>
 
-//
-// External clock value on Sandy Bridge and above (in MHz).
-// Rounded FSB * 4.
-//
-#define OC_CPU_SNB_QPB_CLOCK 0x19U
-
 typedef struct {
   //
   // Note, Vendor and BrandString are reordered for proper alignment.
@@ -68,6 +62,11 @@ typedef struct {
   UINT16                  PackageCount;
   UINT16                  CoreCount;
   UINT16                  ThreadCount;
+
+  //
+  // External clock for SMBIOS Type4 table.
+  //
+  UINT16                  ExternalClock;
 
   //
   // Platform-dependent frequency for the Always Running Timer (ART), normally
