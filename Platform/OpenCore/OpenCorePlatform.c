@@ -175,7 +175,6 @@ OcPlatformUpdateSmbios (
   OC_SMBIOS_DATA   Data;
   EFI_GUID         Uuid;
   UINT8            SmcVersion[APPLE_SMBIOS_SMC_VERSION_SIZE];
-  UINT32           PlatformFeature;
 
   ZeroMem (&Data, sizeof (Data));
 
@@ -353,17 +352,7 @@ OcPlatformUpdateSmbios (
     }
 
     Data.ProcessorType        = NULL;
-
-    if (MacInfo->Smbios.PlatformFeature != NULL) {
-      PlatformFeature = *MacInfo->Smbios.PlatformFeature;
-      if (Config->PlatformInfo.Generic.ReplaceableMemory) {
-        PlatformFeature &= ~PT_FEATURE_HAS_SOLDERED_SYSTEM_MEMORY;
-      }
-    } else {
-      PlatformFeature = 0;
-    }
-
-    Data.PlatformFeature      = &PlatformFeature;
+    Data.PlatformFeature      = MacInfo->Smbios.PlatformFeature;
 
     if (MacInfo->DataHub.SmcRevision != NULL) {
       SmbiosGetSmcVersion (MacInfo->DataHub.SmcRevision, SmcVersion);
