@@ -17,6 +17,7 @@ BITS     64
 DEFAULT  REL
 
 MSR_IA32_BIOS_SIGN_ID       equ     00000008Bh
+CPUID_VERSION_INFO          equ     1
 
 ;------------------------------------------------------------------------------
 ; UINT32
@@ -36,8 +37,9 @@ BITS  64
   xor eax, eax
   xor edx, edx
   wrmsr
-  mov eax, 1
+  mov eax, CPUID_VERSION_INFO
   cpuid
   mov ecx, MSR_IA32_BIOS_SIGN_ID
   rdmsr
+  mov eax, edx
   ret
