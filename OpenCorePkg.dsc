@@ -100,6 +100,7 @@
 [Components]
   OpenCorePkg/Application/Bootstrap/Bootstrap.inf
   OpenCorePkg/Platform/OpenCore/OpenCore.inf
+  OcSupportPkg/Platform/FwRuntimeServices/FwRuntimeServices.inf
 
 [PcdsFixedAtBuild]
   gEfiMdePkgTokenSpaceGuid.PcdMaximumAsciiStringLength|0

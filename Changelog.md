@@ -3,6 +3,8 @@ OpenCore Changelog
 #### v0.5.4
 - Added Enter key handling in boot menu for quick proceed
 - Update builtin firmware versions
+- Bundled FwRuntimeServices driver with OpenCore
+- Allowed writing to non-volatile variables with disabled write
 
 #### v0.5.3
 - Update builtin firmware versions

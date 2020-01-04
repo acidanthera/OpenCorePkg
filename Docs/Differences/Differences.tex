@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Dec 10 15:40:50 2019
-%DIF ADD ../Configuration.tex        Sat Jan  4 18:43:45 2020
+%DIF ADD ../Configuration.tex        Sat Jan  4 19:00:00 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2674,10 +2674,9 @@ use.
 
   \textbf{WARNING}: Choose variables very carefully, as nvram.plist is not vaulted.
   For instance, do not put \texttt{boot-args} or \texttt{csr-active-config}, as
-  this can bypass SIP\DIFaddbegin \DIFadd{.
-}
+  this can bypass SIP.
 
-\item
+\DIFaddbegin \item
   \texttt{\DIFadd{WriteFlash}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
@@ -2686,9 +2685,10 @@ use.
 
   \emph{\DIFadd{Note}}\DIFadd{: This value is recommended to be enabled on most firmwares, but is
   left configurable for firmwares that may have issues with NVRAM variable storage
-  garbage collection or alike}\DIFaddend .
+  garbage collection or alike.
+}
 
-\end{enumerate}
+\DIFaddend \end{enumerate}
 
 To read NVRAM variable value from macOS one could use \texttt{nvram}
 by concatenating variable GUID and name separated by \texttt{:} symbol.
@@ -3572,12 +3572,15 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
   --- APFS file system bootstrap driver adding the support of embedded APFS drivers
   in bootable APFS containers in UEFI firmwares.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{FwRuntimeServices}}
-  --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
+  \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{FwRuntimeServices}}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwRuntimeServices}}
+  \DIFaddend --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
   of OpenCore and Lilu by supporting read-only and write-only NVRAM variables. Some
   quirks, like \texttt{RequestBootVarRouting}, require this driver for proper function.
   Due to the nature of being a runtime driver, i.e. functioning in parallel with the
-  target operating system, it cannot be implemented within OpenCore itself.
+  target operating system, it cannot be implemented within OpenCore itself\DIFaddbegin \DIFadd{, but is bundled
+  with OpenCore releases}\DIFaddend .
   \item \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
   --- FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
   UEFI firmwares, and cannot be used from OpenCore. It is known that multiple firmwares

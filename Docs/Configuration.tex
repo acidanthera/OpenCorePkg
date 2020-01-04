@@ -3504,12 +3504,13 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
   --- APFS file system bootstrap driver adding the support of embedded APFS drivers
   in bootable APFS containers in UEFI firmwares.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{FwRuntimeServices}}
+  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwRuntimeServices}}
   --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
   of OpenCore and Lilu by supporting read-only and write-only NVRAM variables. Some
   quirks, like \texttt{RequestBootVarRouting}, require this driver for proper function.
   Due to the nature of being a runtime driver, i.e. functioning in parallel with the
-  target operating system, it cannot be implemented within OpenCore itself.
+  target operating system, it cannot be implemented within OpenCore itself, but is bundled
+  with OpenCore releases.
   \item \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
   --- FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
   UEFI firmwares, and cannot be used from OpenCore. It is known that multiple firmwares
