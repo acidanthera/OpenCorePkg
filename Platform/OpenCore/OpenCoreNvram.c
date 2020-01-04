@@ -24,6 +24,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcFileLib.h>
 #include <Library/OcSerializeLib.h>
 #include <Library/OcStringLib.h>
+#include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
@@ -88,7 +89,7 @@ OcReportVersion (
     gRT->SetVariable (
       OC_VERSION_VARIABLE_NAME,
       &gOcVendorVariableGuid,
-      OPEN_CORE_NVRAM_ATTR,
+      Config->Nvram.WriteFlash ? OPEN_CORE_NVRAM_NV_ATTR : OPEN_CORE_NVRAM_ATTR,
       AsciiStrLen (Version),
       (VOID *) Version
       );
@@ -140,6 +141,7 @@ VOID
 OcSetNvramVariable (
   IN CONST CHAR8            *AsciiVariableName,
   IN EFI_GUID               *VariableGuid,
+  IN UINT32                 Attributes,
   IN UINT32                 VariableSize,
   IN VOID                   *VariableData,
   IN OC_NVRAM_LEGACY_ENTRY  *SchemaEntry
@@ -196,7 +198,7 @@ OcSetNvramVariable (
     Status = gRT->SetVariable (
       UnicodeVariableName,
       VariableGuid,
-      OPEN_CORE_NVRAM_ATTR,
+      Attributes,
       VariableSize,
       VariableData
       );
@@ -224,7 +226,7 @@ STATIC
 VOID
 OcLoadLegacyNvram (
   IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem,
-  IN OC_NVRAM_LEGACY_MAP             *Schema
+  IN OC_GLOBAL_CONFIG                *Config
   )
 {
   UINT8                 *FileBuffer;
@@ -237,6 +239,9 @@ OcLoadLegacyNvram (
   GUID                  VariableGuid;
   OC_ASSOC              *VariableMap;
   OC_NVRAM_LEGACY_ENTRY *SchemaEntry;
+  OC_NVRAM_LEGACY_MAP   *Schema;
+
+  Schema = &Config->Nvram.Legacy;
 
   FileBuffer = ReadFile (FileSystem, OPEN_CORE_NVRAM_PATH, &FileSize, BASE_1MB);
   if (FileBuffer == NULL) {
@@ -277,6 +282,7 @@ OcLoadLegacyNvram (
       OcSetNvramVariable (
         OC_BLOB_GET (VariableMap->Keys[VariableIndex]),
         &VariableGuid,
+        OPEN_CORE_NVRAM_ATTR,
         VariableMap->Values[VariableIndex]->Size,
         OC_BLOB_GET (VariableMap->Values[VariableIndex]),
         SchemaEntry
@@ -294,15 +300,21 @@ OcBlockNvram (
   )
 {
   EFI_STATUS    Status;
-  UINT32        GuidIndex;
-  UINT32        VariableIndex;
+  UINT32        BlockGuidIndex;
+  UINT32        AddGuidIndex;
+  UINT32        BlockVariableIndex;
+  UINT32        AddVariableIndex;
   CONST CHAR8   *AsciiVariableName;
   CHAR16        *UnicodeVariableName;
   GUID          VariableGuid;
+  OC_ASSOC      *VariableMap;
+  VOID          *CurrentValue;
+  UINTN         CurrentValueSize;
+  BOOLEAN       SameContents;
 
-  for (GuidIndex = 0; GuidIndex < Config->Nvram.Block.Count; ++GuidIndex) {
+  for (BlockGuidIndex = 0; BlockGuidIndex < Config->Nvram.Block.Count; ++BlockGuidIndex) {
     Status = OcProcessVariableGuid (
-      OC_BLOB_GET (Config->Nvram.Block.Keys[GuidIndex]),
+      OC_BLOB_GET (Config->Nvram.Block.Keys[BlockGuidIndex]),
       &VariableGuid,
       NULL,
       NULL
@@ -312,13 +324,55 @@ OcBlockNvram (
       continue;
     }
 
-    for (VariableIndex = 0; VariableIndex < Config->Nvram.Block.Values[GuidIndex]->Count; ++VariableIndex) {
-      AsciiVariableName   = OC_BLOB_GET (Config->Nvram.Block.Values[GuidIndex]->Values[VariableIndex]);
+    //
+    // When variable is set and non-volatile variable setting is used,
+    // we do not want a variable to be constantly removed and added every reboot,
+    // as it will negatively impact flash memory. In case the variable is already set
+    // and has the same value we do not delete it.
+    //
+    for (AddGuidIndex = 0; AddGuidIndex < Config->Nvram.Add.Count; ++AddGuidIndex) {
+      if (AsciiStrCmp (
+        OC_BLOB_GET (Config->Nvram.Block.Keys[BlockGuidIndex]),
+        OC_BLOB_GET (Config->Nvram.Add.Keys[AddGuidIndex])) == 0) {
+        break;
+      }
+    }
+
+    for (BlockVariableIndex = 0; BlockVariableIndex < Config->Nvram.Block.Values[BlockGuidIndex]->Count; ++BlockVariableIndex) {
+      AsciiVariableName   = OC_BLOB_GET (Config->Nvram.Block.Values[BlockGuidIndex]->Values[BlockVariableIndex]);
       UnicodeVariableName = AsciiStrCopyToUnicode (AsciiVariableName, 0);
 
       if (UnicodeVariableName == NULL) {
         DEBUG ((DEBUG_WARN, "OC: Failed to convert NVRAM variable name %a\n", AsciiVariableName));
         continue;
+      }
+
+      if (AddGuidIndex != Config->Nvram.Add.Count) {
+        VariableMap = NULL;
+        for (AddVariableIndex = 0; AddVariableIndex < Config->Nvram.Add.Values[AddGuidIndex]->Count; ++AddVariableIndex) {
+          if (AsciiStrCmp (AsciiVariableName, OC_BLOB_GET (Config->Nvram.Add.Values[AddGuidIndex]->Keys[AddVariableIndex])) == 0) {
+            VariableMap = Config->Nvram.Add.Values[AddGuidIndex];
+            break;
+          }
+        }
+
+        if (VariableMap != NULL) {
+          Status = GetVariable2 (UnicodeVariableName, &VariableGuid, &CurrentValue, &CurrentValueSize);
+
+          if (!EFI_ERROR (Status)) {
+            SameContents = CurrentValueSize == VariableMap->Values[AddVariableIndex]->Size
+              && CompareMem (OC_BLOB_GET (VariableMap->Values[AddVariableIndex]), CurrentValue, CurrentValueSize) == 0;
+            FreePool (CurrentValue);
+          } else {
+            SameContents = FALSE;
+          }
+
+          if (SameContents) {
+            DEBUG ((DEBUG_INFO, "OC: Not deleting NVRAM %g:%a, matches add\n", &VariableGuid, AsciiVariableName));
+            FreePool (UnicodeVariableName);
+            continue;
+          }
+        }
       }
 
       Status = gRT->SetVariable (UnicodeVariableName, &VariableGuid, 0, 0, 0);
@@ -365,6 +419,7 @@ OcAddNvram (
       OcSetNvramVariable (
         OC_BLOB_GET (VariableMap->Keys[VariableIndex]),
         &VariableGuid,
+        Config->Nvram.WriteFlash ? OPEN_CORE_NVRAM_NV_ATTR : OPEN_CORE_NVRAM_ATTR,
         VariableMap->Values[VariableIndex]->Size,
         OC_BLOB_GET (VariableMap->Values[VariableIndex]),
         NULL
@@ -380,7 +435,7 @@ OcLoadNvramSupport (
   )
 {
   if (Config->Nvram.UseLegacy && Storage->FileSystem != NULL) {
-    OcLoadLegacyNvram (Storage->FileSystem, &Config->Nvram.Legacy);
+    OcLoadLegacyNvram (Storage->FileSystem, Config);
   }
 
   OcBlockNvram (Config);

@@ -2610,6 +2610,16 @@ use.
   For instance, do not put \texttt{boot-args} or \texttt{csr-active-config}, as
   this can bypass SIP.
 
+\item
+  \texttt{WriteFlash}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enables writing to flash memory for all added variables.
+  
+  \emph{Note}: This value is recommended to be enabled on most firmwares, but is
+  left configurable for firmwares that may have issues with NVRAM variable storage
+  garbage collection or alike.
+
 \end{enumerate}
 
 To read NVRAM variable value from macOS one could use \texttt{nvram}

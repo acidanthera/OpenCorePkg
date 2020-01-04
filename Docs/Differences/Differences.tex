@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Dec 10 15:40:50 2019
-%DIF ADD ../Configuration.tex        Wed Dec 11 22:09:19 2019
+%DIF ADD ../Configuration.tex        Sat Jan  4 18:43:45 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2592,9 +2592,8 @@ several GUIDs, including but not limited to:
 \hyperref[platforminfo]{PlatformInfo} section.
 Please ensure that variables of this section never collide with them,
 as behaviour is undefined otherwise.
-\DIFaddbegin 
 
-\DIFadd{For proper macOS functioning it is often required to use }\texttt{\DIFadd{OC\_FIRMWARE\_RUNTIME}}
+\DIFaddbegin \DIFadd{For proper macOS functioning it is often required to use }\texttt{\DIFadd{OC\_FIRMWARE\_RUNTIME}}
 \DIFadd{protocol implementation currently offered as a part of }\texttt{\DIFadd{FwRuntimeServices}} \DIFadd{driver.
 While it brings any benefits, there are certain limitations which arise depending on the
 use.
@@ -2610,9 +2609,8 @@ use.
   \DIFadd{is used, and for overwriting volatile variables with non-volatile on UEFI 2.8
   non-conformant firmwares.
 }\end{enumerate}
-\DIFaddend 
 
-\subsection{Properties}\label{nvramprops}
+\DIFaddend \subsection{Properties}\label{nvramprops}
 
 \begin{enumerate}
 \item
@@ -2676,7 +2674,19 @@ use.
 
   \textbf{WARNING}: Choose variables very carefully, as nvram.plist is not vaulted.
   For instance, do not put \texttt{boot-args} or \texttt{csr-active-config}, as
-  this can bypass SIP.
+  this can bypass SIP\DIFaddbegin \DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{WriteFlash}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Enables writing to flash memory for all added variables.
+  }
+
+  \emph{\DIFadd{Note}}\DIFadd{: This value is recommended to be enabled on most firmwares, but is
+  left configurable for firmwares that may have issues with NVRAM variable storage
+  garbage collection or alike}\DIFaddend .
 
 \end{enumerate}
 
