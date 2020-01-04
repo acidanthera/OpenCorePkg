@@ -39,3 +39,7 @@
 
 [Sources]
   OcCpuLib.c
+  OcCpuInternals.h
+
+[Sources.X64]
+  X64/Microcode.nasm

@@ -40,6 +40,8 @@
 #include <Register/Intel/Msr/SandyBridgeMsr.h>
 #include <Register/Intel/Msr/NehalemMsr.h>
 
+#include "OcCpuInternals.h"
+
 //
 // Tolerance within which we consider two frequency values to be roughly
 // equivalent.
@@ -1374,13 +1376,8 @@ OcCpuScanProcessor (
   // Get processor signature and decode
   //
   if (Cpu->MaxId >= CPUID_VERSION_INFO) {
-    //
-    // Intel SDM requires us issuing CPUID 1 read during microcode
-    // version read, so let's do it here for simplicity.
-    //
-
     if (Cpu->Vendor[0] == CPUID_VENDOR_INTEL) {
-      AsmWriteMsr64 (MSR_IA32_BIOS_SIGN_ID, 0);
+      Cpu->MicrocodeRevision = AsmReadIntelMicrocodeRevision ();
     }
 
     AsmCpuid (
@@ -1390,10 +1387,6 @@ OcCpuScanProcessor (
       &Cpu->CpuidVerEcx.Uint32,
       &Cpu->CpuidVerEdx.Uint32
       );
-
-    if (Cpu->Vendor[0] == CPUID_VENDOR_INTEL) {
-      Cpu->MicrocodeRevision = AsmReadMsr32 (MSR_IA32_BIOS_SIGN_ID);
-    }
 
     Cpu->Signature = Cpu->CpuidVerEax.Uint32;
     Cpu->Stepping  = (UINT8) Cpu->CpuidVerEax.Bits.SteppingId;
