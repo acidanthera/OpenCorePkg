@@ -470,6 +470,11 @@ AppleMapPrepareMemoryPool (
 {
   EFI_STATUS  Status;
 
+  if (!BootCompat->Settings.SetupVirtualMap
+    || BootCompat->KernelState.VmContext.MemoryPool != NULL) {
+    return;
+  }
+
   Status = VmAllocateMemoryPool (
     &BootCompat->KernelState.VmContext,
     OC_DEFAULT_VMEM_PAGE_COUNT
@@ -488,6 +493,13 @@ AppleMapPrepareBooterState (
   )
 {
   EFI_STATUS            Status;
+
+  //
+  // Allocate memory pool if needed.
+  //
+  AppleMapPrepareMemoryPool (
+    BootCompat
+    );
 
   //
   // This function may be called twice, do not redo in this case.

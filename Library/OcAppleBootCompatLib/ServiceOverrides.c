@@ -740,15 +740,6 @@ InstallServiceOverrides (
   gBS->RestoreTPL (OriginalTpl);
 
   //
-  // Allocate memory pool if needed.
-  //
-  if (BootCompat->Settings.SetupVirtualMap) {
-    AppleMapPrepareMemoryPool (
-      BootCompat
-      );
-  }
-
-  //
   // Update GetVariable handle with the help of external runtime services.
   //
   SetGetVariableHookHandler (NULL, BootCompat);
