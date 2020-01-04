@@ -437,7 +437,9 @@ OC_SCHEMA
 mPlatformConfigurationGenericSchema[] = {
   OC_SCHEMA_STRING_IN  ("MLB",                OC_GLOBAL_CONFIG, PlatformInfo.Generic.Mlb),
   OC_SCHEMA_DATAF_IN   ("ROM",                OC_GLOBAL_CONFIG, PlatformInfo.Generic.Rom),
+  OC_SCHEMA_BOOLEAN_IN ("ReplaceableMemory",  OC_GLOBAL_CONFIG, PlatformInfo.Generic.ReplaceableMemory),
   OC_SCHEMA_BOOLEAN_IN ("SpoofVendor",        OC_GLOBAL_CONFIG, PlatformInfo.Generic.SpoofVendor),
+  OC_SCHEMA_BOOLEAN_IN ("SupportsCsm",        OC_GLOBAL_CONFIG, PlatformInfo.Generic.SupportsCsm),
   OC_SCHEMA_STRING_IN  ("SystemProductName",  OC_GLOBAL_CONFIG, PlatformInfo.Generic.SystemProductName),
   OC_SCHEMA_STRING_IN  ("SystemSerialNumber", OC_GLOBAL_CONFIG, PlatformInfo.Generic.SystemSerialNumber),
   OC_SCHEMA_STRING_IN  ("SystemUUID",         OC_GLOBAL_CONFIG, PlatformInfo.Generic.SystemUuid),
