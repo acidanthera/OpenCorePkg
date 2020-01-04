@@ -1415,14 +1415,15 @@ OcCpuScanProcessor (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCCPU: Signature %0X Stepping %0X Model %0X Family %0X Type %0X ExtModel %0X ExtFamily %0X\n",
+    "OCCPU: Signature %0X Stepping %0X Model %0X Family %0X Type %0X ExtModel %0X ExtFamily %0X uCode %0X\n",
     Cpu->Signature,
     Cpu->Stepping,
     Cpu->Model,
     Cpu->Family,
     Cpu->Type,
     Cpu->ExtModel,
-    Cpu->ExtFamily
+    Cpu->ExtFamily,
+    Cpu->MicrocodeRevision
     ));
     
   //
