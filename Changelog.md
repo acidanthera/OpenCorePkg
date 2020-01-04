@@ -5,6 +5,10 @@ OpenCore Changelog
 - Update builtin firmware versions
 - Bundled FwRuntimeServices driver with OpenCore
 - Allowed writing to non-volatile variables with disabled write
+- Fixed microcode reading on Intel CPUs
+- Fixed SMBIOS Type4 External Clock values
+- Improved Windows compatibility on some setups (acidanthera/bugtracker#614)
+- Added `SupportsCsm` and `ReplaceableMemory` options in `PlatformInfo/Generic`
 
 #### v0.5.3
 - Update builtin firmware versions

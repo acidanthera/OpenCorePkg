@@ -2944,6 +2944,14 @@ be used. Version with macOS specific enhancements can be downloaded from
 
 \begin{enumerate}
 \item
+  \texttt{ReplaceableMemory}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Forces replaceable memory bit in \texttt{PlatformFeature}.
+
+  Resetting soldered bit in \texttt{PlatformFeature} enables memory tab in
+  \texttt{About My Mac}.
+\item
   \texttt{SpoofVendor}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -2952,6 +2960,16 @@ be used. Version with macOS specific enhancements can be downloaded from
   It is dangerous to use Apple in SMBIOS vendor fields for reasons given
   in \texttt{SystemManufacturer} description. However, certain firmwares
   may not provide valid values otherwise, which could break some software.
+\item
+  \texttt{SupportsCsm}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Forces CSM support in \texttt{FirmwareFeatures}.
+
+  Without this bit it is not possible to reboot to Windows installed on
+  a drive with EFI partition being not the first partition on the disk.
+  
+  \emph{Note}: This was enabled unconditionally in older OpenCore versions.
 \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\

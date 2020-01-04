@@ -175,6 +175,7 @@ OcPlatformUpdateSmbios (
   OC_SMBIOS_DATA   Data;
   EFI_GUID         Uuid;
   UINT8            SmcVersion[APPLE_SMBIOS_SMC_VERSION_SIZE];
+  UINT32           PlatformFeature;
 
   ZeroMem (&Data, sizeof (Data));
 
@@ -345,13 +346,24 @@ OcPlatformUpdateSmbios (
     // are recognised as legacy. See:
     // https://github.com/acidanthera/bugtracker/issues/327
     // https://sourceforge.net/p/cloverefiboot/tickets/435
-    // I could imagine this being configurable, but see no issue otherwise.
     //
-    Data.FirmwareFeatures     |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE;
-    Data.FirmwareFeaturesMask |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE;
+    if (Config->PlatformInfo.Generic.SupportsCsm) {
+      Data.FirmwareFeatures     |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE;
+      Data.FirmwareFeaturesMask |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE;
+    }
 
     Data.ProcessorType        = NULL;
-    Data.PlatformFeature      = MacInfo->Smbios.PlatformFeature;
+
+    if (MacInfo->Smbios.PlatformFeature != NULL) {
+      PlatformFeature = *MacInfo->Smbios.PlatformFeature;
+      if (Config->PlatformInfo.Generic.ReplaceableMemory) {
+        PlatformFeature &= ~PT_FEATURE_HAS_SOLDERED_SYSTEM_MEMORY;
+      }
+    } else {
+      PlatformFeature = 0;
+    }
+
+    Data.PlatformFeature      = &PlatformFeature;
 
     if (MacInfo->DataHub.SmcRevision != NULL) {
       SmbiosGetSmcVersion (MacInfo->DataHub.SmcRevision, SmcVersion);

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Dec 10 15:40:50 2019
-%DIF ADD ../Configuration.tex        Sat Jan  4 19:00:00 2020
+%DIF ADD ../Configuration.tex        Sun Jan  5 00:00:22 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3012,7 +3012,16 @@ be used. Version with macOS specific enhancements can be downloaded from
 
 \begin{enumerate}
 \item
-  \texttt{SpoofVendor}\\
+  \DIFaddbegin \texttt{\DIFadd{ReplaceableMemory}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Forces replaceable memory bit in }\texttt{\DIFadd{PlatformFeature}}\DIFadd{.
+}
+
+  \DIFadd{Resetting soldered bit in }\texttt{\DIFadd{PlatformFeature}} \DIFadd{enables memory tab in
+  }\texttt{\DIFadd{About My Mac}}\DIFadd{.
+}\item
+  \DIFaddend \texttt{SpoofVendor}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Sets SMBIOS vendor fields to \texttt{Acidanthera}.
@@ -3021,7 +3030,19 @@ be used. Version with macOS specific enhancements can be downloaded from
   in \texttt{SystemManufacturer} description. However, certain firmwares
   may not provide valid values otherwise, which could break some software.
 \item
-  \texttt{SystemProductName}\\
+  \DIFaddbegin \texttt{\DIFadd{SupportsCsm}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Forces CSM support in }\texttt{\DIFadd{FirmwareFeatures}}\DIFadd{.
+}
+
+  \DIFadd{Without this bit it is not possible to reboot to Windows installed on
+  a drive with EFI partition being not the first partition on the disk.
+  }
+
+  \emph{\DIFadd{Note}}\DIFadd{: This was enabled unconditionally in older OpenCore versions.
+}\item
+  \DIFaddend \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{MacPro6,1}\\
   \textbf{Description}: Refer to SMBIOS \texttt{SystemProductName}.
