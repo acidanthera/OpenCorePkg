@@ -174,6 +174,7 @@ mBooterQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("ProvideCustomSlide",     OC_GLOBAL_CONFIG, Booter.Quirks.ProvideCustomSlide),
   OC_SCHEMA_BOOLEAN_IN ("SetupVirtualMap",        OC_GLOBAL_CONFIG, Booter.Quirks.SetupVirtualMap),
   OC_SCHEMA_BOOLEAN_IN ("ShrinkMemoryMap",        OC_GLOBAL_CONFIG, Booter.Quirks.ShrinkMemoryMap),
+  OC_SCHEMA_BOOLEAN_IN ("SignalAppleOS",          OC_GLOBAL_CONFIG, Booter.Quirks.SignalAppleOS),
 };
 
 STATIC
@@ -540,6 +541,7 @@ mUefiProtocolsSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("DeviceProperties",        OC_GLOBAL_CONFIG, Uefi.Protocols.DeviceProperties),
   OC_SCHEMA_BOOLEAN_IN ("FirmwareVolume",          OC_GLOBAL_CONFIG, Uefi.Protocols.FirmwareVolume),
   OC_SCHEMA_BOOLEAN_IN ("HashServices",            OC_GLOBAL_CONFIG, Uefi.Protocols.HashServices),
+  OC_SCHEMA_BOOLEAN_IN ("OSInfo",                  OC_GLOBAL_CONFIG, Uefi.Protocols.OSInfo),
   OC_SCHEMA_BOOLEAN_IN ("UnicodeCollation",        OC_GLOBAL_CONFIG, Uefi.Protocols.UnicodeCollation)
 };
 

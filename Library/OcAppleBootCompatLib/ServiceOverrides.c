@@ -25,6 +25,7 @@
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcMemoryLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcOSInfoLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
@@ -272,6 +273,7 @@ OcStartImage (
 {
   EFI_STATUS                  Status;
   EFI_LOADED_IMAGE_PROTOCOL   *AppleLoadedImage;
+  EFI_OS_INFO_PROTOCOL        *OSInfo;
   BOOT_COMPAT_CONTEXT         *BootCompat;
   OC_FWRT_CONFIG              Config;
   UINTN                       DataSize;
@@ -310,6 +312,17 @@ OcStartImage (
       AppleLoadedImage,
       BootCompat->ServicePtrs.GetMemoryMap
       );
+  } else if (BootCompat->Settings.SignalAppleOS) {
+    Status = gBS->LocateProtocol (
+      &gEfiOSInfoProtocolGuid,
+      NULL,
+      (VOID *) &OSInfo
+      );
+
+    if (!EFI_ERROR (Status)) {
+      OSInfo->OSVendor (EFI_OS_INFO_APPLE_VENDOR_NAME);
+      OSInfo->OSName ("Mac OS X 10.15");
+    }
   }
 
   if (BootCompat->ServiceState.FwRuntime != NULL) {

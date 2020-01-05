@@ -68,4 +68,5 @@
   OcDeviceTreeLib
   OcGuardLib
   OcMemoryLib
+  OcOSInfoLib
   OcRngLib

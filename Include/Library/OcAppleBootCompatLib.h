@@ -78,6 +78,11 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   BOOLEAN  EnableWriteUnprotector;
   ///
+  /// Signal OSInfo protocol that every loaded non-macOS OS is macOS.
+  /// Works around disabled IGPU in Windows and Linux on Apple laptops.
+  ///
+  BOOLEAN  SignalAppleOS;
+  ///
   /// List of physical addresses to not be devirtualised by DevirtualiseMmio.
   ///
   EFI_PHYSICAL_ADDRESS *MmioWhitelist;
