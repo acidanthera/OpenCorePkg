@@ -1348,6 +1348,16 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   It is rare to need this quirk on Haswell or newer. Do not use unless you fully
   understand the consequences.
 
+\item
+  \texttt{SignalAppleOS}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Report macOS being loaded through OS Info for any OS.
+
+  This quirk is useful on Mac firmwares, which behave differently in different OS.
+  For example, it is supposed to enable Intel GPU in Windows and Linux in some
+  dual-GPU MacBook models.
+
 \end{enumerate}
 
 \section{DeviceProperties}\label{devprops}
@@ -3787,6 +3797,14 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   on platforms providing broken SHA-1 hashing. Can be diagnosed by invalid
   cursor size with \texttt{UIScale} set to \texttt{02}, in general platforms
   prior to APTIO V (Haswell and older) are affected.
+
+\item
+  \texttt{OSInfo}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Forcibly reinstalls OS Info protocol with builtin
+  versions. This protocol is generally used to receive notifications from macOS
+  bootloader, by the firmware or by other applications.
 
 \item
   \texttt{UnicodeCollation}\\

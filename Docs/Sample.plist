@@ -252,6 +252,8 @@
 			<true/>
 			<key>ShrinkMemoryMap</key>
 			<false/>
+			<key>SignalAppleOS</key>
+			<false/>
 		</dict>
 	</dict>
 	<key>DeviceProperties</key>
@@ -780,6 +782,8 @@
 			<key>FirmwareVolume</key>
 			<false/>
 			<key>HashServices</key>
+			<false/>
+			<key>OSInfo</key>
 			<false/>
 			<key>UnicodeCollation</key>
 			<false/>

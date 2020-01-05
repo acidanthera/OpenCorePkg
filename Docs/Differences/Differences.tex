@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Dec 10 15:40:50 2019
-%DIF ADD ../Configuration.tex        Sun Jan  5 01:16:21 2020
+%DIF ADD ../Configuration.tex        Sun Jan  5 21:08:43 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1413,7 +1413,19 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   It is rare to need this quirk on Haswell or newer. Do not use unless you fully
   understand the consequences.
 
-\end{enumerate}
+\DIFaddbegin \item
+  \texttt{\DIFadd{SignalAppleOS}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Report macOS being loaded through OS Info for any OS.
+}
+
+  \DIFadd{This quirk is useful on Mac firmwares, which behave differently in different OS.
+  For example, it is supposed to enable Intel GPU in Windows and Linux in some
+  dual-GPU MacBook models.
+}
+
+\DIFaddend \end{enumerate}
 
 \section{DeviceProperties}\label{devprops}
 
@@ -3858,7 +3870,16 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   versions. Should be set to \texttt{true} to ensure File Vault 2 compatibility
   on platforms providing broken SHA-1 hashing. Can be diagnosed by invalid
   cursor size with \texttt{UIScale} set to \texttt{02}, in general platforms
-  prior to APTIO V (Haswell and older) are affected.
+  prior to APTIO V (Haswell and older) are affected\DIFaddbegin \DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{OSInfo}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Forcibly reinstalls OS Info protocol with builtin
+  versions. This protocol is generally used to receive notifications from macOS
+  bootloader, by the firmware or by other applications}\DIFaddend .
 
 \item
   \texttt{UnicodeCollation}\\

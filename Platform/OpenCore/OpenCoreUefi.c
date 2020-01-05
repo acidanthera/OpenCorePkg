@@ -34,6 +34,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcFirmwareVolumeLib.h>
 #include <Library/OcHashServicesLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcOSInfoLib.h>
 #include <Library/OcUnicodeCollationEngLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -326,6 +327,10 @@ OcReinstallProtocols (
   if (OcFirmwareVolumeInstallProtocol (Config->Uefi.Protocols.FirmwareVolume) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install firmware volume protocol\n"));
   }
+
+  if (OcOSInfoInstallProtocol (Config->Uefi.Protocols.OSInfo) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install os info protocol\n"));
+  }
 }
 
 STATIC
@@ -449,6 +454,7 @@ OcLoadBooterUefiSupport (
   AbcSettings.ProvideCustomSlide     = Config->Booter.Quirks.ProvideCustomSlide;
   AbcSettings.SetupVirtualMap        = Config->Booter.Quirks.SetupVirtualMap;
   AbcSettings.ShrinkMemoryMap        = Config->Booter.Quirks.ShrinkMemoryMap;
+  AbcSettings.SignalAppleOS          = Config->Booter.Quirks.SignalAppleOS;
 
   if (AbcSettings.DevirtualiseMmio && Config->Booter.MmioWhitelist.Count > 0) {
     AbcSettings.MmioWhitelist = AllocatePool (

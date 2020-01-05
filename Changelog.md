@@ -9,6 +9,8 @@ OpenCore Changelog
 - Fixed SMBIOS Type4 External Clock values
 - Improved Windows compatibility on some setups (acidanthera/bugtracker#614)
 - Added `SupportsCsm` and option in `PlatformInfo/Generic`
+- Added `OSInfo` protocol support
+- Added `SignalAppleOS` `Booter` quirk to enable IGPU on Macs in other OS
 
 #### v0.5.3
 - Update builtin firmware versions

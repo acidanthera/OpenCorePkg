@@ -88,6 +88,7 @@
   OcHashServicesLib
   OcMachoLib
   OcMiscLib
+  OcOSInfoLib
   OcSmbiosLib
   OcStorageLib
   OcUnicodeCollationEngLib
