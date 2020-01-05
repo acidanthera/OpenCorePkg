@@ -56,7 +56,7 @@ InternalOSInfoSet (
       mAppleOSLoadedSignaled = TRUE;
     }
 
-    if (mOSName != NULL) {
+    if (mOSName == NULL) {
       return;
     }
 
