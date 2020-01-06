@@ -76,7 +76,7 @@ SecureZeroMem (
   IN  UINTN  Length
   )
 {
-  volatile UINT8 *volatile Destination;
+  volatile UINT8 *Destination;
 
   if (Length == 0) {
     return Buffer;
@@ -85,7 +85,7 @@ SecureZeroMem (
   ASSERT (Buffer != NULL);
   ASSERT (Length <= (MAX_ADDRESS - (UINTN) Buffer + 1));
 
-  Destination = (volatile UINT8 *volatile) Buffer;
+  Destination = (volatile UINT8 *) Buffer;
 
   while (Length--) {
     *Destination++ = 0;
