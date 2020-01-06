@@ -15,28 +15,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Library/DebugLib.h>
 
-/**
-  Performs a cryptographically secure comparison of the contents of two
-  buffers.
-
-  This function compares Length bytes of SourceBuffer to Length bytes of
-  DestinationBuffer in a cryptographically secure fashion. This especially
-  implies that different lengths of the longest shared prefix do not change
-  execution time in a way relevant to security.
-
-  If Length > 0 and DestinationBuffer is NULL, then ASSERT().
-  If Length > 0 and SourceBuffer is NULL, then ASSERT().
-  If Length is greater than (MAX_ADDRESS - DestinationBuffer + 1), then ASSERT().
-  If Length is greater than (MAX_ADDRESS - SourceBuffer + 1), then ASSERT().
-
-  @param  DestinationBuffer The pointer to the destination buffer to compare.
-  @param  SourceBuffer      The pointer to the source buffer to compare.
-  @param  Length            The number of bytes to compare.
-
-  @return 0                 All Length bytes of the two buffers are identical.
-  @retval -1                The two buffers are not identical within Length
-                            bytes.
-**/
 INTN
 SecureCompareMem (
   IN CONST VOID  *DestinationBuffer,
@@ -59,12 +37,12 @@ SecureCompareMem (
   if (Length > 0) {
     ASSERT (DestinationBuffer != NULL);
     ASSERT (SourceBuffer != NULL);
-    ASSERT ((Length - 1) <= (MAX_ADDRESS - (UINTN)DestinationBuffer));
-    ASSERT ((Length - 1) <= (MAX_ADDRESS - (UINTN)SourceBuffer));
+    ASSERT ((Length - 1) <= (MAX_ADDRESS - (UINTN) DestinationBuffer));
+    ASSERT ((Length - 1) <= (MAX_ADDRESS - (UINTN) SourceBuffer));
   }
 
-  Destination = (volatile CONST UINT8 *)DestinationBuffer;
-  Source      = (volatile CONST UINT8 *)SourceBuffer;
+  Destination = (volatile CONST UINT8 *) DestinationBuffer;
+  Source      = (volatile CONST UINT8 *) SourceBuffer;
 
   XorDiff = 0;
   for (Index = 0; Index < Length; ++Index) {
@@ -90,4 +68,28 @@ SecureCompareMem (
   // can only ever be 0 or 1, to finally yield the appropiate return value.
   //
   return ((INTN)(1U & ((XorDiff - 1U) >> 8U))) - 1;
+}
+
+VOID *
+SecureZeroMem (
+  OUT VOID   *Buffer,
+  IN  UINTN  Length
+  )
+{
+  volatile UINT8 *volatile Destination;
+
+  if (Length == 0) {
+    return Buffer;
+  }
+
+  ASSERT (Buffer != NULL);
+  ASSERT (Length <= (MAX_ADDRESS - (UINTN) Buffer + 1));
+
+  Destination = (volatile UINT8 *volatile) Buffer;
+
+  while (Length--) {
+    *Destination++ = 0;
+  }
+
+  return Buffer;
 }

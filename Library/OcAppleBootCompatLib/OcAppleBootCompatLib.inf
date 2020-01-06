@@ -65,6 +65,7 @@
   UefiBootServicesTableLib
   UefiRuntimeServicesTableLib
   OcCpuLib
+  OcCryptoLib
   OcDeviceTreeLib
   OcGuardLib
   OcMemoryLib

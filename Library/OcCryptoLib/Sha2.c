@@ -601,5 +601,5 @@ Sha384 (
   Sha384Init (&Ctx);
   Sha384Update (&Ctx, Data, Len);
   Sha384Final (&Ctx, Hash);
-  ZeroMem (&Ctx, sizeof (Ctx));
+  SecureZeroMem (&Ctx, sizeof (Ctx));
 }

@@ -109,7 +109,7 @@ SmcIoVirtualSmcWriteValue (
   // Handle HBKP separately to let boot.efi erase its contents as early as it wants.
   //
   if (Key == SMC_KEY_HBKP && Size <= SMC_HBKP_SIZE) {
-    ZeroMem (mVirtualSmcKeyValue[mAuthenticationKeyIndex].Data, SMC_HBKP_SIZE);
+    SecureZeroMem (mVirtualSmcKeyValue[mAuthenticationKeyIndex].Data, SMC_HBKP_SIZE);
     CopyMem (mVirtualSmcKeyValue[mAuthenticationKeyIndex].Data, Value, Size);
     for (Index = 0; Index < SMC_HBKP_SIZE; Index++) {
       if (mVirtualSmcKeyValue[mAuthenticationKeyIndex].Data[Index] != 0) {
@@ -397,7 +397,7 @@ EraseAuthenticationKey (
   IN VOID      *Context
   )
 {
-  ZeroMem (mVirtualSmcKeyValue[mAuthenticationKeyIndex].Data, SMC_HBKP_SIZE);
+  SecureZeroMem (mVirtualSmcKeyValue[mAuthenticationKeyIndex].Data, SMC_HBKP_SIZE);
 }
 
 STATIC
@@ -450,8 +450,8 @@ ExtractAuthentificationKey (
     PayloadSize  = Size - (sizeof (UINT32) + AES_BLOCK_SIZE);
     AesInitCtxIv (&Context, EncryptKey, InitVector);
     AesCbcDecryptBuffer (&Context, Payload, PayloadSize);
-    ZeroMem (&Context, sizeof (Context));
-    ZeroMem (EncryptKey, sizeof (EncryptKey));
+    SecureZeroMem (&Context, sizeof (Context));
+    SecureZeroMem (EncryptKey, sizeof (EncryptKey));
     RealSize = *(const UINT32 *)Payload;
 
     //
@@ -515,7 +515,7 @@ LoadAuthenticationKey (
       ExtractAuthentificationKey (Buffer, (UINT32)Size);
     }
 
-    ZeroMem (Buffer, Size);
+    SecureZeroMem (Buffer, Size);
     Status = gRT->SetVariable (VIRTUALSMC_ENCRYPTION_KEY, &gOcWriteOnlyVariableGuid, Attributes, Size, Buffer);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCSMC: Failed to zero key - %r\n", Status));

@@ -65,6 +65,16 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #endif
 
 //
+// ChaCha key size.
+//
+#define CHACHA_KEY_SIZE 32
+
+//
+// ChaCha IV size.
+//
+#define CHACHA_IV_SIZE  12
+
+//
 // Possible RSA algorithm types supported by OcCryptoLib
 // for RSA digital signature verification
 // PcdOcCryptoAllowedSigHashTypes MUST be kept in sync with changes!
@@ -219,6 +229,7 @@ ChaChaInitCtx (
 
 /**
   Perform ChaCha encryption/decryption.
+  Source may match Destination.
 
   @param[in,out] Context     ChaCha context.
   @param[in]     Source      Data for transformation.
@@ -486,6 +497,23 @@ SecureCompareMem (
   IN CONST VOID  *DestinationBuffer,
   IN CONST VOID  *SourceBuffer,
   IN UINTN       Length
+  );
+
+/**
+  Performs a cryptographically secure memory zeroing.
+
+  If Length > 0 and Buffer is NULL, then ASSERT().
+  If Length is greater than (MAX_ADDRESS - Buffer + 1), then ASSERT().
+
+  @param[out]  Buffer   The pointer to the destination buffer to zero.
+  @param[in]   Length   The number of bytes to zero.
+
+  @return Buffer.
+**/
+VOID *
+SecureZeroMem (
+  OUT VOID   *Buffer,
+  IN  UINTN  Length
   );
 
 /**

@@ -194,5 +194,5 @@ Sha1 (
   Sha1Init (&Ctx);
   Sha1Update (&Ctx, Data, Len);
   Sha1Final (&Ctx,Hash);
-  ZeroMem (&Ctx, sizeof (Ctx));
+  SecureZeroMem (&Ctx, sizeof (Ctx));
 }

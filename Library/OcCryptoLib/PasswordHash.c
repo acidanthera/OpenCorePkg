@@ -54,14 +54,7 @@ OcHashPasswordSha512 (
     Sha512Update (&ShaContext, Salt, SaltSize);
     Sha512Final  (&ShaContext, Hash);
   }
-  //
-  // The security-critical data constructed by this function is destroyed to
-  // prevent data leakage by, after returning, free memory.
-  // FIXME: ZeroMem() is not necessarily safe (it may be optimized away for
-  //        certain implementations) and CPU memory (registers and caches) are
-  //        not considered.
-  //
-  ZeroMem (&ShaContext, sizeof (ShaContext));
+  SecureZeroMem (&ShaContext, sizeof (ShaContext));
 }
 
 /**
@@ -95,14 +88,7 @@ OcVerifyPasswordSha512 (
 
   OcHashPasswordSha512 (Password, PasswordSize, Salt, SaltSize, VerifyHash);
   Result = SecureCompareMem (RefHash, VerifyHash, SHA512_DIGEST_SIZE) == 0;
-  //
-  // The security-critical data constructed by this function is destroyed to
-  // prevent data leakage by, after returning, free memory.
-  // FIXME: ZeroMem() is not necessarily safe (it may be optimized away for
-  //        certain implementations) and CPU memory (registers and caches) are
-  //        not considered.
-  //
-  ZeroMem (VerifyHash, SHA512_DIGEST_SIZE);
+  SecureZeroMem (VerifyHash, SHA512_DIGEST_SIZE);
 
   return Result;
 }

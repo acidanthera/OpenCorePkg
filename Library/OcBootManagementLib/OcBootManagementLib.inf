@@ -93,6 +93,7 @@
   OcAppleDiskImageLib
   OcAppleKeyMapLib
   OcAppleKeysLib
+  OcCryptoLib
   OcDevicePathLib
   OcGuardLib
   OcFileLib

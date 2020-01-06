@@ -233,5 +233,5 @@ Md5 (
   Md5Init (&Ctx);
   Md5Update (&Ctx, Data, Len);
   Md5Final (&Ctx,Hash);
-  ZeroMem (&Ctx, sizeof (Ctx));
+  SecureZeroMem (&Ctx, sizeof (Ctx));
 }

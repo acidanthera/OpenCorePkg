@@ -27,7 +27,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcCryptoLib.h>
 
 #define U32V(v) ((UINT32)(v) & 0xFFFFFFFFU)
-#define ROTATE(v, c) (LRotU32((v), (c)))
+#define ROTATE(v, c) (LRotU32 ((v), (c)))
 #define XOR(v, w) ((v) ^ (w))
 #define PLUS(v, w) (U32V((v) + (w)))
 #define PLUSONE(v) (PLUS((v), 1))

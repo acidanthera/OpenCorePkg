@@ -25,6 +25,7 @@
 #include <Library/DebugLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcCpuLib.h>
+#include <Library/OcCryptoLib.h>
 #include <Library/OcDeviceTreeLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/OcMemoryLib.h>
@@ -591,8 +592,8 @@ HideSlideFromOs (
   //
   SlideSupport->ValidSlideCount = 0;
   SlideSupport->BootArgsSize    = 0;
-  ZeroMem (SlideSupport->ValidSlides, sizeof (SlideSupport->ValidSlides));
-  ZeroMem (SlideSupport->BootArgs, sizeof (SlideSupport->BootArgs));
+  SecureZeroMem (SlideSupport->ValidSlides, sizeof (SlideSupport->ValidSlides));
+  SecureZeroMem (SlideSupport->BootArgs, sizeof (SlideSupport->BootArgs));
 }
 
 VOID

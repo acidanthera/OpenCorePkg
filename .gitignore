@@ -11,6 +11,7 @@ TestsUser/DiskImage/DiskImage
 TestsUser/Macho/Macho
 TestsUser/Prelinked/Prelinked
 TestsUser/Prelinked/Result.xml
+TestsUser/RsaPreprocess/RsaPreprocess
 TestsUser/Serialized/Serialized
 TestsUser/Smbios/Smbios
 Utilities/RsaTool/RsaTool
