@@ -2259,6 +2259,21 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   showing \texttt{NVRAM Reset} entry in boot picker.
 
 \item
+  \texttt{AuthRestart}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable \texttt{VirtualSMC}-compatible authenticated restart.
+
+  Authenticated restart is a way to reboot FileVault 2 enabled macOS without entering
+  the password. To perform authenticated restart one can use a dedicated terminal
+  command: \texttt{sudo fdesetup authrestart}. It is also used when installing
+  operating system updates.
+
+  VirtualSMC performs authenticated restart by saving disk encryption key split in
+  NVRAM and RTC, which despite being removed as soon as OpenCore starts, may be
+  considered a security risk and thus is optional.
+
+\item
   \texttt{ExposeSensitiveData}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0x6}\\
@@ -3545,12 +3560,6 @@ and supplementary utilities can be used.
   --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware.
-  \item \href{https://github.com/acidanthera/VirtualSMC}{\texttt{VirtualSmc}}
-  --- UEFI SMC driver, required for proper FileVault 2 functionality and potentially
-  other macOS specifics. An alternative, named \texttt{SMCHelper}, is not compatible
-  with \texttt{VirtualSmc} and OpenCore, which is unaware of its specific interfaces.
-  In case \texttt{FakeSMC} kernel extension is used, manual NVRAM variable addition
-  may be needed and \texttt{VirtualSmc} driver should still be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
   --- HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HFSPlus} driver commonly found in Apple firmwares. While
@@ -3745,6 +3754,17 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Apple Key Map protocols with builtin
   versions.
+
+\item
+  \texttt{AppleSmcIo}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple SMC I/O protocol with a builtin
+  version.
+
+  This protocol replaces legacy \texttt{VirtualSmc} UEFI driver, and is compatible
+  with any SMC kernel extension. However, in case \texttt{FakeSMC} kernel extension
+  is used, manual NVRAM key variable addition may be needed.
 
 \item
   \texttt{AppleUserInterfaceTheme}\\

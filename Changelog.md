@@ -11,6 +11,8 @@ OpenCore Changelog
 - Added `SupportsCsm` and option in `PlatformInfo/Generic`
 - Added `OSInfo` protocol support
 - Added `SignalAppleOS` `Booter` quirk to enable IGPU on Macs in other OS
+- Added `AppleSmcIo`protocol support (replaces `VirtualSmc` UEFI driver)
+- Added `AuthRestart` security property for VirtualSMC authenticated restart
 
 #### v0.5.3
 - Update builtin firmware versions

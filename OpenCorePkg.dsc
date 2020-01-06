@@ -90,6 +90,7 @@
   OcRtcLib|OcSupportPkg/Library/OcRtcLib/OcRtcLib.inf
   OcSerializeLib|OcSupportPkg/Library/OcSerializeLib/OcSerializeLib.inf
   OcSmbiosLib|OcSupportPkg/Library/OcSmbiosLib/OcSmbiosLib.inf
+  OcSmcLib|OcSupportPkg/Library/OcSmcLib/OcSmcLib.inf
   OcStorageLib|OcSupportPkg/Library/OcStorageLib/OcStorageLib.inf
   OcStringLib|OcSupportPkg/Library/OcStringLib/OcStringLib.inf
   OcTemplateLib|OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf

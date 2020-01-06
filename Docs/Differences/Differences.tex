@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Dec 10 15:40:50 2019
-%DIF ADD ../Configuration.tex        Sun Jan  5 21:08:43 2020
+%DIF ADD ../Configuration.tex        Mon Jan  6 15:57:19 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2326,7 +2326,25 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   showing \texttt{NVRAM Reset} entry in boot picker.
 
 \item
-  \texttt{ExposeSensitiveData}\\
+  \DIFaddbegin \texttt{\DIFadd{AuthRestart}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Enable }\texttt{\DIFadd{VirtualSMC}}\DIFadd{-compatible authenticated restart.
+}
+
+  \DIFadd{Authenticated restart is a way to reboot FileVault 2 enabled macOS without entering
+  the password. To perform authenticated restart one can use a dedicated terminal
+  command: }\texttt{\DIFadd{sudo fdesetup authrestart}}\DIFadd{. It is also used when installing
+  operating system updates.
+}
+
+  \DIFadd{VirtualSMC performs authenticated restart by saving disk encryption key split in
+  NVRAM and RTC, which despite being removed as soon as OpenCore starts, may be
+  considered a security risk and thus is optional.
+}
+
+\item
+  \DIFaddend \texttt{ExposeSensitiveData}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0x6}\\
   \textbf{Description}: Sensitive data exposure bitmask (sum) to operating system.
@@ -3619,13 +3637,20 @@ and supplementary utilities can be used.
   --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware.
-  \item \href{https://github.com/acidanthera/VirtualSMC}{\texttt{VirtualSmc}}
-  --- UEFI SMC driver, required for proper FileVault 2 functionality and potentially
-  other macOS specifics. An alternative, named \texttt{SMCHelper}, is not compatible
-  with \texttt{VirtualSmc} and OpenCore, which is unaware of its specific interfaces.
-  In case \texttt{FakeSMC} kernel extension is used, manual NVRAM variable addition
-  may be needed and \texttt{VirtualSmc} driver should still be used.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
+  \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/VirtualSMC}{\texttt{VirtualSmc}}
+%DIFDELCMD <   %%%
+\DIFdel{--- UEFI SMC driver, required for proper FileVault 2 functionality and potentially
+  other macOS specifics. An alternative, named }\texttt{\DIFdel{SMCHelper}}%DIFAUXCMD
+\DIFdel{, is not compatible
+  with }\texttt{\DIFdel{VirtualSmc}} %DIFAUXCMD
+\DIFdel{and OpenCore, which is unaware of its specific interfaces.
+  In case }\texttt{\DIFdel{FakeSMC}} %DIFAUXCMD
+\DIFdel{kernel extension is used, manual NVRAM variable addition
+  may be needed and }\texttt{\DIFdel{VirtualSmc}} %DIFAUXCMD
+\DIFdel{driver should still be used.
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdelend \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
   --- HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HFSPlus} driver commonly found in Apple firmwares. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
@@ -3821,7 +3846,20 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   versions.
 
 \item
-  \texttt{AppleUserInterfaceTheme}\\
+  \DIFaddbegin \texttt{\DIFadd{AppleSmcIo}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Reinstalls Apple SMC I/O protocol with a builtin
+  version.
+}
+
+  \DIFadd{This protocol replaces legacy }\texttt{\DIFadd{VirtualSmc}} \DIFadd{UEFI driver, and is compatible
+  with any SMC kernel extension. However, in case }\texttt{\DIFadd{FakeSMC}} \DIFadd{kernel extension
+  is used, manual NVRAM key variable addition may be needed.
+}
+
+\item
+  \DIFaddend \texttt{AppleUserInterfaceTheme}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Apple User Interface Theme protocol with a builtin

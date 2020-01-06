@@ -90,6 +90,7 @@
   OcMiscLib
   OcOSInfoLib
   OcSmbiosLib
+  OcSmcLib
   OcStorageLib
   OcUnicodeCollationEngLib
   OcVirtualFsLib

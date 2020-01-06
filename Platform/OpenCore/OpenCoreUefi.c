@@ -34,6 +34,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcFirmwareVolumeLib.h>
 #include <Library/OcHashServicesLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcSmcLib.h>
 #include <Library/OcOSInfoLib.h>
 #include <Library/OcUnicodeCollationEngLib.h>
 #include <Library/PrintLib.h>
@@ -302,6 +303,10 @@ OcReinstallProtocols (
 
   if (OcAppleImageConversionInstallProtocol (Config->Uefi.Protocols.AppleImageConversion) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install image conversion protocol\n"));
+  }
+
+  if (OcSmcIoInstallProtocol (Config->Uefi.Protocols.AppleSmcIo, Config->Misc.Security.AuthRestart) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install smc i/o protocol\n"));
   }
 
   if (OcAppleUserInterfaceThemeInstallProtocol (Config->Uefi.Protocols.AppleUserInterfaceTheme) == NULL) {
