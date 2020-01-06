@@ -21,87 +21,168 @@
 **/
 
 #include <Library/BaseLib.h>
+#include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/OcMiscLib.h>
+#include <Library/OcCryptoLib.h>
 #include <Library/OcRngLib.h>
 
-/**
-  Written in 2019 by David Blackman and Sebastiano Vigna (vigna@acm.org)
+#include <Register/Intel/Cpuid.h>
 
-  To the extent possible under law, the author has dedicated all copyright
-  and related and neighboring rights to this software to the public domain
-  worldwide. This software is distributed without any warranty.
+#include "OcRngInternals.h"
 
-  See <http://creativecommons.org/publicdomain/zero/1.0/>.
+STATIC OC_RNG_CONTEXT mRng;
 
-  This is xoshiro256** 1.0, one of our all-purpose, rock-solid
-  generators. It has excellent (sub-ns) speed, a state (256 bits) that is
-  large enough for any parallel application, and it passes all tests we
-  are aware of.
-
-  For generating just floating-point numbers, xoshiro256+ is even faster.
-
-  The state must be seeded so that it is not everywhere zero. If you have
-  a 64-bit seed, we suggest to seed a splitmix64 generator and use its
-  output to fill mXorShiroState.
-**/
-
-STATIC UINT64 mXorShiroState[4];
-
+STATIC
 VOID
-XorShiro256Init (
-  VOID
+ChaChaRngStir (
+  IN  UINT32  BytesNeeded
   )
 {
-  UINTN  Index;
+  //
+  // Implementation design based on arc4random from FreeBSD.
+  //
+
+  UINTN    Index;
+  UINT32   KeySeed[CHACHA_KEY_SIZE / sizeof (UINT32)];
+  UINT32   IvSeed[CHACHA_IV_SIZE / sizeof (UINT32)];
+  BOOLEAN  Result;
+
+  STATIC_ASSERT (CHACHA_KEY_SIZE % sizeof (UINT32) == 0, "Unexpected key size");
+  STATIC_ASSERT (CHACHA_IV_SIZE % sizeof (UINT32) == 0, "Unexpected key size");
+
+  ASSERT (BytesNeeded <= MAX_BYTES_TO_EMIT);
 
   //
-  // TODO: Try to find better entropy source and consider using CSPRNG
-  // in some future (e.g. ChaCha20).
+  // Do not reseed if we are initialised and do not yet need a reseed.
   //
-  for (Index = 0; Index < sizeof (mXorShiroState); ++Index) {
-    ((UINT8 *) mXorShiroState)[Index] = (UINT8) (AsmReadTsc () & 0xFFU);
+  if (mRng.PrngInitialised && mRng.BytesTillReseed >= BytesNeeded) {
+    mRng.BytesTillReseed -= BytesNeeded;
+    return;
+  }
+
+  //
+  // Generate seeds.
+  //
+  for (Index = 0; Index < ARRAY_SIZE (KeySeed); ++Index) {
+    Result = GetRandomNumber32 (&KeySeed[Index]);
+    if (!Result) {
+      ASSERT (FALSE);
+      CpuDeadLoop ();
+    }
+  }
+
+  for (Index = 0; Index < ARRAY_SIZE (IvSeed); ++Index) {
+    Result = GetRandomNumber32 (&IvSeed[Index]);
+    if (!Result) {
+      ASSERT (FALSE);
+      CpuDeadLoop ();
+    }
+  }
+
+  //
+  // Reinitialize if we are making a second loop.
+  //
+  if (mRng.PrngInitialised) {
+    ZeroMem (mRng.Buffer, sizeof (mRng.Buffer));
+    //
+    // Fill buffer with keystream.
+    //
+    ChaChaCryptBuffer (&mRng.ChaCha, mRng.Buffer, mRng.Buffer, sizeof (mRng.Buffer));
+    //
+    // Mix in RNG data.
+    //
+    for (Index = 0; Index < ARRAY_SIZE (KeySeed); ++Index) {
+      mRng.Buffer[Index] ^= KeySeed[Index];
+    }
+    for (Index = 0; Index < ARRAY_SIZE (IvSeed); ++Index) {
+      mRng.Buffer[ARRAY_SIZE (KeySeed) + Index] ^= KeySeed[Index];
+    }
+  } else {
+    mRng.PrngInitialised = TRUE;
+  }
+
+  //
+  // Setup ChaCha context.
+  //
+  ChaChaInitCtx (&mRng.ChaCha, (UINT8 *) KeySeed, (UINT8 *) IvSeed, 0);
+
+  SecureZeroMem (KeySeed, sizeof (KeySeed));
+  SecureZeroMem (IvSeed, sizeof (IvSeed));
+
+  mRng.BytesTillReseed = MAX_BYTES_TO_EMIT - BytesNeeded;
+  mRng.BytesInBuffer = 0;
+
+  ZeroMem (mRng.Buffer, sizeof (mRng.Buffer));
+}
+
+STATIC
+VOID
+ChaChaRngGenerate (
+  OUT UINT8   *Data,
+  IN  UINT32  Size
+  )
+{
+  UINT32  CurrentSize;
+
+  ASSERT (Size <= MAX_BYTES_TO_EMIT);
+
+  ChaChaRngStir (Size);
+
+  while (Size > 0) {
+    if (mRng.BytesInBuffer > 0) {
+      CurrentSize = MIN (Size, mRng.BytesInBuffer);
+
+      CopyMem (Data, mRng.Buffer + sizeof (mRng.Buffer) - mRng.BytesInBuffer, CurrentSize);
+      ZeroMem (mRng.Buffer + sizeof (mRng.Buffer) - mRng.BytesInBuffer, CurrentSize);
+
+      Data               += CurrentSize;
+      Size               -= CurrentSize;
+      mRng.BytesInBuffer -= CurrentSize;
+    }
+
+    if (mRng.BytesInBuffer == 0) {
+      ZeroMem (mRng.Buffer, sizeof (mRng.Buffer));
+      //
+      // Fill buffer with keystream.
+      //
+      ChaChaCryptBuffer (&mRng.ChaCha, mRng.Buffer, mRng.Buffer, sizeof (mRng.Buffer));
+      //
+      // Immediately reinit for backtracking resistance.
+      //
+      ChaChaInitCtx (&mRng.ChaCha, &mRng.Buffer[0], &mRng.Buffer[CHACHA_KEY_SIZE], 0);
+      ZeroMem (mRng.Buffer, CHACHA_KEY_SIZE + CHACHA_IV_SIZE);
+      mRng.BytesInBuffer = sizeof (mRng.Buffer) - CHACHA_KEY_SIZE - CHACHA_IV_SIZE;
+    }
   }
 }
 
+STATIC
 UINT64
-XorShiro256Next (
-  VOID
+GetEntropyBits (
+  IN UINT64  Bits
   )
 {
-  UINT64 Result;
-  UINT64 T;
+  UINT64  Index;
+  UINT64  Entropy;
+  UINT64  Tmp;
 
-  Result = LRotU64 (mXorShiroState[1] * 5, 7) * 9;
-  T      = mXorShiroState[1] << 17;
+  //
+  // Uses non-deterministic CPU execution.
+  // REF: https://static.lwn.net/images/conf/rtlws11/random-hardware.pdf
+  // REF: https://www.osadl.org/fileadmin/dam/presentations/RTLWS11/okech-inherent-randomness.pdf
+  // REF: http://lkml.iu.edu/hypermail/linux/kernel/1909.3/03714.html
+  //
+  Entropy = 0;
+  for (Index = 0; Index < Bits; ++Index) {
+    Tmp = AsmReadTsc () + AsmAddRngJitter (AsmReadTsc ());
+    if ((Tmp & BIT0) != 0) {
+      Entropy |= (1U << Index);
+    }
+  }
 
-  mXorShiroState[2] ^= mXorShiroState[0];
-  mXorShiroState[3] ^= mXorShiroState[1];
-  mXorShiroState[1] ^= mXorShiroState[2];
-  mXorShiroState[0] ^= mXorShiroState[3];
-
-  mXorShiroState[2] ^= T;
-
-  mXorShiroState[3] = LRotU64 (mXorShiroState[3], 45);
-
-  return Result;
+  return Entropy;
 }
-
-//
-// Hardware RNG generator availability.
-//
-STATIC BOOLEAN mRdRandAvailable = FALSE;
-
-//
-// Bit mask used to determine if RdRand instruction is supported.
-//
-#define RDRAND_MASK                  BIT30
-
-//
-// Limited retry number when valid random data is returned.
-// Uses the recommended value defined in Section 7.3.17 of "Intel 64 and IA-32
-// Architectures Software Developer's Mannual".
-//
-#define RDRAND_RETRY_LIMIT           10
 
 /**
   The constructor function checks whether or not RDRAND instruction is supported
@@ -120,19 +201,19 @@ OcRngLibConstructor (
   VOID
   )
 {
-  UINT32  RegEcx;
+  CPUID_VERSION_INFO_ECX RegEcx;
 
   //
   // Determine RDRAND support by examining bit 30 of the ECX register returned by
   // CPUID. A value of 1 indicates that processor support RDRAND instruction.
   //
-  AsmCpuid (1, 0, 0, &RegEcx, 0);
-  mRdRandAvailable = (RegEcx & RDRAND_MASK) == RDRAND_MASK;
+  AsmCpuid (1, 0, 0, &RegEcx.Uint32, 0);
+  mRng.HardwareRngAvailable = RegEcx.Bits.RDRAND;
 
   //
   // Initialize PRNG.
   //
-  XorShiro256Init ();
+  ChaChaRngStir (0);
 
   return RETURN_SUCCESS;
 }
@@ -158,20 +239,19 @@ GetRandomNumber16 (
 
   ASSERT (Rand != NULL);
 
-  if (!mRdRandAvailable) {
-    return FALSE;
-  }
-
-  //
-  // A loop to fetch a 16 bit random value with a retry count limit.
-  //
-  for (Index = 0; Index < RDRAND_RETRY_LIMIT; Index++) {
-    if (AsmRdRand16 (Rand)) {
-      return TRUE;
+  if (mRng.HardwareRngAvailable) {
+    //
+    // A loop to fetch a 16 bit random value with a retry count limit.
+    //
+    for (Index = 0; Index < RDRAND_RETRY_LIMIT; Index++) {
+      if (AsmRdRand16 (Rand)) {
+        return TRUE;
+      }
     }
   }
 
-  return FALSE;
+  *Rand = (UINT16) GetEntropyBits (sizeof (UINT16) * OC_CHAR_BIT);
+  return TRUE;
 }
 
 /**
@@ -195,19 +275,18 @@ GetRandomNumber32 (
 
   ASSERT (Rand != NULL);
 
-  if (!mRdRandAvailable) {
-    return FALSE;
-  }
-
-  //
-  // A loop to fetch a 32 bit random value with a retry count limit.
-  //
-  for (Index = 0; Index < RDRAND_RETRY_LIMIT; Index++) {
-    if (AsmRdRand32 (Rand)) {
-      return TRUE;
+  if (mRng.HardwareRngAvailable) {
+    //
+    // A loop to fetch a 32 bit random value with a retry count limit.
+    //
+    for (Index = 0; Index < RDRAND_RETRY_LIMIT; Index++) {
+      if (AsmRdRand32 (Rand)) {
+        return TRUE;
+      }
     }
   }
 
+  *Rand = (UINT32) GetEntropyBits (sizeof (UINT32) * OC_CHAR_BIT);
   return FALSE;
 }
 
@@ -232,20 +311,19 @@ GetRandomNumber64 (
 
   ASSERT (Rand != NULL);
 
-  if (!mRdRandAvailable) {
-    return FALSE;
-  }
-
-  //
-  // A loop to fetch a 64 bit random value with a retry count limit.
-  //
-  for (Index = 0; Index < RDRAND_RETRY_LIMIT; Index++) {
-    if (AsmRdRand64 (Rand)) {
-      return TRUE;
+  if (mRng.HardwareRngAvailable) {
+    //
+    // A loop to fetch a 64 bit random value with a retry count limit.
+    //
+    for (Index = 0; Index < RDRAND_RETRY_LIMIT; Index++) {
+      if (AsmRdRand64 (Rand)) {
+        return TRUE;
+      }
     }
   }
 
-  return FALSE;
+  *Rand = GetEntropyBits (sizeof (UINT64) * OC_CHAR_BIT);
+  return TRUE;
 }
 
 /**
@@ -267,21 +345,19 @@ GetRandomNumber128 (
 {
   ASSERT (Rand != NULL);
 
-  if (!mRdRandAvailable) {
-    return FALSE;
+  if (mRng.HardwareRngAvailable) {
+    //
+    // Read 64 bits twice
+    //
+    if (GetRandomNumber64 (&Rand[0])
+      && GetRandomNumber64 (&Rand[1])) {
+      return TRUE;
+    }
   }
 
-  //
-  // Read first 64 bits
-  //
-  if (!GetRandomNumber64 (Rand)) {
-    return FALSE;
-  }
-
-  //
-  // Read second 64 bits
-  //
-  return GetRandomNumber64 (++Rand);
+  Rand[0] = GetEntropyBits (sizeof (UINT64) * OC_CHAR_BIT);
+  Rand[1] = GetEntropyBits (sizeof (UINT64) * OC_CHAR_BIT);
+  return TRUE;
 }
 
 /**
@@ -297,9 +373,7 @@ GetPseudoRandomNumber16 (
 {
   UINT16  Rand;
 
-  if (!GetRandomNumber16 (&Rand)) {
-    Rand = (UINT16) (XorShiro256Next () & 0xFFFFULL);
-  }
+  ChaChaRngGenerate ((UINT8 *) &Rand, sizeof (Rand));
 
   return Rand;
 }
@@ -317,9 +391,7 @@ GetPseudoRandomNumber32 (
 {
   UINT32  Rand;
 
-  if (!GetRandomNumber32 (&Rand)) {
-    Rand = (UINT32) (XorShiro256Next () & 0xFFFFFFFFULL);
-  }
+  ChaChaRngGenerate ((UINT8 *) &Rand, sizeof (Rand));
 
   return Rand;
 }
@@ -337,9 +409,7 @@ GetPseudoRandomNumber64 (
 {
   UINT64  Rand;
 
-  if (!GetRandomNumber64 (&Rand)) {
-    Rand = XorShiro256Next ();
-  }
+  ChaChaRngGenerate ((UINT8 *) &Rand, sizeof (Rand));
 
   return Rand;
 }

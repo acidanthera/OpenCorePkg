@@ -30,6 +30,10 @@
 
 [Sources.Ia32, Sources.X64]
   OcRngLib.c
+  OcRngInternals.h
+
+[Sources.X64]
+  X64/RngDelay.nasm
 
 [Packages]
   OcSupportPkg/OcSupportPkg.dec
@@ -38,3 +42,4 @@
 [LibraryClasses]
   BaseLib
   DebugLib
+  OcCryptoLib

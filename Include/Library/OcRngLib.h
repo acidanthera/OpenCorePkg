@@ -19,6 +19,8 @@
 
 /**
   Generates a 16-bit pseudo random number.
+  This generator is still guaranteed to be cryptographically secure
+  by the use of CPRNG with entropy.
 
   @retval     16-bit pseudo random number.
 **/
@@ -30,6 +32,8 @@ GetPseudoRandomNumber16 (
 
 /**
   Generates a 32-bit pseudo random number.
+  This generator is still guaranteed to be cryptographically secure
+  by the use of CPRNG with entropy.
 
   @retval     32-bit pseudo random number.
 **/
@@ -41,6 +45,8 @@ GetPseudoRandomNumber32 (
 
 /**
   Generates a 64-bit pseudo random number.
+  This generator is still guaranteed to be cryptographically secure
+  by the use of CPRNG with entropy.
 
   @retval     64-bit pseudo random number.
 **/
