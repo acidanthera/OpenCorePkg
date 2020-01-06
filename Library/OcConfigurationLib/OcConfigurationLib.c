@@ -338,6 +338,7 @@ STATIC
 OC_SCHEMA
 mMiscConfigurationSecuritySchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("AllowNvramReset",      OC_GLOBAL_CONFIG, Misc.Security.AllowNvramReset),
+  OC_SCHEMA_BOOLEAN_IN ("AuthRestart",          OC_GLOBAL_CONFIG, Misc.Security.AuthRestart),
   OC_SCHEMA_BOOLEAN_IN ("EnablePassword",       OC_GLOBAL_CONFIG, Misc.Security.EnablePassword),
   OC_SCHEMA_INTEGER_IN ("ExposeSensitiveData",  OC_GLOBAL_CONFIG, Misc.Security.ExposeSensitiveData),
   OC_SCHEMA_INTEGER_IN ("HaltLevel",            OC_GLOBAL_CONFIG, Misc.Security.HaltLevel),
@@ -535,6 +536,7 @@ mUefiProtocolsSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("AppleEvent",              OC_GLOBAL_CONFIG, Uefi.Protocols.AppleEvent),
   OC_SCHEMA_BOOLEAN_IN ("AppleImageConversion",    OC_GLOBAL_CONFIG, Uefi.Protocols.AppleImageConversion),
   OC_SCHEMA_BOOLEAN_IN ("AppleKeyMap",             OC_GLOBAL_CONFIG, Uefi.Protocols.AppleKeyMap),
+  OC_SCHEMA_BOOLEAN_IN ("AppleSmcIo",              OC_GLOBAL_CONFIG, Uefi.Protocols.AppleSmcIo),
   OC_SCHEMA_BOOLEAN_IN ("AppleUserInterfaceTheme", OC_GLOBAL_CONFIG, Uefi.Protocols.AppleUserInterfaceTheme),
   OC_SCHEMA_BOOLEAN_IN ("ConsoleControl",          OC_GLOBAL_CONFIG, Uefi.Protocols.ConsoleControl),
   OC_SCHEMA_BOOLEAN_IN ("DataHub",                 OC_GLOBAL_CONFIG, Uefi.Protocols.DataHub),

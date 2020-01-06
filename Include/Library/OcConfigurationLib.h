@@ -292,6 +292,7 @@
   _(UINT32                      , ScanPolicy                  ,      , OC_SCAN_DEFAULT_POLICY  , ()) \
   _(BOOLEAN                     , AllowNvramReset             ,      , FALSE                   , ()) \
   _(BOOLEAN                     , ExposeSensitiveData         ,      , OCS_EXPOSE_VERSION      , ()) \
+  _(BOOLEAN                     , AuthRestart                 ,      , FALSE                   , ()) \
   _(BOOLEAN                     , EnablePassword              ,      , FALSE                   , ()) \
   _(UINT8                       , PasswordHash                , [64] , {0}                     , ()) \
   _(OC_DATA                     , PasswordSalt                ,      , OC_EDATA_CONSTR (_, __) , OC_DESTR (OC_DATA)) \
@@ -472,6 +473,7 @@ OC_DECLARE (OC_UEFI_INPUT)
   _(BOOLEAN                     , AppleEvent                  ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleImageConversion        ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleKeyMap                 ,     , FALSE  , ()) \
+  _(BOOLEAN                     , AppleSmcIo                  ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleUserInterfaceTheme     ,     , FALSE  , ()) \
   _(BOOLEAN                     , ConsoleControl              ,     , FALSE  , ()) \
   _(BOOLEAN                     , DataHub                     ,     , FALSE  , ()) \
