@@ -90,6 +90,7 @@
   OcRtcLib|OcSupportPkg/Library/OcRtcLib/OcRtcLib.inf
   OcSerializeLib|OcSupportPkg/Library/OcSerializeLib/OcSerializeLib.inf
   OcSmbiosLib|OcSupportPkg/Library/OcSmbiosLib/OcSmbiosLib.inf
+  OcSmcLib|OcSupportPkg/Library/OcSmcLib/OcSmcLib.inf
   OcStringLib|OcSupportPkg/Library/OcStringLib/OcStringLib.inf
   OcTemplateLib|OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
   OcTimerLib|OcSupportPkg/Library/OcTimerLib/OcTimerLib.inf
@@ -138,6 +139,7 @@
   OcSupportPkg/Library/OcRngLib/OcRngLib.inf
   OcSupportPkg/Library/OcSerializeLib/OcSerializeLib.inf
   OcSupportPkg/Library/OcSmbiosLib/OcSmbiosLib.inf
+  OcSupportPkg/Library/OcSmcLib/OcSmcLib.inf
   OcSupportPkg/Library/OcStorageLib/OcStorageLib.inf
   OcSupportPkg/Library/OcStringLib/OcStringLib.inf
   OcSupportPkg/Library/OcTemplateLib/OcTemplateLib.inf
