@@ -77,7 +77,7 @@ BigNumSwapWord (
 //
 
 /**
-  Calculates the Montgomery Inverse and R² mod N.
+  Calculates the Montgomery Inverse and R^2 mod N.
 
   @param[in,out] RSqrMod   The buffer to return R^2 mod N into.
   @param[in]     NumWords  The number of Words of RSqrMod and N.

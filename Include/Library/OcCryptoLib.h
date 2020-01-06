@@ -81,6 +81,10 @@ typedef struct AES_CONTEXT_ {
   UINT8 Iv[AES_BLOCK_SIZE];
 } AES_CONTEXT;
 
+typedef struct CHACHA_CONTEXT_ {
+  UINT32 Input[16];
+} CHACHA_CONTEXT;
+
 typedef struct MD5_CONTEXT_ {
   UINT8   Data[64];
   UINT32  DataLen;
@@ -195,6 +199,38 @@ AesCtrXcryptBuffer (
   AES_CONTEXT  *Context,
   UINT8        *Data,
   UINT32       Len
+  );
+
+/**
+  Setup ChaCha context (IETF variant).
+
+  @param[out] Context  ChaCha context.
+  @param[in]  Key      ChaCha 256-bit key.
+  @param[in]  Iv       ChaCha 96-bit initialisation vector.
+  @param[in]  Counter  ChaCha 32-bit counter.
+**/
+VOID
+ChaChaInitCtx (
+  OUT CHACHA_CONTEXT  *Context,
+  IN  CONST UINT8     *Key,
+  IN  CONST UINT8     *Iv,
+  IN  UINT32          Counter
+  );
+
+/**
+  Perform ChaCha encryption/decryption.
+
+  @param[in,out] Context     ChaCha context.
+  @param[in]     Source      Data for transformation.
+  @param[out]    Destination Resulting data.
+  @param[in]     Length      Data and ciphertext lengths.
+**/
+VOID
+ChaChaCryptBuffer (
+  IN OUT CHACHA_CONTEXT  *Context,
+  IN     CONST UINT8     *Source,
+     OUT UINT8           *Destination,
+  IN     UINT32          Length
   );
 
 VOID

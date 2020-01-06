@@ -30,8 +30,9 @@
 
 [Sources]
   Aes.c
-  RsaDigitalSign.c
+  ChaCha.c
   Md5.c
+  RsaDigitalSign.c
   Sha1.c
   Sha2.c
   SecureMem.c

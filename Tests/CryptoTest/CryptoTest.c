@@ -48,7 +48,7 @@ TestRsa2048Sha256Verify (
     );
 
   SignatureVerified = RsaVerifySigHashFromKey (
-    (OC_RSA_PUBLIC_KEY *) Rsa2048Sha256Sample.PublicKey,
+    (CONST OC_RSA_PUBLIC_KEY *) Rsa2048Sha256Sample.PublicKey,
     Rsa2048Sha256Sample.Signature,
     sizeof (Rsa2048Sha256Sample.Signature),
     DataSha256Hash,
@@ -207,6 +207,75 @@ TestAesCbc (
   return Status;
 }
 
+EFI_STATUS
+EFIAPI
+TestChaCha (
+  VOID
+  )
+{
+  CHACHA_CONTEXT  Context;
+  BOOLEAN         EncryptionOk;
+  BOOLEAN         DecryptionOk;
+  UINT8 TmpBuffer1[sizeof (ChaChaCipherText)];
+  UINT8 TmpBuffer2[sizeof (ChaChaCipherText)];
+
+  ZeroMem (&Context, sizeof (Context));
+
+  ChaChaInitCtx (
+    &Context,
+    ChaChaEncryptionKey,
+    ChaChaInitVector,
+    ChaChaCounter
+    );
+
+  ZeroMem (TmpBuffer1, sizeof (TmpBuffer1));
+
+  ChaChaCryptBuffer (
+    &Context,
+    ChaChaPlainText,
+    TmpBuffer1,
+    sizeof (TmpBuffer1)
+    );
+
+  EncryptionOk = CompareMem (TmpBuffer1, ChaChaCipherText, sizeof (TmpBuffer1)) == 0;
+  if (EncryptionOk) {
+    Print (L"ChaCha encryption test passed\n");
+  } else {
+    Print (L"ChaCha encryption test failed\n");
+  }
+
+  ZeroMem (&Context, sizeof (Context));
+
+  ChaChaInitCtx (
+    &Context,
+    ChaChaEncryptionKey,
+    ChaChaInitVector,
+    ChaChaCounter
+    );
+
+  ZeroMem (TmpBuffer2, sizeof (TmpBuffer2));
+
+  ChaChaCryptBuffer (
+    &Context,
+    TmpBuffer1,
+    TmpBuffer2,
+    sizeof (TmpBuffer2)
+    );
+
+  DecryptionOk = CompareMem (TmpBuffer2, ChaChaPlainText, sizeof (TmpBuffer2)) == 0;
+  if (DecryptionOk) {
+    Print (L"ChaCha decryption test passed\n");
+  } else {
+    Print (L"ChaCha decryption test failed\n");
+  }
+
+  if (EncryptionOk && DecryptionOk) {
+    return EFI_SUCCESS;
+  }
+
+  return EFI_INVALID_PARAMETER;
+}
+
 
 EFI_STATUS
 EFIAPI
@@ -336,49 +405,69 @@ UefiDriverMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
+  BOOLEAN    Failure;
   EFI_STATUS Status;
+
+  Failure = FALSE;
 
   //
   // Test hash algorithms
   //
   Status = TestHash ();
-  if (EFI_ERROR(Status)) {
-    Print(L"HashTest failed!\n");
+  if (EFI_ERROR (Status)) {
+    Print (L"HashTest failed!\n");
+    Failure = TRUE;
   } else {
-    Print(L"All hash tests passed!\n");
+    Print (L"All hash tests passed!\n");
   }
 
   //
   // Test AES-128-CBC
   //
   Status = TestAesCbc ();
-  if (EFI_ERROR(Status)) {
-    Print(L"AES-128-CBC failed!\n");
+  if (EFI_ERROR (Status)) {
+    Print (L"AES-128-CBC failed!\n");
+    Failure = TRUE;
   } else {
-    Print(L"AES-128-CBC passed!\n");
+    Print (L"AES-128-CBC passed!\n");
   }
 
   //
   // Test AES-128-CTR
   //
   Status = TestAesCtr ();
-  if (EFI_ERROR(Status)) {
-    Print(L"AES-128-CTR failed!\n");
+  if (EFI_ERROR (Status)) {
+    Print (L"AES-128-CTR failed!\n");
+    Failure = TRUE;
   } else {
-    Print(L"AES-128-CTR passed!\n");
+    Print (L"AES-128-CTR passed!\n");
+  }
+
+  Status = TestChaCha ();
+  if (EFI_ERROR (Status)) {
+    Print (L"ChaCha failed!\n");
+    Failure = TRUE;
+  } else {
+    Print (L"ChaCha passed!\n");
   }
 
   //
   // Test Rsa2048Sha256 signature
   //
   Status = TestRsa2048Sha256Verify ();
-  if (EFI_ERROR(Status)) {
-    Print(L"Rsa2048Sha256 failed!\n");
+  if (EFI_ERROR (Status)) {
+    Print (L"Rsa2048Sha256 failed!\n");
+    Failure = TRUE;
   } else {
-    Print(L"Rsa2048Sha256 passed!\n");
+    Print (L"Rsa2048Sha256 passed!\n");
   }
 
-  return Status;
+  if (Failure) {
+    Print (L"Some tests failed\n");
+    return EFI_INVALID_PARAMETER;
+  }
+
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -388,7 +477,10 @@ UefiAppMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
+  BOOLEAN    Failure;
   EFI_STATUS Status;
+
+  Failure = FALSE;
 
   WaitForKeyPress (L"Press any key...");
   Print (L"This is test app...\n");
@@ -397,8 +489,9 @@ UefiAppMain (
   // Test hash algorithms
   //
   Status = TestHash ();
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     Print(L"HashTest failed!\n");
+    Failure = TRUE;
   } else {
     Print(L"All hash tests passed!\n");
   }
@@ -409,8 +502,9 @@ UefiAppMain (
   // Test AES-128-CBC
   //
   Status = TestAesCbc ();
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     Print(L"AES-128-CBC failed!\n");
+    Failure = TRUE;
   } else {
     Print(L"AES-128-CBC passed!\n");
   }
@@ -421,10 +515,24 @@ UefiAppMain (
   // Test AES-128-CTR
   //
   Status = TestAesCtr ();
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     Print(L"AES-128-CTR failed!\n");
+    Failure = TRUE;
   } else {
     Print(L"AES-128-CTR passed!\n");
+  }
+
+  WaitForKeyPress (L"Press any key...");
+
+  //
+  // Test ChaCha
+  //
+  Status = TestChaCha ();
+  if (EFI_ERROR (Status)) {
+    Print (L"ChaCha failed!\n");
+    Failure = TRUE;
+  } else {
+    Print (L"ChaCha passed!\n");
   }
 
   WaitForKeyPress (L"Press any key...");
@@ -433,14 +541,19 @@ UefiAppMain (
   // Test Rsa2048Sha256 signature
   //
   Status = TestRsa2048Sha256Verify ();
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     Print(L"Rsa2048Sha256 failed!\n");
+    Failure = TRUE;
   } else {
     Print(L"Rsa2048Sha256 passed!\n");
   }
   WaitForKeyPress (L"Press any key to exit");
 
 
-  return Status;
-}
+  if (Failure) {
+    Print (L"Some tests failed\n");
+    return EFI_INVALID_PARAMETER;
+  }
 
+  return EFI_SUCCESS;
+}

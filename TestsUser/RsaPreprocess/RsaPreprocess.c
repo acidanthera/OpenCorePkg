@@ -1,3 +1,22 @@
+/** @file
+  Copyright (C) 2019, Download-Fritz. All rights reserved.
+
+  All rights reserved.
+
+  This program and the accompanying materials
+  are licensed and made available under the terms and conditions of the BSD License
+  which accompanies this distribution.  The full text of the license may be found at
+  http://opensource.org/licenses/bsd-license.php
+
+  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+**/
+
+
+/**
+clang -g -fsanitize=undefined,address -I../Include -I../../Include  -I../../Library/OcCryptoLib -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h RsaPreprocess.c  ../../Library/OcAppleKeysLib/OcAppleKeysLib.c ../../Library/OcCryptoLib/BigNumMontgomery.c ../../Library/OcCryptoLib/BigNumPrimitives.c ../../Library/OcCryptoLib/X64/BigNumWordMul64.c -o RsaPreprocess
+**/
+
 #include <Base.h>
 
 #include <Library/OcCryptoLib.h>
@@ -37,18 +56,20 @@ int verifyRsa (CONST OC_RSA_PUBLIC_KEY *PublicKey, char *Name)
   N0Inv = BigNumCalculateMontParams (
             RSqrMod,
             ModulusSize / OC_BN_WORD_SIZE,
-            PublicKey->Data
+            (CONST OC_BN_WORD *) PublicKey->Data
             );
 
   printf (
-    "%s: results: %d %d\n",
+    "%s: results: %d %d (%llX vs %llX)\n",
     Name,
     memcmp (
       RSqrMod,
       &PublicKey->Data[PublicKey->Hdr.NumQwords],
       ModulusSize
       ),
-    N0Inv != PublicKey->Hdr.N0Inv
+    N0Inv != PublicKey->Hdr.N0Inv,
+    (unsigned long long) N0Inv,
+    (unsigned long long) PublicKey->Hdr.N0Inv
     );
 
   free(RSqrMod);
