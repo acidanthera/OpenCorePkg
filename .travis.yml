@@ -1,0 +1,22 @@
+language: cpp
+env:
+  global:
+  - FORCE_INSTALL=1
+
+matrix:
+  include:
+  - os: osx
+    name: "Build"
+    osx_image: xcode10.2
+    compiler: clang
+
+    script:
+    - "./macbuild.tool"
+
+  - os: osx
+    name: "Build"
+    osx_image: xcode11.3
+    compiler: clang
+
+    script:
+    - "./macbuild.tool"
