@@ -1,6 +1,8 @@
 OcSupportPkg
 ============
 
+[![Build Status](https://travis-ci.com/acidanthera/OcSupportPkg.svg?branch=master)](https://travis-ci.com/acidanthera/OcSupportPkg)
+
 Additional UEFI support common libraries shared by other projects in [Acidanthera](https://github.com/acidanthera). The primary purpose of the library set is to provide supplemental functionality for Apple-specific UEFI drivers.
 
 Early history of the codebase could be found in [AppleSupportPkg](https://github.com/acidanthera/AppleSupportPkg) and PicoLib library set by The HermitCrabs Lab.
@@ -21,7 +23,7 @@ Early history of the codebase could be found in [AppleSupportPkg](https://github
 
 This library implements basic safety features recommended for the use within the project. It implements fast
 safe integral arithmetics mapping on compiler builtins, type alignment checking, and UBSan runtime,
-based on [NetBSD implementation](https://blog.netbsd.org/tnf/entry/introduction_to_µubsan_a_clean).
+based on [NetBSD implementation](https://blog.netbsd.org/tnf/entry/introduction_to_Âµubsan_a_clean).
 
 The use of UBSan runtime requires the use of Clang compiler and `-fsanitize=undefined` argument. Refer to
 [Clang documentation](https://releases.llvm.org/7.0.0/tools/clang/docs/UndefinedBehaviorSanitizer.html) for more
