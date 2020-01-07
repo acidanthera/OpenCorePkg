@@ -208,7 +208,7 @@ OcRngLibConstructor (
   // CPUID. A value of 1 indicates that processor support RDRAND instruction.
   //
   AsmCpuid (1, 0, 0, &RegEcx.Uint32, 0);
-  mRng.HardwareRngAvailable = RegEcx.Bits.RDRAND;
+  mRng.HardwareRngAvailable = RegEcx.Bits.RDRAND != 0;
 
   //
   // Initialize PRNG.
