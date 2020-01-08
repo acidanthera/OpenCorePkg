@@ -32,6 +32,9 @@
   OcRngLib.c
   OcRngInternals.h
 
+[Sources.IA32]
+  IA32/RngDelay.nasm
+
 [Sources.X64]
   X64/RngDelay.nasm
 

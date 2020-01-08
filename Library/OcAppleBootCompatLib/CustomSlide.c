@@ -80,7 +80,7 @@ GenerateSlideValue (
   IN  SLIDE_SUPPORT_STATE  *SlideSupport
   )
 {
-  UINT64  Slide;
+  UINT32  Slide;
 
   //
   // Handle 0 slide case.
@@ -90,7 +90,7 @@ GenerateSlideValue (
   }
 
   do {
-    Slide = GetPseudoRandomNumber64 () % SlideSupport->ValidSlideCount;
+    DivU64x32Remainder (GetPseudoRandomNumber64 (), SlideSupport->ValidSlideCount, &Slide);
   } while (Slide == 0);
 
   return SlideSupport->ValidSlides[Slide];

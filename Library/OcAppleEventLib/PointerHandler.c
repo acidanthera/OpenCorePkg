@@ -792,7 +792,7 @@ InternalSimplePointerPollNotifyFunction (
     EndTime = GetTimeInNanoSecond (EndTime - StartTime);
     // Maximum time allowed in this function is half the interval plus some margin (0.55 * 100ns)
     if (EndTime > mSimplePointerPollTime * 55ULL) {
-      mSimplePointerPollTime = EndTime / 50ULL;
+      mSimplePointerPollTime = DivU64x32 (EndTime, 50);
       if (mSimplePointerPollTime > MAX_POINTER_POLL_FREQUENCY) {
         mSimplePointerPollTime = MAX_POINTER_POLL_FREQUENCY;
       }

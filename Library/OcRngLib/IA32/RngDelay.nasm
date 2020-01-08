@@ -13,7 +13,7 @@
 ;  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 ;------------------------------------------------------------------------------
 
-BITS     64
+BITS     32
 DEFAULT  REL
 
 SECTION  .text
@@ -31,23 +31,42 @@ ASM_PFX(AsmAddRngJitter):
   ; This assembly code corresponds to Hamming Weight implementation for targets
   ; with fast multiplication.
   ; REF: https://en.wikipedia.org/wiki/Hamming_weight#Efficient_implementation
-  mov  rax, rcx
-  shr  rax, 1
-  mov  rdx, 5555555555555555h
-  and  rdx, rax
-  sub  rcx, rdx
-  mov  rax, 3333333333333333h
-  mov  rdx, rcx
-  and  rdx, rax
-  shr  rcx, 2
-  and  rcx, rax
-  add  rcx, rdx
-  mov  rax, rcx
-  shr  rax, 4
-  lea  rax, [rax+rcx]
-  mov  rcx, 0F0F0F0F0F0F0F0Fh
-  and  rcx, rax
-  mov  rax, 101010101010101h
-  imul rax, rcx
-  shr  rax, 38h
+  push esi
+  mov  edx, [esp+8]
+  mov  eax, [esp+12]
+  mov  ecx, edx
+  shr  ecx, 1
+  mov  esi, eax
+  shr  esi, 1
+  and  esi, 55555555h
+  and  ecx, 55555555h
+  sub  edx, ecx
+  sbb  eax, esi
+  mov  ecx, eax
+  and  ecx, 33333333h
+  mov  esi, edx
+  and  esi, 33333333h
+  shr  edx, 2
+  shr  eax, 2
+  and  eax, 33333333h
+  add  eax, ecx
+  and  edx, 33333333h
+  add  edx, esi
+  mov  ecx, eax
+  shld ecx, edx, 1Ch
+  mov  esi, eax
+  shr  esi, 4
+  add  ecx, edx
+  adc  esi, eax
+  and  esi, 0F0F0F0Fh
+  and  ecx, 0F0F0F0Fh
+  mov  edx, 1010101h
+  mov  eax, ecx
+  mul  edx
+  imul ecx, 1010101h
+  add  ecx, edx
+  imul eax, esi, 1010101h
+  add  eax, ecx
+  shr  eax, 18h
+  pop  esi
   ret

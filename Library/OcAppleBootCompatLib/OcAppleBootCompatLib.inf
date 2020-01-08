@@ -36,12 +36,14 @@
   KernelSupport.c
   OcAppleBootCompatLib.c
   ServiceOverrides.c
+  # All headers should go to [Sources], this sounds like a bug in EDK II Build System.
+  IA32/ContextSwitch.h
+  X64/ContextSwitch.h
 
 [Sources.IA32]
-  IA32/ContextSwitch.h
+  IA32/ContextSwitchSupport.c
 
 [Sources.X64]
-  X64/ContextSwitch.h
   X64/ContextSwitch.nasm
   X64/ContextSwitchSupport.c
 

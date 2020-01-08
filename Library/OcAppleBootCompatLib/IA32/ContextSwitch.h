@@ -46,29 +46,4 @@ typedef PACKED struct ASM_KERNEL_JUMP_ {
 
 #pragma pack(pop)
 
-/**
-  Assembly interface to save UEFI environment state in specific way.
-
-  @param[in,out]  AsmState      Assembly state to update, can be preserved.
-**/
-VOID
-EFIAPI
-AsmAppleMapPlatformSaveState (
-  IN OUT ASM_SUPPORT_STATE  *AsmState
-  );
-
-/**
-  Assembly interface for backjump from kernel code.
-  Takes kernel arguments through RAX or EAX register.
-**/
-VOID
-AsmAppleMapPlatformPrepareKernelState (
-  );
-
-/**
-  Assembly global variable containing ASM_SUPPORT_STATE address.
-  Must fit into lower 32-bit bytes due to 32-bit .
-**/
-extern UINT32 gOcAbcAsmStateAddr32;
-
 #endif // CONTEXT_SWITCH_H
