@@ -107,6 +107,10 @@ WaitForKeyPress (
 #define OC_INPUT_INVALID  -2 ///< Some other key
 #define OC_INPUT_TIMEOUT  -3 ///< Timeout
 #define OC_INPUT_CONTINUE -4 ///< Continue (press enter)
+#define OC_INPUT_UP       -5 ///< Move up
+#define OC_INPUT_DOWN     -6 ///< Move down
+#define OC_INPUT_TOP      -7 ///< Move to top
+#define OC_INPUT_BOTTOM   -8 ///< Move to bottom
 
 /**
   Obtains key index from user input.

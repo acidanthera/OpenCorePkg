@@ -133,6 +133,22 @@ WaitForKeyIndex (
     return OC_INPUT_ABORTED;
   }
 
+  if (Key.ScanCode == SCAN_UP) {
+    return OC_INPUT_UP;
+  }
+
+  if (Key.ScanCode == SCAN_DOWN) {
+    return OC_INPUT_DOWN;
+  }
+
+  if (Key.ScanCode == SCAN_LEFT || Key.ScanCode == SCAN_PAGE_UP || Key.ScanCode == SCAN_HOME) {
+    return OC_INPUT_TOP;
+  }
+
+  if (Key.ScanCode == SCAN_RIGHT || Key.ScanCode == SCAN_PAGE_DOWN || Key.ScanCode == SCAN_END) {
+    return OC_INPUT_BOTTOM;
+  }
+
   if (Key.UnicodeChar == CHAR_CARRIAGE_RETURN) {
     return OC_INPUT_CONTINUE;
   }

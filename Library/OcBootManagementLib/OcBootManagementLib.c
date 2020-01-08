@@ -729,14 +729,17 @@ OcShowSimpleBootMenu (
   OUT OC_BOOT_ENTRY               **ChosenBootEntry
   )
 {
-  UINTN   Index;
-  UINTN   Length;
-  INTN    KeyIndex;
-  CHAR16  Code[2];
-  UINT32  TimeOutSeconds;
+  UINTN           Index;
+  UINTN           Length;
+  INTN            KeyIndex;
+  INTN            ChosenEntry;
+  CHAR16          Code[2];
+  UINT32          TimeOutSeconds;
+  APPLE_KEY_CODE  LastPolled;
 
-  Code[1] = '\0';
-
+  ChosenEntry    = -1;
+  Code[1]        = '\0';
+  LastPolled     = 0;
   TimeOutSeconds = Context->TimeoutSeconds;
 
   while (TRUE) {
@@ -756,8 +759,15 @@ OcShowSimpleBootMenu (
     gST->ConOut->OutputString (gST->ConOut, L"\r\n\r\n");
 
     for (Index = 0; Index < MIN (Count, OC_INPUT_MAX); ++Index) {
+      if (DefaultEntry == Index && TimeOutSeconds > 0) {
+        gST->ConOut->OutputString (gST->ConOut, L"* ");
+      } else if (ChosenEntry >= 0 && (UINTN) ChosenEntry == Index) {
+        gST->ConOut->OutputString (gST->ConOut, L"> ");
+      } else {
+        gST->ConOut->OutputString (gST->ConOut, L"  ");
+      }
+
       Code[0] = OC_INPUT_STR[Index];
-      gST->ConOut->OutputString (gST->ConOut, DefaultEntry == Index && TimeOutSeconds > 0 ? L"* " : L"  ");
       gST->ConOut->OutputString (gST->ConOut, Code);
       gST->ConOut->OutputString (gST->ConOut, L". ");
       gST->ConOut->OutputString (gST->ConOut, BootEntries[Index].Name);
@@ -778,21 +788,56 @@ OcShowSimpleBootMenu (
 
     while (TRUE) {
       if (Context->PollAppleHotKeys) {
-        KeyIndex = OcWaitForAppleKeyIndex (Context, TimeOutSeconds);
+        KeyIndex = OcWaitForAppleKeyIndex (Context, TimeOutSeconds, &LastPolled);
       } else {
         KeyIndex = WaitForKeyIndex (TimeOutSeconds);
       }
+
       if (KeyIndex == OC_INPUT_TIMEOUT) {
         *ChosenBootEntry = &BootEntries[DefaultEntry];
         gST->ConOut->OutputString (gST->ConOut, L"Timeout\r\n");
         return EFI_SUCCESS;
       } else if (KeyIndex == OC_INPUT_CONTINUE) {
-        *ChosenBootEntry = &BootEntries[DefaultEntry];
+        *ChosenBootEntry = &BootEntries[ChosenEntry >= 0 ? (UINTN) ChosenEntry : DefaultEntry];
         gST->ConOut->OutputString (gST->ConOut, L"OK\r\n");
         return EFI_SUCCESS;
       } else if (KeyIndex == OC_INPUT_ABORTED) {
         gST->ConOut->OutputString (gST->ConOut, L"Aborted\r\n");
         return EFI_ABORTED;
+      } else if (KeyIndex == OC_INPUT_UP) {
+        if (TimeOutSeconds > 0) {
+          ChosenEntry = (INTN) DefaultEntry;
+        }
+        if (ChosenEntry < 0) {
+          ChosenEntry = 0;
+        } else if (ChosenEntry == 0) {
+          ChosenEntry = (INTN) (MIN (Count, OC_INPUT_MAX) - 1);
+        } else {
+          --ChosenEntry;
+        }
+        TimeOutSeconds = 0;
+        break;
+      } else if (KeyIndex == OC_INPUT_DOWN) {
+        if (TimeOutSeconds > 0) {
+          ChosenEntry = (INTN) DefaultEntry;
+        }
+        if (ChosenEntry < 0) {
+          ChosenEntry = 0;
+        } else if (ChosenEntry == (INTN) (MIN (Count, OC_INPUT_MAX) - 1)) {
+          ChosenEntry = 0;
+        } else {
+          ++ChosenEntry;
+        }
+        TimeOutSeconds = 0;
+        break;
+      } else if (KeyIndex == OC_INPUT_TOP) {
+        ChosenEntry = 0;
+        TimeOutSeconds = 0;
+        break;
+      } else if (KeyIndex == OC_INPUT_BOTTOM) {
+        ChosenEntry = (INTN) (MIN (Count, OC_INPUT_MAX) - 1);
+        TimeOutSeconds = 0;
+        break;
       } else if (KeyIndex != OC_INPUT_INVALID && (UINTN)KeyIndex < Count) {
         ASSERT (KeyIndex >= 0);
         *ChosenBootEntry = &BootEntries[KeyIndex];
@@ -946,7 +991,8 @@ OcLoadPickerHotKeys (
 INTN
 OcWaitForAppleKeyIndex (
   IN OUT OC_PICKER_CONTEXT  *Context,
-  IN UINTN                  Timeout
+  IN     UINTN              Timeout,
+  IN OUT APPLE_KEY_CODE     *LastKey  OPTIONAL
   )
 {
   EFI_STATUS                         Status;
@@ -1000,6 +1046,13 @@ OcWaitForAppleKeyIndex (
     }
 
     CurrTime    = GetTimeInNanoSecond (GetPerformanceCounter ());
+
+    //
+    // Reset lastly pressed key.
+    //
+    if (LastKey != NULL && (Modifiers != 0 || NumKeys != 1 || *LastKey != Keys[0])) {
+      *LastKey = 0;
+    }
 
     HasCommand = (Modifiers & (APPLE_MODIFIER_LEFT_COMMAND | APPLE_MODIFIER_RIGHT_COMMAND)) != 0;
     HasShift   = (Modifiers & (APPLE_MODIFIER_LEFT_SHIFT | APPLE_MODIFIER_RIGHT_SHIFT)) != 0;
@@ -1105,11 +1158,43 @@ OcWaitForAppleKeyIndex (
       return OC_INPUT_ABORTED;
     }
     //
+    // Ignore repeated key press.
+    //
+    if (LastKey != NULL && Modifiers == 0 && NumKeys == 1 && *LastKey == Keys[0]) {
+      NumKeys = 0;
+    }
+    //
     // Check exact match on index strokes.
     //
     if (Modifiers == 0 && NumKeys == 1) {
-      if (Keys[0] == AppleHidUsbKbUsageKeyReturn) {
+      if (LastKey != NULL) {
+        *LastKey = Keys[0];
+      }
+
+      if (Keys[0] == AppleHidUsbKbUsageKeyEnter
+        || Keys[0] == AppleHidUsbKbUsageKeyReturn
+        || Keys[0] == AppleHidUsbKbUsageKeyPadEnter) {
         return OC_INPUT_CONTINUE;
+      }
+
+      if (Keys[0] == AppleHidUsbKbUsageKeyUpArrow) {
+        return OC_INPUT_UP;
+      }
+
+      if (Keys[0] == AppleHidUsbKbUsageKeyDownArrow) {
+        return OC_INPUT_DOWN;
+      }
+
+      if (Keys[0] == AppleHidUsbKbUsageKeyLeftArrow
+        || Keys[0] == AppleHidUsbKbUsageKeyPgUp
+        || Keys[0] == AppleHidUsbKbUsageKeyHome) {
+        return OC_INPUT_TOP;
+      }
+
+      if (Keys[0] == AppleHidUsbKbUsageKeyRightArrow
+        || Keys[0] == AppleHidUsbKbUsageKeyPgDn
+        || Keys[0] == AppleHidUsbKbUsageKeyEnd) {
+        return OC_INPUT_BOTTOM;
       }
 
       STATIC_ASSERT (AppleHidUsbKbUsageKeyOne + 8 == AppleHidUsbKbUsageKeyNine, "Unexpected encoding");
