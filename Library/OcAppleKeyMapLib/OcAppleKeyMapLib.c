@@ -558,10 +558,18 @@ OcAppleKeyMapInstallProtocols (
       (VOID *)&Aggregator
       );
 
-    if (!EFI_ERROR (Status) && !EFI_ERROR (Status2)) {
-      mKeyMapDatabase = Database;
+    if (!EFI_ERROR (Status2)) {
+      //
+      // VMware Fusion has no KeyMapDatabase, and it is intended.
+      //
+      if (!EFI_ERROR (Status)) {
+        mKeyMapDatabase = Database;
+      }
       return Aggregator;
-    } else if (!EFI_ERROR (Status) || !EFI_ERROR (Status2)) {
+    } else if (!EFI_ERROR (Status)) {
+      //
+      // Installed KeyMapDatabase makes no sense, however.
+      //
       return NULL;
     }
   }
