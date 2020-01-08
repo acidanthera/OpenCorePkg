@@ -43,6 +43,7 @@ package() {
 }
 
 cd $(dirname "$0")
+ARCHS=(X64 IA32)
 SELFPKG=OpenCorePkg
 DEPNAMES=('EfiPkg' 'OcSupportPkg' 'MacInfoPkg')
 DEPURLS=('https://github.com/acidanthera/EfiPkg' 'https://github.com/acidanthera/OcSupportPkg' 'https://github.com/acidanthera/MacInfoPkg')
