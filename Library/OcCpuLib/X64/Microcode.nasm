@@ -19,6 +19,8 @@ DEFAULT  REL
 MSR_IA32_BIOS_SIGN_ID       equ     00000008Bh
 CPUID_VERSION_INFO          equ     1
 
+SECTION  .text
+
 ;------------------------------------------------------------------------------
 ; UINT32
 ; EFIAPI
