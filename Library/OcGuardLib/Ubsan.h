@@ -67,6 +67,18 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #ifdef __GNUC__
 #if defined(MDE_CPU_X64) || defined(MDE_CPU_IA32)
 #include <stddef.h>
+
+#ifndef __SSIZE_TYPE__
+#define __SSIZE_TYPE__                                                         \
+  __typeof__(_Generic((__SIZE_TYPE__)0,                                        \
+                      unsigned long long int : (long long int)0,               \
+                      unsigned long int : (long int)0,                         \
+                      unsigned int : (int)0,                                   \
+                      unsigned short : (short)0,                               \
+                      unsigned char : (signed char)0))
+#endif // __SSIZE_TYPE__
+
+typedef __SSIZE_TYPE__ ssize_t;
 #else
 #error Unknown CPU arch
 #endif
