@@ -287,7 +287,7 @@ GetRandomNumber32 (
   }
 
   *Rand = (UINT32) GetEntropyBits (sizeof (UINT32) * OC_CHAR_BIT);
-  return FALSE;
+  return TRUE;
 }
 
 /**
