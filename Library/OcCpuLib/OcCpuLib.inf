@@ -41,5 +41,8 @@
   OcCpuLib.c
   OcCpuInternals.h
 
+[Sources.IA32]
+  IA32/Microcode.nasm
+
 [Sources.X64]
   X64/Microcode.nasm

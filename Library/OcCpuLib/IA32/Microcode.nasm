@@ -13,7 +13,7 @@
 ;  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 ;------------------------------------------------------------------------------
 
-BITS     64
+BITS     32
 DEFAULT  REL
 
 MSR_IA32_BIOS_SIGN_ID       equ     00000008Bh

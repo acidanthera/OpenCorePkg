@@ -27,8 +27,10 @@
 #include <Protocol/LoadedImage.h>
 #include <Protocol/OcFirmwareRuntime.h>
 
-#ifdef MDE_CPU_X64
+#if defined(MDE_CPU_X64)
 #include "X64/ContextSwitch.h"
+#elif defined(MDE_CPU_IA32)
+#include <IA32/ContextSwitch.h>
 #else
 #error "Unsupported architecture!"
 #endif
