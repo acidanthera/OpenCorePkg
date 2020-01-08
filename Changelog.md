@@ -13,6 +13,8 @@ OpenCore Changelog
 - Added `SignalAppleOS` `Booter` quirk to enable IGPU on Macs in other OS
 - Added `AppleSmcIo`protocol support (replaces `VirtualSmc` UEFI driver)
 - Added `AuthRestart` security property for VirtualSMC authenticated restart
+- Fixed input protocol initialisation on VMware fusion
+- Added arrow key handling in boot menu
 
 #### v0.5.3
 - Update builtin firmware versions
