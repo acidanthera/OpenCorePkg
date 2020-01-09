@@ -3519,8 +3519,8 @@ and supplementary utilities can be used.
   \textbf{Description}: Perform UEFI controller connection after driver
   loading. This option is useful for loading filesystem drivers, which
   usually follow UEFI driver model, and may not start by themselves.
-  While effective, this option is not necessary with e.g. APFS loader
-  driver, and may slightly slowdown the boot.
+  While effective, this option may not be necessary for drivers performing
+  automatic connection, and may slightly slowdown the boot.
 
 \item
   \texttt{Drivers}\\

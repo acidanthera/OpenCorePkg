@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Dec 10 15:40:50 2019
-%DIF ADD ../Configuration.tex        Mon Jan  6 15:57:19 2020
+%DIF ADD ../Configuration.tex        Thu Jan  9 23:19:19 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3594,8 +3594,9 @@ and supplementary utilities can be used.
   \textbf{Description}: Perform UEFI controller connection after driver
   loading. This option is useful for loading filesystem drivers, which
   usually follow UEFI driver model, and may not start by themselves.
-  While effective, this option is not necessary with e.g. APFS loader
-  driver, and may slightly slowdown the boot.
+  While effective, this option \DIFdelbegin \DIFdel{is not necessary with e.g. APFS loader
+  driver}\DIFdelend \DIFaddbegin \DIFadd{may not be necessary for drivers performing
+  automatic connection}\DIFaddend , and may slightly slowdown the boot.
 
 \item
   \texttt{Drivers}\\
