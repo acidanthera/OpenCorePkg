@@ -313,7 +313,7 @@ BigNumRightShiftWordsAndBits (
   //
   //ASSERT (NumWords > 0);
 
-  for (Index = NumWords; Index < NumWordsA - 1; ++Index) {
+  for (Index = NumWords; Index < (UINTN) (NumWordsA - 1); ++Index) {
     Result[Index - NumWords] = (A[Index] >> NumBits) | (A[Index + 1] << (OC_BN_WORD_NUM_BITS - NumBits));
   }
   //
