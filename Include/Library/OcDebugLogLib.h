@@ -99,32 +99,6 @@ WaitForKeyPress (
   );
 
 /**
-  Default index mapping macros.
-**/
-#define OC_INPUT_STR      "123456789ABCDEFGHIJKLMNOPQRSTUVXWZ"
-#define OC_INPUT_MAX      L_STR_LEN (OC_INPUT_STR)
-#define OC_INPUT_ABORTED  -1 ///< Esc or 0
-#define OC_INPUT_INVALID  -2 ///< Some other key
-#define OC_INPUT_TIMEOUT  -3 ///< Timeout
-#define OC_INPUT_CONTINUE -4 ///< Continue (press enter)
-#define OC_INPUT_UP       -5 ///< Move up
-#define OC_INPUT_DOWN     -6 ///< Move down
-#define OC_INPUT_TOP      -7 ///< Move to top
-#define OC_INPUT_BOTTOM   -8 ///< Move to bottom
-
-/**
-  Obtains key index from user input.
-
-  @param[in]  Time  Timeout to wait for.
-
-  @returns key index [0, OC_INPUT_MAX), OC_INPUT_ABORTED, or OC_INPUT_INVALID, OC_INPUT_MAX.
-**/
-INTN
-WaitForKeyIndex (
-  IN UINTN  Timeout
-  );
-
-/**
   Print Device Path to log.
 
   @param[in] ErrorLevel  Debug error level.
