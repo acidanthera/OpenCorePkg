@@ -15,6 +15,7 @@ OpenCore Changelog
 - Added `AuthRestart` security property for VirtualSMC authenticated restart
 - Fixed input protocol initialisation on VMware fusion
 - Added arrow key handling in boot menu
+- FileVault 2-like key input is now the only supported input in boot menu
 
 #### v0.5.3
 - Update builtin firmware versions
