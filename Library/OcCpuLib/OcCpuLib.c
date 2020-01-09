@@ -1023,14 +1023,14 @@ ScanIntelProcessor (
       Cpu->MaxBusRatio = (UINT8) PlatformInfo.Bits.MaximumNonTurboRatio;
     } else if (Cpu->Model >= CPU_MODEL_PENRYN) {
       PerfStatus.Uint64 = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
-      Cpu->MaxBusRatio = (UINT8) (PerfStatus.Uint64 >> 8U) & 0x1FU;
+      Cpu->MaxBusRatio = (UINT8) (RShiftU64 (PerfStatus.Uint64, 8) & 0x1FU);
       //
       // Undocumented values:
       // Non-integer bus ratio for the max-multi.
       // Non-integer bus ratio for the current-multi.
       //
-      // MaxBusRatioDiv = (UINT8)(PerfStatus.Uint64 >> 46U) & 0x01U;
-      // CurrDiv = (UINT8)(PerfStatus.Uint64 >> 14U) & 0x01U;
+      // MaxBusRatioDiv = (UINT8) (RShiftU64 (PerfStatus.Uint64, 46) & 0x01U);
+      // CurrDiv = (UINT8) (RShiftU64 (PerfStatus.Uint64, 14) & 0x01U);
       //
     }
 
@@ -1396,7 +1396,7 @@ OcCpuScanProcessor (
     Cpu->Type      = (UINT8) Cpu->CpuidVerEax.Bits.ProcessorType;
     Cpu->ExtFamily = (UINT8) Cpu->CpuidVerEax.Bits.ExtendedFamilyId;
     Cpu->Brand     = (UINT8) Cpu->CpuidVerEbx.Bits.BrandIndex;
-    Cpu->Features  = (((UINT64) Cpu->CpuidVerEcx.Uint32) << 32ULL) | Cpu->CpuidVerEdx.Uint32;
+    Cpu->Features  = LShiftU64 (Cpu->CpuidVerEcx.Uint32, 32) | Cpu->CpuidVerEdx.Uint32;
 
     //
     // TODO: We do not have Hypervisor support in EDK II CPUID structure yet.

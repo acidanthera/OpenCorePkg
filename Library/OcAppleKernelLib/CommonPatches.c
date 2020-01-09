@@ -1001,7 +1001,7 @@ PatchKernelCpuId (
     FnPatch->Family        = (UINT8) Eax.Bits.FamilyId;
     FnPatch->Type          = (UINT8) Eax.Bits.ProcessorType;
     FnPatch->ExtFamily     = (UINT8) Eax.Bits.ExtendedFamilyId;
-    FnPatch->Features      = ((UINT64) Ecx.Uint32 << 32ULL) | (UINT64) Edx.Uint32;
+    FnPatch->Features      = LShiftU64 (Ecx.Uint32, 32) | (UINT64) Edx.Uint32;
     if (FnPatch->Features & CPUID_FEATURE_HTT) {
       FnPatch->LogicalPerPkg = (UINT16) Ebx.Bits.MaximumAddressableIdsForLogicalProcessors;
     } else {
