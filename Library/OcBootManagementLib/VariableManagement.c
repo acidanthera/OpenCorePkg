@@ -21,6 +21,7 @@
 #include <Library/DebugLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -255,4 +256,14 @@ OcDeleteVariables (
     DEBUG ((DEBUG_INFO, "OCB: Restoring FW NVRAM...\n"));
     FwRuntime->SetOverride (NULL);
   }
+}
+
+EFI_STATUS
+InternalSystemActionResetNvram (
+  VOID
+  )
+{
+  OcDeleteVariables ();
+  DirectRestCold ();
+  return EFI_DEVICE_ERROR;
 }

@@ -81,6 +81,10 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   BOOLEAN                   IsFolder;
   //
+  // Should make this option default boot option.
+  //
+  BOOLEAN                   SetDefault;
+  //
   // Load option data (usually "boot args") size.
   //
   UINT32                    LoadOptionsSize;
@@ -639,17 +643,19 @@ OcLoadPickerHotKeys (
 
   @param[in,out]  Context      Picker context.
   @param[in]      Time         Timeout to wait for.
-  @param[in,out]  LastKey      Last key press.
   @param[in]      PollHotkeys  Poll key combinations.
+  @param[in,out]  LastKey      Last key press, optional.
+  @param[out]     SetDefault   Set boot option as default, optional.
 
-  @returns key index [0, OC_INPUT_MAX), OC_INPUT_ABORTED, or OC_INPUT_INVALID.
+  @returns key index [0, OC_INPUT_MAX) or OC_INPUT_* value.
 **/
 INTN
 OcWaitForAppleKeyIndex (
   IN OUT OC_PICKER_CONTEXT  *Context,
   IN     UINTN              Timeout,
-  IN OUT APPLE_KEY_CODE     *LastKey  OPTIONAL,
-  IN     BOOLEAN            PollHotkeys
+  IN     BOOLEAN            PollHotkeys,
+  IN OUT APPLE_KEY_CODE     *LastKey     OPTIONAL,
+     OUT BOOLEAN            *SetDefault  OPTIONAL
   );
 
 /**

@@ -114,4 +114,12 @@ InternalFillValidBootEntries (
   IN     UINTN                        EntryIndex
   );
 
+/**
+  Resets selected NVRAM variables and reboots the system.
+**/
+EFI_STATUS
+InternalSystemActionResetNvram (
+  VOID
+  );
+
 #endif // BOOT_MANAGEMENET_INTERNAL_H
