@@ -411,16 +411,22 @@ CountFreePages (
       continue;
     }
 
-    FreePages += EntryWalker->NumberOfPages;
+    //
+    // This cannot overflow even on 32-bit systems unless they have > 16 TB of RAM,
+    // just assert to ensure that we have valid MemoryMap.
+    //
+    ASSERT (EntryWalker->NumberOfPages <= MAX_UINTN);
+    ASSERT (MAX_UINTN - EntryWalker->NumberOfPages >= FreePages);
+    FreePages += (UINTN) EntryWalker->NumberOfPages;
 
     if (LowerMemory == NULL || EntryWalker->PhysicalStart >= BASE_4GB) {
       continue;
     }
 
     if (EntryWalker->PhysicalStart + EFI_PAGES_TO_SIZE (EntryWalker->NumberOfPages) > BASE_4GB) {
-      *LowerMemory += EFI_SIZE_TO_PAGES (BASE_4GB - EntryWalker->PhysicalStart);
+      *LowerMemory += (UINTN) EFI_SIZE_TO_PAGES (BASE_4GB - EntryWalker->PhysicalStart);
     } else {
-      *LowerMemory += EntryWalker->NumberOfPages;
+      *LowerMemory += (UINTN) EntryWalker->NumberOfPages;
     }
   }
 
