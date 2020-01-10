@@ -263,7 +263,7 @@ VmMapVirtualPage (
     //
     // Put it to PML4.
     //
-    PML4->Uint64 = ((UINT64)PDPE) & PAGING_4K_ADDRESS_MASK_64;
+    PML4->Uint64 = ((UINT64)(UINTN) PDPE) & PAGING_4K_ADDRESS_MASK_64;
     PML4->Bits.ReadWrite = 1;
     PML4->Bits.Present = 1;
   }
@@ -306,7 +306,7 @@ VmMapVirtualPage (
     //
     // Put it to PDPE.
     //
-    PDPE->Uint64 = ((UINT64) PDE) & PAGING_4K_ADDRESS_MASK_64;
+    PDPE->Uint64 = ((UINT64)(UINTN) PDE) & PAGING_4K_ADDRESS_MASK_64;
     PDPE->Bits.ReadWrite = 1;
     PDPE->Bits.Present = 1;
   }
@@ -348,7 +348,7 @@ VmMapVirtualPage (
     //
     // Put it to PDE.
     //
-    PDE->Uint64 = ((UINT64) PTE4K) & PAGING_4K_ADDRESS_MASK_64;
+    PDE->Uint64 = ((UINT64)(UINTN) PTE4K) & PAGING_4K_ADDRESS_MASK_64;
     PDE->Bits.ReadWrite = 1;
     PDE->Bits.Present = 1;
   }
