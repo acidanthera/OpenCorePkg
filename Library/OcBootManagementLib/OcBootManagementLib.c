@@ -431,7 +431,7 @@ OcRunSimpleBootPicker (
       //
       // Do not wait on successful return code.
       //
-      if (!EFI_ERROR (Status)) {
+      if (EFI_ERROR (Status)) {
         gBS->Stall (SECONDS_TO_MICROSECONDS (5));
       }
     }
