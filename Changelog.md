@@ -16,6 +16,8 @@ OpenCore Changelog
 - Fixed input protocol initialisation on VMware fusion
 - Added arrow key handling in boot menu
 - FileVault 2-like key input is now the only supported input in boot menu
+- Fixed 5 second delay when exiting Shell to OpenCore Picker
+- Added default boot option update and `AllowSetDefault` `Security` option
 
 #### v0.5.3
 - Update builtin firmware versions
