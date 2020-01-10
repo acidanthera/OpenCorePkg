@@ -421,6 +421,10 @@ typedef struct {
   //
   BOOLEAN          ShowNvramReset;
   //
+  // Allow setting default boot option from boot menu.
+  //
+  BOOLEAN          AllowSetDefault;
+  //
   // Additional boot arguments for Apple loaders.
   //
   CHAR8            AppleBootArgs[BOOT_LINE_LENGTH];
@@ -526,6 +530,20 @@ OcGetDefaultBootEntry (
   IN     OC_PICKER_CONTEXT  *Context,
   IN OUT OC_BOOT_ENTRY      *BootEntries,
   IN     UINTN              NumBootEntries
+  );
+
+/**
+  Set default entry to passed entry.
+
+  @param[in]      Context          Picker context.
+  @param[in,out]  Entry            Entry to make default.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcSetDefaultBootEntry (
+  IN OC_PICKER_CONTEXT  *Context,
+  IN OC_BOOT_ENTRY      *Entry
   );
 
 typedef struct {

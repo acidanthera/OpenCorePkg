@@ -416,6 +416,11 @@ OcRunSimpleBootPicker (
         Chosen->SetDefault
         ));
 
+      if (Chosen->SetDefault) {
+        Status = OcSetDefaultBootEntry (Context, Chosen);
+        DEBUG ((DEBUG_INFO, "OCB: Setting default - %r\n", Status));
+      }
+
       Status = OcLoadBootEntry (
         AppleBootPolicy,
         Context,
