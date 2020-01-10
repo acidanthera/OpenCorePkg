@@ -174,7 +174,7 @@ GetCurrentMemoryMapAlloc (
     if (EFI_ERROR (Status)) {
       if (TopMemory != NULL) {
         gBS->FreePages (
-          (EFI_PHYSICAL_ADDRESS) *MemoryMap,
+          (EFI_PHYSICAL_ADDRESS) ((UINTN) *MemoryMap),
           (UINTN) *TopMemory
           );
       } else {
