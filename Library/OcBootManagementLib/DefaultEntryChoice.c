@@ -863,6 +863,10 @@ OcSetDefaultBootEntry (
       NULL
       );
 
+    if (BootOptionDevicePath == NULL) {
+      continue;
+    }
+
     BootOptionRemainingDevicePath = BootOptionDevicePath;
     Status = gBS->LocateDevicePath (
       &gEfiSimpleFileSystemProtocolGuid,
