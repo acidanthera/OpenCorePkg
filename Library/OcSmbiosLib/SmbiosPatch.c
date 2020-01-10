@@ -1260,8 +1260,8 @@ SmbiosPrepareTable (
   if (mOriginalSmbios != NULL) {
     DEBUG ((
       DEBUG_INFO,
-      "OCSMB: Found DMI Anchor %08LX v%u.%u Table Address %08LX Length %04X\n",
-      (UINT64) mOriginalSmbios,
+      "OCSMB: Found DMI Anchor %p v%u.%u Table Address %08LX Length %04X\n",
+      mOriginalSmbios,
       mOriginalSmbios->MajorVersion,
       mOriginalSmbios->MinorVersion,
       (UINT64) mOriginalSmbios->TableAddress,
@@ -1272,8 +1272,8 @@ SmbiosPrepareTable (
   if (mOriginalSmbios3 != NULL) {
     DEBUG ((
       DEBUG_INFO,
-      "OCSMB: Found DMI Anchor %08LX v%u.%u Table Address %08LX Length %04X\n",
-      (UINT64) mOriginalSmbios3,
+      "OCSMB: Found DMI Anchor %p v%u.%u Table Address %08LX Length %04X\n",
+      mOriginalSmbios3,
       mOriginalSmbios3->MajorVersion,
       mOriginalSmbios3->MinorVersion,
       mOriginalSmbios3->TableAddress,
@@ -1516,8 +1516,8 @@ SmbiosTableApply (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCSMB: Patched %08LX v%d.%d Table Address %08LX Length %04X %X %X\n",
-    (UINT64) TableEntryPoint,
+    "OCSMB: Patched %p v%d.%d Table Address %08LX Length %04X %X %X\n",
+    TableEntryPoint,
     TableEntryPoint->MajorVersion,
     TableEntryPoint->MinorVersion,
     (UINT64) TableEntryPoint->TableAddress,
