@@ -99,6 +99,7 @@
   OcXmlLib|OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
 
 [Components]
+  OcSupportPkg/Application/VerifyMsrE2/VerifyMsrE2.inf
   OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
   OcSupportPkg/Library/OcAppleBootCompatLib/OcAppleBootCompatLib.inf
   OcSupportPkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
