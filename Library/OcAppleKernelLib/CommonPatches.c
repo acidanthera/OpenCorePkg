@@ -425,6 +425,88 @@ PatchAppleXcpmExtraMsrs (
 
 STATIC
 UINT8
+mPerfCtrlFind1[] = {
+  0xB9, 0x99, 0x01, 0x00, 0x00, ///< mov ecx, 199h
+  0x0F, 0x30                    ///< wrmsr
+};
+
+STATIC
+UINT8
+mPerfCtrlFind2[] = {
+  0xB9, 0x99, 0x01, 0x00, 0x00, ///< mov ecx, 199h
+  0x31, 0xD2,                   ///< xor edx, edx
+  0x0F, 0x30                    ///< wrmsr
+};
+
+STATIC
+UINT8
+mPerfCtrlMax[] = {
+  0xB9, 0x99, 0x01, 0x00, 0x00, ///< mov ecx, 199h
+  0x31, 0xD2,                   ///< xor edx, edx
+  0xB8, 0x00, 0xFF, 0x00, 0x00, ///< mov eax, 0xFF00
+  0x0F, 0x30,                   ///< wrmsr
+  0xC3                          ///< ret
+};
+
+RETURN_STATUS
+PatchAppleXcpmForceBoost (
+  IN OUT PATCHER_CONTEXT   *Patcher
+  )
+{
+  UINT8   *Start;
+  UINT8   *Last;
+  UINT8   *Current;
+
+  Start   = (UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext);
+  Last    = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE*2;
+  Start  += EFI_PAGE_SIZE;
+  Current = Start;
+
+  while (Current < Last) {
+    if (Current[0] == mPerfCtrlFind1[0]
+      || Current[1] == mPerfCtrlFind1[1]
+      || Current[2] == mPerfCtrlFind1[2]
+      || Current[3] == mPerfCtrlFind1[3]) {
+      if (CompareMem (&Current[4], &mPerfCtrlFind1[4], sizeof (mPerfCtrlFind1) - 4) == 0
+        || CompareMem (&Current[4], &mPerfCtrlFind2[4], sizeof (mPerfCtrlFind2) - 4) == 0) {
+        break;
+      }
+    }
+
+    ++Current;
+  }
+
+  if (Current == Last) {
+    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate MSR_IA32_PERF_CONTROL write\n"));
+    return EFI_NOT_FOUND;
+  }
+
+  Start    = Current - EFI_PAGE_SIZE;
+  Current -= 4;
+
+  while (Current >= Start) {
+    if (Current[0] == 0x55
+      && Current[1] == 0x48
+      && Current[2] == 0x89
+      && Current[3] == 0xE5) {
+      break;
+    }
+
+    --Current;
+  }
+
+  if (Current < Start) {
+    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate MSR_IA32_PERF_CONTROL prologue\n"));
+    return EFI_NOT_FOUND;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: Patch write max to MSR_IA32_PERF_CONTROL\n"));
+  CopyMem (Current, mPerfCtrlMax, sizeof (mPerfCtrlMax));
+  return EFI_SUCCESS;
+}
+
+STATIC
+UINT8
 mRemoveUsbLimitV1Find[] = {
   0xff, 0xff, 0x10
 };
