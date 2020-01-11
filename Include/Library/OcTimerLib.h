@@ -27,16 +27,4 @@ RecalculateTSC (
   VOID
   );
 
-/**
-  Obtain ACPI PM timer address for this BSP.
-
-  @param[out]  Type   Address source type, optional.
-
-  @retval ACPI PM timer address or 0.
-**/
-UINTN
-OcGetPmTimerAddr (
-  OUT CONST CHAR8 **Type  OPTIONAL
-  );
-
 #endif // OC_TIMER_LIB_H

@@ -15,6 +15,12 @@
 #ifndef OC_CPU_INTERNALS_H
 #define OC_CPU_INTERNALS_H
 
+//
+// Tolerance within which we consider two frequency values to be roughly
+// equivalent.
+//
+#define OC_CPU_FREQUENCY_TOLERANCE 50000000ULL // 50 Mhz
+
 /**
   Returns microcode revision for Intel CPUs.
 
@@ -52,6 +58,18 @@ InternalDetectAppleProcessorType (
   IN UINT8  Model,
   IN UINT8  Stepping,
   IN UINT8  AppleMajorType
+  );
+
+/**
+  Obtain ACPI PM timer address for this BSP.
+
+  @param[out]  Type   Address source type, optional.
+
+  @retval ACPI PM timer address or 0.
+**/
+UINTN
+InternalGetPmTimerAddr (
+  OUT CONST CHAR8 **Type  OPTIONAL
   );
 
 /**

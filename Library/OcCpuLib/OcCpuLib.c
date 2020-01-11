@@ -12,28 +12,15 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include <Uefi.h>
+#include <PiDxe.h>
 
-#include <IndustryStandard/CpuId.h>
-#include <IndustryStandard/GenericIch.h>
-#include <IndustryStandard/Pci.h>
 #include <IndustryStandard/AppleSmBios.h>
-
-#include <Protocol/PciIo.h>
-
+#include <Protocol/MpService.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
-#include <Library/MemoryAllocationLib.h>
-#include <Library/IoLib.h>
 #include <Library/OcCpuLib.h>
-#include <Library/PciLib.h>
-#include <Library/OcMiscLib.h>
-#include <Library/OcStringLib.h>
-#include <Library/OcTimerLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-#include <Library/UefiLib.h>
-
 #include <ProcessorInfo.h>
 #include <Register/Microcode.h>
 #include <Register/Msr.h>
@@ -42,12 +29,104 @@
 
 #include "OcCpuInternals.h"
 
-//
-// Tolerance within which we consider two frequency values to be roughly
-// equivalent.
-//
-#define OC_CPU_FREQUENCY_TOLERANCE 50000000ULL // 50 Mhz
+STATIC
+EFI_STATUS
+ScanThreadCount (
+  OUT OC_CPU_INFO  *Cpu
+  )
+{
+  EFI_STATUS                 Status;
+  EFI_MP_SERVICES_PROTOCOL   *MpServices;
+  UINTN                      Index;
+  UINTN                      NumberOfProcessors;
+  UINTN                      NumberOfEnabledProcessors;
+  EFI_PROCESSOR_INFORMATION  Info;
 
+  Cpu->PackageCount = 1;
+  Cpu->CoreCount    = 1;
+  Cpu->ThreadCount  = 1;
+
+  Status = gBS->LocateProtocol (
+    &gEfiMpServiceProtocolGuid,
+    NULL,
+    (VOID **) &MpServices
+    );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCCPU: No MP services - %r\n", Status));
+    return Status;
+  }
+
+  NumberOfProcessors = 0;
+  NumberOfEnabledProcessors = 0;
+  Status = MpServices->GetNumberOfProcessors (
+    MpServices,
+    &NumberOfProcessors,
+    &NumberOfEnabledProcessors
+    );
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCCPU: MP services threads %u (enabled %u) - %r\n",
+    (UINT32) NumberOfProcessors,
+    (UINT32) NumberOfEnabledProcessors,
+    Status
+    ));
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  if (NumberOfProcessors == 0) {
+    return EFI_NOT_FOUND;
+  }
+
+  //
+  // This code assumes that all CPUs have same amount of cores and threads.
+  //
+  for (Index = 0; Index < NumberOfProcessors; ++Index) {
+    Status = MpServices->GetProcessorInfo (MpServices, Index, &Info);
+
+    if (EFI_ERROR (Status)) {
+      //
+      // It might make sense to error and exit here.
+      //
+      continue;
+    }
+
+    if (Info.Location.Package + 1 >= Cpu->PackageCount) {
+      Cpu->PackageCount = (UINT16) (Info.Location.Package + 1);
+    }
+
+    if (Info.Location.Core + 1 >= Cpu->CoreCount) {
+      Cpu->CoreCount = (UINT16) (Info.Location.Core + 1);
+    }
+
+    if (Info.Location.Thread + 1 >= Cpu->ThreadCount) {
+      Cpu->ThreadCount = (UINT16) (Info.Location.Thread + 1);
+    }
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCCPU: MP services Pkg %u Cores %u Threads %u - %r\n",
+    Cpu->PackageCount,
+    Cpu->CoreCount,
+    Cpu->ThreadCount,
+    Status
+    ));
+
+  //
+  // Several implementations may not report virtual threads.
+  //
+  if (Cpu->ThreadCount < Cpu->CoreCount) {
+    Cpu->ThreadCount = Cpu->CoreCount;
+  }
+
+  return Status;
+}
+
+STATIC
 VOID
 ScanIntelProcessor (
   IN OUT OC_CPU_INFO  *Cpu
@@ -146,7 +225,7 @@ ScanIntelProcessor (
     // Calculate the Tsc frequency
     //
     DEBUG_CODE_BEGIN ();
-    TimerAddr = OcGetPmTimerAddr (&TimerSourceType);
+    TimerAddr = InternalGetPmTimerAddr (&TimerSourceType);
     DEBUG ((DEBUG_INFO, "OCCPU: Timer address is %Lx from %a\n", (UINT64) TimerAddr, TimerSourceType));
     DEBUG_CODE_END ();
     Cpu->CPUFrequencyFromTSC = InternalCalculateTSCFromPMTimer (Recalculate);
@@ -224,12 +303,9 @@ ScanIntelProcessor (
   if (Cpu->ThreadCount == 0) {
     Cpu->ThreadCount = 1;
   }
-
-  //
-  // TODO: handle package count...
-  //
 }
 
+STATIC
 VOID
 ScanAmdProcessor (
   IN OUT OC_CPU_INFO  *Cpu
@@ -443,9 +519,7 @@ OcCpuScanProcessor (
       );
   }
 
-  Cpu->PackageCount = 1;
-  Cpu->CoreCount    = 1;
-  Cpu->ThreadCount  = 1;
+  ScanThreadCount (Cpu);
 
   //
   // Get processor signature and decode

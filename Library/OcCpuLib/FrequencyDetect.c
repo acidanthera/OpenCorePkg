@@ -30,7 +30,7 @@
 #include "OcCpuInternals.h"
 
 UINTN
-OcGetPmTimerAddr (
+InternalGetPmTimerAddr (
   OUT CONST CHAR8 **Type  OPTIONAL
   )
 {
@@ -141,7 +141,7 @@ InternalCalculateTSCFromPMTimer (
   }
 
   if (TSCFrequency == 0) {
-    TimerAddr       = OcGetPmTimerAddr (NULL);
+    TimerAddr       = InternalGetPmTimerAddr (NULL);
     TimerResolution = 10;
 
     if (TimerAddr != 0) {

@@ -37,6 +37,9 @@
   BaseLib
   IoLib
 
+[Protocols]
+  gEfiMpServiceProtocolGuid
+
 [Sources]
   AppleCpuSupport.c
   FrequencyDetect.c
