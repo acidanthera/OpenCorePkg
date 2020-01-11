@@ -27,6 +27,7 @@ Kexts
 ## Keyboard, trackpad and mouse
 
 - [ApplePS2SmartTouchPad.kext](https://osxlatitude.com/forums/topic/1948-elan-focaltech-and-synaptics-smart-touchpad-driver-mac-os-x/)
+- [GK701HIDDevice.kext](https://github.com/osy86/GK701HIDDevice)
 - [NoTouchID.kext](https://github.com/al3xtjames/NoTouchID)
 - [SerialMouse.kext](https://github.com/Goldfish64/SerialMouse)
 - [VoodooI2C.kext](https://github.com/alexandred/VoodooI2C)
