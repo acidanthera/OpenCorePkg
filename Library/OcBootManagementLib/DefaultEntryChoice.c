@@ -903,7 +903,7 @@ OcSetDefaultBootEntry (
     }
 
     LoadOption->Attributes         = LOAD_OPTION_ACTIVE | LOAD_OPTION_CATEGORY_BOOT;
-    LoadOption->FilePathListLength = DevicePathSize;
+    LoadOption->FilePathListLength = (UINT16) DevicePathSize;
     CopyMem (LoadOption + 1, Entry->Name, LoadOptionNameSize);
     CopyMem ((UINT8 *) (LoadOption + 1) + LoadOptionNameSize, Entry->DevicePath, DevicePathSize);
 
@@ -1032,7 +1032,7 @@ InternalReportLoadOption (
   }
 
   LoadOption->Attributes         = LOAD_OPTION_HIDDEN;
-  LoadOption->FilePathListLength = DevicePathSize;
+  LoadOption->FilePathListLength = (UINT16) DevicePathSize;
   CopyMem (LoadOption + 1, LoadOptionName, LoadOptionNameSize);
   CopyMem ((UINT8 *) (LoadOption + 1) + LoadOptionNameSize, DevicePath, DevicePathSize);
 
