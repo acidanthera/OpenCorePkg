@@ -25,6 +25,7 @@ package() {
   mkdir -p tmp/Utilities || exit 1
   cp OpenCore.efi tmp/EFI/OC/ || exit 1
   cp BOOTx64.efi tmp/EFI/BOOT/ || exit 1
+  cp AppleUsbKbDxe.efi tmp/EFI/OC/Drivers/ || exit 1
   cp FwRuntimeServices.efi tmp/EFI/OC/Drivers/ || exit 1
   cp CleanNvram.efi tmp/EFI/OC/Tools/ || exit 1
   cp VerifyMsrE2.efi tmp/EFI/OC/Tools/ || exit 1

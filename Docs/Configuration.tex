@@ -2176,7 +2176,7 @@ behaviour that does not go to any other sections
   recovery. Hold \texttt{CMD+R} key combination to choose this option.
   \end{itemize}
 
-  \emph{Note}: activated \texttt{KeySupport}, \texttt{UsbKbDxe}, or similar driver is required
+  \emph{Note}: activated \texttt{KeySupport}, \texttt{AppleUsbKbDxe}, or similar driver is required
   for key handling to work. On many firmwares it is not possible to get all the keys function.
 
   In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key
@@ -3609,7 +3609,7 @@ and supplementary utilities can be used.
   --- NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
   firmwares starting with Broadwell generation. For Haswell and earlier embedding it
   within the firmware may be more favourable in case a NVMe SSD drive is installed.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{UsbKbDxe}}
+  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AppleUsbKbDxe}}
   --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware.
@@ -3713,7 +3713,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   This option activates the internal keyboard interceptor driver, based on
   \texttt{AppleGenericInput} aka (\texttt{AptioIntputFix}), to fill
   \texttt{AppleKeyMapAggregator} database for input functioning. In case
-  a separate driver is used, such as \texttt{UsbKbDxe}, this option
+  a separate driver is used, such as \texttt{AppleUsbKbDxe}, this option
   should never be enabled.
 
 \item

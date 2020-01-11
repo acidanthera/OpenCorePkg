@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Dec 10 15:40:50 2019
-%DIF ADD ../Configuration.tex        Sun Jan 12 02:22:29 2020
+%DIF ADD ../Configuration.tex        Sun Jan 12 02:58:20 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2254,7 +2254,7 @@ behaviour that does not go to any other sections
   recovery. Hold \texttt{CMD+R} key combination to choose this option.
   \end{itemize}
 
-  \emph{Note}: activated \texttt{KeySupport}, \texttt{UsbKbDxe}, or similar driver is required
+  \emph{Note}: activated \texttt{KeySupport}, \texttt{\DIFdelbegin \DIFdel{UsbKbDxe}\DIFdelend \DIFaddbegin \DIFadd{AppleUsbKbDxe}\DIFaddend }, or similar driver is required
   for key handling to work. On many firmwares it is not possible to get all the keys function.
 
   In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key
@@ -3701,8 +3701,10 @@ and supplementary utilities can be used.
   --- NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
   firmwares starting with Broadwell generation. For Haswell and earlier embedding it
   within the firmware may be more favourable in case a NVMe SSD drive is installed.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{UsbKbDxe}}
-  --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
+  \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{UsbKbDxe}}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AppleUsbKbDxe}}
+  \DIFaddend --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware.
   \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/VirtualSMC}{\texttt{VirtualSmc}}
@@ -3818,7 +3820,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   This option activates the internal keyboard interceptor driver, based on
   \texttt{AppleGenericInput} aka (\texttt{AptioIntputFix}), to fill
   \texttt{AppleKeyMapAggregator} database for input functioning. In case
-  a separate driver is used, such as \texttt{UsbKbDxe}, this option
+  a separate driver is used, such as \texttt{\DIFdelbegin \DIFdel{UsbKbDxe}\DIFdelend \DIFaddbegin \DIFadd{AppleUsbKbDxe}\DIFaddend }, this option
   should never be enabled.
 
 \item
