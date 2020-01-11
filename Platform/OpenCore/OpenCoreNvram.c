@@ -144,7 +144,8 @@ OcSetNvramVariable (
   IN UINT32                 Attributes,
   IN UINT32                 VariableSize,
   IN VOID                   *VariableData,
-  IN OC_NVRAM_LEGACY_ENTRY  *SchemaEntry
+  IN OC_NVRAM_LEGACY_ENTRY  *SchemaEntry,
+  IN BOOLEAN                Overwrite
   )
 {
   EFI_STATUS            Status;
@@ -152,7 +153,9 @@ OcSetNvramVariable (
   CHAR16                *UnicodeVariableName;
   BOOLEAN               IsAllowed;
   UINT32                VariableIndex;
-
+  VOID                  *OrgValue;
+  UINTN                 OrgSize;
+  UINT32                OrgAttributes;
 
   if (SchemaEntry != NULL) {
     IsAllowed = FALSE;
@@ -193,6 +196,51 @@ OcSetNvramVariable (
     &OriginalVariableSize,
     NULL
     );
+
+  if (Status == EFI_BUFFER_TOO_SMALL && Overwrite) {
+    Status = GetVariable3 (UnicodeVariableName, VariableGuid, &OrgValue, &OrgSize, &OrgAttributes);
+    if (!EFI_ERROR (Status)) {
+      //
+      // Do not allow overwriting BS-only variables. Ideally we also check for NV attribute,
+      // but it is not set by Duet.
+      //
+      if ((Attributes & (EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS))
+        == (EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS)) {
+        Status = gRT->SetVariable (UnicodeVariableName, VariableGuid, 0, 0, 0);
+
+        if (EFI_ERROR (Status)) {
+          DEBUG ((
+            DEBUG_INFO,
+            "OC: Failed to delete overwritten variable %g:%a - %r\n",
+            VariableGuid,
+            AsciiVariableName,
+            Status
+            ));
+          Status = EFI_BUFFER_TOO_SMALL;
+        }
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "OC: Overwritten variable %g:%a has invalid attrs - %X\n",
+          VariableGuid,
+          AsciiVariableName,
+          Attributes
+          ));
+        Status = EFI_BUFFER_TOO_SMALL;
+      }
+
+      FreePool (OrgValue);
+    } else {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: Overwritten variable %g:%a has unknown attrs - %r\n",
+        VariableGuid,
+        AsciiVariableName,
+        Status
+        ));
+      Status = EFI_BUFFER_TOO_SMALL;
+    }
+  }
 
   if (Status != EFI_BUFFER_TOO_SMALL) {
     Status = gRT->SetVariable (
@@ -282,10 +330,11 @@ OcLoadLegacyNvram (
       OcSetNvramVariable (
         OC_BLOB_GET (VariableMap->Keys[VariableIndex]),
         &VariableGuid,
-        OPEN_CORE_NVRAM_ATTR,
+        Config->Nvram.WriteFlash ? OPEN_CORE_NVRAM_NV_ATTR : OPEN_CORE_NVRAM_ATTR,
         VariableMap->Values[VariableIndex]->Size,
         OC_BLOB_GET (VariableMap->Values[VariableIndex]),
-        SchemaEntry
+        SchemaEntry,
+        Config->Nvram.LegacyOverwrite
         );
     }
   }
@@ -422,7 +471,8 @@ OcAddNvram (
         Config->Nvram.WriteFlash ? OPEN_CORE_NVRAM_NV_ATTR : OPEN_CORE_NVRAM_ATTR,
         VariableMap->Values[VariableIndex]->Size,
         OC_BLOB_GET (VariableMap->Values[VariableIndex]),
-        NULL
+        NULL,
+        FALSE
         );
     }
   }
@@ -434,7 +484,7 @@ OcLoadNvramSupport (
   IN OC_GLOBAL_CONFIG    *Config
   )
 {
-  if (Config->Nvram.UseLegacy && Storage->FileSystem != NULL) {
+  if (Config->Nvram.LegacyEnable && Storage->FileSystem != NULL) {
     OcLoadLegacyNvram (Storage->FileSystem, Config);
   }
 
