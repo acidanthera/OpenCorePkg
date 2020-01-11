@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Dec 10 15:40:50 2019
-%DIF ADD ../Configuration.tex        Fri Jan 10 03:20:25 2020
+%DIF ADD ../Configuration.tex        Sun Jan 12 02:22:29 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1699,20 +1699,52 @@ blocking.
   \textbf{Type}: \texttt{plist\ data}, 16 bytes\\
   \textbf{Failsafe}: All zero\\
   \textbf{Description}: Sequence of \texttt{EAX}, \texttt{EBX}, \texttt{ECX},
-  \texttt{EDX} values in Little Endian order to replace \texttt{CPUID (1)}
-  call in XNU kernel. Normally it is only the value of \texttt{EAX} that needs to be taken care of,
-  which represents the exact CPUID. And the remainders are to be left as zeroes.
-  For instance, \texttt{A9 06 03 00} stands for CPUID \texttt{0x0306A9} (Ivy Bridge).
-  A good example can be found at
+  \texttt{EDX} values \DIFdelbegin \DIFdel{in Little Endian order }\DIFdelend to replace \texttt{CPUID (1)} call in XNU kernel.
+\DIFaddbegin 
+
+  \DIFadd{This property serves for two needs:
+}
+
+  \begin{itemize}
+    \tightlist
+    \item \DIFadd{Enabling support of an unsupported CPU model.
+    }\item \DIFadd{Enabling XCPM support for an unsupported CPU variant.
+  }\end{itemize}
+
+  \DIFaddend Normally it is only the value of \texttt{EAX} that needs to be taken care of,
+  \DIFdelbegin \DIFdel{which represents the exact CPUID. And the remainders }\DIFdelend \DIFaddbegin \DIFadd{since it represents the full CPUID. The remaining bytes }\DIFaddend are to be left as zeroes.
+  \DIFdelbegin \DIFdel{For instance, }\DIFdelend \DIFaddbegin \DIFadd{Byte order is Little Endian, so for example, }\DIFaddend \texttt{A9 06 03 00} stands for CPUID
+  \texttt{0x0306A9} (Ivy Bridge).
+\DIFdelbegin \DIFdel{A good example }\DIFdelend \DIFaddbegin 
+
+  \DIFadd{For XCPM support it is recommended to use the following combinations.
+}
+
+  \begin{itemize}
+    \tightlist
+    \item \DIFadd{Haswell-E (}\texttt{\DIFadd{0x306F2}}\DIFadd{) to Haswell (}\texttt{\DIFadd{0x0306C3}}\DIFadd{):}\\
+    \texttt{\DIFadd{Cpuid1Data}}\DIFadd{: }\texttt{\DIFadd{C3 06 03 00 00 00 00 00 00 00 00 00 00 00 00 00}}\\
+    \texttt{\DIFadd{Cpuid1Mask}}\DIFadd{: }\texttt{\DIFadd{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}}
+    \item \DIFadd{Broadwell-E (}\texttt{\DIFadd{0x0406F1}}\DIFadd{) to Broadwell (}\texttt{\DIFadd{0x0306D4}}\DIFadd{):}\\
+    \texttt{\DIFadd{Cpuid1Data}}\DIFadd{: }\texttt{\DIFadd{D4 06 03 00 00 00 00 00 00 00 00 00 00 00 00 00}}\\
+    \texttt{\DIFadd{Cpuid1Mask}}\DIFadd{: }\texttt{\DIFadd{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}}
+  \end{itemize}
+
+  \DIFadd{Further explanations }\DIFaddend can be found at
   \href{https://github.com/acidanthera/bugtracker/issues/365}{acidanthera/bugtracker\#365}.
-  (See \texttt{Special NOTES for Haswell+ low-end})  
+  \DIFdelbegin \DIFdel{(See }\DIFdelend \DIFaddbegin \DIFadd{See }\DIFaddend \texttt{Special NOTES\DIFdelbegin \DIFdel{for Haswell}\DIFdelend \DIFaddbegin } \DIFadd{for Haswell}\DIFaddend + low-end\DIFdelbegin %DIFDELCMD < \MBLOCKRIGHTBRACE%%%
+\DIFdel{)  
+}\DIFdelend \DIFaddbegin \DIFadd{.
+}\DIFaddend 
 
 \item
   \texttt{Cpuid1Mask}\\
   \textbf{Type}: \texttt{plist\ data}, 16 bytes\\
   \textbf{Failsafe}: All zero\\
-  \textbf{Description}: Bit mask of active bits in \texttt{Cpuid1Data}. When
-  each \texttt{Cpuid1Mask} bit is set to 0, the original CPU bit is used,
+  \textbf{Description}: Bit mask of active bits in \texttt{Cpuid1Data}.
+\DIFaddbegin 
+
+  \DIFaddend When each \texttt{Cpuid1Mask} bit is set to 0, the original CPU bit is used,
   otherwise set bits take the value of \texttt{Cpuid1Data}.
 
 \end{enumerate}
@@ -1866,7 +1898,23 @@ blocking.
   CPUs. It is recommended to use \texttt{AppleIntelCpuPowerManagement.kext} for the former.
 
 \item
-  \texttt{CustomSMBIOSGuid}\\
+  \DIFaddbegin \texttt{\DIFadd{AppleXcpmForceBoost}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Forces maximum performance in XCPM mode.
+}
+
+  \DIFadd{This patch writes }\texttt{\DIFadd{0xFF00}} \DIFadd{to }\texttt{\DIFadd{MSR\_IA32\_PERF\_CONTROL}} \DIFadd{(}\texttt{\DIFadd{0x199}}\DIFadd{),
+  effectively setting maximum multiplier for all the time.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: While this may increase the performance, this patch is strongly discouraged
+  on all systems but those explicitly dedicated to scientific or media calculations.
+  In general only certain Xeon models benefit from the patch.
+}
+
+\item
+  \DIFaddend \texttt{CustomSMBIOSGuid}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Performs GUID patching for \texttt{UpdateSMBIOSMode}
@@ -2690,9 +2738,10 @@ use.
   \texttt{config.plist}.
   \end{itemize}
 
-  Variable loading happens prior to \texttt{Block} (and \texttt{Add}) phases, and will not
-  overwrite any existing variable. Variables allowed to be set must be specified in
-  \texttt{LegacySchema}. Third-party scripts may be used to create \texttt{nvram.plist}
+  Variable loading happens prior to \texttt{Block} (and \texttt{Add}) phases\DIFdelbegin \DIFdel{, and }\DIFdelend \DIFaddbegin \DIFadd{. Unless
+  }\texttt{\DIFadd{LegacyOverwrite}} \DIFadd{is enabled, it }\DIFaddend will not overwrite any existing variable.
+  Variables allowed to be set must be specified in \texttt{LegacySchema}.
+  Third-party scripts may be used to create \texttt{nvram.plist}
   file. An example of such script can be found in \texttt{Utilities}. The use of third-party
   scripts may require \texttt{ExposeSensitiveData} set to \texttt{0x3} to provide
   \texttt{boot-path} variable with OpenCore EFI partition UUID.
@@ -2702,7 +2751,17 @@ use.
   by the firmware or it is incompatible.
 
 \item
-  \texttt{LegacySchema}\\
+  \DIFaddbegin \texttt{\DIFadd{LegacyOverwrite}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Permits overwriting firmware variables from }\texttt{\DIFadd{nvram.plist}}\DIFadd{.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: Only variables accessible from the operating system will be overwritten.
+}
+
+\item
+  \DIFaddend \texttt{LegacySchema}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Allows setting select NVRAM variables from a map
   (\texttt{plist\ dict}) of GUIDs to an array (\texttt{plist\ array}) of

@@ -21,6 +21,9 @@ OpenCore Changelog
 - Fixed CPU package detection on configurations with multiple CPUs
 - Bundled CleanNvram and VerifyMsrE2 tools for debugging
 - Added screen clearing after choosing boot entry in picker
+- Added `WriteFlash` NVRAM option to enable writing variables in `Add`
+- Added `LegacyOverwrite` NVRAM option to allow overwriting variables by nvram.plist
+- Added `AppleXcpmForceBoost` kernel quirk to maximise select Xeon performance
 
 #### v0.5.3
 - Update builtin firmware versions

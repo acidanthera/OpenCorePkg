@@ -442,6 +442,10 @@ OcKernelApplyPatches (
       PatchAppleXcpmExtraMsrs (&Patcher);
     }
 
+    if (Config->Kernel.Quirks.AppleXcpmForceBoost) {
+      PatchAppleXcpmForceBoost (&Patcher);
+    }
+
     if (Config->Kernel.Quirks.PanicNoKextDump) {
       PatchPanicKextDump (&Patcher);
     }
