@@ -433,6 +433,13 @@ OcRunSimpleBootPicker (
         DEBUG ((DEBUG_INFO, "OCB: Setting default - %r\n", Status));
       }
 
+      //
+      // Clear screen before loading the entry.
+      //
+      if (Context->PickerCommand == OcPickerShowPicker) {
+        gST->ConOut->ClearScreen (gST->ConOut);
+      }
+
       Status = OcLoadBootEntry (
         AppleBootPolicy,
         Context,
