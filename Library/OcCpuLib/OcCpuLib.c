@@ -1411,7 +1411,7 @@ OcCpuScanProcessor (
     }
   }
 
-  DEBUG ((DEBUG_INFO, "OCCPU: %a %a\n", "Found", Cpu->BrandString));
+  DEBUG ((DEBUG_INFO, "OCCPU: Found %a\n", Cpu->BrandString));
 
   DEBUG ((
     DEBUG_INFO,

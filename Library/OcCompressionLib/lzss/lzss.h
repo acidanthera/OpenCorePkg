@@ -30,6 +30,10 @@ typedef INT32 int32_t;
 #define compress_lzss CompressLZSS
 #define decompress_lzss DecompressLZSS
 
+#ifdef memset
+#undef memset
+#endif
+
 #ifdef bzero
 #undef bzero
 #endif
@@ -42,6 +46,7 @@ typedef INT32 int32_t;
 #undef free
 #endif
 
+#define memset(Dst, Val, Size) SetMem ((Dst), (Size), (Val))
 #define bzero(Dst, Size) ZeroMem ((Dst), (Size))
 #define malloc(Size) AllocatePool (Size)
 #define free(Ptr) FreePool (Ptr)

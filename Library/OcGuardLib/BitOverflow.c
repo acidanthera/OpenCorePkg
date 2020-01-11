@@ -16,6 +16,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
+#include <Library/BaseLib.h>
 #include <Library/OcGuardLib.h>
 
 //
@@ -122,7 +123,7 @@ BOOLEAN
 {
   INT64  Temp;
 
-  Temp    = (INT64) A * B;
+  Temp    = MultS64x64 (A, B);
   *Result = (INT32) Temp;
   if (Temp >= MIN_INT32 && Temp <= MAX_INT32) {
     return FALSE;
@@ -186,23 +187,23 @@ BOOLEAN
   // Implements overflow checking by a series of up to 3 multiplications.
   //
 
-  AHi = A >> 32ULL;
+  AHi = RShiftU64 (A, 32);
   ALo = A & MAX_UINT32;
-  BHi = B >> 32ULL;
+  BHi = RShiftU64 (B, 32);
   BLo = B & MAX_UINT32;
 
-  LoBits = ALo * BLo;
+  LoBits = MultU64x64 (ALo, BLo);
   if (AHi == 0 && BHi == 0) {
     *Result = LoBits;
     return FALSE; 
   }
 
   Overflow = AHi > 0 && BHi > 0;
-  HiBits1  = ALo * BHi;
-  HiBits2  = AHi * BLo;
+  HiBits1  = MultU64x64 (ALo, BHi);
+  HiBits2  = MultU64x64 (AHi, BLo);
 
-  *Result = LoBits + ((HiBits1 + HiBits2) << 32ULL);
-  return Overflow || *Result < LoBits || (HiBits1 >> 32ULL) != 0 || (HiBits2 >> 32ULL) != 0;
+  *Result = LoBits + LShiftU64 (HiBits1 + HiBits2, 32);
+  return Overflow || *Result < LoBits || RShiftU64 (HiBits1, 32) != 0 || RShiftU64 (HiBits2, 32) != 0;
 }
 
 BOOLEAN

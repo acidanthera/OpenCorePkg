@@ -605,7 +605,7 @@ InternalCalculateTargetsIntel64 (
 
     TargetAddress = ALIGN_VALUE (
                       (Section->Address + LoadAddress),
-                      (UINT64)(1U << Section->Alignment)
+                      LShiftU64 (1, Section->Alignment)
                       );
     TargetAddress -= Section->Address;
   }
@@ -816,7 +816,7 @@ InternalRelocateRelocationIntel64 (
       case MachX8664RelocGot:
       case MachX8664RelocGotLoad:
       {
-        Adjustment = (1ULL << Length);
+        Adjustment = LShiftU64 (1, Length);
         break;
       }
 

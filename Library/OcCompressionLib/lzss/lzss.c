@@ -107,8 +107,7 @@ u_int32_t decompress_lzss(
     }
 
     dst = dststart;
-    for (i = 0; i < N - F; i++)
-        text_buf[i] = ' ';
+    memset(text_buf, ' ', N - F);
     r = N - F;
     flags = 0;
     for ( ; ; ) {
@@ -149,16 +148,10 @@ u_int32_t decompress_lzss(
  * Note there are 256 trees. */
 static void init_state(struct encode_state *sp)
 {
-    int  i;
-
     bzero(sp, sizeof(*sp));
-
-    for (i = 0; i < N - F; i++)
-        sp->text_buf[i] = ' ';
-    for (i = N + 1; i <= N + 256; i++)
-        sp->rchild[i] = NIL;
-    for (i = 0; i < N; i++)
-        sp->parent[i] = NIL;
+    memset(&sp->text_buf[0], ' ', N - F);
+    bzero(&sp->rchild[N + 1], 256 * sizeof(sp->rchild[0]));
+    bzero(&sp->parent[0], N * sizeof(sp->parent[0]));
 }
 
 /*
