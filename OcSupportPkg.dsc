@@ -25,41 +25,27 @@
 
 [LibraryClasses]
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
-  BaseRngLib|MdePkg/Library/BaseRngLib/BaseRngLib.inf
   BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
+  BaseRngLib|MdePkg/Library/BaseRngLib/BaseRngLib.inf
   CpuLib|MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
   DebugLib|OcSupportPkg/Library/OcDebugLogLib/OcDebugLogLib.inf
   DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
-  PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
   DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
-  UefiHiiServicesLib|MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf
-  HiiLib|MdeModulePkg/Library/UefiHiiLib/UefiHiiLib.inf
-  MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
-  PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
-  UefiBootServicesTableLib|MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
-  UefiDriverEntryPoint|MdePkg/Library/UefiDriverEntryPoint/UefiDriverEntryPoint.inf
-  UefiApplicationEntryPoint|MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
-  UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
-  UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
-  UefiUsbLib|MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
-  PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
-  IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
-  PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf
   DxeServicesTableLib|MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf
-  SerialPortLib|MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf
-  PlatformHookLib|MdeModulePkg/Library/BasePlatformHookLibNull/BasePlatformHookLibNull.inf
-  HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
   FileHandleLib|MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
+  HiiLib|MdeModulePkg/Library/UefiHiiLib/UefiHiiLib.inf
+  HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
+  IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
+  MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
   OcAcpiLib|OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
   OcAppleBootCompatLib|OcSupportPkg/Library/OcAppleBootCompatLib/OcAppleBootCompatLib.inf
   OcAppleBootPolicyLib|OcSupportPkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
   OcAppleChunklistLib|OcSupportPkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
-  OcAppleImg4Lib|OcSupportPkg/Library/OcAppleImg4Lib/OcAppleImg4Lib.inf
   OcAppleDiskImageLib|OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
   OcAppleEventLib|OcSupportPkg/Library/OcAppleEventLib/OcAppleEventLib.inf
-  OcInputLib|OcSupportPkg/Library/OcInputLib/OcInputLib.inf
   OcAppleImageConversionLib|OcSupportPkg/Library/OcAppleImageConversionLib/OcAppleImageConversionLib.inf
   OcAppleImageVerificationLib|OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
+  OcAppleImg4Lib|OcSupportPkg/Library/OcAppleImg4Lib/OcAppleImg4Lib.inf
   OcAppleKernelLib|OcSupportPkg/Library/OcAppleKernelLib/OcAppleKernelLib.inf
   OcAppleKeyMapLib|OcSupportPkg/Library/OcAppleKeyMapLib/OcAppleKeyMapLib.inf
   OcAppleKeysLib|OcSupportPkg/Library/OcAppleKeysLib/OcAppleKeysLib.inf
@@ -67,11 +53,11 @@
   OcAppleSecureBootLib|OcSupportPkg/Library/OcAppleSecureBootLib/OcAppleSecureBootLib.inf
   OcAppleUserInterfaceThemeLib|OcSupportPkg/Library/OcAppleUserInterfaceThemeLib/OcAppleUserInterfaceThemeLib.inf
   OcBootManagementLib|OcSupportPkg/Library/OcBootManagementLib/OcBootManagementLib.inf
-  OcConsoleLib|OcSupportPkg/Library/OcConsoleLib/OcConsoleLib.inf
+  OcCompressionLib|OcSupportPkg/Library/OcCompressionLib/OcCompressionLib.inf
   OcConsoleControlEntryModeLib|OcSupportPkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeLib.inf
+  OcConsoleLib|OcSupportPkg/Library/OcConsoleLib/OcConsoleLib.inf
   OcCpuLib|OcSupportPkg/Library/OcCpuLib/OcCpuLib.inf
   OcCryptoLib|OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
-  OcCompressionLib|OcSupportPkg/Library/OcCompressionLib/OcCompressionLib.inf
   OcDataHubLib|OcSupportPkg/Library/OcDataHubLib/OcDataHubLib.inf
   OcDebugLogLib|OcSupportPkg/Library/OcDebugLogLib/OcDebugLogLib.inf
   OcDevicePathLib|OcSupportPkg/Library/OcDevicePathLib/OcDevicePathLib.inf
@@ -81,6 +67,7 @@
   OcFirmwareVolumeLib|OcSupportPkg/Library/OcFirmwareVolumeLib/OcFirmwareVolumeLib.inf
   OcGuardLib|OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf
   OcHashServicesLib|OcSupportPkg/Library/OcHashServicesLib/OcHashServicesLib.inf
+  OcInputLib|OcSupportPkg/Library/OcInputLib/OcInputLib.inf
   OcMachoLib|OcSupportPkg/Library/OcMachoLib/OcMachoLib.inf
   OcMemoryLib|OcSupportPkg/Library/OcMemoryLib/OcMemoryLib.inf
   OcMiscLib|OcSupportPkg/Library/OcMiscLib/OcMiscLib.inf
@@ -97,32 +84,46 @@
   OcUnicodeCollationEngLib|OcSupportPkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngLib.inf
   OcVirtualFsLib|OcSupportPkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OcXmlLib|OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
+  PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
+  PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
+  PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf
+  PlatformHookLib|MdeModulePkg/Library/BasePlatformHookLibNull/BasePlatformHookLibNull.inf
+  PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
+  ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
+  SerialPortLib|MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf
+  UefiApplicationEntryPoint|MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
+  UefiBootServicesTableLib|MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
+  UefiDriverEntryPoint|MdePkg/Library/UefiDriverEntryPoint/UefiDriverEntryPoint.inf
+  UefiHiiServicesLib|MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf
+  UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
+  UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
+  UefiUsbLib|MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
 
 [Components]
   OcSupportPkg/Application/CleanNvram/CleanNvram.inf
   OcSupportPkg/Application/VerifyMsrE2/VerifyMsrE2.inf
+  OcSupportPkg/Debug/GdbSyms/GdbSyms.inf
   OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
   OcSupportPkg/Library/OcAppleBootCompatLib/OcAppleBootCompatLib.inf
   OcSupportPkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
   OcSupportPkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
-  OcSupportPkg/Library/OcAppleImg4Lib/OcAppleImg4Lib.inf
   OcSupportPkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
   OcSupportPkg/Library/OcAppleEventLib/OcAppleEventLib.inf
-  OcSupportPkg/Library/OcInputLib/OcInputLib.inf
   OcSupportPkg/Library/OcAppleImageConversionLib/OcAppleImageConversionLib.inf
   OcSupportPkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
+  OcSupportPkg/Library/OcAppleImg4Lib/OcAppleImg4Lib.inf
   OcSupportPkg/Library/OcAppleKernelLib/OcAppleKernelLib.inf
   OcSupportPkg/Library/OcAppleKeyMapLib/OcAppleKeyMapLib.inf
   OcSupportPkg/Library/OcAppleRamDiskLib/OcAppleRamDiskLib.inf
   OcSupportPkg/Library/OcAppleSecureBootLib/OcAppleSecureBootLib.inf
   OcSupportPkg/Library/OcAppleUserInterfaceThemeLib/OcAppleUserInterfaceThemeLib.inf
   OcSupportPkg/Library/OcBootManagementLib/OcBootManagementLib.inf
+  OcSupportPkg/Library/OcCompressionLib/OcCompressionLib.inf
   OcSupportPkg/Library/OcConfigurationLib/OcConfigurationLib.inf
-  OcSupportPkg/Library/OcConsoleLib/OcConsoleLib.inf
   OcSupportPkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeLib.inf
+  OcSupportPkg/Library/OcConsoleLib/OcConsoleLib.inf
   OcSupportPkg/Library/OcCpuLib/OcCpuLib.inf
   OcSupportPkg/Library/OcCryptoLib/OcCryptoLib.inf
-  OcSupportPkg/Library/OcCompressionLib/OcCompressionLib.inf
   OcSupportPkg/Library/OcDataHubLib/OcDataHubLib.inf
   OcSupportPkg/Library/OcDebugLogLib/OcDebugLogLib.inf
   OcSupportPkg/Library/OcDevicePathLib/OcDevicePathLib.inf
@@ -133,6 +134,7 @@
   OcSupportPkg/Library/OcFirmwareVolumeLib/OcFirmwareVolumeLib.inf
   OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf
   OcSupportPkg/Library/OcHashServicesLib/OcHashServicesLib.inf
+  OcSupportPkg/Library/OcInputLib/OcInputLib.inf
   OcSupportPkg/Library/OcMachoLib/OcMachoLib.inf
   OcSupportPkg/Library/OcMemoryLib/OcMemoryLib.inf
   OcSupportPkg/Library/OcMiscLib/OcMiscLib.inf
@@ -149,14 +151,14 @@
   OcSupportPkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngLib.inf
   OcSupportPkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OcSupportPkg/Library/OcXmlLib/OcXmlLib.inf
-  OcSupportPkg/Debug/GdbSyms/GdbSyms.inf
+  OcSupportPkg/Platform/AppleUsbKbDxe/UsbKbDxe.inf
   OcSupportPkg/Platform/FwRuntimeServices/FwRuntimeServices.inf
-  OcSupportPkg/Tests/CryptoTest/CryptoTest.inf
-  OcSupportPkg/Tests/CryptoTest/CryptoTestApp.inf
   OcSupportPkg/Tests/AcpiTest/AcpiTest.inf
   OcSupportPkg/Tests/AcpiTest/AcpiTestApp.inf
   OcSupportPkg/Tests/BlessTest/BlessTest.inf
   OcSupportPkg/Tests/BlessTest/BlessTestApp.inf
+  OcSupportPkg/Tests/CryptoTest/CryptoTest.inf
+  OcSupportPkg/Tests/CryptoTest/CryptoTestApp.inf
   OcSupportPkg/Tests/DataHubTest/DataHubTest.inf
   OcSupportPkg/Tests/DataHubTest/DataHubTestApp.inf
   OcSupportPkg/Tests/ExternalUi/ExternalUi.inf

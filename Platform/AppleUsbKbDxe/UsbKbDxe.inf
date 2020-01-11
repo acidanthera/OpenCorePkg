@@ -1,0 +1,106 @@
+## @file
+# USB Keyboard Driver that manages USB keyboard and produces Simple Text Input(Ex) Protocol.
+#
+# USB Keyboard Driver consumes USB I/O Protocol and Device Path Protocol, and produces
+# Simple Text Input Protocol and Simple Text Input Ex Protocol on USB keyboard devices.
+# It initializes the keyboard layout according to info retrieved from HII database.
+# If HII cannot provide the info, this module uses its carried default one if PCD allows.
+# It manages the USB keyboard device via Asynchronous Interrupt Transfer of USB I/O Protocol,
+# and parses the data according to USB HID documents.
+# This module refers to following specifications:
+# 1. Universal Serial Bus HID Firmware Specification, ver 1.11
+# 2. Universal Serial Bus HID Usage Tables, ver 1.12
+# 3. UEFI Specification, v2.1
+#
+# Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
+# Portions Copyright (C) 2016 - 2018, Download-Fritz. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AppleUsbKbDxe
+  MODULE_UNI_FILE                = UsbKbDxe.uni
+  FILE_GUID                      = D1A1230D-1288-4443-B381-8CC85FA69949
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = USBKeyboardDriverBindingEntryPoint
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 EBC ARM AARCH64
+#
+#  DRIVER_BINDING                =  gUsbKeyboardDriverBinding
+#  COMPONENT_NAME                =  gUsbKeyboardComponentName
+#  COMPONENT_NAME2               =  gUsbKeyboardComponentName2
+#
+
+[Sources]
+  EfiKey.c
+  EfiKey.h
+  AppleKey.c
+  AppleKey.h
+  KeyBoard.c
+  ComponentName.c
+  KeyBoard.h
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  EfiPkg/EfiPkg.dec
+  OcSupportPkg/OcSupportPkg.dec
+
+[LibraryClasses]
+  MemoryAllocationLib
+  UefiLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  UefiRuntimeServicesTableLib
+  BaseMemoryLib
+  ReportStatusCodeLib
+  DebugLib
+  PcdLib
+  UefiUsbLib
+  HiiLib
+  OcGuardLib
+
+[Guids]
+  #
+  # Event registered to EFI_HII_SET_KEYBOARD_LAYOUT_EVENT_GUID group,
+  # which will be triggered by EFI_HII_DATABASE_PROTOCOL.SetKeyboardLayout().
+  #
+  gEfiHiiKeyBoardLayoutGuid                     ## SOMETIMES_CONSUMES ## Event
+  gUsbKeyboardLayoutPackageGuid                 ## SOMETIMES_CONSUMES ## HII
+  gUsbKeyboardLayoutKeyGuid                     ## SOMETIMES_PRODUCES ## UNDEFINED
+  gAppleKeyboardPlatformInfoGuid                ## SOMETIMES_CONSUMES
+
+[Protocols]
+  gEfiUsbIoProtocolGuid                         ## TO_START
+  gEfiDevicePathProtocolGuid                    ## TO_START
+  gEfiSimpleTextInProtocolGuid                  ## BY_START
+  gEfiSimpleTextInputExProtocolGuid             ## BY_START
+  #
+  # If HII Database Protocol exists, then keyboard layout from HII database is used.
+  # Otherwise, USB keyboard module tries to use its carried default layout.
+  #
+  gEfiHiiDatabaseProtocolGuid                   ## SOMETIMES_CONSUMES
+  gAppleKeyMapDatabaseProtocolGuid              ## SOMETIMES_CONSUMES
+  gApplePlatformInfoDatabaseProtocolGuid        ## SOMETMES_CONSUMES
+  gEfiKeyboardInfoProtocolGuid                  ## SOMETIMES_PRODUCES
+
+[FeaturePcd]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdDisableDefaultKeyboardLayoutInUsbKbDriver    ## CONSUMES
+  gOcSupportPkgTokenSpaceGuid.PcdEnableDisconnectOnExitBootServicesInUsbKbDriver ## CONSUMES
+  gOcSupportPkgTokenSpaceGuid.PcdNotifyAppleKeyMapDbInUsbKbDriver                ## CONSUMES
+  gOcSupportPkgTokenSpaceGuid.PcdUsbKbDriverTakePrecedence                       ## CONSUMES
+
+# [Event]
+# EVENT_TYPE_RELATIVE_TIMER        ## CONSUMES
+#
+
+[UserExtensions.TianoCore."ExtraFiles"]
+  UsbKbDxeExtra.uni
