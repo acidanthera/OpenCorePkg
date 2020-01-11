@@ -11,6 +11,7 @@ matrix:
     compiler: clang
 
     script:
+    - HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl
     - "./macbuild.tool"
 
   - os: osx
@@ -19,4 +20,5 @@ matrix:
     compiler: clang
 
     script:
+    - HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl
     - "./macbuild.tool"
