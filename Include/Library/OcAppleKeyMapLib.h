@@ -18,6 +18,11 @@
 #include <Protocol/AppleKeyMapAggregator.h>
 
 /**
+  Default buffer size for key map.
+**/
+#define OC_KEY_MAP_DEFAULT_SIZE 8
+
+/**
   Returns the previously install Apple Key Map Database protocol.
 
   @retval installed or located protocol or NULL
@@ -75,6 +80,20 @@ OcKeyMapHasKey (
   IN CONST APPLE_KEY_CODE  *Keys,
   IN UINTN                 NumKeys,
   IN CONST APPLE_KEY_CODE  KeyCode
+  );
+
+/**
+  Performs keyboard input flush.
+
+  @param[in] KeyMap        Apple Key Map Aggregator protocol.
+  @param[in] Key           Key to wait for removal or 0.
+  @param[in] FlushConsole  Also flush console input.
+**/
+VOID
+OcKeyMapFlush (
+  IN APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,
+  IN APPLE_KEY_CODE                     Key,
+  IN BOOLEAN                            FlushConsole
   );
 
 #endif // OC_APPLE_KEY_MAP_LIB_H

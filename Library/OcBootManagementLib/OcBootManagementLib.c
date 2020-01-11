@@ -53,19 +53,24 @@ OcShowSimpleBootMenu (
   OUT OC_BOOT_ENTRY               **ChosenBootEntry
   )
 {
-  UINTN           Index;
-  UINTN           Length;
-  INTN            KeyIndex;
-  INTN            ChosenEntry;
-  CHAR16          Code[2];
-  UINT32          TimeOutSeconds;
-  APPLE_KEY_CODE  LastPolled;
-  BOOLEAN         SetDefault;
+  APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
+  UINTN                              Index;
+  UINTN                              Length;
+  INTN                               KeyIndex;
+  INTN                               ChosenEntry;
+  CHAR16                             Code[2];
+  UINT32                             TimeOutSeconds;
+  BOOLEAN                            SetDefault;
 
   ChosenEntry    = -1;
   Code[1]        = '\0';
-  LastPolled     = 0;
   TimeOutSeconds = Context->TimeoutSeconds;
+
+  KeyMap = OcAppleKeyMapInstallProtocols (FALSE);
+  if (KeyMap == NULL) {
+    DEBUG ((DEBUG_ERROR, "OCB: Missing AppleKeyMapAggregator\n"));
+    return EFI_UNSUPPORTED;
+  }
 
   while (TRUE) {
     gST->ConOut->ClearScreen (gST->ConOut);
@@ -114,9 +119,9 @@ OcShowSimpleBootMenu (
     while (TRUE) {
       KeyIndex = OcWaitForAppleKeyIndex (
         Context,
+        KeyMap,
         TimeOutSeconds,
         Context->PollAppleHotKeys,
-        &LastPolled,
         &SetDefault
         );
 
@@ -158,11 +163,11 @@ OcShowSimpleBootMenu (
         }
         TimeOutSeconds = 0;
         break;
-      } else if (KeyIndex == OC_INPUT_TOP) {
+      } else if (KeyIndex == OC_INPUT_TOP || KeyIndex == OC_INPUT_LEFT) {
         ChosenEntry = 0;
         TimeOutSeconds = 0;
         break;
-      } else if (KeyIndex == OC_INPUT_BOTTOM) {
+      } else if (KeyIndex == OC_INPUT_BOTTOM || KeyIndex == OC_INPUT_RIGHT) {
         ChosenEntry = (INTN) (MIN (Count, OC_INPUT_MAX) - 1);
         TimeOutSeconds = 0;
         break;
@@ -325,16 +330,23 @@ OcRunSimpleBootPicker (
   IN OC_PICKER_CONTEXT  *Context
   )
 {
-  EFI_STATUS                  Status;
-  APPLE_BOOT_POLICY_PROTOCOL  *AppleBootPolicy;
-  OC_BOOT_ENTRY               *Chosen;
-  OC_BOOT_ENTRY               *Entries;
-  UINTN                       EntryCount;
-  INTN                        DefaultEntry;
+  EFI_STATUS                         Status;
+  APPLE_BOOT_POLICY_PROTOCOL         *AppleBootPolicy;
+  APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
+  OC_BOOT_ENTRY                      *Chosen;
+  OC_BOOT_ENTRY                      *Entries;
+  UINTN                              EntryCount;
+  INTN                               DefaultEntry;
 
   AppleBootPolicy = OcAppleBootPolicyInstallProtocol (FALSE);
   if (AppleBootPolicy == NULL) {
     DEBUG ((DEBUG_ERROR, "OCB: AppleBootPolicy locate failure\n"));
+    return EFI_NOT_FOUND;
+  }
+
+  KeyMap = OcAppleKeyMapInstallProtocols (FALSE);
+  if (KeyMap == NULL) {
+    DEBUG ((DEBUG_ERROR, "OCB: AppleKeyMap locate failure\n"));
     return EFI_NOT_FOUND;
   }
 
@@ -434,6 +446,12 @@ OcRunSimpleBootPicker (
       if (EFI_ERROR (Status)) {
         gBS->Stall (SECONDS_TO_MICROSECONDS (5));
       }
+
+      //
+      // Ensure that we flush all pressed keys after the application.
+      // This resolves the problem of application-pressed keys being used to control the menu.
+      //
+      OcKeyMapFlush (KeyMap, 0, TRUE);
     }
 
     OcFreeBootEntries (Entries, EntryCount);

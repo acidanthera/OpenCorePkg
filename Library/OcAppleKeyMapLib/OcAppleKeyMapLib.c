@@ -23,7 +23,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcAppleKeyMapLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/TimerLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 
@@ -252,6 +254,59 @@ OcKeyMapHasKey (
   )
 {
   return OcKeyMapHasKeys (Keys, NumKeys, &KeyCode, 1, FALSE);
+}
+
+VOID
+OcKeyMapFlush (
+  IN APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,
+  IN APPLE_KEY_CODE                     Key,
+  IN BOOLEAN                            FlushConsole
+  )
+{
+  EFI_STATUS          Status;
+  UINTN               NumKeys;
+  APPLE_MODIFIER_MAP  Modifiers;
+  EFI_INPUT_KEY       EfiKey;
+  APPLE_KEY_CODE      Keys[OC_KEY_MAP_DEFAULT_SIZE];
+
+  ASSERT (KeyMap != NULL);
+
+  while (TRUE) {
+    NumKeys = ARRAY_SIZE (Keys);
+    Status = KeyMap->GetKeyStrokes (
+      KeyMap,
+      &Modifiers,
+      &NumKeys,
+      Keys
+      );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OCAK: GetKeyStrokes failure - %r\n", Status));
+      break;
+    }
+
+    if (Key != 0 && !OcKeyMapHasKey (Keys, NumKeys, Key) && Modifiers == 0) {
+      break;
+    }
+
+    if (Key == 0 && NumKeys == 0 && Modifiers == 0) {
+      break;
+    }
+
+    MicroSecondDelay (10);
+  }
+
+  if (FlushConsole) {
+    do {
+      Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &EfiKey);
+    } while (!EFI_ERROR (Status));
+
+    //
+    // This one is required on APTIO IV after holding OPT key.
+    // Interestingly it does not help adding this after OPT key handling.
+    //
+    gST->ConIn->Reset (gST->ConIn, FALSE);
+  }
 }
 
 // InternalContainsKeyStrokes
