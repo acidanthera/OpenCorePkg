@@ -31,34 +31,35 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
 #ifdef EFIAPI
+#include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #endif
 
 #include <Library/OcCryptoLib.h>
 
 
-#define UNPACK64(x, str)                      \
-  do {                                        \
-    *((str) + 7) = (UINT8) ((x)      );       \
-    *((str) + 6) = (UINT8) ((x) >>  8);       \
-    *((str) + 5) = (UINT8) ((x) >> 16);       \
-    *((str) + 4) = (UINT8) ((x) >> 24);       \
-    *((str) + 3) = (UINT8) ((x) >> 32);       \
-    *((str) + 2) = (UINT8) ((x) >> 40);       \
-    *((str) + 1) = (UINT8) ((x) >> 48);       \
-    *((str) + 0) = (UINT8) ((x) >> 56);       \
+#define UNPACK64(x, str)                         \
+  do {                                           \
+    *((str) + 7) = (UINT8) (x);                  \
+    *((str) + 6) = (UINT8) RShiftU64 ((x),  8);  \
+    *((str) + 5) = (UINT8) RShiftU64 ((x), 16);  \
+    *((str) + 4) = (UINT8) RShiftU64 ((x), 24);  \
+    *((str) + 3) = (UINT8) RShiftU64 ((x), 32);  \
+    *((str) + 2) = (UINT8) RShiftU64 ((x), 40);  \
+    *((str) + 1) = (UINT8) RShiftU64 ((x), 48);  \
+    *((str) + 0) = (UINT8) RShiftU64 ((x), 56);  \
   } while(0)
 
-#define PACK64(str, x)                        \
-  do {                                        \
-    *(x) =   ((UINT64) *((str) + 7)      )    \
-           | ((UINT64) *((str) + 6) <<  8)    \
-           | ((UINT64) *((str) + 5) << 16)    \
-           | ((UINT64) *((str) + 4) << 24)    \
-           | ((UINT64) *((str) + 3) << 32)    \
-           | ((UINT64) *((str) + 2) << 40)    \
-           | ((UINT64) *((str) + 1) << 48)    \
-           | ((UINT64) *((str) + 0) << 56);   \
+#define PACK64(str, x)                           \
+  do {                                           \
+    *(x) =    ((UINT64) *((str) + 7))            \
+           | LShiftU64 (*((str) + 6),  8)        \
+           | LShiftU64 (*((str) + 5), 16)        \
+           | LShiftU64 (*((str) + 4), 24)        \
+           | LShiftU64 (*((str) + 3), 32)        \
+           | LShiftU64 (*((str) + 2), 40)        \
+           | LShiftU64 (*((str) + 1), 48)        \
+           | LShiftU64 (*((str) + 0), 56);       \
   } while (0)
 
 
