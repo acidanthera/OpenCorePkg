@@ -7,3 +7,17 @@ DEPNAMES=('EfiPkg')
 DEPURLS=('https://github.com/acidanthera/EfiPkg')
 DEPBRANCHES=('master')
 src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/efibuild.sh) && eval "$src" || exit 1
+
+UTILS=(
+  "AppleEfiSignTools"
+  "EfiResTool"
+  "readlabel"
+  "RsaTool"
+)
+
+cd Utilities || exit 1
+for util in "${UTILS[@]}"; do
+  cd "$util" || exit 1
+  make || exit 1
+  cd - || exit 1
+done

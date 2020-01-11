@@ -60,11 +60,13 @@ typedef struct {
 #define MAX_UINT32    UINT32_MAX
 #define MAX_UINT64    UINT64_MAX
 #define MAX_UINTN     SIZE_MAX
+#define MAX_ADDRESS   UINTPTR_MAX
 
 #define ALIGN_VALUE(Value, Alignment) ((Value) + (((Alignment) - (Value)) & ((Alignment) - 1)))
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof((x)[0]))
 #define PcdGet16(TokenName) _PCD_GET_MODE_16_##TokenName
 
+#define STATIC_ASSERT _Static_assert
 #define ASSERT assert
 #define DEBUG(...)
 
@@ -77,8 +79,8 @@ typedef struct {
 #define SwapBytes32 _byteswap_ulong
 #define SwapBytes64 _byteswap_uint64
 #endif
+#define LShiftU64(A, B) ((UINT64)(A) << (UINTN)(B))
 #define RShiftU64(A, B) ((UINT64)(A) >> (UINTN)(B))
-#define RShiftL64(A, B) ((UINT64)(A) << (UINTN)(B))
 
 #define ZeroMem(Dst, Size) (memset)((Dst), 0, (Size))
 #define CopyMem(Dst, Src, Size) (memcpy)((Dst), (Src), (Size))
