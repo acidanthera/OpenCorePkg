@@ -753,7 +753,7 @@ PatchThirdPartyDriveSupport (
     if (RETURN_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOAHCIBlockStorage V1 - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOAHCIBlockStorage V2\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOAHCIBlockStorage V1\n"));
     }
 
     Status = PatcherApplyGenericPatch (&Patcher, &mIOAHCIBlockStoragePatchV2);
