@@ -55,6 +55,5 @@
   OcRtcLib
   PcdLib
   UefiBootServicesTableLib
-  UefiDriverEntryPoint
   UefiLib
   UefiRuntimeServicesTableLib
