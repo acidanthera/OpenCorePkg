@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Dec 10 15:40:50 2019
-%DIF ADD ../Configuration.tex        Sun Jan 12 22:14:21 2020
+%DIF ADD ../Configuration.tex        Sun Jan 12 22:48:11 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3924,8 +3924,11 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   in \texttt{100} nanosecond units. Setting a lower value generally improves performance
   and responsiveness of the interface and input handling.
 
-  The recommended value is \texttt{50000} (\texttt{5} milliseconds) or slightly higher. ASUS
-  boards use \texttt{60000} for the interface. Apple boards use \texttt{100000}.
+  The recommended value is \texttt{50000} (\texttt{5} milliseconds) or slightly higher. \DIFdelbegin \DIFdel{ASUS
+  }\DIFdelend \DIFaddbegin \DIFadd{Select
+  ASUS Z87 }\DIFaddend boards use \texttt{60000} for the interface. Apple boards use \texttt{100000}.
+  \DIFaddbegin \DIFadd{You may leave it as }\texttt{\DIFadd{0}} \DIFadd{in case there are issues.
+}\DIFaddend 
 
 \end{enumerate}
 

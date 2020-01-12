@@ -3803,8 +3803,9 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   in \texttt{100} nanosecond units. Setting a lower value generally improves performance
   and responsiveness of the interface and input handling.
 
-  The recommended value is \texttt{50000} (\texttt{5} milliseconds) or slightly higher. ASUS
-  boards use \texttt{60000} for the interface. Apple boards use \texttt{100000}.
+  The recommended value is \texttt{50000} (\texttt{5} milliseconds) or slightly higher. Select
+  ASUS Z87 boards use \texttt{60000} for the interface. Apple boards use \texttt{100000}.
+  You may leave it as \texttt{0} in case there are issues.
 
 \end{enumerate}
 
