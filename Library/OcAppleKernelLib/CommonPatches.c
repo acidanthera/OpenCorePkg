@@ -464,9 +464,9 @@ PatchAppleXcpmForceBoost (
 
   while (Current < Last) {
     if (Current[0] == mPerfCtrlFind1[0]
-      || Current[1] == mPerfCtrlFind1[1]
-      || Current[2] == mPerfCtrlFind1[2]
-      || Current[3] == mPerfCtrlFind1[3]) {
+      && Current[1] == mPerfCtrlFind1[1]
+      && Current[2] == mPerfCtrlFind1[2]
+      && Current[3] == mPerfCtrlFind1[3]) {
       if (CompareMem (&Current[4], &mPerfCtrlFind1[4], sizeof (mPerfCtrlFind1) - 4) == 0
         || CompareMem (&Current[4], &mPerfCtrlFind2[4], sizeof (mPerfCtrlFind2) - 4) == 0) {
         break;
