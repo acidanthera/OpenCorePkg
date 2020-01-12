@@ -102,6 +102,8 @@
   UefiUsbLib|MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
 
 [Components]
+  MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf
+  MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf
   OpenCorePkg/Application/Bootstrap/Bootstrap.inf
   OpenCorePkg/Platform/OpenCore/OpenCore.inf
   OcSupportPkg/Application/CleanNvram/CleanNvram.inf

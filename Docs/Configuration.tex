@@ -3616,7 +3616,7 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
   --- APFS file system bootstrap driver adding the support of embedded APFS drivers
   in bootable APFS containers in UEFI firmwares.
-  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwRuntimeServices}}
+  \item \href{https://github.com/acidanthera/OcSupportPkg}{\texttt{FwRuntimeServices}}
   --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
   of OpenCore and Lilu by supporting read-only and write-only NVRAM variables. Some
   quirks, like \texttt{RequestBootVarRouting}, require this driver for proper function.
@@ -3627,13 +3627,13 @@ and supplementary utilities can be used.
   --- FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
   UEFI firmwares, and cannot be used from OpenCore. It is known that multiple firmwares
   have a bug in their FAT support implementation, which leads to corrupted filesystems
-  on write attempt.  Embedding this driver within the firmware may be required in case
+  on write attempt. Embedding this driver within the firmware may be required in case
   writing to EFI partition is needed during the boot process.
   \item \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}
   --- NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
   firmwares starting with Broadwell generation. For Haswell and earlier embedding it
   within the firmware may be more favourable in case a NVMe SSD drive is installed.
-  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AppleUsbKbDxe}}
+  \item \href{https://github.com/acidanthera/OcSupportPkg}{\texttt{AppleUsbKbDxe}}
   --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware.

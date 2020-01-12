@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Dec 10 15:40:50 2019
-%DIF ADD ../Configuration.tex        Sun Jan 12 03:20:10 2020
+%DIF ADD ../Configuration.tex        Sun Jan 12 17:07:53 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3720,7 +3720,7 @@ and supplementary utilities can be used.
   in bootable APFS containers in UEFI firmwares.
   \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{FwRuntimeServices}}
 %DIFDELCMD <   %%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwRuntimeServices}}
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OcSupportPkg}{\texttt{FwRuntimeServices}}
   \DIFaddend --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
   of OpenCore and Lilu by supporting read-only and write-only NVRAM variables. Some
   quirks, like \texttt{RequestBootVarRouting}, require this driver for proper function.
@@ -3731,7 +3731,7 @@ and supplementary utilities can be used.
   --- FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
   UEFI firmwares, and cannot be used from OpenCore. It is known that multiple firmwares
   have a bug in their FAT support implementation, which leads to corrupted filesystems
-  on write attempt.  Embedding this driver within the firmware may be required in case
+  on write attempt. Embedding this driver within the firmware may be required in case
   writing to EFI partition is needed during the boot process.
   \item \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}
   --- NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
@@ -3739,7 +3739,7 @@ and supplementary utilities can be used.
   within the firmware may be more favourable in case a NVMe SSD drive is installed.
   \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{UsbKbDxe}}
 %DIFDELCMD <   %%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AppleUsbKbDxe}}
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OcSupportPkg}{\texttt{AppleUsbKbDxe}}
   \DIFaddend --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware.
