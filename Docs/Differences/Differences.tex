@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Dec 10 15:40:50 2019
-%DIF ADD ../Configuration.tex        Sun Jan 12 02:58:20 2020
+%DIF ADD ../Configuration.tex        Sun Jan 12 03:20:10 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1865,23 +1865,59 @@ blocking.
   MSR modification in AppleIntelCPUPowerManagement.kext, commonly causing early
   kernel panic, when it is locked from writing.
 
-  \emph{Note}: This option should \DIFaddbegin \DIFadd{be }\DIFaddend avoided whenever possible. Modern firmwares provide
-  \texttt{CFG Lock} setting, disabling which is much cleaner. More details
-  about the issue can be found in
-  \href{https://github.com/acidanthera/AppleSupportPkg#verifymsre2}{VerifyMsrE2} notes.
+  \DIFdelbegin \emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: This option should }\DIFdelend \DIFaddbegin \DIFadd{Certain firmwares lock }\texttt{\DIFadd{PKG\_CST\_CONFIG\_CONTROL}} \DIFadd{MSR register. To check its
+  state one can use bundled }\texttt{\DIFadd{VerifyMsrE2}} \DIFadd{tool. Select firmwares have this
+  register locked on some cores only.
+}
+
+  \DIFadd{As modern firmwares provide }\texttt{\DIFadd{CFG Lock}} \DIFadd{setting, which allows configuring
+  }\texttt{\DIFadd{PKG\_CST\_CONFIG\_CONTROL}} \DIFadd{MSR register lock, this option should be }\DIFaddend avoided
+  whenever possible. \DIFdelbegin \DIFdel{Modern firmwares provide
+  }\DIFdelend \DIFaddbegin \DIFadd{For several APTIO firmwares not displaying }\DIFaddend \texttt{CFG Lock} setting
+  \DIFdelbegin \DIFdel{, disabling which is much cleaner.
+    More details
+  about the issue can be foundin
+  }%DIFDELCMD < \href{https://github.com/acidanthera/AppleSupportPkg#verifymsre2}{VerifyMsrE2} %%%
+\DIFdel{notes.}\DIFdelend \DIFaddbegin \DIFadd{in the GUI it is possible to access the option directly:
+}\DIFaddend 
+
+  \DIFaddbegin \begin{enumerate}
+    \tightlist
+    \DIFaddend \item \DIFaddbegin \DIFadd{Download }\href{https://github.com/LongSoft/UEFITool/releases}{UEFITool} \DIFadd{and
+      }\href{https://github.com/LongSoft/Universal-IFR-Extractor/releases}{IFR-Extractor}\DIFadd{.
+    }\item \DIFadd{Open your firmware image in UEFITool and find }\texttt{\DIFadd{CFG Lock}} \DIFadd{unicode string.
+      If it is not present, your firmware may not have this option and you should stop.
+    }\item \DIFadd{Extract the }\texttt{\DIFadd{Setup.bin}} \DIFadd{PE32 Image Section (the one UEFITool found) through
+      }\texttt{\DIFadd{Extract Body}} \DIFadd{menu option.
+    }\item \DIFadd{Run IFR-Extractor on the extracted file (e.g. }\texttt{\DIFadd{./ifrextract Setup.bin Setup.txt}}\DIFadd{).
+    }\item \DIFadd{Find }\texttt{\DIFadd{CFG Lock, VarStoreInfo (VarOffset/VarName):}} \DIFadd{in }\texttt{\DIFadd{Setup.txt}} \DIFadd{and
+      remember the offset right after it (e.g. }\texttt{\DIFadd{0x123}}\DIFadd{).
+    }\item \DIFadd{Download and run }\href{http://brains.by/posts/bootx64.7z}{Modified GRUB Shell} \DIFadd{compiled by
+      }\href{https://geektimes.com/post/258090}{brainsucker} \DIFadd{or use
+      }\href{https://github.com/datasone/grub-mod-setup_var}{a newer version} \DIFadd{by
+      }\href{https://github.com/datasone}{datasone}\DIFadd{.
+    }\item \DIFadd{Enter }\texttt{\DIFadd{setup\_var 0x123 0x00}} \DIFadd{command, where }\texttt{\DIFadd{0x123}} \DIFadd{should be replaced by
+      your actual offset, and reboot.
+  }\end{enumerate}
+
+  \textbf{\DIFadd{WARNING}}\DIFadd{: Variable offsets are unique not only to each motherboard but even to its firmware
+  version. Never ever try to use an offset without checking.
+}
 
 \item
-  \texttt{AppleXcpmCfgLock}\\
+  \DIFaddend \texttt{AppleXcpmCfgLock}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Disables \texttt{PKG\_CST\_CONFIG\_CONTROL} (\texttt{0xE2})
   MSR modification in XNU kernel, commonly causing early kernel panic, when it is
   locked from writing (XCPM power management).
 
-  \emph{Note}: This option should \DIFaddbegin \DIFadd{be }\DIFaddend avoided whenever possible. Modern firmwares provide
-  \texttt{CFG Lock} setting, disabling which is much cleaner. More details
-  about the issue can be found in
-  \href{https://github.com/acidanthera/AppleSupportPkg#verifymsre2}{VerifyMsrE2} notes.
+  \emph{Note}: This option should \DIFaddbegin \DIFadd{be }\DIFaddend avoided whenever possible. \DIFdelbegin \DIFdel{Modern firmwares provide
+  }\DIFdelend \DIFaddbegin \DIFadd{See }\DIFaddend \texttt{\DIFdelbegin \DIFdel{CFG Lock}\DIFdelend \DIFaddbegin \DIFadd{AppleCpuPmCfgLock}\DIFaddend }
+  \DIFdelbegin \DIFdel{setting, disabling which is much cleaner. More detailsabout the issue can be found in
+  }%DIFDELCMD < \href{https://github.com/acidanthera/AppleSupportPkg#verifymsre2}{VerifyMsrE2} %%%
+\DIFdel{notes}\DIFdelend \DIFaddbegin \DIFadd{description for more details}\DIFaddend .
 
 \item
   \texttt{AppleXcpmExtraMsrs}\\

@@ -1790,10 +1790,36 @@ blocking.
   MSR modification in AppleIntelCPUPowerManagement.kext, commonly causing early
   kernel panic, when it is locked from writing.
 
-  \emph{Note}: This option should be avoided whenever possible. Modern firmwares provide
-  \texttt{CFG Lock} setting, disabling which is much cleaner. More details
-  about the issue can be found in
-  \href{https://github.com/acidanthera/AppleSupportPkg#verifymsre2}{VerifyMsrE2} notes.
+  Certain firmwares lock \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR register. To check its
+  state one can use bundled \texttt{VerifyMsrE2} tool. Select firmwares have this
+  register locked on some cores only.
+
+  As modern firmwares provide \texttt{CFG Lock} setting, which allows configuring
+  \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR register lock, this option should be avoided
+  whenever possible. For several APTIO firmwares not displaying \texttt{CFG Lock} setting
+  in the GUI it is possible to access the option directly:
+
+  \begin{enumerate}
+    \tightlist
+    \item Download \href{https://github.com/LongSoft/UEFITool/releases}{UEFITool} and
+      \href{https://github.com/LongSoft/Universal-IFR-Extractor/releases}{IFR-Extractor}.
+    \item Open your firmware image in UEFITool and find \texttt{CFG Lock} unicode string.
+      If it is not present, your firmware may not have this option and you should stop.
+    \item Extract the \texttt{Setup.bin} PE32 Image Section (the one UEFITool found) through
+      \texttt{Extract Body} menu option.
+    \item Run IFR-Extractor on the extracted file (e.g. \texttt{./ifrextract Setup.bin Setup.txt}).
+    \item Find \texttt{CFG Lock, VarStoreInfo (VarOffset/VarName):} in \texttt{Setup.txt} and
+      remember the offset right after it (e.g. \texttt{0x123}).
+    \item Download and run \href{http://brains.by/posts/bootx64.7z}{Modified GRUB Shell} compiled by
+      \href{https://geektimes.com/post/258090}{brainsucker} or use
+      \href{https://github.com/datasone/grub-mod-setup_var}{a newer version} by
+      \href{https://github.com/datasone}{datasone}.
+    \item Enter \texttt{setup\_var 0x123 0x00} command, where \texttt{0x123} should be replaced by
+      your actual offset, and reboot.
+  \end{enumerate}
+
+  \textbf{WARNING}: Variable offsets are unique not only to each motherboard but even to its firmware
+  version. Never ever try to use an offset without checking.
 
 \item
   \texttt{AppleXcpmCfgLock}\\
@@ -1803,10 +1829,8 @@ blocking.
   MSR modification in XNU kernel, commonly causing early kernel panic, when it is
   locked from writing (XCPM power management).
 
-  \emph{Note}: This option should be avoided whenever possible. Modern firmwares provide
-  \texttt{CFG Lock} setting, disabling which is much cleaner. More details
-  about the issue can be found in
-  \href{https://github.com/acidanthera/AppleSupportPkg#verifymsre2}{VerifyMsrE2} notes.
+  \emph{Note}: This option should be avoided whenever possible. See \texttt{AppleCpuPmCfgLock}
+  description for more details.
 
 \item
   \texttt{AppleXcpmExtraMsrs}\\
