@@ -485,7 +485,7 @@ PatchForceInternalDiskIcons (
   );
 
 /**
-  Apply VT-d disabling patches to AppleACPIPlatform kext to disable IOMapper in macOS.
+  Apply VT-d disabling patches to IOPCIFamily kext to disable IOMapper in macOS.
 
   @param Context  Prelinked kernel context.
 
@@ -493,6 +493,18 @@ PatchForceInternalDiskIcons (
 **/
 RETURN_STATUS
 PatchAppleIoMapperSupport (
+  IN OUT PRELINKED_CONTEXT  *Context
+  );
+
+/**
+  Apply PCI bar size patches to IOPCIFamily kext for compatibility with select configuration.
+
+  @param Context  Prelinked kernel context.
+
+  @return  RETURN_SUCCESS on success.
+**/
+RETURN_STATUS
+PatchIncreasePciBarSize (
   IN OUT PRELINKED_CONTEXT  *Context
   );
 

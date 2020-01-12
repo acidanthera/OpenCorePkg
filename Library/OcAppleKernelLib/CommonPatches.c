@@ -866,12 +866,67 @@ PatchAppleIoMapperSupport (
   if (!RETURN_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &mAppleIoMapperPatch);
     if (RETURN_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOPCIFamily - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOPCIFamily AppleIoMapper - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOPCIFamily\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOPCIFamily AppleIoMapper\n"));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.iokit.IOPCIFamily - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.iokit.IOPCIFamily for AppleIoMapper - %r\n", Status));
+  }
+
+  return Status;
+}
+
+STATIC
+UINT8
+mIncreasePciBarSizePatchFind[] = {
+  0x00, 0x00, 0x00, 0x40
+};
+
+STATIC
+UINT8
+mIncreasePciBarSizePatchReplace[] = {
+  0x00, 0x00, 0x00, 0x80
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mIncreasePciBarSizePatch = {
+  .Comment     = DEBUG_POINTER ("IncreasePciBarSize"),
+  .Base        = "__ZN17IOPCIConfigurator24probeBaseAddressRegisterEP16IOPCIConfigEntryjj",
+  .Find        = mIncreasePciBarSizePatchFind,
+  .Mask        = NULL,
+  .Replace     = mIncreasePciBarSizePatchReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mIncreasePciBarSizePatchFind),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = EFI_PAGE_SIZE
+};
+
+RETURN_STATUS
+PatchIncreasePciBarSize (
+  IN OUT PRELINKED_CONTEXT  *Context
+  )
+{
+  RETURN_STATUS       Status;
+  PATCHER_CONTEXT     Patcher;
+
+  Status = PatcherInitContextFromPrelinked (
+    &Patcher,
+    Context,
+    "com.apple.iokit.IOPCIFamily"
+    );
+
+  if (!RETURN_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (&Patcher, &mIncreasePciBarSizePatch);
+    if (RETURN_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOPCIFamily IncreasePciBarSize - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOPCIFamily IncreasePciBarSize\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.iokit.IOPCIFamily for IncreasePciBarSize - %r\n", Status));
   }
 
   return Status;
