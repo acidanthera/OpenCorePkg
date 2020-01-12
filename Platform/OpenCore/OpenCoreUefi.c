@@ -156,11 +156,10 @@ OcConnectDrivers (
   UINTN       HandleCount;
   EFI_HANDLE  *HandleBuffer;
   UINTN       Index;
-  VOID        *DriverBinding;
 
   Status = gBS->LocateHandleBuffer (
-                  AllHandles,
-                  NULL,
+                  ByProtocol,
+                  &gEfiDevicePathProtocolGuid,
                   NULL,
                   &HandleCount,
                   &HandleBuffer
@@ -170,19 +169,6 @@ OcConnectDrivers (
   }
 
   for (Index = 0; Index < HandleCount; ++Index) {
-    Status = gBS->HandleProtocol (
-      HandleBuffer[Index],
-      &gEfiDevicePathProtocolGuid,
-      &DriverBinding
-      );
-
-    if (EFI_ERROR (Status)) {
-      //
-      // Calling ConnectController on non-driver results in freezes on APTIO IV.
-      //
-      continue;
-    }
-
     gBS->ConnectController (HandleBuffer[Index], NULL, NULL, TRUE);
   }
 
