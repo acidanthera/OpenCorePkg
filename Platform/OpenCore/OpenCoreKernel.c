@@ -430,6 +430,10 @@ OcKernelApplyPatches (
       PatchAppleIoMapperSupport (Context);
     }
 
+    if (Config->Kernel.Quirks.IncreasePciBarSize) {
+      PatchIncreasePciBarSize (Context);     
+    }
+
     if (Config->Kernel.Quirks.CustomSmbiosGuid) {
       PatchCustomSmbiosGuid (Context);
     }

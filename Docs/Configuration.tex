@@ -1888,6 +1888,15 @@ blocking.
   usually have compatible AHCI controllers.
 
 \item
+  \texttt{IncreasePciBarSize}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Increases 32-bit PCI bar size in IOPCIFamily from 1 to 4 GBs.
+
+  \emph{Note}: This option should be avoided whenever possible. In general the necessity
+  of this option means misconfigured or broken firmware.
+
+\item
   \texttt{LapicKernelPanic}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

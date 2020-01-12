@@ -533,6 +533,8 @@
 			<false/>
 			<key>ExternalDiskIcons</key>
 			<false/>
+			<key>IncreasePciBarSize</key>
+			<false/>
 			<key>LapicKernelPanic</key>
 			<false/>
 			<key>PanicNoKextDump</key>

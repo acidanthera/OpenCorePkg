@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Dec 10 15:40:50 2019
-%DIF ADD ../Configuration.tex        Sun Jan 12 17:07:53 2020
+%DIF ADD ../Configuration.tex        Sun Jan 12 22:14:21 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1978,7 +1978,18 @@ blocking.
   usually have compatible AHCI controllers.
 
 \item
-  \texttt{LapicKernelPanic}\\
+  \DIFaddbegin \texttt{\DIFadd{IncreasePciBarSize}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Increases 32-bit PCI bar size in IOPCIFamily from 1 to 4 GBs.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This option should be avoided whenever possible. In general the necessity
+  of this option means misconfigured or broken firmware.
+}
+
+\item
+  \DIFaddend \texttt{LapicKernelPanic}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Disables kernel panic on LAPIC interrupts.

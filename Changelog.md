@@ -24,6 +24,8 @@ OpenCore Changelog
 - Added `WriteFlash` NVRAM option to enable writing variables in `Add`
 - Added `LegacyOverwrite` NVRAM option to allow overwriting variables by nvram.plist
 - Added `AppleXcpmForceBoost` kernel quirk to maximise select Xeon performance
+- Bundled NvmExpressDxe and XhciDxe drivers for platforms that need them
+- Added `IncreasePciBarSize` kernel quirk for select platforms with PCI space issues
 
 #### v0.5.3
 - Update builtin firmware versions
