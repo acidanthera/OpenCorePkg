@@ -34,6 +34,10 @@
 
   gOcCustomSmbiosTableGuid    = { 0xEB9D2D35, 0x2D88, 0x11D3, { 0x9A, 0x16, 0x00, 0x90, 0x27, 0x3F, 0xC1, 0x4D }}
 
+  gMePavpProtocolGuid         = { 0xFBF6FCF1, 0x96CF, 0x4E2E, { 0xA6, 0xA6, 0x1B, 0xAB, 0x8C, 0xBE, 0x36, 0xB1 }}
+
+  gMeFpfProtocolGuid          = { 0x3893448C, 0xEAB6, 0x4F4C, { 0xB2, 0x3C, 0x57, 0xC2, 0xC4, 0x65, 0x8D, 0xFC }}
+
 [Protocols]
   ## Include/Protocol/OcInterface.h
   gOcInterfaceProtocolGuid       = { 0x53027CDF, 0x3A89, 0x4255, { 0xAE, 0x29, 0xD6, 0x66, 0x6E, 0xFE, 0x99, 0xEF }}
@@ -58,6 +62,12 @@
 
   ##  Include/Protocol/AmiKeycode.h
   gAmiEfiKeycodeProtocolGuid  = { 0x0ADFB62D, 0xFF74, 0x484C, { 0x89, 0x44, 0xF8, 0x5C, 0x4B, 0xEA, 0x87, 0xA8 } }
+
+  ##  Include/Protocol/Heci.h
+  gEfiHeciProtocolGuid              = { 0xCFB33810, 0x6E87, 0x4284, { 0xB2, 0x03, 0xA6, 0x6A, 0xBE, 0x07, 0xF6, 0xE8 }}
+
+  ##  Include/Protocol/Heci2.h
+  gEfiHeci2ProtocolGuid             = { 0x3C7BC880, 0x41F8, 0x4869, { 0xAE, 0xFC, 0x87, 0x0A, 0x3E, 0xD2, 0x82, 0x99 }}
 
 [PcdsFeatureFlag]
   ## Indicates if Apple Thunderbolt NHI protocol is called during device property export.<BR><BR>
@@ -195,16 +205,22 @@
   OcFileLib|Include/Library/OcFileLib.h
 
   ##  @libraryclass
-  OcFirmwareVolumeLib|Include/Library/OcFirmwareVolumeLib.h
+  OcFirmwarePasswordLib|Include/Library/OcFirmwarePasswordLib.h
 
   ##  @libraryclass
-  OcFirmwarePasswordLib|Include/Library/OcFirmwarePasswordLib.h
+  OcFirmwareVolumeLib|Include/Library/OcFirmwareVolumeLib.h
 
   ##  @libraryclass
   OcGuardLib|Include/Library/OcGuardLib.h
 
   ##  @libraryclass
   OcHashServicesLib|Include/Library/OcHashServicesLib.h
+
+  ##  @libraryclass
+  OcHeciLib|Include/Library/OcHeciLib.h
+
+  ##  @libraryclass
+  OcInputLib|Include/Library/OcInputLib.h
 
   ##  @libraryclass
   OcMachoLib|Include/Library/OcMachoLib.h
@@ -216,16 +232,25 @@
   OcMiscLib|Include/Library/OcMiscLib.h
 
   ##  @libraryclass
+  OcOSInfoLib|Include/Library/OcOSInfoLib.h
+
+  ##  @libraryclass
   OcPngLib|Include/Library/OcPngLib.h
 
   ##  @libraryclass
   OcRngLib|Include/Library/OcRngLib.h
 
   ##  @libraryclass
+  OcRtcLib|Include/Library/OcRtcLib.h
+
+  ##  @libraryclass
   OcSerializeLib|Include/Library/OcSerializeLib.h
 
   ##  @libraryclass
   OcSmbiosLib|Include/Library/OcSmbiosLib.h
+
+  ##  @libraryclass
+  OcSmcLib|Include/Library/OcSmcLib.h
 
   ##  @libraryclass
   OcStorageLib|Include/Library/OcStorageLib.h

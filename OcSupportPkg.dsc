@@ -67,6 +67,7 @@
   OcFirmwareVolumeLib|OcSupportPkg/Library/OcFirmwareVolumeLib/OcFirmwareVolumeLib.inf
   OcGuardLib|OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf
   OcHashServicesLib|OcSupportPkg/Library/OcHashServicesLib/OcHashServicesLib.inf
+  OcHeciLib|OcSupportPkg/Library/OcHeciLib/OcHeciLib.inf
   OcInputLib|OcSupportPkg/Library/OcInputLib/OcInputLib.inf
   OcMachoLib|OcSupportPkg/Library/OcMachoLib/OcMachoLib.inf
   OcMemoryLib|OcSupportPkg/Library/OcMemoryLib/OcMemoryLib.inf
@@ -101,6 +102,7 @@
 
 [Components]
   OcSupportPkg/Application/CleanNvram/CleanNvram.inf
+  OcSupportPkg/Application/PavpProvision/PavpProvision.inf
   OcSupportPkg/Application/VerifyMsrE2/VerifyMsrE2.inf
   OcSupportPkg/Debug/GdbSyms/GdbSyms.inf
   OcSupportPkg/Library/OcAcpiLib/OcAcpiLib.inf
@@ -134,6 +136,7 @@
   OcSupportPkg/Library/OcFirmwareVolumeLib/OcFirmwareVolumeLib.inf
   OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf
   OcSupportPkg/Library/OcHashServicesLib/OcHashServicesLib.inf
+  OcSupportPkg/Library/OcHeciLib/OcHeciLib.inf
   OcSupportPkg/Library/OcInputLib/OcInputLib.inf
   OcSupportPkg/Library/OcMachoLib/OcMachoLib.inf
   OcSupportPkg/Library/OcMemoryLib/OcMemoryLib.inf
