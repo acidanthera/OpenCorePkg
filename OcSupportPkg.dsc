@@ -120,6 +120,7 @@
   OcSupportPkg/Library/OcAppleSecureBootLib/OcAppleSecureBootLib.inf
   OcSupportPkg/Library/OcAppleUserInterfaceThemeLib/OcAppleUserInterfaceThemeLib.inf
   OcSupportPkg/Library/OcBootManagementLib/OcBootManagementLib.inf
+  OcSupportPkg/Library/OcCompilerIntrinsicsLib/OcCompilerIntrinsicsLib.inf
   OcSupportPkg/Library/OcCompressionLib/OcCompressionLib.inf
   OcSupportPkg/Library/OcConfigurationLib/OcConfigurationLib.inf
   OcSupportPkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeLib.inf
@@ -187,6 +188,9 @@
   gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000042
   gEfiMdePkgTokenSpaceGuid.PcdFixedDebugPrintErrorLevel|0x80000042
 !endif
+
+[LibraryClasses]
+  NULL|OcSupportPkg/Library/OcCompilerIntrinsicsLib/OcCompilerIntrinsicsLib.inf
 
 [BuildOptions]
   # While there are no PCDs as of now, there at least are some custom macros.

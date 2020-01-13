@@ -30,7 +30,6 @@
 
 [Sources]
   BitOverflow.c
-  Builtins.c
   Canary.c
   NativeOverflow.c
   TripleOverflow.c
