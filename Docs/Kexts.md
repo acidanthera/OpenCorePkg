@@ -48,6 +48,7 @@ Kexts
 
 ## CPU and SMC
 
+- [AppleMCEReporterDisabler.kext](https://github.com/acidanthera/bugtracker/issues/424#issuecomment-535624313)
 - [AsusSMC.kext](https://github.com/hieplpvip/AsusSMC)
 - [CPUFriend.kext](https://github.com/acidanthera/CPUFriend)
 - [FakeSMC.kext and sensors](https://github.com/CloverHackyColor/FakeSMC3_with_plugins)
