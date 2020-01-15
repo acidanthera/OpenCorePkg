@@ -24,7 +24,7 @@
   VERSION_STRING  = 1.0
   LIBRARY_CLASS   = OcCpuLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
 
-# VALID_ARCHITECTURES = IA32 X64 
+# VALID_ARCHITECTURES = IA32 X64
 
 [Packages]
   OcSupportPkg/OcSupportPkg.dec
@@ -39,6 +39,7 @@
 
 [Protocols]
   gEfiMpServiceProtocolGuid
+  gFrameworkEfiMpServiceProtocolGuid
 
 [Sources]
   AppleCpuSupport.c
