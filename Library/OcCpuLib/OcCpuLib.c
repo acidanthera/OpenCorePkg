@@ -283,6 +283,7 @@ ScanIntelProcessor (
   MSR_SANDY_BRIDGE_PKG_CST_CONFIG_CONTROL_REGISTER  PkgCstConfigControl;
   MSR_IA32_PERF_STATUS_REGISTER                     PerfStatus;
   MSR_NEHALEM_PLATFORM_INFO_REGISTER                PlatformInfo;
+  OC_CPU_GENERATION                                 CpuGeneration;
   MSR_NEHALEM_TURBO_RATIO_LIMIT_REGISTER            TurboLimit;
   UINT16                                            CoreCount;
   CONST CHAR8                                       *TimerSourceType;
@@ -315,10 +316,17 @@ ScanIntelProcessor (
     //
     if (Cpu->Model >= CPU_MODEL_NEHALEM) {
       PerfStatus.Uint64 = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
-      Cpu->CurBusRatio = (UINT8) (PerfStatus.Bits.State >> 8U);
       PlatformInfo.Uint64 = AsmReadMsr64 (MSR_NEHALEM_PLATFORM_INFO);
       Cpu->MinBusRatio = (UINT8) PlatformInfo.Bits.MaximumEfficiencyRatio;
       Cpu->MaxBusRatio = (UINT8) PlatformInfo.Bits.MaximumNonTurboRatio;
+      CpuGeneration = OcCpuGetGeneration ();
+
+      if (CpuGeneration == OcCpuGenerationNehalem
+        || CpuGeneration == OcCpuGenerationWestmere) {
+        Cpu->CurBusRatio = (UINT8) PerfStatus.Bits.State;
+      } else {
+        Cpu->CurBusRatio = (UINT8) (PerfStatus.Bits.State >> 8U);
+      }
     } else if (Cpu->Model >= CPU_MODEL_PENRYN) {
       PerfStatus.Uint64 = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
       Cpu->MaxBusRatio = (UINT8) (RShiftU64 (PerfStatus.Uint64, 8) & 0x1FU);
