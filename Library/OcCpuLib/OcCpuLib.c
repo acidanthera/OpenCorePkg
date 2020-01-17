@@ -846,15 +846,15 @@ OcCpuCorrectFlexRatio (
   }
 }
 
-BOOLEAN
-OcIsSandyOrIvy (
+OC_CPU_GENERATION
+OcCpuGetGeneration (
   VOID
   )
 {
   CPU_MICROCODE_PROCESSOR_SIGNATURE  Sig;
-  BOOLEAN                            SandyOrIvy;
   UINT32                             CpuFamily;
   UINT32                             CpuModel;
+  OC_CPU_GENERATION                  CpuGeneration;
 
   Sig.Uint32 = 0;
 
@@ -870,15 +870,72 @@ OcIsSandyOrIvy (
     CpuModel |= Sig.Bits.ExtendedModel << 4;
   }
 
-  SandyOrIvy = CpuFamily == 6 && (CpuModel == 0x2A || CpuModel == 0x3A);
+  CpuGeneration = OcCpuGenerationUnknown;
+  if (CpuFamily == 6) {
+    switch (CpuModel) {
+      case CPU_MODEL_PENRYN:
+        CpuGeneration = OcCpuGenerationPenryn;
+        break;
+      case CPU_MODEL_NEHALEM:
+      case CPU_MODEL_FIELDS:
+      case CPU_MODEL_DALES:
+      case CPU_MODEL_NEHALEM_EX:
+        CpuGeneration = OcCpuGenerationNehalem;
+        break;
+      case CPU_MODEL_DALES_32NM:
+      case CPU_MODEL_WESTMERE:
+      case CPU_MODEL_WESTMERE_EX:
+        CpuGeneration = OcCpuGenerationWestmere;
+        break;
+      case CPU_MODEL_SANDYBRIDGE:
+      case CPU_MODEL_JAKETOWN:
+        CpuGeneration = OcCpuGenerationSandyBridge;
+        break;
+      case CPU_MODEL_IVYBRIDGE:
+      case CPU_MODEL_IVYBRIDGE_EP:
+        CpuGeneration = OcCpuGenerationIvyBridge;
+        break;
+      case CPU_MODEL_HASWELL:
+      case CPU_MODEL_HASWELL_EP:
+      case CPU_MODEL_HASWELL_ULT:
+      case CPU_MODEL_CRYSTALWELL:
+        CpuGeneration = OcCpuGenerationHaswell;
+        break;
+      case CPU_MODEL_BROADWELL:
+      case CPU_MODEL_BROADWELL_EP:
+      case CPU_MODEL_BRYSTALWELL:
+        CpuGeneration = OcCpuGenerationBroadwell;
+        break;
+      case CPU_MODEL_SKYLAKE:
+      case CPU_MODEL_SKYLAKE_DT:
+      case CPU_MODEL_SKYLAKE_W:
+        CpuGeneration = OcCpuGenerationSkylake;
+        break;
+      case CPU_MODEL_KABYLAKE:
+      case CPU_MODEL_KABYLAKE_DT:
+        //
+        // Kaby has 0x9 stepping, and Coffee use 0xA / 0xB stepping.
+        //
+        if (Sig.Bits.Stepping == 9) {
+          CpuGeneration = OcCpuGenerationKabyLake;
+        } else {
+          CpuGeneration = OcCpuGenerationCoffeeLake;
+        }
+        break;
+      case CPU_MODEL_CANNONLAKE:
+        CpuGeneration = OcCpuGenerationCannonLake;
+        break;
+    }
+  }
 
   DEBUG ((
     DEBUG_VERBOSE,
-    "OCCPU: Discovered CpuFamily %d CpuModel %d SandyOrIvy %a\n",
+    "OCCPU: Discovered CpuFamily %d CpuModel %d CpuStepping %d CpuGeneration %d\n",
     CpuFamily,
     CpuModel,
-    SandyOrIvy ? "YES" : "NO"
+    Sig.Bits.Stepping,
+    CpuGeneration
     ));
 
-  return SandyOrIvy;
+  return CpuGeneration;
 }

@@ -240,6 +240,7 @@ ShouldUseCustomSlideOffset (
   EFI_STATUS             Status;
   UINTN                  DescriptorSize;
   UINT32                 DescriptorVersion;
+  OC_CPU_GENERATION      CpuGeneration;
   UINTN                  Index;
   UINTN                  Slide;
   UINTN                  NumEntries;
@@ -279,7 +280,10 @@ ShouldUseCustomSlideOffset (
     FilterMap (FilterMapContext, MemoryMapSize, MemoryMap, DescriptorSize);
   }
 
-  SlideSupport->HasSandyOrIvy       = OcIsSandyOrIvy ();
+  CpuGeneration = OcCpuGetGeneration ();
+  SlideSupport->HasSandyOrIvy = CpuGeneration == OcCpuGenerationSandyBridge ||
+                                CpuGeneration == OcCpuGenerationIvyBridge;
+
   SlideSupport->EstimatedKernelArea = (UINTN) EFI_PAGES_TO_SIZE (
     CountRuntimePages (MemoryMapSize, MemoryMap, DescriptorSize, NULL)
     ) + ESTIMATED_KERNEL_SIZE;
@@ -824,6 +828,7 @@ AppleSlideHandleBalloonState (
   UINTN                  StartAddrTmp;
   UINTN                  EndAddr;
   UINT32                 DescriptorVersion;
+  OC_CPU_GENERATION      CpuGeneration;
   BOOLEAN                HasSandyOrIvy;
   UINTN                  EstimatedKernelArea;
 
@@ -864,7 +869,10 @@ AppleSlideHandleBalloonState (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  HasSandyOrIvy       = OcIsSandyOrIvy ();
+  CpuGeneration       = OcCpuGetGeneration ();
+  HasSandyOrIvy       = CpuGeneration == OcCpuGenerationSandyBridge ||
+                        CpuGeneration == OcCpuGenerationIvyBridge;
+
   EstimatedKernelArea = (UINTN) EFI_PAGES_TO_SIZE (
     CountRuntimePages (MemoryMapSize, MemoryMap, DescriptorSize, NULL)
     ) + ESTIMATED_KERNEL_SIZE;

@@ -118,6 +118,22 @@ typedef struct {
   UINT64                  FSBFrequency;
 } OC_CPU_INFO;
 
+typedef enum {
+  OcCpuGenerationUnknown,
+  OcCpuGenerationPenryn,
+  OcCpuGenerationNehalem,
+  OcCpuGenerationWestmere,
+  OcCpuGenerationSandyBridge,
+  OcCpuGenerationIvyBridge,
+  OcCpuGenerationHaswell,
+  OcCpuGenerationBroadwell,
+  OcCpuGenerationSkylake,
+  OcCpuGenerationKabyLake,
+  OcCpuGenerationCoffeeLake,
+  OcCpuGenerationCannonLake,
+  OcCpuGenerationMaxGeneration
+} OC_CPU_GENERATION;
+
 /**
   Scan the processor and fill the cpu info structure with results.
 
@@ -154,12 +170,12 @@ OcCpuModelToAppleFamily (
   );
 
 /**
-  Special Intel Sandy Bridge and Ivy Bridge detection code.
+  Obtain CPU's generation.
 
-  @retval TRUE when running with Sandy Bridge or Ivy Bridge CPU.
-**/
-BOOLEAN
-OcIsSandyOrIvy (
+  @retval CPU's generation (e.g. OcCpuGenerationUnknown).
+ */
+OC_CPU_GENERATION
+OcCpuGetGeneration (
   VOID
   );
 
