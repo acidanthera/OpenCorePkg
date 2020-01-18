@@ -39,6 +39,7 @@
   gAppleEpidCertificateFileGuid
   gAppleEpidGroupPublicKeysFileGuid
   gMePavpProtocolGuid
+  gMeFpfProtocolGuid
 
 [Packages]
   EfiPkg/EfiPkg.dec
