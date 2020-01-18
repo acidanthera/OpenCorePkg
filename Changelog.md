@@ -1,5 +1,11 @@
 OpenCore Changelog
 ==================
+
+#### v0.5.5
+- Fixed CPU bus ratio calculation for Nehalem and Westmere
+- Fixed CPU package calculation on MacPro5,1 and similar
+- Improved OpenCore rerun detection for new versions
+
 #### v0.5.4
 - Added Enter key handling in boot menu for quick proceed
 - Update builtin firmware versions

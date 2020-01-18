@@ -92,7 +92,7 @@ LoadOpenCore (
 }
 
 STATIC
-VOID
+EFI_STATUS
 StartOpenCore (
   IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL   *FileSystem,
   IN EFI_HANDLE                        LoadHandle,
@@ -112,7 +112,7 @@ StartOpenCore (
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "BS: Failed to locate bootstrap protocol - %r\n", Status));
-    return;
+    return EFI_NOT_FOUND;
   }
 
   if (Bootstrap->Revision != OC_BOOTSTRAP_PROTOCOL_REVISION) {
@@ -122,16 +122,18 @@ StartOpenCore (
       Bootstrap->Revision,
       OC_BOOTSTRAP_PROTOCOL_REVISION
       ));
-    return;
+    return EFI_UNSUPPORTED;
   }
 
   AbsPath = AbsoluteDevicePath (LoadHandle, LoadPath);
 
-  Bootstrap->ReRun (Bootstrap, FileSystem, AbsPath);
+  Status = Bootstrap->ReRun (Bootstrap, FileSystem, AbsPath);
 
   if (AbsPath != NULL) {
     FreePool (AbsPath);
   }
+
+  return Status;
 }
 
 EFI_STATUS
@@ -187,7 +189,10 @@ UefiMain (
   //
 
   DEBUG ((DEBUG_INFO, "BS: Trying to start loaded OpenCore image...\n"));
-  StartOpenCore (FileSystem, LoadedImage->DeviceHandle, LoadedImage->FilePath);
+  Status = StartOpenCore (FileSystem, LoadedImage->DeviceHandle, LoadedImage->FilePath);
+  if (EFI_ERROR (Status) && Status != EFI_NOT_FOUND) {
+    return Status;
+  }
 
   DEBUG ((DEBUG_INFO, "BS: Trying to load OpenCore image...\n"));
   Status = LoadOpenCore (FileSystem, ImageHandle, &OcImageHandle);
@@ -196,8 +201,8 @@ UefiMain (
     return EFI_NOT_FOUND;
   }
 
-  StartOpenCore (FileSystem, LoadedImage->DeviceHandle, LoadedImage->FilePath);
-  DEBUG ((DEBUG_WARN, "BS: Failed to start OpenCore image...\n"));
+  Status = StartOpenCore (FileSystem, LoadedImage->DeviceHandle, LoadedImage->FilePath);
+  DEBUG ((DEBUG_WARN, "BS: Failed to start OpenCore image - %r\n", Status));
 
-  return EFI_NOT_FOUND;
+  return Status;
 }
