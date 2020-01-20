@@ -8,9 +8,11 @@
  * as they normally use another non-standard device with "PNP0C02" HID and
  * "PCHRESV" UID.
  *
- * On certain implementations, including APTIO V, PMC MMIO mapping is required
- * for NVRAM access. The reason for this is still quite unclear, as SPI is
- * located in higher addresses:
+ * On certain implementations, including APTIO V, PMC initialisation is
+ * required for NVRAM access. Otherwise it will freeze in SMM mode.
+ * The reason for this is rather unclear. Note, that PMC and SPI are
+ * located in separate memory regions and PCHRESV maps both, yet only
+ * PMC region is used by AppleIntelPCHPMC:
  * 0xFE000000~0xFE00FFFF - PMC MBAR
  * 0xFE010000~0xFE010FFF - SPI BAR0
  * 0xFE020000~0xFE035FFF - SerialIo BAR in ACPI mode
