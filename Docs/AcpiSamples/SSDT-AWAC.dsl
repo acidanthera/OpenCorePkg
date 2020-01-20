@@ -23,4 +23,3 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "AWAC", 0x00000000)
         }
     }
 }
-

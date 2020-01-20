@@ -98,4 +98,3 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "SsdtEC", 0x00001000)
         }
     }
 }
-

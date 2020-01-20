@@ -34,4 +34,3 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "ALS0", 0x00000000)
         }
     }
 }
-

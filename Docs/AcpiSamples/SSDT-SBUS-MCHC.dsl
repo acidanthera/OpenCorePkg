@@ -70,4 +70,3 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "MCHCSBUS", 0x00000000)
         Return (Zero)
     }
 }
-
