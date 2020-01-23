@@ -62,6 +62,7 @@
   OcDebugLogLib|OcSupportPkg/Library/OcDebugLogLib/OcDebugLogLib.inf
   OcDevicePathLib|OcSupportPkg/Library/OcDevicePathLib/OcDevicePathLib.inf
   OcDevicePropertyLib|OcSupportPkg/Library/OcDevicePropertyLib/OcDevicePropertyLib.inf
+  OcDriverConnectionLib|OcSupportPkg/Library/OcDriverConnectionLib/OcDriverConnectionLib.inf
   OcFileLib|OcSupportPkg/Library/OcFileLib/OcFileLib.inf
   OcFirmwarePasswordLib|OcSupportPkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
   OcFirmwareVolumeLib|OcSupportPkg/Library/OcFirmwareVolumeLib/OcFirmwareVolumeLib.inf
@@ -132,6 +133,7 @@
   OcSupportPkg/Library/OcDevicePathLib/OcDevicePathLib.inf
   OcSupportPkg/Library/OcDevicePropertyLib/OcDevicePropertyLib.inf
   OcSupportPkg/Library/OcDeviceTreeLib/OcDeviceTreeLib.inf
+  OcSupportPkg/Library/OcDriverConnectionLib/OcDriverConnectionLib.inf
   OcSupportPkg/Library/OcFileLib/OcFileLib.inf
   OcSupportPkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
   OcSupportPkg/Library/OcFirmwareVolumeLib/OcFirmwareVolumeLib.inf
