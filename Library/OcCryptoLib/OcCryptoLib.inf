@@ -19,7 +19,7 @@
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = OcCryptoLib
   FILE_GUID                      = 56C05E0A-52BB-4B16-B472-6A816E82E5AD
-  MODULE_TYPE                    = BASE
+  MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = OcCryptoLib|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SAL_DRIVER DXE_SMM_DRIVER SMM_CORE UEFI_APPLICATION UEFI_DRIVER
 

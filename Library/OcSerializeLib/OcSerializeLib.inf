@@ -19,7 +19,7 @@
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = OcSerializeLib
   FILE_GUID                      = CABE9035-D604-4504-B338-A5BCEFCDEE95
-  MODULE_TYPE                    = BASE
+  MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = OcSerializeLib|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SAL_DRIVER DXE_SMM_DRIVER SMM_CORE UEFI_APPLICATION UEFI_DRIVER
 

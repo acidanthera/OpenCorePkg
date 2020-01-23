@@ -21,7 +21,7 @@
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = OcFirmwareVolumeLib
   FILE_GUID                      = 93D299BF-BF18-43E5-983A-1AA8694497FF
-  MODULE_TYPE                    = BASE
+  MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = OcFirmwareVolumeLib|DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER DXE_SAL_DRIVER
 
