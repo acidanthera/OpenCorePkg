@@ -1,11 +1,19 @@
 #!/bin/sh
 
 #
-# Copyright © 2019 Rodion Shingarev. All rights reserved.
+# Copyright © 2020 Rodion Shingarev. All rights reserved.
 # Slight optimizations by PMheart and vit9696.
 #
 
-if [ ! -x /usr/bin/dirname ] || [ ! -x /usr/sbin/nvram ] || [ ! -x /usr/bin/grep ] || [ ! -x /bin/chmod ] || [ ! -x /usr/bin/sed ] || [ ! -x /usr/bin/base64 ] || [ ! -x /bin/rm ] || [ ! -x /bin/mkdir ] || [ ! -x /bin/cat ] || [ ! -x /bin/dd ] || [ ! -x /usr/bin/stat ] || [ ! -x /usr/libexec/PlistBuddy ] || [ ! -x /usr/sbin/ioreg ] || [ ! -x /usr/bin/xxd ] || [ ! -x /usr/sbin/diskutil ] || [ ! -x /bin/cp ] || [ ! -x /usr/bin/wc ] || [ ! -x /usr/bin/uuidgen ]; then
+if [ "$1" = "install" ]; then
+  SELFNAME=$(basename "$0")
+  SELFDIR=$(dirname "$0")
+  cd "$SELFDIR" || exit 1
+  sudo defaults write com.apple.loginwindow LogoutHook "$(pwd)/${SELFNAME}"
+  exit 0
+fi
+
+if [ ! -x /usr/bin/dirname ] || [ ! -x /usr/sbin/nvram ] || [ ! -x /usr/bin/grep ] || [ ! -x /bin/chmod ] || [ ! -x /usr/bin/sed ] || [ ! -x /usr/bin/base64 ] || [ ! -x /bin/rm ] || [ ! -x /bin/mkdir ] || [ ! -x /bin/cat ] || [ ! -x /bin/dd ] || [ ! -x /usr/bin/stat ] || [ ! -x /usr/libexec/PlistBuddy ] || [ ! -x /usr/sbin/ioreg ] || [ ! -x /usr/bin/xxd ] || [ ! -x /usr/sbin/diskutil ] || [ ! -x /bin/cp ] || [ ! -x /usr/bin/wc ] || [ ! -x /usr/bin/uuidgen ] || [ ! -x /usr/bin/hexdump ]; then
   abort "Unix environment is broken!"
 fi
 
@@ -45,19 +53,27 @@ cd "${uuidDump}"         || abort "Failed to enter dump directory!"
 
 "${nvram}" -xp > ./nvram1.plist || abort "Failed to dump nvram!"
 
-getKey '8BE4DF61-93CA-11D2-AA0D-00E098032B8C:Boot0080' > ./Boot0080
-if [ ! -z "$(/bin/cat ./Boot0080)" ]; then
-  getKey 'efi-boot-device-data' > efi-boot-device-data || abort "Failed to retrieve efi-boot-device-data!"
+getKey "8BE4DF61-93CA-11D2-AA0D-00E098032B8C:Boot0080" > Boot0080
+getKey "efi-boot-device-data" > efi-boot-device-data
+if [ ! -z "$(/bin/cat "Boot0080" | /usr/bin/hexdump)" ] && [ ! -z "$(/bin/cat "efi-boot-device-data" | /usr/bin/hexdump )" ]; then
   /bin/dd seek=24 if=efi-boot-device-data of=Boot0080 bs=1 count=$(/usr/bin/stat -f%z efi-boot-device-data)    || abort "Failed to fill Boot0080 with efi-boot-device-data!"
   /usr/libexec/PlistBuddy -c "Import Add:8BE4DF61-93CA-11D2-AA0D-00E098032B8C:Boot0080 Boot0080" ./nvram.plist || abort "Failed to import Boot0080!"
 fi
 
-for key in BootOrder BootCurrent BootNext Boot008{1..3}; do
+for key in BootOrder BootNext Boot008{1..3}; do
   getKey "8BE4DF61-93CA-11D2-AA0D-00E098032B8C:${key}" > "${key}"
-  if [ ! -z "$(/bin/cat "${key}")" ]; then
+  if [ ! -z "$(/bin/cat "${key}" | /usr/bin/hexdump)" ]; then
     /usr/libexec/PlistBuddy -c "Import Add:8BE4DF61-93CA-11D2-AA0D-00E098032B8C:${key} ${key}" ./nvram.plist || abort "Failed to import ${key} from 8BE4DF61-93CA-11D2-AA0D-00E098032B8C!"
   fi
 done
+
+# Optional for security reasons: Wi-Fi settings for Install OS X and Recovery
+# for key in current-network preferred-count; do
+#   getKey "36C28AB5-6566-4C50-9EBD-CBB920F83843:${key}" > "${key}"
+#   if [ ! -z "$(/bin/cat "${key}" | /usr/bin/hexdump)" ]; then
+#     /usr/libexec/PlistBuddy -c "Import Add:36C28AB5-6566-4C50-9EBD-CBB920F83843:${key} ${key}" ./nvram.plist || abort "Failed to import ${key} from 36C28AB5-6566-4C50-9EBD-CBB920F83843!"
+#   fi
+# done
 
 /usr/libexec/PlistBuddy -c "Add Version integer 1"                                       ./nvram.plist || abort "Failed to add Version!"
 /usr/libexec/PlistBuddy -c "Add Add:7C436110-AB2A-4BBB-A880-FE41995C9F82 dict"           ./nvram.plist || abort "Failed to add dict 7C436110-AB2A-4BBB-A880-FE41995C9F82"
