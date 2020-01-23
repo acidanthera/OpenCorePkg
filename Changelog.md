@@ -7,6 +7,8 @@ OpenCore Changelog
 - Improved OpenCore rerun detection for new versions
 - Fixed loading picker on boot failure when it is hidden
 - Added PMC ACPI sample for 300-series chipsets
+- Improved driver connection performance on APTIO IV
+- Fixed boot option saving in LogoutHook.command
 
 #### v0.5.4
 - Added Enter key handling in boot menu for quick proceed

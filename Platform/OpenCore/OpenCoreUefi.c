@@ -31,6 +31,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcCpuLib.h>
 #include <Library/OcDataHubLib.h>
 #include <Library/OcDevicePropertyLib.h>
+#include <Library/OcDriverConnectionLib.h>
 #include <Library/OcFirmwareVolumeLib.h>
 #include <Library/OcHashServicesLib.h>
 #include <Library/OcMiscLib.h>
@@ -50,8 +51,9 @@ STATIC EFI_EVENT mOcExitBootServicesEvent;
 STATIC
 VOID
 OcLoadDrivers (
-  IN OC_STORAGE_CONTEXT  *Storage,
-  IN OC_GLOBAL_CONFIG    *Config
+  IN  OC_STORAGE_CONTEXT  *Storage,
+  IN  OC_GLOBAL_CONFIG    *Config,
+  OUT EFI_HANDLE          **DriversToConnect  OPTIONAL
   )
 {
   EFI_STATUS  Status;
@@ -60,6 +62,13 @@ OcLoadDrivers (
   UINT32      Index;
   CHAR16      DriverPath[64];
   EFI_HANDLE  ImageHandle;
+  EFI_HANDLE  *DriversToConnectIterator;
+  VOID        *DriverBinding;
+
+  DriversToConnectIterator = NULL;
+  if (DriversToConnect != NULL) {
+    *DriversToConnect = NULL;
+  }
 
   DEBUG ((DEBUG_INFO, "OC: Got %u drivers\n", Config->Uefi.Drivers.Count));
 
@@ -140,39 +149,54 @@ OcLoadDrivers (
         OC_BLOB_GET (Config->Uefi.Drivers.Values[Index]),
         Index
         ));
+
+      if (DriversToConnect != NULL) {
+        Status = gBS->HandleProtocol (
+          ImageHandle,
+          &gEfiDriverBindingProtocolGuid,
+          (VOID **) &DriverBinding
+          );
+
+        if (!EFI_ERROR (Status)) {
+          if (*DriversToConnect == NULL) {
+            //
+            // Allocate enough entries for the drivers to connect.
+            //
+            *DriversToConnect = AllocatePool (
+              (Config->Uefi.Drivers.Count + 1 - Index) * sizeof (**DriversToConnect)
+              );
+
+            if (*DriversToConnect != NULL) {
+              DriversToConnectIterator = *DriversToConnect;
+            } else {
+              DEBUG ((DEBUG_ERROR, "OC: Failed to allocate memory for drivers to connect\n"));
+              FreePool (Driver);
+              return;
+            }
+          }
+
+          *DriversToConnectIterator = ImageHandle;
+          ++DriversToConnectIterator;
+
+          DEBUG ((
+            DEBUG_INFO,
+            "OC: Driver %a at %u needs connection.\n",
+            OC_BLOB_GET (Config->Uefi.Drivers.Values[Index]),
+            Index
+            ));
+        }
+      }
     }
 
     FreePool (Driver);
   }
-}
 
-STATIC
-VOID
-OcConnectDrivers (
-  VOID
-  )
-{
-  EFI_STATUS  Status;
-  UINTN       HandleCount;
-  EFI_HANDLE  *HandleBuffer;
-  UINTN       Index;
-
-  Status = gBS->LocateHandleBuffer (
-                  ByProtocol,
-                  &gEfiDevicePathProtocolGuid,
-                  NULL,
-                  &HandleCount,
-                  &HandleBuffer
-                 );
-  if (EFI_ERROR (Status)) {
-    return;
+  //
+  // Driver connection list should be null-terminated.
+  //
+  if (*DriversToConnectIterator != NULL) {
+    *DriversToConnectIterator = NULL;
   }
-
-  for (Index = 0; Index < HandleCount; ++Index) {
-    gBS->ConnectController (HandleBuffer[Index], NULL, NULL, TRUE);
-  }
-
-  FreePool (HandleBuffer);
 }
 
 STATIC
@@ -482,6 +506,7 @@ OcLoadUefiSupport (
   )
 {
   EFI_STATUS  Status;
+  EFI_HANDLE  *DriversToConnect;
   UINTN       Index;
   UINTN       Index2;
   UINT16      *BootOrder;
@@ -595,11 +620,16 @@ OcLoadUefiSupport (
 
   OcMiscUefiQuirksLoaded (Config);
 
-  OcLoadDrivers (Storage, Config);
-
-  DEBUG ((DEBUG_INFO, "OC: Connecting drivers...\n"));
-
   if (Config->Uefi.ConnectDrivers) {
+    OcLoadDrivers (Storage, Config, &DriversToConnect);
+    DEBUG ((DEBUG_INFO, "OC: Connecting drivers...\n"));
+    OcRegisterDriversToHighestPriority (DriversToConnect);
+    //
+    // DriversToConnect is not freed as it is owned by OcRegisterDriversToHighestPriority.
+    //
     OcConnectDrivers ();
+    DEBUG ((DEBUG_INFO, "OC: Connecting drivers done...\n"));
+  } else {
+    OcLoadDrivers (Storage, Config, NULL);
   }
 }
