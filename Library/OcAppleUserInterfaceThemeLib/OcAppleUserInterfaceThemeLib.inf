@@ -19,7 +19,7 @@
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = OcAppleUserInterfaceThemeLib
   FILE_GUID                      = 9EC4BF49-61CB-4BB1-9D1A-7524800393FC
-  MODULE_TYPE                    = DXE_DRIVER
+  MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = OcAppleUserInterfaceThemeLib|DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER DXE_SAL_DRIVER
 
