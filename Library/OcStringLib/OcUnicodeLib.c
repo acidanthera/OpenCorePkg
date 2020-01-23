@@ -19,35 +19,6 @@
 #include <Library/OcStringLib.h>
 #include <Library/PcdLib.h>
 
-/**
-  Performs a case insensitive comparison of two Null-terminated Unicode strings,
-  and returns the difference between the first mismatched Unicode characters.
-
-  This function performs a case insensitive comparison of the Null-terminated
-  Unicode string FirstString to the Null-terminated Unicode string
-  SecondString. If FirstString is identical to SecondString, then 0 is
-  returned. Otherwise, the value returned is the first mismatched upper case
-  Unicode character in SecondString subtracted from the first mismatched upper
-  case Unicode character in FirstString.
-
-  If FirstString is NULL, then ASSERT().
-  If SecondString is NULL, then ASSERT().
-  If PcdMaximumUnicodeStringLength is not zero and FirstString contains more
-  than PcdMaximumUnicodeStringLength Unicode characters, not including the
-  Null-terminator, then ASSERT().
-  If PcdMaximumUnicodeStringLength is not zero and SecondString contains more
-  than PcdMaximumUnicodeStringLength Unicode characters, not including the
-  Null-terminator, then ASSERT().
-
-  @param  FirstString   A pointer to a Null-terminated Unicode string.
-  @param  SecondString  A pointer to a Null-terminated Unicode string.
-
-  @retval ==0    FirstString is identical to SecondString using case
-                 insensitiv comparisons.
-  @retval !=0    FirstString is not identical to SecondString using case
-                 insensitive comparisons.
-
-**/
 INTN
 EFIAPI
 StriCmp (
@@ -76,44 +47,6 @@ StriCmp (
   return UpperFirstString - UpperSecondString;
 }
 
-/**
-  Compares up to a specified length the contents of two Null-terminated Unicode
-  strings using case insensitive comparisons, and returns the difference
-  between the first mismatched Unicode characters.
-
-  This function compares the Null-terminated Unicode string FirstString to the
-  Null-terminated Unicode string SecondString using case insensitive
-  comparisons.  At most, Length Unicode characters will be compared. If Length
-  is 0, then 0 is returned. If FirstString is identical to SecondString, then 0
-  is returned. Otherwise, the value returned is the first mismatched upper case
-  Unicode character in SecondString subtracted from the first mismatched upper
-  case Unicode character in FirstString.
-
-  If Length > 0 and FirstString is NULL, then ASSERT().
-  If Length > 0 and FirstString is not aligned on a 16-bit boundary, then
-  ASSERT().
-  If Length > 0 and SecondString is NULL, then ASSERT().
-  If Length > 0 and SecondString is not aligned on a 16-bit boundary, then
-  ASSERT().
-  If PcdMaximumUnicodeStringLength is not zero, and Length is greater than
-  PcdMaximumUnicodeStringLength, then ASSERT().
-  If PcdMaximumUnicodeStringLength is not zero, and FirstString contains more
-  than PcdMaximumUnicodeStringLength Unicode characters, not including the
-  Null-terminator, then ASSERT().
-  If PcdMaximumUnicodeStringLength is not zero, and SecondString contains more
-  than PcdMaximumUnicodeStringLength Unicode characters, not including the
-  Null-terminator, then ASSERT().
-
-  @param  FirstString   A pointer to a Null-terminated Unicode string.
-  @param  SecondString  A pointer to a Null-terminated Unicode string.
-  @param  Length        The maximum number of Unicode characters to compare.
-
-  @retval ==0    FirstString is identical to SecondString using case
-                 insensitive comparisons.
-  @retval others FirstString is not identical to SecondString using case
-                 insensitive comparisons.
-
-**/
 INTN
 EFIAPI
 StrniCmp (
@@ -154,6 +87,51 @@ StrniCmp (
   }
 
   return UpperFirstString - UpperSecondString;
+}
+
+CHAR16 *
+EFIAPI
+StriStr (
+  IN      CONST CHAR16              *String,
+  IN      CONST CHAR16              *SearchString
+  )
+{
+  CONST CHAR16 *FirstMatch;
+  CONST CHAR16 *SearchStringTmp;
+
+  //
+  // ASSERT both strings are less long than PcdMaximumUnicodeStringLength.
+  // Length tests are performed inside StrLen().
+  //
+  ASSERT (StrSize (String) != 0);
+  ASSERT (StrSize (SearchString) != 0);
+
+  if (*SearchString == L'\0') {
+    return (CHAR16 *) String;
+  }
+
+  while (*String != L'\0') {
+    SearchStringTmp = SearchString;
+    FirstMatch = String;
+
+    while ((CharToUpper (*String) == CharToUpper (*SearchStringTmp))
+            && (*String != L'\0')) {
+      String++;
+      SearchStringTmp++;
+    }
+
+    if (*SearchStringTmp == L'\0') {
+      return (CHAR16 *) FirstMatch;
+    }
+
+    if (*String == L'\0') {
+      return NULL;
+    }
+
+    String = FirstMatch + 1;
+  }
+
+  return NULL;
 }
 
 VOID

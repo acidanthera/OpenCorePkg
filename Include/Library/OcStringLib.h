@@ -173,6 +173,38 @@ StrniCmp (
   );
 
 /**
+  Returns the first occurrence of a Null-terminated Unicode sub-string
+  in a Null-terminated Unicode string through a case insensitive comparison.
+
+  This function scans the contents of the Null-terminated Unicode string
+  specified by String and returns the first occurrence of SearchString.
+  If SearchString is not found in String, then NULL is returned.  If
+  the length of SearchString is zero, then String is returned.
+
+  If String is NULL, then ASSERT().
+  If String is not aligned on a 16-bit boundary, then ASSERT().
+  If SearchString is NULL, then ASSERT().
+  If SearchString is not aligned on a 16-bit boundary, then ASSERT().
+
+  If PcdMaximumUnicodeStringLength is not zero, and SearchString
+  or String contains more than PcdMaximumUnicodeStringLength Unicode
+  characters, not including the Null-terminator, then ASSERT().
+
+  @param  String          The pointer to a Null-terminated Unicode string.
+  @param  SearchString    The pointer to a Null-terminated Unicode string to search for.
+
+  @retval NULL            If the SearchString does not appear in String.
+  @return others          If there is a match.
+
+**/
+CHAR16 *
+EFIAPI
+StriStr (
+  IN      CONST CHAR16              *String,
+  IN      CONST CHAR16              *SearchString
+  );
+
+/**
   Convert path with mixed slashes to UEFI slashes (\\).
 
   @param[in,out]  String      Path.
