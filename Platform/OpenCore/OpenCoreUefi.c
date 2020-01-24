@@ -623,10 +623,12 @@ OcLoadUefiSupport (
   if (Config->Uefi.ConnectDrivers) {
     OcLoadDrivers (Storage, Config, &DriversToConnect);
     DEBUG ((DEBUG_INFO, "OC: Connecting drivers...\n"));
-    OcRegisterDriversToHighestPriority (DriversToConnect);
-    //
-    // DriversToConnect is not freed as it is owned by OcRegisterDriversToHighestPriority.
-    //
+    if (DriversToConnect != NULL) {
+      OcRegisterDriversToHighestPriority (DriversToConnect);
+      //
+      // DriversToConnect is not freed as it is owned by OcRegisterDriversToHighestPriority.
+      //
+    }
     OcConnectDrivers ();
     DEBUG ((DEBUG_INFO, "OC: Connecting drivers done...\n"));
   } else {
