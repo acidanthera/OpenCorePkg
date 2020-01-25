@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Jan 22 16:59:51 2020
-%DIF ADD ../Configuration.tex        Wed Jan 22 16:59:51 2020
+%DIF DEL PreviousConfiguration.tex   Fri Jan 17 12:56:17 2020
+%DIF ADD ../Configuration.tex        Sat Jan 25 12:18:44 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2421,7 +2421,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
     \item \texttt{0x01} --- Expose printable booter path as an UEFI variable.
     \item \texttt{0x02} --- Expose OpenCore version as an UEFI variable.
     \item \texttt{0x04} --- Expose OpenCore version in boot picker menu title.
-  \end{itemize}
+    \DIFaddbegin \item \texttt{\DIFadd{0x08}} \DIFadd{--- Expose OEM information as a set of UEFI variables.
+  }\DIFaddend \end{itemize}
 
   Exposed booter path points to OpenCore.efi or its booter depending on the load order.
   To obtain booter path use the following command in macOS:
@@ -2440,7 +2441,16 @@ u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 \end{lstlisting}
 
-\item
+  \DIFaddbegin \DIFadd{To obtain OEM information use the following commands in macOS:
+}\DIFmodbegin
+\begin{lstlisting}[label=nvramver, style=ocbash,alsolanguage=DIFcode]
+%DIF > nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-product # SMBIOS Type1 ProductName
+%DIF > nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-vendor  # SMBIOS Type2 Manufacturer
+%DIF > nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductName
+\end{lstlisting}
+\DIFmodend
+
+\DIFaddend \item
   \texttt{HaltLevel}\\
   \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
   \textbf{Failsafe}: \texttt{0x80000000} (\texttt{DEBUG\_ERROR})\\

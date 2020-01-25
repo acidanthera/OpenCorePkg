@@ -9,6 +9,7 @@ OpenCore Changelog
 - Added PMC ACPI sample for 300-series chipsets
 - Improved driver connection performance on APTIO IV
 - Fixed boot option saving in LogoutHook.command
+- Added support for OEM information in `ExposeSensitiveData`
 
 #### v0.5.4
 - Added Enter key handling in boot menu for quick proceed

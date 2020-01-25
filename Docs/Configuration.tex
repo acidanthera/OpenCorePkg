@@ -2361,6 +2361,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
     \item \texttt{0x01} --- Expose printable booter path as an UEFI variable.
     \item \texttt{0x02} --- Expose OpenCore version as an UEFI variable.
     \item \texttt{0x04} --- Expose OpenCore version in boot picker menu title.
+    \item \texttt{0x08} --- Expose OEM information as a set of UEFI variables.
   \end{itemize}
 
   Exposed booter path points to OpenCore.efi or its booter depending on the load order.
@@ -2378,6 +2379,13 @@ u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\
   To obtain OpenCore version use the following command in macOS:
 \begin{lstlisting}[label=nvramver, style=ocbash]
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
+\end{lstlisting}
+
+  To obtain OEM information use the following commands in macOS:
+\begin{lstlisting}[label=nvramver, style=ocbash]
+nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-product # SMBIOS Type1 ProductName
+nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-vendor  # SMBIOS Type2 Manufacturer
+nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductName
 \end{lstlisting}
 
 \item

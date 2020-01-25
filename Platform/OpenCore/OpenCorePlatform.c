@@ -165,10 +165,11 @@ OcPlatformUpdateDataHub (
 STATIC
 VOID
 OcPlatformUpdateSmbios (
-  IN OC_GLOBAL_CONFIG       *Config,
-  IN OC_CPU_INFO            *CpuInfo,
-  IN MAC_INFO_DATA          *MacInfo,
-  IN OC_SMBIOS_UPDATE_MODE  UpdateMode
+  IN     OC_GLOBAL_CONFIG       *Config,
+  IN     OC_CPU_INFO            *CpuInfo,
+  IN     MAC_INFO_DATA          *MacInfo,
+  IN OUT OC_SMBIOS_TABLE        *SmbiosTable,
+  IN     OC_SMBIOS_UPDATE_MODE  UpdateMode
   )
 {
   EFI_STATUS       Status;
@@ -355,12 +356,12 @@ OcPlatformUpdateSmbios (
     Data.PlatformFeature      = MacInfo->Smbios.PlatformFeature;
 
     if (MacInfo->DataHub.SmcRevision != NULL) {
-      SmbiosGetSmcVersion (MacInfo->DataHub.SmcRevision, SmcVersion);
+      OcSmbiosGetSmcVersion (MacInfo->DataHub.SmcRevision, SmcVersion);
       Data.SmcVersion           = SmcVersion;
     }
   }
 
-  Status = CreateSmbios (&Data, UpdateMode, CpuInfo);
+  Status = OcSmbiosCreate (SmbiosTable, &Data, UpdateMode, CpuInfo);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OC: Failed to update SMBIOS - %r\n", Status));
   }
@@ -553,6 +554,9 @@ OcLoadPlatformSupport (
   OC_SMBIOS_UPDATE_MODE  SmbiosUpdateMode;
   MAC_INFO_DATA          InfoData;
   MAC_INFO_DATA          *UsedMacInfo;
+  EFI_STATUS             Status;
+  OC_SMBIOS_TABLE        SmbiosTable;
+  BOOLEAN                ExposeOem;
 
   if (Config->PlatformInfo.Automatic) {
     GetMacInfo (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemProductName), &InfoData);
@@ -565,23 +569,38 @@ OcLoadPlatformSupport (
     OcPlatformUpdateDataHub (Config, CpuInfo, UsedMacInfo);
   }
 
-  if (Config->PlatformInfo.UpdateSmbios) {
-    SmbiosUpdateStr  = OC_BLOB_GET (&Config->PlatformInfo.UpdateSmbiosMode);
+  ExposeOem = (Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_OEM_INFO) != 0;
 
-    if (AsciiStrCmp (SmbiosUpdateStr, "TryOverwrite") == 0) {
-      SmbiosUpdateMode = OcSmbiosUpdateTryOverwrite;
-    } else if (AsciiStrCmp (SmbiosUpdateStr, "Create") == 0) {
-      SmbiosUpdateMode = OcSmbiosUpdateCreate;
-    } else if (AsciiStrCmp (SmbiosUpdateStr, "Overwrite") == 0) {
-      SmbiosUpdateMode = OcSmbiosUpdateOverwrite;
-    } else if (AsciiStrCmp (SmbiosUpdateStr, "Custom") == 0) {
-      SmbiosUpdateMode = OcSmbiosUpdateCustom;
+  if (ExposeOem || Config->PlatformInfo.UpdateSmbios) {
+    Status = OcSmbiosTablePrepare (&SmbiosTable);
+    if (!EFI_ERROR (Status)) {
+      if (ExposeOem) {
+        OcSmbiosExposeOemInfo (&SmbiosTable);
+      }
+
+      if (Config->PlatformInfo.UpdateSmbios) {
+        SmbiosUpdateStr  = OC_BLOB_GET (&Config->PlatformInfo.UpdateSmbiosMode);
+
+        if (AsciiStrCmp (SmbiosUpdateStr, "TryOverwrite") == 0) {
+          SmbiosUpdateMode = OcSmbiosUpdateTryOverwrite;
+        } else if (AsciiStrCmp (SmbiosUpdateStr, "Create") == 0) {
+          SmbiosUpdateMode = OcSmbiosUpdateCreate;
+        } else if (AsciiStrCmp (SmbiosUpdateStr, "Overwrite") == 0) {
+          SmbiosUpdateMode = OcSmbiosUpdateOverwrite;
+        } else if (AsciiStrCmp (SmbiosUpdateStr, "Custom") == 0) {
+          SmbiosUpdateMode = OcSmbiosUpdateCustom;
+        } else {
+          DEBUG ((DEBUG_WARN, "OC: Invalid SMBIOS update mode %a\n", SmbiosUpdateStr));
+          SmbiosUpdateMode = OcSmbiosUpdateCreate;
+        }
+
+        OcPlatformUpdateSmbios (Config, CpuInfo, UsedMacInfo, &SmbiosTable, SmbiosUpdateMode);
+      }
+
+      OcSmbiosTableFree (&SmbiosTable);
     } else {
-      DEBUG ((DEBUG_WARN, "OC: Invalid SMBIOS update mode %a\n", SmbiosUpdateStr));
-      SmbiosUpdateMode = OcSmbiosUpdateCreate;
+      DEBUG ((DEBUG_WARN, "OC: Unable to obtain SMBIOS - %r\n", Status));
     }
-
-    OcPlatformUpdateSmbios (Config, CpuInfo, UsedMacInfo, SmbiosUpdateMode);
   }
 
   if (Config->PlatformInfo.UpdateNvram) {
