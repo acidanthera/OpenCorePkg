@@ -278,6 +278,18 @@ OcFixAppleBootDevicePath (
           return -1;
         }
 
+        case MSG_NVME_NAMESPACE_DP:
+        {
+          //
+          // Apple MacPro5,1 includes NVMe driver, however, it contains a typo in MSG_SASEX_DP.
+          // Instead of 0x16 aka 22 (SasEx) it uses 0x22 aka 34 (Unspecified).
+          // Here we replace it with the "right" value.
+          // Reference: https://forums.macrumors.com/posts/28169441.
+          //
+          InvalidNode.NvmeNamespace->Header.SubType = 0x22;
+          continue;
+        }
+
         default:
         {
           break;
@@ -292,6 +304,23 @@ OcFixAppleBootDevicePath (
         case ACPI_DP:
         {
           if (EISA_ID_TO_NUM (InvalidNode.Acpi->HID) == 0x0A03) {
+            //
+            // In some firmwares UIDs for PciRoot do not match between ACPI tables and UEFI
+            // UEFI Device Paths. The former contain 0x00, 0x40, 0x80, 0xC0 values, while
+            // the latter have ascending numbers.
+            // Reference: https://github.com/acidanthera/bugtracker/issues/664.
+            //
+            if (InvalidNode.Acpi->UID == 0x40) {
+              InvalidNode.Acpi->UID = 1;
+              continue;
+            } else if (InvalidNode.Acpi->UID == 0x80) {
+              InvalidNode.Acpi->UID = 2;
+              continue;
+            } else if (InvalidNode.Acpi->UID == 0xC0) {
+              InvalidNode.Acpi->UID = 3;
+              continue;
+            }
+
             InvalidNode.Acpi->HID = BitFieldWrite32 (
                                       InvalidNode.Acpi->HID,
                                       16,
