@@ -134,7 +134,10 @@ ControlledClearScreen (
 {
   EFI_STATUS                            Status;
   EFI_GRAPHICS_OUTPUT_PROTOCOL          *GraphicsOutput;
-  UINT32                                Mode;
+  UINT32                                Width;
+  UINT32                                Height;
+  UINTN                                 SizeOfInfo;
+  EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  *Info;
 
   Status = gBS->HandleProtocol (
     gST->ConsoleOutHandle,
@@ -143,23 +146,61 @@ ControlledClearScreen (
     );
 
   if (!EFI_ERROR (Status)) {
-    Mode = GraphicsOutput->Mode->Mode;
+    Status = GraphicsOutput->QueryMode (
+      GraphicsOutput,
+      GraphicsOutput->Mode->Mode,
+      &SizeOfInfo,
+      &Info
+      );
+    if (!EFI_ERROR (Status)) {
+      Width  = Info->HorizontalResolution;
+      Height = Info->VerticalResolution;
+      FreePool (Info);
+    } else {
+      GraphicsOutput = NULL;
+    }
   } else {
     GraphicsOutput = NULL;
   }
 
   //
   // On APTIO V with large resolution (e.g. 2K or 4K) ClearScreen
-  // invocation resets resolution to 1024x768. We restore it here.
-  // This is probably the safest approach. Other ways include:
-  // - Change SetMode function to some No-op in GOP.
-  // - Cleanup the screen manually.
-  // None of these are tested as I am tired and do not want to risk.
+  // invocation resets resolution to 1024x768. To avoid the glitches
+  // we clear the screen manually, doing with other methods results
+  // in screen flashes and other problems.
   //
-  Status = mOriginalClearScreen (This);
 
   if (GraphicsOutput != NULL) {
-    GraphicsOutput->SetMode (GraphicsOutput, Mode);
+    STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL mGraphicsEfiColors[8] = {
+      //
+      // B    G    R   reserved
+      //
+      {0x00, 0x00, 0x00, 0x00},  // BLACK
+      {0x98, 0x00, 0x00, 0x00},  // LIGHTBLUE
+      {0x00, 0x98, 0x00, 0x00},  // LIGHGREEN
+      {0x98, 0x98, 0x00, 0x00},  // LIGHCYAN
+      {0x00, 0x00, 0x98, 0x00},  // LIGHRED
+      {0x98, 0x00, 0x98, 0x00},  // MAGENTA
+      {0x00, 0x98, 0x98, 0x00},  // BROWN
+      {0x98, 0x98, 0x98, 0x00},  // LIGHTGRAY
+    };
+
+    Status = GraphicsOutput->Blt (
+      GraphicsOutput,
+      &mGraphicsEfiColors[BitFieldRead32 ((UINT32) This->Mode->Attribute, 4, 6)],
+      EfiBltVideoFill,
+      0,
+      0,
+      0,
+      0,
+      Width,
+      Height,
+      0
+      );
+
+    This->SetCursorPosition (This, 0, 0);
+  } else {
+    Status = mOriginalClearScreen (This);
   }
 
   return Status;
