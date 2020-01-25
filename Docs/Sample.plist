@@ -717,14 +717,14 @@
 		<true/>
 		<key>Generic</key>
 		<dict>
+			<key>AdviseWindows</key>
+			<false/>
 			<key>MLB</key>
 			<string>M000000000001</string>
 			<key>ROM</key>
 			<data>ESIzAAAA</data>
 			<key>SpoofVendor</key>
 			<true/>
-			<key>SupportsCsm</key>
-			<false/>
 			<key>SystemProductName</key>
 			<string>MacPro5,1</string>
 			<key>SystemSerialNumber</key>

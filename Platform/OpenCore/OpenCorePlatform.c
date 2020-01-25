@@ -347,9 +347,9 @@ OcPlatformUpdateSmbios (
     // https://github.com/acidanthera/bugtracker/issues/327
     // https://sourceforge.net/p/cloverefiboot/tickets/435
     //
-    if (Config->PlatformInfo.Generic.SupportsCsm) {
-      Data.FirmwareFeatures     |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE;
-      Data.FirmwareFeaturesMask |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE;
+    if (Config->PlatformInfo.Generic.AdviseWindows) {
+      Data.FirmwareFeatures     |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT;
+      Data.FirmwareFeaturesMask |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT;
     }
 
     Data.ProcessorType        = NULL;

@@ -3072,15 +3072,22 @@ be used. Version with macOS specific enhancements can be downloaded from
   in \texttt{SystemManufacturer} description. However, certain firmwares
   may not provide valid values otherwise, which could break some software.
 \item
-  \texttt{SupportsCsm}\\
+  \texttt{AdviseWindows}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Forces CSM support in \texttt{FirmwareFeatures}.
+  \textbf{Description}: Forces Windows support in \texttt{FirmwareFeatures}.
 
-  Without this bit it is not possible to reboot to Windows installed on
-  a drive with EFI partition being not the first partition on the disk.
-  
-  \emph{Note}: This was enabled unconditionally in older OpenCore versions.
+  Added bits to \texttt{FirmwareFeatures}:
+
+  \begin{itemize}
+    \item \texttt{FW\_FEATURE\_SUPPORTS\_CSM\_LEGACY\_MODE} (\texttt{0x1})
+    - Without this bit it is not possible to reboot to Windows installed on
+      a drive with EFI partition being not the first partition on the disk.
+    \item \texttt{FW\_FEATURE\_SUPPORTS\_UEFI\_WINDOWS\_BOOT} (\texttt{0x20000000})
+    - Without this bit it is not possible to reboot to Windows installed on
+      a drive with EFI partition being the first partition on the disk.
+  \end{itemize}
+
 \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\

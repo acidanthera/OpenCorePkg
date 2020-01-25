@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Jan 17 12:56:17 2020
-%DIF ADD ../Configuration.tex        Sat Jan 25 12:18:44 2020
+%DIF ADD ../Configuration.tex        Sat Jan 25 14:22:59 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3134,16 +3134,27 @@ be used. Version with macOS specific enhancements can be downloaded from
   in \texttt{SystemManufacturer} description. However, certain firmwares
   may not provide valid values otherwise, which could break some software.
 \item
-  \texttt{SupportsCsm}\\
+  \texttt{\DIFdelbegin \DIFdel{SupportsCsm}\DIFdelend \DIFaddbegin \DIFadd{AdviseWindows}\DIFaddend }\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Forces CSM support in \texttt{FirmwareFeatures}.
+  \textbf{Description}: Forces \DIFdelbegin \DIFdel{CSM }\DIFdelend \DIFaddbegin \DIFadd{Windows }\DIFaddend support in \texttt{FirmwareFeatures}.
 
-  Without this bit it is not possible to reboot to Windows installed on
-  a drive with EFI partition being not the first partition on the disk.
+  \DIFaddbegin \DIFadd{Added bits to }\texttt{\DIFadd{FirmwareFeatures}}\DIFadd{:
+}
 
-  \emph{Note}: This was enabled unconditionally in older OpenCore versions.
-\item
+  \begin{itemize}
+    \item \texttt{\DIFadd{FW\_FEATURE\_SUPPORTS\_CSM\_LEGACY\_MODE}} \DIFadd{(}\texttt{\DIFadd{0x1}}\DIFadd{)
+    - }\DIFaddend Without this bit it is not possible to reboot to Windows installed on
+      a drive with EFI partition being not the first partition on the disk.
+    \DIFaddbegin \item \texttt{\DIFadd{FW\_FEATURE\_SUPPORTS\_UEFI\_WINDOWS\_BOOT}} \DIFadd{(}\texttt{\DIFadd{0x20000000}}\DIFadd{)
+    - Without this bit it is not possible to reboot to Windows installed on
+      a drive with EFI partition being the first partition on the disk.
+  }\end{itemize}
+\DIFaddend 
+
+\DIFdelbegin \emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: This was enabled unconditionally in older OpenCore versions.
+  }\DIFdelend \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{MacPro6,1}\\
