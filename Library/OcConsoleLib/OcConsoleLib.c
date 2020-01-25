@@ -837,7 +837,7 @@ SetConsoleMode (
   UINTN                                 Rows;
   BOOLEAN                               SetMax;
 
-  SetMax       = Width == 0 && Height == 0;
+  SetMax = Width == 0 && Height == 0;
 
   DEBUG ((
     DEBUG_INFO,

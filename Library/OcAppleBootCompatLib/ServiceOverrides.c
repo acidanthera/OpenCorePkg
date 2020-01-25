@@ -266,9 +266,9 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcStartImage (
-  IN     EFI_HANDLE  ImageHandle,
-     OUT UINTN       *ExitDataSize,
-     OUT CHAR16      **ExitData  OPTIONAL
+  IN  EFI_HANDLE  ImageHandle,
+  OUT UINTN       *ExitDataSize,
+  OUT CHAR16      **ExitData  OPTIONAL
   )
 {
   EFI_STATUS                  Status;

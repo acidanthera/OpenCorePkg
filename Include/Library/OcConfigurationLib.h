@@ -373,7 +373,7 @@
   _(OC_STRING                   , Mlb                ,     , OC_STRING_CONSTR ("OPENCORE_MLB_SN11", _, __), OC_DESTR (OC_STRING) ) \
   _(UINT8                       , Rom                , [6] , {0}                                          , () )                   \
   _(BOOLEAN                     , SpoofVendor        ,     , FALSE                                        , () )                   \
-  _(BOOLEAN                     , SupportsCsm        ,     , FALSE                                        , () )
+  _(BOOLEAN                     , AdviseWindows      ,     , FALSE                                        , () )
   OC_DECLARE (OC_PLATFORM_GENERIC_CONFIG)
 
 #define OC_PLATFORM_DATA_HUB_CONFIG_FIELDS(_, __) \

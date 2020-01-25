@@ -36,7 +36,7 @@ OcLoadPickerHotKeys (
 
   UINTN                              NumKeys;
   APPLE_MODIFIER_MAP                 Modifiers;
-  APPLE_KEY_CODE                     Keys[8];
+  APPLE_KEY_CODE                     Keys[OC_KEY_MAP_DEFAULT_SIZE];
 
   BOOLEAN                            HasCommand;
   BOOLEAN                            HasEscape;
