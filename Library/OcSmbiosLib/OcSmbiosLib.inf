@@ -44,6 +44,7 @@
   gEfiSmbiosTableGuid
   gEfiSmbios3TableGuid
   gOcCustomSmbiosTableGuid
+  gOcVendorVariableGuid
 
 [Protocols]
   gEfiPciRootBridgeIoProtocolGuid

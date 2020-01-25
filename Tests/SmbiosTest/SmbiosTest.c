@@ -84,10 +84,17 @@ TestSmbios (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  OC_CPU_INFO  CpuInfo;
+  EFI_STATUS       Status;
+  OC_CPU_INFO      CpuInfo;
+  OC_SMBIOS_TABLE  SmbiosTable;
   OcCpuScanProcessor (&CpuInfo);
-  CreateSmbios (&Data, OcSmbiosUpdateCreate, &CpuInfo);
-  return EFI_SUCCESS;
+  Status = OcSmbiosTablePrepare (&SmbiosTable);
+  if (!EFI_ERROR (Status)) {
+    OcSmbiosCreate (&SmbiosTable, &Data, OcSmbiosUpdateCreate, &CpuInfo);
+    OcSmbiosTableFree (&SmbiosTable);
+  }
+
+  return Status;
 }
 
 EFI_STATUS

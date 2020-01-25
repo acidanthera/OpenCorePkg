@@ -20,6 +20,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_SMBIOS_LIB_H
 
 #include <Library/OcCpuLib.h>
+#include <IndustryStandard/AppleSmBios.h>
 
 //
 // This GUID is used for storing SMBIOS data when the firmware overwrites SMBIOS data at original
@@ -136,17 +137,81 @@ typedef enum OC_SMBIOS_UPDATE_MODE_ {
   OcSmbiosUpdateCustom       = 3,
 } OC_SMBIOS_UPDATE_MODE;
 
+//
+// Growing SMBIOS table data.
+//
+typedef struct OC_SMBIOS_TABLE_ {
+  //
+  // SMBIOS table.
+  //
+  UINT8                            *Table;
+  //
+  // Current table position.
+  //
+  APPLE_SMBIOS_STRUCTURE_POINTER   CurrentPtr;
+  //
+  // Current string position.
+  //
+  CHAR8                            *CurrentStrPtr;
+  //
+  // Allocated table size, multiple of EFI_PAGE_SIZE.
+  //
+  UINT32                           AllocatedTableSize;
+  //
+  // Incrementable handle.
+  //
+  SMBIOS_HANDLE                    Handle;
+  //
+  // Largest structure size within the table.
+  //
+  UINT16                           MaxStructureSize;
+  //
+  // Number of structures within the table.
+  //
+  UINT16                           NumberOfStructures;
+} OC_SMBIOS_TABLE;
+
+/**
+  Prepare new SMBIOS table based on host data.
+
+  @param  SmbiosTable
+
+  @retval EFI_SUCCESS if buffer is ready to be filled.
+**/
+EFI_STATUS
+OcSmbiosTablePrepare (
+  IN OUT OC_SMBIOS_TABLE  *SmbiosTable
+  );
+
+/**
+  Free SMBIOS table
+
+  @param[in, out]  Table  Current table buffer.
+
+  @retval EFI_SUCCESS on success
+**/
 VOID
-SmbiosGetSmcVersion (
-  IN  CONST UINT8  *SmcRevision,
-  OUT UINT8        *SmcVersion
+OcSmbiosTableFree (
+  IN OUT OC_SMBIOS_TABLE  *Table
   );
 
 EFI_STATUS
-CreateSmbios (
-  IN OC_SMBIOS_DATA         *Data,
-  IN OC_SMBIOS_UPDATE_MODE  Mode,
-  IN OC_CPU_INFO            *CpuInfo
+OcSmbiosCreate (
+  IN OUT OC_SMBIOS_TABLE        *SmbiosTable,
+  IN     OC_SMBIOS_DATA         *Data,
+  IN     OC_SMBIOS_UPDATE_MODE  Mode,
+  IN     OC_CPU_INFO            *CpuInfo
+  );
+
+VOID
+OcSmbiosExposeOemInfo (
+  IN OC_SMBIOS_TABLE   *SmbiosTable
+  );
+
+VOID
+OcSmbiosGetSmcVersion (
+  IN  CONST UINT8  *SmcRevision,
+  OUT UINT8        *SmcVersion
   );
 
 #endif // OC_SMBIOS_LIB_H

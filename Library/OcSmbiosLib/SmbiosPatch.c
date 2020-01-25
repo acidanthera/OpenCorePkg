@@ -16,6 +16,7 @@
 
 #include <Protocol/PciRootBridgeIo.h>
 
+#include <Guid/OcVariables.h>
 #include <Guid/SmBios.h>
 
 #include <Library/BaseMemoryLib.h>
@@ -30,6 +31,7 @@
 #include <Library/OcStringLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
 
 #include <IndustryStandard/AppleSmBios.h>
 #include <IndustryStandard/Pci.h>
@@ -1168,16 +1170,8 @@ SmbiosHandleLegacyRegion (
   return EFI_SUCCESS;
 }
 
-/**
-  Prepare new SMBIOS table based on host data.
-
-  @param  SmbiosTable
-
-  @retval EFI_SUCCESS if buffer is ready to be filled.
-**/
-STATIC
 EFI_STATUS
-SmbiosPrepareTable (
+OcSmbiosTablePrepare (
   IN OUT OC_SMBIOS_TABLE  *SmbiosTable
   )
 {
@@ -1287,6 +1281,19 @@ SmbiosPrepareTable (
   }
 
   return Status;
+}
+
+
+VOID
+OcSmbiosTableFree (
+  IN OUT OC_SMBIOS_TABLE  *Table
+  )
+{
+  if (Table->Table != NULL) {
+    FreePool (Table->Table);
+  }
+
+  ZeroMem (Table, sizeof (*Table));
 }
 
 STATIC
@@ -1555,7 +1562,7 @@ SmbiosTableApply (
 }
 
 VOID
-SmbiosGetSmcVersion (
+OcSmbiosGetSmcVersion (
   IN  CONST UINT8  *SmcRevision,
   OUT UINT8        *SmcVersion
   )
@@ -1665,19 +1672,15 @@ SmbiosGetSmcVersion (
   }
 }
 
-/**
-
-  @retval EFI_SUCCESS               The smbios tables were generated successfully
-**/
 EFI_STATUS
-CreateSmbios (
-  IN OC_SMBIOS_DATA         *Data,
-  IN OC_SMBIOS_UPDATE_MODE  Mode,
-  IN OC_CPU_INFO            *CpuInfo
+OcSmbiosCreate (
+  IN OUT OC_SMBIOS_TABLE        *SmbiosTable,
+  IN     OC_SMBIOS_DATA         *Data,
+  IN     OC_SMBIOS_UPDATE_MODE  Mode,
+  IN     OC_CPU_INFO            *CpuInfo
   )
 {
   EFI_STATUS                      Status;
-  OC_SMBIOS_TABLE                 SmbiosTable;
   SMBIOS_HANDLE                   MemoryDeviceHandle;
   APPLE_SMBIOS_STRUCTURE_POINTER  MemoryDeviceInfo;
   APPLE_SMBIOS_STRUCTURE_POINTER  MemoryDeviceAddress;
@@ -1690,27 +1693,22 @@ CreateSmbios (
 
   ASSERT (Data != NULL);
 
-  Status = SmbiosPrepareTable (&SmbiosTable);
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-
   Mapping = AllocatePool (OC_SMBIOS_MAX_MAPPING * sizeof (*Mapping));
   if (Mapping == NULL) {
     DEBUG ((DEBUG_WARN, "OCSMB: Cannot allocate mapping table\n"));
     return EFI_OUT_OF_RESOURCES;
   }
 
-  PatchBiosInformation (&SmbiosTable, Data);
-  PatchSystemInformation (&SmbiosTable, Data);
-  PatchBaseboardInformation (&SmbiosTable, Data);
-  PatchSystemEnclosure (&SmbiosTable, Data);
-  PatchProcessorInformation (&SmbiosTable, Data, CpuInfo);
-  PatchCacheInformation (&SmbiosTable, Data);
-  PatchSystemPorts (&SmbiosTable, Data);
-  PatchSystemSlots (&SmbiosTable, Data);
-  PatchMemoryArray (&SmbiosTable, Data);
-  PatchMemoryMappedAddress (&SmbiosTable, Data, Mapping, &MappingNum);
+  PatchBiosInformation (SmbiosTable, Data);
+  PatchSystemInformation (SmbiosTable, Data);
+  PatchBaseboardInformation (SmbiosTable, Data);
+  PatchSystemEnclosure (SmbiosTable, Data);
+  PatchProcessorInformation (SmbiosTable, Data, CpuInfo);
+  PatchCacheInformation (SmbiosTable, Data);
+  PatchSystemPorts (SmbiosTable, Data);
+  PatchSystemSlots (SmbiosTable, Data);
+  PatchMemoryArray (SmbiosTable, Data);
+  PatchMemoryMappedAddress (SmbiosTable, Data, Mapping, &MappingNum);
 
   NumberMemoryDevices = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_DEVICE);
   NumberMemoryMapped  = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS);
@@ -1726,7 +1724,7 @@ CreateSmbios (
     // For each memory device we must generate type 17
     //
     PatchMemoryDevice (
-      &SmbiosTable,
+      SmbiosTable,
       Data,
       MemoryDeviceInfo,
       MemoryDeviceNo,
@@ -1744,7 +1742,7 @@ CreateSmbios (
         && MemoryDeviceAddress.Standard.Type20->MemoryDeviceHandle ==
            MemoryDeviceInfo.Standard.Type17->Hdr.Handle) {
           PatchMemoryMappedDevice (
-            &SmbiosTable,
+            SmbiosTable,
             Data,
             MemoryDeviceAddress,
             MemoryMappedNo,
@@ -1756,20 +1754,94 @@ CreateSmbios (
     }
   }
 
-  PatchPortableBatteryDevice (&SmbiosTable, Data);
-  PatchBootInformation (&SmbiosTable, Data);
-  CreateAppleProcessorType (&SmbiosTable, Data, CpuInfo);
-  CreateAppleProcessorSpeed (&SmbiosTable, Data, CpuInfo);
-  CreateAppleFirmwareVolume (&SmbiosTable, Data);
-  CreateApplePlatformFeature (&SmbiosTable, Data);
-  CreateAppleSmcInformation (&SmbiosTable, Data);
-  CreateSmBiosEndOfTable (&SmbiosTable, Data);
+  PatchPortableBatteryDevice (SmbiosTable, Data);
+  PatchBootInformation (SmbiosTable, Data);
+  CreateAppleProcessorType (SmbiosTable, Data, CpuInfo);
+  CreateAppleProcessorSpeed (SmbiosTable, Data, CpuInfo);
+  CreateAppleFirmwareVolume (SmbiosTable, Data);
+  CreateApplePlatformFeature (SmbiosTable, Data);
+  CreateAppleSmcInformation (SmbiosTable, Data);
+  CreateSmBiosEndOfTable (SmbiosTable, Data);
 
   FreePool (Mapping);
 
-  Status = SmbiosTableApply (&SmbiosTable, Mode);
-
-  SmbiosTableFree (&SmbiosTable);
+  Status = SmbiosTableApply (SmbiosTable, Mode);
 
   return Status;
+}
+
+VOID
+OcSmbiosExposeOemInfo (
+  IN OC_SMBIOS_TABLE   *SmbiosTable
+  )
+{
+  EFI_STATUS                      Status;
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  CHAR8                           *Value;
+  UINTN                           Length;
+
+  Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_INFORMATION, 1);
+
+  if (Original.Raw != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type1->ProductName)) {
+    Value = SmbiosGetString (Original, Original.Standard.Type1->ProductName);
+    if (Value != NULL) {
+      Length = AsciiStrLen (Value);
+      Status = gRT->SetVariable (
+        OC_OEM_PRODUCT_VARIABLE_NAME,
+        &gOcVendorVariableGuid,
+        EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+        Length,
+        Value
+        );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM product\n"));
+      }
+    } else {
+      DEBUG ((DEBUG_INFO, "OCSMB: Cannot find OEM product\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_INFO, "OCSMB: Cannot access OEM Type1\n"));
+  }
+
+  Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_BASEBOARD_INFORMATION, 1);
+
+  if (Original.Raw != NULL
+    && SMBIOS_ACCESSIBLE (Original, Standard.Type2->Manufacturer)
+    && SMBIOS_ACCESSIBLE (Original, Standard.Type2->ProductName)) {
+    Value = SmbiosGetString (Original, Original.Standard.Type2->Manufacturer);
+    if (Value != NULL) {
+      Length = AsciiStrLen (Value);
+      Status = gRT->SetVariable (
+        OC_OEM_VENDOR_VARIABLE_NAME,
+        &gOcVendorVariableGuid,
+        EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+        Length,
+        Value
+        );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM vendor\n"));
+      }
+    } else {
+      DEBUG ((DEBUG_INFO, "OCSMB: Cannot find OEM vendor\n"));
+    }
+
+    Value = SmbiosGetString (Original, Original.Standard.Type2->ProductName);
+    if (Value != NULL) {
+      Length = AsciiStrLen (Value);
+      Status = gRT->SetVariable (
+        OC_OEM_BOARD_VARIABLE_NAME,
+        &gOcVendorVariableGuid,
+        EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+        Length,
+        Value
+        );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM board\n"));
+      }
+    } else {
+      DEBUG ((DEBUG_INFO, "OCSMB: Cannot find OEM board\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_INFO, "OCSMB: Cannot access OEM Type2\n"));
+  }
 }

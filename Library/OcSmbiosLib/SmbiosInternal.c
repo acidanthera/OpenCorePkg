@@ -21,6 +21,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcSmbiosLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -85,18 +86,6 @@ SmbiosExtendTable (
   Table->AllocatedTableSize = RequestedSize;
 
   return EFI_SUCCESS;
-}
-
-VOID
-SmbiosTableFree (
-  IN OUT OC_SMBIOS_TABLE  *Table
-  )
-{
-  if (Table->Table != NULL) {
-    FreePool (Table->Table);
-  }
-
-  ZeroMem (Table, sizeof (*Table));
 }
 
 UINT8

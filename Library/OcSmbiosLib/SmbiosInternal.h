@@ -17,6 +17,7 @@
 
 #include <IndustryStandard/AppleSmBios.h>
 #include <Library/OcGuardLib.h>
+#include <Library/OcSmbiosLib.h>
 
 //
 // 2 zero bytes required in the end of each table.
@@ -100,40 +101,6 @@ enum {
 STATIC_ASSERT (OcSmbiosAutomaticHandle > OcSmbiosLastReservedHandle, "Inconsistent handle IDs");
 
 //
-// Growing SMBIOS table data.
-//
-typedef struct OC_SMBIOS_TABLE_ {
-  //
-  // SMBIOS table.
-  //
-  UINT8                            *Table;
-  //
-  // Current table position.
-  //
-  APPLE_SMBIOS_STRUCTURE_POINTER   CurrentPtr;
-  //
-  // Current string position.
-  //
-  CHAR8                            *CurrentStrPtr;
-  //
-  // Allocated table size, multiple of EFI_PAGE_SIZE.
-  //
-  UINT32                           AllocatedTableSize;
-  //
-  // Incrementable handle.
-  //
-  SMBIOS_HANDLE                    Handle;
-  //
-  // Largest structure size within the table.
-  //
-  UINT16                           MaxStructureSize;
-  //
-  // Number of structures within the table.
-  //
-  UINT16                           NumberOfStructures;
-} OC_SMBIOS_TABLE;
-
-//
 // Map old handles to new ones.
 //
 typedef struct OC_SMBIOS_MAPPING_ {
@@ -153,18 +120,6 @@ EFI_STATUS
 SmbiosExtendTable (
   IN OUT OC_SMBIOS_TABLE  *Table,
   IN     UINT32           Size
-  );
-
-/**
-  Free SMBIOS table
-
-  @param[in, out]  Table  Current table buffer.
-
-  @retval EFI_SUCCESS on success
-**/
-VOID
-SmbiosTableFree (
-  IN OUT OC_SMBIOS_TABLE  *Table
   );
 
 /**

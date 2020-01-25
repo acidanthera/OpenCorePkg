@@ -58,6 +58,21 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_VERSION_VARIABLE_NAME           L"opencore-version"
 
 //
+// Variable used to report OEM product from SMBIOS Type1 ProductName.
+//
+#define OC_OEM_PRODUCT_VARIABLE_NAME       L"oem-product"
+
+//
+// Variable used to report OEM board vendor from SMBIOS Type2 Manufacturer.
+//
+#define OC_OEM_VENDOR_VARIABLE_NAME        L"oem-vendor"
+
+//
+// Variable used to report OEM board vendor from SMBIOS Type2 ProductName.
+//
+#define OC_OEM_BOARD_VARIABLE_NAME         L"oem-board"
+
+//
 // 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102
 // This GUID is specifically used for normal variable access by Lilu kernel extension and its plugins.
 //
