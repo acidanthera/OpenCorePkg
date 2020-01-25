@@ -895,3 +895,34 @@ SetConsoleMode (
 
   return EFI_SUCCESS;
 }
+
+VOID
+OcProvideConsoleGop (
+  VOID
+  )
+{
+  EFI_STATUS  Status;
+  VOID        *Gop;
+
+  Gop = NULL;
+  Status = gBS->HandleProtocol (gST->ConsoleOutHandle, &gEfiGraphicsOutputProtocolGuid, &Gop);
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCC: Installing GOP (%r) on ConsoleOutHandle...\n", Status));
+    Status = gBS->LocateProtocol (&gEfiGraphicsOutputProtocolGuid, NULL, &Gop);
+
+    if (!EFI_ERROR (Status)) {
+      Status = gBS->InstallMultipleProtocolInterfaces (
+        &gST->ConsoleOutHandle,
+        &gEfiGraphicsOutputProtocolGuid,
+        Gop,
+        NULL
+        );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_WARN, "OCC: Failed to install GOP on ConsoleOutHandle - %r\n", Status));
+      }
+    } else {
+      DEBUG ((DEBUG_WARN, "OCC: Missing GOP entirely - %r\n", Status));
+    }
+  }
+}

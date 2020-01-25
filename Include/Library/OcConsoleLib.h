@@ -154,4 +154,12 @@ SetConsoleMode (
   IN  UINT32              Height
   );
 
+/**
+  Ensure installed GOP protocol on ConOut handle.
+**/
+VOID
+OcProvideConsoleGop (
+  VOID
+  );
+
 #endif // OC_CONSOLE_LIB_H
