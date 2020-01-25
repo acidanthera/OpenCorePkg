@@ -201,38 +201,6 @@ OcLoadDrivers (
 
 STATIC
 VOID
-OcProvideConsoleGop (
-  VOID
-  )
-{
-  EFI_STATUS  Status;
-  VOID        *Gop;
-
-  Gop = NULL;
-  Status = gBS->HandleProtocol (gST->ConsoleOutHandle, &gEfiGraphicsOutputProtocolGuid, &Gop);
-
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OC: Missing GOP on ConsoleOutHandle, will install - %r\n", Status));
-    Status = gBS->LocateProtocol (&gEfiGraphicsOutputProtocolGuid, NULL, &Gop);
-
-    if (!EFI_ERROR (Status)) {
-      Status = gBS->InstallMultipleProtocolInterfaces (
-        &gST->ConsoleOutHandle,
-        &gEfiGraphicsOutputProtocolGuid,
-        Gop,
-        NULL
-        );
-      if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_WARN, "OC: Failed to install GOP on ConsoleOutHandle - %r\n", Status));
-      }
-    } else {
-      DEBUG ((DEBUG_WARN, "OC: Missing GOP entirely - %r\n", Status));
-    }
-  }
-}
-
-STATIC
-VOID
 EFIAPI
 OcExitBootServicesHandler (
   IN EFI_EVENT  Event,
