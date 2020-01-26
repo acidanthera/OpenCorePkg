@@ -1,0 +1,169 @@
+## @file
+#  General purpose test application.
+#
+#  Copyright (c) 2019, vit9696. All rights reserved.<BR>
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution.  The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+##
+
+[Defines]
+  INF_VERSION                         = 0x00010005
+  BASE_NAME                           = GUI
+  FILE_GUID                           = A72DCBF9-388A-47FE-B13A-591716F70609
+  MODULE_TYPE                         = UEFI_APPLICATION
+  VERSION_STRING                      = 1.0
+  INF_VERSION                         = 0x00010005
+  EDK_RELEASE_VERSION                 = 0x00020000
+  EFI_SPECIFICATION_VERSION           = 0x00010000
+  ENTRY_POINT                         = UefiMain
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#
+
+[Sources]
+  GUI.c
+  GUI.h
+  GuiApp.h
+  GuiApp.c
+  Views/BootPicker.c
+  Images/Cursor.c
+  Images/IconHd.c
+  Images/IconHdExt.c
+  Images/IconSelected.c
+  Images/Selector.c
+  Images/Helvetica_bmp.c
+  Images/Helvetica_fnt.c
+  BitmapFont.c
+  GuiIo.h
+  Input/InputSimAbsPtr.c
+  Input/InputSimTextIn.c
+  Output/StGopShared.c
+
+  #Output/OutputStGop.c
+  Output/OutputFbGop.c
+
+  HwOps.h
+
+  HwOps.c
+  #HwOpsEmu.c
+
+  OcBootstrap.c
+  #OcBootstrapEmu.c
+
+  GetTscHw.c
+  #GetTscEmu.c
+
+  #freetype2/src/autofit/afangles.c
+
+    # base components (required)
+
+#      freetype2/src/base/ftsystem.c
+#      freetype2/src/base/ftinit.c
+#      freetype2/src/base/ftdebug.c
+
+#      freetype2/src/base/ftbase.c
+
+#      freetype2/src/base/ftbbox.c       # recommended, see <ftbbox.h>
+#      freetype2/src/base/ftglyph.c      # recommended, see <ftglyph.h>
+
+#      freetype2/src/base/ftbdf.c        # optional, see <ftbdf.h>
+#      freetype2/src/base/ftbitmap.c     # optional, see <ftbitmap.h>
+#      freetype2/src/base/ftcid.c        # optional, see <ftcid.h>
+#      freetype2/src/base/ftfstype.c     # optional
+#      freetype2/src/base/ftgasp.c       # optional, see <ftgasp.h>
+#      freetype2/src/base/ftgxval.c      # optional, see <ftgxval.h>
+#      freetype2/src/base/ftmm.c         # optional, see <ftmm.h>
+#      freetype2/src/base/ftotval.c      # optional, see <ftotval.h>
+#      freetype2/src/base/ftpatent.c     # optional
+#      freetype2/src/base/ftpfr.c        # optional, see <ftpfr.h>
+#      freetype2/src/base/ftstroke.c     # optional, see <ftstroke.h>
+#      freetype2/src/base/ftsynth.c      # optional, see <ftsynth.h>
+#      freetype2/src/base/fttype1.c      # optional, see <t1tables.h>
+#      #freetype2/src/base/ftwinfnt.c     # optional, see <ftwinfnt.h>
+
+#      #freetype2/src/base/ftmac.c        # only on the Macintosh
+
+    # font drivers (optional; at least one is needed)
+
+#      freetype2/src/bdf/bdf.c           # BDF font driver
+#      freetype2/src/cff/cff.c           # CFF/OpenType font driver
+#      freetype2/src/cid/type1cid.c      # Type 1 CID-keyed font driver
+#      freetype2/src/pcf/pcf.c           # PCF font driver
+#      freetype2/src/pfr/pfr.c           # PFR/TrueDoc font driver
+#      freetype2/src/sfnt/sfnt.c         # SFNT files support
+                                 #(TrueType & OpenType)
+#      freetype2/src/truetype/truetype.c # TrueType font driver
+#      freetype2/src/type1/type1.c       # Type 1 font driver
+#      freetype2/src/type42/type42.c     # Type 42 font driver
+#      #freetype2/src/winfonts/winfnt.c   # Windows FONT / FNT font driver
+
+    # rasterizers (optional; at least one is needed for vector
+    #   formats)
+
+#      freetype2/src/raster/raster.c     # monochrome rasterizer
+#      freetype2/src/smooth/smooth.c     # anti-aliasing rasterizer
+
+    # auxiliary modules (optional)
+
+#      #freetype2/src/autofit/autofit.c   # auto hinting module
+#      freetype2/src/cache/ftcache.c     # cache sub-system (in beta)
+#      freetype2/src/gzip/ftgzip.c       # support for compressed fonts (.gz)
+#      freetype2/src/lzw/ftlzw.c         # support for compressed fonts (.Z)
+#      freetype2/src/bzip2/ftbzip2.c     # support for compressed fonts (.bz2)
+#      freetype2/src/gxvalid/gxvalid.c   # TrueTypeGX/AAT table validation
+#      freetype2/src/otvalid/otvalid.c   # OpenType table validation
+#      freetype2/src/psaux/psaux.c       # PostScript Type 1 parsing
+#      freetype2/src/pshinter/pshinter.c # PS hinting module
+#      #freetype2/src/psnames/psnames.c   # PostScript glyph names support
+
+#	  StdLibEdk2.c
+
+[Packages]
+  EfiPkg/EfiPkg.dec
+  OcSupportPkg/OcSupportPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+  OpenCorePkg/Platform/GUI/FreeType.dec
+
+[Protocols]
+  gEfiGraphicsOutputProtocolGuid
+  gEfiSimplePointerProtocolGuid
+  gEfiAbsolutePointerProtocolGuid
+
+  gOcBootstrapProtocolGuid
+  gOcInterfaceProtocolGuid
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  BmpSupportLib
+  MemoryAllocationLib
+  OcGuardLib
+  UefiBootServicesTableLib
+  DebugLib
+  UefiApplicationEntryPoint
+
+  FrameBufferBltLib
+  MtrrLib
+  #SortLib
+
+  #OcBootManagementLib
+
+[BuildOptions]
+  *_*_*_CC_FLAGS = -D OC_TARGET_RELEASE
+#  GCC:DEBUG_CLANG38_*_CC_FLAGS = -fsanitize=undefined
+#  GCC:DEBUG_CLANG38_*_DLINK2_FLAGS = -fno-sanitize=all
+#*_*_*_CC_FLAGS = -DFT2_BUILD_LIBRARY
+#GCC:*_*_*_CC_FLAGS = -Wno-unused-variable -Wno-unused-function -Wno-incompatible-pointer-types
+#MSFT:*_*_*_CC_FLAGS = -D_CRT_SECURE_NO_WARNINGS /W0 /X /GL-

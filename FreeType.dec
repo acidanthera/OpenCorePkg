@@ -1,0 +1,8 @@
+[Defines]
+  PACKAGE_NAME      = FreeTypePkg
+  PACKAGE_GUID      = BA8CBA06-8FC1-4BE0-ABA6-2E771C386414
+  PACKAGE_VERSION   = 1.0
+  DEC_SPECIFICATION = 0x00010005
+
+[Includes]
+  OpenCorePkg/Platform/GUI/freetype2/include
