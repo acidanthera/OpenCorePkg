@@ -104,6 +104,14 @@
 				<key>Path</key>
 				<string>SSDT-ALS0.aml</string>
 			</dict>
+			<dict>
+				<key>Comment</key>
+				<string></string>
+				<key>Enabled</key>
+				<false/>
+				<key>Path</key>
+				<string>SSDT-PMC.aml</string>
+			</dict>
 		</array>
 		<key>Block</key>
 		<array>
