@@ -295,7 +295,7 @@
 				<key>BundlePath</key>
 				<string>Lilu.kext</string>
 				<key>Comment</key>
-				<string></string>
+				<string>Arbitrary kext and process patching</string>
 				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>
@@ -311,7 +311,7 @@
 				<key>BundlePath</key>
 				<string>VirtualSMC.kext</string>
 				<key>Comment</key>
-				<string></string>
+				<string>SMC emulator</string>
 				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>
@@ -327,7 +327,7 @@
 				<key>BundlePath</key>
 				<string>WhateverGreen.kext</string>
 				<key>Comment</key>
-				<string>Video card</string>
+				<string>Various patches necessary for certain ATI/AMD/Intel/Nvidia GPUs</string>
 				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>
@@ -343,7 +343,7 @@
 				<key>BundlePath</key>
 				<string>AppleALC.kext</string>
 				<key>Comment</key>
-				<string>Sound</string>
+				<string>Native macOS HD audio for not officially supported codecs</string>
 				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>
@@ -359,7 +359,7 @@
 				<key>BundlePath</key>
 				<string>IntelMausi.kext</string>
 				<key>Comment</key>
-				<string></string>
+				<string>Intel Ethernet LAN</string>
 				<key>Enabled</key>
 				<false/>
 				<key>ExecutablePath</key>
@@ -375,7 +375,7 @@
 				<key>BundlePath</key>
 				<string>Legacy_USB3.kext</string>
 				<key>Comment</key>
-				<string></string>
+				<string>XHC ports configuration</string>
 				<key>Enabled</key>
 				<false/>
 				<key>ExecutablePath</key>
