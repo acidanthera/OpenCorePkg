@@ -13,6 +13,7 @@ OpenCore Changelog
 - Improved `SanitiseClearScreen` to avoid mode switching
 - Replaced `SupportsCsm` with `AdviseWindows` enabling UEFI mode
 - Fixed issues with default boot path selection on some boards
+- Update builtin firmware versions
 
 #### v0.5.4
 - Added Enter key handling in boot menu for quick proceed
