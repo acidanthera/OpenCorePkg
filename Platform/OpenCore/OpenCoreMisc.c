@@ -227,7 +227,7 @@ OcMiscEarlyInit (
     return EFI_SECURITY_VIOLATION; ///< Should be unreachable.
   }
 
-  if (VaultKey == NULL && Config->Misc.Security.RequireSignature) {
+  if (Config->Misc.Security.RequireVault && VaultKey == NULL && Config->Misc.Security.RequireSignature) {
     DEBUG ((DEBUG_ERROR, "OC: Configuration requires signed vault but no public key provided!\n"));
     CpuDeadLoop ();
     return EFI_SECURITY_VIOLATION; ///< Should be unreachable.
