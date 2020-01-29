@@ -227,7 +227,9 @@ OcMiscEarlyInit (
     return EFI_SECURITY_VIOLATION; ///< Should be unreachable.
   }
 
-  if (Config->Misc.Security.RequireVault && VaultKey == NULL && Config->Misc.Security.RequireSignature) {
+  if (!Config->Misc.Security.RequireVault && Config->Misc.Security.RequireSignature) {
+    DEBUG((DEBUG_INFO, "OC: Configuration value RequireSignature is true while RequireVault is false. Consider changing RequireSignature to false, to have a clean config.plist."));
+  } else if (Config->Misc.Security.RequireVault && VaultKey == NULL && Config->Misc.Security.RequireSignature) {
     DEBUG ((DEBUG_ERROR, "OC: Configuration requires signed vault but no public key provided!\n"));
     CpuDeadLoop ();
     return EFI_SECURITY_VIOLATION; ///< Should be unreachable.
