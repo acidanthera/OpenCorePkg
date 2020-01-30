@@ -340,12 +340,7 @@ OcPlatformUpdateSmbios (
     Data.FirmwareFeaturesMask = MacInfo->Smbios.FirmwareFeaturesMask;
 
     //
-    // Adopt to arbitrary hardware specifics. This bit allows the use
-    // of legacy Windows installation in boot selector preference pane.
-    // We need it because Windows systems with EFI partition not being 1st
-    // are recognised as legacy. See:
-    // https://github.com/acidanthera/bugtracker/issues/327
-    // https://sourceforge.net/p/cloverefiboot/tickets/435
+    // Adopt to arbitrary hardware specifics. See description in NVRAM handling code.
     //
     if (Config->PlatformInfo.Generic.AdviseWindows) {
       Data.FirmwareFeatures     |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT;
@@ -404,6 +399,19 @@ OcPlatformUpdateNvram (
     RomSize        = sizeof (Config->PlatformInfo.Generic.Rom);
     ExFeatures     = MacInfo->Smbios.FirmwareFeatures;
     ExFeaturesMask = MacInfo->Smbios.FirmwareFeaturesMask;
+
+    //
+    // Adopt to arbitrary hardware specifics. This bit allows the use
+    // of legacy Windows installation in boot selector preference pane.
+    // We need it because Windows systems with EFI partition not being 1st
+    // are recognised as legacy. See:
+    // https://github.com/acidanthera/bugtracker/issues/327
+    // https://sourceforge.net/p/cloverefiboot/tickets/435
+    //
+    if (Config->PlatformInfo.Generic.AdviseWindows) {
+      ExFeatures     |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT;
+      ExFeaturesMask |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT;
+    }
   }
 
   Features       = (UINT32) ExFeatures;

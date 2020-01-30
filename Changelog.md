@@ -14,6 +14,7 @@ OpenCore Changelog
 - Replaced `SupportsCsm` with `AdviseWindows` enabling UEFI mode
 - Fixed issues with default boot path selection on some boards
 - Update builtin firmware versions
+- Fixed `AvdiseWindows` not setting `FirmwareFeatures` in NVRAM
 
 #### v0.5.4
 - Added Enter key handling in boot menu for quick proceed
