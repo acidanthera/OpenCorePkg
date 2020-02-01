@@ -34,6 +34,7 @@
   gEfiUgaDrawProtocolGuid
 
 [Sources]
+  AsciiTextOutput.c
   ConsoleControl.c
   NullTextOutput.c
   OcConsoleLib.c

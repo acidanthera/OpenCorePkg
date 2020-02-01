@@ -429,6 +429,22 @@ OcConsoleControlConfigure (
   }
 }
 
+VOID
+OcConsoleControlSync (
+  VOID
+  )
+{
+  if (mOriginalOutputString != NULL) {
+    mOriginalOutputString     = gST->ConOut->OutputString;
+    gST->ConOut->OutputString = ControlledOutputString;
+  }
+
+  if (mOriginalClearScreen != NULL) {
+    mOriginalClearScreen      = gST->ConOut->ClearScreen;
+    gST->ConOut->ClearScreen  = ControlledClearScreen;
+  }
+}
+
 EFI_STATUS
 ConsoleControlSetBehaviourForHandle (
   IN EFI_HANDLE                    Handle,

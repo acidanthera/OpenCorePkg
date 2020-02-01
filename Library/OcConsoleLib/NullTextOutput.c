@@ -1,7 +1,5 @@
 /** @file
 
-APFS Driver Loader - loads apfs.efi from EfiBootRecord block
-
 Copyright (c) 2017-2018, savvas
 Copyright (c) 2018, vit9696
 
@@ -21,6 +19,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DebugLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcConsoleLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
@@ -146,7 +145,7 @@ mNullTextOutputProtocol = {
 
 EFI_SYSTEM_TABLE *
 AllocateNullTextOutSystemTable (
-  EFI_SYSTEM_TABLE  *SystemTable
+  IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
   EFI_SYSTEM_TABLE  *NewSystemTable;

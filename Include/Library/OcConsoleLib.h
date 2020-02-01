@@ -57,6 +57,14 @@ OcConsoleControlConfigure (
   );
 
 /**
+  Sync console control protocol with the new ConOut protocol.
+**/
+VOID
+OcConsoleControlSync (
+  VOID
+  );
+
+/**
   Configure console control behaviour.
 
   @param[in] Behaviour          Custom console behaviour.
@@ -171,7 +179,15 @@ OcProvideConsoleGop (
 **/
 EFI_SYSTEM_TABLE *
 AllocateNullTextOutSystemTable (
-  EFI_SYSTEM_TABLE  *SystemTable
+  IN EFI_SYSTEM_TABLE  *SystemTable
+  );
+
+/**
+  Replace ConOut with builtin implementation for text output.
+**/
+VOID
+OcInstallCustomConOut (
+  VOID
   );
 
 #endif // OC_CONSOLE_LIB_H
