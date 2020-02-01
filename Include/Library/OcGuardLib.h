@@ -625,6 +625,6 @@ STATIC_ASSERT (sizeof (UINTN) == 4, "UINTN is expected to be 4 bytes");
   OcSecond__ = OcOverflowAddSN(OcTmp__, (C), (Res));    \
   OcFirst__ | OcSecond__; })
 
-#endif // __GNUC__
+#endif // __GNUC__ or __clang__
 
 #endif // OC_GUARD_LIB_H

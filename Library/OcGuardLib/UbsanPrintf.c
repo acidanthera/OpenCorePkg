@@ -70,7 +70,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # define SIZEOF_INT __SIZEOF_INT__
 #endif
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 # define _TFP_GCC_NO_INLINE_  __attribute__ ((noinline))
 #else
 # define _TFP_GCC_NO_INLINE_

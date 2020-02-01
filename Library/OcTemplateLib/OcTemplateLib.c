@@ -43,13 +43,13 @@ typedef union PRIV_OC_LIST_ {
 //
 // We have to be a bit careful about this hack, so assert that type layouts match at the very least.
 //
-#if defined(__GNUC__) && (__GNUC__ == 3 && __GNUC_MINOR__ >= 5 || __GNUC__ > 3)
-STATIC_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, Count)      == __builtin_offsetof (PRIV_OC_MAP, Count), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
-STATIC_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, AllocCount) == __builtin_offsetof (PRIV_OC_MAP, AllocCount), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
-STATIC_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, Construct)  == __builtin_offsetof (PRIV_OC_MAP, Construct), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
-STATIC_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, Destruct)   == __builtin_offsetof (PRIV_OC_MAP, Destruct), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
-STATIC_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, Values)     == __builtin_offsetof (PRIV_OC_MAP, Values), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
-STATIC_ASSERT(__builtin_offsetof (PRIV_OC_ARRAY, ValueSize)  == __builtin_offsetof (PRIV_OC_MAP, ValueSize), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+#if defined(__GNUC__) || defined(__clang__)
+STATIC_ASSERT(OFFSET_OF (PRIV_OC_ARRAY, Count)      == OFFSET_OF (PRIV_OC_MAP, Count), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+STATIC_ASSERT(OFFSET_OF (PRIV_OC_ARRAY, AllocCount) == OFFSET_OF (PRIV_OC_MAP, AllocCount), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+STATIC_ASSERT(OFFSET_OF (PRIV_OC_ARRAY, Construct)  == OFFSET_OF (PRIV_OC_MAP, Construct), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+STATIC_ASSERT(OFFSET_OF (PRIV_OC_ARRAY, Destruct)   == OFFSET_OF (PRIV_OC_MAP, Destruct), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+STATIC_ASSERT(OFFSET_OF (PRIV_OC_ARRAY, Values)     == OFFSET_OF (PRIV_OC_MAP, Values), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+STATIC_ASSERT(OFFSET_OF (PRIV_OC_ARRAY, ValueSize)  == OFFSET_OF (PRIV_OC_MAP, ValueSize), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
 #endif
 
 VOID

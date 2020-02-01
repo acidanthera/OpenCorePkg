@@ -20,7 +20,7 @@
 #include <Library/OcMiscLib.h>
 
 VOID
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 __attribute__ ((noinline))
 #endif
 DebugBreak (

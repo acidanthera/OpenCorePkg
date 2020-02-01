@@ -64,7 +64,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 // Try to provide a somewhat adequate size_t implementation.
 // Have to be careful about -Wformat warnings in Clang.
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 #if defined(MDE_CPU_X64) || defined(MDE_CPU_IA32)
 #include <stddef.h>
 
@@ -174,7 +174,7 @@ typedef __SSIZE_TYPE__ ssize_t;
 
 // Note, that we do not use UEFI-like printf.
 #ifndef __printflike
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 #define __printflike(x, y) __attribute__((format(printf, (x), (y))))
 #else
 #define __printflike(x, y)
@@ -188,7 +188,7 @@ typedef __SSIZE_TYPE__ ssize_t;
 
 // Support unreachable where possible
 #ifndef __unreachable
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 #define __unreachable() __builtin_unreachable()
 #else
 #define __unreachable()
