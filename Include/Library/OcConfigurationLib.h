@@ -270,6 +270,7 @@
   _(BOOLEAN                     , PollAppleHotKeys            ,     , FALSE                       ,     ())                   \
   _(BOOLEAN                     , ShowPicker                  ,     , FALSE                       ,     ())                   \
   _(BOOLEAN                     , UsePicker                   ,     , FALSE                       ,     ())                   \
+  _(UINT32                      , TakeoffDelay                ,     , 0                           ,     ())                   \
   _(UINT32                      , Timeout                     ,     , 0                           ,     ())                   \
   _(OC_STRING                   , HibernateMode               ,     , OC_STRING_CONSTR ("None", _, __), OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , Resolution                  ,     , OC_STRING_CONSTR ("", _, __),     OC_DESTR (OC_STRING)) \

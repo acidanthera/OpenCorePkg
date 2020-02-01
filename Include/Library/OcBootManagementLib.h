@@ -369,6 +369,10 @@ typedef struct {
   //
   UINT32           TimeoutSeconds;
   //
+  // Default delay prior to handling hotkeys (pass 0 to ignore).
+  //
+  UINT32           TakeoffDelay;
+  //
   // Define picker behaviour.
   // For example, show boot menu or just boot the default option.
   //

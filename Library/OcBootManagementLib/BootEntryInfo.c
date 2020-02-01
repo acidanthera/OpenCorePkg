@@ -576,7 +576,8 @@ InternalFillValidBootEntries (
 
     DEBUG ((
       DEBUG_BULK_INFO,
-      "OCB: Adding entry %u recovery (%s) - %r\n",
+      "OCB: Adding entry %u, external - %u, recovery (%s) - %r\n",
+      (UINT32) EntryIndex,
       DevPathScanInfo->IsExternal,
       RecoveryPath != NULL ? RecoveryPath : L"<null>",
       Status
