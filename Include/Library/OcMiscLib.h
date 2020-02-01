@@ -49,18 +49,6 @@ OcBase64Decode (
   IN OUT UINTN        *DecodedLength
   );
 
-/**
-  Allocate new System Table with disabled text output.
-
-  @param[in] SystemTable     Base System Table.
-
-  @retval non NULL  The System Table table was allocated successfully.
-**/
-EFI_SYSTEM_TABLE *
-AllocateNullTextOutSystemTable (
-  EFI_SYSTEM_TABLE  *SystemTable
-  );
-
 INT32
 FindPattern (
   IN CONST UINT8   *Pattern,

@@ -35,6 +35,7 @@
 
 [Sources]
   ConsoleControl.c
+  NullTextOutput.c
   OcConsoleLib.c
   OcConsoleLibInternal.h
   ResolutionParsing.c

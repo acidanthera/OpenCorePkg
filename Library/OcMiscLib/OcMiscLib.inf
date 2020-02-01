@@ -47,6 +47,5 @@
   DataPatcher.c
   DirectReset.c
   ReleaseUsbOwnership.c
-  NullTextOutput.c
   UninstallAllProtocolInterfaces.c
   Math.c
