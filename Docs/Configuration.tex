@@ -2222,7 +2222,7 @@ behaviour that does not go to any other sections
   recovery. Hold \texttt{CMD+R} key combination to choose this option.
   \end{itemize}
 
-  \emph{Note}: activated \texttt{KeySupport}, \texttt{AppleUsbKbDxe}, or similar driver is required
+  \emph{Note}: Activated \texttt{KeySupport}, \texttt{AppleUsbKbDxe}, or similar driver is required
   for key handling to work. On many firmwares it is not possible to get all the keys function.
 
   In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key
@@ -3630,11 +3630,16 @@ and supplementary utilities can be used.
   \texttt{ConnectDrivers}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Perform UEFI controller connection after driver
-  loading. This option is useful for loading filesystem drivers, which
+  \textbf{Description}: Perform UEFI controller connection after driver loading.
+
+  This option is useful for loading filesystem drivers, which
   usually follow UEFI driver model, and may not start by themselves.
   While effective, this option may not be necessary for drivers performing
   automatic connection, and may slightly slowdown the boot.
+
+  \emph{Note}: Some firmwares, made by Apple in particular, only connect the boot
+  drive to speedup the boot process. Enable this option to be able to see all the
+  boot options when having multiple drives.
 
 \item
   \texttt{Drivers}\\
@@ -3848,13 +3853,16 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Description}: Reinstalls Apple Boot Policy protocol with a builtin
   version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
 
+  \emph{Note}: Some Macs like MacPro5,1 do have APFS compatibility, but their
+  Apple Boot Policy protocol contains recovery detection issues, thus using
+  this option is advised on them as well. 
+
 \item
   \texttt{AppleEvent}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Apple Event protocol with a builtin
   version. This may be used to ensure File Vault 2 compatibility on VMs or legacy Macs.
-
 
 \item
   \texttt{AppleImageConversion}\\
