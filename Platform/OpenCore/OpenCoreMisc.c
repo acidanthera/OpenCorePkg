@@ -518,6 +518,7 @@ OcMiscBoot (
   Context->ScanPolicy         = Config->Misc.Security.ScanPolicy;
   Context->LoadPolicy         = OC_LOAD_DEFAULT_POLICY;
   Context->TimeoutSeconds     = Config->Misc.Boot.Timeout;
+  Context->TakeoffDelay       = Config->Misc.Boot.TakeoffDelay;
   Context->StartImage         = StartImage;
   Context->CustomBootGuid     = CustomBootGuid;
   Context->ExcludeHandle      = LoadHandle;

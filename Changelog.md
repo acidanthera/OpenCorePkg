@@ -15,6 +15,7 @@ OpenCore Changelog
 - Fixed issues with default boot path selection on some boards
 - Update builtin firmware versions
 - Fixed `AdviseWindows` not setting `FirmwareFeatures` in NVRAM
+- Added `TakeoffDelay` option for improved action hotkey support
 
 #### v0.5.4
 - Added Enter key handling in boot menu for quick proceed

@@ -2110,9 +2110,9 @@ behaviour that does not go to any other sections
   \texttt{PollAppleHotKeys}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enable modifier hotkey handling in boot picker.
+  \textbf{Description}: Enable \texttt{modifier hotkey} handling in boot picker.
 
-  In addition to action hotkeys, which are partially described in \texttt{UsePicker}
+  In addition to \texttt{action hotkeys}, which are partially described in \texttt{UsePicker}
   section and are normally handled by Apple BDS, there exist modifier keys, which are
   handled by operating system bootloader, namely \texttt{boot.efi}. These keys
   allow to change operating system behaviour by providing different boot modes.
@@ -2122,7 +2122,7 @@ behaviour that does not go to any other sections
   permissive manner from within boot picker. Such extensions include the support
   of tapping on keys in addition to holding and pressing \texttt{Shift} along with
   other keys instead of just \texttt{Shift} alone, which is not detectible on many
-  PS/2 keyboards. This list of known hotkeys includes:
+  PS/2 keyboards. This list of known \texttt{modifier hotkeys} includes:
   \begin{itemize}
   \tightlist
   \item \texttt{CMD+C+MINUS} --- disable board compatibility checking.
@@ -2164,6 +2164,18 @@ behaviour that does not go to any other sections
   \textbf{Description}: Show simple boot picker to allow boot entry selection.
 
 \item
+  \texttt{TakeoffDelay}\\
+  \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Delay in microseconds performed before handling
+  picker startup and \texttt{action hotkeys}.
+
+  Introducing a delay may give extra time to hold the right \texttt{action hotkey}
+  sequence to e.g. boot to recovery mode. On some platforms setting this option to
+  at least \texttt{5000-10000} microseconds may be necessary to access
+  \texttt{action hotkeys} at all due to the nature of the keyboard driver.
+
+\item
   \texttt{Timeout}\\
   \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
   \textbf{Failsafe}: \texttt{0}\\
@@ -2185,8 +2197,9 @@ behaviour that does not go to any other sections
   test driver.
 
   OpenCore built-in boot picker contains a set of actions chosen during the boot process.
-  The list of supported actions is similar to Apple BDS and currently consists of the following
-  options:
+  The list of supported actions is similar to Apple BDS and in general can be accessed by
+  holding \texttt{action hotkeys} during boot process. Currently the following actions are
+  considered:
 
   \begin{itemize}
   \tightlist
