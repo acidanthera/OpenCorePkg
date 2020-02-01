@@ -404,28 +404,91 @@ OcProvideConsoleGop (
   VOID
   )
 {
-  EFI_STATUS  Status;
-  VOID        *Gop;
+  EFI_STATUS                    Status;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL  *OriginalGop;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL  *Gop;
+  UINTN                         HandleCount;
+  EFI_HANDLE                    *HandleBuffer;
+  UINTN                         Index;
 
-  Gop = NULL;
-  Status = gBS->HandleProtocol (gST->ConsoleOutHandle, &gEfiGraphicsOutputProtocolGuid, &Gop);
+  OriginalGop = NULL;
+  Status = gBS->HandleProtocol (
+    gST->ConsoleOutHandle,
+    &gEfiGraphicsOutputProtocolGuid,
+    (VOID **) &OriginalGop
+    );
 
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCC: Installing GOP (%r) on ConsoleOutHandle...\n", Status));
-    Status = gBS->LocateProtocol (&gEfiGraphicsOutputProtocolGuid, NULL, &Gop);
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCC: GOP exists on ConsoleOutHandle and has %u modes\n",
+      (UINT32) OriginalGop->Mode->MaxMode
+      ));
+
+    //
+    // This is not the case on MacPro5,1 with Mac EFI incompatible GPU.
+    // Here we need to uninstall ConOut GOP in favour of GPU GOP.
+    //
+    if (OriginalGop->Mode->MaxMode > 0) {
+      return;
+    }
+
+    DEBUG ((
+      DEBUG_INFO,
+      "OCC: Looking for GOP replacement due to invalid mode count\n"
+      ));
+
+    Status = gBS->LocateHandleBuffer (
+      ByProtocol,
+      &gEfiGraphicsOutputProtocolGuid,
+      NULL,
+      &HandleCount,
+      &HandleBuffer
+      );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCC: No handles with GOP protocol - %r\n", Status));
+      return;
+    }
+
+    Status = EFI_NOT_FOUND;
+    for (Index = 0; Index < HandleCount; ++Index) {
+      if (HandleBuffer[Index] != gST->ConsoleOutHandle) {
+        Status = gBS->HandleProtocol (
+          HandleBuffer[Index],
+          &gEfiGraphicsOutputProtocolGuid,
+          (VOID **) &Gop
+          );
+        break;
+      }
+    }
+
+    DEBUG ((DEBUG_INFO, "OCC: Alternative GOP status is - %r\n", Status));
+    FreePool (HandleBuffer);
 
     if (!EFI_ERROR (Status)) {
-      Status = gBS->InstallMultipleProtocolInterfaces (
-        &gST->ConsoleOutHandle,
+      gBS->UninstallProtocolInterface (
+        gST->ConsoleOutHandle,
         &gEfiGraphicsOutputProtocolGuid,
-        Gop,
-        NULL
+        OriginalGop
         );
-      if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_WARN, "OCC: Failed to install GOP on ConsoleOutHandle - %r\n", Status));
-      }
-    } else {
-      DEBUG ((DEBUG_WARN, "OCC: Missing GOP entirely - %r\n", Status));
     }
+  } else {
+    DEBUG ((DEBUG_INFO, "OCC: Installing GOP (%r) on ConsoleOutHandle...\n", Status));
+    Status = gBS->LocateProtocol (&gEfiGraphicsOutputProtocolGuid, NULL, (VOID **) &Gop);
+  }
+
+  if (!EFI_ERROR (Status)) {
+    Status = gBS->InstallMultipleProtocolInterfaces (
+      &gST->ConsoleOutHandle,
+      &gEfiGraphicsOutputProtocolGuid,
+      Gop,
+      NULL
+      );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "OCC: Failed to install GOP on ConsoleOutHandle - %r\n", Status));
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "OCC: Missing compatible GOP - %r\n", Status));
   }
 }
