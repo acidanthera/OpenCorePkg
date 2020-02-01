@@ -451,8 +451,8 @@ OcConsoleControlSetBehaviourForHandle (
 
   if (Handle != NULL) {
     Status = gBS->HandleProtocol (
-      &gEfiConsoleControlProtocolGuid,
       Handle,
+      &gEfiConsoleControlProtocolGuid,
       (VOID *) &ConsoleControl
       );
   } else {
@@ -662,6 +662,7 @@ ParseConsoleControlBehaviour (
   return OcConsoleControlDefault;
 }
 
+STATIC
 EFI_STATUS
 SetConsoleResolutionForProtocol (
   IN  EFI_GRAPHICS_OUTPUT_PROTOCOL    *GraphicsOutput,
@@ -832,6 +833,7 @@ SetConsoleResolutionForProtocol (
   return Status;
 }
 
+STATIC
 EFI_STATUS
 SetConsoleModeForProtocol (
   IN  EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *TextOut,
