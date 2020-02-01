@@ -702,6 +702,7 @@ SetConsoleResolution (
       );
 
     if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCC: Mode %u failure - %r\n", ModeIndex, Status));
       continue;
     }
 
@@ -723,6 +724,7 @@ SetConsoleResolution (
           || Info->PixelFormat == PixelBlueGreenRedReserved8BitPerColor)
         && (Bpp == 0 || Bpp == 24 || Bpp == 32)) {
         ModeNumber = ModeIndex;
+        FreePool (Info);
         break;
       }
     } else if (Info->HorizontalResolution > Width
