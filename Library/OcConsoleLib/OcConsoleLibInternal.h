@@ -17,6 +17,7 @@
 
 #include <Library/OcConsoleLib.h>
 #include <Protocol/GraphicsOutput.h>
+#include <Protocol/SimpleTextOut.h>
 #include <Protocol/UgaDraw.h>
 
 typedef struct {
@@ -31,6 +32,19 @@ SetConsoleResolutionForProtocol (
   IN  UINT32                          Height,
   IN  UINT32                          Bpp    OPTIONAL,
   IN  BOOLEAN                         Reconnect
+  );
+
+EFI_STATUS
+SetConsoleModeForProtocol (
+  IN  EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *TextOut,
+  IN  UINT32                           Width,
+  IN  UINT32                           Height
+  );
+
+EFI_STATUS
+ConsoleControlSetBehaviourForHandle (
+  IN EFI_HANDLE                    Handle,
+  IN OC_CONSOLE_CONTROL_BEHAVIOUR  Behaviour
   );
 
 VOID

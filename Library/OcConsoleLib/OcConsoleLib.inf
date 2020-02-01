@@ -34,8 +34,10 @@
   gEfiUgaDrawProtocolGuid
 
 [Sources]
+  ConsoleControl.c
   OcConsoleLib.c
   OcConsoleLibInternal.h
+  ResolutionParsing.c
   UgaPassThrough.c
 
 [Packages]
