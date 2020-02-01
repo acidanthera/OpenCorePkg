@@ -124,8 +124,8 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcUgaDrawBlt (
-  IN  EFI_UGA_DRAW_PROTOCOL                   * This,
-  IN  EFI_UGA_PIXEL                           * BltBuffer, OPTIONAL
+  IN  EFI_UGA_DRAW_PROTOCOL                   *This,
+  IN  EFI_UGA_PIXEL                           *BltBuffer OPTIONAL,
   IN  EFI_UGA_BLT_OPERATION                   BltOperation,
   IN  UINTN                                   SourceX,
   IN  UINTN                                   SourceY,
@@ -133,7 +133,7 @@ OcUgaDrawBlt (
   IN  UINTN                                   DestinationY,
   IN  UINTN                                   Width,
   IN  UINTN                                   Height,
-  IN  UINTN                                   Delta         OPTIONAL
+  IN  UINTN                                   Delta      OPTIONAL
   )
 {
   OC_UGA_PROTOCOL   *OcUgaDraw;

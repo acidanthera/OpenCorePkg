@@ -429,8 +429,10 @@ OcConsoleControlConfigure (
   }
 }
 
+STATIC
 EFI_STATUS
-OcConsoleControlSetBehaviour (
+OcConsoleControlSetBehaviourForHandle (
+  IN EFI_HANDLE                    Handle,
   IN OC_CONSOLE_CONTROL_BEHAVIOUR  Behaviour
   )
 {
@@ -447,11 +449,19 @@ OcConsoleControlSetBehaviour (
     return EFI_SUCCESS;
   }
 
-  Status = gBS->LocateProtocol (
-    &gEfiConsoleControlProtocolGuid,
-    NULL,
-    (VOID *) &ConsoleControl
-    );
+  if (Handle != NULL) {
+    Status = gBS->HandleProtocol (
+      &gEfiConsoleControlProtocolGuid,
+      Handle,
+      (VOID *) &ConsoleControl
+      );
+  } else {
+    Status = gBS->LocateProtocol (
+      &gEfiConsoleControlProtocolGuid,
+      NULL,
+      (VOID *) &ConsoleControl
+      );
+  }
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -487,6 +497,14 @@ OcConsoleControlSetBehaviour (
   }
 
   return Status;
+}
+
+EFI_STATUS
+OcConsoleControlSetBehaviour (
+  IN OC_CONSOLE_CONTROL_BEHAVIOUR  Behaviour
+  )
+{
+  return OcConsoleControlSetBehaviourForHandle (NULL, Behaviour);
 }
 
 VOID
@@ -815,6 +833,122 @@ SetConsoleResolutionForProtocol (
 }
 
 EFI_STATUS
+SetConsoleModeForProtocol (
+  IN  EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *TextOut,
+  IN  UINT32                           Width,
+  IN  UINT32                           Height
+  )
+{
+  EFI_STATUS                            Status;
+
+  UINT32                                MaxMode;
+  UINT32                                ModeIndex;
+  INT64                                 ModeNumber;
+  UINTN                                 Columns;
+  UINTN                                 Rows;
+  BOOLEAN                               SetMax;
+
+  SetMax = Width == 0 && Height == 0;
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCC: Requesting %ux%u (max: %d) console mode, curr %u, max %u\n",
+    Width,
+    Height,
+    SetMax,
+    (UINT32) TextOut->Mode->Mode,
+    (UINT32) TextOut->Mode->MaxMode
+    ));
+
+  //
+  // Find the resolution we need.
+  //
+  ModeNumber = -1;
+  MaxMode    = TextOut->Mode->MaxMode;
+  for (ModeIndex = 0; ModeIndex < MaxMode; ++ModeIndex) {
+    Status = TextOut->QueryMode (
+      TextOut,
+      ModeIndex,
+      &Columns,
+      &Rows
+      );
+
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    DEBUG ((
+      DEBUG_INFO,
+      "OCC: Mode %u - %ux%u\n",
+      ModeIndex,
+      (UINT32) Columns,
+      (UINT32) Rows
+      ));
+
+    if (!SetMax) {
+      //
+      // Custom mode is requested.
+      //
+      if (Columns == Width && Rows == Height) {
+        ModeNumber = ModeIndex;
+        break;
+      }
+    } else if ((UINT32) Columns > Width
+      || ((UINT32) Columns == Width && (UINT32) Rows > Height)) {
+      Width      = (UINT32) Columns;
+      Height     = (UINT32) Rows;
+      ModeNumber = ModeIndex;
+    }
+  }
+
+  if (ModeNumber < 0) {
+    DEBUG ((DEBUG_WARN, "OCC: No compatible mode for %ux%u (max: %u) console mode\n", Width, Height, SetMax));
+    return EFI_NOT_FOUND;
+  }
+
+  if (ModeNumber == TextOut->Mode->Mode) {
+    //
+    // This does not seem to affect systems anyhow, but for safety reasons
+    // we should refresh console mode after changing GOP resolution.
+    //
+    DEBUG ((
+      DEBUG_INFO,
+      "OCC: Current console mode matches desired mode %u, forcing update\n",
+      (UINT32) ModeNumber
+      ));
+  }
+
+  //
+  // Current graphics mode is not set, or is not set to the mode found above.
+  // Set the new graphics mode.
+  //
+  DEBUG ((
+    DEBUG_INFO,
+    "OCC: Setting mode %u (prev %u) with %ux%u console mode\n",
+    (UINT32) ModeNumber,
+    (UINT32) TextOut->Mode->Mode,
+    Width,
+    Height
+    ));
+
+  Status = TextOut->SetMode (TextOut, (UINTN) ModeNumber);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_WARN,
+      "OCC: Failed to set mode %u with %ux%u console mode\n",
+      (UINT32) ModeNumber,
+      Width,
+      Height
+      ));
+    return Status;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCC: Changed console mode to %u\n", (UINT32) TextOut->Mode->Mode));
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
 SetConsoleResolution (
   IN  UINT32              Width,
   IN  UINT32              Height,
@@ -882,117 +1016,11 @@ SetConsoleResolution (
 
 EFI_STATUS
 SetConsoleMode (
-  IN  UINT32              Width,
-  IN  UINT32              Height
+  IN  UINT32                       Width,
+  IN  UINT32                       Height
   )
 {
-  EFI_STATUS                            Status;
-
-  UINT32                                MaxMode;
-  UINT32                                ModeIndex;
-  INT64                                 ModeNumber;
-  UINTN                                 Columns;
-  UINTN                                 Rows;
-  BOOLEAN                               SetMax;
-
-  SetMax = Width == 0 && Height == 0;
-
-  DEBUG ((
-    DEBUG_INFO,
-    "OCC: Requesting %ux%u (max: %d) console mode, curr %u, max %u\n",
-    Width,
-    Height,
-    SetMax,
-    (UINT32) gST->ConOut->Mode->Mode,
-    (UINT32) gST->ConOut->Mode->MaxMode
-    ));
-
-  //
-  // Find the resolution we need.
-  //
-  ModeNumber = -1;
-  MaxMode    = gST->ConOut->Mode->MaxMode;
-  for (ModeIndex = 0; ModeIndex < MaxMode; ++ModeIndex) {
-    Status = gST->ConOut->QueryMode (
-      gST->ConOut,
-      ModeIndex,
-      &Columns,
-      &Rows
-      );
-
-    if (EFI_ERROR (Status)) {
-      continue;
-    }
-
-    DEBUG ((
-      DEBUG_INFO,
-      "OCC: Mode %u - %ux%u\n",
-      ModeIndex,
-      (UINT32) Columns,
-      (UINT32) Rows
-      ));
-
-    if (!SetMax) {
-      //
-      // Custom mode is requested.
-      //
-      if (Columns == Width && Rows == Height) {
-        ModeNumber = ModeIndex;
-        break;
-      }
-    } else if ((UINT32) Columns > Width
-      || ((UINT32) Columns == Width && (UINT32) Rows > Height)) {
-      Width      = (UINT32) Columns;
-      Height     = (UINT32) Rows;
-      ModeNumber = ModeIndex;
-    }
-  }
-
-  if (ModeNumber < 0) {
-    DEBUG ((DEBUG_WARN, "OCC: No compatible mode for %ux%u (max: %u) console mode\n", Width, Height, SetMax));
-    return EFI_NOT_FOUND;
-  }
-
-  if (ModeNumber == gST->ConOut->Mode->Mode) {
-    //
-    // This does not seem to affect systems anyhow, but for safety reasons
-    // we should refresh console mode after changing GOP resolution.
-    //
-    DEBUG ((
-      DEBUG_INFO,
-      "OCC: Current console mode matches desired mode %u, forcing update\n",
-      (UINT32) ModeNumber
-      ));
-  }
-
-  //
-  // Current graphics mode is not set, or is not set to the mode found above.
-  // Set the new graphics mode.
-  //
-  DEBUG ((
-    DEBUG_INFO,
-    "OCC: Setting mode %u (prev %u) with %ux%u console mode\n",
-    (UINT32) ModeNumber,
-    (UINT32) gST->ConOut->Mode->Mode,
-    Width,
-    Height
-    ));
-
-  Status = gST->ConOut->SetMode (gST->ConOut, (UINTN) ModeNumber);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((
-      DEBUG_WARN,
-      "OCC: Failed to set mode %u with %ux%u console mode\n",
-      (UINT32) ModeNumber,
-      Width,
-      Height
-      ));
-    return Status;
-  }
-
-  DEBUG ((DEBUG_INFO, "OCC: Changed console mode to %u\n", (UINT32) gST->ConOut->Mode->Mode));
-
-  return EFI_SUCCESS;
+  return SetConsoleModeForProtocol (gST->ConOut, Width, Height);
 }
 
 VOID
