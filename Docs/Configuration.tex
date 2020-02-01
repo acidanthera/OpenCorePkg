@@ -2020,6 +2020,30 @@ behaviour that does not go to any other sections
 \begin{enumerate}
 
 \item
+  \texttt{BuiltinTextRenderer}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enables experimental builtin text renderer.
+
+  This option makes all text going through standard console output
+  render through builtin text renderer bypassing firmware services.
+  While still experimental and feature incomplete, this option
+  effecitly avoids the need for various quirks like
+  \texttt{ReplaceTabWithSpace} or \texttt{SanitiseClearScreen}. It
+  should also increase the dimensions of the output area.
+
+  Since builtin text renderer works in graphics mode, extra care
+  may need to be paid to \texttt{ConsoleBehaviourOs},
+  \texttt{ConsoleBehaviourUi}, \texttt{ConsoleControl}, and
+  \texttt{IgnoreTextInGraphics} options. While individual for the
+  target system, it is recommended to use \texttt{ForceGraphics} and
+  builtin \texttt{ConsoleControl} to avoid compatibility issues.
+
+  \emph{Note}: Some Macs, namely \texttt{MacPro5,1}, may have broken
+  console output with newer GPUs, and thus enabling this option can
+  be required for them.
+
+\item
   \texttt{ConsoleMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
@@ -3853,9 +3877,9 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Description}: Reinstalls Apple Boot Policy protocol with a builtin
   version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
 
-  \emph{Note}: Some Macs like MacPro5,1 do have APFS compatibility, but their
-  Apple Boot Policy protocol contains recovery detection issues, thus using
-  this option is advised on them as well. 
+  \emph{Note}: Some Macs, namely \texttt{MacPro5,1}, do have APFS compatibility,
+  but their Apple Boot Policy protocol contains recovery detection issues, thus
+  using this option is advised on them as well.
 
 \item
   \texttt{AppleEvent}\\
@@ -4043,8 +4067,14 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{ProvideConsoleGop}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: macOS bootloader requires GOP (Graphics Output Protocol)
-  to be present on console handle. This option will install it if missing.
+  \textbf{Description}: Ensure GOP (Graphics Output Protocol) on console handle.
+
+  macOS bootloader requires GOP to be present on console handle, yet the exact
+  location of GOP is not covered by the UEFI specification. This option will
+  ensure GOP is installed on console handle if it is present.
+
+  \emph{Note}: This option will also replace broken GOP protocol on console handle,
+  which may be the case on \texttt{MacPro5,1} with newer GPUs.
 
 \item
   \texttt{ReconnectOnResChange}\\

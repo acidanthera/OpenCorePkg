@@ -384,6 +384,10 @@ OcMiscLateInit (
       ));
   }
 
+  if (Config->Misc.Boot.BuiltinTextRenderer) {
+    OcInstallCustomConOut ();
+  }
+
   HibernateMode = OC_BLOB_GET (&Config->Misc.Boot.HibernateMode);
 
   if (AsciiStrCmp (HibernateMode, "None") == 0) {
