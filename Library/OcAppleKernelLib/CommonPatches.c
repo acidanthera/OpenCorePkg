@@ -879,6 +879,54 @@ PatchAppleIoMapperSupport (
 
 STATIC
 UINT8
+mAppleDummyCpuPmPatchReplace[] = {
+  0xB8, 0x01, 0x00, 0x00, 0x00, 0xC3 // mov eax, 1 ; ret
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mAppleDummyCpuPmPatch = {
+  .Comment     = DEBUG_POINTER ("DummyCpuPm"),
+  .Base        = "__ZN28AppleIntelCPUPowerManagement5startEP9IOService",
+  .Find        = NULL,
+  .Mask        = NULL,
+  .Replace     = mAppleDummyCpuPmPatchReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mAppleDummyCpuPmPatchReplace),
+  .Count       = 1,
+  .Skip        = 0
+};
+
+RETURN_STATUS
+PatchDummyPowerManagement (
+  IN OUT PRELINKED_CONTEXT  *Context
+  )
+{
+  RETURN_STATUS       Status;
+  PATCHER_CONTEXT     Patcher;
+
+  Status = PatcherInitContextFromPrelinked (
+    &Patcher,
+    Context,
+    "com.apple.driver.AppleIntelCPUPowerManagement"
+    );
+
+  if (!RETURN_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (&Patcher, &mAppleDummyCpuPmPatch);
+    if (RETURN_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch dummy AppleIntelCPUPowerManagement - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success dummy AppleIntelCPUPowerManagement\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to find AppleIntelCPUPowerManagement for dummy - %r\n", Status));
+  }
+
+  return Status;
+}
+
+STATIC
+UINT8
 mIncreasePciBarSizePatchFind[] = {
   0x00, 0x00, 0x00, 0x40
 };

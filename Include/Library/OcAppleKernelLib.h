@@ -497,6 +497,18 @@ PatchAppleIoMapperSupport (
   );
 
 /**
+  Apply dummy power management patches to AppleIntelCpuPowerManagement in macOS.
+
+  @param Context  Prelinked kernel context.
+
+  @return  RETURN_SUCCESS on success.
+**/
+RETURN_STATUS
+PatchDummyPowerManagement (
+  IN OUT PRELINKED_CONTEXT  *Context
+  );
+
+/**
   Apply PCI bar size patches to IOPCIFamily kext for compatibility with select configuration.
 
   @param Context  Prelinked kernel context.

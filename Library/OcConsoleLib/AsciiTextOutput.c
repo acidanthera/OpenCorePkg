@@ -551,6 +551,8 @@ OcInstallCustomConOut (
 {
   EFI_STATUS  Status;
 
+  DEBUG ((DEBUG_INFO, "OCC: Using builtin text renderer\n"));
+
   Status = AsciiTextReset (&mAsciiTextOutputProtocol, TRUE);
 
   if (EFI_ERROR (Status)) {

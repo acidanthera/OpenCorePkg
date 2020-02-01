@@ -285,6 +285,7 @@ mKernelQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("AppleXcpmForceBoost",     OC_GLOBAL_CONFIG, Kernel.Quirks.AppleXcpmForceBoost),
   OC_SCHEMA_BOOLEAN_IN ("CustomSMBIOSGuid",        OC_GLOBAL_CONFIG, Kernel.Quirks.CustomSmbiosGuid),
   OC_SCHEMA_BOOLEAN_IN ("DisableIoMapper",         OC_GLOBAL_CONFIG, Kernel.Quirks.DisableIoMapper),
+  OC_SCHEMA_BOOLEAN_IN ("DummyPowerManagement",    OC_GLOBAL_CONFIG, Kernel.Quirks.DummyPowerManagement),
   OC_SCHEMA_BOOLEAN_IN ("ExternalDiskIcons",       OC_GLOBAL_CONFIG, Kernel.Quirks.ExternalDiskIcons),
   OC_SCHEMA_BOOLEAN_IN ("IncreasePciBarSize",      OC_GLOBAL_CONFIG, Kernel.Quirks.IncreasePciBarSize),
   OC_SCHEMA_BOOLEAN_IN ("LapicKernelPanic",        OC_GLOBAL_CONFIG, Kernel.Quirks.LapicKernelPanic),
