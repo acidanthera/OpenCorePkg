@@ -437,6 +437,10 @@ OcKernelApplyPatches (
     if (Config->Kernel.Quirks.CustomSmbiosGuid) {
       PatchCustomSmbiosGuid (Context);
     }
+
+    if (Config->Kernel.Quirks.DummyPowerManagement) {
+      PatchDummyPowerManagement (Context);
+    }
   } else {
     if (Config->Kernel.Quirks.AppleXcpmCfgLock) {
       PatchAppleXcpmCfgLock (&Patcher);

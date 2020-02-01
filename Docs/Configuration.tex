@@ -1878,6 +1878,16 @@ blocking.
   VT-d support in other systems in case they need it.
 
 \item
+  \texttt{DummyPowerManagement}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Disables \texttt{AppleIntelCpuPowerManagement}.
+
+  \emph{Note}: This option is a preferred alternative to
+  \texttt{NullCpuPowerManagement.kext} for CPUs without native power
+  management driver in macOS.
+
+\item
   \texttt{ExternalDiskIcons}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

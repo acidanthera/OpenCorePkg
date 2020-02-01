@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Jan 17 12:56:17 2020
-%DIF ADD ../Configuration.tex        Sun Feb  2 01:35:24 2020
+%DIF ADD ../Configuration.tex        Sun Feb  2 02:19:09 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1938,7 +1938,19 @@ blocking.
   VT-d support in other systems in case they need it.
 
 \item
-  \texttt{ExternalDiskIcons}\\
+  \DIFaddbegin \texttt{\DIFadd{DummyPowerManagement}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Disables }\texttt{\DIFadd{AppleIntelCpuPowerManagement}}\DIFadd{.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This option is a preferred alternative to
+  }\texttt{\DIFadd{NullCpuPowerManagement.kext}} \DIFadd{for CPUs without native power
+  management driver in macOS.
+}
+
+\item
+  \DIFaddend \texttt{ExternalDiskIcons}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Apply icon type patches to AppleAHCIPort.kext to force
