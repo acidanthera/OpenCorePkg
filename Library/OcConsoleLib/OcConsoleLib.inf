@@ -31,9 +31,12 @@
   gEfiConsoleControlProtocolGuid
   gEfiGraphicsOutputProtocolGuid
   gEfiSimpleTextOutProtocolGuid
+  gEfiUgaDrawProtocolGuid
 
 [Sources]
   OcConsoleLib.c
+  OcConsoleLibInternal.h
+  UgaPassThrough.c
 
 [Packages]
   EfiPkg/EfiPkg.dec

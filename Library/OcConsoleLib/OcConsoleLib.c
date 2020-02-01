@@ -21,6 +21,7 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcConsoleLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
@@ -644,11 +645,12 @@ ParseConsoleControlBehaviour (
 }
 
 EFI_STATUS
-SetConsoleResolution (
-  IN  UINT32              Width,
-  IN  UINT32              Height,
-  IN  UINT32              Bpp    OPTIONAL,
-  IN  BOOLEAN             Reconnect
+SetConsoleResolutionForProtocol (
+  IN  EFI_GRAPHICS_OUTPUT_PROTOCOL    *GraphicsOutput,
+  IN  UINT32                          Width,
+  IN  UINT32                          Height,
+  IN  UINT32                          Bpp    OPTIONAL,
+  IN  BOOLEAN                         Reconnect
   )
 {
   EFI_STATUS                            Status;
@@ -661,19 +663,7 @@ SetConsoleResolution (
   EFI_HANDLE                            *HandleBuffer;
   UINTN                                 Index;
   EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  *Info;
-  EFI_GRAPHICS_OUTPUT_PROTOCOL          *GraphicsOutput;
   BOOLEAN                               SetMax;
-
-  Status = gBS->HandleProtocol (
-    gST->ConsoleOutHandle,
-    &gEfiGraphicsOutputProtocolGuid,
-    (VOID **) &GraphicsOutput
-    );
-
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OCC: Missing GOP on console - %r\n", Status));
-    return Status;
-  }
 
   SetMax = Width == 0 && Height == 0;
 
@@ -818,8 +808,74 @@ SetConsoleResolution (
     // If it does not, there is a separate ConsoleMode param, which expands to SetConsoleMode.
     //
   } else {
-    DEBUG ((DEBUG_WARN, "OCS: Failed to find any text output handles\n"));
+    DEBUG ((DEBUG_WARN, "OCC: Failed to find any text output handles\n"));
   }
+
+  return Status;
+}
+
+EFI_STATUS
+SetConsoleResolution (
+  IN  UINT32              Width,
+  IN  UINT32              Height,
+  IN  UINT32              Bpp    OPTIONAL,
+  IN  BOOLEAN             Reconnect
+  )
+{
+  EFI_STATUS                    Status;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput;
+
+#ifdef OC_CONSOLE_CHANGE_ALL_RESOLUTIONS
+  UINTN                         HandleCount;
+  EFI_HANDLE                    *HandleBuffer;
+  UINTN                         Index;
+
+  Status = gBS->LocateHandleBuffer (
+    ByProtocol,
+    &gEfiGraphicsOutputProtocolGuid,
+    NULL,
+    &HandleCount,
+    &HandleBuffer
+    );
+
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCC: Found %u handles with GOP\n", (UINT32) HandleCount));
+
+    for (Index = 0; Index < HandleCount; ++Index) {
+      DEBUG ((DEBUG_INFO, "OCC: Trying handle %u - %p\n", (UINT32) Index, HandleBuffer[Index]));
+
+      Status = gBS->HandleProtocol (
+        HandleBuffer[Index],
+        &gEfiGraphicsOutputProtocolGuid,
+        (VOID **) &GraphicsOutput
+        );
+
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_WARN, "OCC: Missing GOP on console - %r\n", Status));
+        continue;
+      }
+
+      Status = SetConsoleResolutionForProtocol (GraphicsOutput, Width, Height, Bpp, Reconnect);
+    }
+
+    FreePool (HandleBuffer);
+  } else {
+    DEBUG ((DEBUG_INFO, "OCC: Failed to find handles with GOP\n"));
+  }
+#else
+  Status = gBS->HandleProtocol (
+    gST->ConsoleOutHandle,
+    &gEfiGraphicsOutputProtocolGuid,
+    (VOID **) &GraphicsOutput
+    );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OCC: Missing GOP on ConOut - %r\n", Status));
+    return Status;
+  }
+
+  Status = SetConsoleResolutionForProtocol (GraphicsOutput, Width, Height, Bpp, Reconnect);
+#endif
 
   return Status;
 }
