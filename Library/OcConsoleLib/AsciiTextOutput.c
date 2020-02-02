@@ -158,6 +158,9 @@ STATIC UINTN mConsoleWidth;
 STATIC UINTN mConsoleHeight;
 STATIC UINTN mConsoleMaxPosX;
 STATIC UINTN mConsoleMaxPosY;
+STATIC UINTN mCursorPosX;
+STATIC UINTN mCursorPosY;
+STATIC BOOLEAN mCursorOnscreen;
 STATIC UINT8 mFontScale;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION mBackgroundColor;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION mForegroundColor;
@@ -179,8 +182,6 @@ STATIC
 VOID
 RenderChar (
   IN  CHAR16  Char,
-  IN  UINT32  FgColor,
-  IN  UINT32  BgColor,
   OUT VOID    *Buffer
   )
 {
@@ -194,7 +195,7 @@ RenderChar (
   DstBuffer = Buffer;
 
   if ((Char >= 0 && Char < ISO_CHAR_MIN) || Char == 0x7F) {
-    SetMem32 (DstBuffer, TGT_CHAR_AREA * sizeof (DstBuffer[0]), BgColor);
+    SetMem32 (DstBuffer, TGT_CHAR_AREA * sizeof (DstBuffer[0]), mBackgroundColor.Raw);
     return;
   }
 
@@ -204,7 +205,7 @@ RenderChar (
 
   SrcBuffer = mIsoFontData + ((Char - ISO_CHAR_MIN) * (ISO_CHAR_HEIGHT - 2));
 
-  SetMem32 (DstBuffer, TGT_CHAR_WIDTH * mFontScale * sizeof (DstBuffer[0]), BgColor);
+  SetMem32 (DstBuffer, TGT_CHAR_WIDTH * mFontScale * sizeof (DstBuffer[0]), mBackgroundColor.Raw);
   DstBuffer += TGT_CHAR_WIDTH * mFontScale;
 
   for (Line = 0; Line < ISO_CHAR_HEIGHT - 2; ++Line) {
@@ -215,7 +216,7 @@ RenderChar (
       Mask = 1;
       do {
         for (Index2 = 0; Index2 < mFontScale; ++Index2) {
-          *DstBuffer = (*SrcBuffer & Mask) ? FgColor : BgColor;
+          *DstBuffer = (*SrcBuffer & Mask) ? mForegroundColor.Raw : mBackgroundColor.Raw;
           ++DstBuffer;
         }
         Mask <<= 1U;
@@ -224,7 +225,63 @@ RenderChar (
     ++SrcBuffer;
   }
 
-  SetMem32 (DstBuffer, TGT_CHAR_WIDTH * mFontScale * sizeof (DstBuffer[0]), BgColor);
+  SetMem32 (DstBuffer, TGT_CHAR_WIDTH * mFontScale * sizeof (DstBuffer[0]), mBackgroundColor.Raw);
+}
+
+STATIC
+VOID
+RenderCursor (
+  IN UINTN    PosX,
+  IN UINTN    PosY,
+  IN BOOLEAN  Enabled
+  )
+{
+  //
+  // Disabled and invisible.
+  //
+  if (!Enabled && !mCursorOnscreen) {
+    return;
+  }
+
+  //
+  // Hide previous.
+  //
+  if (mCursorOnscreen) {
+    mGraphicsOutput->Blt (
+      mGraphicsOutput,
+      &mBackgroundColor.Pixel,
+      EfiBltVideoFill,
+      0,
+      0,
+      TGT_CHAR_WIDTH + mCursorPosX * TGT_CHAR_WIDTH + mFontScale,
+      TGT_CHAR_HEIGHT + mCursorPosY * TGT_CHAR_HEIGHT - mFontScale + TGT_CHAR_HEIGHT,
+      TGT_CHAR_WIDTH - mFontScale * 2,
+      mFontScale,
+      0
+      );
+    mCursorOnscreen = FALSE;
+  }
+
+  //
+  // Draw new.
+  //
+  if (Enabled) {
+    mGraphicsOutput->Blt (
+      mGraphicsOutput,
+      &mForegroundColor.Pixel,
+      EfiBltVideoFill,
+      0,
+      0,
+      TGT_CHAR_WIDTH + PosX * TGT_CHAR_WIDTH + mFontScale,
+      TGT_CHAR_HEIGHT + PosY * TGT_CHAR_HEIGHT - mFontScale + TGT_CHAR_HEIGHT,
+      TGT_CHAR_WIDTH - mFontScale * 2,
+      mFontScale,
+      0
+      );
+    mCursorPosX     = PosX;
+    mCursorPosY     = PosY;
+    mCursorOnscreen = TRUE;
+  }
 }
 
 STATIC
@@ -270,6 +327,9 @@ AsciiTextReset (
   mConsoleHeight           = (Info->VerticalResolution / TGT_CHAR_HEIGHT) - 2;
   This->Mode->CursorColumn = 0;
   This->Mode->CursorRow    = 0;
+  mCursorOnscreen          = FALSE;
+  mCursorPosX              = 0;
+  mCursorPosY              = 0;
   mConsoleMaxPosX          = 0;
   mConsoleMaxPosY          = 0;
   mBackgroundColor.Raw     = mGraphicsEfiColors[0];
@@ -345,7 +405,7 @@ AsciiTextOutputString (
       continue;
     }
 
-    RenderChar (String[Index], mForegroundColor.Raw, mBackgroundColor.Raw, &mCharacterBuffer[0].Raw);
+    RenderChar (String[Index], &mCharacterBuffer[0].Raw);
 
     mGraphicsOutput->Blt (
       mGraphicsOutput,
@@ -363,6 +423,8 @@ AsciiTextOutputString (
     ++This->Mode->CursorColumn;
     mConsoleMaxPosX = MAX (mConsoleMaxPosX, This->Mode->CursorColumn);
   }
+
+  RenderCursor (This->Mode->CursorColumn, This->Mode->CursorRow, This->Mode->CursorVisible);
 
   return EFI_SUCCESS;
 }
@@ -452,6 +514,7 @@ AsciiTextClearScreen (
   IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This
   )
 {
+  mCursorOnscreen           = FALSE;
   This->Mode->CursorColumn  = 0;
   This->Mode->CursorRow     = 0;
 
@@ -492,6 +555,7 @@ AsciiTextSetCursorPosition (
 
   This->Mode->CursorColumn = (INT32) Column;
   This->Mode->CursorRow    = (INT32) Row;
+  RenderCursor (This->Mode->CursorColumn, This->Mode->CursorRow, This->Mode->CursorVisible);
 
   return EFI_SUCCESS;
 }
@@ -504,10 +568,8 @@ AsciiTextEnableCursor (
   IN BOOLEAN                         Visible
   )
 {
-  //
-  // TODO: Implement cursor support.
-  //
   This->Mode->CursorVisible = Visible;
+  RenderCursor (This->Mode->CursorColumn, This->Mode->CursorRow, This->Mode->CursorVisible);
   return EFI_SUCCESS;
 }
 
