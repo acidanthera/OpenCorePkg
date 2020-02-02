@@ -382,18 +382,31 @@ AsciiTextOutputString (
 
     if ((UINTN) This->Mode->CursorRow >= mConsoleHeight) {
       //
-      // TODO: Some GOP implementations (e.g. NVIDIA) cannot perform such operations.
+      // TODO: Many GOP implementations (e.g. NVIDIA) fail to perform overlapping operations.
       //
       mGraphicsOutput->Blt (
         mGraphicsOutput,
         NULL,
         EfiBltVideoToVideo,
-        TGT_CHAR_WIDTH,
+        0,
         TGT_CHAR_HEIGHT * 2,
-        TGT_CHAR_WIDTH,
+        0,
         TGT_CHAR_HEIGHT,
-        MIN (mConsoleMaxPosX * TGT_CHAR_WIDTH, mGraphicsOutput->Mode->Info->HorizontalResolution - TGT_CHAR_WIDTH),
-        MIN ((mConsoleMaxPosY + 1) * TGT_CHAR_HEIGHT, mGraphicsOutput->Mode->Info->VerticalResolution - TGT_CHAR_HEIGHT),
+        mGraphicsOutput->Mode->Info->HorizontalResolution,
+        TGT_CHAR_HEIGHT * (mConsoleHeight - 1),
+        0
+        );
+
+      mGraphicsOutput->Blt (
+        mGraphicsOutput,
+        &mBackgroundColor.Pixel,
+        EfiBltVideoFill,
+        0,
+        0,
+        0,
+        TGT_CHAR_HEIGHT * mConsoleHeight,
+        mGraphicsOutput->Mode->Info->HorizontalResolution,
+        TGT_CHAR_HEIGHT,
         0
         );
 
