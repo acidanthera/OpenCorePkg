@@ -26,6 +26,7 @@
 #include <Library/OcMiscLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
 
 VOID
 OcConsoleDisableCursor (

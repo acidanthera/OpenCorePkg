@@ -27,6 +27,9 @@
 #  VALID_ARCHITECTURES           = X64
 #
 
+[Guids]
+  gAppleVendorVariableGuid
+
 [Protocols]
   gEfiConsoleControlProtocolGuid
   gEfiGraphicsOutputProtocolGuid
@@ -51,3 +54,5 @@
   BaseLib
   BaseMemoryLib
   DebugLib
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib

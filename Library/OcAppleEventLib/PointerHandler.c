@@ -36,9 +36,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "AppleEventInternal.h"
 
-// UI_SCALE_VARIABLE_NAME
-#define UI_SCALE_VARIABLE_NAME  L"UIScale"
-
 #include <Library/BaseLib.h>
 
 // POINTER_POLL_FREQUENCY
@@ -815,13 +812,17 @@ EventCreateSimplePointerPollEvent (
 
   DataSize = sizeof (mUiScale);
 
-  gRT->GetVariable (
-         UI_SCALE_VARIABLE_NAME,
-         &gAppleVendorVariableGuid,
-         NULL,
-         &DataSize,
-         (VOID *)&mUiScale
-         );
+  Status = gRT->GetVariable (
+    APPLE_UI_SCALE_VARIABLE_NAME,
+    &gAppleVendorVariableGuid,
+    NULL,
+    &DataSize,
+    (VOID *) &mUiScale
+    );
+
+  if (EFI_ERROR (Status) || mUiScale != 2) {
+    mUiScale = 1;
+  }
 
   InternalRemoveUninstalledInstances (
     &mPointerProtocols,
