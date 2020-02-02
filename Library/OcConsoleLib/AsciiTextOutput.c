@@ -381,9 +381,6 @@ AsciiTextOutputString (
     }
 
     if ((UINTN) This->Mode->CursorRow >= mConsoleHeight) {
-      //
-      // TODO: Many GOP implementations (e.g. NVIDIA) fail to perform overlapping operations.
-      //
       mGraphicsOutput->Blt (
         mGraphicsOutput,
         NULL,
