@@ -63,7 +63,7 @@ OcStoreLoadPath (
 
   DEBUG ((
     EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-    "OC: Setting NVRAM %g:%a = %a - %r\n",
+    "OC: Setting NVRAM %g:%s = %a - %r\n",
     &gOcVendorVariableGuid,
     OC_LOG_VARIABLE_PATH,
     OutPath,
