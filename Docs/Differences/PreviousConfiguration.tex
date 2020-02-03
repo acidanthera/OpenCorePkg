@@ -89,7 +89,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.5.4)
+       Reference Manual (0.5.5)
 
        \vspace{0.2in}
 
@@ -101,7 +101,7 @@
 
        \rmfamily
 
-       Copyright \textcopyright 2018-2019 vit9696
+       Copyright \textcopyright 2018-2020 vit9696
 
    \end{center}
 \end{titlepage}
@@ -1878,6 +1878,16 @@ blocking.
   VT-d support in other systems in case they need it.
 
 \item
+  \texttt{DummyPowerManagement}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Disables \texttt{AppleIntelCpuPowerManagement}.
+
+  \emph{Note}: This option is a preferred alternative to
+  \texttt{NullCpuPowerManagement.kext} for CPUs without native power
+  management driver in macOS.
+
+\item
   \texttt{ExternalDiskIcons}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -2020,6 +2030,30 @@ behaviour that does not go to any other sections
 \begin{enumerate}
 
 \item
+  \texttt{BuiltinTextRenderer}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enables experimental builtin text renderer.
+
+  This option makes all text going through standard console output
+  render through builtin text renderer bypassing firmware services.
+  While still experimental and feature incomplete, this option
+  effecitly avoids the need for various quirks like
+  \texttt{ReplaceTabWithSpace} or \texttt{SanitiseClearScreen}. It
+  should also increase the dimensions of the output area.
+
+  Since builtin text renderer works in graphics mode, extra care
+  may need to be paid to \texttt{ConsoleBehaviourOs},
+  \texttt{ConsoleBehaviourUi}, \texttt{ConsoleControl}, and
+  \texttt{IgnoreTextInGraphics} options. While individual for the
+  target system, it is recommended to use \texttt{ForceGraphics} and
+  builtin \texttt{ConsoleControl} to avoid compatibility issues.
+
+  \emph{Note}: Some Macs, namely \texttt{MacPro5,1}, may have broken
+  console output with newer GPUs, and thus enabling this option can
+  be required for them.
+
+\item
   \texttt{ConsoleMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
@@ -2110,9 +2144,9 @@ behaviour that does not go to any other sections
   \texttt{PollAppleHotKeys}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enable modifier hotkey handling in boot picker.
+  \textbf{Description}: Enable \texttt{modifier hotkey} handling in boot picker.
 
-  In addition to action hotkeys, which are partially described in \texttt{UsePicker}
+  In addition to \texttt{action hotkeys}, which are partially described in \texttt{UsePicker}
   section and are normally handled by Apple BDS, there exist modifier keys, which are
   handled by operating system bootloader, namely \texttt{boot.efi}. These keys
   allow to change operating system behaviour by providing different boot modes.
@@ -2122,7 +2156,7 @@ behaviour that does not go to any other sections
   permissive manner from within boot picker. Such extensions include the support
   of tapping on keys in addition to holding and pressing \texttt{Shift} along with
   other keys instead of just \texttt{Shift} alone, which is not detectible on many
-  PS/2 keyboards. This list of known hotkeys includes:
+  PS/2 keyboards. This list of known \texttt{modifier hotkeys} includes:
   \begin{itemize}
   \tightlist
   \item \texttt{CMD+C+MINUS} --- disable board compatibility checking.
@@ -2164,6 +2198,18 @@ behaviour that does not go to any other sections
   \textbf{Description}: Show simple boot picker to allow boot entry selection.
 
 \item
+  \texttt{TakeoffDelay}\\
+  \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Delay in microseconds performed before handling
+  picker startup and \texttt{action hotkeys}.
+
+  Introducing a delay may give extra time to hold the right \texttt{action hotkey}
+  sequence to e.g. boot to recovery mode. On some platforms setting this option to
+  at least \texttt{5000-10000} microseconds may be necessary to access
+  \texttt{action hotkeys} at all due to the nature of the keyboard driver.
+
+\item
   \texttt{Timeout}\\
   \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
   \textbf{Failsafe}: \texttt{0}\\
@@ -2185,8 +2231,9 @@ behaviour that does not go to any other sections
   test driver.
 
   OpenCore built-in boot picker contains a set of actions chosen during the boot process.
-  The list of supported actions is similar to Apple BDS and currently consists of the following
-  options:
+  The list of supported actions is similar to Apple BDS and in general can be accessed by
+  holding \texttt{action hotkeys} during boot process. Currently the following actions are
+  considered:
 
   \begin{itemize}
   \tightlist
@@ -2209,7 +2256,7 @@ behaviour that does not go to any other sections
   recovery. Hold \texttt{CMD+R} key combination to choose this option.
   \end{itemize}
 
-  \emph{Note}: activated \texttt{KeySupport}, \texttt{AppleUsbKbDxe}, or similar driver is required
+  \emph{Note}: Activated \texttt{KeySupport}, \texttt{AppleUsbKbDxe}, or similar driver is required
   for key handling to work. On many firmwares it is not possible to get all the keys function.
 
   In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key
@@ -2361,6 +2408,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
     \item \texttt{0x01} --- Expose printable booter path as an UEFI variable.
     \item \texttt{0x02} --- Expose OpenCore version as an UEFI variable.
     \item \texttt{0x04} --- Expose OpenCore version in boot picker menu title.
+    \item \texttt{0x08} --- Expose OEM information as a set of UEFI variables.
   \end{itemize}
 
   Exposed booter path points to OpenCore.efi or its booter depending on the load order.
@@ -2378,6 +2426,13 @@ u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\
   To obtain OpenCore version use the following command in macOS:
 \begin{lstlisting}[label=nvramver, style=ocbash]
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
+\end{lstlisting}
+
+  To obtain OEM information use the following commands in macOS:
+\begin{lstlisting}[label=nvramver, style=ocbash]
+nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-product # SMBIOS Type1 ProductName
+nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-vendor  # SMBIOS Type2 Manufacturer
+nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductName
 \end{lstlisting}
 
 \item
@@ -3064,15 +3119,22 @@ be used. Version with macOS specific enhancements can be downloaded from
   in \texttt{SystemManufacturer} description. However, certain firmwares
   may not provide valid values otherwise, which could break some software.
 \item
-  \texttt{SupportsCsm}\\
+  \texttt{AdviseWindows}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Forces CSM support in \texttt{FirmwareFeatures}.
+  \textbf{Description}: Forces Windows support in \texttt{FirmwareFeatures}.
 
-  Without this bit it is not possible to reboot to Windows installed on
-  a drive with EFI partition being not the first partition on the disk.
-  
-  \emph{Note}: This was enabled unconditionally in older OpenCore versions.
+  Added bits to \texttt{FirmwareFeatures}:
+
+  \begin{itemize}
+    \item \texttt{FW\_FEATURE\_SUPPORTS\_CSM\_LEGACY\_MODE} (\texttt{0x1})
+    - Without this bit it is not possible to reboot to Windows installed on
+      a drive with EFI partition being not the first partition on the disk.
+    \item \texttt{FW\_FEATURE\_SUPPORTS\_UEFI\_WINDOWS\_BOOT} (\texttt{0x20000000})
+    - Without this bit it is not possible to reboot to Windows installed on
+      a drive with EFI partition being the first partition on the disk.
+  \end{itemize}
+
 \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -3602,11 +3664,16 @@ and supplementary utilities can be used.
   \texttt{ConnectDrivers}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Perform UEFI controller connection after driver
-  loading. This option is useful for loading filesystem drivers, which
+  \textbf{Description}: Perform UEFI controller connection after driver loading.
+
+  This option is useful for loading filesystem drivers, which
   usually follow UEFI driver model, and may not start by themselves.
   While effective, this option may not be necessary for drivers performing
   automatic connection, and may slightly slowdown the boot.
+
+  \emph{Note}: Some firmwares, made by Apple in particular, only connect the boot
+  drive to speedup the boot process. Enable this option to be able to see all the
+  boot options when having multiple drives.
 
 \item
   \texttt{Drivers}\\
@@ -3744,7 +3811,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{AppleKeyMapAggregator} protocol.
 
   This option activates the internal keyboard interceptor driver, based on
-  \texttt{AppleGenericInput} aka (\texttt{AptioIntputFix}), to fill
+  \texttt{AppleGenericInput} aka (\texttt{AptioInputFix}), to fill
   \texttt{AppleKeyMapAggregator} database for input functioning. In case
   a separate driver is used, such as \texttt{AppleUsbKbDxe}, this option
   should never be enabled.
@@ -3820,13 +3887,16 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Description}: Reinstalls Apple Boot Policy protocol with a builtin
   version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
 
+  \emph{Note}: Some Macs, namely \texttt{MacPro5,1}, do have APFS compatibility,
+  but their Apple Boot Policy protocol contains recovery detection issues, thus
+  using this option is advised on them as well.
+
 \item
   \texttt{AppleEvent}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Apple Event protocol with a builtin
   version. This may be used to ensure File Vault 2 compatibility on VMs or legacy Macs.
-
 
 \item
   \texttt{AppleImageConversion}\\
@@ -4007,8 +4077,14 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{ProvideConsoleGop}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: macOS bootloader requires GOP (Graphics Output Protocol)
-  to be present on console handle. This option will install it if missing.
+  \textbf{Description}: Ensure GOP (Graphics Output Protocol) on console handle.
+
+  macOS bootloader requires GOP to be present on console handle, yet the exact
+  location of GOP is not covered by the UEFI specification. This option will
+  ensure GOP is installed on console handle if it is present.
+
+  \emph{Note}: This option will also replace broken GOP protocol on console handle,
+  which may be the case on \texttt{MacPro5,1} with newer GPUs.
 
 \item
   \texttt{ReconnectOnResChange}\\
@@ -4338,7 +4414,8 @@ you will need \texttt{debug=0x8} boot argument.
 
   For offline installation refer to
   \href{https://support.apple.com/HT201372}{How to create a bootable installer for macOS}
-  article.
+  article. Apart from App Store and \texttt{softwareupdate} utility there also are
+  \href{https://github.com/corpnewt/gibMacOS}{third-party tools} to download an offline image.
 
 \item
   \textbf{Why do online recovery images (\texttt{*.dmg}) fail to load?}
