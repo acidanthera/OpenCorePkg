@@ -666,7 +666,7 @@ OcKernelFileOpen (
   EFI_TIME           ModificationTime;
   UINT32             DarwinVersion;
 
-  Status = This->Open (This, NewHandle, FileName, OpenMode, Attributes);
+  Status = SafeFileOpen (This, NewHandle, FileName, OpenMode, Attributes);
 
   DEBUG ((
     DEBUG_VERBOSE,
