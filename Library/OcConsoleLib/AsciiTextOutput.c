@@ -242,6 +242,10 @@ RenderCursor (
   if (!Enabled && !mCursorOnscreen) {
     return;
   }
+  
+  if (Enabled && mCursorOnscreen && PosX == mCursorPosX && PosY == mCursorPosY) {
+    return;
+  }
 
   //
   // Hide previous.
