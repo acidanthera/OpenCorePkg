@@ -21,6 +21,7 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/OcGuardLib.h>
+#include <Library/OcFileLib.h>
 #include <Library/OcVirtualFsLib.h>
 
 #include <Guid/FileInfo.h>
@@ -54,7 +55,7 @@ VirtualFileOpen (
   }
 
   if (Data->OriginalProtocol != NULL) {
-    Status = Data->OriginalProtocol->Open (
+    Status = SafeFileOpen (
       Data->OriginalProtocol,
       NewHandle,
       FileName,

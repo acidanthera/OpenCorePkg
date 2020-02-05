@@ -449,7 +449,7 @@ TestFileOpen (
   EFI_STATUS         PrelinkedStatus;
   EFI_TIME           ModificationTime;
 
-  Status = This->Open (This, NewHandle, FileName, OpenMode, Attributes);
+  Status = SafeFileOpen (This, NewHandle, FileName, OpenMode, Attributes);
 
   if (EFI_ERROR (Status)) {
     return Status;

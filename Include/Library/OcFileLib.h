@@ -68,6 +68,7 @@ LocateFileSystemByGuid (
   );
 
 /**
+  Retrieves volume label.
 
   @param[in]  FileSystem   A pointer to the file system protocol of the volume.
 
@@ -76,6 +77,38 @@ LocateFileSystemByGuid (
 CHAR16 *
 GetVolumeLabel (
   IN     EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem
+  );
+
+/**
+  Opens a new file relative to the source file's location.
+  This function is equivalent to EFI_FILE_OPEN but has additional restrictions
+  to provide board compatibility. Currently the only restriction is
+  no trailing slash in the filename due to issues in FAT drivers.
+
+  - Multiple boards, namely ASUS P8H61-M and P8H61-M LX2 will not
+    open directories with trailing slash. It is irrelevant whether
+    front slash is present for them.
+    For example, it means that L"EFI\\OC\\" or L"\\EFI\\OC\\" will both
+    fail to open, while L"EFI\\OC" and L"\\EFI\\OC" will open fine.
+  - Most newer boards on APTIO IV do handle directories with trailing
+    slash, however, their driver will modify passed string by removing
+    the slash by \0.
+
+  @param  Protocol   File protocol instance.
+  @param  NewHandle  Pointer for returned handle.
+  @param  FileName   Null-terminated file name.
+  @param  OpenMode   File open mode.
+  @param  Attributes Attributes for the newly created file.
+
+  @retval EFI_SUCCESS for successfully opened file.
+*/
+EFI_STATUS
+SafeFileOpen (
+  IN  EFI_FILE_PROTOCOL       *Protocol,
+  OUT EFI_FILE_PROTOCOL       **NewHandle,
+  IN  CONST CHAR16            *FileName,
+  IN  UINT64                  OpenMode,
+  IN  UINT64                  Attributes
   );
 
 /**

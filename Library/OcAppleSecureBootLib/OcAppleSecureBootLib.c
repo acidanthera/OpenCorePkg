@@ -285,7 +285,7 @@ InternalReadFile (
   ASSERT (FilePath != NULL);
   ASSERT (FileSize != NULL);
 
-  Status = Volume->Open (Volume, &FileHandle, FilePath, EFI_FILE_MODE_READ, 0);
+  Status = SafeFileOpen (Volume, &FileHandle, FilePath, EFI_FILE_MODE_READ, 0);
   if (EFI_ERROR (Status)) {
     return NULL;
   }

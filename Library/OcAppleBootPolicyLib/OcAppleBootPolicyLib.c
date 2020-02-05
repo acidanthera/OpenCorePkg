@@ -130,13 +130,13 @@ InternalFileExists (
   EFI_STATUS      Status;
   EFI_FILE_HANDLE FileHandle;
 
-  Status = Root->Open (
-                   Root,
-                   &FileHandle,
-                   (CHAR16 *) FileName,
-                   EFI_FILE_MODE_READ,
-                   0
-                   );
+  Status = SafeFileOpen (
+    Root,
+    &FileHandle,
+    FileName,
+    EFI_FILE_MODE_READ,
+    0
+    );
 
   if (!EFI_ERROR (Status)) {
     FileHandle->Close (FileHandle);
@@ -472,13 +472,13 @@ InternalGetBooterFromApfsVolumePredefinedNameList (
   EFI_FILE_PROTOCOL *VolumeDirectoryHandle;
   EFI_FILE_INFO     *VolumeDirectoryInfo;
 
-  Status = PrebootRoot->Open (
-                     PrebootRoot,
-                     &VolumeDirectoryHandle,
-                     VolumeDirectoryName,
-                     EFI_FILE_MODE_READ,
-                     0
-                     );
+  Status = SafeFileOpen (
+    PrebootRoot,
+    &VolumeDirectoryHandle,
+    VolumeDirectoryName,
+    EFI_FILE_MODE_READ,
+    0
+    );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_BULK_INFO, "OCBP: Missing partition %s on preboot - %r\n", VolumeDirectoryName, Status));
@@ -1214,13 +1214,13 @@ BootPolicyGetApfsRecoveryFilePath (
       PathName
       );
 
-    Status = (*Root)->Open (
-                        *Root,
-                        &NewHandle,
-                        FullPathBuffer,
-                        EFI_FILE_MODE_READ,
-                        0
-                        );
+    Status = SafeFileOpen (
+      *Root,
+      &NewHandle,
+      FullPathBuffer,
+      EFI_FILE_MODE_READ,
+      0
+      );
 
     if (EFI_ERROR (Status)) {
       (*Root)->Close (*Root);
@@ -1438,13 +1438,13 @@ BootPolicyGetAllApfsRecoveryFilePath (
           &VolumeInfo[Index3].VolumeGuid
           );
 
-        Status = Root->Open (
-                         Root,
-                         &NewHandle,
-                         VolumePathName,
-                         EFI_FILE_MODE_READ,
-                         0
-                         );
+        Status = SafeFileOpen (
+          Root,
+          &NewHandle,
+          VolumePathName,
+          EFI_FILE_MODE_READ,
+          0
+          );
 
         if (EFI_ERROR (Status)) {
           continue;

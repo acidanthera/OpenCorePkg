@@ -55,7 +55,7 @@ ReadFile (
     return NULL;
   }
 
-  Status = Volume->Open (
+  Status = SafeFileOpen (
     Volume,
     &FileHandle,
     (CHAR16 *) FilePath,
@@ -128,7 +128,7 @@ ReadFileSize (
     return Status;
   }
 
-  Status = Volume->Open (
+  Status = SafeFileOpen (
     Volume,
     &FileHandle,
     (CHAR16 *) FilePath,

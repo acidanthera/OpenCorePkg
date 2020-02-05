@@ -375,13 +375,13 @@ InternalLoadDmg (
     return NULL;
   }
 
-  Status = DmgDir->Open (
-                     DmgDir,
-                     &DmgFile,
-                     DmgFileInfo->FileName,
-                     EFI_FILE_MODE_READ,
-                     0
-                     );
+  Status = SafeFileOpen (
+    DmgDir,
+    &DmgFile,
+    DmgFileInfo->FileName,
+    EFI_FILE_MODE_READ,
+    0
+    );
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,
@@ -437,13 +437,13 @@ InternalLoadDmg (
                         DmgFileNameLen
                         );
   if (ChunklistFileInfo != NULL) {
-    Status = DmgDir->Open (
-                       DmgDir,
-                       &ChunklistFile,
-                       ChunklistFileInfo->FileName,
-                       EFI_FILE_MODE_READ,
-                       0
-                       );
+    Status = SafeFileOpen (
+      DmgDir,
+      &ChunklistFile,
+      ChunklistFileInfo->FileName,
+      EFI_FILE_MODE_READ,
+      0
+      );
     if (!EFI_ERROR (Status)) {
       Status = GetFileSize (ChunklistFile, &ChunklistFileSize);
       if (Status == EFI_SUCCESS) {

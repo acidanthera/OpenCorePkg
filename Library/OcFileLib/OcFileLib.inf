@@ -31,7 +31,7 @@
   GetFileInfo.c
   GetVolumeLabel.c
   LocateFileSystem.c
-  OpenFileByDp.c
+  OpenFile.c
   ReadFile.c
   GptPartitionEntry.c
   FsConnectQuirk.c

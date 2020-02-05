@@ -236,7 +236,7 @@ OcStorageInitFromFs (
     return Status;
   }
 
-  Status = RootVolume->Open (
+  Status = SafeFileOpen (
     RootVolume,
     &Context->StorageRoot,
     (CHAR16 *) Path,
@@ -352,7 +352,7 @@ OcStorageReadFileUnicode (
     return NULL;
   }
 
-  Status = Context->StorageRoot->Open (
+  Status = SafeFileOpen (
     Context->StorageRoot,
     &File,
     (CHAR16 *) FilePath,

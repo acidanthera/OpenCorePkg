@@ -18,11 +18,43 @@
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
+#include <Library/OcFileLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 #include <Protocol/DevicePath.h>
 #include <Protocol/SimpleFileSystem.h>
+
+EFI_STATUS
+SafeFileOpen (
+  IN  EFI_FILE_PROTOCOL       *Protocol,
+  OUT EFI_FILE_PROTOCOL       **NewHandle,
+  IN  CONST CHAR16            *FileName,
+  IN  UINT64                  OpenMode,
+  IN  UINT64                  Attributes
+  )
+{
+  EFI_STATUS  Status;
+  UINTN       Length;
+
+  DEBUG_CODE_BEGIN ();
+  ASSERT (FileName != NULL);
+  Length = StrLen (FileName);
+  if (Length > 0 && FileName[Length - 1] == L'\\') {
+    DEBUG ((DEBUG_ERROR, "OCFS: Filename %s has trailing slash\n", FileName));
+  }
+  DEBUG_CODE_END ();
+
+  Status = Protocol->Open (
+    Protocol,
+    NewHandle,
+    (CHAR16 *) FileName,
+    OpenMode,
+    Attributes
+    );
+
+  return Status;
+}
 
 EFI_STATUS
 EFIAPI
@@ -126,13 +158,13 @@ OcOpenFileByDevicePath (
     //
     // Open or create the file corresponding to the next pathname fragment.
     //
-    Status = LastFile->Open (
-                         LastFile,
-                         &NextFile,
-                         PathName,
-                         OpenMode,
-                         Attributes
-                         );
+    Status = SafeFileOpen (
+      LastFile,
+      &NextFile,
+      PathName,
+      OpenMode,
+      Attributes
+      );
 
     FreePool (AlignedPathName);
 

@@ -175,7 +175,7 @@ FindWritableFileSystem (
     //
     // We cannot test if the file system is writeable without attempting to create some file.
     //
-    Status = Fs->Open (
+    Status = SafeFileOpen (
       Fs,
       &File,
       L"octest.fil",
@@ -228,7 +228,7 @@ SetFileData (
     Fs = WritableFs;
   }
 
-  Status = Fs->Open (
+  Status = SafeFileOpen (
     Fs,
     &File,
     (CHAR16 *) FileName,

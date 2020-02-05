@@ -256,8 +256,7 @@ InternalGetRecoveryOsBooter (
     // Their SlingShot.efi app just bruteforces com.apple.recovery.boot directory existence,
     // and we have to copy.
     //
-
-    Status = Root->Open (Root, &Recovery, L"\\com.apple.recovery.boot\\", EFI_FILE_MODE_READ, 0);
+    Status = SafeFileOpen (Root, &Recovery, L"\\com.apple.recovery.boot", EFI_FILE_MODE_READ, 0);
     if (!EFI_ERROR (Status)) {
       //
       // Do not do any extra checks for simplicity, as they will be done later either way.
@@ -269,6 +268,19 @@ InternalGetRecoveryOsBooter (
       if (TmpPath != NULL) {
         *FilePath = AppendFileNameDevicePath (TmpPath, L"\\com.apple.recovery.boot\\");
         if (*FilePath != NULL) {
+          DEBUG_CODE_BEGIN ();
+          CHAR16 *DevicePathText = ConvertDevicePathToText (*FilePath, FALSE, FALSE);
+          if (DevicePathText != NULL) {
+            DEBUG ((
+              DEBUG_INFO,
+              "OCBM: Got recovery dp %s\n",
+              DevicePathText
+              ));
+            FreePool (DevicePathText);
+          } else {
+            DEBUG ((DEBUG_INFO, "OCBM: Alloc failure wtf?\n"));
+          }
+          DEBUG_CODE_END ();
           Status = EFI_SUCCESS;
         }
       }
