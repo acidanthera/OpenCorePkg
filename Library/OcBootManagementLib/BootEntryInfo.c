@@ -174,6 +174,7 @@ InternalGetRecoveryOsBooter (
   UINTN                            FilePathSize;
   EFI_DEVICE_PATH_PROTOCOL         *TmpPath;
   UINTN                            TmpPathSize;
+  CHAR16                           *DevicePathText;
 
   Status = gBS->HandleProtocol (
     Device,
@@ -269,16 +270,10 @@ InternalGetRecoveryOsBooter (
         *FilePath = AppendFileNameDevicePath (TmpPath, L"\\com.apple.recovery.boot\\");
         if (*FilePath != NULL) {
           DEBUG_CODE_BEGIN ();
-          CHAR16 *DevicePathText = ConvertDevicePathToText (*FilePath, FALSE, FALSE);
+          DevicePathText = ConvertDevicePathToText (*FilePath, FALSE, FALSE);
           if (DevicePathText != NULL) {
-            DEBUG ((
-              DEBUG_INFO,
-              "OCBM: Got recovery dp %s\n",
-              DevicePathText
-              ));
+            DEBUG ((DEBUG_INFO, "OCBM: Got recovery dp %s\n", DevicePathText));
             FreePool (DevicePathText);
-          } else {
-            DEBUG ((DEBUG_INFO, "OCBM: Alloc failure wtf?\n"));
           }
           DEBUG_CODE_END ();
           Status = EFI_SUCCESS;
