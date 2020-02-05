@@ -41,7 +41,7 @@ SafeFileOpen (
   ASSERT (FileName != NULL);
   Length = StrLen (FileName);
   if (Length > 0 && FileName[Length - 1] == L'\\') {
-    DEBUG ((DEBUG_ERROR, "OCFS: Filename %s has trailing slash\n", FileName));
+    DEBUG ((DEBUG_INFO, "OCFS: Filename %s has trailing slash\n", FileName));
   }
   DEBUG_CODE_END ();
 
