@@ -166,23 +166,30 @@ STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION mBackgroundColor;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION mForegroundColor;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION *mCharacterBuffer;
 
-#define TGT_CHAR_WIDTH  ((UINTN)(ISO_CHAR_WIDTH) * mFontScale)
-#define TGT_CHAR_HEIGHT ((UINTN)(ISO_CHAR_HEIGHT) * mFontScale)
-#define TGT_CHAR_AREA   ((TGT_CHAR_WIDTH) * (TGT_CHAR_HEIGHT))
+#define SCR_PADD           1
+#define TGT_CHAR_WIDTH     ((UINTN)(ISO_CHAR_WIDTH) * mFontScale)
+#define TGT_CHAR_HEIGHT    ((UINTN)(ISO_CHAR_HEIGHT) * mFontScale)
+#define TGT_CHAR_AREA      ((TGT_CHAR_WIDTH) * (TGT_CHAR_HEIGHT))
+#define TGT_PADD_WIDTH     ((TGT_CHAR_WIDTH) * (SCR_PADD))
+#define TGT_PADD_HEIGHT    ((ISO_CHAR_HEIGHT) * (SCR_PADD))
+#define TGT_CURSOR_X       mFontScale
+#define TGT_CURSOR_Y       ((TGT_CHAR_HEIGHT) - mFontScale)
+#define TGT_CURSOR_WIDTH   ((TGT_CHAR_WIDTH) - mFontScale*2)
+#define TGT_CURSOR_HEIGHT  (mFontScale)
 
 /**
-  Render character to TGT_CHAR_AREA buffer.
+  Render character onscreen.
 
-  @param[in]  Char    Character code.
-  @param[in]  FgColor Character colour.
-  @param[in]  BgColor Background colour.
-  @param[out] Buffer  Character buffer.
+  @param[in]  Char  Character code.
+  @param[in]  PosX  Character X position.
+  @param[in]  PosY  Character Y position.
 **/
 STATIC
 VOID
 RenderChar (
-  IN  CHAR16  Char,
-  OUT VOID    *Buffer
+  IN CHAR16   Char,
+  IN UINTN    PosX,
+  IN UINTN    PosY
   )
 {
   UINT32  *DstBuffer;
@@ -192,57 +199,76 @@ RenderChar (
   UINT32  Index2;
   UINT8   Mask;
 
-  DstBuffer = Buffer;
+  DstBuffer = &mCharacterBuffer[0].Raw;
 
-  if ((Char >= 0 && Char < ISO_CHAR_MIN) || Char == 0x7F) {
+  if ((Char >= 0 && Char < ISO_CHAR_MIN) || Char == ' ' || Char == '\t' || Char == 0x7F) {
+    //
+    // I am not positive we can skip drawing step for these symbols.
+    //
     SetMem32 (DstBuffer, TGT_CHAR_AREA * sizeof (DstBuffer[0]), mBackgroundColor.Raw);
-    return;
-  }
+  } else {
 
-  if (Char < ISO_CHAR_MIN || Char > ISO_CHAR_MAX) {
-    Char = L'_';
-  }
-
-  SrcBuffer = mIsoFontData + ((Char - ISO_CHAR_MIN) * (ISO_CHAR_HEIGHT - 2));
-
-  SetMem32 (DstBuffer, TGT_CHAR_WIDTH * mFontScale * sizeof (DstBuffer[0]), mBackgroundColor.Raw);
-  DstBuffer += TGT_CHAR_WIDTH * mFontScale;
-
-  for (Line = 0; Line < ISO_CHAR_HEIGHT - 2; ++Line) {
-    //
-    // Iterate, while the single bit drops to the right.
-    //
-    for (Index = 0; Index < mFontScale; ++Index) {
-      Mask = 1;
-      do {
-        for (Index2 = 0; Index2 < mFontScale; ++Index2) {
-          *DstBuffer = (*SrcBuffer & Mask) ? mForegroundColor.Raw : mBackgroundColor.Raw;
-          ++DstBuffer;
-        }
-        Mask <<= 1U;
-      } while (Mask != 0);
+    if (Char < ISO_CHAR_MIN || Char > ISO_CHAR_MAX) {
+      Char = L'_';
     }
-    ++SrcBuffer;
+
+    SrcBuffer = mIsoFontData + ((Char - ISO_CHAR_MIN) * (ISO_CHAR_HEIGHT - 2));
+
+    SetMem32 (DstBuffer, TGT_CHAR_WIDTH * mFontScale * sizeof (DstBuffer[0]), mBackgroundColor.Raw);
+    DstBuffer += TGT_CHAR_WIDTH * mFontScale;
+
+    for (Line = 0; Line < ISO_CHAR_HEIGHT - 2; ++Line) {
+      //
+      // Iterate, while the single bit drops to the right.
+      //
+      for (Index = 0; Index < mFontScale; ++Index) {
+        Mask = 1;
+        do {
+          for (Index2 = 0; Index2 < mFontScale; ++Index2) {
+            *DstBuffer = (*SrcBuffer & Mask) ? mForegroundColor.Raw : mBackgroundColor.Raw;
+            ++DstBuffer;
+          }
+          Mask <<= 1U;
+        } while (Mask != 0);
+      }
+      ++SrcBuffer;
+    }
+
+    SetMem32 (DstBuffer, TGT_CHAR_WIDTH * mFontScale * sizeof (DstBuffer[0]), mBackgroundColor.Raw);
   }
 
-  SetMem32 (DstBuffer, TGT_CHAR_WIDTH * mFontScale * sizeof (DstBuffer[0]), mBackgroundColor.Raw);
+  mGraphicsOutput->Blt (
+    mGraphicsOutput,
+    &mCharacterBuffer[0].Pixel,
+    EfiBltBufferToVideo,
+    0,
+    0,
+    TGT_PADD_WIDTH  + PosX * TGT_CHAR_WIDTH,
+    TGT_PADD_HEIGHT + PosY * TGT_CHAR_HEIGHT,
+    TGT_CHAR_WIDTH,
+    TGT_CHAR_HEIGHT,
+    0
+    );
 }
 
+/**
+  Render cursor onscreen.
+
+  @param[in]  Enabled  Whether cursor should be drawn.
+  @param[in]  PosX     Character X position.
+  @param[in]  PosY     Character Y position.
+**/
 STATIC
 VOID
 RenderCursor (
+  IN BOOLEAN  Enabled,
   IN UINTN    PosX,
-  IN UINTN    PosY,
-  IN BOOLEAN  Enabled
+  IN UINTN    PosY
   )
 {
   //
-  // Disabled and invisible.
+  // Enabled but already drawn.
   //
-  if (!Enabled && !mCursorOnscreen) {
-    return;
-  }
-  
   if (Enabled && mCursorOnscreen && PosX == mCursorPosX && PosY == mCursorPosY) {
     return;
   }
@@ -257,10 +283,10 @@ RenderCursor (
       EfiBltVideoFill,
       0,
       0,
-      TGT_CHAR_WIDTH + mCursorPosX * TGT_CHAR_WIDTH + mFontScale,
-      TGT_CHAR_HEIGHT + mCursorPosY * TGT_CHAR_HEIGHT - mFontScale + TGT_CHAR_HEIGHT,
-      TGT_CHAR_WIDTH - mFontScale * 2,
-      mFontScale,
+      TGT_PADD_WIDTH  + mCursorPosX * TGT_CHAR_WIDTH  + TGT_CURSOR_X,
+      TGT_PADD_HEIGHT + mCursorPosY * TGT_CHAR_HEIGHT + TGT_CURSOR_Y,
+      TGT_CURSOR_WIDTH,
+      TGT_CURSOR_HEIGHT,
       0
       );
     mCursorOnscreen = FALSE;
@@ -276,16 +302,60 @@ RenderCursor (
       EfiBltVideoFill,
       0,
       0,
-      TGT_CHAR_WIDTH + PosX * TGT_CHAR_WIDTH + mFontScale,
-      TGT_CHAR_HEIGHT + PosY * TGT_CHAR_HEIGHT - mFontScale + TGT_CHAR_HEIGHT,
-      TGT_CHAR_WIDTH - mFontScale * 2,
-      mFontScale,
+      TGT_PADD_WIDTH  + PosX * TGT_CHAR_WIDTH  + TGT_CURSOR_X,
+      TGT_PADD_HEIGHT + PosY * TGT_CHAR_HEIGHT + TGT_CURSOR_Y,
+      TGT_CURSOR_WIDTH,
+      TGT_CURSOR_HEIGHT,
       0
       );
     mCursorPosX     = PosX;
     mCursorPosY     = PosY;
     mCursorOnscreen = TRUE;
   }
+}
+
+STATIC
+VOID
+RenderScroll (
+  VOID
+  )
+{
+  //
+  // Hide previous cursor.
+  //
+  RenderCursor (FALSE, 0, 0);
+
+  //
+  // Move data.
+  //
+  mGraphicsOutput->Blt (
+    mGraphicsOutput,
+    NULL,
+    EfiBltVideoToVideo,
+    0,
+    TGT_PADD_HEIGHT + TGT_CHAR_HEIGHT,
+    0,
+    TGT_PADD_HEIGHT,
+    mGraphicsOutput->Mode->Info->HorizontalResolution,
+    TGT_CHAR_HEIGHT * (mConsoleHeight - 1),
+    0
+    );
+
+  //
+  // Erase last line.
+  //
+  mGraphicsOutput->Blt (
+    mGraphicsOutput,
+    &mBackgroundColor.Pixel,
+    EfiBltVideoFill,
+    0,
+    0,
+    0,
+    TGT_PADD_HEIGHT + TGT_CHAR_HEIGHT * (mConsoleHeight - 1),
+    mGraphicsOutput->Mode->Info->HorizontalResolution,
+    TGT_CHAR_HEIGHT,
+    0
+    );
 }
 
 STATIC
@@ -298,6 +368,9 @@ AsciiTextReset (
 {
   EFI_STATUS                            Status;
   EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  *Info;
+  EFI_TPL                               OldTpl;
+
+  OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
 
   Status = gBS->HandleProtocol (
     gST->ConsoleOutHandle,
@@ -306,6 +379,7 @@ AsciiTextReset (
     );
 
   if (EFI_ERROR (Status)) {
+    gBS->RestoreTPL (OldTpl);
     return EFI_DEVICE_ERROR;
   }
 
@@ -315,6 +389,7 @@ AsciiTextReset (
     || Info->VerticalResolution < TGT_CHAR_HEIGHT * 3
     || (Info->PixelFormat != PixelRedGreenBlueReserved8BitPerColor
       && Info->PixelFormat != PixelBlueGreenRedReserved8BitPerColor)) {
+    gBS->RestoreTPL (OldTpl);
     return EFI_DEVICE_ERROR;
   }
 
@@ -324,13 +399,16 @@ AsciiTextReset (
 
   mCharacterBuffer = AllocatePool (TGT_CHAR_AREA * sizeof (mCharacterBuffer[0]));
   if (mCharacterBuffer == NULL) {
+    gBS->RestoreTPL (OldTpl);
     return EFI_DEVICE_ERROR;
   }
 
-  mConsoleWidth            = (Info->HorizontalResolution / TGT_CHAR_WIDTH) - 2;
-  mConsoleHeight           = (Info->VerticalResolution / TGT_CHAR_HEIGHT) - 2;
+  mConsoleWidth            = (Info->HorizontalResolution / TGT_CHAR_WIDTH)  - 2 * SCR_PADD;
+  mConsoleHeight           = (Info->VerticalResolution   / TGT_CHAR_HEIGHT) - 2 * SCR_PADD;
+  This->Mode->MaxMode      = 1;
   This->Mode->CursorColumn = 0;
   This->Mode->CursorRow    = 0;
+  This->Mode->Attribute    = (ARRAY_SIZE (mGraphicsEfiColors) / 2) - 1;
   mCursorOnscreen          = FALSE;
   mCursorPosX              = 0;
   mCursorPosY              = 0;
@@ -352,6 +430,7 @@ AsciiTextReset (
     0
     );
 
+  gBS->RestoreTPL (OldTpl);
   return EFI_SUCCESS;
 }
 
@@ -363,82 +442,77 @@ AsciiTextOutputString (
   IN CHAR16                          *String
   )
 {
-  UINTN                          Index;
+  UINTN    Index;
+  EFI_TPL  OldTpl;
+
+  OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+
+  //
+  // We cannot assert here and these values should not but may be trashed by the user,
+  // so we do sanity checks in runtime.
+  //
+  if (This->Mode->CursorColumn < 0 || (UINTN) This->Mode->CursorColumn >= mConsoleWidth) {
+    This->Mode->CursorColumn = 0;
+  }
+
+  if (This->Mode->CursorRow < 0 || (UINTN) This->Mode->CursorRow >= mConsoleHeight) {
+    This->Mode->CursorRow = 0;
+  }
 
   for (Index = 0; String[Index] != '\0'; ++Index) {
+    //
+    // Carriage return should just move the cursor back.
+    //
     if (String[Index] == '\r') {
       This->Mode->CursorColumn = 0;
       continue;
     }
 
-    if ((UINTN) This->Mode->CursorColumn >= mConsoleWidth || String[Index] == '\n') {
-      if ((UINTN) This->Mode->CursorColumn >= mConsoleWidth) {
-        This->Mode->CursorColumn = 0;
+    //
+    // Newline should move the cursor lower.
+    // In case we are out of room it should scroll instead.
+    //
+    if (String[Index] == '\n') {
+      if ((UINTN) This->Mode->CursorRow < mConsoleHeight - 1) {
+        ++This->Mode->CursorRow;
+        mConsoleMaxPosY = MAX (mConsoleMaxPosY, (UINTN) This->Mode->CursorRow);
+      } else {
+        RenderScroll ();
       }
-
-      ++This->Mode->CursorRow;
-      mConsoleMaxPosY = MAX (mConsoleMaxPosY, (UINTN) This->Mode->CursorRow);
-
-      if (String[Index] == '\n') {
-        continue;
-      }
-    }
-
-    if ((UINTN) This->Mode->CursorRow >= mConsoleHeight) {
-      mGraphicsOutput->Blt (
-        mGraphicsOutput,
-        NULL,
-        EfiBltVideoToVideo,
-        0,
-        TGT_CHAR_HEIGHT * 2,
-        0,
-        TGT_CHAR_HEIGHT,
-        mGraphicsOutput->Mode->Info->HorizontalResolution,
-        TGT_CHAR_HEIGHT * (mConsoleHeight - 1),
-        0
-        );
-
-      mGraphicsOutput->Blt (
-        mGraphicsOutput,
-        &mBackgroundColor.Pixel,
-        EfiBltVideoFill,
-        0,
-        0,
-        0,
-        TGT_CHAR_HEIGHT * mConsoleHeight,
-        mGraphicsOutput->Mode->Info->HorizontalResolution,
-        TGT_CHAR_HEIGHT,
-        0
-        );
-
-      This->Mode->CursorColumn = 0;
-      This->Mode->CursorRow    = (INT32) (mConsoleHeight - 1);
-    }
-
-    if (String[Index] < ' ' && String[Index] != '\t') {
       continue;
     }
 
-    RenderChar (String[Index], &mCharacterBuffer[0].Raw);
-
-    mGraphicsOutput->Blt (
-      mGraphicsOutput,
-      &mCharacterBuffer[0].Pixel,
-      EfiBltBufferToVideo,
-      0,
-      0,
-      TGT_CHAR_WIDTH + This->Mode->CursorColumn * TGT_CHAR_WIDTH,
-      TGT_CHAR_HEIGHT + This->Mode->CursorRow * TGT_CHAR_HEIGHT,
-      TGT_CHAR_WIDTH,
-      TGT_CHAR_HEIGHT,
-      0
-      );
-
-    ++This->Mode->CursorColumn;
-    mConsoleMaxPosX = MAX (mConsoleMaxPosX, This->Mode->CursorColumn);
+    //
+    // Render normal symbol and decide on next cursor position.
+    //
+    RenderChar (String[Index], This->Mode->CursorColumn, This->Mode->CursorRow);
+    if ((UINTN) This->Mode->CursorColumn < mConsoleWidth - 1) {
+      //
+      // Continues on the same line.
+      //
+      ++This->Mode->CursorColumn;
+      mConsoleMaxPosX = MAX (mConsoleMaxPosX, (UINTN) This->Mode->CursorColumn);
+    } else if ((UINTN) This->Mode->CursorRow < mConsoleHeight - 1) {
+      //
+      // New line without scroll.
+      //
+      This->Mode->CursorColumn = 0;
+      ++This->Mode->CursorRow;
+      mConsoleMaxPosY = MAX (mConsoleMaxPosY, (UINTN) This->Mode->CursorRow);
+    } else {
+      //
+      // New line with scroll.
+      //
+      This->Mode->CursorColumn = 0;
+      RenderScroll ();
+    }
   }
 
-  RenderCursor (This->Mode->CursorColumn, This->Mode->CursorRow, This->Mode->CursorVisible);
+  if (This->Mode->CursorVisible) {
+    RenderCursor (TRUE, This->Mode->CursorColumn, This->Mode->CursorRow);
+  }
+
+  gBS->RestoreTPL (OldTpl);
 
   return EFI_SUCCESS;
 }
@@ -464,14 +538,22 @@ AsciiTextQueryMode (
   OUT UINTN                           *Rows
   )
 {
-  if (ModeNumber != 0) {
-    return EFI_UNSUPPORTED;
+  EFI_STATUS  Status;
+  EFI_TPL     OldTpl;
+
+  OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+
+  if (ModeNumber == 0) {
+    *Columns = mConsoleWidth;
+    *Rows    = mConsoleHeight;
+    Status = EFI_SUCCESS;
+  } else {
+    Status = EFI_UNSUPPORTED;
   }
 
-  *Columns = mConsoleWidth;
-  *Rows    = mConsoleHeight;
+  gBS->RestoreTPL (OldTpl);
 
-  return EFI_SUCCESS;
+  return Status;
 }
 
 STATIC
@@ -497,27 +579,32 @@ AsciiTextSetAttribute (
   IN UINTN                           Attribute
   )
 {
-  UINT32  FgColor;
-  UINT32  BgColor;
+  UINT32   FgColor;
+  UINT32   BgColor;
+  EFI_TPL  OldTpl;
 
   if ((Attribute & ~0x7FU) != 0) {
     return EFI_UNSUPPORTED;
   }
 
+  OldTpl  = gBS->RaiseTPL (TPL_NOTIFY);
+
   FgColor = BitFieldRead32 (Attribute, 0, 3);
   BgColor = BitFieldRead32 (Attribute, 4, 6);
 
   //
-  // Black foreground means grey.
+  // Once we change the background we should redraw everything.
   //
-  if (FgColor == 0) {
-    FgColor = ARRAY_SIZE (mGraphicsEfiColors) / 2 - 1;
+  if (mGraphicsEfiColors[BgColor] != mBackgroundColor.Raw) {
+    mConsoleMaxPosX = mConsoleWidth + SCR_PADD;
+    mConsoleMaxPosY = mConsoleHeight + SCR_PADD;
   }
 
   mForegroundColor.Raw  = mGraphicsEfiColors[FgColor];
   mBackgroundColor.Raw  = mGraphicsEfiColors[BgColor];
   This->Mode->Attribute = Attribute;
 
+  gBS->RestoreTPL (OldTpl);
   return EFI_SUCCESS;
 }
 
@@ -528,29 +615,45 @@ AsciiTextClearScreen (
   IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This
   )
 {
+  UINTN    Width;
+  UINTN    Height;
+  EFI_TPL  OldTpl;
+
+  OldTpl  = gBS->RaiseTPL (TPL_NOTIFY);
+
   mCursorOnscreen           = FALSE;
   This->Mode->CursorColumn  = 0;
   This->Mode->CursorRow     = 0;
 
-  if (mConsoleMaxPosX > 0) {
-    mGraphicsOutput->Blt (
-      mGraphicsOutput,
-      &mBackgroundColor.Pixel,
-      EfiBltVideoFill,
-      0,
-      0,
-      0,
-      0,
-      MIN ((mConsoleMaxPosX + 1) * TGT_CHAR_WIDTH, mGraphicsOutput->Mode->Info->HorizontalResolution),
-      MIN ((mConsoleMaxPosY + 2) * TGT_CHAR_HEIGHT, mGraphicsOutput->Mode->Info->VerticalResolution),
-      0
-      );
-  }
+  //
+  // X coordinate points to the right most coordinate of the last printed
+  // character, but after this character we may also have cursor.
+  // Y coordinate points to the top most coordinate of the last printed row.
+  //
+  Width  = TGT_PADD_WIDTH  + (mConsoleMaxPosX + 1) * TGT_CHAR_WIDTH;
+  Height = TGT_PADD_HEIGHT + (mConsoleMaxPosY + 1) * TGT_CHAR_HEIGHT;
+
+  //
+  // We clear in any case as we do not detect cursor state.
+  //
+  mGraphicsOutput->Blt (
+    mGraphicsOutput,
+    &mBackgroundColor.Pixel,
+    EfiBltVideoFill,
+    0,
+    0,
+    0,
+    0,
+    MIN (Width, mGraphicsOutput->Mode->Info->HorizontalResolution),
+    MIN (Height, mGraphicsOutput->Mode->Info->VerticalResolution),
+    0
+    );
 
   //
   // We do not reset max here, as we may still scroll (e.g. in shell via page buttons).
   //
 
+  gBS->RestoreTPL (OldTpl);
   return EFI_SUCCESS;
 }
 
@@ -563,15 +666,26 @@ AsciiTextSetCursorPosition (
   IN UINTN                           Row
   )
 {
-  if (Column >= mConsoleWidth || Row >= mConsoleHeight) {
-    return EFI_UNSUPPORTED;
+  EFI_STATUS  Status;
+  EFI_TPL     OldTpl;
+
+  OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+
+  if (Column < mConsoleWidth && Row < mConsoleHeight) {
+    This->Mode->CursorColumn = (INT32) Column;
+    This->Mode->CursorRow    = (INT32) Row;
+    mConsoleMaxPosX = MAX (mConsoleMaxPosX, Column);
+    mConsoleMaxPosY = MAX (mConsoleMaxPosY, Row);
+    if (This->Mode->CursorVisible) {
+      RenderCursor (TRUE, This->Mode->CursorColumn, This->Mode->CursorRow);
+    }
+    Status = EFI_SUCCESS;
+  } else {
+    Status = EFI_UNSUPPORTED;
   }
 
-  This->Mode->CursorColumn = (INT32) Column;
-  This->Mode->CursorRow    = (INT32) Row;
-  RenderCursor (This->Mode->CursorColumn, This->Mode->CursorRow, This->Mode->CursorVisible);
-
-  return EFI_SUCCESS;
+  gBS->RestoreTPL (OldTpl);
+  return Status;
 }
 
 STATIC
@@ -582,21 +696,18 @@ AsciiTextEnableCursor (
   IN BOOLEAN                         Visible
   )
 {
+  EFI_TPL     OldTpl;
+
+  OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
   This->Mode->CursorVisible = Visible;
-  RenderCursor (This->Mode->CursorColumn, This->Mode->CursorRow, This->Mode->CursorVisible);
+  RenderCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
+  gBS->RestoreTPL (OldTpl);
   return EFI_SUCCESS;
 }
 
 STATIC
 EFI_SIMPLE_TEXT_OUTPUT_MODE
-mAsciiTextOutputMode = {
-  .MaxMode       = 1,
-  .Mode          = 0,
-  .Attribute     = 0,
-  .CursorColumn  = 0,
-  .CursorRow     = 0,
-  .CursorVisible = FALSE,
-};
+mAsciiTextOutputMode;
 
 STATIC
 EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL
