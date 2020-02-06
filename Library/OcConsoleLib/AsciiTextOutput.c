@@ -158,9 +158,6 @@ STATIC UINTN mConsoleWidth;
 STATIC UINTN mConsoleHeight;
 STATIC UINTN mConsoleMaxPosX;
 STATIC UINTN mConsoleMaxPosY;
-STATIC UINTN mCursorPosX;
-STATIC UINTN mCursorPosY;
-STATIC BOOLEAN mCursorOnscreen;
 STATIC UINT8 mFontScale;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION mBackgroundColor;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION mForegroundColor;
@@ -202,9 +199,6 @@ RenderChar (
   DstBuffer = &mCharacterBuffer[0].Raw;
 
   if ((Char >= 0 && Char < ISO_CHAR_MIN) || Char == ' ' || Char == '\t' || Char == 0x7F) {
-    //
-    // I am not positive we can skip drawing step for these symbols.
-    //
     SetMem32 (DstBuffer, TGT_CHAR_AREA * sizeof (DstBuffer[0]), mBackgroundColor.Raw);
   } else {
 
@@ -252,66 +246,66 @@ RenderChar (
 }
 
 /**
-  Render cursor onscreen.
+  Swap cursor visibility onscreen.
 
-  @param[in]  Enabled  Whether cursor should be drawn.
+  @param[in]  Enabled  Whether cursor is visible.
   @param[in]  PosX     Character X position.
   @param[in]  PosY     Character Y position.
 **/
 STATIC
 VOID
-RenderCursor (
+FlushCursor (
   IN BOOLEAN  Enabled,
   IN UINTN    PosX,
   IN UINTN    PosY
   )
 {
-  //
-  // Enabled but already drawn.
-  //
-  if (Enabled && mCursorOnscreen && PosX == mCursorPosX && PosY == mCursorPosY) {
+  EFI_STATUS                           Status;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION  Colour;
+
+  if (!Enabled) {
     return;
   }
 
   //
-  // Hide previous.
+  // UEFI only has one cursor at a time. UEFI Shell edit command has a cursor and a mouse
+  // pointer, which are not connected. To be able to draw both at a time UEFI Shell constantly
+  // redraws both the cursor and the mouse pointer. To do that it constantly flips bg and fg
+  // colours as well as cursor visibility.
+  // It seems that the Shell implementation relies on an undocumented feature (is that a bug?)
+  // of hiding an already drawn cursor with a space with inverted attributes.
+  // This is weird but EDK II implementation seems to match the logic, and as a result we
+  // track cursor visibility or easily optimise this logic.
   //
-  if (mCursorOnscreen) {
-    mGraphicsOutput->Blt (
-      mGraphicsOutput,
-      &mBackgroundColor.Pixel,
-      EfiBltVideoFill,
-      0,
-      0,
-      TGT_PADD_WIDTH  + mCursorPosX * TGT_CHAR_WIDTH  + TGT_CURSOR_X,
-      TGT_PADD_HEIGHT + mCursorPosY * TGT_CHAR_HEIGHT + TGT_CURSOR_Y,
-      TGT_CURSOR_WIDTH,
-      TGT_CURSOR_HEIGHT,
-      0
-      );
-    mCursorOnscreen = FALSE;
+  Status = mGraphicsOutput->Blt (
+    mGraphicsOutput,
+    &Colour.Pixel,
+    EfiBltVideoToBltBuffer,
+    TGT_PADD_WIDTH  + PosX * TGT_CHAR_WIDTH  + TGT_CURSOR_X,
+    TGT_PADD_HEIGHT + PosY * TGT_CHAR_HEIGHT + TGT_CURSOR_Y,
+    0,
+    0,
+    1,
+    1,
+    0
+    );
+
+  if (EFI_ERROR (Status)) {
+    return;
   }
 
-  //
-  // Draw new.
-  //
-  if (Enabled) {
-    mGraphicsOutput->Blt (
-      mGraphicsOutput,
-      &mForegroundColor.Pixel,
-      EfiBltVideoFill,
-      0,
-      0,
-      TGT_PADD_WIDTH  + PosX * TGT_CHAR_WIDTH  + TGT_CURSOR_X,
-      TGT_PADD_HEIGHT + PosY * TGT_CHAR_HEIGHT + TGT_CURSOR_Y,
-      TGT_CURSOR_WIDTH,
-      TGT_CURSOR_HEIGHT,
-      0
-      );
-    mCursorPosX     = PosX;
-    mCursorPosY     = PosY;
-    mCursorOnscreen = TRUE;
-  }
+  mGraphicsOutput->Blt (
+    mGraphicsOutput,
+    Colour.Raw == mForegroundColor.Raw ? &mBackgroundColor.Pixel : &mForegroundColor.Pixel,
+    EfiBltVideoFill,
+    0,
+    0,
+    TGT_PADD_WIDTH  + PosX * TGT_CHAR_WIDTH  + TGT_CURSOR_X,
+    TGT_PADD_HEIGHT + PosY * TGT_CHAR_HEIGHT + TGT_CURSOR_Y,
+    TGT_CURSOR_WIDTH,
+    TGT_CURSOR_HEIGHT,
+    0
+    );
 }
 
 STATIC
@@ -320,11 +314,6 @@ RenderScroll (
   VOID
   )
 {
-  //
-  // Hide previous cursor.
-  //
-  RenderCursor (FALSE, 0, 0);
-
   //
   // Move data.
   //
@@ -409,9 +398,6 @@ AsciiTextReset (
   This->Mode->CursorColumn = 0;
   This->Mode->CursorRow    = 0;
   This->Mode->Attribute    = (ARRAY_SIZE (mGraphicsEfiColors) / 2) - 1;
-  mCursorOnscreen          = FALSE;
-  mCursorPosX              = 0;
-  mCursorPosY              = 0;
   mConsoleMaxPosX          = 0;
   mConsoleMaxPosY          = 0;
   mBackgroundColor.Raw     = mGraphicsEfiColors[0];
@@ -459,6 +445,8 @@ AsciiTextOutputString (
     This->Mode->CursorRow = 0;
   }
 
+  FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
+
   for (Index = 0; String[Index] != '\0'; ++Index) {
     //
     // Carriage return should just move the cursor back.
@@ -503,14 +491,12 @@ AsciiTextOutputString (
       //
       // New line with scroll.
       //
-      This->Mode->CursorColumn = 0;
       RenderScroll ();
+      This->Mode->CursorColumn = 0;
     }
   }
 
-  if (This->Mode->CursorVisible) {
-    RenderCursor (TRUE, This->Mode->CursorColumn, This->Mode->CursorRow);
-  }
+  FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
 
   gBS->RestoreTPL (OldTpl);
 
@@ -589,20 +575,26 @@ AsciiTextSetAttribute (
 
   OldTpl  = gBS->RaiseTPL (TPL_NOTIFY);
 
-  FgColor = BitFieldRead32 (Attribute, 0, 3);
-  BgColor = BitFieldRead32 (Attribute, 4, 6);
+  if (Attribute != This->Mode->Attribute) {
+    FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
 
-  //
-  // Once we change the background we should redraw everything.
-  //
-  if (mGraphicsEfiColors[BgColor] != mBackgroundColor.Raw) {
-    mConsoleMaxPosX = mConsoleWidth + SCR_PADD;
-    mConsoleMaxPosY = mConsoleHeight + SCR_PADD;
+    FgColor = BitFieldRead32 (Attribute, 0, 3);
+    BgColor = BitFieldRead32 (Attribute, 4, 6);
+
+    //
+    // Once we change the background we should redraw everything.
+    //
+    if (mGraphicsEfiColors[BgColor] != mBackgroundColor.Raw) {
+      mConsoleMaxPosX = mConsoleWidth + SCR_PADD;
+      mConsoleMaxPosY = mConsoleHeight + SCR_PADD;
+    }
+
+    mForegroundColor.Raw  = mGraphicsEfiColors[FgColor];
+    mBackgroundColor.Raw  = mGraphicsEfiColors[BgColor];
+    This->Mode->Attribute = Attribute;
+
+    FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
   }
-
-  mForegroundColor.Raw  = mGraphicsEfiColors[FgColor];
-  mBackgroundColor.Raw  = mGraphicsEfiColors[BgColor];
-  This->Mode->Attribute = Attribute;
 
   gBS->RestoreTPL (OldTpl);
   return EFI_SUCCESS;
@@ -621,10 +613,6 @@ AsciiTextClearScreen (
 
   OldTpl  = gBS->RaiseTPL (TPL_NOTIFY);
 
-  mCursorOnscreen           = FALSE;
-  This->Mode->CursorColumn  = 0;
-  This->Mode->CursorRow     = 0;
-
   //
   // X coordinate points to the right most coordinate of the last printed
   // character, but after this character we may also have cursor.
@@ -633,9 +621,6 @@ AsciiTextClearScreen (
   Width  = TGT_PADD_WIDTH  + (mConsoleMaxPosX + 1) * TGT_CHAR_WIDTH;
   Height = TGT_PADD_HEIGHT + (mConsoleMaxPosY + 1) * TGT_CHAR_HEIGHT;
 
-  //
-  // We clear in any case as we do not detect cursor state.
-  //
   mGraphicsOutput->Blt (
     mGraphicsOutput,
     &mBackgroundColor.Pixel,
@@ -648,6 +633,13 @@ AsciiTextClearScreen (
     MIN (Height, mGraphicsOutput->Mode->Info->VerticalResolution),
     0
     );
+
+  //
+  // Handle cursor.
+  //
+  This->Mode->CursorColumn  = 0;
+  This->Mode->CursorRow     = 0;
+  FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
 
   //
   // We do not reset max here, as we may still scroll (e.g. in shell via page buttons).
@@ -672,13 +664,12 @@ AsciiTextSetCursorPosition (
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
 
   if (Column < mConsoleWidth && Row < mConsoleHeight) {
+    FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
     This->Mode->CursorColumn = (INT32) Column;
     This->Mode->CursorRow    = (INT32) Row;
+    FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
     mConsoleMaxPosX = MAX (mConsoleMaxPosX, Column);
     mConsoleMaxPosY = MAX (mConsoleMaxPosY, Row);
-    if (This->Mode->CursorVisible) {
-      RenderCursor (TRUE, This->Mode->CursorColumn, This->Mode->CursorRow);
-    }
     Status = EFI_SUCCESS;
   } else {
     Status = EFI_UNSUPPORTED;
@@ -699,8 +690,9 @@ AsciiTextEnableCursor (
   EFI_TPL     OldTpl;
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+  FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
   This->Mode->CursorVisible = Visible;
-  RenderCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
+  FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
   gBS->RestoreTPL (OldTpl);
   return EFI_SUCCESS;
 }
