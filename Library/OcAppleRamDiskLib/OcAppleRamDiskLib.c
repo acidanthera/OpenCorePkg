@@ -26,6 +26,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcGuardLib.h>
 #include <Library/OcMemoryLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcCryptoLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiLib.h>
@@ -478,46 +479,98 @@ OcAppleRamDiskLoadFile (
   IN UINTN                              FileSize
   )
 {
-  EFI_STATUS Status;
-  UINT64     FilePosition;
-  UINT32     Index;
-  UINTN      RequestedSize;
-  UINTN      ReadSize;
+  EFI_STATUS      Status;
+  UINT64          FilePosition;
+  UINT32          Index;
+  UINTN           RequestedSize;
+  UINTN           ReadSize;
+  UINTN           ExtentSize;
+  SHA256_CONTEXT  Ctx;
+  UINT8           Digest[SHA256_DIGEST_SIZE];
+  UINT8           *TmpBuffer;
+  UINT8           *ExtentBuffer;
 
   ASSERT (ExtentTable != NULL);
   INTERNAL_ASSERT_EXTENT_TABLE_VALID (ExtentTable);
   ASSERT (File != NULL);
   ASSERT (FileSize > 0);
 
-  FilePosition = 0;
-
-  Status = File->SetPosition (File, FilePosition);
-  if (EFI_ERROR (Status)) {
+  //
+  // We need a temporary buffer in lower addresses as several motherboards on APTIO IV
+  // (e.g. GA-Z87X-UD4H) fail to read directly to high addresses when using FAT filesystem.
+  // The issue is likely a continuation of AvoidHighAlloc bugs.
+  //
+  TmpBuffer = AllocatePool (BASE_4MB);
+  if (TmpBuffer == NULL) {
     return FALSE;
   }
 
-  for (Index = 0; Index < ExtentTable->ExtentCount; ++Index) {
+  DEBUG_CODE_BEGIN ();
+  Sha256Init (&Ctx);
+  DEBUG_CODE_END ();
+
+  FilePosition = 0;
+
+  for (Index = 0; Index < ExtentTable->ExtentCount && FileSize > 0; ++Index) {
     ASSERT (ExtentTable->Extents[Index].Start <= MAX_UINTN);
     ASSERT (ExtentTable->Extents[Index].Length <= MAX_UINTN);
 
-    RequestedSize = ReadSize = (UINTN)MIN (FileSize, ExtentTable->Extents[Index].Length);
-    Status = File->Read (
-      File,
-      &RequestedSize,
-      (VOID *)(UINTN)ExtentTable->Extents[Index].Start
-      );
+    ExtentBuffer = (VOID *)(UINTN) ExtentTable->Extents[Index].Start;
+    ExtentSize   = ExtentTable->Extents[Index].Length;
 
-    if (EFI_ERROR (Status) || RequestedSize != ReadSize) {
-      return FALSE;
-    }
+    while (FileSize > 0 && ExtentSize > 0) {
+      Status = File->SetPosition (File, FilePosition);
+      if (EFI_ERROR (Status)) {
+        FreePool (TmpBuffer);
+        return FALSE;
+      }
 
-    FileSize -= RequestedSize;
-    if (FileSize == 0) {
-      return TRUE;
+      RequestedSize = MIN (MIN (BASE_4MB, FileSize), ExtentSize);
+      ReadSize = RequestedSize;
+      Status = File->Read (
+        File,
+        &ReadSize,
+        TmpBuffer
+        );
+      if (EFI_ERROR (Status) || RequestedSize != ReadSize) {
+        FreePool (TmpBuffer);
+        return FALSE;
+      }
+
+      DEBUG_CODE_BEGIN ();
+      Sha256Update (&Ctx, TmpBuffer, ReadSize);
+      DEBUG_CODE_END ();
+
+      CopyMem (ExtentBuffer, TmpBuffer, ReadSize);
+
+      FilePosition += ReadSize;
+      ExtentBuffer += ReadSize;
+      ExtentSize   -= ReadSize;
+      FileSize     -= ReadSize;
     }
   }
 
-  return FALSE;
+  FreePool (TmpBuffer);
+
+  //
+  // Not enough extents.
+  //
+  if (FileSize != 0) {
+    return FALSE;
+  }
+
+  DEBUG_CODE_BEGIN ();
+  Sha256Final (&Ctx, Digest);
+  DEBUG ((
+    DEBUG_INFO,
+    "OCRAM: SHA-256 Digest is: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X\n",
+     Digest[0],  Digest[1],  Digest[2],  Digest[3],  Digest[4],  Digest[5],  Digest[6],  Digest[7],  Digest[8],  Digest[9],
+    Digest[10], Digest[11], Digest[12], Digest[13], Digest[14], Digest[15], Digest[16], Digest[17], Digest[18], Digest[19],
+    Digest[20], Digest[21], Digest[22], Digest[23], Digest[24], Digest[25], Digest[26], Digest[27], Digest[28], Digest[29],
+    Digest[30], Digest[31]
+    ));
+  DEBUG_CODE_END ();
+  return TRUE;
 }
 
 VOID
