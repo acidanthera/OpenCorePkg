@@ -3,7 +3,8 @@ OpenCore Changelog
 
 #### v0.5.6
 - Various improvements to builtin text renderer
-- Fixed locating dmg recovery in APTIO IV firmwares on FAT32
+- Fixed locating DMG recovery in APTIO IV firmwares on FAT32
+- Fixed loading DMG recovery in APTIO IV firmwares on FAT32
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere
