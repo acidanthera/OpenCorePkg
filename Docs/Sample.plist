@@ -831,8 +831,6 @@
 		</dict>
 		<key>Quirks</key>
 		<dict>
-			<key>AvoidHighAlloc</key>
-			<false/>
 			<key>ClearScreenOnModeSwitch</key>
 			<false/>
 			<key>ExitBootServicesDelay</key>

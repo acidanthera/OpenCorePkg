@@ -402,18 +402,6 @@ OcShouldReconnectConsoleOnResolutionChange (
   return Config->Uefi.Quirks.ReconnectOnResChange;
 }
 
-OC_BALLOON_ALLOC
-OcGetBallooningHandler (
-  IN  OC_GLOBAL_CONFIG  *Config
-  )
-{
-  if (Config->Uefi.Quirks.AvoidHighAlloc) {
-    return OcHandleKernelProtectionZone;
-  }
-
-  return NULL;
-}
-
 VOID
 OcLoadBooterUefiSupport (
   IN OC_GLOBAL_CONFIG  *Config

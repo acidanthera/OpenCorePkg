@@ -5,6 +5,7 @@ OpenCore Changelog
 - Various improvements to builtin text renderer
 - Fixed locating DMG recovery in APTIO IV firmwares on FAT32
 - Fixed loading DMG recovery in APTIO IV firmwares on FAT32
+- Removed `AvoidHighAlloc` quirk due to removed I/O over 4GB
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere

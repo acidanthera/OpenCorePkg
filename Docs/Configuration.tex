@@ -3999,19 +3999,6 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \begin{enumerate}
 
 \item
-  \texttt{AvoidHighAlloc}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Advises allocators to avoid allocations above first 4 GBs of RAM.
-
-  This is a workaround for select board firmwares, namely GA-Z77P-D3 (rev. 1.1), failing
-  to properly access higher memory in UEFI Boot Services. On these boards this quirk is
-  required for booting entries that need to allocate large memory chunks, such as macOS DMG
-  recovery entries. On unaffected boards it may cause boot failures, and thus strongly not
-  recommended. For known issues refer to
-  \href{https://github.com/acidanthera/bugtracker/issues/449}{\texttt{acidanthera/bugtracker\#449}}.
-
-\item
   \texttt{ClearScreenOnModeSwitch}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

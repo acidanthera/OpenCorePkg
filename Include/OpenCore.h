@@ -187,18 +187,6 @@ OcMiscGetVersionString (
   );
 
 /**
-  Get ballooning handler for memory allocation protections.
-
-  @param[in]  Config    OpenCore configuration.
-
-  @retval Handler address or NULL.
-**/
-OC_BALLOON_ALLOC
-OcGetBallooningHandler (
-  IN  OC_GLOBAL_CONFIG  *Config
-  );
-
-/**
   Load early miscellaneous support like configuration.
 
   @param[in]  Storage   OpenCore storage.
