@@ -131,19 +131,3 @@ OcAbcInitialize (
 
   return EFI_SUCCESS;
 }
-
-EFI_STATUS
-EFIAPI
-OcHandleKernelProtectionZone (
-  IN BOOLEAN          Allocate
-  )
-{
-  BOOT_COMPAT_CONTEXT  *BootCompat;
-
-  BootCompat = GetBootCompatContext ();
-
-  return AppleSlideHandleBalloonState (
-    BootCompat,
-    Allocate
-    );
-}

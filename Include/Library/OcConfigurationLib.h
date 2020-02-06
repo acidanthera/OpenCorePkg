@@ -497,7 +497,6 @@ OC_DECLARE (OC_UEFI_INPUT)
 ///
 #define OC_UEFI_QUIRKS_FIELDS(_, __) \
   _(UINT32                      , ExitBootServicesDelay       ,     , 0      , ()) \
-  _(BOOLEAN                     , AvoidHighAlloc              ,     , FALSE  , ()) \
   _(BOOLEAN                     , IgnoreInvalidFlexRatio      ,     , FALSE  , ()) \
   _(BOOLEAN                     , IgnoreTextInGraphics        ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReleaseUsbOwnership         ,     , FALSE  , ()) \

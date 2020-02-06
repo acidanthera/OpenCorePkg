@@ -236,8 +236,7 @@ CONST APPLE_RAM_DISK_EXTENT_TABLE *
 InternalAppleRamDiskAllocate (
   IN UINTN            Size,
   IN EFI_MEMORY_TYPE  MemoryType,
-  IN BOOLEAN          PreferHighMem,
-  IN BOOLEAN          AvoidHighMem
+  IN BOOLEAN          PreferHighMem
   )
 {
   BOOLEAN                      Result;
@@ -269,7 +268,7 @@ InternalAppleRamDiskAllocate (
   // in the lower addresses (see more detail in AptioMemoryFix) depending on
   // KASLR offset generated randomly or with slide boot argument.
   //
-  if (PreferHighMem && !AvoidHighMem) {
+  if (PreferHighMem) {
     RemainingSize = InternalAllocateRemainingSize (
       BASE_4GB,
       BASE_8EB,
@@ -300,7 +299,7 @@ InternalAppleRamDiskAllocate (
   //
   RemainingSize = InternalAllocateRemainingSize (
     0,
-    AvoidHighMem ? BASE_4GB : BASE_8EB,
+    BASE_8EB,
     MemoryType,
     MemoryMap,
     MemoryMapSize,
@@ -321,36 +320,30 @@ InternalAppleRamDiskAllocate (
 CONST APPLE_RAM_DISK_EXTENT_TABLE *
 OcAppleRamDiskAllocate (
   IN UINTN            Size,
-  IN EFI_MEMORY_TYPE  MemoryType,
-  IN BOOLEAN          AvoidHighMem
+  IN EFI_MEMORY_TYPE  MemoryType
   )
 {
   CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable;
 
-  if (!AvoidHighMem) {
-    //
-    // Try to allocate preferrably above BASE_4GB to avoid colliding with the kernel.
-    //
-    ExtentTable = InternalAppleRamDiskAllocate (Size, MemoryType, TRUE, FALSE);
-  } else {
-    ExtentTable = NULL;
-  }
+  //
+  // Try to allocate preferrably above BASE_4GB to avoid colliding with the kernel.
+  //
+  ExtentTable = InternalAppleRamDiskAllocate (Size, MemoryType, TRUE);
 
   if (ExtentTable == NULL) {
     //
     // Being here means that we exceeded entry amount in the extent table.
     // Retry with any addresses. Should never happen in reality.
     //
-    ExtentTable = InternalAppleRamDiskAllocate (Size, MemoryType, FALSE, AvoidHighMem);
+    ExtentTable = InternalAppleRamDiskAllocate (Size, MemoryType, FALSE);
   }
 
   DEBUG ((
     DEBUG_BULK_INFO,
-    "OCRAM: Extent allocation of %u bytes (%x) gave %p (avoid high %d)\n",
+    "OCRAM: Extent allocation of %u bytes (%x) gave %p\n",
     (UINT32) Size,
     (UINT32) MemoryType,
-    ExtentTable,
-    AvoidHighMem
+    ExtentTable
     ));
 
   return ExtentTable;
@@ -496,9 +489,10 @@ OcAppleRamDiskLoadFile (
   ASSERT (FileSize > 0);
 
   //
-  // We need a temporary buffer in lower addresses as several motherboards on APTIO IV
-  // (e.g. GA-Z87X-UD4H) fail to read directly to high addresses when using FAT filesystem.
-  // The issue is likely a continuation of AvoidHighAlloc bugs.
+  // We need a temporary buffer in lower addresses as several motherboards on APTIO IV,
+  // e.g. GA-Z77P-D3 (rev. 1.1), GA-Z87X-UD4H, etc. fail to read directly to high addresses
+  // when using FAT filesystem. The original workaround to this was AvoidHighAlloc quirk.
+  // REF: https://github.com/acidanthera/bugtracker/issues/449
   //
   TmpBuffer = AllocatePool (BASE_4MB);
   if (TmpBuffer == NULL) {

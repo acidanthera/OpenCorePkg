@@ -320,8 +320,7 @@ EFI_DEVICE_PATH_PROTOCOL *
 InternalLoadDmg (
   IN OUT INTERNAL_DMG_LOAD_CONTEXT   *Context,
   IN     APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN     UINT32                      Policy,
-  IN     BOOLEAN                     AvoidHighMem
+  IN     UINT32                      Policy
   )
 {
   EFI_DEVICE_PATH_PROTOCOL *DevPath;
@@ -415,7 +414,7 @@ InternalLoadDmg (
     return NULL;
   }
 
-  Result = OcAppleDiskImageInitializeFromFile (Context->DmgContext, DmgFile, AvoidHighMem);
+  Result = OcAppleDiskImageInitializeFromFile (Context->DmgContext, DmgFile);
 
   DmgFile->Close (DmgFile);
 

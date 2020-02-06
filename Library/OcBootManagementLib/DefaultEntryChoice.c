@@ -1105,7 +1105,6 @@ InternalLoadBootEntry (
   UINT32                     EntryDataSize;
   CONST CHAR8                *Args;
   UINT32                     ArgsLen;
-  BOOLEAN                    UseBallooning;
 
   ASSERT (BootPolicy != NULL);
   ASSERT (BootEntry != NULL);
@@ -1122,8 +1121,6 @@ InternalLoadBootEntry (
 
   ZeroMem (DmgLoadContext, sizeof (*DmgLoadContext));
 
-  UseBallooning = FALSE;
-
   EntryData    = NULL;
   EntryDataSize = 0;
 
@@ -1132,30 +1129,13 @@ InternalLoadBootEntry (
       return EFI_SECURITY_VIOLATION;
     }
 
-    //
-    // Assume that DMG load requires a lot of memory.
-    //
-    UseBallooning = Context->BalloonAllocator != NULL;
-
-#ifdef OC_ENABLE_BALLOONING
-    if (UseBallooning) {
-      Context->BalloonAllocator (TRUE);
-    }
-#endif
-
     DmgLoadContext->DevicePath = BootEntry->DevicePath;
     DevicePath = InternalLoadDmg (
                    DmgLoadContext,
                    BootPolicy,
-                   Context->LoadPolicy,
-                   UseBallooning
+                   Context->LoadPolicy
                    );
     if (DevicePath == NULL) {
-#ifdef OC_ENABLE_BALLOONING
-      if (UseBallooning) {
-        Context->BalloonAllocator (FALSE);
-      }
-#endif
       return EFI_UNSUPPORTED;
     }
   } else if (BootEntry->Type == OcBootCustom && BootEntry->DevicePath == NULL) {
@@ -1181,12 +1161,11 @@ InternalLoadBootEntry (
   UnicodeDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
   DEBUG ((
     DEBUG_INFO,
-    "OCB: Perform boot %s to dp %s (%p/%u), balloon %d\n",
+    "OCB: Perform boot %s to dp %s (%p/%u)\n",
     BootEntry->Name,
     UnicodeDevicePath != NULL ? UnicodeDevicePath : L"<null>",
     EntryData,
-    EntryDataSize,
-    UseBallooning
+    EntryDataSize
     ));
   if (UnicodeDevicePath != NULL) {
     FreePool (UnicodeDevicePath);
@@ -1259,11 +1238,6 @@ InternalLoadBootEntry (
     }
   } else {
     InternalUnloadDmg (DmgLoadContext);
-#ifdef OC_ENABLE_BALLOONING
-    if (UseBallooning) {
-      Context->BalloonAllocator (FALSE);
-    }
-#endif
   }
 
   return Status;
