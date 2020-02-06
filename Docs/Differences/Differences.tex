@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu Feb  6 00:43:28 2020
-%DIF ADD ../Configuration.tex        Thu Feb  6 19:22:37 2020
+%DIF DEL PreviousConfiguration.tex   Thu Feb  6 21:14:54 2020
+%DIF ADD ../Configuration.tex        Thu Feb  6 21:16:35 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4057,12 +4057,9 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \subsection{Quirks Properties}\label{uefiquirkprops}
 
 \begin{enumerate}
-\DIFdelbegin %DIFDELCMD < 
 
-%DIFDELCMD < \item
-\item%DIFAUXCMD
-%DIFDELCMD <   %%%
-\texttt{\DIFdel{AvoidHighAlloc}}%DIFAUXCMD
+\item
+  \DIFdelbegin \texttt{\DIFdel{AvoidHighAlloc}}%DIFAUXCMD
 %DIFDELCMD < \\
 %DIFDELCMD <   %%%
 \textbf{\DIFdel{Type}}%DIFAUXCMD
@@ -4085,10 +4082,12 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   recommended. For known issues refer to
   }%DIFDELCMD < \href{https://github.com/acidanthera/bugtracker/issues/449}{\texttt{acidanthera/bugtracker\#449}}%%%
 \DIFdel{.
-}\DIFdelend 
+}%DIFDELCMD < 
 
-\item
-  \texttt{ClearScreenOnModeSwitch}\\
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdelend \texttt{ClearScreenOnModeSwitch}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Some firmwares clear only part of screen when switching
@@ -4497,8 +4496,9 @@ you will need \texttt{debug=0x8} boot argument.
   \textbf{Why do online recovery images (\texttt{*.dmg}) fail to load?}
 
   This may be caused by missing HFS+ driver, as all presently known recovery volumes
-  have HFS+ filesystem. Another cause may be buggy firmware allocator, which can be
-  worked around with \texttt{AvoidHighAlloc} UEFI quirk.
+  have HFS+ filesystem\DIFdelbegin \DIFdel{. Another cause may be buggy firmware allocator, which can be
+  worked around with }\texttt{\DIFdel{AvoidHighAlloc}} %DIFAUXCMD
+\DIFdel{UEFI quirk}\DIFdelend .
 
 \item
   \textbf{Can I use this on Apple hardware or virtual machines?}
