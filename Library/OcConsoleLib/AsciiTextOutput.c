@@ -575,7 +575,7 @@ AsciiTextSetAttribute (
 
   OldTpl  = gBS->RaiseTPL (TPL_NOTIFY);
 
-  if (Attribute != This->Mode->Attribute) {
+  if (Attribute != (UINTN) This->Mode->Attribute) {
     FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
 
     FgColor = BitFieldRead32 (Attribute, 0, 3);
