@@ -397,11 +397,11 @@ AsciiTextReset (
   This->Mode->MaxMode      = 1;
   This->Mode->CursorColumn = 0;
   This->Mode->CursorRow    = 0;
-  This->Mode->Attribute    = (ARRAY_SIZE (mGraphicsEfiColors) / 2) - 1;
+  This->Mode->Attribute    = ARRAY_SIZE (mGraphicsEfiColors) / 2 - 1;
   mConsoleMaxPosX          = 0;
   mConsoleMaxPosY          = 0;
   mBackgroundColor.Raw     = mGraphicsEfiColors[0];
-  mForegroundColor.Raw     = mGraphicsEfiColors[ARRAY_SIZE (mGraphicsEfiColors) - 1];
+  mForegroundColor.Raw     = mGraphicsEfiColors[ARRAY_SIZE (mGraphicsEfiColors) / 2 - 1];
 
   mGraphicsOutput->Blt (
     mGraphicsOutput,
