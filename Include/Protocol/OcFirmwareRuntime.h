@@ -17,7 +17,7 @@
 
 #include <Uefi.h>
 
-#define OC_FIRMWARE_RUNTIME_REVISION 3
+#define OC_FIRMWARE_RUNTIME_REVISION 4
 
 /**
   OC_FIRMWARE_RUNTIME_PROTOCOL_GUID
@@ -63,6 +63,10 @@ typedef struct OC_FWRT_CONFIG_ {
   /// requires it, here we decide to use it for macOS exclusively.
   ///
   BOOLEAN  WriteUnprotector;
+  ///
+  /// Secure boot variable protection.
+  ///
+  BOOLEAN  ProtectSecureBoot;
 } OC_FWRT_CONFIG;
 
 /**

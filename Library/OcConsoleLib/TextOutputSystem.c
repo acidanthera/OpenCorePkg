@@ -227,11 +227,11 @@ ConsoleControlGetMode (
 
   *Mode = mConsoleMode;
 
-  if (GopUgaExists) {
+  if (GopUgaExists != NULL) {
     *GopUgaExists = TRUE;
   }
 
-  if (StdInLocked) {
+  if (StdInLocked != NULL) {
     *StdInLocked  = FALSE;
   }
 

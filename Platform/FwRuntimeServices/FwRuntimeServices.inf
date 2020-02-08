@@ -43,6 +43,7 @@
 
 [Guids]
   gEfiGlobalVariableGuid                      ## CONSUMES
+  gEfiImageSecurityDatabaseGuid               ## CONSUMES
   gOcReadOnlyVariableGuid                     ## CONSUMES
   gOcWriteOnlyVariableGuid                    ## CONSUMES
   gOcVendorVariableGuid                       ## CONSUMES

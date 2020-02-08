@@ -335,6 +335,11 @@ OcStartImage (
     Config.RestrictedVariables = TRUE;
 
     //
+    // Restrict secure boot variables and never let them slip unless once restricted.
+    //
+    Config.ProtectSecureBoot = BootCompat->Settings.ProtectSecureBoot;
+
+    //
     // Enable Boot#### variable redirection if OpenCore requested it.
     // Do NOT disable it once enabled for stability reasons.
     //
