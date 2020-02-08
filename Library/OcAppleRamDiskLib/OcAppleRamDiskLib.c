@@ -510,7 +510,7 @@ OcAppleRamDiskLoadFile (
     ASSERT (ExtentTable->Extents[Index].Length <= MAX_UINTN);
 
     ExtentBuffer = (VOID *)(UINTN) ExtentTable->Extents[Index].Start;
-    ExtentSize   = ExtentTable->Extents[Index].Length;
+    ExtentSize   = (UINTN) ExtentTable->Extents[Index].Length;
 
     while (FileSize > 0 && ExtentSize > 0) {
       Status = File->SetPosition (File, FilePosition);
