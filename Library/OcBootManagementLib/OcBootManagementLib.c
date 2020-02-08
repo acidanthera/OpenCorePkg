@@ -76,6 +76,10 @@ OcShowSimpleBootMenu (
   OcConsoleControlSetMode (EfiConsoleControlScreenText);
   gST->ConOut->EnableCursor (gST->ConOut, FALSE);
 
+  if (Context->ConsoleAttributes != 0) {
+    gST->ConOut->SetAttribute (gST->ConOut, Context->ConsoleAttributes & 0x7FU);
+  }
+
   while (TRUE) {
     gST->ConOut->ClearScreen (gST->ConOut);
     gST->ConOut->OutputString (gST->ConOut, L"OpenCore Boot Menu");

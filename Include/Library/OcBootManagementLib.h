@@ -399,6 +399,10 @@ typedef struct {
   //
   CONST CHAR8      *TitleSuffix;
   //
+  // Console attributes. 0 is reserved as disabled.
+  //
+  UINT32           ConsoleAttributes;
+  //
   // Enable polling boot arguments.
   //
   BOOLEAN          PollAppleHotKeys;
