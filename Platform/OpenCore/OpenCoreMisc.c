@@ -220,6 +220,7 @@ OcMiscEarlyInit (
     return EFI_UNSUPPORTED; ///< Should be unreachable.
   }
 
+  AsciiVault = OC_BLOB_GET (&Config->Misc.Security.Vault);
   if (AsciiStrCmp (AsciiVault, "Secure") == 0) {
     Vault = OcsVaultSecure;
   } else if (AsciiStrCmp (AsciiVault, "Optional") == 0) {
@@ -267,7 +268,7 @@ OcMiscEarlyInit (
     DEBUG_INFO,
     "OC: OpenCore %a is loading in %a mode (%d/%d)...\n",
     OcMiscGetVersionString (),
-    Config->Misc.Security.Vault,
+    AsciiVault,
     Storage->HasVault,
     VaultKey != NULL
     ));
