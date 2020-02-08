@@ -66,6 +66,7 @@ OC_STRUCTORS       (OC_PLATFORM_CONFIG, ())
 
 OC_ARRAY_STRUCTORS (OC_UEFI_DRIVER_ARRAY)
 OC_STRUCTORS       (OC_UEFI_INPUT, ())
+OC_STRUCTORS       (OC_UEFI_OUTPUT, ())
 OC_STRUCTORS       (OC_UEFI_PROTOCOLS, ())
 OC_STRUCTORS       (OC_UEFI_QUIRKS, ())
 OC_STRUCTORS       (OC_UEFI_CONFIG, ())
@@ -316,14 +317,9 @@ mMiscBlessOverrideSchema = OC_SCHEMA_STRING (NULL);
 STATIC
 OC_SCHEMA
 mMiscConfigurationBootSchema[] = {
-  OC_SCHEMA_BOOLEAN_IN ("BuiltinTextRenderer", OC_GLOBAL_CONFIG, Misc.Boot.BuiltinTextRenderer),
-  OC_SCHEMA_STRING_IN  ("ConsoleBehaviourOs",  OC_GLOBAL_CONFIG, Misc.Boot.ConsoleBehaviourOs),
-  OC_SCHEMA_STRING_IN  ("ConsoleBehaviourUi",  OC_GLOBAL_CONFIG, Misc.Boot.ConsoleBehaviourUi),
-  OC_SCHEMA_STRING_IN  ("ConsoleMode",         OC_GLOBAL_CONFIG, Misc.Boot.ConsoleMode),
   OC_SCHEMA_STRING_IN  ("HibernateMode",       OC_GLOBAL_CONFIG, Misc.Boot.HibernateMode),
   OC_SCHEMA_BOOLEAN_IN ("HideSelf",            OC_GLOBAL_CONFIG, Misc.Boot.HideSelf),
   OC_SCHEMA_BOOLEAN_IN ("PollAppleHotKeys",    OC_GLOBAL_CONFIG, Misc.Boot.PollAppleHotKeys),
-  OC_SCHEMA_STRING_IN  ("Resolution",          OC_GLOBAL_CONFIG, Misc.Boot.Resolution),
   OC_SCHEMA_BOOLEAN_IN ("ShowPicker",          OC_GLOBAL_CONFIG, Misc.Boot.ShowPicker),
   OC_SCHEMA_INTEGER_IN ("TakeoffDelay",        OC_GLOBAL_CONFIG, Misc.Boot.TakeoffDelay),
   OC_SCHEMA_INTEGER_IN ("Timeout",             OC_GLOBAL_CONFIG, Misc.Boot.Timeout),
@@ -521,17 +517,11 @@ mUefiDriversSchema = OC_SCHEMA_STRING (NULL);
 STATIC
 OC_SCHEMA
 mUefiQuirksSchema[] = {
-  OC_SCHEMA_BOOLEAN_IN ("ClearScreenOnModeSwitch",OC_GLOBAL_CONFIG, Uefi.Quirks.ClearScreenOnModeSwitch),
   OC_SCHEMA_INTEGER_IN ("ExitBootServicesDelay",  OC_GLOBAL_CONFIG, Uefi.Quirks.ExitBootServicesDelay),
   OC_SCHEMA_BOOLEAN_IN ("IgnoreInvalidFlexRatio", OC_GLOBAL_CONFIG, Uefi.Quirks.IgnoreInvalidFlexRatio),
-  OC_SCHEMA_BOOLEAN_IN ("IgnoreTextInGraphics",   OC_GLOBAL_CONFIG, Uefi.Quirks.IgnoreTextInGraphics),
-  OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop",      OC_GLOBAL_CONFIG, Uefi.Quirks.ProvideConsoleGop),
-  OC_SCHEMA_BOOLEAN_IN ("ReconnectOnResChange",   OC_GLOBAL_CONFIG, Uefi.Quirks.ReconnectOnResChange),
   OC_SCHEMA_BOOLEAN_IN ("ReleaseUsbOwnership",    OC_GLOBAL_CONFIG, Uefi.Quirks.ReleaseUsbOwnership),
-  OC_SCHEMA_BOOLEAN_IN ("ReplaceTabWithSpace",    OC_GLOBAL_CONFIG, Uefi.Quirks.ReplaceTabWithSpace),
   OC_SCHEMA_BOOLEAN_IN ("RequestBootVarFallback", OC_GLOBAL_CONFIG, Uefi.Quirks.RequestBootVarFallback),
   OC_SCHEMA_BOOLEAN_IN ("RequestBootVarRouting",  OC_GLOBAL_CONFIG, Uefi.Quirks.RequestBootVarRouting),
-  OC_SCHEMA_BOOLEAN_IN ("SanitiseClearScreen",    OC_GLOBAL_CONFIG, Uefi.Quirks.SanitiseClearScreen),
   OC_SCHEMA_BOOLEAN_IN ("UnblockFsConnect",       OC_GLOBAL_CONFIG, Uefi.Quirks.UnblockFsConnect)
 };
 
@@ -544,7 +534,6 @@ mUefiProtocolsSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("AppleKeyMap",             OC_GLOBAL_CONFIG, Uefi.Protocols.AppleKeyMap),
   OC_SCHEMA_BOOLEAN_IN ("AppleSmcIo",              OC_GLOBAL_CONFIG, Uefi.Protocols.AppleSmcIo),
   OC_SCHEMA_BOOLEAN_IN ("AppleUserInterfaceTheme", OC_GLOBAL_CONFIG, Uefi.Protocols.AppleUserInterfaceTheme),
-  OC_SCHEMA_BOOLEAN_IN ("ConsoleControl",          OC_GLOBAL_CONFIG, Uefi.Protocols.ConsoleControl),
   OC_SCHEMA_BOOLEAN_IN ("DataHub",                 OC_GLOBAL_CONFIG, Uefi.Protocols.DataHub),
   OC_SCHEMA_BOOLEAN_IN ("DeviceProperties",        OC_GLOBAL_CONFIG, Uefi.Protocols.DeviceProperties),
   OC_SCHEMA_BOOLEAN_IN ("FirmwareVolume",          OC_GLOBAL_CONFIG, Uefi.Protocols.FirmwareVolume),
@@ -568,10 +557,26 @@ mUefiInputSchema[] = {
 
 STATIC
 OC_SCHEMA
+mUefiOutputSchema[] = {
+  OC_SCHEMA_BOOLEAN_IN ("ClearScreenOnModeSwitch",OC_GLOBAL_CONFIG, Uefi.Output.ClearScreenOnModeSwitch),
+  OC_SCHEMA_STRING_IN  ("ConsoleMode",            OC_GLOBAL_CONFIG, Uefi.Output.ConsoleMode),
+  OC_SCHEMA_BOOLEAN_IN ("IgnoreTextInGraphics",   OC_GLOBAL_CONFIG, Uefi.Output.IgnoreTextInGraphics),
+  OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop",      OC_GLOBAL_CONFIG, Uefi.Output.ProvideConsoleGop),
+  OC_SCHEMA_BOOLEAN_IN ("ReconnectOnResChange",   OC_GLOBAL_CONFIG, Uefi.Output.ReconnectOnResChange),
+  OC_SCHEMA_BOOLEAN_IN ("ReplaceTabWithSpace",    OC_GLOBAL_CONFIG, Uefi.Output.ReplaceTabWithSpace),
+  OC_SCHEMA_STRING_IN  ("Resolution",             OC_GLOBAL_CONFIG, Uefi.Output.Resolution),
+  OC_SCHEMA_BOOLEAN_IN ("SanitiseClearScreen",    OC_GLOBAL_CONFIG, Uefi.Output.SanitiseClearScreen),
+  OC_SCHEMA_INTEGER_IN ("Scale",                  OC_GLOBAL_CONFIG, Uefi.Output.Scale),
+  OC_SCHEMA_STRING_IN  ("TextRenderer",           OC_GLOBAL_CONFIG, Uefi.Output.TextRenderer),
+};
+
+STATIC
+OC_SCHEMA
 mUefiConfigurationSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("ConnectDrivers", OC_GLOBAL_CONFIG, Uefi.ConnectDrivers),
   OC_SCHEMA_ARRAY_IN   ("Drivers",        OC_GLOBAL_CONFIG, Uefi.Drivers, &mUefiDriversSchema),
   OC_SCHEMA_DICT       ("Input",          mUefiInputSchema),
+  OC_SCHEMA_DICT       ("Output",         mUefiOutputSchema),
   OC_SCHEMA_DICT       ("Protocols",      mUefiProtocolsSchema),
   OC_SCHEMA_DICT       ("Quirks",         mUefiQuirksSchema)
 };

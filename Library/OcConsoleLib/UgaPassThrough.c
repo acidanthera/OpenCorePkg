@@ -96,23 +96,21 @@ OcUgaDrawSetMode (
 
   OcUgaDraw = BASE_CR (This, OC_UGA_PROTOCOL, Uga);
 
-  Status = SetConsoleResolutionForProtocol (
+  Status = OcSetConsoleResolutionForProtocol (
     OcUgaDraw->GraphicsOutput,
     HorizontalResolution,
     VerticalResolution,
-    ColorDepth,
-    FALSE
+    ColorDepth
     );
 
   DEBUG ((DEBUG_INFO, "OCC: UGA SetConsoleResolutionOnHandle attempt - %r\n", Status));
 
   if (EFI_ERROR (Status)) {
-    Status = SetConsoleResolutionForProtocol (
+    Status = OcSetConsoleResolutionForProtocol (
       OcUgaDraw->GraphicsOutput,
       0,
       0,
-      0,
-      FALSE
+      0
       );
     DEBUG ((DEBUG_INFO, "OCC: UGA SetConsoleResolutionOnHandle max attempt - %r\n", Status));
   }

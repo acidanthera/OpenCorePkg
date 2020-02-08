@@ -16,6 +16,7 @@
 #define OC_CONSOLE_LIB_INTERNAL_H
 
 #include <Library/OcConsoleLib.h>
+#include <Protocol/ConsoleControl.h>
 #include <Protocol/GraphicsOutput.h>
 #include <Protocol/SimpleTextOut.h>
 #include <Protocol/UgaDraw.h>
@@ -26,25 +27,39 @@ typedef struct {
 } OC_UGA_PROTOCOL;
 
 EFI_STATUS
-SetConsoleResolutionForProtocol (
+OcSetConsoleResolutionForProtocol (
   IN  EFI_GRAPHICS_OUTPUT_PROTOCOL    *GraphicsOutput,
   IN  UINT32                          Width,
   IN  UINT32                          Height,
-  IN  UINT32                          Bpp    OPTIONAL,
-  IN  BOOLEAN                         Reconnect
+  IN  UINT32                          Bpp    OPTIONAL
   );
 
 EFI_STATUS
-SetConsoleModeForProtocol (
+OcSetConsoleModeForProtocol (
   IN  EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *TextOut,
   IN  UINT32                           Width,
   IN  UINT32                           Height
   );
 
 EFI_STATUS
-ConsoleControlSetBehaviourForHandle (
-  IN EFI_HANDLE                    Handle,
-  IN OC_CONSOLE_CONTROL_BEHAVIOUR  Behaviour
+OcConsoleControlInstallProtocol (
+  IN  EFI_CONSOLE_CONTROL_PROTOCOL     *NewProtocol,
+  OUT EFI_CONSOLE_CONTROL_PROTOCOL     *OldProtocol  OPTIONAL,
+  OUT EFI_CONSOLE_CONTROL_SCREEN_MODE  *OldMode  OPTIONAL
+  );
+
+VOID
+OcUseBuiltinTextOutput (
+  IN UINT32  Resolution
+  );
+
+VOID
+OcUseSystemTextOutput (
+  IN OC_CONSOLE_RENDERER          Renderer,
+  IN BOOLEAN                      IgnoreTextOutput,
+  IN BOOLEAN                      SanitiseClearScreen,
+  IN BOOLEAN                      ClearScreenOnModeSwitch,
+  IN BOOLEAN                      ReplaceTabWithSpace
   );
 
 VOID

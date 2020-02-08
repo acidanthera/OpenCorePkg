@@ -26,6 +26,7 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/OcConsoleLib.h>
 #include <Library/OcCryptoLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/DevicePathLib.h>
@@ -71,6 +72,8 @@ OcShowSimpleBootMenu (
     DEBUG ((DEBUG_ERROR, "OCB: Missing AppleKeyMapAggregator\n"));
     return EFI_UNSUPPORTED;
   }
+
+  OcConsoleControlSetMode (EfiConsoleControlScreenText);
 
   while (TRUE) {
     gST->ConOut->ClearScreen (gST->ConOut);
@@ -218,6 +221,8 @@ OcShowSimplePasswordRequest (
   if (Privilege->CurrentLevel >= Level) {
     return EFI_SUCCESS;
   }
+
+  OcConsoleControlSetMode (EfiConsoleControlScreenText);
 
   gST->ConOut->ClearScreen (gST->ConOut);
 

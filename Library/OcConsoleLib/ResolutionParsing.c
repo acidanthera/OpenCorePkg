@@ -100,7 +100,7 @@ ParseResolution (
 }
 
 VOID
-ParseScreenResolution (
+OcParseScreenResolution (
   IN  CONST CHAR8         *String,
   OUT UINT32              *Width,
   OUT UINT32              *Height,
@@ -118,7 +118,7 @@ ParseScreenResolution (
 }
 
 VOID
-ParseConsoleMode (
+OcParseConsoleMode (
   IN  CONST CHAR8         *String,
   OUT UINT32              *Width,
   OUT UINT32              *Height,
@@ -131,32 +131,4 @@ ParseConsoleMode (
   ASSERT (Max != NULL);
 
   ParseResolution (String, Width, Height, NULL, Max);
-}
-
-OC_CONSOLE_CONTROL_BEHAVIOUR
-ParseConsoleControlBehaviour (
-  IN  CONST CHAR8        *Behaviour
-  )
-{
-  if (Behaviour[0] == '\0') {
-    return OcConsoleControlDefault;
-  }
-
-  if (AsciiStrCmp (Behaviour, "Graphics") == 0) {
-    return OcConsoleControlGraphics;
-  }
-
-  if (AsciiStrCmp (Behaviour, "Text") == 0) {
-    return OcConsoleControlText;
-  }
-
-  if (AsciiStrCmp (Behaviour, "ForceGraphics") == 0) {
-    return OcConsoleControlForceGraphics;
-  }
-
-  if (AsciiStrCmp (Behaviour, "ForceText") == 0) {
-    return OcConsoleControlForceText;
-  }
-
-  return OcConsoleControlDefault;
 }

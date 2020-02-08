@@ -12,6 +12,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include "OcConsoleLibInternal.h"
+
 #include <Uefi.h>
 #include <Guid/AppleVariable.h>
 #include <Library/BaseLib.h>
@@ -21,6 +23,7 @@
 #include <Library/OcConsoleLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
+#include <Protocol/ConsoleControl.h>
 #include <Protocol/GraphicsOutput.h>
 
 /*
@@ -162,6 +165,7 @@ STATIC UINT8 mFontScale;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION mBackgroundColor;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION mForegroundColor;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION *mCharacterBuffer;
+STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE     mConsoleMode = EfiConsoleControlScreenText;
 
 #define SCR_PADD           1
 #define TGT_CHAR_WIDTH     ((UINTN)(ISO_CHAR_WIDTH) * mFontScale)
@@ -430,6 +434,13 @@ AsciiTextOutputString (
 {
   UINTN    Index;
   EFI_TPL  OldTpl;
+
+  //
+  // Do not print text in graphics mode.
+  //
+  if (mConsoleMode != EfiConsoleControlScreenText) {
+    return EFI_UNSUPPORTED;
+  }
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
 
@@ -716,25 +727,107 @@ mAsciiTextOutputProtocol = {
   &mAsciiTextOutputMode
 };
 
+STATIC
+EFI_STATUS
+EFIAPI
+ConsoleControlGetMode (
+  IN   EFI_CONSOLE_CONTROL_PROTOCOL    *This,
+  OUT  EFI_CONSOLE_CONTROL_SCREEN_MODE *Mode,
+  OUT  BOOLEAN                         *GopUgaExists OPTIONAL,
+  OUT  BOOLEAN                         *StdInLocked  OPTIONAL
+  )
+{
+  *Mode = mConsoleMode;
+
+  if (GopUgaExists) {
+    *GopUgaExists = TRUE;
+  }
+
+  if (StdInLocked) {
+    *StdInLocked  = FALSE;
+  }
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+EFIAPI
+ConsoleControlSetMode (
+  IN EFI_CONSOLE_CONTROL_PROTOCOL     *This,
+  IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode
+  )
+{
+  mConsoleMode = Mode;
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+EFIAPI
+ConsoleControlLockStdIn (
+  IN EFI_CONSOLE_CONTROL_PROTOCOL *This,
+  IN CHAR16                       *Password
+  )
+{
+  return EFI_DEVICE_ERROR;
+}
+
+STATIC
+EFI_CONSOLE_CONTROL_PROTOCOL
+mConsoleControlProtocol = {
+  ConsoleControlGetMode,
+  ConsoleControlSetMode,
+  ConsoleControlLockStdIn
+};
+
 VOID
-OcInstallCustomConOut (
+ConsoleControlInstall (
   VOID
   )
 {
-  EFI_STATUS  Status;
-  UINTN       UiScaleSize;
+  EFI_STATUS                    Status;
+  EFI_CONSOLE_CONTROL_PROTOCOL  *ConsoleControl;
+  EFI_HANDLE                    NewHandle;
 
-  UiScaleSize = sizeof (mFontScale);
-
-  Status = gRT->GetVariable (
-    APPLE_UI_SCALE_VARIABLE_NAME,
-    &gAppleVendorVariableGuid,
+  Status = gBS->LocateProtocol (
+    &gEfiConsoleControlProtocolGuid,
     NULL,
-    &UiScaleSize,
-    (VOID *) &mFontScale
+    (VOID *) &ConsoleControl
     );
 
-  if (EFI_ERROR (Status) || mFontScale != 2) {
+  if (!EFI_ERROR (Status)) {
+    ConsoleControl->SetMode (ConsoleControl, EfiConsoleControlScreenGraphics);
+
+    CopyMem (
+      ConsoleControl,
+      &mConsoleControlProtocol,
+      sizeof (mConsoleControlProtocol)
+      );
+  }
+
+  NewHandle = NULL;
+  gBS->InstallMultipleProtocolInterfaces (
+    &NewHandle,
+    &gEfiConsoleControlProtocolGuid,
+    &mConsoleControlProtocol,
+    NULL
+    );
+}
+
+VOID
+OcUseBuiltinTextOutput (
+  IN UINT32  Resolution
+  )
+{
+  EFI_STATUS  Status;
+
+  //
+  // TODO: Support more scales.
+  //
+  if (Resolution == 200) {
+    mFontScale = 2;
+  } else {
     mFontScale = 1;
   }
 
@@ -747,6 +840,9 @@ OcInstallCustomConOut (
     return;
   }
 
+  OcConsoleControlSetMode (EfiConsoleControlScreenGraphics);
+  OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
+
   gST->ConOut = &mAsciiTextOutputProtocol;
   gST->Hdr.CRC32 = 0;
 
@@ -755,6 +851,4 @@ OcInstallCustomConOut (
     gST->Hdr.HeaderSize,
     &gST->Hdr.CRC32
     );
-
-  OcConsoleControlSync ();
 }

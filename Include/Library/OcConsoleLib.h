@@ -18,70 +18,45 @@
 #include <Protocol/ConsoleControl.h>
 
 /**
-  Possible console control behaviour.
+  Console renderer to use.
 **/
 typedef enum {
-  OcConsoleControlDefault,
-  OcConsoleControlText,
-  OcConsoleControlGraphics,
-  OcConsoleControlForceText,
-  OcConsoleControlForceGraphics,
-} OC_CONSOLE_CONTROL_BEHAVIOUR;
-
-/**
-  Locate Console Control protocol.
-
-  @param[in] Reinstall       Force local Console Control instance.
-
-  @retval Console Control protocol instance or NULL.
-**/
-EFI_CONSOLE_CONTROL_PROTOCOL *
-OcConsoleControlInstallProtocol (
-  IN BOOLEAN  Reinstall
-  );
+  OcConsoleRendererBuiltinGraphics,
+  OcConsoleRendererSystemGraphics,
+  OcConsoleRendererSystemText,
+  OcConsoleRendererSystemGeneric
+} OC_CONSOLE_RENDERER;
 
 /**
   Configure console control protocol with given options.
 
+  @param[in] Renderer                 Renderer to use.
+  @param[in] Resolution               Renderer resolution in percents.
   @param[in] IgnoreTextOutput         Skip console output in text mode.
   @param[in] SanitiseClearScreen      Workaround ClearScreen breaking resolution.
   @param[in] ClearScreenOnModeSwitch  Clear graphic screen when switching to text mode.
   @param[in] ReplaceTabWithSpace      Replace invisible tab characters with spaces in OutputString.
 **/
 VOID
-OcConsoleControlConfigure (
-  IN BOOLEAN                      IgnoreTextOutput,
-  IN BOOLEAN                      SanitiseClearScreen,
-  IN BOOLEAN                      ClearScreenOnModeSwitch,
-  IN BOOLEAN                      ReplaceTabWithSpace
+OcSetupConsole (
+  IN OC_CONSOLE_RENDERER   Renderer,
+  IN UINT32                Resolution,
+  IN BOOLEAN               IgnoreTextOutput,
+  IN BOOLEAN               SanitiseClearScreen,
+  IN BOOLEAN               ClearScreenOnModeSwitch,
+  IN BOOLEAN               ReplaceTabWithSpace
   );
 
 /**
-  Sync console control protocol with the new ConOut protocol.
+  Update console control screen mode.
+
+  @param[in] Mode       Desired mode.
+
+  @retval previous console control mode.
 **/
-VOID
-OcConsoleControlSync (
-  VOID
-  );
-
-/**
-  Configure console control behaviour.
-
-  @param[in] Behaviour          Custom console behaviour.
-
-  @retval EFI_SUCCESS on success.
-**/
-EFI_STATUS
-OcConsoleControlSetBehaviour (
-  IN OC_CONSOLE_CONTROL_BEHAVIOUR  Behaviour
-  );
-
-/**
-  Disable and hide onscreen cursor.
-**/
-VOID
-OcConsoleDisableCursor (
-  VOID
+EFI_CONSOLE_CONTROL_SCREEN_MODE
+OcConsoleControlSetMode (
+  IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode
   );
 
 /**
@@ -94,7 +69,7 @@ OcConsoleDisableCursor (
   @param[out]  Max      Set to TRUE when String equals to Max.
 **/
 VOID
-ParseScreenResolution (
+OcParseScreenResolution (
   IN  CONST CHAR8         *String,
   OUT UINT32              *Width,
   OUT UINT32              *Height,
@@ -111,23 +86,11 @@ ParseScreenResolution (
   @param[out]  Max      Set to TRUE when String equals to Max.
 **/
 VOID
-ParseConsoleMode (
+OcParseConsoleMode (
   IN  CONST CHAR8         *String,
   OUT UINT32              *Width,
   OUT UINT32              *Height,
   OUT BOOLEAN             *Max
-  );
-
-/**
-  Parse console control behaviour from string.
-
-  @param[in]   Behaviour  Console control behaviour.
-
-  @retval OC_CONSOLE_CONTROL_BEHAVIOUR.
-**/
-OC_CONSOLE_CONTROL_BEHAVIOUR
-ParseConsoleControlBehaviour (
-  IN  CONST CHAR8        *Behaviour
   );
 
 /**
@@ -136,16 +99,14 @@ ParseConsoleControlBehaviour (
   @param[in]  Width      Resolution width or 0 for Max.
   @param[in]  Height     Resolution height or 0 for Max.
   @param[in]  Bpp        Resolution bpp or 0 for automatic.
-  @param[in]  Reconnect  Reconnect console output handles after resolution change.
 
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-SetConsoleResolution (
+OcSetConsoleResolution (
   IN  UINT32              Width,
   IN  UINT32              Height,
-  IN  UINT32              Bpp    OPTIONAL,
-  IN  BOOLEAN             Reconnect
+  IN  UINT32              Bpp    OPTIONAL
   );
 
 /**
@@ -157,7 +118,7 @@ SetConsoleResolution (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-SetConsoleMode (
+OcSetConsoleMode (
   IN  UINT32              Width,
   IN  UINT32              Height
   );
@@ -171,6 +132,14 @@ OcProvideConsoleGop (
   );
 
 /**
+  Perform console reconnection.
+**/
+VOID
+OcReconnectConsole (
+  VOID
+  );
+
+/**
   Allocate new System Table with disabled text output.
 
   @param[in] SystemTable     Base System Table.
@@ -180,14 +149,6 @@ OcProvideConsoleGop (
 EFI_SYSTEM_TABLE *
 AllocateNullTextOutSystemTable (
   IN EFI_SYSTEM_TABLE  *SystemTable
-  );
-
-/**
-  Replace ConOut with builtin implementation for text output.
-**/
-VOID
-OcInstallCustomConOut (
-  VOID
   );
 
 #endif // OC_CONSOLE_LIB_H

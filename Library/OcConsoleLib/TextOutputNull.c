@@ -157,7 +157,7 @@ AllocateNullTextOutSystemTable (
   NewSystemTable = (EFI_SYSTEM_TABLE *) AllocateZeroPool (SystemTable->Hdr.HeaderSize);
 
   if (NewSystemTable == NULL) {
-      return NULL;
+    return NULL;
   }
 
   CopyMem ((VOID *) NewSystemTable, SystemTable, SystemTable->Hdr.HeaderSize);
