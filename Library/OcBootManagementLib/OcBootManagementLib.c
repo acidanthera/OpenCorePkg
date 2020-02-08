@@ -74,6 +74,7 @@ OcShowSimpleBootMenu (
   }
 
   OcConsoleControlSetMode (EfiConsoleControlScreenText);
+  gST->ConOut->EnableCursor (gST->ConOut, FALSE);
 
   while (TRUE) {
     gST->ConOut->ClearScreen (gST->ConOut);
@@ -223,7 +224,7 @@ OcShowSimplePasswordRequest (
   }
 
   OcConsoleControlSetMode (EfiConsoleControlScreenText);
-
+  gST->ConOut->EnableCursor (gST->ConOut, FALSE);
   gST->ConOut->ClearScreen (gST->ConOut);
 
   for (Index = 0; Index < 3; ++Index) {
