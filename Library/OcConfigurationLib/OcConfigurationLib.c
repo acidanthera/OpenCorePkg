@@ -348,9 +348,8 @@ mMiscConfigurationSecuritySchema[] = {
   OC_SCHEMA_INTEGER_IN ("HaltLevel",            OC_GLOBAL_CONFIG, Misc.Security.HaltLevel),
   OC_SCHEMA_DATAF_IN   ("PasswordHash",         OC_GLOBAL_CONFIG, Misc.Security.PasswordHash),
   OC_SCHEMA_DATA_IN    ("PasswordSalt",         OC_GLOBAL_CONFIG, Misc.Security.PasswordSalt),
-  OC_SCHEMA_BOOLEAN_IN ("RequireSignature",     OC_GLOBAL_CONFIG, Misc.Security.RequireSignature),
-  OC_SCHEMA_BOOLEAN_IN ("RequireVault",         OC_GLOBAL_CONFIG, Misc.Security.RequireVault),
   OC_SCHEMA_INTEGER_IN ("ScanPolicy",           OC_GLOBAL_CONFIG, Misc.Security.ScanPolicy),
+  OC_SCHEMA_STRING_IN  ("Vault",                OC_GLOBAL_CONFIG, Misc.Security.Vault),
 };
 
 STATIC

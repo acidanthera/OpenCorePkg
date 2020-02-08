@@ -291,7 +291,14 @@
 #define OCS_EXPOSE_OEM_INFO    8U
 #define OCS_EXPOSE_VERSION     (OCS_EXPOSE_VERSION_VAR | OCS_EXPOSE_VERSION_UI)
 
+typedef enum {
+  OcsVaultOptional = 0,
+  OcsVaultBasic    = 1,
+  OcsVaultSecure   = 2,
+} OCS_VAULT_MODE;
+
 #define OC_MISC_SECURITY_FIELDS(_, __) \
+  _(OC_STRING                   , Vault                       ,      , OC_STRING_CONSTR ("Secure", _, __), OC_DESTR (OC_STRING) ) \
   _(UINT32                      , ScanPolicy                  ,      , OC_SCAN_DEFAULT_POLICY  , ()) \
   _(BOOLEAN                     , AllowNvramReset             ,      , FALSE                   , ()) \
   _(BOOLEAN                     , AllowSetDefault             ,      , FALSE                   , ()) \
@@ -300,8 +307,6 @@
   _(BOOLEAN                     , EnablePassword              ,      , FALSE                   , ()) \
   _(UINT8                       , PasswordHash                , [64] , {0}                     , ()) \
   _(OC_DATA                     , PasswordSalt                ,      , OC_EDATA_CONSTR (_, __) , OC_DESTR (OC_DATA)) \
-  _(BOOLEAN                     , RequireVault                ,      , TRUE                    , ()) \
-  _(BOOLEAN                     , RequireSignature            ,      , TRUE                    , ()) \
   _(UINT64                      , HaltLevel                   ,      , 0x80000000              , ())
   OC_DECLARE (OC_MISC_SECURITY)
 
