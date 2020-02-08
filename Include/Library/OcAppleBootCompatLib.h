@@ -73,6 +73,10 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   BOOLEAN  DisableVariableWrite;
   ///
+  /// Protect secure boot variables.
+  ///
+  BOOLEAN  ProtectSecureBoot;
+  ///
   /// Permit writing to executable memory in UEFI runtime services. Fixes crashes
   /// on many APTIO V firmwares.
   ///
