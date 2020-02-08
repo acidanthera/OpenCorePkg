@@ -76,6 +76,23 @@ STATIC
 EFI_CONSOLE_CONTROL_PROTOCOL
 mOriginalConsoleControlProtocol;
 
+//
+// EFI background colours.
+//
+STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL mEfiBackgroundColors[8] = {
+  //
+  // B    G    R   reserved
+  //
+  {0x00, 0x00, 0x00, 0x00},  // BLACK
+  {0x98, 0x00, 0x00, 0x00},  // LIGHTBLUE
+  {0x00, 0x98, 0x00, 0x00},  // LIGHGREEN
+  {0x98, 0x98, 0x00, 0x00},  // LIGHCYAN
+  {0x00, 0x00, 0x98, 0x00},  // LIGHRED
+  {0x98, 0x00, 0x98, 0x00},  // MAGENTA
+  {0x00, 0x98, 0x98, 0x00},  // BROWN
+  {0x98, 0x98, 0x98, 0x00},  // LIGHTGRAY
+};
+
 STATIC
 EFI_STATUS
 EFIAPI
@@ -163,23 +180,9 @@ ControlledClearScreen (
   //
 
   if (GraphicsOutput != NULL) {
-    STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL mGraphicsEfiColors[8] = {
-      //
-      // B    G    R   reserved
-      //
-      {0x00, 0x00, 0x00, 0x00},  // BLACK
-      {0x98, 0x00, 0x00, 0x00},  // LIGHTBLUE
-      {0x00, 0x98, 0x00, 0x00},  // LIGHGREEN
-      {0x98, 0x98, 0x00, 0x00},  // LIGHCYAN
-      {0x00, 0x00, 0x98, 0x00},  // LIGHRED
-      {0x98, 0x00, 0x98, 0x00},  // MAGENTA
-      {0x00, 0x98, 0x98, 0x00},  // BROWN
-      {0x98, 0x98, 0x98, 0x00},  // LIGHTGRAY
-    };
-
     Status = GraphicsOutput->Blt (
       GraphicsOutput,
-      &mGraphicsEfiColors[BitFieldRead32 ((UINT32) This->Mode->Attribute, 4, 6)],
+      &mEfiBackgroundColors[BitFieldRead32 ((UINT32) This->Mode->Attribute, 4, 6)],
       EfiBltVideoFill,
       0,
       0,
@@ -248,7 +251,6 @@ ConsoleControlSetMode (
 {
   EFI_STATUS                    Status;
   EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput;
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL Background;
 
   DEBUG ((DEBUG_INFO, "OCC: Setting cc mode %d -> %d\n", mConsoleMode, Mode));
 
@@ -262,13 +264,9 @@ ConsoleControlSetMode (
       );
 
     if (!EFI_ERROR (Status)) {
-      Background.Red   = 0;
-      Background.Green = 0;
-      Background.Blue  = 0;
-
       Status = GraphicsOutput->Blt (
         GraphicsOutput,
-        &Background,
+        &mEfiBackgroundColors[BitFieldRead32 ((UINT32) gST->ConOut->Mode->Attribute, 4, 6)],
         EfiBltVideoFill,
         0,
         0,
