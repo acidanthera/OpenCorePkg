@@ -6,6 +6,12 @@ OpenCore Changelog
 - Fixed locating DMG recovery in APTIO IV firmwares on FAT32
 - Fixed loading DMG recovery in APTIO IV firmwares on FAT32
 - Removed `AvoidHighAlloc` quirk due to removed I/O over 4GB
+- Moved `ConsoleMode`, `Resolution` options to `Output` section
+- Moved console-related UEFI quirks to `Output` section
+- Replaced `ConsoleControl` and `BuiltinTextRenderer` with `TextRenderer`
+- Added `Scale` option to set builtin text renderer scaling
+- Removed `ConsoleBehaviourOs` and `ConsoleBehaviourUi`
+- Fixed providing ConsoleOutHandle GOP when running from Shell
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere

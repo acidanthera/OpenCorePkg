@@ -123,7 +123,7 @@ This document is structured as a specification, and is not meant to provide a st
 step algorithm for configuring end-user board support package (BSP). Any third-party
 articles, tools, books, etc., providing such material are prone to their authors'
 preferences, tastes, this document misinterpretation, and essential obsolescence.
-In case you still use these sources, for example, 
+In case you still use these sources, for example,
 \href{https://khronokernel-2.gitbook.io/opencore-vanilla-desktop-guide}{Opencore Vanilla Desktop Guide},
 please ensure following this document for every made decision and judging its consequences.
 Regardless of the sources used you are required to fully understand every dedicated OpenCore
@@ -694,7 +694,7 @@ use \texttt{OC:}, for libraries and drivers use their own unique prefixes.
 \item Use \texttt{DEBUG\_CODE\_BEGIN ()} and \texttt{DEBUG\_CODE\_END ()} constructions to guard debug checks
 that may potentially reduce the performance of release builds and are otherwise unnecessary.
 \item Use \texttt{DEBUG} macro to print debug messages during normal functioning, and \texttt{RUNTIME\_DEBUG} for
-debugging after \texttt{EXIT\_BOOT\_SERVICES}. 
+debugging after \texttt{EXIT\_BOOT\_SERVICES}.
 \item Use \texttt{DEBUG\_VERBOSE} debug level to leave debug messages for future debugging of the code, which
 are currently not necessary. By default \texttt{DEBUG\_VERBOSE} messages are ignored even in \texttt{DEBUG} builds.
 \item Use \texttt{DEBUG\_INFO} debug level for all non critical messages (including errors) and \texttt{DEBUG\_BULK\_INFO}
@@ -2030,95 +2030,6 @@ behaviour that does not go to any other sections
 \begin{enumerate}
 
 \item
-  \texttt{BuiltinTextRenderer}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enables experimental builtin text renderer.
-
-  This option makes all text going through standard console output
-  render through builtin text renderer bypassing firmware services.
-  While still experimental and feature incomplete, this option
-  efficiently avoids the need for various quirks like
-  \texttt{ReplaceTabWithSpace} or \texttt{SanitiseClearScreen}. It
-  should also increase the dimensions of the output area.
-
-  Since builtin text renderer works in graphics mode, extra care
-  may need to be paid to \texttt{ConsoleBehaviourOs},
-  \texttt{ConsoleBehaviourUi}, \texttt{ConsoleControl}, and
-  \texttt{IgnoreTextInGraphics} options. While individual for the
-  target system, it is recommended to use \texttt{ForceGraphics} and
-  builtin \texttt{ConsoleControl} to avoid compatibility issues.
-
-  \emph{Note}: Some Macs, namely \texttt{MacPro5,1}, may have broken
-  console output with newer GPUs, and thus enabling this option can
-  be required for them.
-
-\item
-  \texttt{ConsoleMode}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Sets console output mode as specified
-  with the \texttt{WxH} (e.g. \texttt{80x24}) formatted string.
-  Set to empty string not to change console mode. Set to \texttt{Max}
-  to try to use largest available console mode.
-
-  \emph{Note}: This field is best to be left empty on most firmwares.
-
-\item
-  \texttt{ConsoleBehaviourOs}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Set console control behaviour upon operating system load.
-
-  Console control is a legacy protocol used for switching between text and graphics
-  screen output. Some firmwares do not provide it, yet select operating systems
-  require its presence, which is what \texttt{ConsoleControl} UEFI protocol is for.
-
-  When console control is available, OpenCore can be made console control aware,
-  and set different modes for the operating system booter (\texttt{ConsoleBehaviourOs}),
-  which normally runs in graphics mode, and its own user interface
-  (\texttt{ConsoleBehaviourUi}), which normally runs in text mode. Possible
-  behaviours, set as values of these options, include:
-
-  \begin{itemize}
-  \tightlist
-  \item Empty string --- Do not modify console control mode.
-  \item \texttt{Text} --- Switch to text mode.
-  \item \texttt{Graphics} --- Switch to graphics mode.
-  \item \texttt{ForceText} --- Switch to text mode and preserve it
-  (requires \texttt{ConsoleControl}).
-  \item \texttt{ForceGraphics} --- Switch to graphics mode and preserve it
-  (require \texttt{ConsoleControl}).
-  \end{itemize}
-
-  Hints:
-  \begin{itemize}
-  \tightlist
-  \item Unless empty works, firstly try to set
-  \texttt{ConsoleBehaviourOs} to \texttt{Graphics} and
-  \texttt{ConsoleBehaviourUi} to \texttt{Text}.
-  \item On APTIO IV (Haswell and earlier) it is usually enough to have
-  \texttt{ConsoleBehaviourOs} set to \texttt{Graphics} and
-  \texttt{ConsoleBehaviourUi} set to \texttt{ForceText} to avoid visual glitches.
-  \item On APTIO V (Broadwell and newer) \texttt{ConsoleBehaviourOs}
-  set to \texttt{ForceGraphics} and \texttt{ConsoleBehaviourUi} set to
-  \texttt{ForceText} usually works best.
-  \item On Apple firmwares \texttt{ConsoleBehaviourOs}
-  set to \texttt{Graphics} and \texttt{ConsoleBehaviourUi} set to
-  \texttt{Text} is supposed to work best.
-  \end{itemize}
-
-  \emph{Note}: \texttt{IgnoreTextInGraphics} and \texttt{SanitiseClearScreen} may need to be enabled for select
-  firmware implementations. Particularly APTIO firmwares.
-
-\item
-  \texttt{ConsoleBehaviourUi}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Set console control behaviour upon OpenCore user
-  interface load. Refer to \texttt{ConsoleBehaviourOs} description for details.
-
-\item
   \texttt{HibernateMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{None}\\
@@ -2165,31 +2076,7 @@ behaviour that does not go to any other sections
   \item \texttt{CMD+S+MINUS} --- disable KASLR slide, requires disabled SIP.
   \item \texttt{CMD+V} --- verbose mode.
   \item \texttt{Shift} --- safe mode.
-  \end{itemize} 
-
-\item
-  \texttt{Resolution}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Sets console output screen resolution.
-
-  \begin{itemize}
-  \tightlist
-  \item Set to \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) or \texttt{WxH}
-  (e.g. \texttt{1920x1080}) formatted string to request custom resolution
-  from GOP if available.
-  \item Set to empty string not to change screen resolution.
-  \item Set to \texttt{Max} to try to use largest available screen resolution.
   \end{itemize}
-
-  On HiDPI screens \texttt{APPLE\_VENDOR\_VARIABLE\_GUID} \texttt{UIScale}
-  NVRAM variable may need to be set to \texttt{02} to enable HiDPI scaling
-  in FileVault 2 UEFI password interface and boot screen logo. Refer to
-  \hyperref[nvramvarsrec]{Recommended Variables} section for more details.
-
-  \emph{Note}: This will fail when console handle has no GOP protocol. When
-  the firmware does not provide it, it can be added with \texttt{ProvideConsoleGop}
-  UEFI quirk set to \texttt{true}.
 
 \item
   \texttt{ShowPicker}\\
@@ -2781,7 +2668,7 @@ use.
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Enables writing to flash memory for all added variables.
-  
+
   \emph{Note}: This value is recommended to be enabled on most firmwares, but is
   left configurable for firmwares that may have issues with NVRAM variable storage
   garbage collection or alike.
@@ -2960,7 +2847,10 @@ troubleshooting:
   \item \texttt{kc-read-size=VALUE} --- Chunk size used for buffered I/O from network or
   disk for prelinkedkernel reading and related. Set to 1MB (0x100000) by default, can be
   tuned for faster booting.
-\end{itemize}
+  \end{itemize}
+
+  \emph{Note}: To quickly see verbose output from \texttt{boot.efi} set this to \texttt{log=1}
+  (currently this is broken in 10.15).
 \item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg-once}
   \break
   Booter arguments override removed after first launch. Otherwise equivalent to \texttt{bootercfg}.
@@ -3281,7 +3171,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   by CPU maximum bus ratio and is specified in Hz. Refer to
   \texttt{MSR\_NEHALEM\_PLATFORM\_INFO}~(\texttt{CEh}) MSR value to determine
   maximum bus ratio on modern Intel CPUs.
-  
+
   \emph{Note}: This value is not used on Skylake and newer but is still provided
   to follow suit.
 \item
@@ -3290,12 +3180,12 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Failsafe}: Automatic\\
   \textbf{Description}: Sets \texttt{ARTFrequency} in
   \texttt{gEfiProcessorSubClassGuid}.
-  
+
   This value contains CPU ART frequency, also known as crystal clock frequency.
   Its existence is exclusive to Skylake generation and newer. The value is specified
   in Hz, and is normally 24 MHz for client Intel segment, 25 MHz for server Intel segment,
   and 19.2 MHz for Intel Atom CPUs. macOS till 10.15 inclusive assumes 24 MHz by default.
-  
+
   \emph{Note}: On Intel Skylake X ART frequency may be a little less (approx. 0.25\%) than
   24 or 25 MHz due to special EMI-reduction circuit as described in
   \href{https://github.com/acidanthera/bugtracker/issues/448#issuecomment-524914166}{Acidanthera Bugtracker}.
@@ -3742,6 +3632,12 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Description}: Apply individual settings designed for input (keyboard and mouse) in
   \hyperref[uefiinputprops]{Input Properties} section below.
 
+\item
+  \texttt{Input}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Failsafe}: None\\
+  \textbf{Description}: Apply individual settings designed for output (text and graphics) in
+  \hyperref[uefioutputprops]{Output Properties} section below.
 
 \item
   \texttt{Protocols}\\
@@ -3876,6 +3772,189 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 
 \end{enumerate}
 
+\subsection{Output Properties}\label{uefioutputprops}
+
+\begin{enumerate}
+
+\item
+  \texttt{TextRenderer}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{BuiltinGraphics}\\
+  \textbf{Description}: Chooses renderer for text going through standard
+  console output.
+
+  Currently two renderers are supported: \texttt{Builtin} and
+  \texttt{System}. \texttt{System} renderer uses firmware services
+  for text rendering. \texttt{Builtin} bypassing firmware services
+  and performs text rendering on its own. Different renderers support
+  a different set of options. It is recommended to use \texttt{Builtin}
+  renderer, as it supports HiDPI mode and uses full screen resolution.
+
+  UEFI firmwares generally support \texttt{ConsoleControl} with two
+  rendering modes: \texttt{Graphics} and \texttt{Text}. Some firmwares
+  do not support \texttt{ConsoleControl} and rendering modes. OpenCore
+  and macOS expect text to only be shown in \texttt{Graphics} mode and
+  graphics to be drawn in any mode. Since this is not required by UEFI
+  specification, exact behaviour varies.
+
+  Valid values are combinations of text renderer and rendering mode:
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{BuiltinGraphics} --- Switch to \texttt{Graphics}
+    mode and use \texttt{Builtin} renderer with
+    custom \texttt{ConsoleControl}.
+  \item \texttt{SystemGraphics} --- Switch to \texttt{Graphics}
+    mode and use \texttt{System} renderer with
+    custom \texttt{ConsoleControl}.
+  \item \texttt{SystemText} --- Switch to \texttt{Text}
+    mode and use \texttt{System} renderer with
+    custom \texttt{ConsoleControl}.
+  \item \texttt{SystemGeneric} --- Use \texttt{System} renderer with
+    system \texttt{ConsoleControl} assuming it behaves correctly.
+  \end{itemize}
+
+  The use of \texttt{BuiltinGraphics} is generally straightforward.
+  For most platforms it is necessary to enable \texttt{ProvideConsoleGop},
+  set \texttt{Resolution} to \texttt{Max}, and optionally configure
+  \texttt{Scale}.
+
+  The use of \texttt{System} protocols is more complicated. In general
+  the preferred setting is \texttt{SystemGraphics} or \texttt{SystemText}.
+  Enabling \texttt{ProvideConsoleGop}, setting \texttt{Resolution} to
+  \texttt{Max}, enabling \texttt{ReplaceTabWithSpace} is useful on almost
+  all platforms. \texttt{SanitiseClearScreen}, \texttt{IgnoreTextInGraphics},
+  and \texttt{ClearScreenOnModeSwitch} are more specific, and their use
+  depends on the firmware.
+
+  \emph{Note}: Some Macs, namely \texttt{MacPro5,1}, may have broken
+  console output with newer GPUs, and thus only \texttt{BuiltinGraphics}
+  may work for them.
+
+\item
+  \texttt{ConsoleMode}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Sets console output mode as specified
+  with the \texttt{WxH} (e.g. \texttt{80x24}) formatted string.
+
+  Set to empty string not to change console mode. Set to \texttt{Max}
+  to try to use largest available console mode. Currently
+  \texttt{Builtin} text renderer supports only one console mode, so
+  this option is ignored.
+
+  \emph{Note}: This field is best to be left empty on most firmwares.
+
+\item
+  \texttt{Resolution}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Sets console output screen resolution.
+
+  \begin{itemize}
+  \tightlist
+  \item Set to \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) or \texttt{WxH}
+  (e.g. \texttt{1920x1080}) formatted string to request custom resolution
+  from GOP if available.
+  \item Set to empty string not to change screen resolution.
+  \item Set to \texttt{Max} to try to use largest available screen resolution.
+  \end{itemize}
+
+  On HiDPI screens \texttt{APPLE\_VENDOR\_VARIABLE\_GUID} \texttt{UIScale}
+  NVRAM variable may need to be set to \texttt{02} to enable HiDPI scaling
+  in FileVault 2 UEFI password interface and boot screen logo. Refer to
+  \hyperref[nvramvarsrec]{Recommended Variables} section for more details.
+
+  \emph{Note}: This will fail when console handle has no GOP protocol. When
+  the firmware does not provide it, it can be added with \texttt{ProvideConsoleGop}
+  set to \texttt{true}.
+
+\item
+  \texttt{ClearScreenOnModeSwitch}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Some firmwares clear only part of screen when switching
+  from graphics to text mode, leaving a fragment of previously drawn image visible.
+  This option fills the entire graphics screen with black color before switching to
+  text mode.
+
+  \emph{Note}: This option only applies to \texttt{System} renderer.
+
+\item
+  \texttt{IgnoreTextInGraphics}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Select firmwares output text onscreen in both graphics and
+  text mode. This is normally unexpected, because random text may appear over
+  graphical images and cause UI corruption. Setting this option to \texttt{true} will
+  discard all text output when console control is in mode different from \texttt{Text}.
+
+  \emph{Note}: This option only applies to \texttt{System} renderer.
+
+\item
+  \texttt{ReplaceTabWithSpace}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Some firmwares do not print tab characters or even everything
+  that follows them, causing difficulties or inability to use the UEFI Shell builtin
+  text editor to edit property lists and other documents. This option makes the console
+  output spaces instead of tabs.
+
+  \emph{Note}: This option only applies to \texttt{System} renderer.
+
+\item
+  \texttt{ProvideConsoleGop}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Ensure GOP (Graphics Output Protocol) on console handle.
+
+  macOS bootloader requires GOP to be present on console handle, yet the exact
+  location of GOP is not covered by the UEFI specification. This option will
+  ensure GOP is installed on console handle if it is present.
+
+  \emph{Note}: This option will also replace broken GOP protocol on console handle,
+  which may be the case on \texttt{MacPro5,1} with newer GPUs.
+
+\item
+  \texttt{ReconnectOnResChange}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reconnect console controllers after changing screen resolution.
+
+  On some firmwares when screen resolution is changed via GOP, it is required to reconnect
+  the controllers, which produce the console protocols (simple text out). Otherwise they
+  will not produce text based on the new resolution.
+
+  \emph{Note}: On several boards this logic may result in black screen when launching
+  OpenCore from Shell and thus it is optional. In versions prior to 0.5.2 this option
+  was mandatory and not configurable. Please do not use this unless required.
+
+\item
+  \texttt{SanitiseClearScreen}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Some firmwares reset screen resolution to a failsafe
+  value (like \texttt{1024x768}) on the attempts to clear screen contents
+  when large display (e.g. 2K or 4K) is used. This option attempts to apply
+  a workaround.
+
+  \emph{Note}: This option only applies to \texttt{System} renderer.
+   On all known affected systems \texttt{ConsoleMode} had to be set to
+   empty string for this to work.
+
+\item
+  \texttt{Scale}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{100}\\
+  \textbf{Description}: Sets text renderer HiDPI scaling in percents.
+
+  Currently only \texttt{100} and \texttt{200} values are supported.
+
+  \emph{Note}: This option only applies to \texttt{Builtin} renderer.
+
+\end{enumerate}
+
+
 \subsection{Protocols Properties}\label{uefiprotoprops}
 
 \begin{enumerate}
@@ -3929,18 +4008,6 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Apple User Interface Theme protocol with a builtin
   version.
-
-\item
-  \texttt{ConsoleControl}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Replaces Console Control protocol with a builtin version.
-
-  macOS bootloader requires console control protocol for text output, which some firmwares
-  miss. This option is required to be set when the protocol is already available in the
-  firmware, and other console control options are used, such as \texttt{IgnoreTextInGraphics},
-  \texttt{SanitiseClearScreen}, and sometimes \texttt{ConsoleBehaviourOs} with
-  \texttt{ConsoleBehaviourUi}).
 
 \item
   \texttt{DataHub}\\
@@ -3999,18 +4066,6 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \begin{enumerate}
 
 \item
-  \texttt{ClearScreenOnModeSwitch}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Some firmwares clear only part of screen when switching
-  from graphics to text mode, leaving a fragment of previously drawn image visible.
-  This option fills the entire graphics screen with black color before switching to
-  text mode.
-
-  \emph{Note}: \texttt{ConsoleControl} should be set to
-  \texttt{true} for this to work.
-
-\item
   \texttt{ExitBootServicesDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
@@ -4033,59 +4088,6 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 
   \emph{Note}: While the option is not supposed to induce harm on unaffected firmwares,
   its usage is not recommended when it is not required.
-
-\item
-  \texttt{IgnoreTextInGraphics}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Select firmwares output text onscreen in both graphics and
-  text mode. This is normally unexpected, because random text may appear over
-  graphical images and cause UI corruption. Setting this option to \texttt{true} will
-  discard all text output when console control is in mode different from \texttt{Text}.
-
-  \emph{Note}: While the option is not supposed to induce harm on unaffected firmwares,
-  its usage is not recommended when it is not required. This option may hide
-  onscreen error messages. \texttt{ConsoleControl} may need to be set to
-  \texttt{true} for this to work.
-
-\item
-  \texttt{ReplaceTabWithSpace}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Some firmwares do not print tab characters or even everything 
-  that follows them, causing difficulties or inability to use the UEFI Shell builtin 
-  text editor to edit property lists and other documents. This option makes the console
-  output spaces instead of tabs. 
-
-  \emph{Note}: \texttt{ConsoleControl} may need to be set to
-  \texttt{true} for this to work.
-
-\item
-  \texttt{ProvideConsoleGop}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Ensure GOP (Graphics Output Protocol) on console handle.
-
-  macOS bootloader requires GOP to be present on console handle, yet the exact
-  location of GOP is not covered by the UEFI specification. This option will
-  ensure GOP is installed on console handle if it is present.
-
-  \emph{Note}: This option will also replace broken GOP protocol on console handle,
-  which may be the case on \texttt{MacPro5,1} with newer GPUs.
-
-\item
-  \texttt{ReconnectOnResChange}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reconnect console controllers after changing screen resolution.
-
-  On some firmwares when screen resolution is changed via GOP, it is required to reconnect
-  the controllers, which produce the console protocols (simple text out). Otherwise they
-  will not produce text based on the new resolution.
-
-  \emph{Note}: On several boards this logic may result in black screen when launching
-  OpenCore from Shell and thus it is optional. In versions prior to 0.5.2 this option
-  was mandatory and not configurable. Please do not use this unless required.
 
 \item
   \texttt{ReleaseUsbOwnership}\\
@@ -4151,19 +4153,6 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   Simply said, you are required to enable this quirk to be able to reliably
   use \href{https://support.apple.com/HT202796}{Startup Disk} preference
   pane in a firmware that is not compatible with macOS boot entries by design.
-
-\item
-  \texttt{SanitiseClearScreen}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Some firmwares reset screen resolution to a failsafe
-  value (like \texttt{1024x768}) on the attempts to clear screen contents
-  when large display (e.g. 2K or 4K) is used. This option attempts to apply
-  a workaround.
-
-  \emph{Note}: \texttt{ConsoleControl} may need to be set to
-  \texttt{true} for this to work. On all known affected systems
-  \texttt{ConsoleMode} had to be set to empty string for this to work.
 
 \item
   \texttt{UnblockFsConnect}\\

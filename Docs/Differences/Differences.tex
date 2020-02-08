@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Feb  7 17:19:37 2020
-%DIF ADD ../Configuration.tex        Fri Feb  7 17:23:17 2020
+%DIF DEL PreviousConfiguration.tex   Thu Feb  6 00:43:28 2020
+%DIF ADD ../Configuration.tex        Sat Feb  8 21:55:39 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -183,7 +183,7 @@ This document is structured as a specification, and is not meant to provide a st
 step algorithm for configuring end-user board support package (BSP). Any third-party
 articles, tools, books, etc., providing such material are prone to their authors'
 preferences, tastes, this document misinterpretation, and essential obsolescence.
-In case you still use these sources, for example, 
+In case you still use these sources, for example,
 \href{https://khronokernel-2.gitbook.io/opencore-vanilla-desktop-guide}{Opencore Vanilla Desktop Guide},
 please ensure following this document for every made decision and judging its consequences.
 Regardless of the sources used you are required to fully understand every dedicated OpenCore
@@ -754,7 +754,7 @@ use \texttt{OC:}, for libraries and drivers use their own unique prefixes.
 \item Use \texttt{DEBUG\_CODE\_BEGIN ()} and \texttt{DEBUG\_CODE\_END ()} constructions to guard debug checks
 that may potentially reduce the performance of release builds and are otherwise unnecessary.
 \item Use \texttt{DEBUG} macro to print debug messages during normal functioning, and \texttt{RUNTIME\_DEBUG} for
-debugging after \texttt{EXIT\_BOOT\_SERVICES}. 
+debugging after \texttt{EXIT\_BOOT\_SERVICES}.
 \item Use \texttt{DEBUG\_VERBOSE} debug level to leave debug messages for future debugging of the code, which
 are currently not necessary. By default \texttt{DEBUG\_VERBOSE} messages are ignored even in \texttt{DEBUG} builds.
 \item Use \texttt{DEBUG\_INFO} debug level for all non critical messages (including errors) and \texttt{DEBUG\_BULK\_INFO}
@@ -2090,96 +2090,225 @@ behaviour that does not go to any other sections
 \begin{enumerate}
 
 \item
-  \texttt{BuiltinTextRenderer}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enables experimental builtin text renderer.
+  \DIFdelbegin \texttt{\DIFdel{BuiltinTextRenderer}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Enables experimental builtin text renderer.
+}%DIFDELCMD < 
 
-  This option makes all text going through standard console output
+%DIFDELCMD <   %%%
+\DIFdel{This option makes all text going through standard console output
   render through builtin text renderer bypassing firmware services.
   While still experimental and feature incomplete, this option
-  \DIFdelbegin \DIFdel{effecitly }\DIFdelend \DIFaddbegin \DIFadd{efficiently }\DIFaddend avoids the need for various quirks like
-  \texttt{ReplaceTabWithSpace} or \texttt{SanitiseClearScreen}. It
+  effecitly avoids the need for various quirks like
+  }\texttt{\DIFdel{ReplaceTabWithSpace}} %DIFAUXCMD
+\DIFdel{or }\texttt{\DIFdel{SanitiseClearScreen}}%DIFAUXCMD
+\DIFdel{. It
   should also increase the dimensions of the output area.
+}%DIFDELCMD < 
 
-  Since builtin text renderer works in graphics mode, extra care
-  may need to be paid to \texttt{ConsoleBehaviourOs},
-  \texttt{ConsoleBehaviourUi}, \texttt{ConsoleControl}, and
-  \texttt{IgnoreTextInGraphics} options. While individual for the
-  target system, it is recommended to use \texttt{ForceGraphics} and
-  builtin \texttt{ConsoleControl} to avoid compatibility issues.
+%DIFDELCMD <   %%%
+\DIFdel{Since builtin text renderer works in graphics mode, extra care
+  may need to be paid to }\texttt{\DIFdel{ConsoleBehaviourOs}}%DIFAUXCMD
+\DIFdel{,
+  }\texttt{\DIFdel{ConsoleBehaviourUi}}%DIFAUXCMD
+\DIFdel{, }\texttt{\DIFdel{ConsoleControl}}%DIFAUXCMD
+\DIFdel{, and
+  }\texttt{\DIFdel{IgnoreTextInGraphics}} %DIFAUXCMD
+\DIFdel{options. While individual for the
+  target system, it is recommended to use }\texttt{\DIFdel{ForceGraphics}} %DIFAUXCMD
+\DIFdel{and
+  builtin }\texttt{\DIFdel{ConsoleControl}} %DIFAUXCMD
+\DIFdel{to avoid compatibility issues.
+}%DIFDELCMD < 
 
-  \emph{Note}: Some Macs, namely \texttt{MacPro5,1}, may have broken
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: Some Macs, namely }\texttt{\DIFdel{MacPro5,1}}%DIFAUXCMD
+\DIFdel{, may have broken
   console output with newer GPUs, and thus enabling this option can
   be required for them.
+}%DIFDELCMD < 
 
-\item
-  \texttt{ConsoleMode}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Sets console output mode as specified
-  with the \texttt{WxH} (e.g. \texttt{80x24}) formatted string.
-  Set to empty string not to change console mode. Set to \texttt{Max}
-  to try to use largest available console mode.
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\texttt{\DIFdel{ConsoleMode}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ string}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: Empty string}%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Sets console output mode as specified
+  with the }\texttt{\DIFdel{WxH}} %DIFAUXCMD
+\DIFdel{(e.g. }\texttt{\DIFdel{80x24}}%DIFAUXCMD
+\DIFdel{) formatted string.
+  Set to empty string not to change console mode. Set to }\texttt{\DIFdel{Max}}
+  %DIFAUXCMD
+\DIFdel{to try to use largest available console mode.
+}%DIFDELCMD < 
 
-  \emph{Note}: This field is best to be left empty on most firmwares.
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: This field is best to be left empty on most firmwares.
+}%DIFDELCMD < 
 
-\item
-  \texttt{ConsoleBehaviourOs}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Set console control behaviour upon operating system load.
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\texttt{\DIFdel{ConsoleBehaviourOs}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ string}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: Empty string}%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Set console control behaviour upon operating system load.
+}%DIFDELCMD < 
 
-  Console control is a legacy protocol used for switching between text and graphics
+%DIFDELCMD <   %%%
+\DIFdel{Console control is a legacy protocol used for switching between text and graphics
   screen output. Some firmwares do not provide it, yet select operating systems
-  require its presence, which is what \texttt{ConsoleControl} UEFI protocol is for.
+  require its presence, which is what }\texttt{\DIFdel{ConsoleControl}} %DIFAUXCMD
+\DIFdel{UEFI protocol is for.
+}%DIFDELCMD < 
 
-  When console control is available, OpenCore can be made console control aware,
-  and set different modes for the operating system booter (\texttt{ConsoleBehaviourOs}),
+%DIFDELCMD <   %%%
+\DIFdel{When console control is available, OpenCore can be made console control aware,
+  and set different modes for the operating system booter (}\texttt{\DIFdel{ConsoleBehaviourOs}}%DIFAUXCMD
+\DIFdel{),
   which normally runs in graphics mode, and its own user interface
-  (\texttt{ConsoleBehaviourUi}), which normally runs in text mode. Possible
+  (}\texttt{\DIFdel{ConsoleBehaviourUi}}%DIFAUXCMD
+\DIFdel{), which normally runs in text mode. Possible
   behaviours, set as values of these options, include:
+}%DIFDELCMD < 
 
-  \begin{itemize}
-  \tightlist
-  \item Empty string --- Do not modify console control mode.
-  \item \texttt{Text} --- Switch to text mode.
-  \item \texttt{Graphics} --- Switch to graphics mode.
-  \item \texttt{ForceText} --- Switch to text mode and preserve it
-  (requires \texttt{ConsoleControl}).
-  \item \texttt{ForceGraphics} --- Switch to graphics mode and preserve it
-  (require \texttt{ConsoleControl}).
-  \end{itemize}
+%DIFDELCMD <   \begin{itemize}
+\begin{itemize}%DIFAUXCMD
+%DIFDELCMD <   \tightlist
+%DIFDELCMD <   \item %%%
+\item%DIFAUXCMD
+\DIFdel{Empty string --- Do not modify console control mode.
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{Text}} %DIFAUXCMD
+\DIFdel{--- Switch to text mode.
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{Graphics}} %DIFAUXCMD
+\DIFdel{--- Switch to graphics mode.
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{ForceText}} %DIFAUXCMD
+\DIFdel{--- Switch to text mode and preserve it
+  (requires }\texttt{\DIFdel{ConsoleControl}}%DIFAUXCMD
+\DIFdel{).
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{ForceGraphics}} %DIFAUXCMD
+\DIFdel{--- Switch to graphics mode and preserve it
+  (require }\texttt{\DIFdel{ConsoleControl}}%DIFAUXCMD
+\DIFdel{).
+  }
+\end{itemize}%DIFAUXCMD
+%DIFDELCMD < \end{itemize}
+%DIFDELCMD < 
 
-  Hints:
-  \begin{itemize}
-  \tightlist
-  \item Unless empty works, firstly try to set
-  \texttt{ConsoleBehaviourOs} to \texttt{Graphics} and
-  \texttt{ConsoleBehaviourUi} to \texttt{Text}.
-  \item On APTIO IV (Haswell and earlier) it is usually enough to have
-  \texttt{ConsoleBehaviourOs} set to \texttt{Graphics} and
-  \texttt{ConsoleBehaviourUi} set to \texttt{ForceText} to avoid visual glitches.
-  \item On APTIO V (Broadwell and newer) \texttt{ConsoleBehaviourOs}
-  set to \texttt{ForceGraphics} and \texttt{ConsoleBehaviourUi} set to
-  \texttt{ForceText} usually works best.
-  \item On Apple firmwares \texttt{ConsoleBehaviourOs}
-  set to \texttt{Graphics} and \texttt{ConsoleBehaviourUi} set to
-  \texttt{Text} is supposed to work best.
-  \end{itemize}
+%DIFDELCMD <   %%%
+\DIFdel{Hints:
+  }%DIFDELCMD < \begin{itemize}
+\begin{itemize}%DIFAUXCMD
+%DIFDELCMD <   \tightlist
+%DIFDELCMD <   \item %%%
+\item%DIFAUXCMD
+\DIFdel{Unless empty works, firstly try to set
+  }\texttt{\DIFdel{ConsoleBehaviourOs}} %DIFAUXCMD
+\DIFdel{to }\texttt{\DIFdel{Graphics}} %DIFAUXCMD
+\DIFdel{and
+  }\texttt{\DIFdel{ConsoleBehaviourUi}} %DIFAUXCMD
+\DIFdel{to }\texttt{\DIFdel{Text}}%DIFAUXCMD
+\DIFdel{.
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdel{On APTIO IV (Haswell and earlier) it is usually enough to have
+  }\texttt{\DIFdel{ConsoleBehaviourOs}} %DIFAUXCMD
+\DIFdel{set to }\texttt{\DIFdel{Graphics}} %DIFAUXCMD
+\DIFdel{and
+  }\texttt{\DIFdel{ConsoleBehaviourUi}} %DIFAUXCMD
+\DIFdel{set to }\texttt{\DIFdel{ForceText}} %DIFAUXCMD
+\DIFdel{to avoid visual glitches.
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdel{On APTIO V (Broadwell and newer) }\texttt{\DIFdel{ConsoleBehaviourOs}}
+  %DIFAUXCMD
+\DIFdel{set to }\texttt{\DIFdel{ForceGraphics}} %DIFAUXCMD
+\DIFdel{and }\texttt{\DIFdel{ConsoleBehaviourUi}} %DIFAUXCMD
+\DIFdel{set to
+  }\texttt{\DIFdel{ForceText}} %DIFAUXCMD
+\DIFdel{usually works best.
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdel{On Apple firmwares }\texttt{\DIFdel{ConsoleBehaviourOs}}
+  %DIFAUXCMD
+\DIFdel{set to }\texttt{\DIFdel{Graphics}} %DIFAUXCMD
+\DIFdel{and }\texttt{\DIFdel{ConsoleBehaviourUi}} %DIFAUXCMD
+\DIFdel{set to
+  }\texttt{\DIFdel{Text}} %DIFAUXCMD
+\DIFdel{is supposed to work best.
+  }
+\end{itemize}%DIFAUXCMD
+%DIFDELCMD < \end{itemize}
+%DIFDELCMD < 
 
-  \emph{Note}: \texttt{IgnoreTextInGraphics} and \texttt{SanitiseClearScreen} may need to be enabled for select
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{IgnoreTextInGraphics}} %DIFAUXCMD
+\DIFdel{and }\texttt{\DIFdel{SanitiseClearScreen}} %DIFAUXCMD
+\DIFdel{may need to be enabled for select
   firmware implementations. Particularly APTIO firmwares.
+}%DIFDELCMD < 
 
-\item
-  \texttt{ConsoleBehaviourUi}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Set console control behaviour upon OpenCore user
-  interface load. Refer to \texttt{ConsoleBehaviourOs} description for details.
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\texttt{\DIFdel{ConsoleBehaviourUi}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ string}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: Empty string}%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Set console control behaviour upon OpenCore user
+  interface load. Refer to }\texttt{\DIFdel{ConsoleBehaviourOs}} %DIFAUXCMD
+\DIFdel{description for details.
+}%DIFDELCMD < 
 
-\item
-  \texttt{HibernateMode}\\
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdelend \texttt{HibernateMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{None}\\
   \textbf{Description}: Hibernation detection mode. The following modes are supported:
@@ -2225,34 +2354,71 @@ behaviour that does not go to any other sections
   \item \texttt{CMD+S+MINUS} --- disable KASLR slide, requires disabled SIP.
   \item \texttt{CMD+V} --- verbose mode.
   \item \texttt{Shift} --- safe mode.
-  \end{itemize} 
-
-\item
-  \texttt{Resolution}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Sets console output screen resolution.
-
-  \begin{itemize}
-  \tightlist
-  \item Set to \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) or \texttt{WxH}
-  (e.g. \texttt{1920x1080}) formatted string to request custom resolution
-  from GOP if available.
-  \item Set to empty string not to change screen resolution.
-  \item Set to \texttt{Max} to try to use largest available screen resolution.
   \end{itemize}
 
-  On HiDPI screens \texttt{APPLE\_VENDOR\_VARIABLE\_GUID} \texttt{UIScale}
-  NVRAM variable may need to be set to \texttt{02} to enable HiDPI scaling
-  in FileVault 2 UEFI password interface and boot screen logo. Refer to
-  \hyperref[nvramvarsrec]{Recommended Variables} section for more details.
-
-  \emph{Note}: This will fail when console handle has no GOP protocol. When
-  the firmware does not provide it, it can be added with \texttt{ProvideConsoleGop}
-  UEFI quirk set to \texttt{true}.
-
 \item
-  \texttt{ShowPicker}\\
+  \DIFdelbegin \texttt{\DIFdel{Resolution}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ string}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: Empty string}%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Sets console output screen resolution.
+}%DIFDELCMD < 
+
+%DIFDELCMD <   \begin{itemize}
+\begin{itemize}%DIFAUXCMD
+%DIFDELCMD <   \tightlist
+%DIFDELCMD <   \item %%%
+\item%DIFAUXCMD
+\DIFdel{Set to }\texttt{\DIFdel{WxH@Bpp}} %DIFAUXCMD
+\DIFdel{(e.g. }\texttt{\DIFdel{1920x1080@32}}%DIFAUXCMD
+\DIFdel{) or }\texttt{\DIFdel{WxH}}
+  %DIFAUXCMD
+\DIFdel{(e.g. }\texttt{\DIFdel{1920x1080}}%DIFAUXCMD
+\DIFdel{) formatted string to request custom resolution
+  from GOP if available.
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdel{Set to empty string not to change screen resolution.
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdel{Set to }\texttt{\DIFdel{Max}} %DIFAUXCMD
+\DIFdel{to try to use largest available screen resolution.
+  }
+\end{itemize}%DIFAUXCMD
+%DIFDELCMD < \end{itemize}
+%DIFDELCMD < 
+
+%DIFDELCMD <   %%%
+\DIFdel{On HiDPI screens }\texttt{\DIFdel{APPLE\_VENDOR\_VARIABLE\_GUID}} %DIFAUXCMD
+\texttt{\DIFdel{UIScale}}
+  %DIFAUXCMD
+\DIFdel{NVRAM variable may need to be set to }\texttt{\DIFdel{02}} %DIFAUXCMD
+\DIFdel{to enable HiDPI scaling
+  in FileVault 2 UEFI password interface and boot screen logo. Refer to
+  }%DIFDELCMD < \hyperref[nvramvarsrec]{Recommended Variables} %%%
+\DIFdel{section for more details.
+}%DIFDELCMD < 
+
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: This will fail when console handle has no GOP protocol. When
+  the firmware does not provide it, it can be added with }\texttt{\DIFdel{ProvideConsoleGop}}
+  %DIFAUXCMD
+\DIFdel{UEFI quirk set to }\texttt{\DIFdel{true}}%DIFAUXCMD
+\DIFdel{.
+}%DIFDELCMD < 
+
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdelend \texttt{ShowPicker}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Show simple boot picker to allow boot entry selection.
@@ -3020,8 +3186,12 @@ troubleshooting:
   \item \texttt{kc-read-size=VALUE} --- Chunk size used for buffered I/O from network or
   disk for prelinkedkernel reading and related. Set to 1MB (0x100000) by default, can be
   tuned for faster booting.
-\end{itemize}
-\item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg-once}
+  \end{itemize}
+\DIFaddbegin 
+
+  \emph{\DIFadd{Note}}\DIFadd{: To quickly see verbose output from }\texttt{\DIFadd{boot.efi}} \DIFadd{set this to }\texttt{\DIFadd{log=1}}
+  \DIFadd{(currently this is broken in 10.15).
+}\DIFaddend \item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg-once}
   \break
   Booter arguments override removed after first launch. Otherwise equivalent to \texttt{bootercfg}.
 \item
@@ -3802,9 +3972,16 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Description}: Apply individual settings designed for input (keyboard and mouse) in
   \hyperref[uefiinputprops]{Input Properties} section below.
 
+\item
+  \DIFaddbegin \texttt{\DIFadd{Input}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ dict}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: None}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Apply individual settings designed for output (text and graphics) in
+  }\hyperref[uefioutputprops]{Output Properties} \DIFadd{section below.
+}
 
 \item
-  \texttt{Protocols}\\
+  \DIFaddend \texttt{Protocols}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Force builtin versions of select protocols described
@@ -3936,7 +4113,220 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 
 \end{enumerate}
 
-\subsection{Protocols Properties}\label{uefiprotoprops}
+\DIFaddbegin \subsection{\DIFadd{Output Properties}}\label{uefioutputprops}
+
+\begin{enumerate}
+
+\item
+  \texttt{\DIFadd{TextRenderer}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{BuiltinGraphics}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Chooses renderer for text going through standard
+  console output.
+}
+
+  \DIFadd{Currently two renderers are supported: }\texttt{\DIFadd{Builtin}} \DIFadd{and
+  }\texttt{\DIFadd{System}}\DIFadd{. }\texttt{\DIFadd{System}} \DIFadd{renderer uses firmware services
+  for text rendering. }\texttt{\DIFadd{Builtin}} \DIFadd{bypassing firmware services
+  and performs text rendering on its own. Different renderers support
+  a different set of options. It is recommended to use }\texttt{\DIFadd{Builtin}}
+  \DIFadd{renderer, as it supports HiDPI mode and uses full screen resolution.
+}
+
+  \DIFadd{UEFI firmwares generally support }\texttt{\DIFadd{ConsoleControl}} \DIFadd{with two
+  rendering modes: }\texttt{\DIFadd{Graphics}} \DIFadd{and }\texttt{\DIFadd{Text}}\DIFadd{. Some firmwares
+  do not support }\texttt{\DIFadd{ConsoleControl}} \DIFadd{and rendering modes. OpenCore
+  and macOS expect text to only be shown in }\texttt{\DIFadd{Graphics}} \DIFadd{mode and
+  graphics to be drawn in any mode. Since this is not required by UEFI
+  specification, exact behaviour varies.
+}
+
+  \DIFadd{Valid values are combinations of text renderer and rendering mode:
+}
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{BuiltinGraphics}} \DIFadd{--- Switch to }\texttt{\DIFadd{Graphics}}
+    \DIFadd{mode and use }\texttt{\DIFadd{Builtin}} \DIFadd{renderer with
+    custom }\texttt{\DIFadd{ConsoleControl}}\DIFadd{.
+  }\item \texttt{\DIFadd{SystemGraphics}} \DIFadd{--- Switch to }\texttt{\DIFadd{Graphics}}
+    \DIFadd{mode and use }\texttt{\DIFadd{System}} \DIFadd{renderer with
+    custom }\texttt{\DIFadd{ConsoleControl}}\DIFadd{.
+  }\item \texttt{\DIFadd{SystemText}} \DIFadd{--- Switch to }\texttt{\DIFadd{Text}}
+    \DIFadd{mode and use }\texttt{\DIFadd{System}} \DIFadd{renderer with
+    custom }\texttt{\DIFadd{ConsoleControl}}\DIFadd{.
+  }\item \texttt{\DIFadd{SystemGeneric}} \DIFadd{--- Use }\texttt{\DIFadd{System}} \DIFadd{renderer with
+    system }\texttt{\DIFadd{ConsoleControl}} \DIFadd{assuming it behaves correctly.
+  }\end{itemize}
+
+  \DIFadd{The use of }\texttt{\DIFadd{BuiltinGraphics}} \DIFadd{is generally straightforward.
+  For most platforms it is necessary to enable }\texttt{\DIFadd{ProvideConsoleGop}}\DIFadd{,
+  set }\texttt{\DIFadd{Resolution}} \DIFadd{to }\texttt{\DIFadd{Max}}\DIFadd{, and optionally configure
+  }\texttt{\DIFadd{Scale}}\DIFadd{.
+}
+
+  \DIFadd{The use of }\texttt{\DIFadd{System}} \DIFadd{protocols is more complicated. In general
+  the preferred setting is }\texttt{\DIFadd{SystemGraphics}} \DIFadd{or }\texttt{\DIFadd{SystemText}}\DIFadd{.
+  Enabling }\texttt{\DIFadd{ProvideConsoleGop}}\DIFadd{, setting }\texttt{\DIFadd{Resolution}} \DIFadd{to
+  }\texttt{\DIFadd{Max}}\DIFadd{, enabling }\texttt{\DIFadd{ReplaceTabWithSpace}} \DIFadd{is useful on almost
+  all platforms. }\texttt{\DIFadd{SanitiseClearScreen}}\DIFadd{, }\texttt{\DIFadd{IgnoreTextInGraphics}}\DIFadd{,
+  and }\texttt{\DIFadd{ClearScreenOnModeSwitch}} \DIFadd{are more specific, and their use
+  depends on the firmware.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: Some Macs, namely }\texttt{\DIFadd{MacPro5,1}}\DIFadd{, may have broken
+  console output with newer GPUs, and thus only }\texttt{\DIFadd{BuiltinGraphics}}
+  \DIFadd{may work for them.
+}
+
+\item
+  \texttt{\DIFadd{ConsoleMode}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Sets console output mode as specified
+  with the }\texttt{\DIFadd{WxH}} \DIFadd{(e.g. }\texttt{\DIFadd{80x24}}\DIFadd{) formatted string.
+}
+
+  \DIFadd{Set to empty string not to change console mode. Set to }\texttt{\DIFadd{Max}}
+  \DIFadd{to try to use largest available console mode. Currently
+  }\texttt{\DIFadd{Builtin}} \DIFadd{text renderer supports only one console mode, so
+  this option is ignored.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This field is best to be left empty on most firmwares.
+}
+
+\item
+  \texttt{\DIFadd{Resolution}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Sets console output screen resolution.
+}
+
+  \begin{itemize}
+  \tightlist
+  \item \DIFadd{Set to }\texttt{\DIFadd{WxH@Bpp}} \DIFadd{(e.g. }\texttt{\DIFadd{1920x1080@32}}\DIFadd{) or }\texttt{\DIFadd{WxH}}
+  \DIFadd{(e.g. }\texttt{\DIFadd{1920x1080}}\DIFadd{) formatted string to request custom resolution
+  from GOP if available.
+  }\item \DIFadd{Set to empty string not to change screen resolution.
+  }\item \DIFadd{Set to }\texttt{\DIFadd{Max}} \DIFadd{to try to use largest available screen resolution.
+  }\end{itemize}
+
+  \DIFadd{On HiDPI screens }\texttt{\DIFadd{APPLE\_VENDOR\_VARIABLE\_GUID}} \texttt{\DIFadd{UIScale}}
+  \DIFadd{NVRAM variable may need to be set to }\texttt{\DIFadd{02}} \DIFadd{to enable HiDPI scaling
+  in FileVault 2 UEFI password interface and boot screen logo. Refer to
+  }\hyperref[nvramvarsrec]{Recommended Variables} \DIFadd{section for more details.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This will fail when console handle has no GOP protocol. When
+  the firmware does not provide it, it can be added with }\texttt{\DIFadd{ProvideConsoleGop}}
+  \DIFadd{set to }\texttt{\DIFadd{true}}\DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{ClearScreenOnModeSwitch}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Some firmwares clear only part of screen when switching
+  from graphics to text mode, leaving a fragment of previously drawn image visible.
+  This option fills the entire graphics screen with black color before switching to
+  text mode.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This option only applies to }\texttt{\DIFadd{System}} \DIFadd{renderer.
+}
+
+\item
+  \texttt{\DIFadd{IgnoreTextInGraphics}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Select firmwares output text onscreen in both graphics and
+  text mode. This is normally unexpected, because random text may appear over
+  graphical images and cause UI corruption. Setting this option to }\texttt{\DIFadd{true}} \DIFadd{will
+  discard all text output when console control is in mode different from }\texttt{\DIFadd{Text}}\DIFadd{.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This option only applies to }\texttt{\DIFadd{System}} \DIFadd{renderer.
+}
+
+\item
+  \texttt{\DIFadd{ReplaceTabWithSpace}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Some firmwares do not print tab characters or even everything
+  that follows them, causing difficulties or inability to use the UEFI Shell builtin
+  text editor to edit property lists and other documents. This option makes the console
+  output spaces instead of tabs.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This option only applies to }\texttt{\DIFadd{System}} \DIFadd{renderer.
+}
+
+\item
+  \texttt{\DIFadd{ProvideConsoleGop}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Ensure GOP (Graphics Output Protocol) on console handle.
+}
+
+  \DIFadd{macOS bootloader requires GOP to be present on console handle, yet the exact
+  location of GOP is not covered by the UEFI specification. This option will
+  ensure GOP is installed on console handle if it is present.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This option will also replace broken GOP protocol on console handle,
+  which may be the case on }\texttt{\DIFadd{MacPro5,1}} \DIFadd{with newer GPUs.
+}
+
+\item
+  \texttt{\DIFadd{ReconnectOnResChange}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Reconnect console controllers after changing screen resolution.
+}
+
+  \DIFadd{On some firmwares when screen resolution is changed via GOP, it is required to reconnect
+  the controllers, which produce the console protocols (simple text out). Otherwise they
+  will not produce text based on the new resolution.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: On several boards this logic may result in black screen when launching
+  OpenCore from Shell and thus it is optional. In versions prior to 0.5.2 this option
+  was mandatory and not configurable. Please do not use this unless required.
+}
+
+\item
+  \texttt{\DIFadd{SanitiseClearScreen}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Some firmwares reset screen resolution to a failsafe
+  value (like }\texttt{\DIFadd{1024x768}}\DIFadd{) on the attempts to clear screen contents
+  when large display (e.g. 2K or 4K) is used. This option attempts to apply
+  a workaround.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This option only applies to }\texttt{\DIFadd{System}} \DIFadd{renderer.
+   On all known affected systems }\texttt{\DIFadd{ConsoleMode}} \DIFadd{had to be set to
+   empty string for this to work.
+}
+
+\item
+  \texttt{\DIFadd{Scale}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{100}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Sets text renderer HiDPI scaling in percents.
+}
+
+  \DIFadd{Currently only }\texttt{\DIFadd{100}} \DIFadd{and }\texttt{\DIFadd{200}} \DIFadd{values are supported.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This option only applies to }\texttt{\DIFadd{Builtin}} \DIFadd{renderer.
+}
+
+\end{enumerate}
+
+
+\DIFaddend \subsection{Protocols Properties}\label{uefiprotoprops}
 
 \begin{enumerate}
 
@@ -3991,19 +4381,37 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   version.
 
 \item
-  \texttt{ConsoleControl}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Replaces Console Control protocol with a builtin version.
+  \DIFdelbegin \texttt{\DIFdel{ConsoleControl}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Replaces Console Control protocol with a builtin version.
+}%DIFDELCMD < 
 
-  macOS bootloader requires console control protocol for text output, which some firmwares
+%DIFDELCMD <   %%%
+\DIFdel{macOS bootloader requires console control protocol for text output, which some firmwares
   miss. This option is required to be set when the protocol is already available in the
-  firmware, and other console control options are used, such as \texttt{IgnoreTextInGraphics},
-  \texttt{SanitiseClearScreen}, and sometimes \texttt{ConsoleBehaviourOs} with
-  \texttt{ConsoleBehaviourUi}).
+  firmware, and other console control options are used, such as }\texttt{\DIFdel{IgnoreTextInGraphics}}%DIFAUXCMD
+\DIFdel{,
+  }\texttt{\DIFdel{SanitiseClearScreen}}%DIFAUXCMD
+\DIFdel{, and sometimes }\texttt{\DIFdel{ConsoleBehaviourOs}} %DIFAUXCMD
+\DIFdel{with
+  }\texttt{\DIFdel{ConsoleBehaviourUi}}%DIFAUXCMD
+\DIFdel{).
+}%DIFDELCMD < 
 
-\item
-  \texttt{DataHub}\\
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdelend \texttt{DataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Data Hub protocol with a builtin version.
@@ -4087,19 +4495,36 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 %DIFDELCMD < \item
 \item%DIFAUXCMD
 %DIFDELCMD <   %%%
-\DIFdelend \texttt{ClearScreenOnModeSwitch}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Some firmwares clear only part of screen when switching
+\texttt{\DIFdel{ClearScreenOnModeSwitch}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Some firmwares clear only part of screen when switching
   from graphics to text mode, leaving a fragment of previously drawn image visible.
   This option fills the entire graphics screen with black color before switching to
   text mode.
+}%DIFDELCMD < 
 
-  \emph{Note}: \texttt{ConsoleControl} should be set to
-  \texttt{true} for this to work.
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{ConsoleControl}} %DIFAUXCMD
+\DIFdel{should be set to
+  }\texttt{\DIFdel{true}} %DIFAUXCMD
+\DIFdel{for this to work.
+}%DIFDELCMD < 
 
-\item
-  \texttt{ExitBootServicesDelay}\\
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdelend \texttt{ExitBootServicesDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Adds delay in microseconds after \texttt{EXIT\_BOOT\_SERVICES}
@@ -4123,60 +4548,131 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   its usage is not recommended when it is not required.
 
 \item
-  \texttt{IgnoreTextInGraphics}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Select firmwares output text onscreen in both graphics and
+  \DIFdelbegin \texttt{\DIFdel{IgnoreTextInGraphics}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Select firmwares output text onscreen in both graphics and
   text mode. This is normally unexpected, because random text may appear over
-  graphical images and cause UI corruption. Setting this option to \texttt{true} will
-  discard all text output when console control is in mode different from \texttt{Text}.
+  graphical images and cause UI corruption. Setting this option to }\texttt{\DIFdel{true}} %DIFAUXCMD
+\DIFdel{will
+  discard all text output when console control is in mode different from }\texttt{\DIFdel{Text}}%DIFAUXCMD
+\DIFdel{.
+}%DIFDELCMD < 
 
-  \emph{Note}: While the option is not supposed to induce harm on unaffected firmwares,
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: While the option is not supposed to induce harm on unaffected firmwares,
   its usage is not recommended when it is not required. This option may hide
-  onscreen error messages. \texttt{ConsoleControl} may need to be set to
-  \texttt{true} for this to work.
+  onscreen error messages. }\texttt{\DIFdel{ConsoleControl}} %DIFAUXCMD
+\DIFdel{may need to be set to
+  }\texttt{\DIFdel{true}} %DIFAUXCMD
+\DIFdel{for this to work.
+}%DIFDELCMD < 
 
-\item
-  \texttt{ReplaceTabWithSpace}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Some firmwares do not print tab characters or even everything 
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\texttt{\DIFdel{ReplaceTabWithSpace}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Some firmwares do not print tab characters or even everything 
   that follows them, causing difficulties or inability to use the UEFI Shell builtin 
   text editor to edit property lists and other documents. This option makes the console
   output spaces instead of tabs. 
+}%DIFDELCMD < 
 
-  \emph{Note}: \texttt{ConsoleControl} may need to be set to
-  \texttt{true} for this to work.
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{ConsoleControl}} %DIFAUXCMD
+\DIFdel{may need to be set to
+  }\texttt{\DIFdel{true}} %DIFAUXCMD
+\DIFdel{for this to work.
+}%DIFDELCMD < 
 
-\item
-  \texttt{ProvideConsoleGop}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Ensure GOP (Graphics Output Protocol) on console handle.
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\texttt{\DIFdel{ProvideConsoleGop}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Ensure GOP (Graphics Output Protocol) on console handle.
+}%DIFDELCMD < 
 
-  macOS bootloader requires GOP to be present on console handle, yet the exact
+%DIFDELCMD <   %%%
+\DIFdel{macOS bootloader requires GOP to be present on console handle, yet the exact
   location of GOP is not covered by the UEFI specification. This option will
   ensure GOP is installed on console handle if it is present.
+}%DIFDELCMD < 
 
-  \emph{Note}: This option will also replace broken GOP protocol on console handle,
-  which may be the case on \texttt{MacPro5,1} with newer GPUs.
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: This option will also replace broken GOP protocol on console handle,
+  which may be the case on }\texttt{\DIFdel{MacPro5,1}} %DIFAUXCMD
+\DIFdel{with newer GPUs.
+}%DIFDELCMD < 
 
-\item
-  \texttt{ReconnectOnResChange}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reconnect console controllers after changing screen resolution.
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\texttt{\DIFdel{ReconnectOnResChange}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Reconnect console controllers after changing screen resolution.
+}%DIFDELCMD < 
 
-  On some firmwares when screen resolution is changed via GOP, it is required to reconnect
+%DIFDELCMD <   %%%
+\DIFdel{On some firmwares when screen resolution is changed via GOP, it is required to reconnect
   the controllers, which produce the console protocols (simple text out). Otherwise they
   will not produce text based on the new resolution.
+}%DIFDELCMD < 
 
-  \emph{Note}: On several boards this logic may result in black screen when launching
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: On several boards this logic may result in black screen when launching
   OpenCore from Shell and thus it is optional. In versions prior to 0.5.2 this option
   was mandatory and not configurable. Please do not use this unless required.
+}%DIFDELCMD < 
 
-\item
-  \texttt{ReleaseUsbOwnership}\\
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdelend \texttt{ReleaseUsbOwnership}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Attempt to detach USB controller ownership from
@@ -4241,20 +4737,39 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   pane in a firmware that is not compatible with macOS boot entries by design.
 
 \item
-  \texttt{SanitiseClearScreen}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Some firmwares reset screen resolution to a failsafe
-  value (like \texttt{1024x768}) on the attempts to clear screen contents
+  \DIFdelbegin \texttt{\DIFdel{SanitiseClearScreen}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Some firmwares reset screen resolution to a failsafe
+  value (like }\texttt{\DIFdel{1024x768}}%DIFAUXCMD
+\DIFdel{) on the attempts to clear screen contents
   when large display (e.g. 2K or 4K) is used. This option attempts to apply
   a workaround.
+}%DIFDELCMD < 
 
-  \emph{Note}: \texttt{ConsoleControl} may need to be set to
-  \texttt{true} for this to work. On all known affected systems
-  \texttt{ConsoleMode} had to be set to empty string for this to work.
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{ConsoleControl}} %DIFAUXCMD
+\DIFdel{may need to be set to
+  }\texttt{\DIFdel{true}} %DIFAUXCMD
+\DIFdel{for this to work. On all known affected systems
+  }\texttt{\DIFdel{ConsoleMode}} %DIFAUXCMD
+\DIFdel{had to be set to empty string for this to work.
+}%DIFDELCMD < 
 
-\item
-  \texttt{UnblockFsConnect}\\
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdelend \texttt{UnblockFsConnect}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Some firmwares block partition handles by opening them

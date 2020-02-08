@@ -69,16 +69,10 @@ OcStartImage (
   OUT CHAR16                      **ExitData    OPTIONAL
   )
 {
-  EFI_STATUS   Status;
+  EFI_STATUS                       Status;
+  EFI_CONSOLE_CONTROL_SCREEN_MODE  OldMode;
 
-  //
-  // Request OS mode.
-  //
-  OcConsoleControlSetBehaviour (
-    ParseConsoleControlBehaviour (
-      OC_BLOB_GET (&mOpenCoreConfiguration.Misc.Boot.ConsoleBehaviourOs)
-      )
-    );
+  OldMode = OcConsoleControlSetMode (EfiConsoleControlScreenGraphics);
 
   Status = gBS->StartImage (
     ImageHandle,
@@ -90,14 +84,7 @@ OcStartImage (
     DEBUG ((DEBUG_WARN, "OC: Boot failed - %r\n", Status));
   }
 
-  //
-  // Restore ui mode.
-  //
-  OcConsoleControlSetBehaviour (
-    ParseConsoleControlBehaviour (
-      OC_BLOB_GET (&mOpenCoreConfiguration.Misc.Boot.ConsoleBehaviourUi)
-      )
-    );
+  OcConsoleControlSetMode (OldMode);
 
   return Status;
 }

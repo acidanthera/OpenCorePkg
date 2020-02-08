@@ -267,10 +267,6 @@ OcReinstallProtocols (
     DEBUG ((DEBUG_ERROR, "OC: Failed to install boot policy protocol\n"));
   }
 
-  if (OcConsoleControlInstallProtocol (Config->Uefi.Protocols.ConsoleControl) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install console control protocol\n"));
-  }
-
   if (OcDataHubInstallProtocol (Config->Uefi.Protocols.DataHub) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install data hub protocol\n"));
   }
@@ -394,12 +390,116 @@ OcLoadUefiInputSupport (
   return ExitBs;
 }
 
-BOOLEAN
-OcShouldReconnectConsoleOnResolutionChange (
+STATIC
+VOID
+OcLoadUefiOutputSupport (
   IN OC_GLOBAL_CONFIG  *Config
   )
 {
-  return Config->Uefi.Quirks.ReconnectOnResChange;
+  EFI_STATUS           Status;
+  CONST CHAR8          *AsciiRenderer;
+  OC_CONSOLE_RENDERER  Renderer;
+  UINT32               Width;
+  UINT32               Height;
+  UINT32               Bpp;
+  BOOLEAN              SetMax;
+
+  if (Config->Uefi.Output.ProvideConsoleGop) {
+    OcProvideConsoleGop ();
+  }
+
+  OcParseScreenResolution (
+    OC_BLOB_GET (&Config->Uefi.Output.Resolution),
+    &Width,
+    &Height,
+    &Bpp,
+    &SetMax
+    );
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OC: Requested resolution is %ux%u@%u (max: %d) from %a\n",
+    Width,
+    Height,
+    Bpp,
+    SetMax,
+    OC_BLOB_GET (&Config->Uefi.Output.Resolution)
+    ));
+
+  if (SetMax || (Width > 0 && Height > 0)) {
+    Status = OcSetConsoleResolution (
+      Width,
+      Height,
+      Bpp
+      );
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Changed resolution to %ux%u@%u (max: %d) from %a - %r\n",
+      Width,
+      Height,
+      Bpp,
+      SetMax,
+      OC_BLOB_GET (&Config->Uefi.Output.Resolution),
+      Status
+      ));
+  }
+
+  if (Config->Uefi.Output.ReconnectOnResChange) {
+    OcReconnectConsole ();
+  }
+
+  AsciiRenderer = OC_BLOB_GET (&Config->Uefi.Output.TextRenderer);
+
+  if (AsciiRenderer[0] == '\0' || AsciiStrCmp (AsciiRenderer, "BuiltinGraphics") == 0) {
+    Renderer = OcConsoleRendererBuiltinGraphics;
+  } else if (AsciiStrCmp (AsciiRenderer, "SystemGraphics") == 0) {
+    Renderer = OcConsoleRendererSystemGraphics;
+  } else if (AsciiStrCmp (AsciiRenderer, "SystemText") == 0) {
+    Renderer = OcConsoleRendererSystemText;
+  } else if (AsciiStrCmp (AsciiRenderer, "SystemGeneric") == 0) {
+    Renderer = OcConsoleRendererSystemGeneric;
+  } else {
+    DEBUG ((DEBUG_WARN, "OC: Requested unknown renderer %a\n", AsciiRenderer));
+    Renderer = OcConsoleRendererBuiltinGraphics;
+  }
+
+  OcSetupConsole (
+    Renderer,
+    Config->Uefi.Output.Scale,
+    Config->Uefi.Output.IgnoreTextInGraphics,
+    Config->Uefi.Output.SanitiseClearScreen,
+    Config->Uefi.Output.ClearScreenOnModeSwitch,
+    Config->Uefi.Output.ReplaceTabWithSpace
+    );
+
+  OcParseConsoleMode (
+    OC_BLOB_GET (&Config->Uefi.Output.ConsoleMode),
+    &Width,
+    &Height,
+    &SetMax
+    );
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OC: Requested console mode is %ux%u (max: %d) from %a\n",
+    Width,
+    Height,
+    SetMax,
+    OC_BLOB_GET (&Config->Uefi.Output.ConsoleMode)
+    ));
+
+  if (SetMax || (Width > 0 && Height > 0)) {
+    Status = OcSetConsoleMode (Width, Height);
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Changed console mode to %ux%u (max: %d) from %a - %r\n",
+      Width,
+      Height,
+      SetMax,
+      OC_BLOB_GET (&Config->Uefi.Output.ConsoleMode),
+      Status
+      ));
+  }
 }
 
 VOID
@@ -473,6 +573,7 @@ OcLoadUefiSupport (
   OcReinstallProtocols (Config);
 
   AgiExitBs = OcLoadUefiInputSupport (Config);
+
   //
   // Setup Apple bootloader specific UEFI features.
   //
@@ -481,17 +582,6 @@ OcLoadUefiSupport (
   if (Config->Uefi.Quirks.IgnoreInvalidFlexRatio) {
     OcCpuCorrectFlexRatio (CpuInfo);
   }
-
-  if (Config->Uefi.Quirks.ProvideConsoleGop) {
-    OcProvideConsoleGop ();
-  }
-
-  OcConsoleControlConfigure (
-    Config->Uefi.Quirks.IgnoreTextInGraphics,
-    Config->Uefi.Quirks.SanitiseClearScreen,
-    Config->Uefi.Quirks.ClearScreenOnModeSwitch,
-    Config->Uefi.Quirks.ReplaceTabWithSpace
-    );
 
   //
   // Inform platform support whether we want Boot#### routing or not.
@@ -574,6 +664,7 @@ OcLoadUefiSupport (
     OcUnblockUnmountedPartitions ();
   }
 
+  OcLoadUefiOutputSupport (Config);
   OcMiscUefiQuirksLoaded (Config);
 
   if (Config->Uefi.ConnectDrivers) {

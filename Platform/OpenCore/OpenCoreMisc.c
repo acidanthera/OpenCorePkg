@@ -290,10 +290,6 @@ OcMiscLateInit (
 {
   EFI_STATUS   Status;
   EFI_STATUS   HibernateStatus;
-  UINT32       Width;
-  UINT32       Height;
-  UINT32       Bpp;
-  BOOLEAN      SetMax;
   CONST CHAR8  *HibernateMode;
   UINT32       HibernateMask;
 
@@ -318,76 +314,6 @@ OcMiscLateInit (
     }
   }
 
-  ParseScreenResolution (
-    OC_BLOB_GET (&Config->Misc.Boot.Resolution),
-    &Width,
-    &Height,
-    &Bpp,
-    &SetMax
-    );
-
-  DEBUG ((
-    DEBUG_INFO,
-    "OC: Requested resolution is %ux%u@%u (max: %d) from %a\n",
-    Width,
-    Height,
-    Bpp,
-    SetMax,
-    OC_BLOB_GET (&Config->Misc.Boot.Resolution)
-    ));
-
-  if (SetMax || (Width > 0 && Height > 0)) {
-    Status = SetConsoleResolution (
-      Width,
-      Height,
-      Bpp,
-      OcShouldReconnectConsoleOnResolutionChange (Config)
-      );
-    DEBUG ((
-      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-      "OC: Changed resolution to %ux%u@%u (max: %d) from %a - %r\n",
-      Width,
-      Height,
-      Bpp,
-      SetMax,
-      OC_BLOB_GET (&Config->Misc.Boot.Resolution),
-      Status
-      ));
-  }
-
-  ParseConsoleMode (
-    OC_BLOB_GET (&Config->Misc.Boot.ConsoleMode),
-    &Width,
-    &Height,
-    &SetMax
-    );
-
-  DEBUG ((
-    DEBUG_INFO,
-    "OC: Requested console mode is %ux%u (max: %d) from %a\n",
-    Width,
-    Height,
-    SetMax,
-    OC_BLOB_GET (&Config->Misc.Boot.ConsoleMode)
-    ));
-
-  if (SetMax || (Width > 0 && Height > 0)) {
-    Status = SetConsoleMode (Width, Height);
-    DEBUG ((
-      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-      "OC: Changed console mode to %ux%u (max: %d) from %a - %r\n",
-      Width,
-      Height,
-      SetMax,
-      OC_BLOB_GET (&Config->Misc.Boot.ConsoleMode),
-      Status
-      ));
-  }
-
-  if (Config->Misc.Boot.BuiltinTextRenderer) {
-    OcInstallCustomConOut ();
-  }
-
   HibernateMode = OC_BLOB_GET (&Config->Misc.Boot.HibernateMode);
 
   if (AsciiStrCmp (HibernateMode, "None") == 0) {
@@ -407,7 +333,6 @@ OcMiscLateInit (
 
   HibernateStatus = OcActivateHibernateWake (HibernateMask);
   DEBUG ((DEBUG_INFO, "OC: Hibernation detection status is %r\n", HibernateStatus));
-  (VOID) HibernateStatus;
 
   return Status;
 }
@@ -608,21 +533,4 @@ OcMiscUefiQuirksLoaded (
     sizeof (Config->Misc.Security.ScanPolicy),
     &Config->Misc.Security.ScanPolicy
     );
-
-  //
-  // Regardless of the mode ensure our cursor is disabled as we do not need it.
-  // This is a bit ugly, but works for most platforms we have:
-  // - Firstly disable it on platforms that start with it for whatever reason.
-  //   Generally Insyde laptops are happy with that.
-  // - Secondly change the mode, on APTIO it may reenable the cursor in Text mode.
-  // - Thirdly disable it again to ensure it is definitely disabled.
-  //
-
-  OcConsoleDisableCursor ();
-  OcConsoleControlSetBehaviour (
-    ParseConsoleControlBehaviour (
-      OC_BLOB_GET (&Config->Misc.Boot.ConsoleBehaviourUi)
-      )
-    );
-  OcConsoleDisableCursor ();
 }

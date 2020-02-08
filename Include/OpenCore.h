@@ -164,19 +164,6 @@ OcLoadUefiSupport (
   );
 
 /**
-  Decide whether console controller reconnection is required
-  upon changing screen resolution.
-
-  @param[in]  Config    OpenCore configuration.
-
-  @retval TRUE when required.
-**/
-BOOLEAN
-OcShouldReconnectConsoleOnResolutionChange (
-  IN OC_GLOBAL_CONFIG  *Config
-  );
-
-/**
   Get human readable version string.
 
   @retval null-terminated 7-bit ASCII version string.
