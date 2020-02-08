@@ -13,6 +13,7 @@ OpenCore Changelog
 - Removed `ConsoleBehaviourOs` and `ConsoleBehaviourUi`
 - Fixed providing ConsoleOutHandle GOP when running from Shell
 - Added `PickerAttributes` option to colour picker
+- Added `ProtectSecureBoot` option through FwRuntimeServices
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere

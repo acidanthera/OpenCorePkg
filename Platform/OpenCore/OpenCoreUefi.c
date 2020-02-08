@@ -517,6 +517,7 @@ OcLoadBooterUefiSupport (
   AbcSettings.DevirtualiseMmio       = Config->Booter.Quirks.DevirtualiseMmio;
   AbcSettings.DisableSingleUser      = Config->Booter.Quirks.DisableSingleUser;
   AbcSettings.DisableVariableWrite   = Config->Booter.Quirks.DisableVariableWrite;
+  AbcSettings.ProtectSecureBoot      = Config->Booter.Quirks.ProtectSecureBoot;
   AbcSettings.DiscardHibernateMap    = Config->Booter.Quirks.DiscardHibernateMap;
   AbcSettings.EnableSafeModeSlide    = Config->Booter.Quirks.EnableSafeModeSlide;
   AbcSettings.EnableWriteUnprotector = Config->Booter.Quirks.EnableWriteUnprotector;

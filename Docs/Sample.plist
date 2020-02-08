@@ -254,6 +254,8 @@
 			<false/>
 			<key>ProtectCsmRegion</key>
 			<false/>
+			<key>ProtectSecureBoot</key>
+			<false/>
 			<key>ProvideCustomSlide</key>
 			<true/>
 			<key>SetupVirtualMap</key>

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Feb  6 00:43:28 2020
-%DIF ADD ../Configuration.tex        Sat Feb  8 22:43:16 2020
+%DIF ADD ../Configuration.tex        Sat Feb  8 23:35:07 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1364,7 +1364,22 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   this quirk. Do not use this unless you fully understand the consequences.
 
 \item
-  \texttt{ProvideCustomSlide}\\
+  \DIFaddbegin \texttt{\DIFadd{ProtectSecureBoot}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Protect UEFI Secure Boot variables from being written.
+}
+
+  \DIFadd{Reports security violation during attempts to write to }\texttt{\DIFadd{db}}\DIFadd{, }\texttt{\DIFadd{dbx}}\DIFadd{,
+  }\texttt{\DIFadd{PK}}\DIFadd{, and }\texttt{\DIFadd{KEK}} \DIFadd{variables from the operating system.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This quirk mainly attempts to avoid issues with NVRAM implementations
+  with problematic defragmentation, such as select Insyde or }\texttt{\DIFadd{MacPro5,1}}\DIFadd{.
+}
+
+\item
+  \DIFaddend \texttt{ProvideCustomSlide}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Provide custom KASLR slide on low memory.
