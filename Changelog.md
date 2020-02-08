@@ -12,6 +12,7 @@ OpenCore Changelog
 - Added `Scale` option to set builtin text renderer scaling
 - Removed `ConsoleBehaviourOs` and `ConsoleBehaviourUi`
 - Fixed providing ConsoleOutHandle GOP when running from Shell
+- Added `PickerAttributes` option to colour picker
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere

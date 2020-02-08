@@ -583,6 +583,8 @@
 			<string>None</string>
 			<key>HideSelf</key>
 			<true/>
+			<key>PickerAttributes</key>
+			<integer>0</integer>
 			<key>PollAppleHotKeys</key>
 			<false/>
 			<key>ShowPicker</key>

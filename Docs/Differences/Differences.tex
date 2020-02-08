@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Feb  6 00:43:28 2020
-%DIF ADD ../Configuration.tex        Sat Feb  8 21:55:39 2020
+%DIF ADD ../Configuration.tex        Sat Feb  8 22:43:16 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2330,7 +2330,51 @@ behaviour that does not go to any other sections
   installed on the same volume and driver boot is used.
 
 \item
-  \texttt{PollAppleHotKeys}\\
+  \DIFaddbegin \texttt{\DIFadd{PickerAttributes}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Sets specific attributes for picker.
+}
+
+  \DIFadd{Builtin picker supports colour arguments as a sum of foreground and background
+  colors according to UEFI specification. The value of black background and
+  black foreground (}\texttt{\DIFadd{0}}\DIFadd{) is reserved. List of colour names:
+}
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{0x00}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BLACK}}
+  \item \texttt{\DIFadd{0x01}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BLUE}}
+  \item \texttt{\DIFadd{0x02}} \DIFadd{--- }\texttt{\DIFadd{EFI\_GREEN}}
+  \item \texttt{\DIFadd{0x03}} \DIFadd{--- }\texttt{\DIFadd{EFI\_CYAN}}
+  \item \texttt{\DIFadd{0x04}} \DIFadd{--- }\texttt{\DIFadd{EFI\_RED}}
+  \item \texttt{\DIFadd{0x05}} \DIFadd{--- }\texttt{\DIFadd{EFI\_MAGENTA}}
+  \item \texttt{\DIFadd{0x06}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BROWN}}
+  \item \texttt{\DIFadd{0x07}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTGRAY}}
+  \item \texttt{\DIFadd{0x08}} \DIFadd{--- }\texttt{\DIFadd{EFI\_DARKGRAY}}
+  \item \texttt{\DIFadd{0x09}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTBLUE}}
+  \item \texttt{\DIFadd{0x0A}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTGREEN}}
+  \item \texttt{\DIFadd{0x0B}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTCYAN}}
+  \item \texttt{\DIFadd{0x0C}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTRED}}
+  \item \texttt{\DIFadd{0x0D}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTMAGENTA}}
+  \item \texttt{\DIFadd{0x0E}} \DIFadd{--- }\texttt{\DIFadd{EFI\_YELLOW}}
+  \item \texttt{\DIFadd{0x0F}} \DIFadd{--- }\texttt{\DIFadd{EFI\_WHITE}}
+  \item \texttt{\DIFadd{0x00}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_BLACK}}
+  \item \texttt{\DIFadd{0x10}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_BLUE}}
+  \item \texttt{\DIFadd{0x20}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_GREEN}}
+  \item \texttt{\DIFadd{0x30}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_CYAN}}
+  \item \texttt{\DIFadd{0x40}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_RED}}
+  \item \texttt{\DIFadd{0x50}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_MAGENTA}}
+  \item \texttt{\DIFadd{0x60}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_BROWN}}
+  \item \texttt{\DIFadd{0x70}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_LIGHTGRAY}}
+  \end{itemize}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This option may not work well with }\texttt{\DIFadd{System}} \DIFadd{text renderer.
+  Setting a background different from black could help testing proper GOP functioning.
+}
+
+\item
+  \DIFaddend \texttt{PollAppleHotKeys}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Enable \texttt{modifier hotkey} handling in boot picker.

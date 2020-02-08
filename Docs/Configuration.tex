@@ -2052,6 +2052,47 @@ behaviour that does not go to any other sections
   installed on the same volume and driver boot is used.
 
 \item
+  \texttt{PickerAttributes}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Sets specific attributes for picker.
+
+  Builtin picker supports colour arguments as a sum of foreground and background
+  colors according to UEFI specification. The value of black background and
+  black foreground (\texttt{0}) is reserved. List of colour names:
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{0x00} --- \texttt{EFI\_BLACK}
+  \item \texttt{0x01} --- \texttt{EFI\_BLUE}
+  \item \texttt{0x02} --- \texttt{EFI\_GREEN}
+  \item \texttt{0x03} --- \texttt{EFI\_CYAN}
+  \item \texttt{0x04} --- \texttt{EFI\_RED}
+  \item \texttt{0x05} --- \texttt{EFI\_MAGENTA}
+  \item \texttt{0x06} --- \texttt{EFI\_BROWN}
+  \item \texttt{0x07} --- \texttt{EFI\_LIGHTGRAY}
+  \item \texttt{0x08} --- \texttt{EFI\_DARKGRAY}
+  \item \texttt{0x09} --- \texttt{EFI\_LIGHTBLUE}
+  \item \texttt{0x0A} --- \texttt{EFI\_LIGHTGREEN}
+  \item \texttt{0x0B} --- \texttt{EFI\_LIGHTCYAN}
+  \item \texttt{0x0C} --- \texttt{EFI\_LIGHTRED}
+  \item \texttt{0x0D} --- \texttt{EFI\_LIGHTMAGENTA}
+  \item \texttt{0x0E} --- \texttt{EFI\_YELLOW}
+  \item \texttt{0x0F} --- \texttt{EFI\_WHITE}
+  \item \texttt{0x00} --- \texttt{EFI\_BACKGROUND\_BLACK}
+  \item \texttt{0x10} --- \texttt{EFI\_BACKGROUND\_BLUE}
+  \item \texttt{0x20} --- \texttt{EFI\_BACKGROUND\_GREEN}
+  \item \texttt{0x30} --- \texttt{EFI\_BACKGROUND\_CYAN}
+  \item \texttt{0x40} --- \texttt{EFI\_BACKGROUND\_RED}
+  \item \texttt{0x50} --- \texttt{EFI\_BACKGROUND\_MAGENTA}
+  \item \texttt{0x60} --- \texttt{EFI\_BACKGROUND\_BROWN}
+  \item \texttt{0x70} --- \texttt{EFI\_BACKGROUND\_LIGHTGRAY}
+  \end{itemize}
+
+  \emph{Note}: This option may not work well with \texttt{System} text renderer.
+  Setting a background different from black could help testing proper GOP functioning.
+
+\item
   \texttt{PollAppleHotKeys}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
