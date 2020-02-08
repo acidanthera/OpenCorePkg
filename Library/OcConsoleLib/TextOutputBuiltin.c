@@ -739,12 +739,12 @@ ConsoleControlGetMode (
 {
   *Mode = mConsoleMode;
 
-  if (GopUgaExists) {
+  if (GopUgaExists != NULL) {
     *GopUgaExists = TRUE;
   }
 
-  if (StdInLocked) {
-    *StdInLocked  = FALSE;
+  if (StdInLocked != NULL) {
+    *StdInLocked = FALSE;
   }
 
   return EFI_SUCCESS;

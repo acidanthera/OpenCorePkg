@@ -89,7 +89,10 @@ OcConsoleControlInstallProtocol (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCC: Install console control - %r\n",
+    "OCC: Install console control (%p/%p/%p) - %r\n",
+    NewProtocol,
+    OldProtocol,
+    OldMode,
     Status
     ));
 
@@ -125,7 +128,7 @@ OcConsoleControlInstallProtocol (
   Status = gBS->InstallMultipleProtocolInterfaces (
     &NewHandle,
     &gEfiConsoleControlProtocolGuid,
-    ConsoleControl,
+    NewProtocol,
     NULL
     );
 

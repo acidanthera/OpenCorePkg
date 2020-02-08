@@ -232,7 +232,7 @@ ConsoleControlGetMode (
   }
 
   if (StdInLocked != NULL) {
-    *StdInLocked  = FALSE;
+    *StdInLocked = FALSE;
   }
 
   return EFI_SUCCESS;
