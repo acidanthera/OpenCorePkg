@@ -265,11 +265,11 @@ OcMiscEarlyInit (
 
   DEBUG ((
     DEBUG_INFO,
-    "OC: OpenCore is now loading (Vault: %d/%d, Sign %d/%d)...\n",
+    "OC: OpenCore %a is loading in %a mode (%d/%d)...\n",
+    OcMiscGetVersionString (),
+    Config->Misc.Security.Vault,
     Storage->HasVault,
-    Config->Misc.Security.RequireVault,
-    VaultKey != NULL,
-    Config->Misc.Security.RequireSignature
+    VaultKey != NULL
     ));
 
   Status = gRT->GetTime (&BootTime, NULL);
