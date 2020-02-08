@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Feb  6 00:43:28 2020
-%DIF ADD ../Configuration.tex        Sat Feb  8 23:35:07 2020
+%DIF ADD ../Configuration.tex        Sun Feb  9 00:48:51 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2729,17 +2729,45 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   Possible values match \texttt{DisplayLevel} values.
 
 \item
-  \texttt{RequireSignature}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{true}\\
-  \textbf{Description}: Require \texttt{vault.sig} signature file for
-  \texttt{vault.plist} in \texttt{OC} directory.
+  \texttt{\DIFdelbegin \DIFdel{RequireSignature}\DIFdelend \DIFaddbegin \DIFadd{Vault}\DIFaddend }\\
+  \textbf{Type}: \texttt{plist\ \DIFdelbegin \DIFdel{boolean}\DIFdelend \DIFaddbegin \DIFadd{string}\DIFaddend }\\
+  \textbf{Failsafe}: \texttt{\DIFdelbegin \DIFdel{true}\DIFdelend \DIFaddbegin \DIFadd{Secure}\DIFaddend }\\
+  \textbf{Description}: \DIFdelbegin \DIFdel{Require }\DIFdelend \DIFaddbegin \DIFadd{Enables vaulting mechanism in OpenCore.
+}
 
-  This file should contain a raw 256 byte RSA-2048 signature from SHA-256
+  \DIFadd{Valid values:
+}
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{Optional}} \DIFadd{--- require nothing, no vault is used, insecure.
+  }\item \texttt{\DIFadd{Basic}} \DIFadd{--- require }\texttt{\DIFadd{vault.plist}} \DIFadd{file present
+  in }\texttt{\DIFadd{OC}} \DIFadd{directory. This provides basic filesystem integrity
+  verification and may protect from unintentional filesystem corruption.
+  }\item \texttt{\DIFadd{Secure}} \DIFadd{--- require }\DIFaddend \texttt{vault.sig} signature file for
+  \texttt{vault.plist} in \texttt{OC} directory. \DIFdelbegin %DIFDELCMD < 
+
+%DIFDELCMD <   %%%
+\DIFdel{This }\DIFdelend \DIFaddbegin \DIFadd{This includes }\texttt{\DIFadd{Basic}}
+  \DIFadd{integrity checking but also attempts to build a trusted bootchain.
+  }\end{itemize}
+
+  \texttt{\DIFadd{vault.plist}} \DIFaddend file should contain \DIFaddbegin \DIFadd{SHA-256 hashes for all files used by OpenCore.
+  Presence of this file is highly recommended to ensure that unintentional
+  file modifications (including filesystem corruption) do not happen unnoticed.
+  To create this file automatically use
+  }\href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/CreateVault}{\texttt{create\_vault.sh}} \DIFadd{script.
+  Regardless of the underlying filesystem, path name and case must match
+  between }\texttt{\DIFadd{config.plist}} \DIFadd{and }\texttt{\DIFadd{vault.plist}}\DIFadd{.
+}
+
+  \texttt{\DIFadd{vault.sig}} \DIFadd{file should contain }\DIFaddend a raw 256 byte RSA-2048 signature from SHA-256
   hash of \texttt{vault.plist}. The signature is verified against the public
-  key embedded into \texttt{OpenCore.efi}.
+  key embedded into \texttt{OpenCore.efi}. \DIFdelbegin %DIFDELCMD < 
 
-  To embed the public key you should do either of the following:
+%DIFDELCMD <   %%%
+\DIFdelend To embed the public key you should
+  do either of the following:
 
   \begin{itemize}
   \tightlist
@@ -2753,32 +2781,65 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   To convert public key from X.509 certificate or from PEM file use
   \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/CreateVault}{RsaTool}.
 
-  \emph{Note}: \texttt{vault.sig} is used regardless of this option when public key
-  is embedded into \texttt{OpenCore.efi}. Setting it to \texttt{true} will only ensure
+
+  \DIFdelbegin \emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{vault.sig}} %DIFAUXCMD
+\DIFdel{is used regardless of this option when public key
+  is embedded into }\texttt{\DIFdel{OpenCore.efi}}%DIFAUXCMD
+\DIFdel{. Setting it to }\texttt{\DIFdel{true}} %DIFAUXCMD
+\DIFdel{will only ensure
   configuration sanity, and abort the boot process when public key is not set but
   was supposed to be used for verification.
+}%DIFDELCMD < 
 
-\item
-  \texttt{RequireVault}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{true}\\
-  \textbf{Description}: Require \texttt{vault.plist} file present
-  in \texttt{OC} directory.
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\texttt{\DIFdel{RequireVault}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{true}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Require }\texttt{\DIFdel{vault.plist}} %DIFAUXCMD
+\DIFdel{file present
+  in }\texttt{\DIFdel{OC}} %DIFAUXCMD
+\DIFdel{directory.
+}%DIFDELCMD < 
 
-  This file should contain SHA-256 hashes for all files used by OpenCore.
+%DIFDELCMD <   %%%
+\DIFdel{This file should contain SHA-256 hashes for all files used by OpenCore.
   Presence of this file is highly recommended to ensure that unintentional
   file modifications (including filesystem corruption) do not happen unnoticed.
   To create this file automatically use
-  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/CreateVault}{\texttt{create\_vault.sh}} script.
+  }%DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/CreateVault}{\texttt{create\_vault.sh}} %%%
+\DIFdel{script.
+}%DIFDELCMD < 
 
-  Regardless of the underlying filesystem, path name and case must match
-  between \texttt{config.plist} and \texttt{vault.plist}.
+%DIFDELCMD <   %%%
+\DIFdel{Regardless of the underlying filesystem, path name and case must match
+  between }\texttt{\DIFdel{config.plist}} %DIFAUXCMD
+\DIFdel{and }\texttt{\DIFdel{vault.plist}}%DIFAUXCMD
+\DIFdel{.
+}%DIFDELCMD < 
 
-  \emph{Note}: \texttt{vault.plist} is tried to be read regardless of the value
-  of this option, but setting it to \texttt{true} will ensure configuration
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{vault.plist}} %DIFAUXCMD
+\DIFdel{is tried to be read regardless of the value
+  of this option, but setting it to }\texttt{\DIFdel{true}} %DIFAUXCMD
+\DIFdel{will ensure configuration
   sanity, and abort the boot process.
+}%DIFDELCMD < 
 
-  The complete set of commands to:
+%DIFDELCMD <   %%%
+\DIFdelend The complete set of commands to:
 
   \begin{itemize}
   \tightlist
@@ -2798,7 +2859,7 @@ dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=528 conv=notrunc
 rm vault.pub
 \end{lstlisting}
 
-  \emph{Note}: While it may appear obvious, but you have to use an external
+  \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: While it may appear obvious, but you have to use an external
   method to verify \texttt{OpenCore.efi} and \texttt{BOOTx64.efi} for
   secure boot path. For this you are recommended to at least enable UEFI SecureBoot
   with a custom certificate, and sign \texttt{OpenCore.efi} and \texttt{BOOTx64.efi}
@@ -2806,7 +2867,13 @@ rm vault.pub
   can be found in \href{https://habr.com/post/273497/}{Taming UEFI SecureBoot}
   paper (in Russian).
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note 2}}\DIFadd{: }\texttt{\DIFadd{vault.plist}} \DIFadd{and }\texttt{\DIFadd{vault.sig}} \DIFadd{are used regardless of this
+  option when }\texttt{\DIFadd{vault.plist}} \DIFadd{is present or public key is embedded into
+  }\texttt{\DIFadd{OpenCore.efi}}\DIFadd{. Setting this option will only ensure configuration sanity,
+  and abort the boot process otherwise.
+}
+
+\DIFaddend \item
   \texttt{ScanPolicy}\\
   \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
   \textbf{Failsafe}: \texttt{0xF0103}\\

@@ -14,6 +14,7 @@ OpenCore Changelog
 - Fixed providing ConsoleOutHandle GOP when running from Shell
 - Added `PickerAttributes` option to colour picker
 - Added `ProtectSecureBoot` option through FwRuntimeServices
+- Replaced `RequireVault` and `RequireSignature` with `Vault`
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere

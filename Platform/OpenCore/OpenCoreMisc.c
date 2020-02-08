@@ -194,6 +194,8 @@ OcMiscEarlyInit (
   CHAR8                     *ConfigData;
   UINT32                    ConfigDataSize;
   EFI_TIME                  BootTime;
+  CONST CHAR8               *AsciiVault;
+  OCS_VAULT_MODE            Vault;
 
   ConfigData = OcStorageReadFileUnicode (
     Storage,
@@ -218,16 +220,28 @@ OcMiscEarlyInit (
     return EFI_UNSUPPORTED; ///< Should be unreachable.
   }
 
+  if (AsciiStrCmp (AsciiVault, "Secure") == 0) {
+    Vault = OcsVaultSecure;
+  } else if (AsciiStrCmp (AsciiVault, "Optional") == 0) {
+    Vault = OcsVaultOptional;
+  } else if (AsciiStrCmp (AsciiVault, "Basic") == 0) {
+    Vault = OcsVaultBasic;
+  } else {
+    DEBUG ((DEBUG_ERROR, "OC: Invalid Vault mode: %a\n", AsciiVault));
+    CpuDeadLoop ();
+    return EFI_UNSUPPORTED; ///< Should be unreachable.
+  }
+
   //
   // Sanity check that the configuration is adequate.
   //
-  if (!Storage->HasVault && Config->Misc.Security.RequireVault) {
+  if (!Storage->HasVault && Vault >= OcsVaultBasic) {
     DEBUG ((DEBUG_ERROR, "OC: Configuration requires vault but no vault provided!\n"));
     CpuDeadLoop ();
     return EFI_SECURITY_VIOLATION; ///< Should be unreachable.
   }
 
-  if (VaultKey == NULL && Config->Misc.Security.RequireSignature) {
+  if (VaultKey == NULL && Vault >= OcsVaultSecure) {
     DEBUG ((DEBUG_ERROR, "OC: Configuration requires signed vault but no public key provided!\n"));
     CpuDeadLoop ();
     return EFI_SECURITY_VIOLATION; ///< Should be unreachable.

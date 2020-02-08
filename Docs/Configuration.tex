@@ -2384,17 +2384,36 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   Possible values match \texttt{DisplayLevel} values.
 
 \item
-  \texttt{RequireSignature}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{true}\\
-  \textbf{Description}: Require \texttt{vault.sig} signature file for
-  \texttt{vault.plist} in \texttt{OC} directory.
+  \texttt{Vault}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Secure}\\
+  \textbf{Description}: Enables vaulting mechanism in OpenCore.
 
-  This file should contain a raw 256 byte RSA-2048 signature from SHA-256
+  Valid values:
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Optional} --- require nothing, no vault is used, insecure.
+  \item \texttt{Basic} --- require \texttt{vault.plist} file present
+  in \texttt{OC} directory. This provides basic filesystem integrity
+  verification and may protect from unintentional filesystem corruption.
+  \item \texttt{Secure} --- require \texttt{vault.sig} signature file for
+  \texttt{vault.plist} in \texttt{OC} directory. This includes \texttt{Basic}
+  integrity checking but also attempts to build a trusted bootchain.
+  \end{itemize}
+
+  \texttt{vault.plist} file should contain SHA-256 hashes for all files used by OpenCore.
+  Presence of this file is highly recommended to ensure that unintentional
+  file modifications (including filesystem corruption) do not happen unnoticed.
+  To create this file automatically use
+  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/CreateVault}{\texttt{create\_vault.sh}} script.
+  Regardless of the underlying filesystem, path name and case must match
+  between \texttt{config.plist} and \texttt{vault.plist}.
+
+  \texttt{vault.sig} file should contain a raw 256 byte RSA-2048 signature from SHA-256
   hash of \texttt{vault.plist}. The signature is verified against the public
-  key embedded into \texttt{OpenCore.efi}.
-
-  To embed the public key you should do either of the following:
+  key embedded into \texttt{OpenCore.efi}. To embed the public key you should
+  do either of the following:
 
   \begin{itemize}
   \tightlist
@@ -2408,30 +2427,6 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   To convert public key from X.509 certificate or from PEM file use
   \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/CreateVault}{RsaTool}.
 
-  \emph{Note}: \texttt{vault.sig} is used regardless of this option when public key
-  is embedded into \texttt{OpenCore.efi}. Setting it to \texttt{true} will only ensure
-  configuration sanity, and abort the boot process when public key is not set but
-  was supposed to be used for verification.
-
-\item
-  \texttt{RequireVault}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{true}\\
-  \textbf{Description}: Require \texttt{vault.plist} file present
-  in \texttt{OC} directory.
-
-  This file should contain SHA-256 hashes for all files used by OpenCore.
-  Presence of this file is highly recommended to ensure that unintentional
-  file modifications (including filesystem corruption) do not happen unnoticed.
-  To create this file automatically use
-  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/CreateVault}{\texttt{create\_vault.sh}} script.
-
-  Regardless of the underlying filesystem, path name and case must match
-  between \texttt{config.plist} and \texttt{vault.plist}.
-
-  \emph{Note}: \texttt{vault.plist} is tried to be read regardless of the value
-  of this option, but setting it to \texttt{true} will ensure configuration
-  sanity, and abort the boot process.
 
   The complete set of commands to:
 
@@ -2453,13 +2448,18 @@ dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=528 conv=notrunc
 rm vault.pub
 \end{lstlisting}
 
-  \emph{Note}: While it may appear obvious, but you have to use an external
+  \emph{Note 1}: While it may appear obvious, but you have to use an external
   method to verify \texttt{OpenCore.efi} and \texttt{BOOTx64.efi} for
   secure boot path. For this you are recommended to at least enable UEFI SecureBoot
   with a custom certificate, and sign \texttt{OpenCore.efi} and \texttt{BOOTx64.efi}
   with your custom key. More details on customising secure boot on modern firmwares
   can be found in \href{https://habr.com/post/273497/}{Taming UEFI SecureBoot}
   paper (in Russian).
+
+  \emph{Note 2}: \texttt{vault.plist} and \texttt{vault.sig} are used regardless of this
+  option when \texttt{vault.plist} is present or public key is embedded into
+  \texttt{OpenCore.efi}. Setting this option will only ensure configuration sanity,
+  and abort the boot process otherwise.
 
 \item
   \texttt{ScanPolicy}\\
