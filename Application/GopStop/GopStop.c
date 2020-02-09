@@ -202,6 +202,7 @@ RunGopTest (
 {
   EFI_STATUS                    Status;
   EFI_GRAPHICS_OUTPUT_PROTOCOL  *Gop;
+  UINTN                         Index;
   UINT32                        ChunkX;
   UINT32                        ChunkY;
   UINT32                        ChunkW;
