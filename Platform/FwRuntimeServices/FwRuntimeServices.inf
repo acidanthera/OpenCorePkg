@@ -48,6 +48,7 @@
   gOcWriteOnlyVariableGuid                    ## CONSUMES
   gOcVendorVariableGuid                       ## CONSUMES
   gAppleBootVariableGuid                      ## SOMETIMES_CONSUMES
+  gMicrosoftVariableGuid                      ## SOMETIMES_CONSUMES
 
 [Protocols]
   gOcFirmwareRuntimeProtocolGuid              ## SOMETIMES_PRODUCES

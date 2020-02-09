@@ -17,6 +17,7 @@
 #include <Guid/OcVariables.h>
 #include <Guid/GlobalVariable.h>
 #include <Guid/ImageAuthentication.h>
+#include <Guid/MicrosoftVariable.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -928,17 +929,22 @@ WrapSetVariable (
   //
   if (gCurrentConfig->ProtectSecureBoot
     && mKernelStarted) {
-    if (CompareGuid (VendorGuid, &gEfiGlobalVariableGuid)
-      && (StrCmp (VariableName, EFI_PLATFORM_KEY_NAME) == 0
-      || StrCmp (VariableName, EFI_KEY_EXCHANGE_KEY_NAME) == 0)) {
-      return EFI_SECURITY_VIOLATION;
-    }
-
-    if (CompareGuid (VendorGuid, &gEfiImageSecurityDatabaseGuid)
-      && (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE) == 0
-      || StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0
-      || StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE2) == 0
-      || StrCmp (VariableName, L"dbr" /* EFI_IMAGE_SECURITY_DATABASE3 */) == 0)) {
+    if (CompareGuid (VendorGuid, &gEfiGlobalVariableGuid)) {
+      if (StrCmp (VariableName, EFI_PLATFORM_KEY_NAME) == 0
+        || StrCmp (VariableName, EFI_KEY_EXCHANGE_KEY_NAME) == 0) {
+        return EFI_SECURITY_VIOLATION;
+      }
+    } else if (CompareGuid (VendorGuid, &gEfiImageSecurityDatabaseGuid)) {
+      if (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE) == 0
+        || StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0
+        || StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE2) == 0
+        || StrCmp (VariableName, L"dbr" /* EFI_IMAGE_SECURITY_DATABASE3 */) == 0) {
+        return EFI_SECURITY_VIOLATION;
+      }
+    } else if (CompareGuid (VendorGuid, &gMicrosoftVariableGuid)) {
+      //
+      // CurrentActivePolicy, CurrentPolicy, RevocationList, WindowsBootChainSvn, whatever.
+      //
       return EFI_SECURITY_VIOLATION;
     }
   }
