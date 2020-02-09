@@ -14,6 +14,7 @@
 
 #include "BootManagementInternal.h"
 
+#include <Guid/AppleFile.h>
 #include <Guid/AppleVariable.h>
 #include <Guid/OcVariables.h>
 
@@ -347,6 +348,7 @@ OcRunSimpleBootPicker (
   OC_BOOT_ENTRY                      *Entries;
   UINTN                              EntryCount;
   INTN                               DefaultEntry;
+  BOOLEAN                            ForbidApple;
 
   AppleBootPolicy = OcAppleBootPolicyInstallProtocol (FALSE);
   if (AppleBootPolicy == NULL) {
@@ -360,6 +362,9 @@ OcRunSimpleBootPicker (
     return EFI_NOT_FOUND;
   }
 
+  //
+  // This one is handled as is for Apple BootPicker for now.
+  //
   if (Context->PickerCommand != OcPickerDefault) {
     Status = Context->RequestPrivilege (
                         Context->PrivilegeContext,
@@ -373,6 +378,14 @@ OcRunSimpleBootPicker (
 
       Context->PickerCommand = OcPickerDefault;
     }
+  }
+
+  if (Context->PickerCommand == OcPickerShowPicker && Context->PickerMode == OcPickerModeApple) {
+    Status = OcRunAppleBootPicker ();
+    DEBUG ((DEBUG_INFO, "OCB: Apple BootPicker failed - %r, fallback to builtin\n", Status));
+    ForbidApple = TRUE;
+  } else {
+    ForbidApple = FALSE;
   }
 
   while (TRUE) {
@@ -406,6 +419,12 @@ OcRunSimpleBootPicker (
     DefaultEntry = OcGetDefaultBootEntry (Context, Entries, EntryCount);
 
     if (Context->PickerCommand == OcPickerShowPicker) {
+      if (!ForbidApple && Context->PickerMode == OcPickerModeApple) {
+        Status = OcRunAppleBootPicker ();
+        DEBUG ((DEBUG_INFO, "OCB: Apple BootPicker failed on error - %r, fallback to builtin\n", Status));
+        ForbidApple = TRUE;
+      }
+
       Status = OcShowSimpleBootMenu (
         Context,
         Entries,
@@ -477,4 +496,46 @@ OcRunSimpleBootPicker (
 
     OcFreeBootEntries (Entries, EntryCount);
   }
+}
+
+EFI_STATUS
+OcRunAppleBootPicker (
+  VOID
+  )
+{
+  EFI_STATUS                           Status;
+  EFI_HANDLE                           NewHandle;
+  EFI_DEVICE_PATH_PROTOCOL             *Dp;
+
+  Dp = CreateFvFileDevicePath (&gAppleBootPickerFileGuid);
+  if (Dp != NULL) {
+    NewHandle = NULL;
+    Status = gBS->LoadImage (
+      FALSE,
+      gImageHandle,
+      Dp,
+      NULL,
+      0,
+      &NewHandle
+      );
+    if (EFI_ERROR (Status)) {
+      Status = EFI_INVALID_PARAMETER;
+    }
+  } else {
+    Status = EFI_NOT_FOUND;
+  }
+
+  if (!EFI_ERROR (Status)) {
+    Status = gBS->StartImage (
+      NewHandle,
+      NULL,
+      NULL
+      );
+
+    if (EFI_ERROR (Status)) {
+      Status = EFI_UNSUPPORTED;
+    }
+  }
+
+  return Status;
 }

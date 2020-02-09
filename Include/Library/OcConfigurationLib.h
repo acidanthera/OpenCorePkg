@@ -268,14 +268,14 @@
   OC_DECLARE (OC_MISC_BLESS_ARRAY)
 
 #define OC_MISC_BOOT_FIELDS(_, __) \
-  _(BOOLEAN                     , HideSelf                    ,     , FALSE                       ,     ())                   \
-  _(BOOLEAN                     , PollAppleHotKeys            ,     , FALSE                       ,     ())                   \
-  _(BOOLEAN                     , ShowPicker                  ,     , FALSE                       ,     ())                   \
-  _(BOOLEAN                     , UsePicker                   ,     , FALSE                       ,     ())                   \
-  _(UINT32                      , PickerAttributes            ,     , 0                           ,     ())                   \
-  _(UINT32                      , TakeoffDelay                ,     , 0                           ,     ())                   \
-  _(UINT32                      , Timeout                     ,     , 0                           ,     ())                   \
-  _(OC_STRING                   , HibernateMode               ,     , OC_STRING_CONSTR ("None", _, __), OC_DESTR (OC_STRING))
+  _(OC_STRING                   , PickerMode                  ,     , OC_STRING_CONSTR ("Builtin", _, __) , OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , HibernateMode               ,     , OC_STRING_CONSTR ("None", _, __)    , OC_DESTR (OC_STRING)) \
+  _(UINT32                      , PickerAttributes            ,     , 0                                   , ())                   \
+  _(UINT32                      , TakeoffDelay                ,     , 0                                   , ())                   \
+  _(UINT32                      , Timeout                     ,     , 0                                   , ())                   \
+  _(BOOLEAN                     , HideSelf                    ,     , FALSE                               , ())                   \
+  _(BOOLEAN                     , PollAppleHotKeys            ,     , FALSE                               , ())                   \
+  _(BOOLEAN                     , ShowPicker                  ,     , FALSE                               , ())
   OC_DECLARE (OC_MISC_BOOT)
 
 #define OC_MISC_DEBUG_FIELDS(_, __) \

@@ -74,6 +74,7 @@
   gOcVendorVariableGuid                         ## SOMETIMES_CONSUMES
   gOcReadOnlyVariableGuid                       ## SOMETIMES_CONSUMES
   gOcWriteOnlyVariableGuid                      ## SOMETIMES_CONSUMES
+  gAppleBootPickerFileGuid                      ## SOMETIMES_CONSUMES
 
 [Protocols]
   gAppleBootPolicyProtocolGuid       ## PRODUCES

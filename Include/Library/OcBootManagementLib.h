@@ -37,6 +37,15 @@ typedef enum OC_BOOT_ENTRY_TYPE_ {
 } OC_BOOT_ENTRY_TYPE;
 
 /**
+  Picker mode.
+**/
+typedef enum OC_PICKER_MODE_ {
+  OcPickerModeBuiltin,
+  OcPickerModeExternal,
+  OcPickerModeApple,
+} OC_PICKER_MODE;
+
+/**
   Action to perform as part of executing a system boot entry.
 **/
 typedef
@@ -398,6 +407,10 @@ typedef struct {
   // Additional suffix to include by the interface.
   //
   CONST CHAR8      *TitleSuffix;
+  //
+  // Used picker mode.
+  //
+  OC_PICKER_MODE   PickerMode;
   //
   // Console attributes. 0 is reserved as disabled.
   //
@@ -827,6 +840,17 @@ OcAppendArgumentToCmd (
 **/
 VOID
 OcDeleteVariables (
+  VOID
+  );
+
+
+/**
+  Launch Apple BootPicker.
+
+  @retval error code, should not return. 
+**/
+EFI_STATUS
+OcRunAppleBootPicker (
   VOID
   );
 

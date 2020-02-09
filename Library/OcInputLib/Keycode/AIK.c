@@ -130,9 +130,14 @@ AIKPollKeyboardHandler (
       &KeyData
       );
     if (!EFI_ERROR (Status)) {
-      (VOID) Counter;
-      DEBUG ((DEBUG_VERBOSE, "Read key with scan 0x%X and unicode 0x%X at %Lu\n",
-        KeyData.Key.ScanCode, KeyData.Key.UnicodeChar, Counter
+      DEBUG ((
+        DEBUG_VERBOSE,
+        "AIK: Key scan 0x%X uni 0x%X Shift 0x%X toggle 0x%X at %Lu\n",
+        KeyData.Key.ScanCode,
+        KeyData.Key.UnicodeChar,
+        KeyData.KeyState.KeyShiftState,
+        KeyData.KeyState.KeyToggleState,
+        Counter
         ));
       AIKDataWriteEntry (&Keycode->Data, &KeyData);
       AIKTargetWriteEntry (&Keycode->Target, &KeyData);

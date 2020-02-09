@@ -34,9 +34,11 @@
   OpenFile.c
   ReadFile.c
   GptPartitionEntry.c
+  FirmwareFile.c
   FsConnectQuirk.c
 
 [Packages]
+  EfiPkg/EfiPkg.dec
   OcSupportPkg/OcSupportPkg.dec
   MdePkg/MdePkg.dec
 
@@ -54,7 +56,9 @@
   gEfiPartTypeSystemPartGuid           ## CONSUMES
 
 [Protocols]
+  gEfiFirmwareVolumeProtocolGuid
   gEfiFirmwareVolume2ProtocolGuid
+  gEfiDevicePathProtocolGuid
   gEfiBlockIo2ProtocolGuid
   gEfiBlockIoProtocolGuid
   gEfiDiskIo2ProtocolGuid
