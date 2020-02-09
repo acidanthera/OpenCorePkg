@@ -15,6 +15,8 @@ OpenCore Changelog
 - Added `PickerAttributes` option to colour picker
 - Added `ProtectSecureBoot` option through FwRuntimeServices
 - Replaced `RequireVault` and `RequireSignature` with `Vault`
+- Added `BootKicker` tool to support launching Apple BootPicker
+- Added BootPicker support as an external UI in OC through `PickerMode`
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere

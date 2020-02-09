@@ -2110,7 +2110,7 @@ behaviour that does not go to any other sections
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Enable \texttt{modifier hotkey} handling in boot picker.
 
-  In addition to \texttt{action hotkeys}, which are partially described in \texttt{UsePicker}
+  In addition to \texttt{action hotkeys}, which are partially described in \texttt{PickerMode}
   section and are normally handled by Apple BDS, there exist modifier keys, which are
   handled by operating system bootloader, namely \texttt{boot.efi}. These keys
   allow to change operating system behaviour by providing different boot modes.
@@ -2157,16 +2157,30 @@ behaviour that does not go to any other sections
   automatic booting of the default boot entry. Use 0 to disable timer.
 
 \item
-  \texttt{UsePicker}\\
+  \texttt{PickerMode}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Use OpenCore built-in boot picker for boot management.
+  \textbf{Description}: Choose boot picker used for boot management.
 
-  \texttt{UsePicker} set to \texttt{false} entirely disables all boot management
-  in OpenCore except policy enforcement. In this case a custom user interface may
+  Picker describes underlying boot management with an optional user interface
+  responsible for handling boot options. The following values are supported:
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Builtin} --- boot management is handled by OpenCore, a simple
+  text only user interface is used.
+  \item \texttt{External} --- an external boot management protocol is used
+  if available. Otherwise \texttt{Builtin} mode is used.
+  \item \texttt{Apple} --- Apple boot management is used if available.
+  Otherwise \texttt{Builtin} mode is used.
+  \end{itemize}
+
+
+  Upon success \texttt{External} mode will entirely disable all boot management
+  in OpenCore except policy enforcement. In \texttt{Apple} mode it may additionally
+  bypass policy enforcement. To implement \texttt{External} mode a custom user interface may
   utilise \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}
-  \texttt{OcBootManagementLib} to implement a user friendly boot picker oneself.
-  Reference example of external graphics interface is provided in
+  \texttt{OcBootManagementLib}. Reference example of external graphics interface is provided in
   \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tests/ExternalUi}{ExternalUi}
   test driver.
 
@@ -2199,10 +2213,10 @@ behaviour that does not go to any other sections
   \emph{Note}: Activated \texttt{KeySupport}, \texttt{AppleUsbKbDxe}, or similar driver is required
   for key handling to work. On many firmwares it is not possible to get all the keys function.
 
-  In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key
-  \texttt{ShowPicker}. This key exists for firmwares with PS/2 keyboards that
-  fail to report held \texttt{OPT} key and require continual presses of \texttt{Escape}
-  key to enter the boot menu.
+  In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key to display picker when
+  \texttt{ShowPicker} is disabled. This key exists for \texttt{Apple} picker mode and for
+  firmwares with PS/2 keyboards that fail to report held \texttt{OPT} key and require continual
+  presses of \texttt{Escape} key to enter the boot menu.
 
 \end{enumerate}
 
@@ -3686,7 +3700,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \hyperref[uefiinputprops]{Input Properties} section below.
 
 \item
-  \texttt{Input}\\
+  \texttt{Output}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Apply individual settings designed for output (text and graphics) in

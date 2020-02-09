@@ -107,6 +107,7 @@
   MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf
   OpenCorePkg/Application/Bootstrap/Bootstrap.inf
   OpenCorePkg/Platform/OpenCore/OpenCore.inf
+  OcSupportPkg/Application/BootKicker/BootKicker.inf
   OcSupportPkg/Application/CleanNvram/CleanNvram.inf
   OcSupportPkg/Application/VerifyMsrE2/VerifyMsrE2.inf
   OcSupportPkg/Platform/AppleUsbKbDxe/UsbKbDxe.inf

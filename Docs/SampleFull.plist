@@ -583,6 +583,8 @@
 		<dict>
 			<key>HibernateMode</key>
 			<string>None</string>
+			<key>PickerMode</key>
+			<string>Builtin</string>
 			<key>HideSelf</key>
 			<true/>
 			<key>PickerAttributes</key>
@@ -595,8 +597,6 @@
 			<integer>0</integer>
 			<key>Timeout</key>
 			<integer>5</integer>
-			<key>UsePicker</key>
-			<true/>
 		</dict>
 		<key>Debug</key>
 		<dict>

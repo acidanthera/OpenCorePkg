@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Feb  6 00:43:28 2020
-%DIF ADD ../Configuration.tex        Sun Feb  9 01:08:55 2020
+%DIF ADD ../Configuration.tex        Sun Feb  9 14:29:44 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2394,7 +2394,7 @@ behaviour that does not go to any other sections
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Enable \texttt{modifier hotkey} handling in boot picker.
 
-  In addition to \texttt{action hotkeys}, which are partially described in \texttt{UsePicker}
+  In addition to \texttt{action hotkeys}, which are partially described in \texttt{\DIFdelbegin \DIFdel{UsePicker}\DIFdelend \DIFaddbegin \DIFadd{PickerMode}\DIFaddend }
   section and are normally handled by Apple BDS, there exist modifier keys, which are
   handled by operating system bootloader, namely \texttt{boot.efi}. These keys
   allow to change operating system behaviour by providing different boot modes.
@@ -2502,16 +2502,32 @@ behaviour that does not go to any other sections
   automatic booting of the default boot entry. Use 0 to disable timer.
 
 \item
-  \texttt{UsePicker}\\
+  \texttt{\DIFdelbegin \DIFdel{UsePicker}\DIFdelend \DIFaddbegin \DIFadd{PickerMode}\DIFaddend }\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Use OpenCore built-in boot picker for boot management.
+  \textbf{Description}: \DIFdelbegin \DIFdel{Use OpenCore built-in boot picker }\DIFdelend \DIFaddbegin \DIFadd{Choose boot picker used }\DIFaddend for boot management.
 
-  \texttt{UsePicker} set to \texttt{false} entirely disables all boot management
-  in OpenCore except policy enforcement. In this case a custom user interface may
+  \DIFaddbegin \DIFadd{Picker describes underlying boot management with an optional user interface
+  responsible for handling boot options. The following values are supported:
+}
+
+  \begin{itemize}
+  \tightlist
+  \item \DIFaddend \texttt{\DIFdelbegin \DIFdel{UsePicker}\DIFdelend \DIFaddbegin \DIFadd{Builtin}\DIFaddend } \DIFdelbegin \DIFdel{set to }\DIFdelend \DIFaddbegin \DIFadd{--- boot management is handled by OpenCore, a simple
+  text only user interface is used.
+  }\item \DIFaddend \texttt{\DIFdelbegin \DIFdel{false}%DIFDELCMD < \MBLOCKRIGHTBRACE %%%
+\DIFdel{entirely disables }\DIFdelend \DIFaddbegin \DIFadd{External}} \DIFadd{--- an external boot management protocol is used
+  if available. Otherwise }\texttt{\DIFadd{Builtin}} \DIFadd{mode is used.
+  }\item \texttt{\DIFadd{Apple}} \DIFadd{--- Apple boot management is used if available.
+  Otherwise }\texttt{\DIFadd{Builtin}} \DIFadd{mode is used.
+  }\end{itemize}
+
+
+  \DIFadd{Upon success }\texttt{\DIFadd{External}} \DIFadd{mode will entirely disable }\DIFaddend all boot management
+  in OpenCore except policy enforcement. In \DIFdelbegin \DIFdel{this case }\DIFdelend \DIFaddbegin \texttt{\DIFadd{Apple}} \DIFadd{mode it may additionally
+  bypass policy enforcement. To implement }\texttt{\DIFadd{External}} \DIFadd{mode }\DIFaddend a custom user interface may
   utilise \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}
-  \texttt{OcBootManagementLib} to implement a user friendly boot picker oneself.
-  Reference example of external graphics interface is provided in
+  \texttt{OcBootManagementLib}\DIFdelbegin \DIFdel{to implement a user friendly boot picker oneself}\DIFdelend . Reference example of external graphics interface is provided in
   \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tests/ExternalUi}{ExternalUi}
   test driver.
 
@@ -2544,10 +2560,10 @@ behaviour that does not go to any other sections
   \emph{Note}: Activated \texttt{KeySupport}, \texttt{AppleUsbKbDxe}, or similar driver is required
   for key handling to work. On many firmwares it is not possible to get all the keys function.
 
-  In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key
-  \texttt{ShowPicker}. This key exists for firmwares with PS/2 keyboards that
-  fail to report held \texttt{OPT} key and require continual presses of \texttt{Escape}
-  key to enter the boot menu.
+  In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key \DIFaddbegin \DIFadd{to display picker when
+  }\DIFaddend \texttt{ShowPicker} \DIFaddbegin \DIFadd{is disabled}\DIFaddend . This key exists for \DIFaddbegin \texttt{\DIFadd{Apple}} \DIFadd{picker mode and for
+  }\DIFaddend firmwares with PS/2 keyboards that fail to report held \texttt{OPT} key and require continual
+  presses of \texttt{Escape} key to enter the boot menu.
 
 \end{enumerate}
 
@@ -4099,7 +4115,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \hyperref[uefiinputprops]{Input Properties} section below.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{Input}}\\
+  \DIFaddbegin \texttt{\DIFadd{Output}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ dict}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: None}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Apply individual settings designed for output (text and graphics) in
