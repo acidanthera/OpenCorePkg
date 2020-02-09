@@ -3986,6 +3986,19 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   which may be the case on \texttt{MacPro5,1} with newer GPUs.
 
 \item
+  \texttt{ProvideEarlyConsole}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Ensure switching to text mode early at startup.
+
+  Disabling this option may result in hiding all messages during startup.
+  Since only error messages should normally be printed during startup, this option
+  is recommended to be always enabled. The only exception for this option
+  to be disabled is when firmware or third-party drivers, e.g. \texttt{ApfsJumpStart}
+  on legacy Macs, unconditionally print to standard output and cannot be otherwise
+  controlled by the bootloader.
+
+\item
   \texttt{ReconnectOnResChange}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
