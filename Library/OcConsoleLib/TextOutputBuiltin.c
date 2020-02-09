@@ -165,7 +165,7 @@ STATIC UINT8 mFontScale;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION mBackgroundColor;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION mForegroundColor;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION *mCharacterBuffer;
-STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE     mConsoleMode = EfiConsoleControlScreenText;
+STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE     mConsoleMode = EfiConsoleControlScreenGraphics;
 
 #define SCR_PADD           1
 #define TGT_CHAR_WIDTH     ((UINTN)(ISO_CHAR_WIDTH) * mFontScale)
