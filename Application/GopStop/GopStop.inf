@@ -1,5 +1,5 @@
 ## @file
-#  Run Apple Boot Picker.
+#  Test graphics output protocol.
 #
 #  Copyright (c) 2018, vit9696. All rights reserved.<BR>
 #
@@ -14,8 +14,8 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = BootKicker
-  FILE_GUID                      = 3099A880-582F-44BA-8DA3-F4A875F3E34D
+  BASE_NAME                      = GopStop
+  FILE_GUID                      = 76EFA38A-84A0-4B8F-ADA0-E2BE88CFA8D0
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
   ENTRY_POINT                    = UefiMain
@@ -32,14 +32,9 @@
 #
 
 [Sources]
-  BootKicker.c
-
-[Guids]
-  gAppleBootPickerFileGuid
+  GopStop.c
 
 [Protocols]
-  gEfiDevicePathProtocolGuid
-  gEfiFirmwareVolumeProtocolGuid
   gEfiGraphicsOutputProtocolGuid
 
 [Packages]
@@ -48,9 +43,12 @@
   OcSupportPkg/OcSupportPkg.dec
 
 [LibraryClasses]
-  OcBootManagementLib
-  OcConsoleLib
+  BaseLib
+  DebugLib
+  MemoryAllocationLib
   OcFileLib
+  PrintLib
   UefiApplicationEntryPoint
   UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
   UefiLib

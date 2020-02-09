@@ -1,5 +1,5 @@
 /** @file
-  Run Apple boot picker.
+  Run Apple Boot Picker.
 
 Copyright (c) 2020, vit9696. All rights reserved.<BR>
 This program and the accompanying materials
@@ -26,7 +26,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiLib.h>
 #include <Protocol/DevicePath.h>
 #include <Protocol/GraphicsOutput.h>
-#include <Protocol/DevicePath.h>
 
 EFI_STATUS
 EFIAPI
@@ -39,6 +38,8 @@ UefiMain (
   EFI_GRAPHICS_OUTPUT_PROTOCOL         *Gop;
   EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION  Pixel;
 
+  gBS->SetWatchdogTimer (0, 0, 0, NULL);
+
   OcProvideConsoleGop ();
 
   OcSetConsoleResolution (0, 0, 0);
@@ -48,8 +49,6 @@ UefiMain (
     &gEfiGraphicsOutputProtocolGuid,
     (VOID **) &Gop
     );
-
-  gBS->SetWatchdogTimer (0, 0, 0, NULL);
 
   if (EFI_ERROR (Status)) {
     gBS->Stall (SECONDS_TO_MICROSECONDS (10));
