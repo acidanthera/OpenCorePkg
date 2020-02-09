@@ -106,7 +106,7 @@ AnalyzeGopHandle (
   Height  = 0;
   NewMode = -1;
 
-  for (Index = 0; Index <= Gop->Mode->MaxMode; ++Index) {
+  for (Index = 0; Index < Gop->Mode->MaxMode; ++Index) {
     Status = Gop->QueryMode (
       Gop,
       Index,
