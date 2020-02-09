@@ -507,8 +507,11 @@ OcRunAppleBootPicker (
   EFI_HANDLE                           NewHandle;
   EFI_DEVICE_PATH_PROTOCOL             *Dp;
 
+  DEBUG ((DEBUG_INFO, "OCB: OcRunAppleBootPicker attempting to find...\n"));
+
   Dp = CreateFvFileDevicePath (&gAppleBootPickerFileGuid);
   if (Dp != NULL) {
+    DEBUG ((DEBUG_INFO, "OCB: OcRunAppleBootPicker attempting to load...\n"));
     NewHandle = NULL;
     Status = gBS->LoadImage (
       FALSE,
@@ -526,6 +529,7 @@ OcRunAppleBootPicker (
   }
 
   if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCB: OcRunAppleBootPicker attempting to start...\n"));
     Status = gBS->StartImage (
       NewHandle,
       NULL,
