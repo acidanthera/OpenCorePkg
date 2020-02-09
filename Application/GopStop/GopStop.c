@@ -272,8 +272,11 @@ RunGopTest (
 
   //
   // 2. Wait 5 seconds.
+  // Note: Ensure that stall value is within UINT32 in nanoseconds.
   //
-  gBS->Stall (SECONDS_TO_MICROSECONDS (5));
+  for (Index = 0; Index < 5; ++Index) {
+    gBS->Stall (SECONDS_TO_MICROSECONDS (1));
+  }
 
   //
   // TODO:
@@ -321,8 +324,11 @@ RunGopTest (
 
   //
   // 9. Wait 5 seconds.
+  // Note: Ensure that stall value is within UINT32 in nanoseconds.
   //
-  gBS->Stall (SECONDS_TO_MICROSECONDS (5));
+  for (Index = 0; Index < 5; ++Index) {
+    gBS->Stall (SECONDS_TO_MICROSECONDS (1));
+  }
 }
 
 EFI_STATUS

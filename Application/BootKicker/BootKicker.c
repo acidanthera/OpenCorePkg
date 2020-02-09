@@ -37,6 +37,7 @@ UefiMain (
   EFI_STATUS                           Status;
   EFI_GRAPHICS_OUTPUT_PROTOCOL         *Gop;
   EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION  Pixel;
+  UINTN                                Index;
 
   gBS->SetWatchdogTimer (0, 0, 0, NULL);
 
@@ -51,7 +52,12 @@ UefiMain (
     );
 
   if (EFI_ERROR (Status)) {
-    gBS->Stall (SECONDS_TO_MICROSECONDS (10));
+    //
+    // Note: Ensure that stall value is within UINT32 in nanoseconds.
+    //
+    for (Index = 0; Index < 10; ++Index) {
+      gBS->Stall (SECONDS_TO_MICROSECONDS (1));
+    }
     return Status;
   }
 
@@ -95,7 +101,12 @@ UefiMain (
     0
     );
 
-  gBS->Stall (SECONDS_TO_MICROSECONDS (10));
+  //
+  // Note: Ensure that stall value is within UINT32 in nanoseconds.
+  //
+  for (Index = 0; Index < 10; ++Index) {
+    gBS->Stall (SECONDS_TO_MICROSECONDS (1));
+  }
 
   return EFI_SUCCESS;
 }
