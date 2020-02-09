@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Feb  6 00:43:28 2020
-%DIF ADD ../Configuration.tex        Sun Feb  9 14:29:44 2020
+%DIF ADD ../Configuration.tex        Sun Feb  9 14:54:45 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2503,8 +2503,8 @@ behaviour that does not go to any other sections
 
 \item
   \texttt{\DIFdelbegin \DIFdel{UsePicker}\DIFdelend \DIFaddbegin \DIFadd{PickerMode}\DIFaddend }\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Type}: \texttt{plist\ \DIFdelbegin \DIFdel{boolean}\DIFdelend \DIFaddbegin \DIFadd{string}\DIFaddend }\\
+  \textbf{Failsafe}: \texttt{\DIFdelbegin \DIFdel{false}\DIFdelend \DIFaddbegin \DIFadd{Builtin}\DIFaddend }\\
   \textbf{Description}: \DIFdelbegin \DIFdel{Use OpenCore built-in boot picker }\DIFdelend \DIFaddbegin \DIFadd{Choose boot picker used }\DIFaddend for boot management.
 
   \DIFaddbegin \DIFadd{Picker describes underlying boot management with an optional user interface
@@ -2557,15 +2557,19 @@ behaviour that does not go to any other sections
   recovery. Hold \texttt{CMD+R} key combination to choose this option.
   \end{itemize}
 
-  \emph{Note}: Activated \texttt{KeySupport}, \texttt{AppleUsbKbDxe}, or similar driver is required
+  \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: Activated \texttt{KeySupport}, \texttt{AppleUsbKbDxe}, or similar driver is required
   for key handling to work. On many firmwares it is not possible to get all the keys function.
 
-  In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key \DIFaddbegin \DIFadd{to display picker when
+  \DIFaddbegin \emph{\DIFadd{Note 2}}\DIFadd{: }\DIFaddend In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key \DIFaddbegin \DIFadd{to display picker when
   }\DIFaddend \texttt{ShowPicker} \DIFaddbegin \DIFadd{is disabled}\DIFaddend . This key exists for \DIFaddbegin \texttt{\DIFadd{Apple}} \DIFadd{picker mode and for
   }\DIFaddend firmwares with PS/2 keyboards that fail to report held \texttt{OPT} key and require continual
   presses of \texttt{Escape} key to enter the boot menu.
 
-\end{enumerate}
+  \DIFaddbegin \emph{\DIFadd{Note 3}}\DIFadd{: On Macs with problematic GOP it may be difficult to access Apple BootPicker.
+  To workaround this problem even without loading OpenCore }\texttt{\DIFadd{BootKicker}} \DIFadd{utility can be blessed.
+}
+
+\DIFaddend \end{enumerate}
 
 \subsection{Debug Properties}\label{miscdebugprops}
 

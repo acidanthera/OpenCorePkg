@@ -2158,8 +2158,8 @@ behaviour that does not go to any other sections
 
 \item
   \texttt{PickerMode}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Builtin}\\
   \textbf{Description}: Choose boot picker used for boot management.
 
   Picker describes underlying boot management with an optional user interface
@@ -2210,13 +2210,16 @@ behaviour that does not go to any other sections
   recovery. Hold \texttt{CMD+R} key combination to choose this option.
   \end{itemize}
 
-  \emph{Note}: Activated \texttt{KeySupport}, \texttt{AppleUsbKbDxe}, or similar driver is required
+  \emph{Note 1}: Activated \texttt{KeySupport}, \texttt{AppleUsbKbDxe}, or similar driver is required
   for key handling to work. On many firmwares it is not possible to get all the keys function.
 
-  In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key to display picker when
+  \emph{Note 2}: In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key to display picker when
   \texttt{ShowPicker} is disabled. This key exists for \texttt{Apple} picker mode and for
   firmwares with PS/2 keyboards that fail to report held \texttt{OPT} key and require continual
   presses of \texttt{Escape} key to enter the boot menu.
+
+  \emph{Note 3}: On Macs with problematic GOP it may be difficult to access Apple BootPicker.
+  To workaround this problem even without loading OpenCore \texttt{BootKicker} utility can be blessed.
 
 \end{enumerate}
 
