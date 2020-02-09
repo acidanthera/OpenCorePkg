@@ -39,6 +39,8 @@ UefiMain (
   EFI_GRAPHICS_OUTPUT_PROTOCOL         *Gop;
   EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION  Pixel;
 
+  OcProvideConsoleGop ();
+
   Status = gBS->HandleProtocol (
     gST->ConsoleOutHandle,
     &gEfiGraphicsOutputProtocolGuid,
@@ -46,7 +48,6 @@ UefiMain (
     );
 
   gBS->SetWatchdogTimer (0, 0, 0, NULL);
-  OcProvideConsoleGop ();
 
   if (EFI_ERROR (Status)) {
     gBS->Stall (SECONDS_TO_MICROSECONDS (10));
