@@ -109,6 +109,7 @@
   OpenCorePkg/Platform/OpenCore/OpenCore.inf
   OcSupportPkg/Application/BootKicker/BootKicker.inf
   OcSupportPkg/Application/CleanNvram/CleanNvram.inf
+  OcSupportPkg/Application/GopStop/GopStop.inf
   OcSupportPkg/Application/VerifyMsrE2/VerifyMsrE2.inf
   OcSupportPkg/Platform/AppleUsbKbDxe/UsbKbDxe.inf
   OcSupportPkg/Platform/FwRuntimeServices/FwRuntimeServices.inf
