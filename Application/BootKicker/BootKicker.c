@@ -41,6 +41,8 @@ UefiMain (
 
   OcProvideConsoleGop ();
 
+  OcSetConsoleResolution (0, 0, 0);
+
   Status = gBS->HandleProtocol (
     gST->ConsoleOutHandle,
     &gEfiGraphicsOutputProtocolGuid,
