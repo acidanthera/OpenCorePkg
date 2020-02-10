@@ -247,7 +247,24 @@ RunGopTest (
   STATIC UINT32 mColorsTest[9] = {12, 10, 9, 15, 7, 0, 11, 5, 14};
 
   //
-  // 1. Fill screen with 4 Red (#FF0000) / Green (#00FF00) / Blue (#0000FF) / White (#FFFFFF) rectangles.
+  // 1. Fill screen with Red (#FF0000) in direct mode.
+  //
+  SetMem32 (
+    (VOID *)(UINTN) Gop->Mode->FrameBufferBase,
+    Gop->Mode->Info->VerticalResolution * Gop->Mode->Info->PixelsPerScanLine * sizeof (UINT32),
+    *(UINT32 *) &mGraphicsEfiColors[mColorsTest[0]]
+    );
+
+  //
+  // 2. Wait 5 seconds.
+  // Note: Ensure that stall value is within UINT32 in nanoseconds.
+  //
+  for (Index = 0; Index < 5; ++Index) {
+    gBS->Stall (SECONDS_TO_MICROSECONDS (1));
+  }
+
+  //
+  // 3. Fill screen with 4 Red (#FF0000) / Green (#00FF00) / Blue (#0000FF) / White (#FFFFFF) rectangles.
   // The user should visually ensure that the colours match and that rectangles equally split the screen in 4 parts.
   //
   ChunkW = Gop->Mode->Info->HorizontalResolution / 2;
@@ -272,7 +289,7 @@ RunGopTest (
   }
 
   //
-  // 2. Wait 5 seconds.
+  // 4. Wait 5 seconds.
   // Note: Ensure that stall value is within UINT32 in nanoseconds.
   //
   for (Index = 0; Index < 5; ++Index) {
@@ -281,23 +298,23 @@ RunGopTest (
 
   //
   // TODO:
-  // 3. Fill screen with white text on black screen in normal mode.
+  // 5. Fill screen with white text on black screen in normal mode.
   //    The screen should effectively be filled with 9 equal rectangles.
   //    From left to right top to bottom they should contain the following symbols: A B C D # F G H I.
   //    Instead of # there should be current GOP number. The user should visually ensure text and
   //    background colour, rectangle sizes, rectangle data.
-  // 4. Wait 5 seconds.
-  // 5. Fill screen with white text on black screen in HiDPI mode. This should repeat the previous test
+  // 6. Wait 5 seconds.
+  // 7. Fill screen with white text on black screen in HiDPI mode. This should repeat the previous test
   //    but the text should be twice bigger. The user should ensure all previous requirements and the
   //    fact that the text got bigger.
-  // 6. Wait 5 seconds.
-  // 7. Print all GOP reports one by one (on separate screens) with white text in black screen in
+  // 8. Wait 5 seconds.
+  // 9. Print all GOP reports one by one (on separate screens) with white text in black screen in
   //    normal mode. Wait 5 seconds after each. The user should screenshot these and later compare
   //    to the file if available.
   //
 
   //
-  // 8. Fill screen with 9 rectangles of different colours. From left to right top to bottom they
+  // 10. Fill screen with 9 rectangles of different colours. From left to right top to bottom they
   // should contain the following colours: Red (#FF0000), Green (#00FF00), Blue (#0000FF), White (#FFFFFF),
   // Light Grey (#989898), Black (#000000), Cyan (#00FFFF), Magenta (#FF00FF), Yellow (#FFFF00). The user should
   // visually ensure that the colours match and that rectangles equally split the screen in 9 parts.
@@ -324,7 +341,7 @@ RunGopTest (
   }
 
   //
-  // 9. Wait 5 seconds.
+  // 11. Wait 5 seconds.
   // Note: Ensure that stall value is within UINT32 in nanoseconds.
   //
   for (Index = 0; Index < 5; ++Index) {
