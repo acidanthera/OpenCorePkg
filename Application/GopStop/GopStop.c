@@ -76,10 +76,10 @@ AnalyzeGopHandle (
   AsciiSPrint (
     Tmp,
     sizeof (Tmp),
-    "Current mode %u, max mode %u, FB: %p, FBS: %X\n",
+    "Current mode %u, max mode %u, FB: %p, FBS: %LX\n",
     Gop->Mode->Mode,
     Gop->Mode->MaxMode,
-    (VOID *) Gop->Mode->FrameBufferBase,
+    (UINT64) Gop->Mode->FrameBufferBase,
     (UINT32) Gop->Mode->FrameBufferSize
     );
   DEBUG ((DEBUG_WARN, "GSTT: %a", Tmp));
@@ -164,11 +164,11 @@ AnalyzeGopHandle (
     AsciiSPrint (
       Tmp,
       sizeof (Tmp),
-      "New %u <-> %u: max mode %u, FB: %p, FBS: %X - %r\n",
+      "New %u <-> %u: max mode %u, FB: %p, FBS: %LX - %r\n",
       (UINT32) NewMode,
       Gop->Mode->Mode,
       Gop->Mode->MaxMode,
-      (VOID *) Gop->Mode->FrameBufferBase,
+      (UINT64) Gop->Mode->FrameBufferBase,
       (UINT32) Gop->Mode->FrameBufferSize,
       Status
       );
