@@ -27,20 +27,29 @@ OcConsoleControlEntryModeInit (
 {
   EFI_STATUS                   Status;
   EFI_CONSOLE_CONTROL_PROTOCOL *ConsoleControl;
+
   //
   // On several firmwares we need to use legacy console control protocol to
   // switch to text mode, otherwise a black screen will be shown.
   //
   Status = gBS->HandleProtocol (
-                  gST->ConsoleOutHandle,
-                  &gEfiConsoleControlProtocolGuid,
-                  (VOID **)&ConsoleControl
-                  );
+    gST->ConsoleOutHandle,
+    &gEfiConsoleControlProtocolGuid,
+    (VOID **) &ConsoleControl
+    );
+  if (EFI_ERROR (Status)) {
+    Status = gBS->LocateProtocol (
+    &gEfiConsoleControlProtocolGuid,
+    NULL,
+    (VOID **) &ConsoleControl
+    );
+  }
+
   if (!EFI_ERROR (Status)) {
     ConsoleControl->SetMode (
-                      ConsoleControl,
-                      PcdGet8 (PcdConsoleControlEntryMode)
-                      );
+      ConsoleControl,
+      PcdGet8 (PcdConsoleControlEntryMode)
+      );
   }
 
   return EFI_SUCCESS;
