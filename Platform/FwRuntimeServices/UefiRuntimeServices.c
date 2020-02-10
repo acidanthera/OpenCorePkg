@@ -927,8 +927,7 @@ WrapSetVariable (
   //
   // Abort access to SecureBoot variables.
   //
-  if (gCurrentConfig->ProtectSecureBoot
-    && mKernelStarted) {
+  if (gCurrentConfig->ProtectSecureBoot) {
     if (CompareGuid (VendorGuid, &gEfiGlobalVariableGuid)) {
       if (StrCmp (VariableName, EFI_PLATFORM_KEY_NAME) == 0
         || StrCmp (VariableName, EFI_KEY_EXCHANGE_KEY_NAME) == 0) {
