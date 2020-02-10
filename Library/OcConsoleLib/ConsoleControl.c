@@ -79,7 +79,6 @@ OcConsoleControlInstallProtocol (
 {
   EFI_STATUS                    Status;
   EFI_CONSOLE_CONTROL_PROTOCOL  *ConsoleControl;
-  EFI_HANDLE                    NewHandle;
 
   Status = gBS->LocateProtocol (
     &gEfiConsoleControlProtocolGuid,
@@ -89,7 +88,7 @@ OcConsoleControlInstallProtocol (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCC: Install console control (%p/%p/%p) - %r\n",
+    "OCC: Install console control (%p/%p/%p), current - %r\n",
     NewProtocol,
     OldProtocol,
     OldMode,
@@ -124,13 +123,14 @@ OcConsoleControlInstallProtocol (
     return EFI_SUCCESS;
   }
 
-  NewHandle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
-    &NewHandle,
+    &gST->ConsoleOutHandle,
     &gEfiConsoleControlProtocolGuid,
     NewProtocol,
     NULL
     );
+
+  DEBUG ((DEBUG_INFO, "OCC: Install console control, new - %r\n", Status));
 
   return Status;
 }
