@@ -575,7 +575,7 @@ AcpiInitContext (
   }
 
   if (Context->NumberOfTables != DstIndex) {
-    DEBUG ((DEBUG_WARN, "OCA: Only %u ACPI tables out of %u were valid\n", DstIndex, Context->NumberOfTables));
+    DEBUG ((DEBUG_INFO, "OCA: Only %u ACPI tables out of %u were valid\n", DstIndex, Context->NumberOfTables));
     Context->NumberOfTables = DstIndex;
   }
 
