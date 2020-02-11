@@ -67,13 +67,12 @@ DecodePng (
 /**
   Encodes raw pixel buffer into PNG image data
 
-  @param  RawData            RawData from png image
+  @param  RawData               RawData from png image
   @param  Width                 Image width
-  @param  Height               Image height
-  @param  BitDepth          BitDept, 8 or 16
-  @param  Buffer              Output buffer
-  @param  BufferSize      Output size
-
+  @param  Height                Image height
+  @param  BitDepth              BitDept, 8 or 16
+  @param  Buffer                Output buffer
+  @param  BufferSize            Output size
 
   @return EFI_SUCCESS  The function completed successfully.
   @return EFI_INVALID_PARAMETER  Passed wrong parameter
