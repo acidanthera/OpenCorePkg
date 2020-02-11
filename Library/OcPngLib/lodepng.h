@@ -36,7 +36,6 @@ freely, subject to the following restrictions:
 #include <Library/DebugLib.h>
 
 #define LODEPNG_NO_COMPILE_CPP
-#define LODEPNG_NO_COMPILE_ENCODER
 #define LODEPNG_NO_COMPILE_DISK
 #define LODEPNG_NO_COMPILE_ALLOCATORS
 #define LODEPNG_NO_COMPILE_ERROR_TEXT

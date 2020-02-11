@@ -134,6 +134,71 @@ DecodePng (
 }
 
 /**
+  Encodes raw pixel buffer into PNG image data
+
+  @param  RawData            RawData from png image
+  @param  Width                 Image width
+  @param  Height               Image height
+  @param  BitDepth          BitDept, 8 or 16
+  @param  Buffer              Output buffer
+  @param  BufferSize      Output size
+
+
+  @return EFI_SUCCESS  The function completed successfully.
+  @return EFI_INVALID_PARAMETER  Passed wrong parameter
+**/
+EFI_STATUS
+EncodePng (
+  IN  VOID    *RawData,
+  IN  UINT32  Width,
+  IN  UINT32  Height,
+  IN  UINT8   BitDepth,
+  OUT VOID    **Buffer,
+  OUT UINTN   *BufferSize
+  )
+{
+  LodePNGState      State;
+  UINTN             Size;
+  unsigned          Error;
+  unsigned          W;
+  unsigned          H;
+  
+  
+  //
+  // Init lodepng state
+  //
+  lodepng_state_init (&State);
+  
+  State.info_raw.colortype = LCT_RGBA;
+  State.info_raw.bitdepth = BitDepth;
+  State.info_png.color.colortype = LCT_RGBA;
+  State.info_png.color.bitdepth = BitDepth;
+  W = Width;
+  H = Height;
+  Size = 0;
+  
+  //
+  // It should return 0 on success
+  //
+  Error = lodepng_encode ((unsigned char **) Buffer, &Size, RawData, W, H, &State);
+
+  if (Error) {
+    DEBUG ((DEBUG_INFO, "OcPngLib: Error while Encoding PNG image\n"));
+    return EFI_INVALID_PARAMETER;
+  }
+  
+  *BufferSize = Size;
+  
+  //
+  // Cleanup state
+  //
+  lodepng_state_cleanup (&State);
+
+  return EFI_SUCCESS;
+
+}
+
+/**
   Frees image buffer
 
   @param  Buffer                 Buffer with desired png image
