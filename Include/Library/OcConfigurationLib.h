@@ -489,7 +489,8 @@ OC_DECLARE (OC_UEFI_INPUT)
   _(BOOLEAN                     , ProvideEarlyConsole         ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReplaceTabWithSpace         ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReconnectOnResChange        ,     , FALSE  , ()) \
-  _(BOOLEAN                     , SanitiseClearScreen         ,     , FALSE  , ())
+  _(BOOLEAN                     , SanitiseClearScreen         ,     , FALSE  , ()) \
+  _(BOOLEAN                     , DirectGopRendering          ,     , FALSE  , ())
 OC_DECLARE (OC_UEFI_OUTPUT)
 
 ///

@@ -140,6 +140,14 @@ OcReconnectConsole (
   );
 
 /**
+  Use direct GOP renderer for console.
+**/
+EFI_STATUS
+OcUseDirectGop (
+  VOID
+  );
+
+/**
   Allocate new System Table with disabled text output.
 
   @param[in] SystemTable     Base System Table.

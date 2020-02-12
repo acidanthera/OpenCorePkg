@@ -21,6 +21,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
+#include <Library/FrameBufferBltLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcMiscLib.h>
@@ -35,6 +36,14 @@ mOriginalHandleProtocol;
 STATIC
 EFI_GRAPHICS_OUTPUT_PROTOCOL *
 mConsoleGraphicsOutput;
+
+STATIC
+FRAME_BUFFER_CONFIGURE *
+mFramebufferContext;
+
+STATIC
+EFI_GRAPHICS_OUTPUT_PROTOCOL_SET_MODE
+mOriginalGopSetMode;
 
 STATIC
 EFI_STATUS
@@ -166,6 +175,110 @@ OcProvideConsoleGop (
   }
 }
 
+STATIC
+FRAME_BUFFER_CONFIGURE *
+EFIAPI
+DirectGopFromTarget (
+  IN EFI_PHYSICAL_ADDRESS                  FramebufferBase,
+  IN EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  *Info
+  )
+{
+  EFI_STATUS                    Status;
+  UINTN                         ConfigureSize;
+  FRAME_BUFFER_CONFIGURE        *Context;
+
+  ConfigureSize = 0;
+  Status = FrameBufferBltConfigure (
+    (VOID *) FramebufferBase,
+    Info,
+    NULL,
+    &ConfigureSize
+    );
+  if (Status != EFI_BUFFER_TOO_SMALL) {
+    return NULL;
+  }
+
+  Context = AllocatePool (ConfigureSize);
+  if (Context == NULL) {
+    return NULL;
+  }
+
+  Status = FrameBufferBltConfigure (
+    (VOID *) FramebufferBase,
+    Info,
+    Context,
+    &ConfigureSize
+    );
+  if (EFI_ERROR (Status)) {
+    FreePool (Context);
+    return NULL;
+  }
+
+  return Context;
+}
+
+STATIC
+EFI_STATUS
+EFIAPI
+DirectGopSetMode (
+  IN  EFI_GRAPHICS_OUTPUT_PROTOCOL *This,
+  IN  UINT32                       ModeNumber
+  )
+{
+  EFI_STATUS                            Status;
+
+  Status = This->SetMode (This, ModeNumber);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  if (mFramebufferContext != NULL) {
+    FreePool (mFramebufferContext);
+    mFramebufferContext = NULL;
+  }
+
+  mFramebufferContext = DirectGopFromTarget (This->Mode->FrameBufferBase, This->Mode->Info);
+  if (mFramebufferContext == NULL) {
+    return EFI_DEVICE_ERROR;
+  }
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+EFIAPI
+DirectGopBlt (
+  IN  EFI_GRAPHICS_OUTPUT_PROTOCOL            *This,
+  IN  EFI_GRAPHICS_OUTPUT_BLT_PIXEL           *BltBuffer   OPTIONAL,
+  IN  EFI_GRAPHICS_OUTPUT_BLT_OPERATION       BltOperation,
+  IN  UINTN                                   SourceX,
+  IN  UINTN                                   SourceY,
+  IN  UINTN                                   DestinationX,
+  IN  UINTN                                   DestinationY,
+  IN  UINTN                                   Width,
+  IN  UINTN                                   Height,
+  IN  UINTN                                   Delta         OPTIONAL
+  )
+{
+  if (mFramebufferContext != NULL) {
+    return FrameBufferBlt (
+      mFramebufferContext,
+      BltBuffer,
+      BltOperation,
+      SourceX,
+      SourceY,
+      DestinationX,
+      DestinationY,
+      Width,
+      Height,
+      Delta
+      );
+  }
+
+  return EFI_DEVICE_ERROR;
+}
+
 VOID
 OcReconnectConsole (
   VOID
@@ -218,4 +331,39 @@ OcReconnectConsole (
   } else {
     DEBUG ((DEBUG_WARN, "OCC: Failed to find any text output handles\n"));
   }
+}
+
+EFI_STATUS
+OcUseDirectGop (
+  VOID
+  )
+{
+  EFI_STATUS                    Status;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL  *Gop;
+
+  DEBUG ((DEBUG_INFO, "OCC: Switching to direct GOP renderer...\n"));
+
+  Status = gBS->HandleProtocol (
+    gST->ConsoleOutHandle,
+    &gEfiGraphicsOutputProtocolGuid,
+    (VOID **) &Gop
+    );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCC: Cannot find console GOP for direct GOP - %r\n", Status));
+    return Status;
+  }
+
+  mFramebufferContext = DirectGopFromTarget (Gop->Mode->FrameBufferBase, Gop->Mode->Info);
+  if (mFramebufferContext == NULL) {
+    DEBUG ((DEBUG_INFO, "OCC: Delaying direct GOP configuration...\n"));
+    //
+    // This is possible at the start.
+    //
+  }
+
+  mOriginalGopSetMode = Gop->SetMode;
+  Gop->SetMode = DirectGopSetMode;
+  Gop->Blt = DirectGopBlt;
+  return EFI_SUCCESS;
 }

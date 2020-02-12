@@ -49,6 +49,7 @@
 
 [Packages]
   EfiPkg/EfiPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
   MdePkg/MdePkg.dec
   OcSupportPkg/OcSupportPkg.dec
 
@@ -56,5 +57,6 @@
   BaseLib
   BaseMemoryLib
   DebugLib
+  FrameBufferBltLib
   UefiBootServicesTableLib
   UefiRuntimeServicesTableLib
