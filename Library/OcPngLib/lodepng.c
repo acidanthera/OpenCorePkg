@@ -2773,13 +2773,13 @@ void lodepng_color_mode_cleanup(LodePNGColorMode* info) {
 }
 
 unsigned lodepng_color_mode_copy(LodePNGColorMode* dest, const LodePNGColorMode* source) {
-  size_t i;
   lodepng_color_mode_cleanup(dest);
   *dest = *source;
   if(source->palette) {
     dest->palette = (unsigned char*)lodepng_malloc(1024);
     if(!dest->palette && source->palettesize) return 83; /*alloc fail*/
-    for(i = 0; i != source->palettesize * 4; ++i) dest->palette[i] = source->palette[i];
+    /* OC: fixes undefined reference to memcpy. */
+    lodepng_memcpy(dest->palette, source->palette, source->palettesize * 4);
   }
   return 0;
 }
