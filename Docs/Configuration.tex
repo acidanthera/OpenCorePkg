@@ -3951,6 +3951,16 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \emph{Note}: This option only applies to \texttt{System} renderer.
 
 \item
+  \texttt{DirectGopRendering}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Use builtin graphics output protocol renderer for console.
+
+  On some firmwares this may provide better performance or even fix rendering issues,
+  but in general it is recommended not to use this option unless there is obvious
+  benefit.
+
+\item
   \texttt{IgnoreTextInGraphics}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

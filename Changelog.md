@@ -18,6 +18,7 @@ OpenCore Changelog
 - Added `BootKicker` tool to support launching Apple BootPicker
 - Added BootPicker support as an external UI in OC through `PickerMode`
 - Added `ProvideEarlyConsole` to view console output during startup
+- Added `DirectGopRendering` option to use direct GOP output
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere

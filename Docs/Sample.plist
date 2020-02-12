@@ -806,6 +806,8 @@
 			<false/>
 			<key>ProvideConsoleGop</key>
 			<true/>
+			<key>DirectGopRendering</key>
+			<false/>
 			<key>ProvideEarlyConsole</key>
 			<true/>
 			<key>ReconnectOnResChange</key>

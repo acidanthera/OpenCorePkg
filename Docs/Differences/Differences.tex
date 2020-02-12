@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Feb  6 00:43:28 2020
-%DIF ADD ../Configuration.tex        Sun Feb  9 19:48:13 2020
+%DIF ADD ../Configuration.tex        Thu Feb 13 00:46:02 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4380,6 +4380,18 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 }
 
   \emph{\DIFadd{Note}}\DIFadd{: This option only applies to }\texttt{\DIFadd{System}} \DIFadd{renderer.
+}
+
+\item
+  \texttt{\DIFadd{DirectGopRendering}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Use builtin graphics output protocol renderer for console.
+}
+
+  \DIFadd{On some firmwares this may provide better performance or even fix rendering issues,
+  but in general it is recommended not to use this option unless there is obvious
+  benefit.
 }
 
 \item

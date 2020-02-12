@@ -444,6 +444,10 @@ OcLoadUefiOutputSupport (
       ));
   }
 
+  if (Config->Uefi.Output.DirectGopRendering) {
+    OcUseDirectGop ();
+  }
+
   if (Config->Uefi.Output.ReconnectOnResChange) {
     OcReconnectConsole ();
   }
