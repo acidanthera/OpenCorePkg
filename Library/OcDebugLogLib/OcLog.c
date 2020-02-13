@@ -355,13 +355,6 @@ OcLogAddEntry  (
   return Status;
 }
 
-/**
-  Retrieve pointer to the log buffer
-
-  @param[in] This           This protocol.
-  @param[in] OcLogBuffer  Address to store the buffer pointer.
-
-**/
 EFI_STATUS
 EFIAPI
 OcLogGetLog  (
@@ -385,15 +378,6 @@ OcLogGetLog  (
   return Status;
 }
 
-/**
-  Save the current log
-
-  @param[in] This         This protocol.
-  @param[in] NonVolatile  Variable.
-  @param[in] FilePath     Filepath to save the log, optional.
-
-  @retval EFI_SUCCESS  The log was saved successfully.
-**/
 EFI_STATUS
 EFIAPI
 OcLogSaveLog (
@@ -405,13 +389,6 @@ OcLogSaveLog (
   return EFI_NOT_FOUND;
 }
 
-/**
-  Reset the internal timers
-
-  @param[in] This  This protocol.
-
-  @retval EFI_SUCCESS  The timers were reset successfully.
-**/
 EFI_STATUS
 EFIAPI
 OcLogResetTimers (
@@ -421,18 +398,6 @@ OcLogResetTimers (
   return EFI_SUCCESS;
 }
 
-/**
-  Install or update the OcLog protocol with specified options.
-
-  @param[in] Options       Logging options.
-  @param[in] DisplayDelay  Delay in microseconds after each displayed log entry.
-  @param[in] DisplayLevel  Console visible error level.
-  @param[in] HaltLevel     Error level causing CPU halt.
-  @param[in] LogPrefixPath Log path (without timestamp).
-  @param[in] LogFileSystem Log filesystem, optional.
-
-  @retval EFI_SUCCESS  The entry point is executed successfully.
-**/
 EFI_STATUS
 OcConfigureLogProtocol (
   IN OC_LOG_OPTIONS                   Options,
@@ -451,24 +416,34 @@ OcConfigureLogProtocol (
   EFI_FILE_PROTOCOL     *LogRoot;
   CHAR16                *LogPath;
 
-  LogRoot = NULL;
-  LogPath = GetLogPath (LogPrefixPath);
-
   if ((Options & (OC_LOG_FILE | OC_LOG_ENABLE)) == (OC_LOG_FILE | OC_LOG_ENABLE)) {
-    if (LogFileSystem != NULL && LogPath != NULL) {
-      Status = LogFileSystem->OpenVolume (LogFileSystem, &LogRoot);
-      if (EFI_ERROR (Status)) {
-        LogRoot = NULL;
-      }
-    }
+    LogRoot = NULL;
+    LogPath = GetLogPath (LogPrefixPath);
 
-    if (LogRoot == NULL) {
-      Status = FindWritableFileSystem (&LogRoot);
-      if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_ERROR, "OCL: There is no place to write log file to - %r\n", Status));
-        LogRoot = NULL;
+    if (LogPath != NULL) {
+      if (LogFileSystem != NULL) {
+        Status = LogFileSystem->OpenVolume (LogFileSystem, &LogRoot);
+        if (EFI_ERROR (Status)) {
+          LogRoot = NULL;
+        }
+      }
+
+      if (LogRoot == NULL) {
+        Status = FindWritableFileSystem (&LogRoot);
+        if (EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_ERROR, "OCL: There is no place to write log file to - %r\n", Status));
+          LogRoot = NULL;
+        }
+      }
+
+      if (LogRoot == NULL) {
+        FreePool (LogPath);
+        LogPath = NULL;
       }
     }
+  } else {
+    LogRoot       = NULL;
+    LogPath       = NULL;
   }
 
   //
@@ -477,10 +452,10 @@ OcConfigureLogProtocol (
 
   OcLog = NULL;
   Status  = gBS->LocateProtocol (
-                   &gOcLogProtocolGuid,
-                   NULL,
-                   (VOID **)&OcLog
-                   );
+    &gOcLogProtocolGuid,
+    NULL,
+    (VOID **) &OcLog
+    );
 
   if (!EFI_ERROR (Status)) {
     //
@@ -550,11 +525,8 @@ OcConfigureLogProtocol (
         );
     } else {
       LogRoot->Close (LogRoot);
+      FreePool (LogPath);
     }
-  }
-
-  if (EFI_ERROR (Status) && LogPath != NULL) {
-    FreePool (LogPath);
   }
 
   return Status;
