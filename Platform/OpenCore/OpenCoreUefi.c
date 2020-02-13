@@ -476,10 +476,6 @@ OcLoadUefiOutputSupport (
     Config->Uefi.Output.ReplaceTabWithSpace
     );
 
-  if (Config->Uefi.Output.ProvideEarlyConsole) {
-    OcConsoleControlSetMode (EfiConsoleControlScreenText);
-  }
-
   OcParseConsoleMode (
     OC_BLOB_GET (&Config->Uefi.Output.ConsoleMode),
     &Width,

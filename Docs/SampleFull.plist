@@ -911,8 +911,6 @@
 			<true/>
 			<key>DirectGopRendering</key>
 			<false/>
-			<key>ProvideEarlyConsole</key>
-			<true/>
 			<key>ReconnectOnResChange</key>
 			<false/>
 			<key>ReplaceTabWithSpace</key>

@@ -17,7 +17,6 @@ OpenCore Changelog
 - Replaced `RequireVault` and `RequireSignature` with `Vault`
 - Added `BootKicker` tool to support launching Apple BootPicker
 - Added BootPicker support as an external UI in OC through `PickerMode`
-- Added `ProvideEarlyConsole` to view console output during startup
 - Added `DirectGopRendering` option to use direct GOP output
 
 #### v0.5.5

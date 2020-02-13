@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Feb  6 00:43:28 2020
-%DIF ADD ../Configuration.tex        Thu Feb 13 00:46:02 2020
+%DIF ADD ../Configuration.tex        Thu Feb 13 03:27:29 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4434,21 +4434,6 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 
   \emph{\DIFadd{Note}}\DIFadd{: This option will also replace broken GOP protocol on console handle,
   which may be the case on }\texttt{\DIFadd{MacPro5,1}} \DIFadd{with newer GPUs.
-}
-
-\item
-  \texttt{\DIFadd{ProvideEarlyConsole}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Ensure switching to text mode early at startup.
-}
-
-  \DIFadd{Disabling this option may result in hiding all messages during startup.
-  Since only error messages should normally be printed during startup, this option
-  is recommended to be always enabled. The only exception for this option
-  to be disabled is when firmware or third-party drivers, e.g. }\texttt{\DIFadd{ApfsJumpStart}}
-  \DIFadd{on legacy Macs, unconditionally print to standard output and cannot be otherwise
-  controlled by the bootloader.
 }
 
 \item
