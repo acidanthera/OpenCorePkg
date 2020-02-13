@@ -673,7 +673,6 @@ OcLoadUefiSupport (
     OcUnblockUnmountedPartitions ();
   }
 
-  OcLoadUefiOutputSupport (Config);
   OcMiscUefiQuirksLoaded (Config);
 
   if (Config->Uefi.ConnectDrivers) {
@@ -690,4 +689,6 @@ OcLoadUefiSupport (
   } else {
     OcLoadDrivers (Storage, Config, NULL);
   }
+
+  OcLoadUefiOutputSupport (Config);
 }
