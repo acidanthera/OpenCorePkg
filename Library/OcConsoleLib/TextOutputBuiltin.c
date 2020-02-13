@@ -157,11 +157,12 @@ STATIC UINT32 mGraphicsEfiColors[16] = {
 };
 
 STATIC EFI_GRAPHICS_OUTPUT_PROTOCOL *mGraphicsOutput;
-STATIC UINTN mConsoleWidth;
-STATIC UINTN mConsoleHeight;
-STATIC UINTN mConsoleMaxPosX;
-STATIC UINTN mConsoleMaxPosY;
-STATIC UINT8 mFontScale;
+STATIC UINTN  mConsoleWidth;
+STATIC UINTN  mConsoleHeight;
+STATIC UINTN  mConsoleMaxPosX;
+STATIC UINTN  mConsoleMaxPosY;
+STATIC UINT32 mConsoleGopMode;
+STATIC UINT8  mFontScale;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION mBackgroundColor;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION mForegroundColor;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION *mCharacterBuffer;
@@ -353,6 +354,56 @@ RenderScroll (
 
 STATIC
 EFI_STATUS
+RenderResync (
+  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This
+  )
+{
+  EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  *Info;
+
+  Info = mGraphicsOutput->Mode->Info;
+
+  if (Info->HorizontalResolution < TGT_CHAR_WIDTH * 3
+    || Info->VerticalResolution < TGT_CHAR_HEIGHT * 3
+    || (Info->PixelFormat != PixelRedGreenBlueReserved8BitPerColor
+      && Info->PixelFormat != PixelBlueGreenRedReserved8BitPerColor)) {
+    return EFI_DEVICE_ERROR;
+  }
+
+  if (mCharacterBuffer != NULL) {
+    FreePool (mCharacterBuffer);
+  }
+
+  mCharacterBuffer = AllocatePool (TGT_CHAR_AREA * sizeof (mCharacterBuffer[0]));
+  if (mCharacterBuffer == NULL) {
+    return EFI_DEVICE_ERROR;
+  }
+
+  mConsoleGopMode          = mGraphicsOutput->Mode->Mode;
+  mConsoleWidth            = (Info->HorizontalResolution / TGT_CHAR_WIDTH)  - 2 * SCR_PADD;
+  mConsoleHeight           = (Info->VerticalResolution   / TGT_CHAR_HEIGHT) - 2 * SCR_PADD;
+  mConsoleMaxPosX          = 0;
+  mConsoleMaxPosY          = 0;
+
+  This->Mode->CursorColumn = 0;
+  This->Mode->CursorRow    = 0;
+
+  mGraphicsOutput->Blt (
+    mGraphicsOutput,
+    &mBackgroundColor.Pixel,
+    EfiBltVideoFill,
+    0,
+    0,
+    0,
+    0,
+    Info->HorizontalResolution,
+    Info->VerticalResolution,
+    0
+    );
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
 EFIAPI
 AsciiTextReset (
   IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This,
@@ -360,7 +411,6 @@ AsciiTextReset (
   )
 {
   EFI_STATUS                            Status;
-  EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  *Info;
   EFI_TPL                               OldTpl;
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
@@ -376,49 +426,16 @@ AsciiTextReset (
     return EFI_DEVICE_ERROR;
   }
 
-  Info = mGraphicsOutput->Mode->Info;
-
-  if (Info->HorizontalResolution < TGT_CHAR_WIDTH * 3
-    || Info->VerticalResolution < TGT_CHAR_HEIGHT * 3
-    || (Info->PixelFormat != PixelRedGreenBlueReserved8BitPerColor
-      && Info->PixelFormat != PixelBlueGreenRedReserved8BitPerColor)) {
-    gBS->RestoreTPL (OldTpl);
-    return EFI_DEVICE_ERROR;
-  }
-
-  if (mCharacterBuffer != NULL) {
-    FreePool (mCharacterBuffer);
-  }
-
-  mCharacterBuffer = AllocatePool (TGT_CHAR_AREA * sizeof (mCharacterBuffer[0]));
-  if (mCharacterBuffer == NULL) {
-    gBS->RestoreTPL (OldTpl);
-    return EFI_DEVICE_ERROR;
-  }
-
-  mConsoleWidth            = (Info->HorizontalResolution / TGT_CHAR_WIDTH)  - 2 * SCR_PADD;
-  mConsoleHeight           = (Info->VerticalResolution   / TGT_CHAR_HEIGHT) - 2 * SCR_PADD;
   This->Mode->MaxMode      = 1;
-  This->Mode->CursorColumn = 0;
-  This->Mode->CursorRow    = 0;
   This->Mode->Attribute    = ARRAY_SIZE (mGraphicsEfiColors) / 2 - 1;
-  mConsoleMaxPosX          = 0;
-  mConsoleMaxPosY          = 0;
   mBackgroundColor.Raw     = mGraphicsEfiColors[0];
   mForegroundColor.Raw     = mGraphicsEfiColors[ARRAY_SIZE (mGraphicsEfiColors) / 2 - 1];
 
-  mGraphicsOutput->Blt (
-    mGraphicsOutput,
-    &mBackgroundColor.Pixel,
-    EfiBltVideoFill,
-    0,
-    0,
-    0,
-    0,
-    Info->HorizontalResolution,
-    Info->VerticalResolution,
-    0
-    );
+  Status = RenderResync (This);
+  if (EFI_ERROR (Status)) {
+    gBS->RestoreTPL (OldTpl);
+    return Status;
+  }
 
   gBS->RestoreTPL (OldTpl);
   return EFI_SUCCESS;
@@ -432,8 +449,9 @@ AsciiTextOutputString (
   IN CHAR16                          *String
   )
 {
-  UINTN    Index;
-  EFI_TPL  OldTpl;
+  UINTN       Index;
+  EFI_TPL     OldTpl;
+  EFI_STATUS  Status;
 
   //
   // Do not print text in graphics mode.
@@ -443,6 +461,17 @@ AsciiTextOutputString (
   }
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+
+  //
+  // Do not print in different modes.
+  //
+  if (mConsoleGopMode != mGraphicsOutput->Mode->Mode) {
+    Status = RenderResync (This);
+    if (EFI_ERROR (Status)) {
+      gBS->RestoreTPL (OldTpl);
+      return Status;
+    }
+  }
 
   //
   // We cannot assert here and these values should not but may be trashed by the user,
@@ -540,12 +569,20 @@ AsciiTextQueryMode (
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
 
+  if (mConsoleGopMode != mGraphicsOutput->Mode->Mode) {
+    Status = RenderResync (This);
+    if (EFI_ERROR (Status)) {
+      gBS->RestoreTPL (OldTpl);
+      return Status;
+    }
+  }
+
   if (ModeNumber == 0) {
     *Columns = mConsoleWidth;
     *Rows    = mConsoleHeight;
-    Status = EFI_SUCCESS;
+    Status   = EFI_SUCCESS;
   } else {
-    Status = EFI_UNSUPPORTED;
+    Status   = EFI_UNSUPPORTED;
   }
 
   gBS->RestoreTPL (OldTpl);
@@ -561,8 +598,20 @@ AsciiTextSetMode (
   IN UINTN                           ModeNumber
   )
 {
+  EFI_STATUS  Status;
+  EFI_TPL     OldTpl;
+
   if (ModeNumber != 0) {
     return EFI_UNSUPPORTED;
+  }
+
+  if (mConsoleGopMode != mGraphicsOutput->Mode->Mode) {
+    OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+    Status = RenderResync (This);
+    gBS->RestoreTPL (OldTpl);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
   }
 
   return EFI_SUCCESS;
@@ -576,15 +625,24 @@ AsciiTextSetAttribute (
   IN UINTN                           Attribute
   )
 {
-  UINT32   FgColor;
-  UINT32   BgColor;
-  EFI_TPL  OldTpl;
+  EFI_STATUS  Status;
+  UINT32      FgColor;
+  UINT32      BgColor;
+  EFI_TPL     OldTpl;
 
   if ((Attribute & ~0x7FU) != 0) {
     return EFI_UNSUPPORTED;
   }
 
   OldTpl  = gBS->RaiseTPL (TPL_NOTIFY);
+
+  if (mConsoleGopMode != mGraphicsOutput->Mode->Mode) {
+    Status = RenderResync (This);
+    if (EFI_ERROR (Status)) {
+      gBS->RestoreTPL (OldTpl);
+      return Status;
+    }
+  }
 
   if (Attribute != (UINTN) This->Mode->Attribute) {
     FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
@@ -618,11 +676,20 @@ AsciiTextClearScreen (
   IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This
   )
 {
-  UINTN    Width;
-  UINTN    Height;
-  EFI_TPL  OldTpl;
+  EFI_STATUS  Status;
+  UINTN       Width;
+  UINTN       Height;
+  EFI_TPL     OldTpl;
 
   OldTpl  = gBS->RaiseTPL (TPL_NOTIFY);
+
+  if (mConsoleGopMode != mGraphicsOutput->Mode->Mode) {
+    Status = RenderResync (This);
+    if (EFI_ERROR (Status)) {
+      gBS->RestoreTPL (OldTpl);
+      return Status;
+    }
+  }
 
   //
   // X coordinate points to the right most coordinate of the last printed
@@ -674,6 +741,14 @@ AsciiTextSetCursorPosition (
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
 
+  if (mConsoleGopMode != mGraphicsOutput->Mode->Mode) {
+    Status = RenderResync (This);
+    if (EFI_ERROR (Status)) {
+      gBS->RestoreTPL (OldTpl);
+      return Status;
+    }
+  }
+
   if (Column < mConsoleWidth && Row < mConsoleHeight) {
     FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
     This->Mode->CursorColumn = (INT32) Column;
@@ -698,9 +773,19 @@ AsciiTextEnableCursor (
   IN BOOLEAN                         Visible
   )
 {
+  EFI_STATUS  Status;
   EFI_TPL     OldTpl;
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+
+  if (mConsoleGopMode != mGraphicsOutput->Mode->Mode) {
+    Status = RenderResync (This);
+    if (EFI_ERROR (Status)) {
+      gBS->RestoreTPL (OldTpl);
+      return Status;
+    }
+  }
+
   FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
   This->Mode->CursorVisible = Visible;
   FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
