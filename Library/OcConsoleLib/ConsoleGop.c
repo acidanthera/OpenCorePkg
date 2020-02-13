@@ -225,23 +225,40 @@ DirectGopSetMode (
   IN  UINT32                       ModeNumber
   )
 {
-  EFI_STATUS                            Status;
+  EFI_STATUS              Status;
+  EFI_TPL                 OldTpl;
+  FRAME_BUFFER_CONFIGURE  *Original;
 
-  Status = This->SetMode (This, ModeNumber);
+  if (ModeNumber == This->Mode->Mode) {
+    return EFI_SUCCESS;
+  }
+
+  OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+
+  //
+  // Protect from invalid Blt calls during SetMode
+  //
+  Original = mFramebufferContext;
+  mFramebufferContext = NULL;
+
+  Status = mOriginalGopSetMode (This, ModeNumber);
   if (EFI_ERROR (Status)) {
+    mFramebufferContext = Original;
+    gBS->RestoreTPL (OldTpl);
     return Status;
   }
 
-  if (mFramebufferContext != NULL) {
-    FreePool (mFramebufferContext);
-    mFramebufferContext = NULL;
+  if (Original != NULL) {
+    FreePool (Original);
   }
 
   mFramebufferContext = DirectGopFromTarget (This->Mode->FrameBufferBase, This->Mode->Info);
   if (mFramebufferContext == NULL) {
+    gBS->RestoreTPL (OldTpl);
     return EFI_DEVICE_ERROR;
   }
 
+  gBS->RestoreTPL (OldTpl);
   return EFI_SUCCESS;
 }
 
