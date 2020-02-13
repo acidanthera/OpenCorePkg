@@ -486,7 +486,6 @@ OC_DECLARE (OC_UEFI_INPUT)
   _(BOOLEAN                     , IgnoreTextInGraphics        ,     , FALSE  , ()) \
   _(BOOLEAN                     , ClearScreenOnModeSwitch     ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProvideConsoleGop           ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ProvideEarlyConsole         ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReplaceTabWithSpace         ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReconnectOnResChange        ,     , FALSE  , ()) \
   _(BOOLEAN                     , SanitiseClearScreen         ,     , FALSE  , ()) \

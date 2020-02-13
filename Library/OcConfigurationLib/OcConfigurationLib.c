@@ -564,7 +564,6 @@ mUefiOutputSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("DirectGopRendering",     OC_GLOBAL_CONFIG, Uefi.Output.DirectGopRendering),
   OC_SCHEMA_BOOLEAN_IN ("IgnoreTextInGraphics",   OC_GLOBAL_CONFIG, Uefi.Output.IgnoreTextInGraphics),
   OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop",      OC_GLOBAL_CONFIG, Uefi.Output.ProvideConsoleGop),
-  OC_SCHEMA_BOOLEAN_IN ("ProvideEarlyConsole",    OC_GLOBAL_CONFIG, Uefi.Output.ProvideEarlyConsole),
   OC_SCHEMA_BOOLEAN_IN ("ReconnectOnResChange",   OC_GLOBAL_CONFIG, Uefi.Output.ReconnectOnResChange),
   OC_SCHEMA_BOOLEAN_IN ("ReplaceTabWithSpace",    OC_GLOBAL_CONFIG, Uefi.Output.ReplaceTabWithSpace),
   OC_SCHEMA_STRING_IN  ("Resolution",             OC_GLOBAL_CONFIG, Uefi.Output.Resolution),
