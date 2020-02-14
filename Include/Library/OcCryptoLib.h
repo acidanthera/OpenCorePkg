@@ -166,15 +166,15 @@ typedef PACKED struct {
 
 VOID
 AesInitCtxIv (
-  AES_CONTEXT  *Context,
-  CONST UINT8  *Key,
-  CONST UINT8  *Iv
+  OUT AES_CONTEXT  *Context,
+  IN  CONST UINT8  *Key,
+  IN  CONST UINT8  *Iv
   );
 
 VOID
 AesSetCtxIv (
-  AES_CONTEXT  *Context,
-  CONST UINT8  *Iv
+  OUT AES_CONTEXT  *Context,
+  IN  CONST UINT8  *Iv
   );
 
 //
@@ -185,16 +185,16 @@ AesSetCtxIv (
 //
 VOID
 AesCbcEncryptBuffer (
-  AES_CONTEXT  *Context,
-  UINT8        *Data,
-  UINT32       Len
+  IN OUT AES_CONTEXT  *Context,
+  IN OUT UINT8        *Data,
+  IN     UINT32       Len
   );
 
 VOID
 AesCbcDecryptBuffer (
-  AES_CONTEXT  *Context,
-  UINT8        *Data,
-  UINT32       Len
+  IN OUT AES_CONTEXT  *Context,
+  IN OUT UINT8        *Data,
+  IN     UINT32       Len
   );
 
 //
@@ -206,9 +206,9 @@ AesCbcDecryptBuffer (
 //
 VOID
 AesCtrXcryptBuffer (
-  AES_CONTEXT  *Context,
-  UINT8        *Data,
-  UINT32       Len
+  IN OUT AES_CONTEXT  *Context,
+  IN OUT UINT8        *Data,
+  IN     UINT32       Len
   );
 
 /**

@@ -72,6 +72,7 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 //
 
 #define Nb 4
+
 #if CONFIG_AES_KEY_SIZE == 32
 #define Nk 8
 #define Nr 14
@@ -164,8 +165,8 @@ STATIC CONST UINT8 Rcon[11] = {
 STATIC
 VOID
 KeyExpansion (
-  UINT8        *RoundKey,
-  CONST UINT8  *Key
+  OUT UINT8        *RoundKey,
+  IN  CONST UINT8  *Key
   )
 {
   UINT32 Index, J, K;
@@ -177,8 +178,7 @@ KeyExpansion (
   //
   // The first round key is the key itself.
   //
-  for (Index = 0; Index < Nk; ++Index)
-  {
+  for (Index = 0; Index < Nk; ++Index) {
     RoundKey[(Index * 4) + 0] = Key[(Index * 4) + 0];
     RoundKey[(Index * 4) + 1] = Key[(Index * 4) + 1];
     RoundKey[(Index * 4) + 2] = Key[(Index * 4) + 2];
@@ -188,18 +188,14 @@ KeyExpansion (
   //
   // All other round keys are found from the previous round keys.
   //
-  for (Index = Nk; Index < Nb * (Nr + 1); ++Index)
-  {
-    {
-      K = (Index - 1) * 4;
-      TempA[0] = RoundKey[K + 0];
-      TempA[1] = RoundKey[K + 1];
-      TempA[2] = RoundKey[K + 2];
-      TempA[3] = RoundKey[K + 3];
-    }
+  for (Index = Nk; Index < Nb * (Nr + 1); ++Index) {
+    K = (Index - 1) * 4;
+    TempA[0] = RoundKey[K + 0];
+    TempA[1] = RoundKey[K + 1];
+    TempA[2] = RoundKey[K + 2];
+    TempA[3] = RoundKey[K + 3];
 
-    if (Index % Nk == 0)
-    {
+    if (Index % Nk == 0) {
       //
       // This function shifts the 4 bytes in a word to the left once.
       // [a0,a1,a2,a3] becomes [a1,a2,a3,a0]
@@ -208,13 +204,11 @@ KeyExpansion (
       //
       // Function RotWord()
       //
-      {
-        K = TempA[0];
-        TempA[0] = TempA[1];
-        TempA[1] = TempA[2];
-        TempA[2] = TempA[3];
-        TempA[3] = (UINT8) K;
-      }
+      K = TempA[0];
+      TempA[0] = TempA[1];
+      TempA[1] = TempA[2];
+      TempA[2] = TempA[3];
+      TempA[3] = (UINT8) K;
 
       //
       // SubWord() is a function that takes a four-byte input word and
@@ -224,28 +218,23 @@ KeyExpansion (
       //
       // Function Subword()
       //
-      {
-        TempA[0] = GetSboxValue (TempA[0]);
-        TempA[1] = GetSboxValue (TempA[1]);
-        TempA[2] = GetSboxValue (TempA[2]);
-        TempA[3] = GetSboxValue (TempA[3]);
-      }
+      TempA[0] = GetSboxValue (TempA[0]);
+      TempA[1] = GetSboxValue (TempA[1]);
+      TempA[2] = GetSboxValue (TempA[2]);
+      TempA[3] = GetSboxValue (TempA[3]);
 
       TempA[0] = TempA[0] ^ Rcon[Index / Nk];
     }
 
 #if CONFIG_AES_KEY_SIZE == 32
-    if (Index % Nk == 4)
-    {
+    if (Index % Nk == 4) {
       //
       // Function Subword()
       //
-      {
-        TempA[0] = GetSboxValue (TempA[0]);
-        TempA[1] = GetSboxValue (TempA[1]);
-        TempA[2] = GetSboxValue (TempA[2]);
-        TempA[3] = GetSboxValue (TempA[3]);
-      }
+      TempA[0] = GetSboxValue (TempA[0]);
+      TempA[1] = GetSboxValue (TempA[1]);
+      TempA[2] = GetSboxValue (TempA[2]);
+      TempA[3] = GetSboxValue (TempA[3]);
     }
 #endif
 
@@ -259,9 +248,9 @@ KeyExpansion (
 
 VOID
 AesInitCtxIv (
-  AES_CONTEXT  *Context,
-  CONST UINT8  *Key,
-  CONST UINT8  *Iv
+  OUT AES_CONTEXT  *Context,
+  IN  CONST UINT8  *Key,
+  IN  CONST UINT8  *Iv
   )
 {
   KeyExpansion (Context->RoundKey, Key);
@@ -269,9 +258,9 @@ AesInitCtxIv (
 }
 
 VOID
-AesCtxSetIv (
-  AES_CONTEXT  *Context,
-  CONST UINT8  *Iv
+AesSetCtxIv (
+  OUT AES_CONTEXT  *Context,
+  IN  CONST UINT8  *Iv
   )
 {
   CopyMem (Context->Iv, Iv, AES_BLOCK_SIZE);
@@ -284,17 +273,15 @@ AesCtxSetIv (
 STATIC
 VOID
 AddRoundKey (
-  UINT8               Round,
-  AES_INTERNAL_STATE  *State,
-  CONST UINT8         *RoundKey
+  IN     UINT8               Round,
+  IN OUT AES_INTERNAL_STATE  *State,
+  IN     CONST UINT8         *RoundKey
   )
 {
   UINT8  I, J;
 
-  for (I = 0; I < 4; ++I)
-  {
-    for (J = 0; J < 4; ++J)
-    {
+  for (I = 0; I < 4; ++I) {
+    for (J = 0; J < 4; ++J) {
       (*State)[I][J] ^= RoundKey[(Round * Nb * 4) + (I * Nb) + J];
     }
   }
@@ -307,15 +294,13 @@ AddRoundKey (
 STATIC 
 VOID
 SubBytes (
-  AES_INTERNAL_STATE  *State
+  IN OUT AES_INTERNAL_STATE  *State
   )
 {
   UINT8  I, J;
 
-  for (I = 0; I < 4; ++I)
-  {
-    for (J = 0; J < 4; ++J)
-    {
+  for (I = 0; I < 4; ++I) {
+    for (J = 0; J < 4; ++J) {
       (*State)[J][I] = GetSboxValue((*State)[J][I]);
     }
   }
@@ -329,7 +314,7 @@ SubBytes (
 STATIC 
 VOID
 ShiftRows (
-  AES_INTERNAL_STATE  *State
+  IN OUT AES_INTERNAL_STATE  *State
   )
 {
   UINT8  Temp;
@@ -367,7 +352,7 @@ ShiftRows (
 STATIC 
 UINT8
 XTime (
-  UINT8 X
+  IN UINT8 X
   )
 {
   return (UINT8) (((UINT32) X << 1u) ^ ((((UINT32) X >> 7u) & 1u) * 0x1bu));
@@ -379,13 +364,12 @@ XTime (
 STATIC 
 VOID
 MixColumns (
-  AES_INTERNAL_STATE  *State
+  IN OUT AES_INTERNAL_STATE  *State
   )
 {
   UINT8  I, Tmp, Tm, T;
 
-  for (I = 0; I < 4; ++I)
-  {
+  for (I = 0; I < 4; ++I) {
     T   = (*State)[I][0];
     Tmp = (UINT8) ((UINT32) ((*State) [I][0]) ^ (UINT32) ((*State) [I][1])
           ^ (UINT32) ((*State) [I][2]) ^ (UINT32) ((*State) [I][3]));
@@ -425,13 +409,12 @@ MixColumns (
 STATIC 
 VOID
 InvMixColumns (
-  AES_INTERNAL_STATE  *State
+  IN OUT AES_INTERNAL_STATE  *State
   )
 {
   UINT8  I, A, B, C, D;
 
-  for (I = 0; I < 4; ++I)
-  {
+  for (I = 0; I < 4; ++I) {
     A = (*State) [I][0];
     B = (*State) [I][1];
     C = (*State) [I][2];
@@ -455,15 +438,13 @@ InvMixColumns (
 STATIC
 VOID
 InvSubBytes (
-  AES_INTERNAL_STATE  *State
+  IN OUT AES_INTERNAL_STATE  *State
   )
 {
   UINT8  I, J;
 
-  for (I = 0; I < 4; ++I)
-  {
-    for (J = 0; J < 4; ++J)
-    {
+  for (I = 0; I < 4; ++I) {
+    for (J = 0; J < 4; ++J) {
       (*State)[J][I] = GetSBoxInvert ((*State)[J][I]);
     }
   }
@@ -472,7 +453,7 @@ InvSubBytes (
 STATIC
 VOID
 InvShiftRows (
-  AES_INTERNAL_STATE  *State
+  IN OUT AES_INTERNAL_STATE  *State
   )
 {
   UINT8  Temp;
@@ -513,8 +494,8 @@ InvShiftRows (
 STATIC
 VOID
 Cipher (
-  AES_INTERNAL_STATE  *State,
-  UINT8               *RoundKey
+  IN OUT AES_INTERNAL_STATE  *State,
+  IN     CONST UINT8         *RoundKey
   )
 {
   UINT8  Round;
@@ -529,8 +510,7 @@ Cipher (
   // The first Nr-1 rounds are identical.
   // These Nr-1 rounds are executed in the loop below.
   //
-  for (Round = 1; Round < Nr; ++Round)
-  {
+  for (Round = 1; Round < Nr; ++Round) {
     SubBytes (State);
     ShiftRows (State);
     MixColumns (State);
@@ -549,8 +529,8 @@ Cipher (
 STATIC
 VOID
 InvCipher (
-  AES_INTERNAL_STATE  *State,
-  UINT8               *RoundKey
+  IN OUT AES_INTERNAL_STATE  *State,
+  IN     CONST UINT8         *RoundKey
   )
 {
   UINT8  Round;
@@ -565,8 +545,7 @@ InvCipher (
   // The first Nr-1 rounds are identical.
   // These Nr-1 rounds are executed in the loop below.
   //
-  for (Round = (Nr - 1); Round > 0; --Round)
-  {
+  for (Round = (Nr - 1); Round > 0; --Round) {
     InvShiftRows (State);
     InvSubBytes (State);
     AddRoundKey (Round, State, RoundKey);
@@ -585,8 +564,8 @@ InvCipher (
 STATIC
 VOID
 XorWithIv (
-  UINT8       *Buf,
-  CONST UINT8 *Iv
+  IN OUT UINT8       *Buf,
+  IN     CONST UINT8 *Iv
   )
 {
   UINT8  I;
@@ -594,8 +573,7 @@ XorWithIv (
   //
   // The block in AES is always 128bit no matter the key size
   //
-  for (I = 0; I < AES_BLOCK_SIZE; ++I)
-  {
+  for (I = 0; I < AES_BLOCK_SIZE; ++I) {
     Buf[I] ^= Iv[I];
   }
 }
@@ -606,16 +584,17 @@ XorWithIv (
 
 VOID
 AesCbcEncryptBuffer (
-  AES_CONTEXT  *Context,
-  UINT8        *Data,
-  UINT32       Len
+  IN OUT AES_CONTEXT  *Context,
+  IN OUT UINT8        *Data,
+  IN     UINT32       Len
   )
 {
   UINT32  I;
-  UINT8   *Iv = Context->Iv;
+  UINT8   *Iv;
 
-  for (I = 0; I < Len; I += AES_BLOCK_SIZE)
-  {
+  Iv = Context->Iv;
+
+  for (I = 0; I < Len; I += AES_BLOCK_SIZE) {
     XorWithIv (Data, Iv);
     Cipher ((AES_INTERNAL_STATE *) Data, Context->RoundKey);
     Iv = Data;
@@ -630,23 +609,21 @@ AesCbcEncryptBuffer (
 
 VOID
 AesCbcDecryptBuffer (
-  AES_CONTEXT  *Context,
-  UINT8        *Data,
-  UINT32       Len
+  IN OUT AES_CONTEXT  *Context,
+  IN OUT UINT8        *Data,
+  IN     UINT32       Len
   )
 {
   UINT32  I;
   UINT8   StoreNextIv[AES_BLOCK_SIZE];
 
-  for (I = 0; I < Len; I += AES_BLOCK_SIZE)
-  {
+  for (I = 0; I < Len; I += AES_BLOCK_SIZE) {
     CopyMem (StoreNextIv, Data, AES_BLOCK_SIZE);
     InvCipher ((AES_INTERNAL_STATE *) Data, Context->RoundKey);
     XorWithIv (Data, Context->Iv);
     CopyMem (Context->Iv, StoreNextIv, AES_BLOCK_SIZE);
     Data += AES_BLOCK_SIZE;
   }
-
 }
 
 //
@@ -655,36 +632,31 @@ AesCbcDecryptBuffer (
 //
 VOID
 AesCtrXcryptBuffer (
-  AES_CONTEXT  *Context,
-  UINT8        *Data,
-  UINT32       Len
+  IN OUT AES_CONTEXT  *Context,
+  IN OUT UINT8        *Data,
+  IN     UINT32       Len
   )
 {
   UINT8  Buffer[AES_BLOCK_SIZE];
   UINT32 I;
   INT32  Bi;
 
-  for (I = 0, Bi = AES_BLOCK_SIZE; I < Len; ++I, ++Bi)
-  {
+  for (I = 0, Bi = AES_BLOCK_SIZE; I < Len; ++I, ++Bi) {
     //
     // We need to regen xor compliment in buffer
     //
-    if (Bi == AES_BLOCK_SIZE)
-    {
-
+    if (Bi == AES_BLOCK_SIZE) {
       CopyMem (Buffer, Context->Iv, AES_BLOCK_SIZE);
       Cipher ((AES_INTERNAL_STATE *) Buffer, Context->RoundKey);
 
       //
       // Increment Iv and handle overflow
       //
-      for (Bi = (AES_BLOCK_SIZE - 1); Bi >= 0; --Bi)
-      {
+      for (Bi = (AES_BLOCK_SIZE - 1); Bi >= 0; --Bi) {
         //
         // Inc will owerflow
         //
-        if (Context->Iv[Bi] == 255)
-        {
+        if (Context->Iv[Bi] == 255) {
           Context->Iv[Bi] = 0;
           continue;
         }
