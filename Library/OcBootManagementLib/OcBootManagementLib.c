@@ -506,6 +506,7 @@ OcRunAppleBootPicker (
   EFI_STATUS                           Status;
   EFI_HANDLE                           NewHandle;
   EFI_DEVICE_PATH_PROTOCOL             *Dp;
+  APPLE_PICKER_ENTRY_REASON            PickerEntryReason;
 
   DEBUG ((DEBUG_INFO, "OCB: OcRunAppleBootPicker attempting to find...\n"));
 
@@ -529,7 +530,16 @@ OcRunAppleBootPicker (
   }
 
   if (!EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCB: OcRunAppleBootPicker attempting to start...\n"));
+    PickerEntryReason = ApplePickerEntryReasonUnknown;
+    Status = gRT->SetVariable (
+      APPLE_PICKER_ENTRY_REASON_VARIABLE_NAME,
+      &gAppleVendorVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS,
+      sizeof (PickerEntryReason),
+      &PickerEntryReason
+      );
+
+    DEBUG ((DEBUG_INFO, "OCB: OcRunAppleBootPicker attempting to start with var %r...\n", Status));
     Status = gBS->StartImage (
       NewHandle,
       NULL,
