@@ -339,7 +339,6 @@ OcSetConsoleMode (
 VOID
 OcSetupConsole (
   IN OC_CONSOLE_RENDERER          Renderer,
-  IN UINT32                       Resolution,
   IN BOOLEAN                      IgnoreTextOutput,
   IN BOOLEAN                      SanitiseClearScreen,
   IN BOOLEAN                      ClearScreenOnModeSwitch,
@@ -347,7 +346,7 @@ OcSetupConsole (
   )
 {
   if (Renderer == OcConsoleRendererBuiltinGraphics) {
-    OcUseBuiltinTextOutput (Resolution);
+    OcUseBuiltinTextOutput ();
   } else {
     OcUseSystemTextOutput (
       Renderer,

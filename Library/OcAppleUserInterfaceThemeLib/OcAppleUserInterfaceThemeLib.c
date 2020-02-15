@@ -13,13 +13,15 @@ THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include <Guid/AppleVariable.h>
 #include <Library/DebugLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/OcAppleUserInterfaceThemeLib.h>
 #include <Protocol/UserInterfaceTheme.h>
 
-STATIC UINT32 mCurrentColor = 0;
+STATIC UINT32 mCurrentColor;
 
 STATIC
 EFI_STATUS
@@ -41,24 +43,16 @@ STATIC EFI_USER_INTERFACE_THEME_PROTOCOL mAppleUserInterfaceThemeProtocol = {
   UserInterfaceThemeGetColor
 };
 
-/**
-  Install and initialise the Apple Image Conversion protocol.
-
-  @param[in] Reinstall  Replace any installed protocol.
-
-  @returns Installed or located protocol.
-  @retval NULL  There was an error locating or installing the protocol.
-**/
 EFI_USER_INTERFACE_THEME_PROTOCOL *
 OcAppleUserInterfaceThemeInstallProtocol (
   IN BOOLEAN  Reinstall
   )
 {
   EFI_STATUS                         Status;
-  UINT32                             Color           = 0;
-  UINTN                              DataSize        = 0;
-  EFI_USER_INTERFACE_THEME_PROTOCOL  *EfiUiInterface = NULL;
-  EFI_HANDLE                         NewHandle       = NULL;
+  UINT32                             Color;
+  UINTN                              DataSize;
+  EFI_USER_INTERFACE_THEME_PROTOCOL  *EfiUiInterface;
+  EFI_HANDLE                         NewHandle;
 
   if (Reinstall) {
     Status = UninstallAllProtocolInstances (&gEfiUserInterfaceThemeProtocolGuid);
@@ -68,10 +62,10 @@ OcAppleUserInterfaceThemeInstallProtocol (
     }
   } else {
     Status = gBS->LocateProtocol (
-                    &gEfiUserInterfaceThemeProtocolGuid,
-                    NULL,
-                    (VOID **)&EfiUiInterface
-                    );
+      &gEfiUserInterfaceThemeProtocolGuid,
+      NULL,
+      (VOID **) &EfiUiInterface
+      );
     if (!EFI_ERROR (Status)) {
       return EfiUiInterface;
     }
@@ -80,26 +74,27 @@ OcAppleUserInterfaceThemeInstallProtocol (
   //
   // Default color is black
   //
-  mCurrentColor = 0x000000;
+  mCurrentColor = APPLE_COLOR_SYRAH_BLACK;
 
   DataSize = sizeof (Color);
   Status = gRT->GetVariable (
-                  L"DefaultBackgroundColor",
-                  &gAppleVendorVariableGuid,
-                  0,
-                  &DataSize,
-                  &Color
-                  );
+    APPLE_DEFAULT_BACKGROUND_COLOR_VARIABLE_NAME,
+    &gAppleVendorVariableGuid,
+    0,
+    &DataSize,
+    &Color
+    );
   if (!EFI_ERROR (Status)) {
     mCurrentColor = Color;
   }
 
+  NewHandle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
-                  &NewHandle,
-                  &gEfiUserInterfaceThemeProtocolGuid,
-                  &mAppleUserInterfaceThemeProtocol,
-                  NULL
-                  );
+    &NewHandle,
+    &gEfiUserInterfaceThemeProtocolGuid,
+    &mAppleUserInterfaceThemeProtocol,
+    NULL
+    );
   if (EFI_ERROR (Status)) {
     return NULL;
   }

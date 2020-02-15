@@ -31,7 +31,6 @@ typedef enum {
   Configure console control protocol with given options.
 
   @param[in] Renderer                 Renderer to use.
-  @param[in] Resolution               Renderer resolution in percents.
   @param[in] IgnoreTextOutput         Skip console output in text mode.
   @param[in] SanitiseClearScreen      Workaround ClearScreen breaking resolution.
   @param[in] ClearScreenOnModeSwitch  Clear graphic screen when switching to text mode.
@@ -40,7 +39,6 @@ typedef enum {
 VOID
 OcSetupConsole (
   IN OC_CONSOLE_RENDERER   Renderer,
-  IN UINT32                Resolution,
   IN BOOLEAN               IgnoreTextOutput,
   IN BOOLEAN               SanitiseClearScreen,
   IN BOOLEAN               ClearScreenOnModeSwitch,

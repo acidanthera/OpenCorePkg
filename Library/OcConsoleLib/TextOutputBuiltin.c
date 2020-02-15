@@ -902,17 +902,23 @@ ConsoleControlInstall (
 
 VOID
 OcUseBuiltinTextOutput (
-  IN UINT32  Resolution
+  VOID
   )
 {
   EFI_STATUS  Status;
+  UINTN       UiScaleSize;
 
-  //
-  // TODO: Support more scales.
-  //
-  if (Resolution == 200) {
-    mFontScale = 2;
-  } else {
+  UiScaleSize = sizeof (mFontScale);
+
+  Status = gRT->GetVariable (
+    APPLE_UI_SCALE_VARIABLE_NAME,
+    &gAppleVendorVariableGuid,
+    NULL,
+    &UiScaleSize,
+    (VOID *) &mFontScale
+    );
+
+  if (EFI_ERROR (Status) || mFontScale != 2) {
     mFontScale = 1;
   }
 

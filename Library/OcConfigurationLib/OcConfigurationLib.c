@@ -568,7 +568,6 @@ mUefiOutputSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("ReplaceTabWithSpace",    OC_GLOBAL_CONFIG, Uefi.Output.ReplaceTabWithSpace),
   OC_SCHEMA_STRING_IN  ("Resolution",             OC_GLOBAL_CONFIG, Uefi.Output.Resolution),
   OC_SCHEMA_BOOLEAN_IN ("SanitiseClearScreen",    OC_GLOBAL_CONFIG, Uefi.Output.SanitiseClearScreen),
-  OC_SCHEMA_INTEGER_IN ("Scale",                  OC_GLOBAL_CONFIG, Uefi.Output.Scale),
   OC_SCHEMA_STRING_IN  ("TextRenderer",           OC_GLOBAL_CONFIG, Uefi.Output.TextRenderer),
 };
 

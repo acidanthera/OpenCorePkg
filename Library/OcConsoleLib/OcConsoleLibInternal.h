@@ -50,7 +50,7 @@ OcConsoleControlInstallProtocol (
 
 VOID
 OcUseBuiltinTextOutput (
-  IN UINT32  Resolution
+  VOID
   );
 
 VOID
