@@ -87,14 +87,4 @@ EncodePng (
   OUT UINTN   *BufferSize
   );
 
-/**
-  Frees image buffer
-
-  @param  Buffer                 Buffer with desired png image
-**/
-VOID
-FreePng (
-  IN  VOID      *Buffer
-  );
-
 #endif

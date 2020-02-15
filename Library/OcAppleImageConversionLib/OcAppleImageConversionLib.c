@@ -23,7 +23,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcPngLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-STATIC CONST UINT8 mPngHeader[] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+STATIC
+CONST UINT8
+mPngHeader[] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
 
 STATIC
 EFI_STATUS
@@ -33,17 +35,13 @@ RecognizeImageData (
   IN UINTN  ImageSize
   )
 {
-  BOOLEAN     IsValidPngImage;
-  EFI_STATUS  Status = EFI_INVALID_PARAMETER;
-
-  if (ImageBuffer != NULL && ImageSize >= sizeof (mPngHeader)) {
-    IsValidPngImage = CompareMem (ImageBuffer, mPngHeader, sizeof (mPngHeader)) == 0;
-    if (IsValidPngImage) {
-      Status = EFI_SUCCESS;
-    }
+  if (ImageBuffer == NULL
+    || ImageSize < sizeof (mPngHeader)
+    || CompareMem (ImageBuffer, mPngHeader, sizeof (mPngHeader)) != 0) {
+    return EFI_INVALID_PARAMETER;
   }
 
-  return Status;
+  return EFI_SUCCESS;
 }
 
 STATIC
@@ -77,57 +75,48 @@ DecodeImageData (
   OUT UINTN          *RawImageDataSize
   )
 {
-  UINT32          X;
-  UINT32          Y;
-  VOID            *Data;
+  EFI_STATUS      Status;
+  UINTN           Index;
+  UINTN           PixelCount;
+  EFI_UGA_PIXEL   *PixelWalker;
   UINT32          Width;
   UINT32          Height;
-  UINT8           *DataWalker;
-  EFI_UGA_PIXEL   *Pixel;
-  EFI_STATUS      Status;
+  UINT8           TmpChannel;
 
-  if (!RawImageData || !RawImageDataSize) {
+  STATIC_ASSERT (sizeof (EFI_UGA_PIXEL) == sizeof (UINT32), "Unsupported pixel size");
+  STATIC_ASSERT (OFFSET_OF (EFI_UGA_PIXEL, Blue)     == 0,  "Unsupported pixel format");
+  STATIC_ASSERT (OFFSET_OF (EFI_UGA_PIXEL, Green)    == 1,  "Unsupported pixel format");
+  STATIC_ASSERT (OFFSET_OF (EFI_UGA_PIXEL, Red)      == 2,  "Unsupported pixel format");
+  STATIC_ASSERT (OFFSET_OF (EFI_UGA_PIXEL, Reserved) == 3,  "Unsupported pixel format");
+
+  if (RawImageData == NULL || RawImageDataSize == NULL) {
     return EFI_INVALID_PARAMETER;
   }
 
   Status = DecodePng (
-            ImageBuffer,
-            ImageSize,
-            &Data,
-            &Width,
-            &Height,
-            NULL
-            );
+    ImageBuffer,
+    ImageSize,
+    (VOID **) RawImageData,
+    &Width,
+    &Height,
+    NULL
+    );
 
   if (EFI_ERROR (Status)) {
     return EFI_UNSUPPORTED;
   }
 
-  if (OcOverflowTriMulUN (Width, Height, sizeof(EFI_UGA_PIXEL), RawImageDataSize)) {
-    FreePng (Data);
-    return EFI_UNSUPPORTED;
+  PixelCount  = (UINTN) Width * Height;
+  PixelWalker = *RawImageData;
+
+  for (Index = 0; Index < PixelCount; ++Index) {
+    TmpChannel            = PixelWalker->Blue;
+    PixelWalker->Blue     = PixelWalker->Red;
+    PixelWalker->Red      = TmpChannel;
+    PixelWalker->Reserved = 0xFF - PixelWalker->Reserved;
+    ++PixelWalker;
   }
-
-  *RawImageData = (EFI_UGA_PIXEL *) AllocatePool (*RawImageDataSize);
-
-  if (*RawImageData == NULL) {
-    FreePng (Data);
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  DataWalker = (UINT8 *) Data;
-  Pixel      = *RawImageData;
-  for (Y = 0; Y < Height; Y++) {
-    for (X = 0; X < Width; X++) {
-      Pixel->Red = *DataWalker++;
-      Pixel->Green = *DataWalker++;
-      Pixel->Blue = *DataWalker++;
-      Pixel->Reserved = 0xFF - *DataWalker++;
-      Pixel++;
-    }
-  }
-
-  FreePng (Data);
+  
   return EFI_SUCCESS;
 }
 
@@ -142,15 +131,19 @@ GetImageDimsVersion (
   OUT UINT32  *Height
   )
 {
-  EFI_STATUS  Status = EFI_INVALID_PARAMETER;
-  if (Buffer && BufferSize && Version && Height && Width) {
-    Status = EFI_UNSUPPORTED;
-    if (Version <= APPLE_IMAGE_CONVERSION_PROTOCOL_INTERFACE_V1) {
-      Status = GetImageDims (Buffer, BufferSize, Width, Height);
-    }
+  if (Buffer == NULL
+    || BufferSize == 0
+    || Version == 0
+    || Width == NULL
+    || Height == NULL) {
+    return EFI_INVALID_PARAMETER;
   }
 
-  return Status;
+  if (Version > APPLE_IMAGE_CONVERSION_PROTOCOL_INTERFACE_V1) {
+    return EFI_UNSUPPORTED;
+  }
+
+  return GetImageDims (Buffer, BufferSize, Width, Height);
 }
 
 STATIC
@@ -164,15 +157,19 @@ DecodeImageDataVersion (
   OUT UINTN          *RawImageDataSize
   )
 {
-  EFI_STATUS  Status = EFI_INVALID_PARAMETER;
-  if (Buffer && BufferSize && Version && RawImageData && RawImageDataSize) {
-    Status = EFI_UNSUPPORTED;
-    if (Version <= APPLE_IMAGE_CONVERSION_PROTOCOL_INTERFACE_V1) {
-      Status = DecodeImageData (Buffer, BufferSize, RawImageData, RawImageDataSize);
-    }
+  if (Buffer == NULL
+    || BufferSize == 0
+    || Version == 0
+    || RawImageData == NULL
+    || RawImageDataSize == NULL) {
+    return EFI_INVALID_PARAMETER;
   }
 
-  return Status;
+  if (Version > APPLE_IMAGE_CONVERSION_PROTOCOL_INTERFACE_V1) {
+    return EFI_UNSUPPORTED;
+  }
+
+  return DecodeImageData (Buffer, BufferSize, RawImageData, RawImageDataSize);
 }
 
 //
@@ -188,22 +185,14 @@ STATIC APPLE_IMAGE_CONVERSION_PROTOCOL mAppleImageConversion = {
   DecodeImageDataVersion
 };
 
-/**
-  Install and initialise the Apple Image Conversion protocol.
-
-  @param[in] Reinstall  Replace any installed protocol.
-
-  @returns Installed or located protocol.
-  @retval NULL  There was an error locating or installing the protocol.
-**/
 APPLE_IMAGE_CONVERSION_PROTOCOL *
 OcAppleImageConversionInstallProtocol (
   IN BOOLEAN  Reinstall
   )
 {
   EFI_STATUS                       Status;
-  APPLE_IMAGE_CONVERSION_PROTOCOL  *AppleImageConversionInterface = NULL;
-  EFI_HANDLE                       NewHandle                      = NULL;
+  APPLE_IMAGE_CONVERSION_PROTOCOL  *AppleImageConversionInterface;
+  EFI_HANDLE                       NewHandle;
 
   if (Reinstall) {
     Status = UninstallAllProtocolInstances (&gAppleImageConversionProtocolGuid);
@@ -213,21 +202,23 @@ OcAppleImageConversionInstallProtocol (
     }
   } else {
     Status = gBS->LocateProtocol (
-                    &gAppleImageConversionProtocolGuid,
-                    NULL,
-                    (VOID **)&AppleImageConversionInterface
-                    );
+      &gAppleImageConversionProtocolGuid,
+      NULL,
+      (VOID **) &AppleImageConversionInterface
+      );
     if (!EFI_ERROR (Status)) {
       return AppleImageConversionInterface;
     }
   }
 
+  NewHandle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
-                  &NewHandle,
-                  &gAppleImageConversionProtocolGuid,
-                  &mAppleImageConversion,
-                  NULL
-                  );
+    &NewHandle,
+    &gAppleImageConversionProtocolGuid,
+    &mAppleImageConversion,
+    NULL
+    );
+
   if (EFI_ERROR (Status)) {
     return NULL;
   }

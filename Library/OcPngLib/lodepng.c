@@ -124,68 +124,49 @@ to something as fast. */
 // Floating point operations are used here, this must be defined to prevent linker error
 const int32_t _fltused = 0;
 
-// Internal C function implementations
-static inline void* lodepng_memcpy(void* dst, const void* src, size_t size) {
-  CopyMem (dst, (VOID *) src, size);
-  return dst;
-}
-
-static inline void* lodepng_memset(void* dst, int c, size_t n) {
-  SetMem (dst, n, (UINT8) c);
-  return dst;
-}
-
-// LODEPNG_MAX_ALLOC + sizeof(size_t) must fit into size_t.
 #define LODEPNG_MAX_ALLOC ((size_t)256*1024*1024)
-STATIC_ASSERT(sizeof(size_t) >= 4, "Unsupported size_t");
 
 void* lodepng_malloc(size_t size) {
   if (size > LODEPNG_MAX_ALLOC) {
     return NULL;
   }
 
-  void* ptr;
-  EFI_STATUS Status = gBS->AllocatePool(EfiBootServicesData, size + sizeof(size_t), &ptr);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "lodepng alloc failure - %r\n", Status));
-    return NULL;
-  }
-
-  lodepng_memcpy(ptr, &size, sizeof(size_t));
-  return (uint8_t*)ptr + sizeof(size_t);
+  return AllocatePool(size);
 }
 
 void lodepng_free(void* ptr) {
-  if (ptr) {
-    EFI_STATUS Status = gBS->FreePool((uint8_t*)ptr - sizeof(size_t));
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "lodepng dealloc failure - %r\n", Status));
-    }
+  if (ptr != NULL) {
+    FreePool(ptr);
   }
 }
 
 void* lodepng_realloc(void* ptr, size_t new_size) {
-  if (!ptr) {
-    // NULL pointer means just do malloc
-    return lodepng_malloc(new_size);
-  } else if (new_size == 0) {
-    // Non-NULL pointer and zero size means just do free
-    lodepng_free(ptr);
-    return NULL;
-  }
+  ASSERT (FALSE);
+  CpuDeadLoop ();
+  return NULL;
+}
 
-  void* new_ptr = lodepng_malloc(new_size);
-  if (new_ptr != NULL) {
-    size_t old_size;
-    lodepng_memcpy(&old_size, (uint8_t *)ptr - sizeof(size_t), sizeof(size_t));
-    lodepng_memcpy(new_ptr, ptr, new_size > old_size ? old_size : new_size);
-    lodepng_free(ptr);
-  }
+static void* lodepng_reallocate(void* ptr, size_t old_size, size_t new_size) {
+  (void)old_size;
+  return ReallocatePool (old_size, new_size, ptr);
+}
 
-  return new_ptr;
+static void lodepng_memcpy(void* LODEPNG_RESTRICT dst,
+                           const void* LODEPNG_RESTRICT src, size_t size) {
+  CopyMem (dst, (VOID *) src, size);
+}
+
+static void lodepng_memset(void* LODEPNG_RESTRICT dst,
+                           int value, size_t num) {
+  SetMem (dst, num, (UINT8) value);
 }
 
 #else
+
+static void* lodepng_reallocate(void* ptr, size_t old_size, size_t new_size) {
+  (void)old_size;
+  return lodepng_realloc(ptr, new_size);
+}
 
 static void lodepng_memcpy(void* LODEPNG_RESTRICT dst,
                            const void* LODEPNG_RESTRICT src, size_t size) {
@@ -304,7 +285,7 @@ static unsigned uivector_resize(uivector* p, size_t size) {
   size_t allocsize = size * sizeof(unsigned);
   if(allocsize > p->allocsize) {
     size_t newsize = (allocsize > p->allocsize * 2u) ? allocsize : ((allocsize * 3u) >> 1u);
-    void* data = lodepng_realloc(p->data, newsize);
+    void* data = lodepng_reallocate(p->data, p->allocsize, newsize);
     if(data) {
       p->allocsize = newsize;
       p->data = (unsigned*)data;
@@ -342,7 +323,7 @@ typedef struct ucvector {
 static unsigned ucvector_resize(ucvector* p, size_t size) {
   if(size > p->allocsize) {
     size_t newsize = (size > p->allocsize * 2u) ? size : ((size * 3u) >> 1u);
-    void* data = lodepng_realloc(p->data, newsize);
+    void* data = lodepng_reallocate(p->data, p->allocsize, newsize);
     if(data) {
       p->allocsize = newsize;
       p->data = (unsigned char*)data;
@@ -2624,7 +2605,7 @@ unsigned lodepng_chunk_append(unsigned char** out, size_t* outlength, const unsi
   if(lodepng_addofl(lodepng_chunk_length(chunk), 12, &total_chunk_length)) return 77;
   if(lodepng_addofl(*outlength, total_chunk_length, &new_length)) return 77;
 
-  new_buffer = (unsigned char*)lodepng_realloc(*out, new_length);
+  new_buffer = (unsigned char*)lodepng_reallocate(*out, *outlength, new_length);
   if(!new_buffer) return 83; /*alloc fail*/
   (*out) = new_buffer;
   (*outlength) = new_length;
@@ -2642,7 +2623,7 @@ unsigned lodepng_chunk_create(unsigned char** out, size_t* outlength, unsigned l
   size_t new_length = *outlength;
   if(lodepng_addofl(new_length, length, &new_length)) return 77;
   if(lodepng_addofl(new_length, 12, &new_length)) return 77;
-  new_buffer = (unsigned char*)lodepng_realloc(*out, new_length);
+  new_buffer = (unsigned char*)lodepng_reallocate(*out, *outlength, new_length);
   if(!new_buffer) return 83; /*alloc fail*/
   (*out) = new_buffer;
   (*outlength) = new_length;
@@ -2945,8 +2926,8 @@ void lodepng_clear_text(LodePNGInfo* info) {
 }
 
 unsigned lodepng_add_text(LodePNGInfo* info, const char* key, const char* str) {
-  char** new_keys = (char**)(lodepng_realloc(info->text_keys, sizeof(char*) * (info->text_num + 1)));
-  char** new_strings = (char**)(lodepng_realloc(info->text_strings, sizeof(char*) * (info->text_num + 1)));
+  char** new_keys = (char**)(lodepng_reallocate(info->text_keys, sizeof(char*) * info->text_num, sizeof(char*) * (info->text_num + 1)));
+  char** new_strings = (char**)(lodepng_reallocate(info->text_strings, sizeof(char*) * info->text_num, sizeof(char*) * (info->text_num + 1)));
 
   if(new_keys) info->text_keys = new_keys;
   if(new_strings) info->text_strings = new_strings;
@@ -3005,10 +2986,10 @@ void lodepng_clear_itext(LodePNGInfo* info) {
 
 unsigned lodepng_add_itext(LodePNGInfo* info, const char* key, const char* langtag,
                            const char* transkey, const char* str) {
-  char** new_keys = (char**)(lodepng_realloc(info->itext_keys, sizeof(char*) * (info->itext_num + 1)));
-  char** new_langtags = (char**)(lodepng_realloc(info->itext_langtags, sizeof(char*) * (info->itext_num + 1)));
-  char** new_transkeys = (char**)(lodepng_realloc(info->itext_transkeys, sizeof(char*) * (info->itext_num + 1)));
-  char** new_strings = (char**)(lodepng_realloc(info->itext_strings, sizeof(char*) * (info->itext_num + 1)));
+  char** new_keys = (char**)(lodepng_reallocate(info->itext_keys, sizeof(char*) * info->itext_num, sizeof(char*) * (info->itext_num + 1)));
+  char** new_langtags = (char**)(lodepng_reallocate(info->itext_langtags, sizeof(char*) * info->itext_num, sizeof(char*) * (info->itext_num + 1)));
+  char** new_transkeys = (char**)(lodepng_reallocate(info->itext_transkeys, sizeof(char*) * info->itext_num, sizeof(char*) * (info->itext_num + 1)));
+  char** new_strings = (char**)(lodepng_reallocate(info->itext_strings, sizeof(char*) * info->itext_num, sizeof(char*) * (info->itext_num + 1)));
 
   if(new_keys) info->itext_keys = new_keys;
   if(new_langtags) info->itext_langtags = new_langtags;
