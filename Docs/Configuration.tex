@@ -1344,7 +1344,9 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   performing early boot identity mapping of assigned virtual addresses to physical
   memory.
 
-  \emph{Note}: The necessity of this quirk is determined by early boot failures.
+  \emph{Note}: The necessity of this quirk is determined by early boot failures. Currently
+  new firmwares with memory protection support (like OVMF) do not support this quirk due to
+  \href{https://github.com/acidanthera/bugtracker/issues/719}{acidanthera/bugtracker\#719}.
 
 \item
   \texttt{ShrinkMemoryMap}\\
@@ -2102,7 +2104,8 @@ behaviour that does not go to any other sections
   \end{itemize}
 
   \emph{Note}: This option may not work well with \texttt{System} text renderer.
-  Setting a background different from black could help testing proper GOP functioning.
+  Setting a background different from black could help testing proper GOP functioning
+  but may slightly reduce performance.
 
 \item
   \texttt{PollAppleHotKeys}\\
@@ -2843,6 +2846,12 @@ improvements:
   \break
   One-byte data defining boot.efi user interface scaling. Should be \textbf{01} for normal
   screens and \textbf{02} for HiDPI screens.
+ \item
+  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:DefaultBackgroundColor}
+  \break
+  Four-byte \texttt{RGBA} data defining boot.efi user interface background colour.
+  Standard colours include \textbf{BF BF BF 00} (Light Gray) and \textbf{00 00 00 00}
+  (Syrah Black). Other colours may be set at user's preference.
 \end{itemize}
 
 \subsection{Other Variables}\label{nvramvarsother}
@@ -3886,8 +3895,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 
   The use of \texttt{BuiltinGraphics} is generally straightforward.
   For most platforms it is necessary to enable \texttt{ProvideConsoleGop},
-  set \texttt{Resolution} to \texttt{Max}, and optionally configure
-  \texttt{Scale}.
+  set \texttt{Resolution} to \texttt{Max}.
 
   The use of \texttt{System} protocols is more complicated. In general
   the preferred setting is \texttt{SystemGraphics} or \texttt{SystemText}.
@@ -3932,8 +3940,9 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 
   On HiDPI screens \texttt{APPLE\_VENDOR\_VARIABLE\_GUID} \texttt{UIScale}
   NVRAM variable may need to be set to \texttt{02} to enable HiDPI scaling
-  in FileVault 2 UEFI password interface and boot screen logo. Refer to
-  \hyperref[nvramvarsrec]{Recommended Variables} section for more details.
+  in \texttt{Builtin} text renderer, FileVault 2 UEFI password interface,
+  and boot screen logo. Refer to \hyperref[nvramvarsrec]{Recommended Variables}
+  section for more details.
 
   \emph{Note}: This will fail when console handle has no GOP protocol. When
   the firmware does not provide it, it can be added with \texttt{ProvideConsoleGop}
@@ -4022,16 +4031,6 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
    On all known affected systems \texttt{ConsoleMode} had to be set to
    empty string for this to work.
 
-\item
-  \texttt{Scale}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{100}\\
-  \textbf{Description}: Sets text renderer HiDPI scaling in percents.
-
-  Currently only \texttt{100} and \texttt{200} values are supported.
-
-  \emph{Note}: This option only applies to \texttt{Builtin} renderer.
-
 \end{enumerate}
 
 
@@ -4111,6 +4110,9 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Description}: Forcibly wraps Firmware Volume protocols or installs new
   to support custom cursor images for File Vault 2. Should be set to \texttt{true}
   to ensure File Vault 2 compatibility on everything but VMs and legacy Macs.
+
+  \emph{Note}: Several virtual machines including VMware may have corrupted
+  cursor image in HiDPI mode and thus may also require this setting to be enabled.
 
 \item
   \texttt{HashServices}\\
