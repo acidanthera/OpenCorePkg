@@ -72,6 +72,10 @@ typedef struct {
   ///
   EFI_DEVICE_PATH_PROTOCOL         *DummyDevicePath;
   ///
+  /// Dummy file path relative to storage.
+  ///
+  EFI_DEVICE_PATH_PROTOCOL         *DummyFilePath;
+  ///
   /// Vault context.
   ///
   OC_STORAGE_VAULT                 Vault;

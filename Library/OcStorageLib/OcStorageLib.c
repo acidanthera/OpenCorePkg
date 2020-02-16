@@ -288,7 +288,8 @@ OcStorageInitFromFs (
     EFI_NATIVE_INTERFACE,
     &mDummyBootDevicePath
     );
-  Context->DummyDevicePath = (EFI_DEVICE_PATH_PROTOCOL *) &mDummyBootDeviceFilePath;
+  Context->DummyDevicePath = &mDummyBootDeviceFilePath.Vendor.Header;
+  Context->DummyFilePath   = &mDummyBootDeviceFilePath.VendorFile.Header;
 
   if (Signature != NULL) {
     FreePool (Signature);

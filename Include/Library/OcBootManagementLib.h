@@ -304,7 +304,9 @@ EFI_STATUS
   IN  OC_BOOT_ENTRY               *ChosenEntry,
   OUT VOID                        **Data,
   OUT UINT32                      *DataSize,
-  OUT EFI_DEVICE_PATH_PROTOCOL    **DevicePath OPTIONAL
+  OUT EFI_DEVICE_PATH_PROTOCOL    **DevicePath         OPTIONAL,
+  OUT EFI_HANDLE                  *ParentDeviceHandle  OPTIONAL,
+  OUT EFI_DEVICE_PATH_PROTOCOL    **ParentFilePath     OPTIONAL
   );
 
 /**

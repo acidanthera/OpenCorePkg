@@ -1099,6 +1099,8 @@ InternalLoadBootEntry (
   EFI_STATUS                 Status;
   EFI_STATUS                 OptionalStatus;
   EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
+  EFI_HANDLE                 ParentDeviceHandle;
+  EFI_DEVICE_PATH_PROTOCOL   *ParentFilePath;
   CHAR16                     *UnicodeDevicePath;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
   VOID                       *EntryData;
@@ -1146,7 +1148,9 @@ InternalLoadBootEntry (
       BootEntry,
       &EntryData,
       &EntryDataSize,
-      &DevicePath
+      &DevicePath,
+      &ParentDeviceHandle,
+      &ParentFilePath
       );
 
     if (EFI_ERROR (Status)) {
@@ -1194,10 +1198,10 @@ InternalLoadBootEntry (
 #endif
 
     OptionalStatus = gBS->HandleProtocol (
-                            *EntryHandle,
-                            &gEfiLoadedImageProtocolGuid,
-                            (VOID **) &LoadedImage
-                            );
+      *EntryHandle,
+      &gEfiLoadedImageProtocolGuid,
+      (VOID **) &LoadedImage
+      );
     if (!EFI_ERROR (OptionalStatus)) {
       DEBUG ((
         DEBUG_INFO,
@@ -1234,6 +1238,19 @@ InternalLoadBootEntry (
           LoadedImage->DeviceHandle,
           LoadedImage->FilePath
           ));
+
+        //
+        // Some fragile firmwares fail to properly set LoadedImage file source
+        // fields to our custom device path, so we fix it up here.
+        // REF: https://github.com/acidanthera/bugtracker/issues/712
+        //
+        if (LoadedImage->DeviceHandle == NULL) {
+          if (LoadedImage->FilePath != NULL) {
+            FreePool (LoadedImage->FilePath);
+          }
+          LoadedImage->DeviceHandle = ParentDeviceHandle;
+          LoadedImage->FilePath     = DuplicateDevicePath (ParentFilePath);
+        }
       }
     }
   } else {
