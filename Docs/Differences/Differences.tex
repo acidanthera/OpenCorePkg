@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sat Feb 15 19:18:47 2020
-%DIF ADD ../Configuration.tex        Sun Feb 16 02:28:53 2020
+%DIF ADD ../Configuration.tex        Sun Feb 16 05:27:28 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2340,7 +2340,29 @@ behaviour that does not go to any other sections
   \end{itemize}
 
 \item
-  \texttt{HideSelf}\\
+  \DIFaddbegin \texttt{\DIFadd{HideAuxiliary}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Hides auxiliary entries from picker menu by default.
+}
+
+  \DIFadd{An entry is considered auxiliary when at least one of the following applies:
+}
+
+  \begin{itemize}
+  \tightlist
+    \item \DIFadd{Entry is macOS recovery.
+    }\item \DIFadd{Entry is explicitly marked as }\texttt{\DIFadd{Auxiliary}}\DIFadd{.
+    }\item \DIFadd{Entry is system (e.g. }\texttt{\DIFadd{Clean NVRAM}}\DIFadd{).
+  }\end{itemize}
+
+  \DIFadd{To see all entries picker menu needs to be reloaded by pressing one of the
+  designated keys: }\texttt{\DIFadd{Escape}}\DIFadd{, }\texttt{\DIFadd{0}}\DIFadd{, }\texttt{\DIFadd{Spacebar}}\DIFadd{. Hiding
+  auxiliary entries may increase boot performance for multidisk systems.
+}
+
+\item
+  \DIFaddend \texttt{HideSelf}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Hides own boot entry from boot picker. This
@@ -2983,7 +3005,15 @@ rm vault.pub
   of the specified entry.
 
 \item
-  \texttt{Comment}\\
+  \DIFaddbegin \texttt{\DIFadd{Auxiliary}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: This entry will not be listed by default when
+  }\texttt{\DIFadd{HideAuxiliary}} \DIFadd{is set to }\texttt{\DIFadd{true}}\DIFadd{.
+}
+
+\item
+  \DIFaddend \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable

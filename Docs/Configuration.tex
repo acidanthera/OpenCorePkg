@@ -2058,6 +2058,25 @@ behaviour that does not go to any other sections
   \end{itemize}
 
 \item
+  \texttt{HideAuxiliary}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Hides auxiliary entries from picker menu by default.
+
+  An entry is considered auxiliary when at least one of the following applies:
+
+  \begin{itemize}
+  \tightlist
+    \item Entry is macOS recovery.
+    \item Entry is explicitly marked as \texttt{Auxiliary}.
+    \item Entry is system (e.g. \texttt{Clean NVRAM}).
+  \end{itemize}
+
+  To see all entries picker menu needs to be reloaded by pressing one of the
+  designated keys: \texttt{Escape}, \texttt{0}, \texttt{Spacebar}. Hiding
+  auxiliary entries may increase boot performance for multidisk systems.
+
+\item
   \texttt{HideSelf}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -2565,6 +2584,13 @@ rm vault.pub
   \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Arbitrary ASCII string used as boot arguments (load options)
   of the specified entry.
+
+\item
+  \texttt{Auxiliary}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: This entry will not be listed by default when
+  \texttt{HideAuxiliary} is set to \texttt{true}.
 
 \item
   \texttt{Comment}\\

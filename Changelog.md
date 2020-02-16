@@ -19,6 +19,7 @@ OpenCore Changelog
 - Added `DirectGopRendering` option to use direct GOP output
 - Multiple memory corruption and performance fixes for PNG support
 - Fixed `DefaultBackgroundColor` variable handling
+- Added `HideAuxiliary` and `Auxiliary` options
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere
