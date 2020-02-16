@@ -20,6 +20,7 @@ OpenCore Changelog
 - Multiple memory corruption and performance fixes for PNG support
 - Fixed `DefaultBackgroundColor` variable handling
 - Added `HideAuxiliary` and `Auxiliary` options
+- Fixed picker timeout and log timestamps for VMware
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere
