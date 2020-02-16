@@ -34,8 +34,6 @@ void ZLIB_INTERNAL zcfree (opaque, ptr)
   FreePool (ptr);
 }
 
-#ifndef OC_USE_SSH_ZLIB
-
 UINT8 *
 CompressZLIB (
   OUT UINT8        *Dst,
@@ -77,5 +75,3 @@ DecompressZLIB (
 
   return 0;
 }
-
-#endif // OC_USE_SSH_ZLIB
