@@ -31,9 +31,7 @@ freely, subject to the following restrictions:
 #include <Uefi.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/UefiBootServicesTableLib.h>
 
 #define LODEPNG_NO_COMPILE_CPP
 #define LODEPNG_NO_COMPILE_DISK
@@ -52,7 +50,6 @@ typedef INT16  int16_t;
 typedef INT8   int8_t;
 
 void* lodepng_malloc(size_t size);
-void* lodepng_realloc(void* ptr, size_t new_size);
 void lodepng_free(void* ptr);
 
 #else

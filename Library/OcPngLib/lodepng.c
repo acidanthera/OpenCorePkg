@@ -140,12 +140,6 @@ void lodepng_free(void* ptr) {
   }
 }
 
-void* lodepng_realloc(void* ptr, size_t new_size) {
-  ASSERT (FALSE);
-  CpuDeadLoop ();
-  return NULL;
-}
-
 static void* lodepng_reallocate(void* ptr, size_t old_size, size_t new_size) {
   (void)old_size;
   return ReallocatePool (old_size, new_size, ptr);
@@ -285,6 +279,7 @@ static unsigned uivector_resize(uivector* p, size_t size) {
   size_t allocsize = size * sizeof(unsigned);
   if(allocsize > p->allocsize) {
     size_t newsize = (allocsize > p->allocsize * 2u) ? allocsize : ((allocsize * 3u) >> 1u);
+    /* OC: UEFI ReallocatePool compatibility. */
     void* data = lodepng_reallocate(p->data, p->allocsize, newsize);
     if(data) {
       p->allocsize = newsize;
@@ -323,6 +318,7 @@ typedef struct ucvector {
 static unsigned ucvector_resize(ucvector* p, size_t size) {
   if(size > p->allocsize) {
     size_t newsize = (size > p->allocsize * 2u) ? size : ((size * 3u) >> 1u);
+    /* OC: UEFI ReallocatePool compatibility. */
     void* data = lodepng_reallocate(p->data, p->allocsize, newsize);
     if(data) {
       p->allocsize = newsize;
@@ -449,13 +445,13 @@ static unsigned lodepng_buffer_file(unsigned char* out, size_t size, const char*
   readsize = fread(out, 1, size, file);
   fclose(file);
 
-  if (readsize != size) return 78;
+  if(readsize != size) return 78;
   return 0;
 }
 
 unsigned lodepng_load_file(unsigned char** out, size_t* outsize, const char* filename) {
   long size = lodepng_filesize(filename);
-  if (size < 0) return 78;
+  if(size < 0) return 78;
   *outsize = (size_t)size;
 
   *out = (unsigned char*)lodepng_malloc((size_t)size);
@@ -1192,14 +1188,12 @@ static unsigned huffmanDecodeSymbol(LodePNGBitReader* reader, const HuffmanTree*
 /* / Inflator (Decompressor)                                                / */
 /* ////////////////////////////////////////////////////////////////////////// */
 
-/*get the tree of a deflated block with fixed tree, as specified in the deflate specification*/
+/*get the tree of a deflated block with fixed tree, as specified in the deflate specification
+Returns error code.*/
 static unsigned getTreeInflateFixed(HuffmanTree* tree_ll, HuffmanTree* tree_d) {
-  /* OC: fixes memory corruption. */
-  unsigned error;
-  error = generateFixedLitLenTree(tree_ll);
-  if(!error)
-    error = generateFixedDistanceTree(tree_d);
-  return error;
+  unsigned error = generateFixedLitLenTree(tree_ll);
+  if(error) return error;
+  return generateFixedDistanceTree(tree_d);
 }
 
 /*get the tree of a deflated block with dynamic tree, the tree itself is also Huffman compressed with a known tree*/
@@ -1345,7 +1339,6 @@ static unsigned inflateHuffmanBlock(ucvector* out, size_t* pos, LodePNGBitReader
   HuffmanTree_init(&tree_ll);
   HuffmanTree_init(&tree_d);
 
-  /* OC: fixes memory corruption. */
   if(btype == 1) error = getTreeInflateFixed(&tree_ll, &tree_d);
   else /*if(btype == 2)*/ error = getTreeInflateDynamic(&tree_ll, &tree_d, reader);
 
@@ -1399,7 +1392,7 @@ static unsigned inflateHuffmanBlock(ucvector* out, size_t* pos, LodePNGBitReader
       backward = start - distance;
 
       if(!ucvector_resize(out, (*pos) + length)) ERROR_BREAK(83 /*alloc fail*/);
-      if (distance < length) {
+      if(distance < length) {
         size_t forward;
         lodepng_memcpy(out->data + *pos, out->data + backward, distance);
         *pos += distance;
@@ -1530,7 +1523,7 @@ static size_t searchCodeIndex(const unsigned* array, size_t array_size, size_t v
 
   while(left <= right) {
     size_t mid = (left + right) >> 1;
-    if (array[mid] >= value) right = mid - 1;
+    if(array[mid] >= value) right = mid - 1;
     else left = mid + 1;
   }
   if(left >= array_size || array[left] > value) left--;
@@ -2110,27 +2103,29 @@ static unsigned deflateFixed(LodePNGBitWriter* writer, Hash* hash,
   HuffmanTree_init(&tree_ll);
   HuffmanTree_init(&tree_d);
 
-  generateFixedLitLenTree(&tree_ll);
-  generateFixedDistanceTree(&tree_d);
+  error = generateFixedLitLenTree(&tree_ll);
+  if(!error) error = generateFixedDistanceTree(&tree_d);
 
-  writeBits(writer, BFINAL, 1);
-  writeBits(writer, 1, 1); /*first bit of BTYPE*/
-  writeBits(writer, 0, 1); /*second bit of BTYPE*/
+  if(!error) {
+    writeBits(writer, BFINAL, 1);
+    writeBits(writer, 1, 1); /*first bit of BTYPE*/
+    writeBits(writer, 0, 1); /*second bit of BTYPE*/
 
-  if(settings->use_lz77) /*LZ77 encoded*/ {
-    uivector lz77_encoded;
-    uivector_init(&lz77_encoded);
-    error = encodeLZ77(&lz77_encoded, hash, data, datapos, dataend, settings->windowsize,
-                       settings->minmatch, settings->nicematch, settings->lazymatching);
-    if(!error) writeLZ77data(writer, &lz77_encoded, &tree_ll, &tree_d);
-    uivector_cleanup(&lz77_encoded);
-  } else /*no LZ77, but still will be Huffman compressed*/ {
-    for(i = datapos; i < dataend; ++i) {
-      writeBitsReversed(writer, tree_ll.codes[data[i]], tree_ll.lengths[data[i]]);
+    if(settings->use_lz77) /*LZ77 encoded*/ {
+      uivector lz77_encoded;
+      uivector_init(&lz77_encoded);
+      error = encodeLZ77(&lz77_encoded, hash, data, datapos, dataend, settings->windowsize,
+                         settings->minmatch, settings->nicematch, settings->lazymatching);
+      if(!error) writeLZ77data(writer, &lz77_encoded, &tree_ll, &tree_d);
+      uivector_cleanup(&lz77_encoded);
+    } else /*no LZ77, but still will be Huffman compressed*/ {
+      for(i = datapos; i < dataend; ++i) {
+        writeBitsReversed(writer, tree_ll.codes[data[i]], tree_ll.lengths[data[i]]);
+      }
     }
+    /*add END code*/
+    if(!error) writeBitsReversed(writer,tree_ll.codes[256], tree_ll.lengths[256]);
   }
-  /*add END code*/
-  if(!error) writeBitsReversed(writer,tree_ll.codes[256], tree_ll.lengths[256]);
 
   /*cleanup*/
   HuffmanTree_cleanup(&tree_ll);
@@ -2605,6 +2600,7 @@ unsigned lodepng_chunk_append(unsigned char** out, size_t* outlength, const unsi
   if(lodepng_addofl(lodepng_chunk_length(chunk), 12, &total_chunk_length)) return 77;
   if(lodepng_addofl(*outlength, total_chunk_length, &new_length)) return 77;
 
+  /* OC: UEFI ReallocatePool compatibility. */
   new_buffer = (unsigned char*)lodepng_reallocate(*out, *outlength, new_length);
   if(!new_buffer) return 83; /*alloc fail*/
   (*out) = new_buffer;
@@ -2623,6 +2619,7 @@ unsigned lodepng_chunk_create(unsigned char** out, size_t* outlength, unsigned l
   size_t new_length = *outlength;
   if(lodepng_addofl(new_length, length, &new_length)) return 77;
   if(lodepng_addofl(new_length, 12, &new_length)) return 77;
+  /* OC: UEFI ReallocatePool compatibility. */
   new_buffer = (unsigned char*)lodepng_reallocate(*out, *outlength, new_length);
   if(!new_buffer) return 83; /*alloc fail*/
   (*out) = new_buffer;
@@ -2926,6 +2923,7 @@ void lodepng_clear_text(LodePNGInfo* info) {
 }
 
 unsigned lodepng_add_text(LodePNGInfo* info, const char* key, const char* str) {
+  /* OC: UEFI ReallocatePool compatibility. */
   char** new_keys = (char**)(lodepng_reallocate(info->text_keys, sizeof(char*) * info->text_num, sizeof(char*) * (info->text_num + 1)));
   char** new_strings = (char**)(lodepng_reallocate(info->text_strings, sizeof(char*) * info->text_num, sizeof(char*) * (info->text_num + 1)));
 
@@ -2986,6 +2984,7 @@ void lodepng_clear_itext(LodePNGInfo* info) {
 
 unsigned lodepng_add_itext(LodePNGInfo* info, const char* key, const char* langtag,
                            const char* transkey, const char* str) {
+  /* OC: UEFI ReallocatePool compatibility. */
   char** new_keys = (char**)(lodepng_reallocate(info->itext_keys, sizeof(char*) * info->itext_num, sizeof(char*) * (info->itext_num + 1)));
   char** new_langtags = (char**)(lodepng_reallocate(info->itext_langtags, sizeof(char*) * info->itext_num, sizeof(char*) * (info->itext_num + 1)));
   char** new_transkeys = (char**)(lodepng_reallocate(info->itext_transkeys, sizeof(char*) * info->itext_num, sizeof(char*) * (info->itext_num + 1)));
@@ -3562,7 +3561,7 @@ unsigned lodepng_convert(unsigned char* out, const unsigned char* in,
       /*if the input was also palette with same bitdepth, then the color types are also
       equal, so copy literally. This to preserve the exact indices that were in the PNG
       even in case there are duplicate colors in the palette.*/
-      if (mode_in->colortype == LCT_PALETTE && mode_in->bitdepth == mode_out->bitdepth) {
+      if(mode_in->colortype == LCT_PALETTE && mode_in->bitdepth == mode_out->bitdepth) {
         size_t numbytes = lodepng_get_raw_size(w, h, mode_in);
         for(i = 0; i != numbytes; ++i) out[i] = in[i];
         return 0;
@@ -4730,7 +4729,7 @@ unsigned lodepng_inspect_chunk(LodePNGState* state, size_t pos,
   unsigned unhandled = 0;
   unsigned error = 0;
 
-  if (pos + 4 > insize) return 30;
+  if(pos + 4 > insize) return 30;
   chunkLength = lodepng_chunk_length(chunk);
   if(chunkLength > 2147483647) return 63;
   data = lodepng_chunk_data_const(chunk);
@@ -4926,8 +4925,7 @@ static void decodeGeneric(unsigned char** out, unsigned* w, unsigned* h,
     if(!IEND) chunk = lodepng_chunk_next_const(chunk, in + insize);
   }
 
-  if (state->info_png.color.colortype == LCT_PALETTE
-      && !state->info_png.color.palette) {
+  if(state->info_png.color.colortype == LCT_PALETTE && !state->info_png.color.palette) {
     state->error = 106; /* error: PNG file must have PLTE chunk if color type is palette */
   }
 
@@ -5596,7 +5594,6 @@ static unsigned filter(unsigned char* out, const unsigned char* in, unsigned w, 
     unsigned type = 0, bestType = 0;
     unsigned char* dummy;
     LodePNGCompressSettings zlibsettings;
-    /* OC: fixes linking issues. */
     lodepng_memcpy(&zlibsettings, &settings->zlibsettings, sizeof(LodePNGCompressSettings));
     /*use fixed tree on the attempts so that the tree is not adapted to the filtertype on purpose,
     to simulate the true case where the tree is the same for the whole image. Sometimes it gives
