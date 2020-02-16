@@ -2075,9 +2075,9 @@ behaviour that does not go to any other sections
     \item Entry is system (e.g. \texttt{Clean NVRAM}).
   \end{itemize}
 
-  To see all entries picker menu needs to be reloaded by pressing one of the
-  designated keys: \texttt{Escape}, \texttt{0}, \texttt{Spacebar}. Hiding
-  auxiliary entries may increase boot performance for multidisk systems.
+  To see all entries picker menu needs to be reloaded in extended mode by pressing
+  \texttt{Spacebar} key. Hiding auxiliary entries may increase boot performance
+  for multidisk systems.
 
 \item
   \texttt{HideSelf}\\
@@ -3998,8 +3998,8 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Description}: Use builtin graphics output protocol renderer for console.
 
   On some firmwares this may provide better performance or even fix rendering issues,
-  but in general it is recommended not to use this option unless there is obvious
-  benefit.
+  like on \texttt{MacPro5,1}. However, it is recommended not to use this option unless
+  there is an obvious benefit as it may even result in slower scrolling.
 
 \item
   \texttt{IgnoreTextInGraphics}\\
