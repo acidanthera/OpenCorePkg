@@ -388,10 +388,10 @@ InternalPrepareScanInfo (
   }
 
   Status = InternalCheckScanPolicy (
-             DevPathScanInfo->Device,
-             Context->ScanPolicy,
-             &DevPathScanInfo->IsExternal
-             );
+    DevPathScanInfo->Device,
+    Context->ScanPolicy,
+    &DevPathScanInfo->IsExternal
+    );
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,
@@ -413,13 +413,13 @@ InternalPrepareScanInfo (
       Status = SimpleFs->OpenVolume (SimpleFs, &Root);
       if (!EFI_ERROR (Status)) {
         Status = OcGetBooterFromPredefinedNameList (
-                   DevPathScanInfo->Device,
-                   Root,
-                   (CONST CHAR16 **)Context->CustomBootPaths,
-                   Context->NumCustomBootPaths,
-                   &DevPathScanInfo->BootDevicePath,
-                   NULL
-                   );
+          DevPathScanInfo->Device,
+          Root,
+          (CONST CHAR16 **)Context->CustomBootPaths,
+          Context->NumCustomBootPaths,
+          &DevPathScanInfo->BootDevicePath,
+          NULL
+          );
 
         Root->Close (Root);
       }
@@ -436,17 +436,20 @@ InternalPrepareScanInfo (
     Status = EFI_UNSUPPORTED;
   }
 
-  DevPathScanInfo->SkipRecovery = FALSE;
+  //
+  // Do not deal with recovery when hiding auxiliary.
+  //
+  DevPathScanInfo->SkipRecovery = Context->HideAuxiliary;
 
   //
   // This volume may still be a recovery volume.
   //
-  if (EFI_ERROR (Status)) {
+  if (EFI_ERROR (Status) && !DevPathScanInfo->SkipRecovery) {
     Status = InternalGetRecoveryOsBooter (
-               DevPathScanInfo->Device,
-               &DevPathScanInfo->BootDevicePath,
-               TRUE
-               );
+      DevPathScanInfo->Device,
+      &DevPathScanInfo->BootDevicePath,
+      TRUE
+      );
     if (!EFI_ERROR (Status)) {
       DevPathScanInfo->SkipRecovery = TRUE;
     }
@@ -553,6 +556,19 @@ InternalFillValidBootEntries (
       }
     }
 
+    Entries[EntryIndex].DevicePath = DevicePath;
+    Entries[EntryIndex].IsExternal = DevPathScanInfo->IsExternal;
+    InternalSetBootEntryFlags (&Entries[EntryIndex]);
+
+    //
+    // This entry can still be legacy HFS non-dmg recovery, ensure that it is not.
+    //
+    if (Context->HideAuxiliary && Entries[EntryIndex].Type == OcBootAppleRecovery) {
+      ZeroMem (&Entries[EntryIndex], sizeof (Entries[EntryIndex]));
+      FreePool (DevicePath);
+      continue;
+    }
+
     DEBUG ((
       DEBUG_BULK_INFO,
       "OCB: Adding entry %u, external - %d, skip recovery - %d\n",
@@ -562,9 +578,6 @@ InternalFillValidBootEntries (
       ));
     DebugPrintDevicePath (DEBUG_BULK_INFO, "DevicePath", DevicePath);
 
-    Entries[EntryIndex].DevicePath = DevicePath;
-    Entries[EntryIndex].IsExternal = DevPathScanInfo->IsExternal;
-    InternalSetBootEntryFlags (&Entries[EntryIndex]);
     ++EntryIndex;
 
     if (DevPathScanInfo->SkipRecovery) {

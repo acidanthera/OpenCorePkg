@@ -91,6 +91,10 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   BOOLEAN                   IsFolder;
   //
+  // Set when this entry is considered auxiliary.
+  //
+  BOOLEAN                   IsAuxiliary;
+  //
   // Should make this option default boot option.
   //
   BOOLEAN                   SetDefault;
@@ -319,6 +323,10 @@ typedef struct {
   // Entry boot arguments.
   //
   CONST CHAR8  *Arguments;
+  //
+  // Whether this entry is auxiliary.
+  //
+  BOOLEAN      Auxiliary;
 } OC_PICKER_ENTRY;
 
 /**
@@ -427,6 +435,10 @@ typedef struct {
   // Allow setting default boot option from boot menu.
   //
   BOOLEAN          AllowSetDefault;
+  //
+  // Hide and do not scan auxiliary entries.
+  //
+  BOOLEAN          HideAuxiliary;
   //
   // Additional boot arguments for Apple loaders.
   //
@@ -650,7 +662,7 @@ OcLoadPickerHotKeys (
 **/
 #define OC_INPUT_STR      "123456789ABCDEFGHIJKLMNOPQRSTUVXWZ"
 #define OC_INPUT_MAX      L_STR_LEN (OC_INPUT_STR)
-#define OC_INPUT_ABORTED  -1  ///< Esc or 0
+#define OC_INPUT_ABORTED  -1  ///< Esc, Space or 0
 #define OC_INPUT_INVALID  -2  ///< Some other key
 #define OC_INPUT_TIMEOUT  -3  ///< Timeout
 #define OC_INPUT_CONTINUE -4  ///< Continue (press enter)

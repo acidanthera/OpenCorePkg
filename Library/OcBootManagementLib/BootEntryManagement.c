@@ -206,7 +206,7 @@ OcScanForBootEntries (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  if (Context->ShowNvramReset) {
+  if (Context->ShowNvramReset && !Context->HideAuxiliary) {
     Result = OcOverflowAddUN (EntriesSize, sizeof (OC_BOOT_ENTRY), &EntriesSize);
     if (Result) {
       return EFI_OUT_OF_RESOURCES;
@@ -214,12 +214,12 @@ OcScanForBootEntries (
   }
 
   Status = gBS->LocateHandleBuffer (
-                  ByProtocol,
-                  &gEfiSimpleFileSystemProtocolGuid,
-                  NULL,
-                  &NoHandles,
-                  &Handles
-                  );
+    ByProtocol,
+    &gEfiSimpleFileSystemProtocolGuid,
+    NULL,
+    &NoHandles,
+    &Handles
+    );
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -266,11 +266,11 @@ OcScanForBootEntries (
     ASSERT (DevPathScanInfo->NumBootInstances > 0);
 
     Result = OcOverflowMulAddUN (
-               DevPathScanInfo->NumBootInstances,
-               2 * sizeof (OC_BOOT_ENTRY),
-               EntriesSize,
-               &EntriesSize
-               );
+      DevPathScanInfo->NumBootInstances,
+      2 * sizeof (OC_BOOT_ENTRY),
+      EntriesSize,
+      &EntriesSize
+      );
     if (Result) {
       FreePool (Handles);
       FreePool (DevPathScanInfos);
@@ -359,6 +359,10 @@ OcScanForBootEntries (
   }
 
   for (Index = 0; Index < Context->AllCustomEntryCount; ++Index) {
+    if (Context->CustomEntries[Index].Auxiliary && Context->HideAuxiliary) {
+      continue;
+    }
+
     Entries[EntryIndex].Name = AsciiStrCopyToUnicode (Context->CustomEntries[Index].Name, 0);
     PathName                 = AsciiStrCopyToUnicode (Context->CustomEntries[Index].Path, 0);
     if (Entries[EntryIndex].Name == NULL || PathName == NULL) {
@@ -424,11 +428,11 @@ OcScanForBootEntries (
     ++EntryIndex;
   }
 
-  if (Context->ShowNvramReset) {
+  if (Context->ShowNvramReset && !Context->HideAuxiliary) {
     Entries[EntryIndex].Name = AllocateCopyPool (
-                                 L_STR_SIZE (L"Reset NVRAM"),
-                                 L"Reset NVRAM"
-                                 );
+      L_STR_SIZE (L"Reset NVRAM"),
+      L"Reset NVRAM"
+      );
     if (Entries[EntryIndex].Name == NULL) {
       OcFreeBootEntries (Entries, EntryIndex + 1);
       return EFI_OUT_OF_RESOURCES;
