@@ -79,7 +79,9 @@ OcToolLoadEntry (
   IN  OC_BOOT_ENTRY               *ChosenEntry,
   OUT VOID                        **Data,
   OUT UINT32                      *DataSize,
-  OUT EFI_DEVICE_PATH_PROTOCOL    **DevicePath OPTIONAL
+  OUT EFI_DEVICE_PATH_PROTOCOL    **DevicePath         OPTIONAL,
+  OUT EFI_HANDLE                  *ParentDeviceHandle  OPTIONAL,
+  OUT EFI_DEVICE_PATH_PROTOCOL    **ParentFilePath     OPTIONAL
   )
 {
   CHAR16              ToolPath[64];
@@ -110,6 +112,14 @@ OcToolLoadEntry (
 
   if (DevicePath != NULL) {
     *DevicePath = Storage->DummyDevicePath;
+  }
+
+  if (ParentDeviceHandle != NULL) {
+    *ParentDeviceHandle = Storage->StorageHandle;
+  }
+
+  if (ParentFilePath != NULL) {
+    *ParentFilePath = Storage->DummyFilePath;
   }
 
   return EFI_SUCCESS;
