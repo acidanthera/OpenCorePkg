@@ -14,6 +14,7 @@
 
 #include <Uefi.h>
 
+#include <Guid/OcVariables.h>
 #include <IndustryStandard/CpuId.h>
 #include <IndustryStandard/GenericIch.h>
 #include <Protocol/PciIo.h>
@@ -24,6 +25,7 @@
 #include <Library/PciLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
 #include <ProcessorInfo.h>
 #include <Register/Msr.h>
 
@@ -126,15 +128,33 @@ InternalCalculateTSCFromPMTimer (
   //
   STATIC UINT64 TSCFrequency = 0;
 
-  UINTN    TimerAddr;
-  UINT64   Tsc0;
-  UINT64   Tsc1;
-  UINT32   AcpiTick0;
-  UINT32   AcpiTick1;
-  UINT32   AcpiTicksDelta;
-  UINT32   AcpiTicksTarget;
-  UINT32   TimerResolution;
-  EFI_TPL  PrevTpl;
+  UINTN       TimerAddr;
+  UINTN       VariableSize;
+  UINT64      Tsc0;
+  UINT64      Tsc1;
+  UINT32      AcpiTick0;
+  UINT32      AcpiTick1;
+  UINT32      AcpiTicksDelta;
+  UINT32      AcpiTicksTarget;
+  UINT32      TimerResolution;
+  EFI_TPL     PrevTpl;
+  EFI_STATUS  Status;
+
+  //
+  // Decide whether we need to store the frequency.
+  //
+  if (TSCFrequency == 0) {
+    VariableSize = sizeof (TSCFrequency);
+    Status = gRT->GetVariable (
+      OC_ACPI_CPU_FREQUENCY_VARIABLE_NAME,
+      &gOcVendorVariableGuid,
+      NULL,
+      &VariableSize,
+      &TSCFrequency
+      );
+  } else {
+    Status = EFI_ALREADY_STARTED;
+  }
 
   if (Recalculate) {
     TSCFrequency = 0;
@@ -220,6 +240,19 @@ InternalCalculateTSCFromPMTimer (
     }
 
     DEBUG ((DEBUG_VERBOSE, "TscFrequency %lld\n", TSCFrequency));
+
+    //
+    // Set the variable if not present and valid.
+    //
+    if (TSCFrequency != 0 && Status == EFI_NOT_FOUND) {
+      gRT->SetVariable (
+        OC_ACPI_CPU_FREQUENCY_VARIABLE_NAME,
+        &gOcVendorVariableGuid,
+        EFI_VARIABLE_BOOTSERVICE_ACCESS,
+        sizeof (TSCFrequency),
+        &TSCFrequency
+        );
+    }
   }
 
   return TSCFrequency;

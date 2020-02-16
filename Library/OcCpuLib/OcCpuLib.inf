@@ -36,6 +36,10 @@
 [LibraryClasses]
   BaseLib
   IoLib
+  UefiRuntimeServicesTableLib
+
+[Guids]
+  gOcVendorVariableGuid
 
 [Protocols]
   gEfiMpServiceProtocolGuid

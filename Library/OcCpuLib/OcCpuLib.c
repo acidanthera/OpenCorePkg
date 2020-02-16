@@ -374,23 +374,25 @@ ScanIntelProcessor (
     DEBUG_CODE_END ();
 
     //
-    // Calculate the Tsc frequency
-    //
-    DEBUG_CODE_BEGIN ();
-    TimerAddr = InternalGetPmTimerAddr (&TimerSourceType);
-    DEBUG ((DEBUG_INFO, "OCCPU: Timer address is %Lx from %a\n", (UINT64) TimerAddr, TimerSourceType));
-    DEBUG_CODE_END ();
-    Cpu->CPUFrequencyFromTSC = InternalCalculateTSCFromPMTimer (Recalculate);
-
-    //
     // Determine our core crystal clock frequency
     //
     Cpu->ARTFrequency = InternalCalculateARTFrequencyIntel (&Cpu->CPUFrequencyFromART, Recalculate);
 
     //
+    // Calculate the TSC frequency only if ART frequency is not available or we are in debug builds.
+    //
+    if (Cpu->CPUFrequencyFromART == 0 || Recalculate) {
+      DEBUG_CODE_BEGIN ();
+      TimerAddr = InternalGetPmTimerAddr (&TimerSourceType);
+      DEBUG ((DEBUG_INFO, "OCCPU: Timer address is %Lx from %a\n", (UINT64) TimerAddr, TimerSourceType));
+      DEBUG_CODE_END ();
+      Cpu->CPUFrequencyFromTSC = InternalCalculateTSCFromPMTimer (Recalculate);
+    }
+
+    //
     // Calculate CPU frequency based on ART if present, otherwise TSC
     //
-    Cpu->CPUFrequency = Cpu->CPUFrequencyFromART > 0 ? Cpu->CPUFrequencyFromART : Cpu->CPUFrequencyFromTSC;
+    Cpu->CPUFrequency = Cpu->CPUFrequencyFromART != 0 ? Cpu->CPUFrequencyFromART : Cpu->CPUFrequencyFromTSC;
 
     //
     // Verify that our two CPU frequency calculations do not differ substantially.
