@@ -288,10 +288,14 @@ OcWaitForAppleKeyIndex (
     // Handle reload menu.
     //
     if (OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyEscape)
-     || OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyZero)
-     || OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeySpaceBar)) {
+     || OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyZero)) {
       OcKeyMapFlush (KeyMap, 0, TRUE);
       return OC_INPUT_ABORTED;
+    }
+
+    if (OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeySpaceBar)) {
+      OcKeyMapFlush (KeyMap, 0, TRUE);
+      return OC_INPUT_MORE;
     }
 
     //

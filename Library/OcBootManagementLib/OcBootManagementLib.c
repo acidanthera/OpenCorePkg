@@ -146,6 +146,9 @@ OcShowSimpleBootMenu (
         gST->ConOut->OutputString (gST->ConOut, L"OK\r\n");
         return EFI_SUCCESS;
       } else if (KeyIndex == OC_INPUT_ABORTED) {
+        gST->ConOut->OutputString (gST->ConOut, L"Aborted\r\n");
+        return EFI_ABORTED;
+      } else if (KeyIndex == OC_INPUT_MORE) {
         gST->ConOut->OutputString (gST->ConOut, L"Reload\r\n");
         Context->HideAuxiliary = FALSE;
         return EFI_ABORTED;
