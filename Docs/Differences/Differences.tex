@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sat Feb 15 19:18:47 2020
-%DIF ADD ../Configuration.tex        Sun Feb 16 05:27:28 2020
+%DIF ADD ../Configuration.tex        Sun Feb 16 07:18:51 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -626,10 +626,14 @@ approach could be \href{https://www.sublimetext.com}{Sublime Text} with
 \href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
 Add \texttt{.clang\_complete} file with similar content to your UDK root:
 
-\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash]
+\DIFmodbegin
+\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash,alsolanguage=DIFcode]
 -I/UefiPackages/MdePkg
 -I/UefiPackages/MdePkg/Include
 -I/UefiPackages/MdePkg/Include/X64
+%DIF > -I/UefiPackages/MdeModulePkg
+%DIF > -I/UefiPackages/MdeModulePkg/Include
+%DIF > -I/UefiPackages/MdeModulePkg/Include/X64
 -I/UefiPackages/EfiPkg
 -I/UefiPackages/EfiPkg/Include
 -I/UefiPackages/EfiPkg/Include/X64
@@ -653,6 +657,7 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -Wno-unused-const-variable
 -DOC_TARGET_NOOPT=1
 \end{lstlisting}
+\DIFmodend
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
 files must ensure that their tool checks for \texttt{opencore-version} NVRAM variable
@@ -4115,7 +4120,11 @@ and supplementary utilities can be used.
   Due to the nature of being a runtime driver, i.e. functioning in parallel with the
   target operating system, it cannot be implemented within OpenCore itself, but is bundled
   with OpenCore releases.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
+  \item \DIFaddbegin \href{https://github.com/acidanthera/audk}{\texttt{HiiDatabase}}
+  \DIFadd{--- HII services support driver from }\texttt{\DIFadd{MdeModulePkg}}\DIFadd{. This driver is included in
+  most firmwares starting with Ivy Bridge generation. Some applications with the GUI
+  like UEFI Shell may need this driver to work properly.
+  }\item \DIFaddend \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
   --- FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
   UEFI firmwares, and cannot be used from OpenCore. It is known that multiple firmwares
   have a bug in their FAT support implementation, which leads to corrupted filesystems

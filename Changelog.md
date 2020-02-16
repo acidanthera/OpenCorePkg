@@ -22,6 +22,7 @@ OpenCore Changelog
 - Added `HideAuxiliary` and `Auxiliary` options
 - Fixed picker timeout and log timestamps for VMware
 - Fixed NULL parent DeviceHandle for launched tools
+- Added bundled HiiDatabase driver for very old firmwares
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere
