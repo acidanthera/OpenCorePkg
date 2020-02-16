@@ -461,10 +461,10 @@ InternalCalculateVMTFrequency (
   // We get kHZ from node and we should translate it first.
   //
   if (FSBFrequency != NULL) {
-    *FSBFrequency = CpuidEbx * 1000;
+    *FSBFrequency = CpuidEbx * 1000ULL;
   }
 
-  return CpuidEax * 1000;
+  return CpuidEax * 1000ULL;
 }
 
 UINT64

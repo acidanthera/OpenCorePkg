@@ -1123,8 +1123,10 @@ InternalLoadBootEntry (
 
   ZeroMem (DmgLoadContext, sizeof (*DmgLoadContext));
 
-  EntryData    = NULL;
-  EntryDataSize = 0;
+  EntryData          = NULL;
+  EntryDataSize      = 0;
+  ParentDeviceHandle = NULL;
+  ParentFilePath     = NULL;
 
   if (BootEntry->IsFolder) {
     if ((Context->LoadPolicy & OC_LOAD_ALLOW_DMG_BOOT) == 0) {
@@ -1244,7 +1246,7 @@ InternalLoadBootEntry (
         // fields to our custom device path, so we fix it up here.
         // REF: https://github.com/acidanthera/bugtracker/issues/712
         //
-        if (LoadedImage->DeviceHandle == NULL) {
+        if (LoadedImage->DeviceHandle == NULL && ParentDeviceHandle != NULL) {
           if (LoadedImage->FilePath != NULL) {
             FreePool (LoadedImage->FilePath);
           }

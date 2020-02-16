@@ -189,7 +189,7 @@ DirectGopFromTarget (
 
   ConfigureSize = 0;
   Status = FrameBufferBltConfigure (
-    (VOID *) FramebufferBase,
+    (VOID *)(UINTN) FramebufferBase,
     Info,
     NULL,
     &ConfigureSize
@@ -204,7 +204,7 @@ DirectGopFromTarget (
   }
 
   Status = FrameBufferBltConfigure (
-    (VOID *) FramebufferBase,
+    (VOID *)(UINTN) FramebufferBase,
     Info,
     Context,
     &ConfigureSize
