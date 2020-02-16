@@ -43,7 +43,6 @@
   OcStringLib
 
 [Sources]
-  Base64Decode.c
   DataPatcher.c
   DirectReset.c
   ReleaseUsbOwnership.c

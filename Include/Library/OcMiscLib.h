@@ -28,27 +28,6 @@
 **/
 #define SECONDS_TO_MICROSECONDS(x) ((x)*1000000)
 
-/**
-  TODO: EDK II has its implementation in BaseLib, but it is broken,
-  as it fails to update DecodedLength:
-  https://github.com/acidanthera/bugtracker/issues/372
-
-  @param[in] EncodedData        A pointer to the data to convert.
-  @param[in] EncodedLength      The length of data to convert.
-  @param[in] DecodedData        A pointer to location to store the decoded data.
-  @param[in] DecodedSize        A pointer to location to store the decoded size.
-
-  @retval  TRUE on success.
-**/
-RETURN_STATUS
-EFIAPI
-OcBase64Decode (
-  IN     CONST CHAR8  *EncodedData,
-  IN     UINTN        EncodedLength,
-     OUT UINT8        *DecodedData,
-  IN OUT UINTN        *DecodedLength
-  );
-
 INT32
 FindPattern (
   IN CONST UINT8   *Pattern,

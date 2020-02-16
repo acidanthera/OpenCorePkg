@@ -1492,7 +1492,7 @@ PlistDataValue (
   }
 
   Length = *Size;
-  Result = OcBase64Decode (Content, AsciiStrLen (Content), Buffer, &Length);
+  Result = Base64Decode (Content, AsciiStrLen (Content), Buffer, &Length);
 
   if (!RETURN_ERROR (Result) && (UINT32) Length == Length) {
     *Size = (UINT32) Length;
@@ -1576,7 +1576,7 @@ PlistMetaDataValue (
     if (Content != NULL) {
 
       Length = *Size;
-      Result = OcBase64Decode (Content, AsciiStrLen (Content), Buffer, &Length);
+      Result = Base64Decode (Content, AsciiStrLen (Content), Buffer, &Length);
 
       if (!RETURN_ERROR (Result) && (UINT32) Length == Length) {
         *Size = (UINT32) Length;
