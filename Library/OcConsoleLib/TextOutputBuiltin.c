@@ -551,6 +551,12 @@ AsciiTextTestString (
   IN CHAR16                          *String
   )
 {
+  if (StrCmp (String, OC_CONSOLE_CLEAR_AND_CLIP) == 0) {
+    This->ClearScreen (This);
+    mConsoleMaxPosX = 0;
+    mConsoleMaxPosY = 0;
+  }
+
   return EFI_SUCCESS;
 }
 

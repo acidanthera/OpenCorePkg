@@ -28,6 +28,11 @@ typedef enum {
 } OC_CONSOLE_RENDERER;
 
 /**
+  Special commands sent to Builtin text renderer through TestString.
+**/
+#define OC_CONSOLE_CLEAR_AND_CLIP  L"ClearAndClip"
+
+/**
   Configure console control protocol with given options.
 
   @param[in] Renderer                 Renderer to use.
