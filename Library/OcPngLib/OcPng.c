@@ -38,6 +38,9 @@ GetPngDims (
   // Init state
   //
   lodepng_state_init (&State);
+  State.decoder.ignore_crc                  = TRUE;
+  State.decoder.zlibsettings.ignore_adler32 = TRUE;
+  State.decoder.zlibsettings.ignore_nlen    = TRUE;
 
   //
   // Reads header and resets other parameters in state->info_png
@@ -76,8 +79,11 @@ DecodePng (
   // Init lodepng state
   //
   lodepng_state_init (&State);
-  State.info_raw.colortype = LCT_RGBA;
-  State.info_raw.bitdepth  = 8;
+  State.info_raw.colortype                  = LCT_RGBA;
+  State.info_raw.bitdepth                   = 8;
+  State.decoder.ignore_crc                  = TRUE;
+  State.decoder.zlibsettings.ignore_adler32 = TRUE;
+  State.decoder.zlibsettings.ignore_nlen    = TRUE;
 
   //
   // It should return 0 on success
