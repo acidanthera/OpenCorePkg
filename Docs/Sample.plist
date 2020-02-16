@@ -663,9 +663,9 @@
 			</dict>
 			<dict>
 				<key>Arguments</key>
+				<string></string>
 				<key>Auxiliary</key>
 				<false/>
-				<string></string>
 				<key>Comment</key>
 				<string>Memory testing utility</string>
 				<key>Enabled</key>
