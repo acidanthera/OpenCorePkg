@@ -385,7 +385,7 @@ ScanIntelProcessor (
     //
     // Determine our core crystal clock frequency
     //
-    Cpu->ARTFrequency = InternalCalcluateARTFrequencyIntel (&Cpu->CPUFrequencyFromART, Recalculate);
+    Cpu->ARTFrequency = InternalCalculateARTFrequencyIntel (&Cpu->CPUFrequencyFromART, Recalculate);
 
     //
     // Calculate CPU frequency based on ART if present, otherwise TSC
@@ -699,14 +699,6 @@ OcCpuScanProcessor (
     Cpu->Brand     = (UINT8) Cpu->CpuidVerEbx.Bits.BrandIndex;
     Cpu->Features  = LShiftU64 (Cpu->CpuidVerEcx.Uint32, 32) | Cpu->CpuidVerEdx.Uint32;
 
-    //
-    // TODO: We do not have Hypervisor support in EDK II CPUID structure yet.
-    // See https://github.com/acidanthera/audk/pull/2.
-    // Get Hypervisor/Virtualization information.
-    //
-    Cpu->Hypervisor = (BOOLEAN) (Cpu->CpuidVerEcx.Bits.NotUsed > 0);
-    DEBUG ((DEBUG_INFO, "OCCPU: Hypervisor: %d\n", Cpu->Hypervisor));
-
     if (Cpu->Features & CPUID_FEATURE_HTT) {
       Cpu->ThreadCount = (UINT16) Cpu->CpuidVerEbx.Bits.MaximumAddressableIdsForLogicalProcessors;
     }
@@ -727,47 +719,36 @@ OcCpuScanProcessor (
     Cpu->MicrocodeRevision
     ));
 
-  //
-  // If we are under virtualization and cpuid invtsc is enabled, we can just read
-  // TSCFrequency and FSBFrequency from VMWare Timing node instead of reading MSR
-  // (which hypervisors may not implemented yet), at least in QEMU/VMWare it works.
-  // Source:
-  //  1. CPUID usage for interaction between Hypervisors and Linux.: https://lwn.net/Articles/301888/
-  //  2. [Qemu-devel] [PATCH v2 0/3] x86-kvm: Fix Mac guest timekeeping by exposi: https://lists.gnu.org/archive/html/qemu-devel/2017-01/msg04344.html
-  //
-  AsmCpuid (0x40000000, &CpuidEax, NULL, NULL, NULL);
-  if (Cpu->Hypervisor && (CpuidEax >= 0x40000010)) {
-    DEBUG ((DEBUG_INFO, "OCCPU: Cpu under virtualization, try get TSC/FSB frequency from VMWare Timing\n"));
-    AsmCpuid (0x40000010, &CpuidEax, &CpuidEbx, NULL, NULL);
+  Cpu->CPUFrequencyFromVMT = InternalCalculateVMTFrequency (
+    &Cpu->FSBFrequency,
+    &Cpu->Hypervisor
+    );
 
-    if (CpuidEax & CpuidEbx) {
-      //
-      // We get kHZ from node and we should translate it first.
-      //
-      Cpu->CPUFrequencyFromVMT = CpuidEax * 1000;
-      Cpu->FSBFrequency = CpuidEbx * 1000;
+  if (Cpu->Hypervisor) {
+    DEBUG ((DEBUG_INFO, "OCCPU: Hypervisor detected\n"));
+  }
 
-      Cpu->CPUFrequency = Cpu->CPUFrequencyFromVMT;
-      //
-      // We can calculate Bus Ratio here
-      //
-      Cpu->MaxBusRatio = (UINT8)DivU64x32 (Cpu->CPUFrequency, (UINT32)Cpu->FSBFrequency);
-      //
-      // We don't have anything like turbo, so we just assign some variables here
-      //
-      Cpu->MinBusRatio = Cpu->MaxBusRatio;
-      Cpu->CurBusRatio = Cpu->MaxBusRatio;
+  if (Cpu->CPUFrequencyFromVMT > 0) {
+    Cpu->CPUFrequency = Cpu->CPUFrequencyFromVMT;
+    //
+    // We can calculate Bus Ratio here
+    //
+    Cpu->MaxBusRatio = (UINT8) DivU64x32 (Cpu->CPUFrequency, (UINT32)Cpu->FSBFrequency);
+    //
+    // We don't have anything like turbo, so we just assign some variables here
+    //
+    Cpu->MinBusRatio = Cpu->MaxBusRatio;
+    Cpu->CurBusRatio = Cpu->MaxBusRatio;
 
-      DEBUG ((
-        DEBUG_INFO,
-        "OCCPU: VMWare TSC: %11LuHz, %5LuMHz; FSB: %11LuHz, %5LuMHz; BusRatio: %d\n",
-        Cpu->CPUFrequency,
-        DivU64x32 (Cpu->CPUFrequency, 1000000),
-        Cpu->FSBFrequency,
-        DivU64x32 (Cpu->FSBFrequency, 1000000),
-        Cpu->MaxBusRatio
-        ));
-    }
+    DEBUG ((
+      DEBUG_INFO,
+      "OCCPU: VMWare TSC: %11LuHz, %5LuMHz; FSB: %11LuHz, %5LuMHz; BusRatio: %d\n",
+      Cpu->CPUFrequency,
+      DivU64x32 (Cpu->CPUFrequency, 1000000),
+      Cpu->FSBFrequency,
+      DivU64x32 (Cpu->FSBFrequency, 1000000),
+      Cpu->MaxBusRatio
+      ));
   }
 
   if (Cpu->Vendor[0] == CPUID_VENDOR_INTEL) {

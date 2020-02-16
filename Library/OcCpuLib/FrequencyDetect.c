@@ -226,7 +226,7 @@ InternalCalculateTSCFromPMTimer (
 }
 
 UINT64
-InternalCalcluateARTFrequencyIntel (
+InternalCalculateARTFrequencyIntel (
   OUT UINT64   *CPUFrequency,
   IN  BOOLEAN  Recalculate
   )
@@ -370,6 +370,71 @@ InternalCalcluateARTFrequencyIntel (
 }
 
 UINT64
+InternalCalculateVMTFrequency (
+  OUT UINT64   *FSBFrequency     OPTIONAL,
+  OUT BOOLEAN  *UnderHypervisor  OPTIONAL
+  )
+{
+  UINT32                  CpuidEax;
+  UINT32                  CpuidEbx;
+  CPUID_VERSION_INFO_ECX  CpuidVerEcx;
+
+  AsmCpuid (
+    CPUID_VERSION_INFO,
+    NULL,
+    NULL,
+    &CpuidVerEcx.Uint32,
+    NULL
+    );
+
+  if (FSBFrequency != NULL) {
+    *FSBFrequency = 0;
+  }
+
+  if (UnderHypervisor != NULL) {
+    *UnderHypervisor = CpuidVerEcx.Bits.NotUsed != 0;
+  }
+
+  //
+  // TODO: We do not have Hypervisor support in EDK II CPUID structure yet.
+  // See https://github.com/acidanthera/audk/pull/2.
+  // Get Hypervisor/Virtualization information.
+  //
+  if (CpuidVerEcx.Bits.NotUsed == 0) {
+    return 0;
+  }
+
+  //
+  // If we are under virtualization and cpuid invtsc is enabled, we can just read
+  // TSCFrequency and FSBFrequency from VMWare Timing node instead of reading MSR
+  // (which hypervisors may not implemented yet), at least in QEMU/VMWare it works.
+  // Source:
+  //  1. CPUID usage for interaction between Hypervisors and Linux.:
+  //     https://lwn.net/Articles/301888/
+  //  2. [Qemu-devel] [PATCH v2 0/3] x86-kvm: Fix Mac guest timekeeping by exposi:
+  //     https://lists.gnu.org/archive/html/qemu-devel/2017-01/msg04344.html
+  //
+  AsmCpuid (0x40000000, &CpuidEax, NULL, NULL, NULL);
+  if (CpuidEax < 0x40000010) {
+    return 0;
+  }
+
+  AsmCpuid (0x40000010, &CpuidEax, &CpuidEbx, NULL, NULL);
+  if (CpuidEax == 0 || CpuidEbx == 0) {
+    return 0;
+  }
+
+  //
+  // We get kHZ from node and we should translate it first.
+  //
+  if (FSBFrequency != NULL) {
+    *FSBFrequency = CpuidEbx * 1000;
+  }
+
+  return CpuidEax * 1000;
+}
+
+UINT64
 OcGetTSCFrequency (
   VOID
   )
@@ -381,9 +446,12 @@ OcGetTSCFrequency (
   // available (e.g. 300 series chipsets).
   // TODO: For AMD, the base clock can be determined from P-registers.
   //
-  InternalCalcluateARTFrequencyIntel (&CPUFrequency, FALSE);
+  InternalCalculateARTFrequencyIntel (&CPUFrequency, FALSE);
   if (CPUFrequency == 0) {
-    CPUFrequency = InternalCalculateTSCFromPMTimer (FALSE);
+    CPUFrequency = InternalCalculateVMTFrequency (NULL, NULL);
+    if (CPUFrequency == 0) {
+      CPUFrequency = InternalCalculateTSCFromPMTimer (FALSE);
+    }
   }
   //
   // For all known models with an invariant TSC, its frequency is equal to the

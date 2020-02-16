@@ -93,9 +93,23 @@ InternalCalculateTSCFromPMTimer (
   @retval  The calculated ART frequency.
 **/
 UINT64
-InternalCalcluateARTFrequencyIntel (
+InternalCalculateARTFrequencyIntel (
   OUT UINT64   *CPUFrequency,
   IN  BOOLEAN  Recalculate
+  );
+
+/**
+  Calculate the CPU frequency via VMT for hypervisors
+
+  @param[out] FSBFrequency     FSB frequency, optional.
+  @param[out] UnderHypervisor  Hypervisor status, optional.
+
+  @retval  CPU frequency or 0.
+**/
+UINT64
+InternalCalculateVMTFrequency (
+  OUT UINT64   *FSBFrequency     OPTIONAL,
+  OUT BOOLEAN  *UnderHypervisor  OPTIONAL
   );
 
 #endif // OC_CPU_INTERNALS_H
