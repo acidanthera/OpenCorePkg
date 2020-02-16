@@ -23,6 +23,7 @@ OpenCore Changelog
 - Fixed picker timeout and log timestamps for VMware
 - Fixed NULL parent DeviceHandle for launched tools
 - Added bundled HiiDatabase driver for very old firmwares
+- Added SSE2 support in memory intrinsics for better performance
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere
