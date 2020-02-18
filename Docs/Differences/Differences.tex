@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Feb 17 14:59:54 2020
-%DIF ADD ../Configuration.tex        Mon Feb 17 16:23:01 2020
+%DIF DEL PreviousConfiguration.tex   Wed Feb 19 00:48:53 2020
+%DIF ADD ../Configuration.tex        Wed Feb 19 00:51:48 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -5044,7 +5044,8 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \item To access Apple filesystems like HFS and APFS separate software may need to
   be installed. Some of the known tools are:
   \href{https://forums.macrumors.com/threads/apple-hfs-windows-driver-download.1368010/}{Apple HFS+ driver}
-  (\href{https://forums.macrumors.com/threads/apple-hfs-windows-driver-download.1368010/page-4#post-24180079}{hack for Windows 10}),
+  (\DIFdelbegin %DIFDELCMD < \href{https://forums.macrumors.com/threads/apple-hfs-windows-driver-download.1368010/page-4#post-24180079}{hack for Windows 10}%%%
+\DIFdelend \DIFaddbegin \href{https://forums.macrumors.com/threads/apple-hfs-windows-driver-download.1368010/post-24180079}{hack for Windows 10}\DIFaddend ),
   \href{http://www.catacombae.org/hfsexplorer}{HFSExplorer}, MacDrive, Paragon APFS,
   Paragon HFS+, TransMac, etc. Remember to never ever attempt to modify Apple file systems
   from Windows as this often leads to irrecoverable data loss.
