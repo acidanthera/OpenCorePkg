@@ -349,6 +349,18 @@ OcWaitForAppleKeyIndex (
         return OC_INPUT_BOTTOM;
       }
 
+      STATIC_ASSERT (UsbHidUsageIdKbKpKeyF1 + 11 == UsbHidUsageIdKbKpKeyF12, "Unexpected encoding");
+      if (Keys[0] >= UsbHidUsageIdKbKpKeyF1 && Keys[0] <= UsbHidUsageIdKbKpKeyF12) {
+        OcKeyMapFlush (KeyMap, Keys[0], TRUE);
+        return OC_INPUT_FUNCTIONAL (Keys[0] - UsbHidUsageIdKbKpKeyF1 + 1);
+      }
+
+      STATIC_ASSERT (UsbHidUsageIdKbKpKeyF13 + 11 == UsbHidUsageIdKbKpKeyF24, "Unexpected encoding");
+      if (Keys[0] >= UsbHidUsageIdKbKpKeyF13 && Keys[0] <= UsbHidUsageIdKbKpKeyF24) {
+        OcKeyMapFlush (KeyMap, Keys[0], TRUE);
+        return OC_INPUT_FUNCTIONAL (Keys[0] - UsbHidUsageIdKbKpKeyF13 + 13);
+      }
+
       STATIC_ASSERT (AppleHidUsbKbUsageKeyOne + 8 == AppleHidUsbKbUsageKeyNine, "Unexpected encoding");
       for (KeyCode = AppleHidUsbKbUsageKeyOne; KeyCode <= AppleHidUsbKbUsageKeyNine; ++KeyCode) {
         if (OcKeyMapHasKey (Keys, NumKeys, KeyCode)) {
