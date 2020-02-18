@@ -186,8 +186,7 @@ OcShowSimpleBootMenu (
         ChosenEntry = (INTN) (MIN (Count, OC_INPUT_MAX) - 1);
         TimeOutSeconds = 0;
         break;
-      } else if (KeyIndex != OC_INPUT_INVALID && (UINTN)KeyIndex < Count) {
-        ASSERT (KeyIndex >= 0);
+      } else if (KeyIndex != OC_INPUT_INVALID && KeyIndex >= 0 && (UINTN)KeyIndex < Count) {
         *ChosenBootEntry = &BootEntries[KeyIndex];
         (*ChosenBootEntry)->SetDefault = SetDefault;
         Code[0] = OC_INPUT_STR[KeyIndex];
