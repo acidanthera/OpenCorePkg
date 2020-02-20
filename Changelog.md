@@ -25,6 +25,7 @@ OpenCore Changelog
 - Added bundled HiiDatabase driver for very old firmwares
 - Added SSE2 support in memory intrinsics for better performance
 - Improved ACPI PM timer CPU frequency calculation performance
+- Improved LapicKernelPanic compatibility with newer macOS versions
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere
