@@ -104,6 +104,7 @@
 
 [Components]
   OcSupportPkg/Application/BootKicker/BootKicker.inf
+  OcSupportPkg/Application/ChipTune/ChipTune.inf
   OcSupportPkg/Application/CleanNvram/CleanNvram.inf
   OcSupportPkg/Application/GopStop/GopStop.inf
   OcSupportPkg/Application/PavpProvision/PavpProvision.inf
