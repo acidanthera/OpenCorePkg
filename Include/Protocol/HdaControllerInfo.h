@@ -49,7 +49,7 @@ typedef
 EFI_STATUS
 (EFIAPI *EFI_HDA_CONTROLLER_INFO_GET_NAME) (
   IN  EFI_HDA_CONTROLLER_INFO_PROTOCOL  *This,
-  OUT CHAR16                            **ControllerName
+  OUT CONST CHAR16                      **ControllerName
   );
 
 /**

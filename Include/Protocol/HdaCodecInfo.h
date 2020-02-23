@@ -101,7 +101,7 @@ typedef
 EFI_STATUS
 (EFIAPI *EFI_HDA_CODEC_INFO_GET_NAME) (
   IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
-  OUT CHAR16                       **CodecName
+  OUT CONST CHAR16                 **CodecName
   );
 
 /**

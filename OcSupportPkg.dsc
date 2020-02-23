@@ -69,6 +69,7 @@
   OcFirmwareVolumeLib|OcSupportPkg/Library/OcFirmwareVolumeLib/OcFirmwareVolumeLib.inf
   OcGuardLib|OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf
   OcHashServicesLib|OcSupportPkg/Library/OcHashServicesLib/OcHashServicesLib.inf
+  OcHdaDevicesLib|OcSupportPkg/Library/OcHdaDevicesLib/OcHdaDevicesLib.inf
   OcHeciLib|OcSupportPkg/Library/OcHeciLib/OcHeciLib.inf
   OcInputLib|OcSupportPkg/Library/OcInputLib/OcInputLib.inf
   OcMachoLib|OcSupportPkg/Library/OcMachoLib/OcMachoLib.inf
@@ -143,6 +144,7 @@
   OcSupportPkg/Library/OcFirmwareVolumeLib/OcFirmwareVolumeLib.inf
   OcSupportPkg/Library/OcGuardLib/OcGuardLib.inf
   OcSupportPkg/Library/OcHashServicesLib/OcHashServicesLib.inf
+  OcSupportPkg/Library/OcHdaDevicesLib/OcHdaDevicesLib.inf
   OcSupportPkg/Library/OcHeciLib/OcHeciLib.inf
   OcSupportPkg/Library/OcInputLib/OcInputLib.inf
   OcSupportPkg/Library/OcMachoLib/OcMachoLib.inf

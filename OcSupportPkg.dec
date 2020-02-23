@@ -226,6 +226,9 @@
   OcHashServicesLib|Include/Library/OcHashServicesLib.h
 
   ##  @libraryclass
+  OcHdaDevicesLib|Include/Library/OcHdaDevicesLib.h
+
+  ##  @libraryclass
   OcHeciLib|Include/Library/OcHeciLib.h
 
   ##  @libraryclass
