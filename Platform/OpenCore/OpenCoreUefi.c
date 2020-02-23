@@ -412,7 +412,7 @@ OcLoadUefiOutputSupport (
   BOOLEAN              SetMax;
 
   if (Config->Uefi.Output.ProvideConsoleGop) {
-    OcProvideConsoleGop ();
+    OcProvideConsoleGop (TRUE);
   }
 
   OcParseScreenResolution (
