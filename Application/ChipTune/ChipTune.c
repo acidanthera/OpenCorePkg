@@ -118,7 +118,7 @@ UefiMain (
       NULL,
       (VOID **) &BeepGenProtocol
       );
-    if (EFI_ERROR (Status) || BeepGenProtocol->AppleBeepGenBeep == NULL) {
+    if (EFI_ERROR (Status) || BeepGenProtocol->GenBeep == NULL) {
       Print (L"Beep protocol is unusable - %r\n", Status);
       BeepGenProtocol = NULL;
     }
@@ -145,7 +145,7 @@ UefiMain (
     );
 
   if (BeepGenProtocol != NULL) {
-    Status = BeepGenProtocol->AppleBeepGenBeep (
+    Status = BeepGenProtocol->GenBeep (
       Count,
       Signal,
       Silence
