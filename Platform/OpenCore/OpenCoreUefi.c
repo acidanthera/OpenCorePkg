@@ -80,6 +80,13 @@ OcLoadDrivers (
       Index
       ));
 
+    //
+    // Skip drivers marked as comments.
+    //
+    if (OC_BLOB_GET (Config->Uefi.Drivers.Values[Index])[0] == '#') {
+      continue;
+    }
+
     UnicodeSPrint (
       DriverPath,
       sizeof (DriverPath),
