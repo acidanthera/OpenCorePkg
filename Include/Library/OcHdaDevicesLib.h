@@ -84,4 +84,3 @@ OcHdaCodecGetName (
   );
 
 #endif // OC_HDA_DEVICES_LIB_H
-

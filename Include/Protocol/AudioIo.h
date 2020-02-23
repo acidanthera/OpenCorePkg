@@ -78,21 +78,21 @@ typedef enum {
   Port surface.
 **/
 typedef enum {
-    EfiAudioIoSurfaceExternal = 0,
-    EfiAudioIoSurfaceInternal,
-    EfiAudioIoSurfaceOther,
-    EfiAudioIoSurfaceMaximum
+  EfiAudioIoSurfaceExternal,
+  EfiAudioIoSurfaceInternal,
+  EfiAudioIoSurfaceOther,
+  EfiAudioIoSurfaceMaximum
 } EFI_AUDIO_IO_PROTOCOL_SURFACE;
 
 /**
   Size in bits of each sample.
 **/
 typedef enum {
-    EfiAudioIoBits8     = BIT0,
-    EfiAudioIoBits16    = BIT1,
-    EfiAudioIoBits20    = BIT2,
-    EfiAudioIoBits24    = BIT3,
-    EfiAudioIoBits32    = BIT4
+  EfiAudioIoBits8     = BIT0,
+  EfiAudioIoBits16    = BIT1,
+  EfiAudioIoBits20    = BIT2,
+  EfiAudioIoBits24    = BIT3,
+  EfiAudioIoBits32    = BIT4
 } EFI_AUDIO_IO_PROTOCOL_BITS;
 
 /**

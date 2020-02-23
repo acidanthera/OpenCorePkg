@@ -41,7 +41,7 @@ UefiMain (
 
   gBS->SetWatchdogTimer (0, 0, 0, NULL);
 
-  OcProvideConsoleGop ();
+  OcProvideConsoleGop (FALSE);
 
   OcSetConsoleResolution (0, 0, 0);
 

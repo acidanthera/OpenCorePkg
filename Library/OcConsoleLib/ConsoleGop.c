@@ -71,7 +71,7 @@ ConsoleHandleProtocol (
 
 VOID
 OcProvideConsoleGop (
-  VOID
+  IN BOOLEAN  Route
   )
 {
   EFI_STATUS                    Status;
@@ -85,10 +85,12 @@ OcProvideConsoleGop (
   // Shell may replace gST->ConsoleOutHandle, so we have to ensure
   // that HandleProtocol always reports valid chosen GOP.
   //
-  mOriginalHandleProtocol  = gBS->HandleProtocol;
-  gBS->HandleProtocol      = ConsoleHandleProtocol;
-  gBS->Hdr.CRC32           = 0;
-  gBS->CalculateCrc32 (gBS, gBS->Hdr.HeaderSize, &gBS->Hdr.CRC32);
+  if (Route) {
+    mOriginalHandleProtocol  = gBS->HandleProtocol;
+    gBS->HandleProtocol      = ConsoleHandleProtocol;
+    gBS->Hdr.CRC32           = 0;
+    gBS->CalculateCrc32 (gBS, gBS->Hdr.HeaderSize, &gBS->Hdr.CRC32);
+  }
 
   OriginalGop = NULL;
   Status = gBS->HandleProtocol (

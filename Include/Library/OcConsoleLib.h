@@ -131,7 +131,7 @@ OcSetConsoleMode (
 **/
 VOID
 OcProvideConsoleGop (
-  VOID
+  IN BOOLEAN  Route
   );
 
 /**

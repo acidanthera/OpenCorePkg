@@ -475,10 +475,10 @@ typedef enum {
   _(BOOLEAN                     , PointerSupport     ,     , FALSE                         , ()) \
   _(OC_STRING                   , PointerSupportMode ,     , OC_STRING_CONSTR ("", _, __)  , OC_DESTR (OC_STRING)) \
   _(UINT32                      , TimerResolution    ,     , 0                             , ())
-OC_DECLARE (OC_UEFI_INPUT)
+  OC_DECLARE (OC_UEFI_INPUT)
 
 ///
-/// Input is a set of options to support advanced output.
+/// Output is a set of options to support advanced output.
 ///
 #define OC_UEFI_OUTPUT_FIELDS(_, __) \
   _(OC_STRING                   , ConsoleMode                 ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
@@ -491,7 +491,7 @@ OC_DECLARE (OC_UEFI_INPUT)
   _(BOOLEAN                     , ReconnectOnResChange        ,     , FALSE  , ()) \
   _(BOOLEAN                     , SanitiseClearScreen         ,     , FALSE  , ()) \
   _(BOOLEAN                     , DirectGopRendering          ,     , FALSE  , ())
-OC_DECLARE (OC_UEFI_OUTPUT)
+  OC_DECLARE (OC_UEFI_OUTPUT)
 
 ///
 /// Prefer own protocol implementation for these protocols.
