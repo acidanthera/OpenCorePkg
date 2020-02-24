@@ -53,6 +53,7 @@
   OcAppleRamDiskLib|OcSupportPkg/Library/OcAppleRamDiskLib/OcAppleRamDiskLib.inf
   OcAppleSecureBootLib|OcSupportPkg/Library/OcAppleSecureBootLib/OcAppleSecureBootLib.inf
   OcAppleUserInterfaceThemeLib|OcSupportPkg/Library/OcAppleUserInterfaceThemeLib/OcAppleUserInterfaceThemeLib.inf
+  OcAudioLib|OcSupportPkg/Library/OcAudioLib/OcAudioLib.inf
   OcBootManagementLib|OcSupportPkg/Library/OcBootManagementLib/OcBootManagementLib.inf
   OcCompressionLib|OcSupportPkg/Library/OcCompressionLib/OcCompressionLib.inf
   OcConsoleControlEntryModeLib|OcSupportPkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeLib.inf
@@ -125,6 +126,7 @@
   OcSupportPkg/Library/OcAppleRamDiskLib/OcAppleRamDiskLib.inf
   OcSupportPkg/Library/OcAppleSecureBootLib/OcAppleSecureBootLib.inf
   OcSupportPkg/Library/OcAppleUserInterfaceThemeLib/OcAppleUserInterfaceThemeLib.inf
+  OcSupportPkg/Library/OcAudioLib/OcAudioLib.inf
   OcSupportPkg/Library/OcBootManagementLib/OcBootManagementLib.inf
   OcSupportPkg/Library/OcCompilerIntrinsicsLib/OcCompilerIntrinsicsLib.inf
   OcSupportPkg/Library/OcCompressionLib/OcCompressionLib.inf

@@ -57,6 +57,9 @@
   ## Include/Protocol/HdaIo.h
   gEfiHdaIoProtocolGuid             = { 0xA090D7F9, 0xB50A, 0x4EA1, { 0xBD, 0xE9, 0x1A, 0xA5, 0xE9, 0x81, 0x2F, 0x45 }}
 
+  ## Include/Protocol/OcAudio.h
+  gOcAudioProtocolGuid              = { 0x4B228577, 0x6274, 0x4A48, { 0x82, 0xAE, 0x07, 0x13, 0xA1, 0x17, 0x19, 0x87 }}
+
   ## Include/Protocol/OcBootstrap.h
   gOcBootstrapProtocolGuid          = { 0xBA1EB455, 0xB182, 0x4F14, { 0x85, 0x21, 0xE4, 0x22, 0xC3, 0x25, 0xDE, 0xF6 }}
 
@@ -176,6 +179,9 @@
 
   ##  @libraryclass
   OcAppleUserInterfaceThemeLib|Include/Library/OcAppleUserInterfaceThemeLib.h
+
+  ##  @libraryclass
+  OcAudioLib|Include/Library/OcAudioLib.h
 
   ##  @libraryclass
   OcBootManagementLib|Include/Library/OcBootManagementLib.h
