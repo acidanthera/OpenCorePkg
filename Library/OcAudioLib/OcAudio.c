@@ -206,6 +206,7 @@ InernalOcAudioPlayFileDone (
   Private->CurrentBuffer = NULL;
 
   if (Private->PlaybackEvent != NULL) {
+    DEBUG ((DEBUG_INFO, "OCAU: Signaling for completion\n"));
     gBS->SignalEvent (Private->PlaybackEvent);
   }
 }
@@ -257,7 +258,7 @@ InternalOcAudioPlayFile (
       &Private->PlaybackEvent
       );
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAU: Unable to create audio completion event\n"));
+      DEBUG ((DEBUG_INFO, "OCAU: Unable to create audio completion event - %r\n", Status));
     }
   }
 
@@ -357,11 +358,22 @@ InternalOcAudioStopPlayBack (
   OC_AUDIO_PROTOCOL_PRIVATE       *Private;
   EFI_TPL                         OldTpl;
   UINTN                           Index;
+  EFI_STATUS                      Status;
 
   Private = OC_AUDIO_PROTOCOL_PRIVATE_FROM_OC_AUDIO (This);
 
-  if (Wait && Private->CurrentBuffer != NULL && Private->PlaybackEvent) {
-    gBS->WaitForEvent (1, &Private->PlaybackEvent, &Index);
+  if (Wait && Private->PlaybackEvent != NULL) {
+    if (Private->CurrentBuffer != NULL) {
+      Status = gBS->WaitForEvent (1, &Private->PlaybackEvent, &Index);
+    } else {
+      Status = gBS->CheckEvent (Private->PlaybackEvent);
+    }
+    DEBUG ((
+      DEBUG_INFO,
+      "OCAU: Waited (%d) for audio to complete - %r\n",
+      Private->CurrentBuffer != NULL,
+      Status
+      ));
   }
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
