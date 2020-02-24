@@ -52,6 +52,7 @@
   OcAppleKeysLib|OcSupportPkg/Library/OcAppleKeysLib/OcAppleKeysLib.inf
   OcAppleRamDiskLib|OcSupportPkg/Library/OcAppleRamDiskLib/OcAppleRamDiskLib.inf
   OcAppleUserInterfaceThemeLib|OcSupportPkg/Library/OcAppleUserInterfaceThemeLib/OcAppleUserInterfaceThemeLib.inf
+  OcAudioLib|OcSupportPkg/Library/OcAudioLib/OcAudioLib.inf
   OcBootManagementLib|OcSupportPkg/Library/OcBootManagementLib/OcBootManagementLib.inf
   OcCompressionLib|OcSupportPkg/Library/OcCompressionLib/OcCompressionLib.inf
   OcConfigurationLib|OcSupportPkg/Library/OcConfigurationLib/OcConfigurationLib.inf
@@ -110,6 +111,7 @@
   OpenCorePkg/Application/Bootstrap/Bootstrap.inf
   OpenCorePkg/Platform/OpenCore/OpenCore.inf
   OcSupportPkg/Application/BootKicker/BootKicker.inf
+  OcSupportPkg/Application/ChipTune/ChipTune.inf
   OcSupportPkg/Application/CleanNvram/CleanNvram.inf
   OcSupportPkg/Application/GopStop/GopStop.inf
   OcSupportPkg/Application/VerifyMsrE2/VerifyMsrE2.inf

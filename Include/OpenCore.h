@@ -63,6 +63,8 @@
 
 #define OPEN_CORE_TOOL_PATH        L"Tools\\"
 
+#define OPEN_CORE_AUDIO_PATH       L"Resources\\Audio\\"
+
 #define OPEN_CORE_NVRAM_ATTR       (EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS)
 
 #define OPEN_CORE_NVRAM_NV_ATTR    (EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE)
@@ -161,6 +163,50 @@ OcLoadUefiSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
   IN OC_GLOBAL_CONFIG    *Config,
   IN OC_CPU_INFO         *CpuInfo
+  );
+
+/**
+  Load UEFI input compatibility support.
+
+  @param[out] Config    OpenCore configuration.
+
+  @retval  TRUE if needs Exit Boot Services handling.
+**/
+BOOLEAN
+OcLoadUefiInputSupport (
+  IN OC_GLOBAL_CONFIG  *Config
+  );
+
+/**
+  Load UEFI output compatibility support.
+
+  @param[out] Config    OpenCore configuration.
+**/
+VOID
+OcLoadUefiOutputSupport (
+  IN OC_GLOBAL_CONFIG  *Config
+  );
+
+/**
+  Load UEFI audio compatibility support.
+
+  @param[in]  Storage   OpenCore storage.
+  @param[out] Config    OpenCore configuration.
+
+  @retval  TRUE if needs Exit Boot Services handling.
+**/
+BOOLEAN
+OcLoadUefiAudioSupport (
+  IN OC_STORAGE_CONTEXT  *Storage,
+  IN OC_GLOBAL_CONFIG    *Config
+  );
+
+/**
+  Complete audio services before loading.
+**/
+VOID
+OcUefiAudioExitBootServices (
+  VOID
   );
 
 /**

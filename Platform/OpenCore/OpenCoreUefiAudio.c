@@ -1,0 +1,275 @@
+/** @file
+  OpenCore driver.
+
+Copyright (c) 2019, vit9696. All rights reserved.<BR>
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+
+**/
+
+#include <OpenCore.h>
+
+#include <Guid/OcVariables.h>
+#include <Guid/GlobalVariable.h>
+
+#include <Library/BaseLib.h>
+#include <Library/DebugLib.h>
+#include <Library/DevicePathLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/OcAppleBootCompatLib.h>
+#include <Library/OcAppleBootPolicyLib.h>
+#include <Library/OcAppleEventLib.h>
+#include <Library/OcAppleImageConversionLib.h>
+#include <Library/OcAudioLib.h>
+#include <Library/OcInputLib.h>
+#include <Library/OcAppleKeyMapLib.h>
+#include <Library/OcAppleUserInterfaceThemeLib.h>
+#include <Library/OcConsoleLib.h>
+#include <Library/OcCpuLib.h>
+#include <Library/OcDataHubLib.h>
+#include <Library/OcDevicePropertyLib.h>
+#include <Library/OcDriverConnectionLib.h>
+#include <Library/OcFirmwareVolumeLib.h>
+#include <Library/OcHashServicesLib.h>
+#include <Library/OcMiscLib.h>
+#include <Library/OcSmcLib.h>
+#include <Library/OcOSInfoLib.h>
+#include <Library/OcUnicodeCollationEngLib.h>
+#include <Library/PrintLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+
+STATIC
+OC_AUDIO_PROTOCOL *
+mOcAudio;
+
+STATIC
+EFI_STATUS
+EFIAPI
+OcAudioAcquireFile (
+  IN  VOID                            *Context,
+  IN  UINT32                          File,
+  IN  APPLE_VOICE_OVER_LANGUAGE_CODE  LanguageCode,
+  OUT UINT8                           **Buffer,
+  OUT UINT32                          *BufferSize
+  )
+{
+  CHAR16              FilePath[96];
+  OC_STORAGE_CONTEXT  *Storage;
+  CONST CHAR8         *BaseType;
+  CONST CHAR8         *BasePath;
+  BOOLEAN             Localised;
+
+  Storage   = (OC_STORAGE_CONTEXT *) Context;
+  Localised = TRUE;
+  BaseType  = "AXEFIAudio";
+
+  switch (File) {
+    case AppleVoiceOverAudioFileVoiceOverOn:
+      BasePath = "VoiceOverOn";
+      break;
+    case AppleVoiceOverAudioFileVoiceOverOff:
+      BasePath = "VoiceOverOff";
+      break;
+    case AppleVoiceOverAudioFileUsername:
+      BasePath = "Username";
+      break;
+    case AppleVoiceOverAudioFilePassword:
+      BasePath = "Password";
+      break;
+    case AppleVoiceOverAudioFileUsernameOrPasswordIncorrect:
+      BasePath = "UsernameOrPasswordIncorrect";
+      break;
+    case AppleVoiceOverAudioFileAccountLockedTryLater:
+      BasePath = "AccountLockedTryLater";
+      break;
+    case AppleVoiceOverAudioFileAccountLocked:
+      BasePath = "AccountLocked";
+      break;
+    case AppleVoiceOverAudioFileVoiceOverBoot:
+      BasePath = "VoiceOver_Boot";
+      Localised = FALSE;
+      break;
+    case AppleVoiceOverAudioFileVoiceOverBoot2:
+      BasePath = "VoiceOver_Boot";
+      Localised = FALSE;
+      break;
+    case AppleVoiceOverAudioFileClick:
+      BasePath = "Click";
+      Localised = FALSE;
+      break;
+    case AppleVoiceOverAudioFileBeep:
+      BasePath = "Beep";
+      Localised = FALSE;
+      break;
+    default:
+      BasePath = NULL;
+      break;
+  }
+
+  if (BasePath == NULL) {
+    DEBUG ((DEBUG_INFO, "OC: Unknown Wave %d\n", File));
+    return EFI_NOT_FOUND;
+  }
+
+  if (Localised) {
+    UnicodeSPrint (
+      FilePath,
+      sizeof (FilePath),
+      OPEN_CORE_AUDIO_PATH "%a_%a_%a.wav",
+      BaseType,
+      OcLanguageCodeToString (LanguageCode),
+      BasePath
+      );
+
+    if (!OcStorageExistsFileUnicode (Context, FilePath)) {
+      UnicodeSPrint (
+        FilePath,
+        sizeof (FilePath),
+        OPEN_CORE_AUDIO_PATH "%a_%a_%a.wav",
+        BaseType,
+        OcLanguageCodeToString (AppleVoiceOverLanguageEn),
+        BasePath
+        );
+    }
+  } else {
+    UnicodeSPrint (
+      FilePath,
+      sizeof (FilePath),
+      OPEN_CORE_AUDIO_PATH "%a_%a.wav",
+      BaseType,
+      BasePath
+      );
+  }
+
+  DEBUG ((DEBUG_INFO, "OC: Wave %s was requested\n", FilePath));
+
+  *Buffer = OcStorageReadFileUnicode (
+    Storage,
+    FilePath,
+    BufferSize
+    );
+  if (*Buffer == NULL) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: Wave %s cannot be found!\n",
+      FilePath
+      ));
+    return EFI_NOT_FOUND;
+  }
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+EFIAPI
+OcAudioReleaseFile (
+  IN  VOID                            *Context,
+  IN  UINT8                           *Buffer
+  )
+{
+  FreePool (Buffer);
+  return EFI_SUCCESS;
+}
+
+BOOLEAN
+OcLoadUefiAudioSupport (
+  IN OC_STORAGE_CONTEXT  *Storage,
+  IN OC_GLOBAL_CONFIG    *Config
+  )
+{
+  EFI_STATUS                 Status;
+  CHAR8                      *AsciiDevicePath;
+  CHAR16                     *UnicodeDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
+  OC_AUDIO_PROTOCOL          *OcAudio;
+  UINT8                      VolumeLevel;
+  BOOLEAN                    Muted;
+
+  if (!Config->Uefi.Audio.AudioSupport) {
+    DEBUG ((DEBUG_INFO, "OC: Requested not to use audio\n"));
+    return FALSE;
+  }
+
+  VolumeLevel = OcGetVolumeLevel (&Muted);
+
+  DevicePath        = NULL;
+  AsciiDevicePath   = OC_BLOB_GET (&Config->Uefi.Audio.AudioDevice);
+  if (AsciiDevicePath[0] != '\0') {
+    UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
+    if (UnicodeDevicePath != NULL) {
+      DevicePath = ConvertTextToDevicePath (UnicodeDevicePath);
+      FreePool (UnicodeDevicePath);
+    }
+
+    if (DevicePath == NULL) {
+      DEBUG ((DEBUG_INFO, "OC: Requested to use invalid audio device\n"));
+      return FALSE;
+    }
+  }
+
+  OcAudio = OcAudioInstallProtocols (FALSE);
+  if (OcAudio == NULL) {
+    DEBUG ((DEBUG_INFO, "OC: Cannot locate OcAudio protocol\n"));
+    FreePool (DevicePath);
+    return FALSE;
+  }
+
+  //
+  // Never disable sound completely, as it is vital for accessability.
+  //
+  Status = OcAudio->Connect (
+    OcAudio,
+    DevicePath,
+    Config->Uefi.Audio.AudioCodec,
+    Config->Uefi.Audio.AudioOut,
+    VolumeLevel < 20 ? 20 : VolumeLevel
+    );
+
+  FreePool (DevicePath);
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OC: Audio connection failed - %r\n", Status));
+    return FALSE;
+  }
+
+  Status = OcAudio->SetProvider (
+    OcAudio,
+    OcAudioAcquireFile,
+    OcAudioReleaseFile,
+    Storage
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OC: Audio cannot set storage provider - %r\n", Status));
+    return FALSE;
+  }
+
+  if (Config->Uefi.Audio.PlayChime && VolumeLevel > 0 && !Muted) {
+    DEBUG ((DEBUG_INFO, "OC: Starting to play chime...\n"));
+    Status = OcAudio->PlayFile (
+      OcAudio,
+      AppleVoiceOverAudioFileVoiceOverBoot
+      );
+    DEBUG ((DEBUG_INFO, "OC: Play chime started - %r\n", Status));
+  }
+
+  mOcAudio = OcAudio;
+  return TRUE;
+}
+
+VOID
+OcUefiAudioExitBootServices (
+  VOID
+  )
+{
+  if (mOcAudio != NULL) {
+    mOcAudio->StopPlayback (mOcAudio, TRUE);
+  }
+}
