@@ -65,6 +65,7 @@ OC_STRUCTORS       (OC_PLATFORM_SMBIOS_CONFIG, ())
 OC_STRUCTORS       (OC_PLATFORM_CONFIG, ())
 
 OC_ARRAY_STRUCTORS (OC_UEFI_DRIVER_ARRAY)
+OC_STRUCTORS       (OC_UEFI_AUDIO, ())
 OC_STRUCTORS       (OC_UEFI_INPUT, ())
 OC_STRUCTORS       (OC_UEFI_OUTPUT, ())
 OC_STRUCTORS       (OC_UEFI_PROTOCOLS, ())
@@ -531,6 +532,7 @@ mUefiQuirksSchema[] = {
 STATIC
 OC_SCHEMA
 mUefiProtocolsSchema[] = {
+  OC_SCHEMA_BOOLEAN_IN ("AppleAudio",              OC_GLOBAL_CONFIG, Uefi.Protocols.AppleAudio),
   OC_SCHEMA_BOOLEAN_IN ("AppleBootPolicy",         OC_GLOBAL_CONFIG, Uefi.Protocols.AppleBootPolicy),
   OC_SCHEMA_BOOLEAN_IN ("AppleEvent",              OC_GLOBAL_CONFIG, Uefi.Protocols.AppleEvent),
   OC_SCHEMA_BOOLEAN_IN ("AppleImageConversion",    OC_GLOBAL_CONFIG, Uefi.Protocols.AppleImageConversion),
@@ -543,6 +545,16 @@ mUefiProtocolsSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("HashServices",            OC_GLOBAL_CONFIG, Uefi.Protocols.HashServices),
   OC_SCHEMA_BOOLEAN_IN ("OSInfo",                  OC_GLOBAL_CONFIG, Uefi.Protocols.OSInfo),
   OC_SCHEMA_BOOLEAN_IN ("UnicodeCollation",        OC_GLOBAL_CONFIG, Uefi.Protocols.UnicodeCollation)
+};
+
+STATIC
+OC_SCHEMA
+mUefiAudioSchema[] = {
+  OC_SCHEMA_INTEGER_IN ("AudioCodec",         OC_GLOBAL_CONFIG, Uefi.Audio.AudioCodec),
+  OC_SCHEMA_STRING_IN  ("AudioDevice",        OC_GLOBAL_CONFIG, Uefi.Audio.AudioDevice),
+  OC_SCHEMA_INTEGER_IN ("AudioOut",           OC_GLOBAL_CONFIG, Uefi.Audio.AudioOut),
+  OC_SCHEMA_BOOLEAN_IN ("AudioSupport",       OC_GLOBAL_CONFIG, Uefi.Audio.AudioSupport),
+  OC_SCHEMA_BOOLEAN_IN ("PlayChime",          OC_GLOBAL_CONFIG, Uefi.Audio.PlayChime),
 };
 
 STATIC
@@ -576,6 +588,7 @@ mUefiOutputSchema[] = {
 STATIC
 OC_SCHEMA
 mUefiConfigurationSchema[] = {
+  OC_SCHEMA_DICT       ("Audio",          mUefiAudioSchema),
   OC_SCHEMA_BOOLEAN_IN ("ConnectDrivers", OC_GLOBAL_CONFIG, Uefi.ConnectDrivers),
   OC_SCHEMA_ARRAY_IN   ("Drivers",        OC_GLOBAL_CONFIG, Uefi.Drivers, &mUefiDriversSchema),
   OC_SCHEMA_DICT       ("Input",          mUefiInputSchema),

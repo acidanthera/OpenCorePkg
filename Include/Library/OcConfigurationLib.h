@@ -464,6 +464,17 @@ typedef enum {
   OC_DECLARE (OC_UEFI_DRIVER_ARRAY)
 
 ///
+/// Audio is a set of options for sound configuration.
+///
+#define OC_UEFI_AUDIO_FIELDS(_, __) \
+  _(BOOLEAN                     , AudioSupport       ,     , FALSE                         , ()) \
+  _(OC_STRING                   , AudioDevice        ,     , OC_STRING_CONSTR ("", _, __)  , OC_DESTR (OC_STRING)) \
+  _(UINT8                       , AudioCodec         ,     , 0                             , ()) \
+  _(UINT8                       , AudioOut           ,     , 0                             , ()) \
+  _(BOOLEAN                     , PlayChime          ,     , FALSE                         , ())
+  OC_DECLARE (OC_UEFI_AUDIO)
+
+///
 /// Input is a set of options to support advanced input.
 ///
 #define OC_UEFI_INPUT_FIELDS(_, __) \
@@ -497,6 +508,7 @@ typedef enum {
 /// Prefer own protocol implementation for these protocols.
 ///
 #define OC_UEFI_PROTOCOLS_FIELDS(_, __) \
+  _(BOOLEAN                     , AppleAudio                  ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleBootPolicy             ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleEvent                  ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleImageConversion        ,     , FALSE  , ()) \
@@ -528,6 +540,7 @@ typedef enum {
 ///
 #define OC_UEFI_CONFIG_FIELDS(_, __) \
   _(BOOLEAN                     , ConnectDrivers   ,     , FALSE                                    , ()) \
+  _(OC_UEFI_AUDIO               , Audio            ,     , OC_CONSTR2 (OC_UEFI_AUDIO, _, __)        , OC_DESTR (OC_UEFI_AUDIO)) \
   _(OC_UEFI_DRIVER_ARRAY        , Drivers          ,     , OC_CONSTR2 (OC_UEFI_DRIVER_ARRAY, _, __) , OC_DESTR (OC_UEFI_DRIVER_ARRAY)) \
   _(OC_UEFI_INPUT               , Input            ,     , OC_CONSTR2 (OC_UEFI_INPUT, _, __)        , OC_DESTR (OC_UEFI_INPUT)) \
   _(OC_UEFI_OUTPUT              , Output           ,     , OC_CONSTR2 (OC_UEFI_OUTPUT, _, __)       , OC_DESTR (OC_UEFI_OUTPUT)) \
