@@ -209,7 +209,7 @@ typedef struct {
   ///
   /// Codec address.
   ///
-  UINT8 Address;
+  UINT8                     Address;
 } EFI_HDA_IO_DEVICE_PATH;
 
 extern EFI_GUID gEfiHdaIoDevicePathGuid;

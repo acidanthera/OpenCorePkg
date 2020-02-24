@@ -318,6 +318,49 @@ OcStorageFree (
   }
 }
 
+BOOLEAN
+OcStorageExistsFileUnicode (
+  IN  OC_STORAGE_CONTEXT               *Context,
+  IN  CONST CHAR16                     *FilePath
+  )
+{
+  EFI_STATUS         Status;
+  EFI_FILE_PROTOCOL  *File;
+  UINT8              *VaultDigest;
+
+  //
+  // Using this API with empty filename is also not allowed.
+  //
+  ASSERT (Context != NULL);
+  ASSERT (FilePath != NULL);
+  ASSERT (StrLen (FilePath) > 0);
+
+  VaultDigest = OcStorageGetDigest (Context, FilePath);
+
+  if (VaultDigest != NULL) {
+    return TRUE;
+  }
+
+  if (Context->StorageRoot == NULL) {
+    return FALSE;
+  }
+
+  Status = SafeFileOpen (
+    Context->StorageRoot,
+    &File,
+    (CHAR16 *) FilePath,
+    EFI_FILE_MODE_READ,
+    0
+    );
+
+  if (!EFI_ERROR (Status)) {
+    File->Close (File);
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
 VOID *
 OcStorageReadFileUnicode (
   IN  OC_STORAGE_CONTEXT               *Context,

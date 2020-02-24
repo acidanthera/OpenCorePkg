@@ -114,6 +114,20 @@ OcStorageFree (
   );
 
 /**
+  Check whether file exists.
+
+  @param[in]  Context      Storage context.
+  @param[in]  FilePath     The full path to the file on the device.
+
+  @retval TRUE if file is present in vault or ondisk.
+**/
+BOOLEAN
+OcStorageExistsFileUnicode (
+  IN  OC_STORAGE_CONTEXT               *Context,
+  IN  CONST CHAR16                     *FilePath
+  );
+
+/**
   Read file from storage with implicit double (2 byte) null termination.
   Null termination does not affect the returned file size.
   Depending on the implementation 0 byte files may return null.
