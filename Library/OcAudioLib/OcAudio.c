@@ -287,7 +287,7 @@ InternalOcAudioPlayFile (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCAU: File %d for land %d is %d %d %d (%u) - %r\n",
+    "OCAU: File %d for lang %d is %d %d %d (%u) - %r\n",
     File,
     Private->Language,
     Frequency,
@@ -374,14 +374,21 @@ InternalOcAudioStopPlayBack (
       Private->CurrentBuffer != NULL,
       Status
       ));
+  } else {
+    Status = EFI_UNSUPPORTED;
   }
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
 
   if (Private->CurrentBuffer != NULL) {
-    Private->AudioIo->StopPlayback (
-      Private->AudioIo
-      );
+    //
+    // Do not stop after successful waiting.
+    //
+    if (EFI_ERROR (Status)) {
+      Private->AudioIo->StopPlayback (
+        Private->AudioIo
+        );
+    }
     Private->CurrentBuffer = NULL; ///< Should be nulled by StopPlayback.
   }
 
