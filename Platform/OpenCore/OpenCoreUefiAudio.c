@@ -93,6 +93,7 @@ OcAudioAcquireFile (
       BasePath = "AccountLocked";
       break;
     case AppleVoiceOverAudioFileVoiceOverBoot:
+      BaseType = "OCEFIAudio";
       BasePath = "VoiceOver_Boot";
       Localised = FALSE;
       break;
