@@ -142,6 +142,7 @@ OcAppendArgumentToCmd (
 
   if (Context != NULL) {
     Status = Context->RequestPrivilege (
+                        Context,
                         Context->PrivilegeContext,
                         OcPrivilegeAuthorized
                         );

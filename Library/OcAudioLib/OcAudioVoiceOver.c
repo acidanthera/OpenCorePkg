@@ -12,11 +12,14 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include <Guid/AppleVariable.h>
+
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcAudioLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
 
 #include <Protocol/AppleHda.h>
 #include <Protocol/AppleBeepGen.h>
@@ -70,6 +73,51 @@ OcLanguageCodeToString (
   )
 {
   return mLanguagePairing[LanguageCode];
+}
+
+EFI_STATUS
+OcSetVoiceOverLanguage (
+  CONST CHAR8   *Language  OPTIONAL
+  )
+{
+  EFI_STATUS                       Status;
+  UINTN                            LanguageSize;
+  CHAR8                            LanguageData[16];
+  APPLE_VOICE_OVER_AUDIO_PROTOCOL  *VoiceOver;
+
+  if (Language == NULL) {
+    LanguageSize = sizeof (LanguageData) - 1;
+    Status = gRT->GetVariable (
+      APPLE_PREV_LANG_KBD_VARIABLE_NAME,
+      &gAppleBootVariableGuid,
+      NULL,
+      &LanguageSize,
+      &LanguageData[0]
+      );
+    if (!EFI_ERROR (Status)) {
+      LanguageData[LanguageSize] = 0;
+      Language = LanguageData;
+    }
+  } else {
+    Status = EFI_SUCCESS;
+  }
+
+  if (!EFI_ERROR (Status)) {
+    Status = gBS->LocateProtocol (
+      &gAppleVOAudioProtocolGuid,
+      NULL,
+      (VOID **) &VoiceOver
+      );
+
+    if (!EFI_ERROR (Status)) {
+      Status = VoiceOver->SetLanguageString (VoiceOver, Language);
+    }
+    DEBUG ((DEBUG_INFO, "OCAU: Language for audio %a - %r\n", Language, Status));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAU: No language for audio - %r\n", Status));
+  }
+
+  return Status;
 }
 
 EFI_STATUS

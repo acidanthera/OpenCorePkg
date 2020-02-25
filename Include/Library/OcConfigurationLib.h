@@ -273,6 +273,7 @@
   _(UINT32                      , PickerAttributes            ,     , 0                                   , ())                   \
   _(UINT32                      , TakeoffDelay                ,     , 0                                   , ())                   \
   _(UINT32                      , Timeout                     ,     , 0                                   , ())                   \
+  _(BOOLEAN                     , PickerAudioAssist           ,     , FALSE                               , ())                   \
   _(BOOLEAN                     , HideAuxiliary               ,     , FALSE                               , ())                   \
   _(BOOLEAN                     , HideSelf                    ,     , FALSE                               , ())                   \
   _(BOOLEAN                     , PollAppleHotKeys            ,     , FALSE                               , ())                   \

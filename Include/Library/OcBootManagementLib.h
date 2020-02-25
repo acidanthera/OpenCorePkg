@@ -22,6 +22,13 @@
 #include <Library/OcStringLib.h>
 #include <Protocol/AppleKeyMapAggregator.h>
 #include <Protocol/LoadedImage.h>
+#include <Protocol/AppleBeepGen.h>
+#include <Protocol/OcAudio.h>
+
+/**
+  Primary picker context.
+**/
+typedef struct OC_PICKER_CONTEXT_ OC_PICKER_CONTEXT;
 
 /**
   Operating system boot type.
@@ -345,7 +352,8 @@ typedef enum {
 typedef
 EFI_STATUS
 (EFIAPI *OC_REQ_PRIVILEGE)(
-  IN VOID                *Context,
+  IN OC_PICKER_CONTEXT   *Context,
+  IN VOID                *PrivilegeContext,
   IN OC_PRIVILEGE_LEVEL  Level
   );
 
@@ -363,109 +371,121 @@ typedef enum {
 /**
   Boot picker context describing picker behaviour.
 **/
-typedef struct {
+struct OC_PICKER_CONTEXT_ {
   //
   // Scan policy (e.g. OC_SCAN_DEFAULT_POLICY).
   //
-  UINT32           ScanPolicy;
+  UINT32                     ScanPolicy;
   //
   // Load policy (e.g. OC_LOAD_DEFAULT_POLICY).
   //
-  UINT32           LoadPolicy;
+  UINT32                     LoadPolicy;
   //
   // Default entry selection timeout (pass 0 to ignore).
   //
-  UINT32           TimeoutSeconds;
+  UINT32                     TimeoutSeconds;
   //
   // Default delay prior to handling hotkeys (pass 0 to ignore).
   //
-  UINT32           TakeoffDelay;
+  UINT32                     TakeoffDelay;
   //
   // Define picker behaviour.
   // For example, show boot menu or just boot the default option.
   //
-  OC_PICKER_CMD    PickerCommand;
+  OC_PICKER_CMD              PickerCommand;
   //
   // Use custom (gOcVendorVariableGuid) for Boot#### variables.
   //
-  BOOLEAN          CustomBootGuid;
+  BOOLEAN                    CustomBootGuid;
   //
   // Custom entry reading routine, optional for no custom entries.
   //
-  OC_CUSTOM_READ   CustomRead;
+  OC_CUSTOM_READ             CustomRead;
   //
   // Context to pass to CustomRead, optional.
   //
-  VOID             *CustomEntryContext;
+  VOID                       *CustomEntryContext;
   //
   // Image starting routine used, required.
   //
-  OC_IMAGE_START   StartImage;
+  OC_IMAGE_START             StartImage;
   //
   // Handle to exclude scanning from, optional.
   //
-  EFI_HANDLE       ExcludeHandle;
+  EFI_HANDLE                 ExcludeHandle;
   //
   // Privilege escalation requesting routine.
   //
-  OC_REQ_PRIVILEGE RequestPrivilege;
+  OC_REQ_PRIVILEGE           RequestPrivilege;
   //
   // Context to pass to RequestPrivilege, optional.
   //
-  VOID             *PrivilegeContext;
+  VOID                       *PrivilegeContext;
   //
   // Additional suffix to include by the interface.
   //
-  CONST CHAR8      *TitleSuffix;
+  CONST CHAR8                *TitleSuffix;
   //
   // Used picker mode.
   //
-  OC_PICKER_MODE   PickerMode;
+  OC_PICKER_MODE             PickerMode;
   //
   // Console attributes. 0 is reserved as disabled.
   //
-  UINT32           ConsoleAttributes;
+  UINT32                     ConsoleAttributes;
   //
   // Enable polling boot arguments.
   //
-  BOOLEAN          PollAppleHotKeys;
+  BOOLEAN                    PollAppleHotKeys;
   //
   // Append the "Reset NVRAM" option to the boot entry list.
   //
-  BOOLEAN          ShowNvramReset;
+  BOOLEAN                    ShowNvramReset;
   //
   // Allow setting default boot option from boot menu.
   //
-  BOOLEAN          AllowSetDefault;
+  BOOLEAN                    AllowSetDefault;
   //
   // Hide and do not scan auxiliary entries.
   //
-  BOOLEAN          HideAuxiliary;
+  BOOLEAN                    HideAuxiliary;
+  //
+  // Enable audio assistant during picker playback.
+  //
+  BOOLEAN                    PickerAudioAssist;
+  //
+  // Recommended audio protocol, optional.
+  //
+  OC_AUDIO_PROTOCOL          *OcAudio;
+  //
+  // Recommended beeper protocol, optional.
+  //
+  APPLE_BEEP_GEN_PROTOCOL    *BeepGen;
   //
   // Additional boot arguments for Apple loaders.
   //
-  CHAR8            AppleBootArgs[BOOT_LINE_LENGTH];
+  CHAR8                      AppleBootArgs[BOOT_LINE_LENGTH];
   //
   // Number of custom boot paths (bless override).
   //
-  UINTN            NumCustomBootPaths;
+  UINTN                      NumCustomBootPaths;
   //
   // Custom boot paths (bless override).  Must start with '\'.
   //
-  CHAR16           **CustomBootPaths;
+  CHAR16                     **CustomBootPaths;
   //
   // Number of absolute custom entries.
   //
-  UINT32           AbsoluteEntryCount;
+  UINT32                     AbsoluteEntryCount;
   //
   // Number of total custom entries (absolute and tools).
   //
-  UINT32           AllCustomEntryCount;
+  UINT32                     AllCustomEntryCount;
   //
   // Custom picker entries.  Absolute entries come first.
   //
-  OC_PICKER_ENTRY  CustomEntries[];
-} OC_PICKER_CONTEXT;
+  OC_PICKER_ENTRY            CustomEntries[];
+};
 
 /**
   Hibernate detection bit mask for hibernate source usage.
@@ -573,8 +593,9 @@ typedef struct {
 /**
   Show simple password prompt and return verification status.
 
-  @param[in] Context  Privilege context.
-  @param[in] Level    The privilege level to request escalating to.
+  @param[in]  Context          Picker context.
+  @param[in] PrivilegeContext  Privilege context.
+  @param[in] Level             The privilege level to request escalating to.
 
   @retval EFI_SUCCESS  The privilege level has been escalated successfully.
   @retval EFI_ABORTED  The privilege escalation has been aborted.
@@ -584,7 +605,8 @@ typedef struct {
 EFI_STATUS
 EFIAPI
 OcShowSimplePasswordRequest (
-  IN VOID                *Context,
+  IN OC_PICKER_CONTEXT   *Context,
+  IN VOID                *PrivilegeContext,
   IN OC_PRIVILEGE_LEVEL  Level
   );
 
@@ -675,6 +697,7 @@ OcLoadPickerHotKeys (
 #define OC_INPUT_TOP            -9        ///< Move to top
 #define OC_INPUT_BOTTOM         -10       ///< Move to bottom
 #define OC_INPUT_MORE           -11       ///< Show more entries (press space)
+#define OC_INPUT_VOICE_OVER     -12       ///< Toggle VoiceOver (press CMD+F5)
 #define OC_INPUT_FUNCTIONAL(x) (-20 - (x))  ///< Functional hotkeys
 
 /**
@@ -682,7 +705,7 @@ OcLoadPickerHotKeys (
 
   @param[in,out]  Context      Picker context.
   @param[in]      KeyMap       Apple Key Map Aggregator protocol.
-  @param[in]      Time         Timeout to wait for.
+  @param[in]      Time         Timeout to wait for in milliseconds.
   @param[in]      PollHotkeys  Poll key combinations.
   @param[out]     SetDefault   Set boot option as default, optional.
 
@@ -859,7 +882,6 @@ OcDeleteVariables (
   VOID
   );
 
-
 /**
   Launch Apple BootPicker.
 
@@ -868,6 +890,56 @@ OcDeleteVariables (
 EFI_STATUS
 OcRunAppleBootPicker (
   VOID
+  );
+
+/**
+  Play audio file for context.
+
+  @param[in]  Context   Picker context.
+  @param[in]  File      File to play.
+  @param[in]  Fallback  Try to fallback to beeps on failure.
+
+  @retval EFI_SUCCESS on success or when unnecessary.
+**/
+EFI_STATUS
+OcPlayAudioFile (
+  IN     OC_PICKER_CONTEXT  *Context,
+  IN     UINT32             File,
+  IN     BOOLEAN            Fallback
+  );
+
+/**
+  Generate cycles of beep signals for context with silence afterwards, blocking.
+
+  @param[in]  Context   Picker context.
+  @param[in] ToneCount      Number of signals to produce.
+  @param[in] ToneLength     Signal length in milliseconds.
+  @param[in] SilenceLength  Silence length in milliseconds.
+
+  @retval EFI_SUCCESS on success or when unnecessary.
+**/
+EFI_STATUS
+OcPlayAudioBeep (
+  IN     OC_PICKER_CONTEXT        *Context,
+  IN     UINT32                   ToneCount,
+  IN     UINT32                   ToneLength,
+  IN     UINT32                   SilenceLength
+  );
+
+/**
+  Play audio file for context.
+
+  @param[in]  Context   Picker context.
+  @param[in]  Entry     Entry to play.
+  @param[in]  Number    Entry index number.
+
+  @retval EFI_SUCCESS on success or when unnecessary.
+**/
+EFI_STATUS
+OcPlayAudioEntry (
+  IN     OC_PICKER_CONTEXT  *Context,
+  IN     OC_BOOT_ENTRY      *Entry,
+  IN     UINT32             Number
   );
 
 #endif // OC_BOOT_MANAGEMENT_LIB_H

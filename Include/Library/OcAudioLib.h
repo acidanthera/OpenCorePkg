@@ -49,4 +49,16 @@ OcGetVolumeLevel (
   OUT BOOLEAN  *Muted
   );
 
+/**
+  Set VoiceOver language from string.
+
+  @param[in]  Language   Language string, optional for system.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcSetVoiceOverLanguage (
+  CONST CHAR8   *Language  OPTIONAL
+  );
+
 #endif // OC_AUDIO_LIB_H

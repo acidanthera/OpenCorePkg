@@ -323,6 +323,7 @@ mMiscConfigurationBootSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("HideAuxiliary",       OC_GLOBAL_CONFIG, Misc.Boot.HideAuxiliary),
   OC_SCHEMA_BOOLEAN_IN ("HideSelf",            OC_GLOBAL_CONFIG, Misc.Boot.HideSelf),
   OC_SCHEMA_INTEGER_IN ("PickerAttributes",    OC_GLOBAL_CONFIG, Misc.Boot.PickerAttributes),
+  OC_SCHEMA_BOOLEAN_IN ("PickerAudioAssist",   OC_GLOBAL_CONFIG, Misc.Boot.PickerAudioAssist),
   OC_SCHEMA_STRING_IN  ("PickerMode",          OC_GLOBAL_CONFIG, Misc.Boot.PickerMode),
   OC_SCHEMA_BOOLEAN_IN ("PollAppleHotKeys",    OC_GLOBAL_CONFIG, Misc.Boot.PollAppleHotKeys),
   OC_SCHEMA_BOOLEAN_IN ("ShowPicker",          OC_GLOBAL_CONFIG, Misc.Boot.ShowPicker),

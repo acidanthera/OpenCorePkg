@@ -430,8 +430,8 @@ OcScanForBootEntries (
 
   if (Context->ShowNvramReset && !Context->HideAuxiliary) {
     Entries[EntryIndex].Name = AllocateCopyPool (
-      L_STR_SIZE (L"Reset NVRAM"),
-      L"Reset NVRAM"
+      L_STR_SIZE (OC_MENU_RESET_NVRAM_ENTRY),
+      OC_MENU_RESET_NVRAM_ENTRY
       );
     if (Entries[EntryIndex].Name == NULL) {
       OcFreeBootEntries (Entries, EntryIndex + 1);

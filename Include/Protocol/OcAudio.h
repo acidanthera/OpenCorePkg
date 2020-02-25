@@ -31,6 +31,81 @@
 typedef struct OC_AUDIO_PROTOCOL_ OC_AUDIO_PROTOCOL;
 
 /**
+  Custom OpenCore audio files.
+**/
+typedef enum {
+  OcVoiceOverAudioFileBase                  = 0x1000,
+
+  OcVoiceOverAudioFileIndexBase             = 0x1000,
+  OcVoiceOverAudioFile1                     = 0x1001,
+  OcVoiceOverAudioFile2                     = 0x1002,
+  OcVoiceOverAudioFile3                     = 0x1003,
+  OcVoiceOverAudioFile4                     = 0x1004,
+  OcVoiceOverAudioFile5                     = 0x1005,
+  OcVoiceOverAudioFile6                     = 0x1006,
+  OcVoiceOverAudioFile7                     = 0x1007,
+  OcVoiceOverAudioFile8                     = 0x1008,
+  OcVoiceOverAudioFile9                     = 0x1009,
+  OcVoiceOverAudioFileIndexAlphabetical     = 0x100A,
+  OcVoiceOverAudioFileLetterA               = 0x100A,
+  OcVoiceOverAudioFileLetterB               = 0x100B,
+  OcVoiceOverAudioFileLetterC               = 0x100C,
+  OcVoiceOverAudioFileLetterD               = 0x100D,
+  OcVoiceOverAudioFileLetterE               = 0x100E,
+  OcVoiceOverAudioFileLetterF               = 0x100F,
+  OcVoiceOverAudioFileLetterG               = 0x1010,
+  OcVoiceOverAudioFileLetterH               = 0x1011,
+  OcVoiceOverAudioFileLetterI               = 0x1012,
+  OcVoiceOverAudioFileLetterJ               = 0x1013,
+  OcVoiceOverAudioFileLetterK               = 0x1014,
+  OcVoiceOverAudioFileLetterL               = 0x1015,
+  OcVoiceOverAudioFileLetterM               = 0x1016,
+  OcVoiceOverAudioFileLetterN               = 0x1017,
+  OcVoiceOverAudioFileLetterO               = 0x1018,
+  OcVoiceOverAudioFileLetterP               = 0x1019,
+  OcVoiceOverAudioFileLetterQ               = 0x101A,
+  OcVoiceOverAudioFileLetterR               = 0x101B,
+  OcVoiceOverAudioFileLetterS               = 0x101C,
+  OcVoiceOverAudioFileLetterT               = 0x101D,
+  OcVoiceOverAudioFileLetterU               = 0x101E,
+  OcVoiceOverAudioFileLetterV               = 0x101F,
+  OcVoiceOverAudioFileLetterW               = 0x1020,
+  OcVoiceOverAudioFileLetterX               = 0x1021,
+  OcVoiceOverAudioFileLetterY               = 0x1022,
+  OcVoiceOverAudioFileLetterZ               = 0x1023,
+  OcVoiceOverAudioFileIndexMax              = 0x1023,
+
+  OcVoiceOverAudioFileAbortTimeout          = 0x1030,
+  OcVoiceOverAudioFileChooseOS              = 0x1031,
+  OcVoiceOverAudioFileDefault               = 0x1032,
+  OcVoiceOverAudioFileDiskImage             = 0x1033,
+  OcVoiceOverAudioFileEnterPassword         = 0x1034,
+  OcVoiceOverAudioFileExecutionFailure      = 0x1035,
+  OcVoiceOverAudioFileExecutionSuccessful   = 0x1036,
+  OcVoiceOverAudioFileExternal              = 0x1037,
+  OcVoiceOverAudioFileExternalOption        = 0x1038,
+  OcVoiceOverAudioFileLoading               = 0x1039,
+  OcVoiceOverAudioFilemacOS                 = 0x103A,
+  OcVoiceOverAudioFilemacOS_Recovery        = 0x103B,
+  OcVoiceOverAudioFileOtherOS               = 0x103C,
+  OcVoiceOverAudioFilePasswordAccepted      = 0x103D,
+  OcVoiceOverAudioFilePasswordIncorrect     = 0x103E,
+  OcVoiceOverAudioFilePasswordRetryLimit    = 0x103F,
+  OcVoiceOverAudioFileReloading             = 0x1040,
+  OcVoiceOverAudioFileResetNVRAM            = 0x1041,
+  OcVoiceOverAudioFileSelected              = 0x1042,
+  OcVoiceOverAudioFileShowAuxiliary         = 0x1043,
+  OcVoiceOverAudioFileTimeout               = 0x1044,
+  OcVoiceOverAudioFileUEFI_Shell            = 0x1045,
+  OcVoiceOverAudioFileWelcome               = 0x1046,
+  OcVoiceOverAudioFileWindows               = 0x1047,
+
+  OcVoiceOverAudioFileMax                   = 0x1048,
+} OC_VOICE_OVER_AUDIO_FILE;
+
+STATIC_ASSERT (OcVoiceOverAudioFileIndexMax - OcVoiceOverAudioFileIndexBase == 9 + 26, "Invalid index count");
+
+/**
   Connect to Audio I/O.
 
   @param[in,out] This         Audio protocol instance.

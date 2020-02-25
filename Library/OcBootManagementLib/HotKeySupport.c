@@ -158,7 +158,7 @@ OcWaitForAppleKeyIndex (
   //
 
   CurrTime  = GetTimeInNanoSecond (GetPerformanceCounter ());
-  EndTime   = CurrTime + Timeout * 1000000000ULL;
+  EndTime   = CurrTime + Timeout * 1000000ULL;
 
   if (SetDefault != NULL) {
     *SetDefault = FALSE;
@@ -178,7 +178,7 @@ OcWaitForAppleKeyIndex (
       return OC_INPUT_INVALID;
     }
 
-    CurrTime    = GetTimeInNanoSecond (GetPerformanceCounter ());
+    CurrTime    = GetTimeInNanoSecond (GetPerformanceCounter ());  
 
     //
     // Handle key combinations.
@@ -282,6 +282,15 @@ OcWaitForAppleKeyIndex (
         }
         continue;
       }
+    }
+
+    //
+    // Handle VoiceOver.
+    //
+    if ((Modifiers & (APPLE_MODIFIER_LEFT_COMMAND | APPLE_MODIFIER_RIGHT_COMMAND)) != 0
+      && OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyF5)) {
+      OcKeyMapFlush (KeyMap, 0, TRUE);
+      return OC_INPUT_VOICE_OVER;
     }
 
     //

@@ -83,6 +83,8 @@
   gEfiLoadedImageProtocolGuid        ## SOMETIMES_CONSUMES
   gEfiUsbIoProtocolGuid              ## SOMETIMES_CONSUMES
   gOcFirmwareRuntimeProtocolGuid     ## SOMETIMES_CONSUMES
+  gOcAudioProtocolGuid               ## SOMETIMES_CONSUMES
+  gAppleBeepGenProtocolGuid          ## SOMETIMES_CONSUMES
 
 [LibraryClasses]
   BaseLib
