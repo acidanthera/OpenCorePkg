@@ -536,6 +536,7 @@ OcMiscBoot (
   Context->AllCustomEntryCount = EntryIndex;
   Context->PollAppleHotKeys    = Config->Misc.Boot.PollAppleHotKeys;
   Context->HideAuxiliary       = Config->Misc.Boot.HideAuxiliary;
+  Context->PickerAudioAssist   = Config->Misc.Boot.PickerAudioAssist;
 
   OcLoadPickerHotKeys (Context);
 

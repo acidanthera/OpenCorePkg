@@ -29,6 +29,7 @@ OpenCore Changelog
 - Fixed drivers starting with `#` not being skipped
 - Added audio support through AudioDxe with optional boot chime
 - Added VoiceOver accessability support in boot.efi for 10.13+
+- Added `PickerAudioAssist` option for audio assistance in picker
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere
