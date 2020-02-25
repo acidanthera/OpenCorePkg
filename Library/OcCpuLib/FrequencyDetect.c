@@ -484,6 +484,12 @@ OcGetTSCFrequency (
     CPUFrequency = InternalCalculateVMTFrequency (NULL, NULL);
     if (CPUFrequency == 0) {
       CPUFrequency = InternalCalculateTSCFromPMTimer (FALSE);
+      if (CPUFrequency == 0) {
+        //
+        // Assume at least some frequency, so that we always work.
+        //
+        CPUFrequency = OC_FALLBACK_CPU_FREQUENCY;
+      }
     }
   }
   //

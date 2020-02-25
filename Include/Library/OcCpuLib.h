@@ -18,6 +18,11 @@
 #include <IndustryStandard/CpuId.h>
 #include <IndustryStandard/AppleIntelCpuInfo.h>
 
+/**
+  Assumed CPU frequency when it cannot be detected.
+**/
+#define OC_FALLBACK_CPU_FREQUENCY 1000000000
+
 typedef struct {
   //
   // Note, Vendor and BrandString are reordered for proper alignment.
@@ -182,7 +187,7 @@ OcCpuGetGeneration (
 /**
   Obtain CPU's invariant TSC frequency.
 
-  @retval CPU's TSC frequency.
+  @retval CPU's TSC frequency or OC_FALLBACK_CPU_FREQUENCY.
 **/
 UINT64
 OcGetTSCFrequency (
