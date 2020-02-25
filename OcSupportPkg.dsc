@@ -109,6 +109,7 @@
   OcSupportPkg/Application/ChipTune/ChipTune.inf
   OcSupportPkg/Application/CleanNvram/CleanNvram.inf
   OcSupportPkg/Application/GopStop/GopStop.inf
+  OcSupportPkg/Application/HdaCodecDump/HdaCodecDump.inf
   OcSupportPkg/Application/PavpProvision/PavpProvision.inf
   OcSupportPkg/Application/VerifyMsrE2/VerifyMsrE2.inf
   OcSupportPkg/Debug/GdbSyms/GdbSyms.inf
