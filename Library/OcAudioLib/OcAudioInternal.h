@@ -21,6 +21,7 @@
 #include <Protocol/AppleVoiceOver.h>
 #include <Protocol/OcAudio.h>
 
+#define OC_AUDIO_DEFAULT_VOLUME_LEVEL  70
 
 #define OC_AUDIO_PROTOCOL_PRIVATE_SIGNATURE  \
   SIGNATURE_32 ('D', 'J', 'B', 'n')

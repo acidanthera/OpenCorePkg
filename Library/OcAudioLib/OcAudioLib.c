@@ -140,7 +140,7 @@ OcGetVolumeLevel (
     &Value
     );
   if (EFI_ERROR (Status)) {
-    Value = 100;
+    Value = OC_AUDIO_DEFAULT_VOLUME_LEVEL;
   }
 
   DEBUG ((DEBUG_INFO, "OCAU: System volume is %X - %r\n", Value, Status));
