@@ -59,13 +59,15 @@ InternalOcAudioConnect (
   IN     UINT8                     Volume
   )
 {
-  EFI_STATUS                 Status;
-  OC_AUDIO_PROTOCOL_PRIVATE  *Private;
-  UINTN                      Index;
-  EFI_HANDLE                 *AudioIoHandles;
-  UINTN                      AudioIoHandleCount;
-  EFI_DEVICE_PATH_PROTOCOL   *CodecDevicePath;
-  CHAR16                     *DevicePathText;
+  EFI_STATUS                  Status;
+  OC_AUDIO_PROTOCOL_PRIVATE   *Private;
+  UINTN                       Index;
+  EFI_HANDLE                  *AudioIoHandles;
+  UINTN                       AudioIoHandleCount;
+  EFI_DEVICE_PATH_PROTOCOL    *CodecDevicePath;
+  CHAR16                      *DevicePathText;
+  EFI_AUDIO_IO_PROTOCOL_PORT  *OutputPorts;
+  UINTN                       OutputPortsCount;
 
   Private = OC_AUDIO_PROTOCOL_PRIVATE_FROM_OC_AUDIO (This);
 
@@ -122,18 +124,38 @@ InternalOcAudioConnect (
           DevicePathText = ConvertDevicePathToText (CodecDevicePath, FALSE, FALSE);
         }
 
+        OutputPortsCount = 0;
+        Status = gBS->HandleProtocol (
+          AudioIoHandles[Index],
+          &gEfiAudioIoProtocolGuid,
+          (VOID **) &Private->AudioIo
+          );
+        if (!EFI_ERROR (Status)) {
+          Status = Private->AudioIo->GetOutputs (
+            Private->AudioIo,
+            &OutputPorts,
+            &OutputPortsCount
+            );
+          if (!EFI_ERROR (Status)) {
+            FreePool (OutputPorts);
+          }
+        }
+
         DEBUG ((
           DEBUG_INFO,
-          "OCAU: %u/%u %s - %r\n",
+          "OCAU: %u/%u %s (%u outputs) - %r\n",
           (UINT32) (Index + 1),
           (UINT32) (AudioIoHandleCount),
           DevicePathText != NULL ? DevicePathText : L"<invalid>",
+          (UINT32) OutputPortsCount,
           Status
           ));
 
         if (DevicePathText != NULL) {
           FreePool (DevicePathText);
         }
+
+        Status = EFI_NOT_FOUND;
         DEBUG_CODE_END ();
 
         if (IsDevicePathEqual (DevicePath, CodecDevicePath)) {
