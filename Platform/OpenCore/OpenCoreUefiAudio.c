@@ -106,9 +106,6 @@ OcAudioAcquireFile (
         "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"[File - OcVoiceOverAudioFileIndexBase]
         );
       BasePath = IndexPath;
-      if (File >= OcVoiceOverAudioFileIndexAlphabetical) {
-        Localised = FALSE;
-      }
     } else {
       switch (File) {
         case OcVoiceOverAudioFileAbortTimeout:
