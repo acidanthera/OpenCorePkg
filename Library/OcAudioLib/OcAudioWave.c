@@ -164,7 +164,7 @@ InternalGetRawData (
       return EFI_UNSUPPORTED;
   }
 
-  *Channels = WaveFormat->Channels;
+  *Channels = (UINT8) WaveFormat->Channels;
 
   return EFI_SUCCESS;
 }
