@@ -142,10 +142,9 @@ OcAppendArgumentToCmd (
 
   if (Context != NULL) {
     Status = Context->RequestPrivilege (
-                        Context,
-                        Context->PrivilegeContext,
-                        OcPrivilegeAuthorized
-                        );
+      Context,
+      OcPrivilegeAuthorized
+      );
     if (EFI_ERROR (Status)) {
       if (Status != EFI_ABORTED) {
         ASSERT (FALSE);

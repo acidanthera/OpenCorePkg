@@ -450,7 +450,6 @@ EFI_STATUS
 EFIAPI
 OcShowSimplePasswordRequest (
   IN OC_PICKER_CONTEXT   *Context,
-  IN VOID                *PrivilegeContext,
   IN OC_PRIVILEGE_LEVEL  Level
   )
 {
@@ -465,13 +464,9 @@ OcShowSimplePasswordRequest (
   EFI_STATUS           Status;
   EFI_INPUT_KEY        Key;
 
-  if (Context == NULL) {
-    return EFI_SUCCESS;
-  }
+  Privilege = Context->PrivilegeContext;
 
-  Privilege = (OC_PRIVILEGE_CONTEXT *) PrivilegeContext;
-
-  if (Privilege->CurrentLevel >= Level) {
+  if (Privilege == NULL || Privilege->CurrentLevel >= Level) {
     return EFI_SUCCESS;
   }
 
@@ -652,7 +647,6 @@ OcRunSimpleBootPicker (
   if (Context->PickerCommand != OcPickerDefault) {
     Status = Context->RequestPrivilege (
       Context,
-      Context->PrivilegeContext,
       OcPrivilegeAuthorized
       );
     if (EFI_ERROR (Status)) {

@@ -353,7 +353,6 @@ typedef
 EFI_STATUS
 (EFIAPI *OC_REQ_PRIVILEGE)(
   IN OC_PICKER_CONTEXT   *Context,
-  IN VOID                *PrivilegeContext,
   IN OC_PRIVILEGE_LEVEL  Level
   );
 
@@ -594,8 +593,7 @@ typedef struct {
   Show simple password prompt and return verification status.
 
   @param[in]  Context          Picker context.
-  @param[in] PrivilegeContext  Privilege context.
-  @param[in] Level             The privilege level to request escalating to.
+  @param[in]  Level            The privilege level to request escalating to.
 
   @retval EFI_SUCCESS  The privilege level has been escalated successfully.
   @retval EFI_ABORTED  The privilege escalation has been aborted.
@@ -605,9 +603,8 @@ typedef struct {
 EFI_STATUS
 EFIAPI
 OcShowSimplePasswordRequest (
-  IN OC_PICKER_CONTEXT   *Context,
-  IN VOID                *PrivilegeContext,
-  IN OC_PRIVILEGE_LEVEL  Level
+  IN OC_PICKER_CONTEXT      *Context,
+  IN OC_PRIVILEGE_LEVEL     Level
   );
 
 /**
