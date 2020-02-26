@@ -37,7 +37,7 @@
 #define OC_MENU_DISK_IMAGE           L" (dmg)"
 #define OC_MENU_EXTERNAL             L" (external)"
 
-#define OC_VOICE_OVER_IDLE_TIMEOUT_MS     500  ///< Experimental, less is problematic.
+#define OC_VOICE_OVER_IDLE_TIMEOUT_MS     700  ///< Experimental, less is problematic.
 
 #define OC_VOICE_OVER_SIGNAL_NORMAL_MS    200  ///< From boot.efi, constant.
 #define OC_VOICE_OVER_SILENCE_NORMAL_MS   150  ///< From boot.efi, constant.
