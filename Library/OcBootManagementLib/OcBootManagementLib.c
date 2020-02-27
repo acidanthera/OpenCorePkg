@@ -613,7 +613,7 @@ OcShowSimplePasswordRequest (
 }
 
 EFI_STATUS
-OcRunSimpleBootPicker (
+OcRunBootPicker (
   IN OC_PICKER_CONTEXT  *Context
   )
 {
@@ -716,7 +716,7 @@ OcRunSimpleBootPicker (
         ForbidApple = TRUE;
       }
 
-      Status = OcShowSimpleBootMenu (
+      Status = Context->ShowMenu (
         Context,
         Entries,
         EntryCount,

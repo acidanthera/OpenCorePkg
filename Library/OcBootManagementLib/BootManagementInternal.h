@@ -24,32 +24,6 @@
 #include <Protocol/DevicePath.h>
 #include <Protocol/SimpleFileSystem.h>
 
-#define OC_MENU_BOOT_MENU            L"OpenCore Boot Menu"
-#define OC_MENU_RESET_NVRAM_ENTRY    L"Reset NVRAM"
-#define OC_MENU_UEFI_SHELL_ENTRY     L"UEFI Shell"
-#define OC_MENU_PASSWORD_REQUEST     L"Password: "
-#define OC_MENU_PASSWORD_RETRY_LIMIT L"Password retry limit exceeded."
-#define OC_MENU_CHOOSE_OS            L"Choose the Operating System: "
-#define OC_MENU_SHOW_AUXILIARY       L"Show Auxiliary"
-#define OC_MENU_RELOADING            L"Reloading"
-#define OC_MENU_TIMEOUT              L"Timeout"
-#define OC_MENU_OK                   L"OK"
-#define OC_MENU_DISK_IMAGE           L" (dmg)"
-#define OC_MENU_EXTERNAL             L" (external)"
-
-#define OC_VOICE_OVER_IDLE_TIMEOUT_MS     700  ///< Experimental, less is problematic.
-
-#define OC_VOICE_OVER_SIGNAL_NORMAL_MS    200  ///< From boot.efi, constant.
-#define OC_VOICE_OVER_SILENCE_NORMAL_MS   150  ///< From boot.efi, constant.
-#define OC_VOICE_OVER_SIGNALS_NORMAL      1    ///< Username prompt or any input for boot.efi
-#define OC_VOICE_OVER_SIGNALS_PASSWORD    2    ///< Password prompt for boot.efi
-#define OC_VOICE_OVER_SIGNALS_PASSWORD_OK 3    ///< Password correct for boot.efi
-
-#define OC_VOICE_OVER_SIGNAL_ERROR_MS     1000
-#define OC_VOICE_OVER_SILENCE_ERROR_MS    150
-#define OC_VOICE_OVER_SIGNALS_ERROR       1    ///< Password verification error or boot failure.
-#define OC_VOICE_OVER_SIGNALS_HWERROR     3    ///< Hardware error
-
 typedef struct {
   EFI_DEVICE_PATH_PROTOCOL       *DevicePath;
   OC_APPLE_DISK_IMAGE_CONTEXT    *DmgContext;

@@ -38,7 +38,7 @@ ExternalGuiRun (
   // however, a more advanced user interface should reimplement
   // OcRunSimpleBootPicker logic.
   //
-  return OcRunSimpleBootPicker (Picker);
+  return OcRunBootPicker (Picker);
 }
 
 STATIC

@@ -393,6 +393,19 @@ EFI_STATUS
   );
 
 /**
+  Display entries onscreen.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *OC_SHOW_MENU) (
+  IN  OC_PICKER_CONTEXT           *Context,
+  IN  OC_BOOT_ENTRY               *BootEntries,
+  IN  UINTN                       Count,
+  IN  UINTN                       DefaultEntry,
+  OUT OC_BOOT_ENTRY               **ChosenBootEntry
+  );
+
+/**
   Picker behaviour action.
 **/
 typedef enum {
@@ -448,6 +461,10 @@ struct OC_PICKER_CONTEXT_ {
   // Handle to exclude scanning from, optional.
   //
   EFI_HANDLE                 ExcludeHandle;
+  //
+  // Entry display routine.
+  //
+  OC_SHOW_MENU               ShowMenu;
   //
   // Privilege escalation requesting routine.
   //
@@ -656,6 +673,7 @@ OcShowSimplePasswordRequest (
   @retval EFI_ABORTED          When the user chose to by pressing Esc or 0.
 **/
 EFI_STATUS
+EFIAPI
 OcShowSimpleBootMenu (
   IN  OC_PICKER_CONTEXT           *Context,
   IN  OC_BOOT_ENTRY               *BootEntries,
@@ -761,7 +779,7 @@ OcWaitForAppleKeyIndex (
   @retval does not return unless a fatal error happened.
 **/
 EFI_STATUS
-OcRunSimpleBootPicker (
+OcRunBootPicker (
   IN  OC_PICKER_CONTEXT  *Context
   );
 
