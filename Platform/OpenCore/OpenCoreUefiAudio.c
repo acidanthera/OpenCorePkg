@@ -46,10 +46,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
-STATIC
-OC_AUDIO_PROTOCOL *
-mOcAudio;
-
 typedef struct OC_AUDIO_FILE_ {
   UINT8   *Buffer;
   UINT32  Size;
@@ -326,7 +322,7 @@ OcAudioExitBootServices (
 {
   OC_AUDIO_PROTOCOL  *OcAudio;
   OcAudio = Context;
-  OcAudio->StopPlayback (mOcAudio, TRUE);
+  OcAudio->StopPlayback (OcAudio, TRUE);
 }
 
 VOID
