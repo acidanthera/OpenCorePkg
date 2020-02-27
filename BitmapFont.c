@@ -670,8 +670,8 @@ GuiFontDestruct (
 extern unsigned char Helvetica_fnt[];
 extern unsigned int Helvetica_fnt_len;
 
-extern unsigned char Helvetica_0_bmp[];
-extern unsigned int Helvetica_0_bmp_len;
+extern unsigned char Helvetica_0_png[];
+extern unsigned int Helvetica_0_png_len;
 
 BOOLEAN
 GuiInitializeFontHelvetica (
@@ -681,8 +681,8 @@ GuiInitializeFontHelvetica (
   ASSERT (Context != NULL);
   return GuiFontConstruct (
            Context,
-           Helvetica_0_bmp,
-           Helvetica_0_bmp_len,
+           Helvetica_0_png,
+           Helvetica_0_png_len,
            Helvetica_fnt,
            Helvetica_fnt_len
            );

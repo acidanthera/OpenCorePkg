@@ -7,20 +7,20 @@
 #include "BmfLib.h"
 #include "GuiApp.h"
 
-extern unsigned char Cursor_bmp[];
-extern unsigned int  Cursor_bmp_len;
+extern unsigned char Cursor_png[];
+extern unsigned int  Cursor_png_len;
 
-extern unsigned char IconHd_bmp[];
-extern unsigned int  IconHd_bmp_len;
+extern unsigned char IconHd_png[];
+extern unsigned int  IconHd_png_len;
 
-extern unsigned char IconHdExt_bmp[];
-extern unsigned int  IconHdExt_bmp_len;
+extern unsigned char IconHdExt_png[];
+extern unsigned int  IconHdExt_png_len;
 
-extern unsigned char IconSelected_bmp[];
-extern unsigned int  IconSelected_bmp_len;
+extern unsigned char IconSelected_png[];
+extern unsigned int  IconSelected_png_len;
 
-extern unsigned char Selector_bmp[];
-extern unsigned int  Selector_bmp_len;
+extern unsigned char Selector_png[];
+extern unsigned int  Selector_png_len;
 
 GLOBAL_REMOVE_IF_UNREFERENCED BOOT_PICKER_GUI_CONTEXT mGuiContext = { { { 0 } } };
 
@@ -68,11 +68,11 @@ InternalContextConstruct (
 
   Context->BootEntry = NULL;
 
-  Status  = GuiBmpToImage (&Context->Cursor,            Cursor_bmp,       Cursor_bmp_len);
-  Status |= GuiBmpToImage (&Context->EntryBackSelected, IconSelected_bmp, IconSelected_bmp_len);
-  Status |= GuiBmpToClickImage (&Context->EntrySelector,     Selector_bmp,     Selector_bmp_len,  &HighlightPixel);
-  Status |= GuiBmpToImage (&Context->EntryIconInternal, IconHd_bmp,       IconHd_bmp_len);
-  Status |= GuiBmpToImage (&Context->EntryIconExternal, IconHdExt_bmp,    IconHdExt_bmp_len);
+  Status  = GuiBmpToImage (&Context->Cursor,            Cursor_png,       Cursor_png_len);
+  Status |= GuiBmpToImage (&Context->EntryBackSelected, IconSelected_png, IconSelected_png_len);
+  Status |= GuiBmpToClickImage (&Context->EntrySelector,     Selector_png,     Selector_png_len,  &HighlightPixel);
+  Status |= GuiBmpToImage (&Context->EntryIconInternal, IconHd_png,       IconHd_png_len);
+  Status |= GuiBmpToImage (&Context->EntryIconExternal, IconHdExt_png,    IconHdExt_png_len);
   if (RETURN_ERROR (Status)) {
     InternalContextDestruct (Context);
     return RETURN_UNSUPPORTED;

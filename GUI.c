@@ -6,6 +6,7 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcCpuLib.h>
+#include <Library/OcPngLib.h>
 #include <Library/TimerLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
@@ -1201,42 +1202,34 @@ GuiBmpToImage (
   IN     UINTN      BmpImageSize
   )
 {
-  RETURN_STATUS                 Status;
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL *Buffer;
-  UINTN                         BufferSize;
-  UINTN                         BmpHeight;
-  UINTN                         BmpWidth;
-  UINTN                         Index;
+  EFI_STATUS                       Status;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL    *BufferWalker;
+  UINTN                            Index;
+  UINT8                            TmpChannel;
 
-  ASSERT (Image != NULL);
-  ASSERT (BmpImage != NULL);
-  ASSERT (BmpImageSize > 0);
+  Status = DecodePng (
+               BmpImage,
+               BmpImageSize,
+               (VOID **) &Image->Buffer,
+               &Image->Width,
+               &Image->Height,
+               NULL
+              );
 
-  Buffer = NULL;
-  Status = TranslateBmpToGopBlt (
-             BmpImage,
-             BmpImageSize,
-             &Buffer,
-             &BufferSize,
-             &BmpHeight,
-             &BmpWidth
-             );
-  if (RETURN_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCUI: DecodePNG...%r\n", Status));
     return Status;
   }
-  // TODO: Update the lib?
-  ASSERT ((UINT32)BmpHeight == BmpHeight);
-  ASSERT ((UINT32)BmpWidth  == BmpWidth);
 
-  for (Index = 0; Index < BmpWidth * BmpHeight; ++Index) {
-    Buffer[Index].Blue  = (UINT8)((Buffer[Index].Blue  * Buffer[Index].Reserved) / 0xFF);
-    Buffer[Index].Green = (UINT8)((Buffer[Index].Green * Buffer[Index].Reserved) / 0xFF);
-    Buffer[Index].Red   = (UINT8)((Buffer[Index].Red   * Buffer[Index].Reserved) / 0xFF);
+  BufferWalker = Image->Buffer;
+  for (Index = 0; Index < (UINTN) Image->Width * Image->Height; ++Index) {
+    TmpChannel             = (UINT8) ((BufferWalker->Blue * BufferWalker->Reserved) / 0xFF);
+    BufferWalker->Blue     = (UINT8) ((BufferWalker->Red * BufferWalker->Reserved) / 0xFF);
+    BufferWalker->Green    = (UINT8) ((BufferWalker->Green * BufferWalker->Reserved) / 0xFF);
+    BufferWalker->Red      = TmpChannel;
+    ++BufferWalker;
   }
 
-  Image->Height = (UINT32)BmpHeight;
-  Image->Width  = (UINT32)BmpWidth;
-  Image->Buffer = Buffer;
   return RETURN_SUCCESS;
 }
 
