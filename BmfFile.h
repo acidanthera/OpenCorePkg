@@ -8,7 +8,10 @@ typedef struct {
   UINT32 size;
 } BMF_BLOCK_HEADER;
 
-VERIFY_SIZE_OF (BMF_BLOCK_HEADER, 5);
+STATIC_ASSERT (
+  sizeof(BMF_BLOCK_HEADER) == 5,
+  "BMF_BLOCK_HEADER struct must be packed"
+);
 
 #define BMF_BLOCK_INFO_ID  1
 
@@ -33,7 +36,10 @@ typedef PACKED struct {
   CHAR8  fontName[];   // This is the name of the true type font.
 } BMF_BLOCK_INFO;
 
-VERIFY_SIZE_OF (BMF_BLOCK_INFO, 14);
+STATIC_ASSERT (
+  sizeof(BMF_BLOCK_INFO) == 14,
+  "BMF_BLOCK_INFO struct must be packed"
+);
 
 #define BMF_BLOCK_COMMON_ID  2
 
@@ -53,7 +59,10 @@ typedef PACKED struct {
   UINT8  blueChnl;   // Set to 0 if the channel holds the glyph data, 1 if it holds the outline, 2 if it holds the glyph and the outline, 3 if its set to zero, and 4 if its set to one.
 } BMF_BLOCK_COMMON;
 
-VERIFY_SIZE_OF (BMF_BLOCK_COMMON, 15);
+STATIC_ASSERT (
+  sizeof(BMF_BLOCK_COMMON) == 15,
+  "BMF_BLOCK_COMMON struct must be packed"
+);
 
 #define BMF_BLOCK_PAGES_ID  3
 
@@ -75,7 +84,10 @@ typedef PACKED struct {
   UINT8  chnl;     // The texture channel where the character image is found (1 = blue, 2 = green, 4 = red, 8 = alpha, 15 = all channels).
 } BMF_CHAR;
 
-VERIFY_SIZE_OF (BMF_CHAR, 20);
+STATIC_ASSERT (
+  sizeof(BMF_CHAR) == 20,
+  "BMF_CHAR struct must be packed"
+);
 
 #define BMF_BLOCK_CHARS_ID  4
 
@@ -90,7 +102,10 @@ typedef PACKED struct {
   INT16  amount; // How much the x position should be adjusted when drawing the second character immediately following the first.
 } BMF_KERNING_PAIR;
 
-VERIFY_SIZE_OF (BMF_KERNING_PAIR, 10);
+STATIC_ASSERT (
+  sizeof(BMF_KERNING_PAIR) == 10,
+  "BMF_KERNING_PAIR struct must be packed"
+);
 
 #define BMF_BLOCK_KERNING_PAIRS_ID  5
 
@@ -104,7 +119,10 @@ typedef PACKED struct {
   UINT8 version;
 } BMF_HEADER;
 
-VERIFY_SIZE_OF (BMF_HEADER, 4);
+STATIC_ASSERT (
+  sizeof(BMF_HEADER) == 4,
+  "BMF_HEADER struct must be packed"
+);
 
 #pragma pack()
 
