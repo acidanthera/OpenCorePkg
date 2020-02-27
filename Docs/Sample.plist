@@ -785,6 +785,11 @@
 			<string>HfsPlus.efi</string>
 			<string>ApfsDriverLoader.efi</string>
 			<string>FwRuntimeServices.efi</string>
+			<string>#AppleUsbKbDxe.efi</string>
+			<string>#HiiDatabase.efi</string>
+			<string>#NvmExpressDxe.efi</string>
+			<string>#XhciDxe.efi</string>
+			<string>#AudioDxe.efi</string>
 		</array>
 		<key>Audio</key>
 		<dict>

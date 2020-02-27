@@ -757,7 +757,7 @@
 			<key>BoardProduct</key>
 			<string>Mac-F221BEC8</string>
 			<key>BoardRevision</key>
-			<data>AQ==</data>
+			<data></data>
 			<key>DevicePathsSupported</key>
 			<integer>1</integer>
 			<key>FSBFrequency</key>
@@ -888,6 +888,11 @@
 			<string>HfsPlus.efi</string>
 			<string>ApfsDriverLoader.efi</string>
 			<string>FwRuntimeServices.efi</string>
+			<string>#AppleUsbKbDxe.efi</string>
+			<string>#HiiDatabase.efi</string>
+			<string>#NvmExpressDxe.efi</string>
+			<string>#XhciDxe.efi</string>
+			<string>#AudioDxe.efi</string>
 		</array>
 		<key>Audio</key>
 		<dict>
