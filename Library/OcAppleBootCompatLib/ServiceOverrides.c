@@ -530,8 +530,19 @@ OcExitBootServices (
 {
   EFI_STATUS               Status;
   BOOT_COMPAT_CONTEXT      *BootCompat;
+  UINTN                    Index;
 
   BootCompat = GetBootCompatContext ();
+
+  //
+  // Handle events in case we have any.
+  //
+  for (Index = 0; BootCompat->Settings.ExitBootServicesHandlers[Index] != NULL; ++Index) {
+    BootCompat->Settings.ExitBootServicesHandlers[Index] (
+      NULL,
+      BootCompat->Settings.ExitBootServicesHandlerContexts[Index]
+      );
+  }
 
   //
   // For non-macOS operating systems return directly.

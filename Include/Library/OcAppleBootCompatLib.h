@@ -94,6 +94,14 @@ typedef struct OC_ABC_SETTINGS_ {
   /// Size of list of physical addresses to not be devirtualised by DevirtualiseMmio.
   ///
   UINTN                MmioWhitelistSize;
+  ///
+  /// List of NULL-terminated handlers for TPL_APPLICATION execution within ExitBootServices.
+  ///
+  EFI_EVENT_NOTIFY     *ExitBootServicesHandlers;
+  ///
+  /// List of handler contexts for ExitBootServicesHandlers.
+  ///
+  VOID                 **ExitBootServicesHandlerContexts;
 } OC_ABC_SETTINGS;
 
 /**
