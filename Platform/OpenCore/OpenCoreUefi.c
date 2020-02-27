@@ -366,8 +366,10 @@ OcLoadBooterUefiSupport (
         (UINT32) Config->Booter.MmioWhitelist.Count
         ));
     }
-
   }
+
+  AbcSettings.ExitBootServicesHandlers = mOcExitBootServicesHandlers;
+  AbcSettings.ExitBootServicesHandlerContexts = mOcExitBootServicesContexts;
 
   OcAbcInitialize (&AbcSettings);
 }
@@ -386,6 +388,7 @@ OcLoadUefiSupport (
   UINT16      *BootOrder;
   UINTN       BootOrderSize;
   BOOLEAN     BootOrderChanged;
+  EFI_EVENT   Event;
 
   OcReinstallProtocols (Config);
 
@@ -490,8 +493,11 @@ OcLoadUefiSupport (
 
   OcLoadUefiAudioSupport (Storage, Config);
 
-  OcScheduleExitBootServices (
+  gBS->CreateEvent (
+    EVT_SIGNAL_EXIT_BOOT_SERVICES,
+    TPL_NOTIFY,
     OcExitBootServicesHandler,
-    Config
+    Config,
+    &Event
     );
 }
