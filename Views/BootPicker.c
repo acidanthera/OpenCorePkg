@@ -808,6 +808,9 @@ BootPickerEntriesEmpty (
   while (!IsNull (&mBootPicker.Hdr.Obj.Children, ListEntry)) {
     NextEntry = ListEntry->BackLink;
     RemoveEntryList (ListEntry);
+    mBootPicker.Hdr.Obj.Width   -= BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE;
+    mBootPicker.Hdr.Obj.OffsetX += (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) / 2;
+
     ListEntry = NextEntry;
 
     BootEntry = BASE_CR (ListEntry, GUI_VOLUME_ENTRY, Hdr.Link);
