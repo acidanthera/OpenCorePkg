@@ -55,6 +55,8 @@ OcShowMenuByOc (
 
   *ChosenBootEntry = NULL;
   mGuiContext.BootEntry = NULL;
+  mGuiContext.HideAuxiliary = Context->HideAuxiliary;
+  mGuiContext.Refresh = FALSE;
 
   BootPickerEntriesEmpty ();
 
@@ -72,9 +74,13 @@ OcShowMenuByOc (
   }
 
   GuiDrawLoop (&mDrawContext);
-  ASSERT (mGuiContext.BootEntry != NULL);
+  ASSERT (mGuiContext.BootEntry != NULL || mGuiContext.Refresh);
 
   *ChosenBootEntry = mGuiContext.BootEntry;
+  Context->HideAuxiliary = mGuiContext.HideAuxiliary;
+  if (mGuiContext.Refresh) {
+    return RETURN_ABORTED;
+  }
   return RETURN_SUCCESS;
 }
 

@@ -319,6 +319,13 @@ InternalBootPickerKeyEvent (
     ASSERT (Picker->SelectedEntry != NULL);
     GuiContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
     GuiContext->BootEntry = Picker->SelectedEntry->Context;
+  } else if (Key->UnicodeChar == L' ') {
+    GuiContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
+    GuiContext->HideAuxiliary = FALSE;
+    GuiContext->Refresh = TRUE;
+  } else if (Key->ScanCode == SCAN_ESC) {
+    GuiContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
+    GuiContext->Refresh = TRUE;
   }
 }
 
@@ -828,7 +835,7 @@ InternalBootPickerExitLoop (
   ASSERT (Context != NULL);
 
   GuiContext = (CONST BOOT_PICKER_GUI_CONTEXT *)Context;
-  return GuiContext->BootEntry != NULL;
+  return GuiContext->BootEntry != NULL || GuiContext->Refresh;
 }
 
 STATIC GUI_INTERPOLATION mBpAnimInfoOpacity;

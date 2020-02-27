@@ -9,6 +9,8 @@ typedef struct {
   GUI_IMAGE        Cursor;
   GUI_FONT_CONTEXT FontContext;
   VOID             *BootEntry;
+  BOOLEAN          HideAuxiliary;
+  BOOLEAN          Refresh;
 } BOOT_PICKER_GUI_CONTEXT;
 
 RETURN_STATUS
