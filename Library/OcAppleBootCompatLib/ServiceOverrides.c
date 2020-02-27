@@ -537,11 +537,13 @@ OcExitBootServices (
   //
   // Handle events in case we have any.
   //
-  for (Index = 0; BootCompat->Settings.ExitBootServicesHandlers[Index] != NULL; ++Index) {
-    BootCompat->Settings.ExitBootServicesHandlers[Index] (
-      NULL,
-      BootCompat->Settings.ExitBootServicesHandlerContexts[Index]
-      );
+  if (BootCompat->Settings.ExitBootServicesHandlers != NULL) {
+    for (Index = 0; BootCompat->Settings.ExitBootServicesHandlers[Index] != NULL; ++Index) {
+      BootCompat->Settings.ExitBootServicesHandlers[Index] (
+        NULL,
+        BootCompat->Settings.ExitBootServicesHandlerContexts[Index]
+        );
+    }
   }
 
   //
