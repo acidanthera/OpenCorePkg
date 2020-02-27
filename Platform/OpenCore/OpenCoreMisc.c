@@ -495,6 +495,7 @@ OcMiscBoot (
   Context->CustomRead         = OcToolLoadEntry;
   Context->PrivilegeContext   = Privilege;
   Context->RequestPrivilege   = OcShowSimplePasswordRequest;
+  Context->ShowMenu           = OcShowSimpleBootMenu;
   Context->PickerMode         = PickerMode;
   Context->ConsoleAttributes  = Config->Misc.Boot.PickerAttributes;
 
@@ -549,7 +550,7 @@ OcMiscBoot (
   if (Interface != NULL) {
     Status = Interface->ShowInteface (Interface, Storage, Context);
   } else {
-    Status = OcRunSimpleBootPicker (Context);
+    Status = OcRunBootPicker (Context);
   }
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to show boot menu!\n"));
