@@ -49,6 +49,92 @@ OcAudioGetCodecDevicePath (
     );
 }
 
+STATIC
+EFI_STATUS
+InternalMatchCodecDevicePath (
+  IN OUT OC_AUDIO_PROTOCOL_PRIVATE   *Private,
+  IN     EFI_DEVICE_PATH_PROTOCOL    *DevicePath,
+  IN     EFI_HANDLE                  *AudioIoHandles,
+  IN     UINTN                       AudioIoHandleCount
+  )
+{
+  EFI_STATUS                  Status;
+  UINTN                       Index;
+  CHAR16                      *DevicePathText;
+  EFI_DEVICE_PATH_PROTOCOL    *CodecDevicePath;
+  EFI_AUDIO_IO_PROTOCOL_PORT  *OutputPorts;
+  UINTN                       OutputPortsCount;
+
+  DEBUG_CODE_BEGIN ();
+  DevicePathText = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
+  DEBUG ((
+    DEBUG_INFO,
+    "OCAU: Matching %s...\n",
+    DevicePathText != NULL ? DevicePathText : L"<invalid>"
+    ));
+  if (DevicePathText != NULL) {
+    FreePool (DevicePathText);
+  }
+  DEBUG_CODE_END ();
+
+  for (Index = 0; Index < AudioIoHandleCount; ++Index) {
+    Status = gBS->HandleProtocol (
+      AudioIoHandles[Index],
+      &gEfiDevicePathProtocolGuid,
+      (VOID **) &CodecDevicePath
+      );
+
+    DEBUG_CODE_BEGIN ();
+    DevicePathText = NULL;
+    if (!EFI_ERROR (Status)) {
+      DevicePathText = ConvertDevicePathToText (CodecDevicePath, FALSE, FALSE);
+    }
+
+    OutputPortsCount = 0;
+    Status = gBS->HandleProtocol (
+      AudioIoHandles[Index],
+      &gEfiAudioIoProtocolGuid,
+      (VOID **) &Private->AudioIo
+      );
+    if (!EFI_ERROR (Status)) {
+      Status = Private->AudioIo->GetOutputs (
+        Private->AudioIo,
+        &OutputPorts,
+        &OutputPortsCount
+        );
+      if (!EFI_ERROR (Status)) {
+        FreePool (OutputPorts);
+      }
+    }
+
+    DEBUG ((
+      DEBUG_INFO,
+      "OCAU: %u/%u %s (%u outputs) - %r\n",
+      (UINT32) (Index + 1),
+      (UINT32) (AudioIoHandleCount),
+      DevicePathText != NULL ? DevicePathText : L"<invalid>",
+      (UINT32) OutputPortsCount,
+      Status
+      ));
+
+    if (DevicePathText != NULL) {
+      FreePool (DevicePathText);
+    }
+    DEBUG_CODE_END ();
+
+    if (IsDevicePathEqual (DevicePath, CodecDevicePath)) {
+      Status = gBS->HandleProtocol (
+        AudioIoHandles[Index],
+        &gEfiAudioIoProtocolGuid,
+        (VOID **) &Private->AudioIo
+        );
+      return EFI_SUCCESS;
+    }
+  }
+
+  return EFI_NOT_FOUND;
+}
+
 EFI_STATUS
 EFIAPI
 InternalOcAudioConnect (
@@ -61,13 +147,9 @@ InternalOcAudioConnect (
 {
   EFI_STATUS                  Status;
   OC_AUDIO_PROTOCOL_PRIVATE   *Private;
-  UINTN                       Index;
   EFI_HANDLE                  *AudioIoHandles;
   UINTN                       AudioIoHandleCount;
-  EFI_DEVICE_PATH_PROTOCOL    *CodecDevicePath;
-  CHAR16                      *DevicePathText;
-  EFI_AUDIO_IO_PROTOCOL_PORT  *OutputPorts;
-  UINTN                       OutputPortsCount;
+  EFI_DEVICE_PATH_PROTOCOL    *TmpDevicePath;
 
   Private = OC_AUDIO_PROTOCOL_PRIVATE_FROM_OC_AUDIO (This);
 
@@ -98,73 +180,23 @@ InternalOcAudioConnect (
         return EFI_INVALID_PARAMETER;
       }
 
-      DEBUG_CODE_BEGIN ();
-      DevicePathText = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
-      DEBUG ((
-        DEBUG_INFO,
-        "OCAU: Matching %s (%d)...\n",
-        DevicePathText != NULL ? DevicePathText : L"<invalid>",
-        CodecAddress
-        ));
-      if (DevicePathText != NULL) {
-        FreePool (DevicePathText);
-      }
-      DEBUG_CODE_END ();
+      Status = InternalMatchCodecDevicePath (
+        Private,
+        DevicePath,
+        AudioIoHandles,
+        AudioIoHandleCount
+        );
 
-      for (Index = 0; Index < AudioIoHandleCount; ++Index) {
-        Status = gBS->HandleProtocol (
-          AudioIoHandles[Index],
-          &gEfiDevicePathProtocolGuid,
-          (VOID **) &CodecDevicePath
-          );
-
-        DEBUG_CODE_BEGIN ();
-        DevicePathText = NULL;
-        if (!EFI_ERROR (Status)) {
-          DevicePathText = ConvertDevicePathToText (CodecDevicePath, FALSE, FALSE);
-        }
-
-        OutputPortsCount = 0;
-        Status = gBS->HandleProtocol (
-          AudioIoHandles[Index],
-          &gEfiAudioIoProtocolGuid,
-          (VOID **) &Private->AudioIo
-          );
-        if (!EFI_ERROR (Status)) {
-          Status = Private->AudioIo->GetOutputs (
-            Private->AudioIo,
-            &OutputPorts,
-            &OutputPortsCount
+      if (EFI_ERROR (Status)) {
+        TmpDevicePath = DevicePath;
+        if (OcFixAppleBootDevicePath (&TmpDevicePath) > 0) {
+          DEBUG ((DEBUG_INFO, "OCAU: Retrying with fixed device path\n"));
+          Status = InternalMatchCodecDevicePath (
+            Private,
+            DevicePath,
+            AudioIoHandles,
+            AudioIoHandleCount
             );
-          if (!EFI_ERROR (Status)) {
-            FreePool (OutputPorts);
-          }
-        }
-
-        DEBUG ((
-          DEBUG_INFO,
-          "OCAU: %u/%u %s (%u outputs) - %r\n",
-          (UINT32) (Index + 1),
-          (UINT32) (AudioIoHandleCount),
-          DevicePathText != NULL ? DevicePathText : L"<invalid>",
-          (UINT32) OutputPortsCount,
-          Status
-          ));
-
-        if (DevicePathText != NULL) {
-          FreePool (DevicePathText);
-        }
-
-        Status = EFI_NOT_FOUND;
-        DEBUG_CODE_END ();
-
-        if (IsDevicePathEqual (DevicePath, CodecDevicePath)) {
-          Status = gBS->HandleProtocol (
-            AudioIoHandles[Index],
-            &gEfiAudioIoProtocolGuid,
-            (VOID **) &Private->AudioIo
-            );
-          break;
         }
       }
 
@@ -220,12 +252,28 @@ InernalOcAudioPlayFileDone (
 
   Private = Context;
 
-  if (Private->ProviderRelease != NULL) {
-    ASSERT (Private->CurrentBuffer != NULL);
-    Private->ProviderRelease (Private->ProviderContext, Private->CurrentBuffer);
-  }
+  DEBUG ((
+    DEBUG_INFO,
+    "OCAU: PlayFileDone for %p event %p\n",
+    Private->CurrentBuffer,
+    Private->PlaybackEvent
+    ));
 
-  Private->CurrentBuffer = NULL;
+  if (Private->CurrentBuffer != NULL) {
+    DEBUG ((DEBUG_INFO, "OCAU: Signaling for completion\n"));
+
+    if (Private->ProviderRelease != NULL) {
+      Private->ProviderRelease (Private->ProviderContext, Private->CurrentBuffer);
+    }
+
+    Private->CurrentBuffer = NULL;  
+  } else {
+    //
+    // This hit us several times on legacy machines but is randomly reproducible.
+    //
+    DEBUG ((DEBUG_INFO, "OCAU: Audio driver tried to release audio twice\n"));
+    return;
+  }
 
   if (Private->PlaybackEvent != NULL) {
     DEBUG ((DEBUG_INFO, "OCAU: Signaling for completion\n"));
@@ -385,9 +433,20 @@ InternalOcAudioStopPlayBack (
   Private = OC_AUDIO_PROTOCOL_PRIVATE_FROM_OC_AUDIO (This);
 
   if (Wait && Private->PlaybackEvent != NULL) {
+    //
+    // CurrentBuffer is set when asynchronous audio data is playing.
+    // Try to wait for asynchronous audio playback for complete.
+    //
     if (Private->CurrentBuffer != NULL) {
       Status = gBS->WaitForEvent (1, &Private->PlaybackEvent, &Index);
-    } else {
+    }
+
+    //
+    // It is possible that the audio completed before we waited.
+    // It is also possible that we cannot wait from here due to being in TPL_NOTIFY.
+    // Reset event state in both cases, so that subsequent WaitForEvent work correctly.
+    //
+    if (Private->CurrentBuffer == NULL || EFI_ERROR (Status)) {
       Status = gBS->CheckEvent (Private->PlaybackEvent);
     }
     DEBUG ((
