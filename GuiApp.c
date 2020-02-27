@@ -73,11 +73,11 @@ InternalContextConstruct (
 
   Context->BootEntry = NULL;
 
-  Status  = GuiBmpToImage (&Context->Cursor,            Cursor_png,       Cursor_png_len);
-  Status |= GuiBmpToImage (&Context->EntryBackSelected, IconSelected_png, IconSelected_png_len);
-  Status |= GuiBmpToClickImage (&Context->EntrySelector,     Selector_png,     Selector_png_len,  &HighlightPixel);
-  Status |= GuiBmpToImage (&Context->EntryIconInternal, IconHd_png,       IconHd_png_len);
-  Status |= GuiBmpToImage (&Context->EntryIconExternal, IconHdExt_png,    IconHdExt_png_len);
+  Status  = GuiPngToImage (&Context->Cursor,            Cursor_png,       Cursor_png_len);
+  Status |= GuiPngToImage (&Context->EntryBackSelected, IconSelected_png, IconSelected_png_len);
+  Status |= GuiPngToClickImage (&Context->EntrySelector,     Selector_png,     Selector_png_len,  &HighlightPixel);
+  Status |= GuiPngToImage (&Context->EntryIconInternal, IconHd_png,       IconHd_png_len);
+  Status |= GuiPngToImage (&Context->EntryIconExternal, IconHdExt_png,    IconHdExt_png_len);
   if (RETURN_ERROR (Status)) {
     InternalContextDestruct (Context);
     return RETURN_UNSUPPORTED;

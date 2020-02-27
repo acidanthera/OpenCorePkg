@@ -640,7 +640,7 @@ GuiFontConstruct (
   ASSERT (FileBuffer  != NULL);
   ASSERT (FileSize     > 0);
 
-  Status = GuiBmpToImage (
+  Status = GuiPngToImage (
              &Context->FontImage,
              BmpImage,
              BmpImageSize

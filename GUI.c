@@ -1196,7 +1196,7 @@ GuiDrawLoop (
 }
 
 RETURN_STATUS
-GuiBmpToImage (
+GuiPngToImage (
   IN OUT GUI_IMAGE  *Image,
   IN     VOID       *BmpImage,
   IN     UINTN      BmpImageSize
@@ -1400,7 +1400,7 @@ GuiGetInterpolatedValue (
 }
 
 RETURN_STATUS
-GuiBmpToClickImage (
+GuiPngToClickImage (
   IN OUT GUI_CLICK_IMAGE                      *Image,
   IN     VOID                                 *BmpImage,
   IN     UINTN                                BmpImageSize,
@@ -1413,7 +1413,7 @@ GuiBmpToClickImage (
   ASSERT (BmpImage != NULL);
   ASSERT (HighlightPixel != NULL);
 
-  Status = GuiBmpToImage (&Image->BaseImage, BmpImage, BmpImageSize);
+  Status = GuiPngToImage (&Image->BaseImage, BmpImage, BmpImageSize);
   if (RETURN_ERROR (Status)) {
     return Status;
   }

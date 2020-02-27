@@ -128,7 +128,7 @@ struct GUI_DRAWING_CONTEXT_ {
 };
 
 RETURN_STATUS
-GuiBmpToImage (
+GuiPngToImage (
   IN OUT GUI_IMAGE  *Image,
   IN     VOID       *BmpImage,
   IN     UINTN      BmpImageSize
@@ -261,7 +261,7 @@ GuiGetInterpolatedValue (
   );
 
 RETURN_STATUS
-GuiBmpToClickImage (
+GuiPngToClickImage (
   IN OUT GUI_CLICK_IMAGE                      *Image,
   IN     VOID                                 *BmpImage,
   IN     UINTN                                BmpImageSize,
