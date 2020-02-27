@@ -1,7 +1,12 @@
 #include <Uefi.h>
 
+#include <Protocol/OcInterface.h>
+
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcBootManagementLib.h>
+#include <Library/OcStorageLib.h>
+#include <Library/UefiBootServicesTableLib.h>
 
 #include "GUI.h"
 #include "BmfLib.h"
@@ -101,74 +106,6 @@ InternalGetCursorImage (
 
   GuiContext = (CONST BOOT_PICKER_GUI_CONTEXT *)Context;
   return &GuiContext->Cursor;
-}
-
-RETURN_STATUS
-InternalBootPickerEntriesAddDummies (
-  IN CONST BOOT_PICKER_GUI_CONTEXT  *GuiContext
-  )
-{
-  RETURN_STATUS Status;
-  
-  ASSERT (GuiContext != NULL);
-
-  Status  = BootPickerEntriesAdd (GuiContext, L"Macintosh SSD",  NULL, FALSE, TRUE);
-  Status |= BootPickerEntriesAdd (GuiContext, L"Macintosh HD",   NULL, FALSE, FALSE);
-  Status |= BootPickerEntriesAdd (GuiContext, L"Recovery HD",    NULL, FALSE, FALSE);
-  Status |= BootPickerEntriesAdd (GuiContext, L"TimeMachine HD", NULL, TRUE,  FALSE);
-  if (RETURN_ERROR (Status)) {
-    return RETURN_UNSUPPORTED;
-  }
-
-  return RETURN_SUCCESS;
-}
-
-EFI_STATUS
-EFIAPI
-OcBootstrapMain (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
-  );
-
-EFI_STATUS
-EFIAPI
-UefiMain (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
-  )
-{
-  EFI_STATUS          Status;
-  GUI_DRAWING_CONTEXT DrawContext;
-
-  OcBootstrapMain (ImageHandle, SystemTable);
-
-  Status = GuiLibConstruct (0, 0);
-  if (RETURN_ERROR (Status)) {
-    return Status;
-  }
-
-  Status = InternalContextConstruct (&mGuiContext);
-  if (RETURN_ERROR (Status)) {
-    return Status;
-  }
-
-  Status = BootPickerViewInitialize (
-             &DrawContext,
-             &mGuiContext,
-             InternalGetCursorImage
-             );
-  if (RETURN_ERROR (Status)) {
-    return Status;
-  }
-
-  Status = InternalBootPickerEntriesAddDummies (&mGuiContext);
-  if (RETURN_ERROR (Status)) {
-    return Status;
-  }
-
-  GuiDrawLoop (&DrawContext);
-
-  return EFI_SUCCESS;
 }
 
 EFI_STATUS
