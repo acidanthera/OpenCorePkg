@@ -48,7 +48,27 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/DevicePath.h>
 #include <Protocol/GraphicsOutput.h>
 
-STATIC EFI_EVENT mOcExitBootServicesEvent;
+#define OC_EXIT_BOOT_SERVICES_HANDLER_MAX 5
+
+STATIC EFI_EVENT_NOTIFY mOcExitBootServicesHandlers[OC_EXIT_BOOT_SERVICES_HANDLER_MAX+1];
+STATIC VOID             *mOcExitBootServicesContexts[OC_EXIT_BOOT_SERVICES_HANDLER_MAX];
+STATIC UINTN            mOcExitBootServicesIndex;
+
+VOID
+OcScheduleExitBootServices (
+  IN EFI_EVENT_NOTIFY   Handler,
+  IN VOID               *Context
+  )
+{
+  if (mOcExitBootServicesIndex + 1 == OC_EXIT_BOOT_SERVICES_HANDLER_MAX) {
+    ASSERT (FALSE);
+    return;
+  }
+
+  mOcExitBootServicesHandlers[mOcExitBootServicesIndex] = Handler;
+  mOcExitBootServicesContexts[mOcExitBootServicesIndex] = Context;
+  ++mOcExitBootServicesIndex;
+}
 
 STATIC
 VOID
@@ -238,32 +258,6 @@ OcExitBootServicesHandler (
   if (Config->Uefi.Quirks.ExitBootServicesDelay > 0) {
     gBS->Stall (Config->Uefi.Quirks.ExitBootServicesDelay);
   }
-
-  if (Config->Uefi.Input.TimerResolution != 0) {
-    Status = OcAppleGenericInputTimerQuirkExit ();
-    DEBUG ((
-      DEBUG_INFO,
-      "OC: OcAppleGenericInputTimerQuirkExit status - %r\n",
-      Status
-      ));
-  }
-
-  if (Config->Uefi.Input.PointerSupport) {
-    Status = OcAppleGenericInputPointerExit ();
-    DEBUG ((DEBUG_INFO,
-      "OC: OcAppleGenericInputPointerExit status - %r\n",
-      Status
-      ));
-  }
-
-  if (Config->Uefi.Input.KeySupport) {
-    Status = OcAppleGenericInputKeycodeExit ();
-    DEBUG ((
-      DEBUG_INFO,
-      "OC: OcAppleGenericInputKeycodeExit status - %r\n",
-      Status
-      ));
-  }
 }
 
 STATIC
@@ -392,12 +386,10 @@ OcLoadUefiSupport (
   UINT16      *BootOrder;
   UINTN       BootOrderSize;
   BOOLEAN     BootOrderChanged;
-  BOOLEAN     AgiExitBs;
-  BOOLEAN     AudioExitBs;
 
   OcReinstallProtocols (Config);
 
-  AgiExitBs = OcLoadUefiInputSupport (Config);
+  OcLoadUefiInputSupport (Config);
 
   //
   // Setup Apple bootloader specific UEFI features.
@@ -496,18 +488,10 @@ OcLoadUefiSupport (
 
   OcLoadUefiOutputSupport (Config);
 
-  AudioExitBs = OcLoadUefiAudioSupport (Storage, Config);
+  OcLoadUefiAudioSupport (Storage, Config);
 
-  if (Config->Uefi.Quirks.ReleaseUsbOwnership
-    || Config->Uefi.Quirks.ExitBootServicesDelay > 0
-    || AgiExitBs
-    || AudioExitBs) {
-    gBS->CreateEvent (
-      EVT_SIGNAL_EXIT_BOOT_SERVICES,
-      TPL_NOTIFY,
-      OcExitBootServicesHandler,
-      Config,
-      &mOcExitBootServicesEvent
-      );
-  }
+  OcScheduleExitBootServices (
+    OcExitBootServicesHandler,
+    Config
+    );
 }

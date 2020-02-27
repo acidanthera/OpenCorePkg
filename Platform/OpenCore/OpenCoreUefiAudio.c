@@ -316,7 +316,20 @@ OcAudioReleaseFile (
   return EFI_SUCCESS;
 }
 
-BOOLEAN
+STATIC
+VOID
+EFIAPI
+OcAudioExitBootServices (
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
+  )
+{
+  OC_AUDIO_PROTOCOL  *OcAudio;
+  OcAudio = Context;
+  OcAudio->StopPlayback (mOcAudio, TRUE);
+}
+
+VOID
 OcLoadUefiAudioSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
   IN OC_GLOBAL_CONFIG    *Config
@@ -332,7 +345,7 @@ OcLoadUefiAudioSupport (
 
   if (!Config->Uefi.Audio.AudioSupport) {
     DEBUG ((DEBUG_INFO, "OC: Requested not to use audio\n"));
-    return FALSE;
+    return;
   }
 
   VolumeLevel = OcGetVolumeLevel (&Muted);
@@ -348,7 +361,7 @@ OcLoadUefiAudioSupport (
 
     if (DevicePath == NULL) {
       DEBUG ((DEBUG_INFO, "OC: Requested to use invalid audio device\n"));
-      return FALSE;
+      return;
     }
   }
 
@@ -356,7 +369,7 @@ OcLoadUefiAudioSupport (
   if (OcAudio == NULL) {
     DEBUG ((DEBUG_INFO, "OC: Cannot locate OcAudio protocol\n"));
     FreePool (DevicePath);
-    return FALSE;
+    return;
   }
 
   //
@@ -374,7 +387,7 @@ OcLoadUefiAudioSupport (
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OC: Audio connection failed - %r\n", Status));
-    return FALSE;
+    return;
   }
 
   Status = OcAudio->SetProvider (
@@ -385,7 +398,7 @@ OcLoadUefiAudioSupport (
     );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OC: Audio cannot set storage provider - %r\n", Status));
-    return FALSE;
+    return;
   }
 
   OcSetVoiceOverLanguage (NULL);
@@ -399,16 +412,5 @@ OcLoadUefiAudioSupport (
     DEBUG ((DEBUG_INFO, "OC: Play chime started - %r\n", Status));
   }
 
-  mOcAudio = OcAudio;
-  return TRUE;
-}
-
-VOID
-OcUefiAudioExitBootServices (
-  VOID
-  )
-{
-  if (mOcAudio != NULL) {
-    mOcAudio->StopPlayback (mOcAudio, TRUE);
-  }
+  OcScheduleExitBootServices (OcAudioExitBootServices, OcAudio);
 }

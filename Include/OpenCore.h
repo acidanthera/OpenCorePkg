@@ -169,10 +169,8 @@ OcLoadUefiSupport (
   Load UEFI input compatibility support.
 
   @param[out] Config    OpenCore configuration.
-
-  @retval  TRUE if needs Exit Boot Services handling.
 **/
-BOOLEAN
+VOID
 OcLoadUefiInputSupport (
   IN OC_GLOBAL_CONFIG  *Config
   );
@@ -192,21 +190,23 @@ OcLoadUefiOutputSupport (
 
   @param[in]  Storage   OpenCore storage.
   @param[out] Config    OpenCore configuration.
-
-  @retval  TRUE if needs Exit Boot Services handling.
 **/
-BOOLEAN
+VOID
 OcLoadUefiAudioSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
   IN OC_GLOBAL_CONFIG    *Config
   );
 
 /**
-  Complete audio services before loading.
+  Schedule Exit Boot Services event in TPL_APPLICATION mode.
+
+  @param[in]  Handler   Handler function to invoke.
+  @param[in]  Context   Handler function context.
 **/
 VOID
-OcUefiAudioExitBootServices (
-  VOID
+OcScheduleExitBootServices (
+  IN EFI_EVENT_NOTIFY   Handler,
+  IN VOID               *Context
   );
 
 /**

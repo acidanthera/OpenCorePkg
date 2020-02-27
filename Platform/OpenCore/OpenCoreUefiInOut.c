@@ -45,7 +45,47 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
-BOOLEAN
+STATIC
+VOID
+EFIAPI
+OcExitBootServicesInputHandler (
+  IN EFI_EVENT    Event,
+  IN VOID         *Context
+  )
+{
+  EFI_STATUS        Status;
+  OC_GLOBAL_CONFIG  *Config;
+
+  Config = Context;
+
+  if (Config->Uefi.Input.TimerResolution != 0) {
+    Status = OcAppleGenericInputTimerQuirkExit ();
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: OcAppleGenericInputTimerQuirkExit status - %r\n",
+      Status
+      ));
+  }
+
+  if (Config->Uefi.Input.PointerSupport) {
+    Status = OcAppleGenericInputPointerExit ();
+    DEBUG ((DEBUG_INFO,
+      "OC: OcAppleGenericInputPointerExit status - %r\n",
+      Status
+      ));
+  }
+
+  if (Config->Uefi.Input.KeySupport) {
+    Status = OcAppleGenericInputKeycodeExit ();
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: OcAppleGenericInputKeycodeExit status - %r\n",
+      Status
+      ));
+  }
+}
+
+VOID
 OcLoadUefiInputSupport (
   IN OC_GLOBAL_CONFIG  *Config
   )
@@ -119,7 +159,9 @@ OcLoadUefiInputSupport (
     }
   }
 
-  return ExitBs;
+  if (ExitBs) {
+    OcScheduleExitBootServices (OcExitBootServicesInputHandler, Config);
+  }
 }
 
 VOID
