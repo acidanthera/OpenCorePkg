@@ -188,6 +188,7 @@ EFI_STATUS
 
   @param[in,out] This         Audio protocol instance.
   @param[in]     File         File to play.
+  @param[in]     Wait         Wait for completion of the previous track.
 
   @retval EFI_SUCCESS on successful playback startup.
 **/
@@ -195,7 +196,8 @@ typedef
 EFI_STATUS
 (EFIAPI* OC_AUDIO_PLAY_FILE) (
   IN OUT OC_AUDIO_PROTOCOL          *This,
-  IN     UINT32                     File
+  IN     UINT32                     File,
+  IN     BOOLEAN                    Wait
   );
 
 /**

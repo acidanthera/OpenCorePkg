@@ -203,6 +203,7 @@ EFI_STATUS
 
 /**
   Begins playback on the device asynchronously.
+  The callback if specified will be executed with TPL_NOTIFY.
 
   @param[in] This               A pointer to the EFI_AUDIO_IO_PROTOCOL instance.
   @param[in] Data               A pointer to the buffer containing the audio data to play.
@@ -227,6 +228,7 @@ EFI_STATUS
 
 /**
   Stops playback on the device.
+  Note, this will not call registered callbacks for stop audio.
 
   @param[in] This               A pointer to the EFI_AUDIO_IO_PROTOCOL instance.
 

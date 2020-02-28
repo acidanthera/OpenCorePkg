@@ -103,6 +103,18 @@ OcAudioInstallProtocols (
     }
   }
 
+  Status = gBS->CreateEvent (
+    0,
+    TPL_NOTIFY,
+    NULL,
+    NULL,
+    &mAudioProtocol.PlaybackEvent
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAU: Unable to create audio completion event - %r\n", Status));
+    return NULL;
+  }
+
   NewHandle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
     &NewHandle,
@@ -116,6 +128,8 @@ OcAudioInstallProtocols (
     );
 
   if (EFI_ERROR (Status)) {
+    gBS->CloseEvent (mAudioProtocol.PlaybackEvent);
+    mAudioProtocol.PlaybackEvent = NULL;
     return NULL;
   }
 

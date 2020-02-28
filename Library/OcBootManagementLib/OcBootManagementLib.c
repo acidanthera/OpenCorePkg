@@ -73,8 +73,7 @@ OcPlayAudioFile (
   }
 
   if (Context->OcAudio != NULL) {
-    Context->OcAudio->StopPlayback (Context->OcAudio, TRUE);
-    Status = Context->OcAudio->PlayFile (Context->OcAudio, File);
+    Status = Context->OcAudio->PlayFile (Context->OcAudio, File, TRUE);
   }
 
   if (Fallback && EFI_ERROR (Status)) {

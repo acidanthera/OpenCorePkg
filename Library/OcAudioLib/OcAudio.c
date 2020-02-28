@@ -252,53 +252,28 @@ InernalOcAudioPlayFileDone (
 
   Private = Context;
 
-  DEBUG ((
-    DEBUG_INFO,
-    "OCAU: PlayFileDone for %p event %p\n",
-    Private->CurrentBuffer,
-    Private->PlaybackEvent
-    ));
+  DEBUG ((DEBUG_VERBOSE, "OCAU: PlayFileDone signaling for completion\n"));
 
-  if (Private->CurrentBuffer != NULL) {
-    DEBUG ((DEBUG_INFO, "OCAU: Signaling for completion\n"));
-
-    if (Private->ProviderRelease != NULL) {
-      Private->ProviderRelease (Private->ProviderContext, Private->CurrentBuffer);
-    }
-
-    Private->CurrentBuffer = NULL;  
-  } else {
-    //
-    // This hit us several times on legacy machines but is randomly reproducible.
-    //
-    DEBUG ((DEBUG_INFO, "OCAU: Audio driver tried to release audio twice\n"));
-    return;
-  }
-
-  if (Private->PlaybackEvent != NULL) {
-    DEBUG ((DEBUG_INFO, "OCAU: Signaling for completion\n"));
-    gBS->SignalEvent (Private->PlaybackEvent);
-  }
-}
-
-STATIC
-VOID
-EFIAPI
-InternalOcAudioPlayNotifyHandler (
-  IN EFI_EVENT  Event,
-  IN VOID       *Context
-  )
-{
   //
-  // Do nothing.
+  // The event callback is guaranteed to be called with TPL_NOTIFY,
+  // therefore we are guaranteed to have audio buffer set here.
   //
+  ASSERT (Private->CurrentBuffer != NULL);
+
+  if (Private->ProviderRelease != NULL) {
+    Private->ProviderRelease (Private->ProviderContext, Private->CurrentBuffer);
+  }
+  Private->CurrentBuffer = NULL;
+
+  gBS->SignalEvent (Private->PlaybackEvent);
 }
 
 EFI_STATUS
 EFIAPI
 InternalOcAudioPlayFile (
   IN OUT OC_AUDIO_PROTOCOL          *This,
-  IN     UINT32                     File
+  IN     UINT32                     File,
+  IN     BOOLEAN                    Wait
   )
 {
   EFI_STATUS                      Status;
@@ -317,19 +292,6 @@ InternalOcAudioPlayFile (
   if (Private->AudioIo == NULL || Private->ProviderAcquire == NULL) {
     DEBUG ((DEBUG_INFO, "OCAU: PlayFile has no AudioIo or provider is unconfigured\n"));
     return EFI_ABORTED;
-  }
-
-  if (Private->PlaybackEvent == NULL) {
-    Status = gBS->CreateEvent (
-      EVT_NOTIFY_WAIT,
-      TPL_NOTIFY,
-      InternalOcAudioPlayNotifyHandler,
-      NULL,
-      &Private->PlaybackEvent
-      );
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAU: Unable to create audio completion event - %r\n", Status));
-    }
   }
 
   Status = Private->ProviderAcquire (
@@ -375,10 +337,7 @@ InternalOcAudioPlayFile (
     return EFI_NOT_FOUND;
   }
 
-  //
-  // TODO: This should support queuing.
-  //
-  This->StopPlayback (This, TRUE);
+  This->StopPlayback (This, Wait);
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
   Private->CurrentBuffer = Buffer;
@@ -429,48 +388,78 @@ InternalOcAudioStopPlayBack (
   EFI_TPL                         OldTpl;
   UINTN                           Index;
   EFI_STATUS                      Status;
+  BOOLEAN                         CheckEvent;
 
   Private = OC_AUDIO_PROTOCOL_PRIVATE_FROM_OC_AUDIO (This);
 
-  if (Wait && Private->PlaybackEvent != NULL) {
+  //
+  // Note, this function cannot call prints, as it may be called from within
+  // ExitBootServices handler.
+  //
+
+  DEBUG ((DEBUG_VERBOSE, "OCAU: StopPlayback %d %p\n", Wait, Private->CurrentBuffer != NULL));
+
+  //
+  // Ensure that we never have the events signaled.
+  //
+  CheckEvent = TRUE;
+
+  if (Wait) {
     //
     // CurrentBuffer is set when asynchronous audio data is playing.
     // Try to wait for asynchronous audio playback for complete.
     //
     if (Private->CurrentBuffer != NULL) {
       Status = gBS->WaitForEvent (1, &Private->PlaybackEvent, &Index);
+      DEBUG ((DEBUG_VERBOSE, "OCAU: StopPlayback wait - %r\n", Status));
+      //
+      // This can fail in the following cases when current TPL is not TPL_APPLICATION.
+      // boot.efi does it from TPL_NOTIFY for password clicks in FV2 UI.
+      //
+      if (!EFI_ERROR (Status)) {
+        //
+        // If our wait was a success, we must have freed the buffer due to callback
+        // execution (InernalOcAudioPlayFileDone).
+        //
+        CheckEvent = FALSE;
+        ASSERT (Private->CurrentBuffer == NULL);
+      }
     }
-
-    //
-    // It is possible that the audio completed before we waited.
-    // It is also possible that we cannot wait from here due to being in TPL_NOTIFY.
-    // Reset event state in both cases, so that subsequent WaitForEvent work correctly.
-    //
-    if (Private->CurrentBuffer == NULL || EFI_ERROR (Status)) {
-      Status = gBS->CheckEvent (Private->PlaybackEvent);
-    }
-    DEBUG ((
-      DEBUG_INFO,
-      "OCAU: Waited (%d) for audio to complete - %r\n",
-      Private->CurrentBuffer != NULL,
-      Status
-      ));
-  } else {
-    Status = EFI_UNSUPPORTED;
   }
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
 
   if (Private->CurrentBuffer != NULL) {
     //
-    // Do not stop after successful waiting.
+    // The audio is still playing. Stop playback now.
     //
-    if (EFI_ERROR (Status)) {
-      Private->AudioIo->StopPlayback (
-        Private->AudioIo
-        );
+    Private->AudioIo->StopPlayback (
+      Private->AudioIo
+      );
+
+    //
+    // Calling StopPlayback ignores the registered callback, free file here.
+    //
+    if (Private->ProviderRelease != NULL) {
+      Private->ProviderRelease (Private->ProviderContext, Private->CurrentBuffer);
     }
-    Private->CurrentBuffer = NULL; ///< Should be nulled by StopPlayback.
+
+    Private->CurrentBuffer = NULL;
+  }
+
+  if (CheckEvent) {
+    //
+    // 1. It is possible that the audio completed before we waited, and thus
+    //    Private->CurrentBuffer was NULL at the time we checked it.
+    // 2. It is possible that we WaitForEvent failed due to wrong TPL.
+    // 3. It is possible that we were called with Wait = FALSE, and in this
+    //    case we still need to ensure that the event is reset for next playback.
+    // CheckEvent may fail if neither of these is true, and this is expected.
+    // We can call CheckEvent with TPL_APPLICATION, as a call to StopPlayback
+    // in TPL_NOTIFY guarantees no callbacks.
+    //
+    Status = gBS->CheckEvent (Private->PlaybackEvent);
+    DEBUG ((DEBUG_VERBOSE, "OCAU: StopPlayback check - %r\n", Status));
   }
 
   gBS->RestoreTPL (OldTpl);

@@ -81,7 +81,8 @@ EFI_STATUS
 EFIAPI
 InternalOcAudioPlayFile (
   IN OUT OC_AUDIO_PROTOCOL          *This,
-  IN     UINT32                     File
+  IN     UINT32                     File,
+  IN     BOOLEAN                    Wait
   );
 
 EFI_STATUS
