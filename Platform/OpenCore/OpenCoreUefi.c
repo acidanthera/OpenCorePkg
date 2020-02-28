@@ -241,9 +241,17 @@ OcExitBootServicesHandler (
 
   Config = (OC_GLOBAL_CONFIG *) Context;
 
+  //
+  // Printing from ExitBootServices is dangerous, as it may cause
+  // memory reallocation, which can make ExitBootServices fail.
+  // Only do that on error, which is not expected.
+  //
+
   if (Config->Uefi.Quirks.ReleaseUsbOwnership) {
     Status = ReleaseUsbOwnership ();
-    DEBUG ((DEBUG_INFO, "OC: ReleaseUsbOwnership status - %r\n", Status));
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OC: ReleaseUsbOwnership - %r\n", Status));
+    }
   }
 
   //

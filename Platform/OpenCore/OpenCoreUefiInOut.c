@@ -58,30 +58,42 @@ OcExitBootServicesInputHandler (
 
   Config = Context;
 
+  //
+  // Printing from ExitBootServices is dangerous, as it may cause
+  // memory reallocation, which can make ExitBootServices fail.
+  // Only do that on error, which is not expected.
+  //
+
   if (Config->Uefi.Input.TimerResolution != 0) {
     Status = OcAppleGenericInputTimerQuirkExit ();
-    DEBUG ((
-      DEBUG_INFO,
-      "OC: OcAppleGenericInputTimerQuirkExit status - %r\n",
-      Status
-      ));
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: OcAppleGenericInputTimerQuirkExit status - %r\n",
+        Status
+        ));
+    }
   }
 
   if (Config->Uefi.Input.PointerSupport) {
     Status = OcAppleGenericInputPointerExit ();
-    DEBUG ((DEBUG_INFO,
-      "OC: OcAppleGenericInputPointerExit status - %r\n",
-      Status
-      ));
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO,
+        "OC: OcAppleGenericInputPointerExit status - %r\n",
+        Status
+        ));
+    }
   }
 
   if (Config->Uefi.Input.KeySupport) {
     Status = OcAppleGenericInputKeycodeExit ();
-    DEBUG ((
-      DEBUG_INFO,
-      "OC: OcAppleGenericInputKeycodeExit status - %r\n",
-      Status
-      ));
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: OcAppleGenericInputKeycodeExit status - %r\n",
+        Status
+        ));
+    }
   }
 }
 

@@ -403,7 +403,8 @@ OcLoadUefiAudioSupport (
     DEBUG ((DEBUG_INFO, "OC: Starting to play chime...\n"));
     Status = OcAudio->PlayFile (
       OcAudio,
-      AppleVoiceOverAudioFileVoiceOverBoot
+      AppleVoiceOverAudioFileVoiceOverBoot,
+      FALSE
       );
     DEBUG ((DEBUG_INFO, "OC: Play chime started - %r\n", Status));
   }
