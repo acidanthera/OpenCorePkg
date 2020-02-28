@@ -543,6 +543,10 @@ OcExitBootServices (
         NULL,
         BootCompat->Settings.ExitBootServicesHandlerContexts[Index]
         );
+      //
+      // Even if ExitBootServices fails, do not subsequently call the events we handled.
+      //
+      BootCompat->Settings.ExitBootServicesHandlers[Index] = NULL;
     }
   }
 
