@@ -700,6 +700,8 @@
 				<data>MQ==</data>
 				<key>prev-lang:kbd</key>
 				<data>cnUtUlU6MjUy</data>
+				<key>SystemAudioVolume</key>
+				<data>Rg==</data>
 			</dict>
 		</dict>
 		<key>Block</key>
@@ -727,6 +729,7 @@
 				<string>LocationServicesEnabled</string>
 				<string>SystemAudioVolume</string>
 				<string>SystemAudioVolumeDB</string>
+				<string>SystemAudioVolumeSaved</string>
 				<string>bluetoothActiveControllerInfo</string>
 				<string>bluetoothInternalControllerInfo</string>
 				<string>flagstate</string>
@@ -904,8 +907,12 @@
 			<integer>0</integer>
 			<key>AudioOut</key>
 			<integer>0</integer>
+			<key>MinimumVolume</key>
+			<integer>20</integer>
 			<key>PlayChime</key>
 			<false/>
+			<key>VolumeAmplifier</key>
+			<integer>0</integer>
 		</dict>
 		<key>Input</key>
 		<dict>

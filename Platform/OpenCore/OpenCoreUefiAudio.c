@@ -344,7 +344,7 @@ OcLoadUefiAudioSupport (
     return;
   }
 
-  VolumeLevel = OcGetVolumeLevel (&Muted);
+  VolumeLevel = OcGetVolumeLevel (Config->Uefi.Audio.VolumeAmplifier, &Muted);
 
   DevicePath        = NULL;
   AsciiDevicePath   = OC_BLOB_GET (&Config->Uefi.Audio.AudioDevice);
@@ -376,7 +376,8 @@ OcLoadUefiAudioSupport (
     DevicePath,
     Config->Uefi.Audio.AudioCodec,
     Config->Uefi.Audio.AudioOut,
-    VolumeLevel < 20 ? 20 : VolumeLevel
+    VolumeLevel < Config->Uefi.Audio.MinimumVolume
+      ? Config->Uefi.Audio.MinimumVolume : VolumeLevel
     );
 
   FreePool (DevicePath);
@@ -399,7 +400,7 @@ OcLoadUefiAudioSupport (
 
   OcSetVoiceOverLanguage (NULL);
 
-  if (Config->Uefi.Audio.PlayChime && VolumeLevel > 0 && !Muted) {
+  if (Config->Uefi.Audio.PlayChime && VolumeLevel >= Config->Uefi.Audio.MinimumVolume && !Muted) {
     DEBUG ((DEBUG_INFO, "OC: Starting to play chime...\n"));
     Status = OcAudio->PlayFile (
       OcAudio,
