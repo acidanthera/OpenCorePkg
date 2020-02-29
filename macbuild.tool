@@ -59,19 +59,21 @@ DEPURLS=('https://github.com/acidanthera/EfiPkg' 'https://github.com/acidanthera
 DEPBRANCHES=('master' 'master')
 src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/efibuild.sh) && eval "$src" || exit 1
 
-UTILS=(
-  "AppleEfiSignTool"
-  "EfiResTool"
-  "readlabel"
-  "RsaTool"
-)
+if [ "$BUILD_UTILITIES" = "1" ]; then
+  UTILS=(
+    "AppleEfiSignTool"
+    "EfiResTool"
+    "readlabel"
+    "RsaTool"
+  )
 
-cd Utilities || exit 1
-for util in "${UTILS[@]}"; do
-  cd "$util" || exit 1
-  make || exit 1
-  cd - || exit 1
-done
+  cd Utilities || exit 1
+  for util in "${UTILS[@]}"; do
+    cd "$util" || exit 1
+    make || exit 1
+    cd - || exit 1
+  done
+fi
 
 cd ../Library/OcConfigurationLib || exit 1
 ./CheckSchema.py OcConfigurationLib.c || exit 1
