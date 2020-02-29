@@ -49,12 +49,12 @@
   IA32/BigNumWordMul64.c
 
 [FixedPcd]
-  gOcSupportPkgTokenSpaceGuid.PcdOcCryptoAllowedRsaModuli
-  gOcSupportPkgTokenSpaceGuid.PcdOcCryptoAllowedSigHashTypes
+  gOpenCorePkgTokenSpaceGuid.PcdOcCryptoAllowedRsaModuli
+  gOpenCorePkgTokenSpaceGuid.PcdOcCryptoAllowedSigHashTypes
 
 [Packages]
   MdePkg/MdePkg.dec
-  OcSupportPkg/OcSupportPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
 
 [LibraryClasses]
   UefiRuntimeServicesTableLib

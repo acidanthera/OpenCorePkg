@@ -41,9 +41,9 @@ package() {
   cp "${selfdir}/Docs/SampleFull.plist" tmp/Docs/ || exit 1
   cp "${selfdir}/Changelog.md" tmp/Docs/ || exit 1
   cp -r "${selfdir}/Docs/AcpiSamples/" tmp/Docs/AcpiSamples/ || exit 1
-  cp -r "${selfdir}/UDK/OcSupportPkg/Utilities/BootInstall" tmp/Utilities/ || exit 1
-  cp -r "${selfdir}/UDK/OcSupportPkg/Utilities/CreateVault" tmp/Utilities/ || exit 1
-  cp -r "${selfdir}/UDK/OcSupportPkg/Utilities/LogoutHook" tmp/Utilities/ || exit 1
+  cp -r "${selfdir}/Utilities/BootInstall" tmp/Utilities/ || exit 1
+  cp -r "${selfdir}/Utilities/CreateVault" tmp/Utilities/ || exit 1
+  cp -r "${selfdir}/Utilities/LogoutHook" tmp/Utilities/ || exit 1
   pushd tmp || exit 1
   zip -qry -FS ../"OpenCore-${ver}-${2}.zip" * || exit 1
   popd || exit 1
@@ -54,9 +54,9 @@ package() {
 cd $(dirname "$0")
 ARCHS=(X64 IA32)
 SELFPKG=OpenCorePkg
-DEPNAMES=('EfiPkg' 'OcSupportPkg' 'MacInfoPkg')
-DEPURLS=('https://github.com/acidanthera/EfiPkg' 'https://github.com/acidanthera/OcSupportPkg' 'https://github.com/acidanthera/MacInfoPkg')
-DEPBRANCHES=('master' 'master' 'master')
+DEPNAMES=('EfiPkg' 'MacInfoPkg')
+DEPURLS=('https://github.com/acidanthera/EfiPkg' 'https://github.com/acidanthera/MacInfoPkg')
+DEPBRANCHES=('master' 'master')
 src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/efibuild.sh) && eval "$src" || exit 1
 
 UTILS=(

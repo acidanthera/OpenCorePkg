@@ -22,7 +22,7 @@
 
 [Packages]
   MdePkg/MdePkg.dec
-  OcSupportPkg/OcSupportPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
 
 [LibraryClasses]
   BaseMemoryLib

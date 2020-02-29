@@ -38,7 +38,7 @@
   PropertyTest.c
 
 [Packages]
-  OcSupportPkg/OcSupportPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   UefiCpuPkg/UefiCpuPkg.dec

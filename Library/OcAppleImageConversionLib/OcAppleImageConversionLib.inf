@@ -36,7 +36,7 @@
 [Packages]
   MdePkg/MdePkg.dec
   EfiPkg/EfiPkg.dec
-  OcSupportPkg/OcSupportPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
 
 [Protocols]
   gAppleImageConversionProtocolGuid   ## SOMETIMES_PRODUCES

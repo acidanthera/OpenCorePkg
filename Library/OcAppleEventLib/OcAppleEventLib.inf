@@ -39,7 +39,7 @@
   PointerHandler.c
 
 [Packages]
-  OcSupportPkg/OcSupportPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
   EfiPkg/EfiPkg.dec
 

@@ -34,21 +34,21 @@
   OcDevicePropertyLib.c
 
 [Packages]
-  OcSupportPkg/OcSupportPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
   EfiPkg/EfiPkg.dec
 
 [Guids]
   gAppleBootVariableGuid       ## CONSUMES ## PRODUCES
   gAppleVendorVariableGuid     ## CONSUMES ## PRODUCES
-  gOcSupportPkgTokenSpaceGuid  ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid   ## CONSUMES
 
 [Protocols]
   gEfiDevicePathPropertyDatabaseProtocolGuid  ## PRODUCES
 
 [FeaturePcd]
-  gOcSupportPkgTokenSpaceGuid.PcdEnableAppleThunderboltSync       ## CONSUMES
-  gOcSupportPkgTokenSpaceGuid.PcNvramInitDevicePropertyDatabase   ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcdEnableAppleThunderboltSync        ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcNvramInitDevicePropertyDatabase    ## CONSUMES
 
 [LibraryClasses]
   BaseLib

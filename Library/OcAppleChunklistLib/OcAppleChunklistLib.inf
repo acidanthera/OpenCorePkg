@@ -21,7 +21,7 @@
 
 [Packages]
     MdePkg/MdePkg.dec
-    OcSupportPkg/OcSupportPkg.dec
+    OpenCorePkg/OpenCorePkg.dec
     EfiPkg/EfiPkg.dec
 
 [LibraryClasses]

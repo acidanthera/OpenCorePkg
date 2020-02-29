@@ -34,7 +34,7 @@
 [Packages]
   MdePkg/MdePkg.dec
   EfiPkg/EfiPkg.dec
-  OcSupportPkg/OcSupportPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
 
 [Guids]
   gAppleSecureBootVariableGuid  ## SOMETIMES_CONSUMES

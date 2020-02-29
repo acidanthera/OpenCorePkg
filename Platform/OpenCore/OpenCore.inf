@@ -50,7 +50,7 @@
 [Packages]
   EfiPkg/EfiPkg.dec
   OpenCorePkg/OpenCorePkg.dec
-  OcSupportPkg/OcSupportPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
   MacInfoPkg/MacInfoPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec

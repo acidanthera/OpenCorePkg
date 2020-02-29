@@ -29,10 +29,10 @@
 [Packages]
   EfiPkg/EfiPkg.dec
   MdePkg/MdePkg.dec
-  OcSupportPkg/OcSupportPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
 
 [Pcd]
-  gOcSupportPkgTokenSpaceGuid.PcdConsoleControlEntryMode
+  gOpenCorePkgTokenSpaceGuid.PcdConsoleControlEntryMode
 
 [Protocols]
   gEfiConsoleControlProtocolGuid

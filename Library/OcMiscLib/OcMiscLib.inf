@@ -27,7 +27,7 @@
 # VALID_ARCHITECTURES = IA32 X64
 
 [Packages]
-  OcSupportPkg/OcSupportPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
   EfiPkg/EfiPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec

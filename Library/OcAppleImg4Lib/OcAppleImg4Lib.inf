@@ -24,7 +24,7 @@
 [Packages]
   MdePkg/MdePkg.dec
   EfiPkg/EfiPkg.dec
-  OcSupportPkg/OcSupportPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
 
 [LibraryClasses]
   BaseMemoryLib

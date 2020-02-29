@@ -41,7 +41,7 @@
 [Packages]
   EfiPkg/EfiPkg.dec
   MdePkg/MdePkg.dec
-  OcSupportPkg/OcSupportPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
 
 [Guids]
   gAppleBootVariableGuid

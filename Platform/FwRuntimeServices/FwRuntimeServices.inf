@@ -21,7 +21,7 @@
   ENTRY_POINT                    = UefiEntrypoint
 
 [Packages]
-  OcSupportPkg/OcSupportPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
   EfiPkg/EfiPkg.dec
   MdeModulePkg/MdeModulePkg.dec
   MdePkg/MdePkg.dec

@@ -34,7 +34,7 @@
   OcDeviceTreeLib.c
 
 [Packages]
-  OcSupportPkg/OcSupportPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
 
 [LibraryClasses]

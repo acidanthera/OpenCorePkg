@@ -39,7 +39,7 @@
 
 [Packages]
   EfiPkg/EfiPkg.dec
-  OcSupportPkg/OcSupportPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
 
 [LibraryClasses]
