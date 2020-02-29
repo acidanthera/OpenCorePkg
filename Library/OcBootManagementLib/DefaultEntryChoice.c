@@ -457,7 +457,7 @@ InternalGetDefaultBootEntry (
   if (Status == EFI_NOT_FOUND) {
     DEBUG ((DEBUG_INFO, "OCB: BootNext has not been found\n"));
 
-    BootOrder = InternalGetBootOrder(
+    BootOrder = InternalGetBootOrder (
       BootVariableGuid,
       &BootOrderCount
       );
@@ -836,7 +836,7 @@ OcSetDefaultBootEntry (
     BootVariableGuid = &gEfiGlobalVariableGuid;
   }
 
-  BootOrder = InternalGetBootOrder(
+  BootOrder = InternalGetBootOrder (
     BootVariableGuid,
     &BootOrderCount
     );

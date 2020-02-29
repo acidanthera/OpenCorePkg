@@ -954,15 +954,15 @@ OcRunAppleBootPicker (
 **/
 EFI_STATUS
 OcPlayAudioFile (
-  IN     OC_PICKER_CONTEXT  *Context,
-  IN     UINT32             File,
-  IN     BOOLEAN            Fallback
+  IN  OC_PICKER_CONTEXT  *Context,
+  IN  UINT32             File,
+  IN  BOOLEAN            Fallback
   );
 
 /**
   Generate cycles of beep signals for context with silence afterwards, blocking.
 
-  @param[in]  Context   Picker context.
+  @param[in] Context        Picker context.
   @param[in] ToneCount      Number of signals to produce.
   @param[in] ToneLength     Signal length in milliseconds.
   @param[in] SilenceLength  Silence length in milliseconds.
@@ -971,10 +971,10 @@ OcPlayAudioFile (
 **/
 EFI_STATUS
 OcPlayAudioBeep (
-  IN     OC_PICKER_CONTEXT        *Context,
-  IN     UINT32                   ToneCount,
-  IN     UINT32                   ToneLength,
-  IN     UINT32                   SilenceLength
+  IN  OC_PICKER_CONTEXT        *Context,
+  IN  UINT32                   ToneCount,
+  IN  UINT32                   ToneLength,
+  IN  UINT32                   SilenceLength
   );
 
 /**
@@ -988,9 +988,21 @@ OcPlayAudioBeep (
 **/
 EFI_STATUS
 OcPlayAudioEntry (
-  IN     OC_PICKER_CONTEXT  *Context,
-  IN     OC_BOOT_ENTRY      *Entry,
-  IN     UINT32             Number
+  IN  OC_PICKER_CONTEXT  *Context,
+  IN  OC_BOOT_ENTRY      *Entry,
+  IN  UINT32             Number
+  );
+
+/**
+  Toggle VoiceOver support.
+
+  @param[in]  Context   Picker context.
+  @param[in]  File      File to play after enabling VoiceOver.
+**/
+VOID
+OcToggleVoiceOver (
+  IN  OC_PICKER_CONTEXT  *Context,
+  IN  UINT32             File  OPTIONAL
   );
 
 #endif // OC_BOOT_MANAGEMENT_LIB_H

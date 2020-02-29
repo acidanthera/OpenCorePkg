@@ -33,6 +33,7 @@
 [Sources]
   AppleHibernate.c
   BootArguments.c
+  BootAudio.c
   BootEntryInfo.c
   BootEntryManagement.c
   BootManagementInternal.h

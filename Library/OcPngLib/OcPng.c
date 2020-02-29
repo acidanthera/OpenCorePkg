@@ -119,7 +119,6 @@ EncodePng (
   IN  VOID    *RawData,
   IN  UINT32  Width,
   IN  UINT32  Height,
-  IN  UINT8   BitDepth,
   OUT VOID    **Buffer,
   OUT UINTN   *BufferSize
   )
