@@ -73,7 +73,8 @@ if [ "$BUILD_UTILITIES" = "1" ]; then
     make || exit 1
     cd - || exit 1
   done
+  cd .. || exit 1
 fi
 
-cd ../Library/OcConfigurationLib || exit 1
+cd Library/OcConfigurationLib || exit 1
 ./CheckSchema.py OcConfigurationLib.c || exit 1
