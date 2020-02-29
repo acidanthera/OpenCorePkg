@@ -19,7 +19,7 @@ The general approach is as follows:
 By default EDK II optimises produced binaries, so to build a "real" debug binary one should target
 `NOOPT`. Do be aware that it strongly affects resulting binary size.
 
-`GdbSyms.dll` is built as a part of OcSupportPkg, yet prebuilt binaries are also available:
+`GdbSyms.dll` is built as a part of OpenCorePkg, yet prebuilt binaries are also available:
 
 - `GdbSyms/Bin/X64_XCODE5/GdbSyms.dll` is built with UDK2018 and XCODE5
 
@@ -72,10 +72,10 @@ used. This can be done in several ways:
 Once GDB is installed the process is as simple as running the following set of commands:
 
 ```
-$ ggdb /opt/UDK/Build/OcSupportPkg/NOOPT_XCODE5/X64/OcSupportPkg/Debug/GdbSyms/GdbSyms/DEBUG/GdbSyms.dll.dSYM/Contents/Resources/DWARF/GdbSyms.dll
+$ ggdb /opt/UDK/Build/OpenCorePkg/NOOPT_XCODE5/X64/OpenCorePkg/Debug/GdbSyms/GdbSyms/DEBUG/GdbSyms.dll.dSYM/Contents/Resources/DWARF/GdbSyms.dll
 
 target remote localhost:8864
-source /opt/UDK/OcSupportPkg/Debug/Scripts/gdb_uefi.py
+source /opt/UDK/OpenCorePkg/Debug/Scripts/gdb_uefi.py
 set pagination off
 reload-uefi
 b DebugBreak
