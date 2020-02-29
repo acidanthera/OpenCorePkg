@@ -31,7 +31,7 @@
   HDA Controller Info protocol GUID.
 **/
 #define EFI_HDA_CONTROLLER_INFO_PROTOCOL_GUID \
-  { 0xE5FC2CAF, 0x0291, 0x46F2,                \
+  { 0xE5FC2CAF, 0x0291, 0x46F2,               \
     { 0x87, 0xF8, 0x10, 0xC7, 0x58, 0x72, 0x58, 0x04 } }
 
 typedef struct EFI_HDA_CONTROLLER_INFO_PROTOCOL_ EFI_HDA_CONTROLLER_INFO_PROTOCOL;

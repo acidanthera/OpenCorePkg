@@ -46,6 +46,7 @@
 #define VEN_ULI_ID              0x10B9
 #define VEN_MOTO_ID             0x1057
 #define VEN_SII_ID              0x1095
+#define VEN_VMWARE_ID           0x15AD
 #define VEN_WOLFSON_ID          0x14EC
 
 #define VEN_INVALID_ID          0xFFFF

@@ -174,6 +174,11 @@ STATIC HDA_CONTROLLER_LIST_ENTRY mHdaControllerList[] = {
   ///
   { HDA_CONTROLLER (VIA, 0x3288),     "VIA VT8251/8237A HD Audio Controller" },
   { HDA_CONTROLLER (VIA, 0xFFFF),     "VIA HD Audio Controller" },
+  ///
+  /// 15AD  VMware, Inc.
+  ///
+  { HDA_CONTROLLER (VMWARE, 0x1977),  "VMware HD Audio Controller"},
+  { HDA_CONTROLLER (VMWARE, 0xFFFF),  "VMware (Unknown)"},
 };
 
 //
@@ -361,6 +366,11 @@ STATIC HDA_CODEC_LIST_ENTRY mHdaCodecList[] = {
   /// Nvidia.
   ///
   { HDA_CODEC (NVIDIA, 0xFFFF),         0x0000, "Nvidia (Unknown)" },
+  ///
+  /// VMware.
+  ///
+  { HDA_CODEC (VMWARE, 0x1975),         0x0000, "VMware HD Audio Codec"},
+  { HDA_CODEC (VMWARE, 0xFFFF),         0x0000, "VMware (Unknown)"},
   ///
   /// Realtek.
   ///
