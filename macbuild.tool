@@ -21,3 +21,6 @@ for util in "${UTILS[@]}"; do
   make || exit 1
   cd - || exit 1
 done
+
+cd ../Library/OcConfigurationLib || exit 1
+./CheckSchema.py OcConfigurationLib.c || exit 1
