@@ -167,7 +167,7 @@ OcGetVolumeLevel (
   }
 
   if (Amplifier > 0) {
-    NewValue = Value * Amplifier / 100;
+    NewValue = (UINT8) (Value * Amplifier / 100);
   } else {
     NewValue = Value;
   }
