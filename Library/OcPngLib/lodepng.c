@@ -1,5 +1,5 @@
 /*
-LodePNG version 20200215
+LodePNG version 20200219
 
 Copyright (c) 2005-2020 Lode Vandevenne
 
@@ -44,7 +44,7 @@ Rename this file to lodepng.cpp to use it for C++, or to lodepng.c to use it for
 #pragma warning( disable : 4996 ) /*VS does not like fopen, but fopen_s is not standard C so unusable here*/
 #endif /*_MSC_VER */
 
-const char* LODEPNG_VERSION_STRING = "20200215";
+const char* LODEPNG_VERSION_STRING = "20200219";
 
 /*
 This source file is built up in the following large parts. The code sections
@@ -2657,6 +2657,7 @@ static unsigned checkColorValidity(LodePNGColorType colortype, unsigned bd) {
     case LCT_PALETTE:    if(!(bd == 1 || bd == 2 || bd == 4 || bd == 8            )) return 37; break;
     case LCT_GREY_ALPHA: if(!(                                 bd == 8 || bd == 16)) return 37; break;
     case LCT_RGBA:       if(!(                                 bd == 8 || bd == 16)) return 37; break;
+    case LCT_MAX_OCTET_VALUE: return 31; /* invalid color type */
     default: return 31; /* invalid color type */
   }
   return 0; /*allowed color type / bits combination*/
@@ -2669,6 +2670,7 @@ static unsigned getNumColorChannels(LodePNGColorType colortype) {
     case LCT_PALETTE: return 1;
     case LCT_GREY_ALPHA: return 2;
     case LCT_RGBA: return 4;
+    case LCT_MAX_OCTET_VALUE: return 0; /* invalid color type */
     default: return 0; /*invalid color type*/
   }
 }
@@ -5090,7 +5092,8 @@ void lodepng_state_cleanup(LodePNGState* state) {
 
 void lodepng_state_copy(LodePNGState* dest, const LodePNGState* source) {
   lodepng_state_cleanup(dest);
-  *dest = *source;
+  /* OC: Fixes undefined reference to memcpy. */
+  lodepng_memcpy(dest, source, sizeof(LodePNGState));
   lodepng_color_mode_init(&dest->info_raw);
   lodepng_info_init(&dest->info_png);
   dest->error = lodepng_color_mode_copy(&dest->info_raw, &source->info_raw); if(dest->error) return;
