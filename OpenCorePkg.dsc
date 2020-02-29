@@ -109,8 +109,18 @@
   UefiUsbLib|MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
 
 [Components]
-  MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf
-  MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf
+  MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf{
+    <LibraryClasses>
+      !if $(TARGET) == RELEASE
+        DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
+      !endif
+  }
+  MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf{
+    <LibraryClasses>
+      !if $(TARGET) == RELEASE
+        DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
+      !endif
+  }
   MdeModulePkg/Universal/HiiDatabaseDxe/HiiDatabaseDxe.inf
   OpenCorePkg/Application/BootKicker/BootKicker.inf
   OpenCorePkg/Application/Bootstrap/Bootstrap.inf

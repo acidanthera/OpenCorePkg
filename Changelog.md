@@ -33,6 +33,7 @@ OpenCore Changelog
 - Added `HdaCodecDump.efi` tool in default package
 - Added legacy AudioDxe and Microsoft namespaces to Reset NVRAM
 - Merged `OcSupportPkg` with `OpenCorePkg` for easier bisection
+- Disabled warnings in release versions of NVMe and XHCI drivers
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere
