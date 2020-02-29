@@ -31,6 +31,7 @@ OpenCore Changelog
 - Added VoiceOver accessability support in boot.efi for 10.13+
 - Added `PickerAudioAssist` option for audio assistance in picker
 - Added `HdaCodecDump.efi` tool in default package
+- Added legacy AudioDxe and Microsoft namespaces to Reset NVRAM
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere
