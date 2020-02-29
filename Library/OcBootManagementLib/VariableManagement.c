@@ -16,6 +16,7 @@
 
 #include <Guid/AppleVariable.h>
 #include <Guid/GlobalVariable.h>
+#include <Guid/MicrosoftVariable.h>
 #include <Guid/OcVariables.h>
 
 #include <Library/DebugLib.h>
@@ -106,6 +107,11 @@ IsDeletableVariable (
   // Boot Chime preferences if present
   //
   } else if (CompareGuid (Guid, &mBootChimeVendorVariableGuid)) {
+    return TRUE;
+  //
+  // Microsoft certificates if present
+  //
+  } else if (CompareGuid (Guid, &gMicrosoftVariableGuid)) {
     return TRUE;
   }
 
