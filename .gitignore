@@ -7,6 +7,18 @@ xcshareddata
 xcuserdata
 project.xcworkspace
 *.dSYM
+TestsUser/DiskImage/DiskImage
+TestsUser/Macho/Macho
+TestsUser/Prelinked/Prelinked
+TestsUser/Prelinked/Result.xml
+TestsUser/RsaPreprocess/RsaPreprocess
+TestsUser/Serialized/Serialized
+TestsUser/Smbios/Smbios
+Utilities/RsaTool/RsaTool
+Utilities/EfiResTool/EfiResTool
+Utilities/AppleEfiSignTool/AppleEfiSignTool
+Utilities/readlabel/readlabel
+*.o
 DICT
 fuzz-*.log
 crash-*
@@ -17,3 +29,8 @@ slow-unit-*
 *.out
 *.synctex.gz
 *.toc
+out.bin
+prelinkedkernel.unpack
+.gdb_history
+*.dmg
+*.chunklist

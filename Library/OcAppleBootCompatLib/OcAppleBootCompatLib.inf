@@ -1,0 +1,78 @@
+## @file
+#
+#  Component description file for the library producing the Apple Device property protocol.
+#
+#  Copyright (C) 2019, vit9696. All rights reserved.<BR>
+#
+# All rights reserved.
+#
+# This program and the accompanying materials
+# are licensed and made available under the terms and conditions of the BSD License
+# which accompanies this distribution.  The full text of the license may be found at
+# http://opensource.org/licenses/bsd-license.php
+#
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OcAppleBootCompatLib
+  FILE_GUID                      = A393F7CF-3966-4C7E-8763-3DD991681C9B
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = OcAppleBootCompatLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#
+
+[Sources]
+  BootCompatInternal.h
+  CustomSlide.c
+  KernelSupport.c
+  OcAppleBootCompatLib.c
+  ServiceOverrides.c
+  # All headers should go to [Sources], this sounds like a bug in EDK II Build System.
+  IA32/ContextSwitch.h
+  X64/ContextSwitch.h
+
+[Sources.IA32]
+  IA32/ContextSwitchSupport.c
+
+[Sources.X64]
+  X64/ContextSwitch.nasm
+  X64/ContextSwitchSupport.c
+
+[Packages]
+  EfiPkg/EfiPkg.dec
+  MdePkg/MdePkg.dec
+  OcSupportPkg/OcSupportPkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+
+[Guids]
+  gAppleBootVariableGuid        ## SOMETIMES_CONSUMES
+
+[Protocols]
+  gOcAppleBootCompatProtocolGuid    ## PRODUCES
+  gOcFirmwareRuntimeProtocolGuid    ## SOMETIMES_CONSUMES
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  DevicePathLib
+  MemoryAllocationLib
+  PrintLib
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+  OcCpuLib
+  OcCryptoLib
+  OcDeviceTreeLib
+  OcGuardLib
+  OcMemoryLib
+  OcOSInfoLib
+  OcRngLib

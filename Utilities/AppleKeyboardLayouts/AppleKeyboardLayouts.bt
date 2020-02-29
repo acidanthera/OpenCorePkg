@@ -1,0 +1,63 @@
+/**
+ *   010 Editor v9.0 Binary Template
+ *
+ *      File: /System/Library/Keyboard Layouts/AppleKeyboardLayouts.bundle/Contents/Resources/AppleKeyboardLayouts-L.dat
+ *   Authors: vit9696
+ *   Version: 0.1
+ *   Purpose: Keyboard layout decoding (replacement of USBKeyboardLayouts.plist)
+ *
+ * Copyright (c) 2018 vit9696
+ */
+
+typedef uint64 uint64_t;
+typedef uint32 uint32_t;
+typedef uint16 uint16_t;
+typedef unsigned char uint8_t;
+
+typedef int64 int64_t;
+typedef int32 int32_t;
+typedef int16 int16_t;
+typedef char int8_t;
+
+struct Header {
+    uint32_t Magic;
+    uint32_t Count;
+    uint32_t Offset;
+    uint32_t Unk2;
+    uint32_t Unk3;
+    uint32_t Unk4;
+    uint32_t Unk5;
+    uint32_t Unk6;
+    uint32_t Unk7;
+};
+
+struct Entry {
+    uint32_t Zero;
+    uint32_t KeyLayoutName; /* e.g. Czech-QWERTY */
+    uint32_t KeyLayoutNumber; /* e.g. 30778 */
+    uint32_t Flags; /* ScriptCode? */
+    uint32_t Locale; /* e.g. cs */
+    uint32_t UnkFlags;
+    uint32_t KeyLayoutDataSize;
+    uint32_t KeyLayoutDataAddr;
+    uint32_t UnkSize;
+    uint32_t UnkAddr;
+    uint32_t IconSize;
+    uint32_t IconAddr;
+    uint32_t ModPlistSize;
+    uint32_t ModPlistAddr;
+    uint32_t PlistSize;
+    uint32_t PlistAddr;
+};
+
+string entryToPrintable(Entry &e) {
+    local string out;
+    Assert(e.Zero == 0, "Zero != 0");
+    SPrintf(out, "[%d] %s - %s", e.KeyLayoutNumber, e.Locale == 0 ? "<null>" : ReadString(e.Locale), ReadString(e.KeyLayoutName));
+    return out;
+}
+
+Header h;
+Assert(h.Magic == 0xABCDEF02, "Invalid magic!");
+FSeek(h.Offset);
+Entry e[h.Count] <read=entryToPrintable>;

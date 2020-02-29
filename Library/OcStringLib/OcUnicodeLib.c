@@ -1,0 +1,176 @@
+/** @file
+  Copyright (C) 2016, The HermitCrabs Lab. All rights reserved.
+
+  All rights reserved.
+
+  This program and the accompanying materials
+  are licensed and made available under the terms and conditions of the BSD License
+  which accompanies this distribution.  The full text of the license may be found at
+  http://opensource.org/licenses/bsd-license.php
+
+  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+**/
+
+#include <Base.h>
+
+#include <Library/BaseLib.h>
+#include <Library/DebugLib.h>
+#include <Library/OcStringLib.h>
+#include <Library/PcdLib.h>
+
+INTN
+EFIAPI
+StriCmp (
+  IN CHAR16  *FirstString,
+  IN CHAR16  *SecondString
+  )
+{
+  CHAR16  UpperFirstString;
+  CHAR16  UpperSecondString;
+
+  //
+  // ASSERT both strings are less long than PcdMaximumUnicodeStringLength
+  //
+  ASSERT (StrSize (FirstString) != 0);
+  ASSERT (StrSize (SecondString) != 0);
+
+  UpperFirstString  = CharToUpper (*FirstString);
+  UpperSecondString = CharToUpper (*SecondString);
+  while ((*FirstString != '\0') && (*SecondString != '\0') && (UpperFirstString == UpperSecondString)) {
+    FirstString++;
+    SecondString++;
+    UpperFirstString  = CharToUpper (*FirstString);
+    UpperSecondString = CharToUpper (*SecondString);
+  }
+
+  return UpperFirstString - UpperSecondString;
+}
+
+INTN
+EFIAPI
+StrniCmp (
+  IN CONST CHAR16  *FirstString,
+  IN CONST CHAR16  *SecondString,
+  IN UINTN         Length
+  )
+{
+  CHAR16  UpperFirstString;
+  CHAR16  UpperSecondString;
+
+  if (Length == 0) {
+    return 0;
+  }
+
+  //
+  // ASSERT both strings are less long than PcdMaximumUnicodeStringLength.
+  // Length tests are performed inside StrLen().
+  //
+  ASSERT (StrSize (FirstString) != 0);
+  ASSERT (StrSize (SecondString) != 0);
+
+  if (PcdGet32 (PcdMaximumUnicodeStringLength) != 0) {
+    ASSERT (Length <= PcdGet32 (PcdMaximumUnicodeStringLength));
+  }
+
+  UpperFirstString  = CharToUpper (*FirstString);
+  UpperSecondString = CharToUpper (*SecondString);
+  while ((*FirstString != L'\0') &&
+         (*SecondString != L'\0') &&
+         (UpperFirstString == UpperSecondString) &&
+         (Length > 1)) {
+    FirstString++;
+    SecondString++;
+    UpperFirstString  = CharToUpper (*FirstString);
+    UpperSecondString = CharToUpper (*SecondString);
+    Length--;
+  }
+
+  return UpperFirstString - UpperSecondString;
+}
+
+CHAR16 *
+EFIAPI
+StriStr (
+  IN      CONST CHAR16              *String,
+  IN      CONST CHAR16              *SearchString
+  )
+{
+  CONST CHAR16 *FirstMatch;
+  CONST CHAR16 *SearchStringTmp;
+
+  //
+  // ASSERT both strings are less long than PcdMaximumUnicodeStringLength.
+  // Length tests are performed inside StrLen().
+  //
+  ASSERT (StrSize (String) != 0);
+  ASSERT (StrSize (SearchString) != 0);
+
+  if (*SearchString == L'\0') {
+    return (CHAR16 *) String;
+  }
+
+  while (*String != L'\0') {
+    SearchStringTmp = SearchString;
+    FirstMatch = String;
+
+    while ((CharToUpper (*String) == CharToUpper (*SearchStringTmp))
+            && (*String != L'\0')) {
+      String++;
+      SearchStringTmp++;
+    }
+
+    if (*SearchStringTmp == L'\0') {
+      return (CHAR16 *) FirstMatch;
+    }
+
+    if (*String == L'\0') {
+      return NULL;
+    }
+
+    String = FirstMatch + 1;
+  }
+
+  return NULL;
+}
+
+VOID
+UnicodeUefiSlashes (
+  IN OUT CHAR16  *String
+  )
+{
+  CHAR16  *Needle;
+
+  while ((Needle = StrStr (String, L"/")) != NULL) {
+    *Needle = L'\\';
+  }
+}
+
+VOID
+UnicodeFilterString (
+  IN OUT CHAR16   *String,
+  IN     BOOLEAN  SingleLine
+  )
+{
+  while (*String != L'\0') {
+    if ((*String & 0x7FU) != *String) {
+      //
+      // Remove all unicode characters.
+      //
+      *String = L'_';
+    } else if (SingleLine && (*String == L'\r' || *String == L'\n')) {
+      //
+      // Stop after printing one line.
+      //
+      *String = L'\0';
+      break;
+    } else if (*String < 0x20 || *String == 0x7F) {
+      //
+      // Drop all unprintable spaces but space including tabs.
+      //
+      *String = L'_';
+    }
+
+    ++String;
+  }
+}
