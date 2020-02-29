@@ -138,12 +138,14 @@ OcAudioInstallProtocols (
 
 UINT8
 OcGetVolumeLevel (
+  IN  UINT32   Amplifier,
   OUT BOOLEAN  *Muted
   )
 {
   EFI_STATUS  Status;
   UINTN       Size;
   UINT8       Value;
+  UINT8       NewValue;
 
   Size   = sizeof (Value);
   Status = gRT->GetVariable (
@@ -157,8 +159,6 @@ OcGetVolumeLevel (
     Value = OC_AUDIO_DEFAULT_VOLUME_LEVEL;
   }
 
-  DEBUG ((DEBUG_INFO, "OCAU: System volume is %X - %r\n", Value, Status));
-
   if ((Value & APPLE_SYSTEM_AUDIO_VOLUME_MUTED) != 0) {
     Value  &= APPLE_SYSTEM_AUDIO_VOLUME_VOLUME_MASK;
     *Muted = TRUE;
@@ -166,5 +166,21 @@ OcGetVolumeLevel (
     *Muted = FALSE;
   }
 
-  return MIN (Value, 100);
+  if (Amplifier > 0) {
+    NewValue = Value * Amplifier / 100;
+  } else {
+    NewValue = Value;
+  }
+
+  NewValue = MIN (NewValue, 100);
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCAU: System volume is %d (calculated from %d) - %r\n",
+    NewValue,
+    Value,
+    Status
+    ));
+
+  return NewValue;
 }
