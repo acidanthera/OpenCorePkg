@@ -275,7 +275,7 @@ OcReinstallProtocols (
   )
 {
   if (OcAudioInstallProtocols (Config->Uefi.Protocols.AppleAudio) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install audio protocols\n"));
+    DEBUG ((DEBUG_INFO, "OC: Disabling audio in favour of firmware implementation\n"));
   }
 
   if (OcAppleBootPolicyInstallProtocol (Config->Uefi.Protocols.AppleBootPolicy) == NULL) {
