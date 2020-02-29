@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Feb 19 00:48:53 2020
-%DIF ADD ../Configuration.tex        Wed Feb 19 00:51:48 2020
+%DIF DEL PreviousConfiguration.tex   Sat Feb 15 19:18:47 2020
+%DIF ADD ../Configuration.tex        Sat Feb 29 05:47:19 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -425,7 +425,72 @@ be relied upon, and all fields must be properly specified in the configuration.
 \subsection{Directory Structure}\label{directory-structure}
 
 \begin{center}
-\begin{tikzpicture}[%
+\DIFdelbegin %DIFDELCMD < \begin{tikzpicture}[%
+%DIFDELCMD <   grow via three points={one child at (0.5,-0.7) and
+%DIFDELCMD <   two children at (0.5,-0.7) and (0.5,-1.4)},
+%DIFDELCMD <   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
+%DIFDELCMD <   \node {ESP}
+%DIFDELCMD <     child { node {EFI}
+%DIFDELCMD <       child { node {BOOT}
+%DIFDELCMD <         child { node [selected] {BOOTx64.efi}}
+%DIFDELCMD <       }
+%DIFDELCMD <       child [missing] {}
+%DIFDELCMD <       child { node {OC}
+%DIFDELCMD <         child { node {ACPI}
+%DIFDELCMD <           child { node [optional] {DSDT.aml}}
+%DIFDELCMD <           child { node [optional] {SSDT-1.aml}}
+%DIFDELCMD <           child { node [optional] {MYTABLE.aml}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node {Drivers}
+%DIFDELCMD <           child { node [optional] {MyDriver.efi}}
+%DIFDELCMD <           child { node [optional] {OtherDriver.efi}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node {Kexts}
+%DIFDELCMD <           child { node [optional] {MyKext.kext}}
+%DIFDELCMD <           child { node [optional] {OtherKext.kext}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node  {Tools}
+%DIFDELCMD <           child { node [optional] {Tool.efi}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node [selected] {OpenCore.efi}}
+%DIFDELCMD <         child { node [optional] {vault.plist}}
+%DIFDELCMD <         child { node {config.plist}}
+%DIFDELCMD <         child { node [optional] {vault.sig}}
+%DIFDELCMD <       }
+%DIFDELCMD <     }
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child { node [optional] {nvram.plist}}
+%DIFDELCMD <     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
+%DIFDELCMD <   ;
+%DIFDELCMD < \end{tikzpicture}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \begin{tikzpicture}[%
   grow via three points={one child at (0.5,-0.7) and
   two children at (0.5,-0.7) and (0.5,-1.4)},
   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
@@ -456,6 +521,10 @@ be relied upon, and all fields must be properly specified in the configuration.
         }
         child [missing] {}
         child [missing] {}
+        child { node [optional] {Resources}
+          child { node [optional] {Audio}}
+        }
+        child [missing] {}
         child { node  {Tools}
           child { node [optional] {Tool.efi}}
         }
@@ -485,11 +554,13 @@ be relied upon, and all fields must be properly specified in the configuration.
     child [missing] {}
     child [missing] {}
     child [missing] {}
+    child [missing] {}
+    child [missing] {}
     child { node [optional] {nvram.plist}}
     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
   ;
 \end{tikzpicture}
-\break
+\DIFaddend \break
 \label{fig:DS}
 Figure 1. Directory Structure
 \end{center}
@@ -521,7 +592,13 @@ entries include:
   Directory used for storing supplemental kernel information
   for \hyperref[kernel]{\texttt{Kernel}} section.
 \item
-  \texttt{Tools}
+  \DIFaddbegin \texttt{\DIFadd{Resources}}
+  \break
+  \DIFadd{Directory used for storing media resources, such as audio files
+  for screen reader support. See }\hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
+  \DIFadd{section for more details.
+}\item
+  \DIFaddend \texttt{Tools}
   \break
   Directory used for storing supplemental tools.
 \item
@@ -1159,8 +1236,8 @@ list of checks to do first. Prior to starting please ensure that you have:
   if present. You may need to flash GOP ROM on NVIDIA 6xx/AMD 2xx or older. Use
   \DIFdelbegin %DIFDELCMD < \href{https://www.win-raid.com/t892f16-AMD-and-Nvidia-GOP-update-No-requests-DIY.html#msg15730}{GopUpdate}
 %DIFDELCMD <   %%%
-\DIFdelend \DIFaddbegin \href{https://www.win-raid.com/t892f16-AMD-and-Nvidia-GOP-update-No-requests-DIY.html}{GopUpdate} \DIFadd{(See the second post) 
-  }\DIFaddend or \href{http://www.insanelymac.com/forum/topic/299614-asus-eah6450-video-bios-uefi-gop-upgrade-and-gop-uefi-binary-in-efi-for-many-ati-cards/page-1#entry2042163}{AMD UEFI GOP MAKER}
+\DIFdelend \DIFaddbegin \href{https://www.win-raid.com/t892f16-AMD-and-Nvidia-GOP-update-No-requests-DIY.html}{GopUpdate}
+  \DIFadd{(see the second post) }\DIFaddend or \href{http://www.insanelymac.com/forum/topic/299614-asus-eah6450-video-bios-uefi-gop-upgrade-and-gop-uefi-binary-in-efi-for-many-ati-cards/page-1#entry2042163}{AMD UEFI GOP MAKER}
   in case you are not sure how.
 \item \texttt{EHCI/XHCI Hand-off} enabled in firmware settings \texttt{only} if boot
   stalls unless USB devices are disconnected.
@@ -2117,192 +2194,152 @@ behaviour that does not go to any other sections
 \begin{enumerate}
 
 \item
-  \DIFdelbegin \texttt{\DIFdel{BuiltinTextRenderer}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Type}}%DIFAUXCMD
-\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
-\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Description}}%DIFAUXCMD
-\DIFdel{: Enables experimental builtin text renderer.
-}%DIFDELCMD < 
+  \texttt{\DIFdelbegin \DIFdel{BuiltinTextRenderer}\DIFdelend \DIFaddbegin \DIFadd{HibernateMode}\DIFaddend }\\
+  \textbf{Type}: \texttt{plist\ \DIFdelbegin \DIFdel{boolean}\DIFdelend \DIFaddbegin \DIFadd{string}\DIFaddend }\\
+  \textbf{Failsafe}: \texttt{\DIFdelbegin \DIFdel{false}\DIFdelend \DIFaddbegin \DIFadd{None}\DIFaddend }\\
+  \textbf{Description}: \DIFdelbegin \DIFdel{Enables experimental builtin text renderer. }\DIFdelend \DIFaddbegin \DIFadd{Hibernation detection mode. The following modes are supported:
+}\DIFaddend 
 
-%DIFDELCMD <   %%%
-\DIFdel{This option makes all text going through standard console output
+  \DIFdelbegin \DIFdel{This option makes all text going through standard console output
   render through builtin text renderer bypassing firmware services.
   While still experimental and feature incomplete, this option
   effecitly avoids the need for various quirks like
   }\texttt{\DIFdel{ReplaceTabWithSpace}} %DIFAUXCMD
 \DIFdel{or }\texttt{\DIFdel{SanitiseClearScreen}}%DIFAUXCMD
-\DIFdel{. It
+\DIFdel{.
+    It
   should also increase the dimensions of the output area.
 }%DIFDELCMD < 
 
 %DIFDELCMD <   %%%
 \DIFdel{Since builtin text renderer works in graphics mode, extra care
-  may need to be paid to }\texttt{\DIFdel{ConsoleBehaviourOs}}%DIFAUXCMD
-\DIFdel{,
+  may need to be paid to }\DIFdelend \DIFaddbegin \begin{itemize}
+  \tightlist
+    \item \texttt{\DIFadd{None}} \DIFadd{--- Avoid hibernation for your own good.
+    }\item \DIFaddend \texttt{\DIFdelbegin \DIFdel{ConsoleBehaviourOs}\DIFdelend \DIFaddbegin \DIFadd{Auto}\DIFaddend } \DIFdelbegin \DIFdel{,
   }\texttt{\DIFdel{ConsoleBehaviourUi}}%DIFAUXCMD
 \DIFdel{, }\texttt{\DIFdel{ConsoleControl}}%DIFAUXCMD
-\DIFdel{, and
-  }\texttt{\DIFdel{IgnoreTextInGraphics}} %DIFAUXCMD
-\DIFdel{options. While individual for the
-  target system, it is recommended to use }\texttt{\DIFdel{ForceGraphics}} %DIFAUXCMD
-\DIFdel{and
+\DIFdel{, and }\texttt{\DIFdel{IgnoreTextInGraphics}} %DIFAUXCMD
+\DIFdel{options.
+    While individual for the
+  target system, it is recommended to use }\DIFdelend \DIFaddbegin \DIFadd{--- Use RTC and NVRAM detection.
+    }\item \DIFaddend \texttt{\DIFdelbegin \DIFdel{ForceGraphics}\DIFdelend \DIFaddbegin \DIFadd{RTC}\DIFaddend } \DIFdelbegin \DIFdel{and
   builtin }\texttt{\DIFdel{ConsoleControl}} %DIFAUXCMD
 \DIFdel{to avoid compatibility issues.
-}%DIFDELCMD < 
+    }%DIFDELCMD < 
 
 %DIFDELCMD <   %%%
 \emph{\DIFdel{Note}}%DIFAUXCMD
-\DIFdel{: Some Macs, namely }\texttt{\DIFdel{MacPro5,1}}%DIFAUXCMD
-\DIFdel{, may have broken
+\DIFdel{: Some Macs, namely }\DIFdelend \DIFaddbegin \DIFadd{--- Use RTC detection.
+    }\item \DIFaddend \texttt{\DIFdelbegin \DIFdel{MacPro5,1}\DIFdelend \DIFaddbegin \DIFadd{NVRAM}\DIFaddend } \DIFdelbegin \DIFdel{, may have broken
   console output with newer GPUs, and thus enabling this option can
   be required for them.
-}%DIFDELCMD < 
+  }\DIFdelend \DIFaddbegin \DIFadd{--- Use NVRAM detection.
+  }\end{itemize}
+\DIFaddend 
 
-%DIFDELCMD < \item
-\item%DIFAUXCMD
-%DIFDELCMD <   %%%
-\texttt{\DIFdel{ConsoleMode}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Type}}%DIFAUXCMD
-\DIFdel{: }\texttt{\DIFdel{plist\ string}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
-\DIFdel{: Empty string}%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Description}}%DIFAUXCMD
-\DIFdel{: Sets console output mode as specified
-  with the }\texttt{\DIFdel{WxH}} %DIFAUXCMD
-\DIFdel{(e.g. }\texttt{\DIFdel{80x24}}%DIFAUXCMD
-\DIFdel{) formatted string.
-  Set to empty string not to change console mode. Set to }\texttt{\DIFdel{Max}}
+\item
+  \texttt{\DIFdelbegin \DIFdel{ConsoleMode}\DIFdelend \DIFaddbegin \DIFadd{HideAuxiliary}\DIFaddend }\\
+  \textbf{Type}: \texttt{plist\ \DIFdelbegin \DIFdel{string}\DIFdelend \DIFaddbegin \DIFadd{boolean}\DIFaddend }\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Empty string}\DIFdelend \DIFaddbegin \texttt{\DIFadd{false}}\DIFaddend \\
+  \textbf{Description}: \DIFdelbegin \DIFdel{Sets console output mode as specified
+  with the }\DIFdelend \DIFaddbegin \DIFadd{Hides auxiliary entries from picker menu by default.
+}
+
+  \DIFadd{An entry is considered auxiliary when at least one of the following applies:
+}
+
+  \begin{itemize}
+  \tightlist
+    \item \DIFadd{Entry is macOS recovery.
+    }\item \DIFadd{Entry is explicitly marked as }\DIFaddend \texttt{\DIFdelbegin \DIFdel{WxH}\DIFdelend \DIFaddbegin \DIFadd{Auxiliary}\DIFaddend }\DIFaddbegin \DIFadd{.
+    }\item \DIFadd{Entry is system }\DIFaddend (e.g. \texttt{\DIFdelbegin \DIFdel{80x24}\DIFdelend \DIFaddbegin \DIFadd{Clean NVRAM}\DIFaddend })\DIFdelbegin \DIFdel{formatted string.
+  Set to empty string not to change console mode }\DIFdelend .
+  \DIFdelbegin \DIFdel{Set to }\texttt{\DIFdel{Max}}
   %DIFAUXCMD
-\DIFdel{to try to use largest available console mode.
-}%DIFDELCMD < 
+\DIFdel{to try to use largest available console mode}\DIFdelend \DIFaddbegin \end{itemize}
 
-%DIFDELCMD <   %%%
-\emph{\DIFdel{Note}}%DIFAUXCMD
-\DIFdel{: This field is best to be left empty on most firmwares.
-}%DIFDELCMD < 
+  \DIFadd{To see all entries picker menu needs to be reloaded in extended mode by pressing
+  }\texttt{\DIFadd{Spacebar}} \DIFadd{key. Hiding auxiliary entries may increase boot performance
+  for multidisk systems}\DIFaddend .
 
-%DIFDELCMD < \item
-\item%DIFAUXCMD
-%DIFDELCMD <   %%%
-\texttt{\DIFdel{ConsoleBehaviourOs}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Type}}%DIFAUXCMD
-\DIFdel{: }\texttt{\DIFdel{plist\ string}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
-\DIFdel{: Empty string}%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Description}}%DIFAUXCMD
-\DIFdel{: Set console control behaviour upon operating system load.
-}%DIFDELCMD < 
+\DIFdelbegin \emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: This field is
+  best to be left empty on most firmwares}\DIFdelend \DIFaddbegin \item
+  \texttt{\DIFadd{HideSelf}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Hides own boot entry from boot picker. This
+  may potentially hide other entries, for instance, when another UEFI OS is
+  installed on the same volume and driver boot is used}\DIFaddend .
 
-%DIFDELCMD <   %%%
-\DIFdel{Console control is a legacy protocol used for switching between text and graphics
+\item
+  \texttt{\DIFdelbegin \DIFdel{ConsoleBehaviourOs}\DIFdelend \DIFaddbegin \DIFadd{PickerAttributes}\DIFaddend }\\
+  \textbf{Type}: \texttt{plist\ \DIFdelbegin \DIFdel{string}\DIFdelend \DIFaddbegin \DIFadd{integer}\DIFaddend }\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Empty string}\DIFdelend \DIFaddbegin \texttt{\DIFadd{0}}\DIFaddend \\
+  \textbf{Description}: \DIFdelbegin \DIFdel{Set console control behaviour upon operating system load}\DIFdelend \DIFaddbegin \DIFadd{Sets specific attributes for picker}\DIFaddend .
+
+  \DIFdelbegin \DIFdel{Console control is a legacy protocol used for switching between text and graphics
   screen output. Some firmwares do not provide it, yet select operating systems
   require its presence, which is what }\texttt{\DIFdel{ConsoleControl}} %DIFAUXCMD
-\DIFdel{UEFI protocol is for.
-}%DIFDELCMD < 
+\DIFdel{UEFI protocol is for. }%DIFDELCMD < 
 
 %DIFDELCMD <   %%%
 \DIFdel{When console control is available, OpenCore can be made console control aware,
-  and set different modes for the operating system booter (}\texttt{\DIFdel{ConsoleBehaviourOs}}%DIFAUXCMD
-\DIFdel{),
+  and
+  set different modes for the operating system booter (}\DIFdelend \DIFaddbegin \DIFadd{Builtin picker supports colour arguments as a sum of foreground and background
+  colors according to UEFI specification. The value of black background and
+  black foreground (}\DIFaddend \texttt{\DIFdelbegin \DIFdel{ConsoleBehaviourOs}\DIFdelend \DIFaddbegin \DIFadd{0}\DIFaddend }) \DIFdelbegin \DIFdel{,
   which normally runs in graphics mode, and its own user interface
   (}\texttt{\DIFdel{ConsoleBehaviourUi}}%DIFAUXCMD
 \DIFdel{), which normally runs in text mode. Possible
-  behaviours, set as values of these options, include:
-}%DIFDELCMD < 
+  behaviours, set as values of these options, include}\DIFdelend \DIFaddbegin \DIFadd{is reserved. List of colour names}\DIFaddend :
 
-%DIFDELCMD <   \begin{itemize}
-\begin{itemize}%DIFAUXCMD
-%DIFDELCMD <   \tightlist
-%DIFDELCMD <   \item %%%
-\item%DIFAUXCMD
-\DIFdel{Empty string --- Do not modify console control mode.
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{Text}} %DIFAUXCMD
-\DIFdel{--- Switch to text mode.
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{Graphics}} %DIFAUXCMD
-\DIFdel{--- Switch to graphics mode.
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{ForceText}} %DIFAUXCMD
-\DIFdel{--- Switch to text mode and preserve it
-  (requires }\texttt{\DIFdel{ConsoleControl}}%DIFAUXCMD
-\DIFdel{).
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{ForceGraphics}} %DIFAUXCMD
-\DIFdel{--- Switch to graphics mode and preserve it
-  (require }\texttt{\DIFdel{ConsoleControl}}%DIFAUXCMD
-\DIFdel{).
-  }
-\end{itemize}%DIFAUXCMD
-%DIFDELCMD < \end{itemize}
+  \begin{itemize}
+  \tightlist
+  \item \DIFdelbegin \DIFdel{Empty string }\DIFdelend \DIFaddbegin \texttt{\DIFadd{0x00}} \DIFaddend --- \DIFdelbegin \DIFdel{Do not modify console control mode.
+  }\DIFdelend \DIFaddbegin \texttt{\DIFadd{EFI\_BLACK}}
+  \DIFaddend \item \texttt{\DIFdelbegin \DIFdel{Text}\DIFdelend \DIFaddbegin \DIFadd{0x01}\DIFaddend } --- \DIFdelbegin \DIFdel{Switch to text mode.
+  }\DIFdelend \DIFaddbegin \texttt{\DIFadd{EFI\_BLUE}}
+  \DIFaddend \item \texttt{\DIFdelbegin \DIFdel{Graphics}\DIFdelend \DIFaddbegin \DIFadd{0x02}\DIFaddend } --- \DIFdelbegin \DIFdel{Switch to graphics mode.
+  }\DIFdelend \DIFaddbegin \texttt{\DIFadd{EFI\_GREEN}}
+  \DIFaddend \item \texttt{\DIFdelbegin \DIFdel{ForceText}\DIFdelend \DIFaddbegin \DIFadd{0x03}\DIFaddend } --- \DIFdelbegin \DIFdel{Switch to text mode and preserve it
+  (requires }\DIFdelend \texttt{\DIFdelbegin \DIFdel{ConsoleControl}\DIFdelend \DIFaddbegin \DIFadd{EFI\_CYAN}\DIFaddend }
+  \DIFdelbegin \DIFdel{).
+  }\DIFdelend \item \texttt{\DIFdelbegin \DIFdel{ForceGraphics}\DIFdelend \DIFaddbegin \DIFadd{0x04}\DIFaddend } --- \DIFdelbegin \DIFdel{Switch to graphics mode and preserve it
+  (require }\DIFdelend \texttt{\DIFdelbegin \DIFdel{ConsoleControl}\DIFdelend \DIFaddbegin \DIFadd{EFI\_RED}\DIFaddend }
+  \DIFdelbegin \DIFdel{).
+  }%DIFDELCMD < \end{itemize}
 %DIFDELCMD < 
 
 %DIFDELCMD <   %%%
 \DIFdel{Hints:
   }%DIFDELCMD < \begin{itemize}
-\begin{itemize}%DIFAUXCMD
 %DIFDELCMD <   \tightlist
-%DIFDELCMD <   \item %%%
-\item%DIFAUXCMD
-\DIFdel{Unless empty works, firstly try to set
-  }\texttt{\DIFdel{ConsoleBehaviourOs}} %DIFAUXCMD
-\DIFdel{to }\texttt{\DIFdel{Graphics}} %DIFAUXCMD
-\DIFdel{and
+%DIFDELCMD <   %%%
+\DIFdelend \item \DIFdelbegin \DIFdel{Unless empty works, firstly try to set
+  }\DIFdelend \texttt{\DIFdelbegin \DIFdel{ConsoleBehaviourOs}\DIFdelend \DIFaddbegin \DIFadd{0x05}\DIFaddend } \DIFdelbegin \DIFdel{to }\DIFdelend \DIFaddbegin \DIFadd{--- }\DIFaddend \texttt{\DIFdelbegin \DIFdel{Graphics}\DIFdelend \DIFaddbegin \DIFadd{EFI\_MAGENTA}\DIFaddend }
+  \DIFdelbegin \DIFdel{and
   }\texttt{\DIFdel{ConsoleBehaviourUi}} %DIFAUXCMD
 \DIFdel{to }\texttt{\DIFdel{Text}}%DIFAUXCMD
 \DIFdel{.
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdel{On APTIO IV (Haswell and earlier) it is usually enough to have
-  }\texttt{\DIFdel{ConsoleBehaviourOs}} %DIFAUXCMD
-\DIFdel{set to }\texttt{\DIFdel{Graphics}} %DIFAUXCMD
-\DIFdel{and
+  }\DIFdelend \item \DIFdelbegin \DIFdel{On APTIO IV (Haswell and earlier) it is usually enough to have
+  }\DIFdelend \texttt{\DIFdelbegin \DIFdel{ConsoleBehaviourOs}\DIFdelend \DIFaddbegin \DIFadd{0x06}\DIFaddend } \DIFdelbegin \DIFdel{set to }\DIFdelend \DIFaddbegin \DIFadd{--- }\DIFaddend \texttt{\DIFdelbegin \DIFdel{Graphics}\DIFdelend \DIFaddbegin \DIFadd{EFI\_BROWN}\DIFaddend }
+  \DIFdelbegin \DIFdel{and
   }\texttt{\DIFdel{ConsoleBehaviourUi}} %DIFAUXCMD
 \DIFdel{set to }\texttt{\DIFdel{ForceText}} %DIFAUXCMD
 \DIFdel{to avoid visual glitches.
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdel{On APTIO V (Broadwell and newer) }\texttt{\DIFdel{ConsoleBehaviourOs}}
-  %DIFAUXCMD
-\DIFdel{set to }\texttt{\DIFdel{ForceGraphics}} %DIFAUXCMD
-\DIFdel{and }\texttt{\DIFdel{ConsoleBehaviourUi}} %DIFAUXCMD
+  }\DIFdelend \item \DIFdelbegin \DIFdel{On APTIO V (Broadwell and newer) }\DIFdelend \texttt{\DIFdelbegin \DIFdel{ConsoleBehaviourOs}\DIFdelend \DIFaddbegin \DIFadd{0x07}\DIFaddend } \DIFdelbegin \DIFdel{set to }\DIFdelend \DIFaddbegin \DIFadd{--- }\DIFaddend \texttt{\DIFdelbegin \DIFdel{ForceGraphics}\DIFdelend \DIFaddbegin \DIFadd{EFI\_LIGHTGRAY}\DIFaddend }
+  \DIFdelbegin \DIFdel{and }\texttt{\DIFdel{ConsoleBehaviourUi}} %DIFAUXCMD
 \DIFdel{set to
   }\texttt{\DIFdel{ForceText}} %DIFAUXCMD
 \DIFdel{usually works best.
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdel{On Apple firmwares }\texttt{\DIFdel{ConsoleBehaviourOs}}
-  %DIFAUXCMD
-\DIFdel{set to }\texttt{\DIFdel{Graphics}} %DIFAUXCMD
-\DIFdel{and }\texttt{\DIFdel{ConsoleBehaviourUi}} %DIFAUXCMD
+  }\DIFdelend \item \DIFdelbegin \DIFdel{On Apple firmwares }\DIFdelend \texttt{\DIFdelbegin \DIFdel{ConsoleBehaviourOs}\DIFdelend \DIFaddbegin \DIFadd{0x08}\DIFaddend } \DIFdelbegin \DIFdel{set to }\DIFdelend \DIFaddbegin \DIFadd{--- }\DIFaddend \texttt{\DIFdelbegin \DIFdel{Graphics}\DIFdelend \DIFaddbegin \DIFadd{EFI\_DARKGRAY}\DIFaddend }
+  \DIFdelbegin \DIFdel{and }\texttt{\DIFdel{ConsoleBehaviourUi}} %DIFAUXCMD
 \DIFdel{set to
   }\texttt{\DIFdel{Text}} %DIFAUXCMD
 \DIFdel{is supposed to work best.
-  }
-\end{itemize}%DIFAUXCMD
-%DIFDELCMD < \end{itemize}
+  }%DIFDELCMD < \end{itemize}
 %DIFDELCMD < 
 
 %DIFDELCMD <   %%%
@@ -2313,11 +2350,8 @@ behaviour that does not go to any other sections
   firmware implementations. Particularly APTIO firmwares.
 }%DIFDELCMD < 
 
-%DIFDELCMD < \item
-\item%DIFAUXCMD
-%DIFDELCMD <   %%%
-\texttt{\DIFdel{ConsoleBehaviourUi}}%DIFAUXCMD
-%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelend \item \texttt{\DIFdelbegin \DIFdel{ConsoleBehaviourUi}\DIFdelend \DIFaddbegin \DIFadd{0x09}\DIFaddend } \DIFdelbegin %DIFDELCMD < \\
 %DIFDELCMD <   %%%
 \textbf{\DIFdel{Type}}%DIFAUXCMD
 \DIFdel{: }\texttt{\DIFdel{plist\ string}}%DIFAUXCMD
@@ -2328,85 +2362,36 @@ behaviour that does not go to any other sections
 %DIFDELCMD <   %%%
 \textbf{\DIFdel{Description}}%DIFAUXCMD
 \DIFdel{: Set console control behaviour upon OpenCore user
-  interface load. Refer to }\texttt{\DIFdel{ConsoleBehaviourOs}} %DIFAUXCMD
-\DIFdel{description for details.
+  interface load. Refer to }\DIFdelend \DIFaddbegin \DIFadd{--- }\DIFaddend \texttt{\DIFdelbegin \DIFdel{ConsoleBehaviourOs}\DIFdelend \DIFaddbegin \DIFadd{EFI\_LIGHTBLUE}\DIFaddend }
+  \DIFdelbegin \DIFdel{description for details.
 }%DIFDELCMD < 
 
-%DIFDELCMD < \item
-\item%DIFAUXCMD
+%DIFDELCMD < %%%
+\DIFdelend \item \texttt{\DIFdelbegin \DIFdel{HibernateMode}\DIFdelend \DIFaddbegin \DIFadd{0x0A}\DIFaddend } \DIFdelbegin %DIFDELCMD < \\
 %DIFDELCMD <   %%%
-\DIFdelend \texttt{HibernateMode}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: \texttt{None}\\
-  \textbf{Description}: Hibernation detection mode. The following modes are supported:
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\DIFdelend \DIFaddbegin \DIFadd{--- }\DIFaddend \texttt{\DIFdelbegin \DIFdel{plist\ string}\DIFdelend \DIFaddbegin \DIFadd{EFI\_LIGHTGREEN}\DIFaddend }
+  \DIFdelbegin %DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{None}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Hibernation detection mode. The following modes are supported:
+}%DIFDELCMD < 
 
-  \begin{itemize}
-  \tightlist
-    \item \texttt{None} --- Avoid hibernation for your own good.
-    \item \texttt{Auto} --- Use RTC and NVRAM detection.
-    \item \texttt{RTC} --- Use RTC detection.
-    \item \texttt{NVRAM} --- Use NVRAM detection.
-  \end{itemize}
-
-\item
-  \DIFaddbegin \texttt{\DIFadd{HideAuxiliary}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Hides auxiliary entries from picker menu by default.
-}
-
-  \DIFadd{An entry is considered auxiliary when at least one of the following applies:
-}
-
-  \begin{itemize}
-  \tightlist
-    \item \DIFadd{Entry is macOS recovery.
-    }\item \DIFadd{Entry is explicitly marked as }\texttt{\DIFadd{Auxiliary}}\DIFadd{.
-    }\item \DIFadd{Entry is system (e.g. }\texttt{\DIFadd{Clean NVRAM}}\DIFadd{).
-  }\end{itemize}
-
-  \DIFadd{To see all entries picker menu needs to be reloaded in extended mode by pressing
-  }\texttt{\DIFadd{Spacebar}} \DIFadd{key. Hiding auxiliary entries may increase boot performance
-  for multidisk systems.
-}
-
-\item
-  \DIFaddend \texttt{HideSelf}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Hides own boot entry from boot picker. This
-  may potentially hide other entries, for instance, when another UEFI OS is
-  installed on the same volume and driver boot is used.
-
-\item
-  \DIFaddbegin \texttt{\DIFadd{PickerAttributes}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Sets specific attributes for picker.
-}
-
-  \DIFadd{Builtin picker supports colour arguments as a sum of foreground and background
-  colors according to UEFI specification. The value of black background and
-  black foreground (}\texttt{\DIFadd{0}}\DIFadd{) is reserved. List of colour names:
-}
-
-  \begin{itemize}
-  \tightlist
-  \item \texttt{\DIFadd{0x00}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BLACK}}
-  \item \texttt{\DIFadd{0x01}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BLUE}}
-  \item \texttt{\DIFadd{0x02}} \DIFadd{--- }\texttt{\DIFadd{EFI\_GREEN}}
-  \item \texttt{\DIFadd{0x03}} \DIFadd{--- }\texttt{\DIFadd{EFI\_CYAN}}
-  \item \texttt{\DIFadd{0x04}} \DIFadd{--- }\texttt{\DIFadd{EFI\_RED}}
-  \item \texttt{\DIFadd{0x05}} \DIFadd{--- }\texttt{\DIFadd{EFI\_MAGENTA}}
-  \item \texttt{\DIFadd{0x06}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BROWN}}
-  \item \texttt{\DIFadd{0x07}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTGRAY}}
-  \item \texttt{\DIFadd{0x08}} \DIFadd{--- }\texttt{\DIFadd{EFI\_DARKGRAY}}
-  \item \texttt{\DIFadd{0x09}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTBLUE}}
-  \item \texttt{\DIFadd{0x0A}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTGREEN}}
-  \item \texttt{\DIFadd{0x0B}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTCYAN}}
-  \item \texttt{\DIFadd{0x0C}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTRED}}
-  \item \texttt{\DIFadd{0x0D}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTMAGENTA}}
-  \item \texttt{\DIFadd{0x0E}} \DIFadd{--- }\texttt{\DIFadd{EFI\_YELLOW}}
+%DIFDELCMD <   \begin{itemize}
+%DIFDELCMD <   \tightlist
+%DIFDELCMD <     %%%
+\DIFdelend \item \texttt{\DIFdelbegin \DIFdel{None}\DIFdelend \DIFaddbegin \DIFadd{0x0B}\DIFaddend } --- \DIFdelbegin \DIFdel{Avoid hibernation for your own good.
+    }\DIFdelend \DIFaddbegin \texttt{\DIFadd{EFI\_LIGHTCYAN}}
+  \DIFaddend \item \texttt{\DIFdelbegin \DIFdel{Auto}\DIFdelend \DIFaddbegin \DIFadd{0x0C}\DIFaddend } --- \DIFdelbegin \DIFdel{Use RTC and NVRAM detection.
+    }\DIFdelend \DIFaddbegin \texttt{\DIFadd{EFI\_LIGHTRED}}
+  \DIFaddend \item \texttt{\DIFdelbegin \DIFdel{RTC}\DIFdelend \DIFaddbegin \DIFadd{0x0D}\DIFaddend } --- \DIFdelbegin \DIFdel{Use RTC detection.
+    }\DIFdelend \DIFaddbegin \texttt{\DIFadd{EFI\_LIGHTMAGENTA}}
+  \DIFaddend \item \texttt{\DIFdelbegin \DIFdel{NVRAM}\DIFdelend \DIFaddbegin \DIFadd{0x0E}\DIFaddend } --- \DIFdelbegin \DIFdel{Use NVRAM detection.
+  }\DIFdelend \DIFaddbegin \texttt{\DIFadd{EFI\_YELLOW}}
   \item \texttt{\DIFadd{0x0F}} \DIFadd{--- }\texttt{\DIFadd{EFI\_WHITE}}
   \item \texttt{\DIFadd{0x00}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_BLACK}}
   \item \texttt{\DIFadd{0x10}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_BLUE}}
@@ -2416,14 +2401,37 @@ behaviour that does not go to any other sections
   \item \texttt{\DIFadd{0x50}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_MAGENTA}}
   \item \texttt{\DIFadd{0x60}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_BROWN}}
   \item \texttt{\DIFadd{0x70}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_LIGHTGRAY}}
-  \end{itemize}
+  \DIFaddend \end{itemize}
 
-  \emph{\DIFadd{Note}}\DIFadd{: This option may not work well with }\texttt{\DIFadd{System}} \DIFadd{text renderer.
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: This option may not work well with }\texttt{\DIFadd{System}} \DIFadd{text renderer.
   Setting a background different from black could help testing proper GOP functioning.
 }
 
-\item
-  \DIFaddend \texttt{PollAppleHotKeys}\\
+\DIFaddend \item
+  \texttt{\DIFdelbegin \DIFdel{HideSelf}\DIFdelend \DIFaddbegin \DIFadd{PickerAudioAssist}\DIFaddend }\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: \DIFdelbegin \DIFdel{Hides own boot entry from boot picker.
+This
+  may potentially hide other entries, for instance, when another UEFI OS is installed on the same volume and driver boot is used.
+  }\DIFdelend \DIFaddbegin \DIFadd{Enable screen reader by default in boot picker.
+}\DIFaddend 
+
+  \DIFaddbegin \DIFadd{For macOS bootloader screen reader preference is set in }\texttt{\DIFadd{preferences.efires}}
+  \DIFadd{archive in }\texttt{\DIFadd{isVOEnabled.int32}} \DIFadd{file and is controlled by the operating system.
+  For OpenCore screen reader support this option is an independent equivalent.
+  Toggling screen reader support in both OpenCore boot picker and macOS bootloader
+  FileVault 2 login window can also be done with }\texttt{\DIFadd{Command}} \DIFadd{+ }\texttt{\DIFadd{F5}} \DIFadd{key
+  combination.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: screen reader requires working audio support, see
+  }\hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
+  \DIFadd{section for more details.
+}
+
+\DIFaddend \item
+  \texttt{PollAppleHotKeys}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Enable \texttt{modifier hotkey} handling in boot picker.
@@ -3397,7 +3405,22 @@ troubleshooting:
   \break
   NVIDIA Web Driver control variable. Takes ASCII digit \texttt{1} or \texttt{0}
   to enable or disable installed driver.
-\end{itemize}
+\DIFaddbegin \item
+  \texttt{\DIFadd{7C436110-AB2A-4BBB-A880-FE41995C9F82:StartupMute}}
+  \break
+  \DIFadd{Mute startup chime sound in firmware audio support. 8-bit integer.
+  The value of }\texttt{\DIFadd{0x00}} \DIFadd{means unmuted. Missing variable or any
+  other value means muted. This variable only affects Gibraltar
+  machines (T2).
+}\item
+  \texttt{\DIFadd{7C436110-AB2A-4BBB-A880-FE41995C9F82:SystemAudioVolume}}
+  \break
+  \DIFadd{System audio volume level for firmware audio support. 8-bit integer.
+  The bit of }\texttt{\DIFadd{0x80}} \DIFadd{means muted. Lower bits are used to encode
+  volume range specific to installed audio codec. The value is capped
+  by }\texttt{\DIFadd{MaximumBootBeepVolume}} \DIFadd{AppleHDA layout value to avoid
+  too loud audio playback in the firmware.
+}\DIFaddend \end{itemize}
 
 \section{PlatformInfo}\label{platforminfo}
 
@@ -4086,15 +4109,62 @@ and supplementary utilities can be used.
 
 \begin{enumerate}
 \item
-  \texttt{ConnectDrivers}\\
+  \DIFaddbegin \texttt{\DIFadd{Audio}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ dict}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: None}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Configure audio backend support described
+  in }\hyperref[uefiaudioprops]{Audio Properties} \DIFadd{section below.
+}
+
+  \DIFadd{Audio support provides a way for upstream protocols to interact with the
+  selected hardware and audio resources. All audio resources should reside
+  in }\texttt{\DIFadd{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Audio}}
+  \DIFadd{directory. Currently the only supported audio file format is WAVE PCM. While it is
+  driver-dependent which audio stream format is supported, most common audio cards
+  support 16-bit signed stereo audio at 44100 or 48000 Hz.
+}
+
+  \DIFadd{Audio file path is determined by audio type, audio localisation, and audio path. Each filename
+  looks as follows: }\texttt{[\DIFadd{audio type}]\DIFadd{\_}[\DIFadd{audio localisation}]\DIFadd{\_}[\DIFadd{audio path}]\DIFadd{.wav}}\DIFadd{. For unlocalised
+  files filename does not include the language code and looks as follows:
+  }\texttt{[\DIFadd{audio type}]\DIFadd{\_}[\DIFadd{audio path}]\DIFadd{.wav}}\DIFadd{.
+}
+
+  \begin{itemize}
+  \tightlist
+  \item \DIFadd{Audio type can be }\texttt{\DIFadd{OCEFIAudio}} \DIFadd{for OpenCore audio files or
+    }\texttt{\DIFadd{AXEFIAudio}} \DIFadd{for macOS bootloader audio files.
+  }\item \DIFadd{Audio localisation is a two letter language code (e.g. }\texttt{\DIFadd{en}}\DIFadd{)
+  with an exception for Chinese, Spanish, and Portuguese. Refer to
+  }\href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_LANGUAGE\_CODE} definition}
+  \DIFadd{for the list of all supported localisations.
+  }\item \DIFadd{Audio path is the base filename corresponding to a file identifier. For macOS bootloader audio paths refer to
+  }\href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_AUDIO\_FILE} definition}\DIFadd{.
+  For OpenCore audio paths refer to
+  }\href{https://github.com/acidanthera/OcSupportPkg/blob/master/Include/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}\DIFadd{.
+  The only exception is OpenCore boot chime file, which is }\texttt{\DIFadd{OCEFIAudio\_VoiceOver\_Boot.wav}}\DIFadd{.
+  }\end{itemize}
+
+  \DIFadd{Audio localisation is determined separately for macOS bootloader and OpenCore.
+  For macOS bootloader it is set in }\texttt{\DIFadd{preferences.efires}} \DIFadd{archive in
+  }\texttt{\DIFadd{systemLanguage.utf8}} \DIFadd{file and is controlled by the operating system.
+  For OpenCore the value of }\texttt{\DIFadd{prev-lang:kbd}} \DIFadd{variable is used.
+  When native audio localisation of a particular file is missing, English language
+  (}\texttt{\DIFadd{en}}\DIFadd{) localisation is used. Sample audio files can be found in
+  }\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}\DIFadd{.
+}
+
+\item
+  \DIFaddend \texttt{ConnectDrivers}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Perform UEFI controller connection after driver loading.
 
-  This option is useful for loading filesystem drivers, which
-  usually follow UEFI driver model, and may not start by themselves.
-  While effective, this option may not be necessary for drivers performing
-  automatic connection, and may slightly slowdown the boot.
+  This option is useful for loading \DIFdelbegin \DIFdel{filesystem drivers , which
+  usually follow }\DIFdelend \DIFaddbegin \DIFadd{drivers following }\DIFaddend UEFI driver model
+  \DIFdelbegin \DIFdel{, and }\DIFdelend \DIFaddbegin \DIFadd{as they }\DIFaddend may not start by themselves. \DIFaddbegin \DIFadd{Examples of such drivers are filesystem
+  or audio drivers. }\DIFaddend While effective, this option may not be necessary for drivers
+  performing automatic connection, and may slightly slowdown the boot.
 
   \emph{Note}: Some firmwares, made by Apple in particular, only connect the boot
   drive to speedup the boot process. Enable this option to be able to see all the
@@ -4117,10 +4187,14 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
   --- APFS file system bootstrap driver adding the support of embedded APFS drivers
   in bootable APFS containers in UEFI firmwares.
-  \item \href{https://github.com/acidanthera/OcSupportPkg}{\texttt{FwRuntimeServices}}
+  \item \DIFaddbegin \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
+  \DIFadd{--- HDA audio support driver in UEFI firmwares for most Intel and some other controllers.
+  Refer to }\href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
+  \DIFadd{for known issues in AudioDxe.
+  }\item \DIFaddend \href{https://github.com/acidanthera/OcSupportPkg}{\texttt{FwRuntimeServices}}
   --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
-  of OpenCore and Lilu by supporting read-only and write-only NVRAM variables. Some
-  quirks, like \texttt{RequestBootVarRouting}, require this driver for proper function.
+  of \DIFdelbegin \DIFdel{OpenCore }\DIFdelend \DIFaddbegin \DIFadd{\mbox{OpenCore} }\DIFaddend and Lilu by supporting read-only and write-only NVRAM variables. Some
+  \DIFdelbegin \DIFdel{quirks, like }\DIFdelend \DIFaddbegin \DIFadd{commonly used quirks, e.g. }\DIFaddend \texttt{RequestBootVarRouting}, require this driver for proper function.
   Due to the nature of being a runtime driver, i.e. functioning in parallel with the
   target operating system, it cannot be implemented within OpenCore itself, but is bundled
   with OpenCore releases.
@@ -4197,7 +4271,126 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 
 \end{enumerate}
 
-\subsection{Input Properties}\label{uefiinputprops}
+
+\DIFaddbegin \subsection{\DIFadd{Audio Properties}}\label{uefiaudioprops}
+
+\begin{enumerate}
+
+\item
+  \texttt{\DIFadd{AudioCodec}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Codec address on the specified audio controller for audio support.
+}
+
+  \DIFadd{Normally this contains first audio codec address on the builtin analog audio controller (}\texttt{\DIFadd{HDEF}}\DIFadd{).
+  Audio codec addresses, e.g. }\texttt{\DIFadd{2}}\DIFadd{, can be found in the debug log (marked in bold):
+}
+
+  \texttt{\DIFadd{OCAU: 1/3 PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)/VenMsg(<redacted>,}\textbf{\DIFadd{00000000}}\DIFadd{) (4 outputs)}}\\
+  \texttt{\DIFadd{OCAU: 2/3 PciRoot(0x0)/Pci(0x3,0x0)/VenMsg(<redacted>,}\textbf{\DIFadd{00000000}}\DIFadd{) (1 outputs)}}\\
+  \texttt{\DIFadd{OCAU: 3/3 PciRoot(0x0)/Pci(0x1B,0x0)/VenMsg(<redacted>,}\textbf{\DIFadd{02000000}}\DIFadd{) (7 outputs)}}
+
+  \DIFadd{As an alternative this value can be obtained from }\texttt{\DIFadd{IOHDACodecDevice}} \DIFadd{class in I/O Registry
+  containing it in }\texttt{\DIFadd{IOHDACodecAddress}} \DIFadd{field.
+}
+
+\item
+  \texttt{\DIFadd{AudioDevice}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Device path of the specified audio controller for audio support.
+}
+
+  \DIFadd{Normally this contains builtin analog audio controller (}\texttt{\DIFadd{HDEF}}\DIFadd{) device path,
+  e.g. }\texttt{\DIFadd{PciRoot(0x0)/Pci(0x1b,0x0)}}\DIFadd{. The list of recognised audio controllers can be
+  found in the debug log (marked in bold):
+}
+
+  \texttt{\DIFadd{OCAU: 1/3 }\textbf{\DIFadd{PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)}}\DIFadd{/VenMsg(<redacted>,00000000) (4 outputs)}}\\
+  \texttt{\DIFadd{OCAU: 2/3 }\textbf{\DIFadd{PciRoot(0x0)/Pci(0x3,0x0)}}\DIFadd{/VenMsg(<redacted>,00000000) (1 outputs)}}\\
+  \texttt{\DIFadd{OCAU: 3/3 }\textbf{\DIFadd{PciRoot(0x0)/Pci(0x1B,0x0)}}\DIFadd{/VenMsg(<redacted>,02000000) (7 outputs)}}
+
+  \DIFadd{As an alternative }\texttt{\DIFadd{gfxutil -f HDEF}} \DIFadd{command can be used in macOS. Specifying empty device
+  path will result in the first available audio controller to be used.
+}
+
+\item
+  \texttt{\DIFadd{AudioOut}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Index of the output port of the specified codec starting from 0.
+}
+
+  \DIFadd{Normally this contains the index of the green out of the builtin analog audio controller (}\texttt{\DIFadd{HDEF}}\DIFadd{).
+  The number of output nodes in the debug log (marked in bold):
+}
+
+  \texttt{\DIFadd{OCAU: 1/3 PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)/VenMsg(<redacted>,00000000) (}\textbf{\DIFadd{4 outputs}}\DIFadd{)}}\\
+  \texttt{\DIFadd{OCAU: 2/3 PciRoot(0x0)/Pci(0x3,0x0)/VenMsg(<redacted>,00000000) (}\textbf{\DIFadd{1 outputs}}\DIFadd{)}}\\
+  \texttt{\DIFadd{OCAU: 3/3 PciRoot(0x0)/Pci(0x1B,0x0)/VenMsg(<redacted>,02000000) (}\textbf{\DIFadd{7 outputs}}\DIFadd{)}}
+
+\item
+  \texttt{\DIFadd{AudioSupport}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Activate audio support by connecting to a backend driver.
+}
+
+  \DIFadd{Enabling this setting routes audio playback from builtin protocols to a dedicated
+  audio port (}\texttt{\DIFadd{AudioOut}}\DIFadd{) of the specified codec (}\texttt{\DIFadd{AudioCodec}}\DIFadd{) located
+  on the audio controller (}\texttt{\DIFadd{AudioDevice}}\DIFadd{).
+}
+
+\item
+  \texttt{\DIFadd{MinimumVolume}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Minimal heard volume level from }\texttt{\DIFadd{0}} \DIFadd{to }\texttt{\DIFadd{100}}\DIFadd{.
+}
+
+  \DIFadd{Screen reader will use this volume level, when the calculated volume level is
+  less than }\texttt{\DIFadd{MinimumVolume}}\DIFadd{. Boot chime sound will not play if the calculated
+  volume level is less than }\texttt{\DIFadd{MinimumVolume}}\DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{PlayChime}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Play chime sound at startup.
+}
+
+  \DIFadd{Enabling this setting plays boot chime through builtin audio support. Volume level
+  is determined by }\texttt{\DIFadd{MinimumVolume}} \DIFadd{and }\texttt{\DIFadd{VolumeAmplifier}} \DIFadd{settings and
+  }\texttt{\DIFadd{SystemAudioVolume}} \DIFadd{NVRAM variable.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: this setting is separate from }\texttt{\DIFadd{StartupMute}} \DIFadd{NVRAM variable
+  to avoid conflicts when the firmware is able to play boot chime.
+}
+
+\item
+  \texttt{\DIFadd{VolumeAmplifier}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Multiplication coefficient for system volume to raw volume linear translation
+  from }\texttt{\DIFadd{0}} \DIFadd{to }\texttt{\DIFadd{1000}}\DIFadd{.
+}
+
+  \DIFadd{Volume level range read from }\texttt{\DIFadd{SystemAudioVolume}} \DIFadd{varies depending on the codec.
+  To transform read value in }\texttt{[\DIFadd{0, 127}]} \DIFadd{range into raw volume range }\texttt{[\DIFadd{0, 100}]}
+  \DIFadd{the read value is scaled to }\texttt{\DIFadd{VolumeAmplifier}} \DIFadd{percents:
+  }\begin{align*}
+      \DIFadd{RawVolume }&\DIFadd{= MIN(\frac{SystemAudioVolume * VolumeAmplifier}{100}, 100)
+  }\end{align*}
+  \emph{\DIFadd{Note}}\DIFadd{: the transformation used in macOS is not linear, but it is very close
+  and this nuance is thus ignored.
+}
+
+\end{enumerate}
+
+\DIFaddend \subsection{Input Properties}\label{uefiinputprops}
 
 \begin{enumerate}
 
@@ -4529,7 +4722,32 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \begin{enumerate}
 
 \item
-  \texttt{AppleBootPolicy}\\
+  \DIFaddbegin \texttt{\DIFadd{AppleAudio}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Reinstalls Apple audio protocols with builtin
+  versions.
+}
+
+  \DIFadd{Apple audio protocols allow macOS bootloader and OpenCore to play
+  sounds and signals for screen reading or audible error reporting.
+  Supported protocols are beep generation and VoiceOver. VoiceOver protocol
+  is specific to Gibraltar machines (T2) and is not supported before
+  macOS High Sierra (10.13). Instead older macOS versions use AppleHDA protocol,
+  which is currently not implemented.
+}
+
+  \DIFadd{Only one set of audio protocols can be available at a time, so in order
+  to get audio playback in OpenCore user interface on Mac system implementing some
+  of these protocols this setting should be enabled.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: Backend audio driver needs to be configured in }\texttt{\DIFadd{UEFI Audio}}
+  \DIFadd{section for these protocols to be able to stream audio.
+}
+
+\item
+  \DIFaddend \texttt{AppleBootPolicy}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Apple Boot Policy protocol with a builtin
