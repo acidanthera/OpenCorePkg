@@ -32,6 +32,7 @@ OpenCore Changelog
 - Added `PickerAudioAssist` option for audio assistance in picker
 - Added `HdaCodecDump.efi` tool in default package
 - Added legacy AudioDxe and Microsoft namespaces to Reset NVRAM
+- Merged `OcSupportPkg` with `OpenCorePkg` for easier bisection
 
 #### v0.5.5
 - Fixed CPU bus ratio calculation for Nehalem and Westmere

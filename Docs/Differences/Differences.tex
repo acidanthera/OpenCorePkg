@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Feb 15 19:18:47 2020
-%DIF ADD ../Configuration.tex        Sat Feb 29 05:47:19 2020
+%DIF DEL PreviousConfiguration.tex   Sat Feb 29 16:48:42 2020
+%DIF ADD ../Configuration.tex        Sat Feb 29 18:43:13 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -653,7 +653,8 @@ For BIOS booting a third-party UEFI environment provider will have to
 be used. \texttt{DuetPkg} is one of the known UEFI environment providers
 for legacy systems. To run OpenCore on such a legacy system you can install
 \texttt{DuetPkg} with a dedicated tool:
-\href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/BootInstall}{BootInstall}.
+\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/BootInstall}{BootInstall}%%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/BootInstall}{BootInstall}\DIFaddend .
 
 For upgrade purposes refer to \texttt{Differences.pdf} document, providing
 the information about the changes affecting the configuration compared
@@ -676,9 +677,13 @@ patches is welcome. Please do follow
 \href{https://github.com/tianocore/tianocore.github.io/wiki/Code-Style-C}{EDK II C Codestyle}.
 
 Required external package dependencies include
-\href{https://github.com/acidanthera/OcSupportPkg}{EfiPkg},
-\href{https://github.com/acidanthera/OcSupportPkg}{MacInfoPkg}, and
-\href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}.
+\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg}{EfiPkg}%%%
+\DIFdel{,
+}%DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg}{MacInfoPkg}%%%
+\DIFdel{, and
+}%DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}%%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/EfiPkg}{EfiPkg} \DIFadd{and
+}\href{https://github.com/acidanthera/MacInfoPkg}{MacInfoPkg}\DIFaddend .
 
 To compile with \texttt{XCODE5}, besides \href{https://developer.apple.com/xcode}{Xcode},
 one should also install \href{https://www.nasm.us}{NASM} and
@@ -686,17 +691,19 @@ one should also install \href{https://www.nasm.us}{NASM} and
 The latest Xcode version is recommended for use despite the toolchain name. Example
 command sequence may look as follows:
 
-\begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
+\DIFmodbegin
+\begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash,alsolanguage=DIFcode]
 git clone https://github.com/acidanthera/audk UDK
 cd UDK
 git clone https://github.com/acidanthera/EfiPkg
 git clone https://github.com/acidanthera/MacInfoPkg
-git clone https://github.com/acidanthera/OcSupportPkg
+%DIF < git clone https://github.com/acidanthera/OcSupportPkg
 git clone https://github.com/acidanthera/OpenCorePkg
 source edksetup.sh
 make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
+\DIFmodend
 
 For IDE usage Xcode projects are available in the root of the repositories. Another
 approach could be \href{https://www.sublimetext.com}{Sublime Text} with
@@ -716,7 +723,7 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -I/UefiPackages/EfiPkg/Include/X64
 -I/UefiPackages/AppleSupportPkg/Include
 -I/UefiPackages/OpenCorePkg/Include
--I/UefiPackages/OcSupportPkg/Include
+%DIF < -I/UefiPackages/OcSupportPkg/Include
 -I/UefiPackages/MacInfoPkg/Include
 -I/UefiPackages/UefiCpuPkg/Include
 -IInclude
@@ -754,7 +761,8 @@ before sending the patch to ensure no double work and to avoid your patch being 
 
 \textbf{Organisation}. The codebase is structured in multiple repositories
 which contain separate EDK II packages. \texttt{AppleSupportPkg} and \texttt{OpenCorePkg}
-are primary packages, and \texttt{EfiPkg}, \texttt{OcSupportPkg}, \texttt{MacInfoPkg.dsc})
+are primary packages, and \texttt{EfiPkg}, \DIFdelbegin \texttt{\DIFdel{OcSupportPkg}}%DIFAUXCMD
+\DIFdel{, }\DIFdelend \texttt{MacInfoPkg.dsc})
 are dependent packages.
 \begin{itemize}
 \tightlist
@@ -2568,10 +2576,14 @@ This
   \DIFadd{Upon success }\texttt{\DIFadd{External}} \DIFadd{mode will entirely disable }\DIFaddend all boot management
   in OpenCore except policy enforcement. In \DIFdelbegin \DIFdel{this case }\DIFdelend \DIFaddbegin \texttt{\DIFadd{Apple}} \DIFadd{mode it may additionally
   bypass policy enforcement. To implement }\texttt{\DIFadd{External}} \DIFadd{mode }\DIFaddend a custom user interface may
-  utilise \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}
-  \texttt{OcBootManagementLib}\DIFdelbegin \DIFdel{to implement a user friendly boot picker oneself}\DIFdelend . Reference example of external graphics interface is provided in
-  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tests/ExternalUi}{ExternalUi}
-  test driver.
+  utilise \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg}{OcSupportPkg}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{OpenCorePkg}
+  \DIFaddend \texttt{OcBootManagementLib}\DIFdelbegin \DIFdel{to implement a user friendly boot picker oneself}\DIFdelend . Reference example of external graphics interface is provided in
+  \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Tests/ExternalUi}{ExternalUi}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Tests/ExternalUi}{ExternalUi}
+  \DIFaddend test driver.
 
   OpenCore built-in boot picker contains a set of actions chosen during the boot process.
   The list of supported actions is similar to Apple BDS and in general can be accessed by
@@ -2818,7 +2830,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   Presence of this file is highly recommended to ensure that unintentional
   file modifications (including filesystem corruption) do not happen unnoticed.
   To create this file automatically use
-  }\href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/CreateVault}{\texttt{create\_vault.sh}} \DIFadd{script.
+  }\href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/CreateVault}{\texttt{create\_vault.sh}} \DIFadd{script.
   Regardless of the underlying filesystem, path name and case must match
   between }\texttt{\DIFadd{config.plist}} \DIFadd{and }\texttt{\DIFadd{vault.plist}}\DIFadd{.
 }
@@ -2841,7 +2853,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
 
   RSA public key 520 byte format description can be found in Chromium OS documentation.
   To convert public key from X.509 certificate or from PEM file use
-  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/CreateVault}{RsaTool}.
+  \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/CreateVault}{RsaTool}%%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/CreateVault}{RsaTool}\DIFaddend .
 
 
   \DIFdelbegin \emph{\DIFdel{Note}}%DIFAUXCMD
@@ -3292,7 +3305,8 @@ improvements:
   e.g. \texttt{ru-RU:252} for Russian locale and ABC keyboard. Also accepts short forms:
   \texttt{ru:252} or \texttt{ru:0} (U.S. keyboard, compatible with 10.9). Full decoded
   keyboard list from \texttt{AppleKeyboardLayouts-L.dat} can be found
-  \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/AppleKeyboardLayouts}{here}. Using non-latin keyboard on 10.14
+  \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Utilities/AppleKeyboardLayouts}{here}%%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/AppleKeyboardLayouts}{here}\DIFaddend . Using non-latin keyboard on 10.14
   will not enable ABC keyboard, unlike previous and subsequent macOS versions, and is thus not recommended in case you need 10.14.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:security-mode}
@@ -4141,7 +4155,7 @@ and supplementary utilities can be used.
   }\item \DIFadd{Audio path is the base filename corresponding to a file identifier. For macOS bootloader audio paths refer to
   }\href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_AUDIO\_FILE} definition}\DIFadd{.
   For OpenCore audio paths refer to
-  }\href{https://github.com/acidanthera/OcSupportPkg/blob/master/Include/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}\DIFadd{.
+  }\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}\DIFadd{.
   The only exception is OpenCore boot chime file, which is }\texttt{\DIFadd{OCEFIAudio\_VoiceOver\_Boot.wav}}\DIFadd{.
   }\end{itemize}
 
@@ -4187,12 +4201,14 @@ and supplementary utilities can be used.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
   --- APFS file system bootstrap driver adding the support of embedded APFS drivers
   in bootable APFS containers in UEFI firmwares.
-  \item \DIFaddbegin \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
-  \DIFadd{--- HDA audio support driver in UEFI firmwares for most Intel and some other controllers.
+  \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg}{\texttt{FwRuntimeServices}}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
+  \DIFaddend --- \DIFaddbegin \DIFadd{HDA audio support driver in UEFI firmwares for most Intel and some other controllers.
   Refer to }\href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
   \DIFadd{for known issues in AudioDxe.
-  }\item \DIFaddend \href{https://github.com/acidanthera/OcSupportPkg}{\texttt{FwRuntimeServices}}
-  --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
+  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwRuntimeServices}}
+  \DIFadd{--- }\DIFaddend \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
   of \DIFdelbegin \DIFdel{OpenCore }\DIFdelend \DIFaddbegin \DIFadd{\mbox{OpenCore} }\DIFaddend and Lilu by supporting read-only and write-only NVRAM variables. Some
   \DIFdelbegin \DIFdel{quirks, like }\DIFdelend \DIFaddbegin \DIFadd{commonly used quirks, e.g. }\DIFaddend \texttt{RequestBootVarRouting}, require this driver for proper function.
   Due to the nature of being a runtime driver, i.e. functioning in parallel with the
@@ -4212,8 +4228,10 @@ and supplementary utilities can be used.
   --- NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
   firmwares starting with Broadwell generation. For Haswell and earlier embedding it
   within the firmware may be more favourable in case a NVMe SSD drive is installed.
-  \item \href{https://github.com/acidanthera/OcSupportPkg}{\texttt{AppleUsbKbDxe}}
-  --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
+  \item \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg}{\texttt{AppleUsbKbDxe}}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AppleUsbKbDxe}}
+  \DIFaddend --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
@@ -5333,8 +5351,10 @@ Similar to other projects working with hardware OpenCore supports auditing and d
 The use of \texttt{NOOPT} or \texttt{DEBUG} build modes instead of \texttt{RELEASE}
 can produce a lot more debug output. With \texttt{NOOPT} source level debugging with
 GDB or IDA Pro is also available. For GDB check
-\href{https://github.com/acidanthera/OcSupportPkg/tree/master/Debug}{OcSupport Debug}
-page. For IDA Pro you will need IDA Pro 7.3 or newer, refer to
+\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OcSupportPkg/tree/master/Debug}{OcSupport Debug}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Debug}{OcSupport Debug}
+\DIFaddend page. For IDA Pro you will need IDA Pro 7.3 or newer, refer to
 \href{https://www.hex-rays.com/products/ida/support/tutorials/index.shtml}{Debugging the XNU Kernel with IDA Pro}
 for more details.
 
