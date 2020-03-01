@@ -63,11 +63,8 @@
   #GetTscEmu.c
 
 
-#	  StdLibEdk2.c
-
 [Packages]
   EfiPkg/EfiPkg.dec
-  OcSupportPkg/OcSupportPkg.dec
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
@@ -85,7 +82,6 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
-  BmpSupportLib
   MemoryAllocationLib
   OcGuardLib
   UefiBootServicesTableLib
