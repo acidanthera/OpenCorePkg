@@ -7,29 +7,646 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		354F740F22573F0A00AB1A9B /* OpenCoreUefi.c in Sources */ = {isa = PBXBuildFile; fileRef = 354F740222573F0A00AB1A9B /* OpenCoreUefi.c */; };
-		354F741022573F0A00AB1A9B /* OpenCore.c in Sources */ = {isa = PBXBuildFile; fileRef = 354F740322573F0A00AB1A9B /* OpenCore.c */; };
-		354F741122573F0A00AB1A9B /* OcBootstrap.h in Headers */ = {isa = PBXBuildFile; fileRef = 354F740722573F0A00AB1A9B /* OcBootstrap.h */; };
-		354F741222573F0A00AB1A9B /* OpenCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 354F740822573F0A00AB1A9B /* OpenCore.h */; };
-		354F741322573F0A00AB1A9B /* Bootstrap.c in Sources */ = {isa = PBXBuildFile; fileRef = 354F740E22573F0A00AB1A9B /* Bootstrap.c */; };
-		358D567D230D403D00F2894B /* lib__index_OcSupportPkg.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 358D567C230D403D00F2894B /* lib__index_OcSupportPkg.dylib */; };
+		3511D58D23FDB2A800CC3B17 /* OpenCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 3511D57C23FDB2A700CC3B17 /* OpenCore.h */; };
+		3511D58E23FDB2A800CC3B17 /* Bootstrap.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D58023FDB2A800CC3B17 /* Bootstrap.c */; };
+		3511D58F23FDB2A800CC3B17 /* OpenCoreUefi.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D58323FDB2A800CC3B17 /* OpenCoreUefi.c */; };
+		3511D59023FDB2A800CC3B17 /* OpenCoreVault.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D58423FDB2A800CC3B17 /* OpenCoreVault.c */; };
+		3511D59123FDB2A800CC3B17 /* OpenCore.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D58523FDB2A800CC3B17 /* OpenCore.c */; };
+		3511D59223FDB2A800CC3B17 /* OpenCoreAcpi.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D58623FDB2A800CC3B17 /* OpenCoreAcpi.c */; };
+		3511D59323FDB2A800CC3B17 /* OpenCoreMisc.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D58723FDB2A800CC3B17 /* OpenCoreMisc.c */; };
+		3511D59423FDB2A800CC3B17 /* OpenCorePlatform.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D58823FDB2A800CC3B17 /* OpenCorePlatform.c */; };
+		3511D59523FDB2A800CC3B17 /* OpenCoreDevProps.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D58923FDB2A800CC3B17 /* OpenCoreDevProps.c */; };
+		3511D59623FDB2A800CC3B17 /* OpenCoreNvram.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D58A23FDB2A800CC3B17 /* OpenCoreNvram.c */; };
+		3511D59723FDB2A800CC3B17 /* OpenCoreKernel.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D58C23FDB2A800CC3B17 /* OpenCoreKernel.c */; };
+		3511D5CC23FDB37200CC3B17 /* NdkBootPicker.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D5CB23FDB37200CC3B17 /* NdkBootPicker.c */; };
+		35366BF8240C213500D54CBB /* OcMachoLibInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366A8D240C213400D54CBB /* OcMachoLibInternal.h */; };
+		35366BF9240C213500D54CBB /* Header.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A8F240C213400D54CBB /* Header.c */; };
+		35366BFA240C213500D54CBB /* Symbols.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A90240C213400D54CBB /* Symbols.c */; };
+		35366BFB240C213500D54CBB /* Relocations.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A91240C213400D54CBB /* Relocations.c */; };
+		35366BFC240C213500D54CBB /* CxxSymbols.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A92240C213400D54CBB /* CxxSymbols.c */; };
+		35366BFD240C213500D54CBB /* OcUnicodeLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A95240C213400D54CBB /* OcUnicodeLib.c */; };
+		35366BFE240C213500D54CBB /* OcAsciiLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A96240C213400D54CBB /* OcAsciiLib.c */; };
+		35366BFF240C213500D54CBB /* lodepng.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366A99240C213400D54CBB /* lodepng.h */; };
+		35366C00240C213500D54CBB /* OcPng.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A9A240C213400D54CBB /* OcPng.c */; };
+		35366C01240C213500D54CBB /* lodepng.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A9B240C213400D54CBB /* lodepng.c */; };
+		35366C02240C213500D54CBB /* OcSerializeLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A9D240C213400D54CBB /* OcSerializeLib.c */; };
+		35366C03240C213500D54CBB /* OcDataHubLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AA0240C213400D54CBB /* OcDataHubLib.c */; };
+		35366C04240C213500D54CBB /* DataHub.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AA2240C213400D54CBB /* DataHub.c */; };
+		35366C05240C213500D54CBB /* DataHub.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366AA3240C213400D54CBB /* DataHub.h */; };
+		35366C06240C213500D54CBB /* ConsoleControl.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AA5240C213400D54CBB /* ConsoleControl.c */; };
+		35366C07240C213500D54CBB /* OcConsoleLibInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366AA6240C213400D54CBB /* OcConsoleLibInternal.h */; };
+		35366C08240C213500D54CBB /* ResolutionParsing.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AA7240C213400D54CBB /* ResolutionParsing.c */; };
+		35366C09240C213500D54CBB /* UgaPassThrough.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AA9240C213400D54CBB /* UgaPassThrough.c */; };
+		35366C0A240C213500D54CBB /* OcConsoleLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AAA240C213400D54CBB /* OcConsoleLib.c */; };
+		35366C0B240C213500D54CBB /* ConsoleGop.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AAB240C213400D54CBB /* ConsoleGop.c */; };
+		35366C0C240C213500D54CBB /* TextOutputNull.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AAC240C213400D54CBB /* TextOutputNull.c */; };
+		35366C0D240C213500D54CBB /* TextOutputSystem.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AAD240C213400D54CBB /* TextOutputSystem.c */; };
+		35366C0E240C213500D54CBB /* TextOutputBuiltin.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AAE240C213400D54CBB /* TextOutputBuiltin.c */; };
+		35366C0F240C213500D54CBB /* OcRtcLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB1240C213400D54CBB /* OcRtcLib.c */; };
+		35366C10240C213500D54CBB /* AppleEventInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366AB4240C213400D54CBB /* AppleEventInternal.h */; };
+		35366C11240C213500D54CBB /* OcAppleEventLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB5240C213400D54CBB /* OcAppleEventLib.c */; };
+		35366C12240C213500D54CBB /* AppleEvent.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB6240C213400D54CBB /* AppleEvent.c */; };
+		35366C13240C213500D54CBB /* AppleKeyMap.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB7240C213400D54CBB /* AppleKeyMap.c */; };
+		35366C14240C213500D54CBB /* EventQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB8240C213400D54CBB /* EventQueue.c */; };
+		35366C15240C213500D54CBB /* KeyHandler.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB9240C213400D54CBB /* KeyHandler.c */; };
+		35366C16240C213500D54CBB /* PointerHandler.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366ABA240C213400D54CBB /* PointerHandler.c */; };
+		35366C17240C213500D54CBB /* OcDeviceTreeLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366ABC240C213400D54CBB /* OcDeviceTreeLib.c */; };
+		35366C18240C213500D54CBB /* OcUnicodeCollationEngLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366ABF240C213400D54CBB /* OcUnicodeCollationEngLib.c */; };
+		35366C19240C213500D54CBB /* OcUnicodeCollationEngLibInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366AC1240C213400D54CBB /* OcUnicodeCollationEngLibInternal.h */; };
+		35366C1A240C213500D54CBB /* OcHashServicesLibInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366AC3240C213400D54CBB /* OcHashServicesLibInternal.h */; };
+		35366C1B240C213500D54CBB /* OcHashServicesLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AC4240C213400D54CBB /* OcHashServicesLib.c */; };
+		35366C1C240C213500D54CBB /* OcAppleChunklistLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AC7240C213400D54CBB /* OcAppleChunklistLib.c */; };
+		35366C1D240C213500D54CBB /* OcHeciLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366ACA240C213400D54CBB /* OcHeciLib.c */; };
+		35366C1E240C213500D54CBB /* OcConsoleControlEntryModeLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366ACD240C213400D54CBB /* OcConsoleControlEntryModeLib.c */; };
+		35366C1F240C213500D54CBB /* OcAppleImageVerification.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AD1240C213400D54CBB /* OcAppleImageVerification.c */; };
+		35366C20240C213500D54CBB /* OcAppleImageConversionLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AD4240C213400D54CBB /* OcAppleImageConversionLib.c */; };
+		35366C21240C213500D54CBB /* Aes.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AD6240C213400D54CBB /* Aes.c */; };
+		35366C22240C213500D54CBB /* Sha2.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AD7240C213400D54CBB /* Sha2.c */; };
+		35366C23240C213500D54CBB /* BigNumMontgomery.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AD8240C213400D54CBB /* BigNumMontgomery.c */; };
+		35366C24240C213500D54CBB /* BigNumWordMul64.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366ADB240C213400D54CBB /* BigNumWordMul64.c */; };
+		35366C25240C213500D54CBB /* BigNumLibInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366ADC240C213400D54CBB /* BigNumLibInternal.h */; };
+		35366C26240C213500D54CBB /* BigNumLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366ADD240C213400D54CBB /* BigNumLib.h */; };
+		35366C27240C213500D54CBB /* Sha1.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366ADE240C213400D54CBB /* Sha1.c */; };
+		35366C28240C213500D54CBB /* BigNumPrimitives.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366ADF240C213400D54CBB /* BigNumPrimitives.c */; };
+		35366C29240C213500D54CBB /* PasswordHash.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE0240C213400D54CBB /* PasswordHash.c */; };
+		35366C2A240C213500D54CBB /* BigNumWordMul64.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE2240C213400D54CBB /* BigNumWordMul64.c */; };
+		35366C2B240C213500D54CBB /* ChaCha.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE3240C213400D54CBB /* ChaCha.c */; };
+		35366C2C240C213500D54CBB /* RsaDigitalSign.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE4240C213400D54CBB /* RsaDigitalSign.c */; };
+		35366C2D240C213500D54CBB /* Md5.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE5240C213400D54CBB /* Md5.c */; };
+		35366C2E240C213500D54CBB /* SecureMem.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE6240C213400D54CBB /* SecureMem.c */; };
+		35366C2F240C213500D54CBB /* DirectReset.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE8240C213400D54CBB /* DirectReset.c */; };
+		35366C30240C213500D54CBB /* Math.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE9240C213400D54CBB /* Math.c */; };
+		35366C31240C213500D54CBB /* UninstallAllProtocolInterfaces.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AEA240C213400D54CBB /* UninstallAllProtocolInterfaces.c */; };
+		35366C32240C213500D54CBB /* ReleaseUsbOwnership.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AEB240C213400D54CBB /* ReleaseUsbOwnership.c */; };
+		35366C33240C213500D54CBB /* DataPatcher.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AED240C213400D54CBB /* DataPatcher.c */; };
+		35366C34240C213500D54CBB /* OcTimerLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AEF240C213400D54CBB /* OcTimerLib.c */; };
+		35366C35240C213500D54CBB /* DER_CertCrl.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AF3240C213400D54CBB /* DER_CertCrl.c */; };
+		35366C36240C213500D54CBB /* DER_Keys.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AF4240C213400D54CBB /* DER_Keys.c */; };
+		35366C37240C213500D54CBB /* DER_Encode.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366AF5240C213400D54CBB /* DER_Encode.h */; };
+		35366C38240C213500D54CBB /* oids.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366AF6240C213400D54CBB /* oids.h */; };
+		35366C39240C213500D54CBB /* libDER.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366AF7240C213400D54CBB /* libDER.h */; };
+		35366C3A240C213500D54CBB /* DER_Decode.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366AF8240C213400D54CBB /* DER_Decode.h */; };
+		35366C3B240C213500D54CBB /* DER_Digest.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AF9240C213400D54CBB /* DER_Digest.c */; };
+		35366C3C240C213500D54CBB /* DER_CertCrl.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366AFA240C213400D54CBB /* DER_CertCrl.h */; };
+		35366C3D240C213500D54CBB /* asn1Types.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366AFB240C213400D54CBB /* asn1Types.h */; };
+		35366C3E240C213500D54CBB /* DER_Keys.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366AFC240C213400D54CBB /* DER_Keys.h */; };
+		35366C3F240C213500D54CBB /* DER_Decode.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AFD240C213400D54CBB /* DER_Decode.c */; };
+		35366C40240C213500D54CBB /* oids.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AFE240C213400D54CBB /* oids.c */; };
+		35366C41240C213500D54CBB /* DER_Encode.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AFF240C213400D54CBB /* DER_Encode.c */; };
+		35366C42240C213500D54CBB /* DER_Digest.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B00240C213400D54CBB /* DER_Digest.h */; };
+		35366C43240C213500D54CBB /* OcAppleImg4Lib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B01240C213400D54CBB /* OcAppleImg4Lib.c */; };
+		35366C44240C213500D54CBB /* libDER_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B03240C213400D54CBB /* libDER_config.h */; };
+		35366C45240C213500D54CBB /* libDERImg4_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B05240C213400D54CBB /* libDERImg4_config.h */; };
+		35366C46240C213500D54CBB /* Img4oids.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B06240C213400D54CBB /* Img4oids.c */; };
+		35366C47240C213500D54CBB /* DER_Img4Manifest.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B07240C213400D54CBB /* DER_Img4Manifest.h */; };
+		35366C48240C213500D54CBB /* DER_Img4Manifest.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B08240C213400D54CBB /* DER_Img4Manifest.c */; };
+		35366C49240C213500D54CBB /* libDERImg4.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B09240C213400D54CBB /* libDERImg4.h */; };
+		35366C4A240C213500D54CBB /* Img4oids.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B0A240C213400D54CBB /* Img4oids.h */; };
+		35366C4B240C213500D54CBB /* OcBootManagementLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B0C240C213400D54CBB /* OcBootManagementLib.c */; };
+		35366C4C240C213500D54CBB /* BootEntryInfo.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B0D240C213400D54CBB /* BootEntryInfo.c */; };
+		35366C4D240C213500D54CBB /* DmgBootSupport.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B0E240C213400D54CBB /* DmgBootSupport.c */; };
+		35366C4E240C213500D54CBB /* BootManagementInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B0F240C213400D54CBB /* BootManagementInternal.h */; };
+		35366C4F240C213500D54CBB /* HotKeySupport.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B10240C213400D54CBB /* HotKeySupport.c */; };
+		35366C50240C213500D54CBB /* PolicyManagement.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B12240C213400D54CBB /* PolicyManagement.c */; };
+		35366C51240C213500D54CBB /* DefaultEntryChoice.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B13240C213400D54CBB /* DefaultEntryChoice.c */; };
+		35366C52240C213500D54CBB /* BootAudio.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B14240C213400D54CBB /* BootAudio.c */; };
+		35366C53240C213500D54CBB /* BootArguments.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B15240C213400D54CBB /* BootArguments.c */; };
+		35366C54240C213500D54CBB /* AppleHibernate.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B16240C213400D54CBB /* AppleHibernate.c */; };
+		35366C55240C213500D54CBB /* BootEntryManagement.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B17240C213400D54CBB /* BootEntryManagement.c */; };
+		35366C56240C213500D54CBB /* VariableManagement.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B18240C213400D54CBB /* VariableManagement.c */; };
+		35366C57240C213500D54CBB /* lzss.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B1B240C213400D54CBB /* lzss.c */; };
+		35366C58240C213500D54CBB /* lzss.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B1C240C213400D54CBB /* lzss.h */; };
+		35366C59240C213500D54CBB /* zlib_uefi.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B1E240C213400D54CBB /* zlib_uefi.c */; };
+		35366C5A240C213500D54CBB /* zutil.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B1F240C213400D54CBB /* zutil.h */; };
+		35366C5B240C213500D54CBB /* inftrees.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B20240C213400D54CBB /* inftrees.h */; };
+		35366C5C240C213500D54CBB /* inflate.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B21240C213400D54CBB /* inflate.c */; };
+		35366C5D240C213500D54CBB /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B22240C213400D54CBB /* compress.c */; };
+		35366C5E240C213500D54CBB /* deflate.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B23240C213400D54CBB /* deflate.c */; };
+		35366C5F240C213500D54CBB /* inffixed.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B24240C213400D54CBB /* inffixed.h */; };
+		35366C60240C213500D54CBB /* trees.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B25240C213400D54CBB /* trees.h */; };
+		35366C61240C213500D54CBB /* inffast.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B26240C213400D54CBB /* inffast.h */; };
+		35366C62240C213500D54CBB /* crc32.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B27240C213400D54CBB /* crc32.c */; };
+		35366C63240C213500D54CBB /* infback.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B28240C213400D54CBB /* infback.c */; };
+		35366C64240C213500D54CBB /* deflate.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B29240C213400D54CBB /* deflate.h */; };
+		35366C65240C213500D54CBB /* zlib.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B2A240C213400D54CBB /* zlib.h */; };
+		35366C66240C213500D54CBB /* inflate.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B2B240C213400D54CBB /* inflate.h */; };
+		35366C67240C213500D54CBB /* inftrees.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B2C240C213400D54CBB /* inftrees.c */; };
+		35366C68240C213500D54CBB /* uncompr.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B2D240C213400D54CBB /* uncompr.c */; };
+		35366C69240C213500D54CBB /* trees.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B2E240C213400D54CBB /* trees.c */; };
+		35366C6A240C213500D54CBB /* crc32.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B2F240C213400D54CBB /* crc32.h */; };
+		35366C6B240C213500D54CBB /* inffast.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B30240C213400D54CBB /* inffast.c */; };
+		35366C6C240C213500D54CBB /* adler32.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B31240C213400D54CBB /* adler32.c */; };
+		35366C6D240C213500D54CBB /* zconf.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B32240C213400D54CBB /* zconf.h */; };
+		35366C6E240C213500D54CBB /* lzvn.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B35240C213400D54CBB /* lzvn.h */; };
+		35366C6F240C213500D54CBB /* lzvn.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B36240C213400D54CBB /* lzvn.c */; };
+		35366C70240C213500D54CBB /* OcAppleKeyMapLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B39240C213400D54CBB /* OcAppleKeyMapLib.c */; };
+		35366C71240C213500D54CBB /* DebugSmbios.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B3B240C213400D54CBB /* DebugSmbios.c */; };
+		35366C72240C213500D54CBB /* SmbiosInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B3C240C213400D54CBB /* SmbiosInternal.c */; };
+		35366C73240C213500D54CBB /* DebugSmbios.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B3D240C213400D54CBB /* DebugSmbios.h */; };
+		35366C74240C213500D54CBB /* SmbiosInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B3F240C213400D54CBB /* SmbiosInternal.h */; };
+		35366C75240C213500D54CBB /* SmbiosPatch.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B40240C213400D54CBB /* SmbiosPatch.c */; };
+		35366C76240C213500D54CBB /* OcStorageLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B43240C213400D54CBB /* OcStorageLib.c */; };
+		35366C77240C213500D54CBB /* OcAppleSecureBootLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B45240C213400D54CBB /* OcAppleSecureBootLib.c */; };
+		35366C79240C213500D54CBB /* Ubsan.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B49240C213400D54CBB /* Ubsan.h */; };
+		35366C7B240C213500D54CBB /* BitOverflow.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B4C240C213400D54CBB /* BitOverflow.c */; };
+		35366C7C240C213500D54CBB /* TripleOverflow.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B4D240C213400D54CBB /* TripleOverflow.c */; };
+		35366C7E240C213500D54CBB /* NativeOverflow.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B4F240C213400D54CBB /* NativeOverflow.c */; };
+		35366C7F240C213500D54CBB /* OcAppleKeysLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B52240C213400D54CBB /* OcAppleKeysLib.c */; };
+		35366C80240C213500D54CBB /* OcAppleBootPolicyLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B54240C213400D54CBB /* OcAppleBootPolicyLib.c */; };
+		35366C81240C213500D54CBB /* OcAppleUserInterfaceThemeLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B57240C213400D54CBB /* OcAppleUserInterfaceThemeLib.c */; };
+		35366C82240C213500D54CBB /* OcAcpiLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B5A240C213400D54CBB /* OcAcpiLib.c */; };
+		35366C83240C213500D54CBB /* AIKSource.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B5F240C213400D54CBB /* AIKSource.h */; };
+		35366C84240C213500D54CBB /* AIK.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B60240C213400D54CBB /* AIK.h */; };
+		35366C85240C213500D54CBB /* AIKTarget.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B61240C213400D54CBB /* AIKTarget.c */; };
+		35366C86240C213500D54CBB /* AIKShim.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B62240C213400D54CBB /* AIKShim.c */; };
+		35366C87240C213500D54CBB /* AIKTranslate.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B63240C213400D54CBB /* AIKTranslate.h */; };
+		35366C88240C213500D54CBB /* AIKData.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B64240C213400D54CBB /* AIKData.h */; };
+		35366C89240C213500D54CBB /* AIKMap.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B65240C213400D54CBB /* AIKMap.c */; };
+		35366C8A240C213500D54CBB /* AIK.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B66240C213400D54CBB /* AIK.c */; };
+		35366C8B240C213500D54CBB /* AIKSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B67240C213400D54CBB /* AIKSource.c */; };
+		35366C8C240C213500D54CBB /* AIKTranslate.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B68240C213400D54CBB /* AIKTranslate.c */; };
+		35366C8D240C213500D54CBB /* AIKTarget.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B69240C213400D54CBB /* AIKTarget.h */; };
+		35366C8E240C213500D54CBB /* AIKShim.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B6A240C213400D54CBB /* AIKShim.h */; };
+		35366C8F240C213500D54CBB /* AIKData.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B6B240C213400D54CBB /* AIKData.c */; };
+		35366C90240C213500D54CBB /* AIT.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B6E240C213400D54CBB /* AIT.c */; };
+		35366C91240C213500D54CBB /* AIM.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B70240C213400D54CBB /* AIM.c */; };
+		35366C92240C213500D54CBB /* AIM.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B71240C213400D54CBB /* AIM.h */; };
+		35366C93240C213500D54CBB /* OcFirmwarePasswordLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B73240C213400D54CBB /* OcFirmwarePasswordLib.c */; };
+		35366C94240C213500D54CBB /* AppleFwPasswordInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B74240C213400D54CBB /* AppleFwPasswordInternal.h */; };
+		35366C95240C213500D54CBB /* OcAppleDiskImageLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B77240C213400D54CBB /* OcAppleDiskImageLib.c */; };
+		35366C96240C213500D54CBB /* OcAppleDiskImageLibInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B78240C213400D54CBB /* OcAppleDiskImageLibInternal.h */; };
+		35366C97240C213500D54CBB /* OcAppleDiskImageBlockIo.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B7A240C213400D54CBB /* OcAppleDiskImageBlockIo.c */; };
+		35366C98240C213500D54CBB /* OcAppleDiskImageLibInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B7B240C213400D54CBB /* OcAppleDiskImageLibInternal.c */; };
+		35366C9A240C213500D54CBB /* OcRngLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B7F240C213400D54CBB /* OcRngLib.c */; };
+		35366C9C240C213500D54CBB /* OcRngInternals.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B83240C213400D54CBB /* OcRngInternals.h */; };
+		35366C9D240C213500D54CBB /* OcHdaDevicesLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B85240C213400D54CBB /* OcHdaDevicesLib.c */; };
+		35366C9E240C213500D54CBB /* OcHdaDevicesInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B87240C213400D54CBB /* OcHdaDevicesInternal.h */; };
+		35366C9F240C213500D54CBB /* OcFirmwareVolumeLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B8A240C213400D54CBB /* OcFirmwareVolumeLib.c */; };
+		35366CA0240C213500D54CBB /* FvOnFv2Thunk.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B8B240C213400D54CBB /* FvOnFv2Thunk.c */; };
+		35366CA1240C213500D54CBB /* OcFirmwareVolumeLibInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B8C240C213400D54CBB /* OcFirmwareVolumeLibInternal.h */; };
+		35366CA2240C213500D54CBB /* ExpandDevicePath.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B8F240C213400D54CBB /* ExpandDevicePath.c */; };
+		35366CA3240C213500D54CBB /* OcDevicePathLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B90240C213400D54CBB /* OcDevicePathLib.c */; };
+		35366CA4240C213500D54CBB /* DebugHelp.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B92240C213400D54CBB /* DebugHelp.c */; };
+		35366CA5240C213500D54CBB /* DebugPrint.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B93240C213400D54CBB /* DebugPrint.c */; };
+		35366CA6240C213500D54CBB /* OcLog.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B95240C213400D54CBB /* OcLog.c */; };
+		35366CA7240C213500D54CBB /* OcLogInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B96240C213400D54CBB /* OcLogInternal.h */; };
+		35366CA8240C213500D54CBB /* OcDebugLogLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B97240C213400D54CBB /* OcDebugLogLib.c */; };
+		35366CA9240C213500D54CBB /* OcAudioGenBeep.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B99240C213400D54CBB /* OcAudioGenBeep.c */; };
+		35366CAA240C213500D54CBB /* OcAudio.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B9B240C213400D54CBB /* OcAudio.c */; };
+		35366CAB240C213500D54CBB /* OcAudioWave.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B9C240C213400D54CBB /* OcAudioWave.c */; };
+		35366CAC240C213500D54CBB /* OcAudioInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366B9D240C213400D54CBB /* OcAudioInternal.h */; };
+		35366CAD240C213500D54CBB /* OcAudioLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B9E240C213400D54CBB /* OcAudioLib.c */; };
+		35366CAE240C213500D54CBB /* OcAudioVoiceOver.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B9F240C213400D54CBB /* OcAudioVoiceOver.c */; };
+		35366CAF240C213500D54CBB /* VirtualFile.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BA1240C213400D54CBB /* VirtualFile.c */; };
+		35366CB0240C213500D54CBB /* VirtualVolume.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BA3240C213400D54CBB /* VirtualVolume.c */; };
+		35366CB1240C213500D54CBB /* VirtualFs.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BA4240C213400D54CBB /* VirtualFs.c */; };
+		35366CB2240C213500D54CBB /* VirtualFsInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366BA5240C213400D54CBB /* VirtualFsInternal.h */; };
+		35366CB3240C213500D54CBB /* PrelinkedKext.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BA7240C213400D54CBB /* PrelinkedKext.c */; };
+		35366CB4240C213500D54CBB /* PrelinkedContext.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BA8240C213400D54CBB /* PrelinkedContext.c */; };
+		35366CB5240C213500D54CBB /* Link.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BA9240C213400D54CBB /* Link.c */; };
+		35366CB6240C213500D54CBB /* KextPatcher.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BAB240C213400D54CBB /* KextPatcher.c */; };
+		35366CB7240C213500D54CBB /* CommonPatches.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BAC240C213400D54CBB /* CommonPatches.c */; };
+		35366CB8240C213500D54CBB /* Vtables.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BAD240C213400D54CBB /* Vtables.c */; };
+		35366CB9240C213500D54CBB /* KernelReader.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BAE240C213400D54CBB /* KernelReader.c */; };
+		35366CBA240C213500D54CBB /* PrelinkedInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366BAF240C213400D54CBB /* PrelinkedInternal.h */; };
+		35366CBB240C213500D54CBB /* OpenFile.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BB1240C213400D54CBB /* OpenFile.c */; };
+		35366CBC240C213500D54CBB /* FsConnectQuirk.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BB2240C213400D54CBB /* FsConnectQuirk.c */; };
+		35366CBD240C213500D54CBB /* GptPartitionEntry.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BB3240C213400D54CBB /* GptPartitionEntry.c */; };
+		35366CBE240C213500D54CBB /* ReadFile.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BB4240C213400D54CBB /* ReadFile.c */; };
+		35366CBF240C213500D54CBB /* FirmwareFile.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BB5240C213400D54CBB /* FirmwareFile.c */; };
+		35366CC0240C213500D54CBB /* GetVolumeLabel.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BB6240C213400D54CBB /* GetVolumeLabel.c */; };
+		35366CC1240C213500D54CBB /* FileProtocol.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BB7240C213400D54CBB /* FileProtocol.c */; };
+		35366CC2240C213500D54CBB /* GetFileInfo.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BB8240C213400D54CBB /* GetFileInfo.c */; };
+		35366CC3240C213500D54CBB /* LocateFileSystem.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BB9240C213400D54CBB /* LocateFileSystem.c */; };
+		35366CC4240C213500D54CBB /* OcCpuInternals.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366BBC240C213400D54CBB /* OcCpuInternals.h */; };
+		35366CC6240C213500D54CBB /* FrequencyDetect.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BBF240C213400D54CBB /* FrequencyDetect.c */; };
+		35366CC7240C213500D54CBB /* AppleCpuSupport.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BC1240C213400D54CBB /* AppleCpuSupport.c */; };
+		35366CC8240C213500D54CBB /* OcCpuLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BC2240C213400D54CBB /* OcCpuLib.c */; };
+		35366CCA240C213500D54CBB /* OcConfigurationLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BC8240C213400D54CBB /* OcConfigurationLib.c */; };
+		35366CCB240C213500D54CBB /* OcDriverConnectionLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BCA240C213400D54CBB /* OcDriverConnectionLib.c */; };
+		35366CCC240C213500D54CBB /* OcXmlLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BCD240C213400D54CBB /* OcXmlLib.c */; };
+		35366CCD240C213500D54CBB /* OcDevicePropertyLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BD1240C213400D54CBB /* OcDevicePropertyLib.c */; };
+		35366CCE240C213500D54CBB /* OcOSInfoLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BD3240C213500D54CBB /* OcOSInfoLib.c */; };
+		35366CCF240C213500D54CBB /* OcTemplateLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BD7240C213500D54CBB /* OcTemplateLib.c */; };
+		35366CD0240C213500D54CBB /* OcCompilerIntrinsicsLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BD9240C213500D54CBB /* OcCompilerIntrinsicsLib.c */; };
+		35366CD1240C213500D54CBB /* MsvcMath32.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BDB240C213500D54CBB /* MsvcMath32.c */; };
+		35366CD2240C213500D54CBB /* CustomSlide.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BDE240C213500D54CBB /* CustomSlide.c */; };
+		35366CD3240C213500D54CBB /* ContextSwitchSupport.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BE0240C213500D54CBB /* ContextSwitchSupport.c */; };
+		35366CD5240C213500D54CBB /* ContextSwitch.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366BE2240C213500D54CBB /* ContextSwitch.h */; };
+		35366CD6240C213500D54CBB /* BootCompatInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366BE3240C213500D54CBB /* BootCompatInternal.h */; };
+		35366CD7240C213500D54CBB /* ServiceOverrides.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BE4240C213500D54CBB /* ServiceOverrides.c */; };
+		35366CD8240C213500D54CBB /* ContextSwitchSupport.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BE6240C213500D54CBB /* ContextSwitchSupport.c */; };
+		35366CD9240C213500D54CBB /* ContextSwitch.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366BE7240C213500D54CBB /* ContextSwitch.h */; };
+		35366CDA240C213500D54CBB /* KernelSupport.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BE8240C213500D54CBB /* KernelSupport.c */; };
+		35366CDB240C213500D54CBB /* OcAppleBootCompatLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BE9240C213500D54CBB /* OcAppleBootCompatLib.c */; };
+		35366CDC240C213500D54CBB /* MemoryMap.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BEB240C213500D54CBB /* MemoryMap.c */; };
+		35366CDD240C213500D54CBB /* VirtualMemory.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BEC240C213500D54CBB /* VirtualMemory.c */; };
+		35366CDE240C213500D54CBB /* LegacyRegionLock.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BED240C213500D54CBB /* LegacyRegionLock.c */; };
+		35366CDF240C213500D54CBB /* LegacyRegionUnLock.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BEE240C213500D54CBB /* LegacyRegionUnLock.c */; };
+		35366CE0240C213500D54CBB /* UmmMalloc.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BF0240C213500D54CBB /* UmmMalloc.c */; };
+		35366CE1240C213500D54CBB /* OcAppleRamDiskLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BF3240C213500D54CBB /* OcAppleRamDiskLib.c */; };
+		35366CE2240C213500D54CBB /* OcSmcLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BF5240C213500D54CBB /* OcSmcLib.c */; };
+		35366CE3240C213500D54CBB /* OcSmcLibInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366BF7240C213500D54CBB /* OcSmcLibInternal.h */; };
+		35C7411224055115005CB6EF /* GetTscEmu.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C73DEB24055113005CB6EF /* GetTscEmu.c */; };
+		35C7411324055115005CB6EF /* GuiApp.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C73DEC24055113005CB6EF /* GuiApp.c */; };
+		35C7411424055115005CB6EF /* GUI.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C73DED24055113005CB6EF /* GUI.c */; };
+		35C7411524055115005CB6EF /* BmfLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 35C73DEE24055113005CB6EF /* BmfLib.h */; };
+		35C7430024055116005CB6EF /* IconHdExt.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740EC24055114005CB6EF /* IconHdExt.c */; };
+		35C7430124055116005CB6EF /* Helvetica_fnt.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740ED24055114005CB6EF /* Helvetica_fnt.c */; };
+		35C7430224055116005CB6EF /* IconHd.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740F224055114005CB6EF /* IconHd.c */; };
+		35C7430324055116005CB6EF /* Selector.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740F324055114005CB6EF /* Selector.c */; };
+		35C7430424055116005CB6EF /* Cursor.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740F624055114005CB6EF /* Cursor.c */; };
+		35C7430524055116005CB6EF /* Helvetica_bmp.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740F724055114005CB6EF /* Helvetica_bmp.c */; };
+		35C7430624055116005CB6EF /* IconSelected.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740F824055114005CB6EF /* IconSelected.c */; };
+		35C7430724055116005CB6EF /* InputSimTextIn.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740FA24055114005CB6EF /* InputSimTextIn.c */; };
+		35C7430824055116005CB6EF /* InputSimAbsPtr.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740FB24055114005CB6EF /* InputSimAbsPtr.c */; };
+		35C7430A24055116005CB6EF /* OutputFbGop.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410024055114005CB6EF /* OutputFbGop.c */; };
+		35C7430B24055116005CB6EF /* StGopShared.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410124055114005CB6EF /* StGopShared.c */; };
+		35C7430C24055116005CB6EF /* OutputStGop.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410224055114005CB6EF /* OutputStGop.c */; };
+		35C7430D24055116005CB6EF /* OcBootstrap.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410324055114005CB6EF /* OcBootstrap.c */; };
+		35C7430E24055116005CB6EF /* HwOps.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410424055115005CB6EF /* HwOps.c */; };
+		35C7430F24055116005CB6EF /* GuiApp.h in Headers */ = {isa = PBXBuildFile; fileRef = 35C7410524055115005CB6EF /* GuiApp.h */; };
+		35C7431024055116005CB6EF /* GUI.h in Headers */ = {isa = PBXBuildFile; fileRef = 35C7410624055115005CB6EF /* GUI.h */; };
+		35C7431124055116005CB6EF /* HwOpsEmu.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410724055115005CB6EF /* HwOpsEmu.c */; };
+		35C7431224055116005CB6EF /* BitmapFontUser.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410824055115005CB6EF /* BitmapFontUser.c */; };
+		35C7431324055116005CB6EF /* GuiIo.h in Headers */ = {isa = PBXBuildFile; fileRef = 35C7410924055115005CB6EF /* GuiIo.h */; };
+		35C7431424055116005CB6EF /* OcBootstrapEmu.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410B24055115005CB6EF /* OcBootstrapEmu.c */; };
+		35C7431524055116005CB6EF /* BitmapFont.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410C24055115005CB6EF /* BitmapFont.c */; };
+		35C7431624055116005CB6EF /* BootPicker.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410E24055115005CB6EF /* BootPicker.c */; };
+		35C7431724055116005CB6EF /* HwOps.h in Headers */ = {isa = PBXBuildFile; fileRef = 35C7410F24055115005CB6EF /* HwOps.h */; };
+		35C7431824055116005CB6EF /* BmfFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 35C7411024055115005CB6EF /* BmfFile.h */; };
+		35C7431924055116005CB6EF /* GetTscHw.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7411124055115005CB6EF /* GetTscHw.c */; };
+		35F6ACA6240C22EE00D6FA49 /* Canary.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B48240C213400D54CBB /* Canary.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		354F73F822573EBF00AB1A9B /* lib__OpenCorePkg__index.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = lib__OpenCorePkg__index.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		354F73FD22573F0A00AB1A9B /* OpenCorePkg.dec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OpenCorePkg.dec; sourceTree = "<group>"; };
-		354F73FE22573F0A00AB1A9B /* OpenCorePkg.dsc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OpenCorePkg.dsc; sourceTree = "<group>"; };
-		354F73FF22573F0A00AB1A9B /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		354F740222573F0A00AB1A9B /* OpenCoreUefi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OpenCoreUefi.c; sourceTree = "<group>"; };
-		354F740322573F0A00AB1A9B /* OpenCore.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OpenCore.c; sourceTree = "<group>"; };
-		354F740422573F0A00AB1A9B /* OpenCore.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OpenCore.inf; sourceTree = "<group>"; };
-		354F740722573F0A00AB1A9B /* OcBootstrap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcBootstrap.h; sourceTree = "<group>"; };
-		354F740822573F0A00AB1A9B /* OpenCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenCore.h; sourceTree = "<group>"; };
-		354F740922573F0A00AB1A9B /* build.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = build.sh; sourceTree = "<group>"; };
-		354F740A22573F0A00AB1A9B /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
-		354F740D22573F0A00AB1A9B /* Bootstrap.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Bootstrap.inf; sourceTree = "<group>"; };
-		354F740E22573F0A00AB1A9B /* Bootstrap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Bootstrap.c; sourceTree = "<group>"; };
-		358D567C230D403D00F2894B /* lib__index_OcSupportPkg.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = lib__index_OcSupportPkg.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		3511D55E23FDB2A700CC3B17 /* Configuration.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Configuration.tex; sourceTree = "<group>"; };
+		3511D55F23FDB2A700CC3B17 /* BuildDocs.tool */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = BuildDocs.tool; sourceTree = "<group>"; };
+		3511D56023FDB2A700CC3B17 /* SampleFull.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = SampleFull.plist; sourceTree = "<group>"; };
+		3511D56223FDB2A700CC3B17 /* LogoApprox.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LogoApprox.svg; sourceTree = "<group>"; };
+		3511D56323FDB2A700CC3B17 /* OpenCore_with_text_Small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = OpenCore_with_text_Small.png; sourceTree = "<group>"; };
+		3511D56423FDB2A700CC3B17 /* OpenCore_with_text_Right.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = OpenCore_with_text_Right.png; sourceTree = "<group>"; };
+		3511D56523FDB2A700CC3B17 /* OpenCore_with_text_Large.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = OpenCore_with_text_Large.png; sourceTree = "<group>"; };
+		3511D56623FDB2A700CC3B17 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		3511D56723FDB2A700CC3B17 /* Logo.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = Logo.pdf; sourceTree = "<group>"; };
+		3511D56823FDB2A700CC3B17 /* Logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Logo.png; sourceTree = "<group>"; };
+		3511D56923FDB2A700CC3B17 /* Logo.sketch */ = {isa = PBXFileReference; lastKnownFileType = file; path = Logo.sketch; sourceTree = "<group>"; };
+		3511D56A23FDB2A700CC3B17 /* Configuration.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = Configuration.pdf; sourceTree = "<group>"; };
+		3511D56C23FDB2A700CC3B17 /* SSDT-AWAC.dsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "SSDT-AWAC.dsl"; sourceTree = "<group>"; };
+		3511D56D23FDB2A700CC3B17 /* SSDT-RTC0.dsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "SSDT-RTC0.dsl"; sourceTree = "<group>"; };
+		3511D56E23FDB2A700CC3B17 /* SSDT-EC.dsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "SSDT-EC.dsl"; sourceTree = "<group>"; };
+		3511D56F23FDB2A700CC3B17 /* SSDT-ALS0.dsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "SSDT-ALS0.dsl"; sourceTree = "<group>"; };
+		3511D57023FDB2A700CC3B17 /* SSDT-PMC.dsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "SSDT-PMC.dsl"; sourceTree = "<group>"; };
+		3511D57123FDB2A700CC3B17 /* SSDT-SBUS-MCHC.dsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "SSDT-SBUS-MCHC.dsl"; sourceTree = "<group>"; };
+		3511D57223FDB2A700CC3B17 /* SSDT-EC-USBX.dsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "SSDT-EC-USBX.dsl"; sourceTree = "<group>"; };
+		3511D57323FDB2A700CC3B17 /* SSDT-EHCx_OFF.dsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "SSDT-EHCx_OFF.dsl"; sourceTree = "<group>"; };
+		3511D57423FDB2A700CC3B17 /* SSDT-PLUG.dsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "SSDT-PLUG.dsl"; sourceTree = "<group>"; };
+		3511D57523FDB2A700CC3B17 /* Kexts.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Kexts.md; sourceTree = "<group>"; };
+		3511D57723FDB2A700CC3B17 /* Differences.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = Differences.pdf; sourceTree = "<group>"; };
+		3511D57823FDB2A700CC3B17 /* PreviousConfiguration.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PreviousConfiguration.tex; sourceTree = "<group>"; };
+		3511D57923FDB2A700CC3B17 /* Differences.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Differences.tex; sourceTree = "<group>"; };
+		3511D57A23FDB2A700CC3B17 /* Sample.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Sample.plist; sourceTree = "<group>"; };
+		3511D57C23FDB2A700CC3B17 /* OpenCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenCore.h; sourceTree = "<group>"; };
+		3511D57F23FDB2A800CC3B17 /* Bootstrap.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Bootstrap.inf; sourceTree = "<group>"; };
+		3511D58023FDB2A800CC3B17 /* Bootstrap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Bootstrap.c; sourceTree = "<group>"; };
+		3511D58323FDB2A800CC3B17 /* OpenCoreUefi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OpenCoreUefi.c; sourceTree = "<group>"; };
+		3511D58423FDB2A800CC3B17 /* OpenCoreVault.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OpenCoreVault.c; sourceTree = "<group>"; };
+		3511D58523FDB2A800CC3B17 /* OpenCore.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OpenCore.c; sourceTree = "<group>"; };
+		3511D58623FDB2A800CC3B17 /* OpenCoreAcpi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OpenCoreAcpi.c; sourceTree = "<group>"; };
+		3511D58723FDB2A800CC3B17 /* OpenCoreMisc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OpenCoreMisc.c; sourceTree = "<group>"; };
+		3511D58823FDB2A800CC3B17 /* OpenCorePlatform.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OpenCorePlatform.c; sourceTree = "<group>"; };
+		3511D58923FDB2A800CC3B17 /* OpenCoreDevProps.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OpenCoreDevProps.c; sourceTree = "<group>"; };
+		3511D58A23FDB2A800CC3B17 /* OpenCoreNvram.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OpenCoreNvram.c; sourceTree = "<group>"; };
+		3511D58B23FDB2A800CC3B17 /* OpenCore.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OpenCore.inf; sourceTree = "<group>"; };
+		3511D58C23FDB2A800CC3B17 /* OpenCoreKernel.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OpenCoreKernel.c; sourceTree = "<group>"; };
+		3511D59823FDB2D900CC3B17 /* lib__OpenCorePkg__index.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = lib__OpenCorePkg__index.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		3511D5CB23FDB37200CC3B17 /* NdkBootPicker.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = NdkBootPicker.c; path = ../NdkBootPicker/NdkBootPicker.c; sourceTree = "<group>"; };
+		35366A8D240C213400D54CBB /* OcMachoLibInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcMachoLibInternal.h; sourceTree = "<group>"; };
+		35366A8E240C213400D54CBB /* OcMachoLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcMachoLib.inf; sourceTree = "<group>"; };
+		35366A8F240C213400D54CBB /* Header.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Header.c; sourceTree = "<group>"; };
+		35366A90240C213400D54CBB /* Symbols.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Symbols.c; sourceTree = "<group>"; };
+		35366A91240C213400D54CBB /* Relocations.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Relocations.c; sourceTree = "<group>"; };
+		35366A92240C213400D54CBB /* CxxSymbols.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CxxSymbols.c; sourceTree = "<group>"; };
+		35366A94240C213400D54CBB /* OcStringLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcStringLib.inf; sourceTree = "<group>"; };
+		35366A95240C213400D54CBB /* OcUnicodeLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcUnicodeLib.c; sourceTree = "<group>"; };
+		35366A96240C213400D54CBB /* OcAsciiLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAsciiLib.c; sourceTree = "<group>"; };
+		35366A98240C213400D54CBB /* OcPngLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcPngLib.inf; sourceTree = "<group>"; };
+		35366A99240C213400D54CBB /* lodepng.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lodepng.h; sourceTree = "<group>"; };
+		35366A9A240C213400D54CBB /* OcPng.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcPng.c; sourceTree = "<group>"; };
+		35366A9B240C213400D54CBB /* lodepng.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lodepng.c; sourceTree = "<group>"; };
+		35366A9D240C213400D54CBB /* OcSerializeLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcSerializeLib.c; sourceTree = "<group>"; };
+		35366A9E240C213400D54CBB /* OcSerializeLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcSerializeLib.inf; sourceTree = "<group>"; };
+		35366AA0240C213400D54CBB /* OcDataHubLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcDataHubLib.c; sourceTree = "<group>"; };
+		35366AA1240C213400D54CBB /* OcDataHubLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcDataHubLib.inf; sourceTree = "<group>"; };
+		35366AA2240C213400D54CBB /* DataHub.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DataHub.c; sourceTree = "<group>"; };
+		35366AA3240C213400D54CBB /* DataHub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataHub.h; sourceTree = "<group>"; };
+		35366AA5240C213400D54CBB /* ConsoleControl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ConsoleControl.c; sourceTree = "<group>"; };
+		35366AA6240C213400D54CBB /* OcConsoleLibInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcConsoleLibInternal.h; sourceTree = "<group>"; };
+		35366AA7240C213400D54CBB /* ResolutionParsing.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ResolutionParsing.c; sourceTree = "<group>"; };
+		35366AA8240C213400D54CBB /* OcConsoleLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcConsoleLib.inf; sourceTree = "<group>"; };
+		35366AA9240C213400D54CBB /* UgaPassThrough.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = UgaPassThrough.c; sourceTree = "<group>"; };
+		35366AAA240C213400D54CBB /* OcConsoleLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcConsoleLib.c; sourceTree = "<group>"; };
+		35366AAB240C213400D54CBB /* ConsoleGop.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ConsoleGop.c; sourceTree = "<group>"; };
+		35366AAC240C213400D54CBB /* TextOutputNull.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TextOutputNull.c; sourceTree = "<group>"; };
+		35366AAD240C213400D54CBB /* TextOutputSystem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TextOutputSystem.c; sourceTree = "<group>"; };
+		35366AAE240C213400D54CBB /* TextOutputBuiltin.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TextOutputBuiltin.c; sourceTree = "<group>"; };
+		35366AB0240C213400D54CBB /* OcRtcLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcRtcLib.inf; sourceTree = "<group>"; };
+		35366AB1240C213400D54CBB /* OcRtcLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcRtcLib.c; sourceTree = "<group>"; };
+		35366AB3240C213400D54CBB /* OcAppleEventLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleEventLib.inf; sourceTree = "<group>"; };
+		35366AB4240C213400D54CBB /* AppleEventInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppleEventInternal.h; sourceTree = "<group>"; };
+		35366AB5240C213400D54CBB /* OcAppleEventLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleEventLib.c; sourceTree = "<group>"; };
+		35366AB6240C213400D54CBB /* AppleEvent.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AppleEvent.c; sourceTree = "<group>"; };
+		35366AB7240C213400D54CBB /* AppleKeyMap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AppleKeyMap.c; sourceTree = "<group>"; };
+		35366AB8240C213400D54CBB /* EventQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = EventQueue.c; sourceTree = "<group>"; };
+		35366AB9240C213400D54CBB /* KeyHandler.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = KeyHandler.c; sourceTree = "<group>"; };
+		35366ABA240C213400D54CBB /* PointerHandler.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PointerHandler.c; sourceTree = "<group>"; };
+		35366ABC240C213400D54CBB /* OcDeviceTreeLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcDeviceTreeLib.c; sourceTree = "<group>"; };
+		35366ABD240C213400D54CBB /* OcDeviceTreeLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcDeviceTreeLib.inf; sourceTree = "<group>"; };
+		35366ABF240C213400D54CBB /* OcUnicodeCollationEngLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcUnicodeCollationEngLib.c; sourceTree = "<group>"; };
+		35366AC0240C213400D54CBB /* OcUnicodeCollationEngLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcUnicodeCollationEngLib.inf; sourceTree = "<group>"; };
+		35366AC1240C213400D54CBB /* OcUnicodeCollationEngLibInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcUnicodeCollationEngLibInternal.h; sourceTree = "<group>"; };
+		35366AC3240C213400D54CBB /* OcHashServicesLibInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcHashServicesLibInternal.h; sourceTree = "<group>"; };
+		35366AC4240C213400D54CBB /* OcHashServicesLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcHashServicesLib.c; sourceTree = "<group>"; };
+		35366AC5240C213400D54CBB /* OcHashServicesLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcHashServicesLib.inf; sourceTree = "<group>"; };
+		35366AC7240C213400D54CBB /* OcAppleChunklistLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleChunklistLib.c; sourceTree = "<group>"; };
+		35366AC8240C213400D54CBB /* OcAppleChunklistLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleChunklistLib.inf; sourceTree = "<group>"; };
+		35366ACA240C213400D54CBB /* OcHeciLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcHeciLib.c; sourceTree = "<group>"; };
+		35366ACB240C213400D54CBB /* OcHeciLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcHeciLib.inf; sourceTree = "<group>"; };
+		35366ACD240C213400D54CBB /* OcConsoleControlEntryModeLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcConsoleControlEntryModeLib.c; sourceTree = "<group>"; };
+		35366ACE240C213400D54CBB /* OcConsoleControlEntryModeLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcConsoleControlEntryModeLib.inf; sourceTree = "<group>"; };
+		35366AD0240C213400D54CBB /* OcAppleImageVerificationLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleImageVerificationLib.inf; sourceTree = "<group>"; };
+		35366AD1240C213400D54CBB /* OcAppleImageVerification.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleImageVerification.c; sourceTree = "<group>"; };
+		35366AD3240C213400D54CBB /* OcAppleImageConversionLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleImageConversionLib.inf; sourceTree = "<group>"; };
+		35366AD4240C213400D54CBB /* OcAppleImageConversionLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleImageConversionLib.c; sourceTree = "<group>"; };
+		35366AD6240C213400D54CBB /* Aes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Aes.c; sourceTree = "<group>"; };
+		35366AD7240C213400D54CBB /* Sha2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Sha2.c; sourceTree = "<group>"; };
+		35366AD8240C213400D54CBB /* BigNumMontgomery.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BigNumMontgomery.c; sourceTree = "<group>"; };
+		35366AD9240C213400D54CBB /* OcCryptoLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcCryptoLib.inf; sourceTree = "<group>"; };
+		35366ADB240C213400D54CBB /* BigNumWordMul64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BigNumWordMul64.c; sourceTree = "<group>"; };
+		35366ADC240C213400D54CBB /* BigNumLibInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BigNumLibInternal.h; sourceTree = "<group>"; };
+		35366ADD240C213400D54CBB /* BigNumLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BigNumLib.h; sourceTree = "<group>"; };
+		35366ADE240C213400D54CBB /* Sha1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Sha1.c; sourceTree = "<group>"; };
+		35366ADF240C213400D54CBB /* BigNumPrimitives.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BigNumPrimitives.c; sourceTree = "<group>"; };
+		35366AE0240C213400D54CBB /* PasswordHash.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PasswordHash.c; sourceTree = "<group>"; };
+		35366AE2240C213400D54CBB /* BigNumWordMul64.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BigNumWordMul64.c; sourceTree = "<group>"; };
+		35366AE3240C213400D54CBB /* ChaCha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ChaCha.c; sourceTree = "<group>"; };
+		35366AE4240C213400D54CBB /* RsaDigitalSign.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = RsaDigitalSign.c; sourceTree = "<group>"; };
+		35366AE5240C213400D54CBB /* Md5.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Md5.c; sourceTree = "<group>"; };
+		35366AE6240C213400D54CBB /* SecureMem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SecureMem.c; sourceTree = "<group>"; };
+		35366AE8240C213400D54CBB /* DirectReset.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DirectReset.c; sourceTree = "<group>"; };
+		35366AE9240C213400D54CBB /* Math.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Math.c; sourceTree = "<group>"; };
+		35366AEA240C213400D54CBB /* UninstallAllProtocolInterfaces.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = UninstallAllProtocolInterfaces.c; sourceTree = "<group>"; };
+		35366AEB240C213400D54CBB /* ReleaseUsbOwnership.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ReleaseUsbOwnership.c; sourceTree = "<group>"; };
+		35366AEC240C213400D54CBB /* OcMiscLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcMiscLib.inf; sourceTree = "<group>"; };
+		35366AED240C213400D54CBB /* DataPatcher.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DataPatcher.c; sourceTree = "<group>"; };
+		35366AEF240C213400D54CBB /* OcTimerLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcTimerLib.c; sourceTree = "<group>"; };
+		35366AF0240C213400D54CBB /* OcTimerLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcTimerLib.inf; sourceTree = "<group>"; };
+		35366AF3240C213400D54CBB /* DER_CertCrl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DER_CertCrl.c; sourceTree = "<group>"; };
+		35366AF4240C213400D54CBB /* DER_Keys.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DER_Keys.c; sourceTree = "<group>"; };
+		35366AF5240C213400D54CBB /* DER_Encode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DER_Encode.h; sourceTree = "<group>"; };
+		35366AF6240C213400D54CBB /* oids.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = oids.h; sourceTree = "<group>"; };
+		35366AF7240C213400D54CBB /* libDER.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libDER.h; sourceTree = "<group>"; };
+		35366AF8240C213400D54CBB /* DER_Decode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DER_Decode.h; sourceTree = "<group>"; };
+		35366AF9240C213400D54CBB /* DER_Digest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DER_Digest.c; sourceTree = "<group>"; };
+		35366AFA240C213400D54CBB /* DER_CertCrl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DER_CertCrl.h; sourceTree = "<group>"; };
+		35366AFB240C213400D54CBB /* asn1Types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = asn1Types.h; sourceTree = "<group>"; };
+		35366AFC240C213400D54CBB /* DER_Keys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DER_Keys.h; sourceTree = "<group>"; };
+		35366AFD240C213400D54CBB /* DER_Decode.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DER_Decode.c; sourceTree = "<group>"; };
+		35366AFE240C213400D54CBB /* oids.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = oids.c; sourceTree = "<group>"; };
+		35366AFF240C213400D54CBB /* DER_Encode.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DER_Encode.c; sourceTree = "<group>"; };
+		35366B00240C213400D54CBB /* DER_Digest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DER_Digest.h; sourceTree = "<group>"; };
+		35366B01240C213400D54CBB /* OcAppleImg4Lib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleImg4Lib.c; sourceTree = "<group>"; };
+		35366B02240C213400D54CBB /* OcAppleImg4Lib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleImg4Lib.inf; sourceTree = "<group>"; };
+		35366B03240C213400D54CBB /* libDER_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libDER_config.h; sourceTree = "<group>"; };
+		35366B05240C213400D54CBB /* libDERImg4_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libDERImg4_config.h; sourceTree = "<group>"; };
+		35366B06240C213400D54CBB /* Img4oids.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Img4oids.c; sourceTree = "<group>"; };
+		35366B07240C213400D54CBB /* DER_Img4Manifest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DER_Img4Manifest.h; sourceTree = "<group>"; };
+		35366B08240C213400D54CBB /* DER_Img4Manifest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DER_Img4Manifest.c; sourceTree = "<group>"; };
+		35366B09240C213400D54CBB /* libDERImg4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libDERImg4.h; sourceTree = "<group>"; };
+		35366B0A240C213400D54CBB /* Img4oids.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Img4oids.h; sourceTree = "<group>"; };
+		35366B0C240C213400D54CBB /* OcBootManagementLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcBootManagementLib.c; sourceTree = "<group>"; };
+		35366B0D240C213400D54CBB /* BootEntryInfo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BootEntryInfo.c; sourceTree = "<group>"; };
+		35366B0E240C213400D54CBB /* DmgBootSupport.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DmgBootSupport.c; sourceTree = "<group>"; };
+		35366B0F240C213400D54CBB /* BootManagementInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BootManagementInternal.h; sourceTree = "<group>"; };
+		35366B10240C213400D54CBB /* HotKeySupport.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = HotKeySupport.c; sourceTree = "<group>"; };
+		35366B11240C213400D54CBB /* OcBootManagementLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcBootManagementLib.inf; sourceTree = "<group>"; };
+		35366B12240C213400D54CBB /* PolicyManagement.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PolicyManagement.c; sourceTree = "<group>"; };
+		35366B13240C213400D54CBB /* DefaultEntryChoice.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DefaultEntryChoice.c; sourceTree = "<group>"; };
+		35366B14240C213400D54CBB /* BootAudio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BootAudio.c; sourceTree = "<group>"; };
+		35366B15240C213400D54CBB /* BootArguments.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BootArguments.c; sourceTree = "<group>"; };
+		35366B16240C213400D54CBB /* AppleHibernate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AppleHibernate.c; sourceTree = "<group>"; };
+		35366B17240C213400D54CBB /* BootEntryManagement.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BootEntryManagement.c; sourceTree = "<group>"; };
+		35366B18240C213400D54CBB /* VariableManagement.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VariableManagement.c; sourceTree = "<group>"; };
+		35366B1B240C213400D54CBB /* lzss.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lzss.c; sourceTree = "<group>"; };
+		35366B1C240C213400D54CBB /* lzss.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lzss.h; sourceTree = "<group>"; };
+		35366B1E240C213400D54CBB /* zlib_uefi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = zlib_uefi.c; sourceTree = "<group>"; };
+		35366B1F240C213400D54CBB /* zutil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zutil.h; sourceTree = "<group>"; };
+		35366B20240C213400D54CBB /* inftrees.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inftrees.h; sourceTree = "<group>"; };
+		35366B21240C213400D54CBB /* inflate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = inflate.c; sourceTree = "<group>"; };
+		35366B22240C213400D54CBB /* compress.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = compress.c; sourceTree = "<group>"; };
+		35366B23240C213400D54CBB /* deflate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = deflate.c; sourceTree = "<group>"; };
+		35366B24240C213400D54CBB /* inffixed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inffixed.h; sourceTree = "<group>"; };
+		35366B25240C213400D54CBB /* trees.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trees.h; sourceTree = "<group>"; };
+		35366B26240C213400D54CBB /* inffast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inffast.h; sourceTree = "<group>"; };
+		35366B27240C213400D54CBB /* crc32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = crc32.c; sourceTree = "<group>"; };
+		35366B28240C213400D54CBB /* infback.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = infback.c; sourceTree = "<group>"; };
+		35366B29240C213400D54CBB /* deflate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = deflate.h; sourceTree = "<group>"; };
+		35366B2A240C213400D54CBB /* zlib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zlib.h; sourceTree = "<group>"; };
+		35366B2B240C213400D54CBB /* inflate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inflate.h; sourceTree = "<group>"; };
+		35366B2C240C213400D54CBB /* inftrees.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = inftrees.c; sourceTree = "<group>"; };
+		35366B2D240C213400D54CBB /* uncompr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = uncompr.c; sourceTree = "<group>"; };
+		35366B2E240C213400D54CBB /* trees.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trees.c; sourceTree = "<group>"; };
+		35366B2F240C213400D54CBB /* crc32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32.h; sourceTree = "<group>"; };
+		35366B30240C213400D54CBB /* inffast.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = inffast.c; sourceTree = "<group>"; };
+		35366B31240C213400D54CBB /* adler32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = adler32.c; sourceTree = "<group>"; };
+		35366B32240C213400D54CBB /* zconf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zconf.h; sourceTree = "<group>"; };
+		35366B33240C213400D54CBB /* OcCompressionLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcCompressionLib.inf; sourceTree = "<group>"; };
+		35366B35240C213400D54CBB /* lzvn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lzvn.h; sourceTree = "<group>"; };
+		35366B36240C213400D54CBB /* lzvn.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lzvn.c; sourceTree = "<group>"; };
+		35366B38240C213400D54CBB /* OcAppleKeyMapLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleKeyMapLib.inf; sourceTree = "<group>"; };
+		35366B39240C213400D54CBB /* OcAppleKeyMapLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleKeyMapLib.c; sourceTree = "<group>"; };
+		35366B3B240C213400D54CBB /* DebugSmbios.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DebugSmbios.c; sourceTree = "<group>"; };
+		35366B3C240C213400D54CBB /* SmbiosInternal.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SmbiosInternal.c; sourceTree = "<group>"; };
+		35366B3D240C213400D54CBB /* DebugSmbios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DebugSmbios.h; sourceTree = "<group>"; };
+		35366B3E240C213400D54CBB /* OcSmbiosLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcSmbiosLib.inf; sourceTree = "<group>"; };
+		35366B3F240C213400D54CBB /* SmbiosInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SmbiosInternal.h; sourceTree = "<group>"; };
+		35366B40240C213400D54CBB /* SmbiosPatch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SmbiosPatch.c; sourceTree = "<group>"; };
+		35366B42240C213400D54CBB /* OcStorageLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcStorageLib.inf; sourceTree = "<group>"; };
+		35366B43240C213400D54CBB /* OcStorageLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcStorageLib.c; sourceTree = "<group>"; };
+		35366B45240C213400D54CBB /* OcAppleSecureBootLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleSecureBootLib.c; sourceTree = "<group>"; };
+		35366B46240C213400D54CBB /* OcAppleSecureBootLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleSecureBootLib.inf; sourceTree = "<group>"; };
+		35366B48240C213400D54CBB /* Canary.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Canary.c; sourceTree = "<group>"; };
+		35366B49240C213400D54CBB /* Ubsan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ubsan.h; sourceTree = "<group>"; };
+		35366B4A240C213400D54CBB /* UbsanPrintf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = UbsanPrintf.c; sourceTree = "<group>"; };
+		35366B4B240C213400D54CBB /* OcGuardLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcGuardLib.inf; sourceTree = "<group>"; };
+		35366B4C240C213400D54CBB /* BitOverflow.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BitOverflow.c; sourceTree = "<group>"; };
+		35366B4D240C213400D54CBB /* TripleOverflow.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = TripleOverflow.c; sourceTree = "<group>"; };
+		35366B4E240C213400D54CBB /* Ubsan.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Ubsan.c; sourceTree = "<group>"; };
+		35366B4F240C213400D54CBB /* NativeOverflow.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = NativeOverflow.c; sourceTree = "<group>"; };
+		35366B51240C213400D54CBB /* OcAppleKeysLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleKeysLib.inf; sourceTree = "<group>"; };
+		35366B52240C213400D54CBB /* OcAppleKeysLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleKeysLib.c; sourceTree = "<group>"; };
+		35366B54240C213400D54CBB /* OcAppleBootPolicyLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleBootPolicyLib.c; sourceTree = "<group>"; };
+		35366B55240C213400D54CBB /* OcAppleBootPolicyLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleBootPolicyLib.inf; sourceTree = "<group>"; };
+		35366B57240C213400D54CBB /* OcAppleUserInterfaceThemeLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleUserInterfaceThemeLib.c; sourceTree = "<group>"; };
+		35366B58240C213400D54CBB /* OcAppleUserInterfaceThemeLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleUserInterfaceThemeLib.inf; sourceTree = "<group>"; };
+		35366B5A240C213400D54CBB /* OcAcpiLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAcpiLib.c; sourceTree = "<group>"; };
+		35366B5B240C213400D54CBB /* OcAcpiLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAcpiLib.inf; sourceTree = "<group>"; };
+		35366B5E240C213400D54CBB /* AppleHid.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AppleHid.txt; sourceTree = "<group>"; };
+		35366B5F240C213400D54CBB /* AIKSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AIKSource.h; sourceTree = "<group>"; };
+		35366B60240C213400D54CBB /* AIK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AIK.h; sourceTree = "<group>"; };
+		35366B61240C213400D54CBB /* AIKTarget.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AIKTarget.c; sourceTree = "<group>"; };
+		35366B62240C213400D54CBB /* AIKShim.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AIKShim.c; sourceTree = "<group>"; };
+		35366B63240C213400D54CBB /* AIKTranslate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AIKTranslate.h; sourceTree = "<group>"; };
+		35366B64240C213400D54CBB /* AIKData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AIKData.h; sourceTree = "<group>"; };
+		35366B65240C213400D54CBB /* AIKMap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AIKMap.c; sourceTree = "<group>"; };
+		35366B66240C213400D54CBB /* AIK.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AIK.c; sourceTree = "<group>"; };
+		35366B67240C213400D54CBB /* AIKSource.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AIKSource.c; sourceTree = "<group>"; };
+		35366B68240C213400D54CBB /* AIKTranslate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AIKTranslate.c; sourceTree = "<group>"; };
+		35366B69240C213400D54CBB /* AIKTarget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AIKTarget.h; sourceTree = "<group>"; };
+		35366B6A240C213400D54CBB /* AIKShim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AIKShim.h; sourceTree = "<group>"; };
+		35366B6B240C213400D54CBB /* AIKData.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AIKData.c; sourceTree = "<group>"; };
+		35366B6C240C213400D54CBB /* OcInputLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcInputLib.inf; sourceTree = "<group>"; };
+		35366B6E240C213400D54CBB /* AIT.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AIT.c; sourceTree = "<group>"; };
+		35366B70240C213400D54CBB /* AIM.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AIM.c; sourceTree = "<group>"; };
+		35366B71240C213400D54CBB /* AIM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AIM.h; sourceTree = "<group>"; };
+		35366B73240C213400D54CBB /* OcFirmwarePasswordLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcFirmwarePasswordLib.c; sourceTree = "<group>"; };
+		35366B74240C213400D54CBB /* AppleFwPasswordInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppleFwPasswordInternal.h; sourceTree = "<group>"; };
+		35366B75240C213400D54CBB /* OcFirmwarePasswordLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcFirmwarePasswordLib.inf; sourceTree = "<group>"; };
+		35366B77240C213400D54CBB /* OcAppleDiskImageLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleDiskImageLib.c; sourceTree = "<group>"; };
+		35366B78240C213400D54CBB /* OcAppleDiskImageLibInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcAppleDiskImageLibInternal.h; sourceTree = "<group>"; };
+		35366B79240C213400D54CBB /* OcAppleDiskImageLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleDiskImageLib.inf; sourceTree = "<group>"; };
+		35366B7A240C213400D54CBB /* OcAppleDiskImageBlockIo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleDiskImageBlockIo.c; sourceTree = "<group>"; };
+		35366B7B240C213400D54CBB /* OcAppleDiskImageLibInternal.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleDiskImageLibInternal.c; sourceTree = "<group>"; };
+		35366B7E240C213400D54CBB /* RngDelay.nasm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.nasm; path = RngDelay.nasm; sourceTree = "<group>"; };
+		35366B7F240C213400D54CBB /* OcRngLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcRngLib.c; sourceTree = "<group>"; };
+		35366B81240C213400D54CBB /* RngDelay.nasm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.nasm; path = RngDelay.nasm; sourceTree = "<group>"; };
+		35366B82240C213400D54CBB /* OcRngLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcRngLib.inf; sourceTree = "<group>"; };
+		35366B83240C213400D54CBB /* OcRngInternals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcRngInternals.h; sourceTree = "<group>"; };
+		35366B85240C213400D54CBB /* OcHdaDevicesLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcHdaDevicesLib.c; sourceTree = "<group>"; };
+		35366B86240C213400D54CBB /* OcHdaDevicesLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcHdaDevicesLib.inf; sourceTree = "<group>"; };
+		35366B87240C213400D54CBB /* OcHdaDevicesInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcHdaDevicesInternal.h; sourceTree = "<group>"; };
+		35366B89240C213400D54CBB /* OcFirmwareVolumeLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcFirmwareVolumeLib.inf; sourceTree = "<group>"; };
+		35366B8A240C213400D54CBB /* OcFirmwareVolumeLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcFirmwareVolumeLib.c; sourceTree = "<group>"; };
+		35366B8B240C213400D54CBB /* FvOnFv2Thunk.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FvOnFv2Thunk.c; sourceTree = "<group>"; };
+		35366B8C240C213400D54CBB /* OcFirmwareVolumeLibInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcFirmwareVolumeLibInternal.h; sourceTree = "<group>"; };
+		35366B8E240C213400D54CBB /* OcDevicePathLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcDevicePathLib.inf; sourceTree = "<group>"; };
+		35366B8F240C213400D54CBB /* ExpandDevicePath.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ExpandDevicePath.c; sourceTree = "<group>"; };
+		35366B90240C213400D54CBB /* OcDevicePathLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcDevicePathLib.c; sourceTree = "<group>"; };
+		35366B92240C213400D54CBB /* DebugHelp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DebugHelp.c; sourceTree = "<group>"; };
+		35366B93240C213400D54CBB /* DebugPrint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DebugPrint.c; sourceTree = "<group>"; };
+		35366B94240C213400D54CBB /* OcDebugLogLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcDebugLogLib.inf; sourceTree = "<group>"; };
+		35366B95240C213400D54CBB /* OcLog.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcLog.c; sourceTree = "<group>"; };
+		35366B96240C213400D54CBB /* OcLogInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcLogInternal.h; sourceTree = "<group>"; };
+		35366B97240C213400D54CBB /* OcDebugLogLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcDebugLogLib.c; sourceTree = "<group>"; };
+		35366B99240C213400D54CBB /* OcAudioGenBeep.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAudioGenBeep.c; sourceTree = "<group>"; };
+		35366B9A240C213400D54CBB /* OcAudioLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAudioLib.inf; sourceTree = "<group>"; };
+		35366B9B240C213400D54CBB /* OcAudio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAudio.c; sourceTree = "<group>"; };
+		35366B9C240C213400D54CBB /* OcAudioWave.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAudioWave.c; sourceTree = "<group>"; };
+		35366B9D240C213400D54CBB /* OcAudioInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcAudioInternal.h; sourceTree = "<group>"; };
+		35366B9E240C213400D54CBB /* OcAudioLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAudioLib.c; sourceTree = "<group>"; };
+		35366B9F240C213400D54CBB /* OcAudioVoiceOver.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAudioVoiceOver.c; sourceTree = "<group>"; };
+		35366BA1240C213400D54CBB /* VirtualFile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VirtualFile.c; sourceTree = "<group>"; };
+		35366BA2240C213400D54CBB /* OcVirtualFsLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcVirtualFsLib.inf; sourceTree = "<group>"; };
+		35366BA3240C213400D54CBB /* VirtualVolume.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VirtualVolume.c; sourceTree = "<group>"; };
+		35366BA4240C213400D54CBB /* VirtualFs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VirtualFs.c; sourceTree = "<group>"; };
+		35366BA5240C213400D54CBB /* VirtualFsInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VirtualFsInternal.h; sourceTree = "<group>"; };
+		35366BA7240C213400D54CBB /* PrelinkedKext.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PrelinkedKext.c; sourceTree = "<group>"; };
+		35366BA8240C213400D54CBB /* PrelinkedContext.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PrelinkedContext.c; sourceTree = "<group>"; };
+		35366BA9240C213400D54CBB /* Link.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Link.c; sourceTree = "<group>"; };
+		35366BAA240C213400D54CBB /* OcAppleKernelLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleKernelLib.inf; sourceTree = "<group>"; };
+		35366BAB240C213400D54CBB /* KextPatcher.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = KextPatcher.c; sourceTree = "<group>"; };
+		35366BAC240C213400D54CBB /* CommonPatches.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CommonPatches.c; sourceTree = "<group>"; };
+		35366BAD240C213400D54CBB /* Vtables.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Vtables.c; sourceTree = "<group>"; };
+		35366BAE240C213400D54CBB /* KernelReader.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = KernelReader.c; sourceTree = "<group>"; };
+		35366BAF240C213400D54CBB /* PrelinkedInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrelinkedInternal.h; sourceTree = "<group>"; };
+		35366BB1240C213400D54CBB /* OpenFile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OpenFile.c; sourceTree = "<group>"; };
+		35366BB2240C213400D54CBB /* FsConnectQuirk.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FsConnectQuirk.c; sourceTree = "<group>"; };
+		35366BB3240C213400D54CBB /* GptPartitionEntry.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GptPartitionEntry.c; sourceTree = "<group>"; };
+		35366BB4240C213400D54CBB /* ReadFile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ReadFile.c; sourceTree = "<group>"; };
+		35366BB5240C213400D54CBB /* FirmwareFile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FirmwareFile.c; sourceTree = "<group>"; };
+		35366BB6240C213400D54CBB /* GetVolumeLabel.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GetVolumeLabel.c; sourceTree = "<group>"; };
+		35366BB7240C213400D54CBB /* FileProtocol.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FileProtocol.c; sourceTree = "<group>"; };
+		35366BB8240C213400D54CBB /* GetFileInfo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GetFileInfo.c; sourceTree = "<group>"; };
+		35366BB9240C213400D54CBB /* LocateFileSystem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LocateFileSystem.c; sourceTree = "<group>"; };
+		35366BBA240C213400D54CBB /* OcFileLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcFileLib.inf; sourceTree = "<group>"; };
+		35366BBC240C213400D54CBB /* OcCpuInternals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcCpuInternals.h; sourceTree = "<group>"; };
+		35366BBE240C213400D54CBB /* Microcode.nasm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.nasm; path = Microcode.nasm; sourceTree = "<group>"; };
+		35366BBF240C213400D54CBB /* FrequencyDetect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FrequencyDetect.c; sourceTree = "<group>"; };
+		35366BC0240C213400D54CBB /* OcCpuLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcCpuLib.inf; sourceTree = "<group>"; };
+		35366BC1240C213400D54CBB /* AppleCpuSupport.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AppleCpuSupport.c; sourceTree = "<group>"; };
+		35366BC2240C213400D54CBB /* OcCpuLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcCpuLib.c; sourceTree = "<group>"; };
+		35366BC4240C213400D54CBB /* Microcode.nasm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.nasm; path = Microcode.nasm; sourceTree = "<group>"; };
+		35366BC6240C213400D54CBB /* OcConfigurationLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcConfigurationLib.inf; sourceTree = "<group>"; };
+		35366BC7240C213400D54CBB /* CheckSchema.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = CheckSchema.py; sourceTree = "<group>"; };
+		35366BC8240C213400D54CBB /* OcConfigurationLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcConfigurationLib.c; sourceTree = "<group>"; };
+		35366BCA240C213400D54CBB /* OcDriverConnectionLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcDriverConnectionLib.c; sourceTree = "<group>"; };
+		35366BCB240C213400D54CBB /* OcDriverConnectionLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcDriverConnectionLib.inf; sourceTree = "<group>"; };
+		35366BCD240C213400D54CBB /* OcXmlLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcXmlLib.c; sourceTree = "<group>"; };
+		35366BCE240C213400D54CBB /* OcXmlLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcXmlLib.inf; sourceTree = "<group>"; };
+		35366BD0240C213400D54CBB /* OcDevicePropertyLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcDevicePropertyLib.inf; sourceTree = "<group>"; };
+		35366BD1240C213400D54CBB /* OcDevicePropertyLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcDevicePropertyLib.c; sourceTree = "<group>"; };
+		35366BD3240C213500D54CBB /* OcOSInfoLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcOSInfoLib.c; sourceTree = "<group>"; };
+		35366BD4240C213500D54CBB /* OcOSInfoLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcOSInfoLib.inf; sourceTree = "<group>"; };
+		35366BD6240C213500D54CBB /* OcTemplateLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcTemplateLib.inf; sourceTree = "<group>"; };
+		35366BD7240C213500D54CBB /* OcTemplateLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcTemplateLib.c; sourceTree = "<group>"; };
+		35366BD9240C213500D54CBB /* OcCompilerIntrinsicsLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcCompilerIntrinsicsLib.c; sourceTree = "<group>"; };
+		35366BDA240C213500D54CBB /* OcCompilerIntrinsicsLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcCompilerIntrinsicsLib.inf; sourceTree = "<group>"; };
+		35366BDB240C213500D54CBB /* MsvcMath32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = MsvcMath32.c; sourceTree = "<group>"; };
+		35366BDD240C213500D54CBB /* OcAppleBootCompatLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleBootCompatLib.inf; sourceTree = "<group>"; };
+		35366BDE240C213500D54CBB /* CustomSlide.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CustomSlide.c; sourceTree = "<group>"; };
+		35366BE0240C213500D54CBB /* ContextSwitchSupport.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ContextSwitchSupport.c; sourceTree = "<group>"; };
+		35366BE1240C213500D54CBB /* ContextSwitch.nasm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.nasm; path = ContextSwitch.nasm; sourceTree = "<group>"; };
+		35366BE2240C213500D54CBB /* ContextSwitch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContextSwitch.h; sourceTree = "<group>"; };
+		35366BE3240C213500D54CBB /* BootCompatInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BootCompatInternal.h; sourceTree = "<group>"; };
+		35366BE4240C213500D54CBB /* ServiceOverrides.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ServiceOverrides.c; sourceTree = "<group>"; };
+		35366BE6240C213500D54CBB /* ContextSwitchSupport.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ContextSwitchSupport.c; sourceTree = "<group>"; };
+		35366BE7240C213500D54CBB /* ContextSwitch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContextSwitch.h; sourceTree = "<group>"; };
+		35366BE8240C213500D54CBB /* KernelSupport.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = KernelSupport.c; sourceTree = "<group>"; };
+		35366BE9240C213500D54CBB /* OcAppleBootCompatLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleBootCompatLib.c; sourceTree = "<group>"; };
+		35366BEB240C213500D54CBB /* MemoryMap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = MemoryMap.c; sourceTree = "<group>"; };
+		35366BEC240C213500D54CBB /* VirtualMemory.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VirtualMemory.c; sourceTree = "<group>"; };
+		35366BED240C213500D54CBB /* LegacyRegionLock.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LegacyRegionLock.c; sourceTree = "<group>"; };
+		35366BEE240C213500D54CBB /* LegacyRegionUnLock.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LegacyRegionUnLock.c; sourceTree = "<group>"; };
+		35366BEF240C213500D54CBB /* OcMemoryLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcMemoryLib.inf; sourceTree = "<group>"; };
+		35366BF0240C213500D54CBB /* UmmMalloc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = UmmMalloc.c; sourceTree = "<group>"; };
+		35366BF2240C213500D54CBB /* OcAppleRamDiskLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleRamDiskLib.inf; sourceTree = "<group>"; };
+		35366BF3240C213500D54CBB /* OcAppleRamDiskLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleRamDiskLib.c; sourceTree = "<group>"; };
+		35366BF5240C213500D54CBB /* OcSmcLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcSmcLib.c; sourceTree = "<group>"; };
+		35366BF6240C213500D54CBB /* OcSmcLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcSmcLib.inf; sourceTree = "<group>"; };
+		35366BF7240C213500D54CBB /* OcSmcLibInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcSmcLibInternal.h; sourceTree = "<group>"; };
+		357E232523F2A06B00BC930F /* UDK */ = {isa = PBXFileReference; lastKnownFileType = folder; path = UDK; sourceTree = "<group>"; };
+		35C73DEB24055113005CB6EF /* GetTscEmu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GetTscEmu.c; sourceTree = "<group>"; };
+		35C73DEC24055113005CB6EF /* GuiApp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GuiApp.c; sourceTree = "<group>"; };
+		35C73DED24055113005CB6EF /* GUI.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GUI.c; sourceTree = "<group>"; };
+		35C73DEE24055113005CB6EF /* BmfLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BmfLib.h; sourceTree = "<group>"; };
+		35C740EC24055114005CB6EF /* IconHdExt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = IconHdExt.c; sourceTree = "<group>"; };
+		35C740ED24055114005CB6EF /* Helvetica_fnt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Helvetica_fnt.c; sourceTree = "<group>"; };
+		35C740F124055114005CB6EF /* Helvetica_0.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = Helvetica_0.bmp; sourceTree = "<group>"; };
+		35C740F224055114005CB6EF /* IconHd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = IconHd.c; sourceTree = "<group>"; };
+		35C740F324055114005CB6EF /* Selector.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Selector.c; sourceTree = "<group>"; };
+		35C740F624055114005CB6EF /* Cursor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Cursor.c; sourceTree = "<group>"; };
+		35C740F724055114005CB6EF /* Helvetica_bmp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Helvetica_bmp.c; sourceTree = "<group>"; };
+		35C740F824055114005CB6EF /* IconSelected.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = IconSelected.c; sourceTree = "<group>"; };
+		35C740FA24055114005CB6EF /* InputSimTextIn.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = InputSimTextIn.c; sourceTree = "<group>"; };
+		35C740FB24055114005CB6EF /* InputSimAbsPtr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = InputSimAbsPtr.c; sourceTree = "<group>"; };
+		35C740FD24055114005CB6EF /* Bmf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Bmf; sourceTree = "<group>"; };
+		35C7410024055114005CB6EF /* OutputFbGop.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OutputFbGop.c; sourceTree = "<group>"; };
+		35C7410124055114005CB6EF /* StGopShared.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = StGopShared.c; sourceTree = "<group>"; };
+		35C7410224055114005CB6EF /* OutputStGop.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OutputStGop.c; sourceTree = "<group>"; };
+		35C7410324055114005CB6EF /* OcBootstrap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcBootstrap.c; sourceTree = "<group>"; };
+		35C7410424055115005CB6EF /* HwOps.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = HwOps.c; sourceTree = "<group>"; };
+		35C7410524055115005CB6EF /* GuiApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GuiApp.h; sourceTree = "<group>"; };
+		35C7410624055115005CB6EF /* GUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUI.h; sourceTree = "<group>"; };
+		35C7410724055115005CB6EF /* HwOpsEmu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = HwOpsEmu.c; sourceTree = "<group>"; };
+		35C7410824055115005CB6EF /* BitmapFontUser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BitmapFontUser.c; sourceTree = "<group>"; };
+		35C7410924055115005CB6EF /* GuiIo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GuiIo.h; sourceTree = "<group>"; };
+		35C7410A24055115005CB6EF /* GUI.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = GUI.inf; sourceTree = "<group>"; };
+		35C7410B24055115005CB6EF /* OcBootstrapEmu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcBootstrapEmu.c; sourceTree = "<group>"; };
+		35C7410C24055115005CB6EF /* BitmapFont.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BitmapFont.c; sourceTree = "<group>"; };
+		35C7410E24055115005CB6EF /* BootPicker.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BootPicker.c; sourceTree = "<group>"; };
+		35C7410F24055115005CB6EF /* HwOps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HwOps.h; sourceTree = "<group>"; };
+		35C7411024055115005CB6EF /* BmfFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BmfFile.h; sourceTree = "<group>"; };
+		35C7411124055115005CB6EF /* GetTscHw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GetTscHw.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,95 +654,1071 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				358D567D230D403D00F2894B /* lib__index_OcSupportPkg.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		354F73E922573DE700AB1A9B = {
+		3511D55D23FDB2A600CC3B17 /* Docs */ = {
 			isa = PBXGroup;
 			children = (
-				354F740B22573F0A00AB1A9B /* Application */,
-				354F740922573F0A00AB1A9B /* build.sh */,
-				354F740522573F0A00AB1A9B /* Include */,
-				354F740A22573F0A00AB1A9B /* LICENSE.txt */,
-				354F73FD22573F0A00AB1A9B /* OpenCorePkg.dec */,
-				354F73FE22573F0A00AB1A9B /* OpenCorePkg.dsc */,
-				354F740022573F0A00AB1A9B /* Platform */,
-				354F73FF22573F0A00AB1A9B /* README.md */,
-				354F73F922573EBF00AB1A9B /* Products */,
-				358D567B230D403D00F2894B /* Frameworks */,
+				3511D55E23FDB2A700CC3B17 /* Configuration.tex */,
+				3511D55F23FDB2A700CC3B17 /* BuildDocs.tool */,
+				3511D56023FDB2A700CC3B17 /* SampleFull.plist */,
+				3511D56123FDB2A700CC3B17 /* Logos */,
+				3511D56A23FDB2A700CC3B17 /* Configuration.pdf */,
+				3511D56B23FDB2A700CC3B17 /* AcpiSamples */,
+				3511D57523FDB2A700CC3B17 /* Kexts.md */,
+				3511D57623FDB2A700CC3B17 /* Differences */,
+				3511D57A23FDB2A700CC3B17 /* Sample.plist */,
 			);
+			path = Docs;
 			sourceTree = "<group>";
 		};
-		354F73F922573EBF00AB1A9B /* Products */ = {
+		3511D56123FDB2A700CC3B17 /* Logos */ = {
 			isa = PBXGroup;
 			children = (
-				354F73F822573EBF00AB1A9B /* lib__OpenCorePkg__index.dylib */,
+				3511D56223FDB2A700CC3B17 /* LogoApprox.svg */,
+				3511D56323FDB2A700CC3B17 /* OpenCore_with_text_Small.png */,
+				3511D56423FDB2A700CC3B17 /* OpenCore_with_text_Right.png */,
+				3511D56523FDB2A700CC3B17 /* OpenCore_with_text_Large.png */,
+				3511D56623FDB2A700CC3B17 /* README.md */,
+				3511D56723FDB2A700CC3B17 /* Logo.pdf */,
+				3511D56823FDB2A700CC3B17 /* Logo.png */,
+				3511D56923FDB2A700CC3B17 /* Logo.sketch */,
 			);
-			name = Products;
+			path = Logos;
 			sourceTree = "<group>";
 		};
-		354F740022573F0A00AB1A9B /* Platform */ = {
+		3511D56B23FDB2A700CC3B17 /* AcpiSamples */ = {
 			isa = PBXGroup;
 			children = (
-				354F740122573F0A00AB1A9B /* OpenCore */,
+				3511D56C23FDB2A700CC3B17 /* SSDT-AWAC.dsl */,
+				3511D56D23FDB2A700CC3B17 /* SSDT-RTC0.dsl */,
+				3511D56E23FDB2A700CC3B17 /* SSDT-EC.dsl */,
+				3511D56F23FDB2A700CC3B17 /* SSDT-ALS0.dsl */,
+				3511D57023FDB2A700CC3B17 /* SSDT-PMC.dsl */,
+				3511D57123FDB2A700CC3B17 /* SSDT-SBUS-MCHC.dsl */,
+				3511D57223FDB2A700CC3B17 /* SSDT-EC-USBX.dsl */,
+				3511D57323FDB2A700CC3B17 /* SSDT-EHCx_OFF.dsl */,
+				3511D57423FDB2A700CC3B17 /* SSDT-PLUG.dsl */,
 			);
-			path = Platform;
+			path = AcpiSamples;
 			sourceTree = "<group>";
 		};
-		354F740122573F0A00AB1A9B /* OpenCore */ = {
+		3511D57623FDB2A700CC3B17 /* Differences */ = {
 			isa = PBXGroup;
 			children = (
-				354F740222573F0A00AB1A9B /* OpenCoreUefi.c */,
-				354F740322573F0A00AB1A9B /* OpenCore.c */,
-				354F740422573F0A00AB1A9B /* OpenCore.inf */,
+				3511D57723FDB2A700CC3B17 /* Differences.pdf */,
+				3511D57823FDB2A700CC3B17 /* PreviousConfiguration.tex */,
+				3511D57923FDB2A700CC3B17 /* Differences.tex */,
 			);
-			path = OpenCore;
+			path = Differences;
 			sourceTree = "<group>";
 		};
-		354F740522573F0A00AB1A9B /* Include */ = {
+		3511D57B23FDB2A700CC3B17 /* Include */ = {
 			isa = PBXGroup;
 			children = (
-				354F740622573F0A00AB1A9B /* Protocol */,
-				354F740822573F0A00AB1A9B /* OpenCore.h */,
+				3511D57C23FDB2A700CC3B17 /* OpenCore.h */,
 			);
 			path = Include;
 			sourceTree = "<group>";
 		};
-		354F740622573F0A00AB1A9B /* Protocol */ = {
+		3511D57D23FDB2A700CC3B17 /* Application */ = {
 			isa = PBXGroup;
 			children = (
-				354F740722573F0A00AB1A9B /* OcBootstrap.h */,
-			);
-			path = Protocol;
-			sourceTree = "<group>";
-		};
-		354F740B22573F0A00AB1A9B /* Application */ = {
-			isa = PBXGroup;
-			children = (
-				354F740C22573F0A00AB1A9B /* Bootstrap */,
+				3511D57E23FDB2A800CC3B17 /* Bootstrap */,
 			);
 			path = Application;
 			sourceTree = "<group>";
 		};
-		354F740C22573F0A00AB1A9B /* Bootstrap */ = {
+		3511D57E23FDB2A800CC3B17 /* Bootstrap */ = {
 			isa = PBXGroup;
 			children = (
-				354F740D22573F0A00AB1A9B /* Bootstrap.inf */,
-				354F740E22573F0A00AB1A9B /* Bootstrap.c */,
+				3511D57F23FDB2A800CC3B17 /* Bootstrap.inf */,
+				3511D58023FDB2A800CC3B17 /* Bootstrap.c */,
 			);
 			path = Bootstrap;
 			sourceTree = "<group>";
 		};
-		358D567B230D403D00F2894B /* Frameworks */ = {
+		3511D58123FDB2A800CC3B17 /* Platform */ = {
 			isa = PBXGroup;
 			children = (
-				358D567C230D403D00F2894B /* lib__index_OcSupportPkg.dylib */,
+				35C73DEA24055113005CB6EF /* GUI */,
+				3511D58223FDB2A800CC3B17 /* OpenCore */,
 			);
-			name = Frameworks;
+			path = Platform;
+			sourceTree = "<group>";
+		};
+		3511D58223FDB2A800CC3B17 /* OpenCore */ = {
+			isa = PBXGroup;
+			children = (
+				3511D58323FDB2A800CC3B17 /* OpenCoreUefi.c */,
+				3511D58423FDB2A800CC3B17 /* OpenCoreVault.c */,
+				3511D58523FDB2A800CC3B17 /* OpenCore.c */,
+				3511D58623FDB2A800CC3B17 /* OpenCoreAcpi.c */,
+				3511D58723FDB2A800CC3B17 /* OpenCoreMisc.c */,
+				3511D58823FDB2A800CC3B17 /* OpenCorePlatform.c */,
+				3511D58923FDB2A800CC3B17 /* OpenCoreDevProps.c */,
+				3511D58A23FDB2A800CC3B17 /* OpenCoreNvram.c */,
+				3511D58B23FDB2A800CC3B17 /* OpenCore.inf */,
+				3511D58C23FDB2A800CC3B17 /* OpenCoreKernel.c */,
+			);
+			path = OpenCore;
+			sourceTree = "<group>";
+		};
+		35366A8B240C213300D54CBB /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				35366A8C240C213400D54CBB /* OcMachoLib */,
+				35366A93240C213400D54CBB /* OcStringLib */,
+				35366A97240C213400D54CBB /* OcPngLib */,
+				35366A9C240C213400D54CBB /* OcSerializeLib */,
+				35366A9F240C213400D54CBB /* OcDataHubLib */,
+				35366AA4240C213400D54CBB /* OcConsoleLib */,
+				35366AAF240C213400D54CBB /* OcRtcLib */,
+				35366AB2240C213400D54CBB /* OcAppleEventLib */,
+				35366ABB240C213400D54CBB /* OcDeviceTreeLib */,
+				35366ABE240C213400D54CBB /* OcUnicodeCollationEngLib */,
+				35366AC2240C213400D54CBB /* OcHashServicesLib */,
+				35366AC6240C213400D54CBB /* OcAppleChunklistLib */,
+				35366AC9240C213400D54CBB /* OcHeciLib */,
+				35366ACC240C213400D54CBB /* OcConsoleControlEntryModeLib */,
+				35366ACF240C213400D54CBB /* OcAppleImageVerificationLib */,
+				35366AD2240C213400D54CBB /* OcAppleImageConversionLib */,
+				35366AD5240C213400D54CBB /* OcCryptoLib */,
+				35366AE7240C213400D54CBB /* OcMiscLib */,
+				35366AEE240C213400D54CBB /* OcTimerLib */,
+				35366AF1240C213400D54CBB /* OcAppleImg4Lib */,
+				35366B0B240C213400D54CBB /* OcBootManagementLib */,
+				35366B19240C213400D54CBB /* OcCompressionLib */,
+				35366B37240C213400D54CBB /* OcAppleKeyMapLib */,
+				35366B3A240C213400D54CBB /* OcSmbiosLib */,
+				35366B41240C213400D54CBB /* OcStorageLib */,
+				35366B44240C213400D54CBB /* OcAppleSecureBootLib */,
+				35366B47240C213400D54CBB /* OcGuardLib */,
+				35366B50240C213400D54CBB /* OcAppleKeysLib */,
+				35366B53240C213400D54CBB /* OcAppleBootPolicyLib */,
+				35366B56240C213400D54CBB /* OcAppleUserInterfaceThemeLib */,
+				35366B59240C213400D54CBB /* OcAcpiLib */,
+				35366B5C240C213400D54CBB /* OcInputLib */,
+				35366B72240C213400D54CBB /* OcFirmwarePasswordLib */,
+				35366B76240C213400D54CBB /* OcAppleDiskImageLib */,
+				35366B7C240C213400D54CBB /* OcRngLib */,
+				35366B84240C213400D54CBB /* OcHdaDevicesLib */,
+				35366B88240C213400D54CBB /* OcFirmwareVolumeLib */,
+				35366B8D240C213400D54CBB /* OcDevicePathLib */,
+				35366B91240C213400D54CBB /* OcDebugLogLib */,
+				35366B98240C213400D54CBB /* OcAudioLib */,
+				35366BA0240C213400D54CBB /* OcVirtualFsLib */,
+				35366BA6240C213400D54CBB /* OcAppleKernelLib */,
+				35366BB0240C213400D54CBB /* OcFileLib */,
+				35366BBB240C213400D54CBB /* OcCpuLib */,
+				35366BC5240C213400D54CBB /* OcConfigurationLib */,
+				35366BC9240C213400D54CBB /* OcDriverConnectionLib */,
+				35366BCC240C213400D54CBB /* OcXmlLib */,
+				35366BCF240C213400D54CBB /* OcDevicePropertyLib */,
+				35366BD2240C213500D54CBB /* OcOSInfoLib */,
+				35366BD5240C213500D54CBB /* OcTemplateLib */,
+				35366BD8240C213500D54CBB /* OcCompilerIntrinsicsLib */,
+				35366BDC240C213500D54CBB /* OcAppleBootCompatLib */,
+				35366BEA240C213500D54CBB /* OcMemoryLib */,
+				35366BF1240C213500D54CBB /* OcAppleRamDiskLib */,
+				35366BF4240C213500D54CBB /* OcSmcLib */,
+			);
+			path = Library;
+			sourceTree = "<group>";
+		};
+		35366A8C240C213400D54CBB /* OcMachoLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366A8D240C213400D54CBB /* OcMachoLibInternal.h */,
+				35366A8E240C213400D54CBB /* OcMachoLib.inf */,
+				35366A8F240C213400D54CBB /* Header.c */,
+				35366A90240C213400D54CBB /* Symbols.c */,
+				35366A91240C213400D54CBB /* Relocations.c */,
+				35366A92240C213400D54CBB /* CxxSymbols.c */,
+			);
+			path = OcMachoLib;
+			sourceTree = "<group>";
+		};
+		35366A93240C213400D54CBB /* OcStringLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366A94240C213400D54CBB /* OcStringLib.inf */,
+				35366A95240C213400D54CBB /* OcUnicodeLib.c */,
+				35366A96240C213400D54CBB /* OcAsciiLib.c */,
+			);
+			path = OcStringLib;
+			sourceTree = "<group>";
+		};
+		35366A97240C213400D54CBB /* OcPngLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366A98240C213400D54CBB /* OcPngLib.inf */,
+				35366A99240C213400D54CBB /* lodepng.h */,
+				35366A9A240C213400D54CBB /* OcPng.c */,
+				35366A9B240C213400D54CBB /* lodepng.c */,
+			);
+			path = OcPngLib;
+			sourceTree = "<group>";
+		};
+		35366A9C240C213400D54CBB /* OcSerializeLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366A9D240C213400D54CBB /* OcSerializeLib.c */,
+				35366A9E240C213400D54CBB /* OcSerializeLib.inf */,
+			);
+			path = OcSerializeLib;
+			sourceTree = "<group>";
+		};
+		35366A9F240C213400D54CBB /* OcDataHubLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366AA0240C213400D54CBB /* OcDataHubLib.c */,
+				35366AA1240C213400D54CBB /* OcDataHubLib.inf */,
+				35366AA2240C213400D54CBB /* DataHub.c */,
+				35366AA3240C213400D54CBB /* DataHub.h */,
+			);
+			path = OcDataHubLib;
+			sourceTree = "<group>";
+		};
+		35366AA4240C213400D54CBB /* OcConsoleLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366AA5240C213400D54CBB /* ConsoleControl.c */,
+				35366AA6240C213400D54CBB /* OcConsoleLibInternal.h */,
+				35366AA7240C213400D54CBB /* ResolutionParsing.c */,
+				35366AA8240C213400D54CBB /* OcConsoleLib.inf */,
+				35366AA9240C213400D54CBB /* UgaPassThrough.c */,
+				35366AAA240C213400D54CBB /* OcConsoleLib.c */,
+				35366AAB240C213400D54CBB /* ConsoleGop.c */,
+				35366AAC240C213400D54CBB /* TextOutputNull.c */,
+				35366AAD240C213400D54CBB /* TextOutputSystem.c */,
+				35366AAE240C213400D54CBB /* TextOutputBuiltin.c */,
+			);
+			path = OcConsoleLib;
+			sourceTree = "<group>";
+		};
+		35366AAF240C213400D54CBB /* OcRtcLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366AB0240C213400D54CBB /* OcRtcLib.inf */,
+				35366AB1240C213400D54CBB /* OcRtcLib.c */,
+			);
+			path = OcRtcLib;
+			sourceTree = "<group>";
+		};
+		35366AB2240C213400D54CBB /* OcAppleEventLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366AB3240C213400D54CBB /* OcAppleEventLib.inf */,
+				35366AB4240C213400D54CBB /* AppleEventInternal.h */,
+				35366AB5240C213400D54CBB /* OcAppleEventLib.c */,
+				35366AB6240C213400D54CBB /* AppleEvent.c */,
+				35366AB7240C213400D54CBB /* AppleKeyMap.c */,
+				35366AB8240C213400D54CBB /* EventQueue.c */,
+				35366AB9240C213400D54CBB /* KeyHandler.c */,
+				35366ABA240C213400D54CBB /* PointerHandler.c */,
+			);
+			path = OcAppleEventLib;
+			sourceTree = "<group>";
+		};
+		35366ABB240C213400D54CBB /* OcDeviceTreeLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366ABC240C213400D54CBB /* OcDeviceTreeLib.c */,
+				35366ABD240C213400D54CBB /* OcDeviceTreeLib.inf */,
+			);
+			path = OcDeviceTreeLib;
+			sourceTree = "<group>";
+		};
+		35366ABE240C213400D54CBB /* OcUnicodeCollationEngLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366ABF240C213400D54CBB /* OcUnicodeCollationEngLib.c */,
+				35366AC0240C213400D54CBB /* OcUnicodeCollationEngLib.inf */,
+				35366AC1240C213400D54CBB /* OcUnicodeCollationEngLibInternal.h */,
+			);
+			path = OcUnicodeCollationEngLib;
+			sourceTree = "<group>";
+		};
+		35366AC2240C213400D54CBB /* OcHashServicesLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366AC3240C213400D54CBB /* OcHashServicesLibInternal.h */,
+				35366AC4240C213400D54CBB /* OcHashServicesLib.c */,
+				35366AC5240C213400D54CBB /* OcHashServicesLib.inf */,
+			);
+			path = OcHashServicesLib;
+			sourceTree = "<group>";
+		};
+		35366AC6240C213400D54CBB /* OcAppleChunklistLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366AC7240C213400D54CBB /* OcAppleChunklistLib.c */,
+				35366AC8240C213400D54CBB /* OcAppleChunklistLib.inf */,
+			);
+			path = OcAppleChunklistLib;
+			sourceTree = "<group>";
+		};
+		35366AC9240C213400D54CBB /* OcHeciLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366ACA240C213400D54CBB /* OcHeciLib.c */,
+				35366ACB240C213400D54CBB /* OcHeciLib.inf */,
+			);
+			path = OcHeciLib;
+			sourceTree = "<group>";
+		};
+		35366ACC240C213400D54CBB /* OcConsoleControlEntryModeLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366ACD240C213400D54CBB /* OcConsoleControlEntryModeLib.c */,
+				35366ACE240C213400D54CBB /* OcConsoleControlEntryModeLib.inf */,
+			);
+			path = OcConsoleControlEntryModeLib;
+			sourceTree = "<group>";
+		};
+		35366ACF240C213400D54CBB /* OcAppleImageVerificationLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366AD0240C213400D54CBB /* OcAppleImageVerificationLib.inf */,
+				35366AD1240C213400D54CBB /* OcAppleImageVerification.c */,
+			);
+			path = OcAppleImageVerificationLib;
+			sourceTree = "<group>";
+		};
+		35366AD2240C213400D54CBB /* OcAppleImageConversionLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366AD3240C213400D54CBB /* OcAppleImageConversionLib.inf */,
+				35366AD4240C213400D54CBB /* OcAppleImageConversionLib.c */,
+			);
+			path = OcAppleImageConversionLib;
+			sourceTree = "<group>";
+		};
+		35366AD5240C213400D54CBB /* OcCryptoLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366AD6240C213400D54CBB /* Aes.c */,
+				35366AD7240C213400D54CBB /* Sha2.c */,
+				35366AD8240C213400D54CBB /* BigNumMontgomery.c */,
+				35366AD9240C213400D54CBB /* OcCryptoLib.inf */,
+				35366ADA240C213400D54CBB /* X64 */,
+				35366ADC240C213400D54CBB /* BigNumLibInternal.h */,
+				35366ADD240C213400D54CBB /* BigNumLib.h */,
+				35366ADE240C213400D54CBB /* Sha1.c */,
+				35366ADF240C213400D54CBB /* BigNumPrimitives.c */,
+				35366AE0240C213400D54CBB /* PasswordHash.c */,
+				35366AE1240C213400D54CBB /* IA32 */,
+				35366AE3240C213400D54CBB /* ChaCha.c */,
+				35366AE4240C213400D54CBB /* RsaDigitalSign.c */,
+				35366AE5240C213400D54CBB /* Md5.c */,
+				35366AE6240C213400D54CBB /* SecureMem.c */,
+			);
+			path = OcCryptoLib;
+			sourceTree = "<group>";
+		};
+		35366ADA240C213400D54CBB /* X64 */ = {
+			isa = PBXGroup;
+			children = (
+				35366ADB240C213400D54CBB /* BigNumWordMul64.c */,
+			);
+			path = X64;
+			sourceTree = "<group>";
+		};
+		35366AE1240C213400D54CBB /* IA32 */ = {
+			isa = PBXGroup;
+			children = (
+				35366AE2240C213400D54CBB /* BigNumWordMul64.c */,
+			);
+			path = IA32;
+			sourceTree = "<group>";
+		};
+		35366AE7240C213400D54CBB /* OcMiscLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366AE8240C213400D54CBB /* DirectReset.c */,
+				35366AE9240C213400D54CBB /* Math.c */,
+				35366AEA240C213400D54CBB /* UninstallAllProtocolInterfaces.c */,
+				35366AEB240C213400D54CBB /* ReleaseUsbOwnership.c */,
+				35366AEC240C213400D54CBB /* OcMiscLib.inf */,
+				35366AED240C213400D54CBB /* DataPatcher.c */,
+			);
+			path = OcMiscLib;
+			sourceTree = "<group>";
+		};
+		35366AEE240C213400D54CBB /* OcTimerLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366AEF240C213400D54CBB /* OcTimerLib.c */,
+				35366AF0240C213400D54CBB /* OcTimerLib.inf */,
+			);
+			path = OcTimerLib;
+			sourceTree = "<group>";
+		};
+		35366AF1240C213400D54CBB /* OcAppleImg4Lib */ = {
+			isa = PBXGroup;
+			children = (
+				35366AF2240C213400D54CBB /* libDER */,
+				35366B01240C213400D54CBB /* OcAppleImg4Lib.c */,
+				35366B02240C213400D54CBB /* OcAppleImg4Lib.inf */,
+				35366B03240C213400D54CBB /* libDER_config.h */,
+				35366B04240C213400D54CBB /* libDERImg4 */,
+			);
+			path = OcAppleImg4Lib;
+			sourceTree = "<group>";
+		};
+		35366AF2240C213400D54CBB /* libDER */ = {
+			isa = PBXGroup;
+			children = (
+				35366AF3240C213400D54CBB /* DER_CertCrl.c */,
+				35366AF4240C213400D54CBB /* DER_Keys.c */,
+				35366AF5240C213400D54CBB /* DER_Encode.h */,
+				35366AF6240C213400D54CBB /* oids.h */,
+				35366AF7240C213400D54CBB /* libDER.h */,
+				35366AF8240C213400D54CBB /* DER_Decode.h */,
+				35366AF9240C213400D54CBB /* DER_Digest.c */,
+				35366AFA240C213400D54CBB /* DER_CertCrl.h */,
+				35366AFB240C213400D54CBB /* asn1Types.h */,
+				35366AFC240C213400D54CBB /* DER_Keys.h */,
+				35366AFD240C213400D54CBB /* DER_Decode.c */,
+				35366AFE240C213400D54CBB /* oids.c */,
+				35366AFF240C213400D54CBB /* DER_Encode.c */,
+				35366B00240C213400D54CBB /* DER_Digest.h */,
+			);
+			path = libDER;
+			sourceTree = "<group>";
+		};
+		35366B04240C213400D54CBB /* libDERImg4 */ = {
+			isa = PBXGroup;
+			children = (
+				35366B05240C213400D54CBB /* libDERImg4_config.h */,
+				35366B06240C213400D54CBB /* Img4oids.c */,
+				35366B07240C213400D54CBB /* DER_Img4Manifest.h */,
+				35366B08240C213400D54CBB /* DER_Img4Manifest.c */,
+				35366B09240C213400D54CBB /* libDERImg4.h */,
+				35366B0A240C213400D54CBB /* Img4oids.h */,
+			);
+			path = libDERImg4;
+			sourceTree = "<group>";
+		};
+		35366B0B240C213400D54CBB /* OcBootManagementLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B0C240C213400D54CBB /* OcBootManagementLib.c */,
+				35366B0D240C213400D54CBB /* BootEntryInfo.c */,
+				35366B0E240C213400D54CBB /* DmgBootSupport.c */,
+				35366B0F240C213400D54CBB /* BootManagementInternal.h */,
+				35366B10240C213400D54CBB /* HotKeySupport.c */,
+				35366B11240C213400D54CBB /* OcBootManagementLib.inf */,
+				35366B12240C213400D54CBB /* PolicyManagement.c */,
+				35366B13240C213400D54CBB /* DefaultEntryChoice.c */,
+				35366B14240C213400D54CBB /* BootAudio.c */,
+				35366B15240C213400D54CBB /* BootArguments.c */,
+				35366B16240C213400D54CBB /* AppleHibernate.c */,
+				35366B17240C213400D54CBB /* BootEntryManagement.c */,
+				35366B18240C213400D54CBB /* VariableManagement.c */,
+			);
+			path = OcBootManagementLib;
+			sourceTree = "<group>";
+		};
+		35366B19240C213400D54CBB /* OcCompressionLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B1A240C213400D54CBB /* lzss */,
+				35366B1D240C213400D54CBB /* zlib */,
+				35366B33240C213400D54CBB /* OcCompressionLib.inf */,
+				35366B34240C213400D54CBB /* lzvn */,
+			);
+			path = OcCompressionLib;
+			sourceTree = "<group>";
+		};
+		35366B1A240C213400D54CBB /* lzss */ = {
+			isa = PBXGroup;
+			children = (
+				35366B1B240C213400D54CBB /* lzss.c */,
+				35366B1C240C213400D54CBB /* lzss.h */,
+			);
+			path = lzss;
+			sourceTree = "<group>";
+		};
+		35366B1D240C213400D54CBB /* zlib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B1E240C213400D54CBB /* zlib_uefi.c */,
+				35366B1F240C213400D54CBB /* zutil.h */,
+				35366B20240C213400D54CBB /* inftrees.h */,
+				35366B21240C213400D54CBB /* inflate.c */,
+				35366B22240C213400D54CBB /* compress.c */,
+				35366B23240C213400D54CBB /* deflate.c */,
+				35366B24240C213400D54CBB /* inffixed.h */,
+				35366B25240C213400D54CBB /* trees.h */,
+				35366B26240C213400D54CBB /* inffast.h */,
+				35366B27240C213400D54CBB /* crc32.c */,
+				35366B28240C213400D54CBB /* infback.c */,
+				35366B29240C213400D54CBB /* deflate.h */,
+				35366B2A240C213400D54CBB /* zlib.h */,
+				35366B2B240C213400D54CBB /* inflate.h */,
+				35366B2C240C213400D54CBB /* inftrees.c */,
+				35366B2D240C213400D54CBB /* uncompr.c */,
+				35366B2E240C213400D54CBB /* trees.c */,
+				35366B2F240C213400D54CBB /* crc32.h */,
+				35366B30240C213400D54CBB /* inffast.c */,
+				35366B31240C213400D54CBB /* adler32.c */,
+				35366B32240C213400D54CBB /* zconf.h */,
+			);
+			path = zlib;
+			sourceTree = "<group>";
+		};
+		35366B34240C213400D54CBB /* lzvn */ = {
+			isa = PBXGroup;
+			children = (
+				35366B35240C213400D54CBB /* lzvn.h */,
+				35366B36240C213400D54CBB /* lzvn.c */,
+			);
+			path = lzvn;
+			sourceTree = "<group>";
+		};
+		35366B37240C213400D54CBB /* OcAppleKeyMapLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B38240C213400D54CBB /* OcAppleKeyMapLib.inf */,
+				35366B39240C213400D54CBB /* OcAppleKeyMapLib.c */,
+			);
+			path = OcAppleKeyMapLib;
+			sourceTree = "<group>";
+		};
+		35366B3A240C213400D54CBB /* OcSmbiosLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B3B240C213400D54CBB /* DebugSmbios.c */,
+				35366B3C240C213400D54CBB /* SmbiosInternal.c */,
+				35366B3D240C213400D54CBB /* DebugSmbios.h */,
+				35366B3E240C213400D54CBB /* OcSmbiosLib.inf */,
+				35366B3F240C213400D54CBB /* SmbiosInternal.h */,
+				35366B40240C213400D54CBB /* SmbiosPatch.c */,
+			);
+			path = OcSmbiosLib;
+			sourceTree = "<group>";
+		};
+		35366B41240C213400D54CBB /* OcStorageLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B42240C213400D54CBB /* OcStorageLib.inf */,
+				35366B43240C213400D54CBB /* OcStorageLib.c */,
+			);
+			path = OcStorageLib;
+			sourceTree = "<group>";
+		};
+		35366B44240C213400D54CBB /* OcAppleSecureBootLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B45240C213400D54CBB /* OcAppleSecureBootLib.c */,
+				35366B46240C213400D54CBB /* OcAppleSecureBootLib.inf */,
+			);
+			path = OcAppleSecureBootLib;
+			sourceTree = "<group>";
+		};
+		35366B47240C213400D54CBB /* OcGuardLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B48240C213400D54CBB /* Canary.c */,
+				35366B49240C213400D54CBB /* Ubsan.h */,
+				35366B4A240C213400D54CBB /* UbsanPrintf.c */,
+				35366B4B240C213400D54CBB /* OcGuardLib.inf */,
+				35366B4C240C213400D54CBB /* BitOverflow.c */,
+				35366B4D240C213400D54CBB /* TripleOverflow.c */,
+				35366B4E240C213400D54CBB /* Ubsan.c */,
+				35366B4F240C213400D54CBB /* NativeOverflow.c */,
+			);
+			path = OcGuardLib;
+			sourceTree = "<group>";
+		};
+		35366B50240C213400D54CBB /* OcAppleKeysLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B51240C213400D54CBB /* OcAppleKeysLib.inf */,
+				35366B52240C213400D54CBB /* OcAppleKeysLib.c */,
+			);
+			path = OcAppleKeysLib;
+			sourceTree = "<group>";
+		};
+		35366B53240C213400D54CBB /* OcAppleBootPolicyLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B54240C213400D54CBB /* OcAppleBootPolicyLib.c */,
+				35366B55240C213400D54CBB /* OcAppleBootPolicyLib.inf */,
+			);
+			path = OcAppleBootPolicyLib;
+			sourceTree = "<group>";
+		};
+		35366B56240C213400D54CBB /* OcAppleUserInterfaceThemeLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B57240C213400D54CBB /* OcAppleUserInterfaceThemeLib.c */,
+				35366B58240C213400D54CBB /* OcAppleUserInterfaceThemeLib.inf */,
+			);
+			path = OcAppleUserInterfaceThemeLib;
+			sourceTree = "<group>";
+		};
+		35366B59240C213400D54CBB /* OcAcpiLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B5A240C213400D54CBB /* OcAcpiLib.c */,
+				35366B5B240C213400D54CBB /* OcAcpiLib.inf */,
+			);
+			path = OcAcpiLib;
+			sourceTree = "<group>";
+		};
+		35366B5C240C213400D54CBB /* OcInputLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B5D240C213400D54CBB /* Keycode */,
+				35366B6C240C213400D54CBB /* OcInputLib.inf */,
+				35366B6D240C213400D54CBB /* Timer */,
+				35366B6F240C213400D54CBB /* Pointer */,
+			);
+			path = OcInputLib;
+			sourceTree = "<group>";
+		};
+		35366B5D240C213400D54CBB /* Keycode */ = {
+			isa = PBXGroup;
+			children = (
+				35366B5E240C213400D54CBB /* AppleHid.txt */,
+				35366B5F240C213400D54CBB /* AIKSource.h */,
+				35366B60240C213400D54CBB /* AIK.h */,
+				35366B61240C213400D54CBB /* AIKTarget.c */,
+				35366B62240C213400D54CBB /* AIKShim.c */,
+				35366B63240C213400D54CBB /* AIKTranslate.h */,
+				35366B64240C213400D54CBB /* AIKData.h */,
+				35366B65240C213400D54CBB /* AIKMap.c */,
+				35366B66240C213400D54CBB /* AIK.c */,
+				35366B67240C213400D54CBB /* AIKSource.c */,
+				35366B68240C213400D54CBB /* AIKTranslate.c */,
+				35366B69240C213400D54CBB /* AIKTarget.h */,
+				35366B6A240C213400D54CBB /* AIKShim.h */,
+				35366B6B240C213400D54CBB /* AIKData.c */,
+			);
+			path = Keycode;
+			sourceTree = "<group>";
+		};
+		35366B6D240C213400D54CBB /* Timer */ = {
+			isa = PBXGroup;
+			children = (
+				35366B6E240C213400D54CBB /* AIT.c */,
+			);
+			path = Timer;
+			sourceTree = "<group>";
+		};
+		35366B6F240C213400D54CBB /* Pointer */ = {
+			isa = PBXGroup;
+			children = (
+				35366B70240C213400D54CBB /* AIM.c */,
+				35366B71240C213400D54CBB /* AIM.h */,
+			);
+			path = Pointer;
+			sourceTree = "<group>";
+		};
+		35366B72240C213400D54CBB /* OcFirmwarePasswordLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B73240C213400D54CBB /* OcFirmwarePasswordLib.c */,
+				35366B74240C213400D54CBB /* AppleFwPasswordInternal.h */,
+				35366B75240C213400D54CBB /* OcFirmwarePasswordLib.inf */,
+			);
+			path = OcFirmwarePasswordLib;
+			sourceTree = "<group>";
+		};
+		35366B76240C213400D54CBB /* OcAppleDiskImageLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B77240C213400D54CBB /* OcAppleDiskImageLib.c */,
+				35366B78240C213400D54CBB /* OcAppleDiskImageLibInternal.h */,
+				35366B79240C213400D54CBB /* OcAppleDiskImageLib.inf */,
+				35366B7A240C213400D54CBB /* OcAppleDiskImageBlockIo.c */,
+				35366B7B240C213400D54CBB /* OcAppleDiskImageLibInternal.c */,
+			);
+			path = OcAppleDiskImageLib;
+			sourceTree = "<group>";
+		};
+		35366B7C240C213400D54CBB /* OcRngLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B7D240C213400D54CBB /* X64 */,
+				35366B7F240C213400D54CBB /* OcRngLib.c */,
+				35366B80240C213400D54CBB /* IA32 */,
+				35366B82240C213400D54CBB /* OcRngLib.inf */,
+				35366B83240C213400D54CBB /* OcRngInternals.h */,
+			);
+			path = OcRngLib;
+			sourceTree = "<group>";
+		};
+		35366B7D240C213400D54CBB /* X64 */ = {
+			isa = PBXGroup;
+			children = (
+				35366B7E240C213400D54CBB /* RngDelay.nasm */,
+			);
+			path = X64;
+			sourceTree = "<group>";
+		};
+		35366B80240C213400D54CBB /* IA32 */ = {
+			isa = PBXGroup;
+			children = (
+				35366B81240C213400D54CBB /* RngDelay.nasm */,
+			);
+			path = IA32;
+			sourceTree = "<group>";
+		};
+		35366B84240C213400D54CBB /* OcHdaDevicesLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B85240C213400D54CBB /* OcHdaDevicesLib.c */,
+				35366B86240C213400D54CBB /* OcHdaDevicesLib.inf */,
+				35366B87240C213400D54CBB /* OcHdaDevicesInternal.h */,
+			);
+			path = OcHdaDevicesLib;
+			sourceTree = "<group>";
+		};
+		35366B88240C213400D54CBB /* OcFirmwareVolumeLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B89240C213400D54CBB /* OcFirmwareVolumeLib.inf */,
+				35366B8A240C213400D54CBB /* OcFirmwareVolumeLib.c */,
+				35366B8B240C213400D54CBB /* FvOnFv2Thunk.c */,
+				35366B8C240C213400D54CBB /* OcFirmwareVolumeLibInternal.h */,
+			);
+			path = OcFirmwareVolumeLib;
+			sourceTree = "<group>";
+		};
+		35366B8D240C213400D54CBB /* OcDevicePathLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B8E240C213400D54CBB /* OcDevicePathLib.inf */,
+				35366B8F240C213400D54CBB /* ExpandDevicePath.c */,
+				35366B90240C213400D54CBB /* OcDevicePathLib.c */,
+			);
+			path = OcDevicePathLib;
+			sourceTree = "<group>";
+		};
+		35366B91240C213400D54CBB /* OcDebugLogLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B92240C213400D54CBB /* DebugHelp.c */,
+				35366B93240C213400D54CBB /* DebugPrint.c */,
+				35366B94240C213400D54CBB /* OcDebugLogLib.inf */,
+				35366B95240C213400D54CBB /* OcLog.c */,
+				35366B96240C213400D54CBB /* OcLogInternal.h */,
+				35366B97240C213400D54CBB /* OcDebugLogLib.c */,
+			);
+			path = OcDebugLogLib;
+			sourceTree = "<group>";
+		};
+		35366B98240C213400D54CBB /* OcAudioLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366B99240C213400D54CBB /* OcAudioGenBeep.c */,
+				35366B9A240C213400D54CBB /* OcAudioLib.inf */,
+				35366B9B240C213400D54CBB /* OcAudio.c */,
+				35366B9C240C213400D54CBB /* OcAudioWave.c */,
+				35366B9D240C213400D54CBB /* OcAudioInternal.h */,
+				35366B9E240C213400D54CBB /* OcAudioLib.c */,
+				35366B9F240C213400D54CBB /* OcAudioVoiceOver.c */,
+			);
+			path = OcAudioLib;
+			sourceTree = "<group>";
+		};
+		35366BA0240C213400D54CBB /* OcVirtualFsLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366BA1240C213400D54CBB /* VirtualFile.c */,
+				35366BA2240C213400D54CBB /* OcVirtualFsLib.inf */,
+				35366BA3240C213400D54CBB /* VirtualVolume.c */,
+				35366BA4240C213400D54CBB /* VirtualFs.c */,
+				35366BA5240C213400D54CBB /* VirtualFsInternal.h */,
+			);
+			path = OcVirtualFsLib;
+			sourceTree = "<group>";
+		};
+		35366BA6240C213400D54CBB /* OcAppleKernelLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366BA7240C213400D54CBB /* PrelinkedKext.c */,
+				35366BA8240C213400D54CBB /* PrelinkedContext.c */,
+				35366BA9240C213400D54CBB /* Link.c */,
+				35366BAA240C213400D54CBB /* OcAppleKernelLib.inf */,
+				35366BAB240C213400D54CBB /* KextPatcher.c */,
+				35366BAC240C213400D54CBB /* CommonPatches.c */,
+				35366BAD240C213400D54CBB /* Vtables.c */,
+				35366BAE240C213400D54CBB /* KernelReader.c */,
+				35366BAF240C213400D54CBB /* PrelinkedInternal.h */,
+			);
+			path = OcAppleKernelLib;
+			sourceTree = "<group>";
+		};
+		35366BB0240C213400D54CBB /* OcFileLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366BB1240C213400D54CBB /* OpenFile.c */,
+				35366BB2240C213400D54CBB /* FsConnectQuirk.c */,
+				35366BB3240C213400D54CBB /* GptPartitionEntry.c */,
+				35366BB4240C213400D54CBB /* ReadFile.c */,
+				35366BB5240C213400D54CBB /* FirmwareFile.c */,
+				35366BB6240C213400D54CBB /* GetVolumeLabel.c */,
+				35366BB7240C213400D54CBB /* FileProtocol.c */,
+				35366BB8240C213400D54CBB /* GetFileInfo.c */,
+				35366BB9240C213400D54CBB /* LocateFileSystem.c */,
+				35366BBA240C213400D54CBB /* OcFileLib.inf */,
+			);
+			path = OcFileLib;
+			sourceTree = "<group>";
+		};
+		35366BBB240C213400D54CBB /* OcCpuLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366BBC240C213400D54CBB /* OcCpuInternals.h */,
+				35366BBD240C213400D54CBB /* X64 */,
+				35366BBF240C213400D54CBB /* FrequencyDetect.c */,
+				35366BC0240C213400D54CBB /* OcCpuLib.inf */,
+				35366BC1240C213400D54CBB /* AppleCpuSupport.c */,
+				35366BC2240C213400D54CBB /* OcCpuLib.c */,
+				35366BC3240C213400D54CBB /* IA32 */,
+			);
+			path = OcCpuLib;
+			sourceTree = "<group>";
+		};
+		35366BBD240C213400D54CBB /* X64 */ = {
+			isa = PBXGroup;
+			children = (
+				35366BBE240C213400D54CBB /* Microcode.nasm */,
+			);
+			path = X64;
+			sourceTree = "<group>";
+		};
+		35366BC3240C213400D54CBB /* IA32 */ = {
+			isa = PBXGroup;
+			children = (
+				35366BC4240C213400D54CBB /* Microcode.nasm */,
+			);
+			path = IA32;
+			sourceTree = "<group>";
+		};
+		35366BC5240C213400D54CBB /* OcConfigurationLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366BC6240C213400D54CBB /* OcConfigurationLib.inf */,
+				35366BC7240C213400D54CBB /* CheckSchema.py */,
+				35366BC8240C213400D54CBB /* OcConfigurationLib.c */,
+			);
+			path = OcConfigurationLib;
+			sourceTree = "<group>";
+		};
+		35366BC9240C213400D54CBB /* OcDriverConnectionLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366BCA240C213400D54CBB /* OcDriverConnectionLib.c */,
+				35366BCB240C213400D54CBB /* OcDriverConnectionLib.inf */,
+			);
+			path = OcDriverConnectionLib;
+			sourceTree = "<group>";
+		};
+		35366BCC240C213400D54CBB /* OcXmlLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366BCD240C213400D54CBB /* OcXmlLib.c */,
+				35366BCE240C213400D54CBB /* OcXmlLib.inf */,
+			);
+			path = OcXmlLib;
+			sourceTree = "<group>";
+		};
+		35366BCF240C213400D54CBB /* OcDevicePropertyLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366BD0240C213400D54CBB /* OcDevicePropertyLib.inf */,
+				35366BD1240C213400D54CBB /* OcDevicePropertyLib.c */,
+			);
+			path = OcDevicePropertyLib;
+			sourceTree = "<group>";
+		};
+		35366BD2240C213500D54CBB /* OcOSInfoLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366BD3240C213500D54CBB /* OcOSInfoLib.c */,
+				35366BD4240C213500D54CBB /* OcOSInfoLib.inf */,
+			);
+			path = OcOSInfoLib;
+			sourceTree = "<group>";
+		};
+		35366BD5240C213500D54CBB /* OcTemplateLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366BD6240C213500D54CBB /* OcTemplateLib.inf */,
+				35366BD7240C213500D54CBB /* OcTemplateLib.c */,
+			);
+			path = OcTemplateLib;
+			sourceTree = "<group>";
+		};
+		35366BD8240C213500D54CBB /* OcCompilerIntrinsicsLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366BD9240C213500D54CBB /* OcCompilerIntrinsicsLib.c */,
+				35366BDA240C213500D54CBB /* OcCompilerIntrinsicsLib.inf */,
+				35366BDB240C213500D54CBB /* MsvcMath32.c */,
+			);
+			path = OcCompilerIntrinsicsLib;
+			sourceTree = "<group>";
+		};
+		35366BDC240C213500D54CBB /* OcAppleBootCompatLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366BDD240C213500D54CBB /* OcAppleBootCompatLib.inf */,
+				35366BDE240C213500D54CBB /* CustomSlide.c */,
+				35366BDF240C213500D54CBB /* X64 */,
+				35366BE3240C213500D54CBB /* BootCompatInternal.h */,
+				35366BE4240C213500D54CBB /* ServiceOverrides.c */,
+				35366BE5240C213500D54CBB /* IA32 */,
+				35366BE8240C213500D54CBB /* KernelSupport.c */,
+				35366BE9240C213500D54CBB /* OcAppleBootCompatLib.c */,
+			);
+			path = OcAppleBootCompatLib;
+			sourceTree = "<group>";
+		};
+		35366BDF240C213500D54CBB /* X64 */ = {
+			isa = PBXGroup;
+			children = (
+				35366BE0240C213500D54CBB /* ContextSwitchSupport.c */,
+				35366BE1240C213500D54CBB /* ContextSwitch.nasm */,
+				35366BE2240C213500D54CBB /* ContextSwitch.h */,
+			);
+			path = X64;
+			sourceTree = "<group>";
+		};
+		35366BE5240C213500D54CBB /* IA32 */ = {
+			isa = PBXGroup;
+			children = (
+				35366BE6240C213500D54CBB /* ContextSwitchSupport.c */,
+				35366BE7240C213500D54CBB /* ContextSwitch.h */,
+			);
+			path = IA32;
+			sourceTree = "<group>";
+		};
+		35366BEA240C213500D54CBB /* OcMemoryLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366BEB240C213500D54CBB /* MemoryMap.c */,
+				35366BEC240C213500D54CBB /* VirtualMemory.c */,
+				35366BED240C213500D54CBB /* LegacyRegionLock.c */,
+				35366BEE240C213500D54CBB /* LegacyRegionUnLock.c */,
+				35366BEF240C213500D54CBB /* OcMemoryLib.inf */,
+				35366BF0240C213500D54CBB /* UmmMalloc.c */,
+			);
+			path = OcMemoryLib;
+			sourceTree = "<group>";
+		};
+		35366BF1240C213500D54CBB /* OcAppleRamDiskLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366BF2240C213500D54CBB /* OcAppleRamDiskLib.inf */,
+				35366BF3240C213500D54CBB /* OcAppleRamDiskLib.c */,
+			);
+			path = OcAppleRamDiskLib;
+			sourceTree = "<group>";
+		};
+		35366BF4240C213500D54CBB /* OcSmcLib */ = {
+			isa = PBXGroup;
+			children = (
+				35366BF5240C213500D54CBB /* OcSmcLib.c */,
+				35366BF6240C213500D54CBB /* OcSmcLib.inf */,
+				35366BF7240C213500D54CBB /* OcSmcLibInternal.h */,
+			);
+			path = OcSmcLib;
+			sourceTree = "<group>";
+		};
+		354F73E922573DE700AB1A9B = {
+			isa = PBXGroup;
+			children = (
+				35366A8B240C213300D54CBB /* Library */,
+				3511D5CB23FDB37200CC3B17 /* NdkBootPicker.c */,
+				3511D57D23FDB2A700CC3B17 /* Application */,
+				3511D55D23FDB2A600CC3B17 /* Docs */,
+				3511D57B23FDB2A700CC3B17 /* Include */,
+				3511D58123FDB2A800CC3B17 /* Platform */,
+				357E232523F2A06B00BC930F /* UDK */,
+				3511D59823FDB2D900CC3B17 /* lib__OpenCorePkg__index.dylib */,
+			);
+			sourceTree = "<group>";
+		};
+		35C73DEA24055113005CB6EF /* GUI */ = {
+			isa = PBXGroup;
+			children = (
+				35C73DEB24055113005CB6EF /* GetTscEmu.c */,
+				35C73DEC24055113005CB6EF /* GuiApp.c */,
+				35C73DED24055113005CB6EF /* GUI.c */,
+				35C73DEE24055113005CB6EF /* BmfLib.h */,
+				35C740EB24055114005CB6EF /* Images */,
+				35C740F924055114005CB6EF /* Input */,
+				35C740FD24055114005CB6EF /* Bmf */,
+				35C740FF24055114005CB6EF /* Output */,
+				35C7410324055114005CB6EF /* OcBootstrap.c */,
+				35C7410424055115005CB6EF /* HwOps.c */,
+				35C7410524055115005CB6EF /* GuiApp.h */,
+				35C7410624055115005CB6EF /* GUI.h */,
+				35C7410724055115005CB6EF /* HwOpsEmu.c */,
+				35C7410824055115005CB6EF /* BitmapFontUser.c */,
+				35C7410924055115005CB6EF /* GuiIo.h */,
+				35C7410A24055115005CB6EF /* GUI.inf */,
+				35C7410B24055115005CB6EF /* OcBootstrapEmu.c */,
+				35C7410C24055115005CB6EF /* BitmapFont.c */,
+				35C7410D24055115005CB6EF /* Views */,
+				35C7410F24055115005CB6EF /* HwOps.h */,
+				35C7411024055115005CB6EF /* BmfFile.h */,
+				35C7411124055115005CB6EF /* GetTscHw.c */,
+			);
+			path = GUI;
+			sourceTree = "<group>";
+		};
+		35C740EB24055114005CB6EF /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				35C740EC24055114005CB6EF /* IconHdExt.c */,
+				35C740ED24055114005CB6EF /* Helvetica_fnt.c */,
+				35C740F124055114005CB6EF /* Helvetica_0.bmp */,
+				35C740F224055114005CB6EF /* IconHd.c */,
+				35C740F324055114005CB6EF /* Selector.c */,
+				35C740F624055114005CB6EF /* Cursor.c */,
+				35C740F724055114005CB6EF /* Helvetica_bmp.c */,
+				35C740F824055114005CB6EF /* IconSelected.c */,
+			);
+			path = Images;
+			sourceTree = "<group>";
+		};
+		35C740F924055114005CB6EF /* Input */ = {
+			isa = PBXGroup;
+			children = (
+				35C740FA24055114005CB6EF /* InputSimTextIn.c */,
+				35C740FB24055114005CB6EF /* InputSimAbsPtr.c */,
+			);
+			path = Input;
+			sourceTree = "<group>";
+		};
+		35C740FF24055114005CB6EF /* Output */ = {
+			isa = PBXGroup;
+			children = (
+				35C7410024055114005CB6EF /* OutputFbGop.c */,
+				35C7410124055114005CB6EF /* StGopShared.c */,
+				35C7410224055114005CB6EF /* OutputStGop.c */,
+			);
+			path = Output;
+			sourceTree = "<group>";
+		};
+		35C7410D24055115005CB6EF /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				35C7410E24055115005CB6EF /* BootPicker.c */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -135,8 +1728,72 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				354F741122573F0A00AB1A9B /* OcBootstrap.h in Headers */,
-				354F741222573F0A00AB1A9B /* OpenCore.h in Headers */,
+				35366C94240C213500D54CBB /* AppleFwPasswordInternal.h in Headers */,
+				35366C74240C213500D54CBB /* SmbiosInternal.h in Headers */,
+				35366C4A240C213500D54CBB /* Img4oids.h in Headers */,
+				35366C05240C213500D54CBB /* DataHub.h in Headers */,
+				35366BF8240C213500D54CBB /* OcMachoLibInternal.h in Headers */,
+				35C7431724055116005CB6EF /* HwOps.h in Headers */,
+				35366CD5240C213500D54CBB /* ContextSwitch.h in Headers */,
+				35366C64240C213500D54CBB /* deflate.h in Headers */,
+				35366C65240C213500D54CBB /* zlib.h in Headers */,
+				35366C25240C213500D54CBB /* BigNumLibInternal.h in Headers */,
+				35366C96240C213500D54CBB /* OcAppleDiskImageLibInternal.h in Headers */,
+				35366C42240C213500D54CBB /* DER_Digest.h in Headers */,
+				35366C66240C213500D54CBB /* inflate.h in Headers */,
+				35366C88240C213500D54CBB /* AIKData.h in Headers */,
+				35366CBA240C213500D54CBB /* PrelinkedInternal.h in Headers */,
+				35366C73240C213500D54CBB /* DebugSmbios.h in Headers */,
+				3511D58D23FDB2A800CC3B17 /* OpenCore.h in Headers */,
+				35366CC4240C213500D54CBB /* OcCpuInternals.h in Headers */,
+				35366C38240C213500D54CBB /* oids.h in Headers */,
+				35366C37240C213500D54CBB /* DER_Encode.h in Headers */,
+				35C7431324055116005CB6EF /* GuiIo.h in Headers */,
+				35366C9C240C213500D54CBB /* OcRngInternals.h in Headers */,
+				35366C3A240C213500D54CBB /* DER_Decode.h in Headers */,
+				35366C6E240C213500D54CBB /* lzvn.h in Headers */,
+				35366BFF240C213500D54CBB /* lodepng.h in Headers */,
+				35366CB2240C213500D54CBB /* VirtualFsInternal.h in Headers */,
+				35366C8D240C213500D54CBB /* AIKTarget.h in Headers */,
+				35366CE3240C213500D54CBB /* OcSmcLibInternal.h in Headers */,
+				35366C07240C213500D54CBB /* OcConsoleLibInternal.h in Headers */,
+				35366C60240C213500D54CBB /* trees.h in Headers */,
+				35366C3E240C213500D54CBB /* DER_Keys.h in Headers */,
+				35366CAC240C213500D54CBB /* OcAudioInternal.h in Headers */,
+				35366CD6240C213500D54CBB /* BootCompatInternal.h in Headers */,
+				35366C6A240C213500D54CBB /* crc32.h in Headers */,
+				35366C3C240C213500D54CBB /* DER_CertCrl.h in Headers */,
+				35366C10240C213500D54CBB /* AppleEventInternal.h in Headers */,
+				35366C92240C213500D54CBB /* AIM.h in Headers */,
+				35366C45240C213500D54CBB /* libDERImg4_config.h in Headers */,
+				35366C19240C213500D54CBB /* OcUnicodeCollationEngLibInternal.h in Headers */,
+				35366C58240C213500D54CBB /* lzss.h in Headers */,
+				35366C6D240C213500D54CBB /* zconf.h in Headers */,
+				35366C84240C213500D54CBB /* AIK.h in Headers */,
+				35366C9E240C213500D54CBB /* OcHdaDevicesInternal.h in Headers */,
+				35366CA1240C213500D54CBB /* OcFirmwareVolumeLibInternal.h in Headers */,
+				35366C8E240C213500D54CBB /* AIKShim.h in Headers */,
+				35366C5F240C213500D54CBB /* inffixed.h in Headers */,
+				35366C5B240C213500D54CBB /* inftrees.h in Headers */,
+				35366C4E240C213500D54CBB /* BootManagementInternal.h in Headers */,
+				35366C39240C213500D54CBB /* libDER.h in Headers */,
+				35366C5A240C213500D54CBB /* zutil.h in Headers */,
+				35366C47240C213500D54CBB /* DER_Img4Manifest.h in Headers */,
+				35366C61240C213500D54CBB /* inffast.h in Headers */,
+				35366C83240C213500D54CBB /* AIKSource.h in Headers */,
+				35366C3D240C213500D54CBB /* asn1Types.h in Headers */,
+				35366C44240C213500D54CBB /* libDER_config.h in Headers */,
+				35366CD9240C213500D54CBB /* ContextSwitch.h in Headers */,
+				35366C87240C213500D54CBB /* AIKTranslate.h in Headers */,
+				35366C26240C213500D54CBB /* BigNumLib.h in Headers */,
+				35C7431824055116005CB6EF /* BmfFile.h in Headers */,
+				35C7431024055116005CB6EF /* GUI.h in Headers */,
+				35C7411524055115005CB6EF /* BmfLib.h in Headers */,
+				35366C49240C213500D54CBB /* libDERImg4.h in Headers */,
+				35366CA7240C213500D54CBB /* OcLogInternal.h in Headers */,
+				35366C79240C213500D54CBB /* Ubsan.h in Headers */,
+				35C7430F24055116005CB6EF /* GuiApp.h in Headers */,
+				35366C1A240C213500D54CBB /* OcHashServicesLibInternal.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -149,12 +1806,12 @@
 			buildConfigurationList = 354F73F122573DE700AB1A9B /* Build configuration list for PBXLegacyTarget "OpenCorePkg" */;
 			buildPhases = (
 			);
-			buildToolPath = "$(SRCROOT)/build.sh";
-			buildWorkingDirectory = "$(SRCROOT)/..";
+			buildToolPath = "$(SRCROOT)/xcbuild.tool";
+			buildWorkingDirectory = "$(SRCROOT)/UDK";
 			dependencies = (
 			);
 			name = OpenCorePkg;
-			passBuildSettingsInEnvironment = 1;
+			passBuildSettingsInEnvironment = 0;
 			productName = OpenCorePkg;
 		};
 /* End PBXLegacyTarget section */
@@ -174,7 +1831,7 @@
 			);
 			name = __OpenCorePkg__index;
 			productName = __OpenCorePkg__index;
-			productReference = 354F73F822573EBF00AB1A9B /* lib__OpenCorePkg__index.dylib */;
+			productReference = 3511D59823FDB2D900CC3B17 /* lib__OpenCorePkg__index.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
@@ -202,7 +1859,7 @@
 				en,
 			);
 			mainGroup = 354F73E922573DE700AB1A9B;
-			productRefGroup = 354F73F922573EBF00AB1A9B /* Products */;
+			productRefGroup = 354F73E922573DE700AB1A9B;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -217,9 +1874,210 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				354F741022573F0A00AB1A9B /* OpenCore.c in Sources */,
-				354F740F22573F0A00AB1A9B /* OpenCoreUefi.c in Sources */,
-				354F741322573F0A00AB1A9B /* Bootstrap.c in Sources */,
+				35366C21240C213500D54CBB /* Aes.c in Sources */,
+				35C7431524055116005CB6EF /* BitmapFont.c in Sources */,
+				35366C8B240C213500D54CBB /* AIKSource.c in Sources */,
+				35366C7E240C213500D54CBB /* NativeOverflow.c in Sources */,
+				35366C97240C213500D54CBB /* OcAppleDiskImageBlockIo.c in Sources */,
+				35366C01240C213500D54CBB /* lodepng.c in Sources */,
+				35C7430124055116005CB6EF /* Helvetica_fnt.c in Sources */,
+				35366C80240C213500D54CBB /* OcAppleBootPolicyLib.c in Sources */,
+				35366C98240C213500D54CBB /* OcAppleDiskImageLibInternal.c in Sources */,
+				35366CE0240C213500D54CBB /* UmmMalloc.c in Sources */,
+				35366C52240C213500D54CBB /* BootAudio.c in Sources */,
+				35366C72240C213500D54CBB /* SmbiosInternal.c in Sources */,
+				35366C9D240C213500D54CBB /* OcHdaDevicesLib.c in Sources */,
+				35366CB1240C213500D54CBB /* VirtualFs.c in Sources */,
+				35366C62240C213500D54CBB /* crc32.c in Sources */,
+				35C7430624055116005CB6EF /* IconSelected.c in Sources */,
+				35366C8F240C213500D54CBB /* AIKData.c in Sources */,
+				35366C55240C213500D54CBB /* BootEntryManagement.c in Sources */,
+				35366C20240C213500D54CBB /* OcAppleImageConversionLib.c in Sources */,
+				3511D59323FDB2A800CC3B17 /* OpenCoreMisc.c in Sources */,
+				35366C04240C213500D54CBB /* DataHub.c in Sources */,
+				3511D59523FDB2A800CC3B17 /* OpenCoreDevProps.c in Sources */,
+				35366CCC240C213500D54CBB /* OcXmlLib.c in Sources */,
+				35366CC1240C213500D54CBB /* FileProtocol.c in Sources */,
+				35366C95240C213500D54CBB /* OcAppleDiskImageLib.c in Sources */,
+				35366C4F240C213500D54CBB /* HotKeySupport.c in Sources */,
+				35366C36240C213500D54CBB /* DER_Keys.c in Sources */,
+				35C7430424055116005CB6EF /* Cursor.c in Sources */,
+				35366C9A240C213500D54CBB /* OcRngLib.c in Sources */,
+				35366CDD240C213500D54CBB /* VirtualMemory.c in Sources */,
+				3511D58E23FDB2A800CC3B17 /* Bootstrap.c in Sources */,
+				35366C7B240C213500D54CBB /* BitOverflow.c in Sources */,
+				35366CB9240C213500D54CBB /* KernelReader.c in Sources */,
+				35C7430524055116005CB6EF /* Helvetica_bmp.c in Sources */,
+				35366C9F240C213500D54CBB /* OcFirmwareVolumeLib.c in Sources */,
+				35366C57240C213500D54CBB /* lzss.c in Sources */,
+				35366C03240C213500D54CBB /* OcDataHubLib.c in Sources */,
+				35366C15240C213500D54CBB /* KeyHandler.c in Sources */,
+				35366C76240C213500D54CBB /* OcStorageLib.c in Sources */,
+				35C7411324055115005CB6EF /* GuiApp.c in Sources */,
+				35C7430C24055116005CB6EF /* OutputStGop.c in Sources */,
+				35366C32240C213500D54CBB /* ReleaseUsbOwnership.c in Sources */,
+				35366CD0240C213500D54CBB /* OcCompilerIntrinsicsLib.c in Sources */,
+				35C7411224055115005CB6EF /* GetTscEmu.c in Sources */,
+				35366C50240C213500D54CBB /* PolicyManagement.c in Sources */,
+				35366CAB240C213500D54CBB /* OcAudioWave.c in Sources */,
+				3511D59423FDB2A800CC3B17 /* OpenCorePlatform.c in Sources */,
+				35366CA0240C213500D54CBB /* FvOnFv2Thunk.c in Sources */,
+				35C7430B24055116005CB6EF /* StGopShared.c in Sources */,
+				35366CBB240C213500D54CBB /* OpenFile.c in Sources */,
+				35366CA4240C213500D54CBB /* DebugHelp.c in Sources */,
+				35366CDB240C213500D54CBB /* OcAppleBootCompatLib.c in Sources */,
+				3511D59223FDB2A800CC3B17 /* OpenCoreAcpi.c in Sources */,
+				35C7430024055116005CB6EF /* IconHdExt.c in Sources */,
+				35366C75240C213500D54CBB /* SmbiosPatch.c in Sources */,
+				35366CB4240C213500D54CBB /* PrelinkedContext.c in Sources */,
+				35366BFC240C213500D54CBB /* CxxSymbols.c in Sources */,
+				35366C06240C213500D54CBB /* ConsoleControl.c in Sources */,
+				35366CB3240C213500D54CBB /* PrelinkedKext.c in Sources */,
+				35366CAE240C213500D54CBB /* OcAudioVoiceOver.c in Sources */,
+				3511D5CC23FDB37200CC3B17 /* NdkBootPicker.c in Sources */,
+				35366CCE240C213500D54CBB /* OcOSInfoLib.c in Sources */,
+				35366CBD240C213500D54CBB /* GptPartitionEntry.c in Sources */,
+				35366CAA240C213500D54CBB /* OcAudio.c in Sources */,
+				35366C93240C213500D54CBB /* OcFirmwarePasswordLib.c in Sources */,
+				35366C1C240C213500D54CBB /* OcAppleChunklistLib.c in Sources */,
+				35366CD7240C213500D54CBB /* ServiceOverrides.c in Sources */,
+				35F6ACA6240C22EE00D6FA49 /* Canary.c in Sources */,
+				35366C82240C213500D54CBB /* OcAcpiLib.c in Sources */,
+				3511D59723FDB2A800CC3B17 /* OpenCoreKernel.c in Sources */,
+				35366C86240C213500D54CBB /* AIKShim.c in Sources */,
+				35366C02240C213500D54CBB /* OcSerializeLib.c in Sources */,
+				35366C1D240C213500D54CBB /* OcHeciLib.c in Sources */,
+				35366BFB240C213500D54CBB /* Relocations.c in Sources */,
+				35C7431124055116005CB6EF /* HwOpsEmu.c in Sources */,
+				35366C4B240C213500D54CBB /* OcBootManagementLib.c in Sources */,
+				35366C2D240C213500D54CBB /* Md5.c in Sources */,
+				35366C51240C213500D54CBB /* DefaultEntryChoice.c in Sources */,
+				35366CC0240C213500D54CBB /* GetVolumeLabel.c in Sources */,
+				35366C7F240C213500D54CBB /* OcAppleKeysLib.c in Sources */,
+				3511D58F23FDB2A800CC3B17 /* OpenCoreUefi.c in Sources */,
+				35366CDA240C213500D54CBB /* KernelSupport.c in Sources */,
+				35366CDE240C213500D54CBB /* LegacyRegionLock.c in Sources */,
+				35366CC6240C213500D54CBB /* FrequencyDetect.c in Sources */,
+				35366C90240C213500D54CBB /* AIT.c in Sources */,
+				35366C68240C213500D54CBB /* uncompr.c in Sources */,
+				35366C28240C213500D54CBB /* BigNumPrimitives.c in Sources */,
+				35366CCF240C213500D54CBB /* OcTemplateLib.c in Sources */,
+				35366C1E240C213500D54CBB /* OcConsoleControlEntryModeLib.c in Sources */,
+				35366C24240C213500D54CBB /* BigNumWordMul64.c in Sources */,
+				3511D59623FDB2A800CC3B17 /* OpenCoreNvram.c in Sources */,
+				35C7431424055116005CB6EF /* OcBootstrapEmu.c in Sources */,
+				35366CDC240C213500D54CBB /* MemoryMap.c in Sources */,
+				35366BFE240C213500D54CBB /* OcAsciiLib.c in Sources */,
+				35C7430E24055116005CB6EF /* HwOps.c in Sources */,
+				35366C11240C213500D54CBB /* OcAppleEventLib.c in Sources */,
+				35366C7C240C213500D54CBB /* TripleOverflow.c in Sources */,
+				35366C56240C213500D54CBB /* VariableManagement.c in Sources */,
+				35366C4C240C213500D54CBB /* BootEntryInfo.c in Sources */,
+				35366CA5240C213500D54CBB /* DebugPrint.c in Sources */,
+				35366C08240C213500D54CBB /* ResolutionParsing.c in Sources */,
+				35366C0F240C213500D54CBB /* OcRtcLib.c in Sources */,
+				35366C4D240C213500D54CBB /* DmgBootSupport.c in Sources */,
+				35366CBC240C213500D54CBB /* FsConnectQuirk.c in Sources */,
+				35366C0E240C213500D54CBB /* TextOutputBuiltin.c in Sources */,
+				35366CB7240C213500D54CBB /* CommonPatches.c in Sources */,
+				35366C41240C213500D54CBB /* DER_Encode.c in Sources */,
+				35C7430A24055116005CB6EF /* OutputFbGop.c in Sources */,
+				35366C18240C213500D54CBB /* OcUnicodeCollationEngLib.c in Sources */,
+				35C7430224055116005CB6EF /* IconHd.c in Sources */,
+				35366C5D240C213500D54CBB /* compress.c in Sources */,
+				35366C33240C213500D54CBB /* DataPatcher.c in Sources */,
+				35366CBE240C213500D54CBB /* ReadFile.c in Sources */,
+				35C7431224055116005CB6EF /* BitmapFontUser.c in Sources */,
+				35C7430D24055116005CB6EF /* OcBootstrap.c in Sources */,
+				35366C6C240C213500D54CBB /* adler32.c in Sources */,
+				35366CA2240C213500D54CBB /* ExpandDevicePath.c in Sources */,
+				35366C89240C213500D54CBB /* AIKMap.c in Sources */,
+				35366C35240C213500D54CBB /* DER_CertCrl.c in Sources */,
+				35366CA3240C213500D54CBB /* OcDevicePathLib.c in Sources */,
+				35366C23240C213500D54CBB /* BigNumMontgomery.c in Sources */,
+				35366C77240C213500D54CBB /* OcAppleSecureBootLib.c in Sources */,
+				35C7430724055116005CB6EF /* InputSimTextIn.c in Sources */,
+				35366CCA240C213500D54CBB /* OcConfigurationLib.c in Sources */,
+				35366C46240C213500D54CBB /* Img4oids.c in Sources */,
+				35366CE2240C213500D54CBB /* OcSmcLib.c in Sources */,
+				35366C53240C213500D54CBB /* BootArguments.c in Sources */,
+				35366C16240C213500D54CBB /* PointerHandler.c in Sources */,
+				35C7431924055116005CB6EF /* GetTscHw.c in Sources */,
+				35366C14240C213500D54CBB /* EventQueue.c in Sources */,
+				35366C00240C213500D54CBB /* OcPng.c in Sources */,
+				35366C27240C213500D54CBB /* Sha1.c in Sources */,
+				35366C91240C213500D54CBB /* AIM.c in Sources */,
+				35366CE1240C213500D54CBB /* OcAppleRamDiskLib.c in Sources */,
+				35366CC7240C213500D54CBB /* AppleCpuSupport.c in Sources */,
+				35366CC3240C213500D54CBB /* LocateFileSystem.c in Sources */,
+				35366C0D240C213500D54CBB /* TextOutputSystem.c in Sources */,
+				35366C09240C213500D54CBB /* UgaPassThrough.c in Sources */,
+				35366C3B240C213500D54CBB /* DER_Digest.c in Sources */,
+				35366CDF240C213500D54CBB /* LegacyRegionUnLock.c in Sources */,
+				35366C5C240C213500D54CBB /* inflate.c in Sources */,
+				35366C2C240C213500D54CBB /* RsaDigitalSign.c in Sources */,
+				35366CD2240C213500D54CBB /* CustomSlide.c in Sources */,
+				35366C3F240C213500D54CBB /* DER_Decode.c in Sources */,
+				35C7430824055116005CB6EF /* InputSimAbsPtr.c in Sources */,
+				35366C67240C213500D54CBB /* inftrees.c in Sources */,
+				35366C85240C213500D54CBB /* AIKTarget.c in Sources */,
+				35366C40240C213500D54CBB /* oids.c in Sources */,
+				35366CD8240C213500D54CBB /* ContextSwitchSupport.c in Sources */,
+				35366C31240C213500D54CBB /* UninstallAllProtocolInterfaces.c in Sources */,
+				35366C1F240C213500D54CBB /* OcAppleImageVerification.c in Sources */,
+				35366CA9240C213500D54CBB /* OcAudioGenBeep.c in Sources */,
+				35366C34240C213500D54CBB /* OcTimerLib.c in Sources */,
+				35366C6F240C213500D54CBB /* lzvn.c in Sources */,
+				35366C2B240C213500D54CBB /* ChaCha.c in Sources */,
+				35366BF9240C213500D54CBB /* Header.c in Sources */,
+				35366CC8240C213500D54CBB /* OcCpuLib.c in Sources */,
+				3511D59123FDB2A800CC3B17 /* OpenCore.c in Sources */,
+				35366C13240C213500D54CBB /* AppleKeyMap.c in Sources */,
+				35366C69240C213500D54CBB /* trees.c in Sources */,
+				35366C8C240C213500D54CBB /* AIKTranslate.c in Sources */,
+				35366C0B240C213500D54CBB /* ConsoleGop.c in Sources */,
+				3511D59023FDB2A800CC3B17 /* OpenCoreVault.c in Sources */,
+				35366C2E240C213500D54CBB /* SecureMem.c in Sources */,
+				35366CCB240C213500D54CBB /* OcDriverConnectionLib.c in Sources */,
+				35366C59240C213500D54CBB /* zlib_uefi.c in Sources */,
+				35366C0C240C213500D54CBB /* TextOutputNull.c in Sources */,
+				35366CBF240C213500D54CBB /* FirmwareFile.c in Sources */,
+				35366C43240C213500D54CBB /* OcAppleImg4Lib.c in Sources */,
+				35366C48240C213500D54CBB /* DER_Img4Manifest.c in Sources */,
+				35366C8A240C213500D54CBB /* AIK.c in Sources */,
+				35366C1B240C213500D54CBB /* OcHashServicesLib.c in Sources */,
+				35366C30240C213500D54CBB /* Math.c in Sources */,
+				35366CD1240C213500D54CBB /* MsvcMath32.c in Sources */,
+				35366CD3240C213500D54CBB /* ContextSwitchSupport.c in Sources */,
+				35366C12240C213500D54CBB /* AppleEvent.c in Sources */,
+				35C7430324055116005CB6EF /* Selector.c in Sources */,
+				35366CA6240C213500D54CBB /* OcLog.c in Sources */,
+				35366CB5240C213500D54CBB /* Link.c in Sources */,
+				35366C54240C213500D54CBB /* AppleHibernate.c in Sources */,
+				35C7411424055115005CB6EF /* GUI.c in Sources */,
+				35366CB6240C213500D54CBB /* KextPatcher.c in Sources */,
+				35366CB8240C213500D54CBB /* Vtables.c in Sources */,
+				35366C71240C213500D54CBB /* DebugSmbios.c in Sources */,
+				35366C2A240C213500D54CBB /* BigNumWordMul64.c in Sources */,
+				35366C29240C213500D54CBB /* PasswordHash.c in Sources */,
+				35366CC2240C213500D54CBB /* GetFileInfo.c in Sources */,
+				35366C6B240C213500D54CBB /* inffast.c in Sources */,
+				35366CA8240C213500D54CBB /* OcDebugLogLib.c in Sources */,
+				35366C5E240C213500D54CBB /* deflate.c in Sources */,
+				35366BFD240C213500D54CBB /* OcUnicodeLib.c in Sources */,
+				35366C22240C213500D54CBB /* Sha2.c in Sources */,
+				35366C81240C213500D54CBB /* OcAppleUserInterfaceThemeLib.c in Sources */,
+				35C7431624055116005CB6EF /* BootPicker.c in Sources */,
+				35366C2F240C213500D54CBB /* DirectReset.c in Sources */,
+				35366C63240C213500D54CBB /* infback.c in Sources */,
+				35366BFA240C213500D54CBB /* Symbols.c in Sources */,
+				35366CAD240C213500D54CBB /* OcAudioLib.c in Sources */,
+				35366C70240C213500D54CBB /* OcAppleKeyMapLib.c in Sources */,
+				35366C0A240C213500D54CBB /* OcConsoleLib.c in Sources */,
+				35366CB0240C213500D54CBB /* VirtualVolume.c in Sources */,
+				35366C17240C213500D54CBB /* OcDeviceTreeLib.c in Sources */,
+				35366CAF240C213500D54CBB /* VirtualFile.c in Sources */,
+				35366CCD240C213500D54CBB /* OcDevicePropertyLib.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -359,17 +2217,27 @@
 		354F73FB22573EBF00AB1A9B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = NO;
+				CLANG_ENABLE_MODULE_DEBUGGING = NO;
+				CLANG_MODULES_AUTOLINK = NO;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
-				GCC_PREPROCESSOR_DEFINITIONS = MACH_LITTLE_ENDIAN;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/../**";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					MACH_LITTLE_ENDIAN,
+					OC_TARGET_RELEASE,
+					MDE_CPU_X64,
+				);
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/UDK/**";
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_CFLAGS = (
+					"-fdiagnostics-absolute-paths",
 					"-include",
-					"$(SRCROOT)/../MdePkg/Include/Uefi.h",
+					"$(SRCROOT)/UDK/Build/OpenCorePkg/RELEASE_XCODE5/X64/OpenCorePkg/Platform/OpenCore/OpenCore/DEBUG/AutoGen.h",
+					"-include",
+					"$(SRCROOT)/UDK/MdePkg/Include/Uefi.h",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -380,17 +2248,27 @@
 		354F73FC22573EBF00AB1A9B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = NO;
+				CLANG_ENABLE_MODULE_DEBUGGING = NO;
+				CLANG_MODULES_AUTOLINK = NO;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
-				GCC_PREPROCESSOR_DEFINITIONS = MACH_LITTLE_ENDIAN;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/../**";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					MACH_LITTLE_ENDIAN,
+					OC_TARGET_RELEASE,
+					MDE_CPU_X64,
+				);
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/UDK/**";
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_CFLAGS = (
+					"-fdiagnostics-absolute-paths",
 					"-include",
-					"$(SRCROOT)/../MdePkg/Include/Uefi.h",
+					"$(SRCROOT)/UDK/Build/OpenCorePkg/RELEASE_XCODE5/X64/OpenCorePkg/Platform/OpenCore/OpenCore/DEBUG/AutoGen.h",
+					"-include",
+					"$(SRCROOT)/UDK/MdePkg/Include/Uefi.h",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
