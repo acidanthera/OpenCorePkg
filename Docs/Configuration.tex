@@ -124,7 +124,8 @@ step algorithm for configuring end-user board support package (BSP). Any third-p
 articles, tools, books, etc., providing such material are prone to their authors'
 preferences, tastes, this document misinterpretation, and essential obsolescence.
 In case you still use these sources, for example,
-\href{https://khronokernel-2.gitbook.io/opencore-vanilla-desktop-guide}{Opencore Vanilla Desktop Guide},
+\href{https://khronokernel-2.gitbook.io/opencore-vanilla-desktop-guide}{Opencore Vanilla Desktop Guide}
+(\href{https://khronokernel-1.gitbook.io/getting-started-with-opencore}{parent link}),
 please ensure following this document for every made decision and judging its consequences.
 Regardless of the sources used you are required to fully understand every dedicated OpenCore
 configuration option and concept prior to reporting any issues in
@@ -2957,10 +2958,89 @@ troubleshooting:
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg}
   \break
   Booter arguments, similar to \texttt{boot-args} but for boot.efi. Accepts a set of
-  arguments, which are hexadecimal 64-bit values with or without 0x prefix primarily
-  for logging control:
+  arguments, which are hexadecimal 64-bit values with or without \texttt{0x}.
+  At different stages boot.efi will request different debugging (logging)
+  modes (e.g. after \texttt{ExitBootServices} it will only print to serial).
+  Several booter arguments control whether these requests will succeed. The
+  list of known requests is covered below:
+
   \begin{itemize}
-  \item \texttt{log=VALUE}
+  \tightlist
+  \item \texttt{0x00} -- \texttt{INIT}.
+  \item \texttt{0x01} -- \texttt{VERBOSE} (e.g. \texttt{-v}, force console logging).
+  \item \texttt{0x02} -- \texttt{EXIT}.
+  \item \texttt{0x03} -- \texttt{RESET:OK}.
+  \item \texttt{0x04} -- \texttt{RESET:FAIL} (e.g. unknown \texttt{board-id}, hibernate mismatch, panic loop, etc.).
+  \item \texttt{0x05} -- \texttt{RESET:RECOVERY}.
+  \item \texttt{0x06} -- \texttt{RECOVERY}.
+  \item \texttt{0x07} -- \texttt{REAN:START}.
+  \item \texttt{0x08} -- \texttt{REAN:END}.
+  \item \texttt{0x09} -- \texttt{DT} (can no longer log to DeviceTree).
+  \item \texttt{0x0A} -- \texttt{EXITBS:START} (forced serial only).
+  \item \texttt{0x0B} -- \texttt{EXITBS:END} (forced serial only).
+  \item \texttt{0x0C} -- \texttt{UNKNOWN}.
+  \end{itemize}
+  
+  In 10.15 debugging support was mostly broken before 10.15.4 due to some
+  kind of refactoring and introduction of a
+  \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleDebugLog.h}{new debug protocol}.
+  Some of the arguments and their values below may not be valid for versions prior
+  to 10.15.4. The list of known arguments is covered below:
+
+  \begin{itemize}
+  \item \texttt{boot-save-log=VALUE} --- debug log save mode for normal boot.
+  	\begin{itemize}
+    \item \texttt{0}
+    \item \texttt{1}
+    \item \texttt{2} --- (default).
+    \item \texttt{3}
+    \item \texttt{4} --- (save to file).
+    \end{itemize}
+  \item \texttt{wake-save-log=VALUE} --- debug log save mode for hibernation wake.
+  	\begin{itemize}
+    \item \texttt{0} --- disabled.
+    \item \texttt{1}
+    \item \texttt{2} --- (default).
+    \item \texttt{3} --- (unavailable).
+    \item \texttt{4} --- (save to file, unavailable).
+    \end{itemize}
+  \item \texttt{breakpoint=VALUE} --- enables debug breaks (missing in production \texttt{boot.efi}).
+    \begin{itemize}
+    \item \texttt{0} --- disables debug breaks on errors (default).
+    \item \texttt{1} --- enables debug breaks on errors.
+    \end{itemize}
+  \item \texttt{console=VALUE} --- enables console logging.
+    \begin{itemize}
+    \item \texttt{0} --- disables console logging.
+    \item \texttt{1} --- enables console logging when debug protocol is missing (default).
+    \item \texttt{2} --- enables console logging unconditionally (unavailable).
+    \end{itemize}
+  \item \texttt{embed-log-dt=VALUE} --- enables DeviceTree logging.
+    \begin{itemize}
+    \item \texttt{0} --- disables DeviceTree logging (default).
+    \item \texttt{1} --- enables DeviceTree logging.
+    \end{itemize}
+  \item \texttt{kc-read-size=VALUE} --- Chunk size used for buffered I/O from network or
+    disk for prelinkedkernel reading and related. Set to 1MB (0x100000) by default, can be
+    tuned for faster booting.
+  \item \texttt{log-level=VALUE} --- log level bitmask.
+    \begin{itemize}
+    \item \texttt{0x01} --- enables trace logging (default).
+    \end{itemize}
+  \item \texttt{serial=VALUE} --- enables serial logging.
+    \begin{itemize}
+    \item \texttt{0} --- disables serial logging (default).
+    \item \texttt{1} --- enables serial logging for \texttt{EXITBS:END} onwards.
+    \item \texttt{1} --- enables serial logging for \texttt{EXITBS:START} onwards.
+    \item \texttt{3} --- enables serial logging when debug protocol is missing.
+    \item \texttt{4} --- enables serial logging unconditionally.
+    \end{itemize}
+  \item \texttt{timestamps=VALUE} --- enables timestamp logging.
+    \begin{itemize}
+    \item \texttt{0} --- disables timestamp logging.
+    \item \texttt{1} --- enables timestamp logging (default).
+    \end{itemize}
+  \item \texttt{log=VALUE} --- deprecated starting from 10.15.
     \begin{itemize}
     \item \texttt{1} --- AppleLoggingConOutOrErrSet/AppleLoggingConOutOrErrPrint
     (classical ConOut/StdErr)
@@ -2968,22 +3048,20 @@ troubleshooting:
     \item \texttt{4} --- AppleLoggingFileSet/AppleLoggingFilePrint (BOOTER.LOG/BOOTER.OLD
     file on EFI partition)
     \end{itemize}
-  \item \texttt{debug=VALUE}
+  \item \texttt{debug=VALUE} --- deprecated starting from 10.15.
   \begin{itemize}
   \item \texttt{1} --- enables print something to BOOTER.LOG (stripped code implies there
   may be a crash)
   \item \texttt{2} --- enables perf logging to /efi/debug-log in the device three
   \item \texttt{4} --- enables timestamp printing for styled printf calls
   \end{itemize}
-  \item \texttt{level=VALUE} --- Verbosity level of DEBUG output. Everything but
-  \texttt{0x80000000} is stripped from the binary, and this is the default value.
-  \item \texttt{kc-read-size=VALUE} --- Chunk size used for buffered I/O from network or
-  disk for prelinkedkernel reading and related. Set to 1MB (0x100000) by default, can be
-  tuned for faster booting.
+  \item \texttt{level=VALUE}  --- deprecated starting from 10.15. Verbosity level of
+  DEBUG output. Everything but \texttt{0x80000000} is stripped from the binary,
+  and this is the default value.
   \end{itemize}
 
-  \emph{Note}: To quickly see verbose output from \texttt{boot.efi} set this to \texttt{log=1}
-  (currently this is broken in 10.15).
+  \emph{Note}: To quickly see verbose output from \texttt{boot.efi} on versions before 10.15
+  set \texttt{bootercfg} to \texttt{log=1}.
 \item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg-once}
   \break
   Booter arguments override removed after first launch. Otherwise equivalent to \texttt{bootercfg}.
@@ -3773,9 +3851,13 @@ and supplementary utilities can be used.
   --- APFS file system bootstrap driver adding the support of embedded APFS drivers
   in bootable APFS containers in UEFI firmwares.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
-  --- HDA audio support driver in UEFI firmwares for most Intel and some other controllers.
+  --- HDA audio support driver in UEFI firmwares for most Intel and some other analog audio controllers.
   Refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
   for known issues in AudioDxe.
+  \item \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ExFatDxe}}
+  --- Proprietary ExFAT file system driver for Bootcamp support commonly found in Apple
+  firmwares. For Sandy Bridge and earlier CPUs \texttt{ExFatDxeLegacy} driver should be
+  used due to the lack of \texttt{RDRAND} instruction support.
   \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwRuntimeServices}}
   --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
   of \mbox{OpenCore} and Lilu by supporting read-only and write-only NVRAM variables. Some
@@ -3783,6 +3865,10 @@ and supplementary utilities can be used.
   Due to the nature of being a runtime driver, i.e. functioning in parallel with the
   target operating system, it cannot be implemented within OpenCore itself, but is bundled
   with OpenCore releases.
+  \item \href{https://github.com/acidanthera/OcBinaryData}{\texttt{HfsPlus}}
+  --- Proprietary HFS file system driver with bless support commonly found in Apple
+  firmwares. For Sandy Bridge and earlier CPUs \texttt{HfsPlusLegacy} driver should be
+  used due to the lack of \texttt{RDRAND} instruction support.
   \item \href{https://github.com/acidanthera/audk}{\texttt{HiiDatabase}}
   --- HII services support driver from \texttt{MdeModulePkg}. This driver is included in
   most firmwares starting with Ivy Bridge generation. Some applications with the GUI
@@ -3803,7 +3889,7 @@ and supplementary utilities can be used.
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
   --- HFS file system driver with bless support. This driver is an alternative to
-  a closed source \texttt{HFSPlus} driver commonly found in Apple firmwares. While
+  a closed source \texttt{HfsPlus} driver commonly found in Apple firmwares. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
   a security audit.
   \item \href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}}
@@ -3900,11 +3986,13 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \textbf{Description}: Index of the output port of the specified codec starting from 0.
 
   Normally this contains the index of the green out of the builtin analog audio controller (\texttt{HDEF}).
-  The number of output nodes in the debug log (marked in bold):
+  The number of output nodes (\texttt{N}) in the debug log (marked in bold):
 
   \texttt{OCAU: 1/3 PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)/VenMsg(<redacted>,00000000) (\textbf{4 outputs})}\\
   \texttt{OCAU: 2/3 PciRoot(0x0)/Pci(0x3,0x0)/VenMsg(<redacted>,00000000) (\textbf{1 outputs})}\\
   \texttt{OCAU: 3/3 PciRoot(0x0)/Pci(0x1B,0x0)/VenMsg(<redacted>,02000000) (\textbf{7 outputs})}
+  
+  The quickest way to find the right port is to bruteforce the values from \texttt{0} to \texttt{N - 1}. 
 
 \item
   \texttt{AudioSupport}\\
