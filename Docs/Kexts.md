@@ -34,6 +34,7 @@ Kexts
 - [VoodooI2C.kext](https://github.com/alexandred/VoodooI2C)
 - [VoodooPS2Controller.kext](https://github.com/acidanthera/VoodooPS2)
 - [VoodooInput.kext](https://github.com/acidanthera/VoodooInput)
+- [VoodooSMBus.kext](https://github.com/leo-labs/VoodooSMBus)
 
 ## Video and audio
 
@@ -80,6 +81,7 @@ Kexts
 - [RTCMemoryFixup.kext](https://github.com/lvs1974/RTCMemoryFixup)
 - [NightShiftUnlocker.kext](https://github.com/0xFireWolf/NightShiftUnlocker)
 - [WebCamera.kext](https://www.applelife.ru/threads/asus-x550vc-i-asus-x550cc.41752/page-130#post-593586)
+- [TOSMotionSensor.kext](https://github.com/jslegendre/TOSMotionSensor)
 
 More complete list with legacy kexts is hosted [here](https://docs.google.com/spreadsheets/d/15S-ocrkm_VTUJpKxNII-YUyQFd5VYdjbe0DHlZVCQyM). Full Lilu plugin list with legacy kexts is hosted [here](https://github.com/acidanthera/Lilu/blob/master/KnownPlugins.md). For developers only.   
 Acidanthera members are not affiliated with the authors of any kernel extensions but ones hosted at https://github.com/acidanthera. This list is provided for information purposes without warranty of any kind.  
