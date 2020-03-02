@@ -251,13 +251,8 @@
 		35C7411324055115005CB6EF /* GuiApp.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C73DEC24055113005CB6EF /* GuiApp.c */; };
 		35C7411424055115005CB6EF /* GUI.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C73DED24055113005CB6EF /* GUI.c */; };
 		35C7411524055115005CB6EF /* BmfLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 35C73DEE24055113005CB6EF /* BmfLib.h */; };
-		35C7430024055116005CB6EF /* IconHdExt.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740EC24055114005CB6EF /* IconHdExt.c */; };
 		35C7430124055116005CB6EF /* Helvetica_fnt.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740ED24055114005CB6EF /* Helvetica_fnt.c */; };
-		35C7430224055116005CB6EF /* IconHd.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740F224055114005CB6EF /* IconHd.c */; };
-		35C7430324055116005CB6EF /* Selector.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740F324055114005CB6EF /* Selector.c */; };
-		35C7430424055116005CB6EF /* Cursor.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740F624055114005CB6EF /* Cursor.c */; };
-		35C7430524055116005CB6EF /* Helvetica_bmp.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740F724055114005CB6EF /* Helvetica_bmp.c */; };
-		35C7430624055116005CB6EF /* IconSelected.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740F824055114005CB6EF /* IconSelected.c */; };
+		35C7430524055116005CB6EF /* Helvetica_png.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740F724055114005CB6EF /* Helvetica_png.c */; };
 		35C7430724055116005CB6EF /* InputSimTextIn.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740FA24055114005CB6EF /* InputSimTextIn.c */; };
 		35C7430824055116005CB6EF /* InputSimAbsPtr.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740FB24055114005CB6EF /* InputSimAbsPtr.c */; };
 		35C7430A24055116005CB6EF /* OutputFbGop.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410024055114005CB6EF /* OutputFbGop.c */; };
@@ -615,18 +610,13 @@
 		35366BF6240C213500D54CBB /* OcSmcLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcSmcLib.inf; sourceTree = "<group>"; };
 		35366BF7240C213500D54CBB /* OcSmcLibInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcSmcLibInternal.h; sourceTree = "<group>"; };
 		357E232523F2A06B00BC930F /* UDK */ = {isa = PBXFileReference; lastKnownFileType = folder; path = UDK; sourceTree = "<group>"; };
+		358C68E4240C2F3100DEBA5E /* Helvetica_0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Helvetica_0.png; sourceTree = "<group>"; };
 		35C73DEB24055113005CB6EF /* GetTscEmu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GetTscEmu.c; sourceTree = "<group>"; };
 		35C73DEC24055113005CB6EF /* GuiApp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GuiApp.c; sourceTree = "<group>"; };
 		35C73DED24055113005CB6EF /* GUI.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GUI.c; sourceTree = "<group>"; };
 		35C73DEE24055113005CB6EF /* BmfLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BmfLib.h; sourceTree = "<group>"; };
-		35C740EC24055114005CB6EF /* IconHdExt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = IconHdExt.c; sourceTree = "<group>"; };
 		35C740ED24055114005CB6EF /* Helvetica_fnt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Helvetica_fnt.c; sourceTree = "<group>"; };
-		35C740F124055114005CB6EF /* Helvetica_0.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; path = Helvetica_0.bmp; sourceTree = "<group>"; };
-		35C740F224055114005CB6EF /* IconHd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = IconHd.c; sourceTree = "<group>"; };
-		35C740F324055114005CB6EF /* Selector.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Selector.c; sourceTree = "<group>"; };
-		35C740F624055114005CB6EF /* Cursor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Cursor.c; sourceTree = "<group>"; };
-		35C740F724055114005CB6EF /* Helvetica_bmp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Helvetica_bmp.c; sourceTree = "<group>"; };
-		35C740F824055114005CB6EF /* IconSelected.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = IconSelected.c; sourceTree = "<group>"; };
+		35C740F724055114005CB6EF /* Helvetica_png.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Helvetica_png.c; sourceTree = "<group>"; };
 		35C740FA24055114005CB6EF /* InputSimTextIn.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = InputSimTextIn.c; sourceTree = "<group>"; };
 		35C740FB24055114005CB6EF /* InputSimAbsPtr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = InputSimAbsPtr.c; sourceTree = "<group>"; };
 		35C740FD24055114005CB6EF /* Bmf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Bmf; sourceTree = "<group>"; };
@@ -1682,14 +1672,9 @@
 		35C740EB24055114005CB6EF /* Images */ = {
 			isa = PBXGroup;
 			children = (
-				35C740EC24055114005CB6EF /* IconHdExt.c */,
+				358C68E4240C2F3100DEBA5E /* Helvetica_0.png */,
 				35C740ED24055114005CB6EF /* Helvetica_fnt.c */,
-				35C740F124055114005CB6EF /* Helvetica_0.bmp */,
-				35C740F224055114005CB6EF /* IconHd.c */,
-				35C740F324055114005CB6EF /* Selector.c */,
-				35C740F624055114005CB6EF /* Cursor.c */,
-				35C740F724055114005CB6EF /* Helvetica_bmp.c */,
-				35C740F824055114005CB6EF /* IconSelected.c */,
+				35C740F724055114005CB6EF /* Helvetica_png.c */,
 			);
 			path = Images;
 			sourceTree = "<group>";
@@ -1889,7 +1874,6 @@
 				35366C9D240C213500D54CBB /* OcHdaDevicesLib.c in Sources */,
 				35366CB1240C213500D54CBB /* VirtualFs.c in Sources */,
 				35366C62240C213500D54CBB /* crc32.c in Sources */,
-				35C7430624055116005CB6EF /* IconSelected.c in Sources */,
 				35366C8F240C213500D54CBB /* AIKData.c in Sources */,
 				35366C55240C213500D54CBB /* BootEntryManagement.c in Sources */,
 				35366C20240C213500D54CBB /* OcAppleImageConversionLib.c in Sources */,
@@ -1901,13 +1885,12 @@
 				35366C95240C213500D54CBB /* OcAppleDiskImageLib.c in Sources */,
 				35366C4F240C213500D54CBB /* HotKeySupport.c in Sources */,
 				35366C36240C213500D54CBB /* DER_Keys.c in Sources */,
-				35C7430424055116005CB6EF /* Cursor.c in Sources */,
 				35366C9A240C213500D54CBB /* OcRngLib.c in Sources */,
 				35366CDD240C213500D54CBB /* VirtualMemory.c in Sources */,
 				3511D58E23FDB2A800CC3B17 /* Bootstrap.c in Sources */,
 				35366C7B240C213500D54CBB /* BitOverflow.c in Sources */,
 				35366CB9240C213500D54CBB /* KernelReader.c in Sources */,
-				35C7430524055116005CB6EF /* Helvetica_bmp.c in Sources */,
+				35C7430524055116005CB6EF /* Helvetica_png.c in Sources */,
 				35366C9F240C213500D54CBB /* OcFirmwareVolumeLib.c in Sources */,
 				35366C57240C213500D54CBB /* lzss.c in Sources */,
 				35366C03240C213500D54CBB /* OcDataHubLib.c in Sources */,
@@ -1927,7 +1910,6 @@
 				35366CA4240C213500D54CBB /* DebugHelp.c in Sources */,
 				35366CDB240C213500D54CBB /* OcAppleBootCompatLib.c in Sources */,
 				3511D59223FDB2A800CC3B17 /* OpenCoreAcpi.c in Sources */,
-				35C7430024055116005CB6EF /* IconHdExt.c in Sources */,
 				35366C75240C213500D54CBB /* SmbiosPatch.c in Sources */,
 				35366CB4240C213500D54CBB /* PrelinkedContext.c in Sources */,
 				35366BFC240C213500D54CBB /* CxxSymbols.c in Sources */,
@@ -1983,7 +1965,6 @@
 				35366C41240C213500D54CBB /* DER_Encode.c in Sources */,
 				35C7430A24055116005CB6EF /* OutputFbGop.c in Sources */,
 				35366C18240C213500D54CBB /* OcUnicodeCollationEngLib.c in Sources */,
-				35C7430224055116005CB6EF /* IconHd.c in Sources */,
 				35366C5D240C213500D54CBB /* compress.c in Sources */,
 				35366C33240C213500D54CBB /* DataPatcher.c in Sources */,
 				35366CBE240C213500D54CBB /* ReadFile.c in Sources */,
@@ -2050,7 +2031,6 @@
 				35366CD1240C213500D54CBB /* MsvcMath32.c in Sources */,
 				35366CD3240C213500D54CBB /* ContextSwitchSupport.c in Sources */,
 				35366C12240C213500D54CBB /* AppleEvent.c in Sources */,
-				35C7430324055116005CB6EF /* Selector.c in Sources */,
 				35366CA6240C213500D54CBB /* OcLog.c in Sources */,
 				35366CB5240C213500D54CBB /* Link.c in Sources */,
 				35366C54240C213500D54CBB /* AppleHibernate.c in Sources */,
