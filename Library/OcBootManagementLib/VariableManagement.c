@@ -112,7 +112,12 @@ IsDeletableVariable (
   // Microsoft certificates if present
   //
   } else if (CompareGuid (Guid, &gMicrosoftVariableGuid)) {
-    return TRUE;
+    //
+    // Do not remove current OEM policy.
+    //
+    if (StrCmp (Name, L"CurrentPolicy") != 0) {
+      return TRUE;
+    }
   }
 
   return FALSE;
