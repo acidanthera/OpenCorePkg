@@ -35,12 +35,7 @@
   GuiApp.h
   GuiApp.c
   Views/BootPicker.c
-  Images/Cursor.c
-  Images/IconHd.c
-  Images/IconHdExt.c
-  Images/IconSelected.c
-  Images/Selector.c
-  Images/Helvetica_bmp.c
+  Images/Helvetica_png.c
   Images/Helvetica_fnt.c
   BitmapFont.c
   GuiIo.h
@@ -90,6 +85,7 @@
   OcPngLib
   FrameBufferBltLib
   MtrrLib
+  OcStorageLib
   #SortLib
 
   OcBootManagementLib

@@ -86,7 +86,8 @@ OcShowMenuByOc (
 
 RETURN_STATUS
 InternalContextConstruct (
-  OUT BOOT_PICKER_GUI_CONTEXT  *Context
+  OUT BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN  OC_STORAGE_CONTEXT       *Storage
   );
 
 /**
@@ -113,7 +114,7 @@ GuiOcInterfaceRun (
     return Status;
   }
 
-  Status = InternalContextConstruct (&mGuiContext);
+  Status = InternalContextConstruct (&mGuiContext, Storage);
   if (RETURN_ERROR (Status)) {
     return Status;
   }

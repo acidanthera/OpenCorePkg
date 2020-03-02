@@ -12,21 +12,6 @@
 #include "BmfLib.h"
 #include "GuiApp.h"
 
-extern unsigned char Cursor_png[];
-extern unsigned int  Cursor_png_len;
-
-extern unsigned char IconHd_png[];
-extern unsigned int  IconHd_png_len;
-
-extern unsigned char IconHdExt_png[];
-extern unsigned int  IconHdExt_png_len;
-
-extern unsigned char IconSelected_png[];
-extern unsigned int  IconSelected_png_len;
-
-extern unsigned char Selector_png[];
-extern unsigned int  Selector_png_len;
-
 GLOBAL_REMOVE_IF_UNREFERENCED BOOT_PICKER_GUI_CONTEXT mGuiContext = { { { 0 } } };
 
 STATIC
@@ -57,9 +42,46 @@ InternalContextDestruct (
   InternalSafeFreePool (Context->FontContext.FontImage.Buffer);
 }
 
+
+RETURN_STATUS
+LoadImageFromStorage (
+  IN  OC_STORAGE_CONTEXT       *Storage,
+  IN  CONST CHAR16             *ImageFilePath,
+  OUT GUI_IMAGE                *Image
+  )
+{
+  VOID          *ImageData;
+  UINT32        ImageSize;
+  RETURN_STATUS Status;
+  ImageData = OcStorageReadFileUnicode(Storage, ImageFilePath, &ImageSize);
+  Status  = GuiPngToImage (Image, ImageData, ImageSize);
+  FreePool(ImageData);
+  return Status;
+}
+
+
+RETURN_STATUS
+LoadClickImageFromStorage (
+  IN  OC_STORAGE_CONTEXT                  *Storage,
+  IN  CONST CHAR16                        *ImageFilePath,
+  OUT GUI_CLICK_IMAGE                     *Image,
+  IN  CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL *HighlightPixel
+  )
+{
+  VOID          *ImageData;
+  UINT32        ImageSize;
+  RETURN_STATUS Status;
+  ImageData = OcStorageReadFileUnicode(Storage, ImageFilePath, &ImageSize);
+  Status  = GuiPngToClickImage (Image, ImageData, ImageSize, HighlightPixel);
+  FreePool(ImageData);
+  return Status;
+}
+
+
 RETURN_STATUS
 InternalContextConstruct (
-  OUT BOOT_PICKER_GUI_CONTEXT  *Context
+  OUT BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN  OC_STORAGE_CONTEXT       *Storage
   )
 {
   STATIC CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL HighlightPixel = {
@@ -73,11 +95,12 @@ InternalContextConstruct (
 
   Context->BootEntry = NULL;
 
-  Status  = GuiPngToImage (&Context->Cursor,            Cursor_png,       Cursor_png_len);
-  Status |= GuiPngToImage (&Context->EntryBackSelected, IconSelected_png, IconSelected_png_len);
-  Status |= GuiPngToClickImage (&Context->EntrySelector,     Selector_png,     Selector_png_len,  &HighlightPixel);
-  Status |= GuiPngToImage (&Context->EntryIconInternal, IconHd_png,       IconHd_png_len);
-  Status |= GuiPngToImage (&Context->EntryIconExternal, IconHdExt_png,    IconHdExt_png_len);
+  Status = LoadImageFromStorage(Storage, L"Icons\\Cursor.png", &Context->Cursor);
+  Status |= LoadImageFromStorage(Storage, L"Icons\\Selected.png", &Context->EntryBackSelected);
+  Status |= LoadClickImageFromStorage(Storage, L"Icons\\Selector.png", &Context->EntrySelector, &HighlightPixel);
+  Status |= LoadImageFromStorage(Storage, L"Icons\\InternalHardDrive.png", &Context->EntryIconInternal);
+  Status |= LoadImageFromStorage(Storage, L"Icons\\ExternalHardDrive.png", &Context->EntryIconExternal);
+
   if (RETURN_ERROR (Status)) {
     InternalContextDestruct (Context);
     return RETURN_UNSUPPORTED;
