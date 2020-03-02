@@ -203,7 +203,7 @@ DeleteVariables (
           // may produce unpredictable results, so we restart.
           //
           Restart = TRUE;
-        } else if (Status == EFI_NOT_FOUND) {
+        } else if (Status == EFI_NOT_FOUND || Status == EFI_SECURITY_VIOLATION) {
           DEBUG ((
             DEBUG_INFO,
             "Deleting %g:%s... SKIP - %r\n",
