@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Mar  1 22:18:28 2020
-%DIF ADD ../Configuration.tex        Mon Mar  2 22:37:12 2020
+%DIF DEL PreviousConfiguration.tex   Wed Mar  4 15:32:59 2020
+%DIF ADD ../Configuration.tex        Wed Mar  4 15:39:59 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4009,7 +4009,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{AudioCodec}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: empty string\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{empty string}\DIFdelend \DIFaddbegin \texttt{\DIFadd{0}}\DIFaddend \\
   \textbf{Description}: Codec address on the specified audio controller for audio support.
 
   Normally this contains first audio codec address on the builtin analog audio controller (\texttt{HDEF}).
@@ -4025,7 +4025,8 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{AudioDevice}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Failsafe}: \DIFdelbegin \texttt{\DIFdel{0}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{empty string}\DIFaddend \\
   \textbf{Description}: Device path of the specified audio controller for audio support.
 
   Normally this contains builtin analog audio controller (\texttt{HDEF}) device path,
