@@ -3,6 +3,7 @@
 #include <Protocol/AbsolutePointer.h>
 #include <Protocol/SimplePointer.h>
 
+#include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -84,14 +85,14 @@ InternalUpdateStateSimple (
                        PointerState.RelativeMovementX,
                        Context->SimpleMaxX
                        );
-  State->X = (UINT32)(Context->SimpleX / Context->Pointer->Mode->ResolutionX);
+  State->X = (UINT32) DivU64x32 (Context->SimpleX, Context->Pointer->Mode->ResolutionX);
 
   Context->SimpleY = InternalClipPointerSimple (
                        Context->SimpleY,
                        PointerState.RelativeMovementY,
                        Context->SimpleMaxY
                        );
-  State->Y = (UINT32)(Context->SimpleY / Context->Pointer->Mode->ResolutionY);
+  State->Y = (UINT32) DivU64x32 (Context->SimpleY, Context->Pointer->Mode->ResolutionY);
 
   State->PrimaryDown   = PointerState.LeftButton;
   State->SecondaryDown = PointerState.RightButton;
@@ -125,11 +126,11 @@ InternalUpdateStateAbsolute (
 
   NewX  = PointerState.CurrentX - Context->AbsPointer->Mode->AbsoluteMinX;
   NewX *= Context->Width;
-  NewX /= (Context->AbsPointer->Mode->AbsoluteMaxX - Context->AbsPointer->Mode->AbsoluteMinX);
+  NewX  = DivU64x32 (NewX, Context->AbsPointer->Mode->AbsoluteMaxX - Context->AbsPointer->Mode->AbsoluteMinX);
 
   NewY  = PointerState.CurrentY - Context->AbsPointer->Mode->AbsoluteMinY;
   NewY *= Context->Height;
-  NewY /= (Context->AbsPointer->Mode->AbsoluteMaxY - Context->AbsPointer->Mode->AbsoluteMinY);
+  NewY  = DivU64x32 (NewX, Context->AbsPointer->Mode->AbsoluteMaxY - Context->AbsPointer->Mode->AbsoluteMinY);
 
   State->X = (UINT32)NewX;
   State->Y = (UINT32)NewY;

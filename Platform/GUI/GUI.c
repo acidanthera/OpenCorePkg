@@ -970,7 +970,7 @@ GuiLibConstruct (
     CacheWriteBack
     );
 
-  mDeltaTscTarget =  GuiGetTSCFrequency () / 60;
+  mDeltaTscTarget =  DivU64x32 (GuiGetTSCFrequency (), 60);
 
   mScreenViewCursor.X = CursorDefaultX;
   mScreenViewCursor.Y = CursorDefaultY;
@@ -1380,10 +1380,10 @@ GuiGetInterpolatedValue (
     return Interpol->EndValue;
   }
 
-  AnimTime = (INT32)((INTERPOL_FP_TIME_FACTOR * DeltaTime) / Interpol->Duration);
+  AnimTime = (INT32) DivU64x32 ((UINT64) INTERPOL_FP_TIME_FACTOR * DeltaTime, Interpol->Duration);
   if (Interpol->Type == GuiInterpolTypeSmooth) {
     //
-    // One INTERPOL_FP_TIME_FACTOR unit corresponds to 45° in the unit circle. Divide
+    // One INTERPOL_FP_TIME_FACTOR unit corresponds to 45 degrees in the unit circle. Divide
     // the time by two because the integral of sin from 0 to Pi is equal to 2,
     // i.e. double speed.
     //
@@ -1396,7 +1396,9 @@ GuiGetInterpolatedValue (
     ASSERT (Interpol->Type == GuiInterpolTypeLinear);
   }
 
-  return (((Interpol->EndValue * AnimTime) + (Interpol->StartValue * (INTERPOL_FP_TIME_FACTOR - AnimTime))) / INTERPOL_FP_TIME_FACTOR);
+  return (Interpol->EndValue * AnimTime
+    + (Interpol->StartValue * (INTERPOL_FP_TIME_FACTOR - AnimTime)))
+    / INTERPOL_FP_TIME_FACTOR;
 }
 
 RETURN_STATUS
