@@ -300,6 +300,7 @@ InternalSetBootEntryFlags (
   EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
   FILEPATH_DEVICE_PATH      *FilePath;
   UINTN                     Len;
+  UINTN                     RestLen;
   UINTN                     Index;
   UINTN                     Index2;
   BOOLEAN                   Result;
@@ -335,7 +336,7 @@ InternalSetBootEntryFlags (
   while (!IsDevicePathEnd (DevicePathWalker)) {
     if ((DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
      && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)) {
-      FilePath = (FILEPATH_DEVICE_PATH *)DevicePathWalker;
+      FilePath = (FILEPATH_DEVICE_PATH *) DevicePathWalker;
       Len      = OcFileDevicePathNameLen (FilePath);
       if (Len > 0) {
         //
@@ -346,12 +347,12 @@ InternalSetBootEntryFlags (
         if (BootEntry->Type == OcBootUnknown) {
           CmpResult = -1;
           for (Index = 0; Index < ARRAY_SIZE (BootInstanceNames) && CmpResult != 0; ++Index) {
-            Result = OcOverflowSubUN (Len, BootInstanceLengths[Index], &Len);
+            Result = OcOverflowSubUN (Len, BootInstanceLengths[Index], &RestLen);
             if (Result) {
               continue;
             }
 
-            for (Index2 = 0; Index2 < Len; ++Index2) {
+            for (Index2 = 0; Index2 < RestLen; ++Index2) {
               CmpResult = CompareMem (
                 &FilePath->PathName[Index2],
                 BootInstanceNames[Index],
