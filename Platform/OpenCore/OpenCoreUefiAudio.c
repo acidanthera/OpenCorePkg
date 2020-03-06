@@ -140,6 +140,9 @@ OcAudioAcquireFile (
         case OcVoiceOverAudioFilemacOS_Recovery:
           BasePath = "macOS_Recovery";
           break;
+        case OcVoiceOverAudioFilemacOS_TimeMachine:
+          BasePath = "macOS_TimeMachine";
+          break;
         case OcVoiceOverAudioFileOtherOS:
           BasePath = "OtherOS";
           break;

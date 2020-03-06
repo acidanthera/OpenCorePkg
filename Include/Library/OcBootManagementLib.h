@@ -72,8 +72,9 @@ typedef struct OC_PICKER_CONTEXT_ OC_PICKER_CONTEXT;
 **/
 typedef enum OC_BOOT_ENTRY_TYPE_ {
   OcBootUnknown,
-  OcBootApple,
+  OcBootAppleOs,
   OcBootAppleRecovery,
+  OcBootAppleTimeMachine,
   OcBootWindows,
   OcBootCustom,
   OcBootSystem

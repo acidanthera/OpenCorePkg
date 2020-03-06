@@ -178,10 +178,12 @@ OcPlayAudioEntry (
 {
   OcPlayAudioFile (Context, OcVoiceOverAudioFileIndexBase + Number, FALSE);
 
-  if (Entry->Type == OcBootApple) {
+  if (Entry->Type == OcBootAppleOs) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFilemacOS, FALSE);
   } else if (Entry->Type == OcBootAppleRecovery) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFilemacOS_Recovery, FALSE);
+  } else if (Entry->Type == OcBootAppleTimeMachine) {
+    OcPlayAudioFile (Context, OcVoiceOverAudioFilemacOS_TimeMachine, FALSE);
   } else if (Entry->Type == OcBootWindows) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFileWindows, FALSE);
   } else if (StrStr (Entry->Name, OC_MENU_UEFI_SHELL_ENTRY) != NULL) {

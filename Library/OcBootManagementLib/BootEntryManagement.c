@@ -110,7 +110,7 @@ OcDescribeBootEntry (
     if (BootEntry->Name != NULL
       && (!StrCmp (BootEntry->Name, L"Recovery HD")
        || !StrCmp (BootEntry->Name, L"Recovery"))) {
-      if (BootEntry->Type == OcBootUnknown || BootEntry->Type == OcBootApple) {
+      if (BootEntry->Type == OcBootUnknown || BootEntry->Type == OcBootAppleOs) {
         BootEntry->Type = OcBootAppleRecovery;
       }
       RecoveryBootName = InternalGetAppleRecoveryName (FileSystem, BootDirectoryName);

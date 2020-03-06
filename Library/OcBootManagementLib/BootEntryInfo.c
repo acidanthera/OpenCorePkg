@@ -301,6 +301,7 @@ InternalSetBootEntryFlags (
   FILEPATH_DEVICE_PATH      *FilePath;
   UINTN                     Len;
   UINTN                     Index;
+  UINTN                     Index2;
   BOOLEAN                   Result;
   INTN                      CmpResult;
 
@@ -312,6 +313,21 @@ InternalSetBootEntryFlags (
   if (DevicePathWalker == NULL) {
     return;
   }
+
+  STATIC CONST CHAR16 *BootInstanceNames[] = {
+    L"com.apple.recovery.boot",
+    L"tmbootpicker.efi"
+  };
+
+  STATIC UINTN BootInstanceLengths[] = {
+    L_STR_LEN (L"com.apple.recovery.boot"),
+    L_STR_LEN (L"tmbootpicker.efi")
+  };
+
+  STATIC UINT32 BootInstanceTypes[] = {
+    OcBootAppleRecovery,
+    OcBootAppleTimeMachine
+  };
 
   //
   // TODO: Move this to a new OcIsAppleRecoveryBootDevicePath function.
@@ -328,20 +344,21 @@ InternalSetBootEntryFlags (
         BootEntry->IsFolder = (FilePath->PathName[Len - 1] == L'\\');
 
         if (BootEntry->Type == OcBootUnknown) {
-          Result = OcOverflowSubUN (
-                     Len,
-                     L_STR_LEN (L"com.apple.recovery.boot"),
-                     &Len
-                     );
-          if (!Result) {
-            for (Index = 0; Index < Len; ++Index) {
+          CmpResult = -1;
+          for (Index = 0; Index < ARRAY_SIZE (BootInstanceNames) && CmpResult != 0; ++Index) {
+            Result = OcOverflowSubUN (Len, BootInstanceLengths[Index], &Len);
+            if (Result) {
+              continue;
+            }
+
+            for (Index2 = 0; Index2 < Len; ++Index2) {
               CmpResult = CompareMem (
-                            &FilePath->PathName[Index],
-                            L"com.apple.recovery.boot",
-                            L_STR_SIZE_NT (L"com.apple.recovery.boot")
-                            );
+                &FilePath->PathName[Index2],
+                BootInstanceNames[Index],
+                BootInstanceLengths[Index] * sizeof (BootInstanceNames[Index][0])
+                );
               if (CmpResult == 0) {
-                BootEntry->Type = OcBootAppleRecovery;
+                BootEntry->Type = BootInstanceTypes[Index];
                 break;
               }
             }
@@ -356,7 +373,7 @@ InternalSetBootEntryFlags (
   }
 
   if (BootEntry->Type == OcBootUnknown && OcIsAppleBootDevicePath (BootEntry->DevicePath)) { 
-    BootEntry->Type = OcBootApple;
+    BootEntry->Type = OcBootAppleOs;
   }
 }
 
@@ -561,9 +578,11 @@ InternalFillValidBootEntries (
     InternalSetBootEntryFlags (&Entries[EntryIndex]);
 
     //
-    // This entry can still be legacy HFS non-dmg recovery, ensure that it is not.
+    // This entry can still be legacy HFS non-dmg recovery or Time Machine, ensure that it is not.
     //
-    if (Context->HideAuxiliary && Entries[EntryIndex].Type == OcBootAppleRecovery) {
+    if (Context->HideAuxiliary
+      && (Entries[EntryIndex].Type == OcBootAppleRecovery
+        || Entries[EntryIndex].Type == OcBootAppleTimeMachine)) {
       ZeroMem (&Entries[EntryIndex], sizeof (Entries[EntryIndex]));
       FreePool (DevicePath);
       continue;

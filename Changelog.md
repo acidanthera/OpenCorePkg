@@ -1,6 +1,9 @@
 OpenCore Changelog
 ==================
 
+#### v0.5.7
+- Added TimeMachine detection to picker
+
 #### v0.5.6
 - Various improvements to builtin text renderer
 - Fixed locating DMG recovery in APTIO IV firmwares on FAT32

@@ -763,9 +763,9 @@ OcGetDefaultBootEntry (
   }
 
   if (Context->PickerCommand == OcPickerBootApple) {
-    if (BootEntries[BootEntryIndex].Type != OcBootApple) {
+    if (BootEntries[BootEntryIndex].Type != OcBootAppleOs) {
       for (Index = 0; Index < NumBootEntries; ++Index) {
-        if (BootEntries[Index].Type == OcBootApple) {
+        if (BootEntries[Index].Type == OcBootAppleOs) {
           BootEntryIndex = (UINT32) Index;
           DEBUG ((DEBUG_INFO, "OCB: Override default to Apple %u\n", BootEntryIndex));
           break;
@@ -1217,7 +1217,9 @@ InternalLoadBootEntry (
       LoadedImage->LoadOptions     = NULL;
 
       if (BootEntry->LoadOptions == NULL
-        && (BootEntry->Type == OcBootApple || BootEntry->Type == OcBootAppleRecovery)) {
+        && (BootEntry->Type == OcBootAppleOs
+          || BootEntry->Type == OcBootAppleRecovery
+          || BootEntry->Type == OcBootAppleTimeMachine)) {
         Args    = Context->AppleBootArgs;
         ArgsLen = (UINT32)AsciiStrLen (Args);
       } else {
