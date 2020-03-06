@@ -79,11 +79,6 @@ InternalGetRecoveryOsBooter (
   IN  BOOLEAN                   Basic
   );
 
-VOID
-InternalSetBootEntryFlags (
-  IN OUT OC_BOOT_ENTRY   *BootEntry
-  );
-
 EFI_STATUS
 InternalLoadBootEntry (
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,

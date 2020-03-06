@@ -273,7 +273,7 @@ InternalGetBootEntryByDevicePath (
 
   for (Index = 0; Index < NumBootEntries; ++Index) {
     BootEntry = &BootEntries[Index];
-    if (BootEntry->DevicePath == NULL || BootEntry->Type == OcBootSystem) {
+    if (BootEntry->DevicePath == NULL || BootEntry->Type == OC_BOOT_SYSTEM) {
       continue;
     }
 
@@ -763,9 +763,9 @@ OcGetDefaultBootEntry (
   }
 
   if (Context->PickerCommand == OcPickerBootApple) {
-    if (BootEntries[BootEntryIndex].Type != OcBootAppleOs) {
+    if (BootEntries[BootEntryIndex].Type != OC_BOOT_APPLE_OS) {
       for (Index = 0; Index < NumBootEntries; ++Index) {
-        if (BootEntries[Index].Type == OcBootAppleOs) {
+        if (BootEntries[Index].Type == OC_BOOT_APPLE_OS) {
           BootEntryIndex = (UINT32) Index;
           DEBUG ((DEBUG_INFO, "OCB: Override default to Apple %u\n", BootEntryIndex));
           break;
@@ -773,14 +773,14 @@ OcGetDefaultBootEntry (
       }
     }
   } else if (Context->PickerCommand == OcPickerBootAppleRecovery) {
-    if (BootEntries[BootEntryIndex].Type != OcBootAppleRecovery) {
+    if (BootEntries[BootEntryIndex].Type != OC_BOOT_APPLE_RECOVERY) {
       if (BootEntryIndex + 1 < NumBootEntries
-        && BootEntries[BootEntryIndex + 1].Type == OcBootAppleRecovery) {
+        && BootEntries[BootEntryIndex + 1].Type == OC_BOOT_APPLE_RECOVERY) {
         BootEntryIndex = BootEntryIndex + 1;
         DEBUG ((DEBUG_INFO, "OCB: Override default to Apple Recovery %u, next\n", BootEntryIndex));
       } else {
         for (Index = 0; Index < NumBootEntries; ++Index) {
-          if (BootEntries[Index].Type == OcBootAppleRecovery) {
+          if (BootEntries[Index].Type == OC_BOOT_APPLE_RECOVERY) {
             BootEntryIndex = (UINT32) Index;
             DEBUG ((DEBUG_INFO, "OCB: Override default option to Apple Recovery %u\n", BootEntryIndex));
             break;
@@ -1113,7 +1113,7 @@ InternalLoadBootEntry (
   //
   // System entries are not loaded but called directly.
   //
-  ASSERT (BootEntry->Type != OcBootSystem);
+  ASSERT (BootEntry->Type != OC_BOOT_SYSTEM);
   ASSERT (Context != NULL);
   ASSERT (DmgLoadContext != NULL);
 
@@ -1142,7 +1142,7 @@ InternalLoadBootEntry (
     if (DevicePath == NULL) {
       return EFI_UNSUPPORTED;
     }
-  } else if (BootEntry->Type == OcBootCustom && BootEntry->DevicePath == NULL) {
+  } else if (BootEntry->Type == OC_BOOT_CUSTOM && BootEntry->DevicePath == NULL) {
     ASSERT (Context->CustomRead != NULL);
 
     Status = Context->CustomRead (
@@ -1216,16 +1216,13 @@ InternalLoadBootEntry (
       LoadedImage->LoadOptionsSize = 0;
       LoadedImage->LoadOptions     = NULL;
 
-      if (BootEntry->LoadOptions == NULL
-        && (BootEntry->Type == OcBootAppleOs
-          || BootEntry->Type == OcBootAppleRecovery
-          || BootEntry->Type == OcBootAppleTimeMachine)) {
+      if (BootEntry->LoadOptions == NULL && (BootEntry->Type & OC_BOOT_APPLE_ANY) != 0) {
         Args    = Context->AppleBootArgs;
-        ArgsLen = (UINT32)AsciiStrLen (Args);
+        ArgsLen = (UINT32) AsciiStrLen (Args);
       } else {
         Args    = BootEntry->LoadOptions;
         ArgsLen = BootEntry->LoadOptionsSize;
-        ASSERT (ArgsLen == ((Args == NULL) ? 0 : (UINT32)AsciiStrLen (Args)));
+        ASSERT (ArgsLen == ((Args == NULL) ? 0 : (UINT32) AsciiStrLen (Args)));
       }
 
       if (ArgsLen > 0) {
@@ -1235,7 +1232,7 @@ InternalLoadBootEntry (
         }
       }
 
-      if (BootEntry->Type == OcBootCustom) {
+      if (BootEntry->Type == OC_BOOT_CUSTOM) {
         DEBUG ((
           DEBUG_INFO,
           "OCB: Custom DeviceHandle %p FilePath %p\n",

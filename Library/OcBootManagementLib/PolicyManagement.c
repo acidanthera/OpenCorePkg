@@ -220,37 +220,109 @@ InternalCheckScanPolicy (
   return RETURN_SUCCESS;
 }
 
-BOOLEAN
-OcIsAppleBootDevicePath (
-  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+OC_BOOT_ENTRY_TYPE
+OcGetBootDevicePathType (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  OUT BOOLEAN                   *IsFolder  OPTIONAL
   )
 {
   EFI_DEVICE_PATH_PROTOCOL    *CurrNode;
   FILEPATH_DEVICE_PATH        *LastNode;
   UINTN                       PathLen;
+  UINTN                       RestLen;
   UINTN                       Index;
- 
+  INTN                        CmpResult;
+  OC_BOOT_ENTRY_TYPE          Type;
+  BOOLEAN                     Folder;
+  BOOLEAN                     Overflowed;
+
   LastNode = NULL;
+  Type     = OC_BOOT_UNKNOWN;
+  Folder   = FALSE;
 
   for (CurrNode = DevicePath; !IsDevicePathEnd (CurrNode); CurrNode = NextDevicePathNode (CurrNode)) {
-    if (DevicePathType (CurrNode) == MEDIA_DEVICE_PATH && DevicePathSubType (CurrNode) == MEDIA_FILEPATH_DP) {
+    if ((DevicePathType (CurrNode) == MEDIA_DEVICE_PATH)
+     && (DevicePathSubType (CurrNode) == MEDIA_FILEPATH_DP)) {
       LastNode = (FILEPATH_DEVICE_PATH *) CurrNode;
+      PathLen  = OcFileDevicePathNameLen (LastNode);
+      if (PathLen == 0) {
+        continue;
+      }
+
+      //
+      // Only the trailer of the last (non-empty) FilePath node matters.
+      //
+      Folder = (LastNode->PathName[PathLen - 1] == L'\\');
+
+      //
+      // Detect macOS recovery by com.apple.recovery.boot in the bootloader path.
+      //
+      if (Type == OC_BOOT_UNKNOWN) {
+        Overflowed = OcOverflowSubUN (PathLen, L_STR_LEN (L"com.apple.recovery.boot"), &RestLen);
+        if (Overflowed) {
+          continue;
+        }
+
+        for (Index = 0; Index < RestLen; ++Index) {
+          CmpResult = CompareMem (
+            &LastNode->PathName[Index],
+            L"com.apple.recovery.boot",
+            L_STR_SIZE_NT (L"com.apple.recovery.boot")
+            );
+          if (CmpResult == 0) {
+            Type = OC_BOOT_APPLE_RECOVERY;
+            break;
+          }
+        }
+      }
+    } else {
+      Folder = FALSE;
     }
   }
 
-  if (LastNode != NULL) {
-    //
-    // Detect macOS by boot.efi in the bootloader name.
-    //
-    PathLen = OcFileDevicePathNameLen (LastNode);
-    if (PathLen >= L_STR_LEN ("boot.efi")) {
-      Index = PathLen - L_STR_LEN ("boot.efi");
-      return (Index == 0 || LastNode->PathName[Index - 1] == L'\\')
-        && CompareMem (&LastNode->PathName[Index], L"boot.efi", L_STR_SIZE (L"boot.efi")) == 0;
+  if (IsFolder != NULL) {
+    *IsFolder = Folder;
+  }
+
+  if (LastNode == NULL || Type != OC_BOOT_UNKNOWN) {
+    return Type;
+  }
+
+  //
+  // Detect macOS by boot.efi in the bootloader name.
+  // Detect macOS Time Machine by tmbootpicker.efi in the bootloader name.
+  //
+  STATIC CONST CHAR16 *Bootloaders[] = {
+    L"boot.efi",
+    L"tmbootpicker.efi"
+  };
+
+  STATIC CONST UINTN BootloaderLengths[] = {
+    L_STR_LEN (L"boot.efi"),
+    L_STR_LEN (L"tmbootpicker.efi")
+  };
+
+  STATIC CONST OC_BOOT_ENTRY_TYPE BootloaderTypes[] = {
+    OC_BOOT_APPLE_OS,
+    OC_BOOT_APPLE_TIME_MACHINE
+  };
+
+  for (Index = 0; Index < ARRAY_SIZE (Bootloaders); ++Index) {
+    if (PathLen < BootloaderLengths[Index]) {
+      continue;
+    }
+
+    RestLen = PathLen - BootloaderLengths[Index];
+    if ((RestLen == 0 || LastNode->PathName[RestLen - 1] == L'\\')
+      && CompareMem (
+        &LastNode->PathName[RestLen],
+        Bootloaders[Index],
+        BootloaderLengths[Index] * sizeof (LastNode->PathName[0])) == 0) {
+      return BootloaderTypes[Index];
     }
   }
 
-  return FALSE;
+  return OC_BOOT_UNKNOWN;
 }
 
 EFI_LOADED_IMAGE_PROTOCOL *
@@ -269,7 +341,7 @@ OcGetAppleBootLoadedImage (
 
   if (!EFI_ERROR (Status)
     && LoadedImage->FilePath != NULL
-    && OcIsAppleBootDevicePath (LoadedImage->FilePath)) {
+    && (OcGetBootDevicePathType (LoadedImage->FilePath, NULL) & OC_BOOT_APPLE_ANY) != 0) {
     return LoadedImage;
   }
 

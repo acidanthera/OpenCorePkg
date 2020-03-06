@@ -70,15 +70,16 @@ typedef struct OC_PICKER_CONTEXT_ OC_PICKER_CONTEXT;
   Operating system boot type.
   WARNING: This is only for debug purposes.
 **/
-typedef enum OC_BOOT_ENTRY_TYPE_ {
-  OcBootUnknown,
-  OcBootAppleOs,
-  OcBootAppleRecovery,
-  OcBootAppleTimeMachine,
-  OcBootWindows,
-  OcBootCustom,
-  OcBootSystem
-} OC_BOOT_ENTRY_TYPE;
+typedef UINT32 OC_BOOT_ENTRY_TYPE;
+
+#define OC_BOOT_UNKNOWN             BIT0
+#define OC_BOOT_APPLE_OS            BIT1
+#define OC_BOOT_APPLE_RECOVERY      BIT2
+#define OC_BOOT_APPLE_TIME_MACHINE  BIT3
+#define OC_BOOT_APPLE_ANY           (OC_BOOT_APPLE_OS | OC_BOOT_APPLE_RECOVERY | OC_BOOT_APPLE_TIME_MACHINE)
+#define OC_BOOT_WINDOWS             BIT4
+#define OC_BOOT_CUSTOM              BIT5
+#define OC_BOOT_SYSTEM              BIT6
 
 /**
   Picker mode.
@@ -811,15 +812,18 @@ OcGetFileSystemPolicyType (
   );
 
 /**
-  Check if supplied device path contains Apple bootloader.
+  Check if supplied device path contains known names (e.g. Apple bootloader).
 
-  @param[in]  DevicePath        Device path.
+  @param[in]   DevicePath        Device path.
+  @param[out]  IsFolder          Device path represents directory, optional.
 
-  @retval TRUE for potentially Apple images.
+  @retval entry type for potentially known bootloaders.
+  @retval OC_BOOT_UNKNOWN for unknown bootloaders.
 **/
-BOOLEAN
-OcIsAppleBootDevicePath (
-  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+OC_BOOT_ENTRY_TYPE
+OcGetBootDevicePathType (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  OUT BOOLEAN                   *IsFolder  OPTIONAL
   );
 
 /**

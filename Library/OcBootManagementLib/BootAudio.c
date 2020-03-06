@@ -178,19 +178,19 @@ OcPlayAudioEntry (
 {
   OcPlayAudioFile (Context, OcVoiceOverAudioFileIndexBase + Number, FALSE);
 
-  if (Entry->Type == OcBootAppleOs) {
+  if (Entry->Type == OC_BOOT_APPLE_OS) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFilemacOS, FALSE);
-  } else if (Entry->Type == OcBootAppleRecovery) {
+  } else if (Entry->Type == OC_BOOT_APPLE_RECOVERY) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFilemacOS_Recovery, FALSE);
-  } else if (Entry->Type == OcBootAppleTimeMachine) {
+  } else if (Entry->Type == OC_BOOT_APPLE_TIME_MACHINE) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFilemacOS_TimeMachine, FALSE);
-  } else if (Entry->Type == OcBootWindows) {
+  } else if (Entry->Type == OC_BOOT_WINDOWS) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFileWindows, FALSE);
   } else if (StrStr (Entry->Name, OC_MENU_UEFI_SHELL_ENTRY) != NULL) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFileUEFI_Shell, FALSE);
   } else if (StrStr (Entry->Name, OC_MENU_RESET_NVRAM_ENTRY) != NULL) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFileResetNVRAM, FALSE);
-  } else if (Entry->Type == OcBootCustom) {
+  } else if (Entry->Type == OC_BOOT_CUSTOM) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFileExternalOption, FALSE);
   } else {
     OcPlayAudioFile (Context, OcVoiceOverAudioFileOtherOS, FALSE);
