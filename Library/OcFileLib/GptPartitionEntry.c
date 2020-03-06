@@ -432,7 +432,15 @@ InternalGetDiskPartitions (
              );
   if (EFI_ERROR (Status)) {
     FreePool (GptHeader);
-    DEBUG ((DEBUG_INFO, "OCPI: ReadDisk1 %r\n", Status));
+    DEBUG ((
+      DEBUG_INFO,
+      "OCPI: ReadDisk1 (block: %u, io1: %d, io2: %d, size: %u) %r\n",
+      BlockSize,
+      DiskIo != NULL,
+      DiskIo2 != NULL,
+      (UINT32) sizeof (*GptHeader),
+      Status
+      ));
     return NULL;
   }
 
@@ -488,7 +496,15 @@ InternalGetDiskPartitions (
              );
   if (EFI_ERROR (Status)) {
     FreePool (PartEntries);
-    DEBUG ((DEBUG_INFO, "OCPI: ReadDisk2 %r\n", Status));
+    DEBUG ((
+      DEBUG_INFO,
+      "OCPI: ReadDisk2 (block: %u, io1: %d, io2: %d, size: %u) %r\n",
+      BlockSize,
+      DiskIo != NULL,
+      DiskIo2 != NULL,
+      (UINT32) PartEntriesSize,
+      Status
+      ));
     return NULL;
   }
 
