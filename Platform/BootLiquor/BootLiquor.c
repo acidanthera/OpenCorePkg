@@ -12,14 +12,14 @@
 #include <Library/BmpSupportLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/MtrrLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcPngLib.h>
 #include <Library/TimerLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include "GUI.h"
+#include "BootLiquor.h"
 #include "GuiIo.h"
-#include "HwOps.h"
 
 typedef struct {
   UINT32 MinX;
@@ -866,7 +866,7 @@ GuiFlushScreen (
   // Raise the TPL to not interrupt timing or flushing.
   //
   OldTpl     = gBS->RaiseTPL (TPL_NOTIFY);
-  Interrupts = GuiSaveAndDisableInterrupts ();
+  Interrupts = SaveAndDisableInterrupts ();
 
   EndTsc   = AsmReadTsc ();
   DeltaTsc = EndTsc - mStartTsc;
@@ -893,7 +893,7 @@ GuiFlushScreen (
   }
 
   if (Interrupts) {
-    GuiEnableInterrupts ();
+    EnableInterrupts ();
   }
   gBS->RestoreTPL (OldTpl);
   //
@@ -965,7 +965,7 @@ GuiLibConstruct (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  GuiMtrrSetMemoryAttribute (
+  MtrrSetMemoryAttribute (
     (EFI_PHYSICAL_ADDRESS)mScreenBuffer,
     mScreenBufferDelta * OutputInfo->VerticalResolution,
     CacheWriteBack
@@ -1199,8 +1199,8 @@ GuiDrawLoop (
 RETURN_STATUS
 GuiPngToImage (
   IN OUT GUI_IMAGE  *Image,
-  IN     VOID       *BmpImage,
-  IN     UINTN      BmpImageSize
+  IN     VOID       *ImageData,
+  IN     UINTN      ImageDataSize
   )
 {
   EFI_STATUS                       Status;
@@ -1209,13 +1209,13 @@ GuiPngToImage (
   UINT8                            TmpChannel;
 
   Status = DecodePng (
-               BmpImage,
-               BmpImageSize,
-               (VOID **) &Image->Buffer,
-               &Image->Width,
-               &Image->Height,
-               NULL
-              );
+    ImageData,
+    ImageDataSize,
+    (VOID **) &Image->Buffer,
+    &Image->Width,
+    &Image->Height,
+    NULL
+    );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCUI: DecodePNG...%r\n", Status));
@@ -1327,18 +1327,19 @@ isin_S3 (
   IN INT32  x
   )
 {
-// S(x) = x * ( (3<<p) - (x*x>>r) ) >> s
-// n : Q-pos for quarter circle             13
-// A : Q-pos for output                     12
-// p : Q-pos for parentheses intermediate   15
-// r = 2n-p                                 11
-// s = A-1-p-n                              17
-
-#define n  13
-#define A  12
-#define p  15
-#define r  ((2 * n) - p)
-#define s  (n + p + 1 - A)
+  //
+  // S(x) = x * ( (3<<p) - (x*x>>r) ) >> s
+  // n : Q-pos for quarter circle             13
+  // A : Q-pos for output                     12
+  // p : Q-pos for parentheses intermediate   15
+  // r = 2n-p                                 11
+  // s = A-1-p-n                              17
+  //
+  STATIC CONST INT32 n = 13;
+  STATIC CONST INT32 A = 12;
+  STATIC CONST INT32 p = 15;
+  STATIC CONST INT32 r = ((2 * n) - p);
+  STATIC CONST INT32 s = (n + p + 1 - A);
 
   x = x << (30 - n); // shift to full s32 range (Q13->Q30)
 
@@ -1348,15 +1349,7 @@ isin_S3 (
   x = x >> (30 - n);
 
   return x * ((3 << p) - (x * x >> r)) >> s;
-
-#undef n
-#undef A
-#undef p
-#undef r
-#undef s
 }
-
-#define INTERPOL_FP_TIME_FACTOR  (1U << 12U)
 
 UINT32
 GuiGetInterpolatedValue (
@@ -1371,6 +1364,8 @@ GuiGetInterpolatedValue (
   ASSERT (Interpol->StartTime <= CurrentTime);
   ASSERT (Interpol->Duration > 0);
 
+  STATIC CONST UINT32 InterpolFpTimeFactor = 1U << 12U;
+
   if (CurrentTime == Interpol->StartTime) {
     return Interpol->StartValue;
   }
@@ -1381,10 +1376,10 @@ GuiGetInterpolatedValue (
     return Interpol->EndValue;
   }
 
-  AnimTime = (INT32) DivU64x32 ((UINT64) INTERPOL_FP_TIME_FACTOR * DeltaTime, Interpol->Duration);
+  AnimTime = (INT32) DivU64x32 ((UINT64) InterpolFpTimeFactor * DeltaTime, Interpol->Duration);
   if (Interpol->Type == GuiInterpolTypeSmooth) {
     //
-    // One INTERPOL_FP_TIME_FACTOR unit corresponds to 45 degrees in the unit circle. Divide
+    // One InterpolFpTimeFactor unit corresponds to 45 degrees in the unit circle. Divide
     // the time by two because the integral of sin from 0 to Pi is equal to 2,
     // i.e. double speed.
     //
@@ -1392,14 +1387,14 @@ GuiGetInterpolatedValue (
     //
     // FP-square to further smoothen the animation.
     //
-    AnimTime = (AnimTime * AnimTime) / INTERPOL_FP_TIME_FACTOR;
+    AnimTime = (AnimTime * AnimTime) / InterpolFpTimeFactor;
   } else {
     ASSERT (Interpol->Type == GuiInterpolTypeLinear);
   }
 
   return (Interpol->EndValue * AnimTime
-    + (Interpol->StartValue * (INTERPOL_FP_TIME_FACTOR - AnimTime)))
-    / INTERPOL_FP_TIME_FACTOR;
+    + (Interpol->StartValue * (InterpolFpTimeFactor - AnimTime)))
+    / InterpolFpTimeFactor;
 }
 
 RETURN_STATUS

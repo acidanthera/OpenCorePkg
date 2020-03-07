@@ -31,27 +31,18 @@
 
 [Sources]
   BitmapFont.c
-  #GetTscEmu.c
-  GetTscHw.c
-  GUI.c
-  GUI.h
+  BootLiquor.c
+  BootLiquor.h
   GuiApp.c
   GuiApp.h
   GuiIo.h
-  #HwOpsEmu.c
-  HwOps.c
-  HwOps.h
-  Images/Helvetica_fnt.c
-  Images/Helvetica_png.c
   Input/InputSimAbsPtr.c
   Input/InputSimTextIn.c
-  #OcBootstrapEmu.c
   OcBootstrap.c
   Output/OutputFbGop.c
   #Output/OutputStGop.c
   Output/StGopShared.c
   Views/BootPicker.c
-
 
 [Packages]
   EfiPkg/EfiPkg.dec

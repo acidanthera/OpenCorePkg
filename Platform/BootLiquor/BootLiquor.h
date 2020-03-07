@@ -5,8 +5,8 @@
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
-#ifndef GUI_H
-#define GUI_H
+#ifndef BOOT_LIQUOR_H
+#define BOOT_LIQUOR_H
 
 #include <Protocol/GraphicsOutput.h>
 #include <Protocol/SimpleTextIn.h>
@@ -137,8 +137,8 @@ struct GUI_DRAWING_CONTEXT_ {
 RETURN_STATUS
 GuiPngToImage (
   IN OUT GUI_IMAGE  *Image,
-  IN     VOID       *BmpImage,
-  IN     UINTN      BmpImageSize
+  IN     VOID       *ImageData,
+  IN     UINTN      ImageDataSize
   );
 
 VOID
@@ -275,4 +275,4 @@ GuiPngToClickImage (
   IN     CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *HighlightPixel
   );
 
-#endif // GUI_H
+#endif // BOOT_LIQUOR_H

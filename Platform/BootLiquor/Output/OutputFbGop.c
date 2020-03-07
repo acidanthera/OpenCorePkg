@@ -15,8 +15,7 @@
 #include <Library/MtrrLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include "GuiIo.h"
-#include "HwOps.h"
+#include "../GuiIo.h"
 
 struct GUI_OUTPUT_CONTEXT_ {
   EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *Info;
@@ -83,7 +82,7 @@ InternalOutputConstruct (
         return FALSE;
       }
 
-      GuiMtrrSetMemoryAttribute (
+      MtrrSetMemoryAttribute (
         Gop->Mode->FrameBufferBase,
         Gop->Mode->FrameBufferSize,
         CacheWriteCombining

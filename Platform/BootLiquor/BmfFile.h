@@ -16,7 +16,7 @@ typedef struct {
 } BMF_BLOCK_HEADER;
 
 STATIC_ASSERT (
-  sizeof(BMF_BLOCK_HEADER) == 5,
+  sizeof (BMF_BLOCK_HEADER) == 5,
   "BMF_BLOCK_HEADER struct must be packed"
 );
 
@@ -44,7 +44,7 @@ typedef PACKED struct {
 } BMF_BLOCK_INFO;
 
 STATIC_ASSERT (
-  sizeof(BMF_BLOCK_INFO) == 14,
+  sizeof (BMF_BLOCK_INFO) == 14,
   "BMF_BLOCK_INFO struct must be packed"
 );
 
@@ -67,7 +67,7 @@ typedef PACKED struct {
 } BMF_BLOCK_COMMON;
 
 STATIC_ASSERT (
-  sizeof(BMF_BLOCK_COMMON) == 15,
+  sizeof (BMF_BLOCK_COMMON) == 15,
   "BMF_BLOCK_COMMON struct must be packed"
 );
 
@@ -92,7 +92,7 @@ typedef PACKED struct {
 } BMF_CHAR;
 
 STATIC_ASSERT (
-  sizeof(BMF_CHAR) == 20,
+  sizeof (BMF_CHAR) == 20,
   "BMF_CHAR struct must be packed"
 );
 
@@ -110,7 +110,7 @@ typedef PACKED struct {
 } BMF_KERNING_PAIR;
 
 STATIC_ASSERT (
-  sizeof(BMF_KERNING_PAIR) == 10,
+  sizeof (BMF_KERNING_PAIR) == 10,
   "BMF_KERNING_PAIR struct must be packed"
 );
 
@@ -127,7 +127,7 @@ typedef PACKED struct {
 } BMF_HEADER;
 
 STATIC_ASSERT (
-  sizeof(BMF_HEADER) == 4,
+  sizeof (BMF_HEADER) == 4,
   "BMF_HEADER struct must be packed"
 );
 

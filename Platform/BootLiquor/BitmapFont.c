@@ -12,7 +12,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcGuardLib.h>
 
-#include "GUI.h"
+#include "BootLiquor.h"
 #include "BmfLib.h"
 
 CONST BMF_CHAR *
@@ -22,36 +22,47 @@ BmfGetChar (
   )
 {
   CONST BMF_CHAR *Chars;
-
   UINTN          Left;
   UINTN          Right;
   UINTN          Median;
+  UINTN          Index;
 
   ASSERT (Context != NULL);
 
   Chars = Context->Chars;
-  //
-  // Binary Search for the character as the list is sorted.
-  //
-  Left  = 0;
-  //
-  // As duplicates are not allowed, Right can be ceiled with Char.
-  //
-  Right = MIN (Context->NumChars, Char) - 1;
-  while (Left <= Right) {
+
+  for (Index = 0; Index < 2; ++Index) {
     //
-    // This cannot wrap around due to the file size limitation.
+    // Binary Search for the character as the list is sorted.
     //
-    Median = (Left + Right) / 2;
-    if (Chars[Median].id == Char) {
-      return &Chars[Median];
-    } else if (Chars[Median].id < Char) {
-      Left  = Median + 1;
-    } else {
-      Right = Median - 1;
+    Left  = 0;
+    //
+    // As duplicates are not allowed, Right can be ceiled with Char.
+    //
+    Right = MIN (Context->NumChars, Char) - 1;
+    while (Left <= Right) {
+      //
+      // This cannot wrap around due to the file size limitation.
+      //
+      Median = (Left + Right) / 2;
+      if (Chars[Median].id == Char) {
+        return &Chars[Median];
+      } else if (Chars[Median].id < Char) {
+        Left  = Median + 1;
+      } else {
+        Right = Median - 1;
+      }
     }
+
+    //
+    // Fallback to underscore on not found symbols.
+    //
+    Char = '_';
   }
 
+  //
+  // Supplied font does not support even underscores. 
+  //
   return NULL;
 }
 
@@ -632,8 +643,8 @@ GuiGetLabel (
 BOOLEAN
 GuiFontConstruct (
   OUT GUI_FONT_CONTEXT  *Context,
-  IN  VOID              *BmpImage,
-  IN  UINTN             BmpImageSize,
+  IN  VOID              *FontImage,
+  IN  UINTN             FontImageSize,
   IN  CONST VOID        *FileBuffer,
   IN  UINT32            FileSize
   )
@@ -641,17 +652,17 @@ GuiFontConstruct (
   RETURN_STATUS Status;
   BOOLEAN       Result;
 
-  ASSERT (Context     != NULL);
-  ASSERT (BmpImage    != NULL);
-  ASSERT (BmpImageSize > 0);
-  ASSERT (FileBuffer  != NULL);
-  ASSERT (FileSize     > 0);
+  ASSERT (Context       != NULL);
+  ASSERT (FontImage     != NULL);
+  ASSERT (FontImageSize > 0);
+  ASSERT (FileBuffer    != NULL);
+  ASSERT (FileSize      > 0);
 
   Status = GuiPngToImage (
-             &Context->FontImage,
-             BmpImage,
-             BmpImageSize
-             );
+    &Context->FontImage,
+    FontImage,
+    FontImageSize
+    );
   if (RETURN_ERROR (Status)) {
     return FALSE;
   }
@@ -660,6 +671,7 @@ GuiFontConstruct (
   if (!Result) {
     return FALSE;
   }
+
   // TODO: check file size
   return TRUE;
 }
@@ -672,25 +684,4 @@ GuiFontDestruct (
   ASSERT (Context != NULL);
   ASSERT (Context->FontImage.Buffer != NULL);
   FreePool (Context->FontImage.Buffer);
-}
-
-extern unsigned char Helvetica_fnt[];
-extern unsigned int Helvetica_fnt_len;
-
-extern unsigned char Helvetica_0_png[];
-extern unsigned int Helvetica_0_png_len;
-
-BOOLEAN
-GuiInitializeFontHelvetica (
-  OUT GUI_FONT_CONTEXT  *Context
-  )
-{
-  ASSERT (Context != NULL);
-  return GuiFontConstruct (
-           Context,
-           Helvetica_0_png,
-           Helvetica_0_png_len,
-           Helvetica_fnt,
-           Helvetica_fnt_len
-           );
 }

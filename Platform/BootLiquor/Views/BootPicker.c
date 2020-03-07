@@ -14,7 +14,7 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 
-#include "../GUI.h"
+#include "../BootLiquor.h"
 #include "../BmfLib.h"
 #include "../GuiApp.h"
 

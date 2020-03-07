@@ -15,7 +15,7 @@
 #include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include "GUI.h"
+#include "BootLiquor.h"
 #include "GuiIo.h"
 
 struct GUI_POINTER_CONTEXT_ {

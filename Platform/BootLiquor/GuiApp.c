@@ -15,7 +15,7 @@
 #include <Library/OcStorageLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include "GUI.h"
+#include "BootLiquor.h"
 #include "BmfLib.h"
 #include "GuiApp.h"
 
@@ -52,17 +52,29 @@ InternalContextDestruct (
 
 RETURN_STATUS
 LoadImageFromStorage (
-  IN  OC_STORAGE_CONTEXT       *Storage,
-  IN  CONST CHAR16             *ImageFilePath,
-  OUT GUI_IMAGE                *Image
+  IN  OC_STORAGE_CONTEXT                   *Storage,
+  IN  CONST CHAR16                         *ImageFilePath,
+  OUT VOID                                 *Image,
+  IN  CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *HighlightPixel  OPTIONAL
   )
 {
   VOID          *ImageData;
   UINT32        ImageSize;
   RETURN_STATUS Status;
-  ImageData = OcStorageReadFileUnicode(Storage, ImageFilePath, &ImageSize);
-  Status  = GuiPngToImage (Image, ImageData, ImageSize);
-  FreePool(ImageData);
+
+  ImageData = OcStorageReadFileUnicode (Storage, ImageFilePath, &ImageSize);
+  if (ImageData == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  if (HighlightPixel != NULL) {
+    Status  = GuiPngToClickImage (Image, ImageData, ImageSize, HighlightPixel);
+  } else {
+    Status  = GuiPngToImage (Image, ImageData, ImageSize);
+  }
+
+  FreePool (ImageData);
+
   return Status;
 }
 
@@ -78,7 +90,7 @@ LoadClickImageFromStorage (
   VOID          *ImageData;
   UINT32        ImageSize;
   RETURN_STATUS Status;
-  ImageData = OcStorageReadFileUnicode(Storage, ImageFilePath, &ImageSize);
+  ImageData = OcStorageReadFileUnicode (Storage, ImageFilePath, &ImageSize);
   Status  = GuiPngToClickImage (Image, ImageData, ImageSize, HighlightPixel);
   FreePool(ImageData);
   return Status;
@@ -97,25 +109,51 @@ InternalContextConstruct (
 
   RETURN_STATUS Status;
   BOOLEAN       Result;
+  VOID          *FontImage;
+  VOID          *FontData;
+  UINT32        FontImageSize;
+  UINT32        FontDataSize;
 
   ASSERT (Context != NULL);
 
   Context->BootEntry = NULL;
 
-  Status = LoadImageFromStorage(Storage, L"Icons\\Cursor.png", &Context->Cursor);
-  Status |= LoadImageFromStorage(Storage, L"Icons\\Selected.png", &Context->EntryBackSelected);
-  Status |= LoadClickImageFromStorage(Storage, L"Icons\\Selector.png", &Context->EntrySelector, &HighlightPixel);
-  Status |= LoadImageFromStorage(Storage, L"Icons\\InternalHardDrive.png", &Context->EntryIconInternal);
-  Status |= LoadImageFromStorage(Storage, L"Icons\\ExternalHardDrive.png", &Context->EntryIconExternal);
+  Status = LoadImageFromStorage (Storage, L"Resources\\Image\\Cursor.png", &Context->Cursor, NULL);
+  Status |= LoadImageFromStorage (Storage, L"Resources\\Image\\Selected.png", &Context->EntryBackSelected, NULL);
+  Status |= LoadImageFromStorage (Storage, L"Resources\\Image\\Selector.png", &Context->EntrySelector, &HighlightPixel);
+  Status |= LoadImageFromStorage (Storage, L"Resources\\Image\\InternalHardDrive.png", &Context->EntryIconInternal, NULL);
+  Status |= LoadImageFromStorage (Storage, L"Resources\\Image\\ExternalHardDrive.png", &Context->EntryIconExternal, NULL);
 
   if (RETURN_ERROR (Status)) {
     InternalContextDestruct (Context);
     return RETURN_UNSUPPORTED;
   }
 
-  Result = GuiInitializeFontHelvetica (&Context->FontContext);
+  FontImage = OcStorageReadFileUnicode (Storage, L"Resources\\Font\\Font.png", &FontImageSize);
+  FontData  = OcStorageReadFileUnicode (Storage, L"Resources\\Font\\Font.bin", &FontDataSize);
+
+  if (FontImage != NULL && FontData != NULL) {
+    Result = GuiFontConstruct (
+      &Context->FontContext,
+      FontImage,
+      FontImageSize,
+      FontData,
+      FontDataSize
+      );
+  } else {
+    Result = FALSE;
+  }
+
+  if (FontImage != NULL) {
+    FreePool (FontImage);
+  }
+
+  if (FontData != NULL) {
+    FreePool (FontData);
+  }
+
   if (!Result) {
-    DEBUG ((DEBUG_WARN, "BMF: Helvetica failed\n"));
+    DEBUG ((DEBUG_WARN, "BMF: Font failed\n"));
     InternalContextDestruct (Context);
     return RETURN_UNSUPPORTED;
   }

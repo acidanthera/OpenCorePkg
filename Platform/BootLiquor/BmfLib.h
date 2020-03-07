@@ -9,6 +9,7 @@
 #define BMF_LIB_H
 
 #include "BmfFile.h"
+#include "BootLiquor.h"
 
 typedef struct {
   CONST BMF_BLOCK_INFO          *Info;
@@ -28,8 +29,12 @@ typedef struct {
 } GUI_FONT_CONTEXT;
 
 BOOLEAN
-GuiInitializeFontHelvetica (
-  OUT GUI_FONT_CONTEXT  *Context
+GuiFontConstruct (
+  OUT GUI_FONT_CONTEXT  *Context,
+  IN  VOID              *FontImage,
+  IN  UINTN             FontImageSize,
+  IN  CONST VOID        *FileBuffer,
+  IN  UINT32            FileSize
   );
 
 VOID

@@ -8,7 +8,7 @@
 #ifndef GUI_IO_H
 #define GUI_IO_H
 
-#include "GUI.h"
+#include "BootLiquor.h"
 
 typedef struct GUI_OUTPUT_CONTEXT_  GUI_OUTPUT_CONTEXT;
 typedef struct GUI_POINTER_CONTEXT_ GUI_POINTER_CONTEXT;

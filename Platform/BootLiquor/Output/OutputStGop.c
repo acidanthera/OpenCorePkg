@@ -12,7 +12,7 @@
 #include <Library/DebugLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include "GuiIo.h"
+#include "../GuiIo.h"
 
 struct GUI_OUTPUT_CONTEXT_ {
   EFI_GRAPHICS_OUTPUT_PROTOCOL Gop;

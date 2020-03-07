@@ -24,7 +24,7 @@
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
 
-#include "GUI.h"
+#include "BootLiquor.h"
 #include "BmfLib.h"
 #include "GuiApp.h"
 
@@ -176,4 +176,3 @@ UefiMain (
 
   return Status;
 }
-

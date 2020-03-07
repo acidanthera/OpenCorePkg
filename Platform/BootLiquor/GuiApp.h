@@ -8,6 +8,9 @@
 #ifndef GUI_APP_H
 #define GUI_APP_H
 
+#include "BootLiquor.h"
+#include "BmfLib.h"
+
 typedef struct {
   GUI_CLICK_IMAGE  EntrySelector;
   GUI_IMAGE        EntryIconInternal;
