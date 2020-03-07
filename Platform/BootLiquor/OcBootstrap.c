@@ -120,7 +120,7 @@ GuiOcInterfaceRun (
 
   Context->ShowMenu = OcShowMenuByOc;
 
-  return OcRunBootPicker(Context);
+  return OcRunBootPicker (Context);
 }
 
 STATIC OC_INTERFACE_PROTOCOL mOcInterface = {
@@ -168,10 +168,6 @@ UefiMain (
     DEBUG ((DEBUG_INFO, "OCE: Registered custom GUI protocol\n"));
   } else {
     DEBUG ((DEBUG_ERROR, "OCE: Failed to install GUI protocol - %r\n", Status));
-  }
-
-  if (RETURN_ERROR (Status)) {
-    return Status;
   }
 
   return Status;
