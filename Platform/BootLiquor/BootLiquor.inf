@@ -31,6 +31,8 @@
 
 [Sources]
   BitmapFont.c
+  BmfFile.h
+  BmfLib.h
   BootLiquor.c
   BootLiquor.h
   GuiApp.c
