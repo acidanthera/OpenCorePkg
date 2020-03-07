@@ -645,7 +645,7 @@ GuiFontConstruct (
   OUT GUI_FONT_CONTEXT  *Context,
   IN  VOID              *FontImage,
   IN  UINTN             FontImageSize,
-  IN  CONST VOID        *FileBuffer,
+  IN  VOID              *FileBuffer,
   IN  UINT32            FileSize
   )
 {
@@ -658,17 +658,24 @@ GuiFontConstruct (
   ASSERT (FileBuffer    != NULL);
   ASSERT (FileSize      > 0);
 
+  ZeroMem (Context, sizeof (*Context));
+
+  Context->KerningData = FileBuffer;
   Status = GuiPngToImage (
     &Context->FontImage,
     FontImage,
     FontImageSize
     );
+  FreePool (FontImage);
+
   if (RETURN_ERROR (Status)) {
+    GuiFontDestruct (Context);
     return FALSE;
   }
 
   Result = BmfContextInitialize (&Context->BmfContext, FileBuffer, FileSize);
   if (!Result) {
+    GuiFontDestruct (Context);
     return FALSE;
   }
 
@@ -682,6 +689,10 @@ GuiFontDestruct (
   )
 {
   ASSERT (Context != NULL);
-  ASSERT (Context->FontImage.Buffer != NULL);
-  FreePool (Context->FontImage.Buffer);
+  if (Context->FontImage.Buffer != NULL) {
+    FreePool (Context->FontImage.Buffer);
+  }
+  if (Context->KerningData != NULL) {
+    FreePool (Context->KerningData);
+  }
 }

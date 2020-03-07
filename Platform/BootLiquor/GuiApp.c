@@ -118,7 +118,7 @@ InternalContextConstruct (
 
   Context->BootEntry = NULL;
 
-  Status = LoadImageFromStorage (Storage, L"Resources\\Image\\Cursor.png", &Context->Cursor, NULL);
+  Status  = LoadImageFromStorage (Storage, L"Resources\\Image\\Cursor.png", &Context->Cursor, NULL);
   Status |= LoadImageFromStorage (Storage, L"Resources\\Image\\Selected.png", &Context->EntryBackSelected, NULL);
   Status |= LoadImageFromStorage (Storage, L"Resources\\Image\\Selector.png", &Context->EntrySelector, &HighlightPixel);
   Status |= LoadImageFromStorage (Storage, L"Resources\\Image\\InternalHardDrive.png", &Context->EntryIconInternal, NULL);
@@ -142,14 +142,6 @@ InternalContextConstruct (
       );
   } else {
     Result = FALSE;
-  }
-
-  if (FontImage != NULL) {
-    FreePool (FontImage);
-  }
-
-  if (FontData != NULL) {
-    FreePool (FontData);
   }
 
   if (!Result) {

@@ -26,6 +26,7 @@ typedef struct {
 typedef struct {
   GUI_IMAGE   FontImage;
   BMF_CONTEXT BmfContext;
+  VOID        *KerningData;
 } GUI_FONT_CONTEXT;
 
 BOOLEAN
@@ -33,7 +34,7 @@ GuiFontConstruct (
   OUT GUI_FONT_CONTEXT  *Context,
   IN  VOID              *FontImage,
   IN  UINTN             FontImageSize,
-  IN  CONST VOID        *FileBuffer,
+  IN  VOID              *FileBuffer,
   IN  UINT32            FileSize
   );
 
