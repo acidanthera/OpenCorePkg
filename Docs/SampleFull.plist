@@ -896,6 +896,7 @@
 			<string>#NvmExpressDxe.efi</string>
 			<string>#XhciDxe.efi</string>
 			<string>#AudioDxe.efi</string>
+			<string>#BootLiquor.efi</string>
 		</array>
 		<key>Audio</key>
 		<dict>
