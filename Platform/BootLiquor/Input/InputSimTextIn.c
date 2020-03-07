@@ -12,7 +12,7 @@
 #include <Library/DebugLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include "GuiIo.h"
+#include "../GuiIo.h"
 
 struct GUI_KEY_CONTEXT_ {
   EFI_SIMPLE_TEXT_INPUT_PROTOCOL TextIn;

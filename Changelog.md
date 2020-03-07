@@ -4,6 +4,7 @@ OpenCore Changelog
 #### v0.5.7
 - Added TimeMachine detection to picker
 - Added early preview version of BootLiquor
+- Fixed FS discovery on NVMe with legacy drivers
 
 #### v0.5.6
 - Various improvements to builtin text renderer

@@ -15,8 +15,8 @@
 #include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include "BootLiquor.h"
-#include "GuiIo.h"
+#include "../BootLiquor.h"
+#include "../GuiIo.h"
 
 struct GUI_POINTER_CONTEXT_ {
   EFI_SIMPLE_POINTER_PROTOCOL   *Pointer;
@@ -66,6 +66,28 @@ InternalClipPointerSimple (
 }
 
 STATIC
+INT64
+InternalGetInterpolatedValue (
+  IN INT64  Value
+  )
+{
+  INTN    Bit;
+
+  STATIC CONST INT8 AccelerationNumbers[] = {1, 2, 3, 4, 5, 6};
+
+  if (Value != 0) {
+    Bit = HighBitSet64 (ABS (Value));
+    return Value * AccelerationNumbers[
+      Bit >= ARRAY_SIZE (AccelerationNumbers) - 1
+      ? ARRAY_SIZE (AccelerationNumbers) - 1
+      : Bit
+      ];
+  }
+
+  return 0;
+}
+
+STATIC
 EFI_STATUS
 InternalUpdateStateSimple (
   IN OUT GUI_POINTER_CONTEXT  *Context,
@@ -74,6 +96,8 @@ InternalUpdateStateSimple (
 {
   EFI_STATUS               Status;
   EFI_SIMPLE_POINTER_STATE PointerState;
+  INT64                    InterpolatedX;
+  INT64                    InterpolatedY;
 
   ASSERT (Context != NULL);
   ASSERT (State != NULL);
@@ -87,19 +111,46 @@ InternalUpdateStateSimple (
     return Status;
   }
 
+  InterpolatedX = DivS64x64Remainder (
+    InternalGetInterpolatedValue (PointerState.RelativeMovementX),
+    Context->Pointer->Mode->ResolutionX,
+    NULL
+    );
+  InterpolatedY = DivS64x64Remainder (
+    InternalGetInterpolatedValue (PointerState.RelativeMovementY),
+    Context->Pointer->Mode->ResolutionY,
+    NULL
+    );
+
+  if (InterpolatedX == 0) {
+    if (PointerState.RelativeMovementX > 0) {
+      InterpolatedX = 1;
+    } else if (PointerState.RelativeMovementX < 0) {
+      InterpolatedX = -1;
+    }
+  }
+
+  if (InterpolatedY == 0) {
+    if (PointerState.RelativeMovementY > 0) {
+      InterpolatedY = 1;
+    } else if (PointerState.RelativeMovementY < 0) {
+      InterpolatedY = -1;
+    }
+  }
+
   Context->SimpleX = InternalClipPointerSimple (
-                       Context->SimpleX,
-                       PointerState.RelativeMovementX,
-                       Context->SimpleMaxX
-                       );
-  State->X = (UINT32) DivU64x32 (Context->SimpleX, Context->Pointer->Mode->ResolutionX);
+    Context->SimpleX,
+    (INT32) InterpolatedX,
+    Context->SimpleMaxX
+    );
+  State->X = (UINT32) Context->SimpleX;
 
   Context->SimpleY = InternalClipPointerSimple (
-                       Context->SimpleY,
-                       PointerState.RelativeMovementY,
-                       Context->SimpleMaxY
-                       );
-  State->Y = (UINT32) DivU64x32 (Context->SimpleY, Context->Pointer->Mode->ResolutionY);
+    Context->SimpleY,
+    (INT32) InterpolatedY,
+    Context->SimpleMaxY
+    );
+  State->Y = (UINT32) Context->SimpleY;
 
   State->PrimaryDown   = PointerState.LeftButton;
   State->SecondaryDown = PointerState.RightButton;
@@ -304,10 +355,10 @@ GuiPointerConstruct (
   }
 
   if (Context.Pointer != NULL) {
-    Context.SimpleX    = DefaultX     * Context.Pointer->Mode->ResolutionX;
-    Context.SimpleY    = DefaultY     * Context.Pointer->Mode->ResolutionY;
-    Context.SimpleMaxX = (Width  - 1) * Context.Pointer->Mode->ResolutionX;
-    Context.SimpleMaxY = (Height - 1) * Context.Pointer->Mode->ResolutionY;
+    Context.SimpleX    = DefaultX;
+    Context.SimpleY    = DefaultY;
+    Context.SimpleMaxX = Width - 1;
+    Context.SimpleMaxY = Height - 1;
   }
 
   Context.Width  = Width;
