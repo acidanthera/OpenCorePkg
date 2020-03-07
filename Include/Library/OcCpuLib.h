@@ -20,8 +20,11 @@
 
 /**
   Assumed CPU frequency when it cannot be detected.
+  Can be overridden by e.g. emulator.
 **/
+#ifndef OC_FALLBACK_CPU_FREQUENCY
 #define OC_FALLBACK_CPU_FREQUENCY 1000000000
+#endif
 
 typedef struct {
   //

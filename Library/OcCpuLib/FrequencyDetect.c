@@ -141,6 +141,13 @@ InternalCalculateTSCFromPMTimer (
   EFI_STATUS  Status;
 
   //
+  // Do not use ACPI PM timer in ring 3 (e.g. emulator).
+  //
+  if ((AsmReadCs () & 3U) == 3) {
+    return EFI_UNSUPPORTED;
+  }
+
+  //
   // Decide whether we need to store the frequency.
   //
   if (TSCFrequency == 0) {
