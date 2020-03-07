@@ -186,7 +186,7 @@ OcDiskRead (
   //
   // Context block size is checked to be POT during initialization.
   //
-  if (EFI_ERROR (Status) && !OC_POT_ALIGNED (BufferSize, Context->BlockSize)) {
+  if (EFI_ERROR (Status) && !OC_POT_ALIGNED (Context->BlockSize, BufferSize)) {
     NewSize   = ALIGN_VALUE (BufferSize, Context->BlockSize);
     NewBuffer = AllocatePool (NewSize);
 
