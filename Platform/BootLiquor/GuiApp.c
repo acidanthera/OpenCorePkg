@@ -78,25 +78,6 @@ LoadImageFromStorage (
   return Status;
 }
 
-
-RETURN_STATUS
-LoadClickImageFromStorage (
-  IN  OC_STORAGE_CONTEXT                  *Storage,
-  IN  CONST CHAR16                        *ImageFilePath,
-  OUT GUI_CLICK_IMAGE                     *Image,
-  IN  CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL *HighlightPixel
-  )
-{
-  VOID          *ImageData;
-  UINT32        ImageSize;
-  RETURN_STATUS Status;
-  ImageData = OcStorageReadFileUnicode (Storage, ImageFilePath, &ImageSize);
-  Status  = GuiPngToClickImage (Image, ImageData, ImageSize, HighlightPixel);
-  FreePool(ImageData);
-  return Status;
-}
-
-
 RETURN_STATUS
 InternalContextConstruct (
   OUT BOOT_PICKER_GUI_CONTEXT  *Context,

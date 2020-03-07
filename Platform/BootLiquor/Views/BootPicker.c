@@ -817,6 +817,9 @@ BootPickerEntriesEmpty (
   ListEntry = mBootPicker.Hdr.Obj.Children.BackLink;
   ASSERT (ListEntry == &mBootPickerSelector.Hdr.Link);
 
+  //
+  // Last entry is always the selector, which is special and cannot be freed.
+  //
   ListEntry = ListEntry->BackLink;
 
   while (!IsNull (&mBootPicker.Hdr.Obj.Children, ListEntry)) {
@@ -825,10 +828,10 @@ BootPickerEntriesEmpty (
     mBootPicker.Hdr.Obj.Width   -= BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE;
     mBootPicker.Hdr.Obj.OffsetX += (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) / 2;
 
-    ListEntry = NextEntry;
-
     BootEntry = BASE_CR (ListEntry, GUI_VOLUME_ENTRY, Hdr.Link);
     InternalBootPickerEntryDestruct (BootEntry);
+
+    ListEntry = NextEntry;
   }
 }
 
