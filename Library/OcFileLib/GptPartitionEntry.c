@@ -44,6 +44,174 @@ STATIC EFI_GUID mInternalPartitionEntryProtocolGuid = {
   0x9FC6B19, 0xB8A1, 0x4A01, { 0x8D, 0xB1, 0x87, 0x94, 0xE7, 0x63, 0x4C, 0xA5 }
 };
 
+EFI_STATUS
+OcDiskInitializeContext (
+  OUT OC_DISK_CONTEXT  *Context,
+  IN  EFI_HANDLE       DiskHandle,
+  IN  BOOLEAN          UseBlockIo2,
+  IN  BOOLEAN          UseDiskIo2
+  )
+{
+  EFI_STATUS  Status;
+
+  //
+  // Retrieve the Block I/O protocol.
+  //
+  if (UseBlockIo2) {
+    Status = gBS->HandleProtocol (
+      DiskHandle,
+      &gEfiBlockIo2ProtocolGuid,
+      (VOID **) &Context->BlockIo2
+      );
+  } else {
+    Context->BlockIo2 = NULL;
+    Status = EFI_ABORTED;
+  }
+
+  if (EFI_ERROR (Status)) {
+    Status = gBS->HandleProtocol (
+      DiskHandle,
+      &gEfiBlockIoProtocolGuid,
+      (VOID **) &Context->BlockIo
+      );
+  } else {
+    Context->BlockIo = NULL;
+  }
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCPI: Block I/O (%d/%d) protocols (%d) are not present on %p - %r\n",
+      Context->BlockIo != NULL,
+      Context->BlockIo2 != NULL,
+      UseBlockIo2,
+      DiskHandle,
+      Status
+      ));
+    return Status;
+  }
+
+  if (Context->BlockIo2 != NULL) {
+    Context->BlockSize = Context->BlockIo2->Media->BlockSize;
+    Context->MediaId   = Context->BlockIo2->Media->MediaId;
+  } else {
+    Context->BlockSize = Context->BlockIo->Media->BlockSize;
+    Context->MediaId   = Context->BlockIo->Media->MediaId;
+  }
+
+  //
+  // Check that BlockSize is POT.
+  //
+  if (Context->BlockSize == 0 || (Context->BlockSize & (Context->BlockSize - 1)) != 0) {
+    DEBUG ((DEBUG_INFO, "OCPI: Block I/O has invalid block size %u\n", Context->BlockSize));
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Retrieve the Disk I/O protocol.
+  //
+  if (UseDiskIo2) {
+    Status = gBS->HandleProtocol (
+      DiskHandle,
+      &gEfiDiskIo2ProtocolGuid,
+      (VOID **) &Context->DiskIo2
+      );
+  } else {
+    Context->DiskIo2 = NULL;
+    Status = EFI_ABORTED;
+  }
+
+  if (EFI_ERROR (Status)) {
+    Status = gBS->HandleProtocol (
+      DiskHandle,
+      &gEfiDiskIoProtocolGuid,
+      (VOID **) &Context->DiskIo
+      );
+  } else {
+    Context->DiskIo = NULL;
+  }
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCPI: Disk I/O (%d/%d) protocols (%d) are not present on %p - %r\n",
+      Context->DiskIo != NULL,
+      Context->DiskIo2 != NULL,
+      UseDiskIo2,
+      DiskHandle,
+      Status
+      ));
+    return Status;
+  }
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+OcDiskRead (
+  IN  OC_DISK_CONTEXT  *Context,
+  IN  UINT64           Lba,
+  IN  UINTN            BufferSize,
+  OUT VOID             *Buffer
+  )
+{
+  EFI_STATUS  Status;
+  VOID        *NewBuffer;
+  UINTN       NewSize;
+  UINT64      Offset;
+
+  Offset = MultU64x32 (Lba, Context->BlockSize);
+
+  ASSERT (Context->DiskIo2 != NULL || Context->DiskIo != NULL);
+
+  if (Context->DiskIo2 != NULL) {
+    Status = Context->DiskIo2->ReadDiskEx (
+      Context->DiskIo2,
+      Context->MediaId,
+      Offset,
+      NULL,
+      BufferSize,
+      Buffer
+      );
+  } else {
+    Status = Context->DiskIo->ReadDisk (
+      Context->DiskIo,
+      Context->MediaId,
+      Offset,
+      BufferSize,
+      Buffer
+      );
+  }
+
+  //
+  // Context block size is checked to be POT during initialization.
+  //
+  if (EFI_ERROR (Status) && !OC_POT_ALIGNED (BufferSize, Context->BlockSize)) {
+    NewSize   = ALIGN_VALUE (BufferSize, Context->BlockSize);
+    NewBuffer = AllocatePool (NewSize);
+
+    if (NewBuffer != NULL) {
+      Status = OcDiskRead (Context, Lba, NewSize, NewBuffer);
+      if (!EFI_ERROR (Status)) {
+        CopyMem (Buffer, NewBuffer, BufferSize);
+      }
+      FreePool (NewBuffer);
+    } else {
+      Status = EFI_OUT_OF_RESOURCES;
+    }
+
+    DEBUG ((
+      DEBUG_INFO,
+      "OCPI: Reading %u through POT %u - %r\n",
+      (UINT32) BufferSize,
+      (UINT32) NewSize,
+      Status
+      ));
+  }
+
+  return Status;
+}
+
 STATIC
 VOID
 InternalDebugPrintPartitionEntry (
@@ -71,33 +239,6 @@ InternalDebugPrintPartitionEntry (
     PartitionEntry->Attributes,
     PartitionEntry->PartitionName
     ));
-}
-
-STATIC
-EFI_STATUS
-InternalReadDisk (
-  IN  EFI_DISK_IO_PROTOCOL   *DiskIo,
-  IN  EFI_DISK_IO2_PROTOCOL  *DiskIo2,
-  IN  UINT32                 MediaId,
-  IN  UINT64                 Offset,
-  IN  UINTN                  BufferSize,
-  OUT VOID                   *Buffer
-  )
-{
-  ASSERT (DiskIo2 != NULL || DiskIo != NULL);
-
-  if (DiskIo2 != NULL) {
-    return DiskIo2->ReadDiskEx (
-                      DiskIo2,
-                      MediaId,
-                      Offset,
-                      NULL,
-                      BufferSize,
-                      Buffer
-                      );
-  }
-
-  return DiskIo->ReadDisk (DiskIo, MediaId, Offset, BufferSize, Buffer);
 }
 
 STATIC
@@ -327,12 +468,7 @@ InternalGetDiskPartitions (
   EFI_STATUS                 Status;
   BOOLEAN                    Result;
 
-  EFI_BLOCK_IO_PROTOCOL      *BlockIo;
-  EFI_BLOCK_IO2_PROTOCOL     *BlockIo2;
-  EFI_DISK_IO_PROTOCOL       *DiskIo;
-  EFI_DISK_IO2_PROTOCOL      *DiskIo2;
-  UINT32                     MediaId;
-  UINT32                     BlockSize;
+  OC_DISK_CONTEXT            DiskContext;
 
   EFI_LBA                    PartEntryLBA;
   UINT32                     NumPartitions;
@@ -342,69 +478,22 @@ InternalGetDiskPartitions (
   EFI_PARTITION_TABLE_HEADER *GptHeader;
 
   ASSERT (DiskHandle != NULL);
-  //
-  // Retrieve the Block I/O protocol.
-  //
+
   Status = gBS->HandleProtocol (
-                  DiskHandle,
-                  &mInternalDiskPartitionEntriesProtocolGuid,
-                  (VOID **)&PartEntries
-                  );
+    DiskHandle,
+    &mInternalDiskPartitionEntriesProtocolGuid,
+    (VOID **) &PartEntries
+    );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCPI: Located cached partition entries\n"));
     return PartEntries;
   }
 
-  if (HasBlockIo2) {
-    Status = gBS->HandleProtocol (
-                    DiskHandle,
-                    &gEfiBlockIo2ProtocolGuid,
-                    (VOID **)&BlockIo2
-                    );
-  } else {
-    Status = gBS->HandleProtocol (
-                    DiskHandle,
-                    &gEfiBlockIoProtocolGuid,
-                    (VOID **)&BlockIo
-                    );
-  }
+  Status = OcDiskInitializeContext (&DiskContext, DiskHandle, HasBlockIo2, TRUE);
   if (EFI_ERROR (Status)) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OCPI: Block I/O protocol is not present %r(%d)\n",
-      Status,
-      HasBlockIo2
-      ));
     return NULL;
   }
-  //
-  // Retrieve the Disk I/O protocol.
-  //
-  DiskIo = NULL;
 
-  Status = gBS->HandleProtocol (
-                  DiskHandle,
-                  &gEfiDiskIo2ProtocolGuid,
-                  (VOID **)&DiskIo2
-                  );
-  if (EFI_ERROR (Status)) {
-    DiskIo2 = NULL;
-
-    Status = gBS->HandleProtocol (
-                    DiskHandle,
-                    &gEfiDiskIoProtocolGuid,
-                    (VOID **)&DiskIo
-                    );
-  }
-  if (EFI_ERROR (Status)) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OCPI: Disk I/O protocol is not present %r(%d)\n",
-      Status,
-      HasBlockIo2
-      ));
-    return NULL;
-  }
   //
   // Retrieve the GPT header.
   //
@@ -414,30 +503,20 @@ InternalGetDiskPartitions (
     return NULL;
   }
 
-  if (HasBlockIo2) {
-    BlockSize = BlockIo2->Media->BlockSize;
-    MediaId   = BlockIo2->Media->MediaId;
-  } else {
-    BlockSize = BlockIo->Media->BlockSize;
-    MediaId   = BlockIo->Media->MediaId;
-  }
-
-  Status = InternalReadDisk (
-             DiskIo,
-             DiskIo2,
-             MediaId,
-             (PRIMARY_PART_HEADER_LBA * BlockSize),
-             sizeof (*GptHeader),
-             GptHeader
-             );
+  Status = OcDiskRead (
+    &DiskContext,
+    PRIMARY_PART_HEADER_LBA,
+    sizeof (*GptHeader),
+    GptHeader
+    );
   if (EFI_ERROR (Status)) {
     FreePool (GptHeader);
     DEBUG ((
       DEBUG_INFO,
       "OCPI: ReadDisk1 (block: %u, io1: %d, io2: %d, size: %u) %r\n",
-      BlockSize,
-      DiskIo != NULL,
-      DiskIo2 != NULL,
+      DiskContext.BlockSize,
+      DiskContext.DiskIo != NULL,
+      DiskContext.DiskIo2 != NULL,
       (UINT32) sizeof (*GptHeader),
       Status
       ));
@@ -469,10 +548,10 @@ InternalGetDiskPartitions (
   }
 
   Result = OcOverflowAddUN (
-             sizeof (PartEntries),
-             PartEntriesSize,
-             &PartEntriesStructSize
-             );
+    sizeof (PartEntries),
+    PartEntriesSize,
+    &PartEntriesStructSize
+    );
   if (Result) {
     DEBUG ((DEBUG_INFO, "OCPI: Partition entries struct size overflows\n"));
     return NULL;
@@ -486,22 +565,20 @@ InternalGetDiskPartitions (
     return NULL;
   }
 
-  Status = InternalReadDisk (
-             DiskIo,
-             DiskIo2,
-             MediaId,
-             MultU64x32 (PartEntryLBA, BlockSize),
-             PartEntriesSize,
-             PartEntries->FirstEntry
-             );
+  Status = OcDiskRead (
+    &DiskContext,
+    PartEntryLBA,
+    PartEntriesSize,
+    PartEntries->FirstEntry
+    );
   if (EFI_ERROR (Status)) {
     FreePool (PartEntries);
     DEBUG ((
       DEBUG_INFO,
       "OCPI: ReadDisk2 (block: %u, io1: %d, io2: %d, size: %u) %r\n",
-      BlockSize,
-      DiskIo != NULL,
-      DiskIo2 != NULL,
+      DiskContext.BlockSize,
+      DiskContext.DiskIo != NULL,
+      DiskContext.DiskIo2 != NULL,
       (UINT32) PartEntriesSize,
       Status
       ));
@@ -514,11 +591,11 @@ InternalGetDiskPartitions (
   // FIXME: This causes the handle to be dangling if the device is detached.
   //
   Status = gBS->InstallMultipleProtocolInterfaces (
-                  &DiskHandle,
-                  &mInternalDiskPartitionEntriesProtocolGuid,
-                  PartEntries,
-                  NULL
-                  );
+    &DiskHandle,
+    &mInternalDiskPartitionEntriesProtocolGuid,
+    PartEntries,
+    NULL
+    );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCPI: Failed to cache partition entries\n"));
     FreePool (PartEntries);

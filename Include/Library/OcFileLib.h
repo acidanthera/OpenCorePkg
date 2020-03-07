@@ -21,6 +21,10 @@
 
 #include <Protocol/SimpleFileSystem.h>
 #include <Protocol/DevicePath.h>
+#include <Protocol/BlockIo.h>
+#include <Protocol/BlockIo2.h>
+#include <Protocol/DiskIo.h>
+#include <Protocol/DiskIo2.h>
 
 /**
   Maximum safe volume label size.
@@ -292,6 +296,54 @@ OcDiskFindSystemPartitionPath (
   );
 
 /**
+  Disk I/O context.
+**/
+typedef struct {
+  EFI_BLOCK_IO_PROTOCOL      *BlockIo;
+  EFI_BLOCK_IO2_PROTOCOL     *BlockIo2;
+  EFI_DISK_IO_PROTOCOL       *DiskIo;
+  EFI_DISK_IO2_PROTOCOL      *DiskIo2;
+  UINT32                     MediaId;
+  UINT32                     BlockSize;
+} OC_DISK_CONTEXT;
+
+/**
+  Initialize disk I/O context.
+
+  @param[out]  Context      Disk I/O context to intialize.
+  @param[in]   DiskHandle   Disk handle with protocols.
+  @param[in]   UseBlockIo2  Try to use BlockIo2 protocol if available.
+  @param[in]   UseDiskIo2   Try to use DiskIo2 protocol if available.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcDiskInitializeContext (
+  OUT OC_DISK_CONTEXT  *Context,
+  IN  EFI_HANDLE       DiskHandle,
+  IN  BOOLEAN          UseBlockIo2,
+  IN  BOOLEAN          UseDiskIo2
+  );
+
+/**
+  Read information from disk.
+
+  @param[in]  Context     Disk I/O context.
+  @param[in]  Lba         LBA number to read from.
+  @param[in]  BufferSize  Buffer size allocated in Buffer.
+  @param[out] Buffer      Buffer to store data in.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcDiskRead (
+  IN  OC_DISK_CONTEXT  *Context,
+  IN  UINT64           Lba,
+  IN  UINTN            BufferSize,
+  OUT VOID             *Buffer
+  );
+
+/**
   Retrieve the partition's GPT information, if applicable.
   Calls to this function undergo internal lazy caching.
 
@@ -312,7 +364,6 @@ VOID
 OcUnblockUnmountedPartitions (
   VOID
   );
-
 
 /**
   Creates a device path for a firmware file.
