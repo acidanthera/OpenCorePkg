@@ -950,6 +950,8 @@
 			<true/>
 			<key>DirectGopRendering</key>
 			<false/>
+			<key>DirectGopCacheMode</key>
+			<integer>-1</integer>
 			<key>ReconnectOnResChange</key>
 			<false/>
 			<key>ReplaceTabWithSpace</key>

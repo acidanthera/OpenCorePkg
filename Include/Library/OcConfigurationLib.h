@@ -498,6 +498,7 @@ typedef enum {
   _(OC_STRING                   , ConsoleMode                 ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , Resolution                  ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , TextRenderer                ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
+  _(INT32                       , DirectGopCacheMode          ,     , -1     , ()) \
   _(BOOLEAN                     , IgnoreTextInGraphics        ,     , FALSE  , ()) \
   _(BOOLEAN                     , ClearScreenOnModeSwitch     ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProvideConsoleGop           ,     , FALSE  , ()) \

@@ -23,6 +23,7 @@
 #include <Library/DebugLib.h>
 #include <Library/FrameBufferBltLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/MtrrLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcGuardLib.h>
@@ -44,6 +45,10 @@ mFramebufferContext;
 STATIC
 EFI_GRAPHICS_OUTPUT_PROTOCOL_SET_MODE
 mOriginalGopSetMode;
+
+STATIC
+INT32
+mCachePolicy;
 
 STATIC
 EFI_STATUS
@@ -260,6 +265,14 @@ DirectGopSetMode (
     return EFI_DEVICE_ERROR;
   }
 
+  if (mCachePolicy >= 0) {
+    MtrrSetMemoryAttribute (
+      This->Mode->FrameBufferBase,
+      This->Mode->FrameBufferSize,
+      mCachePolicy
+      );
+  }
+
   gBS->RestoreTPL (OldTpl);
   return EFI_SUCCESS;
 }
@@ -354,7 +367,7 @@ OcReconnectConsole (
 
 EFI_STATUS
 OcUseDirectGop (
-  VOID
+  IN INT32  CacheType
   )
 {
   EFI_STATUS                    Status;
@@ -384,5 +397,26 @@ OcUseDirectGop (
   mOriginalGopSetMode = Gop->SetMode;
   Gop->SetMode = DirectGopSetMode;
   Gop->Blt = DirectGopBlt;
+  mCachePolicy = -1;
+
+  if (CacheType >= 0) {
+    Status = MtrrSetMemoryAttribute (
+      Gop->Mode->FrameBufferBase,
+      Gop->Mode->FrameBufferSize,
+      CacheType
+      );
+    DEBUG ((
+      DEBUG_INFO,
+      "OCC: FB (%Lx, %Lx) MTRR (%x) - %r\n",
+      (UINT64) Gop->Mode->FrameBufferBase,
+      (UINT64) Gop->Mode->FrameBufferSize,
+      CacheType,
+      Status
+      ));
+    if (!EFI_ERROR (Status)) {
+      mCachePolicy = CacheType;
+    }
+  }
+
   return EFI_SUCCESS;
 }

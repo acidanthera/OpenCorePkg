@@ -237,7 +237,7 @@ OcLoadUefiOutputSupport (
   }
 
   if (Config->Uefi.Output.DirectGopRendering) {
-    OcUseDirectGop ();
+    OcUseDirectGop (Config->Uefi.Output.DirectGopCacheMode);
   }
 
   if (Config->Uefi.Output.ReconnectOnResChange) {

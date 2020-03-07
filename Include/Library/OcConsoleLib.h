@@ -144,10 +144,14 @@ OcReconnectConsole (
 
 /**
   Use direct GOP renderer for console.
+
+  @param[in] CacheType   Caching type, e.g. CacheWriteCombining or -1 to disable.
+
+  @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
 OcUseDirectGop (
-  VOID
+  IN INT32  CacheType
   );
 
 /**
