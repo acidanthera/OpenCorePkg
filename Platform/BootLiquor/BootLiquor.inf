@@ -14,7 +14,7 @@
 
 [Defines]
   INF_VERSION                         = 0x00010005
-  BASE_NAME                           = GUI
+  BASE_NAME                           = BootLiquor
   FILE_GUID                           = A72DCBF9-388A-47FE-B13A-591716F70609
   MODULE_TYPE                         = UEFI_DRIVER
   VERSION_STRING                      = 1.0
@@ -30,32 +30,27 @@
 #
 
 [Sources]
+  BitmapFont.c
+  #GetTscEmu.c
+  GetTscHw.c
   GUI.c
   GUI.h
-  GuiApp.h
   GuiApp.c
-  Views/BootPicker.c
-  Images/Helvetica_png.c
-  Images/Helvetica_fnt.c
-  BitmapFont.c
+  GuiApp.h
   GuiIo.h
+  #HwOpsEmu.c
+  HwOps.c
+  HwOps.h
+  Images/Helvetica_fnt.c
+  Images/Helvetica_png.c
   Input/InputSimAbsPtr.c
   Input/InputSimTextIn.c
-  Output/StGopShared.c
-
-  #Output/OutputStGop.c
-  Output/OutputFbGop.c
-
-  HwOps.h
-
-  HwOps.c
-  #HwOpsEmu.c
-
-  OcBootstrap.c
   #OcBootstrapEmu.c
-
-  GetTscHw.c
-  #GetTscEmu.c
+  OcBootstrap.c
+  Output/OutputFbGop.c
+  #Output/OutputStGop.c
+  Output/StGopShared.c
+  Views/BootPicker.c
 
 
 [Packages]
@@ -77,23 +72,13 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
-  MemoryAllocationLib
-  OcGuardLib
-  UefiBootServicesTableLib
   DebugLib
-  UefiDriverEntryPoint
-  OcPngLib
   FrameBufferBltLib
+  MemoryAllocationLib
   MtrrLib
-  OcStorageLib
-  #SortLib
-
   OcBootManagementLib
-
-[BuildOptions]
-  *_*_*_CC_FLAGS = -D OC_TARGET_RELEASE
-#  GCC:DEBUG_CLANG38_*_CC_FLAGS = -fsanitize=undefined
-#  GCC:DEBUG_CLANG38_*_DLINK2_FLAGS = -fno-sanitize=all
-#*_*_*_CC_FLAGS = -DFT2_BUILD_LIBRARY
-#GCC:*_*_*_CC_FLAGS = -Wno-unused-variable -Wno-unused-function -Wno-incompatible-pointer-types
-#MSFT:*_*_*_CC_FLAGS = -D_CRT_SECURE_NO_WARNINGS /W0 /X /GL-
+  OcGuardLib
+  OcPngLib
+  OcStorageLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint

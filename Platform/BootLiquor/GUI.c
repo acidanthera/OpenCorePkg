@@ -1,3 +1,10 @@
+/** @file
+  This file is part of BootLiquor, OpenCore GUI.
+
+  Copyright (c) 2018-2019, Download-Fritz. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-3-Clause
+**/
+
 #include <Uefi.h>
 
 #include <Library/BaseLib.h>
@@ -910,12 +917,6 @@ GuiRedrawAndFlushScreen (
   GuiFlushScreen (DrawContext);
 }
 
-// TODO: move
-UINT64
-GuiGetTSCFrequency (
-  VOID
-  );
-
 EFI_STATUS
 GuiLibConstruct (
   IN UINT32  CursorDefaultX,
@@ -970,7 +971,7 @@ GuiLibConstruct (
     CacheWriteBack
     );
 
-  mDeltaTscTarget =  DivU64x32 (GuiGetTSCFrequency (), 60);
+  mDeltaTscTarget =  DivU64x32 (OcGetTSCFrequency (), 60);
 
   mScreenViewCursor.X = CursorDefaultX;
   mScreenViewCursor.Y = CursorDefaultY;

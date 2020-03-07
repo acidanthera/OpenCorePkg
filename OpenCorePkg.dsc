@@ -187,6 +187,7 @@
   OpenCorePkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OpenCorePkg/Library/OcXmlLib/OcXmlLib.inf
   OpenCorePkg/Platform/AppleUsbKbDxe/UsbKbDxe.inf
+  OpenCorePkg/Platform/BootLiquor/BootLiquor.inf
   OpenCorePkg/Platform/FwRuntimeServices/FwRuntimeServices.inf
   OpenCorePkg/Platform/OpenCore/OpenCore.inf
   OpenCorePkg/Tests/AcpiTest/AcpiTest.inf
@@ -204,7 +205,6 @@
   OpenCorePkg/Tests/PropertyTest/PropertyTestApp.inf
   OpenCorePkg/Tests/SmbiosTest/SmbiosTest.inf
   OpenCorePkg/Tests/SmbiosTest/SmbiosTestApp.inf
-  OpenCorePkg/Platform/GUI/GUI.inf
 
 [LibraryClasses]
   NULL|OpenCorePkg/Library/OcCompilerIntrinsicsLib/OcCompilerIntrinsicsLib.inf

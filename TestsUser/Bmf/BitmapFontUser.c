@@ -1,3 +1,11 @@
+/** @file
+  This file is part of BootLiquor, OpenCore GUI.
+
+  Copyright (c) 2018-2019, Download-Fritz. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-3-Clause
+**/
+
+
 /*
 clang -g -fshort-wchar -fsanitize=undefined,address -I$WORKSPACE/Public/Vendor/Acidanthera/OcSupportPkg/Include -I$WORKSPACE/Public/Vendor/Acidanthera/OcSupportPkg/TestsUser/Include -I$WORKSPACE/Public/edk2/MdePkg/Include/ -I$WORKSPACE/Public/edk2/MdeModulePkg/Include/ -include $WORKSPACE/Public/Vendor/Acidanthera/OcSupportPkg/TestsUser/Include/Base.h BitmapFontUser.c BitmapFont.c Images/Helvetica_bmp.c Images/Helvetica_fnt.c $WORKSPACE/Public/Vendor/Acidanthera/OcSupportPkg/Library/BaseBmpSupportLib/BmpSupportLib.c -o Bmf
 */

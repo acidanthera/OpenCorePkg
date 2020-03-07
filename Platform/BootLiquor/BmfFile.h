@@ -1,3 +1,10 @@
+/** @file
+  This file is part of BootLiquor, OpenCore GUI.
+
+  Copyright (c) 2018-2019, Download-Fritz. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-3-Clause
+**/
+
 #ifndef BMF_FILE_H
 #define BMF_FILE_H
 

@@ -1,6 +1,12 @@
+/** @file
+  This file is part of BootLiquor, OpenCore GUI.
+
+  Copyright (c) 2018-2019, Download-Fritz. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-3-Clause
+**/
+
 #include <Base.h>
 
-#include <Library/BaseLib.h>
 #include <Library/MtrrLib.h>
 
 BOOLEAN
@@ -9,7 +15,7 @@ GuiSaveAndDisableInterrupts (
   VOID
   )
 {
-  return SaveAndDisableInterrupts ();
+  return FALSE;
 }
 
 VOID
@@ -18,7 +24,7 @@ GuiEnableInterrupts (
   VOID
   )
 {
-  EnableInterrupts ();
+  ;
 }
 
 RETURN_STATUS
@@ -29,9 +35,5 @@ GuiMtrrSetMemoryAttribute (
   IN MTRR_MEMORY_CACHE_TYPE  Attribute
   )
 {
-  return MtrrSetMemoryAttribute (
-           BaseAddress,
-           Length,
-           Attribute
-           );
+  return RETURN_SUCCESS;
 }
