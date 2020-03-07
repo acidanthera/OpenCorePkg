@@ -8,6 +8,7 @@
 #ifndef GUI_IO_H
 #define GUI_IO_H
 
+#include <Protocol/GraphicsOutput.h>
 #include "BootLiquor.h"
 
 typedef struct GUI_OUTPUT_CONTEXT_  GUI_OUTPUT_CONTEXT;
@@ -96,39 +97,6 @@ GuiKeyRead (
 VOID
 GuiKeyDestruct (
   IN GUI_KEY_CONTEXT  *Context
-  );
-
-////////////////
-typedef struct GUI_OUTPUT_CONTEXT_GOP_ST_ GUI_OUTPUT_CONTEXT_GOP_ST;
-
-GUI_OUTPUT_CONTEXT_GOP_ST *
-GuiOutputConstructStGop (
-  VOID
-  );
-
-EFI_STATUS
-EFIAPI
-GuiOutputBltStGop (
-  IN GUI_OUTPUT_CONTEXT_GOP_ST          *Context,
-  IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL      *BltBuffer OPTIONAL,
-  IN EFI_GRAPHICS_OUTPUT_BLT_OPERATION  BltOperation,
-  IN UINTN                              SourceX,
-  IN UINTN                              SourceY,
-  IN UINTN                              DestinationX,
-  IN UINTN                              DestinationY,
-  IN UINTN                              Width,
-  IN UINTN                              Height,
-  IN UINTN                              Delta OPTIONAL
-  );
-
-CONST EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *
-GuiOutputGetInfoStGop (
-  IN GUI_OUTPUT_CONTEXT_GOP_ST  *Context
-  );
-
-VOID
-GuiOutputDestructStGop (
-  IN GUI_OUTPUT_CONTEXT_GOP_ST  *Context
   );
 
 #endif
