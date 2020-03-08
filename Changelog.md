@@ -8,6 +8,7 @@ OpenCore Changelog
 - Added `DirectGopCacheMode` option for FB cache policy
 - Added `KeyFiltering` option to workaround buggy KB drivers
 - Added tool and custom entry separation in audio assistant
+- Added `FwProtect` tool to configure full NVRAM access from Shell
 
 #### v0.5.6
 - Various improvements to builtin text renderer

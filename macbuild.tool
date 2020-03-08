@@ -33,6 +33,7 @@ package() {
   cp XhciDxe.efi tmp/EFI/OC/Drivers/ || exit 1
   cp BootKicker.efi tmp/EFI/OC/Tools/ || exit 1
   cp CleanNvram.efi tmp/EFI/OC/Tools/ || exit 1
+  cp FwProtect.efi tmp/EFI/OC/Tools/ || exit 1
   cp GopStop.efi tmp/EFI/OC/Tools/ || exit 1
   cp HdaCodecDump.efi tmp/EFI/OC/Tools/ || exit 1
   cp VerifyMsrE2.efi tmp/EFI/OC/Tools/ || exit 1
