@@ -42,7 +42,7 @@ OcDescribeBootEntry (
   //
   // Custom entries need no special description.
   //
-  if (BootEntry->Type == OC_BOOT_CUSTOM) {
+  if (BootEntry->Type == OC_BOOT_EXTERNAL_OS || BootEntry->Type == OC_BOOT_EXTERNAL_TOOL) {
     return EFI_SUCCESS;
   }
 
@@ -370,7 +370,11 @@ OcScanForBootEntries (
       return EFI_OUT_OF_RESOURCES;
     }
 
-    Entries[EntryIndex].Type = OC_BOOT_CUSTOM;
+    if (Context->CustomEntries[Index].Tool) {
+      Entries[EntryIndex].Type = OC_BOOT_EXTERNAL_TOOL;
+    } else {
+      Entries[EntryIndex].Type = OC_BOOT_EXTERNAL_OS;
+    }
 
     if (Index < Context->AbsoluteEntryCount) {
       DEBUG ((

@@ -128,8 +128,11 @@ OcAudioAcquireFile (
         case OcVoiceOverAudioFileExternal:
           BasePath = "External";
           break;
-        case OcVoiceOverAudioFileExternalOption:
-          BasePath = "ExternalOption";
+        case OcVoiceOverAudioFileExternalOS:
+          BasePath = "ExternalOS";
+          break;
+        case OcVoiceOverAudioFileExternalTool:
+          BasePath = "ExternalTool";
           break;
         case OcVoiceOverAudioFileLoading:
           BasePath = "Loading";

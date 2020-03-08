@@ -190,8 +190,10 @@ OcPlayAudioEntry (
     OcPlayAudioFile (Context, OcVoiceOverAudioFileUEFI_Shell, FALSE);
   } else if (StrStr (Entry->Name, OC_MENU_RESET_NVRAM_ENTRY) != NULL) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFileResetNVRAM, FALSE);
-  } else if (Entry->Type == OC_BOOT_CUSTOM) {
-    OcPlayAudioFile (Context, OcVoiceOverAudioFileExternalOption, FALSE);
+  } else if (Entry->Type == OC_BOOT_EXTERNAL_OS) {
+    OcPlayAudioFile (Context, OcVoiceOverAudioFileExternalOS, FALSE);
+  } else if (Entry->Type == OC_BOOT_EXTERNAL_TOOL) {
+    OcPlayAudioFile (Context, OcVoiceOverAudioFileExternalTool, FALSE);
   } else {
     OcPlayAudioFile (Context, OcVoiceOverAudioFileOtherOS, FALSE);
   }

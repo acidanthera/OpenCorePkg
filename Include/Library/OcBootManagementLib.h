@@ -78,8 +78,9 @@ typedef UINT32 OC_BOOT_ENTRY_TYPE;
 #define OC_BOOT_APPLE_TIME_MACHINE  BIT3
 #define OC_BOOT_APPLE_ANY           (OC_BOOT_APPLE_OS | OC_BOOT_APPLE_RECOVERY | OC_BOOT_APPLE_TIME_MACHINE)
 #define OC_BOOT_WINDOWS             BIT4
-#define OC_BOOT_CUSTOM              BIT5
-#define OC_BOOT_SYSTEM              BIT6
+#define OC_BOOT_EXTERNAL_OS         BIT5
+#define OC_BOOT_EXTERNAL_TOOL       BIT6
+#define OC_BOOT_SYSTEM              BIT7
 
 /**
   Picker mode.
@@ -374,6 +375,10 @@ typedef struct {
   // Whether this entry is auxiliary.
   //
   BOOLEAN      Auxiliary;
+  //
+  // Whether this entry is a tool.
+  //
+  BOOLEAN      Tool;
 } OC_PICKER_ENTRY;
 
 /**

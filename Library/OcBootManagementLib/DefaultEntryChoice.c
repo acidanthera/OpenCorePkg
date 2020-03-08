@@ -1142,7 +1142,7 @@ InternalLoadBootEntry (
     if (DevicePath == NULL) {
       return EFI_UNSUPPORTED;
     }
-  } else if (BootEntry->Type == OC_BOOT_CUSTOM && BootEntry->DevicePath == NULL) {
+  } else if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL) {
     ASSERT (Context->CustomRead != NULL);
 
     Status = Context->CustomRead (
@@ -1232,10 +1232,11 @@ InternalLoadBootEntry (
         }
       }
 
-      if (BootEntry->Type == OC_BOOT_CUSTOM) {
+      if (BootEntry->Type == OC_BOOT_EXTERNAL_OS || BootEntry->Type == OC_BOOT_EXTERNAL_TOOL) {
         DEBUG ((
           DEBUG_INFO,
-          "OCB: Custom DeviceHandle %p FilePath %p\n",
+          "OCB: Custom (%u) DeviceHandle %p FilePath %p\n",
+          BootEntry->Type,
           LoadedImage->DeviceHandle,
           LoadedImage->FilePath
           ));
