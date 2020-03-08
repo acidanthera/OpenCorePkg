@@ -47,4 +47,9 @@ typedef struct {
   OC_LOG_PROTOCOL        OcLog;
 } OC_LOG_PRIVATE_DATA;
 
+OC_LOG_PROTOCOL *
+InternalGetOcLog (
+  VOID
+  );
+
 #endif // OC_LOG_INTERNAL_H

@@ -334,6 +334,7 @@ mMiscConfigurationBootSchema[] = {
 STATIC
 OC_SCHEMA
 mMiscConfigurationDebugSchema[] = {
+  OC_SCHEMA_BOOLEAN_IN ("AppleDebug",       OC_GLOBAL_CONFIG, Misc.Debug.AppleDebug),
   OC_SCHEMA_BOOLEAN_IN ("DisableWatchDog",  OC_GLOBAL_CONFIG, Misc.Debug.DisableWatchDog),
   OC_SCHEMA_INTEGER_IN ("DisplayDelay",     OC_GLOBAL_CONFIG, Misc.Debug.DisplayDelay),
   OC_SCHEMA_INTEGER_IN ("DisplayLevel",     OC_GLOBAL_CONFIG, Misc.Debug.DisplayLevel),
@@ -535,6 +536,7 @@ OC_SCHEMA
 mUefiProtocolsSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("AppleAudio",              OC_GLOBAL_CONFIG, Uefi.Protocols.AppleAudio),
   OC_SCHEMA_BOOLEAN_IN ("AppleBootPolicy",         OC_GLOBAL_CONFIG, Uefi.Protocols.AppleBootPolicy),
+  OC_SCHEMA_BOOLEAN_IN ("AppleDebugLog",           OC_GLOBAL_CONFIG, Uefi.Protocols.AppleDebugLog),
   OC_SCHEMA_BOOLEAN_IN ("AppleEvent",              OC_GLOBAL_CONFIG, Uefi.Protocols.AppleEvent),
   OC_SCHEMA_BOOLEAN_IN ("AppleImageConversion",    OC_GLOBAL_CONFIG, Uefi.Protocols.AppleImageConversion),
   OC_SCHEMA_BOOLEAN_IN ("AppleKeyMap",             OC_GLOBAL_CONFIG, Uefi.Protocols.AppleKeyMap),

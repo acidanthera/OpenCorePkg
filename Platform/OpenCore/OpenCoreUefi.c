@@ -18,7 +18,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Guid/GlobalVariable.h>
 
 #include <Library/BaseLib.h>
-#include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleBootCompatLib.h>
@@ -32,6 +31,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcConsoleLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcDataHubLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/OcDevicePropertyLib.h>
 #include <Library/OcDriverConnectionLib.h>
 #include <Library/OcFirmwareVolumeLib.h>
@@ -292,6 +292,10 @@ OcReinstallProtocols (
 
   if (OcAppleImageConversionInstallProtocol (Config->Uefi.Protocols.AppleImageConversion) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install image conversion protocol\n"));
+  }
+
+  if (OcAppleDebugLogInstallProtocol (Config->Uefi.Protocols.AppleDebugLog) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install debug log protocol\n"));
   }
 
   if (OcSmcIoInstallProtocol (Config->Uefi.Protocols.AppleSmcIo, Config->Misc.Security.AuthRestart) == NULL) {

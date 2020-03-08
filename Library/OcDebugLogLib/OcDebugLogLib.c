@@ -25,7 +25,7 @@
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-STATIC OC_LOG_PROTOCOL *mOcLog = NULL;
+#include "OcLogInternal.h"
 
 /**
   Prints a debug message to the debug output device if the specified error level is enabled.
@@ -49,31 +49,18 @@ DebugPrint (
   ...
   )
 {
-  EFI_STATUS Status;
-  VA_LIST    Marker;
-  CHAR16     Buffer[256];
+  VA_LIST          Marker;
+  CHAR16           Buffer[256];
+  OC_LOG_PROTOCOL  *OcLog;
 
   ASSERT (Format != NULL);
 
-  //
-  // Obtaing logging protocol if any.
-  //
-  if (mOcLog == NULL) {
-    Status = gBS->LocateProtocol (
-      &gOcLogProtocolGuid,
-      NULL,
-      (VOID **) &mOcLog
-      );
-
-    if (EFI_ERROR (Status) || mOcLog->Revision != OC_LOG_REVISION) {
-      mOcLog = NULL;
-    }
-  }
+  OcLog = InternalGetOcLog ();
 
   VA_START (Marker, Format);
 
-  if (mOcLog != NULL) {
-    mOcLog->AddEntry (mOcLog, ErrorLevel, Format, Marker);
+  if (OcLog != NULL) {
+    OcLog->AddEntry (OcLog, ErrorLevel, Format, Marker);
   } else if ((ErrorLevel & GetDebugPrintErrorLevel ()) != 0) {
     UnicodeVSPrintAsciiFormat (Buffer, sizeof (Buffer), Format, Marker);
     gST->ConOut->OutputString (gST->ConOut, Buffer);

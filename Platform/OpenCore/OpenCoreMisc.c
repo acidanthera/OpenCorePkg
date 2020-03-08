@@ -359,6 +359,8 @@ OcMiscLateInit (
   HibernateStatus = OcActivateHibernateWake (HibernateMask);
   DEBUG ((DEBUG_INFO, "OC: Hibernation detection status is %r\n", HibernateStatus));
 
+  OcAppleDebugLogConfigure (Config->Misc.Debug.AppleDebug);
+
   return Status;
 }
 

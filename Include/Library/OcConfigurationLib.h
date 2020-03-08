@@ -281,10 +281,11 @@
   OC_DECLARE (OC_MISC_BOOT)
 
 #define OC_MISC_DEBUG_FIELDS(_, __) \
-  _(BOOLEAN                     , DisableWatchDog             ,     , FALSE        , ()) \
-  _(UINT32                      , DisplayDelay                ,     , 0            , ()) \
   _(UINT64                      , DisplayLevel                ,     , 0            , ()) \
-  _(UINT32                      , Target                      ,     , 0            , ())
+  _(UINT32                      , DisplayDelay                ,     , 0            , ()) \
+  _(UINT32                      , Target                      ,     , 0            , ()) \
+  _(BOOLEAN                     , AppleDebug                  ,     , FALSE        , ()) \
+  _(BOOLEAN                     , DisableWatchDog             ,     , FALSE        , ())
   OC_DECLARE (OC_MISC_DEBUG)
 
 #define OCS_EXPOSE_BOOT_PATH   1U
@@ -515,6 +516,7 @@ typedef enum {
 #define OC_UEFI_PROTOCOLS_FIELDS(_, __) \
   _(BOOLEAN                     , AppleAudio                  ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleBootPolicy             ,     , FALSE  , ()) \
+  _(BOOLEAN                     , AppleDebugLog               ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleEvent                  ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleImageConversion        ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleKeyMap                 ,     , FALSE  , ()) \

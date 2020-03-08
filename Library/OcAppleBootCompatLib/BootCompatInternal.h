@@ -210,6 +210,10 @@ typedef struct SERVICES_OVERRIDE_STATE_ {
   /// TRUE if we are done reporting MMIO cleanup.
   ///
   BOOLEAN                       ReportedMmio;
+  ///
+  /// TRUE if we are waiting for performance memory allocation.
+  ///
+  BOOLEAN                       AwaitingPerfAlloc;
 } SERVICES_OVERRIDE_STATE;
 
 /**

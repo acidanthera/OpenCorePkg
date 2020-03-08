@@ -9,6 +9,8 @@ OpenCore Changelog
 - Added `KeyFiltering` option to workaround buggy KB drivers
 - Added tool and custom entry separation in audio assistant
 - Added `FwProtect` tool to configure full NVRAM access from Shell
+- Added `boot.efi` debug protocol support for 10.15.4+
+- Added `boot.efi` performance logging for 10.15.4+
 
 #### v0.5.6
 - Various improvements to builtin text renderer

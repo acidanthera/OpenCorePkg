@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Mar  6 09:43:05 2020
-%DIF ADD ../Configuration.tex        Sun Mar  8 15:47:32 2020
+%DIF ADD ../Configuration.tex        Sun Mar  8 23:40:39 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1369,8 +1369,8 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Protect CSM region areas from relocation.
 
-  Ensure that CSM memory regions are marked as ACPI NVS to prevent boot.efi or XNU from
-  relocating or using them.
+  Ensure that CSM memory regions are marked as ACPI NVS to prevent \DIFdelbegin \DIFdel{boot.efi }\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}} \DIFaddend or
+  XNU from relocating or using them.
 
   \emph{Note}: The necessity of this quirk is determined by artifacts and sleep wake issues.
   As \texttt{AvoidRuntimeDefrag} resolves a similar problem, no known firmwares should need
@@ -2340,7 +2340,17 @@ behaviour that does not go to any other sections
 \begin{enumerate}
 
 \item
-  \texttt{DisableWatchDog}\\
+  \DIFaddbegin \texttt{\DIFadd{AppleDebug}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Enable }\texttt{\DIFadd{boot.efi}} \DIFadd{debug log saving to OpenCore log.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This option only applies to 10.15.4 and newer.
+}
+
+\item
+  \DIFaddend \texttt{DisableWatchDog}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Select firmwares may not succeed in quickly booting
@@ -2896,13 +2906,17 @@ The following variables are mandatory for macOS functioning:
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:MLB}
   \break
   \texttt{BoardSerialNumber}. Present on newer Macs (2013+ at least) to avoid extra parsing
-  of SMBIOS tables, especially in boot.efi.
-\item
+  of SMBIOS tables, especially in \DIFdelbegin \DIFdel{boot.
+efi.
+}\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}}\DIFadd{.
+}\DIFaddend \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}
   \break
   Primary network adapter MAC address or replacement value. Present on newer Macs
-  (2013+ at least) to avoid accessing special memory region, especially in boot.efi.
-\end{itemize}
+  (2013+ at least) to avoid accessing special memory region, especially in \DIFdelbegin \DIFdel{boot.
+efi.
+}\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}}\DIFadd{.
+}\DIFaddend \end{itemize}
 
 \subsection{Recommended Variables}\label{nvramvarsrec}
 
@@ -2930,8 +2944,10 @@ improvements:
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_BID}
   \break
   Hardware \texttt{BoardProduct} (e.g. \texttt{Mac-35C1E88140C3E6CF}). Not present on
-  real Macs, but used to avoid extra parsing of SMBIOS tables, especially in boot.efi.
-\item
+  real Macs, but used to avoid extra parsing of SMBIOS tables, especially in \DIFdelbegin \DIFdel{boot.
+efi.
+}\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}}\DIFadd{.
+}\DIFaddend \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_MLB}
   \break
   Hardware \texttt{BoardSerialNumber}. Override for MLB. Present on newer Macs (2013+ at least).
@@ -2960,12 +2976,12 @@ improvements:
  \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:UIScale}
   \break
-  One-byte data defining boot.efi user interface scaling. Should be \textbf{01} for normal
+  One-byte data defining \DIFdelbegin \DIFdel{boot.efi }\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}} \DIFaddend user interface scaling. Should be \textbf{01} for normal
   screens and \textbf{02} for HiDPI screens.
  \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:DefaultBackgroundColor}
   \break
-  Four-byte \texttt{RGBA} data defining boot.efi user interface background colour.
+  Four-byte \texttt{RGBA} data defining \DIFdelbegin \DIFdel{boot.efi }\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}} \DIFaddend user interface background colour.
   Standard colours include \textbf{BF BF BF 00} (Light Gray) and \textbf{00 00 00 00}
   (Syrah Black). Other colours may be set at user's preference.
 \end{itemize}
@@ -3018,9 +3034,9 @@ troubleshooting:
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg}
   \break
-  Booter arguments, similar to \texttt{boot-args} but for boot.efi. Accepts a set of
+  Booter arguments, similar to \texttt{boot-args} but for \DIFdelbegin \DIFdel{boot. efi. }\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}}\DIFadd{. }\DIFaddend Accepts a set of
   arguments, which are hexadecimal 64-bit values with or without \texttt{0x}.
-  At different stages boot.efi will request different debugging (logging)
+  At different stages \DIFdelbegin \DIFdel{boot.efi }\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}} \DIFaddend will request different debugging (logging)
   modes (e.g. after \texttt{ExitBootServices} it will only print to serial).
   Several booter arguments control whether these requests will succeed. The
   list of known requests is covered below:
@@ -3121,13 +3137,21 @@ troubleshooting:
   and this is the default value.
   \end{itemize}
 
-  \emph{Note}: To quickly see verbose output from \texttt{boot.efi} on versions before 10.15
-  set \texttt{bootercfg} to \texttt{log=1}.
-\item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg-once}
+  \emph{Note}: To \DIFdelbegin \DIFdel{quickly }\DIFdelend see verbose output from \texttt{boot.efi} on \DIFdelbegin \DIFdel{versions }\DIFdelend \DIFaddbegin \DIFadd{modern macOS versions
+  enable }\texttt{\DIFadd{AppleDebug}} \DIFadd{option. This will save the log to general OpenCore log.
+  For versions }\DIFaddend before 10.15\DIFaddbegin \DIFadd{.4 }\DIFaddend set \texttt{bootercfg} to \texttt{log=1}. \DIFaddbegin \DIFadd{This will
+  print verbose output onscreen.
+}\DIFaddend \item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg-once}
   \break
   Booter arguments override removed after first launch. Otherwise equivalent to \texttt{bootercfg}.
 \item
-  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:fmm-computer-name}
+  \DIFaddbegin \texttt{\DIFadd{7C436110-AB2A-4BBB-A880-FE41995C9F82:efiboot-perf-record}}
+  \break
+  \DIFadd{Enable performance log saving in }\texttt{\DIFadd{boot.efi}}\DIFadd{. Performance log is saved to physical
+  memory and is pointed by }\texttt{\DIFadd{efiboot-perf-record-data}} \DIFadd{and }\texttt{\DIFadd{efiboot-perf-record-size}}
+  \DIFadd{variables. Starting from 10.15.4 it can also be saved to OpenCore log by }\texttt{\DIFadd{AppleDebug}} \DIFadd{option.
+}\item
+  \DIFaddend \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:fmm-computer-name}
   \break
   Current saved host name. ASCII string.
 \item
@@ -4345,11 +4369,10 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   This option fills the entire graphics screen with black color before switching to
   text mode.
 
-  \emph{Note}: This option only applies to \texttt{System} renderer\DIFaddbegin \DIFadd{.
-}
+  \emph{Note}: This option only applies to \texttt{System} renderer.
 
 \item
-  \texttt{\DIFadd{DirectGopCacheMode}}\\
+  \DIFaddbegin \texttt{\DIFadd{DirectGopCacheMode}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Cache mode for builtin graphics output protocol framebuffer.
@@ -4363,10 +4386,11 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 
   \emph{\DIFadd{Note}}\DIFadd{: This option is not supported on most hardware (see
   }\href{https://github.com/acidanthera/bugtracker/issues/755}{acidanthera/bugtracker\#755}
-  \DIFadd{for more details)}\DIFaddend .
+  \DIFadd{for more details).
+}
 
 \item
-  \texttt{DirectGopRendering}\\
+  \DIFaddend \texttt{DirectGopRendering}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Use builtin graphics output protocol renderer for console.
@@ -4474,7 +4498,15 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 
   \emph{Note}: Some Macs, namely \texttt{MacPro5,1}, do have APFS compatibility,
   but their Apple Boot Policy protocol contains recovery detection issues, thus
-  using this option is advised on them as well.
+  using this option is advised on them as well\DIFaddbegin \DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{AppleDebugLog}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Reinstalls Apple Debug Log protocol with a builtin
+  version}\DIFaddend .
 
 \item
   \texttt{AppleEvent}\\

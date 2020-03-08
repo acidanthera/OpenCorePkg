@@ -1488,16 +1488,6 @@ BootPolicyGetAllApfsRecoveryFilePath (
   return Status;
 }
 
-/**
-  The Entry Point installing the APPLE_BOOT_POLICY_PROTOCOL.
-
-  @param[in] ImageHandle  The firmware allocated handle for the EFI image.
-  @param[in] SystemTable  A pointer to the EFI System Table.
-
-  @retval EFI_SUCCESS          The entry point is executed successfully.
-  @retval EFI_ALREADY_STARTED  The protocol has already been installed.
-
-**/
 APPLE_BOOT_POLICY_PROTOCOL *
 OcAppleBootPolicyInstallProtocol (
   IN BOOLEAN  Reinstall
@@ -1527,11 +1517,11 @@ OcAppleBootPolicyInstallProtocol (
   }
 
   Handle = NULL;
-  Status = gBS->InstallProtocolInterface (
+  Status = gBS->InstallMultipleProtocolInterfaces (
     &Handle,
     &gAppleBootPolicyProtocolGuid,
-    EFI_NATIVE_INTERFACE,
-    (VOID **) &mAppleBootPolicyProtocol
+    (VOID **) &mAppleBootPolicyProtocol,
+    NULL
     );
 
   if (EFI_ERROR (Status)) {

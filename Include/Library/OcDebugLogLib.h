@@ -17,6 +17,7 @@
 
 #include <Library/DebugLib.h>
 #include <Protocol/OcLog.h>
+#include <Protocol/AppleDebugLog.h>
 
 #define OC_HEX_LOWER(x) "0123456789ABCDEF"[((UINT32) (x) & 0x0FU)]
 #define OC_HEX_UPPER(x) "0123456789ABCDEF"[((UINT32) (x) & 0xF0U) >> 4U]
@@ -64,6 +65,41 @@ OcConfigureLogProtocol (
   IN UINTN                            HaltLevel,
   IN CONST CHAR16                     *LogPrefixPath  OPTIONAL,
   IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *LogFileSystem  OPTIONAL
+  );
+
+/**
+  Install and initialise the Apple Debug Log protocol.
+
+  @param[in] Reinstall  Replace any installed protocol.
+
+  @returns Installed or located protocol.
+  @retval NULL  There was an error locating or installing the protocol.
+**/
+APPLE_DEBUG_LOG_PROTOCOL *
+OcAppleDebugLogInstallProtocol (
+  IN BOOLEAN  Reinstall
+  );
+
+/**
+  Configure Apple Debug Log protocol.
+
+  @param[in] Enable  Enable logging to OcLog.
+**/
+VOID
+OcAppleDebugLogConfigure (
+  IN BOOLEAN  Enable
+  );
+
+/**
+  Configure Apple performance log location.
+
+  @param[in,out]  PerfBuffer       Performance buffer location.
+  @param[in]      PerfBufferSize   Performance buffer size.
+**/
+VOID
+OcAppleDebugLogPerfAllocated (
+  IN OUT VOID  *PerfBuffer,
+  IN     UINTN  PerfBufferSize
   );
 
 /**

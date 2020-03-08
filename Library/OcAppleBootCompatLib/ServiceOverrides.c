@@ -15,14 +15,15 @@
 
 #include "BootCompatInternal.h"
 
+#include <Guid/AppleVariable.h>
 #include <Guid/OcVariables.h>
 
 #include <IndustryStandard/AppleHibernate.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
 #include <Library/OcBootManagementLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/OcMemoryLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcOSInfoLib.h>
@@ -413,8 +414,22 @@ OcAllocatePages (
 {
   EFI_STATUS              Status;
   BOOT_COMPAT_CONTEXT     *BootCompat;
+  BOOLEAN                 IsPerfAlloc;
 
-  BootCompat = GetBootCompatContext ();
+  BootCompat  = GetBootCompatContext ();
+  IsPerfAlloc = FALSE;
+
+  if (BootCompat->ServiceState.AwaitingPerfAlloc) {
+    if (BootCompat->ServiceState.AppleBootNestedCount > 0) {
+      if (Type == AllocateMaxAddress
+        && MemoryType == EfiACPIReclaimMemory
+        && *Memory == BASE_4GB - 1) {
+        IsPerfAlloc = TRUE;
+      }
+    } else {
+      BootCompat->ServiceState.AwaitingPerfAlloc = FALSE;
+    }
+  }
 
   Status = BootCompat->ServicePtrs.AllocatePages (
     Type,
@@ -424,7 +439,13 @@ OcAllocatePages (
     );
 
   if (!EFI_ERROR (Status) && BootCompat->ServiceState.AppleBootNestedCount > 0) {
-    if (Type == AllocateAddress && MemoryType == EfiLoaderData) {
+    if (IsPerfAlloc) {
+      //
+      // Called from boot.efi.
+      // New perf data, it can be reallocated multiple times.
+      //
+      OcAppleDebugLogPerfAllocated ((VOID *)(UINTN) *Memory, EFI_PAGES_TO_SIZE (NumberOfPages));
+    } else if (Type == AllocateAddress && MemoryType == EfiLoaderData) {
       //
       // Called from boot.efi.
       // Store minimally allocated address to find kernel image start.
@@ -663,11 +684,12 @@ OcGetVariable (
 {
   EFI_STATUS             Status;
   BOOT_COMPAT_CONTEXT    *BootCompat;
+  BOOLEAN                IsApple;
 
   BootCompat = GetBootCompatContext ();
+  IsApple = BootCompat->ServiceState.AppleBootNestedCount > 0;
 
-  if (BootCompat->ServiceState.AppleBootNestedCount > 0
-    && BootCompat->Settings.ProvideCustomSlide) {
+  if (IsApple && BootCompat->Settings.ProvideCustomSlide) {
     Status = AppleSlideGetVariable (
       BootCompat,
       BootCompat->ServicePtrs.GetVariable,
@@ -688,6 +710,17 @@ OcGetVariable (
       DataSize,
       Data
       );
+  }
+
+  //
+  // Catch performance record allocation.
+  //
+  if (IsApple
+    && Status == EFI_BUFFER_TOO_SMALL
+    && CompareGuid (VendorGuid, &gAppleBootVariableGuid)
+    && StrCmp (VariableName, APPLE_EFI_BOOT_PERF_VARIABLE_NAME) == 0) {
+    BootCompat->ServiceState.AwaitingPerfAlloc = TRUE;
+    DEBUG ((DEBUG_INFO, "OCABC: Caught successful request for %s\n", VariableName));
   }
 
   return Status;

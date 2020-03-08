@@ -39,6 +39,7 @@
 
 [Protocols]
   gOcLogProtocolGuid
+  gAppleDebugLogProtocolGuid
 
 [LibraryClasses]
   BaseLib
@@ -57,6 +58,7 @@
   gEfiMdePkgTokenSpaceGuid.PcdFixedDebugPrintErrorLevel
 
 [Sources]
+  OcAppleLog.c
   OcDebugLogLib.c
   OcLog.c
   OcLogInternal.h

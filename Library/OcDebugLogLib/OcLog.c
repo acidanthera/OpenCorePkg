@@ -398,6 +398,30 @@ OcLogResetTimers (
   return EFI_SUCCESS;
 }
 
+OC_LOG_PROTOCOL *
+InternalGetOcLog (
+  VOID
+  )
+{
+  EFI_STATUS  Status;
+
+  STATIC OC_LOG_PROTOCOL *mInternalOcLog = NULL;
+
+  if (mInternalOcLog == NULL) {
+    Status = gBS->LocateProtocol (
+      &gOcLogProtocolGuid,
+      NULL,
+      (VOID **) &mInternalOcLog
+      );
+
+    if (EFI_ERROR (Status) || mInternalOcLog->Revision != OC_LOG_REVISION) {
+      mInternalOcLog = NULL;
+    }
+  }
+
+  return mInternalOcLog;
+}
+
 EFI_STATUS
 OcConfigureLogProtocol (
   IN OC_LOG_OPTIONS                   Options,
@@ -450,14 +474,9 @@ OcConfigureLogProtocol (
   // Check if protocol already exists.
   //
 
-  OcLog = NULL;
-  Status  = gBS->LocateProtocol (
-    &gOcLogProtocolGuid,
-    NULL,
-    (VOID **) &OcLog
-    );
+  OcLog = InternalGetOcLog ();
 
-  if (!EFI_ERROR (Status)) {
+  if (OcLog != NULL) {
     //
     // Set desired options in existing protocol.
     //
@@ -476,15 +495,13 @@ OcConfigureLogProtocol (
     OcLog->FileSystem   = LogRoot;
     OcLog->FilePath     = LogPath;
 
-    //
-    // Keep EFI_SUCCESS...
-    //
+    Status = EFI_SUCCESS;
   } else {
     Private = AllocateZeroPool (sizeof (*Private));
     Status  = EFI_OUT_OF_RESOURCES;
 
     if (Private != NULL) {
-      Private->Signature = OC_LOG_PRIVATE_DATA_SIGNATURE;
+      Private->Signature          = OC_LOG_PRIVATE_DATA_SIGNATURE;
       Private->AsciiBufferSize    = OC_LOG_BUFFER_SIZE;
       Private->NvramBufferSize    = OC_LOG_NVRAM_BUFFER_SIZE;
       Private->OcLog.Revision     = OC_LOG_REVISION;

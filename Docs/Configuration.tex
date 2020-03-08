@@ -1309,8 +1309,8 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Protect CSM region areas from relocation.
 
-  Ensure that CSM memory regions are marked as ACPI NVS to prevent boot.efi or XNU from
-  relocating or using them.
+  Ensure that CSM memory regions are marked as ACPI NVS to prevent \texttt{boot.efi} or
+  XNU from relocating or using them.
 
   \emph{Note}: The necessity of this quirk is determined by artifacts and sleep wake issues.
   As \texttt{AvoidRuntimeDefrag} resolves a similar problem, no known firmwares should need
@@ -2280,6 +2280,14 @@ behaviour that does not go to any other sections
 \begin{enumerate}
 
 \item
+  \texttt{AppleDebug}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable \texttt{boot.efi} debug log saving to OpenCore log.
+
+  \emph{Note}: This option only applies to 10.15.4 and newer.
+
+\item
   \texttt{DisableWatchDog}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -2836,12 +2844,12 @@ The following variables are mandatory for macOS functioning:
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:MLB}
   \break
   \texttt{BoardSerialNumber}. Present on newer Macs (2013+ at least) to avoid extra parsing
-  of SMBIOS tables, especially in boot.efi.
+  of SMBIOS tables, especially in \texttt{boot.efi}.
 \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}
   \break
   Primary network adapter MAC address or replacement value. Present on newer Macs
-  (2013+ at least) to avoid accessing special memory region, especially in boot.efi.
+  (2013+ at least) to avoid accessing special memory region, especially in \texttt{boot.efi}.
 \end{itemize}
 
 \subsection{Recommended Variables}\label{nvramvarsrec}
@@ -2870,7 +2878,7 @@ improvements:
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_BID}
   \break
   Hardware \texttt{BoardProduct} (e.g. \texttt{Mac-35C1E88140C3E6CF}). Not present on
-  real Macs, but used to avoid extra parsing of SMBIOS tables, especially in boot.efi.
+  real Macs, but used to avoid extra parsing of SMBIOS tables, especially in \texttt{boot.efi}.
 \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_MLB}
   \break
@@ -2900,12 +2908,12 @@ improvements:
  \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:UIScale}
   \break
-  One-byte data defining boot.efi user interface scaling. Should be \textbf{01} for normal
+  One-byte data defining \texttt{boot.efi} user interface scaling. Should be \textbf{01} for normal
   screens and \textbf{02} for HiDPI screens.
  \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:DefaultBackgroundColor}
   \break
-  Four-byte \texttt{RGBA} data defining boot.efi user interface background colour.
+  Four-byte \texttt{RGBA} data defining \texttt{boot.efi} user interface background colour.
   Standard colours include \textbf{BF BF BF 00} (Light Gray) and \textbf{00 00 00 00}
   (Syrah Black). Other colours may be set at user's preference.
 \end{itemize}
@@ -2958,9 +2966,9 @@ troubleshooting:
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg}
   \break
-  Booter arguments, similar to \texttt{boot-args} but for boot.efi. Accepts a set of
+  Booter arguments, similar to \texttt{boot-args} but for \texttt{boot.efi}. Accepts a set of
   arguments, which are hexadecimal 64-bit values with or without \texttt{0x}.
-  At different stages boot.efi will request different debugging (logging)
+  At different stages \texttt{boot.efi} will request different debugging (logging)
   modes (e.g. after \texttt{ExitBootServices} it will only print to serial).
   Several booter arguments control whether these requests will succeed. The
   list of known requests is covered below:
@@ -3061,11 +3069,19 @@ troubleshooting:
   and this is the default value.
   \end{itemize}
 
-  \emph{Note}: To quickly see verbose output from \texttt{boot.efi} on versions before 10.15
-  set \texttt{bootercfg} to \texttt{log=1}.
+  \emph{Note}: To see verbose output from \texttt{boot.efi} on modern macOS versions
+  enable \texttt{AppleDebug} option. This will save the log to general OpenCore log.
+  For versions before 10.15.4 set \texttt{bootercfg} to \texttt{log=1}. This will
+  print verbose output onscreen.
 \item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg-once}
   \break
   Booter arguments override removed after first launch. Otherwise equivalent to \texttt{bootercfg}.
+\item
+  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:efiboot-perf-record}
+  \break
+  Enable performance log saving in \texttt{boot.efi}. Performance log is saved to physical
+  memory and is pointed by \texttt{efiboot-perf-record-data} and \texttt{efiboot-perf-record-size}
+  variables. Starting from 10.15.4 it can also be saved to OpenCore log by \texttt{AppleDebug} option.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:fmm-computer-name}
   \break
@@ -4408,6 +4424,13 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \emph{Note}: Some Macs, namely \texttt{MacPro5,1}, do have APFS compatibility,
   but their Apple Boot Policy protocol contains recovery detection issues, thus
   using this option is advised on them as well.
+
+\item
+  \texttt{AppleDebugLog}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple Debug Log protocol with a builtin
+  version.
 
 \item
   \texttt{AppleEvent}\\
