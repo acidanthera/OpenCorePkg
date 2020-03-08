@@ -951,7 +951,7 @@
 			<key>DirectGopRendering</key>
 			<false/>
 			<key>DirectGopCacheMode</key>
-			<integer>-1</integer>
+			<string></string>
 			<key>ReconnectOnResChange</key>
 			<false/>
 			<key>ReplaceTabWithSpace</key>
