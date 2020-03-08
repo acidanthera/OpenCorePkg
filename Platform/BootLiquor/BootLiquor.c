@@ -1336,10 +1336,9 @@ isin_S3 (
   // s = A-1-p-n                              17
   //
   STATIC CONST INT32 n = 13;
-  STATIC CONST INT32 A = 12;
   STATIC CONST INT32 p = 15;
-  STATIC CONST INT32 r = ((2 * n) - p);
-  STATIC CONST INT32 s = (n + p + 1 - A);
+  STATIC CONST INT32 r = 11;
+  STATIC CONST INT32 s = 17;
 
   x = x << (30 - n); // shift to full s32 range (Q13->Q30)
 
@@ -1376,7 +1375,7 @@ GuiGetInterpolatedValue (
     return Interpol->EndValue;
   }
 
-  AnimTime = (INT32) DivU64x32 ((UINT64) InterpolFpTimeFactor * DeltaTime, Interpol->Duration);
+  AnimTime = (INT32) DivU64x64Remainder ((UINT64) InterpolFpTimeFactor * DeltaTime, Interpol->Duration, NULL);
   if (Interpol->Type == GuiInterpolTypeSmooth) {
     //
     // One InterpolFpTimeFactor unit corresponds to 45 degrees in the unit circle. Divide
