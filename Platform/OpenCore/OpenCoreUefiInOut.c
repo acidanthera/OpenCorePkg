@@ -163,7 +163,8 @@ OcLoadUefiInputSupport (
                  KeyMode,
                  Config->Uefi.Input.KeyForgetThreshold,
                  Config->Uefi.Input.KeyMergeThreshold,
-                 Config->Uefi.Input.KeySwap
+                 Config->Uefi.Input.KeySwap,
+                 Config->Uefi.Input.KeyFiltering
                  );
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_ERROR, "OC: Failed to initialize keycode\n"));

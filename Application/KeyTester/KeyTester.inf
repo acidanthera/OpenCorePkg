@@ -1,7 +1,7 @@
 ## @file
-#  Verify MSR 0xE2 status on all the processors.
+#  Test keyboard input through standard protocol.
 #
-#  Copyright (c) 2018, vit9696. All rights reserved.<BR>
+#  Copyright (c) 2020, vit9696. All rights reserved.<BR>
 #
 #  This program and the accompanying materials
 #  are licensed and made available under the terms and conditions of the BSD License
@@ -14,8 +14,8 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = VerifyMsrE2
-  FILE_GUID                      = 9031CCA3-EF7A-4D36-ADCA-F75802085D32
+  BASE_NAME                      = KeyTester
+  FILE_GUID                      = 78E262F9-4438-49E0-9C53-0CA377B4029D
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
   ENTRY_POINT                    = UefiMain
@@ -32,20 +32,16 @@
 #
 
 [Sources]
-  VerifyMsrE2.c
+  KeyTester.c
 
 [Packages]
+  EfiPkg/EfiPkg.dec
   MdePkg/MdePkg.dec
-  MdeModulePkg/MdeModulePkg.dec
   OpenCorePkg/OpenCorePkg.dec
-  UefiCpuPkg/UefiCpuPkg.dec
-
-[Protocols]
-  gEfiMpServiceProtocolGuid                 ## CONSUMES
 
 [LibraryClasses]
+  DebugLib
   OcConsoleControlEntryModeLib
   UefiApplicationEntryPoint
+  UefiBootServicesTableLib
   UefiLib
-  PcdLib
-  IoLib

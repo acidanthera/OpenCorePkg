@@ -54,7 +54,8 @@ typedef struct {
 EFI_STATUS
 AIKSourceGrabEfiKey (
   AIK_SOURCE        *Source,
-  AMI_EFI_KEY_DATA  *KeyData
+  AMI_EFI_KEY_DATA  *KeyData,
+  BOOLEAN           KeyFiltering
   );
 
 EFI_STATUS

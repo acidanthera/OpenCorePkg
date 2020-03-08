@@ -23,7 +23,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 EFI_STATUS
 AIKSourceGrabEfiKey (
   AIK_SOURCE        *Source,
-  AMI_EFI_KEY_DATA  *KeyData
+  AMI_EFI_KEY_DATA  *KeyData,
+  BOOLEAN           KeyFiltering
   )
 {
   EFI_STATUS      Status;
@@ -48,11 +49,78 @@ AIKSourceGrabEfiKey (
     Event  = NULL;
   }
 
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  //
+  // Some boards like GA Z77P-D3 may return uninitialised data in EFI_INPUT_KEY.
+  // Try to reduce the effects by discarding definitely invalid symbols.
+  // See: tables 107 and 108 in UEFI spec describing EFI Scan Codes.
+  //
+  if (KeyFiltering) {
+    if ((KeyData->Key.UnicodeChar & ~0xFFU) != 0) {
+      return EFI_INVALID_PARAMETER;
+    }
+
+    switch (KeyData->Key.ScanCode) {
+      case SCAN_NULL:
+      case SCAN_UP:
+      case SCAN_DOWN:
+      case SCAN_RIGHT:
+      case SCAN_LEFT:
+      case SCAN_HOME:
+      case SCAN_END:
+      case SCAN_INSERT:
+      case SCAN_DELETE:
+      case SCAN_PAGE_UP:
+      case SCAN_PAGE_DOWN:
+      case SCAN_F1:
+      case SCAN_F2:
+      case SCAN_F3:
+      case SCAN_F4:
+      case SCAN_F5:
+      case SCAN_F6:
+      case SCAN_F7:
+      case SCAN_F8:
+      case SCAN_F9:
+      case SCAN_F10:
+      case SCAN_ESC:
+      case SCAN_F11:
+      case SCAN_F12:
+      case SCAN_PAUSE:
+      case SCAN_F13:
+      case SCAN_F14:
+      case SCAN_F15:
+      case SCAN_F16:
+      case SCAN_F17:
+      case SCAN_F18:
+      case SCAN_F19:
+      case SCAN_F20:
+      case SCAN_F21:
+      case SCAN_F22:
+      case SCAN_F23:
+      case SCAN_F24:
+      case SCAN_MUTE:
+      case SCAN_VOLUME_UP:
+      case SCAN_VOLUME_DOWN:
+      case SCAN_BRIGHTNESS_UP:
+      case SCAN_BRIGHTNESS_DOWN:
+      case SCAN_SUSPEND:
+      case SCAN_HIBERNATE:
+      case SCAN_TOGGLE_DISPLAY:
+      case SCAN_RECOVERY:
+      case SCAN_EJECT:
+        break;
+      default:
+        return EFI_INVALID_PARAMETER;
+    }
+  }
+
   if (Event != NULL) {
     gBS->SignalEvent (Event);
   }
-
-  return Status;
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS

@@ -49,6 +49,11 @@ typedef struct {
   UINT8                 KeyMergeThreshold;
 
   //
+  // Perform ASCII and scan code input key filtering.
+  //
+  BOOLEAN               KeyFiltering;
+
+  //
   // Input sources
   //
   AIK_SOURCE            Source;

@@ -4051,6 +4051,17 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \begin{enumerate}
 
 \item
+  \texttt{KeyFiltering}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable keyboard input sanity checking.
+
+  Apparently some boards like GA Z77P-D3 may return uninitialised data
+  in \texttt{EFI\_INPUT\_KEY} with all input protocols.
+  This option discards keys that are neither ASCII, nor are defined
+  in the UEFI specification (see tables 107 and 108 in version 2.8).
+
+\item
   \texttt{KeyForgetThreshold}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
@@ -4115,6 +4126,9 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \item \texttt{V2} --- Uses UEFI standard modern input protocol \texttt{EFI\_SIMPLE\_TEXT\_INPUT\_EX\_PROTOCOL}.
   \item \texttt{AMI} --- Uses APTIO input protocol \texttt{AMI\_EFIKEYCODE\_PROTOCOL}.
   \end{itemize}
+
+  \emph{Note}: Currently \texttt{V1}, \texttt{V2}, and \texttt{AMI} unlike \texttt{Auto} only do filtering of
+  the particular specified protocol. This may change in the future versions.
 
 \item
   \texttt{KeySwap}\\
@@ -4268,6 +4282,21 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   text mode.
 
   \emph{Note}: This option only applies to \texttt{System} renderer.
+
+\item
+  \texttt{DirectGopCacheMode}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Cache mode for builtin graphics output protocol framebuffer.
+
+  Tuning cache mode may provide better rendering performance on some firmwares.
+  Providing empty string leaves cache control settings to the firmware.
+  Valid non-empty values are: \texttt{Uncacheable}, \texttt{WriteCombining}, and
+  \texttt{WriteThrough}.
+
+  \emph{Note}: This option is not supported on most hardware (see
+  \href{https://github.com/acidanthera/bugtracker/issues/755}{acidanthera/bugtracker\#755}
+  for more details).
 
 \item
   \texttt{DirectGopRendering}\\
