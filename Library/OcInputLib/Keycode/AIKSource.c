@@ -60,7 +60,7 @@ AIKSourceGrabEfiKey (
   //
   if (KeyFiltering) {
     if ((KeyData->Key.UnicodeChar & ~0xFFU) != 0) {
-      return EFI_INVALID_PARAMETER;
+      return EFI_UNSUPPORTED;
     }
 
     switch (KeyData->Key.ScanCode) {
@@ -113,7 +113,7 @@ AIKSourceGrabEfiKey (
       case SCAN_EJECT:
         break;
       default:
-        return EFI_INVALID_PARAMETER;
+        return EFI_UNSUPPORTED;
     }
   }
 

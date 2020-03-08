@@ -142,6 +142,11 @@ AIKPollKeyboardHandler (
         ));
       AIKDataWriteEntry (&Keycode->Data, &KeyData);
       AIKTargetWriteEntry (&Keycode->Target, &KeyData);
+    } else if (Status == EFI_UNSUPPORTED) {
+      //
+      // Filtered key, do not abort.
+      //
+      Status = EFI_SUCCESS;
     }
 
     Index++;
