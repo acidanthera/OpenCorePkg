@@ -37,7 +37,9 @@
   BaseLib
   MemoryAllocationLib
   OcFileLib
+  OcSerializeLib
   OcStringLib
+  OcTemplateLib
 
 [Guids]
   gEfiFileInfoGuid                     ## CONSUMES
