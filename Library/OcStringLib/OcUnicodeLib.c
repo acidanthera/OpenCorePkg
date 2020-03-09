@@ -21,7 +21,7 @@
 
 INTN
 EFIAPI
-StriCmp (
+OcStriCmp (
   IN CHAR16  *FirstString,
   IN CHAR16  *SecondString
   )
@@ -49,7 +49,7 @@ StriCmp (
 
 INTN
 EFIAPI
-StrniCmp (
+OcStrniCmp (
   IN CONST CHAR16  *FirstString,
   IN CONST CHAR16  *SecondString,
   IN UINTN         Length
@@ -91,7 +91,7 @@ StrniCmp (
 
 CHAR16 *
 EFIAPI
-StriStr (
+OcStriStr (
   IN      CONST CHAR16              *String,
   IN      CONST CHAR16              *SearchString
   )
