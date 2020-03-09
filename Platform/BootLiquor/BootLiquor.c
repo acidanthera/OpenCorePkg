@@ -966,7 +966,7 @@ GuiLibConstruct (
   }
 
   MtrrSetMemoryAttribute (
-    (EFI_PHYSICAL_ADDRESS)mScreenBuffer,
+    (EFI_PHYSICAL_ADDRESS)(UINTN) mScreenBuffer,
     mScreenBufferDelta * OutputInfo->VerticalResolution,
     CacheWriteBack
     );
@@ -1247,7 +1247,6 @@ GuiCreateHighlightedImage (
   UINT32                        ColumnOffset;
   BOOLEAN                       OneSet;
   UINT32                        FirstUnsetX;
-  UINT32                        IndexUnsetX;
   UINT32                        IndexY;
   UINT32                        RowOffset;
 
@@ -1292,16 +1291,13 @@ GuiCreateHighlightedImage (
           // Set all fully transparent pixels between two not fully transparent
           // pixels to the highlighter pixel.
           //
-          for (
-            IndexUnsetX = FirstUnsetX;
-            FirstUnsetX < ColumnOffset;
-            ++FirstUnsetX
-            ) {
+          while (FirstUnsetX < ColumnOffset) {
             CopyMem (
               &Buffer[RowOffset + FirstUnsetX],
               &PremulPixel,
               sizeof (*Buffer)
               );
+            ++FirstUnsetX;
           }
 
           FirstUnsetX = 0;
