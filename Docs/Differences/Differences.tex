@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Mar  6 09:43:05 2020
-%DIF ADD ../Configuration.tex        Sun Mar  8 23:40:39 2020
+%DIF ADD ../Configuration.tex        Tue Mar 10 00:51:02 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1049,8 +1049,10 @@ Several cases, where patching actually does make sense, include:
   with a dummy name by patching \texttt{\_Q11} with \texttt{XQ11}.
 \end{itemize}
 
-Tianocore \href{https://github.com/tianocore/edk2/blob/UDK2018/MdePkg/Include/IndustryStandard/AcpiAml.h}{AcpiAml.h}
-source file may help understanding ACPI opcodes.
+Tianocore \DIFdelbegin %DIFDELCMD < \href{https://github.com/tianocore/edk2/blob/UDK2018/MdePkg/Include/IndustryStandard/AcpiAml.h}{AcpiAml.h}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/IndustryStandard/AcpiAml.h}{AcpiAml.h}
+\DIFaddend source file may help understanding ACPI opcodes.
 
 \subsection{Quirks Properties}\label{acpipropsquirks}
 
@@ -2372,7 +2374,8 @@ behaviour that does not go to any other sections
   Unless \texttt{Target} enables console (onscreen) printing,
   onscreen debug output will not be visible. The following levels
   are supported (discover more in
-  \href{https://github.com/tianocore/edk2/blob/UDK2018/MdePkg/Include/Library/DebugLib.h}{DebugLib.h}):
+  \DIFdelbegin %DIFDELCMD < \href{https://github.com/tianocore/edk2/blob/UDK2018/MdePkg/Include/Library/DebugLib.h}{DebugLib.h}%%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/Library/DebugLib.h}{DebugLib.h}\DIFaddend ):
 
   \begin{itemize}
   \tightlist
@@ -3199,8 +3202,10 @@ are written to three select destinations:
 
 Most of the fields specify the overrides in SMBIOS, and their field
 names conform to EDK2
-\href{https://github.com/tianocore/edk2/blob/UDK2018/MdePkg/Include/IndustryStandard/SmBios.h}{SmBios.h}
-header file. However, several important fields reside in Data Hub and
+\DIFdelbegin %DIFDELCMD < \href{https://github.com/tianocore/edk2/blob/UDK2018/MdePkg/Include/IndustryStandard/SmBios.h}{SmBios.h}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/IndustryStandard/SmBios.h}{SmBios.h}
+\DIFaddend header file. However, several important fields reside in Data Hub and
 NVRAM. Some of the values can be found in more than one field and/or
 destination, so there are two ways to control their update process:
 manual, where one specifies all the values (the default), and semi-automatic,

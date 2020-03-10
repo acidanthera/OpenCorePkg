@@ -1,0 +1,221 @@
+From 3ef5f6fb8cf4649d857f6065a06f0bb2fb8b9d3d Mon Sep 17 00:00:00 2001
+From: Vitaly Cheptsov <vit9696@protonmail.com>
+Date: Mon, 10 Feb 2020 13:10:40 +0300
+Subject: [PATCH 1/1] ShellPkg: Add support for input with separately reported
+ modifiers
+
+REF: https://bugzilla.tianocore.org/show_bug.cgi?id=2510
+
+Some firmwares:
+- Report Shift modifier even when they report upper-case unicode letter.
+- Report Ctrl modifier with "shifted" UniChar (i.e. X - 'A' + 1).
+
+This change provides support for these firmwares preserving the compatibility
+with the previous input handling.
+
+Signed-off-by: Michael Belyaev <usrsse2@icloud.com>
+Reviewed-by: Vitaly Cheptsov <vit9696@protonmail.com>
+---
+ ShellPkg/Library/UefiShellDebug1CommandsLib/Edit/MainTextEditor.c   | 37 ++++++++++++++------
+ ShellPkg/Library/UefiShellDebug1CommandsLib/EditInputBar.c          | 28 ++++++++++-----
+ ShellPkg/Library/UefiShellDebug1CommandsLib/EditMenuBar.c           |  6 ++++
+ ShellPkg/Library/UefiShellDebug1CommandsLib/HexEdit/MainHexEditor.c | 11 +++---
+ 4 files changed, 58 insertions(+), 24 deletions(-)
+
+diff --git a/ShellPkg/Library/UefiShellDebug1CommandsLib/Edit/MainTextEditor.c b/ShellPkg/Library/UefiShellDebug1CommandsLib/Edit/MainTextEditor.c
+index df530f1119..9615a4dfbd 100644
+--- a/ShellPkg/Library/UefiShellDebug1CommandsLib/Edit/MainTextEditor.c
++++ b/ShellPkg/Library/UefiShellDebug1CommandsLib/Edit/MainTextEditor.c
+@@ -1381,8 +1381,8 @@ MainCommandDisplayHelp (
+       continue;
+     }
+ 
+-    if (((KeyData.KeyState.KeyShiftState & EFI_SHIFT_STATE_VALID) == 0) ||
+-        (KeyData.KeyState.KeyShiftState == EFI_SHIFT_STATE_VALID)) {
++    if (((KeyData.KeyState.KeyShiftState & EFI_SHIFT_STATE_VALID) == 0)
++      || (KeyData.KeyState.KeyShiftState == EFI_SHIFT_STATE_VALID)) {
+       //
+       // For consoles that don't support/report shift state,
+       // CTRL+W is translated to L'W' - L'A' + 1.
+@@ -1390,14 +1390,17 @@ MainCommandDisplayHelp (
+       if (KeyData.Key.UnicodeChar == L'W' - L'A' + 1) {
+         break;
+       }
+-    } else if (((KeyData.KeyState.KeyShiftState & EFI_SHIFT_STATE_VALID) != 0) &&
+-               ((KeyData.KeyState.KeyShiftState & (EFI_LEFT_CONTROL_PRESSED | EFI_RIGHT_CONTROL_PRESSED)) != 0) &&
+-               ((KeyData.KeyState.KeyShiftState & ~(EFI_SHIFT_STATE_VALID | EFI_LEFT_CONTROL_PRESSED | EFI_RIGHT_CONTROL_PRESSED)) == 0)) {
++    } else if (((KeyData.KeyState.KeyShiftState & EFI_SHIFT_STATE_VALID) != 0)
++            && ((KeyData.KeyState.KeyShiftState & (EFI_LEFT_CONTROL_PRESSED | EFI_RIGHT_CONTROL_PRESSED)) != 0)
++            && ((KeyData.KeyState.KeyShiftState & ~(EFI_SHIFT_STATE_VALID | EFI_LEFT_CONTROL_PRESSED | EFI_RIGHT_CONTROL_PRESSED)) == 0)) {
+       //
+       // For consoles that supports/reports shift state,
+       // make sure that only CONTROL shift key is pressed.
++      // For some consoles that report shift state,
++      // CTRL+W is still translated to L'W' - L'A' + 1.
+       //
+-      if ((KeyData.Key.UnicodeChar == 'w') || (KeyData.Key.UnicodeChar == 'W')) {
++      if ((KeyData.Key.UnicodeChar == L'w') || (KeyData.Key.UnicodeChar == L'W')
++        || (KeyData.Key.UnicodeChar == L'w' - L'a' + 1) || (KeyData.Key.UnicodeChar == L'W' - L'A' + 1)) {
+         break;
+       }
+     }
+@@ -1834,7 +1837,8 @@ MainEditorKeyInput (
+   EFI_KEY_DATA              KeyData;
+   EFI_STATUS                Status;
+   EFI_SIMPLE_POINTER_STATE  MouseState;
+-  BOOLEAN                   NoShiftState;
++  BOOLEAN                   NoModifierState;
++  BOOLEAN                   ShiftOnlyState;
+ 
+   do {
+ 
+@@ -1886,17 +1890,28 @@ MainEditorKeyInput (
+         //
+         StatusBarSetRefresh();
+         //
+-        // NoShiftState: TRUE when no shift key is pressed.
++        // NoModifierState: TRUE when no modifier key is pressed.
+         //
+-        NoShiftState = ((KeyData.KeyState.KeyShiftState & EFI_SHIFT_STATE_VALID) == 0) || (KeyData.KeyState.KeyShiftState == EFI_SHIFT_STATE_VALID);
++        NoModifierState = ((KeyData.KeyState.KeyShiftState & EFI_SHIFT_STATE_VALID) == 0)
++                        || (KeyData.KeyState.KeyShiftState == EFI_SHIFT_STATE_VALID);
++        //
++        // ShiftOnlyState: TRUE when no modifier key except Shift is pressed.
++        //
++        ShiftOnlyState = ((KeyData.KeyState.KeyShiftState & EFI_SHIFT_STATE_VALID) == 0)
++                        || ((KeyData.KeyState.KeyShiftState
++                          & ~(EFI_SHIFT_STATE_VALID | EFI_LEFT_SHIFT_PRESSED | EFI_RIGHT_SHIFT_PRESSED)) == 0);
+         //
+         // dispatch to different components' key handling function
+         //
+         if (EFI_NOT_FOUND != MenuBarDispatchControlHotKey(&KeyData)) {
+           Status = EFI_SUCCESS;
+-        } else if (NoShiftState && ((KeyData.Key.ScanCode == SCAN_NULL) || ((KeyData.Key.ScanCode >= SCAN_UP) && (KeyData.Key.ScanCode <= SCAN_PAGE_DOWN)))) {
++        } else if ((ShiftOnlyState && (KeyData.Key.ScanCode == SCAN_NULL))
++                || (NoModifierState && (KeyData.Key.ScanCode >= SCAN_UP) && (KeyData.Key.ScanCode <= SCAN_PAGE_DOWN))) {
++          //
++          // alphanumeric keys with or without shift, or arrow keys without shift
++          //
+           Status = FileBufferHandleInput (&KeyData.Key);
+-        } else if (NoShiftState && (KeyData.Key.ScanCode >= SCAN_F1) && (KeyData.Key.ScanCode <= SCAN_F12)) {
++        } else if (NoModifierState && (KeyData.Key.ScanCode >= SCAN_F1) && (KeyData.Key.ScanCode <= SCAN_F12)) {
+           Status = MenuBarDispatchFunctionKey (&KeyData.Key);
+         } else {
+           StatusBarSetStatusString (L"Unknown Command");
+diff --git a/ShellPkg/Library/UefiShellDebug1CommandsLib/EditInputBar.c b/ShellPkg/Library/UefiShellDebug1CommandsLib/EditInputBar.c
+index 35b0b701e8..d053059220 100644
+--- a/ShellPkg/Library/UefiShellDebug1CommandsLib/EditInputBar.c
++++ b/ShellPkg/Library/UefiShellDebug1CommandsLib/EditInputBar.c
+@@ -130,6 +130,8 @@ InputBarRefresh (
+   UINTN                   EventIndex;
+   UINTN                   CursorRow;
+   UINTN                   CursorCol;
++  BOOLEAN                 ShiftPressed;
++  BOOLEAN                 ModifiersPressed;
+ 
+   //
+   // variable initialization
+@@ -180,17 +182,23 @@ InputBarRefresh (
+     if (EFI_ERROR (Status)) {
+       continue;
+     }
+-    if (((KeyData.KeyState.KeyShiftState & EFI_SHIFT_STATE_VALID) != 0) &&
+-        (KeyData.KeyState.KeyShiftState != EFI_SHIFT_STATE_VALID)) {
+-      //
+-      // Shift key pressed.
+-      //
++    ModifiersPressed = ((KeyData.KeyState.KeyShiftState & EFI_SHIFT_STATE_VALID) != 0)
++                    && (KeyData.KeyState.KeyShiftState != EFI_SHIFT_STATE_VALID);
++
++    //
++    // TRUE if Shift is pressed and no other modifiers are pressed
++    //
++    ShiftPressed = ModifiersPressed &&
++                   ((KeyData.KeyState.KeyShiftState &
++                     ~(EFI_SHIFT_STATE_VALID | EFI_LEFT_SHIFT_PRESSED | EFI_RIGHT_SHIFT_PRESSED)) == 0);
++
++    if (ModifiersPressed && !ShiftPressed) {
+       continue;
+     }
+     //
+     // pressed ESC
+     //
+-    if (KeyData.Key.ScanCode == SCAN_ESC) {
++    if (!ModifiersPressed && KeyData.Key.ScanCode == SCAN_ESC) {
+       Size    = 0;
+       Status  = EFI_NOT_READY;
+       break;
+@@ -198,9 +206,10 @@ InputBarRefresh (
+     //
+     // return pressed
+     //
+-    if (KeyData.Key.UnicodeChar == CHAR_LINEFEED || KeyData.Key.UnicodeChar == CHAR_CARRIAGE_RETURN) {
++    if (!ModifiersPressed
++      && (KeyData.Key.UnicodeChar == CHAR_LINEFEED || KeyData.Key.UnicodeChar == CHAR_CARRIAGE_RETURN)) {
+       break;
+-    } else if (KeyData.Key.UnicodeChar == CHAR_BACKSPACE) {
++    } else if (!ModifiersPressed && KeyData.Key.UnicodeChar == CHAR_BACKSPACE) {
+       //
+       // backspace
+       //
+@@ -213,7 +222,8 @@ InputBarRefresh (
+ 
+         }
+       }
+-    } else if (KeyData.Key.UnicodeChar <= 127 && KeyData.Key.UnicodeChar >= 32) {
++    } else if ((!ModifiersPressed || ShiftPressed)
++            && KeyData.Key.UnicodeChar <= 127 && KeyData.Key.UnicodeChar >= 32) {
+       //
+       // VALID ASCII char pressed
+       //
+diff --git a/ShellPkg/Library/UefiShellDebug1CommandsLib/EditMenuBar.c b/ShellPkg/Library/UefiShellDebug1CommandsLib/EditMenuBar.c
+index ca8bc506d9..eabbf3c571 100644
+--- a/ShellPkg/Library/UefiShellDebug1CommandsLib/EditMenuBar.c
++++ b/ShellPkg/Library/UefiShellDebug1CommandsLib/EditMenuBar.c
+@@ -190,11 +190,17 @@ MenuBarDispatchControlHotKey (
+     //
+     // For consoles that supports/reports shift state,
+     // make sure only CONTROL is pressed.
++    // For some consoles that report shift state,
++    // Ctrl+A is still translated to 1 (UnicodeChar).
+     //
+     if ((KeyData->Key.UnicodeChar >= L'A') && (KeyData->Key.UnicodeChar <= L'Z')) {
+       ControlIndex = KeyData->Key.UnicodeChar - L'A' + 1;
+     } else if ((KeyData->Key.UnicodeChar >= L'a') && (KeyData->Key.UnicodeChar <= L'z')) {
+       ControlIndex = KeyData->Key.UnicodeChar - L'a' + 1;
++    } else if ((KeyData->Key.UnicodeChar >= L'A' - L'A' + 1) && (KeyData->Key.UnicodeChar <= L'Z' - L'A' + 1)) {
++      ControlIndex = KeyData->Key.UnicodeChar;
++    } else if ((KeyData->Key.UnicodeChar >= L'a' - L'a' + 1) && (KeyData->Key.UnicodeChar <= L'z' - L'z' + 1)) {
++      ControlIndex = KeyData->Key.UnicodeChar;
+     }
+   }
+   if ((SCAN_CONTROL_Z < ControlIndex)
+diff --git a/ShellPkg/Library/UefiShellDebug1CommandsLib/HexEdit/MainHexEditor.c b/ShellPkg/Library/UefiShellDebug1CommandsLib/HexEdit/MainHexEditor.c
+index a00df49d38..394e531c16 100644
+--- a/ShellPkg/Library/UefiShellDebug1CommandsLib/HexEdit/MainHexEditor.c
++++ b/ShellPkg/Library/UefiShellDebug1CommandsLib/HexEdit/MainHexEditor.c
+@@ -137,14 +137,17 @@ HMainCommandDisplayHelp (
+       if (KeyData.Key.UnicodeChar == L'W' - L'A' + 1) {
+         break;
+       }
+-    } else if (((KeyData.KeyState.KeyShiftState & EFI_SHIFT_STATE_VALID) != 0) &&
+-               ((KeyData.KeyState.KeyShiftState & (EFI_LEFT_CONTROL_PRESSED | EFI_RIGHT_CONTROL_PRESSED)) != 0) &&
+-               ((KeyData.KeyState.KeyShiftState & ~(EFI_SHIFT_STATE_VALID | EFI_LEFT_CONTROL_PRESSED | EFI_RIGHT_CONTROL_PRESSED)) == 0)) {
++    } else if (((KeyData.KeyState.KeyShiftState & EFI_SHIFT_STATE_VALID) != 0)
++            && ((KeyData.KeyState.KeyShiftState & (EFI_LEFT_CONTROL_PRESSED | EFI_RIGHT_CONTROL_PRESSED)) != 0)
++            && ((KeyData.KeyState.KeyShiftState & ~(EFI_SHIFT_STATE_VALID | EFI_LEFT_CONTROL_PRESSED | EFI_RIGHT_CONTROL_PRESSED)) == 0)) {
+       //
+       // For consoles that supports/reports shift state,
+       // make sure that only CONTROL shift key is pressed.
++      // For some consoles that report shift state,
++      // CTRL+W is still translated to L'W' - L'A' + 1.
+       //
+-      if ((KeyData.Key.UnicodeChar == 'w') || (KeyData.Key.UnicodeChar == 'W')) {
++      if ((KeyData.Key.UnicodeChar == 'w') || (KeyData.Key.UnicodeChar == 'W')
++        || (KeyData.Key.UnicodeChar == L'w' - L'a' + 1) || (KeyData.Key.UnicodeChar == L'W' - L'A' + 1)) {
+         break;
+       }
+     }
+-- 
+2.21.1 (Apple Git-122.3)
+

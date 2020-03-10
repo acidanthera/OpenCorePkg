@@ -989,7 +989,7 @@ Several cases, where patching actually does make sense, include:
   with a dummy name by patching \texttt{\_Q11} with \texttt{XQ11}.
 \end{itemize}
 
-Tianocore \href{https://github.com/tianocore/edk2/blob/UDK2018/MdePkg/Include/IndustryStandard/AcpiAml.h}{AcpiAml.h}
+Tianocore \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/IndustryStandard/AcpiAml.h}{AcpiAml.h}
 source file may help understanding ACPI opcodes.
 
 \subsection{Quirks Properties}\label{acpipropsquirks}
@@ -2310,7 +2310,7 @@ behaviour that does not go to any other sections
   Unless \texttt{Target} enables console (onscreen) printing,
   onscreen debug output will not be visible. The following levels
   are supported (discover more in
-  \href{https://github.com/tianocore/edk2/blob/UDK2018/MdePkg/Include/Library/DebugLib.h}{DebugLib.h}):
+  \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/Library/DebugLib.h}{DebugLib.h}):
 
   \begin{itemize}
   \tightlist
@@ -3131,7 +3131,7 @@ are written to three select destinations:
 
 Most of the fields specify the overrides in SMBIOS, and their field
 names conform to EDK2
-\href{https://github.com/tianocore/edk2/blob/UDK2018/MdePkg/Include/IndustryStandard/SmBios.h}{SmBios.h}
+\href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/IndustryStandard/SmBios.h}{SmBios.h}
 header file. However, several important fields reside in Data Hub and
 NVRAM. Some of the values can be found in more than one field and/or
 destination, so there are two ways to control their update process:

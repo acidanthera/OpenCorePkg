@@ -1,0 +1,49 @@
+From 85298e8b1d07a229fdc23ce9999e915e44552bad Mon Sep 17 00:00:00 2001
+From: Vitaly Cheptsov <vit9696@protonmail.com>
+Date: Mon, 13 Jan 2020 00:35:04 +0300
+Subject: [PATCH 1/1] ShellPkg: Do not connect handles without device paths
+
+REF: https://bugzilla.tianocore.org/show_bug.cgi?id=2460
+
+Doing this reduces the amount of needless work during device
+connection and resolves issues with firmwares that freeze
+when connecting handles without device paths.
+
+Signed-off-by: Vitaly Cheptsov <vit9696@protonmail.com>
+---
+ ShellPkg/Library/UefiShellLevel2CommandsLib/Load.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/ShellPkg/Library/UefiShellDebug1CommandsLib/LoadPciRom.c b/ShellPkg/Library/UefiShellDebug1CommandsLib/LoadPciRom.c
+index 5b6cba17f3..cb889cf5e0 100644
+--- a/ShellPkg/Library/UefiShellDebug1CommandsLib/LoadPciRom.c
++++ b/ShellPkg/Library/UefiShellDebug1CommandsLib/LoadPciRom.c
+@@ -387,8 +387,8 @@ LoadPciRomConnectAllDriversToAllControllers (
+   UINTN       Index;
+ 
+   Status = gBS->LocateHandleBuffer (
+-                  AllHandles,
+-                  NULL,
++                  ByProtocol,
++                  &gEfiDevicePathProtocolGuid,
+                   NULL,
+                   &HandleCount,
+                   &HandleBuffer
+diff --git a/ShellPkg/Library/UefiShellLevel2CommandsLib/Load.c b/ShellPkg/Library/UefiShellLevel2CommandsLib/Load.c
+index b6e7c952fa..083aac0dba 100644
+--- a/ShellPkg/Library/UefiShellLevel2CommandsLib/Load.c
++++ b/ShellPkg/Library/UefiShellLevel2CommandsLib/Load.c
+@@ -32,8 +32,8 @@ ConnectAllEfi (
+   UINTN       Index;
+ 
+   Status = gBS->LocateHandleBuffer (
+-                  AllHandles,
+-                  NULL,
++                  ByProtocol,
++                  &gEfiDevicePathProtocolGuid,
+                   NULL,
+                   &HandleCount,
+                   &HandleBuffer
+-- 
+2.21.0 (Apple Git-122.2)
+
