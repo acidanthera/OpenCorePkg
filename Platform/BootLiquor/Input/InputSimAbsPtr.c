@@ -23,10 +23,10 @@ struct GUI_POINTER_CONTEXT_ {
   EFI_ABSOLUTE_POINTER_PROTOCOL *AbsPointer;
   UINT32                        Width;
   UINT32                        Height;
-  UINT64                        SimpleMaxX;
-  UINT64                        SimpleMaxY;
-  UINT64                        SimpleX;
-  UINT64                        SimpleY;
+  UINT32                        MaxX;
+  UINT32                        MaxY;
+  UINT32                        X;
+  UINT32                        Y;
   UINT8                         LockedBy;
 };
 
@@ -37,11 +37,11 @@ enum {
 };
 
 STATIC
-UINT64
+UINT32
 InternalClipPointerSimple (
-  IN UINT64  OldCoord,
-  IN INT32   DeltaCoord,
-  IN UINT64  MaxCoord
+  IN UINT32  OldCoord,
+  IN INT64   DeltaCoord,
+  IN UINT32  MaxCoord
   )
 {
   BOOLEAN Result;
@@ -50,25 +50,25 @@ InternalClipPointerSimple (
   Result = OcOverflowAddS64 (OldCoord, DeltaCoord, &NewCoord);
   if (!Result) {
     if (NewCoord <= 0) {
-      NewCoord = 0;
-    } else if ((UINT64)NewCoord > MaxCoord) {
-      NewCoord = MaxCoord;
+      return 0;
+    } else if (NewCoord > MaxCoord) {
+      return MaxCoord;
+    } else {
+      return (UINT32) NewCoord;
     }
   } else {
     if (DeltaCoord < 0) {
-      NewCoord = 0;
+      return 0;
     } else {
-      NewCoord = MaxCoord;
+      return MaxCoord;
     }
   }
-
-  return NewCoord;
 }
 
 STATIC
 INT64
 InternalGetInterpolatedValue (
-  IN INT64  Value
+  IN INT32  Value
   )
 {
   INTN    Bit;
@@ -76,11 +76,9 @@ InternalGetInterpolatedValue (
   STATIC CONST INT8 AccelerationNumbers[] = {1, 2, 3, 4, 5, 6};
 
   if (Value != 0) {
-    Bit = HighBitSet64 (ABS (Value));
-    return Value * AccelerationNumbers[
-      Bit >= ARRAY_SIZE (AccelerationNumbers) - 1
-      ? ARRAY_SIZE (AccelerationNumbers) - 1
-      : Bit
+    Bit = HighBitSet32 (ABS (Value));
+    return (INT64) Value * AccelerationNumbers[
+      MIN (Bit, ARRAY_SIZE (AccelerationNumbers) - 1)
       ];
   }
 
@@ -138,19 +136,19 @@ InternalUpdateStateSimple (
     }
   }
 
-  Context->SimpleX = InternalClipPointerSimple (
-    Context->SimpleX,
-    (INT32) InterpolatedX,
-    Context->SimpleMaxX
+  Context->X = InternalClipPointerSimple (
+    Context->X,
+    InterpolatedX,
+    Context->MaxX
     );
-  State->X = (UINT32) Context->SimpleX;
+  State->X = Context->X;
 
-  Context->SimpleY = InternalClipPointerSimple (
-    Context->SimpleY,
-    (INT32) InterpolatedY,
-    Context->SimpleMaxY
+  Context->Y = InternalClipPointerSimple (
+    Context->Y,
+    InterpolatedY,
+    Context->MaxY
     );
-  State->Y = (UINT32) Context->SimpleY;
+  State->Y = Context->Y;
 
   State->PrimaryDown   = PointerState.LeftButton;
   State->SecondaryDown = PointerState.RightButton;
@@ -188,7 +186,7 @@ InternalUpdateStateAbsolute (
 
   NewY  = PointerState.CurrentY - Context->AbsPointer->Mode->AbsoluteMinY;
   NewY *= Context->Height;
-  NewY  = DivU64x32 (NewX, Context->AbsPointer->Mode->AbsoluteMaxY - Context->AbsPointer->Mode->AbsoluteMinY);
+  NewY  = DivU64x32 (NewY, Context->AbsPointer->Mode->AbsoluteMaxY - Context->AbsPointer->Mode->AbsoluteMinY);
 
   State->X = (UINT32)NewX;
   State->Y = (UINT32)NewY;
@@ -196,13 +194,11 @@ InternalUpdateStateAbsolute (
   State->PrimaryDown   = (PointerState.ActiveButtons & EFI_ABSP_TouchActive) != 0;
   State->SecondaryDown = (PointerState.ActiveButtons & EFI_ABS_AltActive) != 0;
   //
-  // WORKAROUND: Adapt SimpleX/Y based on touch position so the cursor
-  //             will not jump when changing from touch to mouse.
+  // Adapt X/Y based on touch position so the cursor will not jump when
+  // changing from touch to mouse.
   //
-  if (Context->Pointer != NULL) {
-    Context->SimpleX = State->X * Context->Pointer->Mode->ResolutionX;
-    Context->SimpleY = State->Y * Context->Pointer->Mode->ResolutionY;
-  }
+  Context->X = (UINT32)NewX;
+  Context->Y = (UINT32)NewY;
 
   return EFI_SUCCESS;
 }
@@ -355,10 +351,10 @@ GuiPointerConstruct (
   }
 
   if (Context.Pointer != NULL) {
-    Context.SimpleX    = DefaultX;
-    Context.SimpleY    = DefaultY;
-    Context.SimpleMaxX = Width - 1;
-    Context.SimpleMaxY = Height - 1;
+    Context.X    = DefaultX;
+    Context.Y    = DefaultY;
+    Context.MaxX = Width - 1;
+    Context.MaxY = Height - 1;
   }
 
   Context.Width  = Width;
