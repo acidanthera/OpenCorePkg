@@ -293,3 +293,6 @@
 
   ##  @libraryclass
   OcXmlLib|Include/Library/OcXmlLib.h
+
+  ##  @libraryclass
+  UefiBootServicesTableLib|Include/Library/UefiBootServicesTableLib.h

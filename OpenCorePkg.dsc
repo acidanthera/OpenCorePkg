@@ -161,6 +161,7 @@
   OpenCorePkg/Library/OcAppleUserInterfaceThemeLib/OcAppleUserInterfaceThemeLib.inf
   OpenCorePkg/Library/OcAudioLib/OcAudioLib.inf
   OpenCorePkg/Library/OcBootManagementLib/OcBootManagementLib.inf
+  OpenCorePkg/Library/OcBootServicesTableLib/OcBootServicesTableLib.inf
   OpenCorePkg/Library/OcCompilerIntrinsicsLib/OcCompilerIntrinsicsLib.inf
   OpenCorePkg/Library/OcCompressionLib/OcCompressionLib.inf
   OpenCorePkg/Library/OcConfigurationLib/OcConfigurationLib.inf
@@ -228,6 +229,8 @@
     <LibraryClasses>
       # Switch to console mode at startup.
       NULL|OpenCorePkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeLib.inf
+      # Use custom BootServicesTable
+      UefiBootServicesTableLib|OpenCorePkg/Library/OcBootServicesTableLib/OcBootServicesTableLib.inf
       # Add the original commands.
       NULL|ShellPkg/Library/UefiShellLevel2CommandsLib/UefiShellLevel2CommandsLib.inf
       NULL|ShellPkg/Library/UefiShellLevel1CommandsLib/UefiShellLevel1CommandsLib.inf
