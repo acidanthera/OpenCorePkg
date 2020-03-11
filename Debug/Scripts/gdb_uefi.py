@@ -67,7 +67,10 @@ class UefiMisc():
             else:
                 data.append (v)
             index = index + 1
-        return data.tostring ().decode (charset)
+        try:
+            return data.tobytes ().decode (charset)
+        except AttributeError:
+            return data.tostring ().decode (charset)
 
     #
     # Returns a UTF16 string corresponding to a (CHAR16 *) value in EFI.
@@ -227,7 +230,7 @@ class ReloadUefi (gdb.Command):
     CV_MTOC = 0x434F544D
     DOS_MAGIC = 0x5A4D
     PE32PLUS_MAGIC = 0x20b
-    EST_SIGNATURE = 0x5453595320494249L
+    EST_SIGNATURE = 0x5453595320494249
     DEBUG_GUID = [0x49152E77, 0x1ADA, 0x4764,
                   [0xB7,0xA2,0x7A,0xFE,
                    0xFE,0xD9,0x5E, 0x8B]]
@@ -370,7 +373,7 @@ class ReloadUefi (gdb.Command):
         sect_t = self.ptype ('EFI_IMAGE_SECTION_HEADER')
         sections = (opt.address + 1).cast (sect_t)
         sects = {}
-        for i in xrange (file['NumberOfSections']):
+        for i in range (file['NumberOfSections']):
             name = UefiMisc.parse_utf8 (sections[i]['Name'])
             addr = long(sections[i]['VirtualAddress'])
             if name != '':
@@ -451,9 +454,13 @@ class ReloadUefi (gdb.Command):
         # 1. Parse Mach-O.
         # FIXME: We should not rely on otool really.
         commands = subprocess.check_output(['otool', '-l', file])
+        try:
+            lines = commands.decode('utf-8').split('\n')
+        except:
+            lines = commands.split('\n')
         in_sect = False
         machsections = {}
-        for line in commands.split('\n'):
+        for line in lines:
             line = line.strip()
             if line.startswith('Section'):
                 in_sect = True

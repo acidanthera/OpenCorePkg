@@ -12,6 +12,10 @@ if [ "$GDB" = "" ]; then
 fi
 
 if [ "$GDB" = "" ]; then
+  GDB=$(which gdb-multiarch)
+fi
+
+if [ "$GDB" = "" ]; then
   GDB=$(which gdb)
 fi
 
