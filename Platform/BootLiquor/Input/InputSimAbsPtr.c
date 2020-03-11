@@ -182,11 +182,11 @@ InternalUpdateStateAbsolute (
 
   NewX  = PointerState.CurrentX - Context->AbsPointer->Mode->AbsoluteMinX;
   NewX *= Context->Width;
-  NewX  = DivU64x32 (NewX, Context->AbsPointer->Mode->AbsoluteMaxX - Context->AbsPointer->Mode->AbsoluteMinX);
+  NewX  = DivU64x32 (NewX, (UINT32) (Context->AbsPointer->Mode->AbsoluteMaxX - Context->AbsPointer->Mode->AbsoluteMinX));
 
   NewY  = PointerState.CurrentY - Context->AbsPointer->Mode->AbsoluteMinY;
   NewY *= Context->Height;
-  NewY  = DivU64x32 (NewY, Context->AbsPointer->Mode->AbsoluteMaxY - Context->AbsPointer->Mode->AbsoluteMinY);
+  NewY  = DivU64x32 (NewY, (UINT32) (Context->AbsPointer->Mode->AbsoluteMaxY - Context->AbsPointer->Mode->AbsoluteMinY));
 
   State->X = (UINT32)NewX;
   State->Y = (UINT32)NewY;
