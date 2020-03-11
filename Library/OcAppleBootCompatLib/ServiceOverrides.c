@@ -260,145 +260,6 @@ DevirtualiseMmio (
 }
 
 /**
-  UEFI Boot Services StartImage override. Called to start an efi image.
-  If this is boot.efi, then our overrides are enabled.
-**/
-STATIC
-EFI_STATUS
-EFIAPI
-OcStartImage (
-  IN  EFI_HANDLE  ImageHandle,
-  OUT UINTN       *ExitDataSize,
-  OUT CHAR16      **ExitData  OPTIONAL
-  )
-{
-  EFI_STATUS                  Status;
-  EFI_LOADED_IMAGE_PROTOCOL   *AppleLoadedImage;
-  EFI_OS_INFO_PROTOCOL        *OSInfo;
-  BOOT_COMPAT_CONTEXT         *BootCompat;
-  OC_FWRT_CONFIG              Config;
-  UINTN                       DataSize;
-
-  BootCompat        = GetBootCompatContext ();
-  AppleLoadedImage  = OcGetAppleBootLoadedImage (ImageHandle);
-
-  //
-  // Clear monitoring vars
-  //
-  BootCompat->ServiceState.MinAllocatedAddr = 0;
-
-  if (AppleLoadedImage != NULL) {
-    //
-    // Report about macOS being loaded.
-    //
-    ++BootCompat->ServiceState.AppleBootNestedCount;
-    BootCompat->ServiceState.AppleHibernateWake = OcIsAppleHibernateWake ();
-    BootCompat->ServiceState.AppleCustomSlide = OcCheckArgumentFromEnv (
-      AppleLoadedImage,
-      BootCompat->ServicePtrs.GetVariable,
-      "slide=",
-      L_STR_LEN ("slide=")
-      );
-
-    if (BootCompat->Settings.EnableSafeModeSlide) {
-      ASSERT (AppleLoadedImage->ImageSize <= MAX_UINTN);
-      AppleSlideUnlockForSafeMode (
-        (UINT8 *) AppleLoadedImage->ImageBase,
-        (UINTN)AppleLoadedImage->ImageSize
-        );
-    }
-
-    AppleMapPrepareBooterState (
-      BootCompat,
-      AppleLoadedImage,
-      BootCompat->ServicePtrs.GetMemoryMap
-      );
-  } else if (BootCompat->Settings.SignalAppleOS) {
-    Status = gBS->LocateProtocol (
-      &gEfiOSInfoProtocolGuid,
-      NULL,
-      (VOID *) &OSInfo
-      );
-
-    if (!EFI_ERROR (Status)) {
-      OSInfo->OSVendor (EFI_OS_INFO_APPLE_VENDOR_NAME);
-      OSInfo->OSName ("Mac OS X 10.15");
-    }
-  }
-
-  if (BootCompat->ServiceState.FwRuntime != NULL) {
-    BootCompat->ServiceState.FwRuntime->GetCurrent (&Config);
-
-    //
-    // Support for ReadOnly and WriteOnly variables is OpenCore & Lilu security basics.
-    // For now always enable it.
-    //
-    Config.RestrictedVariables = TRUE;
-
-    //
-    // Restrict secure boot variables and never let them slip unless once restricted.
-    //
-    Config.ProtectSecureBoot = BootCompat->Settings.ProtectSecureBoot;
-
-    //
-    // Enable Boot#### variable redirection if OpenCore requested it.
-    // Do NOT disable it once enabled for stability reasons.
-    //
-    DataSize = sizeof (Config.BootVariableRedirect);
-    BootCompat->ServicePtrs.GetVariable (
-      OC_BOOT_REDIRECT_VARIABLE_NAME,
-      &gOcVendorVariableGuid,
-      NULL,
-      &DataSize,
-      &Config.BootVariableRedirect
-      );
-
-    //
-    // Do the same thing for Boot#### variable fallback.
-    //
-    DataSize = sizeof (Config.BootVariableFallback);
-    BootCompat->ServicePtrs.GetVariable (
-      OC_BOOT_FALLBACK_VARIABLE_NAME,
-      &gOcVendorVariableGuid,
-      NULL,
-      &DataSize,
-      &Config.BootVariableFallback
-      );
-
-    //
-    // Enable Apple-specific changes if requested.
-    // Disable them when this is no longer Apple.
-    //
-    if (BootCompat->ServiceState.AppleBootNestedCount > 0) {
-      Config.WriteProtection  = BootCompat->Settings.DisableVariableWrite;
-      Config.WriteUnprotector = BootCompat->Settings.EnableWriteUnprotector;
-    } else {
-      Config.WriteProtection  = FALSE;
-      Config.WriteUnprotector = FALSE;
-    }
-
-    BootCompat->ServiceState.FwRuntime->SetMain (
-      &Config
-      );
-  }
-
-  Status = BootCompat->ServicePtrs.StartImage (
-    ImageHandle,
-    ExitDataSize,
-    ExitData
-    );
-
-  if (AppleLoadedImage != NULL) {
-    //
-    // We failed but other operating systems should be loadable.
-    //
-    --BootCompat->ServiceState.AppleBootNestedCount;
-  }
-
-  return Status;
-}
-
-/**
   UEFI Boot Services AllocatePages override.
   Returns pages from free memory block to boot.efi for kernel boot image.
 **/
@@ -532,6 +393,156 @@ OcGetMemoryMap (
     // during hibernate wake to be able to iterate memory map.
     //
     BootCompat->ServiceState.MemoryMapDescriptorSize = *DescriptorSize;
+  }
+
+  return Status;
+}
+
+/**
+  UEFI Boot Services StartImage override. Called to start an efi image.
+  If this is boot.efi, then our overrides are enabled.
+**/
+STATIC
+EFI_STATUS
+EFIAPI
+OcStartImage (
+  IN  EFI_HANDLE  ImageHandle,
+  OUT UINTN       *ExitDataSize,
+  OUT CHAR16      **ExitData  OPTIONAL
+  )
+{
+  EFI_STATUS                  Status;
+  EFI_LOADED_IMAGE_PROTOCOL   *AppleLoadedImage;
+  EFI_OS_INFO_PROTOCOL        *OSInfo;
+  BOOT_COMPAT_CONTEXT         *BootCompat;
+  OC_FWRT_CONFIG              Config;
+  UINTN                       DataSize;
+
+  BootCompat        = GetBootCompatContext ();
+  AppleLoadedImage  = OcGetAppleBootLoadedImage (ImageHandle);
+
+  //
+  // Recover firmware-replaced GetMemoryMap pointer.
+  //
+  if (BootCompat->Settings.ProtectUefiServices
+    && BootCompat->ServicePtrs.GetMemoryMap != OcGetMemoryMap) {
+    DEBUG ((DEBUG_INFO, "OCABC: Recovering trashed GetMemoryMap pointer\n"));
+    gBS->GetMemoryMap = OcGetMemoryMap;
+    gBS->Hdr.CRC32    = 0;
+    gBS->CalculateCrc32 (gBS, gBS->Hdr.HeaderSize, &gBS->Hdr.CRC32);
+  }
+
+  //
+  // Clear monitoring vars
+  //
+  BootCompat->ServiceState.MinAllocatedAddr = 0;
+
+  if (AppleLoadedImage != NULL) {
+    //
+    // Report about macOS being loaded.
+    //
+    ++BootCompat->ServiceState.AppleBootNestedCount;
+    BootCompat->ServiceState.AppleHibernateWake = OcIsAppleHibernateWake ();
+    BootCompat->ServiceState.AppleCustomSlide = OcCheckArgumentFromEnv (
+      AppleLoadedImage,
+      BootCompat->ServicePtrs.GetVariable,
+      "slide=",
+      L_STR_LEN ("slide=")
+      );
+
+    if (BootCompat->Settings.EnableSafeModeSlide) {
+      ASSERT (AppleLoadedImage->ImageSize <= MAX_UINTN);
+      AppleSlideUnlockForSafeMode (
+        (UINT8 *) AppleLoadedImage->ImageBase,
+        (UINTN)AppleLoadedImage->ImageSize
+        );
+    }
+
+    AppleMapPrepareBooterState (
+      BootCompat,
+      AppleLoadedImage,
+      BootCompat->ServicePtrs.GetMemoryMap
+      );
+  } else if (BootCompat->Settings.SignalAppleOS) {
+    Status = gBS->LocateProtocol (
+      &gEfiOSInfoProtocolGuid,
+      NULL,
+      (VOID *) &OSInfo
+      );
+
+    if (!EFI_ERROR (Status)) {
+      OSInfo->OSVendor (EFI_OS_INFO_APPLE_VENDOR_NAME);
+      OSInfo->OSName ("Mac OS X 10.15");
+    }
+  }
+
+  if (BootCompat->ServiceState.FwRuntime != NULL) {
+    BootCompat->ServiceState.FwRuntime->GetCurrent (&Config);
+
+    //
+    // Support for ReadOnly and WriteOnly variables is OpenCore & Lilu security basics.
+    // For now always enable it.
+    //
+    Config.RestrictedVariables = TRUE;
+
+    //
+    // Restrict secure boot variables and never let them slip unless once restricted.
+    //
+    Config.ProtectSecureBoot = BootCompat->Settings.ProtectSecureBoot;
+
+    //
+    // Enable Boot#### variable redirection if OpenCore requested it.
+    // Do NOT disable it once enabled for stability reasons.
+    //
+    DataSize = sizeof (Config.BootVariableRedirect);
+    BootCompat->ServicePtrs.GetVariable (
+      OC_BOOT_REDIRECT_VARIABLE_NAME,
+      &gOcVendorVariableGuid,
+      NULL,
+      &DataSize,
+      &Config.BootVariableRedirect
+      );
+
+    //
+    // Do the same thing for Boot#### variable fallback.
+    //
+    DataSize = sizeof (Config.BootVariableFallback);
+    BootCompat->ServicePtrs.GetVariable (
+      OC_BOOT_FALLBACK_VARIABLE_NAME,
+      &gOcVendorVariableGuid,
+      NULL,
+      &DataSize,
+      &Config.BootVariableFallback
+      );
+
+    //
+    // Enable Apple-specific changes if requested.
+    // Disable them when this is no longer Apple.
+    //
+    if (BootCompat->ServiceState.AppleBootNestedCount > 0) {
+      Config.WriteProtection  = BootCompat->Settings.DisableVariableWrite;
+      Config.WriteUnprotector = BootCompat->Settings.EnableWriteUnprotector;
+    } else {
+      Config.WriteProtection  = FALSE;
+      Config.WriteUnprotector = FALSE;
+    }
+
+    BootCompat->ServiceState.FwRuntime->SetMain (
+      &Config
+      );
+  }
+
+  Status = BootCompat->ServicePtrs.StartImage (
+    ImageHandle,
+    ExitDataSize,
+    ExitData
+    );
+
+  if (AppleLoadedImage != NULL) {
+    //
+    // We failed but other operating systems should be loadable.
+    //
+    --BootCompat->ServiceState.AppleBootNestedCount;
   }
 
   return Status;

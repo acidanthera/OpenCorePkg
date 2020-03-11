@@ -87,6 +87,17 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   BOOLEAN  SignalAppleOS;
   ///
+  /// CoreImage may update and restore GetMemoryMap during loading (see InsertImageRecord)
+  /// as it needs this for segment splitting. Unfortunately it assumes nobody else
+  /// changes GetMemoryMap, and thus restores to its own CoreGetMemoryMap instead of
+  /// the previous value. Fix it here.
+  /// To make it worse VMware also replaces GetMemoryMap pointer in MacMisc, which CoreDxe
+  /// effectively trashes when we load drivers. As a result without this hack VMware Fusion
+  /// may show "Your Mac OS guest might run unreliably with more than one virtual core."
+  /// message when running OpenCore.
+  ///
+  BOOLEAN  ProtectUefiServices;
+  ///
   /// List of physical addresses to not be devirtualised by DevirtualiseMmio.
   ///
   EFI_PHYSICAL_ADDRESS *MmioWhitelist;

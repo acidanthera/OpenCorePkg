@@ -116,12 +116,13 @@
   _(BOOLEAN                     , DevirtualiseMmio          ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableSingleUser         ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableVariableWrite      ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ProtectSecureBoot         ,     , FALSE  , ()) \
   _(BOOLEAN                     , DiscardHibernateMap       ,     , FALSE  , ()) \
   _(BOOLEAN                     , EnableSafeModeSlide       ,     , FALSE  , ()) \
   _(BOOLEAN                     , EnableWriteUnprotector    ,     , FALSE  , ()) \
   _(BOOLEAN                     , ForceExitBootServices     ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProtectCsmRegion          ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ProtectSecureBoot         ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ProtectUefiServices       ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProvideCustomSlide        ,     , FALSE  , ()) \
   _(BOOLEAN                     , SetupVirtualMap           ,     , FALSE  , ()) \
   _(BOOLEAN                     , ShrinkMemoryMap           ,     , FALSE  , ()) \

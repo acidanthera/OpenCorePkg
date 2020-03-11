@@ -11,6 +11,7 @@ OpenCore Changelog
 - Added `FwProtect` tool to configure full NVRAM access from Shell
 - Added `boot.efi` debug protocol support for 10.15.4+
 - Added `boot.efi` performance logging for 10.15.4+
+- Added `ProtectUefiServices` quirk to fix `DevirtualiseMmio` on Z390
 
 #### v0.5.6
 - Various improvements to builtin text renderer

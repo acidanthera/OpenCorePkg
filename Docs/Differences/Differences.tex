@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Mar  6 09:43:05 2020
-%DIF ADD ../Configuration.tex        Tue Mar 10 00:51:02 2020
+%DIF ADD ../Configuration.tex        Thu Mar 12 02:08:30 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1391,7 +1391,25 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   with problematic defragmentation, such as select Insyde or \texttt{MacPro5,1}.
 
 \item
-  \texttt{ProvideCustomSlide}\\
+  \DIFaddbegin \texttt{\DIFadd{ProtectUefiServices}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Protect UEFI services from being overridden by the firmware.
+}
+
+  \DIFadd{Some modern firmwares including both hardware and virtual machines, like VMware,
+  may update pointers to UEFI services during driver loading and related actions.
+  Consequentially this directly breaks other quirks that affect memory management,
+  like }\texttt{\DIFadd{DevirtualiseMmio}}\DIFadd{, }\texttt{\DIFadd{ProtectCsmRegion}}\DIFadd{, or }\texttt{\DIFadd{ShrinkMemoryMap}}\DIFadd{,
+  and may also break other quirks depending on the effects of these.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: On VMware the need for this quirk may be diagnosed by ``Your Mac OS guest
+  might run unreliably with more than one virtual core.'' message.
+}
+
+\item
+  \DIFaddend \texttt{ProvideCustomSlide}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Provide custom KASLR slide on low memory.

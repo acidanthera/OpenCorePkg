@@ -356,6 +356,7 @@ OcLoadBooterUefiSupport (
   AbcSettings.SetupVirtualMap        = Config->Booter.Quirks.SetupVirtualMap;
   AbcSettings.ShrinkMemoryMap        = Config->Booter.Quirks.ShrinkMemoryMap;
   AbcSettings.SignalAppleOS          = Config->Booter.Quirks.SignalAppleOS;
+  AbcSettings.ProtectUefiServices    = Config->Booter.Quirks.ProtectUefiServices;
 
   if (AbcSettings.DevirtualiseMmio && Config->Booter.MmioWhitelist.Count > 0) {
     AbcSettings.MmioWhitelist = AllocatePool (
