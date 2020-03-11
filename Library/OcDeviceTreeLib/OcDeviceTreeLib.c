@@ -588,6 +588,8 @@ DTDeleteProperty (
   CHAR8               *DeviceTreeEnd;
   UINT32              DeleteLength;
 
+  ASSERT (mDTLength != NULL);
+
   PropIter       = &mOpaquePropIter;
   DeletePosition = NULL;
   DeviceTreeEnd  = (CHAR8 *) mDTRootNode + *mDTLength;
@@ -603,9 +605,7 @@ DTDeleteProperty (
           //
           // Adjust Device Tree Length.
           //
-          if (mDTLength != NULL) {
-            *mDTLength -= DeleteLength;
-          }
+          *mDTLength -= DeleteLength;
 
           //
           // Delete Property.
@@ -655,6 +655,8 @@ DTInsertProperty (
   CHAR8               *DeviceTree;
   CHAR8               *DeviceTreeEnd;
   CHAR8               *InsertPosition;
+
+  ASSERT (mDTLength != NULL);
 
   PropIter       = &mOpaquePropIter;
   EntryLength    = ALIGN_VALUE (ValueLength, sizeof (UINT32));
@@ -707,9 +709,7 @@ DTInsertProperty (
       //
       // Adjust Length.
       //
-      if (mDTLength != NULL) {
-        *mDTLength += sizeof (DTProperty) + EntryLength;
-      }
+      *mDTLength += sizeof (DTProperty) + EntryLength;
     }
   }
 }
