@@ -48,7 +48,17 @@ OcAcpiAddTables (
       continue;
     }
 
-    UnicodeSPrint (FullPath, sizeof (FullPath), OPEN_CORE_ACPI_PATH "%a", TablePath);
+    Status = OcUnicodeSafeSPrint (FullPath, sizeof (FullPath), OPEN_CORE_ACPI_PATH "%a", TablePath);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_WARN,
+        "OC: Failed to fit ACPI path %s%a",
+        OPEN_CORE_ACPI_PATH,
+        TablePath
+        ));
+      continue;
+    }
+
     UnicodeUefiSlashes (FullPath);
 
     TableData = OcStorageReadFileUnicode (Storage, FullPath, &TableDataLength);

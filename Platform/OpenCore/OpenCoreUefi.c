@@ -109,12 +109,21 @@ OcLoadDrivers (
       continue;
     }
 
-    UnicodeSPrint (
+    Status = OcUnicodeSafeSPrint (
       DriverPath,
       sizeof (DriverPath),
       OPEN_CORE_UEFI_DRIVER_PATH "%a",
       OC_BLOB_GET (Config->Uefi.Drivers.Values[Index])
       );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "OC: Driver %s%a doex not fit path!\n",
+        OPEN_CORE_UEFI_DRIVER_PATH,
+        OC_BLOB_GET (Config->Uefi.Drivers.Values[Index])
+        ));
+      continue;
+    }
 
     Driver = OcStorageReadFileUnicode (Storage, DriverPath, &DriverSize);
     if (Driver == NULL) {

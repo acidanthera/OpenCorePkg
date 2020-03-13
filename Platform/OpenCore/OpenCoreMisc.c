@@ -23,6 +23,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcDebugLogLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -84,15 +85,25 @@ OcToolLoadEntry (
   OUT EFI_DEVICE_PATH_PROTOCOL    **ParentFilePath     OPTIONAL
   )
 {
+  EFI_STATUS          Status;
   CHAR16              ToolPath[OC_STORAGE_SAFE_PATH_MAX];
   OC_STORAGE_CONTEXT  *Storage;
 
-  UnicodeSPrint (
+  Status = OcUnicodeSafeSPrint (
     ToolPath,
     sizeof (ToolPath),
     OPEN_CORE_TOOL_PATH "%s",
     ChosenEntry->PathName
     );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_ERROR,
+      "OC: Tool %s%s does not fit path!\n",
+      OPEN_CORE_TOOL_PATH,
+      ToolPath
+      ));
+    return EFI_NOT_FOUND;
+  }
 
   Storage = (OC_STORAGE_CONTEXT *) Context;
 

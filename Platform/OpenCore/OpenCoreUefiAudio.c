@@ -70,6 +70,7 @@ OcAudioAcquireFile (
   OUT UINT32                          *BufferSize
   )
 {
+  EFI_STATUS          Status;
   CHAR8               IndexPath[8];
   CHAR16              FilePath[OC_STORAGE_SAFE_PATH_MAX];
   OC_STORAGE_CONTEXT  *Storage;
@@ -94,13 +95,14 @@ OcAudioAcquireFile (
 
     BaseType  = "OCEFIAudio";
     if (File > OcVoiceOverAudioFileIndexBase && File <= OcVoiceOverAudioFileIndexMax) {
-      AsciiSPrint (
+      Status = OcAsciiSafeSPrint (
         IndexPath,
         sizeof (IndexPath),
         "%a%c",
         File >= OcVoiceOverAudioFileIndexAlphabetical ? "Letter" : "",
         "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"[File - OcVoiceOverAudioFileIndexBase]
         );
+      ASSERT_EFI_ERROR (Status);
       BasePath = IndexPath;
     } else {
       switch (File) {
@@ -251,7 +253,7 @@ OcAudioAcquireFile (
   }
 
   if (Localised) {
-    UnicodeSPrint (
+    Status = OcUnicodeSafeSPrint (
       FilePath,
       sizeof (FilePath),
       OPEN_CORE_AUDIO_PATH "%a_%a_%a.wav",
@@ -259,9 +261,10 @@ OcAudioAcquireFile (
       OcLanguageCodeToString (LanguageCode),
       BasePath
       );
+    ASSERT_EFI_ERROR (Status);
 
     if (!OcStorageExistsFileUnicode (Context, FilePath)) {
-      UnicodeSPrint (
+      Status = OcUnicodeSafeSPrint (
         FilePath,
         sizeof (FilePath),
         OPEN_CORE_AUDIO_PATH "%a_%a_%a.wav",
@@ -269,15 +272,17 @@ OcAudioAcquireFile (
         OcLanguageCodeToString (AppleVoiceOverLanguageEn),
         BasePath
         );
+      ASSERT_EFI_ERROR (Status);
     }
   } else {
-    UnicodeSPrint (
+    Status = OcUnicodeSafeSPrint (
       FilePath,
       sizeof (FilePath),
       OPEN_CORE_AUDIO_PATH "%a_%a.wav",
       BaseType,
       BasePath
       );
+    ASSERT_EFI_ERROR (Status);
   }
 
   DEBUG ((DEBUG_INFO, "OC: Wave %s was requested\n", FilePath));
