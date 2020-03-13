@@ -71,7 +71,7 @@ OcAudioAcquireFile (
   )
 {
   CHAR8               IndexPath[8];
-  CHAR16              FilePath[96];
+  CHAR16              FilePath[OC_STORAGE_SAFE_PATH_MAX];
   OC_STORAGE_CONTEXT  *Storage;
   CONST CHAR8         *BaseType;
   CONST CHAR8         *BasePath;

@@ -36,6 +36,11 @@
 #define OC_STORAGE_VAULT_VERSION 1
 
 /**
+  Safe maximum file path in the storage.
+**/
+#define OC_STORAGE_SAFE_PATH_MAX 128
+
+/**
   Structure declaration for valult file.
 **/
 #define OC_STORAGE_VAULT_HASH_FIELDS(_, __) \

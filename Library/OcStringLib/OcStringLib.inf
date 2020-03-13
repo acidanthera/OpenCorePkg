@@ -20,10 +20,9 @@
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = OcStringLib
   FILE_GUID                      = 1E0810F7-9E40-43D0-A036-185407D0231D
-  MODULE_TYPE                    = BASE
+  MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = OcStringLib
-
+  LIBRARY_CLASS                  = OcStringLib|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SAL_DRIVER DXE_SMM_DRIVER SMM_CORE UEFI_APPLICATION UEFI_DRIVER
 
 #
 # The following information is for reference only and not required by the build tools.
@@ -39,10 +38,6 @@
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
 
-[Guids]
-
-[Protocols]
-
 [Pcd]
   gEfiMdePkgTokenSpaceGuid.PcdMaximumUnicodeStringLength   ## SOMETIMES_CONSUMES
 
@@ -50,4 +45,4 @@
   BaseLib
   BaseMemoryLib
   MemoryAllocationLib
-
+  PrintLib

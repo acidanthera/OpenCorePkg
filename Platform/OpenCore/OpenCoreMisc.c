@@ -84,7 +84,7 @@ OcToolLoadEntry (
   OUT EFI_DEVICE_PATH_PROTOCOL    **ParentFilePath     OPTIONAL
   )
 {
-  CHAR16              ToolPath[64];
+  CHAR16              ToolPath[OC_STORAGE_SAFE_PATH_MAX];
   OC_STORAGE_CONTEXT  *Storage;
 
   UnicodeSPrint (

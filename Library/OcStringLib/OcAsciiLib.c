@@ -17,6 +17,7 @@
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/PrintLib.h>
 #include <Library/OcStringLib.h>
 
 // IsAsciiPrint
@@ -130,3 +131,31 @@ AsciiUint64ToLowerHex (
   return TRUE;
 }
 
+EFI_STATUS
+EFIAPI
+OcAsciiSafeSPrint (
+  OUT CHAR8         *StartOfBuffer,
+  IN  UINTN         BufferSize,
+  IN  CONST CHAR8   *FormatString,
+  ...
+  )
+{
+  EFI_STATUS  Status;
+  VA_LIST     Marker;
+  UINTN       NumberOfPrinted;
+
+  ASSERT (StartOfBuffer != NULL);
+  ASSERT (BufferSize > 0);
+  ASSERT (FormatString != NULL);
+
+  VA_START (Marker, FormatString);
+  NumberOfPrinted = SPrintLengthAsciiFormat (FormatString, Marker);
+  if (BufferSize - 1 >= NumberOfPrinted) {
+    AsciiVSPrint (StartOfBuffer, BufferSize, FormatString, Marker);
+    Status = EFI_SUCCESS;
+  } else {
+    Status = EFI_OUT_OF_RESOURCES;
+  }
+  VA_END (Marker);
+  return Status;
+}

@@ -37,7 +37,7 @@ OcAcpiAddTables (
   UINT32               Index;
   OC_ACPI_ADD_ENTRY    *Table;
   CONST CHAR8          *TablePath;
-  CHAR16               FullPath[128];
+  CHAR16               FullPath[OC_STORAGE_SAFE_PATH_MAX];
 
   for (Index = 0; Index < Config->Acpi.Add.Count; ++Index) {
     Table = Config->Acpi.Add.Values[Index];

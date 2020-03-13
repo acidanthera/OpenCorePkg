@@ -82,7 +82,7 @@ OcLoadDrivers (
   VOID        *Driver;
   UINT32      DriverSize;
   UINT32      Index;
-  CHAR16      DriverPath[64];
+  CHAR16      DriverPath[OC_STORAGE_SAFE_PATH_MAX];
   EFI_HANDLE  ImageHandle;
   EFI_HANDLE  *DriversToConnectIterator;
   VOID        *DriverBinding;

@@ -180,7 +180,7 @@ OcKernelLoadKextsAndReserve (
   CHAR8                *Comment;
   CHAR8                *PlistPath;
   CHAR8                *ExecutablePath;
-  CHAR16               FullPath[128];
+  CHAR16               FullPath[OC_STORAGE_SAFE_PATH_MAX];
   OC_KERNEL_ADD_ENTRY  *Kext;
 
   ReserveSize = PRELINK_INFO_RESERVE_SIZE;
@@ -562,7 +562,7 @@ OcKernelProcessPrelinked (
   CHAR8                *ExecutablePath;
   CHAR8                *Comment;
   UINT32               Index;
-  CHAR8                FullPath[128];
+  CHAR8                FullPath[OC_STORAGE_SAFE_PATH_MAX];
   OC_KERNEL_ADD_ENTRY  *Kext;
   UINT32               MaxKernel;
   UINT32               MinKernel;

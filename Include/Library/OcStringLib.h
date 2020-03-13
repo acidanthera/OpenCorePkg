@@ -12,8 +12,10 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef OC_STRING_LIB_H_
-#define OC_STRING_LIB_H_
+#ifndef OC_STRING_LIB_H
+#define OC_STRING_LIB_H
+
+#include <Uefi.h>
 
 /**
   Returns the length of a Null-terminated string literal.
@@ -88,6 +90,28 @@ AsciiUint64ToLowerHex (
   OUT CHAR8   *Buffer,
   IN  UINT32  BufferSize,
   IN  UINT64  Value
+  );
+
+/**
+  Alternative to AsciiSPrint, which checks that the buffer can contain all the characters.
+
+  @param  StartOfBuffer   A pointer to the output buffer for the produced Null-terminated
+                          ASCII string.
+  @param  BufferSize      The size, in bytes, of the output buffer specified by StartOfBuffer.
+  @param  FormatString    A Null-terminated ASCII format string.
+  @param  ...             Variable argument list whose contents are accessed based on the
+                          format string specified by FormatString.
+
+  @retval EFI_SUCCESS           When data was printed to supplied buffer.
+  @retval EFI_OUT_OF_RESOURCES  When supplied buffer cannot contain all the characters.
+**/
+EFI_STATUS
+EFIAPI
+OcAsciiSafeSPrint (
+  OUT CHAR8         *StartOfBuffer,
+  IN  UINTN         BufferSize,
+  IN  CONST CHAR8   *FormatString,
+  ...
   );
 
 /**
@@ -205,6 +229,28 @@ OcStriStr (
   );
 
 /**
+  Alternative to UnicodeSPrint, which checks that the buffer can contain all the characters.
+
+  @param  StartOfBuffer   A pointer to the output buffer for the produced Null-terminated
+                          Unicode string.
+  @param  BufferSize      The size, in bytes, of the output buffer specified by StartOfBuffer.
+  @param  FormatString    A Null-terminated Unicode format string.
+  @param  ...             Variable argument list whose contents are accessed based on the
+                          format string specified by FormatString.
+
+  @retval EFI_SUCCESS           When data was printed to supplied buffer.
+  @retval EFI_OUT_OF_RESOURCES  When supplied buffer cannot contain all the characters.
+**/
+EFI_STATUS
+EFIAPI
+OcUnicodeSafeSPrint (
+  OUT CHAR16        *StartOfBuffer,
+  IN  UINTN         BufferSize,
+  IN  CONST CHAR16  *FormatString,
+  ...
+  );
+
+/**
   Convert path with mixed slashes to UEFI slashes (\\).
 
   @param[in,out]  String      Path.
@@ -226,4 +272,4 @@ UnicodeFilterString (
   IN     BOOLEAN  SingleLine
   );
 
-#endif // OC_STRING_LIB_H_
+#endif // OC_STRING_LIB_H

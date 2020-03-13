@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Mar  6 09:43:05 2020
-%DIF ADD ../Configuration.tex        Thu Mar 12 02:08:30 2020
+%DIF ADD ../Configuration.tex        Sat Mar 14 00:06:58 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -563,7 +563,12 @@ entries include:
   OpenCore log file.
 \end{itemize}
 
-\subsection{Installation and Upgrade}\label{configuration-install}
+\DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: It is not guaranteed that paths longer than
+}\texttt{\DIFadd{OC\_STORAGE\_SAFE\_PATH\_MAX}} \DIFadd{(128 characters including
+}\texttt{\\\DIFadd{0}}\DIFadd{-termnator) will be accessible within OpenCore.
+}
+
+\DIFaddend \subsection{Installation and Upgrade}\label{configuration-install}
 
 To install OpenCore reflect the
 \hyperref[configuration-structure]{Configuration Structure} described

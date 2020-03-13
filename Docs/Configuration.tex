@@ -503,6 +503,10 @@ entries include:
   OpenCore log file.
 \end{itemize}
 
+\emph{Note}: It is not guaranteed that paths longer than
+\texttt{OC\_STORAGE\_SAFE\_PATH\_MAX} (128 characters including
+\texttt{\\0}-termnator) will be accessible within OpenCore.
+
 \subsection{Installation and Upgrade}\label{configuration-install}
 
 To install OpenCore reflect the

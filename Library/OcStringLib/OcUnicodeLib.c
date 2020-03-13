@@ -17,6 +17,7 @@
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcStringLib.h>
+#include <Library/PrintLib.h>
 #include <Library/PcdLib.h>
 
 INTN
@@ -173,4 +174,33 @@ UnicodeFilterString (
 
     ++String;
   }
+}
+
+EFI_STATUS
+EFIAPI
+OcUnicodeSafeSPrint (
+  OUT CHAR16        *StartOfBuffer,
+  IN  UINTN         BufferSize,
+  IN  CONST CHAR16  *FormatString,
+  ...
+  )
+{
+  EFI_STATUS  Status;
+  VA_LIST     Marker;
+  UINTN       NumberOfPrinted;
+
+  ASSERT (StartOfBuffer != NULL);
+  ASSERT (BufferSize > 0);
+  ASSERT (FormatString != NULL);
+
+  VA_START (Marker, FormatString);
+  NumberOfPrinted = SPrintLength (FormatString, Marker);
+  if (BufferSize - 1 >= NumberOfPrinted) {
+    UnicodeVSPrint (StartOfBuffer, BufferSize, FormatString, Marker);
+    Status = EFI_SUCCESS;
+  } else {
+    Status = EFI_OUT_OF_RESOURCES;
+  }
+  VA_END (Marker);
+  return Status;
 }
