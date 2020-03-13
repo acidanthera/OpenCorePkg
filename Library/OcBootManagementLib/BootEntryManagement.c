@@ -100,7 +100,7 @@ OcDescribeBootEntry (
     if (!EFI_ERROR (Status)) {
       BootEntry->Type = OC_BOOT_WINDOWS;
       if (BootEntry->Name == NULL) {
-        BootEntry->Name = AllocateCopyPool (sizeof (L"BOOTCAMP Windows"), L"BOOTCAMP Windows");
+        BootEntry->Name = AllocateCopyPool (sizeof (L"Windows"), L"Windows");
       }
     }
   }
