@@ -279,9 +279,16 @@ OcBootServicesTableLibConstructor (
   ASSERT (SystemTable->BootServices != NULL);
 
   //
-  // Cache the Image Handle
+  // Cache the Image Handle.
   //
   gImageHandle = ImageHandle;
+
+  //
+  // Cache EFI System Table.
+  // Note, we cannot override it as it may be used for ConOut
+  // spoofing to redirect output for tools.
+  //
+  gST = SystemTable;
 
   //
   // Allocate a copy of EFI Boot Services Table.
@@ -322,39 +329,6 @@ OcBootServicesTableLibConstructor (
     &gBS->Hdr.CRC32
     );
 
-  //
-  // Allocate a copy of EFI System Table.
-  //
-  Status = SystemTable->BootServices->AllocatePool (
-    EfiBootServicesData,
-    SystemTable->Hdr.HeaderSize,
-    (VOID **) &gST
-    );
-  if (EFI_ERROR (Status)) {
-    gBS->FreePool (gBS);
-    return Status;
-  }
-
-  //
-  // Copy the original EFI System Table into our custom table.
-  //
-  CopyMem (
-    gST,
-    SystemTable,
-    SystemTable->Hdr.HeaderSize
-    );
-
-  //
-  // Override BootServices pointer and rehash.
-  //
-  gST->BootServices = gBS;
-  gST->Hdr.CRC32    = 0;
-  SystemTable->BootServices->CalculateCrc32 (
-    gST,
-    gST->Hdr.HeaderSize,
-    &gST->Hdr.CRC32
-    );
-
   return EFI_SUCCESS;
 }
 
@@ -369,6 +343,5 @@ OcBootServicesTableLibDestructor (
   // Free memory for table copies.
   //
   SystemTable->BootServices->FreePool (gBS);
-  SystemTable->BootServices->FreePool (gST);
   return EFI_SUCCESS;
 }
