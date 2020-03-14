@@ -34,7 +34,7 @@ package() {
   cp GopStop.efi tmp/EFI/OC/Tools/ || exit 1
   cp HdaCodecDump.efi tmp/EFI/OC/Tools/ || exit 1
   cp HiiDatabase.efi tmp/EFI/OC/Drivers/ || exit 1
-  cp KeySupport.efi tmp/EFI/OC/Tools/ || exit 1
+  cp KeyTester.efi tmp/EFI/OC/Tools/ || exit 1
   cp NvmExpressDxe.efi tmp/EFI/OC/Drivers/ || exit 1
   cp OpenCore.efi tmp/EFI/OC/ || exit 1
   cp Shell.efi tmp/EFI/OC/Tools/ || exit 1
