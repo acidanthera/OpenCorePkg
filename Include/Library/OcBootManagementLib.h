@@ -341,7 +341,7 @@ EFI_STATUS
 
 /**
   Exposed custom entry load interface.
-  Must return allocated file buffer from pool.
+  Returns allocated file buffer from pool on success.
 **/
 typedef
 EFI_STATUS
@@ -353,6 +353,22 @@ EFI_STATUS
   OUT EFI_DEVICE_PATH_PROTOCOL    **DevicePath         OPTIONAL,
   OUT EFI_HANDLE                  *ParentDeviceHandle  OPTIONAL,
   OUT EFI_DEVICE_PATH_PROTOCOL    **ParentFilePath     OPTIONAL
+  );
+
+/**
+  Exposed custom entry describe interface.
+  Return allocated file buffers from pool on success.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *OC_CUSTOM_DESCRIBE) (
+  IN  VOID                        *Context,
+  IN  OC_BOOT_ENTRY               *ChosenEntry,
+  IN  UINT8                       LabelScale           OPTIONAL,
+  OUT VOID                        **IconData           OPTIONAL,
+  OUT UINT32                      *IconDataSize        OPTIONAL,
+  OUT VOID                        **LabelData          OPTIONAL,
+  OUT UINT32                      *LabelDataSize       OPTIONAL
   );
 
 /**
@@ -456,6 +472,10 @@ struct OC_PICKER_CONTEXT_ {
   // Custom entry reading routine, optional for no custom entries.
   //
   OC_CUSTOM_READ             CustomRead;
+  //
+  // Custom entry describing routine, optional for no custom entries.
+  //
+  OC_CUSTOM_DESCRIBE         CustomDescribe;
   //
   // Context to pass to CustomRead, optional.
   //

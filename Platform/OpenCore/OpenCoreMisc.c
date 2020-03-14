@@ -100,7 +100,7 @@ OcToolLoadEntry (
       DEBUG_ERROR,
       "OC: Tool %s%s does not fit path!\n",
       OPEN_CORE_TOOL_PATH,
-      ToolPath
+      ChosenEntry->PathName
       ));
     return EFI_NOT_FOUND;
   }
@@ -134,6 +134,96 @@ OcToolLoadEntry (
   }
 
   return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+EFIAPI
+OcToolDescribeEntry (
+  IN  VOID                        *Context,
+  IN  OC_BOOT_ENTRY               *ChosenEntry,
+  IN  UINT8                       LabelScale           OPTIONAL,
+  OUT VOID                        **IconData           OPTIONAL,
+  OUT UINT32                      *IconDataSize        OPTIONAL,
+  OUT VOID                        **LabelData          OPTIONAL,
+  OUT UINT32                      *LabelDataSize       OPTIONAL
+  )
+{
+  EFI_STATUS          Status;
+  CHAR16              DescPath[OC_STORAGE_SAFE_PATH_MAX];
+  OC_STORAGE_CONTEXT  *Storage;
+  BOOLEAN             HasIcon;
+  BOOLEAN             HasLabel;
+
+  Storage  = (OC_STORAGE_CONTEXT *) Context;
+  HasIcon  = FALSE;
+  HasLabel = FALSE;
+
+  if (IconData != NULL && IconDataSize != NULL) {
+    *IconData     = NULL;
+    *IconDataSize = 0;
+
+    Status = OcUnicodeSafeSPrint (
+      DescPath,
+      sizeof (DescPath),
+      OPEN_CORE_TOOL_PATH "%s.icns",
+      ChosenEntry->PathName
+      );
+    if (!EFI_ERROR (Status)) {
+      if (OcStorageExistsFileUnicode (Context, DescPath)) {
+        *IconData = OcStorageReadFileUnicode (
+          Storage,
+          DescPath,
+          IconDataSize
+          );
+        HasIcon = *IconData != NULL;
+      }
+    } else {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: Tool label %s%s.icns does not fit path!\n",
+        OPEN_CORE_TOOL_PATH,
+        DescPath
+        ));
+    }
+  }
+
+  if (LabelData != NULL && LabelDataSize != NULL) {
+    *LabelData     = NULL;
+    *LabelDataSize = 0;
+
+    Status = OcUnicodeSafeSPrint (
+      DescPath,
+      sizeof (DescPath),
+      OPEN_CORE_TOOL_PATH "%s.lbl%a",
+      ChosenEntry->PathName,
+      LabelScale == 2 ? "2x" : ""
+      );
+    if (!EFI_ERROR (Status)) {
+      if (OcStorageExistsFileUnicode (Context, DescPath)) {
+        *LabelData = OcStorageReadFileUnicode (
+          Storage,
+          DescPath,
+          LabelDataSize
+          );
+        HasLabel = *LabelData != NULL;
+      }
+    } else {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: Tool label %s%s.lbl%a does not fit path!\n",
+        OPEN_CORE_TOOL_PATH,
+        DescPath,
+        LabelScale == 2 ? "2x" : ""
+        ));
+    }
+  }
+
+  if (HasIcon || HasLabel) {
+    return EFI_SUCCESS;
+  }
+
+  return EFI_NOT_FOUND;
 }
 
 CONST CHAR8 *
@@ -506,6 +596,7 @@ OcMiscBoot (
   Context->ExcludeHandle      = LoadHandle;
   Context->CustomEntryContext = Storage;
   Context->CustomRead         = OcToolLoadEntry;
+  Context->CustomDescribe     = OcToolDescribeEntry;
   Context->PrivilegeContext   = Privilege;
   Context->RequestPrivilege   = OcShowSimplePasswordRequest;
   Context->ShowMenu           = OcShowSimpleBootMenu;
