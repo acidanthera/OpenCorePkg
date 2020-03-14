@@ -36,3 +36,4 @@
 [LibraryClasses]
   BaseMemoryLib
   DebugLib
+  DevicePathLib

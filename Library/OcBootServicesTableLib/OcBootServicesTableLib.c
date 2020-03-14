@@ -13,6 +13,10 @@
 #include <Library/OcBootServicesTableLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/DevicePathLib.h>
+
+#include <Protocol/DevicePath.h>
+#include <Protocol/LoadedImage.h>
 
 typedef struct OC_REGISTERED_PROTOCOL_ {
   EFI_GUID   *ProtocolGuid;
@@ -88,8 +92,9 @@ OcOpenProtocol (
   IN  UINT32                    Attributes
   )
 {
-  EFI_STATUS  Status;
-  UINTN       Index;
+  EFI_STATUS                 Status;
+  UINTN                      Index;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
 
   Status = mOpenProtocol (
     Handle,
@@ -99,6 +104,21 @@ OcOpenProtocol (
     ControllerHandle,
     Attributes
     );
+
+  //
+  // On Apple EFI some paths may not be valid for our DevicePath library.
+  // As a result we can end up in an infinite loop in GetImageNameFromHandle
+  // calling "drivers" in the Shell. Workaround by discarding unsupported paths.
+  //
+  if (!EFI_ERROR (Status)
+    && CompareGuid (Protocol, &gEfiLoadedImageProtocolGuid)
+    && Interface != NULL) {
+    LoadedImage = *Interface;
+
+    if (LoadedImage->FilePath != NULL && !IsDevicePathValid (LoadedImage->FilePath, 0)) {
+      LoadedImage->FilePath = NULL;
+    }
+  }
 
   if (Status != EFI_UNSUPPORTED || Handle != gImageHandle) {
     return Status;

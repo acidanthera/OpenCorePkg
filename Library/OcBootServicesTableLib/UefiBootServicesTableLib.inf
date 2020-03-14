@@ -30,6 +30,7 @@
 
 [Protocols]
   gEfiDevicePathProtocolGuid
+  gEfiLoadedImageProtocolGuid
 
 [LibraryClasses]
   BaseMemoryLib
