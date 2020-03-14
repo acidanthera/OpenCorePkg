@@ -17,7 +17,7 @@ TestsUser/Smbios/Smbios
 Utilities/RsaTool/RsaTool
 Utilities/EfiResTool/EfiResTool
 Utilities/AppleEfiSignTool/AppleEfiSignTool
-Utilities/readlabel/readlabel
+Utilities/disklabel/disklabel
 *.o
 DICT
 fuzz-*.log

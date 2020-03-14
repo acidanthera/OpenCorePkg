@@ -14,6 +14,7 @@ OpenCore Changelog
 - Added `ProtectUefiServices` quirk to fix `DevirtualiseMmio` on Z390
 - Replaced `BOOTCAMP Windows` with `Windows` to match the original
 - Added bundled `Shell.efi` originally available as OpenCoreShell
+- Rework `readlabel` utility into `disklabel` with encoding support
 
 #### v0.5.6
 - Various improvements to builtin text renderer
