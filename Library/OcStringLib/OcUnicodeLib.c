@@ -187,6 +187,7 @@ OcUnicodeSafeSPrint (
 {
   EFI_STATUS  Status;
   VA_LIST     Marker;
+  VA_LIST     Marker2;
   UINTN       NumberOfPrinted;
 
   ASSERT (StartOfBuffer != NULL);
@@ -194,13 +195,19 @@ OcUnicodeSafeSPrint (
   ASSERT (FormatString != NULL);
 
   VA_START (Marker, FormatString);
-  NumberOfPrinted = SPrintLength (FormatString, Marker);
+
+  VA_COPY (Marker2, Marker);
+  NumberOfPrinted = SPrintLength (FormatString, Marker2);
+  VA_END (Marker2);
+
   if (BufferSize - 1 >= NumberOfPrinted) {
     UnicodeVSPrint (StartOfBuffer, BufferSize, FormatString, Marker);
     Status = EFI_SUCCESS;
   } else {
     Status = EFI_OUT_OF_RESOURCES;
   }
+
   VA_END (Marker);
+
   return Status;
 }

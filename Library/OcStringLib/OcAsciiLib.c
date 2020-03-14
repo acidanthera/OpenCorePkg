@@ -142,6 +142,7 @@ OcAsciiSafeSPrint (
 {
   EFI_STATUS  Status;
   VA_LIST     Marker;
+  VA_LIST     Marker2;
   UINTN       NumberOfPrinted;
 
   ASSERT (StartOfBuffer != NULL);
@@ -149,13 +150,19 @@ OcAsciiSafeSPrint (
   ASSERT (FormatString != NULL);
 
   VA_START (Marker, FormatString);
-  NumberOfPrinted = SPrintLengthAsciiFormat (FormatString, Marker);
+
+  VA_COPY (Marker2, Marker);
+  NumberOfPrinted = SPrintLengthAsciiFormat (FormatString, Marker2);
+  VA_END (Marker2);
+
   if (BufferSize - 1 >= NumberOfPrinted) {
     AsciiVSPrint (StartOfBuffer, BufferSize, FormatString, Marker);
     Status = EFI_SUCCESS;
   } else {
     Status = EFI_OUT_OF_RESOURCES;
   }
+
   VA_END (Marker);
+
   return Status;
 }
