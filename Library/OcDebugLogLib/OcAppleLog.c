@@ -135,7 +135,7 @@ AppleDebugLogPrint (
         // Ensure it is terminated with a newline.
         //
         mCurrentBuffer[Length] = '\n';
-        mCurrentBuffer[Length] = '\0';
+        mCurrentBuffer[Length+1] = '\0';
       }
       AppleDebugLogPrintToOcLog (
         OcLog,
