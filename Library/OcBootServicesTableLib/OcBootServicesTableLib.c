@@ -26,7 +26,7 @@ EFI_BOOT_SERVICES               *gBS               = NULL;
 
 STATIC EFI_CONNECT_CONTROLLER   mConnectController = NULL;
 STATIC EFI_LOCATE_PROTOCOL      mLocateProtocol    = NULL;
-STATIC OC_REGISTERED_PROTOCOL   mRegisteredProtocols[8];
+STATIC OC_REGISTERED_PROTOCOL   mRegisteredProtocols[16];
 STATIC UINTN                    mRegisteredProtocolCount = 0;
 
 STATIC
@@ -140,6 +140,8 @@ OcRegisterBootServicesProtocol (
   mRegisteredProtocols[mRegisteredProtocolCount].ProtocolGuid     = ProtocolGuid;
   mRegisteredProtocols[mRegisteredProtocolCount].ProtocolInstance = ProtocolInstance;
   mRegisteredProtocols[mRegisteredProtocolCount].Override         = Override;
+
+  ++mRegisteredProtocolCount;
 
   return EFI_SUCCESS;
 }
