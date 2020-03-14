@@ -1,0 +1,90 @@
+## @file
+# The DXE driver produces HII protocols defined in UEFI specification.
+#
+# This driver produces all required HII serivces that includes HiiDataBase, HiiString,
+# HiiFont, HiiConfigRouting. To support UEFI HII, this driver is required.
+#
+# Copyright (c) 2007 - 2018, Intel Corporation. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OcHiiDatabaseLocalLib
+  FILE_GUID                      = F5A0BBDD-A4D9-4E55-82C1-A239DF146911
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = OcHiiDatabaseLocalLib|DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER DXE_SAL_DRIVER
+
+  CONSTRUCTOR                    = OcHiiDatabaseLocalLibConstructor
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 EBC
+#
+
+[Sources]
+  HiiDatabaseEntry.c
+  Image.c
+  ImageEx.c
+  HiiDatabase.h
+  ConfigRouting.c
+  String.c
+  Database.c
+  Font.c
+  ConfigKeywordHandler.c
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  MemoryAllocationLib
+  DevicePathLib
+  BaseLib
+  OcBootServicesTableLib
+  BaseMemoryLib
+  DebugLib
+  UefiLib
+  PcdLib
+  UefiRuntimeServicesTableLib
+  PrintLib
+  # Depend on UnicodeCollation for correct PlatformLang
+  OcUnicodeCollationEngLocalLib
+
+[Protocols]
+  gEfiDevicePathProtocolGuid                                            ## SOMETIMES_CONSUMES
+  gEfiHiiStringProtocolGuid                                             ## PRODUCES
+  gEfiHiiImageProtocolGuid        |gEfiMdeModulePkgTokenSpaceGuid.PcdSupportHiiImageProtocol  ## SOMETIMES_PRODUCES
+  gEfiHiiImageExProtocolGuid      |gEfiMdeModulePkgTokenSpaceGuid.PcdSupportHiiImageProtocol  ## SOMETIMES_PRODUCES
+  gEfiHiiImageDecoderProtocolGuid |gEfiMdeModulePkgTokenSpaceGuid.PcdSupportHiiImageProtocol  ## SOMETIMES_CONSUMES
+  gEfiHiiConfigRoutingProtocolGuid                                      ## PRODUCES
+  gEfiHiiDatabaseProtocolGuid                                           ## PRODUCES
+  gEfiHiiFontProtocolGuid                                               ## PRODUCES
+  gEfiHiiConfigAccessProtocolGuid                                       ## SOMETIMES_CONSUMES
+  gEfiConfigKeywordHandlerProtocolGuid                                  ## PRODUCES
+
+[FeaturePcd]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSupportHiiImageProtocol   ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdHiiOsRuntimeSupport       ## CONSUMES
+
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdUefiVariableDefaultPlatformLang ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdNvStoreDefaultValueBuffer ## CONSUMES
+
+[Guids]
+  #
+  # Event registered to EFI_HII_SET_KEYBOARD_LAYOUT_EVENT_GUID group,
+  # which will be triggered by EFI_HII_DATABASE_PROTOCOL.SetKeyboardLayout().
+  #
+  ## CONSUMES  ## Event
+  ## PRODUCES  ## Event
+  gEfiHiiKeyBoardLayoutGuid
+  gEfiHiiImageDecoderNameJpegGuid |gEfiMdeModulePkgTokenSpaceGuid.PcdSupportHiiImageProtocol  ## SOMETIMES_CONSUMES ## GUID
+  gEfiHiiImageDecoderNamePngGuid  |gEfiMdeModulePkgTokenSpaceGuid.PcdSupportHiiImageProtocol  ## SOMETIMES_CONSUMES ## GUID
+  gEdkiiIfrBitVarstoreGuid                                                                    ## SOMETIMES_CONSUMES ## GUID

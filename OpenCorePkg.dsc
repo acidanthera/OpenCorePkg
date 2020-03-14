@@ -81,6 +81,7 @@
   OcHashServicesLib|OpenCorePkg/Library/OcHashServicesLib/OcHashServicesLib.inf
   OcHdaDevicesLib|OpenCorePkg/Library/OcHdaDevicesLib/OcHdaDevicesLib.inf
   OcHeciLib|OpenCorePkg/Library/OcHeciLib/OcHeciLib.inf
+  OcHiiDatabaseLocalLib|OpenCorePkg/Library/OcHiiDatabaseLib/OcHiiDatabaseLocalLib.inf
   OcInputLib|OpenCorePkg/Library/OcInputLib/OcInputLib.inf
   OcMachoLib|OpenCorePkg/Library/OcMachoLib/OcMachoLib.inf
   OcMemoryLib|OpenCorePkg/Library/OcMemoryLib/OcMemoryLib.inf
@@ -186,6 +187,7 @@
   OpenCorePkg/Library/OcHashServicesLib/OcHashServicesLib.inf
   OpenCorePkg/Library/OcHdaDevicesLib/OcHdaDevicesLib.inf
   OpenCorePkg/Library/OcHeciLib/OcHeciLib.inf
+  OpenCorePkg/Library/OcHiiDatabaseLib/OcHiiDatabaseLocalLib.inf
   OpenCorePkg/Library/OcInputLib/OcInputLib.inf
   OpenCorePkg/Library/OcMachoLib/OcMachoLib.inf
   OpenCorePkg/Library/OcMemoryLib/OcMemoryLib.inf

@@ -38,3 +38,4 @@
   # Libraries supporting local installation go here
   OcConsoleControlEntryModeLocalLib
   OcUnicodeCollationEngLocalLib
+  OcHiiDatabaseLocalLib
