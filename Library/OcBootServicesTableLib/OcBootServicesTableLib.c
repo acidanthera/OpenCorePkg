@@ -24,10 +24,12 @@ EFI_HANDLE                      gImageHandle       = NULL;
 EFI_SYSTEM_TABLE                *gST               = NULL;
 EFI_BOOT_SERVICES               *gBS               = NULL;
 
-STATIC EFI_CONNECT_CONTROLLER   mConnectController = NULL;
-STATIC EFI_LOCATE_PROTOCOL      mLocateProtocol    = NULL;
-STATIC OC_REGISTERED_PROTOCOL   mRegisteredProtocols[16];
-STATIC UINTN                    mRegisteredProtocolCount = 0;
+STATIC EFI_CONNECT_CONTROLLER    mConnectController = NULL;
+STATIC EFI_OPEN_PROTOCOL         mOpenProtocol = NULL;
+STATIC EFI_LOCATE_HANDLE_BUFFER  mLocateHandleBuffer = NULL;
+STATIC EFI_LOCATE_PROTOCOL       mLocateProtocol    = NULL;
+STATIC OC_REGISTERED_PROTOCOL    mRegisteredProtocols[16];
+STATIC UINTN                     mRegisteredProtocolCount = 0;
 
 STATIC
 EFI_STATUS
@@ -70,6 +72,100 @@ OcConnectController (
     RemainingDevicePath,
     Recursive
     );
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
+EFIAPI
+OcOpenProtocol (
+  IN  EFI_HANDLE                Handle,
+  IN  EFI_GUID                  *Protocol,
+  OUT VOID                      **Interface OPTIONAL,
+  IN  EFI_HANDLE                AgentHandle,
+  IN  EFI_HANDLE                ControllerHandle,
+  IN  UINT32                    Attributes
+  )
+{
+  EFI_STATUS  Status;
+  UINTN       Index;
+
+  Status = mOpenProtocol (
+    Handle,
+    Protocol,
+    Interface,
+    AgentHandle,
+    ControllerHandle,
+    Attributes
+    );
+
+  if (Status != EFI_UNSUPPORTED || Handle != gImageHandle) {
+    return Status;
+  }
+
+  if (Interface == NULL && Attributes != EFI_OPEN_PROTOCOL_TEST_PROTOCOL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // Process all protocols as overrides are not specific to handle.
+  //
+  for (Index = 0; Index < mRegisteredProtocolCount; ++Index) {
+    if (CompareGuid (mRegisteredProtocols[Index].ProtocolGuid, Protocol)) {
+      if (Interface != NULL) {
+        *Interface = mRegisteredProtocols[Index].ProtocolInstance;
+      }
+      return EFI_SUCCESS;
+    }
+  }
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
+EFIAPI
+OcLocateHandleBuffer (
+  IN     EFI_LOCATE_SEARCH_TYPE       SearchType,
+  IN     EFI_GUID                     *Protocol      OPTIONAL,
+  IN     VOID                         *SearchKey     OPTIONAL,
+  IN OUT UINTN                        *NoHandles,
+  OUT    EFI_HANDLE                   **Buffer
+  )
+{
+  EFI_STATUS  Status;
+  UINTN       Index;
+
+  Status = mLocateHandleBuffer (
+    SearchType,
+    Protocol,
+    SearchKey,
+    NoHandles,
+    Buffer
+    );
+
+  if (Status == EFI_NOT_FOUND && SearchType == ByProtocol) {
+    //
+    // Process all protocols as overrides are not specific to handle.
+    //
+    for (Index = 0; Index < mRegisteredProtocolCount; ++Index) {
+      if (CompareGuid (mRegisteredProtocols[Index].ProtocolGuid, Protocol)) {
+        Status = gBS->AllocatePool (
+          EfiBootServicesData,
+          sizeof (**Buffer),
+          (VOID **) Buffer
+          );
+        if (!EFI_ERROR (Status)) {
+          *NoHandles = 1;
+          **Buffer   = gImageHandle;
+          return EFI_SUCCESS;
+        }
+
+        return EFI_NOT_FOUND;
+      }
+    }
+  }
 
   return Status;
 }
@@ -189,13 +285,17 @@ OcBootServicesTableLibConstructor (
     );
 
   //
-  // Override ConnectController and LocateProtocol functions and rehash.
+  // Override boot services functions and rehash.
   //
-  mConnectController     = gBS->ConnectController;
-  mLocateProtocol        = gBS->LocateProtocol;
-  gBS->ConnectController = OcConnectController;
-  gBS->LocateProtocol    = OcLocateProtocol;
-  gBS->Hdr.CRC32         = 0;
+  mConnectController      = gBS->ConnectController;
+  mOpenProtocol           = gBS->OpenProtocol;
+  mLocateHandleBuffer     = gBS->LocateHandleBuffer;
+  mLocateProtocol         = gBS->LocateProtocol;
+  gBS->ConnectController  = OcConnectController;
+  gBS->OpenProtocol       = OcOpenProtocol;
+  gBS->LocateHandleBuffer = OcLocateHandleBuffer;
+  gBS->LocateProtocol     = OcLocateProtocol;
+  gBS->Hdr.CRC32          = 0;
   SystemTable->BootServices->CalculateCrc32 (
     gBS,
     gBS->Hdr.HeaderSize,
