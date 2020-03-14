@@ -3,7 +3,7 @@
   library's constructor and allow overriding its properties.
 
   Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
-  Copyright (c) 2020, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2020, vit9696. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/

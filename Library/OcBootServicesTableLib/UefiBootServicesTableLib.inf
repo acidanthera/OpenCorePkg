@@ -10,21 +10,19 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = OcBootServicesTableLib
-  FILE_GUID                      = 64CCF528-1707-4DCB-84B7-EA02FEBB6A16
+  BASE_NAME                      = UefiBootServicesTableLib
+  FILE_GUID                      = FEA6B92A-B21D-46DE-A74C-CDFB334CFBE3
   MODULE_TYPE                    = UEFI_DRIVER
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = OcBootServicesTableLib|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SMM_DRIVER UEFI_APPLICATION UEFI_DRIVER SMM_CORE
+  LIBRARY_CLASS                  = UefiBootServicesTableLib|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SMM_DRIVER UEFI_APPLICATION UEFI_DRIVER SMM_CORE
 
-  CONSTRUCTOR                    = OcBootServicesTableLibConstructor
-  DESTRUCTOR                     = OcBootServicesTableLibDestructor
 
 #
 #  VALID_ARCHITECTURES           = IA32 X64 EBC
 #
 
 [Sources]
-  OcBootServicesTableLib.c
+  UefiBootServicesTableLib.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -36,3 +34,7 @@
 [LibraryClasses]
   BaseMemoryLib
   DebugLib
+  OcBootServicesTableLib
+  # Libraries supporting local installation go here
+  OcConsoleControlEntryModeLocalLib
+  OcUnicodeCollationEngLocalLib

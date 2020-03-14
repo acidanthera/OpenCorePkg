@@ -43,6 +43,6 @@
 
 [LibraryClasses]
   OcBootManagementLib
-  OcConsoleControlEntryModeLib
+  OcConsoleControlEntryModeGenericLib
   UefiApplicationEntryPoint
   UefiBootServicesTableLib

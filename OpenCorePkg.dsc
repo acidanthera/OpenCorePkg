@@ -60,9 +60,11 @@
   OcAppleUserInterfaceThemeLib|OpenCorePkg/Library/OcAppleUserInterfaceThemeLib/OcAppleUserInterfaceThemeLib.inf
   OcAudioLib|OpenCorePkg/Library/OcAudioLib/OcAudioLib.inf
   OcBootManagementLib|OpenCorePkg/Library/OcBootManagementLib/OcBootManagementLib.inf
+  OcBootServicesTableLib|OpenCorePkg/Library/OcBootServicesTableLib/OcBootServicesTableLib.inf
   OcCompressionLib|OpenCorePkg/Library/OcCompressionLib/OcCompressionLib.inf
   OcConfigurationLib|OpenCorePkg/Library/OcConfigurationLib/OcConfigurationLib.inf
-  OcConsoleControlEntryModeLib|OpenCorePkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeLib.inf
+  OcConsoleControlEntryModeGenericLib|OpenCorePkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeGenericLib.inf
+  OcConsoleControlEntryModeLocalLib|OpenCorePkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeLocalLib.inf
   OcConsoleLib|OpenCorePkg/Library/OcConsoleLib/OcConsoleLib.inf
   OcCpuLib|OpenCorePkg/Library/OcCpuLib/OcCpuLib.inf
   OcCryptoLib|OpenCorePkg/Library/OcCryptoLib/OcCryptoLib.inf
@@ -94,7 +96,8 @@
   OcStringLib|OpenCorePkg/Library/OcStringLib/OcStringLib.inf
   OcTemplateLib|OpenCorePkg/Library/OcTemplateLib/OcTemplateLib.inf
   OcTimerLib|OpenCorePkg/Library/OcTimerLib/OcTimerLib.inf
-  OcUnicodeCollationEngLib|OpenCorePkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngLib.inf
+  OcUnicodeCollationEngGenericLib|OpenCorePkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngGenericLib.inf
+  OcUnicodeCollationEngLocalLib|OpenCorePkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngLocalLib.inf
   OcVirtualFsLib|OpenCorePkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OcXmlLib|OpenCorePkg/Library/OcXmlLib/OcXmlLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
@@ -165,7 +168,8 @@
   OpenCorePkg/Library/OcCompilerIntrinsicsLib/OcCompilerIntrinsicsLib.inf
   OpenCorePkg/Library/OcCompressionLib/OcCompressionLib.inf
   OpenCorePkg/Library/OcConfigurationLib/OcConfigurationLib.inf
-  OpenCorePkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeLib.inf
+  OpenCorePkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeGenericLib.inf
+  OpenCorePkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeLocalLib.inf
   OpenCorePkg/Library/OcConsoleLib/OcConsoleLib.inf
   OpenCorePkg/Library/OcCpuLib/OcCpuLib.inf
   OpenCorePkg/Library/OcCryptoLib/OcCryptoLib.inf
@@ -196,7 +200,8 @@
   OpenCorePkg/Library/OcStringLib/OcStringLib.inf
   OpenCorePkg/Library/OcTemplateLib/OcTemplateLib.inf
   OpenCorePkg/Library/OcTimerLib/OcTimerLib.inf
-  OpenCorePkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngLib.inf
+  OpenCorePkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngGenericLib.inf
+  OpenCorePkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngLocalLib.inf
   OpenCorePkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OpenCorePkg/Library/OcXmlLib/OcXmlLib.inf
   OpenCorePkg/Platform/AppleUsbKbDxe/UsbKbDxe.inf
@@ -227,10 +232,8 @@
       # For some reason ShellPkg overrides this, so do we.
       gEfiMdePkgTokenSpaceGuid.PcdUefiLibMaxPrintBufferSize|16000
     <LibraryClasses>
-      # Switch to console mode at startup.
-      NULL|OpenCorePkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeLib.inf
       # Use custom BootServicesTable
-      UefiBootServicesTableLib|OpenCorePkg/Library/OcBootServicesTableLib/OcBootServicesTableLib.inf
+      UefiBootServicesTableLib|OpenCorePkg/Library/OcBootServicesTableLib/UefiBootServicesTableLib.inf
       # Add the original commands.
       NULL|ShellPkg/Library/UefiShellLevel2CommandsLib/UefiShellLevel2CommandsLib.inf
       NULL|ShellPkg/Library/UefiShellLevel1CommandsLib/UefiShellLevel1CommandsLib.inf

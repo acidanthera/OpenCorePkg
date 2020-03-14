@@ -44,7 +44,7 @@
   gEfiMpServiceProtocolGuid                 ## CONSUMES
 
 [LibraryClasses]
-  OcConsoleControlEntryModeLib
+  OcConsoleControlEntryModeGenericLib
   UefiApplicationEntryPoint
   UefiLib
   PcdLib

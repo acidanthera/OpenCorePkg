@@ -41,7 +41,7 @@
 
 [LibraryClasses]
   DebugLib
-  OcConsoleControlEntryModeLib
+  OcConsoleControlEntryModeGenericLib
   UefiApplicationEntryPoint
   UefiBootServicesTableLib
   UefiLib

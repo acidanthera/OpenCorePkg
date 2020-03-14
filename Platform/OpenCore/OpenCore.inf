@@ -96,7 +96,7 @@
   OcSmbiosLib
   OcSmcLib
   OcStorageLib
-  OcUnicodeCollationEngLib
+  OcUnicodeCollationEngGenericLib
   OcVirtualFsLib
   MacInfoLib
   PcdLib

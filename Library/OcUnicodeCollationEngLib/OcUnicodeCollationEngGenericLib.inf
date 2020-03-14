@@ -16,11 +16,11 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = OcUnicodeCollationEngLib
+  BASE_NAME                      = OcUnicodeCollationEngGenericLib
   FILE_GUID                      = 5D91AD3D-05B2-497F-BF82-A8707174FCBD
   MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = OcUnicodeCollationEngLib|DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER DXE_SAL_DRIVER
+  LIBRARY_CLASS                  = OcUnicodeCollationEngGenericLib|DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER DXE_SAL_DRIVER
 
 #
 # The following information is for reference only and not required by the build tools.
@@ -29,12 +29,12 @@
 #
 
 [Sources]
-  OcUnicodeCollationEngLib.c
-  OcUnicodeCollationEngLibInternal.h
+  OcUnicodeCollationEngCommon.c
+  OcUnicodeCollationEngGeneric.c
+  OcUnicodeCollationEngInternal.h
 
 [Packages]
   MdePkg/MdePkg.dec
-  EfiPkg/EfiPkg.dec
   OpenCorePkg/OpenCorePkg.dec
 
 [Guids]
@@ -46,6 +46,5 @@
 [LibraryClasses]
   BaseLib
   DebugLib
-  UefiLib
   UefiBootServicesTableLib
   UefiRuntimeServicesTableLib

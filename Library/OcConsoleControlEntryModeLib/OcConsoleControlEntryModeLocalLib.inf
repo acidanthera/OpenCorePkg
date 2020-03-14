@@ -15,11 +15,11 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = OcConsoleControlEntryModeLib
-  FILE_GUID                      = 74B78F70-2959-47C7-8EAB-62DED119972B
+  BASE_NAME                      = OcConsoleControlEntryModeLocalLib
+  FILE_GUID                      = 987B4FC6-929A-4F34-9C1B-1876484C92FE
   MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
-  CONSTRUCTOR                    = OcConsoleControlEntryModeInit
+  CONSTRUCTOR                    = OcConsoleControlEntryModeConstructor
   LIBRARY_CLASS                  = NULL|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SAL_DRIVER DXE_SMM_DRIVER SMM_CORE UEFI_APPLICATION UEFI_DRIVER
 
 #
@@ -39,7 +39,7 @@
 
 [LibraryClasses]
   PcdLib
-  UefiBootServicesTableLib
+  OcBootServicesTableLib
 
 [Sources]
   OcConsoleControlEntryModeLib.c

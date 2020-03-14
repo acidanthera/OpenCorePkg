@@ -20,7 +20,7 @@
 
 EFI_STATUS
 EFIAPI
-OcConsoleControlEntryModeInit (
+OcConsoleControlEntryModeConstructor (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
@@ -28,28 +28,30 @@ OcConsoleControlEntryModeInit (
   EFI_STATUS                   Status;
   EFI_CONSOLE_CONTROL_PROTOCOL *ConsoleControl;
 
-  //
-  // On several firmwares we need to use legacy console control protocol to
-  // switch to text mode, otherwise a black screen will be shown.
-  //
-  Status = gBS->HandleProtocol (
-    gST->ConsoleOutHandle,
-    &gEfiConsoleControlProtocolGuid,
-    (VOID **) &ConsoleControl
-    );
-  if (EFI_ERROR (Status)) {
-    Status = gBS->LocateProtocol (
-    &gEfiConsoleControlProtocolGuid,
-    NULL,
-    (VOID **) &ConsoleControl
-    );
-  }
-
-  if (!EFI_ERROR (Status)) {
-    ConsoleControl->SetMode (
-      ConsoleControl,
-      PcdGet8 (PcdConsoleControlEntryMode)
+  if (FixedPcdGet8 (PcdConsoleControlEntryMode) < EfiConsoleControlScreenMaxValue) {
+    //
+    // On several firmwares we need to use legacy console control protocol to
+    // switch to text mode, otherwise a black screen will be shown.
+    //
+    Status = gBS->HandleProtocol (
+      gST->ConsoleOutHandle,
+      &gEfiConsoleControlProtocolGuid,
+      (VOID **) &ConsoleControl
       );
+    if (EFI_ERROR (Status)) {
+      Status = gBS->LocateProtocol (
+      &gEfiConsoleControlProtocolGuid,
+      NULL,
+      (VOID **) &ConsoleControl
+      );
+    }
+
+    if (!EFI_ERROR (Status)) {
+      ConsoleControl->SetMode (
+        ConsoleControl,
+        FixedPcdGet8 (PcdConsoleControlEntryMode)
+        );
+    }
   }
 
   return EFI_SUCCESS;

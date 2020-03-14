@@ -122,6 +122,7 @@
   ## Defines the Console Control initialization mode set on entry.<BR><BR>
   #   0 - EfiConsoleControlScreenText<BR>
   #   1 - EfiConsoleControlScreenGraphics<BR>
+  #   2 - EfiConsoleControlScreenMaxValue (does nothing)<BR>
   # @Prompt Initialize the console to the specified mode on entry.
   gOpenCorePkgTokenSpaceGuid.PcdConsoleControlEntryMode|0|UINT8|0x00000100
 
@@ -188,6 +189,9 @@
 
   ##  @libraryclass
   OcBootManagementLib|Include/Library/OcBootManagementLib.h
+
+  ##  @libraryclass
+  OcBootServicesTableLib|Include/Library/OcBootServicesTableLib.h
 
   ##  @libraryclass
   OcCompressionLib|Include/Library/OcCompressionLib.h
@@ -286,7 +290,7 @@
   OcTimerLib|Include/Library/OcTimerLib.h
 
   ##  @libraryclass
-  OcUnicodeCollationEngLib|Include/Library/OcUnicodeCollationEngLib.h
+  OcUnicodeCollationEngGenericLib|Include/Library/OcUnicodeCollationEngGenericLib.h
 
   ##  @libraryclass
   OcVirtualFsLib|Include/Library/OcVirtualFsLib.h

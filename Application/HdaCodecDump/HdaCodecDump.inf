@@ -28,7 +28,7 @@
   BaseMemoryLib
   DebugLib
   MemoryAllocationLib
-  OcConsoleControlEntryModeLib
+  OcConsoleControlEntryModeGenericLib
   PcdLib
   UefiApplicationEntryPoint
   UefiBootServicesTableLib

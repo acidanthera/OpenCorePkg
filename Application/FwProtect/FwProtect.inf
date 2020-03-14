@@ -46,7 +46,7 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
-  OcConsoleControlEntryModeLib
+  OcConsoleControlEntryModeGenericLib
   UefiApplicationEntryPoint
   UefiBootServicesTableLib
   UefiLib

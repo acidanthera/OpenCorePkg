@@ -1,24 +1,13 @@
 /** @file
   Driver to implement English version of Unicode Collation Protocol.
 
-Copyright (c) 2006 - 2011, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials
-are licensed and made available under the terms and conditions of the BSD License
-which accompanies this distribution.  The full text of the license may be found at
-http://opensource.org/licenses/bsd-license.php
-
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
+SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
 
-#include <Library/BaseLib.h>
-#include <Library/OcGuardLib.h>
-#include <Library/OcMiscLib.h>
-#include <Library/UefiLib.h>
-
-#include "OcUnicodeCollationEngLibInternal.h"
+#include "OcUnicodeCollationEngInternal.h"
 
 CHAR8 mEngUpperMap[MAP_TABLE_SIZE];
 CHAR8 mEngLowerMap[MAP_TABLE_SIZE];
@@ -64,7 +53,7 @@ STATIC CHAR8  UnicodeLanguages[6] = "en";
 //
 // EFI Unicode Collation2 Protocol supporting RFC 4646 language code
 //
-GLOBAL_REMOVE_IF_UNREFERENCED EFI_UNICODE_COLLATION_PROTOCOL  Unicode2Eng = {
+GLOBAL_REMOVE_IF_UNREFERENCED EFI_UNICODE_COLLATION_PROTOCOL  gInternalUnicode2Eng = {
   EngStriColl,
   EngMetaiMatch,
   EngStrLwr,
@@ -74,74 +63,75 @@ GLOBAL_REMOVE_IF_UNREFERENCED EFI_UNICODE_COLLATION_PROTOCOL  Unicode2Eng = {
   UnicodeLanguages
 };
 
-/**
-  The user Entry Point for English module.
-
-  This function initializes unicode character mapping and then installs Unicode
-  Collation & Unicode Collation 2 Protocols based on the feature flags.
-
-  @param[in] Reinstall  Replace any installed protocol.
-
-  @returns Installed protocol.
-  @retval NULL  There was an error installing the protocol.
-**/
-EFI_UNICODE_COLLATION_PROTOCOL *
-OcUnicodeCollationEngInstallProtocol (
-  IN BOOLEAN  Reinstall
+VOID
+OcUnicodeCollationUpdatePlatformLanguage (
+  VOID
   )
 {
   EFI_STATUS                      Status;
-  BOOLEAN                         OverwroteLang = FALSE;
-  UINTN                           Index         = 0;
-  UINTN                           Index2        = 0;
-  EFI_UNICODE_COLLATION_PROTOCOL  *Existing     = NULL;
-  CHAR8                           *PlatformLang = NULL;
-  UINTN                           Size          = 0;
-  EFI_HANDLE                      NewHandle     = NULL;
+  CHAR8                           *PlatformLang;
+  UINTN                           Size;
 
   //
   // On several platforms EFI_PLATFORM_LANG_VARIABLE_NAME is not available.
-  // Fallback to "en-US" which is supported by this driver and the wide majority of others.
+  // Fallback to "en-US" which is supported by this library and the wide majority of others.
   //
-  Status = GetVariable2 (EFI_PLATFORM_LANG_VARIABLE_NAME, &gEfiGlobalVariableGuid, (VOID **) &PlatformLang, &Size);
-  //
-  // No value or something broken, discard and fallback.
-  //
-  if (EFI_ERROR (Status) || AsciiStrLen (PlatformLang) < 2) {
-    gRT->SetVariable (
-           EFI_PLATFORM_LANG_VARIABLE_NAME, &gEfiGlobalVariableGuid,
-           EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-           6, "en-US");
-    OverwroteLang = TRUE;
+  Size = 0;
+  PlatformLang = NULL;
+  Status = gRT->GetVariable (
+    EFI_PLATFORM_LANG_VARIABLE_NAME,
+    &gEfiGlobalVariableGuid,
+    NULL,
+    &Size,
+    PlatformLang
+    );
+  if (Status == EFI_BUFFER_TOO_SMALL) {
+    Status = gBS->AllocatePool (
+      EfiBootServicesData,
+      Size,
+      (VOID **) &PlatformLang
+      );
+    if (!EFI_ERROR (Status)) {
+      Status = gRT->GetVariable (
+        EFI_PLATFORM_LANG_VARIABLE_NAME,
+        &gEfiGlobalVariableGuid,
+        NULL,
+        &Size,
+        PlatformLang
+        );
+      if (EFI_ERROR (Status)) {
+        gBS->FreePool (PlatformLang);
+      }
+    }
   }
 
-  if (Reinstall) {
-    Status = UninstallAllProtocolInstances (&gEfiUnicodeCollation2ProtocolGuid);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCUC: Uninstall failed: %r\n", Status));
-      return NULL;
+  if (!EFI_ERROR (Status)) {
+    if (AsciiStrnLenS (PlatformLang, Size) < 2) {
+      gBS->FreePool (PlatformLang);
+      PlatformLang = NULL;
     }
   } else {
-    Status = gBS->LocateProtocol (
-                    &gEfiUnicodeCollation2ProtocolGuid,
-                    NULL,
-                    (VOID **) &Existing);
-
-    if (!EFI_ERROR (Status)) {
-      //
-      // We do not need to install an existing collation.
-      //
-      return Existing;
-    }
+    PlatformLang = NULL;
   }
 
-  //
-  // On some platforms with missing gEfiUnicodeCollation2ProtocolGuid EFI_PLATFORM_LANG_VARIABLE_NAME is set
-  // to the value different from "en" or "en-...". This is not going to work with our driver UEFI Shell load failures:
-  // we did not overwrite EFI_PLATFORM_LANG_VARIABLE_NAME, but it uses some other language.
-  // Workaround by appending the other language to the list of supported ones.
-  //
-  if (!OverwroteLang && AsciiStrnCmp (PlatformLang, "en", 2)) {
+  if (PlatformLang == NULL) {
+    //
+    // No value or something broken, discard and fallback.
+    //
+    gRT->SetVariable (
+      EFI_PLATFORM_LANG_VARIABLE_NAME,
+      &gEfiGlobalVariableGuid,
+      EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+      sizeof ("en-US"),
+      "en-US"
+      );
+  } else if (AsciiStrnCmp (PlatformLang, "en", 2) != 0) {
+    //
+    // On some platforms with missing gEfiUnicodeCollation2ProtocolGuid EFI_PLATFORM_LANG_VARIABLE_NAME is set
+    // to the value different from "en" or "en-...". This is not going to work with our driver and UEFI Shell
+    // will fail to load. Since we did not overwrite EFI_PLATFORM_LANG_VARIABLE_NAME, and it uses some other language,
+    // workaround by appending the other language to the list of supported ones.
+    //
     STATIC_ASSERT (sizeof (UnicodeLanguages) == 6 && sizeof (UnicodeLanguages[0]) == 1,
       "UnicodeLanguages must contain one extra language");
     UnicodeLanguages[2] = ';';
@@ -153,9 +143,18 @@ OcUnicodeCollationEngInstallProtocol (
   //
   // Free allocated memory for platform languages
   //
-  if (PlatformLang) {
+  if (PlatformLang != NULL) {
     gBS->FreePool (PlatformLang);
   }
+}
+
+VOID
+OcUnicodeCollationInitializeMappingTables (
+  VOID
+  )
+{
+  UINTN  Index;
+  UINTN  Index2;
 
   //
   // Initialize mapping tables for the supported languages
@@ -180,20 +179,7 @@ OcUnicodeCollationEngInstallProtocol (
     Index2 = mOtherChars[Index];
     mEngInfoMap[Index2] |= CHAR_FAT_VALID;
   }
-
-  Status = gBS->InstallMultipleProtocolInterfaces (
-                  &NewHandle,
-                  &gEfiUnicodeCollation2ProtocolGuid,
-                  &Unicode2Eng,
-                  NULL
-                  );
-  if (EFI_ERROR (Status)) {
-    return NULL;
-  }
-
-  return &Unicode2Eng;
 }
-
 
 /**
   Performs a case-insensitive comparison of two Null-terminated strings.

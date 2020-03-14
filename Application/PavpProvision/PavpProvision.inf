@@ -53,7 +53,7 @@
   gEfiFirmwareVolumeProtocolGuid
 
 [LibraryClasses]
-  OcConsoleControlEntryModeLib
+  OcConsoleControlEntryModeGenericLib
   OcHeciLib
   UefiApplicationEntryPoint
   UefiLib
