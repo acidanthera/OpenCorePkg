@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Mar  6 09:43:05 2020
-%DIF ADD ../Configuration.tex        Sat Mar 14 00:57:49 2020
+%DIF ADD ../Configuration.tex        Sat Mar 14 07:03:02 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2132,8 +2132,8 @@ behaviour that does not go to any other sections
   Designed to be filled with \texttt{plist\ dict} values, describing each load entry.
   See \hyperref[miscentryprops]{Entry Properties} section below.
 
-  \emph{Note}: Select tools, for example,
-  \href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} are very
+  \emph{Note}: Select tools, for example, \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} %%%
+\DIFdelend \DIFaddbegin \DIFadd{UEFI Shell, }\DIFaddend are very
   dangerous and \textbf{MUST NOT} appear in production configurations, especially
   in vaulted ones and protected with secure boot, as they may be used to easily
   bypass secure boot chain.
@@ -3889,79 +3889,164 @@ tweaks for the onboard firmware. To inspect firmware contents, apply modificatio
 and perform upgrades \href{https://github.com/LongSoft/UEFITool/releases}{UEFITool}
 and supplementary utilities can be used.
 
-\subsection{Properties}\label{uefiprops}
+\subsection{\DIFdelbegin \DIFdel{Properties}\DIFdelend \DIFaddbegin \DIFadd{Drivers}\DIFaddend }\DIFdelbegin %DIFDELCMD < \label{uefiprops}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \label{uefidrivers}
+\DIFaddend 
 
-\begin{enumerate}
-\item
-  \texttt{Audio}\\
-  \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
-  \textbf{Description}: Configure audio backend support described
-  in \hyperref[uefiaudioprops]{Audio Properties} section below.
+\DIFdelbegin %DIFDELCMD < \begin{enumerate}
+%DIFDELCMD < \item
+%DIFDELCMD <   %%%
+\texttt{\DIFdel{Audio}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ dict}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: None}%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Configure audio backend support described
+  in }%DIFDELCMD < \hyperref[uefiaudioprops]{Audio Properties} %%%
+\DIFdel{section below.
+}%DIFDELCMD < 
 
-  Audio support provides a way for upstream protocols to interact with the
+%DIFDELCMD <   %%%
+\DIFdel{Audio support provides a way for upstream protocols to interact with the
   selected hardware and audio resources. All audio resources should reside
-  in \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Audio}
-  directory. Currently the only supported audio file format is WAVE PCM. While it is
+  in }\texttt{\DIFdel{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Audio}}
+  %DIFAUXCMD
+\DIFdel{directory. Currently the only supported audio file format is WAVE PCM. While it is
   driver-dependent which audio stream format is supported, most common audio cards
   support 16-bit signed stereo audio at 44100 or 48000 Hz.
+}%DIFDELCMD < 
 
-  Audio file path is determined by audio type, audio localisation, and audio path. Each filename
-  looks as follows: \texttt{[audio type]\_[audio localisation]\_[audio path].wav}. For unlocalised
+%DIFDELCMD <   %%%
+\DIFdel{Audio file path is determined by audio type, audio localisation, and audio path. Each filename
+  looks as follows: }\texttt{%DIFDELCMD < [%%%
+\DIFdel{audio type}%DIFDELCMD < ]%%%
+\DIFdel{\_}%DIFDELCMD < [%%%
+\DIFdel{audio localisation}%DIFDELCMD < ]%%%
+\DIFdel{\_}%DIFDELCMD < [%%%
+\DIFdel{audio path}%DIFDELCMD < ]%%%
+\DIFdel{.wav}}%DIFAUXCMD
+\DIFdel{. For unlocalised
   files filename does not include the language code and looks as follows:
-  \texttt{[audio type]\_[audio path].wav}.
+  }\texttt{%DIFDELCMD < [%%%
+\DIFdel{audio type}%DIFDELCMD < ]%%%
+\DIFdel{\_}%DIFDELCMD < [%%%
+\DIFdel{audio path}%DIFDELCMD < ]%%%
+\DIFdel{.wav}}%DIFAUXCMD
+\DIFdel{.
+}%DIFDELCMD < 
 
-  \begin{itemize}
-  \tightlist
-  \item Audio type can be \texttt{OCEFIAudio} for OpenCore audio files or
-    \texttt{AXEFIAudio} for macOS bootloader audio files.
-  \item Audio localisation is a two letter language code (e.g. \texttt{en})
+%DIFDELCMD <   \begin{itemize}
+\begin{itemize}%DIFAUXCMD
+%DIFDELCMD <   \tightlist
+%DIFDELCMD <   \item %%%
+\item%DIFAUXCMD
+\DIFdel{Audio type can be }\texttt{\DIFdel{OCEFIAudio}} %DIFAUXCMD
+\DIFdel{for OpenCore audio files or
+    }\texttt{\DIFdel{AXEFIAudio}} %DIFAUXCMD
+\DIFdel{for macOS bootloader audio files.
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdel{Audio localisation is a two letter language code (e.g. }\texttt{\DIFdel{en}}%DIFAUXCMD
+\DIFdel{)
   with an exception for Chinese, Spanish, and Portuguese. Refer to
-  \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_LANGUAGE\_CODE} definition}
-  for the list of all supported localisations.
-  \item Audio path is the base filename corresponding to a file identifier. For macOS bootloader audio paths refer to
-  \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_AUDIO\_FILE} definition}.
+  }%DIFDELCMD < \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_LANGUAGE\_CODE} definition}
+%DIFDELCMD <   %%%
+\DIFdel{for the list of all supported localisations.
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdel{Audio path is the base filename corresponding to a file identifier. For macOS bootloader audio paths refer to
+  }%DIFDELCMD < \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_AUDIO\_FILE} definition}%%%
+\DIFdel{.
   For OpenCore audio paths refer to
-  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}.
-  The only exception is OpenCore boot chime file, which is \texttt{OCEFIAudio\_VoiceOver\_Boot.wav}.
-  \end{itemize}
+  }%DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}%%%
+\DIFdel{.
+  The only exception is OpenCore boot chime file, which is }\texttt{\DIFdel{OCEFIAudio\_VoiceOver\_Boot.wav}}%DIFAUXCMD
+\DIFdel{.
+  }
+\end{itemize}%DIFAUXCMD
+%DIFDELCMD < \end{itemize}
+%DIFDELCMD < 
 
-  Audio localisation is determined separately for macOS bootloader and OpenCore.
-  For macOS bootloader it is set in \texttt{preferences.efires} archive in
-  \texttt{systemLanguage.utf8} file and is controlled by the operating system.
-  For OpenCore the value of \texttt{prev-lang:kbd} variable is used.
+%DIFDELCMD <   %%%
+\DIFdel{Audio localisation is determined separately for macOS bootloader and OpenCore.
+  For macOS bootloader it is set in }\texttt{\DIFdel{preferences.efires}} %DIFAUXCMD
+\DIFdel{archive in
+  }\texttt{\DIFdel{systemLanguage.utf8}} %DIFAUXCMD
+\DIFdel{file and is controlled by the operating system.
+  For OpenCore the value of }\texttt{\DIFdel{prev-lang:kbd}} %DIFAUXCMD
+\DIFdel{variable is used.
   When native audio localisation of a particular file is missing, English language
-  (\texttt{en}) localisation is used. Sample audio files can be found in
-  \href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}.
+  (}\texttt{\DIFdel{en}}%DIFAUXCMD
+\DIFdel{) localisation is used. Sample audio files can be found in
+  }%DIFDELCMD < \href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}%%%
+\DIFdel{.
+}%DIFDELCMD < 
 
-\item
-  \texttt{ConnectDrivers}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Perform UEFI controller connection after driver loading.
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\texttt{\DIFdel{ConnectDrivers}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Perform UEFI controller connection after driver loading.
+}%DIFDELCMD < 
 
-  This option is useful for loading drivers following UEFI driver model
+%DIFDELCMD <   %%%
+\DIFdel{This option is useful for loading drivers following UEFI driver model
   as they may not start by themselves. Examples of such drivers are filesystem
   or audio drivers. While effective, this option may not be necessary for drivers
   performing automatic connection, and may slightly slowdown the boot.
+}%DIFDELCMD < 
 
-  \emph{Note}: Some firmwares, made by Apple in particular, only connect the boot
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: Some firmwares, made by Apple in particular, only connect the boot
   drive to speedup the boot process. Enable this option to be able to see all the
   boot options when having multiple drives.
+}%DIFDELCMD < 
 
-\item
-  \texttt{Drivers}\\
-  \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Failsafe}: None\\
-  \textbf{Description}: Load selected drivers from \texttt{OC/Drivers}
-  directory.
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\texttt{\DIFdel{Drivers}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ array}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: None}%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Load selected drivers from }\texttt{\DIFdel{OC/Drivers}}
+  %DIFAUXCMD
+\DIFdel{directory.
+}%DIFDELCMD < 
 
-  Designed to be filled with string filenames meant to be loaded as UEFI
-  drivers. Depending on the firmware a different set of drivers may be required.
-  Loading an incompatible driver may lead your system to unbootable state or
-  even cause permanent firmware damage. Some of the known drivers include:
+%DIFDELCMD <   %%%
+\DIFdel{Designed to be filled with string filenames meant to be loaded as UEFI
+  drivers. }\DIFdelend Depending on the firmware a different set of drivers may be required.
+Loading an incompatible driver may lead your system to unbootable state or
+even cause permanent firmware damage. Some of the known drivers \DIFdelbegin \DIFdel{include}\DIFdelend \DIFaddbegin \DIFadd{are listed below}\DIFaddend :
 
-  \begin{itemize}
+\begin{itemize}
   \tightlist
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
   --- APFS file system bootstrap driver adding the support of embedded APFS drivers
@@ -3974,8 +4059,8 @@ and supplementary utilities can be used.
   --- Proprietary ExFAT file system driver for Bootcamp support commonly found in Apple
   firmwares. For Sandy Bridge and earlier CPUs \texttt{ExFatDxeLegacy} driver should be
   used due to the lack of \texttt{RDRAND} instruction support.
-  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwRuntimeServices}}
-  --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
+  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwRuntimeServices}} \DIFaddbegin \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
+  }\DIFaddend --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
   of \mbox{OpenCore} and Lilu by supporting read-only and write-only NVRAM variables. Some
   commonly used quirks, e.g. \texttt{RequestBootVarRouting}, require this driver for proper function.
   Due to the nature of being a runtime driver, i.e. functioning in parallel with the
@@ -3985,8 +4070,8 @@ and supplementary utilities can be used.
   --- Proprietary HFS file system driver with bless support commonly found in Apple
   firmwares. For Sandy Bridge and earlier CPUs \texttt{HfsPlusLegacy} driver should be
   used due to the lack of \texttt{RDRAND} instruction support.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{HiiDatabase}}
-  --- HII services support driver from \texttt{MdeModulePkg}. This driver is included in
+  \item \href{https://github.com/acidanthera/audk}{\texttt{HiiDatabase}} \DIFaddbegin \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
+  }\DIFaddend --- HII services support driver from \texttt{MdeModulePkg}. This driver is included in
   most firmwares starting with Ivy Bridge generation. Some applications with the GUI
   like UEFI Shell may need this driver to work properly.
   \item \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
@@ -3995,12 +4080,12 @@ and supplementary utilities can be used.
   have a bug in their FAT support implementation, which leads to corrupted filesystems
   on write attempt. Embedding this driver within the firmware may be required in case
   writing to EFI partition is needed during the boot process.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}
-  --- NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
+  \item \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}} \DIFaddbegin \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
+  }\DIFaddend --- NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
   firmwares starting with Broadwell generation. For Haswell and earlier embedding it
   within the firmware may be more favourable in case a NVMe SSD drive is installed.
-  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AppleUsbKbDxe}}
-  --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
+  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AppleUsbKbDxe}} \DIFaddbegin \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
+  }\DIFaddend --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware.
   \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
@@ -4008,14 +4093,14 @@ and supplementary utilities can be used.
   a closed source \texttt{HfsPlus} driver commonly found in Apple firmwares. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
   a security audit.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}}
-  --- XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
+  \item \href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}} \DIFaddbegin \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
+  }\DIFaddend --- XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
   included in most firmwares starting with Sandy Bridge generation. For earlier firmwares
   or legacy systems it may be used to support external USB 3.0 PCI cards.
-  \end{itemize}
+\end{itemize}
 
-  To compile the drivers from UDK (EDK II) use the same command you do normally use
-  for OpenCore compilation, but choose a corresponding package:
+To compile the drivers from UDK (EDK II) use the same command you \DIFdelbegin \DIFdel{do }\DIFdelend normally use
+for OpenCore compilation, but choose a corresponding package:
 \begin{lstlisting}[label=compileudk, style=ocbash]
 git clone https://github.com/acidanthera/audk UDK
 cd UDK
@@ -4025,8 +4110,151 @@ build -a X64 -b RELEASE -t XCODE5 -p FatPkg/FatPkg.dsc
 build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \end{lstlisting}
 
+\DIFaddbegin \subsection{\DIFadd{Tools}}\label{uefitools}
+
+\DIFadd{Standalone tools may help to debug firmware and hardware. Some of the known tools are listed below.
+While some tools can be launched from within OpenCore many should be run separately either directly
+or from }\texttt{\DIFadd{Shell}}\DIFadd{.
+}
+
+\DIFadd{To boot into Shell or any other tool directly save }\texttt{\DIFadd{Shell.efi}}
+\DIFadd{under the name of }\texttt{\DIFadd{EFI\textbackslash BOOT\textbackslash BOOTX64.EFI}}
+\DIFadd{on a FAT32 partition. In general it is unimportant whether the partitition scheme
+is }\texttt{\DIFadd{GPT}} \DIFadd{or }\texttt{\DIFadd{MBR}}\DIFadd{.
+}
+
+\DIFadd{While the previous approach works both on Macs and other computers,
+an alternative Mac-only approach to bless the tool on an HFS+ or APFS
+volume:
+}
+
+\DIFmodbegin
+\begin{lstlisting}[caption=Blessing tool, label=blesstool, style=ocbash,alsolanguage=DIFcode]
+%DIF > sudo bless --verbose --file /Volumes/VOLNAME/DIR/Shell.efi \
+%DIF >   --folder /Volumes/VOLNAME/DIR/ --setBoot
+\end{lstlisting}
+\DIFmodend
+
+\emph{\DIFadd{Note 1}}\DIFadd{: You may have to copy }\texttt{\DIFadd{/System/Library/CoreServices/BridgeVersion.bin}}
+  \DIFadd{to }\texttt{\DIFadd{/Volumes/VOLNAME/DIR}}\DIFadd{. }\\
+\emph{\DIFadd{Note 2}}\DIFadd{: To be able to use }\texttt{\DIFadd{bless}} \DIFadd{you may have to
+  }\href{https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html}{disable System Integrity Protection}\DIFadd{. }\\
+\emph{\DIFadd{Note 3}}\DIFadd{: To be able to boot you may have to }\href{https://support.apple.com/HT208330}{disable Secure Boot}
+  \DIFadd{if present.
+}
+
+\DIFadd{Some of the known tools are listed below:
+}
+
+\begin{itemize}
+  \tightlist
+  \DIFaddend \item 
+  \DIFaddbegin \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{BootKicker}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
+  --- Enter Apple BootPicker menu (exclusive for Macs with compatible GPUs).
+  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ChipTune}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
+  --- Test BeepGen protocol and generate audio signals of different style and length.
+  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CleanNvram}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
+  --- Reset NVRAM alternative bundled as a standalone tool.
+  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwProtect}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
+  --- Unlock and lock back NVRAM protection for other tools to be able to get full NVRAM access
+  when launching from OpenCore.
+  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{GopStop}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
+  --- Test GraphicsOutput protocol with a
+  }\href{https://github.com/acidanthera/OpenCorePkg/tree/master/Application/GopStop}{simple scenario}\DIFadd{.
+  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{HdaCodecDump}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
+  --- Parse and dump High Definition Audio codec information (requires }\texttt{\DIFadd{AudioDxe}}\DIFadd{).
+  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{KeySupport}}
+  \DIFadd{--- Test keyboard input in }\texttt{\DIFadd{SimpleText}} \DIFadd{mode.
+  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenCore Shell}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
+  --- OpenCore-configured }\href{http://github.com/tianocore/edk2}{\texttt{UEFI Shell}} \DIFadd{for compatibility
+  with a broad range of firmwares.
+  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{PavpProvision}}
+  \DIFadd{--- Perform EPID provisioning (requires certificate data configuration).
+  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VerifyMsrE2}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
+  --- Check }\texttt{\DIFadd{CFG Lock}} \DIFadd{(MSR }\texttt{\DIFadd{0xE2}} \DIFadd{write protection) consistency across all cores.
+}\end{itemize}
+
+\subsection{\DIFadd{Properties}}\label{uefiprops}
+
+\begin{enumerate}
 \item
-  \texttt{Input}\\
+  \texttt{\DIFadd{Audio}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ dict}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: None}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Configure audio backend support described
+  in }\hyperref[uefiaudioprops]{Audio Properties} \DIFadd{section below.
+}
+
+  \DIFadd{Audio support provides a way for upstream protocols to interact with the
+  selected hardware and audio resources. All audio resources should reside
+  in }\texttt{\DIFadd{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Audio}}
+  \DIFadd{directory. Currently the only supported audio file format is WAVE PCM. While it is
+  driver-dependent which audio stream format is supported, most common audio cards
+  support 16-bit signed stereo audio at 44100 or 48000 Hz.
+}
+
+  \DIFadd{Audio file path is determined by audio type, audio localisation, and audio path. Each filename
+  looks as follows: }\texttt{[\DIFadd{audio type}]\DIFadd{\_}[\DIFadd{audio localisation}]\DIFadd{\_}[\DIFadd{audio path}]\DIFadd{.wav}}\DIFadd{. For unlocalised
+  files filename does not include the language code and looks as follows:
+  }\texttt{[\DIFadd{audio type}]\DIFadd{\_}[\DIFadd{audio path}]\DIFadd{.wav}}\DIFadd{.
+}
+
+  \begin{itemize}
+  \tightlist
+  \item \DIFadd{Audio type can be }\texttt{\DIFadd{OCEFIAudio}} \DIFadd{for OpenCore audio files or
+    }\texttt{\DIFadd{AXEFIAudio}} \DIFadd{for macOS bootloader audio files.
+  }\item \DIFadd{Audio localisation is a two letter language code (e.g. }\texttt{\DIFadd{en}}\DIFadd{)
+  with an exception for Chinese, Spanish, and Portuguese. Refer to
+  }\href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_LANGUAGE\_CODE} definition}
+  \DIFadd{for the list of all supported localisations.
+  }\item \DIFadd{Audio path is the base filename corresponding to a file identifier. For macOS bootloader audio paths refer to
+  }\href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_AUDIO\_FILE} definition}\DIFadd{.
+  For OpenCore audio paths refer to
+  }\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}\DIFadd{.
+  The only exception is OpenCore boot chime file, which is }\texttt{\DIFadd{OCEFIAudio\_VoiceOver\_Boot.wav}}\DIFadd{.
+  }\end{itemize}
+
+  \DIFadd{Audio localisation is determined separately for macOS bootloader and OpenCore.
+  For macOS bootloader it is set in }\texttt{\DIFadd{preferences.efires}} \DIFadd{archive in
+  }\texttt{\DIFadd{systemLanguage.utf8}} \DIFadd{file and is controlled by the operating system.
+  For OpenCore the value of }\texttt{\DIFadd{prev-lang:kbd}} \DIFadd{variable is used.
+  When native audio localisation of a particular file is missing, English language
+  (}\texttt{\DIFadd{en}}\DIFadd{) localisation is used. Sample audio files can be found in
+  }\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}\DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{ConnectDrivers}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Perform UEFI controller connection after driver loading.
+}
+
+  \DIFadd{This option is useful for loading drivers following UEFI driver model
+  as they may not start by themselves. Examples of such drivers are filesystem
+  or audio drivers. While effective, this option may not be necessary for drivers
+  performing automatic connection, and may slightly slowdown the boot.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: Some firmwares, made by Apple in particular, only connect the boot
+  drive to speedup the boot process. Enable this option to be able to see all the
+  boot options when having multiple drives.
+}
+
+\item
+  \texttt{\DIFadd{Drivers}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ array}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: None}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Load selected drivers from }\texttt{\DIFadd{OC/Drivers}}
+  \DIFadd{directory.
+}
+
+  \DIFadd{Designed to be filled with string filenames meant to be loaded as UEFI
+  drivers.
+}
+
+\item
+  \DIFaddend \texttt{Input}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Apply individual settings designed for input (keyboard and mouse) in

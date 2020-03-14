@@ -2064,8 +2064,7 @@ behaviour that does not go to any other sections
   Designed to be filled with \texttt{plist\ dict} values, describing each load entry.
   See \hyperref[miscentryprops]{Entry Properties} section below.
 
-  \emph{Note}: Select tools, for example,
-  \href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} are very
+  \emph{Note}: Select tools, for example, UEFI Shell, are very
   dangerous and \textbf{MUST NOT} appear in production configurations, especially
   in vaulted ones and protected with secure boot, as they may be used to easily
   bypass secure boot chain.
@@ -3810,6 +3809,133 @@ tweaks for the onboard firmware. To inspect firmware contents, apply modificatio
 and perform upgrades \href{https://github.com/LongSoft/UEFITool/releases}{UEFITool}
 and supplementary utilities can be used.
 
+\subsection{Drivers}\label{uefidrivers}
+
+Depending on the firmware a different set of drivers may be required.
+Loading an incompatible driver may lead your system to unbootable state or
+even cause permanent firmware damage. Some of the known drivers are listed below:
+
+\begin{itemize}
+  \tightlist
+  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
+  --- APFS file system bootstrap driver adding the support of embedded APFS drivers
+  in bootable APFS containers in UEFI firmwares.
+  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
+  --- HDA audio support driver in UEFI firmwares for most Intel and some other analog audio controllers.
+  Refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
+  for known issues in AudioDxe.
+  \item \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ExFatDxe}}
+  --- Proprietary ExFAT file system driver for Bootcamp support commonly found in Apple
+  firmwares. For Sandy Bridge and earlier CPUs \texttt{ExFatDxeLegacy} driver should be
+  used due to the lack of \texttt{RDRAND} instruction support.
+  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwRuntimeServices}} (\textbf{builtin})
+  --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
+  of \mbox{OpenCore} and Lilu by supporting read-only and write-only NVRAM variables. Some
+  commonly used quirks, e.g. \texttt{RequestBootVarRouting}, require this driver for proper function.
+  Due to the nature of being a runtime driver, i.e. functioning in parallel with the
+  target operating system, it cannot be implemented within OpenCore itself, but is bundled
+  with OpenCore releases.
+  \item \href{https://github.com/acidanthera/OcBinaryData}{\texttt{HfsPlus}}
+  --- Proprietary HFS file system driver with bless support commonly found in Apple
+  firmwares. For Sandy Bridge and earlier CPUs \texttt{HfsPlusLegacy} driver should be
+  used due to the lack of \texttt{RDRAND} instruction support.
+  \item \href{https://github.com/acidanthera/audk}{\texttt{HiiDatabase}} (\textbf{builtin})
+  --- HII services support driver from \texttt{MdeModulePkg}. This driver is included in
+  most firmwares starting with Ivy Bridge generation. Some applications with the GUI
+  like UEFI Shell may need this driver to work properly.
+  \item \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
+  --- FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
+  UEFI firmwares, and cannot be used from OpenCore. It is known that multiple firmwares
+  have a bug in their FAT support implementation, which leads to corrupted filesystems
+  on write attempt. Embedding this driver within the firmware may be required in case
+  writing to EFI partition is needed during the boot process.
+  \item \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}} (\textbf{builtin})
+  --- NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
+  firmwares starting with Broadwell generation. For Haswell and earlier embedding it
+  within the firmware may be more favourable in case a NVMe SSD drive is installed.
+  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AppleUsbKbDxe}} (\textbf{builtin})
+  --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
+  on top of a custom USB keyboard driver implementation. This is an alternative to
+  builtin \texttt{KeySupport}, which may work better or worse depending on the firmware.
+  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
+  --- HFS file system driver with bless support. This driver is an alternative to
+  a closed source \texttt{HfsPlus} driver commonly found in Apple firmwares. While
+  it is feature complete, it is approximately 3~times slower and is yet to undergo
+  a security audit.
+  \item \href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}} (\textbf{builtin})
+  --- XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
+  included in most firmwares starting with Sandy Bridge generation. For earlier firmwares
+  or legacy systems it may be used to support external USB 3.0 PCI cards.
+\end{itemize}
+
+To compile the drivers from UDK (EDK II) use the same command you normally use
+for OpenCore compilation, but choose a corresponding package:
+\begin{lstlisting}[label=compileudk, style=ocbash]
+git clone https://github.com/acidanthera/audk UDK
+cd UDK
+source edksetup.sh
+make -C BaseTools
+build -a X64 -b RELEASE -t XCODE5 -p FatPkg/FatPkg.dsc
+build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
+\end{lstlisting}
+
+\subsection{Tools}\label{uefitools}
+
+Standalone tools may help to debug firmware and hardware. Some of the known tools are listed below.
+While some tools can be launched from within OpenCore many should be run separately either directly
+or from \texttt{Shell}.
+
+To boot into Shell or any other tool directly save \texttt{Shell.efi}
+under the name of \texttt{EFI\textbackslash BOOT\textbackslash BOOTX64.EFI}
+on a FAT32 partition. In general it is unimportant whether the partitition scheme
+is \texttt{GPT} or \texttt{MBR}.
+
+While the previous approach works both on Macs and other computers,
+an alternative Mac-only approach to bless the tool on an HFS+ or APFS
+volume:
+
+\begin{lstlisting}[caption=Blessing tool, label=blesstool, style=ocbash]
+sudo bless --verbose --file /Volumes/VOLNAME/DIR/Shell.efi \
+  --folder /Volumes/VOLNAME/DIR/ --setBoot
+\end{lstlisting}
+
+\emph{Note 1}: You may have to copy \texttt{/System/Library/CoreServices/BridgeVersion.bin}
+  to \texttt{/Volumes/VOLNAME/DIR}. \\
+\emph{Note 2}: To be able to use \texttt{bless} you may have to
+  \href{https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html}{disable System Integrity Protection}. \\
+\emph{Note 3}: To be able to boot you may have to \href{https://support.apple.com/HT208330}{disable Secure Boot}
+  if present.
+
+Some of the known tools are listed below:
+
+\begin{itemize}
+  \tightlist
+  \item 
+  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{BootKicker}} (\textbf{builtin})
+  --- Enter Apple BootPicker menu (exclusive for Macs with compatible GPUs).
+  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ChipTune}} (\textbf{builtin})
+  --- Test BeepGen protocol and generate audio signals of different style and length.
+  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CleanNvram}} (\textbf{builtin})
+  --- Reset NVRAM alternative bundled as a standalone tool.
+  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwProtect}} (\textbf{builtin})
+  --- Unlock and lock back NVRAM protection for other tools to be able to get full NVRAM access
+  when launching from OpenCore.
+  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{GopStop}} (\textbf{builtin})
+  --- Test GraphicsOutput protocol with a
+  \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Application/GopStop}{simple scenario}.
+  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{HdaCodecDump}} (\textbf{builtin})
+  --- Parse and dump High Definition Audio codec information (requires \texttt{AudioDxe}).
+  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{KeySupport}} (\textbf{builtin})
+  --- Test keyboard input in \texttt{SimpleText} mode.
+  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenCore Shell}} (\textbf{builtin})
+  --- OpenCore-configured \href{http://github.com/tianocore/edk2}{\texttt{UEFI Shell}} for compatibility
+  with a broad range of firmwares.
+  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{PavpProvision}}
+  --- Perform EPID provisioning (requires certificate data configuration).
+  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VerifyMsrE2}} (\textbf{builtin})
+  --- Check \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) consistency across all cores.
+\end{itemize}
+
 \subsection{Properties}\label{uefiprops}
 
 \begin{enumerate}
@@ -3878,73 +4004,7 @@ and supplementary utilities can be used.
   directory.
 
   Designed to be filled with string filenames meant to be loaded as UEFI
-  drivers. Depending on the firmware a different set of drivers may be required.
-  Loading an incompatible driver may lead your system to unbootable state or
-  even cause permanent firmware damage. Some of the known drivers include:
-
-  \begin{itemize}
-  \tightlist
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
-  --- APFS file system bootstrap driver adding the support of embedded APFS drivers
-  in bootable APFS containers in UEFI firmwares.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
-  --- HDA audio support driver in UEFI firmwares for most Intel and some other analog audio controllers.
-  Refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
-  for known issues in AudioDxe.
-  \item \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ExFatDxe}}
-  --- Proprietary ExFAT file system driver for Bootcamp support commonly found in Apple
-  firmwares. For Sandy Bridge and earlier CPUs \texttt{ExFatDxeLegacy} driver should be
-  used due to the lack of \texttt{RDRAND} instruction support.
-  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwRuntimeServices}}
-  --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
-  of \mbox{OpenCore} and Lilu by supporting read-only and write-only NVRAM variables. Some
-  commonly used quirks, e.g. \texttt{RequestBootVarRouting}, require this driver for proper function.
-  Due to the nature of being a runtime driver, i.e. functioning in parallel with the
-  target operating system, it cannot be implemented within OpenCore itself, but is bundled
-  with OpenCore releases.
-  \item \href{https://github.com/acidanthera/OcBinaryData}{\texttt{HfsPlus}}
-  --- Proprietary HFS file system driver with bless support commonly found in Apple
-  firmwares. For Sandy Bridge and earlier CPUs \texttt{HfsPlusLegacy} driver should be
-  used due to the lack of \texttt{RDRAND} instruction support.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{HiiDatabase}}
-  --- HII services support driver from \texttt{MdeModulePkg}. This driver is included in
-  most firmwares starting with Ivy Bridge generation. Some applications with the GUI
-  like UEFI Shell may need this driver to work properly.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
-  --- FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
-  UEFI firmwares, and cannot be used from OpenCore. It is known that multiple firmwares
-  have a bug in their FAT support implementation, which leads to corrupted filesystems
-  on write attempt. Embedding this driver within the firmware may be required in case
-  writing to EFI partition is needed during the boot process.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}
-  --- NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
-  firmwares starting with Broadwell generation. For Haswell and earlier embedding it
-  within the firmware may be more favourable in case a NVMe SSD drive is installed.
-  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AppleUsbKbDxe}}
-  --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
-  on top of a custom USB keyboard driver implementation. This is an alternative to
-  builtin \texttt{KeySupport}, which may work better or worse depending on the firmware.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
-  --- HFS file system driver with bless support. This driver is an alternative to
-  a closed source \texttt{HfsPlus} driver commonly found in Apple firmwares. While
-  it is feature complete, it is approximately 3~times slower and is yet to undergo
-  a security audit.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}}
-  --- XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
-  included in most firmwares starting with Sandy Bridge generation. For earlier firmwares
-  or legacy systems it may be used to support external USB 3.0 PCI cards.
-  \end{itemize}
-
-  To compile the drivers from UDK (EDK II) use the same command you do normally use
-  for OpenCore compilation, but choose a corresponding package:
-\begin{lstlisting}[label=compileudk, style=ocbash]
-git clone https://github.com/acidanthera/audk UDK
-cd UDK
-source edksetup.sh
-make -C BaseTools
-build -a X64 -b RELEASE -t XCODE5 -p FatPkg/FatPkg.dsc
-build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
-\end{lstlisting}
+  drivers.
 
 \item
   \texttt{Input}\\

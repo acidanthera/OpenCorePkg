@@ -30,7 +30,6 @@ latexdiff -s ONLYCHANGEDPAGE PreviousConfiguration.tex ../Configuration.tex \
   > Differences.tex || \
   abort "Unable to differentiate"
 
-pdflatex Differences || \
-  abort "Unable to create differences pdf"
-pdflatex Differences || \
-  abort "Unable to create differences pdf with TOC"
+pdflatex -interaction=nonstopmode Differences
+pdflatex -interaction=nonstopmode Differences
+exit 0
