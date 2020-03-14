@@ -23,20 +23,21 @@ package() {
   mkdir -p tmp/EFI/BOOT || exit 1
   mkdir -p tmp/Docs/AcpiSamples || exit 1
   mkdir -p tmp/Utilities || exit 1
-  cp OpenCore.efi tmp/EFI/OC/ || exit 1
-  cp BOOTx64.efi tmp/EFI/BOOT/ || exit 1
   cp AppleUsbKbDxe.efi tmp/EFI/OC/Drivers/ || exit 1
-  cp BootLiquor.efi tmp/EFI/OC/Drivers/ || exit 1
-  cp FwRuntimeServices.efi tmp/EFI/OC/Drivers/ || exit 1
-  cp HiiDatabase.efi tmp/EFI/OC/Drivers/ || exit 1
-  cp NvmExpressDxe.efi tmp/EFI/OC/Drivers/ || exit 1
-  cp XhciDxe.efi tmp/EFI/OC/Drivers/ || exit 1
   cp BootKicker.efi tmp/EFI/OC/Tools/ || exit 1
+  cp BootLiquor.efi tmp/EFI/OC/Drivers/ || exit 1
+  cp BOOTx64.efi tmp/EFI/BOOT/ || exit 1
   cp CleanNvram.efi tmp/EFI/OC/Tools/ || exit 1
   cp FwProtect.efi tmp/EFI/OC/Tools/ || exit 1
+  cp FwRuntimeServices.efi tmp/EFI/OC/Drivers/ || exit 1
   cp GopStop.efi tmp/EFI/OC/Tools/ || exit 1
   cp HdaCodecDump.efi tmp/EFI/OC/Tools/ || exit 1
+  cp HiiDatabase.efi tmp/EFI/OC/Drivers/ || exit 1
+  cp NvmExpressDxe.efi tmp/EFI/OC/Drivers/ || exit 1
+  cp OpenCore.efi tmp/EFI/OC/ || exit 1
+  cp Shell.efi tmp/EFI/OC/Tools/ || exit 1
   cp VerifyMsrE2.efi tmp/EFI/OC/Tools/ || exit 1
+  cp XhciDxe.efi tmp/EFI/OC/Drivers/ || exit 1
   cp "${selfdir}/Docs/Configuration.pdf" tmp/Docs/ || exit 1
   cp "${selfdir}/Docs/Differences/Differences.pdf" tmp/Docs/ || exit 1
   cp "${selfdir}/Docs/Sample.plist" tmp/Docs/ || exit 1
