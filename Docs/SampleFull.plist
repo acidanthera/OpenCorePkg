@@ -782,26 +782,26 @@
 			<key>SystemProductName</key>
 			<string>iMac19,1</string>
 			<key>SystemSerialNumber</key>
-			<string>C02Y90H3JV3Q</string>
+			<string>W00000000001</string>
 			<key>SystemUUID</key>
-			<string>208E566D-5C3B-4219-A0F4-2CD7D168CB25</string>
+			<string>00000000-0000-0000-0000-000000000000</string>
 		</dict>
 		<key>Generic</key>
 		<dict>
 			<key>AdviseWindows</key>
 			<false/>
 			<key>MLB</key>
-			<string>C02908404QXLNV91H</string>
+			<string>M0000000000000001</string>
 			<key>ROM</key>
-			<data>OPnTB3qP</data>
+			<data>ESIzRFVm</data>
 			<key>SpoofVendor</key>
 			<true/>
 			<key>SystemProductName</key>
 			<string>iMac19,1</string>
 			<key>SystemSerialNumber</key>
-			<string>C02Y90H3JV3Q</string>
+			<string>W00000000001</string>
 			<key>SystemUUID</key>
-			<string>208E566D-5C3B-4219-A0F4-2CD7D168CB25</string>
+			<string>00000000-0000-0000-0000-000000000000</string>
 		</dict>
 		<key>PlatformNVRAM</key>
 		<dict>
@@ -812,9 +812,9 @@
 			<key>FirmwareFeaturesMask</key>
 			<data>f//f/wAAAAA=</data>
 			<key>MLB</key>
-			<string>C02908404QXLNV91H</string>
+			<string>M0000000000000001</string>
 			<key>ROM</key>
-			<data>OPnTB3qP</data>
+			<data>ESIzRFVm</data>
 		</dict>
 		<key>SMBIOS</key>
 		<dict>
@@ -833,7 +833,7 @@
 			<key>BoardProduct</key>
 			<string>Mac-AA95B1DDAB278B95</string>
 			<key>BoardSerialNumber</key>
-			<string>C02908404QXLNV91H</string>
+			<string>M0000000000000001</string>
 			<key>BoardType</key>
 			<integer>10</integer>
 			<key>BoardVersion</key>
@@ -843,7 +843,7 @@
 			<key>ChassisManufacturer</key>
 			<string>Acidanthera</string>
 			<key>ChassisSerialNumber</key>
-			<string>C02Y90H3JV3Q</string>
+			<string>W00000000001</string>
 			<key>ChassisType</key>
 			<integer>9</integer>
 			<key>ChassisVersion</key>
@@ -869,9 +869,9 @@
 			<key>SystemSKUNumber</key>
 			<string></string>
 			<key>SystemSerialNumber</key>
-			<string>C02Y90H3JV3Q</string>
+			<string>W00000000001</string>
 			<key>SystemUUID</key>
-			<string>208E566D-5C3B-4219-A0F4-2CD7D168CB25</string>
+			<string>00000000-0000-0000-0000-000000000000</string>
 			<key>SystemVersion</key>
 			<string>1.0</string>
 		</dict>
