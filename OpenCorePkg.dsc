@@ -142,10 +142,10 @@
   OpenCorePkg/Application/Bootstrap/Bootstrap.inf
   OpenCorePkg/Application/ChipTune/ChipTune.inf
   OpenCorePkg/Application/CleanNvram/CleanNvram.inf
-  OpenCorePkg/Application/FwProtect/FwProtect.inf
   OpenCorePkg/Application/GopStop/GopStop.inf
   OpenCorePkg/Application/HdaCodecDump/HdaCodecDump.inf
   OpenCorePkg/Application/KeyTester/KeyTester.inf
+  OpenCorePkg/Application/OpenControl/OpenControl.inf
   OpenCorePkg/Application/PavpProvision/PavpProvision.inf
   OpenCorePkg/Application/VerifyMsrE2/VerifyMsrE2.inf
   OpenCorePkg/Debug/GdbSyms/GdbSyms.inf
@@ -206,10 +206,10 @@
   OpenCorePkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngLocalLib.inf
   OpenCorePkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OpenCorePkg/Library/OcXmlLib/OcXmlLib.inf
-  OpenCorePkg/Platform/AppleUsbKbDxe/UsbKbDxe.inf
-  OpenCorePkg/Platform/BootLiquor/BootLiquor.inf
-  OpenCorePkg/Platform/FwRuntimeServices/FwRuntimeServices.inf
+  OpenCorePkg/Platform/OpenCanopy/OpenCanopy.inf
   OpenCorePkg/Platform/OpenCore/OpenCore.inf
+  OpenCorePkg/Platform/OpenRuntime/OpenRuntime.inf
+  OpenCorePkg/Platform/OpenUsbKbDxe/UsbKbDxe.inf
   OpenCorePkg/Tests/AcpiTest/AcpiTest.inf
   OpenCorePkg/Tests/AcpiTest/AcpiTestApp.inf
   OpenCorePkg/Tests/BlessTest/BlessTest.inf

@@ -1,5 +1,5 @@
 /** @file
-  This file is part of BootLiquor, OpenCore GUI.
+  This file is part of OpenCanopy, OpenCore GUI.
 
   Copyright (c) 2018-2019, Download-Fritz. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-3-Clause
@@ -8,7 +8,7 @@
 #ifndef GUI_APP_H
 #define GUI_APP_H
 
-#include "BootLiquor.h"
+#include "OpenCanopy.h"
 #include "BmfLib.h"
 
 typedef struct {

@@ -1,5 +1,5 @@
 /** @file
-  This file is part of BootLiquor, OpenCore GUI.
+  This file is part of OpenCanopy, OpenCore GUI.
 
   Copyright (c) 2018-2019, Download-Fritz. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-3-Clause
@@ -15,7 +15,7 @@
 #include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include "../BootLiquor.h"
+#include "../OpenCanopy.h"
 #include "../GuiIo.h"
 
 struct GUI_POINTER_CONTEXT_ {

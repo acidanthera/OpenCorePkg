@@ -14,7 +14,7 @@
 
 [Defines]
   INF_VERSION                         = 0x00010005
-  BASE_NAME                           = BootLiquor
+  BASE_NAME                           = OpenCanopy
   FILE_GUID                           = A72DCBF9-388A-47FE-B13A-591716F70609
   MODULE_TYPE                         = UEFI_DRIVER
   VERSION_STRING                      = 1.0
@@ -33,8 +33,8 @@
   BitmapFont.c
   BmfFile.h
   BmfLib.h
-  BootLiquor.c
-  BootLiquor.h
+  OpenCanopy.c
+  OpenCanopy.h
   GuiApp.c
   GuiApp.h
   GuiIo.h

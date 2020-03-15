@@ -14,7 +14,7 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = FwRuntimeServices
+  BASE_NAME                      = OpenRuntime
   FILE_GUID                      = E0BA9DEF-0478-462E-BF46-908EB0EFC7E0
   MODULE_TYPE                    = DXE_RUNTIME_DRIVER
   VERSION_STRING                 = 1.0
@@ -38,8 +38,8 @@
 
 [Sources]
   UefiRuntimeServices.c
-  FwRuntimeServices.c
-  FwRuntimeServicesPrivate.h
+  OpenRuntime.c
+  OpenRuntimePrivate.h
 
 [Guids]
   gEfiGlobalVariableGuid                      ## CONSUMES

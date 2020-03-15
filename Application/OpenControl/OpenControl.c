@@ -1,5 +1,5 @@
 /** @file
-  Override FwRuntimeServices protection.
+  Control OpenCore instance.
 
 Copyright (c) 2020, vit9696. All rights reserved.<BR>
 This program and the accompanying materials
@@ -83,6 +83,6 @@ UefiMain (
     }
   }
 
-  Print (L"Usage: FwProtect <disable|restore>\n");
+  Print (L"Usage: OpenControl <disable|restore>\n");
   return EFI_SUCCESS;
 }

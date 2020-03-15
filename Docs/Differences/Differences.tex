@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Mar  6 09:43:05 2020
-%DIF ADD ../Configuration.tex        Sat Mar 14 07:34:54 2020
+%DIF ADD ../Configuration.tex        Sun Mar 15 17:26:37 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1308,7 +1308,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   This is a security option allowing one to restrict NVRAM access in macOS.
   This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented
-  in \texttt{FwRuntimeServices.efi}.
+  in \texttt{\DIFdelbegin \DIFdel{FwRuntimeServices}\DIFdelend \DIFaddbegin \DIFadd{OpenRuntime}\DIFaddend .efi}.
 
   \emph{Note}: This quirk can also be used as an ugly workaround to buggy UEFI
   runtime services implementations that fail to write variables to NVRAM and
@@ -1356,7 +1356,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   This option bypasses \texttt{R\^X} permissions in code pages of UEFI runtime
   services by removing write protection (\texttt{WP}) bit from \texttt{CR0}
   register during their execution. This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME}
-  protocol implemented in \texttt{FwRuntimeServices.efi}.
+  protocol implemented in \texttt{\DIFdelbegin \DIFdel{FwRuntimeServices}\DIFdelend \DIFaddbegin \DIFadd{OpenRuntime}\DIFaddend .efi}.
 
   \emph{Note}: The necessity of this quirk is determined by early boot crashes
   of the firmware.
@@ -2315,14 +2315,21 @@ behaviour that does not go to any other sections
   Otherwise \texttt{Builtin} mode is used.
   \end{itemize}
 
-
   Upon success \texttt{External} mode will entirely disable all boot management
   in OpenCore except policy enforcement. In \texttt{Apple} mode it may additionally
-  bypass policy enforcement. To implement \texttt{External} mode a custom user interface may
-  utilise \href{https://github.com/acidanthera/OpenCorePkg}{OpenCorePkg}
-  \texttt{OcBootManagementLib}. Reference example of external graphics interface is provided in
-  \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Tests/ExternalUi}{ExternalUi}
-  test driver.
+  bypass policy enforcement. \DIFdelbegin \DIFdel{To implement }\texttt{\DIFdel{External}} %DIFAUXCMD
+\DIFdel{mode }\DIFdelend \DIFaddbegin \DIFadd{See }\hyperref[ueficanopy]{OpenCanopy} \DIFadd{plugin
+  for an example of }\DIFaddend a custom user interface\DIFdelbegin \DIFdel{may
+  utilise }%DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg}{OpenCorePkg}
+%DIFDELCMD <   %%%
+\texttt{\DIFdel{OcBootManagementLib}}%DIFAUXCMD
+\DIFdel{.
+Reference example of external graphics interface is provided in
+  }%DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Tests/ExternalUi}{ExternalUi}
+%DIFDELCMD <   %%%
+\DIFdel{test driver.
+}\DIFdelend \DIFaddbegin \DIFadd{.
+}\DIFaddend 
 
   OpenCore built-in boot picker contains a set of actions chosen during the boot process.
   The list of supported actions is similar to Apple BDS and in general can be accessed by
@@ -2350,7 +2357,7 @@ behaviour that does not go to any other sections
   recovery. Hold \texttt{CMD+R} key combination to choose this option.
   \end{itemize}
 
-  \emph{Note 1}: Activated \texttt{KeySupport}, \texttt{AppleUsbKbDxe}, or similar driver is required
+  \emph{Note 1}: Activated \texttt{KeySupport}, \texttt{\DIFdelbegin \DIFdel{AppleUsbKbDxe}\DIFdelend \DIFaddbegin \DIFadd{OpenUsbKbDxe}\DIFaddend }, or similar driver is required
   for key handling to work. On many firmwares it is not possible to get all the keys function.
 
   \emph{Note 2}: In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key to display picker when
@@ -2755,7 +2762,7 @@ rm vault.pub
   Example: \texttt{PciRoot(0x0)/Pci(0x1,0x1)/.../\textbackslash EFI\textbackslash COOL.EFI}
   \item \texttt{Tools} specify internal boot options, which are part of bootloader
   vault, and therefore take file paths relative to \texttt{OC/Tools} directory.
-  Example: \texttt{Shell.efi}.
+  Example: \texttt{\DIFdelbegin \DIFdel{Shell}\DIFdelend \DIFaddbegin \DIFadd{OpenShell}\DIFaddend .efi}.
   \end{itemize}
 
 \end{enumerate}
@@ -2801,7 +2808,7 @@ Please ensure that variables of this section never collide with them,
 as behaviour is undefined otherwise.
 
 For proper macOS functioning it is often required to use \texttt{OC\_FIRMWARE\_RUNTIME}
-protocol implementation currently offered as a part of \texttt{FwRuntimeServices} driver.
+protocol implementation currently offered as a part of \texttt{\DIFdelbegin \DIFdel{FwRuntimeServices}\DIFdelend \DIFaddbegin \DIFadd{OpenRuntime}\DIFaddend } driver.
 While it brings any benefits, there are certain limitations which arise depending on the
 use.
 
@@ -4046,60 +4053,95 @@ and supplementary utilities can be used.
 Loading an incompatible driver may lead your system to unbootable state or
 even cause permanent firmware damage. Some of the known drivers \DIFdelbegin \DIFdel{include}\DIFdelend \DIFaddbegin \DIFadd{are listed below}\DIFaddend :
 
-\begin{itemize}
-  \tightlist
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
-  --- APFS file system bootstrap driver adding the support of embedded APFS drivers
-  in bootable APFS containers in UEFI firmwares.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
-  --- HDA audio support driver in UEFI firmwares for most Intel and some other analog audio controllers.
+\DIFdelbegin %DIFDELCMD < \begin{itemize}
+%DIFDELCMD <   \tightlist
+%DIFDELCMD <   \item %%%
+\item%DIFAUXCMD
+\DIFdelend \DIFaddbegin \begin{tabular}{p{1.3in}p{5.55in}}
+\DIFaddend \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
+\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin & \DIFaddend APFS file system bootstrap driver adding the support of embedded APFS drivers
+  in bootable APFS containers in UEFI firmwares \DIFdelbegin \DIFdel{.
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdelend \DIFaddbegin \\
+\DIFaddend \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
+\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin & \DIFaddend HDA audio support driver in UEFI firmwares for most Intel and some other analog audio controllers.
   Refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
-  for known issues in AudioDxe.
-  \item \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ExFatDxe}}
-  --- Proprietary ExFAT file system driver for Bootcamp support commonly found in Apple
+  for known issues in AudioDxe. \DIFdelbegin %DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdelend \DIFaddbegin \\
+\DIFaddend \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ExFatDxe}}
+\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin & \DIFaddend Proprietary ExFAT file system driver for Bootcamp support commonly found in Apple
   firmwares. For Sandy Bridge and earlier CPUs \texttt{ExFatDxeLegacy} driver should be
-  used due to the lack of \texttt{RDRAND} instruction support.
-  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwRuntimeServices}} \DIFaddbegin \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
-  }\DIFaddend --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
+  used due to the lack of \texttt{RDRAND} instruction support. \DIFdelbegin %DIFDELCMD < \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwRuntimeServices}}
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdel{--- }\texttt{\DIFdel{OC\_FIRMWARE\_RUNTIME}} %DIFAUXCMD
+\DIFdel{protocol implementation that increases the security
   of \mbox{OpenCore} and Lilu by supporting read-only and write-only NVRAM variables. Some
-  commonly used quirks, e.g. \texttt{RequestBootVarRouting}, require this driver for proper function.
+  commonly used quirks, e.g. }\texttt{\DIFdel{RequestBootVarRouting}}%DIFAUXCMD
+\DIFdel{, require this driver for proper function.
   Due to the nature of being a runtime driver, i.e. functioning in parallel with the
   target operating system, it cannot be implemented within OpenCore itself, but is bundled
   with OpenCore releases.
-  \item \href{https://github.com/acidanthera/OcBinaryData}{\texttt{HfsPlus}}
-  --- Proprietary HFS file system driver with bless support commonly found in Apple
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdelend \DIFaddbegin \\
+\DIFaddend \href{https://github.com/acidanthera/OcBinaryData}{\texttt{HfsPlus}}
+\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin & \DIFaddend Proprietary HFS file system driver with bless support commonly found in Apple
   firmwares. For Sandy Bridge and earlier CPUs \texttt{HfsPlusLegacy} driver should be
-  used due to the lack of \texttt{RDRAND} instruction support.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{HiiDatabase}} \DIFaddbegin \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
-  }\DIFaddend --- HII services support driver from \texttt{MdeModulePkg}. This driver is included in
+  used due to the lack of \texttt{RDRAND} instruction support. \DIFdelbegin %DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdelend \DIFaddbegin \\
+\DIFaddend \href{https://github.com/acidanthera/audk}{\texttt{HiiDatabase}}\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \textbf{\DIFadd{*}}
+& \DIFaddend HII services support driver from \texttt{MdeModulePkg}. This driver is included in
   most firmwares starting with Ivy Bridge generation. Some applications with the GUI
-  like UEFI Shell may need this driver to work properly.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
-  --- FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
+  like UEFI Shell may need this driver to work properly. \DIFdelbegin %DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdelend \DIFaddbegin \\
+\DIFaddend \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
+\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin & \DIFaddend FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
   UEFI firmwares, and cannot be used from OpenCore. It is known that multiple firmwares
   have a bug in their FAT support implementation, which leads to corrupted filesystems
   on write attempt. Embedding this driver within the firmware may be required in case
-  writing to EFI partition is needed during the boot process.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}} \DIFaddbegin \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
-  }\DIFaddend --- NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
+  writing to EFI partition is needed during the boot process. \DIFdelbegin %DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdelend \DIFaddbegin \\
+  \DIFaddend \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \textbf{\DIFadd{*}}
+& \DIFaddend NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
   firmwares starting with Broadwell generation. For Haswell and earlier embedding it
-  within the firmware may be more favourable in case a NVMe SSD drive is installed.
-  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AppleUsbKbDxe}} \DIFaddbegin \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
-  }\DIFaddend --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
+  within the firmware may be more favourable in case a NVMe SSD drive is installed. \DIFdelbegin %DIFDELCMD < \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AppleUsbKbDxe}}
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdel{--- }\DIFdelend \DIFaddbegin \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenCanopy}}\textbf{\DIFadd{*}}
+& \hyperref[ueficanopy]{OpenCore plugin} \DIFadd{implementing graphical interface. }\\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenRuntime}}\textbf{\DIFadd{*}}
+& \hyperref[uefiruntime]{OpenCore plugin} \DIFadd{implementing }\texttt{\DIFadd{OC\_FIRMWARE\_RUNTIME}} \DIFadd{protocol. }\\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenUsbKbDxe}}\textbf{\DIFadd{*}}
+& \DIFaddend USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
-  builtin \texttt{KeySupport}, which may work better or worse depending on the firmware.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
-  --- HFS file system driver with bless support. This driver is an alternative to
+  builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \DIFdelbegin %DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdelend \DIFaddbegin \\
+\DIFaddend \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
+\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin & \DIFaddend HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HfsPlus} driver commonly found in Apple firmwares. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
-  a security audit.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}} \DIFaddbegin \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
-  }\DIFaddend --- XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
+  a security audit. \DIFdelbegin %DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdelend \DIFaddbegin \\
+\DIFaddend \href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}}\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \textbf{\DIFadd{*}}
+& \DIFaddend XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
   included in most firmwares starting with Sandy Bridge generation. For earlier firmwares
   or legacy systems it may be used to support external USB 3.0 PCI cards.
-\end{itemize}
+\DIFdelbegin %DIFDELCMD < \end{itemize}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \end{tabular}
+\DIFaddend 
 
-To compile the drivers from UDK (EDK II) use the same command you \DIFdelbegin \DIFdel{do }\DIFdelend normally use
+\DIFaddbegin \DIFadd{Driver marked with }\textbf{\DIFadd{*}} \DIFadd{are bundled with OpenCore.
+}\DIFaddend To compile the drivers from UDK (EDK II) use the same command you \DIFdelbegin \DIFdel{do }\DIFdelend normally use
 for OpenCore compilation, but choose a corresponding package:
 \begin{lstlisting}[label=compileudk, style=ocbash]
 git clone https://github.com/acidanthera/audk UDK
@@ -4117,7 +4159,7 @@ While some tools can be launched from within OpenCore many should be run separat
 or from }\texttt{\DIFadd{Shell}}\DIFadd{.
 }
 
-\DIFadd{To boot into Shell or any other tool directly save }\texttt{\DIFadd{Shell.efi}}
+\DIFadd{To boot into OpenShell or any other tool directly save }\texttt{\DIFadd{OpenShell.efi}}
 \DIFadd{under the name of }\texttt{\DIFadd{EFI\textbackslash BOOT\textbackslash BOOTX64.EFI}}
 \DIFadd{on a FAT32 partition. In general it is unimportant whether the partitition scheme
 is }\texttt{\DIFadd{GPT}} \DIFadd{or }\texttt{\DIFadd{MBR}}\DIFadd{.
@@ -4130,7 +4172,7 @@ volume:
 
 \DIFmodbegin
 \begin{lstlisting}[caption=Blessing tool, label=blesstool, style=ocbash,alsolanguage=DIFcode]
-%DIF > sudo bless --verbose --file /Volumes/VOLNAME/DIR/Shell.efi \
+%DIF > sudo bless --verbose --file /Volumes/VOLNAME/DIR/OpenShell.efi \
 %DIF >   --folder /Volumes/VOLNAME/DIR/ --setBoot
 \end{lstlisting}
 \DIFmodend
@@ -4143,35 +4185,75 @@ volume:
   \DIFadd{if present.
 }
 
-\DIFadd{Some of the known tools are listed below:
+\DIFadd{Some of the known tools are listed below (builtin tools are marked with }\textbf{\DIFadd{*}}\DIFadd{):
+}
+
+\begin{tabular}{p{1.3in}p{5.55in}}
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{BootKicker}}\textbf{\DIFadd{*}}
+& \DIFadd{Enter Apple BootPicker menu (exclusive for Macs with compatible GPUs). }\\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ChipTune}}\textbf{\DIFadd{*}}
+& \DIFadd{Test BeepGen protocol and generate audio signals of different style and length. }\\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CleanNvram}}\textbf{\DIFadd{*}}
+& \DIFadd{Reset NVRAM alternative bundled as a standalone tool. }\\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{GopStop}}\textbf{\DIFadd{*}}
+& \DIFadd{Test GraphicsOutput protocol with a
+  }\href{https://github.com/acidanthera/OpenCorePkg/tree/master/Application/GopStop}{simple scenario}\DIFadd{. }\\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{HdaCodecDump}}\textbf{\DIFadd{*}}
+& \DIFadd{Parse and dump High Definition Audio codec information (requires }\texttt{\DIFadd{AudioDxe}}\DIFadd{). }\\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{KeyTester}}\textbf{\DIFadd{*}}
+& \DIFadd{Test keyboard input in }\texttt{\DIFadd{SimpleText}} \DIFadd{mode. }\\
+\href{https://www.memtest86.com}{\texttt{MemTest86}}
+& \DIFadd{Memory testing utility. }\\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenControl}}\textbf{\DIFadd{*}}
+& \DIFadd{Unlock and lock back NVRAM protection for other tools to be able to get full NVRAM access
+  when launching from OpenCore. }\\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenShell}}\textbf{\DIFadd{*}}
+& \DIFadd{OpenCore-configured }\href{http://github.com/tianocore/edk2}{\texttt{UEFI Shell}} \DIFadd{for compatibility
+  with a broad range of firmwares. }\\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{PavpProvision}}
+& \DIFadd{Perform EPID provisioning (requires certificate data configuration). }\\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VerifyMsrE2}}\textbf{\DIFadd{*}}
+& \DIFadd{Check }\texttt{\DIFadd{CFG Lock}} \DIFadd{(MSR }\texttt{\DIFadd{0xE2}} \DIFadd{write protection) consistency across all cores.
+}\end{tabular}
+
+\subsection{\DIFadd{OpenCanopy}}\label{ueficanopy}
+
+\DIFadd{OpenCanopy is a graphical OpenCore user interface that runs in
+}\texttt{\DIFadd{External}} \texttt{\DIFadd{PickerMode}} \DIFadd{and relies on
+}\href{https://github.com/acidanthera/OpenCorePkg}{OpenCorePkg} \texttt{\DIFadd{OcBootManagementLib}}
+\DIFadd{similar to the builtin text interface.
+}
+
+\DIFadd{OpenCanopy requires graphical resources located in }\texttt{\DIFadd{Resources}} \DIFadd{directory to run.
+Sample resources (fonts and images) can be found in
+}\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}\DIFadd{.
+}
+
+\emph{\DIFadd{Note}}\DIFadd{: OpenCanopy is currently considered experimental and is not recommended for
+everyday use. Refer to
+}\href{https://github.com/acidanthera/bugtracker/issues/759}{acidanthera/bugtracker\#759}
+\DIFadd{for more details regarding the current limitations.
+}
+
+\subsection{\DIFadd{OpenRuntime}}\label{uefiruntime}
+
+\texttt{\DIFadd{OpenRuntime}} \DIFadd{is an OpenCore plugin implementing }\texttt{\DIFadd{OC\_FIRMWARE\_RUNTIME}} \DIFadd{protocol.
+This protocol implements multiple features required for OpenCore that are otherwise not possible
+to implement in OpenCore itself as they are needed to work in runtime, i.e. during operating system
+functioning. Feature highlights:
 }
 
 \begin{itemize}
-  \tightlist
-  \DIFaddend \item 
-  \DIFaddbegin \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{BootKicker}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
-  --- Enter Apple BootPicker menu (exclusive for Macs with compatible GPUs).
-  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ChipTune}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
-  --- Test BeepGen protocol and generate audio signals of different style and length.
-  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CleanNvram}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
-  --- Reset NVRAM alternative bundled as a standalone tool.
-  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwProtect}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
-  --- Unlock and lock back NVRAM protection for other tools to be able to get full NVRAM access
-  when launching from OpenCore.
-  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{GopStop}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
-  --- Test GraphicsOutput protocol with a
-  }\href{https://github.com/acidanthera/OpenCorePkg/tree/master/Application/GopStop}{simple scenario}\DIFadd{.
-  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{HdaCodecDump}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
-  --- Parse and dump High Definition Audio codec information (requires }\texttt{\DIFadd{AudioDxe}}\DIFadd{).
-  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{KeyTester}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
-  --- Test keyboard input in }\texttt{\DIFadd{SimpleText}} \DIFadd{mode.
-  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenCore Shell}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
-  --- OpenCore-configured }\href{http://github.com/tianocore/edk2}{\texttt{UEFI Shell}} \DIFadd{for compatibility
-  with a broad range of firmwares.
-  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{PavpProvision}}
-  \DIFadd{--- Perform EPID provisioning (requires certificate data configuration).
-  }\item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VerifyMsrE2}} \DIFadd{(}\textbf{\DIFadd{builtin}}\DIFadd{)
-  --- Check }\texttt{\DIFadd{CFG Lock}} \DIFadd{(MSR }\texttt{\DIFadd{0xE2}} \DIFadd{write protection) consistency across all cores.
+  \DIFaddend \item \DIFaddbegin \DIFadd{NVRAM namespaces, allowing to isolate operating systems from accessing select
+  variables (e.g. }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{or }\texttt{\DIFadd{ProtectSecureBoot}}\DIFadd{).
+  }\item \DIFadd{NVRAM proxying, allowing to manipulate multiple variables on variable updates
+  (e.g. }\texttt{\DIFadd{RequestBootVarFallback}}\DIFadd{).
+  }\item \DIFadd{Read-only and write-only NVRAM variables, enhancing the security of OpenCore,
+  Lilu, and Lilu plugins, like VirtualSMC, which implements }\texttt{\DIFadd{AuthRestart}} \DIFadd{support.
+  }\item \DIFadd{NVRAM isolation, allowing to protect all variables from being written from
+  an untrusted operating system (e.g. }\texttt{\DIFadd{DisableVariableWrite}}\DIFadd{).
+  }\item \DIFadd{UEFI Runtime Services memory protection management to workaround read-only
+  mapping (e.g. }\texttt{\DIFadd{EnableWriteUnprotector}}\DIFadd{).
 }\end{itemize}
 
 \subsection{\DIFadd{Properties}}\label{uefiprops}
@@ -4455,7 +4537,7 @@ volume:
   This option activates the internal keyboard interceptor driver, based on
   \texttt{AppleGenericInput} aka (\texttt{AptioInputFix}), to fill
   \texttt{AppleKeyMapAggregator} database for input functioning. In case
-  a separate driver is used, such as \texttt{AppleUsbKbDxe}, this option
+  a separate driver is used, such as \texttt{\DIFdelbegin \DIFdel{AppleUsbKbDxe}\DIFdelend \DIFaddbegin \DIFadd{OpenUsbKbDxe}\DIFaddend }, this option
   should never be enabled.
 
 \item
@@ -4757,18 +4839,18 @@ volume:
 
   \emph{Note}: Some Macs, namely \texttt{MacPro5,1}, do have APFS compatibility,
   but their Apple Boot Policy protocol contains recovery detection issues, thus
-  using this option is advised on them as well\DIFaddbegin \DIFadd{.
-}
+  using this option is advised on them as well.
 
 \item
-  \texttt{\DIFadd{AppleDebugLog}}\\
+  \DIFaddbegin \texttt{\DIFadd{AppleDebugLog}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Reinstalls Apple Debug Log protocol with a builtin
-  version}\DIFaddend .
+  version.
+}
 
 \item
-  \texttt{AppleEvent}\\
+  \DIFaddend \texttt{AppleEvent}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Apple Event protocol with a builtin
@@ -4906,7 +4988,7 @@ volume:
   \texttt{OC\_VENDOR\_VARIABLE\_GUID} to \newline \texttt{EFI\_GLOBAL\_VARIABLE\_GUID}.
 
   This quirk requires \texttt{RequestBootVarRouting} to be enabled and therefore
-  \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented in \texttt{FwRuntimeServices.efi}.
+  \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented in \texttt{\DIFdelbegin \DIFdel{FwRuntimeServices}\DIFdelend \DIFaddbegin \DIFadd{OpenRuntime}\DIFaddend .efi}.
 
   By redirecting \texttt{Boot} prefixed variables to a separate GUID namespace we achieve
   multiple goals:
@@ -4948,7 +5030,7 @@ volume:
   \texttt{EFI\_GLOBAL\_VARIABLE\_GUID} to \newline \texttt{OC\_VENDOR\_VARIABLE\_GUID}.
 
   This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented
-  in \texttt{FwRuntimeServices.efi}. The quirk lets default boot entry
+  in \texttt{\DIFdelbegin \DIFdel{FwRuntimeServices}\DIFdelend \DIFaddbegin \DIFadd{OpenRuntime}\DIFaddend .efi}. The quirk lets default boot entry
   preservation at times when firmwares delete incompatible boot entries.
   Simply said, you are required to enable this quirk to be able to reliably
   use \href{https://support.apple.com/HT202796}{Startup Disk} preference
@@ -5220,7 +5302,7 @@ you will need \texttt{debug=0x8} boot argument.
   \textbf{How can I migrate from \texttt{AptioMemoryFix}?}
 
   Behaviour similar to that of \texttt{AptioMemoryFix} can be obtained by
-  installing \texttt{FwRuntimeServices} driver and enabling the quirks listed below.
+  installing \texttt{\DIFdelbegin \DIFdel{FwRuntimeServices}\DIFdelend \DIFaddbegin \DIFadd{OpenRuntime}\DIFaddend } driver and enabling the quirks listed below.
   Please note, that most of these are not necessary to be enabled. Refer to their
   individual descriptions in this document for more details.
   \begin{itemize}

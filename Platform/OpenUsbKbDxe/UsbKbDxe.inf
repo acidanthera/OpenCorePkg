@@ -22,7 +22,7 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = AppleUsbKbDxe
+  BASE_NAME                      = OpenUsbKbDxe
   MODULE_UNI_FILE                = UsbKbDxe.uni
   FILE_GUID                      = D1A1230D-1288-4443-B381-8CC85FA69949
   MODULE_TYPE                    = UEFI_DRIVER

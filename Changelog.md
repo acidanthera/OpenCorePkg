@@ -3,18 +3,20 @@ OpenCore Changelog
 
 #### v0.5.7
 - Added TimeMachine detection to picker
-- Added early preview version of BootLiquor
+- Added early preview version of OpenCanopy
 - Fixed FS discovery on NVMe with legacy drivers
 - Added `DirectGopCacheMode` option for FB cache policy
 - Added `KeyFiltering` option to workaround buggy KB drivers
 - Added tool and custom entry separation in audio assistant
-- Added `FwProtect` tool to configure full NVRAM access from Shell
+- Added `OpenControl` tool to configure full NVRAM access from Shell
 - Added `boot.efi` debug protocol support for 10.15.4+
 - Added `boot.efi` performance logging for 10.15.4+
 - Added `ProtectUefiServices` quirk to fix `DevirtualiseMmio` on Z390
 - Replaced `BOOTCAMP Windows` with `Windows` to match the original
-- Added bundled `Shell.efi` originally available as OpenCoreShell
+- Added bundled `OpenShell` originally available as OpenCoreShell
 - Rework `readlabel` utility into `disklabel` with encoding support
+- Renamed `FwRuntimeServices` driver to `OpenRuntime`
+- Renamed `AppleUsbKbDxe` driver to `OpenUsbKbDxe`
 
 #### v0.5.6
 - Various improvements to builtin text renderer

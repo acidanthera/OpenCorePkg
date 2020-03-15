@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include "FwRuntimeServicesPrivate.h"
+#include "OpenRuntimePrivate.h"
 
 #include <Guid/OcVariables.h>
 #include <Guid/GlobalVariable.h>

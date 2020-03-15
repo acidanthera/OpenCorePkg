@@ -1,5 +1,5 @@
 ## @file
-#  Override FwRuntimeServices protection.
+#  Control OpenCore instance.
 #
 #  Copyright (c) 2018, vit9696. All rights reserved.<BR>
 #
@@ -14,7 +14,7 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = FwProtect
+  BASE_NAME                      = OpenControl
   FILE_GUID                      = D123E297-3C1F-4D9E-8AD6-31748FA6522B
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
@@ -32,7 +32,7 @@
 #
 
 [Sources]
-  FwProtect.c
+  OpenControl.c
 
 [Protocols]
   gEfiShellParametersProtocolGuid
