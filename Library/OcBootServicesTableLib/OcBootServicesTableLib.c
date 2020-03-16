@@ -335,8 +335,8 @@ OcBootServicesTableLibConstructor (
 EFI_STATUS
 EFIAPI
 OcBootServicesTableLibDestructor (
-  IN CONST EFI_HANDLE                ImageHandle,
-  IN       EFI_SYSTEM_TABLE  * CONST SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
   //
