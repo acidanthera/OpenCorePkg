@@ -55,10 +55,9 @@ OcShowMenuByOc (
 
   for (Index = 0; Index < Count; ++Index) {
     Status = BootPickerEntriesAdd (
+               Context,
                &mGuiContext,
-               BootEntries[Index].Name,
                &BootEntries[Index],
-               BootEntries[Index].IsExternal,
                Index == DefaultEntry
                );
     if (RETURN_ERROR (Status)) {

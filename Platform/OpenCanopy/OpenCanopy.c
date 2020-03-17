@@ -1197,6 +1197,49 @@ GuiDrawLoop (
 }
 
 RETURN_STATUS
+GuiIcnsToImage128x128 (
+  IN OUT GUI_IMAGE  *Image,
+  IN     VOID       *IcnsImage,
+  IN     UINTN      IcnsImageSize,
+  IN     UINT32     Scale
+  )
+{
+  UINTN Index;
+  UINT32 RecordLength;
+  UINT8 *ImageData;
+
+  //
+  // We do not need to support 'it32' 128x128 icon format,
+  // because Finder automatically converts the icons to PNG-based
+  // when assigning volume icon
+  //
+
+  Index = 8;
+  ImageData = (UINT8 *) IcnsImage;
+  while (Index < IcnsImageSize - 8) {
+    RecordLength = ImageData[Index + 4] << 24
+                 | ImageData[Index + 5] << 16
+                 | ImageData[Index + 6] << 8
+                 | ImageData[Index + 7];
+    if (Scale == 1
+     && ImageData[Index    ] == 'i'
+     && ImageData[Index + 1] == 'c'
+     && ImageData[Index + 2] == '0'
+     && ImageData[Index + 3] == '7') {
+      return GuiPngToImage(Image, IcnsImage + Index + 8, RecordLength - 8);
+    } else if (Scale == 2
+     && ImageData[Index    ] == 'i'
+     && ImageData[Index + 1] == 'c'
+     && ImageData[Index + 2] == '1'
+     && ImageData[Index + 3] == '3') {
+      return GuiPngToImage(Image, IcnsImage + Index + 8, RecordLength - 8);
+    }
+    Index += RecordLength;
+  }
+  return RETURN_NOT_FOUND;
+}
+
+RETURN_STATUS
 GuiPngToImage (
   IN OUT GUI_IMAGE  *Image,
   IN     VOID       *ImageData,

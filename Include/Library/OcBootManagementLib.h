@@ -20,6 +20,7 @@
 #include <IndustryStandard/AppleHid.h>
 #include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcStringLib.h>
+#include <Library/OcStorageLib.h>
 #include <Protocol/AppleKeyMapAggregator.h>
 #include <Protocol/LoadedImage.h>
 #include <Protocol/AppleBeepGen.h>
@@ -152,6 +153,14 @@ typedef struct OC_BOOT_ENTRY_ {
   // Load option data (usually "boot args").
   //
   VOID                      *LoadOptions;
+  //
+  // Path to ".VolumeIcon.icns" file, if exists.
+  //
+  EFI_DEVICE_PATH_PROTOCOL  *IconFile;
+  //
+  // Path to directory containing ".disk_label" and ".disk_label_2x" files, if exists.
+  //
+  EFI_DEVICE_PATH_PROTOCOL  *LabelImageDirectory;
 } OC_BOOT_ENTRY;
 
 /**
@@ -561,6 +570,10 @@ struct OC_PICKER_CONTEXT_ {
   //
   UINT32                     AllCustomEntryCount;
   //
+  // Storage
+  //
+  OC_STORAGE_CONTEXT         *Storage;
+  //
   // Custom picker entries.  Absolute entries come first.
   //
   OC_PICKER_ENTRY            CustomEntries[];
@@ -585,6 +598,45 @@ EFI_STATUS
 OcDescribeBootEntry (
   IN     APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
   IN OUT OC_BOOT_ENTRY              *BootEntry
+  );
+
+/**
+  Get '.disk_label' or '.disk_label_2x' file contents, if exists.
+
+  @param[in]  BootPolicy     Apple Boot Policy Protocol.
+  @param[in]  BootEntry      Located boot entry.
+  @param[in]  Scale          User interface scale.
+  @param[out]  ImageData          FIle contents.
+  @param[out]  DataLength          File length.
+
+  @retval EFI_SUCCESS          The file was read successfully.
+**/
+EFI_STATUS
+OcGetBootEntryLabelImage (
+  IN  OC_PICKER_CONTEXT          *Context,
+  IN  APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
+  IN  OC_BOOT_ENTRY              *BootEntry,
+  IN  UINT32                     Scale,
+  OUT VOID                       **ImageData,
+  OUT UINT32                     *DataLength
+  );
+
+/**
+  Get '.VolumeIcon.icns' file contents, if exists.
+
+  @param[in]  BootPolicy     Apple Boot Policy Protocol.
+  @param[in]  BootEntry      Located boot entry.
+  @param[out]  ImageData          FIle contents.
+  @param[out]  DataLength          File length.
+
+  @retval EFI_SUCCESS          The file was read successfully.
+**/
+EFI_STATUS
+OcGetBootEntryIcon (
+  IN  APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
+  IN  OC_BOOT_ENTRY              *BootEntry,
+  OUT VOID                       **ImageData,
+  OUT UINT32                     *DataLength
   );
 
 /**

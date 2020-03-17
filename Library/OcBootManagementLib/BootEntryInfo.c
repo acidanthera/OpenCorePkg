@@ -67,6 +67,39 @@ InternalGetAppleDiskLabel (
   return UnicodeDiskLabel;
 }
 
+EFI_STATUS
+InternalGetAppleDiskLabelImage (
+  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
+  IN  CONST CHAR16                     *BootDirectoryName,
+  IN  CONST CHAR16                     *LabelFilename,
+  OUT VOID                             **ImageData,
+  OUT UINT32                           *DataSize
+  )
+{
+  CHAR16   *DiskLabelPath;
+  UINTN    DiskLabelPathSize;
+
+  DiskLabelPathSize = StrSize (BootDirectoryName) + StrSize (LabelFilename) - sizeof (CHAR16);
+  DiskLabelPath     = AllocatePool (DiskLabelPathSize);
+
+  if (DiskLabelPath == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  UnicodeSPrint (DiskLabelPath, DiskLabelPathSize, L"%s%s", BootDirectoryName, LabelFilename);
+  DEBUG ((DEBUG_WARN, "Trying to get label from %s\n", DiskLabelPath));
+
+  *ImageData = ReadFile (FileSystem, DiskLabelPath, DataSize, 10485760);
+  FreePool (DiskLabelPath);
+
+  if (*ImageData != NULL && *DataSize > 5) {
+    return EFI_SUCCESS;
+  }
+
+  DEBUG((DEBUG_WARN, "File %s not found\n", DiskLabelPath));
+  return EFI_NOT_FOUND;
+}
+
 STATIC
 CHAR16 *
 GetAppleRecoveryNameFromPlist (

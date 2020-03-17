@@ -5,8 +5,8 @@
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
-#ifndef BOOT_LIQUOR_H
-#define BOOT_LIQUOR_H
+#ifndef OPEN_CANOPY_H
+#define OPEN_CANOPY_H
 
 #include <Protocol/GraphicsOutput.h>
 #include <Protocol/SimpleTextIn.h>
@@ -132,6 +132,7 @@ struct GUI_DRAWING_CONTEXT_ {
   GUI_EXIT_LOOP        ExitLoop;
   LIST_ENTRY           Animations;
   VOID                 *GuiContext;
+  UINT8                Scale;
 };
 
 RETURN_STATUS
@@ -139,6 +140,14 @@ GuiPngToImage (
   IN OUT GUI_IMAGE  *Image,
   IN     VOID       *ImageData,
   IN     UINTN      ImageDataSize
+  );
+  
+RETURN_STATUS
+GuiIcnsToImage128x128 (
+  IN OUT GUI_IMAGE  *Image,
+  IN     VOID       *IcnsImage,
+  IN     UINTN      IcnsImageSize,
+  IN     UINT32     Scale
   );
 
 VOID
@@ -275,4 +284,4 @@ GuiPngToClickImage (
   IN     CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *HighlightPixel
   );
 
-#endif // BOOT_LIQUOR_H
+#endif // OPEN_CANOPY_H
