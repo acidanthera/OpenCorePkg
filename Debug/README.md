@@ -17,11 +17,16 @@ The general approach is as follows:
 #### Preparing Source Code
 
 By default EDK II optimises produced binaries, so to build a "real" debug binary one should target
-`NOOPT`. Do be aware that it strongly affects resulting binary size.
+`NOOPT`. Do be aware that it strongly affects resulting binary size:
+
+```
+build -a X64 -t XCODE5   -b NOOPT -p OpenCorePkg/OpenCorePkg.dsc # for macOS
+build -a X64 -t CLANGPDB -b NOOPT -p OpenCorePkg/OpenCorePkg.dsc # for other systems
+```
 
 `GdbSyms.dll` is built as a part of OpenCorePkg, yet prebuilt binaries are also available:
 
-- `GdbSyms/Bin/X64_XCODE5/GdbSyms.dll` is built with UDK2018 and XCODE5
+- `GdbSyms/Bin/X64_XCODE5/GdbSyms.dll` is built with XCODE5
 
 To wait for debugger connection on startup `WaitForKeyPress` functions from `OcMiscLib.h` can be
 utilised. Do be aware that this function additionally calls `DebugBreak` function, which may
@@ -60,6 +65,44 @@ settings:
 bios.bootDelay = "3000"
 ```
 
+#### QEMU configuration
+
+In addition to VMware it is also possible to use [QEMU](https://www.qemu.org). QEMU debugging
+on macOS host is generally rather limited and slow, but it is enough for generic troubleshooting
+when no macOS guest booting is required.
+
+1. Build OVMF firmware in NOOPT mode to be able to debug it:
+
+    ```
+    build -a X64 -t XCODE5   -b NOOPT -p OvmfPkg/OvmfPkgX64.dsc # for macOS
+    build -a X64 -t CLANGPDB -b NOOPT -p OvmfPkg/OvmfPkgX64.dsc # for other systems
+    ```
+
+2. Prepare launch directory with OpenCore as usual. For example, make a directory named
+    `QemuRun` and `cd` to it. You should have a similar directory structure:
+
+    ```
+    .
+    └── ESP
+        └── EFI
+            ├── BOOT
+            │   └── BOOTx64.efi
+            └── OC
+                ├── OpenCore.efi
+                └── config.plist
+    ```
+
+3. Run QEMU (`OVMF_BUILD` should point to OVMF build directory, e.g.
+    `$HOME/UefiWorkspace/Build/OvmfX64/NOOPT_XCODE5/FV`):
+
+    ```
+    qemu-system-x86_64 -L . -bios "$OVMF_BUILD/OVMF.fd" -hda fat:rw:ESP \
+      -machine q35 -m 2048 -cpu Penryn -smp 4,cores=2 -gdb tcp::8864
+    ```
+
+You may additionally pass `-S` flag to QEMU to stop at first instruction
+and wait for GDB connection.
+
 #### GDB Configuration
 
 It is a good idea to use GDB Multiarch in case different debugging architectures are planned to be
@@ -80,6 +123,9 @@ set pagination off
 reload-uefi
 b DebugBreak
 ```
+
+For simplicitly `macgdb.tool` performs them all. Note, that you need to run `reload-uefi`
+after any new binary loads.
 
 #### References
 

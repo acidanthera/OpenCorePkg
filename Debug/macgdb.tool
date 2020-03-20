@@ -24,7 +24,11 @@ if [ "$GDB" = "" ]; then
   exit 1
 fi
 
-"$GDB" -ex "target remote localhost:8864" \
+if [ "$GDB_PORT" = "" ]; then
+  GDB_PORT=8864
+fi
+
+"$GDB" -ex "target remote localhost:$GDB_PORT" \
        -ex "source Scripts/gdb_uefi.py" \
        -ex "set pagination off" \
        -ex "reload-uefi" \
