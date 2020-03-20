@@ -17,6 +17,7 @@ OpenCore Changelog
 - Rework `readlabel` utility into `disklabel` with encoding support
 - Renamed `FwRuntimeServices` driver to `OpenRuntime`
 - Renamed `AppleUsbKbDxe` driver to `OpenUsbKbDxe`
+- Update builtin firmware
 
 #### v0.5.6
 - Various improvements to builtin text renderer
