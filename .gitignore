@@ -34,3 +34,4 @@ prelinkedkernel.unpack
 .gdb_history
 *.dmg
 *.chunklist
+*.pyc
