@@ -449,12 +449,34 @@ class ReloadUefi:
             if opt == "-o":
                 self.offset_by_headers = True
 
+        self.typetarget   = None
+        self.activetarget = None
+
+        # FIXME: Use ReadCStringFromMemory.
         # FIXME: Support executing code.
         if len(args) >= 1 and args[0] != '':
             gdb.execute ("symbol-file")
             gdb.execute ("symbol-file %s" % args[0])
         else:
-            self.typetarget = self.debugger.GetSelectedTarget()
+            for i in range(0, self.debugger.GetNumTargets()):
+                target      = self.debugger.GetTargetAtIndex(i)
+                target_name = str(target)
+                print('Target {} is "{}"'.format(i, target_name))
+                if target_name.find('GdbSyms') >= 0:
+                    self.typetarget = target
+                elif target_name.find('No executable module.') >= 0:
+                    self.activetarget = target
+
+        if not self.typetarget:
+            print('Cannot find GdbSyms target!')
+            return
+
+        if not self.activetarget:
+            print('Cannot find target with full memory access!')
+            return
+
+        # Force into full memory target.
+        self.debugger.SetSelectedTarget(self.activetarget)
 
         est = self.search_est ()
         if est == self.EINVAL:

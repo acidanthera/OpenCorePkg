@@ -26,7 +26,7 @@ fi
 
 "$LLDB" -o "settings set plugin.process.gdb-remote.target-definition-file Scripts/x86_64_target_definition.py" \
   -o "gdb-remote $LLDB_PORT" \
-  -o "target modules add GdbSyms/Bin/X64_CLANGDWARF/GdbSyms.debug" \
+  -o "target create GdbSyms/Bin/X64_CLANGDWARF/GdbSyms.debug" \
   -o "command script import Scripts/lldb_uefi.py" \
   -o "command script add -c lldb_uefi.ReloadUefi reload-uefi" \
   -o "reload-uefi" \
