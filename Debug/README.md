@@ -124,7 +124,7 @@ reload-uefi
 b DebugBreak
 ```
 
-For simplicitly `macgdb.tool` performs them all. Note, that you need to run `reload-uefi`
+For simplicitly `rungdb.tool` performs them all. Note, that you need to run `reload-uefi`
 after any new binary loads.
 
 #### CLANGDWARF
@@ -146,9 +146,9 @@ export EFI_SYMBOL_PATH="$WORKSPACE/Build/OvmfX64/NOOPT_CLANGPDB/X64:$WORKSPACE/B
 ```
 
 The reason for this requirement is fragile `--add-gnudebug-link` option
-[implementation in llvm-objcopy](https://github.com/llvm/llvm-project/blob/f69eba07726a9fe084812aa224309d62c4bdd2e4/llvm/tools/llvm-objcopy/COFF/COFFObjcopy.cpp#L84-L90). It strips path from
-the debug file preserving only filename and also does not update
-DataDirectory debug entry.
+[implementation in llvm-objcopy](https://bugs.llvm.org/show_bug.cgi?id=45277).
+It strips path from the debug file preserving only filename and also does not
+update DataDirectory debug entry.
 
 #### References
 
