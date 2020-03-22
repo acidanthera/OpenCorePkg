@@ -13,6 +13,7 @@ import re
 import shlex
 import subprocess
 import sys
+from collections import OrderedDict
 from common_uefi import *
 
 class ReloadUefi:
@@ -97,8 +98,8 @@ class ReloadUefi:
             if single_entry:
                 return member.Dereference().GetValueAsUnsigned()
 
-            # Unfortunately LLDB is unaware of underlying types like CHAR8,
-            # so we only have size to trust.
+            # Unfortunately LLDB is unaware of underlying types like CHAR8 when working in PDB mode,
+            # so we only have size to trust. DWARF mode is ok, but it is best to stay most compatible.
             member_unsigned = member.GetValueAsUnsigned()
             char_type = member.GetType().GetPointeeType()
             if char_type.GetByteSize() == 1:
@@ -218,7 +219,7 @@ class ReloadUefi:
         sect_t = self.ptype ('EFI_IMAGE_SECTION_HEADER')
         sections_addr = opt.GetLoadAddress() + opt.GetByteSize()
         sections = self.typed_ptr(sect_t, sections_addr)
-        sects = {}
+        sects = OrderedDict()
         for i in range (self.get_field(file, 'NumberOfSections')):
             section = sections.GetValueForExpressionPath('[{}]'.format(i))
             name = self.get_field(section, 'Name', force_bytes=True)
@@ -278,87 +279,24 @@ class ReloadUefi:
             return cvp + self.sizeof('EFI_IMAGE_DEBUG_CODEVIEW_RSDS_ENTRY')
         elif cvv == self.CV_MTOC:
             return cvp + self.sizeof('EFI_IMAGE_DEBUG_CODEVIEW_MTOC_ENTRY')
+        elif cvv == 0:
+            return 0            
+
         return self.EINVAL
 
     #
     # Prepares symbol load command with proper section information.
     # Currently supports Mach-O and single-section files.
     #
-    # TODO: Proper ELF support.
-    #
     def get_sym_cmd (self, file, orgbase, sections, macho, fallack_base):
-        dll_file = file.replace('.pdb', '.dll')
-        module_cmd = 'target modules add -s {} {}'.format(file, dll_file)
-
-
-        # TODO: Should just mapping files work?
-        # map_cmd = 'target modules load -f {} -s 0x{:X}'.format(dll_file, orgbase)
-        map_cmd = 'target modules load -f {}'.format(dll_file)
-
-        # Fallback case, no sections, just load .text.
-        if not sections.get('.text') or not sections.get('.data'):
-            print("WARN: Using fallback mode for {}".format(file))
-            map_cmd += '.text 0x%x' % (fallack_base)
-            return (module_cmd, map_cmd)
-
-        for section in sections:
-            map_cmd += ' {} 0x{:X}'.format(section, orgbase + sections[section])
-
+        if file.endswith('.pdb'):
+            dll_file   = file.replace('.pdb', '.dll')
+            module_cmd = 'target modules add -s {} {}'.format(file, dll_file)
+        else:
+            dll_file   = file
+            module_cmd = 'target modules add {}'.format(file)
+        map_cmd = 'target modules load -f {} -s 0x{:X}'.format(dll_file, orgbase)
         return (module_cmd, map_cmd)
-
-        cmd += ' 0x%x' % (orgbase + sections['.text'])
-
-        if not macho or not os.path.exists(file):
-            # Another fallback, try to load data at least.
-            cmd += ' .data 0x%x' % (orgbase + sections['.data'])
-            return (module_cmd, cmd)
-
-        # 1. Parse Mach-O.
-        # FIXME: We should not rely on otool really.
-        commands = subprocess.check_output(['otool', '-l', file])
-        try:
-            lines = commands.decode('utf-8').split('\n')
-        except:
-            lines = commands.split('\n')
-        in_sect = False
-        machsections = {}
-        for line in lines:
-            line = line.strip()
-            if line.startswith('Section'):
-                in_sect = True
-                sectname = None
-                segname = None
-            elif in_sect:
-                if line.startswith('sectname'):
-                    sectname = line.split()[1]
-                elif line.startswith('segname'):
-                    segname = line.split()[1]
-                elif line.startswith('addr'):
-                    machsections[segname + '.' + sectname] = long(line.split()[1], base=16)
-                    in_sect = False
-
-        # 2. Convert section names to sections.
-        mapping = {
-            '__TEXT.__cstring':         '.cstring',
-            '__TEXT.__const':           '.const',
-            '__TEXT.__ustring':         '__TEXT.__ustring',
-            '__DATA.__const':           '.const_data',
-            '__DATA.__data':            '.data',
-            '__DATA.__bss':             '.bss',
-            '__DATA.__common':          '__DATA.__common',
-            # FIXME: These should not be loadable, but gdb still loads them :/
-            # '__DWARF.__apple_names':    '__DWARF.__apple_names',
-            # '__DWARF.__apple_namespac': '__DWARF.__apple_namespac',
-            # '__DWARF.__apple_types':    '__DWARF.__apple_types',
-            # '__DWARF.__apple_objc':     '__DWARF.__apple_objc',
-        }
-
-        # 3. Rebase.
-        for entry in mapping:
-            if machsections.get(entry):
-                cmd += ' -s %s 0x%x' % (mapping[entry], long(orgbase) + machsections[entry])
-
-        return (module_cmd, cmd)
 
     #
     # Parses an EFI_LOADED_IMAGE_PROTOCOL, figuring out the symbol file name.
@@ -372,26 +310,51 @@ class ReloadUefi:
         pe = self.pe_headers (base)
         opt = self.pe_optional (pe)
         file = self.pe_file (pe)
-        sym_name = self.pe_parse_debug (pe)
+        sym_address = self.pe_parse_debug (pe)
         sections = self.pe_sections (opt, file, base)
+
+        if sym_address == 0:
+            # llvm-objcopy --add-gnu-debuglink=a/x.debug a/x.dll does not update
+            # DataDirectory with any data, instead it creates a new section
+            # with a /\d+ name containing:
+            # - ASCII debug file name (x.debug) padded by 4 bytes
+            # - CRC32
+            last_section = next(reversed(sections))
+            if re.match(r'^/\d+$', last_section):
+                sym_address = sections[last_section]
+                sym_ptr     = self.typed_ptr(self.ptype('char'), sym_address + base)
+                sym_name    = UefiMisc.parse_utf8(self.get_field(sym_ptr))
+                if not sym_name.endswith('.debug'):
+                    sym_name = self.EINVAL
+        elif sym_address != self.EINVAL:
+            sym_ptr  = self.typed_ptr(self.ptype('char'), sym_address)
+            sym_name = UefiMisc.parse_utf8(self.get_field(sym_ptr))
+        else:
+            sym_name = self.EINVAL
 
         # For ELF and Mach-O-derived images...
         if self.offset_by_headers:
             base = base + self.get_field(opt, 'SizeOfHeaders')
         if sym_name != self.EINVAL:
-            sym_ptr  = self.typed_ptr(self.ptype('char'), sym_name)
-            sym_name = UefiMisc.parse_utf8(self.get_field(sym_ptr))
-            sym_name_dbg = re.sub(r"\.dll$", ".debug", sym_name)
-            macho = False
-            if os.path.isdir(sym_name + '.dSYM'):
-                sym_name += '.dSYM/Contents/Resources/DWARF/' + os.path.basename(sym_name)
-                macho = True
-            elif sym_name_dbg != sym_name and os.path.exists(sym_name_dbg):
-                # TODO: implement .elf handling.
-                sym_name = sym_name_dbg
-            elif not os.path.exists(sym_name):
-                return
-            syms.append (self.get_sym_cmd (sym_name, orgbase, sections, macho, base))
+            macho = os.path.isdir(sym_name + '.dSYM')
+            if macho:
+                real_sym = sym_name + '.dSYM/Contents/Resources/DWARF/' + os.path.basename(sym_name)
+            else:
+                sym_name_dbg = re.sub(r"\.dll$", ".debug", sym_name)
+                if sym_name_dbg != sym_name and os.path.exists(sym_name_dbg):
+                    real_sym = sym_name_dbg
+                else:
+                    real_sym = None
+                    paths    = os.getenv('EFI_SYMBOL_PATH', '').split(':')
+                    for path in paths:
+                        if os.path.exists(os.path.join(path, sym_name)):
+                            real_sym = os.path.join(path, sym_name)
+                            break
+
+            if real_sym:
+                syms.append (self.get_sym_cmd (real_sym, orgbase, sections, macho, base))
+            else:
+                print('No symbol file {}'.format(sym_name))
 
     #
     # Parses table EFI_DEBUG_IMAGE_INFO structures, builds
