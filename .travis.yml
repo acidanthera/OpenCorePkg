@@ -18,6 +18,7 @@ matrix:
 
     deploy:
       provider: releases
+      skip_cleanup: true
       file:
       - Binaries/RELEASE/*.zip
       - Binaries/DEBUG/*.zip
