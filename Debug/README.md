@@ -103,6 +103,14 @@ when no macOS guest booting is required.
 You may additionally pass `-S` flag to QEMU to stop at first instruction
 and wait for GDB connection.
 
+#### Debugger Configuration
+
+For simplicitly `efidebug.tool` performs all the necessary GDB or LLDB scripting.
+Note, that you need to run `reload-uefi` after any new binary loads.
+
+Check `efidebug.tool` header for environment variables to configure your setup.
+For example, you can use `EFI_DEBUGGER` variable to force LLDB (`LLDB`) or GDB (`GDB`).
+
 #### GDB Configuration
 
 It is a good idea to use GDB Multiarch in case different debugging architectures are planned to be
@@ -112,7 +120,8 @@ used. This can be done in several ways:
 - https://macports.org/ — via MacPorts (`sudo port install gdb +multiarch`)
 - Your preferred method here
 
-Once GDB is installed the process is as simple as running the following set of commands:
+Once GDB is installed you can use `efidebug.tool` for debugging. In case you do not
+want to use `efidebug.tool`, the following set of commands can be used as a reference:
 
 ```
 $ ggdb /opt/UDK/Build/OpenCorePkg/NOOPT_XCODE5/X64/OpenCorePkg/Debug/GdbSyms/GdbSyms/DEBUG/GdbSyms.dll.dSYM/Contents/Resources/DWARF/GdbSyms.dll
@@ -123,9 +132,6 @@ set pagination off
 reload-uefi
 b DebugBreak
 ```
-
-For simplicitly `rungdb.tool` performs them all. Note, that you need to run `reload-uefi`
-after any new binary loads.
 
 #### CLANGDWARF
 

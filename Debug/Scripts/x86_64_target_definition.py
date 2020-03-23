@@ -37,6 +37,8 @@
 # GDB server.
 #----------------------------------------------------------------------
 from lldb import *
+import os
+import sys
 
 # Compiler and DWARF register numbers
 name_to_gcc_dwarf_regnum = {
@@ -774,5 +776,8 @@ def get_target_definition(triple):
 
 def get_dynamic_setting(target, setting_name):
     if setting_name == 'gdb-server-target-definition':
-        # FIXME: Make this configurable for e.g. 'x86_64-apple-macosx'
-        return get_target_definition('x86_64-pc-windows-msvc')
+        triple = os.getenv('EFI_TRIPLE')
+        if not triple:
+            print('Cannot find requested triple!\nHint: set EFI_TRIPLE variable.')
+            sys.exit(1)
+        return get_target_definition(triple)

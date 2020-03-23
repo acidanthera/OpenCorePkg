@@ -338,7 +338,7 @@ class ReloadUefi:
         if sym_name != self.EINVAL:
             macho = os.path.isdir(sym_name + '.dSYM')
             if macho:
-                real_sym = sym_name + '.dSYM/Contents/Resources/DWARF/' + os.path.basename(sym_name)
+                real_sym = sym_name
             else:
                 sym_name_dbg = re.sub(r"\.dll$", ".debug", sym_name)
                 if sym_name_dbg != sym_name and os.path.exists(sym_name_dbg):
