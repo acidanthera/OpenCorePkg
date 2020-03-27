@@ -175,9 +175,6 @@ InternalBootPickerViewKeyEvent (
   ASSERT (This != NULL);
   ASSERT (DrawContext != NULL);
   ASSERT (Key != NULL);
-
-  ASSERT (mBootPicker.Hdr.Obj.OffsetX >= 0);
-  ASSERT (mBootPicker.Hdr.Obj.OffsetY >= 0);
   //
   // Consider moving between multiple panes with UP/DOWN and store the current
   // view within the object - for now, hardcoding this is enough.
@@ -187,8 +184,8 @@ InternalBootPickerViewKeyEvent (
                         &mBootPicker.Hdr.Obj,
                         DrawContext,
                         Context,
-                        BaseX + (UINT32)mBootPicker.Hdr.Obj.OffsetX,
-                        BaseY + (UINT32)mBootPicker.Hdr.Obj.OffsetY,
+                        BaseX + mBootPicker.Hdr.Obj.OffsetX,
+                        BaseY + mBootPicker.Hdr.Obj.OffsetY,
                         Key
                         );
 }
