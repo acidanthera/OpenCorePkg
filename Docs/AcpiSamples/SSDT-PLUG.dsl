@@ -1,5 +1,9 @@
 /*
  * XCPM power management compatibility table.
+ *
+ * Please note that this table is only a sample and may need to be
+ * adapted to fit your board's ACPI stack. For instance, both scope
+ * and device name may vary (e.g. _SB_.PR00 instead of _PR_.CPU0).
  */
 DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlug", 0x00003000)
 {
