@@ -134,14 +134,14 @@ choose_debugger() {
 
 choose_debugger
 
-if [ "${EFI_DEBUGGER}" = "GDB" ]; then
+if [ "${EFI_DEBUGGER}" = "GDB" ] || [ "${EFI_DEBUGGER}" = "gdb" ]; then
   "${GDB}" -ex "target remote ${EFI_HOST}:${EFI_PORT}" \
     -ex "source Scripts/gdb_uefi.py" \
     -ex "set pagination off" \
     -ex "reload-uefi" \
     -ex "b DebugBreak" \
     "${EFI_SYMS}"
-elif [ "${EFI_DEBUGGER}" = "LLDB" ]; then
+elif [ "${EFI_DEBUGGER}" = "LLDB" ] || [ "${EFI_DEBUGGER}" = "lldb" ]; then
   "$LLDB" -o "settings set plugin.process.gdb-remote.target-definition-file Scripts/x86_64_target_definition.py" \
     -o "gdb-remote ${EFI_HOST}:${EFI_PORT}" \
     -o "target create ${EFI_SYMS_PDB} ${EFI_SYMS}" \
