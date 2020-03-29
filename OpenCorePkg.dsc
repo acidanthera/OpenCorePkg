@@ -267,6 +267,12 @@
   gEfiMdePkgTokenSpaceGuid.PcdFixedDebugPrintErrorLevel|0x80000042
 !endif
 
+[BuildOptions.common.EDKII.DXE_RUNTIME_DRIVER]
+  GCC:*_*_*_DLINK_FLAGS = -z common-page-size=0x1000
+  XCODE:*_*_*_DLINK_FLAGS = -seg1addr 0x1000 -segalign 0x1000
+  XCODE:*_*_*_MTOC_FLAGS = -align 0x1000
+  CLANGPDB:*_*_*_DLINK_FLAGS = /ALIGN:4096
+
 [BuildOptions]
   # While there are no PCDs as of now, there at least are some custom macros.
   DEFINE OCPKG_BUILD_OPTIONS_GEN = -D DISABLE_NEW_DEPRECATED_INTERFACES $(OCPKG_BUILD_OPTIONS)
