@@ -18,6 +18,7 @@ OpenCore Changelog
 - Renamed `FwRuntimeServices` driver to `OpenRuntime`
 - Renamed `AppleUsbKbDxe` driver to `OpenUsbKbDxe`
 - Update builtin firmware
+- Fixed `PowerTimeoutKernelPanic` on 10.15.4
 
 #### v0.5.6
 - Various improvements to builtin text renderer

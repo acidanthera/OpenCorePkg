@@ -439,6 +439,35 @@ class ReloadUefi:
     def __call__(self, debugger, command, exe_ctx, result):
         self.debugger = debugger
 
+
+        category = debugger.GetDefaultCategory()
+        FormatBool = lldb.SBTypeFormat(lldb.eFormatBoolean)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("BOOLEAN"), FormatBool)
+
+        FormatHex  = lldb.SBTypeFormat(lldb.eFormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("UINT64"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("INT64"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("UINT32"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("INT32"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("UINT16"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("INT16"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("UINT8"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("INT8"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("UINTN"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("INTN"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("CHAR8"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("CHAR16"), FormatHex)
+
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("EFI_PHYSICAL_ADDRESS"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("PHYSICAL_ADDRESS"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("EFI_STATUS"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("EFI_TPL"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("EFI_LBA"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("EFI_BOOT_MODE"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier("EFI_FV_FILETYPE"), FormatHex)
+
+
+
         args = shlex.split(command)
         try:
             opts, args = getopt.getopt(args, "o", ["offset-by-headers"])
