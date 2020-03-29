@@ -19,7 +19,7 @@ OpenCore Changelog
 - Renamed `AppleUsbKbDxe` driver to `OpenUsbKbDxe`
 - Update builtin firmware
 - Fixed `PowerTimeoutKernelPanic` on 10.15.4
-- Fixed 4K section alignment in `OpenRuntime`
+- Fixed 4K section alignment in `OpenRuntime` to fix Linux booting
 
 #### v0.5.6
 - Various improvements to builtin text renderer
