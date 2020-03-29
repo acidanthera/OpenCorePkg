@@ -14,6 +14,7 @@
 
 #include <Uefi.h>
 
+#include <Guid/MemoryAttributesTable.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
@@ -433,4 +434,45 @@ CountFreePages (
   FreePool (MemoryMap);
 
   return FreePages;
+}
+
+VOID
+OcPrintMemoryAttributesTable (
+  VOID
+  )
+{
+  UINTN                             Index;
+  CONST EFI_MEMORY_ATTRIBUTES_TABLE *MemoryAttributesTable;
+  CONST EFI_MEMORY_DESCRIPTOR       *MemoryAttributesEntry;
+
+  for (Index = 0; Index < gST->NumberOfTableEntries; ++Index) {
+    if (CompareGuid (&gST->ConfigurationTable[Index].VendorGuid, &gEfiMemoryAttributesTableGuid)) {
+      MemoryAttributesTable = (CONST EFI_MEMORY_ATTRIBUTES_TABLE *) gST->ConfigurationTable[Index].VendorTable;
+
+      DEBUG ((DEBUG_INFO, "OCMM: MemoryAttributesTable:\n"));
+      DEBUG ((DEBUG_INFO, "OCMM:   Version              - 0x%08x\n", MemoryAttributesTable->Version));
+      DEBUG ((DEBUG_INFO, "OCMM:   NumberOfEntries      - 0x%08x\n", MemoryAttributesTable->NumberOfEntries));
+      DEBUG ((DEBUG_INFO, "OCMM:   DescriptorSize       - 0x%08x\n", MemoryAttributesTable->DescriptorSize));
+
+      MemoryAttributesEntry = (CONST EFI_MEMORY_DESCRIPTOR *) (MemoryAttributesTable + 1);
+
+      for (Index = 0; Index < MemoryAttributesTable->NumberOfEntries; ++Index) {
+        DEBUG ((DEBUG_INFO, "OCMM: Entry (0x%x)\n", MemoryAttributesEntry));
+        DEBUG ((DEBUG_INFO, "OCMM:   Type              - 0x%x\n", MemoryAttributesEntry->Type));
+        DEBUG ((DEBUG_INFO, "OCMM:   PhysicalStart     - 0x%016lx\n", MemoryAttributesEntry->PhysicalStart));
+        DEBUG ((DEBUG_INFO, "OCMM:   VirtualStart      - 0x%016lx\n", MemoryAttributesEntry->VirtualStart));
+        DEBUG ((DEBUG_INFO, "OCMM:   NumberOfPages     - 0x%016lx\n", MemoryAttributesEntry->NumberOfPages));
+        DEBUG ((DEBUG_INFO, "OCMM:   Attribute         - 0x%016lx\n", MemoryAttributesEntry->Attribute));
+
+        MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (
+          MemoryAttributesEntry,
+          MemoryAttributesTable->DescriptorSize
+          );
+      }
+
+      return;
+    }
+  }
+
+  DEBUG ((DEBUG_INFO, "OCMM: MemoryAttributesTable is not present!\n"));
 }

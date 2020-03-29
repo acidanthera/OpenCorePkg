@@ -32,6 +32,9 @@
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
 
+[Guids]
+  gEfiMemoryAttributesTableGuid
+
 [Protocols]
   gEfiLegacyRegionProtocolGuid
 

@@ -213,6 +213,14 @@ CountFreePages (
   );
 
 /**
+  Print memory attributes table if present.
+**/
+VOID
+OcPrintMemoryAttributesTable (
+  VOID
+  );
+
+/**
   Return pointer to PML4 table in PageTable and PWT and PCD flags in Flags.
 
   @param[out]  Flags      Current page table PWT and PCT flags.
