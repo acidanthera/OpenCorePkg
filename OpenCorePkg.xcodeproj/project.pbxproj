@@ -7,6 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		350857EC24216525005A0D86 /* OcUnicodeLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A95240C213400D54CBB /* OcUnicodeLib.c */; };
+		350857ED24220712005A0D86 /* GuiApp.c in Sources */ = {isa = PBXBuildFile; fileRef = 350857D42421373F005A0D86 /* GuiApp.c */; };
+		350857EE2422071A005A0D86 /* OpenCanopy.h in Headers */ = {isa = PBXBuildFile; fileRef = 350857DA2421373F005A0D86 /* OpenCanopy.h */; };
+		350857EF24220721005A0D86 /* BmfLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 350857D52421373F005A0D86 /* BmfLib.h */; };
+		350857F024220724005A0D86 /* OcBootstrap.c in Sources */ = {isa = PBXBuildFile; fileRef = 350857DD2421373F005A0D86 /* OcBootstrap.c */; };
+		350857F124220727005A0D86 /* GuiApp.h in Headers */ = {isa = PBXBuildFile; fileRef = 350857DE2421373F005A0D86 /* GuiApp.h */; };
+		350857F224220729005A0D86 /* GuiIo.h in Headers */ = {isa = PBXBuildFile; fileRef = 350857DF2421373F005A0D86 /* GuiIo.h */; };
+		350857F32422072D005A0D86 /* OpenCanopy.c in Sources */ = {isa = PBXBuildFile; fileRef = 350857E02421373F005A0D86 /* OpenCanopy.c */; };
+		350857F424220730005A0D86 /* BitmapFont.c in Sources */ = {isa = PBXBuildFile; fileRef = 350857E12421373F005A0D86 /* BitmapFont.c */; };
+		350857F524220733005A0D86 /* BmfFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 350857E42421373F005A0D86 /* BmfFile.h */; };
+		350857F624220737005A0D86 /* BootPicker.c in Sources */ = {isa = PBXBuildFile; fileRef = 350857E32421373F005A0D86 /* BootPicker.c */; };
+		350857F72422073B005A0D86 /* OutputStGop.c in Sources */ = {isa = PBXBuildFile; fileRef = 350857DC2421373F005A0D86 /* OutputStGop.c */; };
 		3511D58D23FDB2A800CC3B17 /* OpenCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 3511D57C23FDB2A700CC3B17 /* OpenCore.h */; };
 		3511D58E23FDB2A800CC3B17 /* Bootstrap.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D58023FDB2A800CC3B17 /* Bootstrap.c */; };
 		3511D58F23FDB2A800CC3B17 /* OpenCoreUefi.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D58323FDB2A800CC3B17 /* OpenCoreUefi.c */; };
@@ -18,13 +30,11 @@
 		3511D59523FDB2A800CC3B17 /* OpenCoreDevProps.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D58923FDB2A800CC3B17 /* OpenCoreDevProps.c */; };
 		3511D59623FDB2A800CC3B17 /* OpenCoreNvram.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D58A23FDB2A800CC3B17 /* OpenCoreNvram.c */; };
 		3511D59723FDB2A800CC3B17 /* OpenCoreKernel.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D58C23FDB2A800CC3B17 /* OpenCoreKernel.c */; };
-		3511D5CC23FDB37200CC3B17 /* NdkBootPicker.c in Sources */ = {isa = PBXBuildFile; fileRef = 3511D5CB23FDB37200CC3B17 /* NdkBootPicker.c */; };
 		35366BF8240C213500D54CBB /* OcMachoLibInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366A8D240C213400D54CBB /* OcMachoLibInternal.h */; };
 		35366BF9240C213500D54CBB /* Header.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A8F240C213400D54CBB /* Header.c */; };
 		35366BFA240C213500D54CBB /* Symbols.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A90240C213400D54CBB /* Symbols.c */; };
 		35366BFB240C213500D54CBB /* Relocations.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A91240C213400D54CBB /* Relocations.c */; };
 		35366BFC240C213500D54CBB /* CxxSymbols.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A92240C213400D54CBB /* CxxSymbols.c */; };
-		35366BFD240C213500D54CBB /* OcUnicodeLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A95240C213400D54CBB /* OcUnicodeLib.c */; };
 		35366BFE240C213500D54CBB /* OcAsciiLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A96240C213400D54CBB /* OcAsciiLib.c */; };
 		35366BFF240C213500D54CBB /* lodepng.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366A99240C213400D54CBB /* lodepng.h */; };
 		35366C00240C213500D54CBB /* OcPng.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A9A240C213400D54CBB /* OcPng.c */; };
@@ -51,13 +61,10 @@
 		35366C15240C213500D54CBB /* KeyHandler.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB9240C213400D54CBB /* KeyHandler.c */; };
 		35366C16240C213500D54CBB /* PointerHandler.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366ABA240C213400D54CBB /* PointerHandler.c */; };
 		35366C17240C213500D54CBB /* OcDeviceTreeLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366ABC240C213400D54CBB /* OcDeviceTreeLib.c */; };
-		35366C18240C213500D54CBB /* OcUnicodeCollationEngLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366ABF240C213400D54CBB /* OcUnicodeCollationEngLib.c */; };
-		35366C19240C213500D54CBB /* OcUnicodeCollationEngLibInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366AC1240C213400D54CBB /* OcUnicodeCollationEngLibInternal.h */; };
 		35366C1A240C213500D54CBB /* OcHashServicesLibInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366AC3240C213400D54CBB /* OcHashServicesLibInternal.h */; };
 		35366C1B240C213500D54CBB /* OcHashServicesLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AC4240C213400D54CBB /* OcHashServicesLib.c */; };
 		35366C1C240C213500D54CBB /* OcAppleChunklistLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AC7240C213400D54CBB /* OcAppleChunklistLib.c */; };
 		35366C1D240C213500D54CBB /* OcHeciLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366ACA240C213400D54CBB /* OcHeciLib.c */; };
-		35366C1E240C213500D54CBB /* OcConsoleControlEntryModeLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366ACD240C213400D54CBB /* OcConsoleControlEntryModeLib.c */; };
 		35366C1F240C213500D54CBB /* OcAppleImageVerification.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AD1240C213400D54CBB /* OcAppleImageVerification.c */; };
 		35366C20240C213500D54CBB /* OcAppleImageConversionLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AD4240C213400D54CBB /* OcAppleImageConversionLib.c */; };
 		35366C21240C213500D54CBB /* Aes.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AD6240C213400D54CBB /* Aes.c */; };
@@ -71,7 +78,6 @@
 		35366C29240C213500D54CBB /* PasswordHash.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE0240C213400D54CBB /* PasswordHash.c */; };
 		35366C2A240C213500D54CBB /* BigNumWordMul64.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE2240C213400D54CBB /* BigNumWordMul64.c */; };
 		35366C2B240C213500D54CBB /* ChaCha.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE3240C213400D54CBB /* ChaCha.c */; };
-		35366C2C240C213500D54CBB /* RsaDigitalSign.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE4240C213400D54CBB /* RsaDigitalSign.c */; };
 		35366C2D240C213500D54CBB /* Md5.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE5240C213400D54CBB /* Md5.c */; };
 		35366C2E240C213500D54CBB /* SecureMem.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE6240C213400D54CBB /* SecureMem.c */; };
 		35366C2F240C213500D54CBB /* DirectReset.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE8240C213400D54CBB /* DirectReset.c */; };
@@ -247,34 +253,30 @@
 		35366CE1240C213500D54CBB /* OcAppleRamDiskLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BF3240C213500D54CBB /* OcAppleRamDiskLib.c */; };
 		35366CE2240C213500D54CBB /* OcSmcLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BF5240C213500D54CBB /* OcSmcLib.c */; };
 		35366CE3240C213500D54CBB /* OcSmcLibInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366BF7240C213500D54CBB /* OcSmcLibInternal.h */; };
-		35C7411224055115005CB6EF /* GetTscEmu.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C73DEB24055113005CB6EF /* GetTscEmu.c */; };
-		35C7411324055115005CB6EF /* GuiApp.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C73DEC24055113005CB6EF /* GuiApp.c */; };
-		35C7411424055115005CB6EF /* GUI.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C73DED24055113005CB6EF /* GUI.c */; };
-		35C7411524055115005CB6EF /* BmfLib.h in Headers */ = {isa = PBXBuildFile; fileRef = 35C73DEE24055113005CB6EF /* BmfLib.h */; };
-		35C7430124055116005CB6EF /* Helvetica_fnt.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740ED24055114005CB6EF /* Helvetica_fnt.c */; };
-		35C7430524055116005CB6EF /* Helvetica_png.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740F724055114005CB6EF /* Helvetica_png.c */; };
-		35C7430724055116005CB6EF /* InputSimTextIn.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740FA24055114005CB6EF /* InputSimTextIn.c */; };
-		35C7430824055116005CB6EF /* InputSimAbsPtr.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C740FB24055114005CB6EF /* InputSimAbsPtr.c */; };
-		35C7430A24055116005CB6EF /* OutputFbGop.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410024055114005CB6EF /* OutputFbGop.c */; };
-		35C7430B24055116005CB6EF /* StGopShared.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410124055114005CB6EF /* StGopShared.c */; };
-		35C7430C24055116005CB6EF /* OutputStGop.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410224055114005CB6EF /* OutputStGop.c */; };
-		35C7430D24055116005CB6EF /* OcBootstrap.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410324055114005CB6EF /* OcBootstrap.c */; };
-		35C7430E24055116005CB6EF /* HwOps.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410424055115005CB6EF /* HwOps.c */; };
-		35C7430F24055116005CB6EF /* GuiApp.h in Headers */ = {isa = PBXBuildFile; fileRef = 35C7410524055115005CB6EF /* GuiApp.h */; };
-		35C7431024055116005CB6EF /* GUI.h in Headers */ = {isa = PBXBuildFile; fileRef = 35C7410624055115005CB6EF /* GUI.h */; };
-		35C7431124055116005CB6EF /* HwOpsEmu.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410724055115005CB6EF /* HwOpsEmu.c */; };
-		35C7431224055116005CB6EF /* BitmapFontUser.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410824055115005CB6EF /* BitmapFontUser.c */; };
-		35C7431324055116005CB6EF /* GuiIo.h in Headers */ = {isa = PBXBuildFile; fileRef = 35C7410924055115005CB6EF /* GuiIo.h */; };
-		35C7431424055116005CB6EF /* OcBootstrapEmu.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410B24055115005CB6EF /* OcBootstrapEmu.c */; };
-		35C7431524055116005CB6EF /* BitmapFont.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410C24055115005CB6EF /* BitmapFont.c */; };
-		35C7431624055116005CB6EF /* BootPicker.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7410E24055115005CB6EF /* BootPicker.c */; };
-		35C7431724055116005CB6EF /* HwOps.h in Headers */ = {isa = PBXBuildFile; fileRef = 35C7410F24055115005CB6EF /* HwOps.h */; };
-		35C7431824055116005CB6EF /* BmfFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 35C7411024055115005CB6EF /* BmfFile.h */; };
-		35C7431924055116005CB6EF /* GetTscHw.c in Sources */ = {isa = PBXBuildFile; fileRef = 35C7411124055115005CB6EF /* GetTscHw.c */; };
 		35F6ACA6240C22EE00D6FA49 /* Canary.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366B48240C213400D54CBB /* Canary.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		350857D42421373F005A0D86 /* GuiApp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GuiApp.c; sourceTree = "<group>"; };
+		350857D52421373F005A0D86 /* BmfLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BmfLib.h; sourceTree = "<group>"; };
+		350857D62421373F005A0D86 /* OpenCanopy.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OpenCanopy.inf; sourceTree = "<group>"; };
+		350857D82421373F005A0D86 /* InputSimTextIn.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = InputSimTextIn.c; sourceTree = "<group>"; };
+		350857D92421373F005A0D86 /* InputSimAbsPtr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = InputSimAbsPtr.c; sourceTree = "<group>"; };
+		350857DA2421373F005A0D86 /* OpenCanopy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenCanopy.h; sourceTree = "<group>"; };
+		350857DC2421373F005A0D86 /* OutputStGop.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OutputStGop.c; sourceTree = "<group>"; };
+		350857DD2421373F005A0D86 /* OcBootstrap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcBootstrap.c; sourceTree = "<group>"; };
+		350857DE2421373F005A0D86 /* GuiApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GuiApp.h; sourceTree = "<group>"; };
+		350857DF2421373F005A0D86 /* GuiIo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GuiIo.h; sourceTree = "<group>"; };
+		350857E02421373F005A0D86 /* OpenCanopy.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OpenCanopy.c; sourceTree = "<group>"; };
+		350857E12421373F005A0D86 /* BitmapFont.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BitmapFont.c; sourceTree = "<group>"; };
+		350857E32421373F005A0D86 /* BootPicker.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BootPicker.c; sourceTree = "<group>"; };
+		350857E42421373F005A0D86 /* BmfFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BmfFile.h; sourceTree = "<group>"; };
+		350857E62421628D005A0D86 /* OcUnicodeCollationEngLocal.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcUnicodeCollationEngLocal.c; sourceTree = "<group>"; };
+		350857E72421628D005A0D86 /* OcUnicodeCollationEngLocalLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcUnicodeCollationEngLocalLib.inf; sourceTree = "<group>"; };
+		350857E82421628D005A0D86 /* OcUnicodeCollationEngGenericLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcUnicodeCollationEngGenericLib.inf; sourceTree = "<group>"; };
+		350857E92421628D005A0D86 /* OcUnicodeCollationEngGeneric.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcUnicodeCollationEngGeneric.c; sourceTree = "<group>"; };
+		350857EA2421628D005A0D86 /* OcUnicodeCollationEngCommon.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcUnicodeCollationEngCommon.c; sourceTree = "<group>"; };
+		350857EB2421628D005A0D86 /* OcUnicodeCollationEngInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcUnicodeCollationEngInternal.h; sourceTree = "<group>"; };
 		3511D55E23FDB2A700CC3B17 /* Configuration.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Configuration.tex; sourceTree = "<group>"; };
 		3511D55F23FDB2A700CC3B17 /* BuildDocs.tool */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = BuildDocs.tool; sourceTree = "<group>"; };
 		3511D56023FDB2A700CC3B17 /* SampleFull.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = SampleFull.plist; sourceTree = "<group>"; };
@@ -315,7 +317,6 @@
 		3511D58B23FDB2A800CC3B17 /* OpenCore.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OpenCore.inf; sourceTree = "<group>"; };
 		3511D58C23FDB2A800CC3B17 /* OpenCoreKernel.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OpenCoreKernel.c; sourceTree = "<group>"; };
 		3511D59823FDB2D900CC3B17 /* lib__OpenCorePkg__index.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = lib__OpenCorePkg__index.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		3511D5CB23FDB37200CC3B17 /* NdkBootPicker.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = NdkBootPicker.c; path = ../NdkBootPicker/NdkBootPicker.c; sourceTree = "<group>"; };
 		35366A8D240C213400D54CBB /* OcMachoLibInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcMachoLibInternal.h; sourceTree = "<group>"; };
 		35366A8E240C213400D54CBB /* OcMachoLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcMachoLib.inf; sourceTree = "<group>"; };
 		35366A8F240C213400D54CBB /* Header.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Header.c; sourceTree = "<group>"; };
@@ -357,9 +358,6 @@
 		35366ABA240C213400D54CBB /* PointerHandler.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = PointerHandler.c; sourceTree = "<group>"; };
 		35366ABC240C213400D54CBB /* OcDeviceTreeLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcDeviceTreeLib.c; sourceTree = "<group>"; };
 		35366ABD240C213400D54CBB /* OcDeviceTreeLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcDeviceTreeLib.inf; sourceTree = "<group>"; };
-		35366ABF240C213400D54CBB /* OcUnicodeCollationEngLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcUnicodeCollationEngLib.c; sourceTree = "<group>"; };
-		35366AC0240C213400D54CBB /* OcUnicodeCollationEngLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcUnicodeCollationEngLib.inf; sourceTree = "<group>"; };
-		35366AC1240C213400D54CBB /* OcUnicodeCollationEngLibInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcUnicodeCollationEngLibInternal.h; sourceTree = "<group>"; };
 		35366AC3240C213400D54CBB /* OcHashServicesLibInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcHashServicesLibInternal.h; sourceTree = "<group>"; };
 		35366AC4240C213400D54CBB /* OcHashServicesLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcHashServicesLib.c; sourceTree = "<group>"; };
 		35366AC5240C213400D54CBB /* OcHashServicesLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcHashServicesLib.inf; sourceTree = "<group>"; };
@@ -610,33 +608,6 @@
 		35366BF6240C213500D54CBB /* OcSmcLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcSmcLib.inf; sourceTree = "<group>"; };
 		35366BF7240C213500D54CBB /* OcSmcLibInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcSmcLibInternal.h; sourceTree = "<group>"; };
 		357E232523F2A06B00BC930F /* UDK */ = {isa = PBXFileReference; lastKnownFileType = folder; path = UDK; sourceTree = "<group>"; };
-		358C68E4240C2F3100DEBA5E /* Helvetica_0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Helvetica_0.png; sourceTree = "<group>"; };
-		35C73DEB24055113005CB6EF /* GetTscEmu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GetTscEmu.c; sourceTree = "<group>"; };
-		35C73DEC24055113005CB6EF /* GuiApp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GuiApp.c; sourceTree = "<group>"; };
-		35C73DED24055113005CB6EF /* GUI.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GUI.c; sourceTree = "<group>"; };
-		35C73DEE24055113005CB6EF /* BmfLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BmfLib.h; sourceTree = "<group>"; };
-		35C740ED24055114005CB6EF /* Helvetica_fnt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Helvetica_fnt.c; sourceTree = "<group>"; };
-		35C740F724055114005CB6EF /* Helvetica_png.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Helvetica_png.c; sourceTree = "<group>"; };
-		35C740FA24055114005CB6EF /* InputSimTextIn.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = InputSimTextIn.c; sourceTree = "<group>"; };
-		35C740FB24055114005CB6EF /* InputSimAbsPtr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = InputSimAbsPtr.c; sourceTree = "<group>"; };
-		35C740FD24055114005CB6EF /* Bmf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Bmf; sourceTree = "<group>"; };
-		35C7410024055114005CB6EF /* OutputFbGop.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OutputFbGop.c; sourceTree = "<group>"; };
-		35C7410124055114005CB6EF /* StGopShared.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = StGopShared.c; sourceTree = "<group>"; };
-		35C7410224055114005CB6EF /* OutputStGop.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OutputStGop.c; sourceTree = "<group>"; };
-		35C7410324055114005CB6EF /* OcBootstrap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcBootstrap.c; sourceTree = "<group>"; };
-		35C7410424055115005CB6EF /* HwOps.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = HwOps.c; sourceTree = "<group>"; };
-		35C7410524055115005CB6EF /* GuiApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GuiApp.h; sourceTree = "<group>"; };
-		35C7410624055115005CB6EF /* GUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUI.h; sourceTree = "<group>"; };
-		35C7410724055115005CB6EF /* HwOpsEmu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = HwOpsEmu.c; sourceTree = "<group>"; };
-		35C7410824055115005CB6EF /* BitmapFontUser.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BitmapFontUser.c; sourceTree = "<group>"; };
-		35C7410924055115005CB6EF /* GuiIo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GuiIo.h; sourceTree = "<group>"; };
-		35C7410A24055115005CB6EF /* GUI.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = GUI.inf; sourceTree = "<group>"; };
-		35C7410B24055115005CB6EF /* OcBootstrapEmu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcBootstrapEmu.c; sourceTree = "<group>"; };
-		35C7410C24055115005CB6EF /* BitmapFont.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BitmapFont.c; sourceTree = "<group>"; };
-		35C7410E24055115005CB6EF /* BootPicker.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = BootPicker.c; sourceTree = "<group>"; };
-		35C7410F24055115005CB6EF /* HwOps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HwOps.h; sourceTree = "<group>"; };
-		35C7411024055115005CB6EF /* BmfFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BmfFile.h; sourceTree = "<group>"; };
-		35C7411124055115005CB6EF /* GetTscHw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GetTscHw.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -650,6 +621,64 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		350857D32421373F005A0D86 /* OpenCanopy */ = {
+			isa = PBXGroup;
+			children = (
+				350857D42421373F005A0D86 /* GuiApp.c */,
+				350857D52421373F005A0D86 /* BmfLib.h */,
+				350857D62421373F005A0D86 /* OpenCanopy.inf */,
+				350857D72421373F005A0D86 /* Input */,
+				350857DA2421373F005A0D86 /* OpenCanopy.h */,
+				350857DB2421373F005A0D86 /* Output */,
+				350857DD2421373F005A0D86 /* OcBootstrap.c */,
+				350857DE2421373F005A0D86 /* GuiApp.h */,
+				350857DF2421373F005A0D86 /* GuiIo.h */,
+				350857E02421373F005A0D86 /* OpenCanopy.c */,
+				350857E12421373F005A0D86 /* BitmapFont.c */,
+				350857E22421373F005A0D86 /* Views */,
+				350857E42421373F005A0D86 /* BmfFile.h */,
+			);
+			path = OpenCanopy;
+			sourceTree = "<group>";
+		};
+		350857D72421373F005A0D86 /* Input */ = {
+			isa = PBXGroup;
+			children = (
+				350857D82421373F005A0D86 /* InputSimTextIn.c */,
+				350857D92421373F005A0D86 /* InputSimAbsPtr.c */,
+			);
+			path = Input;
+			sourceTree = "<group>";
+		};
+		350857DB2421373F005A0D86 /* Output */ = {
+			isa = PBXGroup;
+			children = (
+				350857DC2421373F005A0D86 /* OutputStGop.c */,
+			);
+			path = Output;
+			sourceTree = "<group>";
+		};
+		350857E22421373F005A0D86 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				350857E32421373F005A0D86 /* BootPicker.c */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		350857E52421628C005A0D86 /* OcUnicodeCollationEngLib */ = {
+			isa = PBXGroup;
+			children = (
+				350857E62421628D005A0D86 /* OcUnicodeCollationEngLocal.c */,
+				350857E72421628D005A0D86 /* OcUnicodeCollationEngLocalLib.inf */,
+				350857E82421628D005A0D86 /* OcUnicodeCollationEngGenericLib.inf */,
+				350857E92421628D005A0D86 /* OcUnicodeCollationEngGeneric.c */,
+				350857EA2421628D005A0D86 /* OcUnicodeCollationEngCommon.c */,
+				350857EB2421628D005A0D86 /* OcUnicodeCollationEngInternal.h */,
+			);
+			path = OcUnicodeCollationEngLib;
+			sourceTree = "<group>";
+		};
 		3511D55D23FDB2A600CC3B17 /* Docs */ = {
 			isa = PBXGroup;
 			children = (
@@ -735,7 +764,7 @@
 		3511D58123FDB2A800CC3B17 /* Platform */ = {
 			isa = PBXGroup;
 			children = (
-				35C73DEA24055113005CB6EF /* GUI */,
+				350857D32421373F005A0D86 /* OpenCanopy */,
 				3511D58223FDB2A800CC3B17 /* OpenCore */,
 			);
 			path = Platform;
@@ -761,6 +790,7 @@
 		35366A8B240C213300D54CBB /* Library */ = {
 			isa = PBXGroup;
 			children = (
+				350857E52421628C005A0D86 /* OcUnicodeCollationEngLib */,
 				35366A8C240C213400D54CBB /* OcMachoLib */,
 				35366A93240C213400D54CBB /* OcStringLib */,
 				35366A97240C213400D54CBB /* OcPngLib */,
@@ -770,7 +800,6 @@
 				35366AAF240C213400D54CBB /* OcRtcLib */,
 				35366AB2240C213400D54CBB /* OcAppleEventLib */,
 				35366ABB240C213400D54CBB /* OcDeviceTreeLib */,
-				35366ABE240C213400D54CBB /* OcUnicodeCollationEngLib */,
 				35366AC2240C213400D54CBB /* OcHashServicesLib */,
 				35366AC6240C213400D54CBB /* OcAppleChunklistLib */,
 				35366AC9240C213400D54CBB /* OcHeciLib */,
@@ -922,16 +951,6 @@
 				35366ABD240C213400D54CBB /* OcDeviceTreeLib.inf */,
 			);
 			path = OcDeviceTreeLib;
-			sourceTree = "<group>";
-		};
-		35366ABE240C213400D54CBB /* OcUnicodeCollationEngLib */ = {
-			isa = PBXGroup;
-			children = (
-				35366ABF240C213400D54CBB /* OcUnicodeCollationEngLib.c */,
-				35366AC0240C213400D54CBB /* OcUnicodeCollationEngLib.inf */,
-				35366AC1240C213400D54CBB /* OcUnicodeCollationEngLibInternal.h */,
-			);
-			path = OcUnicodeCollationEngLib;
 			sourceTree = "<group>";
 		};
 		35366AC2240C213400D54CBB /* OcHashServicesLib */ = {
@@ -1630,7 +1649,6 @@
 			isa = PBXGroup;
 			children = (
 				35366A8B240C213300D54CBB /* Library */,
-				3511D5CB23FDB37200CC3B17 /* NdkBootPicker.c */,
 				3511D57D23FDB2A700CC3B17 /* Application */,
 				3511D55D23FDB2A600CC3B17 /* Docs */,
 				3511D57B23FDB2A700CC3B17 /* Include */,
@@ -1638,72 +1656,6 @@
 				357E232523F2A06B00BC930F /* UDK */,
 				3511D59823FDB2D900CC3B17 /* lib__OpenCorePkg__index.dylib */,
 			);
-			sourceTree = "<group>";
-		};
-		35C73DEA24055113005CB6EF /* GUI */ = {
-			isa = PBXGroup;
-			children = (
-				35C73DEB24055113005CB6EF /* GetTscEmu.c */,
-				35C73DEC24055113005CB6EF /* GuiApp.c */,
-				35C73DED24055113005CB6EF /* GUI.c */,
-				35C73DEE24055113005CB6EF /* BmfLib.h */,
-				35C740EB24055114005CB6EF /* Images */,
-				35C740F924055114005CB6EF /* Input */,
-				35C740FD24055114005CB6EF /* Bmf */,
-				35C740FF24055114005CB6EF /* Output */,
-				35C7410324055114005CB6EF /* OcBootstrap.c */,
-				35C7410424055115005CB6EF /* HwOps.c */,
-				35C7410524055115005CB6EF /* GuiApp.h */,
-				35C7410624055115005CB6EF /* GUI.h */,
-				35C7410724055115005CB6EF /* HwOpsEmu.c */,
-				35C7410824055115005CB6EF /* BitmapFontUser.c */,
-				35C7410924055115005CB6EF /* GuiIo.h */,
-				35C7410A24055115005CB6EF /* GUI.inf */,
-				35C7410B24055115005CB6EF /* OcBootstrapEmu.c */,
-				35C7410C24055115005CB6EF /* BitmapFont.c */,
-				35C7410D24055115005CB6EF /* Views */,
-				35C7410F24055115005CB6EF /* HwOps.h */,
-				35C7411024055115005CB6EF /* BmfFile.h */,
-				35C7411124055115005CB6EF /* GetTscHw.c */,
-			);
-			path = GUI;
-			sourceTree = "<group>";
-		};
-		35C740EB24055114005CB6EF /* Images */ = {
-			isa = PBXGroup;
-			children = (
-				358C68E4240C2F3100DEBA5E /* Helvetica_0.png */,
-				35C740ED24055114005CB6EF /* Helvetica_fnt.c */,
-				35C740F724055114005CB6EF /* Helvetica_png.c */,
-			);
-			path = Images;
-			sourceTree = "<group>";
-		};
-		35C740F924055114005CB6EF /* Input */ = {
-			isa = PBXGroup;
-			children = (
-				35C740FA24055114005CB6EF /* InputSimTextIn.c */,
-				35C740FB24055114005CB6EF /* InputSimAbsPtr.c */,
-			);
-			path = Input;
-			sourceTree = "<group>";
-		};
-		35C740FF24055114005CB6EF /* Output */ = {
-			isa = PBXGroup;
-			children = (
-				35C7410024055114005CB6EF /* OutputFbGop.c */,
-				35C7410124055114005CB6EF /* StGopShared.c */,
-				35C7410224055114005CB6EF /* OutputStGop.c */,
-			);
-			path = Output;
-			sourceTree = "<group>";
-		};
-		35C7410D24055115005CB6EF /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				35C7410E24055115005CB6EF /* BootPicker.c */,
-			);
-			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1718,7 +1670,6 @@
 				35366C4A240C213500D54CBB /* Img4oids.h in Headers */,
 				35366C05240C213500D54CBB /* DataHub.h in Headers */,
 				35366BF8240C213500D54CBB /* OcMachoLibInternal.h in Headers */,
-				35C7431724055116005CB6EF /* HwOps.h in Headers */,
 				35366CD5240C213500D54CBB /* ContextSwitch.h in Headers */,
 				35366C64240C213500D54CBB /* deflate.h in Headers */,
 				35366C65240C213500D54CBB /* zlib.h in Headers */,
@@ -1733,10 +1684,10 @@
 				35366CC4240C213500D54CBB /* OcCpuInternals.h in Headers */,
 				35366C38240C213500D54CBB /* oids.h in Headers */,
 				35366C37240C213500D54CBB /* DER_Encode.h in Headers */,
-				35C7431324055116005CB6EF /* GuiIo.h in Headers */,
 				35366C9C240C213500D54CBB /* OcRngInternals.h in Headers */,
 				35366C3A240C213500D54CBB /* DER_Decode.h in Headers */,
 				35366C6E240C213500D54CBB /* lzvn.h in Headers */,
+				350857EE2422071A005A0D86 /* OpenCanopy.h in Headers */,
 				35366BFF240C213500D54CBB /* lodepng.h in Headers */,
 				35366CB2240C213500D54CBB /* VirtualFsInternal.h in Headers */,
 				35366C8D240C213500D54CBB /* AIKTarget.h in Headers */,
@@ -1751,11 +1702,12 @@
 				35366C10240C213500D54CBB /* AppleEventInternal.h in Headers */,
 				35366C92240C213500D54CBB /* AIM.h in Headers */,
 				35366C45240C213500D54CBB /* libDERImg4_config.h in Headers */,
-				35366C19240C213500D54CBB /* OcUnicodeCollationEngLibInternal.h in Headers */,
 				35366C58240C213500D54CBB /* lzss.h in Headers */,
+				350857F124220727005A0D86 /* GuiApp.h in Headers */,
 				35366C6D240C213500D54CBB /* zconf.h in Headers */,
 				35366C84240C213500D54CBB /* AIK.h in Headers */,
 				35366C9E240C213500D54CBB /* OcHdaDevicesInternal.h in Headers */,
+				350857F224220729005A0D86 /* GuiIo.h in Headers */,
 				35366CA1240C213500D54CBB /* OcFirmwareVolumeLibInternal.h in Headers */,
 				35366C8E240C213500D54CBB /* AIKShim.h in Headers */,
 				35366C5F240C213500D54CBB /* inffixed.h in Headers */,
@@ -1765,19 +1717,17 @@
 				35366C5A240C213500D54CBB /* zutil.h in Headers */,
 				35366C47240C213500D54CBB /* DER_Img4Manifest.h in Headers */,
 				35366C61240C213500D54CBB /* inffast.h in Headers */,
+				350857F524220733005A0D86 /* BmfFile.h in Headers */,
 				35366C83240C213500D54CBB /* AIKSource.h in Headers */,
 				35366C3D240C213500D54CBB /* asn1Types.h in Headers */,
 				35366C44240C213500D54CBB /* libDER_config.h in Headers */,
 				35366CD9240C213500D54CBB /* ContextSwitch.h in Headers */,
 				35366C87240C213500D54CBB /* AIKTranslate.h in Headers */,
 				35366C26240C213500D54CBB /* BigNumLib.h in Headers */,
-				35C7431824055116005CB6EF /* BmfFile.h in Headers */,
-				35C7431024055116005CB6EF /* GUI.h in Headers */,
-				35C7411524055115005CB6EF /* BmfLib.h in Headers */,
+				350857EF24220721005A0D86 /* BmfLib.h in Headers */,
 				35366C49240C213500D54CBB /* libDERImg4.h in Headers */,
 				35366CA7240C213500D54CBB /* OcLogInternal.h in Headers */,
 				35366C79240C213500D54CBB /* Ubsan.h in Headers */,
-				35C7430F24055116005CB6EF /* GuiApp.h in Headers */,
 				35366C1A240C213500D54CBB /* OcHashServicesLibInternal.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1860,18 +1810,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				35366C21240C213500D54CBB /* Aes.c in Sources */,
-				35C7431524055116005CB6EF /* BitmapFont.c in Sources */,
 				35366C8B240C213500D54CBB /* AIKSource.c in Sources */,
 				35366C7E240C213500D54CBB /* NativeOverflow.c in Sources */,
 				35366C97240C213500D54CBB /* OcAppleDiskImageBlockIo.c in Sources */,
 				35366C01240C213500D54CBB /* lodepng.c in Sources */,
-				35C7430124055116005CB6EF /* Helvetica_fnt.c in Sources */,
 				35366C80240C213500D54CBB /* OcAppleBootPolicyLib.c in Sources */,
 				35366C98240C213500D54CBB /* OcAppleDiskImageLibInternal.c in Sources */,
 				35366CE0240C213500D54CBB /* UmmMalloc.c in Sources */,
 				35366C52240C213500D54CBB /* BootAudio.c in Sources */,
 				35366C72240C213500D54CBB /* SmbiosInternal.c in Sources */,
 				35366C9D240C213500D54CBB /* OcHdaDevicesLib.c in Sources */,
+				350857EC24216525005A0D86 /* OcUnicodeLib.c in Sources */,
+				350857F72422073B005A0D86 /* OutputStGop.c in Sources */,
+				350857F024220724005A0D86 /* OcBootstrap.c in Sources */,
 				35366CB1240C213500D54CBB /* VirtualFs.c in Sources */,
 				35366C62240C213500D54CBB /* crc32.c in Sources */,
 				35366C8F240C213500D54CBB /* AIKData.c in Sources */,
@@ -1890,22 +1841,17 @@
 				3511D58E23FDB2A800CC3B17 /* Bootstrap.c in Sources */,
 				35366C7B240C213500D54CBB /* BitOverflow.c in Sources */,
 				35366CB9240C213500D54CBB /* KernelReader.c in Sources */,
-				35C7430524055116005CB6EF /* Helvetica_png.c in Sources */,
 				35366C9F240C213500D54CBB /* OcFirmwareVolumeLib.c in Sources */,
 				35366C57240C213500D54CBB /* lzss.c in Sources */,
 				35366C03240C213500D54CBB /* OcDataHubLib.c in Sources */,
 				35366C15240C213500D54CBB /* KeyHandler.c in Sources */,
 				35366C76240C213500D54CBB /* OcStorageLib.c in Sources */,
-				35C7411324055115005CB6EF /* GuiApp.c in Sources */,
-				35C7430C24055116005CB6EF /* OutputStGop.c in Sources */,
 				35366C32240C213500D54CBB /* ReleaseUsbOwnership.c in Sources */,
 				35366CD0240C213500D54CBB /* OcCompilerIntrinsicsLib.c in Sources */,
-				35C7411224055115005CB6EF /* GetTscEmu.c in Sources */,
 				35366C50240C213500D54CBB /* PolicyManagement.c in Sources */,
 				35366CAB240C213500D54CBB /* OcAudioWave.c in Sources */,
 				3511D59423FDB2A800CC3B17 /* OpenCorePlatform.c in Sources */,
 				35366CA0240C213500D54CBB /* FvOnFv2Thunk.c in Sources */,
-				35C7430B24055116005CB6EF /* StGopShared.c in Sources */,
 				35366CBB240C213500D54CBB /* OpenFile.c in Sources */,
 				35366CA4240C213500D54CBB /* DebugHelp.c in Sources */,
 				35366CDB240C213500D54CBB /* OcAppleBootCompatLib.c in Sources */,
@@ -1916,7 +1862,6 @@
 				35366C06240C213500D54CBB /* ConsoleControl.c in Sources */,
 				35366CB3240C213500D54CBB /* PrelinkedKext.c in Sources */,
 				35366CAE240C213500D54CBB /* OcAudioVoiceOver.c in Sources */,
-				3511D5CC23FDB37200CC3B17 /* NdkBootPicker.c in Sources */,
 				35366CCE240C213500D54CBB /* OcOSInfoLib.c in Sources */,
 				35366CBD240C213500D54CBB /* GptPartitionEntry.c in Sources */,
 				35366CAA240C213500D54CBB /* OcAudio.c in Sources */,
@@ -1930,7 +1875,7 @@
 				35366C02240C213500D54CBB /* OcSerializeLib.c in Sources */,
 				35366C1D240C213500D54CBB /* OcHeciLib.c in Sources */,
 				35366BFB240C213500D54CBB /* Relocations.c in Sources */,
-				35C7431124055116005CB6EF /* HwOpsEmu.c in Sources */,
+				350857F624220737005A0D86 /* BootPicker.c in Sources */,
 				35366C4B240C213500D54CBB /* OcBootManagementLib.c in Sources */,
 				35366C2D240C213500D54CBB /* Md5.c in Sources */,
 				35366C51240C213500D54CBB /* DefaultEntryChoice.c in Sources */,
@@ -1944,13 +1889,10 @@
 				35366C68240C213500D54CBB /* uncompr.c in Sources */,
 				35366C28240C213500D54CBB /* BigNumPrimitives.c in Sources */,
 				35366CCF240C213500D54CBB /* OcTemplateLib.c in Sources */,
-				35366C1E240C213500D54CBB /* OcConsoleControlEntryModeLib.c in Sources */,
 				35366C24240C213500D54CBB /* BigNumWordMul64.c in Sources */,
 				3511D59623FDB2A800CC3B17 /* OpenCoreNvram.c in Sources */,
-				35C7431424055116005CB6EF /* OcBootstrapEmu.c in Sources */,
 				35366CDC240C213500D54CBB /* MemoryMap.c in Sources */,
 				35366BFE240C213500D54CBB /* OcAsciiLib.c in Sources */,
-				35C7430E24055116005CB6EF /* HwOps.c in Sources */,
 				35366C11240C213500D54CBB /* OcAppleEventLib.c in Sources */,
 				35366C7C240C213500D54CBB /* TripleOverflow.c in Sources */,
 				35366C56240C213500D54CBB /* VariableManagement.c in Sources */,
@@ -1959,17 +1901,14 @@
 				35366C08240C213500D54CBB /* ResolutionParsing.c in Sources */,
 				35366C0F240C213500D54CBB /* OcRtcLib.c in Sources */,
 				35366C4D240C213500D54CBB /* DmgBootSupport.c in Sources */,
+				350857ED24220712005A0D86 /* GuiApp.c in Sources */,
 				35366CBC240C213500D54CBB /* FsConnectQuirk.c in Sources */,
 				35366C0E240C213500D54CBB /* TextOutputBuiltin.c in Sources */,
 				35366CB7240C213500D54CBB /* CommonPatches.c in Sources */,
 				35366C41240C213500D54CBB /* DER_Encode.c in Sources */,
-				35C7430A24055116005CB6EF /* OutputFbGop.c in Sources */,
-				35366C18240C213500D54CBB /* OcUnicodeCollationEngLib.c in Sources */,
 				35366C5D240C213500D54CBB /* compress.c in Sources */,
 				35366C33240C213500D54CBB /* DataPatcher.c in Sources */,
 				35366CBE240C213500D54CBB /* ReadFile.c in Sources */,
-				35C7431224055116005CB6EF /* BitmapFontUser.c in Sources */,
-				35C7430D24055116005CB6EF /* OcBootstrap.c in Sources */,
 				35366C6C240C213500D54CBB /* adler32.c in Sources */,
 				35366CA2240C213500D54CBB /* ExpandDevicePath.c in Sources */,
 				35366C89240C213500D54CBB /* AIKMap.c in Sources */,
@@ -1977,13 +1916,11 @@
 				35366CA3240C213500D54CBB /* OcDevicePathLib.c in Sources */,
 				35366C23240C213500D54CBB /* BigNumMontgomery.c in Sources */,
 				35366C77240C213500D54CBB /* OcAppleSecureBootLib.c in Sources */,
-				35C7430724055116005CB6EF /* InputSimTextIn.c in Sources */,
 				35366CCA240C213500D54CBB /* OcConfigurationLib.c in Sources */,
 				35366C46240C213500D54CBB /* Img4oids.c in Sources */,
 				35366CE2240C213500D54CBB /* OcSmcLib.c in Sources */,
 				35366C53240C213500D54CBB /* BootArguments.c in Sources */,
 				35366C16240C213500D54CBB /* PointerHandler.c in Sources */,
-				35C7431924055116005CB6EF /* GetTscHw.c in Sources */,
 				35366C14240C213500D54CBB /* EventQueue.c in Sources */,
 				35366C00240C213500D54CBB /* OcPng.c in Sources */,
 				35366C27240C213500D54CBB /* Sha1.c in Sources */,
@@ -1991,15 +1928,14 @@
 				35366CE1240C213500D54CBB /* OcAppleRamDiskLib.c in Sources */,
 				35366CC7240C213500D54CBB /* AppleCpuSupport.c in Sources */,
 				35366CC3240C213500D54CBB /* LocateFileSystem.c in Sources */,
+				350857F32422072D005A0D86 /* OpenCanopy.c in Sources */,
 				35366C0D240C213500D54CBB /* TextOutputSystem.c in Sources */,
 				35366C09240C213500D54CBB /* UgaPassThrough.c in Sources */,
 				35366C3B240C213500D54CBB /* DER_Digest.c in Sources */,
 				35366CDF240C213500D54CBB /* LegacyRegionUnLock.c in Sources */,
 				35366C5C240C213500D54CBB /* inflate.c in Sources */,
-				35366C2C240C213500D54CBB /* RsaDigitalSign.c in Sources */,
 				35366CD2240C213500D54CBB /* CustomSlide.c in Sources */,
 				35366C3F240C213500D54CBB /* DER_Decode.c in Sources */,
-				35C7430824055116005CB6EF /* InputSimAbsPtr.c in Sources */,
 				35366C67240C213500D54CBB /* inftrees.c in Sources */,
 				35366C85240C213500D54CBB /* AIKTarget.c in Sources */,
 				35366C40240C213500D54CBB /* oids.c in Sources */,
@@ -2034,7 +1970,6 @@
 				35366CA6240C213500D54CBB /* OcLog.c in Sources */,
 				35366CB5240C213500D54CBB /* Link.c in Sources */,
 				35366C54240C213500D54CBB /* AppleHibernate.c in Sources */,
-				35C7411424055115005CB6EF /* GUI.c in Sources */,
 				35366CB6240C213500D54CBB /* KextPatcher.c in Sources */,
 				35366CB8240C213500D54CBB /* Vtables.c in Sources */,
 				35366C71240C213500D54CBB /* DebugSmbios.c in Sources */,
@@ -2044,15 +1979,14 @@
 				35366C6B240C213500D54CBB /* inffast.c in Sources */,
 				35366CA8240C213500D54CBB /* OcDebugLogLib.c in Sources */,
 				35366C5E240C213500D54CBB /* deflate.c in Sources */,
-				35366BFD240C213500D54CBB /* OcUnicodeLib.c in Sources */,
 				35366C22240C213500D54CBB /* Sha2.c in Sources */,
 				35366C81240C213500D54CBB /* OcAppleUserInterfaceThemeLib.c in Sources */,
-				35C7431624055116005CB6EF /* BootPicker.c in Sources */,
 				35366C2F240C213500D54CBB /* DirectReset.c in Sources */,
 				35366C63240C213500D54CBB /* infback.c in Sources */,
 				35366BFA240C213500D54CBB /* Symbols.c in Sources */,
 				35366CAD240C213500D54CBB /* OcAudioLib.c in Sources */,
 				35366C70240C213500D54CBB /* OcAppleKeyMapLib.c in Sources */,
+				350857F424220730005A0D86 /* BitmapFont.c in Sources */,
 				35366C0A240C213500D54CBB /* OcConsoleLib.c in Sources */,
 				35366CB0240C213500D54CBB /* VirtualVolume.c in Sources */,
 				35366C17240C213500D54CBB /* OcDeviceTreeLib.c in Sources */,
@@ -2208,17 +2142,21 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					MACH_LITTLE_ENDIAN,
 					OC_TARGET_RELEASE,
-					MDE_CPU_X64,
 				);
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/UDK/**";
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/UDK/MdePkg/Include/X64",
+					"$(SRCROOT)/UDK/**",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_CFLAGS = (
 					"-fdiagnostics-absolute-paths",
 					"-include",
 					"$(SRCROOT)/UDK/Build/OpenCorePkg/RELEASE_XCODE5/X64/OpenCorePkg/Platform/OpenCore/OpenCore/DEBUG/AutoGen.h",
 					"-include",
-					"$(SRCROOT)/UDK/MdePkg/Include/Uefi.h",
+					"$(SRCROOT)/UDK/Build/OpenCorePkg/RELEASE_XCODE5/X64/OpenCorePkg/Platform/OpenCore/OpenCore/DEBUG/AutoGen.c",
+					"-fshort-wchar",
 				);
+				OTHER_LDFLAGS = "-###";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -2239,17 +2177,21 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					MACH_LITTLE_ENDIAN,
 					OC_TARGET_RELEASE,
-					MDE_CPU_X64,
 				);
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/UDK/**";
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/UDK/MdePkg/Include/X64",
+					"$(SRCROOT)/UDK/**",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_CFLAGS = (
 					"-fdiagnostics-absolute-paths",
 					"-include",
 					"$(SRCROOT)/UDK/Build/OpenCorePkg/RELEASE_XCODE5/X64/OpenCorePkg/Platform/OpenCore/OpenCore/DEBUG/AutoGen.h",
 					"-include",
-					"$(SRCROOT)/UDK/MdePkg/Include/Uefi.h",
+					"$(SRCROOT)/UDK/Build/OpenCorePkg/RELEASE_XCODE5/X64/OpenCorePkg/Platform/OpenCore/OpenCore/DEBUG/AutoGen.c",
+					"-fshort-wchar",
 				);
+				OTHER_LDFLAGS = "-###";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;

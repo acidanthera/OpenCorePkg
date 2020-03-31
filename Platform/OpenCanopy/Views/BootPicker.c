@@ -823,9 +823,9 @@ BootPickerEntriesAdd (
     return EFI_NOT_FOUND;
   }
 
-  if (EFI_SUCCESS == OcGetBootEntryLabelImage(Context, AppleBootPolicy, Entry, 1, &IconFileData, &IconFileSize) &&
+  /*if (EFI_SUCCESS == OcGetBootEntryLabelImage(Context, AppleBootPolicy, Entry, 1, &IconFileData, &IconFileSize) &&
       EFI_SUCCESS == DecodeAppleDiskLabelImage(&VolumeEntry->Label, IconFileData, IconFileSize)) {
-  } else if (TRUE) {
+  } else*/ if (TRUE) {
     switch (Entry->Type) {
       case OC_BOOT_UNKNOWN:
         Status = CopyLabel(&VolumeEntry->Label, &GuiContext->EntryLabelEFIBoot);

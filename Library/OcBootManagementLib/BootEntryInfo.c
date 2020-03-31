@@ -87,7 +87,7 @@ InternalGetAppleDiskLabelImage (
   }
 
   UnicodeSPrint (DiskLabelPath, DiskLabelPathSize, L"%s%s", BootDirectoryName, LabelFilename);
-  DEBUG ((DEBUG_WARN, "Trying to get label from %s\n", DiskLabelPath));
+  DEBUG ((DEBUG_WARN, "Trying to get image from %s\n", DiskLabelPath));
 
   *ImageData = ReadFile (FileSystem, DiskLabelPath, DataSize, 10485760);
   FreePool (DiskLabelPath);

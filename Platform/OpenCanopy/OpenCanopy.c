@@ -1399,12 +1399,11 @@ GuiGetInterpolatedValue (
   UINT32 DeltaTime;
 
   ASSERT (Interpol != NULL);
-  ASSERT (Interpol->StartTime <= CurrentTime);
   ASSERT (Interpol->Duration > 0);
 
   STATIC CONST UINT32 InterpolFpTimeFactor = 1U << 12U;
 
-  if (CurrentTime == Interpol->StartTime) {
+  if (CurrentTime <= Interpol->StartTime) {
     return Interpol->StartValue;
   }
 
