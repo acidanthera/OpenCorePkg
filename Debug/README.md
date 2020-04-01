@@ -78,6 +78,9 @@ when no macOS guest booting is required.
     build -a X64 -t CLANGPDB -b NOOPT -p OvmfPkg/OvmfPkgX64.dsc # for other systems
     ```
 
+    To build OVMF with SMM support add `-D SMM_REQUIRE=1`. To build OVMF with serial debugging
+    add `-D DEBUG_ON_SERIAL_PORT=1`.
+
 2. Prepare launch directory with OpenCore as usual. For example, make a directory named
     `QemuRun` and `cd` to it. You should have a similar directory structure:
 
@@ -100,8 +103,17 @@ when no macOS guest booting is required.
       -machine q35 -m 2048 -cpu Penryn -smp 4,cores=2 -gdb tcp::8864
     ```
 
-You may additionally pass `-S` flag to QEMU to stop at first instruction
-and wait for GDB connection.
+    To run QEMU with SMM support use the following command:
+    ```
+    qemu-system-x86_64 -L . -global driver=cfi.pflash01,property=secure,value=on \
+    -drive if=pflash,format=raw,unit=0,file="$OVMF_BUILD"/OVMF_CODE.fd,readonly=on \
+    -drive if=pflash,format=raw,unit=1,file="$OVMF_BUILD"/OVMF_VARS.fd -hda fat:rw:ESP \
+    -global ICH9-LPC.disable_s3=1 -machine q35,smm=on,accel=tcg -m 2048 -cpu Penryn \
+    -smp 4,cores=2 -cdrom /Users/user/Downloads/debian-10.3.0-amd64-netinst.iso -gdb tcp::8864
+    ```
+
+    You may additionally pass `-S` flag to QEMU to stop at first instruction
+    and wait for GDB connection. To use serial debugging add `-serial stdio`.
 
 #### Debugger Configuration
 

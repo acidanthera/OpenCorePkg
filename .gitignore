@@ -35,3 +35,4 @@ prelinkedkernel.unpack
 *.dmg
 *.chunklist
 *.pyc
+Debug/QemuRun
