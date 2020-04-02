@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Mar  6 09:43:05 2020
-%DIF ADD ../Configuration.tex        Fri Mar 20 05:08:27 2020
+%DIF ADD ../Configuration.tex        Thu Apr  2 21:22:46 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1455,8 +1455,9 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Attempt to join similar memory map entries.
 
-  Select firmwares have very large memory maps, which do not fit Apple kernel,
-  permitting up to \texttt{64} slots for runtime memory. This quirk attempts to unify
+  Select firmwares have very large memory maps, which do not fit \DIFdelbegin \DIFdel{Apple kernel, permitting up to }\texttt{\DIFdel{64}} %DIFAUXCMD
+\DIFdel{slots for runtime memory}\DIFdelend \DIFaddbegin \DIFadd{into a single 4 KB
+  page, which is a requirement for Apple kernel}\DIFaddend . This quirk attempts to unify
   contiguous slots of similar types to prevent boot failures.
 
   \emph{Note}: The necessity of this quirk is determined by early boot failures.

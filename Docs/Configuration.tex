@@ -1387,8 +1387,8 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Attempt to join similar memory map entries.
 
-  Select firmwares have very large memory maps, which do not fit Apple kernel,
-  permitting up to \texttt{64} slots for runtime memory. This quirk attempts to unify
+  Select firmwares have very large memory maps, which do not fit into a single 4 KB
+  page, which is a requirement for Apple kernel. This quirk attempts to unify
   contiguous slots of similar types to prevent boot failures.
 
   \emph{Note}: The necessity of this quirk is determined by early boot failures.
