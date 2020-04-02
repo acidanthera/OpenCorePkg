@@ -109,6 +109,32 @@ OcAbcInitialize (
     return Status;
   }
 
+  DEBUG ((
+    DEBUG_INFO,
+    "OCABC: RTDFRG %d DEVMMIO %d NOSU %d NOVRWR %d NOSB %d NOHBMAP %d SMSLIDE %d WRUNPROT %d\n",
+    Settings->AvoidRuntimeDefrag,
+    Settings->DevirtualiseMmio,
+    Settings->DisableSingleUser,
+    Settings->DisableVariableWrite,
+    Settings->ProtectSecureBoot,
+    Settings->DiscardHibernateMap,
+    Settings->EnableSafeModeSlide,
+    Settings->EnableWriteUnprotector
+    ));
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCABC: FEXITBS %d PRCSM %d CSLIDE %d PRSRV %d VMAP %d SHRMAP %d APPLOS %d RTPERMS %d\n",
+    Settings->ForceExitBootServices,
+    Settings->ProtectCsmRegion,
+    Settings->ProvideCustomSlide,
+    Settings->ProtectUefiServices,
+    Settings->SetupVirtualMap,
+    Settings->ShrinkMemoryMap,
+    Settings->SignalAppleOS,
+    Settings->SyncRuntimePermissions
+    ));
+
   DEBUG_CODE_BEGIN ();
   TotalMemory = CountFreePages (&LowMemory);
   DEBUG ((
