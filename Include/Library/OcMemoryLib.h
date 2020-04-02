@@ -24,7 +24,6 @@
 #define PREV_MEMORY_DESCRIPTOR(MemoryDescriptor, Size) \
   ((EFI_MEMORY_DESCRIPTOR *)((UINT8 *)(MemoryDescriptor) - (Size)))
 
-
 /**
   Get last descriptor address.
   It is assumed that the descriptor contains pages.
@@ -264,6 +263,16 @@ OcUpdateAttributes (
   IN EFI_MEMORY_TYPE       Type,
   IN UINT64                SetAttributes,
   IN UINT64                DropAttributes
+  );
+
+/**
+  Count upper bound of split runtime descriptors.
+
+  @retval amount of runtime descriptors.
+**/
+UINTN
+OcCountSplitDescritptors (
+  VOID
   );
 
 /**

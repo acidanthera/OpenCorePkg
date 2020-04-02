@@ -540,3 +540,36 @@ OcUpdateAttributes (
 
   return EFI_UNSUPPORTED;
 }
+
+UINTN
+OcCountSplitDescritptors (
+  VOID
+  )
+{
+  UINTN                             Index;
+  UINTN                             DescriptorCount;
+  CONST EFI_MEMORY_ATTRIBUTES_TABLE *MemoryAttributesTable;
+  EFI_MEMORY_DESCRIPTOR             *MemoryAttributesEntry;
+
+  DescriptorCount = 0;
+
+  for (Index = 0; Index < gST->NumberOfTableEntries; ++Index) {
+    if (CompareGuid (&gST->ConfigurationTable[Index].VendorGuid, &gEfiMemoryAttributesTableGuid)) {
+      MemoryAttributesTable = (CONST EFI_MEMORY_ATTRIBUTES_TABLE *) gST->ConfigurationTable[Index].VendorTable;
+      MemoryAttributesEntry = (EFI_MEMORY_DESCRIPTOR *) (MemoryAttributesTable + 1);
+      for (Index = 0; Index < MemoryAttributesTable->NumberOfEntries; ++Index) {
+        if (MemoryAttributesEntry->Type == EfiRuntimeServicesCode
+          || MemoryAttributesEntry->Type == EfiRuntimeServicesData) {
+          ++DescriptorCount;
+        }
+
+        MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (
+          MemoryAttributesEntry,
+          MemoryAttributesTable->DescriptorSize
+          );
+      }
+    }
+  }
+
+  return DescriptorCount;
+}
