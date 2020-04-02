@@ -221,6 +221,52 @@ OcPrintMemoryAttributesTable (
   );
 
 /**
+  Refresh memory descriptor containing the specified address.
+
+  @param[in]  MemoryMapSize   Memory map size in bytes.
+  @param[in]  MemoryMap       Memory map to refresh.
+  @param[in]  DescriptorSize  Memory map descriptor size in bytes.
+  @param[in]  Address         Address contained in the updated entry.
+  @param[in]  Type            Memory type to assign to the entry.
+  @param[in]  SetAttribues    Attributes to set.
+  @param[in]  DropAttributes  Attributes to remove.
+
+  @retval EFI_SUCCESS on success.
+  @retval EFI_NOT_FOUND no entry contains the specified address.
+  @retval EFI_UNSUPPORTED memory attributes are not supported by the platform.
+**/
+EFI_STATUS
+OcUpdateDescriptors (
+  IN UINTN                  MemoryMapSize,
+  IN EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN UINTN                  DescriptorSize,
+  IN EFI_PHYSICAL_ADDRESS   Address,
+  IN EFI_MEMORY_TYPE        Type,
+  IN UINT64                 SetAttributes,
+  IN UINT64                 DropAttributes
+  );
+
+/**
+  Refresh memory attributes entry containing the specified address.
+
+  @param[in]  Address         Address contained in the updated entry.
+  @param[in]  Type            Memory type to assign to the entry.
+  @param[in]  SetAttribues    Attributes to set.
+  @param[in]  DropAttributes  Attributes to remove.
+
+  @retval EFI_SUCCESS on success.
+  @retval EFI_NOT_FOUND no entry contains the specified address.
+  @retval EFI_UNSUPPORTED memory attributes are not supported by the platform.
+**/
+EFI_STATUS
+OcUpdateAttributes (
+  IN EFI_PHYSICAL_ADDRESS  Address,
+  IN EFI_MEMORY_TYPE       Type,
+  IN UINT64                SetAttributes,
+  IN UINT64                DropAttributes
+  );
+
+/**
   Return pointer to PML4 table in PageTable and PWT and PCD flags in Flags.
 
   @param[out]  Flags      Current page table PWT and PCT flags.

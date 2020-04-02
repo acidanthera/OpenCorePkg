@@ -476,3 +476,67 @@ OcPrintMemoryAttributesTable (
 
   DEBUG ((DEBUG_INFO, "OCMM: MemoryAttributesTable is not present!\n"));
 }
+
+EFI_STATUS
+OcUpdateDescriptors (
+  IN UINTN                  MemoryMapSize,
+  IN EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN UINTN                  DescriptorSize,
+  IN EFI_PHYSICAL_ADDRESS   Address,
+  IN EFI_MEMORY_TYPE        Type,
+  IN UINT64                 SetAttributes,
+  IN UINT64                 DropAttributes
+  )
+{
+  UINTN  Index;
+  UINTN  EntryCount;
+
+  EntryCount = MemoryMapSize / DescriptorSize;
+
+  for (Index = 0; Index < EntryCount; ++Index) {
+    if (AREA_WITHIN_DESCRIPTOR (MemoryMap, Address, 1)) {
+      MemoryMap->Attribute  = Type;
+      MemoryMap->Attribute |= SetAttributes;
+      MemoryMap->Attribute &= ~DropAttributes;
+      return EFI_SUCCESS;
+    }
+
+    MemoryMap = NEXT_MEMORY_DESCRIPTOR (
+      MemoryMap,
+      DescriptorSize
+      );
+  }
+
+  return EFI_NOT_FOUND;
+}
+
+EFI_STATUS
+OcUpdateAttributes (
+  IN EFI_PHYSICAL_ADDRESS  Address,
+  IN EFI_MEMORY_TYPE       Type,
+  IN UINT64                SetAttributes,
+  IN UINT64                DropAttributes
+  )
+{
+  UINTN                             Index;
+  CONST EFI_MEMORY_ATTRIBUTES_TABLE *MemoryAttributesTable;
+  EFI_MEMORY_DESCRIPTOR             *MemoryAttributesEntry;
+
+  for (Index = 0; Index < gST->NumberOfTableEntries; ++Index) {
+    if (CompareGuid (&gST->ConfigurationTable[Index].VendorGuid, &gEfiMemoryAttributesTableGuid)) {
+      MemoryAttributesTable = (CONST EFI_MEMORY_ATTRIBUTES_TABLE *) gST->ConfigurationTable[Index].VendorTable;
+      MemoryAttributesEntry = (EFI_MEMORY_DESCRIPTOR *) (MemoryAttributesTable + 1);
+      return OcUpdateDescriptors (
+        MemoryAttributesTable->NumberOfEntries * MemoryAttributesTable->DescriptorSize,
+        MemoryAttributesEntry,
+        MemoryAttributesTable->DescriptorSize,
+        Address,
+        Type,
+        SetAttributes,
+        DropAttributes
+        );
+    }
+  }
+
+  return EFI_UNSUPPORTED;
+}
