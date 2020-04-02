@@ -98,6 +98,10 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   BOOLEAN  ProtectUefiServices;
   ///
+  /// Fix OpenRuntime permissions in the memory map and memory attributes.
+  ///
+  BOOLEAN  SyncRuntimePermissions;
+  ///
   /// List of physical addresses to not be devirtualised by DevirtualiseMmio.
   ///
   EFI_PHYSICAL_ADDRESS *MmioWhitelist;

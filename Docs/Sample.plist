@@ -266,6 +266,8 @@
 			<false/>
 			<key>SignalAppleOS</key>
 			<false/>
+			<key>SyncRuntimePermissions</key>
+			<false/>
 		</dict>
 	</dict>
 	<key>DeviceProperties</key>

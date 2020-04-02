@@ -126,7 +126,8 @@
   _(BOOLEAN                     , ProvideCustomSlide        ,     , FALSE  , ()) \
   _(BOOLEAN                     , SetupVirtualMap           ,     , FALSE  , ()) \
   _(BOOLEAN                     , ShrinkMemoryMap           ,     , FALSE  , ()) \
-  _(BOOLEAN                     , SignalAppleOS             ,     , FALSE  , ())
+  _(BOOLEAN                     , SignalAppleOS             ,     , FALSE  , ()) \
+  _(BOOLEAN                     , SyncRuntimePermissions    ,     , FALSE  , ())
   OC_DECLARE (OC_BOOTER_QUIRKS)
 
 ///

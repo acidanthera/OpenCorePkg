@@ -179,6 +179,7 @@ mBooterQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("SetupVirtualMap",        OC_GLOBAL_CONFIG, Booter.Quirks.SetupVirtualMap),
   OC_SCHEMA_BOOLEAN_IN ("ShrinkMemoryMap",        OC_GLOBAL_CONFIG, Booter.Quirks.ShrinkMemoryMap),
   OC_SCHEMA_BOOLEAN_IN ("SignalAppleOS",          OC_GLOBAL_CONFIG, Booter.Quirks.SignalAppleOS),
+  OC_SCHEMA_BOOLEAN_IN ("SyncRuntimePermissions", OC_GLOBAL_CONFIG, Booter.Quirks.SyncRuntimePermissions),
 };
 
 STATIC
