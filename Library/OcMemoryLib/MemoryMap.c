@@ -495,7 +495,7 @@ OcUpdateDescriptors (
 
   for (Index = 0; Index < EntryCount; ++Index) {
     if (AREA_WITHIN_DESCRIPTOR (MemoryMap, Address, 1)) {
-      MemoryMap->Attribute  = Type;
+      MemoryMap->Type       = Type;
       MemoryMap->Attribute |= SetAttributes;
       MemoryMap->Attribute &= ~DropAttributes;
       return EFI_SUCCESS;
