@@ -17,7 +17,7 @@
 
 #include <Uefi.h>
 
-#define OC_FIRMWARE_RUNTIME_REVISION 4
+#define OC_FIRMWARE_RUNTIME_REVISION 7
 
 /**
   OC_FIRMWARE_RUNTIME_PROTOCOL_GUID
@@ -118,6 +118,22 @@ EFI_STATUS
   );
 
 /**
+  Obtain area that needs to be executable in OS runtime.
+
+  @param[out]  BaseAddress   Executable area start.
+  @param[out]  Pages         Number of executable pages.
+
+  @retval EFI_SUCCESS on success.
+  @retval EFI_UNSUPPORTED not required.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *OC_FWRT_GET_EXEC_AREA) (
+  OUT EFI_PHYSICAL_ADDRESS  *BaseAddress,
+  OUT UINTN                 *Pages
+  );
+
+/**
   Firmware runtime protocol instance.
   Check for revision to ensure binary compatibility.
 **/
@@ -127,6 +143,7 @@ typedef struct {
   OC_FWRT_SET_MAIN_CONFIG      SetMain;
   OC_FWRT_SET_OVERRIDE_CONFIG  SetOverride;
   OC_FWRT_ON_GET_VARIABLE      OnGetVariable;
+  OC_FWRT_GET_EXEC_AREA        GetExecArea;
 } OC_FIRMWARE_RUNTIME_PROTOCOL;
 
 /**

@@ -59,13 +59,30 @@ FwSetOverride (
 }
 
 STATIC
+EFI_STATUS
+EFIAPI
+FwGetExecArea (
+  OUT EFI_PHYSICAL_ADDRESS  *BaseAddress,
+  OUT UINTN                 *Pages
+  )
+{
+  //
+  // FIXME: This is not accurate, but it does not need to be for now.
+  //
+  *BaseAddress = (EFI_PHYSICAL_ADDRESS)(UINTN) FwGetCurrent;
+  *Pages       = 1;
+  return EFI_SUCCESS;
+}
+
+STATIC
 OC_FIRMWARE_RUNTIME_PROTOCOL
 mOcFirmwareRuntimeProtocol = {
   OC_FIRMWARE_RUNTIME_REVISION,
   FwGetCurrent,
   FwSetMain,
   FwSetOverride,
-  FwOnGetVariable
+  FwOnGetVariable,
+  FwGetExecArea
 };
 
 EFI_STATUS
