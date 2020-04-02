@@ -765,9 +765,21 @@ SetGetVariableHookHandler (
       (VOID **) &FwRuntime
       );
 
-    if (!EFI_ERROR (Status) && FwRuntime->Revision == OC_FIRMWARE_RUNTIME_REVISION) {
-      Status = FwRuntime->OnGetVariable (OcGetVariable, &BootCompat->ServicePtrs.GetVariable);
+    if (!EFI_ERROR (Status)) {
+      if (FwRuntime->Revision == OC_FIRMWARE_RUNTIME_REVISION) {
+        DEBUG ((DEBUG_INFO, "OCABC: Got rendezvous with OpenRuntime r%u\n", OC_FIRMWARE_RUNTIME_REVISION));
+        Status = FwRuntime->OnGetVariable (OcGetVariable, &BootCompat->ServicePtrs.GetVariable);
+      } else {
+        DEBUG ((
+          DEBUG_ERROR,
+          "OCABC: Incompatible OpenRuntime r%u, require r%u\n",
+          (UINT32) FwRuntime->Revision,
+          (UINT32) OC_FIRMWARE_RUNTIME_REVISION
+          ));
+        CpuDeadLoop ();
+      }
     } else {
+      DEBUG ((DEBUG_INFO, "OCABC: Awaiting rendezvous with OpenRuntime r%u\n", OC_FIRMWARE_RUNTIME_REVISION));
       Status = EFI_UNSUPPORTED;
     }
 

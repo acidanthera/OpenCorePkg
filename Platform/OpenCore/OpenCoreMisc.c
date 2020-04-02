@@ -645,6 +645,8 @@ OcMiscBoot (
   Context->HideAuxiliary       = Config->Misc.Boot.HideAuxiliary;
   Context->PickerAudioAssist   = Config->Misc.Boot.PickerAudioAssist;
 
+  DEBUG ((DEBUG_INFO, "OC: Ready for takeoff in %u us\n", (UINT32) Context->TakeoffDelay));
+
   OcLoadPickerHotKeys (Context);
 
   Context->ShowNvramReset  = Config->Misc.Security.AllowNvramReset;
