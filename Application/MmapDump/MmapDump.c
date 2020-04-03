@@ -81,6 +81,7 @@ UefiMain (
     );
 
   if (MemoryMap != NULL) {
+    OcSortMemoryMap (MemoryMapSize, MemoryMap, DescriptorSize);
     DEBUG ((DEBUG_INFO, "MMDD: Dumping the original memory map\n"));
     OcPrintMemoryMap (MemoryMapSize, MemoryMap, DescriptorSize);
     DEBUG ((DEBUG_INFO, "MMDD: Dumping patched memory map\n"));

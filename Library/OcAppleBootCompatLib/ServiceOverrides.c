@@ -465,6 +465,8 @@ OcGetMemoryMap (
     }
 
     if (BootCompat->Settings.RebuildAppleMemoryMap) {
+      OcSortMemoryMap (*MemoryMapSize, MemoryMap, *DescriptorSize);
+
       Status2 = OcSplitMemoryMapByAttributes (
         OriginalSize,
         MemoryMapSize,
@@ -475,7 +477,7 @@ OcGetMemoryMap (
         DEBUG ((DEBUG_INFO, "OCABC: Cannot rebuild memory map - %r\n", Status));
       }
 
-      ShrinkMemoryMap (
+      OcShrinkMemoryMap (
         MemoryMapSize,
         MemoryMap,
         *DescriptorSize

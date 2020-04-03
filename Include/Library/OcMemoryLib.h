@@ -119,14 +119,30 @@ GetCurrentMemoryMapAlloc (
   );
 
 /**
+  Sort memory map entries based upon PhysicalStart, from low to high.
+
+  @param  MemoryMapSize          Size, in bytes, of the MemoryMap buffer.
+  @param  MemoryMap              A pointer to the buffer in which firmware places
+                                 the current memory map.
+  @param  DescriptorSize         Size, in bytes, of an individual EFI_MEMORY_DESCRIPTOR.
+**/
+VOID
+OcSortMemoryMap (
+  IN UINTN                      MemoryMapSize,
+  IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN UINTN                      DescriptorSize
+  );
+
+/**
   Shrink memory map by joining non-runtime records.
+  Requires sorted memory map.
 
   @param[in,out]  MemoryMapSize      Memory map size in bytes, updated on shrink.
   @param[in,out]  MemoryMap          Memory map to shrink.
   @param[in]      DescriptorSize     Memory map descriptor size in bytes.
 **/
 VOID
-ShrinkMemoryMap (
+OcShrinkMemoryMap (
   IN OUT UINTN                  *MemoryMapSize,
   IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
   IN     UINTN                  DescriptorSize
@@ -309,8 +325,9 @@ OcCountSplitDescritptors (
 
 /**
   Split memory map by memory attributes if available.
+  Requires sorted memory map!
 
-  @param[in]     OriginalMemoryMapSize   Upper memory map size bound for growth.
+  @param[in]     MaxMemoryMapSize        Upper memory map size bound for growth.
   @param[in,out] MemoryMapSize           Current memory map size, updated on return.
   @param[in,out] MemoryMap               Memory map to split.
   @param[in]     DescriptorSize          Memory map descriptor size.
@@ -323,7 +340,7 @@ OcCountSplitDescritptors (
 **/
 EFI_STATUS
 OcSplitMemoryMapByAttributes (
-  IN     UINTN                  OriginalMemoryMapSize,
+  IN     UINTN                  MaxMemoryMapSize,
   IN OUT UINTN                  *MemoryMapSize,
   IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
   IN     UINTN                  DescriptorSize

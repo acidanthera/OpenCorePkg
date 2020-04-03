@@ -23,6 +23,24 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 
+STATIC CONST CHAR8 *mEfiMemoryTypeDesc[EfiMaxMemoryType] = {
+  "Reserved ",
+  "LDR Code ",
+  "LDR Data ",
+  "BS Code  ",
+  "BS Data  ",
+  "RT Code  ",
+  "RT Data  ",
+  "Available",
+  "Unusable ",
+  "ACPI RECL",
+  "ACPI NVS ",
+  "MemMapIO ",
+  "MemPortIO",
+  "PAL Code ",
+  "Persist  "
+};
+
 EFI_MEMORY_DESCRIPTOR *
 OcGetCurrentMemoryMap (
   OUT UINTN   *MemoryMapSize,
@@ -209,7 +227,38 @@ GetCurrentMemoryMapAlloc (
 }
 
 VOID
-ShrinkMemoryMap (
+OcSortMemoryMap (
+  IN UINTN                      MemoryMapSize,
+  IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN UINTN                      DescriptorSize
+  )
+{
+  EFI_MEMORY_DESCRIPTOR       *MemoryMapEntry;
+  EFI_MEMORY_DESCRIPTOR       *NextMemoryMapEntry;
+  EFI_MEMORY_DESCRIPTOR       *MemoryMapEnd;
+  EFI_MEMORY_DESCRIPTOR       TempMemoryMap;
+
+  MemoryMapEntry = MemoryMap;
+  NextMemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
+  MemoryMapEnd = (EFI_MEMORY_DESCRIPTOR *) ((UINT8 *) MemoryMap + MemoryMapSize);
+  while (MemoryMapEntry < MemoryMapEnd) {
+    while (NextMemoryMapEntry < MemoryMapEnd) {
+      if (MemoryMapEntry->PhysicalStart > NextMemoryMapEntry->PhysicalStart) {
+        CopyMem (&TempMemoryMap, MemoryMapEntry, sizeof(EFI_MEMORY_DESCRIPTOR));
+        CopyMem (MemoryMapEntry, NextMemoryMapEntry, sizeof(EFI_MEMORY_DESCRIPTOR));
+        CopyMem (NextMemoryMapEntry, &TempMemoryMap, sizeof(EFI_MEMORY_DESCRIPTOR));
+      }
+
+      NextMemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (NextMemoryMapEntry, DescriptorSize);
+    }
+
+    MemoryMapEntry      = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
+    NextMemoryMapEntry  = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
+  }
+}
+
+VOID
+OcShrinkMemoryMap (
   IN OUT UINTN                  *MemoryMapSize,
   IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
   IN     UINTN                  DescriptorSize
@@ -451,6 +500,57 @@ CountFreePages (
   return FreePages;
 }
 
+STATIC
+VOID
+OcPrintMemoryDescritptor (
+  IN EFI_MEMORY_DESCRIPTOR  *Desc
+  )
+{
+  CONST CHAR8  *Type;
+  CONST CHAR8  *SizeType;
+  UINT64       SizeValue;
+
+  if (Desc->Type < ARRAY_SIZE (mEfiMemoryTypeDesc)) {
+    Type = mEfiMemoryTypeDesc[Desc->Type];
+  } else {
+    Type = "Invalid";
+  }
+
+  SizeValue = EFI_PAGES_TO_SIZE (Desc->NumberOfPages);
+  if (SizeValue >= BASE_1MB) {
+    SizeValue /= BASE_1MB;
+    SizeType   = "MB";
+  } else {
+    SizeValue /= BASE_1KB;
+    SizeType   = "KB";
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "%a [%a|%a|%a|%a|%a|%a|%a|%a|%a|%a|%a|%a|%a|%a] 0x%016LX-0x%016LX -> 0x%016X (%Lu %a)\n",
+    Type,
+    (Desc->Attribute & EFI_MEMORY_RUNTIME)        != 0 ? "RUN" : "   ",
+    (Desc->Attribute & EFI_MEMORY_CPU_CRYPTO)     != 0 ? "CRY" : "   ",
+    (Desc->Attribute & EFI_MEMORY_SP)             != 0 ? "SP"  : "  ",
+    (Desc->Attribute & EFI_MEMORY_RO)             != 0 ? "RO"  : "  ",
+    (Desc->Attribute & EFI_MEMORY_MORE_RELIABLE)  != 0 ? "MR"  : "  ",
+    (Desc->Attribute & EFI_MEMORY_NV)             != 0 ? "NV"  : "  ",
+    (Desc->Attribute & EFI_MEMORY_RP)             != 0 ? "RP"  : "  ",
+    (Desc->Attribute & EFI_MEMORY_XP)             != 0 ? "XP"  : "  ",
+    (Desc->Attribute & EFI_MEMORY_RO)             != 0 ? "RO"  : "  ",
+    (Desc->Attribute & EFI_MEMORY_UCE)            != 0 ? "UCE" : "   ",
+    (Desc->Attribute & EFI_MEMORY_WB)             != 0 ? "WB"  : "  ",
+    (Desc->Attribute & EFI_MEMORY_WT)             != 0 ? "WT"  : "  ",
+    (Desc->Attribute & EFI_MEMORY_WC)             != 0 ? "WC"  : "  ",
+    (Desc->Attribute & EFI_MEMORY_UC)             != 0 ? "UC"  : "  ",
+    Desc->PhysicalStart,
+    Desc->PhysicalStart + (EFI_PAGES_TO_SIZE (Desc->NumberOfPages) - 1),
+    Desc->VirtualStart,
+    SizeValue,
+    SizeType
+    ));
+}
+
 VOID
 OcPrintMemoryAttributesTable (
   VOID
@@ -472,13 +572,7 @@ OcPrintMemoryAttributesTable (
   DEBUG ((DEBUG_INFO, "OCMM:   DescriptorSize       - 0x%08x\n", MemoryAttributesTable->DescriptorSize));
 
   for (Index = 0; Index < MemoryAttributesTable->NumberOfEntries; ++Index) {
-    DEBUG ((DEBUG_INFO, "OCMM: Entry (0x%x)\n", MemoryAttributesEntry));
-    DEBUG ((DEBUG_INFO, "OCMM:   Type              - 0x%x\n", MemoryAttributesEntry->Type));
-    DEBUG ((DEBUG_INFO, "OCMM:   PhysicalStart     - 0x%016lx\n", MemoryAttributesEntry->PhysicalStart));
-    DEBUG ((DEBUG_INFO, "OCMM:   VirtualStart      - 0x%016lx\n", MemoryAttributesEntry->VirtualStart));
-    DEBUG ((DEBUG_INFO, "OCMM:   NumberOfPages     - 0x%016lx\n", MemoryAttributesEntry->NumberOfPages));
-    DEBUG ((DEBUG_INFO, "OCMM:   Attribute         - 0x%016lx\n", MemoryAttributesEntry->Attribute));
-
+    OcPrintMemoryDescritptor (MemoryAttributesEntry);
     MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (
       MemoryAttributesEntry,
       MemoryAttributesTable->DescriptorSize
@@ -504,13 +598,7 @@ OcPrintMemoryMap (
   DEBUG ((DEBUG_INFO, "OCMM:   DescriptorSize       - 0x%08x\n", DescriptorSize));
 
   for (Index = 0; Index < NumberOfEntries; ++Index) {
-    DEBUG ((DEBUG_INFO, "OCMM: Entry (0x%x)\n", MemoryMap));
-    DEBUG ((DEBUG_INFO, "OCMM:   Type              - 0x%x\n", MemoryMap->Type));
-    DEBUG ((DEBUG_INFO, "OCMM:   PhysicalStart     - 0x%016lx\n", MemoryMap->PhysicalStart));
-    DEBUG ((DEBUG_INFO, "OCMM:   VirtualStart      - 0x%016lx\n", MemoryMap->VirtualStart));
-    DEBUG ((DEBUG_INFO, "OCMM:   NumberOfPages     - 0x%016lx\n", MemoryMap->NumberOfPages));
-    DEBUG ((DEBUG_INFO, "OCMM:   Attribute         - 0x%016lx\n", MemoryMap->Attribute));
-
+    OcPrintMemoryDescritptor (MemoryMap);
     MemoryMap = NEXT_MEMORY_DESCRIPTOR (
       MemoryMap,
       DescriptorSize
@@ -772,7 +860,7 @@ OcSplitMemoryEntryByAttribute (
 
 EFI_STATUS
 OcSplitMemoryMapByAttributes (
-  IN     UINTN                  OriginalMemoryMapSize,
+  IN     UINTN                  MaxMemoryMapSize,
   IN OUT UINTN                  *MemoryMapSize,
   IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
   IN     UINTN                  DescriptorSize
@@ -792,7 +880,7 @@ OcSplitMemoryMapByAttributes (
   BOOLEAN                            CanSplit;
   BOOLEAN                            InDescAttrs;
 
-  ASSERT (OriginalMemoryMapSize >= *MemoryMapSize);
+  ASSERT (MaxMemoryMapSize >= *MemoryMapSize);
 
   MemoryAttributesTable = OcGetMemoryAttributes (&MemoryAttributesEntry);
   if (MemoryAttributesTable == NULL) {
@@ -803,12 +891,11 @@ OcSplitMemoryMapByAttributes (
   LastAttributeIndex = 0;
   MemoryMapEntry     = MemoryMap;
   CurrentEntryCount  = *MemoryMapSize / DescriptorSize;
-  TotalEntryCount    = OriginalMemoryMapSize / DescriptorSize;
+  TotalEntryCount    = MaxMemoryMapSize / DescriptorSize;
   AttributeCount     = MemoryAttributesTable->NumberOfEntries;
 
   //
   // We assume that the memory map and attribute table are sorted.
-  // If this is not the case we can add a sort call here.
   //
   for (Index = 0; Index < CurrentEntryCount; ++Index) {
     //
