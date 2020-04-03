@@ -870,6 +870,7 @@ SetGetVariableHookHandler (
     if (!EFI_ERROR (Status)) {
       if (FwRuntime->Revision == OC_FIRMWARE_RUNTIME_REVISION) {
         DEBUG ((DEBUG_INFO, "OCABC: Got rendezvous with OpenRuntime r%u\n", OC_FIRMWARE_RUNTIME_REVISION));
+        DEBUG ((DEBUG_INFO, "OCABC: MAT support is %d\n", OcGetMemoryAttributes (NULL) != NULL));
         Status = FwRuntime->OnGetVariable (OcGetVariable, &BootCompat->ServicePtrs.GetVariable);
       } else {
         DEBUG ((
