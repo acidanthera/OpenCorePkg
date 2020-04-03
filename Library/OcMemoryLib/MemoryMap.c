@@ -631,7 +631,7 @@ OcSplitMemoryEntryByAttribute (
     }
 
     NewMemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
-    DiffPages         = EFI_SIZE_TO_PAGES (MemoryAttribte->PhysicalStart - MemoryMapEntry->PhysicalStart);
+    DiffPages         = (UINTN) EFI_SIZE_TO_PAGES (MemoryAttribte->PhysicalStart - MemoryMapEntry->PhysicalStart);
     CopyMem (
       NewMemoryMapEntry,
       MemoryMapEntry,
@@ -673,7 +673,7 @@ OcSplitMemoryEntryByAttribute (
   }
 
   NewMemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
-  DiffPages         = MemoryMapEntry->NumberOfPages - MemoryAttribte->NumberOfPages;
+  DiffPages         = (UINTN) (MemoryMapEntry->NumberOfPages - MemoryAttribte->NumberOfPages);
   CopyMem (
     NewMemoryMapEntry,
     MemoryMapEntry,
