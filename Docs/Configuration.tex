@@ -1294,7 +1294,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   protocol implemented in \texttt{OpenRuntime.efi}.
 
   \emph{Note}: This quirk may potentially weaken firmware security, please use
-  \texttt{RebuildAppleMemoryMap} instead unless it fails for you.
+  \texttt{RebuildAppleMemoryMap} if your firmware supports memory attributes table (MAT).
 
 \item
   \texttt{ForceExitBootServices}\\
@@ -1393,7 +1393,8 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   4 KB.
 
   \emph{Note}: The necessity of this quirk is determined by early boot failures.
-  This quirk replaces \texttt{EnableWriteUnprotector} on most platforms.
+  This quirk replaces \texttt{EnableWriteUnprotector} on firmwares supporting
+  memory attributes table (MAT).
 
 \item
   \texttt{SetupVirtualMap}\\

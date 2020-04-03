@@ -89,6 +89,9 @@ UefiMain (
     Status = OcSplitMemoryMapByAttributes (OriginalSize, &MemoryMapSize, MemoryMap, DescriptorSize);
     if (!EFI_ERROR (Status)) {
       OcPrintMemoryMap (MemoryMapSize, MemoryMap, DescriptorSize);
+      DEBUG ((DEBUG_INFO, "MMDD: Dumping shrinked memory map\n"));
+      OcShrinkMemoryMap (&MemoryMapSize, MemoryMap, DescriptorSize);
+      OcPrintMemoryMap (MemoryMapSize, MemoryMap, DescriptorSize);
     } else {
       DEBUG ((DEBUG_INFO, "MMDD: Cannot patch memory map - %r\n", Status));
     }

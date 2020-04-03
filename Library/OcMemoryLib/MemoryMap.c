@@ -268,7 +268,8 @@ OcShrinkMemoryMap (
   UINT64                  Bytes;
   EFI_MEMORY_DESCRIPTOR   *PrevDesc;
   EFI_MEMORY_DESCRIPTOR   *Desc;
-  BOOLEAN                 CanBeJoined;
+  BOOLEAN                 CanBeJoinedFree;
+  BOOLEAN                 CanBeJoinedRt;
   BOOLEAN                 HasEntriesToRemove;
 
   PrevDesc           = MemoryMap;
@@ -279,30 +280,45 @@ OcShrinkMemoryMap (
 
   while (SizeFromDescToEnd > 0) {
     Bytes = EFI_PAGES_TO_SIZE (PrevDesc->NumberOfPages);
-    CanBeJoined = FALSE;
+    CanBeJoinedFree = FALSE;
+    CanBeJoinedRt   = FALSE;
     if (Desc->Attribute == PrevDesc->Attribute
       && PrevDesc->PhysicalStart + Bytes == Desc->PhysicalStart) {
       //
       // It *should* be safe to join this with conventional memory, because the firmware should not use
       // GetMemoryMap for allocation, and for the kernel it does not matter, since it joins them.
       //
-      CanBeJoined = (Desc->Type == EfiBootServicesCode ||
-        Desc->Type == EfiBootServicesData ||
-        Desc->Type == EfiConventionalMemory ||
-        Desc->Type == EfiLoaderCode ||
-        Desc->Type == EfiLoaderData) && (
-        PrevDesc->Type == EfiBootServicesCode ||
-        PrevDesc->Type == EfiBootServicesData ||
-        PrevDesc->Type == EfiConventionalMemory ||
-        PrevDesc->Type == EfiLoaderCode ||
-        PrevDesc->Type == EfiLoaderData);
+      CanBeJoinedFree = (
+          Desc->Type == EfiBootServicesCode
+          || Desc->Type == EfiBootServicesData
+          || Desc->Type == EfiConventionalMemory
+          || Desc->Type == EfiLoaderCode
+          || Desc->Type == EfiLoaderData
+        ) && (
+          PrevDesc->Type == EfiBootServicesCode
+          || PrevDesc->Type == EfiBootServicesData
+          || PrevDesc->Type == EfiConventionalMemory
+          || PrevDesc->Type == EfiLoaderCode
+          || PrevDesc->Type == EfiLoaderData
+        );
+
+      CanBeJoinedRt = (
+          Desc->Type == EfiRuntimeServicesCode
+          && PrevDesc->Type == EfiRuntimeServicesCode
+        ) || (
+          Desc->Type == EfiRuntimeServicesData
+          && PrevDesc->Type == EfiRuntimeServicesData
+        );
     }
 
-    if (CanBeJoined) {
+    if (CanBeJoinedFree) {
       //
       // Two entries are the same/similar - join them
       //
       PrevDesc->Type           = EfiConventionalMemory;
+      PrevDesc->NumberOfPages += Desc->NumberOfPages;
+      HasEntriesToRemove       = TRUE;
+    } else if (CanBeJoinedRt) {
       PrevDesc->NumberOfPages += Desc->NumberOfPages;
       HasEntriesToRemove       = TRUE;
     } else {

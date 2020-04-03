@@ -23,7 +23,7 @@ OpenCore Changelog
 - Introduced `SyncRuntimePermissions` to fix Linux booting on CFL+
 - Introduced `RebuildAppleMemoryMap` to fix macOS booting on Dell 5490
 - Removed `ShrinkMemoryMap` in favour of more advanced `RebuildAppleMemoryMap`
-- Marked `EnableWriteUnprotector` as deprecated on new systems (SKL+)
+- Marked `EnableWriteUnprotector` as deprecated on modern systems
 
 #### v0.5.6
 - Various improvements to builtin text renderer

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Mar  6 09:43:05 2020
-%DIF ADD ../Configuration.tex        Fri Apr  3 14:10:56 2020
+%DIF ADD ../Configuration.tex        Fri Apr  3 22:24:21 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1360,7 +1360,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   \emph{Note}: \DIFdelbegin \DIFdel{The necessity of this quirk is determined by early boot crashes
   of the firmware }\DIFdelend \DIFaddbegin \DIFadd{This quirk may potentially weaken firmware security, please use
-  }\texttt{\DIFadd{RebuildAppleMemoryMap}} \DIFadd{instead unless it fails for you}\DIFaddend .
+  }\texttt{\DIFadd{RebuildAppleMemoryMap}} \DIFadd{if your firmware supports memory attributes table (MAT)}\DIFaddend .
 
 \item
   \texttt{ForceExitBootServices}\\
@@ -1465,7 +1465,8 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 }
 
   \emph{\DIFadd{Note}}\DIFadd{: The necessity of this quirk is determined by early boot failures.
-  This quirk replaces }\texttt{\DIFadd{EnableWriteUnprotector}} \DIFadd{on most platforms.
+  This quirk replaces }\texttt{\DIFadd{EnableWriteUnprotector}} \DIFadd{on firmwares supporting
+  memory attributes table (MAT).
 }
 
 \item
