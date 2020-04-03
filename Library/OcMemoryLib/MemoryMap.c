@@ -513,7 +513,7 @@ OcPrintMemoryDescritptor (
   if (Desc->Type < ARRAY_SIZE (mEfiMemoryTypeDesc)) {
     Type = mEfiMemoryTypeDesc[Desc->Type];
   } else {
-    Type = "Invalid";
+    Type = "Invalid  ";
   }
 
   SizeValue = EFI_PAGES_TO_SIZE (Desc->NumberOfPages);
@@ -527,7 +527,7 @@ OcPrintMemoryDescritptor (
 
   DEBUG ((
     DEBUG_INFO,
-    "%a [%a|%a|%a|%a|%a|%a|%a|%a|%a|%a|%a|%a|%a|%a] 0x%016LX-0x%016LX -> 0x%016X (%Lu %a)\n",
+    "OCMM: %a [%a|%a|%a|%a|%a|%a|%a|%a|%a|%a|%a|%a|%a|%a] 0x%016LX-0x%016LX -> 0x%016X (%Lu %a)\n",
     Type,
     (Desc->Attribute & EFI_MEMORY_RUNTIME)        != 0 ? "RUN" : "   ",
     (Desc->Attribute & EFI_MEMORY_CPU_CRYPTO)     != 0 ? "CRY" : "   ",
@@ -535,9 +535,9 @@ OcPrintMemoryDescritptor (
     (Desc->Attribute & EFI_MEMORY_RO)             != 0 ? "RO"  : "  ",
     (Desc->Attribute & EFI_MEMORY_MORE_RELIABLE)  != 0 ? "MR"  : "  ",
     (Desc->Attribute & EFI_MEMORY_NV)             != 0 ? "NV"  : "  ",
-    (Desc->Attribute & EFI_MEMORY_RP)             != 0 ? "RP"  : "  ",
     (Desc->Attribute & EFI_MEMORY_XP)             != 0 ? "XP"  : "  ",
-    (Desc->Attribute & EFI_MEMORY_RO)             != 0 ? "RO"  : "  ",
+    (Desc->Attribute & EFI_MEMORY_RP)             != 0 ? "RP"  : "  ",
+    (Desc->Attribute & EFI_MEMORY_WP)             != 0 ? "WP"  : "  ",
     (Desc->Attribute & EFI_MEMORY_UCE)            != 0 ? "UCE" : "   ",
     (Desc->Attribute & EFI_MEMORY_WB)             != 0 ? "WB"  : "  ",
     (Desc->Attribute & EFI_MEMORY_WT)             != 0 ? "WT"  : "  ",
@@ -557,14 +557,32 @@ OcPrintMemoryAttributesTable (
   )
 {
   UINTN                             Index;
+  UINTN                             RealSize;
   CONST EFI_MEMORY_ATTRIBUTES_TABLE *MemoryAttributesTable;
   EFI_MEMORY_DESCRIPTOR             *MemoryAttributesEntry;
 
-  MemoryAttributesTable = OcGetMemoryAttributes (&MemoryAttributesEntry);
+  MemoryAttributesTable = OcGetMemoryAttributes (NULL);
   if (MemoryAttributesTable == NULL) {
     DEBUG ((DEBUG_INFO, "OCMM: MemoryAttributesTable is not present!\n"));
     return;
   }
+
+  //
+  // Printing may reallocate, so we create a copy of the memory attributes.
+  //
+  STATIC UINT8 mMemoryAttributesTable[EFI_PAGE_SIZE*2];
+  RealSize = (UINTN) (sizeof (EFI_MEMORY_ATTRIBUTES_TABLE)
+    + MemoryAttributesTable->NumberOfEntries * MemoryAttributesTable->DescriptorSize);
+
+  if (RealSize > sizeof(mMemoryAttributesTable)) {
+    DEBUG ((DEBUG_INFO, "OCMM: MemoryAttributesTable has too large size %u!\n", (UINT32) RealSize));
+    return;
+  }
+
+  CopyMem (mMemoryAttributesTable, MemoryAttributesTable, RealSize);
+
+  MemoryAttributesTable = (EFI_MEMORY_ATTRIBUTES_TABLE *) mMemoryAttributesTable;
+  MemoryAttributesEntry = (EFI_MEMORY_DESCRIPTOR *) (MemoryAttributesTable + 1);
 
   DEBUG ((DEBUG_INFO, "OCMM: MemoryAttributesTable:\n"));
   DEBUG ((DEBUG_INFO, "OCMM:   Version              - 0x%08x\n", MemoryAttributesTable->Version));
@@ -735,7 +753,7 @@ OcRealMemoryType (
   //
   // Use code for write-protected areas.
   //
-  if ((MemoryAttribte->Attribute & EFI_MEMORY_WP) != 0) {
+  if ((MemoryAttribte->Attribute & EFI_MEMORY_RO) != 0) {
     return EfiRuntimeServicesCode;
   }
 
@@ -836,16 +854,15 @@ OcSplitMemoryEntryByAttribute (
   }
 
   NewMemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
-  DiffPages         = (UINTN) (MemoryMapEntry->NumberOfPages - MemoryAttribute->NumberOfPages);
   CopyMem (
     NewMemoryMapEntry,
     MemoryMapEntry,
     DescriptorSize * (*CurrentEntryCount - *CurrentEntryIndex)
     );
   MemoryMapEntry->Type              = OcRealMemoryType (MemoryAttribute);
-  MemoryMapEntry->NumberOfPages     = DiffPages;
-  NewMemoryMapEntry->PhysicalStart += EFI_PAGES_TO_SIZE (DiffPages);
-  NewMemoryMapEntry->NumberOfPages -= DiffPages;
+  MemoryMapEntry->NumberOfPages     = MemoryAttribute->NumberOfPages;
+  NewMemoryMapEntry->PhysicalStart += EFI_PAGES_TO_SIZE (MemoryAttribute->NumberOfPages);
+  NewMemoryMapEntry->NumberOfPages -= MemoryAttribute->NumberOfPages;
 
   //
   // Current processed entry is now the one we need to process.
@@ -897,7 +914,8 @@ OcSplitMemoryMapByAttributes (
   //
   // We assume that the memory map and attribute table are sorted.
   //
-  for (Index = 0; Index < CurrentEntryCount; ++Index) {
+  Index = 0;
+  while (Index < CurrentEntryCount) {
     //
     // Split entry by as many attributes as possible.
     //
@@ -969,6 +987,7 @@ OcSplitMemoryMapByAttributes (
           *MemoryMapSize = CurrentEntryCount * DescriptorSize;
           return Status;
         }
+        continue;
       } else {
         //
         // Did not find a suitable attribute or processed all the attributes.
@@ -981,6 +1000,7 @@ OcSplitMemoryMapByAttributes (
       MemoryMapEntry,
       DescriptorSize
       );
+    ++Index;
   }
 
   *MemoryMapSize = CurrentEntryCount * DescriptorSize;

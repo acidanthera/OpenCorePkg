@@ -35,6 +35,7 @@
   MmapDump.c
 
 [Packages]
+  EfiPkg/EfiPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   OpenCorePkg/OpenCorePkg.dec
@@ -46,6 +47,7 @@
 [LibraryClasses]
   OcConsoleControlEntryModeGenericLib
   OcMemoryLib
+  OcMiscLib
   UefiApplicationEntryPoint
   UefiLib
   PcdLib

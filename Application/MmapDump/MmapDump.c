@@ -16,6 +16,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiLib.h>
 #include <Library/DebugLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/OcMemoryLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -69,8 +70,6 @@ UefiMain (
     "MMDD: Note, that DEBUG version of the tool prints more\n"
     ));
 
-  OcPrintMemoryAttributesTable ();
-
   MemoryMap = OcGetCurrentMemoryMap (
     &MemoryMapSize,
     &DescriptorSize,
@@ -81,6 +80,7 @@ UefiMain (
     );
 
   if (MemoryMap != NULL) {
+    OcPrintMemoryAttributesTable ();
     OcSortMemoryMap (MemoryMapSize, MemoryMap, DescriptorSize);
     DEBUG ((DEBUG_INFO, "MMDD: Dumping the original memory map\n"));
     OcPrintMemoryMap (MemoryMapSize, MemoryMap, DescriptorSize);
@@ -92,6 +92,7 @@ UefiMain (
     } else {
       DEBUG ((DEBUG_INFO, "MMDD: Cannot patch memory map - %r\n", Status));
     }
+    FreePool (MemoryMap);
   } else {
     DEBUG ((DEBUG_INFO, "MMDD: Unable to obtain memory map\n"));
   }
