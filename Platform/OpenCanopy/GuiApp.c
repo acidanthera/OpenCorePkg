@@ -48,10 +48,9 @@ InternalContextDestruct (
   InternalSafeFreePool (Context->EntrySelector.BaseImage.Buffer);
   InternalSafeFreePool (Context->EntrySelector.HoldImage.Buffer);
   InternalSafeFreePool (Context->EntryIconInternal.Buffer);
-  InternalSafeFreePool (Context->EntryIconInternal.Buffer);
-  InternalSafeFreePool (Context->EntryIconExternal.Buffer);
   InternalSafeFreePool (Context->EntryIconExternal.Buffer);
   InternalSafeFreePool (Context->FontContext.FontImage.Buffer);
+  // TODO: free all labels and icons
 }
 
 STATIC

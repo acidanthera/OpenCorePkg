@@ -570,10 +570,6 @@ struct OC_PICKER_CONTEXT_ {
   //
   UINT32                     AllCustomEntryCount;
   //
-  // Storage
-  //
-  OC_STORAGE_CONTEXT         *Storage;
-  //
   // Custom picker entries.  Absolute entries come first.
   //
   OC_PICKER_ENTRY            CustomEntries[];

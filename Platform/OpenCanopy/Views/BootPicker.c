@@ -823,11 +823,12 @@ BootPickerEntriesAdd (
     return EFI_NOT_FOUND;
   }
 
-  /*if (EFI_SUCCESS == OcGetBootEntryLabelImage(Context, AppleBootPolicy, Entry, 1, &IconFileData, &IconFileSize) &&
+  if (EFI_SUCCESS == OcGetBootEntryLabelImage(Context, AppleBootPolicy, Entry, 1, &IconFileData, &IconFileSize) &&
       EFI_SUCCESS == DecodeAppleDiskLabelImage(&VolumeEntry->Label, IconFileData, IconFileSize)) {
-  } else*/ if (TRUE) {
+  } else if (TRUE) {
     switch (Entry->Type) {
       case OC_BOOT_UNKNOWN:
+      case OC_BOOT_EXTERNAL_OS:
         Status = CopyLabel(&VolumeEntry->Label, &GuiContext->EntryLabelEFIBoot);
         break;
 
@@ -840,7 +841,6 @@ BootPickerEntriesAdd (
         break;
 
       case OC_BOOT_EXTERNAL_TOOL:
-      case OC_BOOT_EXTERNAL_OS:
         Status = CopyLabel(&VolumeEntry->Label, &GuiContext->EntryLabelTool);
         break;
 
@@ -863,7 +863,7 @@ BootPickerEntriesAdd (
 
   VolumeEntry->Context = Entry;
 
-  if (Entry->Type == OC_BOOT_EXTERNAL_TOOL || Entry->Type == OC_BOOT_EXTERNAL_OS || Entry->Type == OC_BOOT_SYSTEM) {
+  if (Entry->Type == OC_BOOT_EXTERNAL_TOOL || Entry->Type == OC_BOOT_SYSTEM) {
     VolumeEntry->EntryIcon = &GuiContext->EntryIconTool;
   } else if (EFI_SUCCESS == OcGetBootEntryIcon(AppleBootPolicy, Entry, &IconFileData, &IconFileSize) &&
              (EntryIcon = (GUI_IMAGE *) AllocatePool(sizeof(GUI_IMAGE))) &&

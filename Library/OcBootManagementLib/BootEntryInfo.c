@@ -83,20 +83,21 @@ InternalGetAppleDiskLabelImage (
   DiskLabelPath     = AllocatePool (DiskLabelPathSize);
 
   if (DiskLabelPath == NULL) {
-    return EFI_INVALID_PARAMETER;
+    return EFI_OUT_OF_RESOURCES;
   }
 
   UnicodeSPrint (DiskLabelPath, DiskLabelPathSize, L"%s%s", BootDirectoryName, LabelFilename);
   DEBUG ((DEBUG_WARN, "Trying to get image from %s\n", DiskLabelPath));
 
   *ImageData = ReadFile (FileSystem, DiskLabelPath, DataSize, 10485760);
-  FreePool (DiskLabelPath);
 
   if (*ImageData != NULL && *DataSize > 5) {
+    FreePool (DiskLabelPath);
     return EFI_SUCCESS;
   }
 
   DEBUG((DEBUG_WARN, "File %s not found\n", DiskLabelPath));
+  FreePool (DiskLabelPath);
   return EFI_NOT_FOUND;
 }
 
