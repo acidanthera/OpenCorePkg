@@ -631,6 +631,40 @@ OcCountSplitDescritptors (
 }
 
 /**
+  Determine actual memory type from the attribute.
+
+  @param[in]  MemoryAttribute  Attribute to inspect.
+**/
+STATIC
+UINT32
+OcRealMemoryType (
+  IN EFI_MEMORY_DESCRIPTOR  *MemoryAttribte
+  )
+{
+  ASSERT (MemoryAttribte->Type == EfiRuntimeServicesCode
+    || MemoryAttribte->Type == EfiRuntimeServicesData);
+
+  //
+  // Use code for write-protected areas.
+  //
+  if ((MemoryAttribte->Attribute & EFI_MEMORY_WP) != 0) {
+    return EfiRuntimeServicesCode;
+  }
+
+  //
+  // Use data for executable-protected areas.
+  //
+  if ((MemoryAttribte->Attribute & EFI_MEMORY_XP) != 0) {
+    return EfiRuntimeServicesData;
+  }
+
+  //
+  // Use whatever is set.
+  //
+  return MemoryAttribte->Type;
+}
+
+/**
   Split memory map descriptor by attribute.
 
   @param[in,out] RetMemoryMapEntry    Pointer to descriptor in the memory map, updated to next proccessed.
@@ -650,7 +684,7 @@ OcSplitMemoryEntryByAttribute (
   IN OUT UINTN                  *CurrentEntryIndex,
   IN OUT UINTN                  *CurrentEntryCount,
   IN     UINTN                  TotalEntryCount,
-  IN     EFI_MEMORY_DESCRIPTOR  *MemoryAttribte,
+  IN     EFI_MEMORY_DESCRIPTOR  *MemoryAttribute,
   IN     UINTN                  DescriptorSize
 
   )
@@ -666,20 +700,20 @@ OcSplitMemoryEntryByAttribute (
   // Shorten the existing descriptor and insert the new one after it.
   // [DESC1] -> [DESC1][DESC2]
   //
-  if (MemoryAttribte->PhysicalStart > MemoryMapEntry->PhysicalStart) {
+  if (MemoryAttribute->PhysicalStart > MemoryMapEntry->PhysicalStart) {
     if (*CurrentEntryCount == TotalEntryCount) {
       return EFI_OUT_OF_RESOURCES;
     }
 
     NewMemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
-    DiffPages         = (UINTN) EFI_SIZE_TO_PAGES (MemoryAttribte->PhysicalStart - MemoryMapEntry->PhysicalStart);
+    DiffPages         = (UINTN) EFI_SIZE_TO_PAGES (MemoryAttribute->PhysicalStart - MemoryMapEntry->PhysicalStart);
     CopyMem (
       NewMemoryMapEntry,
       MemoryMapEntry,
       DescriptorSize * (*CurrentEntryCount - *CurrentEntryIndex)
       );
     MemoryMapEntry->NumberOfPages     = DiffPages;
-    NewMemoryMapEntry->PhysicalStart  = MemoryAttribte->PhysicalStart;
+    NewMemoryMapEntry->PhysicalStart  = MemoryAttribute->PhysicalStart;
     NewMemoryMapEntry->NumberOfPages -= DiffPages;
 
     MemoryMapEntry = NewMemoryMapEntry;
@@ -691,15 +725,15 @@ OcSplitMemoryEntryByAttribute (
     ++(*CurrentEntryCount);
   }
 
-  ASSERT (MemoryAttribte->PhysicalStart == MemoryMapEntry->PhysicalStart);
+  ASSERT (MemoryAttribute->PhysicalStart == MemoryMapEntry->PhysicalStart);
 
   //
   // Memory attribute matches our descriptor.
   // Simply update its protection.
   // [DESC1] -> [DESC1*]
   //
-  if (MemoryMapEntry->NumberOfPages == MemoryAttribte->NumberOfPages) {
-    MemoryMapEntry->Type = MemoryAttribte->Type;
+  if (MemoryMapEntry->NumberOfPages == MemoryAttribute->NumberOfPages) {
+    MemoryMapEntry->Type = OcRealMemoryType (MemoryAttribute);
     *RetMemoryMapEntry = MemoryMapEntry;
     return EFI_SUCCESS;
   }
@@ -714,13 +748,13 @@ OcSplitMemoryEntryByAttribute (
   }
 
   NewMemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
-  DiffPages         = (UINTN) (MemoryMapEntry->NumberOfPages - MemoryAttribte->NumberOfPages);
+  DiffPages         = (UINTN) (MemoryMapEntry->NumberOfPages - MemoryAttribute->NumberOfPages);
   CopyMem (
     NewMemoryMapEntry,
     MemoryMapEntry,
     DescriptorSize * (*CurrentEntryCount - *CurrentEntryIndex)
     );
-  MemoryMapEntry->Type              = MemoryAttribte->Type;
+  MemoryMapEntry->Type              = OcRealMemoryType (MemoryAttribute);
   MemoryMapEntry->NumberOfPages     = DiffPages;
   NewMemoryMapEntry->PhysicalStart += EFI_PAGES_TO_SIZE (DiffPages);
   NewMemoryMapEntry->NumberOfPages -= DiffPages;
@@ -805,9 +839,8 @@ OcSplitMemoryMapByAttributes (
             InDescAttrs = TRUE;
             //
             // No need to process the attribute of the same type.
-            // FIXME: Do we need this to inspect attributes?
             //
-            if (MemoryAttributesEntry->Type != MemoryMapEntry->Type) {
+            if (OcRealMemoryType (MemoryAttributesEntry) != MemoryMapEntry->Type) {
               //
               // Start with the next attribute on the second iteration.
               //
