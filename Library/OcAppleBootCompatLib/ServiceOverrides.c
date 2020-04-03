@@ -35,6 +35,30 @@
 #include <Protocol/OcFirmwareRuntime.h>
 
 /**
+  Helper function to mark OpenRuntime as executable with proper permissions.
+
+  @param[in]  BootCompat  Boot compatibility context.
+**/
+STATIC
+VOID
+FixRuntimeAttributes (
+  IN BOOT_COMPAT_CONTEXT     *BootCompat
+  )
+{
+  EFI_STATUS              Status;
+  EFI_PHYSICAL_ADDRESS    Address;
+  UINTN                   Pages;
+
+  if (BootCompat->Settings.SyncRuntimePermissions && BootCompat->ServiceState.FwRuntime != NULL) {
+    Status = BootCompat->ServiceState.FwRuntime->GetExecArea (&Address, &Pages);
+
+    if (!EFI_ERROR (Status)) {
+      OcUpdateAttributes (Address, EfiRuntimeServicesCode, EFI_MEMORY_RO, EFI_MEMORY_XP);
+    }
+  }
+}
+
+/**
   Helper function to call ExitBootServices that can handle outdated MapKey issues.
 
   @param[in]  ExitBootServices  ExitBootServices function pointer, optional.
@@ -275,8 +299,6 @@ OcAllocatePages (
 {
   EFI_STATUS              Status;
   BOOT_COMPAT_CONTEXT     *BootCompat;
-  EFI_PHYSICAL_ADDRESS    Address;
-  UINTN                   Pages;
   BOOLEAN                 IsPerfAlloc;
 
   BootCompat  = GetBootCompatContext ();
@@ -302,13 +324,7 @@ OcAllocatePages (
     );
 
   if (!EFI_ERROR (Status)) {
-    if (BootCompat->Settings.SyncRuntimePermissions && BootCompat->ServiceState.FwRuntime != NULL) {
-      Status = BootCompat->ServiceState.FwRuntime->GetExecArea (&Address, &Pages);
-
-      if (!EFI_ERROR (Status)) {
-        OcUpdateAttributes (Address, EfiRuntimeServicesCode, EFI_MEMORY_RO, EFI_MEMORY_XP);
-      }
-    }
+    FixRuntimeAttributes (BootCompat);
 
     if (BootCompat->ServiceState.AppleBootNestedCount > 0) {
       if (IsPerfAlloc) {
@@ -336,6 +352,33 @@ OcAllocatePages (
         BootCompat->ServiceState.HibernateImageAddress = *Memory;
       }
     }
+  }
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
+EFIAPI
+OcAllocatePool (
+  IN  EFI_MEMORY_TYPE              PoolType,
+  IN  UINTN                        Size,
+  OUT VOID                         **Buffer
+  )
+{
+  EFI_STATUS              Status;
+  BOOT_COMPAT_CONTEXT     *BootCompat;
+
+  BootCompat  = GetBootCompatContext ();
+
+  Status = BootCompat->ServicePtrs.AllocatePool (
+    PoolType,
+    Size,
+    Buffer
+    );
+
+  if (!EFI_ERROR (Status)) {
+    FixRuntimeAttributes (BootCompat);
   }
 
   return Status;
@@ -472,8 +515,6 @@ OcStartImage (
   BOOT_COMPAT_CONTEXT         *BootCompat;
   OC_FWRT_CONFIG              Config;
   UINTN                       DataSize;
-  EFI_PHYSICAL_ADDRESS        Address;
-  UINTN                       Pages;
 
   BootCompat        = GetBootCompatContext ();
   AppleLoadedImage  = OcGetAppleBootLoadedImage (ImageHandle);
@@ -489,13 +530,7 @@ OcStartImage (
     gBS->CalculateCrc32 (gBS, gBS->Hdr.HeaderSize, &gBS->Hdr.CRC32);
   }
 
-  if (BootCompat->Settings.SyncRuntimePermissions && BootCompat->ServiceState.FwRuntime != NULL) {
-    Status = BootCompat->ServiceState.FwRuntime->GetExecArea (&Address, &Pages);
-
-    if (!EFI_ERROR (Status)) {
-      OcUpdateAttributes (Address, EfiRuntimeServicesCode, EFI_MEMORY_RO, EFI_MEMORY_XP);
-    }
-  }
+  FixRuntimeAttributes (BootCompat);
 
   //
   // Clear monitoring vars
@@ -627,8 +662,6 @@ OcExitBootServices (
 {
   EFI_STATUS               Status;
   BOOT_COMPAT_CONTEXT      *BootCompat;
-  EFI_PHYSICAL_ADDRESS     Address;
-  UINTN                    Pages;
   UINTN                    Index;
 
   BootCompat = GetBootCompatContext ();
@@ -649,13 +682,7 @@ OcExitBootServices (
     }
   }
 
-  if (BootCompat->Settings.SyncRuntimePermissions && BootCompat->ServiceState.FwRuntime != NULL) {
-    Status = BootCompat->ServiceState.FwRuntime->GetExecArea (&Address, &Pages);
-
-    if (!EFI_ERROR (Status)) {
-      OcUpdateAttributes (Address, EfiRuntimeServicesCode, EFI_MEMORY_RO, EFI_MEMORY_XP);
-    }
-  }
+  FixRuntimeAttributes (BootCompat);
 
   //
   // For non-macOS operating systems return directly.
@@ -882,12 +909,14 @@ InstallServiceOverrides (
   OriginalTpl = gBS->RaiseTPL (TPL_HIGH_LEVEL);
 
   ServicePtrs->AllocatePages        = gBS->AllocatePages;
+  ServicePtrs->AllocatePool         = gBS->AllocatePool;
   ServicePtrs->GetMemoryMap         = gBS->GetMemoryMap;
   ServicePtrs->ExitBootServices     = gBS->ExitBootServices;
   ServicePtrs->StartImage           = gBS->StartImage;
   ServicePtrs->SetVirtualAddressMap = gRT->SetVirtualAddressMap;
 
   gBS->AllocatePages        = OcAllocatePages;
+  gBS->AllocatePool         = OcAllocatePool;
   gBS->GetMemoryMap         = OcGetMemoryMap;
   gBS->ExitBootServices     = OcExitBootServices;
   gBS->StartImage           = OcStartImage;
