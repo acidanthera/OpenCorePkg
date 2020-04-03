@@ -447,6 +447,8 @@ OcStartImage (
   BOOT_COMPAT_CONTEXT         *BootCompat;
   OC_FWRT_CONFIG              Config;
   UINTN                       DataSize;
+  EFI_PHYSICAL_ADDRESS        Address;
+  UINTN                       Pages;
 
   BootCompat        = GetBootCompatContext ();
   AppleLoadedImage  = OcGetAppleBootLoadedImage (ImageHandle);
@@ -460,6 +462,14 @@ OcStartImage (
     gBS->GetMemoryMap = OcGetMemoryMap;
     gBS->Hdr.CRC32    = 0;
     gBS->CalculateCrc32 (gBS, gBS->Hdr.HeaderSize, &gBS->Hdr.CRC32);
+  }
+
+  if (BootCompat->Settings.SyncRuntimePermissions && BootCompat->ServiceState.FwRuntime != NULL) {
+    Status = BootCompat->ServiceState.FwRuntime->GetExecArea (&Address, &Pages);
+
+    if (!EFI_ERROR (Status)) {
+      OcUpdateAttributes (Address, EfiRuntimeServicesCode, EFI_MEMORY_RO, EFI_MEMORY_XP);
+    }
   }
 
   //
