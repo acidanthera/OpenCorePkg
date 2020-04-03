@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Mar  6 09:43:05 2020
-%DIF ADD ../Configuration.tex        Thu Apr  2 21:22:46 2020
+%DIF ADD ../Configuration.tex        Fri Apr  3 14:10:56 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1358,8 +1358,9 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   register during their execution. This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME}
   protocol implemented in \texttt{\DIFdelbegin \DIFdel{FwRuntimeServices}\DIFdelend \DIFaddbegin \DIFadd{OpenRuntime}\DIFaddend .efi}.
 
-  \emph{Note}: The necessity of this quirk is determined by early boot crashes
-  of the firmware.
+  \emph{Note}: \DIFdelbegin \DIFdel{The necessity of this quirk is determined by early boot crashes
+  of the firmware }\DIFdelend \DIFaddbegin \DIFadd{This quirk may potentially weaken firmware security, please use
+  }\texttt{\DIFadd{RebuildAppleMemoryMap}} \DIFadd{instead unless it fails for you}\DIFaddend .
 
 \item
   \texttt{ForceExitBootServices}\\
@@ -1435,7 +1436,40 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   this option is to be enabled.
 
 \item
-  \texttt{SetupVirtualMap}\\
+  \DIFaddbegin \texttt{\DIFadd{RebuildAppleMemoryMap}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Generate Memory Map compatible with macOS.
+}
+
+  \DIFadd{Apple kernel has several limitations in parsing UEFI memory map:
+}
+
+  \begin{itemize}
+  \tightlist
+  \item \DIFadd{Memory map size must not exceed 4096 bytes as Apple kernel maps
+    it as a single 4K page. Since some firmwares have very large memory maps
+    (approximately over 100 entries) Apple kernel will crash at boot.
+  }\item \DIFadd{Memory attributes table is ignored. }\texttt{\DIFadd{EfiRuntimeServicesCode}}
+    \DIFadd{memory statically gets }\texttt{\DIFadd{RX}} \DIFadd{permissions, and all other memory types
+    get }\texttt{\DIFadd{RW}} \DIFadd{permissions. Since some firmware drivers may write to global
+    variables at runtime, Apple kernel will crash at calling UEFI runtime services,
+    unless driver }\texttt{\DIFadd{.data}} \DIFadd{section has }\texttt{\DIFadd{EfiRuntimeServicesData}}
+    \DIFadd{type.
+  }\end{itemize}
+
+  \DIFadd{To workaround these limitations this quirk applies memory attributes table
+  permissions to memory map passed to Apple kernel and optionally attempts
+  to unify contiguous slots of similar types if the resulting memory map exceeds
+  4 KB.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: The necessity of this quirk is determined by early boot failures.
+  This quirk replaces }\texttt{\DIFadd{EnableWriteUnprotector}} \DIFadd{on most platforms.
+}
+
+\item
+  \DIFaddend \texttt{SetupVirtualMap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Setup virtual memory at \texttt{SetVirtualAddresses}.
@@ -1450,22 +1484,39 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \href{https://github.com/acidanthera/bugtracker/issues/719}{acidanthera/bugtracker\#719}.
 
 \item
-  \texttt{ShrinkMemoryMap}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Attempt to join similar memory map entries.
+  \DIFdelbegin \texttt{\DIFdel{ShrinkMemoryMap}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Attempt to join similar memory map entries.
+}%DIFDELCMD < 
 
-  Select firmwares have very large memory maps, which do not fit \DIFdelbegin \DIFdel{Apple kernel, permitting up to }\texttt{\DIFdel{64}} %DIFAUXCMD
-\DIFdel{slots for runtime memory}\DIFdelend \DIFaddbegin \DIFadd{into a single 4 KB
-  page, which is a requirement for Apple kernel}\DIFaddend . This quirk attempts to unify
+%DIFDELCMD <   %%%
+\DIFdel{Select firmwares have very large memory maps, which do not fit Apple kernel,
+  permitting up to }\texttt{\DIFdel{64}} %DIFAUXCMD
+\DIFdel{slots for runtime memory. This quirk attempts to unify
   contiguous slots of similar types to prevent boot failures.
+}%DIFDELCMD < 
 
-  \emph{Note}: The necessity of this quirk is determined by early boot failures.
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: The necessity of this quirk is determined by early boot failures.
   It is rare to need this quirk on Haswell or newer. Do not use unless you fully
   understand the consequences.
+}%DIFDELCMD < 
 
-\item
-  \texttt{SignalAppleOS}\\
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdelend \texttt{SignalAppleOS}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Report macOS being loaded through OS Info for any OS.
@@ -1474,7 +1525,22 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   For example, it is supposed to enable Intel GPU in Windows and Linux in some
   dual-GPU MacBook models.
 
-\end{enumerate}
+\DIFaddbegin \item
+  \texttt{\DIFadd{SyncRuntimePermissions}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Update memory permissions for }\texttt{\DIFadd{OpenRuntime}} \DIFadd{to function.
+}
+
+  \DIFadd{Some firmwares may incorrectly mark }\texttt{\DIFadd{OpenRuntime}} \DIFadd{as not executable, this quirks
+  updates memory map and memory attributes table to correct this.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: The necessity of this quirk is determined by early boot failures either in
+  macOS or in Linux/Windows. In general only firmwares released in 2018 or later are affected.
+}
+
+\DIFaddend \end{enumerate}
 
 \section{DeviceProperties}\label{devprops}
 

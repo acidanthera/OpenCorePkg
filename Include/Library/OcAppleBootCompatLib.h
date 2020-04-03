@@ -60,9 +60,11 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   BOOLEAN  ProtectCsmRegion;
   ///
-  /// Attempt to reduce memory map entries through grouping to fit into Apple kernel.
+  /// Rebuild memory map to be compatible with Apple kernel.
+  /// - Apply memory attributes and split RT entries into code and data.
+  /// - Reduce memory map entries through grouping to fit into 4KB.
   ///
-  BOOLEAN  ShrinkMemoryMap;
+  BOOLEAN  RebuildAppleMemoryMap;
   ///
   /// Ensure that ExitBootServices call succeeds even with outdated MemoryMap key.
   ///

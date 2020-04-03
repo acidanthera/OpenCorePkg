@@ -21,6 +21,9 @@ OpenCore Changelog
 - Fixed `PowerTimeoutKernelPanic` on 10.15.4
 - Fixed 4K section alignment in `OpenRuntime` to fix Linux booting on SKL
 - Introduced `SyncRuntimePermissions` to fix Linux booting on CFL+
+- Introduced `RebuildAppleMemoryMap` to fix macOS booting on Dell 5490
+- Removed `ShrinkMemoryMap` in favour of more advanced `RebuildAppleMemoryMap`
+- Marked `EnableWriteUnprotector` as deprecated on new systems (SKL+)
 
 #### v0.5.6
 - Various improvements to builtin text renderer

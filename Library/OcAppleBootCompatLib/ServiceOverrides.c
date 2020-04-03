@@ -362,9 +362,11 @@ OcGetMemoryMap (
   BOOT_COMPAT_CONTEXT   *BootCompat;
   EFI_PHYSICAL_ADDRESS  Address;
   UINTN                 Pages;
+  UINTN                 OriginalSize;
 
   BootCompat = GetBootCompatContext ();
 
+  OriginalSize = MemoryMapSize != 0 ? *MemoryMapSize : 0;
   Status = BootCompat->ServicePtrs.GetMemoryMap (
     MemoryMapSize,
     MemoryMap,
@@ -372,6 +374,14 @@ OcGetMemoryMap (
     DescriptorSize,
     DescriptorVersion
     );
+
+  //
+  // Reserve larger area for the memory map when we need to split it.
+  //
+  if (BootCompat->ServiceState.AppleBootNestedCount > 0 && Status == EFI_BUFFER_TOO_SMALL) {
+    *MemoryMapSize += OcCountSplitDescritptors () * *DescriptorSize;
+    return EFI_BUFFER_TOO_SMALL;
+  }
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -411,7 +421,17 @@ OcGetMemoryMap (
         );
     }
 
-    if (BootCompat->Settings.ShrinkMemoryMap) {
+    if (BootCompat->Settings.RebuildAppleMemoryMap) {
+      Status2 = OcSplitMemoryMapByAttributes (
+        OriginalSize,
+        MemoryMapSize,
+        MemoryMap,
+        *DescriptorSize
+        );
+      if (EFI_ERROR (Status2) && Status != EFI_UNSUPPORTED) {
+        DEBUG ((DEBUG_INFO, "OCABC: Cannot rebuild memory map - %r\n", Status));
+      }
+
       ShrinkMemoryMap (
         MemoryMapSize,
         MemoryMap,

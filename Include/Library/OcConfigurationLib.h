@@ -124,8 +124,8 @@
   _(BOOLEAN                     , ProtectSecureBoot         ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProtectUefiServices       ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProvideCustomSlide        ,     , FALSE  , ()) \
+  _(BOOLEAN                     , RebuildAppleMemoryMap     ,     , FALSE  , ()) \
   _(BOOLEAN                     , SetupVirtualMap           ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ShrinkMemoryMap           ,     , FALSE  , ()) \
   _(BOOLEAN                     , SignalAppleOS             ,     , FALSE  , ()) \
   _(BOOLEAN                     , SyncRuntimePermissions    ,     , FALSE  , ())
   OC_DECLARE (OC_BOOTER_QUIRKS)

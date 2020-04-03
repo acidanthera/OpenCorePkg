@@ -124,13 +124,13 @@ OcAbcInitialize (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCABC: FEXITBS %d PRCSM %d CSLIDE %d PRSRV %d VMAP %d SHRMAP %d APPLOS %d RTPERMS %d\n",
+    "OCABC: FEXITBS %d PRCSM %d CSLIDE %d PRSRV %d RBMAP %d VMAP %d APPLOS %d RTPERMS %d\n",
     Settings->ForceExitBootServices,
     Settings->ProtectCsmRegion,
     Settings->ProvideCustomSlide,
     Settings->ProtectUefiServices,
+    Settings->RebuildAppleMemoryMap,
     Settings->SetupVirtualMap,
-    Settings->ShrinkMemoryMap,
     Settings->SignalAppleOS,
     Settings->SyncRuntimePermissions
     ));

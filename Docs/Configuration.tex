@@ -1293,8 +1293,8 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   register during their execution. This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME}
   protocol implemented in \texttt{OpenRuntime.efi}.
 
-  \emph{Note}: The necessity of this quirk is determined by early boot crashes
-  of the firmware.
+  \emph{Note}: This quirk may potentially weaken firmware security, please use
+  \texttt{RebuildAppleMemoryMap} instead unless it fails for you.
 
 \item
   \texttt{ForceExitBootServices}\\
@@ -1367,6 +1367,35 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   this option is to be enabled.
 
 \item
+  \texttt{RebuildAppleMemoryMap}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Generate Memory Map compatible with macOS.
+
+  Apple kernel has several limitations in parsing UEFI memory map:
+
+  \begin{itemize}
+  \tightlist
+  \item Memory map size must not exceed 4096 bytes as Apple kernel maps
+    it as a single 4K page. Since some firmwares have very large memory maps
+    (approximately over 100 entries) Apple kernel will crash at boot.
+  \item Memory attributes table is ignored. \texttt{EfiRuntimeServicesCode}
+    memory statically gets \texttt{RX} permissions, and all other memory types
+    get \texttt{RW} permissions. Since some firmware drivers may write to global
+    variables at runtime, Apple kernel will crash at calling UEFI runtime services,
+    unless driver \texttt{.data} section has \texttt{EfiRuntimeServicesData}
+    type.
+  \end{itemize}
+
+  To workaround these limitations this quirk applies memory attributes table
+  permissions to memory map passed to Apple kernel and optionally attempts
+  to unify contiguous slots of similar types if the resulting memory map exceeds
+  4 KB.
+
+  \emph{Note}: The necessity of this quirk is determined by early boot failures.
+  This quirk replaces \texttt{EnableWriteUnprotector} on most platforms.
+
+\item
   \texttt{SetupVirtualMap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -1382,20 +1411,6 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \href{https://github.com/acidanthera/bugtracker/issues/719}{acidanthera/bugtracker\#719}.
 
 \item
-  \texttt{ShrinkMemoryMap}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Attempt to join similar memory map entries.
-
-  Select firmwares have very large memory maps, which do not fit into a single 4 KB
-  page, which is a requirement for Apple kernel. This quirk attempts to unify
-  contiguous slots of similar types to prevent boot failures.
-
-  \emph{Note}: The necessity of this quirk is determined by early boot failures.
-  It is rare to need this quirk on Haswell or newer. Do not use unless you fully
-  understand the consequences.
-
-\item
   \texttt{SignalAppleOS}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -1404,6 +1419,18 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   This quirk is useful on Mac firmwares, which behave differently in different OS.
   For example, it is supposed to enable Intel GPU in Windows and Linux in some
   dual-GPU MacBook models.
+
+\item
+  \texttt{SyncRuntimePermissions}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Update memory permissions for \texttt{OpenRuntime} to function.
+
+  Some firmwares may incorrectly mark \texttt{OpenRuntime} as not executable, this quirks
+  updates memory map and memory attributes table to correct this.
+
+  \emph{Note}: The necessity of this quirk is determined by early boot failures either in
+  macOS or in Linux/Windows. In general only firmwares released in 2018 or later are affected.
 
 \end{enumerate}
 

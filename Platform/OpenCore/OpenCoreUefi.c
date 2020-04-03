@@ -363,8 +363,8 @@ OcLoadBooterUefiSupport (
   AbcSettings.ProtectCsmRegion       = Config->Booter.Quirks.ProtectCsmRegion;
   AbcSettings.ProvideCustomSlide     = Config->Booter.Quirks.ProvideCustomSlide;
   AbcSettings.ProtectUefiServices    = Config->Booter.Quirks.ProtectUefiServices;
+  AbcSettings.RebuildAppleMemoryMap  = Config->Booter.Quirks.RebuildAppleMemoryMap;
   AbcSettings.SetupVirtualMap        = Config->Booter.Quirks.SetupVirtualMap;
-  AbcSettings.ShrinkMemoryMap        = Config->Booter.Quirks.ShrinkMemoryMap;
   AbcSettings.SignalAppleOS          = Config->Booter.Quirks.SignalAppleOS;
   AbcSettings.SyncRuntimePermissions = Config->Booter.Quirks.SyncRuntimePermissions;
 
