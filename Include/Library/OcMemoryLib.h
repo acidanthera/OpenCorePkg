@@ -16,6 +16,7 @@
 #define OC_MEMORY_LIB_H
 
 #include <Uefi.h>
+#include <Guid/MemoryAttributesTable.h>
 #include <IndustryStandard/VirtualMemory.h>
 
 /**
@@ -246,6 +247,19 @@ OcUpdateDescriptors (
   );
 
 /**
+  Obtain memory attributes table.
+
+  @param[out] MemoryAttributesEntry  memory descriptor pointer, optional.
+
+  @retval pointer to memory attributes table.
+  @retval NULL if memory attributes table is unsupported.
+**/
+EFI_MEMORY_ATTRIBUTES_TABLE *
+OcGetMemoryAttributes (
+  OUT EFI_MEMORY_DESCRIPTOR  **MemoryAttributesEntry  OPTIONAL
+  );
+
+/**
   Refresh memory attributes entry containing the specified address.
 
   @param[in]  Address         Address contained in the updated entry.
@@ -273,6 +287,28 @@ OcUpdateAttributes (
 UINTN
 OcCountSplitDescritptors (
   VOID
+  );
+
+/**
+  Split memory map by memory attributes if available.
+
+  @param[in]     OriginalMemoryMapSize   Upper memory map size bound for growth.
+  @param[in,out] MemoryMapSize           Current memory map size, updated on return.
+  @param[in,out] MemoryMap               Memory map to split.
+  @param[in]     DescriptorSize          Memory map descriptor size.
+
+  Note, the function is guaranteed to return valid memory map, though not necessarily split.
+
+  @retval EFI_SUCCESS on success.
+  @retval EFI_UNSUPPORTED memory attributes are not supported by the platform.
+  @retval EFI_OUT_OF_RESOURCES new memory map did not fit.
+**/
+EFI_STATUS
+OcSplitMemoryMapByAttributes (
+  IN     UINTN                  OriginalMemoryMapSize,
+  IN OUT UINTN                  *MemoryMapSize,
+  IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN     UINTN                  DescriptorSize
   );
 
 /**
