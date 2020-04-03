@@ -358,6 +358,7 @@ OcGetMemoryMap (
   )
 {
   EFI_STATUS            Status;
+  EFI_STATUS            Status2;
   BOOT_COMPAT_CONTEXT   *BootCompat;
   EFI_PHYSICAL_ADDRESS  Address;
   UINTN                 Pages;
@@ -377,9 +378,9 @@ OcGetMemoryMap (
   }
 
   if (BootCompat->Settings.SyncRuntimePermissions && BootCompat->ServiceState.FwRuntime != NULL) {
-    Status = BootCompat->ServiceState.FwRuntime->GetExecArea (&Address, &Pages);
+    Status2 = BootCompat->ServiceState.FwRuntime->GetExecArea (&Address, &Pages);
 
-    if (!EFI_ERROR (Status)) {
+    if (!EFI_ERROR (Status2)) {
       OcUpdateDescriptors (
         *MemoryMapSize,
         MemoryMap,
