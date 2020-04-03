@@ -477,7 +477,8 @@ AppleMapPrepareMemoryPool (
 
   Status = VmAllocateMemoryPool (
     &BootCompat->KernelState.VmContext,
-    OC_DEFAULT_VMEM_PAGE_COUNT
+    OC_DEFAULT_VMEM_PAGE_COUNT,
+    BootCompat->ServicePtrs.GetMemoryMap
     );
 
   if (EFI_ERROR (Status)) {

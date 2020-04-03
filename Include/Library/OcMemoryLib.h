@@ -393,15 +393,17 @@ typedef struct OC_VMEM_CONTEXT_ {
   in the end of BASE_4GB of RAM. Should be called while boot services are
   still usable.
 
-  @param[out]  Context   Virtual memory pool context.
-  @param[in]   NumPages  Number of pages to be allocated in the pool.
+  @param[out]  Context       Virtual memory pool context.
+  @param[in]   NumPages      Number of pages to be allocated in the pool.
+  @param[in]   GetMemoryMap  Custom GetMemoryMap implementation to use, optional.
 
   @retval EFI_SUCCESS on successful allocation.
 **/
 EFI_STATUS
 VmAllocateMemoryPool (
-  OUT OC_VMEM_CONTEXT  *Context,
-  IN  UINTN            NumPages
+  OUT OC_VMEM_CONTEXT     *Context,
+  IN  UINTN               NumPages,
+  IN  EFI_GET_MEMORY_MAP  GetMemoryMap  OPTIONAL
   );
 
 /**

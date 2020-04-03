@@ -143,8 +143,9 @@ GetPhysicalAddress (
 
 EFI_STATUS
 VmAllocateMemoryPool (
-  OUT OC_VMEM_CONTEXT  *Context,
-  IN  UINTN            NumPages
+  OUT OC_VMEM_CONTEXT     *Context,
+  IN  UINTN               NumPages,
+  IN  EFI_GET_MEMORY_MAP  GetMemoryMap  OPTIONAL
   )
 {
   EFI_STATUS              Status;
@@ -155,7 +156,7 @@ VmAllocateMemoryPool (
     EfiBootServicesData,
     NumPages,
     &Addr,
-    NULL,
+    GetMemoryMap,
     NULL
     );
 
