@@ -12,6 +12,8 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlug", 0x00003000)
 {
     External (_SB_.CPU0, DeviceObj)
     External (_PR_.CPU0, DeviceObj)
+    External (_PR_.C000, DeviceObj)
+    External (_PR_.P000, DeviceObj)
     External (_SB_.PR00, DeviceObj)
     External (_PR_.PR00, DeviceObj)
     External (_SB_.SCK0.CP00, DeviceObj)
@@ -49,6 +51,36 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlug", 0x00003000)
 
     If (CondRefOf (\_SB.PR00)) {
         Scope (\_SB.PR00) {
+            Method (_DSM, 4, NotSerialized) {
+                If (LEqual (Arg2, Zero)) {
+                    Return (Buffer (One) { 0x03 })
+                }
+
+                Return (Package (0x02) {
+                    "plugin-type",
+                    One
+                })
+            }
+        }
+    }
+    
+    If (CondRefOf (\_PR.C000)) {
+        Scope (\_PR.P000) {
+            Method (_DSM, 4, NotSerialized) {
+                If (LEqual (Arg2, Zero)) {
+                    Return (Buffer (One) { 0x03 })
+                }
+
+                Return (Package (0x02) {
+                    "plugin-type",
+                    One
+                })
+            }
+        }
+    }
+    
+    If (CondRefOf (\_PR.P000)) {
+        Scope (\_PR.P000) {
             Method (_DSM, 4, NotSerialized) {
                 If (LEqual (Arg2, Zero)) {
                     Return (Buffer (One) { 0x03 })
