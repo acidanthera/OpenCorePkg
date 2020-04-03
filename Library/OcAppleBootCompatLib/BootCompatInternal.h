@@ -142,15 +142,25 @@ typedef struct UEFI_SERVICES_POINTERS_ {
   ///
   EFI_ALLOCATE_PAGES          AllocatePages;
   ///
-  /// Original pool allocator. We override it to fix memory
-  /// attributes table as it is updated after pool alloc.
+  /// Original page deallocator. We override it to fix memory
+  /// attributes table as it is updated after page dealloc.
   ///
-  EFI_ALLOCATE_POOL           AllocatePool;
+  EFI_FREE_PAGES              FreePages;
   ///
   /// Original memory map function. We override it to make
   /// memory map shrinking and CSM region protection.
   ///
   EFI_GET_MEMORY_MAP          GetMemoryMap;
+  ///
+  /// Original pool allocator. We override it to fix memory
+  /// attributes table as it is updated after pool alloc.
+  ///
+  EFI_ALLOCATE_POOL           AllocatePool;
+  ///
+  /// Original pool deallocator. We override it to fix memory
+  /// attributes table as it is updated after pool dealloc.
+  ///
+  EFI_FREE_POOL               FreePool;
   ///
   /// Original exit boot services function. We override it
   /// to ensure we always succeed exiting boot services.

@@ -357,13 +357,16 @@ OcAllocatePages (
   return Status;
 }
 
+/**
+  UEFI Boot Services FreePages override.
+  Ensures synchronised memory attribute table.
+**/
 STATIC
 EFI_STATUS
 EFIAPI
-OcAllocatePool (
-  IN  EFI_MEMORY_TYPE              PoolType,
-  IN  UINTN                        Size,
-  OUT VOID                         **Buffer
+OcFreePages (
+  IN  EFI_PHYSICAL_ADDRESS         Memory,
+  IN  UINTN                        Pages
   )
 {
   EFI_STATUS              Status;
@@ -371,10 +374,9 @@ OcAllocatePool (
 
   BootCompat  = GetBootCompatContext ();
 
-  Status = BootCompat->ServicePtrs.AllocatePool (
-    PoolType,
-    Size,
-    Buffer
+  Status = BootCompat->ServicePtrs.FreePages (
+    Memory,
+    Pages
     );
 
   if (!EFI_ERROR (Status)) {
@@ -493,6 +495,64 @@ OcGetMemoryMap (
     if (*MemoryMapSize > EFI_PAGE_SIZE) {
       DEBUG ((DEBUG_INFO, "OCABC: Memory map exceeds 4K - %u, booting may fail\n", (UINT32) *MemoryMapSize));
     }
+  }
+
+  return Status;
+}
+
+/**
+  UEFI Boot Services AllocatePool override.
+  Ensures synchronised memory attribute table.
+**/
+STATIC
+EFI_STATUS
+EFIAPI
+OcAllocatePool (
+  IN  EFI_MEMORY_TYPE              PoolType,
+  IN  UINTN                        Size,
+  OUT VOID                         **Buffer
+  )
+{
+  EFI_STATUS              Status;
+  BOOT_COMPAT_CONTEXT     *BootCompat;
+
+  BootCompat  = GetBootCompatContext ();
+
+  Status = BootCompat->ServicePtrs.AllocatePool (
+    PoolType,
+    Size,
+    Buffer
+    );
+
+  if (!EFI_ERROR (Status)) {
+    FixRuntimeAttributes (BootCompat);
+  }
+
+  return Status;
+}
+
+/**
+  UEFI Boot Services FreePool override.
+  Ensures synchronised memory attribute table.
+**/
+STATIC
+EFI_STATUS
+EFIAPI
+OcFreePool (
+  IN VOID                         *Buffer
+  )
+{
+  EFI_STATUS              Status;
+  BOOT_COMPAT_CONTEXT     *BootCompat;
+
+  BootCompat  = GetBootCompatContext ();
+
+  Status = BootCompat->ServicePtrs.FreePool (
+    Buffer
+    );
+
+  if (!EFI_ERROR (Status)) {
+    FixRuntimeAttributes (BootCompat);
   }
 
   return Status;
@@ -912,15 +972,19 @@ InstallServiceOverrides (
   OriginalTpl = gBS->RaiseTPL (TPL_HIGH_LEVEL);
 
   ServicePtrs->AllocatePages        = gBS->AllocatePages;
-  ServicePtrs->AllocatePool         = gBS->AllocatePool;
+  ServicePtrs->FreePages            = gBS->FreePages;
   ServicePtrs->GetMemoryMap         = gBS->GetMemoryMap;
+  ServicePtrs->AllocatePool         = gBS->AllocatePool;
+  ServicePtrs->FreePool             = gBS->FreePool;
   ServicePtrs->ExitBootServices     = gBS->ExitBootServices;
   ServicePtrs->StartImage           = gBS->StartImage;
   ServicePtrs->SetVirtualAddressMap = gRT->SetVirtualAddressMap;
 
   gBS->AllocatePages        = OcAllocatePages;
-  gBS->AllocatePool         = OcAllocatePool;
+  gBS->FreePages            = OcFreePages;
   gBS->GetMemoryMap         = OcGetMemoryMap;
+  gBS->AllocatePool         = OcAllocatePool;
+  gBS->FreePool             = OcFreePool;
   gBS->ExitBootServices     = OcExitBootServices;
   gBS->StartImage           = OcStartImage;
   gRT->SetVirtualAddressMap = OcSetVirtualAddressMap;
