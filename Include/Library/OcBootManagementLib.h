@@ -477,7 +477,7 @@ struct OC_PICKER_CONTEXT_ {
   //
   OC_CUSTOM_DESCRIBE         CustomDescribe;
   //
-  // Context to pass to CustomRead, optional.
+  // Context to pass to CustomRead and CustomDescribe, optional.
   //
   VOID                       *CustomEntryContext;
   //
