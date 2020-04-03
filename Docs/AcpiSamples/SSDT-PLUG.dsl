@@ -15,6 +15,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlug", 0x00003000)
     External (_SB_.PR00, DeviceObj)
     External (_PR_.PR00, DeviceObj)
     External (_SB_.SCK0.CP00, DeviceObj)
+    External (_SB_.SCK0.PR00, DeviceObj)
 
     If (CondRefOf (\_SB.CPU0)) {
         Scope (\_SB.CPU0) {
@@ -89,5 +90,74 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlug", 0x00003000)
                 })
             }
         }
+    }
+    
+    If (CondRefOf (\_SB.SCK0.PR00))
+    {
+        Scope (\_SB.SCK0.PR00)
+        {
+            Method (_DSM, 4, NotSerialized){
+                If (LEqual (Arg2, Zero)) {
+                    Return (Buffer (One) { 0x03 })
+                }
+
+                Return (Package (0x02) {
+                    "plugin-type", 
+                    One
+                })
+            }
+        }
+
+        Method (DTGP, 5, NotSerialized) {
+            If (LEqual (Arg0, ToUUID ("a0b5b7c6-1318-441c-b0c9-fe695eaf949b"))) {
+                If (LEqual (Arg1, One)) {
+                    If (LEqual (Arg2, Zero)) {
+                        Store (Buffer (One) {
+                                 0x03                                           
+                            }, Arg4)
+                        Return (One)
+                    }
+
+                    If (LEqual (Arg2, One)) {
+                        Return (One)
+                    }
+                }
+            }
+
+            Store (Buffer (One) {
+                     0x00                                           
+                }, Arg4)
+            Return (Zero)
+        }
+
+        Method (_DSM, 4, NotSerialized) {
+            Store (Package (0x02) {
+                    "plugin-type", 
+                    One
+                }, Local0)
+            DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))
+            Return (Local0)
+        }
+    }
+    Method (DTGP, 5, NotSerialized) {
+        If (LEqual (Arg0, ToUUID ("a0b5b7c6-1318-441c-b0c9-fe695eaf949b"))) {
+            If (LEqual (Arg1, One)) {
+                If (LEqual (Arg2, Zero)) {
+                    Store (Buffer (One) {
+                             0x03                                           
+                        }, Arg4)
+                    Return (One)
+                }
+
+                If (LEqual (Arg2, One)) {
+                    Return (One)
+                }
+            }
+        }
+
+        Store (Buffer (One) {
+                 0x00                                           
+            }, Arg4)
+        Return (Zero)
     }
 }
