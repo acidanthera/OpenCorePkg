@@ -473,7 +473,7 @@ OcGetMemoryMap (
         MemoryMap,
         *DescriptorSize
         );
-      if (EFI_ERROR (Status2) && Status != EFI_UNSUPPORTED) {
+      if (EFI_ERROR (Status2) && Status2 != EFI_UNSUPPORTED) {
         DEBUG ((DEBUG_INFO, "OCABC: Cannot rebuild memory map - %r\n", Status));
       }
 
