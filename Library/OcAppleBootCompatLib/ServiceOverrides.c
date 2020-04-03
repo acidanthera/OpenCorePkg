@@ -423,6 +423,10 @@ OcGetMemoryMap (
     // during hibernate wake to be able to iterate memory map.
     //
     BootCompat->ServiceState.MemoryMapDescriptorSize = *DescriptorSize;
+
+    if (*MemoryMapSize > EFI_PAGE_SIZE) {
+      DEBUG ((DEBUG_INFO, "OCABC: Memory map exceeds 4K - %u, booting may fail\n", (UINT32) *MemoryMapSize));
+    }
   }
 
   return Status;
