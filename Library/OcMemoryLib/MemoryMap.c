@@ -24,16 +24,20 @@
 #include <Library/UefiLib.h>
 
 EFI_MEMORY_DESCRIPTOR *
-GetCurrentMemoryMap (
+OcGetCurrentMemoryMap (
   OUT UINTN   *MemoryMapSize,
   OUT UINTN   *DescriptorSize,
-  OUT UINTN   *MapKey             OPTIONAL,
-  OUT UINT32  *DescriptorVersion  OPTIONAL
+  OUT UINTN   *MapKey                 OPTIONAL,
+  OUT UINT32  *DescriptorVersion      OPTIONAL,
+  OUT UINTN   *OriginalMemoryMapSize  OPTIONAL,
+  IN  BOOLEAN IncludeSplitSpace
   )
 {
   EFI_MEMORY_DESCRIPTOR   *MemoryMap;
   EFI_STATUS              Status;
   UINTN                   MapKeyValue;
+  UINTN                   OriginalSize;
+  UINTN                   ExtraSize;
   UINT32                  DescriptorVersionValue;
   BOOLEAN                 Result;
 
@@ -50,13 +54,19 @@ GetCurrentMemoryMap (
     return NULL;
   }
 
+  if (IncludeSplitSpace) {
+    ExtraSize = OcCountSplitDescritptors () * *DescriptorSize;
+  } else {
+    ExtraSize = 0;
+  }
+
   //
   // Apple uses 1024 as constant, however it will grow by at least
   // DescriptorSize.
   //
   Result = OcOverflowAddUN (
     *MemoryMapSize,
-    MAX (*DescriptorSize, 1024),
+    MAX (*DescriptorSize + ExtraSize, 1024 + ExtraSize),
     MemoryMapSize
     );
 
@@ -64,7 +74,8 @@ GetCurrentMemoryMap (
     return NULL;
   }
 
-  MemoryMap = AllocatePool (*MemoryMapSize);
+  OriginalSize = *MemoryMapSize;
+  MemoryMap = AllocatePool (OriginalSize);
   if (MemoryMap == NULL) {
     return NULL;
   }
@@ -88,6 +99,10 @@ GetCurrentMemoryMap (
 
   if (DescriptorVersion != NULL) {
     *DescriptorVersion = DescriptorVersionValue;
+  }
+
+  if (OriginalMemoryMapSize != NULL) {
+    *OriginalMemoryMapSize = OriginalSize;
   }
 
   return MemoryMap;
@@ -398,7 +413,7 @@ CountFreePages (
     *LowerMemory = 0;
   }
 
-  MemoryMap = GetCurrentMemoryMap (&MemoryMapSize, &DescriptorSize, NULL, NULL);
+  MemoryMap = OcGetCurrentMemoryMap (&MemoryMapSize, &DescriptorSize, NULL, NULL, NULL, FALSE);
   if (MemoryMap == NULL) {
     return 0;
   }
@@ -443,38 +458,64 @@ OcPrintMemoryAttributesTable (
 {
   UINTN                             Index;
   CONST EFI_MEMORY_ATTRIBUTES_TABLE *MemoryAttributesTable;
-  CONST EFI_MEMORY_DESCRIPTOR       *MemoryAttributesEntry;
+  EFI_MEMORY_DESCRIPTOR             *MemoryAttributesEntry;
 
-  for (Index = 0; Index < gST->NumberOfTableEntries; ++Index) {
-    if (CompareGuid (&gST->ConfigurationTable[Index].VendorGuid, &gEfiMemoryAttributesTableGuid)) {
-      MemoryAttributesTable = (CONST EFI_MEMORY_ATTRIBUTES_TABLE *) gST->ConfigurationTable[Index].VendorTable;
-
-      DEBUG ((DEBUG_INFO, "OCMM: MemoryAttributesTable:\n"));
-      DEBUG ((DEBUG_INFO, "OCMM:   Version              - 0x%08x\n", MemoryAttributesTable->Version));
-      DEBUG ((DEBUG_INFO, "OCMM:   NumberOfEntries      - 0x%08x\n", MemoryAttributesTable->NumberOfEntries));
-      DEBUG ((DEBUG_INFO, "OCMM:   DescriptorSize       - 0x%08x\n", MemoryAttributesTable->DescriptorSize));
-
-      MemoryAttributesEntry = (CONST EFI_MEMORY_DESCRIPTOR *) (MemoryAttributesTable + 1);
-
-      for (Index = 0; Index < MemoryAttributesTable->NumberOfEntries; ++Index) {
-        DEBUG ((DEBUG_INFO, "OCMM: Entry (0x%x)\n", MemoryAttributesEntry));
-        DEBUG ((DEBUG_INFO, "OCMM:   Type              - 0x%x\n", MemoryAttributesEntry->Type));
-        DEBUG ((DEBUG_INFO, "OCMM:   PhysicalStart     - 0x%016lx\n", MemoryAttributesEntry->PhysicalStart));
-        DEBUG ((DEBUG_INFO, "OCMM:   VirtualStart      - 0x%016lx\n", MemoryAttributesEntry->VirtualStart));
-        DEBUG ((DEBUG_INFO, "OCMM:   NumberOfPages     - 0x%016lx\n", MemoryAttributesEntry->NumberOfPages));
-        DEBUG ((DEBUG_INFO, "OCMM:   Attribute         - 0x%016lx\n", MemoryAttributesEntry->Attribute));
-
-        MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (
-          MemoryAttributesEntry,
-          MemoryAttributesTable->DescriptorSize
-          );
-      }
-
-      return;
-    }
+  MemoryAttributesTable = OcGetMemoryAttributes (&MemoryAttributesEntry);
+  if (MemoryAttributesTable == NULL) {
+    DEBUG ((DEBUG_INFO, "OCMM: MemoryAttributesTable is not present!\n"));
+    return;
   }
 
-  DEBUG ((DEBUG_INFO, "OCMM: MemoryAttributesTable is not present!\n"));
+  DEBUG ((DEBUG_INFO, "OCMM: MemoryAttributesTable:\n"));
+  DEBUG ((DEBUG_INFO, "OCMM:   Version              - 0x%08x\n", MemoryAttributesTable->Version));
+  DEBUG ((DEBUG_INFO, "OCMM:   NumberOfEntries      - 0x%08x\n", MemoryAttributesTable->NumberOfEntries));
+  DEBUG ((DEBUG_INFO, "OCMM:   DescriptorSize       - 0x%08x\n", MemoryAttributesTable->DescriptorSize));
+
+  for (Index = 0; Index < MemoryAttributesTable->NumberOfEntries; ++Index) {
+    DEBUG ((DEBUG_INFO, "OCMM: Entry (0x%x)\n", MemoryAttributesEntry));
+    DEBUG ((DEBUG_INFO, "OCMM:   Type              - 0x%x\n", MemoryAttributesEntry->Type));
+    DEBUG ((DEBUG_INFO, "OCMM:   PhysicalStart     - 0x%016lx\n", MemoryAttributesEntry->PhysicalStart));
+    DEBUG ((DEBUG_INFO, "OCMM:   VirtualStart      - 0x%016lx\n", MemoryAttributesEntry->VirtualStart));
+    DEBUG ((DEBUG_INFO, "OCMM:   NumberOfPages     - 0x%016lx\n", MemoryAttributesEntry->NumberOfPages));
+    DEBUG ((DEBUG_INFO, "OCMM:   Attribute         - 0x%016lx\n", MemoryAttributesEntry->Attribute));
+
+    MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (
+      MemoryAttributesEntry,
+      MemoryAttributesTable->DescriptorSize
+      );
+  }
+}
+
+VOID
+OcPrintMemoryMap (
+  IN UINTN                  MemoryMapSize,
+  IN EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN UINTN                  DescriptorSize
+  )
+{
+  UINTN     Index;
+  UINT32    NumberOfEntries;
+
+  NumberOfEntries = (UINT32) (MemoryMapSize / DescriptorSize);
+
+  DEBUG ((DEBUG_INFO, "OCMM: MemoryMap:\n"));
+  DEBUG ((DEBUG_INFO, "OCMM:   Size                 - 0x%08x\n", MemoryMapSize));
+  DEBUG ((DEBUG_INFO, "OCMM:   NumberOfEntries      - 0x%08x\n", NumberOfEntries));
+  DEBUG ((DEBUG_INFO, "OCMM:   DescriptorSize       - 0x%08x\n", DescriptorSize));
+
+  for (Index = 0; Index < NumberOfEntries; ++Index) {
+    DEBUG ((DEBUG_INFO, "OCMM: Entry (0x%x)\n", MemoryMap));
+    DEBUG ((DEBUG_INFO, "OCMM:   Type              - 0x%x\n", MemoryMap->Type));
+    DEBUG ((DEBUG_INFO, "OCMM:   PhysicalStart     - 0x%016lx\n", MemoryMap->PhysicalStart));
+    DEBUG ((DEBUG_INFO, "OCMM:   VirtualStart      - 0x%016lx\n", MemoryMap->VirtualStart));
+    DEBUG ((DEBUG_INFO, "OCMM:   NumberOfPages     - 0x%016lx\n", MemoryMap->NumberOfPages));
+    DEBUG ((DEBUG_INFO, "OCMM:   Attribute         - 0x%016lx\n", MemoryMap->Attribute));
+
+    MemoryMap = NEXT_MEMORY_DESCRIPTOR (
+      MemoryMap,
+      DescriptorSize
+      );
+  }
 }
 
 EFI_STATUS

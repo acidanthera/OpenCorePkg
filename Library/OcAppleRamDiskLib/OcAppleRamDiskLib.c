@@ -246,7 +246,7 @@ InternalAppleRamDiskAllocate (
   UINTN                        RemainingSize;
   APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable;
 
-  MemoryMap = GetCurrentMemoryMap (&MemoryMapSize, &DescriptorSize, NULL, NULL);
+  MemoryMap = OcGetCurrentMemoryMap (&MemoryMapSize, &DescriptorSize, NULL, NULL, NULL, FALSE);
   if (MemoryMap == NULL) {
     return NULL;
   }

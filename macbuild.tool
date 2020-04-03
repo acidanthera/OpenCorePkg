@@ -31,6 +31,7 @@ package() {
   cp HdaCodecDump.efi tmp/EFI/OC/Tools/ || exit 1
   cp HiiDatabase.efi tmp/EFI/OC/Drivers/ || exit 1
   cp KeyTester.efi tmp/EFI/OC/Tools/ || exit 1
+  cp MmapDump.efi tmp/EFI/OC/Tools/ || exit 1
   cp NvmExpressDxe.efi tmp/EFI/OC/Drivers/ || exit 1
   cp OpenCanopy.efi tmp/EFI/OC/Drivers/ || exit 1
   cp OpenControl.efi tmp/EFI/OC/Tools/ || exit 1

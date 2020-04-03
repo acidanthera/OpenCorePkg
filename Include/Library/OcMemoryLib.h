@@ -73,21 +73,25 @@ LegacyRegionUnlock (
   );
 
 /**
-  Get current memory map allocated on pool.
+  Get current memory map allocated on pool with reserved entries.
 
-  @param[out]  MemoryMapSize      Resulting memory map size in bytes.
-  @param[out]  DescriptorSize     Resulting memory map descriptor size in bytes.
-  @param[out]  MapKey             Memory map key, optional.
-  @param[out]  DescriptorVersion  Memory map descriptor version, optional.
+  @param[out]  MemoryMapSize          Resulting memory map size in bytes.
+  @param[out]  DescriptorSize         Resulting memory map descriptor size in bytes.
+  @param[out]  MapKey                 Memory map key, optional.
+  @param[out]  DescriptorVersion      Memory map descriptor version, optional.
+  @param[out]  OriginalMemoryMapSize  Actual pool allocation memory, optional.
+  @param[out]  IncludeSplitSpace      Allocate memory to permit splitting memory map.
 
   @retval current memory map or NULL.
 **/
 EFI_MEMORY_DESCRIPTOR *
-GetCurrentMemoryMap (
+OcGetCurrentMemoryMap (
   OUT UINTN   *MemoryMapSize,
   OUT UINTN   *DescriptorSize,
-  OUT UINTN   *MapKey             OPTIONAL,
-  OUT UINT32  *DescriptorVersion  OPTIONAL
+  OUT UINTN   *MapKey                 OPTIONAL,
+  OUT UINT32  *DescriptorVersion      OPTIONAL,
+  OUT UINTN   *OriginalMemoryMapSize  OPTIONAL,
+  IN  BOOLEAN IncludeSplitSpace
   );
 
 /**
@@ -218,6 +222,20 @@ CountFreePages (
 VOID
 OcPrintMemoryAttributesTable (
   VOID
+  );
+
+/**
+  Print memory map.
+
+  @param[in]  MemoryMapSize   Memory map size in bytes.
+  @param[in]  MemoryMap       Memory map to print.
+  @param[in]  DescriptorSize  Memory map descriptor size in bytes.
+**/
+VOID
+OcPrintMemoryMap (
+  IN UINTN                  MemoryMapSize,
+  IN EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN UINTN                  DescriptorSize
   );
 
 /**
