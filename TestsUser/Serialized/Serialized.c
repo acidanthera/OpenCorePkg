@@ -19,6 +19,263 @@
 
 #include <sys/time.h>
 
+RETURN_STATUS
+EFIAPI
+Base64Decode (
+  IN     CONST CHAR8 *Source          OPTIONAL,
+  IN     UINTN       SourceSize,
+  OUT    UINT8       *Destination     OPTIONAL,
+  IN OUT UINTN       *DestinationSize
+  )
+{
+  BOOLEAN PaddingMode;
+  UINTN   SixBitGroupsConsumed;
+  UINT32  Accumulator;
+  UINTN   OriginalDestinationSize;
+  UINTN   SourceIndex;
+  CHAR8   SourceChar;
+  UINT32  Base64Value;
+  UINT8   DestinationOctet;
+
+  if (DestinationSize == NULL) {
+    return RETURN_INVALID_PARAMETER;
+  }
+
+  //
+  // Check Source array validity.
+  //
+  if (Source == NULL) {
+    if (SourceSize > 0) {
+      //
+      // At least one CHAR8 element at NULL Source.
+      //
+      return RETURN_INVALID_PARAMETER;
+    }
+  } else if (SourceSize > MAX_ADDRESS - (UINTN)Source) {
+    //
+    // Non-NULL Source, but it wraps around.
+    //
+    return RETURN_INVALID_PARAMETER;
+  }
+
+  //
+  // Check Destination array validity.
+  //
+  if (Destination == NULL) {
+    if (*DestinationSize > 0) {
+      //
+      // At least one UINT8 element at NULL Destination.
+      //
+      return RETURN_INVALID_PARAMETER;
+    }
+  } else if (*DestinationSize > MAX_ADDRESS - (UINTN)Destination) {
+    //
+    // Non-NULL Destination, but it wraps around.
+    //
+    return RETURN_INVALID_PARAMETER;
+  }
+
+  //
+  // Check for overlap.
+  //
+  if (Source != NULL && Destination != NULL) {
+    //
+    // Both arrays have been provided, and we know from earlier that each array
+    // is valid in itself.
+    //
+    if ((UINTN)Source + SourceSize <= (UINTN)Destination) {
+      //
+      // Source array precedes Destination array, OK.
+      //
+    } else if ((UINTN)Destination + *DestinationSize <= (UINTN)Source) {
+      //
+      // Destination array precedes Source array, OK.
+      //
+    } else {
+      //
+      // Overlap.
+      //
+      return RETURN_INVALID_PARAMETER;
+    }
+  }
+
+  //
+  // Decoding loop setup.
+  //
+  PaddingMode             = FALSE;
+  SixBitGroupsConsumed    = 0;
+  Accumulator             = 0;
+  OriginalDestinationSize = *DestinationSize;
+  *DestinationSize        = 0;
+
+  //
+  // Decoding loop.
+  //
+  for (SourceIndex = 0; SourceIndex < SourceSize; SourceIndex++) {
+    SourceChar = Source[SourceIndex];
+
+    //
+    // Whitespace is ignored at all positions (regardless of padding mode).
+    //
+    if (SourceChar == '\t' || SourceChar == '\n' || SourceChar == '\v' ||
+        SourceChar == '\f' || SourceChar == '\r' || SourceChar == ' ') {
+      continue;
+    }
+
+    //
+    // If we're in padding mode, accept another padding character, as long as
+    // that padding character completes the quantum. This completes case (2)
+    // from RFC4648, Chapter 4. "Base 64 Encoding":
+    //
+    // (2) The final quantum of encoding input is exactly 8 bits; here, the
+    //     final unit of encoded output will be two characters followed by two
+    //     "=" padding characters.
+    //
+    if (PaddingMode) {
+      if (SourceChar == '=' && SixBitGroupsConsumed == 3) {
+        SixBitGroupsConsumed = 0;
+        continue;
+      }
+      return RETURN_INVALID_PARAMETER;
+    }
+
+    //
+    // When not in padding mode, decode Base64Value based on RFC4648, "Table 1:
+    // The Base 64 Alphabet".
+    //
+    if ('A' <= SourceChar && SourceChar <= 'Z') {
+      Base64Value = SourceChar - 'A';
+    } else if ('a' <= SourceChar && SourceChar <= 'z') {
+      Base64Value = 26 + (SourceChar - 'a');
+    } else if ('0' <= SourceChar && SourceChar <= '9') {
+      Base64Value = 52 + (SourceChar - '0');
+    } else if (SourceChar == '+') {
+      Base64Value = 62;
+    } else if (SourceChar == '/') {
+      Base64Value = 63;
+    } else if (SourceChar == '=') {
+      //
+      // Enter padding mode.
+      //
+      PaddingMode = TRUE;
+
+      if (SixBitGroupsConsumed == 2) {
+        //
+        // If we have consumed two 6-bit groups from the current quantum before
+        // encountering the first padding character, then this is case (2) from
+        // RFC4648, Chapter 4. "Base 64 Encoding". Bump SixBitGroupsConsumed,
+        // and we'll enforce another padding character.
+        //
+        SixBitGroupsConsumed = 3;
+      } else if (SixBitGroupsConsumed == 3) {
+        //
+        // If we have consumed three 6-bit groups from the current quantum
+        // before encountering the first padding character, then this is case
+        // (3) from RFC4648, Chapter 4. "Base 64 Encoding". The quantum is now
+        // complete.
+        //
+        SixBitGroupsConsumed = 0;
+      } else {
+        //
+        // Padding characters are not allowed at the first two positions of a
+        // quantum.
+        //
+        return RETURN_INVALID_PARAMETER;
+      }
+
+      //
+      // Wherever in a quantum we enter padding mode, we enforce the padding
+      // bits pending in the accumulator -- from the last 6-bit group just
+      // preceding the padding character -- to be zero. Refer to RFC4648,
+      // Chapter 3.5. "Canonical Encoding".
+      //
+      if (Accumulator != 0) {
+        return RETURN_INVALID_PARAMETER;
+      }
+
+      //
+      // Advance to the next source character.
+      //
+      continue;
+    } else {
+      //
+      // Other characters outside of the encoding alphabet are rejected.
+      //
+      return RETURN_INVALID_PARAMETER;
+    }
+
+    //
+    // Feed the bits of the current 6-bit group of the quantum to the
+    // accumulator.
+    //
+    Accumulator = (Accumulator << 6) | Base64Value;
+    SixBitGroupsConsumed++;
+    switch (SixBitGroupsConsumed) {
+    case 1:
+      //
+      // No octet to spill after consuming the first 6-bit group of the
+      // quantum; advance to the next source character.
+      //
+      continue;
+    case 2:
+      //
+      // 12 bits accumulated (6 pending + 6 new); prepare for spilling an
+      // octet. 4 bits remain pending.
+      //
+      DestinationOctet = (UINT8)(Accumulator >> 4);
+      Accumulator &= 0xF;
+      break;
+    case 3:
+      //
+      // 10 bits accumulated (4 pending + 6 new); prepare for spilling an
+      // octet. 2 bits remain pending.
+      //
+      DestinationOctet = (UINT8)(Accumulator >> 2);
+      Accumulator &= 0x3;
+      break;
+    default:
+      ASSERT (SixBitGroupsConsumed == 4);
+      //
+      // 8 bits accumulated (2 pending + 6 new); prepare for spilling an octet.
+      // The quantum is complete, 0 bits remain pending.
+      //
+      DestinationOctet = (UINT8)Accumulator;
+      Accumulator = 0;
+      SixBitGroupsConsumed = 0;
+      break;
+    }
+
+    //
+    // Store the decoded octet if there's room left. Increment
+    // (*DestinationSize) unconditionally.
+    //
+    if (*DestinationSize < OriginalDestinationSize) {
+      ASSERT (Destination != NULL);
+      Destination[*DestinationSize] = DestinationOctet;
+    }
+    (*DestinationSize)++;
+
+    //
+    // Advance to the next source character.
+    //
+  }
+
+  //
+  // If Source terminates mid-quantum, then Source is invalid.
+  //
+  if (SixBitGroupsConsumed != 0) {
+    return RETURN_INVALID_PARAMETER;
+  }
+
+  //
+  // Done.
+  //
+  if (*DestinationSize <= OriginalDestinationSize) {
+    return RETURN_SUCCESS;
+  }
+  return RETURN_BUFFER_TOO_SMALL;
+}
+
 /*
  clang -g -fsanitize=undefined,address -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h Serialized.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcConfigurationLib/OcConfigurationLib.c -o Serialized
 

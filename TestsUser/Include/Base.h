@@ -1830,6 +1830,7 @@ EFI_STATUS
 #define _PCD_GET_MODE_BOOL_PcNvramInitDevicePropertyDatabase false
 #define _PCD_GET_MODE_32_PcdMaximumDevicePathNodeCount 11
 #define _PCD_GET_MODE_32_PcdMaximumUnicodeStringLength 0xFFFFFFFF
+#define _PCD_GET_MODE_32_PcdMaximumAsciiStringLength 0xFFFFFFFF
 
 #ifndef ABS
 #define ABS(x) (((x)<0) ? -(x) : (x))
