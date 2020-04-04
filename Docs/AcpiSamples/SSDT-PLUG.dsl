@@ -65,7 +65,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlug", 0x00003000)
     }
     
     If (CondRefOf (\_PR.C000)) {
-        Scope (\_PR.P000) {
+        Scope (\_PR.C000) {
             Method (_DSM, 4, NotSerialized) {
                 If (LEqual (Arg2, Zero)) {
                     Return (Buffer (One) { 0x03 })
