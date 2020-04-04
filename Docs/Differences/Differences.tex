@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Mar  6 09:43:05 2020
-%DIF ADD ../Configuration.tex        Fri Apr  3 22:24:21 2020
+%DIF ADD ../Configuration.tex        Sat Apr  4 23:12:10 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1530,11 +1530,21 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \texttt{\DIFadd{SyncRuntimePermissions}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Update memory permissions for }\texttt{\DIFadd{OpenRuntime}} \DIFadd{to function.
+  \textbf{\DIFadd{Description}}\DIFadd{: Update memory permissions for runtime environment.
 }
 
-  \DIFadd{Some firmwares may incorrectly mark }\texttt{\DIFadd{OpenRuntime}} \DIFadd{as not executable, this quirks
-  updates memory map and memory attributes table to correct this.
+  \DIFadd{Some firmwares either fail to properly handle runtime permissions:
+  }\begin{itemize}
+    \tightlist
+    \item \DIFadd{They incorrectly mark }\texttt{\DIFadd{OpenRuntime}} \DIFadd{as not executable in the memory map.
+    }\item \DIFadd{They incorrectly mark }\texttt{\DIFadd{OpenRuntime}} \DIFadd{as not executable in the memory
+    attributes table.
+    }\item \DIFadd{They lose entries from the memory attributes table after }\texttt{\DIFadd{OpenRuntime}}
+    \DIFadd{is loaded.
+    }\item \DIFadd{They mark items in the memory attributes table as read-write-execute.
+  }\end{itemize}
+
+  \DIFadd{This quirk tries to update memory map and memory attributes table to correct this.
 }
 
   \emph{\DIFadd{Note}}\DIFadd{: The necessity of this quirk is determined by early boot failures either in

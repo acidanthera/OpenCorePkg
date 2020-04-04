@@ -1425,10 +1425,20 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \texttt{SyncRuntimePermissions}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Update memory permissions for \texttt{OpenRuntime} to function.
+  \textbf{Description}: Update memory permissions for runtime environment.
 
-  Some firmwares may incorrectly mark \texttt{OpenRuntime} as not executable, this quirks
-  updates memory map and memory attributes table to correct this.
+  Some firmwares either fail to properly handle runtime permissions:
+  \begin{itemize}
+    \tightlist
+    \item They incorrectly mark \texttt{OpenRuntime} as not executable in the memory map.
+    \item They incorrectly mark \texttt{OpenRuntime} as not executable in the memory
+    attributes table.
+    \item They lose entries from the memory attributes table after \texttt{OpenRuntime}
+    is loaded.
+    \item They mark items in the memory attributes table as read-write-execute.
+  \end{itemize}
+
+  This quirk tries to update memory map and memory attributes table to correct this.
 
   \emph{Note}: The necessity of this quirk is determined by early boot failures either in
   macOS or in Linux/Windows. In general only firmwares released in 2018 or later are affected.
