@@ -1402,7 +1402,10 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   to unify contiguous slots of similar types if the resulting memory map exceeds
   4 KB.
 
-  \emph{Note}: The necessity of this quirk is determined by early boot failures.
+  \emph{Note 1}: Since many firmwares come with incorrect memory protection
+  table this quirk often comes in pair with \texttt{SyncRuntimePermissions}.
+
+  \emph{Note 2}: The necessity of this quirk is determined by early boot failures.
   This quirk replaces \texttt{EnableWriteUnprotector} on firmwares supporting
   memory attributes table (MAT).
 
