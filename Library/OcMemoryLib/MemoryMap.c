@@ -257,13 +257,14 @@ OcSortMemoryMap (
   }
 }
 
-VOID
+EFI_STATUS
 OcShrinkMemoryMap (
   IN OUT UINTN                  *MemoryMapSize,
   IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
   IN     UINTN                  DescriptorSize
   )
 {
+  EFI_STATUS              Status;
   UINTN                   SizeFromDescToEnd;
   UINT64                  Bytes;
   EFI_MEMORY_DESCRIPTOR   *PrevDesc;
@@ -271,6 +272,12 @@ OcShrinkMemoryMap (
   BOOLEAN                 CanBeJoinedFree;
   BOOLEAN                 CanBeJoinedRt;
   BOOLEAN                 HasEntriesToRemove;
+
+  Status = EFI_NOT_FOUND;
+
+  if (*MemoryMapSize <= DescriptorSize) {
+    return Status;
+  }
 
   PrevDesc           = MemoryMap;
   Desc               = NEXT_MEMORY_DESCRIPTOR (PrevDesc, DescriptorSize);
@@ -318,9 +325,11 @@ OcShrinkMemoryMap (
       PrevDesc->Type           = EfiConventionalMemory;
       PrevDesc->NumberOfPages += Desc->NumberOfPages;
       HasEntriesToRemove       = TRUE;
+      Status                   = EFI_SUCCESS;
     } else if (CanBeJoinedRt) {
       PrevDesc->NumberOfPages += Desc->NumberOfPages;
       HasEntriesToRemove       = TRUE;
+      Status                   = EFI_SUCCESS;
     } else {
       //
       // Cannot be joined - we need to move to next
@@ -341,6 +350,82 @@ OcShrinkMemoryMap (
     Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
     SizeFromDescToEnd -= DescriptorSize;
   }
+
+  //
+  // Handle last entries if they were merged.
+  //
+  if (HasEntriesToRemove) {
+    *MemoryMapSize += DescriptorSize;
+  }
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+OcDeduplicateDescriptors (
+  IN OUT UINTN                  *EntryCount,
+  IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN     UINTN                  DescriptorSize
+  )
+{
+  EFI_STATUS              Status;
+  UINTN                   EntriesToGo;
+  EFI_MEMORY_DESCRIPTOR   *PrevDesc;
+  EFI_MEMORY_DESCRIPTOR   *Desc;
+  BOOLEAN                 IsDuplicate;
+  BOOLEAN                 HasEntriesToRemove;
+
+  Status = EFI_NOT_FOUND;
+
+  if (*EntryCount <= 1) {
+    return Status;
+  }
+
+  PrevDesc           = MemoryMap;
+  Desc               = NEXT_MEMORY_DESCRIPTOR (PrevDesc, DescriptorSize);
+  EntriesToGo        = *EntryCount - 1;
+  *EntryCount        = 1;
+  HasEntriesToRemove = FALSE;
+
+  while (EntriesToGo > 0) {
+    IsDuplicate = Desc->PhysicalStart == PrevDesc->PhysicalStart
+      && Desc->NumberOfPages == PrevDesc->NumberOfPages;
+
+    if (IsDuplicate) {
+      //
+      // Two entries are duplicate, remove them.
+      //
+      Status               = EFI_SUCCESS;
+      HasEntriesToRemove   = TRUE;
+    } else {
+      //
+      // Not duplicates - we need to move to next
+      //
+      ++(*EntryCount);
+      PrevDesc = NEXT_MEMORY_DESCRIPTOR (PrevDesc, DescriptorSize);
+      if (HasEntriesToRemove) {
+        //
+        // Have same entries between PrevDesc and Desc which are replaced by PrevDesc,
+        // we need to copy [Desc, end of list] to PrevDesc + 1.
+        //
+        CopyMem (PrevDesc, Desc, EntriesToGo * DescriptorSize);
+        Desc = PrevDesc;
+        HasEntriesToRemove = FALSE;
+      }
+    }
+
+    Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
+    --EntriesToGo;
+  }
+
+  //
+  // Handle last entries if they were deduplicated.
+  //
+  if (HasEntriesToRemove) {
+    ++(*EntryCount);
+  }
+
+  return Status;
 }
 
 EFI_STATUS

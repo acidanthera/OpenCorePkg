@@ -140,10 +140,30 @@ OcSortMemoryMap (
   @param[in,out]  MemoryMapSize      Memory map size in bytes, updated on shrink.
   @param[in,out]  MemoryMap          Memory map to shrink.
   @param[in]      DescriptorSize     Memory map descriptor size in bytes.
+
+  @retval EFI_SUCCESS on success.
+  @retval EFI_NOT_FOUND when cannot join anything.
 **/
-VOID
+EFI_STATUS
 OcShrinkMemoryMap (
   IN OUT UINTN                  *MemoryMapSize,
+  IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN     UINTN                  DescriptorSize
+  );
+
+/**
+  Deduplicate memory descriptors. Requires sorted entry list.
+
+  @param[in,out]  EntryCount         Memory map size in entries, updated on shrink.
+  @param[in,out]  MemoryMap          Memory map to shrink.
+  @param[in]      DescriptorSize     Memory map descriptor size in bytes.
+
+  @retval EFI_SUCCESS on success.
+  @retval EFI_NOT_FOUND when cannot join anything.
+**/
+EFI_STATUS
+OcDeduplicateDescriptors (
+  IN OUT UINTN                  *EntryCount,
   IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
   IN     UINTN                  DescriptorSize
   );
