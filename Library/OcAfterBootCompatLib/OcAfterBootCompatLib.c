@@ -19,14 +19,14 @@
 #include <Library/OcDebugLogLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/OcAppleBootCompatLib.h>
+#include <Library/OcAfterBootCompatLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include <Protocol/OcAppleBootCompat.h>
+#include <Protocol/OcAfterBootCompat.h>
 
 #include "BootCompatInternal.h"
 
@@ -35,15 +35,15 @@
   with legacy AptioMemoryFix protocol, allowing us to avoid
   conflicts between the two.
 **/
-STATIC OC_APPLE_BOOT_COMPAT_PROTOCOL mOcAppleBootCompatProtocol = {
-  OC_APPLE_BOOT_COMPAT_PROTOCOL_REVISION
+STATIC OC_AFTER_BOOT_COMPAT_PROTOCOL mOcAfterBootCompatProtocol = {
+  OC_AFTER_BOOT_COMPAT_PROTOCOL_REVISION
 };
 
 /**
   Apple Boot Compatibility context. This context is used throughout
   the library. Must be accessed through GetBootCompatContext ().
 **/
-STATIC BOOT_COMPAT_CONTEXT  mOcAppleBootCompatContext;
+STATIC BOOT_COMPAT_CONTEXT  mOcAfterBootCompatContext;
 
 STATIC
 EFI_STATUS
@@ -56,7 +56,7 @@ InstallAbcProtocol (
   EFI_HANDLE  Handle;
 
   Status = gBS->LocateProtocol (
-    &gOcAppleBootCompatProtocolGuid,
+    &gOcAfterBootCompatProtocolGuid,
     NULL,
     &Interface
     );
@@ -73,8 +73,8 @@ InstallAbcProtocol (
   Handle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
     &Handle,
-    &gOcAppleBootCompatProtocolGuid,
-    &mOcAppleBootCompatProtocol,
+    &gOcAfterBootCompatProtocolGuid,
+    &mOcAfterBootCompatProtocol,
     NULL
     );
 
@@ -91,7 +91,7 @@ GetBootCompatContext (
   VOID
   )
 {
-  return &mOcAppleBootCompatContext;
+  return &mOcAfterBootCompatContext;
 }
 
 EFI_STATUS

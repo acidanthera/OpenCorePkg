@@ -71,7 +71,7 @@
   DevicePathLib
   IoLib
   OcAcpiLib
-  OcAppleBootCompatLib
+  OcAfterBootCompatLib
   OcAppleBootPolicyLib
   OcAppleEventLib
   OcAppleImageConversionLib

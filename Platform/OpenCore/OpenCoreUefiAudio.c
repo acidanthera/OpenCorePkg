@@ -22,7 +22,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/OcAppleBootCompatLib.h>
+#include <Library/OcAfterBootCompatLib.h>
 #include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcAppleEventLib.h>
 #include <Library/OcAppleImageConversionLib.h>

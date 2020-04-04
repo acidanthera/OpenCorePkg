@@ -19,7 +19,7 @@
 
 #include <IndustryStandard/AppleBootArgs.h>
 
-#include <Library/OcAppleBootCompatLib.h>
+#include <Library/OcAfterBootCompatLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcMemoryLib.h>

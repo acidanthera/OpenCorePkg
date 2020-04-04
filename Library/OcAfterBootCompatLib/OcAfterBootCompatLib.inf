@@ -18,11 +18,11 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = OcAppleBootCompatLib
+  BASE_NAME                      = OcAfterBootCompatLib
   FILE_GUID                      = A393F7CF-3966-4C7E-8763-3DD991681C9B
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = OcAppleBootCompatLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+  LIBRARY_CLASS                  = OcAfterBootCompatLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
 
 #
 # The following information is for reference only and not required by the build tools.
@@ -34,7 +34,7 @@
   BootCompatInternal.h
   CustomSlide.c
   KernelSupport.c
-  OcAppleBootCompatLib.c
+  OcAfterBootCompatLib.c
   ServiceOverrides.c
   # All headers should go to [Sources], this sounds like a bug in EDK II Build System.
   IA32/ContextSwitch.h
@@ -57,7 +57,7 @@
   gAppleBootVariableGuid        ## SOMETIMES_CONSUMES
 
 [Protocols]
-  gOcAppleBootCompatProtocolGuid    ## PRODUCES
+  gOcAfterBootCompatProtocolGuid    ## PRODUCES
   gOcFirmwareRuntimeProtocolGuid    ## SOMETIMES_CONSUMES
 
 [LibraryClasses]

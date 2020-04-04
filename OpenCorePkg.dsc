@@ -44,7 +44,7 @@
   MacInfoLib|MacInfoPkg/Library/MacInfoLib/MacInfoLib.inf
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
   OcAcpiLib|OpenCorePkg/Library/OcAcpiLib/OcAcpiLib.inf
-  OcAppleBootCompatLib|OpenCorePkg/Library/OcAppleBootCompatLib/OcAppleBootCompatLib.inf
+  OcAfterBootCompatLib|OpenCorePkg/Library/OcAfterBootCompatLib/OcAfterBootCompatLib.inf
   OcAppleBootPolicyLib|OpenCorePkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
   OcAppleChunklistLib|OpenCorePkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
   OcAppleDiskImageLib|OpenCorePkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
@@ -151,7 +151,7 @@
   OpenCorePkg/Application/VerifyMsrE2/VerifyMsrE2.inf
   OpenCorePkg/Debug/GdbSyms/GdbSyms.inf
   OpenCorePkg/Library/OcAcpiLib/OcAcpiLib.inf
-  OpenCorePkg/Library/OcAppleBootCompatLib/OcAppleBootCompatLib.inf
+  OpenCorePkg/Library/OcAfterBootCompatLib/OcAfterBootCompatLib.inf
   OpenCorePkg/Library/OcAppleBootPolicyLib/OcAppleBootPolicyLib.inf
   OpenCorePkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
   OpenCorePkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf

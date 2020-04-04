@@ -12,8 +12,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef OC_APPLE_BOOT_COMPAT_LIB_H
-#define OC_APPLE_BOOT_COMPAT_LIB_H
+#ifndef OC_AFTER_BOOT_COMPAT_LIB_H
+#define OC_AFTER_BOOT_COMPAT_LIB_H
 
 /**
   Apple Boot Compatibility layer configuration.
@@ -137,4 +137,4 @@ OcAbcInitialize (
   IN OC_ABC_SETTINGS  *Settings
   );
 
-#endif // OC_APPLE_BOOT_COMPAT_LIB_H
+#endif // OC_AFTER_BOOT_COMPAT_LIB_H
