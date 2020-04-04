@@ -21,7 +21,7 @@
 #include <Library/OcMemoryLib.h>
 
 PAGE_MAP_AND_DIRECTORY_POINTER  *
-GetCurrentPageTable (
+OcGetCurrentPageTable (
   OUT UINTN                           *Flags  OPTIONAL
   )
 {
@@ -40,7 +40,7 @@ GetCurrentPageTable (
 }
 
 EFI_STATUS
-GetPhysicalAddress (
+OcGetPhysicalAddress (
   IN  PAGE_MAP_AND_DIRECTORY_POINTER   *PageTable  OPTIONAL,
   IN  EFI_VIRTUAL_ADDRESS              VirtualAddr,
   OUT EFI_PHYSICAL_ADDRESS             *PhysicalAddr
@@ -58,7 +58,7 @@ GetPhysicalAddress (
   PAGE_TABLE_1G_ENTRY             *PTE1G;
 
   if (PageTable == NULL) {
-    PageTable = GetCurrentPageTable (NULL);
+    PageTable = OcGetCurrentPageTable (NULL);
   }
 
   VA.Uint64 = (UINT64) VirtualAddr;
@@ -152,7 +152,7 @@ VmAllocateMemoryPool (
   EFI_PHYSICAL_ADDRESS    Addr;
 
   Addr = BASE_4GB;
-  Status = AllocatePagesFromTop (
+  Status = OcAllocatePagesFromTop (
     EfiBootServicesData,
     NumPages,
     &Addr,
@@ -209,7 +209,7 @@ VmMapVirtualPage (
   UINTN                           Index;
 
   if (PageTable == NULL) {
-    PageTable = GetCurrentPageTable (NULL);
+    PageTable = OcGetCurrentPageTable (NULL);
   }
 
   VA.Uint64 = (UINT64) VirtualAddr;
@@ -384,7 +384,7 @@ VmMapVirtualPages (
   EFI_STATUS  Status;
 
   if (PageTable == NULL) {
-    PageTable = GetCurrentPageTable (NULL);
+    PageTable = OcGetCurrentPageTable (NULL);
   }
 
   Status = EFI_SUCCESS;

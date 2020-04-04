@@ -45,6 +45,9 @@
   OcStringLib
 
 [Sources]
+  MemoryAlloc.c
+  MemoryAttributes.c
+  MemoryDebug.c
   MemoryMap.c
   LegacyRegionLock.c
   LegacyRegionUnLock.c

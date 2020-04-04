@@ -261,7 +261,7 @@ ShouldUseCustomSlideOffset (
   }
 
   AllocatedMapPages = BASE_4GB;
-  Status = GetCurrentMemoryMapAlloc (
+  Status = OcGetCurrentMemoryMapAlloc (
     &MemoryMapSize,
     &MemoryMap,
     &MapKey,
@@ -285,7 +285,7 @@ ShouldUseCustomSlideOffset (
                                 CpuGeneration == OcCpuGenerationIvyBridge;
 
   SlideSupport->EstimatedKernelArea = (UINTN) EFI_PAGES_TO_SIZE (
-    CountRuntimePages (MemoryMapSize, MemoryMap, DescriptorSize, NULL)
+    OcCountRuntimePages (MemoryMapSize, MemoryMap, DescriptorSize, NULL)
     ) + ESTIMATED_KERNEL_SIZE;
 
   //

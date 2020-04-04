@@ -136,7 +136,7 @@ OcAbcInitialize (
     ));
 
   DEBUG_CODE_BEGIN ();
-  TotalMemory = CountFreePages (&LowMemory);
+  TotalMemory = OcCountFreePages (&LowMemory);
   DEBUG ((
     DEBUG_INFO,
     "OCABC: Firmware has %Lu free pages (%Lu in lower 4 GB)\n",

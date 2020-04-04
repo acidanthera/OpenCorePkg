@@ -84,9 +84,11 @@ UefiMain (
     OcSortMemoryMap (MemoryMapSize, MemoryMap, DescriptorSize);
     DEBUG ((DEBUG_INFO, "MMDD: Dumping the original memory map\n"));
     OcPrintMemoryMap (MemoryMapSize, MemoryMap, DescriptorSize);
-    OcUpdateAttributes (Address, EfiRuntimeServicesCode, EFI_MEMORY_RO, EFI_MEMORY_XP);
+    DEBUG ((DEBUG_INFO, "MMDD: Dumping patched attributes\n"));
+    OcRebuildAttributes (Address, NULL);
     Status = OcSplitMemoryMapByAttributes (OriginalSize, &MemoryMapSize, MemoryMap, DescriptorSize);
     if (!EFI_ERROR (Status)) {
+      OcPrintMemoryAttributesTable ();
       DEBUG ((DEBUG_INFO, "MMDD: Dumping patched memory map\n"));
       OcPrintMemoryMap (MemoryMapSize, MemoryMap, DescriptorSize);
     } else {

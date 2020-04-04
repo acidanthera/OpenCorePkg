@@ -181,7 +181,7 @@ PerformRtMemoryVirtualMapping (
   //
   // Get current VM page table.
   //
-  PageTable = GetCurrentPageTable (NULL);
+  PageTable = OcGetCurrentPageTable (NULL);
 
   for (Index = 0; Index < NumEntries; ++Index) {
     //
@@ -520,7 +520,7 @@ AppleMapPrepareBooterState (
       //
       BootCompat->KernelState.SysTableRtArea     = BASE_4GB;
       BootCompat->KernelState.SysTableRtAreaSize = gST->Hdr.HeaderSize;
-      Status = AllocatePagesFromTop (
+      Status = OcAllocatePagesFromTop (
         EfiRuntimeServicesData,
         EFI_SIZE_TO_PAGES (gST->Hdr.HeaderSize),
         &BootCompat->KernelState.SysTableRtArea,

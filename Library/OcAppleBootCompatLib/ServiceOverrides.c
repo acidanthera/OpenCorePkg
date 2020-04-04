@@ -56,6 +56,10 @@ FixRuntimeAttributes (
 
   if (BootCompat->Settings.SyncRuntimePermissions && BootCompat->ServiceState.FwRuntime != NULL) {
     //
+    // Be very careful of recursion here, who knows what the firmware can call.
+    //
+    BootCompat->Settings.SyncRuntimePermissions = FALSE;
+    //
     // Some firmwares do not update MAT after loading runtime drivers after EndOfDxe.
     // Since the memory used to allocate runtime driver resides in BINs, MAT has whatever
     // permissions designated for unused memory. Mark unused memory containing our driver
@@ -65,8 +69,13 @@ FixRuntimeAttributes (
     Status = BootCompat->ServiceState.FwRuntime->GetExecArea (&Address, &Pages);
 
     if (!EFI_ERROR (Status)) {
-      OcUpdateAttributes (Address, EfiRuntimeServicesCode, EFI_MEMORY_RO, EFI_MEMORY_XP);
+      OcRebuildAttributes (Address, BootCompat->ServicePtrs.GetMemoryMap);
     }
+
+    //
+    // Permit syncing runtime permissions again.
+    //
+    BootCompat->Settings.SyncRuntimePermissions = TRUE;
   }
 }
 
@@ -115,7 +124,7 @@ ForceExitBootServices (
     // It is technically forbidden to allocate pool memory here, but we should not hit this code
     // in the first place, and for older firmwares, where it was necessary (?), it worked just fine.
     //
-    Status = GetCurrentMemoryMapAlloc (
+    Status = OcGetCurrentMemoryMapAlloc (
       &MemoryMapSize,
       &MemoryMap,
       &MapKey,

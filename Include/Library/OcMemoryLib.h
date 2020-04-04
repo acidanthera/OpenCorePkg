@@ -103,12 +103,12 @@ OcGetCurrentMemoryMap (
   @param[out]    DescriptorSize     Resulting memory map descriptor size in bytes.
   @param[out]    DescriptorVersion  Memory map descriptor version.
   @param[in]     GetMemoryMap       Custom GetMemoryMap implementation to use, optional.
-  @param[in,out] TopMemory          Base top address for AllocatePagesFromTop allocation, number of pages after return.
+  @param[in,out] TopMemory          Base top address for OcAllocatePagesFromTop allocation, number of pages after return.
 
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-GetCurrentMemoryMapAlloc (
+OcGetCurrentMemoryMapAlloc (
      OUT UINTN                  *MemoryMapSize,
      OUT EFI_MEMORY_DESCRIPTOR  **MemoryMap,
      OUT UINTN                  *MapKey,
@@ -163,7 +163,7 @@ OcShrinkMemoryMap (
 **/
 EFI_STATUS
 OcDeduplicateDescriptors (
-  IN OUT UINTN                  *EntryCount,
+  IN OUT UINT32                 *EntryCount,
   IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
   IN     UINTN                  DescriptorSize
   );
@@ -182,7 +182,6 @@ BOOLEAN
   IN EFI_PHYSICAL_ADDRESS  Address,
   IN UINTN                 Size
   );
-
 
 /**
   Filter memory map entries.
@@ -214,7 +213,7 @@ VOID
   @retval EFI_SUCCESS on successful allocation.
 **/
 EFI_STATUS
-AllocatePagesFromTop (
+OcAllocatePagesFromTop (
   IN     EFI_MEMORY_TYPE         MemoryType,
   IN     UINTN                   Pages,
   IN OUT EFI_PHYSICAL_ADDRESS    *Memory,
@@ -233,7 +232,7 @@ AllocatePagesFromTop (
   @retval Number of runtime pages.
 **/
 UINT64
-CountRuntimePages (
+OcCountRuntimePages (
   IN  UINTN                  MemoryMapSize,
   IN  EFI_MEMORY_DESCRIPTOR  *MemoryMap,
   IN  UINTN                  DescriptorSize,
@@ -248,7 +247,7 @@ CountRuntimePages (
   @retval Number of free pages.
 **/
 UINTN
-CountFreePages (
+OcCountFreePages (
   OUT UINTN                  *LowerMemory  OPTIONAL
   );
 
@@ -317,20 +316,16 @@ OcGetMemoryAttributes (
   Refresh memory attributes entry containing the specified address.
 
   @param[in]  Address         Address contained in the updated entry.
-  @param[in]  Type            Memory type to assign to the entry.
-  @param[in]  SetAttribues    Attributes to set.
-  @param[in]  DropAttributes  Attributes to remove.
+  @param[in]  GetMemoryMap    
 
   @retval EFI_SUCCESS on success.
   @retval EFI_NOT_FOUND no entry contains the specified address.
   @retval EFI_UNSUPPORTED memory attributes are not supported by the platform.
 **/
 EFI_STATUS
-OcUpdateAttributes (
+OcRebuildAttributes (
   IN EFI_PHYSICAL_ADDRESS  Address,
-  IN EFI_MEMORY_TYPE       Type,
-  IN UINT64                SetAttributes,
-  IN UINT64                DropAttributes
+  IN EFI_GET_MEMORY_MAP    GetMemoryMap  OPTIONAL
   );
 
 /**
@@ -374,7 +369,7 @@ OcSplitMemoryMapByAttributes (
   @retval Current page table address.
 **/
 PAGE_MAP_AND_DIRECTORY_POINTER  *
-GetCurrentPageTable (
+OcGetCurrentPageTable (
   OUT UINTN                           *Flags  OPTIONAL
   );
 
@@ -388,7 +383,7 @@ GetCurrentPageTable (
   @retval EFI_SUCCESS on successful lookup.
 **/
 EFI_STATUS
-GetPhysicalAddress (
+OcGetPhysicalAddress (
   IN  PAGE_MAP_AND_DIRECTORY_POINTER   *PageTable  OPTIONAL,
   IN  EFI_VIRTUAL_ADDRESS              VirtualAddr,
   OUT EFI_PHYSICAL_ADDRESS             *PhysicalAddr
