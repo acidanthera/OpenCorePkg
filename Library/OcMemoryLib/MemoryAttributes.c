@@ -192,6 +192,7 @@ OcExpandAttributesByMap (
   UINTN                 MatIndex;
   EFI_PHYSICAL_ADDRESS  LastAddress;
   BOOLEAN               DoneWithMat;
+  BOOLEAN               LastMat;
 
   MatIndex = 0;
   Status   = EFI_NOT_FOUND;
@@ -204,13 +205,14 @@ OcExpandAttributesByMap (
       DoneWithMat = FALSE;
 
       while (MatIndex < MemoryAttributesTable->NumberOfEntries && !DoneWithMat) {
+        LastMat = (MatIndex + 1) == MemoryAttributesTable->NumberOfEntries;
         if (MemoryAttributesEntry->PhysicalStart >= MemoryMap->PhysicalStart
           && MemoryAttributesEntry->PhysicalStart <= LastAddress) {
           //
           // We have an attribute for that memory map descriptor, assume it is parsed.
           //
           DoneWithMat = TRUE;
-        } else if (LastAddress < MemoryAttributesEntry->PhysicalStart) {
+        } else if (LastAddress < MemoryAttributesEntry->PhysicalStart || LastMat) {
           //
           // We have an attribute past the memory map descriptor, insert the new one here.
           //
@@ -244,6 +246,12 @@ OcExpandAttributesByMap (
           ++MemoryAttributesTable->NumberOfEntries;
           DoneWithMat = TRUE;
           Status = EFI_SUCCESS;
+          //
+          // Do not increment on last mat, as we may add multiple entries past last.
+          //
+          if (LastMat) {
+            break;
+          }
         }
 
         MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (
