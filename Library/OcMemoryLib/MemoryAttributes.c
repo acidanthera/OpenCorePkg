@@ -190,8 +190,10 @@ OcExpandAttributesByMap (
   EFI_STATUS            Status;
   UINTN                 MapIndex;
   UINTN                 MatIndex;
-  EFI_PHYSICAL_ADDRESS  LastAddress;
-  BOOLEAN               DoneWithMat;
+  EFI_PHYSICAL_ADDRESS  LastMapAddress;
+  EFI_PHYSICAL_ADDRESS  LastMatAddress;
+  EFI_PHYSICAL_ADDRESS  NewNextGluedAddress;
+  EFI_PHYSICAL_ADDRESS  NextGluedAddress;
   BOOLEAN               LastMat;
 
   MatIndex = 0;
@@ -201,59 +203,116 @@ OcExpandAttributesByMap (
     if (MemoryMap->Type == EfiRuntimeServicesCode
       || MemoryMap->Type == EfiRuntimeServicesData) {
 
-      LastAddress = LAST_DESCRIPTOR_ADDR (MemoryMap);
-      DoneWithMat = FALSE;
+      LastMapAddress   = LAST_DESCRIPTOR_ADDR (MemoryMap);
+      NextGluedAddress = MemoryMap->PhysicalStart;
 
-      while (MatIndex < MemoryAttributesTable->NumberOfEntries && !DoneWithMat) {
-        LastMat = (MatIndex + 1) == MemoryAttributesTable->NumberOfEntries;
-        if (MemoryAttributesEntry->PhysicalStart >= MemoryMap->PhysicalStart
-          && MemoryAttributesEntry->PhysicalStart <= LastAddress) {
-          //
-          // We have an attribute for that memory map descriptor, assume it is parsed.
-          //
-          DoneWithMat = TRUE;
-        } else if (LastAddress < MemoryAttributesEntry->PhysicalStart || LastMat) {
-          //
-          // We have an attribute past the memory map descriptor, insert the new one here.
-          //
-          if (MemoryAttributesTable->NumberOfEntries >= MaxDescriptors) {
-            return EFI_OUT_OF_RESOURCES;
+      while (MatIndex < MemoryAttributesTable->NumberOfEntries) {
+        LastMatAddress = LAST_DESCRIPTOR_ADDR (MemoryAttributesEntry);
+        LastMat        = MatIndex + 1 == MemoryAttributesTable->NumberOfEntries;
+
+        //
+        // Skip unsupported MAT type.
+        // Skip MAT entry relevant to not existent or older MAP entry,
+        // but only if it is not the last one.
+        //
+        if ((MemoryMap->Type != EfiRuntimeServicesCode && MemoryMap->Type != EfiRuntimeServicesData)
+          || (LastMatAddress < MemoryMap->PhysicalStart && !LastMat)) {
+          MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (
+            MemoryAttributesEntry,
+            MemoryAttributesTable->DescriptorSize
+            );
+          ++MatIndex;
+          continue;
+        }
+
+        //
+        // 1. MAT entry at the beginning of MAP entry.
+        // 2. MAT entry continuing previous MAT entry within MAP entry.
+        // MAT is required to be smaller or equal than MAP by UEFI spec.
+        //
+        if (NextGluedAddress == MemoryAttributesEntry->PhysicalStart) {
+          ASSERT (MemoryAttributesEntry->NumberOfPages <= MemoryMap->NumberOfPages);
+          if (LastMatAddress == LastMapAddress) {
+            //
+            // Completed iterating over this MAP entry.
+            //
+            break;
           }
+          ASSERT (LastMatAddress < LastMapAddress);
+          NextGluedAddress = LastMatAddress + 1;
+          MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (
+            MemoryAttributesEntry,
+            MemoryAttributesTable->DescriptorSize
+            );
+          ++MatIndex;
+          continue;
+        }
+
+        //
+        // Have a hole between neighbouring MAT entries, 3 variants:
+        // - MAT is within MAP (but starts later).
+        // - MAT starts after MAP.
+        // - No MAT to cover MAP (this is the last MAT entry).
+        // Need to insert a new MAT entry to cover the hole.
+        //
+        if (MemoryAttributesTable->NumberOfEntries >= MaxDescriptors) {
+          return EFI_OUT_OF_RESOURCES;
+        }
+
+        if (!LastMat) {
+          //
+          // Choose the next processed address. This is the closest boundary for us:
+          // - First MAT address, when MAT is within MAP.
+          // - Last MAP address, when MAT starts after MAP.
+          //
+          NewNextGluedAddress = MIN (LastMapAddress + 1, MemoryAttributesEntry->PhysicalStart);
           //
           // Copy existing attributes to the right.
           //
+          ASSERT (MemoryAttributesEntry->PhysicalStart > NextGluedAddress);
           CopyMem (
             NEXT_MEMORY_DESCRIPTOR (MemoryAttributesEntry, MemoryAttributesTable->DescriptorSize),
             MemoryAttributesEntry,
             (MemoryAttributesTable->NumberOfEntries - MatIndex) * MemoryAttributesTable->DescriptorSize
             );
+        } else {
           //
-          // Write the new attribute.
+          // Adding up to the end of MAP, nothing to copy.
           //
-          MemoryAttributesEntry->Type          = OcRealMemoryType (MemoryMap);
-          MemoryAttributesEntry->PhysicalStart = MemoryMap->PhysicalStart;
-          MemoryAttributesEntry->VirtualStart  = 0;
-          MemoryAttributesEntry->NumberOfPages = MemoryMap->NumberOfPages;
-          MemoryAttributesEntry->Attribute     = EFI_MEMORY_RUNTIME;
-          if (MemoryAttributesEntry->Type == EfiRuntimeServicesCode) {
-            MemoryAttributesEntry->Attribute |= EFI_MEMORY_RO;
-          } else {
-            MemoryAttributesEntry->Attribute |= EFI_MEMORY_XP;
-          }
-          //
-          // Increase the amount of entries and complete iteration.
-          //
-          ++MemoryAttributesTable->NumberOfEntries;
-          DoneWithMat = TRUE;
-          Status = EFI_SUCCESS;
-          //
-          // Do not increment on last mat, as we may add multiple entries past last.
-          //
-          if (LastMat) {
-            break;
-          }
+          ASSERT (MemoryAttributesEntry->PhysicalStart < NextGluedAddress);
+          NewNextGluedAddress = LastMapAddress + 1;
         }
-
+        //
+        // Write the new attribute.
+        //
+        MemoryAttributesEntry->Type          = OcRealMemoryType (MemoryMap);
+        MemoryAttributesEntry->PhysicalStart = NextGluedAddress;
+        MemoryAttributesEntry->VirtualStart  = 0;
+        MemoryAttributesEntry->NumberOfPages = EFI_SIZE_TO_PAGES (NewNextGluedAddress - NextGluedAddress);
+        MemoryAttributesEntry->Attribute     = EFI_MEMORY_RUNTIME;
+        if (MemoryAttributesEntry->Type == EfiRuntimeServicesCode) {
+          MemoryAttributesEntry->Attribute |= EFI_MEMORY_RO;
+        } else {
+          MemoryAttributesEntry->Attribute |= EFI_MEMORY_XP;
+        }
+        //
+        // Increase the amount of entries and mark success.
+        //
+        ++MemoryAttributesTable->NumberOfEntries;
+        Status = EFI_SUCCESS;
+        //
+        // Choose the next processed address.
+        //
+        NextGluedAddress = NewNextGluedAddress;
+        //
+        // Done processing MATs.
+        //
+        if (NextGluedAddress == LastMapAddress + 1) {
+          break;
+        }
+        //
+        // Process next MAT.
+        //
         MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (
           MemoryAttributesEntry,
           MemoryAttributesTable->DescriptorSize
