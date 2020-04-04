@@ -111,7 +111,7 @@ OcPrintMemoryAttributesTable (
   //
   // Printing may reallocate, so we create a copy of the memory attributes.
   //
-  STATIC UINT8 mMemoryAttributesTable[EFI_PAGE_SIZE*2];
+  STATIC UINT8 mMemoryAttributesTable[OC_DEFAULT_MEMORY_MAP_SIZE];
   RealSize = (UINTN) (sizeof (EFI_MEMORY_ATTRIBUTES_TABLE)
     + MemoryAttributesTable->NumberOfEntries * MemoryAttributesTable->DescriptorSize);
 

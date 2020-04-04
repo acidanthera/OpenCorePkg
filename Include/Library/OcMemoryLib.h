@@ -45,6 +45,12 @@
 #define OC_DEFAULT_VMEM_PAGE_COUNT 0x200
 
 /**
+  Reasonable default memory map size used when allocations are problematic.
+  Note, that MacPro5,1 is known to have 8880 memory map.
+**/
+#define OC_DEFAULT_MEMORY_MAP_SIZE  (EFI_PAGE_SIZE*3)
+
+/**
   Lock the legacy region specified to enable modification.
 
   @param[in] LegacyAddress  The address of the region to lock.

@@ -59,13 +59,7 @@ FixRuntimeAttributes (
     // Be very careful of recursion here, who knows what the firmware can call.
     //
     BootCompat->Settings.SyncRuntimePermissions = FALSE;
-    //
-    // Some firmwares do not update MAT after loading runtime drivers after EndOfDxe.
-    // Since the memory used to allocate runtime driver resides in BINs, MAT has whatever
-    // permissions designated for unused memory. Mark unused memory containing our driver
-    // as executable here.
-    // REF: https://github.com/acidanthera/bugtracker/issues/491#issuecomment-606835337
-    //
+
     Status = BootCompat->ServiceState.FwRuntime->GetExecArea (&Address, &Pages);
 
     if (!EFI_ERROR (Status)) {
@@ -207,6 +201,16 @@ ProtectCsmRegion (
         Desc->Type = EfiACPIMemoryNVS;
         break;
       }
+    }
+
+    Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
+  }
+
+  Desc = MemoryMap;
+
+  for (Index = 0; Index < NumEntries; ++Index) {
+    if (Desc->Type == EfiReservedMemoryType && (Desc->Attribute & EFI_MEMORY_RUNTIME) != 0) {
+      Desc->Type = EfiMemoryMappedIO;
     }
 
     Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);

@@ -162,6 +162,107 @@ OcSplitMemoryEntryByAttribute (
   return EFI_SUCCESS;
 }
 
+/**
+  Expand attributes table by adding memory map runtime entries into it.
+  Requires sorted memory map.
+
+  @param[in,out]  MemoryAttributesTable   Memory attributes table.
+  @param[in,out]  MemoryAttributesEntry   Memory attributes descriptor.
+  @param[in]      MaxDescriptors          Maximum amount of descriptors in the attributes table.
+  @param[in]      MemoryMapDescriptors    Memory map descriptor count.
+  @param[in]      MemoryMap               Memory map.
+  @param[in]      DescriptorSize          Memory map descriptor size.
+
+  @retval EFI_SUCCESS on success.
+  @retval EFI_NOT_FOUND nothing to do.
+**/
+STATIC
+EFI_STATUS
+OcExpandAttributesByMap (
+  IN OUT EFI_MEMORY_ATTRIBUTES_TABLE  *MemoryAttributesTable,
+  IN OUT EFI_MEMORY_DESCRIPTOR        *MemoryAttributesEntry,
+  IN     UINTN                        MaxDescriptors,
+  IN     UINTN                        MemoryMapDescriptors,
+  IN     EFI_MEMORY_DESCRIPTOR        *MemoryMap,
+  IN     UINTN                        DescriptorSize
+  )
+{
+  EFI_STATUS            Status;
+  UINTN                 MapIndex;
+  UINTN                 MatIndex;
+  EFI_PHYSICAL_ADDRESS  LastAddress;
+  BOOLEAN               DoneWithMat;
+
+  MatIndex = 0;
+  Status   = EFI_NOT_FOUND;
+
+  for (MapIndex = 0; MapIndex < MemoryMapDescriptors; ++MapIndex) {
+    if (MemoryMap->Type == EfiRuntimeServicesCode
+      || MemoryMap->Type == EfiRuntimeServicesData) {
+
+      LastAddress = LAST_DESCRIPTOR_ADDR (MemoryMap);
+      DoneWithMat = FALSE;
+
+      while (MatIndex < MemoryAttributesTable->NumberOfEntries && !DoneWithMat) {
+        if (MemoryAttributesEntry->PhysicalStart >= MemoryMap->PhysicalStart
+          && MemoryAttributesEntry->PhysicalStart <= LastAddress) {
+          //
+          // We have an attribute for that memory map descriptor, assume it is parsed.
+          //
+          DoneWithMat = TRUE;
+        } else if (LastAddress < MemoryAttributesEntry->PhysicalStart) {
+          //
+          // We have an attribute past the memory map descriptor, insert the new one here.
+          //
+          if (MemoryAttributesTable->NumberOfEntries >= MaxDescriptors) {
+            return EFI_OUT_OF_RESOURCES;
+          }
+          //
+          // Copy existing attributes to the right.
+          //
+          CopyMem (
+            NEXT_MEMORY_DESCRIPTOR (MemoryAttributesEntry, MemoryAttributesTable->DescriptorSize),
+            MemoryAttributesEntry,
+            (MemoryAttributesTable->NumberOfEntries - MatIndex) * MemoryAttributesTable->DescriptorSize
+            );
+          //
+          // Write the new attribute.
+          //
+          MemoryAttributesEntry->Type          = OcRealMemoryType (MemoryMap);
+          MemoryAttributesEntry->PhysicalStart = MemoryMap->PhysicalStart;
+          MemoryAttributesEntry->VirtualStart  = 0;
+          MemoryAttributesEntry->NumberOfPages = MemoryMap->NumberOfPages;
+          MemoryAttributesEntry->Attribute     = EFI_MEMORY_RUNTIME;
+          if (MemoryAttributesEntry->Type == EfiRuntimeServicesCode) {
+            MemoryAttributesEntry->Attribute |= EFI_MEMORY_RO;
+          } else {
+            MemoryAttributesEntry->Attribute |= EFI_MEMORY_XP;
+          }
+          //
+          // Increase the amount of entries and complete iteration.
+          //
+          ++MemoryAttributesTable->NumberOfEntries;
+          DoneWithMat = TRUE;
+          Status = EFI_SUCCESS;
+        }
+
+        MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (
+          MemoryAttributesEntry,
+          MemoryAttributesTable->DescriptorSize
+          );
+        ++MatIndex;
+      }
+    }
+
+    MemoryMap = NEXT_MEMORY_DESCRIPTOR (
+      MemoryMap,
+      DescriptorSize
+      );
+  }
+
+  return Status;
+}
+
 EFI_MEMORY_ATTRIBUTES_TABLE *
 OcGetMemoryAttributes (
   OUT EFI_MEMORY_DESCRIPTOR  **MemoryAttributesEntry  OPTIONAL
@@ -193,6 +294,11 @@ OcRebuildAttributes (
   EFI_MEMORY_ATTRIBUTES_TABLE        *MemoryAttributesTable;
   EFI_MEMORY_DESCRIPTOR              *MemoryAttributesEntry;
   UINTN                              MaxDescriptors;
+  UINTN                              MemoryMapSize;
+  EFI_MEMORY_DESCRIPTOR              *MemoryMap;
+  UINTN                              DescriptorSize;
+  UINTN                              MapKey;
+  UINT32                             DescriptorVersion;
 
   MemoryAttributesTable = OcGetMemoryAttributes (&MemoryAttributesEntry);
   if (MemoryAttributesTable == NULL) {
@@ -212,17 +318,57 @@ OcRebuildAttributes (
     );
   if (!EFI_ERROR (Status)) {
     //
+    // Statically allocate memory for the memory map to avoid allocations.
+    //
+    STATIC UINT8 mMemoryMap[OC_DEFAULT_MEMORY_MAP_SIZE];
+
+    //
     // Assume effected and add missing entries.
     //
     if (GetMemoryMap == NULL) {
       GetMemoryMap = gBS->GetMemoryMap;
     }
 
-    //
-    // TODO: Implement
-    //
+    MemoryMapSize = sizeof (mMemoryMap);
+    MemoryMap     = (EFI_MEMORY_DESCRIPTOR *) mMemoryMap;
+
+    Status = GetMemoryMap (
+      &MemoryMapSize,
+      MemoryMap,
+      &MapKey,
+      &DescriptorSize,
+      &DescriptorVersion
+      );
+
+    if (!EFI_ERROR (Status)) {
+      OcSortMemoryMap (
+        MemoryMapSize,
+        MemoryMap,
+        DescriptorSize
+        );
+
+      OcExpandAttributesByMap (
+        MemoryAttributesTable,
+        MemoryAttributesEntry,
+        MaxDescriptors,
+        MemoryMapSize / DescriptorSize,
+        MemoryMap,
+        DescriptorSize
+        );
+    } else {
+      //
+      // TODO: Scream in fear here? We cannot log, but for a fatal error it is "fine".
+      //
+    }
   }
 
+  //
+  // Some firmwares do not update MAT after loading runtime drivers after EndOfDxe.
+  // Since the memory used to allocate runtime driver resides in BINs, MAT has whatever
+  // permissions designated for unused memory. Mark unused memory containing our driver
+  // as executable here.
+  // REF: https://github.com/acidanthera/bugtracker/issues/491#issuecomment-606835337
+  //
   Status = OcUpdateDescriptors (
     MemoryAttributesTable->NumberOfEntries * MemoryAttributesTable->DescriptorSize,
     MemoryAttributesEntry,
