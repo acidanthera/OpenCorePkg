@@ -50,7 +50,7 @@ UefiMain (
       (UINT32) Address,
       Status
       ));
-  } else if (FwRuntime->Revision != OC_FIRMWARE_RUNTIME_REVISION) {
+  } else if (!EFI_ERROR (Status) && FwRuntime->Revision != OC_FIRMWARE_RUNTIME_REVISION) {
     DEBUG ((
       DEBUG_WARN,
       "MMDD: OpenRuntime has unexpected revision r%u instead of r%u\n",
@@ -84,17 +84,17 @@ UefiMain (
     OcSortMemoryMap (MemoryMapSize, MemoryMap, DescriptorSize);
     DEBUG ((DEBUG_INFO, "MMDD: Dumping the original memory map\n"));
     OcPrintMemoryMap (MemoryMapSize, MemoryMap, DescriptorSize);
-    DEBUG ((DEBUG_INFO, "MMDD: Dumping patched memory map\n"));
     OcUpdateAttributes (Address, EfiRuntimeServicesCode, EFI_MEMORY_RO, EFI_MEMORY_XP);
     Status = OcSplitMemoryMapByAttributes (OriginalSize, &MemoryMapSize, MemoryMap, DescriptorSize);
     if (!EFI_ERROR (Status)) {
-      OcPrintMemoryMap (MemoryMapSize, MemoryMap, DescriptorSize);
-      DEBUG ((DEBUG_INFO, "MMDD: Dumping shrinked memory map\n"));
-      OcShrinkMemoryMap (&MemoryMapSize, MemoryMap, DescriptorSize);
+      DEBUG ((DEBUG_INFO, "MMDD: Dumping patched memory map\n"));
       OcPrintMemoryMap (MemoryMapSize, MemoryMap, DescriptorSize);
     } else {
       DEBUG ((DEBUG_INFO, "MMDD: Cannot patch memory map - %r\n", Status));
     }
+    DEBUG ((DEBUG_INFO, "MMDD: Dumping shrinked memory map\n"));
+    OcShrinkMemoryMap (&MemoryMapSize, MemoryMap, DescriptorSize);
+    OcPrintMemoryMap (MemoryMapSize, MemoryMap, DescriptorSize);
     FreePool (MemoryMap);
   } else {
     DEBUG ((DEBUG_INFO, "MMDD: Unable to obtain memory map\n"));
