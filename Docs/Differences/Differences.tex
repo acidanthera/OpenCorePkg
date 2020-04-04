@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Mar  6 09:43:05 2020
-%DIF ADD ../Configuration.tex        Sat Apr  4 23:12:10 2020
+%DIF ADD ../Configuration.tex        Sat Apr  4 23:32:52 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1375,17 +1375,34 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   of the firmware. Do not use this unless you fully understand the consequences.
 
 \item
-  \texttt{ProtectCsmRegion}\\
+  \texttt{\DIFdelbegin \DIFdel{ProtectCsmRegion}\DIFdelend \DIFaddbegin \DIFadd{ProtectMemoryRegions}\DIFaddend }\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Protect CSM region areas from relocation.
+  \textbf{Description}: Protect \DIFdelbegin \DIFdel{CSM region areas from relocation}\DIFdelend \DIFaddbegin \DIFadd{memory regions from incorrect access}\DIFaddend .
 
-  Ensure that CSM memory regions are marked as ACPI NVS to prevent \DIFdelbegin \DIFdel{boot.efi }\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}} \DIFaddend or
-  XNU from relocating or using them.
+  \DIFdelbegin \DIFdel{Ensure that CSM memory regions are marked as ACPI NVS to prevent boot.
+  efi or XNU from
+  relocating or using them}\DIFdelend \DIFaddbegin \DIFadd{Some firmwares incorrectly map select memory regions:
+}
 
-  \emph{Note}: The necessity of this quirk is determined by artifacts and sleep wake issues.
-  As \texttt{AvoidRuntimeDefrag} resolves a similar problem, no known firmwares should need
-  this quirk. Do not use this unless you fully understand the consequences.
+  \begin{itemize}
+    \tightlist
+    \item \DIFadd{CSM region can be marked as boot services code or data, which
+      leaves it as free memory for XNU kernel.
+    }\item \DIFadd{MMIO regions can be marked as reserved memory and stay unmapped,
+      but may be required to be accessible at runtime for NVRAM support.
+  }\end{itemize}
+
+  \DIFadd{This quirk attempts to fix types of these regions, e.g. ACPI NVS for
+  CSM or MMIO for MMIO}\DIFaddend .
+
+  \emph{Note}: The necessity of this quirk is determined by artifacts\DIFdelbegin \DIFdel{and }\DIFdelend \DIFaddbegin \DIFadd{, }\DIFaddend sleep
+  wake issues\DIFdelbegin \DIFdel{.
+  As }\texttt{\DIFdel{AvoidRuntimeDefrag}} %DIFAUXCMD
+\DIFdel{resolves a similar problem, no known firmwares should }\DIFdelend \DIFaddbegin \DIFadd{, and boot failures. In general only very old firmwares }\DIFaddend need
+  this quirk.
+\DIFdelbegin \DIFdel{Do not use this unless you fully understand the consequences.
+}\DIFdelend 
 
 \item
   \texttt{ProtectSecureBoot}\\
@@ -5393,7 +5410,7 @@ you will need \texttt{debug=0x8} boot argument.
   \item \texttt{EnableSafeModeSlide}
   \item \texttt{EnableWriteUnprotector}
   \item \texttt{ForceExitBootServices}
-  \item \texttt{ProtectCsmRegion}
+  \item \texttt{\DIFdelbegin \DIFdel{ProtectCsmRegion}\DIFdelend \DIFaddbegin \DIFadd{ProtectMemoryRegions}\DIFaddend }
   \item \texttt{ProvideCustomSlide}
   \item \texttt{SetupVirtualMap}
   \item \texttt{ShrinkMemoryMap}

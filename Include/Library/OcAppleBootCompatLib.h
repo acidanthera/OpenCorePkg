@@ -55,10 +55,13 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   BOOLEAN  EnableSafeModeSlide;
   ///
-  /// Attempt to protect certain CSM memory regions from being used by the kernel.
-  /// On older firmwares this caused wake issues.
+  /// Attempt to protect certain memory regions from being incorrectly mapped:
+  /// - CSM region could get used by the kernel due to being BS data,
+  ///   which caused caused wake issues on older firmwares.
+  /// - MMIO regions can be marked as reserved memory and be thus unmapped,
+  ///   which caused boot failures when accessing NVRAM.
   ///
-  BOOLEAN  ProtectCsmRegion;
+  BOOLEAN  ProtectMemoryRegions;
   ///
   /// Rebuild memory map to be compatible with Apple kernel.
   /// - Apply memory attributes and split RT entries into code and data.

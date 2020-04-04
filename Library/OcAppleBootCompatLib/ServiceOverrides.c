@@ -150,7 +150,7 @@ ForceExitBootServices (
 }
 
 /**
-  Protect CSM region in memory map from relocation.
+  Protect regions in memory map.
 
   @param[in,out]  MemoryMapSize      Memory map size in bytes, updated on shrink.
   @param[in,out]  MemoryMap          Memory map to shrink.
@@ -158,7 +158,7 @@ ForceExitBootServices (
 **/
 STATIC
 VOID
-ProtectCsmRegion (
+ProtectMemoryRegions (
   IN     UINTN                  MemoryMapSize,
   IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
   IN     UINTN                  DescriptorSize
@@ -205,6 +205,13 @@ ProtectCsmRegion (
 
     Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
   }
+
+  //
+  // Some firmwares may leave MMIO regions as reserved memory with runtime flag,
+  // which will not get mapped by macOS kernel. This will cause boot failures due
+  // to these firmwares accessing these regions at runtime for NVRAM support.
+  // REF: https://github.com/acidanthera/bugtracker/issues/791#issuecomment-608959387
+  //
 
   Desc = MemoryMap;
 
@@ -478,8 +485,8 @@ OcGetMemoryMap (
   }
 
   if (BootCompat->ServiceState.AppleBootNestedCount > 0) {
-    if (BootCompat->Settings.ProtectCsmRegion) {
-      ProtectCsmRegion (
+    if (BootCompat->Settings.ProtectMemoryRegions) {
+      ProtectMemoryRegions (
         *MemoryMapSize,
         MemoryMap,
         *DescriptorSize

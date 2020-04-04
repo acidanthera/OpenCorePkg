@@ -1309,17 +1309,27 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   of the firmware. Do not use this unless you fully understand the consequences.
 
 \item
-  \texttt{ProtectCsmRegion}\\
+  \texttt{ProtectMemoryRegions}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Protect CSM region areas from relocation.
+  \textbf{Description}: Protect memory regions from incorrect access.
 
-  Ensure that CSM memory regions are marked as ACPI NVS to prevent \texttt{boot.efi} or
-  XNU from relocating or using them.
+  Some firmwares incorrectly map select memory regions:
 
-  \emph{Note}: The necessity of this quirk is determined by artifacts and sleep wake issues.
-  As \texttt{AvoidRuntimeDefrag} resolves a similar problem, no known firmwares should need
-  this quirk. Do not use this unless you fully understand the consequences.
+  \begin{itemize}
+    \tightlist
+    \item CSM region can be marked as boot services code or data, which
+      leaves it as free memory for XNU kernel.
+    \item MMIO regions can be marked as reserved memory and stay unmapped,
+      but may be required to be accessible at runtime for NVRAM support.
+  \end{itemize}
+
+  This quirk attempts to fix types of these regions, e.g. ACPI NVS for
+  CSM or MMIO for MMIO.
+
+  \emph{Note}: The necessity of this quirk is determined by artifacts, sleep
+  wake issues, and boot failures. In general only very old firmwares need
+  this quirk.
 
 \item
   \texttt{ProtectSecureBoot}\\
@@ -5043,7 +5053,7 @@ you will need \texttt{debug=0x8} boot argument.
   \item \texttt{EnableSafeModeSlide}
   \item \texttt{EnableWriteUnprotector}
   \item \texttt{ForceExitBootServices}
-  \item \texttt{ProtectCsmRegion}
+  \item \texttt{ProtectMemoryRegions}
   \item \texttt{ProvideCustomSlide}
   \item \texttt{SetupVirtualMap}
   \item \texttt{ShrinkMemoryMap}

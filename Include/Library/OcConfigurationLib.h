@@ -120,7 +120,7 @@
   _(BOOLEAN                     , EnableSafeModeSlide       ,     , FALSE  , ()) \
   _(BOOLEAN                     , EnableWriteUnprotector    ,     , FALSE  , ()) \
   _(BOOLEAN                     , ForceExitBootServices     ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ProtectCsmRegion          ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ProtectMemoryRegions      ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProtectSecureBoot         ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProtectUefiServices       ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProvideCustomSlide        ,     , FALSE  , ()) \

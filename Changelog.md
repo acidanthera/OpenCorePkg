@@ -24,6 +24,8 @@ OpenCore Changelog
 - Introduced `RebuildAppleMemoryMap` to fix macOS booting on Dell 5490
 - Removed `ShrinkMemoryMap` in favour of more advanced `RebuildAppleMemoryMap`
 - Marked `EnableWriteUnprotector` as deprecated on modern systems
+- Introduced `ProtectMemoryRegions` to fix memory region handling
+- Removed `ProtectCsmRegion` in favour of `ProtectMemoryRegions`
 
 #### v0.5.6
 - Various improvements to builtin text renderer
