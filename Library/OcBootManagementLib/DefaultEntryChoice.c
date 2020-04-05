@@ -1114,7 +1114,7 @@ InternalLoadBootEntry (
   //
   // System entries are not loaded but called directly.
   //
-  ASSERT (BootEntry->Type != OC_BOOT_SYSTEM);
+  ASSERT ((BootEntry->Type & OC_BOOT_SYSTEM) == 0);
   ASSERT (Context != NULL);
   ASSERT (DmgLoadContext != NULL);
 

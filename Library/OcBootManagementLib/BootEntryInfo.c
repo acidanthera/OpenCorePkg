@@ -15,6 +15,7 @@
 #include "BootManagementInternal.h"
 
 #include <Guid/AppleBless.h>
+#include <IndustryStandard/AppleDiskLabel.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -49,7 +50,7 @@ InternalGetAppleDiskLabel (
   }
 
   UnicodeSPrint (DiskLabelPath, DiskLabelPathSize, L"%s%s", BootDirectoryName, LabelFilename);
-  DEBUG ((DEBUG_INFO, "Trying to get label from %s\n", DiskLabelPath));
+  DEBUG ((DEBUG_INFO, "OCBM: Trying to get label from %s\n", DiskLabelPath));
 
   AsciiDiskLabel = (CHAR8 *) ReadFile (FileSystem, DiskLabelPath, &DiskLabelLength, OC_MAX_VOLUME_LABEL_SIZE);
   FreePool (DiskLabelPath);
@@ -65,6 +66,48 @@ InternalGetAppleDiskLabel (
   }
 
   return UnicodeDiskLabel;
+}
+
+EFI_STATUS
+InternalGetAppleImage (
+  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
+  IN  CONST CHAR16                     *DirectoryName,
+  IN  CONST CHAR16                     *LabelFilename,
+  OUT VOID                             **ImageData,
+  OUT UINT32                           *DataSize
+  )
+{
+  CHAR16   *ImagePath;
+  UINTN    ImagePathSize;
+
+  ImagePathSize = StrSize (DirectoryName) + StrSize (LabelFilename) - sizeof (CHAR16);
+  ImagePath     = AllocatePool (ImagePathSize);
+
+  if (ImagePath == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  UnicodeSPrint (ImagePath, ImagePathSize, L"%s%s", DirectoryName, LabelFilename);
+  DEBUG ((DEBUG_INFO, "OCBM: Trying to get image from %s\n", ImagePath));
+
+  *ImageData = ReadFile (FileSystem, ImagePath, DataSize, BASE_16MB);
+
+  FreePool (ImagePath);
+
+  if (*ImageData == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  //
+  // Whether it is disk label or .icns, disk label is always smaller.
+  // Early abort on obviously small images.
+  //
+  if (*DataSize <= sizeof (APPLE_DISK_LABEL)) {
+    FreePool (*ImageData);
+    return EFI_UNSUPPORTED;
+  }
+
+  return EFI_SUCCESS;
 }
 
 STATIC

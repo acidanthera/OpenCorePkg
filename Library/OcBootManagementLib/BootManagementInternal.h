@@ -66,6 +66,15 @@ InternalGetAppleDiskLabel (
   IN  CONST CHAR16                     *LabelFilename
   );
 
+EFI_STATUS
+InternalGetAppleImage (
+  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
+  IN  CONST CHAR16                     *DirectoryName,
+  IN  CONST CHAR16                     *LabelFilename,
+  OUT VOID                             **ImageData,
+  OUT UINT32                           *DataSize
+  );
+
 CHAR16 *
 InternalGetAppleRecoveryName (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,

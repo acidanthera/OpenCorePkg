@@ -7,6 +7,9 @@
 
 #include <Uefi.h>
 
+#include <IndustryStandard/AppleIcon.h>
+#include <IndustryStandard/AppleDiskLabel.h>
+
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/BmpSupportLib.h>
@@ -14,6 +17,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/MtrrLib.h>
 #include <Library/OcCpuLib.h>
+#include <Library/OcGuardLib.h>
 #include <Library/OcPngLib.h>
 #include <Library/TimerLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -50,6 +54,29 @@ STATIC UINT64                        mStartTsc          = 0;
 //
 STATIC UINT8                         mNumValidDrawReqs  = 0;
 STATIC GUI_DRAW_REQUEST              mDrawRequests[4]   = { { 0 } };
+//
+// Disk label palette.
+//
+STATIC
+CONST UINT8
+mAppleDiskLabelImagePalette[256] = {
+  [0x00] = 255,
+  [0xf6] = 238,
+  [0xf7] = 221,
+  [0x2a] = 204,
+  [0xf8] = 187,
+  [0xf9] = 170,
+  [0x55] = 153,
+  [0xfa] = 136,
+  [0xfb] = 119,
+  [0x80] = 102,
+  [0xfc] = 85,
+  [0xfd] = 68,
+  [0xab] = 51,
+  [0xfe] = 34,
+  [0xff] = 17,
+  [0xd6] = 0
+};
 
 BOOLEAN
 GuiClipChildBounds (
@@ -927,7 +954,7 @@ GuiLibConstruct (
 
   mOutputContext = GuiOutputConstruct ();
   if (mOutputContext == NULL) {
-    DEBUG ((DEBUG_ERROR, "Failed to initialise output\n"));
+    DEBUG ((DEBUG_ERROR, "OCUI: Failed to initialise output\n"));
     return EFI_UNSUPPORTED;
   }
 
@@ -944,12 +971,12 @@ GuiLibConstruct (
                       OutputInfo->VerticalResolution
                       );
   if (mPointerContext == NULL) {
-    DEBUG ((DEBUG_WARN, "Failed to initialise pointer\n"));
+    DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise pointer\n"));
   }
 
   mKeyContext = GuiKeyConstruct ();
   if (mKeyContext == NULL) {
-    DEBUG ((DEBUG_WARN, "Failed to initialise key input\n"));
+    DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise key input\n"));
   }
 
   if (mPointerContext == NULL && mKeyContext == NULL) {
@@ -960,7 +987,7 @@ GuiLibConstruct (
   mScreenBufferDelta = OutputInfo->HorizontalResolution * sizeof (*mScreenBuffer);
   mScreenBuffer      = AllocatePool (OutputInfo->VerticalResolution * mScreenBufferDelta);
   if (mScreenBuffer == NULL) {
-    DEBUG ((DEBUG_ERROR, "GUI alloc failure\n"));
+    DEBUG ((DEBUG_ERROR, "OCUI: GUI alloc failure\n"));
     GuiLibDestruct ();
     return EFI_OUT_OF_RESOURCES;
   }
@@ -1197,10 +1224,126 @@ GuiDrawLoop (
 }
 
 RETURN_STATUS
+GuiIcnsToImageIcon (
+  OUT GUI_IMAGE  *Image,
+  IN  VOID       *IcnsImage,
+  IN  UINT32     IcnsImageSize,
+  IN  UINT8      Scale
+  )
+{
+  EFI_STATUS         Status;
+  UINT32             Offset;
+  UINT32             RecordLength;
+  APPLE_ICNS_RECORD  *Record;
+
+  ASSERT (Scale == 1 || Scale == 2);
+
+  //
+  // We do not need to support 'it32' 128x128 icon format,
+  // because Finder automatically converts the icons to PNG-based
+  // when assigning volume icon.
+  //
+
+  if (IcnsImageSize < sizeof (APPLE_ICNS_RECORD)*2) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Record = IcnsImage;
+  if (Record->Type != APPLE_ICNS_MAGIC || SwapBytes32 (Record->Size) != IcnsImageSize) {
+    return EFI_SECURITY_VIOLATION;
+  }
+
+  Offset  = sizeof (APPLE_ICNS_RECORD);
+  while (Offset < IcnsImageSize - sizeof (APPLE_ICNS_RECORD)) {
+    Record       = (APPLE_ICNS_RECORD *) ((UINT8 *) IcnsImage + Offset);
+    RecordLength = SwapBytes32 (Record->Size);
+
+    //
+    // 1. Record smaller than its header is invalid.
+    // 2. Record overflowing UINT32 is invalid.
+    // 3. Record larger than file size is invalid.
+    //
+    if (RecordLength < sizeof (APPLE_ICNS_RECORD)
+      || OcOverflowAddU32 (Offset, RecordLength, &Offset)
+      || Offset > IcnsImageSize) {
+      return EFI_SECURITY_VIOLATION;
+    }
+
+    if ((Scale == 1 && Record->Type == APPLE_ICNS_IC07)
+      || (Scale == 2 && Record->Type == APPLE_ICNS_IC13)) {
+      Status = GuiPngToImage (
+        Image,
+        Record->Data,
+        RecordLength - sizeof (APPLE_ICNS_RECORD)
+        );
+
+      if (!EFI_ERROR (Status)) {
+        if (Image->Width != APPLE_DISK_ICON_DIMENSION * Scale
+          || Image->Height != APPLE_DISK_ICON_DIMENSION * Scale) {
+          FreePool (Image->Buffer);
+          Status = EFI_UNSUPPORTED;
+        }
+      }
+
+      return Status;
+    }
+  }
+
+  return RETURN_NOT_FOUND;
+}
+
+EFI_STATUS
+GuiLabelToImage (
+  OUT GUI_IMAGE *Image,
+  IN  VOID      *RawData,
+  IN  UINT32    DataLength,
+  IN  UINT8     Scale
+  )
+{
+  APPLE_DISK_LABEL  *Label;
+  UINT32            PixelIdx;
+
+  ASSERT (RawData != NULL);
+  ASSERT (Scale == 1 || Scale == 2);
+
+  if (DataLength < sizeof (APPLE_DISK_LABEL)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Label = RawData;
+  Image->Width  = SwapBytes16 (Label->Width);
+  Image->Height = SwapBytes16 (Label->Height);
+
+  if (Image->Width > APPLE_DISK_LABEL_MAX_WIDTH * Scale
+    || Image->Height > APPLE_DISK_LABEL_MAX_HEIGHT * Scale
+    || DataLength != sizeof (APPLE_DISK_LABEL) + Image->Width * Image->Height) {
+    DEBUG ((DEBUG_INFO, "OCUI: Invalid label has %dx%d dims at %u size\n", Image->Width, Image->Height, DataLength));
+    return EFI_SECURITY_VIOLATION;
+  }
+
+  Image->Buffer = (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) AllocatePool (
+    Image->Width * Image->Height * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL)
+    );
+
+  if (Image->Buffer == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  for (PixelIdx = 0; PixelIdx < Image->Width * Image->Height; PixelIdx++) {
+    Image->Buffer[PixelIdx].Blue     = 255 - mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+    Image->Buffer[PixelIdx].Green    = 255 - mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+    Image->Buffer[PixelIdx].Red      = 255 - mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+    Image->Buffer[PixelIdx].Reserved = 255;
+  }
+
+  return EFI_SUCCESS;
+}
+
+RETURN_STATUS
 GuiPngToImage (
-  IN OUT GUI_IMAGE  *Image,
-  IN     VOID       *ImageData,
-  IN     UINTN      ImageDataSize
+  OUT GUI_IMAGE  *Image,
+  IN  VOID       *ImageData,
+  IN  UINT32     ImageDataSize
   )
 {
   EFI_STATUS                       Status;
@@ -1218,7 +1361,7 @@ GuiPngToImage (
     );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCUI: DecodePNG...%r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCUI: DecodePNG - %r\n", Status));
     return Status;
   }
 
@@ -1356,12 +1499,11 @@ GuiGetInterpolatedValue (
   UINT32 DeltaTime;
 
   ASSERT (Interpol != NULL);
-  ASSERT (Interpol->StartTime <= CurrentTime);
   ASSERT (Interpol->Duration > 0);
 
   STATIC CONST UINT32 InterpolFpTimeFactor = 1U << 12U;
 
-  if (CurrentTime == Interpol->StartTime) {
+  if (CurrentTime <= Interpol->StartTime) {
     return Interpol->StartValue;
   }
 

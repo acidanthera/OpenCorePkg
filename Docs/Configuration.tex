@@ -2127,6 +2127,47 @@ behaviour that does not go to any other sections
 \begin{enumerate}
 
 \item
+  \texttt{ConsoleAttributes}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Sets specific attributes for console.
+
+  Text renderer supports colour arguments as a sum of foreground and background
+  colors according to UEFI specification. The value of black background and
+  black foreground (\texttt{0}) is reserved. List of colour names:
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{0x00} --- \texttt{EFI\_BLACK}
+  \item \texttt{0x01} --- \texttt{EFI\_BLUE}
+  \item \texttt{0x02} --- \texttt{EFI\_GREEN}
+  \item \texttt{0x03} --- \texttt{EFI\_CYAN}
+  \item \texttt{0x04} --- \texttt{EFI\_RED}
+  \item \texttt{0x05} --- \texttt{EFI\_MAGENTA}
+  \item \texttt{0x06} --- \texttt{EFI\_BROWN}
+  \item \texttt{0x07} --- \texttt{EFI\_LIGHTGRAY}
+  \item \texttt{0x08} --- \texttt{EFI\_DARKGRAY}
+  \item \texttt{0x09} --- \texttt{EFI\_LIGHTBLUE}
+  \item \texttt{0x0A} --- \texttt{EFI\_LIGHTGREEN}
+  \item \texttt{0x0B} --- \texttt{EFI\_LIGHTCYAN}
+  \item \texttt{0x0C} --- \texttt{EFI\_LIGHTRED}
+  \item \texttt{0x0D} --- \texttt{EFI\_LIGHTMAGENTA}
+  \item \texttt{0x0E} --- \texttt{EFI\_YELLOW}
+  \item \texttt{0x0F} --- \texttt{EFI\_WHITE}
+  \item \texttt{0x00} --- \texttt{EFI\_BACKGROUND\_BLACK}
+  \item \texttt{0x10} --- \texttt{EFI\_BACKGROUND\_BLUE}
+  \item \texttt{0x20} --- \texttt{EFI\_BACKGROUND\_GREEN}
+  \item \texttt{0x30} --- \texttt{EFI\_BACKGROUND\_CYAN}
+  \item \texttt{0x40} --- \texttt{EFI\_BACKGROUND\_RED}
+  \item \texttt{0x50} --- \texttt{EFI\_BACKGROUND\_MAGENTA}
+  \item \texttt{0x60} --- \texttt{EFI\_BACKGROUND\_BROWN}
+  \item \texttt{0x70} --- \texttt{EFI\_BACKGROUND\_LIGHTGRAY}
+  \end{itemize}
+
+  \emph{Note}: This option may not work well with \texttt{System} text renderer.
+  Setting a background different from black could help testing proper GOP functioning.
+
+\item
   \texttt{HibernateMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{None}\\
@@ -2174,40 +2215,37 @@ behaviour that does not go to any other sections
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Sets specific attributes for picker.
 
-  Builtin picker supports colour arguments as a sum of foreground and background
-  colors according to UEFI specification. The value of black background and
-  black foreground (\texttt{0}) is reserved. List of colour names:
+  Different pickers may be configured through the attribute mask containing
+  OpenCore-reserved (\texttt{BIT0}\textasciitilde\texttt{BIT15}) and OEM-specific
+  (\texttt{BIT16}\textasciitilde\texttt{BIT31}) values.
+
+  Current OpenCore values include:
 
   \begin{itemize}
   \tightlist
-  \item \texttt{0x00} --- \texttt{EFI\_BLACK}
-  \item \texttt{0x01} --- \texttt{EFI\_BLUE}
-  \item \texttt{0x02} --- \texttt{EFI\_GREEN}
-  \item \texttt{0x03} --- \texttt{EFI\_CYAN}
-  \item \texttt{0x04} --- \texttt{EFI\_RED}
-  \item \texttt{0x05} --- \texttt{EFI\_MAGENTA}
-  \item \texttt{0x06} --- \texttt{EFI\_BROWN}
-  \item \texttt{0x07} --- \texttt{EFI\_LIGHTGRAY}
-  \item \texttt{0x08} --- \texttt{EFI\_DARKGRAY}
-  \item \texttt{0x09} --- \texttt{EFI\_LIGHTBLUE}
-  \item \texttt{0x0A} --- \texttt{EFI\_LIGHTGREEN}
-  \item \texttt{0x0B} --- \texttt{EFI\_LIGHTCYAN}
-  \item \texttt{0x0C} --- \texttt{EFI\_LIGHTRED}
-  \item \texttt{0x0D} --- \texttt{EFI\_LIGHTMAGENTA}
-  \item \texttt{0x0E} --- \texttt{EFI\_YELLOW}
-  \item \texttt{0x0F} --- \texttt{EFI\_WHITE}
-  \item \texttt{0x00} --- \texttt{EFI\_BACKGROUND\_BLACK}
-  \item \texttt{0x10} --- \texttt{EFI\_BACKGROUND\_BLUE}
-  \item \texttt{0x20} --- \texttt{EFI\_BACKGROUND\_GREEN}
-  \item \texttt{0x30} --- \texttt{EFI\_BACKGROUND\_CYAN}
-  \item \texttt{0x40} --- \texttt{EFI\_BACKGROUND\_RED}
-  \item \texttt{0x50} --- \texttt{EFI\_BACKGROUND\_MAGENTA}
-  \item \texttt{0x60} --- \texttt{EFI\_BACKGROUND\_BROWN}
-  \item \texttt{0x70} --- \texttt{EFI\_BACKGROUND\_LIGHTGRAY}
+  \item \texttt{0x0001} --- \texttt{OC\_ATTR\_USE\_VOLUME\_ICON}, provides custom icons
+    for boot entries:
+    \begin{itemize}
+      \tightlist
+      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS.
+      \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
+      \item \texttt{<TOOL\_NAME>.icns} file for \texttt{Tools}.
+    \end{itemize}
+    Volume icons can be set in Finder.
+  \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
+    rendered titles for boot entries:
+    \begin{itemize}
+      \tightlist
+      \item \texttt{.disk\_label} (\texttt{.disk\_label\_2x}) file near bootloader for all filesystems.
+      \item \texttt{<TOOL\_NAME.lbl} (\texttt{<TOOL\_NAME.l2x}) file near tool for \texttt{Tools}.
+    \end{itemize}
+    Prerendered labels can be generated via \texttt{disklabel} utility or \texttt{bless} command.
+    When disabled or missing text labels (\texttt{.contentDetails} or \texttt{.disk\_label.contentDetails})
+    are to be rendered instead.
+  \item \texttt{0x0004} --- \texttt{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}, provides predefined
+    label images for boot entries without custom entries. May give less detail for the actual
+    boot entry.
   \end{itemize}
-
-  \emph{Note}: This option may not work well with \texttt{System} text renderer.
-  Setting a background different from black could help testing proper GOP functioning.
 
 \item
   \texttt{PickerAudioAssist}\\

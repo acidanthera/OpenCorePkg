@@ -45,7 +45,7 @@
 #error "Unknown target definition"
 #endif
 
-#define OPEN_CORE_IMAGE_PATH       L"EFI\\OC\\OpenCore.efi"
+#define OPEN_CORE_DRIVER_PATH      L"EFI\\OC\\OpenCore.efi"
 
 #define OPEN_CORE_ROOT_PATH        L"EFI\\OC"
 
@@ -62,8 +62,6 @@
 #define OPEN_CORE_KEXT_PATH        L"Kexts\\"
 
 #define OPEN_CORE_TOOL_PATH        L"Tools\\"
-
-#define OPEN_CORE_AUDIO_PATH       L"Resources\\Audio\\"
 
 #define OPEN_CORE_NVRAM_ATTR       (EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS)
 

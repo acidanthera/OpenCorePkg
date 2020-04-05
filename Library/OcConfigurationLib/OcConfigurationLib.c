@@ -321,6 +321,7 @@ mMiscBlessOverrideSchema = OC_SCHEMA_STRING (NULL);
 STATIC
 OC_SCHEMA
 mMiscConfigurationBootSchema[] = {
+  OC_SCHEMA_INTEGER_IN ("ConsoleAttributes",   OC_GLOBAL_CONFIG, Misc.Boot.ConsoleAttributes),
   OC_SCHEMA_STRING_IN  ("HibernateMode",       OC_GLOBAL_CONFIG, Misc.Boot.HibernateMode),
   OC_SCHEMA_BOOLEAN_IN ("HideAuxiliary",       OC_GLOBAL_CONFIG, Misc.Boot.HideAuxiliary),
   OC_SCHEMA_BOOLEAN_IN ("HideSelf",            OC_GLOBAL_CONFIG, Misc.Boot.HideSelf),
@@ -649,11 +650,6 @@ OcConfigurationInit (
   return EFI_SUCCESS;
 }
 
-/**
-  Free configuration structure.
-
-  @param[in,out]  Config   Configuration structure.
-**/
 VOID
 OcConfigurationFree (
   IN OUT OC_GLOBAL_CONFIG   *Config

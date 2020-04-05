@@ -20,6 +20,7 @@
 #include <IndustryStandard/AppleHid.h>
 #include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcStringLib.h>
+#include <Library/OcStorageLib.h>
 #include <Protocol/AppleKeyMapAggregator.h>
 #include <Protocol/LoadedImage.h>
 #include <Protocol/AppleBeepGen.h>
@@ -45,6 +46,21 @@ typedef struct OC_PICKER_CONTEXT_ OC_PICKER_CONTEXT;
 #define OC_MENU_OK                   L"OK"
 #define OC_MENU_DISK_IMAGE           L" (dmg)"
 #define OC_MENU_EXTERNAL             L" (external)"
+
+/**
+  Paths allowed to be accessible by the interfaces.
+**/
+#define OPEN_CORE_IMAGE_PATH       L"Resources\\Image\\"
+#define OPEN_CORE_LABEL_PATH       L"Resources\\Label\\"
+#define OPEN_CORE_AUDIO_PATH       L"Resources\\Audio\\"
+#define OPEN_CORE_FONT_PATH        L"Resources\\Font\\"
+
+/**
+  Attributes supported by the interfaces.
+**/
+#define OC_ATTR_USE_VOLUME_ICON          BIT0
+#define OC_ATTR_USE_DISK_LABEL_FILE      BIT1
+#define OC_ATTR_USE_GENERIC_LABEL_IMAGE  BIT2
 
 /**
   Default timeout for IDLE timeout during menu picker navigation
@@ -80,7 +96,8 @@ typedef UINT32 OC_BOOT_ENTRY_TYPE;
 #define OC_BOOT_WINDOWS             BIT4
 #define OC_BOOT_EXTERNAL_OS         BIT5
 #define OC_BOOT_EXTERNAL_TOOL       BIT6
-#define OC_BOOT_SYSTEM              BIT7
+#define OC_BOOT_RESET_NVRAM         BIT7
+#define OC_BOOT_SYSTEM              (OC_BOOT_RESET_NVRAM)
 
 /**
   Picker mode.
@@ -513,6 +530,12 @@ struct OC_PICKER_CONTEXT_ {
   //
   UINT32                     ConsoleAttributes;
   //
+  // Picker attribues:
+  // - BIT0~BIT15  are OpenCore reserved.
+  // - BIT16~BIT31 are OEM-specific.
+  //
+  UINT32                     PickerAttributes;
+  //
   // Enable polling boot arguments.
   //
   BOOLEAN                    PollAppleHotKeys;
@@ -579,12 +602,52 @@ struct OC_PICKER_CONTEXT_ {
   @param[in]  BootPolicy     Apple Boot Policy Protocol.
   @param[in]  BootEntry      Located boot entry.
 
-  @retval EFI_SUCCESS          The entry point is described successfully.
+  @retval EFI_SUCCESS   The entry point is described successfully.
 **/
 EFI_STATUS
 OcDescribeBootEntry (
   IN     APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
   IN OUT OC_BOOT_ENTRY              *BootEntry
+  );
+
+/**
+  Get '.disk_label' or '.disk_label_2x' file contents, if exists.
+
+  @param[in]   BootPolicy     Apple Boot Policy Protocol.
+  @param[in]   BootEntry      Located boot entry.
+  @param[in]   Scale          User interface scale.
+  @param[out]  ImageData      File contents.
+  @param[out]  DataLength     File length.
+
+  @retval EFI_SUCCESS   The file was read successfully.
+**/
+EFI_STATUS
+OcGetBootEntryLabelImage (
+  IN  OC_PICKER_CONTEXT          *Context,
+  IN  APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
+  IN  OC_BOOT_ENTRY              *BootEntry,
+  IN  UINT8                      Scale,
+  OUT VOID                       **ImageData,
+  OUT UINT32                     *DataLength
+  );
+
+/**
+  Get '.VolumeIcon.icns' file contents, if exists.
+
+  @param[in]   BootPolicy     Apple Boot Policy Protocol.
+  @param[in]   BootEntry      Located boot entry.
+  @param[out]  ImageData      File contents.
+  @param[out]  DataLength     File length.
+
+  @retval EFI_SUCCESS   The file was read successfully.
+**/
+EFI_STATUS
+OcGetBootEntryIcon (
+  IN  OC_PICKER_CONTEXT          *Context,
+  IN  APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
+  IN  OC_BOOT_ENTRY              *BootEntry,
+  OUT VOID                       **ImageData,
+  OUT UINT32                     *DataLength
   );
 
 /**

@@ -163,12 +163,20 @@ OcToolDescribeEntry (
     *IconData     = NULL;
     *IconDataSize = 0;
 
-    Status = OcUnicodeSafeSPrint (
-      DescPath,
-      sizeof (DescPath),
-      OPEN_CORE_TOOL_PATH "%s.icns",
-      ChosenEntry->PathName
-      );
+    if (ChosenEntry->Type == OC_BOOT_RESET_NVRAM) {
+      Status = StrCpyS (
+        DescPath,
+        sizeof (DescPath),
+        OPEN_CORE_IMAGE_PATH "ResetNVRAM.icns"
+        );
+    } else {
+      Status = OcUnicodeSafeSPrint (
+        DescPath,
+        sizeof (DescPath),
+        OPEN_CORE_TOOL_PATH "%s.icns",
+        ChosenEntry->PathName
+        );
+    }
     if (!EFI_ERROR (Status)) {
       if (OcStorageExistsFileUnicode (Context, DescPath)) {
         *IconData = OcStorageReadFileUnicode (
@@ -180,10 +188,12 @@ OcToolDescribeEntry (
       }
     } else {
       DEBUG ((
-        DEBUG_INFO,
-        "OC: Tool label %s%s.icns does not fit path!\n",
-        OPEN_CORE_TOOL_PATH,
-        DescPath
+        DEBUG_WARN,
+        "OC: Custom label %s%s.icns does not fit path!\n",
+        ChosenEntry->Type == OC_BOOT_RESET_NVRAM
+          ? OPEN_CORE_IMAGE_PATH : OPEN_CORE_TOOL_PATH,
+        ChosenEntry->Type == OC_BOOT_RESET_NVRAM
+          ? L"ResetNVRAM": ChosenEntry->PathName
         ));
     }
   }
@@ -192,13 +202,23 @@ OcToolDescribeEntry (
     *LabelData     = NULL;
     *LabelDataSize = 0;
 
-    Status = OcUnicodeSafeSPrint (
-      DescPath,
-      sizeof (DescPath),
-      OPEN_CORE_TOOL_PATH "%s.lbl%a",
-      ChosenEntry->PathName,
-      LabelScale == 2 ? "2x" : ""
-      );
+    if (ChosenEntry->Type == OC_BOOT_RESET_NVRAM) {
+      Status = OcUnicodeSafeSPrint (
+        DescPath,
+        sizeof (DescPath),
+        OPEN_CORE_LABEL_PATH "ResetNVRAM.%a",
+        LabelScale == 2 ? "l2x" : "lbl"
+        );
+    } else {
+      Status = OcUnicodeSafeSPrint (
+        DescPath,
+        sizeof (DescPath),
+        OPEN_CORE_TOOL_PATH "%s.%a",
+        ChosenEntry->PathName,
+        LabelScale == 2 ? "l2x" : "lbl"
+        );
+    }
+
     if (!EFI_ERROR (Status)) {
       if (OcStorageExistsFileUnicode (Context, DescPath)) {
         *LabelData = OcStorageReadFileUnicode (
@@ -210,14 +230,26 @@ OcToolDescribeEntry (
       }
     } else {
       DEBUG ((
-        DEBUG_INFO,
-        "OC: Tool label %s%s.lbl%a does not fit path!\n",
-        OPEN_CORE_TOOL_PATH,
-        DescPath,
-        LabelScale == 2 ? "2x" : ""
+        DEBUG_WARN,
+        "OC: Custom label %s%s.%a does not fit path!\n",
+        ChosenEntry->Type == OC_BOOT_RESET_NVRAM
+          ? OPEN_CORE_LABEL_PATH : OPEN_CORE_TOOL_PATH,
+        ChosenEntry->Type == OC_BOOT_RESET_NVRAM
+          ? L"ResetNVRAM" : ChosenEntry->PathName,
+        LabelScale == 2 ? "l2x" : "lbl"
         ));
     }
   }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OC: Got label %d icon %d for type %u - %s\n",
+    HasLabel,
+    HasIcon,
+    ChosenEntry->Type,
+    ChosenEntry->Type == OC_BOOT_RESET_NVRAM
+      ? L"ResetNVRAM" : ChosenEntry->PathName
+    ));
 
   if (HasIcon || HasLabel) {
     return EFI_SUCCESS;
@@ -601,7 +633,8 @@ OcMiscBoot (
   Context->RequestPrivilege   = OcShowSimplePasswordRequest;
   Context->ShowMenu           = OcShowSimpleBootMenu;
   Context->PickerMode         = PickerMode;
-  Context->ConsoleAttributes  = Config->Misc.Boot.PickerAttributes;
+  Context->ConsoleAttributes  = Config->Misc.Boot.ConsoleAttributes;
+  Context->PickerAttributes   = Config->Misc.Boot.PickerAttributes;
 
   if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_VERSION_UI) != 0) {
     Context->TitleSuffix      = OcMiscGetVersionString ();
