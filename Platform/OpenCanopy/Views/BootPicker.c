@@ -771,13 +771,13 @@ BootPickerEntriesAdd (
   ASSERT (GuiContext != NULL);
   ASSERT (Entry != NULL);
 
-  DEBUG ((DEBUG_INFO, "Console attributes: %d\n", Context->ConsoleAttributes));
+  DEBUG ((DEBUG_INFO, "OCUI: Console attributes: %d\n", Context->ConsoleAttributes));
 
-  UseVolumeIcon   = (Context->ConsoleAttributes & OPENCANOPY_USE_VOLUME_ICON) != 0;
-  UseDiskLabel    = (Context->ConsoleAttributes & OPENCANOPY_USE_DISK_LABEL_FILE) != 0;
-  UseGenericLabel = (Context->ConsoleAttributes & OPENCANOPY_USE_GENERIC_LABEL_IMAGE) != 0;
+  UseVolumeIcon   = (Context->PickerAttributes & OC_ATTR_USE_VOLUME_ICON) != 0;
+  UseDiskLabel    = (Context->PickerAttributes & OC_ATTR_USE_DISK_LABEL_FILE) != 0;
+  UseGenericLabel = (Context->PickerAttributes & OC_ATTR_USE_GENERIC_LABEL_IMAGE) != 0;
 
-  DEBUG ((DEBUG_INFO, "UseDiskLabel: %d, UseGenericLabel: %d\n", UseDiskLabel, UseGenericLabel));
+  DEBUG ((DEBUG_INFO, "OCUI: UseDiskLabel: %d, UseGenericLabel: %d\n", UseDiskLabel, UseGenericLabel));
 
   VolumeEntry = AllocateZeroPool (sizeof (*VolumeEntry));
   if (VolumeEntry == NULL) {
@@ -786,7 +786,7 @@ BootPickerEntriesAdd (
 
   AppleBootPolicy = OcAppleBootPolicyInstallProtocol (FALSE);
   if (AppleBootPolicy == NULL) {
-    DEBUG ((DEBUG_ERROR, "OCB: AppleBootPolicy locate failure\n"));
+    DEBUG ((DEBUG_ERROR, "OCUI: AppleBootPolicy locate failure\n"));
     return EFI_NOT_FOUND;
   }
 
@@ -827,7 +827,13 @@ BootPickerEntriesAdd (
         break;
 
       case OC_BOOT_EXTERNAL_TOOL:
-        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelTool);
+        if (StrStr (Entry->Name, OC_MENU_RESET_NVRAM_ENTRY) != NULL) {
+          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelResetNVRAM);
+        } else if (StrStr (Entry->Name, OC_MENU_UEFI_SHELL_ENTRY) != NULL) {
+          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelShell);
+        } else {
+          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelTool);
+        }
         break;
 
       case OC_BOOT_APPLE_OS:
@@ -839,7 +845,7 @@ BootPickerEntriesAdd (
         break;
 
       default:
-        DEBUG ((DEBUG_ERROR, "Entry kind %d unsupported", Entry->Type));
+        DEBUG ((DEBUG_ERROR, "OCUI: Entry kind %d unsupported", Entry->Type));
         return RETURN_UNSUPPORTED;
     }
   }
@@ -852,7 +858,7 @@ BootPickerEntriesAdd (
       StrLen (Entry->Name)
       );
     if (!Result) {
-      DEBUG ((DEBUG_WARN, "BMF: label failed\n"));
+      DEBUG ((DEBUG_WARN, "OCUI: label failed\n"));
       return RETURN_UNSUPPORTED;
     }
   }

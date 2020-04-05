@@ -272,6 +272,7 @@
 #define OC_MISC_BOOT_FIELDS(_, __) \
   _(OC_STRING                   , PickerMode                  ,     , OC_STRING_CONSTR ("Builtin", _, __) , OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , HibernateMode               ,     , OC_STRING_CONSTR ("None", _, __)    , OC_DESTR (OC_STRING)) \
+  _(UINT32                      , ConsoleAttributes           ,     , 0                                   , ())                   \
   _(UINT32                      , PickerAttributes            ,     , 0                                   , ())                   \
   _(UINT32                      , TakeoffDelay                ,     , 0                                   , ())                   \
   _(UINT32                      , Timeout                     ,     , 0                                   , ())                   \

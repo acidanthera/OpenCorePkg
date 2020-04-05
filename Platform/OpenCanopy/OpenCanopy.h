@@ -292,8 +292,4 @@ GuiPngToClickImage (
   IN     CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *HighlightPixel
   );
 
-#define OPENCANOPY_USE_VOLUME_ICON         (1 << 10)
-#define OPENCANOPY_USE_DISK_LABEL_FILE     (1 << 9)
-#define OPENCANOPY_USE_GENERIC_LABEL_IMAGE (1 << 8)
-
 #endif // OPEN_CANOPY_H

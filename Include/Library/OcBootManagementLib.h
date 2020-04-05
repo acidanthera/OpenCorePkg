@@ -56,6 +56,13 @@ typedef struct OC_PICKER_CONTEXT_ OC_PICKER_CONTEXT;
 #define OPEN_CORE_FONT_PATH        L"Resources\\Font\\"
 
 /**
+  Attributes supported by the interfaces.
+**/
+#define OC_ATTR_USE_VOLUME_ICON          BIT0
+#define OC_ATTR_USE_DISK_LABEL_FILE      BIT1
+#define OC_ATTR_USE_GENERIC_LABEL_IMAGE  BIT2
+
+/**
   Default timeout for IDLE timeout during menu picker navigation
   before VoiceOver toggle.
 **/
@@ -522,6 +529,12 @@ struct OC_PICKER_CONTEXT_ {
   // Console attributes. 0 is reserved as disabled.
   //
   UINT32                     ConsoleAttributes;
+  //
+  // Picker attribues:
+  // - BIT0~BIT15  are OpenCore reserved.
+  // - BIT16~BIT31 are OEM-specific.
+  //
+  UINT32                     PickerAttributes;
   //
   // Enable polling boot arguments.
   //

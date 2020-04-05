@@ -954,7 +954,7 @@ GuiLibConstruct (
 
   mOutputContext = GuiOutputConstruct ();
   if (mOutputContext == NULL) {
-    DEBUG ((DEBUG_ERROR, "Failed to initialise output\n"));
+    DEBUG ((DEBUG_ERROR, "OCUI: Failed to initialise output\n"));
     return EFI_UNSUPPORTED;
   }
 
@@ -971,12 +971,12 @@ GuiLibConstruct (
                       OutputInfo->VerticalResolution
                       );
   if (mPointerContext == NULL) {
-    DEBUG ((DEBUG_WARN, "Failed to initialise pointer\n"));
+    DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise pointer\n"));
   }
 
   mKeyContext = GuiKeyConstruct ();
   if (mKeyContext == NULL) {
-    DEBUG ((DEBUG_WARN, "Failed to initialise key input\n"));
+    DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise key input\n"));
   }
 
   if (mPointerContext == NULL && mKeyContext == NULL) {
@@ -987,7 +987,7 @@ GuiLibConstruct (
   mScreenBufferDelta = OutputInfo->HorizontalResolution * sizeof (*mScreenBuffer);
   mScreenBuffer      = AllocatePool (OutputInfo->VerticalResolution * mScreenBufferDelta);
   if (mScreenBuffer == NULL) {
-    DEBUG ((DEBUG_ERROR, "GUI alloc failure\n"));
+    DEBUG ((DEBUG_ERROR, "OCUI: GUI alloc failure\n"));
     GuiLibDestruct ();
     return EFI_OUT_OF_RESOURCES;
   }
@@ -1317,7 +1317,7 @@ GuiLabelToImage (
   if (Image->Width > APPLE_DISK_LABEL_MAX_WIDTH * Scale
     || Image->Height > APPLE_DISK_LABEL_MAX_HEIGHT * Scale
     || DataLength != sizeof (APPLE_DISK_LABEL) + Image->Width * Image->Height) {
-    DEBUG ((DEBUG_INFO, "OCCP: Invalid label has %dx%d dims at %u size\n", Image->Width, Image->Height, DataLength));
+    DEBUG ((DEBUG_INFO, "OCUI: Invalid label has %dx%d dims at %u size\n", Image->Width, Image->Height, DataLength));
     return EFI_SECURITY_VIOLATION;
   }
 

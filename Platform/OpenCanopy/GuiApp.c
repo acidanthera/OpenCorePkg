@@ -57,6 +57,7 @@ InternalContextDestruct (
   InternalSafeFreePool (Context->EntryLabelRecovery.Buffer);
   InternalSafeFreePool (Context->EntryLabelMacOS.Buffer);
   InternalSafeFreePool (Context->EntryLabelTool.Buffer);
+  InternalSafeFreePool (Context->EntryLabelShell.Buffer);
   InternalSafeFreePool (Context->EntryLabelResetNVRAM.Buffer);
   /*
   InternalSafeFreePool (Context->Poof[0].Buffer);
@@ -92,20 +93,20 @@ LoadImageFileFromStorageForScale (
     ImageFileExt
     );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OCCP: Cannot fit %a\n", ImageFilePath));
+    DEBUG ((DEBUG_WARN, "OCUI: Cannot fit %a\n", ImageFilePath));
     return EFI_OUT_OF_RESOURCES;
   }
 
   *FileData = OcStorageReadFileUnicode (Storage, Path, FileSize);
 
   if (*FileData == NULL) {
-    DEBUG ((DEBUG_WARN, "OCCP: Failed to load %s\n", Path));
+    DEBUG ((DEBUG_WARN, "OCUI: Failed to load %s\n", Path));
     return RETURN_NOT_FOUND;
   }
 
   if (*FileSize == 0) {
     FreePool (*FileData);
-    DEBUG ((DEBUG_WARN, "OCCP: Empty %s\n", Path));
+    DEBUG ((DEBUG_WARN, "OCUI: Empty %s\n", Path));
     return RETURN_NOT_FOUND; 
   }
 
@@ -136,20 +137,20 @@ LoadLabelFileFromStorageForScale (
     Scale == 2 ? "l2x" : "lbl"
     );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OCCP: Cannot fit %a\n", LabelFilePath));
+    DEBUG ((DEBUG_WARN, "OCUI: Cannot fit %a\n", LabelFilePath));
     return EFI_OUT_OF_RESOURCES;
   }
 
   *FileData = OcStorageReadFileUnicode (Storage, Path, FileSize);
 
   if (*FileData == NULL) {
-    DEBUG ((DEBUG_WARN, "OCCP: Failed to load %s\n", Path));
+    DEBUG ((DEBUG_WARN, "OCUI: Failed to load %s\n", Path));
     return RETURN_NOT_FOUND;
   }
 
   if (*FileSize == 0) {
     FreePool (*FileData);
-    DEBUG ((DEBUG_WARN, "OCCP: Empty %s\n", Path));
+    DEBUG ((DEBUG_WARN, "OCUI: Empty %s\n", Path));
     return RETURN_NOT_FOUND; 
   }
 
@@ -193,7 +194,7 @@ LoadImageFromStorage (
   FreePool (ImageData);
 
   if (RETURN_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "Failed to decode image %a - %\n", ImageFilePath, Status));
+    DEBUG ((DEBUG_WARN, "OCUI: Failed to decode image %a - %\n", ImageFilePath, Status));
   }
 
   return Status;
@@ -223,7 +224,7 @@ LoadLabelFromStorage (
   FreePool (ImageData);
 
   if (RETURN_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "Failed to decode label %a - %r\n", ImageFilePath, Status));
+    DEBUG ((DEBUG_WARN, "OCUI: Failed to decode label %a - %r\n", ImageFilePath, Status));
   }
 
   return Status;
@@ -281,6 +282,7 @@ InternalContextConstruct (
   Status |= LoadLabelFromStorage (Storage, "Recovery",    Context->Scale, &Context->EntryLabelRecovery);
   Status |= LoadLabelFromStorage (Storage, "ResetNVRAM",  Context->Scale, &Context->EntryLabelResetNVRAM);
   Status |= LoadLabelFromStorage (Storage, "Tool",        Context->Scale, &Context->EntryLabelTool);
+  Status |= LoadLabelFromStorage (Storage, "Shell",       Context->Scale, &Context->EntryLabelShell);
   Status |= LoadLabelFromStorage (Storage, "macOS",       Context->Scale, &Context->EntryLabelMacOS);
 
   /*
@@ -291,7 +293,7 @@ InternalContextConstruct (
   Status |= LoadImageFromStorage (Storage, "ToolbarPoof5128x128", "png", Context->Scale, &Context->Poof[4], NULL);
   */
   if (RETURN_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "Failed to load image\n"));
+    DEBUG ((DEBUG_ERROR, "OCUI: Failed to load images\n"));
     InternalContextDestruct (Context);
     return RETURN_UNSUPPORTED;
   }
@@ -312,7 +314,7 @@ InternalContextConstruct (
   }
 
   if (!Result) {
-    DEBUG ((DEBUG_WARN, "BMF: Font failed\n"));
+    DEBUG ((DEBUG_WARN, "OCUI: Font init failed\n"));
     InternalContextDestruct (Context);
     return RETURN_UNSUPPORTED;
   }

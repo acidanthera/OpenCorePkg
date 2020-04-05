@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Mar  6 09:43:05 2020
-%DIF ADD ../Configuration.tex        Sat Apr  4 23:56:00 2020
+%DIF ADD ../Configuration.tex        Mon Apr  6 00:16:42 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2244,7 +2244,51 @@ behaviour that does not go to any other sections
 \begin{enumerate}
 
 \item
-  \texttt{HibernateMode}\\
+  \DIFaddbegin \texttt{\DIFadd{ConsoleAttributes}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Sets specific attributes for console.
+}
+
+  \DIFadd{Text renderer supports colour arguments as a sum of foreground and background
+  colors according to UEFI specification. The value of black background and
+  black foreground (}\texttt{\DIFadd{0}}\DIFadd{) is reserved. List of colour names:
+}
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{0x00}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BLACK}}
+  \item \texttt{\DIFadd{0x01}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BLUE}}
+  \item \texttt{\DIFadd{0x02}} \DIFadd{--- }\texttt{\DIFadd{EFI\_GREEN}}
+  \item \texttt{\DIFadd{0x03}} \DIFadd{--- }\texttt{\DIFadd{EFI\_CYAN}}
+  \item \texttt{\DIFadd{0x04}} \DIFadd{--- }\texttt{\DIFadd{EFI\_RED}}
+  \item \texttt{\DIFadd{0x05}} \DIFadd{--- }\texttt{\DIFadd{EFI\_MAGENTA}}
+  \item \texttt{\DIFadd{0x06}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BROWN}}
+  \item \texttt{\DIFadd{0x07}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTGRAY}}
+  \item \texttt{\DIFadd{0x08}} \DIFadd{--- }\texttt{\DIFadd{EFI\_DARKGRAY}}
+  \item \texttt{\DIFadd{0x09}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTBLUE}}
+  \item \texttt{\DIFadd{0x0A}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTGREEN}}
+  \item \texttt{\DIFadd{0x0B}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTCYAN}}
+  \item \texttt{\DIFadd{0x0C}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTRED}}
+  \item \texttt{\DIFadd{0x0D}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTMAGENTA}}
+  \item \texttt{\DIFadd{0x0E}} \DIFadd{--- }\texttt{\DIFadd{EFI\_YELLOW}}
+  \item \texttt{\DIFadd{0x0F}} \DIFadd{--- }\texttt{\DIFadd{EFI\_WHITE}}
+  \item \texttt{\DIFadd{0x00}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_BLACK}}
+  \item \texttt{\DIFadd{0x10}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_BLUE}}
+  \item \texttt{\DIFadd{0x20}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_GREEN}}
+  \item \texttt{\DIFadd{0x30}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_CYAN}}
+  \item \texttt{\DIFadd{0x40}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_RED}}
+  \item \texttt{\DIFadd{0x50}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_MAGENTA}}
+  \item \texttt{\DIFadd{0x60}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_BROWN}}
+  \item \texttt{\DIFadd{0x70}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_LIGHTGRAY}}
+  \end{itemize}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This option may not work well with }\texttt{\DIFadd{System}} \DIFadd{text renderer.
+  Setting a background different from black could help testing proper GOP functioning.
+}
+
+\item
+  \DIFaddend \texttt{HibernateMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{None}\\
   \textbf{Description}: Hibernation detection mode. The following modes are supported:
@@ -2291,42 +2335,135 @@ behaviour that does not go to any other sections
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Sets specific attributes for picker.
 
-  Builtin picker supports colour arguments as a sum of foreground and background
+  \DIFdelbegin \DIFdel{Builtin picker supports colour arguments as a sum of foreground and background
   colors according to UEFI specification. The value of black background and
-  black foreground (\texttt{0}) is reserved. List of colour names:
+  black foreground (}\DIFdelend \DIFaddbegin \DIFadd{Different pickers may be configured through the attribute mask containing
+  OpenCore-reserved (}\texttt{\DIFadd{BIT0}}\DIFadd{\textasciitilde}\texttt{\DIFadd{BIT15}}\DIFadd{) and OEM-specific
+  (}\DIFaddend \texttt{\DIFdelbegin \DIFdel{0}%DIFDELCMD < \MBLOCKRIGHTBRACE%%%
+\DIFdel{) is reserved.
+List of colour names}\DIFdelend \DIFaddbegin \DIFadd{BIT16}}\DIFadd{\textasciitilde}\texttt{\DIFadd{BIT31}}\DIFadd{) values.
+}
+
+  \DIFadd{Current OpenCore values include}\DIFaddend :
 
   \begin{itemize}
   \tightlist
-  \item \texttt{0x00} --- \texttt{EFI\_BLACK}
-  \item \texttt{0x01} --- \texttt{EFI\_BLUE}
-  \item \texttt{0x02} --- \texttt{EFI\_GREEN}
-  \item \texttt{0x03} --- \texttt{EFI\_CYAN}
-  \item \texttt{0x04} --- \texttt{EFI\_RED}
-  \item \texttt{0x05} --- \texttt{EFI\_MAGENTA}
-  \item \texttt{0x06} --- \texttt{EFI\_BROWN}
-  \item \texttt{0x07} --- \texttt{EFI\_LIGHTGRAY}
-  \item \texttt{0x08} --- \texttt{EFI\_DARKGRAY}
-  \item \texttt{0x09} --- \texttt{EFI\_LIGHTBLUE}
-  \item \texttt{0x0A} --- \texttt{EFI\_LIGHTGREEN}
-  \item \texttt{0x0B} --- \texttt{EFI\_LIGHTCYAN}
-  \item \texttt{0x0C} --- \texttt{EFI\_LIGHTRED}
-  \item \texttt{0x0D} --- \texttt{EFI\_LIGHTMAGENTA}
-  \item \texttt{0x0E} --- \texttt{EFI\_YELLOW}
-  \item \texttt{0x0F} --- \texttt{EFI\_WHITE}
-  \item \texttt{0x00} --- \texttt{EFI\_BACKGROUND\_BLACK}
-  \item \texttt{0x10} --- \texttt{EFI\_BACKGROUND\_BLUE}
-  \item \texttt{0x20} --- \texttt{EFI\_BACKGROUND\_GREEN}
-  \item \texttt{0x30} --- \texttt{EFI\_BACKGROUND\_CYAN}
-  \item \texttt{0x40} --- \texttt{EFI\_BACKGROUND\_RED}
-  \item \texttt{0x50} --- \texttt{EFI\_BACKGROUND\_MAGENTA}
-  \item \texttt{0x60} --- \texttt{EFI\_BACKGROUND\_BROWN}
-  \item \texttt{0x70} --- \texttt{EFI\_BACKGROUND\_LIGHTGRAY}
-  \end{itemize}
+  \item \texttt{\DIFdelbegin \DIFdel{0x00}\DIFdelend \DIFaddbegin \DIFadd{0x0001}\DIFaddend } --- \texttt{\DIFdelbegin \DIFdel{EFI}\DIFdelend \DIFaddbegin \DIFadd{OC}\DIFaddend \_\DIFdelbegin \DIFdel{BLACK}\DIFdelend \DIFaddbegin \DIFadd{ATTR\_USE\_VOLUME\_ICON}\DIFaddend }\DIFaddbegin \DIFadd{, provides custom icons
+    for boot entries:
+    }\begin{itemize}
+      \tightlist
+      \DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x01}\DIFdelend \DIFaddbegin \DIFadd{.VolumeIcon.icns}\DIFaddend } \DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \DIFadd{file at }\DIFaddend \texttt{\DIFdelbegin \DIFdel{EFI\_BLUE}\DIFdelend \DIFaddbegin \DIFadd{Preboot}\DIFaddend } \DIFaddbegin \DIFadd{root for APFS.
+      }\DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x02}\DIFdelend \DIFaddbegin \DIFadd{.VolumeIcon.icns}\DIFaddend } \DIFdelbegin \DIFdel{--- }\texttt{\DIFdel{EFI\_GREEN}}
+  %DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{file at volume root for other filesystems.
+      }\DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x03}\DIFdelend \DIFaddbegin \DIFadd{<TOOL\_NAME>.icns}\DIFaddend } \DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \DIFadd{file for }\DIFaddend \texttt{\DIFdelbegin \DIFdel{EFI\_CYAN}\DIFdelend \DIFaddbegin \DIFadd{Tools}\DIFaddend }\DIFaddbegin \DIFadd{.
+    }\end{itemize}
+    \DIFadd{Volume icons can be set in Finder.
+  }\DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x04}\DIFdelend \DIFaddbegin \DIFadd{0x0002}\DIFaddend } --- \texttt{\DIFdelbegin \DIFdel{EFI}\DIFdelend \DIFaddbegin \DIFadd{OC}\DIFaddend \_\DIFdelbegin \DIFdel{RED}\DIFdelend \DIFaddbegin \DIFadd{ATTR\_USE\_DISK\_LABEL\_FILE}\DIFaddend }\DIFaddbegin \DIFadd{, provides custom
+    rendered titles for boot entries:
+    }\begin{itemize}
+      \tightlist
+      \DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x05}\DIFdelend \DIFaddbegin \DIFadd{.disk\_label}\DIFaddend } \DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \DIFadd{(}\DIFaddend \texttt{\DIFdelbegin \DIFdel{EFI}\DIFdelend \DIFaddbegin \DIFadd{.disk}\DIFaddend \_\DIFdelbegin \DIFdel{MAGENTA}\DIFdelend \DIFaddbegin \DIFadd{label\_2x}\DIFaddend }\DIFaddbegin \DIFadd{) file near bootloader for all filesystems.
+      }\DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x06}\DIFdelend \DIFaddbegin \DIFadd{<TOOL\_NAME.lbl}\DIFaddend } \DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \DIFadd{(}\DIFaddend \texttt{\DIFdelbegin \DIFdel{EFI}\DIFdelend \DIFaddbegin \DIFadd{<TOOL}\DIFaddend \_\DIFdelbegin \DIFdel{BROWN}\DIFdelend \DIFaddbegin \DIFadd{NAME.l2x}\DIFaddend }\DIFdelbegin %DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{) file near tool for }\DIFaddend \texttt{\DIFdelbegin \DIFdel{0x07}\DIFdelend \DIFaddbegin \DIFadd{Tools}\DIFaddend }\DIFdelbegin \DIFdel{--- }\texttt{\DIFdel{EFI\_LIGHTGRAY}}
+  %DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{.
+    }\end{itemize}
+    \DIFadd{Prerendered labels can be generated via }\texttt{\DIFadd{disklabel}} \DIFadd{utility or }\texttt{\DIFadd{bless}} \DIFadd{command.
+    When disabled or missing text labels (}\texttt{\DIFadd{.contentDetails}} \DIFadd{or }\texttt{\DIFadd{.disk\_label.contentDetails}}\DIFadd{)
+    are to be rendered instead.
+  }\DIFaddend \item \DIFdelbegin \texttt{\DIFdel{0x08}} %DIFAUXCMD
+\DIFdelend \DIFaddbegin \texttt{\DIFadd{0x0004}} \DIFaddend --- \DIFdelbegin \texttt{\DIFdel{EFI\_DARKGRAY}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{0x09}} %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{EFI\_LIGHTBLUE}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{0x0A}} %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{EFI\_LIGHTGREEN}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{0x0B}} %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{EFI\_LIGHTCYAN}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{0x0C}} %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{EFI\_LIGHTRED}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{0x0D}} %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{EFI\_LIGHTMAGENTA}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{0x0E}} %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{EFI\_YELLOW}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{0x0F}} %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{EFI\_WHITE}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{0x00}} %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_BLACK}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{0x10}} %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_BLUE}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{0x20}} %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_GREEN}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{0x30}} %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_CYAN}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{0x40}} %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_RED}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{0x50}} %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_MAGENTA}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{0x60}} %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_BROWN}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{0x70}} %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_LIGHTGRAY}}
+  %DIFAUXCMD
+\DIFdelend \DIFaddbegin \texttt{\DIFadd{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}}\DIFadd{, provides predefined
+    label images for boot entries without custom entries. May give less detail for the actual
+    boot entry.
+  }\DIFaddend \end{itemize}
 
-  \emph{Note}: This option may not work well with \texttt{System} text renderer.
-  Setting a background different from black could help testing proper GOP functioning.
+\DIFdelbegin \emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: This option may not work well with }%DIFDELCMD < \texttt{%%%
+\DIFdel{System}%DIFDELCMD < \MBLOCKRIGHTBRACE %%%
+\DIFdel{text renderer.
+  Setting a background different from black could help testing proper GOP functioning. }%DIFDELCMD < 
 
-\item
+%DIFDELCMD < %%%
+\DIFdelend \item
   \texttt{PickerAudioAssist}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

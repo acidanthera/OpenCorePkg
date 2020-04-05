@@ -23,6 +23,7 @@ typedef struct {
   GUI_IMAGE        EntryLabelRecovery;
   GUI_IMAGE        EntryLabelMacOS;
   GUI_IMAGE        EntryLabelTool;
+  GUI_IMAGE        EntryLabelShell;
   GUI_IMAGE        EntryLabelResetNVRAM;
   // GUI_IMAGE        Poof[5];
   GUI_IMAGE        EntryBackSelected;

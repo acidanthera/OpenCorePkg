@@ -633,7 +633,8 @@ OcMiscBoot (
   Context->RequestPrivilege   = OcShowSimplePasswordRequest;
   Context->ShowMenu           = OcShowSimpleBootMenu;
   Context->PickerMode         = PickerMode;
-  Context->ConsoleAttributes  = Config->Misc.Boot.PickerAttributes;
+  Context->ConsoleAttributes  = Config->Misc.Boot.ConsoleAttributes;
+  Context->PickerAttributes   = Config->Misc.Boot.PickerAttributes;
 
   if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_VERSION_UI) != 0) {
     Context->TitleSuffix      = OcMiscGetVersionString ();
