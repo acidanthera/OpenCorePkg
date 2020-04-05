@@ -862,12 +862,8 @@ BootPickerEntriesAdd (
         Status = CopyLabel(&VolumeEntry->Label, &GuiContext->EntryLabelMacOS);
         break;
 
-      case OC_BOOT_SYSTEM:
-        if (StrCmp(Entry->Name, OC_MENU_RESET_NVRAM_ENTRY) == 0) {
-          Status = CopyLabel(&VolumeEntry->Label, &GuiContext->EntryLabelResetNVRAM);
-        } else {
-          Status = CopyLabel(&VolumeEntry->Label, &GuiContext->EntryLabelTool);
-        }
+      case OC_BOOT_RESET_NVRAM:
+        Status = CopyLabel(&VolumeEntry->Label, &GuiContext->EntryLabelResetNVRAM);
         break;
 
       default:

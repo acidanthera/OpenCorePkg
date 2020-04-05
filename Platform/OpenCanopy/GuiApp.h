@@ -11,6 +11,8 @@
 #include "OpenCanopy.h"
 #include "BmfLib.h"
 
+#include <Library/OcBootManagementLib.h>
+
 typedef struct {
   GUI_CLICK_IMAGE  EntrySelector;
   GUI_IMAGE        EntryIconInternal;
@@ -29,7 +31,7 @@ typedef struct {
   VOID             *BootEntry;
   BOOLEAN          HideAuxiliary;
   BOOLEAN          Refresh;
-  UINT32           Scale;
+  UINT8            Scale;
 } BOOT_PICKER_GUI_CONTEXT;
 
 RETURN_STATUS

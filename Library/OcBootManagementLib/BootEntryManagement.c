@@ -132,20 +132,12 @@ OcDescribeBootEntry (
   return EFI_SUCCESS;
 }
 
-// .disk_label is read from the directory which contains the booter
-// .VolumeIcon.icns is read from the volume root
-
-#define OPEN_CORE_ROOT_PATH        L"EFI\\OC"
-
-#define OPEN_CORE_TOOL_PATH        L"Tools\\"
-
-
 EFI_STATUS
 OcGetBootEntryLabelImage (
   IN  OC_PICKER_CONTEXT          *Context,
   IN  APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
   IN  OC_BOOT_ENTRY              *BootEntry,
-  IN  UINT32                     Scale,
+  IN  UINT8                      Scale,
   OUT VOID                       **ImageData,
   OUT UINT32                     *DataLength
   )
@@ -159,35 +151,24 @@ OcGetBootEntryLabelImage (
   *ImageData = NULL;
   *DataLength = 0;
 
-  DEBUG((DEBUG_INFO, "Entered OcGetBootEntryLabelImage for entry"));
-  DEBUG((DEBUG_INFO, "Entered OcGetBootEntryLabelImage for entry %s", BootEntry->Name));
+  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL || BootEntry->Type == OC_BOOT_RESET_NVRAM) {
+    ASSERT (Context->CustomDescribe != NULL);
 
-  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL || BootEntry->Type == OC_BOOT_SYSTEM) {
-    if (Context->CustomDescribe == NULL) {
-      DEBUG((DEBUG_ERROR, "CustomDescribe is null\n"));
-      return EFI_NOT_FOUND;
-    }
-    Status = Context->CustomDescribe(
+    Status = Context->CustomDescribe (
       Context->CustomEntryContext,
       BootEntry,
-      (UINT8)Scale,
+      Scale,
       NULL,
       NULL,
       ImageData,
       DataLength
       );
-    if (EFI_ERROR(Status)) {
-      *ImageData = NULL;
-      *DataLength = 0;
-    }
+
     DEBUG((DEBUG_INFO, "Get label for external tool %s - %r\n", BootEntry->Name, Status));
     return Status;
   }
 
-  if (BootEntry->DevicePath == NULL) {
-    DEBUG((DEBUG_ERROR, "DevicePath for entry %s is NULL\n", BootEntry->Name));
-    return EFI_UNSUPPORTED;
-  }
+  ASSERT (BootEntry->DevicePath != NULL);
 
   Status = BootPolicy->DevicePathToDirPath (
     BootEntry->DevicePath,
@@ -211,13 +192,17 @@ OcGetBootEntryLabelImage (
     return Status;
   }
 
-  return InternalGetAppleDiskLabelImage (
+  Status = InternalGetAppleImage (
     FileSystem,
     BootDirectoryName,
     Scale == 2 ? L".disk_label_2x" : L".disk_label",
     ImageData,
     DataLength
     );
+
+  FreePool (BootDirectoryName);
+
+  return Status;
 }
 
 EFI_STATUS
@@ -238,12 +223,10 @@ OcGetBootEntryIcon (
   *ImageData = NULL;
   *DataLength = 0;
 
-  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL || BootEntry->Type == OC_BOOT_SYSTEM) {
-    if (Context->CustomDescribe == NULL) {
-      DEBUG((DEBUG_ERROR, "CustomDescribe is null\n"));
-      return EFI_NOT_FOUND;
-    }
-    Status = Context->CustomDescribe(
+  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL || BootEntry->Type == OC_BOOT_RESET_NVRAM) {
+    ASSERT (Context->CustomDescribe != NULL);
+
+    Status = Context->CustomDescribe (
       Context->CustomEntryContext,
       BootEntry,
       0,
@@ -252,18 +235,12 @@ OcGetBootEntryIcon (
       NULL,
       NULL
       );
-    if (EFI_ERROR(Status)) {
-      *ImageData = NULL;
-      *DataLength = 0;
-    }
+
     DEBUG((DEBUG_INFO, "Get label for external tool %s - %r\n", BootEntry->Name, Status));
     return Status;
   }
 
-  if (BootEntry->DevicePath == NULL) {
-    DEBUG((DEBUG_ERROR, "DevicePath for entry %s is NULL\n", BootEntry->Name));
-    return EFI_UNSUPPORTED;
-  }
+  ASSERT (BootEntry->DevicePath != NULL);
 
   Status = BootPolicy->DevicePathToDirPath (
     BootEntry->DevicePath,
@@ -287,9 +264,18 @@ OcGetBootEntryIcon (
     return Status;
   }
 
-  return InternalGetAppleDiskLabelImage (FileSystem, L"\\", L".VolumeIcon.icns", ImageData, DataLength);
-}
+  Status = InternalGetAppleImage (
+    FileSystem,
+    L"",
+    L".VolumeIcon.icns",
+    ImageData,
+    DataLength
+    );
 
+  FreePool (BootDirectoryName);
+
+  return Status;
+}
 
 VOID
 OcResetBootEntry (
@@ -602,7 +588,7 @@ OcScanForBootEntries (
       return EFI_OUT_OF_RESOURCES;
     }
 
-    Entries[EntryIndex].Type         = OC_BOOT_SYSTEM;
+    Entries[EntryIndex].Type         = OC_BOOT_RESET_NVRAM;
     Entries[EntryIndex].SystemAction = InternalSystemActionResetNvram;
     ++EntryIndex;
   }
@@ -631,7 +617,7 @@ OcLoadBootEntry (
   EFI_HANDLE                 EntryHandle;
   INTERNAL_DMG_LOAD_CONTEXT  DmgLoadContext;
 
-  if (BootEntry->Type == OC_BOOT_SYSTEM) {
+  if ((BootEntry->Type & OC_BOOT_SYSTEM) != 0) {
     ASSERT (BootEntry->SystemAction != NULL);
     return BootEntry->SystemAction ();
   }

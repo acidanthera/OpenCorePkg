@@ -47,7 +47,7 @@ LoadOpenCore (
   ASSERT (ImageHandle != NULL);
 
   BufferSize = 0;
-  Buffer = ReadFile (FileSystem, OPEN_CORE_IMAGE_PATH, &BufferSize, BASE_16MB);
+  Buffer = ReadFile (FileSystem, OPEN_CORE_DRIVER_PATH, &BufferSize, BASE_16MB);
   if (Buffer == NULL) {
     DEBUG ((DEBUG_ERROR, "BS: Failed to locate valid OpenCore image - %p!\n", Buffer));
     return EFI_NOT_FOUND;
@@ -154,7 +154,7 @@ UefiMain (
   //
   // We have just started at EFI/BOOT/BOOTx64.efi.
   // We need to run OpenCore on this partition as it failed automatically.
-  // The image is optionally located at OPEN_CORE_IMAGE_PATH file.
+  // The image is optionally located at OPEN_CORE_DRIVER_PATH file.
   //
 
   LoadedImage = NULL;

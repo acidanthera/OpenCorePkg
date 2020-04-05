@@ -159,69 +159,24 @@ OcToolDescribeEntry (
   HasIcon  = FALSE;
   HasLabel = FALSE;
 
-  if (ChosenEntry->Type == OC_BOOT_SYSTEM) {
-
-    if (StrCmp(ChosenEntry->Name, OC_MENU_RESET_NVRAM_ENTRY) == 0) {
-      if (IconData != NULL && IconDataSize != NULL) {
-        *IconData     = NULL;
-        *IconDataSize = 0;
-
-        if (OcStorageExistsFileUnicode (Context, L"Resources\\Image\\ResetNVRAM.icns")) {
-          *IconData = OcStorageReadFileUnicode (
-            Storage,
-            L"Resources\\Image\\ResetNVRAM.icns",
-            IconDataSize
-            );
-          HasIcon = *IconData != NULL;
-        }
-      }
-
-      if (LabelData != NULL && LabelDataSize != NULL) {
-        *LabelData     = NULL;
-        *LabelDataSize = 0;
-
-        Status = OcUnicodeSafeSPrint (
-          DescPath,
-          sizeof (DescPath),
-          L"Resources\\Label\\ResetNVRAM.%a",
-          LabelScale == 2 ? "l2x" : "lbl"
-          );
-        if (!EFI_ERROR (Status)) {
-          if (OcStorageExistsFileUnicode (Context, DescPath)) {
-            *LabelData = OcStorageReadFileUnicode (
-              Storage,
-              DescPath,
-              LabelDataSize
-              );
-            HasLabel = *LabelData != NULL;
-          }
-        } else {
-          DEBUG ((
-            DEBUG_ERROR,
-            "OC: Resources\\Label\\ResetNVRAM.%a does not fit path!\n",
-            LabelScale == 2 ? "l2x" : "lbl"
-            ));
-        }
-      }
-    }
-
-    if (HasLabel) {
-      return EFI_SUCCESS;
-    }
-
-    return EFI_NOT_FOUND;
-  }
-
   if (IconData != NULL && IconDataSize != NULL) {
     *IconData     = NULL;
     *IconDataSize = 0;
 
-    Status = OcUnicodeSafeSPrint (
-      DescPath,
-      sizeof (DescPath),
-      OPEN_CORE_TOOL_PATH "%s.icns",
-      ChosenEntry->PathName
-      );
+    if (ChosenEntry->Type == OC_BOOT_RESET_NVRAM) {
+      Status = OcUnicodeSafeSPrint (
+        DescPath,
+        sizeof (DescPath),
+        OPEN_CORE_TOOL_PATH "%s.icns",
+        ChosenEntry->PathName
+        );
+    } else {
+      Status = StrCpyS (
+        DescPath,
+        sizeof (DescPath),
+        OPEN_CORE_IMAGE_PATH "ResetNVRAM.icns"
+        );
+    }
     if (!EFI_ERROR (Status)) {
       if (OcStorageExistsFileUnicode (Context, DescPath)) {
         *IconData = OcStorageReadFileUnicode (
@@ -235,8 +190,10 @@ OcToolDescribeEntry (
       DEBUG ((
         DEBUG_WARN,
         "OC: Tool label %s%s.icns does not fit path!\n",
-        OPEN_CORE_TOOL_PATH,
-        DescPath
+        ChosenEntry->Type == OC_BOOT_RESET_NVRAM
+          ? OPEN_CORE_IMAGE_PATH : OPEN_CORE_TOOL_PATH,
+        ChosenEntry->Type == OC_BOOT_RESET_NVRAM
+          ? L"ResetNVRAM": ChosenEntry->PathName
         ));
     }
   }
@@ -245,13 +202,23 @@ OcToolDescribeEntry (
     *LabelData     = NULL;
     *LabelDataSize = 0;
 
-    Status = OcUnicodeSafeSPrint (
-      DescPath,
-      sizeof (DescPath),
-      OPEN_CORE_TOOL_PATH "%s.%a",
-      ChosenEntry->PathName,
-      LabelScale == 2 ? "l2x" : "lbl"
-      );
+    if (ChosenEntry->Type == OC_BOOT_RESET_NVRAM) {
+      Status = OcUnicodeSafeSPrint (
+        DescPath,
+        sizeof (DescPath),
+        OPEN_CORE_LABEL_PATH "ResetNVRAM.%a",
+        LabelScale == 2 ? "l2x" : "lbl"
+        );
+    } else {
+      Status = OcUnicodeSafeSPrint (
+        DescPath,
+        sizeof (DescPath),
+        OPEN_CORE_TOOL_PATH "%s.%a",
+        ChosenEntry->PathName,
+        LabelScale == 2 ? "l2x" : "lbl"
+        );
+    }
+
     if (!EFI_ERROR (Status)) {
       if (OcStorageExistsFileUnicode (Context, DescPath)) {
         *LabelData = OcStorageReadFileUnicode (
@@ -261,23 +228,28 @@ OcToolDescribeEntry (
           );
         HasLabel = *LabelData != NULL;
       }
-      else {
-        DEBUG ((
-          DEBUG_WARN,
-          "File %s not found\n",
-          DescPath
-          ));
-      }
     } else {
       DEBUG ((
         DEBUG_WARN,
         "OC: Tool label %s%s.%a does not fit path!\n",
-        OPEN_CORE_TOOL_PATH,
-        DescPath,
+        ChosenEntry->Type == OC_BOOT_RESET_NVRAM
+          ? OPEN_CORE_LABEL_PATH : OPEN_CORE_TOOL_PATH,
+        ChosenEntry->Type == OC_BOOT_RESET_NVRAM
+          ? L"ResetNVRAM" : ChosenEntry->PathName,
         LabelScale == 2 ? "l2x" : "lbl"
         ));
     }
   }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OC: Got label %d icon %d for type %u - %s\n",
+    HasLabel,
+    HasIcon,
+    ChosenEntry->Type,
+    ChosenEntry->Type == OC_BOOT_RESET_NVRAM
+      ? L"ResetNVRAM" : ChosenEntry->PathName
+    ));
 
   if (HasIcon || HasLabel) {
     return EFI_SUCCESS;

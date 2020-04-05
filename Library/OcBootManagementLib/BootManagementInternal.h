@@ -67,9 +67,9 @@ InternalGetAppleDiskLabel (
   );
 
 EFI_STATUS
-InternalGetAppleDiskLabelImage (
+InternalGetAppleImage (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
-  IN  CONST CHAR16                     *BootDirectoryName,
+  IN  CONST CHAR16                     *DirectoryName,
   IN  CONST CHAR16                     *LabelFilename,
   OUT VOID                             **ImageData,
   OUT UINT32                           *DataSize

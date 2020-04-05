@@ -48,6 +48,14 @@ typedef struct OC_PICKER_CONTEXT_ OC_PICKER_CONTEXT;
 #define OC_MENU_EXTERNAL             L" (external)"
 
 /**
+  Paths allowed to be accessible by the interfaces.
+**/
+#define OPEN_CORE_IMAGE_PATH       L"Resources\\Image\\"
+#define OPEN_CORE_LABEL_PATH       L"Resources\\Label\\"
+#define OPEN_CORE_AUDIO_PATH       L"Resources\\Audio\\"
+#define OPEN_CORE_FONT_PATH        L"Resources\\Font\\"
+
+/**
   Default timeout for IDLE timeout during menu picker navigation
   before VoiceOver toggle.
 **/
@@ -81,7 +89,8 @@ typedef UINT32 OC_BOOT_ENTRY_TYPE;
 #define OC_BOOT_WINDOWS             BIT4
 #define OC_BOOT_EXTERNAL_OS         BIT5
 #define OC_BOOT_EXTERNAL_TOOL       BIT6
-#define OC_BOOT_SYSTEM              BIT7
+#define OC_BOOT_RESET_NVRAM         BIT7
+#define OC_BOOT_SYSTEM              (OC_BOOT_RESET_NVRAM)
 
 /**
   Picker mode.
@@ -153,14 +162,6 @@ typedef struct OC_BOOT_ENTRY_ {
   // Load option data (usually "boot args").
   //
   VOID                      *LoadOptions;
-  //
-  // Path to ".VolumeIcon.icns" file, if exists.
-  //
-  EFI_DEVICE_PATH_PROTOCOL  *IconFile;
-  //
-  // Path to directory containing ".disk_label" and ".disk_label_2x" files, if exists.
-  //
-  EFI_DEVICE_PATH_PROTOCOL  *LabelImageDirectory;
 } OC_BOOT_ENTRY;
 
 /**
@@ -588,7 +589,7 @@ struct OC_PICKER_CONTEXT_ {
   @param[in]  BootPolicy     Apple Boot Policy Protocol.
   @param[in]  BootEntry      Located boot entry.
 
-  @retval EFI_SUCCESS          The entry point is described successfully.
+  @retval EFI_SUCCESS   The entry point is described successfully.
 **/
 EFI_STATUS
 OcDescribeBootEntry (
@@ -599,20 +600,20 @@ OcDescribeBootEntry (
 /**
   Get '.disk_label' or '.disk_label_2x' file contents, if exists.
 
-  @param[in]  BootPolicy     Apple Boot Policy Protocol.
-  @param[in]  BootEntry      Located boot entry.
-  @param[in]  Scale          User interface scale.
-  @param[out]  ImageData          FIle contents.
-  @param[out]  DataLength          File length.
+  @param[in]   BootPolicy     Apple Boot Policy Protocol.
+  @param[in]   BootEntry      Located boot entry.
+  @param[in]   Scale          User interface scale.
+  @param[out]  ImageData      File contents.
+  @param[out]  DataLength     File length.
 
-  @retval EFI_SUCCESS          The file was read successfully.
+  @retval EFI_SUCCESS   The file was read successfully.
 **/
 EFI_STATUS
 OcGetBootEntryLabelImage (
   IN  OC_PICKER_CONTEXT          *Context,
   IN  APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
   IN  OC_BOOT_ENTRY              *BootEntry,
-  IN  UINT32                     Scale,
+  IN  UINT8                      Scale,
   OUT VOID                       **ImageData,
   OUT UINT32                     *DataLength
   );
@@ -620,12 +621,12 @@ OcGetBootEntryLabelImage (
 /**
   Get '.VolumeIcon.icns' file contents, if exists.
 
-  @param[in]  BootPolicy     Apple Boot Policy Protocol.
-  @param[in]  BootEntry      Located boot entry.
-  @param[out]  ImageData          FIle contents.
-  @param[out]  DataLength          File length.
+  @param[in]   BootPolicy     Apple Boot Policy Protocol.
+  @param[in]   BootEntry      Located boot entry.
+  @param[out]  ImageData      File contents.
+  @param[out]  DataLength     File length.
 
-  @retval EFI_SUCCESS          The file was read successfully.
+  @retval EFI_SUCCESS   The file was read successfully.
 **/
 EFI_STATUS
 OcGetBootEntryIcon (

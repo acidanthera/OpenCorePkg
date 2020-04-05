@@ -26,6 +26,14 @@
 
 GLOBAL_REMOVE_IF_UNREFERENCED BOOT_PICKER_GUI_CONTEXT mGuiContext = { { { 0 } } };
 
+// FIXME: Move out.
+EFI_STATUS
+DecodeAppleDiskLabelImage (
+  OUT GUI_IMAGE *Image,
+  IN  UINT8     *RawData,
+  IN  UINT32    DataLength
+  );
+
 STATIC
 VOID
 InternalSafeFreePool (
@@ -71,31 +79,42 @@ STATIC
 RETURN_STATUS
 LoadImageFileFromStorageForScale (
   IN  OC_STORAGE_CONTEXT       *Storage,
-  IN  CONST CHAR16             *ImageFilePath,
-  IN  UINT32                   Scale,
+  IN  CONST CHAR8              *ImageFilePath,
+  IN  CONST CHAR8              *ImageFileExt,
+  IN  UINT8                    Scale,
   OUT VOID                     **FileData,
   OUT UINT32                   *FileSize
   )
 {
-  UINTN         BufferSize;
-  CHAR16        *Path;
+  EFI_STATUS    Status;
+  CHAR16        Path[OC_STORAGE_SAFE_PATH_MAX];
 
-  BufferSize = sizeof(CHAR16) * (StrLen (ImageFilePath) + 2);
-  Path = AllocatePool (BufferSize);
-  if (Path == NULL) {
-    DEBUG ((DEBUG_ERROR, "Out of memory"));
-    return RETURN_OUT_OF_RESOURCES;
+  Status = OcUnicodeSafeSPrint (
+    Path,
+    sizeof (Path),
+    OPEN_CORE_IMAGE_PATH L"%a%a.%a",
+    ImageFilePath,
+    Scale == 2 ? "@2x" : "",
+    ImageFileExt
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OCCP: Cannot fit %a\n", ImageFilePath));
+    return EFI_OUT_OF_RESOURCES;
   }
-
-  UnicodeSPrint (Path, BufferSize, ImageFilePath, Scale == 2 ? L"@2x" : L"");
 
   *FileData = OcStorageReadFileUnicode (Storage, Path, FileSize);
 
-  if (*FileData == NULL || *FileSize == 0) {
-    DEBUG ((DEBUG_WARN, "Failed to load %s\n", Path));
+  if (*FileData == NULL) {
+    DEBUG ((DEBUG_WARN, "OCCP: Failed to load %s\n", Path));
     return RETURN_NOT_FOUND;
   }
-  FreePool (Path);
+
+  if (*FileSize == 0) {
+    FreePool (*FileData);
+    DEBUG ((DEBUG_WARN, "OCCP: Empty %s\n", Path));
+    return RETURN_NOT_FOUND; 
+  }
+
   return RETURN_SUCCESS;
 }
 
@@ -104,40 +123,49 @@ STATIC
 RETURN_STATUS
 LoadLabelFileFromStorageForScale (
   IN  OC_STORAGE_CONTEXT       *Storage,
-  IN  CONST CHAR16             *ImageFilePath,
-  IN  UINT32                   Scale,
+  IN  CONST CHAR8              *LabelFilePath,
+  IN  UINT8                    Scale,
   OUT VOID                     **FileData,
   OUT UINT32                   *FileSize
   )
 {
-  UINTN         BufferSize;
-  CHAR16        *Path;
+  EFI_STATUS    Status;
+  CHAR16        Path[OC_STORAGE_SAFE_PATH_MAX];
 
-  BufferSize = sizeof(CHAR16) * (StrLen (ImageFilePath) + 5);
-  Path = AllocatePool (BufferSize);
-  if (Path == NULL) {
-    DEBUG ((DEBUG_ERROR, "Out of memory"));
-    return RETURN_OUT_OF_RESOURCES;
+  Status = OcUnicodeSafeSPrint (
+    Path,
+    sizeof (Path),
+    OPEN_CORE_LABEL_PATH L"%a.%a",
+    LabelFilePath,
+    Scale == 2 ? "l2x" : "lbl"
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OCCP: Cannot fit %a\n", LabelFilePath));
+    return EFI_OUT_OF_RESOURCES;
   }
-
-  UnicodeSPrint (Path, BufferSize, L"%s.%a", ImageFilePath, Scale == 2 ? "l2x" : "lbl");
 
   *FileData = OcStorageReadFileUnicode (Storage, Path, FileSize);
 
-  if (*FileData == NULL || *FileSize == 0) {
-    DEBUG ((DEBUG_WARN, "Failed to load %s\n", Path));
+  if (*FileData == NULL) {
+    DEBUG ((DEBUG_WARN, "OCCP: Failed to load %s\n", Path));
     return RETURN_NOT_FOUND;
   }
-  FreePool (Path);
+
+  if (*FileSize == 0) {
+    FreePool (*FileData);
+    DEBUG ((DEBUG_WARN, "OCCP: Empty %s\n", Path));
+    return RETURN_NOT_FOUND; 
+  }
+
   return RETURN_SUCCESS;
 }
-
 
 RETURN_STATUS
 LoadImageFromStorage (
   IN  OC_STORAGE_CONTEXT                   *Storage,
-  IN  CONST CHAR16                         *ImageFilePath,
-  IN  UINT32                               Scale,
+  IN  CONST CHAR8                          *ImageFilePath,
+  IN  CONST CHAR8                          *ImageFileExt,
+  IN  UINT8                                Scale,
   OUT VOID                                 *Image,
   IN  CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *HighlightPixel  OPTIONAL
   )
@@ -146,7 +174,14 @@ LoadImageFromStorage (
   UINT32        ImageSize;
   RETURN_STATUS Status;
 
-  Status = LoadImageFileFromStorageForScale(Storage, ImageFilePath, Scale, &ImageData, &ImageSize);
+  Status = LoadImageFileFromStorageForScale (
+    Storage,
+    ImageFilePath,
+    ImageFileExt,
+    Scale,
+    &ImageData,
+    &ImageSize
+    );
   if (ImageData == NULL) {
     return EFI_NOT_FOUND;
   }
@@ -160,26 +195,17 @@ LoadImageFromStorage (
   FreePool (ImageData);
 
   if (RETURN_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "Failed to decode image %s\n", ImageFilePath));
+    DEBUG ((DEBUG_WARN, "Failed to decode image %a\n", ImageFilePath));
   }
 
   return Status;
 }
 
-
-EFI_STATUS
-DecodeAppleDiskLabelImage (
-  OUT GUI_IMAGE *Image,
-  IN  UINT8     *RawData,
-  IN  UINT32    DataLength
-  );
-
-
 RETURN_STATUS
 LoadLabelFromStorage (
   IN  OC_STORAGE_CONTEXT       *Storage,
-  IN  CONST CHAR16             *ImageFilePath,
-  IN  UINT32                   Scale,
+  IN  CONST CHAR8              *ImageFilePath,
+  IN  UINT8                    Scale,
   OUT GUI_IMAGE                *Image
   )
 {
@@ -193,10 +219,13 @@ LoadLabelFromStorage (
   }
 
   Status = DecodeAppleDiskLabelImage (Image, ImageData, ImageSize);
+
   FreePool (ImageData);
-  if (RETURN_ERROR(Status)) {
+
+  if (RETURN_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "Failed to decode image %s\n", ImageFilePath));
   }
+
   return Status;
 }
 
@@ -222,27 +251,27 @@ InternalContextConstruct (
 
   Context->BootEntry = NULL;
 
-  Status  = LoadImageFromStorage(Storage, L"Resources\\Image\\Cursor%s.png",            Context->Scale, &Context->Cursor, NULL);
-  Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\Selected%s.png",          Context->Scale, &Context->EntryBackSelected, NULL);
-  Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\InternalHardDrive%s.png", Context->Scale, &Context->EntryIconInternal, NULL);
-  Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\ExternalHardDrive%s.png", Context->Scale, &Context->EntryIconExternal, NULL);
-  Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\Tool%s.png",              Context->Scale, &Context->EntryIconTool, NULL);
-  Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\Selector%s.png",          Context->Scale, &Context->EntrySelector, &HighlightPixel);
+  Status  = LoadImageFromStorage(Storage, "Cursor",            "png", Context->Scale, &Context->Cursor, NULL);
+  Status |= LoadImageFromStorage(Storage, "Selected",          "png", Context->Scale, &Context->EntryBackSelected, NULL);
+  Status |= LoadImageFromStorage(Storage, "InternalHardDrive", "png", Context->Scale, &Context->EntryIconInternal, NULL);
+  Status |= LoadImageFromStorage(Storage, "ExternalHardDrive", "png", Context->Scale, &Context->EntryIconExternal, NULL);
+  Status |= LoadImageFromStorage(Storage, "Tool",              "png", Context->Scale, &Context->EntryIconTool, NULL);
+  Status |= LoadImageFromStorage(Storage, "Selector",          "png", Context->Scale, &Context->EntrySelector, &HighlightPixel);
 
   // TODO: don't load prerendered labels if the user requested to always use font rendering. But we don't have picker context here
-  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\EFIBoot",     Context->Scale, &Context->EntryLabelEFIBoot);
-  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\Windows",     Context->Scale, &Context->EntryLabelWindows);
-  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\Recovery",    Context->Scale, &Context->EntryLabelRecovery);
-  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\ResetNVRAM",  Context->Scale, &Context->EntryLabelResetNVRAM);
-  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\Tool",        Context->Scale, &Context->EntryLabelTool);
-  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\macOS",       Context->Scale, &Context->EntryLabelMacOS);
+  Status |= LoadLabelFromStorage(Storage, "EFIBoot",     Context->Scale, &Context->EntryLabelEFIBoot);
+  Status |= LoadLabelFromStorage(Storage, "Windows",     Context->Scale, &Context->EntryLabelWindows);
+  Status |= LoadLabelFromStorage(Storage, "Recovery",    Context->Scale, &Context->EntryLabelRecovery);
+  Status |= LoadLabelFromStorage(Storage, "ResetNVRAM",  Context->Scale, &Context->EntryLabelResetNVRAM);
+  Status |= LoadLabelFromStorage(Storage, "Tool",        Context->Scale, &Context->EntryLabelTool);
+  Status |= LoadLabelFromStorage(Storage, "macOS",       Context->Scale, &Context->EntryLabelMacOS);
 
   /*
-  Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\ToolbarPoof1128x128%s.png", Context->Scale, &Context->Poof[0], NULL);
-  Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\ToolbarPoof2128x128%s.png", Context->Scale, &Context->Poof[1], NULL);
-  Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\ToolbarPoof3128x128%s.png", Context->Scale, &Context->Poof[2], NULL);
-  Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\ToolbarPoof4128x128%s.png", Context->Scale, &Context->Poof[3], NULL);
-  Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\ToolbarPoof5128x128%s.png", Context->Scale, &Context->Poof[4], NULL);
+  Status |= LoadImageFromStorage(Storage, "ToolbarPoof1128x128", "png", Context->Scale, &Context->Poof[0], NULL);
+  Status |= LoadImageFromStorage(Storage, "ToolbarPoof2128x128", "png", Context->Scale, &Context->Poof[1], NULL);
+  Status |= LoadImageFromStorage(Storage, "ToolbarPoof3128x128", "png", Context->Scale, &Context->Poof[2], NULL);
+  Status |= LoadImageFromStorage(Storage, "ToolbarPoof4128x128", "png", Context->Scale, &Context->Poof[3], NULL);
+  Status |= LoadImageFromStorage(Storage, "ToolbarPoof5128x128", "png", Context->Scale, &Context->Poof[4], NULL);
   */
   if (RETURN_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Failed to load image\n"));
@@ -250,9 +279,8 @@ InternalContextConstruct (
     return RETURN_UNSUPPORTED;
   }
 
-  // TODO: don't load font if the user requested not to use font rendering. But we don't have picker context here
-  FontImage = OcStorageReadFileUnicode (Storage, L"Resources\\Font\\Font.png", &FontImageSize);
-  FontData  = OcStorageReadFileUnicode (Storage, L"Resources\\Font\\Font.bin", &FontDataSize);
+  FontImage = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font.png", &FontImageSize);
+  FontData  = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font.bin", &FontDataSize);
 
   if (FontImage != NULL && FontData != NULL) {
     Result = GuiFontConstruct (
@@ -286,6 +314,9 @@ InternalContextConstruct (
   if (EFI_ERROR (Status) || Context->Scale != 2) {
     Context->Scale = 1;
   }
+
+  // FIXME: Add support for 2x scaling.
+  Context->Scale = 1;
 
   return RETURN_SUCCESS;
 }

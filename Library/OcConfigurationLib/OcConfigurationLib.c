@@ -649,11 +649,6 @@ OcConfigurationInit (
   return EFI_SUCCESS;
 }
 
-/**
-  Free configuration structure.
-
-  @param[in,out]  Config   Configuration structure.
-**/
 VOID
 OcConfigurationFree (
   IN OUT OC_GLOBAL_CONFIG   *Config
