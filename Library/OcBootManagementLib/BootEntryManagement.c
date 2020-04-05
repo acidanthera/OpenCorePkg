@@ -162,7 +162,7 @@ OcGetBootEntryLabelImage (
   DEBUG((DEBUG_INFO, "Entered OcGetBootEntryLabelImage for entry"));
   DEBUG((DEBUG_INFO, "Entered OcGetBootEntryLabelImage for entry %s", BootEntry->Name));
 
-  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL) {
+  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL || BootEntry->Type == OC_BOOT_SYSTEM) {
     if (Context->CustomDescribe == NULL) {
       DEBUG((DEBUG_ERROR, "CustomDescribe is null\n"));
       return EFI_NOT_FOUND;
@@ -182,10 +182,6 @@ OcGetBootEntryLabelImage (
     }
     DEBUG((DEBUG_INFO, "Get label for external tool %s - %r\n", BootEntry->Name, Status));
     return Status;
-  }
-
-  if (BootEntry->Type == OC_BOOT_SYSTEM) {
-    return EFI_UNSUPPORTED;
   }
 
   if (BootEntry->DevicePath == NULL) {

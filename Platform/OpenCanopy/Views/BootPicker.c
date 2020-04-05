@@ -808,9 +808,19 @@ BootPickerEntriesAdd (
   UINT32                 IconFileSize;
   VOID                   *IconFileData;
   GUI_IMAGE              *EntryIcon;
+  BOOLEAN                UseDiskLabel;
+  BOOLEAN                UseGenericLabel;
+  BOOLEAN                Result;
 
   ASSERT (GuiContext != NULL);
   ASSERT (Entry != NULL);
+
+  DEBUG((DEBUG_INFO, "Console attributes: %d\n", Context->ConsoleAttributes));
+
+  UseDiskLabel = (Context->ConsoleAttributes & OPENCANOPY_USE_DISK_LABEL_FILE) != 0;
+  UseGenericLabel = (Context->ConsoleAttributes & OPENCANOPY_USE_GENERIC_LABEL_IMAGE) != 0;
+
+  DEBUG((DEBUG_INFO, "UseDiskLabel: %d, UseGenericLabel: %d\n", UseDiskLabel, UseGenericLabel));
 
   VolumeEntry = AllocateZeroPool (sizeof (*VolumeEntry));
   if (VolumeEntry == NULL) {
@@ -823,9 +833,11 @@ BootPickerEntriesAdd (
     return EFI_NOT_FOUND;
   }
 
-  if (EFI_SUCCESS == OcGetBootEntryLabelImage(Context, AppleBootPolicy, Entry, 1, &IconFileData, &IconFileSize) &&
-      EFI_SUCCESS == DecodeAppleDiskLabelImage(&VolumeEntry->Label, IconFileData, IconFileSize)) {
-  } else if (TRUE) {
+  if (UseDiskLabel
+   && EFI_SUCCESS == OcGetBootEntryLabelImage(Context, AppleBootPolicy, Entry, 1, &IconFileData, &IconFileSize)
+   && EFI_SUCCESS == DecodeAppleDiskLabelImage(&VolumeEntry->Label, IconFileData, IconFileSize)) {
+    // do nothing
+  } else if (UseGenericLabel) {
     switch (Entry->Type) {
       case OC_BOOT_UNKNOWN:
       case OC_BOOT_EXTERNAL_OS:
@@ -849,17 +861,33 @@ BootPickerEntriesAdd (
         break;
 
       case OC_BOOT_SYSTEM:
-        Status = CopyLabel(&VolumeEntry->Label, &GuiContext->EntryLabelResetNVRAM); // currently it is the only system action
+        if (StrCmp(Entry->Name, OC_MENU_RESET_NVRAM_ENTRY) == 0) {
+          Status = CopyLabel(&VolumeEntry->Label, &GuiContext->EntryLabelResetNVRAM);
+        } else {
+          Status = CopyLabel(&VolumeEntry->Label, &GuiContext->EntryLabelTool);
+        }
         break;
 
       default:
         DEBUG((DEBUG_ERROR, "Entry kind %d unsupported", Entry->Type));
-    return RETURN_UNSUPPORTED;
-  }
+        return RETURN_UNSUPPORTED;
+    }
     if (RETURN_ERROR(Status)) {
       return Status;
     }
+  } else {
+    Result = GuiGetLabel (
+      &VolumeEntry->Label,
+      &GuiContext->FontContext,
+      Entry->Name,
+      StrLen (Entry->Name)
+      );
+    if (!Result) {
+      DEBUG ((DEBUG_WARN, "BMF: label failed\n"));
+      return RETURN_UNSUPPORTED;
+    }
   }
+
 
   VolumeEntry->Context = Entry;
 

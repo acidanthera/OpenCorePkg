@@ -43,14 +43,26 @@ InternalContextDestruct (
   IN OUT BOOT_PICKER_GUI_CONTEXT  *Context
   )
 {
+  // TODO: maybe refactor it to an array?
   InternalSafeFreePool (Context->Cursor.Buffer);
   InternalSafeFreePool (Context->EntryBackSelected.Buffer);
   InternalSafeFreePool (Context->EntrySelector.BaseImage.Buffer);
   InternalSafeFreePool (Context->EntrySelector.HoldImage.Buffer);
   InternalSafeFreePool (Context->EntryIconInternal.Buffer);
   InternalSafeFreePool (Context->EntryIconExternal.Buffer);
+  InternalSafeFreePool (Context->EntryIconTool.Buffer);
   InternalSafeFreePool (Context->FontContext.FontImage.Buffer);
-  // TODO: free all labels and icons
+  InternalSafeFreePool (Context->EntryLabelEFIBoot.Buffer);
+  InternalSafeFreePool (Context->EntryLabelWindows.Buffer);
+  InternalSafeFreePool (Context->EntryLabelRecovery.Buffer);
+  InternalSafeFreePool (Context->EntryLabelMacOS.Buffer);
+  InternalSafeFreePool (Context->EntryLabelTool.Buffer);
+  InternalSafeFreePool (Context->EntryLabelResetNVRAM.Buffer);
+  InternalSafeFreePool (Context->Poof[0].Buffer);
+  InternalSafeFreePool (Context->Poof[1].Buffer);
+  InternalSafeFreePool (Context->Poof[2].Buffer);
+  InternalSafeFreePool (Context->Poof[3].Buffer);
+  InternalSafeFreePool (Context->Poof[4].Buffer);
 }
 
 STATIC
@@ -73,8 +85,40 @@ LoadImageFileFromStorageForScale (
     return RETURN_OUT_OF_RESOURCES;
   }
 
-  // FIXME: what if format string is of wrong kind?
   UnicodeSPrint (Path, BufferSize, ImageFilePath, Scale == 2 ? L"@2x" : L"");
+
+  *FileData = OcStorageReadFileUnicode (Storage, Path, FileSize);
+
+  if (*FileData == NULL || *FileSize == 0) {
+    DEBUG ((DEBUG_WARN, "Failed to load %s\n", Path));
+    return RETURN_NOT_FOUND;
+  }
+  FreePool (Path);
+  return RETURN_SUCCESS;
+}
+
+
+STATIC
+RETURN_STATUS
+LoadLabelFileFromStorageForScale (
+  IN  OC_STORAGE_CONTEXT       *Storage,
+  IN  CONST CHAR16             *ImageFilePath,
+  IN  UINT32                   Scale,
+  OUT VOID                     **FileData,
+  OUT UINT32                   *FileSize
+  )
+{
+  UINTN         BufferSize;
+  CHAR16        *Path;
+
+  BufferSize = sizeof(CHAR16) * (StrLen (ImageFilePath) + 5);
+  Path = AllocatePool (BufferSize);
+  if (Path == NULL) {
+    DEBUG ((DEBUG_ERROR, "Out of memory"));
+    return RETURN_OUT_OF_RESOURCES;
+  }
+
+  UnicodeSPrint (Path, BufferSize, L"%s.%a", ImageFilePath, Scale == 2 ? "l2x" : "lbl");
 
   *FileData = OcStorageReadFileUnicode (Storage, Path, FileSize);
 
@@ -141,7 +185,7 @@ LoadLabelFromStorage (
   UINT32        ImageSize;
   RETURN_STATUS Status;
 
-  Status = LoadImageFileFromStorageForScale (Storage, ImageFilePath, Scale, &ImageData, &ImageSize);
+  Status = LoadLabelFileFromStorageForScale (Storage, ImageFilePath, Scale, &ImageData, &ImageSize);
   if (RETURN_ERROR(Status)) {
     return Status;
   }
@@ -181,14 +225,15 @@ InternalContextConstruct (
   Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\InternalHardDrive%s.png", Context->Scale, &Context->EntryIconInternal, NULL);
   Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\ExternalHardDrive%s.png", Context->Scale, &Context->EntryIconExternal, NULL);
   Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\Tool%s.png",              Context->Scale, &Context->EntryIconTool, NULL);
-  Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\Selector%s.png",     Context->Scale, &Context->EntrySelector, &HighlightPixel);
+  Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\Selector%s.png",          Context->Scale, &Context->EntrySelector, &HighlightPixel);
 
-  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\EFIBoot%s.disklabel",     Context->Scale, &Context->EntryLabelEFIBoot);
-  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\Windows%s.disklabel",     Context->Scale, &Context->EntryLabelWindows);
-  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\Recovery%s.disklabel",    Context->Scale, &Context->EntryLabelRecovery);
-  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\Tool%s.disklabel",        Context->Scale, &Context->EntryLabelTool);
-  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\ResetNVRAM%s.disklabel",  Context->Scale, &Context->EntryLabelResetNVRAM);
-  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\macOS%s.disklabel",       Context->Scale, &Context->EntryLabelMacOS);
+  // TODO: don't load prerendered labels if the user requested to always use font rendering. But we don't have picker context here
+  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\EFIBoot",     Context->Scale, &Context->EntryLabelEFIBoot);
+  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\Windows",     Context->Scale, &Context->EntryLabelWindows);
+  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\Recovery",    Context->Scale, &Context->EntryLabelRecovery);
+  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\ResetNVRAM",  Context->Scale, &Context->EntryLabelResetNVRAM);
+  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\Tool",        Context->Scale, &Context->EntryLabelTool);
+  Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\macOS",       Context->Scale, &Context->EntryLabelMacOS);
 
   Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\ToolbarPoof1128x128%s.png", Context->Scale, &Context->Poof[0], NULL);
   Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\ToolbarPoof2128x128%s.png", Context->Scale, &Context->Poof[1], NULL);
@@ -201,6 +246,7 @@ InternalContextConstruct (
     return RETURN_UNSUPPORTED;
   }
 
+  // TODO: don't load font if the user requested not to use font rendering. But we don't have picker context here
   FontImage = OcStorageReadFileUnicode (Storage, L"Resources\\Font\\Font.png", &FontImageSize);
   FontData  = OcStorageReadFileUnicode (Storage, L"Resources\\Font\\Font.bin", &FontDataSize);
 

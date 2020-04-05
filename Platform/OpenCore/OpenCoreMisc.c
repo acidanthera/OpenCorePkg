@@ -159,6 +159,57 @@ OcToolDescribeEntry (
   HasIcon  = FALSE;
   HasLabel = FALSE;
 
+  if (ChosenEntry->Type == OC_BOOT_SYSTEM) {
+
+    DEBUG((DEBUG_ERROR, "Got here 1"));
+
+    if (StrCmp(ChosenEntry->Name, OC_MENU_RESET_NVRAM_ENTRY) == 0) {
+      if (IconData != NULL && IconDataSize != NULL) {
+        *IconData     = NULL;
+        *IconDataSize = 0;
+      }
+
+      if (LabelData != NULL && LabelDataSize != NULL) {
+        *LabelData     = NULL;
+        *LabelDataSize = 0;
+        DEBUG((DEBUG_ERROR, "Got here 2"));
+
+        Status = OcUnicodeSafeSPrint (
+          DescPath,
+          sizeof (DescPath),
+          L"Resources\\Label\\ResetNVRAM.%a",
+          LabelScale == 2 ? "l2x" : "lbl"
+          );
+        if (!EFI_ERROR (Status)) {
+          DEBUG((DEBUG_ERROR, "Got here 3"));
+
+          if (OcStorageExistsFileUnicode (Context, DescPath)) {
+            DEBUG((DEBUG_ERROR, "Got here 4"));
+
+            *LabelData = OcStorageReadFileUnicode (
+              Storage,
+              DescPath,
+              LabelDataSize
+              );
+            HasLabel = *LabelData != NULL;
+          }
+        } else {
+          DEBUG ((
+            DEBUG_ERROR,
+            "OC: Resources\\Label\\ResetNVRAM.%a does not fit path!\n",
+            LabelScale == 2 ? "l2x" : "lbl"
+            ));
+        }
+      }
+    }
+
+    if (HasLabel) {
+      return EFI_SUCCESS;
+    }
+
+    return EFI_NOT_FOUND;
+  }
+
   if (IconData != NULL && IconDataSize != NULL) {
     *IconData     = NULL;
     *IconDataSize = 0;
@@ -195,9 +246,9 @@ OcToolDescribeEntry (
     Status = OcUnicodeSafeSPrint (
       DescPath,
       sizeof (DescPath),
-      OPEN_CORE_TOOL_PATH "%s.lbl%a",
+      OPEN_CORE_TOOL_PATH "%s.%a",
       ChosenEntry->PathName,
-      LabelScale == 2 ? "2x" : ""
+      LabelScale == 2 ? "l2x" : "lbl"
       );
     if (!EFI_ERROR (Status)) {
       if (OcStorageExistsFileUnicode (Context, DescPath)) {
@@ -210,11 +261,11 @@ OcToolDescribeEntry (
       }
     } else {
       DEBUG ((
-        DEBUG_INFO,
-        "OC: Tool label %s%s.lbl%a does not fit path!\n",
+        DEBUG_WARN,
+        "OC: Tool label %s%s.%a does not fit path!\n",
         OPEN_CORE_TOOL_PATH,
         DescPath,
-        LabelScale == 2 ? "2x" : ""
+        LabelScale == 2 ? "l2x" : "lbl"
         ));
     }
   }
