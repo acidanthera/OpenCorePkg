@@ -161,18 +161,24 @@ OcToolDescribeEntry (
 
   if (ChosenEntry->Type == OC_BOOT_SYSTEM) {
 
-    DEBUG((DEBUG_ERROR, "Got here 1"));
-
     if (StrCmp(ChosenEntry->Name, OC_MENU_RESET_NVRAM_ENTRY) == 0) {
       if (IconData != NULL && IconDataSize != NULL) {
         *IconData     = NULL;
         *IconDataSize = 0;
+
+        if (OcStorageExistsFileUnicode (Context, L"Resources\\Image\\ResetNVRAM.icns")) {
+          *IconData = OcStorageReadFileUnicode (
+            Storage,
+            L"Resources\\Image\\ResetNVRAM.icns",
+            IconDataSize
+            );
+          HasIcon = *IconData != NULL;
+        }
       }
 
       if (LabelData != NULL && LabelDataSize != NULL) {
         *LabelData     = NULL;
         *LabelDataSize = 0;
-        DEBUG((DEBUG_ERROR, "Got here 2"));
 
         Status = OcUnicodeSafeSPrint (
           DescPath,
@@ -181,11 +187,7 @@ OcToolDescribeEntry (
           LabelScale == 2 ? "l2x" : "lbl"
           );
         if (!EFI_ERROR (Status)) {
-          DEBUG((DEBUG_ERROR, "Got here 3"));
-
           if (OcStorageExistsFileUnicode (Context, DescPath)) {
-            DEBUG((DEBUG_ERROR, "Got here 4"));
-
             *LabelData = OcStorageReadFileUnicode (
               Storage,
               DescPath,
@@ -231,7 +233,7 @@ OcToolDescribeEntry (
       }
     } else {
       DEBUG ((
-        DEBUG_INFO,
+        DEBUG_WARN,
         "OC: Tool label %s%s.icns does not fit path!\n",
         OPEN_CORE_TOOL_PATH,
         DescPath
@@ -258,6 +260,13 @@ OcToolDescribeEntry (
           LabelDataSize
           );
         HasLabel = *LabelData != NULL;
+      }
+      else {
+        DEBUG ((
+          DEBUG_WARN,
+          "File %s not found\n",
+          DescPath
+          ));
       }
     } else {
       DEBUG ((

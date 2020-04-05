@@ -222,6 +222,7 @@ OcGetBootEntryLabelImage (
 
 EFI_STATUS
 OcGetBootEntryIcon (
+  IN  OC_PICKER_CONTEXT          *Context,
   IN  APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
   IN  OC_BOOT_ENTRY              *BootEntry,
   OUT VOID                       **ImageData,
@@ -237,11 +238,31 @@ OcGetBootEntryIcon (
   *ImageData = NULL;
   *DataLength = 0;
 
-  //
-  // Custom entries have no special icon.
-  //
-  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL) {
-    return EFI_NOT_FOUND;
+  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL || BootEntry->Type == OC_BOOT_SYSTEM) {
+    if (Context->CustomDescribe == NULL) {
+      DEBUG((DEBUG_ERROR, "CustomDescribe is null\n"));
+      return EFI_NOT_FOUND;
+    }
+    Status = Context->CustomDescribe(
+      Context->CustomEntryContext,
+      BootEntry,
+      0,
+      ImageData,
+      DataLength,
+      NULL,
+      NULL
+      );
+    if (EFI_ERROR(Status)) {
+      *ImageData = NULL;
+      *DataLength = 0;
+    }
+    DEBUG((DEBUG_INFO, "Get label for external tool %s - %r\n", BootEntry->Name, Status));
+    return Status;
+  }
+
+  if (BootEntry->DevicePath == NULL) {
+    DEBUG((DEBUG_ERROR, "DevicePath for entry %s is NULL\n", BootEntry->Name));
+    return EFI_UNSUPPORTED;
   }
 
   Status = BootPolicy->DevicePathToDirPath (

@@ -629,6 +629,7 @@ OcGetBootEntryLabelImage (
 **/
 EFI_STATUS
 OcGetBootEntryIcon (
+  IN  OC_PICKER_CONTEXT          *Context,
   IN  APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
   IN  OC_BOOT_ENTRY              *BootEntry,
   OUT VOID                       **ImageData,

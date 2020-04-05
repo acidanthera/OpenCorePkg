@@ -58,11 +58,13 @@ InternalContextDestruct (
   InternalSafeFreePool (Context->EntryLabelMacOS.Buffer);
   InternalSafeFreePool (Context->EntryLabelTool.Buffer);
   InternalSafeFreePool (Context->EntryLabelResetNVRAM.Buffer);
+  /*
   InternalSafeFreePool (Context->Poof[0].Buffer);
   InternalSafeFreePool (Context->Poof[1].Buffer);
   InternalSafeFreePool (Context->Poof[2].Buffer);
   InternalSafeFreePool (Context->Poof[3].Buffer);
   InternalSafeFreePool (Context->Poof[4].Buffer);
+  */
 }
 
 STATIC
@@ -235,11 +237,13 @@ InternalContextConstruct (
   Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\Tool",        Context->Scale, &Context->EntryLabelTool);
   Status |= LoadLabelFromStorage(Storage, L"Resources\\Label\\macOS",       Context->Scale, &Context->EntryLabelMacOS);
 
+  /*
   Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\ToolbarPoof1128x128%s.png", Context->Scale, &Context->Poof[0], NULL);
   Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\ToolbarPoof2128x128%s.png", Context->Scale, &Context->Poof[1], NULL);
   Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\ToolbarPoof3128x128%s.png", Context->Scale, &Context->Poof[2], NULL);
   Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\ToolbarPoof4128x128%s.png", Context->Scale, &Context->Poof[3], NULL);
   Status |= LoadImageFromStorage(Storage, L"Resources\\Image\\ToolbarPoof5128x128%s.png", Context->Scale, &Context->Poof[4], NULL);
+  */
   if (RETURN_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Failed to load image\n"));
     InternalContextDestruct (Context);

@@ -22,7 +22,7 @@ typedef struct {
   GUI_IMAGE        EntryLabelMacOS;
   GUI_IMAGE        EntryLabelTool;
   GUI_IMAGE        EntryLabelResetNVRAM;
-  GUI_IMAGE        Poof[5];
+  // GUI_IMAGE        Poof[5];
   GUI_IMAGE        EntryBackSelected;
   GUI_IMAGE        Cursor;
   GUI_FONT_CONTEXT FontContext;

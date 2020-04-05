@@ -417,10 +417,10 @@ InternalBootPickerEntryDraw (
   ASSERT (Context != NULL);
 
   Entry       = BASE_CR (This, GUI_VOLUME_ENTRY, Hdr.Obj);
-  if (mBootPickerImageIndex < 5) {
+  /*if (mBootPickerImageIndex < 5) {
     EntryIcon = &((BOOT_PICKER_GUI_CONTEXT *) DrawContext->GuiContext)->Poof[mBootPickerImageIndex];
-  } else {
-  EntryIcon   = Entry->EntryIcon;
+  } else */{
+    EntryIcon   = Entry->EntryIcon;
   }
   Label       = &Entry->Label;
 
@@ -808,6 +808,7 @@ BootPickerEntriesAdd (
   UINT32                 IconFileSize;
   VOID                   *IconFileData;
   GUI_IMAGE              *EntryIcon;
+  BOOLEAN                UseVolumeIcon;
   BOOLEAN                UseDiskLabel;
   BOOLEAN                UseGenericLabel;
   BOOLEAN                Result;
@@ -817,7 +818,8 @@ BootPickerEntriesAdd (
 
   DEBUG((DEBUG_INFO, "Console attributes: %d\n", Context->ConsoleAttributes));
 
-  UseDiskLabel = (Context->ConsoleAttributes & OPENCANOPY_USE_DISK_LABEL_FILE) != 0;
+  UseVolumeIcon   = (Context->ConsoleAttributes & OPENCANOPY_USE_VOLUME_ICON) != 0;
+  UseDiskLabel    = (Context->ConsoleAttributes & OPENCANOPY_USE_DISK_LABEL_FILE) != 0;
   UseGenericLabel = (Context->ConsoleAttributes & OPENCANOPY_USE_GENERIC_LABEL_IMAGE) != 0;
 
   DEBUG((DEBUG_INFO, "UseDiskLabel: %d, UseGenericLabel: %d\n", UseDiskLabel, UseGenericLabel));
@@ -888,15 +890,15 @@ BootPickerEntriesAdd (
     }
   }
 
-
   VolumeEntry->Context = Entry;
 
-  if (Entry->Type == OC_BOOT_EXTERNAL_TOOL || Entry->Type == OC_BOOT_SYSTEM) {
-    VolumeEntry->EntryIcon = &GuiContext->EntryIconTool;
-  } else if (EFI_SUCCESS == OcGetBootEntryIcon(AppleBootPolicy, Entry, &IconFileData, &IconFileSize) &&
-             (EntryIcon = (GUI_IMAGE *) AllocatePool(sizeof(GUI_IMAGE))) &&
-             EFI_SUCCESS == GuiIcnsToImage128x128(EntryIcon, IconFileData, IconFileSize, GuiContext->Scale)) {
+  if (UseVolumeIcon
+   && EFI_SUCCESS == OcGetBootEntryIcon(Context, AppleBootPolicy, Entry, &IconFileData, &IconFileSize)
+   && (EntryIcon = (GUI_IMAGE *) AllocatePool(sizeof(GUI_IMAGE)))
+   && EFI_SUCCESS == GuiIcnsToImage128x128(EntryIcon, IconFileData, IconFileSize, GuiContext->Scale)) {
     VolumeEntry->EntryIcon = EntryIcon;
+  } else if (Entry->Type == OC_BOOT_EXTERNAL_TOOL || Entry->Type == OC_BOOT_SYSTEM) {
+    VolumeEntry->EntryIcon = &GuiContext->EntryIconTool;
   } else if (!Entry->IsExternal) {
     VolumeEntry->EntryIcon = &GuiContext->EntryIconInternal;
   } else {
@@ -1210,11 +1212,13 @@ BootPickerViewInitialize (
   PickerAnim2.Animate = InternalBootPickerAnimateOpacity;
   InsertHeadList (&DrawContext->Animations, &PickerAnim2.Link);
 
+  /*
   InitBpAnimImageList(GuiInterpolTypeLinear, 25, 25);
   STATIC GUI_ANIMATION PoofAnim;
   PoofAnim.Context = GuiContext->Poof;
   PoofAnim.Animate = InternalBootPickerAnimateImageList;
   InsertHeadList(&DrawContext->Animations, &PoofAnim.Link);
+  */
 
   return RETURN_SUCCESS;
 }
