@@ -164,17 +164,17 @@ OcToolDescribeEntry (
     *IconDataSize = 0;
 
     if (ChosenEntry->Type == OC_BOOT_RESET_NVRAM) {
+      Status = StrCpyS (
+        DescPath,
+        sizeof (DescPath),
+        OPEN_CORE_IMAGE_PATH "ResetNVRAM.icns"
+        );
+    } else {
       Status = OcUnicodeSafeSPrint (
         DescPath,
         sizeof (DescPath),
         OPEN_CORE_TOOL_PATH "%s.icns",
         ChosenEntry->PathName
-        );
-    } else {
-      Status = StrCpyS (
-        DescPath,
-        sizeof (DescPath),
-        OPEN_CORE_IMAGE_PATH "ResetNVRAM.icns"
         );
     }
     if (!EFI_ERROR (Status)) {
@@ -189,7 +189,7 @@ OcToolDescribeEntry (
     } else {
       DEBUG ((
         DEBUG_WARN,
-        "OC: Tool label %s%s.icns does not fit path!\n",
+        "OC: Custom label %s%s.icns does not fit path!\n",
         ChosenEntry->Type == OC_BOOT_RESET_NVRAM
           ? OPEN_CORE_IMAGE_PATH : OPEN_CORE_TOOL_PATH,
         ChosenEntry->Type == OC_BOOT_RESET_NVRAM
@@ -231,7 +231,7 @@ OcToolDescribeEntry (
     } else {
       DEBUG ((
         DEBUG_WARN,
-        "OC: Tool label %s%s.%a does not fit path!\n",
+        "OC: Custom label %s%s.%a does not fit path!\n",
         ChosenEntry->Type == OC_BOOT_RESET_NVRAM
           ? OPEN_CORE_LABEL_PATH : OPEN_CORE_TOOL_PATH,
         ChosenEntry->Type == OC_BOOT_RESET_NVRAM

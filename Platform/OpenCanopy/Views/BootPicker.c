@@ -36,8 +36,8 @@
 #define BOOT_SELECTOR_BUTTON_SPACE          BOOT_ENTRY_LABEL_SPACE + BOOT_ENTRY_LABEL_HEIGHT + 3
 #define BOOT_SELECTOR_HEIGHT                BOOT_SELECTOR_BACKGROUND_DIMENSION + BOOT_SELECTOR_BUTTON_SPACE + BOOT_SELECTOR_BUTTON_DIMENSION
 
-#define BOOT_ENTRY_WIDTH   BOOT_ENTRY_DIMENSION
-#define BOOT_ENTRY_HEIGHT  BOOT_ENTRY_DIMENSION + BOOT_ENTRY_LABEL_SPACE + BOOT_ENTRY_LABEL_HEIGHT
+#define BOOT_ENTRY_WIDTH   (BOOT_ENTRY_DIMENSION)
+#define BOOT_ENTRY_HEIGHT  (BOOT_ENTRY_DIMENSION + BOOT_ENTRY_LABEL_SPACE + BOOT_ENTRY_LABEL_HEIGHT)
 
 typedef struct {
   GUI_OBJ_CHILD         Hdr;
@@ -50,6 +50,7 @@ typedef struct {
   CONST GUI_IMAGE *EntryIcon;
   GUI_IMAGE       Label;
   VOID            *Context;
+  BOOLEAN         CustomIcon;
 } GUI_VOLUME_ENTRY;
 
 typedef struct {
@@ -727,56 +728,6 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ mBootPickerView = {
 };
 
 STATIC
-UINT8
-AppleDiskLabelImagePalette[256] = {
-  [0x00] = 255,
-  [0xf6] = 238,
-  [0xf7] = 221,
-  [0x2a] = 204,
-  [0xf8] = 187,
-  [0xf9] = 170,
-  [0x55] = 153,
-  [0xfa] = 136,
-  [0xfb] = 119,
-  [0x80] = 102,
-  [0xfc] = 85,
-  [0xfd] = 68,
-  [0xab] = 51,
-  [0xfe] = 34,
-  [0xff] = 17,
-  [0xd6] = 0
-};
-
-EFI_STATUS
-DecodeAppleDiskLabelImage (
-  OUT GUI_IMAGE *Image,
-  IN  UINT8     *RawData,
-  IN  UINT32    DataLength
-  )
-{
-  UINT32 PixelIdx;
-
-  if (RawData == NULL || DataLength < 5) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  Image->Width = RawData[1] << 8 | RawData[2];
-  Image->Height = RawData[3] << 8 | RawData[4];
-  Image->Buffer = (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) AllocatePool(Image->Width * Image->Height * sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
-
-  if (DataLength != 5 + Image->Width * Image->Height) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  for (PixelIdx = 0; PixelIdx < Image->Width * Image->Height; PixelIdx++) {
-    Image->Buffer[PixelIdx].Blue     = 255 - AppleDiskLabelImagePalette[RawData[5 + PixelIdx]];
-    Image->Buffer[PixelIdx].Green    = 255 - AppleDiskLabelImagePalette[RawData[5 + PixelIdx]];
-    Image->Buffer[PixelIdx].Red      = 255 - AppleDiskLabelImagePalette[RawData[5 + PixelIdx]];
-    Image->Buffer[PixelIdx].Reserved = 255;
-  }
-  return EFI_SUCCESS;
-}
-
 RETURN_STATUS
 CopyLabel (
   OUT GUI_IMAGE       *Destination,
@@ -785,10 +736,15 @@ CopyLabel (
 {
   Destination->Width = Source->Width;
   Destination->Height = Source->Height;
-  Destination->Buffer = (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) AllocateCopyPool(sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL) * Source->Width * Source->Height, Source->Buffer);
+  Destination->Buffer = (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) AllocateCopyPool (
+    sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL) * Source->Width * Source->Height,
+    Source->Buffer
+    );
+
   if (Destination->Buffer == NULL) {
     return RETURN_OUT_OF_RESOURCES;
   }
+
   return RETURN_SUCCESS;
 }
 
@@ -816,13 +772,13 @@ BootPickerEntriesAdd (
   ASSERT (GuiContext != NULL);
   ASSERT (Entry != NULL);
 
-  DEBUG((DEBUG_INFO, "Console attributes: %d\n", Context->ConsoleAttributes));
+  DEBUG ((DEBUG_INFO, "Console attributes: %d\n", Context->ConsoleAttributes));
 
   UseVolumeIcon   = (Context->ConsoleAttributes & OPENCANOPY_USE_VOLUME_ICON) != 0;
   UseDiskLabel    = (Context->ConsoleAttributes & OPENCANOPY_USE_DISK_LABEL_FILE) != 0;
   UseGenericLabel = (Context->ConsoleAttributes & OPENCANOPY_USE_GENERIC_LABEL_IMAGE) != 0;
 
-  DEBUG((DEBUG_INFO, "UseDiskLabel: %d, UseGenericLabel: %d\n", UseDiskLabel, UseGenericLabel));
+  DEBUG ((DEBUG_INFO, "UseDiskLabel: %d, UseGenericLabel: %d\n", UseDiskLabel, UseGenericLabel));
 
   VolumeEntry = AllocateZeroPool (sizeof (*VolumeEntry));
   if (VolumeEntry == NULL) {
@@ -835,45 +791,61 @@ BootPickerEntriesAdd (
     return EFI_NOT_FOUND;
   }
 
-  if (UseDiskLabel
-   && EFI_SUCCESS == OcGetBootEntryLabelImage(Context, AppleBootPolicy, Entry, 1, &IconFileData, &IconFileSize)
-   && EFI_SUCCESS == DecodeAppleDiskLabelImage(&VolumeEntry->Label, IconFileData, IconFileSize)) {
-    // do nothing
-  } else if (UseGenericLabel) {
+  if (UseDiskLabel) {
+    Status = OcGetBootEntryLabelImage (
+      Context,
+      AppleBootPolicy,
+      Entry,
+      GuiContext->Scale,
+      &IconFileData,
+      &IconFileSize
+      );
+    if (!EFI_ERROR (Status)) {
+      Status = GuiLabelToImage (
+        &VolumeEntry->Label,
+        IconFileData,
+        IconFileSize,
+        GuiContext->Scale
+        );
+    }
+  } else {
+    Status = EFI_UNSUPPORTED;
+  }
+
+  if (EFI_ERROR (Status) && UseGenericLabel) {
     switch (Entry->Type) {
       case OC_BOOT_UNKNOWN:
       case OC_BOOT_EXTERNAL_OS:
-        Status = CopyLabel(&VolumeEntry->Label, &GuiContext->EntryLabelEFIBoot);
+        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelEFIBoot);
         break;
 
       case OC_BOOT_APPLE_RECOVERY:
-        Status = CopyLabel(&VolumeEntry->Label, &GuiContext->EntryLabelRecovery);
+        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelRecovery);
         break;
 
       case OC_BOOT_WINDOWS:
-        Status = CopyLabel(&VolumeEntry->Label, &GuiContext->EntryLabelWindows);
+        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelWindows);
         break;
 
       case OC_BOOT_EXTERNAL_TOOL:
-        Status = CopyLabel(&VolumeEntry->Label, &GuiContext->EntryLabelTool);
+        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelTool);
         break;
 
       case OC_BOOT_APPLE_OS:
-        Status = CopyLabel(&VolumeEntry->Label, &GuiContext->EntryLabelMacOS);
+        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelMacOS);
         break;
 
       case OC_BOOT_RESET_NVRAM:
-        Status = CopyLabel(&VolumeEntry->Label, &GuiContext->EntryLabelResetNVRAM);
+        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelResetNVRAM);
         break;
 
       default:
-        DEBUG((DEBUG_ERROR, "Entry kind %d unsupported", Entry->Type));
+        DEBUG ((DEBUG_ERROR, "Entry kind %d unsupported", Entry->Type));
         return RETURN_UNSUPPORTED;
     }
-    if (RETURN_ERROR(Status)) {
-      return Status;
-    }
-  } else {
+  }
+
+  if (EFI_ERROR (Status)) {
     Result = GuiGetLabel (
       &VolumeEntry->Label,
       &GuiContext->FontContext,
@@ -888,17 +860,32 @@ BootPickerEntriesAdd (
 
   VolumeEntry->Context = Entry;
 
-  if (UseVolumeIcon
-   && EFI_SUCCESS == OcGetBootEntryIcon(Context, AppleBootPolicy, Entry, &IconFileData, &IconFileSize)
-   && (EntryIcon = (GUI_IMAGE *) AllocatePool(sizeof(GUI_IMAGE)))
-   && EFI_SUCCESS == GuiIcnsToImage128x128(EntryIcon, IconFileData, IconFileSize, GuiContext->Scale)) {
-    VolumeEntry->EntryIcon = EntryIcon;
-  } else if (Entry->Type == OC_BOOT_EXTERNAL_TOOL || Entry->Type == OC_BOOT_SYSTEM) {
-    VolumeEntry->EntryIcon = &GuiContext->EntryIconTool;
-  } else if (!Entry->IsExternal) {
-    VolumeEntry->EntryIcon = &GuiContext->EntryIconInternal;
+  if (UseVolumeIcon) {
+    Status = OcGetBootEntryIcon (Context, AppleBootPolicy, Entry, &IconFileData, &IconFileSize);
+
+    if (!EFI_ERROR (Status)) {
+      EntryIcon = (GUI_IMAGE *) AllocatePool (sizeof ( GUI_IMAGE));
+      Status = GuiIcnsToImageIcon (EntryIcon, IconFileData, IconFileSize, GuiContext->Scale);
+      FreePool (IconFileData);
+      if (!EFI_ERROR (Status)) {
+        VolumeEntry->EntryIcon = EntryIcon;
+        VolumeEntry->CustomIcon = TRUE;
+      } else {
+        FreePool (EntryIcon);
+      }
+    }
   } else {
-    VolumeEntry->EntryIcon = &GuiContext->EntryIconExternal;
+    Status = EFI_UNSUPPORTED;
+  }
+
+  if (EFI_ERROR (Status)) {
+    if (Entry->Type == OC_BOOT_EXTERNAL_TOOL || Entry->Type == OC_BOOT_SYSTEM) {
+      VolumeEntry->EntryIcon = &GuiContext->EntryIconTool;
+    } else if (!Entry->IsExternal) {
+      VolumeEntry->EntryIcon = &GuiContext->EntryIconInternal;
+    } else {
+      VolumeEntry->EntryIcon = &GuiContext->EntryIconExternal;
+    }
   }
 
   VolumeEntry->Hdr.Parent       = &mBootPicker.Hdr.Obj;
@@ -939,6 +926,11 @@ InternalBootPickerEntryDestruct (
 {
   ASSERT (Entry != NULL);
   ASSERT (Entry->Label.Buffer != NULL);
+
+  if (Entry->CustomIcon) {
+    FreePool (Entry->EntryIcon->Buffer);
+    FreePool ((VOID *) Entry->EntryIcon);
+  }
 
   FreePool (Entry->Label.Buffer);
   FreePool (Entry);

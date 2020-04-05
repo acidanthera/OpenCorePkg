@@ -164,7 +164,7 @@ OcGetBootEntryLabelImage (
       DataLength
       );
 
-    DEBUG((DEBUG_INFO, "Get label for external tool %s - %r\n", BootEntry->Name, Status));
+    DEBUG ((DEBUG_INFO, "OCB: Get custom label %s - %r\n", BootEntry->Name, Status));
     return Status;
   }
 
@@ -200,6 +200,7 @@ OcGetBootEntryLabelImage (
     DataLength
     );
 
+  DEBUG ((DEBUG_INFO, "OCB: Get normal label %s - %r\n", BootEntry->Name, Status));
   FreePool (BootDirectoryName);
 
   return Status;
@@ -236,7 +237,7 @@ OcGetBootEntryIcon (
       NULL
       );
 
-    DEBUG((DEBUG_INFO, "Get label for external tool %s - %r\n", BootEntry->Name, Status));
+    DEBUG ((DEBUG_INFO, "Get custom icon %s - %r\n", BootEntry->Name, Status));
     return Status;
   }
 
@@ -271,6 +272,8 @@ OcGetBootEntryIcon (
     ImageData,
     DataLength
     );
+
+  DEBUG ((DEBUG_INFO, "OCB: Get normal icon %s - %r\n", BootEntry->Name, Status));
 
   FreePool (BootDirectoryName);
 

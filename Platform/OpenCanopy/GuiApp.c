@@ -26,14 +26,6 @@
 
 GLOBAL_REMOVE_IF_UNREFERENCED BOOT_PICKER_GUI_CONTEXT mGuiContext = { { { 0 } } };
 
-// FIXME: Move out.
-EFI_STATUS
-DecodeAppleDiskLabelImage (
-  OUT GUI_IMAGE *Image,
-  IN  UINT8     *RawData,
-  IN  UINT32    DataLength
-  );
-
 STATIC
 VOID
 InternalSafeFreePool (
@@ -218,7 +210,7 @@ LoadLabelFromStorage (
     return Status;
   }
 
-  Status = DecodeAppleDiskLabelImage (Image, ImageData, ImageSize);
+  Status = GuiLabelToImage (Image, ImageData, ImageSize, Scale);
 
   FreePool (ImageData);
 

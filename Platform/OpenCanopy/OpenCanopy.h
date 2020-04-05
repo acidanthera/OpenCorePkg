@@ -137,17 +137,25 @@ struct GUI_DRAWING_CONTEXT_ {
 
 RETURN_STATUS
 GuiPngToImage (
-  IN OUT GUI_IMAGE  *Image,
-  IN     VOID       *ImageData,
-  IN     UINTN      ImageDataSize
+  OUT GUI_IMAGE  *Image,
+  IN  VOID       *ImageData,
+  IN  UINT32     ImageDataSize
   );
   
 RETURN_STATUS
-GuiIcnsToImage128x128 (
-  IN OUT GUI_IMAGE  *Image,
-  IN     VOID       *IcnsImage,
-  IN     UINTN      IcnsImageSize,
-  IN     UINT32     Scale
+GuiIcnsToImageIcon (
+  OUT GUI_IMAGE  *Image,
+  IN  VOID       *IcnsImage,
+  IN  UINT32     IcnsImageSize,
+  IN  UINT8      Scale
+  );
+
+RETURN_STATUS
+GuiLabelToImage (
+  OUT GUI_IMAGE *Image,
+  IN  VOID      *RawData,
+  IN  UINT32    DataLength,
+  IN  UINT8     Scale
   );
 
 VOID
