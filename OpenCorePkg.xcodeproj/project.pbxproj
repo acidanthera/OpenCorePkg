@@ -236,15 +236,6 @@
 		35366CCF240C213500D54CBB /* OcTemplateLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BD7240C213500D54CBB /* OcTemplateLib.c */; };
 		35366CD0240C213500D54CBB /* OcCompilerIntrinsicsLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BD9240C213500D54CBB /* OcCompilerIntrinsicsLib.c */; };
 		35366CD1240C213500D54CBB /* MsvcMath32.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BDB240C213500D54CBB /* MsvcMath32.c */; };
-		35366CD2240C213500D54CBB /* CustomSlide.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BDE240C213500D54CBB /* CustomSlide.c */; };
-		35366CD3240C213500D54CBB /* ContextSwitchSupport.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BE0240C213500D54CBB /* ContextSwitchSupport.c */; };
-		35366CD5240C213500D54CBB /* ContextSwitch.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366BE2240C213500D54CBB /* ContextSwitch.h */; };
-		35366CD6240C213500D54CBB /* BootCompatInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366BE3240C213500D54CBB /* BootCompatInternal.h */; };
-		35366CD7240C213500D54CBB /* ServiceOverrides.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BE4240C213500D54CBB /* ServiceOverrides.c */; };
-		35366CD8240C213500D54CBB /* ContextSwitchSupport.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BE6240C213500D54CBB /* ContextSwitchSupport.c */; };
-		35366CD9240C213500D54CBB /* ContextSwitch.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366BE7240C213500D54CBB /* ContextSwitch.h */; };
-		35366CDA240C213500D54CBB /* KernelSupport.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BE8240C213500D54CBB /* KernelSupport.c */; };
-		35366CDB240C213500D54CBB /* OcAppleBootCompatLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BE9240C213500D54CBB /* OcAppleBootCompatLib.c */; };
 		35366CDC240C213500D54CBB /* MemoryMap.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BEB240C213500D54CBB /* MemoryMap.c */; };
 		35366CDD240C213500D54CBB /* VirtualMemory.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BEC240C213500D54CBB /* VirtualMemory.c */; };
 		35366CDE240C213500D54CBB /* LegacyRegionLock.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366BED240C213500D54CBB /* LegacyRegionLock.c */; };
@@ -585,17 +576,6 @@
 		35366BD9240C213500D54CBB /* OcCompilerIntrinsicsLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcCompilerIntrinsicsLib.c; sourceTree = "<group>"; };
 		35366BDA240C213500D54CBB /* OcCompilerIntrinsicsLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcCompilerIntrinsicsLib.inf; sourceTree = "<group>"; };
 		35366BDB240C213500D54CBB /* MsvcMath32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = MsvcMath32.c; sourceTree = "<group>"; };
-		35366BDD240C213500D54CBB /* OcAppleBootCompatLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleBootCompatLib.inf; sourceTree = "<group>"; };
-		35366BDE240C213500D54CBB /* CustomSlide.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CustomSlide.c; sourceTree = "<group>"; };
-		35366BE0240C213500D54CBB /* ContextSwitchSupport.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ContextSwitchSupport.c; sourceTree = "<group>"; };
-		35366BE1240C213500D54CBB /* ContextSwitch.nasm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.nasm; path = ContextSwitch.nasm; sourceTree = "<group>"; };
-		35366BE2240C213500D54CBB /* ContextSwitch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContextSwitch.h; sourceTree = "<group>"; };
-		35366BE3240C213500D54CBB /* BootCompatInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BootCompatInternal.h; sourceTree = "<group>"; };
-		35366BE4240C213500D54CBB /* ServiceOverrides.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ServiceOverrides.c; sourceTree = "<group>"; };
-		35366BE6240C213500D54CBB /* ContextSwitchSupport.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ContextSwitchSupport.c; sourceTree = "<group>"; };
-		35366BE7240C213500D54CBB /* ContextSwitch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContextSwitch.h; sourceTree = "<group>"; };
-		35366BE8240C213500D54CBB /* KernelSupport.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = KernelSupport.c; sourceTree = "<group>"; };
-		35366BE9240C213500D54CBB /* OcAppleBootCompatLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleBootCompatLib.c; sourceTree = "<group>"; };
 		35366BEB240C213500D54CBB /* MemoryMap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = MemoryMap.c; sourceTree = "<group>"; };
 		35366BEC240C213500D54CBB /* VirtualMemory.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = VirtualMemory.c; sourceTree = "<group>"; };
 		35366BED240C213500D54CBB /* LegacyRegionLock.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LegacyRegionLock.c; sourceTree = "<group>"; };
@@ -841,7 +821,6 @@
 				35366BD2240C213500D54CBB /* OcOSInfoLib */,
 				35366BD5240C213500D54CBB /* OcTemplateLib */,
 				35366BD8240C213500D54CBB /* OcCompilerIntrinsicsLib */,
-				35366BDC240C213500D54CBB /* OcAppleBootCompatLib */,
 				35366BEA240C213500D54CBB /* OcMemoryLib */,
 				35366BF1240C213500D54CBB /* OcAppleRamDiskLib */,
 				35366BF4240C213500D54CBB /* OcSmcLib */,
@@ -1579,40 +1558,6 @@
 			path = OcCompilerIntrinsicsLib;
 			sourceTree = "<group>";
 		};
-		35366BDC240C213500D54CBB /* OcAppleBootCompatLib */ = {
-			isa = PBXGroup;
-			children = (
-				35366BDD240C213500D54CBB /* OcAppleBootCompatLib.inf */,
-				35366BDE240C213500D54CBB /* CustomSlide.c */,
-				35366BDF240C213500D54CBB /* X64 */,
-				35366BE3240C213500D54CBB /* BootCompatInternal.h */,
-				35366BE4240C213500D54CBB /* ServiceOverrides.c */,
-				35366BE5240C213500D54CBB /* IA32 */,
-				35366BE8240C213500D54CBB /* KernelSupport.c */,
-				35366BE9240C213500D54CBB /* OcAppleBootCompatLib.c */,
-			);
-			path = OcAppleBootCompatLib;
-			sourceTree = "<group>";
-		};
-		35366BDF240C213500D54CBB /* X64 */ = {
-			isa = PBXGroup;
-			children = (
-				35366BE0240C213500D54CBB /* ContextSwitchSupport.c */,
-				35366BE1240C213500D54CBB /* ContextSwitch.nasm */,
-				35366BE2240C213500D54CBB /* ContextSwitch.h */,
-			);
-			path = X64;
-			sourceTree = "<group>";
-		};
-		35366BE5240C213500D54CBB /* IA32 */ = {
-			isa = PBXGroup;
-			children = (
-				35366BE6240C213500D54CBB /* ContextSwitchSupport.c */,
-				35366BE7240C213500D54CBB /* ContextSwitch.h */,
-			);
-			path = IA32;
-			sourceTree = "<group>";
-		};
 		35366BEA240C213500D54CBB /* OcMemoryLib */ = {
 			isa = PBXGroup;
 			children = (
@@ -1670,7 +1615,6 @@
 				35366C4A240C213500D54CBB /* Img4oids.h in Headers */,
 				35366C05240C213500D54CBB /* DataHub.h in Headers */,
 				35366BF8240C213500D54CBB /* OcMachoLibInternal.h in Headers */,
-				35366CD5240C213500D54CBB /* ContextSwitch.h in Headers */,
 				35366C64240C213500D54CBB /* deflate.h in Headers */,
 				35366C65240C213500D54CBB /* zlib.h in Headers */,
 				35366C25240C213500D54CBB /* BigNumLibInternal.h in Headers */,
@@ -1696,7 +1640,6 @@
 				35366C60240C213500D54CBB /* trees.h in Headers */,
 				35366C3E240C213500D54CBB /* DER_Keys.h in Headers */,
 				35366CAC240C213500D54CBB /* OcAudioInternal.h in Headers */,
-				35366CD6240C213500D54CBB /* BootCompatInternal.h in Headers */,
 				35366C6A240C213500D54CBB /* crc32.h in Headers */,
 				35366C3C240C213500D54CBB /* DER_CertCrl.h in Headers */,
 				35366C10240C213500D54CBB /* AppleEventInternal.h in Headers */,
@@ -1721,7 +1664,6 @@
 				35366C83240C213500D54CBB /* AIKSource.h in Headers */,
 				35366C3D240C213500D54CBB /* asn1Types.h in Headers */,
 				35366C44240C213500D54CBB /* libDER_config.h in Headers */,
-				35366CD9240C213500D54CBB /* ContextSwitch.h in Headers */,
 				35366C87240C213500D54CBB /* AIKTranslate.h in Headers */,
 				35366C26240C213500D54CBB /* BigNumLib.h in Headers */,
 				350857EF24220721005A0D86 /* BmfLib.h in Headers */,
@@ -1854,7 +1796,6 @@
 				35366CA0240C213500D54CBB /* FvOnFv2Thunk.c in Sources */,
 				35366CBB240C213500D54CBB /* OpenFile.c in Sources */,
 				35366CA4240C213500D54CBB /* DebugHelp.c in Sources */,
-				35366CDB240C213500D54CBB /* OcAppleBootCompatLib.c in Sources */,
 				3511D59223FDB2A800CC3B17 /* OpenCoreAcpi.c in Sources */,
 				35366C75240C213500D54CBB /* SmbiosPatch.c in Sources */,
 				35366CB4240C213500D54CBB /* PrelinkedContext.c in Sources */,
@@ -1867,7 +1808,6 @@
 				35366CAA240C213500D54CBB /* OcAudio.c in Sources */,
 				35366C93240C213500D54CBB /* OcFirmwarePasswordLib.c in Sources */,
 				35366C1C240C213500D54CBB /* OcAppleChunklistLib.c in Sources */,
-				35366CD7240C213500D54CBB /* ServiceOverrides.c in Sources */,
 				35F6ACA6240C22EE00D6FA49 /* Canary.c in Sources */,
 				35366C82240C213500D54CBB /* OcAcpiLib.c in Sources */,
 				3511D59723FDB2A800CC3B17 /* OpenCoreKernel.c in Sources */,
@@ -1882,7 +1822,6 @@
 				35366CC0240C213500D54CBB /* GetVolumeLabel.c in Sources */,
 				35366C7F240C213500D54CBB /* OcAppleKeysLib.c in Sources */,
 				3511D58F23FDB2A800CC3B17 /* OpenCoreUefi.c in Sources */,
-				35366CDA240C213500D54CBB /* KernelSupport.c in Sources */,
 				35366CDE240C213500D54CBB /* LegacyRegionLock.c in Sources */,
 				35366CC6240C213500D54CBB /* FrequencyDetect.c in Sources */,
 				35366C90240C213500D54CBB /* AIT.c in Sources */,
@@ -1934,12 +1873,10 @@
 				35366C3B240C213500D54CBB /* DER_Digest.c in Sources */,
 				35366CDF240C213500D54CBB /* LegacyRegionUnLock.c in Sources */,
 				35366C5C240C213500D54CBB /* inflate.c in Sources */,
-				35366CD2240C213500D54CBB /* CustomSlide.c in Sources */,
 				35366C3F240C213500D54CBB /* DER_Decode.c in Sources */,
 				35366C67240C213500D54CBB /* inftrees.c in Sources */,
 				35366C85240C213500D54CBB /* AIKTarget.c in Sources */,
 				35366C40240C213500D54CBB /* oids.c in Sources */,
-				35366CD8240C213500D54CBB /* ContextSwitchSupport.c in Sources */,
 				35366C31240C213500D54CBB /* UninstallAllProtocolInterfaces.c in Sources */,
 				35366C1F240C213500D54CBB /* OcAppleImageVerification.c in Sources */,
 				35366CA9240C213500D54CBB /* OcAudioGenBeep.c in Sources */,
@@ -1965,7 +1902,6 @@
 				35366C1B240C213500D54CBB /* OcHashServicesLib.c in Sources */,
 				35366C30240C213500D54CBB /* Math.c in Sources */,
 				35366CD1240C213500D54CBB /* MsvcMath32.c in Sources */,
-				35366CD3240C213500D54CBB /* ContextSwitchSupport.c in Sources */,
 				35366C12240C213500D54CBB /* AppleEvent.c in Sources */,
 				35366CA6240C213500D54CBB /* OcLog.c in Sources */,
 				35366CB5240C213500D54CBB /* Link.c in Sources */,
