@@ -21,6 +21,10 @@ package() {
   mkdir -p tmp/EFI/OC/Kexts || exit 1
   mkdir -p tmp/EFI/OC/Tools || exit 1
   mkdir -p tmp/EFI/BOOT || exit 1
+  mkdir -p tmp/EFI/Resources/Audio || exit 1
+  mkdir -p tmp/EFI/Resources/Font || exit 1
+  mkdir -p tmp/EFI/Resources/Image || exit 1
+  mkdir -p tmp/EFI/Resources/Label || exit 1
   mkdir -p tmp/Docs/AcpiSamples || exit 1
   mkdir -p tmp/Utilities || exit 1
   cp BootKicker.efi tmp/EFI/OC/Tools/ || exit 1
