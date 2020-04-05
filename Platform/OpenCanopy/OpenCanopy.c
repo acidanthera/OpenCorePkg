@@ -1236,6 +1236,8 @@ GuiIcnsToImageIcon (
   UINT32             RecordLength;
   APPLE_ICNS_RECORD  *Record;
 
+  ASSERT (Scale == 1 || Scale == 2);
+
   //
   // We do not need to support 'it32' 128x128 icon format,
   // because Finder automatically converts the icons to PNG-based
@@ -1301,7 +1303,10 @@ GuiLabelToImage (
   APPLE_DISK_LABEL  *Label;
   UINT32            PixelIdx;
 
-  if (RawData == NULL || DataLength < sizeof (APPLE_DISK_LABEL)) {
+  ASSERT (RawData != NULL);
+  ASSERT (Scale == 1 || Scale == 2);
+
+  if (DataLength < sizeof (APPLE_DISK_LABEL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -1312,6 +1317,7 @@ GuiLabelToImage (
   if (Image->Width > APPLE_DISK_LABEL_MAX_WIDTH * Scale
     || Image->Height > APPLE_DISK_LABEL_MAX_HEIGHT * Scale
     || DataLength != sizeof (APPLE_DISK_LABEL) + Image->Width * Image->Height) {
+    DEBUG ((DEBUG_INFO, "OCCP: Invalid label has %dx%d dims at %u size\n", Image->Width, Image->Height, DataLength));
     return EFI_SECURITY_VIOLATION;
   }
 

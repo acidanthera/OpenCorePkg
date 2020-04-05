@@ -81,6 +81,8 @@ LoadImageFileFromStorageForScale (
   EFI_STATUS    Status;
   CHAR16        Path[OC_STORAGE_SAFE_PATH_MAX];
 
+  ASSERT (Scale == 1 || Scale == 2);
+
   Status = OcUnicodeSafeSPrint (
     Path,
     sizeof (Path),
@@ -124,6 +126,8 @@ LoadLabelFileFromStorageForScale (
   EFI_STATUS    Status;
   CHAR16        Path[OC_STORAGE_SAFE_PATH_MAX];
 
+  ASSERT (Scale == 1 || Scale == 2);
+
   Status = OcUnicodeSafeSPrint (
     Path,
     sizeof (Path),
@@ -166,6 +170,8 @@ LoadImageFromStorage (
   UINT32        ImageSize;
   RETURN_STATUS Status;
 
+  ASSERT (Scale == 1 || Scale == 2);
+
   Status = LoadImageFileFromStorageForScale (
     Storage,
     ImageFilePath,
@@ -187,7 +193,7 @@ LoadImageFromStorage (
   FreePool (ImageData);
 
   if (RETURN_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "Failed to decode image %a\n", ImageFilePath));
+    DEBUG ((DEBUG_WARN, "Failed to decode image %a - %\n", ImageFilePath, Status));
   }
 
   return Status;
@@ -201,12 +207,14 @@ LoadLabelFromStorage (
   OUT GUI_IMAGE                *Image
   )
 {
-  VOID          *ImageData;
-  UINT32        ImageSize;
-  RETURN_STATUS Status;
+  VOID           *ImageData;
+  UINT32         ImageSize;
+  RETURN_STATUS  Status;
+
+  ASSERT (Scale == 1 || Scale == 2);
 
   Status = LoadLabelFileFromStorageForScale (Storage, ImageFilePath, Scale, &ImageData, &ImageSize);
-  if (RETURN_ERROR(Status)) {
+  if (RETURN_ERROR (Status)) {
     return Status;
   }
 
@@ -215,7 +223,7 @@ LoadLabelFromStorage (
   FreePool (ImageData);
 
   if (RETURN_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "Failed to decode image %s\n", ImageFilePath));
+    DEBUG ((DEBUG_WARN, "Failed to decode label %a - %r\n", ImageFilePath, Status));
   }
 
   return Status;
@@ -241,29 +249,46 @@ InternalContextConstruct (
 
   ASSERT (Context != NULL);
 
+  Context->Scale = 1;
+  UiScaleSize = sizeof (Context->Scale);
+
+  Status = gRT->GetVariable (
+    APPLE_UI_SCALE_VARIABLE_NAME,
+    &gAppleVendorVariableGuid,
+    NULL,
+    &UiScaleSize,
+    (VOID *) &Context->Scale
+    );
+
+  if (EFI_ERROR (Status) || Context->Scale != 2) {
+    Context->Scale = 1;
+  }
+
+  // FIXME: Add support for 2x scaling.
+  Context->Scale = 1;
+
   Context->BootEntry = NULL;
 
-  Status  = LoadImageFromStorage(Storage, "Cursor",            "png", Context->Scale, &Context->Cursor, NULL);
-  Status |= LoadImageFromStorage(Storage, "Selected",          "png", Context->Scale, &Context->EntryBackSelected, NULL);
-  Status |= LoadImageFromStorage(Storage, "InternalHardDrive", "png", Context->Scale, &Context->EntryIconInternal, NULL);
-  Status |= LoadImageFromStorage(Storage, "ExternalHardDrive", "png", Context->Scale, &Context->EntryIconExternal, NULL);
-  Status |= LoadImageFromStorage(Storage, "Tool",              "png", Context->Scale, &Context->EntryIconTool, NULL);
-  Status |= LoadImageFromStorage(Storage, "Selector",          "png", Context->Scale, &Context->EntrySelector, &HighlightPixel);
+  Status  = LoadImageFromStorage (Storage, "Cursor",            "png", Context->Scale, &Context->Cursor, NULL);
+  Status |= LoadImageFromStorage (Storage, "Selected",          "png", Context->Scale, &Context->EntryBackSelected, NULL);
+  Status |= LoadImageFromStorage (Storage, "InternalHardDrive", "png", Context->Scale, &Context->EntryIconInternal, NULL);
+  Status |= LoadImageFromStorage (Storage, "ExternalHardDrive", "png", Context->Scale, &Context->EntryIconExternal, NULL);
+  Status |= LoadImageFromStorage (Storage, "Tool",              "png", Context->Scale, &Context->EntryIconTool, NULL);
+  Status |= LoadImageFromStorage (Storage, "Selector",          "png", Context->Scale, &Context->EntrySelector, &HighlightPixel);
 
-  // TODO: don't load prerendered labels if the user requested to always use font rendering. But we don't have picker context here
-  Status |= LoadLabelFromStorage(Storage, "EFIBoot",     Context->Scale, &Context->EntryLabelEFIBoot);
-  Status |= LoadLabelFromStorage(Storage, "Windows",     Context->Scale, &Context->EntryLabelWindows);
-  Status |= LoadLabelFromStorage(Storage, "Recovery",    Context->Scale, &Context->EntryLabelRecovery);
-  Status |= LoadLabelFromStorage(Storage, "ResetNVRAM",  Context->Scale, &Context->EntryLabelResetNVRAM);
-  Status |= LoadLabelFromStorage(Storage, "Tool",        Context->Scale, &Context->EntryLabelTool);
-  Status |= LoadLabelFromStorage(Storage, "macOS",       Context->Scale, &Context->EntryLabelMacOS);
+  Status |= LoadLabelFromStorage (Storage, "EFIBoot",     Context->Scale, &Context->EntryLabelEFIBoot);
+  Status |= LoadLabelFromStorage (Storage, "Windows",     Context->Scale, &Context->EntryLabelWindows);
+  Status |= LoadLabelFromStorage (Storage, "Recovery",    Context->Scale, &Context->EntryLabelRecovery);
+  Status |= LoadLabelFromStorage (Storage, "ResetNVRAM",  Context->Scale, &Context->EntryLabelResetNVRAM);
+  Status |= LoadLabelFromStorage (Storage, "Tool",        Context->Scale, &Context->EntryLabelTool);
+  Status |= LoadLabelFromStorage (Storage, "macOS",       Context->Scale, &Context->EntryLabelMacOS);
 
   /*
-  Status |= LoadImageFromStorage(Storage, "ToolbarPoof1128x128", "png", Context->Scale, &Context->Poof[0], NULL);
-  Status |= LoadImageFromStorage(Storage, "ToolbarPoof2128x128", "png", Context->Scale, &Context->Poof[1], NULL);
-  Status |= LoadImageFromStorage(Storage, "ToolbarPoof3128x128", "png", Context->Scale, &Context->Poof[2], NULL);
-  Status |= LoadImageFromStorage(Storage, "ToolbarPoof4128x128", "png", Context->Scale, &Context->Poof[3], NULL);
-  Status |= LoadImageFromStorage(Storage, "ToolbarPoof5128x128", "png", Context->Scale, &Context->Poof[4], NULL);
+  Status |= LoadImageFromStorage (Storage, "ToolbarPoof1128x128", "png", Context->Scale, &Context->Poof[0], NULL);
+  Status |= LoadImageFromStorage (Storage, "ToolbarPoof2128x128", "png", Context->Scale, &Context->Poof[1], NULL);
+  Status |= LoadImageFromStorage (Storage, "ToolbarPoof3128x128", "png", Context->Scale, &Context->Poof[2], NULL);
+  Status |= LoadImageFromStorage (Storage, "ToolbarPoof4128x128", "png", Context->Scale, &Context->Poof[3], NULL);
+  Status |= LoadImageFromStorage (Storage, "ToolbarPoof5128x128", "png", Context->Scale, &Context->Poof[4], NULL);
   */
   if (RETURN_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Failed to load image\n"));
@@ -292,24 +317,6 @@ InternalContextConstruct (
     return RETURN_UNSUPPORTED;
   }
   
-  Context->Scale = 1;
-  UiScaleSize = sizeof (Context->Scale);
-
-  Status = gRT->GetVariable (
-    APPLE_UI_SCALE_VARIABLE_NAME,
-    &gAppleVendorVariableGuid,
-    NULL,
-    &UiScaleSize,
-    (VOID *) &Context->Scale
-    );
-
-  if (EFI_ERROR (Status) || Context->Scale != 2) {
-    Context->Scale = 1;
-  }
-
-  // FIXME: Add support for 2x scaling.
-  Context->Scale = 1;
-
   return RETURN_SUCCESS;
 }
 

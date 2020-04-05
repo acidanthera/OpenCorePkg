@@ -47,7 +47,7 @@ typedef struct {
 
 typedef struct {
   GUI_OBJ_CHILD   Hdr;
-  CONST GUI_IMAGE *EntryIcon;
+  GUI_IMAGE       EntryIcon;
   GUI_IMAGE       Label;
   VOID            *Context;
   BOOLEAN         CustomIcon;
@@ -421,7 +421,7 @@ InternalBootPickerEntryDraw (
   /*if (mBootPickerImageIndex < 5) {
     EntryIcon = &((BOOT_PICKER_GUI_CONTEXT *) DrawContext->GuiContext)->Poof[mBootPickerImageIndex];
   } else */{
-    EntryIcon   = Entry->EntryIcon;
+    EntryIcon   = &Entry->EntryIcon;
   }
   Label       = &Entry->Label;
 
@@ -507,7 +507,7 @@ InternalBootPickerEntryPtrEvent (
   Entry = BASE_CR (This, GUI_VOLUME_ENTRY, Hdr.Obj);
 
   IsHit = GuiClickableIsHit (
-            Entry->EntryIcon,
+            &Entry->EntryIcon,
             OffsetX - (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) / 2,
             OffsetY - (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) / 2
             );
@@ -763,7 +763,6 @@ BootPickerEntriesAdd (
   CONST GUI_VOLUME_ENTRY *PrevEntry;
   UINT32                 IconFileSize;
   VOID                   *IconFileData;
-  GUI_IMAGE              *EntryIcon;
   BOOLEAN                UseVolumeIcon;
   BOOLEAN                UseDiskLabel;
   BOOLEAN                UseGenericLabel;
@@ -864,14 +863,10 @@ BootPickerEntriesAdd (
     Status = OcGetBootEntryIcon (Context, AppleBootPolicy, Entry, &IconFileData, &IconFileSize);
 
     if (!EFI_ERROR (Status)) {
-      EntryIcon = (GUI_IMAGE *) AllocatePool (sizeof ( GUI_IMAGE));
-      Status = GuiIcnsToImageIcon (EntryIcon, IconFileData, IconFileSize, GuiContext->Scale);
+      Status = GuiIcnsToImageIcon (&VolumeEntry->EntryIcon, IconFileData, IconFileSize, GuiContext->Scale);
       FreePool (IconFileData);
       if (!EFI_ERROR (Status)) {
-        VolumeEntry->EntryIcon = EntryIcon;
         VolumeEntry->CustomIcon = TRUE;
-      } else {
-        FreePool (EntryIcon);
       }
     }
   } else {
@@ -880,11 +875,11 @@ BootPickerEntriesAdd (
 
   if (EFI_ERROR (Status)) {
     if (Entry->Type == OC_BOOT_EXTERNAL_TOOL || Entry->Type == OC_BOOT_SYSTEM) {
-      VolumeEntry->EntryIcon = &GuiContext->EntryIconTool;
+      CopyMem (&VolumeEntry->EntryIcon, &GuiContext->EntryIconTool, sizeof (VolumeEntry->EntryIcon));
     } else if (!Entry->IsExternal) {
-      VolumeEntry->EntryIcon = &GuiContext->EntryIconInternal;
+      CopyMem (&VolumeEntry->EntryIcon, &GuiContext->EntryIconInternal, sizeof (VolumeEntry->EntryIcon));
     } else {
-      VolumeEntry->EntryIcon = &GuiContext->EntryIconExternal;
+      CopyMem (&VolumeEntry->EntryIcon, &GuiContext->EntryIconExternal, sizeof (VolumeEntry->EntryIcon));
     }
   }
 
@@ -928,8 +923,7 @@ InternalBootPickerEntryDestruct (
   ASSERT (Entry->Label.Buffer != NULL);
 
   if (Entry->CustomIcon) {
-    FreePool (Entry->EntryIcon->Buffer);
-    FreePool ((VOID *) Entry->EntryIcon);
+    FreePool (Entry->EntryIcon.Buffer);
   }
 
   FreePool (Entry->Label.Buffer);
@@ -1056,7 +1050,7 @@ InternalBootPickerAnimateImageList (
   CONST GUI_IMAGE  *EntryIcon;
 
   Entry       = BASE_CR (&mBootPicker.Hdr.Obj, GUI_VOLUME_ENTRY, Hdr.Obj);
-  EntryIcon   = Entry->EntryIcon;
+  EntryIcon   = &Entry->EntryIcon;
 
   //mBootPickerImageIndex++;
   mBootPickerImageIndex = (UINT8)GuiGetInterpolatedValue (&mBpAnimInfoImageList, CurrentTime);
