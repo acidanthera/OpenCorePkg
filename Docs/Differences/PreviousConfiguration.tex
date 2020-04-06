@@ -89,7 +89,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.5.6)
+       Reference Manual (0.5.7)
 
        \vspace{0.2in}
 
@@ -503,6 +503,10 @@ entries include:
   OpenCore log file.
 \end{itemize}
 
+\emph{Note}: It is not guaranteed that paths longer than
+\texttt{OC\_STORAGE\_SAFE\_PATH\_MAX} (128 characters including
+\texttt{\\0}-termnator) will be accessible within OpenCore.
+
 \subsection{Installation and Upgrade}\label{configuration-install}
 
 To install OpenCore reflect the
@@ -605,6 +609,7 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -Wno-varargs
 -Wno-unused-const-variable
 -DOC_TARGET_NOOPT=1
+-DNO_MSABI_VA_FUNCS=1
 \end{lstlisting}
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
@@ -989,7 +994,7 @@ Several cases, where patching actually does make sense, include:
   with a dummy name by patching \texttt{\_Q11} with \texttt{XQ11}.
 \end{itemize}
 
-Tianocore \href{https://github.com/tianocore/edk2/blob/UDK2018/MdePkg/Include/IndustryStandard/AcpiAml.h}{AcpiAml.h}
+Tianocore \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/IndustryStandard/AcpiAml.h}{AcpiAml.h}
 source file may help understanding ACPI opcodes.
 
 \subsection{Quirks Properties}\label{acpipropsquirks}
@@ -1238,7 +1243,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   This is a security option allowing one to restrict NVRAM access in macOS.
   This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented
-  in \texttt{FwRuntimeServices.efi}.
+  in \texttt{OpenRuntime.efi}.
 
   \emph{Note}: This quirk can also be used as an ugly workaround to buggy UEFI
   runtime services implementations that fail to write variables to NVRAM and
@@ -1286,10 +1291,10 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   This option bypasses \texttt{R\^X} permissions in code pages of UEFI runtime
   services by removing write protection (\texttt{WP}) bit from \texttt{CR0}
   register during their execution. This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME}
-  protocol implemented in \texttt{FwRuntimeServices.efi}.
+  protocol implemented in \texttt{OpenRuntime.efi}.
 
-  \emph{Note}: The necessity of this quirk is determined by early boot crashes
-  of the firmware.
+  \emph{Note}: This quirk may potentially weaken firmware security, please use
+  \texttt{RebuildAppleMemoryMap} if your firmware supports memory attributes table (MAT).
 
 \item
   \texttt{ForceExitBootServices}\\
@@ -1304,17 +1309,27 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   of the firmware. Do not use this unless you fully understand the consequences.
 
 \item
-  \texttt{ProtectCsmRegion}\\
+  \texttt{ProtectMemoryRegions}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Protect CSM region areas from relocation.
+  \textbf{Description}: Protect memory regions from incorrect access.
 
-  Ensure that CSM memory regions are marked as ACPI NVS to prevent boot.efi or XNU from
-  relocating or using them.
+  Some firmwares incorrectly map select memory regions:
 
-  \emph{Note}: The necessity of this quirk is determined by artifacts and sleep wake issues.
-  As \texttt{AvoidRuntimeDefrag} resolves a similar problem, no known firmwares should need
-  this quirk. Do not use this unless you fully understand the consequences.
+  \begin{itemize}
+    \tightlist
+    \item CSM region can be marked as boot services code or data, which
+      leaves it as free memory for XNU kernel.
+    \item MMIO regions can be marked as reserved memory and stay unmapped,
+      but may be required to be accessible at runtime for NVRAM support.
+  \end{itemize}
+
+  This quirk attempts to fix types of these regions, e.g. ACPI NVS for
+  CSM or MMIO for MMIO.
+
+  \emph{Note}: The necessity of this quirk is determined by artifacts, sleep
+  wake issues, and boot failures. In general only very old firmwares need
+  this quirk.
 
 \item
   \texttt{ProtectSecureBoot}\\
@@ -1327,6 +1342,21 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   \emph{Note}: This quirk mainly attempts to avoid issues with NVRAM implementations
   with problematic defragmentation, such as select Insyde or \texttt{MacPro5,1}.
+
+\item
+  \texttt{ProtectUefiServices}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Protect UEFI services from being overridden by the firmware.
+
+  Some modern firmwares including both hardware and virtual machines, like VMware,
+  may update pointers to UEFI services during driver loading and related actions.
+  Consequentially this directly breaks other quirks that affect memory management,
+  like \texttt{DevirtualiseMmio}, \texttt{ProtectCsmRegion}, or \texttt{ShrinkMemoryMap},
+  and may also break other quirks depending on the effects of these.
+
+  \emph{Note}: On VMware the need for this quirk may be diagnosed by ``Your Mac OS guest
+  might run unreliably with more than one virtual core.'' message.
 
 \item
   \texttt{ProvideCustomSlide}\\
@@ -1347,6 +1377,39 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   this option is to be enabled.
 
 \item
+  \texttt{RebuildAppleMemoryMap}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Generate Memory Map compatible with macOS.
+
+  Apple kernel has several limitations in parsing UEFI memory map:
+
+  \begin{itemize}
+  \tightlist
+  \item Memory map size must not exceed 4096 bytes as Apple kernel maps
+    it as a single 4K page. Since some firmwares have very large memory maps
+    (approximately over 100 entries) Apple kernel will crash at boot.
+  \item Memory attributes table is ignored. \texttt{EfiRuntimeServicesCode}
+    memory statically gets \texttt{RX} permissions, and all other memory types
+    get \texttt{RW} permissions. Since some firmware drivers may write to global
+    variables at runtime, Apple kernel will crash at calling UEFI runtime services,
+    unless driver \texttt{.data} section has \texttt{EfiRuntimeServicesData}
+    type.
+  \end{itemize}
+
+  To workaround these limitations this quirk applies memory attributes table
+  permissions to memory map passed to Apple kernel and optionally attempts
+  to unify contiguous slots of similar types if the resulting memory map exceeds
+  4 KB.
+
+  \emph{Note 1}: Since many firmwares come with incorrect memory protection
+  table this quirk often comes in pair with \texttt{SyncRuntimePermissions}.
+
+  \emph{Note 2}: The necessity of this quirk is determined by early boot failures.
+  This quirk replaces \texttt{EnableWriteUnprotector} on firmwares supporting
+  memory attributes table (MAT).
+
+\item
   \texttt{SetupVirtualMap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -1362,20 +1425,6 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \href{https://github.com/acidanthera/bugtracker/issues/719}{acidanthera/bugtracker\#719}.
 
 \item
-  \texttt{ShrinkMemoryMap}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Attempt to join similar memory map entries.
-
-  Select firmwares have very large memory maps, which do not fit Apple kernel,
-  permitting up to \texttt{64} slots for runtime memory. This quirk attempts to unify
-  contiguous slots of similar types to prevent boot failures.
-
-  \emph{Note}: The necessity of this quirk is determined by early boot failures.
-  It is rare to need this quirk on Haswell or newer. Do not use unless you fully
-  understand the consequences.
-
-\item
   \texttt{SignalAppleOS}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -1385,6 +1434,28 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   For example, it is supposed to enable Intel GPU in Windows and Linux in some
   dual-GPU MacBook models.
 
+\item
+  \texttt{SyncRuntimePermissions}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Update memory permissions for runtime environment.
+
+  Some firmwares either fail to properly handle runtime permissions:
+  \begin{itemize}
+    \tightlist
+    \item They incorrectly mark \texttt{OpenRuntime} as not executable in the memory map.
+    \item They incorrectly mark \texttt{OpenRuntime} as not executable in the memory
+    attributes table.
+    \item They lose entries from the memory attributes table after \texttt{OpenRuntime}
+    is loaded.
+    \item They mark items in the memory attributes table as read-write-execute.
+  \end{itemize}
+
+  This quirk tries to update memory map and memory attributes table to correct this.
+
+  \emph{Note}: The necessity of this quirk is determined by early boot failures either in
+  macOS or in Linux/Windows. In general only firmwares released in 2018 or later are affected.
+
 \end{enumerate}
 
 \section{DeviceProperties}\label{devprops}
@@ -1392,7 +1463,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 \subsection{Introduction}\label{devpropsintro}
 
 Device configuration is provided to macOS with a dedicated buffer,
-called \texttt{EfiDevicePropertyDatabase}. This buffer is a serialised
+called \texttt{EfiDevicePathPropertyDatabase}. This buffer is a serialised
 map of DevicePaths to a map of property names and their values.
 
 Property data can be debugged with
@@ -2044,8 +2115,7 @@ behaviour that does not go to any other sections
   Designed to be filled with \texttt{plist\ dict} values, describing each load entry.
   See \hyperref[miscentryprops]{Entry Properties} section below.
 
-  \emph{Note}: Select tools, for example,
-  \href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} are very
+  \emph{Note}: Select tools, for example, UEFI Shell, are very
   dangerous and \textbf{MUST NOT} appear in production configurations, especially
   in vaulted ones and protected with secure boot, as they may be used to easily
   bypass secure boot chain.
@@ -2057,53 +2127,12 @@ behaviour that does not go to any other sections
 \begin{enumerate}
 
 \item
-  \texttt{HibernateMode}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: \texttt{None}\\
-  \textbf{Description}: Hibernation detection mode. The following modes are supported:
-
-  \begin{itemize}
-  \tightlist
-    \item \texttt{None} --- Avoid hibernation for your own good.
-    \item \texttt{Auto} --- Use RTC and NVRAM detection.
-    \item \texttt{RTC} --- Use RTC detection.
-    \item \texttt{NVRAM} --- Use NVRAM detection.
-  \end{itemize}
-
-\item
-  \texttt{HideAuxiliary}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Hides auxiliary entries from picker menu by default.
-
-  An entry is considered auxiliary when at least one of the following applies:
-
-  \begin{itemize}
-  \tightlist
-    \item Entry is macOS recovery.
-    \item Entry is explicitly marked as \texttt{Auxiliary}.
-    \item Entry is system (e.g. \texttt{Clean NVRAM}).
-  \end{itemize}
-
-  To see all entries picker menu needs to be reloaded in extended mode by pressing
-  \texttt{Spacebar} key. Hiding auxiliary entries may increase boot performance
-  for multidisk systems.
-
-\item
-  \texttt{HideSelf}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Hides own boot entry from boot picker. This
-  may potentially hide other entries, for instance, when another UEFI OS is
-  installed on the same volume and driver boot is used.
-
-\item
-  \texttt{PickerAttributes}\\
+  \texttt{ConsoleAttributes}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Sets specific attributes for picker.
+  \textbf{Description}: Sets specific attributes for console.
 
-  Builtin picker supports colour arguments as a sum of foreground and background
+  Text renderer supports colour arguments as a sum of foreground and background
   colors according to UEFI specification. The value of black background and
   black foreground (\texttt{0}) is reserved. List of colour names:
 
@@ -2137,6 +2166,89 @@ behaviour that does not go to any other sections
 
   \emph{Note}: This option may not work well with \texttt{System} text renderer.
   Setting a background different from black could help testing proper GOP functioning.
+
+\item
+  \texttt{HibernateMode}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{None}\\
+  \textbf{Description}: Hibernation detection mode. The following modes are supported:
+
+  \begin{itemize}
+  \tightlist
+    \item \texttt{None} --- Avoid hibernation for your own good.
+    \item \texttt{Auto} --- Use RTC and NVRAM detection.
+    \item \texttt{RTC} --- Use RTC detection.
+    \item \texttt{NVRAM} --- Use NVRAM detection.
+  \end{itemize}
+
+\item
+  \texttt{HideAuxiliary}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Hides auxiliary entries from picker menu by default.
+
+  An entry is considered auxiliary when at least one of the following applies:
+
+  \begin{itemize}
+  \tightlist
+    \item Entry is macOS recovery.
+    \item Entry is macOS Time Machine.
+    \item Entry is explicitly marked as \texttt{Auxiliary}.
+    \item Entry is system (e.g. \texttt{Clean NVRAM}).
+  \end{itemize}
+
+  To see all entries picker menu needs to be reloaded in extended mode by pressing
+  \texttt{Spacebar} key. Hiding auxiliary entries may increase boot performance
+  for multidisk systems.
+
+\item
+  \texttt{HideSelf}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Hides own boot entry from boot picker. This
+  may potentially hide other entries, for instance, when another UEFI OS is
+  installed on the same volume and driver boot is used.
+
+\item
+  \texttt{PickerAttributes}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Sets specific attributes for picker.
+
+  Different pickers may be configured through the attribute mask containing
+  OpenCore-reserved (\texttt{BIT0}\textasciitilde\texttt{BIT15}) and OEM-specific
+  (\texttt{BIT16}\textasciitilde\texttt{BIT31}) values.
+
+  Current OpenCore values include:
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{0x0001} --- \texttt{OC\_ATTR\_USE\_VOLUME\_ICON}, provides custom icons
+    for boot entries:
+    \begin{itemize}
+      \tightlist
+      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS.
+      \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
+      \item \texttt{<TOOL\_NAME>.icns} file for \texttt{Tools}.
+    \end{itemize}
+    Volume icons can be set in Finder.
+  \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
+    rendered titles for boot entries:
+    \begin{itemize}
+      \tightlist
+      \item \texttt{.disk\_label} (\texttt{.disk\_label\_2x}) file near bootloader for all filesystems.
+      \item \texttt{<TOOL\_NAME.lbl} (\texttt{<TOOL\_NAME.l2x}) file near tool for \texttt{Tools}.
+    \end{itemize}
+    Prerendered labels can be generated via \texttt{disklabel} utility or \texttt{bless} command.
+    When disabled or missing text labels (\texttt{.contentDetails} or \texttt{.disk\_label.contentDetails})
+    are to be rendered instead.
+  \item \texttt{0x0004} --- \texttt{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}, provides predefined
+    label images for boot entries without custom entries. May give less detail for the actual
+    boot entry.
+  \item \texttt{0x0008} --- \texttt{OC\_ATTR\_USE\_ALTERNATE\_ICONS}, changes used icon set to
+    an alternate one if it is supported. For example, this could make a use of old-style icons
+    with a custom background colour.
+  \end{itemize}
 
 \item
   \texttt{PickerAudioAssist}\\
@@ -2226,14 +2338,10 @@ behaviour that does not go to any other sections
   Otherwise \texttt{Builtin} mode is used.
   \end{itemize}
 
-
   Upon success \texttt{External} mode will entirely disable all boot management
   in OpenCore except policy enforcement. In \texttt{Apple} mode it may additionally
-  bypass policy enforcement. To implement \texttt{External} mode a custom user interface may
-  utilise \href{https://github.com/acidanthera/OpenCorePkg}{OpenCorePkg}
-  \texttt{OcBootManagementLib}. Reference example of external graphics interface is provided in
-  \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Tests/ExternalUi}{ExternalUi}
-  test driver.
+  bypass policy enforcement. See \hyperref[ueficanopy]{OpenCanopy} plugin
+  for an example of a custom user interface.
 
   OpenCore built-in boot picker contains a set of actions chosen during the boot process.
   The list of supported actions is similar to Apple BDS and in general can be accessed by
@@ -2261,7 +2369,7 @@ behaviour that does not go to any other sections
   recovery. Hold \texttt{CMD+R} key combination to choose this option.
   \end{itemize}
 
-  \emph{Note 1}: Activated \texttt{KeySupport}, \texttt{AppleUsbKbDxe}, or similar driver is required
+  \emph{Note 1}: Activated \texttt{KeySupport}, \texttt{OpenUsbKbDxe}, or similar driver is required
   for key handling to work. On many firmwares it is not possible to get all the keys function.
 
   \emph{Note 2}: In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key to display picker when
@@ -2277,6 +2385,14 @@ behaviour that does not go to any other sections
 \subsection{Debug Properties}\label{miscdebugprops}
 
 \begin{enumerate}
+
+\item
+  \texttt{AppleDebug}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable \texttt{boot.efi} debug log saving to OpenCore log.
+
+  \emph{Note}: This option only applies to 10.15.4 and newer.
 
 \item
   \texttt{DisableWatchDog}\\
@@ -2301,7 +2417,7 @@ behaviour that does not go to any other sections
   Unless \texttt{Target} enables console (onscreen) printing,
   onscreen debug output will not be visible. The following levels
   are supported (discover more in
-  \href{https://github.com/tianocore/edk2/blob/UDK2018/MdePkg/Include/Library/DebugLib.h}{DebugLib.h}):
+  \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/Library/DebugLib.h}{DebugLib.h}):
 
   \begin{itemize}
   \tightlist
@@ -2655,7 +2771,7 @@ rm vault.pub
   Example: \texttt{PciRoot(0x0)/Pci(0x1,0x1)/.../\textbackslash EFI\textbackslash COOL.EFI}
   \item \texttt{Tools} specify internal boot options, which are part of bootloader
   vault, and therefore take file paths relative to \texttt{OC/Tools} directory.
-  Example: \texttt{Shell.efi}.
+  Example: \texttt{OpenShell.efi}.
   \end{itemize}
 
 \end{enumerate}
@@ -2701,7 +2817,7 @@ Please ensure that variables of this section never collide with them,
 as behaviour is undefined otherwise.
 
 For proper macOS functioning it is often required to use \texttt{OC\_FIRMWARE\_RUNTIME}
-protocol implementation currently offered as a part of \texttt{FwRuntimeServices} driver.
+protocol implementation currently offered as a part of \texttt{OpenRuntime} driver.
 While it brings any benefits, there are certain limitations which arise depending on the
 use.
 
@@ -2835,12 +2951,12 @@ The following variables are mandatory for macOS functioning:
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:MLB}
   \break
   \texttt{BoardSerialNumber}. Present on newer Macs (2013+ at least) to avoid extra parsing
-  of SMBIOS tables, especially in boot.efi.
+  of SMBIOS tables, especially in \texttt{boot.efi}.
 \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}
   \break
   Primary network adapter MAC address or replacement value. Present on newer Macs
-  (2013+ at least) to avoid accessing special memory region, especially in boot.efi.
+  (2013+ at least) to avoid accessing special memory region, especially in \texttt{boot.efi}.
 \end{itemize}
 
 \subsection{Recommended Variables}\label{nvramvarsrec}
@@ -2869,7 +2985,7 @@ improvements:
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_BID}
   \break
   Hardware \texttt{BoardProduct} (e.g. \texttt{Mac-35C1E88140C3E6CF}). Not present on
-  real Macs, but used to avoid extra parsing of SMBIOS tables, especially in boot.efi.
+  real Macs, but used to avoid extra parsing of SMBIOS tables, especially in \texttt{boot.efi}.
 \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_MLB}
   \break
@@ -2899,12 +3015,12 @@ improvements:
  \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:UIScale}
   \break
-  One-byte data defining boot.efi user interface scaling. Should be \textbf{01} for normal
+  One-byte data defining \texttt{boot.efi} user interface scaling. Should be \textbf{01} for normal
   screens and \textbf{02} for HiDPI screens.
  \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:DefaultBackgroundColor}
   \break
-  Four-byte \texttt{RGBA} data defining boot.efi user interface background colour.
+  Four-byte \texttt{RGBA} data defining \texttt{boot.efi} user interface background colour.
   Standard colours include \textbf{BF BF BF 00} (Light Gray) and \textbf{00 00 00 00}
   (Syrah Black). Other colours may be set at user's preference.
 \end{itemize}
@@ -2957,9 +3073,9 @@ troubleshooting:
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg}
   \break
-  Booter arguments, similar to \texttt{boot-args} but for boot.efi. Accepts a set of
+  Booter arguments, similar to \texttt{boot-args} but for \texttt{boot.efi}. Accepts a set of
   arguments, which are hexadecimal 64-bit values with or without \texttt{0x}.
-  At different stages boot.efi will request different debugging (logging)
+  At different stages \texttt{boot.efi} will request different debugging (logging)
   modes (e.g. after \texttt{ExitBootServices} it will only print to serial).
   Several booter arguments control whether these requests will succeed. The
   list of known requests is covered below:
@@ -3060,11 +3176,19 @@ troubleshooting:
   and this is the default value.
   \end{itemize}
 
-  \emph{Note}: To quickly see verbose output from \texttt{boot.efi} on versions before 10.15
-  set \texttt{bootercfg} to \texttt{log=1}.
+  \emph{Note}: To see verbose output from \texttt{boot.efi} on modern macOS versions
+  enable \texttt{AppleDebug} option. This will save the log to general OpenCore log.
+  For versions before 10.15.4 set \texttt{bootercfg} to \texttt{log=1}. This will
+  print verbose output onscreen.
 \item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg-once}
   \break
   Booter arguments override removed after first launch. Otherwise equivalent to \texttt{bootercfg}.
+\item
+  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:efiboot-perf-record}
+  \break
+  Enable performance log saving in \texttt{boot.efi}. Performance log is saved to physical
+  memory and is pointed by \texttt{efiboot-perf-record-data} and \texttt{efiboot-perf-record-size}
+  variables. Starting from 10.15.4 it can also be saved to OpenCore log by \texttt{AppleDebug} option.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:fmm-computer-name}
   \break
@@ -3114,7 +3238,7 @@ are written to three select destinations:
 
 Most of the fields specify the overrides in SMBIOS, and their field
 names conform to EDK2
-\href{https://github.com/tianocore/edk2/blob/UDK2018/MdePkg/Include/IndustryStandard/SmBios.h}{SmBios.h}
+\href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/IndustryStandard/SmBios.h}{SmBios.h}
 header file. However, several important fields reside in Data Hub and
 NVRAM. Some of the values can be found in more than one field and/or
 destination, so there are two ways to control their update process:
@@ -3773,6 +3897,212 @@ tweaks for the onboard firmware. To inspect firmware contents, apply modificatio
 and perform upgrades \href{https://github.com/LongSoft/UEFITool/releases}{UEFITool}
 and supplementary utilities can be used.
 
+\subsection{Drivers}\label{uefidrivers}
+
+Depending on the firmware a different set of drivers may be required.
+Loading an incompatible driver may lead your system to unbootable state or
+even cause permanent firmware damage. Some of the known drivers are listed below:
+
+\begin{tabular}{p{1.3in}p{5.55in}}
+\href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
+& APFS file system bootstrap driver adding the support of embedded APFS drivers
+  in bootable APFS containers in UEFI firmwares \\
+\href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
+& HDA audio support driver in UEFI firmwares for most Intel and some other analog audio controllers.
+  Refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
+  for known issues in AudioDxe. \\
+\href{https://github.com/acidanthera/OcBinaryData}{\texttt{ExFatDxe}}
+& Proprietary ExFAT file system driver for Bootcamp support commonly found in Apple
+  firmwares. For Sandy Bridge and earlier CPUs \texttt{ExFatDxeLegacy} driver should be
+  used due to the lack of \texttt{RDRAND} instruction support. \\
+\href{https://github.com/acidanthera/OcBinaryData}{\texttt{HfsPlus}}
+& Proprietary HFS file system driver with bless support commonly found in Apple
+  firmwares. For Sandy Bridge and earlier CPUs \texttt{HfsPlusLegacy} driver should be
+  used due to the lack of \texttt{RDRAND} instruction support. \\
+\href{https://github.com/acidanthera/audk}{\texttt{HiiDatabase}}\textbf{*}
+& HII services support driver from \texttt{MdeModulePkg}. This driver is included in
+  most firmwares starting with Ivy Bridge generation. Some applications with the GUI
+  like UEFI Shell may need this driver to work properly. \\
+\href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
+& FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
+  UEFI firmwares, and cannot be used from OpenCore. It is known that multiple firmwares
+  have a bug in their FAT support implementation, which leads to corrupted filesystems
+  on write attempt. Embedding this driver within the firmware may be required in case
+  writing to EFI partition is needed during the boot process. \\
+  \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}\textbf{*}
+& NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
+  firmwares starting with Broadwell generation. For Haswell and earlier embedding it
+  within the firmware may be more favourable in case a NVMe SSD drive is installed. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenCanopy}}\textbf{*}
+& \hyperref[ueficanopy]{OpenCore plugin} implementing graphical interface. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenRuntime}}\textbf{*}
+& \hyperref[uefiruntime]{OpenCore plugin} implementing \texttt{OC\_FIRMWARE\_RUNTIME} protocol. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenUsbKbDxe}}\textbf{*}
+& USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
+  on top of a custom USB keyboard driver implementation. This is an alternative to
+  builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \\
+\href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
+& HFS file system driver with bless support. This driver is an alternative to
+  a closed source \texttt{HfsPlus} driver commonly found in Apple firmwares. While
+  it is feature complete, it is approximately 3~times slower and is yet to undergo
+  a security audit. \\
+\href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}}\textbf{*}
+& XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
+  included in most firmwares starting with Sandy Bridge generation. For earlier firmwares
+  or legacy systems it may be used to support external USB 3.0 PCI cards.
+\end{tabular}
+
+Driver marked with \textbf{*} are bundled with OpenCore.
+To compile the drivers from UDK (EDK II) use the same command you normally use
+for OpenCore compilation, but choose a corresponding package:
+\begin{lstlisting}[label=compileudk, style=ocbash]
+git clone https://github.com/acidanthera/audk UDK
+cd UDK
+source edksetup.sh
+make -C BaseTools
+build -a X64 -b RELEASE -t XCODE5 -p FatPkg/FatPkg.dsc
+build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
+\end{lstlisting}
+
+\subsection{Tools}\label{uefitools}
+
+Standalone tools may help to debug firmware and hardware. Some of the known tools are listed below.
+While some tools can be launched from within OpenCore many should be run separately either directly
+or from \texttt{Shell}.
+
+To boot into OpenShell or any other tool directly save \texttt{OpenShell.efi}
+under the name of \texttt{EFI\textbackslash BOOT\textbackslash BOOTX64.EFI}
+on a FAT32 partition. In general it is unimportant whether the partitition scheme
+is \texttt{GPT} or \texttt{MBR}.
+
+While the previous approach works both on Macs and other computers,
+an alternative Mac-only approach to bless the tool on an HFS+ or APFS
+volume:
+
+\begin{lstlisting}[caption=Blessing tool, label=blesstool, style=ocbash]
+sudo bless --verbose --file /Volumes/VOLNAME/DIR/OpenShell.efi \
+  --folder /Volumes/VOLNAME/DIR/ --setBoot
+\end{lstlisting}
+
+\emph{Note 1}: You may have to copy \texttt{/System/Library/CoreServices/BridgeVersion.bin}
+  to \texttt{/Volumes/VOLNAME/DIR}. \\
+\emph{Note 2}: To be able to use \texttt{bless} you may have to
+  \href{https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html}{disable System Integrity Protection}. \\
+\emph{Note 3}: To be able to boot you may have to \href{https://support.apple.com/HT208330}{disable Secure Boot}
+  if present.
+
+Some of the known tools are listed below (builtin tools are marked with \textbf{*}):
+
+\begin{tabular}{p{1.3in}p{5.55in}}
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{BootKicker}}\textbf{*}
+& Enter Apple BootPicker menu (exclusive for Macs with compatible GPUs). \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ChipTune}}\textbf{*}
+& Test BeepGen protocol and generate audio signals of different style and length. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CleanNvram}}\textbf{*}
+& Reset NVRAM alternative bundled as a standalone tool. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{GopStop}}\textbf{*}
+& Test GraphicsOutput protocol with a
+  \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Application/GopStop}{simple scenario}. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{HdaCodecDump}}\textbf{*}
+& Parse and dump High Definition Audio codec information (requires \texttt{AudioDxe}). \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{KeyTester}}\textbf{*}
+& Test keyboard input in \texttt{SimpleText} mode. \\
+\href{https://www.memtest86.com}{\texttt{MemTest86}}
+& Memory testing utility. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenControl}}\textbf{*}
+& Unlock and lock back NVRAM protection for other tools to be able to get full NVRAM access
+  when launching from OpenCore. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenShell}}\textbf{*}
+& OpenCore-configured \href{http://github.com/tianocore/edk2}{\texttt{UEFI Shell}} for compatibility
+  with a broad range of firmwares. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{PavpProvision}}
+& Perform EPID provisioning (requires certificate data configuration). \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VerifyMsrE2}}\textbf{*}
+& Check \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) consistency across all cores.
+\end{tabular}
+
+\subsection{OpenCanopy}\label{ueficanopy}
+
+OpenCanopy is a graphical OpenCore user interface that runs in
+\texttt{External} \texttt{PickerMode} and relies on
+\href{https://github.com/acidanthera/OpenCorePkg}{OpenCorePkg} \texttt{OcBootManagementLib}
+similar to the builtin text interface.
+
+OpenCanopy requires graphical resources located in \texttt{Resources} directory to run.
+Sample resources (fonts and images) can be found in
+\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}.
+
+OpenCanopy provides full support for \texttt{PickerAttributes} and offers a configurable
+builtin icon set. The default chosen icon set depends on the \texttt{DefaultBackgroundColor}
+variable value. For Light Gray \texttt{Old} icon set will be used, for other colours ---
+the one without a prefix.
+
+Predefined icons are put to \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Image}
+directory. Full list of supported icons (in \texttt{.icns} format) is provided below. Missing optional
+icons will use the closest available icon. External entries will use \texttt{Ext}-prefixed
+icon if available (e.g. \texttt{OldExtHardDrive.icns}).
+
+\begin{itemize}
+\tightlist
+  \item \texttt{Cursor} --- Mouse cursor (mandatory).
+  \item \texttt{Selected} --- Selected item (mandatory).
+  \item \texttt{Selector} --- Selecting item (mandatory).
+  \item \texttt{HardDrive} --- Generic OS (mandatory).
+  \item \texttt{Apple} --- Apple OS.
+  \item \texttt{AppleRecv} --- Apple Recovery OS.
+  \item \texttt{AppleTM} --- Apple Time Machine.
+  \item \texttt{Windows} --- Windows.
+  \item \texttt{Other} --- Custom entry (see \texttt{Entries}).
+  \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool.
+  \item \texttt{Shell} --- Entry with UEFI Shell name (e.g. \texttt{OpenShell}).
+  \item \texttt{Tool} --- Any other tool.
+\end{itemize}
+
+Predefined labels are put to \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Label}
+directory. Each label has \texttt{.lbl} or \texttt{.l2x} suffix to represent the scaling level.
+Full list of labels is provided below. All labels are mandatory.
+
+\begin{itemize}
+\tightlist
+  \item \texttt{EFIBoot} --- Generic OS.
+  \item \texttt{Apple} --- Apple OS.
+  \item \texttt{AppleRecv} --- Apple Recovery OS.
+  \item \texttt{AppleTM} --- Apple Time Machine.
+  \item \texttt{Windows} --- Windows.
+  \item \texttt{Other} --- Custom entry (see \texttt{Entries}).
+  \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool.
+  \item \texttt{Shell} --- Entry with UEFI Shell name (e.g. \texttt{OpenShell}).
+  \item \texttt{Tool} --- Any other tool.
+\end{itemize}
+
+Label and icon generation can be performed with bundled utilities: \texttt{disklabel} and
+\texttt{icnspack}. Please refer to sample data for the details about the dimensions.
+
+\emph{WARNING}: OpenCanopy is currently considered experimental and is not recommended for
+everyday use. Refer to
+\href{https://github.com/acidanthera/bugtracker/issues/759}{acidanthera/bugtracker\#759}
+for more details regarding the current limitations.
+
+\subsection{OpenRuntime}\label{uefiruntime}
+
+\texttt{OpenRuntime} is an OpenCore plugin implementing \texttt{OC\_FIRMWARE\_RUNTIME} protocol.
+This protocol implements multiple features required for OpenCore that are otherwise not possible
+to implement in OpenCore itself as they are needed to work in runtime, i.e. during operating system
+functioning. Feature highlights:
+
+\begin{itemize}
+  \item NVRAM namespaces, allowing to isolate operating systems from accessing select
+  variables (e.g. \texttt{RequestBootVarRouting} or \texttt{ProtectSecureBoot}).
+  \item NVRAM proxying, allowing to manipulate multiple variables on variable updates
+  (e.g. \texttt{RequestBootVarFallback}).
+  \item Read-only and write-only NVRAM variables, enhancing the security of OpenCore,
+  Lilu, and Lilu plugins, like VirtualSMC, which implements \texttt{AuthRestart} support.
+  \item NVRAM isolation, allowing to protect all variables from being written from
+  an untrusted operating system (e.g. \texttt{DisableVariableWrite}).
+  \item UEFI Runtime Services memory protection management to workaround read-only
+  mapping (e.g. \texttt{EnableWriteUnprotector}).
+\end{itemize}
+
 \subsection{Properties}\label{uefiprops}
 
 \begin{enumerate}
@@ -3841,73 +4171,7 @@ and supplementary utilities can be used.
   directory.
 
   Designed to be filled with string filenames meant to be loaded as UEFI
-  drivers. Depending on the firmware a different set of drivers may be required.
-  Loading an incompatible driver may lead your system to unbootable state or
-  even cause permanent firmware damage. Some of the known drivers include:
-
-  \begin{itemize}
-  \tightlist
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
-  --- APFS file system bootstrap driver adding the support of embedded APFS drivers
-  in bootable APFS containers in UEFI firmwares.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
-  --- HDA audio support driver in UEFI firmwares for most Intel and some other analog audio controllers.
-  Refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
-  for known issues in AudioDxe.
-  \item \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ExFatDxe}}
-  --- Proprietary ExFAT file system driver for Bootcamp support commonly found in Apple
-  firmwares. For Sandy Bridge and earlier CPUs \texttt{ExFatDxeLegacy} driver should be
-  used due to the lack of \texttt{RDRAND} instruction support.
-  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwRuntimeServices}}
-  --- \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation that increases the security
-  of \mbox{OpenCore} and Lilu by supporting read-only and write-only NVRAM variables. Some
-  commonly used quirks, e.g. \texttt{RequestBootVarRouting}, require this driver for proper function.
-  Due to the nature of being a runtime driver, i.e. functioning in parallel with the
-  target operating system, it cannot be implemented within OpenCore itself, but is bundled
-  with OpenCore releases.
-  \item \href{https://github.com/acidanthera/OcBinaryData}{\texttt{HfsPlus}}
-  --- Proprietary HFS file system driver with bless support commonly found in Apple
-  firmwares. For Sandy Bridge and earlier CPUs \texttt{HfsPlusLegacy} driver should be
-  used due to the lack of \texttt{RDRAND} instruction support.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{HiiDatabase}}
-  --- HII services support driver from \texttt{MdeModulePkg}. This driver is included in
-  most firmwares starting with Ivy Bridge generation. Some applications with the GUI
-  like UEFI Shell may need this driver to work properly.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
-  --- FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
-  UEFI firmwares, and cannot be used from OpenCore. It is known that multiple firmwares
-  have a bug in their FAT support implementation, which leads to corrupted filesystems
-  on write attempt. Embedding this driver within the firmware may be required in case
-  writing to EFI partition is needed during the boot process.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}
-  --- NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
-  firmwares starting with Broadwell generation. For Haswell and earlier embedding it
-  within the firmware may be more favourable in case a NVMe SSD drive is installed.
-  \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AppleUsbKbDxe}}
-  --- USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
-  on top of a custom USB keyboard driver implementation. This is an alternative to
-  builtin \texttt{KeySupport}, which may work better or worse depending on the firmware.
-  \item \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
-  --- HFS file system driver with bless support. This driver is an alternative to
-  a closed source \texttt{HfsPlus} driver commonly found in Apple firmwares. While
-  it is feature complete, it is approximately 3~times slower and is yet to undergo
-  a security audit.
-  \item \href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}}
-  --- XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
-  included in most firmwares starting with Sandy Bridge generation. For earlier firmwares
-  or legacy systems it may be used to support external USB 3.0 PCI cards.
-  \end{itemize}
-
-  To compile the drivers from UDK (EDK II) use the same command you do normally use
-  for OpenCore compilation, but choose a corresponding package:
-\begin{lstlisting}[label=compileudk, style=ocbash]
-git clone https://github.com/acidanthera/audk UDK
-cd UDK
-source edksetup.sh
-make -C BaseTools
-build -a X64 -b RELEASE -t XCODE5 -p FatPkg/FatPkg.dsc
-build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
-\end{lstlisting}
+  drivers.
 
 \item
   \texttt{Input}\\
@@ -3949,7 +4213,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{AudioCodec}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: empty string\\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Codec address on the specified audio controller for audio support.
 
   Normally this contains first audio codec address on the builtin analog audio controller (\texttt{HDEF}).
@@ -3965,7 +4229,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \item
   \texttt{AudioDevice}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Failsafe}: empty string\\
   \textbf{Description}: Device path of the specified audio controller for audio support.
 
   Normally this contains builtin analog audio controller (\texttt{HDEF}) device path,
@@ -4050,6 +4314,17 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \begin{enumerate}
 
 \item
+  \texttt{KeyFiltering}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable keyboard input sanity checking.
+
+  Apparently some boards like GA Z77P-D3 may return uninitialised data
+  in \texttt{EFI\_INPUT\_KEY} with all input protocols.
+  This option discards keys that are neither ASCII, nor are defined
+  in the UEFI specification (see tables 107 and 108 in version 2.8).
+
+\item
   \texttt{KeyForgetThreshold}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
@@ -4097,7 +4372,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   This option activates the internal keyboard interceptor driver, based on
   \texttt{AppleGenericInput} aka (\texttt{AptioInputFix}), to fill
   \texttt{AppleKeyMapAggregator} database for input functioning. In case
-  a separate driver is used, such as \texttt{AppleUsbKbDxe}, this option
+  a separate driver is used, such as \texttt{OpenUsbKbDxe}, this option
   should never be enabled.
 
 \item
@@ -4114,6 +4389,9 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \item \texttt{V2} --- Uses UEFI standard modern input protocol \texttt{EFI\_SIMPLE\_TEXT\_INPUT\_EX\_PROTOCOL}.
   \item \texttt{AMI} --- Uses APTIO input protocol \texttt{AMI\_EFIKEYCODE\_PROTOCOL}.
   \end{itemize}
+
+  \emph{Note}: Currently \texttt{V1}, \texttt{V2}, and \texttt{AMI} unlike \texttt{Auto} only do filtering of
+  the particular specified protocol. This may change in the future versions.
 
 \item
   \texttt{KeySwap}\\
@@ -4269,6 +4547,21 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \emph{Note}: This option only applies to \texttt{System} renderer.
 
 \item
+  \texttt{DirectGopCacheMode}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Cache mode for builtin graphics output protocol framebuffer.
+
+  Tuning cache mode may provide better rendering performance on some firmwares.
+  Providing empty string leaves cache control settings to the firmware.
+  Valid non-empty values are: \texttt{Uncacheable}, \texttt{WriteCombining}, and
+  \texttt{WriteThrough}.
+
+  \emph{Note}: This option is not supported on most hardware (see
+  \href{https://github.com/acidanthera/bugtracker/issues/755}{acidanthera/bugtracker\#755}
+  for more details).
+
+\item
   \texttt{DirectGopRendering}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -4378,6 +4671,13 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \emph{Note}: Some Macs, namely \texttt{MacPro5,1}, do have APFS compatibility,
   but their Apple Boot Policy protocol contains recovery detection issues, thus
   using this option is advised on them as well.
+
+\item
+  \texttt{AppleDebugLog}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple Debug Log protocol with a builtin
+  version.
 
 \item
   \texttt{AppleEvent}\\
@@ -4518,7 +4818,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{OC\_VENDOR\_VARIABLE\_GUID} to \newline \texttt{EFI\_GLOBAL\_VARIABLE\_GUID}.
 
   This quirk requires \texttt{RequestBootVarRouting} to be enabled and therefore
-  \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented in \texttt{FwRuntimeServices.efi}.
+  \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented in \texttt{OpenRuntime.efi}.
 
   By redirecting \texttt{Boot} prefixed variables to a separate GUID namespace we achieve
   multiple goals:
@@ -4560,7 +4860,7 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
   \texttt{EFI\_GLOBAL\_VARIABLE\_GUID} to \newline \texttt{OC\_VENDOR\_VARIABLE\_GUID}.
 
   This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented
-  in \texttt{FwRuntimeServices.efi}. The quirk lets default boot entry
+  in \texttt{OpenRuntime.efi}. The quirk lets default boot entry
   preservation at times when firmwares delete incompatible boot entries.
   Simply said, you are required to enable this quirk to be able to reliably
   use \href{https://support.apple.com/HT202796}{Startup Disk} preference
@@ -4710,7 +5010,7 @@ Similar to other projects working with hardware OpenCore supports auditing and d
 The use of \texttt{NOOPT} or \texttt{DEBUG} build modes instead of \texttt{RELEASE}
 can produce a lot more debug output. With \texttt{NOOPT} source level debugging with
 GDB or IDA Pro is also available. For GDB check
-\href{https://github.com/acidanthera/OpenCorePkg/tree/master/Debug}{OcSupport Debug}
+\href{https://github.com/acidanthera/OpenCorePkg/tree/master/Debug}{OpenCore Debug}
 page. For IDA Pro you will need IDA Pro 7.3 or newer, refer to
 \href{https://www.hex-rays.com/products/ida/support/tutorials/index.shtml}{Debugging the XNU Kernel with IDA Pro}
 for more details.
@@ -4832,7 +5132,7 @@ you will need \texttt{debug=0x8} boot argument.
   \textbf{How can I migrate from \texttt{AptioMemoryFix}?}
 
   Behaviour similar to that of \texttt{AptioMemoryFix} can be obtained by
-  installing \texttt{FwRuntimeServices} driver and enabling the quirks listed below.
+  installing \texttt{OpenRuntime} driver and enabling the quirks listed below.
   Please note, that most of these are not necessary to be enabled. Refer to their
   individual descriptions in this document for more details.
   \begin{itemize}
@@ -4843,7 +5143,7 @@ you will need \texttt{debug=0x8} boot argument.
   \item \texttt{EnableSafeModeSlide}
   \item \texttt{EnableWriteUnprotector}
   \item \texttt{ForceExitBootServices}
-  \item \texttt{ProtectCsmRegion}
+  \item \texttt{ProtectMemoryRegions}
   \item \texttt{ProvideCustomSlide}
   \item \texttt{SetupVirtualMap}
   \item \texttt{ShrinkMemoryMap}

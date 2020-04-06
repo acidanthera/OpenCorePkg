@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Mar  6 09:43:05 2020
-%DIF ADD ../Configuration.tex        Mon Apr  6 04:46:56 2020
+%DIF DEL PreviousConfiguration.tex   Mon Apr  6 16:12:47 2020
+%DIF ADD ../Configuration.tex        Mon Apr  6 16:16:32 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -149,7 +149,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.5\DIFdelbegin \DIFdel{.6}\DIFdelend \DIFaddbegin \DIFadd{.7}\DIFaddend )
+       Reference Manual (0.5\DIFdelbegin \DIFdel{.7}\DIFdelend \DIFaddbegin \DIFadd{.8}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -563,12 +563,11 @@ entries include:
   OpenCore log file.
 \end{itemize}
 
-\DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: It is not guaranteed that paths longer than
-}\texttt{\DIFadd{OC\_STORAGE\_SAFE\_PATH\_MAX}} \DIFadd{(128 characters including
-}\texttt{\\\DIFadd{0}}\DIFadd{-termnator) will be accessible within OpenCore.
-}
+\emph{Note}: It is not guaranteed that paths longer than
+\texttt{OC\_STORAGE\_SAFE\_PATH\_MAX} (128 characters including
+\texttt{\\0}-termnator) will be accessible within OpenCore.
 
-\DIFaddend \subsection{Installation and Upgrade}\label{configuration-install}
+\subsection{Installation and Upgrade}\label{configuration-install}
 
 To install OpenCore reflect the
 \hyperref[configuration-structure]{Configuration Structure} described
@@ -642,8 +641,7 @@ approach could be \href{https://www.sublimetext.com}{Sublime Text} with
 \href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
 Add \texttt{.clang\_complete} file with similar content to your UDK root:
 
-\DIFmodbegin
-\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash,alsolanguage=DIFcode]
+\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash]
 -I/UefiPackages/MdePkg
 -I/UefiPackages/MdePkg/Include
 -I/UefiPackages/MdePkg/Include/X64
@@ -671,9 +669,8 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -Wno-varargs
 -Wno-unused-const-variable
 -DOC_TARGET_NOOPT=1
-%DIF > -DNO_MSABI_VA_FUNCS=1
+-DNO_MSABI_VA_FUNCS=1
 \end{lstlisting}
-\DIFmodend
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
 files must ensure that their tool checks for \texttt{opencore-version} NVRAM variable
@@ -1057,10 +1054,8 @@ Several cases, where patching actually does make sense, include:
   with a dummy name by patching \texttt{\_Q11} with \texttt{XQ11}.
 \end{itemize}
 
-Tianocore \DIFdelbegin %DIFDELCMD < \href{https://github.com/tianocore/edk2/blob/UDK2018/MdePkg/Include/IndustryStandard/AcpiAml.h}{AcpiAml.h}
-%DIFDELCMD < %%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/IndustryStandard/AcpiAml.h}{AcpiAml.h}
-\DIFaddend source file may help understanding ACPI opcodes.
+Tianocore \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/IndustryStandard/AcpiAml.h}{AcpiAml.h}
+source file may help understanding ACPI opcodes.
 
 \subsection{Quirks Properties}\label{acpipropsquirks}
 
@@ -1308,7 +1303,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   This is a security option allowing one to restrict NVRAM access in macOS.
   This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented
-  in \texttt{\DIFdelbegin \DIFdel{FwRuntimeServices}\DIFdelend \DIFaddbegin \DIFadd{OpenRuntime}\DIFaddend .efi}.
+  in \texttt{OpenRuntime.efi}.
 
   \emph{Note}: This quirk can also be used as an ugly workaround to buggy UEFI
   runtime services implementations that fail to write variables to NVRAM and
@@ -1356,11 +1351,10 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   This option bypasses \texttt{R\^X} permissions in code pages of UEFI runtime
   services by removing write protection (\texttt{WP}) bit from \texttt{CR0}
   register during their execution. This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME}
-  protocol implemented in \texttt{\DIFdelbegin \DIFdel{FwRuntimeServices}\DIFdelend \DIFaddbegin \DIFadd{OpenRuntime}\DIFaddend .efi}.
+  protocol implemented in \texttt{OpenRuntime.efi}.
 
-  \emph{Note}: \DIFdelbegin \DIFdel{The necessity of this quirk is determined by early boot crashes
-  of the firmware }\DIFdelend \DIFaddbegin \DIFadd{This quirk may potentially weaken firmware security, please use
-  }\texttt{\DIFadd{RebuildAppleMemoryMap}} \DIFadd{if your firmware supports memory attributes table (MAT)}\DIFaddend .
+  \emph{Note}: This quirk may potentially weaken firmware security, please use
+  \texttt{RebuildAppleMemoryMap} if your firmware supports memory attributes table (MAT).
 
 \item
   \texttt{ForceExitBootServices}\\
@@ -1375,34 +1369,27 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   of the firmware. Do not use this unless you fully understand the consequences.
 
 \item
-  \texttt{\DIFdelbegin \DIFdel{ProtectCsmRegion}\DIFdelend \DIFaddbegin \DIFadd{ProtectMemoryRegions}\DIFaddend }\\
+  \texttt{ProtectMemoryRegions}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Protect \DIFdelbegin \DIFdel{CSM region areas from relocation}\DIFdelend \DIFaddbegin \DIFadd{memory regions from incorrect access}\DIFaddend .
+  \textbf{Description}: Protect memory regions from incorrect access.
 
-  \DIFdelbegin \DIFdel{Ensure that CSM memory regions are marked as ACPI NVS to prevent boot.
-  efi or XNU from
-  relocating or using them}\DIFdelend \DIFaddbegin \DIFadd{Some firmwares incorrectly map select memory regions:
-}
+  Some firmwares incorrectly map select memory regions:
 
   \begin{itemize}
     \tightlist
-    \item \DIFadd{CSM region can be marked as boot services code or data, which
+    \item CSM region can be marked as boot services code or data, which
       leaves it as free memory for XNU kernel.
-    }\item \DIFadd{MMIO regions can be marked as reserved memory and stay unmapped,
+    \item MMIO regions can be marked as reserved memory and stay unmapped,
       but may be required to be accessible at runtime for NVRAM support.
-  }\end{itemize}
+  \end{itemize}
 
-  \DIFadd{This quirk attempts to fix types of these regions, e.g. ACPI NVS for
-  CSM or MMIO for MMIO}\DIFaddend .
+  This quirk attempts to fix types of these regions, e.g. ACPI NVS for
+  CSM or MMIO for MMIO.
 
-  \emph{Note}: The necessity of this quirk is determined by artifacts\DIFdelbegin \DIFdel{and }\DIFdelend \DIFaddbegin \DIFadd{, }\DIFaddend sleep
-  wake issues\DIFdelbegin \DIFdel{.
-  As }\texttt{\DIFdel{AvoidRuntimeDefrag}} %DIFAUXCMD
-\DIFdel{resolves a similar problem, no known firmwares should }\DIFdelend \DIFaddbegin \DIFadd{, and boot failures. In general only very old firmwares }\DIFaddend need
+  \emph{Note}: The necessity of this quirk is determined by artifacts, sleep
+  wake issues, and boot failures. In general only very old firmwares need
   this quirk.
-\DIFdelbegin \DIFdel{Do not use this unless you fully understand the consequences.
-}\DIFdelend 
 
 \item
   \texttt{ProtectSecureBoot}\\
@@ -1417,25 +1404,22 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   with problematic defragmentation, such as select Insyde or \texttt{MacPro5,1}.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{ProtectUefiServices}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Protect UEFI services from being overridden by the firmware.
-}
+  \texttt{ProtectUefiServices}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Protect UEFI services from being overridden by the firmware.
 
-  \DIFadd{Some modern firmwares including both hardware and virtual machines, like VMware,
+  Some modern firmwares including both hardware and virtual machines, like VMware,
   may update pointers to UEFI services during driver loading and related actions.
   Consequentially this directly breaks other quirks that affect memory management,
-  like }\texttt{\DIFadd{DevirtualiseMmio}}\DIFadd{, }\texttt{\DIFadd{ProtectCsmRegion}}\DIFadd{, or }\texttt{\DIFadd{ShrinkMemoryMap}}\DIFadd{,
+  like \texttt{DevirtualiseMmio}, \texttt{ProtectCsmRegion}, or \texttt{ShrinkMemoryMap},
   and may also break other quirks depending on the effects of these.
-}
 
-  \emph{\DIFadd{Note}}\DIFadd{: On VMware the need for this quirk may be diagnosed by ``Your Mac OS guest
+  \emph{Note}: On VMware the need for this quirk may be diagnosed by ``Your Mac OS guest
   might run unreliably with more than one virtual core.'' message.
-}
 
 \item
-  \DIFaddend \texttt{ProvideCustomSlide}\\
+  \texttt{ProvideCustomSlide}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Provide custom KASLR slide on low memory.
@@ -1453,45 +1437,40 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   this option is to be enabled.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{RebuildAppleMemoryMap}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Generate Memory Map compatible with macOS.
-}
+  \texttt{RebuildAppleMemoryMap}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Generate Memory Map compatible with macOS.
 
-  \DIFadd{Apple kernel has several limitations in parsing UEFI memory map:
-}
+  Apple kernel has several limitations in parsing UEFI memory map:
 
   \begin{itemize}
   \tightlist
-  \item \DIFadd{Memory map size must not exceed 4096 bytes as Apple kernel maps
+  \item Memory map size must not exceed 4096 bytes as Apple kernel maps
     it as a single 4K page. Since some firmwares have very large memory maps
     (approximately over 100 entries) Apple kernel will crash at boot.
-  }\item \DIFadd{Memory attributes table is ignored. }\texttt{\DIFadd{EfiRuntimeServicesCode}}
-    \DIFadd{memory statically gets }\texttt{\DIFadd{RX}} \DIFadd{permissions, and all other memory types
-    get }\texttt{\DIFadd{RW}} \DIFadd{permissions. Since some firmware drivers may write to global
+  \item Memory attributes table is ignored. \texttt{EfiRuntimeServicesCode}
+    memory statically gets \texttt{RX} permissions, and all other memory types
+    get \texttt{RW} permissions. Since some firmware drivers may write to global
     variables at runtime, Apple kernel will crash at calling UEFI runtime services,
-    unless driver }\texttt{\DIFadd{.data}} \DIFadd{section has }\texttt{\DIFadd{EfiRuntimeServicesData}}
-    \DIFadd{type.
-  }\end{itemize}
+    unless driver \texttt{.data} section has \texttt{EfiRuntimeServicesData}
+    type.
+  \end{itemize}
 
-  \DIFadd{To workaround these limitations this quirk applies memory attributes table
+  To workaround these limitations this quirk applies memory attributes table
   permissions to memory map passed to Apple kernel and optionally attempts
   to unify contiguous slots of similar types if the resulting memory map exceeds
   4 KB.
-}
 
-  \emph{\DIFadd{Note 1}}\DIFadd{: Since many firmwares come with incorrect memory protection
-  table this quirk often comes in pair with }\texttt{\DIFadd{SyncRuntimePermissions}}\DIFadd{.
-}
+  \emph{Note 1}: Since many firmwares come with incorrect memory protection
+  table this quirk often comes in pair with \texttt{SyncRuntimePermissions}.
 
-  \emph{\DIFadd{Note 2}}\DIFadd{: The necessity of this quirk is determined by early boot failures.
-  This quirk replaces }\texttt{\DIFadd{EnableWriteUnprotector}} \DIFadd{on firmwares supporting
+  \emph{Note 2}: The necessity of this quirk is determined by early boot failures.
+  This quirk replaces \texttt{EnableWriteUnprotector} on firmwares supporting
   memory attributes table (MAT).
-}
 
 \item
-  \DIFaddend \texttt{SetupVirtualMap}\\
+  \texttt{SetupVirtualMap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Setup virtual memory at \texttt{SetVirtualAddresses}.
@@ -1506,39 +1485,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \href{https://github.com/acidanthera/bugtracker/issues/719}{acidanthera/bugtracker\#719}.
 
 \item
-  \DIFdelbegin \texttt{\DIFdel{ShrinkMemoryMap}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Type}}%DIFAUXCMD
-\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
-\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Description}}%DIFAUXCMD
-\DIFdel{: Attempt to join similar memory map entries.
-}%DIFDELCMD < 
-
-%DIFDELCMD <   %%%
-\DIFdel{Select firmwares have very large memory maps, which do not fit Apple kernel,
-  permitting up to }\texttt{\DIFdel{64}} %DIFAUXCMD
-\DIFdel{slots for runtime memory. This quirk attempts to unify
-  contiguous slots of similar types to prevent boot failures.
-}%DIFDELCMD < 
-
-%DIFDELCMD <   %%%
-\emph{\DIFdel{Note}}%DIFAUXCMD
-\DIFdel{: The necessity of this quirk is determined by early boot failures.
-  It is rare to need this quirk on Haswell or newer. Do not use unless you fully
-  understand the consequences.
-}%DIFDELCMD < 
-
-%DIFDELCMD < \item
-\item%DIFAUXCMD
-%DIFDELCMD <   %%%
-\DIFdelend \texttt{SignalAppleOS}\\
+  \texttt{SignalAppleOS}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Report macOS being loaded through OS Info for any OS.
@@ -1547,39 +1494,36 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   For example, it is supposed to enable Intel GPU in Windows and Linux in some
   dual-GPU MacBook models.
 
-\DIFaddbegin \item
-  \texttt{\DIFadd{SyncRuntimePermissions}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Update memory permissions for runtime environment.
-}
+\item
+  \texttt{SyncRuntimePermissions}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Update memory permissions for runtime environment.
 
-  \DIFadd{Some firmwares either fail to properly handle runtime permissions:
-  }\begin{itemize}
+  Some firmwares either fail to properly handle runtime permissions:
+  \begin{itemize}
     \tightlist
-    \item \DIFadd{They incorrectly mark }\texttt{\DIFadd{OpenRuntime}} \DIFadd{as not executable in the memory map.
-    }\item \DIFadd{They incorrectly mark }\texttt{\DIFadd{OpenRuntime}} \DIFadd{as not executable in the memory
+    \item They incorrectly mark \texttt{OpenRuntime} as not executable in the memory map.
+    \item They incorrectly mark \texttt{OpenRuntime} as not executable in the memory
     attributes table.
-    }\item \DIFadd{They lose entries from the memory attributes table after }\texttt{\DIFadd{OpenRuntime}}
-    \DIFadd{is loaded.
-    }\item \DIFadd{They mark items in the memory attributes table as read-write-execute.
-  }\end{itemize}
+    \item They lose entries from the memory attributes table after \texttt{OpenRuntime}
+    is loaded.
+    \item They mark items in the memory attributes table as read-write-execute.
+  \end{itemize}
 
-  \DIFadd{This quirk tries to update memory map and memory attributes table to correct this.
-}
+  This quirk tries to update memory map and memory attributes table to correct this.
 
-  \emph{\DIFadd{Note}}\DIFadd{: The necessity of this quirk is determined by early boot failures either in
+  \emph{Note}: The necessity of this quirk is determined by early boot failures either in
   macOS or in Linux/Windows. In general only firmwares released in 2018 or later are affected.
-}
 
-\DIFaddend \end{enumerate}
+\end{enumerate}
 
 \section{DeviceProperties}\label{devprops}
 
 \subsection{Introduction}\label{devpropsintro}
 
 Device configuration is provided to macOS with a dedicated buffer,
-called \texttt{\DIFdelbegin \DIFdel{EfiDevicePropertyDatabase}\DIFdelend \DIFaddbegin \DIFadd{EfiDevicePathPropertyDatabase}\DIFaddend }. This buffer is a serialised
+called \texttt{EfiDevicePathPropertyDatabase}. This buffer is a serialised
 map of DevicePaths to a map of property names and their values.
 
 Property data can be debugged with
@@ -2231,8 +2175,7 @@ behaviour that does not go to any other sections
   Designed to be filled with \texttt{plist\ dict} values, describing each load entry.
   See \hyperref[miscentryprops]{Entry Properties} section below.
 
-  \emph{Note}: Select tools, for example, \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} %%%
-\DIFdelend \DIFaddbegin \DIFadd{UEFI Shell, }\DIFaddend are very
+  \emph{Note}: Select tools, for example, UEFI Shell, are very
   dangerous and \textbf{MUST NOT} appear in production configurations, especially
   in vaulted ones and protected with secure boot, as they may be used to easily
   bypass secure boot chain.
@@ -2244,51 +2187,48 @@ behaviour that does not go to any other sections
 \begin{enumerate}
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{ConsoleAttributes}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Sets specific attributes for console.
-}
+  \texttt{ConsoleAttributes}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Sets specific attributes for console.
 
-  \DIFadd{Text renderer supports colour arguments as a sum of foreground and background
+  Text renderer supports colour arguments as a sum of foreground and background
   colors according to UEFI specification. The value of black background and
-  black foreground (}\texttt{\DIFadd{0}}\DIFadd{) is reserved. List of colour names:
-}
+  black foreground (\texttt{0}) is reserved. List of colour names:
 
   \begin{itemize}
   \tightlist
-  \item \texttt{\DIFadd{0x00}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BLACK}}
-  \item \texttt{\DIFadd{0x01}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BLUE}}
-  \item \texttt{\DIFadd{0x02}} \DIFadd{--- }\texttt{\DIFadd{EFI\_GREEN}}
-  \item \texttt{\DIFadd{0x03}} \DIFadd{--- }\texttt{\DIFadd{EFI\_CYAN}}
-  \item \texttt{\DIFadd{0x04}} \DIFadd{--- }\texttt{\DIFadd{EFI\_RED}}
-  \item \texttt{\DIFadd{0x05}} \DIFadd{--- }\texttt{\DIFadd{EFI\_MAGENTA}}
-  \item \texttt{\DIFadd{0x06}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BROWN}}
-  \item \texttt{\DIFadd{0x07}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTGRAY}}
-  \item \texttt{\DIFadd{0x08}} \DIFadd{--- }\texttt{\DIFadd{EFI\_DARKGRAY}}
-  \item \texttt{\DIFadd{0x09}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTBLUE}}
-  \item \texttt{\DIFadd{0x0A}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTGREEN}}
-  \item \texttt{\DIFadd{0x0B}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTCYAN}}
-  \item \texttt{\DIFadd{0x0C}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTRED}}
-  \item \texttt{\DIFadd{0x0D}} \DIFadd{--- }\texttt{\DIFadd{EFI\_LIGHTMAGENTA}}
-  \item \texttt{\DIFadd{0x0E}} \DIFadd{--- }\texttt{\DIFadd{EFI\_YELLOW}}
-  \item \texttt{\DIFadd{0x0F}} \DIFadd{--- }\texttt{\DIFadd{EFI\_WHITE}}
-  \item \texttt{\DIFadd{0x00}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_BLACK}}
-  \item \texttt{\DIFadd{0x10}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_BLUE}}
-  \item \texttt{\DIFadd{0x20}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_GREEN}}
-  \item \texttt{\DIFadd{0x30}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_CYAN}}
-  \item \texttt{\DIFadd{0x40}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_RED}}
-  \item \texttt{\DIFadd{0x50}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_MAGENTA}}
-  \item \texttt{\DIFadd{0x60}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_BROWN}}
-  \item \texttt{\DIFadd{0x70}} \DIFadd{--- }\texttt{\DIFadd{EFI\_BACKGROUND\_LIGHTGRAY}}
+  \item \texttt{0x00} --- \texttt{EFI\_BLACK}
+  \item \texttt{0x01} --- \texttt{EFI\_BLUE}
+  \item \texttt{0x02} --- \texttt{EFI\_GREEN}
+  \item \texttt{0x03} --- \texttt{EFI\_CYAN}
+  \item \texttt{0x04} --- \texttt{EFI\_RED}
+  \item \texttt{0x05} --- \texttt{EFI\_MAGENTA}
+  \item \texttt{0x06} --- \texttt{EFI\_BROWN}
+  \item \texttt{0x07} --- \texttt{EFI\_LIGHTGRAY}
+  \item \texttt{0x08} --- \texttt{EFI\_DARKGRAY}
+  \item \texttt{0x09} --- \texttt{EFI\_LIGHTBLUE}
+  \item \texttt{0x0A} --- \texttt{EFI\_LIGHTGREEN}
+  \item \texttt{0x0B} --- \texttt{EFI\_LIGHTCYAN}
+  \item \texttt{0x0C} --- \texttt{EFI\_LIGHTRED}
+  \item \texttt{0x0D} --- \texttt{EFI\_LIGHTMAGENTA}
+  \item \texttt{0x0E} --- \texttt{EFI\_YELLOW}
+  \item \texttt{0x0F} --- \texttt{EFI\_WHITE}
+  \item \texttt{0x00} --- \texttt{EFI\_BACKGROUND\_BLACK}
+  \item \texttt{0x10} --- \texttt{EFI\_BACKGROUND\_BLUE}
+  \item \texttt{0x20} --- \texttt{EFI\_BACKGROUND\_GREEN}
+  \item \texttt{0x30} --- \texttt{EFI\_BACKGROUND\_CYAN}
+  \item \texttt{0x40} --- \texttt{EFI\_BACKGROUND\_RED}
+  \item \texttt{0x50} --- \texttt{EFI\_BACKGROUND\_MAGENTA}
+  \item \texttt{0x60} --- \texttt{EFI\_BACKGROUND\_BROWN}
+  \item \texttt{0x70} --- \texttt{EFI\_BACKGROUND\_LIGHTGRAY}
   \end{itemize}
 
-  \emph{\DIFadd{Note}}\DIFadd{: This option may not work well with }\texttt{\DIFadd{System}} \DIFadd{text renderer.
+  \emph{Note}: This option may not work well with \texttt{System} text renderer.
   Setting a background different from black could help testing proper GOP functioning.
-}
 
 \item
-  \DIFaddend \texttt{HibernateMode}\\
+  \texttt{HibernateMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{None}\\
   \textbf{Description}: Hibernation detection mode. The following modes are supported:
@@ -2312,8 +2252,8 @@ behaviour that does not go to any other sections
   \begin{itemize}
   \tightlist
     \item Entry is macOS recovery.
-    \item Entry is \DIFaddbegin \DIFadd{macOS Time Machine.
-    }\item \DIFadd{Entry is }\DIFaddend explicitly marked as \texttt{Auxiliary}.
+    \item Entry is macOS Time Machine.
+    \item Entry is explicitly marked as \texttt{Auxiliary}.
     \item Entry is system (e.g. \texttt{Clean NVRAM}).
   \end{itemize}
 
@@ -2335,130 +2275,42 @@ behaviour that does not go to any other sections
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Sets specific attributes for picker.
 
-  \DIFdelbegin \DIFdel{Builtin picker supports colour arguments as a sum of foreground and background
-  colors according to UEFI specification. The value of black background and
-  black foreground (}\DIFdelend \DIFaddbegin \DIFadd{Different pickers may be configured through the attribute mask containing
-  OpenCore-reserved (}\texttt{\DIFadd{BIT0}}\DIFadd{\textasciitilde}\texttt{\DIFadd{BIT15}}\DIFadd{) and OEM-specific
-  (}\DIFaddend \texttt{\DIFdelbegin \DIFdel{0}%DIFDELCMD < \MBLOCKRIGHTBRACE%%%
-\DIFdel{) is reserved.
-List of colour names}\DIFdelend \DIFaddbegin \DIFadd{BIT16}}\DIFadd{\textasciitilde}\texttt{\DIFadd{BIT31}}\DIFadd{) values.
-}
+  Different pickers may be configured through the attribute mask containing
+  OpenCore-reserved (\texttt{BIT0}\textasciitilde\texttt{BIT15}) and OEM-specific
+  (\texttt{BIT16}\textasciitilde\texttt{BIT31}) values.
 
-  \DIFadd{Current OpenCore values include}\DIFaddend :
+  Current OpenCore values include:
 
   \begin{itemize}
   \tightlist
-  \item \texttt{\DIFdelbegin \DIFdel{0x00}\DIFdelend \DIFaddbegin \DIFadd{0x0001}\DIFaddend } --- \texttt{\DIFdelbegin \DIFdel{EFI}\DIFdelend \DIFaddbegin \DIFadd{OC}\DIFaddend \_\DIFdelbegin \DIFdel{BLACK}\DIFdelend \DIFaddbegin \DIFadd{ATTR\_USE\_VOLUME\_ICON}\DIFaddend }\DIFaddbegin \DIFadd{, provides custom icons
+  \item \texttt{0x0001} --- \texttt{OC\_ATTR\_USE\_VOLUME\_ICON}, provides custom icons
     for boot entries:
-    }\begin{itemize}
+    \begin{itemize}
       \tightlist
-      \DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x01}\DIFdelend \DIFaddbegin \DIFadd{.VolumeIcon.icns}\DIFaddend } \DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \DIFadd{file at }\DIFaddend \texttt{\DIFdelbegin \DIFdel{EFI\_BLUE}\DIFdelend \DIFaddbegin \DIFadd{Preboot}\DIFaddend } \DIFaddbegin \DIFadd{root for APFS.
-      }\DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x02}\DIFdelend \DIFaddbegin \DIFadd{.VolumeIcon.icns}\DIFaddend } \DIFdelbegin \DIFdel{--- }\texttt{\DIFdel{EFI\_GREEN}}
-  %DIFAUXCMD
-\DIFdelend \DIFaddbegin \DIFadd{file at volume root for other filesystems.
-      }\DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x03}\DIFdelend \DIFaddbegin \DIFadd{<TOOL\_NAME>.icns}\DIFaddend } \DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \DIFadd{file for }\DIFaddend \texttt{\DIFdelbegin \DIFdel{EFI\_CYAN}\DIFdelend \DIFaddbegin \DIFadd{Tools}\DIFaddend }\DIFaddbegin \DIFadd{.
-    }\end{itemize}
-    \DIFadd{Volume icons can be set in Finder.
-  }\DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x04}\DIFdelend \DIFaddbegin \DIFadd{0x0002}\DIFaddend } --- \texttt{\DIFdelbegin \DIFdel{EFI}\DIFdelend \DIFaddbegin \DIFadd{OC}\DIFaddend \_\DIFdelbegin \DIFdel{RED}\DIFdelend \DIFaddbegin \DIFadd{ATTR\_USE\_DISK\_LABEL\_FILE}\DIFaddend }\DIFaddbegin \DIFadd{, provides custom
+      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS.
+      \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
+      \item \texttt{<TOOL\_NAME>.icns} file for \texttt{Tools}.
+    \end{itemize}
+    Volume icons can be set in Finder.
+  \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
     rendered titles for boot entries:
-    }\begin{itemize}
+    \begin{itemize}
       \tightlist
-      \DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x05}\DIFdelend \DIFaddbegin \DIFadd{.disk\_label}\DIFaddend } \DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \DIFadd{(}\DIFaddend \texttt{\DIFdelbegin \DIFdel{EFI}\DIFdelend \DIFaddbegin \DIFadd{.disk}\DIFaddend \_\DIFdelbegin \DIFdel{MAGENTA}\DIFdelend \DIFaddbegin \DIFadd{label\_2x}\DIFaddend }\DIFaddbegin \DIFadd{) file near bootloader for all filesystems.
-      }\DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x06}\DIFdelend \DIFaddbegin \DIFadd{<TOOL\_NAME.lbl}\DIFaddend } \DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \DIFadd{(}\DIFaddend \texttt{\DIFdelbegin \DIFdel{EFI}\DIFdelend \DIFaddbegin \DIFadd{<TOOL}\DIFaddend \_\DIFdelbegin \DIFdel{BROWN}\DIFdelend \DIFaddbegin \DIFadd{NAME.l2x}\DIFaddend }\DIFaddbegin \DIFadd{) file near tool for }\texttt{\DIFadd{Tools}}\DIFadd{.
-    }\end{itemize}
-    \DIFadd{Prerendered labels can be generated via }\texttt{\DIFadd{disklabel}} \DIFadd{utility or }\texttt{\DIFadd{bless}} \DIFadd{command.
-    When disabled or missing text labels (}\texttt{\DIFadd{.contentDetails}} \DIFadd{or }\texttt{\DIFadd{.disk\_label.contentDetails}}\DIFadd{)
+      \item \texttt{.disk\_label} (\texttt{.disk\_label\_2x}) file near bootloader for all filesystems.
+      \item \texttt{<TOOL\_NAME.lbl} (\texttt{<TOOL\_NAME.l2x}) file near tool for \texttt{Tools}.
+    \end{itemize}
+    Prerendered labels can be generated via \texttt{disklabel} utility or \texttt{bless} command.
+    When disabled or missing text labels (\texttt{.contentDetails} or \texttt{.disk\_label.contentDetails})
     are to be rendered instead.
-  }\DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x07}\DIFdelend \DIFaddbegin \DIFadd{0x0004}\DIFaddend } --- \texttt{\DIFdelbegin \DIFdel{EFI}\DIFdelend \DIFaddbegin \DIFadd{OC}\DIFaddend \_\DIFdelbegin \DIFdel{LIGHTGRAY}\DIFdelend \DIFaddbegin \DIFadd{ATTR\_USE\_GENERIC\_LABEL\_IMAGE}\DIFaddend }\DIFaddbegin \DIFadd{, provides predefined
+  \item \texttt{0x0004} --- \texttt{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}, provides predefined
     label images for boot entries without custom entries. May give less detail for the actual
     boot entry.
-  }\DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x08}\DIFdelend \DIFaddbegin \DIFadd{0x0008}\DIFaddend } --- \texttt{\DIFdelbegin \DIFdel{EFI}\DIFdelend \DIFaddbegin \DIFadd{OC}\DIFaddend \_\DIFdelbegin \DIFdel{DARKGRAY}\DIFdelend \DIFaddbegin \DIFadd{ATTR\_USE\_ALTERNATE\_ICONS}\DIFaddend }\DIFdelbegin %DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{0x09}} %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{EFI\_LIGHTBLUE}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{0x0A}} %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{EFI\_LIGHTGREEN}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{0x0B}} %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{EFI\_LIGHTCYAN}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{0x0C}} %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{EFI\_LIGHTRED}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{0x0D}} %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{EFI\_LIGHTMAGENTA}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{0x0E}} %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{EFI\_YELLOW}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{0x0F}} %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{EFI\_WHITE}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{0x00}} %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_BLACK}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{0x10}} %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_BLUE}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{0x20}} %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_GREEN}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{0x30}} %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_CYAN}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{0x40}} %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_RED}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{0x50}} %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_MAGENTA}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{0x60}} %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_BROWN}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{0x70}} %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_LIGHTGRAY}}
-  %DIFAUXCMD
-\DIFdelend \DIFaddbegin \DIFadd{, changes used icon set to
+  \item \texttt{0x0008} --- \texttt{OC\_ATTR\_USE\_ALTERNATE\_ICONS}, changes used icon set to
     an alternate one if it is supported. For example, this could make a use of old-style icons
     with a custom background colour.
-  }\DIFaddend \end{itemize}
+  \end{itemize}
 
-\DIFdelbegin \emph{\DIFdel{Note}}%DIFAUXCMD
-\DIFdel{: This option may not work well with }\texttt{\DIFdel{System}} %DIFAUXCMD
-\DIFdel{text renderer. Setting a background different from black could help testing proper GOP functioning.
-  }%DIFDELCMD < 
-
-%DIFDELCMD < %%%
-\DIFdelend \item
+\item
   \texttt{PickerAudioAssist}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -2548,19 +2400,8 @@ List of colour names}\DIFdelend \DIFaddbegin \DIFadd{BIT16}}\DIFadd{\textasciiti
 
   Upon success \texttt{External} mode will entirely disable all boot management
   in OpenCore except policy enforcement. In \texttt{Apple} mode it may additionally
-  bypass policy enforcement. \DIFdelbegin \DIFdel{To implement }\texttt{\DIFdel{External}} %DIFAUXCMD
-\DIFdel{mode }\DIFdelend \DIFaddbegin \DIFadd{See }\hyperref[ueficanopy]{OpenCanopy} \DIFadd{plugin
-  for an example of }\DIFaddend a custom user interface\DIFdelbegin \DIFdel{may
-  utilise }%DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg}{OpenCorePkg}
-%DIFDELCMD <   %%%
-\texttt{\DIFdel{OcBootManagementLib}}%DIFAUXCMD
-\DIFdel{.
-Reference example of external graphics interface is provided in
-  }%DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Tests/ExternalUi}{ExternalUi}
-%DIFDELCMD <   %%%
-\DIFdel{test driver.
-}\DIFdelend \DIFaddbegin \DIFadd{.
-}\DIFaddend 
+  bypass policy enforcement. See \hyperref[ueficanopy]{OpenCanopy} plugin
+  for an example of a custom user interface.
 
   OpenCore built-in boot picker contains a set of actions chosen during the boot process.
   The list of supported actions is similar to Apple BDS and in general can be accessed by
@@ -2588,7 +2429,7 @@ Reference example of external graphics interface is provided in
   recovery. Hold \texttt{CMD+R} key combination to choose this option.
   \end{itemize}
 
-  \emph{Note 1}: Activated \texttt{KeySupport}, \texttt{\DIFdelbegin \DIFdel{AppleUsbKbDxe}\DIFdelend \DIFaddbegin \DIFadd{OpenUsbKbDxe}\DIFaddend }, or similar driver is required
+  \emph{Note 1}: Activated \texttt{KeySupport}, \texttt{OpenUsbKbDxe}, or similar driver is required
   for key handling to work. On many firmwares it is not possible to get all the keys function.
 
   \emph{Note 2}: In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key to display picker when
@@ -2606,17 +2447,15 @@ Reference example of external graphics interface is provided in
 \begin{enumerate}
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{AppleDebug}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Enable }\texttt{\DIFadd{boot.efi}} \DIFadd{debug log saving to OpenCore log.
-}
+  \texttt{AppleDebug}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable \texttt{boot.efi} debug log saving to OpenCore log.
 
-  \emph{\DIFadd{Note}}\DIFadd{: This option only applies to 10.15.4 and newer.
-}
+  \emph{Note}: This option only applies to 10.15.4 and newer.
 
 \item
-  \DIFaddend \texttt{DisableWatchDog}\\
+  \texttt{DisableWatchDog}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Select firmwares may not succeed in quickly booting
@@ -2638,8 +2477,7 @@ Reference example of external graphics interface is provided in
   Unless \texttt{Target} enables console (onscreen) printing,
   onscreen debug output will not be visible. The following levels
   are supported (discover more in
-  \DIFdelbegin %DIFDELCMD < \href{https://github.com/tianocore/edk2/blob/UDK2018/MdePkg/Include/Library/DebugLib.h}{DebugLib.h}%%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/Library/DebugLib.h}{DebugLib.h}\DIFaddend ):
+  \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/Library/DebugLib.h}{DebugLib.h}):
 
   \begin{itemize}
   \tightlist
@@ -2993,7 +2831,7 @@ rm vault.pub
   Example: \texttt{PciRoot(0x0)/Pci(0x1,0x1)/.../\textbackslash EFI\textbackslash COOL.EFI}
   \item \texttt{Tools} specify internal boot options, which are part of bootloader
   vault, and therefore take file paths relative to \texttt{OC/Tools} directory.
-  Example: \texttt{\DIFdelbegin \DIFdel{Shell}\DIFdelend \DIFaddbegin \DIFadd{OpenShell}\DIFaddend .efi}.
+  Example: \texttt{OpenShell.efi}.
   \end{itemize}
 
 \end{enumerate}
@@ -3039,7 +2877,7 @@ Please ensure that variables of this section never collide with them,
 as behaviour is undefined otherwise.
 
 For proper macOS functioning it is often required to use \texttt{OC\_FIRMWARE\_RUNTIME}
-protocol implementation currently offered as a part of \texttt{\DIFdelbegin \DIFdel{FwRuntimeServices}\DIFdelend \DIFaddbegin \DIFadd{OpenRuntime}\DIFaddend } driver.
+protocol implementation currently offered as a part of \texttt{OpenRuntime} driver.
 While it brings any benefits, there are certain limitations which arise depending on the
 use.
 
@@ -3173,17 +3011,13 @@ The following variables are mandatory for macOS functioning:
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:MLB}
   \break
   \texttt{BoardSerialNumber}. Present on newer Macs (2013+ at least) to avoid extra parsing
-  of SMBIOS tables, especially in \DIFdelbegin \DIFdel{boot.
-efi.
-}\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}}\DIFadd{.
-}\DIFaddend \item
+  of SMBIOS tables, especially in \texttt{boot.efi}.
+\item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}
   \break
   Primary network adapter MAC address or replacement value. Present on newer Macs
-  (2013+ at least) to avoid accessing special memory region, especially in \DIFdelbegin \DIFdel{boot.
-efi.
-}\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}}\DIFadd{.
-}\DIFaddend \end{itemize}
+  (2013+ at least) to avoid accessing special memory region, especially in \texttt{boot.efi}.
+\end{itemize}
 
 \subsection{Recommended Variables}\label{nvramvarsrec}
 
@@ -3211,10 +3045,8 @@ improvements:
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_BID}
   \break
   Hardware \texttt{BoardProduct} (e.g. \texttt{Mac-35C1E88140C3E6CF}). Not present on
-  real Macs, but used to avoid extra parsing of SMBIOS tables, especially in \DIFdelbegin \DIFdel{boot.
-efi.
-}\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}}\DIFadd{.
-}\DIFaddend \item
+  real Macs, but used to avoid extra parsing of SMBIOS tables, especially in \texttt{boot.efi}.
+\item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_MLB}
   \break
   Hardware \texttt{BoardSerialNumber}. Override for MLB. Present on newer Macs (2013+ at least).
@@ -3243,12 +3075,12 @@ efi.
  \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:UIScale}
   \break
-  One-byte data defining \DIFdelbegin \DIFdel{boot.efi }\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}} \DIFaddend user interface scaling. Should be \textbf{01} for normal
+  One-byte data defining \texttt{boot.efi} user interface scaling. Should be \textbf{01} for normal
   screens and \textbf{02} for HiDPI screens.
  \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:DefaultBackgroundColor}
   \break
-  Four-byte \texttt{RGBA} data defining \DIFdelbegin \DIFdel{boot.efi }\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}} \DIFaddend user interface background colour.
+  Four-byte \texttt{RGBA} data defining \texttt{boot.efi} user interface background colour.
   Standard colours include \textbf{BF BF BF 00} (Light Gray) and \textbf{00 00 00 00}
   (Syrah Black). Other colours may be set at user's preference.
 \end{itemize}
@@ -3301,9 +3133,9 @@ troubleshooting:
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg}
   \break
-  Booter arguments, similar to \texttt{boot-args} but for \DIFdelbegin \DIFdel{boot. efi. }\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}}\DIFadd{. }\DIFaddend Accepts a set of
+  Booter arguments, similar to \texttt{boot-args} but for \texttt{boot.efi}. Accepts a set of
   arguments, which are hexadecimal 64-bit values with or without \texttt{0x}.
-  At different stages \DIFdelbegin \DIFdel{boot.efi }\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}} \DIFaddend will request different debugging (logging)
+  At different stages \texttt{boot.efi} will request different debugging (logging)
   modes (e.g. after \texttt{ExitBootServices} it will only print to serial).
   Several booter arguments control whether these requests will succeed. The
   list of known requests is covered below:
@@ -3404,21 +3236,21 @@ troubleshooting:
   and this is the default value.
   \end{itemize}
 
-  \emph{Note}: To \DIFdelbegin \DIFdel{quickly }\DIFdelend see verbose output from \texttt{boot.efi} on \DIFdelbegin \DIFdel{versions }\DIFdelend \DIFaddbegin \DIFadd{modern macOS versions
-  enable }\texttt{\DIFadd{AppleDebug}} \DIFadd{option. This will save the log to general OpenCore log.
-  For versions }\DIFaddend before 10.15\DIFaddbegin \DIFadd{.4 }\DIFaddend set \texttt{bootercfg} to \texttt{log=1}. \DIFaddbegin \DIFadd{This will
+  \emph{Note}: To see verbose output from \texttt{boot.efi} on modern macOS versions
+  enable \texttt{AppleDebug} option. This will save the log to general OpenCore log.
+  For versions before 10.15.4 set \texttt{bootercfg} to \texttt{log=1}. This will
   print verbose output onscreen.
-}\DIFaddend \item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg-once}
+\item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg-once}
   \break
   Booter arguments override removed after first launch. Otherwise equivalent to \texttt{bootercfg}.
 \item
-  \DIFaddbegin \texttt{\DIFadd{7C436110-AB2A-4BBB-A880-FE41995C9F82:efiboot-perf-record}}
+  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:efiboot-perf-record}
   \break
-  \DIFadd{Enable performance log saving in }\texttt{\DIFadd{boot.efi}}\DIFadd{. Performance log is saved to physical
-  memory and is pointed by }\texttt{\DIFadd{efiboot-perf-record-data}} \DIFadd{and }\texttt{\DIFadd{efiboot-perf-record-size}}
-  \DIFadd{variables. Starting from 10.15.4 it can also be saved to OpenCore log by }\texttt{\DIFadd{AppleDebug}} \DIFadd{option.
-}\item
-  \DIFaddend \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:fmm-computer-name}
+  Enable performance log saving in \texttt{boot.efi}. Performance log is saved to physical
+  memory and is pointed by \texttt{efiboot-perf-record-data} and \texttt{efiboot-perf-record-size}
+  variables. Starting from 10.15.4 it can also be saved to OpenCore log by \texttt{AppleDebug} option.
+\item
+  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:fmm-computer-name}
   \break
   Current saved host name. ASCII string.
 \item
@@ -3466,10 +3298,8 @@ are written to three select destinations:
 
 Most of the fields specify the overrides in SMBIOS, and their field
 names conform to EDK2
-\DIFdelbegin %DIFDELCMD < \href{https://github.com/tianocore/edk2/blob/UDK2018/MdePkg/Include/IndustryStandard/SmBios.h}{SmBios.h}
-%DIFDELCMD < %%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/IndustryStandard/SmBios.h}{SmBios.h}
-\DIFaddend header file. However, several important fields reside in Data Hub and
+\href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/IndustryStandard/SmBios.h}{SmBios.h}
+header file. However, several important fields reside in Data Hub and
 NVRAM. Some of the values can be found in more than one field and/or
 destination, so there are two ways to control their update process:
 manual, where one specifies all the values (the default), and semi-automatic,
@@ -4127,252 +3957,63 @@ tweaks for the onboard firmware. To inspect firmware contents, apply modificatio
 and perform upgrades \href{https://github.com/LongSoft/UEFITool/releases}{UEFITool}
 and supplementary utilities can be used.
 
-\subsection{\DIFdelbegin \DIFdel{Properties}\DIFdelend \DIFaddbegin \DIFadd{Drivers}\DIFaddend }\DIFdelbegin %DIFDELCMD < \label{uefiprops}
-%DIFDELCMD < %%%
-\DIFdelend \DIFaddbegin \label{uefidrivers}
-\DIFaddend 
+\subsection{Drivers}\label{uefidrivers}
 
-\DIFdelbegin %DIFDELCMD < \begin{enumerate}
-%DIFDELCMD < \item
-%DIFDELCMD <   %%%
-\texttt{\DIFdel{Audio}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Type}}%DIFAUXCMD
-\DIFdel{: }\texttt{\DIFdel{plist\ dict}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
-\DIFdel{: None}%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Description}}%DIFAUXCMD
-\DIFdel{: Configure audio backend support described
-  in }%DIFDELCMD < \hyperref[uefiaudioprops]{Audio Properties} %%%
-\DIFdel{section below.
-}%DIFDELCMD < 
-
-%DIFDELCMD <   %%%
-\DIFdel{Audio support provides a way for upstream protocols to interact with the
-  selected hardware and audio resources. All audio resources should reside
-  in }\texttt{\DIFdel{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Audio}}
-  %DIFAUXCMD
-\DIFdel{directory. Currently the only supported audio file format is WAVE PCM. While it is
-  driver-dependent which audio stream format is supported, most common audio cards
-  support 16-bit signed stereo audio at 44100 or 48000 Hz.
-}%DIFDELCMD < 
-
-%DIFDELCMD <   %%%
-\DIFdel{Audio file path is determined by audio type, audio localisation, and audio path. Each filename
-  looks as follows: }\texttt{%DIFDELCMD < [%%%
-\DIFdel{audio type}%DIFDELCMD < ]%%%
-\DIFdel{\_}%DIFDELCMD < [%%%
-\DIFdel{audio localisation}%DIFDELCMD < ]%%%
-\DIFdel{\_}%DIFDELCMD < [%%%
-\DIFdel{audio path}%DIFDELCMD < ]%%%
-\DIFdel{.wav}}%DIFAUXCMD
-\DIFdel{. For unlocalised
-  files filename does not include the language code and looks as follows:
-  }\texttt{%DIFDELCMD < [%%%
-\DIFdel{audio type}%DIFDELCMD < ]%%%
-\DIFdel{\_}%DIFDELCMD < [%%%
-\DIFdel{audio path}%DIFDELCMD < ]%%%
-\DIFdel{.wav}}%DIFAUXCMD
-\DIFdel{.
-}%DIFDELCMD < 
-
-%DIFDELCMD <   \begin{itemize}
-\begin{itemize}%DIFAUXCMD
-%DIFDELCMD <   \tightlist
-%DIFDELCMD <   \item %%%
-\item%DIFAUXCMD
-\DIFdel{Audio type can be }\texttt{\DIFdel{OCEFIAudio}} %DIFAUXCMD
-\DIFdel{for OpenCore audio files or
-    }\texttt{\DIFdel{AXEFIAudio}} %DIFAUXCMD
-\DIFdel{for macOS bootloader audio files.
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdel{Audio localisation is a two letter language code (e.g. }\texttt{\DIFdel{en}}%DIFAUXCMD
-\DIFdel{)
-  with an exception for Chinese, Spanish, and Portuguese. Refer to
-  }%DIFDELCMD < \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_LANGUAGE\_CODE} definition}
-%DIFDELCMD <   %%%
-\DIFdel{for the list of all supported localisations.
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdel{Audio path is the base filename corresponding to a file identifier. For macOS bootloader audio paths refer to
-  }%DIFDELCMD < \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_AUDIO\_FILE} definition}%%%
-\DIFdel{.
-  For OpenCore audio paths refer to
-  }%DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}%%%
-\DIFdel{.
-  The only exception is OpenCore boot chime file, which is }\texttt{\DIFdel{OCEFIAudio\_VoiceOver\_Boot.wav}}%DIFAUXCMD
-\DIFdel{.
-  }
-\end{itemize}%DIFAUXCMD
-%DIFDELCMD < \end{itemize}
-%DIFDELCMD < 
-
-%DIFDELCMD <   %%%
-\DIFdel{Audio localisation is determined separately for macOS bootloader and OpenCore.
-  For macOS bootloader it is set in }\texttt{\DIFdel{preferences.efires}} %DIFAUXCMD
-\DIFdel{archive in
-  }\texttt{\DIFdel{systemLanguage.utf8}} %DIFAUXCMD
-\DIFdel{file and is controlled by the operating system.
-  For OpenCore the value of }\texttt{\DIFdel{prev-lang:kbd}} %DIFAUXCMD
-\DIFdel{variable is used.
-  When native audio localisation of a particular file is missing, English language
-  (}\texttt{\DIFdel{en}}%DIFAUXCMD
-\DIFdel{) localisation is used. Sample audio files can be found in
-  }%DIFDELCMD < \href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}%%%
-\DIFdel{.
-}%DIFDELCMD < 
-
-%DIFDELCMD < \item
-\item%DIFAUXCMD
-%DIFDELCMD <   %%%
-\texttt{\DIFdel{ConnectDrivers}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Type}}%DIFAUXCMD
-\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
-\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Description}}%DIFAUXCMD
-\DIFdel{: Perform UEFI controller connection after driver loading.
-}%DIFDELCMD < 
-
-%DIFDELCMD <   %%%
-\DIFdel{This option is useful for loading drivers following UEFI driver model
-  as they may not start by themselves. Examples of such drivers are filesystem
-  or audio drivers. While effective, this option may not be necessary for drivers
-  performing automatic connection, and may slightly slowdown the boot.
-}%DIFDELCMD < 
-
-%DIFDELCMD <   %%%
-\emph{\DIFdel{Note}}%DIFAUXCMD
-\DIFdel{: Some firmwares, made by Apple in particular, only connect the boot
-  drive to speedup the boot process. Enable this option to be able to see all the
-  boot options when having multiple drives.
-}%DIFDELCMD < 
-
-%DIFDELCMD < \item
-\item%DIFAUXCMD
-%DIFDELCMD <   %%%
-\texttt{\DIFdel{Drivers}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Type}}%DIFAUXCMD
-\DIFdel{: }\texttt{\DIFdel{plist\ array}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
-\DIFdel{: None}%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Description}}%DIFAUXCMD
-\DIFdel{: Load selected drivers from }\texttt{\DIFdel{OC/Drivers}}
-  %DIFAUXCMD
-\DIFdel{directory.
-}%DIFDELCMD < 
-
-%DIFDELCMD <   %%%
-\DIFdel{Designed to be filled with string filenames meant to be loaded as UEFI
-  drivers. }\DIFdelend Depending on the firmware a different set of drivers may be required.
+Depending on the firmware a different set of drivers may be required.
 Loading an incompatible driver may lead your system to unbootable state or
-even cause permanent firmware damage. Some of the known drivers \DIFdelbegin \DIFdel{include}\DIFdelend \DIFaddbegin \DIFadd{are listed below}\DIFaddend :
+even cause permanent firmware damage. Some of the known drivers are listed below:
 
-\DIFdelbegin %DIFDELCMD < \begin{itemize}
-%DIFDELCMD <   \tightlist
-%DIFDELCMD <   \item %%%
-\item%DIFAUXCMD
-\DIFdelend \DIFaddbegin \begin{tabular}{p{1.3in}p{5.55in}}
-\DIFaddend \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
-\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin & \DIFaddend APFS file system bootstrap driver adding the support of embedded APFS drivers
-  in bootable APFS containers in UEFI firmwares \DIFdelbegin \DIFdel{.
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdelend \DIFaddbegin \\
-\DIFaddend \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
-\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin & \DIFaddend HDA audio support driver in UEFI firmwares for most Intel and some other analog audio controllers.
+\begin{tabular}{p{1.3in}p{5.55in}}
+\href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
+& APFS file system bootstrap driver adding the support of embedded APFS drivers
+  in bootable APFS containers in UEFI firmwares \\
+\href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
+& HDA audio support driver in UEFI firmwares for most Intel and some other analog audio controllers.
   Refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
-  for known issues in AudioDxe. \DIFdelbegin %DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdelend \DIFaddbegin \\
-\DIFaddend \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ExFatDxe}}
-\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin & \DIFaddend Proprietary ExFAT file system driver for Bootcamp support commonly found in Apple
+  for known issues in AudioDxe. \\
+\href{https://github.com/acidanthera/OcBinaryData}{\texttt{ExFatDxe}}
+& Proprietary ExFAT file system driver for Bootcamp support commonly found in Apple
   firmwares. For Sandy Bridge and earlier CPUs \texttt{ExFatDxeLegacy} driver should be
-  used due to the lack of \texttt{RDRAND} instruction support. \DIFdelbegin %DIFDELCMD < \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FwRuntimeServices}}
-\item%DIFAUXCMD
-%DIFDELCMD <   %%%
-\DIFdel{--- }\texttt{\DIFdel{OC\_FIRMWARE\_RUNTIME}} %DIFAUXCMD
-\DIFdel{protocol implementation that increases the security
-  of \mbox{OpenCore} and Lilu by supporting read-only and write-only NVRAM variables. Some
-  commonly used quirks, e.g. }\texttt{\DIFdel{RequestBootVarRouting}}%DIFAUXCMD
-\DIFdel{, require this driver for proper function.
-  Due to the nature of being a runtime driver, i.e. functioning in parallel with the
-  target operating system, it cannot be implemented within OpenCore itself, but is bundled
-  with OpenCore releases.
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdelend \DIFaddbegin \\
-\DIFaddend \href{https://github.com/acidanthera/OcBinaryData}{\texttt{HfsPlus}}
-\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin & \DIFaddend Proprietary HFS file system driver with bless support commonly found in Apple
+  used due to the lack of \texttt{RDRAND} instruction support. \\
+\href{https://github.com/acidanthera/OcBinaryData}{\texttt{HfsPlus}}
+& Proprietary HFS file system driver with bless support commonly found in Apple
   firmwares. For Sandy Bridge and earlier CPUs \texttt{HfsPlusLegacy} driver should be
-  used due to the lack of \texttt{RDRAND} instruction support. \DIFdelbegin %DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdelend \DIFaddbegin \\
-\DIFaddend \href{https://github.com/acidanthera/audk}{\texttt{HiiDatabase}}\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \textbf{\DIFadd{*}}
-& \DIFaddend HII services support driver from \texttt{MdeModulePkg}. This driver is included in
+  used due to the lack of \texttt{RDRAND} instruction support. \\
+\href{https://github.com/acidanthera/audk}{\texttt{HiiDatabase}}\textbf{*}
+& HII services support driver from \texttt{MdeModulePkg}. This driver is included in
   most firmwares starting with Ivy Bridge generation. Some applications with the GUI
-  like UEFI Shell may need this driver to work properly. \DIFdelbegin %DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdelend \DIFaddbegin \\
-\DIFaddend \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
-\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin & \DIFaddend FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
+  like UEFI Shell may need this driver to work properly. \\
+\href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
+& FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
   UEFI firmwares, and cannot be used from OpenCore. It is known that multiple firmwares
   have a bug in their FAT support implementation, which leads to corrupted filesystems
   on write attempt. Embedding this driver within the firmware may be required in case
-  writing to EFI partition is needed during the boot process. \DIFdelbegin %DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdelend \DIFaddbegin \\
-  \DIFaddend \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \textbf{\DIFadd{*}}
-& \DIFaddend NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
+  writing to EFI partition is needed during the boot process. \\
+  \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}\textbf{*}
+& NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
   firmwares starting with Broadwell generation. For Haswell and earlier embedding it
-  within the firmware may be more favourable in case a NVMe SSD drive is installed. \DIFdelbegin %DIFDELCMD < \item \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AppleUsbKbDxe}}
-\item%DIFAUXCMD
-%DIFDELCMD <   %%%
-\DIFdel{--- }\DIFdelend \DIFaddbegin \\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenCanopy}}\textbf{\DIFadd{*}}
-& \hyperref[ueficanopy]{OpenCore plugin} \DIFadd{implementing graphical interface. }\\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenRuntime}}\textbf{\DIFadd{*}}
-& \hyperref[uefiruntime]{OpenCore plugin} \DIFadd{implementing }\texttt{\DIFadd{OC\_FIRMWARE\_RUNTIME}} \DIFadd{protocol. }\\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenUsbKbDxe}}\textbf{\DIFadd{*}}
-& \DIFaddend USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
+  within the firmware may be more favourable in case a NVMe SSD drive is installed. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenCanopy}}\textbf{*}
+& \hyperref[ueficanopy]{OpenCore plugin} implementing graphical interface. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenRuntime}}\textbf{*}
+& \hyperref[uefiruntime]{OpenCore plugin} implementing \texttt{OC\_FIRMWARE\_RUNTIME} protocol. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenUsbKbDxe}}\textbf{*}
+& USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
-  builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \DIFdelbegin %DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdelend \DIFaddbegin \\
-\DIFaddend \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
-\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin & \DIFaddend HFS file system driver with bless support. This driver is an alternative to
+  builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \\
+\href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
+& HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HfsPlus} driver commonly found in Apple firmwares. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
-  a security audit. \DIFdelbegin %DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdelend \DIFaddbegin \\
-\DIFaddend \href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}}\DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \textbf{\DIFadd{*}}
-& \DIFaddend XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
+  a security audit. \\
+\href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}}\textbf{*}
+& XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
   included in most firmwares starting with Sandy Bridge generation. For earlier firmwares
   or legacy systems it may be used to support external USB 3.0 PCI cards.
-\DIFdelbegin %DIFDELCMD < \end{itemize}
-%DIFDELCMD < %%%
-\DIFdelend \DIFaddbegin \end{tabular}
-\DIFaddend 
+\end{tabular}
 
-\DIFaddbegin \DIFadd{Driver marked with }\textbf{\DIFadd{*}} \DIFadd{are bundled with OpenCore.
-}\DIFaddend To compile the drivers from UDK (EDK II) use the same command you \DIFdelbegin \DIFdel{do }\DIFdelend normally use
+Driver marked with \textbf{*} are bundled with OpenCore.
+To compile the drivers from UDK (EDK II) use the same command you normally use
 for OpenCore compilation, but choose a corresponding package:
 \begin{lstlisting}[label=compileudk, style=ocbash]
 git clone https://github.com/acidanthera/audk UDK
@@ -4383,241 +4024,217 @@ build -a X64 -b RELEASE -t XCODE5 -p FatPkg/FatPkg.dsc
 build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \end{lstlisting}
 
-\DIFaddbegin \subsection{\DIFadd{Tools}}\label{uefitools}
+\subsection{Tools}\label{uefitools}
 
-\DIFadd{Standalone tools may help to debug firmware and hardware. Some of the known tools are listed below.
+Standalone tools may help to debug firmware and hardware. Some of the known tools are listed below.
 While some tools can be launched from within OpenCore many should be run separately either directly
-or from }\texttt{\DIFadd{Shell}}\DIFadd{.
-}
+or from \texttt{Shell}.
 
-\DIFadd{To boot into OpenShell or any other tool directly save }\texttt{\DIFadd{OpenShell.efi}}
-\DIFadd{under the name of }\texttt{\DIFadd{EFI\textbackslash BOOT\textbackslash BOOTX64.EFI}}
-\DIFadd{on a FAT32 partition. In general it is unimportant whether the partitition scheme
-is }\texttt{\DIFadd{GPT}} \DIFadd{or }\texttt{\DIFadd{MBR}}\DIFadd{.
-}
+To boot into OpenShell or any other tool directly save \texttt{OpenShell.efi}
+under the name of \texttt{EFI\textbackslash BOOT\textbackslash BOOTX64.EFI}
+on a FAT32 partition. In general it is unimportant whether the partitition scheme
+is \texttt{GPT} or \texttt{MBR}.
 
-\DIFadd{While the previous approach works both on Macs and other computers,
+While the previous approach works both on Macs and other computers,
 an alternative Mac-only approach to bless the tool on an HFS+ or APFS
 volume:
-}
 
-\DIFmodbegin
-\begin{lstlisting}[caption=Blessing tool, label=blesstool, style=ocbash,alsolanguage=DIFcode]
-%DIF > sudo bless --verbose --file /Volumes/VOLNAME/DIR/OpenShell.efi \
-%DIF >   --folder /Volumes/VOLNAME/DIR/ --setBoot
+\begin{lstlisting}[caption=Blessing tool, label=blesstool, style=ocbash]
+sudo bless --verbose --file /Volumes/VOLNAME/DIR/OpenShell.efi \
+  --folder /Volumes/VOLNAME/DIR/ --setBoot
 \end{lstlisting}
-\DIFmodend
 
-\emph{\DIFadd{Note 1}}\DIFadd{: You may have to copy }\texttt{\DIFadd{/System/Library/CoreServices/BridgeVersion.bin}}
-  \DIFadd{to }\texttt{\DIFadd{/Volumes/VOLNAME/DIR}}\DIFadd{. }\\
-\emph{\DIFadd{Note 2}}\DIFadd{: To be able to use }\texttt{\DIFadd{bless}} \DIFadd{you may have to
-  }\href{https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html}{disable System Integrity Protection}\DIFadd{. }\\
-\emph{\DIFadd{Note 3}}\DIFadd{: To be able to boot you may have to }\href{https://support.apple.com/HT208330}{disable Secure Boot}
-  \DIFadd{if present.
-}
+\emph{Note 1}: You may have to copy \texttt{/System/Library/CoreServices/BridgeVersion.bin}
+  to \texttt{/Volumes/VOLNAME/DIR}. \\
+\emph{Note 2}: To be able to use \texttt{bless} you may have to
+  \href{https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html}{disable System Integrity Protection}. \\
+\emph{Note 3}: To be able to boot you may have to \href{https://support.apple.com/HT208330}{disable Secure Boot}
+  if present.
 
-\DIFadd{Some of the known tools are listed below (builtin tools are marked with }\textbf{\DIFadd{*}}\DIFadd{):
-}
+Some of the known tools are listed below (builtin tools are marked with \textbf{*}):
 
 \begin{tabular}{p{1.3in}p{5.55in}}
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{BootKicker}}\textbf{\DIFadd{*}}
-& \DIFadd{Enter Apple BootPicker menu (exclusive for Macs with compatible GPUs). }\\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ChipTune}}\textbf{\DIFadd{*}}
-& \DIFadd{Test BeepGen protocol and generate audio signals of different style and length. }\\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CleanNvram}}\textbf{\DIFadd{*}}
-& \DIFadd{Reset NVRAM alternative bundled as a standalone tool. }\\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{GopStop}}\textbf{\DIFadd{*}}
-& \DIFadd{Test GraphicsOutput protocol with a
-  }\href{https://github.com/acidanthera/OpenCorePkg/tree/master/Application/GopStop}{simple scenario}\DIFadd{. }\\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{HdaCodecDump}}\textbf{\DIFadd{*}}
-& \DIFadd{Parse and dump High Definition Audio codec information (requires }\texttt{\DIFadd{AudioDxe}}\DIFadd{). }\\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{KeyTester}}\textbf{\DIFadd{*}}
-& \DIFadd{Test keyboard input in }\texttt{\DIFadd{SimpleText}} \DIFadd{mode. }\\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{BootKicker}}\textbf{*}
+& Enter Apple BootPicker menu (exclusive for Macs with compatible GPUs). \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ChipTune}}\textbf{*}
+& Test BeepGen protocol and generate audio signals of different style and length. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CleanNvram}}\textbf{*}
+& Reset NVRAM alternative bundled as a standalone tool. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{GopStop}}\textbf{*}
+& Test GraphicsOutput protocol with a
+  \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Application/GopStop}{simple scenario}. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{HdaCodecDump}}\textbf{*}
+& Parse and dump High Definition Audio codec information (requires \texttt{AudioDxe}). \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{KeyTester}}\textbf{*}
+& Test keyboard input in \texttt{SimpleText} mode. \\
 \href{https://www.memtest86.com}{\texttt{MemTest86}}
-& \DIFadd{Memory testing utility. }\\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenControl}}\textbf{\DIFadd{*}}
-& \DIFadd{Unlock and lock back NVRAM protection for other tools to be able to get full NVRAM access
-  when launching from OpenCore. }\\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenShell}}\textbf{\DIFadd{*}}
-& \DIFadd{OpenCore-configured }\href{http://github.com/tianocore/edk2}{\texttt{UEFI Shell}} \DIFadd{for compatibility
-  with a broad range of firmwares. }\\
+& Memory testing utility. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenControl}}\textbf{*}
+& Unlock and lock back NVRAM protection for other tools to be able to get full NVRAM access
+  when launching from OpenCore. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenShell}}\textbf{*}
+& OpenCore-configured \href{http://github.com/tianocore/edk2}{\texttt{UEFI Shell}} for compatibility
+  with a broad range of firmwares. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{PavpProvision}}
-& \DIFadd{Perform EPID provisioning (requires certificate data configuration). }\\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VerifyMsrE2}}\textbf{\DIFadd{*}}
-& \DIFadd{Check }\texttt{\DIFadd{CFG Lock}} \DIFadd{(MSR }\texttt{\DIFadd{0xE2}} \DIFadd{write protection) consistency across all cores.
-}\end{tabular}
+& Perform EPID provisioning (requires certificate data configuration). \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VerifyMsrE2}}\textbf{*}
+& Check \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) consistency across all cores.
+\end{tabular}
 
-\subsection{\DIFadd{OpenCanopy}}\label{ueficanopy}
+\subsection{OpenCanopy}\label{ueficanopy}
 
-\DIFadd{OpenCanopy is a graphical OpenCore user interface that runs in
-}\texttt{\DIFadd{External}} \texttt{\DIFadd{PickerMode}} \DIFadd{and relies on
-}\href{https://github.com/acidanthera/OpenCorePkg}{OpenCorePkg} \texttt{\DIFadd{OcBootManagementLib}}
-\DIFadd{similar to the builtin text interface.
-}
+OpenCanopy is a graphical OpenCore user interface that runs in
+\texttt{External} \texttt{PickerMode} and relies on
+\href{https://github.com/acidanthera/OpenCorePkg}{OpenCorePkg} \texttt{OcBootManagementLib}
+similar to the builtin text interface.
 
-\DIFadd{OpenCanopy requires graphical resources located in }\texttt{\DIFadd{Resources}} \DIFadd{directory to run.
+OpenCanopy requires graphical resources located in \texttt{Resources} directory to run.
 Sample resources (fonts and images) can be found in
-}\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}\DIFadd{.
-}
+\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}.
 
-\DIFadd{OpenCanopy provides full support for }\texttt{\DIFadd{PickerAttributes}} \DIFadd{and offers a configurable
-builtin icon set. The default chosen icon set depends on the }\texttt{\DIFadd{DefaultBackgroundColor}}
-\DIFadd{variable value. For Light Gray }\texttt{\DIFadd{Old}} \DIFadd{icon set will be used, for other colours ---
+OpenCanopy provides full support for \texttt{PickerAttributes} and offers a configurable
+builtin icon set. The default chosen icon set depends on the \texttt{DefaultBackgroundColor}
+variable value. For Light Gray \texttt{Old} icon set will be used, for other colours ---
 the one without a prefix.
-}
 
-\DIFadd{Predefined icons are put to }\texttt{\DIFadd{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Image}}
-\DIFadd{directory. Full list of supported icons (in }\texttt{\DIFadd{.icns}} \DIFadd{format) is provided below. Missing optional
-icons will use the closest available icon. External entries will use }\texttt{\DIFadd{Ext}}\DIFadd{-prefixed
-icon if available (e.g. }\texttt{\DIFadd{OldExtHardDrive.icns}}\DIFadd{).
-}
+Predefined icons are put to \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Image}
+directory. Full list of supported icons (in \texttt{.icns} format) is provided below. Missing optional
+icons will use the closest available icon. External entries will use \texttt{Ext}-prefixed
+icon if available (e.g. \texttt{OldExtHardDrive.icns}).
 
 \begin{itemize}
 \tightlist
-  \DIFaddend \item \DIFaddbegin \texttt{\DIFadd{Cursor}} \DIFadd{--- Mouse cursor (mandatory).
-  }\item \texttt{\DIFadd{Selected}} \DIFadd{--- Selected item (mandatory).
-  }\item \texttt{\DIFadd{Selector}} \DIFadd{--- Selecting item (mandatory).
-  }\item \texttt{\DIFadd{HardDrive}} \DIFadd{--- Generic OS (mandatory).
-  }\item \texttt{\DIFadd{Apple}} \DIFadd{--- Apple OS.
-  }\item \texttt{\DIFadd{AppleRecv}} \DIFadd{--- Apple Recovery OS.
-  }\item \texttt{\DIFadd{AppleTM}} \DIFadd{--- Apple Time Machine.
-  }\item \texttt{\DIFadd{Windows}} \DIFadd{--- Windows.
-  }\item \texttt{\DIFadd{Other}} \DIFadd{--- Custom entry (see }\texttt{\DIFadd{Entries}}\DIFadd{).
-  }\item \texttt{\DIFadd{ResetNVRAM}} \DIFadd{--- Reset NVRAM system action or tool.
-  }\item \texttt{\DIFadd{Shell}} \DIFadd{--- Entry with UEFI Shell name (e.g. }\texttt{\DIFadd{OpenShell}}\DIFadd{).
-  }\item \texttt{\DIFadd{Tool}} \DIFadd{--- Any other tool.
-}\end{itemize}
+  \item \texttt{Cursor} --- Mouse cursor (mandatory).
+  \item \texttt{Selected} --- Selected item (mandatory).
+  \item \texttt{Selector} --- Selecting item (mandatory).
+  \item \texttt{HardDrive} --- Generic OS (mandatory).
+  \item \texttt{Apple} --- Apple OS.
+  \item \texttt{AppleRecv} --- Apple Recovery OS.
+  \item \texttt{AppleTM} --- Apple Time Machine.
+  \item \texttt{Windows} --- Windows.
+  \item \texttt{Other} --- Custom entry (see \texttt{Entries}).
+  \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool.
+  \item \texttt{Shell} --- Entry with UEFI Shell name (e.g. \texttt{OpenShell}).
+  \item \texttt{Tool} --- Any other tool.
+\end{itemize}
 
-\DIFadd{Predefined labels are put to }\texttt{\DIFadd{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Label}}
-\DIFadd{directory. Each label has }\texttt{\DIFadd{.lbl}} \DIFadd{or }\texttt{\DIFadd{.l2x}} \DIFadd{suffix to represent the scaling level.
+Predefined labels are put to \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Label}
+directory. Each label has \texttt{.lbl} or \texttt{.l2x} suffix to represent the scaling level.
 Full list of labels is provided below. All labels are mandatory.
-}
 
 \begin{itemize}
 \tightlist
-  \item \texttt{\DIFadd{EFIBoot}} \DIFadd{--- Generic OS.
-  }\item \texttt{\DIFadd{Apple}} \DIFadd{--- Apple OS.
-  }\item \texttt{\DIFadd{AppleRecv}} \DIFadd{--- Apple Recovery OS.
-  }\item \texttt{\DIFadd{AppleTM}} \DIFadd{--- Apple Time Machine.
-  }\item \texttt{\DIFadd{Windows}} \DIFadd{--- Windows.
-  }\item \texttt{\DIFadd{Other}} \DIFadd{--- Custom entry (see }\texttt{\DIFadd{Entries}}\DIFadd{).
-  }\item \texttt{\DIFadd{ResetNVRAM}} \DIFadd{--- Reset NVRAM system action or tool.
-  }\item \texttt{\DIFadd{Shell}} \DIFadd{--- Entry with UEFI Shell name (e.g. }\texttt{\DIFadd{OpenShell}}\DIFadd{).
-  }\item \texttt{\DIFadd{Tool}} \DIFadd{--- Any other tool.
-}\end{itemize}
+  \item \texttt{EFIBoot} --- Generic OS.
+  \item \texttt{Apple} --- Apple OS.
+  \item \texttt{AppleRecv} --- Apple Recovery OS.
+  \item \texttt{AppleTM} --- Apple Time Machine.
+  \item \texttt{Windows} --- Windows.
+  \item \texttt{Other} --- Custom entry (see \texttt{Entries}).
+  \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool.
+  \item \texttt{Shell} --- Entry with UEFI Shell name (e.g. \texttt{OpenShell}).
+  \item \texttt{Tool} --- Any other tool.
+\end{itemize}
 
-\DIFadd{Label and icon generation can be performed with bundled utilities: }\texttt{\DIFadd{disklabel}} \DIFadd{and
-}\texttt{\DIFadd{icnspack}}\DIFadd{. Please refer to sample data for the details about the dimensions.
-}
+Label and icon generation can be performed with bundled utilities: \texttt{disklabel} and
+\texttt{icnspack}. Please refer to sample data for the details about the dimensions.
 
-\emph{\DIFadd{WARNING}}\DIFadd{: OpenCanopy is currently considered experimental and is not recommended for
+\emph{WARNING}: OpenCanopy is currently considered experimental and is not recommended for
 everyday use. Refer to
-}\href{https://github.com/acidanthera/bugtracker/issues/759}{acidanthera/bugtracker\#759}
-\DIFadd{for more details regarding the current limitations.
-}
+\href{https://github.com/acidanthera/bugtracker/issues/759}{acidanthera/bugtracker\#759}
+for more details regarding the current limitations.
 
-\subsection{\DIFadd{OpenRuntime}}\label{uefiruntime}
+\subsection{OpenRuntime}\label{uefiruntime}
 
-\texttt{\DIFadd{OpenRuntime}} \DIFadd{is an OpenCore plugin implementing }\texttt{\DIFadd{OC\_FIRMWARE\_RUNTIME}} \DIFadd{protocol.
+\texttt{OpenRuntime} is an OpenCore plugin implementing \texttt{OC\_FIRMWARE\_RUNTIME} protocol.
 This protocol implements multiple features required for OpenCore that are otherwise not possible
 to implement in OpenCore itself as they are needed to work in runtime, i.e. during operating system
 functioning. Feature highlights:
-}
 
 \begin{itemize}
-  \item \DIFadd{NVRAM namespaces, allowing to isolate operating systems from accessing select
-  variables (e.g. }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{or }\texttt{\DIFadd{ProtectSecureBoot}}\DIFadd{).
-  }\item \DIFadd{NVRAM proxying, allowing to manipulate multiple variables on variable updates
-  (e.g. }\texttt{\DIFadd{RequestBootVarFallback}}\DIFadd{).
-  }\item \DIFadd{Read-only and write-only NVRAM variables, enhancing the security of OpenCore,
-  Lilu, and Lilu plugins, like VirtualSMC, which implements }\texttt{\DIFadd{AuthRestart}} \DIFadd{support.
-  }\item \DIFadd{NVRAM isolation, allowing to protect all variables from being written from
-  an untrusted operating system (e.g. }\texttt{\DIFadd{DisableVariableWrite}}\DIFadd{).
-  }\item \DIFadd{UEFI Runtime Services memory protection management to workaround read-only
-  mapping (e.g. }\texttt{\DIFadd{EnableWriteUnprotector}}\DIFadd{).
-}\end{itemize}
+  \item NVRAM namespaces, allowing to isolate operating systems from accessing select
+  variables (e.g. \texttt{RequestBootVarRouting} or \texttt{ProtectSecureBoot}).
+  \item NVRAM proxying, allowing to manipulate multiple variables on variable updates
+  (e.g. \texttt{RequestBootVarFallback}).
+  \item Read-only and write-only NVRAM variables, enhancing the security of OpenCore,
+  Lilu, and Lilu plugins, like VirtualSMC, which implements \texttt{AuthRestart} support.
+  \item NVRAM isolation, allowing to protect all variables from being written from
+  an untrusted operating system (e.g. \texttt{DisableVariableWrite}).
+  \item UEFI Runtime Services memory protection management to workaround read-only
+  mapping (e.g. \texttt{EnableWriteUnprotector}).
+\end{itemize}
 
-\subsection{\DIFadd{Properties}}\label{uefiprops}
+\subsection{Properties}\label{uefiprops}
 
 \begin{enumerate}
 \item
-  \texttt{\DIFadd{Audio}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ dict}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: None}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Configure audio backend support described
-  in }\hyperref[uefiaudioprops]{Audio Properties} \DIFadd{section below.
-}
+  \texttt{Audio}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Failsafe}: None\\
+  \textbf{Description}: Configure audio backend support described
+  in \hyperref[uefiaudioprops]{Audio Properties} section below.
 
-  \DIFadd{Audio support provides a way for upstream protocols to interact with the
+  Audio support provides a way for upstream protocols to interact with the
   selected hardware and audio resources. All audio resources should reside
-  in }\texttt{\DIFadd{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Audio}}
-  \DIFadd{directory. Currently the only supported audio file format is WAVE PCM. While it is
+  in \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Audio}
+  directory. Currently the only supported audio file format is WAVE PCM. While it is
   driver-dependent which audio stream format is supported, most common audio cards
   support 16-bit signed stereo audio at 44100 or 48000 Hz.
-}
 
-  \DIFadd{Audio file path is determined by audio type, audio localisation, and audio path. Each filename
-  looks as follows: }\texttt{[\DIFadd{audio type}]\DIFadd{\_}[\DIFadd{audio localisation}]\DIFadd{\_}[\DIFadd{audio path}]\DIFadd{.wav}}\DIFadd{. For unlocalised
+  Audio file path is determined by audio type, audio localisation, and audio path. Each filename
+  looks as follows: \texttt{[audio type]\_[audio localisation]\_[audio path].wav}. For unlocalised
   files filename does not include the language code and looks as follows:
-  }\texttt{[\DIFadd{audio type}]\DIFadd{\_}[\DIFadd{audio path}]\DIFadd{.wav}}\DIFadd{.
-}
+  \texttt{[audio type]\_[audio path].wav}.
 
   \begin{itemize}
   \tightlist
-  \item \DIFadd{Audio type can be }\texttt{\DIFadd{OCEFIAudio}} \DIFadd{for OpenCore audio files or
-    }\texttt{\DIFadd{AXEFIAudio}} \DIFadd{for macOS bootloader audio files.
-  }\item \DIFadd{Audio localisation is a two letter language code (e.g. }\texttt{\DIFadd{en}}\DIFadd{)
+  \item Audio type can be \texttt{OCEFIAudio} for OpenCore audio files or
+    \texttt{AXEFIAudio} for macOS bootloader audio files.
+  \item Audio localisation is a two letter language code (e.g. \texttt{en})
   with an exception for Chinese, Spanish, and Portuguese. Refer to
-  }\href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_LANGUAGE\_CODE} definition}
-  \DIFadd{for the list of all supported localisations.
-  }\item \DIFadd{Audio path is the base filename corresponding to a file identifier. For macOS bootloader audio paths refer to
-  }\href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_AUDIO\_FILE} definition}\DIFadd{.
+  \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_LANGUAGE\_CODE} definition}
+  for the list of all supported localisations.
+  \item Audio path is the base filename corresponding to a file identifier. For macOS bootloader audio paths refer to
+  \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_AUDIO\_FILE} definition}.
   For OpenCore audio paths refer to
-  }\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}\DIFadd{.
-  The only exception is OpenCore boot chime file, which is }\texttt{\DIFadd{OCEFIAudio\_VoiceOver\_Boot.wav}}\DIFadd{.
-  }\end{itemize}
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}.
+  The only exception is OpenCore boot chime file, which is \texttt{OCEFIAudio\_VoiceOver\_Boot.wav}.
+  \end{itemize}
 
-  \DIFadd{Audio localisation is determined separately for macOS bootloader and OpenCore.
-  For macOS bootloader it is set in }\texttt{\DIFadd{preferences.efires}} \DIFadd{archive in
-  }\texttt{\DIFadd{systemLanguage.utf8}} \DIFadd{file and is controlled by the operating system.
-  For OpenCore the value of }\texttt{\DIFadd{prev-lang:kbd}} \DIFadd{variable is used.
+  Audio localisation is determined separately for macOS bootloader and OpenCore.
+  For macOS bootloader it is set in \texttt{preferences.efires} archive in
+  \texttt{systemLanguage.utf8} file and is controlled by the operating system.
+  For OpenCore the value of \texttt{prev-lang:kbd} variable is used.
   When native audio localisation of a particular file is missing, English language
-  (}\texttt{\DIFadd{en}}\DIFadd{) localisation is used. Sample audio files can be found in
-  }\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}\DIFadd{.
-}
+  (\texttt{en}) localisation is used. Sample audio files can be found in
+  \href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}.
 
 \item
-  \texttt{\DIFadd{ConnectDrivers}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Perform UEFI controller connection after driver loading.
-}
+  \texttt{ConnectDrivers}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Perform UEFI controller connection after driver loading.
 
-  \DIFadd{This option is useful for loading drivers following UEFI driver model
+  This option is useful for loading drivers following UEFI driver model
   as they may not start by themselves. Examples of such drivers are filesystem
   or audio drivers. While effective, this option may not be necessary for drivers
   performing automatic connection, and may slightly slowdown the boot.
-}
 
-  \emph{\DIFadd{Note}}\DIFadd{: Some firmwares, made by Apple in particular, only connect the boot
+  \emph{Note}: Some firmwares, made by Apple in particular, only connect the boot
   drive to speedup the boot process. Enable this option to be able to see all the
   boot options when having multiple drives.
-}
 
 \item
-  \texttt{\DIFadd{Drivers}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ array}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: None}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Load selected drivers from }\texttt{\DIFadd{OC/Drivers}}
-  \DIFadd{directory.
-}
+  \texttt{Drivers}\\
+  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: None\\
+  \textbf{Description}: Load selected drivers from \texttt{OC/Drivers}
+  directory.
 
-  \DIFadd{Designed to be filled with string filenames meant to be loaded as UEFI
+  Designed to be filled with string filenames meant to be loaded as UEFI
   drivers.
-}
 
 \item
-  \DIFaddend \texttt{Input}\\
+  \texttt{Input}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Apply individual settings designed for input (keyboard and mouse) in
@@ -4656,7 +4273,7 @@ functioning. Feature highlights:
 \item
   \texttt{AudioCodec}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \DIFdelbegin \DIFdel{empty string}\DIFdelend \DIFaddbegin \texttt{\DIFadd{0}}\DIFaddend \\
+  \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Codec address on the specified audio controller for audio support.
 
   Normally this contains first audio codec address on the builtin analog audio controller (\texttt{HDEF}).
@@ -4672,8 +4289,7 @@ functioning. Feature highlights:
 \item
   \texttt{AudioDevice}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: \DIFdelbegin \texttt{\DIFdel{0}}%DIFAUXCMD
-\DIFdelend \DIFaddbegin \DIFadd{empty string}\DIFaddend \\
+  \textbf{Failsafe}: empty string\\
   \textbf{Description}: Device path of the specified audio controller for audio support.
 
   Normally this contains builtin analog audio controller (\texttt{HDEF}) device path,
@@ -4758,20 +4374,18 @@ functioning. Feature highlights:
 \begin{enumerate}
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{KeyFiltering}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Enable keyboard input sanity checking.
-}
+  \texttt{KeyFiltering}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable keyboard input sanity checking.
 
-  \DIFadd{Apparently some boards like GA Z77P-D3 may return uninitialised data
-  in }\texttt{\DIFadd{EFI\_INPUT\_KEY}} \DIFadd{with all input protocols.
+  Apparently some boards like GA Z77P-D3 may return uninitialised data
+  in \texttt{EFI\_INPUT\_KEY} with all input protocols.
   This option discards keys that are neither ASCII, nor are defined
   in the UEFI specification (see tables 107 and 108 in version 2.8).
-}
 
 \item
-  \DIFaddend \texttt{KeyForgetThreshold}\\
+  \texttt{KeyForgetThreshold}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Remove key unless it was submitted during this timeout in milliseconds.
@@ -4818,7 +4432,7 @@ functioning. Feature highlights:
   This option activates the internal keyboard interceptor driver, based on
   \texttt{AppleGenericInput} aka (\texttt{AptioInputFix}), to fill
   \texttt{AppleKeyMapAggregator} database for input functioning. In case
-  a separate driver is used, such as \texttt{\DIFdelbegin \DIFdel{AppleUsbKbDxe}\DIFdelend \DIFaddbegin \DIFadd{OpenUsbKbDxe}\DIFaddend }, this option
+  a separate driver is used, such as \texttt{OpenUsbKbDxe}, this option
   should never be enabled.
 
 \item
@@ -4836,11 +4450,10 @@ functioning. Feature highlights:
   \item \texttt{AMI} --- Uses APTIO input protocol \texttt{AMI\_EFIKEYCODE\_PROTOCOL}.
   \end{itemize}
 
-  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: Currently }\texttt{\DIFadd{V1}}\DIFadd{, }\texttt{\DIFadd{V2}}\DIFadd{, and }\texttt{\DIFadd{AMI}} \DIFadd{unlike }\texttt{\DIFadd{Auto}} \DIFadd{only do filtering of
+  \emph{Note}: Currently \texttt{V1}, \texttt{V2}, and \texttt{AMI} unlike \texttt{Auto} only do filtering of
   the particular specified protocol. This may change in the future versions.
-}
 
-\DIFaddend \item
+\item
   \texttt{KeySwap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -4994,25 +4607,22 @@ functioning. Feature highlights:
   \emph{Note}: This option only applies to \texttt{System} renderer.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{DirectGopCacheMode}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Cache mode for builtin graphics output protocol framebuffer.
-}
+  \texttt{DirectGopCacheMode}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Cache mode for builtin graphics output protocol framebuffer.
 
-  \DIFadd{Tuning cache mode may provide better rendering performance on some firmwares.
+  Tuning cache mode may provide better rendering performance on some firmwares.
   Providing empty string leaves cache control settings to the firmware.
-  Valid non-empty values are: }\texttt{\DIFadd{Uncacheable}}\DIFadd{, }\texttt{\DIFadd{WriteCombining}}\DIFadd{, and
-  }\texttt{\DIFadd{WriteThrough}}\DIFadd{.
-}
+  Valid non-empty values are: \texttt{Uncacheable}, \texttt{WriteCombining}, and
+  \texttt{WriteThrough}.
 
-  \emph{\DIFadd{Note}}\DIFadd{: This option is not supported on most hardware (see
-  }\href{https://github.com/acidanthera/bugtracker/issues/755}{acidanthera/bugtracker\#755}
-  \DIFadd{for more details).
-}
+  \emph{Note}: This option is not supported on most hardware (see
+  \href{https://github.com/acidanthera/bugtracker/issues/755}{acidanthera/bugtracker\#755}
+  for more details).
 
 \item
-  \DIFaddend \texttt{DirectGopRendering}\\
+  \texttt{DirectGopRendering}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Use builtin graphics output protocol renderer for console.
@@ -5123,15 +4733,14 @@ functioning. Feature highlights:
   using this option is advised on them as well.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{AppleDebugLog}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Reinstalls Apple Debug Log protocol with a builtin
+  \texttt{AppleDebugLog}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple Debug Log protocol with a builtin
   version.
-}
 
 \item
-  \DIFaddend \texttt{AppleEvent}\\
+  \texttt{AppleEvent}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Apple Event protocol with a builtin
@@ -5269,7 +4878,7 @@ functioning. Feature highlights:
   \texttt{OC\_VENDOR\_VARIABLE\_GUID} to \newline \texttt{EFI\_GLOBAL\_VARIABLE\_GUID}.
 
   This quirk requires \texttt{RequestBootVarRouting} to be enabled and therefore
-  \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented in \texttt{\DIFdelbegin \DIFdel{FwRuntimeServices}\DIFdelend \DIFaddbegin \DIFadd{OpenRuntime}\DIFaddend .efi}.
+  \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented in \texttt{OpenRuntime.efi}.
 
   By redirecting \texttt{Boot} prefixed variables to a separate GUID namespace we achieve
   multiple goals:
@@ -5311,7 +4920,7 @@ functioning. Feature highlights:
   \texttt{EFI\_GLOBAL\_VARIABLE\_GUID} to \newline \texttt{OC\_VENDOR\_VARIABLE\_GUID}.
 
   This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented
-  in \texttt{\DIFdelbegin \DIFdel{FwRuntimeServices}\DIFdelend \DIFaddbegin \DIFadd{OpenRuntime}\DIFaddend .efi}. The quirk lets default boot entry
+  in \texttt{OpenRuntime.efi}. The quirk lets default boot entry
   preservation at times when firmwares delete incompatible boot entries.
   Simply said, you are required to enable this quirk to be able to reliably
   use \href{https://support.apple.com/HT202796}{Startup Disk} preference
@@ -5461,10 +5070,8 @@ Similar to other projects working with hardware OpenCore supports auditing and d
 The use of \texttt{NOOPT} or \texttt{DEBUG} build modes instead of \texttt{RELEASE}
 can produce a lot more debug output. With \texttt{NOOPT} source level debugging with
 GDB or IDA Pro is also available. For GDB check
-\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Debug}{OcSupport Debug}
-%DIFDELCMD < %%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Debug}{OpenCore Debug}
-\DIFaddend page. For IDA Pro you will need IDA Pro 7.3 or newer, refer to
+\href{https://github.com/acidanthera/OpenCorePkg/tree/master/Debug}{OpenCore Debug}
+page. For IDA Pro you will need IDA Pro 7.3 or newer, refer to
 \href{https://www.hex-rays.com/products/ida/support/tutorials/index.shtml}{Debugging the XNU Kernel with IDA Pro}
 for more details.
 
@@ -5585,7 +5192,7 @@ you will need \texttt{debug=0x8} boot argument.
   \textbf{How can I migrate from \texttt{AptioMemoryFix}?}
 
   Behaviour similar to that of \texttt{AptioMemoryFix} can be obtained by
-  installing \texttt{\DIFdelbegin \DIFdel{FwRuntimeServices}\DIFdelend \DIFaddbegin \DIFadd{OpenRuntime}\DIFaddend } driver and enabling the quirks listed below.
+  installing \texttt{OpenRuntime} driver and enabling the quirks listed below.
   Please note, that most of these are not necessary to be enabled. Refer to their
   individual descriptions in this document for more details.
   \begin{itemize}
@@ -5596,7 +5203,7 @@ you will need \texttt{debug=0x8} boot argument.
   \item \texttt{EnableSafeModeSlide}
   \item \texttt{EnableWriteUnprotector}
   \item \texttt{ForceExitBootServices}
-  \item \texttt{\DIFdelbegin \DIFdel{ProtectCsmRegion}\DIFdelend \DIFaddbegin \DIFadd{ProtectMemoryRegions}\DIFaddend }
+  \item \texttt{ProtectMemoryRegions}
   \item \texttt{ProvideCustomSlide}
   \item \texttt{SetupVirtualMap}
   \item \texttt{ShrinkMemoryMap}
