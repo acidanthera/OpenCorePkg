@@ -98,11 +98,6 @@ typedef struct {
   EFI_GRAPHICS_OUTPUT_BLT_PIXEL *Buffer;
 } GUI_IMAGE;
 
-typedef struct {
-  GUI_IMAGE BaseImage;
-  GUI_IMAGE HoldImage;
-} GUI_CLICK_IMAGE;
-
 typedef struct GUI_SCREEN_CURSOR_ GUI_SCREEN_CURSOR;
 
 typedef
@@ -147,7 +142,9 @@ GuiIcnsToImageIcon (
   OUT GUI_IMAGE  *Image,
   IN  VOID       *IcnsImage,
   IN  UINT32     IcnsImageSize,
-  IN  UINT8      Scale
+  IN  UINT8      Scale,
+  IN  UINT32     MatchWidth,
+  IN  UINT32     MatchHeight
   );
 
 RETURN_STATUS
@@ -155,7 +152,8 @@ GuiLabelToImage (
   OUT GUI_IMAGE *Image,
   IN  VOID      *RawData,
   IN  UINT32    DataLength,
-  IN  UINT8     Scale
+  IN  UINT8     Scale,
+  IN  BOOLEAN   Inverted
   );
 
 VOID
@@ -282,14 +280,6 @@ UINT32
 GuiGetInterpolatedValue (
   IN CONST GUI_INTERPOLATION  *Interpol,
   IN       UINT64             CurrentTime
-  );
-
-RETURN_STATUS
-GuiPngToClickImage (
-  IN OUT GUI_CLICK_IMAGE                      *Image,
-  IN     VOID                                 *BmpImage,
-  IN     UINTN                                BmpImageSize,
-  IN     CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *HighlightPixel
   );
 
 #endif // OPEN_CANOPY_H

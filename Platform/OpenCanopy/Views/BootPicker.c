@@ -7,6 +7,8 @@
 
 #include <Uefi.h>
 
+#include <IndustryStandard/AppleIcon.h>
+
 #include <Library/UefiBootServicesTableLib.h>
 
 #include <Library/BaseLib.h>
@@ -21,27 +23,9 @@
 #include "../BmfLib.h"
 #include "../GuiApp.h"
 
-#define CURSOR_DIMENSION  24
-
-#define BOOT_ENTRY_DIMENSION       144
-#define BOOT_ENTRY_ICON_DIMENSION  128
-#define BOOT_ENTRY_LABEL_SPACE     4
-#define BOOT_ENTRY_LABEL_HEIGHT    13
-
-#define BOOT_ENTRY_SPACE  8
-
-#define BOOT_SELECTOR_WIDTH                 144
-#define BOOT_SELECTOR_BACKGROUND_DIMENSION  BOOT_SELECTOR_WIDTH
-#define BOOT_SELECTOR_BUTTON_DIMENSION      40
-#define BOOT_SELECTOR_BUTTON_SPACE          BOOT_ENTRY_LABEL_SPACE + BOOT_ENTRY_LABEL_HEIGHT + 3
-#define BOOT_SELECTOR_HEIGHT                BOOT_SELECTOR_BACKGROUND_DIMENSION + BOOT_SELECTOR_BUTTON_SPACE + BOOT_SELECTOR_BUTTON_DIMENSION
-
-#define BOOT_ENTRY_WIDTH   (BOOT_ENTRY_DIMENSION)
-#define BOOT_ENTRY_HEIGHT  (BOOT_ENTRY_DIMENSION + BOOT_ENTRY_LABEL_SPACE + BOOT_ENTRY_LABEL_HEIGHT)
-
 typedef struct {
   GUI_OBJ_CHILD         Hdr;
-  CONST GUI_CLICK_IMAGE *ClickImage;
+  CONST GUI_IMAGE       *ClickImage;
   CONST GUI_IMAGE       *CurrentImage;
 } GUI_OBJ_CLICKABLE;
 
@@ -577,7 +561,7 @@ InternalBootPickerSelectorDraw (
   ASSERT (This->Width  == BOOT_SELECTOR_WIDTH);
   ASSERT (This->Height == BOOT_SELECTOR_HEIGHT);
 
-  BackgroundImage = &GuiContext->EntryBackSelected;
+  BackgroundImage = &GuiContext->Icons[ICON_SELECTED][ICON_TYPE_BASE];
 
   ASSERT (BackgroundImage->Width  == BOOT_SELECTOR_BACKGROUND_DIMENSION);
   ASSERT (BackgroundImage->Height == BOOT_SELECTOR_BACKGROUND_DIMENSION);
@@ -657,7 +641,7 @@ InternalBootPickerSelectorPtrEvent (
 
   PickerContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
   Clickable     = BASE_CR (This, GUI_OBJ_CLICKABLE, Hdr.Obj);
-  ButtonImage   = &PickerContext->EntrySelector.BaseImage;
+  ButtonImage   = &PickerContext->Icons[ICON_SELECTOR][ICON_TYPE_BASE];
 
   ASSERT (Event == GuiPointerPrimaryDown
        || Event == GuiPointerPrimaryHold
@@ -675,7 +659,7 @@ InternalBootPickerSelectorPtrEvent (
         GuiContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
         GuiContext->BootEntry = mBootPicker.SelectedEntry->Context;
       } else  {
-        ButtonImage = &PickerContext->EntrySelector.HoldImage;
+        ButtonImage = &PickerContext->Icons[ICON_SELECTOR][ICON_TYPE_HELD];
       }
     }
   }
@@ -759,6 +743,7 @@ BootPickerEntriesAdd (
   APPLE_BOOT_POLICY_PROTOCOL *AppleBootPolicy;
   RETURN_STATUS          Status;
   GUI_VOLUME_ENTRY       *VolumeEntry;
+  CONST GUI_IMAGE        *SuggestedIcon;
   LIST_ENTRY             *ListEntry;
   CONST GUI_VOLUME_ENTRY *PrevEntry;
   UINT32                 IconFileSize;
@@ -804,7 +789,8 @@ BootPickerEntriesAdd (
         &VolumeEntry->Label,
         IconFileData,
         IconFileSize,
-        GuiContext->Scale
+        GuiContext->Scale,
+        GuiContext->Light
         );
     }
   } else {
@@ -813,39 +799,38 @@ BootPickerEntriesAdd (
 
   if (EFI_ERROR (Status) && UseGenericLabel) {
     switch (Entry->Type) {
-      case OC_BOOT_UNKNOWN:
-      case OC_BOOT_EXTERNAL_OS:
-        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelEFIBoot);
+      case OC_BOOT_APPLE_OS:
+        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_APPLE]);
         break;
-
       case OC_BOOT_APPLE_RECOVERY:
-        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelRecovery);
+        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_APPLE_RECOVERY]);
         break;
-
+      case OC_BOOT_APPLE_TIME_MACHINE:
+        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_APPLE_TIME_MACHINE]);
+        break;
       case OC_BOOT_WINDOWS:
-        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelWindows);
+        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_WINDOWS]);
         break;
-
+      case OC_BOOT_EXTERNAL_OS:
+        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_OTHER]);
+        break;
+      case OC_BOOT_RESET_NVRAM:
+        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_RESET_NVRAM]);
+        break;
       case OC_BOOT_EXTERNAL_TOOL:
         if (StrStr (Entry->Name, OC_MENU_RESET_NVRAM_ENTRY) != NULL) {
-          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelResetNVRAM);
+          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_RESET_NVRAM]);
         } else if (StrStr (Entry->Name, OC_MENU_UEFI_SHELL_ENTRY) != NULL) {
-          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelShell);
+          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_SHELL]);
         } else {
-          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelTool);
+          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_TOOL]);
         }
         break;
-
-      case OC_BOOT_APPLE_OS:
-        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelMacOS);
+      case OC_BOOT_UNKNOWN:
+        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_GENERIC_HDD]);
         break;
-
-      case OC_BOOT_RESET_NVRAM:
-        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->EntryLabelResetNVRAM);
-        break;
-
       default:
-        DEBUG ((DEBUG_ERROR, "OCUI: Entry kind %d unsupported", Entry->Type));
+        DEBUG ((DEBUG_ERROR, "OCUI: Entry kind %d unsupported for label", Entry->Type));
         return RETURN_UNSUPPORTED;
     }
   }
@@ -869,7 +854,14 @@ BootPickerEntriesAdd (
     Status = OcGetBootEntryIcon (Context, AppleBootPolicy, Entry, &IconFileData, &IconFileSize);
 
     if (!EFI_ERROR (Status)) {
-      Status = GuiIcnsToImageIcon (&VolumeEntry->EntryIcon, IconFileData, IconFileSize, GuiContext->Scale);
+      Status = GuiIcnsToImageIcon (
+        &VolumeEntry->EntryIcon,
+        IconFileData,
+        IconFileSize,
+        GuiContext->Scale,
+        BOOT_ENTRY_ICON_DIMENSION,
+        BOOT_ENTRY_ICON_DIMENSION
+        );
       FreePool (IconFileData);
       if (!EFI_ERROR (Status)) {
         VolumeEntry->CustomIcon = TRUE;
@@ -880,13 +872,61 @@ BootPickerEntriesAdd (
   }
 
   if (EFI_ERROR (Status)) {
-    if (Entry->Type == OC_BOOT_EXTERNAL_TOOL || Entry->Type == OC_BOOT_SYSTEM) {
-      CopyMem (&VolumeEntry->EntryIcon, &GuiContext->EntryIconTool, sizeof (VolumeEntry->EntryIcon));
-    } else if (!Entry->IsExternal) {
-      CopyMem (&VolumeEntry->EntryIcon, &GuiContext->EntryIconInternal, sizeof (VolumeEntry->EntryIcon));
-    } else {
-      CopyMem (&VolumeEntry->EntryIcon, &GuiContext->EntryIconExternal, sizeof (VolumeEntry->EntryIcon));
+    SuggestedIcon = NULL;
+    switch (Entry->Type) {
+      case OC_BOOT_APPLE_OS:
+        SuggestedIcon = &GuiContext->Icons[ICON_APPLE][ICON_TYPE_BASE];
+        break;
+      case OC_BOOT_APPLE_RECOVERY:
+        SuggestedIcon = &GuiContext->Icons[ICON_APPLE_RECOVERY][ICON_TYPE_BASE];
+        if (SuggestedIcon->Buffer == NULL) {
+          SuggestedIcon = &GuiContext->Icons[ICON_APPLE][ICON_TYPE_BASE];
+        }
+        break;
+      case OC_BOOT_APPLE_TIME_MACHINE:
+        SuggestedIcon = &GuiContext->Icons[ICON_APPLE_TIME_MACHINE][ICON_TYPE_BASE];
+        if (SuggestedIcon->Buffer == NULL) {
+          SuggestedIcon = &GuiContext->Icons[ICON_APPLE][ICON_TYPE_BASE];
+        }
+        break;
+      case OC_BOOT_WINDOWS:
+        SuggestedIcon = &GuiContext->Icons[ICON_WINDOWS][ICON_TYPE_BASE];
+        break;
+      case OC_BOOT_EXTERNAL_OS:
+        SuggestedIcon = &GuiContext->Icons[ICON_OTHER][ICON_TYPE_BASE];
+        break;
+      case OC_BOOT_RESET_NVRAM:
+        SuggestedIcon = &GuiContext->Icons[ICON_RESET_NVRAM][ICON_TYPE_BASE];
+        if (SuggestedIcon->Buffer == NULL) {
+          SuggestedIcon = &GuiContext->Icons[ICON_TOOL][ICON_TYPE_BASE];
+        }
+        break;
+      case OC_BOOT_EXTERNAL_TOOL:
+        if (StrStr (Entry->Name, OC_MENU_RESET_NVRAM_ENTRY) != NULL) {
+          SuggestedIcon = &GuiContext->Icons[ICON_RESET_NVRAM][ICON_TYPE_BASE];
+        } else if (StrStr (Entry->Name, OC_MENU_UEFI_SHELL_ENTRY) != NULL) {
+          SuggestedIcon = &GuiContext->Icons[ICON_SHELL][ICON_TYPE_BASE];
+        }
+
+        if (SuggestedIcon == NULL || SuggestedIcon->Buffer == NULL) {
+          SuggestedIcon = &GuiContext->Icons[ICON_TOOL][ICON_TYPE_BASE];
+        }
+        break;
+      case OC_BOOT_UNKNOWN:
+        SuggestedIcon = &GuiContext->Icons[ICON_GENERIC_HDD][ICON_TYPE_BASE];
+        break;
+      default:
+        DEBUG ((DEBUG_ERROR, "OCUI: Entry kind %d unsupported for icon", Entry->Type));
+        return RETURN_UNSUPPORTED;
     }
+
+    ASSERT (SuggestedIcon != NULL);
+
+    if (Entry->IsExternal && SuggestedIcon[ICON_TYPE_EXTERNAL].Buffer != NULL) {
+      SuggestedIcon = &SuggestedIcon[ICON_TYPE_EXTERNAL];
+    }
+
+    CopyMem (&VolumeEntry->EntryIcon, SuggestedIcon, sizeof (VolumeEntry->EntryIcon));
   }
 
   VolumeEntry->Hdr.Parent       = &mBootPicker.Hdr.Obj;
@@ -1151,20 +1191,6 @@ BootPickerViewInitialize (
   ASSERT (GuiContext != NULL);
   ASSERT (GetCursorImage != NULL);
 
-  if (GuiContext->Cursor.Height                  != CURSOR_DIMENSION
-   || GuiContext->Cursor.Width                   != CURSOR_DIMENSION
-   || GuiContext->EntryBackSelected.Height       != BOOT_SELECTOR_BACKGROUND_DIMENSION
-   || GuiContext->EntryBackSelected.Width        != BOOT_SELECTOR_BACKGROUND_DIMENSION
-   || GuiContext->EntrySelector.BaseImage.Height != BOOT_SELECTOR_BUTTON_DIMENSION
-   || GuiContext->EntrySelector.BaseImage.Width  != BOOT_SELECTOR_BUTTON_DIMENSION
-   || GuiContext->EntryIconInternal.Height       != BOOT_ENTRY_ICON_DIMENSION
-   || GuiContext->EntryIconInternal.Width        != BOOT_ENTRY_ICON_DIMENSION
-   || GuiContext->EntryIconExternal.Height       != BOOT_ENTRY_ICON_DIMENSION
-   || GuiContext->EntryIconExternal.Width        != BOOT_ENTRY_ICON_DIMENSION
-   || GuiContext->FontContext.BmfContext.Height  != BOOT_ENTRY_LABEL_HEIGHT) {
-    return RETURN_UNSUPPORTED;
-  }
-
   GuiViewInitialize (
     DrawContext,
     &mBootPickerView,
@@ -1173,8 +1199,8 @@ BootPickerViewInitialize (
     GuiContext
     );
 
-  mBootPickerSelector.ClickImage   = &GuiContext->EntrySelector;
-  mBootPickerSelector.CurrentImage = &GuiContext->EntrySelector.BaseImage;
+  mBootPickerSelector.ClickImage   = &GuiContext->Icons[ICON_SELECTOR][ICON_TYPE_BASE];
+  mBootPickerSelector.CurrentImage = &GuiContext->Icons[ICON_SELECTOR][ICON_TYPE_BASE];
 
   mBootPicker.Hdr.Obj.OffsetX = mBootPickerView.Width / 2;
   mBootPicker.Hdr.Obj.OffsetY = (mBootPickerView.Height - mBootPicker.Hdr.Obj.Height) / 2;

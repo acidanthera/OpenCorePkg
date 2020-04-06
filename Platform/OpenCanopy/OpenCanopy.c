@@ -1228,7 +1228,9 @@ GuiIcnsToImageIcon (
   OUT GUI_IMAGE  *Image,
   IN  VOID       *IcnsImage,
   IN  UINT32     IcnsImageSize,
-  IN  UINT8      Scale
+  IN  UINT8      Scale,
+  IN  UINT32     MatchWidth,
+  IN  UINT32     MatchHeight
   )
 {
   EFI_STATUS         Status;
@@ -1277,9 +1279,9 @@ GuiIcnsToImageIcon (
         RecordLength - sizeof (APPLE_ICNS_RECORD)
         );
 
-      if (!EFI_ERROR (Status)) {
-        if (Image->Width != APPLE_DISK_ICON_DIMENSION * Scale
-          || Image->Height != APPLE_DISK_ICON_DIMENSION * Scale) {
+      if (!EFI_ERROR (Status) && MatchWidth > 0 && MatchHeight > 0) {
+        if (Image->Width != MatchWidth * Scale
+          || Image->Height != MatchHeight * Scale) {
           FreePool (Image->Buffer);
           Status = EFI_UNSUPPORTED;
         }
@@ -1297,7 +1299,8 @@ GuiLabelToImage (
   OUT GUI_IMAGE *Image,
   IN  VOID      *RawData,
   IN  UINT32    DataLength,
-  IN  UINT8     Scale
+  IN  UINT8     Scale,
+  IN  BOOLEAN   Inverted
   )
 {
   APPLE_DISK_LABEL  *Label;
@@ -1329,11 +1332,20 @@ GuiLabelToImage (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  for (PixelIdx = 0; PixelIdx < Image->Width * Image->Height; PixelIdx++) {
-    Image->Buffer[PixelIdx].Blue     = 255 - mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-    Image->Buffer[PixelIdx].Green    = 255 - mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-    Image->Buffer[PixelIdx].Red      = 255 - mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-    Image->Buffer[PixelIdx].Reserved = 255;
+  if (Inverted) {
+    for (PixelIdx = 0; PixelIdx < Image->Width * Image->Height; PixelIdx++) {
+      Image->Buffer[PixelIdx].Blue     = mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Green    = mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Red      = mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Reserved = 255;
+    }
+  } else {
+    for (PixelIdx = 0; PixelIdx < Image->Width * Image->Height; PixelIdx++) {
+      Image->Buffer[PixelIdx].Blue     = 255 - mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Green    = 255 - mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Red      = 255 - mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Reserved = 255;
+    }
   }
 
   return EFI_SUCCESS;
@@ -1532,38 +1544,4 @@ GuiGetInterpolatedValue (
   return (Interpol->EndValue * AnimTime
     + (Interpol->StartValue * (InterpolFpTimeFactor - AnimTime)))
     / InterpolFpTimeFactor;
-}
-
-RETURN_STATUS
-GuiPngToClickImage (
-  IN OUT GUI_CLICK_IMAGE                      *Image,
-  IN     VOID                                 *BmpImage,
-  IN     UINTN                                BmpImageSize,
-  IN     CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *HighlightPixel
-  )
-{
-  RETURN_STATUS Status;
-
-  ASSERT (Image != NULL);
-  ASSERT (BmpImage != NULL);
-  ASSERT (HighlightPixel != NULL);
-
-  Status = GuiPngToImage (&Image->BaseImage, BmpImage, BmpImageSize);
-  if (RETURN_ERROR (Status)) {
-    return Status;
-  }
-
-  Status = GuiCreateHighlightedImage (
-             &Image->HoldImage,
-             &Image->BaseImage,
-             HighlightPixel
-             );
-  if (RETURN_ERROR (Status)) {
-    FreePool (Image->BaseImage.Buffer);
-    Image->BaseImage.Buffer = NULL;
-    Image->HoldImage.Buffer = NULL;
-    return Status;
-  }
-
-  return Status;
 }
