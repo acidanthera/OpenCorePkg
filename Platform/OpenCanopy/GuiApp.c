@@ -26,7 +26,7 @@
 #include "BmfLib.h"
 #include "GuiApp.h"
 
-GLOBAL_REMOVE_IF_UNREFERENCED BOOT_PICKER_GUI_CONTEXT mGuiContext = { { { 0 } } };
+GLOBAL_REMOVE_IF_UNREFERENCED BOOT_PICKER_GUI_CONTEXT mGuiContext;
 
 //
 // FIXME: Should not be global here.
