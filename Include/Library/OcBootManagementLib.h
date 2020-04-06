@@ -61,6 +61,7 @@ typedef struct OC_PICKER_CONTEXT_ OC_PICKER_CONTEXT;
 #define OC_ATTR_USE_VOLUME_ICON          BIT0
 #define OC_ATTR_USE_DISK_LABEL_FILE      BIT1
 #define OC_ATTR_USE_GENERIC_LABEL_IMAGE  BIT2
+#define OC_ATTR_USE_ALTERNATE_ICONS      BIT3
 
 /**
   Default timeout for IDLE timeout during menu picker navigation

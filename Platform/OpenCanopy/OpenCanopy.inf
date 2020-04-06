@@ -55,6 +55,7 @@
   gEfiGraphicsOutputProtocolGuid
   gEfiSimplePointerProtocolGuid
   gEfiAbsolutePointerProtocolGuid
+  gEfiUserInterfaceThemeProtocolGuid
 
   gOcBootstrapProtocolGuid
   gOcInterfaceProtocolGuid

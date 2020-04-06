@@ -45,6 +45,7 @@ typedef struct {
 extern GUI_OBJ           mBootPickerView;
 extern GUI_VOLUME_PICKER mBootPicker;
 extern GUI_OBJ_CLICKABLE mBootPickerSelector;
+extern CONST GUI_IMAGE   mBackgroundImage;
 
 STATIC UINT8 mBootPickerOpacity = 0xFF;
 STATIC UINT8 mBootPickerImageIndex = 0;
@@ -110,21 +111,12 @@ InternalBootPickerViewDraw (
   IN     BOOLEAN              RequestDraw
   )
 {
-  //
-  // Set the background to black with 100 % opacity.
-  //
-  STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL BlackPixel = {
-    0x00, 0x00, 0x00, 0xFF
-  };
-
-  STATIC CONST GUI_IMAGE BlackImage = { 1, 1, &BlackPixel };
-
   ASSERT (This != NULL);
   ASSERT (DrawContext != NULL);
   ASSERT (Context != NULL);
 
   GuiDrawToBuffer (
-    &BlackImage,
+    &mBackgroundImage,
     0xFF,
     TRUE,
     DrawContext,
@@ -414,6 +406,7 @@ InternalBootPickerEntryDraw (
   //
   // Draw the icon horizontally centered.
   //
+  ASSERT (EntryIcon != NULL);
   ASSERT (EntryIcon->Width  == BOOT_ENTRY_ICON_DIMENSION);
   ASSERT (EntryIcon->Height == BOOT_ENTRY_ICON_DIMENSION);
 
@@ -840,7 +833,8 @@ BootPickerEntriesAdd (
       &VolumeEntry->Label,
       &GuiContext->FontContext,
       Entry->Name,
-      StrLen (Entry->Name)
+      StrLen (Entry->Name),
+      GuiContext->Light
       );
     if (!Result) {
       DEBUG ((DEBUG_WARN, "OCUI: label failed\n"));
@@ -921,6 +915,10 @@ BootPickerEntriesAdd (
     }
 
     ASSERT (SuggestedIcon != NULL);
+
+    if (SuggestedIcon->Buffer == NULL) {
+      SuggestedIcon = &GuiContext->Icons[ICON_GENERIC_HDD][ICON_TYPE_BASE];
+    }
 
     if (Entry->IsExternal && SuggestedIcon[ICON_TYPE_EXTERNAL].Buffer != NULL) {
       SuggestedIcon = &SuggestedIcon[ICON_TYPE_EXTERNAL];

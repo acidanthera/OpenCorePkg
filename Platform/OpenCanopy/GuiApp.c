@@ -20,12 +20,20 @@
 #include <Library/BaseLib.h>
 
 #include <Guid/AppleVariable.h>
+#include <Protocol/UserInterfaceTheme.h>
 
 #include "OpenCanopy.h"
 #include "BmfLib.h"
 #include "GuiApp.h"
 
 GLOBAL_REMOVE_IF_UNREFERENCED BOOT_PICKER_GUI_CONTEXT mGuiContext = { { { 0 } } };
+
+//
+// FIXME: Should not be global here.
+//
+STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL mBackgroundPixel;
+STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL mHighlightPixel = {0xAF, 0xAF, 0xAF, 0x32};
+CONST GUI_IMAGE mBackgroundImage = { 1, 1, &mBackgroundPixel };
 
 STATIC
 CONST CHAR8 *
@@ -251,19 +259,21 @@ LoadLabelFromStorage (
 RETURN_STATUS
 InternalContextConstruct (
   OUT BOOT_PICKER_GUI_CONTEXT  *Context,
-  IN  OC_STORAGE_CONTEXT       *Storage
+  IN  OC_STORAGE_CONTEXT       *Storage,
+  IN  OC_PICKER_CONTEXT        *Picker
   )
 {
-  RETURN_STATUS Status;
-  BOOLEAN       Result;
-  VOID          *FontImage;
-  VOID          *FontData;
-  UINT32        FontImageSize;
-  UINT32        FontDataSize;
-  UINTN         UiScaleSize;
-  UINT32        Index;
-  UINT32        ImageDimension;
-  BOOLEAN       Old;
+  RETURN_STATUS                      Status;
+  EFI_USER_INTERFACE_THEME_PROTOCOL  *UiTheme;
+  VOID                               *FontImage;
+  VOID                               *FontData;
+  UINT32                             FontImageSize;
+  UINT32                             FontDataSize;
+  UINTN                              UiScaleSize;
+  UINT32                             Index;
+  UINT32                             ImageDimension;
+  BOOLEAN                            Old;
+  BOOLEAN                            Result;
 
   ASSERT (Context != NULL);
 
@@ -285,11 +295,44 @@ InternalContextConstruct (
   // FIXME: Add support for 2x scaling.
   Context->Scale = 1;
 
-  // FIXME: Add support for old set.
-  Old = FALSE;
+  Status = gBS->LocateProtocol (
+    &gEfiUserInterfaceThemeProtocolGuid,
+    NULL,
+    (VOID **) &UiTheme
+    );
+  if (!EFI_ERROR (Status)) {
+    Status = UiTheme->GetBackgroundColor (&Context->BackgroundColor.Raw);
+  }
 
-  // FIXME: Add support for light background.
-  Context->Light = Old;
+  if (EFI_ERROR (Status)) {
+    Context->BackgroundColor.Raw = APPLE_COLOR_SYRAH_BLACK;
+  }
+
+  //
+  // Set background colour with full opacity.
+  //
+  mBackgroundPixel.Red      = Context->BackgroundColor.Pixel.Red;
+  mBackgroundPixel.Green    = Context->BackgroundColor.Pixel.Green;
+  mBackgroundPixel.Blue     = Context->BackgroundColor.Pixel.Blue;
+  mBackgroundPixel.Reserved = 0xFF;
+
+  Old = Context->BackgroundColor.Raw == APPLE_COLOR_LIGHT_GRAY;
+  if ((Picker->PickerAttributes & OC_ATTR_USE_ALTERNATE_ICONS) != 0) {
+    Old = !Old;
+  }
+
+  if (Context->BackgroundColor.Raw == APPLE_COLOR_SYRAH_BLACK) {
+    Context->Light = FALSE;
+  } else if (Context->BackgroundColor.Raw == APPLE_COLOR_LIGHT_GRAY) {
+    Context->Light = TRUE;
+  } else {
+    //
+    // FIXME: Support proper W3C formula.
+    //
+    Context->Light = (Context->BackgroundColor.Pixel.Red * 299U
+      + Context->BackgroundColor.Pixel.Green * 587U
+      + Context->BackgroundColor.Pixel.Blue * 114U) <= 186000;
+  }
 
   Context->BootEntry = NULL;
 
@@ -300,7 +343,7 @@ InternalContextConstruct (
       ImageDimension = CURSOR_DIMENSION;
     } else if (Index == ICON_SELECTED) {
       ImageDimension = BOOT_SELECTOR_BACKGROUND_DIMENSION;
-    } else if (Index == ICON_SELECTED) {
+    } else if (Index == ICON_SELECTOR) {
       ImageDimension = BOOT_SELECTOR_BUTTON_DIMENSION;
     } else {
       ImageDimension = BOOT_ENTRY_ICON_DIMENSION;
@@ -313,22 +356,15 @@ InternalContextConstruct (
       Context->Scale,
       ImageDimension,
       ImageDimension,
-      Index < ICON_NUM_SYS,
+      Index >= ICON_NUM_SYS,
       Old
       );
 
     if (!EFI_ERROR (Status) && Index == ICON_SELECTOR) {
-      //
-      // FIXME: Should this really be hardcoded?
-      // Maybe move at least somewhere.
-      //
-      STATIC CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL HighlightPixel = {
-        0xAF, 0xAF, 0xAF, 0x32
-      };
       Status = GuiCreateHighlightedImage (
-        &Context->Icons[Index][ICON_TYPE_BASE],
         &Context->Icons[Index][ICON_TYPE_HELD],
-        &HighlightPixel
+        &Context->Icons[Index][ICON_TYPE_BASE],
+        &mHighlightPixel
         );
     }
 

@@ -26,6 +26,8 @@ OpenCore Changelog
 - Marked `EnableWriteUnprotector` as deprecated on modern systems
 - Introduced `ProtectMemoryRegions` to fix memory region handling
 - Removed `ProtectCsmRegion` in favour of `ProtectMemoryRegions`
+- Renamed `PickerAttributes` to `ConsoleAttributes`
+- Introduced `PickerAttributes` as a matter of UI configuration
 
 #### v0.5.6
 - Various improvements to builtin text renderer

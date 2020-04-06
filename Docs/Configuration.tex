@@ -2245,6 +2245,9 @@ behaviour that does not go to any other sections
   \item \texttt{0x0004} --- \texttt{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}, provides predefined
     label images for boot entries without custom entries. May give less detail for the actual
     boot entry.
+  \item \texttt{0x0008} --- \texttt{OC\_ATTR\_USE\_ALTERNATE\_ICONS}, changes used icon set to
+    an alternate one if it is supported. For example, this could make a use of old-style icons
+    with a custom background colour.
   \end{itemize}
 
 \item
@@ -4029,7 +4032,53 @@ OpenCanopy requires graphical resources located in \texttt{Resources} directory 
 Sample resources (fonts and images) can be found in
 \href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}.
 
-\emph{Note}: OpenCanopy is currently considered experimental and is not recommended for
+OpenCanopy provides full support for \texttt{PickerAttributes} and offers a configurable
+builtin icon set. The default chosen icon set depends on the \texttt{DefaultBackgroundColor}
+variable value. For Light Gray \texttt{Old} icon set will be used, for other colours ---
+the one without a prefix.
+
+Predefined icons are put to \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Image}
+directory. Full list of supported icons (in \texttt{.icns} format) is provided below. Missing optional
+icons will use the closest available icon. External entries will use \texttt{Ext}-prefixed
+icon if available (e.g. \texttt{OldExtHardDrive.icns}).
+
+\begin{itemize}
+\tightlist
+  \item \texttt{Cursor} --- Mouse cursor (mandatory).
+  \item \texttt{Selected} --- Selected item (mandatory).
+  \item \texttt{Selector} --- Selecting item (mandatory).
+  \item \texttt{HardDrive} --- Generic OS (mandatory).
+  \item \texttt{Apple} --- Apple OS.
+  \item \texttt{AppleRecv} --- Apple Recovery OS.
+  \item \texttt{AppleTM} --- Apple Time Machine.
+  \item \texttt{Windows} --- Windows.
+  \item \texttt{Other} --- Custom entry (see \texttt{Entries}).
+  \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool.
+  \item \texttt{Shell} --- Entry with UEFI Shell name (e.g. \texttt{OpenShell}).
+  \item \texttt{Tool} --- Any other tool.
+\end{itemize}
+
+Predefined labels are put to \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Label}
+directory. Each label has \texttt{.lbl} or \texttt{.l2x} suffix to represent the scaling level.
+Full list of labels is provided below. All labels are mandatory.
+
+\begin{itemize}
+\tightlist
+  \item \texttt{EFIBoot} --- Generic OS.
+  \item \texttt{Apple} --- Apple OS.
+  \item \texttt{AppleRecv} --- Apple Recovery OS.
+  \item \texttt{AppleTM} --- Apple Time Machine.
+  \item \texttt{Windows} --- Windows.
+  \item \texttt{Other} --- Custom entry (see \texttt{Entries}).
+  \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool.
+  \item \texttt{Shell} --- Entry with UEFI Shell name (e.g. \texttt{OpenShell}).
+  \item \texttt{Tool} --- Any other tool.
+\end{itemize}
+
+Label and icon generation can be performed with bundled utilities: \texttt{disklabel} and
+\texttt{icnspack}. Please refer to sample data for the details about the dimensions.
+
+\emph{WARNING}: OpenCanopy is currently considered experimental and is not recommended for
 everyday use. Refer to
 \href{https://github.com/acidanthera/bugtracker/issues/759}{acidanthera/bugtracker\#759}
 for more details regarding the current limitations.

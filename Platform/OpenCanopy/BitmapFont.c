@@ -556,12 +556,33 @@ BmfGetTextInfo (
   return TextInfo;
 }
 
+STATIC
+VOID
+CopyInverted (
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL *Dst,
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL *Src,
+  UINTN                         PixelCount
+  )
+{
+  UINTN  Index;
+
+  for (Index = 0; Index < PixelCount; ++Index) {
+    Dst->Red       = 255 - Src->Red;
+    Dst->Green     = 255 - Src->Green;
+    Dst->Blue      = 255 - Src->Blue;
+    Dst->Reserved  = Src->Reserved;
+    ++Dst;
+    ++Src;
+  }
+}
+
 BOOLEAN
 GuiGetLabel (
   OUT GUI_IMAGE               *LabelImage,
   IN  CONST GUI_FONT_CONTEXT  *Context,
   IN  CONST CHAR16            *String,
-  IN  UINTN                   StringLen
+  IN  UINTN                   StringLen,
+  IN  BOOLEAN                 Inverted
   )
 {
   EFI_GRAPHICS_OUTPUT_BLT_PIXEL *Buffer;
@@ -616,11 +637,20 @@ GuiGetLabel (
         SourceRowOffset += Context->FontImage.Width,
         TargetRowOffset += TextInfo->Width
       ) {
-      CopyMem (
-        &Buffer[TargetRowOffset + TargetCharX + TextInfo->Chars[Index]->xoffset + InitialCharX],
-        &Context->FontImage.Buffer[SourceRowOffset + TextInfo->Chars[Index]->x + InitialCharX],
-        (TextInfo->Chars[Index]->width + InitialWidthOffset) * sizeof (*Buffer)
-        );
+
+      if (Inverted) {
+        CopyInverted (
+          &Buffer[TargetRowOffset + TargetCharX + TextInfo->Chars[Index]->xoffset + InitialCharX],
+          &Context->FontImage.Buffer[SourceRowOffset + TextInfo->Chars[Index]->x + InitialCharX],
+          (TextInfo->Chars[Index]->width + InitialWidthOffset)
+          );
+      } else {
+        CopyMem (
+          &Buffer[TargetRowOffset + TargetCharX + TextInfo->Chars[Index]->xoffset + InitialCharX],
+          &Context->FontImage.Buffer[SourceRowOffset + TextInfo->Chars[Index]->x + InitialCharX],
+          (TextInfo->Chars[Index]->width + InitialWidthOffset) * sizeof (*Buffer)
+          );
+      }
     }
 
     TargetCharX += TextInfo->Chars[Index]->xadvance;

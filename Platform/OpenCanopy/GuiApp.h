@@ -70,15 +70,16 @@ typedef enum {
 } ICON_TYPE;
 
 typedef struct {
-  GUI_IMAGE        Icons[ICON_NUM_TOTAL][ICON_TYPE_COUNT];
-  GUI_IMAGE        Labels[LABEL_NUM_TOTAL];
-  // GUI_IMAGE        Poof[5];
-  GUI_FONT_CONTEXT FontContext;
-  VOID             *BootEntry;
-  BOOLEAN          HideAuxiliary;
-  BOOLEAN          Refresh;
-  BOOLEAN          Light;
-  UINT8            Scale;
+  GUI_IMAGE                            Icons[ICON_NUM_TOTAL][ICON_TYPE_COUNT];
+  GUI_IMAGE                            Labels[LABEL_NUM_TOTAL];
+  // GUI_IMAGE                         Poof[5];
+  GUI_FONT_CONTEXT                     FontContext;
+  VOID                                 *BootEntry;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION  BackgroundColor;
+  BOOLEAN                              HideAuxiliary;
+  BOOLEAN                              Refresh;
+  BOOLEAN                              Light;
+  UINT8                                Scale;
 } BOOT_PICKER_GUI_CONTEXT;
 
 RETURN_STATUS

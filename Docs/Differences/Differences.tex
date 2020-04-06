@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Mar  6 09:43:05 2020
-%DIF ADD ../Configuration.tex        Mon Apr  6 00:16:42 2020
+%DIF ADD ../Configuration.tex        Mon Apr  6 04:46:56 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2364,19 +2364,15 @@ List of colour names}\DIFdelend \DIFaddbegin \DIFadd{BIT16}}\DIFadd{\textasciiti
     }\begin{itemize}
       \tightlist
       \DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x05}\DIFdelend \DIFaddbegin \DIFadd{.disk\_label}\DIFaddend } \DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \DIFadd{(}\DIFaddend \texttt{\DIFdelbegin \DIFdel{EFI}\DIFdelend \DIFaddbegin \DIFadd{.disk}\DIFaddend \_\DIFdelbegin \DIFdel{MAGENTA}\DIFdelend \DIFaddbegin \DIFadd{label\_2x}\DIFaddend }\DIFaddbegin \DIFadd{) file near bootloader for all filesystems.
-      }\DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x06}\DIFdelend \DIFaddbegin \DIFadd{<TOOL\_NAME.lbl}\DIFaddend } \DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \DIFadd{(}\DIFaddend \texttt{\DIFdelbegin \DIFdel{EFI}\DIFdelend \DIFaddbegin \DIFadd{<TOOL}\DIFaddend \_\DIFdelbegin \DIFdel{BROWN}\DIFdelend \DIFaddbegin \DIFadd{NAME.l2x}\DIFaddend }\DIFdelbegin %DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdelend \DIFaddbegin \DIFadd{) file near tool for }\DIFaddend \texttt{\DIFdelbegin \DIFdel{0x07}\DIFdelend \DIFaddbegin \DIFadd{Tools}\DIFaddend }\DIFdelbegin \DIFdel{--- }\texttt{\DIFdel{EFI\_LIGHTGRAY}}
-  %DIFAUXCMD
-\DIFdelend \DIFaddbegin \DIFadd{.
+      }\DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x06}\DIFdelend \DIFaddbegin \DIFadd{<TOOL\_NAME.lbl}\DIFaddend } \DIFdelbegin \DIFdel{--- }\DIFdelend \DIFaddbegin \DIFadd{(}\DIFaddend \texttt{\DIFdelbegin \DIFdel{EFI}\DIFdelend \DIFaddbegin \DIFadd{<TOOL}\DIFaddend \_\DIFdelbegin \DIFdel{BROWN}\DIFdelend \DIFaddbegin \DIFadd{NAME.l2x}\DIFaddend }\DIFaddbegin \DIFadd{) file near tool for }\texttt{\DIFadd{Tools}}\DIFadd{.
     }\end{itemize}
     \DIFadd{Prerendered labels can be generated via }\texttt{\DIFadd{disklabel}} \DIFadd{utility or }\texttt{\DIFadd{bless}} \DIFadd{command.
     When disabled or missing text labels (}\texttt{\DIFadd{.contentDetails}} \DIFadd{or }\texttt{\DIFadd{.disk\_label.contentDetails}}\DIFadd{)
     are to be rendered instead.
-  }\DIFaddend \item \DIFdelbegin \texttt{\DIFdel{0x08}} %DIFAUXCMD
-\DIFdelend \DIFaddbegin \texttt{\DIFadd{0x0004}} \DIFaddend --- \DIFdelbegin \texttt{\DIFdel{EFI\_DARKGRAY}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
+  }\DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x07}\DIFdelend \DIFaddbegin \DIFadd{0x0004}\DIFaddend } --- \texttt{\DIFdelbegin \DIFdel{EFI}\DIFdelend \DIFaddbegin \DIFadd{OC}\DIFaddend \_\DIFdelbegin \DIFdel{LIGHTGRAY}\DIFdelend \DIFaddbegin \DIFadd{ATTR\_USE\_GENERIC\_LABEL\_IMAGE}\DIFaddend }\DIFaddbegin \DIFadd{, provides predefined
+    label images for boot entries without custom entries. May give less detail for the actual
+    boot entry.
+  }\DIFaddend \item \texttt{\DIFdelbegin \DIFdel{0x08}\DIFdelend \DIFaddbegin \DIFadd{0x0008}\DIFaddend } --- \texttt{\DIFdelbegin \DIFdel{EFI}\DIFdelend \DIFaddbegin \DIFadd{OC}\DIFaddend \_\DIFdelbegin \DIFdel{DARKGRAY}\DIFdelend \DIFaddbegin \DIFadd{ATTR\_USE\_ALTERNATE\_ICONS}\DIFaddend }\DIFdelbegin %DIFDELCMD < \item %%%
 \item%DIFAUXCMD
 \texttt{\DIFdel{0x09}} %DIFAUXCMD
 \DIFdel{--- }\texttt{\DIFdel{EFI\_LIGHTBLUE}}
@@ -2451,16 +2447,15 @@ List of colour names}\DIFdelend \DIFaddbegin \DIFadd{BIT16}}\DIFadd{\textasciiti
 \texttt{\DIFdel{0x70}} %DIFAUXCMD
 \DIFdel{--- }\texttt{\DIFdel{EFI\_BACKGROUND\_LIGHTGRAY}}
   %DIFAUXCMD
-\DIFdelend \DIFaddbegin \texttt{\DIFadd{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}}\DIFadd{, provides predefined
-    label images for boot entries without custom entries. May give less detail for the actual
-    boot entry.
+\DIFdelend \DIFaddbegin \DIFadd{, changes used icon set to
+    an alternate one if it is supported. For example, this could make a use of old-style icons
+    with a custom background colour.
   }\DIFaddend \end{itemize}
 
 \DIFdelbegin \emph{\DIFdel{Note}}%DIFAUXCMD
-\DIFdel{: This option may not work well with }%DIFDELCMD < \texttt{%%%
-\DIFdel{System}%DIFDELCMD < \MBLOCKRIGHTBRACE %%%
-\DIFdel{text renderer.
-  Setting a background different from black could help testing proper GOP functioning. }%DIFDELCMD < 
+\DIFdel{: This option may not work well with }\texttt{\DIFdel{System}} %DIFAUXCMD
+\DIFdel{text renderer. Setting a background different from black could help testing proper GOP functioning.
+  }%DIFDELCMD < 
 
 %DIFDELCMD < %%%
 \DIFdelend \item
@@ -4465,7 +4460,57 @@ Sample resources (fonts and images) can be found in
 }\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}\DIFadd{.
 }
 
-\emph{\DIFadd{Note}}\DIFadd{: OpenCanopy is currently considered experimental and is not recommended for
+\DIFadd{OpenCanopy provides full support for }\texttt{\DIFadd{PickerAttributes}} \DIFadd{and offers a configurable
+builtin icon set. The default chosen icon set depends on the }\texttt{\DIFadd{DefaultBackgroundColor}}
+\DIFadd{variable value. For Light Gray }\texttt{\DIFadd{Old}} \DIFadd{icon set will be used, for other colours ---
+the one without a prefix.
+}
+
+\DIFadd{Predefined icons are put to }\texttt{\DIFadd{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Image}}
+\DIFadd{directory. Full list of supported icons (in }\texttt{\DIFadd{.icns}} \DIFadd{format) is provided below. Missing optional
+icons will use the closest available icon. External entries will use }\texttt{\DIFadd{Ext}}\DIFadd{-prefixed
+icon if available (e.g. }\texttt{\DIFadd{OldExtHardDrive.icns}}\DIFadd{).
+}
+
+\begin{itemize}
+\tightlist
+  \DIFaddend \item \DIFaddbegin \texttt{\DIFadd{Cursor}} \DIFadd{--- Mouse cursor (mandatory).
+  }\item \texttt{\DIFadd{Selected}} \DIFadd{--- Selected item (mandatory).
+  }\item \texttt{\DIFadd{Selector}} \DIFadd{--- Selecting item (mandatory).
+  }\item \texttt{\DIFadd{HardDrive}} \DIFadd{--- Generic OS (mandatory).
+  }\item \texttt{\DIFadd{Apple}} \DIFadd{--- Apple OS.
+  }\item \texttt{\DIFadd{AppleRecv}} \DIFadd{--- Apple Recovery OS.
+  }\item \texttt{\DIFadd{AppleTM}} \DIFadd{--- Apple Time Machine.
+  }\item \texttt{\DIFadd{Windows}} \DIFadd{--- Windows.
+  }\item \texttt{\DIFadd{Other}} \DIFadd{--- Custom entry (see }\texttt{\DIFadd{Entries}}\DIFadd{).
+  }\item \texttt{\DIFadd{ResetNVRAM}} \DIFadd{--- Reset NVRAM system action or tool.
+  }\item \texttt{\DIFadd{Shell}} \DIFadd{--- Entry with UEFI Shell name (e.g. }\texttt{\DIFadd{OpenShell}}\DIFadd{).
+  }\item \texttt{\DIFadd{Tool}} \DIFadd{--- Any other tool.
+}\end{itemize}
+
+\DIFadd{Predefined labels are put to }\texttt{\DIFadd{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Label}}
+\DIFadd{directory. Each label has }\texttt{\DIFadd{.lbl}} \DIFadd{or }\texttt{\DIFadd{.l2x}} \DIFadd{suffix to represent the scaling level.
+Full list of labels is provided below. All labels are mandatory.
+}
+
+\begin{itemize}
+\tightlist
+  \item \texttt{\DIFadd{EFIBoot}} \DIFadd{--- Generic OS.
+  }\item \texttt{\DIFadd{Apple}} \DIFadd{--- Apple OS.
+  }\item \texttt{\DIFadd{AppleRecv}} \DIFadd{--- Apple Recovery OS.
+  }\item \texttt{\DIFadd{AppleTM}} \DIFadd{--- Apple Time Machine.
+  }\item \texttt{\DIFadd{Windows}} \DIFadd{--- Windows.
+  }\item \texttt{\DIFadd{Other}} \DIFadd{--- Custom entry (see }\texttt{\DIFadd{Entries}}\DIFadd{).
+  }\item \texttt{\DIFadd{ResetNVRAM}} \DIFadd{--- Reset NVRAM system action or tool.
+  }\item \texttt{\DIFadd{Shell}} \DIFadd{--- Entry with UEFI Shell name (e.g. }\texttt{\DIFadd{OpenShell}}\DIFadd{).
+  }\item \texttt{\DIFadd{Tool}} \DIFadd{--- Any other tool.
+}\end{itemize}
+
+\DIFadd{Label and icon generation can be performed with bundled utilities: }\texttt{\DIFadd{disklabel}} \DIFadd{and
+}\texttt{\DIFadd{icnspack}}\DIFadd{. Please refer to sample data for the details about the dimensions.
+}
+
+\emph{\DIFadd{WARNING}}\DIFadd{: OpenCanopy is currently considered experimental and is not recommended for
 everyday use. Refer to
 }\href{https://github.com/acidanthera/bugtracker/issues/759}{acidanthera/bugtracker\#759}
 \DIFadd{for more details regarding the current limitations.
@@ -4480,7 +4525,7 @@ functioning. Feature highlights:
 }
 
 \begin{itemize}
-  \DIFaddend \item \DIFaddbegin \DIFadd{NVRAM namespaces, allowing to isolate operating systems from accessing select
+  \item \DIFadd{NVRAM namespaces, allowing to isolate operating systems from accessing select
   variables (e.g. }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{or }\texttt{\DIFadd{ProtectSecureBoot}}\DIFadd{).
   }\item \DIFadd{NVRAM proxying, allowing to manipulate multiple variables on variable updates
   (e.g. }\texttt{\DIFadd{RequestBootVarFallback}}\DIFadd{).

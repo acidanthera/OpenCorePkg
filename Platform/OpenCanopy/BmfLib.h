@@ -48,7 +48,8 @@ GuiGetLabel (
   OUT GUI_IMAGE               *LabelImage,
   IN  CONST GUI_FONT_CONTEXT  *Context,
   IN  CONST CHAR16            *String,
-  IN  UINTN                   StringLen
+  IN  UINTN                   StringLen,
+  IN  BOOLEAN                 Inverted
   );
 
 #endif // BMF_LIB_H
