@@ -115,11 +115,12 @@ OcActivateHibernateWake (
 
   DEBUG ((DEBUG_INFO, "OCB: boot-image is %u bytes - %r\n", (UINT32) Size, Status));
 
+  RtcRawVars = (UINT8 *) &RtcVars;
+
   //
   // Work with RTC memory if allowed.
   //
   if (HibernateMask & HIBERNATE_MODE_RTC) {
-    RtcRawVars = (UINT8 *) &RtcVars;
     for (Index = 0; Index < sizeof (AppleRTCHibernateVars); Index++) {
       RtcRawVars[Index] = OcRtcRead (Index + 128);
     }

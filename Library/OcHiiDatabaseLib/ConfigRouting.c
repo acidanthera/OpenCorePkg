@@ -1117,6 +1117,7 @@ MergeDefaultString (
                                      (VOID *) (*AltCfgResp)
                                      );
         if (*AltCfgResp == NULL) {
+          *StringPtrEnd = TempChar;
           FreePool (AltConfigHdr);
           return EFI_OUT_OF_RESOURCES;
         }

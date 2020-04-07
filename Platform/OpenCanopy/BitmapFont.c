@@ -151,7 +151,9 @@ BmfContextInitialize (
 
   INT16                  MinY;
   UINT16                 MaxY;
+  INT32                  Height;
   INT32                  Width;
+  INT32                  Advance;
   CONST BMF_CHAR         *Chars;
   CONST BMF_KERNING_PAIR *Pairs;
 
@@ -314,8 +316,26 @@ BmfContextInitialize (
   MaxY  = 0;
 
   for (Index = 0; Index < Context->NumChars; ++Index) {
-    if ((INT32)Chars[Index].yoffset + (INT32)Chars[Index].height <= 0
-     || Chars[Index].width < 0 || Chars[Index].xadvance < 0) {
+    Result = OcOverflowAddS32 (
+               Chars[Index].yoffset,
+               Chars[Index].height,
+               &Height
+               );
+    Result |= OcOverflowAddS32 (
+               Chars[Index].xoffset,
+               Chars[Index].width,
+               &Width
+               );
+    Result |= OcOverflowAddS32 (
+               Chars[Index].xoffset,
+               Chars[Index].xadvance,
+               &Advance
+               );
+    if (Result
+     || 0 > Height || Height > MAX_UINT16
+     || 0 > Width || Width > MAX_UINT16
+     || 0 > Advance || Advance > MAX_UINT16
+     || Chars[Index].xadvance < 0) {
       DEBUG ((
         DEBUG_WARN,
         "BMF: Char insane\n"
@@ -343,26 +363,8 @@ BmfContextInitialize (
       return FALSE;
     }
 
-    Result = OcOverflowAddS32 (
-               Chars[Index].xoffset,
-               Chars[Index].width,
-               &Width
-               );
-    if (Result || Width < 0) {
-      return FALSE;
-    }
-
-    Result = OcOverflowAddS32 (
-               Chars[Index].xoffset,
-               Chars[Index].xadvance,
-               &Width
-               );
-    if (Result || Width < 0) {
-      return FALSE;
-    }
-
     MinY = MIN (MinY, Chars[Index].yoffset);
-    MaxY = MAX (MaxY, Chars[Index].yoffset + Chars[Index].height);
+    MaxY = MAX (MaxY, (UINT16) Height);
     //
     // This only yields unexpected but not undefined behaviour when not met,
     // hence it is fine verifying it only DEBUG mode.
@@ -380,14 +382,34 @@ BmfContextInitialize (
     DEBUG_CODE_END ();
   }
 
-  Context->Height  = MaxY - MinY;
+  Result = OcOverflowSubS32 (
+             MaxY,
+             MinY,
+             &Height
+             );
+  if (Result
+   || 0 >= Height || Height > MAX_UINT16) {
+     DEBUG ((
+       DEBUG_WARN,
+       "BMF: Insane font Y info %d %d\n",
+       MaxY,
+       MinY
+       ));
+    return FALSE;
+  }
+
+  Context->Height  = (UINT16) Height;
   Context->OffsetY = -MinY;
 
   Pairs = Context->KerningPairs;
   for (Index = 0; Index < Context->NumKerningPairs; ++Index) {
     Char = BmfGetChar (Context, Pairs[Index].first);
     if (Char == NULL) {
-      DEBUG ((DEBUG_WARN, "BMF: Pair char not found\n"));
+      DEBUG ((
+        DEBUG_WARN,
+        "BMF: Pair char %u not found\n",
+        Pairs[Index].first
+        ));
       return FALSE;
     }
 
@@ -396,16 +418,24 @@ BmfContextInitialize (
                Pairs[Index].amount,
                &Width
                );
-    if (Result || Width < 0) {
-      return FALSE;
-    }
-
-    Result = OcOverflowAddS32 (
-               Char->xoffset + Char->xadvance,
-               Pairs[Index].amount,
-               &Width
-               );
-    if (Result || Width < 0) {
+    Result |= OcOverflowAddS32 (
+                Char->xoffset + Char->xadvance,
+                Pairs[Index].amount,
+                &Advance
+                );
+    if (Result
+     || 0 > Width || Width > MAX_UINT16
+     || 0 > Advance || Advance > MAX_UINT16) {
+       DEBUG ((
+         DEBUG_WARN,
+         "BMF: Pair insane\n"
+         " first %u\n"
+         " second %u\n"
+         " amount %d\n",
+         Pairs[Index].first,
+         Pairs[Index].second,
+         Pairs[Index].amount
+         ));
       return FALSE;
     }
     //
@@ -607,7 +637,7 @@ GuiGetLabel (
     return FALSE;
   }
 
-  Buffer = AllocateZeroPool (TextInfo->Width * TextInfo->Height * sizeof (*Buffer));
+  Buffer = AllocateZeroPool ((UINT32) TextInfo->Width * (UINT32) TextInfo->Height * sizeof (*Buffer));
   if (Buffer == NULL) {
     DEBUG ((DEBUG_WARN, "BMF: out of res\n"));
     FreePool (TextInfo);

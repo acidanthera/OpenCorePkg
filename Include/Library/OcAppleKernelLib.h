@@ -209,7 +209,7 @@ typedef struct {
 RETURN_STATUS
 ReadAppleKernel (
   IN     EFI_FILE_PROTOCOL  *File,
-  IN OUT UINT8              **Kernel,
+     OUT UINT8              **Kernel,
      OUT UINT32             *KernelSize,
      OUT UINT32             *AllocatedSize,
   IN     UINT32             ReservedSize

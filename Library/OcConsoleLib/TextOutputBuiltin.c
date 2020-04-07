@@ -207,7 +207,7 @@ RenderChar (
     SetMem32 (DstBuffer, TGT_CHAR_AREA * sizeof (DstBuffer[0]), mBackgroundColor.Raw);
   } else {
 
-    if (Char < ISO_CHAR_MIN || Char > ISO_CHAR_MAX) {
+    if (Char < 0 || Char > ISO_CHAR_MAX) {
       Char = L'_';
     }
 

@@ -103,6 +103,12 @@ OcUnblockUnmountedPartitions (
                         DiskIoInfos[DiskIoInfoIndex].AgentHandle,
                         NULL
                         );
+        DEBUG ((
+          DEBUG_INFO,
+          "OCFSQ: Failed to unblock handle %p - %r\n",
+          Handles[HandleIndex],
+          Status
+          ));
       }
     }
 

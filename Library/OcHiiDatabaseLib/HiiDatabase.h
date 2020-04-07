@@ -50,10 +50,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define PROPORTIONAL_GLYPH                 0x80
 #define NARROW_GLYPH                       0x40
 
-#define BITMAP_LEN_1_BIT(Width, Height)  (((Width) + 7) / 8 * (Height))
-#define BITMAP_LEN_4_BIT(Width, Height)  (((Width) + 1) / 2 * (Height))
-#define BITMAP_LEN_8_BIT(Width, Height)  ((Width) * (Height))
-#define BITMAP_LEN_24_BIT(Width, Height) ((Width) * (Height) * 3)
+#define BITMAP_LEN_1_BIT(Width, Height)  (((UINT32) (Width) + 7) / 8 * (UINT32) (Height))
+#define BITMAP_LEN_4_BIT(Width, Height)  (((UINT32) (Width) + 1) / 2 * (UINT32) (Height))
+#define BITMAP_LEN_8_BIT(Width, Height)  ((UINT32) (Width) * (UINT32) (Height))
+#define BITMAP_LEN_24_BIT(Width, Height) ((UINT32) (Width) * (UINT32) (Height) * 3)
 
 extern EFI_LOCK mHiiDatabaseLock;
 
