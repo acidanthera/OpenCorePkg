@@ -1,6 +1,9 @@
 OpenCore Changelog
 ==================
 
+#### v0.5.8
+- Fixed invalid CPU object reference in SSDT-PLUG
+
 #### v0.5.7
 - Added TimeMachine detection to picker
 - Added early preview version of OpenCanopy
