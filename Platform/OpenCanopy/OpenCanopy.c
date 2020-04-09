@@ -1325,7 +1325,8 @@ GuiIcnsToImageIcon (
           RecordIT32->Data + sizeof (UINT32),
           SwapBytes32 (RecordIT32->Size) - sizeof (APPLE_ICNS_RECORD) - sizeof (UINT32),
           RecordT8MK->Data,
-          SwapBytes32 (RecordT8MK->Size) - sizeof (APPLE_ICNS_RECORD)
+          SwapBytes32 (RecordT8MK->Size) - sizeof (APPLE_ICNS_RECORD),
+          TRUE
           );
 
         if (DecodedBytes != ImageSize) {

@@ -21,7 +21,8 @@ DecompressMaskedRLE24 (
   IN  UINT8   *Src,
   IN  UINT32  SrcLen,
   IN  UINT8   *Mask,
-  IN  UINT32  MaskLen
+  IN  UINT32  MaskLen,
+  IN  BOOLEAN Premultiply
   )
 {
   //
@@ -113,13 +114,26 @@ DecompressMaskedRLE24 (
   }
 
   //
-  // Put mask to the resulting image.
+  // Add mask to the resulting BGRA image.
   //
-  DstCur = Dst + RunIndex;
-  DstEnd = Dst + MaskLen * sizeof (UINT32);
-  while (DstCur < DstEnd) {
-    *DstCur = *Mask++;
-    DstCur += sizeof (UINT32);
+  if (Premultiply) {
+    DstCur = Dst;
+    SrcEnd = Mask + MaskLen;
+    while (Mask < SrcEnd) {
+      DstValue  = *Mask++;
+      DstCur[0] = (UINT8) ((DstCur[0] * DstValue) / 0xFF);
+      DstCur[1] = (UINT8) ((DstCur[1] * DstValue) / 0xFF);
+      DstCur[2] = (UINT8) ((DstCur[2] * DstValue) / 0xFF);
+      DstCur[3] = DstValue;
+      DstCur   += sizeof (UINT32);
+    }
+  } else {
+    DstCur = Dst + 3;
+    SrcEnd = Mask + MaskLen;
+    while (Mask < SrcEnd) {
+      *DstCur = *Mask++;
+      DstCur += sizeof (UINT32);
+    }
   }
 
   return MaskLen * sizeof (UINT32);

@@ -127,6 +127,7 @@ DecompressZLIB (
   @param[in]   SrcLen      Source buffer size.
   @param[in]   Mask        Source buffer.
   @param[in]   MaskLen     Source buffer size.
+  @param[in]   Premultiply Multiply source channels by alpha.
 
   @return  DecompressedLen on success otherwise 0.
 **/
@@ -137,7 +138,8 @@ DecompressMaskedRLE24 (
   IN  UINT8   *Src,
   IN  UINT32  SrcLen,
   IN  UINT8   *Mask,
-  IN  UINT32  MaskLen
+  IN  UINT32  MaskLen,
+  IN  BOOLEAN Premultiply
   );
 
 #endif // OC_COMPRESSION_LIB_H
