@@ -37,12 +37,12 @@ DecompressMaskedRLE24 (
   // suit by calling it RLE24 just as others do.
   //
 
-  UINT8  ControlValue;
-  UINT8  DstValue;
   UINT8  *SrcEnd;
   UINT8  *SrcLast;
   UINT8  *DstCur;
   UINT8  *DstEnd;
+  UINT8  ControlValue;
+  UINT8  DstValue;
   UINT8  RunIndex;
 
   if (SrcLen < 2 || MaskLen != DstLen / sizeof (UINT32)) {
