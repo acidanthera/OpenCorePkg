@@ -594,7 +594,7 @@
 			<key>ConsoleAttributes</key>
 			<integer>0</integer>
 			<key>PickerAttributes</key>
-			<integer>0</integer>
+			<integer>1</integer>
 			<key>PickerAudioAssist</key>
 			<false/>
 			<key>PickerMode</key>
