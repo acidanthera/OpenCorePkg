@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Apr  7 19:32:13 2020
-%DIF ADD ../Configuration.tex        Thu Apr  9 20:48:13 2020
+%DIF ADD ../Configuration.tex        Fri Apr 10 00:05:52 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2291,8 +2291,9 @@ behaviour that does not go to any other sections
       \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
       \item \texttt{<TOOL\_NAME>.icns} file for \texttt{Tools}.
     \end{itemize}
-    Volume icons can be set in Finder.
-  \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
+    Volume icons can be set in Finder. \DIFaddbegin \DIFadd{Note, that enabling this may result in
+    external and internal icons to be indistinguishable.
+  }\DIFaddend \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
     rendered titles for boot entries:
     \begin{itemize}
       \tightlist

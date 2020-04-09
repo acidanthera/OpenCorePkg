@@ -117,4 +117,27 @@ DecompressZLIB (
   IN  UINTN        SrcLen
   );
 
+/**
+  Decompress buffer with RLE24 algorithm and 8-bit alpha.
+  This algorithm is used for encoding IT32/T8MK images in ICNS.
+
+  @param[out]  Dst         Destination buffer.
+  @param[in]   DstLen      Destination buffer size.
+  @param[in]   Src         Source buffer.
+  @param[in]   SrcLen      Source buffer size.
+  @param[in]   Mask        Source buffer.
+  @param[in]   MaskLen     Source buffer size.
+
+  @return  DecompressedLen on success otherwise 0.
+**/
+UINT32
+DecompressMaskedRLE24 (
+  OUT UINT8   *Dst,
+  IN  UINT32  DstLen,
+  IN  UINT8   *Src,
+  IN  UINT32  SrcLen,
+  IN  UINT8   *Mask,
+  IN  UINT32  MaskLen
+  );
+
 #endif // OC_COMPRESSION_LIB_H

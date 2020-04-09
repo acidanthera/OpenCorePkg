@@ -859,6 +859,8 @@ BootPickerEntriesAdd (
       FreePool (IconFileData);
       if (!EFI_ERROR (Status)) {
         VolumeEntry->CustomIcon = TRUE;
+      } else {
+        DEBUG ((DEBUG_INFO, "OCUI: Failed to convert icon - %r\n", Status));
       }
     }
   } else {

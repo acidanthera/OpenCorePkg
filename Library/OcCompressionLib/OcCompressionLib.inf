@@ -29,8 +29,11 @@
 #
 
 [Sources]
+  OcCompressionLib.c
+
   lzss/lzss.c
   lzss/lzss.h
+
   lzvn/lzvn.c
   lzvn/lzvn.h
 

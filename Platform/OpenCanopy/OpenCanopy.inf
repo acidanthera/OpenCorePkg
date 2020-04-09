@@ -68,6 +68,7 @@
   FrameBufferBltLib
   MemoryAllocationLib
   OcBootManagementLib
+  OcCompressionLib
   OcGuardLib
   OcPngLib
   OcStorageLib

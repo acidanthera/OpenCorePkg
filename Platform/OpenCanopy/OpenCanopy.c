@@ -16,6 +16,7 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/MtrrLib.h>
+#include <Library/OcCompressionLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/OcPngLib.h>
@@ -1236,7 +1237,11 @@ GuiIcnsToImageIcon (
   EFI_STATUS         Status;
   UINT32             Offset;
   UINT32             RecordLength;
+  UINT32             ImageSize;
+  UINT32             DecodedBytes;
   APPLE_ICNS_RECORD  *Record;
+  APPLE_ICNS_RECORD  *RecordIT32;
+  APPLE_ICNS_RECORD  *RecordT8MK;
 
   ASSERT (Scale == 1 || Scale == 2);
 
@@ -1255,17 +1260,21 @@ GuiIcnsToImageIcon (
     return EFI_SECURITY_VIOLATION;
   }
 
+  RecordIT32 = NULL;
+  RecordT8MK = NULL;
+
   Offset  = sizeof (APPLE_ICNS_RECORD);
   while (Offset < IcnsImageSize - sizeof (APPLE_ICNS_RECORD)) {
     Record       = (APPLE_ICNS_RECORD *) ((UINT8 *) IcnsImage + Offset);
     RecordLength = SwapBytes32 (Record->Size);
 
     //
-    // 1. Record smaller than its header is invalid.
+    // 1. Record smaller than its header and 1 32-bit word is invalid.
+    //    32-bit is required by some entries like IT32 (see below).
     // 2. Record overflowing UINT32 is invalid.
     // 3. Record larger than file size is invalid.
     //
-    if (RecordLength < sizeof (APPLE_ICNS_RECORD)
+    if (RecordLength < sizeof (APPLE_ICNS_RECORD) + sizeof (UINT32)
       || OcOverflowAddU32 (Offset, RecordLength, &Offset)
       || Offset > IcnsImageSize) {
       return EFI_SECURITY_VIOLATION;
@@ -1288,6 +1297,44 @@ GuiIcnsToImageIcon (
       }
 
       return Status;
+    }
+
+    if (Scale == 1) {
+      if (Record->Type == APPLE_ICNS_IT32) {
+        RecordIT32 = Record;
+      } else if (Record->Type == APPLE_ICNS_T8MK) {
+        RecordT8MK = Record;
+      }
+
+      if (RecordT8MK != NULL && RecordIT32 != NULL) {
+        Image->Width  = MatchWidth;
+        Image->Height = MatchHeight;
+        ImageSize     = (MatchWidth * MatchHeight) * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL);
+        Image->Buffer = AllocateZeroPool (ImageSize);
+
+        if (Image->Buffer == NULL) {
+          return EFI_OUT_OF_RESOURCES;
+        }
+
+        //
+        // We have to add an additional UINT32 for IT32, since it has a reserved field.
+        //
+        DecodedBytes = DecompressMaskedRLE24 (
+          (UINT8 *) Image->Buffer,
+          ImageSize,
+          RecordIT32->Data + sizeof (UINT32),
+          SwapBytes32 (RecordIT32->Size) - sizeof (APPLE_ICNS_RECORD) - sizeof (UINT32),
+          RecordT8MK->Data,
+          SwapBytes32 (RecordT8MK->Size) - sizeof (APPLE_ICNS_RECORD)
+          );
+
+        if (DecodedBytes != ImageSize) {
+          FreePool (Image->Buffer);
+          return EFI_UNSUPPORTED;
+        }
+
+        return EFI_SUCCESS;
+      }
     }
   }
 

@@ -6,6 +6,7 @@ OpenCore Changelog
 - Fixed incorrect utilities and resources packaging
 - Fixed `Custom` `UpdateSMBIOSMode` modifying SMBIOSv3 table
 - Updated docs to cover separating SMBIOS via `UpdateSMBIOSMode`
+- Fixed rendering macOS installer icons in OpenCanopy
 
 #### v0.5.7
 - Added TimeMachine detection to picker
