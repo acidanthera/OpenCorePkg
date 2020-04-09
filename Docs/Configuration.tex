@@ -3312,14 +3312,19 @@ be used. Version with macOS specific enhancements can be downloaded from
     gEfiSmbiosTable3Guid data if it fits new size. Abort with
     unspecified state otherwise.
   \item
-    \texttt{Custom} --- Write first SMBIOS table
-    (\texttt{gEfiSmbiosTableGuid}) to \texttt{gOcCustomSmbiosTableGuid}
+    \texttt{Custom} --- Write SMBIOS tables
+    (\texttt{gEfiSmbios(3)TableGuid}) to \texttt{gOcCustomSmbios(3)TableGuid}
     to workaround firmwares overwriting SMBIOS contents at
     ExitBootServices. Otherwise equivalent to \texttt{Create}. Requires
     patching AppleSmbios.kext and AppleACPIPlatform.kext to read from
     another GUID: \texttt{"EB9D2D31"} - \texttt{"EB9D2D35"} (in ASCII),
     done automatically by \texttt{CustomSMBIOSGuid} quirk.
   \end{itemize}
+
+  \emph{Note}: A side effect of using \texttt{Custom} approach is making
+  SMBIOS updates exclusive to macOS, avoiding a collission with existing
+  Windows activation and custom OEM software but potentially breaking
+  Apple-specific tools.
 \item
   \texttt{Generic}\\
   \textbf{Type}: \texttt{plist\ dictonary}\\
@@ -4904,7 +4909,8 @@ functioning. Feature highlights:
   \item Windows may need to be reactivated. To avoid it consider
   setting SystemUUID to the original firmware UUID. Be warned,
   on old firmwares it may be invalid, i.e. not random. In case you still have issues,
-  consider using HWID or KMS38 license. The nuances of Windows activation are out of the
+  consider using HWID or KMS38 license or making the use \texttt{Custom}
+  \texttt{UpdateSMBIOSMode}. Other nuances of Windows activation are out of the
   scope of this document and can be found online.
   \end{itemize}
 

@@ -44,6 +44,7 @@
   gEfiSmbiosTableGuid
   gEfiSmbios3TableGuid
   gOcCustomSmbiosTableGuid
+  gOcCustomSmbios3TableGuid
   gOcVendorVariableGuid
 
 [Protocols]

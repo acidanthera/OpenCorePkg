@@ -21,19 +21,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Library/OcCpuLib.h>
 #include <IndustryStandard/AppleSmBios.h>
-
-//
-// This GUID is used for storing SMBIOS data when the firmware overwrites SMBIOS data at original
-// GUID at ExitBootServices, like it happens on some Dell computers.
-// Found by David Passmore. Guid matches syscl's implementation in Clover.
-// See: https://sourceforge.net/p/cloverefiboot/tickets/203/#c070
-//
-#define OC_CUSTOM_SMBIOS_TABLE_GUID \
-  { \
-    0xeb9d2d35, 0x2d88, 0x11d3, {0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d } \
-  }
-
-extern EFI_GUID       gOcCustomSmbiosTableGuid;
+#include <Guid/OcSmBios.h>
 
 //
 // We use this vendor name to spoof SMBIOS data on request.

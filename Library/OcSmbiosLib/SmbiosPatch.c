@@ -1538,7 +1538,7 @@ SmbiosTableApply (
   } else {
     if (TableEntryPoint3 != NULL) {
       Status  = gBS->InstallConfigurationTable (
-        &gEfiSmbios3TableGuid,
+        Mode == OcSmbiosUpdateCustom ? &gOcCustomSmbios3TableGuid : &gEfiSmbios3TableGuid,
         TableEntryPoint3
         );
 

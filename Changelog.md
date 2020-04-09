@@ -3,6 +3,9 @@ OpenCore Changelog
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG
+- Fixed incorrect utilities and resources packaging
+- Fixed `Custom` `UpdateSMBIOSMode` modifying SMBIOSv3 table
+- Updated docs to cover separating SMBIOS via `UpdateSMBIOSMode`
 
 #### v0.5.7
 - Added TimeMachine detection to picker

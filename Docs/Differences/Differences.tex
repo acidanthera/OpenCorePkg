@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Apr  6 16:12:47 2020
-%DIF ADD ../Configuration.tex        Mon Apr  6 16:16:32 2020
+%DIF DEL PreviousConfiguration.tex   Tue Apr  7 19:32:13 2020
+%DIF ADD ../Configuration.tex        Thu Apr  9 20:48:13 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3372,15 +3372,22 @@ be used. Version with macOS specific enhancements can be downloaded from
     gEfiSmbiosTable3Guid data if it fits new size. Abort with
     unspecified state otherwise.
   \item
-    \texttt{Custom} --- Write first SMBIOS table
-    (\texttt{gEfiSmbiosTableGuid}) to \texttt{gOcCustomSmbiosTableGuid}
+    \texttt{Custom} --- Write \DIFdelbegin \DIFdel{first SMBIOS table
+    (}\DIFdelend \DIFaddbegin \DIFadd{SMBIOS tables
+    (}\DIFaddend \texttt{\DIFdelbegin \DIFdel{gEfiSmbiosTableGuid}\DIFdelend \DIFaddbegin \DIFadd{gEfiSmbios(3)TableGuid}\DIFaddend }) to \texttt{\DIFdelbegin \DIFdel{gOcCustomSmbiosTableGuid}\DIFdelend \DIFaddbegin \DIFadd{gOcCustomSmbios(3)TableGuid}\DIFaddend }
     to workaround firmwares overwriting SMBIOS contents at
     ExitBootServices. Otherwise equivalent to \texttt{Create}. Requires
     patching AppleSmbios.kext and AppleACPIPlatform.kext to read from
     another GUID: \texttt{"EB9D2D31"} - \texttt{"EB9D2D35"} (in ASCII),
     done automatically by \texttt{CustomSMBIOSGuid} quirk.
   \end{itemize}
-\item
+\DIFaddbegin 
+
+  \emph{\DIFadd{Note}}\DIFadd{: A side effect of using }\texttt{\DIFadd{Custom}} \DIFadd{approach is making
+  SMBIOS updates exclusive to macOS, avoiding a collission with existing
+  Windows activation and custom OEM software but potentially breaking
+  Apple-specific tools.
+}\DIFaddend \item
   \texttt{Generic}\\
   \textbf{Type}: \texttt{plist\ dictonary}\\
   \textbf{Optional}: When \texttt{Automatic} is \texttt{false}\\
@@ -4964,7 +4971,8 @@ functioning. Feature highlights:
   \item Windows may need to be reactivated. To avoid it consider
   setting SystemUUID to the original firmware UUID. Be warned,
   on old firmwares it may be invalid, i.e. not random. In case you still have issues,
-  consider using HWID or KMS38 license. The nuances of Windows activation are out of the
+  consider using HWID or KMS38 license \DIFdelbegin \DIFdel{. The }\DIFdelend \DIFaddbegin \DIFadd{or making the use }\texttt{\DIFadd{Custom}}
+  \texttt{\DIFadd{UpdateSMBIOSMode}}\DIFadd{. Other }\DIFaddend nuances of Windows activation are out of the
   scope of this document and can be found online.
   \end{itemize}
 
