@@ -35,6 +35,7 @@ Kexts
 - [VoodooPS2Controller.kext](https://github.com/acidanthera/VoodooPS2)
 - [VoodooInput.kext](https://github.com/acidanthera/VoodooInput)
 - [VoodooSMBus.kext](https://github.com/leo-labs/VoodooSMBus)
+- [AlpsT4USB.kext](https://github.com/blankmac/AlpsT4USB)
 
 ## Video and audio
 
@@ -70,7 +71,6 @@ Kexts
 - [SASMegaRAID.kext](https://github.com/dukzcry/osx-goodies)
 - [Sinetek-rtsx.kext](https://www.insanelymac.com/forum/topic/321080-sineteks-driver-for-realtek-rtsx-sdhc-card-readers/?do=findComment&comment=2376387)
 - [VoodooSDHC.kext](https://github.com/lvs1974/VoodooSDHCMod)
-- [AlpsT4USB.kext](https://github.com/blankmac/AlpsT4USB)
 
 ## Other kexts
 
