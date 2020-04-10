@@ -337,12 +337,12 @@ GuiPointerConstruct (
   ASSERT (DefaultY < Height);
 
   Status = InternalHandleProtocolFallback (
-             &gST->ConsoleInHandle,
+             gST->ConsoleInHandle,
              &gEfiSimplePointerProtocolGuid,
              (VOID **)&Context.Pointer
              );
   Status2 = InternalHandleProtocolFallback (
-              &gST->ConsoleInHandle,
+              gST->ConsoleInHandle,
               &gEfiAbsolutePointerProtocolGuid,
               (VOID **)&Context.AbsPointer
               );
