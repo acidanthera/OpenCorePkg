@@ -80,7 +80,7 @@ Kexts
 - [Lilu.kext](https://github.com/acidanthera/Lilu)
 - [LiluFriend.kext](https://github.com/PMheart/LiluFriend)
 - [RTCMemoryFixup.kext](https://github.com/lvs1974/RTCMemoryFixup)
-- [NightShiftUnlocker.kext](https://github.com/0xFireWolf/NightShiftUnlocker)
+- [NightShiftEnabler.kext](https://github.com/cdf/NightShiftEnabler)
 - [WebCamera.kext](https://www.applelife.ru/threads/asus-x550vc-i-asus-x550cc.41752/page-130#post-593586)
 - [TOSMotionSensor.kext](https://github.com/jslegendre/TOSMotionSensor)
 
