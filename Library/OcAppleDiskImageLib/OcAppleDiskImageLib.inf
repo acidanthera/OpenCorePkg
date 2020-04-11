@@ -12,38 +12,38 @@
 ##
 
 [Defines]
-    INF_VERSION    = 0x00010005
-    BASE_NAME      = OcAppleDiskImageLib
-    FILE_GUID      = F8E071ED-3EAB-46C6-9C50-B99B6B3915FF
-    MODULE_TYPE    = BASE
-    VERSION_STRING = 1.0
-    LIBRARY_CLASS  = OcAppleDiskImageLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = OcAppleDiskImageLib
+  FILE_GUID      = F8E071ED-3EAB-46C6-9C50-B99B6B3915FF
+  MODULE_TYPE    = BASE
+  VERSION_STRING = 1.0
+  LIBRARY_CLASS  = OcAppleDiskImageLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
 
 [Packages]
-    EfiPkg/EfiPkg.dec
-    MdePkg/MdePkg.dec
-    OpenCorePkg/OpenCorePkg.dec
+  EfiPkg/EfiPkg.dec
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
 
 [LibraryClasses]
-    BaseMemoryLib
-    DebugLib
-    DevicePathLib
-    MemoryAllocationLib
-	OcAppleRamDiskLib
-    OcCompressionLib
-	OcDevicePathLib
-    OcGuardLib
-    OcXmlLib
-    PrintLib
+  BaseMemoryLib
+  DebugLib
+  DevicePathLib
+  MemoryAllocationLib
+  OcAppleRamDiskLib
+  OcCompressionLib
+  OcDevicePathLib
+  OcGuardLib
+  OcXmlLib
+  PrintLib
 
 [Protocols]
-    gEfiDevicePathProtocolGuid  # PRODUCES
-    gEfiBlockIoProtocolGuid     # PRODUCES
-    gAppleRamDiskProtocolGuid   # CONSUMES
-    gAppleDiskImageProtocolGuid # CONSUMES
+  gEfiDevicePathProtocolGuid  # PRODUCES
+  gEfiBlockIoProtocolGuid     # PRODUCES
+  gAppleRamDiskProtocolGuid   # CONSUMES
+  gAppleDiskImageProtocolGuid # CONSUMES
 
 [Sources]
-    OcAppleDiskImageBlockIo.c
-    OcAppleDiskImageLib.c
-    OcAppleDiskImageLibInternal.c
-    OcAppleDiskImageLibInternal.h
+  OcAppleDiskImageBlockIo.c
+  OcAppleDiskImageLib.c
+  OcAppleDiskImageLibInternal.c
+  OcAppleDiskImageLibInternal.h

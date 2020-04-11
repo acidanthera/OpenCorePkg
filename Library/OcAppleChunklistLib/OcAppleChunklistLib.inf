@@ -12,24 +12,24 @@
 ##
 
 [Defines]
-    INF_VERSION    = 0x00010005
-    BASE_NAME      = OcAppleChunklistLib
-    FILE_GUID      = D891DF81-0C83-47FF-ABAD-546050E1A07F
-    MODULE_TYPE    = BASE
-    VERSION_STRING = 1.0
-    LIBRARY_CLASS  = OcAppleChunklistLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = OcAppleChunklistLib
+  FILE_GUID      = D891DF81-0C83-47FF-ABAD-546050E1A07F
+  MODULE_TYPE    = BASE
+  VERSION_STRING = 1.0
+  LIBRARY_CLASS  = OcAppleChunklistLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
 
 [Packages]
-    MdePkg/MdePkg.dec
-    OpenCorePkg/OpenCorePkg.dec
-    EfiPkg/EfiPkg.dec
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+  EfiPkg/EfiPkg.dec
 
 [LibraryClasses]
-    BaseMemoryLib
-    DebugLib
-	OcAppleRamDiskLib
-    OcCryptoLib
-    UefiLib
+  BaseMemoryLib
+  DebugLib
+  OcAppleRamDiskLib
+  OcCryptoLib
+  UefiLib
 
 [Sources]
-    OcAppleChunklistLib.c
+  OcAppleChunklistLib.c

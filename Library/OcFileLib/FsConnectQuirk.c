@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Uefi.h>
 
 #include <Protocol/BlockIo.h>
-#include <Protocol/DiskIo.h>
 #include <Protocol/SimpleFileSystem.h>
 
 #include <Library/DebugLib.h>
@@ -39,17 +38,17 @@ OcUnblockUnmountedPartitions (
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL     *FileSystem;
   EFI_BLOCK_IO_PROTOCOL               *BlockIo;
 
-  UINTN                               NumDiskIoInfo;
-  EFI_OPEN_PROTOCOL_INFORMATION_ENTRY *DiskIoInfos;
-  UINTN                               DiskIoInfoIndex;
+  UINTN                               NumBlockIoInfo;
+  EFI_OPEN_PROTOCOL_INFORMATION_ENTRY *BlockIoInfos;
+  UINTN                               BlockIoInfoIndex;
   //
-  // For all Disk I/O handles, check whether it is a partition. If it is and
+  // For all Block I/O handles, check whether it is a partition. If it is and
   // does not have a File System protocol attached, ensure it does not have a
   // blocking driver attached which prevents the connection of a FS driver.
   //
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
-                  &gEfiDiskIoProtocolGuid,
+                  &gEfiBlockIoProtocolGuid,
                   NULL,
                   &NumHandles,
                   &Handles
@@ -87,20 +86,20 @@ OcUnblockUnmountedPartitions (
     //
     Status = gBS->OpenProtocolInformation (
                     Handles[HandleIndex],
-                    &gEfiDiskIoProtocolGuid,
-                    &DiskIoInfos,
-                    &NumDiskIoInfo
+                    &gEfiBlockIoProtocolGuid,
+                    &BlockIoInfos,
+                    &NumBlockIoInfo
                     );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCFSQ: Attached drivers could not been retrieved\n"));
       continue;
     }
 
-    for (DiskIoInfoIndex = 0; DiskIoInfoIndex < NumDiskIoInfo; ++DiskIoInfoIndex) {
-      if ((DiskIoInfos[DiskIoInfoIndex].Attributes & EFI_OPEN_PROTOCOL_BY_DRIVER) != 0) {
+    for (BlockIoInfoIndex = 0; BlockIoInfoIndex < NumBlockIoInfo; ++BlockIoInfoIndex) {
+      if ((BlockIoInfos[BlockIoInfoIndex].Attributes & EFI_OPEN_PROTOCOL_BY_DRIVER) != 0) {
         Status = gBS->DisconnectController (
                         Handles[HandleIndex],
-                        DiskIoInfos[DiskIoInfoIndex].AgentHandle,
+                        BlockIoInfos[BlockIoInfoIndex].AgentHandle,
                         NULL
                         );
         if (EFI_ERROR (Status)) {
@@ -114,7 +113,7 @@ OcUnblockUnmountedPartitions (
       }
     }
 
-    FreePool (DiskIoInfos);
+    FreePool (BlockIoInfos);
   }
 
   FreePool (Handles);

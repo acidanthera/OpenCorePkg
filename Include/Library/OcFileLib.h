@@ -23,8 +23,6 @@
 #include <Protocol/DevicePath.h>
 #include <Protocol/BlockIo.h>
 #include <Protocol/BlockIo2.h>
-#include <Protocol/DiskIo.h>
-#include <Protocol/DiskIo2.h>
 
 /**
   Maximum safe volume label size.
@@ -301,8 +299,6 @@ OcDiskFindSystemPartitionPath (
 typedef struct {
   EFI_BLOCK_IO_PROTOCOL      *BlockIo;
   EFI_BLOCK_IO2_PROTOCOL     *BlockIo2;
-  EFI_DISK_IO_PROTOCOL       *DiskIo;
-  EFI_DISK_IO2_PROTOCOL      *DiskIo2;
   UINT32                     MediaId;
   UINT32                     BlockSize;
 } OC_DISK_CONTEXT;
@@ -313,7 +309,6 @@ typedef struct {
   @param[out]  Context      Disk I/O context to intialize.
   @param[in]   DiskHandle   Disk handle with protocols.
   @param[in]   UseBlockIo2  Try to use BlockIo2 protocol if available.
-  @param[in]   UseDiskIo2   Try to use DiskIo2 protocol if available.
 
   @retval EFI_SUCCESS on success.
 **/
@@ -321,8 +316,7 @@ EFI_STATUS
 OcDiskInitializeContext (
   OUT OC_DISK_CONTEXT  *Context,
   IN  EFI_HANDLE       DiskHandle,
-  IN  BOOLEAN          UseBlockIo2,
-  IN  BOOLEAN          UseDiskIo2
+  IN  BOOLEAN          UseBlockIo2
   );
 
 /**
@@ -341,6 +335,29 @@ OcDiskRead (
   IN  UINT64           Lba,
   IN  UINTN            BufferSize,
   OUT VOID             *Buffer
+  );
+
+/**
+  OC partition list.
+**/
+typedef struct {
+  UINT32              NumPartitions;
+  UINT32              PartitionEntrySize;
+  EFI_PARTITION_ENTRY FirstEntry[];
+} OC_PARTITION_ENTRIES;
+
+/**
+  Retrieve the disk GPT partitions, if applicable.
+
+  @param[in]  DiskHandle   Disk device handle to retrive partition table from.
+  @param[in]  UseBlockIo2  Use 2nd revision of Block I/O if available.
+
+  @retval partition entry list or NULL.
+**/
+CONST OC_PARTITION_ENTRIES *
+OcGetDiskPartitions (
+  IN EFI_HANDLE  DiskHandle,
+  IN BOOLEAN     UseBlockIo2
   );
 
 /**

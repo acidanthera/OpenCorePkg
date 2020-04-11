@@ -30,12 +30,6 @@
 #include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-typedef struct {
-  UINT32              NumPartitions;
-  UINT32              PartitionEntrySize;
-  EFI_PARTITION_ENTRY FirstEntry[];
-} INTERNAL_PARTITION_ENTRIES;
-
 STATIC EFI_GUID mInternalDiskPartitionEntriesProtocolGuid = {
   0x1A81704, 0x3442, 0x4A7D, { 0x87, 0x40, 0xF4, 0xEC, 0x5B, 0xBE, 0x59, 0x77 }
 };
@@ -48,8 +42,7 @@ EFI_STATUS
 OcDiskInitializeContext (
   OUT OC_DISK_CONTEXT  *Context,
   IN  EFI_HANDLE       DiskHandle,
-  IN  BOOLEAN          UseBlockIo2,
-  IN  BOOLEAN          UseDiskIo2
+  IN  BOOLEAN          UseBlockIo2
   )
 {
   EFI_STATUS  Status;
@@ -107,43 +100,6 @@ OcDiskInitializeContext (
     return EFI_UNSUPPORTED;
   }
 
-  //
-  // Retrieve the Disk I/O protocol.
-  //
-  if (UseDiskIo2) {
-    Status = gBS->HandleProtocol (
-      DiskHandle,
-      &gEfiDiskIo2ProtocolGuid,
-      (VOID **) &Context->DiskIo2
-      );
-  } else {
-    Context->DiskIo2 = NULL;
-    Status = EFI_ABORTED;
-  }
-
-  if (EFI_ERROR (Status)) {
-    Status = gBS->HandleProtocol (
-      DiskHandle,
-      &gEfiDiskIoProtocolGuid,
-      (VOID **) &Context->DiskIo
-      );
-  } else {
-    Context->DiskIo = NULL;
-  }
-
-  if (EFI_ERROR (Status)) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OCPI: Disk I/O (%d/%d) protocols (%d) are not present on %p - %r\n",
-      Context->DiskIo != NULL,
-      Context->DiskIo2 != NULL,
-      UseDiskIo2,
-      DiskHandle,
-      Status
-      ));
-    return Status;
-  }
-
   return EFI_SUCCESS;
 }
 
@@ -156,57 +112,27 @@ OcDiskRead (
   )
 {
   EFI_STATUS  Status;
-  VOID        *NewBuffer;
-  UINTN       NewSize;
-  UINT64      Offset;
 
-  Offset = MultU64x32 (Lba, Context->BlockSize);
+  ASSERT (Context->BlockIo != NULL || Context->BlockIo2 != NULL);
+  ASSERT ((BufferSize & (Context->BlockSize - 1)) == 0);
 
-  ASSERT (Context->DiskIo2 != NULL || Context->DiskIo != NULL);
-
-  if (Context->DiskIo2 != NULL) {
-    Status = Context->DiskIo2->ReadDiskEx (
-      Context->DiskIo2,
+  if (Context->BlockIo2 != NULL) {
+    Status = Context->BlockIo2->ReadBlocksEx (
+      Context->BlockIo2,
       Context->MediaId,
-      Offset,
+      Lba,
       NULL,
       BufferSize,
       Buffer
       );
   } else {
-    Status = Context->DiskIo->ReadDisk (
-      Context->DiskIo,
+    Status = Context->BlockIo->ReadBlocks (
+      Context->BlockIo,
       Context->MediaId,
-      Offset,
+      Lba,
       BufferSize,
       Buffer
       );
-  }
-
-  //
-  // Context block size is checked to be POT during initialization.
-  //
-  if (EFI_ERROR (Status) && !OC_POT_ALIGNED (Context->BlockSize, BufferSize)) {
-    NewSize   = ALIGN_VALUE (BufferSize, Context->BlockSize);
-    NewBuffer = AllocatePool (NewSize);
-
-    if (NewBuffer != NULL) {
-      Status = OcDiskRead (Context, Lba, NewSize, NewBuffer);
-      if (!EFI_ERROR (Status)) {
-        CopyMem (Buffer, NewBuffer, BufferSize);
-      }
-      FreePool (NewBuffer);
-    } else {
-      Status = EFI_OUT_OF_RESOURCES;
-    }
-
-    DEBUG ((
-      DEBUG_INFO,
-      "OCPI: Reading %u through POT %u - %r\n",
-      (UINT32) BufferSize,
-      (UINT32) NewSize,
-      Status
-      ));
   }
 
   return Status;
@@ -456,14 +382,13 @@ OcDiskFindSystemPartitionPath (
   return EspDevicePath;
 }
 
-STATIC
-CONST INTERNAL_PARTITION_ENTRIES *
-InternalGetDiskPartitions (
+CONST OC_PARTITION_ENTRIES *
+OcGetDiskPartitions (
   IN EFI_HANDLE  DiskHandle,
-  IN BOOLEAN     HasBlockIo2
+  IN BOOLEAN     UseBlockIo2
   )
 {
-  INTERNAL_PARTITION_ENTRIES *PartEntries;
+  OC_PARTITION_ENTRIES       *PartEntries;
 
   EFI_STATUS                 Status;
   BOOLEAN                    Result;
@@ -475,6 +400,7 @@ InternalGetDiskPartitions (
   UINT32                     PartEntrySize;
   UINTN                      PartEntriesSize;
   UINTN                      PartEntriesStructSize;
+  UINTN                      BufferSize;
   EFI_PARTITION_TABLE_HEADER *GptHeader;
 
   ASSERT (DiskHandle != NULL);
@@ -489,7 +415,7 @@ InternalGetDiskPartitions (
     return PartEntries;
   }
 
-  Status = OcDiskInitializeContext (&DiskContext, DiskHandle, HasBlockIo2, TRUE);
+  Status = OcDiskInitializeContext (&DiskContext, DiskHandle, UseBlockIo2);
   if (EFI_ERROR (Status)) {
     return NULL;
   }
@@ -497,7 +423,8 @@ InternalGetDiskPartitions (
   //
   // Retrieve the GPT header.
   //
-  GptHeader = AllocatePool (sizeof (*GptHeader));
+  BufferSize = ALIGN_VALUE (sizeof (*GptHeader), DiskContext.BlockSize);
+  GptHeader = AllocatePool (BufferSize);
   if (GptHeader == NULL) {
     DEBUG ((DEBUG_INFO, "OCPI: GPT header allocation error\n"));
     return NULL;
@@ -506,7 +433,7 @@ InternalGetDiskPartitions (
   Status = OcDiskRead (
     &DiskContext,
     PRIMARY_PART_HEADER_LBA,
-    sizeof (*GptHeader),
+    BufferSize,
     GptHeader
     );
   if (EFI_ERROR (Status)) {
@@ -515,9 +442,9 @@ InternalGetDiskPartitions (
       DEBUG_INFO,
       "OCPI: ReadDisk1 (block: %u, io1: %d, io2: %d, size: %u) %r\n",
       DiskContext.BlockSize,
-      DiskContext.DiskIo != NULL,
-      DiskContext.DiskIo2 != NULL,
-      (UINT32) sizeof (*GptHeader),
+      DiskContext.BlockIo != NULL,
+      DiskContext.BlockIo2 != NULL,
+      (UINT32) BufferSize,
       Status
       ));
     return NULL;
@@ -542,10 +469,12 @@ InternalGetDiskPartitions (
   FreePool (GptHeader);
 
   Result = OcOverflowMulUN (NumPartitions, PartEntrySize, &PartEntriesSize);
-  if (Result) {
+  if (Result || MAX_UINTN - DiskContext.BlockSize < PartEntriesSize) {
     DEBUG ((DEBUG_INFO, "OCPI: Partition entries size overflows\n"));
     return NULL;
   }
+
+  PartEntriesSize = ALIGN_VALUE (PartEntriesSize, DiskContext.BlockSize);
 
   Result = OcOverflowAddUN (
     sizeof (PartEntries),
@@ -577,8 +506,8 @@ InternalGetDiskPartitions (
       DEBUG_INFO,
       "OCPI: ReadDisk2 (block: %u, io1: %d, io2: %d, size: %u) %r\n",
       DiskContext.BlockSize,
-      DiskContext.DiskIo != NULL,
-      DiskContext.DiskIo2 != NULL,
+      DiskContext.BlockIo != NULL,
+      DiskContext.BlockIo2 != NULL,
       (UINT32) PartEntriesSize,
       Status
       ));
@@ -617,7 +546,7 @@ OcGetGptPartitionEntry (
   )
 {
   CONST EFI_PARTITION_ENTRY        *PartEntry;
-  CONST INTERNAL_PARTITION_ENTRIES *Partitions;
+  CONST OC_PARTITION_ENTRIES       *Partitions;
 
   EFI_STATUS                       Status;
   EFI_DEVICE_PATH_PROTOCOL         *FsDevicePath;
@@ -674,7 +603,7 @@ OcGetGptPartitionEntry (
   //
   // Get the disk's GPT partition entries.
   //
-  Partitions = InternalGetDiskPartitions (DiskHandle, HasBlockIo2);
+  Partitions = OcGetDiskPartitions (DiskHandle, HasBlockIo2);
   if (Partitions == NULL) {
     DEBUG ((DEBUG_INFO, "OCPI: Failed to retrieve disk info\n"));
     return NULL;
