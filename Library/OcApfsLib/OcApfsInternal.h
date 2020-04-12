@@ -21,6 +21,18 @@
 
 #define APFS_PRIVATE_DATA_SIGNATURE  SIGNATURE_32 ('A', 'F', 'J', 'S')
 
+/**
+  On Intel 64-bit we can use 128-bit multiplication instead of slow division:
+  (x * (UINT128) 0x8000000080000001) >> 31.
+  Let the compiler do it for us.
+**/
+#ifdef MDE_CPU_X64
+  #define APFS_MOD_MAX_UINT32(Value, Result) do { *(Result) = ((Value) % MAX_UINT32); } while (0)
+#else
+  #define APFS_MOD_MAX_UINT32(Value, Result) do { DivU64x32Remainder ((Value), MAX_UINT32, (Result)); } while (0)
+#endif
+
+
 typedef struct APFS_PRIVATE_DATA_ APFS_PRIVATE_DATA;
 
 /**

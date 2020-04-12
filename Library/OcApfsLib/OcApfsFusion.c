@@ -51,7 +51,10 @@ InternalApfsInitFusionData (
   //
   PrivateData->FusionUuid.Data4[7] &= ~BIT0;
 
-  for (Entry = mApfsPrivateDataList.ForwardLink; Entry != &mApfsPrivateDataList; Entry = Entry->ForwardLink) {
+  for (
+    Entry = GetFirstNode (&mApfsPrivateDataList);
+    !IsNull (&mApfsPrivateDataList, Entry);
+    Entry = GetNextNode (&mApfsPrivateDataList, Entry)) {
     Sibling = CR (Entry, APFS_PRIVATE_DATA, Link, APFS_PRIVATE_DATA_SIGNATURE);
 
     //

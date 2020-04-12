@@ -14,10 +14,10 @@
 
 #include "OcApfsInternal.h"
 #include <Library/OcApfsLib.h>
+#include <Library/DebugLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Protocol/BlockIo.h>
 
-STATIC EFI_EVENT mApfsNewPartitionsEvent;
 STATIC VOID *mApfsNewPartitionsEventKey;
 
 STATIC
@@ -56,24 +56,25 @@ ApfsMonitorNewPartitions (
   )
 {
   EFI_STATUS  Status;
+  EFI_EVENT   Event;
 
   Status = gBS->CreateEvent (
     EVT_NOTIFY_SIGNAL,
     TPL_NOTIFY,
     ApfsNewPartitionArrived,
     NULL,
-    &mApfsNewPartitionsEvent
+    &Event
     );
 
   if (!EFI_ERROR (Status)) {
     Status = gBS->RegisterProtocolNotify (
       &gEfiBlockIoProtocolGuid,
-      mApfsNewPartitionsEvent,
+      Event,
       &mApfsNewPartitionsEventKey
       );
 
     if (EFI_ERROR (Status)) {
-      gBS->CloseEvent (mApfsNewPartitionsEvent);
+      gBS->CloseEvent (Event);
     }
   }
 
@@ -90,6 +91,13 @@ OcApfsConnectDevices (
   UINTN       HandleCount;
   EFI_HANDLE  *HandleBuffer;
   UINTN       Index;
+
+  if (Monitor) {
+    Status = ApfsMonitorNewPartitions ();
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCJS: Failed to setup drive monitoring - %r\n", Status));
+    }
+  }
 
   HandleCount = 0;
   Status = gBS->LocateHandleBuffer (
@@ -110,13 +118,6 @@ OcApfsConnectDevices (
       if (!EFI_ERROR (Status2)) {
         Status = Status2;
       }
-    }
-  }
-
-  if (Monitor) {
-    Status2 = ApfsMonitorNewPartitions ();
-    if (!EFI_ERROR (Status2)) {
-      Status = Status2;
     }
   }
 

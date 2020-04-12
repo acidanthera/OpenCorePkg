@@ -22,39 +22,65 @@
 
 STATIC
 UINT64
-ApfsChecksumCalculate (
-  UINT32  *Data,
+ApfsFletcher64 (
+  VOID    *Data,
   UINTN   DataSize
   )
 {
-  //
-  // TODO: This needs to be replaced with an optimised version.
-  //
-
-  UINTN         Index;
+  UINT32        *Walker;
+  UINT32        *WalkerEnd;
   UINT64        Sum1;
-  UINT64        Check1;
   UINT64        Sum2;
-  UINT64        Check2;
-  UINT32        Remainder;
-  CONST UINT32  ModValue = 0xFFFFFFFF;
+  UINT32        Rem;
+
+  //
+  // For APFS we have the following guarantees (checked outside).
+  // - DataSize is always divisible by 4 (UINT32), the only potential exceptions
+  //   are multiples of block sizes of 1 and 2, which we do not support and filter out.
+  // - DataSize is always between 0x1000-8 and 0x10000-8, i.e. within UINT16.
+  //
+  ASSERT (DataSize >= APFS_NX_MINIMUM_BLOCK_SIZE - sizeof (UINT64));
+  ASSERT (DataSize <= APFS_NX_MAXIMUM_BLOCK_SIZE - sizeof (UINT64));
+  ASSERT (DataSize % sizeof (UINT32) == 0);
 
   Sum1 = 0;
   Sum2 = 0;
 
-  for (Index = 0; Index < DataSize / sizeof (UINT32); Index++) {
-    DivU64x32Remainder (Sum1 + Data[Index], ModValue, &Remainder);
-    Sum1 = Remainder;
-    DivU64x32Remainder (Sum2 + Sum1, ModValue, &Remainder);
-    Sum2 = Remainder;
+  Walker     = Data;
+  WalkerEnd  = Walker + DataSize / sizeof (UINT32);
+
+  //
+  // Do usual Fletcher-64 rounds without modulo due to impossible overflow.
+  //
+  while (Walker < WalkerEnd) {
+    //
+    // Sum1 never overflows, because 0xFFFFFFFF * (0x10000-8) < MAX_UINT64.
+    // This is just a normal sum of data values.
+    //
+    Sum1 += *Walker;
+    //
+    // Sum2 never overflows, because 0xFFFFFFFF * (0x4000-1) * 0x1FFF < MAX_UINT64.
+    // This is just a normal arithmetical progression of sums.
+    //
+    Sum2 += Sum1;
+    ++Walker;
   }
 
-  DivU64x32Remainder (Sum1 + Sum2, ModValue, &Remainder);
-  Check1 = ModValue - Remainder;
-  DivU64x32Remainder (Sum1 + Check1, ModValue, &Remainder);
-  Check2 = ModValue - Remainder;
+  //
+  // Split Fletcher-64 halves.
+  // As per Chinese remainder theorem, perform the modulo now.
+  // No overflows also possible as seen from Sum1/Sum2 upper bounds above.
+  //
 
-  return (Check2 << 32U) | Check1;
+  Sum2 += Sum1;
+  APFS_MOD_MAX_UINT32 (Sum2, &Rem);
+  Sum2  = ~Rem;
+
+  Sum1 += Sum2;
+  APFS_MOD_MAX_UINT32 (Sum1, &Rem);
+  Sum1  = ~Rem;
+
+  return (Sum1 << 32U) | Sum2;
 }
 
 STATIC
@@ -68,8 +94,8 @@ ApfsBlockChecksumVerify (
 
   ASSERT (DataSize > sizeof (*Block));
 
-  NewChecksum = ApfsChecksumCalculate (
-    (VOID *) &Block->ObjectOid,
+  NewChecksum = ApfsFletcher64 (
+    &Block->ObjectOid,
     DataSize - sizeof (Block->Checksum)
     );
 
@@ -295,10 +321,14 @@ InternalApfsReadSuperBlock (
     }
 
     //
-    // Ensure APFS block size is a multiple of disk block size.
+    // Ensure APFS block size is:
+    // - A multiple of disk block size.
+    // - Divisible by UINT32 for fletcher checksum to work (e.g. when block size is 1 or 2).
+    // - Within minimum and maximum edges.
     //
     if (SuperBlock->BlockSize < BlockIo->Media->BlockSize
       || (SuperBlock->BlockSize & (BlockIo->Media->BlockSize - 1)) != 0
+      || (SuperBlock->BlockSize & (sizeof (UINT32) - 1)) != 0
       || SuperBlock->BlockSize < APFS_NX_MINIMUM_BLOCK_SIZE
       || SuperBlock->BlockSize > APFS_NX_MAXIMUM_BLOCK_SIZE) {
       break;

@@ -29,7 +29,9 @@
 #include <Protocol/LoadedImage.h>
 #include <Protocol/SimpleFileSystem.h>
 
-LIST_ENTRY               mApfsPrivateDataList;
+LIST_ENTRY               mApfsPrivateDataList = INITIALIZE_LIST_HEAD_VARIABLE (mApfsPrivateDataList);
+STATIC UINT32            mOcScanPolicy;
+STATIC BOOLEAN           mIgnoreVerbose;
 STATIC EFI_SYSTEM_TABLE  *mNullSystemTable;
 
 STATIC
@@ -38,34 +40,14 @@ ApfsCheckOpenCoreScanPolicy (
   IN EFI_HANDLE  Handle
   )
 {
-  EFI_STATUS  Status;
   UINT32      ScanPolicy;
-  UINT32      OcScanPolicy;
-  UINTN       OcScanPolicySize;
-
-  //
-  // If scan policy is missing, just ignore.
-  // FIXME: This should be passed directly.
-  //
-  OcScanPolicy = 0;
-  OcScanPolicySize = sizeof (OcScanPolicy);
-  Status = gRT->GetVariable (
-    OC_SCAN_POLICY_VARIABLE_NAME,
-    &gOcVendorVariableGuid,
-    NULL,
-    &OcScanPolicySize,
-    &OcScanPolicy
-    );
-  if (EFI_ERROR (Status)) {
-    return EFI_SUCCESS;
-  }
 
   //
   // If filesystem limitations are set and APFS is not allowed,
   // report failure.
   //
-  if ((OcScanPolicy & OC_SCAN_FILE_SYSTEM_LOCK) != 0
-    && (OcScanPolicy & OC_SCAN_ALLOW_FS_APFS) == 0) {
+  if ((mOcScanPolicy & OC_SCAN_FILE_SYSTEM_LOCK) != 0
+    && (mOcScanPolicy & OC_SCAN_ALLOW_FS_APFS) == 0) {
     return EFI_UNSUPPORTED;
   }
 
@@ -73,9 +55,9 @@ ApfsCheckOpenCoreScanPolicy (
   // If device type locking is set and this device is not allowed,
   // report failure.
   //
-  if ((OcScanPolicy & OC_SCAN_DEVICE_LOCK) != 0) {
+  if ((mOcScanPolicy & OC_SCAN_DEVICE_LOCK) != 0) {
     ScanPolicy = OcGetDevicePolicyType (Handle, NULL);
-    if ((ScanPolicy & OcScanPolicy) == 0) {
+    if ((ScanPolicy & mOcScanPolicy) == 0) {
       return EFI_UNSUPPORTED;
     }
   }
@@ -98,14 +80,6 @@ ApfsRegisterPartition (
   PrivateData = AllocateZeroPool (sizeof (*PrivateData));
   if (PrivateData == NULL) {
     return EFI_OUT_OF_RESOURCES;
-  }
-
-  //
-  // Lazy-initialise private data list.
-  // Private data list must be valid as we try to register partition.
-  //
-  if (mApfsPrivateDataList.ForwardLink == NULL) {
-    InitializeListHead (&mApfsPrivateDataList);
   }
 
   //
@@ -203,22 +177,22 @@ ApfsStartDriver (
   }
 
   //
-  // Disable verbose mode.
-  // FIXME: This should be configurable.
+  // Disable verbose mode on request.
   // Note, we cannot deallocate null text output table once we allocate it.
   //
-
-  Status = gBS->HandleProtocol (
-    ImageHandle,
-    &gEfiLoadedImageProtocolGuid,
-    (VOID *) &LoadedImage
-    );
-  if (!EFI_ERROR (Status)) {
-    if (mNullSystemTable == NULL) {
-      mNullSystemTable = AllocateNullTextOutSystemTable (gST);
-    }
-    if (mNullSystemTable != NULL) {
-      LoadedImage->SystemTable = mNullSystemTable;
+  if (mIgnoreVerbose) {
+    Status = gBS->HandleProtocol (
+      ImageHandle,
+      &gEfiLoadedImageProtocolGuid,
+      (VOID *) &LoadedImage
+      );
+    if (!EFI_ERROR (Status)) {
+      if (mNullSystemTable == NULL) {
+        mNullSystemTable = AllocateNullTextOutSystemTable (gST);
+      }
+      if (mNullSystemTable != NULL) {
+        LoadedImage->SystemTable = mNullSystemTable;
+      }
     }
   }
 
@@ -295,6 +269,16 @@ ApfsConnectDevice (
   Status = ApfsStartDriver (PrivateData, DriverBuffer, DriverSize);
   FreePool (DriverBuffer);
   return Status;
+}
+
+VOID
+OcApfsConfigure (
+  IN UINT32   ScanPolicy,
+  IN BOOLEAN  IgnoreVerbose
+  )
+{
+  mOcScanPolicy  = ScanPolicy;
+  mIgnoreVerbose = IgnoreVerbose;
 }
 
 EFI_STATUS
