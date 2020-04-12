@@ -84,12 +84,14 @@ OcDiskInitializeContext (
     return Status;
   }
 
-  if (Context->BlockIo2 != NULL) {
+  if (Context->BlockIo2 != NULL && Context->BlockIo2->Media != NULL) {
     Context->BlockSize = Context->BlockIo2->Media->BlockSize;
     Context->MediaId   = Context->BlockIo2->Media->MediaId;
-  } else {
+  } else if (Context->BlockIo != NULL && Context->BlockIo->Media != NULL) {
     Context->BlockSize = Context->BlockIo->Media->BlockSize;
     Context->MediaId   = Context->BlockIo->Media->MediaId;
+  } else {
+    return EFI_UNSUPPORTED;
   }
 
   //
