@@ -1,0 +1,66 @@
+## @file
+#
+#  Component description file for the library producing the Apple Event protocol.
+#
+#  Copyright (C) 2020, vit9696. All rights reserved.<BR>
+#
+# All rights reserved.
+#
+# This program and the accompanying materials
+# are licensed and made available under the terms and conditions of the BSD License
+# which accompanies this distribution.  The full text of the license may be found at
+# http://opensource.org/licenses/bsd-license.php
+#
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OcApfsLib
+  FILE_GUID                      = D7CE048F-C527-45D2-9B77-7E49A50DC434
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = OcApfsLib|DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#
+
+[Sources]
+  OcApfsConnect.c
+  OcApfsFusion.c
+  OcApfsInternal.h
+  OcApfsIo.c
+  OcApfsLib.c
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+  EfiPkg/EfiPkg.dec
+
+[Guids]
+  gAppleApfsPartitionTypeGuid                     ## GUID CONSUMES
+
+[Protocols]
+  gEfiBlockIoProtocolGuid                         ## PROTOCOL CONSUMES
+  gEfiBlockIo2ProtocolGuid                        ## PROTOCOL CONSUMES
+  gApfsEfiBootRecordInfoProtocolGuid              ## PROTOCOL PRODUCES
+  gApfsUnsupportedBdsProtocolGuid                 ## PROTOCOL CONSUMES
+  gEfiLoadedImageProtocolGuid                     ## PROTOCOL CONSUMES
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  OcAppleImageVerificationLib
+  OcConsoleLib
+  OcGuardLib
+  OcMiscLib
+  MemoryAllocationLib
+  UefiBootServicesTableLib
+  UefiLib
+  UefiRuntimeServicesTableLib

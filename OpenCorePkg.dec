@@ -150,6 +150,9 @@
   OcAfterBootCompatLib|Include/Library/OcAfterBootCompatLib.h
 
   ##  @libraryclass
+  OcApfsLib|Include/Library/OcApfsLib.h
+
+  ##  @libraryclass
   OcAppleBootPolicyLib|Include/Library/OcAppleBootPolicyLib.h
 
   ##  @libraryclass
