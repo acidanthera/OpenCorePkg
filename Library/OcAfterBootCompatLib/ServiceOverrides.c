@@ -1054,7 +1054,7 @@ InstallServiceOverrides (
       );
 
     if (EFI_ERROR (Status)) {
-      gBS->CloseEvent (&BootCompat->ServiceState.GetVariableEvent);
+      gBS->CloseEvent (BootCompat->ServiceState.GetVariableEvent);
     }
   }
 }
