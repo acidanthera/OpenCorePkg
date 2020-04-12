@@ -312,8 +312,8 @@ OcApfsConnectDevice (
   // We have nothing to do if the device is already connected.
   //
   Status = gBS->HandleProtocol (
-    &gEfiSimpleFileSystemProtocolGuid,
     Handle,
+    &gEfiSimpleFileSystemProtocolGuid,
     &TempProtocol
     );
   if (!EFI_ERROR (Status)) {
@@ -325,8 +325,8 @@ OcApfsConnectDevice (
   // We do not need to care about 2nd revision, as apfs.efi does not use it.
   //
   Status = gBS->HandleProtocol (
-    &gEfiBlockIoProtocolGuid,
     Handle,
+    &gEfiBlockIoProtocolGuid,
     (VOID **) &BlockIo
     );
   if (EFI_ERROR (Status)) {
@@ -359,8 +359,8 @@ OcApfsConnectDevice (
   // TODO: Install this protocol on failure (not in ApfsJumpStart)?
   //
   Status = gBS->HandleProtocol (
-    &gApfsUnsupportedBdsProtocolGuid,
     Handle,
+    &gApfsUnsupportedBdsProtocolGuid,
     &TempProtocol
     );
   if (!EFI_ERROR (Status)) {
@@ -372,8 +372,8 @@ OcApfsConnectDevice (
   // handled, though potentially not connected.
   //
   Status = gBS->HandleProtocol (
-    &gApfsEfiBootRecordInfoProtocolGuid,
     Handle,
+    &gApfsEfiBootRecordInfoProtocolGuid,
     &TempProtocol
     );
   if (!EFI_ERROR (Status)) {

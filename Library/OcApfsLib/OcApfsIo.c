@@ -73,7 +73,12 @@ ApfsBlockChecksumVerify (
     DataSize - sizeof (Block->Checksum)
     );
 
-  return NewChecksum == Block->Checksum;
+  if (NewChecksum == Block->Checksum) {
+    return TRUE;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCJS: Checksum mismatch for %Lx\n", Block->ObjectOid));
+  return FALSE;
 }
 
 STATIC
@@ -274,6 +279,13 @@ InternalApfsReadSuperBlock (
     if (EFI_ERROR (Status)) {
       break;
     }
+
+    DEBUG ((
+      DEBUG_VERBOSE,
+      "OCJS: Testing disk with %8X magic %u block\n",
+      SuperBlock->Magic,
+      SuperBlock->BlockSize
+      ));
 
     //
     // Super block is expected to have NXSB magic.
