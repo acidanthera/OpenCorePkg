@@ -78,7 +78,7 @@ DecompressMaskedRLE24 (
         //
         // Early exit on not enough bytes to fill.
         //
-        if (DstEnd - DstCur < ControlValue * sizeof (UINT32)) {
+        if ((UINT32) (DstEnd - DstCur) < ControlValue * sizeof (UINT32)) {
           return 0;
         }
 
@@ -93,7 +93,7 @@ DecompressMaskedRLE24 (
         //
         // Early exit on not enough bytes to read or fill.
         //
-        if (SrcEnd - Src < ControlValue || DstEnd - DstCur < ControlValue * sizeof (UINT32)) {
+        if ((UINT32) (SrcEnd - Src) < ControlValue || DstEnd - DstCur < ControlValue * sizeof (UINT32)) {
           return 0;
         }
 
