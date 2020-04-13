@@ -557,7 +557,7 @@ mUefiProtocolsSchema[] = {
 STATIC
 OC_SCHEMA
 mUefiApfsSchema[] = {
-  OC_SCHEMA_BOOLEAN_IN ("EnableJumpStart",      OC_GLOBAL_CONFIG, Uefi.Apfs.EnableJumpStart),
+  OC_SCHEMA_BOOLEAN_IN ("EnableJumpstart",      OC_GLOBAL_CONFIG, Uefi.Apfs.EnableJumpstart),
   OC_SCHEMA_BOOLEAN_IN ("ConnectNewDevices",    OC_GLOBAL_CONFIG, Uefi.Apfs.ConnectNewDevices),
   OC_SCHEMA_BOOLEAN_IN ("HideVerbose",          OC_GLOBAL_CONFIG, Uefi.Apfs.HideVerbose),
   OC_SCHEMA_INTEGER_IN ("MinVersion",           OC_GLOBAL_CONFIG, Uefi.Apfs.MinVersion),

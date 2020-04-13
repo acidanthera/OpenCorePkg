@@ -474,7 +474,7 @@ typedef enum {
 #define OC_UEFI_APFS_FIELDS(_, __) \
   _(UINT64                      , MinVersion         ,     , 0                             , ()) \
   _(UINT32                      , MinDate            ,     , 0                             , ()) \
-  _(BOOLEAN                     , EnableJumpStart    ,     , FALSE                         , ()) \
+  _(BOOLEAN                     , EnableJumpstart    ,     , FALSE                         , ()) \
   _(BOOLEAN                     , ConnectNewDevices  ,     , FALSE                         , ()) \
   _(BOOLEAN                     , HideVerbose        ,     , FALSE                         , ())
   OC_DECLARE (OC_UEFI_APFS)

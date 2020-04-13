@@ -498,7 +498,7 @@ OcLoadUefiSupport (
 
   OcMiscUefiQuirksLoaded (Config);
 
-  if (Config->Uefi.Apfs.EnableJumpStart) {
+  if (Config->Uefi.Apfs.EnableJumpstart) {
     OcApfsConfigure (
       Config->Uefi.Apfs.MinVersion,
       Config->Uefi.Apfs.MinDate,

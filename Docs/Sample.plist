@@ -789,7 +789,7 @@
 	<dict>
 		<key>APFS</key>
 		<dict>
-			<key>EnableJumpStart</key>
+			<key>EnableJumpstart</key>
 			<true/>
 			<key>ConnectNewDevices</key>
 			<false/>
