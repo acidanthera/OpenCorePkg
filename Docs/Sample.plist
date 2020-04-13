@@ -822,7 +822,6 @@
 		<key>Drivers</key>
 		<array>
 			<string>HfsPlus.efi</string>
-			<string>ApfsDriverLoader.efi</string>
 			<string>OpenRuntime.efi</string>
 			<string>#OpenUsbKbDxe.efi</string>
 			<string>#HiiDatabase.efi</string>
