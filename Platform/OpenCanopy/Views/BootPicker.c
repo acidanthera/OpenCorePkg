@@ -48,7 +48,7 @@ extern GUI_OBJ_CLICKABLE mBootPickerSelector;
 extern CONST GUI_IMAGE   mBackgroundImage;
 
 STATIC UINT8 mBootPickerOpacity = 0xFF;
-STATIC UINT8 mBootPickerImageIndex = 0;
+// STATIC UINT8 mBootPickerImageIndex = 0;
 
 BOOLEAN
 GuiClickableIsHit (
@@ -1092,15 +1092,16 @@ InternalBootPickerAnimateImageList (
   IN     UINT64               CurrentTime
   )
 {
+#if 0
   GUI_VOLUME_ENTRY *Entry;
   CONST GUI_IMAGE  *EntryIcon;
 
   Entry       = BASE_CR (&mBootPicker.Hdr.Obj, GUI_VOLUME_ENTRY, Hdr.Obj);
   EntryIcon   = &Entry->EntryIcon;
 
-  //mBootPickerImageIndex++;
+  mBootPickerImageIndex++;
   mBootPickerImageIndex = (UINT8)GuiGetInterpolatedValue (&mBpAnimInfoImageList, CurrentTime);
-  //Entry->EntryIcon = &((GUI_IMAGE*)Context)[mBootPickerImageIndex];
+  Entry->EntryIcon = &((GUI_IMAGE*)Context)[mBootPickerImageIndex];
   GuiRedrawObject (
     &mBootPicker.Hdr.Obj,
     DrawContext,
@@ -1112,7 +1113,7 @@ InternalBootPickerAnimateImageList (
   if (mBootPickerImageIndex == mBpAnimInfoImageList.EndValue) {
     return TRUE;
   }
-
+#endif
   return FALSE;
 }
 
