@@ -2846,9 +2846,10 @@ use.
 
   Created variables get \texttt{EFI\_VARIABLE\_BOOTSERVICE\_ACCESS} and
   \texttt{EFI\_VARIABLE\_RUNTIME\_ACCESS} attributes set.
-  Variables will only be set if not present and not blocked.
-  To overwrite a variable add it to \texttt{Block} section. This approach
-  enables to provide default values till the operating system takes the lead.
+  Variables will only be set if not present or blocked. I.e. to overwrite
+  an existing variable value add the variable name to the \texttt{Block} section.
+  This approach enables to provide default values till the operating system
+  takes the lead.
 
   \emph{Note}: If \texttt{plist\ key} does not conform to GUID format,
   behaviour is undefined.

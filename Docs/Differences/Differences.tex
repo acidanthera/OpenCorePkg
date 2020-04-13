@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Apr  7 19:32:13 2020
-%DIF ADD ../Configuration.tex        Fri Apr 10 00:05:52 2020
+%DIF ADD ../Configuration.tex        Mon Apr 13 05:30:28 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2906,9 +2906,11 @@ use.
 
   Created variables get \texttt{EFI\_VARIABLE\_BOOTSERVICE\_ACCESS} and
   \texttt{EFI\_VARIABLE\_RUNTIME\_ACCESS} attributes set.
-  Variables will only be set if not present and not blocked.
-  To overwrite a variable add it to \texttt{Block} section. This approach
-  enables to provide default values till the operating system takes the lead.
+  Variables will only be set if not present \DIFdelbegin \DIFdel{and not blocked. To overwrite
+  a variable add it to }\DIFdelend \DIFaddbegin \DIFadd{or blocked. I.e. to overwrite
+  an existing variable value add the variable name to the }\DIFaddend \texttt{Block} section.
+  This approach enables to provide default values till the operating system
+  takes the lead.
 
   \emph{Note}: If \texttt{plist\ key} does not conform to GUID format,
   behaviour is undefined.
