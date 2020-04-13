@@ -507,7 +507,7 @@ OcLoadUefiSupport (
       );
 
     OcApfsConnectDevices (
-      Config->Uefi.Apfs.ConnectNewDevices
+      Config->Uefi.Apfs.JumpstartHotPlug
       );
   }
 

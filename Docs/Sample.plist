@@ -791,10 +791,10 @@
 		<dict>
 			<key>EnableJumpstart</key>
 			<true/>
-			<key>ConnectNewDevices</key>
-			<false/>
 			<key>HideVerbose</key>
 			<true/>
+			<key>JumpstartHotPlug</key>
+			<false/>
 			<key>MinVersion</key>
 			<integer>0</integer>
 			<key>MinDate</key>

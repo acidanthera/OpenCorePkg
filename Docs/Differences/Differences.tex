@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Apr  7 19:32:13 2020
-%DIF ADD ../Configuration.tex        Mon Apr 13 05:30:28 2020
+%DIF ADD ../Configuration.tex        Mon Apr 13 06:12:01 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3974,10 +3974,12 @@ Loading an incompatible driver may lead your system to unbootable state or
 even cause permanent firmware damage. Some of the known drivers are listed below:
 
 \begin{tabular}{p{1.3in}p{5.55in}}
-\href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
-& APFS file system bootstrap driver adding the support of embedded APFS drivers
-  in bootable APFS containers in UEFI firmwares \\
-\href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
+\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
+%DIFDELCMD < & %%%
+\DIFdel{APFS file system bootstrap driver adding the support of embedded APFS drivers
+  in bootable APFS containers in UEFI firmwares }%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\DIFdelend \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
 & HDA audio support driver in UEFI firmwares for most Intel and some other analog audio controllers.
   Refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
   for known issues in AudioDxe. \\
@@ -4177,7 +4179,15 @@ functioning. Feature highlights:
 
 \begin{enumerate}
 \item
-  \texttt{Audio}\\
+  \DIFaddbegin \texttt{\DIFadd{APFS}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ dict}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: None}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Provide APFS support as configured in
+  }\hyperref[uefiapfsprops]{APFS Properties} \DIFadd{section below.
+}
+
+\item
+  \DIFaddend \texttt{Audio}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Configure audio backend support described
@@ -4275,8 +4285,99 @@ functioning. Feature highlights:
 
 \end{enumerate}
 
+\DIFaddbegin \subsection{\DIFadd{APFS Properties}}\label{uefiapfsprops}
 
-\subsection{Audio Properties}\label{uefiaudioprops}
+\begin{enumerate}
+
+\item
+  \texttt{\DIFadd{EnableJumpstart}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Load embedded APFS drivers from APFS containers.
+}
+
+  \DIFadd{APFS EFI driver is bundled in all bootable APFS containers. This
+  option performs loading of signed APFS drivers with respect to
+  }\texttt{\DIFadd{ScanPolicy}}\DIFadd{. See more details in ``EFI Jumpstart'' section of
+  }\href{https://developer.apple.com/support/apple-file-system/Apple-File-System-Reference.pdf}{Apple File System Reference}\DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{HideVerbose}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Hide verbose output from APFS driver.
+}
+
+  \DIFadd{APFS verbose output can be useful for debugging.
+}
+
+\item
+  \texttt{\DIFadd{JumpstartHotPlug}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Load APFS drivers for newly connected devices.
+}
+
+  \DIFadd{Performs APFS driver loading not only at OpenCore startup but also
+  during boot picker. This permits APFS USB hot plug. Disable if not
+  required.
+}
+
+\item
+  \texttt{\DIFadd{MinDate}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Minimal allowed APFS driver date.
+}
+
+  \DIFadd{APFS driver date connects APFS driver with the calendar
+  release date. Older versions of APFS drivers may contain unpatched
+  vulnerabilities, which can be used to inflict harm on your computer.
+  This option permits restricting APFS drivers to only recent releases.
+}
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{\DIFadd{0}} \DIFadd{--- require the default supported release date of APFS
+    in OpenCore. The default release date will increase with time and thus
+    this setting is recommended. Currently set to 2020/01/01.
+    }\item \texttt{\DIFadd{-1}} \DIFadd{--- permit any release date to load (strongly discouraged).
+    }\item \DIFadd{Other --- use custom minimal APFS release date, e.g. }\texttt{\DIFadd{20200401}}
+    \DIFadd{for 2020/04/01. APFS release dates can be found in OpenCore boot log
+    and }\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Library/OcApfsLib.h}{\texttt{OcApfsLib}}\DIFadd{.
+  }\end{itemize}
+
+\item
+  \texttt{\DIFadd{MinVersion}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Minimal allowed APFS driver version.
+}
+
+  \DIFadd{APFS driver version connects APFS driver with the macOS
+  release. APFS drivers from older macOS releases will become
+  unsupported and thus may contain unpatched vulnerabilities, which
+  can be used to inflict harm on your computer. This option permits
+  restricting APFS drivers to only modern macOS versions.
+}
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{\DIFadd{0}} \DIFadd{--- require the default supported version of APFS
+    in OpenCore. The default version will increase with time and thus
+    this setting is recommended. Currently set to the latest point release
+    from High Sierra.
+    }\item \texttt{\DIFadd{-1}} \DIFadd{--- permit any version to load (strongly discouraged).
+    }\item \DIFadd{Other --- use custom minimal APFS version, e.g. }\texttt{\DIFadd{1412101001000000}}
+    \DIFadd{from macOS Catalina 10.15.4. APFS versions can be found in OpenCore boot log
+    and }\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Library/OcApfsLib.h}{\texttt{OcApfsLib}}\DIFadd{.
+  }\end{itemize}
+
+\end{enumerate}
+
+
+\DIFaddend \subsection{Audio Properties}\label{uefiaudioprops}
 
 \begin{enumerate}
 
