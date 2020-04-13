@@ -328,7 +328,9 @@ ApfsStartDriver (
   }
 
   //
-  // Connect loaded apfs.efi to controller from which we retrieve it
+  // Recursively connect controller to get apfs.efi loaded.
+  // We cannot use apfs.efi handle as it apparently creates new handles.
+  // This follows ApfsJumpStart driver implementation.
   //
   gBS->ConnectController (PrivateData->LocationInfo.ControllerHandle, NULL, NULL, TRUE);
   return EFI_SUCCESS;
