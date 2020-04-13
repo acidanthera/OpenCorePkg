@@ -72,6 +72,7 @@
   IoLib
   OcAcpiLib
   OcAfterBootCompatLib
+  OcApfsLib
   OcAppleBootPolicyLib
   OcAppleEventLib
   OcAppleImageConversionLib

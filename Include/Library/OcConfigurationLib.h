@@ -469,6 +469,17 @@ typedef enum {
   OC_DECLARE (OC_UEFI_DRIVER_ARRAY)
 
 ///
+/// APFS is a set of options for APFS file system support.
+///
+#define OC_UEFI_APFS_FIELDS(_, __) \
+  _(UINT64                      , MinVersion         ,     , 0                             , ()) \
+  _(UINT32                      , MinDate            ,     , 0                             , ()) \
+  _(BOOLEAN                     , EnableJumpStart    ,     , FALSE                         , ()) \
+  _(BOOLEAN                     , ConnectNewDevices  ,     , FALSE                         , ()) \
+  _(BOOLEAN                     , HideVerbose        ,     , FALSE                         , ())
+  OC_DECLARE (OC_UEFI_APFS)
+
+///
 /// Audio is a set of options for sound configuration.
 ///
 #define OC_UEFI_AUDIO_FIELDS(_, __) \
@@ -550,6 +561,7 @@ typedef enum {
 ///
 #define OC_UEFI_CONFIG_FIELDS(_, __) \
   _(BOOLEAN                     , ConnectDrivers   ,     , FALSE                                    , ()) \
+  _(OC_UEFI_APFS                , Apfs             ,     , OC_CONSTR2 (OC_UEFI_APFS, _, __)         , OC_DESTR (OC_UEFI_APFS)) \
   _(OC_UEFI_AUDIO               , Audio            ,     , OC_CONSTR2 (OC_UEFI_AUDIO, _, __)        , OC_DESTR (OC_UEFI_AUDIO)) \
   _(OC_UEFI_DRIVER_ARRAY        , Drivers          ,     , OC_CONSTR2 (OC_UEFI_DRIVER_ARRAY, _, __) , OC_DESTR (OC_UEFI_DRIVER_ARRAY)) \
   _(OC_UEFI_INPUT               , Input            ,     , OC_CONSTR2 (OC_UEFI_INPUT, _, __)        , OC_DESTR (OC_UEFI_INPUT)) \

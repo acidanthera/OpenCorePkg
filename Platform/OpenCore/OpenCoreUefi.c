@@ -26,6 +26,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcAppleImageConversionLib.h>
 #include <Library/OcAudioLib.h>
 #include <Library/OcInputLib.h>
+#include <Library/OcApfsLib.h>
 #include <Library/OcAppleKeyMapLib.h>
 #include <Library/OcAppleUserInterfaceThemeLib.h>
 #include <Library/OcConsoleLib.h>
@@ -496,6 +497,19 @@ OcLoadUefiSupport (
   }
 
   OcMiscUefiQuirksLoaded (Config);
+
+  if (Config->Uefi.Apfs.EnableJumpStart) {
+    OcApfsConfigure (
+      Config->Uefi.Apfs.MinVersion,
+      Config->Uefi.Apfs.MinDate,
+      Config->Misc.Security.ScanPolicy,
+      Config->Uefi.Apfs.HideVerbose
+      );
+
+    OcApfsConnectDevices (
+      Config->Uefi.Apfs.ConnectNewDevices
+      );
+  }
 
   if (Config->Uefi.ConnectDrivers) {
     OcLoadDrivers (Storage, Config, &DriversToConnect);

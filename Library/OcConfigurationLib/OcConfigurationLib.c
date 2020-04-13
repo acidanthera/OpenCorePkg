@@ -65,6 +65,7 @@ OC_STRUCTORS       (OC_PLATFORM_SMBIOS_CONFIG, ())
 OC_STRUCTORS       (OC_PLATFORM_CONFIG, ())
 
 OC_ARRAY_STRUCTORS (OC_UEFI_DRIVER_ARRAY)
+OC_STRUCTORS       (OC_UEFI_APFS, ())
 OC_STRUCTORS       (OC_UEFI_AUDIO, ())
 OC_STRUCTORS       (OC_UEFI_INPUT, ())
 OC_STRUCTORS       (OC_UEFI_OUTPUT, ())
@@ -555,6 +556,16 @@ mUefiProtocolsSchema[] = {
 
 STATIC
 OC_SCHEMA
+mUefiApfsSchema[] = {
+  OC_SCHEMA_BOOLEAN_IN ("EnableJumpStart",      OC_GLOBAL_CONFIG, Uefi.Apfs.EnableJumpStart),
+  OC_SCHEMA_BOOLEAN_IN ("ConnectNewDevices",    OC_GLOBAL_CONFIG, Uefi.Apfs.ConnectNewDevices),
+  OC_SCHEMA_BOOLEAN_IN ("HideVerbose",          OC_GLOBAL_CONFIG, Uefi.Apfs.HideVerbose),
+  OC_SCHEMA_INTEGER_IN ("MinVersion",           OC_GLOBAL_CONFIG, Uefi.Apfs.MinVersion),
+  OC_SCHEMA_INTEGER_IN ("MinDate",              OC_GLOBAL_CONFIG, Uefi.Apfs.MinDate),
+};
+
+STATIC
+OC_SCHEMA
 mUefiAudioSchema[] = {
   OC_SCHEMA_INTEGER_IN ("AudioCodec",         OC_GLOBAL_CONFIG, Uefi.Audio.AudioCodec),
   OC_SCHEMA_STRING_IN  ("AudioDevice",        OC_GLOBAL_CONFIG, Uefi.Audio.AudioDevice),
@@ -598,6 +609,7 @@ mUefiOutputSchema[] = {
 STATIC
 OC_SCHEMA
 mUefiConfigurationSchema[] = {
+  OC_SCHEMA_DICT       ("APFS",           mUefiApfsSchema),
   OC_SCHEMA_DICT       ("Audio",          mUefiAudioSchema),
   OC_SCHEMA_BOOLEAN_IN ("ConnectDrivers", OC_GLOBAL_CONFIG, Uefi.ConnectDrivers),
   OC_SCHEMA_ARRAY_IN   ("Drivers",        OC_GLOBAL_CONFIG, Uefi.Drivers, &mUefiDriversSchema),

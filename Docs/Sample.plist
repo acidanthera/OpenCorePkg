@@ -787,6 +787,19 @@
 	</dict>
 	<key>UEFI</key>
 	<dict>
+		<key>APFS</key>
+		<dict>
+			<key>EnableJumpStart</key>
+			<true/>
+			<key>ConnectNewDevices</key>
+			<false/>
+			<key>HideVerbose</key>
+			<true/>
+			<key>MinVersion</key>
+			<integer>0</integer>
+			<key>MinDate</key>
+			<integer>0</integer>
+		</dict>
 		<key>Audio</key>
 		<dict>
 			<key>AudioCodec</key>
