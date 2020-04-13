@@ -17,8 +17,10 @@ fi
 
 rm -f *.aux *.log *.out *.pdf *.toc
 
-pdflatex Configuration.tex || \
+pdflatex -draftmode Configuration.tex || \
   abort "Unable to create configuration pdf"
+pdflatex -draftmode Configuration.tex || \
+  abort "Unable to create configuration pdf with TOC"
 pdflatex Configuration.tex || \
   abort "Unable to create configuration pdf with TOC"
 
@@ -30,6 +32,7 @@ latexdiff -s ONLYCHANGEDPAGE PreviousConfiguration.tex ../Configuration.tex \
   > Differences.tex || \
   abort "Unable to differentiate"
 
-pdflatex -interaction=nonstopmode Differences
+pdflatex -draftmode -interaction=nonstopmode Differences
+pdflatex -draftmode -interaction=nonstopmode Differences
 pdflatex -interaction=nonstopmode Differences
 exit 0
