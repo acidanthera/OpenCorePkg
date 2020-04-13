@@ -61,7 +61,7 @@ BuildPeContext (
   // Check context existence
   //
   if (Context == NULL) {
-    DEBUG ((DEBUG_WARN, "No context provided\n"));
+    DEBUG ((DEBUG_WARN, "OCAV: No context provided\n"));
     return EFI_INVALID_PARAMETER;
   }
 
@@ -74,7 +74,7 @@ BuildPeContext (
     MaxHeaderSize = sizeof (EFI_IMAGE_OPTIONAL_HEADER_UNION);
   }
   if (ImageSize < MaxHeaderSize) {
-    DEBUG ((DEBUG_WARN, "Invalid image\n"));
+    DEBUG ((DEBUG_WARN, "OCAV: Invalid image\n"));
     return EFI_INVALID_PARAMETER;
   }
 
@@ -86,7 +86,7 @@ BuildPeContext (
   if (DosHdr->e_magic == EFI_IMAGE_DOS_SIGNATURE) {
     if (DosHdr->e_lfanew > ImageSize
       || DosHdr->e_lfanew < sizeof (EFI_IMAGE_DOS_HEADER)) {
-      DEBUG ((DEBUG_WARN, "Invalid PE offset\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Invalid PE offset\n"));
       return EFI_INVALID_PARAMETER;
     }
 
@@ -94,12 +94,12 @@ BuildPeContext (
                                                  + DosHdr->e_lfanew);
 
     if (OcOverflowSubUN (ImageSize, sizeof (EFI_IMAGE_OPTIONAL_HEADER_UNION), &TempN)) {
-      DEBUG ((DEBUG_WARN, "Underflow detected!\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Underflow detected!\n"));
       return EFI_INVALID_PARAMETER;
     }
 
     if ((UINT8 *) Image + TempN < (UINT8 *) PeHdr) {
-      DEBUG ((DEBUG_WARN, "Invalid PE location\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Invalid PE location\n"));
       return EFI_INVALID_PARAMETER;
     }
   } else {
@@ -121,13 +121,13 @@ BuildPeContext (
     //
     if (EFI_IMAGE_NUMBER_OF_DIRECTORY_ENTRIES <
         PeHdr->Pe32.OptionalHeader.NumberOfRvaAndSizes) {
-      DEBUG ((DEBUG_WARN, "Image header too small\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Image header too small\n"));
       return EFI_INVALID_PARAMETER;
     }
 
     if (EFI_IMAGE_NUMBER_OF_DIRECTORY_ENTRIES >
         PeHdr->Pe32.OptionalHeader.NumberOfRvaAndSizes) {
-      DEBUG ((DEBUG_WARN, "Non-standard entries present\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Non-standard entries present\n"));
       return EFI_INVALID_PARAMETER;
     }
 
@@ -140,49 +140,49 @@ BuildPeContext (
 
     if (OcOverflowSubU32 (PeHdr->Pe32.FileHeader.SizeOfOptionalHeader,
                           HeaderWithoutDataDir, &Temp32)) {
-      DEBUG ((DEBUG_WARN, "Underflow detected!\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Underflow detected!\n"));
       return EFI_INVALID_PARAMETER;
     }
 
     if (PeHdr->Pe32.FileHeader.SizeOfOptionalHeader < HeaderWithoutDataDir
       || Temp32 != PeHdr->Pe32.OptionalHeader.NumberOfRvaAndSizes
                  * sizeof (EFI_IMAGE_DATA_DIRECTORY)) {
-      DEBUG ((DEBUG_WARN, "Image header overflows data directory\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Image header overflows data directory\n"));
       return EFI_INVALID_PARAMETER;
     }
 
     if (OcOverflowTriAddU32 (DosHdr->e_lfanew, sizeof (UINT32),
                              sizeof (EFI_IMAGE_FILE_HEADER), &Temp32)) {
-      DEBUG ((DEBUG_WARN, "Overflow detected!\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Overflow detected!\n"));
       return EFI_INVALID_PARAMETER;
     }
     if (OcOverflowAddU32 (Temp32, PeHdr->Pe32.FileHeader.SizeOfOptionalHeader, &Temp32)) {
-      DEBUG ((DEBUG_WARN, "Overflow detected!\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Overflow detected!\n"));
       return EFI_INVALID_PARAMETER;
     }
 
     SectionHeaderOffset = Temp32;
 
     if (OcOverflowSubU32 (PeHdr->Pe32.OptionalHeader.SizeOfImage, SectionHeaderOffset, &Temp32)) {
-      DEBUG ((DEBUG_WARN, "Underflow detected!\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Underflow detected!\n"));
       return EFI_INVALID_PARAMETER;
     }
 
     if (PeHdr->Pe32.OptionalHeader.SizeOfImage < SectionHeaderOffset ||
       (Temp32 / EFI_IMAGE_SIZEOF_SECTION_HEADER) <= PeHdr->Pe32.FileHeader.NumberOfSections) {
-      DEBUG ((DEBUG_WARN, "Image sections overflow image size\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Image sections overflow image size\n"));
       return EFI_INVALID_PARAMETER;
     }
 
     if (OcOverflowSubU32 (PeHdr->Pe32.OptionalHeader.SizeOfHeaders, SectionHeaderOffset, &Temp32)) {
-      DEBUG ((DEBUG_WARN, "Underflow detected!\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Underflow detected!\n"));
       return EFI_INVALID_PARAMETER;
     }
 
     if (PeHdr->Pe32.OptionalHeader.SizeOfHeaders < SectionHeaderOffset
       || (Temp32 / EFI_IMAGE_SIZEOF_SECTION_HEADER)
       < (UINT32) PeHdr->Pe32.FileHeader.NumberOfSections) {
-        DEBUG ((DEBUG_WARN, "Image sections overflow section headers\n"));
+        DEBUG ((DEBUG_WARN, "OCAV: Image sections overflow section headers\n"));
         return EFI_INVALID_PARAMETER;
     }
 
@@ -196,13 +196,13 @@ BuildPeContext (
     //
     if (EFI_IMAGE_NUMBER_OF_DIRECTORY_ENTRIES <
         PeHdr->Pe32Plus.OptionalHeader.NumberOfRvaAndSizes) {
-      DEBUG ((DEBUG_WARN, "Image header too small\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Image header too small\n"));
       return EFI_INVALID_PARAMETER;
     }
 
     if (EFI_IMAGE_NUMBER_OF_DIRECTORY_ENTRIES >
         PeHdr->Pe32Plus.OptionalHeader.NumberOfRvaAndSizes) {
-      DEBUG ((DEBUG_WARN, "Non-standard entries present\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Non-standard entries present\n"));
       return EFI_INVALID_PARAMETER;
     }
 
@@ -214,14 +214,14 @@ BuildPeContext (
                            EFI_IMAGE_NUMBER_OF_DIRECTORY_ENTRIES;
 
     if (OcOverflowSubU32 (PeHdr->Pe32Plus.FileHeader.SizeOfOptionalHeader, HeaderWithoutDataDir, &Temp32)) {
-      DEBUG ((DEBUG_WARN, "Underflow detected!\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Underflow detected!\n"));
       return EFI_INVALID_PARAMETER;
     }
 
     if (PeHdr->Pe32Plus.FileHeader.SizeOfOptionalHeader < HeaderWithoutDataDir
       || Temp32 != PeHdr->Pe32Plus.OptionalHeader.NumberOfRvaAndSizes
                  * sizeof (EFI_IMAGE_DATA_DIRECTORY)) {
-      DEBUG ((DEBUG_WARN, "Image header overflows data directory\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Image header overflows data directory\n"));
       return EFI_INVALID_PARAMETER;
     }
 
@@ -230,52 +230,52 @@ BuildPeContext (
     //
     if (OcOverflowTriAddU32 (DosHdr->e_lfanew, sizeof (UINT32),
                              sizeof (EFI_IMAGE_FILE_HEADER), &Temp32)) {
-      DEBUG ((DEBUG_WARN, "Overflow detected!\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Overflow detected!\n"));
       return EFI_INVALID_PARAMETER;
     }
 
     if (OcOverflowAddU32 (Temp32, PeHdr->Pe32Plus.FileHeader.SizeOfOptionalHeader, &Temp32)) {
-      DEBUG ((DEBUG_WARN, "Overflow detected!\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Overflow detected!\n"));
       return EFI_INVALID_PARAMETER;
     }
 
     SectionHeaderOffset = Temp32;
 
     if (OcOverflowSubU32 (PeHdr->Pe32Plus.OptionalHeader.SizeOfImage, SectionHeaderOffset, &Temp32)) {
-      DEBUG ((DEBUG_WARN, "Underflow detected!\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Underflow detected!\n"));
       return EFI_INVALID_PARAMETER;
     }
 
     if (PeHdr->Pe32Plus.OptionalHeader.SizeOfImage < SectionHeaderOffset
       || (Temp32 / EFI_IMAGE_SIZEOF_SECTION_HEADER)
       <= PeHdr->Pe32Plus.FileHeader.NumberOfSections) {
-      DEBUG ((DEBUG_WARN, "Image sections overflow image size\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Image sections overflow image size\n"));
       return EFI_INVALID_PARAMETER;
     }
 
     if (OcOverflowSubU32 (PeHdr->Pe32Plus.OptionalHeader.SizeOfHeaders, SectionHeaderOffset, &Temp32)) {
-      DEBUG ((DEBUG_WARN, "Underflow detected!\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Underflow detected!\n"));
       return EFI_INVALID_PARAMETER;
     }
 
     if (PeHdr->Pe32Plus.OptionalHeader.SizeOfHeaders < SectionHeaderOffset
       || (Temp32 / EFI_IMAGE_SIZEOF_SECTION_HEADER)
       < (UINT32) PeHdr->Pe32Plus.FileHeader.NumberOfSections) {
-      DEBUG ((DEBUG_WARN, "Image sections overflow section headers\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Image sections overflow section headers\n"));
       return EFI_INVALID_PARAMETER;
     }
   } else {
-    DEBUG ((DEBUG_WARN, "Unsupported PE header magic\n"));
+    DEBUG ((DEBUG_WARN, "OCAV: Unsupported PE header magic\n"));
     return EFI_INVALID_PARAMETER;
   }
 
   if (PeHdr->Te.Signature != EFI_IMAGE_NT_SIGNATURE) {
-    DEBUG ((DEBUG_WARN, "Unsupported image type\n"));
+    DEBUG ((DEBUG_WARN, "OCAV: Unsupported image type\n"));
     return EFI_INVALID_PARAMETER;
   }
 
   if (PeHdr->Pe32.FileHeader.Characteristics & EFI_IMAGE_FILE_RELOCS_STRIPPED) {
-    DEBUG ((DEBUG_WARN, "Unsupported image - Relocations have been stripped\n"));
+    DEBUG ((DEBUG_WARN, "OCAV: Unsupported image - Relocations have been stripped\n"));
     return EFI_INVALID_PARAMETER;
   }
 
@@ -336,31 +336,31 @@ BuildPeContext (
        Index < Context->NumberOfSections; Index++, SectionCache++) {
     if (Context->SumOfSectionBytes + SectionCache->SizeOfRawData
       < Context->SumOfSectionBytes) {
-      DEBUG ((DEBUG_WARN, "Malformed binary: %x %x\n", (UINT32) Context->SumOfSectionBytes, ImageSize));
+      DEBUG ((DEBUG_WARN, "OCAV: Malformed binary: %x %x\n", (UINT32) Context->SumOfSectionBytes, ImageSize));
       return EFI_INVALID_PARAMETER;
     }
     Context->SumOfSectionBytes += SectionCache->SizeOfRawData;
   }
 
   if (Context->SumOfSectionBytes >= ImageSize) {
-    DEBUG ((DEBUG_WARN, "Malformed binary: %x %x\n", (UINT32) Context->SumOfSectionBytes, ImageSize));
+    DEBUG ((DEBUG_WARN, "OCAV: Malformed binary: %x %x\n", (UINT32) Context->SumOfSectionBytes, ImageSize));
     return EFI_INVALID_PARAMETER;
   }
 
   if (Context->ImageSize < Context->SizeOfHeaders) {
-    DEBUG ((DEBUG_WARN, "Invalid image\n"));
+    DEBUG ((DEBUG_WARN, "OCAV: Invalid image\n"));
     return EFI_INVALID_PARAMETER;
   }
 
   if (Context->SecDir != NULL) {
     if ((UINT32) ((UINT8 *) Context->SecDir - (UINT8 *) Image) >
         (ImageSize - sizeof (EFI_IMAGE_DATA_DIRECTORY))) {
-      DEBUG ((DEBUG_WARN, "Invalid image\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Invalid image\n"));
       return EFI_INVALID_PARAMETER;
     }
 
     if (Context->SecDir->VirtualAddress >= ImageSize) {
-      DEBUG ((DEBUG_WARN, "Malformed security header\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Malformed security header\n"));
       return EFI_INVALID_PARAMETER;
     }
   }
@@ -392,7 +392,7 @@ GetApplePeImageSignature (
     // Apple EFI_IMAGE_DIRECTORY_ENTRY_SECURITY is always 8 bytes.
     //
     if (Context->SecDir->Size != APPLE_SIGNATURE_SECENTRY_SIZE) {
-      DEBUG ((DEBUG_WARN, "Certificate entry size mismatch\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Certificate entry size mismatch\n"));
       return Status;
     }
     //
@@ -405,7 +405,7 @@ GetApplePeImageSignature (
     // Check for overflow
     //
     if (OcOverflowAddU32 (CertInfo->CertOffset, CertInfo->CertSize, &Result)) {
-      DEBUG ((DEBUG_WARN, "CertificateInfo causes overflow\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: CertificateInfo causes overflow\n"));
       return EFI_INVALID_PARAMETER;
     }
 
@@ -413,7 +413,7 @@ GetApplePeImageSignature (
     // Check that Offset+Size in ImageSize range
     //
     if (Result > ImageSize) {
-      DEBUG ((DEBUG_WARN, "CertificateInfo out of bounds\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: CertificateInfo out of bounds\n"));
       return EFI_INVALID_PARAMETER;
     }
 
@@ -427,7 +427,7 @@ GetApplePeImageSignature (
     // Compare size of signature directory with value from PE SecDir header
     //
     if (CertInfo->CertSize != Cert->CertSize) {
-      DEBUG ((DEBUG_WARN, "Certificate size mismatch with CertificateInfo size value\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Certificate size mismatch with CertificateInfo size value\n"));
       return EFI_INVALID_PARAMETER;
     }
 
@@ -435,7 +435,7 @@ GetApplePeImageSignature (
     // Verify certificate type
     //
     if (Cert->CertType != APPLE_EFI_CERTIFICATE_TYPE) {
-      DEBUG ((DEBUG_WARN, "Unknown certificate type\n"));
+      DEBUG ((DEBUG_WARN, "OCAV: Unknown certificate type\n"));
       return EFI_UNSUPPORTED;
     }
 
@@ -475,7 +475,7 @@ GetApplePeImageSignature (
     Status = EFI_SUCCESS;
 
   } else {
-    DEBUG ((DEBUG_WARN, "Certificate entry not exist\n"));
+    DEBUG ((DEBUG_WARN, "OCAV: Certificate entry not exist\n"));
   }
 
   return Status;
@@ -511,14 +511,14 @@ SanitizeApplePeImage (
   //
   // Calculate real image size
   //
-  DEBUG ((DEBUG_INFO, "Real image size: %lu\n", *RealImageSize));
+  DEBUG ((DEBUG_INFO, "OCAV: Real image size: %lu\n", *RealImageSize));
 
   *RealImageSize = Context->SecDir->VirtualAddress
                    + Context->SecDir->Size
                    + sizeof (APPLE_EFI_CERTIFICATE);
 
   if (*RealImageSize < ImageSize) {
-    DEBUG ((DEBUG_WARN, "Droping tail with size: %lu\n", ImageSize - *RealImageSize));
+    DEBUG ((DEBUG_WARN, "OCAV: Droping tail with size: %lu\n", ImageSize - *RealImageSize));
     //
     // Drop tail
     //
@@ -591,14 +591,14 @@ VerifyApplePeImageSignature (
 
   Context = AllocateZeroPool (sizeof (APPLE_PE_COFF_LOADER_IMAGE_CONTEXT));
   if (Context == NULL) {
-    DEBUG ((DEBUG_WARN, "Pe context allocation failure\n"));
+    DEBUG ((DEBUG_WARN, "OCAV: Pe context allocation failure\n"));
     return EFI_OUT_OF_RESOURCES;
   }
   //
   // Build PE context
   //
   if (EFI_ERROR (BuildPeContext (PeImage, *ImageSize, Context))) {
-    DEBUG ((DEBUG_WARN, "Malformed ApplePeImage\n"));
+    DEBUG ((DEBUG_WARN, "OCAV: Malformed ApplePeImage\n"));
     FreePool (Context);
     return EFI_INVALID_PARAMETER;
   }
@@ -613,7 +613,7 @@ VerifyApplePeImageSignature (
   //
   SignatureContext = AllocateZeroPool (sizeof (APPLE_SIGNATURE_CONTEXT));
   if (SignatureContext == NULL) {
-    DEBUG ((DEBUG_WARN, "Signature context allocation failure\n"));
+    DEBUG ((DEBUG_WARN, "OCAV: Signature context allocation failure\n"));
     FreePool (Context);
     return EFI_OUT_OF_RESOURCES;
   }
@@ -622,7 +622,7 @@ VerifyApplePeImageSignature (
   // Extract AppleSignature from PEImage
   //
   if (EFI_ERROR (GetApplePeImageSignature (PeImage, *ImageSize, Context, SignatureContext))) {
-    DEBUG ((DEBUG_WARN, "AppleSignature broken or not present!\n"));
+    DEBUG ((DEBUG_WARN, "OCAV: AppleSignature broken or not present!\n"));
     FreePool (SignatureContext);
     FreePool (Context);
     return EFI_UNSUPPORTED;
@@ -632,7 +632,7 @@ VerifyApplePeImageSignature (
   // Calcucate PeImage hash
   //
   if (EFI_ERROR (GetApplePeImageSha256 (PeImage, Context))) {
-    DEBUG ((DEBUG_WARN, "Couldn't calcuate hash of PeImage\n"));
+    DEBUG ((DEBUG_WARN, "OCAV: Couldn't calcuate hash of PeImage\n"));
     FreePool (SignatureContext);
     FreePool (Context);
     return EFI_INVALID_PARAMETER;
@@ -651,7 +651,7 @@ VerifyApplePeImageSignature (
   }
 
   if (Pk == NULL) {
-    DEBUG ((DEBUG_WARN, "Unknown publickey or malformed certificate\n"));
+    DEBUG ((DEBUG_WARN, "OCAV: Unknown publickey or malformed certificate\n"));
     FreePool (SignatureContext);
     FreePool (Context);
     return EFI_UNSUPPORTED;
@@ -661,7 +661,7 @@ VerifyApplePeImageSignature (
   // Verify signature
   //
   if (RsaVerifySigHashFromKey (Pk, SignatureContext->Signature, sizeof (SignatureContext->Signature), Context->PeImageHash, sizeof (Context->PeImageHash), OcSigHashTypeSha256) == 1 ) {
-    DEBUG ((DEBUG_INFO, "Signature verified!\n"));
+    DEBUG ((DEBUG_INFO, "OCAV: Signature verified!\n"));
     FreePool (SignatureContext);
     FreePool (Context);
     return EFI_SUCCESS;

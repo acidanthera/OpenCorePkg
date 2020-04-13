@@ -32,7 +32,6 @@
   #define APFS_MOD_MAX_UINT32(Value, Result) do { DivU64x32Remainder ((Value), MAX_UINT32, (Result)); } while (0)
 #endif
 
-
 typedef struct APFS_PRIVATE_DATA_ APFS_PRIVATE_DATA;
 
 /**
@@ -105,10 +104,17 @@ InternalApfsReadSuperBlock (
   );
 
 EFI_STATUS
-InternalApfsReadJumpStartDriver (
+InternalApfsReadDriver (
   IN  APFS_PRIVATE_DATA    *PrivateData,
   OUT UINTN                *DriverSize,
   OUT VOID                 **DriverBuffer
+  );
+
+EFI_STATUS
+InternalApfsGetDriverVersion (
+  IN  VOID                 *DriverBuffer,
+  IN  UINTN                DriverSize,
+  OUT APFS_DRIVER_VERSION  **DriverVersionPtr
   );
 
 VOID

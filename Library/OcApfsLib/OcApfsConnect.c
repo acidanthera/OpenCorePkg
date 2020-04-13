@@ -30,9 +30,19 @@
 #include <Protocol/SimpleFileSystem.h>
 
 LIST_ENTRY               mApfsPrivateDataList = INITIALIZE_LIST_HEAD_VARIABLE (mApfsPrivateDataList);
+STATIC UINT64            mApfsMinimalVersion = OC_APFS_VERSION_DEFAULT;
+STATIC UINT32            mApfsMinimalDate    = OC_APFS_DATE_DEFAULT;
 STATIC UINT32            mOcScanPolicy;
 STATIC BOOLEAN           mIgnoreVerbose;
 STATIC EFI_SYSTEM_TABLE  *mNullSystemTable;
+
+//
+// There seems to exist a driver with a very large version, which is treated by
+// apfs kernel extension to have 0 version. Follow suit.
+//
+STATIC UINT64 mApfsBlacklistedVersions[] = {
+  4294966999999999999ULL
+};
 
 STATIC
 EFI_STATUS
@@ -63,6 +73,104 @@ ApfsCheckOpenCoreScanPolicy (
   }
 
   return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+ApfsVerifyDriverVersion (
+  IN APFS_PRIVATE_DATA  *PrivateData,
+  IN VOID               *DriverBuffer,
+  IN UINTN              DriverSize
+  )
+{
+  EFI_STATUS            Status;
+  APFS_DRIVER_VERSION   *DriverVersion;
+  UINT64                RealVersion;
+  UINT32                RealDate;
+  UINTN                 Index;
+  BOOLEAN               HasLegitVersion;
+
+  Status = InternalApfsGetDriverVersion (
+    DriverBuffer,
+    DriverSize,
+    &DriverVersion
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_WARN,
+      "OCJS: No APFS driver version found for %g - %r\n",
+      &PrivateData->LocationInfo.ContainerUuid,
+      Status
+      ));
+
+    RealVersion = 22; ///< From apfs kernel extension.
+    RealDate    = 0;
+  } else {
+    RealVersion = DriverVersion->Version;
+    RealDate    = 0;
+
+    //
+    // Parse YYYY/MM/DD date.
+    //
+    for (Index = 0; Index < 10; ++Index) {
+      if ((Index == 4 || Index == 7)) {
+        if (DriverVersion->Date[Index] != '/') {
+          RealDate = 0;
+          break;
+        }
+        continue;
+      }
+
+      if (DriverVersion->Date[Index] < '0' || DriverVersion->Date[Index] > '9') {
+        RealDate = 0;
+        break;
+      }
+
+      RealDate *= 10;
+      RealDate += DriverVersion->Date[Index] - '0';
+    }
+
+    if (RealDate == 0) {
+      DEBUG ((
+        DEBUG_WARN,
+        "OCJS: APFS driver date is invalid for %g\n",
+        &PrivateData->LocationInfo.ContainerUuid
+        ));
+    }
+  }
+  
+  for (Index = 0; Index < ARRAY_SIZE (mApfsBlacklistedVersions); ++Index) {
+    if (RealVersion == mApfsBlacklistedVersions[Index]) {
+      DEBUG ((
+        DEBUG_WARN,
+        "OCJS: APFS driver version %Lu is blacklisted for %g, treating as 0\n",
+        DriverVersion->Version,
+        &PrivateData->LocationInfo.ContainerUuid
+        ));
+      RealVersion = 0;
+      break;
+    }
+  }
+
+  HasLegitVersion = (mApfsMinimalVersion == 0 || mApfsMinimalVersion <= RealVersion)
+    && (mApfsMinimalDate == 0 || mApfsMinimalDate <= RealDate);
+
+  DEBUG ((
+    HasLegitVersion ? DEBUG_INFO : DEBUG_WARN,
+    "OCJS: APFS driver %Lu/%u found for %g, required >= %Lu/%u, %a\n",
+    RealVersion,
+    RealDate,
+    &PrivateData->LocationInfo.ContainerUuid,
+    mApfsMinimalVersion,
+    mApfsMinimalDate,
+    HasLegitVersion ? "allow" : "prohibited"
+    ));
+
+  if (HasLegitVersion) {
+    return EFI_SUCCESS;
+  }
+
+  return EFI_SECURITY_VIOLATION;
 }
 
 STATIC
@@ -138,15 +246,20 @@ ApfsStartDriver (
     DEBUG ((
       DEBUG_INFO,
       "OCJS: Failed to verify signature %g - %r\n",
-      PrivateData->LocationInfo.ContainerUuid,
+      &PrivateData->LocationInfo.ContainerUuid,
       Status
       ));
     return Status;
   }
 
-  //
-  // TODO: Verify driver timestamp here.
-  //
+  Status = ApfsVerifyDriverVersion (
+    PrivateData,
+    DriverBuffer,
+    DriverSize
+    );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   Status = gBS->HandleProtocol (
     PrivateData->LocationInfo.ControllerHandle,
@@ -170,7 +283,7 @@ ApfsStartDriver (
     DEBUG ((
       DEBUG_INFO,
       "OCJS: Failed to load %g - %r\n",
-      PrivateData->LocationInfo.ContainerUuid,
+      &PrivateData->LocationInfo.ContainerUuid,
       Status
       ));
     return Status;
@@ -206,7 +319,7 @@ ApfsStartDriver (
     DEBUG ((
       DEBUG_INFO,
       "OCJS: Failed to start %g - %r\n",
-      PrivateData->LocationInfo.ContainerUuid,
+      &PrivateData->LocationInfo.ContainerUuid,
       Status
       ));
 
@@ -261,7 +374,7 @@ ApfsConnectDevice (
     return EFI_NOT_READY;
   }
 
-  Status = InternalApfsReadJumpStartDriver (PrivateData, &DriverSize, &DriverBuffer);
+  Status = InternalApfsReadDriver (PrivateData, &DriverSize, &DriverBuffer);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -273,12 +386,33 @@ ApfsConnectDevice (
 
 VOID
 OcApfsConfigure (
+  IN UINT64   MinVersion,
+  IN UINT32   MinDate,
   IN UINT32   ScanPolicy,
   IN BOOLEAN  IgnoreVerbose
   )
 {
-  mOcScanPolicy  = ScanPolicy;
-  mIgnoreVerbose = IgnoreVerbose;
+  //
+  // Translate special values like 0 and -1.
+  //
+  if (MinVersion == OC_APFS_VERSION_ANY) {
+    mApfsMinimalVersion = 0;
+  } else if (MinVersion == OC_APFS_VERSION_AUTO) {
+    mApfsMinimalVersion = OC_APFS_VERSION_DEFAULT;
+  } else {
+    mApfsMinimalVersion = MinVersion;
+  }
+
+  if (MinDate == OC_APFS_DATE_ANY) {
+    mApfsMinimalDate = 0;
+  } else if (MinDate == OC_APFS_DATE_AUTO) {
+    mApfsMinimalDate = OC_APFS_DATE_DEFAULT;
+  } else {
+    mApfsMinimalDate = MinDate;
+  }
+
+  mOcScanPolicy       = ScanPolicy;
+  mIgnoreVerbose      = IgnoreVerbose;
 }
 
 EFI_STATUS
