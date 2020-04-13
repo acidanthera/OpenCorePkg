@@ -32,73 +32,89 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlug", 0x00003000)
     }
 
     If (CondRefOf (\_SB.CPU0)) {
-        Scope (\_SB.CPU0) {
-            Method (_DSM, 4, NotSerialized)  
-            {
-                Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+        If ((ObjectType (\_SB.CPU0) == 0x0C)) {
+            Scope (\_SB.CPU0) {
+                Method (_DSM, 4, NotSerialized)  
+                {
+                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                }
             }
         }
     }
-
+    
     If (CondRefOf (\_PR.CPU0)) {
-        Scope (\_PR.CPU0) {
-            Method (_DSM, 4, NotSerialized)  
-            {
-                Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+        If ((ObjectType (\_PR.CPU0) == 0x0C)) {
+            Scope (\_PR.CPU0) {
+                Method (_DSM, 4, NotSerialized)  
+                {
+                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                }
             }
         }
     }
 
     If (CondRefOf (\_SB.PR00)) {
-        Scope (\_SB.PR00) {
-            Method (_DSM, 4, NotSerialized)  
-            {
-                Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+        If ((ObjectType (\_SB.PR00) == 0x0C)) {
+            Scope (\_SB.PR00) {
+                Method (_DSM, 4, NotSerialized)  
+                {
+                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                }
             }
         }
     }
     
     If (CondRefOf (\_PR.C000)) {
-        Scope (\_PR.C000) {
-            Method (_DSM, 4, NotSerialized)  
-            {
-                Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+        If ((ObjectType (\_PR.C000) == 0x0C)) {
+            Scope (\_PR.C000) {
+                Method (_DSM, 4, NotSerialized)  
+                {
+                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                }
             }
         }
     }
     
-    If (CondRefOf (\_PR.P000)) {
-        Scope (\_PR.P000) {
-            Method (_DSM, 4, NotSerialized)  
-            {
-                Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+   If (CondRefOf (\_PR.P000)) {
+        If ((ObjectType (\_PR.P000) == 0x0C)) {
+            Scope (\_PR.P000) {
+                Method (_DSM, 4, NotSerialized)  
+                {
+                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                }
+            }
+        }
+    }
+    
+   If (CondRefOf (\_PR.PR00)) {
+        If ((ObjectType (\_PR.PR00) == 0x0C)) {
+            Scope (\_PR.PR00) {
+                Method (_DSM, 4, NotSerialized)  
+                {
+                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                }
             }
         }
     }
 
-    If (CondRefOf (\_PR.PR00)) {
-        Scope (\_PR.PR00) {
-            Method (_DSM, 4, NotSerialized)  
-            {
-                Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+   If (CondRefOf (\_SB.SCK0.CP00)) {
+        If ((ObjectType (\_SB.SCK0.CP00) == 0x0C)) {
+            Scope (\_SB.SCK0.CP00) {
+                Method (_DSM, 4, NotSerialized)  
+                {
+                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                }
             }
         }
     }
 
-    If (CondRefOf (\_SB.SCK0.CP00)) {
-        Scope (\_SB.SCK0.CP00) {
-            Method (_DSM, 4, NotSerialized)  
-            {
-                Return (PMPM (Arg0, Arg1, Arg2, Arg3))
-            }
-        }
-    }
-
-    If (CondRefOf (\_SB.SCK0.PR00)) {
-        Scope (\_SB.SCK0.PR00) {
-            Method (_DSM, 4, NotSerialized)  
-            {
-                Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+   If (CondRefOf (\_SB.SCK0.PR00)) {
+        If ((ObjectType (\_SB.SCK0.PR00) == 0x0C)) {
+            Scope (\_SB.SCK0.PR00) {
+                Method (_DSM, 4, NotSerialized)  
+                {
+                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                }
             }
         }
     }
