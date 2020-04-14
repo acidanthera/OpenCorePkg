@@ -1530,16 +1530,37 @@ PlistIntegerValue (
   BOOLEAN   Hex
   )
 {
-  UINT64  Temp;
+  UINT64       Temp;
+  CONST CHAR8  *TempStr;
+  BOOLEAN      Negate;
 
   if (PlistNodeCast (Node, PLIST_NODE_TYPE_INTEGER) == NULL) {
     return FALSE;
   }
 
+  TempStr = XmlNodeContent (Node);
+
+  while (*TempStr == ' ' || *TempStr == '\t') {
+    ++TempStr;
+  }
+
+  Negate = *TempStr == '-';
+
+  if (Negate) {
+    ++TempStr;
+  }
+
   if (Hex) {
-    Temp = AsciiStrHexToUint64 (XmlNodeContent (Node));
+    Temp = AsciiStrHexToUint64 (TempStr);
   } else {
-    Temp = AsciiStrDecimalToUint64 (XmlNodeContent (Node));
+    Temp = AsciiStrDecimalToUint64 (TempStr);
+  }
+
+  //
+  // May produce unexpected results when the value is too large, but just do not care.
+  //
+  if (Negate) {
+    Temp = 0ULL - Temp;
   }
 
   switch (Size) {
