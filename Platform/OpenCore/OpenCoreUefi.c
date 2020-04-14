@@ -498,19 +498,6 @@ OcLoadUefiSupport (
 
   OcMiscUefiQuirksLoaded (Config);
 
-  if (Config->Uefi.Apfs.EnableJumpstart) {
-    OcApfsConfigure (
-      Config->Uefi.Apfs.MinVersion,
-      Config->Uefi.Apfs.MinDate,
-      Config->Misc.Security.ScanPolicy,
-      Config->Uefi.Apfs.HideVerbose
-      );
-
-    OcApfsConnectDevices (
-      Config->Uefi.Apfs.JumpstartHotPlug
-      );
-  }
-
   if (Config->Uefi.ConnectDrivers) {
     OcLoadDrivers (Storage, Config, &DriversToConnect);
     DEBUG ((DEBUG_INFO, "OC: Connecting drivers...\n"));
@@ -524,6 +511,19 @@ OcLoadUefiSupport (
     DEBUG ((DEBUG_INFO, "OC: Connecting drivers done...\n"));
   } else {
     OcLoadDrivers (Storage, Config, NULL);
+  }
+
+  if (Config->Uefi.Apfs.EnableJumpstart) {
+    OcApfsConfigure (
+      Config->Uefi.Apfs.MinVersion,
+      Config->Uefi.Apfs.MinDate,
+      Config->Misc.Security.ScanPolicy,
+      Config->Uefi.Apfs.HideVerbose
+      );
+
+    OcApfsConnectDevices (
+      Config->Uefi.Apfs.JumpstartHotPlug
+      );
   }
 
   OcLoadUefiOutputSupport (Config);
