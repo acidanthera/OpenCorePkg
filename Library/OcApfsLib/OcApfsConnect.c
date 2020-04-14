@@ -156,7 +156,7 @@ ApfsVerifyDriverVersion (
     && (mApfsMinimalDate == 0 || mApfsMinimalDate <= RealDate);
 
   DEBUG ((
-    HasLegitVersion ? DEBUG_INFO : DEBUG_WARN,
+    DEBUG_INFO,
     "OCJS: APFS driver %Lu/%u found for %g, required >= %Lu/%u, %a\n",
     RealVersion,
     RealDate,
