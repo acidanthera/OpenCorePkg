@@ -976,36 +976,6 @@ InternalBootPickerEntryDestruct (
   FreePool (Entry);
 }
 
-VOID
-BootPickerEntriesEmpty (
-  VOID
-  )
-{
-  LIST_ENTRY       *ListEntry;
-  LIST_ENTRY       *NextEntry;
-  GUI_VOLUME_ENTRY *BootEntry;
-
-  ListEntry = mBootPicker.Hdr.Obj.Children.BackLink;
-  ASSERT (ListEntry == &mBootPickerSelector.Hdr.Link);
-
-  //
-  // Last entry is always the selector, which is special and cannot be freed.
-  //
-  ListEntry = ListEntry->BackLink;
-
-  while (!IsNull (&mBootPicker.Hdr.Obj.Children, ListEntry)) {
-    NextEntry = ListEntry->BackLink;
-    RemoveEntryList (ListEntry);
-    mBootPicker.Hdr.Obj.Width   -= BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE;
-    mBootPicker.Hdr.Obj.OffsetX += (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) / 2;
-
-    BootEntry = BASE_CR (ListEntry, GUI_VOLUME_ENTRY, Hdr.Link);
-    InternalBootPickerEntryDestruct (BootEntry);
-
-    ListEntry = NextEntry;
-  }
-}
-
 BOOLEAN
 InternalBootPickerExitLoop (
   IN VOID  *Context
@@ -1202,9 +1172,12 @@ BootPickerViewInitialize (
 
   mBootPickerSelector.ClickImage   = &GuiContext->Icons[ICON_SELECTOR][ICON_TYPE_BASE];
   mBootPickerSelector.CurrentImage = &GuiContext->Icons[ICON_SELECTOR][ICON_TYPE_BASE];
+  mBootPickerSelector.Hdr.Obj.OffsetX = 0;
+  mBootPickerSelector.Hdr.Obj.OffsetY = 0;
 
   mBootPicker.Hdr.Obj.OffsetX = mBootPickerView.Width / 2;
   mBootPicker.Hdr.Obj.OffsetY = (mBootPickerView.Height - mBootPicker.Hdr.Obj.Height) / 2;
+  mBootPicker.Hdr.Obj.Width   = 0;
 
   // TODO: animations should be tied to UI objects, not global
   // Each object has its own list of animations.
@@ -1215,17 +1188,21 @@ BootPickerViewInitialize (
   // Conditions for delta function:
   //
 
-  InitBpAnimSinMov (GuiInterpolTypeSmooth, 0, 25);
-  STATIC GUI_ANIMATION PickerAnim;
-  PickerAnim.Context = NULL;
-  PickerAnim.Animate = InternalBootPickerAnimateSinMov;
-  InsertHeadList (&DrawContext->Animations, &PickerAnim.Link);
+  if (!GuiContext->DoneIntroAnimation) {
+    InitBpAnimSinMov (GuiInterpolTypeSmooth, 0, 25);
+    STATIC GUI_ANIMATION PickerAnim;
+    PickerAnim.Context = NULL;
+    PickerAnim.Animate = InternalBootPickerAnimateSinMov;
+    InsertHeadList (&DrawContext->Animations, &PickerAnim.Link);
 
-  InitBpAnimOpacity (GuiInterpolTypeSmooth, 0, 25);
-  STATIC GUI_ANIMATION PickerAnim2;
-  PickerAnim2.Context = NULL;
-  PickerAnim2.Animate = InternalBootPickerAnimateOpacity;
-  InsertHeadList (&DrawContext->Animations, &PickerAnim2.Link);
+    InitBpAnimOpacity (GuiInterpolTypeSmooth, 0, 25);
+    STATIC GUI_ANIMATION PickerAnim2;
+    PickerAnim2.Context = NULL;
+    PickerAnim2.Animate = InternalBootPickerAnimateOpacity;
+    InsertHeadList (&DrawContext->Animations, &PickerAnim2.Link);
+
+    GuiContext->DoneIntroAnimation = TRUE;
+  }
 
   /*
   InitBpAnimImageList(GuiInterpolTypeLinear, 25, 25);
@@ -1236,4 +1213,40 @@ BootPickerViewInitialize (
   */
 
   return RETURN_SUCCESS;
+}
+
+VOID
+BootPickerViewDeinitialize (
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN OUT BOOT_PICKER_GUI_CONTEXT  *GuiContext
+  )
+{
+  LIST_ENTRY               *ListEntry;
+  LIST_ENTRY               *NextEntry;
+  GUI_VOLUME_ENTRY         *BootEntry;
+  CONST GUI_SCREEN_CURSOR  *ScreenCursor;
+
+  ListEntry = mBootPicker.Hdr.Obj.Children.BackLink;
+  ASSERT (ListEntry == &mBootPickerSelector.Hdr.Link);
+
+  //
+  // Last entry is always the selector, which is special and cannot be freed.
+  //
+  ListEntry = ListEntry->BackLink;
+
+  while (!IsNull (&mBootPicker.Hdr.Obj.Children, ListEntry)) {
+    NextEntry = ListEntry->BackLink;
+    RemoveEntryList (ListEntry);
+
+    BootEntry = BASE_CR (ListEntry, GUI_VOLUME_ENTRY, Hdr.Link);
+    InternalBootPickerEntryDestruct (BootEntry);
+
+    ListEntry = NextEntry;
+  }
+
+  ScreenCursor = GuiViewCurrentCursor (DrawContext);
+  GuiContext->CursorDefaultX = ScreenCursor->X;
+  GuiContext->CursorDefaultY = ScreenCursor->Y;
+
+  GuiViewDeinitialize (DrawContext);
 }

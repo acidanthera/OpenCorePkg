@@ -8,6 +8,7 @@ OpenCore Changelog
 - Updated docs to cover separating SMBIOS via `UpdateSMBIOSMode`
 - Fixed rendering macOS installer icons in OpenCanopy
 - Added APFS support with Fusion Drive and enhanced security
+- Added AppleEvent mouse support in OpenCanopy
 
 #### v0.5.7
 - Added TimeMachine detection to picker

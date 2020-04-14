@@ -434,14 +434,3 @@ InternalGetCursorImage (
   GuiContext = (CONST BOOT_PICKER_GUI_CONTEXT *)Context;
   return &GuiContext->Icons[ICON_CURSOR][ICON_TYPE_BASE];
 }
-
-EFI_STATUS
-EFIAPI
-UefiUnload (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
-  )
-{
-  GuiLibDestruct ();
-  return EFI_SUCCESS;
-}

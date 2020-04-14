@@ -79,7 +79,10 @@ typedef struct {
   BOOLEAN                              HideAuxiliary;
   BOOLEAN                              Refresh;
   BOOLEAN                              Light;
+  BOOLEAN                              DoneIntroAnimation;
   UINT8                                Scale;
+  UINT32                               CursorDefaultX;
+  UINT32                               CursorDefaultY;
 } BOOT_PICKER_GUI_CONTEXT;
 
 RETURN_STATUS
@@ -98,8 +101,9 @@ BootPickerEntriesAdd (
   );
 
 VOID
-BootPickerEntriesEmpty (
-  VOID
+BootPickerViewDeinitialize (
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN OUT BOOT_PICKER_GUI_CONTEXT  *GuiContext
   );
 
 CONST GUI_IMAGE *

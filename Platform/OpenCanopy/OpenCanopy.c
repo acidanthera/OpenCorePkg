@@ -1058,6 +1058,22 @@ GuiViewInitialize (
 }
 
 VOID
+GuiViewDeinitialize (
+  IN OUT    GUI_DRAWING_CONTEXT   *DrawContext
+  )
+{
+  ZeroMem (DrawContext, sizeof (*DrawContext));
+}
+
+CONST GUI_SCREEN_CURSOR *
+GuiViewCurrentCursor (
+  IN OUT GUI_DRAWING_CONTEXT  *DrawContext
+  )
+{
+  return &mScreenViewCursor;
+}
+
+VOID
 GuiGetBaseCoords (
   IN  GUI_OBJ              *This,
   IN  GUI_DRAWING_CONTEXT  *DrawContext,

@@ -51,7 +51,23 @@ OcShowMenuByOc (
   mGuiContext.HideAuxiliary = Context->HideAuxiliary;
   mGuiContext.Refresh = FALSE;
 
-  BootPickerEntriesEmpty ();
+  Status = GuiLibConstruct (
+    mGuiContext.CursorDefaultX,
+    mGuiContext.CursorDefaultY
+    );
+  if (RETURN_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = BootPickerViewInitialize (
+    &mDrawContext,
+    &mGuiContext,
+    InternalGetCursorImage
+    );
+  if (RETURN_ERROR (Status)) {
+    GuiLibDestruct ();
+    return Status;
+  }
 
   for (Index = 0; Index < Count; ++Index) {
     Status = BootPickerEntriesAdd (
@@ -61,12 +77,20 @@ OcShowMenuByOc (
                Index == DefaultEntry
                );
     if (RETURN_ERROR (Status)) {
+      GuiLibDestruct ();
       return Status;
     }
   }
 
   GuiDrawLoop (&mDrawContext);
   ASSERT (mGuiContext.BootEntry != NULL || mGuiContext.Refresh);
+
+  //
+  // Note, it is important to destruct GUI here, as we must ensure
+  // that keyboard/mouse polling does not conflict with FV2 ui.
+  //
+  BootPickerViewDeinitialize (&mDrawContext, &mGuiContext);
+  GuiLibDestruct ();
 
   *ChosenBootEntry = mGuiContext.BootEntry;
   Context->HideAuxiliary = mGuiContext.HideAuxiliary;
@@ -102,21 +126,10 @@ GuiOcInterfaceRun (
 {
   EFI_STATUS Status;
 
-  Status = GuiLibConstruct (0, 0);
-  if (RETURN_ERROR (Status)) {
-    return Status;
-  }
-
   Status = InternalContextConstruct (&mGuiContext, Storage, Context);
   if (RETURN_ERROR (Status)) {
     return Status;
   }
-
-  Status = BootPickerViewInitialize (
-    &mDrawContext,
-    &mGuiContext,
-    InternalGetCursorImage
-    );
 
   Context->ShowMenu = OcShowMenuByOc;
 

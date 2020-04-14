@@ -7,10 +7,12 @@
 
 #include <Uefi.h>
 
+#include <Protocol/AppleEvent.h>
 #include <Protocol/AbsolutePointer.h>
 #include <Protocol/SimplePointer.h>
 
 #include <Library/BaseLib.h>
+#include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -19,8 +21,10 @@
 #include "../GuiIo.h"
 
 struct GUI_POINTER_CONTEXT_ {
+  APPLE_EVENT_PROTOCOL          *AppleEvent;
   EFI_SIMPLE_POINTER_PROTOCOL   *Pointer;
   EFI_ABSOLUTE_POINTER_PROTOCOL *AbsPointer;
+  APPLE_EVENT_HANDLE            AppleEventHandle;
   UINT32                        Width;
   UINT32                        Height;
   UINT32                        MaxX;
@@ -28,6 +32,8 @@ struct GUI_POINTER_CONTEXT_ {
   UINT32                        X;
   UINT32                        Y;
   UINT8                         LockedBy;
+  BOOLEAN                       PrimaryDown;
+  BOOLEAN                       SecondaryDown;
 };
 
 enum {
@@ -35,6 +41,71 @@ enum {
   PointerLockedSimple,
   PointerLockedAbsolute
 };
+
+STATIC
+VOID
+EFIAPI 
+InternalAppleEventNotification (
+  IN APPLE_EVENT_INFORMATION  *Information,
+  IN VOID                     *NotifyContext
+  )
+{
+  APPLE_POINTER_EVENT_TYPE  EventType;
+  GUI_POINTER_CONTEXT       *Context;
+
+  Context = NotifyContext;
+
+  //
+  // Should not happen but just in case.
+  //
+  if ((Information->EventType & APPLE_ALL_MOUSE_EVENTS) == 0) {
+    return;
+  }
+
+  EventType = Information->EventData.PointerEventType;
+
+  if ((EventType & APPLE_EVENT_TYPE_MOUSE_MOVED) != 0) {
+    Context->X = MIN (
+      (UINT32) Information->PointerPosition.Horizontal,
+      Context->MaxX
+      );
+    Context->Y = MIN (
+      (UINT32) Information->PointerPosition.Vertical,
+      Context->MaxY
+      );
+  }
+
+  if ((EventType & APPLE_EVENT_TYPE_MOUSE_DOWN) != 0) {
+    if ((EventType & APPLE_EVENT_TYPE_LEFT_BUTTON) != 0) {
+      Context->PrimaryDown = TRUE;
+    } else if ((Information->EventType & APPLE_EVENT_TYPE_RIGHT_BUTTON) != 0) {
+      Context->SecondaryDown = TRUE;
+    }
+  } else if ((EventType & APPLE_EVENT_TYPE_MOUSE_UP) != 0) {
+    if ((EventType & APPLE_EVENT_TYPE_LEFT_BUTTON) != 0) {
+      Context->PrimaryDown = FALSE;
+    } else if ((EventType & APPLE_EVENT_TYPE_RIGHT_BUTTON) != 0) {
+      Context->SecondaryDown = FALSE;
+    }
+  }
+}
+
+STATIC
+EFI_STATUS
+InternalUpdateStateSimpleAppleEvent (
+  IN OUT GUI_POINTER_CONTEXT  *Context,
+  OUT    GUI_POINTER_STATE    *State
+  )
+{
+  ASSERT (Context->AppleEvent != NULL);
+
+  State->X = Context->X;
+  State->Y = Context->Y;
+  State->PrimaryDown = Context->PrimaryDown;
+  State->SecondaryDown = Context->SecondaryDown;
+
+  return EFI_SUCCESS;
+}
 
 STATIC
 UINT32
@@ -87,7 +158,7 @@ InternalGetInterpolatedValue (
 
 STATIC
 EFI_STATUS
-InternalUpdateStateSimple (
+InternalUpdateStateSimplePointer (
   IN OUT GUI_POINTER_CONTEXT  *Context,
   OUT    GUI_POINTER_STATE    *State
   )
@@ -97,12 +168,7 @@ InternalUpdateStateSimple (
   INT64                    InterpolatedX;
   INT64                    InterpolatedY;
 
-  ASSERT (Context != NULL);
-  ASSERT (State != NULL);
-
-  if (Context->Pointer == NULL) {
-    return EFI_UNSUPPORTED;
-  }
+  ASSERT (Context->Pointer != NULL);
 
   Status = Context->Pointer->GetState (Context->Pointer, &PointerState);
   if (EFI_ERROR (Status)) {
@@ -154,6 +220,33 @@ InternalUpdateStateSimple (
   State->SecondaryDown = PointerState.RightButton;
 
   return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+InternalUpdateStateSimple (
+  IN OUT GUI_POINTER_CONTEXT  *Context,
+  OUT    GUI_POINTER_STATE    *State
+  )
+{
+  ASSERT (Context != NULL);
+  ASSERT (State != NULL);
+
+  if (Context->AppleEvent != NULL) {
+    return InternalUpdateStateSimpleAppleEvent (
+      Context,
+      State
+      );
+  }
+
+  if (Context->Pointer != NULL) {
+    return InternalUpdateStateSimplePointer (
+      Context,
+      State
+      );
+  }
+
+  return EFI_UNSUPPORTED;
 }
 
 STATIC
@@ -332,33 +425,74 @@ GuiPointerConstruct (
 
   EFI_STATUS Status;
   EFI_STATUS Status2;
+  EFI_TPL    OldTpl;
+  DIMENSION  Dimension;
 
   ASSERT (DefaultX < Width);
   ASSERT (DefaultY < Height);
 
+  Context.Width         = Width;
+  Context.Height        = Height;
+  Context.MaxX          = Width - 1;
+  Context.MaxY          = Height - 1;
+  Context.X             = DefaultX;
+  Context.Y             = DefaultY;
+
   Status = InternalHandleProtocolFallback (
-             gST->ConsoleInHandle,
-             &gEfiSimplePointerProtocolGuid,
-             (VOID **)&Context.Pointer
-             );
+    gST->ConsoleInHandle,
+    &gAppleEventProtocolGuid,
+    (VOID **)&Context.AppleEvent
+    );
+  if (!EFI_ERROR (Status)) {
+    if (Context.AppleEvent->Revision >= APPLE_EVENT_PROTOCOL_REVISION) {
+      OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+
+      Status = Context.AppleEvent->RegisterHandler (
+        APPLE_ALL_MOUSE_EVENTS,
+        InternalAppleEventNotification,
+        &Context.AppleEventHandle,
+        &Context
+        );
+
+      Dimension.Horizontal = (INT32) DefaultX;
+      Dimension.Vertical   = (INT32) DefaultY;
+      Context.AppleEvent->SetCursorPosition (
+        &Dimension
+        );
+
+      gBS->RestoreTPL (OldTpl);
+    } else {
+      Status = EFI_UNSUPPORTED;
+    }
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_WARN,
+        "OCUI: AppleEvent %u is unsupported - %r\n",
+        Context.AppleEvent->Revision,
+        Status
+        ));
+      Context.AppleEvent = NULL;
+    }
+  }
+
+  if (EFI_ERROR (Status)) {
+    Status = InternalHandleProtocolFallback (
+      gST->ConsoleInHandle,
+      &gEfiSimplePointerProtocolGuid,
+      (VOID **)&Context.Pointer
+      );
+  }
+
   Status2 = InternalHandleProtocolFallback (
-              gST->ConsoleInHandle,
-              &gEfiAbsolutePointerProtocolGuid,
-              (VOID **)&Context.AbsPointer
-              );
+    gST->ConsoleInHandle,
+    &gEfiAbsolutePointerProtocolGuid,
+    (VOID **)&Context.AbsPointer
+    );
+
   if (EFI_ERROR (Status) && EFI_ERROR (Status2)) {
     return NULL;
   }
-
-  if (Context.Pointer != NULL) {
-    Context.X    = DefaultX;
-    Context.Y    = DefaultY;
-    Context.MaxX = Width - 1;
-    Context.MaxY = Height - 1;
-  }
-
-  Context.Width  = Width;
-  Context.Height = Height;
 
   return &Context;
 }
@@ -369,4 +503,12 @@ GuiPointerDestruct (
   )
 {
   ASSERT (Context != NULL);
+
+  if (Context->AppleEvent != NULL) {
+    Context->AppleEvent->UnregisterHandler (
+      Context->AppleEventHandle
+      );
+  }
+
+  ZeroMem (Context, sizeof (*Context));
 }

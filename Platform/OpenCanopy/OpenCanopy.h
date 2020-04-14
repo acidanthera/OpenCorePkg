@@ -234,6 +234,16 @@ GuiViewInitialize (
   );
 
 VOID
+GuiViewDeinitialize (
+  IN OUT GUI_DRAWING_CONTEXT   *DrawContext
+  );
+
+CONST GUI_SCREEN_CURSOR *
+GuiViewCurrentCursor (
+  IN OUT GUI_DRAWING_CONTEXT  *DrawContext
+  );
+
+VOID
 GuiDrawLoop (
   IN OUT GUI_DRAWING_CONTEXT  *DrawContext
   );
