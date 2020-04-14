@@ -452,7 +452,7 @@ InternalApfsGetDriverVersion (
     return EFI_BUFFER_TOO_SMALL;
   }
 
-  RemainingSize = DriverSize - Result - OFFSET_OF (EFI_IMAGE_NT_HEADERS64, OptionalHeader);
+  RemainingSize = DriverSize - DosHeader->e_lfanew - OFFSET_OF (EFI_IMAGE_NT_HEADERS64, OptionalHeader);
   NtHeaders     = (VOID *) ((UINT8 *) DriverBuffer + DosHeader->e_lfanew);
 
   if (NtHeaders->Signature != EFI_IMAGE_NT_SIGNATURE
