@@ -25,10 +25,12 @@ struct GUI_POINTER_CONTEXT_ {
   EFI_SIMPLE_POINTER_PROTOCOL   *Pointer;
   EFI_ABSOLUTE_POINTER_PROTOCOL *AbsPointer;
   APPLE_EVENT_HANDLE            AppleEventHandle;
-  UINT32                        Width;
-  UINT32                        Height;
   UINT32                        MaxX;
   UINT32                        MaxY;
+  UINT32                        PrevX;
+  UINT32                        PrevY;
+  UINT32                        PrevRealX;
+  UINT32                        PrevRealY;
   UINT32                        X;
   UINT32                        Y;
   UINT8                         LockedBy;
@@ -41,6 +43,60 @@ enum {
   PointerLockedSimple,
   PointerLockedAbsolute
 };
+
+STATIC
+UINT32
+InternalClipPointerSimple (
+  IN UINT32  OldCoord,
+  IN INT64   DeltaCoord,
+  IN UINT32  MaxCoord
+  )
+{
+  BOOLEAN Result;
+  INT64   NewCoord;
+
+  Result = OcOverflowAddS64 (OldCoord, DeltaCoord, &NewCoord);
+  if (!Result) {
+    if (NewCoord <= 0) {
+      return 0;
+    }
+
+    if (NewCoord > MaxCoord) {
+      return MaxCoord;
+    }
+
+    return (UINT32) NewCoord;
+  }
+
+  if (DeltaCoord < 0) {
+    return 0;
+  }
+
+  return MaxCoord;
+}
+
+STATIC
+INT64
+InternalGetInterpolatedValue (
+  IN INT32  Value
+  )
+{
+  INTN    Bit;
+
+  //
+  // For now this produces most natural speed.
+  //
+  STATIC CONST INT8 AccelerationNumbers[] = {2};
+
+  if (Value != 0) {
+    Bit = HighBitSet32 (ABS (Value));
+    return (INT64) Value * AccelerationNumbers[
+      MIN (Bit, ARRAY_SIZE (AccelerationNumbers) - 1)
+      ];
+  }
+
+  return 0;
+}
 
 STATIC
 VOID
@@ -97,63 +153,44 @@ InternalUpdateStateSimpleAppleEvent (
   OUT    GUI_POINTER_STATE    *State
   )
 {
+  INT64    Difference;
+  INT32    PrevX;
+  INT32    PrevY;
+  EFI_TPL  OldTpl;
+
   ASSERT (Context->AppleEvent != NULL);
 
-  State->X = Context->X;
-  State->Y = Context->Y;
-  State->PrimaryDown = Context->PrimaryDown;
+  OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+
+  PrevX = (INT32) Context->PrevX;
+  PrevY = (INT32) Context->PrevY;  
+
+  Context->PrevX = Context->X;
+  Context->PrevY = Context->Y;
+
+  if (Context->X == 0 || Context->X == Context->MaxX) {
+    State->X = Context->X;
+  } else {
+    Difference = InternalGetInterpolatedValue ((INT32) Context->X - PrevX);
+    State->X   = InternalClipPointerSimple (Context->PrevRealX, Difference, Context->MaxX);
+  }
+
+  if (Context->Y == 0 || Context->Y == Context->MaxY) {
+    State->Y = Context->Y;    
+  } else {
+    Difference = InternalGetInterpolatedValue ((INT32) Context->Y - PrevY);
+    State->Y   = InternalClipPointerSimple (Context->PrevRealY, Difference, Context->MaxY);
+  }
+
+  Context->PrevRealX = State->X;
+  Context->PrevRealY = State->Y;
+
+  State->PrimaryDown   = Context->PrimaryDown;
   State->SecondaryDown = Context->SecondaryDown;
 
+  gBS->RestoreTPL (OldTpl);
+
   return EFI_SUCCESS;
-}
-
-STATIC
-UINT32
-InternalClipPointerSimple (
-  IN UINT32  OldCoord,
-  IN INT64   DeltaCoord,
-  IN UINT32  MaxCoord
-  )
-{
-  BOOLEAN Result;
-  INT64   NewCoord;
-
-  Result = OcOverflowAddS64 (OldCoord, DeltaCoord, &NewCoord);
-  if (!Result) {
-    if (NewCoord <= 0) {
-      return 0;
-    } else if (NewCoord > MaxCoord) {
-      return MaxCoord;
-    } else {
-      return (UINT32) NewCoord;
-    }
-  } else {
-    if (DeltaCoord < 0) {
-      return 0;
-    } else {
-      return MaxCoord;
-    }
-  }
-}
-
-STATIC
-INT64
-InternalGetInterpolatedValue (
-  IN INT32  Value
-  )
-{
-  INTN    Bit;
-
-  STATIC CONST INT8 AccelerationNumbers[] = {1, 2, 3, 4, 5, 6};
-
-  if (Value != 0) {
-    Bit = HighBitSet32 (ABS (Value));
-    return (INT64) Value * AccelerationNumbers[
-      MIN (Bit, ARRAY_SIZE (AccelerationNumbers) - 1)
-      ];
-  }
-
-  return 0;
 }
 
 STATIC
@@ -274,11 +311,11 @@ InternalUpdateStateAbsolute (
   }
 
   NewX  = PointerState.CurrentX - Context->AbsPointer->Mode->AbsoluteMinX;
-  NewX *= Context->Width;
+  NewX *= Context->MaxX + 1;
   NewX  = DivU64x32 (NewX, (UINT32) (Context->AbsPointer->Mode->AbsoluteMaxX - Context->AbsPointer->Mode->AbsoluteMinX));
 
   NewY  = PointerState.CurrentY - Context->AbsPointer->Mode->AbsoluteMinY;
-  NewY *= Context->Height;
+  NewY *= Context->MaxY + 1;
   NewY  = DivU64x32 (NewY, (UINT32) (Context->AbsPointer->Mode->AbsoluteMaxY - Context->AbsPointer->Mode->AbsoluteMinY));
 
   State->X = (UINT32)NewX;
@@ -430,11 +467,15 @@ GuiPointerConstruct (
 
   ASSERT (DefaultX < Width);
   ASSERT (DefaultY < Height);
+  ASSERT (Width    <= MAX_INT32);
+  ASSERT (Height   <= MAX_INT32);
 
-  Context.Width         = Width;
-  Context.Height        = Height;
   Context.MaxX          = Width - 1;
   Context.MaxY          = Height - 1;
+  Context.PrevX         = DefaultX;
+  Context.PrevY         = DefaultY;
+  Context.PrevRealX     = DefaultX;
+  Context.PrevRealY     = DefaultY;
   Context.X             = DefaultX;
   Context.Y             = DefaultY;
 
