@@ -224,7 +224,8 @@ ApfsReadDriver (
       &Lba
       );
 
-    if (OcOverflowMulUN (JumpStart->RecordExtents[Index].BlockCount, PrivateData->ApfsBlockSize, &ChunkSize)
+    if (JumpStart->RecordExtents[Index].BlockCount > MAX_UINTN
+      || OcOverflowMulUN ((UINTN) JumpStart->RecordExtents[Index].BlockCount, PrivateData->ApfsBlockSize, &ChunkSize)
       || ChunkSize > EfiFileSize) {
       FreePool (EfiFile);
       return EFI_SECURITY_VIOLATION;
