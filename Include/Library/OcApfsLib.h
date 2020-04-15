@@ -22,7 +22,7 @@
 #define OC_APFS_DATE_HIGH_SIERRA    20200219U
 
 /**
-  Latest known APFS from High Sierra 10.14.6 (18G4032).
+  Latest known APFS from Mojave 10.14.6 (18G4032).
 **/
 #define OC_APFS_VERSION_MOJAVE      945275008000000ULL
 #define OC_APFS_DATE_MOJAVE         20200211U
