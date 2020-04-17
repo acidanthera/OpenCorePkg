@@ -62,7 +62,7 @@ AIKProtocolArriveInstall (
   Status = EFI_SUCCESS;
 
   if (Keycode->KeyMapDbArriveEvent == NULL) {
-    Status = gBS->CreateEvent (EVT_NOTIFY_SIGNAL, TPL_NOTIFY, AIKProtocolArriveHandler, Keycode, &Keycode->KeyMapDbArriveEvent);
+    Status = gBS->CreateEvent (EVT_NOTIFY_SIGNAL, TPL_CALLBACK, AIKProtocolArriveHandler, Keycode, &Keycode->KeyMapDbArriveEvent);
 
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "KeyMapDbArriveEvent creation failed - %r\n", Status));

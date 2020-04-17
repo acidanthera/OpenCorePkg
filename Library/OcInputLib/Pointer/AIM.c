@@ -352,7 +352,7 @@ AmiShimPointerTimerSetup (
     return EFI_ALREADY_STARTED;
   }
 
-  Status = gBS->CreateEvent (EVT_TIMER | EVT_NOTIFY_SIGNAL, TPL_NOTIFY, AmiShimPointerPositionHandler, NULL, &mAmiShimPointer.PositionEvent);
+  Status = gBS->CreateEvent (EVT_TIMER | EVT_NOTIFY_SIGNAL, TPL_CALLBACK, AmiShimPointerPositionHandler, NULL, &mAmiShimPointer.PositionEvent);
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "AmiShimPointerPositionHandler event creation failed %d\n", Status));
@@ -545,7 +545,7 @@ OcAppleGenericInputPointerInit (
   // The caller is required to pass a valid mode.
   //
 
-  Status = gBS->CreateEvent (EVT_NOTIFY_SIGNAL, TPL_NOTIFY, AmiShimPointerArriveHandler, NULL, &mAmiShimPointer.ProtocolArriveEvent);
+  Status = gBS->CreateEvent (EVT_NOTIFY_SIGNAL, TPL_CALLBACK, AmiShimPointerArriveHandler, NULL, &mAmiShimPointer.ProtocolArriveEvent);
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "AmiShimPointerArriveHandler event creation failed %d\n", Status));

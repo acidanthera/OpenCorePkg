@@ -60,7 +60,7 @@ ApfsMonitorNewPartitions (
 
   Status = gBS->CreateEvent (
     EVT_NOTIFY_SIGNAL,
-    TPL_NOTIFY,
+    TPL_CALLBACK,
     ApfsNewPartitionArrived,
     NULL,
     &Event
