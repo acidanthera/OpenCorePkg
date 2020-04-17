@@ -100,16 +100,16 @@ when no macOS guest booting is required.
 
     ```
     qemu-system-x86_64 -L . -bios "$OVMF_BUILD/OVMF.fd" -hda fat:rw:ESP \
-      -machine q35 -m 2048 -cpu Penryn -smp 4,cores=2 -gdb tcp::8864
+      -machine q35 -m 2048 -cpu Penryn -smp 4,cores=2 -usb -device usb-mouse -gdb tcp::8864
     ```
 
     To run QEMU with SMM support use the following command:
     ```
     qemu-system-x86_64 -L . -global driver=cfi.pflash01,property=secure,value=on \
-    -drive if=pflash,format=raw,unit=0,file="$OVMF_BUILD"/OVMF_CODE.fd,readonly=on \
-    -drive if=pflash,format=raw,unit=1,file="$OVMF_BUILD"/OVMF_VARS.fd -hda fat:rw:ESP \
-    -global ICH9-LPC.disable_s3=1 -machine q35,smm=on,accel=tcg -m 2048 -cpu Penryn \
-    -smp 4,cores=2 -cdrom /Users/user/Downloads/debian-10.3.0-amd64-netinst.iso -gdb tcp::8864
+      -drive if=pflash,format=raw,unit=0,file="$OVMF_BUILD"/OVMF_CODE.fd,readonly=on \
+      -drive if=pflash,format=raw,unit=1,file="$OVMF_BUILD"/OVMF_VARS.fd -hda fat:rw:ESP \
+      -global ICH9-LPC.disable_s3=1 -machine q35,smm=on,accel=tcg -m 2048 -cpu Penryn \
+      -smp 4,cores=2 -usb -device usb-mouse -gdb tcp::8864
     ```
 
     You may additionally pass `-S` flag to QEMU to stop at first instruction

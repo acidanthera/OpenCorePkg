@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Apr  7 19:32:13 2020
-%DIF ADD ../Configuration.tex        Mon Apr 13 06:13:02 2020
+%DIF ADD ../Configuration.tex        Fri Apr 17 09:18:48 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4013,7 +4013,15 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \\
-\href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
+  \DIFaddbegin \href{https://github.com/acidanthera/audk}{\texttt{Ps2MouseDxe}}\textbf{\DIFadd{*}}
+& \DIFadd{PS/2 mouse driver from }\texttt{\DIFadd{MdeModulePkg}}\DIFadd{. Some very old laptop firmwares
+  may not include this driver, but it is necessary for touchpad to work
+  in UEFI graphical interfaces, such as }\texttt{\DIFadd{OpenCanopy}}\DIFadd{. }\\
+  \href{https://github.com/acidanthera/audk}{\texttt{UsbMouseDxe}}\textbf{\DIFadd{*}}
+& \DIFadd{USB mouse driver from }\texttt{\DIFadd{MdeModulePkg}}\DIFadd{. Some virtual machine firmwares
+  like OVMF may not include this driver, but it is necessary for mouse to work
+  in UEFI graphical interfaces, such as }\texttt{\DIFadd{OpenCanopy}}\DIFadd{. }\\
+\DIFaddend \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
 & HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HfsPlus} driver commonly found in Apple firmwares. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo

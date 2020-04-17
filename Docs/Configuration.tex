@@ -3945,6 +3945,14 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \\
+  \href{https://github.com/acidanthera/audk}{\texttt{Ps2MouseDxe}}\textbf{*}
+& PS/2 mouse driver from \texttt{MdeModulePkg}. Some very old laptop firmwares
+  may not include this driver, but it is necessary for touchpad to work
+  in UEFI graphical interfaces, such as \texttt{OpenCanopy}. \\
+  \href{https://github.com/acidanthera/audk}{\texttt{UsbMouseDxe}}\textbf{*}
+& USB mouse driver from \texttt{MdeModulePkg}. Some virtual machine firmwares
+  like OVMF may not include this driver, but it is necessary for mouse to work
+  in UEFI graphical interfaces, such as \texttt{OpenCanopy}. \\
 \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
 & HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HfsPlus} driver commonly found in Apple firmwares. While

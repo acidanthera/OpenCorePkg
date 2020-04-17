@@ -138,6 +138,8 @@
         DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
       !endif
   }
+  MdeModulePkg/Bus/Isa/Ps2MouseDxe/Ps2MouseDxe.inf
+  MdeModulePkg/Bus/Usb/UsbMouseDxe/UsbMouseDxe.inf
   MdeModulePkg/Universal/HiiDatabaseDxe/HiiDatabaseDxe.inf
   OpenCorePkg/Application/BootKicker/BootKicker.inf
   OpenCorePkg/Application/Bootstrap/Bootstrap.inf

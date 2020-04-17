@@ -42,6 +42,8 @@ package() {
   cp OpenCore.efi tmp/EFI/OC/ || exit 1
   cp OpenRuntime.efi tmp/EFI/OC/Drivers/ || exit 1
   cp OpenUsbKbDxe.efi tmp/EFI/OC/Drivers/ || exit 1
+  cp Ps2MouseDxe.efi tmp/EFI/OC/Drivers/ || exit 1
+  cp UsbMouseDxe.efi tmp/EFI/OC/Drivers/ || exit 1
   cp Shell.efi tmp/EFI/OC/Tools/OpenShell.efi || exit 1
   cp VerifyMsrE2.efi tmp/EFI/OC/Tools/ || exit 1
   cp XhciDxe.efi tmp/EFI/OC/Drivers/ || exit 1
