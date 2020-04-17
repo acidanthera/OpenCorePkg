@@ -9,7 +9,7 @@ OpenCore Changelog
 - Fixed rendering macOS installer icons in OpenCanopy
 - Added APFS support with Fusion Drive and enhanced security
 - Added AppleEvent mouse support in OpenCanopy
-- Fixed AppleEvent compatibility with Timer TPL restrictions
+- Fixed AppleEvent and OpenCanopy compatibility with OVMF TPL restrictions
 - Added mouse drivers to the package as OVMF needs one
 
 #### v0.5.7
