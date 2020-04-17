@@ -304,7 +304,14 @@ InternalBootPickerKeyEvent (
     ASSERT (Picker->SelectedEntry != NULL);
     GuiContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
     GuiContext->BootEntry = Picker->SelectedEntry->Context;
-  } else if (Key->UnicodeChar == L' ') {
+  } else if (mBootPickerOpacity != 0xFF) {
+    //
+    // FIXME: Other keys are not allowed when boot picker is partially transparent.
+    //
+    return;
+  }
+
+  if (Key->UnicodeChar == L' ') {
     GuiContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
     GuiContext->HideAuxiliary = FALSE;
     GuiContext->Refresh = TRUE;
