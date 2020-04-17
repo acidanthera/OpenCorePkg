@@ -120,7 +120,7 @@ EventLibCreateNotifyTimerEvent (
            NotifyContext,
            TriggerTime,
            SignalPeriodic,
-           TPL_NOTIFY
+           TPL_CALLBACK
            );
 }
 
