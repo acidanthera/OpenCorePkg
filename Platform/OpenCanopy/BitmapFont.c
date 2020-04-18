@@ -709,7 +709,7 @@ GuiFontConstruct (
   IN  UINT32            FileSize
   )
 {
-  RETURN_STATUS Status;
+  EFI_STATUS    Status;
   BOOLEAN       Result;
 
   ASSERT (Context       != NULL);
@@ -728,7 +728,7 @@ GuiFontConstruct (
     );
   FreePool (FontImage);
 
-  if (RETURN_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     GuiFontDestruct (Context);
     return FALSE;
   }

@@ -43,7 +43,7 @@ OcShowMenuByOc (
   OUT    OC_BOOT_ENTRY            **ChosenBootEntry
   )
 {
-  RETURN_STATUS Status;
+  EFI_STATUS    Status;
   UINTN         Index;
 
   *ChosenBootEntry = NULL;
@@ -55,7 +55,7 @@ OcShowMenuByOc (
     mGuiContext.CursorDefaultX,
     mGuiContext.CursorDefaultY
     );
-  if (RETURN_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 
@@ -64,7 +64,7 @@ OcShowMenuByOc (
     &mGuiContext,
     InternalGetCursorImage
     );
-  if (RETURN_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     GuiLibDestruct ();
     return Status;
   }
@@ -76,7 +76,7 @@ OcShowMenuByOc (
                &BootEntries[Index],
                Index == DefaultEntry
                );
-    if (RETURN_ERROR (Status)) {
+    if (EFI_ERROR (Status)) {
       GuiLibDestruct ();
       return Status;
     }
@@ -95,12 +95,12 @@ OcShowMenuByOc (
   *ChosenBootEntry = mGuiContext.BootEntry;
   Context->HideAuxiliary = mGuiContext.HideAuxiliary;
   if (mGuiContext.Refresh) {
-    return RETURN_ABORTED;
+    return EFI_ABORTED;
   }
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
-RETURN_STATUS
+EFI_STATUS
 InternalContextConstruct (
   OUT BOOT_PICKER_GUI_CONTEXT  *Context,
   IN  OC_STORAGE_CONTEXT       *Storage,
@@ -127,7 +127,7 @@ GuiOcInterfaceRun (
   EFI_STATUS Status;
 
   Status = InternalContextConstruct (&mGuiContext, Storage, Context);
-  if (RETURN_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 

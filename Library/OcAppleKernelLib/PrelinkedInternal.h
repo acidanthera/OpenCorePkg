@@ -178,7 +178,7 @@ InternalCachedPrelinkedKernel (
 /**
   Scan PRELINKED_KEXT for dependencies.
 **/
-RETURN_STATUS
+EFI_STATUS
 InternalScanPrelinkedKext (
   IN OUT PRELINKED_KEXT     *Kext,
   IN OUT PRELINKED_CONTEXT  *Context,
@@ -376,7 +376,7 @@ InternalSolveSymbolValue64 (
            The state of the KEXT is undefined in case this routine fails.
 
 **/
-RETURN_STATUS
+EFI_STATUS
 InternalPrelinkKext64 (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     PRELINKED_KEXT     *Kext,

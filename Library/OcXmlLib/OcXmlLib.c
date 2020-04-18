@@ -1479,7 +1479,7 @@ PlistDataValue (
 {
   CONST CHAR8    *Content;
   UINTN          Length;
-  RETURN_STATUS  Result;
+  EFI_STATUS     Result;
 
   if (PlistNodeCast (Node, PLIST_NODE_TYPE_DATA) == NULL) {
     return FALSE;
@@ -1494,7 +1494,7 @@ PlistDataValue (
   Length = *Size;
   Result = Base64Decode (Content, AsciiStrLen (Content), Buffer, &Length);
 
-  if (!RETURN_ERROR (Result) && (UINT32) Length == Length) {
+  if (!EFI_ERROR (Result) && (UINT32) Length == Length) {
     *Size = (UINT32) Length;
     return TRUE;
   }
@@ -1590,7 +1590,7 @@ PlistMetaDataValue (
 {
   CONST CHAR8    *Content;
   UINTN          Length;
-  RETURN_STATUS  Result;
+  EFI_STATUS     Result;
 
   if (PlistNodeCast (Node, PLIST_NODE_TYPE_DATA) != NULL) {
     Content = XmlNodeContent (Node);
@@ -1599,7 +1599,7 @@ PlistMetaDataValue (
       Length = *Size;
       Result = Base64Decode (Content, AsciiStrLen (Content), Buffer, &Length);
 
-      if (!RETURN_ERROR (Result) && (UINT32) Length == Length) {
+      if (!EFI_ERROR (Result) && (UINT32) Length == Length) {
         *Size = (UINT32) Length;
       } else {
         return FALSE;

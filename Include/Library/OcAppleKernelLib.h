@@ -204,9 +204,9 @@ typedef struct {
   @param[out]     AllocatedSize  Allocated kernel size (AllocatedSize >= KernelSize).
   @param[in]      ReservedSize   Allocated extra size for added kernel extensions.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 ReadAppleKernel (
   IN     EFI_FILE_PROTOCOL  *File,
      OUT UINT8              **Kernel,
@@ -225,9 +225,9 @@ ReadAppleKernel (
   @param[in]     PrelinkedSize       Unpacked prelinked buffer size.
   @param[in]     PrelinkedAllocSize  Unpacked prelinked buffer allocated size.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PrelinkedContextInit (
   IN OUT  PRELINKED_CONTEXT  *Context,
   IN OUT  UINT8              *Prelinked,
@@ -252,9 +252,9 @@ PrelinkedContextFree (
   @param[in,out] Context          Prelinked context.
   @param[in]     Buffer           Pool allocated buffer.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PrelinkedDependencyInsert (
   IN OUT  PRELINKED_CONTEXT  *Context,
   IN      VOID               *Buffer
@@ -266,7 +266,7 @@ PrelinkedDependencyInsert (
 
   @param[in,out] Context  Prelinked context.
 **/
-RETURN_STATUS
+EFI_STATUS
 PrelinkedInjectPrepare (
   IN OUT PRELINKED_CONTEXT  *Context
   );
@@ -276,9 +276,9 @@ PrelinkedInjectPrepare (
 
   @param[in,out] Context  Prelinked context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PrelinkedInjectComplete (
   IN OUT PRELINKED_CONTEXT  *Context
   );
@@ -291,9 +291,9 @@ PrelinkedInjectComplete (
   @param[in]     Executable      Kext executable, optional.
   @param[in]     ExecutableSize  Kext executable size, optional.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PrelinkedReserveKextSize (
   IN OUT UINT32       *ReservedSize,
   IN     UINT32       InfoPlistSize,
@@ -312,9 +312,9 @@ PrelinkedReserveKextSize (
   @param[in,out] Executable      Kext executable, optional.
   @param[in]     ExecutableSize  Kext executable size, optional.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PrelinkedInjectKext (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     CONST CHAR8        *BundlePath,
@@ -332,9 +332,9 @@ PrelinkedInjectKext (
   @param[in,out] Prelinked       Prelinked context.
   @param[in]     Name            Kext bundle identifier.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatcherInitContextFromPrelinked (
   IN OUT PATCHER_CONTEXT    *Context,
   IN OUT PRELINKED_CONTEXT  *Prelinked,
@@ -348,9 +348,9 @@ PatcherInitContextFromPrelinked (
   @param[in,out] Buffer          Kernel buffer (could be prelinked).
   @param[in]     BufferSize      Kernel buffer size.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatcherInitContextFromBuffer (
   IN OUT PATCHER_CONTEXT    *Context,
   IN OUT UINT8              *Buffer,
@@ -364,9 +364,9 @@ PatcherInitContextFromBuffer (
   @param[in]     Name            Symbol name.
   @param[in,out] Address         Returned symbol address in file.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatcherGetSymbolAddress (
   IN OUT PATCHER_CONTEXT    *Context,
   IN     CONST CHAR8        *Name,
@@ -379,9 +379,9 @@ PatcherGetSymbolAddress (
   @param[in,out] Context         Patcher context.
   @param[in]     Patch           Patch description.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatcherApplyGenericPatch (
   IN OUT PATCHER_CONTEXT        *Context,
   IN     PATCHER_GENERIC_PATCH  *Patch
@@ -392,9 +392,9 @@ PatcherApplyGenericPatch (
 
   @param[in,out] Context         Patcher context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatcherBlockKext (
   IN OUT PATCHER_CONTEXT        *Context
   );
@@ -404,9 +404,9 @@ PatcherBlockKext (
 
   @param Context  Prelinked kernel context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatchAppleCpuPmCfgLock (
   IN OUT PRELINKED_CONTEXT  *Context
   );
@@ -416,9 +416,9 @@ PatchAppleCpuPmCfgLock (
 
   @param Patcher  Patcher context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatchAppleXcpmCfgLock (
   IN OUT PATCHER_CONTEXT  *Patcher
   );
@@ -428,9 +428,9 @@ PatchAppleXcpmCfgLock (
 
   @param Patcher  Patcher context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatchAppleXcpmExtraMsrs (
   IN OUT PATCHER_CONTEXT  *Patcher
   );
@@ -440,9 +440,9 @@ PatchAppleXcpmExtraMsrs (
 
   @param Patcher  Patcher context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatchAppleXcpmForceBoost (
   IN OUT PATCHER_CONTEXT   *Patcher
   );
@@ -452,9 +452,9 @@ PatchAppleXcpmForceBoost (
 
   @param Context  Prelinked kernel context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatchUsbXhciPortLimit (
   IN OUT PRELINKED_CONTEXT  *Context
   );
@@ -465,9 +465,9 @@ PatchUsbXhciPortLimit (
 
   @param Context  Prelinked kernel context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatchThirdPartyDriveSupport (
   IN OUT PRELINKED_CONTEXT  *Context
   );
@@ -477,9 +477,9 @@ PatchThirdPartyDriveSupport (
 
   @param Context  Prelinked kernel context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatchForceInternalDiskIcons (
   IN OUT PRELINKED_CONTEXT  *Context
   );
@@ -489,9 +489,9 @@ PatchForceInternalDiskIcons (
 
   @param Context  Prelinked kernel context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatchAppleIoMapperSupport (
   IN OUT PRELINKED_CONTEXT  *Context
   );
@@ -501,9 +501,9 @@ PatchAppleIoMapperSupport (
 
   @param Context  Prelinked kernel context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatchDummyPowerManagement (
   IN OUT PRELINKED_CONTEXT  *Context
   );
@@ -513,9 +513,9 @@ PatchDummyPowerManagement (
 
   @param Context  Prelinked kernel context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatchIncreasePciBarSize (
   IN OUT PRELINKED_CONTEXT  *Context
   );
@@ -528,9 +528,9 @@ PatchIncreasePciBarSize (
   @param Data     4 32-bit integers with CPUID data.
   @param DataMask 4 32-bit integers with CPUID enabled overrides data.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatchKernelCpuId (
   IN OUT PATCHER_CONTEXT  *Patcher,
   IN     OC_CPU_INFO      *CpuInfo,
@@ -543,9 +543,9 @@ PatchKernelCpuId (
 
   @param Context  Prelinked kernel context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatchCustomSmbiosGuid (
   IN OUT PRELINKED_CONTEXT  *Context
   );
@@ -555,9 +555,9 @@ PatchCustomSmbiosGuid (
 
   @param Patcher  Patcher context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatchPanicKextDump (
   IN OUT PATCHER_CONTEXT  *Patcher
   );
@@ -567,9 +567,9 @@ PatchPanicKextDump (
 
   @param Patcher  Patcher context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatchLapicKernelPanic (
   IN OUT PATCHER_CONTEXT  *Patcher
   );
@@ -579,9 +579,9 @@ PatchLapicKernelPanic (
 
   @param Patcher  Patcher context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
-RETURN_STATUS
+EFI_STATUS
 PatchPowerStateTimeout (
   IN OUT PATCHER_CONTEXT   *Patcher
   );
@@ -591,7 +591,7 @@ PatchPowerStateTimeout (
 
   @param Patcher  Patcher context.
 
-  @return  RETURN_SUCCESS on success.
+  @return  EFI_SUCCESS on success.
 **/
 EFI_STATUS
 PatchAppleRtcChecksum (

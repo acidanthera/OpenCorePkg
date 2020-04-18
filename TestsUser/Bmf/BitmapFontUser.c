@@ -19,14 +19,14 @@ clang -g -fshort-wchar -fsanitize=undefined,address -I$WORKSPACE/Public/Vendor/A
 #include "GUI.h"
 #include "BmfLib.h"
 
-RETURN_STATUS
+EFI_STATUS
 GuiBmpToImage (
   IN OUT GUI_IMAGE  *Image,
   IN     VOID       *BmpImage,
   IN     UINTN      BmpImageSize
   )
 {
-  RETURN_STATUS                 Status;
+  EFI_STATUS                    Status;
   EFI_GRAPHICS_OUTPUT_BLT_PIXEL *Buffer;
   UINTN                         BufferSize;
   UINTN                         BmpHeight;
@@ -45,7 +45,7 @@ GuiBmpToImage (
              &BmpHeight,
              &BmpWidth
              );
-  if (RETURN_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
   // TODO: Update the lib?
@@ -55,7 +55,7 @@ GuiBmpToImage (
   Image->Height = (UINT32)BmpHeight;
   Image->Width  = (UINT32)BmpWidth;
   Image->Buffer = Buffer;
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
 int main (void)
@@ -63,8 +63,8 @@ int main (void)
   BOOLEAN Result;
   GUI_FONT_CONTEXT HelveticaContext;
   GUI_IMAGE        Label;
-  RETURN_STATUS Status;
-  VOID            *BmpImage;
+  EFI_STATUS       Status;
+  VOID             *BmpImage;
   UINT32           BmpImageSize;
   FILE *write_ptr;
 
@@ -91,7 +91,7 @@ int main (void)
              &BmpImage,
              &BmpImageSize
              );
-  if (RETURN_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     return -1;
   }
 

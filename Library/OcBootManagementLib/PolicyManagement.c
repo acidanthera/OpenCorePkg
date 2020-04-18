@@ -189,7 +189,7 @@ OcGetFileSystemPolicyType (
   return 0;
 }
 
-RETURN_STATUS
+EFI_STATUS
 InternalCheckScanPolicy (
   IN  EFI_HANDLE                       Handle,
   IN  UINT32                           Policy,
@@ -217,7 +217,7 @@ InternalCheckScanPolicy (
     }
   }
 
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
 OC_BOOT_ENTRY_TYPE

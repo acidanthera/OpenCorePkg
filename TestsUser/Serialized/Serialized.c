@@ -19,7 +19,7 @@
 
 #include <sys/time.h>
 
-RETURN_STATUS
+EFI_STATUS
 EFIAPI
 Base64Decode (
   IN     CONST CHAR8 *Source          OPTIONAL,
@@ -38,7 +38,7 @@ Base64Decode (
   UINT8   DestinationOctet;
 
   if (DestinationSize == NULL) {
-    return RETURN_INVALID_PARAMETER;
+    return EFI_INVALID_PARAMETER;
   }
 
   //
@@ -49,13 +49,13 @@ Base64Decode (
       //
       // At least one CHAR8 element at NULL Source.
       //
-      return RETURN_INVALID_PARAMETER;
+      return EFI_INVALID_PARAMETER;
     }
   } else if (SourceSize > MAX_ADDRESS - (UINTN)Source) {
     //
     // Non-NULL Source, but it wraps around.
     //
-    return RETURN_INVALID_PARAMETER;
+    return EFI_INVALID_PARAMETER;
   }
 
   //
@@ -66,13 +66,13 @@ Base64Decode (
       //
       // At least one UINT8 element at NULL Destination.
       //
-      return RETURN_INVALID_PARAMETER;
+      return EFI_INVALID_PARAMETER;
     }
   } else if (*DestinationSize > MAX_ADDRESS - (UINTN)Destination) {
     //
     // Non-NULL Destination, but it wraps around.
     //
-    return RETURN_INVALID_PARAMETER;
+    return EFI_INVALID_PARAMETER;
   }
 
   //
@@ -95,7 +95,7 @@ Base64Decode (
       //
       // Overlap.
       //
-      return RETURN_INVALID_PARAMETER;
+      return EFI_INVALID_PARAMETER;
     }
   }
 
@@ -136,7 +136,7 @@ Base64Decode (
         SixBitGroupsConsumed = 0;
         continue;
       }
-      return RETURN_INVALID_PARAMETER;
+      return EFI_INVALID_PARAMETER;
     }
 
     //
@@ -180,7 +180,7 @@ Base64Decode (
         // Padding characters are not allowed at the first two positions of a
         // quantum.
         //
-        return RETURN_INVALID_PARAMETER;
+        return EFI_INVALID_PARAMETER;
       }
 
       //
@@ -190,7 +190,7 @@ Base64Decode (
       // Chapter 3.5. "Canonical Encoding".
       //
       if (Accumulator != 0) {
-        return RETURN_INVALID_PARAMETER;
+        return EFI_INVALID_PARAMETER;
       }
 
       //
@@ -201,7 +201,7 @@ Base64Decode (
       //
       // Other characters outside of the encoding alphabet are rejected.
       //
-      return RETURN_INVALID_PARAMETER;
+      return EFI_INVALID_PARAMETER;
     }
 
     //
@@ -264,16 +264,16 @@ Base64Decode (
   // If Source terminates mid-quantum, then Source is invalid.
   //
   if (SixBitGroupsConsumed != 0) {
-    return RETURN_INVALID_PARAMETER;
+    return EFI_INVALID_PARAMETER;
   }
 
   //
   // Done.
   //
   if (*DestinationSize <= OriginalDestinationSize) {
-    return RETURN_SUCCESS;
+    return EFI_SUCCESS;
   }
-  return RETURN_BUFFER_TOO_SMALL;
+  return EFI_BUFFER_TOO_SMALL;
 }
 
 /*

@@ -1228,7 +1228,7 @@ InternalProcessSymbolPointers (
            The state of the KEXT is undefined in case this routine fails.
 
 **/
-RETURN_STATUS
+EFI_STATUS
 InternalPrelinkKext64 (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     PRELINKED_KEXT     *Kext,
@@ -1299,11 +1299,11 @@ InternalPrelinkKext64 (
   // Only perform actions when the kext is flag'd to be dynamically linked.
   //
   if ((MachHeader->Flags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) == 0) {
-    return RETURN_SUCCESS;
+    return EFI_SUCCESS;
   }
 
   if (Kext->Context.VirtualKmod == 0) {
-    return RETURN_UNSUPPORTED;
+    return EFI_UNSUPPORTED;
   }
   //
   // Retrieve the symbol tables required for most following operations.
@@ -1320,7 +1320,7 @@ InternalPrelinkKext64 (
                  &NumUndefinedSymbols
                  );
   if (NumSymbols == 0) {
-    return RETURN_UNSUPPORTED;
+    return EFI_UNSUPPORTED;
   }
 
   Symtab = MachoContext->Symtab;
@@ -1358,7 +1358,7 @@ InternalPrelinkKext64 (
   LinkEditSize = (SymbolTableSize + RelocationsSize + StringTableSize);
 
   if (LinkEditSize > LinkEditSegment->FileSize) {
-    return RETURN_UNSUPPORTED;
+    return EFI_UNSUPPORTED;
   }
 
   SymbolTableSize -= (NumUndefinedSymbols * sizeof (MACH_NLIST_64));
@@ -1377,7 +1377,7 @@ InternalPrelinkKext64 (
     Symbol     = (MACH_NLIST_64 *)&IndirectSymtab[Index];
     SymbolName = MachoGetIndirectSymbolName64 (MachoContext, Symbol);
     if (SymbolName == NULL) {
-      return RETURN_LOAD_ERROR;
+      return EFI_LOAD_ERROR;
     }
 
     Result = InternalSolveSymbol64 (
@@ -1390,7 +1390,7 @@ InternalPrelinkKext64 (
                NumUndefinedSymbols
                );
     if (!Result) {
-      return RETURN_LOAD_ERROR;
+      return EFI_LOAD_ERROR;
     }
   }
   //
@@ -1413,7 +1413,7 @@ InternalPrelinkKext64 (
     if (!Result) {
       DEBUG ((DEBUG_INFO, "Symbol %s was unresolved for kext %a\n",
         MachoGetSymbolName64 (MachoContext, Symbol), Kext->Identifier));
-      return RETURN_LOAD_ERROR;
+      return EFI_LOAD_ERROR;
     }
   }
   //
@@ -1422,7 +1422,7 @@ InternalPrelinkKext64 (
   Result = InternalPatchByVtables64 (Context, Kext);
   if (!Result) {
     DEBUG ((DEBUG_INFO, "Vtable patching failed for kext %a\n", Kext->Identifier));
-    return RETURN_LOAD_ERROR;
+    return EFI_LOAD_ERROR;
   }
   //
   // Relocate local and external symbols.
@@ -1437,7 +1437,7 @@ InternalPrelinkKext64 (
              &KmodInfoOffset
              );
   if (!Result) {
-    return RETURN_LOAD_ERROR;
+    return EFI_LOAD_ERROR;
   }
 
   Result = InternalRelocateSymbols (
@@ -1448,19 +1448,19 @@ InternalPrelinkKext64 (
              &KmodInfoOffset
              );
   if (!Result || (KmodInfoOffset == 0)) {
-    return RETURN_LOAD_ERROR;
+    return EFI_LOAD_ERROR;
   }
 
   KmodInfo = (KMOD_INFO_64_V1 *)((UINTN)MachHeader + (UINTN)KmodInfoOffset);
 
   FirstSegment = MachoGetNextSegment64 (MachoContext, NULL);
   if (FirstSegment == NULL) {
-    return RETURN_UNSUPPORTED;
+    return EFI_UNSUPPORTED;
   }
   
   Result = InternalProcessSymbolPointers (MachoContext, DySymtab, LoadAddress);
   if (!Result) {
-    return RETURN_LOAD_ERROR;
+    return EFI_LOAD_ERROR;
   }
   //
   // Copy the relocations to be reserved and adapt the symbol number they
@@ -1484,7 +1484,7 @@ InternalPrelinkKext64 (
              &TargetRelocation[0]
              );
   if (!Result) {
-    return RETURN_LOAD_ERROR;
+    return EFI_LOAD_ERROR;
   }
 
   Relocations     = MachoContext->ExternRelocations;
@@ -1499,7 +1499,7 @@ InternalPrelinkKext64 (
              &TargetRelocation[NumRelocations]
              );
   if (!Result) {
-    return RETURN_LOAD_ERROR;
+    return EFI_LOAD_ERROR;
   }
   NumRelocations += NumRelocations2;
   RelocationsSize = (NumRelocations * sizeof (MACH_RELOCATION_INFO));
@@ -1645,7 +1645,7 @@ InternalPrelinkKext64 (
     // This should never failed under normal and abnormal conditions.
     //
     ASSERT (FALSE);
-    return RETURN_INVALID_PARAMETER;
+    return EFI_INVALID_PARAMETER;
   }
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }

@@ -190,12 +190,12 @@ GetEntropyBits (
 
   The constructor function checks whether or not RDRAND instruction is supported.
   It will ASSERT() if RDRAND instruction is not supported.
-  It will always return RETURN_SUCCESS.
+  It will always return EFI_SUCCESS.
 
-  @retval RETURN_SUCCESS   The constructor always returns EFI_SUCCESS.
+  @retval EFI_SUCCESS   The constructor always returns EFI_SUCCESS.
 
 **/
-RETURN_STATUS
+EFI_STATUS
 EFIAPI
 OcRngLibConstructor (
   VOID
@@ -215,7 +215,7 @@ OcRngLibConstructor (
   //
   ChaChaRngStir (0);
 
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
 /**

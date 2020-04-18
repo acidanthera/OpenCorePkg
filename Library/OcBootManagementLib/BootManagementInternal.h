@@ -40,7 +40,7 @@ typedef struct {
   BOOLEAN                  SkipRecovery;
 } INTERNAL_DEV_PATH_SCAN_INFO;
 
-RETURN_STATUS
+EFI_STATUS
 InternalCheckScanPolicy (
   IN  EFI_HANDLE                       Handle,
   IN  UINT32                           Policy,

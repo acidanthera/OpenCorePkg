@@ -712,7 +712,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ mBootPickerView = {
 };
 
 STATIC
-RETURN_STATUS
+EFI_STATUS
 CopyLabel (
   OUT GUI_IMAGE       *Destination,
   IN  CONST GUI_IMAGE *Source
@@ -726,13 +726,13 @@ CopyLabel (
     );
 
   if (Destination->Buffer == NULL) {
-    return RETURN_OUT_OF_RESOURCES;
+    return EFI_OUT_OF_RESOURCES;
   }
 
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
-RETURN_STATUS
+EFI_STATUS
 BootPickerEntriesAdd (
   IN OC_PICKER_CONTEXT              *Context,
   IN CONST BOOT_PICKER_GUI_CONTEXT  *GuiContext,
@@ -740,18 +740,18 @@ BootPickerEntriesAdd (
   IN BOOLEAN                        Default
   )
 {
-  APPLE_BOOT_POLICY_PROTOCOL *AppleBootPolicy;
-  RETURN_STATUS          Status;
-  GUI_VOLUME_ENTRY       *VolumeEntry;
-  CONST GUI_IMAGE        *SuggestedIcon;
-  LIST_ENTRY             *ListEntry;
-  CONST GUI_VOLUME_ENTRY *PrevEntry;
-  UINT32                 IconFileSize;
-  VOID                   *IconFileData;
-  BOOLEAN                UseVolumeIcon;
-  BOOLEAN                UseDiskLabel;
-  BOOLEAN                UseGenericLabel;
-  BOOLEAN                Result;
+  APPLE_BOOT_POLICY_PROTOCOL  *AppleBootPolicy;
+  EFI_STATUS                  Status;
+  GUI_VOLUME_ENTRY            *VolumeEntry;
+  CONST GUI_IMAGE             *SuggestedIcon;
+  LIST_ENTRY                  *ListEntry;
+  CONST GUI_VOLUME_ENTRY      *PrevEntry;
+  UINT32                      IconFileSize;
+  VOID                        *IconFileData;
+  BOOLEAN                     UseVolumeIcon;
+  BOOLEAN                     UseDiskLabel;
+  BOOLEAN                     UseGenericLabel;
+  BOOLEAN                     Result;
 
   ASSERT (GuiContext != NULL);
   ASSERT (Entry != NULL);
@@ -766,7 +766,7 @@ BootPickerEntriesAdd (
 
   VolumeEntry = AllocateZeroPool (sizeof (*VolumeEntry));
   if (VolumeEntry == NULL) {
-    return RETURN_OUT_OF_RESOURCES;
+    return EFI_OUT_OF_RESOURCES;
   }
 
   AppleBootPolicy = OcAppleBootPolicyInstallProtocol (FALSE);
@@ -831,7 +831,7 @@ BootPickerEntriesAdd (
         break;
       default:
         DEBUG ((DEBUG_ERROR, "OCUI: Entry kind %d unsupported for label", Entry->Type));
-        return RETURN_UNSUPPORTED;
+        return EFI_UNSUPPORTED;
     }
   }
 
@@ -845,7 +845,7 @@ BootPickerEntriesAdd (
       );
     if (!Result) {
       DEBUG ((DEBUG_WARN, "OCUI: label failed\n"));
-      return RETURN_UNSUPPORTED;
+      return EFI_UNSUPPORTED;
     }
   }
 
@@ -920,7 +920,7 @@ BootPickerEntriesAdd (
         break;
       default:
         DEBUG ((DEBUG_ERROR, "OCUI: Entry kind %d unsupported for icon", Entry->Type));
-        return RETURN_UNSUPPORTED;
+        return EFI_UNSUPPORTED;
     }
 
     ASSERT (SuggestedIcon != NULL);
@@ -964,7 +964,7 @@ BootPickerEntriesAdd (
     InternalBootPickerSelectEntry (&mBootPicker, VolumeEntry);
   }
 
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
 VOID
@@ -1158,7 +1158,7 @@ InternalBootPickerAnimateSinMov (
   return FALSE;
 }
 
-RETURN_STATUS
+EFI_STATUS
 BootPickerViewInitialize (
   OUT GUI_DRAWING_CONTEXT      *DrawContext,
   IN  BOOT_PICKER_GUI_CONTEXT  *GuiContext,
@@ -1219,7 +1219,7 @@ BootPickerViewInitialize (
   InsertHeadList(&DrawContext->Animations, &PoofAnim.Link);
   */
 
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
 VOID

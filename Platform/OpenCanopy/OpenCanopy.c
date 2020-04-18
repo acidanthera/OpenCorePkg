@@ -1240,7 +1240,7 @@ GuiDrawLoop (
   } while (!DrawContext->ExitLoop (DrawContext->GuiContext));
 }
 
-RETURN_STATUS
+EFI_STATUS
 GuiIcnsToImageIcon (
   OUT GUI_IMAGE  *Image,
   IN  VOID       *IcnsImage,
@@ -1355,7 +1355,7 @@ GuiIcnsToImageIcon (
     }
   }
 
-  return RETURN_NOT_FOUND;
+  return EFI_NOT_FOUND;
 }
 
 EFI_STATUS
@@ -1415,7 +1415,7 @@ GuiLabelToImage (
   return EFI_SUCCESS;
 }
 
-RETURN_STATUS
+EFI_STATUS
 GuiPngToImage (
   OUT GUI_IMAGE  *Image,
   IN  VOID       *ImageData,
@@ -1450,10 +1450,10 @@ GuiPngToImage (
     ++BufferWalker;
   }
 
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
-RETURN_STATUS
+EFI_STATUS
 GuiCreateHighlightedImage (
   OUT GUI_IMAGE                            *SelectedImage,
   IN  CONST GUI_IMAGE                      *SourceImage,
@@ -1481,7 +1481,7 @@ GuiCreateHighlightedImage (
              SourceImage->Buffer
              );
   if (Buffer == NULL) {
-    return RETURN_OUT_OF_RESOURCES;
+    return EFI_OUT_OF_RESOURCES;
   }
 
   PremulPixel.Blue     = (UINT8)((HighlightPixel->Blue  * HighlightPixel->Reserved) / 0xFF);
@@ -1530,7 +1530,7 @@ GuiCreateHighlightedImage (
   SelectedImage->Width  = SourceImage->Width;
   SelectedImage->Height = SourceImage->Height;
   SelectedImage->Buffer = Buffer;
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
 /// A sine approximation via a third-order approx.

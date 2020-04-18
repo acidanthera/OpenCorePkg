@@ -31,7 +31,7 @@
 #define KERNEL_HEADER_SIZE (EFI_PAGE_SIZE*2)
 
 STATIC
-RETURN_STATUS
+EFI_STATUS
 ReplaceBuffer (
   IN     UINT32  TargetSize,
   IN OUT UINT8   **Buffer,
@@ -42,23 +42,23 @@ ReplaceBuffer (
   UINT8  *TmpBuffer;
 
   if (OcOverflowAddU32 (TargetSize, ReservedSize, &TargetSize)) {
-    return RETURN_INVALID_PARAMETER;
+    return EFI_INVALID_PARAMETER;
   }
 
   if (*AllocatedSize >= TargetSize) {
-    return RETURN_SUCCESS;
+    return EFI_SUCCESS;
   }
 
   TmpBuffer = AllocatePool (TargetSize);
   if (TmpBuffer == NULL) {
-    return RETURN_OUT_OF_RESOURCES;
+    return EFI_OUT_OF_RESOURCES;
   }
 
   FreePool (*Buffer);
   *Buffer = TmpBuffer;
   *AllocatedSize = TargetSize;
 
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
 STATIC
@@ -133,7 +133,7 @@ ParseCompressedHeader (
   IN     UINT32             ReservedSize
   )
 {
-  RETURN_STATUS       Status;
+  EFI_STATUS        Status;
 
   UINT32            KernelSize;
   MACH_COMP_HEADER  *CompHeader;
@@ -160,7 +160,7 @@ ParseCompressedHeader (
   }
 
   Status = ReplaceBuffer (DecompressedSize, Buffer, AllocatedSize, ReservedSize);
-  if (RETURN_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "Decomp kernel (%u bytes) cannot be allocated at %08X\n", DecompressedSize, Offset));
     return KernelSize;
   }
@@ -172,7 +172,7 @@ ParseCompressedHeader (
   }
 
   Status = GetFileData (File, Offset + sizeof (MACH_COMP_HEADER), CompressedSize, CompressedBuffer);
-  if (RETURN_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "Comp kernel (%u bytes) cannot be read at %08X\n", CompressedSize, Offset));
     FreePool (CompressedBuffer);
     return KernelSize;
@@ -199,7 +199,7 @@ ParseCompressedHeader (
 }
 
 STATIC
-RETURN_STATUS
+EFI_STATUS
 ReadAppleKernelImage (
   IN     EFI_FILE_PROTOCOL  *File,
   IN OUT UINT8              **Buffer,
@@ -209,13 +209,13 @@ ReadAppleKernelImage (
   IN     UINT32             Offset
   )
 {
-  RETURN_STATUS        Status;
+  EFI_STATUS        Status;
   UINT32            *MagicPtr;
   BOOLEAN           ForbidFat;
   BOOLEAN           Compressed;
 
   Status = GetFileData (File, Offset, KERNEL_HEADER_SIZE, *Buffer);
-  if (RETURN_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 
@@ -228,7 +228,7 @@ ReadAppleKernelImage (
   while (TRUE) {
     if (!OC_TYPE_ALIGNED (UINT32 , *Buffer)) {
       DEBUG ((DEBUG_INFO, "Misaligned kernel header %p at %08X\n", *Buffer, Offset));
-      return RETURN_INVALID_PARAMETER;
+      return EFI_INVALID_PARAMETER;
     }
     MagicPtr = (UINT32 *)* Buffer;
 
@@ -240,7 +240,7 @@ ReadAppleKernelImage (
         // This is just a valid (formerly) compressed image.
         //
         if (Compressed) {
-          return RETURN_SUCCESS;
+          return EFI_SUCCESS;
         }
 
         //
@@ -252,22 +252,22 @@ ReadAppleKernelImage (
           // Figure out size for a non fat image.
           //
           Status = GetFileSize (File, KernelSize);
-          if (RETURN_ERROR (Status)) {
+          if (EFI_ERROR (Status)) {
             DEBUG ((DEBUG_INFO, "Kernel size cannot be determined - %r\n", Status));
-            return RETURN_OUT_OF_RESOURCES;
+            return EFI_OUT_OF_RESOURCES;
           }
 
           DEBUG ((DEBUG_VERBOSE, "Determined kernel size is %u bytes\n", *KernelSize));
         }
 
         Status = ReplaceBuffer (*KernelSize, Buffer, AllocatedSize, ReservedSize);
-        if (RETURN_ERROR (Status)) {
+        if (EFI_ERROR (Status)) {
           DEBUG ((DEBUG_INFO, "Kernel (%u bytes) cannot be allocated at %08X\n", *KernelSize, Offset));
           return Status;
         }
 
         Status = GetFileData (File, Offset, *KernelSize, *Buffer);
-        if (RETURN_ERROR (Status)) {
+        if (EFI_ERROR (Status)) {
           DEBUG ((DEBUG_INFO, "Kernel (%u bytes) cannot be read at %08X\n", *KernelSize, Offset));
         }
 
@@ -277,20 +277,20 @@ ReadAppleKernelImage (
       {
         if (ForbidFat) {
           DEBUG ((DEBUG_INFO, "Fat kernel recursion %p at %08X\n", MagicPtr, Offset));
-          return RETURN_INVALID_PARAMETER;
+          return EFI_INVALID_PARAMETER;
         }
 
         *KernelSize = ParseFatArchitecture (Buffer, &Offset);
         if (*KernelSize != 0) {
           return ReadAppleKernelImage (File, Buffer, KernelSize, AllocatedSize, ReservedSize, Offset);
         }
-        return RETURN_INVALID_PARAMETER;
+        return EFI_INVALID_PARAMETER;
       }
       case MACH_COMPRESSED_BINARY_INVERT_SIGNATURE:
       {
         if (Compressed) {
           DEBUG ((DEBUG_INFO, "Compression recursion %p at %08X\n", MagicPtr, Offset));
-          return RETURN_INVALID_PARAMETER;
+          return EFI_INVALID_PARAMETER;
         }
 
         //
@@ -306,16 +306,16 @@ ReadAppleKernelImage (
           DEBUG ((DEBUG_VERBOSE, "Compressed result has %08X magic\n", *(UINT32 *) Buffer));
           continue;
         }
-        return RETURN_INVALID_PARAMETER;
+        return EFI_INVALID_PARAMETER;
       }
       default:
         DEBUG ((Offset > 0 ? DEBUG_INFO : DEBUG_VERBOSE, "Invalid kernel magic %08X at %08X\n", *MagicPtr, Offset));
-        return RETURN_INVALID_PARAMETER;
+        return EFI_INVALID_PARAMETER;
     }
   }
 }
 
-RETURN_STATUS
+EFI_STATUS
 ReadAppleKernel (
   IN     EFI_FILE_PROTOCOL  *File,
      OUT UINT8              **Kernel,
@@ -324,14 +324,14 @@ ReadAppleKernel (
   IN     UINT32             ReservedSize
   )
 {
-  RETURN_STATUS  Status;
+  EFI_STATUS  Status;
 
   *KernelSize    = 0;
   *AllocatedSize = KERNEL_HEADER_SIZE;
   *Kernel        = AllocatePool (*AllocatedSize);
 
   if (*Kernel == NULL) {
-    return RETURN_INVALID_PARAMETER;
+    return EFI_INVALID_PARAMETER;
   }
 
   Status = ReadAppleKernelImage (
@@ -343,7 +343,7 @@ ReadAppleKernel (
     0
     );
 
-  if (RETURN_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     FreePool (*Kernel);
   }
 

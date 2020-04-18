@@ -85,14 +85,14 @@ typedef struct {
   UINT32                               CursorDefaultY;
 } BOOT_PICKER_GUI_CONTEXT;
 
-RETURN_STATUS
+EFI_STATUS
 BootPickerViewInitialize (
   OUT GUI_DRAWING_CONTEXT      *DrawContext,
   IN  BOOT_PICKER_GUI_CONTEXT  *GuiContext,
   IN  GUI_CURSOR_GET_IMAGE     GetCursorImage
   );
 
-RETURN_STATUS
+EFI_STATUS
 BootPickerEntriesAdd (
   IN OC_PICKER_CONTEXT              *Context,
   IN CONST BOOT_PICKER_GUI_CONTEXT  *GuiContext,

@@ -107,7 +107,7 @@ InternalContextDestruct (
 }
 
 STATIC
-RETURN_STATUS
+EFI_STATUS
 LoadImageFileFromStorage (
   OUT GUI_IMAGE                *Images,
   IN  OC_STORAGE_CONTEXT       *Storage,
@@ -175,15 +175,15 @@ LoadImageFileFromStorage (
         Icon,
         Status
         ));
-      return Index == ICON_TYPE_BASE ? RETURN_NOT_FOUND : RETURN_SUCCESS;
+      return Index == ICON_TYPE_BASE ? EFI_NOT_FOUND : EFI_SUCCESS;
     }
   }
 
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
 STATIC
-RETURN_STATUS
+EFI_STATUS
 LoadLabelFileFromStorageForScale (
   IN  OC_STORAGE_CONTEXT       *Storage,
   IN  CONST CHAR8              *LabelFilePath,
@@ -213,19 +213,19 @@ LoadLabelFileFromStorageForScale (
 
   if (*FileData == NULL) {
     DEBUG ((DEBUG_WARN, "OCUI: Failed to load %s\n", Path));
-    return RETURN_NOT_FOUND;
+    return EFI_NOT_FOUND;
   }
 
   if (*FileSize == 0) {
     FreePool (*FileData);
     DEBUG ((DEBUG_WARN, "OCUI: Empty %s\n", Path));
-    return RETURN_NOT_FOUND; 
+    return EFI_NOT_FOUND; 
   }
 
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
-RETURN_STATUS
+EFI_STATUS
 LoadLabelFromStorage (
   IN  OC_STORAGE_CONTEXT       *Storage,
   IN  CONST CHAR8              *ImageFilePath,
@@ -236,12 +236,12 @@ LoadLabelFromStorage (
 {
   VOID           *ImageData;
   UINT32         ImageSize;
-  RETURN_STATUS  Status;
+  EFI_STATUS     Status;
 
   ASSERT (Scale == 1 || Scale == 2);
 
   Status = LoadLabelFileFromStorageForScale (Storage, ImageFilePath, Scale, &ImageData, &ImageSize);
-  if (RETURN_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 
@@ -249,21 +249,21 @@ LoadLabelFromStorage (
 
   FreePool (ImageData);
 
-  if (RETURN_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCUI: Failed to decode label %a - %r\n", ImageFilePath, Status));
   }
 
   return Status;
 }
 
-RETURN_STATUS
+EFI_STATUS
 InternalContextConstruct (
   OUT BOOT_PICKER_GUI_CONTEXT  *Context,
   IN  OC_STORAGE_CONTEXT       *Storage,
   IN  OC_PICKER_CONTEXT        *Picker
   )
 {
-  RETURN_STATUS                      Status;
+  EFI_STATUS                         Status;
   EFI_USER_INTERFACE_THEME_PROTOCOL  *UiTheme;
   VOID                               *FontImage;
   VOID                               *FontData;
@@ -387,10 +387,10 @@ InternalContextConstruct (
     }
   }
 
-  if (RETURN_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OCUI: Failed to load images\n"));
     InternalContextDestruct (Context);
-    return RETURN_UNSUPPORTED;
+    return EFI_UNSUPPORTED;
   }
 
   FontImage = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font.png", &FontImageSize);
@@ -414,10 +414,10 @@ InternalContextConstruct (
   if (!Result) {
     DEBUG ((DEBUG_WARN, "OCUI: Font init failed\n"));
     InternalContextDestruct (Context);
-    return RETURN_UNSUPPORTED;
+    return EFI_UNSUPPORTED;
   }
   
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
 CONST GUI_IMAGE *

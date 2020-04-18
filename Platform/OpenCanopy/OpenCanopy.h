@@ -130,14 +130,14 @@ struct GUI_DRAWING_CONTEXT_ {
   UINT8                Scale;
 };
 
-RETURN_STATUS
+EFI_STATUS
 GuiPngToImage (
   OUT GUI_IMAGE  *Image,
   IN  VOID       *ImageData,
   IN  UINT32     ImageDataSize
   );
   
-RETURN_STATUS
+EFI_STATUS
 GuiIcnsToImageIcon (
   OUT GUI_IMAGE  *Image,
   IN  VOID       *IcnsImage,
@@ -147,7 +147,7 @@ GuiIcnsToImageIcon (
   IN  UINT32     MatchHeight
   );
 
-RETURN_STATUS
+EFI_STATUS
 GuiLabelToImage (
   OUT GUI_IMAGE *Image,
   IN  VOID      *RawData,
@@ -266,7 +266,7 @@ GuiBlendPixel (
   IN     UINT8                                Opacity
   );
 
-RETURN_STATUS
+EFI_STATUS
 GuiCreateHighlightedImage (
   OUT GUI_IMAGE                            *SelectedImage,
   IN  CONST GUI_IMAGE                      *SourceImage,

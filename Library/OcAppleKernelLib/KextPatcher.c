@@ -26,7 +26,7 @@
 
 #include "PrelinkedInternal.h"
 
-RETURN_STATUS
+EFI_STATUS
 PatcherInitContextFromPrelinked (
   IN OUT PATCHER_CONTEXT    *Context,
   IN OUT PRELINKED_CONTEXT  *Prelinked,
@@ -37,14 +37,14 @@ PatcherInitContextFromPrelinked (
 
   Kext = InternalCachedPrelinkedKext (Prelinked, Name);
   if (Kext == NULL) {
-    return RETURN_NOT_FOUND;
+    return EFI_NOT_FOUND;
   }
 
   CopyMem (Context, &Kext->Context, sizeof (*Context));
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
-RETURN_STATUS
+EFI_STATUS
 PatcherInitContextFromBuffer (
   IN OUT PATCHER_CONTEXT    *Context,
   IN OUT UINT8              *Buffer,
@@ -65,7 +65,7 @@ PatcherInitContextFromBuffer (
   //
 
   if (!MachoInitializeContext (&Context->MachContext, Buffer, BufferSize)) {
-    return RETURN_INVALID_PARAMETER;
+    return EFI_INVALID_PARAMETER;
   }
 
   Segment = MachoGetSegmentByName64 (
@@ -73,16 +73,16 @@ PatcherInitContextFromBuffer (
     "__TEXT"
     );
   if (Segment == NULL || Segment->VirtualAddress < Segment->FileOffset) {
-    return RETURN_NOT_FOUND;
+    return EFI_NOT_FOUND;
   }
 
   Context->VirtualBase = Segment->VirtualAddress - Segment->FileOffset;
   Context->VirtualKmod = 0;
 
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
-RETURN_STATUS
+EFI_STATUS
 PatcherGetSymbolAddress (
   IN OUT PATCHER_CONTEXT    *Context,
   IN     CONST CHAR8        *Name,
@@ -98,7 +98,7 @@ PatcherGetSymbolAddress (
   while (TRUE) {
     Symbol = MachoGetSymbolByIndex64 (&Context->MachContext, Index);
     if (Symbol == NULL) {
-      return RETURN_NOT_FOUND;
+      return EFI_NOT_FOUND;
     }
 
     SymbolName = MachoGetSymbolName64 (&Context->MachContext, Symbol);
@@ -111,20 +111,20 @@ PatcherGetSymbolAddress (
   }
 
   if (!MachoSymbolGetFileOffset64 (&Context->MachContext, Symbol, &Offset, NULL)) {
-    return RETURN_INVALID_PARAMETER;
+    return EFI_INVALID_PARAMETER;
   }
 
   *Address = (UINT8 *)MachoGetMachHeader64 (&Context->MachContext) + Offset;
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
-RETURN_STATUS
+EFI_STATUS
 PatcherApplyGenericPatch (
   IN OUT PATCHER_CONTEXT        *Context,
   IN     PATCHER_GENERIC_PATCH  *Patch
   )
 {
-  RETURN_STATUS  Status;
+  EFI_STATUS     Status;
   UINT8          *Base;
   UINT32         Size;
   UINT32         ReplaceCount;
@@ -133,7 +133,7 @@ PatcherApplyGenericPatch (
   Size = MachoGetFileSize (&Context->MachContext);
   if (Patch->Base != NULL) {
     Status = PatcherGetSymbolAddress (Context, Patch->Base, &Base);
-    if (RETURN_ERROR (Status)) {
+    if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
         "OCAK: %a base lookup failure %r\n",
@@ -153,10 +153,10 @@ PatcherApplyGenericPatch (
         "OCAK: %a is borked, not found\n",
         Patch->Comment != NULL ? Patch->Comment : "Patch"
         ));
-      return RETURN_NOT_FOUND;
+      return EFI_NOT_FOUND;
     }
     CopyMem (Base, Patch->Replace, Patch->Size);
-    return RETURN_SUCCESS;
+    return EFI_SUCCESS;
   }
 
   if (Patch->Limit > 0 && Patch->Limit < Size) {
@@ -193,13 +193,13 @@ PatcherApplyGenericPatch (
   }
 
   if (ReplaceCount > 0) {
-    return RETURN_SUCCESS;
+    return EFI_SUCCESS;
   }
 
-  return RETURN_NOT_FOUND;
+  return EFI_NOT_FOUND;
 }
 
-RETURN_STATUS
+EFI_STATUS
 PatcherBlockKext (
   IN OUT PATCHER_CONTEXT        *Context
   )
@@ -213,7 +213,7 @@ PatcherBlockKext (
   // Kernel has 0 kmod.
   //
   if (Context->VirtualKmod == 0 || Context->VirtualBase > Context->VirtualKmod) {
-    return RETURN_UNSUPPORTED;
+    return EFI_UNSUPPORTED;
   }
 
   KmodOffset = Context->VirtualKmod - Context->VirtualBase;
@@ -222,12 +222,12 @@ PatcherBlockKext (
     || KmodOffset > MachoGetFileSize (&Context->MachContext)
     || KmodInfo->StartAddr == 0
     || Context->VirtualBase > KmodInfo->StartAddr) {
-    return RETURN_INVALID_PARAMETER;
+    return EFI_INVALID_PARAMETER;
   }
 
   TmpOffset = KmodInfo->StartAddr - Context->VirtualBase;
   if (TmpOffset > MachoGetFileSize (&Context->MachContext) - 6) {
-    return RETURN_BUFFER_TOO_SMALL;
+    return EFI_BUFFER_TOO_SMALL;
   }
 
   PatchAddr = (UINT8 *)MachoGetMachHeader64 (&Context->MachContext) + TmpOffset;
@@ -243,5 +243,5 @@ PatcherBlockKext (
   PatchAddr[4] = 0x00;
   PatchAddr[5] = 0xC3;
 
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }

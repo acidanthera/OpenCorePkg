@@ -240,7 +240,7 @@ GetTimeInNanoSecond (
   @retval EFI_SUCCESS   The constructor always returns RETURN_SUCCESS.
 
 **/
-RETURN_STATUS
+EFI_STATUS
 EFIAPI
 OcTimerLibConstructor (
   VOID
