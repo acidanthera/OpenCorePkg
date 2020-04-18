@@ -29,11 +29,22 @@
 #
 
 [Sources]
+  AppleRtcRam.c
   OcRtcLib.c
+  OcRtcLibInternal.h
 
 [Packages]
+  EfiPkg/EfiPkg.dec
   MdePkg/MdePkg.dec
   OpenCorePkg/OpenCorePkg.dec
 
+[Protocols]
+  gAppleRtcRamProtocolGuid
+
 [LibraryClasses]
+  BaseMemoryLib
+  DebugLib
   IoLib
+  OcMiscLib
+  UefiLib
+  UefiBootServicesTableLib

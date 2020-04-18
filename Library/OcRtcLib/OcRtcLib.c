@@ -16,35 +16,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
+#include <IndustryStandard/AppleRtc.h>
 #include <Library/IoLib.h>
 #include <Library/OcRtcLib.h>
-
-//
-// Available on all platforms, requires NMI bit handling.
-//
-#define R_PCH_RTC_INDEX           0x70
-#define R_PCH_RTC_TARGET          0x71
-#define R_PCH_RTC_EXT_INDEX       0x72
-#define R_PCH_RTC_EXT_TARGET      0x73
-
-//
-// Available on Ivy Bridge and newer. Ignores NMI bit.
-//
-#define R_PCH_RTC_INDEX_ALT       0x74
-#define R_PCH_RTC_TARGET_ALT      0x75
-#define R_PCH_RTC_EXT_INDEX_ALT   0x76
-#define R_PCH_RTC_EXT_TARGET_ALT  0x77
-
-//
-// RTC Memory bank size
-//
-#define RTC_BANK_SIZE             0x80
-
-//
-// RTC INDEX bit mask
-//
-#define RTC_DATA_MASK             0x7F
-#define RTC_NMI_MASK              0x80
+#include "OcRtcLibInternal.h"
 
 UINT8
 OcRtcRead (
@@ -89,6 +64,36 @@ OcRtcWrite (
   RtcIndexNmi = IoRead8 (RtcIndexPort) & RTC_NMI_MASK;
   IoWrite8 (RtcIndexPort, (Offset & RTC_DATA_MASK) | RtcIndexNmi);
   IoWrite8 (RtcDataPort, Value);
+}
+
+UINT16
+OcRtcChecksumApple (
+  IN CONST VOID   *Data,
+  IN UINTN        Size
+  )
+{
+  CONST UINT8   *Buffer;
+  CONST UINT8   *BufferEnd;
+  UINT16        Checksum;
+  UINTN         Index;
+
+  Buffer    = Data;
+  BufferEnd = Buffer + Size;
+  Checksum  = 0;
+
+  while (Buffer < BufferEnd) {
+    Checksum ^= *Buffer++;
+    for (Index = 0; Index < APPLE_RTC_CHECKSUM_ROUNDS; ++Index) {
+      if (Checksum & 1U) {
+        Checksum >>= 1U;
+        Checksum  ^= APPLE_RTC_CHECKSUM_POLYNOMIAL;
+      } else {
+        Checksum >>= 1U;
+      }
+    }
+  }
+
+  return Checksum;
 }
 
 UINT8
