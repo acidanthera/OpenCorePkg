@@ -1484,3 +1484,72 @@ PatchPowerStateTimeout (
 
   return Status;
 }
+
+//
+// There currently are 2 places main RTC checksum is calculated in AppleRTC.kext
+// __ZN8AppleRTC14updateChecksumEv and __ZN8AppleRTC19rtcRecordTracePointEjjj.
+// Since we do not want to completely break RTC and/or saving tracepoints to RTC
+// we patch-out __ZN8AppleRTC8rtcWriteEjh call arguments (0x58 and 0x59) with
+// invalid (out of range) value 0xFFFF in 4 places.
+//
+
+STATIC
+UINT8
+mAppleRtcChecksumPatchFind[] = {
+  0xBE, 0x58, 0x00, 0x00, 0x00
+};
+
+STATIC
+UINT8
+mAppleRtcChecksumPatchMask[] = {
+  0xFF, 0xFE, 0xFF, 0xFF, 0xFF
+};
+
+STATIC
+UINT8
+mAppleRtcChecksumPatchReplace[] = {
+  0xBE, 0xFF, 0xFF, 0x00, 0x00
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mAppleRtcChecksumPatch = {
+  .Comment     = DEBUG_POINTER ("DisableRtcChecksum"),
+  .Base        = NULL,
+  .Find        = mAppleRtcChecksumPatchFind,
+  .Mask        = mAppleRtcChecksumPatchMask,
+  .Replace     = mAppleRtcChecksumPatchReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mAppleRtcChecksumPatchFind),
+  .Count       = 4,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+EFI_STATUS
+PatchAppleRtcChecksum (
+  IN OUT PRELINKED_CONTEXT  *Context
+  )
+{
+  RETURN_STATUS       Status;
+  PATCHER_CONTEXT     Patcher;
+
+  Status = PatcherInitContextFromPrelinked (
+    &Patcher,
+    Context,
+    "com.apple.driver.AppleRTC"
+    );
+
+  if (!EFI_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (&Patcher, &mAppleRtcChecksumPatch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.AppleRTC DisableRtcChecksum - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.AppleRTC DisableRtcChecksum\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.driver.AppleRTC for DisableRtcChecksum - %r\n", Status));
+  }
+
+  return Status;
+}

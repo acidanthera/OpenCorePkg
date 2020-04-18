@@ -1976,6 +1976,21 @@ blocking.
   VT-d support in other systems in case they need it.
 
 \item
+  \texttt{DisableRtcChecksum}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Disables primary checksum (\texttt{0x58}-\texttt{0x59})
+  writing in AppleRTC.
+
+  \emph{Note 1}: This option will not protect other areas from being overwritten,
+  see \href{https://github.com/acidanthera/RTCMemoryFixup}{RTCMemoryFixup}
+  kernel extension if this is desired.
+
+  \emph{Note 2}: This option will not protect areas from being overwritten
+  at firmware stage (e.g. macOS bootloader), see \texttt{RTC} (FIXME) section
+  if this is desired.
+
+\item
   \texttt{DummyPowerManagement}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

@@ -586,4 +586,16 @@ PatchPowerStateTimeout (
   IN OUT PATCHER_CONTEXT   *Patcher
   );
 
+/**
+  Disable AppleRTC checksum writing.
+
+  @param Patcher  Patcher context.
+
+  @return  RETURN_SUCCESS on success.
+**/
+EFI_STATUS
+PatchAppleRtcChecksum (
+  IN OUT PRELINKED_CONTEXT  *Context
+  );
+
 #endif // OC_APPLE_KERNEL_LIB_H

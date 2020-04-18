@@ -457,6 +457,10 @@ OcKernelApplyPatches (
       PatchAppleIoMapperSupport (Context);
     }
 
+    if (Config->Kernel.Quirks.DisableRtcChecksum) {
+      PatchAppleRtcChecksum (Context);
+    }
+
     if (Config->Kernel.Quirks.IncreasePciBarSize) {
       PatchIncreasePciBarSize (Context);     
     }

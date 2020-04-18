@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Apr  7 19:32:13 2020
-%DIF ADD ../Configuration.tex        Sat Apr 18 13:12:30 2020
+%DIF ADD ../Configuration.tex        Sat Apr 18 15:39:07 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2037,7 +2037,25 @@ blocking.
   VT-d support in other systems in case they need it.
 
 \item
-  \texttt{DummyPowerManagement}\\
+  \DIFaddbegin \texttt{\DIFadd{DisableRtcChecksum}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Disables primary checksum (}\texttt{\DIFadd{0x58}}\DIFadd{-}\texttt{\DIFadd{0x59}}\DIFadd{)
+  writing in AppleRTC.
+}
+
+  \emph{\DIFadd{Note 1}}\DIFadd{: This option will not protect other areas from being overwritten,
+  see }\href{https://github.com/acidanthera/RTCMemoryFixup}{RTCMemoryFixup}
+  \DIFadd{kernel extension if this is desired.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: This option will not protect areas from being overwritten
+  at firmware stage (e.g. macOS bootloader), see }\texttt{\DIFadd{RTC}} \DIFadd{(FIXME) section
+  if this is desired.
+}
+
+\item
+  \DIFaddend \texttt{DummyPowerManagement}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Disables \texttt{AppleIntelCpuPowerManagement}.

@@ -13,6 +13,7 @@ OpenCore Changelog
 - Added mouse drivers to the package as OVMF needs one
 - Added memory region reservation support
 - Added RtcRw tool to manipulate RTC memory
+- Added `PatchAppleRtcChecksum` kernel quirk
 
 #### v0.5.7
 - Added TimeMachine detection to picker
