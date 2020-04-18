@@ -78,6 +78,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_ACPI_CPU_FREQUENCY_VARIABLE_NAME  L"acpi-cpu-frequency"
 
 //
+// Variable used to mark blacklisted RTC values.
+//
+#define OC_RTC_BLACKLIST_VARIABLE_NAME       L"rtc-blacklist"
+
+//
 // 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102
 // This GUID is specifically used for normal variable access by Lilu kernel extension and its plugins.
 //

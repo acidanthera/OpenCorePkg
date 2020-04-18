@@ -1987,8 +1987,8 @@ blocking.
   kernel extension if this is desired.
 
   \emph{Note 2}: This option will not protect areas from being overwritten
-  at firmware stage (e.g. macOS bootloader), see \texttt{RTC} (FIXME) section
-  if this is desired.
+  at firmware stage (e.g. macOS bootloader), see \texttt{AppleRtc} protocol
+  description if this is desired.
 
 \item
   \texttt{DummyPowerManagement}\\
@@ -4825,6 +4825,18 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Apple Key Map protocols with builtin
   versions.
+
+\item
+  \texttt{AppleRtc}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple RTC RAM protocol with builtin
+  version.
+
+  \emph{Note}: Builtin version of Apple RTC RAM protocol may filter out
+  I/O attempts to select RTC memory addresses. The list of addresses
+  can be specified in \texttt{4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:rtc-blacklist}
+  variable as a data array.
 
 \item
   \texttt{AppleSmcIo}\\

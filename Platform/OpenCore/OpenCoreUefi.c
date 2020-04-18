@@ -38,6 +38,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcFirmwareVolumeLib.h>
 #include <Library/OcHashServicesLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcRtcLib.h>
 #include <Library/OcSmcLib.h>
 #include <Library/OcOSInfoLib.h>
 #include <Library/OcUnicodeCollationEngGenericLib.h>
@@ -338,6 +339,10 @@ OcReinstallProtocols (
 
   if (OcOSInfoInstallProtocol (Config->Uefi.Protocols.OSInfo) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install os info protocol\n"));
+  }
+
+  if (OcAppleRtcRamInstallProtocol (Config->Uefi.Protocols.AppleRtcRam) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install rtc ram protocol\n"));
   }
 }
 

@@ -16,9 +16,11 @@
 
 **/
 
+#include <Guid/OcVariables.h>
 #include <Protocol/AppleRtcRam.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcRtcLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -26,6 +28,9 @@
 #include "OcRtcLibInternal.h"
 
 STATIC EFI_LOCK mAppleRtcRamLock;
+STATIC UINT8 mEmulatedRtcArea[APPLE_RTC_TOTAL_SIZE];
+STATIC BOOLEAN mEmulatedRtcStatus[APPLE_RTC_TOTAL_SIZE];
+
 
 STATIC
 EFI_STATUS
@@ -35,6 +40,10 @@ SyncRtcRead (
   )
 {
   EFI_STATUS Status;
+
+  if (mEmulatedRtcStatus[Address]) {
+    return mEmulatedRtcArea[Address];
+  }
 
   Status = EfiAcquireLockOrFail (&mAppleRtcRamLock);
   if (EFI_ERROR (Status)) {
@@ -54,6 +63,11 @@ SyncRtcWrite (
   )
 {
   EFI_STATUS Status;
+
+  if (mEmulatedRtcStatus[Address]) {
+    mEmulatedRtcArea[Address] = Value;
+    return EFI_SUCCESS;
+  }
 
   Status = EfiAcquireLockOrFail (&mAppleRtcRamLock);
   if (EFI_ERROR (Status)) {
@@ -150,7 +164,7 @@ AppleRtcRamReadData (
         return Status;
       }
 
-      if (((UINT32) Temp ^ (UINT32) *Buffer) != 0xFF) {
+      if ((Temp ^ *Buffer) != 0xFF) {
         *Buffer = 0;
       }
     }
@@ -275,8 +289,11 @@ OcAppleRtcRamInstallProtocol (
   IN BOOLEAN  Reinstall
   )
 {
-  EFI_STATUS             Status;
-  APPLE_RTC_RAM_PROTOCOL *Protocol;
+  EFI_STATUS              Status;
+  APPLE_RTC_RAM_PROTOCOL  *Protocol;
+  UINT8                   *RtcBlacklist;
+  UINTN                   Index;
+  UINTN                   RtcBlacklistSize;
 
   DEBUG ((DEBUG_VERBOSE, "OcAppleRtcRamInstallProtocol\n"));
 
@@ -296,6 +313,31 @@ OcAppleRtcRamInstallProtocol (
     if (!EFI_ERROR (Status)) {
       return Protocol;
     }
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCRTC: Wake log is 0x%02X 0x%02X % 3d 0x%02X\n",
+    OcRtcRead (APPLE_RTC_TRACE_DATA_ADDR),
+    OcRtcRead (APPLE_RTC_WL_MASK_ADDR),
+    OcRtcRead (APPLE_RTC_WL_EVENT_ADDR),
+    OcRtcRead (APPLE_RTC_WL_EVENT_EXTRA_ADDR)
+    ));
+
+  Status = GetVariable2 (
+    OC_RTC_BLACKLIST_VARIABLE_NAME,
+    &gOcVendorVariableGuid,
+    (VOID **) &RtcBlacklist,
+    &RtcBlacklistSize
+    );
+
+  if (!EFI_ERROR (Status)) {
+    for (Index = 0; Index < APPLE_RTC_TOTAL_SIZE; ++Index) {
+      mEmulatedRtcStatus[RtcBlacklist[Index]] = TRUE;
+      DEBUG ((DEBUG_INFO, "OCRTC: Blacklisted %02x address\n", RtcBlacklist[Index]));
+    }
+
+    FreePool (RtcBlacklist);
   }
 
   //

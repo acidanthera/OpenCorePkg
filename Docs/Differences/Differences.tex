@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Apr  7 19:32:13 2020
-%DIF ADD ../Configuration.tex        Sat Apr 18 15:39:07 2020
+%DIF ADD ../Configuration.tex        Sat Apr 18 22:12:54 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2050,8 +2050,8 @@ blocking.
 }
 
   \emph{\DIFadd{Note 2}}\DIFadd{: This option will not protect areas from being overwritten
-  at firmware stage (e.g. macOS bootloader), see }\texttt{\DIFadd{RTC}} \DIFadd{(FIXME) section
-  if this is desired.
+  at firmware stage (e.g. macOS bootloader), see }\texttt{\DIFadd{AppleRtc}} \DIFadd{protocol
+  description if this is desired.
 }
 
 \item
@@ -4911,7 +4911,21 @@ functioning. Feature highlights:
   versions.
 
 \item
-  \texttt{AppleSmcIo}\\
+  \DIFaddbegin \texttt{\DIFadd{AppleRtc}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Reinstalls Apple RTC RAM protocol with builtin
+  version.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: Builtin version of Apple RTC RAM protocol may filter out
+  I/O attempts to select RTC memory addresses. The list of addresses
+  can be specified in }\texttt{\DIFadd{4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:rtc-blacklist}}
+  \DIFadd{variable as a data array.
+}
+
+\item
+  \DIFaddend \texttt{AppleSmcIo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Apple SMC I/O protocol with a builtin

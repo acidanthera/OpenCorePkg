@@ -14,6 +14,7 @@ OpenCore Changelog
 - Added memory region reservation support
 - Added RtcRw tool to manipulate RTC memory
 - Added `PatchAppleRtcChecksum` kernel quirk
+- Added `AppleRtcRam` protocol implementation
 
 #### v0.5.7
 - Added TimeMachine detection to picker
