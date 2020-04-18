@@ -12,6 +12,7 @@ OpenCore Changelog
 - Fixed AppleEvent and OpenCanopy compatibility with OVMF TPL restrictions
 - Added mouse drivers to the package as OVMF needs one
 - Added memory region reservation support
+- Added RtcRw tool to manipulate RTC memory
 
 #### v0.5.7
 - Added TimeMachine detection to picker

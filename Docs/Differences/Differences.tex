@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Apr  7 19:32:13 2020
-%DIF ADD ../Configuration.tex        Sat Apr 18 10:27:00 2020
+%DIF ADD ../Configuration.tex        Sat Apr 18 13:12:30 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -621,7 +621,8 @@ Required external package dependencies include
 
 To compile with \texttt{XCODE5}, besides \href{https://developer.apple.com/xcode}{Xcode},
 one should also install \href{https://www.nasm.us}{NASM} and
-\href{https://github.com/acidanthera/ocbuild/raw/master/external/mtoc-mac64.zip}{MTOC}.
+\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/ocbuild/raw/master/external/mtoc-mac64.zip}{MTOC}%%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/ocbuild/tree/master/external}{MTOC}\DIFaddend .
 The latest Xcode version is recommended for use despite the toolchain name. Example
 command sequence may look as follows:
 
@@ -4097,7 +4098,9 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
   with a broad range of firmwares. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{PavpProvision}}
 & Perform EPID provisioning (requires certificate data configuration). \\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VerifyMsrE2}}\textbf{*}
+\DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{RtcRw}}\textbf{\DIFadd{*}}
+& \DIFadd{Utility to read and write RTC (CMOS) memory. }\\
+\DIFaddend \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VerifyMsrE2}}\textbf{*}
 & Check \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) consistency across all cores.
 \end{tabular}
 

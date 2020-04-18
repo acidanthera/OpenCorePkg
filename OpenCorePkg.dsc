@@ -151,6 +151,7 @@
   OpenCorePkg/Application/MmapDump/MmapDump.inf
   OpenCorePkg/Application/OpenControl/OpenControl.inf
   OpenCorePkg/Application/PavpProvision/PavpProvision.inf
+  OpenCorePkg/Application/RtcRw/RtcRw.inf
   OpenCorePkg/Application/VerifyMsrE2/VerifyMsrE2.inf
   OpenCorePkg/Debug/GdbSyms/GdbSyms.inf
   OpenCorePkg/Library/OcAcpiLib/OcAcpiLib.inf
