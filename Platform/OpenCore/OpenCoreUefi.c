@@ -405,14 +405,15 @@ OcLoadUefiSupport (
   IN OC_CPU_INFO         *CpuInfo
   )
 {
-  EFI_STATUS  Status;
-  EFI_HANDLE  *DriversToConnect;
-  UINTN       Index;
-  UINTN       Index2;
-  UINT16      *BootOrder;
-  UINTN       BootOrderSize;
-  BOOLEAN     BootOrderChanged;
-  EFI_EVENT   Event;
+  EFI_STATUS            Status;
+  EFI_HANDLE            *DriversToConnect;
+  UINTN                 Index;
+  UINTN                 Index2;
+  UINT16                *BootOrder;
+  UINTN                 BootOrderSize;
+  BOOLEAN               BootOrderChanged;
+  EFI_EVENT             Event;
+  EFI_PHYSICAL_ADDRESS  ReservedAddress;
 
   OcReinstallProtocols (Config);
 
@@ -497,6 +498,33 @@ OcLoadUefiSupport (
   }
 
   OcMiscUefiQuirksLoaded (Config);
+
+  for (Index = 0; Index < Config->Uefi.ReservedMemory.Count; ++Index) {
+    if (!Config->Uefi.ReservedMemory.Values[Index]->Enabled) {
+      continue;
+    }
+
+    if ((Config->Uefi.ReservedMemory.Values[Index]->Address & (BASE_4KB - 1)) != 0
+      || (Config->Uefi.ReservedMemory.Values[Index]->Size & (BASE_4KB - 1)) != 0) {
+      Status = EFI_INVALID_PARAMETER;
+    } else {
+      ReservedAddress = Config->Uefi.ReservedMemory.Values[Index]->Address;
+      Status = gBS->AllocatePages (
+        AllocateAddress,
+        EfiReservedMemoryType,
+        EFI_SIZE_TO_PAGES (Config->Uefi.ReservedMemory.Values[Index]->Size),
+        &ReservedAddress
+        );
+    }
+
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: Reserving region %Lx of %Lx size - %r\n",
+      Config->Uefi.ReservedMemory.Values[Index]->Address,
+      Config->Uefi.ReservedMemory.Values[Index]->Size,
+      Status
+      ));
+  }
 
   if (Config->Uefi.ConnectDrivers) {
     OcLoadDrivers (Storage, Config, &DriversToConnect);

@@ -70,6 +70,8 @@ OC_STRUCTORS       (OC_UEFI_AUDIO, ())
 OC_STRUCTORS       (OC_UEFI_INPUT, ())
 OC_STRUCTORS       (OC_UEFI_OUTPUT, ())
 OC_STRUCTORS       (OC_UEFI_PROTOCOLS, ())
+OC_STRUCTORS       (OC_UEFI_RSVD_ENTRY, ())
+OC_ARRAY_STRUCTORS (OC_UEFI_RSVD_ARRAY)
 OC_STRUCTORS       (OC_UEFI_QUIRKS, ())
 OC_STRUCTORS       (OC_UEFI_CONFIG, ())
 
@@ -608,6 +610,19 @@ mUefiOutputSchema[] = {
 
 STATIC
 OC_SCHEMA
+mUefiReservedMemoryEntrySchema[] = {
+  OC_SCHEMA_INTEGER_IN   ("Address", OC_UEFI_RSVD_ENTRY, Address),
+  OC_SCHEMA_STRING_IN    ("Comment", OC_UEFI_RSVD_ENTRY, Comment),
+  OC_SCHEMA_BOOLEAN_IN   ("Enabled", OC_UEFI_RSVD_ENTRY, Enabled),
+  OC_SCHEMA_INTEGER_IN   ("Size",    OC_UEFI_RSVD_ENTRY, Address),
+};
+
+STATIC
+OC_SCHEMA
+mUefiReservedMemorySchema = OC_SCHEMA_DICT (NULL, mUefiReservedMemoryEntrySchema);
+
+STATIC
+OC_SCHEMA
 mUefiConfigurationSchema[] = {
   OC_SCHEMA_DICT       ("APFS",           mUefiApfsSchema),
   OC_SCHEMA_DICT       ("Audio",          mUefiAudioSchema),
@@ -616,7 +631,8 @@ mUefiConfigurationSchema[] = {
   OC_SCHEMA_DICT       ("Input",          mUefiInputSchema),
   OC_SCHEMA_DICT       ("Output",         mUefiOutputSchema),
   OC_SCHEMA_DICT       ("Protocols",      mUefiProtocolsSchema),
-  OC_SCHEMA_DICT       ("Quirks",         mUefiQuirksSchema)
+  OC_SCHEMA_DICT       ("Quirks",         mUefiQuirksSchema),
+  OC_SCHEMA_ARRAY_IN   ("ReservedMemory", OC_GLOBAL_CONFIG, Uefi.ReservedMemory, &mUefiReservedMemorySchema),
 };
 
 //

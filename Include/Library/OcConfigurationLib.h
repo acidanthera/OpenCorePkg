@@ -557,6 +557,20 @@ typedef enum {
   OC_DECLARE (OC_UEFI_QUIRKS)
 
 ///
+/// Reserved memory entries adds.
+///
+#define OC_UEFI_RSVD_ENTRY_FIELDS(_, __) \
+  _(UINT64                      , Address          ,     , 0       , () ) \
+  _(UINT64                      , Size             ,     , 0       , () ) \
+  _(BOOLEAN                     , Enabled          ,     , FALSE   , () ) \
+  _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
+  OC_DECLARE (OC_UEFI_RSVD_ENTRY)
+
+#define OC_UEFI_RSVD_ARRAY_FIELDS(_, __) \
+  OC_ARRAY (OC_UEFI_RSVD_ENTRY, _, __)
+  OC_DECLARE (OC_UEFI_RSVD_ARRAY)
+
+///
 /// Uefi contains firmware tweaks and extra drivers.
 ///
 #define OC_UEFI_CONFIG_FIELDS(_, __) \
@@ -567,7 +581,8 @@ typedef enum {
   _(OC_UEFI_INPUT               , Input            ,     , OC_CONSTR2 (OC_UEFI_INPUT, _, __)        , OC_DESTR (OC_UEFI_INPUT)) \
   _(OC_UEFI_OUTPUT              , Output           ,     , OC_CONSTR2 (OC_UEFI_OUTPUT, _, __)       , OC_DESTR (OC_UEFI_OUTPUT)) \
   _(OC_UEFI_PROTOCOLS           , Protocols        ,     , OC_CONSTR2 (OC_UEFI_PROTOCOLS, _, __)    , OC_DESTR (OC_UEFI_PROTOCOLS)) \
-  _(OC_UEFI_QUIRKS              , Quirks           ,     , OC_CONSTR2 (OC_UEFI_QUIRKS, _, __)       , OC_DESTR (OC_UEFI_QUIRKS))
+  _(OC_UEFI_QUIRKS              , Quirks           ,     , OC_CONSTR2 (OC_UEFI_QUIRKS, _, __)       , OC_DESTR (OC_UEFI_QUIRKS)) \
+  _(OC_UEFI_RSVD_ARRAY          , ReservedMemory   ,     , OC_CONSTR2 (OC_UEFI_RSVD_ARRAY, _, __)   , OC_DESTR (OC_UEFI_RSVD_ARRAY))
   OC_DECLARE (OC_UEFI_CONFIG)
 
 /**

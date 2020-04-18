@@ -4222,6 +4222,15 @@ functioning. Feature highlights:
   \textbf{Description}: Apply individual firmware quirks described in
   \hyperref[uefiquirkprops]{Quirks Properties} section below.
 
+\item
+  \texttt{ReservedMemory}\\
+  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Description}: Designed to be filled with \texttt{plist\ dict} values,
+  describing memory areas exquisite to particular firmware and hardware functioning,
+  which should not be used by the operating system. An example of such memory region
+  could be second 256 MB corrupted by Intel HD 3000 or an area with faulty RAM.
+  See \hyperref[uefirsvdprops]{ReservedMemory Properties} section below.
+
 \end{enumerate}
 
 \subsection{APFS Properties}\label{uefiapfsprops}
@@ -4974,6 +4983,42 @@ functioning. Feature highlights:
   in By Driver mode, which results in File System protocols being unable to install.
 
   \emph{Note}: The quirk is mostly relevant for select HP laptops with no drives listed.
+
+\end{enumerate}
+
+\subsection{ReservedMemory Properties}\label{uefirsvdprops}
+
+\begin{enumerate}
+
+\item
+  \texttt{Address}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Start address of the reserved memory region, which should be allocated
+  as reserved effectively marking the memory of this type inaccessible to the operating system.
+
+  The addresses written here must be part of the memory map, have \texttt{EfiConventionalMemory}
+  type, and page-aligned (4 KBs).
+
+\item
+  \texttt{Comment}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Arbitrary ASCII string used to provide human readable
+  reference for the entry. It is implementation defined whether this value is
+  used.
+
+\item
+  \texttt{Size}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Size of the reserved memory region, must be page-aligned (4 KBs).
+
+\item
+  \texttt{Enabled}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: This region will not be reserved unless set to \texttt{true}.
 
 \end{enumerate}
 

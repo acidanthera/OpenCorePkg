@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Apr  7 19:32:13 2020
-%DIF ADD ../Configuration.tex        Fri Apr 17 09:18:48 2020
+%DIF ADD ../Configuration.tex        Sat Apr 18 10:27:00 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4291,7 +4291,17 @@ functioning. Feature highlights:
   \textbf{Description}: Apply individual firmware quirks described in
   \hyperref[uefiquirkprops]{Quirks Properties} section below.
 
-\end{enumerate}
+\DIFaddbegin \item
+  \texttt{\DIFadd{ReservedMemory}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ array}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Designed to be filled with }\texttt{\DIFadd{plist\ dict}} \DIFadd{values,
+  describing memory areas exquisite to particular firmware and hardware functioning,
+  which should not be used by the operating system. An example of such memory region
+  could be second 256 MB corrupted by Intel HD 3000 or an area with faulty RAM.
+  See }\hyperref[uefirsvdprops]{ReservedMemory Properties} \DIFadd{section below.
+}
+
+\DIFaddend \end{enumerate}
 
 \DIFaddbegin \subsection{\DIFadd{APFS Properties}}\label{uefiapfsprops}
 
@@ -5056,7 +5066,48 @@ functioning. Feature highlights:
 
 \end{enumerate}
 
-\section{Troubleshooting}\label{troubleshooting}
+\DIFaddbegin \subsection{\DIFadd{ReservedMemory Properties}}\label{uefirsvdprops}
+
+\begin{enumerate}
+
+\item
+  \texttt{\DIFadd{Address}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Start address of the reserved memory region, which should be allocated
+  as reserved effectively marking the memory of this type inaccessible to the operating system.
+}
+
+  \DIFadd{The addresses written here must be part of the memory map, have }\texttt{\DIFadd{EfiConventionalMemory}}
+  \DIFadd{type, and page-aligned (4 KBs).
+}
+
+\item
+  \texttt{\DIFadd{Comment}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Arbitrary ASCII string used to provide human readable
+  reference for the entry. It is implementation defined whether this value is
+  used.
+}
+
+\item
+  \texttt{\DIFadd{Size}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Size of the reserved memory region, must be page-aligned (4 KBs).
+}
+
+\item
+  \texttt{\DIFadd{Enabled}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: This region will not be reserved unless set to }\texttt{\DIFadd{true}}\DIFadd{.
+}
+
+\end{enumerate}
+
+\DIFaddend \section{Troubleshooting}\label{troubleshooting}
 
 \subsection{Windows support}\label{troubleshootingwin}
 
