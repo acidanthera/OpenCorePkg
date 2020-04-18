@@ -391,6 +391,8 @@ OcMiscEarlyInit (
     return EFI_SECURITY_VIOLATION; ///< Should be unreachable.
   }
 
+  DEBUG ((DEBUG_INFO, "OC: Watchdog status is %d\n", Config->Misc.Debug.DisableWatchDog == FALSE));
+
   if (Config->Misc.Debug.DisableWatchDog) {
     //
     // boot.efi kills watchdog only in FV2 UI.
