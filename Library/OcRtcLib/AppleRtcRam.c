@@ -332,7 +332,7 @@ OcAppleRtcRamInstallProtocol (
     );
 
   if (!EFI_ERROR (Status)) {
-    for (Index = 0; Index < APPLE_RTC_TOTAL_SIZE; ++Index) {
+    for (Index = 0; Index < RtcBlacklistSize; ++Index) {
       mEmulatedRtcStatus[RtcBlacklist[Index]] = TRUE;
       DEBUG ((DEBUG_INFO, "OCRTC: Blacklisted %02x address\n", RtcBlacklist[Index]));
     }
