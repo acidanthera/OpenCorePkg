@@ -148,7 +148,7 @@ AppleRtcRamReadData (
       return Status;
     }
 
-    Status = SyncRtcRead (Address, Buffer);
+    Status = SyncRtcRead ((UINT8) Address, Buffer);
     if (EFI_ERROR (Status)) {
       return Status;
     }
