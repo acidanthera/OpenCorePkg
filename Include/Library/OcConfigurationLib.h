@@ -528,7 +528,7 @@ typedef enum {
 ///
 /// Prefer own protocol implementation for these protocols.
 ///
-#define OC_UEFI_PROTOCOLS_FIELDS(_, __) \
+#define OC_UEFI_PROTOCOL_OVERRIDES_FIELDS(_, __) \
   _(BOOLEAN                     , AppleAudio                  ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleBootPolicy             ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleDebugLog               ,     , FALSE  , ()) \
@@ -544,7 +544,7 @@ typedef enum {
   _(BOOLEAN                     , HashServices                ,     , FALSE  , ()) \
   _(BOOLEAN                     , OSInfo                      ,     , FALSE  , ()) \
   _(BOOLEAN                     , UnicodeCollation            ,     , FALSE  , ())
-  OC_DECLARE (OC_UEFI_PROTOCOLS)
+  OC_DECLARE (OC_UEFI_PROTOCOL_OVERRIDES)
 
 ///
 /// Quirks is a set of hacks for different firmwares.
@@ -576,15 +576,15 @@ typedef enum {
 /// Uefi contains firmware tweaks and extra drivers.
 ///
 #define OC_UEFI_CONFIG_FIELDS(_, __) \
-  _(BOOLEAN                     , ConnectDrivers   ,     , FALSE                                    , ()) \
-  _(OC_UEFI_APFS                , Apfs             ,     , OC_CONSTR2 (OC_UEFI_APFS, _, __)         , OC_DESTR (OC_UEFI_APFS)) \
-  _(OC_UEFI_AUDIO               , Audio            ,     , OC_CONSTR2 (OC_UEFI_AUDIO, _, __)        , OC_DESTR (OC_UEFI_AUDIO)) \
-  _(OC_UEFI_DRIVER_ARRAY        , Drivers          ,     , OC_CONSTR2 (OC_UEFI_DRIVER_ARRAY, _, __) , OC_DESTR (OC_UEFI_DRIVER_ARRAY)) \
-  _(OC_UEFI_INPUT               , Input            ,     , OC_CONSTR2 (OC_UEFI_INPUT, _, __)        , OC_DESTR (OC_UEFI_INPUT)) \
-  _(OC_UEFI_OUTPUT              , Output           ,     , OC_CONSTR2 (OC_UEFI_OUTPUT, _, __)       , OC_DESTR (OC_UEFI_OUTPUT)) \
-  _(OC_UEFI_PROTOCOLS           , Protocols        ,     , OC_CONSTR2 (OC_UEFI_PROTOCOLS, _, __)    , OC_DESTR (OC_UEFI_PROTOCOLS)) \
-  _(OC_UEFI_QUIRKS              , Quirks           ,     , OC_CONSTR2 (OC_UEFI_QUIRKS, _, __)       , OC_DESTR (OC_UEFI_QUIRKS)) \
-  _(OC_UEFI_RSVD_ARRAY          , ReservedMemory   ,     , OC_CONSTR2 (OC_UEFI_RSVD_ARRAY, _, __)   , OC_DESTR (OC_UEFI_RSVD_ARRAY))
+  _(BOOLEAN                     , ConnectDrivers    ,     , FALSE                                          , ()) \
+  _(OC_UEFI_APFS                , Apfs              ,     , OC_CONSTR2 (OC_UEFI_APFS, _, __)               , OC_DESTR (OC_UEFI_APFS)) \
+  _(OC_UEFI_AUDIO               , Audio             ,     , OC_CONSTR2 (OC_UEFI_AUDIO, _, __)              , OC_DESTR (OC_UEFI_AUDIO)) \
+  _(OC_UEFI_DRIVER_ARRAY        , Drivers           ,     , OC_CONSTR2 (OC_UEFI_DRIVER_ARRAY, _, __)       , OC_DESTR (OC_UEFI_DRIVER_ARRAY)) \
+  _(OC_UEFI_INPUT               , Input             ,     , OC_CONSTR2 (OC_UEFI_INPUT, _, __)              , OC_DESTR (OC_UEFI_INPUT)) \
+  _(OC_UEFI_OUTPUT              , Output            ,     , OC_CONSTR2 (OC_UEFI_OUTPUT, _, __)             , OC_DESTR (OC_UEFI_OUTPUT)) \
+  _(OC_UEFI_PROTOCOL_OVERRIDES  , ProtocolOverrides ,     , OC_CONSTR2 (OC_UEFI_PROTOCOL_OVERRIDES, _, __) , OC_DESTR (OC_UEFI_PROTOCOL_OVERRIDES)) \
+  _(OC_UEFI_QUIRKS              , Quirks            ,     , OC_CONSTR2 (OC_UEFI_QUIRKS, _, __)             , OC_DESTR (OC_UEFI_QUIRKS)) \
+  _(OC_UEFI_RSVD_ARRAY          , ReservedMemory    ,     , OC_CONSTR2 (OC_UEFI_RSVD_ARRAY, _, __)         , OC_DESTR (OC_UEFI_RSVD_ARRAY))
   OC_DECLARE (OC_UEFI_CONFIG)
 
 /**

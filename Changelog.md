@@ -15,6 +15,7 @@ OpenCore Changelog
 - Added RtcRw tool to manipulate RTC memory
 - Added `PatchAppleRtcChecksum` kernel quirk
 - Added `AppleRtcRam` protocol implementation
+- Renamed `Protocols` to `ProtocolOverrides` for clarity
 
 #### v0.5.7
 - Added TimeMachine detection to picker

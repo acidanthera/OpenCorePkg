@@ -285,63 +285,63 @@ OcReinstallProtocols (
   IN OC_GLOBAL_CONFIG    *Config
   )
 {
-  if (OcAudioInstallProtocols (Config->Uefi.Protocols.AppleAudio) == NULL) {
+  if (OcAudioInstallProtocols (Config->Uefi.ProtocolOverrides.AppleAudio) == NULL) {
     DEBUG ((DEBUG_INFO, "OC: Disabling audio in favour of firmware implementation\n"));
   }
 
-  if (OcAppleBootPolicyInstallProtocol (Config->Uefi.Protocols.AppleBootPolicy) == NULL) {
+  if (OcAppleBootPolicyInstallProtocol (Config->Uefi.ProtocolOverrides.AppleBootPolicy) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install boot policy protocol\n"));
   }
 
-  if (OcDataHubInstallProtocol (Config->Uefi.Protocols.DataHub) == NULL) {
+  if (OcDataHubInstallProtocol (Config->Uefi.ProtocolOverrides.DataHub) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install data hub protocol\n"));
   }
 
-  if (OcDevicePathPropertyInstallProtocol (Config->Uefi.Protocols.DeviceProperties) == NULL) {
+  if (OcDevicePathPropertyInstallProtocol (Config->Uefi.ProtocolOverrides.DeviceProperties) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install device properties protocol\n"));
   }
 
-  if (OcAppleImageConversionInstallProtocol (Config->Uefi.Protocols.AppleImageConversion) == NULL) {
+  if (OcAppleImageConversionInstallProtocol (Config->Uefi.ProtocolOverrides.AppleImageConversion) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install image conversion protocol\n"));
   }
 
-  if (OcAppleDebugLogInstallProtocol (Config->Uefi.Protocols.AppleDebugLog) == NULL) {
+  if (OcAppleDebugLogInstallProtocol (Config->Uefi.ProtocolOverrides.AppleDebugLog) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install debug log protocol\n"));
   }
 
-  if (OcSmcIoInstallProtocol (Config->Uefi.Protocols.AppleSmcIo, Config->Misc.Security.AuthRestart) == NULL) {
+  if (OcSmcIoInstallProtocol (Config->Uefi.ProtocolOverrides.AppleSmcIo, Config->Misc.Security.AuthRestart) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install smc i/o protocol\n"));
   }
 
-  if (OcAppleUserInterfaceThemeInstallProtocol (Config->Uefi.Protocols.AppleUserInterfaceTheme) == NULL) {
+  if (OcAppleUserInterfaceThemeInstallProtocol (Config->Uefi.ProtocolOverrides.AppleUserInterfaceTheme) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install user interface theme protocol\n"));
   }
 
-  if (OcUnicodeCollationEngInstallProtocol (Config->Uefi.Protocols.UnicodeCollation) == NULL) {
+  if (OcUnicodeCollationEngInstallProtocol (Config->Uefi.ProtocolOverrides.UnicodeCollation) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install unicode collation protocol\n"));
   }
 
-  if (OcHashServicesInstallProtocol (Config->Uefi.Protocols.HashServices) == NULL) {
+  if (OcHashServicesInstallProtocol (Config->Uefi.ProtocolOverrides.HashServices) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install hash services protocol\n"));
   }
 
-  if (OcAppleKeyMapInstallProtocols (Config->Uefi.Protocols.AppleKeyMap) == NULL) {
+  if (OcAppleKeyMapInstallProtocols (Config->Uefi.ProtocolOverrides.AppleKeyMap) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install key map protocols\n"));
   }
 
-  if (OcAppleEventInstallProtocol (Config->Uefi.Protocols.AppleEvent) == NULL) {
+  if (OcAppleEventInstallProtocol (Config->Uefi.ProtocolOverrides.AppleEvent) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install key event protocol\n"));
   }
 
-  if (OcFirmwareVolumeInstallProtocol (Config->Uefi.Protocols.FirmwareVolume) == NULL) {
+  if (OcFirmwareVolumeInstallProtocol (Config->Uefi.ProtocolOverrides.FirmwareVolume) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install firmware volume protocol\n"));
   }
 
-  if (OcOSInfoInstallProtocol (Config->Uefi.Protocols.OSInfo) == NULL) {
+  if (OcOSInfoInstallProtocol (Config->Uefi.ProtocolOverrides.OSInfo) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install os info protocol\n"));
   }
 
-  if (OcAppleRtcRamInstallProtocol (Config->Uefi.Protocols.AppleRtcRam) == NULL) {
+  if (OcAppleRtcRamInstallProtocol (Config->Uefi.ProtocolOverrides.AppleRtcRam) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install rtc ram protocol\n"));
   }
 }

@@ -69,7 +69,7 @@ OC_STRUCTORS       (OC_UEFI_APFS, ())
 OC_STRUCTORS       (OC_UEFI_AUDIO, ())
 OC_STRUCTORS       (OC_UEFI_INPUT, ())
 OC_STRUCTORS       (OC_UEFI_OUTPUT, ())
-OC_STRUCTORS       (OC_UEFI_PROTOCOLS, ())
+OC_STRUCTORS       (OC_UEFI_PROTOCOL_OVERRIDES, ())
 OC_STRUCTORS       (OC_UEFI_RSVD_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_UEFI_RSVD_ARRAY)
 OC_STRUCTORS       (OC_UEFI_QUIRKS, ())
@@ -540,22 +540,22 @@ mUefiQuirksSchema[] = {
 
 STATIC
 OC_SCHEMA
-mUefiProtocolsSchema[] = {
-  OC_SCHEMA_BOOLEAN_IN ("AppleAudio",              OC_GLOBAL_CONFIG, Uefi.Protocols.AppleAudio),
-  OC_SCHEMA_BOOLEAN_IN ("AppleBootPolicy",         OC_GLOBAL_CONFIG, Uefi.Protocols.AppleBootPolicy),
-  OC_SCHEMA_BOOLEAN_IN ("AppleDebugLog",           OC_GLOBAL_CONFIG, Uefi.Protocols.AppleDebugLog),
-  OC_SCHEMA_BOOLEAN_IN ("AppleEvent",              OC_GLOBAL_CONFIG, Uefi.Protocols.AppleEvent),
-  OC_SCHEMA_BOOLEAN_IN ("AppleImageConversion",    OC_GLOBAL_CONFIG, Uefi.Protocols.AppleImageConversion),
-  OC_SCHEMA_BOOLEAN_IN ("AppleKeyMap",             OC_GLOBAL_CONFIG, Uefi.Protocols.AppleKeyMap),
-  OC_SCHEMA_BOOLEAN_IN ("AppleRtcRam",             OC_GLOBAL_CONFIG, Uefi.Protocols.AppleRtcRam),
-  OC_SCHEMA_BOOLEAN_IN ("AppleSmcIo",              OC_GLOBAL_CONFIG, Uefi.Protocols.AppleSmcIo),
-  OC_SCHEMA_BOOLEAN_IN ("AppleUserInterfaceTheme", OC_GLOBAL_CONFIG, Uefi.Protocols.AppleUserInterfaceTheme),
-  OC_SCHEMA_BOOLEAN_IN ("DataHub",                 OC_GLOBAL_CONFIG, Uefi.Protocols.DataHub),
-  OC_SCHEMA_BOOLEAN_IN ("DeviceProperties",        OC_GLOBAL_CONFIG, Uefi.Protocols.DeviceProperties),
-  OC_SCHEMA_BOOLEAN_IN ("FirmwareVolume",          OC_GLOBAL_CONFIG, Uefi.Protocols.FirmwareVolume),
-  OC_SCHEMA_BOOLEAN_IN ("HashServices",            OC_GLOBAL_CONFIG, Uefi.Protocols.HashServices),
-  OC_SCHEMA_BOOLEAN_IN ("OSInfo",                  OC_GLOBAL_CONFIG, Uefi.Protocols.OSInfo),
-  OC_SCHEMA_BOOLEAN_IN ("UnicodeCollation",        OC_GLOBAL_CONFIG, Uefi.Protocols.UnicodeCollation)
+mUefiProtocolOverridesSchema[] = {
+  OC_SCHEMA_BOOLEAN_IN ("AppleAudio",              OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.AppleAudio),
+  OC_SCHEMA_BOOLEAN_IN ("AppleBootPolicy",         OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.AppleBootPolicy),
+  OC_SCHEMA_BOOLEAN_IN ("AppleDebugLog",           OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.AppleDebugLog),
+  OC_SCHEMA_BOOLEAN_IN ("AppleEvent",              OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.AppleEvent),
+  OC_SCHEMA_BOOLEAN_IN ("AppleImageConversion",    OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.AppleImageConversion),
+  OC_SCHEMA_BOOLEAN_IN ("AppleKeyMap",             OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.AppleKeyMap),
+  OC_SCHEMA_BOOLEAN_IN ("AppleRtcRam",             OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.AppleRtcRam),
+  OC_SCHEMA_BOOLEAN_IN ("AppleSmcIo",              OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.AppleSmcIo),
+  OC_SCHEMA_BOOLEAN_IN ("AppleUserInterfaceTheme", OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.AppleUserInterfaceTheme),
+  OC_SCHEMA_BOOLEAN_IN ("DataHub",                 OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.DataHub),
+  OC_SCHEMA_BOOLEAN_IN ("DeviceProperties",        OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.DeviceProperties),
+  OC_SCHEMA_BOOLEAN_IN ("FirmwareVolume",          OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.FirmwareVolume),
+  OC_SCHEMA_BOOLEAN_IN ("HashServices",            OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.HashServices),
+  OC_SCHEMA_BOOLEAN_IN ("OSInfo",                  OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.OSInfo),
+  OC_SCHEMA_BOOLEAN_IN ("UnicodeCollation",        OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.UnicodeCollation)
 };
 
 STATIC
@@ -626,15 +626,15 @@ mUefiReservedMemorySchema = OC_SCHEMA_DICT (NULL, mUefiReservedMemoryEntrySchema
 STATIC
 OC_SCHEMA
 mUefiConfigurationSchema[] = {
-  OC_SCHEMA_DICT       ("APFS",           mUefiApfsSchema),
-  OC_SCHEMA_DICT       ("Audio",          mUefiAudioSchema),
-  OC_SCHEMA_BOOLEAN_IN ("ConnectDrivers", OC_GLOBAL_CONFIG, Uefi.ConnectDrivers),
-  OC_SCHEMA_ARRAY_IN   ("Drivers",        OC_GLOBAL_CONFIG, Uefi.Drivers, &mUefiDriversSchema),
-  OC_SCHEMA_DICT       ("Input",          mUefiInputSchema),
-  OC_SCHEMA_DICT       ("Output",         mUefiOutputSchema),
-  OC_SCHEMA_DICT       ("Protocols",      mUefiProtocolsSchema),
-  OC_SCHEMA_DICT       ("Quirks",         mUefiQuirksSchema),
-  OC_SCHEMA_ARRAY_IN   ("ReservedMemory", OC_GLOBAL_CONFIG, Uefi.ReservedMemory, &mUefiReservedMemorySchema),
+  OC_SCHEMA_DICT       ("APFS",              mUefiApfsSchema),
+  OC_SCHEMA_DICT       ("Audio",             mUefiAudioSchema),
+  OC_SCHEMA_BOOLEAN_IN ("ConnectDrivers",    OC_GLOBAL_CONFIG, Uefi.ConnectDrivers),
+  OC_SCHEMA_ARRAY_IN   ("Drivers",           OC_GLOBAL_CONFIG, Uefi.Drivers, &mUefiDriversSchema),
+  OC_SCHEMA_DICT       ("Input",             mUefiInputSchema),
+  OC_SCHEMA_DICT       ("Output",            mUefiOutputSchema),
+  OC_SCHEMA_DICT       ("ProtocolOverrides", mUefiProtocolOverridesSchema),
+  OC_SCHEMA_DICT       ("Quirks",            mUefiQuirksSchema),
+  OC_SCHEMA_ARRAY_IN   ("ReservedMemory",    OC_GLOBAL_CONFIG, Uefi.ReservedMemory, &mUefiReservedMemorySchema),
 };
 
 //

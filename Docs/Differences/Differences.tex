@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Apr 19 02:31:22 2020
-%DIF ADD ../Configuration.tex        Sun Apr 19 02:31:22 2020
+%DIF DEL PreviousConfiguration.tex   Tue Apr  7 19:32:13 2020
+%DIF ADD ../Configuration.tex        Mon Apr 20 09:29:28 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4297,11 +4297,12 @@ functioning. Feature highlights:
   \hyperref[uefioutputprops]{Output Properties} section below.
 
 \item
-  \texttt{Protocols}\\
+  \texttt{\DIFdelbegin \DIFdel{Protocols}\DIFdelend \DIFaddbegin \DIFadd{ProtocolOverrides}\DIFaddend }\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Force builtin versions of select protocols described
-  in \hyperref[uefiprotoprops]{Protocols Properties} section below.
+  in \DIFdelbegin %DIFDELCMD < \hyperref[uefiprotoprops]{Protocols Properties} %%%
+\DIFdelend \DIFaddbegin \hyperref[uefiprotoprops]{ProtocolOverrides Properties} \DIFaddend section below.
 
   \emph{Note}: all protocol instances are installed prior to driver loading.
 
@@ -4846,7 +4847,7 @@ functioning. Feature highlights:
 \end{enumerate}
 
 
-\subsection{Protocols Properties}\label{uefiprotoprops}
+\subsection{\DIFdelbegin \DIFdel{Protocols }\DIFdelend \DIFaddbegin \DIFadd{ProtocolOverrides }\DIFaddend Properties}\label{uefiprotoprops}
 
 \begin{enumerate}
 
