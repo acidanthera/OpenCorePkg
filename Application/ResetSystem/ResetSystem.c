@@ -22,6 +22,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiLib.h>
 #include <Protocol/DevicePath.h>
 #include <Protocol/ShellParameters.h>
+#include <Protocol/LoadedImage.h>
 
 STATIC
 EFI_STATUS
@@ -32,18 +33,32 @@ GetArguments (
 {
   EFI_STATUS                     Status;
   EFI_SHELL_PARAMETERS_PROTOCOL  *ShellParameters;
+  EFI_LOADED_IMAGE_PROTOCOL      *LoadedImage;
 
   Status = gBS->HandleProtocol (
     gImageHandle,
     &gEfiShellParametersProtocolGuid,
     (VOID**) &ShellParameters
     );
-  if (EFI_ERROR (Status)) {
-    return Status;
+  if (!EFI_ERROR (Status)) {
+    *Argc = ShellParameters->Argc;
+    *Argv = ShellParameters->Argv;
+    return EFI_SUCCESS;
   }
 
-  *Argc = ShellParameters->Argc;
-  *Argv = ShellParameters->Argv;
+  Status = gBS->HandleProtocol (
+    gImageHandle,
+    &gEfiLoadedImageProtocolGuid,
+    (VOID**) &LoadedImage
+    );
+  if (EFI_ERROR (Status) || LoadedImage->LoadOptions == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  STATIC CHAR16 *StArgv[2] = {L"Self", NULL};
+  StArgv[1] = LoadedImage->LoadOptions;
+  *Argc = ARRAY_SIZE (StArgv);
+  *Argv = StArgv;
   return EFI_SUCCESS;
 }
 
@@ -64,8 +79,8 @@ UefiMain (
   if (!EFI_ERROR (Status) && Argc >= 2) {
     Mode = Argv[1];
   } else {
-    DEBUG ((DEBUG_INFO, "OCRST: Assuming default to be ResetCold...\n"));
-    Mode = L"ResetCold";
+    DEBUG ((DEBUG_INFO, "OCRST: Assuming default to be ResetCold - %r\n", Status));
+    Mode = L"ColdReset";
   }
 
   if (StrCmp (Mode, L"ColdReset") == 0) {

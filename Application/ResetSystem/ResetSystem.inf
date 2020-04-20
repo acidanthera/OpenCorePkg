@@ -36,6 +36,7 @@
 
 [Protocols]
   gEfiShellParametersProtocolGuid
+  gEfiLoadedImageProtocolGuid
 
 [Packages]
   EfiPkg/EfiPkg.dec
