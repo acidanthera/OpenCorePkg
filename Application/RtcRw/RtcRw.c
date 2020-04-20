@@ -1,5 +1,5 @@
 /** @file
-  Play beep.
+  RTC memory read/write.
 
 Copyright (c) 2020, vit9696. All rights reserved.<BR>
 This program and the accompanying materials
