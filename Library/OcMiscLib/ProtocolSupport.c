@@ -17,13 +17,46 @@
 #include <Library/DebugLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Protocol/LoadedImage.h>
+#include <Protocol/ShellParameters.h>
 
-/**
-  @param[in] Protocol    The published unique identifier of the protocol. It is the caller’s responsibility to pass in
-                         a valid GUID.
+EFI_STATUS
+GetArguments (
+  OUT UINTN   *Argc,
+  OUT CHAR16  ***Argv
+  )
+{
+  EFI_STATUS                     Status;
+  EFI_SHELL_PARAMETERS_PROTOCOL  *ShellParameters;
+  EFI_LOADED_IMAGE_PROTOCOL      *LoadedImage;
 
-  @retval EFI_SUCCESS on success.
-**/
+  Status = gBS->HandleProtocol (
+    gImageHandle,
+    &gEfiShellParametersProtocolGuid,
+    (VOID**) &ShellParameters
+    );
+  if (!EFI_ERROR (Status)) {
+    *Argc = ShellParameters->Argc;
+    *Argv = ShellParameters->Argv;
+    return EFI_SUCCESS;
+  }
+
+  Status = gBS->HandleProtocol (
+    gImageHandle,
+    &gEfiLoadedImageProtocolGuid,
+    (VOID**) &LoadedImage
+    );
+  if (EFI_ERROR (Status) || LoadedImage->LoadOptions == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  STATIC CHAR16 *StArgv[2] = {L"Self", NULL};
+  StArgv[1] = LoadedImage->LoadOptions;
+  *Argc = ARRAY_SIZE (StArgv);
+  *Argv = StArgv;
+  return EFI_SUCCESS;
+}
+
 EFI_STATUS
 UninstallAllProtocolInstances (
   EFI_GUID  *Protocol

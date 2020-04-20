@@ -20,47 +20,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiLib.h>
-#include <Protocol/DevicePath.h>
-#include <Protocol/ShellParameters.h>
-#include <Protocol/LoadedImage.h>
-
-STATIC
-EFI_STATUS
-GetArguments (
-  OUT UINTN   *Argc,
-  OUT CHAR16  ***Argv
-  )
-{
-  EFI_STATUS                     Status;
-  EFI_SHELL_PARAMETERS_PROTOCOL  *ShellParameters;
-  EFI_LOADED_IMAGE_PROTOCOL      *LoadedImage;
-
-  Status = gBS->HandleProtocol (
-    gImageHandle,
-    &gEfiShellParametersProtocolGuid,
-    (VOID**) &ShellParameters
-    );
-  if (!EFI_ERROR (Status)) {
-    *Argc = ShellParameters->Argc;
-    *Argv = ShellParameters->Argv;
-    return EFI_SUCCESS;
-  }
-
-  Status = gBS->HandleProtocol (
-    gImageHandle,
-    &gEfiLoadedImageProtocolGuid,
-    (VOID**) &LoadedImage
-    );
-  if (EFI_ERROR (Status) || LoadedImage->LoadOptions == NULL) {
-    return EFI_NOT_FOUND;
-  }
-
-  STATIC CHAR16 *StArgv[2] = {L"Self", NULL};
-  StArgv[1] = LoadedImage->LoadOptions;
-  *Argc = ARRAY_SIZE (StArgv);
-  *Argv = StArgv;
-  return EFI_SUCCESS;
-}
 
 EFI_STATUS
 EFIAPI

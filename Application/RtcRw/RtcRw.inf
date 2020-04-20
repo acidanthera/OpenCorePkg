@@ -34,9 +34,6 @@
 [Sources]
   RtcRw.c
 
-[Protocols]
-  gEfiShellParametersProtocolGuid
-
 [Packages]
   EfiPkg/EfiPkg.dec
   MdePkg/MdePkg.dec
@@ -44,6 +41,7 @@
 
 [LibraryClasses]
   OcConsoleLib
+  OcMiscLib
   OcRtcLib
   UefiApplicationEntryPoint
   UefiBootServicesTableLib

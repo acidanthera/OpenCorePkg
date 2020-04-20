@@ -52,6 +52,22 @@ ApplyPatch (
   );
 
 /**
+  Obtain application arguments.
+
+  @param[out]  Argc   Argument count.
+  @param[out]  Argv   Argument list.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+GetArguments (
+  OUT UINTN   *Argc,
+  OUT CHAR16  ***Argv
+  );
+
+/**
+  Uninstall all protocols with the specified GUID.
+
   @param[in] Protocol    The published unique identifier of the protocol. It is the caller’s responsibility to pass in
                          a valid GUID.
 

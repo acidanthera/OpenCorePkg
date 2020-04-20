@@ -34,6 +34,8 @@
 
 [Protocols]
   gEfiPciIoProtocolGuid
+  gEfiShellParametersProtocolGuid
+  gEfiLoadedImageProtocolGuid
 
 [LibraryClasses]
   BaseLib
@@ -46,5 +48,5 @@
   DataPatcher.c
   DirectReset.c
   ReleaseUsbOwnership.c
-  UninstallAllProtocolInterfaces.c
+  ProtocolSupport.c
   Math.c

@@ -35,7 +35,6 @@
   OpenControl.c
 
 [Protocols]
-  gEfiShellParametersProtocolGuid
   gOcFirmwareRuntimeProtocolGuid
 
 [Packages]
@@ -47,6 +46,7 @@
   BaseLib
   BaseMemoryLib
   OcConsoleControlEntryModeGenericLib
+  OcMiscLib
   UefiApplicationEntryPoint
   UefiBootServicesTableLib
   UefiLib

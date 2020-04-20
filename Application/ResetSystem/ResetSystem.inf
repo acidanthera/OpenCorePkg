@@ -34,10 +34,6 @@
 [Sources]
   ResetSystem.c
 
-[Protocols]
-  gEfiShellParametersProtocolGuid
-  gEfiLoadedImageProtocolGuid
-
 [Packages]
   EfiPkg/EfiPkg.dec
   MdePkg/MdePkg.dec

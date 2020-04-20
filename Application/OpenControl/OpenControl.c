@@ -17,33 +17,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/BaseMemoryLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/UefiLib.h>
 #include <Protocol/OcFirmwareRuntime.h>
-#include <Protocol/ShellParameters.h>
-
-STATIC
-EFI_STATUS
-GetArguments (
-  OUT UINTN   *Argc,
-  OUT CHAR16  ***Argv
-  )
-{
-  EFI_STATUS                     Status;
-  EFI_SHELL_PARAMETERS_PROTOCOL  *ShellParameters;
-
-  Status = gBS->HandleProtocol (
-    gImageHandle,
-    &gEfiShellParametersProtocolGuid,
-    (VOID**) &ShellParameters
-    );
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-
-  *Argc = ShellParameters->Argc;
-  *Argv = ShellParameters->Argv;
-  return EFI_SUCCESS;
-}
 
 EFI_STATUS
 EFIAPI
