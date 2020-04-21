@@ -517,7 +517,7 @@ OcLoadUefiSupport (
       Status = gBS->AllocatePages (
         AllocateAddress,
         EfiReservedMemoryType,
-        EFI_SIZE_TO_PAGES (Config->Uefi.ReservedMemory.Values[Index]->Size),
+        (UINTN) EFI_SIZE_TO_PAGES (Config->Uefi.ReservedMemory.Values[Index]->Size),
         &ReservedAddress
         );
     }
