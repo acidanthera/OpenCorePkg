@@ -1153,7 +1153,7 @@ GuiDrawLoop (
   // Main drawing loop, time and derieve sub-frequencies as required.
   //
 
-  //STATIC BOOLEAN logOnce = 0;
+  //Capture timer at start of boot to use for timeout logic
   if(StartTimer == 0){
     //only read start time on init
     StartTimer = AsmReadTsc ();
@@ -1259,7 +1259,6 @@ GuiDrawLoop (
     //
     GuiFlushScreen (DrawContext);
 
-
     //
     // Exit early if reach timer timeout and timer isn't disabled due to key event
     //
@@ -1269,6 +1268,9 @@ GuiDrawLoop (
       mGuiContext.BootEntry = mBootPicker.SelectedEntry->Context;
       break;
     }
+
+    //UINT64 EndTsc = AsmReadTsc ();	
+    //DEBUG ((DEBUG_ERROR, "Loop delta TSC: %lld, target: %lld\n", EndTsc - StartTsc, mDeltaTscTarget));
 
   } while (!DrawContext->ExitLoop (DrawContext->GuiContext));
 }
