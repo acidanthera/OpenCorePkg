@@ -291,12 +291,14 @@ OcLogAddEntry  (
     // I know it is slow, but fixed size write is more reliable with broken FAT32 driver.
     //
     if ((OcLog->Options & OC_LOG_FILE) != 0 && OcLog->FileSystem != NULL) {
-      SetFileData (
-        OcLog->FileSystem,
-        OcLog->FilePath,
-        Private->AsciiBuffer,
-        (UINT32) Private->AsciiBufferSize
-        );
+      if (EfiGetCurrentTpl () <= TPL_CALLBACK) {
+        SetFileData (
+          OcLog->FileSystem,
+          OcLog->FilePath,
+          Private->AsciiBuffer,
+          (UINT32) Private->AsciiBufferSize
+          );
+      }
     }
 
     //
