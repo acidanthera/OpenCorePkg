@@ -45,7 +45,7 @@
 #error "Unknown target definition"
 #endif
 
-#define OPEN_CORE_BOOTSTRAP_PATH   L"EFI\\OC\\Bootsrap\\Bootstrap.efi"
+#define OPEN_CORE_BOOTSTRAP_PATH   L"EFI\\OC\\Bootstrap\\Bootstrap.efi"
 
 #define OPEN_CORE_DRIVER_PATH      L"EFI\\OC\\OpenCore.efi"
 
