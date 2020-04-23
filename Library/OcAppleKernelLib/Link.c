@@ -54,35 +54,37 @@ InternalOcGetSymbolWorkerName (
   //
   Kext->Processed = TRUE;
 
-  NumSymbols = Kext->NumberOfSymbols;
-  Symbols    = Kext->LinkedSymbolTable;
+  if (Kext->LinkedSymbolTable != NULL) {
+    NumSymbols = Kext->NumberOfSymbols;
+    Symbols    = Kext->LinkedSymbolTable;
 
-  if (SymbolLevel == OcGetSymbolOnlyCxx) {
-    NumSymbols = Kext->NumberOfCxxSymbols;
-    Symbols    = &Kext->LinkedSymbolTable[Kext->NumberOfSymbols - Kext->NumberOfCxxSymbols];
-  }
+    if (SymbolLevel == OcGetSymbolOnlyCxx) {
+      NumSymbols = Kext->NumberOfCxxSymbols;
+      Symbols    = &Kext->LinkedSymbolTable[Kext->NumberOfSymbols - Kext->NumberOfCxxSymbols];
+    }
 
-  SymbolsEnd = &Symbols[NumSymbols];
-  while (Symbols < SymbolsEnd) {
-    //
-    // Symbol names often start and end similarly due to C++ mangling (e.g. __ZN).
-    // To optimise the lookup we compare their length check in the middle.
-    // Please do not change this without careful profiling.
-    //
-    if (Symbols->Length == LookupValueLength) {
-      if (Symbols->Name[LookupValueLength / 2] == LookupValue[LookupValueLength / 2]
-        && Symbols->Name[(LookupValueLength / 2) + 1] == LookupValue[(LookupValueLength / 2) + 1]) {
-        for (Index = 0; Index < LookupValueLength; ++Index) {
-          if (Symbols->Name[Index] != LookupValue[Index]) {
-            break;
+    SymbolsEnd = &Symbols[NumSymbols];
+    while (Symbols < SymbolsEnd) {
+      //
+      // Symbol names often start and end similarly due to C++ mangling (e.g. __ZN).
+      // To optimise the lookup we compare their length check in the middle.
+      // Please do not change this without careful profiling.
+      //
+      if (Symbols->Length == LookupValueLength) {
+        if (Symbols->Name[LookupValueLength / 2] == LookupValue[LookupValueLength / 2]
+          && Symbols->Name[(LookupValueLength / 2) + 1] == LookupValue[(LookupValueLength / 2) + 1]) {
+          for (Index = 0; Index < LookupValueLength; ++Index) {
+            if (Symbols->Name[Index] != LookupValue[Index]) {
+              break;
+            }
+          }
+          if (Index == LookupValueLength) {
+            return Symbols;
           }
         }
-        if (Index == LookupValueLength) {
-          return Symbols;
-        }
       }
+      Symbols++;
     }
-    Symbols++;
   }
 
   if (SymbolLevel != OcGetSymbolFirstLevel) {
@@ -130,27 +132,29 @@ InternalOcGetSymbolWorkerValue (
   //
   Kext->Processed = TRUE;
 
-  NumSymbols = Kext->NumberOfSymbols;
-  Symbols    = Kext->LinkedSymbolTable;
+  if (Kext->LinkedSymbolTable != NULL) {
+    NumSymbols = Kext->NumberOfSymbols;
+    Symbols    = Kext->LinkedSymbolTable;
 
-  if (SymbolLevel == OcGetSymbolOnlyCxx) {
-    NumSymbols = Kext->NumberOfCxxSymbols;
-    Symbols    = &Kext->LinkedSymbolTable[(Kext->NumberOfSymbols - Kext->NumberOfCxxSymbols) & ~15ULL];
-  }
-  //
-  // WARN! Hot path! Do not change this code unless you have decent profiling data.
-  // We are not allowed to use SIMD in UEFI, but we can still do better with larger iteration.
-  // Up to 15 C symbols extra may get parsed, but it is fine, as they will not match.
-  // Increasing the iteration block to more than 16 no longer pays off.
-  // Note, lower loop is not on hot path.
-  //
-  SymbolsEnd = &Symbols[NumSymbols & ~15ULL];
-  while (Symbols < SymbolsEnd) {
-    #define MATCH(X) if (Symbols[X].Value == LookupValue) { return &Symbols[X]; }
-    MATCH (0) MATCH (1) MATCH (2)  MATCH (3)  MATCH (4)  MATCH (5)  MATCH (6)  MATCH (7)
-    MATCH (8) MATCH (9) MATCH (10) MATCH (11) MATCH (12) MATCH (13) MATCH (14) MATCH (15)
-    #undef MATCH
-    Symbols += 16;
+    if (SymbolLevel == OcGetSymbolOnlyCxx) {
+      NumSymbols = Kext->NumberOfCxxSymbols;
+      Symbols    = &Kext->LinkedSymbolTable[(Kext->NumberOfSymbols - Kext->NumberOfCxxSymbols) & ~15ULL];
+    }
+    //
+    // WARN! Hot path! Do not change this code unless you have decent profiling data.
+    // We are not allowed to use SIMD in UEFI, but we can still do better with larger iteration.
+    // Up to 15 C symbols extra may get parsed, but it is fine, as they will not match.
+    // Increasing the iteration block to more than 16 no longer pays off.
+    // Note, lower loop is not on hot path.
+    //
+    SymbolsEnd = &Symbols[NumSymbols & ~15ULL];
+    while (Symbols < SymbolsEnd) {
+      #define MATCH(X) if (Symbols[X].Value == LookupValue) { return &Symbols[X]; }
+      MATCH (0) MATCH (1) MATCH (2)  MATCH (3)  MATCH (4)  MATCH (5)  MATCH (6)  MATCH (7)
+      MATCH (8) MATCH (9) MATCH (10) MATCH (11) MATCH (12) MATCH (13) MATCH (14) MATCH (15)
+      #undef MATCH
+      Symbols += 16;
+    }
   }
 
   if (SymbolLevel != OcGetSymbolFirstLevel) {
