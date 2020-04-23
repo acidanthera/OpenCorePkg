@@ -167,8 +167,8 @@ InternalCreatePrelinkedKext (
 }
 
 STATIC
-EFI_STATUS
-InternalScanCurrentPrelinkedKextLinkedEdit (
+VOID
+InternalScanCurrentPrelinkedKextLinkInfo (
   IN OUT PRELINKED_KEXT  *Kext
   )
 {
@@ -177,10 +177,6 @@ InternalScanCurrentPrelinkedKextLinkedEdit (
       &Kext->Context.MachContext,
       "__LINKEDIT"
       );
-
-    if (Kext->LinkEditSegment == NULL) {
-      return EFI_NOT_FOUND;
-    }
   }
 
   if (Kext->SymbolTable == NULL) {
@@ -195,12 +191,7 @@ InternalScanCurrentPrelinkedKextLinkedEdit (
                    NULL,
                    NULL
                    );
-    if (Kext->NumberOfSymbols == 0) {
-      return EFI_NOT_FOUND;
-    }
   }
-
-  return EFI_SUCCESS;
 }
 
 STATIC
@@ -416,27 +407,59 @@ InternalScanBuildLinkedVtables (
 }
 
 STATIC
+UINT32
+InternalGetLinkBufferSize (
+  IN OUT PRELINKED_KEXT  *Kext
+  )
+{
+  UINT32 Size;
+  //
+  // LinkBuffer must be able to hold all symbols and for KEXTs to be prelinked
+  // also the __LINKEDIT segment (however not both simultaneously/separately).
+  //
+  Size = Kext->NumberOfSymbols * sizeof (MACH_NLIST_64);
+  
+  if (Kext->LinkEditSegment != NULL) {
+    Size = MAX ((UINT32) Kext->LinkEditSegment->FileSize, Size);
+  }
+
+  return Size;
+}
+
+STATIC
 EFI_STATUS
 InternalUpdateLinkBuffer (
   IN OUT PRELINKED_KEXT     *Kext,
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
+  UINT32 BufferSize;
+
   ASSERT (Kext != NULL);
   ASSERT (Context != NULL);
 
   if (Context->LinkBuffer == NULL) {
+    //
+    // Context->LinkBufferSize was updated recursively during initial dependency
+    // walk to save reallocations.
+    //
+    ASSERT (Context->LinkBufferSize >= InternalGetLinkBufferSize (Kext));
+
     Context->LinkBuffer = AllocatePool (Context->LinkBufferSize);
     if (Context->LinkBuffer == NULL) {
       return EFI_OUT_OF_RESOURCES;
     }
-  } else if (Context->LinkBufferSize < Kext->LinkEditSegment->FileSize) {
-    FreePool (Context->LinkBuffer);
+  } else {
+    BufferSize = InternalGetLinkBufferSize (Kext);
 
-    Context->LinkBufferSize = (UINT32)Kext->LinkEditSegment->FileSize;
-    Context->LinkBuffer     = AllocatePool (Context->LinkBufferSize);
-    if (Context->LinkBuffer == NULL) {
-      return EFI_OUT_OF_RESOURCES;
+    if (Context->LinkBufferSize < BufferSize) {
+      FreePool (Context->LinkBuffer);
+
+      Context->LinkBufferSize = BufferSize;
+      Context->LinkBuffer     = AllocatePool (Context->LinkBufferSize);
+      if (Context->LinkBuffer == NULL) {
+        return EFI_OUT_OF_RESOURCES;
+      }
     }
   }
 
@@ -646,7 +669,6 @@ InternalScanPrelinkedKext (
   )
 {
   EFI_STATUS      Status;
-  EFI_STATUS      LinkedEditStatus;
   UINT32          FieldCount;
   UINT32          FieldIndex;
   UINT32          DependencyIndex;
@@ -656,30 +678,30 @@ InternalScanPrelinkedKext (
   // __LINKEDIT may validly not be present, as seen for 10.7.5's
   // com.apple.kpi.unsupported.
   //
-  LinkedEditStatus = InternalScanCurrentPrelinkedKextLinkedEdit (Kext);
-  if (!EFI_ERROR (LinkedEditStatus)) {
-    //
-    // Find the biggest __LINKEDIT size down the first dependency tree walk to
-    // possibly save a few re-allocations.
-    //
-    if ((Context->LinkBuffer == NULL)
-     && (Context->LinkBufferSize < Kext->LinkEditSegment->FileSize)) {
-      Context->LinkBufferSize = (UINT32)Kext->LinkEditSegment->FileSize;
-    }
+  InternalScanCurrentPrelinkedKextLinkInfo (Kext);
+  //
+  // Find the biggest LinkBuffer size down the first dependency tree walk to
+  // possibly save a few re-allocations.
+  //
+  if (Context->LinkBuffer == NULL) {
+    Context->LinkBufferSize = MAX (
+                                InternalGetLinkBufferSize (Kext),
+                                Context->LinkBufferSize
+                                );
+  }
 
-    //
-    // Always add kernel dependency.
-    //
-    DependencyKext = InternalCachedPrelinkedKernel (Context);
-    if (DependencyKext == NULL) {
-      return EFI_NOT_FOUND;
-    }
+  //
+  // Always add kernel dependency.
+  //
+  DependencyKext = InternalCachedPrelinkedKernel (Context);
+  if (DependencyKext == NULL) {
+    return EFI_NOT_FOUND;
+  }
 
-    if (DependencyKext != Kext) {
-      Status = InternalInsertPrelinkedKextDependency (Kext, Context, 0, DependencyKext);
-      if (EFI_ERROR (Status)) {
-        return Status;
-      }
+  if (DependencyKext != Kext) {
+    Status = InternalInsertPrelinkedKextDependency (Kext, Context, 0, DependencyKext);
+    if (EFI_ERROR (Status)) {
+      return Status;
     }
   }
 
@@ -728,27 +750,25 @@ InternalScanPrelinkedKext (
     Kext->BundleLibraries = NULL;
   }
 
-  if (!EFI_ERROR (LinkedEditStatus)) {
-    //
-    // Extend or allocate LinkBuffer in case there are no dependencies (kernel).
-    //
-    Status = InternalUpdateLinkBuffer (Kext, Context);
+  //
+  // Extend or allocate LinkBuffer in case there are no dependencies (kernel).
+  //
+  Status = InternalUpdateLinkBuffer (Kext, Context);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+  //
+  // Collect data to enable linking against this KEXT.
+  //
+  if (Dependency) {
+    Status = InternalScanBuildLinkedSymbolTable (Kext, Context);
     if (EFI_ERROR (Status)) {
       return Status;
     }
-    //
-    // Collect data to enable linking against this KEXT.
-    //
-    if (Dependency) {
-      Status = InternalScanBuildLinkedSymbolTable (Kext, Context);
-      if (EFI_ERROR (Status)) {
-        return Status;
-      }
 
-      Status = InternalScanBuildLinkedVtables (Kext, Context);
-      if (EFI_ERROR (Status)) {
-        return Status;
-      }
+    Status = InternalScanBuildLinkedVtables (Kext, Context);
+    if (EFI_ERROR (Status)) {
+      return Status;
     }
   }
 

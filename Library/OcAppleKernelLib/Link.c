@@ -1306,7 +1306,7 @@ InternalPrelinkKext64 (
     return EFI_SUCCESS;
   }
 
-  if (Kext->Context.VirtualKmod == 0) {
+  if (LinkEditSegment == NULL || Kext->Context.VirtualKmod == 0) {
     return EFI_UNSUPPORTED;
   }
   //
