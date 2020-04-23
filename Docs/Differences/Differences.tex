@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Apr  7 19:32:13 2020
-%DIF ADD ../Configuration.tex        Mon Apr 20 13:11:07 2020
+%DIF ADD ../Configuration.tex        Fri Apr 24 00:55:25 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2602,7 +2602,41 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   considered a security risk and thus is optional.
 
 \item
-  \texttt{ExposeSensitiveData}\\
+  \DIFaddbegin \texttt{\DIFadd{BootProtect}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{None}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Attempt to provide bootloader persistence.
+}
+
+  \DIFadd{Valid values:
+}
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{None}} \DIFadd{--- do nothing.
+  }\item \texttt{\DIFadd{Bootstrap}} \DIFadd{--- create or update top-priority
+  }\texttt{\DIFadd{\textbackslash EFI\textbackslash OC\textbackslash Bootstrap\textbackslash Bootstrap.efi}}
+  \DIFadd{boot option (}\texttt{\DIFadd{Boot9696}}\DIFadd{) in UEFI variable storage at bootloader startup. For this option
+  to work }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{is required to be enabled.
+  }\end{itemize}
+
+  \DIFadd{This option provides integration with third-party operating system installation and upgrade
+  at the times they overwrite }\texttt{\DIFadd{\textbackslash EFI\textbackslash BOOT\textbackslash BOOTx64.efi}}
+  \DIFadd{file. By creating a custom option in }\texttt{\DIFadd{Bootstrap}} \DIFadd{mode this file path becomes no longer
+  used for bootstraping OpenCore.
+}
+
+  \emph{\DIFadd{Note 1}}\DIFadd{: Some firmewares may have broken NVRAM, no boot option support, or various other
+  incompatibilities of any kind. While unlikely, the use of this option may even cause boot failure.
+  Use at your own risk on boards known to be compatible.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: Be warned that NVRAM reset will also erase the boot option created in
+  }\texttt{\DIFadd{Bootstrap}} \DIFadd{mode.
+}
+
+\item
+  \DIFaddend \texttt{ExposeSensitiveData}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0x6}\\
   \textbf{Description}: Sensitive data exposure bitmask (sum) to operating system.

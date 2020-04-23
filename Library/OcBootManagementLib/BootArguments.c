@@ -159,7 +159,7 @@ OcAppendArgumentToCmd (
   // Account for extra space.
   //
   if (Len + (Len > 0 ? 1 : 0) + ArgumentLength >= BOOT_LINE_LENGTH) {
-    DEBUG ((DEBUG_INFO, "OCBM: boot-args are invalid, ignoring\n"));
+    DEBUG ((DEBUG_INFO, "OCB: boot-args are invalid, ignoring\n"));
     return FALSE;
   }
 

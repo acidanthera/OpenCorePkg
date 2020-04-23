@@ -50,7 +50,7 @@ InternalGetAppleDiskLabel (
   }
 
   UnicodeSPrint (DiskLabelPath, DiskLabelPathSize, L"%s%s", BootDirectoryName, LabelFilename);
-  DEBUG ((DEBUG_INFO, "OCBM: Trying to get label from %s\n", DiskLabelPath));
+  DEBUG ((DEBUG_INFO, "OCB: Trying to get label from %s\n", DiskLabelPath));
 
   AsciiDiskLabel = (CHAR8 *) ReadFile (FileSystem, DiskLabelPath, &DiskLabelLength, OC_MAX_VOLUME_LABEL_SIZE);
   FreePool (DiskLabelPath);
@@ -88,7 +88,7 @@ InternalGetAppleImage (
   }
 
   UnicodeSPrint (ImagePath, ImagePathSize, L"%s%s", DirectoryName, LabelFilename);
-  DEBUG ((DEBUG_INFO, "OCBM: Trying to get image from %s\n", ImagePath));
+  DEBUG ((DEBUG_INFO, "OCB: Trying to get image from %s\n", ImagePath));
 
   *ImageData = ReadFile (FileSystem, ImagePath, DataSize, BASE_16MB);
 
@@ -315,7 +315,7 @@ InternalGetRecoveryOsBooter (
           DEBUG_CODE_BEGIN ();
           DevicePathText = ConvertDevicePathToText (*FilePath, FALSE, FALSE);
           if (DevicePathText != NULL) {
-            DEBUG ((DEBUG_INFO, "OCBM: Got recovery dp %s\n", DevicePathText));
+            DEBUG ((DEBUG_INFO, "OCB: Got recovery dp %s\n", DevicePathText));
             FreePool (DevicePathText);
           }
           DEBUG_CODE_END ();

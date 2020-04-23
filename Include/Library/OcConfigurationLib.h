@@ -305,6 +305,7 @@ typedef enum {
 } OCS_VAULT_MODE;
 
 #define OC_MISC_SECURITY_FIELDS(_, __) \
+  _(OC_STRING                   , BootProtect                 ,      , OC_STRING_CONSTR ("None", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Vault                       ,      , OC_STRING_CONSTR ("Secure", _, __), OC_DESTR (OC_STRING) ) \
   _(UINT32                      , ScanPolicy                  ,      , OC_SCAN_DEFAULT_POLICY  , ()) \
   _(BOOLEAN                     , AllowNvramReset             ,      , FALSE                   , ()) \

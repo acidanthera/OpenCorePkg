@@ -450,28 +450,38 @@ OcMiscLateInit (
 {
   EFI_STATUS   Status;
   EFI_STATUS   HibernateStatus;
+  CONST CHAR8  *BootProtect;
   CONST CHAR8  *HibernateMode;
   UINT32       HibernateMask;
+  EFI_HANDLE   OcHandle;
 
   if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_BOOT_PATH) != 0) {
     OcStoreLoadPath (LoadPath);
   }
 
-  Status = EFI_SUCCESS;
+  OcHandle = NULL;
+  if (LoadPath != NULL) {
+    Status = gBS->LocateDevicePath (
+      &gEfiSimpleFileSystemProtocolGuid,
+      &LoadPath,
+      &OcHandle
+      );
+  } else {
+    Status = EFI_UNSUPPORTED;
+  }
 
-  if (LoadHandle != NULL) {
-    *LoadHandle = NULL;
-    //
-    // Do not disclose self entry unless asked.
-    //
-    if (LoadPath != NULL && Config->Misc.Boot.HideSelf) {
-      Status = gBS->LocateDevicePath (
-        &gEfiSimpleFileSystemProtocolGuid,
-        &LoadPath,
-        LoadHandle
-        );
-      DEBUG ((DEBUG_INFO, "OC: LoadHandle is %p - %r\n", *LoadHandle, Status));
-    }
+  BootProtect = OC_BLOB_GET (&Config->Misc.Security.BootProtect);
+  DEBUG ((DEBUG_INFO, "OC: LoadHandle %p with BootProtect in %a mode - %r\n", OcHandle, BootProtect, Status));
+
+  if (OcHandle != NULL && AsciiStrCmp (BootProtect, "Bootstrap") == 0) {
+    OcRegisterBootOption (L"OpenCore", OcHandle, OPEN_CORE_BOOTSTRAP_PATH);
+  }
+
+  //
+  // Do not disclose self entry unless asked.
+  //
+  if (LoadHandle != NULL && Config->Misc.Boot.HideSelf) {
+    *LoadHandle = OcHandle;
   }
 
   HibernateMode = OC_BLOB_GET (&Config->Misc.Boot.HibernateMode);

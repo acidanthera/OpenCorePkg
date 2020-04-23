@@ -2538,6 +2538,35 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   considered a security risk and thus is optional.
 
 \item
+  \texttt{BootProtect}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{None}\\
+  \textbf{Description}: Attempt to provide bootloader persistence.
+
+  Valid values:
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{None} --- do nothing.
+  \item \texttt{Bootstrap} --- create or update top-priority
+  \texttt{\textbackslash EFI\textbackslash OC\textbackslash Bootstrap\textbackslash Bootstrap.efi}
+  boot option (\texttt{Boot9696}) in UEFI variable storage at bootloader startup. For this option
+  to work \texttt{RequestBootVarRouting} is required to be enabled.
+  \end{itemize}
+
+  This option provides integration with third-party operating system installation and upgrade
+  at the times they overwrite \texttt{\textbackslash EFI\textbackslash BOOT\textbackslash BOOTx64.efi}
+  file. By creating a custom option in \texttt{Bootstrap} mode this file path becomes no longer
+  used for bootstraping OpenCore.
+
+  \emph{Note 1}: Some firmewares may have broken NVRAM, no boot option support, or various other
+  incompatibilities of any kind. While unlikely, the use of this option may even cause boot failure.
+  Use at your own risk on boards known to be compatible.
+
+  \emph{Note 2}: Be warned that NVRAM reset will also erase the boot option created in
+  \texttt{Bootstrap} mode.
+
+\item
   \texttt{ExposeSensitiveData}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0x6}\\
