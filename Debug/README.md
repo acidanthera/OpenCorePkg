@@ -74,6 +74,8 @@ when no macOS guest booting is required.
 1. Build OVMF firmware in NOOPT mode to be able to debug it:
 
     ```
+    git submodule init
+    git submodule update     # to clone OpenSSL
     build -a X64 -t XCODE5   -b NOOPT -p OvmfPkg/OvmfPkgX64.dsc # for macOS
     build -a X64 -t CLANGPDB -b NOOPT -p OvmfPkg/OvmfPkgX64.dsc # for other systems
     ```
