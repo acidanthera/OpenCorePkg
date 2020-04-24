@@ -22,25 +22,8 @@
 #include "../OpenCanopy.h"
 #include "../BmfLib.h"
 #include "../GuiApp.h"
+#include "BootPicker.h"
 
-typedef struct {
-  GUI_OBJ_CHILD         Hdr;
-  CONST GUI_IMAGE       *ClickImage;
-  CONST GUI_IMAGE       *CurrentImage;
-} GUI_OBJ_CLICKABLE;
-
-typedef struct {
-  GUI_OBJ_CHILD   Hdr;
-  GUI_IMAGE       EntryIcon;
-  GUI_IMAGE       Label;
-  VOID            *Context;
-  BOOLEAN         CustomIcon;
-} GUI_VOLUME_ENTRY;
-
-typedef struct {
-  GUI_OBJ_CHILD    Hdr;
-  GUI_VOLUME_ENTRY *SelectedEntry;
-} GUI_VOLUME_PICKER;
 
 extern GUI_OBJ           mBootPickerView;
 extern GUI_VOLUME_PICKER mBootPicker;

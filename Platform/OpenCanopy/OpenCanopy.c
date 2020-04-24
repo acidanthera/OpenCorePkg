@@ -16,6 +16,7 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/MtrrLib.h>
+#include <Library/OcBootManagementLib.h>
 #include <Library/OcCompressionLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcGuardLib.h>
@@ -25,6 +26,8 @@
 
 #include "OpenCanopy.h"
 #include "GuiIo.h"
+#include "GuiApp.h"
+#include "Views/BootPicker.h"
 
 typedef struct {
   UINT32 MinX;
@@ -32,6 +35,12 @@ typedef struct {
   UINT32 MaxX;
   UINT32 MaxY;
 } GUI_DRAW_REQUEST;
+
+//
+// Variables to assign the picked volume automatically once menu times out
+//
+extern BOOT_PICKER_GUI_CONTEXT mGuiContext;
+extern GUI_VOLUME_PICKER mBootPicker;
 
 //
 // I/O contexts
@@ -1112,7 +1121,8 @@ GuiGetBaseCoords (
 
 VOID
 GuiDrawLoop (
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext
+  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
+  IN     UINT32               TimeOutSeconds
   )
 {
   EFI_STATUS          Status;
@@ -1123,9 +1133,9 @@ GuiDrawLoop (
   GUI_OBJ             *HoldObject;
   INT64               HoldObjBaseX;
   INT64               HoldObjBaseY;
-
   CONST LIST_ENTRY    *AnimEntry;
   CONST GUI_ANIMATION *Animation;
+  UINT64              LoopStartTsc;
 
   ASSERT (DrawContext != NULL);
 
@@ -1141,9 +1151,8 @@ GuiDrawLoop (
   //
   // Main drawing loop, time and derieve sub-frequencies as required.
   //
-  mStartTsc = AsmReadTsc ();
+  LoopStartTsc = mStartTsc = AsmReadTsc ();
   do {
-    //UINT64 StartTsc = AsmReadTsc ();
     if (mPointerContext != NULL) {
       //
       // Process pointer events.
@@ -1206,11 +1215,9 @@ GuiDrawLoop (
                                &InputKey
                                );
         //
-        // HACK: MSVC complains about unreachable code.
+        // If detected key press then disable menu timeout
         //
-        if (Status != EFI_SUCCESS) {
-          return;
-        }
+        TimeOutSeconds = 0;
       }
     }
 
@@ -1235,8 +1242,17 @@ GuiDrawLoop (
     //
     GuiFlushScreen (DrawContext);
 
-    //UINT64 EndTsc = AsmReadTsc ();
-    //DEBUG ((DEBUG_ERROR, "Loop delta TSC: %lld, target: %lld\n", EndTsc - StartTsc, mDeltaTscTarget));
+    //
+    // Exit early if reach timer timeout and timer isn't disabled due to key event
+    //
+    if (TimeOutSeconds > 0
+      && GetTimeInNanoSecond (AsmReadTsc () - LoopStartTsc) >= TimeOutSeconds * 1000000000ULL) {
+      //
+      // FIXME: There should be view function or alike.
+      //
+      mGuiContext.BootEntry = mBootPicker.SelectedEntry->Context;
+      break;
+    }
   } while (!DrawContext->ExitLoop (DrawContext->GuiContext));
 }
 

@@ -82,7 +82,7 @@ OcShowMenuByOc (
     }
   }
 
-  GuiDrawLoop (&mDrawContext);
+  GuiDrawLoop (&mDrawContext, Context->TimeoutSeconds);
   ASSERT (mGuiContext.BootEntry != NULL || mGuiContext.Refresh);
 
   //

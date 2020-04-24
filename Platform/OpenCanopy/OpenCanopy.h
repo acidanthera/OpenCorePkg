@@ -245,7 +245,8 @@ GuiViewCurrentCursor (
 
 VOID
 GuiDrawLoop (
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext
+  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
+  IN     UINT32               TimeoutSeconds
   );
 
 EFI_STATUS
