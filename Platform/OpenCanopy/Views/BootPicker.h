@@ -27,5 +27,4 @@ typedef struct {
   GUI_VOLUME_ENTRY *SelectedEntry;
 } GUI_VOLUME_PICKER;
 
-
 #endif // BOOT_PICKER_H
