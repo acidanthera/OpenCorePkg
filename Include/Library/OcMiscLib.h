@@ -114,4 +114,54 @@ MultThenDivU64x64x32 (
   OUT UINT32  *Remainder  OPTIONAL
   );
 
+/**
+  Internal worker macro that calls DebugPrint().
+
+  This macro calls DebugPrint(), passing in the filename, line number, an
+  expression that failed the comparison with expected value,
+  the expected value and the actual value.
+
+  @param  Expression  Integer expression that evaluated to value different from Value (should be convertible to INTN)
+  @param  ExpectedValue  Expected value of the expression (should be convertible to INTN)
+
+**/
+#define _ASSERT_EQUALS(Expression, ExpectedValue)              \
+  DebugPrint(                                          \
+    DEBUG_ERROR,                                       \
+    "ASSERT %a(%d): %a (expected: %d, actual: %d)\n",  \
+    __FILE__,                                          \
+    __LINE__,                                          \
+    #Expression,                                       \
+    (INTN)(ExpectedValue),                                     \
+    (INTN)(Expression))
+
+/**
+  Macro that calls DebugAssert() if the value of an expression differs from the expected value.
+
+  If MDEPKG_NDEBUG is not defined and the DEBUG_PROPERTY_DEBUG_ASSERT_ENABLED
+  bit of PcdDebugProperyMask is set, then this macro evaluates the integer
+  expression specified by Expression.  If the value of Expression differs from ExpectedValue, then
+  DebugPrint() is called passing in the source filename, source line number,
+  Expression, it's value and ExpectedValue; then ASSERT(FALSE) is called to
+  cause a breakpoint, deadloop or no-op depending on PcdDebugProperyMask.
+
+  @param  Expression  Integer expression (should be convertible to INTN).
+  @param  ExpectedValue  Expected value (should be convertible to INTN).
+
+**/
+#if !defined(MDEPKG_NDEBUG)
+  #define ASSERT_EQUALS(Expression, ExpectedValue)    \
+    do {                                      \
+      if (DebugAssertEnabled ()) {            \
+        if ((Expression) != (ExpectedValue)) {        \
+          _ASSERT_EQUALS (Expression, ExpectedValue); \
+          ASSERT(FALSE);                      \
+          ANALYZER_UNREACHABLE ();            \
+        }                                     \
+      }                                       \
+    } while (FALSE)
+#else
+  #define ASSERT_EQUALS(Expression, ExpectedValue)
+#endif
+
 #endif // OC_MISC_LIB_H

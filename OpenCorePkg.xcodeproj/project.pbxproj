@@ -82,7 +82,6 @@
 		35366C2E240C213500D54CBB /* SecureMem.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE6240C213400D54CBB /* SecureMem.c */; };
 		35366C2F240C213500D54CBB /* DirectReset.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE8240C213400D54CBB /* DirectReset.c */; };
 		35366C30240C213500D54CBB /* Math.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AE9240C213400D54CBB /* Math.c */; };
-		35366C31240C213500D54CBB /* UninstallAllProtocolInterfaces.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AEA240C213400D54CBB /* UninstallAllProtocolInterfaces.c */; };
 		35366C32240C213500D54CBB /* ReleaseUsbOwnership.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AEB240C213400D54CBB /* ReleaseUsbOwnership.c */; };
 		35366C33240C213500D54CBB /* DataPatcher.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AED240C213400D54CBB /* DataPatcher.c */; };
 		35366C34240C213500D54CBB /* OcTimerLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AEF240C213400D54CBB /* OcTimerLib.c */; };
@@ -379,7 +378,6 @@
 		35366AE6240C213400D54CBB /* SecureMem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SecureMem.c; sourceTree = "<group>"; };
 		35366AE8240C213400D54CBB /* DirectReset.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DirectReset.c; sourceTree = "<group>"; };
 		35366AE9240C213400D54CBB /* Math.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Math.c; sourceTree = "<group>"; };
-		35366AEA240C213400D54CBB /* UninstallAllProtocolInterfaces.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = UninstallAllProtocolInterfaces.c; sourceTree = "<group>"; };
 		35366AEB240C213400D54CBB /* ReleaseUsbOwnership.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ReleaseUsbOwnership.c; sourceTree = "<group>"; };
 		35366AEC240C213400D54CBB /* OcMiscLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcMiscLib.inf; sourceTree = "<group>"; };
 		35366AED240C213400D54CBB /* DataPatcher.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DataPatcher.c; sourceTree = "<group>"; };
@@ -1030,7 +1028,6 @@
 			children = (
 				35366AE8240C213400D54CBB /* DirectReset.c */,
 				35366AE9240C213400D54CBB /* Math.c */,
-				35366AEA240C213400D54CBB /* UninstallAllProtocolInterfaces.c */,
 				35366AEB240C213400D54CBB /* ReleaseUsbOwnership.c */,
 				35366AEC240C213400D54CBB /* OcMiscLib.inf */,
 				35366AED240C213400D54CBB /* DataPatcher.c */,
@@ -1877,7 +1874,6 @@
 				35366C67240C213500D54CBB /* inftrees.c in Sources */,
 				35366C85240C213500D54CBB /* AIKTarget.c in Sources */,
 				35366C40240C213500D54CBB /* oids.c in Sources */,
-				35366C31240C213500D54CBB /* UninstallAllProtocolInterfaces.c in Sources */,
 				35366C1F240C213500D54CBB /* OcAppleImageVerification.c in Sources */,
 				35366CA9240C213500D54CBB /* OcAudioGenBeep.c in Sources */,
 				35366C34240C213500D54CBB /* OcTimerLib.c in Sources */,

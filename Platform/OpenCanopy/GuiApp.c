@@ -154,8 +154,8 @@ LoadImageFileFromStorage (
           FileData,
           FileSize,
           Scale,
-          MatchWidth,
-          MatchHeight
+          0, //MatchWidth * Scale,
+          0 //MatchHeight * Scale
           );
       }
 
@@ -292,9 +292,6 @@ InternalContextConstruct (
     Context->Scale = 1;
   }
 
-  // FIXME: Add support for 2x scaling.
-  Context->Scale = 1;
-
   Status = gBS->LocateProtocol (
     &gEfiUserInterfaceThemeProtocolGuid,
     NULL,
@@ -354,8 +351,8 @@ InternalContextConstruct (
       Storage,
       mIconNames[Index],
       Context->Scale,
-      ImageDimension,
-      ImageDimension,
+      ImageDimension * Context->Scale,
+      ImageDimension * Context->Scale,
       Index >= ICON_NUM_SYS,
       Old
       );
