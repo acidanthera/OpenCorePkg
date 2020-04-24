@@ -26,6 +26,7 @@
 ; responsibility is to locate the active partition, load the
 ; partition booter into memory, and jump to the booter's entry point.
 ; It leaves the boot drive in DL and a pointer to the partition entry in SI.
+; This version of boot0 implements hybrid GUID/MBR partition scheme support.
 ;
 ; This boot loader must be placed in the Master Boot Record.
 ;
@@ -38,17 +39,9 @@
 ;
 ; This code is written for the NASM assembler.
 ;   nasm boot0.s -o boot0
-
-;
-; This version of boot0 implements hybrid GUID/MBR partition scheme support
 ;
 ; Written by Tamás Kosárszky on 2008-03-10 and JrCs on 2013-05-08.
-;
-; Turbo added EFI System Partition boot support
-;
-; Added KillerJK's switchPass2 modifications
-;
-; JrCs added FAT32/exFAT System Partition boot support on GPT pure partition scheme
+; With additions by Turbo for EFI System Partition boot support.
 ;
 
 ;
@@ -78,9 +71,6 @@ kMBRPartTable       EQU  kMBRBuffer + kPartTableOffset
 
 kSectorBytes        EQU  512            ; sector size in bytes
 kBootSignature      EQU  0xAA55         ; boot sector signature
-kHFSPSignature      EQU  'H+'           ; HFS+ volume signature
-kHFSPCaseSignature  EQU  'HX'           ; HFS+ volume case-sensitive signature
-kEXFATSignature     EQU  'EX'           ; exFAT volume signature
 kFAT32BootCodeOffset EQU  0x5a          ; offset of boot code in FAT32 boot sector
 kBoot1FAT32Magic    EQU  'BO'           ; Magic string to detect our boot1f32 code
 
@@ -90,9 +80,7 @@ kGPTSignatureHigh   EQU  'PART'
 kGUIDLastDwordOffs  EQU  12             ; last 4 byte offset of a GUID
 
 kPartCount          EQU  4              ; number of paritions per table
-kPartTypeEXFAT      EQU  0x07           ; exFAT Filesystem type
 kPartTypeFAT32      EQU  0x0c           ; FAT32 Filesystem type
-kPartTypeHFS        EQU  0xaf           ; HFS+ Filesystem type
 kPartTypePMBR       EQU  0xee           ; On all GUID Partition Table disks a Protective MBR (PMBR)
                                         ; in LBA 0 (that is, the first block) precedes the
                                         ; GUID Partition Table Header to maintain compatibility
@@ -104,17 +92,10 @@ kPartTypePMBR       EQU  0xee           ; On all GUID Partition Table disks a Pr
 
 kPartActive         EQU  0x80           ; active flag enabled
 kPartInactive       EQU  0x00           ; active flag disabled
-kAppleGUID          EQU  0xACEC4365     ; last 4 bytes of Apple type GUIDs.
 kEFISystemGUID      EQU  0x3BC93EC9     ; last 4 bytes of EFI System Partition Type GUID:
                                         ; C12A7328-F81F-11D2-BA4B-00A0C93EC93B
 kBasicDataGUID      EQU  0xC79926B7     ; last 4 bytes of Basic Data System Partition Type GUID:
                                         ; EBD0A0A2-B9E5-4433-87C0-68B6B72699C7
-
-%ifdef FLOPPY
-kDriveNumber        EQU  0x00
-%else
-kDriveNumber        EQU  0x80
-%endif
 
 ;
 ; Format of fdisk partition entry.
@@ -285,10 +266,6 @@ find_boot:
     xor     bx, bx                      ; BL will be set to 1 later in case of
                                         ; Protective MBR has been found
 
-    inc     bh                          ; BH = 1. Giving a chance for a second pass
-                                        ; to boot an inactive but boot1h aware HFS+ partition
-                                        ; by scanning the MBR partition entries again.
-
 .start_scan:
     mov     cx, kPartCount              ; number of partition entries per table
 
@@ -308,7 +285,7 @@ find_boot:
     cmp     BYTE [si + part.type], 0                ; unused partition?
     je      .continue                               ; skip to next entry
     cmp     BYTE [si + part.type], kPartTypePMBR    ; check for Protective MBR
-    jne     .testPass
+    jne     .tryToBootIfActive
 
     mov     BYTE [si + part.bootid], kPartInactive  ; found Protective MBR
                                                     ; clear active flag to make sure this protective
@@ -316,45 +293,16 @@ find_boot:
     mov     bl, 1                                   ; Assume we can deal with GPT but try to scan
                                                     ; later if not found any other bootable partitions.
 
-.testPass:
-    cmp     bh, 1
-    jne     .Pass2
-
-.Pass1:
-    jmp     SHORT .tryToBootIfActive
-
-
-.Pass2:
-    jmp     SHORT .tryToBootSupportedFS
-
 .tryToBootIfActive:
     ; We're going to try to boot a partition if it is active
     cmp     BYTE [si + part.bootid], kPartActive
     jne     .continue
 
-    xor     dh, dh      ; Argument for loadBootSector to skip file system signature check.
-    jmp     SHORT .tryToBoot
-
-.tryToBootSupportedFS:
-    ; We're going to try to boot a partition with a supported filesystem
-    ; equipped with boot1x in its boot record regardless if it's active or not.
-
-    mov     dh, 1       ; Argument for loadBootSector to check file system signature.
-
-    cmp     BYTE [si + part.type], kPartTypeHFS
-    je      .tryToBoot
-
-    cmp     BYTE [si + part.type], kPartTypeFAT32
-    je      .tryToBoot
-
-    cmp     BYTE [si + part.type], kPartTypeEXFAT
-    jne     .continue
-
-.tryToBoot:
     ;
     ; Found boot partition, read boot sector to memory.
     ;
 
+    xor     dh, dh      ; Argument for loadBootSector to skip file system signature check.
     call    loadBootSector
     jne     .continue
     jmp     SHORT initBootLoader
@@ -369,17 +317,8 @@ find_boot:
     ; for a possible GPT Header at LBA 1
     ;
     dec     bl
-    jnz     .switchPass2                    ; didn't find Protective MBR before
+    jnz     .exit                           ; didn't find Protective MBR before
     call    checkGPT
-
-.switchPass2:
-    ;
-    ; Switching to Pass 2
-    ; try to find a boot1h aware HFS+ MBR partition
-    ;
-    dec     bh
-    mov     si, kMBRPartTable               ; set SI to first entry of MBR Partition table
-    jz      .start_scan                     ; scan again
 
 .exit:
     ret                                     ; Giving up.
@@ -425,16 +364,6 @@ checkGPT:
     push    bx                                          ; push size of GUID Partition entry
 
     ;
-    ; Calculating number of sectors we need to read for loading a GPT Array
-    ;
-;    push    dx                         ; preserve DX (DL = BIOS drive unit number)
-;    mov        ax, cx                  ; AX * BX = number of entries * size of one entry
-;    mul     bx                         ; AX = total byte size of GPT Array
-;    pop        dx                      ; restore DX
-;    shr     ax, 9                      ; convert to sectors
-
-    ;
-    ; ... or:
     ; Current GPT Arrays uses 128 partition entries each 128 bytes long
     ; 128 entries * 128 bytes long GPT Array entries / 512 bytes per sector = 32 sectors
     ;
@@ -463,17 +392,14 @@ checkGPT:
 
     mov     eax, [si + gpta.PartitionTypeGUID + kGUIDLastDwordOffs]
 
-    cmp     eax, kAppleGUID         ; check current GUID Partition for Apple's GUID type
-    je      .gpt_ok
-
     ;
-    ; Turbo - also try EFI System Partition
+    ; Try EFI System Partition
     ;
     cmp     eax, kEFISystemGUID     ; check current GUID Partition for EFI System Partition GUID type
     je      .gpt_ok
 
     ;
-    ; JrCs - also try FAT2 System Partition
+    ; Also try FAT2 System Partition
     ;
     cmp     eax, kBasicDataGUID     ; check current GUID Partition for Basic Data Partition GUID type
     jne     .gpt_continue
@@ -490,8 +416,8 @@ checkGPT:
     jne     .gpt_continue                           ; no boot loader signature
 
     mov     si, kMBRPartTable                       ; fake the current GUID Partition
-    mov     [si + part.lba], eax                    ; as MBR style partition for boot1h
-    mov     BYTE [si + part.type], kPartTypeHFS     ; with HFS+ filesystem type (0xAF)
+    mov     [si + part.lba], eax                    ; as MBR style partition for boot1f32,
+    mov     BYTE [si + part.type], kPartTypeFAT32   ; set filesystem type for cosmetic reasons
     jmp     SHORT initBootLoader
 
 .gpt_continue:
@@ -528,27 +454,9 @@ loadBootSector:
     or      dh, dh
     jz      .checkBootSignature
 
-.checkHFSSignature:
-
 %if VERBOSE
     LogString(test_str)
 %endif
-
-    ;
-    ; Looking for HFSPlus ('H+') or HFSPlus case-sensitive ('HX') signature.
-    ;
-    mov     ax, [kBoot0LoadAddr + 2 * kSectorBytes]
-    cmp     ax, kHFSPSignature      ; 'H+'
-    je      .checkBootSignature
-    cmp     ax, kHFSPCaseSignature  ; 'HX'
-    je      .checkBootSignature
-
-    ;
-    ; Looking for exFAT signature
-    ;
-    mov     ax, [kBoot0LoadAddr + 3]
-    cmp     ax, kEXFATSignature     ; 'EX'
-    je      .checkBootSignature
 
     ;
     ; Looking for boot1f32 magic string.
@@ -812,15 +720,14 @@ boot_error_str  db  'error', 0
 ;
 
 pad_boot:
-        times  428-($-$$) db 0  ; 428 = 440 - len(log_title_str)
+    times  428-($-$$) db 0  ; 428 = 440 - len(log_title_str)
 
 log_title_str:
-        db  10, 13, 'boot0af: ', 0  ; can be use as signature
+    db  10, 13, 'boot0af: ', 0  ; can be use as signature
 
 pad_table_and_sig:
     times 510-($-$$) db 0
     dw    kBootSignature
-
 
     ABSOLUTE 0xE400
 

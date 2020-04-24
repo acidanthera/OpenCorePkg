@@ -43,44 +43,34 @@
 ;
 ; Set to 1 to enable obscure debug messages.
 ;
-DEBUG				EQU		0
-
-;
-; Set to 1 to enable unused code.
-;
-UNUSED				EQU		0
+DEBUG               EQU     0
 
 ;
 ; Set to 1 to enable verbose mode.
 ;
-VERBOSE				EQU		0
-
-;
-; Set to 1 to make this stage 1 loader expecting arguments in SI and DL registers.
-;
-USESIDL				EQU		1
+VERBOSE             EQU     0
 
 ;
 ; Various constants.
 ;
-NULL		   		EQU		0
-CR					EQU		0x0D
-LF					EQU		0x0A
+NULL                EQU     0
+CR                  EQU     0x0D
+LF                  EQU     0x0A
 
-maxSectorCount		EQU		64									; maximum sector count for readSectors
-kSectorBytes		EQU		512									; sector size in bytes
-kBootSignature		EQU		0xAA55								; boot sector signature
+maxSectorCount      EQU     64                                  ; maximum sector count for readSectors
+kSectorBytes        EQU     512                                 ; sector size in bytes
+kBootSignature      EQU     0xAA55                              ; boot sector signature
 
-kBoot1StackAddress	EQU		0xFFF0								; boot1 stack pointer
-kBoot1LoadAddr		EQU		0x7C00								; boot1 load address
-kBoot1RelocAddr		EQU		0xE000								; boot1 relocated address
+kBoot1StackAddress  EQU     0xFFF0                              ; boot1 stack pointer
+kBoot1LoadAddr      EQU     0x7C00                              ; boot1 load address
+kBoot1RelocAddr     EQU     0xE000                              ; boot1 relocated address
 
-kBoot2Sectors		EQU		(480 * 1024 - 512) / kSectorBytes	; max size of 'boot' file in sectors
-kBoot2Segment		EQU		0x2000								; boot2 load segment
-kBoot2Address		EQU		kSectorBytes						; boot2 load address
+kBoot2Sectors       EQU     (480 * 1024 - 512) / kSectorBytes   ; max size of 'boot' file in sectors
+kBoot2Segment       EQU     0x2000                              ; boot2 load segment
+kBoot2Address       EQU     kSectorBytes                        ; boot2 load address
 
-FATBUF				EQU		0x7000								; Just place for one sectors
-DIRBUFSEG			EQU		0x1000								; Cluster sizes >64KB aren't supported
+FATBUF              EQU     0x7000                              ; Just place for one sectors
+DIRBUFSEG           EQU     0x1000                              ; Cluster sizes >64KB aren't supported
 
 ;
 ; Format of fdisk partition entry.
@@ -88,69 +78,69 @@ DIRBUFSEG			EQU		0x1000								; Cluster sizes >64KB aren't supported
 ; The symbol 'part_size' is automatically defined as an `EQU'
 ; giving the size of the structure.
 ;
-			struc part
-.bootid		resb 1		; bootable or not
-.head		resb 1		; starting head, sector, cylinder
-.sect		resb 1		;
-.cyl		resb 1		;
-.type		resb 1		; partition type
-.endhead	resb 1		; ending head, sector, cylinder
-.endsect	resb 1		;
-.endcyl		resb 1		;
-.lba		resd 1		; starting lba
-.sectors	resd 1		; size in sectors
-			endstruc
+            struc part
+.bootid     resb 1      ; bootable or not
+.head       resb 1      ; starting head, sector, cylinder
+.sect       resb 1      ;
+.cyl        resb 1      ;
+.type       resb 1      ; partition type
+.endhead    resb 1      ; ending head, sector, cylinder
+.endsect    resb 1      ;
+.endcyl     resb 1      ;
+.lba        resd 1      ; starting lba
+.sectors    resd 1      ; size in sectors
+            endstruc
 
-				struc direntry
-.nameext	resb 11
-.attr		resb 1
-.nused1		resb 8
-.highclus	resw 1
-.nused2		resb 4
-.lowclus	resw 1
-.size		resd 1
-			endstruc
+                struc direntry
+.nameext    resb 11
+.attr       resb 1
+.nused1     resb 8
+.highclus   resw 1
+.nused2     resb 4
+.lowclus    resw 1
+.size       resd 1
+            endstruc
 
 
 ;
 ; Macros.
 ;
 %macro jmpabs 1
-	push	WORD %1
-	ret
+    push    WORD %1
+    ret
 %endmacro
 
 %macro DebugCharMacro 1
-	pushad
-	mov		al, %1
-	call	print_char
-	call	getc
-	popad
+    pushad
+    mov     al, %1
+    call    print_char
+    call    getc
+    popad
 %endmacro
 
 %macro PrintCharMacro 1
-	pushad
-	mov		al, %1
-	call	print_char
-	popad
+    pushad
+    mov     al, %1
+    call    print_char
+    popad
 %endmacro
 
 %macro PutCharMacro 1
-	call	print_char
+    call    print_char
 %endmacro
 
 %macro PrintHexMacro 1
-	call	print_hex
+    call    print_hex
 %endmacro
 
 %macro PrintString 1
-	mov		si, %1
-	call	print_string
+    mov     si, %1
+    call    print_string
 %endmacro
 
 %macro LogString 1
-	mov		di, %1
-	call	log_string
+    mov     di, %1
+    call    log_string
 %endmacro
 
 %if DEBUG
@@ -170,27 +160,27 @@ DIRBUFSEG			EQU		0x1000								; Cluster sizes >64KB aren't supported
 
     SEGMENT .text
 
-	ORG		kBoot1LoadAddr
+    ORG     kBoot1LoadAddr
 
-	jmp		start
-	times	3-($-$$) nop
+    jmp     start
+    times   3-($-$$) nop
 
-gOEMName			times	8	db	0 ;OEMNAME
-gBPS				dw		0
-gSPC				db		0
-gReservedSectors	dw		0
-gNumFats			db		0
-gCrap1				times	11	db	0
-gPartLBA			dd		0
-gPartSize			dd		0
-gSectPerFat			dd		0
-gCrap2				times	4	db	0
-gRootCluster		dd		0
-gCrap3				times	16	db	0
+gOEMName            times   8   db  0 ;OEMNAME
+gBPS                dw      0
+gSPC                db      0
+gReservedSectors    dw      0
+gNumFats            db      0
+gCrap1              times   11  db  0
+gPartLBA            dd      0
+gPartSize           dd      0
+gSectPerFat         dd      0
+gCrap2              times   4   db  0
+gRootCluster        dd      0
+gCrap3              times   16  db  0
 
-gBIOSDriveNumber	db	 	0
-gExtInfo			times	25 	db	0
-gFileName			db		"BOOT       " ; Used as a magic string in boot0
+gBIOSDriveNumber    db      0
+gExtInfo            times   25  db  0
+gFileName           db      "BOOT       " ; Used as a magic string in boot0
 
 ;--------------------------------------------------------------------------
 ; Boot code is loaded at 0:7C00h.
@@ -201,8 +191,8 @@ start:
     ; Interrupts should be off while the stack is being manipulated.
     ;
     cli                             ; interrupts off
-    xor		eax, eax                  ; zero ax
-    mov		ss, ax                  ; ss <- 0
+    xor     eax, eax                ; zero ax
+    mov     ss, ax                  ; ss <- 0
     mov     sp, kBoot1StackAddress  ; sp <- top of stack
     sti                             ; reenable interrupts
 
@@ -212,20 +202,14 @@ start:
     ;
     ; Initializing global variables.
     ;
-    mov ax, word [gReservedSectors]
-%if USESIDL
+    mov     ax, word [gReservedSectors]
     add     eax, [si + part.lba]
-%else
-    add     eax, [gPartLBA]
-%endif
-    mov     [gPartLBA], eax					; save the current FAT LBA offset
-%if USESIDL
-    mov     [gBIOSDriveNumber], dl			; save BIOS drive number
-%endif
-	xor eax,eax
-	mov al, [gNumFats]
-	mul dword [gSectPerFat]
-	mov [gSectPerFat], eax
+    mov     [gPartLBA], eax                 ; save the current FAT LBA offset
+    mov     [gBIOSDriveNumber], dl          ; save BIOS drive number
+    xor     eax,eax
+    mov     al, [gNumFats]
+    mul     dword [gSectPerFat]
+    mov     [gSectPerFat], eax
 
 ;--------------------------------------------------------------------------
 ; Find stage2 boot file in a FAT32 Volume's root folder.
@@ -233,79 +217,69 @@ start:
 findRootBoot:
 
 %if VERBOSE
-	LogString(init_str)
+    LogString(init_str)
 %endif
 
-	mov		eax, [gRootCluster]
+    mov     eax, [gRootCluster]
 
 nextdirclus:
-	mov		edx, DIRBUFSEG<<4
-	call	readCluster
-	jc		error
-	xor		si, si
-	mov		bl, [gSPC]
-	shl		bx, 9
-	add		bx, si
+    mov     edx, DIRBUFSEG<<4
+    call    readCluster
+    jc      error
+    xor     si, si
+    mov     bl, [gSPC]
+    shl     bx, 9
+    add     bx, si
 
 nextdirent:
-	mov		di, gFileName
-	push	ds
-	push	DIRBUFSEG
-	pop		ds
-	mov		cl, [si]
-	test	cl, cl
-	jz		dserror
-	mov		cx, 11
-	repe	cmpsb
-	jz		direntfound
+    mov     di, gFileName
+    push    ds
+    push    DIRBUFSEG
+    pop     ds
+    mov     cl, [si]
+    test    cl, cl
+    jz      dserror
+    mov     cx, 11
+    repe    cmpsb
+    jz      direntfound
 
 falsealert:
-	pop		ds
-	add		cl, 21
-	add		si, cx
-	cmp		si, bx
-	jz		nextdirclus
-	jmp		nextdirent
+    pop     ds
+    add     cl, 21
+    add     si, cx
+    cmp     si, bx
+    jz      nextdirclus
+    jmp     nextdirent
 
 direntfound:
-;	test byte [ds:si+direntry.attr-11], 0x18
-	lodsb
-	test	al, 0x18
-	jnz		falsealert
-	push	WORD [si + direntry.highclus - 12]
-	push	WORD [si + direntry.lowclus - 12]
-	pop		eax
-	pop		ds
-	mov		edx, (kBoot2Segment << 4) + kBoot2Address
+    lodsb
+    test    al, 0x18
+    jnz     falsealert
+    push    WORD [si + direntry.highclus - 12]
+    push    WORD [si + direntry.lowclus - 12]
+    pop     eax
+    pop     ds
+    mov     edx, (kBoot2Segment << 4) + kBoot2Address
 
 cont_read:
-	push	edx
-	call	readCluster
-	pop		edx
-	pushf
-	xor		ebx,ebx
-	mov		bl, [gSPC]
-	shl		ebx, 9
-	add		edx, ebx
-	popf
-	jnc		cont_read
+    push    edx
+    call    readCluster
+    pop     edx
+    pushf
+    xor     ebx,ebx
+    mov     bl, [gSPC]
+    shl     ebx, 9
+    add     edx, ebx
+    popf
+    jnc     cont_read
 
 boot2:
 
 %if DEBUG
-	DebugChar ('!')
+    DebugChar ('!')
 %endif
 
-%if UNUSED
-	;
-	; Waiting for a key press.
-	;
-
-    mov     ah, 0
-    int		0x16
-%endif
-
-    mov     dl, [gBIOSDriveNumber]			; load BIOS drive number
+    mov     dl, [gBIOSDriveNumber]          ; load BIOS drive number
     jmp     kBoot2Segment:kBoot2Address
 
 dserror:
@@ -321,47 +295,47 @@ hang:
     hlt
     jmp     hang
 
-	; readCluster - Reads cluster EAX to (EDX), updates EAX to next cluster
+    ; readCluster - Reads cluster EAX to (EDX), updates EAX to next cluster
 readCluster:
-	cmp		eax, 0x0ffffff8
-	jb		do_read
-	stc
-	ret
+    cmp     eax, 0x0ffffff8
+    jb      do_read
+    stc
+    ret
 
 do_read:
-	push	eax
-	xor		ecx,ecx
-	dec		eax
-	dec		eax
-	mov		cl, [gSPC]
-	push	edx
-	mul		ecx
-	pop		edx
-	add		eax, [gSectPerFat]
-	mov		ecx, eax
-	xor		ah,ah
-	mov		al, [gSPC]
-	call	readSectors
-	jc		clusend
-	pop		ecx
-	push	cx
-	shr		ecx, 7
-	xor		ax, ax
-	inc		ax
-	mov		edx, FATBUF
-	call	readSectors
-	jc		clusend
-	pop		si
-	and		si, 0x7f
-	shl		si, 2
-	mov		eax, [FATBUF + si]
-	and		eax, 0x0fffffff
-	clc
-	ret
+    push    eax
+    xor     ecx,ecx
+    dec     eax
+    dec     eax
+    mov     cl, [gSPC]
+    push    edx
+    mul     ecx
+    pop     edx
+    add     eax, [gSectPerFat]
+    mov     ecx, eax
+    xor     ah,ah
+    mov     al, [gSPC]
+    call    readSectors
+    jc      clusend
+    pop     ecx
+    push    cx
+    shr     ecx, 7
+    xor     ax, ax
+    inc     ax
+    mov     edx, FATBUF
+    call    readSectors
+    jc      clusend
+    pop     si
+    and     si, 0x7f
+    shl     si, 2
+    mov     eax, [FATBUF + si]
+    and     eax, 0x0fffffff
+    clc
+    ret
 
 clusend:
-	pop		eax
-	ret
+    pop     eax
+    ret
 
 ;--------------------------------------------------------------------------
 ; readSectors - Reads more than 127 sectors using LBA addressing.
@@ -376,28 +350,28 @@ clusend:
 ;        1 error
 ;
 readSectors:
-	pushad
-	mov		bx, ax
+    pushad
+    mov     bx, ax
 
 .loop:
-	xor		eax, eax						; EAX = 0
-	mov		al, bl							; assume we reached the last block.
-	cmp		bx, maxSectorCount				; check if we really reached the last block
-	jb		.readBlock						; yes, BX < MaxSectorCount
-	mov		al, maxSectorCount				; no, read MaxSectorCount
+    xor     eax, eax                        ; EAX = 0
+    mov     al, bl                          ; assume we reached the last block.
+    cmp     bx, maxSectorCount              ; check if we really reached the last block
+    jb      .readBlock                      ; yes, BX < MaxSectorCount
+    mov     al, maxSectorCount              ; no, read MaxSectorCount
 
 .readBlock:
-	call	readLBA
-	sub		bx, ax							; decrease remaning sectors with the read amount
-	jz		.exit							; exit if no more sectors left to be loaded
-	add		ecx, eax						; adjust LBA sector offset
-	shl		ax, 9							; convert sectors to bytes
-	add		edx, eax						; adjust target memory location
-	jmp		.loop							; read remaining sectors
+    call    readLBA
+    sub     bx, ax                          ; decrease remaning sectors with the read amount
+    jz      .exit                           ; exit if no more sectors left to be loaded
+    add     ecx, eax                        ; adjust LBA sector offset
+    shl     ax, 9                           ; convert sectors to bytes
+    add     edx, eax                        ; adjust target memory location
+    jmp     .loop                           ; read remaining sectors
 
 .exit:
-	popad
-	ret
+    popad
+    ret
 
 ;--------------------------------------------------------------------------
 ; readLBA - Read sectors from a partition using LBA addressing.
@@ -413,9 +387,9 @@ readSectors:
 ;        1 error
 ;
 readLBA:
-    pushad                          		; save all registers
-    push    es								; save ES
-    mov     bp, sp                 			; save current SP
+    pushad                                  ; save all registers
+    push    es                              ; save ES
+    mov     bp, sp                          ; save current SP
 
     ;
     ; Convert EDX to segment:offset model and set ES:BX
@@ -428,32 +402,32 @@ readLBA:
     ; capricious BIOSes to make sure offset is always positive.
     ;
 
-	mov		bx, dx							; save offset to BX
-	and		bh, 0x0f						; keep low 12 bits
-	shr		edx, 4							; adjust linear address to segment base
-	xor		dl, dl							; mask low 8 bits
-	mov		es, dx							; save segment to ES
+    mov     bx, dx                          ; save offset to BX
+    and     bh, 0x0f                        ; keep low 12 bits
+    shr     edx, 4                          ; adjust linear address to segment base
+    xor     dl, dl                          ; mask low 8 bits
+    mov     es, dx                          ; save segment to ES
 
     ;
     ; Create the Disk Address Packet structure for the
     ; INT13/F42 (Extended Read Sectors) on the stack.
     ;
 
-    ; push    DWORD 0              			; offset 12, upper 32-bit LBA
-    push    ds                      		; For sake of saving memory,
-    push    ds                      		; push DS register, which is 0.
+    ; push    DWORD 0                       ; offset 12, upper 32-bit LBA
+    push    ds                              ; For sake of saving memory,
+    push    ds                              ; push DS register, which is 0.
 
-    add     ecx, [gPartLBA]         		; offset 8, lower 32-bit LBA
+    add     ecx, [gPartLBA]                 ; offset 8, lower 32-bit LBA
     push    ecx
 
-    push    es                      		; offset 6, memory segment
+    push    es                              ; offset 6, memory segment
 
-    push    bx                      		; offset 4, memory offset
+    push    bx                              ; offset 4, memory offset
 
-    xor     ah, ah             				; offset 3, must be 0
-    push    ax                      		; offset 2, number of sectors
+    xor     ah, ah                          ; offset 3, must be 0
+    push    ax                              ; offset 2, number of sectors
 
-    push    WORD 16                 		; offset 0-1, packet size
+    push    WORD 16                         ; offset 0-1, packet size
 
     ;
     ; INT13 Func 42 - Extended Read Sectors
@@ -471,25 +445,25 @@ readLBA:
     ; Packet offset 2 indicates the number of sectors read
     ; successfully.
     ;
-	mov     dl, [gBIOSDriveNumber]			; load BIOS drive number
-	mov     si, sp
-	mov     ah, 0x42
-	int     0x13
+    mov     dl, [gBIOSDriveNumber]          ; load BIOS drive number
+    mov     si, sp
+    mov     ah, 0x42
+    int     0x13
 
-	jc		error
+    jc      error
 
     ;
     ; Issue a disk reset on error.
     ; Should this be changed to Func 0xD to skip the diskette controller
     ; reset?
     ;
-;	xor     ax, ax                  		; Func 0
-;	int     0x13                    		; INT 13
-;	stc                             		; set carry to indicate error
+;   xor     ax, ax                          ; Func 0
+;   int     0x13                            ; INT 13
+;   stc                                     ; set carry to indicate error
 
 .exit:
-    mov     sp, bp                  		; restore SP
-    pop     es								; restore ES
+    mov     sp, bp                          ; restore SP
+    pop     es                              ; restore ES
     popad
     ret
 
@@ -507,12 +481,12 @@ readLBA:
 log_string:
     pushad
 
-    push	di
-    mov		si, log_title_str
-    call	print_string
+    push    di
+    mov     si, log_title_str
+    call    print_string
 
-    pop		si
-    call	print_string
+    pop     si
+    call    print_string
 
     popad
 
@@ -528,14 +502,14 @@ log_string:
 ;   AX, BX, SI
 ;
 print_string:
-    mov     bx, 1                   		; BH=0, BL=1 (blue)
+    mov     bx, 1                           ; BH=0, BL=1 (blue)
 
 .loop:
-    lodsb                           		; load a byte from DS:SI into AL
-    cmp     al, 0               			; Is it a NULL?
-    je      .exit                   		; yes, all done
-    mov     ah, 0xE                 		; INT10 Func 0xE
-    int     0x10                    		; display byte in tty mode
+    lodsb                                   ; load a byte from DS:SI into AL
+    cmp     al, 0                           ; Is it a NULL?
+    je      .exit                           ; yes, all done
+    mov     ah, 0xE                         ; INT10 Func 0xE
+    int     0x10                            ; display byte in tty mode
     jmp     .loop
 
 .exit:
@@ -558,18 +532,11 @@ print_hex:
 .loop:
     push    ax
     ror     al, 4
-    call    print_nibble            		; display upper nibble
+    call    print_nibble                    ; display upper nibble
     pop     ax
-    call    print_nibble            		; display lower nibble
+    call    print_nibble                    ; display lower nibble
     ror     eax, 8
     loop    .loop
-
-%if UNUSED
-	mov     al, 10							; carriage return
-	call    print_char
-	mov     al, 13
-	call    print_char
-%endif ; UNUSED
 
     popad
     ret
@@ -590,7 +557,7 @@ print_nibble:
 getc:
     pushad
     mov     ah, 0
-    int		0x16
+    int     0x16
     popad
     ret
 
@@ -602,9 +569,9 @@ getc:
 ;
 print_char:
     pushad
-    mov     bx, 1                   		; BH=0, BL=1 (blue)
-    mov     ah, 0x0e                		; bios INT 10, Function 0xE
-    int     0x10                    		; display byte in tty mode
+    mov     bx, 1                           ; BH=0, BL=1 (blue)
+    mov     ah, 0x0e                        ; bios INT 10, Function 0xE
+    int     0x10                            ; display byte in tty mode
     popad
     ret
 
@@ -615,9 +582,9 @@ print_char:
 ;
 
 %if VERBOSE
-log_title_str	db		CR, LF, 'b1f: ', NULL
-init_str		db		'init', NULL
-error_str		db		'error', NULL
+log_title_str   db      CR, LF, 'b1f: ', NULL
+init_str        db      'init', NULL
+error_str       db      'error', NULL
 %endif
 
 ;--------------------------------------------------------------------------
@@ -628,9 +595,9 @@ error_str		db		'error', NULL
 ; that the 'times' argument is negative.
 
 pad_table_and_sig:
-	times			510-($-$$) db 0
-	dw				kBootSignature
+    times           510-($-$$) db 0
+    dw              kBootSignature
 
-	ABSOLUTE		kBoot1LoadAddr + kSectorBytes
+    ABSOLUTE        kBoot1LoadAddr + kSectorBytes
 
 ; END
