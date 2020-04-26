@@ -363,10 +363,25 @@ RenderResync (
   Info = mGraphicsOutput->Mode->Info;
 
   if (Info->HorizontalResolution < TGT_CHAR_WIDTH * 3
-    || Info->VerticalResolution < TGT_CHAR_HEIGHT * 3
-    || (Info->PixelFormat != PixelRedGreenBlueReserved8BitPerColor
-      && Info->PixelFormat != PixelBlueGreenRedReserved8BitPerColor)) {
+    || Info->VerticalResolution < TGT_CHAR_HEIGHT * 3) {
     return EFI_DEVICE_ERROR;
+  }
+
+  if (Info->PixelFormat != PixelRedGreenBlueReserved8BitPerColor
+    && Info->PixelFormat != PixelBlueGreenRedReserved8BitPerColor) {
+    //
+    // DuetPkg may report bit mask image output.
+    //
+    if (Info->PixelFormat != PixelBitMask) {
+      return EFI_DEVICE_ERROR;
+    }
+
+    if (Info->PixelInformation.RedMask != 0xFF000000U
+      && Info->PixelInformation.RedMask != 0xFF0000U
+      && Info->PixelInformation.RedMask != 0xFF00U
+      && Info->PixelInformation.RedMask != 0xFFU) {
+      return EFI_DEVICE_ERROR;
+    }
   }
 
   if (mCharacterBuffer != NULL) {
@@ -933,7 +948,7 @@ OcUseBuiltinTextOutput (
   Status = AsciiTextReset (&mAsciiTextOutputProtocol, TRUE);
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCC: Cannot setup ASCII output\n"));
+    DEBUG ((DEBUG_INFO, "OCC: Cannot setup ASCII output - %r\n", Status));
     return;
   }
 

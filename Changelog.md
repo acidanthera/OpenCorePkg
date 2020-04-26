@@ -20,6 +20,7 @@ OpenCore Changelog
 - Added experimental `BootProtect` `Security` option
 - Fixed kext injection in 10.8 installer
 - Added timeout support to OpenCanopy user interface
+- Fixed handling 24-bit screen resolutions
 
 #### v0.5.7
 - Added TimeMachine detection to picker

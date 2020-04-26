@@ -89,10 +89,16 @@ OcSetConsoleResolutionForProtocol (
       //
       // Custom resolution is requested.
       //
-      if (Info->HorizontalResolution == Width && Info->VerticalResolution == Height
+      if (Info->HorizontalResolution == Width
+        && Info->VerticalResolution == Height
+        && (Bpp == 0 || Bpp == 24 || Bpp == 32)
         && (Info->PixelFormat == PixelRedGreenBlueReserved8BitPerColor
-          || Info->PixelFormat == PixelBlueGreenRedReserved8BitPerColor)
-        && (Bpp == 0 || Bpp == 24 || Bpp == 32)) {
+          || Info->PixelFormat == PixelBlueGreenRedReserved8BitPerColor
+          || (Info->PixelFormat == PixelBitMask
+            && (Info->PixelInformation.RedMask  == 0xFF000000U
+              || Info->PixelInformation.RedMask == 0xFF0000U
+              || Info->PixelInformation.RedMask == 0xFF00U
+              || Info->PixelInformation.RedMask == 0xFFU)))) {
         ModeNumber = ModeIndex;
         FreePool (Info);
         break;
