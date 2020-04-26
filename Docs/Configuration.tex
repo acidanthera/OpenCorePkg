@@ -3989,6 +3989,11 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \\
+  \href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
+& PS/2 keyboard driver from \texttt{MdeModulePkg}. DuetPkg and some firmwares
+  may not include this driver, but it is necessary for PS/2 keyboard to work.
+  Note, unlike \texttt{OpenUsbKbDxe} this driver has no \texttt{AppleKeyMapAggregator}
+  support and thus requires \texttt{KeySupport} to be enabled. \\
   \href{https://github.com/acidanthera/audk}{\texttt{Ps2MouseDxe}}\textbf{*}
 & PS/2 mouse driver from \texttt{MdeModulePkg}. Some very old laptop firmwares
   may not include this driver, but it is necessary for touchpad to work

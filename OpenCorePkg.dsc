@@ -139,6 +139,10 @@
       !endif
   }
   MdeModulePkg/Bus/Isa/Ps2MouseDxe/Ps2MouseDxe.inf
+  MdeModulePkg/Bus/Isa/Ps2KeyboardDxe/Ps2KeyboardDxe.inf {
+    <LibraryClasses>
+      TimerLib|OpenCorePkg/Library/OcTimerLib/OcTimerLib.inf
+  }
   MdeModulePkg/Bus/Usb/UsbMouseDxe/UsbMouseDxe.inf
   MdeModulePkg/Universal/HiiDatabaseDxe/HiiDatabaseDxe.inf
   OpenCorePkg/Application/BootKicker/BootKicker.inf

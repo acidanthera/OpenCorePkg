@@ -21,6 +21,7 @@ OpenCore Changelog
 - Fixed kext injection in 10.8 installer
 - Added timeout support to OpenCanopy user interface
 - Fixed handling 24-bit screen resolutions
+- Added `Ps2KeyboardDxe` driver for DuetPkg
 
 #### v0.5.7
 - Added TimeMachine detection to picker
