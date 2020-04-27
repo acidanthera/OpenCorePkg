@@ -862,7 +862,8 @@ BootPickerEntriesAdd (
         IconFileSize,
         GuiContext->Scale,
         BOOT_ENTRY_ICON_DIMENSION * GuiContext->Scale,
-        BOOT_ENTRY_ICON_DIMENSION * GuiContext->Scale
+        BOOT_ENTRY_ICON_DIMENSION * GuiContext->Scale,
+        FALSE
         );
       FreePool (IconFileData);
       if (!EFI_ERROR (Status)) {

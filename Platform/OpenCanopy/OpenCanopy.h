@@ -144,7 +144,8 @@ GuiIcnsToImageIcon (
   IN  UINT32     IcnsImageSize,
   IN  UINT8      Scale,
   IN  UINT32     MatchWidth,
-  IN  UINT32     MatchHeight
+  IN  UINT32     MatchHeight,
+  IN  BOOLEAN    AllowLess
   );
 
 EFI_STATUS

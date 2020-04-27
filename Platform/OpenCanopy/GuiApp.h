@@ -13,7 +13,7 @@
 
 #include <Library/OcBootManagementLib.h>
 
-#define CURSOR_DIMENSION  24
+#define MAX_CURSOR_DIMENSION  144
 
 #define BOOT_ENTRY_DIMENSION       144
 #define BOOT_ENTRY_ICON_DIMENSION  APPLE_DISK_ICON_DIMENSION

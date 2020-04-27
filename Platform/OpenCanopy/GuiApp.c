@@ -116,7 +116,8 @@ LoadImageFileFromStorage (
   IN  UINT32                   MatchWidth,
   IN  UINT32                   MatchHeight,
   IN  BOOLEAN                  Icon,
-  IN  BOOLEAN                  Old
+  IN  BOOLEAN                  Old,
+  IN  BOOLEAN                  AllowLessSize
   )
 {
   EFI_STATUS    Status;
@@ -154,8 +155,9 @@ LoadImageFileFromStorage (
           FileData,
           FileSize,
           Scale,
-          0, //MatchWidth * Scale,
-          0 //MatchHeight * Scale
+          MatchWidth,
+          MatchHeight,
+          AllowLessSize
           );
       }
 
@@ -337,7 +339,7 @@ InternalContextConstruct (
 
   for (Index = 0; Index < ICON_NUM_TOTAL; ++Index) {
     if (Index == ICON_CURSOR) {
-      ImageDimension = CURSOR_DIMENSION;
+      ImageDimension = MAX_CURSOR_DIMENSION;
     } else if (Index == ICON_SELECTED) {
       ImageDimension = BOOT_SELECTOR_BACKGROUND_DIMENSION;
     } else if (Index == ICON_SELECTOR) {
@@ -351,10 +353,11 @@ InternalContextConstruct (
       Storage,
       mIconNames[Index],
       Context->Scale,
-      ImageDimension * Context->Scale,
-      ImageDimension * Context->Scale,
+      ImageDimension,
+      ImageDimension,
       Index >= ICON_NUM_SYS,
-      Old
+      Old,
+      Index == ICON_CURSOR
       );
 
     if (!EFI_ERROR (Status) && Index == ICON_SELECTOR) {

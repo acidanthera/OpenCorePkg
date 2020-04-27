@@ -1247,7 +1247,8 @@ GuiIcnsToImageIcon (
   IN  UINT32     IcnsImageSize,
   IN  UINT8      Scale,
   IN  UINT32     MatchWidth,
-  IN  UINT32     MatchHeight
+  IN  UINT32     MatchHeight,
+  IN  BOOLEAN    AllowLess
   )
 {
   EFI_STATUS         Status;
@@ -1305,9 +1306,20 @@ GuiIcnsToImageIcon (
         );
 
       if (!EFI_ERROR (Status) && MatchWidth > 0 && MatchHeight > 0) {
-        if (Image->Width != MatchWidth * Scale
-          || Image->Height != MatchHeight * Scale) {
+        if (AllowLess
+          ? (Image->Width >  MatchWidth * Scale || Image->Height >  MatchWidth * Scale
+          || Image->Width == 0 || Image->Height == 0)
+          : (Image->Width != MatchWidth * Scale || Image->Height != MatchHeight * Scale)) {
           FreePool (Image->Buffer);
+          DEBUG ((
+            DEBUG_INFO,
+            "OCUI: Expected %dx%d, actual %dx%d, allow less: %d\n",
+             MatchWidth * Scale,
+             MatchHeight * Scale,
+             Image->Width,
+             Image->Height,
+             AllowLess
+            ));
           Status = EFI_UNSUPPORTED;
         }
       }
