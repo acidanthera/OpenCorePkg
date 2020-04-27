@@ -18,6 +18,7 @@
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcPngLib.h>
 #include <Library/OcStorageLib.h>
+#include <Library/OcMiscLib.h>
 
 #include "../OpenCanopy.h"
 #include "../BmfLib.h"
@@ -176,7 +177,7 @@ InternalBootPickerSelectEntry (
 
   Selector = BASE_CR (SelectorNode, GUI_OBJ_CHILD, Link);
   ASSERT (Selector->Obj.Width <= VolumeEntryObj->Width);
-  ASSERT (This->Hdr.Obj.Height == Selector->Obj.OffsetY + Selector->Obj.Height);
+  ASSERT_EQUALS (This->Hdr.Obj.Height, Selector->Obj.OffsetY + Selector->Obj.Height);
 
   Selector->Obj.OffsetX  = VolumeEntryObj->OffsetX;
   Selector->Obj.OffsetX += (VolumeEntryObj->Width - Selector->Obj.Width) / 2;
@@ -391,14 +392,14 @@ InternalBootPickerEntryDraw (
   }
   Label       = &Entry->Label;
 
-  ASSERT (This->Width  == BOOT_ENTRY_DIMENSION);
-  ASSERT (This->Height == BOOT_ENTRY_HEIGHT);
+  ASSERT_EQUALS (This->Width,  BOOT_ENTRY_DIMENSION * DrawContext->Scale);
+  ASSERT_EQUALS (This->Height, BOOT_ENTRY_HEIGHT    * DrawContext->Scale);
   //
   // Draw the icon horizontally centered.
   //
   ASSERT (EntryIcon != NULL);
-  ASSERT (EntryIcon->Width  == BOOT_ENTRY_ICON_DIMENSION);
-  ASSERT (EntryIcon->Height == BOOT_ENTRY_ICON_DIMENSION);
+  ASSERT_EQUALS (EntryIcon->Width,  BOOT_ENTRY_ICON_DIMENSION * DrawContext->Scale);
+  ASSERT_EQUALS (EntryIcon->Height, BOOT_ENTRY_ICON_DIMENSION * DrawContext->Scale);
 
   GuiDrawChildImage (
     EntryIcon,
@@ -406,8 +407,8 @@ InternalBootPickerEntryDraw (
     DrawContext,
     BaseX,
     BaseY,
-    (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) / 2,
-    (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) / 2,
+    (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) * DrawContext->Scale / 2,
+    (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) * DrawContext->Scale / 2,
     OffsetX,
     OffsetY,
     Width,
@@ -426,8 +427,8 @@ InternalBootPickerEntryDraw (
     DrawContext,
     BaseX,
     BaseY,
-    (BOOT_ENTRY_DIMENSION - Label->Width) / 2,
-    BOOT_ENTRY_DIMENSION + BOOT_ENTRY_LABEL_SPACE + BOOT_ENTRY_LABEL_HEIGHT - Label->Height,
+    (BOOT_ENTRY_DIMENSION * DrawContext->Scale - Label->Width) / 2,
+    (BOOT_ENTRY_DIMENSION + BOOT_ENTRY_LABEL_SPACE + BOOT_ENTRY_LABEL_HEIGHT) * DrawContext->Scale - Label->Height,
     OffsetX,
     OffsetY,
     Width,
@@ -466,8 +467,8 @@ InternalBootPickerEntryPtrEvent (
     return This;
   }
 
-  if (OffsetX < (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) / 2
-   || OffsetY < (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) / 2) {
+  if (OffsetX < (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) * DrawContext->Scale / 2
+   || OffsetY < (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) * DrawContext->Scale / 2) {
     return This;
   }
 
@@ -475,8 +476,8 @@ InternalBootPickerEntryPtrEvent (
 
   IsHit = GuiClickableIsHit (
             &Entry->EntryIcon,
-            OffsetX - (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) / 2,
-            OffsetY - (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) / 2
+            OffsetX - (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) * DrawContext->Scale / 2,
+            OffsetY - (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) * DrawContext->Scale / 2
             );
   if (!IsHit) {
     return This;
@@ -541,18 +542,18 @@ InternalBootPickerSelectorDraw (
   Clickable  = BASE_CR (This, GUI_OBJ_CLICKABLE, Hdr.Obj);
   GuiContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
 
-  ASSERT (This->Width  == BOOT_SELECTOR_WIDTH);
-  ASSERT (This->Height == BOOT_SELECTOR_HEIGHT);
+  ASSERT_EQUALS (This->Width,  BOOT_SELECTOR_WIDTH  * DrawContext->Scale);
+  ASSERT_EQUALS (This->Height, BOOT_SELECTOR_HEIGHT * DrawContext->Scale);
 
   BackgroundImage = &GuiContext->Icons[ICON_SELECTED][ICON_TYPE_BASE];
 
-  ASSERT (BackgroundImage->Width  == BOOT_SELECTOR_BACKGROUND_DIMENSION);
-  ASSERT (BackgroundImage->Height == BOOT_SELECTOR_BACKGROUND_DIMENSION);
+  ASSERT_EQUALS (BackgroundImage->Width,  BOOT_SELECTOR_BACKGROUND_DIMENSION * DrawContext->Scale);
+  ASSERT_EQUALS (BackgroundImage->Height, BOOT_SELECTOR_BACKGROUND_DIMENSION * DrawContext->Scale);
   ASSERT (BackgroundImage->Buffer != NULL);
   //
   // Background starts at (0,0) and is as wide as This.
   //
-  if (OffsetY < BOOT_SELECTOR_BACKGROUND_DIMENSION) {
+  if (OffsetY < BOOT_SELECTOR_BACKGROUND_DIMENSION * DrawContext->Scale) {
     GuiDrawToBuffer (
       BackgroundImage,
       mBootPickerOpacity,
@@ -571,8 +572,8 @@ InternalBootPickerSelectorDraw (
   ButtonImage = Clickable->CurrentImage;
   ASSERT (ButtonImage != NULL);
 
-  ASSERT (ButtonImage->Width  == BOOT_SELECTOR_BUTTON_DIMENSION);
-  ASSERT (ButtonImage->Height == BOOT_SELECTOR_BUTTON_DIMENSION);
+  ASSERT_EQUALS (ButtonImage->Width , BOOT_SELECTOR_BUTTON_DIMENSION * DrawContext->Scale);
+  ASSERT_EQUALS (ButtonImage->Height, BOOT_SELECTOR_BUTTON_DIMENSION * DrawContext->Scale);
   ASSERT (ButtonImage->Buffer != NULL);
 
   GuiDrawChildImage (
@@ -581,8 +582,8 @@ InternalBootPickerSelectorDraw (
     DrawContext,
     BaseX,
     BaseY,
-    (BOOT_SELECTOR_BACKGROUND_DIMENSION - BOOT_SELECTOR_BUTTON_DIMENSION) / 2,
-    BOOT_SELECTOR_BACKGROUND_DIMENSION + BOOT_SELECTOR_BUTTON_SPACE,
+    (BOOT_SELECTOR_BACKGROUND_DIMENSION - BOOT_SELECTOR_BUTTON_DIMENSION) * DrawContext->Scale / 2,
+    (BOOT_SELECTOR_BACKGROUND_DIMENSION + BOOT_SELECTOR_BUTTON_SPACE)     * DrawContext->Scale,
     OffsetX,
     OffsetY,
     Width,
@@ -629,12 +630,12 @@ InternalBootPickerSelectorPtrEvent (
   ASSERT (Event == GuiPointerPrimaryDown
        || Event == GuiPointerPrimaryHold
        || Event == GuiPointerPrimaryUp);
-  if (OffsetX >= (BOOT_SELECTOR_BACKGROUND_DIMENSION - BOOT_SELECTOR_BUTTON_DIMENSION) / 2
-   && OffsetY >= BOOT_SELECTOR_BACKGROUND_DIMENSION + BOOT_SELECTOR_BUTTON_SPACE) {
+  if (OffsetX >= (BOOT_SELECTOR_BACKGROUND_DIMENSION - BOOT_SELECTOR_BUTTON_DIMENSION) * DrawContext->Scale / 2
+   && OffsetY >= (BOOT_SELECTOR_BACKGROUND_DIMENSION + BOOT_SELECTOR_BUTTON_SPACE)     * DrawContext->Scale) {
     IsHit = GuiClickableIsHit (
               ButtonImage,
-              OffsetX - (BOOT_SELECTOR_BACKGROUND_DIMENSION - BOOT_SELECTOR_BUTTON_DIMENSION) / 2,
-              OffsetY - (BOOT_SELECTOR_BACKGROUND_DIMENSION + BOOT_SELECTOR_BUTTON_SPACE)
+              OffsetX - (BOOT_SELECTOR_BACKGROUND_DIMENSION - BOOT_SELECTOR_BUTTON_DIMENSION) * DrawContext->Scale / 2,
+              OffsetY - (BOOT_SELECTOR_BACKGROUND_DIMENSION + BOOT_SELECTOR_BUTTON_SPACE)     * DrawContext->Scale
               );
     if (IsHit) {
       if (Event == GuiPointerPrimaryUp) {
@@ -843,8 +844,9 @@ BootPickerEntriesAdd (
         IconFileData,
         IconFileSize,
         GuiContext->Scale,
-        BOOT_ENTRY_ICON_DIMENSION,
-        BOOT_ENTRY_ICON_DIMENSION
+        BOOT_ENTRY_ICON_DIMENSION * GuiContext->Scale,
+        BOOT_ENTRY_ICON_DIMENSION * GuiContext->Scale,
+        FALSE
         );
       FreePool (IconFileData);
       if (!EFI_ERROR (Status)) {
@@ -920,8 +922,8 @@ BootPickerEntriesAdd (
   }
 
   VolumeEntry->Hdr.Parent       = &mBootPicker.Hdr.Obj;
-  VolumeEntry->Hdr.Obj.Width    = BOOT_ENTRY_WIDTH;
-  VolumeEntry->Hdr.Obj.Height   = BOOT_ENTRY_HEIGHT;
+  VolumeEntry->Hdr.Obj.Width    = BOOT_ENTRY_WIDTH  * GuiContext->Scale;
+  VolumeEntry->Hdr.Obj.Height   = BOOT_ENTRY_HEIGHT * GuiContext->Scale;
   VolumeEntry->Hdr.Obj.Draw     = InternalBootPickerEntryDraw;
   VolumeEntry->Hdr.Obj.PtrEvent = InternalBootPickerEntryPtrEvent;
   InitializeListHead (&VolumeEntry->Hdr.Obj.Children);
@@ -936,12 +938,12 @@ BootPickerEntriesAdd (
 
   if (!IsNull (&mBootPicker.Hdr.Obj.Children, ListEntry)) {
     PrevEntry = BASE_CR (ListEntry, GUI_VOLUME_ENTRY, Hdr.Link);
-    VolumeEntry->Hdr.Obj.OffsetX = PrevEntry->Hdr.Obj.OffsetX + BOOT_ENTRY_DIMENSION + BOOT_ENTRY_SPACE;
+    VolumeEntry->Hdr.Obj.OffsetX = PrevEntry->Hdr.Obj.OffsetX + (BOOT_ENTRY_DIMENSION + BOOT_ENTRY_SPACE) * GuiContext->Scale;
   }
 
   InsertHeadList (ListEntry, &VolumeEntry->Hdr.Link);
-  mBootPicker.Hdr.Obj.Width   += BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE;
-  mBootPicker.Hdr.Obj.OffsetX -= (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) / 2;
+  mBootPicker.Hdr.Obj.Width   += (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) * GuiContext->Scale;
+  mBootPicker.Hdr.Obj.OffsetX -= (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) * GuiContext->Scale / 2;
 
   if (Default) {
     InternalBootPickerSelectEntry (&mBootPicker, VolumeEntry);
@@ -1159,15 +1161,19 @@ BootPickerViewInitialize (
     InternalBootPickerExitLoop,
     GuiContext
     );
+  DrawContext->Scale = GuiContext->Scale;
 
   mBootPickerSelector.ClickImage   = &GuiContext->Icons[ICON_SELECTOR][ICON_TYPE_BASE];
   mBootPickerSelector.CurrentImage = &GuiContext->Icons[ICON_SELECTOR][ICON_TYPE_BASE];
   mBootPickerSelector.Hdr.Obj.OffsetX = 0;
   mBootPickerSelector.Hdr.Obj.OffsetY = 0;
+  mBootPickerSelector.Hdr.Obj.Height = BOOT_SELECTOR_HEIGHT * GuiContext->Scale;
+  mBootPickerSelector.Hdr.Obj.Width  = BOOT_SELECTOR_WIDTH  * GuiContext->Scale;
 
+  mBootPicker.Hdr.Obj.Height  = BOOT_SELECTOR_HEIGHT * GuiContext->Scale;
+  mBootPicker.Hdr.Obj.Width   = 0;
   mBootPicker.Hdr.Obj.OffsetX = mBootPickerView.Width / 2;
   mBootPicker.Hdr.Obj.OffsetY = (mBootPickerView.Height - mBootPicker.Hdr.Obj.Height) / 2;
-  mBootPicker.Hdr.Obj.Width   = 0;
 
   // TODO: animations should be tied to UI objects, not global
   // Each object has its own list of animations.

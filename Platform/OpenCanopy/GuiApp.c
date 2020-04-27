@@ -116,7 +116,8 @@ LoadImageFileFromStorage (
   IN  UINT32                   MatchWidth,
   IN  UINT32                   MatchHeight,
   IN  BOOLEAN                  Icon,
-  IN  BOOLEAN                  Old
+  IN  BOOLEAN                  Old,
+  IN  BOOLEAN                  AllowLessSize
   )
 {
   EFI_STATUS    Status;
@@ -155,7 +156,8 @@ LoadImageFileFromStorage (
           FileSize,
           Scale,
           MatchWidth,
-          MatchHeight
+          MatchHeight,
+          AllowLessSize
           );
       }
 
@@ -292,9 +294,6 @@ InternalContextConstruct (
     Context->Scale = 1;
   }
 
-  // FIXME: Add support for 2x scaling.
-  Context->Scale = 1;
-
   Status = gBS->LocateProtocol (
     &gEfiUserInterfaceThemeProtocolGuid,
     NULL,
@@ -340,7 +339,7 @@ InternalContextConstruct (
 
   for (Index = 0; Index < ICON_NUM_TOTAL; ++Index) {
     if (Index == ICON_CURSOR) {
-      ImageDimension = CURSOR_DIMENSION;
+      ImageDimension = MAX_CURSOR_DIMENSION;
     } else if (Index == ICON_SELECTED) {
       ImageDimension = BOOT_SELECTOR_BACKGROUND_DIMENSION;
     } else if (Index == ICON_SELECTOR) {
@@ -357,7 +356,8 @@ InternalContextConstruct (
       ImageDimension,
       ImageDimension,
       Index >= ICON_NUM_SYS,
-      Old
+      Old,
+      Index == ICON_CURSOR
       );
 
     if (!EFI_ERROR (Status) && Index == ICON_SELECTOR) {
