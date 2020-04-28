@@ -16,16 +16,16 @@
 #define OC_APFS_LIB_H
 
 /**
-  Latest known from High Sierra version 10.13.6 (17G12034).
+  Latest known from High Sierra version 10.13.6 (17G65).
 **/
-#define OC_APFS_VERSION_HIGH_SIERRA 748077012000000ULL
-#define OC_APFS_DATE_HIGH_SIERRA    20200219U
+#define OC_APFS_VERSION_HIGH_SIERRA 748077008000000ULL   /* 748077012000000ULL, 17G12034 */
+#define OC_APFS_DATE_HIGH_SIERRA    20180621U            /* 20200219U, 17G12034 */
 
 /**
-  Latest known APFS from Mojave 10.14.6 (18G4032).
+  Latest known APFS from Mojave 10.14.6 (18G103).
 **/
-#define OC_APFS_VERSION_MOJAVE      945275008000000ULL
-#define OC_APFS_DATE_MOJAVE         20200211U
+#define OC_APFS_VERSION_MOJAVE      945275007000000ULL   /* 945275008000000ULL, 18G4032 */
+#define OC_APFS_DATE_MOJAVE         20190820U            /* 20200211U, 18G4032 */
 
 /**
   Latest known APFS from Catalina 10.15.4 (19E287).
@@ -37,7 +37,7 @@
   Default version subject to increase.
 **/
 #define OC_APFS_VERSION_DEFAULT     OC_APFS_VERSION_HIGH_SIERRA
-#define OC_APFS_DATE_DEFAULT        20200101U
+#define OC_APFS_DATE_DEFAULT        OC_APFS_DATE_HIGH_SIERRA
 
 /**
   Use default version as a minimal.
