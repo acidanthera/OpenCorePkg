@@ -56,7 +56,7 @@ package() {
   cp "${selfdir}/Docs/SampleFull.plist" tmp/Docs/ || exit 1
   cp "${selfdir}/Changelog.md" tmp/Docs/ || exit 1
   cp -r "${selfdir}/Docs/AcpiSamples/" tmp/Docs/AcpiSamples/ || exit 1
-  cp -r "${selfdir}/Utilities/BootInstall" tmp/Utilities/ || exit 1
+  cp "${selfdir}/UDK/DuetPkg/BootLoader/bin" tmp/Utilities/BootInstall || exit 1
   cp -r "${selfdir}/Utilities/CreateVault" tmp/Utilities/ || exit 1
   cp -r "${selfdir}/Utilities/LogoutHook" tmp/Utilities/ || exit 1
   cp -r "${selfdir}/Utilities/disklabel/disklabel" tmp/Utilities/ || exit 1
@@ -71,8 +71,12 @@ package() {
 cd $(dirname "$0")
 ARCHS=(X64 IA32)
 SELFPKG=OpenCorePkg
-DEPNAMES=('EfiPkg' 'MacInfoPkg')
-DEPURLS=('https://github.com/acidanthera/EfiPkg' 'https://github.com/acidanthera/MacInfoPkg')
+DEPNAMES=('EfiPkg' 'MacInfoPkg' 'DuetPkg')
+DEPURLS=(
+  'https://github.com/acidanthera/EfiPkg'
+  'https://github.com/acidanthera/MacInfoPkg'
+  'https://github.com/acidanthera/DuetPkg'
+)
 DEPBRANCHES=('master' 'master')
 src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/efibuild.sh) && eval "$src" || exit 1
 
