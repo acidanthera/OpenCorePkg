@@ -16,7 +16,7 @@
 #define OC_APFS_LIB_H
 
 /**
-  Latest known from High Sierra version 10.13.6 (17G65).
+  Latest known from High Sierra version 10.13.6 (17G66).
 **/
 #define OC_APFS_VERSION_HIGH_SIERRA 748077008000000ULL   /* 748077012000000ULL, 17G12034 */
 #define OC_APFS_DATE_HIGH_SIERRA    20180621U            /* 20200219U, 17G12034 */
