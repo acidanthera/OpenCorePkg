@@ -35,6 +35,7 @@ GUI_DRAWING_CONTEXT
 mDrawContext;
 
 EFI_STATUS
+EFIAPI
 OcShowMenuByOc (
   IN     OC_PICKER_CONTEXT        *Context,
   IN     OC_BOOT_ENTRY            *BootEntries,
