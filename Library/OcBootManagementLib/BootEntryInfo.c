@@ -405,6 +405,7 @@ InternalPrepareScanInfo (
         );
     }
   } else {
+    DEBUG ((DEBUG_INFO, "OCB: Skipping loaded handle %p %p\n", Context->ExcludeHandle, DevPathScanInfo->Device));
     Status = EFI_UNSUPPORTED;
   }
 

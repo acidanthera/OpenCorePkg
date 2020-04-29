@@ -480,8 +480,12 @@ OcMiscLateInit (
   //
   // Do not disclose self entry unless asked.
   //
-  if (LoadHandle != NULL && Config->Misc.Boot.HideSelf) {
-    *LoadHandle = OcHandle;
+  if (LoadHandle != NULL) {
+    if (Config->Misc.Boot.HideSelf) {
+      *LoadHandle = OcHandle;
+    } else {
+      *LoadHandle = NULL;
+    }
   }
 
   HibernateMode = OC_BLOB_GET (&Config->Misc.Boot.HibernateMode);

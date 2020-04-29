@@ -528,7 +528,7 @@ OcScanForBootEntries (
     if (Index < Context->AbsoluteEntryCount) {
       DEBUG ((
         DEBUG_INFO,
-        "OCB: Custom entry %u is %a\n",
+        "OCB: Custom entry %u is %s\n",
         (UINT32) EntryIndex,
         Entries[EntryIndex].Name
         ));
