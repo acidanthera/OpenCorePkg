@@ -202,7 +202,7 @@ BmfContextInitialize (
           return FALSE;
         }
 
-        Context->Info = (CONST BMF_BLOCK_INFO *)Block;
+        Context->Info = (CONST BMF_BLOCK_INFO *)(Block + 1);
 
         DEBUG ((
           DEBUG_INFO,
