@@ -393,8 +393,13 @@ InternalContextConstruct (
     return EFI_UNSUPPORTED;
   }
 
-  FontImage = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font.png", &FontImageSize);
-  FontData  = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font.bin", &FontDataSize);
+  if (Context->Scale == 2) {
+    FontImage = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font_2x.png", &FontImageSize);
+    FontData  = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font_2x.bin", &FontDataSize);
+  } else {
+    FontImage = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font.png", &FontImageSize);
+    FontData  = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font.bin", &FontDataSize);
+  }
 
   if (FontImage != NULL && FontData != NULL) {
     Result = GuiFontConstruct (
@@ -404,7 +409,7 @@ InternalContextConstruct (
       FontData,
       FontDataSize
       );
-    if (Context->FontContext.BmfContext.Height  != BOOT_ENTRY_LABEL_HEIGHT) {
+    if (Context->FontContext.BmfContext.Height != BOOT_ENTRY_LABEL_HEIGHT * Context->Scale) {
       Result = FALSE;
     }
   } else {
