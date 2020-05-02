@@ -822,7 +822,7 @@
 			<key>BIOSReleaseDate</key>
 			<string>02/17/2020</string>
 			<key>BIOSVendor</key>
-			<string>Apple Inc.</string>
+			<string>Acidanthera</string>
 			<key>BIOSVersion</key>
 			<string>1037.100.345.0.0</string>
 			<key>BoardAssetTag</key>
@@ -830,7 +830,7 @@
 			<key>BoardLocationInChassis</key>
 			<string></string>
 			<key>BoardManufacturer</key>
-			<string>Apple Inc.</string>
+			<string>Acidanthera</string>
 			<key>BoardProduct</key>
 			<string>Mac-AA95B1DDAB278B95</string>
 			<key>BoardSerialNumber</key>
@@ -842,7 +842,7 @@
 			<key>ChassisAssetTag</key>
 			<string></string>
 			<key>ChassisManufacturer</key>
-			<string>Apple Inc.</string>
+			<string>Acidanthera</string>
 			<key>ChassisSerialNumber</key>
 			<string>W00000000001</string>
 			<key>ChassisType</key>
@@ -864,7 +864,7 @@
 			<key>SystemFamily</key>
 			<string>iMac</string>
 			<key>SystemManufacturer</key>
-			<string>Apple Inc.</string>
+			<string>Acidanthera</string>
 			<key>SystemProductName</key>
 			<string>iMac19,1</string>
 			<key>SystemSKUNumber</key>
