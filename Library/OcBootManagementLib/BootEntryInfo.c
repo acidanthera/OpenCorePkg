@@ -333,276 +333,255 @@ InternalGetRecoveryOsBooter (
 }
 
 EFI_STATUS
-InternalPrepareScanInfo (
-  IN     APPLE_BOOT_POLICY_PROTOCOL       *BootPolicy,
-  IN     OC_PICKER_CONTEXT                *Context,
-  IN     EFI_HANDLE                       *Handles,
-  IN     UINTN                            Index,
-  IN OUT INTERNAL_DEV_PATH_SCAN_INFO      *DevPathScanInfo
+OcGetBootEntryLabelImage (
+  IN  OC_PICKER_CONTEXT          *Context,
+  IN  APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
+  IN  OC_BOOT_ENTRY              *BootEntry,
+  IN  UINT8                      Scale,
+  OUT VOID                       **ImageData,
+  OUT UINT32                     *DataLength
   )
 {
   EFI_STATUS                       Status;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *SimpleFs;
-  EFI_FILE_PROTOCOL                *Root;
-  CHAR16                           *VolumeLabel;
+  CHAR16                           *BootDirectoryName;
+  EFI_HANDLE                       Device;
+  EFI_HANDLE                       ApfsVolumeHandle;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
 
-  DevPathScanInfo->Device         = Handles[Index];
-  DevPathScanInfo->BootDevicePath = NULL;
+  *ImageData = NULL;
+  *DataLength = 0;
+
+  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL || BootEntry->Type == OC_BOOT_RESET_NVRAM) {
+    ASSERT (Context->CustomDescribe != NULL);
+
+    Status = Context->CustomDescribe (
+      Context->CustomEntryContext,
+      BootEntry,
+      Scale,
+      NULL,
+      NULL,
+      ImageData,
+      DataLength
+      );
+
+    DEBUG ((DEBUG_INFO, "OCB: Get custom label %s - %r\n", BootEntry->Name, Status));
+    return Status;
+  }
+
+  ASSERT (BootEntry->DevicePath != NULL);
+
+  Status = BootPolicy->DevicePathToDirPath (
+    BootEntry->DevicePath,
+    &BootDirectoryName,
+    &Device,
+    &ApfsVolumeHandle
+    );
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   Status = gBS->HandleProtocol (
-    DevPathScanInfo->Device,
+    Device,
     &gEfiSimpleFileSystemProtocolGuid,
-    (VOID **) &SimpleFs
+    (VOID **) &FileSystem
     );
 
   if (EFI_ERROR (Status)) {
+    FreePool (BootDirectoryName);
     return Status;
   }
 
-  Status = InternalCheckScanPolicy (
-    DevPathScanInfo->Device,
-    Context->ScanPolicy,
-    &DevPathScanInfo->IsExternal
+  Status = InternalGetAppleImage (
+    FileSystem,
+    BootDirectoryName,
+    Scale == 2 ? L".disk_label_2x" : L".disk_label",
+    ImageData,
+    DataLength
     );
-  if (EFI_ERROR (Status)) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OCB: Skipping handle %p due to scan policy %x\n",
-      DevPathScanInfo->Device,
-      Context->ScanPolicy
-      ));
-    return Status;
-  }
 
-  //
-  // Do not do normal scanning on load handle.
-  // We only allow recovery there.
-  //
-  if (Context->ExcludeHandle != DevPathScanInfo->Device) {
-    Status = EFI_NOT_FOUND;
-
-    if (Context->NumCustomBootPaths > 0) {
-      Status = SimpleFs->OpenVolume (SimpleFs, &Root);
-      if (!EFI_ERROR (Status)) {
-        Status = OcGetBooterFromPredefinedNameList (
-          DevPathScanInfo->Device,
-          Root,
-          (CONST CHAR16 **)Context->CustomBootPaths,
-          Context->NumCustomBootPaths,
-          &DevPathScanInfo->BootDevicePath,
-          NULL
-          );
-
-        Root->Close (Root);
-      }
-    }
-
-    if (EFI_ERROR (Status)) {
-      Status = BootPolicy->GetBootFileEx (
-        DevPathScanInfo->Device,
-        BootPolicyOk,
-        &DevPathScanInfo->BootDevicePath
-        );
-    }
-  } else {
-    DEBUG ((DEBUG_INFO, "OCB: Skipping loaded handle %p %p\n", Context->ExcludeHandle, DevPathScanInfo->Device));
-    Status = EFI_UNSUPPORTED;
-  }
-
-  //
-  // Do not deal with recovery when hiding auxiliary.
-  //
-  DevPathScanInfo->SkipRecovery = Context->HideAuxiliary;
-
-  //
-  // This volume may still be a recovery volume.
-  //
-  if (EFI_ERROR (Status) && !DevPathScanInfo->SkipRecovery) {
-    Status = InternalGetRecoveryOsBooter (
-      DevPathScanInfo->Device,
-      &DevPathScanInfo->BootDevicePath,
-      TRUE
-      );
-    if (!EFI_ERROR (Status)) {
-      DevPathScanInfo->SkipRecovery = TRUE;
-    }
-  }
-
-  if (!EFI_ERROR (Status)) {
-    ASSERT (DevPathScanInfo->BootDevicePath != NULL);
-
-    DevPathScanInfo->NumBootInstances = OcGetNumDevicePathInstances (
-      DevPathScanInfo->BootDevicePath
-      );
-
-    Status = gBS->HandleProtocol (
-      DevPathScanInfo->Device,
-      &gEfiDevicePathProtocolGuid,
-      (VOID **)&DevPathScanInfo->HdDevicePath
-      );
-    if (EFI_ERROR (Status)) {
-      FreePool (DevPathScanInfo->BootDevicePath);
-      DevPathScanInfo->BootDevicePath = NULL;
-    }
-
-    DevPathScanInfo->HdPrefixSize = GetDevicePathSize (
-      DevPathScanInfo->HdDevicePath
-      ) - END_DEVICE_PATH_LENGTH;
-
-  }
-
-  DEBUG_CODE_BEGIN ();
-  VolumeLabel = GetVolumeLabel (SimpleFs);
-  DEBUG ((
-    DEBUG_INFO,
-    "OCB: Filesystem %u (%p) named %s (%r) has %u entries\n",
-    (UINT32) Index,
-    DevPathScanInfo->Device,
-    VolumeLabel != NULL ? VolumeLabel : L"<Null>",
-    Status,
-    DevPathScanInfo->BootDevicePath == NULL ? 0 : (UINT32) DevPathScanInfo->NumBootInstances
-    ));
-  if (VolumeLabel != NULL) {
-    FreePool (VolumeLabel);
-  }
-  DEBUG_CODE_END ();
+  DEBUG ((DEBUG_INFO, "OCB: Get normal label %s - %r\n", BootEntry->Name, Status));
+  FreePool (BootDirectoryName);
 
   return Status;
 }
 
-UINTN
-InternalFillValidBootEntries (
-  IN     APPLE_BOOT_POLICY_PROTOCOL   *BootPolicy,
-  IN     OC_PICKER_CONTEXT            *Context,
-  IN     INTERNAL_DEV_PATH_SCAN_INFO  *DevPathScanInfo,
-  IN     EFI_DEVICE_PATH_PROTOCOL     *DevicePathWalker,
-  IN OUT OC_BOOT_ENTRY                *Entries,
-  IN     UINTN                        EntryIndex
+EFI_STATUS
+OcGetBootEntryIcon (
+  IN  OC_PICKER_CONTEXT          *Context,
+  IN  APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
+  IN  OC_BOOT_ENTRY              *BootEntry,
+  OUT VOID                       **ImageData,
+  OUT UINT32                     *DataLength
   )
 {
-  EFI_STATUS           Status;
-  EFI_DEVICE_PATH      *DevicePath;
-  UINTN                DevPathSize;
-  INTN                 CmpResult;
-  CHAR16               *RecoveryPath;
-  VOID                 *Reserved;
-  EFI_FILE_PROTOCOL    *RecoveryRoot;
-  EFI_HANDLE           RecoveryDeviceHandle;
+  EFI_STATUS                       Status;
+  CHAR16                           *BootDirectoryName;
+  EFI_HANDLE                       Device;
+  EFI_HANDLE                       ApfsVolumeHandle;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
 
-  while (TRUE) {
-    DevicePath = GetNextDevicePathInstance (&DevicePathWalker, &DevPathSize);
-    if (DevicePath == NULL) {
-      break;
-    }
+  *ImageData = NULL;
+  *DataLength = 0;
 
-    if ((DevPathSize - END_DEVICE_PATH_LENGTH) < DevPathScanInfo->HdPrefixSize) {
-      FreePool (DevicePath);
-      continue;
-    }
+  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL || BootEntry->Type == OC_BOOT_RESET_NVRAM) {
+    ASSERT (Context->CustomDescribe != NULL);
 
-    if ((Context->ScanPolicy & OC_SCAN_SELF_TRUST_LOCK) != 0) {
-      CmpResult = CompareMem (
-        DevicePath,
-        DevPathScanInfo->HdDevicePath,
-        DevPathScanInfo->HdPrefixSize
-        );
-      if (CmpResult != 0) {
-        DEBUG ((
-          DEBUG_INFO,
-          "OCB: Skipping handle %p instance due to self trust violation",
-          DevPathScanInfo->Device
-          ));
-
-        DebugPrintDevicePath (
-          DEBUG_INFO,
-          "  Disk DP",
-          DevPathScanInfo->HdDevicePath
-          );
-        DebugPrintDevicePath (
-          DEBUG_INFO,
-          "  Instance DP",
-          DevicePath
-          );
-
-        FreePool (DevicePath);
-        continue;
-      }
-    }
-
-    Entries[EntryIndex].DevicePath = DevicePath;
-    Entries[EntryIndex].IsExternal = DevPathScanInfo->IsExternal;
-    Entries[EntryIndex].Type = OcGetBootDevicePathType (
-      Entries[EntryIndex].DevicePath,
-      &Entries[EntryIndex].IsFolder
+    Status = Context->CustomDescribe (
+      Context->CustomEntryContext,
+      BootEntry,
+      0,
+      ImageData,
+      DataLength,
+      NULL,
+      NULL
       );
 
-    //
-    // This entry can still be legacy HFS non-dmg recovery or Time Machine, ensure that it is not.
-    //
-    if (Context->HideAuxiliary
-      && (Entries[EntryIndex].Type & (OC_BOOT_APPLE_RECOVERY | OC_BOOT_APPLE_TIME_MACHINE)) != 0) {
-      ZeroMem (&Entries[EntryIndex], sizeof (Entries[EntryIndex]));
-      FreePool (DevicePath);
-      continue;
-    }
-
-    DEBUG ((
-      DEBUG_BULK_INFO,
-      "OCB: Adding entry %u, external - %d, skip recovery - %d\n",
-      (UINT32) EntryIndex,
-      DevPathScanInfo->IsExternal,
-      DevPathScanInfo->SkipRecovery
-      ));
-    DebugPrintDevicePath (DEBUG_BULK_INFO, "DevicePath", DevicePath);
-
-    ++EntryIndex;
-
-    if (DevPathScanInfo->SkipRecovery) {
-      continue;
-    }
-
-    RecoveryPath = NULL;
-    Status = BootPolicy->GetApfsRecoveryFilePath (
-      DevicePath,
-      L"\\",
-      &RecoveryPath,
-      &Reserved,
-      &RecoveryRoot,
-      &RecoveryDeviceHandle
-      );
-
-    DEBUG ((
-      DEBUG_BULK_INFO,
-      "OCB: Adding entry %u, external - %u, recovery (%s) - %r\n",
-      (UINT32) EntryIndex,
-      DevPathScanInfo->IsExternal,
-      RecoveryPath != NULL ? RecoveryPath : L"<null>",
-      Status
-      ));
-
-    if (!EFI_ERROR (Status)) {
-      DevicePath = FileDevicePath (RecoveryDeviceHandle, RecoveryPath);
-      FreePool (RecoveryPath);
-      RecoveryRoot->Close (RecoveryRoot);
-    } else {
-      Status = InternalGetRecoveryOsBooter (
-        DevPathScanInfo->Device,
-        &DevicePath,
-        FALSE
-        );
-      if (EFI_ERROR (Status)) {
-        continue;
-      }
-    }
-
-    Entries[EntryIndex].DevicePath = DevicePath;
-    Entries[EntryIndex].IsExternal = DevPathScanInfo->IsExternal;
-    Entries[EntryIndex].Type = OcGetBootDevicePathType (
-      Entries[EntryIndex].DevicePath,
-      &Entries[EntryIndex].IsFolder
-      );
-    ++EntryIndex;
+    DEBUG ((DEBUG_INFO, "Get custom icon %s - %r\n", BootEntry->Name, Status));
+    return Status;
   }
 
-  return EntryIndex;
+  ASSERT (BootEntry->DevicePath != NULL);
+
+  Status = BootPolicy->DevicePathToDirPath (
+    BootEntry->DevicePath,
+    &BootDirectoryName,
+    &Device,
+    &ApfsVolumeHandle
+    );
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = gBS->HandleProtocol (
+    Device,
+    &gEfiSimpleFileSystemProtocolGuid,
+    (VOID **) &FileSystem
+    );
+
+  if (EFI_ERROR (Status)) {
+    FreePool (BootDirectoryName);
+    return Status;
+  }
+
+  Status = InternalGetAppleImage (
+    FileSystem,
+    L"",
+    L".VolumeIcon.icns",
+    ImageData,
+    DataLength
+    );
+
+  DEBUG ((DEBUG_INFO, "OCB: Get normal icon %s - %r\n", BootEntry->Name, Status));
+
+  FreePool (BootDirectoryName);
+
+  return Status;
+}
+
+EFI_STATUS
+InternalDescribeBootEntry (
+  IN     APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
+  IN OUT OC_BOOT_ENTRY              *BootEntry
+  )
+{
+  EFI_STATUS                       Status;
+  CHAR16                           *BootDirectoryName;
+  CHAR16                           *RecoveryBootName;
+  EFI_HANDLE                       Device;
+  EFI_HANDLE                       ApfsVolumeHandle;
+  UINT32                           BcdSize;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+
+  //
+  // Custom entries need no special description.
+  //
+  if (BootEntry->Type == OC_BOOT_EXTERNAL_OS || BootEntry->Type == OC_BOOT_EXTERNAL_TOOL) {
+    return EFI_SUCCESS;
+  }
+
+  Status = BootPolicy->DevicePathToDirPath (
+    BootEntry->DevicePath,
+    &BootDirectoryName,
+    &Device,
+    &ApfsVolumeHandle
+    );
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = gBS->HandleProtocol (
+    Device,
+    &gEfiSimpleFileSystemProtocolGuid,
+    (VOID **) &FileSystem
+    );
+
+  if (EFI_ERROR (Status)) {
+    FreePool (BootDirectoryName);
+    return Status;
+  }
+
+  //
+  // Try to use APFS-style label or legacy HFS one.
+  //
+  BootEntry->Name = InternalGetAppleDiskLabel (FileSystem, BootDirectoryName, L".contentDetails");
+  if (BootEntry->Name == NULL) {
+    BootEntry->Name = InternalGetAppleDiskLabel (FileSystem, BootDirectoryName, L".disk_label.contentDetails");
+  }
+
+  //
+  // With FV2 encryption on HFS+ the actual boot happens from "Recovery HD/S/L/CoreServices".
+  // For some reason "Recovery HD/S/L/CoreServices/.disk_label" may not get updated immediately,
+  // and will contain "Recovery HD" despite actually pointing to "Macintosh HD".
+  // This also spontaneously happens with renamed APFS volumes. The workaround is to manually
+  // edit the file or sometimes choose the boot volume once more in preferences.
+  //
+  // TODO: Bugreport this to Apple, as this is clearly their bug, which should be reproducible
+  // on original hardware.
+  //
+  // There exists .root_uuid, which contains real partition UUID in ASCII, however, Apple
+  // BootPicker only uses it for entry deduplication, and we cannot figure out the name
+  // on an encrypted volume anyway.
+  //
+
+  //
+  // Windows boot entry may have a custom name, so ensure OC_BOOT_WINDOWS is set correctly.
+  //
+  if (BootEntry->Type == OC_BOOT_UNKNOWN) {
+    DEBUG ((DEBUG_INFO, "OCB: Trying to detect Microsoft BCD\n"));
+    Status = ReadFileSize (FileSystem, L"\\EFI\\Microsoft\\Boot\\BCD", &BcdSize);
+    if (!EFI_ERROR (Status)) {
+      BootEntry->Type = OC_BOOT_WINDOWS;
+      if (BootEntry->Name == NULL) {
+        BootEntry->Name = AllocateCopyPool (sizeof (L"Windows"), L"Windows");
+      }
+    }
+  }
+
+  if (BootEntry->Name == NULL) {
+    BootEntry->Name = GetVolumeLabel (FileSystem);
+    if (BootEntry->Name != NULL
+      && (!StrCmp (BootEntry->Name, L"Recovery HD")
+       || !StrCmp (BootEntry->Name, L"Recovery"))) {
+      if (BootEntry->Type == OC_BOOT_UNKNOWN || BootEntry->Type == OC_BOOT_APPLE_OS) {
+        BootEntry->Type = OC_BOOT_APPLE_RECOVERY;
+      }
+      RecoveryBootName = InternalGetAppleRecoveryName (FileSystem, BootDirectoryName);
+      if (RecoveryBootName != NULL) {
+        FreePool (BootEntry->Name);
+        BootEntry->Name = RecoveryBootName;
+      }
+    }
+  }
+
+  if (BootEntry->Name == NULL) {
+    FreePool (BootDirectoryName);
+    return EFI_NOT_FOUND;
+  }
+
+  BootEntry->PathName = BootDirectoryName;
+
+  return EFI_SUCCESS;
 }

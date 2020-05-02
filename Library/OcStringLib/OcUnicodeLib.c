@@ -15,7 +15,9 @@
 #include <Base.h>
 
 #include <Library/BaseLib.h>
+#include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/OcGuardLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/PrintLib.h>
 #include <Library/PcdLib.h>
@@ -130,6 +132,38 @@ OcStriStr (
     }
 
     String = FirstMatch + 1;
+  }
+
+  return NULL;
+}
+
+CONST CHAR16 *
+OcStrStrLength (
+  IN CONST CHAR16  *String,
+  IN UINTN         StringLength,
+  IN CONST CHAR16  *SearchString,
+  IN UINTN         SearchStringLength
+  )
+{
+  UINTN        RestLen;
+  UINTN        Index;
+  INTN         CmpResult;
+  BOOLEAN      Overflowed;
+
+  Overflowed = OcOverflowSubUN (StringLength, SearchStringLength, &RestLen);
+  if (Overflowed) {
+    return NULL;
+  }
+
+  for (Index = 0; Index < RestLen; ++Index) {
+    CmpResult = CompareMem (
+      &String[Index],
+      SearchString,
+      (SearchStringLength + 1) * sizeof (*SearchString)
+      );
+    if (CmpResult == 0) {
+      return &String[Index];
+    }
   }
 
   return NULL;

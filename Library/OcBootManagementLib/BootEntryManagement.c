@@ -14,6 +14,14 @@
 
 #include "BootManagementInternal.h"
 
+#include <Protocol/DevicePath.h>
+#include <Protocol/SimpleFileSystem.h>
+
+#include <Guid/AppleVariable.h>
+#include <Guid/FileInfo.h>
+#include <Guid/GlobalVariable.h>
+#include <Guid/OcVariables.h>
+
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/OcDebugLogLib.h>
@@ -24,265 +32,1021 @@
 #include <Library/OcFileLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/PrintLib.h>
 
-EFI_STATUS
-OcDescribeBootEntry (
-  IN     APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
-  IN OUT OC_BOOT_ENTRY              *BootEntry
+/*
+  Expands DevicePath from short-form to full-form.
+  The only valid expansions are full Device Paths refering to a file or a 
+  volume root. Latter type may be used with custom policies to determine a
+  bootable file.
+
+  @param[in]  BootContext   Context of filesystems.
+  @param[in]  DevicePath    The Device Path to expand.
+  @param[in]  LazyScan      Lazy filesystem scanning.
+  @param[out] FileSystem    Resulting filesystem.
+  @param[out] IsRoot        Whether DevicePath refers to the root of a volume.
+
+  @returns DevicePath expansion or NULL on failure.
+*/
+STATIC
+EFI_DEVICE_PATH_PROTOCOL *
+ExpandShortFormBootPath (
+  IN  OC_BOOT_CONTEXT           *BootContext,
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN  BOOLEAN                   LazyScan,
+  OUT OC_BOOT_FILESYSTEM        **FileSystem,
+  OUT BOOLEAN                   *IsRoot
   )
 {
-  EFI_STATUS                       Status;
-  CHAR16                           *BootDirectoryName;
-  CHAR16                           *RecoveryBootName;
-  EFI_HANDLE                       Device;
-  EFI_HANDLE                       ApfsVolumeHandle;
-  UINT32                           BcdSize;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  EFI_STATUS               Status;
+
+  EFI_DEVICE_PATH_PROTOCOL *FullDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL *RemainingDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL *PrevDevicePath;
+
+  EFI_HANDLE               FileSystemHandle;
+  EFI_FILE_PROTOCOL        *File;
+  EFI_FILE_INFO            *FileInfo;
+  BOOLEAN                  IsDirectory;
+
+  ASSERT (BootContext != NULL);
+  ASSERT (DevicePath != NULL);
+  ASSERT (FileSystem != NULL);
+  ASSERT (IsRoot != NULL);
 
   //
-  // Custom entries need no special description.
+  // Iteratively expand the short-form Device Path to its possible full forms.
+  // A valid Device Path will either refer to a valid file or to a valid root
+  // volume.
   //
-  if (BootEntry->Type == OC_BOOT_EXTERNAL_OS || BootEntry->Type == OC_BOOT_EXTERNAL_TOOL) {
-    return EFI_SUCCESS;
+  PrevDevicePath = NULL;
+  do {
+    FullDevicePath = OcGetNextLoadOptionDevicePath (
+      DevicePath,
+      PrevDevicePath
+      );
+
+    if (PrevDevicePath != NULL) {
+      FreePool (PrevDevicePath);
+    }
+
+    //
+    // When no more full representations can be built, the Device Path is
+    // not bootable.
+    //
+    if (FullDevicePath == NULL) {
+      DEBUG ((DEBUG_INFO, "OCB: Short-form DP could not be expanded\n"));
+      return NULL;
+    }
+
+    PrevDevicePath = FullDevicePath;
+
+    DebugPrintDevicePath (
+      DEBUG_INFO,
+      "OCB: Expanded DP",
+      FullDevicePath
+      );
+
+  	//
+    // Retrieve the filesystem handle.
+    //
+    RemainingDevicePath = FullDevicePath;
+    Status = gBS->LocateDevicePath (
+      &gEfiSimpleFileSystemProtocolGuid,
+      &RemainingDevicePath,
+      &FileSystemHandle
+      );
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    //
+    // Check whether we are allowed to boot from this filesystem.
+    //
+    *FileSystem = InternalFileSystemForHandle (BootContext, FileSystemHandle, LazyScan);
+    if (*FileSystem == NULL) {
+      continue;
+    }
+
+    //
+    // Check whether the Device Path refers to a valid file handle.
+    //
+    Status = OcOpenFileByRemainingDevicePath (
+      FileSystemHandle,
+      RemainingDevicePath,
+      &File,
+      EFI_FILE_MODE_READ,
+      0
+      );
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    DebugPrintDevicePath (
+      DEBUG_INFO,
+      "OCB: Expanded DP remainder",
+      RemainingDevicePath
+      );
+
+    //
+    // Retrieve file info to determine potentially bootable state.
+    //
+    FileInfo = GetFileInfo (
+      File,
+      &gEfiFileInfoGuid,
+      sizeof (EFI_FILE_INFO),
+      NULL
+      );
+    //
+    // When File Info cannot be retrieved, assume the worst case but don't
+    // skip the Device Path expansion as it is valid.
+    //
+    IsDirectory = TRUE;
+    if (FileInfo != NULL) {
+      IsDirectory = (FileInfo->Attribute & EFI_FILE_DIRECTORY) != 0;
+      FreePool (FileInfo);
+    }
+
+    File->Close (File);
+
+    //
+    // Return only Device Paths that either refer to a file or a volume root,
+    // i.e. skip Device Paths that refer to a folder that is not root.
+    // Root Device Paths may be expanded by custom policies (such as Apple Boot
+    // Policy) later.
+    //
+  } while (!IsDevicePathEnd (RemainingDevicePath) && IsDirectory);
+
+  ASSERT (FullDevicePath != NULL);
+  ASSERT (*FileSystem != NULL);
+
+  *IsRoot = IsDirectory;
+  return FullDevicePath;
+}
+
+/**
+  Check whether device path points to OpenCore bootloader.
+
+  @param[in]  DevicePath   Device path of the entry.
+
+  @retval TRUE   Entry represents OpenCore bootloader.
+  @retval FALSE  Entry is not necessarily OpenCore bootloader.
+**/
+STATIC
+BOOLEAN
+IsOpenCoreBootloader (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+  STATIC CONST UINTN OpenCoreMagicOffset = 0x40;
+  STATIC CONST UINT8 OpenCoreMagic[] = {
+    0x0E, 0x1F, 0xBA, 0x10, 0x00, 0xB4, 0x09, 0xCD, 0x21, 0xB8, 0x01, 0x4C, 0xCD, 0x21, 0x0F, 0x0B,
+    0x4F, 0x70, 0x65, 0x6E, 0x43, 0x6F, 0x72, 0x65, 0x20, 0x42, 0x6F, 0x6F, 0x74, 0x6C, 0x6F, 0x61,
+    0x64, 0x65, 0x72, 0x20, 0x28, 0x63, 0x29, 0x20, 0x41, 0x63, 0x69, 0x64, 0x61, 0x6E, 0x74, 0x68,
+    0x65, 0x72, 0x61, 0x20, 0x52, 0x65, 0x73, 0x65, 0x61, 0x72, 0x63, 0x68, 0x0D, 0x0A, 0x24, 0x00 
+  };
+
+  EFI_STATUS        Status;
+
+  EFI_FILE_PROTOCOL *File;
+  UINT8             FileReadMagic[sizeof (OpenCoreMagic)];
+
+  Status = OcOpenFileByDevicePath (
+    &DevicePath,
+    &File,
+    EFI_FILE_MODE_READ,
+    0
+    );
+  if (EFI_ERROR (Status)) {
+    return FALSE;
   }
 
-  Status = BootPolicy->DevicePathToDirPath (
-    BootEntry->DevicePath,
-    &BootDirectoryName,
-    &Device,
-    &ApfsVolumeHandle
+  Status = GetFileData (
+    File,
+    OpenCoreMagicOffset,
+    sizeof (FileReadMagic),
+    FileReadMagic
     );
-
   if (EFI_ERROR (Status)) {
+    return FALSE;
+  }
+
+  return CompareMem (FileReadMagic, OpenCoreMagic, sizeof (OpenCoreMagic)) == 0;
+}
+
+/**
+  Register bootable entry on the filesystem.
+
+  @param[in,out] BootContext   Context of filesystems.
+  @param[in,out] FileSystem    Filesystem for creation.
+  @param[in]     BootEntry     Entry to register.
+**/
+STATIC
+VOID
+RegisterBootOption (
+  IN OUT OC_BOOT_CONTEXT           *BootContext,
+  IN OUT OC_BOOT_FILESYSTEM        *FileSystem,
+  IN     OC_BOOT_ENTRY             *BootEntry
+  )
+{
+  //
+  // Register boot entry.
+  // Not using RecoveryFs is intended for correct order.
+  //
+  InsertTailList (&FileSystem->BootEntries, &BootEntry->Link);
+  ++BootContext->BootEntryCount;
+
+  //
+  // For tools and system options we are done.
+  //
+  if ((BootEntry->Type & (OC_BOOT_SYSTEM | OC_BOOT_EXTERNAL_TOOL)) != 0) {
+    return;
+  }
+
+  //
+  // If no options were previously found this is the default one.
+  //
+  if (BootContext->DefaultEntry == NULL) {
+    BootContext->DefaultEntry = BootEntry;
+  }
+
+  //
+  // Set override picker commands.
+  //
+  if (BootContext->PickerContext->PickerCommand == OcPickerBootApple) {
+    if (BootContext->DefaultEntry->Type != OC_BOOT_APPLE_OS
+      && BootEntry->Type == OC_BOOT_APPLE_OS) {
+      BootContext->DefaultEntry = BootEntry;
+    }
+  } else if (BootContext->PickerContext->PickerCommand == OcPickerBootAppleRecovery) {
+    if (BootContext->DefaultEntry->Type != OC_BOOT_APPLE_RECOVERY
+      && BootEntry->Type == OC_BOOT_APPLE_RECOVERY) {
+      BootContext->DefaultEntry = BootEntry;
+    }
+  }
+}
+
+/**
+  Create single bootable entry from device path.
+
+  @param[in,out] BootContext   Context of filesystems.
+  @param[in,out] FileSystem    Filesystem for creation.
+  @param[in]     DevicePath    Device path of the entry.
+  @param[in]     RecoveryPart  Device path is on recovery partition.
+
+  @retval EFI_SUCCESS on success.
+**/
+STATIC
+EFI_STATUS
+AddBootEntryOnFileSystem (
+  IN OUT OC_BOOT_CONTEXT           *BootContext,
+  IN OUT OC_BOOT_FILESYSTEM        *FileSystem,
+  IN     EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN     BOOLEAN                   RecoveryPart
+  )
+{
+  EFI_STATUS          Status;
+  OC_BOOT_ENTRY       *BootEntry;
+  OC_BOOT_ENTRY_TYPE  EntryType;
+  BOOLEAN             IsFolder;
+
+  EntryType = OcGetBootDevicePathType (DevicePath, &IsFolder);
+
+  //
+  // Mark self recovery presence.
+  //
+  if (!RecoveryPart && EntryType == OC_BOOT_APPLE_RECOVERY) {
+    FileSystem->HasSelfRecovery = TRUE;
+  }
+
+  //
+  // Do not add recoveries when not requested (e.g. can be HFS+ recovery).
+  //
+  if (BootContext->PickerContext->HideAuxiliary && EntryType == OC_BOOT_APPLE_RECOVERY) {
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Skip OpenCore bootloaders on own entry.
+  // We do not waste time doing this for other entries.
+  //
+  if (RecoveryPart ? FileSystem->RecoveryFs->LoaderFs : FileSystem->LoaderFs
+    && IsOpenCoreBootloader (DevicePath)) {
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Skip firmware updates.
+  //
+  if (BootContext->PickerContext->BlacklistAppleUpdate
+    && EntryType == OC_BOOT_APPLE_FW_UPDATE) {
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Allocate, initialise, and describe boot entry.
+  //
+  BootEntry = AllocateZeroPool (sizeof (*BootEntry));
+  if (BootEntry == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  BootEntry->DevicePath = DevicePath;
+  BootEntry->Type       = EntryType;
+  BootEntry->IsFolder   = IsFolder;
+  BootEntry->IsExternal = RecoveryPart ? FileSystem->RecoveryFs->External : FileSystem->External;
+
+  Status = InternalDescribeBootEntry (
+    BootContext->BootPolicy,
+    BootEntry
+    );
+  if (EFI_ERROR (Status)) {
+    FreePool (BootEntry);
     return Status;
   }
 
-  Status = gBS->HandleProtocol (
-    Device,
-    &gEfiSimpleFileSystemProtocolGuid,
-    (VOID **) &FileSystem
+  RegisterBootOption (
+    BootContext,
+    FileSystem,
+    BootEntry
     );
-
-  if (EFI_ERROR (Status)) {
-    FreePool (BootDirectoryName);
-    return Status;
-  }
-
-  //
-  // Try to use APFS-style label or legacy HFS one.
-  //
-  BootEntry->Name = InternalGetAppleDiskLabel (FileSystem, BootDirectoryName, L".contentDetails");
-  if (BootEntry->Name == NULL) {
-    BootEntry->Name = InternalGetAppleDiskLabel (FileSystem, BootDirectoryName, L".disk_label.contentDetails");
-  }
-
-  //
-  // With FV2 encryption on HFS+ the actual boot happens from "Recovery HD/S/L/CoreServices".
-  // For some reason "Recovery HD/S/L/CoreServices/.disk_label" may not get updated immediately,
-  // and will contain "Recovery HD" despite actually pointing to "Macintosh HD".
-  // This also spontaneously happens with renamed APFS volumes. The workaround is to manually
-  // edit the file or sometimes choose the boot volume once more in preferences.
-  //
-  // TODO: Bugreport this to Apple, as this is clearly their bug, which should be reproducible
-  // on original hardware.
-  //
-  // There exists .root_uuid, which contains real partition UUID in ASCII, however, Apple
-  // BootPicker only uses it for entry deduplication, and we cannot figure out the name
-  // on an encrypted volume anyway.
-  //
-
-  //
-  // Windows boot entry may have a custom name, so ensure OC_BOOT_WINDOWS is set correctly.
-  //
-  if (BootEntry->Type == OC_BOOT_UNKNOWN) {
-    DEBUG ((DEBUG_INFO, "Trying to detect Microsoft BCD\n"));
-    Status = ReadFileSize (FileSystem, L"\\EFI\\Microsoft\\Boot\\BCD", &BcdSize);
-    if (!EFI_ERROR (Status)) {
-      BootEntry->Type = OC_BOOT_WINDOWS;
-      if (BootEntry->Name == NULL) {
-        BootEntry->Name = AllocateCopyPool (sizeof (L"Windows"), L"Windows");
-      }
-    }
-  }
-
-  if (BootEntry->Name == NULL) {
-    BootEntry->Name = GetVolumeLabel (FileSystem);
-    if (BootEntry->Name != NULL
-      && (!StrCmp (BootEntry->Name, L"Recovery HD")
-       || !StrCmp (BootEntry->Name, L"Recovery"))) {
-      if (BootEntry->Type == OC_BOOT_UNKNOWN || BootEntry->Type == OC_BOOT_APPLE_OS) {
-        BootEntry->Type = OC_BOOT_APPLE_RECOVERY;
-      }
-      RecoveryBootName = InternalGetAppleRecoveryName (FileSystem, BootDirectoryName);
-      if (RecoveryBootName != NULL) {
-        FreePool (BootEntry->Name);
-        BootEntry->Name = RecoveryBootName;
-      }
-    }
-  }
-
-  if (BootEntry->Name == NULL) {
-    FreePool (BootDirectoryName);
-    return EFI_NOT_FOUND;
-  }
-
-  BootEntry->PathName = BootDirectoryName;
 
   return EFI_SUCCESS;
 }
 
+/**
+  Create bootable entry from custom entry.
+
+  @param[in,out] BootContext   Context of filesystems.
+  @param[in,out] FileSystem    Filesystem to add custom entry.
+  @param[in]     CustomEntry   Custom entry.
+
+  @retval EFI_SUCCESS on success.
+**/
+STATIC
 EFI_STATUS
-OcGetBootEntryLabelImage (
-  IN  OC_PICKER_CONTEXT          *Context,
-  IN  APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
-  IN  OC_BOOT_ENTRY              *BootEntry,
-  IN  UINT8                      Scale,
-  OUT VOID                       **ImageData,
-  OUT UINT32                     *DataLength
+AddBootEntryFromCustomEntry (
+  IN OUT OC_BOOT_CONTEXT     *BootContext,
+  IN OUT OC_BOOT_FILESYSTEM  *FileSystem,
+  IN     OC_PICKER_ENTRY     *CustomEntry
+  )
+{
+  OC_BOOT_ENTRY         *BootEntry;
+  CHAR16                *PathName;
+  FILEPATH_DEVICE_PATH  *FilePath;
+
+  if (CustomEntry->Auxiliary && BootContext->PickerContext->HideAuxiliary) {
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Allocate, initialise, and describe boot entry.
+  //
+  BootEntry = AllocateZeroPool (sizeof (*BootEntry));
+  if (BootEntry == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  BootEntry->Name = AsciiStrCopyToUnicode (CustomEntry->Name, 0);
+  if (BootEntry->Name == NULL) {
+    FreePool (BootEntry);
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  PathName = AsciiStrCopyToUnicode (CustomEntry->Path, 0);
+  if (PathName == NULL) {
+    FreePool (BootEntry->Name);
+    FreePool (BootEntry);
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCB: Custom entry is %s (%a) -> %a\n",
+    BootEntry->Name,
+    CustomEntry->Tool ? "tool" : "os",
+    CustomEntry->Path
+    ));
+
+  if (CustomEntry->Tool) {
+    BootEntry->Type = OC_BOOT_EXTERNAL_TOOL;
+    UnicodeUefiSlashes (PathName);
+    BootEntry->PathName = PathName;
+  } else {
+    BootEntry->Type = OC_BOOT_EXTERNAL_OS;
+
+    BootEntry->DevicePath = ConvertTextToDevicePath (PathName);
+    FreePool (PathName);
+    if (BootEntry->DevicePath == NULL) {
+      FreePool (BootEntry->Name);
+      FreePool (BootEntry);
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    FilePath = (FILEPATH_DEVICE_PATH *) (
+        FindDevicePathNodeWithType (
+          BootEntry->DevicePath,
+          MEDIA_DEVICE_PATH,
+          MEDIA_FILEPATH_DP
+        )
+      );
+    if (FilePath == NULL) {
+      FreePool (BootEntry->Name);
+      FreePool (BootEntry->DevicePath);
+      FreePool (BootEntry);
+      return EFI_UNSUPPORTED;
+    }
+
+    BootEntry->PathName = AllocateCopyPool (
+      OcFileDevicePathNameSize (FilePath),
+      FilePath->PathName
+      );
+    if (BootEntry->PathName == NULL) {
+      FreePool (BootEntry->Name);
+      FreePool (BootEntry->DevicePath);
+      FreePool (BootEntry);
+      return EFI_OUT_OF_RESOURCES;
+    }
+  }
+
+  BootEntry->LoadOptionsSize = (UINT32) AsciiStrLen (CustomEntry->Arguments);
+  if (BootEntry->LoadOptionsSize > 0) {
+    BootEntry->LoadOptions = AllocateCopyPool (
+      BootEntry->LoadOptionsSize + 1,
+      CustomEntry->Arguments
+      );
+    if (BootEntry->LoadOptions == NULL) {
+      BootEntry->LoadOptionsSize = 0;
+    }
+  }
+
+  RegisterBootOption (
+    BootContext,
+    FileSystem,
+    BootEntry
+    );
+
+  return EFI_SUCCESS;
+}
+
+/**
+  Create bootable entry from system entry.
+
+  @param[in,out] BootContext   Context of filesystems.
+  @param[in,out] FileSystem    Filesystem to add custom entry.
+  @param[in]     Name          System entry name.
+  @param[in]     Action        System entry action.
+
+  @retval EFI_SUCCESS on success.
+**/
+STATIC
+EFI_STATUS
+AddBootEntryFromSystemEntry (
+  IN OUT OC_BOOT_CONTEXT        *BootContext,
+  IN OUT OC_BOOT_FILESYSTEM     *FileSystem,
+  IN     CONST CHAR16           *Name,
+  IN     OC_BOOT_SYSTEM_ACTION  Action
+  )
+{
+  OC_BOOT_ENTRY         *BootEntry;
+
+  if (BootContext->PickerContext->HideAuxiliary) {
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Allocate, initialise, and describe boot entry.
+  //
+  BootEntry = AllocateZeroPool (sizeof (*BootEntry));
+  if (BootEntry == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  BootEntry->Name = AllocateCopyPool (StrSize (Name), Name);
+  if (BootEntry->Name == NULL) {
+    FreePool (BootEntry);
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  BootEntry->Type         = OC_BOOT_RESET_NVRAM;
+  BootEntry->SystemAction = Action;
+
+  RegisterBootOption (
+    BootContext,
+    FileSystem,
+    BootEntry
+    );
+
+  return EFI_SUCCESS;
+}
+
+/**
+  Create bootable entries from bless policy.
+  This function may create more than one entry, and for APFS
+  it will likely produce a sequence of 'OS, RECOVERY' entry pairs.
+
+  @param[in,out] BootContext   Context of filesystems.
+  @param[in,out] FileSystem    Filesystem to scan for bless.
+  @param[in]     LazyScan      Lazy filesystem scanning.
+
+  @retval EFI_STATUS for last created option.
+**/
+STATIC
+EFI_STATUS
+AddBootEntryFromBless (
+  IN OUT OC_BOOT_CONTEXT     *BootContext,
+  IN OUT OC_BOOT_FILESYSTEM  *FileSystem,
+  IN     BOOLEAN             LazyScan
   )
 {
   EFI_STATUS                       Status;
-  CHAR16                           *BootDirectoryName;
-  EFI_HANDLE                       Device;
-  EFI_HANDLE                       ApfsVolumeHandle;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *SimpleFs;
+  EFI_DEVICE_PATH_PROTOCOL         *DevicePath;
+  EFI_DEVICE_PATH_PROTOCOL         *DevicePathWalker;
+  EFI_DEVICE_PATH_PROTOCOL         *NewDevicePath;
+  UINTN                            NewDevicePathSize;
+  EFI_DEVICE_PATH_PROTOCOL         *HdDevicePath;
+  UINTN                            HdPrefixSize;
+  INTN                             CmpResult;
+  EFI_FILE_PROTOCOL                *Root;
+  CHAR16                           *RecoveryPath;
+  VOID                             *Reserved;
+  EFI_FILE_PROTOCOL                *RecoveryRoot;
+  EFI_HANDLE                       RecoveryDeviceHandle;
 
-  *ImageData = NULL;
-  *DataLength = 0;
+  //
+  // We need to ensure that blessed device paths are on the same filesystem.
+  // Read the prefix path.
+  //
+  Status = gBS->HandleProtocol (
+    FileSystem->Handle,
+    &gEfiDevicePathProtocolGuid,
+    (VOID **) &HdDevicePath
+    );
+  if (EFI_ERROR (Status)) {
+    return EFI_UNSUPPORTED;
+  }
 
-  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL || BootEntry->Type == OC_BOOT_RESET_NVRAM) {
-    ASSERT (Context->CustomDescribe != NULL);
+  HdPrefixSize = GetDevicePathSize (HdDevicePath) - END_DEVICE_PATH_LENGTH;
 
-    Status = Context->CustomDescribe (
-      Context->CustomEntryContext,
-      BootEntry,
-      Scale,
-      NULL,
-      NULL,
-      ImageData,
-      DataLength
+  //
+  // Custom bless paths have the priority, try to look them up first.
+  //
+  if (BootContext->PickerContext->NumCustomBootPaths > 0) {
+    Status = gBS->HandleProtocol (
+      FileSystem->Handle,
+      &gEfiSimpleFileSystemProtocolGuid,
+      (VOID **) &SimpleFs
       );
 
-    DEBUG ((DEBUG_INFO, "OCB: Get custom label %s - %r\n", BootEntry->Name, Status));
-    return Status;
+    if (!EFI_ERROR (Status)) {
+      Status = SimpleFs->OpenVolume (SimpleFs, &Root);
+      if (!EFI_ERROR (Status)) {
+        Status = OcGetBooterFromPredefinedNameList (
+          FileSystem->Handle,
+          Root,
+          (CONST CHAR16 **) BootContext->PickerContext->CustomBootPaths,
+          BootContext->PickerContext->NumCustomBootPaths,
+          &DevicePath,
+          NULL
+          );
+
+        Root->Close (Root);
+      }
+    }
   }
 
-  ASSERT (BootEntry->DevicePath != NULL);
+  //
+  // On failure obtain normal bless paths.
+  //
+  if (EFI_ERROR (Status)) {
+    Status = BootContext->BootPolicy->GetBootFileEx (
+      FileSystem->Handle,
+      BootPolicyOk,
+      &DevicePath
+      );
+  }
 
-  Status = BootPolicy->DevicePathToDirPath (
-    BootEntry->DevicePath,
-    &BootDirectoryName,
-    &Device,
-    &ApfsVolumeHandle
-    );
-
+  //
+  // If both custom and normal found nothing, then nothing is blessed.
+  //
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
-  Status = gBS->HandleProtocol (
-    Device,
-    &gEfiSimpleFileSystemProtocolGuid,
-    (VOID **) &FileSystem
-    );
+  //
+  // Since blessed paths can be multiple (e.g. when more than one macOS is present in the container).
+  //
+  Status = EFI_NOT_FOUND;
+  DevicePathWalker = DevicePath;
+  while (TRUE) {
+    NewDevicePath = GetNextDevicePathInstance (&DevicePathWalker, &NewDevicePathSize);
 
-  if (EFI_ERROR (Status)) {
-    FreePool (BootDirectoryName);
-    return Status;
+    //
+    // Blessed path is obviously too short.
+    //
+    if (NewDevicePathSize - END_DEVICE_PATH_LENGTH < HdPrefixSize) {
+      FreePool (NewDevicePath);
+      continue;
+    }
+
+    //
+    // Blessed path does not prefix filesystem path.
+    //
+    CmpResult = CompareMem (
+      NewDevicePath,
+      HdDevicePath,
+      HdPrefixSize
+      );
+    if (CmpResult != 0) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCB: Skipping handle %p instance due to self trust violation\n",
+        FileSystem->Handle
+        ));
+
+      DebugPrintDevicePath (
+        DEBUG_INFO,
+        "OCB: Disk DP",
+        HdDevicePath
+        );
+      DebugPrintDevicePath (
+        DEBUG_INFO,
+        "OCB: Instance DP",
+        NewDevicePath
+        );
+
+      FreePool (NewDevicePath);
+      continue;
+    }
+
+    //
+    // Add blessed device path.
+    //
+    Status = AddBootEntryOnFileSystem (
+      BootContext,
+      FileSystem,
+      NewDevicePath,
+      FALSE
+      );
+    if (EFI_ERROR (Status)) {
+      FreePool (NewDevicePath);
+    }
+
+    //
+    // If the partition contains recovery on itself or recoveries are not requested,
+    // proceed to next entry.
+    //
+    // First part means that APFS recovery is irrelevant, these recoveries are actually
+    // on a different partition, but can only be pointed from Preboot.
+    // This way we will show any 'com.apple.recovery.boot' recovery physically present
+    // on the partition no more than once.
+    //
+    if (FileSystem->HasSelfRecovery || BootContext->PickerContext->HideAuxiliary) {
+      continue;
+    }
+
+    //
+    // Now add APFS recovery (from Recovery partition) right afterwards if present.
+    //
+    Status = BootContext->BootPolicy->GetApfsRecoveryFilePath (
+      DevicePath,
+      L"\\",
+      &RecoveryPath,
+      &Reserved,
+      &RecoveryRoot,
+      &RecoveryDeviceHandle
+      );
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    RecoveryRoot->Close (RecoveryRoot);
+
+    //
+    // Obtain recovery file system and ensure scan policy if it was not done before.
+    //
+    if (FileSystem->RecoveryFs == NULL) {
+      FileSystem->RecoveryFs = InternalFileSystemForHandle (BootContext, RecoveryDeviceHandle, LazyScan);
+    }
+
+    //
+    // If new recovery is not on the same volume or not allowed, then something went wrong, skip it.
+    // This is technically also a performance optimisation allowing us not to lookup recovery fs every time.
+    //
+    if (FileSystem->RecoveryFs == NULL || FileSystem->RecoveryFs->Handle != RecoveryDeviceHandle) {
+      FreePool (RecoveryPath);
+      continue;
+    }
+
+    NewDevicePath = FileDevicePath (RecoveryDeviceHandle, RecoveryPath);
+    FreePool (RecoveryPath);
+    if (NewDevicePath == NULL) {
+      continue;
+    }
+
+    //
+    // Add blessed device path.
+    //
+    Status = AddBootEntryOnFileSystem (
+      BootContext,
+      FileSystem,
+      NewDevicePath,
+      TRUE
+      );
+    if (EFI_ERROR (Status)) {
+      FreePool (NewDevicePath);
+    }
   }
 
-  Status = InternalGetAppleImage (
-    FileSystem,
-    BootDirectoryName,
-    Scale == 2 ? L".disk_label_2x" : L".disk_label",
-    ImageData,
-    DataLength
-    );
-
-  DEBUG ((DEBUG_INFO, "OCB: Get normal label %s - %r\n", BootEntry->Name, Status));
-  FreePool (BootDirectoryName);
+  FreePool (DevicePath);
 
   return Status;
 }
 
+/**
+  Create bootable entries from recovery files (com.apple.boot.recovery) on the volume.
+
+  @param[in,out] BootContext   Context of filesystems.
+  @param[in,out] FileSystem    Filesystem to scan for recovery.
+
+  @retval EFI_SUCCESS on success.
+**/
+STATIC
 EFI_STATUS
-OcGetBootEntryIcon (
-  IN  OC_PICKER_CONTEXT          *Context,
-  IN  APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
-  IN  OC_BOOT_ENTRY              *BootEntry,
-  OUT VOID                       **ImageData,
-  OUT UINT32                     *DataLength
+AddBootEntryFromSelfRecovery (
+  IN OUT OC_BOOT_CONTEXT     *BootContext,
+  IN OUT OC_BOOT_FILESYSTEM  *FileSystem
   )
 {
-  EFI_STATUS                       Status;
-  CHAR16                           *BootDirectoryName;
-  EFI_HANDLE                       Device;
-  EFI_HANDLE                       ApfsVolumeHandle;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  EFI_STATUS                 Status;
+  EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
 
-  *ImageData = NULL;
-  *DataLength = 0;
-
-  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL || BootEntry->Type == OC_BOOT_RESET_NVRAM) {
-    ASSERT (Context->CustomDescribe != NULL);
-
-    Status = Context->CustomDescribe (
-      Context->CustomEntryContext,
-      BootEntry,
-      0,
-      ImageData,
-      DataLength,
-      NULL,
-      NULL
-      );
-
-    DEBUG ((DEBUG_INFO, "Get custom icon %s - %r\n", BootEntry->Name, Status));
-    return Status;
+  //
+  // If there is already one recovery (it may not be registered due to HideAuxiliary)
+  // or if there is HideAuxiliary, do not add recoveries at all.
+  //
+  if (FileSystem->HasSelfRecovery || BootContext->PickerContext->HideAuxiliary) {
+    return EFI_UNSUPPORTED;
   }
 
-  ASSERT (BootEntry->DevicePath != NULL);
-
-  Status = BootPolicy->DevicePathToDirPath (
-    BootEntry->DevicePath,
-    &BootDirectoryName,
-    &Device,
-    &ApfsVolumeHandle
+  Status = InternalGetRecoveryOsBooter (
+    FileSystem->Handle,
+    &DevicePath,
+    FALSE
     );
-
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
-  Status = gBS->HandleProtocol (
-    Device,
-    &gEfiSimpleFileSystemProtocolGuid,
-    (VOID **) &FileSystem
-    );
-
-  if (EFI_ERROR (Status)) {
-    FreePool (BootDirectoryName);
-    return Status;
-  }
-
-  Status = InternalGetAppleImage (
+  //
+  // Returned device path is always on the same partition, thus no scan check.
+  //
+  Status = AddBootEntryOnFileSystem (
+    BootContext,
     FileSystem,
-    L"",
-    L".VolumeIcon.icns",
-    ImageData,
-    DataLength
+    DevicePath,
+    FALSE
     );
 
-  DEBUG ((DEBUG_INFO, "OCB: Get normal icon %s - %r\n", BootEntry->Name, Status));
-
-  FreePool (BootDirectoryName);
+  if (EFI_ERROR (Status)) {
+    FreePool (DevicePath);
+  }
 
   return Status;
 }
 
+/**
+  Create bootable entries from boot options.
+
+  @param[in,out] BootContext   Context of filesystems.
+  @param[in]     BootOption    Boot option number.
+  @param[in]     LazyScan      Lazy filesystem scanning.
+
+  @retval EFI_SUCCESS if at least one option was added.
+**/
+STATIC
+EFI_STATUS
+AddBootEntryFromBootOption (
+  IN OUT OC_BOOT_CONTEXT     *BootContext,
+  IN     UINT16              BootOption,
+  IN     BOOLEAN             LazyScan
+  )
+{
+  EFI_STATUS                 Status;
+  EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
+  EFI_DEVICE_PATH_PROTOCOL   *RemainingDevicePath;
+  EFI_HANDLE                 FileSystemHandle;
+  OC_BOOT_FILESYSTEM         *FileSystem;
+  UINTN                      DevicePathSize;
+  INTN                       NumPatchedNodes;
+  BOOLEAN                    IsAppleLegacy;
+  BOOLEAN                    IsRoot;
+
+  //
+  // Obtain original device path.
+  // Discard load options for security reasons.
+  // Also discard boot name to avoid confusion.
+  //
+  DevicePath = InternalGetBootOptionData (
+    BootOption,
+    BootContext->BootVariableGuid,
+    NULL,
+    NULL,
+    NULL
+    );
+  if (DevicePath == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  //
+  // Get BootCamp device path stored in special variable.
+  // BootCamp device path will point to disk instead of partition.
+  //
+  IsAppleLegacy = InternalIsAppleLegacyLoadApp (DevicePath);
+  if (IsAppleLegacy) {
+    FreePool (DevicePath);
+    Status = GetVariable2 (
+      APPLE_BOOT_CAMP_HD_VARIABLE_NAME,
+      &gAppleBootVariableGuid,
+      (VOID **) &DevicePath,
+      &DevicePathSize
+      );
+    if (EFI_ERROR (Status) || !IsDevicePathValid (DevicePath, DevicePathSize)) {
+      return EFI_NOT_FOUND;
+    }
+  }
+
+  FileSystem = NULL;
+  IsRoot     = FALSE;
+
+  //
+  // Fixup device path if necessary.
+  //
+  RemainingDevicePath = DevicePath;
+  NumPatchedNodes = OcFixAppleBootDevicePath (&RemainingDevicePath);
+
+  //
+  // Expand BootCamp device path to EFI partition device path.
+  //
+  if (IsAppleLegacy) {
+    //
+    // BootCampHD always refers to a full Device Path. Failure to patch
+    // indicates an invalid Device Path.
+    //
+    if (NumPatchedNodes == -1) {
+      FreePool (DevicePath);
+      return EFI_NOT_FOUND;
+    }
+
+    RemainingDevicePath = DevicePath;
+    DevicePath = OcDiskFindSystemPartitionPath (
+      DevicePath,
+      &DevicePathSize,
+      &FileSystemHandle
+      );
+
+    FreePool (RemainingDevicePath);
+
+    //
+    // This is obviously always a Root Device Path.
+    //
+    IsRoot = TRUE;
+
+    //
+    // Ensure that we are allowed to boot from this filesystem.
+    //
+    if (DevicePath != NULL) {
+      FileSystem = InternalFileSystemForHandle (BootContext, FileSystemHandle, LazyScan);
+      if (FileSystem == NULL) {
+        DevicePath = NULL;
+      }
+    }
+
+    //
+    // The Device Path returned by OcDiskFindSystemPartitionPath() is a pointer
+    // to an installed protocol. Duplicate it so we own the memory.
+    //
+    if (DevicePath != NULL) {
+      DevicePath = AllocateCopyPool (DevicePathSize, DevicePath);
+    }
+
+    if (DevicePath == NULL) {
+      return EFI_NOT_FOUND;
+    }
+
+    //
+    // The Device Path must be entirely locatable (and hence full-form) as
+    // OcDiskFindSystemPartitionPath() guarantees to only return valid paths.
+    //
+    ASSERT (DevicePathSize > END_DEVICE_PATH_LENGTH);
+    DevicePathSize -= END_DEVICE_PATH_LENGTH;
+    RemainingDevicePath = (EFI_DEVICE_PATH_PROTOCOL *) ((UINTN) DevicePath + DevicePathSize);
+  } else if (DevicePath == RemainingDevicePath) {
+    //
+    // OcFixAppleBootDevicePath() did not advance the Device Path node, hence
+    // it cannot be located at all and may be a short-form Device Path.
+    // DevicePath has not been changed no matter success or failure.
+    //
+
+    //
+    // Expand and on failure fix the Device Path till both yields no new result.
+    //
+    RemainingDevicePath = DevicePath;
+    do {
+      //
+      // Expand the short-form Device Path.
+      //
+      DevicePath = ExpandShortFormBootPath (
+        BootContext,
+        RemainingDevicePath,
+        LazyScan,
+        &FileSystem,
+        &IsRoot
+        );
+      if (DevicePath != NULL) {
+        break;
+      }
+
+      //
+      // If short-form expansion failed, try to fix the short-form and re-try.
+      //
+      NumPatchedNodes = OcFixAppleBootDevicePathNode (RemainingDevicePath, NULL);
+    } while (NumPatchedNodes > 0);
+
+    FreePool (RemainingDevicePath);
+
+    if (DevicePath == NULL) {
+      return EFI_NOT_FOUND;
+    }
+  } else if (NumPatchedNodes == -1) {
+    //
+    // OcFixAppleBootDevicePath() advanced the Device Path node and yet failed
+    // to locate the path, it is invalid.
+    //
+    FreePool (DevicePath);
+    return EFI_NOT_FOUND;
+  } else {
+    //
+    // OcFixAppleBootDevicePath() advanced the Device Path node and succeeded
+    // to locate the path, but it may still be a shot-form Device Path (lacking
+    // a suffix rather than prefix).
+    //
+    RemainingDevicePath = DevicePath;
+    DevicePath = ExpandShortFormBootPath (
+      BootContext,
+      RemainingDevicePath,
+      LazyScan,
+      &FileSystem,
+      &IsRoot
+      );
+
+    FreePool (RemainingDevicePath);
+
+    if (DevicePath == NULL) {
+      return EFI_NOT_FOUND;
+    }
+  }
+
+  //
+  // If we reached here we have a filesystem and device path.
+  //
+  ASSERT (FileSystem != NULL);
+  ASSERT (DevicePath != NULL);
+
+  if (IsRoot) {
+    FreePool (DevicePath);
+    Status = AddBootEntryFromBless (
+      BootContext,
+      FileSystem,
+      LazyScan
+      );
+  } else {
+    Status = AddBootEntryOnFileSystem (
+      BootContext,
+      FileSystem,
+      DevicePath,
+      FALSE
+      );
+    if (EFI_ERROR (Status)) {
+      FreePool (DevicePath);
+    }
+  }
+
+  return Status;
+}
+
+/**
+  Release boot entry contents allocated from pool.
+
+  @param[in,out]  BootEntry      Located boot entry.
+**/
+STATIC
 VOID
-OcResetBootEntry (
-  IN OUT OC_BOOT_ENTRY              *BootEntry
+FreeBootEntry (
+  IN OC_BOOT_ENTRY        *BootEntry
   )
 {
   if (BootEntry->DevicePath != NULL) {
@@ -305,61 +1069,206 @@ OcResetBootEntry (
     BootEntry->LoadOptions     = NULL;
     BootEntry->LoadOptionsSize = 0;
   }
+
+  FreePool (BootEntry);
 }
 
-VOID
-OcFreeBootEntries (
-  IN OUT OC_BOOT_ENTRY              *BootEntries,
-  IN     UINTN                      Count
+/**
+  Allocate a new filesystem entry in boot entries
+  in case it can be used according to current ScanPolicy.
+
+  @param[in,out] BootContext       Context of filesystems.
+  @param[in]     FileSystemHandle  Filesystem handle.
+  @param[in]     FileSystemEntry   Resulting filesystem, optional.
+
+  @retval EFI_SUCCESS on success.
+**/
+STATIC
+EFI_STATUS
+AddFileSystemEntry (
+  IN OUT OC_BOOT_CONTEXT     *BootContext,
+  IN     EFI_HANDLE          FileSystemHandle,
+     OUT OC_BOOT_FILESYSTEM  **FileSystemEntry  OPTIONAL
   )
 {
-  UINTN  Index;
+  EFI_STATUS          Status;
+  BOOLEAN             IsExternal;
+  OC_BOOT_FILESYSTEM  *Entry;
 
-  for (Index = 0; Index < Count; ++Index) {
-    OcResetBootEntry (&BootEntries[Index]);
+  Status = InternalCheckScanPolicy (
+    FileSystemHandle,
+    BootContext->PickerContext->ScanPolicy,
+    &IsExternal
+    );
+  if (EFI_ERROR (Status)) {
+    return Status;
   }
 
-  FreePool (BootEntries);
-}
-
-EFI_STATUS
-OcScanForBootEntries (
-  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN  OC_PICKER_CONTEXT           *Context,
-  OUT OC_BOOT_ENTRY               **BootEntries,
-  OUT UINTN                       *Count,
-  OUT UINTN                       *AllocCount OPTIONAL,
-  IN  BOOLEAN                     Describe
-  )
-{
-  EFI_STATUS                       Status;
-  BOOLEAN                          Result;
-
-  UINTN                            NoHandles;
-  EFI_HANDLE                       *Handles;
-  UINTN                            Index;
-  OC_BOOT_ENTRY                    *Entries;
-  UINTN                            EntriesSize;
-  UINTN                            EntryIndex;
-  CHAR16                           *PathName;
-  CHAR16                           *DevicePathText;
-
-  UINTN                            DevPathScanInfoSize;
-  INTERNAL_DEV_PATH_SCAN_INFO      *DevPathScanInfo;
-  INTERNAL_DEV_PATH_SCAN_INFO      *DevPathScanInfos;
-  EFI_DEVICE_PATH_PROTOCOL         *DevicePathWalker;
-  CONST FILEPATH_DEVICE_PATH       *FilePath;
-
-  Result = OcOverflowMulUN (Context->AllCustomEntryCount, sizeof (OC_BOOT_ENTRY), &EntriesSize);
-  if (Result) {
+  Entry = AllocatePool (sizeof (*Entry));
+  if (Entry == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  if (Context->ShowNvramReset && !Context->HideAuxiliary) {
-    Result = OcOverflowAddUN (EntriesSize, sizeof (OC_BOOT_ENTRY), &EntriesSize);
-    if (Result) {
-      return EFI_OUT_OF_RESOURCES;
+  Entry->Handle = FileSystemHandle;
+  InitializeListHead (&Entry->BootEntries);
+  Entry->RecoveryFs      = NULL;
+  Entry->External        = IsExternal;
+  Entry->LoaderFs        = BootContext->PickerContext->LoaderHandle == FileSystemHandle;
+  Entry->HasSelfRecovery = FALSE;
+  InsertTailList (&BootContext->FileSystems, &Entry->Link);
+  ++BootContext->FileSystemCount;
+
+  if (FileSystemEntry != NULL) {
+    *FileSystemEntry = Entry;
+  }
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+AddFileSystemEntryForCustom (
+  IN OUT OC_BOOT_CONTEXT     *BootContext
+  )
+{
+  EFI_STATUS          Status;
+  OC_BOOT_FILESYSTEM  *FileSystem;
+  UINTN               Index;
+
+  //
+  // When there are no custom entries and NVRAM reset is hidden
+  // we have no work to do.
+  //
+  if (BootContext->PickerContext->NumCustomBootPaths == 0
+    && (!BootContext->PickerContext->ShowNvramReset
+      || BootContext->PickerContext->HideAuxiliary)) {
+    return EFI_NOT_FOUND;
+  }
+
+  FileSystem = AllocateZeroPool (sizeof (*FileSystem));
+  if (FileSystem == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  FileSystem->Handle = OC_CUSTOM_FS_HANDLE;
+  InitializeListHead (&FileSystem->BootEntries);
+  InsertTailList (&BootContext->FileSystems, &FileSystem->Link);
+  ++BootContext->FileSystemCount;
+
+  Status = EFI_NOT_FOUND;
+  for (Index = 0; Index < BootContext->PickerContext->AllCustomEntryCount; ++Index) {
+    Status = AddBootEntryFromCustomEntry (
+      BootContext,
+      FileSystem,
+      &BootContext->PickerContext->CustomEntries[Index]
+      );
+  }
+
+  if (BootContext->PickerContext->ShowNvramReset) {
+    Status = AddBootEntryFromSystemEntry (
+      BootContext,
+      FileSystem,
+      OC_MENU_RESET_NVRAM_ENTRY,
+      InternalSystemActionResetNvram
+      );
+  }
+
+  return Status;
+}
+
+STATIC
+VOID
+FreeFileSystemEntry (
+  IN OUT OC_BOOT_CONTEXT     *BootContext,
+  IN     OC_BOOT_FILESYSTEM  *FileSystemEntry
+  )
+{
+  LIST_ENTRY     *Link;
+  OC_BOOT_ENTRY  *BootEntry;
+
+  RemoveEntryList (&FileSystemEntry->Link);
+  --BootContext->FileSystemCount;
+
+  while (!IsListEmpty (&FileSystemEntry->BootEntries)) {
+    Link = GetFirstNode (&FileSystemEntry->BootEntries);
+    BootEntry = BASE_CR (Link, OC_BOOT_ENTRY, Link);
+    RemoveEntryList (Link);
+    FreeBootEntry (BootEntry);
+  }
+
+  FreePool (FileSystemEntry);
+}
+
+OC_BOOT_FILESYSTEM *
+InternalFileSystemForHandle (
+  IN OC_BOOT_CONTEXT  *BootContext,
+  IN EFI_HANDLE       FileSystemHandle,
+  IN BOOLEAN          LazyScan
+  )
+{
+  EFI_STATUS          Status;
+  LIST_ENTRY          *Link;
+  OC_BOOT_FILESYSTEM  *FileSystem;  
+
+  for (
+    Link = GetFirstNode (&BootContext->FileSystems);
+    !IsNull (&BootContext->FileSystems, Link);
+    Link = GetNextNode (&BootContext->FileSystems, Link)) {
+    FileSystem = BASE_CR (Link, OC_BOOT_FILESYSTEM, Link);
+
+    if (FileSystem->Handle == FileSystemHandle) {
+      return FileSystem;
     }
+  }
+
+  //
+  // Lazily check filesystem scan policy and add it in case it is ok. 
+  //
+  if (!LazyScan) {
+    return NULL;
+  }
+
+  Status = AddFileSystemEntry (BootContext, FileSystemHandle, &FileSystem);
+  if (!EFI_ERROR (Status)) {
+    return FileSystem;
+  }
+
+  return NULL;
+}
+
+STATIC
+OC_BOOT_CONTEXT *
+BuildFileSystemList (
+  IN APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
+  IN OC_PICKER_CONTEXT           *Context,
+  IN BOOLEAN                     Empty
+  )
+{
+  OC_BOOT_CONTEXT  *BootContext;
+  EFI_STATUS       Status;
+  UINTN            NoHandles;
+  EFI_HANDLE       *Handles;
+  UINTN            Index;
+
+  BootContext = AllocatePool (sizeof (*Context));
+  if (BootContext == NULL) {
+    return NULL;
+  }
+
+  BootContext->BootEntryCount  = 0;
+  BootContext->FileSystemCount = 0;
+  InitializeListHead (&BootContext->FileSystems);
+  if (Context->CustomBootGuid) {
+    BootContext->BootVariableGuid = &gOcVendorVariableGuid;
+  } else {
+    BootContext->BootVariableGuid = &gEfiGlobalVariableGuid;
+  }
+  BootContext->DefaultEntry  = NULL;
+  BootContext->PickerContext = Context;
+  BootContext->BootPolicy    = BootPolicy;
+
+  if (Empty) {
+    return BootContext;
   }
 
   Status = gBS->LocateHandleBuffer (
@@ -369,243 +1278,267 @@ OcScanForBootEntries (
     &NoHandles,
     &Handles
     );
-
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-
-  DEBUG ((DEBUG_INFO, "OCB: Found %u potentially bootable filesystems\n", (UINT32) NoHandles));
-
-  if (NoHandles == 0) {
-    FreePool (Handles);
-    return EFI_NOT_FOUND;
-  }
-
-  Result = OcOverflowMulUN (
-             NoHandles,
-             sizeof (*DevPathScanInfos),
-             &DevPathScanInfoSize
-             );
-  if (Result) {
-    FreePool (Handles);
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  DevPathScanInfos = AllocateZeroPool (DevPathScanInfoSize);
-  if (DevPathScanInfos == NULL) {
-    FreePool (Handles);
-    return EFI_OUT_OF_RESOURCES;
+  if (!EFI_ERROR (Status)) {
+    return BootContext;
   }
 
   for (Index = 0; Index < NoHandles; ++Index) {
-    DevPathScanInfo = &DevPathScanInfos[Index];
-
-    Status = InternalPrepareScanInfo (
-      BootPolicy,
-      Context,
-      Handles,
-      Index,
-      DevPathScanInfo
+    AddFileSystemEntry (
+      BootContext,
+      Handles[Index],
+      NULL
       );
-
-    if (EFI_ERROR (Status)) {
-      continue;
-    }
-
-    ASSERT (DevPathScanInfo->NumBootInstances > 0);
-
-    Result = OcOverflowMulAddUN (
-      DevPathScanInfo->NumBootInstances,
-      2 * sizeof (OC_BOOT_ENTRY),
-      EntriesSize,
-      &EntriesSize
-      );
-    if (Result) {
-      FreePool (Handles);
-      FreePool (DevPathScanInfos);
-      return EFI_OUT_OF_RESOURCES;
-    }
   }
-  //
-  // Errors from within the loop are not fatal.
-  //
-  Status = EFI_SUCCESS;
 
   FreePool (Handles);
+  return BootContext;
+}
 
-  if (EntriesSize == 0) {
-    FreePool (DevPathScanInfos);
-    return EFI_NOT_FOUND;
+VOID
+OcFreeBootContext (
+  IN OUT OC_BOOT_CONTEXT  *Context
+  )
+{
+  LIST_ENTRY          *Link;
+  OC_BOOT_FILESYSTEM  *FileSystem;
+
+  while (!IsListEmpty (&Context->FileSystems)) {
+    Link = GetFirstNode (&Context->FileSystems);
+    FileSystem = BASE_CR (Link, OC_BOOT_FILESYSTEM, Link);
+    FreeFileSystemEntry (Context, FileSystem);
   }
 
-  Entries = AllocateZeroPool (EntriesSize);
+  FreePool (Context);
+}
+
+OC_BOOT_CONTEXT *
+OcScanForBootEntries (
+  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
+  IN  OC_PICKER_CONTEXT           *Context
+  )
+{
+  OC_BOOT_CONTEXT                  *BootContext;
+  UINT16                           *BootOrder;
+  UINTN                            BootOrderCount;
+  UINTN                            Index;
+  LIST_ENTRY                       *Link;
+  OC_BOOT_FILESYSTEM               *FileSystem;
+
+  //
+  // Obtain the list of filesystems filtered by scan policy.
+  //
+  BootContext = BuildFileSystemList (
+    BootPolicy,
+    Context,
+    FALSE
+    );
+  if (BootContext == NULL) {
+    return NULL;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCB: Found %u potentially bootable filesystems\n", (UINT32) BootContext->FileSystemCount));
+
+  //
+  // Create primary boot options from BootOrder.
+  //
+  BootOrder = InternalGetBootOrderForBooting (
+    BootContext->BootVariableGuid,
+    &BootOrderCount
+    );
+  if (BootOrder != NULL) {
+    for (Index = 0; Index < BootOrderCount; ++Index) {
+      AddBootEntryFromBootOption (BootContext, BootOrder[Index], FALSE);
+    }
+
+    FreePool (BootOrder);
+  }
+
+  //
+  // Create primary boot options on filesystems without options
+  // and alternate boot options on all filesystems.
+  //
+  for (
+    Link = GetFirstNode (&BootContext->FileSystems);
+    !IsNull (&BootContext->FileSystems, Link);
+    Link = GetNextNode (&BootContext->FileSystems, Link)) {
+    FileSystem = BASE_CR (Link, OC_BOOT_FILESYSTEM, Link);
+
+    //
+    // No entries, so we process this directory with Apple Bless.
+    //
+    if (IsListEmpty (&FileSystem->BootEntries)) {
+      AddBootEntryFromBless (BootContext, FileSystem, FALSE);
+    }
+
+    //
+    // Record predefined recoveries.
+    //
+    AddBootEntryFromSelfRecovery (BootContext, FileSystem);
+  }
+
+  //
+  // Build custom and system options.
+  //
+  AddFileSystemEntryForCustom (BootContext);
+
+  if (BootContext->BootEntryCount == 0) {
+    OcFreeBootContext (BootContext);
+    return NULL;
+  }
+
+  return BootContext;
+}
+
+OC_BOOT_CONTEXT *
+OcScanForDefaultBootEntry (
+  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
+  IN  OC_PICKER_CONTEXT           *Context
+  )
+{
+  OC_BOOT_CONTEXT                  *BootContext;
+  UINT16                           *BootOrder;
+  UINTN                            BootOrderCount;
+  UINTN                            Index;
+  OC_BOOT_FILESYSTEM               *FileSystem;
+  EFI_STATUS                       Status;
+  UINTN                            NoHandles;
+  EFI_HANDLE                       *Handles;
+
+  //
+  // Obtain empty list of filesystems.
+  //
+  BootContext = BuildFileSystemList (
+    BootPolicy,
+    Context,
+    TRUE
+    );
+  if (BootContext == NULL) {
+    return NULL;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCB: Looking up for default entry\n"));
+
+  //
+  // Create primary boot options from BootOrder.
+  //
+  BootOrder = InternalGetBootOrderForBooting (
+    BootContext->BootVariableGuid,
+    &BootOrderCount
+    );
+  if (BootOrder != NULL) {
+    for (Index = 0; Index < BootOrderCount; ++Index) {
+      AddBootEntryFromBootOption (BootContext, BootOrder[Index], TRUE);
+
+      //
+      // Return as long as we are good.
+      //
+      if (BootContext->DefaultEntry != NULL) {
+        FreePool (BootOrder);
+        return BootContext;
+      }
+    }
+
+    FreePool (BootOrder);
+  }
+
+  //
+  // Obtain filesystems and try processing the remainings.
+  //
+  Status = gBS->LocateHandleBuffer (
+    ByProtocol,
+    &gEfiSimpleFileSystemProtocolGuid,
+    NULL,
+    &NoHandles,
+    &Handles
+    );
+  if (!EFI_ERROR (Status)) {
+    for (Index = 0; Index < NoHandles; ++Index) {
+      //
+      // Do not add filesystems twice.
+      //
+      if (InternalFileSystemForHandle (BootContext, Handles[Index], FALSE) != NULL) {
+        continue;
+      }
+
+      Status = AddFileSystemEntry (
+        BootContext,
+        Handles[Index],
+        &FileSystem
+        );
+      if (EFI_ERROR (Status)) {
+        continue;
+      }
+
+      AddBootEntryFromBless (BootContext, FileSystem, FALSE);
+      if (BootContext->DefaultEntry != NULL) {
+        FreePool (Handles);
+        return BootContext;
+      }
+
+      AddBootEntryFromSelfRecovery (BootContext, FileSystem);
+      if (BootContext->DefaultEntry != NULL) {
+        FreePool (Handles);
+        return BootContext;
+      }
+    }
+
+    FreePool (Handles);
+  }
+
+  //
+  // Build custom and system options.
+  //
+  AddFileSystemEntryForCustom (BootContext);
+
+  if (BootContext->DefaultEntry == NULL) {
+    OcFreeBootContext (BootContext);
+    return NULL;
+  }
+
+  ASSERT (BootContext->BootEntryCount > 0);
+
+  return BootContext;
+}
+
+OC_BOOT_ENTRY  **
+OcEnumerateEntries (
+  IN  OC_BOOT_CONTEXT  *BootContext
+  )
+{
+  OC_BOOT_ENTRY       **Entries;
+  UINT32              EntryIndex;
+  LIST_ENTRY          *FsLink;
+  OC_BOOT_FILESYSTEM  *FileSystem;
+  LIST_ENTRY          *EnLink;
+  OC_BOOT_ENTRY       *BootEntry;
+
+  Entries = AllocatePool (sizeof (*Entries) * BootContext->BootEntryCount);
   if (Entries == NULL) {
-    FreePool (DevPathScanInfos);
-    return EFI_OUT_OF_RESOURCES;
+    return NULL;
   }
 
   EntryIndex = 0;
-  for (Index = 0; Index < NoHandles; ++Index) {
-    DevPathScanInfo = &DevPathScanInfos[Index];
+  for (
+    FsLink = GetFirstNode (&BootContext->FileSystems);
+    !IsNull (&BootContext->FileSystems, FsLink);
+    FsLink = GetNextNode (&BootContext->FileSystems, FsLink)) {
+    FileSystem = BASE_CR (FsLink, OC_BOOT_FILESYSTEM, Link);
 
-    DevicePathWalker = DevPathScanInfo->BootDevicePath;
-    if (DevicePathWalker == NULL) {
-      continue;
-    }
+    for (
+      EnLink = GetFirstNode (&FileSystem->BootEntries);
+      !IsNull (&FileSystem->BootEntries, EnLink);
+      EnLink = GetNextNode (&FileSystem->BootEntries, EnLink)) {
+      BootEntry = BASE_CR (EnLink, OC_BOOT_ENTRY, Link);
 
-    EntryIndex = InternalFillValidBootEntries (
-      BootPolicy,
-      Context,
-      DevPathScanInfo,
-      DevicePathWalker,
-      Entries,
-      EntryIndex
-      );
-
-    FreePool (DevPathScanInfo->BootDevicePath);
-  }
-
-  FreePool (DevPathScanInfos);
-
-  if (Describe) {
-    DEBUG ((DEBUG_INFO, "OCB: Scanning got %u entries\n", (UINT32) EntryIndex));
-
-    for (Index = 0; Index < EntryIndex; ++Index) {
-      Status = OcDescribeBootEntry (BootPolicy, &Entries[Index]);
-      if (EFI_ERROR (Status)) {
-        break;
-      }
-
-      DEBUG_CODE_BEGIN ();
-      DEBUG ((
-        DEBUG_INFO,
-        "OCB: Entry %u is %s at %s (T:%d|F:%d)\n",
-        (UINT32) Index,
-        Entries[Index].Name,
-        Entries[Index].PathName,
-        Entries[Index].Type,
-        Entries[Index].IsFolder
-        ));
-
-      DevicePathText = ConvertDevicePathToText (Entries[Index].DevicePath, FALSE, FALSE);
-      if (DevicePathText != NULL) {
-        DEBUG ((
-          DEBUG_INFO,
-          "OCB: Entry %u is %s at dp %s\n",
-          (UINT32) Index,
-          Entries[Index].Name,
-          DevicePathText
-          ));
-        FreePool (DevicePathText);
-      }
-      DEBUG_CODE_END ();
-    }
-
-    if (EFI_ERROR (Status)) {
-      OcFreeBootEntries (Entries, EntryIndex);
-      return Status;
+      ASSERT (EntryIndex < BootContext->BootEntryCount);
+      Entries[EntryIndex] = BootEntry;
+      BootEntry->EntryIndex = ++EntryIndex;
     }
   }
 
-  for (Index = 0; Index < Context->AllCustomEntryCount; ++Index) {
-    if (Context->CustomEntries[Index].Auxiliary && Context->HideAuxiliary) {
-      continue;
-    }
-
-    Entries[EntryIndex].Name = AsciiStrCopyToUnicode (Context->CustomEntries[Index].Name, 0);
-    PathName                 = AsciiStrCopyToUnicode (Context->CustomEntries[Index].Path, 0);
-    if (Entries[EntryIndex].Name == NULL || PathName == NULL) {
-      OcFreeBootEntries (Entries, EntryIndex + 1);
-      return EFI_OUT_OF_RESOURCES;
-    }
-
-    if (Context->CustomEntries[Index].Tool) {
-      Entries[EntryIndex].Type = OC_BOOT_EXTERNAL_TOOL;
-    } else {
-      Entries[EntryIndex].Type = OC_BOOT_EXTERNAL_OS;
-    }
-
-    if (Index < Context->AbsoluteEntryCount) {
-      DEBUG ((
-        DEBUG_INFO,
-        "OCB: Custom entry %u is %s\n",
-        (UINT32) EntryIndex,
-        Entries[EntryIndex].Name
-        ));
-
-      Entries[EntryIndex].DevicePath = ConvertTextToDevicePath (PathName);
-      FreePool (PathName);
-      if (Entries[EntryIndex].DevicePath == NULL) {
-        FreePool (Entries[EntryIndex].Name);
-        continue;
-      }
-
-      FilePath = (FILEPATH_DEVICE_PATH *)(
-                   FindDevicePathNodeWithType (
-                     Entries[EntryIndex].DevicePath,
-                     MEDIA_DEVICE_PATH,
-                     MEDIA_FILEPATH_DP
-                     )
-                   );
-      if (FilePath == NULL) {
-        FreePool (Entries[EntryIndex].Name);
-        FreePool (Entries[EntryIndex].DevicePath);
-        continue;
-      }
-
-      Entries[EntryIndex].PathName = AllocateCopyPool (
-                                       OcFileDevicePathNameSize (FilePath),
-                                       FilePath->PathName
-                                       );
-      if (Entries[EntryIndex].PathName == NULL) {
-        FreePool (Entries[EntryIndex].Name);
-        FreePool (Entries[EntryIndex].DevicePath);
-        continue;
-      }
-    } else {
-      UnicodeUefiSlashes (PathName);
-      Entries[EntryIndex].PathName = PathName;
-    }
-
-    Entries[EntryIndex].LoadOptionsSize = (UINT32) AsciiStrLen (Context->CustomEntries[Index].Arguments);
-    if (Entries[EntryIndex].LoadOptionsSize > 0) {
-      Entries[EntryIndex].LoadOptions = AllocateCopyPool (
-        Entries[EntryIndex].LoadOptionsSize + 1,
-        Context->CustomEntries[Index].Arguments
-        );
-      if (Entries[EntryIndex].LoadOptions == NULL) {
-        Entries[EntryIndex].LoadOptionsSize = 0;
-      }
-    }
-
-    ++EntryIndex;
-  }
-
-  if (Context->ShowNvramReset && !Context->HideAuxiliary) {
-    Entries[EntryIndex].Name = AllocateCopyPool (
-      L_STR_SIZE (OC_MENU_RESET_NVRAM_ENTRY),
-      OC_MENU_RESET_NVRAM_ENTRY
-      );
-    if (Entries[EntryIndex].Name == NULL) {
-      OcFreeBootEntries (Entries, EntryIndex + 1);
-      return EFI_OUT_OF_RESOURCES;
-    }
-
-    Entries[EntryIndex].Type         = OC_BOOT_RESET_NVRAM;
-    Entries[EntryIndex].SystemAction = InternalSystemActionResetNvram;
-    ++EntryIndex;
-  }
-
-  *BootEntries = Entries;
-  *Count       = EntryIndex;
-
-  ASSERT (*Count <= EntriesSize / sizeof (OC_BOOT_ENTRY));
-
-  if (AllocCount != NULL) {
-    *AllocCount = EntriesSize / sizeof (OC_BOOT_ENTRY);
-  }
-
-  return EFI_SUCCESS;
+  ASSERT (EntryIndex == BootContext->BootEntryCount);
+  ASSERT (BootContext->DefaultEntry == NULL || BootContext->DefaultEntry->EntryIndex > 0);
+  return Entries;
 }
 
 EFI_STATUS

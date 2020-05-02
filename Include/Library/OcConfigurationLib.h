@@ -279,7 +279,6 @@
   _(UINT32                      , Timeout                     ,     , 0                                   , ())                   \
   _(BOOLEAN                     , PickerAudioAssist           ,     , FALSE                               , ())                   \
   _(BOOLEAN                     , HideAuxiliary               ,     , FALSE                               , ())                   \
-  _(BOOLEAN                     , HideSelf                    ,     , FALSE                               , ())                   \
   _(BOOLEAN                     , PollAppleHotKeys            ,     , FALSE                               , ())                   \
   _(BOOLEAN                     , ShowPicker                  ,     , FALSE                               , ())
   OC_DECLARE (OC_MISC_BOOT)
@@ -310,6 +309,7 @@ typedef enum {
   _(UINT32                      , ScanPolicy                  ,      , OC_SCAN_DEFAULT_POLICY  , ()) \
   _(BOOLEAN                     , AllowNvramReset             ,      , FALSE                   , ()) \
   _(BOOLEAN                     , AllowSetDefault             ,      , FALSE                   , ()) \
+  _(BOOLEAN                     , BlacklistAppleUpdate        ,      , FALSE                   , ()) \
   _(BOOLEAN                     , ExposeSensitiveData         ,      , OCS_EXPOSE_VERSION      , ()) \
   _(BOOLEAN                     , AuthRestart                 ,      , FALSE                   , ()) \
   _(BOOLEAN                     , EnablePassword              ,      , FALSE                   , ()) \

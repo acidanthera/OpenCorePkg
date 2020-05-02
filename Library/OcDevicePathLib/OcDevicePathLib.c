@@ -187,187 +187,303 @@ TrailedBooterDevicePath (
   return NULL;
 }
 
+VOID
+OcFixAppleBootDevicePathNodeRestore (
+  IN OUT EFI_DEVICE_PATH_PROTOCOL           *DevicePathNode,
+  IN     CONST APPLE_BOOT_DP_PATCH_CONTEXT  *RestoreContext
+  )
+{
+  EFI_DEV_PATH_PTR Node;
+  UINT8            NodeType;
+  UINT8            NodeSubType;
+
+  //
+  // ATTENTION: This function must be carefully sync'd with changes to
+  //            OcFixAppleBootDevicePathNode().
+  //
+
+  Node.DevPath = DevicePathNode;
+
+  NodeType    = DevicePathType (Node.DevPath);
+  NodeSubType = DevicePathSubType (Node.DevPath);
+
+  if (NodeType == MESSAGING_DEVICE_PATH) {
+    switch (NodeSubType) {
+      case MSG_SATA_DP:
+        Node.Sata->PortMultiplierPortNumber = RestoreContext->Sata.PortMultiplierPortNumber;
+        break;
+
+      //
+      // The related patches in OcFixAppleBootDevicePathNode() are performed
+      // from MSG_SASEX_DP and MSG_NVME_NAMESPACE_DP but change the SubType.
+      // Please refer to the destination rather than the source SubType when
+      // matching the logic.
+      //
+      case MSG_NVME_NAMESPACE_DP:
+      case 0x22:
+        Node.NvmeNamespace->Header.SubType = RestoreContext->SasExNvme.SubType;
+        break;
+
+      default:
+        break;
+    }
+  } else if (NodeType == ACPI_DEVICE_PATH) {
+    switch (NodeSubType) {
+      case ACPI_DP:
+        Node.Acpi->HID = RestoreContext->Acpi.HID;
+        Node.Acpi->UID = RestoreContext->Acpi.UID;
+        break;
+
+      case ACPI_EXTENDED_DP:
+        Node.ExtendedAcpi->HID = RestoreContext->ExtendedAcpi.HID;
+        Node.ExtendedAcpi->CID = RestoreContext->ExtendedAcpi.CID;
+        break;
+
+      default:
+        break;
+    }
+  }
+}
+
+INTN
+OcFixAppleBootDevicePathNode (
+  IN OUT EFI_DEVICE_PATH_PROTOCOL     *DevicePathNode,
+  OUT    APPLE_BOOT_DP_PATCH_CONTEXT  *RestoreContext OPTIONAL
+  )
+{
+  EFI_DEV_PATH_PTR Node;
+  UINT8            NodeType;
+  UINT8            NodeSubType;
+  UINTN            NodeSize;
+
+  ASSERT (DevicePathNode != NULL);
+
+  //
+  // ATTENTION: Changes to this function must be carefully sync'd with
+  //            OcFixAppleBootDevicePathNodeRestore().
+  //
+
+  Node.DevPath = DevicePathNode;
+
+  NodeType    = DevicePathType (Node.DevPath);
+  NodeSubType = DevicePathSubType (Node.DevPath);
+
+  if (NodeType == MESSAGING_DEVICE_PATH) {
+    switch (NodeSubType) {
+      case MSG_SATA_DP:
+        if (RestoreContext != NULL) {
+          RestoreContext->Sata.PortMultiplierPortNumber = Node.Sata->PortMultiplierPortNumber;
+        }
+
+        if (Node.Sata->PortMultiplierPortNumber != 0xFFFF) {
+          //
+          // Must be set to 0xFFFF if the device is directly connected to the
+          // HBA. This rule has been established by UEFI 2.5 via an Erratum
+          // and has not been followed by Apple thus far.
+          // Reference: AppleACPIPlatform.kext,
+          //            appendSATADevicePathNodeForIOMedia
+          //
+          Node.Sata->PortMultiplierPortNumber = 0xFFFF;
+          return 1;
+        }
+
+        return -1;
+
+      case MSG_SASEX_DP:
+        //
+        // Apple uses SubType 0x16 (SasEx) for NVMe, while the UEFI
+        // Specification defines it as SubType 0x17. The structures are
+        // identical.
+        // Reference: AppleACPIPlatform.kext,
+        //            appendNVMeDevicePathNodeForIOMedia
+        //
+        if (RestoreContext != NULL) {
+          RestoreContext->SasExNvme.SubType = Node.DevPath->SubType;
+        }
+
+        STATIC_ASSERT (
+          sizeof (SASEX_DEVICE_PATH) != sizeof (NVME_NAMESPACE_DEVICE_PATH),
+          "SasEx and NVMe DPs must differ in size for fixing to be accurate."
+          );
+
+        NodeSize = DevicePathNodeLength (Node.DevPath);
+        if (NodeSize == sizeof (NVME_NAMESPACE_DEVICE_PATH)) {
+          Node.SasEx->Header.SubType = MSG_NVME_NAMESPACE_DP;
+          return 1;
+        }
+
+        return -1;
+
+      case MSG_NVME_NAMESPACE_DP:
+        //
+        // Apple MacPro5,1 includes NVMe driver, however, it contains a typo in MSG_SASEX_DP.
+        // Instead of 0x16 aka 22 (SasEx) it uses 0x22 aka 34 (Unspecified).
+        // Here we replace it with the "right" value.
+        // Reference: https://forums.macrumors.com/posts/28169441.
+        //
+        if (RestoreContext != NULL) {
+          RestoreContext->SasExNvme.SubType = Node.DevPath->SubType;
+        }
+
+        Node.NvmeNamespace->Header.SubType = 0x22;
+        return 1;
+
+      default:
+        break;
+    }
+  } else if (NodeType == ACPI_DEVICE_PATH) {
+    switch (NodeSubType) {
+      case ACPI_DP:
+        if (RestoreContext != NULL) {
+          RestoreContext->Acpi.HID = Node.Acpi->HID;
+          RestoreContext->Acpi.UID = Node.Acpi->UID;
+        }
+
+        if (EISA_ID_TO_NUM (Node.Acpi->HID) == 0x0A03) {
+          //
+          // In some firmwares UIDs for PciRoot do not match between ACPI tables and UEFI
+          // UEFI Device Paths. The former contain 0x00, 0x40, 0x80, 0xC0 values, while
+          // the latter have ascending numbers.
+          // Reference: https://github.com/acidanthera/bugtracker/issues/664.
+          //
+          if (Node.Acpi->UID == 0x40) {
+            Node.Acpi->UID = 1;
+            return 1;
+          }
+          
+          if (Node.Acpi->UID == 0x80) {
+            Node.Acpi->UID = 2;
+            return 1;
+          }
+          
+          if (Node.Acpi->UID == 0xC0) {
+            Node.Acpi->UID = 3;
+            return 1;
+          }
+          //
+          // Apple uses PciRoot (EISA 0x0A03) nodes while some firmwares might use
+          // PcieRoot (EISA 0x0A08).
+          //
+          Node.Acpi->HID = BitFieldWrite32 (
+            Node.Acpi->HID,
+            16,
+            31,
+            0x0A08
+            );
+          return 1;
+        }
+
+        return -1;
+
+      case ACPI_EXTENDED_DP:
+        if (RestoreContext != NULL) {
+          RestoreContext->ExtendedAcpi.HID = Node.ExtendedAcpi->HID;
+          RestoreContext->ExtendedAcpi.CID = Node.ExtendedAcpi->CID;
+        }
+        //
+        // Apple uses PciRoot (EISA 0x0A03) nodes while some firmwares might use
+        // PcieRoot (EISA 0x0A08).
+        //
+        if (EISA_ID_TO_NUM (Node.ExtendedAcpi->HID) == 0x0A03) {
+          Node.ExtendedAcpi->HID = BitFieldWrite32 (
+            Node.ExtendedAcpi->HID,
+            16,
+            31,
+            0x0A08
+            );
+          return 1;
+        }
+        
+        if (EISA_ID_TO_NUM (Node.ExtendedAcpi->CID) == 0x0A03
+         && EISA_ID_TO_NUM (Node.ExtendedAcpi->HID) != 0x0A08) {
+          Node.ExtendedAcpi->CID = BitFieldWrite32 (
+            Node.ExtendedAcpi->CID,
+            16,
+            31,
+            0x0A08
+            );
+          return 1;
+        }
+
+        return -1;
+
+      default:
+        break;
+    }
+  }
+
+  return 0;
+}
+
 INTN
 OcFixAppleBootDevicePath (
   IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath
   )
 {
-  INTN                     Result;
+  INTN                        Result;
 
-  EFI_DEVICE_PATH_PROTOCOL *OriginalDevPath;
+  EFI_DEVICE_PATH_PROTOCOL    *OriginalDevPath;
 
-  EFI_DEV_PATH_PTR         InvalidNode;
-  UINT8                    NodeType;
-  UINT8                    NodeSubType;
-  UINTN                    NodeSize;
+  APPLE_BOOT_DP_PATCH_CONTEXT FirstNodeRestoreContext;
+  APPLE_BOOT_DP_PATCH_CONTEXT *RestoreContextPtr;
 
-  EFI_DEVICE_PATH_PROTOCOL *RemainingDevPath;
-  EFI_HANDLE               Device;
+  EFI_HANDLE                  Device;
 
   ASSERT (DevicePath != NULL);
   ASSERT (*DevicePath != NULL);
   ASSERT (IsDevicePathValid (*DevicePath, 0));
-  //
-  // CAUTION: When adding new fixes, ensure short-form device paths are not
-  //          modified and success is returned.
-  //
+
   OriginalDevPath = *DevicePath;
   //
-  // Failure will be returned explicitly within the loop.  If this loop is run
-  // only once, it means the Device Path had already been valid.  Hence, Result
-  // will be 0 on termination.  Shall any switch-case continue, which it needs
-  // to in order to patch subsequent nodes, Result will be incremented.
+  // Restoring is only required for the first Device Path node. Please refer
+  // to the loop for an explanation.
   //
-  Result = -1;
-  while (TRUE) {
-    if (Result != MAX_INTN) {
-      ++Result;
-    }
+  RestoreContextPtr = &FirstNodeRestoreContext;
 
-    RemainingDevPath = OriginalDevPath;
+  do {
+    //
+    // Retrieve the first Device Path node that cannot be located.
+    //
     gBS->LocateDevicePath (
            &gEfiDevicePathProtocolGuid,
-           &RemainingDevPath,
+           DevicePath,
            &Device
            );
+    //
+    // Patch the potentially invalid node.
+    //
+    Result = OcFixAppleBootDevicePathNode (*DevicePath, RestoreContextPtr);
+    //
+    // Save a restore context only for the first processing of the first node.
+    // The reason for this is when the first node cannot be located with any
+    // patch applied, the Device Path may be of a prefix short-form and may
+    // possibly be expanded successfully unmodified.
+    //
+    RestoreContextPtr = NULL;
+    //
+    // Continue as long as nodes are being patched.
+    //
+  } while (Result > 0);
 
-    *DevicePath = RemainingDevPath;
-
-    InvalidNode.DevPath = RemainingDevPath;
-    NodeType    = DevicePathType (InvalidNode.DevPath);
-    NodeSubType = DevicePathSubType (InvalidNode.DevPath);
-
-    if (NodeType == MESSAGING_DEVICE_PATH) {
-      switch (NodeSubType) {
-        case MSG_SATA_DP:
-        {
-          if (InvalidNode.Sata->PortMultiplierPortNumber != 0xFFFF) {
-            //
-            // Must be set to 0xFFFF if the device is directly connected to the
-            // HBA. This rule has been established by UEFI 2.5 via an Erratum
-            // and has not been followed by Apple thus far.
-            // Reference: AppleACPIPlatform.kext,
-            //            appendSATADevicePathNodeForIOMedia
-            //
-            InvalidNode.Sata->PortMultiplierPortNumber = 0xFFFF;
-            continue;
-          }
-
-          return -1;
-        }
-
-        case MSG_SASEX_DP:
-        {
-          STATIC_ASSERT (
-            (sizeof (SASEX_DEVICE_PATH) != sizeof (NVME_NAMESPACE_DEVICE_PATH)),
-            "SasEx and NVMe DPs must differ in size for fixing to be accurate."
-            );
-          //
-          // Apple uses SubType 0x16 (SasEx) for NVMe, while the UEFI
-          // Specification defines it as SubType 0x17. The structures are
-          // identical.
-          // Reference: AppleACPIPlatform.kext,
-          //            appendNVMeDevicePathNodeForIOMedia
-          //
-          NodeSize = DevicePathNodeLength (InvalidNode.DevPath);
-          if (NodeSize == sizeof (NVME_NAMESPACE_DEVICE_PATH)) {
-            InvalidNode.SasEx->Header.SubType = MSG_NVME_NAMESPACE_DP;
-            continue;
-          }
-
-          return -1;
-        }
-
-        case MSG_NVME_NAMESPACE_DP:
-        {
-          //
-          // Apple MacPro5,1 includes NVMe driver, however, it contains a typo in MSG_SASEX_DP.
-          // Instead of 0x16 aka 22 (SasEx) it uses 0x22 aka 34 (Unspecified).
-          // Here we replace it with the "right" value.
-          // Reference: https://forums.macrumors.com/posts/28169441.
-          //
-          InvalidNode.NvmeNamespace->Header.SubType = 0x22;
-          continue;
-        }
-
-        default:
-        {
-          break;
-        }
-      }
-    } else if (NodeType == ACPI_DEVICE_PATH) {
-      //
-      // Apple uses PciRoot (EISA 0x0A03) nodes while some firmwares might use
-      // PcieRoot (EISA 0x0A08).
-      //
-      switch (NodeSubType) {
-        case ACPI_DP:
-        {
-          if (EISA_ID_TO_NUM (InvalidNode.Acpi->HID) == 0x0A03) {
-            //
-            // In some firmwares UIDs for PciRoot do not match between ACPI tables and UEFI
-            // UEFI Device Paths. The former contain 0x00, 0x40, 0x80, 0xC0 values, while
-            // the latter have ascending numbers.
-            // Reference: https://github.com/acidanthera/bugtracker/issues/664.
-            //
-            if (InvalidNode.Acpi->UID == 0x40) {
-              InvalidNode.Acpi->UID = 1;
-              continue;
-            } else if (InvalidNode.Acpi->UID == 0x80) {
-              InvalidNode.Acpi->UID = 2;
-              continue;
-            } else if (InvalidNode.Acpi->UID == 0xC0) {
-              InvalidNode.Acpi->UID = 3;
-              continue;
-            }
-
-            InvalidNode.Acpi->HID = BitFieldWrite32 (
-                                      InvalidNode.Acpi->HID,
-                                      16,
-                                      31,
-                                      0x0A08
-                                      );
-            continue;
-          }
-
-          return -1;
-        }
-
-        case ACPI_EXTENDED_DP:
-        {
-          if (EISA_ID_TO_NUM (InvalidNode.ExtendedAcpi->HID) == 0x0A03) {
-            InvalidNode.ExtendedAcpi->HID = BitFieldWrite32 (
-                                              InvalidNode.ExtendedAcpi->HID,
-                                              16,
-                                              31,
-                                              0x0A08
-                                              );
-            continue;
-          }
-          
-          if (((EISA_ID_TO_NUM (InvalidNode.ExtendedAcpi->CID) == 0x0A03)
-            && (EISA_ID_TO_NUM (InvalidNode.ExtendedAcpi->HID) != 0x0A08))) {
-            InvalidNode.ExtendedAcpi->CID = BitFieldWrite32 (
-                                              InvalidNode.ExtendedAcpi->CID,
-                                              16,
-                                              31,
-                                              0x0A08
-                                              );
-            continue;
-          }
-
-          return -1;
-        }
-
-        default:
-        {
-          break;
-        }
-      }
+  if (Result < 0) {
+    //
+    // If the path could not be fixed, restore the first node if it's the one
+    // failing to be located. Please refer to the loop for an explanation.
+    // If advancing by at least one node happened, the Device Path cannot
+    // be of a prefix short-form and hence restoring is not beneficial (and most
+    // especially would require tracking every node individually).
+    //
+    if (OriginalDevPath == *DevicePath) {
+      OcFixAppleBootDevicePathNodeRestore (
+        OriginalDevPath,
+        RestoreContextPtr
+        );
     }
 
-    return Result;
+    return -1;
   }
+
+  return OriginalDevPath == *DevicePath ? 0 : 1;
 }
 
 STATIC

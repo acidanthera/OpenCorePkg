@@ -204,16 +204,78 @@ OcGetNumDevicePathInstances (
   IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   );
 
+///
+/// Used to store information on how to restore a node patched by
+/// OcFixAppleBootDevicePathNode().
+///
+typedef union {
+  struct {
+    UINT32 PortMultiplierPortNumber;
+  } Sata;
+
+  struct {
+    UINT32 SubType;
+  } SasExNvme;
+
+  struct {
+    UINT32 HID;
+    UINT32 UID;
+  } Acpi;
+
+  struct {
+    UINT32 HID;
+    UINT32 CID;
+  } ExtendedAcpi;
+} APPLE_BOOT_DP_PATCH_CONTEXT;
+
+/**
+  Fix Apple Boot Device Path node to be compatible with conventional UEFI
+  implementations.
+
+  @param[in,out] DevicePathNode  A pointer to the device path node to fix.
+  @param[out]    RestoreContext  A pointer to a context that can be used to
+                                 restore DevicePathNode's original content in
+                                 the case of failure.
+
+  @retval -1  DevicePathNode could not be fixed.
+  @retval 0   DevicePathNode was not modified and may be valid.
+  @retval 1   DevicePathNode was fixed and may be valid.
+
+**/
+INTN
+OcFixAppleBootDevicePathNode (
+  IN OUT EFI_DEVICE_PATH_PROTOCOL     *DevicePathNode,
+  OUT    APPLE_BOOT_DP_PATCH_CONTEXT  *RestoreContext OPTIONAL
+  );
+
+/**
+  Restore the original content of DevicePathNode before calling
+  OcFixAppleBootDevicePathNode() with RestoreContext.
+
+  @param[in,out] DevicePathNode  A pointer to the device path node to restore.
+  @param[out]    RestoreContext  A pointer to a context that was used to call
+                                 OcFixAppleBootDevicePathNode().
+
+**/
+VOID
+OcFixAppleBootDevicePathNodeRestore (
+  IN OUT EFI_DEVICE_PATH_PROTOCOL           *DevicePathNode,
+  IN     CONST APPLE_BOOT_DP_PATCH_CONTEXT  *RestoreContext
+  );
+
 /**
   Fix Apple Boot Device Path to be compatible with conventional UEFI
-  implementations.
+  implementations. In case -1 is returned and the first node could not be
+  located or fixed, DevicePath's original state will be preserved. In all other
+  cases, it may be destroyed.
 
   @param[in,out] DevicePath  On input, a pointer to the device path to fix.
                              On output, the device path pointer is modified to
                              point to the remaining part of the device path.
 
-  @retval -1     DevicePath could not be fixed.
-  @retval other  The number of fixed nodes in DevicePath.
+  @retval -1  *DevicePath could not be fixed.
+  @retval 0   *DevicePath was not modified and may be valid.
+  @retval 1   *DevicePath was fixed and may be valid.
 
 **/
 INTN

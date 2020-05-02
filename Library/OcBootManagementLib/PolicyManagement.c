@@ -231,10 +231,8 @@ OcGetBootDevicePathType (
   UINTN                       PathLen;
   UINTN                       RestLen;
   UINTN                       Index;
-  INTN                        CmpResult;
   OC_BOOT_ENTRY_TYPE          Type;
   BOOLEAN                     Folder;
-  BOOLEAN                     Overflowed;
 
   LastNode = NULL;
   Type     = OC_BOOT_UNKNOWN;
@@ -258,21 +256,12 @@ OcGetBootDevicePathType (
       // Detect macOS recovery by com.apple.recovery.boot in the bootloader path.
       //
       if (Type == OC_BOOT_UNKNOWN) {
-        Overflowed = OcOverflowSubUN (PathLen, L_STR_LEN (L"com.apple.recovery.boot"), &RestLen);
-        if (Overflowed) {
-          continue;
-        }
-
-        for (Index = 0; Index < RestLen; ++Index) {
-          CmpResult = CompareMem (
-            &LastNode->PathName[Index],
-            L"com.apple.recovery.boot",
-            L_STR_SIZE_NT (L"com.apple.recovery.boot")
-            );
-          if (CmpResult == 0) {
-            Type = OC_BOOT_APPLE_RECOVERY;
-            break;
-          }
+        if (OcStrStrLength (LastNode->PathName, PathLen,
+          L"com.apple.recovery.boot", L_STR_LEN (L"com.apple.recovery.boot")) != NULL) {
+          Type = OC_BOOT_APPLE_RECOVERY;
+        } else if (OcStrStrLength (LastNode->PathName, PathLen,
+          L"EFI\\APPLE", L_STR_LEN (L"EFI\\APPLE")) != NULL) {
+          Type = OC_BOOT_APPLE_FW_UPDATE;
         }
       }
     } else {

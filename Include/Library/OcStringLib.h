@@ -229,6 +229,25 @@ OcStriStr (
   );
 
 /**
+  Search substring in string.
+
+  @param[in]  String               Search string.
+  @param[in]  StringLength         Search string length.
+  @param[in]  SearchString         String to search.
+  @param[in]  SearchStringLength   String to search length.
+
+  @retval NULL    If the SearchString does not appear in String.
+  @retval others  If there is a match.
+**/
+CONST CHAR16 *
+OcStrStrLength (
+  IN CONST CHAR16  *String,
+  IN UINTN         StringLength,
+  IN CONST CHAR16  *SearchString,
+  IN UINTN         SearchStringLength
+  );
+
+/**
   Alternative to UnicodeSPrint, which checks that the buffer can contain all the characters.
 
   @param  StartOfBuffer   A pointer to the output buffer for the produced Null-terminated

@@ -25,6 +25,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcAppleEventLib.h>
 #include <Library/OcAppleImageConversionLib.h>
 #include <Library/OcAudioLib.h>
+#include <Library/OcBootManagementLib.h>
 #include <Library/OcInputLib.h>
 #include <Library/OcApfsLib.h>
 #include <Library/OcAppleKeyMapLib.h>
@@ -413,9 +414,8 @@ OcLoadUefiSupport (
   EFI_STATUS            Status;
   EFI_HANDLE            *DriversToConnect;
   UINTN                 Index;
-  UINTN                 Index2;
   UINT16                *BootOrder;
-  UINTN                 BootOrderSize;
+  UINTN                 BootOrderCount;
   BOOLEAN               BootOrderChanged;
   EFI_EVENT             Event;
   EFI_PHYSICAL_ADDRESS  ReservedAddress;
@@ -432,6 +432,13 @@ OcLoadUefiSupport (
   if (Config->Uefi.Quirks.IgnoreInvalidFlexRatio) {
     OcCpuCorrectFlexRatio (CpuInfo);
   }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OC: RBVR %d RBVF %d\n",
+    Config->Uefi.Quirks.RequestBootVarRouting,
+    Config->Uefi.Quirks.RequestBootVarFallback
+    ));
 
   //
   // Inform platform support whether we want Boot#### routing or not.
@@ -453,48 +460,27 @@ OcLoadUefiSupport (
     );
 
   if (Config->Uefi.Quirks.RequestBootVarFallback) {
-    Status = GetVariable2 (
-      EFI_BOOT_ORDER_VARIABLE_NAME,
+    BootOrder = OcGetBootOrder (
       &gEfiGlobalVariableGuid,
-      (VOID **) &BootOrder,
-      &BootOrderSize
+      FALSE,
+      &BootOrderCount,
+      &BootOrderChanged,
+      NULL
       );
 
-    //
-    // Deduplicate BootOrder variable contents.
-    //
-    if (!EFI_ERROR (Status) && BootOrderSize > 0 && BootOrderSize % sizeof (BootOrder[0]) == 0) {
-      BootOrderChanged = FALSE;
-
-      for (Index = 1; Index < BootOrderSize / sizeof (BootOrder[0]); ++Index) {
-        for (Index2 = 0; Index2 < Index; ++Index2) {
-          if (BootOrder[Index] == BootOrder[Index2]) {
-            //
-            // Found duplicate.
-            //
-            BootOrderChanged = TRUE;
-            CopyMem (
-              &BootOrder[Index],
-              &BootOrder[Index + 1],
-              BootOrderSize - sizeof (BootOrder[0]) * (Index + 1)
-              );
-            BootOrderSize -= sizeof (BootOrder[0]);
-            --Index;
-            break;
-          }
-        }
-
-        if (BootOrderChanged) {
-          DEBUG ((DEBUG_INFO, "OC: Performed BootOrder deduplication\n"));
-          gRT->SetVariable (
-            EFI_BOOT_ORDER_VARIABLE_NAME,
-            &gEfiGlobalVariableGuid,
-            EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-            BootOrderSize,
-            BootOrder
-            );
-        }
+    if (BootOrder != NULL) {
+      if (BootOrderChanged) {
+        DEBUG ((DEBUG_INFO, "OC: Performed BootOrder deduplication\n"));
+        gRT->SetVariable (
+          EFI_BOOT_ORDER_VARIABLE_NAME,
+          &gEfiGlobalVariableGuid,
+          EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+          BootOrderCount * sizeof (UINT16),
+          BootOrder
+          );
       }
+
+      FreePool (BootOrder);
     }
   }
 
