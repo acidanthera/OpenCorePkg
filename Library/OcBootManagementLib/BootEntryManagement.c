@@ -643,6 +643,9 @@ AddBootEntryFromBless (
   DevicePathWalker = DevicePath;
   while (TRUE) {
     NewDevicePath = GetNextDevicePathInstance (&DevicePathWalker, &NewDevicePathSize);
+    if (NewDevicePath == NULL) {
+      break;
+    }
 
     //
     // Blessed path is obviously too short.
@@ -1291,7 +1294,7 @@ BuildFileSystemList (
     &NoHandles,
     &Handles
     );
-  if (!EFI_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     return BootContext;
   }
 
