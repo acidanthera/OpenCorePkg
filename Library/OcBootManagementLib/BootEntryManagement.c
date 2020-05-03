@@ -1093,6 +1093,7 @@ AddFileSystemEntry (
 {
   EFI_STATUS          Status;
   BOOLEAN             IsExternal;
+  BOOLEAN             LoaderFs;
   OC_BOOT_FILESYSTEM  *Entry;
 
   Status = InternalCheckScanPolicy (
@@ -1100,6 +1101,18 @@ AddFileSystemEntry (
     BootContext->PickerContext->ScanPolicy,
     &IsExternal
     );
+
+  LoaderFs = BootContext->PickerContext->LoaderHandle == FileSystemHandle;
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCB: Adding filesystem %p (E:%d|L:%d) - %r\n",
+    FileSystemHandle,
+    IsExternal,
+    LoaderFs,
+    Status
+    ));
+
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -1113,7 +1126,7 @@ AddFileSystemEntry (
   InitializeListHead (&Entry->BootEntries);
   Entry->RecoveryFs      = NULL;
   Entry->External        = IsExternal;
-  Entry->LoaderFs        = BootContext->PickerContext->LoaderHandle == FileSystemHandle;
+  Entry->LoaderFs        = LoaderFs;
   Entry->HasSelfRecovery = FALSE;
   InsertTailList (&BootContext->FileSystems, &Entry->Link);
   ++BootContext->FileSystemCount;

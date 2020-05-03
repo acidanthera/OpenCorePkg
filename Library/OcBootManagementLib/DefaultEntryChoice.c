@@ -483,6 +483,7 @@ InternalGetBootOrderForBooting (
     &HasBootNext
     );
   if (BootOrder == NULL) {
+    DEBUG ((DEBUG_INFO, "OCB: BootOrder/BootNext are not present or unsupported\n"));
     return NULL;
   }
 
