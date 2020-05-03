@@ -5,7 +5,8 @@ LDFLAGS ?=
 ifneq ($(OS),Windows_NT)
 	UNAME_S := $(shell uname -s)
 	ifeq ($(UNAME_S),Darwin)
-		LDFLAGS+=-Wl,-framework,CoreFoundation -Wl,-framework,CoreGraphics -Wl,-framework,CoreText
+		CFLAGS+=-mmacosx-version-min=10.6
+		LDFLAGS+=-Wl,-framework,CoreFoundation -Wl,-framework,CoreGraphics -Wl,-framework,CoreText -mmacosx-version-min=10.6
 	endif
 endif
 

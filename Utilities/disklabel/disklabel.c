@@ -73,13 +73,14 @@ static const uint8_t palette[256] = {
 };
 
 /* To fit BootPicker. */
-#define LABEL_MAX_WIDTH  340
-#define LABEL_MAX_HEIGHT 12
-#define LABEL_VERSION    1
+#define LABEL_MAX_WIDTH      340
+#define LABEL_MAX_HEIGHT     12
+#define LABEL_TYPE_PALETTED  1
+#define LABEL_TYPE_BGRA      2
 
 #pragma pack(push, 1)
 typedef struct DiskLabel_ {
-  uint8_t  version;
+  uint8_t  type;
   uint16_t width;
   uint16_t height;
   uint8_t  data[];
@@ -169,10 +170,10 @@ static int render_label(const char *label, uint8_t *bitmap_data,
   return 0;
 }
 
-static void *make_label(const char *label, int scale, uint16_t *label_size) {
+static void *make_label(const char *label, int scale, bool bgra, uint16_t *label_size) {
   uint16_t width  = LABEL_MAX_WIDTH * scale;
   uint16_t height = LABEL_MAX_HEIGHT * scale;
-  DiskLabel *label_data = calloc(1, sizeof(DiskLabel) + width*height);
+  DiskLabel *label_data = calloc(1, sizeof(DiskLabel) + width*height*(bgra*3+1));
   if (label_data == NULL) {
     fprintf(stderr, "Label allocation failure\n");
     return NULL;
@@ -196,16 +197,29 @@ static void *make_label(const char *label, int scale, uint16_t *label_size) {
     memmove(&label_data->data[row * newwidth], &label_data->data[row * width], newwidth);
   }
 
-  label_data->version = LABEL_VERSION;
+  label_data->type    = bgra ? LABEL_TYPE_BGRA : LABEL_TYPE_PALETTED;
   label_data->width   = htons(newwidth);
   label_data->height  = htons(height);
 
-  /* Perform antialiasing. */
-  for (uint16_t i = 0; i < newwidth * height; i++) {
-    label_data->data[i] = clut[label_data->data[i] >> 4U];
+  if (bgra) {
+    /* Perform conversion. */
+    for (uint16_t i = 0; i < newwidth * height; i++) {
+      uint32_t index = newwidth * height - i - 1;
+      uint8_t alpha  = label_data->data[index];
+
+      label_data->data[index * 4 + 0] = 0;
+      label_data->data[index * 4 + 1] = 0;
+      label_data->data[index * 4 + 2] = 0;
+      label_data->data[index * 4 + 3] = 0xFF - alpha;
+    }
+  } else {
+    /* Perform antialiasing. */
+    for (uint16_t i = 0; i < newwidth * height; i++) {
+      label_data->data[i] = clut[label_data->data[i] >> 4U];
+    }
   }
 
-  *label_size = sizeof(DiskLabel) + newwidth * height;
+  *label_size = sizeof(DiskLabel) + newwidth * height * (bgra*3+1);
 
   return label_data;
 }
@@ -275,14 +289,15 @@ static int write_file(const char *filename, uint8_t *buffer, size_t size) {
   return 0;
 }
 
-static int write_ppm(const char *filename, size_t width, size_t height, uint8_t *pixel) {
+static int write_ppm(const char *filename, size_t width, size_t height, uint8_t *pixel, bool bgra) {
   FILE *fh = fopen(filename, "wb");
   if (!fh) {
     fprintf(stderr, "Failed to open out file %s!\n", filename);
     return -1;
   }
 
-  if (fprintf(fh, "P6\n%zu %zu\n255\n", width, height) < 0) {
+  // REF: http://netpbm.sourceforge.net/doc/pam.html
+  if (fprintf(fh, "P7\nWIDTH %zu\nHEIGHT %zu\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR\n", width, height) < 0) {
     fprintf(stderr, "Failed to write ppm header to %s!\n", filename);
     fclose(fh);
     return -1;
@@ -290,14 +305,25 @@ static int write_ppm(const char *filename, size_t width, size_t height, uint8_t 
 
   for (size_t y = 0; y < height; ++y) {
     for (size_t x = 0; x < width; ++x) {
-      uint8_t col[3];
-      col[0] = col[1] = col[2] = palette[*pixel];
+      uint8_t col[4];
+      if (bgra) {
+        col[0] = pixel[2];
+        col[1] = pixel[1];
+        col[2] = pixel[0];
+        col[3] = 0xFF - pixel[3];
+        pixel += 4;
+      } else {
+        // Colour can be any and depends on the representation.
+        col[0] = col[1] = col[2] = 0;
+        // PAM 4th channel is opacity (0xFF is fully opaque, 0x00 is fully transparent).
+        col[3] = palette[*pixel];
+        pixel++;
+      }
       if (fwrite(col, sizeof(col), 1, fh) != 1) {
         fprintf(stderr, "Failed to write ppm pixel %zux%zu to %s!\n", x, y, filename);
         fclose(fh);
         return -1;
       }
-      ++pixel;
     }
   }
 
@@ -320,8 +346,8 @@ static int decode_label(const char *infile, const char *outfile) {
     return -1;
   }
 
-  if (label->version != LABEL_VERSION) {
-    fprintf(stderr, "Invalid version %02X!\n", label->version);
+  if (label->type != LABEL_TYPE_PALETTED && label->type != LABEL_TYPE_BGRA) {
+    fprintf(stderr, "Invalid version %02X!\n", label->type);
     free(label);
     return -1;
   }
@@ -329,25 +355,31 @@ static int decode_label(const char *infile, const char *outfile) {
   size_t width  = ntohs(label->width);
   size_t height = ntohs(label->height);
 
-  if (width * height == 0 || size - sizeof(DiskLabel) != width*height) {
-    fprintf(stderr, "Image mismatch %zux%zu with size %zu!\n", width, height, size);
+  size_t exp_size = width * height;
+  bool bgra = label->type == LABEL_TYPE_BGRA;
+  if (bgra) {
+    exp_size *= SIZE_MAX / 4 >= exp_size ? 4 : 0;
+  }
+
+  if (width * height == 0 || size - sizeof(DiskLabel) != exp_size) {
+    fprintf(stderr, "Image type %d mismatch %zux%zu with size %zu!\n", label->type, width, height, size);
     free(label);
     return -1;
   }
 
   (void)remove(outfile);
 
-  int ret = write_ppm(outfile, width, height, label->data);
+  int ret = write_ppm(outfile, width, height, label->data, bgra);
   free(label);
   return ret;
 }
 
-static int encode_label(const char *label, const char *outfile, const char *outfile2x) {
+static int encode_label(const char *label, bool bgra, const char *outfile, const char *outfile2x) {
 #ifdef __APPLE__
   for (int scale = 1; scale <= 2; scale++) {
     const char *filename = scale == 1 ? outfile : outfile2x;
     uint16_t label_size;
-    void *label_data = make_label(label, scale, &label_size);
+    void *label_data = make_label(label, scale, bgra, &label_size);
     bool ok = label_data != NULL && write_file(filename, label_data, label_size) == 0;
     free(label_data);
     if (!ok) {
@@ -357,6 +389,7 @@ static int encode_label(const char *label, const char *outfile, const char *outf
   return 0;
 #else
   (void) label;
+  (void) bgra;
   (void) outfile;
   (void) outfile2x;
   fprintf(stderr, "Encoding labels is unsupported!\n");
@@ -370,12 +403,17 @@ int main(int argc, char *argv[]) {
   }
 
   if (argc == 5 && strcmp(argv[1], "-e") == 0) {
-    return encode_label(argv[2], argv[3], argv[4]);
+    return encode_label(argv[2], false, argv[3], argv[4]);
+  }
+
+  if (argc == 5 && strcmp(argv[1], "-bgra") == 0) {
+    return encode_label(argv[2], true, argv[3], argv[4]);
   }
 
   fprintf(stderr,
     "Usage:\n"
     " disklabel -d .disk_label image.ppm!\n"
-    " disklabel -e \"Label\" .disk_label .disk_label_2x\n");
+    " disklabel -e \"Label\" .disk_label .disk_label_2x\n"
+    " disklabel -bgra \"Label\" .disk_label .disk_label_2x\n");
   return -1;
 }
