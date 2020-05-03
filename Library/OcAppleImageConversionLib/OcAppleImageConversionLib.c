@@ -123,23 +123,23 @@ DecodeImageData (
 STATIC
 EFI_STATUS
 EFIAPI
-GetImageDimsVersion (
-  IN VOID     *Buffer,
+GetImageDimsEx (
+  IN  VOID    *Buffer,
   IN  UINTN   BufferSize,
-  IN  UINTN   Version,
+  IN  UINTN   Scale,
   OUT UINT32  *Width,
   OUT UINT32  *Height
   )
 {
   if (Buffer == NULL
     || BufferSize == 0
-    || Version == 0
+    || Scale == 0
     || Width == NULL
     || Height == NULL) {
     return EFI_INVALID_PARAMETER;
   }
 
-  if (Version > APPLE_IMAGE_CONVERSION_PROTOCOL_INTERFACE_V1) {
+  if (Scale > 1) {
     return EFI_UNSUPPORTED;
   }
 
@@ -149,23 +149,23 @@ GetImageDimsVersion (
 STATIC
 EFI_STATUS
 EFIAPI
-DecodeImageDataVersion (
+DecodeImageDataEx (
   IN  VOID           *Buffer,
   IN  UINTN          BufferSize,
-  IN  UINTN          Version,
+  IN  UINTN          Scale,
   OUT EFI_UGA_PIXEL  **RawImageData,
   OUT UINTN          *RawImageDataSize
   )
 {
   if (Buffer == NULL
     || BufferSize == 0
-    || Version == 0
+    || Scale == 0
     || RawImageData == NULL
     || RawImageDataSize == NULL) {
     return EFI_INVALID_PARAMETER;
   }
 
-  if (Version > APPLE_IMAGE_CONVERSION_PROTOCOL_INTERFACE_V1) {
+  if (Scale > 1) {
     return EFI_UNSUPPORTED;
   }
 
@@ -181,8 +181,8 @@ STATIC APPLE_IMAGE_CONVERSION_PROTOCOL mAppleImageConversion = {
   RecognizeImageData,
   GetImageDims,
   DecodeImageData,
-  GetImageDimsVersion,
-  DecodeImageDataVersion
+  GetImageDimsEx,
+  DecodeImageDataEx
 };
 
 APPLE_IMAGE_CONVERSION_PROTOCOL *
