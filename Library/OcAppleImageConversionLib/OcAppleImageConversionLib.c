@@ -35,10 +35,13 @@ RecognizeImageData (
   IN UINTN  ImageSize
   )
 {
-  if (ImageBuffer == NULL
-    || ImageSize < sizeof (mPngHeader)
-    || CompareMem (ImageBuffer, mPngHeader, sizeof (mPngHeader)) != 0) {
+  if (ImageBuffer == NULL || ImageSize == 0) {
     return EFI_INVALID_PARAMETER;
+  }
+
+  if (ImageSize < sizeof (mPngHeader)
+    || CompareMem (ImageBuffer, mPngHeader, sizeof (mPngHeader)) != 0) {
+    return EFI_UNSUPPORTED;
   }
 
   return EFI_SUCCESS;
@@ -56,6 +59,13 @@ GetImageDims (
 {
   EFI_STATUS  Status;
 
+  if (ImageBuffer == NULL
+    || ImageSize == 0
+    || ImageWidth == NULL
+    || ImageHeight == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
   Status = GetPngDims (ImageBuffer, ImageSize, ImageWidth, ImageHeight);
 
   if (EFI_ERROR (Status)) {
@@ -69,15 +79,17 @@ STATIC
 EFI_STATUS
 EFIAPI
 DecodeImageData (
-  IN  VOID           *ImageBuffer,
-  IN  UINTN          ImageSize,
-  OUT EFI_UGA_PIXEL  **RawImageData,
-  OUT UINTN          *RawImageDataSize
+  IN     VOID           *ImageBuffer,
+  IN     UINTN          ImageSize,
+  IN OUT EFI_UGA_PIXEL  **RawImageData,
+  IN OUT UINTN          *RawImageDataSize
   )
 {
   EFI_STATUS      Status;
   UINTN           Index;
   UINTN           PixelCount;
+  UINTN           ByteCount;
+  VOID            *RealImageData;
   EFI_UGA_PIXEL   *PixelWalker;
   UINT32          Width;
   UINT32          Height;
@@ -89,14 +101,17 @@ DecodeImageData (
   STATIC_ASSERT (OFFSET_OF (EFI_UGA_PIXEL, Red)      == 2,  "Unsupported pixel format");
   STATIC_ASSERT (OFFSET_OF (EFI_UGA_PIXEL, Reserved) == 3,  "Unsupported pixel format");
 
-  if (RawImageData == NULL || RawImageDataSize == NULL) {
+  if (ImageBuffer == NULL
+    || ImageSize == 0
+    || RawImageData == NULL
+    || RawImageDataSize == NULL) {
     return EFI_INVALID_PARAMETER;
   }
 
   Status = DecodePng (
     ImageBuffer,
     ImageSize,
-    (VOID **) RawImageData,
+    (VOID **) &RealImageData,
     &Width,
     &Height,
     NULL
@@ -107,6 +122,27 @@ DecodeImageData (
   }
 
   PixelCount  = (UINTN) Width * Height;
+  ByteCount   = PixelCount * sizeof (*RawImageData);
+
+  //
+  // The buffer can be callee or caller allocated.
+  // This is differentiated by passing non-null to *RawImageData.
+  // For now we always allocate our own data, since boot.efi lets caller do it anyway.
+  //
+  if (*RawImageData != NULL) {
+    if (*RawImageDataSize < ByteCount) {
+      FreePool (RealImageData);
+      *RawImageDataSize = ByteCount;
+      return EFI_BUFFER_TOO_SMALL;
+    }
+
+    CopyMem (*RawImageData, RealImageData, ByteCount);
+    FreePool (RealImageData);
+    *RawImageDataSize = ByteCount;
+  } else {
+    *RawImageData = RealImageData;
+  }
+
   PixelWalker = *RawImageData;
 
   for (Index = 0; Index < PixelCount; ++Index) {
@@ -150,11 +186,11 @@ STATIC
 EFI_STATUS
 EFIAPI
 DecodeImageDataEx (
-  IN  VOID           *Buffer,
-  IN  UINTN          BufferSize,
-  IN  UINTN          Scale,
-  OUT EFI_UGA_PIXEL  **RawImageData,
-  OUT UINTN          *RawImageDataSize
+  IN     VOID           *Buffer,
+  IN     UINTN          BufferSize,
+  IN     UINTN          Scale,
+  IN OUT EFI_UGA_PIXEL  **RawImageData,
+  IN OUT UINTN          *RawImageDataSize
   )
 {
   if (Buffer == NULL
