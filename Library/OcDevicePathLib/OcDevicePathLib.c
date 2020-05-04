@@ -423,6 +423,7 @@ OcFixAppleBootDevicePath (
   INTN                        Result;
 
   EFI_DEVICE_PATH_PROTOCOL    *OriginalDevPath;
+  EFI_DEVICE_PATH_PROTOCOL    *RemainingDevicePath;
 
   APPLE_BOOT_DP_PATCH_CONTEXT FirstNodeRestoreContext;
   APPLE_BOOT_DP_PATCH_CONTEXT *RestoreContextPtr;
@@ -444,9 +445,10 @@ OcFixAppleBootDevicePath (
     //
     // Retrieve the first Device Path node that cannot be located.
     //
+    RemainingDevicePath = OriginalDevPath;
     gBS->LocateDevicePath (
            &gEfiDevicePathProtocolGuid,
-           DevicePath,
+           &RemainingDevicePath,
            &Device
            );
     //
@@ -465,6 +467,8 @@ OcFixAppleBootDevicePath (
     //
   } while (Result > 0);
 
+  *DevicePath = RemainingDevicePath;
+
   if (Result < 0) {
     //
     // If the path could not be fixed, restore the first node if it's the one
@@ -473,7 +477,7 @@ OcFixAppleBootDevicePath (
     // be of a prefix short-form and hence restoring is not beneficial (and most
     // especially would require tracking every node individually).
     //
-    if (OriginalDevPath == *DevicePath) {
+    if (RemainingDevicePath == OriginalDevPath) {
       OcFixAppleBootDevicePathNodeRestore (
         OriginalDevPath,
         RestoreContextPtr
@@ -483,7 +487,7 @@ OcFixAppleBootDevicePath (
     return -1;
   }
 
-  return OriginalDevPath == *DevicePath ? 0 : 1;
+  return RemainingDevicePath == OriginalDevPath ? 0 : 1;
 }
 
 STATIC
