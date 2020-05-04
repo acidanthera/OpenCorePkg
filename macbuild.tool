@@ -69,7 +69,7 @@ package() {
   popd || exit 1
 }
 
-cd "$(dirname $0)" || exit 1
+cd dirname "$0" || exit 1
 ARCHS=(X64 IA32)
 SELFPKG=OpenCorePkg
 DEPNAMES=('EfiPkg' 'MacInfoPkg' 'DuetPkg')
