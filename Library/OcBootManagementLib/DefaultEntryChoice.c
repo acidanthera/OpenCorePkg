@@ -231,9 +231,11 @@ InternalDebugBootEnvironment (
     //
     // Redo with predefined.
     //
-    BootOrder      = &ApplePredefinedVariables[0];
-    BootOrderCount = ARRAY_SIZE (ApplePredefinedVariables);
-    DEBUG ((DEBUG_INFO, "OCB: Predefined list\n"));
+    if (Predefined == 0) {
+      BootOrder      = &ApplePredefinedVariables[0];
+      BootOrderCount = ARRAY_SIZE (ApplePredefinedVariables);
+      DEBUG ((DEBUG_INFO, "OCB: Parsing predefined list...\n"));
+    }
   }
 }
 

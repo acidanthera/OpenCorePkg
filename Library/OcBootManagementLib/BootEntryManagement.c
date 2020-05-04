@@ -251,6 +251,32 @@ RegisterBootOption (
   IN     OC_BOOT_ENTRY             *BootEntry
   )
 {
+  CHAR16  *TextDevicePath;
+
+  DEBUG_CODE_BEGIN ();
+
+  if (BootEntry->DevicePath != NULL) {
+    TextDevicePath = ConvertDevicePathToText (BootEntry->DevicePath, TRUE, FALSE);
+  } else {
+    TextDevicePath = NULL;
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCB: Registering entry %s (T:%d|D:%d|E:%d) - %s\n",
+    BootEntry->Name,
+    BootEntry->Type,
+    BootEntry->IsFolder,
+    BootEntry->IsExternal,
+    OC_HUMAN_STRING (TextDevicePath)
+    ));
+
+  if (TextDevicePath != NULL) {
+    FreePool (TextDevicePath);
+  }
+
+  DEBUG_CODE_END ();
+
   //
   // Register boot entry.
   // Not using RecoveryFs is intended for correct order.
@@ -314,6 +340,8 @@ AddBootEntryOnFileSystem (
 
   EntryType = OcGetBootDevicePathType (DevicePath, &IsFolder);
 
+  DebugPrintDevicePath (DEBUG_INFO, "OCB: Adding entry", DevicePath);
+
   //
   // Mark self recovery presence.
   //
@@ -325,6 +353,7 @@ AddBootEntryOnFileSystem (
   // Do not add recoveries when not requested (e.g. can be HFS+ recovery).
   //
   if (BootContext->PickerContext->HideAuxiliary && EntryType == OC_BOOT_APPLE_RECOVERY) {
+    DEBUG ((DEBUG_INFO, "OCB: Discarding recovery entry due to auxiliary\n"));
     return EFI_UNSUPPORTED;
   }
 
@@ -334,6 +363,7 @@ AddBootEntryOnFileSystem (
   //
   if (RecoveryPart ? FileSystem->RecoveryFs->LoaderFs : FileSystem->LoaderFs
     && IsOpenCoreBootloader (DevicePath)) {
+    DEBUG ((DEBUG_INFO, "OCB: Discarding discovered OpenCore bootloader\n"));
     return EFI_UNSUPPORTED;
   }
 
@@ -342,6 +372,7 @@ AddBootEntryOnFileSystem (
   //
   if (BootContext->PickerContext->BlacklistAppleUpdate
     && EntryType == OC_BOOT_APPLE_FW_UPDATE) {
+    DEBUG ((DEBUG_INFO, "OCB: Discarding discovered Apple FW update\n"));
     return EFI_UNSUPPORTED;
   }
 
@@ -424,7 +455,7 @@ AddBootEntryFromCustomEntry (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCB: Custom entry is %s (%a) -> %a\n",
+    "OCB: Adding custom entry %s (%a) -> %a\n",
     BootEntry->Name,
     CustomEntry->Tool ? "tool" : "os",
     CustomEntry->Path
@@ -516,6 +547,8 @@ AddBootEntryFromSystemEntry (
     return EFI_UNSUPPORTED;
   }
 
+  DEBUG ((DEBUG_INFO, "OCB: Adding system entry %s\n", Name));
+
   //
   // Allocate, initialise, and describe boot entry.
   //
@@ -588,6 +621,8 @@ AddBootEntryFromBless (
   if (EFI_ERROR (Status)) {
     return EFI_UNSUPPORTED;
   }
+
+  DebugPrintDevicePath (DEBUG_INFO, "OCB: Adding bless entry on disk", HdDevicePath);
 
   HdPrefixSize = GetDevicePathSize (HdDevicePath) - END_DEVICE_PATH_LENGTH;
 
@@ -848,6 +883,8 @@ AddBootEntryFromBootOption (
   BOOLEAN                    IsAppleLegacy;
   BOOLEAN                    IsRoot;
 
+  DEBUG ((DEBUG_INFO, "OCB: Building entry from Boot%04x\n", BootOption));
+
   //
   // Obtain original device path.
   // Discard load options for security reasons.
@@ -877,8 +914,15 @@ AddBootEntryFromBootOption (
       (VOID **) &DevicePath,
       &DevicePathSize
       );
+
     if (EFI_ERROR (Status) || !IsDevicePathValid (DevicePath, DevicePathSize)) {
+      DEBUG ((DEBUG_INFO, "OCB: Legacy DP invalid - %r\n", Status));
+      if (!EFI_ERROR (Status)) {
+        FreePool (DevicePath);
+      }
       return EFI_NOT_FOUND;
+    } else {
+      DebugPrintDevicePath (DEBUG_INFO, "OCB: Solved legacy DP", DevicePath);
     }
   }
 
@@ -890,6 +934,9 @@ AddBootEntryFromBootOption (
   //
   RemainingDevicePath = DevicePath;
   NumPatchedNodes = OcFixAppleBootDevicePath (&RemainingDevicePath);
+  if (NumPatchedNodes > 0) {
+    DebugPrintDevicePath (DEBUG_INFO, "OCB: Fixed DP", DevicePath);
+  }
 
   //
   // Expand BootCamp device path to EFI partition device path.
@@ -900,6 +947,7 @@ AddBootEntryFromBootOption (
     // indicates an invalid Device Path.
     //
     if (NumPatchedNodes == -1) {
+      DEBUG ((DEBUG_INFO, "OCB: Ignoring broken legacy DP\n"));
       FreePool (DevicePath);
       return EFI_NOT_FOUND;
     }
@@ -953,6 +1001,7 @@ AddBootEntryFromBootOption (
     // it cannot be located at all and may be a short-form Device Path.
     // DevicePath has not been changed no matter success or failure.
     //
+    DEBUG ((DEBUG_INFO, "OCB: Assuming DP is short-form (prefix)\n"));
 
     //
     // Expand and on failure fix the Device Path till both yields no new result.
@@ -989,6 +1038,7 @@ AddBootEntryFromBootOption (
     // OcFixAppleBootDevicePath() advanced the Device Path node and yet failed
     // to locate the path, it is invalid.
     //
+    DEBUG ((DEBUG_INFO, "OCB: Ignoring broken normal DP\n"));
     FreePool (DevicePath);
     return EFI_NOT_FOUND;
   } else {
@@ -997,6 +1047,8 @@ AddBootEntryFromBootOption (
     // to locate the path, but it may still be a shot-form Device Path (lacking
     // a suffix rather than prefix).
     //
+    DEBUG ((DEBUG_INFO, "OCB: Assuming DP is full-form or lacks suffix\n"));
+
     RemainingDevicePath = DevicePath;
     DevicePath = ExpandShortFormBootPath (
       BootContext,
@@ -1094,10 +1146,13 @@ AddFileSystemEntry (
      OUT OC_BOOT_FILESYSTEM  **FileSystemEntry  OPTIONAL
   )
 {
-  EFI_STATUS          Status;
-  BOOLEAN             IsExternal;
-  BOOLEAN             LoaderFs;
-  OC_BOOT_FILESYSTEM  *Entry;
+  EFI_STATUS                Status;
+  EFI_STATUS                TmpStatus;
+  BOOLEAN                   IsExternal;
+  BOOLEAN                   LoaderFs;
+  OC_BOOT_FILESYSTEM        *Entry;
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
+  CHAR16                    *TextDevicePath;
 
   Status = InternalCheckScanPolicy (
     FileSystemHandle,
@@ -1107,14 +1162,34 @@ AddFileSystemEntry (
 
   LoaderFs = BootContext->PickerContext->LoaderHandle == FileSystemHandle;
 
+  DEBUG_CODE_BEGIN ();
+
+  TmpStatus = gBS->HandleProtocol (
+    FileSystemHandle,
+    &gEfiDevicePathProtocolGuid,
+    (VOID **) &DevicePath
+    );
+  if (!EFI_ERROR (TmpStatus)) {
+    TextDevicePath = ConvertDevicePathToText (DevicePath, TRUE, FALSE);
+  } else {
+    TextDevicePath = NULL;
+  }
+
   DEBUG ((
     DEBUG_INFO,
-    "OCB: Adding filesystem %p (E:%d|L:%d) - %r\n",
+    "OCB: Adding fs %p (E:%d|L:%d|P:%r) - %s\n",
     FileSystemHandle,
     IsExternal,
     LoaderFs,
-    Status
+    Status,
+    OC_HUMAN_STRING (TextDevicePath)
     ));
+
+  if (TextDevicePath != NULL) {
+    FreePool (TextDevicePath);
+  }
+
+  DEBUG_CODE_END ();
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -1160,6 +1235,15 @@ AddFileSystemEntryForCustom (
       || BootContext->PickerContext->HideAuxiliary)) {
     return EFI_NOT_FOUND;
   }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCB: Adding fs %p for %u custom entries%a%a\n",
+    OC_CUSTOM_FS_HANDLE,
+    BootContext->PickerContext->NumCustomBootPaths,
+    BootContext->PickerContext->ShowNvramReset ? " and nvram reset" : "",
+    BootContext->PickerContext->HideAuxiliary ? " (aux hidden)" : "(aux shown)"
+    ));
 
   FileSystem = AllocateZeroPool (sizeof (*FileSystem));
   if (FileSystem == NULL) {
@@ -1233,6 +1317,7 @@ InternalFileSystemForHandle (
     FileSystem = BASE_CR (Link, OC_BOOT_FILESYSTEM, Link);
 
     if (FileSystem->Handle == FileSystemHandle) {
+      DEBUG ((DEBUG_INFO, "OCB: Matched fs %p%a\n", FileSystemHandle, LazyScan ? " (lazy)" : ""));
       return FileSystem;
     }
   }
@@ -1241,6 +1326,7 @@ InternalFileSystemForHandle (
   // Lazily check filesystem scan policy and add it in case it is ok. 
   //
   if (!LazyScan) {
+    DEBUG ((DEBUG_INFO, "OCB: Restricted fs %p access\n", FileSystemHandle));
     return NULL;
   }
 
@@ -1369,6 +1455,8 @@ OcScanForBootEntries (
     FreePool (BootOrder);
   }
 
+  DEBUG ((DEBUG_INFO, "OCB: Processing blessed list\n"));
+
   //
   // Create primary boot options on filesystems without options
   // and alternate boot options on all filesystems.
@@ -1460,6 +1548,7 @@ OcScanForDefaultBootEntry (
   //
   // Obtain filesystems and try processing the remainings.
   //
+  NoHandles = 0;
   Status = gBS->LocateHandleBuffer (
     ByProtocol,
     &gEfiSimpleFileSystemProtocolGuid,
@@ -1467,6 +1556,9 @@ OcScanForDefaultBootEntry (
     &NoHandles,
     &Handles
     );
+
+  DEBUG ((DEBUG_INFO, "OCB: Processing %u blessed list - %r\n", (UINT32) NoHandles, Status));
+
   if (!EFI_ERROR (Status)) {
     for (Index = 0; Index < NoHandles; ++Index) {
       //
