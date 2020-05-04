@@ -2064,8 +2064,8 @@
 				CLANG_MODULES_AUTOLINK = NO;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
 				EXECUTABLE_PREFIX = lib;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					MACH_LITTLE_ENDIAN,
@@ -2076,6 +2076,8 @@
 					"$(SRCROOT)/UDK/MdePkg/Include/X64",
 					"$(SRCROOT)/UDK/**",
 				);
+				LINK_WITH_STANDARD_LIBRARIES = NO;
+				MACH_O_TYPE = staticlib;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_CFLAGS = (
 					"-fdiagnostics-absolute-paths",
@@ -2085,7 +2087,6 @@
 					"$(SRCROOT)/UDK/Build/OpenCorePkg/RELEASE_XCODE5/X64/OpenCorePkg/Platform/OpenCore/OpenCore/DEBUG/AutoGen.c",
 					"-fshort-wchar",
 				);
-				OTHER_LDFLAGS = "-###";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -2100,8 +2101,8 @@
 				CLANG_MODULES_AUTOLINK = NO;
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
 				EXECUTABLE_PREFIX = lib;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					MACH_LITTLE_ENDIAN,
@@ -2112,6 +2113,8 @@
 					"$(SRCROOT)/UDK/MdePkg/Include/X64",
 					"$(SRCROOT)/UDK/**",
 				);
+				LINK_WITH_STANDARD_LIBRARIES = NO;
+				MACH_O_TYPE = staticlib;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_CFLAGS = (
 					"-fdiagnostics-absolute-paths",
@@ -2121,7 +2124,6 @@
 					"$(SRCROOT)/UDK/Build/OpenCorePkg/RELEASE_XCODE5/X64/OpenCorePkg/Platform/OpenCore/OpenCore/DEBUG/AutoGen.c",
 					"-fshort-wchar",
 				);
-				OTHER_LDFLAGS = "-###";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
