@@ -122,6 +122,12 @@ ExpandShortFormBootPath (
       continue;
     }
 
+    DebugPrintDevicePath (
+      DEBUG_INFO,
+      "OCB: Expanded DP remainder",
+      RemainingDevicePath
+      );
+
     //
     // Check whether we are allowed to boot from this filesystem.
     //
@@ -143,12 +149,6 @@ ExpandShortFormBootPath (
     if (EFI_ERROR (Status)) {
       continue;
     }
-
-    DebugPrintDevicePath (
-      DEBUG_INFO,
-      "OCB: Expanded DP remainder",
-      RemainingDevicePath
-      );
 
     //
     // Retrieve file info to determine potentially bootable state.
@@ -338,9 +338,9 @@ AddBootEntryOnFileSystem (
   OC_BOOT_ENTRY_TYPE  EntryType;
   BOOLEAN             IsFolder;
 
-  EntryType = OcGetBootDevicePathType (DevicePath, &IsFolder);
-
   DebugPrintDevicePath (DEBUG_INFO, "OCB: Adding entry", DevicePath);
+
+  EntryType = OcGetBootDevicePathType (DevicePath, &IsFolder);
 
   //
   // Mark self recovery presence.
@@ -651,6 +651,8 @@ AddBootEntryFromBless (
         Root->Close (Root);
       }
     }
+  } else {
+    Status = EFI_NOT_FOUND;
   }
 
   //
@@ -750,7 +752,7 @@ AddBootEntryFromBless (
     // Now add APFS recovery (from Recovery partition) right afterwards if present.
     //
     Status = BootContext->BootPolicy->GetApfsRecoveryFilePath (
-      DevicePath,
+      NewDevicePath,
       L"\\",
       &RecoveryPath,
       &Reserved,
