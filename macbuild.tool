@@ -6,7 +6,8 @@ package() {
     exit 1
   fi
 
-  local ver=$(cat Include/OpenCore.h | grep OPEN_CORE_VERSION | sed 's/.*"\(.*\)".*/\1/' | grep -E '^[0-9.]+$')
+  local ver
+  ver=$(cat Include/OpenCore.h | grep OPEN_CORE_VERSION | sed 's/.*"\(.*\)".*/\1/' | grep -E '^[0-9.]+$')
   if [ "$ver" = "" ]; then
     echo "Invalid version $ver"
   fi
@@ -68,7 +69,7 @@ package() {
   popd || exit 1
 }
 
-cd $(dirname "$0")
+cd $(dirname "$0") || exit 1
 ARCHS=(X64 IA32)
 SELFPKG=OpenCorePkg
 DEPNAMES=('EfiPkg' 'MacInfoPkg' 'DuetPkg')
@@ -78,6 +79,13 @@ DEPURLS=(
   'https://github.com/acidanthera/DuetPkg'
 )
 DEPBRANCHES=('master' 'master' 'master')
+
+export ARCHS
+export SELFPKG
+export DEPNAMES
+export DEPURLS
+export DEPBRANCHES
+
 src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/efibuild.sh) && eval "$src" || exit 1
 
 if [ "$BUILD_UTILITIES" = "1" ]; then
