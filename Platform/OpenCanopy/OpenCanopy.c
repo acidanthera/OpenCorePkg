@@ -1427,17 +1427,17 @@ GuiLabelToImage (
 
   if (Inverted) {
     for (PixelIdx = 0; PixelIdx < Image->Width * Image->Height; PixelIdx++) {
-      Image->Buffer[PixelIdx].Blue     = mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-      Image->Buffer[PixelIdx].Green    = mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-      Image->Buffer[PixelIdx].Red      = mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-      Image->Buffer[PixelIdx].Reserved = 255;
+      Image->Buffer[PixelIdx].Blue     = 0;
+      Image->Buffer[PixelIdx].Green    = 0;
+      Image->Buffer[PixelIdx].Red      = 0;
+      Image->Buffer[PixelIdx].Reserved = 255 -  mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
     }
   } else {
     for (PixelIdx = 0; PixelIdx < Image->Width * Image->Height; PixelIdx++) {
-      Image->Buffer[PixelIdx].Blue     = 255 - mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-      Image->Buffer[PixelIdx].Green    = 255 - mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-      Image->Buffer[PixelIdx].Red      = 255 - mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-      Image->Buffer[PixelIdx].Reserved = 255;
+      Image->Buffer[PixelIdx].Blue     = 255 -  mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Green    = 255 -  mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Red      = 255 -  mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Reserved = 255 -  mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
     }
   }
 
