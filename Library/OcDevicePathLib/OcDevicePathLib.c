@@ -454,7 +454,10 @@ OcFixAppleBootDevicePath (
     //
     // Patch the potentially invalid node.
     //
-    Result = OcFixAppleBootDevicePathNode (*DevicePath, RestoreContextPtr);
+    Result = OcFixAppleBootDevicePathNode (
+               RemainingDevicePath,
+               RestoreContextPtr
+               );
     //
     // Save a restore context only for the first processing of the first node.
     // The reason for this is when the first node cannot be located with any
