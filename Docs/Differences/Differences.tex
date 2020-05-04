@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun May  3 20:40:06 2020
-%DIF ADD ../Configuration.tex        Sun May  3 20:42:35 2020
+%DIF DEL PreviousConfiguration.tex   Mon May  4 14:28:34 2020
+%DIF ADD ../Configuration.tex        Mon May  4 14:38:00 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -149,7 +149,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.5\DIFdelbegin \DIFdel{.7}\DIFdelend \DIFaddbegin \DIFadd{.8}\DIFaddend )
+       Reference Manual (0.5\DIFdelbegin \DIFdel{.8}\DIFdelend \DIFaddbegin \DIFadd{.9}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -184,11 +184,8 @@ step algorithm for configuring end-user board support package (BSP). Any third-p
 articles, tools, books, etc., providing such material are prone to their authors'
 preferences, tastes, this document misinterpretation, and essential obsolescence.
 In case you still use these sources, for example,
-\DIFdelbegin %DIFDELCMD < \href{https://khronokernel-2.gitbook.io/opencore-vanilla-desktop-guide}{Opencore Vanilla Desktop Guide}
-%DIFDELCMD < %%%
-\DIFdel{(}%DIFDELCMD < \href{https://khronokernel-1.gitbook.io/getting-started-with-opencore}{parent link}%%%
-\DIFdelend \DIFaddbegin \href{https://dortania.github.io/OpenCore-Desktop-Guide}{Opencore Desktop Guide}
-\DIFadd{(}\href{https://dortania.github.io/getting-started}{parent link}\DIFaddend ),
+\href{https://dortania.github.io/OpenCore-Desktop-Guide}{Opencore Desktop Guide}
+(\href{https://dortania.github.io/getting-started}{parent link}),
 please ensure following this document for every made decision and judging its consequences.
 Regardless of the sources used you are required to fully understand every dedicated OpenCore
 configuration option and concept prior to reporting any issues in
@@ -595,9 +592,7 @@ utilised.
 For BIOS booting a third-party UEFI environment provider will have to
 be used. \texttt{DuetPkg} is one of the known UEFI environment providers
 for legacy systems. To run OpenCore on such a legacy system you can install
-\texttt{DuetPkg} with a dedicated tool \DIFdelbegin \DIFdel{:
-}%DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/BootInstall}{BootInstall}%%%
-\DIFdelend \DIFaddbegin \DIFadd{BootInstall (bundled with OpenCore)}\DIFaddend .
+\texttt{DuetPkg} with a dedicated tool BootInstall (bundled with OpenCore).
 
 For upgrade purposes refer to \texttt{Differences.pdf} document, providing
 the information about the changes affecting the configuration compared
@@ -625,8 +620,7 @@ Required external package dependencies include
 
 To compile with \texttt{XCODE5}, besides \href{https://developer.apple.com/xcode}{Xcode},
 one should also install \href{https://www.nasm.us}{NASM} and
-\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/ocbuild/raw/master/external/mtoc-mac64.zip}{MTOC}%%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/ocbuild/tree/master/external}{MTOC}\DIFaddend .
+\href{https://github.com/acidanthera/ocbuild/tree/master/external}{MTOC}.
 The latest Xcode version is recommended for use despite the toolchain name. Example
 command sequence may look as follows:
 
@@ -2041,25 +2035,22 @@ blocking.
   VT-d support in other systems in case they need it.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{DisableRtcChecksum}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Disables primary checksum (}\texttt{\DIFadd{0x58}}\DIFadd{-}\texttt{\DIFadd{0x59}}\DIFadd{)
+  \texttt{DisableRtcChecksum}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Disables primary checksum (\texttt{0x58}-\texttt{0x59})
   writing in AppleRTC.
-}
 
-  \emph{\DIFadd{Note 1}}\DIFadd{: This option will not protect other areas from being overwritten,
-  see }\href{https://github.com/acidanthera/RTCMemoryFixup}{RTCMemoryFixup}
-  \DIFadd{kernel extension if this is desired.
-}
+  \emph{Note 1}: This option will not protect other areas from being overwritten,
+  see \href{https://github.com/acidanthera/RTCMemoryFixup}{RTCMemoryFixup}
+  kernel extension if this is desired.
 
-  \emph{\DIFadd{Note 2}}\DIFadd{: This option will not protect areas from being overwritten
-  at firmware stage (e.g. macOS bootloader), see }\texttt{\DIFadd{AppleRtc}} \DIFadd{protocol
+  \emph{Note 2}: This option will not protect areas from being overwritten
+  at firmware stage (e.g. macOS bootloader), see \texttt{AppleRtc} protocol
   description if this is desired.
-}
 
 \item
-  \DIFaddend \texttt{DummyPowerManagement}\\
+  \texttt{DummyPowerManagement}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Disables \texttt{AppleIntelCpuPowerManagement}.
@@ -2314,9 +2305,9 @@ behaviour that does not go to any other sections
       \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
       \item \texttt{<TOOL\_NAME>.icns} file for \texttt{Tools}.
     \end{itemize}
-    Volume icons can be set in Finder. \DIFaddbegin \DIFadd{Note, that enabling this may result in
+    Volume icons can be set in Finder. Note, that enabling this may result in
     external and internal icons to be indistinguishable.
-  }\DIFaddend \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
+  \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
     rendered titles for boot entries:
     \begin{itemize}
       \tightlist
@@ -2606,41 +2597,36 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   considered a security risk and thus is optional.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{BootProtect}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{None}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Attempt to provide bootloader persistence.
-}
+  \texttt{BootProtect}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{None}\\
+  \textbf{Description}: Attempt to provide bootloader persistence.
 
-  \DIFadd{Valid values:
-}
+  Valid values:
 
   \begin{itemize}
   \tightlist
-  \item \texttt{\DIFadd{None}} \DIFadd{--- do nothing.
-  }\item \texttt{\DIFadd{Bootstrap}} \DIFadd{--- create or update top-priority
-  }\texttt{\DIFadd{\textbackslash EFI\textbackslash OC\textbackslash Bootstrap\textbackslash Bootstrap.efi}}
-  \DIFadd{boot option (}\texttt{\DIFadd{Boot9696}}\DIFadd{) in UEFI variable storage at bootloader startup. For this option
-  to work }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{is required to be enabled.
-  }\end{itemize}
+  \item \texttt{None} --- do nothing.
+  \item \texttt{Bootstrap} --- create or update top-priority
+  \texttt{\textbackslash EFI\textbackslash OC\textbackslash Bootstrap\textbackslash Bootstrap.efi}
+  boot option (\texttt{Boot9696}) in UEFI variable storage at bootloader startup. For this option
+  to work \texttt{RequestBootVarRouting} is required to be enabled.
+  \end{itemize}
 
-  \DIFadd{This option provides integration with third-party operating system installation and upgrade
-  at the times they overwrite }\texttt{\DIFadd{\textbackslash EFI\textbackslash BOOT\textbackslash BOOTx64.efi}}
-  \DIFadd{file. By creating a custom option in }\texttt{\DIFadd{Bootstrap}} \DIFadd{mode this file path becomes no longer
+  This option provides integration with third-party operating system installation and upgrade
+  at the times they overwrite \texttt{\textbackslash EFI\textbackslash BOOT\textbackslash BOOTx64.efi}
+  file. By creating a custom option in \texttt{Bootstrap} mode this file path becomes no longer
   used for bootstraping OpenCore.
-}
 
-  \emph{\DIFadd{Note 1}}\DIFadd{: Some firmewares may have broken NVRAM, no boot option support, or various other
+  \emph{Note 1}: Some firmewares may have broken NVRAM, no boot option support, or various other
   incompatibilities of any kind. While unlikely, the use of this option may even cause boot failure.
   Use at your own risk on boards known to be compatible.
-}
 
-  \emph{\DIFadd{Note 2}}\DIFadd{: Be warned that NVRAM reset will also erase the boot option created in
-  }\texttt{\DIFadd{Bootstrap}} \DIFadd{mode.
-}
+  \emph{Note 2}: Be warned that NVRAM reset will also erase the boot option created in
+  \texttt{Bootstrap} mode.
 
 \item
-  \DIFaddend \texttt{ExposeSensitiveData}\\
+  \texttt{ExposeSensitiveData}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0x6}\\
   \textbf{Description}: Sensitive data exposure bitmask (sum) to operating system.
@@ -2963,9 +2949,8 @@ use.
 
   Created variables get \texttt{EFI\_VARIABLE\_BOOTSERVICE\_ACCESS} and
   \texttt{EFI\_VARIABLE\_RUNTIME\_ACCESS} attributes set.
-  Variables will only be set if not present \DIFdelbegin \DIFdel{and not blocked. To overwrite
-  a variable add it to }\DIFdelend \DIFaddbegin \DIFadd{or blocked. I.e. to overwrite
-  an existing variable value add the variable name to the }\DIFaddend \texttt{Block} section.
+  Variables will only be set if not present or blocked. I.e. to overwrite
+  an existing variable value add the variable name to the \texttt{Block} section.
   This approach enables to provide default values till the operating system
   takes the lead.
 
@@ -3432,22 +3417,20 @@ be used. Version with macOS specific enhancements can be downloaded from
     gEfiSmbiosTable3Guid data if it fits new size. Abort with
     unspecified state otherwise.
   \item
-    \texttt{Custom} --- Write \DIFdelbegin \DIFdel{first SMBIOS table
-    (}\DIFdelend \DIFaddbegin \DIFadd{SMBIOS tables
-    (}\DIFaddend \texttt{\DIFdelbegin \DIFdel{gEfiSmbiosTableGuid}\DIFdelend \DIFaddbegin \DIFadd{gEfiSmbios(3)TableGuid}\DIFaddend }) to \texttt{\DIFdelbegin \DIFdel{gOcCustomSmbiosTableGuid}\DIFdelend \DIFaddbegin \DIFadd{gOcCustomSmbios(3)TableGuid}\DIFaddend }
+    \texttt{Custom} --- Write SMBIOS tables
+    (\texttt{gEfiSmbios(3)TableGuid}) to \texttt{gOcCustomSmbios(3)TableGuid}
     to workaround firmwares overwriting SMBIOS contents at
     ExitBootServices. Otherwise equivalent to \texttt{Create}. Requires
     patching AppleSmbios.kext and AppleACPIPlatform.kext to read from
     another GUID: \texttt{"EB9D2D31"} - \texttt{"EB9D2D35"} (in ASCII),
     done automatically by \texttt{CustomSMBIOSGuid} quirk.
   \end{itemize}
-\DIFaddbegin 
 
-  \emph{\DIFadd{Note}}\DIFadd{: A side effect of using }\texttt{\DIFadd{Custom}} \DIFadd{approach is making
+  \emph{Note}: A side effect of using \texttt{Custom} approach is making
   SMBIOS updates exclusive to macOS, avoiding a collission with existing
   Windows activation and custom OEM software but potentially breaking
   Apple-specific tools.
-}\DIFaddend \item
+\item
   \texttt{Generic}\\
   \textbf{Type}: \texttt{plist\ dictonary}\\
   \textbf{Optional}: When \texttt{Automatic} is \texttt{false}\\
@@ -4031,12 +4014,7 @@ Loading an incompatible driver may lead your system to unbootable state or
 even cause permanent firmware damage. Some of the known drivers are listed below:
 
 \begin{tabular}{p{1.3in}p{5.55in}}
-\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{ApfsDriverLoader}}
-%DIFDELCMD < & %%%
-\DIFdel{APFS file system bootstrap driver adding the support of embedded APFS drivers
-  in bootable APFS containers in UEFI firmwares }%DIFDELCMD < \\
-%DIFDELCMD < %%%
-\DIFdelend \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
+\href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
 & HDA audio support driver in UEFI firmwares for most Intel and some other analog audio controllers.
   Refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
   for known issues in AudioDxe. \\
@@ -4070,20 +4048,20 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \\
-  \DIFaddbegin \href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{\DIFadd{*}}
-& \DIFadd{PS/2 keyboard driver from }\texttt{\DIFadd{MdeModulePkg}}\DIFadd{. DuetPkg and some firmwares
+  \href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
+& PS/2 keyboard driver from \texttt{MdeModulePkg}. DuetPkg and some firmwares
   may not include this driver, but it is necessary for PS/2 keyboard to work.
-  Note, unlike }\texttt{\DIFadd{OpenUsbKbDxe}} \DIFadd{this driver has no }\texttt{\DIFadd{AppleKeyMapAggregator}}
-  \DIFadd{support and thus requires }\texttt{\DIFadd{KeySupport}} \DIFadd{to be enabled. }\\
-  \href{https://github.com/acidanthera/audk}{\texttt{Ps2MouseDxe}}\textbf{\DIFadd{*}}
-& \DIFadd{PS/2 mouse driver from }\texttt{\DIFadd{MdeModulePkg}}\DIFadd{. Some very old laptop firmwares
+  Note, unlike \texttt{OpenUsbKbDxe} this driver has no \texttt{AppleKeyMapAggregator}
+  support and thus requires \texttt{KeySupport} to be enabled. \\
+  \href{https://github.com/acidanthera/audk}{\texttt{Ps2MouseDxe}}\textbf{*}
+& PS/2 mouse driver from \texttt{MdeModulePkg}. Some very old laptop firmwares
   may not include this driver, but it is necessary for touchpad to work
-  in UEFI graphical interfaces, such as }\texttt{\DIFadd{OpenCanopy}}\DIFadd{. }\\
-  \href{https://github.com/acidanthera/audk}{\texttt{UsbMouseDxe}}\textbf{\DIFadd{*}}
-& \DIFadd{USB mouse driver from }\texttt{\DIFadd{MdeModulePkg}}\DIFadd{. Some virtual machine firmwares
+  in UEFI graphical interfaces, such as \texttt{OpenCanopy}. \\
+  \href{https://github.com/acidanthera/audk}{\texttt{UsbMouseDxe}}\textbf{*}
+& USB mouse driver from \texttt{MdeModulePkg}. Some virtual machine firmwares
   like OVMF may not include this driver, but it is necessary for mouse to work
-  in UEFI graphical interfaces, such as }\texttt{\DIFadd{OpenCanopy}}\DIFadd{. }\\
-\DIFaddend \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
+  in UEFI graphical interfaces, such as \texttt{OpenCanopy}. \\
+\href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
 & HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HfsPlus} driver commonly found in Apple firmwares. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
@@ -4159,12 +4137,12 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
   with a broad range of firmwares. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{PavpProvision}}
 & Perform EPID provisioning (requires certificate data configuration). \\
-\DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ResetSystem}}\textbf{\DIFadd{*}}
-& \DIFadd{Utility to perform system reset. Takes reset type as an argument:
-  }\texttt{\DIFadd{ColdReset}}\DIFadd{, }\texttt{\DIFadd{WarmReset}}\DIFadd{, }\texttt{\DIFadd{Shutdown}}\DIFadd{. Defaults to }\texttt{\DIFadd{ColdReset}}\DIFadd{. }\\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{RtcRw}}\textbf{\DIFadd{*}}
-& \DIFadd{Utility to read and write RTC (CMOS) memory. }\\
-\DIFaddend \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VerifyMsrE2}}\textbf{*}
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ResetSystem}}\textbf{*}
+& Utility to perform system reset. Takes reset type as an argument:
+  \texttt{ColdReset}, \texttt{WarmReset}, \texttt{Shutdown}. Defaults to \texttt{ColdReset}. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{RtcRw}}\textbf{*}
+& Utility to read and write RTC (CMOS) memory. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VerifyMsrE2}}\textbf{*}
 & Check \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) consistency across all cores.
 \end{tabular}
 
@@ -4254,15 +4232,14 @@ functioning. Feature highlights:
 
 \begin{enumerate}
 \item
-  \DIFaddbegin \texttt{\DIFadd{APFS}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ dict}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: None}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Provide APFS support as configured in
-  }\hyperref[uefiapfsprops]{APFS Properties} \DIFadd{section below.
-}
+  \texttt{APFS}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Failsafe}: None\\
+  \textbf{Description}: Provide APFS support as configured in
+  \hyperref[uefiapfsprops]{APFS Properties} section below.
 
 \item
-  \DIFaddend \texttt{Audio}\\
+  \texttt{Audio}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Configure audio backend support described
@@ -4343,12 +4320,11 @@ functioning. Feature highlights:
   \hyperref[uefioutputprops]{Output Properties} section below.
 
 \item
-  \texttt{\DIFdelbegin \DIFdel{Protocols}\DIFdelend \DIFaddbegin \DIFadd{ProtocolOverrides}\DIFaddend }\\
+  \texttt{ProtocolOverrides}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Force builtin versions of select protocols described
-  in \DIFdelbegin %DIFDELCMD < \hyperref[uefiprotoprops]{Protocols Properties} %%%
-\DIFdelend \DIFaddbegin \hyperref[uefiprotoprops]{ProtocolOverrides Properties} \DIFaddend section below.
+  in \hyperref[uefiprotoprops]{ProtocolOverrides Properties} section below.
 
   \emph{Note}: all protocol instances are installed prior to driver loading.
 
@@ -4359,111 +4335,100 @@ functioning. Feature highlights:
   \textbf{Description}: Apply individual firmware quirks described in
   \hyperref[uefiquirkprops]{Quirks Properties} section below.
 
-\DIFaddbegin \item
-  \texttt{\DIFadd{ReservedMemory}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ array}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Designed to be filled with }\texttt{\DIFadd{plist\ dict}} \DIFadd{values,
+\item
+  \texttt{ReservedMemory}\\
+  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Description}: Designed to be filled with \texttt{plist\ dict} values,
   describing memory areas exquisite to particular firmware and hardware functioning,
   which should not be used by the operating system. An example of such memory region
   could be second 256 MB corrupted by Intel HD 3000 or an area with faulty RAM.
-  See }\hyperref[uefirsvdprops]{ReservedMemory Properties} \DIFadd{section below.
-}
+  See \hyperref[uefirsvdprops]{ReservedMemory Properties} section below.
 
-\DIFaddend \end{enumerate}
+\end{enumerate}
 
-\DIFaddbegin \subsection{\DIFadd{APFS Properties}}\label{uefiapfsprops}
+\subsection{APFS Properties}\label{uefiapfsprops}
 
 \begin{enumerate}
 
 \item
-  \texttt{\DIFadd{EnableJumpstart}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Load embedded APFS drivers from APFS containers.
-}
+  \texttt{EnableJumpstart}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Load embedded APFS drivers from APFS containers.
 
-  \DIFadd{APFS EFI driver is bundled in all bootable APFS containers. This
+  APFS EFI driver is bundled in all bootable APFS containers. This
   option performs loading of signed APFS drivers with respect to
-  }\texttt{\DIFadd{ScanPolicy}}\DIFadd{. See more details in ``EFI Jumpstart'' section of
-  }\href{https://developer.apple.com/support/apple-file-system/Apple-File-System-Reference.pdf}{Apple File System Reference}\DIFadd{.
-}
+  \texttt{ScanPolicy}. See more details in ``EFI Jumpstart'' section of
+  \href{https://developer.apple.com/support/apple-file-system/Apple-File-System-Reference.pdf}{Apple File System Reference}.
 
 \item
-  \texttt{\DIFadd{HideVerbose}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Hide verbose output from APFS driver.
-}
+  \texttt{HideVerbose}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Hide verbose output from APFS driver.
 
-  \DIFadd{APFS verbose output can be useful for debugging.
-}
+  APFS verbose output can be useful for debugging.
 
 \item
-  \texttt{\DIFadd{JumpstartHotPlug}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Load APFS drivers for newly connected devices.
-}
+  \texttt{JumpstartHotPlug}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Load APFS drivers for newly connected devices.
 
-  \DIFadd{Performs APFS driver loading not only at OpenCore startup but also
+  Performs APFS driver loading not only at OpenCore startup but also
   during boot picker. This permits APFS USB hot plug. Disable if not
   required.
-}
 
 \item
-  \texttt{\DIFadd{MinDate}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Minimal allowed APFS driver date.
-}
+  \texttt{MinDate}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Minimal allowed APFS driver date.
 
-  \DIFadd{APFS driver date connects APFS driver with the calendar
+  APFS driver date connects APFS driver with the calendar
   release date. Older versions of APFS drivers may contain unpatched
   vulnerabilities, which can be used to inflict harm on your computer.
   This option permits restricting APFS drivers to only recent releases.
-}
 
   \begin{itemize}
     \tightlist
-    \item \texttt{\DIFadd{0}} \DIFadd{--- require the default supported release date of APFS
+    \item \texttt{0} --- require the default supported release date of APFS
     in OpenCore. The default release date will increase with time and thus
     this setting is recommended. Currently set to 2018/06/21.
-    }\item \texttt{\DIFadd{-1}} \DIFadd{--- permit any release date to load (strongly discouraged).
-    }\item \DIFadd{Other --- use custom minimal APFS release date, e.g. }\texttt{\DIFadd{20200401}}
-    \DIFadd{for 2020/04/01. APFS release dates can be found in OpenCore boot log
-    and }\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Library/OcApfsLib.h}{\texttt{OcApfsLib}}\DIFadd{.
-  }\end{itemize}
+    \item \texttt{-1} --- permit any release date to load (strongly discouraged).
+    \item Other --- use custom minimal APFS release date, e.g. \texttt{20200401}
+    for 2020/04/01. APFS release dates can be found in OpenCore boot log
+    and \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Library/OcApfsLib.h}{\texttt{OcApfsLib}}.
+  \end{itemize}
 
 \item
-  \texttt{\DIFadd{MinVersion}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Minimal allowed APFS driver version.
-}
+  \texttt{MinVersion}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Minimal allowed APFS driver version.
 
-  \DIFadd{APFS driver version connects APFS driver with the macOS
+  APFS driver version connects APFS driver with the macOS
   release. APFS drivers from older macOS releases will become
   unsupported and thus may contain unpatched vulnerabilities, which
   can be used to inflict harm on your computer. This option permits
   restricting APFS drivers to only modern macOS versions.
-}
 
   \begin{itemize}
     \tightlist
-    \item \texttt{\DIFadd{0}} \DIFadd{--- require the default supported version of APFS
+    \item \texttt{0} --- require the default supported version of APFS
     in OpenCore. The default version will increase with time and thus
     this setting is recommended. Currently set to the latest point release
-    from High Sierra from App Store (}\texttt{\DIFadd{748077008000000}}\DIFadd{).
-    }\item \texttt{\DIFadd{-1}} \DIFadd{--- permit any version to load (strongly discouraged).
-    }\item \DIFadd{Other --- use custom minimal APFS version, e.g. }\texttt{\DIFadd{1412101001000000}}
-    \DIFadd{from macOS Catalina 10.15.4. APFS versions can be found in OpenCore boot log
-    and }\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Library/OcApfsLib.h}{\texttt{OcApfsLib}}\DIFadd{.
-  }\end{itemize}
+    from High Sierra from App Store (\texttt{748077008000000}).
+    \item \texttt{-1} --- permit any version to load (strongly discouraged).
+    \item Other --- use custom minimal APFS version, e.g. \texttt{1412101001000000}
+    from macOS Catalina 10.15.4. APFS versions can be found in OpenCore boot log
+    and \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Library/OcApfsLib.h}{\texttt{OcApfsLib}}.
+  \end{itemize}
 
 \end{enumerate}
 
 
-\DIFaddend \subsection{Audio Properties}\label{uefiaudioprops}
+\subsection{Audio Properties}\label{uefiaudioprops}
 
 \begin{enumerate}
 
@@ -4893,7 +4858,7 @@ functioning. Feature highlights:
 \end{enumerate}
 
 
-\subsection{\DIFdelbegin \DIFdel{Protocols }\DIFdelend \DIFaddbegin \DIFadd{ProtocolOverrides }\DIFaddend Properties}\label{uefiprotoprops}
+\subsection{ProtocolOverrides Properties}\label{uefiprotoprops}
 
 \begin{enumerate}
 
@@ -4958,21 +4923,19 @@ functioning. Feature highlights:
   versions.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{AppleRtcRam}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Reinstalls Apple RTC RAM protocol with builtin
+  \texttt{AppleRtcRam}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple RTC RAM protocol with builtin
   version.
-}
 
-  \emph{\DIFadd{Note}}\DIFadd{: Builtin version of Apple RTC RAM protocol may filter out
+  \emph{Note}: Builtin version of Apple RTC RAM protocol may filter out
   I/O attempts to select RTC memory addresses. The list of addresses
-  can be specified in }\texttt{\DIFadd{4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:rtc-blacklist}}
-  \DIFadd{variable as a data array.
-}
+  can be specified in \texttt{4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:rtc-blacklist}
+  variable as a data array.
 
 \item
-  \DIFaddend \texttt{AppleSmcIo}\\
+  \texttt{AppleSmcIo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Apple SMC I/O protocol with a builtin
@@ -5148,48 +5111,43 @@ functioning. Feature highlights:
 
 \end{enumerate}
 
-\DIFaddbegin \subsection{\DIFadd{ReservedMemory Properties}}\label{uefirsvdprops}
+\subsection{ReservedMemory Properties}\label{uefirsvdprops}
 
 \begin{enumerate}
 
 \item
-  \texttt{\DIFadd{Address}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Start address of the reserved memory region, which should be allocated
+  \texttt{Address}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Start address of the reserved memory region, which should be allocated
   as reserved effectively marking the memory of this type inaccessible to the operating system.
-}
 
-  \DIFadd{The addresses written here must be part of the memory map, have }\texttt{\DIFadd{EfiConventionalMemory}}
-  \DIFadd{type, and page-aligned (4 KBs).
-}
+  The addresses written here must be part of the memory map, have \texttt{EfiConventionalMemory}
+  type, and page-aligned (4 KBs).
 
 \item
-  \texttt{\DIFadd{Comment}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Arbitrary ASCII string used to provide human readable
+  \texttt{Comment}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
-}
 
 \item
-  \texttt{\DIFadd{Size}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Size of the reserved memory region, must be page-aligned (4 KBs).
-}
+  \texttt{Size}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Size of the reserved memory region, must be page-aligned (4 KBs).
 
 \item
-  \texttt{\DIFadd{Enabled}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: This region will not be reserved unless set to }\texttt{\DIFadd{true}}\DIFadd{.
-}
+  \texttt{Enabled}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: This region will not be reserved unless set to \texttt{true}.
 
 \end{enumerate}
 
-\DIFaddend \section{Troubleshooting}\label{troubleshooting}
+\section{Troubleshooting}\label{troubleshooting}
 
 \subsection{Windows support}\label{troubleshootingwin}
 
@@ -5216,8 +5174,8 @@ functioning. Feature highlights:
   \item Windows may need to be reactivated. To avoid it consider
   setting SystemUUID to the original firmware UUID. Be warned,
   on old firmwares it may be invalid, i.e. not random. In case you still have issues,
-  consider using HWID or KMS38 license \DIFdelbegin \DIFdel{. The }\DIFdelend \DIFaddbegin \DIFadd{or making the use }\texttt{\DIFadd{Custom}}
-  \texttt{\DIFadd{UpdateSMBIOSMode}}\DIFadd{. Other }\DIFaddend nuances of Windows activation are out of the
+  consider using HWID or KMS38 license or making the use \texttt{Custom}
+  \texttt{UpdateSMBIOSMode}. Other nuances of Windows activation are out of the
   scope of this document and can be found online.
   \end{itemize}
 
