@@ -548,8 +548,8 @@ OcRunBootPicker (
     if (Context->PickerCommand == OcPickerShowPicker) {
       DEBUG ((
         DEBUG_INFO,
-        "OCB: Showing menu... %d\n",
-        Context->PollAppleHotKeys
+        "OCB: Showing menu... %a\n",
+        Context->PollAppleHotKeys ? "(polling hotkeys)" : ""
         ));
 
       if (!SaidWelcome) {

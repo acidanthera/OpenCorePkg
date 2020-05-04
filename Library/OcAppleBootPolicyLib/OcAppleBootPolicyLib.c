@@ -167,7 +167,7 @@ InternalGetApfsSpecialFileInfo (
       );
 
     if (*VolumeInfo == NULL) {
-      DEBUG ((DEBUG_BULK_INFO, "OCBP: APFS Volume Info is missing\n"));
+      DEBUG ((DEBUG_VERBOSE, "OCBP: APFS Volume Info is missing\n"));
       return EFI_NOT_FOUND;
     }
 
@@ -587,7 +587,7 @@ InternalGetBooterFromApfsPredefinedNameList (
       DEBUG ((
         DEBUG_BULK_INFO,
         "OCBP: Borked APFS filesystem %u of %u - %r\n",
-        (UINT32) Index,
+        (UINT32) (Index + 1),
         (UINT32) NumberOfHandles,
         TmpStatus
         ));
@@ -599,7 +599,7 @@ InternalGetBooterFromApfsPredefinedNameList (
       DEBUG ((
         DEBUG_BULK_INFO,
         "OCBP: Borked APFS root volume %u of %u - %r\n",
-        (UINT32) Index,
+        (UINT32) (Index + 1),
         (UINT32) NumberOfHandles,
         TmpStatus
         ));
@@ -612,9 +612,9 @@ InternalGetBooterFromApfsPredefinedNameList (
 
     if (EFI_ERROR (TmpStatus)) {
       DEBUG ((
-        DEBUG_BULK_INFO,
+        DEBUG_VERBOSE,
         "OCBP: No APFS info %u of %u - %r\n",
-        (UINT32) Index,
+        (UINT32) (Index + 1),
         (UINT32) NumberOfHandles,
         TmpStatus
         ));
@@ -628,7 +628,7 @@ InternalGetBooterFromApfsPredefinedNameList (
       "OCBP: APFS match container %g vs %g for %u of %u - %d\n",
       &ContainerInfo->Uuid,
       ContainerUuid,
-      (UINT32) Index,
+      (UINT32) (Index + 1),
       (UINT32) NumberOfHandles,
       ContainerMatch
       ));
@@ -664,7 +664,7 @@ InternalGetBooterFromApfsPredefinedNameList (
       DEBUG ((
         DEBUG_BULK_INFO,
         "OCBP: No APFS booter %u of %u for %s - %r\n",
-        (UINT32) Index,
+        (UINT32) (Index + 1),
         (UINT32) NumberOfHandles,
         VolumeDirectoryName,
         TmpStatus
@@ -675,7 +675,7 @@ InternalGetBooterFromApfsPredefinedNameList (
       DEBUG ((
         DEBUG_BULK_INFO,
         "OCBP: Found APFS booter %u of %u for %s (%p)\n",
-        (UINT32) Index,
+        (UINT32) (Index + 1),
         (UINT32) NumberOfHandles,
         VolumeDirectoryName,
         DevicePath
