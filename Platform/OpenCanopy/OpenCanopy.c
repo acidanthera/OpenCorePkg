@@ -1318,7 +1318,8 @@ GuiIcnsToImageIcon (
       Status = GuiPngToImage (
         Image,
         Record->Data,
-        RecordLength - sizeof (APPLE_ICNS_RECORD)
+        RecordLength - sizeof (APPLE_ICNS_RECORD),
+        TRUE
         );
 
       if (!EFI_ERROR (Status) && MatchWidth > 0 && MatchHeight > 0) {
@@ -1447,7 +1448,8 @@ EFI_STATUS
 GuiPngToImage (
   OUT GUI_IMAGE  *Image,
   IN  VOID       *ImageData,
-  IN  UINT32     ImageDataSize
+  IN  UINT32     ImageDataSize,
+  IN  BOOLEAN    PremultiplyAlpha
   )
 {
   EFI_STATUS                       Status;
@@ -1469,13 +1471,15 @@ GuiPngToImage (
     return Status;
   }
 
-  BufferWalker = Image->Buffer;
-  for (Index = 0; Index < (UINTN) Image->Width * Image->Height; ++Index) {
-    TmpChannel             = (UINT8) ((BufferWalker->Blue * BufferWalker->Reserved) / 0xFF);
-    BufferWalker->Blue     = (UINT8) ((BufferWalker->Red * BufferWalker->Reserved) / 0xFF);
-    BufferWalker->Green    = (UINT8) ((BufferWalker->Green * BufferWalker->Reserved) / 0xFF);
-    BufferWalker->Red      = TmpChannel;
-    ++BufferWalker;
+  if (PremultiplyAlpha) {
+    BufferWalker = Image->Buffer;
+    for (Index = 0; Index < (UINTN) Image->Width * Image->Height; ++Index) {
+      TmpChannel             = (UINT8) ((BufferWalker->Blue * BufferWalker->Reserved) / 0xFF);
+      BufferWalker->Blue     = (UINT8) ((BufferWalker->Red * BufferWalker->Reserved) / 0xFF);
+      BufferWalker->Green    = (UINT8) ((BufferWalker->Green * BufferWalker->Reserved) / 0xFF);
+      BufferWalker->Red      = TmpChannel;
+      ++BufferWalker;
+    }
   }
 
   return EFI_SUCCESS;

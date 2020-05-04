@@ -740,7 +740,8 @@ GuiFontConstruct (
   Status = GuiPngToImage (
     &Context->FontImage,
     FontImage,
-    FontImageSize
+    FontImageSize,
+    FALSE
     );
   FreePool (FontImage);
 
