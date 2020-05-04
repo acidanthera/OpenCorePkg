@@ -419,7 +419,7 @@ InternalBootPickerEntryDraw (
   // Draw the label horizontally centered.
   //
   //ASSERT (Label->Width  <= BOOT_ENTRY_DIMENSION * DrawContext->Scale);
-  ASSERT (Label->Height == BOOT_ENTRY_LABEL_HEIGHT * DrawContext->Scale);
+  ASSERT_EQUALS (Label->Height, BOOT_ENTRY_LABEL_HEIGHT * DrawContext->Scale);
 
   GuiDrawChildImage (
     Label,
