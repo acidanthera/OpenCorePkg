@@ -16,7 +16,7 @@
 
 #include <Guid/AppleFile.h>
 #include <Guid/AppleVariable.h>
-#include <Guid/OcVariables.h>
+#include <Guid/OcVariable.h>
 
 #include <IndustryStandard/AppleCsrConfig.h>
 

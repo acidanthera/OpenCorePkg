@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <OpenCore.h>
 
-#include <Guid/OcVariables.h>
+#include <Guid/OcVariable.h>
 
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
@@ -453,6 +453,7 @@ OcMiscLateInit (
   CONST CHAR8  *BootProtect;
   CONST CHAR8  *HibernateMode;
   UINT32       HibernateMask;
+  UINT32       BootProtectFlag;
   EFI_HANDLE   OcHandle;
 
   if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_BOOT_PATH) != 0) {
@@ -473,9 +474,23 @@ OcMiscLateInit (
   BootProtect = OC_BLOB_GET (&Config->Misc.Security.BootProtect);
   DEBUG ((DEBUG_INFO, "OC: LoadHandle %p with BootProtect in %a mode - %r\n", OcHandle, BootProtect, Status));
 
+  BootProtectFlag = Config->Uefi.Quirks.RequestBootVarRouting ? OC_BOOT_PROTECT_VARIABLE_NAMESPACE : 0;
+
   if (OcHandle != NULL && AsciiStrCmp (BootProtect, "Bootstrap") == 0) {
     OcRegisterBootOption (L"OpenCore", OcHandle, OPEN_CORE_BOOTSTRAP_PATH);
+    BootProtectFlag = OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP;
   }
+
+  //
+  // Inform about boot protection.
+  //
+  gRT->SetVariable (
+    OC_BOOT_PROTECT_VARIABLE_NAME,
+    &gOcVendorVariableGuid,
+    OPEN_CORE_INT_NVRAM_ATTR,
+    sizeof (BootProtectFlag),
+    &BootProtectFlag
+    );
 
   *LoadHandle = OcHandle;
 

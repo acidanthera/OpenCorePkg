@@ -15,7 +15,7 @@
 #ifndef OC_SMC_LIB_INTERNAL_H
 #define OC_SMC_LIB_INTERNAL_H
 
-#include <Guid/OcVariables.h>
+#include <Guid/OcVariable.h>
 #include <Protocol/AppleSmcIo.h>
 
 typedef struct {

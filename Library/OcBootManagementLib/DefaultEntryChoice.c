@@ -17,7 +17,7 @@
 #include <Guid/AppleFile.h>
 #include <Guid/AppleVariable.h>
 #include <Guid/GlobalVariable.h>
-#include <Guid/OcVariables.h>
+#include <Guid/OcVariable.h>
 
 #include <Protocol/LoadedImage.h>
 #include <Protocol/OcFirmwareRuntime.h>

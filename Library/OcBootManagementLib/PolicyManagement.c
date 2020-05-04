@@ -21,7 +21,7 @@
 #include <Guid/Gpt.h>
 #include <Guid/FileInfo.h>
 #include <Guid/GlobalVariable.h>
-#include <Guid/OcVariables.h>
+#include <Guid/OcVariable.h>
 
 #include <Protocol/AppleBootPolicy.h>
 #include <Protocol/ApfsEfiBootRecordInfo.h>

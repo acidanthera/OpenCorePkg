@@ -20,7 +20,7 @@
 #include <Guid/AppleVariable.h>
 #include <Guid/FileInfo.h>
 #include <Guid/GlobalVariable.h>
-#include <Guid/OcVariables.h>
+#include <Guid/OcVariable.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
