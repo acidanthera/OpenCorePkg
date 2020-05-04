@@ -321,16 +321,16 @@ InternalContextConstruct (
   }
 
   if (Context->BackgroundColor.Raw == APPLE_COLOR_SYRAH_BLACK) {
-    Context->Light = FALSE;
+    Context->LightBackground = FALSE;
   } else if (Context->BackgroundColor.Raw == APPLE_COLOR_LIGHT_GRAY) {
-    Context->Light = TRUE;
+    Context->LightBackground = TRUE;
   } else {
     //
     // FIXME: Support proper W3C formula.
     //
-    Context->Light = (Context->BackgroundColor.Pixel.Red * 299U
+    Context->LightBackground = (Context->BackgroundColor.Pixel.Red * 299U
       + Context->BackgroundColor.Pixel.Green * 587U
-      + Context->BackgroundColor.Pixel.Blue * 114U) <= 186000;
+      + Context->BackgroundColor.Pixel.Blue * 114U) >= 186000;
   }
 
   Context->BootEntry = NULL;
@@ -381,7 +381,7 @@ InternalContextConstruct (
         Storage,
         mLabelNames[Index],
         Context->Scale,
-        Context->Light,
+        Context->LightBackground,
         &Context->Labels[Index]
         );
     }

@@ -774,7 +774,7 @@ BootPickerEntriesAdd (
         IconFileData,
         IconFileSize,
         GuiContext->Scale,
-        GuiContext->Light
+        GuiContext->LightBackground
         );
     }
   } else {
@@ -825,7 +825,7 @@ BootPickerEntriesAdd (
       &GuiContext->FontContext,
       Entry->Name,
       StrLen (Entry->Name),
-      GuiContext->Light
+      GuiContext->LightBackground
       );
     if (!Result) {
       DEBUG ((DEBUG_WARN, "OCUI: label failed\n"));

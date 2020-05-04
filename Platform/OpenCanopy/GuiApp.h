@@ -78,7 +78,7 @@ typedef struct {
   EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION  BackgroundColor;
   BOOLEAN                              HideAuxiliary;
   BOOLEAN                              Refresh;
-  BOOLEAN                              Light;
+  BOOLEAN                              LightBackground;
   BOOLEAN                              DoneIntroAnimation;
   UINT8                                Scale;
   UINT32                               CursorDefaultX;
