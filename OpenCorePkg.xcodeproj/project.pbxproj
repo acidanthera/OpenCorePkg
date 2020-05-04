@@ -55,7 +55,6 @@
 		35366C0F240C213500D54CBB /* OcRtcLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB1240C213400D54CBB /* OcRtcLib.c */; };
 		35366C10240C213500D54CBB /* AppleEventInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366AB4240C213400D54CBB /* AppleEventInternal.h */; };
 		35366C11240C213500D54CBB /* OcAppleEventLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB5240C213400D54CBB /* OcAppleEventLib.c */; };
-		35366C12240C213500D54CBB /* AppleEvent.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB6240C213400D54CBB /* AppleEvent.c */; };
 		35366C13240C213500D54CBB /* AppleKeyMap.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB7240C213400D54CBB /* AppleKeyMap.c */; };
 		35366C14240C213500D54CBB /* EventQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB8240C213400D54CBB /* EventQueue.c */; };
 		35366C15240C213500D54CBB /* KeyHandler.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB9240C213400D54CBB /* KeyHandler.c */; };
@@ -341,7 +340,6 @@
 		35366AB3240C213400D54CBB /* OcAppleEventLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleEventLib.inf; sourceTree = "<group>"; };
 		35366AB4240C213400D54CBB /* AppleEventInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppleEventInternal.h; sourceTree = "<group>"; };
 		35366AB5240C213400D54CBB /* OcAppleEventLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleEventLib.c; sourceTree = "<group>"; };
-		35366AB6240C213400D54CBB /* AppleEvent.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AppleEvent.c; sourceTree = "<group>"; };
 		35366AB7240C213400D54CBB /* AppleKeyMap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AppleKeyMap.c; sourceTree = "<group>"; };
 		35366AB8240C213400D54CBB /* EventQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = EventQueue.c; sourceTree = "<group>"; };
 		35366AB9240C213400D54CBB /* KeyHandler.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = KeyHandler.c; sourceTree = "<group>"; };
@@ -912,7 +910,6 @@
 				35366AB3240C213400D54CBB /* OcAppleEventLib.inf */,
 				35366AB4240C213400D54CBB /* AppleEventInternal.h */,
 				35366AB5240C213400D54CBB /* OcAppleEventLib.c */,
-				35366AB6240C213400D54CBB /* AppleEvent.c */,
 				35366AB7240C213400D54CBB /* AppleKeyMap.c */,
 				35366AB8240C213400D54CBB /* EventQueue.c */,
 				35366AB9240C213400D54CBB /* KeyHandler.c */,
@@ -1898,7 +1895,6 @@
 				35366C1B240C213500D54CBB /* OcHashServicesLib.c in Sources */,
 				35366C30240C213500D54CBB /* Math.c in Sources */,
 				35366CD1240C213500D54CBB /* MsvcMath32.c in Sources */,
-				35366C12240C213500D54CBB /* AppleEvent.c in Sources */,
 				35366CA6240C213500D54CBB /* OcLog.c in Sources */,
 				35366CB5240C213500D54CBB /* Link.c in Sources */,
 				35366C54240C213500D54CBB /* AppleHibernate.c in Sources */,
@@ -2074,6 +2070,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					MACH_LITTLE_ENDIAN,
 					OC_TARGET_RELEASE,
+					NO_MSABI_VA_FUNCS,
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/UDK/MdePkg/Include/X64",
@@ -2109,6 +2106,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					MACH_LITTLE_ENDIAN,
 					OC_TARGET_RELEASE,
+					NO_MSABI_VA_FUNCS,
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/UDK/MdePkg/Include/X64",
