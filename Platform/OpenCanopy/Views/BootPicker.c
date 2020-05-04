@@ -418,8 +418,13 @@ InternalBootPickerEntryDraw (
   //
   // Draw the label horizontally centered.
   //
+
+  //
+  // FIXME: Apple allows the label to be up to 340px wide,
+  // but OpenCanopy can't display it now (it would overlap adjacent entries)
+  //
   //ASSERT (Label->Width  <= BOOT_ENTRY_DIMENSION * DrawContext->Scale);
-  ASSERT_EQUALS (Label->Height, BOOT_ENTRY_LABEL_HEIGHT * DrawContext->Scale);
+  ASSERT (Label->Height <= BOOT_ENTRY_LABEL_HEIGHT * DrawContext->Scale);
 
   GuiDrawChildImage (
     Label,

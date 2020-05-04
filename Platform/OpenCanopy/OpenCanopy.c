@@ -68,7 +68,7 @@ STATIC GUI_DRAW_REQUEST              mDrawRequests[4]   = { { 0 } };
 // Disk label palette.
 //
 CONST UINT8
-mAppleDiskLabelImagePalette[256] = {
+gAppleDiskLabelImagePalette[256] = {
   [0x00] = 255,
   [0xf6] = 238,
   [0xf7] = 221,
@@ -1429,14 +1429,14 @@ GuiLabelToImage (
       Image->Buffer[PixelIdx].Blue     = 0;
       Image->Buffer[PixelIdx].Green    = 0;
       Image->Buffer[PixelIdx].Red      = 0;
-      Image->Buffer[PixelIdx].Reserved = 255 -  mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Reserved = 255 -  gAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
     }
   } else {
     for (PixelIdx = 0; PixelIdx < Image->Width * Image->Height; PixelIdx++) {
-      Image->Buffer[PixelIdx].Blue     = 255 -  mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-      Image->Buffer[PixelIdx].Green    = 255 -  mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-      Image->Buffer[PixelIdx].Red      = 255 -  mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-      Image->Buffer[PixelIdx].Reserved = 255 -  mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Blue     = 255 -  gAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Green    = 255 -  gAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Red      = 255 -  gAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Reserved = 255 -  gAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
     }
   }
 
