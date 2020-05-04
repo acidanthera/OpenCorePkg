@@ -411,7 +411,7 @@ BmfContextInitialize (
     return FALSE;
   }
 
-  Context->Height  = (UINT16) Height;
+  Context->Height  = Context->Common->lineHeight;
   Context->OffsetY = -MinY;
 
   Pairs = Context->KerningPairs;
