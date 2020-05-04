@@ -84,6 +84,9 @@ BmfGetKerningPair (
   ASSERT (Context != NULL);
 
   Pairs = Context->KerningPairs;
+
+  if (Pairs == NULL)
+    return NULL;
   //
   // Binary Search for the first character as the list is sorted.
   //
@@ -301,13 +304,23 @@ BmfContextInitialize (
     Block = (CONST BMF_BLOCK_HEADER *)((UINTN)(Block + 1) + Block->size);
   }
 
-  if (Context->Info         == NULL
-   || Context->Common       == NULL
-   || Context->Pages        == NULL
-   || Context->Chars        == NULL
-   || Context->KerningPairs == NULL
-    ) {
-    DEBUG ((DEBUG_WARN, "BMF: Missing block\n"));
+  if (Context->Info         == NULL) {
+    DEBUG ((DEBUG_WARN, "BMF: Missing Info block\n"));
+    return FALSE;
+  }
+
+  if (Context->Common       == NULL) {
+    DEBUG ((DEBUG_WARN, "BMF: Missing Common block\n"));
+    return FALSE;
+  }
+
+  if (Context->Pages        == NULL) {
+    DEBUG ((DEBUG_WARN, "BMF: Missing Pages block\n"));
+    return FALSE;
+  }
+
+  if (Context->Chars        == NULL) {
+    DEBUG ((DEBUG_WARN, "BMF: Missing Chars block\n"));
     return FALSE;
   }
 
@@ -402,64 +415,67 @@ BmfContextInitialize (
   Context->OffsetY = -MinY;
 
   Pairs = Context->KerningPairs;
-  for (Index = 0; Index < Context->NumKerningPairs; ++Index) {
-    Char = BmfGetChar (Context, Pairs[Index].first);
-    if (Char == NULL) {
-      DEBUG ((
-        DEBUG_WARN,
-        "BMF: Pair char %u not found\n",
-        Pairs[Index].first
-        ));
-      return FALSE;
-    }
-
-    Result = OcOverflowAddS32 (
-               Char->xoffset + Char->width,
-               Pairs[Index].amount,
-               &Width
-               );
-    Result |= OcOverflowAddS32 (
-                Char->xoffset + Char->xadvance,
-                Pairs[Index].amount,
-                &Advance
-                );
-    if (Result
-     || 0 > Width || Width > MAX_UINT16
-     || 0 > Advance || Advance > MAX_UINT16) {
-       DEBUG ((
-         DEBUG_WARN,
-         "BMF: Pair insane\n"
-         " first %u\n"
-         " second %u\n"
-         " amount %d\n",
-         Pairs[Index].first,
-         Pairs[Index].second,
-         Pairs[Index].amount
-         ));
-      return FALSE;
-    }
-    //
-    // This only yields unexpected but not undefined behaviour when not met,
-    // hence it is fine verifying it only DEBUG mode.
-    //
-    DEBUG_CODE_BEGIN ();
-    if (Index > 0) {
-      if (Pairs[Index - 1].first > Pairs[Index].first) {
-        DEBUG ((DEBUG_WARN, "BMF: First Character IDs are not sorted\n"));
+  if (Pairs != NULL) { // According to the docs, kerning pairs are optional
+    for (Index = 0; Index < Context->NumKerningPairs; ++Index) {
+      Char = BmfGetChar (Context, Pairs[Index].first);
+      if (Char == NULL) {
+        DEBUG ((
+          DEBUG_WARN,
+          "BMF: Pair char %u not found\n",
+          Pairs[Index].first
+          ));
         return FALSE;
       }
 
-      if (Pairs[Index - 1].first == Pairs[Index].first) {
-        if (Pairs[Index - 1].second > Pairs[Index].second) {
-          DEBUG ((DEBUG_WARN, "BMF: Second Character IDs are not sorted\n"));
-          return FALSE;
-        } else if (Pairs[Index - 1].second == Pairs[Index].second) {
-          DEBUG ((DEBUG_WARN, "BMF: Second Character ID duplicate\n"));
+      Result = OcOverflowAddS32 (
+                 Char->xoffset + Char->width,
+                 Pairs[Index].amount,
+                 &Width
+                 );
+      Result |= OcOverflowAddS32 (
+                  Char->xoffset + Char->xadvance,
+                  Pairs[Index].amount,
+                  &Advance
+                  );
+      if (Result
+       || 0 > Width || Width > MAX_UINT16
+       || 0 > Advance || Advance > MAX_UINT16) {
+         DEBUG ((
+           DEBUG_WARN,
+           "BMF: Pair at index %d insane\n"
+           " first %u\n"
+           " second %u\n"
+           " amount %d\n",
+           Index,
+           Pairs[Index].first,
+           Pairs[Index].second,
+           Pairs[Index].amount
+           ));
+        return FALSE;
+      }
+      //
+      // This only yields unexpected but not undefined behaviour when not met,
+      // hence it is fine verifying it only DEBUG mode.
+      //
+      DEBUG_CODE_BEGIN ();
+      if (Index > 0) {
+        if (Pairs[Index - 1].first > Pairs[Index].first) {
+          DEBUG ((DEBUG_WARN, "BMF: First Character IDs are not sorted\n"));
           return FALSE;
         }
+
+        if (Pairs[Index - 1].first == Pairs[Index].first) {
+          if (Pairs[Index - 1].second > Pairs[Index].second) {
+            DEBUG ((DEBUG_WARN, "BMF: Second Character IDs are not sorted\n"));
+            return FALSE;
+          } else if (Pairs[Index - 1].second == Pairs[Index].second) {
+            DEBUG ((DEBUG_WARN, "BMF: Second Character ID duplicate\n"));
+            return FALSE;
+          }
+        }
       }
+      DEBUG_CODE_END ();
     }
-    DEBUG_CODE_END ();
   }
 
   return TRUE;
