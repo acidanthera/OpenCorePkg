@@ -162,18 +162,20 @@ OcStrStrLength (
     return NULL;
   }
 
-  Y = (CONST CHAR16 *) String;
-  X = (CONST CHAR16 *) SearchString;
-
-  if (X[0] == X[1]) {
-    Index2 = 2;
-    Index3 = 1;
-  } else {
-    Index2 = 1;
-    Index3 = 2;
-  }
-
   if (SearchStringLength > 1) {
+    Index = 0;
+
+    Y = (CONST CHAR16 *) String;
+    X = (CONST CHAR16 *) SearchString;
+
+    if (X[0] == X[1]) {
+      Index2 = 2;
+      Index3 = 1;
+    } else {
+      Index2 = 1;
+      Index3 = 2;
+    }
+
     while (Index <= StringLength - SearchStringLength) {
       if (X[1] != Y[Index+1]) {
         Index += Index2;
