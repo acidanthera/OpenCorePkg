@@ -199,7 +199,7 @@ typedef struct {
   into pool allocated buffer.
 
   @param[in]      File           File handle instance.
-  @param[in, out] Kernel         Resulting non-fat kernel buffer from pool.
+  @param[in,out]  Kernel         Resulting non-fat kernel buffer from pool.
   @param[out]     KernelSize     Actual kernel size.
   @param[out]     AllocatedSize  Allocated kernel size (AllocatedSize >= KernelSize).
   @param[in]      ReservedSize   Allocated extra size for added kernel extensions.

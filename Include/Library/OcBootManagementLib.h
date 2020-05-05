@@ -997,7 +997,7 @@ OcGetArgumentFromCmd (
 /**
   Remove argument from command line if present.
 
-  @param[in, out] CommandLine  Argument command line, e.g. for boot.efi.
+  @param[in,out]  CommandLine  Argument command line, e.g. for boot.efi.
   @param[in]      Argument     Argument, e.g. -v, slide=, debug=, etc.
 **/
 VOID
@@ -1009,8 +1009,8 @@ OcRemoveArgumentFromCmd (
 /**
   Append argument to command line without deduplication.
 
-  @param[in, out] Context         Picker context. NULL, if a privilege escalation is not required.
-  @param[in, out] CommandLine     Argument command line of BOOT_LINE_LENGTH bytes.
+  @param[in,out]  Context         Picker context. NULL, if a privilege escalation is not required.
+  @param[in,out]  CommandLine     Argument command line of BOOT_LINE_LENGTH bytes.
   @param[in]      Argument        Argument, e.g. -v, slide=0, debug=0x100, etc.
   @param[in]      ArgumentLength  Argument length, e.g. L_STR_LEN ("-v").
 

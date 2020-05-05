@@ -32,7 +32,7 @@
   @param[in]      FileBuffer       Pointer to the file's data.
   @param[in]      FileSize         File size of FileData.
   @param[in]      ModificationTime File modification date, optional.
-  @param[in, out] File             Resulting file protocol.
+  @param[in,out]  File             Resulting file protocol.
 
   @return  EFI_SUCCESS if instance was successfully created.
 **/
@@ -53,7 +53,7 @@ CreateVirtualFile (
   @param[in]      OriginalFile     Pointer to the original file.
   @param[in]      OpenCallback     File open callback.
   @param[in]      CloseOnFailure   Close the original file on failure.
-  @param[in, out] File             Resulting file protocol.
+  @param[in,out]  File             Resulting file protocol.
 
   @return  EFI_SUCCESS if instance was successfully created.
   @return  EFI_SIMPLE_FILE_SYSTEM Open-compatible error return code.
@@ -72,7 +72,7 @@ CreateRealFile (
 
   @param[in]       OriginalFileSystem  Source file system.
   @param[in]       OpenCallback        File open callback.
-  @param[in, out]  NewFileSystem       Wrapped file system.
+  @param[in,out]   NewFileSystem       Wrapped file system.
 
   @return  EFI_SUCCESS on successful wrapping.
 **/
@@ -87,7 +87,7 @@ CreateVirtualFs (
   Enables virtual file system access for given BootServices
   with callback on file open.
 
-  @param[in, out] BootServices  Hooked EFI_BOOT_SERVICES.
+  @param[in,out]  BootServices  Hooked EFI_BOOT_SERVICES.
   @param[in]      OpenCallback  File open callback.
 
   @return  EFI_SUCCESS on successful hooking.
@@ -101,7 +101,7 @@ EnableVirtualFs (
 /**
   Enables virtual file system access for given BootServices.
 
-  @param[in, out] BootServices  Hooked EFI_BOOT_SERVICES.
+  @param[in,out]  BootServices  Hooked EFI_BOOT_SERVICES.
 
   @return  EFI_SUCCESS on successful unhooking.
 **/

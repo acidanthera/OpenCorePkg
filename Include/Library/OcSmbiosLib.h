@@ -174,7 +174,7 @@ OcSmbiosTablePrepare (
 /**
   Free SMBIOS table
 
-  @param[in, out]  Table  Current table buffer.
+  @param[in,out]   Table  Current table buffer.
 
   @retval EFI_SUCCESS on success
 **/

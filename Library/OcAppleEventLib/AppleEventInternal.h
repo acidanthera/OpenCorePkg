@@ -38,7 +38,7 @@ EventCancelKeyStrokePollEvent (
 // EventIsCapsLockOnImpl
 /** Retrieves the state of the CapsLock key.
 
-  @param[in, out] CLockOn  This parameter indicates the state of the CapsLock
+  @param[in,out]  CLockOn  This parameter indicates the state of the CapsLock
                            key.
 
   @retval EFI_SUCCESS            The CapsLock state was successfully returned
