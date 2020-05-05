@@ -632,27 +632,6 @@ BlendMem (
   }
 }
 
-STATIC CONST UINT8 mAppleDiskLabelImageClut[] = {
-  0x00, /* 0x00 0x00 0x00 white */
-  0xF6, /* 0x11 0x11 0x11 */
-  0xF7, /* 0x22 0x22 0x22 */
-  0x2A, /* 0x33 = 1*6^2 + 1*6 + 1 = 43 colors */
-  0xF8, /* 0x44 */
-  0xF9, /* 0x55 */
-  0x55, /* 0x66 = 2*(36 + 6 + 1) = 86 colors */
-  0xFA, /* 0x77 */
-  0xFB, /* 0x88 */
-  0x80, /* 0x99 = (3*43) = 129 colors*/
-  0xFC, /* 0xAA */
-  0xFD, /* 0xBB */
-  0xAB, /* 0xCC = 4*43 = 172 colors */
-  0xFE, /* 0xDD */
-  0xFF, /* 0xEE */
-  0xD6, /* 0xFF = 5*43 = 215 */
-};
-
-extern CONST UINT8 gAppleDiskLabelImagePalette[256];
-
 BOOLEAN
 GuiGetLabel (
   OUT GUI_IMAGE               *LabelImage,
@@ -740,15 +719,6 @@ GuiGetLabel (
 
     InitialCharX       = 0;
     InitialWidthOffset = 0;
-  }
-
-  //
-  // Apply palette because Apple does it with stored labels
-  //
-  for (Index = 0; Index < (UINT32) TextInfo->Width * (UINT32) TextInfo->Height; Index++) {
-    Buffer[Index].Blue  = 255 - gAppleDiskLabelImagePalette[mAppleDiskLabelImageClut[Buffer[Index].Blue  >> 4U]];
-    Buffer[Index].Green = 255 - gAppleDiskLabelImagePalette[mAppleDiskLabelImageClut[Buffer[Index].Green >> 4U]];
-    Buffer[Index].Red   = 255 - gAppleDiskLabelImagePalette[mAppleDiskLabelImageClut[Buffer[Index].Red   >> 4U]];
   }
 
   LabelImage->Width  = TextInfo->Width;

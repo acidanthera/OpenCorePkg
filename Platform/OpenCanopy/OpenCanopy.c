@@ -67,6 +67,7 @@ STATIC GUI_DRAW_REQUEST              mDrawRequests[4]   = { { 0 } };
 //
 // Disk label palette.
 //
+STATIC
 CONST UINT8
 gAppleDiskLabelImagePalette[256] = {
   [0x00] = 255,
