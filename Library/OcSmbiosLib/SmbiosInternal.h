@@ -111,7 +111,7 @@ typedef struct OC_SMBIOS_MAPPING_ {
 /**
   Allocate bytes in SMBIOS table if necessary
 
-  @param[in, out]  Table  Current table buffer.
+  @param[in,out]   Table  Current table buffer.
   @param[in]       Size   Amount of free bytes needed.
 
   @retval EFI_SUCCESS on success
@@ -125,10 +125,9 @@ SmbiosExtendTable (
 /**
   Write override string to SMBIOS table
 
-  @param[in, out]  Table     Current table buffer.
+  @param[in,out]   Table     Current table buffer.
   @param[in]       Override  String data override.
-  @param[in, out]  Index     Pointer to current string index, incremented on success.
-  @param[in]       Safe      Filter certain characters.
+  @param[in,out]   Index     Pointer to current string index, incremented on success.
 
   @retval assigned string index or 0
 **/
@@ -181,16 +180,16 @@ SmbiosFinaliseStruct (
 CHAR8 *
 SmbiosGetString (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  SmbiosTable,
-  IN SMBIOS_TABLE_STRING             String
+  IN SMBIOS_TABLE_STRING             StringIndex
   );
 
 /**
   Write string to SMBIOS structure
 
-  @param[in, out] Buffer        Pointer to location containing the current address within the buffer.
+  @param[in,out]  Buffer        Pointer to location containing the current address within the buffer.
   @param[in]      String        Buffer containing the null terminated ascii string.
   @param[in]      Length        String length to write.
-  @param[in, out] Index         Pointer to current string index, incremented on success.
+  @param[in,out]  Index         Pointer to current string index, incremented on success.
 
   @retval assigned string index or 0
 **/

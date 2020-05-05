@@ -128,7 +128,7 @@ InternalMatchCodecDevicePath (
         &gEfiAudioIoProtocolGuid,
         (VOID **) &Private->AudioIo
         );
-      return EFI_SUCCESS;
+      return Status;
     }
   }
 
@@ -172,7 +172,6 @@ InternalOcAudioConnect (
       );
 
     if (!EFI_ERROR (Status)) {
-      Status     = EFI_NOT_FOUND;
       DevicePath = OcAudioGetCodecDevicePath (DevicePath, CodecAddress);
       if (DevicePath == NULL) {
         DEBUG ((DEBUG_INFO, "OCAU: Cannot get full device path\n"));

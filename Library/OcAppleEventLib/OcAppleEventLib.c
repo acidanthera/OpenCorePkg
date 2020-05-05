@@ -430,7 +430,7 @@ EventSetCursorPosition (
 // EventSetEventName
 /** This function is used to assign a name to an event.
 
-  @param[in, out] Handle
+  @param[in,out]  Handle
   @param[in]      Name
 
   @retval EFI_SUCCESS            The event name was assigned successfully.
@@ -473,7 +473,7 @@ EventSetEventName (
 // EventIsCapsLockOnImpl
 /** Retrieves the state of the CapsLock key.
 
-  @param[in, out] CLockOn  This parameter indicates the state of the CapsLock
+  @param[in,out]  CLockOn  This parameter indicates the state of the CapsLock
                            key.
 
   @retval EFI_SUCCESS            The CapsLock state was successfully returned

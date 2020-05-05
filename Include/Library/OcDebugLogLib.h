@@ -55,7 +55,7 @@
   Install or update the OcLog protocol with specified options.
 
   @param[in] Options       Logging options.
-  @param[in] Delay         Delay in microseconds after each log entry.
+  @param[in] DisplayDelay         Delay in microseconds after each log entry.
   @param[in] DisplayLevel  Console visible error level.
   @param[in] HaltLevel     Error level causing CPU halt.
   @param[in] LogPrefixPath Log path (without timestamp).

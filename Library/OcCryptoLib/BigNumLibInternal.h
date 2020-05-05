@@ -65,7 +65,7 @@ BigNumWordMul (
 VOID
 BigNumSub (
   IN OUT OC_BN_WORD        *Result,
-  IN     OC_BN_NUM_WORDS   NumWordsResult,
+  IN     OC_BN_NUM_WORDS   NumWords,
   IN     CONST OC_BN_WORD  *A,
   IN     CONST OC_BN_WORD  *B
   );

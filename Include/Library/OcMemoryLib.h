@@ -287,7 +287,7 @@ OcPrintMemoryMap (
   @param[in]  DescriptorSize  Memory map descriptor size in bytes.
   @param[in]  Address         Address contained in the updated entry.
   @param[in]  Type            Memory type to assign to the entry.
-  @param[in]  SetAttribues    Attributes to set.
+  @param[in]  SetAttributes    Attributes to set.
   @param[in]  DropAttributes  Attributes to remove.
 
   @retval EFI_SUCCESS on success.

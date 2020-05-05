@@ -924,7 +924,7 @@ OcLoadPickerHotKeys (
 
   @param[in,out]  Context      Picker context.
   @param[in]      KeyMap       Apple Key Map Aggregator protocol.
-  @param[in]      Time         Timeout to wait for in milliseconds.
+  @param[in]      Timeout      Timeout to wait for in milliseconds.
   @param[in]      PollHotkeys  Poll key combinations.
   @param[out]     SetDefault   Set boot option as default, optional.
 
@@ -995,7 +995,7 @@ OcGetBootDevicePathType (
 /**
   Get loaded image protocol for Apple bootloader.
 
-  @param[in]  Handle        Image handle.
+  @param[in]  ImageHandle        Image handle.
 
   @retval loaded image protocol or NULL for non Apple images.
 **/
@@ -1035,7 +1035,7 @@ OcParseBootArgs (
 /**
   Check if boot argument is currently passed (via image options or NVRAM).
 
-  @param[in]  LoadImage    UEFI loaded image protocol instance, optional.
+  @param[in]  LoadedImage    UEFI loaded image protocol instance, optional.
   @param[in]  GetVariable  Preferred UEFI NVRAM reader, optional.
   @param[in]  Argument        Argument, e.g. -v, slide=, debug=, etc.
   @param[in]  ArgumentLength  Argument length, e.g. L_STR_LEN ("-v").
@@ -1069,7 +1069,7 @@ OcGetArgumentFromCmd (
 /**
   Remove argument from command line if present.
 
-  @param[in, out] CommandLine  Argument command line, e.g. for boot.efi.
+  @param[in,out]  CommandLine  Argument command line, e.g. for boot.efi.
   @param[in]      Argument     Argument, e.g. -v, slide=, debug=, etc.
 **/
 VOID
@@ -1081,8 +1081,8 @@ OcRemoveArgumentFromCmd (
 /**
   Append argument to command line without deduplication.
 
-  @param[in, out] Context         Picker context. NULL, if a privilege escalation is not required.
-  @param[in, out] CommandLine     Argument command line of BOOT_LINE_LENGTH bytes.
+  @param[in,out]  Context         Picker context. NULL, if a privilege escalation is not required.
+  @param[in,out]  CommandLine     Argument command line of BOOT_LINE_LENGTH bytes.
   @param[in]      Argument        Argument, e.g. -v, slide=0, debug=0x100, etc.
   @param[in]      ArgumentLength  Argument length, e.g. L_STR_LEN ("-v").
 

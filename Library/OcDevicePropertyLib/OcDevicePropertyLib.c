@@ -232,7 +232,7 @@ InternalSyncWithThunderboltDevices (
   @param[in]      Name        The Name of the requested property.
   @param[out]     Value       The Buffer allocated by the caller to return the
                               value of the property into.
-  @param[in, out] Size        On input the size of the allocated Value Buffer.
+  @param[in,out]  Size        On input the size of the allocated Value Buffer.
                               On output the size required to fill the Buffer.
 
   @return                       The status of the operation is returned.
@@ -461,7 +461,7 @@ DppDbRemoveProperty (
   @param[in]      This    A pointer to the protocol instance.
   @param[out]     Buffer  The Buffer allocated by the caller to return the
                           property Buffer into.
-  @param[in, out] Size    On input the size of the allocated Buffer.
+  @param[in,out]  Size    On input the size of the allocated Buffer.
                           On output the size required to fill the Buffer.
 
   @return                       The status of the operation is returned.

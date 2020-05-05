@@ -316,7 +316,7 @@ OcKeyMapFlush (
   @param[in]      This          A pointer to the protocol instance.
   @param[in]      Modifiers     The modifiers manipulating the given keys.
   @param[in]      NumberOfKeyCodes  The number of keys present in KeyCodes.
-  @param[in, out] KeyCodes          The list of keys to check for.  The children
+  @param[in,out]  KeyCodes          The list of keys to check for.  The children
                                 may be sorted in the process.
   @param[in]      ExactMatch    Specifies whether Modifiers and KeyCodes should be
                                 exact matches or just contained.

@@ -894,11 +894,11 @@ AppleSbVerifyWindowsByPath (
 }
 
 /**
-  Verify the signature of ImageBuffer against a Microsoft certificate chain.
+  Verify the signature of TargetBuffer against a Microsoft certificate chain.
 
   @param[in] This              The pointer to the current protocol instance.
-  @param[in] ImageBuffer       The buffer to validate.
-  @param[in] ImageSize         The size, in bytes, of ImageBuffer.
+  @param[in] TargetBuffer       The buffer to validate.
+  @param[in] TargetSize        The size, in bytes, of TargetBuffer.
   @param[in] SetFailureReason  Whether to set the failure reason.
 
   @retval EFI_SUCCESS             ImageBuffer is correctly signed.
@@ -907,7 +907,7 @@ AppleSbVerifyWindowsByPath (
   @retval EFI_UNSUPPORTED         Secure Boot is currently unavailable or
                                   disabled.
   @retval EFI_ACCESS DENIED       A suiting certificate could not be found.
-  @retval EFI_SECURITY_VIOLATION  ImageBuffer's signature is invalid.
+  @retval EFI_SECURITY_VIOLATION  TargetBuffer's signature is invalid.
 
 **/
 STATIC
