@@ -348,11 +348,7 @@ AddBootEntryOnFileSystem (
 
   DEBUG_CODE_BEGIN ();
 
-  if (DevicePath != NULL) {
-    TextDevicePath = ConvertDevicePathToText (DevicePath, TRUE, FALSE);
-  } else {
-    TextDevicePath = NULL;
-  }
+  TextDevicePath = ConvertDevicePathToText (DevicePath, TRUE, FALSE);
 
   DEBUG ((
     DEBUG_INFO,
@@ -645,6 +641,7 @@ AddBootEntryFromBless (
   )
 {
   EFI_STATUS                       Status;
+  EFI_STATUS                       PrimaryStatus;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *SimpleFs;
   EFI_DEVICE_PATH_PROTOCOL         *DevicePath;
   EFI_DEVICE_PATH_PROTOCOL         *DevicePathWalker;
@@ -775,16 +772,16 @@ AddBootEntryFromBless (
     //
     // Add blessed device path.
     //
-    Status = AddBootEntryOnFileSystem (
+    PrimaryStatus = AddBootEntryOnFileSystem (
       BootContext,
       FileSystem,
       NewDevicePath,
       FALSE,
       Deduplicate
       );
-    if (EFI_ERROR (Status)) {
-      FreePool (NewDevicePath);
-    }
+    //
+    // Cannot free the failed device path now as it may have recovery.
+    //
 
     //
     // If the partition contains recovery on itself or recoveries are not requested,
@@ -796,6 +793,10 @@ AddBootEntryFromBless (
     // on the partition no more than once.
     //
     if (FileSystem->HasSelfRecovery || BootContext->PickerContext->HideAuxiliary) {
+      if (EFI_ERROR (PrimaryStatus)) {
+        FreePool (NewDevicePath);
+      }
+      Status = PrimaryStatus;
       continue;
     }
 
@@ -810,6 +811,14 @@ AddBootEntryFromBless (
       &RecoveryRoot,
       &RecoveryDeviceHandle
       );
+
+    //
+    // Can free the failed primary device path now.
+    //
+    if (EFI_ERROR (PrimaryStatus)) {
+      FreePool (NewDevicePath);
+    }
+
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCB: APFS recovery is not present - %r\n", Status));
       continue;
