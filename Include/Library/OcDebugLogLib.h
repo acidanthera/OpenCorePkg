@@ -23,6 +23,12 @@
 #define OC_HEX_UPPER(x) "0123456789ABCDEF"[((UINT32) (x) & 0xF0U) >> 4U]
 
 /**
+  Expand device path to human readable string.
+**/
+#define OC_HUMAN_STRING(TextDevicePath) \
+  ((TextDevicePath) == NULL ? L"<nil>" : (TextDevicePath)[0] == '\0' ? L"<empty>" : (TextDevicePath))
+
+/**
   Debug information that is not logged when NVRAM logging is on.
 **/
 #ifndef DEBUG_BULK_INFO

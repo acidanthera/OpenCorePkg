@@ -780,8 +780,10 @@ GuiFontDestruct (
   ASSERT (Context != NULL);
   if (Context->FontImage.Buffer != NULL) {
     FreePool (Context->FontImage.Buffer);
+    Context->FontImage.Buffer = NULL;
   }
   if (Context->KerningData != NULL) {
     FreePool (Context->KerningData);
+    Context->KerningData = NULL;
   }
 }

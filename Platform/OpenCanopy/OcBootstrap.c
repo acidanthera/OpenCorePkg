@@ -37,10 +37,8 @@ mDrawContext;
 EFI_STATUS
 EFIAPI
 OcShowMenuByOc (
-  IN     OC_PICKER_CONTEXT        *Context,
-  IN     OC_BOOT_ENTRY            *BootEntries,
-  IN     UINTN                    Count,
-  IN     UINTN                    DefaultEntry,
+  IN     OC_BOOT_CONTEXT          *BootContext,
+  IN     OC_BOOT_ENTRY            **BootEntries,
   OUT    OC_BOOT_ENTRY            **ChosenBootEntry
   )
 {
@@ -49,7 +47,7 @@ OcShowMenuByOc (
 
   *ChosenBootEntry = NULL;
   mGuiContext.BootEntry = NULL;
-  mGuiContext.HideAuxiliary = Context->HideAuxiliary;
+  mGuiContext.HideAuxiliary = BootContext->PickerContext->HideAuxiliary;
   mGuiContext.Refresh = FALSE;
 
   Status = GuiLibConstruct (
@@ -70,20 +68,20 @@ OcShowMenuByOc (
     return Status;
   }
 
-  for (Index = 0; Index < Count; ++Index) {
+  for (Index = 0; Index < BootContext->BootEntryCount; ++Index) {
     Status = BootPickerEntriesAdd (
-               Context,
-               &mGuiContext,
-               &BootEntries[Index],
-               Index == DefaultEntry
-               );
+      BootContext->PickerContext,
+      &mGuiContext,
+      BootEntries[Index],
+      Index == BootContext->DefaultEntry->EntryIndex - 1
+      );
     if (EFI_ERROR (Status)) {
       GuiLibDestruct ();
       return Status;
     }
   }
 
-  GuiDrawLoop (&mDrawContext, Context->TimeoutSeconds);
+  GuiDrawLoop (&mDrawContext, BootContext->PickerContext->TimeoutSeconds);
   ASSERT (mGuiContext.BootEntry != NULL || mGuiContext.Refresh);
 
   //
@@ -94,7 +92,7 @@ OcShowMenuByOc (
   GuiLibDestruct ();
 
   *ChosenBootEntry = mGuiContext.BootEntry;
-  Context->HideAuxiliary = mGuiContext.HideAuxiliary;
+  BootContext->PickerContext->HideAuxiliary = mGuiContext.HideAuxiliary;
   if (mGuiContext.Refresh) {
     return EFI_ABORTED;
   }

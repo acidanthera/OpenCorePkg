@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <OpenCore.h>
 
-#include <Guid/OcVariables.h>
+#include <Guid/OcVariable.h>
 
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
@@ -445,7 +445,7 @@ EFI_STATUS
 OcMiscLateInit (
   IN  OC_GLOBAL_CONFIG          *Config,
   IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath  OPTIONAL,
-  OUT EFI_HANDLE                *LoadHandle OPTIONAL
+  OUT EFI_HANDLE                *LoadHandle
   )
 {
   EFI_STATUS   Status;
@@ -453,6 +453,7 @@ OcMiscLateInit (
   CONST CHAR8  *BootProtect;
   CONST CHAR8  *HibernateMode;
   UINT32       HibernateMask;
+  UINT32       BootProtectFlag;
   EFI_HANDLE   OcHandle;
 
   if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_BOOT_PATH) != 0) {
@@ -473,20 +474,25 @@ OcMiscLateInit (
   BootProtect = OC_BLOB_GET (&Config->Misc.Security.BootProtect);
   DEBUG ((DEBUG_INFO, "OC: LoadHandle %p with BootProtect in %a mode - %r\n", OcHandle, BootProtect, Status));
 
+  BootProtectFlag = Config->Uefi.Quirks.RequestBootVarRouting ? OC_BOOT_PROTECT_VARIABLE_NAMESPACE : 0;
+
   if (OcHandle != NULL && AsciiStrCmp (BootProtect, "Bootstrap") == 0) {
     OcRegisterBootOption (L"OpenCore", OcHandle, OPEN_CORE_BOOTSTRAP_PATH);
+    BootProtectFlag = OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP;
   }
 
   //
-  // Do not disclose self entry unless asked.
+  // Inform about boot protection.
   //
-  if (LoadHandle != NULL) {
-    if (Config->Misc.Boot.HideSelf) {
-      *LoadHandle = OcHandle;
-    } else {
-      *LoadHandle = NULL;
-    }
-  }
+  gRT->SetVariable (
+    OC_BOOT_PROTECT_VARIABLE_NAME,
+    &gOcVendorVariableGuid,
+    OPEN_CORE_INT_NVRAM_ATTR,
+    sizeof (BootProtectFlag),
+    &BootProtectFlag
+    );
+
+  *LoadHandle = OcHandle;
 
   HibernateMode = OC_BLOB_GET (&Config->Misc.Boot.HibernateMode);
 
@@ -520,7 +526,7 @@ OcMiscBoot (
   IN  OC_PRIVILEGE_CONTEXT      *Privilege OPTIONAL,
   IN  OC_IMAGE_START            StartImage,
   IN  BOOLEAN                   CustomBootGuid,
-  IN  EFI_HANDLE                LoadHandle OPTIONAL
+  IN  EFI_HANDLE                LoadHandle
   )
 {
   EFI_STATUS             Status;
@@ -635,22 +641,23 @@ OcMiscBoot (
     Context->CustomBootPaths    = BlessOverride;
   }
 
-  Context->ScanPolicy         = Config->Misc.Security.ScanPolicy;
-  Context->LoadPolicy         = OC_LOAD_DEFAULT_POLICY;
-  Context->TimeoutSeconds     = Config->Misc.Boot.Timeout;
-  Context->TakeoffDelay       = Config->Misc.Boot.TakeoffDelay;
-  Context->StartImage         = StartImage;
-  Context->CustomBootGuid     = CustomBootGuid;
-  Context->ExcludeHandle      = LoadHandle;
-  Context->CustomEntryContext = Storage;
-  Context->CustomRead         = OcToolLoadEntry;
-  Context->CustomDescribe     = OcToolDescribeEntry;
-  Context->PrivilegeContext   = Privilege;
-  Context->RequestPrivilege   = OcShowSimplePasswordRequest;
-  Context->ShowMenu           = OcShowSimpleBootMenu;
-  Context->PickerMode         = PickerMode;
-  Context->ConsoleAttributes  = Config->Misc.Boot.ConsoleAttributes;
-  Context->PickerAttributes   = Config->Misc.Boot.PickerAttributes;
+  Context->ScanPolicy            = Config->Misc.Security.ScanPolicy;
+  Context->LoadPolicy            = OC_LOAD_DEFAULT_POLICY;
+  Context->TimeoutSeconds        = Config->Misc.Boot.Timeout;
+  Context->TakeoffDelay          = Config->Misc.Boot.TakeoffDelay;
+  Context->StartImage            = StartImage;
+  Context->CustomBootGuid        = CustomBootGuid;
+  Context->BlacklistAppleUpdate  = Config->Misc.Security.BlacklistAppleUpdate;
+  Context->LoaderHandle          = LoadHandle;
+  Context->CustomEntryContext    = Storage;
+  Context->CustomRead            = OcToolLoadEntry;
+  Context->CustomDescribe        = OcToolDescribeEntry;
+  Context->PrivilegeContext      = Privilege;
+  Context->RequestPrivilege      = OcShowSimplePasswordRequest;
+  Context->ShowMenu              = OcShowSimpleBootMenu;
+  Context->PickerMode            = PickerMode;
+  Context->ConsoleAttributes     = Config->Misc.Boot.ConsoleAttributes;
+  Context->PickerAttributes      = Config->Misc.Boot.PickerAttributes;
 
   if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_VERSION_UI) != 0) {
     Context->TitleSuffix      = OcMiscGetVersionString ();
@@ -706,9 +713,15 @@ OcMiscBoot (
 
   if (Interface != NULL) {
     Status = Interface->ShowInteface (Interface, Storage, Context);
+    DEBUG ((DEBUG_WARN, "OC: External interface failure, fallback to builtin - %r\n", Status));
   } else {
+    Status = EFI_UNSUPPORTED;
+  }
+
+  if (EFI_ERROR (Status)) {
     Status = OcRunBootPicker (Context);
   }
+
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to show boot menu!\n"));
   }

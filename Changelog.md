@@ -1,6 +1,19 @@
 OpenCore Changelog
 ==================
 
+#### v0.5.9
+- Added full HiDPI support in OpenCanopy
+- Improved font rendering by using CoreText
+- Fixed light and custom background font rendering
+- Added `Boot####` options support in boot entry listing
+- Removed `HideSelf` by pattern recognising `BOOTx64.efi`
+- Added `BlacklistAppleUpdate` to avoid Apple FW updates
+- Fixed accidental tool and NVRAM reset booting by default
+- Fixed unrecognised select `com.apple.recovery.boot` entries
+- Changed NVRAM reset not to erase `BootProtect` boot options
+- Improved boot performance when picker UI is disabled
+- Enforced the use of builtin picker when external fails
+
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG
 - Fixed incorrect utilities and resources packaging

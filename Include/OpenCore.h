@@ -248,7 +248,7 @@ EFI_STATUS
 OcMiscLateInit (
   IN  OC_GLOBAL_CONFIG          *Config,
   IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath  OPTIONAL,
-  OUT EFI_HANDLE                *LoadHandle OPTIONAL
+  OUT EFI_HANDLE                *LoadHandle
   );
 
 /**
@@ -268,7 +268,7 @@ OcMiscBoot (
   IN  OC_PRIVILEGE_CONTEXT      *Privilege OPTIONAL,
   IN  OC_IMAGE_START            StartImage,
   IN  BOOLEAN                   CustomBootGuid,
-  IN  EFI_HANDLE                LoadHandle OPTIONAL
+  IN  EFI_HANDLE                LoadHandle
   );
 
 /**

@@ -17,11 +17,12 @@
 #include <Guid/AppleVariable.h>
 #include <Guid/GlobalVariable.h>
 #include <Guid/MicrosoftVariable.h>
-#include <Guid/OcVariables.h>
+#include <Guid/OcVariable.h>
 
 #include <Library/DebugLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcBootManagementLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/PrintLib.h>
@@ -253,8 +254,29 @@ OcDeleteVariables (
   EFI_STATUS                   Status;
   OC_FIRMWARE_RUNTIME_PROTOCOL *FwRuntime;
   OC_FWRT_CONFIG               Config;
+  UINTN                        BootProtectSize;
+  EFI_GUID                     *BootProtectGuid;
+  UINT32                       BootProtect;
+  UINT16                       BootOrder;
+  VOID                         *BootOption;
+  UINTN                        BootOptionSize;
 
   DEBUG ((DEBUG_INFO, "OCB: NVRAM cleanup...\n"));
+
+  //
+  // Obtain boot protection marker.
+  //
+  BootProtectSize = sizeof (BootProtect);
+  Status = gRT->GetVariable (
+    OC_BOOT_PROTECT_VARIABLE_NAME,
+    &gOcVendorVariableGuid,
+    NULL,
+    &BootProtectSize,
+    &BootProtect
+    );
+  if (EFI_ERROR (Status)) {
+    BootProtect = 0;
+  }
 
   Status = gBS->LocateProtocol (
     &gOcFirmwareRuntimeProtocolGuid,
@@ -262,16 +284,60 @@ OcDeleteVariables (
     (VOID **) &FwRuntime
     );
 
-  if (!EFI_ERROR (Status) && FwRuntime->Revision >= OC_FIRMWARE_RUNTIME_REVISION) {
+  if (!EFI_ERROR (Status) && FwRuntime->Revision == OC_FIRMWARE_RUNTIME_REVISION) {
     ZeroMem (&Config, sizeof (Config));
     FwRuntime->SetOverride (&Config);
     DEBUG ((DEBUG_INFO, "OCB: Found FW NVRAM, full access %d\n", Config.BootVariableRedirect));
   } else {
     FwRuntime = NULL;
-    DEBUG ((DEBUG_INFO, "OCB: Missing FW NVRAM, going on...\n"));
+    DEBUG ((DEBUG_INFO, "OCB: Missing compatible FW NVRAM, going on...\n"));
+  }
+
+  if ((BootProtect & OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP) != 0) {
+    BootProtectGuid = (BootProtect & OC_BOOT_PROTECT_VARIABLE_NAMESPACE) != 0 ? &gOcVendorVariableGuid : &gEfiGlobalVariableGuid;
+    Status = GetVariable2 (
+      OC_BOOT_OPTION_VARIABLE_NAME,
+      BootProtectGuid,
+      &BootOption,
+      &BootOptionSize
+      );
+    if (!EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCB: Found %g:%s for preservation of %u bytes\n",
+        OC_BOOT_OPTION_VARIABLE_NAME,
+        BootProtectGuid,
+        (UINT32) BootOptionSize
+        ));
+    } else {
+      BootProtect = 0;
+    }
   }
 
   DeleteVariables ();
+
+  if ((BootProtect & OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP) != 0) {
+    Status = gRT->SetVariable (
+      OC_BOOT_OPTION_VARIABLE_NAME,
+      BootProtectGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+      BootOptionSize,
+      BootOption
+      );
+    BootOrder = OC_BOOT_OPTION;
+    if (!EFI_ERROR (Status)) {
+      Status = gRT->SetVariable (
+        EFI_BOOT_ORDER_VARIABLE_NAME,
+        BootProtectGuid,
+        EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+        sizeof (BootOrder),
+        &BootOrder
+        );
+    }
+
+    DEBUG ((DEBUG_INFO, "OCB: Restored %s - %r\n", OC_BOOT_OPTION_VARIABLE_NAME, Status));
+    FreePool (BootOption);
+  }
 
   if (FwRuntime != NULL) {
     DEBUG ((DEBUG_INFO, "OCB: Restoring FW NVRAM...\n"));

@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <OpenCore.h>
 
 #include <Guid/AppleVariable.h>
-#include <Guid/OcVariables.h>
+#include <Guid/OcVariable.h>
 #include <Guid/GlobalVariable.h>
 
 #include <Library/BaseLib.h>
@@ -146,6 +146,9 @@ OcAudioAcquireFile (
           break;
         case OcVoiceOverAudioFilemacOS_TimeMachine:
           BasePath = "macOS_TimeMachine";
+          break;
+        case OcVoiceOverAudioFilemacOS_UpdateFw:
+          BasePath = "macOS_UpdateFw";
           break;
         case OcVoiceOverAudioFileOtherOS:
           BasePath = "OtherOS";

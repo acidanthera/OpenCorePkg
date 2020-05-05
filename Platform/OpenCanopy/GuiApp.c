@@ -397,8 +397,8 @@ InternalContextConstruct (
     FontImage = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font_2x.png", &FontImageSize);
     FontData  = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font_2x.bin", &FontDataSize);
   } else {
-    FontImage = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font.png", &FontImageSize);
-    FontData  = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font.bin", &FontDataSize);
+    FontImage = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font_1x.png", &FontImageSize);
+    FontData  = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font_1x.bin", &FontDataSize);
   }
 
   if (FontImage != NULL && FontData != NULL) {

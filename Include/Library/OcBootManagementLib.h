@@ -93,11 +93,12 @@ typedef UINT32 OC_BOOT_ENTRY_TYPE;
 #define OC_BOOT_APPLE_OS            BIT1
 #define OC_BOOT_APPLE_RECOVERY      BIT2
 #define OC_BOOT_APPLE_TIME_MACHINE  BIT3
-#define OC_BOOT_APPLE_ANY           (OC_BOOT_APPLE_OS | OC_BOOT_APPLE_RECOVERY | OC_BOOT_APPLE_TIME_MACHINE)
-#define OC_BOOT_WINDOWS             BIT4
-#define OC_BOOT_EXTERNAL_OS         BIT5
-#define OC_BOOT_EXTERNAL_TOOL       BIT6
-#define OC_BOOT_RESET_NVRAM         BIT7
+#define OC_BOOT_APPLE_FW_UPDATE     BIT4
+#define OC_BOOT_APPLE_ANY           (OC_BOOT_APPLE_OS | OC_BOOT_APPLE_RECOVERY | OC_BOOT_APPLE_TIME_MACHINE | OC_BOOT_APPLE_FW_UPDATE)
+#define OC_BOOT_WINDOWS             BIT5
+#define OC_BOOT_EXTERNAL_OS         BIT6
+#define OC_BOOT_EXTERNAL_TOOL       BIT7
+#define OC_BOOT_RESET_NVRAM         BIT8
 #define OC_BOOT_SYSTEM              (OC_BOOT_RESET_NVRAM)
 
 /**
@@ -130,6 +131,10 @@ EFI_STATUS
 **/
 typedef struct OC_BOOT_ENTRY_ {
   //
+  // Link in entry list in OC_BOOT_FILESYSTEM.
+  //
+  LIST_ENTRY                Link;
+  //
   // Device path to booter or its directory.
   // Can be NULL, for example, for custom or system entries.
   //
@@ -153,6 +158,10 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   OC_BOOT_ENTRY_TYPE        Type;
   //
+  // Entry index number, assigned by picker.
+  //
+  UINT32                    EntryIndex;
+  //
   // Set when this entry is an externally available entry (e.g. USB).
   //
   BOOLEAN                   IsExternal;
@@ -160,10 +169,6 @@ typedef struct OC_BOOT_ENTRY_ {
   // Should try booting from first dmg found in DevicePath.
   //
   BOOLEAN                   IsFolder;
-  //
-  // Set when this entry is considered auxiliary.
-  //
-  BOOLEAN                   IsAuxiliary;
   //
   // Should make this option default boot option.
   //
@@ -179,6 +184,75 @@ typedef struct OC_BOOT_ENTRY_ {
 } OC_BOOT_ENTRY;
 
 /**
+  Boot filesystem containing boot entries.
+**/
+typedef struct OC_BOOT_FILESYSTEM_ OC_BOOT_FILESYSTEM;
+struct OC_BOOT_FILESYSTEM_ {
+  //
+  // Link in filesystem list in OC_BOOT_CONTEXT.
+  //
+  LIST_ENTRY           Link;
+  //
+  // Filesystem handle.
+  //
+  EFI_HANDLE           Handle;
+  //
+  // List of boot entries (OC_BOOT_ENTRY).
+  //
+  LIST_ENTRY           BootEntries;
+  //
+  // Pointer to APFS Recovery partition (if any).
+  //
+  OC_BOOT_FILESYSTEM   *RecoveryFs;
+  //
+  // External filesystem.
+  //
+  BOOLEAN              External;
+  //
+  // Loader filesystem.
+  //
+  BOOLEAN              LoaderFs;
+  //
+  // Contains recovery on the filesystem.
+  //
+  BOOLEAN              HasSelfRecovery;
+};
+
+/**
+  Boot context containing boot filesystems.
+**/
+typedef struct OC_BOOT_CONTEXT_ {
+  //
+  // Total boot entry count.
+  //
+  UINTN                       BootEntryCount;
+  //
+  // Total filesystem count.
+  //
+  UINTN                       FileSystemCount;
+  //
+  // List of filesystems containing boot entries (OC_BOOT_FILESYSTEM).
+  //
+  LIST_ENTRY                  FileSystems;
+  //
+  // GUID namespace for boot entries.
+  //
+  EFI_GUID                    *BootVariableGuid;
+  //
+  // Default entry to be booted.
+  //
+  OC_BOOT_ENTRY               *DefaultEntry;
+  //
+  // Picker context for externally configured parameters.
+  //
+  OC_PICKER_CONTEXT           *PickerContext;
+  //
+  // Boot policy protocol.
+  //
+  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy;
+} OC_BOOT_CONTEXT;
+
+/**
   Perform filtering based on file system basis.
   Ignores all filesystems by default.
   Remove this bit to allow any file system.
@@ -191,13 +265,6 @@ typedef struct OC_BOOT_ENTRY_ {
   Remove this bit to allow any device type.
 **/
 #define OC_SCAN_DEVICE_LOCK              BIT1
-
-/**
-  Perform filtering based on booter origin.
-  Ignores all blessed options not on the same partition.
-  Remove this bit to allow foreign booters.
-**/
-#define OC_SCAN_SELF_TRUST_LOCK          BIT2
 
 /**
   Allow scanning APFS filesystems.
@@ -285,7 +352,7 @@ typedef struct OC_BOOT_ENTRY_ {
 **/
 #define OC_SCAN_DEFAULT_POLICY ( \
   OC_SCAN_FILE_SYSTEM_LOCK   | OC_SCAN_DEVICE_LOCK | \
-  OC_SCAN_SELF_TRUST_LOCK    | OC_SCAN_ALLOW_FS_APFS | \
+  OC_SCAN_ALLOW_FS_APFS | \
   OC_SCAN_ALLOW_DEVICE_SATA  | OC_SCAN_ALLOW_DEVICE_SASEX | \
   OC_SCAN_ALLOW_DEVICE_SCSI  | OC_SCAN_ALLOW_DEVICE_NVME)
 
@@ -445,10 +512,8 @@ EFI_STATUS
 typedef
 EFI_STATUS
 (EFIAPI *OC_SHOW_MENU) (
-  IN  OC_PICKER_CONTEXT           *Context,
-  IN  OC_BOOT_ENTRY               *BootEntries,
-  IN  UINTN                       Count,
-  IN  UINTN                       DefaultEntry,
+  IN  OC_BOOT_CONTEXT             *BootContext,
+  IN  OC_BOOT_ENTRY               **BootEntries,
   OUT OC_BOOT_ENTRY               **ChosenBootEntry
   );
 
@@ -493,6 +558,10 @@ struct OC_PICKER_CONTEXT_ {
   //
   BOOLEAN                    CustomBootGuid;
   //
+  // Ignore Apple peripheral firmware updates.
+  //
+  BOOLEAN                    BlacklistAppleUpdate;
+  //
   // Custom entry reading routine, optional for no custom entries.
   //
   OC_CUSTOM_READ             CustomRead;
@@ -509,9 +578,9 @@ struct OC_PICKER_CONTEXT_ {
   //
   OC_IMAGE_START             StartImage;
   //
-  // Handle to exclude scanning from, optional.
+  // Handle to perform loader detection, optional.
   //
-  EFI_HANDLE                 ExcludeHandle;
+  EFI_HANDLE                 LoaderHandle;
   //
   // Entry display routine.
   //
@@ -563,6 +632,10 @@ struct OC_PICKER_CONTEXT_ {
   //
   BOOLEAN                    PickerAudioAssist;
   //
+  // Set when Apple picker cannot be used on this system.
+  //
+  BOOLEAN                    ApplePickerUnsupported;
+  //
   // Recommended audio protocol, optional.
   //
   OC_AUDIO_PROTOCOL          *OcAudio;
@@ -570,6 +643,15 @@ struct OC_PICKER_CONTEXT_ {
   // Recommended beeper protocol, optional.
   //
   APPLE_BEEP_GEN_PROTOCOL    *BeepGen;
+  //
+  // Custom boot order updated during scanning allocated from pool.
+  // Preserved here to avoid situations with losing BootNext on rescan.
+  //
+  UINT16                     *BootOrder;
+  //
+  // Number of entries in boot order.
+  //
+  UINTN                      BootOrderCount;
   //
   // Additional boot arguments for Apple loaders.
   //
@@ -602,20 +684,6 @@ struct OC_PICKER_CONTEXT_ {
 #define HIBERNATE_MODE_NONE   0U
 #define HIBERNATE_MODE_RTC    1U
 #define HIBERNATE_MODE_NVRAM  2U
-
-/**
-  Describe boot entry contents by setting fields other than DevicePath.
-
-  @param[in]  BootPolicy     Apple Boot Policy Protocol.
-  @param[in]  BootEntry      Located boot entry.
-
-  @retval EFI_SUCCESS   The entry point is described successfully.
-**/
-EFI_STATUS
-OcDescribeBootEntry (
-  IN     APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
-  IN OUT OC_BOOT_ENTRY              *BootEntry
-  );
 
 /**
   Get '.disk_label' or '.disk_label_2x' file contents, if exists.
@@ -658,47 +726,55 @@ OcGetBootEntryIcon (
   );
 
 /**
-  Release boot entry contents allocated from pool.
-
-  @param[in,out]  BootEntry      Located boot entry.
-**/
-VOID
-OcResetBootEntry (
-  IN OUT OC_BOOT_ENTRY              *BootEntry
-  );
-
-/**
-  Release boot entries.
-
-  @param[in,out]  BootEntries      Located boot entry array from pool.
-  @param[in]      Count          Boot entry count.
-**/
-VOID
-OcFreeBootEntries (
-  IN OUT OC_BOOT_ENTRY              *BootEntries,
-  IN     UINTN                      Count
-  );
-
-/**
   Scan system for boot entries.
 
   @param[in]  BootPolicy     Apple Boot Policy Protocol.
   @param[in]  Context        Picker context.
-  @param[out] BootEntries    List of boot entries (allocated from pool).
-  @param[out] Count          Number of boot entries.
-  @param[out] AllocCount     Number of allocated boot entries.
-  @param[in]  Describe       Automatically fill description fields
 
-  @retval EFI_SUCCESS        Executed successfully and found entries.
+  @retval boot context allocated from pool.
 **/
-EFI_STATUS
+OC_BOOT_CONTEXT *
 OcScanForBootEntries (
   IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN  OC_PICKER_CONTEXT           *Context,
-  OUT OC_BOOT_ENTRY               **BootEntries,
-  OUT UINTN                       *Count,
-  OUT UINTN                       *AllocCount OPTIONAL,
-  IN  BOOLEAN                     Describe
+  IN  OC_PICKER_CONTEXT           *Context
+  );
+
+/**
+  Scan system for first entry to boot.
+  This is likely to return an incomplete list and can even give NULL,
+  when only tools and system entries are present.
+
+  @param[in]  BootPolicy     Apple Boot Policy Protocol.
+  @param[in]  Context        Picker context.
+
+  @retval boot context allocated from pool.
+**/
+OC_BOOT_CONTEXT *
+OcScanForDefaultBootEntry (
+  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
+  IN  OC_PICKER_CONTEXT           *Context
+  );
+
+/**
+  Perform boot entry enumeration.
+
+  @param[in]  BootContext    Boot context.
+
+  @retval enumerated boot entry list allocated from pool.
+**/
+OC_BOOT_ENTRY  **
+OcEnumerateEntries (
+  IN  OC_BOOT_CONTEXT  *BootContext
+  );
+
+/**
+  Free boot context.
+
+  @param[in,out]  Context    Boot context to free.
+**/
+VOID
+OcFreeBootContext (
+  IN OUT OC_BOOT_CONTEXT  *Context
   );
 
 /**
@@ -759,10 +835,8 @@ OcShowSimplePasswordRequest (
 /**
   Show simple boot entry selection menu and return chosen entry.
 
-  @param[in]  Context          Picker context.
-  @param[in]  BootEntries      Described list of entries.
-  @param[in]  Count            Positive number of boot entries.
-  @param[in]  DefaultEntry     Default boot entry (DefaultEntry < Count).
+  @param[in]  BootContext      Boot context.
+  @param[in]  BootEntries      Enumerated entries.
   @param[in]  ChosenBootEntry  Chosen boot entry from BootEntries on success.
 
   @retval EFI_SUCCESS          Executed successfully and picked up an entry.
@@ -771,10 +845,8 @@ OcShowSimplePasswordRequest (
 EFI_STATUS
 EFIAPI
 OcShowSimpleBootMenu (
-  IN  OC_PICKER_CONTEXT           *Context,
-  IN  OC_BOOT_ENTRY               *BootEntries,
-  IN  UINTN                       Count,
-  IN  UINTN                       DefaultEntry,
+  IN  OC_BOOT_CONTEXT             *BootContext,
+  IN  OC_BOOT_ENTRY               **BootEntries,
   OUT OC_BOOT_ENTRY               **ChosenBootEntry
   );
 
@@ -917,7 +989,7 @@ OcGetFileSystemPolicyType (
 OC_BOOT_ENTRY_TYPE
 OcGetBootDevicePathType (
   IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
-  OUT BOOLEAN                   *IsFolder  OPTIONAL
+  OUT BOOLEAN                  *IsFolder  OPTIONAL
   );
 
 /**
@@ -1102,6 +1174,26 @@ VOID
 OcToggleVoiceOver (
   IN  OC_PICKER_CONTEXT  *Context,
   IN  UINT32             File  OPTIONAL
+  );
+
+/**
+  Obtain BootOrder entry list.
+
+  @param[in]   BootVariableGuid  GUID namespace for boot entries.
+  @param[in]   WithBootNext      Add BootNext as the first option if available.
+  @param[out]  BootOrderCount    Number of entries in boot order.
+  @param[out]  Deduplicated      Whether the list was changed during deduplication, optional.
+  @param[out]  HasBootNext       Whether the list starts with BootNext, optional
+
+  @retval  boot order entry list allocated from pool or NULL.
+**/
+UINT16 *
+OcGetBootOrder (
+  IN  EFI_GUID  *BootVariableGuid,
+  IN  BOOLEAN   WithBootNext,
+  OUT UINTN     *BootOrderCount,
+  OUT BOOLEAN   *Deduplicated  OPTIONAL,
+  OUT BOOLEAN   *HasBootNext   OPTIONAL
   );
 
 /**

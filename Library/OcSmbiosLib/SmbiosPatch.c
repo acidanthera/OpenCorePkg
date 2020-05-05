@@ -16,7 +16,7 @@
 
 #include <Protocol/PciRootBridgeIo.h>
 
-#include <Guid/OcVariables.h>
+#include <Guid/OcVariable.h>
 #include <Guid/SmBios.h>
 
 #include <Library/BaseMemoryLib.h>

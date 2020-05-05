@@ -16,7 +16,7 @@
 
 #include <Guid/AppleFile.h>
 #include <Guid/AppleVariable.h>
-#include <Guid/OcVariables.h>
+#include <Guid/OcVariable.h>
 
 #include <IndustryStandard/AppleCsrConfig.h>
 
@@ -48,13 +48,68 @@
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiLib.h>
 
+STATIC
+EFI_STATUS
+RunShowMenu (
+  IN  OC_BOOT_CONTEXT             *BootContext,
+  OUT OC_BOOT_ENTRY               **ChosenBootEntry
+  )
+{
+  EFI_STATUS      Status;
+  OC_BOOT_ENTRY   **BootEntries;
+  UINT32          EntryReason;
+
+  if (!BootContext->PickerContext->ApplePickerUnsupported
+    && BootContext->PickerContext->PickerMode == OcPickerModeApple) {
+    Status = OcRunAppleBootPicker ();
+    //
+    // This should not return on success.
+    //
+    DEBUG ((DEBUG_INFO, "OCB: Apple BootPicker failed on error - %r, fallback to builtin\n", Status));
+    BootContext->PickerContext->ApplePickerUnsupported = TRUE;
+  }
+
+  BootEntries = OcEnumerateEntries (BootContext);
+  if (BootEntries == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  //
+  // We are not allowed to have no default entry.
+  // However, if default entry is a tool or a system entry, never autoboot it.
+  //
+  if (BootContext->DefaultEntry == NULL) {
+    BootContext->DefaultEntry = BootEntries[0];
+    BootContext->PickerContext->TimeoutSeconds = 0;
+  }
+
+  //
+  // Ensure that picker entry reason is set as it can be read by boot.efi.
+  //
+  EntryReason = ApplePickerEntryReasonUnknown;
+  gRT->SetVariable (
+    APPLE_PICKER_ENTRY_REASON_VARIABLE_NAME,
+    &gAppleVendorVariableGuid,
+    EFI_VARIABLE_BOOTSERVICE_ACCESS,
+    sizeof (EntryReason),
+    &EntryReason
+    );
+
+  Status = BootContext->PickerContext->ShowMenu (
+    BootContext,
+    BootEntries,
+    ChosenBootEntry
+    );
+  FreePool (BootEntries);
+
+  return Status;
+}
+
 EFI_STATUS
 EFIAPI
 OcShowSimpleBootMenu (
-  IN  OC_PICKER_CONTEXT           *Context,
-  IN  OC_BOOT_ENTRY               *BootEntries,
-  IN  UINTN                       Count,
-  IN  UINTN                       DefaultEntry,
+  IN  OC_BOOT_CONTEXT             *BootContext,
+  IN  OC_BOOT_ENTRY               **BootEntries,
   OUT OC_BOOT_ENTRY               **ChosenBootEntry
   )
 {
@@ -65,13 +120,17 @@ OcShowSimpleBootMenu (
   INTN                               ChosenEntry;
   CHAR16                             Code[2];
   UINT32                             TimeOutSeconds;
+  UINT32                             Count;
   BOOLEAN                            SetDefault;
   BOOLEAN                            PlayedOnce;
   BOOLEAN                            PlayChosen;
 
   ChosenEntry    = -1;
   Code[1]        = '\0';
-  TimeOutSeconds = Context->TimeoutSeconds;
+
+  TimeOutSeconds = BootContext->PickerContext->TimeoutSeconds;
+  ASSERT (BootContext->DefaultEntry != NULL);
+
   PlayedOnce     = FALSE;
   PlayChosen     = FALSE;
 
@@ -81,6 +140,8 @@ OcShowSimpleBootMenu (
     return EFI_UNSUPPORTED;
   }
 
+  Count = (UINT32) BootContext->BootEntryCount;
+
   if (Count != MIN (Count, OC_INPUT_MAX)) {
     DEBUG ((DEBUG_WARN, "OCB: Cannot display all entries in the menu!\n"));
   }
@@ -88,8 +149,8 @@ OcShowSimpleBootMenu (
   OcConsoleControlSetMode (EfiConsoleControlScreenText);
   gST->ConOut->EnableCursor (gST->ConOut, FALSE);
 
-  if (Context->ConsoleAttributes != 0) {
-    gST->ConOut->SetAttribute (gST->ConOut, Context->ConsoleAttributes & 0x7FU);
+  if (BootContext->PickerContext->ConsoleAttributes != 0) {
+    gST->ConOut->SetAttribute (gST->ConOut, BootContext->PickerContext->ConsoleAttributes & 0x7FU);
   }
 
   //
@@ -101,11 +162,11 @@ OcShowSimpleBootMenu (
     gST->ConOut->ClearScreen (gST->ConOut);
     gST->ConOut->OutputString (gST->ConOut, OC_MENU_BOOT_MENU);
 
-    if (Context->TitleSuffix != NULL) {
-      Length = AsciiStrLen (Context->TitleSuffix);
+    if (BootContext->PickerContext->TitleSuffix != NULL) {
+      Length = AsciiStrLen (BootContext->PickerContext->TitleSuffix);
       gST->ConOut->OutputString (gST->ConOut, L" (");
       for (Index = 0; Index < Length; ++Index) {
-        Code[0] = Context->TitleSuffix[Index];
+        Code[0] = BootContext->PickerContext->TitleSuffix[Index];
         gST->ConOut->OutputString (gST->ConOut, Code);
       }
       gST->ConOut->OutputString (gST->ConOut, L")");
@@ -114,7 +175,7 @@ OcShowSimpleBootMenu (
     gST->ConOut->OutputString (gST->ConOut, L"\r\n\r\n");
 
     for (Index = 0; Index < MIN (Count, OC_INPUT_MAX); ++Index) {
-      if (DefaultEntry == Index && TimeOutSeconds > 0) {
+      if (TimeOutSeconds > 0 && BootContext->DefaultEntry->EntryIndex - 1 == Index) {
         gST->ConOut->OutputString (gST->ConOut, L"* ");
       } else if (ChosenEntry >= 0 && (UINTN) ChosenEntry == Index) {
         gST->ConOut->OutputString (gST->ConOut, L"> ");
@@ -125,11 +186,11 @@ OcShowSimpleBootMenu (
       Code[0] = OC_INPUT_STR[Index];
       gST->ConOut->OutputString (gST->ConOut, Code);
       gST->ConOut->OutputString (gST->ConOut, L". ");
-      gST->ConOut->OutputString (gST->ConOut, BootEntries[Index].Name);
-      if (BootEntries[Index].IsFolder) {
+      gST->ConOut->OutputString (gST->ConOut, BootEntries[Index]->Name);
+      if (BootEntries[Index]->IsFolder) {
         gST->ConOut->OutputString (gST->ConOut, OC_MENU_DISK_IMAGE);
       }
-      if (BootEntries[Index].IsExternal) {
+      if (BootEntries[Index]->IsExternal) {
         gST->ConOut->OutputString (gST->ConOut, OC_MENU_EXTERNAL);
       }
       gST->ConOut->OutputString (gST->ConOut, L"\r\n");
@@ -138,16 +199,16 @@ OcShowSimpleBootMenu (
     gST->ConOut->OutputString (gST->ConOut, L"\r\n");
     gST->ConOut->OutputString (gST->ConOut, OC_MENU_CHOOSE_OS);
 
-    if (!PlayedOnce && Context->PickerAudioAssist) {
-      OcPlayAudioFile (Context, OcVoiceOverAudioFileChooseOS, FALSE);
+    if (!PlayedOnce && BootContext->PickerContext->PickerAudioAssist) {
+      OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileChooseOS, FALSE);
       for (Index = 0; Index < Count; ++Index) {
-        OcPlayAudioEntry (Context, &BootEntries[Index], 1 + (UINT32) (&BootEntries[Index] - BootEntries));
-        if (DefaultEntry == Index && TimeOutSeconds > 0) {
-          OcPlayAudioFile (Context, OcVoiceOverAudioFileDefault, FALSE);
+        OcPlayAudioEntry (BootContext->PickerContext, BootEntries[Index], BootEntries[Index]->EntryIndex);
+        if (TimeOutSeconds > 0 && BootContext->DefaultEntry->EntryIndex - 1 == Index) {
+          OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileDefault, FALSE);
         }
       }
       OcPlayAudioBeep (
-        Context,
+        BootContext->PickerContext,
         OC_VOICE_OVER_SIGNALS_NORMAL,
         OC_VOICE_OVER_SIGNAL_NORMAL_MS,
         OC_VOICE_OVER_SILENCE_NORMAL_MS
@@ -160,26 +221,30 @@ OcShowSimpleBootMenu (
       // Pronounce entry name only after N ms of idleness.
       //
       KeyIndex = OcWaitForAppleKeyIndex (
-        Context,
+        BootContext->PickerContext,
         KeyMap,
         PlayChosen ? OC_VOICE_OVER_IDLE_TIMEOUT_MS : TimeOutSeconds * 1000,
-        Context->PollAppleHotKeys,
+        BootContext->PickerContext->PollAppleHotKeys,
         &SetDefault
         );
 
       if (PlayChosen && KeyIndex == OC_INPUT_TIMEOUT) {
-        OcPlayAudioFile (Context, OcVoiceOverAudioFileSelected, FALSE);
-        OcPlayAudioEntry (Context, &BootEntries[ChosenEntry], 1 + (UINT32) (&BootEntries[ChosenEntry] - BootEntries));
+        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileSelected, FALSE);
+        OcPlayAudioEntry (BootContext->PickerContext, BootEntries[ChosenEntry], BootEntries[Index]->EntryIndex);
         PlayChosen = FALSE;
         continue;
       } else if (KeyIndex == OC_INPUT_TIMEOUT) {
-        *ChosenBootEntry = &BootEntries[DefaultEntry];
+        *ChosenBootEntry = BootEntries[BootContext->DefaultEntry->EntryIndex - 1];
         gST->ConOut->OutputString (gST->ConOut, OC_MENU_TIMEOUT);
         gST->ConOut->OutputString (gST->ConOut, L"\r\n");
-        OcPlayAudioFile (Context, OcVoiceOverAudioFileTimeout, FALSE);
+        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileTimeout, FALSE);
         return EFI_SUCCESS;
       } else if (KeyIndex == OC_INPUT_CONTINUE) {
-        *ChosenBootEntry = &BootEntries[ChosenEntry >= 0 ? (UINTN) ChosenEntry : DefaultEntry];
+        if (ChosenEntry >= 0) {
+          *ChosenBootEntry = BootEntries[(UINTN) ChosenEntry];
+        } else {
+          *ChosenBootEntry = BootContext->DefaultEntry;
+        }
         (*ChosenBootEntry)->SetDefault = SetDefault;
         gST->ConOut->OutputString (gST->ConOut, OC_MENU_OK);
         gST->ConOut->OutputString (gST->ConOut, L"\r\n");
@@ -187,17 +252,17 @@ OcShowSimpleBootMenu (
       } else if (KeyIndex == OC_INPUT_ABORTED) {
         gST->ConOut->OutputString (gST->ConOut, OC_MENU_RELOADING);
         gST->ConOut->OutputString (gST->ConOut, L"\r\n");
-        OcPlayAudioFile (Context, OcVoiceOverAudioFileReloading, FALSE);
+        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileReloading, FALSE);
         return EFI_ABORTED;
-      } else if (KeyIndex == OC_INPUT_MORE && Context->HideAuxiliary) {
+      } else if (KeyIndex == OC_INPUT_MORE && BootContext->PickerContext->HideAuxiliary) {
         gST->ConOut->OutputString (gST->ConOut, OC_MENU_SHOW_AUXILIARY);
         gST->ConOut->OutputString (gST->ConOut, L"\r\n");
-        OcPlayAudioFile (Context, OcVoiceOverAudioFileShowAuxiliary, FALSE);
-        Context->HideAuxiliary = FALSE;
+        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileShowAuxiliary, FALSE);
+        BootContext->PickerContext->HideAuxiliary = FALSE;
         return EFI_ABORTED;
       } else if (KeyIndex == OC_INPUT_UP) {
         if (TimeOutSeconds > 0) {
-          ChosenEntry = (INTN) DefaultEntry;
+          ChosenEntry = (INTN) (BootContext->DefaultEntry->EntryIndex - 1);
         }
         if (ChosenEntry < 0) {
           ChosenEntry = 0;
@@ -207,13 +272,13 @@ OcShowSimpleBootMenu (
           --ChosenEntry;
         }
         TimeOutSeconds = 0;
-        if (Context->PickerAudioAssist) {
+        if (BootContext->PickerContext->PickerAudioAssist) {
           PlayChosen = TRUE;
         }
         break;
       } else if (KeyIndex == OC_INPUT_DOWN) {
         if (TimeOutSeconds > 0) {
-          ChosenEntry = (INTN) DefaultEntry;
+          ChosenEntry = (INTN) (BootContext->DefaultEntry->EntryIndex - 1);
         }
         if (ChosenEntry < 0) {
           ChosenEntry = 0;
@@ -223,29 +288,29 @@ OcShowSimpleBootMenu (
           ++ChosenEntry;
         }
         TimeOutSeconds = 0;
-        if (Context->PickerAudioAssist) {
+        if (BootContext->PickerContext->PickerAudioAssist) {
           PlayChosen = TRUE;
         }
         break;
       } else if (KeyIndex == OC_INPUT_TOP || KeyIndex == OC_INPUT_LEFT) {
         ChosenEntry = 0;
         TimeOutSeconds = 0;
-        if (Context->PickerAudioAssist) {
+        if (BootContext->PickerContext->PickerAudioAssist) {
           PlayChosen = TRUE;
         }
         break;
       } else if (KeyIndex == OC_INPUT_BOTTOM || KeyIndex == OC_INPUT_RIGHT) {
         ChosenEntry = (INTN) (MIN (Count, OC_INPUT_MAX) - 1);
         TimeOutSeconds = 0;
-        if (Context->PickerAudioAssist) {
+        if (BootContext->PickerContext->PickerAudioAssist) {
           PlayChosen = TRUE;
         }
         break;
       } else if (KeyIndex == OC_INPUT_VOICE_OVER) {
-        OcToggleVoiceOver (Context, 0);
+        OcToggleVoiceOver (BootContext->PickerContext, 0);
         break;
       } else if (KeyIndex != OC_INPUT_INVALID && KeyIndex >= 0 && (UINTN)KeyIndex < Count) {
-        *ChosenBootEntry = &BootEntries[KeyIndex];
+        *ChosenBootEntry = BootEntries[KeyIndex];
         (*ChosenBootEntry)->SetDefault = SetDefault;
         Code[0] = OC_INPUT_STR[KeyIndex];
         gST->ConOut->OutputString (gST->ConOut, Code);
@@ -254,7 +319,7 @@ OcShowSimpleBootMenu (
       }
 
       if (TimeOutSeconds > 0) {
-        OcPlayAudioFile (Context, OcVoiceOverAudioFileAbortTimeout, FALSE);
+        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileAbortTimeout, FALSE);
         TimeOutSeconds = 0;
         break;
       }
@@ -438,14 +503,19 @@ OcRunBootPicker (
   EFI_STATUS                         Status;
   APPLE_BOOT_POLICY_PROTOCOL         *AppleBootPolicy;
   APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
+  OC_BOOT_CONTEXT                    *BootContext;
   OC_BOOT_ENTRY                      *Chosen;
-  OC_BOOT_ENTRY                      *Entries;
-  UINTN                              EntryCount;
-  INTN                               DefaultEntry;
-  BOOLEAN                            ForbidApple;
   BOOLEAN                            SaidWelcome;
 
   SaidWelcome = FALSE;
+
+  //
+  // Reset NVRAM right away if requested by a key combination.
+  // This function should not return under normal conditions.
+  //
+  if (Context->PickerCommand == OcPickerResetNvram) {
+    return InternalSystemActionResetNvram ();
+  }
 
   AppleBootPolicy = OcAppleBootPolicyInstallProtocol (FALSE);
   if (AppleBootPolicy == NULL) {
@@ -480,9 +550,7 @@ OcRunBootPicker (
   if (Context->PickerCommand == OcPickerShowPicker && Context->PickerMode == OcPickerModeApple) {
     Status = OcRunAppleBootPicker ();
     DEBUG ((DEBUG_INFO, "OCB: Apple BootPicker failed - %r, fallback to builtin\n", Status));
-    ForbidApple = TRUE;
-  } else {
-    ForbidApple = FALSE;
+    Context->ApplePickerUnsupported = TRUE;
   }
 
   if (Context->PickerCommand != OcPickerShowPicker && Context->PickerCommand != OcPickerDefault) {
@@ -493,91 +561,105 @@ OcRunBootPicker (
   }
 
   while (TRUE) {
-    DEBUG ((DEBUG_INFO, "OCB: Performing OcScanForBootEntries...\n"));
+    //
+    // Turbo-boost scanning when bypassing picker.
+    //
+    if (Context->PickerCommand == OcPickerDefault) {
+      BootContext = OcScanForDefaultBootEntry (
+        AppleBootPolicy,
+        Context
+        );
+    } else {
+      ASSERT (
+        Context->PickerCommand == OcPickerShowPicker
+        || Context->PickerCommand == OcPickerBootApple
+        || Context->PickerCommand == OcPickerBootAppleRecovery
+        );
 
-    Status = OcScanForBootEntries (
-      AppleBootPolicy,
-      Context,
-      &Entries,
-      &EntryCount,
-      NULL,
-      TRUE
-      );
-
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCB: OcScanForBootEntries failure - %r\n", Status));
-      return Status;
+      BootContext = OcScanForBootEntries (
+        AppleBootPolicy,
+        Context
+        );
     }
 
-    if (EntryCount == 0) {
-      DEBUG ((DEBUG_WARN, "OCB: OcScanForBootEntries has no entries\n"));
+    //
+    // We have no entries at all or have auxiliary entries.
+    // Fallback to showing menu in the latter case.
+    //
+    if (BootContext == NULL) {
+      if (Context->HideAuxiliary) {
+        DEBUG ((DEBUG_WARN, "OCB: System has no boot entries, retrying with auxiliary\n"));
+        Context->PickerCommand = OcPickerShowPicker;
+        Context->HideAuxiliary = FALSE;
+        continue;
+      }
+
+      DEBUG ((DEBUG_WARN, "OCB: System has no boot entries\n"));
       return EFI_NOT_FOUND;
     }
 
-    DEBUG ((
-      DEBUG_INFO,
-      "OCB: Performing OcShowSimpleBootMenu... %d\n",
-      Context->PollAppleHotKeys
-      ));
-
-    DefaultEntry = OcGetDefaultBootEntry (Context, Entries, EntryCount);
-
     if (Context->PickerCommand == OcPickerShowPicker) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCB: Showing menu... %a\n",
+        Context->PollAppleHotKeys ? "(polling hotkeys)" : ""
+        ));
+
       if (!SaidWelcome) {
         OcPlayAudioFile (Context, OcVoiceOverAudioFileWelcome, FALSE);
         SaidWelcome = TRUE;
       }
 
-      if (!ForbidApple && Context->PickerMode == OcPickerModeApple) {
-        Status = OcRunAppleBootPicker ();
-        DEBUG ((DEBUG_INFO, "OCB: Apple BootPicker failed on error - %r, fallback to builtin\n", Status));
-        ForbidApple = TRUE;
+      Status = RunShowMenu (BootContext, &Chosen);
+
+      if (EFI_ERROR (Status) && Status != EFI_ABORTED) {
+        DEBUG ((DEBUG_ERROR, "OCB: ShowMenu failed - %r\n", Status));
+        OcFreeBootContext (BootContext);
+        return Status;
       }
-
-      Status = Context->ShowMenu (
-        Context,
-        Entries,
-        EntryCount,
-        DefaultEntry,
-        &Chosen
-        );
-    } else if (Context->PickerCommand == OcPickerResetNvram) {
-      OcPlayAudioFile (Context, OcVoiceOverAudioFileResetNVRAM, FALSE);
-      return InternalSystemActionResetNvram ();
-    } else {
-      Chosen = &Entries[DefaultEntry];
+    } else if (BootContext->DefaultEntry != NULL) {
+      Chosen = BootContext->DefaultEntry;
       Status = EFI_SUCCESS;
+    } else {
+      //
+      // This can only be failed macOS or macOS recovery boot.
+      // We may actually not rescan here.
+      //
+      ASSERT (Context->PickerCommand == OcPickerBootApple || Context->PickerCommand == OcPickerBootAppleRecovery);
+      DEBUG ((DEBUG_INFO, "OCB: System has no default boot entry, showing menu\n"));
+      Context->PickerCommand = OcPickerShowPicker;
+      OcFreeBootContext (BootContext);
+      continue;
     }
 
-    if (EFI_ERROR (Status) && Status != EFI_ABORTED) {
-      DEBUG ((DEBUG_ERROR, "OCB: OcShowSimpleBootMenu failed - %r\n", Status));
-      OcFreeBootEntries (Entries, EntryCount);
-      return Status;
-    }
+    ASSERT (!EFI_ERROR (Status) || Status == EFI_ABORTED);
 
     Context->TimeoutSeconds = 0;
 
     if (!EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
-        "OCB: Should boot from %s (T:%d|F:%d|DEF:%d)\n",
+        "OCB: Should boot from %u. %s (T:%d|F:%d|DEF:%d)\n",
+        Chosen->EntryIndex,
         Chosen->Name,
         Chosen->Type,
         Chosen->IsFolder,
         Chosen->SetDefault
         ));
 
-      if (Chosen->SetDefault) {
-        if (Context->PickerCommand == OcPickerShowPicker) {
-          OcPlayAudioFile (Context, OcVoiceOverAudioFileSelected, FALSE);
-          OcPlayAudioFile (Context, OcVoiceOverAudioFileDefault, FALSE);
-          OcPlayAudioEntry (Context, Chosen, 1 + (UINT32) (Chosen - Entries));
-        }
-        Status = OcSetDefaultBootEntry (Context, Chosen);
-        DEBUG ((DEBUG_INFO, "OCB: Setting default - %r\n", Status));
-      }
-
       if (Context->PickerCommand == OcPickerShowPicker) {
+        ASSERT (Chosen->EntryIndex > 0);
+
+        if (Chosen->SetDefault) {
+          if (Context->PickerCommand == OcPickerShowPicker) {
+            OcPlayAudioFile (Context, OcVoiceOverAudioFileSelected, FALSE);
+            OcPlayAudioFile (Context, OcVoiceOverAudioFileDefault, FALSE);
+            OcPlayAudioEntry (Context, Chosen, Chosen->EntryIndex);
+          }
+          Status = OcSetDefaultBootEntry (Context, Chosen);
+          DEBUG ((DEBUG_INFO, "OCB: Setting default - %r\n", Status));
+        }
+
         //
         // Clear screen from picker contents before loading the entry.
         //
@@ -586,7 +668,7 @@ OcRunBootPicker (
         // Voice chosen information.
         //
         OcPlayAudioFile (Context, OcVoiceOverAudioFileLoading, FALSE);
-        Status = OcPlayAudioEntry (Context, Chosen, 1 + (UINT32) (Chosen - Entries));
+        Status = OcPlayAudioEntry (Context, Chosen, Chosen->EntryIndex);
         if (EFI_ERROR (Status)) {
           OcPlayAudioBeep (
             Context,
@@ -625,7 +707,7 @@ OcRunBootPicker (
       OcKeyMapFlush (KeyMap, 0, TRUE);
     }
 
-    OcFreeBootEntries (Entries, EntryCount);
+    OcFreeBootContext (BootContext);
   }
 }
 
