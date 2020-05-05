@@ -483,7 +483,7 @@ OcFixAppleBootDevicePath (
     if (RemainingDevicePath == OriginalDevPath) {
       OcFixAppleBootDevicePathNodeRestore (
         OriginalDevPath,
-        RestoreContextPtr
+        &FirstNodeRestoreContext
         );
     }
 
