@@ -265,6 +265,7 @@ InternalParsePlist (
 
     Result = PlistDataSize (BlockDictChildValue, &BlockDictChildDataSize);
     if (!Result || (BlockDictChildDataSize < sizeof (*Block))) {
+      Result = FALSE;
       goto DONE_ERROR;
     }
 
