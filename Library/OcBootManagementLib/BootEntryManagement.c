@@ -1422,8 +1422,6 @@ OcScanForBootEntries (
   )
 {
   OC_BOOT_CONTEXT                  *BootContext;
-  UINT16                           *BootOrder;
-  UINTN                            BootOrderCount;
   UINTN                            Index;
   LIST_ENTRY                       *Link;
   OC_BOOT_FILESYSTEM               *FileSystem;
@@ -1445,16 +1443,17 @@ OcScanForBootEntries (
   //
   // Create primary boot options from BootOrder.
   //
-  BootOrder = InternalGetBootOrderForBooting (
-    BootContext->BootVariableGuid,
-    &BootOrderCount
-    );
-  if (BootOrder != NULL) {
-    for (Index = 0; Index < BootOrderCount; ++Index) {
-      AddBootEntryFromBootOption (BootContext, BootOrder[Index], FALSE);
-    }
+  if (Context->BootOrder == NULL) {
+    Context->BootOrder = InternalGetBootOrderForBooting (
+      BootContext->BootVariableGuid,
+      &Context->BootOrderCount
+      );
+  }
 
-    FreePool (BootOrder);
+  if (Context->BootOrder != NULL) {
+    for (Index = 0; Index < Context->BootOrderCount; ++Index) {
+      AddBootEntryFromBootOption (BootContext, Context->BootOrder[Index], FALSE);
+    }
   }
 
   DEBUG ((DEBUG_INFO, "OCB: Processing blessed list\n"));
@@ -1502,8 +1501,6 @@ OcScanForDefaultBootEntry (
   )
 {
   OC_BOOT_CONTEXT                  *BootContext;
-  UINT16                           *BootOrder;
-  UINTN                            BootOrderCount;
   UINTN                            Index;
   OC_BOOT_FILESYSTEM               *FileSystem;
   EFI_STATUS                       Status;
@@ -1527,24 +1524,24 @@ OcScanForDefaultBootEntry (
   //
   // Create primary boot options from BootOrder.
   //
-  BootOrder = InternalGetBootOrderForBooting (
-    BootContext->BootVariableGuid,
-    &BootOrderCount
-    );
-  if (BootOrder != NULL) {
-    for (Index = 0; Index < BootOrderCount; ++Index) {
-      AddBootEntryFromBootOption (BootContext, BootOrder[Index], TRUE);
+  if (Context->BootOrder == NULL) {
+    Context->BootOrder = InternalGetBootOrderForBooting (
+      BootContext->BootVariableGuid,
+      &Context->BootOrderCount
+      );
+  }
+
+  if (Context->BootOrder != NULL) {
+    for (Index = 0; Index < Context->BootOrderCount; ++Index) {
+      AddBootEntryFromBootOption (BootContext, Context->BootOrder[Index], TRUE);
 
       //
       // Return as long as we are good.
       //
       if (BootContext->DefaultEntry != NULL) {
-        FreePool (BootOrder);
         return BootContext;
       }
     }
-
-    FreePool (BootOrder);
   }
 
   //

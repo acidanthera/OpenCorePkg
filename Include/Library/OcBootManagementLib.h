@@ -640,6 +640,15 @@ struct OC_PICKER_CONTEXT_ {
   //
   APPLE_BEEP_GEN_PROTOCOL    *BeepGen;
   //
+  // Custom boot order updated during scanning allocated from pool.
+  // Preserved here to avoid situations with losing BootNext on rescan.
+  //
+  UINT16                     *BootOrder;
+  //
+  // Number of entries in boot order.
+  //
+  UINTN                      BootOrderCount;
+  //
   // Additional boot arguments for Apple loaders.
   //
   CHAR8                      AppleBootArgs[BOOT_LINE_LENGTH];
