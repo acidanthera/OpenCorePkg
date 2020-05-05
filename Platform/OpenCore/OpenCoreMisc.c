@@ -713,9 +713,15 @@ OcMiscBoot (
 
   if (Interface != NULL) {
     Status = Interface->ShowInteface (Interface, Storage, Context);
+    DEBUG ((DEBUG_WARN, "OC: External interface failure, fallback to builtin - %r\n", Status));
   } else {
+    Status = EFI_UNSUPPORTED;
+  }
+
+  if (EFI_ERROR (Status)) {
     Status = OcRunBootPicker (Context);
   }
+
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to show boot menu!\n"));
   }

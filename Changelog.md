@@ -12,6 +12,7 @@ OpenCore Changelog
 - Fixed unrecognised select `com.apple.recovery.boot` entries
 - Changed NVRAM reset not to erase `BootProtect` boot options
 - Improved boot performance when picker UI is disabled
+- Enforced the use of builtin picker when external fails
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG
