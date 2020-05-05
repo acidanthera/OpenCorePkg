@@ -321,6 +321,7 @@ RegisterBootOption (
   @param[in,out] FileSystem    Filesystem for creation.
   @param[in]     DevicePath    Device path of the entry.
   @param[in]     RecoveryPart  Device path is on recovery partition.
+  @param[in]     Deduplicate   Ensure that duplicated entries are not added. 
 
   @retval EFI_SUCCESS on success.
 **/
@@ -330,12 +331,15 @@ AddBootEntryOnFileSystem (
   IN OUT OC_BOOT_CONTEXT           *BootContext,
   IN OUT OC_BOOT_FILESYSTEM        *FileSystem,
   IN     EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
-  IN     BOOLEAN                   RecoveryPart
+  IN     BOOLEAN                   RecoveryPart,
+  IN     BOOLEAN                   Deduplicate
   )
 {
   EFI_STATUS          Status;
   OC_BOOT_ENTRY       *BootEntry;
   OC_BOOT_ENTRY_TYPE  EntryType;
+  LIST_ENTRY          *Link;
+  OC_BOOT_ENTRY       *ExistingEntry;
   BOOLEAN             IsFolder;
 
   DebugPrintDevicePath (DEBUG_INFO, "OCB: Adding entry", DevicePath);
@@ -374,6 +378,28 @@ AddBootEntryOnFileSystem (
     && EntryType == OC_BOOT_APPLE_FW_UPDATE) {
     DEBUG ((DEBUG_INFO, "OCB: Discarding discovered Apple FW update\n"));
     return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Skip duplicated entries, which may happen in BootOrder.
+  // For example, macOS during hibernation may leave Boot0082 in BootNext and Boot0080 in BootOrder,
+  // and they will have exactly the same boot entry.
+  //
+  if (Deduplicate) {
+    for (
+      Link = GetFirstNode (&FileSystem->BootEntries);
+      !IsNull (&FileSystem->BootEntries, Link);
+      Link = GetNextNode (&FileSystem->BootEntries, Link)) {
+      ExistingEntry = BASE_CR (Link, OC_BOOT_ENTRY, Link);
+      //
+      // All non-custom entries have DPs.
+      //
+      ASSERT (ExistingEntry->DevicePath != NULL);
+      if (IsDevicePathEqual (ExistingEntry->DevicePath, DevicePath)) {
+        DEBUG ((DEBUG_INFO, "OCB: Discarding already present DP\n"));
+        return EFI_ALREADY_STARTED;
+      }
+    }
   }
 
   //
@@ -583,6 +609,7 @@ AddBootEntryFromSystemEntry (
   @param[in,out] BootContext   Context of filesystems.
   @param[in,out] FileSystem    Filesystem to scan for bless.
   @param[in]     LazyScan      Lazy filesystem scanning.
+  @param[in]     Deduplicate   Ensure that duplicated entries are not added. 
 
   @retval EFI_STATUS for last created option.
 **/
@@ -591,7 +618,8 @@ EFI_STATUS
 AddBootEntryFromBless (
   IN OUT OC_BOOT_CONTEXT     *BootContext,
   IN OUT OC_BOOT_FILESYSTEM  *FileSystem,
-  IN     BOOLEAN             LazyScan
+  IN     BOOLEAN             LazyScan,
+  IN     BOOLEAN             Deduplicate
   )
 {
   EFI_STATUS                       Status;
@@ -729,7 +757,8 @@ AddBootEntryFromBless (
       BootContext,
       FileSystem,
       NewDevicePath,
-      FALSE
+      FALSE,
+      Deduplicate
       );
     if (EFI_ERROR (Status)) {
       FreePool (NewDevicePath);
@@ -794,7 +823,8 @@ AddBootEntryFromBless (
       BootContext,
       FileSystem,
       NewDevicePath,
-      TRUE
+      TRUE,
+      Deduplicate
       );
     if (EFI_ERROR (Status)) {
       FreePool (NewDevicePath);
@@ -848,6 +878,7 @@ AddBootEntryFromSelfRecovery (
     BootContext,
     FileSystem,
     DevicePath,
+    FALSE,
     FALSE
     );
 
@@ -1078,14 +1109,16 @@ AddBootEntryFromBootOption (
     Status = AddBootEntryFromBless (
       BootContext,
       FileSystem,
-      LazyScan
+      LazyScan,
+      TRUE
       );
   } else {
     Status = AddBootEntryOnFileSystem (
       BootContext,
       FileSystem,
       DevicePath,
-      FALSE
+      FALSE,
+      TRUE
       );
     if (EFI_ERROR (Status)) {
       FreePool (DevicePath);
@@ -1472,7 +1505,7 @@ OcScanForBootEntries (
     // No entries, so we process this directory with Apple Bless.
     //
     if (IsListEmpty (&FileSystem->BootEntries)) {
-      AddBootEntryFromBless (BootContext, FileSystem, FALSE);
+      AddBootEntryFromBless (BootContext, FileSystem, FALSE, FALSE);
     }
 
     //
@@ -1576,7 +1609,7 @@ OcScanForDefaultBootEntry (
         continue;
       }
 
-      AddBootEntryFromBless (BootContext, FileSystem, FALSE);
+      AddBootEntryFromBless (BootContext, FileSystem, FALSE, FALSE);
       if (BootContext->DefaultEntry != NULL) {
         FreePool (Handles);
         return BootContext;
