@@ -189,7 +189,7 @@ InternalGetAppleRecoveryName (
   }
 
   UnicodeSPrint (SystemVersionPath, SystemVersionPathSize, L"%sSystemVersion.plist", BootDirectoryName);
-  DEBUG ((DEBUG_INFO, "Trying to get recovery from %s\n", SystemVersionPath));
+  DEBUG ((DEBUG_INFO, "OCB: Trying to get recovery from %s\n", SystemVersionPath));
   SystemVersionData = (CHAR8 *) ReadFile (FileSystem, SystemVersionPath, &SystemVersionDataSize, BASE_1MB);
   FreePool (SystemVersionPath);
 

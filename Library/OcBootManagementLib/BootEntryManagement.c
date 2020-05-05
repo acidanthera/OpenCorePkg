@@ -341,11 +341,32 @@ AddBootEntryOnFileSystem (
   OC_BOOT_ENTRY_TYPE  EntryType;
   LIST_ENTRY          *Link;
   OC_BOOT_ENTRY       *ExistingEntry;
+  CHAR16              *TextDevicePath;
   BOOLEAN             IsFolder;
 
-  DebugPrintDevicePath (DEBUG_INFO, "OCB: Adding entry", DevicePath);
-
   EntryType = OcGetBootDevicePathType (DevicePath, &IsFolder);
+
+  DEBUG_CODE_BEGIN ();
+
+  if (DevicePath != NULL) {
+    TextDevicePath = ConvertDevicePathToText (DevicePath, TRUE, FALSE);
+  } else {
+    TextDevicePath = NULL;
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCB: Adding entry type (T:%u|F:%d) - %s\n",
+    EntryType,
+    IsFolder,
+    OC_HUMAN_STRING (TextDevicePath)
+    ));
+
+  if (TextDevicePath != NULL) {
+    FreePool (TextDevicePath);
+  }
+
+  DEBUG_CODE_END ();
 
   //
   // Mark self recovery presence.

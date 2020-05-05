@@ -139,31 +139,55 @@ OcStriStr (
 
 CONST CHAR16 *
 OcStrStrLength (
-  IN CONST CHAR16  *String,
-  IN UINTN         StringLength,
-  IN CONST CHAR16  *SearchString,
-  IN UINTN         SearchStringLength
+  CONST CHAR16  *String,
+  UINTN         StringLength,
+  CONST CHAR16  *SearchString,
+  UINTN         SearchStringLength
   )
 {
-  UINTN        RestLen;
-  UINTN        Index;
-  INTN         CmpResult;
-  BOOLEAN      Overflowed;
+  UINTN         Index;
+  UINTN         Index2;
+  UINTN         Index3;
+  INTN          CmpResult;
+  CONST CHAR16  *Y;
+  CONST CHAR16  *X;
 
-  Overflowed = OcOverflowSubUN (StringLength, SearchStringLength, &RestLen);
-  if (Overflowed) {
+  //
+  // REF: http://www-igm.univ-mlv.fr/~lecroq/string/node13.html#SECTION00130
+  //
+
+  if (SearchStringLength > StringLength
+    || SearchStringLength == 0
+    || StringLength == 0) {
     return NULL;
   }
 
-  for (Index = 0; Index < RestLen; ++Index) {
-    CmpResult = CompareMem (
-      &String[Index],
-      SearchString,
-      (SearchStringLength + 1) * sizeof (*SearchString)
-      );
-    if (CmpResult == 0) {
-      return &String[Index];
+  Y = (CONST CHAR16 *) String;
+  X = (CONST CHAR16 *) SearchString;
+
+  if (X[0] == X[1]) {
+    Index2 = 2;
+    Index3 = 1;
+  } else {
+    Index2 = 1;
+    Index3 = 2;
+  }
+
+  if (SearchStringLength > 1) {
+    while (Index <= StringLength - SearchStringLength) {
+      if (X[1] != Y[Index+1]) {
+        Index += Index2;
+      } else {
+        CmpResult = CompareMem (X+2, Y+Index+2, (SearchStringLength - 2) * sizeof (*SearchString));
+        if (CmpResult == 0 && X[0] == Y[Index]) {
+          return &Y[Index];
+        }
+
+        Index += Index3;
+      }
     }
+  } else {
+    return ScanMem16 (String, StringLength * sizeof (*SearchString), *SearchString);
   }
 
   return NULL;
