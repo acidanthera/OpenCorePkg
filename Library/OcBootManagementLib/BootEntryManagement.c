@@ -1136,15 +1136,10 @@ AddBootEntryFromBootOption (
   ASSERT (FileSystem != NULL);
   ASSERT (DevicePath != NULL);
 
-  if (IsRoot) {
-    FreePool (DevicePath);
-    Status = AddBootEntryFromBless (
-      BootContext,
-      FileSystem,
-      LazyScan,
-      TRUE
-      );
-  } else {
+  //
+  // We have a complete device path, just add this entry.
+  //
+  if (!IsRoot) {
     Status = AddBootEntryOnFileSystem (
       BootContext,
       FileSystem,
@@ -1152,10 +1147,27 @@ AddBootEntryFromBootOption (
       FALSE,
       TRUE
       );
-    if (EFI_ERROR (Status)) {
-      FreePool (DevicePath);
-    }
+  } else {
+    Status = EFI_UNSUPPORTED;
   }
+
+  if (EFI_ERROR (Status)) {
+    FreePool (DevicePath);
+  }
+
+  //
+  // We may have a Boot#### entry pointing to macOS with full DP (up to boot.efi),
+  // so IsRoot will be true. However, if this is APFS, we may still have:
+  // - Recovery for this macOS.
+  // - Another macOS installation.
+  // We can only detect them with bless, so we invoke bless in deduplication mode.
+  //
+  Status = AddBootEntryFromBless (
+    BootContext,
+    FileSystem,
+    LazyScan,
+    TRUE
+    );
 
   return Status;
 }
