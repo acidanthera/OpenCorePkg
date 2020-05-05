@@ -444,10 +444,7 @@ BmfContextInitialize (
        || 0 > Advance || Advance > MAX_UINT16) {
          DEBUG ((
            DEBUG_WARN,
-           "BMF: Pair at index %d insane\n"
-           " first %u\n"
-           " second %u\n"
-           " amount %d\n",
+           "BMF: Pair at index %d insane: first %u, second %u, amount %d\n",
            Index,
            Pairs[Index].first,
            Pairs[Index].second,
