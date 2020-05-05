@@ -811,6 +811,7 @@ AddBootEntryFromBless (
       &RecoveryDeviceHandle
       );
     if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCB: APFS recovery is not present - %r\n", Status));
       continue;
     }
 
@@ -1299,7 +1300,7 @@ AddFileSystemEntryForCustom (
     OC_CUSTOM_FS_HANDLE,
     BootContext->PickerContext->NumCustomBootPaths,
     BootContext->PickerContext->ShowNvramReset ? " and nvram reset" : "",
-    BootContext->PickerContext->HideAuxiliary ? " (aux hidden)" : "(aux shown)"
+    BootContext->PickerContext->HideAuxiliary ? " (aux hidden)" : " (aux shown)"
     ));
 
   FileSystem = AllocateZeroPool (sizeof (*FileSystem));
