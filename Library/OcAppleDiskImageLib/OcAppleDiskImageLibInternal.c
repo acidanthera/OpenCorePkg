@@ -240,7 +240,7 @@ InternalParsePlist (
   }
 
   Result = !OcOverflowMulU32 (NumDmgBlocks, sizeof (*DmgBlocks), &DmgBlocksSize);
-  if (!Result) {
+  if (!Result) { ///< Result must be FALSE on error, it's checked at DONE_ERROR
     goto DONE_ERROR;
   }
 
