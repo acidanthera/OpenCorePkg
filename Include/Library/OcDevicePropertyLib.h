@@ -20,7 +20,7 @@
 /**
   Install and initialise EFI DevicePath property protocol.
 
-  @param[in] Overwrite  Overwrite installed protocol.
+  @param[in] Reinstall  Overwrite installed protocol.
 
   @retval installed or located protocol or NULL.
 **/

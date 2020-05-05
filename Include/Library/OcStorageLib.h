@@ -96,7 +96,7 @@ typedef struct {
   @param[out]  Context     Resulting storage context.
   @param[in]   FileSystem  Storage file system.
   @param[in]   Path        Storage file system path (e.g. L"\\").
-  @param[in]   Key         Storage signature verification key, optional.
+  @param[in]   StorageKey         Storage signature verification key, optional.
 
   @retval EFI_SUCCESS on success.
 **/

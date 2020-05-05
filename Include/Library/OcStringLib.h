@@ -67,7 +67,7 @@ IsAsciiSpace (
 
 /** Convert null terminated ascii string to unicode.
 
-  @param[in]  String1  A pointer to the ascii string to convert to unicode.
+  @param[in]  String  A pointer to the ascii string to convert to unicode.
   @param[in]  Length   Length or 0 to calculate the length of the ascii string to convert.
 
   @retval  A pointer to the converted unicode string allocated from pool.

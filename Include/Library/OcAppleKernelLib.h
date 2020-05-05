@@ -589,7 +589,7 @@ PatchPowerStateTimeout (
 /**
   Disable AppleRTC checksum writing.
 
-  @param Patcher  Patcher context.
+  @param Context  Patcher context.
 
   @return  EFI_SUCCESS on success.
 **/

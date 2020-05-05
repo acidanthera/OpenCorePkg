@@ -136,7 +136,8 @@ ReadFile (
 /**
   Determine file size if it is less than 4 GB.
 
-  @param[in]  File         A pointer to the file protocol.
+  @param[in]  FileSystem   A pointer to the file system protocol of the volume.
+  @param[in]  FilePath     The full path to the file on the device.
   @param[out] Size         32-bit file size.
 
   @retval EFI_SUCCESS on success.
@@ -188,7 +189,7 @@ SetFileData (
 /**
   Get file information of specified type.
 
-  @param[in]  FileHandle         A pointer to file handle.
+  @param[in]  File               A pointer to file handle.
   @param[in]  InformationType    A pointer to file info GUID.
   @param[in]  MinFileInfoSize    Minimal size of the info provided.
   @param[out] RealFileInfoSize   Actual info size read (optional).

@@ -670,7 +670,7 @@ OcResetBootEntry (
 /**
   Release boot entries.
 
-  @param[in,out]  BootEntry      Located boot entry array from pool.
+  @param[in,out]  BootEntries      Located boot entry array from pool.
   @param[in]      Count          Boot entry count.
 **/
 VOID
@@ -687,7 +687,6 @@ OcFreeBootEntries (
   @param[out] BootEntries    List of boot entries (allocated from pool).
   @param[out] Count          Number of boot entries.
   @param[out] AllocCount     Number of allocated boot entries.
-  @param[in]  LoadHandle     Load handle to skip.
   @param[in]  Describe       Automatically fill description fields
 
   @retval EFI_SUCCESS        Executed successfully and found entries.
@@ -853,7 +852,7 @@ OcLoadPickerHotKeys (
 
   @param[in,out]  Context      Picker context.
   @param[in]      KeyMap       Apple Key Map Aggregator protocol.
-  @param[in]      Time         Timeout to wait for in milliseconds.
+  @param[in]      Timeout      Timeout to wait for in milliseconds.
   @param[in]      PollHotkeys  Poll key combinations.
   @param[out]     SetDefault   Set boot option as default, optional.
 
@@ -924,7 +923,7 @@ OcGetBootDevicePathType (
 /**
   Get loaded image protocol for Apple bootloader.
 
-  @param[in]  Handle        Image handle.
+  @param[in]  ImageHandle        Image handle.
 
   @retval loaded image protocol or NULL for non Apple images.
 **/
@@ -964,7 +963,7 @@ OcParseBootArgs (
 /**
   Check if boot argument is currently passed (via image options or NVRAM).
 
-  @param[in]  LoadImage    UEFI loaded image protocol instance, optional.
+  @param[in]  LoadedImage    UEFI loaded image protocol instance, optional.
   @param[in]  GetVariable  Preferred UEFI NVRAM reader, optional.
   @param[in]  Argument        Argument, e.g. -v, slide=, debug=, etc.
   @param[in]  ArgumentLength  Argument length, e.g. L_STR_LEN ("-v").

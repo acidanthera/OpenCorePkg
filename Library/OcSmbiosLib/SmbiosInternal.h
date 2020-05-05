@@ -181,7 +181,7 @@ SmbiosFinaliseStruct (
 CHAR8 *
 SmbiosGetString (
   IN APPLE_SMBIOS_STRUCTURE_POINTER  SmbiosTable,
-  IN SMBIOS_TABLE_STRING             String
+  IN SMBIOS_TABLE_STRING             StringIndex
   );
 
 /**

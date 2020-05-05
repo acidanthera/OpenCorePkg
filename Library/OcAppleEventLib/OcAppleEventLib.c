@@ -430,7 +430,7 @@ EventSetCursorPosition (
 // EventSetEventName
 /** This function is used to assign a name to an event.
 
-  @param[in, out] Handle
+  @param[in,out]  Handle
   @param[in]      Name
 
   @retval EFI_SUCCESS            The event name was assigned successfully.
