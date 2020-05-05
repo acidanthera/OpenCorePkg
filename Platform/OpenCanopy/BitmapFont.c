@@ -748,7 +748,7 @@ GuiGetLabel (
   //
   // Apply palette because Apple does it with stored labels
   //
-  for (Index = 0; Index < TextInfo->Width * TextInfo->Height; Index++) {
+  for (Index = 0; Index < (UINT32) TextInfo->Width * (UINT32) TextInfo->Height; Index++) {
     Buffer[Index].Blue  = 255 - gAppleDiskLabelImagePalette[mAppleDiskLabelImageClut[Buffer[Index].Blue  >> 4U]];
     Buffer[Index].Green = 255 - gAppleDiskLabelImagePalette[mAppleDiskLabelImageClut[Buffer[Index].Green >> 4U]];
     Buffer[Index].Red   = 255 - gAppleDiskLabelImagePalette[mAppleDiskLabelImageClut[Buffer[Index].Red   >> 4U]];

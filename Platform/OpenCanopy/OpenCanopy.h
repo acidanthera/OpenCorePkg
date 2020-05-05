@@ -134,7 +134,7 @@ EFI_STATUS
 GuiPngToImage (
   OUT GUI_IMAGE  *Image,
   IN  VOID       *ImageData,
-  IN  UINT32     ImageDataSize,
+  IN  UINTN      ImageDataSize,
   IN  BOOLEAN    PremultiplyAlpha
   );
   

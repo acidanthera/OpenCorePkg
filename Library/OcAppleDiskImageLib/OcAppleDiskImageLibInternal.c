@@ -239,9 +239,9 @@ InternalParsePlist (
     goto DONE_ERROR;
   }
 
-  Result = OcOverflowMulU32 (NumDmgBlocks, sizeof (*DmgBlocks), &DmgBlocksSize);
-  if (Result) {
-    return FALSE;
+  Result = !OcOverflowMulU32 (NumDmgBlocks, sizeof (*DmgBlocks), &DmgBlocksSize);
+  if (!Result) {
+    goto DONE_ERROR;
   }
 
   DmgBlocks = AllocatePool (DmgBlocksSize);
