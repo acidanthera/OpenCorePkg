@@ -41,16 +41,16 @@ typedef struct DTMemMapEntry_ {
 // Foundation Types.
 //
 
-#define DT_PATH_NAME_SEPERATOR      '/'    //< 0x2F
+#define DT_PATH_NAME_SEPERATOR      '/'    ///< 0x2F
 
-#define DT_MAX_PROPERTY_NAME_LENGTH 31     //< Max length of Property Name (terminator not included)
-#define DT_MAX_ENTRY_NAME_LENGTH    31     //< Max length of a C-String Entry Name (terminator not included)
+#define DT_MAX_PROPERTY_NAME_LENGTH 31     ///< Max length of Property Name (terminator not included)
+#define DT_MAX_ENTRY_NAME_LENGTH    31     ///< Max length of a C-String Entry Name (terminator not included)
 #define DT_PROPERTY_NAME_LENGTH     32
 
-typedef CHAR8 DTEntryNameBuf[DT_PROPERTY_NAME_LENGTH];        //< Length of DTEntryNameBuf = DT_MAX_ENTRY_NAME_LENGTH + 1
+typedef CHAR8 DTEntryNameBuf[DT_PROPERTY_NAME_LENGTH];        ///< Length of DTEntryNameBuf = DT_MAX_ENTRY_NAME_LENGTH + 1
 
 typedef struct OpaqueDTEntry_             DeviceTreeNode;
-typedef DeviceTreeNode                    *DTEntry;           //< Entry
+typedef DeviceTreeNode                    *DTEntry;           ///< Entry
 
 typedef struct OpaqueDTProperty_          DTProperty;
 
@@ -68,8 +68,8 @@ typedef OpaqueDTPropertyIterator          *DTPropertyIterator;
 //
 
 struct OpaqueDTProperty_ {
-  CHAR8   Name[DT_PROPERTY_NAME_LENGTH];  //< NUL terminated property name
-  UINT32  Length;                         //< Length (bytes) of folloing prop value
+  CHAR8   Name[DT_PROPERTY_NAME_LENGTH];  ///< NUL terminated property name
+  UINT32  Length;                         ///< Length (bytes) of folloing prop value
 };
 
 struct OpaqueDTEntry_ {

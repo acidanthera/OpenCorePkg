@@ -39,7 +39,7 @@ typedef struct {
   CPUID_VERSION_INFO_EDX  CpuidVerEdx;
 
   UINT32                  MicrocodeRevision;
-  BOOLEAN                 Hypervisor;   //< indicate whether we are under virtualization
+  BOOLEAN                 Hypervisor;   ///< indicate whether we are under virtualization
 
   UINT8                   Type;
   UINT8                   Family;

@@ -71,5 +71,5 @@ UefiMain (
 
   CpuDeadLoop ();
 
-  return EFI_SUCCESS; //< Unreachable
+  return EFI_SUCCESS; ///< Unreachable
 }
