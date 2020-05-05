@@ -128,7 +128,6 @@ SmbiosExtendTable (
   @param[in,out]   Table     Current table buffer.
   @param[in]       Override  String data override.
   @param[in,out]   Index     Pointer to current string index, incremented on success.
-  @param[in]       Safe      Filter certain characters.
 
   @retval assigned string index or 0
 **/
