@@ -2089,7 +2089,7 @@ removable media list found in the UEFI specification.
 
 Each partition will only be used for booting when it corresponds to ``Scan policy'': a set of restrictions
 to only use partitions with specific file systems and from specific device types. Scan policy behaviour is
-discussed in \texttt{MediaPolicy} property description.
+discussed in \texttt{ScanPolicy} property description.
 
 Scan process starts with obtaining all the partitions filtered with ``Scan policy''. Each partition may
 produce multiple primary and alternate options. Primary options describe operating systems installed
@@ -2655,8 +2655,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   incompatibilities of any kind. While unlikely, the use of this option may even cause boot failure.
   Use at your own risk on boards known to be compatible.
 
-  \emph{Note 2}: Be warned that NVRAM reset will also erase the boot option created in
-  \texttt{Bootstrap} mode.
+  \emph{Note 2}: Be warned that while NVRAM reset executed from OpenCore should not erase the boot
+  option created in \texttt{Bootstrap}, executing NVRAM reset prior to loading OpenCore will remove it.
 
 \item
   \texttt{ExposeSensitiveData}\\
