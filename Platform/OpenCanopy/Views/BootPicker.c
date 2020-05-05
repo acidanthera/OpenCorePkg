@@ -418,8 +418,13 @@ InternalBootPickerEntryDraw (
   //
   // Draw the label horizontally centered.
   //
-  //ASSERT (Label->Width  <= BOOT_ENTRY_DIMENSION);
-  //ASSERT (Label->Height == BOOT_ENTRY_LABEL_HEIGHT);
+
+  //
+  // FIXME: Apple allows the label to be up to 340px wide,
+  // but OpenCanopy can't display it now (it would overlap adjacent entries)
+  //
+  //ASSERT (Label->Width  <= BOOT_ENTRY_DIMENSION * DrawContext->Scale);
+  ASSERT (Label->Height <= BOOT_ENTRY_LABEL_HEIGHT * DrawContext->Scale);
 
   GuiDrawChildImage (
     Label,
@@ -774,7 +779,7 @@ BootPickerEntriesAdd (
         IconFileData,
         IconFileSize,
         GuiContext->Scale,
-        GuiContext->Light
+        GuiContext->LightBackground
         );
     }
   } else {
@@ -825,7 +830,7 @@ BootPickerEntriesAdd (
       &GuiContext->FontContext,
       Entry->Name,
       StrLen (Entry->Name),
-      GuiContext->Light
+      GuiContext->LightBackground
       );
     if (!Result) {
       DEBUG ((DEBUG_WARN, "OCUI: label failed\n"));

@@ -55,7 +55,6 @@
 		35366C0F240C213500D54CBB /* OcRtcLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB1240C213400D54CBB /* OcRtcLib.c */; };
 		35366C10240C213500D54CBB /* AppleEventInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 35366AB4240C213400D54CBB /* AppleEventInternal.h */; };
 		35366C11240C213500D54CBB /* OcAppleEventLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB5240C213400D54CBB /* OcAppleEventLib.c */; };
-		35366C12240C213500D54CBB /* AppleEvent.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB6240C213400D54CBB /* AppleEvent.c */; };
 		35366C13240C213500D54CBB /* AppleKeyMap.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB7240C213400D54CBB /* AppleKeyMap.c */; };
 		35366C14240C213500D54CBB /* EventQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB8240C213400D54CBB /* EventQueue.c */; };
 		35366C15240C213500D54CBB /* KeyHandler.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366AB9240C213400D54CBB /* KeyHandler.c */; };
@@ -306,7 +305,7 @@
 		3511D58A23FDB2A800CC3B17 /* OpenCoreNvram.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OpenCoreNvram.c; sourceTree = "<group>"; };
 		3511D58B23FDB2A800CC3B17 /* OpenCore.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OpenCore.inf; sourceTree = "<group>"; };
 		3511D58C23FDB2A800CC3B17 /* OpenCoreKernel.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OpenCoreKernel.c; sourceTree = "<group>"; };
-		3511D59823FDB2D900CC3B17 /* lib__OpenCorePkg__index.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = lib__OpenCorePkg__index.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		3511D59823FDB2D900CC3B17 /* __OpenCorePkg__index.o */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = __OpenCorePkg__index.o; sourceTree = BUILT_PRODUCTS_DIR; };
 		35366A8D240C213400D54CBB /* OcMachoLibInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OcMachoLibInternal.h; sourceTree = "<group>"; };
 		35366A8E240C213400D54CBB /* OcMachoLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcMachoLib.inf; sourceTree = "<group>"; };
 		35366A8F240C213400D54CBB /* Header.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Header.c; sourceTree = "<group>"; };
@@ -341,7 +340,6 @@
 		35366AB3240C213400D54CBB /* OcAppleEventLib.inf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OcAppleEventLib.inf; sourceTree = "<group>"; };
 		35366AB4240C213400D54CBB /* AppleEventInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppleEventInternal.h; sourceTree = "<group>"; };
 		35366AB5240C213400D54CBB /* OcAppleEventLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OcAppleEventLib.c; sourceTree = "<group>"; };
-		35366AB6240C213400D54CBB /* AppleEvent.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AppleEvent.c; sourceTree = "<group>"; };
 		35366AB7240C213400D54CBB /* AppleKeyMap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = AppleKeyMap.c; sourceTree = "<group>"; };
 		35366AB8240C213400D54CBB /* EventQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = EventQueue.c; sourceTree = "<group>"; };
 		35366AB9240C213400D54CBB /* KeyHandler.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = KeyHandler.c; sourceTree = "<group>"; };
@@ -912,7 +910,6 @@
 				35366AB3240C213400D54CBB /* OcAppleEventLib.inf */,
 				35366AB4240C213400D54CBB /* AppleEventInternal.h */,
 				35366AB5240C213400D54CBB /* OcAppleEventLib.c */,
-				35366AB6240C213400D54CBB /* AppleEvent.c */,
 				35366AB7240C213400D54CBB /* AppleKeyMap.c */,
 				35366AB8240C213400D54CBB /* EventQueue.c */,
 				35366AB9240C213400D54CBB /* KeyHandler.c */,
@@ -1596,7 +1593,7 @@
 				3511D57B23FDB2A700CC3B17 /* Include */,
 				3511D58123FDB2A800CC3B17 /* Platform */,
 				357E232523F2A06B00BC930F /* UDK */,
-				3511D59823FDB2D900CC3B17 /* lib__OpenCorePkg__index.dylib */,
+				3511D59823FDB2D900CC3B17 /* __OpenCorePkg__index.o */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1705,7 +1702,7 @@
 			);
 			name = __OpenCorePkg__index;
 			productName = __OpenCorePkg__index;
-			productReference = 3511D59823FDB2D900CC3B17 /* lib__OpenCorePkg__index.dylib */;
+			productReference = 3511D59823FDB2D900CC3B17 /* __OpenCorePkg__index.o */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
@@ -1898,7 +1895,6 @@
 				35366C1B240C213500D54CBB /* OcHashServicesLib.c in Sources */,
 				35366C30240C213500D54CBB /* Math.c in Sources */,
 				35366CD1240C213500D54CBB /* MsvcMath32.c in Sources */,
-				35366C12240C213500D54CBB /* AppleEvent.c in Sources */,
 				35366CA6240C213500D54CBB /* OcLog.c in Sources */,
 				35366CB5240C213500D54CBB /* Link.c in Sources */,
 				35366C54240C213500D54CBB /* AppleHibernate.c in Sources */,
@@ -2066,29 +2062,39 @@
 				CLANG_ENABLE_MODULES = NO;
 				CLANG_ENABLE_MODULE_DEBUGGING = NO;
 				CLANG_MODULES_AUTOLINK = NO;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Automatic;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				EXECUTABLE_PREFIX = lib;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_EXTENSION = o;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					MACH_LITTLE_ENDIAN,
 					OC_TARGET_RELEASE,
+					NO_MSABI_VA_FUNCS,
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/UDK/MdePkg/Include/X64",
-					"$(SRCROOT)/UDK/**",
+					"$(SRCROOT)/UDK/MdeModulePkg/Include",
+					"$(SRCROOT)/UDK/OpenCorePkg/Include",
+					"$(SRCROOT)/UDK/MdePkg/Include",
+					"$(SRCROOT)/UDK/MacInfoPkg/Include",
+					"$(SRCROOT)/UDK/UefiCpuPkg/Include",
+					"$(SRCROOT)/UDK/EfiPkg/Include",
+					"$(SRCROOT)/UDK/EfiPkg/Include/X64",
+					"$(SRCROOT)/UDK/EfiPkg/Include/AppleMacEfi",
+					"$(SRCROOT)/UDK/OpenCorePkg/Library/OcAppleImg4Lib/**",
 				);
+				LINK_WITH_STANDARD_LIBRARIES = NO;
+				MACH_O_TYPE = staticlib;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_CFLAGS = (
 					"-fdiagnostics-absolute-paths",
+					"-fshort-wchar",
 					"-include",
 					"$(SRCROOT)/UDK/Build/OpenCorePkg/RELEASE_XCODE5/X64/OpenCorePkg/Platform/OpenCore/OpenCore/DEBUG/AutoGen.h",
 					"-include",
 					"$(SRCROOT)/UDK/Build/OpenCorePkg/RELEASE_XCODE5/X64/OpenCorePkg/Platform/OpenCore/OpenCore/DEBUG/AutoGen.c",
-					"-fshort-wchar",
+					"-I",
+					"$(SRCROOT)/UDK/**",
 				);
-				OTHER_LDFLAGS = "-###";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -2101,29 +2107,39 @@
 				CLANG_ENABLE_MODULES = NO;
 				CLANG_ENABLE_MODULE_DEBUGGING = NO;
 				CLANG_MODULES_AUTOLINK = NO;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Automatic;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				EXECUTABLE_PREFIX = lib;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_EXTENSION = o;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					MACH_LITTLE_ENDIAN,
 					OC_TARGET_RELEASE,
+					NO_MSABI_VA_FUNCS,
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/UDK/MdePkg/Include/X64",
-					"$(SRCROOT)/UDK/**",
+					"$(SRCROOT)/UDK/MdeModulePkg/Include",
+					"$(SRCROOT)/UDK/OpenCorePkg/Include",
+					"$(SRCROOT)/UDK/MdePkg/Include",
+					"$(SRCROOT)/UDK/MacInfoPkg/Include",
+					"$(SRCROOT)/UDK/UefiCpuPkg/Include",
+					"$(SRCROOT)/UDK/EfiPkg/Include",
+					"$(SRCROOT)/UDK/EfiPkg/Include/X64",
+					"$(SRCROOT)/UDK/EfiPkg/Include/AppleMacEfi",
+					"$(SRCROOT)/UDK/OpenCorePkg/Library/OcAppleImg4Lib/**",
 				);
+				LINK_WITH_STANDARD_LIBRARIES = NO;
+				MACH_O_TYPE = staticlib;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				OTHER_CFLAGS = (
 					"-fdiagnostics-absolute-paths",
+					"-fshort-wchar",
 					"-include",
 					"$(SRCROOT)/UDK/Build/OpenCorePkg/RELEASE_XCODE5/X64/OpenCorePkg/Platform/OpenCore/OpenCore/DEBUG/AutoGen.h",
 					"-include",
 					"$(SRCROOT)/UDK/Build/OpenCorePkg/RELEASE_XCODE5/X64/OpenCorePkg/Platform/OpenCore/OpenCore/DEBUG/AutoGen.c",
-					"-fshort-wchar",
+					"-I",
+					"$(SRCROOT)/UDK/**",
 				);
-				OTHER_LDFLAGS = "-###";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;

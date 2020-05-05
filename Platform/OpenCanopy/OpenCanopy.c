@@ -69,7 +69,7 @@ STATIC GUI_DRAW_REQUEST              mDrawRequests[4]   = { { 0 } };
 //
 STATIC
 CONST UINT8
-mAppleDiskLabelImagePalette[256] = {
+gAppleDiskLabelImagePalette[256] = {
   [0x00] = 255,
   [0xf6] = 238,
   [0xf7] = 221,
@@ -1318,7 +1318,8 @@ GuiIcnsToImageIcon (
       Status = GuiPngToImage (
         Image,
         Record->Data,
-        RecordLength - sizeof (APPLE_ICNS_RECORD)
+        RecordLength - sizeof (APPLE_ICNS_RECORD),
+        TRUE
         );
 
       if (!EFI_ERROR (Status) && MatchWidth > 0 && MatchHeight > 0) {
@@ -1426,17 +1427,17 @@ GuiLabelToImage (
 
   if (Inverted) {
     for (PixelIdx = 0; PixelIdx < Image->Width * Image->Height; PixelIdx++) {
-      Image->Buffer[PixelIdx].Blue     = mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-      Image->Buffer[PixelIdx].Green    = mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-      Image->Buffer[PixelIdx].Red      = mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-      Image->Buffer[PixelIdx].Reserved = 255;
+      Image->Buffer[PixelIdx].Blue     = 0;
+      Image->Buffer[PixelIdx].Green    = 0;
+      Image->Buffer[PixelIdx].Red      = 0;
+      Image->Buffer[PixelIdx].Reserved = 255 -  gAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
     }
   } else {
     for (PixelIdx = 0; PixelIdx < Image->Width * Image->Height; PixelIdx++) {
-      Image->Buffer[PixelIdx].Blue     = 255 - mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-      Image->Buffer[PixelIdx].Green    = 255 - mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-      Image->Buffer[PixelIdx].Red      = 255 - mAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
-      Image->Buffer[PixelIdx].Reserved = 255;
+      Image->Buffer[PixelIdx].Blue     = 255 -  gAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Green    = 255 -  gAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Red      = 255 -  gAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
+      Image->Buffer[PixelIdx].Reserved = 255 -  gAppleDiskLabelImagePalette[Label->Data[PixelIdx]];
     }
   }
 
@@ -1447,7 +1448,8 @@ EFI_STATUS
 GuiPngToImage (
   OUT GUI_IMAGE  *Image,
   IN  VOID       *ImageData,
-  IN  UINT32     ImageDataSize
+  IN  UINTN      ImageDataSize,
+  IN  BOOLEAN    PremultiplyAlpha
   )
 {
   EFI_STATUS                       Status;
@@ -1469,13 +1471,15 @@ GuiPngToImage (
     return Status;
   }
 
-  BufferWalker = Image->Buffer;
-  for (Index = 0; Index < (UINTN) Image->Width * Image->Height; ++Index) {
-    TmpChannel             = (UINT8) ((BufferWalker->Blue * BufferWalker->Reserved) / 0xFF);
-    BufferWalker->Blue     = (UINT8) ((BufferWalker->Red * BufferWalker->Reserved) / 0xFF);
-    BufferWalker->Green    = (UINT8) ((BufferWalker->Green * BufferWalker->Reserved) / 0xFF);
-    BufferWalker->Red      = TmpChannel;
-    ++BufferWalker;
+  if (PremultiplyAlpha) {
+    BufferWalker = Image->Buffer;
+    for (Index = 0; Index < (UINTN) Image->Width * Image->Height; ++Index) {
+      TmpChannel             = (UINT8) ((BufferWalker->Blue * BufferWalker->Reserved) / 0xFF);
+      BufferWalker->Blue     = (UINT8) ((BufferWalker->Red * BufferWalker->Reserved) / 0xFF);
+      BufferWalker->Green    = (UINT8) ((BufferWalker->Green * BufferWalker->Reserved) / 0xFF);
+      BufferWalker->Red      = TmpChannel;
+      ++BufferWalker;
+    }
   }
 
   return EFI_SUCCESS;

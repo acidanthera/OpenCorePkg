@@ -321,16 +321,16 @@ InternalContextConstruct (
   }
 
   if (Context->BackgroundColor.Raw == APPLE_COLOR_SYRAH_BLACK) {
-    Context->Light = FALSE;
+    Context->LightBackground = FALSE;
   } else if (Context->BackgroundColor.Raw == APPLE_COLOR_LIGHT_GRAY) {
-    Context->Light = TRUE;
+    Context->LightBackground = TRUE;
   } else {
     //
     // FIXME: Support proper W3C formula.
     //
-    Context->Light = (Context->BackgroundColor.Pixel.Red * 299U
+    Context->LightBackground = (Context->BackgroundColor.Pixel.Red * 299U
       + Context->BackgroundColor.Pixel.Green * 587U
-      + Context->BackgroundColor.Pixel.Blue * 114U) <= 186000;
+      + Context->BackgroundColor.Pixel.Blue * 114U) >= 186000;
   }
 
   Context->BootEntry = NULL;
@@ -381,7 +381,7 @@ InternalContextConstruct (
         Storage,
         mLabelNames[Index],
         Context->Scale,
-        Context->Light,
+        Context->LightBackground,
         &Context->Labels[Index]
         );
     }
@@ -393,8 +393,13 @@ InternalContextConstruct (
     return EFI_UNSUPPORTED;
   }
 
-  FontImage = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font.png", &FontImageSize);
-  FontData  = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font.bin", &FontDataSize);
+  if (Context->Scale == 2) {
+    FontImage = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font_2x.png", &FontImageSize);
+    FontData  = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font_2x.bin", &FontDataSize);
+  } else {
+    FontImage = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font.png", &FontImageSize);
+    FontData  = OcStorageReadFileUnicode (Storage, OPEN_CORE_FONT_PATH L"Font.bin", &FontDataSize);
+  }
 
   if (FontImage != NULL && FontData != NULL) {
     Result = GuiFontConstruct (
@@ -404,7 +409,13 @@ InternalContextConstruct (
       FontData,
       FontDataSize
       );
-    if (Context->FontContext.BmfContext.Height  != BOOT_ENTRY_LABEL_HEIGHT) {
+    if (Context->FontContext.BmfContext.Height != BOOT_ENTRY_LABEL_HEIGHT * Context->Scale) {
+        DEBUG((
+          DEBUG_WARN,
+          "OCUI: Font has height %d instead of %d\n",
+          Context->FontContext.BmfContext.Height,
+          BOOT_ENTRY_LABEL_HEIGHT * Context->Scale
+          ));
       Result = FALSE;
     }
   } else {
