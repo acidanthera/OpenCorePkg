@@ -82,6 +82,7 @@ ExpandShortFormBootPath (
   // volume.
   //
   PrevDevicePath = NULL;
+  IsDirectory = FALSE;
   do {
     FullDevicePath = OcGetNextLoadOptionDevicePath (
       DevicePath,
