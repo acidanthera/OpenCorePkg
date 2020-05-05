@@ -8,7 +8,7 @@ env:
 matrix:
   include:
   - os: osx
-    name: "Build"
+    name: "Build macOS XCODE5"
     osx_image: xcode10.2
     compiler: clang
 
@@ -27,6 +27,25 @@ matrix:
         tags: true
       api_key:
         secure: BCsj6FO40+02MPylXhIrUqS0KmwoUsd3y+iS5mwcBo16dqTbgF/emsApptKKgLCrb83sgmedkdEI1tkMTw7kAP8341E4Xmo0DVRQcJ/zDMXMtutmN5f0j1sMsiHhZ6wnaFhVIOvysSiuIal5vRX04rG/2UPnrM2CIv3s1jQPMhuMJGWPGOg76UoFQVo+1Mx7AtDTLJoJhymtIldbrH30h77HDdJbyCT+VPBtFmNbBJvTwVTyyVOuKkUX5JI0P1qNayEY6aFURLvOR6ZR7CSqIFXOiQmWEbFulxGp3Ss+HD+Ule94DXEeuK7xF1NKYHubUBF8BDk3eJcSfbA0vFvE6SbB1OJHItVnXliLb/pR3TlJiY11+XtT3N2YFHTEFOVSUxplyQpmXZDwhiIgn7sZRZQGL6Eqs4CtjKj8Lu/EJEFRIbJZCdlVkznFebSwMjvRaK9Anj1vW5gFs+Wsw5lUZOJPYI8jiHdzGszsDFpOex2PVixwLfVscM7fa5Sgsk4FgV0EzGpzmbcH9jc7AurbyRUgCSnDxhOuH/m4TJLdS8xL3XS+MiB8wZ4bTStqjMWK6fKy13IrmLChJUVPBYoyyqgOjHjtOBYYEcChpDbUqiLh6UCpFyZmkiph8uElgolgGuDZkEIGwcuquap2Ih4q9x1CX5eMri/ukzAqaHz506o=
+
+  - os: linux
+    name: "Build Linux CLANGPDB/GCC5"
+    dist: xenial
+    addons:
+      apt:
+        packages:
+        - nasm
+        - uuid-dev
+
+    script:
+    - llvmfile="clang+llvm-9.0.1-x86_64-linux-gnu-ubuntu-16.04"
+    - curl -LO "https://github.com/llvm/llvm-project/releases/download/llvmorg-9.0.1/${llvmfile}.tar.xz" || exit 1
+    - llvmsum=$(shasum -a 256 "${llvmfile}.tar.xz" | cut -f1 -d' ')
+    - llvmexpsum="1af280e96fec62acf5f3bb525e36baafe09f95f940dc9806e22809a83dfff4f8"
+    - if [ "$llvmsum" != "$llvmexpsum" ]; then echo "Invalid LLVM checksum $llvmsum" ; exit 1 ; fi
+    - tar -xf "${llvmfile}.tar.xz" || exit 1
+    - export PATH="$(pwd)/${llvmfile}/bin:$PATH"
+    - "./macbuild.tool"
 
   - os: osx
     name: "Analyze Coverity"
