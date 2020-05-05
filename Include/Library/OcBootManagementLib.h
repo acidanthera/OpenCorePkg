@@ -632,6 +632,10 @@ struct OC_PICKER_CONTEXT_ {
   //
   BOOLEAN                    PickerAudioAssist;
   //
+  // Set when Apple picker cannot be used on this system.
+  //
+  BOOLEAN                    ApplePickerUnsupported;
+  //
   // Recommended audio protocol, optional.
   //
   OC_AUDIO_PROTOCOL          *OcAudio;

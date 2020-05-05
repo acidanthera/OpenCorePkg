@@ -48,6 +48,63 @@
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiLib.h>
 
+STATIC
+EFI_STATUS
+RunShowMenu (
+  IN  OC_BOOT_CONTEXT             *BootContext,
+  OUT OC_BOOT_ENTRY               **ChosenBootEntry
+  )
+{
+  EFI_STATUS      Status;
+  OC_BOOT_ENTRY   **BootEntries;
+  UINT32          EntryReason;
+
+  if (!BootContext->PickerContext->ApplePickerUnsupported
+    && BootContext->PickerContext->PickerMode == OcPickerModeApple) {
+    Status = OcRunAppleBootPicker ();
+    //
+    // This should not return on success.
+    //
+    DEBUG ((DEBUG_INFO, "OCB: Apple BootPicker failed on error - %r, fallback to builtin\n", Status));
+    BootContext->PickerContext->ApplePickerUnsupported = TRUE;
+  }
+
+  BootEntries = OcEnumerateEntries (BootContext);
+  if (BootEntries == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  //
+  // We are not allowed to have no default entry.
+  // However, if default entry is a tool or a system entry, never autoboot it.
+  //
+  if (BootContext->DefaultEntry == NULL) {
+    BootContext->DefaultEntry = BootEntries[0];
+    BootContext->PickerContext->TimeoutSeconds = 0;
+  }
+
+  //
+  // Ensure that picker entry reason is set as it can be read by boot.efi.
+  //
+  EntryReason = ApplePickerEntryReasonUnknown;
+  gRT->SetVariable (
+    APPLE_PICKER_ENTRY_REASON_VARIABLE_NAME,
+    &gAppleVendorVariableGuid,
+    EFI_VARIABLE_BOOTSERVICE_ACCESS,
+    sizeof (EntryReason),
+    &EntryReason
+    );
+
+  Status = BootContext->PickerContext->ShowMenu (
+    BootContext,
+    BootEntries,
+    ChosenBootEntry
+    );
+  FreePool (BootEntries);
+
+  return Status;
+}
+
 EFI_STATUS
 EFIAPI
 OcShowSimpleBootMenu (
@@ -447,9 +504,7 @@ OcRunBootPicker (
   APPLE_BOOT_POLICY_PROTOCOL         *AppleBootPolicy;
   APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
   OC_BOOT_CONTEXT                    *BootContext;
-  OC_BOOT_ENTRY                      **BootEntries;
   OC_BOOT_ENTRY                      *Chosen;
-  BOOLEAN                            ForbidApple;
   BOOLEAN                            SaidWelcome;
 
   SaidWelcome = FALSE;
@@ -495,9 +550,7 @@ OcRunBootPicker (
   if (Context->PickerCommand == OcPickerShowPicker && Context->PickerMode == OcPickerModeApple) {
     Status = OcRunAppleBootPicker ();
     DEBUG ((DEBUG_INFO, "OCB: Apple BootPicker failed - %r, fallback to builtin\n", Status));
-    ForbidApple = TRUE;
-  } else {
-    ForbidApple = FALSE;
+    Context->ApplePickerUnsupported = TRUE;
   }
 
   if (Context->PickerCommand != OcPickerShowPicker && Context->PickerCommand != OcPickerDefault) {
@@ -557,32 +610,7 @@ OcRunBootPicker (
         SaidWelcome = TRUE;
       }
 
-      if (!ForbidApple && Context->PickerMode == OcPickerModeApple) {
-        Status = OcRunAppleBootPicker ();
-        DEBUG ((DEBUG_INFO, "OCB: Apple BootPicker failed on error - %r, fallback to builtin\n", Status));
-        ForbidApple = TRUE;
-      }
-
-      BootEntries = OcEnumerateEntries (BootContext);
-      if (BootEntries != NULL) {
-        //
-        // We are not allowed to have no default entry.
-        // However, if default entry is a tool or a system entry, never autoboot it.
-        //
-        if (BootContext->DefaultEntry == NULL) {
-          BootContext->DefaultEntry = BootEntries[0];
-          BootContext->PickerContext->TimeoutSeconds = 0;
-        }
-
-        Status = Context->ShowMenu (
-          BootContext,
-          BootEntries,
-          &Chosen
-          );
-        FreePool (BootEntries);
-      } else {
-        Status = EFI_OUT_OF_RESOURCES;
-      }
+      Status = RunShowMenu (BootContext, &Chosen);
 
       if (EFI_ERROR (Status) && Status != EFI_ABORTED) {
         DEBUG ((DEBUG_ERROR, "OCB: ShowMenu failed - %r\n", Status));
