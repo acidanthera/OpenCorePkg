@@ -4142,6 +4142,13 @@ Full list of labels is provided below. All labels are mandatory.
 
 Label and icon generation can be performed with bundled utilities: \texttt{disklabel} and
 \texttt{icnspack}. Please refer to sample data for the details about the dimensions.
+Font is Helvetica 12 pt times scale factor.
+
+Font format corresponds to \href{https://www.angelcode.com/products/bmfont}{AngelCode binary BMF}.
+While there are many utilities to generate font files, currently it is recommended to use
+\href{https://github.com/danpla/dpfontbaker}{dpFontBaker} to generate bitmap font
+(\href{https://github.com/danpla/dpfontbaker/pull/1}{using CoreText produces best results})
+and \href{https://github.com/usr-sse2/fonverter}{fonverter} to export it to binary format.
 
 \emph{WARNING}: OpenCanopy is currently considered experimental and is not recommended for
 everyday use. Refer to

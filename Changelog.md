@@ -1,6 +1,11 @@
 OpenCore Changelog
 ==================
 
+#### v0.5.9
+- Added full HiDPI support in OpenCanopy
+- Improved font rendering by using CoreText
+- Fixed light and custom background font rendering
+
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG
 - Fixed incorrect utilities and resources packaging

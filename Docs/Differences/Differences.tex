@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon May  4 14:28:34 2020
-%DIF ADD ../Configuration.tex        Mon May  4 14:38:00 2020
+%DIF DEL PreviousConfiguration.tex   Mon May  4 15:42:50 2020
+%DIF ADD ../Configuration.tex        Tue May  5 19:26:35 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4201,7 +4201,15 @@ Full list of labels is provided below. All labels are mandatory.
 \end{itemize}
 
 Label and icon generation can be performed with bundled utilities: \texttt{disklabel} and
-\texttt{icnspack}. Please refer to sample data for the details about the dimensions.
+\texttt{icnspack}. Please refer to sample data for the details about the dimensions\DIFaddbegin \DIFadd{.
+Font is Helvetica 12 pt times scale factor.
+}
+
+\DIFadd{Font format corresponds to }\href{https://www.angelcode.com/products/bmfont}{AngelCode binary BMF}\DIFadd{.
+While there are many utilities to generate font files, currently it is recommended to use
+}\href{https://github.com/danpla/dpfontbaker}{dpFontBaker} \DIFadd{to generate bitmap font
+(}\href{https://github.com/danpla/dpfontbaker/pull/1}{using CoreText produces best results}\DIFadd{)
+and }\href{https://github.com/usr-sse2/fonverter}{fonverter} \DIFadd{to export it to binary format}\DIFaddend .
 
 \emph{WARNING}: OpenCanopy is currently considered experimental and is not recommended for
 everyday use. Refer to
