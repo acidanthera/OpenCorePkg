@@ -14,7 +14,7 @@
 
 #include <Uefi.h>
 
-#include <Guid/OcVariables.h>
+#include <Guid/OcVariable.h>
 
 #include <Protocol/OcLog.h>
 

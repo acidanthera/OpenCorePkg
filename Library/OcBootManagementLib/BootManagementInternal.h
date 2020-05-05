@@ -24,6 +24,8 @@
 #include <Protocol/DevicePath.h>
 #include <Protocol/SimpleFileSystem.h>
 
+#define OC_CUSTOM_FS_HANDLE ((EFI_HANDLE)(UINTN) 0x2007C5F5U)
+
 typedef struct {
   EFI_DEVICE_PATH_PROTOCOL       *DevicePath;
   OC_APPLE_DISK_IMAGE_CONTEXT    *DmgContext;
@@ -98,23 +100,75 @@ InternalLoadBootEntry (
   OUT INTERNAL_DMG_LOAD_CONTEXT   *DmgLoadContext
   );
 
-EFI_STATUS
-InternalPrepareScanInfo (
-  IN     APPLE_BOOT_POLICY_PROTOCOL       *BootPolicy,
-  IN     OC_PICKER_CONTEXT                *Context,
-  IN     EFI_HANDLE                       *Handles,
-  IN     UINTN                            Index,
-  IN OUT INTERNAL_DEV_PATH_SCAN_INFO      *DevPathScanInfo
+UINT16 *
+InternalGetBootOrderForBooting (
+  IN  EFI_GUID  *BootVariableGuid,
+  OUT UINTN     *BootOrderCount
   );
 
-UINTN
-InternalFillValidBootEntries (
-  IN     APPLE_BOOT_POLICY_PROTOCOL   *BootPolicy,
-  IN     OC_PICKER_CONTEXT            *Context,
-  IN     INTERNAL_DEV_PATH_SCAN_INFO  *DevPathScanInfo,
-  IN     EFI_DEVICE_PATH_PROTOCOL     *DevicePathWalker,
-  IN OUT OC_BOOT_ENTRY                *Entries,
-  IN     UINTN                        EntryIndex
+VOID
+InternalDebugBootEnvironment (
+  IN CONST UINT16             *BootOrder,
+  IN EFI_GUID                 *BootGuid,
+  IN UINTN                    BootOrderCount
+  );
+
+/**
+  Retrieves booting relevant data from an UEFI Boot#### option.
+  If BootName is NULL, a BDS-style process is assumed and inactive as well as
+  non-Boot type applications are ignored.
+
+  @param[in]  BootOption        The boot option's index.
+  @param[out] BootName          On output, the boot option's description.
+  @param[out] OptionalDataSize  On output, the optional data size.
+  @param[out] OptionalData      On output, a pointer to the optional data.
+
+**/
+EFI_DEVICE_PATH_PROTOCOL *
+InternalGetBootOptionData (
+  IN  UINT16   BootOption,
+  IN  EFI_GUID *BootGuid,
+  OUT CHAR16   **BootName  OPTIONAL,
+  OUT UINT32   *OptionalDataSize  OPTIONAL,
+  OUT VOID     **OptionalData  OPTIONAL
+  );
+
+/**
+  Describe boot entry contents by setting fields other than DevicePath.
+
+  @param[in]  BootPolicy     Apple Boot Policy Protocol.
+  @param[in]  BootEntry      Located boot entry.
+
+  @retval EFI_SUCCESS   The entry point is described successfully.
+**/
+EFI_STATUS
+InternalDescribeBootEntry (
+  IN     APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
+  IN OUT OC_BOOT_ENTRY              *BootEntry
+  );
+
+BOOLEAN
+InternalIsAppleLegacyLoadApp (
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  );
+
+/**
+  Finds filesystem for discovered filesystem handle.
+  This solves the problem of checking scan policy multiple times
+  as well as the problem of finding the filesystem to add entries too.
+
+  @param[in] BootContext       Context of filesystems.
+  @param[in] FileSystemHandle  Partition handle.
+  @param[in] LazyScan          Lazy filesystem scanning.
+
+  @retval discovered filesystem (legit).
+  @retcal NULL when booting is not allowed from this filesystem.
+**/
+OC_BOOT_FILESYSTEM *
+InternalFileSystemForHandle (
+  IN OC_BOOT_CONTEXT  *BootContext,
+  IN EFI_HANDLE       FileSystemHandle,
+  IN BOOLEAN          LazyScan
   );
 
 /**

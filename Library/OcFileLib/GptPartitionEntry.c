@@ -266,17 +266,11 @@ OcPartitionGetDiskHandle (
            );
 }
 
-/**
-  Locate the disk's EFI System Partition.
-
-  @param[in]  DiskDevicePath     The Device Path of the disk to scan.
-  @param[out] EspDevicePathSize  The size of the returned Device Path.
-
-**/
 EFI_DEVICE_PATH_PROTOCOL *
 OcDiskFindSystemPartitionPath (
   IN  CONST EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath,
-  OUT UINTN                           *EspDevicePathSize
+  OUT UINTN                           *EspDevicePathSize,
+  OUT EFI_HANDLE                      *EspDeviceHandle
   )
 {
   EFI_DEVICE_PATH_PROTOCOL  *EspDevicePath;
@@ -299,6 +293,7 @@ OcDiskFindSystemPartitionPath (
 
   ASSERT (DiskDevicePath != NULL);
   ASSERT (EspDevicePathSize != NULL);
+  ASSERT (EspDeviceHandle != NULL);
 
   DebugPrintDevicePath (
     DEBUG_INFO,
@@ -375,6 +370,7 @@ OcDiskFindSystemPartitionPath (
     if (CompareGuid (&PartEntry->PartitionTypeGUID, &gEfiPartTypeSystemPartGuid)) {
       EspDevicePath = HdDevicePath;
       *EspDevicePathSize = HdDpSize;
+      *EspDeviceHandle = Handle;
       break;
     }
   }

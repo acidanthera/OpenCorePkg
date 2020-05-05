@@ -15,7 +15,7 @@
 
 #include "BootCompatInternal.h"
 
-#include <Guid/OcVariables.h>
+#include <Guid/OcVariable.h>
 #include <IndustryStandard/AppleHibernate.h>
 
 #include <Library/BaseLib.h>

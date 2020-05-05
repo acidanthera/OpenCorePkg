@@ -12,8 +12,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#ifndef OC_VARIABLES_H
-#define OC_VARIABLES_H
+#ifndef OC_VARIABLE_H
+#define OC_VARIABLE_H
 
 //
 // Variable used for OpenCore log storage (if enabled).
@@ -50,6 +50,17 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Boot Services only.
 //
 #define OC_SCAN_POLICY_VARIABLE_NAME         L"scan-policy"
+
+//
+// Variable used to report boot protection.
+//
+#define OC_BOOT_PROTECT_VARIABLE_NAME        L"boot-protect"
+
+//
+// Boot protection guids.
+//
+#define OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP BIT0
+#define OC_BOOT_PROTECT_VARIABLE_NAMESPACE BIT1
 
 //
 // Variable used to report OpenCore version in the following format:
@@ -114,4 +125,4 @@ extern EFI_GUID gOcVendorVariableGuid;
 extern EFI_GUID gOcReadOnlyVariableGuid;
 extern EFI_GUID gOcWriteOnlyVariableGuid;
 
-#endif // OC_VARIABLES_H
+#endif // OC_VARIABLE_H

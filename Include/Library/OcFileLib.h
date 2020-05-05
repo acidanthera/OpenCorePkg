@@ -244,6 +244,29 @@ FindWritableFileSystem (
   );
 
 /**
+  Open a file or directory by file system handle and path.
+  See OcOpenFileByDevicePath() for more details.
+
+  @param[in]  FileSystemHandle     File System handle.
+  @param[in]  RemainingDevicePath  The remaining Device Path (must be all file
+                                   path nodes).
+  @param[out] File                 Resulting file protocol.
+  @param[in]  OpenMode             File open mode.
+  @param[in]  Attributes           File attributes.
+
+  @retval EFI_SUCCESS on succesful open.
+**/
+EFI_STATUS
+EFIAPI
+OcOpenFileByRemainingDevicePath (
+  IN  EFI_HANDLE                      FileSystemHandle,
+  IN  CONST EFI_DEVICE_PATH_PROTOCOL  *RemainingDevicePath,
+  OUT EFI_FILE_PROTOCOL               **File,
+  IN  UINT64                          OpenMode,
+  IN  UINT64                          Attributes
+  );
+
+/**
   Open a file or directory by device path. This is a modified
   version of EfiOpenFileByDevicePath function, which handles paths
   with trailing slashes, that cause Open failure on old firmwares.
@@ -285,12 +308,14 @@ OcPartitionGetDiskHandle (
 
   @param[in]  DiskDevicePath     The Device Path of the disk to scan.
   @param[out] EspDevicePathSize  The size of the returned Device Path.
+  @param[out] EspDeviceHandle    Device handle of the returned partition.
 
 **/
 EFI_DEVICE_PATH_PROTOCOL *
 OcDiskFindSystemPartitionPath (
   IN  CONST EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath,
-  OUT UINTN                           *EspDevicePathSize
+  OUT UINTN                           *EspDevicePathSize,
+  OUT EFI_HANDLE                      *EspDeviceHandle
   );
 
 /**

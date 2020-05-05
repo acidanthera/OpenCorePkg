@@ -14,7 +14,7 @@
 
 #include "OpenRuntimePrivate.h"
 
-#include <Guid/OcVariables.h>
+#include <Guid/OcVariable.h>
 #include <Guid/GlobalVariable.h>
 #include <Guid/ImageAuthentication.h>
 #include <Guid/MicrosoftVariable.h>

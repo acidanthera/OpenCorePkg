@@ -567,6 +567,7 @@ command sequence may look as follows:
 \begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
 git clone https://github.com/acidanthera/audk UDK
 cd UDK
+git clone https://github.com/acidanthera/DuetPkg
 git clone https://github.com/acidanthera/EfiPkg
 git clone https://github.com/acidanthera/MacInfoPkg
 git clone https://github.com/acidanthera/OpenCorePkg
@@ -587,11 +588,13 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -I/UefiPackages/MdeModulePkg
 -I/UefiPackages/MdeModulePkg/Include
 -I/UefiPackages/MdeModulePkg/Include/X64
+-I/UefiPackages/DuetPkg/Include
 -I/UefiPackages/EfiPkg
 -I/UefiPackages/EfiPkg/Include
 -I/UefiPackages/EfiPkg/Include/X64
 -I/UefiPackages/AppleSupportPkg/Include
 -I/UefiPackages/OpenCorePkg/Include
+-I/UefiPackages/OvmfPkg/Include
 -I/UefiPackages/MacInfoPkg/Include
 -I/UefiPackages/UefiCpuPkg/Include
 -IInclude
@@ -2076,8 +2079,99 @@ blocking.
 
 \subsection{Introduction}\label{miscintro}
 
-This section contains miscellaneous configuration entries for OpenCore
-behaviour that does not go to any other sections
+This section contains miscellaneous configuration affecting OpenCore operating system loading behaviour
+as well as other entries, which do not go to any other section.
+
+OpenCore tries to follow ``bless'' model also known as ``Apple Boot Policy''. The primary specialty of
+``bless'' model is to allow embedding boot options within the file system (and be accessible through a
+specialised driver) as well as supporting a broader range of predefined boot paths compared to the
+removable media list found in the UEFI specification.
+
+Each partition will only be used for booting when it corresponds to ``Scan policy'': a set of restrictions
+to only use partitions with specific file systems and from specific device types. Scan policy behaviour is
+discussed in \texttt{ScanPolicy} property description.
+
+Scan process starts with obtaining all the partitions filtered with ``Scan policy''. Each partition may
+produce multiple primary and alternate options. Primary options describe operating systems installed
+on this media. Alternate options describe recovery options for the operating systems on the media.
+It is possible for alternate options to exist without primary options and vice versa. Be warned
+that the options may not necessarily describe the operating systems on the same partition.
+Each primary and alternate option can be an auxiliary option or not, refer to \texttt{HideAuxiliary}
+for more details. Algorithm to determine boot options behaves as follows:
+
+\begin{enumerate}
+\tightlist
+\item Obtain all available partition handles filtered by ``Scan policy'' (and driver availability).
+\item Obtain all available boot options from \texttt{BootOrder} UEFI variable.
+\item For each found boot option:
+  \begin{itemize}
+  \item Retrieve device path of the boot option.
+  % Scan policy restrictions are actually checked here as we want the function to be self-contained
+  % for non-scan based startup.
+  \item Perform fixups (e.g. NVMe subtype correction) and expansion (e.g. for Boot Camp) of the device path.
+  \item Obtain device handle by locating device path of the resulting device path (ignore it on failure).
+  \item Find device handle in the list of partition handles (ignore it if missing).
+  % To determine device path type we can use LocateDevicePath RemainingDevicePath argument. Just check whether
+  % it points to the END device path.
+  \item For disk device paths (not specifying a bootloader) execute ``bless'' (may return > 1 entry).
+  \item For file device paths check presence on the file system directly.
+  \item Exclude options with blacklisted filenames (refer to \texttt{BlacklistAppleUpdate} option).
+  % Just kill all \EFI\APPLE\ paths.
+  \item On OpenCore boot partition exclude all OpenCore bootstrap files by header checks.
+  \item Mark device handle as \textit{used} in the list of partition handles if any.
+  % Each partition handle will basically have a list of boot option entries for later quick lookup.
+  \item Register the resulting entries as primary options and determine their types. \\
+  The option will become auxiliary for some types (e.g. Apple HFS recovery).
+  \end{itemize}
+\item For each partition handle:
+  \begin{itemize}
+  \item If partition handle is marked as \textit{unused} execute ``bless'' primary option list retrieval. \\
+    In case \texttt{BlessOverride} list is set, not only standard ``bless'' paths will be found but
+    also custom ones.
+  \item Exclude options with blacklisted filenames (refer to \item{BlacklistAppleUpdate} option).
+  \item On OpenCore boot partition exclude all OpenCore bootstrap files by header checks.
+  \item Register the resulting entries as primary options and determine their types if found. \\
+  The option will become auxiliary for some types (e.g. Apple HFS recovery).
+  % Looking up primary and alternate handles could be done per handle to make sure the list is ordered.
+  \item If partition already has primary options of ``Apple Recovery'' type proceed to next handle.
+  \item Lookup alternate entries by ``bless'' recovery option list retrieval and predefined paths.
+  \item Register the resulting entries as alternate auxiliary options and determine their types if found.
+  \end{itemize}
+\item Custom entries and tools are added as primary options without any checks with respect to \texttt{Auxiliary}.
+\item System entries (e.g. \texttt{Reset NVRAM}) are added as primary auxiliary options.
+\end{enumerate}
+
+The display order of the boot options in the picker and the boot process are determined separately from the scanning
+algorithm. The display order as follows:
+
+\begin{itemize}
+\tightlist
+\item Alternate options follow corresponding primary options, i.e. Apple recovery will be following the
+  relevant macOS option whenever possible.
+\item Options will be listed in file system handle firmware order to maintain an established order across
+  the reboots regardless of the chosen operating system for loading.
+\item Custom entries, tools, and system entries will be added after all other options.
+\item Auxiliary options will only show upon entering ``Advanced Mode'' in the picker (usually by pressing ``Space'').
+\end{itemize}
+
+The boot process is as follows:
+\begin{itemize}
+\tightlist
+\item Try looking up first valid primary option through \texttt{BootNext} UEFI variable.
+\item On failure looking up first valid primary option through \texttt{BootOrder} UEFI variable.
+\item Mark the option as the default option to boot.
+\item Boot option through the picker or without it depending on the \texttt{ShowPicker} option.
+\item Show picker on failure otherwise.
+\end{itemize}
+
+\emph{Note 1}: This process is meant to work reliably only when \texttt{RequestBootVarRouting}
+option is enabled or the firmware does not control UEFI boot options (\texttt{DuetPkg} or
+custom BDS). Without \texttt{BootProtect} it also is possible that other operating systems
+overwrite OpenCore, make sure to enable it if you plan to use them.
+
+\emph{Note 2}: UEFI variable boot options' boot arguments will be dropped if present as they
+may contain arguments compromising the operating system, which is undesired once secure boot
+is enabled.
 
 \subsection{Properties}\label{miscprops}
 
@@ -2214,14 +2308,6 @@ behaviour that does not go to any other sections
   To see all entries picker menu needs to be reloaded in extended mode by pressing
   \texttt{Spacebar} key. Hiding auxiliary entries may increase boot performance
   for multidisk systems.
-
-\item
-  \texttt{HideSelf}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Hides own boot entry from boot picker. This
-  may potentially hide other entries, for instance, when another UEFI OS is
-  installed on the same volume and driver boot is used.
 
 \item
   \texttt{PickerAttributes}\\
@@ -2537,6 +2623,13 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   considered a security risk and thus is optional.
 
 \item
+  \texttt{BlacklistAppleUpdate}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Ignore boot options trying to update Apple peripheral firmware
+  (e.g. \texttt{MultiUpdater.efi}).
+
+\item
   \texttt{BootProtect}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{None}\\
@@ -2562,8 +2655,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   incompatibilities of any kind. While unlikely, the use of this option may even cause boot failure.
   Use at your own risk on boards known to be compatible.
 
-  \emph{Note 2}: Be warned that NVRAM reset will also erase the boot option created in
-  \texttt{Bootstrap} mode.
+  \emph{Note 2}: Be warned that while NVRAM reset executed from OpenCore should not erase the boot
+  option created in \texttt{Bootstrap}, executing NVRAM reset prior to loading OpenCore will remove it.
 
 \item
   \texttt{ExposeSensitiveData}\\

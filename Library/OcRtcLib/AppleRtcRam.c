@@ -16,7 +16,7 @@
 
 **/
 
-#include <Guid/OcVariables.h>
+#include <Guid/OcVariable.h>
 #include <Protocol/AppleRtcRam.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>

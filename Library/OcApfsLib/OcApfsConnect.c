@@ -23,7 +23,7 @@
 #include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
-#include <Guid/OcVariables.h>
+#include <Guid/OcVariable.h>
 #include <Protocol/ApfsUnsupportedBds.h>
 #include <Protocol/DevicePath.h>
 #include <Protocol/LoadedImage.h>
