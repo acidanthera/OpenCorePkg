@@ -61,9 +61,8 @@ matrix:
         - llvm-8-dev
 
     script:
-    - export CC=/usr/lib/llvm-8/bin/clang
-    - export CXX=/usr/lib/llvm-8/bin/clang++
     - export PYTHON_COMMAND=python3 # Something is broken in Travis CI environment, it asks for python3.7.
+    - sudo apt-get remove llvm-3.8 libllvm3.8 # Move LLVM 3.8 out of the way.
     - export PATH="/usr/lib/llvm-8/bin:$PATH" # Default compiler (7.0 or 3.8) has no LTO plugin.
     - export TOOLCHAINS=CLANG38
     - "./macbuild.tool"
