@@ -57,9 +57,11 @@ matrix:
         packages:
         - nasm
         - uuid-dev
+        - clang-8
 
     script:
     - export PYTHON_COMMAND=python3 # Something is broken in Travis CI environment, it asks for python3.7.
+    - export PATH="/usr/lib/llvm-8/bin:$PATH" # Default compiler (7.0 or 3.8) has no LTO plugin.
     - export TOOLCHAINS=CLANG38
     - "./macbuild.tool"
 
