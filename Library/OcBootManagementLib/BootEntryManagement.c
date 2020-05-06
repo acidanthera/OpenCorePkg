@@ -686,7 +686,7 @@ AddBootEntryFromBless (
     if (!EFI_ERROR (Status)) {
       Status = SimpleFs->OpenVolume (SimpleFs, &Root);
       if (!EFI_ERROR (Status)) {
-        Status = OcGetBooterFromPredefinedNameList (
+        Status = OcGetBooterFromPredefinedPathList (
           FileSystem->Handle,
           Root,
           (CONST CHAR16 **) BootContext->PickerContext->CustomBootPaths,
