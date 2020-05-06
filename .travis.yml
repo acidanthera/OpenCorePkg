@@ -68,9 +68,10 @@ matrix:
     - "./macbuild.tool"
     # Currently this is too ugly, but maybe we can use that in the future.
     - sudo apt-get install -y doxygen texlive texlive-latex-extra
-    - doxygen Doxyfile &> log.txt || tail -200 log.txt ; exit 1
-    - cd Doxy/latex || exit 1
-    - make pdf &> log.txt || tail -200 log.txt ; exit 1
+    - abort() { tail -200 log.txt ; exit 1 ; }
+    - doxygen Doxyfile &> log.txt || abort
+    - cd Doxy/latex || abort
+    - make pdf &> log.txt || abort
 
   - os: osx
     name: "Analyze Coverity"
