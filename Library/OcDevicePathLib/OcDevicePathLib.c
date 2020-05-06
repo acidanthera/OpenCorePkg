@@ -210,7 +210,7 @@ OcFixAppleBootDevicePathNodeRestore (
   if (NodeType == MESSAGING_DEVICE_PATH) {
     switch (NodeSubType) {
       case MSG_SATA_DP:
-        Node.Sata->PortMultiplierPortNumber = (UINT16) RestoreContext->Sata.PortMultiplierPortNumber;
+        Node.Sata->PortMultiplierPortNumber = RestoreContext->Sata.PortMultiplierPortNumber;
         break;
 
       //
@@ -221,7 +221,7 @@ OcFixAppleBootDevicePathNodeRestore (
       //
       case MSG_NVME_NAMESPACE_DP:
       case 0x22:
-        Node.NvmeNamespace->Header.SubType = (UINT8) RestoreContext->SasExNvme.SubType;
+        Node.NvmeNamespace->Header.SubType = RestoreContext->SasExNvme.SubType;
         break;
 
       default:

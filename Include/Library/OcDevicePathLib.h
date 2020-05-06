@@ -210,11 +210,11 @@ OcGetNumDevicePathInstances (
 ///
 typedef union {
   struct {
-    UINT32 PortMultiplierPortNumber;
+    UINT16 PortMultiplierPortNumber;
   } Sata;
 
   struct {
-    UINT32 SubType;
+    UINT8 SubType;
   } SasExNvme;
 
   struct {
