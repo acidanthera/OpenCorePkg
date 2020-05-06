@@ -1309,7 +1309,7 @@ AddFileSystemEntryForCustom (
   // When there are no custom entries and NVRAM reset is hidden
   // we have no work to do.
   //
-  if (BootContext->PickerContext->NumCustomBootPaths == 0
+  if (BootContext->PickerContext->AllCustomEntryCount == 0
     && (!BootContext->PickerContext->ShowNvramReset
       || BootContext->PickerContext->HideAuxiliary)) {
     return EFI_NOT_FOUND;
@@ -1319,7 +1319,7 @@ AddFileSystemEntryForCustom (
     DEBUG_INFO,
     "OCB: Adding fs %p for %u custom entries%a%a\n",
     OC_CUSTOM_FS_HANDLE,
-    BootContext->PickerContext->NumCustomBootPaths,
+    BootContext->PickerContext->AllCustomEntryCount,
     BootContext->PickerContext->ShowNvramReset ? " and nvram reset" : "",
     BootContext->PickerContext->HideAuxiliary ? " (aux hidden)" : " (aux shown)"
     ));
