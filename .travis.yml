@@ -58,8 +58,11 @@ matrix:
         - nasm
         - uuid-dev
         - clang-8
+        - llvm-8-dev
 
     script:
+    - export CC=/usr/lib/llvm-8/bin/clang
+    - export CXX=/usr/lib/llvm-8/bin/clang++
     - export PYTHON_COMMAND=python3 # Something is broken in Travis CI environment, it asks for python3.7.
     - export PATH="/usr/lib/llvm-8/bin:$PATH" # Default compiler (7.0 or 3.8) has no LTO plugin.
     - export TOOLCHAINS=CLANG38
