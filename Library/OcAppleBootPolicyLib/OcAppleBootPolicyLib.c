@@ -94,6 +94,14 @@ BootPolicyGetApfsRecoveryFilePath (
   OUT EFI_HANDLE                *DeviceHandle
   );
 
+EFI_STATUS
+EFIAPI
+BootPolicyGetAllApfsRecoveryFilePath (
+  IN  EFI_HANDLE  Handle OPTIONAL,
+  OUT VOID        **Volumes,
+  OUT UINTN       *NumberOfEntries
+  );
+
 ///
 /// The APPLE_BOOT_POLICY_PROTOCOL instance to get installed.
 ///
@@ -103,7 +111,7 @@ STATIC APPLE_BOOT_POLICY_PROTOCOL mAppleBootPolicyProtocol = {
   BootPolicyGetBootFileEx,
   BootPolicyDevicePathToDirPath,
   BootPolicyGetApfsRecoveryFilePath,
-  OcBootPolicyGetAllApfsRecoveryFilePath
+  BootPolicyGetAllApfsRecoveryFilePath
 };
 
 /**
@@ -875,6 +883,9 @@ OcBootPolicyGetBootFile (
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem;
   EFI_FILE_PROTOCOL               *Root;
 
+  ASSERT (Device != NULL);
+  ASSERT (FilePath != NULL);
+
   *FilePath = NULL;
   Root = NULL;
 
@@ -921,6 +932,10 @@ BootPolicyGetBootFile (
   IN OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
   )
 {
+  if (Device == NULL || FilePath == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
   return OcBootPolicyGetBootFile (
     Device,
     gAppleBootPolicyPredefinedPaths,
@@ -944,6 +959,9 @@ OcBootPolicyGetBootFileEx (
   EFI_FILE_PROTOCOL               *Root;
   APPLE_APFS_CONTAINER_INFO       *ContainerInfo;
   APPLE_APFS_VOLUME_INFO          *VolumeInfo;
+
+  ASSERT (Device != NULL);
+  ASSERT (FilePath != NULL);
 
   *FilePath = NULL;
   Root = NULL;
@@ -1023,6 +1041,10 @@ BootPolicyGetBootFileEx (
   OUT EFI_DEVICE_PATH_PROTOCOL        **FilePath
   )
 {
+  if (Device == NULL || FilePath == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
   return OcBootPolicyGetBootFileEx (
     Device,
     gAppleBootPolicyPredefinedPaths,
@@ -1045,6 +1067,11 @@ OcBootPolicyDevicePathToDirPath (
 
   EFI_HANDLE                      DeviceHandle;
   CHAR16                          *PathName;
+
+  ASSERT (DevicePath != NULL);
+  ASSERT (BootPathName != NULL);
+  ASSERT (Device != NULL);
+  ASSERT (ApfsVolumeHandle != NULL);
 
   *BootPathName     = NULL;
   *Device           = NULL;
@@ -1091,6 +1118,13 @@ BootPolicyDevicePathToDirPath (
   OUT EFI_HANDLE                *ApfsVolumeHandle
   )
 {
+  if (DevicePath       == NULL
+   || BootPathName     == NULL
+   || Device           == NULL
+   || ApfsVolumeHandle == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
   return OcBootPolicyDevicePathToDirPath (
     DevicePath,
     gAppleBootPolicyPredefinedPaths,
@@ -1141,15 +1175,15 @@ OcBootPolicyGetApfsRecoveryFilePath (
 
   EFI_FILE_INFO                   *FileInfo;
 
-  Result = EFI_INVALID_PARAMETER;
+  ASSERT (DevicePath != NULL);
+  ASSERT (PathName != NULL);
+  ASSERT (FullPathName != NULL);
+  ASSERT (Root != NULL);
+  ASSERT (DeviceHandle != NULL);
 
   NewHandle     = NULL;
   *Root         = NULL;
   *FullPathName = NULL;
-
-  if (PathName == NULL || DevicePath == NULL) {
-    return EFI_NOT_FOUND;
-  }
 
   Status = OcBootPolicyDevicePathToDirPath (
              DevicePath,
@@ -1317,6 +1351,15 @@ BootPolicyGetApfsRecoveryFilePath (
   OUT EFI_HANDLE                *DeviceHandle
   )
 {
+  if (DevicePath   == NULL
+   || PathName     == NULL
+   || FullPathName == NULL
+   || Reserved     == NULL
+   || Root         == NULL
+   || DeviceHandle == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
   *Reserved = NULL;
 
   return OcBootPolicyGetApfsRecoveryFilePath (
@@ -1331,7 +1374,6 @@ BootPolicyGetApfsRecoveryFilePath (
 }
 
 EFI_STATUS
-EFIAPI
 OcBootPolicyGetAllApfsRecoveryFilePath (
   IN  EFI_HANDLE  Handle OPTIONAL,
   OUT VOID        **Volumes,
@@ -1358,6 +1400,9 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
   EFI_FILE_INFO                   *FileInfo;
   APFS_VOLUME_ROOT                *ApfsRoot;
 
+  ASSERT (Volumes != NULL);
+  ASSERT (NumberOfEntries != NULL);
+
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
                   &gEfiSimpleFileSystemProtocolGuid,
@@ -1370,17 +1415,11 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
     return Status;
   }
 
-  if (NumberOfEntries > 0) {
-    VolumeInfo = AllocateZeroPool (NumberOfHandles * sizeof (*VolumeInfo));
-    ContainerGuids = AllocateZeroPool (NumberOfHandles * sizeof (*ContainerGuids));
+  VolumeInfo = AllocateZeroPool (NumberOfHandles * sizeof (*VolumeInfo));
+  ContainerGuids = AllocateZeroPool (NumberOfHandles * sizeof (*ContainerGuids));
 
-    if (VolumeInfo == NULL || ContainerGuids == NULL) {
-      Status = EFI_OUT_OF_RESOURCES;
-    }
-  } else {
-    Status = EFI_NOT_FOUND;
-    VolumeInfo = NULL;
-    ContainerGuids = NULL;
+  if (VolumeInfo == NULL || ContainerGuids == NULL) {
+    Status = EFI_OUT_OF_RESOURCES;
   }
 
   if (EFI_ERROR (Status)) {
@@ -1555,6 +1594,25 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
   }
 
   return Status;
+}
+
+EFI_STATUS
+EFIAPI
+BootPolicyGetAllApfsRecoveryFilePath (
+  IN  EFI_HANDLE  Handle OPTIONAL,
+  OUT VOID        **Volumes,
+  OUT UINTN       *NumberOfEntries
+  )
+{
+  if (Volumes == NULL || NumberOfEntries == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  return OcBootPolicyGetAllApfsRecoveryFilePath (
+    Handle,
+    Volumes,
+    NumberOfEntries
+    );
 }
 
 APPLE_BOOT_POLICY_PROTOCOL *

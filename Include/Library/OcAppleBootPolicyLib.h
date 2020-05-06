@@ -176,7 +176,6 @@ OcBootPolicyGetApfsRecoveryFilePath (
   @retval other          An unexpected error has occured.
 */
 EFI_STATUS
-EFIAPI
 OcBootPolicyGetAllApfsRecoveryFilePath (
   IN  EFI_HANDLE  Handle OPTIONAL,
   OUT VOID        **Volumes,
