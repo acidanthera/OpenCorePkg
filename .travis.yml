@@ -59,6 +59,9 @@ matrix:
         - uuid-dev
         - clang-8
         - llvm-8-dev
+        - doxygen
+        - texlive
+        - texlive-latex-extra
 
     script:
     - export PYTHON_COMMAND=python3 # Something is broken in Travis CI environment, it asks for python3.7.
@@ -66,6 +69,10 @@ matrix:
     - export PATH="/usr/lib/llvm-8/bin:$PATH" # Default compiler (7.0 or 3.8) has no LTO plugin.
     - export TOOLCHAINS=CLANG38
     - "./macbuild.tool"
+    # Currently this is too ugly, but maybe we can use that in the future.
+    - doxygen Doxyfile &> log.txt || tail -200 log.txt ; exit 1
+    - cd Doxy/latex || exit 1
+    - make pdf &> log.txt || tail -200 log.txt ; exit 1
 
   - os: osx
     name: "Analyze Coverity"

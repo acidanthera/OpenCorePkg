@@ -35,3 +35,4 @@ prelinkedkernel.unpack
 *.chunklist
 *.pyc
 Debug/QemuRun
+Doxy
