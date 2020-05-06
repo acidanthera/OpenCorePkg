@@ -1344,7 +1344,6 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
   EFI_HANDLE                      *HandleBuffer;
   APFS_VOLUME_INFO                *VolumeInfo;
   GUID                            *ContainerGuids;
-  EFI_GUID                        ContainerGuid;
   UINTN                           NumberOfContainers;
   UINTN                           NumberOfVolumeInfos;
   UINTN                           Index;
@@ -1417,7 +1416,7 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
 
     GuidPresent = FALSE;
     for (Index2 = 0; Index2 < NumberOfContainers; ++Index2) {
-      if (CompareGuid (&ContainerGuids[Index2], &ContainerGuid)) {
+      if (CompareGuid (&ContainerGuids[Index2], &VolumeInfo[NumberOfVolumeInfos].ContainerGuid)) {
         GuidPresent = TRUE;
         break;
       }
