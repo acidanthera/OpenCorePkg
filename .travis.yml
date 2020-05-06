@@ -36,8 +36,10 @@ matrix:
         packages:
         - nasm
         - uuid-dev
+        - libssl-dev
 
     script:
+    - export PYTHON_COMMAND=python3 # Something is broken in Travis CI environment, it asks for python3.7.
     - llvmfile="clang+llvm-9.0.1-x86_64-linux-gnu-ubuntu-16.04"
     - curl -LO "https://github.com/llvm/llvm-project/releases/download/llvmorg-9.0.1/${llvmfile}.tar.xz" || exit 1
     - llvmsum=$(shasum -a 256 "${llvmfile}.tar.xz" | cut -f1 -d' ')
@@ -45,6 +47,20 @@ matrix:
     - if [ "$llvmsum" != "$llvmexpsum" ]; then echo "Invalid LLVM checksum $llvmsum" ; exit 1 ; fi
     - tar -xf "${llvmfile}.tar.xz" || exit 1
     - export PATH="$(pwd)/${llvmfile}/bin:$PATH"
+    - "./macbuild.tool"
+
+  - os: linux
+    name: "Build Linux CLANG38"
+    dist: xenial
+    addons:
+      apt:
+        packages:
+        - nasm
+        - uuid-dev
+
+    script:
+    - export PYTHON_COMMAND=python3 # Something is broken in Travis CI environment, it asks for python3.7.
+    - export TOOLCHAINS=CLANG38
     - "./macbuild.tool"
 
   - os: osx
