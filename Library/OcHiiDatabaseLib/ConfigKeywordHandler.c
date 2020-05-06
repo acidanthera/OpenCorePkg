@@ -2797,8 +2797,8 @@ Done:
   @retval EFI_SUCCESS             The specified action was completed successfully.
 
   @retval EFI_INVALID_PARAMETER   One or more of the following are TRUE:
-                                  1. KeywordString is NULL.
-                                  2. Parsing of the KeywordString resulted in an
+                                  \c 1. KeywordString is NULL.
+                                  \c 2. Parsing of the KeywordString resulted in an
                                      error. See Progress and ProgressErr for more data.
 
   @retval EFI_NOT_FOUND           An element of the KeywordString was not found.

@@ -68,7 +68,7 @@ GetArguments (
 /**
   Uninstall all protocols with the specified GUID.
 
-  @param[in] Protocol    The published unique identifier of the protocol. It is the caller’s responsibility to pass in
+  @param[in] Protocol    The published unique identifier of the protocol. It is the caller's responsibility to pass in
                          a valid GUID.
 
   @retval EFI_SUCCESS on success.
