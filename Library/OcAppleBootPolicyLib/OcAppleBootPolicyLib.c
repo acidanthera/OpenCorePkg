@@ -49,12 +49,15 @@ typedef struct {
 ///
 /// An array of file paths to search for in case no file is blessed.
 ///
-STATIC CONST CHAR16 *mBootPathNames[] = {
+GLOBAL_REMOVE_IF_UNREFERENCED CONST CHAR16 *gAppleBootPolicyPredefinedPaths[] = {
   APPLE_BOOTER_DEFAULT_FILE_NAME,
   APPLE_REMOVABLE_MEDIA_FILE_NAME,
   EFI_REMOVABLE_MEDIA_FILE_NAME,
   APPLE_BOOTER_ROOT_FILE_NAME
 };
+
+GLOBAL_REMOVE_IF_UNREFERENCED CONST UINTN gAppleBootPolicyNumPredefinedPaths =
+  ARRAY_SIZE (gAppleBootPolicyPredefinedPaths);
 
 EFI_STATUS
 EFIAPI
@@ -91,14 +94,6 @@ BootPolicyGetApfsRecoveryFilePath (
   OUT EFI_HANDLE                *DeviceHandle
   );
 
-EFI_STATUS
-EFIAPI
-BootPolicyGetAllApfsRecoveryFilePath (
-  IN  EFI_HANDLE  Handle,
-  OUT VOID        **Volumes,
-  OUT UINTN       *NumberOfEntries
-  );
-
 ///
 /// The APPLE_BOOT_POLICY_PROTOCOL instance to get installed.
 ///
@@ -108,7 +103,7 @@ STATIC APPLE_BOOT_POLICY_PROTOCOL mAppleBootPolicyProtocol = {
   BootPolicyGetBootFileEx,
   BootPolicyDevicePathToDirPath,
   BootPolicyGetApfsRecoveryFilePath,
-  BootPolicyGetAllApfsRecoveryFilePath
+  OcBootPolicyGetAllApfsRecoveryFilePath
 };
 
 /**
@@ -330,11 +325,11 @@ InternalGetBooterFromBlessedSystemFolderPath (
 }
 
 EFI_STATUS
-OcGetBooterFromPredefinedNameList (
+OcGetBooterFromPredefinedPathList (
   IN  EFI_HANDLE                Device,
   IN  EFI_FILE_PROTOCOL         *Root,
-  IN  CONST CHAR16              **BootPathNames,
-  IN  UINTN                     NumBootPathNames,
+  IN  CONST CHAR16              **PredefinedPaths,
+  IN  UINTN                     NumPredefinedPaths,
   OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath  OPTIONAL,
   IN  CHAR16                    *Prefix       OPTIONAL
   )
@@ -345,8 +340,8 @@ OcGetBooterFromPredefinedNameList (
   CONST CHAR16  *PathName;
   EFI_STATUS    Status;
 
-  for (Index = 0; Index < NumBootPathNames; ++Index) {
-    PathName = BootPathNames[Index];
+  for (Index = 0; Index < NumPredefinedPaths; ++Index) {
+    PathName = PredefinedPaths[Index];
 
     //
     // For relative paths (i.e. when Prefix is a volume GUID) we must
@@ -461,10 +456,12 @@ InternalGetApfsVolumeInfo (
 
 STATIC
 EFI_STATUS
-InternalGetBooterFromApfsVolumePredefinedNameList (
+InternalGetBooterFromApfsVolumePredefinedPathList (
   IN     EFI_HANDLE                      Device,
   IN     EFI_FILE_PROTOCOL               *PrebootRoot,
   IN     CHAR16                          *VolumeDirectoryName,
+  IN     CONST CHAR16                    **PredefinedPaths,
+  IN     UINTN                           NumPredefinedPaths,
   IN OUT EFI_DEVICE_PATH_PROTOCOL        **DevicePath  OPTIONAL
   )
 {
@@ -510,11 +507,11 @@ InternalGetBooterFromApfsVolumePredefinedNameList (
     ));
 
   if ((VolumeDirectoryInfo->Attribute & EFI_FILE_DIRECTORY) != 0) {
-    Status = OcGetBooterFromPredefinedNameList (
+    Status = OcGetBooterFromPredefinedPathList (
       Device,
       VolumeDirectoryHandle,
-      mBootPathNames,
-      ARRAY_SIZE (mBootPathNames),
+      PredefinedPaths,
+      NumPredefinedPaths,
       DevicePath,
       VolumeDirectoryName
       );
@@ -534,11 +531,13 @@ InternalGetBooterFromApfsVolumePredefinedNameList (
 **/
 STATIC
 EFI_STATUS
-InternalGetBooterFromApfsPredefinedNameList (
+InternalGetBooterFromApfsPredefinedPathList (
   IN  EFI_HANDLE                      Device,
   IN  EFI_FILE_PROTOCOL               *PrebootRoot,
   IN  CONST GUID                      *ContainerUuid,
   IN  CONST CHAR16                    *VolumeUuid  OPTIONAL,
+  IN  CONST CHAR16                    **PredefinedPaths,
+  IN  UINTN                           NumPredefinedPaths,
   OUT EFI_DEVICE_PATH_PROTOCOL        **DevicePath  OPTIONAL,
   OUT EFI_HANDLE                      *VolumeHandle  OPTIONAL
   )
@@ -653,10 +652,12 @@ InternalGetBooterFromApfsPredefinedNameList (
       *VolumeHandle = HandleBuffer[Index];
     }
 
-    TmpStatus = InternalGetBooterFromApfsVolumePredefinedNameList (
+    TmpStatus = InternalGetBooterFromApfsVolumePredefinedPathList (
       Device,
       PrebootRoot,
       VolumeDirectoryName,
+      PredefinedPaths,
+      NumPredefinedPaths,
       DevicePath != NULL ? &VolumeDevPath : NULL
       );
 
@@ -800,6 +801,8 @@ EFI_STATUS
 InternalGetApfsVolumeHandle (
   IN  EFI_HANDLE                DeviceHandle,
   IN  CHAR16                    *PathName,
+  IN  CONST CHAR16              **PredefinedPaths,
+  IN  UINTN                     NumPredefinedPaths,
   OUT EFI_HANDLE                *ApfsVolumeHandle
   )
 {
@@ -837,11 +840,16 @@ InternalGetApfsVolumeHandle (
 
   Status = InternalGetApfsSpecialFileInfo (Root, NULL, &ContainerInfo);
   if (!EFI_ERROR (Status)) {
-    Status = InternalGetBooterFromApfsPredefinedNameList (
+    //
+    // FIXME: ApfsVolumeHandle is only returned when a predefined path exists
+    //
+    Status = InternalGetBooterFromApfsPredefinedPathList (
       DeviceHandle,
       Root,
       &ContainerInfo->Uuid,
       FilePathName,
+      PredefinedPaths,
+      NumPredefinedPaths,
       NULL,
       ApfsVolumeHandle
       );
@@ -854,33 +862,11 @@ InternalGetApfsVolumeHandle (
   return Status;
 }
 
-/**
-  Locates the bootable file of the given volume.  Prefered are the values
-  blessed, though if unavailable, hard-coded names are being verified and used
-  if existing.
-
-  The blessed paths are to be determined by the HFS Driver via
-  EFI_FILE_PROTOCOL.GetInfo().  The related identifier definitions are to be
-  found in AppleBless.h.
-
-  @param[in]  Device    The Device's Handle to perform the search on.
-  @param[out] FilePath  A pointer to the device path pointer to set to the file
-                        path of the boot file.
-
-  @return                       The status of the operation is returned.
-  @retval EFI_NOT_FOUND         A bootable file could not be found on the given
-                                volume.
-  @retval EFI_OUT_OF_RESOURCES  The memory necessary to complete the operation
-                                could not be allocated.
-  @retval EFI_SUCCESS           The operation completed successfully and the
-                                PathName Buffer has been filled.
-  @retval other                 The status of an operation used to complete
-                                this operation is returned.
-**/
 EFI_STATUS
-EFIAPI
-BootPolicyGetBootFile (
+OcBootPolicyGetBootFile (
   IN     EFI_HANDLE                Device,
+  IN  CONST CHAR16                 **PredefinedPaths,
+  IN  UINTN                        NumPredefinedPaths,
   IN OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
   )
 {
@@ -912,11 +898,11 @@ BootPolicyGetBootFile (
   if (EFI_ERROR (Status)) {
     Status = InternalGetBooterFromBlessedSystemFolderPath (Device, Root, FilePath);
     if (EFI_ERROR (Status)) {
-      Status = OcGetBooterFromPredefinedNameList (
+      Status = OcGetBooterFromPredefinedPathList (
                  Device,
                  Root,
-                 mBootPathNames,
-                 ARRAY_SIZE (mBootPathNames),
+                 PredefinedPaths,
+                 NumPredefinedPaths,
                  FilePath,
                  NULL
                  );
@@ -930,9 +916,24 @@ BootPolicyGetBootFile (
 
 EFI_STATUS
 EFIAPI
-BootPolicyGetBootFileEx (
+BootPolicyGetBootFile (
+  IN     EFI_HANDLE                Device,
+  IN OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
+  )
+{
+  return OcBootPolicyGetBootFile (
+    Device,
+    gAppleBootPolicyPredefinedPaths,
+    ARRAY_SIZE (gAppleBootPolicyPredefinedPaths),
+    FilePath
+    );
+}
+
+EFI_STATUS
+OcBootPolicyGetBootFileEx (
   IN  EFI_HANDLE                      Device,
-  IN  BOOT_POLICY_ACTION              Action,
+  IN  CONST CHAR16                    **PredefinedPaths,
+  IN  UINTN                           NumPredefinedPaths,
   OUT EFI_DEVICE_PATH_PROTOCOL        **FilePath
   )
 {
@@ -975,11 +976,13 @@ BootPolicyGetBootFileEx (
       //
       // Blessed entry is always first, and subsequent entries are added with deduplication.
       //
-      Status = InternalGetBooterFromApfsPredefinedNameList (
+      Status = InternalGetBooterFromApfsPredefinedPathList (
                  Device,
                  Root,
                  &ContainerInfo->Uuid,
                  NULL,
+                 PredefinedPaths,
+                 NumPredefinedPaths,
                  FilePath,
                  NULL
                  );
@@ -995,11 +998,11 @@ BootPolicyGetBootFileEx (
     if (EFI_ERROR (Status)) {
       Status = InternalGetBooterFromBlessedSystemFolderPath (Device, Root, FilePath);
       if (EFI_ERROR (Status)) {
-        Status = OcGetBooterFromPredefinedNameList (
+        Status = OcGetBooterFromPredefinedPathList (
                    Device,
                    Root,
-                   mBootPathNames,
-                   ARRAY_SIZE (mBootPathNames),
+                   PredefinedPaths,
+                   NumPredefinedPaths,
                    FilePath,
                    NULL
                    );
@@ -1014,8 +1017,25 @@ BootPolicyGetBootFileEx (
 
 EFI_STATUS
 EFIAPI
-BootPolicyDevicePathToDirPath (
+BootPolicyGetBootFileEx (
+  IN  EFI_HANDLE                      Device,
+  IN  BOOT_POLICY_ACTION              Action,
+  OUT EFI_DEVICE_PATH_PROTOCOL        **FilePath
+  )
+{
+  return OcBootPolicyGetBootFileEx (
+    Device,
+    gAppleBootPolicyPredefinedPaths,
+    ARRAY_SIZE (gAppleBootPolicyPredefinedPaths),
+    FilePath
+    );
+}
+
+EFI_STATUS
+OcBootPolicyDevicePathToDirPath (
   IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN  CONST CHAR16              **PredefinedPaths,
+  IN  UINTN                     NumPredefinedPaths,
   OUT CHAR16                    **BootPathName,
   OUT EFI_HANDLE                *Device,
   OUT EFI_HANDLE                *ApfsVolumeHandle
@@ -1051,18 +1071,43 @@ BootPolicyDevicePathToDirPath (
   // InternalGetApfsVolumeHandle status code is ignored, as ApfsVolumeHandle
   // may not exist.
   //
-  (VOID) InternalGetApfsVolumeHandle (DeviceHandle, PathName, ApfsVolumeHandle);
+  (VOID) InternalGetApfsVolumeHandle (
+    DeviceHandle,
+    PathName,
+    PredefinedPaths,
+    NumPredefinedPaths,
+    ApfsVolumeHandle
+    );
 
   return EFI_SUCCESS;
 }
 
 EFI_STATUS
 EFIAPI
-BootPolicyGetApfsRecoveryFilePath (
+BootPolicyDevicePathToDirPath (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  OUT CHAR16                    **BootPathName,
+  OUT EFI_HANDLE                *Device,
+  OUT EFI_HANDLE                *ApfsVolumeHandle
+  )
+{
+  return OcBootPolicyDevicePathToDirPath (
+    DevicePath,
+    gAppleBootPolicyPredefinedPaths,
+    ARRAY_SIZE (gAppleBootPolicyPredefinedPaths),
+    BootPathName,
+    Device,
+    ApfsVolumeHandle
+    );
+}
+
+EFI_STATUS
+OcBootPolicyGetApfsRecoveryFilePath (
   IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
   IN  CONST CHAR16              *PathName,
+  IN  CONST CHAR16              **PredefinedPaths,
+  IN  UINTN                     NumPredefinedPaths,
   OUT CHAR16                    **FullPathName,
-  OUT VOID                      **Reserved,
   OUT EFI_FILE_PROTOCOL         **Root,
   OUT EFI_HANDLE                *DeviceHandle
   )
@@ -1101,14 +1146,15 @@ BootPolicyGetApfsRecoveryFilePath (
   NewHandle     = NULL;
   *Root         = NULL;
   *FullPathName = NULL;
-  *Reserved     = NULL;
 
   if (PathName == NULL || DevicePath == NULL) {
     return EFI_NOT_FOUND;
   }
 
-  Status = BootPolicyDevicePathToDirPath (
+  Status = OcBootPolicyDevicePathToDirPath (
              DevicePath,
+             PredefinedPaths,
+             NumPredefinedPaths,
              &BootPathName,
              &Device,
              &VolumeHandle
@@ -1262,8 +1308,32 @@ BootPolicyGetApfsRecoveryFilePath (
 
 EFI_STATUS
 EFIAPI
-BootPolicyGetAllApfsRecoveryFilePath (
-  IN  EFI_HANDLE  Handle,
+BootPolicyGetApfsRecoveryFilePath (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN  CONST CHAR16              *PathName,
+  OUT CHAR16                    **FullPathName,
+  OUT VOID                      **Reserved,
+  OUT EFI_FILE_PROTOCOL         **Root,
+  OUT EFI_HANDLE                *DeviceHandle
+  )
+{
+  *Reserved = NULL;
+
+  return OcBootPolicyGetApfsRecoveryFilePath (
+    DevicePath,
+    PathName,
+    gAppleBootPolicyPredefinedPaths,
+    ARRAY_SIZE (gAppleBootPolicyPredefinedPaths),
+    FullPathName,
+    Root,
+    DeviceHandle
+    );
+}
+
+EFI_STATUS
+EFIAPI
+OcBootPolicyGetAllApfsRecoveryFilePath (
+  IN  EFI_HANDLE  Handle OPTIONAL,
   OUT VOID        **Volumes,
   OUT UINTN       *NumberOfEntries
   )
