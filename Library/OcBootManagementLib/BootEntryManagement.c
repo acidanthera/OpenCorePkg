@@ -1167,11 +1167,19 @@ AddBootEntryFromBootOption (
   // avoid detection of e.g. generic booters (such as BOOTx64) to avoid
   // duplicates.
   //
+  // The amount of paths depends on the kind of the entry.
+  // - If this is a root entry (i.e. it points to the partition)
+  //   we invoke full bless, as it may be Windows entry created by legacy NVRAM script.
+  // - If this is a full entry (i.e. it points to the bootloader)
+  //   we invoke partial bless, which ignores BOOTx64.efi.
+  //   Ignoring BOOTx64.efi is important as we may already have bootmgfw.efi as our entry,
+  //   and we do not want to see Windows added twice.
+  //
   Status = AddBootEntryFromBless (
     BootContext,
     FileSystem,
     gAppleBootPolicyPredefinedPaths,
-    gAppleBootPolicyCoreNumPredefinedPaths,
+    IsRoot ? gAppleBootPolicyNumPredefinedPaths : gAppleBootPolicyCoreNumPredefinedPaths,
     LazyScan,
     TRUE
     );
