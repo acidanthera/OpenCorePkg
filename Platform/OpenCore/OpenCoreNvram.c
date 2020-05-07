@@ -251,7 +251,7 @@ OcSetNvramVariable (
       VariableData
       );
     DEBUG ((
-      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      EFI_ERROR (Status) && VariableSize > 0 ? DEBUG_WARN : DEBUG_INFO,
       "OC: Setting NVRAM %g:%a - %r\n",
       VariableGuid,
       AsciiVariableName,
