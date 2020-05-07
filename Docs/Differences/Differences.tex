@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue May  5 21:20:35 2020
-%DIF ADD ../Configuration.tex        Tue May  5 21:25:25 2020
+%DIF DEL PreviousConfiguration.tex   Thu May  7 21:45:28 2020
+%DIF ADD ../Configuration.tex        Thu May  7 22:51:38 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -428,7 +428,78 @@ be relied upon, and all fields must be properly specified in the configuration.
 \subsection{Directory Structure}\label{directory-structure}
 
 \begin{center}
-\begin{tikzpicture}[%
+\DIFdelbegin %DIFDELCMD < \begin{tikzpicture}[%
+%DIFDELCMD <   grow via three points={one child at (0.5,-0.7) and
+%DIFDELCMD <   two children at (0.5,-0.7) and (0.5,-1.4)},
+%DIFDELCMD <   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
+%DIFDELCMD <   \node {ESP}
+%DIFDELCMD <     child { node {EFI}
+%DIFDELCMD <       child { node {BOOT}
+%DIFDELCMD <         child { node [selected] {BOOTx64.efi}}
+%DIFDELCMD <       }
+%DIFDELCMD <       child [missing] {}
+%DIFDELCMD <       child { node {OC}
+%DIFDELCMD <         child { node {ACPI}
+%DIFDELCMD <           child { node [optional] {DSDT.aml}}
+%DIFDELCMD <           child { node [optional] {SSDT-1.aml}}
+%DIFDELCMD <           child { node [optional] {MYTABLE.aml}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node {Drivers}
+%DIFDELCMD <           child { node [optional] {MyDriver.efi}}
+%DIFDELCMD <           child { node [optional] {OtherDriver.efi}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node {Kexts}
+%DIFDELCMD <           child { node [optional] {MyKext.kext}}
+%DIFDELCMD <           child { node [optional] {OtherKext.kext}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node [optional] {Resources}
+%DIFDELCMD <           child { node [optional] {Audio}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node  {Tools}
+%DIFDELCMD <           child { node [optional] {Tool.efi}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node [selected] {OpenCore.efi}}
+%DIFDELCMD <         child { node [optional] {vault.plist}}
+%DIFDELCMD <         child { node {config.plist}}
+%DIFDELCMD <         child { node [optional] {vault.sig}}
+%DIFDELCMD <       }
+%DIFDELCMD <     }
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child { node [optional] {nvram.plist}}
+%DIFDELCMD <     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
+%DIFDELCMD <   ;
+%DIFDELCMD < \end{tikzpicture}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \begin{tikzpicture}[%
   grow via three points={one child at (0.5,-0.7) and
   two children at (0.5,-0.7) and (0.5,-1.4)},
   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
@@ -447,6 +518,10 @@ be relied upon, and all fields must be properly specified in the configuration.
         child [missing] {}
         child [missing] {}
         child [missing] {}
+        child { node {Bootstrap}
+          child { node [selected] {Bootstrap.efi}}
+        }
+        child [missing] {}
         child { node {Drivers}
           child { node [optional] {MyDriver.efi}}
           child { node [optional] {OtherDriver.efi}}
@@ -461,7 +536,13 @@ be relied upon, and all fields must be properly specified in the configuration.
         child [missing] {}
         child { node [optional] {Resources}
           child { node [optional] {Audio}}
+          child { node [optional] {Font}}
+          child { node [optional] {Image}}
+          child { node [optional] {Label}}
         }
+        child [missing] {}
+        child [missing] {}
+        child [missing] {}
         child [missing] {}
         child { node  {Tools}
           child { node [optional] {Tool.efi}}
@@ -494,11 +575,17 @@ be relied upon, and all fields must be properly specified in the configuration.
     child [missing] {}
     child [missing] {}
     child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
+    child { node [optional] {boot}} 
     child { node [optional] {nvram.plist}}
     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
   ;
 \end{tikzpicture}
-\break
+\DIFaddend \break
 \label{fig:DS}
 Figure 1. Directory Structure
 \end{center}
@@ -2245,6 +2332,11 @@ overwrite OpenCore, make sure to enable it if you plan to use them.
 \emph{\DIFadd{Note 2}}\DIFadd{: UEFI variable boot options' boot arguments will be dropped if present as they
 may contain arguments compromising the operating system, which is undesired once secure boot
 is enabled.
+}
+
+\emph{\DIFadd{Note 3}}\DIFadd{: Some operating systems, namely Windows, will create their boot option and 
+mark it as top most upon first boot or after NVRAM Reset. When this happens default boot 
+entry choice will update till next manual reconfiguration.
 }
 
 \DIFaddend \subsection{Properties}\label{miscprops}
