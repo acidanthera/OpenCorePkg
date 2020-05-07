@@ -59,6 +59,8 @@ GLOBAL_REMOVE_IF_UNREFERENCED CONST CHAR16 *gAppleBootPolicyPredefinedPaths[] = 
 GLOBAL_REMOVE_IF_UNREFERENCED CONST UINTN gAppleBootPolicyNumPredefinedPaths =
   ARRAY_SIZE (gAppleBootPolicyPredefinedPaths);
 
+GLOBAL_REMOVE_IF_UNREFERENCED CONST UINTN gAppleBootPolicyCoreNumPredefinedPaths = 1;
+
 EFI_STATUS
 EFIAPI
 BootPolicyGetBootFile (

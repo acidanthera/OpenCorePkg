@@ -175,6 +175,14 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
 
 extern CONST CHAR16 *gAppleBootPolicyPredefinedPaths[];
 
+///
+/// All Apple Boot Policy predefined booter paths.
+///
 extern CONST UINTN gAppleBootPolicyNumPredefinedPaths;
+
+///
+/// Core Apple Boot Policy predefined booter paths.
+///
+extern CONST UINTN gAppleBootPolicyCoreNumPredefinedPaths;
 
 #endif // OC_APPLE_BOOT_POLICY_LIB_H
