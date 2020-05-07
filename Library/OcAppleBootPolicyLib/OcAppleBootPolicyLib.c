@@ -1056,6 +1056,40 @@ BootPolicyGetBootFileEx (
 EFI_STATUS
 OcBootPolicyDevicePathToDirPath (
   IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  OUT CHAR16                    **BootPathName,
+  OUT EFI_HANDLE                *Device
+  )
+{
+  EFI_STATUS Status;
+
+  ASSERT (DevicePath != NULL);
+  ASSERT (BootPathName != NULL);
+  ASSERT (Device != NULL);
+
+  *BootPathName     = NULL;
+  *Device           = NULL;
+
+  Status = gBS->LocateDevicePath (
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  &DevicePath,
+                  Device
+                  );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = InternalGetBootPathName (DevicePath, BootPathName);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+OcBootPolicyDevicePathToDirPathAndApfsHandle (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
   IN  CONST CHAR16              **PredefinedPaths,
   IN  UINTN                     NumPredefinedPaths,
   OUT CHAR16                    **BootPathName,
@@ -1063,44 +1097,30 @@ OcBootPolicyDevicePathToDirPath (
   OUT EFI_HANDLE                *ApfsVolumeHandle
   )
 {
-  EFI_STATUS                      Status;
-
-  EFI_HANDLE                      DeviceHandle;
-  CHAR16                          *PathName;
+  EFI_STATUS Status;
 
   ASSERT (DevicePath != NULL);
   ASSERT (BootPathName != NULL);
   ASSERT (Device != NULL);
   ASSERT (ApfsVolumeHandle != NULL);
 
-  *BootPathName     = NULL;
-  *Device           = NULL;
-  *ApfsVolumeHandle = NULL;
-
-  Status = gBS->LocateDevicePath (
-                  &gEfiSimpleFileSystemProtocolGuid,
-                  &DevicePath,
-                  &DeviceHandle
-                  );
+  Status = OcBootPolicyDevicePathToDirPath (
+    DevicePath,
+    BootPathName,
+    Device
+    );
   if (EFI_ERROR (Status)) {
     return Status;
   }
-
-  Status = InternalGetBootPathName (DevicePath, &PathName);
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-
-  *Device       = DeviceHandle;
-  *BootPathName = PathName;
 
   //
   // InternalGetApfsVolumeHandle status code is ignored, as ApfsVolumeHandle
   // may not exist.
   //
+  *ApfsVolumeHandle = NULL;
   (VOID) InternalGetApfsVolumeHandle (
-    DeviceHandle,
-    PathName,
+    *Device,
+    *BootPathName,
     PredefinedPaths,
     NumPredefinedPaths,
     ApfsVolumeHandle
@@ -1118,6 +1138,8 @@ BootPolicyDevicePathToDirPath (
   OUT EFI_HANDLE                *ApfsVolumeHandle
   )
 {
+  EFI_STATUS Status;
+
   if (DevicePath       == NULL
    || BootPathName     == NULL
    || Device           == NULL
@@ -1125,7 +1147,7 @@ BootPolicyDevicePathToDirPath (
     return EFI_INVALID_PARAMETER;
   }
 
-  return OcBootPolicyDevicePathToDirPath (
+  Status = OcBootPolicyDevicePathToDirPathAndApfsHandle (
     DevicePath,
     gAppleBootPolicyPredefinedPaths,
     ARRAY_SIZE (gAppleBootPolicyPredefinedPaths),
@@ -1133,6 +1155,14 @@ BootPolicyDevicePathToDirPath (
     Device,
     ApfsVolumeHandle
     );
+  if (EFI_ERROR (Status)) {
+    *BootPathName     = NULL;
+    *Device           = NULL;
+    *ApfsVolumeHandle = NULL;
+    return Status;
+  }
+
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -1185,7 +1215,7 @@ OcBootPolicyGetApfsRecoveryFilePath (
   *Root         = NULL;
   *FullPathName = NULL;
 
-  Status = OcBootPolicyDevicePathToDirPath (
+  Status = OcBootPolicyDevicePathToDirPathAndApfsHandle (
              DevicePath,
              PredefinedPaths,
              NumPredefinedPaths,

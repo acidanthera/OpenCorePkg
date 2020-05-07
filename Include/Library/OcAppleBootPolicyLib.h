@@ -103,17 +103,11 @@ OcBootPolicyGetBootFileEx (
 /**
   Retrieves information about DevicePath.
 
-  @param[in]  DevicePath
-  @param[in]  PredefinedPaths     An array of file paths to scan for if no file
-                                  was blessed.
-  @param[in]  NumPredefinedPaths  The number of paths in PredefinedPaths.
+  @param[in]  DevicePath          The device path to describe.
   @param[out] BootPathName        A pointer into which the folder portion of
                                   DevicePath is returned.
   @param[out] Device              A pointer into which the device handle of
                                   DevicePath is returned.
-  @param[out] ApfsVolumeHandle    A pointer into which the device handle of the
-                                  APFS volume DevicePath refers is returned if
-                                  it is bootable, or NULL otherwise.
 
   @retval EFI_SUCCESS  The operation has been completed successfully.
   @retval other        DevicePath is not a valid file path.
@@ -121,11 +115,8 @@ OcBootPolicyGetBootFileEx (
 EFI_STATUS
 OcBootPolicyDevicePathToDirPath (
   IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
-  IN  CONST CHAR16              **PredefinedPaths,
-  IN  UINTN                     NumPredefinedPaths,
   OUT CHAR16                    **BootPathName,
-  OUT EFI_HANDLE                *Device,
-  OUT EFI_HANDLE                *ApfsVolumeHandle
+  OUT EFI_HANDLE                *Device
   );
 
 /**
