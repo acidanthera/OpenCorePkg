@@ -31,7 +31,6 @@
 STATIC
 EFI_DEVICE_PATH_PROTOCOL *
 InternalGetFirstDeviceBootFilePath (
-  IN APPLE_BOOT_POLICY_PROTOCOL      *BootPolicy,
   IN CONST EFI_DEVICE_PATH_PROTOCOL  *DmgDevicePath,
   IN UINTN                           DmgDevicePathSize
   )
@@ -48,7 +47,6 @@ InternalGetFirstDeviceBootFilePath (
   EFI_HANDLE                     *HandleBuffer;
   UINTN                          Index;
 
-  ASSERT (BootPolicy != NULL);
   ASSERT (DmgDevicePath != NULL);
   ASSERT (DmgDevicePathSize >= END_DEVICE_PATH_LENGTH);
 
@@ -90,9 +88,10 @@ InternalGetFirstDeviceBootFilePath (
       continue;
     }
 
-    Status = BootPolicy->GetBootFileEx (
+    Status = OcBootPolicyGetBootFileEx (
                            HandleBuffer[Index],
-                           BootPolicyOk,
+                           gAppleBootPolicyPredefinedPaths,
+                           gAppleBootPolicyNumPredefinedPaths,
                            &BootDevicePath
                            );
     if (!EFI_ERROR (Status)) {
@@ -111,7 +110,6 @@ STATIC
 EFI_DEVICE_PATH_PROTOCOL *
 InternalGetDiskImageBootFile (
   OUT INTERNAL_DMG_LOAD_CONTEXT   *Context,
-  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
   IN  UINT32                      Policy,
   IN  UINTN                       DmgFileSize,
   IN  VOID                        *ChunklistBuffer OPTIONAL,
@@ -127,7 +125,6 @@ InternalGetDiskImageBootFile (
   UINTN                          DmgDevicePathSize;
 
   ASSERT (Context != NULL);
-  ASSERT (BootPolicy != NULL);
   ASSERT (DmgFileSize > 0);
 
   if (ChunklistBuffer == NULL) {
@@ -202,7 +199,6 @@ InternalGetDiskImageBootFile (
   }
 
   DevPath = InternalGetFirstDeviceBootFilePath (
-              BootPolicy,
               DmgDevicePath,
               DmgDevicePathSize
               );
@@ -319,7 +315,6 @@ InternalFindDmgChunklist (
 EFI_DEVICE_PATH_PROTOCOL *
 InternalLoadDmg (
   IN OUT INTERNAL_DMG_LOAD_CONTEXT   *Context,
-  IN     APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
   IN     UINT32                      Policy
   )
 {
@@ -343,7 +338,6 @@ InternalLoadDmg (
   CHAR16 *DevPathText;
 
   ASSERT (Context != NULL);
-  ASSERT (BootPolicy != NULL);
 
   DevPath = Context->DevicePath;
   Status = OcOpenFileByDevicePath (
@@ -472,7 +466,6 @@ InternalLoadDmg (
 
   DevPath = InternalGetDiskImageBootFile (
               Context,
-              BootPolicy,
               Policy,
               DmgFileSize,
               ChunklistBuffer,

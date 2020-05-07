@@ -501,7 +501,6 @@ OcRunBootPicker (
   )
 {
   EFI_STATUS                         Status;
-  APPLE_BOOT_POLICY_PROTOCOL         *AppleBootPolicy;
   APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
   OC_BOOT_CONTEXT                    *BootContext;
   OC_BOOT_ENTRY                      *Chosen;
@@ -515,12 +514,6 @@ OcRunBootPicker (
   //
   if (Context->PickerCommand == OcPickerResetNvram) {
     return InternalSystemActionResetNvram ();
-  }
-
-  AppleBootPolicy = OcAppleBootPolicyInstallProtocol (FALSE);
-  if (AppleBootPolicy == NULL) {
-    DEBUG ((DEBUG_ERROR, "OCB: AppleBootPolicy locate failure\n"));
-    return EFI_NOT_FOUND;
   }
 
   KeyMap = OcAppleKeyMapInstallProtocols (FALSE);
@@ -565,10 +558,7 @@ OcRunBootPicker (
     // Turbo-boost scanning when bypassing picker.
     //
     if (Context->PickerCommand == OcPickerDefault) {
-      BootContext = OcScanForDefaultBootEntry (
-        AppleBootPolicy,
-        Context
-        );
+      BootContext = OcScanForDefaultBootEntry (Context);
     } else {
       ASSERT (
         Context->PickerCommand == OcPickerShowPicker
@@ -576,10 +566,7 @@ OcRunBootPicker (
         || Context->PickerCommand == OcPickerBootAppleRecovery
         );
 
-      BootContext = OcScanForBootEntries (
-        AppleBootPolicy,
-        Context
-        );
+      BootContext = OcScanForBootEntries (Context);
     }
 
     //
@@ -680,7 +667,6 @@ OcRunBootPicker (
       }
 
       Status = OcLoadBootEntry (
-        AppleBootPolicy,
         Context,
         Chosen,
         gImageHandle

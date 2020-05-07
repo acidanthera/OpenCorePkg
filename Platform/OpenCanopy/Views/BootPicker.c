@@ -729,7 +729,6 @@ BootPickerEntriesAdd (
   IN BOOLEAN                        Default
   )
 {
-  APPLE_BOOT_POLICY_PROTOCOL  *AppleBootPolicy;
   EFI_STATUS                  Status;
   GUI_VOLUME_ENTRY            *VolumeEntry;
   CONST GUI_IMAGE             *SuggestedIcon;
@@ -758,16 +757,9 @@ BootPickerEntriesAdd (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  AppleBootPolicy = OcAppleBootPolicyInstallProtocol (FALSE);
-  if (AppleBootPolicy == NULL) {
-    DEBUG ((DEBUG_ERROR, "OCUI: AppleBootPolicy locate failure\n"));
-    return EFI_NOT_FOUND;
-  }
-
   if (UseDiskLabel) {
     Status = OcGetBootEntryLabelImage (
       Context,
-      AppleBootPolicy,
       Entry,
       GuiContext->Scale,
       &IconFileData,
@@ -841,7 +833,7 @@ BootPickerEntriesAdd (
   VolumeEntry->Context = Entry;
 
   if (UseVolumeIcon) {
-    Status = OcGetBootEntryIcon (Context, AppleBootPolicy, Entry, &IconFileData, &IconFileSize);
+    Status = OcGetBootEntryIcon (Context, Entry, &IconFileData, &IconFileSize);
 
     if (!EFI_ERROR (Status)) {
       Status = GuiIcnsToImageIcon (

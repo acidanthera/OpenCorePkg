@@ -335,7 +335,6 @@ InternalGetRecoveryOsBooter (
 EFI_STATUS
 OcGetBootEntryLabelImage (
   IN  OC_PICKER_CONTEXT          *Context,
-  IN  APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
   IN  OC_BOOT_ENTRY              *BootEntry,
   IN  UINT8                      Scale,
   OUT VOID                       **ImageData,
@@ -345,7 +344,6 @@ OcGetBootEntryLabelImage (
   EFI_STATUS                       Status;
   CHAR16                           *BootDirectoryName;
   EFI_HANDLE                       Device;
-  EFI_HANDLE                       ApfsVolumeHandle;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
 
   *ImageData = NULL;
@@ -370,11 +368,10 @@ OcGetBootEntryLabelImage (
 
   ASSERT (BootEntry->DevicePath != NULL);
 
-  Status = BootPolicy->DevicePathToDirPath (
+  Status = OcBootPolicyDevicePathToDirPath (
     BootEntry->DevicePath,
     &BootDirectoryName,
-    &Device,
-    &ApfsVolumeHandle
+    &Device
     );
 
   if (EFI_ERROR (Status)) {
@@ -409,7 +406,6 @@ OcGetBootEntryLabelImage (
 EFI_STATUS
 OcGetBootEntryIcon (
   IN  OC_PICKER_CONTEXT          *Context,
-  IN  APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
   IN  OC_BOOT_ENTRY              *BootEntry,
   OUT VOID                       **ImageData,
   OUT UINT32                     *DataLength
@@ -418,7 +414,6 @@ OcGetBootEntryIcon (
   EFI_STATUS                       Status;
   CHAR16                           *BootDirectoryName;
   EFI_HANDLE                       Device;
-  EFI_HANDLE                       ApfsVolumeHandle;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
 
   *ImageData = NULL;
@@ -443,11 +438,10 @@ OcGetBootEntryIcon (
 
   ASSERT (BootEntry->DevicePath != NULL);
 
-  Status = BootPolicy->DevicePathToDirPath (
+  Status = OcBootPolicyDevicePathToDirPath (
     BootEntry->DevicePath,
     &BootDirectoryName,
-    &Device,
-    &ApfsVolumeHandle
+    &Device
     );
 
   if (EFI_ERROR (Status)) {
@@ -482,15 +476,13 @@ OcGetBootEntryIcon (
 
 EFI_STATUS
 InternalDescribeBootEntry (
-  IN     APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
-  IN OUT OC_BOOT_ENTRY              *BootEntry
+  IN OUT OC_BOOT_ENTRY  *BootEntry
   )
 {
   EFI_STATUS                       Status;
   CHAR16                           *BootDirectoryName;
   CHAR16                           *RecoveryBootName;
   EFI_HANDLE                       Device;
-  EFI_HANDLE                       ApfsVolumeHandle;
   UINT32                           BcdSize;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
 
@@ -501,11 +493,10 @@ InternalDescribeBootEntry (
     return EFI_SUCCESS;
   }
 
-  Status = BootPolicy->DevicePathToDirPath (
+  Status = OcBootPolicyDevicePathToDirPath (
     BootEntry->DevicePath,
     &BootDirectoryName,
-    &Device,
-    &ApfsVolumeHandle
+    &Device
     );
 
   if (EFI_ERROR (Status)) {

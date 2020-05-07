@@ -246,10 +246,6 @@ typedef struct OC_BOOT_CONTEXT_ {
   // Picker context for externally configured parameters.
   //
   OC_PICKER_CONTEXT           *PickerContext;
-  //
-  // Boot policy protocol.
-  //
-  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy;
 } OC_BOOT_CONTEXT;
 
 /**
@@ -688,7 +684,6 @@ struct OC_PICKER_CONTEXT_ {
 /**
   Get '.disk_label' or '.disk_label_2x' file contents, if exists.
 
-  @param[in]   BootPolicy     Apple Boot Policy Protocol.
   @param[in]   BootEntry      Located boot entry.
   @param[in]   Scale          User interface scale.
   @param[out]  ImageData      File contents.
@@ -699,7 +694,6 @@ struct OC_PICKER_CONTEXT_ {
 EFI_STATUS
 OcGetBootEntryLabelImage (
   IN  OC_PICKER_CONTEXT          *Context,
-  IN  APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
   IN  OC_BOOT_ENTRY              *BootEntry,
   IN  UINT8                      Scale,
   OUT VOID                       **ImageData,
@@ -709,7 +703,6 @@ OcGetBootEntryLabelImage (
 /**
   Get '.VolumeIcon.icns' file contents, if exists.
 
-  @param[in]   BootPolicy     Apple Boot Policy Protocol.
   @param[in]   BootEntry      Located boot entry.
   @param[out]  ImageData      File contents.
   @param[out]  DataLength     File length.
@@ -719,7 +712,6 @@ OcGetBootEntryLabelImage (
 EFI_STATUS
 OcGetBootEntryIcon (
   IN  OC_PICKER_CONTEXT          *Context,
-  IN  APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
   IN  OC_BOOT_ENTRY              *BootEntry,
   OUT VOID                       **ImageData,
   OUT UINT32                     *DataLength
@@ -728,15 +720,13 @@ OcGetBootEntryIcon (
 /**
   Scan system for boot entries.
 
-  @param[in]  BootPolicy     Apple Boot Policy Protocol.
-  @param[in]  Context        Picker context.
+  @param[in]  Context  Picker context.
 
   @retval boot context allocated from pool.
 **/
 OC_BOOT_CONTEXT *
 OcScanForBootEntries (
-  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN  OC_PICKER_CONTEXT           *Context
+  IN  OC_PICKER_CONTEXT  *Context
   );
 
 /**
@@ -744,15 +734,13 @@ OcScanForBootEntries (
   This is likely to return an incomplete list and can even give NULL,
   when only tools and system entries are present.
 
-  @param[in]  BootPolicy     Apple Boot Policy Protocol.
-  @param[in]  Context        Picker context.
+  @param[in]  Context  Picker context.
 
   @retval boot context allocated from pool.
 **/
 OC_BOOT_CONTEXT *
 OcScanForDefaultBootEntry (
-  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN  OC_PICKER_CONTEXT           *Context
+  IN  OC_PICKER_CONTEXT  *Context
   );
 
 /**
@@ -853,7 +841,6 @@ OcShowSimpleBootMenu (
 /**
   Load & start boot entry loader image with given options.
 
-  @param[in]  BootPolicy     Apple Boot Policy Protocol.
   @param[in]  Context        Picker context.
   @param[in]  BootEntry      Located boot entry.
   @param[in]  ParentHandle   Parent image handle.
@@ -862,10 +849,9 @@ OcShowSimpleBootMenu (
 **/
 EFI_STATUS
 OcLoadBootEntry (
-  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN  OC_PICKER_CONTEXT           *Context,
-  IN  OC_BOOT_ENTRY               *BootEntry,
-  IN  EFI_HANDLE                  ParentHandle
+  IN  OC_PICKER_CONTEXT  *Context,
+  IN  OC_BOOT_ENTRY      *BootEntry,
+  IN  EFI_HANDLE         ParentHandle
   );
 
 /**

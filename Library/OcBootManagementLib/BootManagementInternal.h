@@ -52,7 +52,6 @@ InternalCheckScanPolicy (
 EFI_DEVICE_PATH_PROTOCOL *
 InternalLoadDmg (
   IN OUT INTERNAL_DMG_LOAD_CONTEXT   *Context,
-  IN     APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
   IN     UINT32                      Policy
   );
 
@@ -92,7 +91,6 @@ InternalGetRecoveryOsBooter (
 
 EFI_STATUS
 InternalLoadBootEntry (
-  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
   IN  OC_PICKER_CONTEXT           *Context,
   IN  OC_BOOT_ENTRY               *BootEntry,
   IN  EFI_HANDLE                  ParentHandle,
@@ -136,15 +134,13 @@ InternalGetBootOptionData (
 /**
   Describe boot entry contents by setting fields other than DevicePath.
 
-  @param[in]  BootPolicy     Apple Boot Policy Protocol.
-  @param[in]  BootEntry      Located boot entry.
+  @param[in]  BootEntry  Located boot entry.
 
   @retval EFI_SUCCESS   The entry point is described successfully.
 **/
 EFI_STATUS
 InternalDescribeBootEntry (
-  IN     APPLE_BOOT_POLICY_PROTOCOL *BootPolicy,
-  IN OUT OC_BOOT_ENTRY              *BootEntry
+  IN OUT OC_BOOT_ENTRY  *BootEntry
   );
 
 BOOLEAN

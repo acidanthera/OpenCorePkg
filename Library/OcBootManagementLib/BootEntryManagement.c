@@ -433,10 +433,7 @@ AddBootEntryOnFileSystem (
   BootEntry->IsFolder   = IsFolder;
   BootEntry->IsExternal = RecoveryPart ? FileSystem->RecoveryFs->External : FileSystem->External;
 
-  Status = InternalDescribeBootEntry (
-    BootContext->BootPolicy,
-    BootEntry
-    );
+  Status = InternalDescribeBootEntry (BootEntry);
   if (EFI_ERROR (Status)) {
     FreePool (BootEntry);
     return Status;
@@ -624,10 +621,12 @@ AddBootEntryFromSystemEntry (
   This function may create more than one entry, and for APFS
   it will likely produce a sequence of 'OS, RECOVERY' entry pairs.
 
-  @param[in,out] BootContext   Context of filesystems.
-  @param[in,out] FileSystem    Filesystem to scan for bless.
-  @param[in]     LazyScan      Lazy filesystem scanning.
-  @param[in]     Deduplicate   Ensure that duplicated entries are not added. 
+  @param[in,out] BootContext         Context of filesystems.
+  @param[in,out] FileSystem          Filesystem to scan for bless.
+  @param[in]     PredefinedPaths     The predefined boot file locations to scan.
+  @param[in]     NumPredefinedPaths  The number of elements in PredefinedPaths.
+  @param[in]     LazyScan            Lazy filesystem scanning.
+  @param[in]     Deduplicate         Ensure that duplicated entries are not added. 
 
   @retval EFI_STATUS for last created option.
 **/
@@ -636,6 +635,8 @@ EFI_STATUS
 AddBootEntryFromBless (
   IN OUT OC_BOOT_CONTEXT     *BootContext,
   IN OUT OC_BOOT_FILESYSTEM  *FileSystem,
+  IN     CONST CHAR16        **PredefinedPaths,
+  IN     UINTN               NumPredefinedPaths,
   IN     BOOLEAN             LazyScan,
   IN     BOOLEAN             Deduplicate
   )
@@ -652,7 +653,6 @@ AddBootEntryFromBless (
   INTN                             CmpResult;
   EFI_FILE_PROTOCOL                *Root;
   CHAR16                           *RecoveryPath;
-  VOID                             *Reserved;
   EFI_FILE_PROTOCOL                *RecoveryRoot;
   EFI_HANDLE                       RecoveryDeviceHandle;
 
@@ -706,9 +706,10 @@ AddBootEntryFromBless (
   // On failure obtain normal bless paths.
   //
   if (EFI_ERROR (Status)) {
-    Status = BootContext->BootPolicy->GetBootFileEx (
+    Status = OcBootPolicyGetBootFileEx (
       FileSystem->Handle,
-      BootPolicyOk,
+      PredefinedPaths,
+      NumPredefinedPaths,
       &DevicePath
       );
   }
@@ -803,11 +804,12 @@ AddBootEntryFromBless (
     //
     // Now add APFS recovery (from Recovery partition) right afterwards if present.
     //
-    Status = BootContext->BootPolicy->GetApfsRecoveryFilePath (
+    Status = OcBootPolicyGetApfsRecoveryFilePath (
       NewDevicePath,
       L"\\",
+      PredefinedPaths,
+      NumPredefinedPaths,
       &RecoveryPath,
-      &Reserved,
       &RecoveryRoot,
       &RecoveryDeviceHandle
       );
@@ -1161,10 +1163,15 @@ AddBootEntryFromBootOption (
   // - Recovery for this macOS.
   // - Another macOS installation.
   // We can only detect them with bless, so we invoke bless in deduplication mode.
+  // We also detect only the Core Apple Boot Policy predefined booter paths to
+  // avoid detection of e.g. generic booters (such as BOOTx64) to avoid
+  // duplicates.
   //
   Status = AddBootEntryFromBless (
     BootContext,
     FileSystem,
+    gAppleBootPolicyPredefinedPaths,
+    gAppleBootPolicyCoreNumPredefinedPaths,
     LazyScan,
     TRUE
     );
@@ -1420,9 +1427,8 @@ InternalFileSystemForHandle (
 STATIC
 OC_BOOT_CONTEXT *
 BuildFileSystemList (
-  IN APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN OC_PICKER_CONTEXT           *Context,
-  IN BOOLEAN                     Empty
+  IN OC_PICKER_CONTEXT  *Context,
+  IN BOOLEAN            Empty
   )
 {
   OC_BOOT_CONTEXT  *BootContext;
@@ -1446,7 +1452,6 @@ BuildFileSystemList (
   }
   BootContext->DefaultEntry  = NULL;
   BootContext->PickerContext = Context;
-  BootContext->BootPolicy    = BootPolicy;
 
   if (Empty) {
     return BootContext;
@@ -1494,8 +1499,7 @@ OcFreeBootContext (
 
 OC_BOOT_CONTEXT *
 OcScanForBootEntries (
-  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN  OC_PICKER_CONTEXT           *Context
+  IN  OC_PICKER_CONTEXT  *Context
   )
 {
   OC_BOOT_CONTEXT                  *BootContext;
@@ -1507,7 +1511,6 @@ OcScanForBootEntries (
   // Obtain the list of filesystems filtered by scan policy.
   //
   BootContext = BuildFileSystemList (
-    BootPolicy,
     Context,
     FALSE
     );
@@ -1549,7 +1552,14 @@ OcScanForBootEntries (
     // No entries, so we process this directory with Apple Bless.
     //
     if (IsListEmpty (&FileSystem->BootEntries)) {
-      AddBootEntryFromBless (BootContext, FileSystem, FALSE, FALSE);
+      AddBootEntryFromBless (
+        BootContext,
+        FileSystem,
+        gAppleBootPolicyPredefinedPaths,
+        gAppleBootPolicyNumPredefinedPaths,
+        FALSE,
+        FALSE
+        );
     }
 
     //
@@ -1573,8 +1583,7 @@ OcScanForBootEntries (
 
 OC_BOOT_CONTEXT *
 OcScanForDefaultBootEntry (
-  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN  OC_PICKER_CONTEXT           *Context
+  IN  OC_PICKER_CONTEXT  *Context
   )
 {
   OC_BOOT_CONTEXT                  *BootContext;
@@ -1587,11 +1596,7 @@ OcScanForDefaultBootEntry (
   //
   // Obtain empty list of filesystems.
   //
-  BootContext = BuildFileSystemList (
-    BootPolicy,
-    Context,
-    TRUE
-    );
+  BootContext = BuildFileSystemList (Context, TRUE);
   if (BootContext == NULL) {
     return NULL;
   }
@@ -1653,7 +1658,14 @@ OcScanForDefaultBootEntry (
         continue;
       }
 
-      AddBootEntryFromBless (BootContext, FileSystem, FALSE, FALSE);
+      AddBootEntryFromBless (
+        BootContext,
+        FileSystem,
+        gAppleBootPolicyPredefinedPaths,
+        gAppleBootPolicyNumPredefinedPaths,
+        FALSE,
+        FALSE
+        );
       if (BootContext->DefaultEntry != NULL) {
         FreePool (Handles);
         return BootContext;
@@ -1727,10 +1739,9 @@ OcEnumerateEntries (
 
 EFI_STATUS
 OcLoadBootEntry (
-  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
-  IN  OC_PICKER_CONTEXT           *Context,
-  IN  OC_BOOT_ENTRY               *BootEntry,
-  IN  EFI_HANDLE                  ParentHandle
+  IN  OC_PICKER_CONTEXT  *Context,
+  IN  OC_BOOT_ENTRY      *BootEntry,
+  IN  EFI_HANDLE         ParentHandle
   )
 {
   EFI_STATUS                 Status;
@@ -1743,7 +1754,6 @@ OcLoadBootEntry (
   }
 
   Status = InternalLoadBootEntry (
-    BootPolicy,
     Context,
     BootEntry,
     ParentHandle,

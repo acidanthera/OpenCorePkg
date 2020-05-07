@@ -941,7 +941,6 @@ OcRegisterBootOption (
 
 EFI_STATUS
 InternalLoadBootEntry (
-  IN  APPLE_BOOT_POLICY_PROTOCOL  *BootPolicy,
   IN  OC_PICKER_CONTEXT           *Context,
   IN  OC_BOOT_ENTRY               *BootEntry,
   IN  EFI_HANDLE                  ParentHandle,
@@ -961,7 +960,6 @@ InternalLoadBootEntry (
   CONST CHAR8                *Args;
   UINT32                     ArgsLen;
 
-  ASSERT (BootPolicy != NULL);
   ASSERT (BootEntry != NULL);
   //
   // System entries are not loaded but called directly.
@@ -987,11 +985,7 @@ InternalLoadBootEntry (
     }
 
     DmgLoadContext->DevicePath = BootEntry->DevicePath;
-    DevicePath = InternalLoadDmg (
-                   DmgLoadContext,
-                   BootPolicy,
-                   Context->LoadPolicy
-                   );
+    DevicePath = InternalLoadDmg (DmgLoadContext, Context->LoadPolicy);
     if (DevicePath == NULL) {
       return EFI_UNSUPPORTED;
     }
