@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu May  7 21:45:28 2020
-%DIF ADD ../Configuration.tex        Thu May  7 22:51:38 2020
+%DIF DEL PreviousConfiguration.tex   Fri May  8 00:31:52 2020
+%DIF ADD ../Configuration.tex        Fri May  8 00:36:52 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4421,17 +4421,18 @@ Full list of labels is provided below. All labels are mandatory.
 \end{itemize}
 
 Label and icon generation can be performed with bundled utilities: \texttt{disklabel} and
-\texttt{icnspack}. Please refer to sample data for the details about the dimensions\DIFaddbegin \DIFadd{.
-Font is Helvetica 12 pt times scale factor.
-}
+\texttt{icnspack}. Please refer to sample data for the details about the dimensions.
+\DIFaddbegin \DIFadd{Font is Helvetica 12 pt times scale factor.
+}\DIFaddend 
 
-\DIFadd{Font format corresponds to }\href{https://www.angelcode.com/products/bmfont}{AngelCode binary BMF}\DIFadd{.
+\DIFaddbegin \DIFadd{Font format corresponds to }\href{https://www.angelcode.com/products/bmfont}{AngelCode binary BMF}\DIFadd{.
 While there are many utilities to generate font files, currently it is recommended to use
 }\href{https://github.com/danpla/dpfontbaker}{dpFontBaker} \DIFadd{to generate bitmap font
 (}\href{https://github.com/danpla/dpfontbaker/pull/1}{using CoreText produces best results}\DIFadd{)
-and }\href{https://github.com/usr-sse2/fonverter}{fonverter} \DIFadd{to export it to binary format}\DIFaddend .
+and }\href{https://github.com/usr-sse2/fonverter}{fonverter} \DIFadd{to export it to binary format.
+}
 
-\emph{WARNING}: OpenCanopy is currently considered experimental and is not recommended for
+\DIFaddend \emph{WARNING}: OpenCanopy is currently considered experimental and is not recommended for
 everyday use. Refer to
 \href{https://github.com/acidanthera/bugtracker/issues/759}{acidanthera/bugtracker\#759}
 for more details regarding the current limitations.
@@ -5562,7 +5563,8 @@ you will need \texttt{debug=0x8} boot argument.
 
   If there is no obvious error, check the available hacks in \texttt{Quirks} sections
   one by one. For early boot troubleshooting, for instance, when OpenCore menu does not appear,
-  using \href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} may help to see
+  using \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OpenCoreShell}{UEFI Shell} %%%
+\DIFdelend \DIFaddbegin \texttt{\DIFadd{UEFI Shell}} \DIFadd{(bundled with OpenCore) }\DIFaddend may help to see
   early debug messages.
 
 \item
