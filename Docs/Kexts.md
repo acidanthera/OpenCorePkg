@@ -58,6 +58,7 @@ Kexts
 - [FakeSMC.kext and sensors](https://github.com/CloverHackyColor/FakeSMC3_with_plugins)
 - [HWPEnabler.kext](https://github.com/headkaze/HWPEnable)
 - [OpcodeEmulator.kext](https://www.insanelymac.com/forum/topic/329704-opcode-emulator-opemu-plug-in-project/)
+- [telemetrap.kext](https://forums.macrumors.com/posts/28447707)
 - [TSCAdjustReset.kext](https://github.com/interferenc/TSCAdjustReset)
 - [VirtualSMC.kext and sensors](https://github.com/acidanthera/VirtualSMC)
 - [VoodooTSCSync.kext](https://github.com/RehabMan/VoodooTSCSync)
