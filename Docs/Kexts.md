@@ -51,6 +51,7 @@ Kexts
 
 ## CPU and SMC
 
+- [AAAMouSSE.kext](https://forums.macrumors.com/threads/mp3-1-others-sse-4-2-emulation-to-enable-amd-metal-driver.2206682/)
 - [AppleMCEReporterDisabler.kext](https://github.com/acidanthera/bugtracker/issues/424#issuecomment-535624313)
 - [AsusSMC.kext](https://github.com/hieplpvip/AsusSMC)
 - [CPUFriend.kext](https://github.com/acidanthera/CPUFriend)
