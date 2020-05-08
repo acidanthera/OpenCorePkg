@@ -13,8 +13,9 @@ matrix:
     compiler: clang
 
     script:
-    - HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl
+    - HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl shellcheck
     - "./macbuild.tool"
+    - shellcheck ./**/*.{sh,tool}
 
     deploy:
       provider: releases
@@ -77,7 +78,7 @@ matrix:
     name: "Analyze Coverity"
     osx_image: xcode11.3
     compiler: clang
-    
+
     before_install:
       - HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl
       - curl -Ls https://entrust.com/root-certificates/entrust_l1k.cer -o ~/entrust_l1k.crt || exit 1
