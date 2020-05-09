@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Mon May  4 15:42:50 2020
-%DIF ADD ../Configuration.tex        Sat May  9 14:02:30 2020
+%DIF ADD ../Configuration.tex        Sat May  9 20:08:09 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2705,7 +2705,28 @@ entry choice will update till next manual reconfiguration.
   \emph{Note}: This option only applies to 10.15.4 and newer.
 
 \item
-  \texttt{DisableWatchDog}\\
+  \DIFaddbegin \texttt{\DIFadd{ApplePanic}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Save macOS kernel panic to OpenCore root partition.
+}
+
+  \DIFadd{The file is saved as }\texttt{\DIFadd{panic-YYYY-MM-DD-HHMMSS.txt}}\DIFadd{. It is strongly
+  recommended to have }\texttt{\DIFadd{keepsyms=1}} \DIFadd{boot argument to see debug symbols
+  in the panic log. In case it was not present }\texttt{\DIFadd{kpdescribe.sh}} \DIFadd{utility
+  (bundled with OpenCore) may be used to partially recover the stacktrace.
+}
+
+  \DIFadd{Development and debug kernels produce more helpful kernel panics.
+  Consider downloading and installing }\texttt{\DIFadd{KernelDebugKit}} \DIFadd{from
+  }\href{https://developer.apple.com}{developer.apple.com} \DIFadd{when debugging a problem.
+  To activate a development kernel you will need to add a }\texttt{\DIFadd{kcsuffix=development}}
+  \DIFadd{boot argument. Use }\texttt{\DIFadd{uname -a}} \DIFadd{command to ensure that your current loaded
+  kernel is a development (or a debug) kernel.
+}
+
+\item
+  \DIFaddend \texttt{DisableWatchDog}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Select firmwares may not succeed in quickly booting

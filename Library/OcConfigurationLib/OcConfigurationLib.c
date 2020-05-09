@@ -341,6 +341,7 @@ STATIC
 OC_SCHEMA
 mMiscConfigurationDebugSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("AppleDebug",       OC_GLOBAL_CONFIG, Misc.Debug.AppleDebug),
+  OC_SCHEMA_BOOLEAN_IN ("ApplePanic",       OC_GLOBAL_CONFIG, Misc.Debug.ApplePanic),
   OC_SCHEMA_BOOLEAN_IN ("DisableWatchDog",  OC_GLOBAL_CONFIG, Misc.Debug.DisableWatchDog),
   OC_SCHEMA_INTEGER_IN ("DisplayDelay",     OC_GLOBAL_CONFIG, Misc.Debug.DisplayDelay),
   OC_SCHEMA_INTEGER_IN ("DisplayLevel",     OC_GLOBAL_CONFIG, Misc.Debug.DisplayLevel),

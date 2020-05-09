@@ -238,6 +238,7 @@ OcMiscEarlyInit (
 /**
   Load late miscellaneous support like boot screen config.
 
+  @param[in]  Storage    OpenCore storage.
   @param[in]  Config     OpenCore configuration.
   @param[in]  LoadPath   OpenCore loading path.
   @param[out] LoadHandle OpenCore loading handle.
@@ -246,6 +247,7 @@ OcMiscEarlyInit (
 **/
 EFI_STATUS
 OcMiscLateInit (
+  IN  OC_STORAGE_CONTEXT        *Storage,
   IN  OC_GLOBAL_CONFIG          *Config,
   IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath  OPTIONAL,
   OUT EFI_HANDLE                *LoadHandle

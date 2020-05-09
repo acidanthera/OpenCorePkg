@@ -288,6 +288,7 @@
   _(UINT32                      , DisplayDelay                ,     , 0            , ()) \
   _(UINT32                      , Target                      ,     , 0            , ()) \
   _(BOOLEAN                     , AppleDebug                  ,     , FALSE        , ()) \
+  _(BOOLEAN                     , ApplePanic                  ,     , FALSE        , ()) \
   _(BOOLEAN                     , DisableWatchDog             ,     , FALSE        , ())
   OC_DECLARE (OC_MISC_DEBUG)
 

@@ -65,8 +65,9 @@ package() {
   cp -r "${selfdir}/UDK/DuetPkg/BootLoader/bin" tmp/Utilities/BootInstall || exit 1
   cp -r "${selfdir}/Utilities/CreateVault" tmp/Utilities/ || exit 1
   cp -r "${selfdir}/Utilities/LogoutHook" tmp/Utilities/ || exit 1
-  cp -r "${selfdir}/Utilities/disklabel/disklabel" tmp/Utilities/ || exit 1
-  cp -r "${selfdir}/Utilities/icnspack/icnspack" tmp/Utilities/ || exit 1
+  cp "${selfdir}/Utilities/disklabel/disklabel" tmp/Utilities/ || exit 1
+  cp "${selfdir}/Utilities/icnspack/icnspack" tmp/Utilities/ || exit 1
+  cp "${selfdir}/Utilities/kpdescribe/kpdescribe.sh" tmp/Utilities/ || exit 1
   pushd tmp || exit 1
   zip -qry -FS ../"OpenCore-${ver}-${2}.zip" ./* || exit 1
   popd || exit 1

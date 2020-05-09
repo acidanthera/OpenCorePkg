@@ -124,7 +124,7 @@ OcMain (
   DEBUG ((DEBUG_INFO, "OC: OcLoadDevPropsSupport...\n"));
   OcLoadDevPropsSupport (&mOpenCoreConfiguration);
   DEBUG ((DEBUG_INFO, "OC: OcMiscLateInit...\n"));
-  OcMiscLateInit (&mOpenCoreConfiguration, LoadPath, &LoadHandle);
+  OcMiscLateInit (Storage, &mOpenCoreConfiguration, LoadPath, &LoadHandle);
   DEBUG ((DEBUG_INFO, "OC: OcLoadKernelSupport...\n"));
   OcLoadKernelSupport (&mOpenCoreStorage, &mOpenCoreConfiguration, &mOpenCoreCpuInfo);
 

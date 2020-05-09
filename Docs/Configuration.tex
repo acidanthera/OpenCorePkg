@@ -2515,6 +2515,24 @@ entry choice will update till next manual reconfiguration.
   \emph{Note}: This option only applies to 10.15.4 and newer.
 
 \item
+  \texttt{ApplePanic}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Save macOS kernel panic to OpenCore root partition.
+
+  The file is saved as \texttt{panic-YYYY-MM-DD-HHMMSS.txt}. It is strongly
+  recommended to have \texttt{keepsyms=1} boot argument to see debug symbols
+  in the panic log. In case it was not present \texttt{kpdescribe.sh} utility
+  (bundled with OpenCore) may be used to partially recover the stacktrace.
+
+  Development and debug kernels produce more helpful kernel panics.
+  Consider downloading and installing \texttt{KernelDebugKit} from
+  \href{https://developer.apple.com}{developer.apple.com} when debugging a problem.
+  To activate a development kernel you will need to add a \texttt{kcsuffix=development}
+  boot argument. Use \texttt{uname -a} command to ensure that your current loaded
+  kernel is a development (or a debug) kernel.
+
+\item
   \texttt{DisableWatchDog}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

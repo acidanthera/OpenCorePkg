@@ -89,6 +89,7 @@ OcLoadDrivers (
   EFI_HANDLE  ImageHandle;
   EFI_HANDLE  *DriversToConnectIterator;
   VOID        *DriverBinding;
+  BOOLEAN     SkipDriver;
 
   DriversToConnectIterator = NULL;
   if (DriversToConnect != NULL) {
@@ -98,17 +99,20 @@ OcLoadDrivers (
   DEBUG ((DEBUG_INFO, "OC: Got %u drivers\n", Config->Uefi.Drivers.Count));
 
   for (Index = 0; Index < Config->Uefi.Drivers.Count; ++Index) {
+    SkipDriver = OC_BLOB_GET (Config->Uefi.Drivers.Values[Index])[0] == '#';
+
     DEBUG ((
       DEBUG_INFO,
-      "OC: Driver %a at %u is being loaded...\n",
+      "OC: Driver %a at %u is %a\n",
       OC_BLOB_GET (Config->Uefi.Drivers.Values[Index]),
-      Index
+      Index,
+      SkipDriver ? "skipped!" : "being loaded..."
       ));
 
     //
     // Skip drivers marked as comments.
     //
-    if (OC_BLOB_GET (Config->Uefi.Drivers.Values[Index])[0] == '#') {
+    if (SkipDriver) {
       continue;
     }
 

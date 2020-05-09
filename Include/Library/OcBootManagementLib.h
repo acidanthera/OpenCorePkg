@@ -867,6 +867,19 @@ OcActivateHibernateWake (
   );
 
 /**
+  Read and expand Apple panic log if present.
+
+  @param[out]  PanicSize    Size of the panic log on success.
+
+  @retval panic buffer on success.
+  @retval NULL on failure.
+**/
+VOID *
+OcReadApplePanicLog (
+  OUT UINT32       *PanicSize
+  );
+
+/**
   Check if active hibernation is happening.
 
   @retval TRUE on waking from hibernation.

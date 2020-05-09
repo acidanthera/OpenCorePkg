@@ -258,6 +258,54 @@ OcToolDescribeEntry (
   return EFI_NOT_FOUND;
 }
 
+STATIC
+VOID
+SavePanicLog (
+  IN OC_STORAGE_CONTEXT  *Storage
+  )
+{
+  EFI_STATUS         Status;
+  VOID               *PanicLog;
+  EFI_FILE_PROTOCOL  *RootFs;
+  UINT32             PanicLogSize;
+  EFI_TIME           PanicLogDate;
+  CHAR16             PanicLogName[32];
+
+  PanicLog = OcReadApplePanicLog (&PanicLogSize);
+  if (PanicLog != NULL) {
+    Status = gRT->GetTime (&PanicLogDate, NULL);
+    if (EFI_ERROR (Status)) {
+      ZeroMem (&PanicLogDate, sizeof (PanicLogDate));
+    }
+
+    UnicodeSPrint (
+      PanicLogName,
+      sizeof (PanicLogName),
+      L"panic-%04u-%02u-%02u-%02u%02u%02u.txt",
+      (UINT32) PanicLogDate.Year,
+      (UINT32) PanicLogDate.Month,
+      (UINT32) PanicLogDate.Day,
+      (UINT32) PanicLogDate.Hour,
+      (UINT32) PanicLogDate.Minute,
+      (UINT32) PanicLogDate.Second
+      );
+
+    Status = Storage->FileSystem->OpenVolume (
+      Storage->FileSystem,
+      &RootFs
+      );
+    if (!EFI_ERROR (Status)) {
+      Status = SetFileData (RootFs, PanicLogName, PanicLog, PanicLogSize);
+      RootFs->Close (RootFs);
+    }
+
+    DEBUG ((DEBUG_INFO, "OC: Saving %u byte panic log %s - %r\n", PanicLogSize, PanicLogName, Status));
+    FreePool (PanicLog);
+  } else {
+    DEBUG ((DEBUG_INFO, "OC: Panic log does not exist\n"));
+  }
+}
+
 CONST CHAR8 *
 OcMiscGetVersionString (
   VOID
@@ -443,6 +491,7 @@ OcMiscEarlyInit (
 
 EFI_STATUS
 OcMiscLateInit (
+  IN  OC_STORAGE_CONTEXT        *Storage,
   IN  OC_GLOBAL_CONFIG          *Config,
   IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath  OPTIONAL,
   OUT EFI_HANDLE                *LoadHandle
@@ -513,6 +562,10 @@ OcMiscLateInit (
 
   HibernateStatus = OcActivateHibernateWake (HibernateMask);
   DEBUG ((DEBUG_INFO, "OC: Hibernation detection status is %r\n", HibernateStatus));
+
+  if (Config->Misc.Debug.ApplePanic) {
+    SavePanicLog (Storage);
+  }
 
   OcAppleDebugLogConfigure (Config->Misc.Debug.AppleDebug);
 

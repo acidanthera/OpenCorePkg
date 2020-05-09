@@ -14,6 +14,7 @@ OpenCore Changelog
 - Improved boot performance when picker UI is disabled
 - Enforced the use of builtin picker when external fails
 - Fixed warnings for empty NVRAM variables (e.g. rtc-blacklist)
+- Added `ApplePanic` to store panic logs on ESP root
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG
