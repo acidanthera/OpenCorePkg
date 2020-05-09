@@ -76,12 +76,12 @@ fi
 done
 
 # Optional for security reasons: Wi-Fi settings for Install OS X and Recovery
- for key in current-network preferred-count; do
-   getKey "36C28AB5-6566-4C50-9EBD-CBB920F83843:${key}" > "${key}"
-   if [ -n "$(/usr/bin/hexdump "${key}" )" ]; then
-     /usr/libexec/PlistBuddy -c "Import Add:36C28AB5-6566-4C50-9EBD-CBB920F83843:${key} ${key}" ./nvram.plist || abort "Failed to import ${key} from 36C28AB5-6566-4C50-9EBD-CBB920F83843!"
-   fi
- done
+# for key in current-network preferred-count; do
+#   getKey "36C28AB5-6566-4C50-9EBD-CBB920F83843:${key}" > "${key}"
+#   if [ -n "$(/usr/bin/hexdump "${key}" )" ]; then
+#     /usr/libexec/PlistBuddy -c "Import Add:36C28AB5-6566-4C50-9EBD-CBB920F83843:${key} ${key}" ./nvram.plist || abort "Failed to import ${key} from 36C28AB5-6566-4C50-9EBD-CBB920F83843!"
+#   fi
+# done
 
 /usr/libexec/PlistBuddy -c "Add Version integer 1"                                       ./nvram.plist || abort "Failed to add Version!"
 /usr/libexec/PlistBuddy -c "Add Add:7C436110-AB2A-4BBB-A880-FE41995C9F82 dict"           ./nvram.plist || abort "Failed to add dict 7C436110-AB2A-4BBB-A880-FE41995C9F82"
@@ -99,4 +99,3 @@ else
 fi
 
 /bin/rm -rf "${uuidDump}"
-
