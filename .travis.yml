@@ -7,7 +7,7 @@ env:
 
 matrix:
   include:
- - os: linux
+  - os: linux
     name: "Shellcheck on Linux"
     addons:
       apt:
