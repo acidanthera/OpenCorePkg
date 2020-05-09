@@ -7,15 +7,15 @@ abort() {
 
 cd "$(dirname "$0")" || abort "Wrong directory"
 
-if [ "$(which latexdiff)" = "" ]; then
+if [ "$(command -v latexdiff)" = "" ]; then
   abort "latexdiff is missing, check your TeX Live installation"
 fi
 
-if [ "$(which pdflatex)" = "" ]; then
+if [ "$(command -v pdflatex)" = "" ]; then
   abort "pdflatex is missing, check your TeX Live installation"
 fi
 
-rm -f *.aux *.log *.out *.pdf *.toc
+rm -f ./*.aux ./*.log ./*.out ./*.pdf ./*.toc
 
 pdflatex -draftmode Configuration.tex || \
   abort "Unable to create configuration pdf"
@@ -26,7 +26,7 @@ pdflatex Configuration.tex || \
 
 cd Differences || abort "Unable to process annotations"
 
-rm -f *.aux *.log *.out *.pdf *.toc
+rm -f ./*.aux ./*.log ./*.out ./*.pdf ./*.toc
 
 latexdiff -s ONLYCHANGEDPAGE PreviousConfiguration.tex ../Configuration.tex \
   > Differences.tex || \

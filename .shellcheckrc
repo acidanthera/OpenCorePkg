@@ -1,0 +1,2 @@
+# Ignore sourced files if any
+disable=SC1091

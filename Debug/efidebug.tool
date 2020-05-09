@@ -26,23 +26,23 @@
 #
 
 RUNDIR=$(dirname "$0")
-pushd "${RUNDIR}" >/dev/null
+pushd "${RUNDIR}" >/dev/null  || exit 1
 RUNDIR=$(pwd)
-popd >/dev/null
+popd >/dev/null || exit 1
 
-cd "$RUNDIR"
+cd "$RUNDIR" || exit 1
 
 find_gdb() {
   if [ "${GDB}" = "" ]; then
-    GDB=$(which ggdb)
+    GDB=$(command -v ggdb)
   fi
 
   if [ "${GDB}" = "" ]; then
-    GDB=$(which gdb-multiarch)
+    GDB=$(command -v gdb-multiarch)
   fi
 
   if [ "${GDB}" = "" ]; then
-    GDB=$(which gdb)
+    GDB=$(command -v gdb)
   fi
 }
 
@@ -52,7 +52,7 @@ find_lldb() {
   fi
 
   if [ "${LLDB}" = "" ]; then
-    LLDB=$(which lldb)
+    LLDB=$(command -v lldb)
   fi
 }
 

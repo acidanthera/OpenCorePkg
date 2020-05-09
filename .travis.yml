@@ -7,6 +7,19 @@ env:
 
 matrix:
   include:
+ - os: linux
+    name: "Shellcheck on Linux"
+    addons:
+      apt:
+        packages:
+        - shellcheck
+
+    script:
+      # Check Parent Dir (Change "*.tool" to "*.{sh,tool}" as required if needed later)
+      - shellcheck ./*.tool
+      # Check Sub Dirs (Change "*.tool" to "*.{sh,tool}" as required if needed later)
+      - shellcheck ./**/*.tool
+
   - os: osx
     name: "Build macOS XCODE5"
     osx_image: xcode10.2
@@ -77,7 +90,7 @@ matrix:
     name: "Analyze Coverity"
     osx_image: xcode11.3
     compiler: clang
-    
+
     before_install:
       - HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl
       - curl -Ls https://entrust.com/root-certificates/entrust_l1k.cer -o ~/entrust_l1k.crt || exit 1
