@@ -44,7 +44,7 @@
   captionpos=b,
   basicstyle=\ttfamily\normalsize,
   keepspaces=true,
-  morekeywords={git, make, build, ioreg, grep, nvram, sort, sudo, diskutil, gfxutil, strings, dd, cut},
+  morekeywords={git, make, build, ioreg, grep, nvram, sort, sudo, diskutil, gfxutil, strings, dd, cut, python},
   literate =
     {"}{{\textquotedbl}}1
     {'}{{\textquotesingle}}1
@@ -2531,6 +2531,16 @@ entry choice will update till next manual reconfiguration.
   To activate a development kernel you will need to add a \texttt{kcsuffix=development}
   boot argument. Use \texttt{uname -a} command to ensure that your current loaded
   kernel is a development (or a debug) kernel.
+
+  In case OpenCore kernel panic saving mechanism was not used, kernel panics may
+  still be found in \texttt{/Library/Logs/DiagnosticReports} directory.
+  Starting with macOS Catalina kernel panics are stored in JSON format, so they
+  need to be preprocessed before passing to \texttt{kpdescribe.sh}:
+
+\begin{lstlisting}[label=kpanic, style=ocbash]
+cat Kernel.panic | grep macOSProcessedStackshotData |
+  python -c 'import json,sys;print(json.load(sys.stdin)["macOSPanicString"])'
+\end{lstlisting}
 
 \item
   \texttt{DisableWatchDog}\\
