@@ -33,6 +33,9 @@ abort() {
 
 nvram=/usr/sbin/nvram
 # FIXME: find an nvram key that is mandatory
+## ShellCheck Exception(s)
+## https://github.com/koalaman/shellcheck/wiki/SC2143
+# shellcheck disable=SC2143
 if [ -z "$("${nvram}" -x '4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path' | /usr/bin/grep 'xml')" ]; then
   nvram="$(pwd)/nvram.mojave"
   if [ ! -f "${nvram}" ]; then
@@ -43,7 +46,11 @@ if [ -z "$("${nvram}" -x '4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path' | /usr
 fi
 
 getKey() {
-  local key="$1"
+  ## ShellCheck Exception(s)
+  ## https://github.com/koalaman/shellcheck/wiki/SC2039
+  # shellcheck disable=SC2039
+  local key
+  key="$1"
   "${nvram}" -x "${key}" | /usr/bin/sed '/\<data\>/,/\<\/data\>/!d;//d' | /usr/bin/base64 --decode
 }
 
@@ -55,13 +62,24 @@ cd "${uuidDump}"         || abort "Failed to enter dump directory!"
 
 getKey "8BE4DF61-93CA-11D2-AA0D-00E098032B8C:Boot0080" > Boot0080
 getKey "efi-boot-device-data" > efi-boot-device-data
+## ShellCheck Exception(s)
+## https://github.com/koalaman/shellcheck/wiki/SC2236
+## https://github.com/koalaman/shellcheck/wiki/SC2002
+# shellcheck disable=SC2236,SC2002
 if [ ! -z "$(/bin/cat "Boot0080" | /usr/bin/hexdump)" ] && [ ! -z "$(/bin/cat "efi-boot-device-data" | /usr/bin/hexdump )" ]; then
-  /bin/dd seek=24 if=efi-boot-device-data of=Boot0080 bs=1 count=$(/usr/bin/stat -f%z efi-boot-device-data)    || abort "Failed to fill Boot0080 with efi-boot-device-data!"
+  /bin/dd seek=24 if=efi-boot-device-data of=Boot0080 bs=1 count="$( /usr/bin/stat -f%z efi-boot-device-data )"    || abort "Failed to fill Boot0080 with efi-boot-device-data!"
   /usr/libexec/PlistBuddy -c "Import Add:8BE4DF61-93CA-11D2-AA0D-00E098032B8C:Boot0080 Boot0080" ./nvram.plist || abort "Failed to import Boot0080!"
 fi
 
+## ShellCheck Exception(s)
+## https://github.com/koalaman/shellcheck/wiki/SC2039
+# shellcheck disable=SC2039
 for key in BootOrder BootNext Boot008{1..3}; do
   getKey "8BE4DF61-93CA-11D2-AA0D-00E098032B8C:${key}" > "${key}"
+  ## ShellCheck Exception(s)
+  ## https://github.com/koalaman/shellcheck/wiki/SC2236
+  ## https://github.com/koalaman/shellcheck/wiki/SC2002
+  # shellcheck disable=SC2236,SC2002
   if [ ! -z "$(/bin/cat "${key}" | /usr/bin/hexdump)" ]; then
     /usr/libexec/PlistBuddy -c "Import Add:8BE4DF61-93CA-11D2-AA0D-00E098032B8C:${key} ${key}" ./nvram.plist || abort "Failed to import ${key} from 8BE4DF61-93CA-11D2-AA0D-00E098032B8C!"
   fi
@@ -80,6 +98,9 @@ done
 /usr/libexec/PlistBuddy -c "Merge nvram1.plist Add:7C436110-AB2A-4BBB-A880-FE41995C9F82" ./nvram.plist || abort "Failed to merge with nvram1.plist!"
 
 UUID="$("${nvram}" 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | /usr/bin/sed 's/.*GPT,\([^,]*\),.*/\1/')"
+## ShellCheck Exception(s)
+## https://github.com/koalaman/shellcheck/wiki/SC2059
+# shellcheck disable=SC2059
 if [ "$(printf "${UUID}" | /usr/bin/wc -c)" -eq 36 ] && [ -z "$(echo "${UUID}" | /usr/bin/sed 's/[-0-9A-F]//g')" ]; then
   /usr/sbin/diskutil mount "${UUID}" || abort "Failed to mount ${UUID}!"
   /bin/cp ./nvram.plist "$(/usr/sbin/diskutil info "${UUID}" | /usr/bin/sed -n 's/.*Mount Point: *//p')" || abort "Failed to copy nvram.plist!"

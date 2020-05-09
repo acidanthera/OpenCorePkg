@@ -45,7 +45,9 @@ cd "${OCPath}" || abort "Failed to reach ${OCPath}"
 /usr/libexec/PlistBuddy -c "Add Version integer 1" vault.plist || abort "Failed to set vault.plist version"
 
 echo "Hashing files in ${OCPath}..."
-
+## ShellCheck Exception(s)
+## https://github.com/koalaman/shellcheck/wiki/SC2162
+# shellcheck disable=SC2162
 /usr/bin/find . -not -path '*/\.*' -type f \
   \( ! -iname ".*" \) \
   \( ! -iname "vault.*" \) \
