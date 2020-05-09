@@ -8,14 +8,23 @@ env:
 matrix:
   include:
   - os: osx
+    name: "Check Shell Scripts"
+    osx_image: xcode10.2
+    compiler: clang
+
+    script:
+      - HOMEBREW_NO_AUTO_UPDATE=1 brew install shellcheck
+      - "./macbuild.tool --skip-tests --skip-build --skip-package"
+      - shellcheck /home/travis/build/acidanthera/OpenCorePkg/**/*.{sh,tool}
+
+  - os: osx
     name: "Build macOS XCODE5"
     osx_image: xcode10.2
     compiler: clang
 
     script:
-    - HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl shellcheck
+    - HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl
     - "./macbuild.tool"
-    - shellcheck ./**/*.{sh,tool}
 
     deploy:
       provider: releases
