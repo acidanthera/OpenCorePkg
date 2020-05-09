@@ -1,7 +1,7 @@
 /*
  * File: HdaRegisters.h
  *
- * Copyright (c) 2018 John Davis
+ * Copyright (c) 2018, 2020 John Davis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -253,5 +253,32 @@
 
 // Input/Output/Bidirectional Stream Descriptor n Link Position in Buffer Alias; 4 bytes.
 #define HDA_REG_SDNLPIBA(n)         (0x2084 + (0x20 * (n)))
+
+
+//
+// Ring buffer register offsets (CORB and RIRB).
+//
+#define HDA_REG_CORB_BASE                 0x40
+#define HDA_REG_RIRB_BASE                 0x50
+
+#define HDA_OFFSET_RING_BASE              0x00
+#define HDA_OFFSET_RING_UBASE             0x04
+#define HDA_OFFSET_RING_WP                0x08
+#define HDA_OFFSET_RING_RP                0x0A
+
+#define HDA_OFFSET_RING_CTL               0x0C
+#define HDA_OFFSET_RING_CTL_RUN           BIT1
+
+#define HDA_OFFSET_RING_STS               0x0D
+
+#define HDA_OFFSET_RING_SIZE              0x0E
+#define HDA_OFFSET_RING_SIZE_MASK         (BIT0 | BIT1)
+#define HDA_OFFSET_RING_SIZE_ENT2         0    // 2 entries.
+#define HDA_OFFSET_RING_SIZE_ENT16        BIT0 // 16 entries.
+#define HDA_OFFSET_RING_SIZE_ENT256       BIT1 // 256 entries.
+#define HDA_OFFSET_RING_SIZE_SZCAP_2      BIT4 // 2 entries.
+#define HDA_OFFSET_RING_SIZE_SZCAP_16     BIT5 // 16 entries.
+#define HDA_OFFSET_RING_SIZE_SZCAP_256    BIT6 // 256 entries.
+
 
 #endif // EFI_HDA_REGS_H
