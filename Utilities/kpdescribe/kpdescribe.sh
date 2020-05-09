@@ -85,9 +85,11 @@ if [[ ! -x /usr/bin/atos ]]; then
 fi
 
 kexts=()
+# Expansion is intentional here
+# shellcheck disable=SC2068
 for kextdir in ${kextdirs[@]}; do
 	if [ -d "$kextdir" ]; then
-		kexts+=($(find "$kextdir" -name Info.plist))
+		while IFS='' read -r kext; do kexts+=("$kext"); done < <(find "$kextdir" -name Info.plist)
 	fi
 done
 
@@ -97,25 +99,25 @@ while (( $# != 0 )); do
 	shift
 	echo "File ${file/$HOME/~}"
 
-	if [[ ! -e $file ]]; then
-		print "ERROR: File $file not found. Skipping."
+	if [[ ! -e "$file" ]]; then
+		print "ERROR: File ""$file"" not found. Skipping."
 		continue
 	fi
 
 	# Find slide address
-	slide=$(awk '/^Kernel slide:.*0x/ { print $3 }' $file)
+	slide=$(awk '/^Kernel slide:.*0x/ { print $3 }' "$file")
 	if [[ "$slide" == "" ]]; then
-		echo -n "ERROR: Missing \"Kernel slide:\" line, so can't process $file. "
+		echo -n "ERROR: Missing \"Kernel slide:\" line, so can't process ""$file"". "
 		echo "This is needed for atos -s. Is this really a Kernel diag panic file?"
 		continue
 	fi
 
 	# Print panic line
-  (grep -E -A 50 '^panic' | grep -E -B 50 '^Backtrace') < $file | grep -vE '^Backtrace'
+  (grep -E -A 50 '^panic' | grep -E -B 50 '^Backtrace') < "$file" | grep -vE '^Backtrace'
 
 	# Check kernel version match (uname -v string)
-	kernel_ver=$(strings -a $kernel | grep 'Darwin Kernel Version' | grep -v '@(#)')
-	panic_ver=$(grep 'Darwin Kernel Version' $file)
+	kernel_ver=$(strings -a "$kernel" | grep 'Darwin Kernel Version' | grep -v '@(#)')
+	panic_ver=$(grep 'Darwin Kernel Version' "$file")
 	warn=""
 	if [[ "$kernel_ver" != "$panic_ver" ]]; then
 		echo "WARNING: kernel version mismatch (use -f):"
@@ -131,25 +133,24 @@ while (( $# != 0 )); do
 		}
 		/Kernel Extensions in backtrace/ { ext = 1 }
 		/^$/ { ext = 0 }
-	' < $file | while read n v s e; do
+	' < "$file" | while read -r n v s e; do
 		# the awk gsub's convert this line:
 		#   com.apple.driver.AppleUSBHub(666.4)[CD9B71FF-2FDD-3BC4-9C39-5E066F66D158]@0xffffff7f84ed2000->0xffffff7f84ee9fff
 		# into this:
 		#   com.apple.driver.AppleUSBHub 666.4 0xffffff7f84ed2000 0xffffff7f84ee9fff
 		# which can then be read as three fields
-		echo $n $v $s $e
+		echo "$n" "$v" "$s" "$e"
 	done)
 
 	i=0
 	unset name version start end kfile
 	while (( i < ${#ranges[@]} )); do
-		read n v s e <<< $(echo "${ranges[$i]}")
+		read -r n v s e <<< "${ranges[$i]}"
 		name[i]=$n
-		version[i]=$v
 		start[i]=$s
 		end[i]=$e
 
-		for kext in ${kexts[@]}; do
+		for kext in "${kexts[@]}"; do
 			if [ ! -f "$kext" ]; then
 				continue
 			fi
@@ -159,7 +160,7 @@ while (( $# != 0 )); do
 				continue
 			fi
 			kver=$(/usr/libexec/PlistBuddy -c 'Print CFBundleVersion' "$kext" 2>&1)
-			if [[ "$kver" =~ "$v" ]] || [ "$(echo "$v" | grep "$kver")" != "" ]; then
+			if [[ "$kver" =~ $v ]] || [ "$(echo "$v" | grep "$kver")" != "" ]; then
 				path="$(dirname "$kext")/MacOS/$(/usr/libexec/PlistBuddy -c 'Print CFBundleExecutable' "$kext" 2>&1)"
 				if [ -f "$path" ]; then
 					kfile[i]="$path"
@@ -177,7 +178,7 @@ while (( $# != 0 )); do
 	awk 'backtrace == 1 && /^[^ ]/ { print $3 }
 		/Backtrace.*Return Address/ { backtrace = 1 }
 		/^$/ { backtrace = 0 }
-	' < $file | while read addr; do
+	' < "$file" | while read -r addr; do
 		line=""
 		# Check extensions
 		if [[ $addr =~ 0x* ]]; then
@@ -186,9 +187,9 @@ while (( $# != 0 )); do
 				[[ "${start[i]}" == "" ]] && break
 				# Assuming fixed width addresses, use string comparison:
 				if [[ $addr > ${start[$i]} && $addr < ${end[$i]} ]]; then
-					unslid=$(($addr-${start[$i]}))
+					unslid=$((addr-${start[$i]}))
 					if [ "${kfile[$i]}" != "" ]; then
-						line=$(atos -o "${kfile[$i]}" -l ${start[$i]} $addr)
+						line=$(atos -o "${kfile[$i]}" -l "${start[$i]}" "$addr")
 					else
 						line="(in ${name[$i]} at ${start[$i]})"
 					fi
@@ -199,8 +200,8 @@ while (( $# != 0 )); do
 		fi
 		# Fallback to kernel
 		if [ "$line" = "" ] ; then
-			line=$(atos -o $kernel -s $slide $addr)
-			unslid=$(($addr-$slide))
+			line=$(atos -o "$kernel" -s "$slide" "$addr")
+			unslid=$((addr-slide))
 		fi
 		printf "0x%016llx  0x%016llx  %s\n" "$addr" "$unslid" "$line"
 	done
@@ -210,7 +211,7 @@ while (( $# != 0 )); do
 		ver == 1 { print "Mac OS version:", $0; ver = 0 }
 		/^Mac OS version/ { ver = 1 }
 		/^Boot args:/ { print $0 }
-	' < $file
+	' < "$file"
 done
 
 echo ""
