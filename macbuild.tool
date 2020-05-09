@@ -7,7 +7,7 @@ package() {
   fi
 
   local ver
-  ver=$(cat Include/OpenCore.h | grep OPEN_CORE_VERSION | sed 's/.*"\(.*\)".*/\1/' | grep -E '^[0-9.]+$')
+  ver=$(grep OPEN_CORE_VERSION ./Include/OpenCore.h | sed 's/.*"\(.*\)".*/\1/' | grep -E '^[0-9.]+$')
   if [ "$ver" = "" ]; then
     echo "Invalid version $ver"
   fi
@@ -68,7 +68,7 @@ package() {
   cp -r "${selfdir}/Utilities/disklabel/disklabel" tmp/Utilities/ || exit 1
   cp -r "${selfdir}/Utilities/icnspack/icnspack" tmp/Utilities/ || exit 1
   pushd tmp || exit 1
-  zip -qry -FS ../"OpenCore-${ver}-${2}.zip" * || exit 1
+  zip -qry -FS ../"OpenCore-${ver}-${2}.zip" ./* || exit 1
   popd || exit 1
   rm -rf tmp || exit 1
   popd || exit 1
