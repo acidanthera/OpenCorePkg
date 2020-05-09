@@ -13,6 +13,7 @@ OpenCore Changelog
 - Changed NVRAM reset not to erase `BootProtect` boot options
 - Improved boot performance when picker UI is disabled
 - Enforced the use of builtin picker when external fails
+- Fixed warnings for empty NVRAM variables (e.g. rtc-blacklist)
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG

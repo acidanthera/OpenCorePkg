@@ -412,6 +412,8 @@ OcBlockNvram (
             SameContents = CurrentValueSize == VariableMap->Values[AddVariableIndex]->Size
               && CompareMem (OC_BLOB_GET (VariableMap->Values[AddVariableIndex]), CurrentValue, CurrentValueSize) == 0;
             FreePool (CurrentValue);
+          } else if (Status == EFI_NOT_FOUND && VariableMap->Values[AddVariableIndex]->Size == 0) {
+            SameContents = TRUE;
           } else {
             SameContents = FALSE;
           }

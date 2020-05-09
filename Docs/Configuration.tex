@@ -464,58 +464,57 @@ entries include:
 \begin{itemize}
 \tightlist
 \item
-  \texttt{BOOTx64.efi}
-  \break
-  Initial booter, which loads \texttt{OpenCore.efi} unless it was
-  already started as a driver.
+  \texttt{BOOTx64.efi} and \texttt{Bootstrap.efi} \\
+  Initial bootstrap loaders, which loads \texttt{OpenCore.efi} unless it was
+  already started as a driver. \texttt{BOOTx64.efi} is loaded by the firmware
+  by default according to UEFI specification, and \texttt{Bootstrap.efi} can
+  be registered as a custom option to let OpenCore coexist with operating systems
+  using \texttt{BOOTx64.efi} as their own loaders (e.g. Windows), see
+  \texttt{BootProtect} for more details.
 \item
-  \texttt{ACPI}
-  \break
+  \texttt{boot} \\
+  Duet bootstrap loader, which initialises UEFI environment on legacy BIOS firmwares
+  and loads \texttt{OpenCore.efi} similarly to other bootstrap loaders. Modern Duet
+  bootstrap loader will default to \texttt{OpenCore.efi} on the same partition when
+  present.
+\item
+  \texttt{ACPI} \\
   Directory used for storing supplemental ACPI information
   for \hyperref[acpi]{\texttt{ACPI}} section.
 \item
-  \texttt{Drivers}
-  \break
+  \texttt{Drivers} \\
   Directory used for storing supplemental \texttt{UEFI}
   drivers for \hyperref[uefi]{\texttt{UEFI}} section.
 \item
-  \texttt{Kexts}
-  \break
+  \texttt{Kexts} \\
   Directory used for storing supplemental kernel information
   for \hyperref[kernel]{\texttt{Kernel}} section.
 \item
-  \texttt{Resources}
-  \break
+  \texttt{Resources} \\
   Directory used for storing media resources, such as audio files
   for screen reader support. See \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
-  section for more details.
+  section for more details. This directory also contains image files
+  for graphical user interface. See \hyperref[ueficanopy]{OpenCanopy} section for more details.
 \item
-  \texttt{Tools}
-  \break
+  \texttt{Tools} \\
   Directory used for storing supplemental tools.
 \item
-  \texttt{OpenCore.efi}
-  \break
+  \texttt{OpenCore.efi} \\
   Main booter driver responsible for operating system loading.
 \item
-  \texttt{vault.plist}
-  \break
+  \texttt{vault.plist} \\
   Hashes for all files potentially loadable by \texttt{OC Config}.
 \item
-  \texttt{config.plist}
-  \break
+  \texttt{config.plist} \\
   \texttt{OC Config}.
 \item
-  \texttt{vault.sig}
-  \break
+  \texttt{vault.sig} \\
   Signature for \texttt{vault.plist}.
 \item
-  \texttt{nvram.plist}
-  \break
+  \texttt{nvram.plist} \\
   OpenCore variable import file.
 \item
-  \texttt{opencore-YYYY-MM-DD-HHMMSS.txt}
-  \break
+  \texttt{opencore-YYYY-MM-DD-HHMMSS.txt} \\
   OpenCore log file.
 \end{itemize}
 
