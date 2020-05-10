@@ -400,7 +400,7 @@ OcGetBootOrder (
     );
 
   if (Status == EFI_BUFFER_TOO_SMALL) {
-    BootOrder = AllocatePool (WithBootNext * sizeof (BootNext) + VariableSize);
+    BootOrder = AllocatePool ((UINTN) WithBootNext * sizeof (BootNext) + VariableSize);
     if (BootOrder == NULL) {
       return NULL;
     }
@@ -410,7 +410,7 @@ OcGetBootOrder (
       BootVariableGuid,
       &VariableAttributes,
       &VariableSize,
-      BootOrder + WithBootNext
+      BootOrder + (UINTN) WithBootNext
       );
     if (EFI_ERROR (Status)
       || VariableSize < sizeof (*BootOrder)
