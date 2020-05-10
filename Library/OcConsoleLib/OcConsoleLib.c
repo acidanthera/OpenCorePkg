@@ -120,7 +120,7 @@ OcSetConsoleResolutionForProtocol (
 
   if (ModeNumber == GraphicsOutput->Mode->Mode) {
     DEBUG ((DEBUG_INFO, "OCC: Current mode matches desired mode %u\n", (UINT32) ModeNumber));
-    return EFI_SUCCESS;
+    return EFI_ALREADY_STARTED;
   }
 
   //
@@ -275,15 +275,16 @@ OcSetConsoleResolution (
   IN  UINT32              Bpp    OPTIONAL
   )
 {
-  EFI_STATUS                    Status;
+  EFI_STATUS                    Result;
   EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput;
 
 #ifdef OC_CONSOLE_CHANGE_ALL_RESOLUTIONS
+  EFI_STATUS                    Status;
   UINTN                         HandleCount;
   EFI_HANDLE                    *HandleBuffer;
   UINTN                         Index;
 
-  Status = gBS->LocateHandleBuffer (
+  Result = gBS->LocateHandleBuffer (
     ByProtocol,
     &gEfiGraphicsOutputProtocolGuid,
     NULL,
@@ -291,7 +292,9 @@ OcSetConsoleResolution (
     &HandleBuffer
     );
 
-  if (!EFI_ERROR (Status)) {
+  if (!EFI_ERROR (Result)) {
+    Result = EFI_NOT_FOUND;
+
     DEBUG ((DEBUG_INFO, "OCC: Found %u handles with GOP\n", (UINT32) HandleCount));
 
     for (Index = 0; Index < HandleCount; ++Index) {
@@ -308,29 +311,29 @@ OcSetConsoleResolution (
         continue;
       }
 
-      Status = OcSetConsoleResolutionForProtocol (GraphicsOutput, Width, Height, Bpp);
+      Result = OcSetConsoleResolutionForProtocol (GraphicsOutput, Width, Height, Bpp);
     }
 
     FreePool (HandleBuffer);
   } else {
-    DEBUG ((DEBUG_INFO, "OCC: Failed to find handles with GOP\n"));
+    DEBUG ((DEBUG_INFO, "OCC: Failed to find handles with GOP - %r\n", Result));
   }
 #else
-  Status = gBS->HandleProtocol (
+  Result = gBS->HandleProtocol (
     gST->ConsoleOutHandle,
     &gEfiGraphicsOutputProtocolGuid,
     (VOID **) &GraphicsOutput
     );
 
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OCC: Missing GOP on ConOut - %r\n", Status));
-    return Status;
+  if (EFI_ERROR (Result)) {
+    DEBUG ((DEBUG_WARN, "OCC: Missing GOP on ConOut - %r\n", Result));
+    return Result;
   }
 
-  Status = OcSetConsoleResolutionForProtocol (GraphicsOutput, Width, Height, Bpp);
+  Result = OcSetConsoleResolutionForProtocol (GraphicsOutput, Width, Height, Bpp);
 #endif
 
-  return Status;
+  return Result;
 }
 
 EFI_STATUS

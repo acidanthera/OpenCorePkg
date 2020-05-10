@@ -227,7 +227,7 @@ OcLoadUefiOutputSupport (
       Bpp
       );
     DEBUG ((
-      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      EFI_ERROR (Status) && Status != EFI_ALREADY_STARTED ? DEBUG_WARN : DEBUG_INFO,
       "OC: Changed resolution to %ux%u@%u (max: %d) from %a - %r\n",
       Width,
       Height,
@@ -236,6 +236,8 @@ OcLoadUefiOutputSupport (
       OC_BLOB_GET (&Config->Uefi.Output.Resolution),
       Status
       ));
+  } else {
+    Status = EFI_UNSUPPORTED;
   }
 
   if (Config->Uefi.Output.DirectGopRendering) {
@@ -255,7 +257,7 @@ OcLoadUefiOutputSupport (
     }
   }
 
-  if (Config->Uefi.Output.ReconnectOnResChange) {
+  if (Config->Uefi.Output.ReconnectOnResChange && !EFI_ERROR (Status)) {
     OcReconnectConsole ();
   }
 
