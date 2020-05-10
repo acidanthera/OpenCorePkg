@@ -268,14 +268,15 @@ OcReadApplePanicLog (
       break;
     }
 
-    TmpData = ReallocatePool (TmpDataSize, TmpDataSize + ValueSize, TmpData);
-    if (TmpData == NULL) {
+    PanicData = ReallocatePool (TmpDataSize, TmpDataSize + ValueSize, TmpData);
+    if (PanicData == NULL) {
       FreePool (Value);
       if (TmpData != NULL) {
         FreePool (TmpData);
       }
       return NULL;
     }
+    TmpData = PanicData;
 
     CopyMem (
       (UINT8 *) TmpData + TmpDataSize,
