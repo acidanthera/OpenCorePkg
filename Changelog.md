@@ -16,6 +16,7 @@ OpenCore Changelog
 - Fixed warnings for empty NVRAM variables (e.g. rtc-blacklist)
 - Added `ApplePanic` to store panic logs on ESP root
 - Fixed `ReconnectOnResChange` reconnecting even without res change
+- Fixed OpenCanopy showing internal icons for external drives
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG

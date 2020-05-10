@@ -964,7 +964,7 @@ GuiLibConstruct (
 
   mOutputContext = GuiOutputConstruct ();
   if (mOutputContext == NULL) {
-    DEBUG ((DEBUG_ERROR, "OCUI: Failed to initialise output\n"));
+    DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise output\n"));
     return EFI_UNSUPPORTED;
   }
 
@@ -997,7 +997,7 @@ GuiLibConstruct (
   mScreenBufferDelta = OutputInfo->HorizontalResolution * sizeof (*mScreenBuffer);
   mScreenBuffer      = AllocatePool (OutputInfo->VerticalResolution * mScreenBufferDelta);
   if (mScreenBuffer == NULL) {
-    DEBUG ((DEBUG_ERROR, "OCUI: GUI alloc failure\n"));
+    DEBUG ((DEBUG_WARN, "OCUI: GUI alloc failure\n"));
     GuiLibDestruct ();
     return EFI_OUT_OF_RESOURCES;
   }

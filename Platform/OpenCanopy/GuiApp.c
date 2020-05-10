@@ -368,11 +368,24 @@ InternalContextConstruct (
         );
     }
 
+    //
+    // For generic disk icon being able to distinguish internal and external
+    // disk icons is a security requirement. These icons are used whenever
+    // 'typed' external icons are not available.
+    //
+    if (!EFI_ERROR (Status)
+      && Index == ICON_GENERIC_HDD
+      && Context->Icons[Index][ICON_TYPE_EXTERNAL].Buffer == NULL) {
+      Status = EFI_NOT_FOUND;
+      DEBUG ((DEBUG_WARN, "OCUI: Missing external disk icon\n"));
+      break;
+    }
+
     if (EFI_ERROR (Status) && Index < ICON_NUM_MANDATORY) {
       break;
-    } else {
-      Status = EFI_SUCCESS;
     }
+
+    Status = EFI_SUCCESS;
   }
 
   if (!EFI_ERROR (Status)) {
@@ -388,7 +401,7 @@ InternalContextConstruct (
   }
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "OCUI: Failed to load images\n"));
+    DEBUG ((DEBUG_WARN, "OCUI: Failed to load images\n"));
     InternalContextDestruct (Context);
     return EFI_UNSUPPORTED;
   }

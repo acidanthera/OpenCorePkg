@@ -161,7 +161,7 @@ UefiMain (
     );
 
   if (!EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "OCUI: Another GUI is already present\n"));
+    DEBUG ((DEBUG_WARN, "OCUI: Another GUI is already present\n"));
     return EFI_ALREADY_STARTED;
   }
 
@@ -179,7 +179,7 @@ UefiMain (
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCUI: Registered custom GUI protocol\n"));
   } else {
-    DEBUG ((DEBUG_ERROR, "OCUI: Failed to install GUI protocol - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "OCUI: Failed to install GUI protocol - %r\n", Status));
   }
 
   return Status;

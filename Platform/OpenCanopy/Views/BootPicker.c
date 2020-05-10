@@ -735,6 +735,7 @@ BootPickerEntriesAdd (
   LIST_ENTRY                  *ListEntry;
   CONST GUI_VOLUME_ENTRY      *PrevEntry;
   UINT32                      IconFileSize;
+  UINT32                      IconTypeIndex;
   VOID                        *IconFileData;
   BOOLEAN                     UseVolumeIcon;
   BOOLEAN                     UseDiskLabel;
@@ -811,7 +812,7 @@ BootPickerEntriesAdd (
         Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_GENERIC_HDD]);
         break;
       default:
-        DEBUG ((DEBUG_ERROR, "OCUI: Entry kind %d unsupported for label", Entry->Type));
+        DEBUG ((DEBUG_WARN, "OCUI: Entry kind %d unsupported for label", Entry->Type));
         return EFI_UNSUPPORTED;
     }
   }
@@ -858,61 +859,58 @@ BootPickerEntriesAdd (
 
   if (EFI_ERROR (Status)) {
     SuggestedIcon = NULL;
+    IconTypeIndex = Entry->IsExternal ? ICON_TYPE_EXTERNAL : ICON_TYPE_BASE;
     switch (Entry->Type) {
       case OC_BOOT_APPLE_OS:
-        SuggestedIcon = &GuiContext->Icons[ICON_APPLE][ICON_TYPE_BASE];
+        SuggestedIcon = &GuiContext->Icons[ICON_APPLE][IconTypeIndex];
         break;
       case OC_BOOT_APPLE_RECOVERY:
-        SuggestedIcon = &GuiContext->Icons[ICON_APPLE_RECOVERY][ICON_TYPE_BASE];
+        SuggestedIcon = &GuiContext->Icons[ICON_APPLE_RECOVERY][IconTypeIndex];
         if (SuggestedIcon->Buffer == NULL) {
-          SuggestedIcon = &GuiContext->Icons[ICON_APPLE][ICON_TYPE_BASE];
+          SuggestedIcon = &GuiContext->Icons[ICON_APPLE][IconTypeIndex];
         }
         break;
       case OC_BOOT_APPLE_TIME_MACHINE:
-        SuggestedIcon = &GuiContext->Icons[ICON_APPLE_TIME_MACHINE][ICON_TYPE_BASE];
+        SuggestedIcon = &GuiContext->Icons[ICON_APPLE_TIME_MACHINE][IconTypeIndex];
         if (SuggestedIcon->Buffer == NULL) {
-          SuggestedIcon = &GuiContext->Icons[ICON_APPLE][ICON_TYPE_BASE];
+          SuggestedIcon = &GuiContext->Icons[ICON_APPLE][IconTypeIndex];
         }
         break;
       case OC_BOOT_WINDOWS:
-        SuggestedIcon = &GuiContext->Icons[ICON_WINDOWS][ICON_TYPE_BASE];
+        SuggestedIcon = &GuiContext->Icons[ICON_WINDOWS][IconTypeIndex];
         break;
       case OC_BOOT_EXTERNAL_OS:
-        SuggestedIcon = &GuiContext->Icons[ICON_OTHER][ICON_TYPE_BASE];
+        SuggestedIcon = &GuiContext->Icons[ICON_OTHER][IconTypeIndex];
         break;
       case OC_BOOT_RESET_NVRAM:
-        SuggestedIcon = &GuiContext->Icons[ICON_RESET_NVRAM][ICON_TYPE_BASE];
+        SuggestedIcon = &GuiContext->Icons[ICON_RESET_NVRAM][IconTypeIndex];
         if (SuggestedIcon->Buffer == NULL) {
-          SuggestedIcon = &GuiContext->Icons[ICON_TOOL][ICON_TYPE_BASE];
+          SuggestedIcon = &GuiContext->Icons[ICON_TOOL][IconTypeIndex];
         }
         break;
       case OC_BOOT_EXTERNAL_TOOL:
         if (StrStr (Entry->Name, OC_MENU_RESET_NVRAM_ENTRY) != NULL) {
-          SuggestedIcon = &GuiContext->Icons[ICON_RESET_NVRAM][ICON_TYPE_BASE];
+          SuggestedIcon = &GuiContext->Icons[ICON_RESET_NVRAM][IconTypeIndex];
         } else if (StrStr (Entry->Name, OC_MENU_UEFI_SHELL_ENTRY) != NULL) {
-          SuggestedIcon = &GuiContext->Icons[ICON_SHELL][ICON_TYPE_BASE];
+          SuggestedIcon = &GuiContext->Icons[ICON_SHELL][IconTypeIndex];
         }
 
         if (SuggestedIcon == NULL || SuggestedIcon->Buffer == NULL) {
-          SuggestedIcon = &GuiContext->Icons[ICON_TOOL][ICON_TYPE_BASE];
+          SuggestedIcon = &GuiContext->Icons[ICON_TOOL][IconTypeIndex];
         }
         break;
       case OC_BOOT_UNKNOWN:
-        SuggestedIcon = &GuiContext->Icons[ICON_GENERIC_HDD][ICON_TYPE_BASE];
+        SuggestedIcon = &GuiContext->Icons[ICON_GENERIC_HDD][IconTypeIndex];
         break;
       default:
-        DEBUG ((DEBUG_ERROR, "OCUI: Entry kind %d unsupported for icon", Entry->Type));
+        DEBUG ((DEBUG_WARN, "OCUI: Entry kind %d unsupported for icon", Entry->Type));
         return EFI_UNSUPPORTED;
     }
 
     ASSERT (SuggestedIcon != NULL);
 
     if (SuggestedIcon->Buffer == NULL) {
-      SuggestedIcon = &GuiContext->Icons[ICON_GENERIC_HDD][ICON_TYPE_BASE];
-    }
-
-    if (Entry->IsExternal && SuggestedIcon[ICON_TYPE_EXTERNAL].Buffer != NULL) {
-      SuggestedIcon = &SuggestedIcon[ICON_TYPE_EXTERNAL];
+      SuggestedIcon = &GuiContext->Icons[ICON_GENERIC_HDD][IconTypeIndex];
     }
 
     CopyMem (&VolumeEntry->EntryIcon, SuggestedIcon, sizeof (VolumeEntry->EntryIcon));
