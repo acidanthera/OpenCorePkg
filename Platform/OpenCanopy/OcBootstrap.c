@@ -54,6 +54,7 @@ OcShowMenuByOc (
   mGuiContext.Refresh = FALSE;
 
   Status = GuiLibConstruct (
+    BootContext->PickerContext,
     mGuiContext.CursorDefaultX,
     mGuiContext.CursorDefaultY
     );

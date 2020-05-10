@@ -121,11 +121,9 @@ OcLoadPickerHotKeys (
 }
 
 INTN
-OcWaitForAppleKeyIndex (
+OcGetAppleKeyIndex (
   IN OUT OC_PICKER_CONTEXT                  *Context,
   IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,
-  IN     UINTN                              Timeout,
-  IN     BOOLEAN                            PollHotkeys,
      OUT BOOLEAN                            *SetDefault  OPTIONAL
   )
 {
@@ -146,9 +144,252 @@ OcWaitForAppleKeyIndex (
   BOOLEAN                            WantsZeroSlide;
   BOOLEAN                            WantsDefault;
   UINT32                             CsrActiveConfig;
+  UINTN                              CsrActiveConfigSize;
+
+  NumKeys = ARRAY_SIZE (Keys);
+  Status = KeyMap->GetKeyStrokes (
+    KeyMap,
+    &Modifiers,
+    &NumKeys,
+    Keys
+    );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OCB: GetKeyStrokes - %r\n", Status));
+    return OC_INPUT_INVALID;
+  }
+
+  //
+  // Handle key combinations.
+  //
+  if (Context->PollAppleHotKeys) {
+    HasCommand = (Modifiers & (APPLE_MODIFIER_LEFT_COMMAND | APPLE_MODIFIER_RIGHT_COMMAND)) != 0;
+    HasShift   = (Modifiers & (APPLE_MODIFIER_LEFT_SHIFT | APPLE_MODIFIER_RIGHT_SHIFT)) != 0;
+    HasKeyC    = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyC);
+    HasKeyK    = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyK);
+    HasKeyS    = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyS);
+    HasKeyV    = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyV);
+    //
+    // Checking for PAD minus is our extension to support more keyboards.
+    //
+    HasKeyMinus = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyMinus)
+      || OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyPadMinus);
+
+    //
+    // Shift is always valid and enables Safe Mode.
+    //
+    if (HasShift) {
+      if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-x", L_STR_LEN ("-x")) == NULL) {
+        DEBUG ((DEBUG_INFO, "OCB: Shift means -x\n"));
+        OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-x", L_STR_LEN ("-x"));
+      }
+      return OC_INPUT_INTERNAL;
+    }
+
+    //
+    // CMD+V is always valid and enables Verbose Mode.
+    //
+    if (HasCommand && HasKeyV) {
+      if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-v", L_STR_LEN ("-v")) == NULL) {
+        DEBUG ((DEBUG_INFO, "OCB: CMD+V means -v\n"));
+        OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-v", L_STR_LEN ("-v"));
+      }
+      return OC_INPUT_INTERNAL;
+    }
+
+    //
+    // CMD+C+MINUS is always valid and disables compatibility check.
+    //
+    if (HasCommand && HasKeyC && HasKeyMinus) {
+      if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-no_compat_check", L_STR_LEN ("-no_compat_check")) == NULL) {
+        DEBUG ((DEBUG_INFO, "OCB: CMD+C+MINUS means -no_compat_check\n"));
+        OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-no_compat_check", L_STR_LEN ("-no_compat_check"));
+      }
+      return OC_INPUT_INTERNAL;
+    }
+
+    //
+    // CMD+K is always valid for new macOS and means force boot to release kernel.
+    //
+    if (HasCommand && HasKeyK) {
+      if (AsciiStrStr (Context->AppleBootArgs, "kcsuffix=release") == NULL) {
+        DEBUG ((DEBUG_INFO, "OCB: CMD+K means kcsuffix=release\n"));
+        OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "kcsuffix=release", L_STR_LEN ("kcsuffix=release"));
+      }
+      return OC_INPUT_INTERNAL;
+    }
+
+    //
+    // boot.efi also checks for CMD+X, but I have no idea what it is for.
+    //
+
+    //
+    // boot.efi requires unrestricted NVRAM just for CMD+S+MINUS, and CMD+S
+    // does not work at all on T2 macs. For CMD+S we simulate T2 behaviour with
+    // DisableSingleUser Booter quirk if necessary.
+    // Ref: https://support.apple.com/HT201573
+    //
+    if (HasCommand && HasKeyS) {
+      WantsZeroSlide = HasKeyMinus;
+
+      if (WantsZeroSlide) {
+        CsrActiveConfig     = 0;
+        CsrActiveConfigSize = sizeof (CsrActiveConfig);
+        Status = gRT->GetVariable (
+          L"csr-active-config",
+          &gAppleBootVariableGuid,
+          NULL,
+          &CsrActiveConfigSize,
+          &CsrActiveConfig
+          );
+        //
+        // FIXME: CMD+S+Minus behaves as CMD+S when "slide=0" is not supported
+        //        by the SIP configuration. This might be an oversight, but is
+        //        consistent with the boot.efi implementation.
+        //
+        WantsZeroSlide = !EFI_ERROR (Status) && (CsrActiveConfig & CSR_ALLOW_UNRESTRICTED_NVRAM) != 0;
+      }
+
+      if (WantsZeroSlide) {
+        if (AsciiStrStr (Context->AppleBootArgs, "slide=0") == NULL) {
+          DEBUG ((DEBUG_INFO, "OCB: CMD+S+MINUS means slide=0\n"));
+          OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "slide=0", L_STR_LEN ("slide=0"));
+        }
+      } else if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-s", L_STR_LEN ("-s")) == NULL) {
+        DEBUG ((DEBUG_INFO, "OCB: CMD+S means -s\n"));
+        OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-s", L_STR_LEN ("-s"));
+      }
+      return OC_INPUT_INTERNAL;
+    }
+  }
+
+  //
+  // Handle VoiceOver.
+  //
+  if ((Modifiers & (APPLE_MODIFIER_LEFT_COMMAND | APPLE_MODIFIER_RIGHT_COMMAND)) != 0
+    && OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyF5)) {
+    OcKeyMapFlush (KeyMap, 0, TRUE);
+    return OC_INPUT_VOICE_OVER;
+  }
+
+  //
+  // Handle reload menu.
+  //
+  if (OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyEscape)
+   || OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyZero)) {
+    OcKeyMapFlush (KeyMap, 0, TRUE);
+    return OC_INPUT_ABORTED;
+  }
+
+  if (OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeySpaceBar)) {
+    OcKeyMapFlush (KeyMap, 0, TRUE);
+    return OC_INPUT_MORE;
+  }
+
+  //
+  // Default update is desired for Ctrl+Index and Ctrl+Enter.
+  //
+  WantsDefault = Modifiers != 0 && (Modifiers & ~(APPLE_MODIFIER_LEFT_CONTROL | APPLE_MODIFIER_RIGHT_CONTROL)) == 0;
+
+  //
+  // Check exact match on index strokes.
+  //
+  if ((Modifiers == 0 || WantsDefault) && NumKeys == 1) {
+    if (Keys[0] == AppleHidUsbKbUsageKeyEnter
+      || Keys[0] == AppleHidUsbKbUsageKeyReturn
+      || Keys[0] == AppleHidUsbKbUsageKeyPadEnter) {
+      if (WantsDefault && SetDefault != NULL) {
+        *SetDefault = TRUE;
+      }
+      OcKeyMapFlush (KeyMap, Keys[0], TRUE);
+      return OC_INPUT_CONTINUE;
+    }
+
+    if (Keys[0] == AppleHidUsbKbUsageKeyUpArrow) {
+      OcKeyMapFlush (KeyMap, Keys[0], TRUE);
+      return OC_INPUT_UP;
+    }
+
+    if (Keys[0] == AppleHidUsbKbUsageKeyDownArrow) {
+      OcKeyMapFlush (KeyMap, Keys[0], TRUE);
+      return OC_INPUT_DOWN;
+    }
+
+    if (Keys[0] == AppleHidUsbKbUsageKeyLeftArrow) {
+      OcKeyMapFlush (KeyMap, Keys[0], TRUE);
+      return OC_INPUT_LEFT;
+    }
+
+    if (Keys[0] == AppleHidUsbKbUsageKeyRightArrow) {
+      OcKeyMapFlush (KeyMap, Keys[0], TRUE);
+      return OC_INPUT_RIGHT;
+    }
+
+    if (Keys[0] == AppleHidUsbKbUsageKeyPgUp
+      || Keys[0] == AppleHidUsbKbUsageKeyHome) {
+      OcKeyMapFlush (KeyMap, Keys[0], TRUE);
+      return OC_INPUT_TOP;
+    }
+
+    if (Keys[0] == AppleHidUsbKbUsageKeyPgDn
+      || Keys[0] == AppleHidUsbKbUsageKeyEnd) {
+      OcKeyMapFlush (KeyMap, Keys[0], TRUE);
+      return OC_INPUT_BOTTOM;
+    }
+
+    STATIC_ASSERT (AppleHidUsbKbUsageKeyF1 + 11 == AppleHidUsbKbUsageKeyF12, "Unexpected encoding");
+    if (Keys[0] >= AppleHidUsbKbUsageKeyF1 && Keys[0] <= AppleHidUsbKbUsageKeyF12) {
+      OcKeyMapFlush (KeyMap, Keys[0], TRUE);
+      return OC_INPUT_FUNCTIONAL (Keys[0] - AppleHidUsbKbUsageKeyF1 + 1);
+    }
+
+    STATIC_ASSERT (AppleHidUsbKbUsageKeyF13 + 11 == AppleHidUsbKbUsageKeyF24, "Unexpected encoding");
+    if (Keys[0] >= AppleHidUsbKbUsageKeyF13 && Keys[0] <= AppleHidUsbKbUsageKeyF24) {
+      OcKeyMapFlush (KeyMap, Keys[0], TRUE);
+      return OC_INPUT_FUNCTIONAL (Keys[0] - AppleHidUsbKbUsageKeyF13 + 13);
+    }
+
+    STATIC_ASSERT (AppleHidUsbKbUsageKeyOne + 8 == AppleHidUsbKbUsageKeyNine, "Unexpected encoding");
+    for (KeyCode = AppleHidUsbKbUsageKeyOne; KeyCode <= AppleHidUsbKbUsageKeyNine; ++KeyCode) {
+      if (OcKeyMapHasKey (Keys, NumKeys, KeyCode)) {
+        if (WantsDefault && SetDefault != NULL) {
+          *SetDefault = TRUE;
+        }
+        OcKeyMapFlush (KeyMap, Keys[0], TRUE);
+        return (INTN) (KeyCode - AppleHidUsbKbUsageKeyOne);
+      }
+    }
+
+    STATIC_ASSERT (AppleHidUsbKbUsageKeyA + 25 == AppleHidUsbKbUsageKeyZ, "Unexpected encoding");
+    for (KeyCode = AppleHidUsbKbUsageKeyA; KeyCode <= AppleHidUsbKbUsageKeyZ; ++KeyCode) {
+      if (OcKeyMapHasKey (Keys, NumKeys, KeyCode)) {
+        if (WantsDefault && SetDefault != NULL) {
+          *SetDefault = TRUE;
+        }
+        OcKeyMapFlush (KeyMap, Keys[0], TRUE);
+        return (INTN) (KeyCode - AppleHidUsbKbUsageKeyA + 9);
+      }
+    }
+  }
+
+  if (NumKeys > 0) {
+    return OC_INPUT_INVALID;
+  }
+
+  return OC_INPUT_TIMEOUT;
+}
+
+INTN
+OcWaitForAppleKeyIndex (
+  IN OUT OC_PICKER_CONTEXT                  *Context,
+  IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,
+  IN     UINTN                              Timeout,
+     OUT BOOLEAN                            *SetDefault  OPTIONAL
+  )
+{
+  INTN                               ResultingKey;
   UINT64                             CurrTime;
   UINT64                             EndTime;
-  UINTN                              CsrActiveConfigSize;
 
   //
   // These hotkeys are normally parsed by boot.efi, and they work just fine
@@ -165,238 +406,29 @@ OcWaitForAppleKeyIndex (
   }
 
   while (Timeout == 0 || CurrTime == 0 || CurrTime < EndTime) {
-    NumKeys = ARRAY_SIZE (Keys);
-    Status = KeyMap->GetKeyStrokes (
-                       KeyMap,
-                       &Modifiers,
-                       &NumKeys,
-                       Keys
-                       );
-
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCB: GetKeyStrokes - %r\n", Status));
-      return OC_INPUT_INVALID;
-    }
-
     CurrTime    = GetTimeInNanoSecond (GetPerformanceCounter ());  
 
+    ResultingKey = OcGetAppleKeyIndex (Context, KeyMap, SetDefault);
+
     //
-    // Handle key combinations.
+    // Requested for another iteration, handled Apple hotkey.
     //
-    if (PollHotkeys) {
-      HasCommand = (Modifiers & (APPLE_MODIFIER_LEFT_COMMAND | APPLE_MODIFIER_RIGHT_COMMAND)) != 0;
-      HasShift   = (Modifiers & (APPLE_MODIFIER_LEFT_SHIFT | APPLE_MODIFIER_RIGHT_SHIFT)) != 0;
-      HasKeyC    = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyC);
-      HasKeyK    = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyK);
-      HasKeyS    = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyS);
-      HasKeyV    = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyV);
-      //
-      // Checking for PAD minus is our extension to support more keyboards.
-      //
-      HasKeyMinus = OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyMinus)
-        || OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyPadMinus);
-
-      //
-      // Shift is always valid and enables Safe Mode.
-      //
-      if (HasShift) {
-        if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-x", L_STR_LEN ("-x")) == NULL) {
-          DEBUG ((DEBUG_INFO, "OCB: Shift means -x\n"));
-          OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-x", L_STR_LEN ("-x"));
-        }
-        continue;
-      }
-
-      //
-      // CMD+V is always valid and enables Verbose Mode.
-      //
-      if (HasCommand && HasKeyV) {
-        if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-v", L_STR_LEN ("-v")) == NULL) {
-          DEBUG ((DEBUG_INFO, "OCB: CMD+V means -v\n"));
-          OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-v", L_STR_LEN ("-v"));
-        }
-        continue;
-      }
-
-      //
-      // CMD+C+MINUS is always valid and disables compatibility check.
-      //
-      if (HasCommand && HasKeyC && HasKeyMinus) {
-        if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-no_compat_check", L_STR_LEN ("-no_compat_check")) == NULL) {
-          DEBUG ((DEBUG_INFO, "OCB: CMD+C+MINUS means -no_compat_check\n"));
-          OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-no_compat_check", L_STR_LEN ("-no_compat_check"));
-        }
-        continue;
-      }
-
-      //
-      // CMD+K is always valid for new macOS and means force boot to release kernel.
-      //
-      if (HasCommand && HasKeyK) {
-        if (AsciiStrStr (Context->AppleBootArgs, "kcsuffix=release") == NULL) {
-          DEBUG ((DEBUG_INFO, "OCB: CMD+K means kcsuffix=release\n"));
-          OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "kcsuffix=release", L_STR_LEN ("kcsuffix=release"));
-        }
-        continue;
-      }
-
-      //
-      // boot.efi also checks for CMD+X, but I have no idea what it is for.
-      //
-
-      //
-      // boot.efi requires unrestricted NVRAM just for CMD+S+MINUS, and CMD+S
-      // does not work at all on T2 macs. For CMD+S we simulate T2 behaviour with
-      // DisableSingleUser Booter quirk if necessary.
-      // Ref: https://support.apple.com/HT201573
-      //
-      if (HasCommand && HasKeyS) {
-        WantsZeroSlide = HasKeyMinus;
-
-        if (WantsZeroSlide) {
-          CsrActiveConfig     = 0;
-          CsrActiveConfigSize = sizeof (CsrActiveConfig);
-          Status = gRT->GetVariable (
-            L"csr-active-config",
-            &gAppleBootVariableGuid,
-            NULL,
-            &CsrActiveConfigSize,
-            &CsrActiveConfig
-            );
-          //
-          // FIXME: CMD+S+Minus behaves as CMD+S when "slide=0" is not supported
-          //        by the SIP configuration. This might be an oversight, but is
-          //        consistent with the boot.efi implementation.
-          //
-          WantsZeroSlide = !EFI_ERROR (Status) && (CsrActiveConfig & CSR_ALLOW_UNRESTRICTED_NVRAM) != 0;
-        }
-
-        if (WantsZeroSlide) {
-          if (AsciiStrStr (Context->AppleBootArgs, "slide=0") == NULL) {
-            DEBUG ((DEBUG_INFO, "OCB: CMD+S+MINUS means slide=0\n"));
-            OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "slide=0", L_STR_LEN ("slide=0"));
-          }
-        } else if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-s", L_STR_LEN ("-s")) == NULL) {
-          DEBUG ((DEBUG_INFO, "OCB: CMD+S means -s\n"));
-          OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-s", L_STR_LEN ("-s"));
-        }
-        continue;
-      }
+    if (ResultingKey == OC_INPUT_INTERNAL) {
+      continue;
     }
 
-    //
-    // Handle VoiceOver.
-    //
-    if ((Modifiers & (APPLE_MODIFIER_LEFT_COMMAND | APPLE_MODIFIER_RIGHT_COMMAND)) != 0
-      && OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyF5)) {
-      OcKeyMapFlush (KeyMap, 0, TRUE);
-      return OC_INPUT_VOICE_OVER;
-    }
-
-    //
-    // Handle reload menu.
-    //
-    if (OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyEscape)
-     || OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyZero)) {
-      OcKeyMapFlush (KeyMap, 0, TRUE);
-      return OC_INPUT_ABORTED;
-    }
-
-    if (OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeySpaceBar)) {
-      OcKeyMapFlush (KeyMap, 0, TRUE);
-      return OC_INPUT_MORE;
-    }
-
-    //
-    // Default update is desired for Ctrl+Index and Ctrl+Enter.
-    //
-    WantsDefault = Modifiers != 0 && (Modifiers & ~(APPLE_MODIFIER_LEFT_CONTROL | APPLE_MODIFIER_RIGHT_CONTROL)) == 0;
-
-    //
-    // Check exact match on index strokes.
-    //
-    if ((Modifiers == 0 || WantsDefault) && NumKeys == 1) {
-      if (Keys[0] == AppleHidUsbKbUsageKeyEnter
-        || Keys[0] == AppleHidUsbKbUsageKeyReturn
-        || Keys[0] == AppleHidUsbKbUsageKeyPadEnter) {
-        if (WantsDefault && SetDefault != NULL) {
-          *SetDefault = TRUE;
-        }
-        OcKeyMapFlush (KeyMap, Keys[0], TRUE);
-        return OC_INPUT_CONTINUE;
-      }
-
-      if (Keys[0] == AppleHidUsbKbUsageKeyUpArrow) {
-        OcKeyMapFlush (KeyMap, Keys[0], TRUE);
-        return OC_INPUT_UP;
-      }
-
-      if (Keys[0] == AppleHidUsbKbUsageKeyDownArrow) {
-        OcKeyMapFlush (KeyMap, Keys[0], TRUE);
-        return OC_INPUT_DOWN;
-      }
-
-      if (Keys[0] == AppleHidUsbKbUsageKeyLeftArrow) {
-        OcKeyMapFlush (KeyMap, Keys[0], TRUE);
-        return OC_INPUT_LEFT;
-      }
-
-      if (Keys[0] == AppleHidUsbKbUsageKeyRightArrow) {
-        OcKeyMapFlush (KeyMap, Keys[0], TRUE);
-        return OC_INPUT_RIGHT;
-      }
-
-      if (Keys[0] == AppleHidUsbKbUsageKeyPgUp
-        || Keys[0] == AppleHidUsbKbUsageKeyHome) {
-        OcKeyMapFlush (KeyMap, Keys[0], TRUE);
-        return OC_INPUT_TOP;
-      }
-
-      if (Keys[0] == AppleHidUsbKbUsageKeyPgDn
-        || Keys[0] == AppleHidUsbKbUsageKeyEnd) {
-        OcKeyMapFlush (KeyMap, Keys[0], TRUE);
-        return OC_INPUT_BOTTOM;
-      }
-
-      STATIC_ASSERT (AppleHidUsbKbUsageKeyF1 + 11 == AppleHidUsbKbUsageKeyF12, "Unexpected encoding");
-      if (Keys[0] >= AppleHidUsbKbUsageKeyF1 && Keys[0] <= AppleHidUsbKbUsageKeyF12) {
-        OcKeyMapFlush (KeyMap, Keys[0], TRUE);
-        return OC_INPUT_FUNCTIONAL (Keys[0] - AppleHidUsbKbUsageKeyF1 + 1);
-      }
-
-      STATIC_ASSERT (AppleHidUsbKbUsageKeyF13 + 11 == AppleHidUsbKbUsageKeyF24, "Unexpected encoding");
-      if (Keys[0] >= AppleHidUsbKbUsageKeyF13 && Keys[0] <= AppleHidUsbKbUsageKeyF24) {
-        OcKeyMapFlush (KeyMap, Keys[0], TRUE);
-        return OC_INPUT_FUNCTIONAL (Keys[0] - AppleHidUsbKbUsageKeyF13 + 13);
-      }
-
-      STATIC_ASSERT (AppleHidUsbKbUsageKeyOne + 8 == AppleHidUsbKbUsageKeyNine, "Unexpected encoding");
-      for (KeyCode = AppleHidUsbKbUsageKeyOne; KeyCode <= AppleHidUsbKbUsageKeyNine; ++KeyCode) {
-        if (OcKeyMapHasKey (Keys, NumKeys, KeyCode)) {
-          if (WantsDefault && SetDefault != NULL) {
-            *SetDefault = TRUE;
-          }
-          OcKeyMapFlush (KeyMap, Keys[0], TRUE);
-          return (INTN) (KeyCode - AppleHidUsbKbUsageKeyOne);
-        }
-      }
-
-      STATIC_ASSERT (AppleHidUsbKbUsageKeyA + 25 == AppleHidUsbKbUsageKeyZ, "Unexpected encoding");
-      for (KeyCode = AppleHidUsbKbUsageKeyA; KeyCode <= AppleHidUsbKbUsageKeyZ; ++KeyCode) {
-        if (OcKeyMapHasKey (Keys, NumKeys, KeyCode)) {
-          if (WantsDefault && SetDefault != NULL) {
-            *SetDefault = TRUE;
-          }
-          OcKeyMapFlush (KeyMap, Keys[0], TRUE);
-          return (INTN) (KeyCode - AppleHidUsbKbUsageKeyA + 9);
-        }
-      }
-    }
     //
     // Abort the timeout when unrecognised keys are pressed.
     //
-    if (Timeout != 0 && NumKeys != 0) {
+    if (Timeout != 0 && ResultingKey == OC_INPUT_INVALID) {
       return OC_INPUT_INVALID;
+    }
+
+    //
+    // Found key, return it.
+    //
+    if (ResultingKey != OC_INPUT_INVALID && ResultingKey != OC_INPUT_TIMEOUT) {
+      return ResultingKey;
     }
 
     MicroSecondDelay (10);

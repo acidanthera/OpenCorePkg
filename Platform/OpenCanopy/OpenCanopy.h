@@ -8,6 +8,7 @@
 #ifndef OPEN_CANOPY_H
 #define OPEN_CANOPY_H
 
+#include <Library/OcBootManagementLib.h>
 #include <Protocol/GraphicsOutput.h>
 #include <Protocol/SimpleTextIn.h>
 
@@ -58,7 +59,8 @@ VOID
   IN     VOID                 *Context OPTIONAL,
   IN     INT64                BaseX,
   IN     INT64                BaseY,
-  IN     CONST EFI_INPUT_KEY  *Key
+  IN     INTN                 Key,
+  IN     BOOLEAN              Modifier
   );
 
 typedef
@@ -259,8 +261,9 @@ GuiClearScreen (
 
 EFI_STATUS
 GuiLibConstruct (
-  IN UINT32  CursorDefaultX,
-  IN UINT32  CursorDefaultY
+  IN OC_PICKER_CONTEXT  *PickerContet,
+  IN UINT32             CursorDefaultX,
+  IN UINT32             CursorDefaultY
   );
 
 VOID

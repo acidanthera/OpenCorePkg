@@ -7,39 +7,69 @@
 
 #include <Uefi.h>
 
-#include <Protocol/SimpleTextIn.h>
+#include <Protocol/AppleKeyMapAggregator.h>
 
 #include <Library/DebugLib.h>
+#include <Library/OcAppleKeyMapLib.h>
+#include <Library/OcBootManagementLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 #include "../GuiIo.h"
 
 struct GUI_KEY_CONTEXT_ {
-  EFI_SIMPLE_TEXT_INPUT_PROTOCOL TextIn;
+  APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
+  OC_PICKER_CONTEXT                  *Context;
 };
 
 GUI_KEY_CONTEXT *
 GuiKeyConstruct (
-  VOID
+  IN OC_PICKER_CONTEXT  *PickerContext
   )
 {
-  ASSERT (gST->ConIn != NULL);
-  return (GUI_KEY_CONTEXT *)gST->ConIn;
+  STATIC GUI_KEY_CONTEXT  mContext;
+  mContext.KeyMap  = OcAppleKeyMapInstallProtocols (FALSE);
+  mContext.Context = PickerContext;
+  if (mContext.KeyMap == NULL) {
+    DEBUG ((DEBUG_WARN, "OCUI: Missing AppleKeyMapAggregator\n"));
+    return NULL;
+  }
+
+  return &mContext;
 }
 
 EFI_STATUS
 EFIAPI
 GuiKeyRead (
   IN OUT GUI_KEY_CONTEXT  *Context,
-  OUT    EFI_INPUT_KEY    *Key
+  OUT    INTN             *KeyIndex,
+  OUT    BOOLEAN          *Modifier
   )
 {
-  EFI_SIMPLE_TEXT_INPUT_PROTOCOL *TextIn;
 
   ASSERT (Context != NULL);
 
-  TextIn = &Context->TextIn;
-  return TextIn->ReadKeyStroke (TextIn,  Key);
+  *Modifier = FALSE;
+  *KeyIndex = OcGetAppleKeyIndex (
+    Context->Context,
+    Context->KeyMap,
+    Modifier
+    );
+
+  //
+  // No key was pressed.
+  //
+  if (*KeyIndex == OC_INPUT_TIMEOUT) {
+    return EFI_NOT_FOUND;
+  }
+
+  //
+  // Internal key was pressed and handled.
+  //
+  if (*KeyIndex == OC_INPUT_INTERNAL) {
+    return EFI_UNSUPPORTED;
+  }
+
+  return EFI_SUCCESS;
 }
 
 VOID
@@ -48,14 +78,10 @@ GuiKeyReset (
   IN OUT GUI_KEY_CONTEXT  *Context
   )
 {
-  EFI_STATUS    Status;
-  EFI_INPUT_KEY Key;
-
   ASSERT (Context != NULL);
-
-  do {
-    Status = GuiKeyRead (Context, &Key);
-  } while (!EFI_ERROR (Status));
+  //
+  // Flush console here?
+  //
 }
 
 VOID
@@ -64,4 +90,5 @@ GuiKeyDestruct (
   )
 {
   ASSERT (Context != NULL);
+  ZeroMem (Context, sizeof (*Context));
 }

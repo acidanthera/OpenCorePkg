@@ -225,7 +225,6 @@ OcShowSimpleBootMenu (
         BootContext->PickerContext,
         KeyMap,
         PlayChosen ? OC_VOICE_OVER_IDLE_TIMEOUT_MS : TimeOutSeconds * 1000,
-        BootContext->PickerContext->PollAppleHotKeys,
         &SetDefault
         );
 

@@ -68,6 +68,7 @@
   DebugLib
   FrameBufferBltLib
   MemoryAllocationLib
+  OcAppleKeyMapLib
   OcBootManagementLib
   OcCompressionLib
   OcGuardLib

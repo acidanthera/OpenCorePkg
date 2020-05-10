@@ -8,6 +8,8 @@
 #ifndef BOOT_PICKER_H
 #define BOOT_PICKER_H
 
+#include "../OpenCanopy.h"
+
 typedef struct {
   GUI_OBJ_CHILD         Hdr;
   CONST GUI_IMAGE       *ClickImage;
@@ -18,7 +20,7 @@ typedef struct {
   GUI_OBJ_CHILD   Hdr;
   GUI_IMAGE       EntryIcon;
   GUI_IMAGE       Label;
-  VOID            *Context;
+  OC_BOOT_ENTRY   *Context;
   BOOLEAN         CustomIcon;
 } GUI_VOLUME_ENTRY;
 

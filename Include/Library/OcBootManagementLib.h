@@ -916,6 +916,7 @@ OcLoadPickerHotKeys (
 #define OC_INPUT_BOTTOM         -10       ///< Move to bottom
 #define OC_INPUT_MORE           -11       ///< Show more entries (press space)
 #define OC_INPUT_VOICE_OVER     -12       ///< Toggle VoiceOver (press CMD+F5)
+#define OC_INPUT_INTERNAL       -13       ///< Accepted internal hotkey (e.g. Apple)
 #define OC_INPUT_FUNCTIONAL(x) (-20 - (x))  ///< Functional hotkeys
 
 /**
@@ -923,8 +924,25 @@ OcLoadPickerHotKeys (
 
   @param[in,out]  Context      Picker context.
   @param[in]      KeyMap       Apple Key Map Aggregator protocol.
+  @param[out]     SetDefault   Set boot option as default, optional.
+
+  @returns key index [0, OC_INPUT_MAX) or OC_INPUT_* value.
+  @returns OC_INPUT_TIMEOUT when no key is pressed.
+  @returns OC_INPUT_INVALID when unknown key is pressed.
+**/
+INTN
+OcGetAppleKeyIndex (
+  IN OUT OC_PICKER_CONTEXT                  *Context,
+  IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,
+     OUT BOOLEAN                            *SetDefault  OPTIONAL
+  );
+
+/**
+  Waits for key index from user input.
+
+  @param[in,out]  Context      Picker context.
+  @param[in]      KeyMap       Apple Key Map Aggregator protocol.
   @param[in]      Timeout      Timeout to wait for in milliseconds.
-  @param[in]      PollHotkeys  Poll key combinations.
   @param[out]     SetDefault   Set boot option as default, optional.
 
   @returns key index [0, OC_INPUT_MAX) or OC_INPUT_* value.
@@ -934,7 +952,6 @@ OcWaitForAppleKeyIndex (
   IN OUT OC_PICKER_CONTEXT                  *Context,
   IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,
   IN     UINTN                              Timeout,
-  IN     BOOLEAN                            PollHotkeys,
      OUT BOOLEAN                            *SetDefault  OPTIONAL
   );
 

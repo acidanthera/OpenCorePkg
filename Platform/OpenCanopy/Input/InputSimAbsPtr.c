@@ -451,10 +451,11 @@ GuiPointerGetState (
 
 GUI_POINTER_CONTEXT *
 GuiPointerConstruct (
-  IN UINT32  DefaultX,
-  IN UINT32  DefaultY,
-  IN UINT32  Width,
-  IN UINT32  Height
+  IN OC_PICKER_CONTEXT  *PickerContext,
+  IN UINT32             DefaultX,
+  IN UINT32             DefaultY,
+  IN UINT32             Width,
+  IN UINT32             Height
   )
 {
   // TODO: alloc on the fly?

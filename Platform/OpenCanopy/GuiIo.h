@@ -8,6 +8,7 @@
 #ifndef GUI_IO_H
 #define GUI_IO_H
 
+#include <Library/OcBootManagementLib.h>
 #include <Protocol/GraphicsOutput.h>
 #include "OpenCanopy.h"
 
@@ -65,10 +66,11 @@ GuiPointerReset (
 
 GUI_POINTER_CONTEXT *
 GuiPointerConstruct (
-  IN UINT32  DefaultX,
-  IN UINT32  DefaultY,
-  IN UINT32  Width,
-  IN UINT32  Height
+  IN OC_PICKER_CONTEXT  *PickerContext,
+  IN UINT32             DefaultX,
+  IN UINT32             DefaultY,
+  IN UINT32             Width,
+  IN UINT32             Height
   );
 
 VOID
@@ -78,7 +80,7 @@ GuiPointerDestruct (
 
 GUI_KEY_CONTEXT *
 GuiKeyConstruct (
-  VOID
+  IN OC_PICKER_CONTEXT  *PickerContext
   );
 
 VOID
@@ -91,7 +93,8 @@ EFI_STATUS
 EFIAPI
 GuiKeyRead (
   IN OUT GUI_KEY_CONTEXT  *Context,
-  OUT    EFI_INPUT_KEY    *Key
+  OUT    INTN             *KeyIndex,
+  OUT    BOOLEAN          *Modifier
   );
 
 VOID

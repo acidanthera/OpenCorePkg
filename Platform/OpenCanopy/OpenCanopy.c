@@ -956,8 +956,9 @@ GuiRedrawAndFlushScreen (
 
 EFI_STATUS
 GuiLibConstruct (
-  IN UINT32  CursorDefaultX,
-  IN UINT32  CursorDefaultY
+  IN OC_PICKER_CONTEXT  *PickerContet,
+  IN UINT32             CursorDefaultX,
+  IN UINT32             CursorDefaultY
   )
 {
   CONST EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *OutputInfo;
@@ -975,16 +976,17 @@ GuiLibConstruct (
   CursorDefaultY = MIN (CursorDefaultY, OutputInfo->VerticalResolution   - 1);
 
   mPointerContext = GuiPointerConstruct (
-                      CursorDefaultX,
-                      CursorDefaultY,
-                      OutputInfo->HorizontalResolution,
-                      OutputInfo->VerticalResolution
-                      );
+    PickerContet,
+    CursorDefaultX,
+    CursorDefaultY,
+    OutputInfo->HorizontalResolution,
+    OutputInfo->VerticalResolution
+    );
   if (mPointerContext == NULL) {
     DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise pointer\n"));
   }
 
-  mKeyContext = GuiKeyConstruct ();
+  mKeyContext = GuiKeyConstruct (PickerContet);
   if (mKeyContext == NULL) {
     DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise key input\n"));
   }
@@ -1128,7 +1130,8 @@ GuiDrawLoop (
   EFI_STATUS          Status;
   BOOLEAN             Result;
 
-  EFI_INPUT_KEY       InputKey;
+  INTN                InputKey;
+  BOOLEAN             Modifier;
   GUI_POINTER_STATE   PointerState;
   GUI_OBJ             *HoldObject;
   INT64               HoldObjBaseX;
@@ -1203,7 +1206,7 @@ GuiDrawLoop (
       //
       // Process key events. Only allow one key at a time for now.
       //
-      Status = GuiKeyRead (mKeyContext, &InputKey);
+      Status = GuiKeyRead (mKeyContext, &InputKey, &Modifier);
       if (!EFI_ERROR (Status)) {
         ASSERT (DrawContext->Screen->KeyEvent != NULL);
         DrawContext->Screen->KeyEvent (
@@ -1212,7 +1215,8 @@ GuiDrawLoop (
                                DrawContext->GuiContext,
                                0,
                                0,
-                               &InputKey
+                               InputKey,
+                               Modifier
                                );
         //
         // If detected key press then disable menu timeout

@@ -3,7 +3,7 @@ OpenCore Changelog
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy
-- Improved font rendering by using CoreText
+- Improved OpenCanopy font rendering by using CoreText
 - Fixed light and custom background font rendering
 - Added `Boot####` options support in boot entry listing
 - Removed `HideSelf` by pattern recognising `BOOTx64.efi`
@@ -18,6 +18,7 @@ OpenCore Changelog
 - Fixed `ReconnectOnResChange` reconnecting even without res change
 - Fixed OpenCanopy showing internal icons for external drives
 - Fixed OpenCanopy launching Shell with text over it
+- Added partial hotkey support to OpenCanopy (e.g. Ctrl+Enter)
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG

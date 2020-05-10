@@ -134,12 +134,13 @@ InternalBootPickerViewKeyEvent (
   IN     VOID                 *Context OPTIONAL,
   IN     INT64                BaseX,
   IN     INT64                BaseY,
-  IN     CONST EFI_INPUT_KEY  *Key
+  IN     INTN                 Key,
+  IN     BOOLEAN              Modifier
   )
 {
   ASSERT (This != NULL);
   ASSERT (DrawContext != NULL);
-  ASSERT (Key != NULL);
+
   //
   // Consider moving between multiple panes with UP/DOWN and store the current
   // view within the object - for now, hardcoding this is enough.
@@ -151,7 +152,8 @@ InternalBootPickerViewKeyEvent (
                         Context,
                         BaseX + mBootPicker.Hdr.Obj.OffsetX,
                         BaseY + mBootPicker.Hdr.Obj.OffsetY,
-                        Key
+                        Key,
+                        Modifier
                         );
 }
 
@@ -239,7 +241,8 @@ InternalBootPickerKeyEvent (
   IN     VOID                 *Context OPTIONAL,
   IN     INT64                BaseX,
   IN     INT64                BaseY,
-  IN     CONST EFI_INPUT_KEY  *Key
+  IN     INTN                 Key,
+  IN     BOOLEAN              Modifier
   )
 {
   GUI_VOLUME_PICKER       *Picker;
@@ -250,13 +253,12 @@ InternalBootPickerKeyEvent (
 
   ASSERT (This != NULL);
   ASSERT (DrawContext != NULL);
-  ASSERT (Key != NULL);
 
   Picker    = BASE_CR (This, GUI_VOLUME_PICKER, Hdr.Obj);
   PrevEntry = Picker->SelectedEntry;
   ASSERT (PrevEntry != NULL);
 
-  if (Key->ScanCode == SCAN_RIGHT) {
+  if (Key == OC_INPUT_RIGHT) {
     NextLink = GetNextNode (
                  &Picker->Hdr.Obj.Children,
                  &PrevEntry->Hdr.Link
@@ -271,7 +273,7 @@ InternalBootPickerKeyEvent (
       NextEntry = BASE_CR (NextLink, GUI_VOLUME_ENTRY, Hdr.Link);
       InternalBootPickerChangeEntry (Picker, DrawContext, BaseX, BaseY, NextEntry);
     }
-  } else if (Key->ScanCode == SCAN_LEFT) {
+  } else if (Key == OC_INPUT_LEFT) {
     NextLink = GetPreviousNode (
                  &Picker->Hdr.Obj.Children,
                  &PrevEntry->Hdr.Link
@@ -283,10 +285,11 @@ InternalBootPickerKeyEvent (
       NextEntry = BASE_CR (NextLink, GUI_VOLUME_ENTRY, Hdr.Link);
       InternalBootPickerChangeEntry (Picker, DrawContext, BaseX, BaseY, NextEntry);
     }
-  } else if (Key->UnicodeChar == CHAR_CARRIAGE_RETURN) {
+  } else if (Key == OC_INPUT_CONTINUE) {
     ASSERT (Context != NULL);
     ASSERT (Picker->SelectedEntry != NULL);
     GuiContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
+    Picker->SelectedEntry->Context->SetDefault = Modifier;
     GuiContext->BootEntry = Picker->SelectedEntry->Context;
   } else if (mBootPickerOpacity != 0xFF) {
     //
@@ -295,11 +298,11 @@ InternalBootPickerKeyEvent (
     return;
   }
 
-  if (Key->UnicodeChar == L' ') {
+  if (Key == OC_INPUT_MORE) {
     GuiContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
     GuiContext->HideAuxiliary = FALSE;
     GuiContext->Refresh = TRUE;
-  } else if (Key->ScanCode == SCAN_ESC) {
+  } else if (Key == OC_INPUT_ABORTED) {
     GuiContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
     GuiContext->Refresh = TRUE;
   }
