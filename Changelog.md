@@ -17,6 +17,7 @@ OpenCore Changelog
 - Added `ApplePanic` to store panic logs on ESP root
 - Fixed `ReconnectOnResChange` reconnecting even without res change
 - Fixed OpenCanopy showing internal icons for external drives
+- Fixed OpenCanopy launching Shell with text over it
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG

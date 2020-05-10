@@ -650,6 +650,7 @@ OcRunBootPicker (
         //
         // Clear screen from picker contents before loading the entry.
         //
+        gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_CLEAR_WHOLE_AND_CLIP);
         gST->ConOut->ClearScreen (gST->ConOut);
         //
         // Voice chosen information.
