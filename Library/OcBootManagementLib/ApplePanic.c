@@ -37,7 +37,6 @@ PanicUnpack (
   VOID          *Unpacked;
   CONST UINT8   *PackedWalker;
   UINT8         *UnpackedWalker;
-  UINTN         Index;
   UINT64        Sequence;
 
   if (OcOverflowMulUN (PackedSize, 8, UnpackedSize)) {
@@ -59,7 +58,6 @@ PanicUnpack (
     return NULL;
   }
 
-  Index = 0;
   Sequence = 0;
   PackedWalker = Packed;
   UnpackedWalker = Unpacked;
