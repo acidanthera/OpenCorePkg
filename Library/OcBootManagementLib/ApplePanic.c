@@ -244,12 +244,12 @@ OcReadApplePanicLog (
   VOID         *Value;
   UINTN        ValueSize;
   CHAR16       VariableName[32];
-  VOID         *PanicData;
   VOID         *TmpData;
-  UINTN        PanicDataSize;
+  UINTN        TmpDataSize;
+  VOID         *PanicData;
 
-  PanicData     = NULL;
-  PanicDataSize = 0;
+  TmpData     = NULL;
+  TmpDataSize = 0;
 
   for (Index = 0; Index < 1024; ++Index) {
     UnicodeSPrint (
@@ -265,27 +265,26 @@ OcReadApplePanicLog (
 
     if (ValueSize == 0) {
       FreePool (Value);
-      Status = EFI_NOT_FOUND;
       break;
     }
 
-    TmpData = ReallocatePool (PanicDataSize, PanicDataSize + ValueSize, PanicData);
+    TmpData = ReallocatePool (TmpDataSize, TmpDataSize + ValueSize, TmpData);
     if (TmpData == NULL) {
       FreePool (Value);
-      if (PanicData != NULL) {
-        FreePool (PanicData);
+      if (TmpData != NULL) {
+        FreePool (TmpData);
       }
       return NULL;
     }
 
     CopyMem (
-      (UINT8 *) PanicData + PanicDataSize,
+      (UINT8 *) TmpData + TmpDataSize,
       Value,
       ValueSize
       );
 
     FreePool (Value);
-    PanicDataSize += ValueSize;
+    TmpDataSize += ValueSize;
   }
 
   if (Index == 0) {
@@ -298,19 +297,25 @@ OcReadApplePanicLog (
   //
   // We have a kernel panic now.
   //
-  ASSERT (PanicData != NULL);
-  ASSERT (PanicDataSize > 0);
+  ASSERT (TmpData != NULL);
+  ASSERT (TmpDataSize > 0);
 
-  TmpData = PanicUnpack (PanicData, PanicDataSize, &PanicDataSize);
-  FreePool (PanicData);
+  PanicData = PanicUnpack (TmpData, TmpDataSize, &TmpDataSize);
+  FreePool (TmpData);
 
-  if (TmpData != NULL) {
-    PanicData = PanicExpand (TmpData, PanicDataSize, &PanicDataSize);
-  } else {
-    PanicData = TmpData;
+  if (PanicData != NULL) {
+    //
+    // Truncate trailing zeroes.
+    //
+    TmpDataSize = AsciiStrLen (PanicData);
+    TmpData = PanicExpand (PanicData, TmpDataSize, &TmpDataSize);
+    if (TmpData != NULL) {
+      FreePool (PanicData);
+      PanicData = TmpData;
+    }
   }
 
-  *PanicSize = (UINT32) PanicDataSize;
+  *PanicSize = (UINT32) TmpDataSize;
 
   return TmpData;
 }
