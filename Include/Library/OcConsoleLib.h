@@ -30,8 +30,8 @@ typedef enum {
 /**
   Special commands sent to Builtin text renderer through TestString.
 **/
-#define OC_CONSOLE_CLEAR_AND_CLIP        L"ClearAndClip"
-#define OC_CONSOLE_CLEAR_WHOLE_AND_CLIP  L"ClearWholeAndClip"
+#define OC_CONSOLE_MARK_CONTROLLED       L"MarkControlled"
+#define OC_CONSOLE_MARK_UNCONTROLLED     L"MarkUncontrolled"
 
 /**
   Configure console control protocol with given options.

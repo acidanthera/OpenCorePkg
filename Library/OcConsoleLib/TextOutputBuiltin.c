@@ -566,16 +566,12 @@ AsciiTextTestString (
   IN CHAR16                          *String
   )
 {
-  if (StrCmp (String, OC_CONSOLE_CLEAR_AND_CLIP) == 0) {
-    This->ClearScreen (This);
-    mConsoleMaxPosX = 0;
-    mConsoleMaxPosY = 0;
-  } else if (StrCmp (String, OC_CONSOLE_CLEAR_WHOLE_AND_CLIP) == 0) {
+  if (StrCmp (String, OC_CONSOLE_MARK_UNCONTROLLED) == 0) {
     mConsoleMaxPosX = mGraphicsOutput->Mode->Info->HorizontalResolution / TGT_CHAR_WIDTH;
     mConsoleMaxPosY = mGraphicsOutput->Mode->Info->VerticalResolution   / TGT_CHAR_HEIGHT;
-    This->ClearScreen (This);
+  } else if (StrCmp (String, OC_CONSOLE_MARK_CONTROLLED) == 0) {
     mConsoleMaxPosX = 0;
-    mConsoleMaxPosY = 0;
+    mConsoleMaxPosX = 0;
   }
 
   return EFI_SUCCESS;

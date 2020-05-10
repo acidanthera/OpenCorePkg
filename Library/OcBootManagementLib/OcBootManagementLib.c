@@ -156,7 +156,8 @@ OcShowSimpleBootMenu (
   //
   // Extension for OpenCore direct text render for faster redraw with custom background.
   //
-  gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_CLEAR_AND_CLIP);
+  gST->ConOut->ClearScreen (gST->ConOut);
+  gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_CONTROLLED);
 
   while (TRUE) {
     gST->ConOut->ClearScreen (gST->ConOut);
@@ -355,8 +356,8 @@ OcShowSimplePasswordRequest (
 
   OcConsoleControlSetMode (EfiConsoleControlScreenText);
   gST->ConOut->EnableCursor (gST->ConOut, FALSE);
-  gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_CLEAR_AND_CLIP);
   gST->ConOut->ClearScreen (gST->ConOut);
+  gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_CONTROLLED);
 
   for (Index = 0; Index < 3; ++Index) {
     PwIndex = 0;
@@ -648,10 +649,17 @@ OcRunBootPicker (
         }
 
         //
-        // Clear screen from picker contents before loading the entry.
+        // Do screen clearing for builtin menu here, so that it is possible to see the action.
+        // TODO: Probably remove that completely.
         //
-        gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_CLEAR_WHOLE_AND_CLIP);
-        gST->ConOut->ClearScreen (gST->ConOut);
+        if (Context->ShowMenu == OcShowSimpleBootMenu) {
+          //
+          // Clear screen from picker contents before loading the entry.
+          //
+          gST->ConOut->ClearScreen (gST->ConOut);
+          gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_UNCONTROLLED);
+        }
+
         //
         // Voice chosen information.
         //

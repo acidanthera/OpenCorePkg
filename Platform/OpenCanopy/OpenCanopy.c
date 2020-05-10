@@ -1256,6 +1256,26 @@ GuiDrawLoop (
   } while (!DrawContext->ExitLoop (DrawContext->GuiContext));
 }
 
+VOID
+GuiClearScreen (
+  IN OUT GUI_DRAWING_CONTEXT           *DrawContext,
+  IN     EFI_GRAPHICS_OUTPUT_BLT_PIXEL *Pixel
+  )
+{
+  GuiOutputBlt (
+    mOutputContext,
+    Pixel,
+    EfiBltVideoFill,
+    0,
+    0,
+    0,
+    0,
+    DrawContext->Screen->Width,
+    DrawContext->Screen->Height,
+    0
+    );
+}
+
 EFI_STATUS
 GuiIcnsToImageIcon (
   OUT GUI_IMAGE  *Image,

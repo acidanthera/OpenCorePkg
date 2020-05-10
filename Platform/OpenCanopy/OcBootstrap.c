@@ -15,6 +15,8 @@
 
 #include <Library/UefiLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/OcBootManagementLib.h>
+#include <Library/OcConsoleLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
@@ -29,6 +31,7 @@
 #include "GuiApp.h"
 
 extern BOOT_PICKER_GUI_CONTEXT mGuiContext;
+extern CONST GUI_IMAGE         mBackgroundImage;
 
 STATIC
 GUI_DRAWING_CONTEXT
@@ -57,6 +60,11 @@ OcShowMenuByOc (
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
+  //
+  // Extension for OpenCore builtin renderer to mark that we control text output here.
+  //
+  gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_CONTROLLED);
 
   Status = BootPickerViewInitialize (
     &mDrawContext,
@@ -88,8 +96,14 @@ OcShowMenuByOc (
   // Note, it is important to destruct GUI here, as we must ensure
   // that keyboard/mouse polling does not conflict with FV2 ui.
   //
+  GuiClearScreen (&mDrawContext, mBackgroundImage.Buffer);
   BootPickerViewDeinitialize (&mDrawContext, &mGuiContext);
   GuiLibDestruct ();
+
+  //
+  // Extension for OpenCore builtin renderer to mark that we no longer control text output here.
+  //
+  gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_UNCONTROLLED);
 
   *ChosenBootEntry = mGuiContext.BootEntry;
   BootContext->PickerContext->HideAuxiliary = mGuiContext.HideAuxiliary;

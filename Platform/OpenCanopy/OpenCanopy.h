@@ -251,6 +251,12 @@ GuiDrawLoop (
   IN     UINT32               TimeoutSeconds
   );
 
+VOID
+GuiClearScreen (
+  IN OUT GUI_DRAWING_CONTEXT           *DrawContext,
+  IN     EFI_GRAPHICS_OUTPUT_BLT_PIXEL *Pixel
+  );
+
 EFI_STATUS
 GuiLibConstruct (
   IN UINT32  CursorDefaultX,
