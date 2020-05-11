@@ -415,6 +415,23 @@ AddBootEntryOnFileSystem (
       ASSERT (ExistingEntry->DevicePath != NULL);
       if (IsDevicePathEqual (ExistingEntry->DevicePath, DevicePath)) {
         DEBUG ((DEBUG_INFO, "OCB: Discarding already present DP\n"));
+        //
+        // We may have more than one macOS installation in APFS container.
+        // Boot policy returns them in a defined (constant) order, and we want
+        // to preserve this order regardless of the BootOrder.
+        //
+        // When an operating system is present in BootOrder it will be put to
+        // the front of FileSystem boot entries. As a result instead of:
+        // [OS1], [REC1], [OS2], [REC2] we may get [OS2], [OS1], [REC1], [REC2].
+        // The latter happens because after [REC1] discovered [OS1] is skipped
+        // due to being already present. The code below moves [OS2] to the end
+        // of list at [REC1] stage to fix the order.
+        //
+        // This change assumes that only one operating system from the container
+        // can be present as a boot option. For now this appears to be true.
+        //
+        RemoveEntryList (Link);
+        InsertTailList (&FileSystem->BootEntries, Link);
         return EFI_ALREADY_STARTED;
       }
     }
