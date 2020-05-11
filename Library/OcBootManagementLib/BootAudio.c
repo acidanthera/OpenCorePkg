@@ -172,11 +172,10 @@ OcPlayAudioBeep (
 EFI_STATUS
 OcPlayAudioEntry (
   IN     OC_PICKER_CONTEXT  *Context,
-  IN     OC_BOOT_ENTRY      *Entry,
-  IN     UINT32             Number
+  IN     OC_BOOT_ENTRY      *Entry
   )
 {
-  OcPlayAudioFile (Context, OcVoiceOverAudioFileIndexBase + Number, FALSE);
+  OcPlayAudioFile (Context, OcVoiceOverAudioFileIndexBase + Entry->EntryIndex, FALSE);
 
   if (Entry->Type == OC_BOOT_APPLE_OS) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFilemacOS, FALSE);

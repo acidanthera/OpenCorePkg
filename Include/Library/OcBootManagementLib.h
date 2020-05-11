@@ -1169,15 +1169,13 @@ OcPlayAudioBeep (
 
   @param[in]  Context   Picker context.
   @param[in]  Entry     Entry to play.
-  @param[in]  Number    Entry index number.
 
   @retval EFI_SUCCESS on success or when unnecessary.
 **/
 EFI_STATUS
 OcPlayAudioEntry (
   IN  OC_PICKER_CONTEXT  *Context,
-  IN  OC_BOOT_ENTRY      *Entry,
-  IN  UINT32             Number
+  IN  OC_BOOT_ENTRY      *Entry
   );
 
 /**

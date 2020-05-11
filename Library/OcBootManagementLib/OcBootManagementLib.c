@@ -203,7 +203,7 @@ OcShowSimpleBootMenu (
     if (!PlayedOnce && BootContext->PickerContext->PickerAudioAssist) {
       OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileChooseOS, FALSE);
       for (Index = 0; Index < Count; ++Index) {
-        OcPlayAudioEntry (BootContext->PickerContext, BootEntries[Index], BootEntries[Index]->EntryIndex);
+        OcPlayAudioEntry (BootContext->PickerContext, BootEntries[Index]);
         if (TimeOutSeconds > 0 && BootContext->DefaultEntry->EntryIndex - 1 == Index) {
           OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileDefault, FALSE);
         }
@@ -230,7 +230,7 @@ OcShowSimpleBootMenu (
 
       if (PlayChosen && KeyIndex == OC_INPUT_TIMEOUT) {
         OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileSelected, FALSE);
-        OcPlayAudioEntry (BootContext->PickerContext, BootEntries[ChosenEntry], BootEntries[Index]->EntryIndex);
+        OcPlayAudioEntry (BootContext->PickerContext, BootEntries[ChosenEntry]);
         PlayChosen = FALSE;
         continue;
       } else if (KeyIndex == OC_INPUT_TIMEOUT) {
@@ -641,7 +641,7 @@ OcRunBootPicker (
           if (Context->PickerCommand == OcPickerShowPicker) {
             OcPlayAudioFile (Context, OcVoiceOverAudioFileSelected, FALSE);
             OcPlayAudioFile (Context, OcVoiceOverAudioFileDefault, FALSE);
-            OcPlayAudioEntry (Context, Chosen, Chosen->EntryIndex);
+            OcPlayAudioEntry (Context, Chosen);
           }
           Status = OcSetDefaultBootEntry (Context, Chosen);
           DEBUG ((DEBUG_INFO, "OCB: Setting default - %r\n", Status));
@@ -663,7 +663,7 @@ OcRunBootPicker (
         // Voice chosen information.
         //
         OcPlayAudioFile (Context, OcVoiceOverAudioFileLoading, FALSE);
-        Status = OcPlayAudioEntry (Context, Chosen, Chosen->EntryIndex);
+        Status = OcPlayAudioEntry (Context, Chosen);
         if (EFI_ERROR (Status)) {
           OcPlayAudioBeep (
             Context,
