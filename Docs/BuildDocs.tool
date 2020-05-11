@@ -7,11 +7,11 @@ abort() {
 
 cd "$(dirname "$0")" || abort "Wrong directory"
 
-if [ "$(command -v latexdiff)" = "" ]; then
+if [ "$(which latexdiff)" = "" ]; then
   abort "latexdiff is missing, check your TeX Live installation"
 fi
 
-if [ "$(command -v pdflatex)" = "" ]; then
+if [ "$(which pdflatex)" = "" ]; then
   abort "pdflatex is missing, check your TeX Live installation"
 fi
 

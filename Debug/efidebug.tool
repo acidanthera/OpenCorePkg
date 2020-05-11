@@ -34,15 +34,15 @@ cd "$RUNDIR" || exit 1
 
 find_gdb() {
   if [ "${GDB}" = "" ]; then
-    GDB=$(command -v ggdb)
+    GDB=$(which ggdb)
   fi
 
   if [ "${GDB}" = "" ]; then
-    GDB=$(command -v gdb-multiarch)
+    GDB=$(which gdb-multiarch)
   fi
 
   if [ "${GDB}" = "" ]; then
-    GDB=$(command -v gdb)
+    GDB=$(which gdb)
   fi
 }
 
@@ -52,7 +52,7 @@ find_lldb() {
   fi
 
   if [ "${LLDB}" = "" ]; then
-    LLDB=$(command -v lldb)
+    LLDB=$(which lldb)
   fi
 }
 

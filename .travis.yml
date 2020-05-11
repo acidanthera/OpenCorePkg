@@ -11,8 +11,8 @@ matrix:
     name: "Check Shell Scripts"
 
     script:
-    - HOMEBREW_NO_INSTALL_CLEANUP=1 HOMEBREW_NO_AUTO_UPDATE=1 brew install shellcheck
-    - find . \( -name "*.tool" -o -name "*.command" -o -name "*.sh" \) -exec shellcheck --severity=info {} \;
+    - HOMEBREW_NO_INSTALL_CLEANUP=1 brew install shellcheck
+    - find . \( -name "*.tool" -o -name "*.command" -o -name "*.sh" \) -exec sh -c 'for TargetFile; do shellcheck --severity=info "${TargetFile}" || exit 1; done' sh {} +
 
   - os: osx
     name: "Build macOS XCODE5"
