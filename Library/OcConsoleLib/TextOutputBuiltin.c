@@ -161,6 +161,8 @@ STATIC UINTN  mConsoleWidth;
 STATIC UINTN  mConsoleHeight;
 STATIC UINTN  mConsoleMaxPosX;
 STATIC UINTN  mConsoleMaxPosY;
+STATIC UINTN  mPrivateColumn; ///< At least UEFI Shell trashes Mode values.
+STATIC UINTN  mPrivateRow;    ///< At least UEFI Shell trashes Mode values.
 STATIC UINT32 mConsoleGopMode;
 STATIC UINT8  mFontScale;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION mBackgroundColor;
@@ -203,7 +205,7 @@ RenderChar (
 
   DstBuffer = &mCharacterBuffer[0].Raw;
 
-  if ((Char >= 0 && Char < ISO_CHAR_MIN) || Char == ' ' || Char == '\t' || Char == 0x7F) {
+  if ((Char >= 0 && Char < ISO_CHAR_MIN) || Char == ' ' || Char == CHAR_TAB || Char == 0x7F) {
     SetMem32 (DstBuffer, TGT_CHAR_AREA * sizeof (DstBuffer[0]), mBackgroundColor.Raw);
   } else {
 
@@ -399,8 +401,8 @@ RenderResync (
   mConsoleMaxPosX          = 0;
   mConsoleMaxPosY          = 0;
 
-  This->Mode->CursorColumn = 0;
-  This->Mode->CursorRow    = 0;
+  mPrivateColumn = mPrivateRow = 0;
+  This->Mode->CursorColumn = This->Mode->CursorRow = 0;
 
   mGraphicsOutput->Blt (
     mGraphicsOutput,
@@ -489,16 +491,10 @@ AsciiTextOutputString (
   }
 
   //
-  // We cannot assert here and these values should not but may be trashed by the user,
-  // so we do sanity checks in runtime.
+  // For whatever reason UEFI Shell trashes these values when executing commands like help -b.
   //
-  if (This->Mode->CursorColumn < 0 || (UINTN) This->Mode->CursorColumn >= mConsoleWidth) {
-    This->Mode->CursorColumn = 0;
-  }
-
-  if (This->Mode->CursorRow < 0 || (UINTN) This->Mode->CursorRow >= mConsoleHeight) {
-    This->Mode->CursorRow = 0;
-  }
+  This->Mode->CursorColumn = (INT32) mPrivateColumn;
+  This->Mode->CursorRow    = (INT32) mPrivateRow;
 
   FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
 
@@ -506,8 +502,20 @@ AsciiTextOutputString (
     //
     // Carriage return should just move the cursor back.
     //
-    if (String[Index] == '\r') {
+    if (String[Index] == CHAR_CARRIAGE_RETURN) {
       This->Mode->CursorColumn = 0;
+      continue;
+    }
+
+    if (String[Index] == CHAR_BACKSPACE) {
+      if (This->Mode->CursorColumn == 0 && This->Mode->CursorRow > 0) {
+        This->Mode->CursorRow--;
+        This->Mode->CursorColumn = (INT32) (mConsoleWidth - 1);
+        RenderChar (' ', This->Mode->CursorColumn, This->Mode->CursorRow);
+      } else if (This->Mode->CursorColumn > 0) {
+        This->Mode->CursorColumn--;
+        RenderChar (' ', This->Mode->CursorColumn, This->Mode->CursorRow);
+      }
       continue;
     }
 
@@ -515,7 +523,7 @@ AsciiTextOutputString (
     // Newline should move the cursor lower.
     // In case we are out of room it should scroll instead.
     //
-    if (String[Index] == '\n') {
+    if (String[Index] == CHAR_LINEFEED) {
       if ((UINTN) This->Mode->CursorRow < mConsoleHeight - 1) {
         ++This->Mode->CursorRow;
         mConsoleMaxPosY = MAX (mConsoleMaxPosY, (UINTN) This->Mode->CursorRow);
@@ -552,6 +560,9 @@ AsciiTextOutputString (
   }
 
   FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
+
+  mPrivateColumn = (UINTN) This->Mode->CursorColumn;
+  mPrivateRow    = (UINTN) This->Mode->CursorRow;
 
   gBS->RestoreTPL (OldTpl);
 
@@ -668,7 +679,7 @@ AsciiTextSetAttribute (
   }
 
   if (Attribute != (UINTN) This->Mode->Attribute) {
-    FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
+    FlushCursor (This->Mode->CursorVisible, mPrivateColumn, mPrivateRow);
 
     FgColor = BitFieldRead32 (Attribute, 0, 3);
     BgColor = BitFieldRead32 (Attribute, 4, 6);
@@ -685,7 +696,7 @@ AsciiTextSetAttribute (
     mBackgroundColor.Raw  = mGraphicsEfiColors[BgColor];
     This->Mode->Attribute = Attribute;
 
-    FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
+    FlushCursor (This->Mode->CursorVisible, mPrivateColumn, mPrivateRow);
   }
 
   gBS->RestoreTPL (OldTpl);
@@ -738,9 +749,9 @@ AsciiTextClearScreen (
   //
   // Handle cursor.
   //
-  This->Mode->CursorColumn  = 0;
-  This->Mode->CursorRow     = 0;
-  FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
+  mPrivateColumn = mPrivateRow = 0;
+  This->Mode->CursorColumn  = This->Mode->CursorRow = 0;
+  FlushCursor (This->Mode->CursorVisible, mPrivateColumn, mPrivateRow);
 
   //
   // We do not reset max here, as we may still scroll (e.g. in shell via page buttons).
@@ -773,10 +784,12 @@ AsciiTextSetCursorPosition (
   }
 
   if (Column < mConsoleWidth && Row < mConsoleHeight) {
-    FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
-    This->Mode->CursorColumn = (INT32) Column;
-    This->Mode->CursorRow    = (INT32) Row;
-    FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
+    FlushCursor (This->Mode->CursorVisible, mPrivateColumn, mPrivateRow);
+    mPrivateColumn = Column;
+    mPrivateRow    = Row;
+    This->Mode->CursorColumn = (INT32) mPrivateColumn;
+    This->Mode->CursorRow    = (INT32) mPrivateRow;
+    FlushCursor (This->Mode->CursorVisible, mPrivateColumn, mPrivateRow);
     mConsoleMaxPosX = MAX (mConsoleMaxPosX, Column);
     mConsoleMaxPosY = MAX (mConsoleMaxPosY, Row);
     Status = EFI_SUCCESS;
@@ -809,9 +822,9 @@ AsciiTextEnableCursor (
     }
   }
 
-  FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
+  FlushCursor (This->Mode->CursorVisible, mPrivateColumn, mPrivateRow);
   This->Mode->CursorVisible = Visible;
-  FlushCursor (This->Mode->CursorVisible, This->Mode->CursorColumn, This->Mode->CursorRow);
+  FlushCursor (This->Mode->CursorVisible, mPrivateColumn, mPrivateRow);
   gBS->RestoreTPL (OldTpl);
   return EFI_SUCCESS;
 }
