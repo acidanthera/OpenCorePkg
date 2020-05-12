@@ -380,6 +380,14 @@ AddBootEntryOnFileSystem (
   }
 
   //
+  // Do not add Time Machine when not requested.
+  //
+  if (BootContext->PickerContext->HideAuxiliary && EntryType == OC_BOOT_APPLE_TIME_MACHINE) {
+    DEBUG ((DEBUG_INFO, "OCB: Discarding time machine entry due to auxiliary\n"));
+    return EFI_UNSUPPORTED;
+  }
+
+  //
   // Skip OpenCore bootloaders on own entry.
   // We do not waste time doing this for other entries.
   //
