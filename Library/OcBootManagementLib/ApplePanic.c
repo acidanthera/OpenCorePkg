@@ -64,14 +64,14 @@ PanicUnpack (
 
   while (PackedSize >= 7) {
     CopyMem (&Sequence, PackedWalker, 7);
-    *UnpackedWalker++ = BitFieldRead64 (Sequence, 7 * 0, 7 * 0 + 6);
-    *UnpackedWalker++ = BitFieldRead64 (Sequence, 7 * 1, 7 * 1 + 6);
-    *UnpackedWalker++ = BitFieldRead64 (Sequence, 7 * 2, 7 * 2 + 6);
-    *UnpackedWalker++ = BitFieldRead64 (Sequence, 7 * 3, 7 * 3 + 6);
-    *UnpackedWalker++ = BitFieldRead64 (Sequence, 7 * 4, 7 * 4 + 6);
-    *UnpackedWalker++ = BitFieldRead64 (Sequence, 7 * 5, 7 * 5 + 6);
-    *UnpackedWalker++ = BitFieldRead64 (Sequence, 7 * 6, 7 * 6 + 6);
-    *UnpackedWalker++ = BitFieldRead64 (Sequence, 7 * 7, 7 * 7 + 6);
+    *UnpackedWalker++ = (UINT8) BitFieldRead64 (Sequence, 7 * 0, 7 * 0 + 6);
+    *UnpackedWalker++ = (UINT8) BitFieldRead64 (Sequence, 7 * 1, 7 * 1 + 6);
+    *UnpackedWalker++ = (UINT8) BitFieldRead64 (Sequence, 7 * 2, 7 * 2 + 6);
+    *UnpackedWalker++ = (UINT8) BitFieldRead64 (Sequence, 7 * 3, 7 * 3 + 6);
+    *UnpackedWalker++ = (UINT8) BitFieldRead64 (Sequence, 7 * 4, 7 * 4 + 6);
+    *UnpackedWalker++ = (UINT8) BitFieldRead64 (Sequence, 7 * 5, 7 * 5 + 6);
+    *UnpackedWalker++ = (UINT8) BitFieldRead64 (Sequence, 7 * 6, 7 * 6 + 6);
+    *UnpackedWalker++ = (UINT8) BitFieldRead64 (Sequence, 7 * 7, 7 * 7 + 6);
     PackedWalker += 7;
     PackedSize   -= 7;
   }
