@@ -24,6 +24,7 @@ OpenCore Changelog
 - Fixed CPU detection crash with QEMU 5.0 and KVM accelerator
 - Removed `RequestBootVarFallback` due to numerous bugs
 - Added `DeduplicateBootOrder` UEFI quirk
+- Removed `DirectGopCacheMode` due to being ineffective
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG

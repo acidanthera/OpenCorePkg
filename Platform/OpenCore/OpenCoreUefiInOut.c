@@ -191,7 +191,6 @@ OcLoadUefiOutputSupport (
 {
   EFI_STATUS           Status;
   CONST CHAR8          *AsciiRenderer;
-  CONST CHAR8          *AsciiCacheMode;
   OC_CONSOLE_RENDERER  Renderer;
   UINT32               Width;
   UINT32               Height;
@@ -241,20 +240,7 @@ OcLoadUefiOutputSupport (
   }
 
   if (Config->Uefi.Output.DirectGopRendering) {
-    AsciiCacheMode = OC_BLOB_GET (&Config->Uefi.Output.DirectGopCacheMode);
-
-    if (AsciiCacheMode[0] == '\0') {
-      OcUseDirectGop (-1);
-    } else if (AsciiStrCmp (AsciiCacheMode, "Uncacheable") == 0) {
-      OcUseDirectGop (CacheUncacheable);
-    } else if (AsciiStrCmp (AsciiCacheMode, "WriteCombining") == 0) {
-      OcUseDirectGop (CacheWriteCombining);
-    } else if (AsciiStrCmp (AsciiCacheMode, "WriteThrough") == 0) {
-      OcUseDirectGop (CacheWriteThrough);
-    } else {
-      DEBUG ((DEBUG_WARN, "OC: Requested unknown cache mode %a\n", AsciiCacheMode));
-      OcUseDirectGop (-1);
-    }
+    OcUseDirectGop (-1);
   }
 
   if (Config->Uefi.Output.ReconnectOnResChange && !EFI_ERROR (Status)) {

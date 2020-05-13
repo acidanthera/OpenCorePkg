@@ -4850,21 +4850,6 @@ functioning. Feature highlights:
   \emph{Note}: This option only applies to \texttt{System} renderer.
 
 \item
-  \texttt{DirectGopCacheMode}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Cache mode for builtin graphics output protocol framebuffer.
-
-  Tuning cache mode may provide better rendering performance on some firmwares.
-  Providing empty string leaves cache control settings to the firmware.
-  Valid non-empty values are: \texttt{Uncacheable}, \texttt{WriteCombining}, and
-  \texttt{WriteThrough}.
-
-  \emph{Note}: This option is not supported on most hardware (see
-  \href{https://github.com/acidanthera/bugtracker/issues/755}{acidanthera/bugtracker\#755}
-  for more details).
-
-\item
   \texttt{DirectGopRendering}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
