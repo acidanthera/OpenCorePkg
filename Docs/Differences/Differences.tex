@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Mon May 11 17:11:58 2020
-%DIF ADD ../Configuration.tex        Wed May 13 16:05:07 2020
+%DIF ADD ../Configuration.tex        Wed May 13 16:09:11 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -5067,22 +5067,42 @@ functioning. Feature highlights:
   \emph{Note}: This option only applies to \texttt{System} renderer.
 
 \item
-  \texttt{DirectGopCacheMode}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
-  \textbf{Description}: Cache mode for builtin graphics output protocol framebuffer.
+  \DIFdelbegin \texttt{\DIFdel{DirectGopCacheMode}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ string}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: Empty string}%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Cache mode for builtin graphics output protocol framebuffer.
+}%DIFDELCMD < 
 
-  Tuning cache mode may provide better rendering performance on some firmwares.
+%DIFDELCMD <   %%%
+\DIFdel{Tuning cache mode may provide better rendering performance on some firmwares.
   Providing empty string leaves cache control settings to the firmware.
-  Valid non-empty values are: \texttt{Uncacheable}, \texttt{WriteCombining}, and
-  \texttt{WriteThrough}.
+  Valid non-empty values are: }\texttt{\DIFdel{Uncacheable}}%DIFAUXCMD
+\DIFdel{, }\texttt{\DIFdel{WriteCombining}}%DIFAUXCMD
+\DIFdel{, and
+  }\texttt{\DIFdel{WriteThrough}}%DIFAUXCMD
+\DIFdel{.
+}%DIFDELCMD < 
 
-  \emph{Note}: This option is not supported on most hardware (see
-  \href{https://github.com/acidanthera/bugtracker/issues/755}{acidanthera/bugtracker\#755}
-  for more details).
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: This option is not supported on most hardware (see
+  }%DIFDELCMD < \href{https://github.com/acidanthera/bugtracker/issues/755}{acidanthera/bugtracker\#755}
+%DIFDELCMD <   %%%
+\DIFdel{for more details).
+}%DIFDELCMD < 
 
-\item
-  \texttt{DirectGopRendering}\\
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdelend \texttt{DirectGopRendering}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Use builtin graphics output protocol renderer for console.
