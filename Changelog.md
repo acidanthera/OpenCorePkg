@@ -20,6 +20,7 @@ OpenCore Changelog
 - Fixed OpenCanopy launching Shell with text over it
 - Added partial hotkey support to OpenCanopy (e.g. Ctrl+Enter)
 - Added builtin text renderer compatibility with Shell page mode
+- Fixed `FadtEnableReset` with too small FACP tables
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG
