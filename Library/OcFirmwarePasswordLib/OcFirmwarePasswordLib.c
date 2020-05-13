@@ -26,10 +26,8 @@
 // AppleFirmwarePasswordCheck
 ///
 ///
-/// @param[in] This        This protocol.
+/// @param[in] This             This protocol.
 /// @param[in] Arg1
-///
-/// @param[out] FilePath    Databuffer
 ///
 /// @retval EFI_SUCCESS         The log was saved successfully.
 /// @retval other

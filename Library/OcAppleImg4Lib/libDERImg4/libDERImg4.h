@@ -56,10 +56,10 @@ typedef struct {
   On success, the Manifest is guaranteed to be digitally signed with the
   platform-provided DERImg4RootCertificate.
 
-  @param[out] ManInfo    Output Manifest information structure.
-  @param[in]  ManBuffer  Buffer containing the Manifest data.
-  @param[in]  ManSize    Size, in bytes, of ManBuffer.
-  @param[in]  ObjType    The object type to inspect.
+  @param[out] ManInfo         Output Manifest information structure.
+  @param[in]  ManifestBuffer  Buffer containing the Manifest data.
+  @param[in]  ManifestSize    Size, in bytes, of ManBuffer.
+  @param[in]  ObjType         The object type to inspect.
 
   @retval DR_Success  ManBuffer contains a valid, signed IMG4 Manifest and its
                       information has been returned into ManInfo.
