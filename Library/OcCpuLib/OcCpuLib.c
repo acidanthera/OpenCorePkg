@@ -300,9 +300,15 @@ ScanIntelProcessor (
     return;
   }
 
-  if (Cpu->Model >= CPU_MODEL_SANDYBRIDGE) {
+  //
+  // Some virtual machines like QEMU 5.0 with KVM will fail to read this value.
+  // REF: https://github.com/acidanthera/bugtracker/issues/914
+  //
+  if (Cpu->Model >= CPU_MODEL_SANDYBRIDGE && !Cpu->Hypervisor) {
     PkgCstConfigControl.Uint64 = AsmReadMsr64 (MSR_SANDY_BRIDGE_PKG_CST_CONFIG_CONTROL);
     Cpu->CstConfigLock = PkgCstConfigControl.Bits.CFGLock == 1;
+  } else {
+    Cpu->CstConfigLock = FALSE;
   }
 
   //

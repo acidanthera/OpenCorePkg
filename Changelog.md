@@ -21,6 +21,7 @@ OpenCore Changelog
 - Added partial hotkey support to OpenCanopy (e.g. Ctrl+Enter)
 - Added builtin text renderer compatibility with Shell page mode
 - Fixed `FadtEnableReset` with too small FACP tables
+- Fixed CPU detection crash with QEMU 5.0 and KVM accelerator
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG
