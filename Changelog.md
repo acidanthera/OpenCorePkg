@@ -25,6 +25,7 @@ OpenCore Changelog
 - Removed `RequestBootVarFallback` due to numerous bugs
 - Added `DeduplicateBootOrder` UEFI quirk
 - Removed `DirectGopCacheMode` due to being ineffective
+- Fixed assertions on log exhaustion causing boot failures
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG

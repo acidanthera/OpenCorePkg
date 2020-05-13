@@ -108,15 +108,7 @@ OcProcessVariableGuid (
   EFI_STATUS  Status;
   UINT32      GuidIndex;
 
-  //
-  // FIXME: Checking string length manually is due to inadequate assertions.
-  //
-  if (AsciiStrLen (AsciiVariableGuid) == GUID_STRING_LENGTH) {
-    Status = AsciiStrToGuid (AsciiVariableGuid, VariableGuid);
-  } else {
-    Status = EFI_BUFFER_TOO_SMALL;
-  }
-
+  Status = AsciiStrToGuid (AsciiVariableGuid, VariableGuid);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OC: Failed to convert NVRAM GUID %a - %r\n", AsciiVariableGuid, Status));
   }

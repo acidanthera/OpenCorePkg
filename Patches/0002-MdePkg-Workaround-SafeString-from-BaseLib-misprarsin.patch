@@ -1,0 +1,29 @@
+From 5873c1446d94f03a2111db9d0b78a1637e4a16bb Mon Sep 17 00:00:00 2001
+From: Vitaly Cheptsov <vit9696@protonmail.com>
+Date: Wed, 13 May 2020 22:10:10 +0300
+Subject: [PATCH 1/1] MdePkg: Workaround SafeString from BaseLib misprarsing
+ data
+
+REF: https://bugzilla.tianocore.org/show_bug.cgi?id=2054
+
+Attempts to upstream this failed due to sabotage from Intel.
+Refer to edk2-devel mailing list for more details.
+---
+ MdePkg/Library/BaseLib/SafeString.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/MdePkg/Library/BaseLib/SafeString.c b/MdePkg/Library/BaseLib/SafeString.c
+index 7dc03d2caa..478b3e9ea2 100644
+--- a/MdePkg/Library/BaseLib/SafeString.c
++++ b/MdePkg/Library/BaseLib/SafeString.c
+@@ -14,7 +14,6 @@
+ 
+ #define SAFE_STRING_CONSTRAINT_CHECK(Expression, Status)  \
+   do { \
+-    ASSERT (Expression); \
+     if (!(Expression)) { \
+       return Status; \
+     } \
+-- 
+2.24.2 (Apple Git-127)
+

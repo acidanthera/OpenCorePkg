@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Mon May 11 17:11:58 2020
-%DIF ADD ../Configuration.tex        Wed May 13 16:09:11 2020
+%DIF ADD ../Configuration.tex        Wed May 13 22:16:41 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -718,12 +718,15 @@ the list of modifications across all published updates.
 \subsection{Contribution}\label{configuration-comp}
 
 OpenCore can be compiled as an ordinary
-\href{https://github.com/tianocore/tianocore.github.io/wiki/EDK-II}{EDK II}.
+\href{https://github.com/tianocore/tianocore.github.io/wiki/EDK-II}{EDK II} \DIFaddbegin \DIFadd{package}\DIFaddend .
 Since \href{https://github.com/tianocore/tianocore.github.io/wiki/UDK}{UDK}
 development was abandoned by TianoCore, OpenCore requires the use of
 \href{https://github.com/tianocore/tianocore.github.io/wiki/EDK-II#stable-tags}{EDK II Stable}.
-Currently supported EDK II release (potentially with patches enhancing the experience)
-is hosted in \href{https://github.com/acidanthera/audk}{acidanthera/audk}.
+Currently supported EDK II release \DIFdelbegin \DIFdel{(potentially with patches enhancing the experience)
+}\DIFdelend is hosted in
+\href{https://github.com/acidanthera/audk}{acidanthera/audk}. \DIFaddbegin \DIFadd{The required patches
+for the package are present in }\texttt{\DIFadd{Patches}} \DIFadd{directory.
+}\DIFaddend 
 
 The only officially supported toolchain is \texttt{XCODE5}. Other toolchains
 might work, but are neither supported, nor recommended. Contribution of clean
