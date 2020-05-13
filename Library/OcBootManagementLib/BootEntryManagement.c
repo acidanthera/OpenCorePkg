@@ -69,6 +69,7 @@ ExpandShortFormBootPath (
   EFI_HANDLE               FileSystemHandle;
   EFI_FILE_PROTOCOL        *File;
   EFI_FILE_INFO            *FileInfo;
+  BOOLEAN                  IsRootPath;
   BOOLEAN                  IsDirectory;
 
   ASSERT (BootContext != NULL);
@@ -173,18 +174,23 @@ ExpandShortFormBootPath (
     File->Close (File);
 
     //
-    // Return only Device Paths that either refer to a file or a volume root,
-    // i.e. skip Device Paths that refer to a folder that is not root.
+    // Return only Device Paths that either refer to a file or a volume root.
     // Root Device Paths may be expanded by custom policies (such as Apple Boot
     // Policy) later.
     //
-  } while (!IsDevicePathEnd (RemainingDevicePath) && IsDirectory);
+    IsRootPath = IsDevicePathEnd (RemainingDevicePath);
+    if (IsRootPath || !IsDirectory) {
+      ASSERT (FullDevicePath != NULL);
+      ASSERT (*FileSystem != NULL);
 
-  ASSERT (FullDevicePath != NULL);
-  ASSERT (*FileSystem != NULL);
+      *IsRoot = IsDirectory;
+      return FullDevicePath;
+    }
 
-  *IsRoot = IsDirectory;
-  return FullDevicePath;
+    //
+    // Request a new device path expansion.
+    //
+  } while (TRUE);
 }
 
 /**
