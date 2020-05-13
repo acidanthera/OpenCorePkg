@@ -17,7 +17,7 @@
 
 #include <Uefi.h>
 
-#define OC_FIRMWARE_RUNTIME_REVISION 10
+#define OC_FIRMWARE_RUNTIME_REVISION 11
 
 /**
   OC_FIRMWARE_RUNTIME_PROTOCOL_GUID
@@ -38,15 +38,6 @@ typedef struct OC_FWRT_CONFIG_ {
   /// Enforce BootXXXX variable redirection to OpenCore vendor GUID.
   ///
   BOOLEAN  BootVariableRedirect;
-  ///
-  /// Route boot variables back to EfiGlobalVariable when they are compatible.
-  /// In general we do not want this, as this basically escapes OpenCore security
-  /// jail, and permits booting operating systems bypassing OpenCore.
-  /// However, some firmwares, namely ASUS APTIO V, will freeze/fail to boot
-  /// by manually adding boot entries for Windows after Windows itself did not
-  /// create them.
-  ///
-  BOOLEAN  BootVariableFallback;
   ///
   /// Make SetVariable do nothing and always return EFI_SECURITY_VIOLATION.
   /// When we do not want variables to be stored in NVRAM or NVRAM implementation

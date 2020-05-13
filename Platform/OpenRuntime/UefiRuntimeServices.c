@@ -57,15 +57,6 @@ STATIC EFI_EVENT                     mTranslateEvent;
 STATIC EFI_GET_VARIABLE              mCustomGetVariable;
 STATIC BOOLEAN                       mKernelStarted;
 
-/**
-  Current boot order before updating.
-**/
-STATIC UINT16                        mTmpBootOrder[16];
-STATIC UINTN                         mTmpBootOrderSize;
-STATIC INT32                         mOcBootOrderMap[16];
-STATIC UINT8                         mTmpBootOption[512];
-STATIC UINTN                         mTmpBootOptionSize;
-
 STATIC
 VOID
 WriteUnprotectorPrologue (
@@ -117,44 +108,15 @@ STATIC
 BOOLEAN
 IsEfiBootVar (
   IN   CHAR16    *VariableName,
-  IN   EFI_GUID  *VendorGuid,
-  OUT  BOOLEAN   *IsBootOrder  OPTIONAL,
-  OUT  INT32     *BootNum      OPTIONAL
+  IN   EFI_GUID  *VendorGuid
   )
 {
-  UINTN   Index;
-  CHAR16  Digit;
-  INT32   TmpNum;
-
   if (!CompareGuid (VendorGuid, &gEfiGlobalVariableGuid)) {
     return FALSE;
   }
 
   if (StrnCmp (L"Boot", VariableName, L_STR_LEN (L"Boot")) != 0) {
     return FALSE;
-  }
-
-  if (IsBootOrder != NULL && StrCmp (VariableName, L"BootOrder") == 0) {
-    *IsBootOrder = TRUE;
-    return TRUE;
-  }
-
-  if (BootNum != NULL
-    && StrLen (VariableName) == L_STR_LEN (L"Boot####")) {
-    TmpNum = 0;
-
-    for (Index = 0; Index < 4; ++Index) {
-      Digit = VariableName[L_STR_LEN (L"Boot") + Index];
-      if (Digit >= '0' && Digit <= '9') {
-        TmpNum = 16 * TmpNum + (INT32) (Digit - '0');
-      } else if (Digit >= 'A' && Digit <= 'F') {
-        TmpNum = 16 * TmpNum + (INT32) (Digit - 'A') + 10;
-      } else {
-        return TRUE;
-      }
-    }
-
-    *BootNum = TmpNum;
   }
 
   return TRUE;
@@ -324,7 +286,7 @@ WrapGetVariable (
   //
   // Redirect Boot-prefixed variables to our own GUID.
   //
-  if (gCurrentConfig->BootVariableRedirect && IsEfiBootVar (VariableName, VendorGuid, NULL, NULL)) {
+  if (gCurrentConfig->BootVariableRedirect && IsEfiBootVar (VariableName, VendorGuid)) {
     VendorGuid = &gOcVendorVariableGuid;
   }
 
@@ -412,7 +374,7 @@ WrapGetNextVariableName (
   // then go through the whole variable list and return
   // variables except EfiBoot.
   //
-  if (!IsEfiBootVar (TempName, &TempGuid, NULL, NULL)) {
+  if (!IsEfiBootVar (TempName, &TempGuid)) {
     while (TRUE) {
       //
       // Request for variables.
@@ -421,7 +383,7 @@ WrapGetNextVariableName (
       Status = mStoredGetNextVariableName (&Size, TempName, &TempGuid);
 
       if (!EFI_ERROR (Status)) {
-        if (!IsEfiBootVar (TempName, &TempGuid, NULL, NULL)) {
+        if (!IsEfiBootVar (TempName, &TempGuid)) {
           Size = StrSize (TempName); ///< Not guaranteed to be updated with EFI_SUCCESS.
 
           if (*VariableNameSize >= Size) {
@@ -549,348 +511,6 @@ WrapGetNextVariableName (
 }
 
 STATIC
-VOID
-HandleBootOrderFallback (
-  UINT16  *NewBootOrder,
-  UINTN   NewBootOrderCount,
-  UINT16  *OldBootOrder,
-  UINTN   OldBootOrderCount
-  )
-{
-  UINTN       Index;
-  UINTN       Index2;
-  EFI_STATUS  Status;
-  INT32       BootNum;
-
-  //
-  // Look for BootOrder entry addition, assume only one exists if at all.
-  // Ignore deletions, as we can handle them later.
-  //
-  BootNum = -1;
-  for (Index = 0; Index < NewBootOrderCount; ++Index) {
-    for (Index2 = 0; Index2 < OldBootOrderCount; ++Index2) {
-      if (NewBootOrder[Index] == OldBootOrder[Index2]) {
-        break;
-      }
-    }
-
-    if (Index2 == OldBootOrderCount) {
-      BootNum = NewBootOrder[Index];
-      break;
-    }
-  }
-
-  if (BootNum < 0) {
-    return;
-  }
-
-  //
-  // BootNum now contains the variable added to OcVendorVariable BootOrder.
-  // Check our pending mapping and submit it to EfiGlobalVariable BootOrder if present.
-  //
-
-  for (Index = 0; Index < ARRAY_SIZE (mOcBootOrderMap); ++Index) {
-    if (mOcBootOrderMap[Index] >= 0 && mOcBootOrderMap[Index] == BootNum) {
-      //
-      // Erase from pending order.
-      //
-      mOcBootOrderMap[Index] = -1;
-      BootNum = (INT32) (Index + OC_GL_BOOT_OPTION_START);
-      break;
-    }
-  }
-
-  if (Index == ARRAY_SIZE (mOcBootOrderMap)) {
-    //
-    // We do not know how to handle this variable, just ignore.
-    // Most likely we have already wrote it.
-    //
-    return;
-  }
-
-  //
-  // BootNum now contains the variable we want to add EfiGlobalVariable BootOrder.
-  // Add it, reusing mTmpBootOrder array.
-  //
-  mTmpBootOrderSize = sizeof (mTmpBootOrder) - sizeof (mTmpBootOrder[0]);
-  Status = mStoredGetVariable (
-    L"BootOrder",
-    &gEfiGlobalVariableGuid,
-    NULL,
-    &mTmpBootOrderSize,
-    mTmpBootOrder
-    );
-
-  if (EFI_ERROR (Status)) {
-    if (Status == EFI_NOT_FOUND) {
-      mTmpBootOrderSize = 0;
-    } else {
-      //
-      // We did not fit BootOrder into our list, just ignore.
-      // This should not happen.
-      //
-      return;
-    }
-  }
-
-  mTmpBootOrder[mTmpBootOrderSize / sizeof (mTmpBootOrder[0])] = (UINT16) BootNum;
-  mTmpBootOrderSize += sizeof (mTmpBootOrder[0]);
-
-  mStoredSetVariable (
-    L"BootOrder",
-    &gEfiGlobalVariableGuid,
-    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-    mTmpBootOrderSize,
-    mTmpBootOrder
-    );
-}
-
-STATIC
-EFI_DEVICE_PATH *
-GetBootEntryDevicePath (
-  EFI_LOAD_OPTION  *LoadOption,
-  UINTN            LoadOptionSize,
-  BOOLEAN          ForFallback
-  )
-{
-  UINT8                     *LoadOptionPtr;
-  CONST CHAR16              *Description;
-  UINTN                     DescriptionSize;
-  UINT16                    FilePathListSize;
-  EFI_DEVICE_PATH_PROTOCOL  *FilePathList;
-  EFI_DEVICE_PATH_PROTOCOL  *CurrNode;
-  FILEPATH_DEVICE_PATH      *LastNode;
-  UINTN                     Index;
-  UINTN                     Index2;
-  UINTN                     PathLen;
-  UINTN                     CurrLen;
-
-  if (LoadOptionSize < sizeof (*LoadOption)
-    || (LoadOption->Attributes & LOAD_OPTION_ACTIVE) == 0
-    || (LoadOption->Attributes & LOAD_OPTION_CATEGORY) != LOAD_OPTION_CATEGORY_BOOT) {
-    return NULL;
-  }
-
-  FilePathListSize = LoadOption->FilePathListLength;
-
-  LoadOptionPtr   = (UINT8 *) (LoadOption + 1);
-  LoadOptionSize -= sizeof (*LoadOption);
-
-  if (LoadOption->FilePathListLength > LoadOptionSize) {
-    return NULL;
-  }
-
-  LoadOptionSize -= FilePathListSize;
-
-  Description     = (CHAR16 *) LoadOptionPtr;
-  DescriptionSize = StrnSizeS (Description, (LoadOptionSize / sizeof (CHAR16)));
-  if (DescriptionSize > LoadOptionSize) {
-    return NULL;
-  }
-
-  //
-  // Just discard all macOS entries.
-  //
-  if (ForFallback && StrCmp (Description, L"Mac OS X") == 0) {
-    return NULL;
-  }
-
-  LoadOptionPtr  += DescriptionSize;
-  LoadOptionSize -= DescriptionSize;
-
-  FilePathList = (EFI_DEVICE_PATH_PROTOCOL *)LoadOptionPtr;
-  if (!IsDevicePathValid (FilePathList, FilePathListSize)) {
-    return NULL;
-  }
-
-  //
-  // Ignore checks for already stored paths.
-  //
-  if (!ForFallback) {
-    return FilePathList;
-  }
-
-  LastNode = NULL;
-
-  for (CurrNode = FilePathList; !IsDevicePathEnd (CurrNode); CurrNode = NextDevicePathNode (CurrNode)) {
-    if (DevicePathType (CurrNode) == MEDIA_DEVICE_PATH && DevicePathSubType (CurrNode) == MEDIA_FILEPATH_DP) {
-      LastNode = (FILEPATH_DEVICE_PATH *) CurrNode;
-    }
-  }
-
-  //
-  // Also discard entries that do not point to files (or maybe folders).
-  //
-  if (LastNode == NULL) {
-    return NULL;
-  }
-
-  //
-  // In addition discard several predefined names that are known to be macOS related.
-  // There obviously are more, but we are unlikely to see them.
-  //
-  STATIC CONST CHAR16 *mAppleBootloaders[] = {
-    L"boot.efi",
-    L"ThorUtil.efi",
-    L"MultiUpdater.efi"
-  };
-
-  PathLen = OcFileDevicePathNameLen (LastNode);
-  for (Index = 0; Index < ARRAY_SIZE (mAppleBootloaders); ++Index) {
-    CurrLen = StrLen (mAppleBootloaders[Index]);
-    if (PathLen >= CurrLen) {
-      Index2 = PathLen - CurrLen;
-      if ((Index2 == 0 || LastNode->PathName[Index2 - 1] == L'\\')
-        && CompareMem (&LastNode->PathName[Index2], mAppleBootloaders[Index], CurrLen) == 0) {
-        return NULL;
-      }
-    }
-  }
-
-  return FilePathList;
-}
-
-STATIC
-VOID
-HandleBootEntryFallback (
-  UINT16           OcBootNum,
-  EFI_LOAD_OPTION  *LoadOption,
-  UINTN            LoadOptionSize
-  )
-{
-  EFI_STATUS       Status;
-  UINTN            Index;
-  UINTN            Index2;
-  CHAR16           BootOption[L_STR_LEN (L"Boot####") + 1];
-  INT32            BootNum;
-  EFI_DEVICE_PATH  *SelfPath;
-  EFI_DEVICE_PATH  *OtherPath;
-
-  //
-  // Check if this device path is eligible for fallback entry.
-  //
-  SelfPath = GetBootEntryDevicePath (LoadOption, LoadOptionSize, TRUE);
-  if (SelfPath == NULL) {
-    return;
-  }
-
-  //
-  // Check if this boot entry is not already present.
-  //
-  mTmpBootOrderSize = sizeof (mTmpBootOrder);
-  Status = mStoredGetVariable (
-    L"BootOrder",
-    &gEfiGlobalVariableGuid,
-    NULL,
-    &mTmpBootOrderSize,
-    mTmpBootOrder
-    );
-
-  if (EFI_ERROR (Status)) {
-    if (Status == EFI_NOT_FOUND) {
-      mTmpBootOrderSize = 0;
-    } else {
-      //
-      // We cannot handle this boot order. Should not happen.
-      //
-      return;
-    }
-  }
-
-  BootOption[0] = 'B';
-  BootOption[1] = 'o';
-  BootOption[2] = 'o';
-  BootOption[3] = 't';
-  BootOption[8] = '\0';
-
-  for (Index = 0; Index < mTmpBootOrderSize / sizeof (mTmpBootOrder[0]); ++Index) {
-    BootOption[4] = "0123456789ABCDEF"[((UINT32) mTmpBootOrder[Index] >> 12U) & 0xFU];
-    BootOption[5] = "0123456789ABCDEF"[((UINT32) mTmpBootOrder[Index] >>  8U) & 0xFU];
-    BootOption[6] = "0123456789ABCDEF"[((UINT32) mTmpBootOrder[Index] >>  4U) & 0xFU];
-    BootOption[7] = "0123456789ABCDEF"[((UINT32) mTmpBootOrder[Index]       ) & 0xFU];
-
-    mTmpBootOptionSize = sizeof (mTmpBootOption);
-    Status = mStoredGetVariable (
-      BootOption,
-      &gEfiGlobalVariableGuid,
-      NULL,
-      &mTmpBootOptionSize,
-      mTmpBootOption
-      );
-
-    if (EFI_ERROR (Status)) {
-      //
-      // Assume orphan entry or whatever it is.
-      // It can technically not fit, but this is not expected.
-      //
-      continue;
-    }
-
-    OtherPath = GetBootEntryDevicePath ((EFI_LOAD_OPTION *) &mTmpBootOption[0], mTmpBootOptionSize, FALSE);
-    if (OtherPath == NULL) {
-      //
-      // Assume invalid entry or whatever it is, just ignore.
-      //
-      continue;
-    }
-
-    //
-    // Check option device paths for equality.
-    // In case they match, just ignore this option.
-    //
-    if (IsDevicePathEqual (SelfPath, OtherPath)) {
-      return;
-    }
-  }
-
-  //
-  // We now want to fallback this option, and need to decide where.
-  // Check if this boot entry is not written already.
-  //
-  BootNum = -1;
-  for (Index = 0; Index < ARRAY_SIZE (mOcBootOrderMap); ++Index) {
-    if (mOcBootOrderMap[Index] >= 0) {
-      if ((UINT16) mOcBootOrderMap[Index] == OcBootNum) {
-        BootNum = (INT32) (OC_GL_BOOT_OPTION_START + Index);
-        break;
-      }
-    } else if (BootNum < 0) {
-      for (Index2 = 0; Index2 < mTmpBootOrderSize / sizeof (mTmpBootOrder[0]); ++Index2) {
-        if (mTmpBootOrder[Index2] == OC_GL_BOOT_OPTION_START + Index) {
-          break;
-        }
-      }
-      if (Index2 == mTmpBootOrderSize / sizeof (mTmpBootOrder[0])) {
-        BootNum = (INT32) (OC_GL_BOOT_OPTION_START + Index);
-      }
-    }
-  }
-
-  //
-  // Unless zero or more we cannot write this entry. Should not happen.
-  //
-  if (BootNum < 0) {
-    return;
-  }
-
-  //
-  // Store the variable.
-  //
-  mOcBootOrderMap[BootNum - OC_GL_BOOT_OPTION_START] = OcBootNum;
-  BootOption[4] = "0123456789ABCDEF"[((UINT32) BootNum >> 12U) & 0xFU];
-  BootOption[5] = "0123456789ABCDEF"[((UINT32) BootNum >>  8U) & 0xFU];
-  BootOption[6] = "0123456789ABCDEF"[((UINT32) BootNum >>  4U) & 0xFU];
-  BootOption[7] = "0123456789ABCDEF"[((UINT32) BootNum       ) & 0xFU];
-  mStoredSetVariable (
-    BootOption,
-    &gEfiGlobalVariableGuid,
-    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-    LoadOptionSize,
-    LoadOption
-    );
-}
-
-STATIC
 EFI_STATUS
 EFIAPI
 WrapSetVariable (
@@ -902,11 +522,8 @@ WrapSetVariable (
   )
 {
   EFI_STATUS  Status;
-  INT32       BootNum;
   BOOLEAN     Ints;
   BOOLEAN     Wp;
-  BOOLEAN     IsBootOrder;
-  BOOLEAN     DoFallback;
 
   //
   // Abort access when running with read-only NVRAM.
@@ -951,42 +568,12 @@ WrapSetVariable (
   //
   // Redirect Boot-prefixed variables to our own GUID.
   //
-  DoFallback  = FALSE;
-  IsBootOrder = FALSE;
-  BootNum     = -1;
   if (gCurrentConfig->BootVariableRedirect
-    && IsEfiBootVar (VariableName, VendorGuid, &IsBootOrder, &BootNum)) {
+    && IsEfiBootVar (VariableName, VendorGuid)) {
     VendorGuid = &gOcVendorVariableGuid;
-    DoFallback = gCurrentConfig->BootVariableFallback;
   }
 
   WriteUnprotectorPrologue (&Ints, &Wp);
-
-  //
-  // Preserve current BootOrder.
-  //
-  if (DoFallback && IsBootOrder) {
-    mTmpBootOrderSize = sizeof (mTmpBootOrder);
-    Status = mStoredGetVariable (
-      VariableName,
-      VendorGuid,
-      NULL,
-      &mTmpBootOrderSize,
-      mTmpBootOrder
-      );
-
-    //
-    // This should never happen, but if it does, just ignore this BootOrder update
-    // as we simply cannot track the difference between current and next.
-    //
-    if (EFI_ERROR (Status)) {
-      if (Status == EFI_NOT_FOUND) {
-        mTmpBootOrderSize = 0;
-      } else {
-        IsBootOrder = FALSE;
-      }
-    }
-  }
 
   Status = mStoredSetVariable (
     VariableName,
@@ -995,26 +582,6 @@ WrapSetVariable (
     DataSize,
     Data
     );
-
-  if (!EFI_ERROR (Status) && DoFallback && Data != NULL && DataSize > 0) {
-    //
-    // So, we need to give back our changes.
-    //
-    if (IsBootOrder && OC_TYPE_ALIGNED (UINT16, Data)) {
-      HandleBootOrderFallback (
-        Data,
-        DataSize / sizeof (UINT16),
-        mTmpBootOrder,
-        mTmpBootOrderSize / sizeof (UINT16)
-        );
-    } else if (BootNum >= 0) {
-      HandleBootEntryFallback (
-        (UINT16) BootNum,
-        Data,
-        DataSize
-        );
-    }
-  }
 
   WriteUnprotectorEpilogue (Ints, Wp);
 
@@ -1121,11 +688,6 @@ RedirectRuntimeServices (
   )
 {
   EFI_STATUS  Status;
-  UINTN       Index;
-
-  for (Index = 0; Index < ARRAY_SIZE (mOcBootOrderMap); ++Index) {
-    mOcBootOrderMap[Index] = -1;
-  }
 
   mStoredGetTime                   = gRT->GetTime;
   mStoredSetTime                   = gRT->SetTime;

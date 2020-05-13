@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon May  4 15:42:50 2020
-%DIF ADD ../Configuration.tex        Sun May 10 02:00:26 2020
+%DIF DEL PreviousConfiguration.tex   Mon May 11 17:11:58 2020
+%DIF ADD ../Configuration.tex        Wed May 13 16:05:07 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3211,11 +3211,16 @@ use.
   When \texttt{RequestBootVarRouting} is used \texttt{Boot}-prefixed variable access
   is restricted and protected in a separate namespace. To access the original variables
   tools have to be aware of \texttt{OC\_FIRMWARE\_RUNTIME} logic.
-\item Assigned NVRAM variables are not always allowed to exceed 512 bytes.\\
-  This is true for \texttt{Boot}-prefixed variables when \texttt{RequestBootVarFallback}
-  is used, and for overwriting volatile variables with non-volatile on UEFI 2.8
+\DIFdelbegin %DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdel{Assigned NVRAM variables are not always allowed to exceed 512 bytes.}%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\DIFdel{This is true for }\texttt{\DIFdel{Boot}}%DIFAUXCMD
+\DIFdel{-prefixed variables when }\texttt{\DIFdel{RequestBootVarFallback}}
+  %DIFAUXCMD
+\DIFdel{is used, and for overwriting volatile variables with non-volatile on UEFI 2.8
   non-conformant firmwares.
-\end{enumerate}
+}\DIFdelend \end{enumerate}
 
 \subsection{Properties}\label{nvramprops}
 
@@ -4508,9 +4513,12 @@ functioning. Feature highlights:
 \begin{itemize}
   \item NVRAM namespaces, allowing to isolate operating systems from accessing select
   variables (e.g. \texttt{RequestBootVarRouting} or \texttt{ProtectSecureBoot}).
-  \item NVRAM proxying, allowing to manipulate multiple variables on variable updates
-  (e.g. \texttt{RequestBootVarFallback}).
-  \item Read-only and write-only NVRAM variables, enhancing the security of OpenCore,
+  \item \DIFdelbegin \DIFdel{NVRAM proxying, allowing to manipulate multiple variables on variable updates
+  (e.g. }\texttt{\DIFdel{RequestBootVarFallback}}%DIFAUXCMD
+\DIFdel{).
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdelend Read-only and write-only NVRAM variables, enhancing the security of OpenCore,
   Lilu, and Lilu plugins, like VirtualSMC, which implements \texttt{AuthRestart} support.
   \item NVRAM isolation, allowing to protect all variables from being written from
   an untrusted operating system (e.g. \texttt{DisableVariableWrite}).
@@ -5302,50 +5310,97 @@ functioning. Feature highlights:
 \begin{enumerate}
 
 \item
-  \texttt{ExitBootServicesDelay}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Adds delay in microseconds after \texttt{EXIT\_BOOT\_SERVICES}
-  event.
+  \texttt{\DIFdelbegin \DIFdel{ExitBootServicesDelay}\DIFdelend \DIFaddbegin \DIFadd{DeduplicateBootOrder}\DIFaddend }\\
+  \textbf{Type}: \DIFdelbegin \texttt{\DIFdel{plist\ integer}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{0}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Adds delay in microseconds after }\texttt{\DIFdel{EXIT\_BOOT\_SERVICES}}
+  %DIFAUXCMD
+\DIFdel{event.
+}%DIFDELCMD < 
 
-  This is a very ugly quirk to circumvent "Still waiting for root device" message
+%DIFDELCMD <   %%%
+\DIFdel{This is a very ugly quirk to circumvent "Still waiting for root device" message
   on select APTIO IV firmwares, namely ASUS Z87-Pro, when using FileVault 2 in particular.
-  It seems that for some reason they execute code in parallel to \texttt{EXIT\_BOOT\_SERVICES},
+  It seems that for some reason they execute code in parallel to }\texttt{\DIFdel{EXIT\_BOOT\_SERVICES}}%DIFAUXCMD
+\DIFdel{,
   which results in SATA controller being inaccessible from macOS. A better approach should be
   found in some future. Expect 3-5 seconds to be enough in case the quirk is needed.
+}%DIFDELCMD < 
 
-\item
-  \texttt{IgnoreInvalidFlexRatio}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\texttt{\DIFdel{IgnoreInvalidFlexRatio}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\DIFdelend \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Select firmwares, namely APTIO IV, may contain invalid values in
-  \texttt{MSR\_FLEX\_RATIO} (\texttt{0x194}) MSR register. These values may cause
+  \textbf{Description}: \DIFdelbegin \DIFdel{Select firmwares, namely APTIO IV, may contain invalid values in }\DIFdelend \DIFaddbegin \DIFadd{Remove duplicate entries in }\DIFaddend \texttt{\DIFdelbegin \DIFdel{MSR\_FLEX\_RATIO}\DIFdelend \DIFaddbegin \DIFadd{BootOrder}\DIFaddend } \DIFdelbegin \DIFdel{(}\texttt{\DIFdel{0x194}}%DIFAUXCMD
+\DIFdel{) MSR register. These values may cause
   macOS boot failure on Intel platforms.
+}%DIFDELCMD < 
 
-  \emph{Note}: While the option is not supposed to induce harm on unaffected firmwares,
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: While the option is not supposed to induce harm on unaffected firmwares,
   its usage is not recommended when it is not required.
+}%DIFDELCMD < 
 
-\item
-  \texttt{ReleaseUsbOwnership}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Attempt to detach USB controller ownership from
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\texttt{\DIFdel{ReleaseUsbOwnership}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Attempt to detach USB controller ownership from
   the firmware driver. While most firmwares manage to properly do that,
   or at least have an option for, select firmwares do not. As a result,
   operating system may freeze upon boot. Not recommended unless required.
+}%DIFDELCMD < 
 
-\item
-  \texttt{RequestBootVarFallback}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Request fallback of some \texttt{Boot} prefixed variables from
-  \texttt{OC\_VENDOR\_VARIABLE\_GUID} to \newline \texttt{EFI\_GLOBAL\_VARIABLE\_GUID}.
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\texttt{\DIFdel{RequestBootVarFallback}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Request fallback of some }\texttt{\DIFdel{Boot}} %DIFAUXCMD
+\DIFdel{prefixed variables from
+  }\texttt{\DIFdel{OC\_VENDOR\_VARIABLE\_GUID}} %DIFAUXCMD
+\DIFdel{to }%DIFDELCMD < \newline %%%
+\DIFdelend \DIFaddbegin \DIFadd{variable
+  in }\DIFaddend \texttt{EFI\_GLOBAL\_VARIABLE\_GUID}.
 
   This quirk requires \texttt{RequestBootVarRouting} to be enabled and therefore
   \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented in \texttt{OpenRuntime.efi}.
 
-  By redirecting \texttt{Boot} prefixed variables to a separate GUID namespace we achieve
-  multiple goals:
+  By redirecting \texttt{Boot} prefixed variables to a separate GUID namespace
+  \DIFaddbegin \DIFadd{with the help of }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{quirk }\DIFaddend we achieve multiple goals:
   \begin{itemize}
   \tightlist
   \item Operating systems are jailed and only controlled by OpenCore boot
@@ -5370,14 +5425,57 @@ functioning. Feature highlights:
   option will not be created by Windows installer, the firmware will attempt to create it
   itself, and then corrupt its boot option list.
 
-  This quirk forwards all UEFI specification valid boot options, that are not related to
-  macOS, to the firmware into \texttt{BootF\#\#\#} and \texttt{BootOrder} variables upon
-  write. As the entries are added to the end of \texttt{BootOrder}, this does not
-  break boot priority, but ensures that the firmware does not try to append a new option
-  on its own after Windows installation for instance.
+  This quirk \DIFdelbegin \DIFdel{forwards all UEFI specification valid boot options, that are not related to macOS,
+  to the firmware into }\texttt{\DIFdel{BootF\#\#\#}} %DIFAUXCMD
+\DIFdel{and }\DIFdelend \DIFaddbegin \DIFadd{removes all duplicates in }\DIFaddend \texttt{BootOrder} \DIFdelbegin \DIFdel{variables upon
+  write.
+As the entries are added to the end of }\texttt{\DIFdel{BootOrder}}%DIFAUXCMD
+\DIFdel{,
+  this does not break boot priority, but ensures that the firmware does not try to append a new option on its own after Windows installation forinstance. }\DIFdelend \DIFaddbegin \DIFadd{variable attempting to resolve
+  the consequences of the bugs upon OpenCore loading. It is recommended to use this key
+  along with }\texttt{\DIFadd{BootProtect}} \DIFadd{option.
+}\DIFaddend 
 
 \item
-  \texttt{RequestBootVarRouting}\\
+  \DIFaddbegin \texttt{\DIFadd{ExitBootServicesDelay}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Adds delay in microseconds after }\texttt{\DIFadd{EXIT\_BOOT\_SERVICES}}
+  \DIFadd{event.
+}
+
+  \DIFadd{This is a very ugly quirk to circumvent "Still waiting for root device" message
+  on select APTIO IV firmwares, namely ASUS Z87-Pro, when using FileVault 2 in particular.
+  It seems that for some reason they execute code in parallel to }\texttt{\DIFadd{EXIT\_BOOT\_SERVICES}}\DIFadd{,
+  which results in SATA controller being inaccessible from macOS. A better approach should be
+  found in some future. Expect 3-5 seconds to be enough in case the quirk is needed.
+}
+
+\item
+  \texttt{\DIFadd{IgnoreInvalidFlexRatio}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Select firmwares, namely APTIO IV, may contain invalid values in
+  }\texttt{\DIFadd{MSR\_FLEX\_RATIO}} \DIFadd{(}\texttt{\DIFadd{0x194}}\DIFadd{) MSR register. These values may cause
+  macOS boot failure on Intel platforms.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: While the option is not supposed to induce harm on unaffected firmwares,
+  its usage is not recommended when it is not required.
+}
+
+\item
+  \texttt{\DIFadd{ReleaseUsbOwnership}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Attempt to detach USB controller ownership from
+  the firmware driver. While most firmwares manage to properly do that,
+  or at least have an option for, select firmwares do not. As a result,
+  operating system may freeze upon boot. Not recommended unless required.
+}
+
+\item
+  \DIFaddend \texttt{RequestBootVarRouting}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Request redirect of all \texttt{Boot} prefixed variables from

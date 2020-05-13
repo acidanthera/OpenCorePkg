@@ -22,6 +22,8 @@ OpenCore Changelog
 - Added builtin text renderer compatibility with Shell page mode
 - Fixed `FadtEnableReset` with too small FACP tables
 - Fixed CPU detection crash with QEMU 5.0 and KVM accelerator
+- Removed `RequestBootVarFallback` due to numerous bugs
+- Added `DeduplicateBootOrder` UEFI quirk
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG

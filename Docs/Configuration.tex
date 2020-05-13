@@ -3010,10 +3010,6 @@ use.
   When \texttt{RequestBootVarRouting} is used \texttt{Boot}-prefixed variable access
   is restricted and protected in a separate namespace. To access the original variables
   tools have to be aware of \texttt{OC\_FIRMWARE\_RUNTIME} logic.
-\item Assigned NVRAM variables are not always allowed to exceed 512 bytes.\\
-  This is true for \texttt{Boot}-prefixed variables when \texttt{RequestBootVarFallback}
-  is used, and for overwriting volatile variables with non-volatile on UEFI 2.8
-  non-conformant firmwares.
 \end{enumerate}
 
 \subsection{Properties}\label{nvramprops}
@@ -4305,8 +4301,6 @@ functioning. Feature highlights:
 \begin{itemize}
   \item NVRAM namespaces, allowing to isolate operating systems from accessing select
   variables (e.g. \texttt{RequestBootVarRouting} or \texttt{ProtectSecureBoot}).
-  \item NVRAM proxying, allowing to manipulate multiple variables on variable updates
-  (e.g. \texttt{RequestBootVarFallback}).
   \item Read-only and write-only NVRAM variables, enhancing the security of OpenCore,
   Lilu, and Lilu plugins, like VirtualSMC, which implements \texttt{AuthRestart} support.
   \item NVRAM isolation, allowing to protect all variables from being written from
@@ -5099,6 +5093,46 @@ functioning. Feature highlights:
 \begin{enumerate}
 
 \item
+  \texttt{DeduplicateBootOrder}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Remove duplicate entries in \texttt{BootOrder} variable
+  in \texttt{EFI\_GLOBAL\_VARIABLE\_GUID}.
+
+  This quirk requires \texttt{RequestBootVarRouting} to be enabled and therefore
+  \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented in \texttt{OpenRuntime.efi}.
+
+  By redirecting \texttt{Boot} prefixed variables to a separate GUID namespace
+  with the help of \texttt{RequestBootVarRouting} quirk we achieve multiple goals:
+  \begin{itemize}
+  \tightlist
+  \item Operating systems are jailed and only controlled by OpenCore boot
+  environment to enhance security.
+  \item Operating systems do not mess with OpenCore boot priority, and guarantee
+  fluent updates and hibernation wakes for cases that require reboots with OpenCore
+  in the middle.
+  \item Potentially incompatible boot entries, such as macOS entries, are not deleted
+  or anyhow corrupted.
+  \end{itemize}
+
+  However, some firmwares do their own boot option scanning upon startup by checking
+  file presence on the available disks. Quite often this scanning includes non-standard
+  locations, such as Windows Bootloader paths. Normally it is not an issue, but some
+  firmwares, ASUS firmwares on APTIO V in particular, have bugs. For them scanning is
+  implemented improperly, and firmware preferences may get accidentally corrupted
+  due to \texttt{BootOrder} entry duplication (each option will be added twice) making
+  it impossible to boot without cleaning NVRAM.
+
+  To trigger the bug one should have some valid boot options (e.g. OpenCore) and then
+  install Windows with \texttt{RequestBootVarRouting} enabled. As Windows bootloader
+  option will not be created by Windows installer, the firmware will attempt to create it
+  itself, and then corrupt its boot option list.
+
+  This quirk removes all duplicates in \texttt{BootOrder} variable attempting to resolve
+  the consequences of the bugs upon OpenCore loading. It is recommended to use this key
+  along with \texttt{BootProtect} option.
+
+\item
   \texttt{ExitBootServicesDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
@@ -5130,48 +5164,6 @@ functioning. Feature highlights:
   the firmware driver. While most firmwares manage to properly do that,
   or at least have an option for, select firmwares do not. As a result,
   operating system may freeze upon boot. Not recommended unless required.
-
-\item
-  \texttt{RequestBootVarFallback}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Request fallback of some \texttt{Boot} prefixed variables from
-  \texttt{OC\_VENDOR\_VARIABLE\_GUID} to \newline \texttt{EFI\_GLOBAL\_VARIABLE\_GUID}.
-
-  This quirk requires \texttt{RequestBootVarRouting} to be enabled and therefore
-  \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented in \texttt{OpenRuntime.efi}.
-
-  By redirecting \texttt{Boot} prefixed variables to a separate GUID namespace we achieve
-  multiple goals:
-  \begin{itemize}
-  \tightlist
-  \item Operating systems are jailed and only controlled by OpenCore boot
-  environment to enhance security.
-  \item Operating systems do not mess with OpenCore boot priority, and guarantee
-  fluent updates and hibernation wakes for cases that require reboots with OpenCore
-  in the middle.
-  \item Potentially incompatible boot entries, such as macOS entries, are not deleted
-  or anyhow corrupted.
-  \end{itemize}
-
-  However, some firmwares do their own boot option scanning upon startup by checking
-  file presence on the available disks. Quite often this scanning includes non-standard
-  locations, such as Windows Bootloader paths. Normally it is not an issue, but some
-  firmwares, ASUS firmwares on APTIO V in particular, have bugs. For them scanning is
-  implemented improperly, and firmware preferences may get accidentally corrupted
-  due to \texttt{BootOrder} entry duplication (each option will be added twice) making
-  it impossible to boot without cleaning NVRAM.
-
-  To trigger the bug one should have some valid boot options (e.g. OpenCore) and then
-  install Windows with \texttt{RequestBootVarRouting} enabled. As Windows bootloader
-  option will not be created by Windows installer, the firmware will attempt to create it
-  itself, and then corrupt its boot option list.
-
-  This quirk forwards all UEFI specification valid boot options, that are not related to
-  macOS, to the firmware into \texttt{BootF\#\#\#} and \texttt{BootOrder} variables upon
-  write. As the entries are added to the end of \texttt{BootOrder}, this does not
-  break boot priority, but ensures that the firmware does not try to append a new option
-  on its own after Windows installation for instance.
 
 \item
   \texttt{RequestBootVarRouting}\\

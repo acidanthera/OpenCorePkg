@@ -33,13 +33,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_BOOT_REDIRECT_VARIABLE_NAME       L"boot-redirect"
 
 //
-// Variable used for OpenCore request to fallback NVRAM Boot variable write.
-// Serves for resolving issues with borked ASUS APTIO V BIOSes.
-// Boot Services only.
-//
-#define OC_BOOT_FALLBACK_VARIABLE_NAME       L"boot-fallback"
-
-//
 // Variable used for exposing OpenCore Security -> LoadPolicy.
 // Boot Services only.
 //
