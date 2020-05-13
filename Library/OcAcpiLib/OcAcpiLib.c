@@ -1084,37 +1084,75 @@ AcpiFadtEnableReset (
   IN OUT OC_ACPI_CONTEXT  *Context
   )
 {
+  EFI_STATUS                                 Status;
+  EFI_PHYSICAL_ADDRESS                       Table;
+  UINT32                                     OldSize;
+  UINT32                                     RequiredSize;
+  EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE  *Fadt;
+  UINT32                                     Index;
+
   if (Context->Fadt == NULL) {
     return EFI_NOT_FOUND;
   }
 
-  if (Context->Fadt->Header.Length < OFFSET_OF (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE, ArmBootArch)) {
-    //
-    // TODO: we can potentially reallocate, but all current supported hardware is fine.
-    //
-    return EFI_BUFFER_TOO_SMALL;
-  }
+  OldSize      = Context->Fadt->Header.Length;
+  RequiredSize = OFFSET_OF (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE, ArmBootArch);
 
-  if (Context->Fadt->Flags & EFI_ACPI_6_2_RESET_REG_SUP) {
+  DEBUG ((DEBUG_INFO, "OCA: FADT reset got %u need %u\n", OldSize, RequiredSize));
+
+  //
+  // One some firmwares the table is too small and does not include
+  // Reset Register area. We will reallocate in this case.
+  // Interestingly EFI_ACPI_6_2_RESET_REG_SUP may be set.
+  //
+  // REF: https://github.com/acidanthera/bugtracker/issues/897
+  //
+
+  if (OldSize < RequiredSize) {
+    Table = BASE_4GB - 1;
+    Status = gBS->AllocatePages (
+      AllocateMaxAddress,
+      EfiACPIMemoryNVS,
+      EFI_SIZE_TO_PAGES (RequiredSize),
+      &Table
+      );
+
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+
+    Fadt = (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE *)(UINTN) Table;
+    CopyMem (Fadt, Context->Fadt, OldSize);
+    ZeroMem (((UINT8 *) Context->Fadt) + OldSize, RequiredSize - OldSize);
+    Fadt->Header.Length = RequiredSize;
+
+    for (Index = 0; Index < Context->NumberOfTables; ++Index) {
+      //
+      // I think sometimes there are multiple FADT tables.
+      //
+      if (Context->Tables[Index]->Signature == EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE_SIGNATURE) {
+        Context->Tables[Index] = (EFI_ACPI_COMMON_HEADER *) Fadt;
+      }
+    }
+  } else if ((Context->Fadt->Flags & EFI_ACPI_6_2_RESET_REG_SUP) == 0) {
+    Fadt = Context->Fadt;
+  } else {
     return EFI_SUCCESS;
   }
 
-  Context->Fadt->Flags |= EFI_ACPI_6_2_RESET_REG_SUP;
+  Fadt->Flags |= EFI_ACPI_6_2_RESET_REG_SUP;
 
   //
   // Resetting through port 0xCF9 is universal on Intel and AMD.
   //
-  Context->Fadt->ResetReg.AddressSpaceId    = EFI_ACPI_6_2_SYSTEM_IO;
-  Context->Fadt->ResetReg.RegisterBitWidth  = 8;
-  Context->Fadt->ResetReg.RegisterBitOffset = 0;
-  Context->Fadt->ResetReg.AccessSize        = EFI_ACPI_6_2_BYTE;
-  Context->Fadt->ResetReg.Address           = 0xCF9;
+  Fadt->ResetReg.AddressSpaceId    = EFI_ACPI_6_2_SYSTEM_IO;
+  Fadt->ResetReg.RegisterBitWidth  = 8;
+  Fadt->ResetReg.RegisterBitOffset = 0;
+  Fadt->ResetReg.AccessSize        = EFI_ACPI_6_2_BYTE;
+  Fadt->ResetReg.Address           = 0xCF9;
 
-  Context->Fadt->Header.Checksum = 0;
-  Context->Fadt->Header.Checksum = CalculateCheckSum8 (
-    (UINT8 *) Context->Fadt,
-    Context->Fadt->Header.Length
-    );
+  Fadt->Header.Checksum = 0;
+  Fadt->Header.Checksum = CalculateCheckSum8 ((UINT8 *) Fadt, Fadt->Header.Length);
 
   return EFI_SUCCESS;
 }
