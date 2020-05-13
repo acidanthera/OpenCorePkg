@@ -311,6 +311,8 @@ ScanIntelProcessor (
     Cpu->CstConfigLock = FALSE;
   }
 
+  DEBUG ((DEBUG_INFO, "OCCPU: EIST CFG Lock %d\n", Cpu->CstConfigLock));
+
   //
   // When the CPU is virtualized and cpuid invtsc is enabled, then we already get
   // the information we want outside the function, skip anyway.
