@@ -528,7 +528,7 @@ UhciReleaseOwnership (
     &Command
     );
 
-  if (PortBase) {
+  if (PortBase != 0 && (PortBase & BIT0) == 0) {
     IoWrite16 (PortBase, 0x0002);
     gBS->Stall (500);
     IoWrite16 (PortBase + 4, 0);
