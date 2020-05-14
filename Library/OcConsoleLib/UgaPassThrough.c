@@ -53,10 +53,7 @@ OcUgaDrawGetMode (
     Info->PixelFormat
     ));
 
-  if (Info->HorizontalResolution == 0
-    || Info->VerticalResolution == 0
-    || (Info->PixelFormat != PixelRedGreenBlueReserved8BitPerColor
-      && Info->PixelFormat != PixelBlueGreenRedReserved8BitPerColor)) {
+  if (Info->HorizontalResolution == 0 || Info->VerticalResolution == 0) {
     return EFI_NOT_STARTED;
   }
 

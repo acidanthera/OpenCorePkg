@@ -27,6 +27,7 @@ OpenCore Changelog
 - Removed `DirectGopCacheMode` due to being ineffective
 - Fixed assertions on log exhaustion causing boot failures
 - Fixed builtin text renderer failing to provide ConsoleControl
+- Fixed compatibility with blit-only GOP (e.g. OVMF Bochs)
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG

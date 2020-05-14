@@ -370,23 +370,6 @@ RenderResync (
     return EFI_DEVICE_ERROR;
   }
 
-  if (Info->PixelFormat != PixelRedGreenBlueReserved8BitPerColor
-    && Info->PixelFormat != PixelBlueGreenRedReserved8BitPerColor) {
-    //
-    // DuetPkg may report bit mask image output.
-    //
-    if (Info->PixelFormat != PixelBitMask) {
-      return EFI_DEVICE_ERROR;
-    }
-
-    if (Info->PixelInformation.RedMask != 0xFF000000U
-      && Info->PixelInformation.RedMask != 0xFF0000U
-      && Info->PixelInformation.RedMask != 0xFF00U
-      && Info->PixelInformation.RedMask != 0xFFU) {
-      return EFI_DEVICE_ERROR;
-    }
-  }
-
   if (mCharacterBuffer != NULL) {
     FreePool (mCharacterBuffer);
   }
