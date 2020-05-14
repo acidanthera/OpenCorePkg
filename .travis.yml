@@ -103,6 +103,6 @@ matrix:
           name: "acidanthera/OpenCorePkg"
           description: "OpenCorePkg"
         notification_email: $NOTIFICATION_EMAIL
-        build_command_prepend: "./macbuild.tool --skip-build --skip-package && cd UDK ; src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/Lilu/master/Lilu/Scripts/covstrap.sh) && eval \"$src\" || exit 1"
+        build_command_prepend: "./macbuild.tool --skip-build --skip-package && cd UDK ; src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/Lilu/master/Lilu/Scripts/covstrap.sh) && eval \"$src\" || exit 1"
         build_command: "../macbuild.tool --skip-tests --skip-package RELEASE"
         branch_pattern: master
