@@ -31,6 +31,7 @@ typedef RETURN_STATUS EFI_STATUS;
 
 struct EFI_SYSTEM_TABLE_;
 typedef struct EFI_SYSTEM_TABLE_ EFI_SYSTEM_TABLE;
+typedef void * EFI_HANDLE;
 
 typedef struct {
   uint32_t Data1;
