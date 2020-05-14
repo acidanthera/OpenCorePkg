@@ -72,6 +72,7 @@
   OcBootManagementLib
   OcCompressionLib
   OcGuardLib
+  OcMiscLib
   OcPngLib
   OcStorageLib
   UefiBootServicesTableLib

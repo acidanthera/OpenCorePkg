@@ -231,7 +231,7 @@ OcAppleImageConversionInstallProtocol (
   EFI_HANDLE                       NewHandle;
 
   if (Reinstall) {
-    Status = UninstallAllProtocolInstances (&gAppleImageConversionProtocolGuid);
+    Status = OcUninstallAllProtocolInstances (&gAppleImageConversionProtocolGuid);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OCIC: Uninstall failed: %r\n", Status));
       return NULL;

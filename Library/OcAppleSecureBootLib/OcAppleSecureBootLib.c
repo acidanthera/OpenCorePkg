@@ -998,7 +998,7 @@ OcAppleSecureBootInstallProtocol (
   UINTN                      DataSize;
 
   if (Reinstall) {
-    Status = UninstallAllProtocolInstances (&gAppleSecureBootProtocolGuid);
+    Status = OcUninstallAllProtocolInstances (&gAppleSecureBootProtocolGuid);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OCSB: Uninstall failed: %r\n", Status));
       return NULL;

@@ -74,8 +74,24 @@ GetArguments (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-UninstallAllProtocolInstances (
+OcUninstallAllProtocolInstances (
   EFI_GUID  *Protocol
+  );
+
+/**
+  Handle protocol on handle and fallback to any protocol when missing.
+
+  @param[in]  Handle        Handle to search for protocol.
+  @param[in]  Protocol      Protocol to search for.
+  @param[out] Interface     Protocol interface if found.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcHandleProtocolFallback (
+  IN  EFI_HANDLE  Handle,
+  IN  EFI_GUID    *Protocol,
+  OUT VOID        **Interface
   );
 
 /**

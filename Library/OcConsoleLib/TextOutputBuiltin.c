@@ -21,6 +21,7 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcConsoleLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Protocol/ConsoleControl.h>
@@ -432,7 +433,7 @@ AsciiTextReset (
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
 
-  Status = gBS->HandleProtocol (
+  Status = OcHandleProtocolFallback (
     gST->ConsoleOutHandle,
     &gEfiGraphicsOutputProtocolGuid,
     (VOID **) &mGraphicsOutput
@@ -909,11 +910,10 @@ ConsoleControlInstall (
 {
   EFI_STATUS                    Status;
   EFI_CONSOLE_CONTROL_PROTOCOL  *ConsoleControl;
-  EFI_HANDLE                    NewHandle;
 
-  Status = gBS->LocateProtocol (
+  Status = OcHandleProtocolFallback (
+    &gST->ConsoleOutHandle,
     &gEfiConsoleControlProtocolGuid,
-    NULL,
     (VOID *) &ConsoleControl
     );
 
@@ -927,9 +927,8 @@ ConsoleControlInstall (
       );
   }
 
-  NewHandle = NULL;
   gBS->InstallMultipleProtocolInterfaces (
-    &NewHandle,
+    &gST->ConsoleOutHandle,
     &gEfiConsoleControlProtocolGuid,
     &mConsoleControlProtocol,
     NULL

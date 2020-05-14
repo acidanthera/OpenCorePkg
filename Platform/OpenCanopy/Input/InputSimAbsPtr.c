@@ -15,6 +15,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcGuardLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 #include "../OpenCanopy.h"
@@ -333,32 +334,6 @@ InternalUpdateStateAbsolute (
   return EFI_SUCCESS;
 }
 
-STATIC
-EFI_STATUS
-InternalHandleProtocolFallback (
-  IN  EFI_HANDLE  Handle,
-  IN  EFI_GUID    *Protocol,
-  OUT VOID        **Interface
-  )
-{
-  EFI_STATUS Status;
-
-  Status = gBS->HandleProtocol (
-                  Handle,
-                  Protocol,
-                  Interface
-                  );
-  if (EFI_ERROR (Status)) {
-    Status = gBS->LocateProtocol (
-                    Protocol,
-                    NULL,
-                    Interface
-                    );
-  }
-
-  return Status;
-}
-
 VOID
 GuiPointerReset (
   IN OUT GUI_POINTER_CONTEXT  *Context
@@ -480,7 +455,7 @@ GuiPointerConstruct (
   Context.X             = DefaultX;
   Context.Y             = DefaultY;
 
-  Status = InternalHandleProtocolFallback (
+  Status = OcHandleProtocolFallback (
     gST->ConsoleInHandle,
     &gAppleEventProtocolGuid,
     (VOID **)&Context.AppleEvent
@@ -519,14 +494,14 @@ GuiPointerConstruct (
   }
 
   if (EFI_ERROR (Status)) {
-    Status = InternalHandleProtocolFallback (
+    Status = OcHandleProtocolFallback (
       gST->ConsoleInHandle,
       &gEfiSimplePointerProtocolGuid,
       (VOID **)&Context.Pointer
       );
   }
 
-  Status2 = InternalHandleProtocolFallback (
+  Status2 = OcHandleProtocolFallback (
     gST->ConsoleInHandle,
     &gEfiAbsolutePointerProtocolGuid,
     (VOID **)&Context.AbsPointer

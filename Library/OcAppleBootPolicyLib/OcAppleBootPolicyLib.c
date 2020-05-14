@@ -1658,7 +1658,7 @@ OcAppleBootPolicyInstallProtocol (
   EFI_HANDLE                  Handle;
 
   if (Reinstall) {
-    Status = UninstallAllProtocolInstances (&gAppleBootPolicyProtocolGuid);
+    Status = OcUninstallAllProtocolInstances (&gAppleBootPolicyProtocolGuid);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OCBP: Uninstall failed: %r\n", Status));
       return NULL;

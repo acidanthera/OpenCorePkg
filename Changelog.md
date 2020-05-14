@@ -26,6 +26,7 @@ OpenCore Changelog
 - Added `DeduplicateBootOrder` UEFI quirk
 - Removed `DirectGopCacheMode` due to being ineffective
 - Fixed assertions on log exhaustion causing boot failures
+- Fixed builtin text renderer failing to provide ConsoleControl
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG

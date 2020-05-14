@@ -597,7 +597,7 @@ OcSmcIoInstallProtocol (
   }
 
   if (Reinstall) {
-    Status = UninstallAllProtocolInstances (&gAppleSmcIoProtocolGuid);
+    Status = OcUninstallAllProtocolInstances (&gAppleSmcIoProtocolGuid);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OCSMC: Uninstall failed: %r\n", Status));
       return NULL;

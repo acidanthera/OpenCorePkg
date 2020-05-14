@@ -34,9 +34,9 @@ OcConsoleControlSetMode (
   EFI_CONSOLE_CONTROL_PROTOCOL     *ConsoleControl;
   EFI_CONSOLE_CONTROL_SCREEN_MODE  OldMode;
 
-  Status = gBS->LocateProtocol (
+  Status = OcHandleProtocolFallback (
+    &gST->ConsoleOutHandle,
     &gEfiConsoleControlProtocolGuid,
-    NULL,
     (VOID *) &ConsoleControl
     );
 
@@ -80,9 +80,9 @@ OcConsoleControlInstallProtocol (
   EFI_STATUS                    Status;
   EFI_CONSOLE_CONTROL_PROTOCOL  *ConsoleControl;
 
-  Status = gBS->LocateProtocol (
+  Status = OcHandleProtocolFallback (
+    &gST->ConsoleOutHandle,
     &gEfiConsoleControlProtocolGuid,
-    NULL,
     (VOID *) &ConsoleControl
     );
 

@@ -563,7 +563,7 @@ OcAppleEventInstallProtocol (
   DEBUG ((DEBUG_VERBOSE, "OcAppleEventInstallProtocol\n"));
 
   if (Reinstall) {
-    Status = UninstallAllProtocolInstances (&gAppleEventProtocolGuid);
+    Status = OcUninstallAllProtocolInstances (&gAppleEventProtocolGuid);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OCAE: Uninstall failed: %r\n", Status));
       return NULL;

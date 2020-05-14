@@ -796,7 +796,7 @@ OcDevicePathPropertyInstallProtocol (
   EFI_HANDLE                                  Handle;
 
   if (Reinstall) {
-    Status = UninstallAllProtocolInstances (&gEfiDevicePathPropertyDatabaseProtocolGuid);
+    Status = OcUninstallAllProtocolInstances (&gEfiDevicePathPropertyDatabaseProtocolGuid);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OCDP: Uninstall failed: %r\n", Status));
       return NULL;

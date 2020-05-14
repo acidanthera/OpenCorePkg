@@ -58,7 +58,7 @@ GetArguments (
 }
 
 EFI_STATUS
-UninstallAllProtocolInstances (
+OcUninstallAllProtocolInstances (
   EFI_GUID  *Protocol
   )
 {
@@ -107,6 +107,31 @@ UninstallAllProtocolInstances (
   }
 
   gBS->FreePool (Handles);
+
+  return Status;
+}
+
+EFI_STATUS
+OcHandleProtocolFallback (
+  IN  EFI_HANDLE  Handle,
+  IN  EFI_GUID    *Protocol,
+  OUT VOID        **Interface
+  )
+{
+  EFI_STATUS Status;
+
+  Status = gBS->HandleProtocol (
+                  Handle,
+                  Protocol,
+                  Interface
+                  );
+  if (EFI_ERROR (Status)) {
+    Status = gBS->LocateProtocol (
+                    Protocol,
+                    NULL,
+                    Interface
+                    );
+  }
 
   return Status;
 }

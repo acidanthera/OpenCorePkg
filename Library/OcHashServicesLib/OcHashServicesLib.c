@@ -197,7 +197,7 @@ OcHashServicesInstallProtocol (
     //
     // Uninstall all the existing protocol instances (which are not to be trusted).
     //
-    Status = UninstallAllProtocolInstances (&gEfiHashServiceBindingProtocolGuid);
+    Status = OcUninstallAllProtocolInstances (&gEfiHashServiceBindingProtocolGuid);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OCHS: Uninstall failed: %r\n", Status));
       return NULL;

@@ -22,7 +22,7 @@ OcUnicodeCollationEngInstallProtocol (
   OcUnicodeCollationInitializeMappingTables ();
 
   if (Reinstall) {
-    Status = UninstallAllProtocolInstances (&gEfiUnicodeCollation2ProtocolGuid);
+    Status = OcUninstallAllProtocolInstances (&gEfiUnicodeCollation2ProtocolGuid);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OCUC: Uninstall failed: %r\n", Status));
       return NULL;

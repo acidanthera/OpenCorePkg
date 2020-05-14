@@ -256,7 +256,7 @@ OcAppleDebugLogInstallProtocol (
   EFI_HANDLE                  Handle;
 
   if (Reinstall) {
-    Status = UninstallAllProtocolInstances (&gAppleDebugLogProtocolGuid);
+    Status = OcUninstallAllProtocolInstances (&gAppleDebugLogProtocolGuid);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OCL: Uninstall failed: %r\n", Status));
       return NULL;

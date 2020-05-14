@@ -148,7 +148,7 @@ ControlledClearScreen (
   UINTN                                 SizeOfInfo;
   EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  *Info;
 
-  Status = gBS->HandleProtocol (
+  Status = OcHandleProtocolFallback (
     gST->ConsoleOutHandle,
     &gEfiGraphicsOutputProtocolGuid,
     (VOID **) &GraphicsOutput
@@ -257,7 +257,7 @@ ConsoleControlSetMode (
   mConsoleMode = Mode;
 
   if (mClearScreenOnModeSwitch && Mode == EfiConsoleControlScreenText) {
-    Status = gBS->HandleProtocol (
+    Status = OcHandleProtocolFallback (
       gST->ConsoleOutHandle,
       &gEfiGraphicsOutputProtocolGuid,
       (VOID **) &GraphicsOutput
