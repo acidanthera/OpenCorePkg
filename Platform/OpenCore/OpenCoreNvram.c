@@ -381,6 +381,15 @@ OcBlockNvram (
 
     for (BlockVariableIndex = 0; BlockVariableIndex < Config->Nvram.Block.Values[BlockGuidIndex]->Count; ++BlockVariableIndex) {
       AsciiVariableName   = OC_BLOB_GET (Config->Nvram.Block.Values[BlockGuidIndex]->Values[BlockVariableIndex]);
+
+      //
+      // '#' is filtered in all keys, but for values we need to do it ourselves.
+      //
+      if (AsciiVariableName[0] == '#') {
+        DEBUG ((DEBUG_INFO, "OC: Variable skip blocking %a\n", AsciiVariableName));
+        continue;
+      }
+
       UnicodeVariableName = AsciiStrCopyToUnicode (AsciiVariableName, 0);
 
       if (UnicodeVariableName == NULL) {
