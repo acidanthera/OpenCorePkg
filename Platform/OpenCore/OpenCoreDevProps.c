@@ -51,7 +51,11 @@ OcLoadDevPropsSupport (
   }
 
   for (DeviceIndex = 0; DeviceIndex < Config->DeviceProperties.Block.Count; ++DeviceIndex) {
-    AsciiDevicePath   = OC_BLOB_GET (Config->DeviceProperties.Block.Keys[DeviceIndex]);
+    AsciiDevicePath = OC_BLOB_GET (Config->DeviceProperties.Block.Keys[DeviceIndex]);
+    if (AsciiDevicePath[0] == '#') {
+      DEBUG ((DEBUG_INFO, "OC: Device property skip blocking %a\n", AsciiDevicePath));
+      continue;
+    }
 
     UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
     DevicePath        = NULL;
@@ -67,7 +71,12 @@ OcLoadDevPropsSupport (
     }
 
     for (PropertyIndex = 0; PropertyIndex < Config->DeviceProperties.Block.Values[DeviceIndex]->Count; ++PropertyIndex) {
-      AsciiProperty       = OC_BLOB_GET (Config->DeviceProperties.Block.Values[DeviceIndex]->Values[PropertyIndex]);
+      AsciiProperty = OC_BLOB_GET (Config->DeviceProperties.Block.Values[DeviceIndex]->Values[PropertyIndex]);
+      if (AsciiProperty[0] == '#') {
+        DEBUG ((DEBUG_INFO, "OC: Device property skip blocking %a\n", AsciiProperty));
+        continue;
+      }
+
       UnicodeProperty = AsciiStrCopyToUnicode (AsciiProperty, 0);
 
       if (UnicodeProperty == NULL) {
@@ -98,6 +107,11 @@ OcLoadDevPropsSupport (
   for (DeviceIndex = 0; DeviceIndex < Config->DeviceProperties.Add.Count; ++DeviceIndex) {
     PropertyMap       = Config->DeviceProperties.Add.Values[DeviceIndex];
     AsciiDevicePath   = OC_BLOB_GET (Config->DeviceProperties.Add.Keys[DeviceIndex]);
+    if (AsciiDevicePath[0] == '#') {
+      DEBUG ((DEBUG_INFO, "OC: Device property skip adding %a\n", AsciiDevicePath));
+      continue;
+    }
+
     UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
     DevicePath        = NULL;
 
@@ -112,9 +126,13 @@ OcLoadDevPropsSupport (
     }
 
     for (PropertyIndex = 0; PropertyIndex < PropertyMap->Count; ++PropertyIndex) {
-      AsciiProperty   = OC_BLOB_GET (PropertyMap->Keys[PropertyIndex]);
-      UnicodeProperty = AsciiStrCopyToUnicode (AsciiProperty, 0);
+      AsciiProperty = OC_BLOB_GET (PropertyMap->Keys[PropertyIndex]);
+      if (AsciiProperty[0] == '#') {
+        DEBUG ((DEBUG_INFO, "OC: Device property skip adding %a\n", AsciiProperty));
+        continue;
+      }
 
+      UnicodeProperty = AsciiStrCopyToUnicode (AsciiProperty, 0);
       if (UnicodeProperty == NULL) {
         DEBUG ((DEBUG_WARN, "OC: Failed to convert %a property\n", AsciiProperty));
         continue;
