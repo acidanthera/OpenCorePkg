@@ -92,7 +92,7 @@ export DEPNAMES
 export DEPURLS
 export DEPBRANCHES
 
-src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/efibuild.sh) && eval "$src" || exit 1
+src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/efibuild.sh) && eval "$src" || exit 1
 
 if [ "$BUILD_UTILITIES" = "1" ]; then
   UTILS=(
