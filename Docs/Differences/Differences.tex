@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May 15 23:18:56 2020
-%DIF ADD ../Configuration.tex        Fri May 15 23:21:51 2020
+%DIF ADD ../Configuration.tex        Sat May 16 00:11:50 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1542,8 +1542,10 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   Some modern firmwares including both hardware and virtual machines, like VMware,
   may update pointers to UEFI services during driver loading and related actions.
   Consequentially this directly breaks other quirks that affect memory management,
-  like \texttt{DevirtualiseMmio}, \texttt{ProtectCsmRegion}, or \texttt{ShrinkMemoryMap},
-  and may also break other quirks depending on the effects of these.
+  like \texttt{DevirtualiseMmio}, \texttt{\DIFdelbegin \DIFdel{ProtectCsmRegion}\DIFdelend \DIFaddbegin \DIFadd{ProtectMemoryRegions}\DIFaddend },
+  \DIFdelbegin \DIFdel{or }\texttt{\DIFdel{ShrinkMemoryMap}}%DIFAUXCMD
+\DIFdel{,
+  }\DIFdelend and may also break other quirks depending on the effects of these.
 
   \emph{Note}: On VMware the need for this quirk may be diagnosed by ``Your Mac OS guest
   might run unreliably with more than one virtual core.'' message.
@@ -5815,27 +5817,71 @@ you will need \texttt{debug=0x8} boot argument.
   For ACPI code this is risky, and is technically equivalent to ACPI table replacement,
   thus not implemented. More detailed explanation can be found on
   \href{https://applelife.ru/posts/819790}{AppleLife.ru}.
+\DIFdelbegin %DIFDELCMD < 
 
-\item
-  \textbf{How can I migrate from \texttt{AptioMemoryFix}?}
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{How can I migrate from }\texttt{\DIFdel{AptioMemoryFix}}%DIFAUXCMD
+\DIFdel{?}}
+%DIFAUXCMD
+%DIFDELCMD < 
 
-  Behaviour similar to that of \texttt{AptioMemoryFix} can be obtained by
-  installing \texttt{OpenRuntime} driver and enabling the quirks listed below.
+%DIFDELCMD <   %%%
+\DIFdel{Behaviour similar to that of }\texttt{\DIFdel{AptioMemoryFix}} %DIFAUXCMD
+\DIFdel{can be obtained by
+  installing }\texttt{\DIFdel{OpenRuntime}} %DIFAUXCMD
+\DIFdel{driver and enabling the quirks listed below.
   Please note, that most of these are not necessary to be enabled. Refer to their
   individual descriptions in this document for more details.
-  \begin{itemize}
-  \tightlist
-  \item \texttt{ProvideConsoleGop} (UEFI quirk)
-  \item \texttt{AvoidRuntimeDefrag}
-  \item \texttt{DiscardHibernateMap}
-  \item \texttt{EnableSafeModeSlide}
-  \item \texttt{EnableWriteUnprotector}
-  \item \texttt{ForceExitBootServices}
-  \item \texttt{ProtectMemoryRegions}
-  \item \texttt{ProvideCustomSlide}
-  \item \texttt{SetupVirtualMap}
-  \item \texttt{ShrinkMemoryMap}
-  \end{itemize}
+  }%DIFDELCMD < \begin{itemize}
+\begin{itemize}%DIFAUXCMD
+%DIFDELCMD <   \tightlist
+%DIFDELCMD <   \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{ProvideConsoleGop}} %DIFAUXCMD
+\DIFdel{(UEFI quirk)
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{AvoidRuntimeDefrag}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{DiscardHibernateMap}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{EnableSafeModeSlide}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{EnableWriteUnprotector}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{ForceExitBootServices}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{ProtectMemoryRegions}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{ProvideCustomSlide}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{SetupVirtualMap}}
+  %DIFAUXCMD
+%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{ShrinkMemoryMap}}
+  %DIFAUXCMD
+
+\end{itemize}%DIFAUXCMD
+%DIFDELCMD < \end{itemize}
+%DIFDELCMD < %%%
+\DIFdelend 
 
 \end{enumerate}
 

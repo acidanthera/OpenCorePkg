@@ -1374,7 +1374,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   Some modern firmwares including both hardware and virtual machines, like VMware,
   may update pointers to UEFI services during driver loading and related actions.
   Consequentially this directly breaks other quirks that affect memory management,
-  like \texttt{DevirtualiseMmio}, \texttt{ProtectCsmRegion}, or \texttt{ShrinkMemoryMap},
+  like \texttt{DevirtualiseMmio}, \texttt{ProtectMemoryRegions},
   and may also break other quirks depending on the effects of these.
 
   \emph{Note}: On VMware the need for this quirk may be diagnosed by ``Your Mac OS guest
@@ -5467,27 +5467,6 @@ you will need \texttt{debug=0x8} boot argument.
   For ACPI code this is risky, and is technically equivalent to ACPI table replacement,
   thus not implemented. More detailed explanation can be found on
   \href{https://applelife.ru/posts/819790}{AppleLife.ru}.
-
-\item
-  \textbf{How can I migrate from \texttt{AptioMemoryFix}?}
-
-  Behaviour similar to that of \texttt{AptioMemoryFix} can be obtained by
-  installing \texttt{OpenRuntime} driver and enabling the quirks listed below.
-  Please note, that most of these are not necessary to be enabled. Refer to their
-  individual descriptions in this document for more details.
-  \begin{itemize}
-  \tightlist
-  \item \texttt{ProvideConsoleGop} (UEFI quirk)
-  \item \texttt{AvoidRuntimeDefrag}
-  \item \texttt{DiscardHibernateMap}
-  \item \texttt{EnableSafeModeSlide}
-  \item \texttt{EnableWriteUnprotector}
-  \item \texttt{ForceExitBootServices}
-  \item \texttt{ProtectMemoryRegions}
-  \item \texttt{ProvideCustomSlide}
-  \item \texttt{SetupVirtualMap}
-  \item \texttt{ShrinkMemoryMap}
-  \end{itemize}
 
 \end{enumerate}
 
