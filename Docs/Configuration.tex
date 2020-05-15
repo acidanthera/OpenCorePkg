@@ -450,6 +450,7 @@ be relied upon, and all fields must be properly specified in the configuration.
     child { node [optional] {boot}} 
     child { node [optional] {nvram.plist}}
     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
+    child { node [optional] {panic-YYYY-MM-DD-HHMMSS.txt}}
   ;
 \end{tikzpicture}
 \break
@@ -516,6 +517,9 @@ entries include:
 \item
   \texttt{opencore-YYYY-MM-DD-HHMMSS.txt} \\
   OpenCore log file.
+\item
+  \texttt{panic-YYYY-MM-DD-HHMMSS.txt} \\
+  Kernel panic log file.
 \end{itemize}
 
 \emph{Note}: It is not guaranteed that paths longer than

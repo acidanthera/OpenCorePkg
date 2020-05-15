@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon May 11 17:11:58 2020
-%DIF ADD ../Configuration.tex        Wed May 13 22:16:41 2020
+%DIF DEL PreviousConfiguration.tex   Fri May 15 02:58:09 2020
+%DIF ADD ../Configuration.tex        Fri May 15 03:21:09 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -587,6 +587,7 @@ be relied upon, and all fields must be properly specified in the configuration.
     child { node [optional] {boot}} 
     child { node [optional] {nvram.plist}}
     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
+    child { node [optional] {panic-YYYY-MM-DD-HHMMSS.txt}}
   ;
 \end{tikzpicture}
 \DIFaddend \break
@@ -677,7 +678,10 @@ entries include:
 %DIFDELCMD <   %%%
 \DIFdelend \DIFaddbegin \\
   \DIFaddend OpenCore log file.
-\end{itemize}
+\DIFaddbegin \item
+  \texttt{\DIFadd{panic-YYYY-MM-DD-HHMMSS.txt}} \\
+  \DIFadd{Kernel panic log file.
+}\DIFaddend \end{itemize}
 
 \emph{Note}: It is not guaranteed that paths longer than
 \texttt{OC\_STORAGE\_SAFE\_PATH\_MAX} (128 characters including
