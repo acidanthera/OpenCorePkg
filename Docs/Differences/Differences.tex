@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May 15 23:18:56 2020
-%DIF ADD ../Configuration.tex        Sat May 16 00:11:50 2020
+%DIF ADD ../Configuration.tex        Sat May 16 00:25:16 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1542,10 +1542,8 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   Some modern firmwares including both hardware and virtual machines, like VMware,
   may update pointers to UEFI services during driver loading and related actions.
   Consequentially this directly breaks other quirks that affect memory management,
-  like \texttt{DevirtualiseMmio}, \texttt{\DIFdelbegin \DIFdel{ProtectCsmRegion}\DIFdelend \DIFaddbegin \DIFadd{ProtectMemoryRegions}\DIFaddend },
-  \DIFdelbegin \DIFdel{or }\texttt{\DIFdel{ShrinkMemoryMap}}%DIFAUXCMD
-\DIFdel{,
-  }\DIFdelend and may also break other quirks depending on the effects of these.
+  like \texttt{DevirtualiseMmio}, \texttt{\DIFdelbegin \DIFdel{ProtectCsmRegion}\DIFdelend \DIFaddbegin \DIFadd{ProtectMemoryRegions}\DIFaddend }, or \texttt{\DIFdelbegin \DIFdel{ShrinkMemoryMap}\DIFdelend \DIFaddbegin \DIFadd{RebuildAppleMemoryMap}\DIFaddend },
+  and may also break other quirks depending on the effects of these.
 
   \emph{Note}: On VMware the need for this quirk may be diagnosed by ``Your Mac OS guest
   might run unreliably with more than one virtual core.'' message.

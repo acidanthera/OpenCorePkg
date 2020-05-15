@@ -1374,7 +1374,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   Some modern firmwares including both hardware and virtual machines, like VMware,
   may update pointers to UEFI services during driver loading and related actions.
   Consequentially this directly breaks other quirks that affect memory management,
-  like \texttt{DevirtualiseMmio}, \texttt{ProtectMemoryRegions},
+  like \texttt{DevirtualiseMmio}, \texttt{ProtectMemoryRegions}, or \texttt{RebuildAppleMemoryMap},
   and may also break other quirks depending on the effects of these.
 
   \emph{Note}: On VMware the need for this quirk may be diagnosed by ``Your Mac OS guest
