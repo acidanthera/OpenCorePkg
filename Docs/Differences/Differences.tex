@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri May 15 02:58:09 2020
-%DIF ADD ../Configuration.tex        Fri May 15 03:21:09 2020
+%DIF DEL PreviousConfiguration.tex   Fri May 15 13:03:18 2020
+%DIF ADD ../Configuration.tex        Fri May 15 13:06:51 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1290,8 +1290,9 @@ list of checks to do first. Prior to starting please ensure that you have:
   It is not necessary unless you cannot boot at all or see
   \texttt{No slide values are usable! Use custom slide!} message in the log.
 \item \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) disabled in
-  firmware settings if present. Cconsider
-\href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{patching it}
+  firmware settings if present. \DIFdelbegin \DIFdel{Cconsider
+}\DIFdelend \DIFaddbegin \DIFadd{Consider
+}\DIFaddend \href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{patching it}
   if you have enough skills and no option is available. See
 \hyperref[kernelpropsquirks]{VerifyMsrE2}
   notes for more details.
