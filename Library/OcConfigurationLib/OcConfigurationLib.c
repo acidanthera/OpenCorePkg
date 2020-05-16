@@ -16,8 +16,8 @@
 
 OC_STRUCTORS       (OC_ACPI_ADD_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_ACPI_ADD_ARRAY)
-OC_STRUCTORS       (OC_ACPI_BLOCK_ENTRY, ())
-OC_ARRAY_STRUCTORS (OC_ACPI_BLOCK_ARRAY)
+OC_STRUCTORS       (OC_ACPI_DELETE_ENTRY, ())
+OC_ARRAY_STRUCTORS (OC_ACPI_DELETE_ARRAY)
 OC_STRUCTORS       (OC_ACPI_PATCH_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_ACPI_PATCH_ARRAY)
 OC_STRUCTORS       (OC_ACPI_QUIRKS, ())
@@ -29,8 +29,8 @@ OC_STRUCTORS       (OC_BOOTER_QUIRKS, ())
 OC_STRUCTORS       (OC_BOOTER_CONFIG, ())
 
 OC_MAP_STRUCTORS   (OC_DEV_PROP_ADD_MAP)
-OC_STRUCTORS       (OC_DEV_PROP_BLOCK_ENTRY, ())
-OC_MAP_STRUCTORS   (OC_DEV_PROP_BLOCK_MAP)
+OC_STRUCTORS       (OC_DEV_PROP_DELETE_ENTRY, ())
+OC_MAP_STRUCTORS   (OC_DEV_PROP_DELETE_MAP)
 OC_STRUCTORS       (OC_DEV_PROP_CONFIG, ())
 
 OC_STRUCTORS       (OC_KERNEL_ADD_ENTRY, ())
@@ -52,8 +52,8 @@ OC_ARRAY_STRUCTORS (OC_MISC_TOOLS_ARRAY)
 OC_STRUCTORS       (OC_MISC_CONFIG, ())
 
 OC_MAP_STRUCTORS   (OC_NVRAM_ADD_MAP)
-OC_STRUCTORS       (OC_NVRAM_BLOCK_ENTRY, ())
-OC_MAP_STRUCTORS   (OC_NVRAM_BLOCK_MAP)
+OC_STRUCTORS       (OC_NVRAM_DELETE_ENTRY, ())
+OC_MAP_STRUCTORS   (OC_NVRAM_DELETE_MAP)
 OC_STRUCTORS       (OC_NVRAM_LEGACY_ENTRY, ())
 OC_MAP_STRUCTORS   (OC_NVRAM_LEGACY_MAP)
 OC_STRUCTORS       (OC_NVRAM_CONFIG, ())
@@ -95,18 +95,18 @@ mAcpiAddSchema = OC_SCHEMA_DICT (NULL, mAcpiAddSchemaEntry);
 
 STATIC
 OC_SCHEMA
-mAcpiBlockSchemaEntry[] = {
-  OC_SCHEMA_BOOLEAN_IN   ("All",            OC_ACPI_BLOCK_ENTRY, All),
-  OC_SCHEMA_STRING_IN    ("Comment",        OC_ACPI_BLOCK_ENTRY, Comment),
-  OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_ACPI_BLOCK_ENTRY, Enabled),
-  OC_SCHEMA_DATAF_IN     ("OemTableId",     OC_ACPI_BLOCK_ENTRY, OemTableId),
-  OC_SCHEMA_INTEGER_IN   ("TableLength",    OC_ACPI_BLOCK_ENTRY, TableLength),
-  OC_SCHEMA_DATAF_IN     ("TableSignature", OC_ACPI_BLOCK_ENTRY, TableSignature),
+mAcpiDeleteSchemaEntry[] = {
+  OC_SCHEMA_BOOLEAN_IN   ("All",            OC_ACPI_DELETE_ENTRY, All),
+  OC_SCHEMA_STRING_IN    ("Comment",        OC_ACPI_DELETE_ENTRY, Comment),
+  OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_ACPI_DELETE_ENTRY, Enabled),
+  OC_SCHEMA_DATAF_IN     ("OemTableId",     OC_ACPI_DELETE_ENTRY, OemTableId),
+  OC_SCHEMA_INTEGER_IN   ("TableLength",    OC_ACPI_DELETE_ENTRY, TableLength),
+  OC_SCHEMA_DATAF_IN     ("TableSignature", OC_ACPI_DELETE_ENTRY, TableSignature),
 };
 
 STATIC
 OC_SCHEMA
-mAcpiBlockSchema = OC_SCHEMA_DICT (NULL, mAcpiBlockSchemaEntry);
+mAcpiDeleteSchema = OC_SCHEMA_DICT (NULL, mAcpiDeleteSchemaEntry);
 
 STATIC
 OC_SCHEMA
@@ -143,7 +143,7 @@ STATIC
 OC_SCHEMA
 mAcpiConfigurationSchema[] = {
   OC_SCHEMA_ARRAY_IN   ("Add",    OC_GLOBAL_CONFIG, Acpi.Add,    &mAcpiAddSchema),
-  OC_SCHEMA_ARRAY_IN   ("Block",  OC_GLOBAL_CONFIG, Acpi.Block,  &mAcpiBlockSchema),
+  OC_SCHEMA_ARRAY_IN   ("Delete", OC_GLOBAL_CONFIG, Acpi.Delete, &mAcpiDeleteSchema),
   OC_SCHEMA_ARRAY_IN   ("Patch",  OC_GLOBAL_CONFIG, Acpi.Patch,  &mAcpiPatchSchema),
   OC_SCHEMA_DICT       ("Quirks", mAcpiQuirksSchema),
 };
@@ -208,17 +208,17 @@ mDevicePropertiesAddSchema = OC_SCHEMA_MAP (NULL, &mDevicePropertiesAddEntrySche
 
 STATIC
 OC_SCHEMA
-mDevicePropertiesBlockEntrySchema = OC_SCHEMA_STRING (NULL);
+mDevicePropertiesDeleteEntrySchema = OC_SCHEMA_STRING (NULL);
 
 STATIC
 OC_SCHEMA
-mDevicePropertiesBlockSchema = OC_SCHEMA_ARRAY (NULL, &mDevicePropertiesBlockEntrySchema);
+mDevicePropertiesDeleteSchema = OC_SCHEMA_ARRAY (NULL, &mDevicePropertiesDeleteEntrySchema);
 
 STATIC
 OC_SCHEMA
 mDevicePropertiesSchema[] = {
   OC_SCHEMA_MAP_IN      ("Add",                OC_GLOBAL_CONFIG, DeviceProperties.Add, &mDevicePropertiesAddSchema),
-  OC_SCHEMA_MAP_IN      ("Block",              OC_GLOBAL_CONFIG, DeviceProperties.Block, &mDevicePropertiesBlockSchema)
+  OC_SCHEMA_MAP_IN      ("Delete",             OC_GLOBAL_CONFIG, DeviceProperties.Delete, &mDevicePropertiesDeleteSchema)
 };
 
 //
@@ -405,11 +405,11 @@ mNvramAddSchema = OC_SCHEMA_MAP (NULL, &mNvramAddEntrySchema);
 
 STATIC
 OC_SCHEMA
-mNvramBlockEntrySchema = OC_SCHEMA_STRING (NULL);
+mNvramDeleteEntrySchema = OC_SCHEMA_STRING (NULL);
 
 STATIC
 OC_SCHEMA
-mNvramBlockSchema = OC_SCHEMA_ARRAY (NULL, &mNvramBlockEntrySchema);
+mNvramDeleteSchema = OC_SCHEMA_ARRAY (NULL, &mNvramDeleteEntrySchema);
 
 STATIC
 OC_SCHEMA
@@ -423,7 +423,7 @@ STATIC
 OC_SCHEMA
 mNvramConfigurationSchema[] = {
   OC_SCHEMA_MAP_IN     ("Add",             OC_GLOBAL_CONFIG, Nvram.Add, &mNvramAddSchema),
-  OC_SCHEMA_MAP_IN     ("Block",           OC_GLOBAL_CONFIG, Nvram.Block, &mNvramBlockSchema),
+  OC_SCHEMA_MAP_IN     ("Delete",          OC_GLOBAL_CONFIG, Nvram.Delete, &mNvramDeleteSchema),
   OC_SCHEMA_BOOLEAN_IN ("LegacyEnable",    OC_GLOBAL_CONFIG, Nvram.LegacyEnable),
   OC_SCHEMA_BOOLEAN_IN ("LegacyOverwrite", OC_GLOBAL_CONFIG, Nvram.LegacyOverwrite),
   OC_SCHEMA_MAP_IN     ("LegacySchema",    OC_GLOBAL_CONFIG, Nvram.Legacy, &mNvramLegacySchema),

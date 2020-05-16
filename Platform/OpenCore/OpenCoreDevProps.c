@@ -50,8 +50,8 @@ OcLoadDevPropsSupport (
     return;
   }
 
-  for (DeviceIndex = 0; DeviceIndex < Config->DeviceProperties.Block.Count; ++DeviceIndex) {
-    AsciiDevicePath   = OC_BLOB_GET (Config->DeviceProperties.Block.Keys[DeviceIndex]);
+  for (DeviceIndex = 0; DeviceIndex < Config->DeviceProperties.Delete.Count; ++DeviceIndex) {
+    AsciiDevicePath   = OC_BLOB_GET (Config->DeviceProperties.Delete.Keys[DeviceIndex]);
     UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
     DevicePath        = NULL;
 
@@ -65,13 +65,13 @@ OcLoadDevPropsSupport (
       continue;
     }
 
-    for (PropertyIndex = 0; PropertyIndex < Config->DeviceProperties.Block.Values[DeviceIndex]->Count; ++PropertyIndex) {
-      AsciiProperty = OC_BLOB_GET (Config->DeviceProperties.Block.Values[DeviceIndex]->Values[PropertyIndex]);
+    for (PropertyIndex = 0; PropertyIndex < Config->DeviceProperties.Delete.Values[DeviceIndex]->Count; ++PropertyIndex) {
+      AsciiProperty = OC_BLOB_GET (Config->DeviceProperties.Delete.Values[DeviceIndex]->Values[PropertyIndex]);
       //
       // '#' is filtered in all keys, but for values we need to do it ourselves.
       //
       if (AsciiProperty[0] == '#') {
-        DEBUG ((DEBUG_INFO, "OC: Device property skip blocking %a\n", AsciiProperty));
+        DEBUG ((DEBUG_INFO, "OC: Device property skip deleting %a\n", AsciiProperty));
         continue;
       }
 

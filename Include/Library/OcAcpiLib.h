@@ -185,16 +185,16 @@ AcpiApplyContext (
   );
 
 /**
-  Drop one ACPI table.
+  Delete one ACPI table.
 
   @param Context     ACPI library context.
   @param Signature   Table signature or 0.
   @param Length      Table length or 0.
   @param OemTableId  Table Id or 0.
-  @param All         Drop all tables or first matched.
+  @param All         Delete all tables or first matched.
 **/
 EFI_STATUS
-AcpiDropTable (
+AcpiDeleteTable (
   IN OUT OC_ACPI_CONTEXT  *Context,
   IN     UINT32           Signature,
   IN     UINT32           Length,

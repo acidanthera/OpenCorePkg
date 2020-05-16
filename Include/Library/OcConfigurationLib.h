@@ -37,20 +37,20 @@
   OC_DECLARE (OC_ACPI_ADD_ARRAY)
 
 ///
-/// ACPI table blocks.
+/// ACPI table deletion.
 ///
-#define OC_ACPI_BLOCK_ENTRY_FIELDS(_, __) \
+#define OC_ACPI_DELETE_ENTRY_FIELDS(_, __) \
   _(BOOLEAN                     , All              ,     , FALSE   , () ) \
   _(BOOLEAN                     , Enabled          ,     , FALSE   , () ) \
   _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(UINT8                       , OemTableId       , [8] , {0}     , () ) \
   _(UINT32                      , TableLength      ,     , 0       , () ) \
   _(UINT8                       , TableSignature   , [4] , {0}     , () )
-  OC_DECLARE (OC_ACPI_BLOCK_ENTRY)
+  OC_DECLARE (OC_ACPI_DELETE_ENTRY)
 
-#define OC_ACPI_BLOCK_ARRAY_FIELDS(_, __) \
-  OC_ARRAY (OC_ACPI_BLOCK_ENTRY, _, __)
-  OC_DECLARE (OC_ACPI_BLOCK_ARRAY)
+#define OC_ACPI_DELETE_ARRAY_FIELDS(_, __) \
+  OC_ARRAY (OC_ACPI_DELETE_ENTRY, _, __)
+  OC_DECLARE (OC_ACPI_DELETE_ARRAY)
 
 ///
 /// ACPI patches.
@@ -87,7 +87,7 @@
 
 #define OC_ACPI_CONFIG_FIELDS(_, __) \
   _(OC_ACPI_ADD_ARRAY         , Add              ,     , OC_CONSTR2 (OC_ACPI_ADD_ARRAY, _, __)     , OC_DESTR (OC_ACPI_ADD_ARRAY)) \
-  _(OC_ACPI_BLOCK_ARRAY       , Block            ,     , OC_CONSTR2 (OC_ACPI_BLOCK_ARRAY, _, __)   , OC_DESTR (OC_ACPI_BLOCK_ARRAY)) \
+  _(OC_ACPI_DELETE_ARRAY      , Delete           ,     , OC_CONSTR2 (OC_ACPI_DELETE_ARRAY, _, __)  , OC_DESTR (OC_ACPI_DELETE_ARRAY)) \
   _(OC_ACPI_PATCH_ARRAY       , Patch            ,     , OC_CONSTR2 (OC_ACPI_PATCH_ARRAY, _, __)   , OC_DESTR (OC_ACPI_PATCH_ARRAY)) \
   _(OC_ACPI_QUIRKS            , Quirks           ,     , OC_CONSTR2 (OC_ACPI_QUIRKS, _, __)        , OC_DESTR (OC_ACPI_QUIRKS))
   OC_DECLARE (OC_ACPI_CONFIG)
@@ -149,17 +149,17 @@
   OC_MAP (OC_STRING, OC_ASSOC, _, __)
   OC_DECLARE (OC_DEV_PROP_ADD_MAP)
 
-#define OC_DEV_PROP_BLOCK_ENTRY_FIELDS(_, __) \
+#define OC_DEV_PROP_DELETE_ENTRY_FIELDS(_, __) \
   OC_ARRAY (OC_STRING, _, __)
-  OC_DECLARE (OC_DEV_PROP_BLOCK_ENTRY)
+  OC_DECLARE (OC_DEV_PROP_DELETE_ENTRY)
 
-#define OC_DEV_PROP_BLOCK_MAP_FIELDS(_, __) \
-  OC_MAP (OC_STRING, OC_DEV_PROP_BLOCK_ENTRY, _, __)
-  OC_DECLARE (OC_DEV_PROP_BLOCK_MAP)
+#define OC_DEV_PROP_DELETE_MAP_FIELDS(_, __) \
+  OC_MAP (OC_STRING, OC_DEV_PROP_DELETE_ENTRY, _, __)
+  OC_DECLARE (OC_DEV_PROP_DELETE_MAP)
 
 #define OC_DEV_PROP_CONFIG_FIELDS(_, __) \
-  _(OC_DEV_PROP_ADD_MAP       , Add              ,     , OC_CONSTR2 (OC_DEV_PROP_ADD_MAP, _, __)   , OC_DESTR (OC_DEV_PROP_ADD_MAP)) \
-  _(OC_DEV_PROP_BLOCK_MAP     , Block            ,     , OC_CONSTR2 (OC_DEV_PROP_BLOCK_MAP, _, __) , OC_DESTR (OC_DEV_PROP_BLOCK_MAP))
+  _(OC_DEV_PROP_ADD_MAP       , Add              ,     , OC_CONSTR2 (OC_DEV_PROP_ADD_MAP, _, __)    , OC_DESTR (OC_DEV_PROP_ADD_MAP)) \
+  _(OC_DEV_PROP_DELETE_MAP    , Delete           ,     , OC_CONSTR2 (OC_DEV_PROP_DELETE_MAP, _, __) , OC_DESTR (OC_DEV_PROP_DELETE_MAP))
   OC_DECLARE (OC_DEV_PROP_CONFIG)
 
 /**
@@ -352,13 +352,13 @@ typedef enum {
   OC_MAP (OC_STRING, OC_ASSOC, _, __)
   OC_DECLARE (OC_NVRAM_ADD_MAP)
 
-#define OC_NVRAM_BLOCK_ENTRY_FIELDS(_, __) \
+#define OC_NVRAM_DELETE_ENTRY_FIELDS(_, __) \
   OC_ARRAY (OC_STRING, _, __)
-  OC_DECLARE (OC_NVRAM_BLOCK_ENTRY)
+  OC_DECLARE (OC_NVRAM_DELETE_ENTRY)
 
-#define OC_NVRAM_BLOCK_MAP_FIELDS(_, __) \
-  OC_MAP (OC_STRING, OC_NVRAM_BLOCK_ENTRY, _, __)
-  OC_DECLARE (OC_NVRAM_BLOCK_MAP)
+#define OC_NVRAM_DELETE_MAP_FIELDS(_, __) \
+  OC_MAP (OC_STRING, OC_NVRAM_DELETE_ENTRY, _, __)
+  OC_DECLARE (OC_NVRAM_DELETE_MAP)
 
 #define OC_NVRAM_LEGACY_ENTRY_FIELDS(_, __) \
   OC_ARRAY (OC_STRING, _, __)
@@ -370,7 +370,7 @@ typedef enum {
 
 #define OC_NVRAM_CONFIG_FIELDS(_, __) \
   _(OC_NVRAM_ADD_MAP           , Add               ,     , OC_CONSTR2 (OC_NVRAM_ADD_MAP, _, __)        , OC_DESTR (OC_NVRAM_ADD_MAP)) \
-  _(OC_NVRAM_BLOCK_MAP         , Block             ,     , OC_CONSTR2 (OC_NVRAM_BLOCK_MAP, _, __)      , OC_DESTR (OC_NVRAM_BLOCK_MAP)) \
+  _(OC_NVRAM_DELETE_MAP        , Delete            ,     , OC_CONSTR2 (OC_NVRAM_DELETE_MAP, _, __)     , OC_DESTR (OC_NVRAM_DELETE_MAP)) \
   _(OC_NVRAM_LEGACY_MAP        , Legacy            ,     , OC_CONSTR2 (OC_NVRAM_LEGACY_MAP, _, __)     , OC_DESTR (OC_NVRAM_LEGACY_MAP)) \
   _(BOOLEAN                    , LegacyEnable      ,     , FALSE                                       , () ) \
   _(BOOLEAN                    , LegacyOverwrite   ,     , FALSE                                       , () ) \

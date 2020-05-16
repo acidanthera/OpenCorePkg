@@ -336,14 +336,14 @@ OcLoadLegacyNvram (
 
 STATIC
 VOID
-OcBlockNvram (
+OcDeleteNvram (
   IN OC_GLOBAL_CONFIG    *Config
   )
 {
   EFI_STATUS    Status;
-  UINT32        BlockGuidIndex;
+  UINT32        DeleteGuidIndex;
   UINT32        AddGuidIndex;
-  UINT32        BlockVariableIndex;
+  UINT32        DeleteVariableIndex;
   UINT32        AddVariableIndex;
   CONST CHAR8   *AsciiVariableName;
   CHAR16        *UnicodeVariableName;
@@ -353,9 +353,9 @@ OcBlockNvram (
   UINTN         CurrentValueSize;
   BOOLEAN       SameContents;
 
-  for (BlockGuidIndex = 0; BlockGuidIndex < Config->Nvram.Block.Count; ++BlockGuidIndex) {
+  for (DeleteGuidIndex = 0; DeleteGuidIndex < Config->Nvram.Delete.Count; ++DeleteGuidIndex) {
     Status = OcProcessVariableGuid (
-      OC_BLOB_GET (Config->Nvram.Block.Keys[BlockGuidIndex]),
+      OC_BLOB_GET (Config->Nvram.Delete.Keys[DeleteGuidIndex]),
       &VariableGuid,
       NULL,
       NULL
@@ -373,20 +373,20 @@ OcBlockNvram (
     //
     for (AddGuidIndex = 0; AddGuidIndex < Config->Nvram.Add.Count; ++AddGuidIndex) {
       if (AsciiStrCmp (
-        OC_BLOB_GET (Config->Nvram.Block.Keys[BlockGuidIndex]),
+        OC_BLOB_GET (Config->Nvram.Delete.Keys[DeleteGuidIndex]),
         OC_BLOB_GET (Config->Nvram.Add.Keys[AddGuidIndex])) == 0) {
         break;
       }
     }
 
-    for (BlockVariableIndex = 0; BlockVariableIndex < Config->Nvram.Block.Values[BlockGuidIndex]->Count; ++BlockVariableIndex) {
-      AsciiVariableName   = OC_BLOB_GET (Config->Nvram.Block.Values[BlockGuidIndex]->Values[BlockVariableIndex]);
+    for (DeleteVariableIndex = 0; DeleteVariableIndex < Config->Nvram.Delete.Values[DeleteGuidIndex]->Count; ++DeleteVariableIndex) {
+      AsciiVariableName   = OC_BLOB_GET (Config->Nvram.Delete.Values[DeleteGuidIndex]->Values[DeleteVariableIndex]);
 
       //
       // '#' is filtered in all keys, but for values we need to do it ourselves.
       //
       if (AsciiVariableName[0] == '#') {
-        DEBUG ((DEBUG_INFO, "OC: Variable skip blocking %a\n", AsciiVariableName));
+        DEBUG ((DEBUG_INFO, "OC: Variable skip deleting %a\n", AsciiVariableName));
         continue;
       }
 
@@ -491,7 +491,7 @@ OcLoadNvramSupport (
     OcLoadLegacyNvram (Storage->FileSystem, Config);
   }
 
-  OcBlockNvram (Config);
+  OcDeleteNvram (Config);
 
   OcAddNvram (Config);
 

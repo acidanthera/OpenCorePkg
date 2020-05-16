@@ -703,7 +703,7 @@ AcpiApplyContext (
 }
 
 EFI_STATUS
-AcpiDropTable (
+AcpiDeleteTable (
   IN OUT OC_ACPI_CONTEXT  *Context,
   IN     UINT32           Signature,
   IN     UINT32           Length,
@@ -731,7 +731,7 @@ AcpiDropTable (
       if (OemTableId == 0 || CurrOemTableId == OemTableId) {
         DEBUG ((
           DEBUG_INFO,
-          "OCA: Dropping table %08x (%016Lx) of %u bytes with %016Lx ID at index %u\n",
+          "OCA: Deleting table %08x (%016Lx) of %u bytes with %016Lx ID at index %u\n",
           Context->Tables[Index]->Signature,
           AcpiReadOemTableId (Context->Tables[Index]),
           Context->Tables[Index]->Length,

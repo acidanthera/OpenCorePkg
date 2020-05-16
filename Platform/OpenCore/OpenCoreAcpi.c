@@ -87,7 +87,7 @@ OcAcpiAddTables (
 
 STATIC
 VOID
-OcAcpiBlockTables (
+OcAcpiDeleteTables (
   IN OC_GLOBAL_CONFIG    *Config,
   IN OC_ACPI_CONTEXT     *Context
   )
@@ -96,10 +96,10 @@ OcAcpiBlockTables (
   UINT32               Index;
   UINT32               Signature;
   UINT64               OemTableId;
-  OC_ACPI_BLOCK_ENTRY  *Table;
+  OC_ACPI_DELETE_ENTRY *Table;
 
-  for (Index = 0; Index < Config->Acpi.Block.Count; ++Index) {
-    Table = Config->Acpi.Block.Values[Index];
+  for (Index = 0; Index < Config->Acpi.Delete.Count; ++Index) {
+    Table = Config->Acpi.Delete.Values[Index];
 
     if (!Table->Enabled) {
       continue;
@@ -108,7 +108,7 @@ OcAcpiBlockTables (
     CopyMem (&Signature, Table->TableSignature, sizeof (Table->TableSignature));
     CopyMem (&OemTableId, Table->OemTableId, sizeof (Table->OemTableId));
 
-    Status = AcpiDropTable (
+    Status = AcpiDeleteTable (
       Context,
       Signature,
       Table->TableLength,
@@ -213,7 +213,7 @@ OcLoadAcpiSupport (
 
   OcAcpiPatchTables (Config, &Context);
 
-  OcAcpiBlockTables (Config, &Context);
+  OcAcpiDeleteTables (Config, &Context);
 
   OcAcpiAddTables (Config, Storage, &Context);
 

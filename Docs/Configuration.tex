@@ -326,9 +326,11 @@ idiomatically to group similar actions in subsections:
 \begin{itemize}
 \tightlist
 \item
-  \texttt{Add} provides support for data addition.
+  \texttt{Add} provides support for data addition. Existing data will
+  not be overridden, and needs to be handled separately with
+  \texttt{Delete} if necessary.
 \item
-  \texttt{Block} provides support for data removal or ignorance.
+  \texttt{Delete} provides support for data removal.
 \item
   \texttt{Patch} provides support for data modification.
 \item
@@ -770,17 +772,17 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
   \textbf{Description}: Load selected tables from \texttt{OC/ACPI}
   directory.
 
-  Designed to be filled with \texttt{plist\ dict} values, describing each block entry.
+  Designed to be filled with \texttt{plist\ dict} values, describing each add entry.
   See \hyperref[acpipropsadd]{Add Properties} section below.
 
 \item
-  \texttt{Block}\\
+  \texttt{Delete}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Remove selected tables from ACPI stack.
 
-  Designed to be filled with \texttt{plist\ dict} values, describing each block entry.
-  See \hyperref[acpipropsblock]{Block Properties} section below.
+  Designed to be filled with \texttt{plist\ dict} values, describing each delete entry.
+  See \hyperref[acpipropsdelete]{Delete Properties} section below.
 
 \item
   \texttt{Patch}\\
@@ -835,7 +837,7 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
 
 \end{enumerate}
 
-\subsection{Block Properties}\label{acpipropsblock}
+\subsection{Delete Properties}\label{acpipropsdelete}
 
 \begin{enumerate}
 \item
@@ -843,7 +845,7 @@ can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Ac
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: If set to \texttt{true}, all ACPI tables matching the
-  condition will be dropped. Otherwise only first matched table.
+  condition will be deleted. Otherwise only first matched table.
 
 \item
   \texttt{Comment}\\
@@ -1118,7 +1120,7 @@ list of checks to do first. Prior to starting please ensure that you have:
   with the same issue are known, consider this option to be first to check if you
   have erratic boot failures.
 \item \texttt{DisableIoMapper} quirk enabled, or \texttt{VT-d} disabled in
-  firmware settings if present, or ACPI DMAR table dropped.
+  firmware settings if present, or ACPI DMAR table deleted.
 \item \textbf{No} `slide` boot argument present in NVRAM or anywhere else.
   It is not necessary unless you cannot boot at all or see
   \texttt{No slide values are usable! Use custom slide!} message in the log.
@@ -1508,13 +1510,13 @@ ioreg -lw0 -p IODeviceTree -n efi -r -x | grep device-properties |
   of deivce paths to a map (\texttt{plist\ dict}) of variable names and their values
   in \texttt{plist\ metadata} format. Device paths must be provided in canonic string
   format (e.g. \texttt{PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)}). Properties will only
-  be set if not present and not blocked.
+  be set if not present and not deleted.
 
   \emph{Note}: Currently properties may only be (formerly) added by the original driver,
-  so unless a separate driver was installed, there is no reason to block the variables.
+  so unless a separate driver was installed, there is no reason to delete the variables.
 
 \item
-  \texttt{Block}\\
+  \texttt{Delete}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Removes device properties from a map (\texttt{plist\ dict})
   of deivce paths to an array (\texttt{plist\ array}) of variable names in
@@ -1993,7 +1995,7 @@ blocking.
   \textbf{Description}: Disables \texttt{IOMapper} support in XNU (VT-d),
   which may conflict with the firmware implementation.
 
-  \emph{Note}: This option is a preferred alternative to dropping \texttt{DMAR}
+  \emph{Note}: This option is a preferred alternative to deleting \texttt{DMAR}
   ACPI table and disabling VT-d in firmware preferences, which does not break
   VT-d support in other systems in case they need it.
 
@@ -2189,7 +2191,7 @@ option is enabled or the firmware does not control UEFI boot options (\texttt{Du
 custom BDS). Without \texttt{BootProtect} it also is possible that other operating systems
 overwrite OpenCore, make sure to enable it if you plan to use them.
 
-\emph{Note 2}: UEFI variable boot options' boot arguments will be dropped if present as they
+\emph{Note 2}: UEFI variable boot options' boot arguments will be removed if present as they
 may contain arguments compromising the operating system, which is undesired once secure boot
 is enabled.
 
@@ -3030,8 +3032,8 @@ use.
 
   Created variables get \texttt{EFI\_VARIABLE\_BOOTSERVICE\_ACCESS} and
   \texttt{EFI\_VARIABLE\_RUNTIME\_ACCESS} attributes set.
-  Variables will only be set if not present or blocked. I.e. to overwrite
-  an existing variable value add the variable name to the \texttt{Block} section.
+  Variables will only be set if not present or deleted. I.e. to overwrite
+  an existing variable value add the variable name to the \texttt{Delete} section.
   This approach enables to provide default values till the operating system
   takes the lead.
 
@@ -3039,7 +3041,7 @@ use.
   behaviour is undefined.
 
 \item
-  \texttt{Block}\\
+  \texttt{Delete}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Removes NVRAM variables from a map (\texttt{plist\ dict})
   of GUIDs to an array (\texttt{plist\ array}) of variable names in
@@ -3060,7 +3062,7 @@ use.
   \texttt{config.plist}.
   \end{itemize}
 
-  Variable loading happens prior to \texttt{Block} (and \texttt{Add}) phases. Unless
+  Variable loading happens prior to \texttt{Delete} (and \texttt{Add}) phases. Unless
   \texttt{LegacyOverwrite} is enabled, it will not overwrite any existing variable.
   Variables allowed to be set must be specified in \texttt{LegacySchema}.
   Third-party scripts may be used to create \texttt{nvram.plist}
@@ -5028,14 +5030,14 @@ functioning. Feature highlights:
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Data Hub protocol with a builtin version.
-  This will drop all previous properties if the protocol was already installed.
+  This will delete all previous properties if the protocol was already installed.
 
 \item
   \texttt{DeviceProperties}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Device Property protocol with a builtin
-  version. This will drop all previous properties if it was already installed.
+  version. This will delete all previous properties if it was already installed.
   This may be used to ensure full compatibility on VMs or legacy Macs.
 
 \item

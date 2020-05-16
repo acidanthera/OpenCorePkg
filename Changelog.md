@@ -28,7 +28,8 @@ OpenCore Changelog
 - Fixed assertions on log exhaustion causing boot failures
 - Fixed builtin text renderer failing to provide ConsoleControl
 - Fixed compatibility with blit-only GOP (e.g. OVMF Bochs)
-- Fixed ignoring `#` in DeviceProperty and NVRAM `Block`
+- Fixed ignoring `#` in DeviceProperty and NVRAM `Delete`
+- Renamed `Block` to `Delete` in `ACPI`,`DeviceProperties`, and `NVRAM`
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG
