@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon May 11 17:11:58 2020
-%DIF ADD ../Configuration.tex        Sun May 17 17:14:55 2020
+%DIF DEL PreviousConfiguration.tex   Sun May 17 22:33:54 2020
+%DIF ADD ../Configuration.tex        Sun May 17 22:38:47 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4460,7 +4460,7 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 \begin{tabular}{p{1.3in}p{5.55in}}
 \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
 %DIFDELCMD < %%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AudioDxe}}
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AudioDxe}}\textbf{\DIFadd{*}}
 \DIFaddend & HDA audio support driver in UEFI firmwares for most Intel and some other analog audio controllers.
   \DIFdelbegin \DIFdel{Refer }\DIFdelend \DIFaddbegin \DIFadd{Staging driver, refer }\DIFaddend to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
   for known issues in AudioDxe. \\
@@ -4509,7 +4509,7 @@ even cause permanent firmware damage. Some of the known drivers are listed below
   in UEFI graphical interfaces, such as \texttt{OpenCanopy}. \\
 \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
 %DIFDELCMD < %%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VBoxHfs}}
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VBoxHfs}}\textbf{\DIFadd{*}}
 \DIFaddend & HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HfsPlus} driver commonly found in Apple firmwares. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo

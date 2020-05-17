@@ -4190,7 +4190,7 @@ Loading an incompatible driver may lead your system to unbootable state or
 even cause permanent firmware damage. Some of the known drivers are listed below:
 
 \begin{tabular}{p{1.3in}p{5.55in}}
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AudioDxe}}
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AudioDxe}}\textbf{*}
 & HDA audio support driver in UEFI firmwares for most Intel and some other analog audio controllers.
   Staging driver, refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
   for known issues in AudioDxe. \\
@@ -4237,7 +4237,7 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & USB mouse driver from \texttt{MdeModulePkg}. Some virtual machine firmwares
   like OVMF may not include this driver, but it is necessary for mouse to work
   in UEFI graphical interfaces, such as \texttt{OpenCanopy}. \\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VBoxHfs}}
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VBoxHfs}}\textbf{*}
 & HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HfsPlus} driver commonly found in Apple firmwares. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
