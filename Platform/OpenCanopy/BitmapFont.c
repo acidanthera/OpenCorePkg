@@ -211,28 +211,24 @@ BmfContextInitialize (
 
         DEBUG ((
           DEBUG_INFO,
-          "Info->fontSize %u\n"
-          "Info->bitField %u\n"
-          "Info->charSet %u\n"
-          "Info->stretchH %u\n"
-          "Info->aa %u\n"
-          "Info->paddingUp %u\n"
-          "Info->paddingRight %u\n"
-          "Info->paddingDown %u\n"
-          "Info->paddingLeft %u\n"
-          "Info->spacingHoriz %u\n"
-          "Info->spacingVert %u\n"
-          "Info->outline %u\n"
-          "Info->fontName %a\n",
+          "OCUI: Info->fontSize %u Info->bitField %u Info->charSet %u Info->stretchH %u Info->aa %u\n",
           Context->Info->fontSize,
           Context->Info->bitField,
           Context->Info->charSet,
           Context->Info->stretchH,
-          Context->Info->aa,
+          Context->Info->aa
+          ));
+        DEBUG ((
+          DEBUG_INFO,
+          "OCUI: Info->paddingUp %u Info->paddingRight %u Info->paddingDown %u Info->paddingLeft %u\n",
           Context->Info->paddingUp,
           Context->Info->paddingRight,
           Context->Info->paddingDown,
-          Context->Info->paddingLeft,
+          Context->Info->paddingLeft
+          ));
+        DEBUG ((
+          DEBUG_INFO,
+          "OCUI: Info->spacingHoriz %u Info->spacingVert %u Info->outline %u Info->fontName %a\n",
           Context->Info->spacingHoriz,
           Context->Info->spacingVert,
           Context->Info->outline,

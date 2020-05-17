@@ -706,7 +706,7 @@ OcKernelFileOpen (
 
   DEBUG ((
     DEBUG_VERBOSE,
-    "Opening file %s with %u mode gave - %r\n",
+    "OC: Opening file %s with %u mode gave - %r\n",
     FileName,
     (UINT32) OpenMode,
     Status
@@ -725,7 +725,7 @@ OcKernelFileOpen (
     && StrStr (FileName, L"kernel") != NULL
     && StrCmp (FileName, L"System\\Library\\Kernels\\kernel") != 0) {
 
-    DEBUG ((DEBUG_INFO, "Trying XNU hook on %s\n", FileName));
+    DEBUG ((DEBUG_INFO, "OC: Trying XNU hook on %s\n", FileName));
     Status = ReadAppleKernel (
       *NewHandle,
       &Kernel,
@@ -733,7 +733,7 @@ OcKernelFileOpen (
       &AllocatedSize,
       OcKernelLoadKextsAndReserve (mOcStorage, mOcConfiguration)
       );
-    DEBUG ((DEBUG_INFO, "Result of XNU hook on %s is %r\n", FileName, Status));
+    DEBUG ((DEBUG_INFO, "OC: Result of XNU hook on %s is %r\n", FileName, Status));
 
     //
     // This is not Apple kernel, just return the original file.
@@ -750,7 +750,7 @@ OcKernelFileOpen (
         AllocatedSize
         );
 
-      DEBUG ((DEBUG_INFO, "Prelinked status - %r\n", PrelinkedStatus));
+      DEBUG ((DEBUG_INFO, "OC: Prelinked status - %r\n", PrelinkedStatus));
 
       Status = GetFileModifcationTime (*NewHandle, &ModificationTime);
       if (EFI_ERROR (Status)) {
@@ -764,14 +764,14 @@ OcKernelFileOpen (
       //
       FileNameCopy = AllocateCopyPool (StrSize (FileName), FileName);
       if (FileNameCopy == NULL) {
-        DEBUG ((DEBUG_WARN, "Failed to allocate kernel name (%a) copy\n", FileName));
+        DEBUG ((DEBUG_WARN, "OC: Failed to allocate kernel name (%a) copy\n", FileName));
         FreePool (Kernel);
         return EFI_OUT_OF_RESOURCES;
       }
 
       Status = CreateVirtualFile (FileNameCopy, Kernel, KernelSize, &ModificationTime, &VirtualFileHandle);
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_WARN, "Failed to virtualise kernel file (%a)\n", FileName));
+        DEBUG ((DEBUG_WARN, "OC: Failed to virtualise kernel file (%a)\n", FileName));
         FreePool (Kernel);
         FreePool (FileNameCopy);
         return EFI_OUT_OF_RESOURCES;

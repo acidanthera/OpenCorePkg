@@ -141,7 +141,7 @@ AIKSourceInstall (
     Status = gBS->HandleProtocol (Source->ConSplitHandler, &gAmiEfiKeycodeProtocolGuid,
       (VOID * *)& Source->AmiKeycode);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "AmiEfiKeycodeProtocol is unavailable on gST->ConsoleHandle - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCII: AmiEfiKeycodeProtocol is unavailable on gST->ConsoleHandle - %r\n", Status));
     }
   }
 
@@ -149,7 +149,7 @@ AIKSourceInstall (
     Status = gBS->HandleProtocol (Source->ConSplitHandler, &gEfiSimpleTextInProtocolGuid,
       (VOID * *)& Source->TextInput);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "EfiSimpleTextInProtocol is unavailable on gST->ConsoleHandle - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCII: EfiSimpleTextInProtocol is unavailable on gST->ConsoleHandle - %r\n", Status));
     }
   }
 
@@ -157,16 +157,16 @@ AIKSourceInstall (
     Status = gBS->HandleProtocol (Source->ConSplitHandler, &gEfiSimpleTextInputExProtocolGuid,
       (VOID * *)& Source->TextInputEx);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "EfiSimpleTextInputExProtocol is unavailable on gST->ConsoleHandle - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCII: EfiSimpleTextInputExProtocol is unavailable on gST->ConsoleHandle - %r\n", Status));
     }
   }
 
   if (Source->AmiKeycode == NULL && Source->TextInput == NULL && Source->TextInputEx == NULL) {
-    DEBUG ((DEBUG_INFO, "No ConSplitter input protocol is unavailable\n"));
+    DEBUG ((DEBUG_INFO, "OCII: No ConSplitter input protocol is unavailable\n"));
     return EFI_NOT_FOUND;
   }
 
-  DEBUG ((DEBUG_INFO, "gST->ConIn %p vs found %p\n", gST->ConIn, Source->TextInput));
+  DEBUG ((DEBUG_INFO, "OCII: gST->ConIn %p vs found %p\n", gST->ConIn, Source->TextInput));
 
   //
   // We additionally reset the protocols as our buffers are empty, and we do not want old data.
@@ -183,7 +183,7 @@ AIKSourceInstall (
       NULL, &Source->AmiKeycode->WaitForKeyEx
       );
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "AmiEfiKeycodeProtocol WaitForKey replace failed - %r", Status));
+      DEBUG ((DEBUG_INFO, "OCII: AmiEfiKeycodeProtocol WaitForKey replace failed - %r", Status));
       Source->AmiKeycode->WaitForKeyEx = Source->AmiWait;
       Source->AmiWait = NULL;
     }
@@ -201,7 +201,7 @@ AIKSourceInstall (
       NULL, &Source->TextInput->WaitForKey
       );
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "EfiSimpleTextInProtocol WaitForKey replace failed - %r", Status));
+      DEBUG ((DEBUG_INFO, "OCII: EfiSimpleTextInProtocol WaitForKey replace failed - %r", Status));
       Source->TextInput->WaitForKey = Source->TextWait;
       Source->TextWait = NULL;
     }
@@ -219,7 +219,7 @@ AIKSourceInstall (
       NULL, &Source->TextInputEx->WaitForKeyEx
       );
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "EfiSimpleTextInputExProtocol WaitForKey replace failed - %r", Status));
+      DEBUG ((DEBUG_INFO, "OCII: EfiSimpleTextInputExProtocol WaitForKey replace failed - %r", Status));
       Source->TextInputEx->WaitForKeyEx = Source->TextWaitEx;
       Source->TextWaitEx = NULL;
     }

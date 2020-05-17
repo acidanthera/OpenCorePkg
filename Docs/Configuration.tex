@@ -2670,6 +2670,69 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   Log is attempted to be written in the safest manner, and thus is very slow. Ensure that
   \texttt{DisableWatchDog} is set to \texttt{true} when you use a slow drive.
 
+  When interpreting the log, note that the lines are prefixed with a tag describing
+  the relevant location (module) of the log line allowing one to better attribute the line
+  to the functionality. The list of currently used tags is provided below.
+
+  \textbf{Drivers and tools}:
+  \begin{itemize}
+  \tightlist
+  \item \texttt{BMF} --- OpenCanopy, bitmap font
+  \item \texttt{BS} --- Bootstrap
+  \item \texttt{GSTT} --- GoptStop
+  \item \texttt{HDA} --- AudioDxe
+  \item \texttt{KKT} --- KeyTester
+  \item \texttt{MMDD} --- MmapDump
+  \item \texttt{OCPAVP} --- PavpProvision
+  \item \texttt{OCRST} --- ResetSystem
+  \item \texttt{OCUI} --- OpenCanopy
+  \item \texttt{OC} --- OpenCore main
+  \end{itemize}
+
+  \textbf{Libraries}:
+  \begin{itemize}
+  \tightlist
+  \item \texttt{AAPL} --- OcDebugLogLib, Apple EfiBoot logging
+  \item \texttt{OCABC} --- OcAfterBootCompatLib
+  \item \texttt{OCAE} --- OcAppleEventLib
+  \item \texttt{OCAK} --- OcAppleKernelLib
+  \item \texttt{OCAU} --- OcAudioLib
+  \item \texttt{OCAV} --- OcAppleImageVerificationLib
+  \item \texttt{OCA} ---- OcAcpiLib
+  \item \texttt{OCBP} --- OcAppleBootPolicyLib
+  \item \texttt{OCB} --- OcBootManagementLib
+  \item \texttt{OCCL} --- OcAppleChunkListLib
+  \item \texttt{OCCPU} --- OcCpuLib
+  \item \texttt{OCC} --- OcConsoleLib
+  \item \texttt{OCDH} --- OcDataHubLib
+  \item \texttt{OCDI} --- OcAppleDiskImageLib
+  \item \texttt{OCFSQ} --- OcFileLib, UnblockFs quirk
+  \item \texttt{OCFS} --- OcFileLib
+  \item \texttt{OCFV} --- OcFirmwareVolumeLib
+  \item \texttt{OCHS} --- OcHashServicesLib
+  \item \texttt{OCIC} --- OcImageConversionLib
+  \item \texttt{OCII} --- OcInputLib
+  \item \texttt{OCJS} --- OcApfsLib
+  \item \texttt{OCKM} --- OcAppleKeyMapLib
+  \item \texttt{OCL} --- OcDebugLogLib
+  \item \texttt{OCMCO} --- OcMachoLib
+  \item \texttt{OCME} --- OcHeciLib
+  \item \texttt{OCMM} --- OcMemoryLib
+  \item \texttt{OCPI} --- OcFileLib, partition info
+  \item \texttt{OCPNG} --- OcPngLib
+  \item \texttt{OCRAM} --- OcAppleRamDiskLib
+  \item \texttt{OCRTC} --- OcRtcLib
+  \item \texttt{OCSB} --- OcAppleSecureBootLib
+  \item \texttt{OCSMB} --- OcSmbiosLib
+  \item \texttt{OCSMC} --- OcSmcLib
+  \item \texttt{OCST} --- OcStorageLib
+  \item \texttt{OCS} --- OcSerializedLib
+  \item \texttt{OCTPL} --- OcTemplateLib
+  \item \texttt{OCUC} --- OcUnicodeCollationLib
+  \item \texttt{OCUT} --- OcAppleUserInterfaceThemeLib
+  \item \texttt{OCXML} --- OcXmlLib
+  \end{itemize}
+
 \end{enumerate}
 
 \subsection{Security Properties}\label{miscsecurityprops}

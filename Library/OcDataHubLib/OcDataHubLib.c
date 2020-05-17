@@ -238,7 +238,7 @@ SetDataHubEntry (
 
   DEBUG ((
     EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-    "Setting DataHub %g:%s (%u) - %r\n",
+    "OCDH: Setting DataHub %g:%s (%u) - %r\n",
     &gApplePlatformProducerNameGuid,
     Key,
     DataSize,

@@ -35,14 +35,14 @@ OcAppleGenericInputTimerQuirkInit (
   if (!EFI_ERROR (Status)) {
     Status = mTimerProtocol->GetTimerPeriod (mTimerProtocol, &mOriginalTimerPeriod);
     if (!EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "AIFTimerBoostInit Current timer is %u\n", mOriginalTimerPeriod));
+      DEBUG ((DEBUG_INFO, "OCII: AIFTimerBoostInit Current timer is %u\n", mOriginalTimerPeriod));
       if (mOriginalTimerPeriod > TimerResolution) {
         Status = mTimerProtocol->SetTimerPeriod (mTimerProtocol, TimerResolution);
         if (!EFI_ERROR (Status)) {
-          DEBUG ((DEBUG_INFO, "AIFTimerBoostInit changed period %d to %d\n",
+          DEBUG ((DEBUG_INFO, "OCII: AIFTimerBoostInit changed period %d to %d\n",
             mOriginalTimerPeriod, TimerResolution));
         } else {
-          DEBUG ((DEBUG_INFO, "AIFTimerBoostInit failed to change period %d to %d, error - %r\n",
+          DEBUG ((DEBUG_INFO, "OCII: AIFTimerBoostInit failed to change period %d to %d, error - %r\n",
             mOriginalTimerPeriod, TimerResolution, Status));
           mTimerProtocol = NULL;
         }
@@ -50,10 +50,10 @@ OcAppleGenericInputTimerQuirkInit (
         mTimerProtocol = NULL;
       }
     } else {
-      DEBUG ((DEBUG_INFO, "AIFTimerBoostInit failed to obtain previous period - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCII: AIFTimerBoostInit failed to obtain previous period - %r\n", Status));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "AIFTimerBoostInit gEfiTimerArchProtocolGuid not found - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCII: AIFTimerBoostInit gEfiTimerArchProtocolGuid not found - %r\n", Status));
   }
 
   return Status;

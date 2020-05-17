@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Mon May 11 17:11:58 2020
-%DIF ADD ../Configuration.tex        Sun May 17 14:42:56 2020
+%DIF ADD ../Configuration.tex        Sun May 17 17:14:55 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2912,7 +2912,71 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   Log is attempted to be written in the safest manner, and thus is very slow. Ensure that
   \texttt{DisableWatchDog} is set to \texttt{true} when you use a slow drive.
 
-\end{enumerate}
+  \DIFaddbegin \DIFadd{When interpreting the log, note that the lines are prefixed with a tag describing
+  the relevant location (module) of the log line allowing one to better attribute the line
+  to the functionality. The list of currently used tags is provided below.
+}
+
+  \textbf{\DIFadd{Drivers and tools}}\DIFadd{:
+  }\begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{BMF}} \DIFadd{--- OpenCanopy, bitmap font
+  }\item \texttt{\DIFadd{BS}} \DIFadd{--- Bootstrap
+  }\item \texttt{\DIFadd{GSTT}} \DIFadd{--- GoptStop
+  }\item \texttt{\DIFadd{HDA}} \DIFadd{--- AudioDxe
+  }\item \texttt{\DIFadd{KKT}} \DIFadd{--- KeyTester
+  }\item \texttt{\DIFadd{MMDD}} \DIFadd{--- MmapDump
+  }\item \texttt{\DIFadd{OCPAVP}} \DIFadd{--- PavpProvision
+  }\item \texttt{\DIFadd{OCRST}} \DIFadd{--- ResetSystem
+  }\item \texttt{\DIFadd{OCUI}} \DIFadd{--- OpenCanopy
+  }\item \texttt{\DIFadd{OC}} \DIFadd{--- OpenCore main
+  }\end{itemize}
+
+  \textbf{\DIFadd{Libraries}}\DIFadd{:
+  }\begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{AAPL}} \DIFadd{--- OcDebugLogLib, Apple EfiBoot logging
+  }\item \texttt{\DIFadd{OCABC}} \DIFadd{--- OcAfterBootCompatLib
+  }\item \texttt{\DIFadd{OCAE}} \DIFadd{--- OcAppleEventLib
+  }\item \texttt{\DIFadd{OCAK}} \DIFadd{--- OcAppleKernelLib
+  }\item \texttt{\DIFadd{OCAU}} \DIFadd{--- OcAudioLib
+  }\item \texttt{\DIFadd{OCAV}} \DIFadd{--- OcAppleImageVerificationLib
+  }\item \texttt{\DIFadd{OCA}} \DIFadd{---- OcAcpiLib
+  }\item \texttt{\DIFadd{OCBP}} \DIFadd{--- OcAppleBootPolicyLib
+  }\item \texttt{\DIFadd{OCB}} \DIFadd{--- OcBootManagementLib
+  }\item \texttt{\DIFadd{OCCL}} \DIFadd{--- OcAppleChunkListLib
+  }\item \texttt{\DIFadd{OCCPU}} \DIFadd{--- OcCpuLib
+  }\item \texttt{\DIFadd{OCC}} \DIFadd{--- OcConsoleLib
+  }\item \texttt{\DIFadd{OCDH}} \DIFadd{--- OcDataHubLib
+  }\item \texttt{\DIFadd{OCDI}} \DIFadd{--- OcAppleDiskImageLib
+  }\item \texttt{\DIFadd{OCFSQ}} \DIFadd{--- OcFileLib, UnblockFs quirk
+  }\item \texttt{\DIFadd{OCFS}} \DIFadd{--- OcFileLib
+  }\item \texttt{\DIFadd{OCFV}} \DIFadd{--- OcFirmwareVolumeLib
+  }\item \texttt{\DIFadd{OCHS}} \DIFadd{--- OcHashServicesLib
+  }\item \texttt{\DIFadd{OCIC}} \DIFadd{--- OcImageConversionLib
+  }\item \texttt{\DIFadd{OCII}} \DIFadd{--- OcInputLib
+  }\item \texttt{\DIFadd{OCJS}} \DIFadd{--- OcApfsLib
+  }\item \texttt{\DIFadd{OCKM}} \DIFadd{--- OcAppleKeyMapLib
+  }\item \texttt{\DIFadd{OCL}} \DIFadd{--- OcDebugLogLib
+  }\item \texttt{\DIFadd{OCMCO}} \DIFadd{--- OcMachoLib
+  }\item \texttt{\DIFadd{OCME}} \DIFadd{--- OcHeciLib
+  }\item \texttt{\DIFadd{OCMM}} \DIFadd{--- OcMemoryLib
+  }\item \texttt{\DIFadd{OCPI}} \DIFadd{--- OcFileLib, partition info
+  }\item \texttt{\DIFadd{OCPNG}} \DIFadd{--- OcPngLib
+  }\item \texttt{\DIFadd{OCRAM}} \DIFadd{--- OcAppleRamDiskLib
+  }\item \texttt{\DIFadd{OCRTC}} \DIFadd{--- OcRtcLib
+  }\item \texttt{\DIFadd{OCSB}} \DIFadd{--- OcAppleSecureBootLib
+  }\item \texttt{\DIFadd{OCSMB}} \DIFadd{--- OcSmbiosLib
+  }\item \texttt{\DIFadd{OCSMC}} \DIFadd{--- OcSmcLib
+  }\item \texttt{\DIFadd{OCST}} \DIFadd{--- OcStorageLib
+  }\item \texttt{\DIFadd{OCS}} \DIFadd{--- OcSerializedLib
+  }\item \texttt{\DIFadd{OCTPL}} \DIFadd{--- OcTemplateLib
+  }\item \texttt{\DIFadd{OCUC}} \DIFadd{--- OcUnicodeCollationLib
+  }\item \texttt{\DIFadd{OCUT}} \DIFadd{--- OcAppleUserInterfaceThemeLib
+  }\item \texttt{\DIFadd{OCXML}} \DIFadd{--- OcXmlLib
+  }\end{itemize}
+
+\DIFaddend \end{enumerate}
 
 \subsection{Security Properties}\label{miscsecurityprops}
 
