@@ -39,7 +39,6 @@
   Timer/AIT.c
 
 [Packages]
-  EfiPkg/EfiPkg.dec
   MdeModulePkg/MdeModulePkg.dec
   MdePkg/MdePkg.dec
   OpenCorePkg/OpenCorePkg.dec

@@ -48,7 +48,6 @@
   OpenCoreVault.c
 
 [Packages]
-  EfiPkg/EfiPkg.dec
   OpenCorePkg/OpenCorePkg.dec
   OpenCorePkg/OpenCorePkg.dec
   MacInfoPkg/MacInfoPkg.dec

@@ -14,7 +14,7 @@
 
 #include <Uefi.h>
 
-#include <ProcessorInfo.h>
+#include <IndustryStandard/ProcessorInfo.h>
 #include <IndustryStandard/Pci.h>
 
 #include <Guid/ApplePlatformInfo.h>

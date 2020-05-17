@@ -583,7 +583,6 @@ patches is welcome. Please do follow
 \href{https://github.com/tianocore/tianocore.github.io/wiki/Code-Style-C}{EDK II C Codestyle}.
 
 Required external package dependencies include
-\href{https://github.com/acidanthera/EfiPkg}{EfiPkg} and
 \href{https://github.com/acidanthera/MacInfoPkg}{MacInfoPkg}.
 
 To compile with \texttt{XCODE5}, besides \href{https://developer.apple.com/xcode}{Xcode},
@@ -596,7 +595,6 @@ command sequence may look as follows:
 git clone https://github.com/acidanthera/audk UDK
 cd UDK
 git clone https://github.com/acidanthera/DuetPkg
-git clone https://github.com/acidanthera/EfiPkg
 git clone https://github.com/acidanthera/MacInfoPkg
 git clone https://github.com/acidanthera/OpenCorePkg
 source edksetup.sh
@@ -617,11 +615,14 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -I/UefiPackages/MdeModulePkg/Include
 -I/UefiPackages/MdeModulePkg/Include/X64
 -I/UefiPackages/DuetPkg/Include
--I/UefiPackages/EfiPkg
--I/UefiPackages/EfiPkg/Include
--I/UefiPackages/EfiPkg/Include/X64
 -I/UefiPackages/AppleSupportPkg/Include
--I/UefiPackages/OpenCorePkg/Include
+-I/UefiPackages/OpenCorePkg/Include/AMI
+-I/UefiPackages/OpenCorePkg/Include/Acidanthera
+-I/UefiPackages/OpenCorePkg/Include/Apple
+-I/UefiPackages/OpenCorePkg/Include/Generic
+-I/UefiPackages/OpenCorePkg/Include/Intel
+-I/UefiPackages/OpenCorePkg/Include/Microsoft
+-I/UefiPackages/OpenCorePkg/Include/VMware
 -I/UefiPackages/OvmfPkg/Include
 -I/UefiPackages/MacInfoPkg/Include
 -I/UefiPackages/UefiCpuPkg/Include
@@ -660,8 +661,7 @@ before sending the patch to ensure no double work and to avoid your patch being 
 
 \textbf{Organisation}. The codebase is structured in multiple repositories
 which contain separate EDK II packages. \texttt{AppleSupportPkg} and \texttt{OpenCorePkg}
-are primary packages, and \texttt{EfiPkg}, \texttt{MacInfoPkg.dsc})
-are dependent packages.
+are primary packages and \texttt{MacInfoPkg.dsc} is a dependent package.
 \begin{itemize}
 \tightlist
 \item Whenever changes are required in multiple repositories, separate pull requests should
@@ -3323,7 +3323,7 @@ troubleshooting:
 
   In 10.15 debugging support was mostly broken before 10.15.4 due to some
   kind of refactoring and introduction of a
-  \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleDebugLog.h}{new debug protocol}.
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/Protocol/AppleDebugLog.h}{new debug protocol}.
   Some of the arguments and their values below may not be valid for versions prior
   to 10.15.4. The list of known arguments is covered below:
 
@@ -3454,7 +3454,7 @@ are written to three select destinations:
 \item
   \href{https://www.dmtf.org/standards/smbios}{SMBIOS}
 \item
-  \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/DataHub.h}{Data
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Intel/Protocol/DataHub.h}{Data
   Hub}
 \item
   NVRAM
@@ -3876,7 +3876,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   compatibility. This value could look like
   \texttt{MM71.88Z.0234.B00.1809171422} in older firmwares, and is
   described in
-  \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Guid/BiosId.h}{BiosId.h}.
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/Guid/BiosId.h}{BiosId.h}.
   In newer firmwares it should look like \texttt{236.0.0.0.0} or
   \texttt{220.230.16.0.0\ (iBridge:\ 16.16.2542.0.0,0)}. iBridge version
   is read from \texttt{BridgeOSVersion} variable, and is only present on
@@ -4069,7 +4069,7 @@ Apple ROM Version
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE133} -
   \texttt{PlatformFeature}\\
   \textbf{Description}: Platform features bitmask. Refer to
-  \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
   for more details. Use \texttt{0xFFFFFFFF} value to not provide this table.
 \item
   \texttt{SmcVersion}\\
@@ -4085,7 +4085,7 @@ Apple ROM Version
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE128} -
   \texttt{FirmwareFeatures} and \texttt{ExtendedFirmwareFeatures}\\
   \textbf{Description}: 64-bit firmware features bitmask. Refer to
-  \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
   for more details. Lower 32 bits match \texttt{FirmwareFeatures}. Upper
   64 bits match \texttt{ExtendedFirmwareFeatures}.
 \item
@@ -4097,7 +4097,7 @@ Apple ROM Version
   \texttt{ExtendedFirmwareFeaturesMask}\\
   \textbf{Description}: Supported bits of extended firmware features
   bitmask. Refer to
-  \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
   for more details. Lower 32 bits match \texttt{FirmwareFeaturesMask}.
   Upper 64 bits match \texttt{ExtendedFirmwareFeaturesMask}.
 \item
@@ -4388,10 +4388,10 @@ functioning. Feature highlights:
     \texttt{AXEFIAudio} for macOS bootloader audio files.
   \item Audio localisation is a two letter language code (e.g. \texttt{en})
   with an exception for Chinese, Spanish, and Portuguese. Refer to
-  \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_LANGUAGE\_CODE} definition}
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_LANGUAGE\_CODE} definition}
   for the list of all supported localisations.
   \item Audio path is the base filename corresponding to a file identifier. For macOS bootloader audio paths refer to
-  \href{https://github.com/acidanthera/EfiPkg/blob/master/Include/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_AUDIO\_FILE} definition}.
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_AUDIO\_FILE} definition}.
   For OpenCore audio paths refer to
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}.
   The only exception is OpenCore boot chime file, which is \texttt{OCEFIAudio\_VoiceOver\_Boot.wav}.

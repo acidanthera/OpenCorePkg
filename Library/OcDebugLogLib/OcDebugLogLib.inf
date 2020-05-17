@@ -27,7 +27,6 @@
 # VALID_ARCHITECTURES = IA32 X64 IPF EBC
 
 [Packages]
-  EfiPkg/EfiPkg.dec
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
   UefiCpuPkg/UefiCpuPkg.dec

@@ -36,7 +36,6 @@
 [Packages]
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
-  EfiPkg/EfiPkg.dec
 
 [Guids]
   gAppleBootVariableGuid       ## CONSUMES ## PRODUCES

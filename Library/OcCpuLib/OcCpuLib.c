@@ -22,7 +22,7 @@
 #include <Library/DebugLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-#include <ProcessorInfo.h>
+#include <IndustryStandard/ProcessorInfo.h>
 #include <Register/Microcode.h>
 #include <Register/Msr.h>
 #include <Register/Intel/Msr/SandyBridgeMsr.h>

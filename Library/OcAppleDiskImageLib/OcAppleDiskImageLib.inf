@@ -20,7 +20,6 @@
   LIBRARY_CLASS  = OcAppleDiskImageLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
 
 [Packages]
-  EfiPkg/EfiPkg.dec
   MdePkg/MdePkg.dec
   OpenCorePkg/OpenCorePkg.dec
 

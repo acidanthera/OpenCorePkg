@@ -23,7 +23,6 @@
 
 [Packages]
   MdePkg/MdePkg.dec
-  EfiPkg/EfiPkg.dec
   OpenCorePkg/OpenCorePkg.dec
 
 [LibraryClasses]

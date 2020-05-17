@@ -42,7 +42,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/GraphicsOutput.h>
 #include <Protocol/SimpleTextInEx.h>
 #include <Protocol/SimpleFileSystem.h>
-#include <ProcessorInfo.h>
+#include <IndustryStandard/ProcessorInfo.h>
 
 STATIC GUID SystemUUID = {0x5BC82C38, 0x4DB6, 0x4883, {0x85, 0x2E, 0xE7, 0x8D, 0x78, 0x0A, 0x6F, 0xE6}};
 STATIC UINT8 BoardRevision = 1;

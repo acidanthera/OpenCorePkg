@@ -35,7 +35,6 @@
   CleanNvram.c
 
 [Packages]
-  EfiPkg/EfiPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   OpenCorePkg/OpenCorePkg.dec

@@ -51,7 +51,6 @@
 [Packages]
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
-  EfiPkg/EfiPkg.dec
   OpenCorePkg/OpenCorePkg.dec
 
 [LibraryClasses]

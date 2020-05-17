@@ -27,7 +27,6 @@
 #
 
 [Packages]
-  EfiPkg/EfiPkg.dec
   MdePkg/MdePkg.dec
   OpenCorePkg/OpenCorePkg.dec
 

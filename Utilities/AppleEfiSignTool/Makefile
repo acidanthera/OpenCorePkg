@@ -1,5 +1,5 @@
 CC ?= gcc
-CFLAGS=-c -Wall -Wextra -pedantic -O3 -I../../Include -I../../IncludeUser -include ../../IncludeUser/UefiCompat.h
+CFLAGS=-c -Wall -Wextra -pedantic -O3 -I../../Include/Acidanthera -I../../IncludeUser -include ../../IncludeUser/UefiCompat.h
 OBJS=AppleEfiBinary.o Sha2.o BigNumWordMul64.o BigNumPrimitives.o BigNumMontgomery.o RsaDigitalSign.o SecureMem.o OcAppleKeysLib.o main.o
 
 all: AppleEfiSignTool

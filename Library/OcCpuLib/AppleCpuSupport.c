@@ -18,7 +18,7 @@
 #include <Library/BaseLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcStringLib.h>
-#include <ProcessorInfo.h>
+#include <IndustryStandard/ProcessorInfo.h>
 
 #include "OcCpuInternals.h"
 

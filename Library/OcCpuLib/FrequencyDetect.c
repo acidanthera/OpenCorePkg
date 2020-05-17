@@ -26,7 +26,7 @@
 #include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
-#include <ProcessorInfo.h>
+#include <IndustryStandard/ProcessorInfo.h>
 #include <Register/Msr.h>
 
 #include "OcCpuInternals.h"

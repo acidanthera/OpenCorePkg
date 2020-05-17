@@ -35,7 +35,6 @@
   OcTimerLib.c
 
 [Packages]
-  EfiPkg/EfiPkg.dec
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
   UefiCpuPkg/UefiCpuPkg.dec

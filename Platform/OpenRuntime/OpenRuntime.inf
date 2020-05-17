@@ -22,7 +22,6 @@
 
 [Packages]
   OpenCorePkg/OpenCorePkg.dec
-  EfiPkg/EfiPkg.dec
   MdeModulePkg/MdeModulePkg.dec
   MdePkg/MdePkg.dec
   UefiCpuPkg/UefiCpuPkg.dec

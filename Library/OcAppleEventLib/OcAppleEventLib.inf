@@ -41,7 +41,6 @@
 [Packages]
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
-  EfiPkg/EfiPkg.dec
 
 [Protocols]
   gAppleEventProtocolGuid             ## SOMETIMES_PRODUCES

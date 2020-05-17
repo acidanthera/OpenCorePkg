@@ -45,7 +45,6 @@
   Views/BootPicker.c
 
 [Packages]
-  EfiPkg/EfiPkg.dec
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
