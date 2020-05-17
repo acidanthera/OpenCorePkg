@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Mon May 11 17:11:58 2020
-%DIF ADD ../Configuration.tex        Sun May 17 01:56:11 2020
+%DIF ADD ../Configuration.tex        Sun May 17 03:32:30 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -181,20 +181,32 @@ operating system. It is to be read as the official clarification of expected
 OpenCore behaviour. All deviations, if found in published OpenCore releases,
 shall be considered documentation or implementation bugs, and are requested to be
 reported through \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
-All other sources or translations of this document are unofficial and may contain errors.
+\DIFdelbegin \DIFdel{All other sources or translations of this document are unofficial and may contain errors.
+}\DIFdelend 
 
 This document is structured as a specification, and is not meant to provide a step by
-step algorithm for configuring end-user board support package (BSP). Any third-party
-articles, tools, books, etc., providing such material are prone to their authors'
-preferences, tastes, this document misinterpretation, and essential obsolescence.
-In case you still use these sources, for example,
-\DIFdelbegin %DIFDELCMD < \href{https://dortania.github.io/OpenCore-Desktop-Guide}{Opencore Desktop Guide}
+step algorithm for configuring end-user board support package (BSP). \DIFdelbegin \DIFdel{Any third-party
+}\DIFdelend \DIFaddbegin \DIFadd{The intended audience
+of the document are programmers and engineers with basic understanding of macOS internals
+and UEFI functioning. For these reasons this document is available exclusively in English,
+and all other sources or translations of this document are unofficial and may
+contain errors.
+}
+
+\DIFadd{Third-party }\DIFaddend articles, tools, books, \DIFdelbegin \DIFdel{etc. , providing such material }\DIFdelend \DIFaddbegin \DIFadd{and alike may be more useful for a wider audience as
+they could provide guide-like material. However, they }\DIFaddend are prone to their authors' preferences,
+tastes, this document misinterpretation, and essential obsolescence.
+In case you \DIFdelbegin \DIFdel{still }\DIFdelend use these sources, for example, \DIFdelbegin %DIFDELCMD < \href{https://dortania.github.io/OpenCore-Desktop-Guide}{Opencore Desktop Guide}
 %DIFDELCMD < %%%
-\DIFdelend \DIFaddbegin \href{https://dortania.github.io/OpenCore-Desktop-Guide}{OpenCore Desktop Guide}
-\DIFaddend (\href{https://dortania.github.io/getting-started}{parent link}),
-please ensure following this document for every made decision and judging its consequences.
-Regardless of the sources used you are required to fully understand every dedicated OpenCore
-configuration option and concept prior to reporting any issues in
+\DIFdel{(}%DIFDELCMD < \href{https://dortania.github.io/getting-started}{parent link}%%%
+\DIFdel{)}\DIFdelend \DIFaddbegin \href{https://dortania.github.io}{Dortania}\DIFadd{'s
+}\href{https://dortania.github.io/OpenCore-Desktop-Guide}{OpenCore Desktop Guide}
+\DIFadd{and }\href{https://dortania.github.io/getting-started}{related material}\DIFaddend ,
+please ensure \DIFdelbegin \DIFdel{following }\DIFdelend \DIFaddbegin \DIFadd{to follow }\DIFaddend this document for every made decision and \DIFdelbegin \DIFdel{judging }\DIFdelend \DIFaddbegin \DIFadd{judge }\DIFaddend its consequences.
+\DIFdelbegin \DIFdel{Regardless }\DIFdelend \DIFaddbegin 
+
+\DIFadd{Be warned that regardless }\DIFaddend of the sources used you are required to fully understand every
+dedicated OpenCore configuration option and concept prior to reporting any issues in
 \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
 
 \subsection{Generic Terms}\label{generic-terms}
@@ -586,7 +598,7 @@ be relied upon, and all fields must be properly specified in the configuration.
     child [missing] {}
     child [missing] {}
     child [missing] {}
-    child { node [optional] {boot}} 
+    child { node [optional] {boot}}
     child { node [optional] {nvram.plist}}
     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
     child { node [optional] {panic-YYYY-MM-DD-HHMMSS.txt}}
@@ -893,7 +905,10 @@ is available, and inline for \texttt{static} variables and functions.
 \href{https://github.com/acidanthera/bugtracker/issues/483}{acidanthera/bugtracker\#483}.
 \end{itemize}
 
-\textbf{Debugging}. The codebase incorporates EDK II debugging and few custom features to improve the experience.
+\DIFdelbegin \textbf{\DIFdel{Debugging}}%DIFAUXCMD
+\DIFdel{. }\DIFdelend \DIFaddbegin \subsection{\DIFadd{Debugging}}\label{configuration-debug}
+
+\DIFaddend The codebase incorporates EDK II debugging and few custom features to improve the experience.
 \begin{itemize}
 \tightlist
 \item Use module prefixes, 2-5 letters followed by a colon (\texttt{:}), for debug messages. For \texttt{OpenCorePkg}
@@ -913,7 +928,11 @@ for extensive messages that should not appear in NVRAM log that is heavily limit
 \texttt{DEBUG\_WARN} for all other human visible errors, \texttt{RELEASE} builds included.
 \end{itemize}
 
-\section{ACPI}\label{acpi}
+\DIFaddbegin \DIFadd{When trying to find the problematic change it is useful to rely on
+}\href{https://git-scm.com/docs/git-bisect}{\texttt{git-bisect}} \DIFadd{functionality.
+}
+
+\DIFaddend \section{ACPI}\label{acpi}
 
 \subsection{Introduction}\label{acpiintro}
 
@@ -929,7 +948,30 @@ To compile and disassemble ACPI tables \href{https://github.com/acpica/acpica}{i
 can be used developed by \href{https://www.acpica.org}{ACPICA}. GUI front-end to iASL compiler
 can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Acidanthera/MaciASL}.
 
-\subsection{Properties}\label{acpiprops}
+\DIFaddbegin \DIFadd{ACPI changes apply globally (to every operating system) with the following effective order:
+}
+
+\begin{itemize}
+\tightlist
+\item \texttt{\DIFadd{Patch}} \DIFadd{is processed.
+}\item \texttt{\DIFadd{Delete}} \DIFadd{is processed.
+}\item \texttt{\DIFadd{Add}} \DIFadd{is processed.
+}\item \texttt{\DIFadd{Quirks}} \DIFadd{are processed.
+}\end{itemize}
+
+\DIFadd{Applying the changes globally resolves the problems of incorrect operating system
+detection, which is not possible before the operating system boots according to
+the ACPI specification, operating system chainloading, and harder ACPI debugging.
+For this reason it may be required to carefully use }\texttt{\DIFadd{\_OSI}} \DIFadd{method when
+writing the changes.
+}
+
+\DIFadd{Applying the patches early makes it possible to write so called ``proxy'' patches,
+where the original method is patched in the original table and is implemented in
+the patched table.
+}
+
+\DIFaddend \subsection{Properties}\label{acpiprops}
 
 \begin{enumerate}
 \item
@@ -1192,7 +1234,13 @@ Several cases, where patching actually does make sense, include:
 Tianocore \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/IndustryStandard/AcpiAml.h}{AcpiAml.h}
 source file may help understanding ACPI opcodes.
 
-\subsection{Quirks Properties}\label{acpipropsquirks}
+\DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: Patches of different }\texttt{\DIFadd{Find}} \DIFadd{and }\texttt{\DIFadd{Replace}} \DIFadd{lengths
+are unsupported as they may corrupt ACPI tables and make you system unstable
+due to area relocation. If you need such changes you may utilities ``proxy''
+patching or }\texttt{\DIFadd{NOP}} \DIFadd{the remaining area.
+}
+
+\DIFaddend \subsection{Quirks Properties}\label{acpipropsquirks}
 
 \begin{enumerate}
 
@@ -2375,8 +2423,8 @@ may contain arguments compromising the operating system, which is undesired once
 is enabled.
 }
 
-\emph{\DIFadd{Note 3}}\DIFadd{: Some operating systems, namely Windows, will create their boot option and 
-mark it as top most upon first boot or after NVRAM Reset. When this happens default boot 
+\emph{\DIFadd{Note 3}}\DIFadd{: Some operating systems, namely Windows, will create their boot option and
+mark it as top most upon first boot or after NVRAM Reset. When this happens default boot
 entry choice will update till next manual reconfiguration.
 }
 
@@ -3768,7 +3816,9 @@ be used. Version with macOS specific enhancements can be downloaded from
   It is dangerous to use Apple in SMBIOS vendor fields for reasons given
   in \texttt{SystemManufacturer} description. However, certain firmwares
   may not provide valid values otherwise, which could break some software.
-\item
+\DIFaddbegin 
+
+\DIFaddend \item
   \texttt{AdviseWindows}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -4790,7 +4840,7 @@ functioning. Feature highlights:
   \texttt{OCAU: 2/3 PciRoot(0x0)/Pci(0x3,0x0)/VenMsg(<redacted>,00000000) (\textbf{1 outputs})}\\
   \texttt{OCAU: 3/3 PciRoot(0x0)/Pci(0x1B,0x0)/VenMsg(<redacted>,02000000) (\textbf{7 outputs})}
 
-  The quickest way to find the right port is to bruteforce the values from \texttt{0} to \texttt{N - 1}. 
+  The quickest way to find the right port is to bruteforce the values from \texttt{0} to \texttt{N - 1}.
 
 \item
   \texttt{AudioSupport}\\
@@ -5761,7 +5811,22 @@ you will need \texttt{debug=0x8} boot argument.
   early debug messages.
 
 \item
-  \textbf{How to customise boot entries?}
+  \DIFaddbegin \textbf{\DIFadd{How to debug macOS boot failure?}}
+
+  \begin{itemize}
+  \tightlist
+  \item \DIFadd{Refer to }\texttt{\DIFadd{boot-args}} \DIFadd{values like }\texttt{\DIFadd{debug=0x100}}\DIFadd{, }\texttt{\DIFadd{keepsyms=1}}\DIFadd{,
+    }\texttt{\DIFadd{-v}}\DIFadd{, and similar.
+  }\item \DIFadd{Do not forget about }\texttt{\DIFadd{AppleDebug}} \DIFadd{and }\texttt{\DIFadd{ApplePanic}} \DIFadd{properties.
+  }\item \DIFadd{Take care of }\texttt{\DIFadd{Booter}}\DIFadd{, }\texttt{\DIFadd{Kernel}}\DIFadd{, and }\texttt{\DIFadd{UEFI}} \DIFadd{quirks.
+  }\item \DIFadd{Consider using serial port to inspect early kernel boot failures. For this you may
+    need }\texttt{\DIFadd{debug=0x108}}\DIFadd{, }\texttt{\DIFadd{serial=5}}\DIFadd{, and }\texttt{\DIFadd{msgbuf=1048576}} \DIFadd{arguments.
+    Refer to the patches in Sample.plist when dying before serial init.
+  }\item \DIFadd{Always read the logs carefully.
+  }\end{itemize}
+
+\item
+  \DIFaddend \textbf{How to customise boot entries?}
 
   OpenCore follows standard Apple Bless model and extracts the entry name
   from \texttt{.contentDetails} and \texttt{.disk\_label.contentDetails} files in the
@@ -5810,8 +5875,10 @@ you will need \texttt{debug=0x8} boot argument.
 
   Sure, most relatively modern Mac models including \texttt{MacPro5,1} and virtual machines
   are fully supported. Even though there are little to none specific details relevant to
-  Mac hardware, some ongoing instructions can be found in
-  \href{https://github.com/acidanthera/bugtracker/issues/377}{acidanthera/bugtracker\#377}.
+  Mac hardware, some ongoing instructions can be found \DIFdelbegin \DIFdel{in
+  }%DIFDELCMD < \href{https://github.com/acidanthera/bugtracker/issues/377}{acidanthera/bugtracker\#377}%%%
+\DIFdelend \DIFaddbegin \DIFadd{on
+  }\href{https://forums.macrumors.com/threads/opencore-on-the-mac-pro.2207814}{MacRumors.com}\DIFaddend .
 
 \item
   \textbf{Why do Find\&Replace patches must equal in length?}
@@ -5820,72 +5887,49 @@ you will need \texttt{debug=0x8} boot argument.
   \href{https://en.wikipedia.org/w/index.php?title=Relative_addressing}{relative addressing}.
   For ACPI code this is risky, and is technically equivalent to ACPI table replacement,
   thus not implemented. More detailed explanation can be found on
-  \href{https://applelife.ru/posts/819790}{AppleLife.ru}.
-\DIFdelbegin %DIFDELCMD < 
+  \href{https://applelife.ru/posts/819790}{AppleLife.ru} \DIFaddbegin \DIFadd{or in the ACPI section of this document}\DIFaddend .
 
-%DIFDELCMD < \item
-\item%DIFAUXCMD
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{How can I migrate from }\texttt{\DIFdel{AptioMemoryFix}}%DIFAUXCMD
-\DIFdel{?}}
-%DIFAUXCMD
-%DIFDELCMD < 
+\item
+  \textbf{How can I \DIFdelbegin \DIFdel{migrate from }\texttt{\DIFdel{AptioMemoryFix}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{decide which }\texttt{\DIFadd{Booter}} \DIFadd{quirks to use}\DIFaddend ?}
 
-%DIFDELCMD <   %%%
-\DIFdel{Behaviour similar to that of }\texttt{\DIFdel{AptioMemoryFix}} %DIFAUXCMD
-\DIFdel{can be obtained by
+  \DIFdelbegin \DIFdel{Behaviour similar to that of }\DIFdelend \DIFaddbegin \DIFadd{These quirks originate from }\DIFaddend \texttt{AptioMemoryFix} \DIFdelbegin \DIFdel{can be obtained by
   installing }\texttt{\DIFdel{OpenRuntime}} %DIFAUXCMD
-\DIFdel{driver and enabling the quirks listed below.
-  Please note, that most of these are not necessary to be enabled. Refer to their
+\DIFdel{driver and enabling the quirks listed below. Please note, that most of these are not necessary to be enabled. Refer to their
   individual descriptions in this document for more details.
-  }%DIFDELCMD < \begin{itemize}
-\begin{itemize}%DIFAUXCMD
-%DIFDELCMD <   \tightlist
-%DIFDELCMD <   \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{ProvideConsoleGop}} %DIFAUXCMD
-\DIFdel{(UEFI quirk)
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{AvoidRuntimeDefrag}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{DiscardHibernateMap}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{EnableSafeModeSlide}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{EnableWriteUnprotector}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{ForceExitBootServices}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{ProtectMemoryRegions}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{ProvideCustomSlide}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{SetupVirtualMap}}
-  %DIFAUXCMD
-%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{ShrinkMemoryMap}}
-  %DIFAUXCMD
+  }\DIFdelend \DIFaddbegin \DIFadd{driver but provide a wider
+  set of changes specific to modern systems. Note, that }\texttt{\DIFadd{OpenRuntime}}
+  \DIFadd{driver is required for most configurations. To get a configuration similar
+  to }\texttt{\DIFadd{AptioMemoryFix}} \DIFadd{you may try enabling the following set of quirks:
+  }\DIFaddend \begin{itemize}
+  \tightlist
+  \item \texttt{ProvideConsoleGop} (UEFI quirk)
+  \item \texttt{AvoidRuntimeDefrag}
+  \item \texttt{DiscardHibernateMap}
+  \item \texttt{EnableSafeModeSlide}
+  \item \texttt{EnableWriteUnprotector}
+  \item \texttt{ForceExitBootServices}
+  \item \texttt{ProtectMemoryRegions}
+  \item \texttt{ProvideCustomSlide}
+  \item \texttt{\DIFdelbegin \DIFdel{SetupVirtualMap}\DIFdelend \DIFaddbegin \DIFadd{RebuildAppleMemoryMap}\DIFaddend }
+  \item \texttt{\DIFdelbegin \DIFdel{ShrinkMemoryMap}\DIFdelend \DIFaddbegin \DIFadd{SetupVirtualMap}\DIFaddend }
+  \end{itemize}
+\DIFaddbegin 
 
-\end{itemize}%DIFAUXCMD
-%DIFDELCMD < \end{itemize}
-%DIFDELCMD < %%%
-\DIFdelend 
+  \DIFadd{However, as of today such set is strongly discouraged as some of these quirks
+  are not necessary to be enabled or need additional quirks. For example,
+  }\texttt{\DIFadd{DevirtualiseMmio}} \DIFadd{and }\texttt{\DIFadd{ProtectUefiServices}} \DIFadd{are often required,
+  while }\texttt{\DIFadd{DiscardHibernateMap}} \DIFadd{and }\texttt{\DIFadd{ForceExitBootServices}} \DIFadd{are rarely
+  necessary.
+}
+
+  \DIFadd{Unfortunately for some quirks like }\texttt{\DIFadd{RebuildAppleMemoryMap}}\DIFadd{,
+  }\texttt{\DIFadd{EnableWriteUnprotector}}\DIFadd{, }\texttt{\DIFadd{ProtectMemoryRegions}}\DIFadd{,
+  }\texttt{\DIFadd{RebuildAppleMemoryMap}}\DIFadd{, }\texttt{\DIFadd{SetupVirtualMap}}\DIFadd{,
+  and }\texttt{\DIFadd{SyncRuntimePermissions}} \DIFadd{there is no definite approach even on similar
+  systems, so trying all their combinations may be required for optimal setup.
+  Refer to individual quirk descriptions in this document for more details.
+}\DIFaddend 
 
 \end{enumerate}
 
