@@ -27,6 +27,7 @@ import sys
 import time
 import xml.etree.ElementTree
 import yaml
+import zlib
 
 try:
   from urllib.request import build_opener
@@ -80,10 +81,12 @@ def num_to_base34(num):
       str    = apple_base34[r] + str
     return str.zfill(3)
 
-def load_products(path='Products.json'):
+def load_products(path='Products.zjson'):
   try:
     with open(path, 'r') as fh:
-      if path.endswith('.json'):
+      if path.endswith('.zjson'):
+        db = json.loads(zlib.decompress(fh.read()))
+      elif path.endswith('.json'):
         db = json.load(fh)
       else:
         db = yaml.safe_load(fh)
@@ -108,8 +111,10 @@ def load_products(path='Products.json'):
 
 def save_database(database, path):
   # We are not using yaml for speed reasons.
+  path = path.replace('.yaml', '.zjson')
+  path = path.replace('.json', '.zjson')
   with open(path, 'w') as fh:
-    json.dump(database, fh, indent=0, separators=(',', ':'), sort_keys=True)
+    fh.write(zlib.compress(json.dumps(database, fh, indent=0, separators=(',', ':'), sort_keys=True), 9))
 
 def store_product(database, model, name, exception, status, date = None):
   database[model] = {
@@ -230,7 +235,7 @@ def main():
   parser.add_argument('--retention', type=int, default=90, help='Check products older than N days')
   parser.add_argument('--savenum', type=int, default=2048, help='Save every N products while invalid')
   parser.add_argument('--merge', type=str, default=None, help='Merge specified database DB into main')
-  parser.add_argument('--database', type=str, default='Products.json', help='Use specified database file')
+  parser.add_argument('--database', type=str, default='Products.zjson', help='Use specified database file')
 
   args = parser.parse_args()
 
