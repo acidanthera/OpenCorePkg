@@ -281,7 +281,7 @@ OcKeyMapFlush (
       );
 
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCAK: GetKeyStrokes failure - %r\n", Status));
+      DEBUG ((DEBUG_ERROR, "OCKM: GetKeyStrokes failure - %r\n", Status));
       break;
     }
 

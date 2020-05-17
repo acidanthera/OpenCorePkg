@@ -118,7 +118,7 @@ InternalSwapBlockData (
              &BlockSectorTop
              );
   if (Result || BlockSectorTop > SectorCount) {
-    DEBUG ((DEBUG_ERROR, "OCDMG: Block sectors exceed DMG sectors %lu %lu\n", BlockSectorTop, SectorCount));
+    DEBUG ((DEBUG_ERROR, "OCDI: Block sectors exceed DMG sectors %lu %lu\n", BlockSectorTop, SectorCount));
     return FALSE;
   }
 

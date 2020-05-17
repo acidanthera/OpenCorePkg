@@ -131,12 +131,12 @@ OcStorageInitializeVault (
   )
 {
   if (Signature != NULL && Vault == NULL) {
-    DEBUG ((DEBUG_ERROR, "OCS: Missing vault with signature\n"));
+    DEBUG ((DEBUG_ERROR, "OCST: Missing vault with signature\n"));
     return EFI_SECURITY_VIOLATION;
   }
 
   if (Vault == NULL) {
-    DEBUG ((DEBUG_INFO, "OCS: Missing vault data, ignoring...\n"));
+    DEBUG ((DEBUG_INFO, "OCST: Missing vault data, ignoring...\n"));
     return EFI_SUCCESS;
   }
 
@@ -144,7 +144,7 @@ OcStorageInitializeVault (
     ASSERT (StorageKey != NULL);
 
     if (!RsaVerifySigDataFromKey (StorageKey, Signature, SignatureSize, Vault, VaultSize, OcSigHashTypeSha256)) {
-      DEBUG ((DEBUG_ERROR, "OCS: Invalid vault signature\n"));
+      DEBUG ((DEBUG_ERROR, "OCST: Invalid vault signature\n"));
       return EFI_SECURITY_VIOLATION;
     }
   }
@@ -152,7 +152,7 @@ OcStorageInitializeVault (
   OC_STORAGE_VAULT_CONSTRUCT (&Context->Vault, sizeof (Context->Vault));
   if (!ParseSerialized (&Context->Vault, &mVaultSchema, Vault, VaultSize)) {
     OC_STORAGE_VAULT_DESTRUCT (&Context->Vault, sizeof (Context->Vault));
-    DEBUG ((DEBUG_ERROR, "OCS: Invalid vault data\n"));
+    DEBUG ((DEBUG_ERROR, "OCST: Invalid vault data\n"));
     return EFI_INVALID_PARAMETER;
   }
 
@@ -160,7 +160,7 @@ OcStorageInitializeVault (
     OC_STORAGE_VAULT_DESTRUCT (&Context->Vault, sizeof (Context->Vault));
     DEBUG ((
       DEBUG_ERROR,
-      "OCS: Unsupported vault data verion %u vs %u\n",
+      "OCST: Unsupported vault data verion %u vs %u\n",
       Context->Vault.Version,
       OC_STORAGE_VAULT_VERSION
       ));
@@ -232,7 +232,7 @@ OcStorageInitFromFs (
 
   Status = FileSystem->OpenVolume (FileSystem, &RootVolume);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCS: FileSystem volume cannot be opened - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCST: FileSystem volume cannot be opened - %r\n", Status));
     return Status;
   }
 
@@ -247,7 +247,7 @@ OcStorageInitFromFs (
   RootVolume->Close (RootVolume);
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCS: Directory %s cannot be opened - %r\n", Path, Status));
+    DEBUG ((DEBUG_INFO, "OCST: Directory %s cannot be opened - %r\n", Path, Status));
     return Status;
   }
 
@@ -279,7 +279,7 @@ OcStorageInitFromFs (
   Status = OcStorageInitializeVault (Context, Vault, DataSize, StorageKey, Signature, SignatureSize);
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCS: Vault init failure %p (%u) - %r\n", Vault, DataSize, Status));
+    DEBUG ((DEBUG_INFO, "OCST: Vault init failure %p (%u) - %r\n", Vault, DataSize, Status));
   }
 
   gBS->InstallProtocolInterface (
@@ -385,7 +385,7 @@ OcStorageReadFileUnicode (
   VaultDigest = OcStorageGetDigest (Context, FilePath);
 
   if (Context->HasVault && VaultDigest == NULL) {
-    DEBUG ((DEBUG_ERROR, "OCS: Aborting %s file access not present in vault\n", FilePath));
+    DEBUG ((DEBUG_ERROR, "OCST: Aborting %s file access not present in vault\n", FilePath));
     return NULL;
   }
 
@@ -430,7 +430,7 @@ OcStorageReadFileUnicode (
   if (VaultDigest != 0) {
     Sha256 (FileDigest, FileBuffer, Size);
     if (CompareMem (FileDigest, VaultDigest, SHA256_DIGEST_SIZE) != 0) {
-      DEBUG ((DEBUG_ERROR, "OCS: Aborting corrupted %s file access\n", FilePath));
+      DEBUG ((DEBUG_ERROR, "OCST: Aborting corrupted %s file access\n", FilePath));
       FreePool (FileBuffer);
       return NULL;
     }

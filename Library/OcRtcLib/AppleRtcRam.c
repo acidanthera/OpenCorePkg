@@ -295,7 +295,7 @@ OcAppleRtcRamInstallProtocol (
   UINTN                   Index;
   UINTN                   RtcBlacklistSize;
 
-  DEBUG ((DEBUG_VERBOSE, "OcAppleRtcRamInstallProtocol\n"));
+  DEBUG ((DEBUG_VERBOSE, "OCRTC: OcAppleRtcRamInstallProtocol\n"));
 
   if (Reinstall) {
     Status = OcUninstallAllProtocolInstances (&gAppleRtcRamProtocolGuid);

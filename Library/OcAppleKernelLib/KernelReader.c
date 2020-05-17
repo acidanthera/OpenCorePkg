@@ -85,7 +85,7 @@ ParseFatArchitecture (
 
   if (OcOverflowMulAddU32 (NumberOfFatArch, sizeof (MACH_FAT_ARCH), sizeof (MACH_FAT_HEADER), &TmpSize)
     || TmpSize > KERNEL_HEADER_SIZE) {
-    DEBUG ((DEBUG_INFO, "Fat kernel invalid arch count %u\n", NumberOfFatArch));
+    DEBUG ((DEBUG_INFO, "OCAK: Fat kernel invalid arch count %u\n", NumberOfFatArch));
     return 0;
   }
 
@@ -106,12 +106,12 @@ ParseFatArchitecture (
       }
 
       if (*Offset == 0) {
-        DEBUG ((DEBUG_INFO, "Fat kernel has 0 offset\n"));
+        DEBUG ((DEBUG_INFO, "OCAK: Fat kernel has 0 offset\n"));
         return 0;
       }
 
       if (OcOverflowAddU32 (*Offset, Size, &TmpSize)) {
-        DEBUG ((DEBUG_INFO, "Fat kernel invalid size %u\n", Size));
+        DEBUG ((DEBUG_INFO, "OCAK: Fat kernel invalid size %u\n", Size));
         return 0;
       }
 
@@ -119,7 +119,7 @@ ParseFatArchitecture (
     }
   }
 
-  DEBUG ((DEBUG_INFO, "Fat kernel has no x86_64 arch\n"));
+  DEBUG ((DEBUG_INFO, "OCAK: Fat kernel has no x86_64 arch\n"));
   return 0;
 }
 
@@ -155,25 +155,25 @@ ParseCompressedHeader (
     || CompressedSize == 0
     || DecompressedSize > OC_COMPRESSION_MAX_LENGTH
     || DecompressedSize < KERNEL_HEADER_SIZE) {
-    DEBUG ((DEBUG_INFO, "Comp kernel invalid comp %u or decomp %u at %08X\n", CompressedSize, DecompressedSize, Offset));
+    DEBUG ((DEBUG_INFO, "OCAK: Comp kernel invalid comp %u or decomp %u at %08X\n", CompressedSize, DecompressedSize, Offset));
     return KernelSize;
   }
 
   Status = ReplaceBuffer (DecompressedSize, Buffer, AllocatedSize, ReservedSize);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "Decomp kernel (%u bytes) cannot be allocated at %08X\n", DecompressedSize, Offset));
+    DEBUG ((DEBUG_INFO, "OCAK: Decomp kernel (%u bytes) cannot be allocated at %08X\n", DecompressedSize, Offset));
     return KernelSize;
   }
 
   CompressedBuffer = AllocatePool (CompressedSize);
   if (CompressedBuffer == NULL) {
-    DEBUG ((DEBUG_INFO, "Comp kernel (%u bytes) cannot be allocated at %08X\n", CompressedSize, Offset));
+    DEBUG ((DEBUG_INFO, "OCAK: Comp kernel (%u bytes) cannot be allocated at %08X\n", CompressedSize, Offset));
     return KernelSize;
   }
 
   Status = GetFileData (File, Offset + sizeof (MACH_COMP_HEADER), CompressedSize, CompressedBuffer);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "Comp kernel (%u bytes) cannot be read at %08X\n", CompressedSize, Offset));
+    DEBUG ((DEBUG_INFO, "OCAK: Comp kernel (%u bytes) cannot be read at %08X\n", CompressedSize, Offset));
     FreePool (CompressedBuffer);
     return KernelSize;
   }
@@ -227,14 +227,14 @@ ReadAppleKernelImage (
 
   while (TRUE) {
     if (!OC_TYPE_ALIGNED (UINT32 , *Buffer)) {
-      DEBUG ((DEBUG_INFO, "Misaligned kernel header %p at %08X\n", *Buffer, Offset));
+      DEBUG ((DEBUG_INFO, "OCAK: Misaligned kernel header %p at %08X\n", *Buffer, Offset));
       return EFI_INVALID_PARAMETER;
     }
     MagicPtr = (UINT32 *)* Buffer;
 
     switch (*MagicPtr) {
       case MACH_HEADER_64_SIGNATURE:
-        DEBUG ((DEBUG_VERBOSE, "Found Mach-O compressed %d offset %u size %u\n", Compressed, Offset, *KernelSize));
+        DEBUG ((DEBUG_VERBOSE, "OCAK: Found Mach-O compressed %d offset %u size %u\n", Compressed, Offset, *KernelSize));
 
         //
         // This is just a valid (formerly) compressed image.
@@ -253,22 +253,22 @@ ReadAppleKernelImage (
           //
           Status = GetFileSize (File, KernelSize);
           if (EFI_ERROR (Status)) {
-            DEBUG ((DEBUG_INFO, "Kernel size cannot be determined - %r\n", Status));
+            DEBUG ((DEBUG_INFO, "OCAK: Kernel size cannot be determined - %r\n", Status));
             return EFI_OUT_OF_RESOURCES;
           }
 
-          DEBUG ((DEBUG_VERBOSE, "Determined kernel size is %u bytes\n", *KernelSize));
+          DEBUG ((DEBUG_VERBOSE, "OCAK: Determined kernel size is %u bytes\n", *KernelSize));
         }
 
         Status = ReplaceBuffer (*KernelSize, Buffer, AllocatedSize, ReservedSize);
         if (EFI_ERROR (Status)) {
-          DEBUG ((DEBUG_INFO, "Kernel (%u bytes) cannot be allocated at %08X\n", *KernelSize, Offset));
+          DEBUG ((DEBUG_INFO, "OCAK: Kernel (%u bytes) cannot be allocated at %08X\n", *KernelSize, Offset));
           return Status;
         }
 
         Status = GetFileData (File, Offset, *KernelSize, *Buffer);
         if (EFI_ERROR (Status)) {
-          DEBUG ((DEBUG_INFO, "Kernel (%u bytes) cannot be read at %08X\n", *KernelSize, Offset));
+          DEBUG ((DEBUG_INFO, "OCAK: Kernel (%u bytes) cannot be read at %08X\n", *KernelSize, Offset));
         }
 
         return Status;
@@ -303,13 +303,13 @@ ReadAppleKernelImage (
         //
         *KernelSize = ParseCompressedHeader (File, Buffer, Offset, AllocatedSize, ReservedSize);
         if (*KernelSize != 0) {
-          DEBUG ((DEBUG_VERBOSE, "Compressed result has %08X magic\n", *(UINT32 *) Buffer));
+          DEBUG ((DEBUG_VERBOSE, "OCAK: Compressed result has %08X magic\n", *(UINT32 *) Buffer));
           continue;
         }
         return EFI_INVALID_PARAMETER;
       }
       default:
-        DEBUG ((Offset > 0 ? DEBUG_INFO : DEBUG_VERBOSE, "Invalid kernel magic %08X at %08X\n", *MagicPtr, Offset));
+        DEBUG ((Offset > 0 ? DEBUG_INFO : DEBUG_VERBOSE, "OCAK: Invalid kernel magic %08X at %08X\n", *MagicPtr, Offset));
         return EFI_INVALID_PARAMETER;
     }
   }

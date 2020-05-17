@@ -537,7 +537,7 @@ PrelinkedInjectKext (
   if (Executable != NULL) {
     ASSERT (ExecutableSize > 0);
     if (!MachoInitializeContext (&ExecutableContext, (UINT8 *)Executable, ExecutableSize)) {
-      DEBUG ((DEBUG_INFO, "OCK: Injected kext %a/%a is not a supported executable\n", BundlePath, ExecutablePath));
+      DEBUG ((DEBUG_INFO, "OCAK: Injected kext %a/%a is not a supported executable\n", BundlePath, ExecutablePath));
       return EFI_INVALID_PARAMETER;
     }
 
@@ -607,7 +607,7 @@ PrelinkedInjectKext (
       }
 
       if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_EXECUTABLE_KEY) == 0) {
-        DEBUG ((DEBUG_ERROR, "OCK: Plist-only kext has %a key\n", INFO_BUNDLE_EXECUTABLE_KEY));
+        DEBUG ((DEBUG_ERROR, "OCAK: Plist-only kext has %a key\n", INFO_BUNDLE_EXECUTABLE_KEY));
         ASSERT (FALSE);
         CpuDeadLoop ();
       }

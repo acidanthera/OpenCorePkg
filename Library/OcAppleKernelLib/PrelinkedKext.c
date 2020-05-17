@@ -478,7 +478,7 @@ InternalInsertPrelinkedKextDependency (
   EFI_STATUS  Status;
 
   if (DependencyIndex >= ARRAY_SIZE (Kext->Dependencies)) {
-    DEBUG ((DEBUG_INFO, "Kext %a has more than %u or more dependencies!", Kext->Identifier, DependencyIndex));
+    DEBUG ((DEBUG_INFO, "OCAK: Kext %a has more than %u or more dependencies!", Kext->Identifier, DependencyIndex));
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -721,7 +721,7 @@ InternalScanPrelinkedKext (
       //
       DependencyKext = InternalCachedPrelinkedKext (Context, DependencyId);
       if (DependencyKext == NULL) {
-        DEBUG ((DEBUG_INFO, "Dependency %a was not found for kext %a\n", DependencyId, Kext->Identifier));
+        DEBUG ((DEBUG_INFO, "OCAK: Dependency %a was not found for kext %a\n", DependencyId, Kext->Identifier));
 
         DependencyKext = InternalGetQuirkDependencyKext (DependencyId, Context);
         if (DependencyKext == NULL) {

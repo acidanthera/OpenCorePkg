@@ -1187,7 +1187,7 @@ InternalStripLoadCommands64 (
     //
     if ((LoadCommand->CommandType == MACH_LOAD_COMMAND_UNIX_THREAD)
      || (LoadCommand->CommandType == MACH_LOAD_COMMAND_MAIN)) {
-      DEBUG ((DEBUG_WARN, "UNIX Thread and Main LCs are unsupported\n"));
+      DEBUG ((DEBUG_WARN, "OCMCO: UNIX Thread and Main LCs are unsupported\n"));
     }
 
     SizeOfLeftCommands -= LoadCommand->CommandSize;

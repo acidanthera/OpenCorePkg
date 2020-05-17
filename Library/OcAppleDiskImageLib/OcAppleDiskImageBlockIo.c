@@ -220,7 +220,7 @@ InternalConstructDmgDevicePath (
     );
 
   UnicodeDevPath = ConvertDevicePathToText ((EFI_DEVICE_PATH_PROTOCOL *)DevPath, FALSE, FALSE);
-  DEBUG ((DEBUG_INFO, "Built DMG DP: %s\n", UnicodeDevPath != NULL ? UnicodeDevPath : L"<NULL>"));
+  DEBUG ((DEBUG_INFO, "OCDI: Built DMG DP: %s\n", UnicodeDevPath != NULL ? UnicodeDevPath : L"<NULL>"));
   if (UnicodeDevPath != NULL) {
     FreePool (UnicodeDevPath);
   }

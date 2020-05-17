@@ -146,7 +146,7 @@ OcBlobAllocate (
 
   Blob = (PRIV_OC_BLOB *) Pointer;
 
-  DEBUG ((DEBUG_VERBOSE, "Allocating %u bytes in blob %p with size %u/%u curr %p\n",
+  DEBUG ((DEBUG_VERBOSE, "OCTPL: Allocating %u bytes in blob %p with size %u/%u curr %p\n",
      Size, Blob, Blob->Size, Blob->MaxSize, Blob->DynValue));
 
   //
@@ -168,7 +168,7 @@ OcBlobAllocate (
     OcFreePointer (&Blob->DynValue, Blob->Size);
     DynValue = AllocatePool (Size);
     if (DynValue == NULL) {
-      DEBUG ((DEBUG_VERBOSE, "Failed to fit %u bytes in OC_BLOB\n", Size));
+      DEBUG ((DEBUG_VERBOSE, "OCTPL: Failed to fit %u bytes in OC_BLOB\n", Size));
       return NULL;
     }
     //

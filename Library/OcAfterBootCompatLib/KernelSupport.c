@@ -595,7 +595,7 @@ AppleMapPrepareKernelJump (
       (VOID*) ImageAddress
       );
     if (KernelEntryVaddr == 0) {
-      RUNTIME_DEBUG ((DEBUG_ERROR, "Kernel entry point was not found!"));
+      RUNTIME_DEBUG ((DEBUG_ERROR, "OCABC: Kernel entry point was not found!"));
       return;
     }
 

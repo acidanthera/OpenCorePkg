@@ -930,7 +930,7 @@ InternalRelocateRelocationIntel64 (
   }
 
   if (InvalidPcRel) {
-    DEBUG ((DEBUG_WARN, "Prelink: Relocation has invalid PC relative flag\n"));
+    DEBUG ((DEBUG_WARN, "OCAK: Relocation has invalid PC relative flag\n"));
   }
 
   ReturnValue = (MachoPreserveRelocationIntel64 (Type) ? 1 : 0);
@@ -1415,7 +1415,7 @@ InternalPrelinkKext64 (
                NumUndefinedSymbols
                );
     if (!Result) {
-      DEBUG ((DEBUG_INFO, "Symbol %s was unresolved for kext %a\n",
+      DEBUG ((DEBUG_INFO, "OCAK: Symbol %s was unresolved for kext %a\n",
         MachoGetSymbolName64 (MachoContext, Symbol), Kext->Identifier));
       return EFI_LOAD_ERROR;
     }
@@ -1425,7 +1425,7 @@ InternalPrelinkKext64 (
   //
   Result = InternalPatchByVtables64 (Context, Kext);
   if (!Result) {
-    DEBUG ((DEBUG_INFO, "Vtable patching failed for kext %a\n", Kext->Identifier));
+    DEBUG ((DEBUG_INFO, "OCAK: Vtable patching failed for kext %a\n", Kext->Identifier));
     return EFI_LOAD_ERROR;
   }
   //

@@ -354,7 +354,7 @@ InternalPatchVtableSymbol (
   //
   Name = ParentEntry->Name;
   if (!MachoSymbolNameIsPureVirtual (Name) && ((Symbol->Value & 1U) != 0)) {
-    DEBUG ((DEBUG_WARN, "Prelink: Invalid VTable symbol\n"));
+    DEBUG ((DEBUG_WARN, "OCAK: Prelink: Invalid VTable symbol\n"));
   }
 
   return TRUE;

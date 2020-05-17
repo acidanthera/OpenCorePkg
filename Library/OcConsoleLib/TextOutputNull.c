@@ -171,7 +171,7 @@ AllocateNullTextOutSystemTable (
     );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "Failed to calculated new system table CRC32 with Status: %r\n", Status));
+    DEBUG ((DEBUG_WARN, "OCC: Failed to calculated new system table CRC32 with Status: %r\n", Status));
     FreePool (NewSystemTable);
     return NULL;
   }

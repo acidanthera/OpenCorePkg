@@ -129,7 +129,7 @@ InternalGetDiskImageBootFile (
 
   if (ChunklistBuffer == NULL) {
     if ((Policy & OC_LOAD_REQUIRE_APPLE_SIGN) != 0) {
-      DEBUG ((DEBUG_WARN, "Missing DMG signature, aborting\n"));
+      DEBUG ((DEBUG_WARN, "OCB: Missing DMG signature, aborting\n"));
       return NULL;
     }
   } else if ((Policy & (OC_LOAD_VERIFY_APPLE_SIGN | OC_LOAD_REQUIRE_TRUSTED_KEY)) != 0) {
@@ -168,7 +168,7 @@ InternalGetDiskImageBootFile (
       }
 
       if (!Result) {
-        DEBUG ((DEBUG_WARN, "DMG is not trusted, aborting\n"));
+        DEBUG ((DEBUG_WARN, "OCB: DMG is not trusted, aborting\n"));
         return NULL;
       }
     }
@@ -178,7 +178,7 @@ InternalGetDiskImageBootFile (
                &ChunklistContext
                );
     if (!Result) {
-      DEBUG ((DEBUG_WARN, "DMG has been altered\n"));
+      DEBUG ((DEBUG_WARN, "OCB: DMG has been altered\n"));
       //
       // FIXME: Warn user instead of aborting when OC_LOAD_REQUIRE_TRUSTED_KEY
       //        is not set.

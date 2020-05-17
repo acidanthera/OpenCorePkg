@@ -59,7 +59,7 @@ OcAppleDiskImageInitializeContext (
   if (FileSize <= sizeof (Trailer)) {
     DEBUG ((
       DEBUG_INFO,
-      "OCBD: DMG file size error: %u/%u\n",
+      "OCDI: DMG file size error: %u/%u\n",
       FileSize,
       (UINT32) sizeof (Trailer)
       ));
@@ -79,7 +79,7 @@ OcAppleDiskImageInitializeContext (
   if (!Result || (Trailer.Signature != SwappedSig)) {
     DEBUG ((
       DEBUG_INFO,
-      "OCBD: DMG trailer error: %d - %Lx/%Lx - %X/%X\n",
+      "OCDI: DMG trailer error: %d - %Lx/%Lx - %X/%X\n",
       Result,
       (UINT64) TrailerOffset,
       (UINT64) FileSize,
@@ -105,7 +105,7 @@ OcAppleDiskImageInitializeContext (
    || (SectorCount == 0)) {
     DEBUG ((
       DEBUG_INFO,
-      "OCBD: DMG context error: %u/%Lu/%Lu/%u/%u\n",
+      "OCDI: DMG context error: %u/%Lu/%Lu/%u/%u\n",
       HeaderSize,
       XmlLength,
       SectorCount,
@@ -115,7 +115,7 @@ OcAppleDiskImageInitializeContext (
   }
 
   if ((SegmentCount != 0) && (SegmentCount != 1)) {
-    DEBUG ((DEBUG_ERROR, "OCBD: Multiple segments are unsupported\n"));
+    DEBUG ((DEBUG_ERROR, "OCDI: Multiple segments are unsupported\n"));
     return FALSE;
   }
 
@@ -125,7 +125,7 @@ OcAppleDiskImageInitializeContext (
              &OffsetTop
              );
   if (Result || (OffsetTop > MAX_UINTN)) {
-    DEBUG ((DEBUG_INFO, "OCBD: DMG sector error: %Lu %Lu\n", SectorCount, OffsetTop));
+    DEBUG ((DEBUG_INFO, "OCDI: DMG sector error: %Lu %Lu\n", SectorCount, OffsetTop));
     return FALSE;
   }
 
@@ -135,7 +135,7 @@ OcAppleDiskImageInitializeContext (
              &OffsetTop
              );
   if (Result || (OffsetTop > TrailerOffset)) {
-    DEBUG ((DEBUG_INFO, "OCBD: DMG xml error: %Lu %Lu %Lu %Lu\n", XmlOffset, XmlLength, OffsetTop, TrailerOffset));
+    DEBUG ((DEBUG_INFO, "OCDI: DMG xml error: %Lu %Lu %Lu %Lu\n", XmlOffset, XmlLength, OffsetTop, TrailerOffset));
     return FALSE;
   }
 
@@ -145,13 +145,13 @@ OcAppleDiskImageInitializeContext (
              &OffsetTop
              );
   if (Result || (OffsetTop > TrailerOffset)) {
-    DEBUG ((DEBUG_INFO, "OCBD: DMG data error: %Lu %Lu %Lu %Lu\n", DataForkOffset, DataForkLength, OffsetTop, TrailerOffset));
+    DEBUG ((DEBUG_INFO, "OCDI: DMG data error: %Lu %Lu %Lu %Lu\n", DataForkOffset, DataForkLength, OffsetTop, TrailerOffset));
     return FALSE;
   }
 
   PlistData = AllocatePool ((UINT32)XmlLength);
   if (PlistData == NULL) {
-    DEBUG ((DEBUG_INFO, "OCBD: DMG plist alloc error: %Lu\n", XmlLength));
+    DEBUG ((DEBUG_INFO, "OCDI: DMG plist alloc error: %Lu\n", XmlLength));
     return FALSE;
   }
 
@@ -162,7 +162,7 @@ OcAppleDiskImageInitializeContext (
              PlistData
              );
   if (!Result) {
-    DEBUG ((DEBUG_INFO, "OCBD: DMG plist read error: %Lu %Lu\n", XmlOffset, XmlLength));
+    DEBUG ((DEBUG_INFO, "OCDI: DMG plist read error: %Lu %Lu\n", XmlOffset, XmlLength));
     FreePool (PlistData);
     return FALSE;
   }
@@ -180,7 +180,7 @@ OcAppleDiskImageInitializeContext (
   FreePool (PlistData);
 
   if (!Result) {
-    DEBUG ((DEBUG_INFO, "OCBD: DMG plist parse error: %Lu %Lu\n", XmlOffset, XmlLength));
+    DEBUG ((DEBUG_INFO, "OCDI: DMG plist parse error: %Lu %Lu\n", XmlOffset, XmlLength));
     return FALSE;
   }
 
@@ -209,19 +209,19 @@ OcAppleDiskImageInitializeFromFile (
 
   Status = GetFileSize (File, &FileSize);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCBD: Failed to retrieve DMG file size\n"));
+    DEBUG ((DEBUG_INFO, "OCDI: Failed to retrieve DMG file size\n"));
     return FALSE;
   }
 
   ExtentTable = OcAppleRamDiskAllocate (FileSize, EfiACPIMemoryNVS);
   if (ExtentTable == NULL) {
-    DEBUG ((DEBUG_INFO, "OCBD: Failed to allocate DMG data\n"));
+    DEBUG ((DEBUG_INFO, "OCDI: Failed to allocate DMG data\n"));
     return FALSE;
   }
 
   Result = OcAppleRamDiskLoadFile (ExtentTable, File, FileSize);
   if (!Result) {
-    DEBUG ((DEBUG_INFO, "OCBD: Failed to load DMG file\n"));
+    DEBUG ((DEBUG_INFO, "OCDI: Failed to load DMG file\n"));
 
     OcAppleRamDiskFree (ExtentTable);
     return FALSE;
@@ -229,7 +229,7 @@ OcAppleDiskImageInitializeFromFile (
 
   Result = OcAppleDiskImageInitializeContext (Context, ExtentTable, FileSize);
   if (!Result) {
-    DEBUG ((DEBUG_INFO, "OCBD: Failed to initialise DMG context\n"));
+    DEBUG ((DEBUG_INFO, "OCDI: Failed to initialise DMG context\n"));
 
     OcAppleRamDiskFree (ExtentTable);
     return FALSE;
@@ -406,7 +406,7 @@ OcAppleDiskImageRead (
       {
         DEBUG ((
           DEBUG_ERROR,
-          "Compression type %x unsupported\n",
+          "OCDI: Compression type %x unsupported\n",
           Chunk->Type
           ));
         return FALSE;

@@ -79,7 +79,7 @@ GetVolumeLabel (
       //
       if (VolumeInfo->VolumeLabel[VolumeLabelSize / sizeof (CHAR16) - 1] != '\0'
         || VolumeLabelSize > OC_MAX_VOLUME_LABEL_SIZE * sizeof (CHAR16)) {
-        DEBUG ((DEBUG_ERROR, "Found unterminated or too long volume label!"));
+        DEBUG ((DEBUG_ERROR, "OCFS: Found unterminated or too long volume label!"));
         FreePool (VolumeInfo);
         return AllocateCopyPool (sizeof (L"INVALID"), L"INVALID");
       } else {

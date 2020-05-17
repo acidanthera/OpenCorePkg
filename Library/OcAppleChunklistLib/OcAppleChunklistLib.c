@@ -178,7 +178,7 @@ OcAppleChunklistVerifyData (
     //
     // Calculate checksum of data and ensure they match.
     //
-    DEBUG ((DEBUG_VERBOSE, "AppleChunklistVerifyData(): Validating chunk %lu of %lu\n",
+    DEBUG ((DEBUG_VERBOSE, "OCCL: Validating chunk %lu of %lu\n",
       (UINT64)Index + 1, (UINT64)Context->ChunkCount));
     Sha256 (ChunkHash, ChunkData, CurrentChunk->Length);
     if (CompareMem (ChunkHash, CurrentChunk->Checksum, SHA256_DIGEST_SIZE) != 0) {

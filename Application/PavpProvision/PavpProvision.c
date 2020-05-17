@@ -119,7 +119,7 @@ ReadProvisioningDataFile (
   // Implement fallback for our firmwares.
   //
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCME: No %g in firmware, using default - %r\n", FvNameGuid, Status));
+    DEBUG ((DEBUG_INFO, "OCPAVP: No %g in firmware, using default - %r\n", FvNameGuid, Status));
 
     if (CompareGuid (&gAppleEpidCertificateFileGuid, FvNameGuid)) {
       *Buffer = AllocateCopyPool (gDefaultAppleEpidCertificateSize, gDefaultAppleEpidCertificate);
@@ -247,7 +247,7 @@ IsBuiltinGpuAvailable (
     );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OC: Failed to find PCI root protocol - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCPAVP: Failed to find PCI root protocol - %r\n", Status));
     return FALSE;
   }
 
@@ -266,7 +266,7 @@ IsBuiltinGpuAvailable (
     );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OC: Failed to read from IGPU device - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCPAVP: Failed to read from IGPU device - %r\n", Status));
     return FALSE;
   }
 
@@ -325,7 +325,7 @@ NeedsFpfProvisioning (
   Hob = NULL;
 #endif
 
-  DEBUG ((DEBUG_INFO, "OC: HOB for FPF is %p\n", Hob));
+  DEBUG ((DEBUG_INFO, "OCPAVP: HOB for FPF is %p\n", Hob));
 
   if (Hob == NULL || Hob->ShouldProvision) {
     DataSize = sizeof (Data);
@@ -604,11 +604,11 @@ OcPerformProvisioning (
   DEBUG ((DEBUG_INFO, "OCPAVP: Done EPID provisioning - %r\n", Status));
 
 #if 0
-  DEBUG ((DEBUG_INFO, "OC: Starting FPF provisioning\n"));
+  DEBUG ((DEBUG_INFO, "OCPAVP: Starting FPF provisioning\n"));
 
   Status = OcPerformFpfProvisioning ();
 
-  DEBUG ((DEBUG_INFO, "OC: Done FPF provisioning - %r\n", Status));
+  DEBUG ((DEBUG_INFO, "OCPAVP: Done FPF provisioning - %r\n", Status));
 #endif
 }
 

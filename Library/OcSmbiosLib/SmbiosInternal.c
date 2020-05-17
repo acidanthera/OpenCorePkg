@@ -111,7 +111,7 @@ SmbiosOverrideString (
   //
   if (Length > SMBIOS_STRING_MAX_LENGTH) {
     Length = SMBIOS_STRING_MAX_LENGTH;
-    DEBUG ((DEBUG_INFO, "SMBIOS truncating '%a' to %u bytes\n", Override, Length));
+    DEBUG ((DEBUG_INFO, "OCMB: SMBIOS truncating '%a' to %u bytes\n", Override, Length));
   }
 
   while (Length > 0 && Override[Length - 1] == ' ') {
@@ -123,7 +123,7 @@ SmbiosOverrideString (
   }
 
   if (EFI_ERROR (SmbiosExtendTable (Table, Length + 1))) {
-    DEBUG ((DEBUG_WARN, "SMBIOS failed to write '%a' with %u byte extension\n", Override, Length + 1));
+    DEBUG ((DEBUG_WARN, "OCSMB: SMBIOS failed to write '%a' with %u byte extension\n", Override, Length + 1));
     return 0;
   }
 
@@ -328,7 +328,7 @@ SmbiosInitialiseStruct (
 
   Status = SmbiosExtendTable (Table, MinLength);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "Failed to extend SMBIOS for table %u - %r", Type, Status));
+    DEBUG ((DEBUG_WARN, "OCSMB: Failed to extend SMBIOS for table %u - %r", Type, Status));
     return Status;
   }
 

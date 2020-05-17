@@ -464,7 +464,7 @@ FvNotificationEvent (
                     (VOID **)&Private->FirmwareVolume2
                     );
     if (EFI_ERROR (Status)) {
-       DEBUG ((DEBUG_INFO, "HandleProtocol FirmwareVolume2 failure: %r", Status));
+       DEBUG ((DEBUG_INFO, "OCFV: HandleProtocol FirmwareVolume2 failure: %r", Status));
     }
 
     //
@@ -483,7 +483,7 @@ FvNotificationEvent (
                     NULL
                     );
     if (EFI_ERROR (Status)) {
-       DEBUG ((DEBUG_INFO, "Install FirmwareVolume protocol failure: %r", Status));
+       DEBUG ((DEBUG_INFO, "OCFV: Install FirmwareVolume protocol failure: %r", Status));
     }
   }
 }
