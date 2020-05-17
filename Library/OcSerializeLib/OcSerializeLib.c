@@ -20,6 +20,27 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 
+STATIC
+CONST CHAR8 *
+mSchemaTypeNames[] = {
+  [OC_SCHEMA_VALUE_BOOLEAN] = "boolean",
+  [OC_SCHEMA_VALUE_INTEGER] = "integer",
+  [OC_SCHEMA_VALUE_DATA] = "data",
+  [OC_SCHEMA_VALUE_STRING] = "string",
+  [OC_SCHEMA_VALUE_MDATA] = "mdata"
+};
+
+CONST CHAR8 *
+GetSchemaTypeName (
+  IN UINT32 Type
+  )
+{
+  if (Type < ARRAY_SIZE (mSchemaTypeNames)) {
+    return mSchemaTypeNames[Type];
+  }
+  return "custom";
+}
+
 OC_SCHEMA *
 LookupConfigSchema (
   OC_SCHEMA      *SortedList,
@@ -74,6 +95,7 @@ ParseSerializedDict (
   UINT32         Index;
   CONST CHAR8    *CurrentKey;
   XML_NODE       *CurrentValue;
+  XML_NODE       *OldValue;
   OC_SCHEMA      *NewSchema;
 
   DictSize = PlistDictChildren (Node);
@@ -105,9 +127,17 @@ ParseSerializedDict (
       continue;
     }
 
+    OldValue = CurrentValue;
     CurrentValue = PlistNodeCast (CurrentValue, NewSchema->Type);
     if (CurrentValue == NULL) {
-      DEBUG ((DEBUG_WARN, "OCS: No match for %a at %u index!\n", CurrentKey, Index));
+      DEBUG ((
+        DEBUG_WARN,
+        "OCS: No type match for %a at %u index, expected type %a got %a!\n",
+        CurrentKey,
+        Index,
+        GetSchemaTypeName (NewSchema->Type),
+        XmlNodeName (OldValue)
+        ));
       continue;
     }
 
@@ -149,7 +179,12 @@ ParseSerializedValue (
   }
 
   if (Result == FALSE) {
-    DEBUG ((DEBUG_WARN, "OCS: Failed to parse %a field of type %u\n", XmlNodeName (Node), Info->Value.Type));
+    DEBUG ((
+      DEBUG_WARN, "OCS: Failed to parse %a field as type %a with <%.16a> contents\n",
+      XmlNodeName (Node),
+      GetSchemaTypeName (Info->Value.Type),
+      XmlNodeContent (Node)
+      ));
   }
 }
 
@@ -181,8 +216,13 @@ ParseSerializedBlob (
   }
 
   if (Result == FALSE) {
-    DEBUG ((DEBUG_WARN, "OCS: Failed to size %a field of type %u\n",
-      XmlNodeName (Node), Info->Blob.Type));
+    DEBUG ((
+      DEBUG_WARN,
+      "OCS: Failed to calculate size of %a field containing <%.16a> as type %u\n",
+      XmlNodeName (Node),
+      XmlNodeContent (Node),
+      GetSchemaTypeName (Info->Blob.Type)
+      ));
     return;
   }
 
@@ -190,8 +230,13 @@ ParseSerializedBlob (
   BlobMemory = OcBlobAllocate (Field, Size, &BlobSize);
 
   if (BlobMemory == NULL) {
-    DEBUG ((DEBUG_INFO, "Failed to allocate %u bytes %a field of type %u\n",
-      Size, XmlNodeName (Node), Info->Blob.Type));
+    DEBUG ((
+      DEBUG_INFO,
+      "OCS: Failed to allocate %u bytes %a field of type %u\n",
+      Size,
+      XmlNodeName (Node),
+      Info->Blob.Type
+      ));
     return;
   }
 
@@ -210,7 +255,13 @@ ParseSerializedBlob (
   }
 
   if (Result == FALSE) {
-    DEBUG ((DEBUG_INFO, "OCS: Failed to parse %a field of type %u\n", XmlNodeName (Node), Info->Blob.Type));
+    DEBUG ((
+      DEBUG_WARN,
+      "OCS: Failed to parse %a field as type %a with <%.16a> contents\n",
+      XmlNodeName (Node),
+      GetSchemaTypeName (Info->Value.Type),
+      XmlNodeContent (Node)
+      ));
   }
 }
 
