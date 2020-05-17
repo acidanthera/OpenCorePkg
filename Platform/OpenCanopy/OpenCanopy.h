@@ -15,6 +15,9 @@
 typedef struct GUI_OBJ_             GUI_OBJ;
 typedef struct GUI_DRAWING_CONTEXT_ GUI_DRAWING_CONTEXT;
 
+struct _BOOT_PICKER_GUI_CONTEXT;
+typedef struct _BOOT_PICKER_GUI_CONTEXT BOOT_PICKER_GUI_CONTEXT;
+
 enum {
   GuiPointerPrimaryDown,
   GuiPointerPrimaryHold,
@@ -26,49 +29,49 @@ typedef UINT8 GUI_PTR_EVENT;
 typedef
 VOID
 (*GUI_OBJ_DRAW)(
-  IN OUT GUI_OBJ              *This,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     VOID                 *Context OPTIONAL,
-  IN     INT64                BaseX,
-  IN     INT64                BaseY,
-  IN     UINT32               OffsetX,
-  IN     UINT32               OffsetY,
-  IN     UINT32               Width,
-  IN     UINT32               Height,
-  IN     BOOLEAN              RequestDraw
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     UINT32                  OffsetX,
+  IN     UINT32                  OffsetY,
+  IN     UINT32                  Width,
+  IN     UINT32                  Height,
+  IN     BOOLEAN                 RequestDraw
   );
 
 typedef
 GUI_OBJ *
 (*GUI_OBJ_PTR_EVENT)(
-  IN OUT GUI_OBJ              *This,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     VOID                 *Context OPTIONAL,
-  IN     GUI_PTR_EVENT        Event,
-  IN     INT64                BaseX,
-  IN     INT64                BaseY,
-  IN     INT64                OffsetX,
-  IN     INT64                OffsetY
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     GUI_PTR_EVENT           Event,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     INT64                   OffsetX,
+  IN     INT64                   OffsetY
   );
 
 typedef
 VOID
 (*GUI_OBJ_KEY_EVENT)(
-  IN OUT GUI_OBJ              *This,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     VOID                 *Context OPTIONAL,
-  IN     INT64                BaseX,
-  IN     INT64                BaseY,
-  IN     INTN                 Key,
-  IN     BOOLEAN              Modifier
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     INTN                    Key,
+  IN     BOOLEAN                 Modifier
   );
 
 typedef
 BOOLEAN
 (*GUI_ANIMATE)(
-  IN     VOID                 *Context OPTIONAL,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     UINT64               CurrentTime
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     UINT64                  CurrentTime
   );
 
 typedef struct {
@@ -105,14 +108,14 @@ typedef struct GUI_SCREEN_CURSOR_ GUI_SCREEN_CURSOR;
 typedef
 CONST GUI_IMAGE *
 (*GUI_CURSOR_GET_IMAGE)(
-  IN OUT GUI_SCREEN_CURSOR  *This,
-  IN     VOID               *Context
+  IN OUT GUI_SCREEN_CURSOR       *This,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context
   );
 
 typedef
 BOOLEAN
 (*GUI_EXIT_LOOP)(
-  IN VOID  *Context
+  IN BOOT_PICKER_GUI_CONTEXT *Context
   );
 
 struct GUI_SCREEN_CURSOR_ {
@@ -162,28 +165,28 @@ GuiLabelToImage (
 
 VOID
 GuiObjDrawDelegate (
-  IN OUT GUI_OBJ              *This,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     VOID                 *Context OPTIONAL,
-  IN     INT64                BaseX,
-  IN     INT64                BaseY,
-  IN     UINT32               OffsetX,
-  IN     UINT32               OffsetY,
-  IN     UINT32               Width,
-  IN     UINT32               Height,
-  IN     BOOLEAN              ParentRedrawn
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     UINT32                  OffsetX,
+  IN     UINT32                  OffsetY,
+  IN     UINT32                  Width,
+  IN     UINT32                  Height,
+  IN     BOOLEAN                 ParentRedrawn
   );
 
 GUI_OBJ *
 GuiObjDelegatePtrEvent (
-  IN OUT GUI_OBJ              *This,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     VOID                 *Context OPTIONAL,
-  IN     GUI_PTR_EVENT        Event,
-  IN     INT64                BaseX,
-  IN     INT64                BaseY,
-  IN     INT64                OffsetX,
-  IN     INT64                OffsetY
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     GUI_PTR_EVENT           Event,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     INT64                   OffsetX,
+  IN     INT64                   OffsetY
   );
 
 BOOLEAN
@@ -230,11 +233,11 @@ GuiRedrawObject (
 
 VOID
 GuiViewInitialize (
-  OUT    GUI_DRAWING_CONTEXT   *DrawContext,
-  IN OUT GUI_OBJ               *Screen,
-  IN     GUI_CURSOR_GET_IMAGE  CursorDraw,
-  IN     GUI_EXIT_LOOP         ExitLoop,
-  IN     VOID                  *GuiContext
+  OUT    GUI_DRAWING_CONTEXT     *DrawContext,
+  IN OUT GUI_OBJ                 *Screen,
+  IN     GUI_CURSOR_GET_IMAGE    CursorDraw,
+  IN     GUI_EXIT_LOOP           ExitLoop,
+  IN     BOOT_PICKER_GUI_CONTEXT *GuiContext
   );
 
 VOID

@@ -446,15 +446,12 @@ InternalContextConstruct (
 
 CONST GUI_IMAGE *
 InternalGetCursorImage (
-  IN OUT GUI_SCREEN_CURSOR  *This,
-  IN     VOID               *Context
+  IN OUT GUI_SCREEN_CURSOR       *This,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context
   )
 {
-  CONST BOOT_PICKER_GUI_CONTEXT *GuiContext;
-
   ASSERT (This != NULL);
   ASSERT (Context != NULL);
 
-  GuiContext = (CONST BOOT_PICKER_GUI_CONTEXT *)Context;
-  return &GuiContext->Icons[ICON_CURSOR][ICON_TYPE_BASE];
+  return &Context->Icons[ICON_CURSOR][ICON_TYPE_BASE];
 }

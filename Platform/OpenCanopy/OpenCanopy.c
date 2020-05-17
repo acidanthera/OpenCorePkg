@@ -167,16 +167,16 @@ GuiClipChildBounds (
 
 VOID
 GuiObjDrawDelegate (
-  IN OUT GUI_OBJ              *This,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     VOID                 *Context OPTIONAL,
-  IN     INT64                BaseX,
-  IN     INT64                BaseY,
-  IN     UINT32               OffsetX,
-  IN     UINT32               OffsetY,
-  IN     UINT32               Width,
-  IN     UINT32               Height,
-  IN     BOOLEAN              RequestDraw
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     UINT32                  OffsetX,
+  IN     UINT32                  OffsetY,
+  IN     UINT32                  Width,
+  IN     UINT32                  Height,
+  IN     BOOLEAN                 RequestDraw
   )
 {
   BOOLEAN       Result;
@@ -243,14 +243,14 @@ GuiObjDrawDelegate (
 
 GUI_OBJ *
 GuiObjDelegatePtrEvent (
-  IN OUT GUI_OBJ              *This,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     VOID                 *Context OPTIONAL,
-  IN     GUI_PTR_EVENT        Event,
-  IN     INT64                BaseX,
-  IN     INT64                BaseY,
-  IN     INT64                OffsetX,
-  IN     INT64                OffsetY
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     GUI_PTR_EVENT           Event,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     INT64                   OffsetX,
+  IN     INT64                   OffsetY
   )
 {
   GUI_OBJ       *Obj;
@@ -1041,11 +1041,11 @@ GuiLibDestruct (
 
 VOID
 GuiViewInitialize (
-  OUT    GUI_DRAWING_CONTEXT   *DrawContext,
-  IN OUT GUI_OBJ               *Screen,
-  IN     GUI_CURSOR_GET_IMAGE  GetCursorImage,
-  IN     GUI_EXIT_LOOP         ExitLoop,
-  IN     VOID                  *GuiContext
+  OUT    GUI_DRAWING_CONTEXT     *DrawContext,
+  IN OUT GUI_OBJ                 *Screen,
+  IN     GUI_CURSOR_GET_IMAGE    GetCursorImage,
+  IN     GUI_EXIT_LOOP           ExitLoop,
+  IN     BOOT_PICKER_GUI_CONTEXT *GuiContext
   )
 {
   CONST EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *OutputInfo;

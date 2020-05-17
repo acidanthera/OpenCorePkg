@@ -83,16 +83,16 @@ GuiClickableIsHit (
 
 VOID
 InternalBootPickerViewDraw (
-  IN OUT GUI_OBJ              *This,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     VOID                 *Context OPTIONAL,
-  IN     INT64                BaseX,
-  IN     INT64                BaseY,
-  IN     UINT32               OffsetX,
-  IN     UINT32               OffsetY,
-  IN     UINT32               Width,
-  IN     UINT32               Height,
-  IN     BOOLEAN              RequestDraw
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     UINT32                  OffsetX,
+  IN     UINT32                  OffsetY,
+  IN     UINT32                  Width,
+  IN     UINT32                  Height,
+  IN     BOOLEAN                 RequestDraw
   )
 {
   ASSERT (This != NULL);
@@ -129,13 +129,13 @@ InternalBootPickerViewDraw (
 
 VOID
 InternalBootPickerViewKeyEvent (
-  IN OUT GUI_OBJ              *This,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     VOID                 *Context OPTIONAL,
-  IN     INT64                BaseX,
-  IN     INT64                BaseY,
-  IN     INTN                 Key,
-  IN     BOOLEAN              Modifier
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     INTN                    Key,
+  IN     BOOLEAN                 Modifier
   )
 {
   ASSERT (This != NULL);
@@ -236,22 +236,22 @@ InternalBootPickerChangeEntry (
 
 VOID
 InternalBootPickerKeyEvent (
-  IN OUT GUI_OBJ              *This,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     VOID                 *Context OPTIONAL,
-  IN     INT64                BaseX,
-  IN     INT64                BaseY,
-  IN     INTN                 Key,
-  IN     BOOLEAN              Modifier
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *GuiContext,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     INTN                    Key,
+  IN     BOOLEAN                 Modifier
   )
 {
   GUI_VOLUME_PICKER       *Picker;
   GUI_VOLUME_ENTRY        *PrevEntry;
   LIST_ENTRY              *NextLink;
   GUI_VOLUME_ENTRY        *NextEntry;
-  BOOT_PICKER_GUI_CONTEXT *GuiContext;
 
   ASSERT (This != NULL);
+  ASSERT (GuiContext != NULL);
   ASSERT (DrawContext != NULL);
 
   Picker    = BASE_CR (This, GUI_VOLUME_PICKER, Hdr.Obj);
@@ -286,9 +286,7 @@ InternalBootPickerKeyEvent (
       InternalBootPickerChangeEntry (Picker, DrawContext, BaseX, BaseY, NextEntry);
     }
   } else if (Key == OC_INPUT_CONTINUE) {
-    ASSERT (Context != NULL);
     ASSERT (Picker->SelectedEntry != NULL);
-    GuiContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
     Picker->SelectedEntry->Context->SetDefault = Modifier;
     GuiContext->BootEntry = Picker->SelectedEntry->Context;
   } else if (mBootPickerOpacity != 0xFF) {
@@ -299,11 +297,9 @@ InternalBootPickerKeyEvent (
   }
 
   if (Key == OC_INPUT_MORE) {
-    GuiContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
     GuiContext->HideAuxiliary = FALSE;
     GuiContext->Refresh = TRUE;
   } else if (Key == OC_INPUT_ABORTED) {
-    GuiContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
     GuiContext->Refresh = TRUE;
   }
 }
@@ -367,16 +363,16 @@ GuiDrawChildImage (
 STATIC
 VOID
 InternalBootPickerEntryDraw (
-  IN OUT GUI_OBJ              *This,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     VOID                 *Context OPTIONAL,
-  IN     INT64                BaseX,
-  IN     INT64                BaseY,
-  IN     UINT32               OffsetX,
-  IN     UINT32               OffsetY,
-  IN     UINT32               Width,
-  IN     UINT32               Height,
-  IN     BOOLEAN              RequestDraw
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     UINT32                  OffsetX,
+  IN     UINT32                  OffsetY,
+  IN     UINT32                  Width,
+  IN     UINT32                  Height,
+  IN     BOOLEAN                 RequestDraw
   )
 {
   CONST GUI_VOLUME_ENTRY *Entry;
@@ -452,20 +448,19 @@ InternalBootPickerEntryDraw (
 STATIC
 GUI_OBJ *
 InternalBootPickerEntryPtrEvent (
-  IN OUT GUI_OBJ              *This,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     VOID                 *Context OPTIONAL,
-  IN     GUI_PTR_EVENT        Event,
-  IN     INT64                BaseX,
-  IN     INT64                BaseY,
-  IN     INT64                OffsetX,
-  IN     INT64                OffsetY
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     GUI_PTR_EVENT           Event,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     INT64                   OffsetX,
+  IN     INT64                   OffsetY
   )
 {
   STATIC BOOLEAN SameIter = FALSE;
 
   GUI_VOLUME_ENTRY        *Entry;
-  BOOT_PICKER_GUI_CONTEXT *GuiContext;
   BOOLEAN                 IsHit;
 
   ASSERT (Event == GuiPointerPrimaryDown
@@ -513,8 +508,7 @@ InternalBootPickerEntryPtrEvent (
     if (SameIter) {
       SameIter = FALSE;
     } else {
-      GuiContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
-      GuiContext->BootEntry = Entry->Context;
+      Context->BootEntry = Entry->Context;
     }
   }
   //
@@ -526,20 +520,19 @@ InternalBootPickerEntryPtrEvent (
 
 VOID
 InternalBootPickerSelectorDraw (
-  IN OUT GUI_OBJ              *This,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     VOID                 *Context OPTIONAL,
-  IN     INT64                BaseX,
-  IN     INT64                BaseY,
-  IN     UINT32               OffsetX,
-  IN     UINT32               OffsetY,
-  IN     UINT32               Width,
-  IN     UINT32               Height,
-  IN     BOOLEAN              RequestDraw
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     UINT32                  OffsetX,
+  IN     UINT32                  OffsetY,
+  IN     UINT32                  Width,
+  IN     UINT32                  Height,
+  IN     BOOLEAN                 RequestDraw
   )
 {
   CONST GUI_OBJ_CLICKABLE       *Clickable;
-  CONST BOOT_PICKER_GUI_CONTEXT *GuiContext;
   CONST GUI_IMAGE               *BackgroundImage;
   CONST GUI_IMAGE               *ButtonImage;
 
@@ -548,12 +541,11 @@ InternalBootPickerSelectorDraw (
   ASSERT (Context != NULL);
 
   Clickable  = BASE_CR (This, GUI_OBJ_CLICKABLE, Hdr.Obj);
-  GuiContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
 
   ASSERT_EQUALS (This->Width,  BOOT_SELECTOR_WIDTH  * DrawContext->Scale);
   ASSERT_EQUALS (This->Height, BOOT_SELECTOR_HEIGHT * DrawContext->Scale);
 
-  BackgroundImage = &GuiContext->Icons[ICON_SELECTED][ICON_TYPE_BASE];
+  BackgroundImage = &Context->Icons[ICON_SELECTED][ICON_TYPE_BASE];
 
   ASSERT_EQUALS (BackgroundImage->Width,  BOOT_SELECTOR_BACKGROUND_DIMENSION * DrawContext->Scale);
   ASSERT_EQUALS (BackgroundImage->Height, BOOT_SELECTOR_BACKGROUND_DIMENSION * DrawContext->Scale);
@@ -606,19 +598,17 @@ InternalBootPickerSelectorDraw (
 
 GUI_OBJ *
 InternalBootPickerSelectorPtrEvent (
-  IN OUT GUI_OBJ              *This,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     VOID                 *Context OPTIONAL,
-  IN     GUI_PTR_EVENT        Event,
-  IN     INT64                BaseX,
-  IN     INT64                BaseY,
-  IN     INT64                OffsetX,
-  IN     INT64                OffsetY
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     GUI_PTR_EVENT           Event,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     INT64                   OffsetX,
+  IN     INT64                   OffsetY
   )
 {
-  BOOT_PICKER_GUI_CONTEXT       *GuiContext;
   GUI_OBJ_CLICKABLE             *Clickable;
-  CONST BOOT_PICKER_GUI_CONTEXT *PickerContext;
   CONST GUI_IMAGE               *ButtonImage;
 
   BOOLEAN                       IsHit;
@@ -631,9 +621,8 @@ InternalBootPickerSelectorPtrEvent (
   //
   ASSERT (IsListEmpty (&This->Children));
 
-  PickerContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
   Clickable     = BASE_CR (This, GUI_OBJ_CLICKABLE, Hdr.Obj);
-  ButtonImage   = &PickerContext->Icons[ICON_SELECTOR][ICON_TYPE_BASE];
+  ButtonImage   = &Context->Icons[ICON_SELECTOR][ICON_TYPE_BASE];
 
   ASSERT (Event == GuiPointerPrimaryDown
        || Event == GuiPointerPrimaryHold
@@ -648,10 +637,9 @@ InternalBootPickerSelectorPtrEvent (
     if (IsHit) {
       if (Event == GuiPointerPrimaryUp) {
         ASSERT (mBootPicker.SelectedEntry != NULL);
-        GuiContext = (BOOT_PICKER_GUI_CONTEXT *)Context;
-        GuiContext->BootEntry = mBootPicker.SelectedEntry->Context;
+        Context->BootEntry = mBootPicker.SelectedEntry->Context;
       } else  {
-        ButtonImage = &PickerContext->Icons[ICON_SELECTOR][ICON_TYPE_HELD];
+        ButtonImage = &Context->Icons[ICON_SELECTOR][ICON_TYPE_HELD];
       }
     }
   }
@@ -968,15 +956,12 @@ InternalBootPickerEntryDestruct (
 
 BOOLEAN
 InternalBootPickerExitLoop (
-  IN VOID  *Context
+  IN BOOT_PICKER_GUI_CONTEXT  *Context
   )
 {
-  CONST BOOT_PICKER_GUI_CONTEXT *GuiContext;
-
   ASSERT (Context != NULL);
 
-  GuiContext = (CONST BOOT_PICKER_GUI_CONTEXT *)Context;
-  return GuiContext->BootEntry != NULL || GuiContext->Refresh;
+  return Context->BootEntry != NULL || Context->Refresh;
 }
 
 STATIC GUI_INTERPOLATION mBpAnimInfoOpacity;
@@ -999,9 +984,9 @@ InitBpAnimOpacity (
 
 BOOLEAN
 InternalBootPickerAnimateOpacity (
-  IN     VOID                 *Context OPTIONAL,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     UINT64               CurrentTime
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     UINT64                  CurrentTime
   )
 {
   ASSERT (DrawContext != NULL);
@@ -1047,9 +1032,9 @@ InitBpAnimImageList (
 
 BOOLEAN
 InternalBootPickerAnimateImageList (
-  IN     VOID                 *Context OPTIONAL,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     UINT64               CurrentTime
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     UINT64                  CurrentTime
   )
 {
 #if 0
@@ -1095,9 +1080,9 @@ InitBpAnimSinMov (
 
 BOOLEAN
 InternalBootPickerAnimateSinMov (
-  IN     VOID                 *Context OPTIONAL,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     UINT64               CurrentTime
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     UINT64                  CurrentTime
   )
 {
   STATIC BOOLEAN First = TRUE;

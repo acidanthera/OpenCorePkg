@@ -69,7 +69,7 @@ typedef enum {
   ICON_TYPE_COUNT    = 2,
 } ICON_TYPE;
 
-typedef struct {
+typedef struct _BOOT_PICKER_GUI_CONTEXT {
   GUI_IMAGE                            Icons[ICON_NUM_TOTAL][ICON_TYPE_COUNT];
   GUI_IMAGE                            Labels[LABEL_NUM_TOTAL];
   // GUI_IMAGE                         Poof[5];
@@ -108,8 +108,8 @@ BootPickerViewDeinitialize (
 
 CONST GUI_IMAGE *
 InternalGetCursorImage (
-  IN OUT GUI_SCREEN_CURSOR  *This,
-  IN     VOID               *Context
+  IN OUT GUI_SCREEN_CURSOR        *This,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context
   );
 
 #endif // GUI_APP_H
