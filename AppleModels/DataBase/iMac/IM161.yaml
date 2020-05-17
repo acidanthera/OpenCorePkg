@@ -1,0 +1,163 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "233.0.0.0.0"
+BIOSLegacyVersion: "IM161.88Z.F000.B00.2002051745"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac16,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02QQHACGF1J"
+SystemSKUNumber: ""
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-A369DDC4E67F1C45"
+BoardVersion: "iMac16,1"
+BoardAssetTag: ""
+BoardType: 0xA
+# FIXME: check
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-A369DDC4E67F1C45"
+ChassisAssetTag: ""
+PlatformFeature: 0x3
+# FIXME: check
+FirmwareFeatures: 0xFC0FE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000FC0FE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0606
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+SmcRevision:
+  - 0x02
+  - 0x31
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x37
+# FIXME: check
+SmcBranch:
+  - 0x6A
+  - 0x31
+  - 0x31
+  - 0x37
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6A
+  - 0x31
+  - 0x31
+  - 0x37
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0xF00008
+OEMStrings: |-
+  Apple ROM Version
+    Model:        IM161
+    EFI Version:  233.0.0.0.0
+    Built by:     root@xapp160
+    Date:         Wed Feb  5 17:45:01 PST 2020
+    Revision:     233 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple LLVM version 5.0 (clang-500.0.68) (based on LLVM 3.3svn)
+Specifications:
+  CPUCodename:
+    - "Broadwell"
+  CPU:
+    - "Intel Core i5-5250U @ 1.60 GHz"
+  GPU:
+    - "Intel HD Graphics 6000"
+  RAM:
+    - "1867 MHz LPDDR3 SDRAM"
+  SystemReportName:
+    - "iMac (21.5-inch, Late 2015)"
+  MarketingName:
+    - "21.5\" iMac (Late 2015)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "GF1J"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "GH34"
+  - "GQ6K"
+  - "GQ6L"
+  - "GVYR"
+  - "GDF9"
+  - "GQ6F"
+  - "GQ6G"
+  - "GVYQ"
+  - "GH32"
+  - "GH36"
+  - "GQ6H"
+  - "GQ6J"
+  - "GVYV"
+  - "GDF7"
+  - "GDF8"
+  - "GQ6C"
+  - "GQ6D"
+  - "GVYT"
+  - "GPX5"
+  - "GPX6"
+  - "GPX7"
+  - "GPXC"
+  - "GPXD"
+  - "GPXF"
+  - "GPX3"
+  - "GPX4"
+  - "GXMK"
+  - "GPX8"
+  - "GPX9"
+  - "GXML"
+  - "H1WR"
+  - "HYGQ"
+  - "HQ9W"
+  - "H2KW"
+  - "HHMG"
+  - "GF1L"
+  - "GF1M"
+  - "GF1K"
+  - "H0N6"
+  - "H1DX"
+  - "J0DJ"
+  - "J0DH"
+  - "J0DG"
+  - "H8KX"
+  - "GG77"
+  - "GG79"
+  - "GG7D"
+  - "H0P6"
+  - "H1DY"
+  - "HQ9V"
+  - "HQ9T"
+  - "H1F2"
+  - "H1F1"
+  - "H25M"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2015
+  - 2016
+  - 2017
+CloverSerialNumber: "C02QQHACGF1J"
+MinimumOSVersion: "10.11"
+MaximumOSVersion: null

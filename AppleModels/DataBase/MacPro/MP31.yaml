@@ -1,0 +1,119 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "MP31.88Z.006C.B05.0802291410"
+BIOSLegacyVersion: "MP31.88Z.006C.B05.0802291410"
+BIOSReleaseDate: "02/22/08"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacPro3,1"
+SystemVersion: "1.3"
+# Note, this one is used by macserial
+SystemSerialNumber: "W88A77AA5J4"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacPro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-F42C88C8"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F42C88C8"
+BoardVersion: "Proto1"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x2
+ChassisVersion: "Mac-F42C88C8"
+ChassisAssetTag: "Pro-Enclosure"
+FirmwareFeatures: 0xC0001403
+FirmwareFeaturesMask: 0xC0003FFF
+ExtendedFirmwareFeatures: 0x00000000C0001403
+ExtendedFirmwareFeaturesMask: 0x00000000C0003FFF
+MemoryFormFactor: 0x9
+ProcessorType:
+  - 0x0402
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+SmcGeneration: 1
+SmcRevision:
+  - 0x01
+  - 0x30
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x03
+SmcBranch:
+  - 0x6D
+  - 0x38
+  - 0x36
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcPlatform:
+  - 0x6D
+  - 0x38
+  - 0x36
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcEPCI: 0x79001
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Harpertown"
+    - "Harpertown"
+    - "Harpertown"
+  CPU:
+    - "Intel Xeon E5462 x2 @ 2.80 GHz"
+    - "Intel Xeon E5472 x2 @ 3.00 GHz"
+    - "Intel Xeon X5482 x2 @ 3.20 GHz"
+  GPU:
+    - "ATI Radeon HD 2600 XT"
+  RAM:
+    - "2GB 800 MHz DDR2 EEC FB-DIMM"
+  SystemReportName:
+    - "Mac Pro (Early 2008)"
+  MarketingName:
+    - "Mac Pro (Early 2008)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "5J4"
+  - "XYK"
+  - "XYL"
+  - "1Z9"
+  - "27K"
+  - "1M3"
+  - "4R4"
+  - "329"
+  - "1BJ"
+  - "2BS"
+  - "14L"
+  - "2EE"
+  - "7AQ"
+  - "2DW"
+  - "31F"
+  - "31E"
+  - "5JA"
+  - "5JB"
+  - "5U8"
+  - "200"
+  - "2MB"
+  - "16U"
+  - "12K"
+  - "1L1"
+  - "1LY"
+  - "1LS"
+  - "1GP"
+  - "1ZA"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2008
+  - 2009
+MinimumOSVersion: "10.5.1"
+MaximumOSVersion: "10.11.6"

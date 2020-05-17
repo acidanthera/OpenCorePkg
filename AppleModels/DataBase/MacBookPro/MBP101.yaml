@@ -1,0 +1,238 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "260.0.0.0.0"
+BIOSLegacyVersion: "MBP101.88Z.F000.B00.2002051902"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro10,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02J40Y8F51R"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-C3EC7CD22292981F"
+#  "Mac-smthelse"
+BoardProduct: "Mac-C3EC7CD22292981F"
+BoardVersion: "MacBookPro10,1"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-C3EC7CD22292981F"
+ChassisAssetTag: ""
+FirmwareFeatures: 0xE00DE137
+FirmwareFeaturesMask: 0xFF1FFF3F
+ExtendedFirmwareFeatures: 0x00000000E00DE137
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0701
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+  - 12345
+SmcGeneration: 2
+SmcRevision:
+  - 0x02
+  - 0x03
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x36
+SmcBranch:
+  - 0x64
+  - 0x32
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcPlatform:
+  - 0x64
+  - 0x32
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcEPCI: 0x74006
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MBP101
+    EFI Version:  260.0.0.0.0
+    Built by:     root@saumon
+    Date:         Wed Feb  5 19:02:19 PST 2020
+    Revision:     260 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
+Specifications:
+  CPUCodename:
+    - "Ivy Bridge"
+    - "Ivy Bridge"
+    - "Ivy Bridge"
+    - "Ivy Bridge"
+    - "Ivy Bridge"
+    - "Ivy Bridge"
+  CPU:
+    - "Intel Core i7-3615QM @ 2.30 GHz"
+    - "Intel Core i7-3720QM @ 2.60 GHz"
+    - "Intel Core i7-3820QM @ 2.70 GHz"
+    - "Intel Core i7-3635QM @ 2.40 GHz"
+    - "Intel Core i7-3740QM @ 2.70 GHz"
+    - "Intel Core i7-3840QM @ 2.80 GHz"
+  GPU:
+    - "NVIDIA GeForce GT 650M"
+  RAM:
+    - "8GB 1600 MHz DDR3L SDRAM"
+  SystemReportName:
+    - "MacBook Pro (Retina, 15-inch, Mid 2012)"
+    - "MacBook Pro (Retina, 15-inch, Early 2013)"
+  MarketingName:
+    - "MacBook Pro with Retina display, Intel Core i7, 15\" (Mid 2012)"
+    - "MacBook Pro with Retina display, Intel Core i7, 15\" (Early 2013)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "DKQ1"
+  - "DKQ2"
+  - "DKQ4"
+  - "DKQ5"
+  - "F51R"
+  - "F5Y2"
+  - "F69W"
+  - "F69Y"
+  - "F6DN"
+  - "F6F3"
+  - "F6L9"
+  - "F8JY"
+  - "F96W"
+  - "F9F1"
+  - "F9F2"
+  - "FCQ3"
+  - "FMLK"
+ # Late 2013
+  - "FFT0"
+  - "FFT1"
+  - "FFT2"
+  - "FFT3"
+  - "FFT4"
+  - "FG1H"
+  - "FG1J"
+  - "FGFH"
+  - "FGFJ"
+  - "FGFK"
+  - "FGFL"
+  - "FGN7"
+  - "FGWF"
+  - "FGWG"
+  - "FGWH"
+  - "FHCQ"
+  - "FHCR"
+  - "FJ47"
+  - "FJVJ"
+  - "FL94"
+  - "FR8D"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "DY3V"
+  - "DY3W"
+  - "DY3Y"
+  - "DY40"
+  - "DY41"
+  - "DY42"
+  - "DY43"
+  - "DY44"
+  - "DY45"
+  - "DY4C"
+  - "F78Q"
+  - "F78Y"
+  - "F790"
+  - "DYJ5"
+  - "DYJ6"
+  - "DRDN"
+  - "DRDP"
+  - "DRDW"
+  - "DRF0"
+  - "DRF1"
+  - "DRF4"
+  - "DT9D"
+  - "DT9F"
+  - "DT9G"
+  - "DT9H"
+  - "F78N"
+  - "F78P"
+  - "DRDQ"
+  - "DRDT"
+  - "DYW4"
+  - "DYW5"
+  - "F0HM"
+  - "F0HN"
+  - "F0HR"
+  - "F0HT"
+  - "F0HV"
+  - "F0HY"
+  - "F0J3"
+  - "F0JD"
+  - "F78T"
+  - "F791"
+  - "F0JC"
+  # Early 2013
+  - "FF63"
+  - "FF65"
+  - "FF67"
+  - "FF6W"
+  - "FF70"
+  - "FF72"
+  - "FF74"
+  - "FF69"
+  - "FF6D"
+  - "FF6G"
+  - "FF6J"
+  - "FF6L"
+  - "FF6N"
+  - "FF6Q"
+  - "FF6T"
+  - "FFW6"
+  - "FFW7"
+  - "FFWG"
+  - "FFWJ"
+  - "FFWK"
+  - "FFWM"
+  - "FFWN"
+  - "FFWP"
+  - "FFW8"
+  - "FFW9"
+  - "FFWC"
+  - "FFWD"
+  - "FFWF"
+  - "FFWH"
+  - "FFWL"
+  - "FFWQ"
+  - "FF64"
+  - "FF66"
+  - "FF68"
+  - "FF6F"
+  - "FF6Y"
+  - "FF71"
+  - "FF73"
+  - "FF75"
+  - "FF6C"
+  - "FF6H"
+  - "FF6K"
+  - "FF6M"
+  - "FF6P"
+  - "FF6R"
+  - "FF6V"
+  - "FF7M"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2012
+  - 2013
+MinimumOSVersion: "10.8.2"
+MaximumOSVersion: null

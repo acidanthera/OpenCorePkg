@@ -1,0 +1,152 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "283.0.0.0.0"
+BIOSLegacyVersion: "MBP102.88Z.F000.B00.2002052052"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro10,2"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02JJ70ADR53"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-AFD8A9D944EA4843"
+#  "Mac-smthelse"
+BoardProduct: "Mac-AFD8A9D944EA4843"
+BoardVersion: "MacBookPro10,2"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-AFD8A9D944EA4843"
+ChassisAssetTag: ""
+FirmwareFeatures: 0xE00DE137
+FirmwareFeaturesMask: 0xFF1FFF3F
+ExtendedFirmwareFeatures: 0x00000000E00DE137
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0601
+  - 0x0701
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+  - 12345
+SmcGeneration: 2
+SmcRevision:
+  - 0x02
+  - 0x06
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x59
+SmcBranch:
+  - 0x62
+  - 0x72
+  - 0x61
+  - 0x6e
+  - 0x63
+  - 0x68
+  - 0x00
+  - 0x00
+SmcPlatform:
+  - 0x64
+  - 0x31
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcEPCI: 0x73007
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MBP102
+    EFI Version:  283.0.0.0.0
+    Built by:     root@saumon
+    Date:         Wed Feb  5 20:52:42 PST 2020
+    Revision:     283 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
+Specifications:
+  CPUCodename:
+    - "Ivy Bridge"
+    - "Ivy Bridge"
+    - "Ivy Bridge"
+    - "Ivy Bridge"
+  CPU:
+    - "Intel Core i5-3210M @ 2.50 GHz"
+    - "Intel Core i7-3520M @ 2.90 GHz"
+    - "Intel Core i5-3230M @ 2.60 GHz"
+    - "Intel Core i7-3540M @ 3.00 GHz"
+  GPU:
+    - "Intel HD 4000"
+  RAM:
+    - "8GB 1600 MHz DDR3L SDRAM"
+  SystemReportName:
+    - "MacBook Pro (Retina, 13-inch, Late 2012)"
+    - "MacBook Pro (Retina, 13-inch, Early 2013)"
+  MarketingName:
+    - "MacBook Pro with Retina display, Intel Core i5, Intel Core i7, 13\" (Late 2012)"
+    - "MacBook Pro with Retina display, Intel Core i5, Intel Core i7, 13\" (Early 2013)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "DR53"
+  - "DR54"
+  - "DR55"
+  - "DR56"
+  - "F775"
+  - "F776"
+  - "F7YF"
+  - "F897"
+  - "F8V6"
+  - "F8V7"
+  - "F8V8"
+  - "F9JT"
+  - "F9V1"
+  - "F9VQ"
+  - "FG7Q"
+  - "FG7R"
+  - "FL85"
+  - "FMLJ"
+  # Late 2013
+  - "FFRP"
+  - "FFRR"
+  - "FG1F"
+  - "FG28"
+  - "FGM8"
+  - "FGN5"
+  - "FGN6"
+  - "FGPJ"
+  - "FHCH"
+  - "FHN0"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "F16P"
+  - "F16V"
+  - "F26L"
+  - "F2WV"
+  - "F16M"
+  - "F16N"
+  - "F26H"
+  - "F2WQ"
+  # Early 2013
+  - "FF58"
+  - "FF5C"
+  - "FF5F"
+  - "FF5H"
+  - "FF59"
+  - "FF5D"
+  - "FF5G"
+  - "FF5J"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2012
+  - 2013
+MinimumOSVersion: "10.8.2"
+MaximumOSVersion: null

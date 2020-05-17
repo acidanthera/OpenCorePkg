@@ -1,0 +1,131 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "215.0.0.0.0"
+BIOSLegacyVersion: "IM101.88Z.F000.B00.1906141458"
+BIOSReleaseDate: "06/14/19"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac10,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W80AA98A5PE"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct:
+- "Mac-F221DCC8"
+- "Mac-F2268CC8"
+BoardVersion: ""
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion:
+- "Mac-F221DCC8"
+- "Mac-F2268CC8"
+ChassisAssetTag: "Asset Tag#"
+# FIXME: check
+FirmwareFeatures: 0xE00DE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000E00DE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x53
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x13
+# FIXME: check
+SmcBranch:
+  - 0x6B
+  - 0x32
+  - 0x32
+  - 0x6B
+  - 0x32
+  - 0x33
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6B
+  - 0x32
+  - 0x33
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7B002
+OEMStrings: |-
+  Apple ROM Version
+    Model:        IM101
+    EFI Version:  215.0.0.0.0
+    Date:         Fri Jun 14 14:58:29 2019
+    Build Type:   Release
+Specifications:
+  CPUCodename:
+    - "Wolfdale"
+    - "Wolfdale"
+  CPU:
+    - "Intel Core 2 Duo E7600 @ 3.06 GHz"
+    - "Intel Core 2 Duo E8600 @ 3.33 GHz"
+  GPU:
+    - "AMD ATI Radeon HD 4670"
+    - "NVIDIA GeForce 9400M"
+  RAM:
+    - "1066 MHz PC3-8500 DDR3 SDRAM"
+  SystemReportName:
+    - "iMac (21.5-inch, Late 2009)"
+  MarketingName:
+    - "iMac Intel Core 2 Duo (widescreen, Late 2009)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "5PE"
+  - "5PK"
+  - "5PC"
+  - "F0G"
+  - "DWR"
+  - "DWU"
+  - "CY8"
+  - "H9K"
+  - "DMX"
+  - "B9U"
+  - "B9S"
+  - "DMW"
+  - "FQH"
+  - "HDF"
+  - "E8F"
+  - "E8D"
+  - "E8E"
+  - "FU1"
+  - "F0H"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2009
+  - 2010
+CloverSerialNumber: "W80AA98A5PE"
+MinimumOSVersion: "10.6.1"
+MaximumOSVersion: "10.13.6"

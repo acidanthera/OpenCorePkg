@@ -1,0 +1,257 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "205.0.0.0.0"
+BIOSLegacyVersion: "MBP142.88Z.F000.B00.2001311618"
+BIOSReleaseDate: "01/31/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro14,2"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02TQHACHV2N"
+SystemSKUNumber: ""
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-CAD6701F7CEA0921"
+BoardVersion: "MacBookPro14,2"
+# FIXME: check
+BoardRevision: 0x1B
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x9
+ChassisVersion: "Mac-CAD6701F7CEA0921"
+ChassisAssetTag: ""
+PlatformFeature: 0x1A
+# FIXME: check
+FirmwareFeatures: 0xFD0FF536
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000FD0FF536
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0605
+  - 0x0605
+  - 0x0705
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+# FIXME: check
+SmcRevision:
+  - 0x02
+  - 0x44
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x02
+# FIXME: check
+SmcBranch:
+  - 0x32
+  - 0x30
+  - 0x31
+  - 0x37
+  - 0x6D
+  - 0x62
+  - 0x70
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6A
+  - 0x37
+  - 0x39
+  - 0x61
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0xF09009
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      MBP142.88Z.F000.B00.2001311618
+    Model:        MBP142
+    EFI Version:  205.0.0.0.0
+    Built by:     _atsserver@xapp157
+    Date:         Fri Jan 31 16:18:25 2020
+    Revision:     205 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     Apple LLVM version 6.1.0 (clang-602.0.53) (based on LLVM 3.6.0svn)
+    UUID:         15894FDD-0CA2-3073-B21F-10A8A2A4198D
+    UUID:         BFB96C2A-9FC6-3DB5-9518-9D7A6B001871
+Specifications:
+  CPUCodename:
+    - "Kaby Lake"
+    - "Kaby Lake"
+    - "Kaby Lake"
+  CPU:
+    - "Intel Core i5-7267U @ 3.10 GHz"
+    - "Intel Core i5-7287U @ 3.30 GHz"
+    - "Intel Core i7-7567U @ 3.50 GHz"
+  GPU:
+    - "Intel Iris Plus 650"
+  RAM:
+    - "2133 MHz LPDDR3 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (13-inch, 2017, Four Thunderbolt 3 Ports)"
+  MarketingName:
+    - "13\" MacBook Pro with Thunderbolt 3 and Touch ID (Mid 2017)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "HV2N"
+  - "HV2M"
+  - "HV2R"
+  - "JJ3H"
+  - "JJ3J"
+  - "JJ3G"
+  - "JJ3F"
+  - "JKXM"
+  - "JHTF"
+  - "K141"
+  - "J9JH"
+  - "J9JD"
+  - "J9JG"
+  - "J9JF"
+  - "J9J9"
+  - "J9J8"
+  - "J9J1"
+  - "J9J3"
+  - "J9J2"
+  - "J9J5"
+  - "J9J4"
+  - "J9J7"
+  - "J9J6"
+  - "JCYQ"
+  - "HV2L"
+  - "HV2X"
+  - "HV2T"
+  - "HV2V"
+  - "HV2W"
+  - "HV2P"
+  - "HV2Q"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "HRPC"
+  - "HRPF"
+  - "HRPH"
+  - "HRR8"
+  - "HRRC"
+  - "HRRF"
+  - "HRNX"
+  - "HRP0"
+  - "HRP2"
+  - "HRQV"
+  - "HRQX"
+  - "HRR0"
+  - "HRP4"
+  - "HRP6"
+  - "HRP8"
+  - "HRR2"
+  - "HRR4"
+  - "HRR6"
+  - "HRP9"
+  - "HRPD"
+  - "HRPG"
+  - "HRR7"
+  - "HRR9"
+  - "HRRD"
+  - "HRNW"
+  - "HRNY"
+  - "HRP1"
+  - "HRQT"
+  - "HRQW"
+  - "HRQY"
+  - "HRP3"
+  - "HRP5"
+  - "HRP7"
+  - "HRR1"
+  - "HRR3"
+  - "HRR5"
+  - "HRQ0"
+  - "HRQ2"
+  - "HRQ4"
+  - "HRRX"
+  - "HRT0"
+  - "HRT2"
+  - "HRPK"
+  - "HRPM"
+  - "HRPP"
+  - "HRRH"
+  - "HRRK"
+  - "HRRM"
+  - "HRPR"
+  - "HRPV"
+  - "HRPX"
+  - "HRRP"
+  - "HRRR"
+  - "HRRV"
+  - "HRPY"
+  - "HRQ1"
+  - "HRQ3"
+  - "HRRW"
+  - "HRRY"
+  - "HRT1"
+  - "HRPJ"
+  - "HRPL"
+  - "HRPN"
+  - "HRRG"
+  - "HRRJ"
+  - "HRRL"
+  - "HRPQ"
+  - "HRPT"
+  - "HRPW"
+  - "HRRN"
+  - "HRRQ"
+  - "HRRT"
+  - "HRQM"
+  - "HRQP"
+  - "HRQR"
+  - "HRTK"
+  - "HRTM"
+  - "HRTP"
+  - "HRQ6"
+  - "HRQ8"
+  - "HRQC"
+  - "HRT4"
+  - "HRT6"
+  - "HRT8"
+  - "HRQF"
+  - "HRQH"
+  - "HRQK"
+  - "HRTC"
+  - "HRTF"
+  - "HRTH"
+  - "HRQL"
+  - "HRQN"
+  - "HRQQ"
+  - "HRTJ"
+  - "HRTL"
+  - "HRTN"
+  - "HRQ5"
+  - "HRQ7"
+  - "HRQ9"
+  - "HRT3"
+  - "HRT5"
+  - "HRT7"
+  - "HRQD"
+  - "HRQG"
+  - "HRQJ"
+  - "HRT9"
+  - "HRTD"
+  - "HRTG"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2017
+  - 2018
+CloverSerialNumber: "C02TQHACHV2N"
+MinimumOSVersion: "10.12.5"
+MaximumOSVersion: null

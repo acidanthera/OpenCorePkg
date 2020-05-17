@@ -1,0 +1,119 @@
+BIOSVendor: "Apple Computer, Inc."
+BIOSVersion: "IM41.88Z.0055.B08.0609061538"
+BIOSLegacyVersion: "IM41.88Z.0055.B08.0609061538"
+BIOSReleaseDate: "09/06/06"
+SystemManufacturer: "Apple Computer, Inc."
+SystemProductName: "iMac4,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W8608HACU2P"
+SystemSKUNumber: "System SKUNumber"
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Computer, Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F42786C8"
+BoardVersion: "DVT"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Computer, Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-F42786C8"
+ChassisAssetTag: "Asset Tag"
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0201
+  - 0x0201
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x01
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x05
+# FIXME: check
+SmcBranch:
+  - 0x6D
+  - 0x33
+  - 0x38
+  - 0x6D
+  - 0x33
+  - 0x39
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6D
+  - 0x33
+  - 0x38
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x73002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Yonah"
+    - "Yonah"
+  CPU:
+    - "Intel Core Duo T2400 @ 1.83 GHz"
+    - "Intel Core Duo T2500 @ 2.00 GHz"
+  GPU:
+    - "AMD ATI Radeon X1600"
+  RAM:
+    - "667 MHz DDR2 SDRAM, PC2-5300"
+  SystemReportName:
+    - "iMac (20-inch, Early 2006)"
+    - "iMac (17-inch, Early 2006)"
+  MarketingName: ""
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "U2P"
+  - "V67"
+  - "V4Q"
+  - "VX0"
+  - "V4P"
+  - "V4R"
+  - "X0U"
+  - "U2S"
+  - "VH0"
+  - "VH2"
+  - "VW4"
+  - "WXN"
+  - "VGM"
+  - "VGC"
+  - "V66"
+  - "V4U"
+  - "V4N"
+  - "VV4"
+  - "VHP"
+  - "VH1"
+  - "VV6"
+  - "V4M"
+  - "U2N"
+  - "U2R"
+  - "VGB"
+  - "VGZ"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2006
+CloverSerialNumber: "W8610HACVGM"
+MinimumOSVersion: "10.4.4"
+MaximumOSVersion: "10.6.8"

@@ -1,0 +1,149 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "181.0.0.0.0"
+BIOSLegacyVersion: "IM183.88Z.F000.B00.2001311618"
+BIOSReleaseDate: "01/31/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac18,2"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02TDHACJ1G5"
+SystemSKUNumber: ""
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-77F17D7DA9285301"
+BoardVersion: "iMac18,2"
+# FIXME: check
+BoardRevision: 0x1F
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-77F17D7DA9285301"
+ChassisAssetTag: ""
+# FIXME: check
+PlatformFeature: 0x0
+# FIXME: check
+FirmwareFeatures: 0xFD0FF576
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000FD0FF576
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0605
+  - 0x0605
+  - 0x0705
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+SmcRevision:
+  - 0x02
+  - 0x40
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x01
+# FIXME: check
+SmcBranch:
+  - 0x6A
+  - 0x31
+  - 0x33
+  - 0x33
+  - 0x5F
+  - 0x34
+  - 0x5F
+  - 0x35
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0xF07009
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      IM183.88Z.F000.B00.2001311618
+    Model:        IM183
+    EFI Version:  181.0.0.0.0
+    Built by:     _atsserver@xapp157
+    Date:         Fri Jan 31 16:18:32 2020
+    Revision:     181 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     Apple LLVM version 6.1.0 (clang-602.0.53) (based on LLVM 3.6.0svn)
+    UUID:         04E73AA7-F5C4-3C6C-8FDD-433A5F441D96
+    UUID:         D01A0E95-D2A6-3E24-B70A-F4AEAA84BF0F
+Specifications:
+  CPUCodename:
+    - "Kaby Lake"
+    - "Kaby Lake"
+    - "Kaby Lake"
+  CPU:
+    - "Intel Core i5-7400 @ 3.00 GHz"
+    - "Intel Core i5-7500 @ 3.40 GHz"
+    - "Intel Core i7-7700 @ 3.60 GHz"
+  GPU:
+    - "AMD Radeon Pro 555"
+    - "AMD Radeon Pro 560"
+  RAM:
+    - "2400 MHz DDR4 SDRAM"
+  SystemReportName:
+    - "iMac (Retina 4K, 21.5-inch, 2017)"
+  MarketingName:
+    - "21.5\" iMac (2017)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "J1G5"
+  - "J9X5"
+  - "J9X4"
+  - "LQHG"
+  - "JGDT"
+  - "J1GC"
+  - "J1GF"
+  - "J1GD"
+  - "J1G8"
+  - "J1G9"
+  - "J1G6"
+  - "J1G7"
+  - "J608"
+  - "JKF9"
+  - "JFPW"
+  - "L7H6"
+  - "JP10"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "J0DX"
+  - "J0DY"
+  - "J0F0"
+  - "J0F1"
+  - "HNWJ"
+  - "HNWK"
+  - "J0RY"
+  - "J0T1"
+  - "HNWL"
+  - "HNWM"
+  - "HNWN"
+  - "HNWP"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2017
+  - 2018
+  - 2019
+CloverSerialNumber: "C02TDHACJ1G5"
+MinimumOSVersion: "10.12.4"
+MaximumOSVersion: null

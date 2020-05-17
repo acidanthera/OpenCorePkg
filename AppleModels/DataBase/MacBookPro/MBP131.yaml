@@ -1,0 +1,133 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "243.0.0.0.0"
+BIOSLegacyVersion: "MBP131.88Z.F000.B00.2001311752"
+BIOSReleaseDate: "01/31/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro13,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C17SJ18EGVC1"
+SystemSKUNumber: ""
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-473D31EABEB93F9B"
+#  "Mac-smthelse"
+BoardProduct: "Mac-473D31EABEB93F9B"
+BoardVersion: "MacBookPro13,1"
+BoardRevision: 0x14
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x9
+ChassisVersion: "Mac-473D31EABEB93F9B"
+ChassisAssetTag: ""
+PlatformFeature: 0x1A
+FirmwareFeatures: 0xFC0FE137
+FirmwareFeaturesMask: 0xFF1FFF3F
+ExtendedFirmwareFeatures: 0x00000000FC0FE137
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0601
+  - 0x0701
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+  - 12345
+SmcGeneration: 2
+SmcRevision:
+  - 0x02
+  - 0x36
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x98
+SmcBranch:
+  - 0x32
+  - 0x30
+  - 0x31
+  - 0x36
+  - 0x6d
+  - 0x62
+  - 0x00
+  - 0x00
+SmcPlatform:
+  - 0x6a
+  - 0x31
+  - 0x33
+  - 0x30
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcEPCI: 0xF02009
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      MBP131.88Z.F000.B00.2001311752
+    Model:        MBP131
+    EFI Version:  243.0.0.0.0
+    Built by:     _atsserver@xapp157
+    Date:         Fri Jan 31 17:52:44 2020
+    Revision:     243 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     Apple LLVM version 6.1.0 (clang-602.0.53) (based on LLVM 3.6.0svn)
+    UUID:         F58BC585-E680-3CEB-8F77-7D03BEAB2864
+    UUID:         95F4BDAD-3BB7-330E-9135-4DB7CCDA524F
+Specifications:
+  CPUCodename:
+    - "Skylake"
+    - "Skylake"
+  CPU:
+    - "Intel Core i5-6360U @ 2.00 GHz"
+    - "Intel Core i7-6660U @ 2.40 GHz"
+  GPU:
+    - "Intel Iris 540"
+  RAM:
+    - "8GB 1866 MHz LPDDR3 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (13-inch, 2016, Two Thunderbolt 3 ports)"
+  MarketingName:
+    - "13\" MacBook Pro with Thunderbolt 3 (Late 2016)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "GVC1"
+  - "GVC8"
+  - "GY25"
+  - "GY6N"
+  - "HV5M"
+  - "HV5H"
+  - "HV5J"
+  - "HV5K"
+  - "HV5L"
+  - "HV5G"
+  - "HV5D"
+  - "HV5N"
+  - "HWCH"
+  - "HYP5"
+  - "J21W"
+  - "J5KW"
+  # Note, first board code is used by macserial
+AppleBoardCode:
+  - "HMHK"
+  - "HMHL"
+  - "HMHM"
+  - "HMHC"
+  - "HMHD"
+  - "HMHF"
+  - "HMHN"
+  - "HMHP"
+  - "HMHQ"
+  - "HMHG"
+  - "HMHH"
+  - "HMHJ"
+  # Note, first year is used by macserial
+AppleModelYear:
+  - 2016
+  - 2017
+MinimumOSVersion: "10.12"
+MaximumOSVersion: null

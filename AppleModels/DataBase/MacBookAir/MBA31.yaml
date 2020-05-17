@@ -1,0 +1,138 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "110.0.0.0.0"
+BIOSLegacyVersion: "MBA31.88Z.F000.B00.1906132254"
+BIOSReleaseDate: "06/13/19"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookAir3,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02FLHACD0QX"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Air"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-942452F5819B1C1B"
+BoardVersion: "MacBookAir3,1"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-942452F5819B1C1B"
+ChassisAssetTag: ""
+# FIXME: check
+FirmwareFeatures: 0xD00DE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000D00DE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0302
+  - 0x0302
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x67
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x10
+# FIXME: check
+SmcBranch:
+  - 0x6B
+  - 0x31
+  - 0x36
+  - 0x6B
+  - 0x39
+  - 0x39
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6B
+  - 0x39
+  - 0x39
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x76005
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MBA31
+    EFI Version:  110.0.0.0.0
+    Date:         Thu Jun 13 22:54:11 2019
+    Build Type:   Release
+Specifications:
+  CPUCodename:
+    - "Penryn"
+    - "Penryn"
+  CPU:
+    - "Intel Core 2 Duo SU9400 @ 1.40 GHz"
+    - "Intel Core 2 Duo SU9600 @ 1.60 GHz"
+  GPU:
+    - "NVIDIA GeForce 320M"
+  RAM:
+    - "1066 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "MacBook Air (11-inch, Late 2010)"
+  MarketingName:
+    - "11\" MacBook Air"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "DDQW"
+  - "DJ67"
+  - "DN00"
+  - "DQQ6"
+  - "DDR0"
+  - "DDQY"
+  - "DDQX"
+  - "DJDL"
+  - "DJ5H"
+  - "DJ5J"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "DF83"
+  - "DF8D"
+  - "DF8G"
+  - "DF8L"
+  - "DG4L"
+  - "DG4M"
+  - "DF86"
+  - "DF8F"
+  - "DF8H"
+  - "DF8M"
+  - "DG4H"
+  - "DG4K"
+  - "DD0T"
+  - "DD14"
+  - "DD15"
+  - "DG4G"
+  - "DG4Q"
+  - "DD0Q"
+  - "DD0R"
+  - "DD0V"
+  - "DD12"
+  - "DG4T"
+  - "DG4V"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2010
+  - 2011
+CloverSerialNumber: "C02DNHACDDR0"
+MinimumOSVersion: "10.6.4"
+MaximumOSVersion: "10.13.6"

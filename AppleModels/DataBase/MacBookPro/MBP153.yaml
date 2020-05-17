@@ -1,0 +1,123 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "1037.120.79.0.0"
+BIOSLegacyVersion: "MBP153.88Z.F000.B00.2004232100"
+BIOSReleaseDate: "04/23/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro15,3"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02YV0ECLVCG"
+SystemSKUNumber: ""
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-1E7E29AD0135F9BC"
+#  "Mac-smthelse"
+BoardProduct: "Mac-1E7E29AD0135F9BC"
+BoardVersion: "MacBookPro15,3"
+# FIXME: check
+BoardRevision: 0x1
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x9
+ChassisVersion: "Mac-1E7E29AD0135F9BC"
+ChassisAssetTag: ""
+PlatformFeature: 0x32
+# FIXME: check
+FirmwareFeatures: 0xFD8FF426
+# FIXME: check
+FirmwareFeaturesMask: 0xFF9FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000FD8FF426
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF9FFF3F
+MemoryFormFactor: 0xD
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0701
+  - 0x1001
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+  - 12345
+SmcGeneration: 3
+SmcPlatform:
+  - 0x6a
+  - 0x37
+  - 0x38
+  - 0x30
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      MBP153.88Z.F000.B00.2004232100
+    Model:        MBP153
+    EFI Version:  1037.120.79.0.0
+    Built by:     tangstad@pdb172
+    Date:         Thu Apr 23 21:00:21 2020
+    Revision:     1037.120.79 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     clang-1103.2.29.8
+    UUID:         D16C1CAC-0CD6-3787-8828-4B2DACE8E2A3
+    UUID:         20CBD59C-B914-31E8-BE44-880BDC88C816
+Specifications:
+  CPUCodename:
+    - "Coffee Lake"
+    - "Coffee Lake"
+    - "Coffee Lake"
+  CPU:
+    - "Intel Core i7-8850H @ 2.60 GHz"
+    - "Intel Core i9-9880H @ 2.30 GHz"
+    - "Intel Core i9-9980HK @ 2.40 GHz"
+  GPU:
+    - "AMD Radeon Pro 555X"
+    - "AMD Radeon Pro 560X"
+    - "AMD Vega 16"
+    - "AMD Vega 20"
+  RAM:
+    - "16GB 2400 MHz LPDDR4 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (15-inch, 2019)"
+  MarketingName:
+    - "15\" MacBook Pro with Thunderbolt 3 and Touch ID (Mid 2019)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "LVCG"
+  - "LVCJ"
+  - "LVDQ"
+  - "LVDR"
+  - "LVDV"
+  - "LVDT"
+  - "MVC0"
+  - "LVCL"
+  - "LVCF"
+  - "LVCK"
+  - "LVCH"
+  - "MV9T"
+  - "NQMC"
+  - "NCM6"
+  - "N6KF"
+  - "N6RJ"
+  - "NQM9"
+  - "NCM5"
+  - "NCM3"
+  - "N5T6"
+  - "NQMF"
+  - "NQMD"
+  - "NCM4"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "0000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2019
+MinimumOSVersion: "10.14.5"
+MaximumOSVersion: null
+AppleModelId: "J780"

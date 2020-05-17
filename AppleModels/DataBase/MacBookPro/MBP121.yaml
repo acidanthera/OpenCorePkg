@@ -1,0 +1,153 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "190.0.0.0.0"
+BIOSLegacyVersion: "MBP121.88Z.F000.B00.2002051745"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro12,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02Q51OSH1DP"
+SystemSKUNumber: ""
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-E43C1C25D4880AD6"
+#  "Mac-smthelse"
+BoardProduct: "Mac-E43C1C25D4880AD6"
+BoardVersion: "MacBookPro12,1"
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x9
+ChassisVersion: "Mac-E43C1C25D4880AD6"
+ChassisAssetTag: ""
+PlatformFeature: 0x2
+FirmwareFeatures: 0xFD0FF576
+FirmwareFeaturesMask: 0xFF1FFF7F
+ExtendedFirmwareFeatures: 0x00000000FD0FF576
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF7F
+MemoryFormFactor: 0xD
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0606
+  - 0x0706
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+  - 12345
+SmcGeneration: 2
+SmcRevision:
+  - 0x02
+  - 0x28
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x07
+SmcBranch:
+  - 0x6a
+  - 0x35
+  - 0x32
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcPlatform:
+  - 0x6a
+  - 0x35
+  - 0x32
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcEPCI: 0x00F01008
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MBP121
+    EFI Version:  190.0.0.0.0
+    Built by:     root@xapp160
+    Date:         Wed Feb  5 17:45:07 PST 2020
+    Revision:     190 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple LLVM version 5.0 (clang-500.0.68) (based on LLVM 3.3svn)
+Specifications:
+  CPUCodename:
+    - "Broadwell"
+    - "Broadwell"
+    - "Broadwell"
+  CPU:
+    - "Intel Core i5-5257U @ 2.70 GHz"
+    - "Intel Core i5-5287U @ 2.90 GHz"
+    - "Intel Core i7-5557U @ 3.10 GHz"
+  GPU:
+    - "Intel Iris 6100"
+  RAM:
+    - "8GB 1866 MHz LPDDR3 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (Retina, 13-inch, Early 2015)"
+  MarketingName:
+    - "13\" MacBook Pro with Retina display (Early 2015)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "H1DP"
+  - "FVH3"
+  - "FVH4"
+  - "FVH5"
+  - "FVH6"
+  - "FVH7"
+  - "FVH8"
+  - "FVH9"
+  - "GKJG"
+  - "GKJM"
+  - "GKJN"
+  - "GL36"
+  - "GL37"
+  - "GM0V"
+  - "GM0W"
+  - "GM10"
+  - "GM11"
+  - "GM12"
+  - "GM13"
+  - "GQR4"
+  - "GQR5"
+  - "GQR6"
+  - "H1DQ"
+  - "GN24"
+  - "HV59"
+  - "GL34"
+  - "GL35"
+  - "J69C"
+  - "GM0Y"
+  - "HTYF"
+  - "GMDF"
+  - "H1WK"
+  - "J4NY"
+  # Note, first board code is used by macserial
+AppleBoardCode:
+  - "GDVV"
+  - "GDVQ"
+  - "GDVW"
+  - "GDW6"
+  - "GDVY"
+  - "GDVT"
+  - "GDW4"
+  - "GDW5"
+  - "GDVN"
+  - "GDVR"
+  - "GDVN"
+  - "GDVR"
+  - "GQ10"
+  - "GDW1"
+  - "GDW2"
+  - "GDW3"
+  # Note, first year is used by macserial
+AppleModelYear:
+  - 2015
+  - 2016
+  - 2017
+MinimumOSVersion: "10.10.2"
+MaximumOSVersion: null

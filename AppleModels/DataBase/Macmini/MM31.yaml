@@ -1,0 +1,132 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "MM31.88Z.0081.B06.0904271717"
+BIOSLegacyVersion: "MM31.88Z.0081.B06.0904271717"
+BIOSReleaseDate: "04/27/2009"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "Macmini3,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W8905BBE19X"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "Macmini"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F22C86C8"
+BoardVersion: ""
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x10
+ChassisVersion: "Mac-F22C86C8"
+ChassisAssetTag: "Asset Tag#"
+FirmwareFeatures: 0xC0001403
+FirmwareFeaturesMask: 0xC0007FFF
+ExtendedFirmwareFeatures: 0x00000000C0001403
+ExtendedFirmwareFeaturesMask: 0x00000000C0007FFF
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+  - 0x0301
+  - 0x0301
+  - 0x0301
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x35
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x01
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x78002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Penryn"
+    - "Penryn"
+    - "Penryn"
+    - "Penryn"
+    - "Penryn"
+  CPU:
+    - "Intel Core 2 Duo P7350 @ 2.00 GHz"
+    - "Intel Core 2 Duo P8700 @ 2.53 GHz"
+    - "Intel Core 2 Duo P7550 @ 2.26 GHz"
+    - "Intel Core 2 Duo P8400 @ 2.26 GHz"
+    - "Intel Core 2 Duo P8800 @ 2.66 GHz"
+  GPU:
+    - "NVIDIA GeForce 9400M"
+  RAM:
+    - "1066 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "Mac mini (Early 2009)"
+    - "Mac mini (Late 2009)"
+    - "Mac mini (Mac OS X Server, Late 2009)"
+  MarketingName:
+    - "Mac mini Intel Core (Early 2009)"
+    - "Mac mini Intel Core (Late 2009)"
+    - "Mac mini (Mac OS X Server, Late 2009)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "19X"
+  - "19Y"
+  - "1BU"
+  - "1BV"
+  - "8NC"
+  - "9RR"
+  - "9RS"
+  - "92G"
+  - "9G7"
+  - "9G6"
+  - "9G5"
+  - "9G8"
+  - "306"
+  - "307"
+  - "AFR"
+  - "BAV"
+  - "DMG"
+  - "B9X"
+  - "DMH"
+  - "CS6"
+  - "F6J"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2009
+  - 2010
+CloverSerialNumber: "YM003HAC9G6"
+MinimumOSVersion: "10.6.1"
+MaximumOSVersion: "10.11.6"

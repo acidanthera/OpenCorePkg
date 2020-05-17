@@ -1,0 +1,137 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "MP41.88Z.0081.B08.1001221313"
+BIOSLegacyVersion: "MP41.88Z.0081.B08.1001221313"
+BIOSReleaseDate: "01/22/10"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacPro4,1"
+SystemVersion: "1.4"
+# Note, this one is used by macserial
+SystemSerialNumber: "CT942NZP20H"
+SystemSKUNumber: "Mac-F221BEC8"
+SystemFamily: "MacPro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-F221BEC8"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F221BEC8"
+BoardVersion: "MacPro4,1"
+BoardAssetTag: "Part Component"
+BoardType: 0xB
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x7
+ChassisVersion: "Mac-F221BEC8"
+ChassisAssetTag: "Pro-Enclosure"
+FirmwareFeatures: 0xE001F537
+FirmwareFeaturesMask: 0xC003FF37
+ExtendedFirmwareFeatures: 0x00000000E001F537
+ExtendedFirmwareFeaturesMask: 0x00000000C003FF37
+MemoryFormFactor: 0x9
+# FIXME: Correct this one
+ProcessorType:
+  - 12345
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+SmcGeneration: 1
+SmcRevision:
+  - 0x01
+  - 0x39
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x05
+# FIXME: Correct this one
+SmcBranch:
+  - 0x6B
+  - 0x35
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: Correct this one
+SmcPlatform:
+  - 0x6B
+  - 0x35
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcEPCI: 0x07C002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Bloomfield"
+    - "Bloomfield"
+    - "Bloomfield"
+  CPU:
+    - "Intel Xeon W3520 @ 2.66 GHz"
+    - "Intel Xeon W3540 @ 2.93 GHz"
+    - "Intel Xeon W3580 @ 3.33 GHz"
+    - "Intel Xeon E5520 x2 @ 2.26 GHz"
+    - "Intel Xeon X5550 x2 @ 2.66 GHz"
+    - "Intel Xeon X5570 x2 @ 2.93 GHz"
+  GPU:
+    - "NVIDIA GeForce GT 120"
+  RAM:
+    - "3 GB 1066 MHz DDR3 ECC SDRAM"
+  SystemReportName:
+    - "Mac Pro (Early 2009)"
+  MarketingName:
+    - "Mac Pro (Early 2009)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "20H"
+  - "BXD"
+  - "7BF"
+  - "4PD"
+  - "4PC"
+  - "8TU"
+  - "8TR"
+  - "20G"
+  - "9MC"
+  - "9MD"
+  - "9MG"
+  - "9MK"
+  - "9MJ"
+  - "9ML"
+  - "8XG"
+  - "8XL"
+  - "8MC"
+  - "9QK"
+  - "8Q0"
+  - "9EU"
+  - "9EV"
+  - "8PZ"
+  - "93H"
+  - "CZ2"
+  - "CZ3"
+  - "CZ4"
+  - "EYY"
+  - "EYX"
+  - "E1E"
+  - "ANS"
+  - "E1C"
+  - "E1D"
+  - "BXT"
+  - "EAA"
+  - "GYH"
+  - "BXE"
+  - "F6H"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2009
+  - 2010
+# Optional, override for SystemSerialNumber for Clover
+CloverSerialNumber: "CT930HAC4PD"
+MinimumOSVersion: "10.5.6"
+MaximumOSVersion: "10.11.6"

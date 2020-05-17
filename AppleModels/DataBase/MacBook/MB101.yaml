@@ -1,0 +1,266 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "185.0.0.0.0"
+BIOSLegacyVersion: "MB101.88Z.F000.B00.2001311754"
+BIOSReleaseDate: "01/31/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBook10,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02TQHACHH27"
+SystemSKUNumber: ""
+SystemFamily: "MacBook"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-EE2EBD4B90B839A8"
+BoardVersion: "MacBook10,1"
+# FIXME: check
+BoardRevision: 0x1
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x9
+ChassisVersion: "Mac-EE2EBD4B90B839A8"
+ChassisAssetTag: ""
+# FIXME: check
+PlatformFeature: 0x1A
+# FIXME: check
+FirmwareFeatures: 0xFC0FE13F
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000FC0FE13F
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0C07
+  - 0x0605
+  - 0x0705
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+# FIXME: check
+SmcRevision:
+  - 0x02
+  - 0x42
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x12
+# FIXME: check
+SmcBranch:
+  - 0x6A
+  - 0x31
+  - 0x32
+  - 0x32
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6A
+  - 0x31
+  - 0x32
+  - 0x32
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0xF08009
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      MB101.88Z.F000.B00.2001311754
+    Model:        MB101
+    EFI Version:  185.0.0.0.0
+    Built by:     _atsserver@xapp157
+    Date:         Fri Jan 31 17:54:11 2020
+    Revision:     185 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     Apple LLVM version 6.1.0 (clang-602.0.53) (based on LLVM 3.6.0svn)
+    UUID:         466A281D-D63C-3A92-B950-2DB7D8F07883
+    UUID:         B13FEC13-4988-3EA9-901B-0C0B1109447A
+Specifications:
+  CPUCodename:
+    - "Kaby Lake"
+    - "Kaby Lake"
+    - "Kaby Lake"
+  CPU:
+    - "Intel Core m3-7Y32 @ 1.10 GHz"
+    - "Intel Core i5-7Y54 @ 1.20 GHz"
+    - "Intel Core i7-7Y75 @ 1.30 GHz"
+  GPU:
+    - "Intel HD Graphics 615"
+  RAM:
+    - "1866 MHz LPDDR3 SDRAM"
+  SystemReportName:
+    - "MacBook (Retina, 12-inch, 2017)"
+  MarketingName:
+    - "12\" MacBook (Mid 2017)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "HH27"
+  - "HH25"
+  - "J9XD"
+  - "JPXQ"
+  - "JPXN"
+  - "J64G"
+  - "J64J"
+  - "J65G"
+  - "J64H"
+  - "HH22"
+  - "HH23"
+  - "HH21"
+  - "HH26"
+  - "HH24"
+  - "HH28"
+  - "HH29"
+  - "HH2C"
+  - "HH2F"
+  - "HH2G"
+  - "HH2D"
+  - "HH2J"
+  - "HH2K"
+  - "HH2H"
+  - "JPXP"
+  - "JPXM"
+  - "N86D"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "HJ9L"
+  - "HJ9M"
+  - "HJ9N"
+  - "HJ9P"
+  - "HJ9W"
+  - "HJ9X"
+  - "HJ9Y"
+  - "HJC0"
+  - "HJC5"
+  - "HJC6"
+  - "HJC7"
+  - "HJC8"
+  - "HJ9G"
+  - "HJ9H"
+  - "HJ9J"
+  - "HJ9K"
+  - "HJ9Q"
+  - "HJ9R"
+  - "HJ9T"
+  - "HJ9V"
+  - "HJC1"
+  - "HJC2"
+  - "HJC3"
+  - "HJC4"
+  - "HJCL"
+  - "HJCM"
+  - "HJCN"
+  - "HJCP"
+  - "HJD5"
+  - "HJD6"
+  - "HJD7"
+  - "HJD8"
+  - "HJDQ"
+  - "HJDR"
+  - "HJDT"
+  - "HJDV"
+  - "HJCQ"
+  - "HJCR"
+  - "HJCT"
+  - "HJCV"
+  - "HJD9"
+  - "HJDC"
+  - "HJDD"
+  - "HJDF"
+  - "HJDW"
+  - "HJDX"
+  - "HJDY"
+  - "HJF0"
+  - "HJC9"
+  - "HJCC"
+  - "HJCD"
+  - "HJCF"
+  - "HJCW"
+  - "HJCX"
+  - "HJCY"
+  - "HJD0"
+  - "HJDG"
+  - "HJDH"
+  - "HJDJ"
+  - "HJDK"
+  - "HJCG"
+  - "HJCH"
+  - "HJCJ"
+  - "HJCK"
+  - "HJD1"
+  - "HJD2"
+  - "HJD3"
+  - "HJD4"
+  - "HJDL"
+  - "HJDM"
+  - "HJDN"
+  - "HJDP"
+  - "HJF9"
+  - "HJFC"
+  - "HJFD"
+  - "HJFF"
+  - "HJFW"
+  - "HJFX"
+  - "HJFY"
+  - "HJG0"
+  - "HJGG"
+  - "HJGH"
+  - "HJGJ"
+  - "HJGK"
+  - "HJFG"
+  - "HJFH"
+  - "HJFJ"
+  - "HJFK"
+  - "HJG1"
+  - "HJG2"
+  - "HJG3"
+  - "HJG4"
+  - "HJGL"
+  - "HJGM"
+  - "HJGN"
+  - "HJGP"
+  - "HJF1"
+  - "HJF2"
+  - "HJF3"
+  - "HJF4"
+  - "HJFL"
+  - "HJFM"
+  - "HJFN"
+  - "HJFP"
+  - "HJG5"
+  - "HJG6"
+  - "HJG7"
+  - "HJG8"
+  - "HJF5"
+  - "HJF6"
+  - "HJF7"
+  - "HJF8"
+  - "HJFQ"
+  - "HJFR"
+  - "HJFT"
+  - "HJFV"
+  - "HJG9"
+  - "HJGC"
+  - "HJGD"
+  - "HJGF"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2017
+  - 2018
+  - 2019
+CloverSerialNumber: "C02TQHACHH27"
+MinimumOSVersion: "10.12.5"
+MaximumOSVersion: null

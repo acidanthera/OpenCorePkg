@@ -1,0 +1,120 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "MB52.88Z.0088.B05.0904162222"
+BIOSLegacyVersion: "MB52.88Z.0088.B05.0904162222"
+BIOSReleaseDate: "04/16/09"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBook5,2"
+SystemVersion: "1.3"
+# Note, this one is used by macserial
+SystemSerialNumber: "W88AAAAA9GU"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F22788AA"
+BoardVersion: "Proto"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-F22788AA"
+ChassisAssetTag: "Asset Tag#"
+MemoryFormFactor: 0xD
+FirmwareFeatures: 0xC0001403
+FirmwareFeaturesMask: 0xC0007FFF
+ExtendedFirmwareFeatures: 0x00000000C0001403
+ExtendedFirmwareFeaturesMask: 0x00000000C0007FFF
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x38
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x05
+# FIXME: check
+SmcBranch:
+  - 0x62
+  - 0x72
+  - 0x61
+  - 0x6E
+  - 0x63
+  - 0x68
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6B
+  - 0x33
+  - 0x36
+  - 0x62
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7A002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Penryn"
+    - "Penryn"
+  CPU:
+    - "Intel Core 2 Duo P7450 @ 2.13 GHz"
+    - "Intel Core 2 Duo P7350 @ 2.00 GHz"
+  GPU:
+    - "NVIDIA GeForce 9400M"
+  RAM:
+    - "800 MHz DDR2 SDRAM"
+  SystemReportName:
+    - "MacBook (13-inch, Early 2009)"
+    - "MacBook (13-inch, Mid 2009)"
+  MarketingName:
+    - "MacBook Intel Core 2 Duo (white, Early 2009)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "9GU"
+  - "8CP"
+  - "79F"
+  - "79E"
+  - "79D"
+  - "85D"
+  - "7A2"
+  - "88J"
+  - "8SJ"
+  - "4R1"
+  - "4R3"
+  - "4R2"
+  - "93K"
+  - "9GV"
+  - "A9Y"
+  - "A9P"
+  - "ASC"
+  - "A9Q"
+  - "A1W"
+  - "A1X"
+  - "ABW"
+  - "A1Y"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2009
+CloverSerialNumber: "W8913HAC4R1"
+MinimumOSVersion: "10.5.7"
+MaximumOSVersion: "10.11.6"

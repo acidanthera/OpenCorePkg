@@ -1,0 +1,130 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "MBP55.88Z.00AC.B03.0906151708"
+BIOSLegacyVersion: "MBP55.88Z.00AC.B03.0906151708"
+BIOSReleaseDate: "06/15/09"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro5,5"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W8035TG966D"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F2268AC8"
+BoardVersion: ""
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-F2268AC8"
+ChassisAssetTag: "Asset Tag#"
+MemoryFormFactor: 0xD
+FirmwareFeatures: 0xC0001403
+FirmwareFeaturesMask: 0xC0007FFF
+ExtendedFirmwareFeatures: 0x00000000C0001403
+ExtendedFirmwareFeaturesMask: 0x00000000C0007FFF
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+  - 0x0301
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x47
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x02
+# FIXME: check
+SmcBranch:
+  - 0x62
+  - 0x72
+  - 0x61
+  - 0x6E
+  - 0x63
+  - 0x68
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7B002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Penryn"
+    - "Penryn"
+    - "Penryn"
+  CPU:
+    - "Intel Core 2 Duo P7550 @ 2.26 GHz"
+    - "Intel Core 2 Duo P8700 @ 2.53 GHz"
+    - "Intel Core 2 Duo P8400 @ 2.26 GHz"
+  GPU:
+    - "NVIDIA GeForce 9400M"
+  RAM:
+    - "1066 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (13-inch, Mid 2009)"
+  MarketingName:
+    - "MacBook Pro Intel Core 2 Duo (aluminum unibody) (Mid 2009)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "66D"
+  - "66E"
+  - "66J"
+  - "66H"
+  - "ALL"
+  - "ALM"
+  - "ALJ"
+  - "ALK"
+  - "A4V"
+  - "A4W"
+  - "A4Z"
+  - "A4X"
+  - "A4Y"
+  - "A55"
+  - "A54"
+  - "A57"
+  - "A56"
+  - "E4R"
+  - "E40"
+  - "E6R"
+  - "A3K"
+  - "A3L"
+  - "AGJ"
+  - "AGH"
+  - "AGQ"
+  - "F9W"
+  - "BKL"
+  - "BKM"
+  - "A50"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2009
+  - 2010
+CloverSerialNumber: "W8951HAC66E"
+MinimumOSVersion: "10.5.7"
+MaximumOSVersion: "10.11.6"

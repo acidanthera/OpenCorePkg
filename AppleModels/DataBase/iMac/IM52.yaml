@@ -1,0 +1,105 @@
+BIOSVendor: "Apple Computer, Inc."
+BIOSVersion: "IM52.88Z.0090.B09.0706270913"
+BIOSLegacyVersion: "IM52.88Z.0090.B09.0706270913"
+BIOSReleaseDate: "06/27/07"
+SystemManufacturer: "Apple Computer, Inc."
+SystemProductName: "iMac5,2"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W8716HACWH5"
+SystemSKUNumber: "System SKUNumber"
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Computer, Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F4218EC8"
+BoardVersion: "DVT"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Computer, Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-F4218EC8"
+ChassisAssetTag: "Asset Tag"
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x06
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x73002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Merom"
+  CPU:
+    - "Intel Core 2 Duo T5600 @ 1.83 GHz"
+  GPU:
+    - "Intel GMA 950 graphics"
+  RAM:
+    - "667 MHz DDR2 SDRAM, PC2-5300"
+  SystemReportName:
+    - "iMac (17-inch, Late 2006 CD)"
+  MarketingName: ""
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "WH5"
+  - "2JW"
+  - "289"
+  - "X4W"
+  - "YTN"
+  - "ZCA"
+  - "WH4"
+  - "WRQ"
+  - "WQR"
+  - "Y4Q"
+  - "WV7"
+  - "Y4D"
+  - "Y4E"
+  - "X3P"
+  - "YD4"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2006
+  - 2007
+CloverSerialNumber: "QP702HACWH4"
+MinimumOSVersion: "10.4.7"
+MaximumOSVersion: "10.7.5"

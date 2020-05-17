@@ -50,7 +50,6 @@
 [Packages]
   OpenCorePkg/OpenCorePkg.dec
   OpenCorePkg/OpenCorePkg.dec
-  MacInfoPkg/MacInfoPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   UefiCpuPkg/UefiCpuPkg.dec
@@ -98,7 +97,7 @@
   OcStorageLib
   OcUnicodeCollationEngGenericLib
   OcVirtualFsLib
-  MacInfoLib
+  OcMacInfoLib
   PcdLib
   PrintLib
   UefiBootServicesTableLib

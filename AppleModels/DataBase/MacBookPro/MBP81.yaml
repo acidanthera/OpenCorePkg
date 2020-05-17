@@ -1,0 +1,228 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "87.0.0.0.0"
+BIOSLegacyVersion: "MBP81.88Z.F000.B00.1906132217"
+BIOSReleaseDate: "06/13/19"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro8,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W89F9196DH2G"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-94245B3640C91C81"
+BoardVersion: "MacBookPro8,1"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-94245B3640C91C81"
+ChassisAssetTag: ""
+# FIXME: check
+FirmwareFeatures: 0xC00DE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000C00DE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0603
+  - 0x0602
+  - 0x0703
+  - 0x0703
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x68
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x99
+# FIXME: check
+SmcBranch:
+  - 0x6B
+  - 0x39
+  - 0x30
+  - 0x69
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6B
+  - 0x39
+  - 0x30
+  - 0x69
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7B005
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MBP81
+    EFI Version:  87.0.0.0.0
+    Date:         Thu Jun 13 22:17:08 2019
+    Build Type:   Release
+Specifications:
+  CPUCodename:
+    - "Sandy Bridge"
+    - "Sandy Bridge"
+    - "Sandy Bridge"
+    - "Sandy Bridge"
+  CPU:
+    - "Intel Core i5-2415M @ 2.30 GHz"
+    - "Intel Core i5-2435M @ 2.40 GHz"
+    - "Intel Core i7-2640M @ 2.80 GHz"
+    - "Intel Core i7-2620M @ 2.70 GHz"
+  GPU:
+    - "Intel HD Graphics 3000"
+  RAM:
+    - "1333 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (13-inch, Early 2011)"
+    - "MacBook Pro (13-inch, Late 2011)"
+  MarketingName:
+    - "MacBook Pro Intel Core i5, Intel Core i7, 13\" (Early 2011)"
+    - "MacBook Pro Intel Core i5, Intel Core i7, 13\" (Late 2011)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "DH2G"
+  - "DH2L"
+  - "DV13"
+  - "DH2H"
+  - "F299"
+  - "F298"
+  - "DW13"
+  - "DY6C"
+  - "DVHP"
+  - "DVHQ"
+  - "DVHJ"
+  - "DVHK"
+  - "DY77"
+  - "DYL1"
+  - "DYL0"
+  - "DYL2"
+  - "DV14"
+  - "DV17"
+  - "DV16"
+  - "DY1J"
+  - "DY1K"
+  - "DY5V"
+  - "DY5T"
+  - "DNGD"
+  - "DLN6"
+  - "DLN5"
+  - "DT66"
+  - "DT67"
+  - "DT64"
+  - "DT65"
+  - "DT62"
+  - "DT63"
+  - "DT60"
+  - "DT61"
+  - "DT4G"
+  - "DT4H"
+  - "DRJ7"
+  - "DRJ9"
+  - "DRJJ"
+  - "DRJK"
+  - "DNVY"
+  - "DRW2"
+  - "DRW1"
+  - "DRW7"
+  - "DM75"
+  - "DNKQ"
+  - "DNKP"
+  - "DH2M"
+  - "DNTK"
+  - "DNCM"
+  - "DR7W"
+  - "DMLH"
+  - "DMLJ"
+  - "DMLF"
+  - "ST61"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "DM6D"
+  - "DM6F"
+  - "DM6J"
+  - "DM6K"
+  - "DM6L"
+  - "DM6N"
+  - "DM6P"
+  - "DM6T"
+  - "DMLK"
+  - "DMLM"
+  - "DMLP"
+  - "DMLR"
+  - "DRKQ"
+  - "DRKR"
+  - "DRKT"
+  - "DRLN"
+  - "DRMH"
+  - "DRMJ"
+  - "DTFL"
+  - "DTFM"
+  - "DTFN"
+  - "DTFQ"
+  - "DTFY"
+  - "DTG0"
+  - "DM6G"
+  - "DM6H"
+  - "DM6M"
+  - "DM6Q"
+  - "DM6R"
+  - "DM6V"
+  - "DM6W"
+  - "DMLL"
+  - "DMLN"
+  - "DMLQ"
+  - "DMLT"
+  - "DMLV"
+  - "DRKM"
+  - "DRKN"
+  - "DRKP"
+  - "DRKV"
+  - "DRMG"
+  - "DRMK"
+  - "DTFJ"
+  - "DTFK"
+  - "DTFR"
+  - "DTFT"
+  - "DTFV"
+  - "DTFW"
+  - "DTML"
+  - "DTMR"
+  - "DTMV"
+  - "DTMY"
+  - "DTN2"
+  - "DTN5"
+  - "DTMK"
+  - "DTMM"
+  - "DTMQ"
+  - "DTN0"
+  - "DTN3"
+  - "DTN4"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2011
+  - 2012
+CloverSerialNumber: "W89F9196DH2G"
+MinimumOSVersion: "10.7.2"
+MaximumOSVersion: "10.13.6"

@@ -1,0 +1,111 @@
+BIOSVendor: "Apple Computer, Inc."
+BIOSVersion: "IM61.88Z.0093.B07.0804281538"
+BIOSLegacyVersion: "IM61.88Z.0093.B07.0804281538"
+BIOSReleaseDate: "04/28/08"
+SystemManufacturer: "Apple Computer, Inc."
+SystemProductName: "iMac6,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W8652HACVGN"
+SystemSKUNumber: "System SKUNumber"
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Computer, Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F4218FC8"
+BoardVersion: "DVT"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Computer, Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-F4218FC8"
+ChassisAssetTag: "Asset Tag"
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x08
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x02
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x73002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Merom"
+    - "Merom"
+  CPU:
+    - "Intel Core 2 Duo T7400 @ 2.16 GHz"
+    - "Intel Core 2 Duo T7600 @ 2.33 GHz"
+  GPU:
+    - "AMD ATI Radeon X1600"
+  RAM:
+    - "667 MHz DDR2 SDRAM, PC2-5300"
+  SystemReportName:
+    - "iMac (24-inch, Late 2006)"
+  MarketingName: ""
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "VGN"
+  - "VGP"
+  - "Y3Z"
+  - "Y3Y"
+  - "XWW"
+  - "XA5"
+  - "X3C"
+  - "WSG"
+  - "WR3"
+  - "YX0"
+  - "Y40"
+  - "XA6"
+  - "XLD"
+  - "YAF"
+  - "XZP"
+  - "X6T"
+  - "XSM"
+  - "WYG"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2006
+  - 2007
+CloverSerialNumber: "QP708HACXA6"
+MinimumOSVersion: "10.4.7"
+MaximumOSVersion: "10.7.5"

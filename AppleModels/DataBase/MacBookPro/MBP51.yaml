@@ -1,0 +1,157 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "MBP51.88Z.007E.B06.1202061253"
+BIOSLegacyVersion: "MBP51.88Z.007E.B06.1202061253"
+BIOSReleaseDate: "02/06/12"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro5,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W88439FE1G0"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F42D86C8"
+BoardVersion: "Proto"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x8
+ChassisVersion: "Mac-F42D86C8"
+ChassisAssetTag: "Asset Tag#"
+MemoryFormFactor: 0xD
+FirmwareFeatures: 0xC0001403
+FirmwareFeaturesMask: 0xC0007FFF
+ExtendedFirmwareFeatures: 0x00000000C0001403
+ExtendedFirmwareFeaturesMask: 0x00000000C0007FFF
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+  - 0x0301
+  - 0x0301
+  - 0x0301
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x33
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x08
+# FIXME: check
+SmcBranch:
+  - 0x6D
+  - 0x39
+  - 0x38
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6D
+  - 0x39
+  - 0x38
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7B002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Penryn"
+    - "Penryn"
+    - "Penryn"
+    - "Penryn"
+    - "Penryn"
+  CPU:
+    - "Intel Core 2 Duo P8600 @ 2.40 GHz"
+    - "Intel Core 2 Duo T9800 @ 2.93 GHz"
+    - "Intel Core 2 Duo T9400 @ 2.53 GHz"
+    - "Intel Core 2 Duo T9550 @ 2.66 GHz"
+    - "Intel Core 2 Duo T9600 @ 2.80 GHz"
+  GPU:
+    - "NVIDIA GeForce 9600M GT"
+  RAM:
+    - "1066 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (15-inch, Late 2008)"
+  MarketingName:
+    - "MacBook Pro Intel Core 2 Duo (aluminum unibody) (Late 2008)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "1G0"
+  - "6J2"
+  - "6J1"
+  - "6J5"
+  - "6J4"
+  - "6JW"
+  - "6JJ"
+  - "76Z"
+  - "8CR"
+  - "63X"
+  - "7XP"
+  - "7XL"
+  - "7XM"
+  - "7XN"
+  - "7X0"
+  - "4RA"
+  - "4RB"
+  - "6EJ"
+  - "6EK"
+  - "8Q3"
+  - "852"
+  - "5HX"
+  - "6GN"
+  - "6GP"
+  - "5TZ"
+  - "5TY"
+  - "8TW"
+  - "8TV"
+  - "8TQ"
+  - "8TZ"
+  - "8TY"
+  - "8TX"
+  - "973"
+  - "972"
+  - "971"
+  - "970"
+  - "6ZB"
+  - "8S6"
+  - "8S7"
+  - "8Q1"
+  - "8Q2"
+  - "8Q5"
+  - "6HZ"
+  - "4R9"
+  - "93G"
+  - "1GN"
+  - "1GK"
+  - "1GA"
+  - "71C"
+  - "71A"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2008
+  - 2009
+CloverSerialNumber: "W88439FE1G0"
+MinimumOSVersion: "10.5.6"
+MaximumOSVersion: "10.11.6"

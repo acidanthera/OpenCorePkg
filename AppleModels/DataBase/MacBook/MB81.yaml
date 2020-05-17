@@ -1,0 +1,167 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "188.0.0.0.0"
+BIOSLegacyVersion: "MB81.88Z.F000.B00.2002051746"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBook8,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02RCE58GCN3"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "Crb"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-BE0E8AC46FE800CC"
+BoardVersion: "MacBook8,1"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x9
+ChassisVersion: "Mac-BE0E8AC46FE800CC"
+ChassisAssetTag: "Chassis Board Asset Tag#"
+PlatformFeature: 0x1A
+# FIXME: check
+FirmwareFeatures: 0xFC0FE13F
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000FC0FE13F
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0B06
+  - 0x0B06
+  - 0x0B06
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+# FIXME: check
+SmcRevision:
+  - 0x02
+  - 0x25
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x87
+# FIXME: check
+SmcBranch:
+  - 0x6A
+  - 0x39
+  - 0x32
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6A
+  - 0x39
+  - 0x32
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0xF0E007
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MB81
+    EFI Version:  188.0.0.0.0
+    Built by:     root@xapp160
+    Date:         Wed Feb  5 17:46:35 PST 2020
+    Revision:     188 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple LLVM version 5.0 (clang-500.0.68) (based on LLVM 3.3svn)
+Specifications:
+  CPUCodename:
+    - "Broadwell"
+    - "Broadwell"
+    - "Broadwell"
+  CPU:
+    - "Intel Core M 5Y51 @ 1.10 GHz"
+    - "Intel Core M 5Y31 @ 900 MHz"
+    - "Intel Core M 5Y71 @ 1.20 GHz"
+  GPU:
+    - "Intel HD Graphics 5300"
+  RAM:
+    - "1600 MHz LPDDR3 SDRAM"
+  SystemReportName:
+    - "MacBook (Retina, 12-inch, Early 2015)"
+  MarketingName:
+    - "12\" MacBook (Early 2015)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "GCN3"
+  - "FFVW"
+  - "FFVY"
+  - "FG46"
+  - "FGC4"
+  - "FGMR"
+  - "FGMT"
+  - "FL8N"
+  - "FM8L"
+  - "FM8M"
+  - "FM8N"
+  - "FMLG"
+  - "FP12"
+  - "GCN1"
+  - "GCN2"
+  - "GCN4"
+  - "GKK3"
+  - "GKK2"
+  - "GKJQ"
+  - "GKJR"
+  - "GL69"
+  - "GL6C"
+  - "GL6G"
+  - "GL6F"
+  - "GL6D"
+  - "GL6H"
+  - "GR88"
+  - "GF85"
+  - "GR8C"
+  - "GR8G"
+  - "GR8F"
+  - "GR8D"
+  - "GR89"
+  - "GF84"
+  - "GF83"
+  - "GF82"
+  - "GKK5"
+  - "GKK4"
+  - "FWW4"
+  - "FWW5"
+  - "FWW6"
+  - "FWW3"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "FV36"
+  - "FV3T"
+  - "FV5W"
+  - "FV9F"
+  - "FV6W"
+  - "FVC7"
+  - "FVF6"
+  - "FV87"
+  - "FV5H"
+  - "FVF0"
+  - "FV7P"
+  - "FVC8"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2015
+  - 2016
+CloverSerialNumber: "C02RCE58GCN3"
+MinimumOSVersion: "10.10.2"
+MaximumOSVersion: null

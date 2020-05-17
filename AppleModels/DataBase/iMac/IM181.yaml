@@ -1,0 +1,117 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "181.0.0.0.0"
+BIOSLegacyVersion: "IM181.88Z.F000.B00.2001311754"
+BIOSReleaseDate: "01/31/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac18,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02TDHACH7JY"
+SystemSKUNumber: ""
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-BE088AF8C5EB4FA2"
+#  "Mac-smthelse"
+BoardProduct: "Mac-4B682C642B45593E"
+BoardVersion: "iMac18,1"
+BoardRevision: 0x1F
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-4B682C642B45593E"
+ChassisAssetTag: ""
+PlatformFeature: 0x0
+FirmwareFeatures: 0xFD0FF576
+FirmwareFeaturesMask: 0xFF1FFF3F
+ExtendedFirmwareFeatures: 0x00000000FD0FF576
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0x9
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0607
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+SmcGeneration: 2
+# FIXME: I believe it should match iMac18,3...
+# But it was checked from Firmware.pkg of 10.15.1
+SmcRevision:
+  - 0x02
+  - 0x39
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x40
+SmcBranch:
+  - 0x6a
+  - 0x31
+  - 0x33
+  - 0x33
+  - 0x5f
+  - 0x34
+  - 0x5f
+  - 0x35
+SmcPlatform:
+  - 0x6a
+  - 0x31
+  - 0x33
+  - 0x35
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcEPCI: 0xF07009
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      IM181.88Z.F000.B00.2001311754
+    Model:        IM181
+    EFI Version:  181.0.0.0.0
+    Built by:     _atsserver@xapp157
+    Date:         Fri Jan 31 17:54:10 2020
+    Revision:     181 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     Apple LLVM version 6.1.0 (clang-602.0.53) (based on LLVM 3.6.0svn)
+    UUID:         04E73AA7-F5C4-3C6C-8FDD-433A5F441D96
+    UUID:         D01A0E95-D2A6-3E24-B70A-F4AEAA84BF0F
+Specifications:
+  CPUCodename:
+    - "Kaby Lake"
+  CPU:
+    - "Intel Core i5-7360U @ 2.30 GHz"
+  GPU:
+    - "Intel Iris Plus Graphics 640"
+  RAM:
+    - "8 GB 2133 MHz DDR4 SDRAM"
+  SystemReportName:
+    - "iMac (21.5-inch, 2017)"
+  MarketingName:
+    - "21.5\" iMac (2017)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "H7JY"
+  - "H7VF"
+  - "JGDR"
+  - "MCD9"
+  - "MCD7"
+  - "KQFL"
+  - "MCD8"
+  - "H7K0"
+  - "H7VG"
+  - "JFRR"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "H69F"
+  - "H668"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2017
+  - 2018
+  - 2019
+  - 2020
+MinimumOSVersion: "10.12.4"
+MaximumOSVersion: null

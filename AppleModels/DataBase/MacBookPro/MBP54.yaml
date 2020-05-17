@@ -1,0 +1,109 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "MBP53.88Z.00AC.B03.0906151647"
+BIOSLegacyVersion: "MBP53.88Z.00AC.B03.0906151647"
+BIOSReleaseDate: "06/15/09"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro5,4"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W8948HAC7XJ"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F22587A1"
+BoardVersion: "MacBookPro5,4"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-F22587A1"
+ChassisAssetTag: "Asset Tag#"
+MemoryFormFactor: 0xD
+FirmwareFeatures: 0xC0001403
+FirmwareFeaturesMask: 0xC0007FFF
+ExtendedFirmwareFeatures: 0x00000000C0001403
+ExtendedFirmwareFeaturesMask: 0x00000000C0007FFF
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x49
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x02
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7B002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Penryn"
+  CPU:
+    - "Intel Core 2 Duo P8700 @ 2.53 GHz"
+  GPU:
+    - "NVIDIA GeForce 9400M"
+  RAM:
+    - "1066 MHz DDR3 SDRAM (PC3-8500)"
+  SystemReportName:
+    - "MacBook Pro (15-inch, 2.53GHz, Mid 2009)"
+  MarketingName:
+    - "MacBook Pro Intel Core 2 Duo (aluminum unibody) (Mid 2009)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "7XJ"
+  - "AMG"
+  - "AMF"
+  - "CS9"
+  - "CS7"
+  - "A3C"
+  - "A3B"
+  - "A3G"
+  - "A3F"
+  - "B21"
+  - "AY9"
+  - "AG7"
+  - "CS8"
+  - "AUT"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2009
+  - 2010
+CloverSerialNumber: "W8948HAC7XJ"
+MinimumOSVersion: "10.5.7"
+MaximumOSVersion: "10.11.6"

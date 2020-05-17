@@ -1,0 +1,176 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "190.0.0.0.0"
+BIOSLegacyVersion: "MB91.88Z.F000.B00.2001311734"
+BIOSReleaseDate: "01/31/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBook9,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02RM408HDNK"
+SystemSKUNumber: ""
+SystemFamily: "MacBook"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-9AE82516C7C6B903"
+BoardVersion: "MacBook9,1"
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x9
+ChassisVersion: "Mac-9AE82516C7C6B903"
+ChassisAssetTag: ""
+# FIXME: check
+PlatformFeature: 0x1A
+# FIXME: check
+FirmwareFeatures: 0xFC0FE13F
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000FC0FE13F
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0D07
+  - 0x0C07
+  - 0x0E07
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+# FIXME: check
+SmcRevision:
+  - 0x02
+  - 0x35
+  - 0x0f
+  - 0x00
+  - 0x01
+  - 0x06
+SmcBranch:
+  - 0x6A
+  - 0x39
+  - 0x33
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcPlatform:
+  - 0x6A
+  - 0x39
+  - 0x33
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0xF0E007
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      MB91.88Z.F000.B00.2001311734
+    EFI Version:  190.0.0.0.0
+    Built by:     _atsserver@xapp157
+    Date:         Fri Jan 31 17:34:08 2020
+    Revision:     190 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build
+    Compiler:     Apple LLVM version 6.1.0 (clang-602.0.53) (based on LLVM 3.6.0svn)
+    UUID:         021A5E00-7894-3E61-A9C1-8EC789188CA6
+    UUID:         829877AD-B7DC-3F4D-9A9B-A11A7C093429
+Specifications:
+  CPUCodename:
+    - "Skylake"
+    - "Skylake"
+    - "Skylake"
+  CPU:
+    - "Intel Core m3-6Y30 @ 1.10 GHz"
+    - "Intel Core m5-6Y54 @ 1.20 GHz"
+    - "Intel Core m7-6Y75 @ 1.10 GHz"
+  GPU:
+    - "Intel HD Graphics 515"
+  RAM:
+    - "8GB 1866 MHz LPDDR3 SDRAM"
+  SystemReportName:
+    - "MacBook (Retina, 12-inch, Early 2016)"
+  MarketingName:
+    - "12\" MacBook (Early 2016)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "HDNK"
+  - "GTHR"
+  - "GTHT"
+  - "GTHV"
+  - "GTHW"
+  - "GTHX"
+  - "GTHY"
+  - "GTJ0"
+  - "GTJ1"
+  - "GTJ2"
+  - "GTJ3"
+  - "GTJ4"
+  - "GTJ6"
+  - "GTJ7"
+  - "GTJ8"
+  - "GTJ9"
+  - "GTJC"
+  - "GTJD"
+  - "H3QW"
+  - "H3QX"
+  - "H3QY"
+  - "H3R5"
+  - "H3R6"
+  - "H3R7"
+  - "HD8M"
+  - "GTGW"
+  - "JC5J"
+  - "HRMD"
+  - "HRMG"
+  - "HRMF"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "FV48"
+  - "FV8P"
+  - "FV9C"
+  - "FV9Q"
+  - "H6LL"
+  - "H6LM"
+  - "H6LN"
+  - "H6LP"
+  - "FV3K"
+  - "FV5M"
+  - "FV67"
+  - "FV77"
+  - "H6LQ"
+  - "H6LR"
+  - "H6LT"
+  - "H6LV"
+  - "FV3D"
+  - "FV4C"
+  - "FV9K"
+  - "FVC6"
+  - "H6M1"
+  - "H6M2"
+  - "H6M3"
+  - "H6M4"
+  - "FV89"
+  - "FV8Q"
+  - "FV8T"
+  - "FVCP"
+  - "H6M5"
+  - "H6M6"
+  - "H6M7"
+  - "H6M8"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2016
+  - 2017
+CloverSerialNumber: "C02RM408HDNK"
+MinimumOSVersion: "10.11.4"
+MaximumOSVersion: null

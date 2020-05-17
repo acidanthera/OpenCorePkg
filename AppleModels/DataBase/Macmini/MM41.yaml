@@ -1,0 +1,119 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "76.0.0.0.0"
+BIOSLegacyVersion: "MM41.88Z.F000.B00.1906132344"
+BIOSReleaseDate: "06/13/2019"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "Macmini4,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02FHBBEDD6H"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "Macmini"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F2208EC8"
+BoardVersion: "Macmini4,1"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x10
+ChassisVersion: "Mac-F2208EC8"
+ChassisAssetTag: ""
+# FIXME: check
+FirmwareFeatures: 0xD00DE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000D00DE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x65
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x02
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x78002
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MM41
+    EFI Version:  76.0.0.0.0
+    Date:         Thu Jun 13 23:44:34 2019
+    Build Type:   Release
+Specifications:
+  CPUCodename:
+    - "Penryn"
+    - "Penryn"
+  CPU:
+    - "Intel Core 2 Duo P8600 @ 2.40 GHz"
+    - "Intel Core 2 Duo P8800 @ 2.66 GHz"
+  GPU:
+    - "NVIDIA GeForce 320M"
+  RAM:
+    - "1066 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "Mac mini (Mid 2010)"
+    - "Mac mini Server (Mid 2010)"
+  MarketingName:
+    - "Mac mini (Mid 2010)"
+    - "Mac mini Server (Mid 2010)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "DD6H"
+  - "DD6L"
+  - "DFDK"
+  - "DDVN"
+  - "DDQ9"
+  - "DD6N"
+  - "DD6K"
+  - "DDJF"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "DC2D"
+  - "DC40"
+  - "DC5G"
+  - "DC6Y"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2010
+  - 2011
+CloverSerialNumber: "C02FHBBEDD6H"
+MinimumOSVersion: "10.6.4"
+MaximumOSVersion: "10.13.6"

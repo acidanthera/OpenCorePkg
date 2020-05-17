@@ -1,0 +1,210 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "176.0.0.0.0"
+BIOSLegacyVersion: "IM171.88Z.F000.B00.2001311733"
+BIOSReleaseDate: "01/31/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac17,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02QFHACGG7L"
+SystemSKUNumber: ""
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-DB15BD556843C820"
+#  "Mac-smthelse"
+BoardProduct:
+  - "Mac-DB15BD556843C820"
+  - "Mac-65CE76090165799A"
+  - "Mac-B809C3757DA9BB8D"
+BoardVersion: "iMac17,1"
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion:
+  - "Mac-DB15BD556843C820"
+  - "Mac-65CE76090165799A"
+  - "Mac-B809C3757DA9BB8D"
+ChassisAssetTag: ""
+PlatformFeature: 0x0
+FirmwareFeatures: 0xFC0FE137
+FirmwareFeaturesMask: 0xFF1FFF3F
+ExtendedFirmwareFeatures: 0x00000000FC0FE137
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0605
+  - 0x0705
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+  - 12345
+SmcGeneration: 2
+SmcRevision:
+  - 0x02
+  - 0x33
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x12
+SmcBranch:
+  - 0x6a
+  - 0x39
+  - 0x35
+  - 0x6a
+  - 0x39
+  - 0x35
+  - 0x61
+  - 0x6d
+SmcPlatform:
+  - 0x6a
+  - 0x39
+  - 0x35
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# SmcRevision:
+#   - 0x02
+#   - 0x34
+#   - 0x0f
+#   - 0x00
+#   - 0x00
+#   - 0x02
+# SmcBranch:
+#   - 0x6a
+#   - 0x39
+#   - 0x35
+#   - 0x6a
+#   - 0x39
+#   - 0x35
+#   - 0x61
+#   - 0x6d
+# SmcPlatform:
+#   - 0x6a
+#   - 0x39
+#   - 0x35
+#   - 0x61
+#   - 0x6d
+#   - 0x00
+#   - 0x00
+#   - 0x00
+SmcEPCI: 0xF01008
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      IM171.88Z.F000.B00.2001311733
+    Model:        IM171
+    EFI Version:  176.0.0.0.0
+    Built by:     _atsserver@xapp157
+    Date:         Fri Jan 31 17:33:35 2020
+    Revision:     176 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     Apple LLVM version 6.1.0 (clang-602.0.53) (based on LLVM 3.6.0svn)
+    UUID:         F0617C92-AC78-3D2F-8DA8-041C791BB575
+    UUID:         1FB6DAA2-C815-34AC-BABE-68D68CB50952
+Specifications:
+  CPUCodename:
+    - "Skylake"
+    - "Skylake"
+    - "Skylake"
+  CPU:
+    - "Intel Core i5-6500 @ 3.20 GHz"
+    - "Intel Core i5-6600 @ 3.30 GHz"
+    - "Intel Core i7-6700K @ 4.00 GHz"
+  GPU:
+    - "AMD Radeon R9 M380"
+    - "AMD Radeon R9 M390"
+    - "AMD Radeon R9 M395"
+    - "AMD Radeon R9 M395X"
+  RAM:
+    - "8 GB 1867 MHz LPDDR3 SDRAM"
+  SystemReportName:
+    - "iMac (Retina 5K, 27-inch, Late 2015)"
+  MarketingName:
+    - "27\" iMac (Late 2015)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "GG7L"
+  - "GG7J"
+  - "GG7N"
+  - "GG7R"
+  - "GG7T"
+  - "GG7V"
+  - "GG80"
+  - "GG81"
+  - "GG82"
+  - "GQ17"
+  - "GQ18"
+  - "H0Q3"
+  - "H0Q4"
+  - "H0Q5"
+  - "H3GP"
+  - "H3GQ"
+  - "H3GR"
+  - "H3GT"
+  - "H3GV"
+  - "H3GW"
+  - "H8L5"
+  - "H8L6"
+  - "H3H4"
+  - "H3HJ"
+  - "HJRN"
+  - "H1H9"
+  - "H4JM"
+  - "H2YQ"
+  - "J0DK"
+  - "GG7Q"
+  - "HN8P"
+  - "H3H9"
+  - "H3H8"
+  - "H3H7"
+  - "H3H6"
+  - "H3H5"
+  - "H3H3"
+  - "H3H2"
+  - "H3H1"
+  - "H3H0"
+  - "H3HH"
+  - "H3HD"
+  - "H3HC"
+  - "HMMQ"
+  - "H3HG"
+  - "H3HF"
+  - "H3GX"
+  - "H3GY"
+  - "H3GN"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "GPF7"
+  - "GPF8"
+  - "GPF3"
+  - "GPF4"
+  - "GTL1"
+  - "GTL2"
+  - "GPJ8"
+  - "GPJD"
+  - "GPDY"
+  - "GPF0"
+  - "GTL3"
+  - "GTL4"
+  - "GPJF"
+  - "GPJH"
+  - "GPJ9"
+  - "GPJJ"
+  - "GPJC"
+  - "GPJG"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2015
+  - 2016
+  - 2017
+# Optional, override for SystemSerialNumber for Clover
+CloverSerialNumber: "C02QFHACGG7L"
+MinimumOSVersion: "10.11"
+MaximumOSVersion: null

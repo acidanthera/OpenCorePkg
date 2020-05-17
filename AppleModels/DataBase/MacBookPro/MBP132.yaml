@@ -1,0 +1,196 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "265.0.0.0.0"
+BIOSLegacyVersion: "MBP132.88Z.F000.B00.2001311618"
+BIOSReleaseDate: "01/31/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro13,2"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02SLHACGYFH"
+SystemSKUNumber: ""
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-66E35819EE2D0D05"
+BoardVersion: "MacBookPro13,2"
+# FIXME: check
+BoardRevision: 0x14
+BoardAssetTag: ""
+BoardType: 0xA
+# FIXME: check
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x9
+ChassisVersion: "Mac-66E35819EE2D0D05"
+ChassisAssetTag: ""
+PlatformFeature: 0x1A
+FirmwareFeatures: 0xFC0FE137
+FirmwareFeaturesMask: 0xFF1FFF3F
+ExtendedFirmwareFeatures: 0x00000000FC0FE137
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0707
+  - 0x0605
+  - 0x0605
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+# FIXME: check
+SmcRevision:
+  - 0x02
+  - 0x37
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x21
+# FIXME: check
+SmcBranch:
+  - 0x32
+  - 0x30
+  - 0x31
+  - 0x36
+  - 0x6D
+  - 0x62
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6A
+  - 0x37
+  - 0x39
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0xF02009
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      MBP132.88Z.F000.B00.2001311618
+    Model:        MBP132
+    EFI Version:  265.0.0.0.0
+    Built by:     _atsserver@xapp157
+    Date:         Fri Jan 31 16:18:23 2020
+    Revision:     265 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     Apple LLVM version 6.1.0 (clang-602.0.53) (based on LLVM 3.6.0svn)
+    UUID:         8A368548-AB14-3C3F-AD6A-1FF5D8E4258B
+    UUID:         FBF87971-41EC-3F3F-A3A3-6F7DF60A06E5
+Specifications:
+  CPUCodename:
+    - "Skylake"
+    - "Skylake"
+    - "Skylake"
+  CPU:
+    - "Intel Core i7-6567U @ 3.30 GHz"
+    - "Intel Core i5-6267U @ 2.90 GHz"
+    - "Intel Core i5-6287U @ 3.10 GHz"
+  GPU:
+    - "Intel Iris Graphics 550"
+  RAM:
+    - "2133 MHz LPDDR3 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (13-inch, 2016, Four Thunderbolt 3 Ports)"
+  MarketingName:
+    - "13\" MacBook Pro with Thunderbolt 3 and Touch ID (2016)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "GYFH"
+  - "GTDX"
+  - "GTFJ"
+  - "GYGR"
+  - "HF1R"
+  - "HF1P"
+  - "HF1Q"
+  - "HF1T"
+  - "HP49"
+  - "HP4D"
+  - "HWH2"
+  - "HXD5"
+  - "GTFK"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "H9W8"
+  - "H9WC"
+  - "H9WP"
+  - "H9WR"
+  - "H9W7"
+  - "H9W9"
+  - "H9WN"
+  - "H9WQ"
+  - "H1QG"
+  - "H1QJ"
+  - "H9WK"
+  - "H9WM"
+  - "H0D3"
+  - "H0D5"
+  - "H9WD"
+  - "H9WG"
+  - "H1QF"
+  - "H1QH"
+  - "H9WJ"
+  - "H9WL"
+  - "H0F2"
+  - "H0F5"
+  - "H9X4"
+  - "H9X6"
+  - "H0D9"
+  - "H0DD"
+  - "H9WV"
+  - "H9WX"
+  - "H0DX"
+  - "H0F0"
+  - "H9X0"
+  - "H9X2"
+  - "H0F1"
+  - "H0F4"
+  - "H9X3"
+  - "H9X5"
+  - "H0D8"
+  - "H0DC"
+  - "H9WT"
+  - "H9WW"
+  - "H0DV"
+  - "H0DY"
+  - "H9WY"
+  - "H9X1"
+  - "H0FD"
+  - "H0FG"
+  - "H9XK"
+  - "H9XM"
+  - "H5F6"
+  - "H5F8"
+  - "H9X8"
+  - "H9XC"
+  - "H0F7"
+  - "H0F9"
+  - "H9XF"
+  - "H9XH"
+  - "H0FC"
+  - "H0FF"
+  - "H9XJ"
+  - "H9XL"
+  - "H5F5"
+  - "H5F7"
+  - "H9X7"
+  - "H9X9"
+  - "H0F6"
+  - "H0F8"
+  - "H9XD"
+  - "H9XG"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2016
+  - 2017
+CloverSerialNumber: "C02SLHACGYFH"
+MinimumOSVersion: "10.12.1"
+MaximumOSVersion: null

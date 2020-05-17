@@ -1,0 +1,220 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "87.0.0.0.0"
+BIOSLegacyVersion: "MBP81.88Z.F000.B00.1906132217"
+BIOSReleaseDate: "06/13/19"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro8,3"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W88F9CDEDF93"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-942459F5819B171B"
+BoardVersion: "MacBookPro8,3"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-942459F5819B171B"
+ChassisAssetTag: ""
+# FIXME: check
+FirmwareFeatures: 0xC00DE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000C00DE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0703
+  - 0x0703
+  - 0x0703
+  - 0x0703
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x70
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x06
+# FIXME: check
+SmcBranch:
+  - 0x6B
+  - 0x39
+  - 0x32
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6B
+  - 0x39
+  - 0x32
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7C005
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MBP81
+    EFI Version:  87.0.0.0.0
+    Date:         Thu Jun 13 22:17:08 2019
+    Build Type:   Release
+Specifications:
+  CPUCodename:
+    - "Sandy Bridge"
+    - "Sandy Bridge"
+    - "Sandy Bridge"
+    - "Sandy Bridge"
+  CPU:
+    - "Intel Core i7-2820QM @ 2.30 GHz"
+    - "Intel Core i7-2720QM @ 2.20 GHz"
+    - "Intel Core i7-2760QM @ 2.40 GHz"
+    - "Intel Core i7-2860QM @ 2.50 GHz"
+  GPU:
+    - "AMD Radeon HD 6750M"
+    - "AMD Radeon HD 6770M"
+  RAM:
+    - "1333 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (17-inch, Early 2011)"
+    - "MacBook Pro (17-inch, Late 2011)"
+  MarketingName:
+    - "MacBook Pro Intel Core i7, 17\" (Early 2011)"
+    - "MacBook Pro Intel Core i7, 17\" (Late 2011)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "DF93"
+  - "DW48"
+  - "DMGH"
+  - "F140"
+  - "F13Y"
+  - "AY5W"
+  - "DY23"
+  - "DY22"
+  - "DVHV"
+  - "DVHW"
+  - "DVHN"
+  - "DV11"
+  - "DV10"
+  - "DYG8"
+  - "DY26"
+  - "DY25"
+  - "DY24"
+  - "DY5W"
+  - "DNKN"
+  - "DMQW"
+  - "DNGG"
+  - "DMRC"
+  - "DMR7"
+  - "DMR5"
+  - "DMR2"
+  - "DMR9"
+  - "DMR8"
+  - "DLNC"
+  - "DLN9"
+  - "DMQT"
+  - "DT6P"
+  - "DT6N"
+  - "DT5R"
+  - "DT5Q"
+  - "DT5P"
+  - "DT5W"
+  - "DT5V"
+  - "DT5T"
+  - "DT5Y"
+  - "DT5N"
+  - "DT5M"
+  - "DRJG"
+  - "DRJN"
+  - "DRJH"
+  - "DRW6"
+  - "DRW5"
+  - "DF92"
+  - "DMR4"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "DM5K"
+  - "DM5L"
+  - "DM5N"
+  - "DM5Q"
+  - "DM5R"
+  - "DM5W"
+  - "DMM0"
+  - "DMM1"
+  - "DMM5"
+  - "DMM9"
+  - "DMMC"
+  - "DMMD"
+  - "DM5J"
+  - "DM5M"
+  - "DM5P"
+  - "DM5T"
+  - "DM5V"
+  - "DM5Y"
+  - "DMM2"
+  - "DMM3"
+  - "DMM4"
+  - "DMM6"
+  - "DMM7"
+  - "DMM8"
+  - "DTYV"
+  - "DTYW"
+  - "DV01"
+  - "DV02"
+  - "DV03"
+  - "DV06"
+  - "DV07"
+  - "DV0C"
+  - "DV0H"
+  - "DV0J"
+  - "DV0K"
+  - "DV0M"
+  - "DYL5"
+  - "DYL7"
+  - "DYLC"
+  - "DYLF"
+  - "DYLG"
+  - "DTYT"
+  - "DTYY"
+  - "DV00"
+  - "DV04"
+  - "DV05"
+  - "DV08"
+  - "DV09"
+  - "DV0D"
+  - "DV0F"
+  - "DV0G"
+  - "DV0L"
+  - "DV0N"
+  - "DYL4"
+  - "DYL6"
+  - "DYL8"
+  - "DYL9"
+  - "DYLD"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2011
+  - 2012
+CloverSerialNumber: "W88F9CDEDF93"
+MinimumOSVersion: "10.7.2"
+MaximumOSVersion: "10.13.6"

@@ -1,0 +1,258 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "1037.120.79.0.0"
+BIOSLegacyVersion: "MBP152.88Z.F000.B00.2004232118"
+BIOSReleaseDate: "04/23/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro15,2"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02X141CJHCC"
+SystemSKUNumber: ""
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-827FB448E656EC26"
+#  "Mac-smthelse"
+BoardProduct: "Mac-827FB448E656EC26"
+BoardVersion: "MacBookPro15,2"
+# FIXME: check
+BoardRevision: 0x1
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x9
+ChassisVersion: "Mac-827FB448E656EC26"
+ChassisAssetTag: ""
+PlatformFeature: 0x32
+# FIXME: check
+FirmwareFeatures: 0xFD8FF426
+# FIXME: check
+FirmwareFeaturesMask: 0xFF9FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000FD8FF426
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF9FFF3F
+MemoryFormFactor: 0xD
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0701
+  - 0x1001
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+  - 12345
+SmcGeneration: 3
+SmcPlatform:
+  - 0x6A
+  - 0x31
+  - 0x33
+  - 0x32
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      MBP152.88Z.F000.B00.2004232118
+    Model:        MBP152
+    EFI Version:  1037.120.79.0.0
+    Built by:     tangstad@pdb172
+    Date:         Thu Apr 23 21:18:40 2020
+    Revision:     1037.120.79 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     clang-1103.2.29.8
+    UUID:         D16C1CAC-0CD6-3787-8828-4B2DACE8E2A3
+    UUID:         20CBD59C-B914-31E8-BE44-880BDC88C816
+Specifications:
+  CPUCodename:
+    - "Coffee Lake"
+    - "Coffee Lake"
+    - "Coffee Lake"
+    - "Coffee Lake"
+  CPU:
+    - "Intel Core i7-8559U @ 2.70 GHz"
+    - "Intel Core i5-8259U @ 2.30 GHz"
+    - "Intel Core i7-8569U @ 2.80 GHz"
+    - "Intel Core i5-8279U @ 2.40 GHz"
+  GPU:
+    - "Intel Iris Plus Graphics 655"
+  RAM:
+    - "8GB 2133 MHz LPDDR3 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (13-inch, 2018, Four Thunderbolt 3 Ports)"
+    - "MacBook Pro (13-inch, 2019, Four Thunderbolt 3 ports)"
+  MarketingName:
+    - "13\" MacBook Pro with Thunderbolt 3 and Touch ID (Mid 2018)"
+    - "13\" MacBook Pro with Thunderbolt 3 and Touch ID (Mid 2019)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "JHCC"
+  - "JHC8"
+  - "JHC9"
+  - "JHCD"
+  - "JHCF"
+  - "JHD2"
+  - "JHD3"
+  - "JHD4"
+  - "JHD5"
+  - "KK98"
+  - "KK99"
+  - "KK9C"
+  - "KQ1X"
+  - "KQ1Y"
+  - "KQ20"
+  - "KQ21"
+  - "KQ22"
+  - "KQ23"
+  - "KQ24"
+  - "KQ25"
+  - "KQ26"
+  - "KQ27"
+  - "LVDC"
+  - "LVDM"
+  - "L42X"
+  - "L4FF"
+  - "L4FG"
+  - "L4FD"
+  - "L4FC"
+  - "L4FJ"
+  - "L4JT"
+  - "LK8C"
+  - "L7GD"
+  - "MV9R"
+  - "MV9K"
+  - "LVDP"
+  - "LVDF"
+  - "LVDG"
+  - "LVDD"
+  - "LVDH"
+  - "LVDN"
+  - "LVDL"
+  - "NCLV"
+  - "NCM1"
+  - "NCM0"
+  - "N5T5"
+  - "NQM8"
+  - "NCLW"
+  - "NCLY"
+  - "NCLX"
+  - "NCM2"
+  - "P4G2"
+  - "P4G1"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "JH4R"
+  - "JN1C"
+  - "JN1D"
+  - "JN1F"
+  - "JN1G"
+  - "JN1H"
+  - "JN1J"
+  - "JN1T"
+  - "JN1V"
+  - "JN1W"
+  - "JN1X"
+  - "JN1Y"
+  - "JN20"
+  - "JN21"
+  - "JN22"
+  - "JN23"
+  - "JN0X"
+  - "JN0Y"
+  - "JN10"
+  - "JN11"
+  - "JN12"
+  - "JN13"
+  - "JN1T"
+  - "JN1V"
+  - "JN1W"
+  - "JN1X"
+  - "JN1Y"
+  - "JN20"
+  - "JN21"
+  - "JN22"
+  - "JN23"
+  - "JN1K"
+  - "JN1L"
+  - "JN1M"
+  - "JN1N"
+  - "JN1Q"
+  - "JN1R"
+  - "JN2K"
+  - "JN2L"
+  - "JN2M"
+  - "JN14"
+  - "JN15"
+  - "JN16"
+  - "JN17"
+  - "JN18"
+  - "JN19"
+  - "JN24"
+  - "JN25"
+  - "JN26"
+  - "JN27"
+  - "JN28"
+  - "JN29"
+  - "JN2C"
+  - "JN2D"
+  - "JN2F"
+  - "JJ50"
+  - "JJ51"
+  - "JJ52"
+  - "JJ53"
+  - "JJ54"
+  - "JJ55"
+  - "JJ62"
+  - "JJ63"
+  - "JJ64"
+  - "JH4Q"
+  - "JH4T"
+  - "JH4W"
+  - "JH4Y"
+  - "JH50"
+  - "JJ5F"
+  - "JJ5G"
+  - "JJ5H"
+  - "JJ5J"
+  - "JJ5K"
+  - "JJ5L"
+  - "JJ5M"
+  - "JJ5N"
+  - "JJ5P"
+  - "JJ56"
+  - "JJ57"
+  - "JJ58"
+  - "JJ59"
+  - "JJ5C"
+  - "JJ5D"
+  - "JJ65"
+  - "JJ66"
+  - "JJ67"
+  - "JH51"
+  - "JH52"
+  - "JH53"
+  - "JH54"
+  - "JH55"
+  - "JH56"
+  - "JJ5Q"
+  - "JJ5R"
+  - "JJ5T"
+  - "JJ5V"
+  - "JJ5W"
+  - "JJ5X"
+  - "JJ5Y"
+  - "JJ60"
+  - "JJ61"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2018
+  - 2019
+  - 2020
+# Optional, override for SystemSerialNumber for Clover
+CloverSerialNumber: "C02X1HACJHCD"
+MinimumOSVersion: "10.13.6"
+MaximumOSVersion: null
+AppleModelId: "J132"

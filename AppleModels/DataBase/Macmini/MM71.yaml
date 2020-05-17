@@ -1,0 +1,164 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "247.0.0.0.0"
+BIOSLegacyVersion: "MM71.88Z.F000.B00.2002051745"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "Macmini7,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02NN7NHG1J0"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "Mac mini"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-35C5E08120C7EEAF"
+BoardVersion: "Macmini7,1"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x10
+ChassisVersion: "Mac-35C5E08120C7EEAF"
+ChassisAssetTag: ""
+PlatformFeature: 0x3
+FirmwareFeatures: 0xF803F537
+FirmwareFeaturesMask: 0xF803FF37
+ExtendedFirmwareFeatures: 0x00000000F803F537
+ExtendedFirmwareFeaturesMask: 0x00000000F803FF37
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0605
+  - 0x0605
+  - 0x0605
+  - 0x0705
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+# FIXME: check
+SmcRevision:
+  - 0x02
+  - 0x24
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x32
+# FIXME: check
+SmcBranch:
+  - 0x6A
+  - 0x36
+  - 0x34
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6A
+  - 0x36
+  - 0x34
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0xF04008
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MM71
+    EFI Version:  247.0.0.0.0
+    Built by:     root@xapp160
+    Date:         Wed Feb  5 17:45:12 PST 2020
+    Revision:     247 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple LLVM version 5.0 (clang-500.0.68) (based on LLVM 3.3svn)
+Specifications:
+  CPUCodename:
+    - "Haswell"
+    - "Haswell"
+    - "Haswell"
+    - "Haswell"
+  CPU:
+    - "Intel Core i5-4260U @ 1.40 GHz"
+    - "Intel Core i5-4278U @ 2.60 GHz"
+    - "Intel Core i5-4308U @ 2.80 GHz"
+    - "Intel Core i7-4578U @ 3.00 GHz"
+  GPU:
+    - "Intel Iris 5100 graphics"
+  RAM:
+    - "1600 MHz LPDDR3 SDRAM"
+  SystemReportName:
+    - "Mac mini (Late 2014)"
+  MarketingName:
+    - "Mac mini (Late 2014)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "G1J0"
+  - "G1HV"
+  - "G1HW"
+  - "G1HY"
+  - "G1J1"
+  - "G1J2"
+  - "GCVG"
+  - "GCVH"
+  - "GCVJ"
+  - "GCVN"
+  - "GCVP"
+  - "GCVQ"
+  - "GCVV"
+  - "GCVW"
+  - "GCVY"
+  - "GCW0"
+  - "GCW1"
+  - "GF1N"
+  - "GF1Q"
+  - "GF1T"
+  - "GJDC"
+  - "GHRN"
+  - "GNL0"
+  - "GN02"
+  - "H84M"
+  - "L7FY"
+  - "L9TM"
+  - "L9TN"
+  - "L9TP"
+  - "HCL5"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "G0MC"
+  - "FWY2"
+  - "FYRD"
+  - "G3N7"
+  - "G0MH"
+  - "G0MJ"
+  - "G3ND"
+  - "G0MK"
+  - "FYRF"
+  - "G0MF"
+  - "G3NC"
+  - "FYRK"
+  - "FYRH"
+  - "FYRJ"
+  - "G3N9"
+  - "G0MM"
+  - "G0MN"
+  - "G0MP"
+  - "G3N8"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2014
+  - 2015
+  - 2016
+  - 2017
+  - 2018
+CloverSerialNumber: "C02NN7NHG1J0"
+MinimumOSVersion: "10.10"
+MaximumOSVersion: null

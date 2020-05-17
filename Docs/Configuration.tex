@@ -582,9 +582,6 @@ might work, but are neither supported, nor recommended. Contribution of clean
 patches is welcome. Please do follow
 \href{https://github.com/tianocore/tianocore.github.io/wiki/Code-Style-C}{EDK II C Codestyle}.
 
-Required external package dependencies include
-\href{https://github.com/acidanthera/MacInfoPkg}{MacInfoPkg}.
-
 To compile with \texttt{XCODE5}, besides \href{https://developer.apple.com/xcode}{Xcode},
 one should also install \href{https://www.nasm.us}{NASM} and
 \href{https://github.com/acidanthera/ocbuild/tree/master/external}{MTOC}.
@@ -595,7 +592,6 @@ command sequence may look as follows:
 git clone https://github.com/acidanthera/audk UDK
 cd UDK
 git clone https://github.com/acidanthera/DuetPkg
-git clone https://github.com/acidanthera/MacInfoPkg
 git clone https://github.com/acidanthera/OpenCorePkg
 source edksetup.sh
 make -C BaseTools
@@ -624,7 +620,6 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -I/UefiPackages/OpenCorePkg/Include/Microsoft
 -I/UefiPackages/OpenCorePkg/Include/VMware
 -I/UefiPackages/OvmfPkg/Include
--I/UefiPackages/MacInfoPkg/Include
 -I/UefiPackages/UefiCpuPkg/Include
 -IInclude
 -include
@@ -659,9 +654,8 @@ listed below before submitting their patches. In general it is also recommended 
 discuss the issue in \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}
 before sending the patch to ensure no double work and to avoid your patch being rejected.
 
-\textbf{Organisation}. The codebase is structured in multiple repositories
-which contain separate EDK II packages. \texttt{AppleSupportPkg} and \texttt{OpenCorePkg}
-are primary packages and \texttt{MacInfoPkg.dsc} is a dependent package.
+\textbf{Organisation}. The codebase is primarily in \texttt{OpenCorePkg} repository,
+which is the primary EDK II package. Some drivers can also be found in \texttt{AppleSupportPkg}.
 \begin{itemize}
 \tightlist
 \item Whenever changes are required in multiple repositories, separate pull requests should
@@ -3444,8 +3438,8 @@ troubleshooting:
 Platform information is comprised of several identification fields
 generated or filled manually to be compatible with macOS services. The
 base part of the configuration may be obtained from
-\href{https://github.com/acidanthera/MacInfoPkg}{\texttt{MacInfoPkg}}
-package, which itself generates a set of interfaces based on a database
+\href{https://github.com/acidanthera/OpenCorePkg/blob/master/AppleModels}{\texttt{AppleModels}},
+which itself generates a set of interfaces based on a database
 in \href{https://yaml.org/spec/1.2/spec.html}{YAML} format. These fields
 are written to three select destinations:
 
@@ -3931,7 +3925,7 @@ Apple ROM Version
   \emph{Note}: If \texttt{SystemProductName} is unknown, and related
   fields are unspecified, default values should be assumed as being set
   to \texttt{MacPro6,1} data. The list of known products can be found in
-  \texttt{MacInfoPkg}.
+  \texttt{AppleModels}.
 \item
   \texttt{SystemVersion}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -3946,7 +3940,7 @@ Apple ROM Version
   \textbf{SMBIOS}: System Information (Type 1) --- Serial Number\\
   \textbf{Description}: Product serial number in defined format. Known
   formats are described in
-  \href{https://github.com/acidanthera/MacInfoPkg/blob/master/macserial/FORMAT.md}{macserial}.
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Utilities/macserial/FORMAT.md}{macserial}.
 \item
   \texttt{SystemUUID}\\
   \textbf{Type}: \texttt{plist\ string}, GUID\\
@@ -5491,8 +5485,8 @@ you will need \texttt{debug=0x8} boot argument.
   Custom name may be created by providing \texttt{.contentDetails} file.
 
   To download recovery online you may use
-  \href{https://github.com/acidanthera/MacInfoPkg/blob/master/macrecovery/macrecovery.py}{macrecovery.py}
-  tool from \href{https://github.com/acidanthera/MacInfoPkg/releases}{MacInfoPkg}.
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Utilities/macrecovery/macrecovery.py}{macrecovery.py},
+  builtin tool.
 
   For offline installation refer to
   \href{https://support.apple.com/HT201372}{How to create a bootable installer for macOS}

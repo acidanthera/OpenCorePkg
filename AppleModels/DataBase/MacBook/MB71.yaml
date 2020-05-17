@@ -1,0 +1,114 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "68.0.0.0.0"
+BIOSLegacyVersion: "MB71.88Z.F000.B00.1906140026"
+BIOSReleaseDate: "06/14/19"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBook7,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "451211MEF5X"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F22C89C8"
+BoardVersion: "MacBook7,1"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-F22C89C8"
+ChassisAssetTag: "Asset Tag#"
+# FIXME: check
+FirmwareFeatures: 0xFC0FE13F
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000FC0FE13F
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x60
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x06
+# FIXME: check
+SmcBranch:
+  - 0x6B
+  - 0x38
+  - 0x37
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6B
+  - 0x38
+  - 0x37
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7A002
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MB71
+    EFI Version:  68.0.0.0.0
+    Date:         Fri Jun 14 00:26:10 2019
+    Build Type:   Release
+Specifications:
+  CPUCodename:
+    - "Penryn"
+  CPU:
+    - "Intel Core 2 Duo P8600 @ 2.40 GHz"
+  GPU:
+    - "NVIDIA GeForce 320M"
+  RAM:
+    - "1066 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "MacBook (13-inch, Mid 2010)"
+  MarketingName:
+    - "MacBook Intel Core 2 Duo (white, Mid 2010)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "F5X"
+  - "HUD"
+  - "GP6"
+  - "FX9"
+  - "HST"
+  - "HSU"
+  - "GUP"
+  - "F5W"
+  - "GST"
+  - "DV8H"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2010
+  - 2011
+CloverSerialNumber: "451211MEF5X"
+MinimumOSVersion: "10.6.3"
+MaximumOSVersion: "10.13.6"

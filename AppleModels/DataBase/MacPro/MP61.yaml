@@ -1,0 +1,156 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "135.0.0.0.0"
+BIOSLegacyVersion: "MP61.88Z.F000.B00.2002052032"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacPro6,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "F5KLA770F9VM"
+SystemSKUNumber: ""
+SystemFamily: "MacPro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-F60DEB81FF30ACF6"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F60DEB81FF30ACF6"
+BoardVersion: "MacPro6,1"
+BoardAssetTag: ""
+BoardType: 0xB
+BoardLocationInChassis: "CPU"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x2
+ChassisVersion: "Mac-F60DEB81FF30ACF6"
+ChassisAssetTag: ""
+PlatformFeature: 0x4
+FirmwareFeatures: 0xE80FE137
+FirmwareFeaturesMask: 0xFF1FFF3F
+ExtendedFirmwareFeatures: 0x00000000E80FE137
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0x9
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0A01
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+SmcGeneration: 2
+SmcRevision:
+  - 0x02
+  - 0x20
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x18
+SmcBranch:
+  - 0x6A
+  - 0x39
+  - 0x30
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcPlatform:
+  - 0x6A
+  - 0x30
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcEPCI: 0xF0F006
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MP61
+    EFI Version:  135.0.0.0.0
+    Built by:     root@saumon
+    Date:         Wed Feb  5 20:32:36 PST 2020
+    Revision:     135 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
+Specifications:
+  CPUCodename:
+    - "Ivy Bridge EP"
+    - "Ivy Bridge EP"
+    - "Ivy Bridge EP"
+  CPU:
+    - "Intel Xeon E5-1620 v2 @ 3.70 GHz"
+    - "Intel Xeon E5-1650 v2 @ 3.50 GHz"
+    - "Intel Xeon E5-1680 v2 @ 3.00 GHz"
+    - "Intel Xeon E5-2697 v2 @ 2.70 GHz"
+  GPU:
+    - "AMD FirePro D300"
+    - "AMD FirePro D500"
+    - "AMD FirePro D700"
+  RAM:
+    - "12 GB 1866 MHz DDR3 ECC SDRAM"
+  SystemReportName:
+    - "Mac Pro (Late 2013)"
+  MarketingName:
+    - "Mac Pro (Late 2013)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "F9VM"
+  - "F693"
+  - "F694"
+  - "F9VN"
+  - "FRDW"
+  - "FRDY"
+  - "FRF0"
+  - "FRF1"
+  - "FRF2"
+  - "FRF3"
+  - "FRF4"
+  - "FRF5"
+  - "FRQC"
+  - "FT3F"
+  - "FT3G"
+  - "FT3H"
+  - "FT95"
+  - "FT96"
+  - "FT97"
+  - "FT98"
+  - "FT99"
+  - "FT9C"
+  - "FT9D"
+  - "FY3Y"
+  - "FY40"
+  - "G1LJ"
+  - "G1LK"
+  - "G1LL"
+  - "G1LM"
+  - "G1LN"
+  - "G1LP"
+  - "G1LQ"
+  - "G1LR"
+  - "G1LT"
+  - "G1LV"
+  - "G1LW"
+  - "G1LY"
+  - "G1M0"
+  - "G1M1"
+  - "G8GC"
+  - "G8GD"
+  - "J3RY"
+  - "J3RW"
+  - "N1VW"
+  - "N1VX"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "FHDD" 
+  - "FNN1"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2013
+  - 2014
+  - 2015
+  - 2016
+  - 2017
+  - 2018
+  - 2019
+MinimumOSVersion: "10.9.1"
+MaximumOSVersion: null

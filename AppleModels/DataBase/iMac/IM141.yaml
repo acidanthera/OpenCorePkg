@@ -1,0 +1,131 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "142.0.0.0.0"
+BIOSLegacyVersion: "IM141.88Z.F000.B00.2002051900"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac14,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "D25LHACKF8J2"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-031B6874CF7F642A"
+BoardVersion: "iMac14,1"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-031B6874CF7F642A"
+ChassisAssetTag: ""
+PlatformFeature: 0x1
+# FIXME: check
+FirmwareFeatures: 0xE00FE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000E00FE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0605
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+# FIXME: check
+SmcRevision:
+  - 0x02
+  - 0x14
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x24
+# FIXME: check
+SmcBranch:
+  - 0x6A
+  - 0x31
+  - 0x36
+  - 0x6A
+  - 0x31
+  - 0x37
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6A
+  - 0x31
+  - 0x36
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x79007
+OEMStrings: |-
+  Apple ROM Version
+    Model:        IM141
+    EFI Version:  142.0.0.0.0
+    Built by:     root@saumon
+    Date:         Wed Feb  5 19:00:51 PST 2020
+    Revision:     142 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
+Specifications:
+  CPUCodename:
+    - "Crystal Well"
+  CPU:
+    - "Intel Core i5-4570R @ 2.70 GHz"
+  GPU:
+    - "Intel Iris Pro 5200"
+  RAM:
+    - "1600 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "iMac (21.5-inch, Late 2013)"
+  MarketingName:
+    - "21.5\" iMac (Late 2013)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "FWJH"
+  - "FR21"
+  - "FR1V"
+  - "FR1T"
+  - "FR1R"
+  - "FR1Q"
+  - "FT4M"
+  - "GHJH"
+  - "H226"
+  - "H0HJ"
+  - "FQN0"
+  - "FVGW"
+  - "FPDV"
+  - "FQMY"
+  - "FQMW"
+  - "FPF2"
+  - "FRM7"
+  - "FRM8"
+  - "FQMV"
+  - "FPF1"
+  - "F8J2"
+  - "F8J7"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "FM59"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2013
+  - 2014
+  - 2015
+CloverSerialNumber: "D25LHACKF8J2"
+MinimumOSVersion: "10.8.4"
+MaximumOSVersion: null

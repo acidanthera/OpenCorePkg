@@ -1,0 +1,139 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "1037.100.345.0.0"
+BIOSLegacyVersion: "IM191.88Z.F000.B00.2002172336"
+BIOSReleaseDate: "02/17/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac19,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02Y90H3JV3Q"
+SystemSKUNumber: ""
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-AA95B1DDAB278B95"
+#  "Mac-smthelse"
+BoardProduct: "Mac-AA95B1DDAB278B95"
+BoardVersion: "iMac19,1"
+BoardRevision: 0x7
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-AA95B1DDAB278B95"
+ChassisAssetTag: ""
+PlatformFeature: 0x20
+FirmwareFeatures: 0xFD8FF576
+FirmwareFeaturesMask: 0xFFDFFF7F
+ExtendedFirmwareFeatures: 0x00000000FD8FF576
+ExtendedFirmwareFeaturesMask: 0x00000000FFDFFF7F
+MemoryFormFactor: 0x9
+# FIXME: Correct this one
+ProcessorType:
+  - 0x1009
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+SmcGeneration: 2
+SmcRevision:
+  - 0x02
+  - 0x46
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x12
+SmcBranch:
+  - 0x6a
+  - 0x31
+  - 0x33
+  - 0x38
+  - 0x5f
+  - 0x39
+  - 0x00
+  - 0x00
+SmcPlatform:
+  - 0x6a
+  - 0x31
+  - 0x33
+  - 0x38
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcEPCI: 0xF0D009
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      IM191.88Z.F000.B00.2002172336
+    Model:        IM191
+    EFI Version:  1037.100.345.0.0
+    Built by:     _securitya@osx390
+    Date:         Mon Feb 17 23:36:22 2020
+    Revision:     1037.100.345 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     clang-1103.0.29.20
+    UUID:         B0A95B7B-D3BB-3286-9FF5-8931794A6492
+    UUID:         F9CB2735-90B0-3DF5-82BD-C4590A9C5829
+Specifications:
+  CPUCodename:
+    - "Coffee Lake"
+    - "Coffee Lake"
+    - "Coffee Lake"
+    - "Coffee Lake"
+  CPU:
+    - "Intel Core i9-9900K @ 3.60 GHz"
+    - "Intel Core i5-9600k @ 3.70 GHz"
+    - "Intel Core i5-8600 @ 3.10 GHz"
+    - "Intel Core i5-8500 @ 3.00 GHz"
+  GPU:
+    - "Radeon Pro 570X"
+    - "Radeon Pro 575X"
+    - "Radeon Pro 580X"
+    - "Radeon Pro Vega 48"
+  RAM:
+    - "8GB 2666 MHz DDR4 SDRAM"
+  SystemReportName:
+    - "iMac (Retina 5K, 27-inch, 2019)"
+  MarketingName:
+    # FIXME
+    - "iMac (27-inch, 2019)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "JV3Q"
+  - "JV3P"
+  - "JV40"
+  - "JV41"
+  - "JV42"
+  - "JV43"
+  - "MC9K"
+  - "MC9J"
+  - "MX7W"
+  - "JV3N"
+  - "JV3T"
+  - "JV3W"
+  - "JV3R"
+  - "JV3Y"
+  - "JV3X"
+  - "MW2R"
+  - "MW2P"
+  - "MW2Q"
+  - "MW2V"
+  - "MW2W"
+  - "MW2T"
+  - "MQQP"
+  - "NY2G"
+  - "P1WV"
+  - "MMTC"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "LNV9"
+  - "KDP0"
+  - "KDN8"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2019
+  - 2020
+MinimumOSVersion: "10.14.4"
+MaximumOSVersion: null

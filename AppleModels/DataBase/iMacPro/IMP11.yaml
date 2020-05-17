@@ -1,0 +1,136 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "1037.120.79.0.0"
+BIOSLegacyVersion: "IMP11.88Z.F000.B00.2004232041"
+BIOSReleaseDate: "04/23/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMacPro1,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02VV5RFHX87"
+SystemSKUNumber: ""
+SystemFamily: "iMac Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-7BA5B2D9E42DDD94"
+#  "Mac-smthelse"
+BoardProduct: "Mac-7BA5B2D9E42DDD94"
+BoardVersion: "iMacPro1,1"
+BoardRevision: 0x9
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-7BA5B2D9E42DDD94"
+ChassisAssetTag: ""
+PlatformFeature: 0x20
+FirmwareFeatures: 0xFD8FF53E
+FirmwareFeaturesMask: 0xFF9FFF3F
+ExtendedFirmwareFeatures: 0x00000000FD8FF53E
+ExtendedFirmwareFeaturesMask: 0x00000000FF9FFF3F
+MemoryFormFactor: 0x9
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0F01
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+SmcGeneration: 3
+SmcPlatform:
+  - 0x6a
+  - 0x31
+  - 0x33
+  - 0x37
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      IMP11.88Z.F000.B00.2004232041
+    Model:        IMP11
+    EFI Version:  1037.120.79.0.0
+    Built by:     tangstad@pdb172
+    Date:         Thu Apr 23 20:41:10 2020
+    Revision:     1037.120.79 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     clang-1103.2.29.8
+    UUID:         4DFDC252-F1D8-31B4-ACD6-E28229F6868C
+    UUID:         44FD0187-8C19-3EF0-92A3-BAD077A8EAB8
+Specifications:
+  CPUCodename:
+    - "Skylake"
+    - "Skylake"
+    - "Skylake"
+    - "Skylake"
+  CPU:
+    - "Intel Xeon W-2140B CPU @ 3.20 GHz"
+    - "Intel Xeon W-2150B CPU @ 3.00 GHz"
+    - "Intel Xeon W-2170B CPU @ 2.50 GHz"
+    - "Intel Xeon W-2191B CPU @ 2.30 GHz"
+  GPU:
+    - "Radeon Pro Vega 56"
+    - "Radeon Pro Vega 64"
+    - "Radeon Pro Vega 64X"
+  RAM:
+    - "32GB 2666 MHz DDR4 ECC SDRAM"
+  SystemReportName:
+    - "iMac Pro (2017)"
+  MarketingName:
+    - "iMac Pro (2017)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "HX87"
+  - "HX8F"
+  - "JL53"
+  - "JL54"
+  - "JL55"
+  - "JLCN"
+  - "JLCP"
+  - "JLCR"
+  - "JLCT"
+  - "JLCV"
+  - "JLCW"
+  - "JLCX"
+  - "JLCY"
+  - "JLD0"
+  - "JLD1"
+  - "JLD2"
+  - "MC9H"
+  - "M0XV"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "JG36"
+  - "JG3C"
+  - "JG3D"
+  - "JG38"
+  - "JG39"
+  - "JML3"
+  - "JMPY"
+  - "JMQ0"
+  - "JML4"
+  - "JMQ1"
+  - "JMQ2"
+  - "J806"
+  - "J807"
+  - "J808"
+  - "J80H"
+  - "J80J"
+  - "J80M"
+  - "J803"
+  - "J804"
+  - "J805"
+  - "J809"
+  - "J80D"
+  - "J80F"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2017
+  - 2018
+  - 2019
+  - 2020
+MinimumOSVersion: "10.13.2"
+MaximumOSVersion: null
+AppleModelId: "J137"

@@ -1,0 +1,155 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "233.0.0.0.0"
+BIOSLegacyVersion: "IM151.88Z.F000.B00.2002052035"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac15,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02Q6HACFY10"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-BE088AF8C5EB4FA2"
+#  "Mac-smthelse"
+BoardProduct: "Mac-42FD25EABCABB274"
+BoardVersion: "iMac15,1"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-42FD25EABCABB274"
+ChassisAssetTag: ""
+PlatformFeature: 0x1
+FirmwareFeatures: 0xF80FE137
+FirmwareFeaturesMask: 0xFF1FFF3F
+ExtendedFirmwareFeatures: 0x00000000F80FE137
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0x9
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0605
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+SmcGeneration: 2
+SmcRevision:
+  - 0x02
+  - 0x22
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x16
+SmcBranch:
+  - 0x6a
+  - 0x37
+  - 0x38
+  - 0x6a
+  - 0x37
+  - 0x38
+  - 0x61
+  - 0x6d
+SmcPlatform:
+  - 0x6a
+  - 0x37
+  - 0x38
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcEPCI: 0xf00008
+OEMStrings: |-
+  Apple ROM Version
+    Model:        IM151
+    EFI Version:  233.0.0.0.0
+    Built by:     root@saumon
+    Date:         Wed Feb  5 20:35:37 PST 2020
+    Revision:     233 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
+Specifications:
+  CPUCodename:
+    - "Devil's Canyon"
+    - "Haswell"
+    - "Haswell"
+  CPU:
+    - "Intel Core i7-4790k @ 4.00 GHz"
+    - "Intel Core i5-4690 @ 3.50 GHz"
+    - "Intel Core i5-4590 @ 3.50 GHz"
+  GPU:
+    - "AMD Radeon R9 M290X"
+    - "AMD Radeon R9 M290"
+  RAM:
+    - "8GB 1600 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "iMac (Retina 5K, 27-inch, Late 2014)"
+    - "iMac (Retina 5K, 27-inch, Mid 2015)"
+  MarketingName:
+    - "27\" iMac Retina 5K (Late 2014)"
+    - "27\" iMac Retina 5K (Mid 2015)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "FY10"
+  - "FY11"
+  - "FY14"
+  - "FY68"
+  - "FY6F"
+  - "GCTM"
+  - "GDQY"
+  - "GDR3"
+  - "GDR4"
+  - "GDR5"
+  - "GDR6"
+  - "GDR7"
+  - "GDR8"
+  - "GDR9"
+  - "GDRC"
+  - "GFFQ"
+  - "GJDM"
+  - "GJDN"
+  - "GJDP"
+  - "GJDQ"
+  - "FY13"
+  - "FY6D"
+  - "GL1Q"
+  - "GL1R"
+  - "GL1T"
+  - "GL1V"
+  - "GL1W"
+  - "GV7V"
+  - "GPJN"
+  - "H682"
+  - "H5DN"
+  - "FY67"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "G2Y7"
+  - "G2Y8"
+  - "GG3L"
+  - "GG3N"
+  - "G2QD"
+  - "G2QF"
+  - "GG3T"
+  - "GG3W"
+  - "FT04"
+  - "FW6K"
+  - "GG3K"
+  - "GG3M"
+  - "FW29"
+  - "FW2C"
+  - "GG3Q"
+  - "GG3V"
+  # Middle 2015
+  - "FQY8"
+  - "FTPF"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2014
+  - 2015
+MinimumOSVersion: "10.10.2"
+MaximumOSVersion: null

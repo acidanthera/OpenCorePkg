@@ -1,0 +1,134 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "87.0.0.0.0"
+BIOSLegacyVersion: "IM121.88Z.F000.B00.1906140041"
+BIOSReleaseDate: "06/14/19"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac12,2"
+SystemVersion: "1.9"
+# Note, this one is used by macserial
+SystemSerialNumber: "W88GG136DHJQ"
+SystemSKUNumber: ""
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-942B59F58194171B"
+BoardVersion: "iMac12,2"
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-942B59F58194171B"
+ChassisAssetTag: ""
+# FIXME: check
+FirmwareFeatures: 0xE00DE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000E00DE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0703
+  - 0x0602
+  - 0x0603
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x72
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x02
+# FIXME: check
+SmcBranch:
+  - 0x6B
+  - 0x36
+  - 0x32
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6B
+  - 0x36
+  - 0x32
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x75005
+OEMStrings: |-
+  Apple ROM Version
+    Model:        IM121
+    EFI Version:  87.0.0.0.0
+    Date:         Fri Jun 14 00:41:24 2019
+    Build Type:   Release
+Specifications:
+  CPUCodename:
+    - "Sandy Bridge"
+    - "Sandy Bridge"
+    - "Sandy Bridge"
+  CPU:
+    - "Intel Core i7-2600 @ 3.40 GHz"
+    - "Intel Core i5-2400 @ 3.10 GHz"
+    - "Intel Core i5-2500S @ 2.70 GHz"
+  GPU:
+    - "AMD Radeon HD 6970M"
+    - "AMD Radeon HD 6770M"
+  RAM:
+    - "1333 MHz PC3-10600 DDR3 SDRAM"
+  SystemReportName:
+    - "iMac (27-inch, Mid 2011)"
+  MarketingName:
+    - "27\" iMac (Mid 2011)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "DHJQ"
+  - "DHJP"
+  - "DHJW"
+  - "FHCV"
+  - "F610"
+  - "DWTR"
+  - "DY6F"
+  - "DHJV"
+  - "DNGH"
+  - "DPNV"
+  - "DRVP"
+  - "DPM2"
+  - "DPM1"
+  - "DNJ9"
+  - "DMW8"
+  - "DNY0"
+  - "DL8P"
+  - "DL8Q"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "DJWM"
+  - "DMT3"
+  - "DMT5"
+  - "DJWN"
+  - "DM69"
+  - "DJWP"
+  - "DM6C"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2011
+  - 2012
+CloverSerialNumber: "W88GG136DHJQ"
+MinimumOSVersion: "10.6.6"
+MaximumOSVersion: "10.13.6"

@@ -1,0 +1,144 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "87.0.0.0.0"
+BIOSLegacyVersion: "IM121.88Z.F000.B00.1906140041"
+BIOSReleaseDate: "06/14/19"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac12,1"
+SystemVersion: "1.9"
+# Note, this one is used by macserial
+SystemSerialNumber: "W80CF65ADHJF"
+SystemSKUNumber: ""
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-942B5BF58194151B"
+BoardVersion: "iMac12,1"
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-942B5BF58194151B"
+ChassisAssetTag: ""
+# FIXME: check
+FirmwareFeatures: 0xE00DE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000E00DE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0603
+  - 0x0903
+  - 0x0603
+  - 0x0703
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x71
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x22
+# FIXME: check
+SmcBranch:
+  - 0x6B
+  - 0x36
+  - 0x30
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6B
+  - 0x36
+  - 0x30
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x73005
+OEMStrings: |-
+  Apple ROM Version
+    Model:        IM121
+    EFI Version:  87.0.0.0.0
+    Date:         Fri Jun 14 00:41:24 2019
+    Build Type:   Release
+Specifications:
+  CPUCodename:
+    - "Sandy Bridge"
+    - "Sandy Bridge"
+    - "Sandy Bridge"
+    - "Sandy Bridge"
+  CPU:
+    - "Intel Core i5-2400S @ 2.50 GHz"
+    - "Intel Core i3-2100 @ 3.10 GHz"
+    - "Intel Core i5-2500S @ 2.70 GHz"
+    - "Intel Core i7-2600S @ 2.80 GHz"
+  GPU:
+    - "AMD Radeon HD 6770M"
+    - "AMD Radeon HD 6750M"
+  RAM:
+    - "1333 MHz PC3-10600 DDR3 SDRAM"
+  SystemReportName:
+    - "iMac (21.5-inch, Mid 2011)"
+    - "iMac (21.5-inch, Late 2011)"
+  MarketingName:
+    - "21.5\" iMac (Early 2011)"
+    - "21.5\" iMac (Late 2011)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "DHJF"
+  - "F611"
+  - "DWTQ"
+  - "DWTP"
+  - "DL8M"
+  - "DL8N"
+  - "DHJT"
+  - "DHJR"
+  - "DHJN"
+  - "DNWY"
+  - "DPNT"
+  - "DPM0"
+  - "DMP0"
+  - "DPNK"
+  - "DPNW"
+  - "DKLH"
+  - "DKL9"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "DJWK"
+  - "DM66"
+  - "DNJK"
+  - "DP0H"
+  - "DKG1"
+  - "DM65"
+  - "DNJJ"
+  - "DKG2"
+  - "DM67"
+  - "DNJL"
+  - "DP0K"
+  - "DP00"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2011
+  - 2012
+  - 2013
+CloverSerialNumber: "W80CF65ADHJF"
+MinimumOSVersion: "10.7.2"
+MaximumOSVersion: "10.13.6"

@@ -8,11 +8,15 @@ env:
 matrix:
   include:
   - os: osx
-    name: "Check Shell Scripts"
+    name: "Run Scripts"
 
     script:
     - HOMEBREW_NO_INSTALL_CLEANUP=1 brew install shellcheck
     - find . \( -name "*.tool" -o -name "*.command" -o -name "*.sh" \) -exec sh -c 'for TargetFile; do shellcheck --severity=info "${TargetFile}" || exit 1; done' sh {} +
+    - pip2 install pyyaml
+    - cd AppleModels || exit 1
+    - python2 ./update_generated.py  || exit 1
+    - if [ "$(git status --porcelain)" != "" ]; then echo "DataBase desync"; exit 1 ; fi
 
   - os: osx
     name: "Build macOS XCODE5"
@@ -20,7 +24,7 @@ matrix:
     compiler: clang
 
     script:
-    - HOMEBREW_NO_INSTALL_CLEANUP=1 HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl
+    - HOMEBREW_NO_INSTALL_CLEANUP=1 HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl mingw-w64
     - "./macbuild.tool"
 
     deploy:

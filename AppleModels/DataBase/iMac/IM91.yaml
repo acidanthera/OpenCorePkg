@@ -1,0 +1,152 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "IM91.88Z.008D.B08.0904271717"
+BIOSLegacyVersion: "IM91.88Z.008D.B08.0904271717"
+BIOSReleaseDate: "04/27/09"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac9,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W89A00A36MJ"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F2218FA9"
+BoardVersion: "iMac9,1"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-F2218FA9"
+ChassisAssetTag: "Asset Tag#"
+FirmwareFeatures: 0xC0001403
+FirmwareFeaturesMask: 0xC0003FFF
+ExtendedFirmwareFeatures: 0x00000000C0001403
+ExtendedFirmwareFeaturesMask: 0x00000000C0003FFF
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+  - 0x0301
+  - 0x0301
+  - 0x0301
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x36
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x03
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x73002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Wolfdale"
+    - "Penryn"
+    - "Wolfdale"
+    - "Penryn"
+    - "Penryn"
+  CPU:
+    - "Intel Core 2 Duo E8135 @ 2.66 GHz"
+    - "Intel Core 2 Duo E8335 @ 2.66 GHz"
+    - "Intel Core 2 Duo E8435 @ 3.06 GHz"
+    - "Intel Core 2 Duo P7350 @ 2.00 GHz"
+    - "Intel Core 2 Duo P7550 @ 2.26 GHz"
+  GPU:
+    - "NVIDIA GeForce GT 120"
+    - "NVIDIA GeForce 9400M"
+    - "NVIDIA GeForce GT 130"
+  RAM:
+    - "1066 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "iMac (20-inch, Early 2009)"
+    - "iMac (24-inch, Early 2009)"
+    - "iMac (20-inch, Mid 2009)"
+  MarketingName:
+    - "iMac Intel Core 2 Duo (aluminum enclosure) (Early 2009)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "6MJ"
+  - "6X0"
+  - "0TH"
+  - "9LN"
+  - "8TT"
+  - "8TS"
+  - "0TF"
+  - "8M5"
+  - "9EX"
+  - "9TH"
+  - "6MH"
+  - "6X3"
+  - "6X1"
+  - "6X2"
+  - "9F3"
+  - "0TM"
+  - "0TJ"
+  - "0TG"
+  - "9LR"
+  - "9LS"
+  - "9LP"
+  - "9LQ"
+  - "8XH"
+  - "0TL"
+  - "8M6"
+  - "259"
+  - "250"
+  - "9ET"
+  - "HUE"
+  - "DWY"
+  - "HT6"
+  - "HS6"
+  - "HS7"
+  - "H1S"
+  - "E86"
+  - "DMV"
+  - "FUN"
+  - "GM9"
+  - "BAH"
+  - "FXN"
+  - "E1B"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2009
+  - 2010
+CloverSerialNumber: "W8919HAC0TG"
+MinimumOSVersion: "10.5.8"
+MaximumOSVersion: "10.11.6"

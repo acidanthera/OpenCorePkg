@@ -1,0 +1,124 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "63.0.0.0.0"
+BIOSLegacyVersion: "IM111.88Z.F000.B00.1906132358"
+BIOSReleaseDate: "06/13/19"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac11,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "G8942B1V5PJ"
+SystemSKUNumber: ""
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F2268DAE"
+BoardVersion: "iMac11,1"
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-F2268DAE"
+ChassisAssetTag: ""
+# FIXME: check
+FirmwareFeatures: 0xE00DE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000E00DE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0601
+  - 0x0701
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x54
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x36
+# FIXME: check
+SmcBranch:
+  - 0x6B
+  - 0x32
+  - 0x33
+  - 0x66
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6B
+  - 0x32
+  - 0x33
+  - 0x66
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7B004
+OEMStrings: |-
+  Apple ROM Version
+    Model:        IM111
+    EFI Version:  63.0.0.0.0
+    Date:         Thu Jun 13 23:58:51 2019
+    Build Type:   Release
+Specifications:
+  CPUCodename:
+    - "Lynnfield"
+    - "Lynnfield"
+  CPU:
+    - "Intel Core i5-750 @ 2.66 GHz"
+    - "Intel Core i7-860 @ 2.80 GHz"
+  GPU:
+    - "AMD ATI Radeon HD 4850"
+  RAM:
+    - "1066 MHz PC3-8500 DDR3 SDRAM"
+  SystemReportName:
+    - "iMac (27-inch, Late 2009)"
+  MarketingName:
+    - "iMac Intel Core i5, Intel Core i7 (widescreen, Late 2009)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "5PJ"
+  - "5RU"
+  - "5PM"
+  - "F0K"
+  - "F0J"
+  - "E1J"
+  - "DWZ"
+  - "CYC"
+  - "CYB"
+  - "H9L"
+  - "H9N"
+  - "H9P"
+  - "H9R"
+  - "DMY"
+  - "DMZ"
+  - "D4V"
+  - "GRP"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2009
+  - 2010
+CloverSerialNumber: "G8942B1V5PJ"
+MinimumOSVersion: "10.6.2"
+MaximumOSVersion: "10.13.6"

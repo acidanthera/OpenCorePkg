@@ -1,0 +1,186 @@
+BIOSVendor: "Apple Computer, Inc."
+BIOSVersion: "MP11.88Z.005C.B08.0707021221"
+BIOSLegacyVersion: "MP11.88Z.005C.B08.0707021221"
+BIOSReleaseDate: "07/02/07"
+SystemManufacturer: "Apple Computer, Inc."
+SystemProductName: "MacPro1,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W88A7HACUQ2"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacPro"
+BoardManufacturer: "Apple Computer, Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-F4208DC8"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F4208DC8"
+BoardVersion: "PVT"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Computer, Inc."
+ChassisType: 0x2
+ChassisVersion: "Mac-F4208DC8"
+ChassisAssetTag: "Asset Tag#"
+FirmwareFeatures: 0x80000015
+FirmwareFeaturesMask: 0x800003FF
+ExtendedFirmwareFeatures: 0x0000000080000015
+ExtendedFirmwareFeaturesMask: 0x00000000800003FF
+MemoryFormFactor: 0x9
+# FIXME: Correct this one
+ProcessorType:
+  - 12345
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+SmcGeneration: 1
+SmcRevision:
+  - 0x01
+  - 0x07
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x10
+SmcBranch:
+  - 0x6D
+  - 0x34
+  - 0x33
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcPlatform:
+  - 0x6D
+  - 0x34
+  - 0x33
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: Correct this one
+SmcEPCI: 0x079001
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Woodcrest"
+    - "Woodcrest"
+    - "Woodcrest"
+  CPU:
+    - "Intel Core Xeon 5130 x2 @ 2.00 GHz"
+    - "Intel Core Xeon 5150 x2 @ 2.66 GHz"
+    - "Intel Core Xeon 5160 x2 @ 3.00 GHz"
+  GPU:
+    - "NVIDIA GeForce 7300 GT"
+  RAM:
+    - "1GB 667 MHz DDR2 ECC FB-DIMM"
+  SystemReportName:
+    - "Mac Pro"
+  MarketingName:
+    - "Mac Pro"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "UQ2"
+  - "0N2"
+  - "08S"
+  - "1MK"
+  - "0L6"
+  - "0L5"
+  - "0L3"
+  - "0L1"
+  - "0L0"
+  - "0L8"
+  - "0LU"
+  - "0LT"
+  - "0LS"
+  - "0LE"
+  - "0LD"
+  - "0LC"
+  - "0LB"
+  - "0LA"
+  - "0LN"
+  - "0LM"
+  - "0LL"
+  - "0L7"
+  - "0L2"
+  - "0L9"
+  - "0LP"
+  - "0KV"
+  - "0KW"
+  - "0KT"
+  - "0KU"
+  - "0KZ"
+  - "0KX"
+  - "0KY"
+  - "0L4"
+  - "0LH"
+  - "0VG"
+  - "0HA"
+  - "0GN"
+  - "0GP"
+  - "0Q0"
+  - "0PY"
+  - "0PX"
+  - "0PZ"
+  - "09H"
+  - "09G"
+  - "WKD"
+  - "Y8F"
+  - "YKH"
+  - "YAB"
+  - "Y3P"
+  - "WWQ"
+  - "XWZ"
+  - "ZNZ"
+  - "XZS"
+  - "YHA"
+  - "YHY"
+  - "X24"
+  - "WWN"
+  - "XAU"
+  - "XAV"
+  - "WRT"
+  - "WRU"
+  - "YY4"
+  - "WSE"
+  - "WS4"
+  - "Z2G"
+  - "Z2H"
+  - "X09"
+  - "X0C"
+  - "X0B"
+  - "X0A"
+  - "X2A"
+  - "X78"
+  - "YX3"
+  - "YJ0"
+  - "XCJ"
+  - "XCK"
+  - "WWX"
+  - "Z6N"
+  - "Z6M"
+  - "X14"
+  - "WUD"
+  - "X13"
+  - "Y5L"
+  - "ZDY"
+  - "XZT"
+  - "ZP0"
+  - "XNK"
+  - "X27"
+  - "XL3"
+  - "WWM"
+  - "X68"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2006
+  - 2007
+  - 2008
+MinimumOSVersion: "10.4.7"
+MaximumOSVersion: "10.7.5"

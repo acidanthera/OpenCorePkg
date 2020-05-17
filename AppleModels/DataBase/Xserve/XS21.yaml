@@ -1,0 +1,110 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "XS21.88Z.006C.B06.0804011317"
+BIOSLegacyVersion: "XS21.88Z.006C.B06.0804011317"
+BIOSReleaseDate: "04/01/08"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "Xserve2,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "CK830DLQX8S"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "Xserve"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F42289C8"
+BoardVersion: "Proto"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x17
+ChassisVersion: "Mac-F42289C8"
+ChassisAssetTag: "Asset Tag#"
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0402
+  - 0x0402
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x26
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x03
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x79001
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Harpertown"
+    - "Harpertown"
+  CPU:
+    - "Intel Xeon E5462 x2 @ 2.80 GHz"
+    - "Intel Xeon E5472 x2 @ 3.00 GHz"
+  GPU:
+    - "AMD ATI Radeon X1300"
+  RAM:
+    - "800 MHz DDR2 ECC FB-DIMM"
+  SystemReportName:
+    - "Xserve (Early 2008)"
+  MarketingName:
+    - "Xserve (Early 2008)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "X8S"
+  - "27P"
+  - "5WE"
+  - "5WD"
+  - "1H4"
+  - "3GM"
+  - "3GN"
+  - "31G"
+  - "20A"
+  - "32A"
+  - "1DR"
+  - "25N"
+  - "12E"
+  - "6EM"
+  - "24B"
+  - "1ZZ"
+  - "X8T"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "XZU"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2008
+  - 2009
+CloverSerialNumber: "CK830DLQX8S"
+MinimumOSVersion: "10.5"
+MaximumOSVersion: Server 10.7.5

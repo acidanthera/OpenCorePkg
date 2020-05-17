@@ -1,0 +1,124 @@
+BIOSVendor: "Apple Computer, Inc."
+BIOSVersion: "MBP22.88Z.00A5.B07.0708131242"
+BIOSLegacyVersion: "MBP22.88Z.00A5.B07.0708131242"
+BIOSReleaseDate: "08/13/07"
+SystemManufacturer: "Apple Computer, Inc."
+SystemProductName: "MacBookPro2,2"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W8827B4CW0L"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Computer, Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F42187C8"
+BoardVersion: "MacBookPro2,2"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Computer, Inc."
+ChassisType: 0x2
+ChassisVersion: "Mac-F42187C8"
+ChassisAssetTag: "Asset Tag#"
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x13
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x03
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7B002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Merom"
+    - "Merom"
+  CPU:
+    - "Intel Core 2 Duo T7400 @ 2.16 GHz"
+    - "Intel Core 2 Duo T7600 @ 2.33 GHz"
+  GPU:
+    - "AMD ATI Mobility Radeon X1600"
+  RAM:
+    - "667 MHz PC2-5300 DDR2 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (15-inch Core 2 Duo)"
+  MarketingName:
+    - "(Core 2 Duo)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "W0L"
+  - "Y1C"
+  - "XKU"
+  - "W0G"
+  - "W4K"
+  - "W4L"
+  - "Y6N"
+  - "X2G"
+  - "Y99"
+  - "Y98"
+  - "X2K"
+  - "W0K"
+  - "X2L"
+  - "X2H"
+  - "X2F"
+  - "X9U"
+  - "X9V"
+  - "XDB"
+  - "XDL"
+  - "XDK"
+  - "YJ9"
+  - "XCS"
+  - "Y41"
+  - "XAQ"
+  - "XC6"
+  - "X5X"
+  - "X6A"
+  - "X6B"
+  - "X2J"
+  - "X2E"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2006
+  - 2007
+CloverSerialNumber: "W8827B4CW0L"
+MinimumOSVersion: "10.4.8"
+MaximumOSVersion: "10.7.5"

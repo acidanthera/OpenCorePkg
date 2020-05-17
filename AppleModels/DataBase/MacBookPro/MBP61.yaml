@@ -1,0 +1,134 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "99.0.0.0.0"
+BIOSLegacyVersion: "MBP61.88Z.F000.B00.1906132235"
+BIOSReleaseDate: "06/13/19"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro6,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02G5834DC79"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F22589C8"
+BoardVersion: "MacBookPro6,1"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-F22589C8"
+ChassisAssetTag: ""
+# FIXME: check
+FirmwareFeatures: 0xC00DE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000C00DE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0602
+  - 0x0702
+  - 0x0702
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x57
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x18
+# FIXME: check
+SmcBranch:
+  - 0x6B
+  - 0x31
+  - 0x37
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6B
+  - 0x31
+  - 0x37
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7A004
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MBP61
+    EFI Version:  99.0.0.0.0
+    Date:         Thu Jun 13 22:35:55 2019
+    Build Type:   Release
+Specifications:
+  CPUCodename:
+    - "Arrandale"
+    - "Arrandale"
+    - "Arrandale"
+  CPU:
+    - "Intel Core i5-540M @ 2.53 GHz"
+    - "Intel Core i7-620M @ 2.66 GHz"
+    - "Intel Core i7-640M @ 2.80 GHz"
+  GPU:
+    - "NVIDIA GeForce GT 330M"
+  RAM:
+    - "1066 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (17-inch, Mid 2010)"
+  MarketingName:
+    - "MacBook Pro Intel Core i5, Intel Core i7 (Mid 2010)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "DC79"
+  - "DDJY"
+  - "DD6Y"
+  - "DJ6G"
+  - "DC7C"
+  - "DHVV"
+  - "DDK4"
+  - "DDK1"
+  - "DDK0"
+  - "DDK3"
+  - "DDK2"
+  - "DDJV"
+  - "DDJT"
+  - "DDJX"
+  - "DDHM"
+  - "DHYC"
+  - "DDHN"
+  - "DCVC"
+  - "DCV9"
+  - "DJQL"
+  - "DJQK"
+  - "DK9H"
+  - "DK9J"
+  - "DK9K"
+  - "DDJW"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "DCMV"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2010
+  - 2011
+CloverSerialNumber: "C02G5834DC79"
+MinimumOSVersion: "10.6.3"
+MaximumOSVersion: "10.13.6"

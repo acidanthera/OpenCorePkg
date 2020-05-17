@@ -1,0 +1,168 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "MBP31.88Z.0070.B07.0803051658"
+BIOSLegacyVersion: "MBP31.88Z.0070.B07.0803051658"
+BIOSReleaseDate: "03/05/08"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro3,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W8841OHZX91"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F4238BC8"
+BoardVersion: "PVT"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x2
+ChassisVersion: "Mac-F4238BC8"
+ChassisAssetTag: "Asset Tag#"
+MemoryFormFactor: 0xD
+FirmwareFeatures: 0xC0001407
+FirmwareFeaturesMask: 0xC0001FFF
+ExtendedFirmwareFeatures: 0x00000000C0001407
+ExtendedFirmwareFeaturesMask: 0x00000000C0001FFF
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+  - 0x0301
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x16
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x11
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7B002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Merom"
+    - "Merom"
+    - "Merom"
+  CPU:
+    - "Intel Core 2 Duo T7700 @ 2.40 GHz"
+    - "Intel Core 2 Duo T7800 @ 2.60 GHz"
+    - "Intel Core 2 Duo T7500 @ 2.20 GHz"
+  GPU:
+    - "NVIDIA GeForce 8600M GT"
+  RAM:
+    - "667 MHz PC2-5300 DDR2 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (15-inch,  2.4 2.2GHz)"
+    - "MacBook Pro (17-inch, 2.4GHZ)"
+  MarketingName: ""
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "X91"
+  - "1CY"
+  - "0PA"
+  - "02V"
+  - "0M0"
+  - "0S3"
+  - "0S6"
+  - "0LQ"
+  - "0LZ"
+  - "1CZ"
+  - "2QV"
+  - "2QU"
+  - "1MG"
+  - "1MF"
+  - "1CW"
+  - "1CX"
+  - "027"
+  - "0NM"
+  - "0ND"
+  - "0LR"
+  - "2QW"
+  - "02D"
+  - "028"
+  - "0PD"
+  - "09R"
+  - "09S"
+  - "YQ4"
+  - "YAP"
+  - "YZ2"
+  - "Z5M"
+  - "YNS"
+  - "YWC"
+  - "YWB"
+  - "YNQ"
+  - "X94"
+  - "YRD"
+  - "YR2"
+  - "YQ5"
+  - "YRE"
+  - "YNW"
+  - "XA9"
+  - "YZ1"
+  - "YAN"
+  - "YAA"
+  - "YRF"
+  - "YAM"
+  - "YAL"
+  - "YYX"
+  - "YZ0"
+  - "YWA"
+  - "YW5"
+  - "Y9T"
+  - "Y9S"
+  - "Z09"
+  - "Z05"
+  - "Z0G"
+  - "YL0"
+  - "X92"
+  - "YKZ"
+  - "YKY"
+  - "YKX"
+  - "YQ3"
+  - "XAG"
+  - "YWD"
+  - "YW9"
+  - "XAH"
+  - "YYV"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2007
+  - 2008
+CloverSerialNumber: "W8841OHZX91"
+MinimumOSVersion: "10.4.9"
+MaximumOSVersion: "10.11.6"

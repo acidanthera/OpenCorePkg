@@ -1,0 +1,190 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "193.0.0.0.0"
+BIOSLegacyVersion: "MBA71.88Z.F000.B00.2002051744"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookAir7,2"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02Q1HACG940"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Air"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-937CB26E2E02BB01"
+BoardVersion: "MacBookAir7,2"
+BoardAssetTag: "Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x9
+ChassisVersion: "Mac-937CB26E2E02BB01"
+ChassisAssetTag: ""
+# FIXME: check
+FirmwareFeatures: 0xE00FE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000E00FE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0606
+  - 0x0706
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+# FIXME: check
+SmcRevision:
+  - 0x02
+  - 0x27
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x02
+# FIXME: check
+SmcBranch:
+  - 0x6A
+  - 0x31
+  - 0x31
+  - 0x33
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6A
+  - 0x31
+  - 0x31
+  - 0x33
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7B007
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MBA71
+    EFI Version:  193.0.0.0.0
+    Built by:     root@xapp160
+    Date:         Wed Feb  5 17:44:58 PST 2020
+    Revision:     193 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple LLVM version 5.0 (clang-500.0.68) (based on LLVM 3.3svn)
+Specifications:
+  CPUCodename:
+    - "Broadwell"
+    - "Broadwell"
+  CPU:
+    - "Intel Core i5-5250U @ 1.60 GHz"
+    - "Intel Core i7-5650U @ 2.20 GHz"
+  GPU:
+    - "Intel HD Graphics 6000"
+  RAM:
+    - "1600 MHz LPDDR3 SDRAM"
+  SystemReportName:
+    - "MacBook Air (13-inch, Early 2015)"
+    - "MacBook Air (13-inch, 2017)"
+  MarketingName:
+    - "13\" MacBook Air (Early 2015)"
+    - "13\" MacBook Air (2017)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "G940"
+  - "G941"
+  - "G942"
+  - "G943"
+  - "G944"
+  - "GKJT"
+  - "GKJV"
+  - "GLCN"
+  - "GLCP"
+  - "GM14"
+  - "GM15"
+  - "GM38"
+  - "GM9G"
+  - "GMC3"
+  - "GN8C"
+  - "GNJJ"
+  - "H3QD"
+  - "H3QF"
+  - "H3QJ"
+  - "H3QK"
+  - "H569"
+  - "HD80"
+  - "GM6M"
+  - "J6VL"
+  - "GNKM"
+  - "H8VV"
+  - "H8VW"
+  - "H8VT"
+  - "H8VX"
+  - "HF4H"
+  - "HF4F"
+  - "HF9N"
+  - "GMD3"
+  - "HDV6"
+  - "HDV4"
+  - "HDV5"
+  - "HD7X"
+  - "GL25"
+  - "GL24"
+  - "GL23"
+  - "GL22"
+  - "GL21"
+  - "GL20"
+  - "HD98"
+  - "J8XH"
+  - "J8XG"
+  - "JCD6"
+  - "J9TN"
+  - "J9TQ"
+  - "J9TP"
+  - "MFWJ"
+  - "LQF1"
+  - "LQ07"
+  - "J8N7"
+  - "JC9H"
+  - "J9HX"
+  - "JFLY"
+  - "JKHD"
+  - "JKHF"
+  - "J1WK"
+  - "J1WL"
+  - "J1WM"
+  - "J1WV"
+  - "J1WT"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "G91Q"
+  - "G91T"
+  - "G91Y"
+  - "G925"
+  - "G928"
+  - "G92C"
+  - "G922"
+  - "G929"
+  - "G92F"
+  - "G91R"
+  - "G926"
+  - "G92G"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2015
+  - 2016
+  - 2017
+  - 2018
+  - 2019
+CloverSerialNumber: "C02Q1HACG940"
+MinimumOSVersion: "10.12.5"
+MaximumOSVersion: null

@@ -1,0 +1,211 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "MB21.88Z.00A5.B07.0706270922"
+BIOSLegacyVersion: "MB21.88Z.00A5.B07.0706270922"
+BIOSReleaseDate: "06/27/07"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBook2,1"
+SystemVersion: "1.2"
+# Note, this one is used by macserial
+SystemSerialNumber: "W88A041AWGP"
+SystemSKUNumber: "System SKUNumber"
+SystemFamily: "MacBook"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F4208CA9"
+BoardVersion: "PVT"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-F4208CA9"
+ChassisAssetTag: "Asset Tag"
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+  - 0x0301
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x13
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x03
+# FIXME: check
+SmcBranch:
+  - 0x62
+  - 0x72
+  - 0x61
+  - 0x6E
+  - 0x63
+  - 0x68
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6D
+  - 0x37
+  - 0x35
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x72001
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Merom"
+    - "Merom"
+    - "Merom"
+  CPU:
+    - "Intel Core 2 Duo T5600 @ 1.83 GHz"
+    - "Intel Core 2 Duo T7200 @ 2.00 GHz"
+    - "Intel Core 2 Duo T7400 @ 2.16 GHz"
+  GPU:
+    - "Intel GMA 950 Graphics"
+  RAM:
+    - "667 MHz DDR2 SDRAM"
+  SystemReportName:
+    - "MacBook (13-inch Late 2006)"
+    - "MacBook (13-inch Mid 2007)"
+  MarketingName: ""
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "WGP"
+  - "YYW"
+  - "YQ8"
+  - "Z88"
+  - "ZA8"
+  - "YA3"
+  - "YRG"
+  - "YA9"
+  - "YA8"
+  - "ZCN"
+  - "ZBF"
+  - "YTL"
+  - "YTK"
+  - "YQ7"
+  - "YRJ"
+  - "YRK"
+  - "ZB7"
+  - "ZB2"
+  - "Z5V"
+  - "Z5W"
+  - "Z5Z"
+  - "Z5X"
+  - "Z5Y"
+  - "YX4"
+  - "YX5"
+  - "YRH"
+  - "ZA9"
+  - "YJK"
+  - "YJM"
+  - "ZAW"
+  - "ZAS"
+  - "ZAP"
+  - "ZAQ"
+  - "YJJ"
+  - "YJL"
+  - "YJN"
+  - "ZAZ"
+  - "ZAX"
+  - "ZAY"
+  - "ZAV"
+  - "ZAU"
+  - "Z60"
+  - "ZBG"
+  - "ZBE"
+  - "ZBB"
+  - "ZBA"
+  - "ZBK"
+  - "ZBJ"
+  - "ZBH"
+  - "ZB1"
+  - "ZB0"
+  - "ZB9"
+  - "ZB8"
+  - "YSK"
+  - "YSH"
+  - "YSM"
+  - "YSL"
+  - "YX2"
+  - "YA5"
+  - "YA4"
+  - "YA7"
+  - "YA6"
+  - "YA2"
+  - "YXZ"
+  - "YX1"
+  - "YSJ"
+  - "YY1"
+  - "YV8"
+  - "XKT"
+  - "X97"
+  - "Y9A"
+  - "X6H"
+  - "X6J"
+  - "XDX"
+  - "XE3"
+  - "XC5"
+  - "XAT"
+  - "Y6M"
+  - "WGM"
+  - "WGL"
+  - "WGK"
+  - "WGU"
+  - "WGQ"
+  - "WGN"
+  - "WGT"
+  - "WGS"
+  - "Y6L"
+  - "YCU"
+  - "X7X"
+  - "XE0"
+  - "XE1"
+  - "XE2"
+  - "XDN"
+  - "XDW"
+  - "XDV"
+  - "XDU"
+  - "XDT"
+  - "XDS"
+  - "XDR"
+  - "XDZ"
+  - "XDY"
+  - "X6L"
+  - "X98"
+  - "XHC"
+  - "XHB"
+  - "WVN"
+  - "X6K"
+  - "X6G"
+  - "XAR"
+  - "XMF"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "WES"
+  - "WEV"
+  - "W6V"
+  - "WET"
+  - "WEU"
+  - "WEW"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2006
+  - 2007
+CloverSerialNumber: "W8713HACWGL"
+MinimumOSVersion: "10.4.9"
+MaximumOSVersion: "10.7.5"

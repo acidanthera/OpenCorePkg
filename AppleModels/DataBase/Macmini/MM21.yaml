@@ -1,0 +1,101 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "MM21.88Z.009A.B00.0706281359"
+BIOSLegacyVersion: "MM21.88Z.009A.B00.0706281359"
+BIOSReleaseDate: "06/28/2007"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "Macmini2,1"
+SystemVersion: "1.1"
+# Note, this one is used by macserial
+SystemSerialNumber: "W8705W9LYL2"
+SystemSKUNumber: "System SKUNumber"
+SystemFamily: "Napa Mac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F4208EAA"
+BoardVersion: "PVT"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x4
+ChassisVersion: "Mac-F4208EAA"
+ChassisAssetTag: "Asset Tag"
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x19
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x02
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x78002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Merom"
+    - "Merom"
+  CPU:
+    - "Intel Core 2 Duo T5600 @ 1.83 GHz"
+    - "Intel Core 2 Duo T7200 @ 2.00 GHz"
+  GPU:
+    - "Intel GMA950 graphics"
+  RAM:
+    - "667 MHz DDR2 SDRAM"
+  SystemReportName:
+    - "Mac mini (Mid 2007)"
+  MarketingName:
+    - "Mac mini Intel Core"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "YL2"
+  - "4NP"
+  - "Z5F"
+  - "YL4"
+  - "YL1"
+  - "YL3"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2007
+  - 2008
+  - 2009
+CloverSerialNumber: "W8705W9LYL2"
+MinimumOSVersion: "10.4.10"
+MaximumOSVersion: "10.7.5"

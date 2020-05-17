@@ -1,0 +1,139 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "IM71.88Z.007A.B03.0803051705"
+BIOSLegacyVersion: "IM71.88Z.007A.B03.0803051705"
+BIOSReleaseDate: "03/05/08"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac7,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W8741HACX87"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F42386C8"
+BoardVersion: "PVT"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-F42386C8"
+ChassisAssetTag: "Asset Tag#"
+FirmwareFeatures: 0xC0001407
+FirmwareFeaturesMask: 0xC0001FFF
+ExtendedFirmwareFeatures: 0x00000000C0001407
+ExtendedFirmwareFeaturesMask: 0x00000000C0001FFF
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+  - 0x0301
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x20
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x04
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x73002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Merom"
+    - "Merom"
+    - "Merom"
+  CPU:
+    - "Intel Core 2 Duo T7300 @ 2.00 GHz"
+    - "Intel Core 2 Duo T7700 @ 2.40 GHz"
+    - "Intel Core 2 Extreme X7900 @ 2.80 GHz"
+  GPU:
+    - "AMD ATI Radeon HD 2400 XT"
+  RAM:
+    - "667 MHz DDR2 SDRAM, PC2-5300"
+  SystemReportName:
+    - "iMac (20-inch, Mid 2007)"
+    - "iMac (24-inch, Mid 2007)"
+  MarketingName:
+    - "iMac Intel Core 2 Duo (aluminum enclosure) (Mid 2007)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "X87"
+  - "1NW"
+  - "2CB"
+  - "0PP"
+  - "1SC"
+  - "3PA"
+  - "0PN"
+  - "0PM"
+  - "0PL"
+  - "0PU"
+  - "1NU"
+  - "1NV"
+  - "3PB"
+  - "02X"
+  - "0U1"
+  - "0PR"
+  - "0PQ"
+  - "0PT"
+  - "09Q"
+  - "X86"
+  - "Z58"
+  - "ZFD"
+  - "Z9G"
+  - "ZEG"
+  - "X85"
+  - "X88"
+  - "ZCV"
+  - "ZCW"
+  - "ZGH"
+  - "ZCT"
+  - "Z59"
+  - "Z9F"
+  - "ZEF"
+  - "ZCR"
+  - "X89"
+  - "X8A"
+  - "ZGP"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2007
+  - 2008
+CloverSerialNumber: "W8739HACX85"
+MinimumOSVersion: "10.4.10"
+MaximumOSVersion: "10.11.6"

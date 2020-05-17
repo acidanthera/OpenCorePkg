@@ -17,6 +17,7 @@ TestsUser/Smbios/Smbios
 Utilities/RsaTool/RsaTool
 Utilities/EfiResTool/EfiResTool
 Utilities/AppleEfiSignTool/AppleEfiSignTool
+Utilities/macserial/bin/
 *.o
 DICT
 fuzz-*.log

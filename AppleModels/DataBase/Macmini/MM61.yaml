@@ -1,0 +1,132 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "283.0.0.0.0"
+BIOSLegacyVersion: "MM61.88Z.F000.B00.2002051859"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "Macmini6,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C07JNHACDY3H"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "Macmini"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-031AEE4D24BFF0B1"
+BoardVersion: "Macmini6,1"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x10
+ChassisVersion: "Mac-031AEE4D24BFF0B1"
+ChassisAssetTag: ""
+PlatformFeature: 0x1
+# FIXME: check
+FirmwareFeatures: 0xE00DE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000E00DE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0704
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+# FIXME: check
+SmcRevision:
+  - 0x02
+  - 0x07
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7D006
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MM61
+    EFI Version:  283.0.0.0.0
+    Built by:     root@saumon
+    Date:         Wed Feb  5 18:59:37 PST 2020
+    Revision:     283 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
+Specifications:
+  CPUCodename:
+    - "Ivy Bridge"
+  CPU:
+    - "Intel Core i5-3210M @ 2.50 GHz"
+  GPU:
+    - "Intel HD Graphics 4000"
+  RAM:
+    - "1600 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "Mac mini (Late 2012)"
+  MarketingName:
+    - "Mac mini (Late 2012)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "DY3H"
+  - "DWYL"
+  - "DWYM"
+  - "DY3G"
+  - "F9RK"
+  - "F9RL"
+  - "F9RM"
+  - "F9VV"
+  - "F9VW"
+  - "F9W0"
+  - "F9W1"
+  - "F9W2"
+  - "FD9G"
+  - "FD9H"
+  - "FD9J"
+  - "FD9K"
+  - "FDWK"
+  - "FGML"
+  - "FRFP"
+  - "FW56"
+  - "FW57"
+  - "G430"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "F1HC"
+  - "DVF8"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2012
+  - 2013
+  - 2014
+CloverSerialNumber: "C07JNHACDY3H"
+MinimumOSVersion: "10.8.1"
+MaximumOSVersion: null

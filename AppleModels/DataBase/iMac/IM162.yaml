@@ -1,0 +1,186 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "233.0.0.0.0"
+BIOSLegacyVersion: "IM162.88Z.F000.B00.2002051745"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac16,2"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02PNHACGG7G"
+SystemSKUNumber: ""
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-FFE5EF870D7BA81A"
+BoardVersion: "iMac16,2"
+BoardAssetTag: ""
+BoardType: 0xA
+# FIXME: check
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-FFE5EF870D7BA81A"
+ChassisAssetTag: ""
+PlatformFeature: 0x3
+# FIXME: check
+FirmwareFeatures: 0xFC0FE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000FC0FE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0606
+  - 0x0606
+  - 0x0706
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+SmcRevision:
+  - 0x02
+  - 0x32
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x21
+# FIXME: check
+SmcBranch:
+  - 0x6A
+  - 0x39
+  - 0x34
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6A
+  - 0x39
+  - 0x34
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0xF00008
+OEMStrings: |-
+  Apple ROM Version
+    Model:        IM162
+    EFI Version:  233.0.0.0.0
+    Built by:     root@xapp160
+    Date:         Wed Feb  5 17:45:41 PST 2020
+    Revision:     233 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple LLVM version 5.0 (clang-500.0.68) (based on LLVM 3.3svn)
+Specifications:
+  CPUCodename:
+    - "Broadwell"
+    - "Broadwell"
+    - "Broadwell"
+  CPU:
+    - "Intel Core i5-5675R @ 3.10 GHz"
+    - "Intel Core i5-5575R @ 2.80 GHz"
+    - "Intel Core i7-5775R @ 3.30 GHz"
+  GPU:
+    - "Intel Iris Pro 6200"
+  RAM:
+    - "1867 MHz LPDDR3 SDRAM"
+  SystemReportName:
+    - "iMac (21.5-inch, Late 2015)"
+    - "iMac (Retina 4K, 21.5-inch, Late 2015)"
+  MarketingName:
+    - "21.5\" iMac (Late 2015)"
+    - "21.5\" iMac (Retina 4K Late 2015)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "GG7G"
+  - "GG78"
+  - "GG7F"
+  - "GG7H"
+  - "H0P7"
+  - "H1F3"
+  - "H1F5"
+  - "H1F7"
+  - "H1F8"
+  - "H1F9"
+  - "H25N"
+  - "H8L0"
+  - "H8L1"
+  - "H8L2"
+  - "H8L3"
+  - "H15R"
+  - "H28H"
+  - "H8KY"
+  - "GG7C"
+  - "H0KF"
+  - "H3RJ"
+  - "HLWV"
+  - "H1WR"
+  - "HYGQ"
+  - "HQ9W"
+  - "H2KW"
+  - "HHMG"
+  - "GF1L"
+  - "GF1M"
+  - "GF1K"
+  - "H0N6"
+  - "H1DX"
+  - "J0DJ"
+  - "J0DH"
+  - "J0DG"
+  - "H8KX"
+  - "GG77"
+  - "GG79"
+  - "GG7D"
+  - "H0P6"
+  - "H1DY"
+  - "HQ9V"
+  - "HQ9T"
+  - "H1F2"
+  - "H1F1"
+  - "H25M"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "GQRY"
+  - "GQT0"
+  - "GQT1"
+  - "GPXJ"
+  - "GPXK"
+  - "GPXL"
+  - "GQRW"
+  - "GQRX"
+  - "GXMM"
+  - "GPXG"
+  - "GPXH"
+  - "GXMN"
+  - "GQT4"
+  - "GQT5"
+  - "GQT6"
+  - "GPXP"
+  - "GPXQ"
+  - "GPXR"
+  - "GQT2"
+  - "GQT3"
+  - "GXMP"
+  - "GPXM"
+  - "GPXN"
+  - "GXMQ"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2015
+  - 2016
+  - 2017
+CloverSerialNumber: "C02PNHACGG78"
+MinimumOSVersion: "10.11"
+MaximumOSVersion: null

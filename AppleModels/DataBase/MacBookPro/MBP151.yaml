@@ -1,0 +1,151 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "1037.120.79.0.0"
+BIOSLegacyVersion: "MBP151.88Z.F000.B00.2004232129"
+BIOSReleaseDate: "04/23/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro15,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02X846JJG5J"
+SystemSKUNumber: ""
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-937A206F2EE63C01"
+#  "Mac-smthelse"
+BoardProduct: "Mac-937A206F2EE63C01"
+BoardVersion: "MacBookPro15,1"
+BoardRevision: 0x1
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x9
+ChassisVersion: "Mac-937A206F2EE63C01"
+ChassisAssetTag: ""
+PlatformFeature: 0x32
+FirmwareFeatures: 0xFD8FF426
+FirmwareFeaturesMask: 0xFF9FFF3F
+ExtendedFirmwareFeatures: 0x00000000FD8FF426
+ExtendedFirmwareFeaturesMask: 0x00000000FF9FFF3F
+MemoryFormFactor: 0xD
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0701
+  - 0x1001
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+  - 12345
+SmcGeneration: 3
+SmcPlatform:
+  - 0x6a
+  - 0x36
+  - 0x38
+  - 0x30
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      MBP151.88Z.F000.B00.2004232129
+    Model:        MBP151
+    EFI Version:  1037.120.79.0.0
+    Built by:     tangstad@pdb172
+    Date:         Thu Apr 23 21:29:41 2020
+    Revision:     1037.120.79 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     clang-1103.2.29.8
+    UUID:         D16C1CAC-0CD6-3787-8828-4B2DACE8E2A3
+    UUID:         20CBD59C-B914-31E8-BE44-880BDC88C816
+Specifications:
+  CPUCodename:
+    - "Coffee Lake"
+    - "Coffee Lake"
+    - "Coffee Lake"
+  CPU:
+    - "Intel Core i7-8750H @ 2.20 GHz"
+    - "Intel Core i7-8850H @ 2.60 GHz"
+    - "Intel Core i9-8950HK @ 2.90 GHz"
+  GPU:
+    - "AMD Radeon Pro 555X"
+    - "AMD Radeon Pro 560X"
+  RAM:
+    - "16GB 2400 MHz LPDDR4 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (15-inch, 2018)"
+  MarketingName:
+    - "15\" MacBook Pro with Thunderbolt 3 and Touch ID (Mid 2018)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "KGYG"
+  - "JG5H"
+  - "JG5J"
+  - "JG5K"
+  - "JG5L"
+  - "JG5M"
+  - "JGH5"
+  - "JGH6"
+  - "JGH7"
+  - "JGH8"
+  - "KGYF"
+  - "KGYH"
+  - "KQ9Q"
+  - "KQ9R"
+  - "KQ9T"
+  - "KQ9V"
+  - "KQ9W"
+  - "KQ9X"
+  - "KQ9Y"
+  - "KQC0"
+  - "KQC1"
+  - "KQC2"
+  - "KQC3"
+  - "KQC4"
+  - "KQC5"
+  - "KQC6"
+  - "KQC7"
+  - "KQC8"
+  - "KQC9"
+  - "KQCC"
+  - "KQCD"
+  - "KQCF"
+  - "KQCG"
+  - "KQCH"
+  - "KQCJ"
+  - "KQCK"
+  - "KQCL"
+  - "KQCM"
+  - "KQCN"
+  - "KQCP"
+  - "KQCR"
+  - "KQCT"
+  - "KQCV"
+  - "KQCW"
+  - "KQCX"
+  - "KWJ2"
+  - "LCM6"
+  - "MJLT"
+  - "L4HW"
+  - "KQCQ"
+  - "LC8K"
+  - "LC8J"
+  - "LC8L"
+  - "L539"
+  - "L53D"
+  - "L4HX"
+  - "L7GC"
+  - "MJLR"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "JP4F"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2018
+  - 2019
+MinimumOSVersion: "10.13.6"
+MaximumOSVersion: null
+AppleModelId: "J680"

@@ -30,6 +30,7 @@ OpenCore Changelog
 - Fixed compatibility with blit-only GOP (e.g. OVMF Bochs)
 - Fixed ignoring `#` in DeviceProperty and NVRAM `Delete`
 - Renamed `Block` to `Delete` in `ACPI`,`DeviceProperties`, and `NVRAM`
+- Added MacBookPro16,2 and MacBookPro16,3 model codes
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG

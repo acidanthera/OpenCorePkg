@@ -1,0 +1,116 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "290.0.0.0.0"
+BIOSLegacyVersion: "IM131.88Z.F000.B00.2002052050"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac13,3"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02KVHACFFYW"
+SystemSKUNumber: ""
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-7DF2A3B5E5D671ED"
+BoardVersion: "iMac13,3"
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-7DF2A3B5E5D671ED"
+ChassisAssetTag: ""
+PlatformFeature: 0x1
+# FIXME: check
+FirmwareFeatures: 0xE00DE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000E00DE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0604
+  - 0x0904
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+# FIXME: check
+SmcRevision:
+  - 0x02
+  - 0x13
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x15
+# FIXME: check
+SmcBranch:
+  - 0x64
+  - 0x38
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x64
+  - 0x38
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x79006
+OEMStrings: |-
+  Apple ROM Version
+    Model:        IM131
+    EFI Version:  290.0.0.0.0
+    Built by:     root@saumon
+    Date:         Wed Feb  5 20:50:22 PST 2020
+    Revision:     290 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
+Specifications:
+  CPUCodename:
+    - "Ivy Bridge"
+    - "Ivy Bridge"
+  CPU:
+    - "Intel Core i5-3470S @ 2.90 GHz"
+    - "Intel Core i3-3225 @ 3.30 GHz"
+  GPU:
+    - "Intel HD Graphics 4000"
+  RAM:
+    - "1600 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "iMac (21.5-inch, Early 2013)"
+  MarketingName:
+    - "21.5\" iMac (Early 2013)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "FFYW"
+  - "FFYV"
+  - "FGPL"
+  - "FGPM"
+  - "FJQQ"
+  - "FLMH"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "F8GR"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2013
+CloverSerialNumber: "C02KVHACFFYV"
+MinimumOSVersion: "10.8.2"
+MaximumOSVersion: null

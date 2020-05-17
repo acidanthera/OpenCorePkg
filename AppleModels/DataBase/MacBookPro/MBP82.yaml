@@ -1,0 +1,351 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "87.0.0.0.0"
+BIOSLegacyVersion: "MBP81.88Z.F000.B00.1906132217"
+BIOSReleaseDate: "06/13/19"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro8,2"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02HL0FGDF8X"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-94245A3940C91C80"
+BoardVersion: "MacBookPro8,2"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-94245A3940C91C80"
+ChassisAssetTag: ""
+# FIXME: check
+FirmwareFeatures: 0xC00DE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000C00DE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0703
+  - 0x0703
+  - 0x0703
+  - 0x0703
+  - 0x0703
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x69
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x04
+# FIXME: check
+SmcBranch:
+  - 0x74
+  - 0x72
+  - 0x75
+  - 0x6E
+  - 0x6B
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6B
+  - 0x39
+  - 0x31
+  - 0x66
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7B005
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MBP81
+    EFI Version:  87.0.0.0.0
+    Date:         Thu Jun 13 22:17:08 2019
+    Build Type:   Release
+Specifications:
+  CPUCodename:
+    - "Sandy Bridge"
+    - "Sandy Bridge"
+    - "Sandy Bridge"
+    - "Sandy Bridge"
+    - "Sandy Bridge"
+  CPU:
+    - "Intel Core i7-2675QM @ 2.20 GHz"
+    - "Intel Core i7-2820QM @ 2.30 GHz"
+    - "Intel Core i7-2760QM @ 2.40 GHz"
+    - "Intel Core i7-2720QM @ 2.20 GHz"
+    - "Intel Core i7-2860QM @ 2.50 GHz"
+  GPU:
+    - "AMD Radeon HD 6750M"
+    - "AMD Radeon HD 6770M"
+  RAM:
+    - "1333 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (15-inch, Early 2011)"
+    - "MacBook Pro (15-inch, Late 2011)"
+  MarketingName:
+    - "MacBook Pro Intel Core i7, 15\" (Early 2011)"
+    - "MacBook Pro Intel Core i7, 15\" (Late 2011)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "DF8X"
+  - "DRJD"
+  - "DRJF"
+  - "DF8V"
+  - "DRJC"
+  - "F0K6"
+  - "F0V2"
+  - "DW3G"
+  - "DW3H"
+  - "DW47"
+  - "DW3J"
+  - "DY20"
+  - "DY60"
+  - "DVHR"
+  - "DVHL"
+  - "DVHM"
+  - "DY7G"
+  - "DYR1"
+  - "DYKC"
+  - "DY1Y"
+  - "DY1V"
+  - "DY1T"
+  - "DV7N"
+  - "DV7M"
+  - "DV7L"
+  - "DV7P"
+  - "DY1R"
+  - "DY1Q"
+  - "DY1N"
+  - "DY1L"
+  - "DY1M"
+  - "DY1W"
+  - "DY1P"
+  - "DYG6"
+  - "DYG7"
+  - "DY21"
+  - "DY5Y"
+  - "DY5R"
+  - "DY5P"
+  - "DY5Q"
+  - "DY5K"
+  - "DYK9"
+  - "DMQP"
+  - "DNGF"
+  - "DLN8"
+  - "DLN7"
+  - "DT6R"
+  - "DT6L"
+  - "DT6M"
+  - "DT6J"
+  - "DT6H"
+  - "DT6F"
+  - "DT6G"
+  - "DT6D"
+  - "DT6C"
+  - "DT68"
+  - "DT69"
+  - "DNRD"
+  - "DT57"
+  - "DT56"
+  - "DT55"
+  - "DT54"
+  - "DT59"
+  - "DT58"
+  - "DT5C"
+  - "DT5G"
+  - "DT5F"
+  - "DT5D"
+  - "DT5J"
+  - "DT5H"
+  - "DT5L"
+  - "DMMJ"
+  - "DMMH"
+  - "DMMF"
+  - "DT4J"
+  - "DRJL"
+  - "DRJM"
+  - "DNVK"
+  - "DT6K"
+  - "DRWD"
+  - "DRW3"
+  - "DRW4"
+  - "DNHY"
+  - "DNH5"
+  - "DNKM"
+  - "DNKY"
+  - "DMDG"
+  - "DMDH"
+  - "DMDJ"
+  - "DNM4"
+  - "DNMW"
+  - "DMGG"
+  - "DF91"
+  - "DF8Y"
+  - "DMPR"
+  - "DMPM"
+  - "DMPN"
+  - "DMC8"
+  - "DMC9"
+  - "DNC3"
+  - "DNCN"
+  - "DMPQ"
+  - "DMPP"
+  - "DMPL"
+  - "DMPK"
+  - "DMPG"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "DMMN"
+  - "DMMQ"
+  - "DMMR"
+  - "DMMW"
+  - "DMN4"
+  - "DMN6"
+  - "DMNN"
+  - "DMNP"
+  - "DMNQ"
+  - "DMNR"
+  - "DMNT"
+  - "DMNV"
+  - "DRMN"
+  - "DRMY"
+  - "DRN0"
+  - "DRN2"
+  - "DRN4"
+  - "DRN6"
+  - "DRP8"
+  - "DRPM"
+  - "DRPT"
+  - "DRPW"
+  - "DRQ0"
+  - "DRQ3"
+  - "DTHH"
+  - "DTHR"
+  - "DTHW"
+  - "DTHY"
+  - "DTJ1"
+  - "DMML"
+  - "DMMM"
+  - "DMMV"
+  - "DMN1"
+  - "DMN3"
+  - "DMN5"
+  - "DMN7"
+  - "DMN8"
+  - "DMN9"
+  - "DMND"
+  - "DMNF"
+  - "DMNG"
+  - "DRMQ"
+  - "DRMT"
+  - "DRMV"
+  - "DRN1"
+  - "DRN7"
+  - "DRN8"
+  - "DRPC"
+  - "DRPK"
+  - "DRPL"
+  - "DRPQ"
+  - "DRPV"
+  - "DRQ2"
+  - "DTHJ"
+  - "DTHN"
+  - "DTHQ"
+  - "DTHT"
+  - "DTHV"
+  - "DMMK"
+  - "DMMP"
+  - "DMMT"
+  - "DMMY"
+  - "DMN0"
+  - "DMN2"
+  - "DMNC"
+  - "DMNH"
+  - "DMNJ"
+  - "DMNK"
+  - "DMNL"
+  - "DMNM"
+  - "DRMM"
+  - "DRMP"
+  - "DRMR"
+  - "DRMW"
+  - "DRN3"
+  - "DRN5"
+  - "DRP9"
+  - "DRPN"
+  - "DRPP"
+  - "DRPR"
+  - "DRPY"
+  - "DRQ1"
+  - "DTHK"
+  - "DTHL"
+  - "DTHM"
+  - "DTHP"
+  - "DTJ6"
+  - "DTWK"
+  - "DTWL"
+  - "DTWM"
+  - "DTWN"
+  - "DTWP"
+  - "DTWQ"
+  - "DTWR"
+  - "DTWT"
+  - "DTWV"
+  - "DTWW"
+  - "DTWY"
+  - "DTY0"
+  - "DYM2"
+  - "DYM3"
+  - "DYM4"
+  - "DYM5"
+  - "DYMC"
+  - "DYNC"
+  - "F16H"
+  - "DYN4"
+  - "DV36"
+  - "DV37"
+  - "DV3D"
+  - "DV3F"
+  - "DV3G"
+  - "DV3H"
+  - "DV3J"
+  - "DV3M"
+  - "DV3P"
+  - "DV3V"
+  - "DV3Y"
+  - "DV40"
+  - "DYM6"
+  - "DYM8"
+  - "DYM9"
+  - "DYMF"
+  - "DYMJ"
+  - "DV32"
+  - "DV34"
+  - "DV38"
+  - "DV39"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2011
+  - 2012
+CloverSerialNumber: "C02HL0FGDF8X"
+MinimumOSVersion: "10.7.2"
+MaximumOSVersion: "10.13.6"

@@ -1,0 +1,119 @@
+BIOSVendor: "Apple Computer, Inc."
+BIOSVersion: "XS11.88Z.0080.B01.0706271533"
+BIOSLegacyVersion: "XS11.88Z.0080.B01.0706271533"
+BIOSReleaseDate: "06/27/07"
+SystemManufacturer: "Apple Computer, Inc."
+SystemProductName: "Xserve1,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "CK703E1EV2Q"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "Xserve"
+BoardManufacturer: "Apple Computer, Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F4208AC8"
+BoardVersion: "Proto"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Computer, Inc."
+ChassisType: 0x17
+ChassisVersion: "Mac-F4208AC8"
+ChassisAssetTag: "Asset Tag#"
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0401
+  - 0x0401
+  - 0x0401
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x11
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x05
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x79001
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Woodcrest"
+    - "Woodcrest"
+    - "Woodcrest"
+  CPU:
+    - "Intel Xeon 5130 x2 @ 2.00 GHz"
+    - "Intel Xeon 5150 x2 @ 2.66 GHz"
+    - "Intel Xeon 5160 x2 @ 3.00 GHz"
+  GPU:
+    - "AMD ATI Radeon X1300"
+  RAM:
+    - "667 MHz DDR2 ECC FB-DIMM"
+  SystemReportName:
+    - "Xserve (Late 2006)"
+  MarketingName:
+    - "Xserve (Late 2006)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "V2Q"
+  - "00W"
+  - "WXM"
+  - "XBR"
+  - "YWF"
+  - "XXC"
+  - "XXF"
+  - "XXE"
+  - "XXD"
+  - "Z2F"
+  - "XBT"
+  - "XBS"
+  - "XBG"
+  - "XBF"
+  - "V2M"
+  - "XAW"
+  - "YZ8"
+  - "YZ9"
+  - "X83"
+  - "X84"
+  - "Y8S"
+  - "XLR"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "V1C"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2006
+  - 2007
+  - 2008
+CloverSerialNumber: "CK703E1EV2Q"
+MinimumOSVersion: "10.4.8"
+MaximumOSVersion: Server 10.7.5

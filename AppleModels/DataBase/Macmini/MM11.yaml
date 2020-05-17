@@ -1,0 +1,123 @@
+BIOSVendor: "Apple Computer, Inc."
+BIOSVersion: "MM11.88Z.0055.B08.0610121326"
+BIOSLegacyVersion: "MM11.88Z.0055.B08.0610121326"
+BIOSReleaseDate: "10/12/2006"
+SystemManufacturer: "Apple Computer, Inc."
+SystemProductName: "Macmini1,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W8702N1JU35"
+SystemSKUNumber: "System SKUNumber"
+SystemFamily: "Napa Mac"
+BoardManufacturer: "Apple Computer, Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F4208EC8"
+BoardVersion: "PVT"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Computer, Inc."
+ChassisType: 0x4
+ChassisVersion: "Mac-F4208EC8"
+ChassisAssetTag: "Asset Tag"
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0201
+  - 0x0201
+  - 0x0201
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x03
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x04
+# FIXME: check
+SmcBranch:
+  - 0x6D
+  - 0x34
+  - 0x30
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6D
+  - 0x34
+  - 0x30
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x78002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Yonah"
+    - "Yonah"
+    - "Yonah"
+  CPU:
+    - "Intel Core Solo T1200 @ 1.50 GHz"
+    - "Intel Core Duo T2300 @ 1.66 GHz"
+    - "Intel Core Duo T2400 @ 1.83 GHz"
+  GPU:
+    - "Intel GMA950 graphics"
+  RAM:
+    - "667 MHz DDR2 SDRAM"
+  SystemReportName:
+    - "Mac mini (Early 2006)"
+    - "Mac mini (Late 2006)"
+  MarketingName:
+    - "Mac mini Intel Core (Early 2006)"
+    - "Mac mini Intel Core (Late 2006)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "U35"
+  - "W0D"
+  - "W0B"
+  - "X20"
+  - "XAS"
+  - "Y9E"
+  - "X1X"
+  - "X1Y"
+  - "X1Z"
+  - "WKN"
+  - "W0A"
+  - "W0C"
+  - "WBZ"
+  - "VS7"
+  - "WCU"
+  - "VLK"
+  - "WEN"
+  - "VJN"
+  - "U36"
+  - "U39"
+  - "U38"
+  - "VS5"
+  - "VU4"
+  - "VU2"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2006
+  - 2007
+CloverSerialNumber: "W8702N1JU35"
+MinimumOSVersion: "10.4.7"
+MaximumOSVersion: "10.6.8"

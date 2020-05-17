@@ -1,0 +1,143 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "197.0.0.0.0"
+BIOSLegacyVersion: "MBP114.88Z.F000.B00.2002051744"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro11,4"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02SNHACG8WN"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-06F11FD93F0323C5"
+BoardVersion: "MacBookPro11,4"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-06F11FD93F0323C5"
+ChassisAssetTag: ""
+PlatformFeature: 0x2
+# FIXME: check
+FirmwareFeatures: 0xE80FE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000E80FE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0705
+  - 0x0705
+  - 0x0705
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+# FIXME: check
+SmcRevision:
+  - 0x02
+  - 0x29
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x23
+# FIXME: check
+SmcBranch:
+  - 0x6A
+  - 0x31
+  - 0x34
+  - 0x35
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0xF0B007
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MBP114
+    EFI Version:  197.0.0.0.0
+    Built by:     root@xapp160
+    Date:         Wed Feb  5 17:44:55 PST 2020
+    Revision:     197 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple LLVM version 5.0 (clang-500.0.68) (based on LLVM 3.3svn)
+Specifications:
+  CPUCodename:
+    - "Crystal Well"
+    - "Crystal Well"
+    - "Crystal Well"
+  CPU:
+    - "Intel Core i7-4770HQ @ 2.20 GHz"
+    - "Intel Core i7-4870HQ @ 2.50 GHz"
+    - "Intel Core i7-4980HQ @ 2.80 GHz"
+  GPU:
+    - "Intel Iris 5200 Pro graphics"
+  RAM:
+    - "1600 MHz DDR3L SDRAM"
+  SystemReportName:
+    - "MacBook Pro (Retina, 15-inch, Mid 2015)"
+  MarketingName:
+    - "15\" MacBook Pro with Retina display (Mid 2015)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "G8WN"
+  - "G8WL"
+  - "HFG7"
+  - "HV37"
+  - "HV36"
+  - "GPLM"
+  - "GPLP"
+  - "HV2K"
+  - "HMMF"
+  - "GPLN"
+  - "GQCM"
+  - "GQCL"
+  - "GQCQ"
+  - "GQCP"
+  - "GQCR"
+  - "GQ62"
+  - "GQ63"
+  - "GQ64"
+  - "GP4H"
+  - "GP4J"
+  - "GWDN"
+  - "GWDP"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "GDQP"
+  - "GDQR"
+  - "GDQQ"
+  - "GDQT"
+  - "G7RP"
+  - "G7RQ"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2015
+  - 2016
+  - 2017
+  - 2018
+CloverSerialNumber: "C02Q7HACG8WL"
+MinimumOSVersion: "10.10.3"
+MaximumOSVersion: null

@@ -1,0 +1,128 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "XS31.88Z.0081.B06.0908061300"
+BIOSLegacyVersion: "XS31.88Z.0081.B06.0908061300"
+BIOSReleaseDate: "08/06/09"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "Xserve3,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "CK933YJ16HS"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "Xserve"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F223BEC8"
+BoardVersion: "Xserve3,1"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x17
+ChassisVersion: "Mac-F223BEC8"
+ChassisAssetTag: "Xserve"
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0501
+  - 0x0501
+  - 0x0501
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x43
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x04
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x79001
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Nehalem EP"
+    - "Nehalem EP"
+    - "Nehalem EP"
+  CPU:
+    - "Intel Xeon E5520 x2 @ 2.26 GHz"
+    - "Intel Xeon X5550 x2 @ 2.66 GHz"
+    - "Intel Xeon X5570 x2 @ 2.93 GHz"
+  GPU:
+    - "NVIDIA GeForce GT 120"
+  RAM:
+    - "1066 MHz DDR3 ECC SDRAM"
+  SystemReportName:
+    - "Xserve (Early 2009)"
+  MarketingName:
+    - "Xserve (Early 2009)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "6HS"
+  - "8DE"
+  - "9N0"
+  - "9VJ"
+  - "9WM"
+  - "9ZP"
+  - "9ZQ"
+  - "9ZL"
+  - "8M3"
+  - "10J"
+  - "10S"
+  - "9SS"
+  - "9ST"
+  - "GQU"
+  - "A6Z"
+  - "DFT"
+  - "A70"
+  - "BR7"
+  - "CS0"
+  - "HDE"
+  - "A2U"
+  - "A2V"
+  - "AFT"
+  - "AFU"
+  - "AFV"
+  - "AFS"
+  - "CRZ"
+  - "DL5"
+  - "D5G"
+  - "DFU"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "63C"
+  - "1PH"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2009
+  - 2010
+  - 2011
+CloverSerialNumber: "CK933YJ16HS"
+MinimumOSVersion: "10.5.6"
+MaximumOSVersion: "10.11.6"

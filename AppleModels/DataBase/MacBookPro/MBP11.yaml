@@ -1,0 +1,149 @@
+BIOSVendor: "Apple Computer, Inc."
+BIOSVersion: "MBP11.88Z.0055.B08.0610121325"
+BIOSLegacyVersion: "MBP11.88Z.0055.B08.0610121325"
+BIOSReleaseDate: "10/12/06"
+SystemManufacturer: "Apple Computer, Inc."
+SystemProductName: "MacBookPro1,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W884857JVJ1"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Computer, Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F425BEC8"
+BoardVersion: "MacBookPro1,1"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Computer, Inc."
+ChassisType: 0x2
+ChassisVersion: "Mac-F425BEC8"
+ChassisAssetTag: "Asset Tag#"
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0201
+  - 0x0201
+  - 0x0201
+  - 0x0201
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x02
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x10
+# FIXME: check
+SmcBranch:
+  - 0x6D
+  - 0x31
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6D
+  - 0x31
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7B002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Yonah"
+    - "Yonah"
+    - "Yonah"
+    - "Yonah"
+  CPU:
+    - "Intel Core Duo L2400 @ 1.66 GHz"
+    - "Intel Core Duo T2400 @ 1.83 GHz"
+    - "Intel Core Duo T2500 @ 2.00 GHz"
+    - "Intel Core Duo T2600 @ 2.16 GHz"
+  GPU:
+    - "AMD ATI Mobility Radeon X1600"
+  RAM:
+    - "667 MHz PC2-5300 DDR2 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (original)"
+    - "MacBook Pro (15-inch Glossy)"
+  MarketingName: ""
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "VJ1"
+  - "VWX"
+  - "VWY"
+  - "VWZ"
+  - "VWW"
+  - "WBH"
+  - "WB8"
+  - "W3N"
+  - "WAG"
+  - "WAW"
+  - "WDA"
+  - "WDB"
+  - "WDC"
+  - "WDD"
+  - "WD7"
+  - "WD8"
+  - "WD9"
+  - "W9Q"
+  - "W9F"
+  - "WBF"
+  - "WBE"
+  - "WBJ"
+  - "WW0"
+  - "WW3"
+  - "WW2"
+  - "W94"
+  - "W93"
+  - "W92"
+  - "WTS"
+  - "WW1"
+  - "VJ6"
+  - "VSD"
+  - "W2Q"
+  - "VWA"
+  - "VGW"
+  - "VJM"
+  - "VJ3"
+  - "VJ2"
+  - "VJ0"
+  - "VJ7"
+  - "VJ5"
+  - "VWB"
+  - "VMU"
+  - "VGX"
+  - "VGY"
+  - "VXX"
+  - "VXW"
+  - "VTZ"
+  - "THV"
+  - "VU0"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2006
+CloverSerialNumber: "W8634HACVWZ"
+MinimumOSVersion: "10.4.5"
+MaximumOSVersion: "10.6.8"

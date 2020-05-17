@@ -1,0 +1,92 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "1037.120.82.0.0"
+BIOSLegacyVersion: "MBP163.88Z.F000.B00.2005050334"
+BIOSReleaseDate: "05/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro16,3"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02CJAATP3XY"
+SystemSKUNumber: ""
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+BoardProduct: "Mac-E7203C0F68AA0004"
+BoardVersion: "MacBookPro16,3"
+BoardRevision: 0x3
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x9
+ChassisVersion: "Mac-E7203C0F68AA0004"
+ChassisAssetTag: ""
+PlatformFeature: 0x32
+FirmwareFeatures: 0xFDAFF066
+FirmwareFeaturesMask: 0xFFFFFF7F
+ExtendedFirmwareFeatures: 0x00000000FDAFF066
+ExtendedFirmwareFeaturesMask: 0x00000000FFFFFF7F
+MemoryFormFactor: 0xD
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0701
+  - 0x1001
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+SmcGeneration: 3
+SmcPlatform:
+  - 0x6a
+  - 0x32
+  - 0x32
+  - 0x33
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      MBP163.88Z.F000.B00.2005050334
+    Model:        MBP163
+    EFI Version:  1037.120.82.0.0
+    Built by:     _securitya@pdb172
+    Date:         Tue May  5 03:34:57 2020
+    Revision:     1037.120.82 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     clang-1103.2.29.8
+    UUID:         D16C1CAC-0CD6-3787-8828-4B2DACE8E2A3
+    UUID:         20CBD59C-B914-31E8-BE44-880BDC88C816
+Specifications:
+  CPUCodename:
+    - "Coffee Lake"
+    - "Coffee Lake"
+  CPU:
+    - "Intel Core i5-8257U @ 1.40 GHz"
+    - "Intel Core i7-8557U @ 1.70 GHz"
+  GPU:
+    - "Intel Iris Plus Graphics 645"
+  RAM:
+    - "8.00 GB 2133 MHz LPDDR3"
+  SystemReportName:
+    - "MacBook Pro (13-inch, 2020, Two Thunderbolt 3 ports)"
+  MarketingName:
+    - "MacBook Pro (13-inch, 2020, Two Thunderbolt 3 ports)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "P3XY"
+  - "P3YV"
+  - "P3YX"
+  - "P3YY"
+  - "P3Y0"
+  - "P3Y1"
+  - "P3Y2"
+  - "P3YW"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "0000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2020
+MinimumOSVersion: "10.15.4"
+MaximumOSVersion: null
+AppleModelId: "J223"

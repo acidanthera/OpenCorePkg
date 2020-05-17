@@ -1,0 +1,175 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "144.0.0.0.0"
+BIOSLegacyVersion: "MP51.88Z.F000.B00.1904121248"
+BIOSReleaseDate: "04/12/2019"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacPro5,1"
+SystemVersion: "1.2"
+# Note, this one is used by macserial
+SystemSerialNumber: "C07JQ07TF4MC"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacPro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-827FB448E656EC26"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F221BEC8"
+BoardVersion: "MacPro5,1"
+BoardAssetTag: ""
+BoardType: 0xB
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x7
+ChassisVersion: "Mac-F221BEC8"
+ChassisAssetTag: ""
+FirmwareFeatures: 0xE80FE137
+FirmwareFeaturesMask: 0xFF1FFF3F
+ExtendedFirmwareFeatures: 0x00000000E80FE137
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0x9
+# FIXME: Correct this one
+ProcessorType:
+  - 12345
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+SmcGeneration: 1
+SmcRevision:
+  - 0x01
+  - 0x39
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x11
+SmcBranch:
+  - 0x6B
+  - 0x35
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcPlatform:
+  - 0x6B
+  - 0x35
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcEPCI: 0xF09009
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MP51
+    EFI Version:  144.0.0.0.0
+    Date:         Fri Apr 12 12:43:00 2019
+    Build Type:   Release
+Specifications:
+  CPUCodename:
+    - "Bloomfield"
+    - "Bloomfield"
+    - "Westmere EP"
+    - "Westmere EP"
+    - "Westmere EP"
+    - "Westmere EP"
+    - "Westmere EP"
+    - "Westmere EP"
+  CPU:
+    - "Intel Xeon W3530 @ 2.80 GHz"
+    - "Intel Xeon W3565 @ 3.20 GHz"
+    - "Intel Xeon W3680 @ 3.33 GHz"
+    - "Intel Xeon E5620 x2 @ 2.40 GHz"
+    - "Intel Xeon E5645 x2 @ 2.40 GHz"
+    - "Intel Xeon X5650 x2 @ 2.66 GHz"
+    - "Intel Xeon X5670 x2 @ 2.93 GHz"
+    - "Intel Xeon X5675 x2 @ 3.06 GHz"
+  GPU:
+    - "ATI Radeon HD 5770"
+  RAM:
+    - "3GB 1066 MHz DDR3 ECC SDRAM"
+  SystemReportName:
+    - "Mac Pro (Mid 2010)"
+    - "Mac Pro Server (Mid 2010)"
+    - "Mac Pro (Mid 2012)"
+    - "Mac Pro Server (Mid 2012)"
+  MarketingName:
+    - "Mac Pro (Mid 2010)"
+    - "Mac Pro Server (Mid 2010)"
+    - "Mac Pro (Mid 2012)"
+    - "Mac Pro Server (Mid 2012)"
+# Note, first model code is used by macserial
+AppleModelCode:
+# Mid 2012
+  - "F4MC"
+  - "F500"
+  - "F4YY"
+  - "F6TD"
+  - "F6TF"
+  - "F6TG"
+  - "F6TC"
+  - "F6T9"
+  - "F64D"
+  - "F64C"
+  - "F648"
+  - "F649"
+  - "F4MH"
+  - "F4MD"
+  - "F4MG"
+  - "F64F"
+  - "F501"
+  - "F4MJ"
+  - "F4MF"
+# Mid 2010
+  - "EUH"
+  - "GWR"
+  - "HFC"
+  - "HFA"
+  - "HFD"
+  - "HFF"
+  - "HFG"
+  - "HFJ"
+  - "HFK"
+  - "HFL"
+  - "HFN"
+  - "EUF"
+  - "HF9"
+  - "HF8"
+  - "HF7"
+  - "GY5"
+  - "H97"
+  - "H99"
+  - "HG3"
+  - "HG1"
+  - "HP9"
+  - "HPA"
+  - "GZL"
+  - "GZM"
+  - "GZJ"
+  - "GZK"
+  - "GZH"
+  - "H2P"
+  - "EUE"
+  - "EUG"
+  - "H2N"
+  - "H0X"
+  - "HPY"
+  - "HPW"
+  - "HPV"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "BH8"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2010
+  - 2011
+  - 2012
+  - 2013
+# Optional, override for macserial default year
+MacserialModelYear: 2012
+# Optional, override for SystemSerialNumber for Clover, wtf?
+CloverSerialNumber: "C07J77F7F4MC"
+MinimumOSVersion: "10.7.4"
+MaximumOSVersion: "10.14.6"

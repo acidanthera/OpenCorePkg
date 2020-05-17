@@ -1,0 +1,106 @@
+BIOSVendor: "Apple Computer, Inc."
+BIOSVersion: "MBP12.88Z.0061.B03.0610121334"
+BIOSLegacyVersion: "MBP12.88Z.0061.B03.0610121334"
+BIOSReleaseDate: "10/12/06"
+SystemManufacturer: "Apple Computer, Inc."
+SystemProductName: "MacBookPro1,2"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W8629HACTHY"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Computer, Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F42DBEC8"
+BoardVersion: "MacBookPro1,2"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Computer, Inc."
+ChassisType: 0x2
+ChassisVersion: "Mac-F42DBEC8"
+ChassisAssetTag: "Asset Tag#"
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0201
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x05
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x10
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7B002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Yonah"
+  CPU:
+    - "Intel Core Duo T2600 @ 2.16 GHz"
+  GPU:
+    - "AMD ATI Mobility Radeon X1600"
+  RAM:
+    - "667 MHz DDR2 SDRAM (PC2-5300)"
+  SystemReportName:
+    - "MacBook Pro (17-inch)"
+  MarketingName: ""
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "THY"
+  - "W3Q"
+  - "W3P"
+  - "W32"
+  - "VVV"
+  - "VW8"
+  - "TJ1"
+  - "WVS"
+  - "WVT"
+  - "VW3"
+  - "WVZ"
+  - "WVY"
+  - "WQW"
+  - "WVU"
+  - "WWU"
+  - "VTG"
+  - "W3R"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2006
+CloverSerialNumber: "W8629HACTHY"
+MinimumOSVersion: "10.4.6"
+MaximumOSVersion: "10.6.8"

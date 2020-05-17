@@ -1,0 +1,119 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "1037.120.79.0.0"
+BIOSLegacyVersion: "MBP154.88Z.F000.B00.2004232040"
+BIOSReleaseDate: "04/23/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro15,4"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "FVFYV019L40Y"
+SystemSKUNumber: ""
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-53FDB3D8DB8CA971"
+#  "Mac-smthelse"
+BoardProduct: "Mac-53FDB3D8DB8CA971"
+BoardVersion: "MacBookPro15,4"
+# FIXME: check
+BoardRevision: 0x1
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x9
+ChassisVersion: "Mac-53FDB3D8DB8CA971"
+ChassisAssetTag: ""
+PlatformFeature: 0x32
+# FIXME: check
+FirmwareFeatures: 0xFD8FF426
+# FIXME: check
+FirmwareFeaturesMask: 0xFF9FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000FD8FF426
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF9FFF3F
+MemoryFormFactor: 0xD
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0701
+  - 0x1001
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+  - 12345
+SmcGeneration: 3
+SmcPlatform:
+  - 0x6A
+  - 0x32
+  - 0x31
+  - 0x33
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      MBP154.88Z.F000.B00.2004232040
+    Model:        MBP154
+    EFI Version:  1037.120.79.0.0
+    Built by:     tangstad@pdb172
+    Date:         Thu Apr 23 20:40:19 2020
+    Revision:     1037.120.79 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     clang-1103.2.29.8
+    UUID:         D16C1CAC-0CD6-3787-8828-4B2DACE8E2A3
+    UUID:         20CBD59C-B914-31E8-BE44-880BDC88C816
+Specifications:
+  CPUCodename:
+    - "Coffee Lake"
+    - "Coffee Lake"
+  CPU:
+    - "Intel Core i5-8257U @ 1.40 GHz"
+    - "Intel Core i7-8557U @ 1.70 GHz"
+  GPU:
+    - "Intel Iris Plus Graphics 645"
+  RAM:
+    - "8GB 2133 MHz LPDDR3 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (13-inch, 2019, Two Thunderbolt 3 ports)"
+  MarketingName:
+    - "13\" MacBook Pro with Thunderbolt 3 and Touch ID (Mid 2019)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "L40Y"
+  - "L410"
+  - "L411"
+  - "L412"
+  - "L413"
+  - "L414"
+  - "L415"
+  - "L416"
+  - "NY19"
+  - "NY17"
+  - "NY1F"
+  - "NY18"
+  - "NY1H"
+  - "N71G"
+  - "NXJM"
+  - "NR4Y"
+  - "N71F"
+  - "N71D"
+  - "N71C"
+  - "NY1G"
+  - "NY1C"
+  - "P0LW"
+  - "P4LF"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "0000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2019
+  - 2020
+MinimumOSVersion: "10.14.5"
+MaximumOSVersion: null
+AppleModelId: "J213"

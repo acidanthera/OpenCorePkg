@@ -1,0 +1,171 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "231.0.0.0.0"
+BIOSLegacyVersion: "MBP91.88Z.F000.B00.2002052053"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro9,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02LW984F1G4"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-4B7AC7E43945597E"
+BoardVersion: "MacBookPro9,1"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+# FIXME: check
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-4B7AC7E43945597E"
+ChassisAssetTag: ""
+# FIXME: check
+FirmwareFeatures: 0xC00DE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000C00DE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0704
+  - 0x0704
+  - 0x0704
+  - 0x0703
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+# FIXME: check
+SmcRevision:
+  - 0x02
+  - 0x01
+  - 0x0f
+  - 0x00
+  - 0x01
+  - 0x75
+# FIXME: check
+SmcBranch:
+  - 0x6A
+  - 0x33
+  - 0x31
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6A
+  - 0x33
+  - 0x31
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x76006
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MBP91
+    EFI Version:  231.0.0.0.0
+    Built by:     root@saumon
+    Date:         Wed Feb  5 20:53:11 PST 2020
+    Revision:     231 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
+Specifications:
+  CPUCodename:
+    - "Ivy Bridge"
+    - "Ivy Bridge"
+    - "Ivy Bridge"
+    - "Sandy Bridge"
+  CPU:
+    - "Intel Core i7-3615QM @ 2.30 GHz"
+    - "Intel Core i7-3720QM @ 2.60 GHz"
+    - "Intel Core i7-3820QM @ 2.70 GHz"
+    - "Intel Core i7-2820QM @ 2.30 GHz"
+  GPU:
+    - "NVIDIA GeForce GT 650M"
+  RAM:
+    - "1600 MHz DDR3L SDRAM"
+  SystemReportName:
+    - "MacBook Pro (15-inch, Mid 2012)"
+  MarketingName:
+    - "MacBook Pro Intel Core i7, 15\" (Mid 2012)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "F1G4"
+  - "F1G3"
+  - "DV33"
+  - "F97M"
+  - "F7F5"
+  - "F9K9"
+  - "FL98"
+  - "FM89"
+  - "F762"
+  - "F761"
+  - "F686"
+  - "F687"
+  - "F38T"
+  - "F38R"
+  - "FT14"
+  - "F7F6"
+  - "FHP7"
+  - "F24T"
+  - "F5Y5"
+  - "F5Y6"
+  - "F5Y7"
+  - "F5Y8"
+  - "F5Y9"
+  - "F5YC"
+  - "F5YD"
+  - "F5YF"
+  - "F5YG"
+  - "F5YH"
+  - "F5YJ"
+  - "F5YK"
+  - "F5YL"
+  - "F5YM"
+  - "F5YN"
+  - "F5YP"
+  - "F8G9"
+  - "F8G8"
+  - "FLNH"
+  - "FLNJ"
+  - "FLNK"
+  - "FCQT"
+  - "F2J5"
+  - "F2J4"
+  - "DV35"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "F327"
+  - "F32C"
+  - "F3JG"
+  - "F3JK"
+  - "F324"
+  - "F325"
+  - "F3JH"
+  - "F3JJ"
+  - "F328"
+  - "F329"
+  - "F3JF"
+  - "F3JL"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2012
+  - 2013
+CloverSerialNumber: "C02LW984F1G4"
+MinimumOSVersion: "10.7.3"
+MaximumOSVersion: null

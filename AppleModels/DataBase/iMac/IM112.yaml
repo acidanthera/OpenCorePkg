@@ -1,0 +1,153 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "99.0.0.0.0"
+BIOSLegacyVersion: "IM112.88Z.F000.B00.1906132310"
+BIOSReleaseDate: "06/13/19"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac11,2"
+SystemVersion: "1.2"
+# Note, this one is used by macserial
+SystemSerialNumber: "W8034342DB7"
+SystemSKUNumber: ""
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F2238AC8"
+BoardVersion: "iMac11,2"
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-F2238AC8"
+ChassisAssetTag: ""
+# FIXME: check
+FirmwareFeatures: 0xE00DE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000E00DE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0901
+  - 0x0901
+  - 0x0601
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x64
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x05
+# FIXME: check
+SmcBranch:
+  - 0x6B
+  - 0x37
+  - 0x34
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6B
+  - 0x37
+  - 0x34
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7C004
+OEMStrings: |-
+  Apple ROM Version
+    Model:        IM112
+    EFI Version:  99.0.0.0.0
+    Date:         Thu Jun 13 23:10:16 2019
+    Build Type:   Release
+Specifications:
+  CPUCodename:
+    - "Clarkdale"
+    - "Clarkdale"
+    - "Clarkdale"
+  CPU:
+    - "Intel Core i3-540 @ 3.06 GHz"
+    - "Intel Core i3-550 @ 3.20 GHz"
+    - "Intel Core i5-680 @ 3.60 GHz"
+  GPU:
+    - "AMD ATI Radeon HD 5670"
+    - "AMD ATI Radeon HD 4670"
+  RAM:
+    - "1333 MHz PC3-10600 DDR3 SDRAM"
+  SystemReportName:
+    - "iMac (21.5-inch, Mid 2010)"
+  MarketingName:
+    - "21.5\" iMac (Mid 2010)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "DB7"
+  - "GQH"
+  - "GQA"
+  - "GVY"
+  - "GVV"
+  - "DNM"
+  - "DNN"
+  - "GTM"
+  - "GTN"
+  - "GY6"
+  - "H9F"
+  - "H9G"
+  - "HRV"
+  - "HPR"
+  - "HPQ"
+  - "HCR"
+  - "HCF"
+  - "HCJ"
+  - "HCK"
+  - "HA1"
+  - "HA2"
+  - "HA5"
+  - "HA6"
+  - "HAK"
+  - "HAB"
+  - "HAC"
+  - "HAD"
+  - "GX0"
+  - "GX1"
+  - "GX8"
+  - "GX9"
+  - "H1X"
+  - "H1Z"
+  - "HJ4"
+  - "HJ6"
+  - "HJW"
+  - "HJV"
+  - "HJS"
+  - "HJE"
+  - "HJG"
+  - "H0C"
+  - "DAS"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2010
+  - 2011
+CloverSerialNumber: "W8034342DB7"
+MinimumOSVersion: "10.6.3"
+MaximumOSVersion: "10.13.6"

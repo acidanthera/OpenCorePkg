@@ -1,0 +1,98 @@
+BIOSVendor: "Apple Computer, Inc."
+BIOSVersion: "IM42.88Z.0071.B03.0610121320"
+BIOSLegacyVersion: "IM42.88Z.0071.B03.0610121320"
+BIOSReleaseDate: "10/12/06"
+SystemManufacturer: "Apple Computer, Inc."
+SystemProductName: "iMac4,2"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W8627HACV2H"
+SystemSKUNumber: "System SKUNumber"
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Computer, Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F4218EC8"
+BoardVersion: "DVT"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Computer, Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-F4218EC8"
+ChassisAssetTag: "Asset Tag"
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0201
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x06
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x73002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Yonah"
+  CPU:
+    - "Intel Core Duo T2400 @ 1.83 GHz"
+  GPU:
+    - "Intel GMA950 graphics"
+  RAM:
+    - "667 MHz DDR2 SDRAM, PC2-5300"
+  SystemReportName:
+    - "iMac (17-inch, Mid 2006)"
+  MarketingName: ""
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "V2H"
+  - "W8K"
+  - "WCV"
+  - "WAE"
+  - "WD4"
+  - "W9E"
+  - "X11"
+  - "V2J"
+  - "WKT"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2006
+CloverSerialNumber: "W8727HACWH5"
+MinimumOSVersion: "10.4.7"
+MaximumOSVersion: "10.6.8"

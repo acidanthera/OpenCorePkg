@@ -1,0 +1,91 @@
+BIOSVendor: "Apple Computer, Inc."
+BIOSVersion: "MP21.88Z.007F.B06.0707021348"
+BIOSLegacyVersion: "MP21.88Z.007F.B06.0707021348"
+BIOSReleaseDate: "07/02/07"
+SystemManufacturer: "Apple Computer, Inc."
+SystemProductName: "MacPro2,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W8930518UPZ"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacPro"
+BoardManufacturer: "Apple Computer, Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-F4208DA9"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F4208DA9"
+BoardVersion: "PVT"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Computer, Inc."
+ChassisType: 0x2
+ChassisVersion: "Mac-F4208DA9"
+ChassisAssetTag: "Asset Tag#"
+FirmwareFeatures: 0xC0000015
+FirmwareFeaturesMask: 0xC0000FFF
+ExtendedFirmwareFeatures: 0x00000000C0000015
+ExtendedFirmwareFeaturesMask: 0x00000000C0000FFF
+MemoryFormFactor: 0x9
+# FIXME: Correct this one
+ProcessorType:
+  - 12345
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+SmcGeneration: 1
+SmcRevision:
+  - 0x01
+  - 0x15
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x03
+SmcBranch:
+  - 0x6D
+  - 0x34
+  - 0x33
+  - 0x61
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcPlatform:
+  - 0x6D
+  - 0x34
+  - 0x33
+  - 0x61
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: Correct this one
+SmcEPCI: 0x079001
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Clovertown"
+  CPU:
+    - "Intel Xeon X5365 x2 @ 3.00 GHz"
+  GPU:
+    - "NVIDIA GeForce 7300 GT"
+  RAM:
+    - "1GB 667 MHz DDR2 ECC FB-DIMM"
+  SystemReportName:
+    - "Mac Pro"
+  MarketingName:
+    - "Mac Pro (8-core)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "UPZ"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2007
+  - 2008
+MinimumOSVersion: "10.4.9"
+MaximumOSVersion: "10.7.5"

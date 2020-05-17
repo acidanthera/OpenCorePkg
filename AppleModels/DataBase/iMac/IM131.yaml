@@ -1,0 +1,136 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "290.0.0.0.0"
+BIOSLegacyVersion: "IM131.88Z.F000.B00.2002052050"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac13,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02JA041DNCT"
+SystemSKUNumber: ""
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-00BE6ED71E35EB86"
+BoardVersion: "iMac13,1"
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-00BE6ED71E35EB86"
+ChassisAssetTag: ""
+PlatformFeature: 0x1
+FirmwareFeatures: 0xE00DE137
+FirmwareFeaturesMask: 0xFF1FFF3F
+ExtendedFirmwareFeatures: 0x00000000E00DE137
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0x9
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0704
+  - 0x0604
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+  - 12345
+SmcGeneration: 2
+SmcRevision:
+  - 0x02
+  - 0x09
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x05
+SmcBranch:
+  - 0x64
+  - 0x37
+  - 0x64
+  - 0x37
+  - 0x69
+  - 0x00
+  - 0x00
+  - 0x00
+SmcPlatform:
+  - 0x64
+  - 0x37
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcEPCI: 0x078006
+OEMStrings: |-
+  Apple ROM Version
+    Model:        IM131
+    EFI Version:  290.0.0.0.0
+    Built by:     root@saumon
+    Date:         Wed Feb  5 20:50:22 PST 2020
+    Revision:     290 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
+Specifications:
+  CPUCodename:
+    - "Ivy Bridge"
+    - "Ivy Bridge"
+    - "Ivy Bridge"
+    - "Ivy Bridge"
+  CPU:
+    - "Intel Core i7-3770S @ 3.10 GHz"
+    - "Intel Core i5-3470S @ 2.90 GHz"
+    - "Intel Core i5-3330S @ 2.70 GHz"
+    - "Intel Core i3-3225 @ 3.30 GHz"
+  GPU:
+    - "NVIDIA GeForce GT 640M"
+    - "NVIDIA GeForce GT 650M"
+    - "Intel HD 4000"
+  RAM:
+    - "8GB 1600 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "iMac (21.5-inch, Late 2012)"
+    - "iMac (21.5-inch, Early 2013)"
+  MarketingName:
+    - "21.5\" iMac (Late 2012)"
+    - "21.5\" iMac (Early 2013)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "DNCT"
+  - "DNCR"
+  - "DNML"
+  - "DNMM"
+  - "F8QM"
+  - "F8QN"
+  - "F9RN"
+  - "FC6M"
+  - "FC6N"
+  - "FC6P"
+  - "FD55"
+  - "FD5Y"
+  - "FF7L"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "DYWF"
+  - "F117"
+  - "F502"
+  - "F505"
+  - "F9GY"
+  - "F9H0"
+  - "F9H1"
+  - "F9H2"
+  - "FF4G"
+  - "FF4H"
+  - "FF4J"
+  - "FF4K"
+  - "FF4L"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2012
+  - 2013
+  - 2014
+MinimumOSVersion: "10.8.2"
+MaximumOSVersion: null

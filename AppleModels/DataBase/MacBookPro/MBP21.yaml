@@ -1,0 +1,107 @@
+BIOSVendor: "Apple Computer, Inc."
+BIOSVersion: "MBP21.88Z.00A5.B08.0708131242"
+BIOSLegacyVersion: "MBP21.88Z.00A5.B08.0708131242"
+BIOSReleaseDate: "08/13/07"
+SystemManufacturer: "Apple Computer, Inc."
+SystemProductName: "MacBookPro2,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "W88130WUW0H"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Computer, Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F42189C8"
+BoardVersion: "MacBookPro2,1"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Computer, Inc."
+ChassisType: 0x2
+ChassisVersion: "Mac-F42189C8"
+ChassisAssetTag: "Asset Tag#"
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x14
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x05
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7B002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Merom"
+  CPU:
+    - "Intel Core 2 Duo T7600 @ 2.33 GHz"
+  GPU:
+    - "AMD ATI Mobility Radeon X1600"
+  RAM:
+    - "667 MHz PC2-5300 DDR2 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (17-inch Core 2 Duo)"
+  MarketingName:
+    - "(Core 2 Duo)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "W0H"
+  - "X9W"
+  - "Y9M"
+  - "W4M"
+  - "X44"
+  - "XWV"
+  - "W0M"
+  - "W0J"
+  - "X40"
+  - "XCT"
+  - "X6C"
+  - "X42"
+  - "X41"
+  - "X3Y"
+  - "X43"
+  - "X57"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2006
+  - 2007
+CloverSerialNumber: "W8715HACW0J"
+MinimumOSVersion: "10.4.8"
+MaximumOSVersion: "10.7.5"

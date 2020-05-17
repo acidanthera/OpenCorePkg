@@ -1,0 +1,222 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "159.0.0.0.0"
+BIOSLegacyVersion: "MBP111.88Z.F000.B00.2002052022"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro11,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02LSHACFH00"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-189A3D4F975D5FFC"
+BoardVersion: "MacBookPro11,1"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-189A3D4F975D5FFC"
+ChassisAssetTag: ""
+PlatformFeature: 0x2
+# FIXME: check
+FirmwareFeatures: 0xE80FE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000E80FE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0605
+  - 0x0605
+  - 0x0605
+  - 0x0605
+  - 0x0705
+  - 0x0705
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+# FIXME: check
+SmcRevision:
+  - 0x02
+  - 0x16
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x68
+# FIXME: check
+SmcBranch:
+  - 0x6A
+  - 0x34
+  - 0x34
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6A
+  - 0x34
+  - 0x34
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0xF0B007
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MBP111
+    EFI Version:  159.0.0.0.0
+    Built by:     root@saumon
+    Date:         Wed Feb  5 20:22:55 PST 2020
+    Revision:     159 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
+Specifications:
+  CPUCodename:
+    - "Haswell"
+    - "Haswell"
+    - "Haswell"
+    - "Haswell"
+    - "Haswell"
+    - "Haswell"
+  CPU:
+    - "Intel Core i5-4258U @ 2.40 GHz"
+    - "Intel Core i5-4288U @ 2.60 GHz"
+    - "Intel Core i5-4308U @ 2.80 GHz"
+    - "Intel Core i5-4278U @ 2.60 GHz"
+    - "Intel Core i7-4578U @ 3.00 GHz"
+    - "Intel Core i7-4558U @ 2.80 GHz"
+  GPU:
+    - "Intel Iris 5100 graphics"
+  RAM:
+    - "1600 MHz DDR3L SDRAM"
+  SystemReportName:
+    - "MacBook Pro (Retina, 13-inch, Late 2013)"
+    - "MacBook Pro (Retina, 13-inch, Mid 2014)"
+  MarketingName:
+    - "13\" MacBook Pro with Retina display (Late 2013)"
+    - "13\" MacBook Pro with Retina display (Mid 2014)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "FH00"
+  - "FGYY"
+  - "FH01"
+  - "FH02"
+  - "FH03"
+  - "FH04"
+  - "FH05"
+  - "FRF6"
+  - "FRF7"
+  - "FRQF"
+  - "FT4Q"
+  - "FT4R"
+  - "FT4T"
+  - "FT4V"
+  - "FTC9"
+  - "FTCD"
+  - "FTCH"
+  - "FTCK"
+  - "FTCL"
+  - "FTPH"
+  - "FTPJ"
+  - "FTPK"
+  - "FTT4"
+  - "FVVW"
+  - "FVWQ"
+  - "G3QJ"
+  - "G3QK"
+  - "G4N6"
+  - "G4N7"
+  - "G3QH"
+  - "G3QQ"
+  - "G3QR"
+  - "GDJM"
+  - "G8L0"
+  - "G971"
+  - "G970"
+  - "G972"
+  - "G96R"
+  - "G96V"
+  - "G96W"
+  - "G96T"
+  - "G96Y"
+  - "G7YQ"
+  - "G7YR"
+  - "G3QL"
+  - "G3QT"
+  - "G7RD"
+  - "G7RF"
+  - "G9FN"
+  - "G9FL"
+  - "G9FM"
+  - "G9FR"
+  - "G9FP"
+  - "G9FQ"
+  - "FWKF"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "FH31"
+  - "FH35"
+  - "FJYK"
+  - "FJYL"
+  - "FJYM"
+  - "FJYR"
+  - "FJYY"
+  - "FK00"
+  - "FMQF"
+  - "FMQG"
+  - "FN3L"
+  - "FN3P"
+  - "FN3Q"
+  - "FLJJ"
+  - "FLJK"
+  - "FLJL"
+  - "FJYV"
+  - "FK01"
+  - "FN3K"
+  - "FN3M"
+  - "FN3N"
+  - "FJYT"
+  - "FJYW"
+  - "FK02"
+  - "G3LM"
+  - "G3LP"
+  - "G3LG"
+  - "G3LH"
+  - "G3LQ"
+  - "GC9Q"
+  - "G3LT"
+  - "G3M0"
+  - "G3LK"
+  - "G3LL"
+  - "G3LN"
+  - "GC9T"
+  - "G3LR"
+  - "G3LV"
+  - "G3LJ"
+  - "G3LW"
+  - "G3LY"
+  - "GC9R"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2013
+  - 2014
+  - 2015
+CloverSerialNumber: "C17N4HACG3QJ"
+MinimumOSVersion: "10.9.4"
+MaximumOSVersion: null

@@ -1,0 +1,157 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "265.0.0.0.0"
+BIOSLegacyVersion: "MBP133.88Z.F000.B00.2001311618"
+BIOSReleaseDate: "01/31/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro13,3"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02T6L42GTFL"
+SystemSKUNumber: ""
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-A5C67F76ED83108C"
+#  "Mac-smthelse"
+BoardProduct: "Mac-A5C67F76ED83108C"
+BoardVersion: "MacBookPro13,3"
+BoardRevision: 0x17
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x9
+ChassisVersion: "Mac-A5C67F76ED83108C"
+ChassisAssetTag: ""
+PlatformFeature: 0x1A
+FirmwareFeatures: 0xFC0FE137
+FirmwareFeaturesMask: 0xFF1FFF3F
+ExtendedFirmwareFeatures: 0x00000000FC0FE137
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0701
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+  - 12345
+SmcGeneration: 2
+SmcRevision:
+  - 0x02
+  - 0x38
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x08
+SmcBranch:
+  - 0x32
+  - 0x30
+  - 0x31
+  - 0x36
+  - 0x6d
+  - 0x62
+  - 0x00
+  - 0x00
+SmcPlatform:
+  - 0x6a
+  - 0x38
+  - 0x30
+  - 0x67
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+SmcEPCI: 0xF04009
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      MBP133.88Z.F000.B00.2001311618
+    Model:        MBP133
+    EFI Version:  265.0.0.0.0
+    Built by:     _atsserver@xapp157
+    Date:         Fri Jan 31 16:18:25 2020
+    Revision:     265 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     Apple LLVM version 6.1.0 (clang-602.0.53) (based on LLVM 3.6.0svn)
+    UUID:         8A368548-AB14-3C3F-AD6A-1FF5D8E4258B
+    UUID:         FBF87971-41EC-3F3F-A3A3-6F7DF60A06E5
+Specifications:
+  CPUCodename:
+    - "Skylake"
+    - "Skylake"
+    - "Skylake"
+  CPU:
+    - "Intel Core i7-6700HQ @ 2.60 GHz"
+    - "Intel Core i7-6820HQ @ 2.70 GHz"
+    - "Intel Core i7-6920HQ @ 2.90 GHz"
+  GPU:
+    - "AMD Radeon Pro 455"
+    - "AMD Radeon Pro 450"
+  RAM:
+    - "16GB 2133 MHz LPDDR3 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (15-inch, 2016)"
+  MarketingName:
+    - "15\" MacBook Pro with Thunderbolt 3 and Touch ID (2016)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "GTFN"
+  - "GTDY"
+  - "GTF1"
+  - "GTFL"
+  - "GTFM"
+  - "H03M"
+  - "H03Q"
+  - "H03T"
+  - "H03Y"
+  - "H040"
+  - "HXF8"
+  - "HWCG"
+  - "HXD3"
+  # Note, first board code is used by macserial
+AppleBoardCode:
+  - "HCF9"
+  - "HCFC"
+  - "HCFD"
+  - "HCFL"
+  - "HCFV"
+  - "HCGR"
+  - "H54Y"
+  - "HCF3"
+  - "HCF4"
+  - "HCF5"
+  - "HCFJ"
+  - "HCFN"
+  - "HCFQ"
+  - "H3PG"
+  - "H3PL"
+  - "HCFF"
+  - "HCFG"
+  - "HCFH"
+  - "HCFM"
+  - "HCFR"
+  - "HCFW"
+  - "HCFF"
+  - "HCFG"
+  - "HCFH"
+  - "HCFM"
+  - "HCFR"
+  - "HCFW"
+  - "HCDN"
+  - "HCDQ"
+  - "HCF6"
+  - "HCF7"
+  - "HCF8"
+  - "HCFK"
+  - "HCFP"
+  - "HCFT"
+  - "H551"
+  - "HCDK"
+  # Note, first year is used by macserial
+AppleModelYear:
+  - 2016
+  - 2017
+MinimumOSVersion: "10.12.1"
+MaximumOSVersion: null

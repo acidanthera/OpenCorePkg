@@ -1,0 +1,141 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "IM81.88Z.00C1.B00.0802091538"
+BIOSLegacyVersion: "IM81.88Z.00C1.B00.0802091538"
+BIOSReleaseDate: "02/09/08"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac8,1"
+SystemVersion: "1.3"
+# Note, this one is used by macserial
+SystemSerialNumber: "W8755HAC2E2"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F227BEC8"
+BoardVersion: "PVT"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-F227BEC8"
+ChassisAssetTag: "Asset Tag#"
+FirmwareFeatures: 0xC0001403
+FirmwareFeaturesMask: 0xC0003FFF
+ExtendedFirmwareFeatures: 0x00000000C0001403
+ExtendedFirmwareFeaturesMask: 0x00000000C0003FFF
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+  - 0x0301
+  - 0x0301
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x29
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x01
+# FIXME: check
+SmcBranch:
+  - 0x6B
+  - 0x33
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6B
+  - 0x33
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x73002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Wolfdale"
+    - "Wolfdale"
+    - "Penryn"
+    - "Penryn"
+  CPU:
+    - "Intel Core 2 Duo E8435 @ 3.06 GHz"
+    - "Intel Core 2 Duo E8135 @ 2.66 GHz"
+    - "Intel Core 2 Duo E8335 @ 2.66 GHz"
+    - "Intel Core 2 Duo E8235 @ 2.80 GHz"
+  GPU:
+    - "AMD ATI Radeon HD 2600 PRO"
+    - "AMD ATI Radeon HD 2400 XT"
+    - "NVIDIA GeForce 8800 GS"
+  RAM:
+    - "800 MHz DDR2 SDRAM, PC2-6400"
+  SystemReportName:
+    - "iMac (20-inch, Early 2008)"
+    - "iMac (24-inch, Early 2008)"
+  MarketingName:
+    - "iMac Intel Core 2 Duo (aluminum enclosure) (Early 2008)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "3SZ"
+  - "8R3"
+  - "8R2"
+  - "3FF"
+  - "3FG"
+  - "28B"
+  - "5A8"
+  - "6F9"
+  - "5J0"
+  - "2PR"
+  - "2PN"
+  - "39S"
+  - "3F9"
+  - "3FH"
+  - "3GS"
+  - "2E4"
+  - "5U6"
+  - "3NX"
+  - "0N4"
+  - "6J3"
+  - "6J6"
+  - "0KM"
+  - "2NX"
+  - "5J1"
+  - "2PT"
+  - "6ZC"
+  - "28A"
+  - "1LW"
+  - "ZE7"
+  - "ZE4"
+  - "ZE2"
+  - "ZE3"
+  - "ZE6"
+  - "ZE5"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2008
+  - 2009
+CloverSerialNumber: "QP849HACZE7"
+MinimumOSVersion: "10.5.2"
+MaximumOSVersion: "10.11.6"

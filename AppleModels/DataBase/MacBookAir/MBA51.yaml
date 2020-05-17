@@ -1,0 +1,139 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "262.0.0.0.0"
+BIOSLegacyVersion: "MBA51.88Z.F000.B00.2002051902"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookAir5,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02J6HACDRV6"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook Air"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-66F35F19FE2A0D05"
+BoardVersion: "MacBookAir5,1"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-66F35F19FE2A0D05"
+ChassisAssetTag: ""
+FirmwareFeatures: 0xE00DE137
+FirmwareFeaturesMask: 0xFF1FFF3F
+ExtendedFirmwareFeatures: 0x00000000E00DE137
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0604
+  - 0x0704
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+# FIXME: check
+SmcRevision:
+  - 0x02
+  - 0x04
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x19
+# FIXME: check
+SmcBranch:
+  - 0x6A
+  - 0x31
+  - 0x31
+  - 0x6A
+  - 0x31
+  - 0x33
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6A
+  - 0x31
+  - 0x31
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7B006
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MBA51
+    EFI Version:  262.0.0.0.0
+    Built by:     root@saumon
+    Date:         Wed Feb  5 19:02:27 PST 2020
+    Revision:     262 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
+Specifications:
+  CPUCodename:
+    - "Ivy Bridge"
+    - "Ivy Bridge"
+  CPU:
+    - "Intel Core i5-3317U @ 1.70 GHz"
+    - "Intel Core i7-3667U @ 2.00 GHz"
+  GPU:
+    - "Intel HD Graphics 4000"
+  RAM:
+    - "1600 MHz DDR3L SDRAM"
+  SystemReportName:
+    - "MacBook Air (11-inch, Mid 2012)"
+  MarketingName:
+    - "11\" MacBook Air (Mid 2012)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "DRV6"
+  - "DRV7"
+  - "DRV8"
+  - "DRV9"
+  - "F569"
+  - "F56C"
+  - "F56G"
+  - "F57H"
+  - "F5MV"
+  - "F67D"
+  - "F67F"
+  - "F67K"
+  - "F67L"
+  - "F67M"
+  - "F88G"
+  - "F88K"
+  - "F88V"
+  - "F910"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "DYKF"
+  - "DYKK"
+  - "F27J"
+  - "F9DH"
+  - "DYKG"
+  - "F0V4"
+  - "F27D"
+  - "F9DK"
+  - "F27G"
+  - "F27H"
+  - "F27K"
+  - "F9DG"
+  - "F279"
+  - "F27C"
+  - "F27F"
+  - "F9DJ"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2012
+  - 2013
+CloverSerialNumber: "C02J6HACDRV6"
+MinimumOSVersion: "10.7.4"
+MaximumOSVersion: null

@@ -1,0 +1,138 @@
+BIOSVendor: "Apple Computer, Inc."
+BIOSVersion: "IM51.88Z.0090.B09.0706270921"
+BIOSLegacyVersion: "IM51.88Z.0090.B09.0706270921"
+BIOSReleaseDate: "06/27/07"
+SystemManufacturer: "Apple Computer, Inc."
+SystemProductName: "iMac5,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "CK637HACX1A"
+SystemSKUNumber: "System SKUNumber"
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Computer, Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F4228EC8"
+BoardVersion: "DVT"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Computer, Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-F4228EC8"
+ChassisAssetTag: "Asset Tag"
+MemoryFormFactor: 0x9
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+  - 0x0301
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x08
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x02
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x73002
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Merom"
+    - "Merom"
+    - "Merom"
+  CPU:
+    - "Intel Core 2 Duo T7200 @ 2.00 GHz"
+    - "Intel Core 2 Duo T7400 @ 2.16 GHz"
+    - "Intel Core 2 Duo T7600 @ 2.33 GHz"
+  GPU:
+    - "AMD ATI Radeon X1600"
+  RAM:
+    - "667 MHz DDR2 SDRAM, PC2-5300"
+  SystemReportName:
+    - "iMac (17-inch, Late 2006)"
+    - "iMac (20-inch, Late 2006)"
+  MarketingName: ""
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "X1A"
+  - "X9G"
+  - "Y3U"
+  - "Y9B"
+  - "X29"
+  - "WRS"
+  - "WSD"
+  - "YAE"
+  - "X0E"
+  - "Y3R"
+  - "X9E"
+  - "XCR"
+  - "XCY"
+  - "XA4"
+  - "WRX"
+  - "X6S"
+  - "VUV"
+  - "VUW"
+  - "YDW"
+  - "X9Y"
+  - "Y3X"
+  - "YAG"
+  - "WVR"
+  - "WV8"
+  - "Y3W"
+  - "Y3V"
+  - "WAR"
+  - "X2W"
+  - "Y6K"
+  - "YLJ"
+  - "Y97"
+  - "X6Q"
+  - "WRR"
+  - "X9F"
+  - "Y94"
+  - "X1W"
+  - "WRW"
+  - "AC1"
+  - "XLF"
+  - "VUX"
+  - "VUY"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2006
+  - 2007
+CloverSerialNumber: "CK708HACVUW"
+MinimumOSVersion: "10.4.7"
+MaximumOSVersion: "10.7.5"

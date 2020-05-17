@@ -1,0 +1,220 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "205.0.0.0.0"
+BIOSLegacyVersion: "MBP143.88Z.F000.B00.2001311754"
+BIOSReleaseDate: "01/31/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro14,3"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02TQHACHTD5"
+SystemSKUNumber: ""
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-551B86E5744E2388"
+BoardVersion: "MacBookPro14,3"
+# FIXME: check
+BoardRevision: 0x1B
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x9
+ChassisVersion: "Mac-551B86E5744E2388"
+ChassisAssetTag: ""
+PlatformFeature: 0x1A
+# FIXME: check
+FirmwareFeatures: 0xFD0FF536
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000FD0FF536
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0705
+  - 0x0705
+  - 0x0705
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+# FIXME: check
+SmcRevision:
+  - 0x02
+  - 0x45
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x01
+# FIXME: check
+SmcBranch:
+  - 0x32
+  - 0x30
+  - 0x31
+  - 0x37
+  - 0x6D
+  - 0x62
+  - 0x70
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6A
+  - 0x38
+  - 0x30
+  - 0x67
+  - 0x61
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0xF0A009
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      MBP143.88Z.F000.B00.2001311754
+    Model:        MBP143
+    EFI Version:  205.0.0.0.0
+    Built by:     _atsserver@xapp157
+    Date:         Fri Jan 31 17:54:14 2020
+    Revision:     205 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     Apple LLVM version 6.1.0 (clang-602.0.53) (based on LLVM 3.6.0svn)
+    UUID:         A54E8387-9400-3D98-BCE5-D6B83515BEF4
+    UUID:         A739744D-8E70-3F7A-9B8D-98F6532FF7E5
+Specifications:
+  CPUCodename:
+    - "Kaby Lake"
+    - "Kaby Lake"
+    - "Kaby Lake"
+  CPU:
+    - "Intel Core i7-7700HQ @ 2.80 GHz"
+    - "Intel Core i7-7820HQ @ 2.90 GHz"
+    - "Intel Core i7-7920HQ @ 3.10 GHz"
+  GPU:
+    - "AMD Radeon Pro 555"
+    - "AMD Radeon Pro 560"
+  RAM:
+    - "2133 MHz LPDDR3 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (15-inch, 2017)"
+  MarketingName:
+    - "15\" MacBook Pro with Thunderbolt 3 and Touch ID (Mid 2017)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "HTD5"
+  - "HTD6"
+  - "HTD8"
+  - "HTD9"
+  - "HTDF"
+  - "HTDH"
+  - "HTDD"
+  - "JD06"
+  - "JD04"
+  - "JHTD"
+  - "J6CQ"
+  - "J6CP"
+  - "J939"
+  - "J925"
+  - "J926"
+  - "HTDC"
+  - "J8KC"
+  - "J93P"
+  - "J93F"
+  - "J93G"
+  - "J93D"
+  - "J93C"
+  - "J93N"
+  - "J93L"
+  - "J93M"
+  - "J93J"
+  - "J93K"
+  - "J93H"
+  - "J936"
+  - "J937"
+  - "J934"
+  - "J935"
+  - "J932"
+  - "J933"
+  - "J931"
+  - "J938"
+  - "HTD7"
+  - "HTDG"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "J1JH"
+  - "J1JJ"
+  - "J1JK"
+  - "J1JL"
+  - "J1JM"
+  - "J1JN"
+  - "J1JP"
+  - "J1JQ"
+  - "J1JR"
+  - "HRDM"
+  - "HRDR"
+  - "HRFF"
+  - "HRFK"
+  - "HRL5"
+  - "HRLK"
+  - "HYR3"
+  - "HYR7"
+  - "HYRW"
+  - "J1HH"
+  - "J1HJ"
+  - "J1HK"
+  - "J1HL"
+  - "J1HM"
+  - "J1HN"
+  - "J1HP"
+  - "J1HQ"
+  - "J1HR"
+  - "HRDK"
+  - "HRDP"
+  - "HRFC"
+  - "HRFH"
+  - "HRL3"
+  - "HRLH"
+  - "HYR1"
+  - "HYR5"
+  - "HYRT"
+  - "J1JT"
+  - "J1JV"
+  - "J1JW"
+  - "J1JX"
+  - "J1JY"
+  - "J1K0"
+  - "J1K1"
+  - "J1K2"
+  - "J1K3"
+  - "J1J5"
+  - "J1J6"
+  - "J1J7"
+  - "J1J8"
+  - "J1J9"
+  - "J1JC"
+  - "J1JD"
+  - "J1JF"
+  - "J1JG"
+  - "HRDL"
+  - "HRDQ"
+  - "HRFD"
+  - "HRFJ"
+  - "HRL4"
+  - "HRLJ"
+  - "HYR2"
+  - "HYR6"
+  - "HYRV"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2017
+  - 2018
+CloverSerialNumber: "C02TQHACHTD5"
+MinimumOSVersion: "10.12.5"
+MaximumOSVersion: null

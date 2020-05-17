@@ -1,0 +1,101 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "1037.120.79.0.0"
+BIOSLegacyVersion: "MP71.88Z.F000.B00.2004232004"
+BIOSReleaseDate: "04/23/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacPro7,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "F5KZN00HP7QM"
+SystemSKUNumber: ""
+SystemFamily: "MacPro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-27AD2F918AE68F61"
+#  "Mac-smthelse"
+BoardProduct: "Mac-27AD2F918AE68F61"
+BoardVersion: "MacPro7,1"
+BoardRevision: 0x9
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x7
+ChassisVersion: "Mac-27AD2F918AE68F61"
+ChassisAssetTag: ""
+PlatformFeature: 0x0
+FirmwareFeatures: 0xFDAFF066
+FirmwareFeaturesMask: 0xFFFFFF7F
+ExtendedFirmwareFeatures: 0x00000000FDAFF066
+ExtendedFirmwareFeaturesMask: 0x00000000FFFFFF7F
+MemoryFormFactor: 0x9
+ProcessorType:
+  - 0x0F02
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+SmcGeneration: 3
+SmcPlatform:
+  - 0x6A
+  - 0x31
+  - 0x36
+  - 0x30
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      MP71.88Z.F000.B00.2004232004
+    Model:        MP71
+    EFI Version:  1037.120.79.0.0
+    Built by:     tangstad@pdb172
+    Date:         Thu Apr 23 20:04:19 2020
+    Revision:     1037.120.79 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     clang-1103.2.29.8
+    UUID:         2377FE0D-73DC-34E3-9D50-0EA81B2D981B
+    UUID:         B1365F68-CE27-3509-837E-0EB2BCE21381
+Specifications:
+  CPUCodename:
+    - "Cascade Lake"
+  CPU:
+    - "Intel Xeon W-3245M CPU @ 3.20 GHz"
+  GPU:
+    - "Radeon Pro 580X"
+    - "Radeon Pro W5700X"
+    - "Radeon Pro Vega II"
+    - "Radeon Pro Vega II Duo"
+  RAM:
+    - "32GB DDR4 ECC"
+  SystemReportName:
+    - "Mac Pro (2019)"
+  MarketingName:
+    - "Mac Pro (2019)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "P7QM"
+  - "PLXV"
+  - "PLXW"
+  - "PLXX"
+  - "PLXY"
+  - "P7QJ"
+  - "P7QK"
+  - "P7QL"
+  - "P7QN"
+  - "P7QP"
+  - "NYGV"
+  - "K7GF"
+  - "K7GD"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "K3F7"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2019
+  - 2020
+MinimumOSVersion: "10.15.1"
+MaximumOSVersion: null
+AppleModelId: "J160"

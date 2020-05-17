@@ -1,0 +1,123 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "283.0.0.0.0"
+BIOSLegacyVersion: "MM61.88Z.F000.B00.2002051859"
+BIOSReleaseDate: "02/05/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "Macmini6,2"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C07JD041DWYN"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "Macmini"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F65AE981FFA204ED"
+BoardVersion: "Macmini6,2"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x10
+ChassisVersion: "Mac-F65AE981FFA204ED"
+ChassisAssetTag: ""
+PlatformFeature: 0x1
+# FIXME: check
+FirmwareFeatures: 0xE00DE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000E00DE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0704
+  - 0x0704
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 2
+# FIXME: check
+SmcRevision:
+  - 0x02
+  - 0x08
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x01
+# FIXME: check
+SmcBranch:
+  - 0x6A
+  - 0x35
+  - 0x30
+  - 0x73
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6A
+  - 0x35
+  - 0x30
+  - 0x73
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7D006
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MM61
+    EFI Version:  283.0.0.0.0
+    Built by:     root@saumon
+    Date:         Wed Feb  5 18:59:37 PST 2020
+    Revision:     283 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
+Specifications:
+  CPUCodename:
+    - "Ivy Bridge"
+    - "Ivy Bridge"
+  CPU:
+    - "Intel Core i7-3615QM @ 2.30 GHz"
+    - "Intel Core i7-3720QM @ 2.60 GHz"
+  GPU:
+    - "Intel HD Graphics 4000"
+  RAM:
+    - "1600 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "Mac mini Server (Late 2012)"
+  MarketingName:
+    - "Mac mini Server (Late 2012)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "DWYN"
+  - "DY3J"
+  - "F9VY"
+  - "F9W3"
+  - "FC08"
+  - "FCCW"
+  - "FP14"
+  - "FP39"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "DVF9"
+  - "F1H8"
+  - "F1G2"
+  - "F1H9"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2012
+  - 2013
+  - 2014
+CloverSerialNumber: "C07JD041DWYN"
+MinimumOSVersion: "10.8.2"
+MaximumOSVersion: null

@@ -1,0 +1,140 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "MB41.88Z.00C1.B00.0802091535"
+BIOSLegacyVersion: "MB41.88Z.00C1.B00.0802091535"
+BIOSReleaseDate: "02/09/08"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBook4,1"
+SystemVersion: "1.3"
+# Note, this one is used by macserial
+SystemSerialNumber: "W88A041A0P0"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "MacBook"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-F22788A9"
+BoardVersion: "PVT"
+BoardAssetTag: "Base Board Asset Tag"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xA
+ChassisVersion: "Mac-F22788A9"
+ChassisAssetTag: "Asset Tag#"
+MemoryFormFactor: 0xD
+FirmwareFeatures: 0xC0001403
+FirmwareFeaturesMask: 0xC0003FFF
+ExtendedFirmwareFeatures: 0x00000000C0001403
+ExtendedFirmwareFeaturesMask: 0x00000000C0003FFF
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0301
+  - 0x0301
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x31
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x01
+# FIXME: check
+SmcBranch:
+  - 0x62
+  - 0x72
+  - 0x61
+  - 0x6E
+  - 0x63
+  - 0x68
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x6D
+  - 0x38
+  - 0x32
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x74001
+OEMStrings: ""
+Specifications:
+  CPUCodename:
+    - "Penryn"
+    - "Penryn"
+  CPU:
+    - "Intel Core 2 Duo T8300 @ 2.40 GHz"
+    - "Intel Core 2 Duo T8100 @ 2.10 GHz"
+  GPU:
+    - "Intel GMA X3100 Graphics"
+  RAM:
+    - "667 MHz DDR2 SDRAM"
+  SystemReportName:
+    - "MacBook (13-inch, Early 2008)"
+    - "MacBook (13-inch, Late 2008)"
+  MarketingName: ""
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "0P0"
+  - "27H"
+  - "27J"
+  - "3N9"
+  - "3NF"
+  - "3ND"
+  - "3NE"
+  - "3NA"
+  - "3X6"
+  - "4R8"
+  - "4R7"
+  - "385"
+  - "47Z"
+  - "0P4"
+  - "1PX"
+  - "1Q7"
+  - "1Q2"
+  - "1QE"
+  - "1QA"
+  - "1QB"
+  - "28C"
+  - "28E"
+  - "28D"
+  - "0P1"
+  - "0P6"
+  - "0P5"
+  - "0P2"
+  - "1LX"
+  - "1ZY"
+  - "7XD"
+  - "6M1"
+  - "6ES"
+  - "6YP"
+  - "5HU"
+  - "5HS"
+  - "6LM"
+  - "6LL"
+  - "5AQ"
+  - "67C"
+  - "3VY"
+  - "6HY"
+  - "6V9"
+# Note, first board code is used by macserial
+# FIXME: check
+AppleBoardCode:
+  - "000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2008
+  - 2009
+CloverSerialNumber: "W88A041A0P0"
+MinimumOSVersion: "10.5.2"
+MaximumOSVersion: "10.7.5"

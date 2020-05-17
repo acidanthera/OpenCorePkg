@@ -1,0 +1,115 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "135.0.0.0.0"
+BIOSLegacyVersion: "MM51.88Z.F000.B00.1906131918"
+BIOSReleaseDate: "06/13/2019"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "Macmini5,3"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C07GWHACDKDJ"
+SystemSKUNumber: "System SKU#"
+SystemFamily: "Macmini"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-00BE6ED71E35EB86"
+#  "Mac-smthelse"
+BoardProduct: "Mac-7BA5B2794B2CDB12"
+BoardVersion: "Macmini5,3"
+BoardAssetTag: "Base Board Asset Tag#"
+BoardType: 0xA
+BoardLocationInChassis: "Part Component"
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x10
+ChassisVersion: "Mac-7BA5B2794B2CDB12"
+ChassisAssetTag: ""
+# FIXME: check
+FirmwareFeatures: 0xD00DE137
+# FIXME: check
+FirmwareFeaturesMask: 0xFF1FFF3F
+# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000D00DE137
+# FIXME: check
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+MemoryFormFactor: 0xD
+# FIXME: check values (most should be correct?) and add missing, if any
+ProcessorType:
+  - 0x0702
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+# FIXME: check
+SmcGeneration: 1
+# FIXME: check
+SmcRevision:
+  - 0x01
+  - 0x77
+  - 0x0f
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcBranch:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcPlatform:
+  - 0x4E
+  - 0x41
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME: check
+SmcEPCI: 0x7D005
+OEMStrings: |-
+  Apple ROM Version
+    Model:        MM51
+    EFI Version:  135.0.0.0.0
+    Built by:     root@saumon
+    Date:         Thu Jun 13 19:18:04 PDT 2019
+    Revision:     135 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, Release
+    Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
+Specifications:
+  CPUCodename:
+    - "Sandy Bridge"
+  CPU:
+    - "Intel Core i7-2635QM @ 2.00 GHz"
+  GPU:
+    - "Intel HD Graphics 3000"
+  RAM:
+    - "1333 MHz DDR3 SDRAM"
+  SystemReportName:
+    - "Mac mini Server (Mid 2011)"
+  MarketingName:
+    - "Mac mini server (Mid 2011)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "DKDJ"
+  - "DJY7"
+  - "DRHR"
+  - "DTCL"
+  - "DTCT"
+  - "DTCV"
+  - "DW39"
+  - "DW3D"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "DHDN"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2011
+  - 2012
+CloverSerialNumber: "C07GWHACDKDJ"
+MinimumOSVersion: "10.7"
+MaximumOSVersion: "10.13.6"
