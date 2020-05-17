@@ -1,0 +1,65 @@
+## @file
+# 
+# Copyright (c) 2005 - 2010, Intel Corporation. All rights reserved.<BR>
+# This program and the accompanying materials                          
+# are licensed and made available under the terms and conditions of the BSD License         
+# which accompanies this distribution.  The full text of the license may be found at        
+# http://opensource.org/licenses/bsd-license.php                                            
+#                                                                                           
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+#
+#  Module Name:
+#
+#  Abstract:
+#
+##
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = PciBusNoEnumerationDxe
+  FILE_GUID                      = 35C0C168-2607-4e51-BB53-448E3ED1A87F
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+
+  ENTRY_POINT                    = PciBusEntryPoint
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenDuetPkg.dec
+
+[LibraryClasses]
+  DebugLib
+  BaseLib
+  UefiLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  BaseMemoryLib
+  ReportStatusCodeLib
+  DevicePathLib
+  PeCoffLib
+
+[Sources]
+  PciBus.h
+  PciIo.h
+  PciCommand.h
+  PciDeviceSupport.h
+  PciEnumerator.h
+  PciEnumeratorSupport.h
+  PciPowerManagement.h
+  PciPowerManagement.c
+  PciEnumerator.c
+  PciEnumeratorSupport.c
+  PciCommand.c
+  ComponentName.c
+  PciDeviceSupport.c
+  PciBus.c
+  PciIo.c
+
+[Protocols]
+  gEfiPciRootBridgeIoProtocolGuid
+  gEfiPciIoProtocolGuid
+  gEfiDevicePathProtocolGuid
+  gEfiDecompressProtocolGuid
+  
+[Guids]
+  gEfiPciOptionRomTableGuid

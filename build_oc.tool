@@ -62,7 +62,7 @@ package() {
   cp "${selfdir}/Docs/SampleFull.plist" tmp/Docs/ || exit 1
   cp "${selfdir}/Changelog.md" tmp/Docs/ || exit 1
   cp -r "${selfdir}/Docs/AcpiSamples/" tmp/Docs/AcpiSamples/ || exit 1
-  cp -r "${selfdir}/UDK/DuetPkg/BootLoader/bin" tmp/Utilities/BootInstall || exit 1
+  cp -r "${selfdir}/Utilities/LegacyBoot" tmp/Utilities/ || exit 1
   cp -r "${selfdir}/Utilities/CreateVault" tmp/Utilities/ || exit 1
   cp -r "${selfdir}/Utilities/LogoutHook" tmp/Utilities/ || exit 1
   cp -r "${selfdir}/Utilities/macrecovery" tmp/Utilities/ || exit 1
@@ -82,17 +82,9 @@ package() {
 cd "$(dirname "$0")" || exit 1
 ARCHS=(X64 IA32)
 SELFPKG=OpenCorePkg
-DEPNAMES=('DuetPkg')
-DEPURLS=(
-  'https://github.com/acidanthera/DuetPkg'
-)
-DEPBRANCHES=('master')
 
 export ARCHS
 export SELFPKG
-export DEPNAMES
-export DEPURLS
-export DEPBRANCHES
 
 ./Utilities/macserial/build.tool || exit 1
 

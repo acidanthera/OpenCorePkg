@@ -1,0 +1,33 @@
+// /** @file
+// BDSDxe module is core driver for BDS phase.
+//
+// When DxeCore dispatching all DXE driver, this module will produce architecture protocol
+// gEfiBdsArchProtocolGuid. After DxeCore finish dispatching, DxeCore will invoke Entry
+// interface of protocol gEfiBdsArchProtocolGuid, then BDS phase is entered.
+// 
+// Generally, this module take reposiblity to connect all necessary devices for platform boot,
+// these boot device path are hold in PlatformBdsLib library instance produced by platform.
+// For legacy boot, BDS will transfer control to legacy BIOS after legacy boot device is select.
+// For EFI boot, BDS will load boot loader file EFI\BOOT\BOOTIA32.EFI, EFI\BOOT\BOOTX64.EFI,
+// EFI\BOOT\BOOTIA64.EFI file from selected boot device and transfer control to boot loader.
+// 
+// BDSDxe also maintain the UI for "Boot Manager, Boot Maintaince Manager, Device Manager" which
+// is used for user to configure boot option or maintain hardware device.
+//
+// Copyright (c) 2008 - 2014, Intel Corporation. All rights reserved.<BR>
+//
+// This program and the accompanying materials
+// are licensed and made available under the terms and conditions of the BSD License
+// which accompanies this distribution.  The full text of the license may be found at
+// http://opensource.org/licenses/bsd-license.php
+// 
+// THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+// WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+//
+// **/
+
+
+#string STR_MODULE_ABSTRACT             #language en-US "BDSDxe module is core driver for BDS phase"
+
+#string STR_MODULE_DESCRIPTION          #language en-US "When DxeCore dispatching all DXE driver, this module will produce architecture protocol gEfiBdsArchProtocolGuid. After DxeCore finishes dispatching, DxeCore will invoke the Entry interface of protocol gEfiBdsArchProtocolGuid. Then BDS phase is entered.  Generally, this module takes reposiblity to connect all necessary devices for platform boot. These boot device paths are held in PlatformBdsLib a library instance produced by the platform. For legacy boot, BDS will transfer control to legacy BIOS after legacy boot device is selected. For EFI boot, BDS will load boot loader file EFI\BOOT\BOOTIA32.EFI, EFI\BOOT\BOOTX64.EFI, EFI\BOOT\BOOTIA64.EFI files from selected boot devices, and transfers control to the boot loader.  BDSDxe also maintains the UI for \"Boot Manager, Boot Maintaince Manager, Device Manager\", which is used by the user to configure boot options or to maintain hardware devices."
+

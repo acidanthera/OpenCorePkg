@@ -1,0 +1,62 @@
+## @file
+# 
+# Copyright (c) 2006 - 2011, Intel Corporation. All rights reserved.<BR>
+# This program and the accompanying materials                          
+# are licensed and made available under the terms and conditions of the BSD License         
+# which accompanies this distribution.  The full text of the license may be found at        
+# http://opensource.org/licenses/bsd-license.php                                            
+#                                                                                           
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+#
+#  Module Name:
+#    DxeIpl.inf
+#
+#  Abstract:
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = DxeIpl
+  FILE_GUID                      = 2119BBD7-9432-4f47-B5E2-5C4EA31B6BDC
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenDuetPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  PrintLib
+  ReportStatusCodeLib
+  IoLib
+
+[Guids]
+  gEfiVariableGuid
+  gDxeCoreFileNameGuid
+  gLdrMemoryDescriptorGuid
+
+[Sources]
+  DxeIpl.h
+  DxeInit.c
+  LegacyTable.c
+  LegacyTable.h
+  HobGeneration.c
+  HobGeneration.h
+  
+[Sources.x64]
+  X64/EnterDxeCore.c
+  X64/Paging.c
+  X64/VirtualMemory.h
+
+[Sources.Ia32]
+  Ia32/EnterDxeCore.c
+  Ia32/Paging.c
+  Ia32/VirtualMemory.h
+ 
+[Depex]
+  TRUE

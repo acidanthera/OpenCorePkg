@@ -557,9 +557,9 @@ cross-platform and open-source alternative
 utilised.
 
 For BIOS booting a third-party UEFI environment provider will have to
-be used. \texttt{DuetPkg} is one of the known UEFI environment providers
+be used. \texttt{OpenDuetPkg} is one of the known UEFI environment providers
 for legacy systems. To run OpenCore on such a legacy system you can install
-\texttt{DuetPkg} with a dedicated tool BootInstall (bundled with OpenCore).
+\texttt{OpenDuetPkg} with a dedicated tool BootInstall (bundled with OpenCore).
 
 For upgrade purposes refer to \texttt{Differences.pdf} document, providing
 the information about the changes affecting the configuration compared
@@ -591,7 +591,6 @@ command sequence may look as follows:
 \begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
 git clone https://github.com/acidanthera/audk UDK
 cd UDK
-git clone https://github.com/acidanthera/DuetPkg
 git clone https://github.com/acidanthera/OpenCorePkg
 source edksetup.sh
 make -C BaseTools
@@ -610,11 +609,12 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -I/UefiPackages/MdeModulePkg
 -I/UefiPackages/MdeModulePkg/Include
 -I/UefiPackages/MdeModulePkg/Include/X64
--I/UefiPackages/DuetPkg/Include
 -I/UefiPackages/AppleSupportPkg/Include
 -I/UefiPackages/OpenCorePkg/Include/AMI
 -I/UefiPackages/OpenCorePkg/Include/Acidanthera
 -I/UefiPackages/OpenCorePkg/Include/Apple
+-I/UefiPackages/OpenCorePkg/Include/Apple/X64
+-I/UefiPackages/OpenCorePkg/Include/Duet
 -I/UefiPackages/OpenCorePkg/Include/Generic
 -I/UefiPackages/OpenCorePkg/Include/Intel
 -I/UefiPackages/OpenCorePkg/Include/Microsoft
@@ -2217,7 +2217,7 @@ The boot process is as follows:
 \end{itemize}
 
 \emph{Note 1}: This process is meant to work reliably only when \texttt{RequestBootVarRouting}
-option is enabled or the firmware does not control UEFI boot options (\texttt{DuetPkg} or
+option is enabled or the firmware does not control UEFI boot options (\texttt{OpenDuetPkg} or
 custom BDS). Without \texttt{BootProtect} it also is possible that other operating systems
 overwrite OpenCore, make sure to enable it if you plan to use them.
 
@@ -4163,7 +4163,7 @@ even cause permanent firmware damage. Some of the known drivers are listed below
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \\
   \href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
-& PS/2 keyboard driver from \texttt{MdeModulePkg}. DuetPkg and some firmwares
+& PS/2 keyboard driver from \texttt{MdeModulePkg}. \texttt{OpenDuetPkg} and some firmwares
   may not include this driver, but it is necessary for PS/2 keyboard to work.
   Note, unlike \texttt{OpenUsbKbDxe} this driver has no \texttt{AppleKeyMapAggregator}
   support and thus requires \texttt{KeySupport} to be enabled. \\

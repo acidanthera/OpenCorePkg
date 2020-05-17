@@ -1,0 +1,73 @@
+## @file
+#
+#  Duet BDS defines library.
+#
+#  Copyright (c) 2007 - 2014, Intel Corporation. All rights reserved.<BR>
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution.  The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = DuetBdsLib
+  FILE_GUID                      = F90C932F-196F-4AFC-9A10-DD3081DE9F83
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = DuetBdsLib|DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_APPLICATION
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#
+
+[Sources]
+  BdsConnect.c
+  BdsMisc.c
+  BdsPlatform.c
+  BdsPlatform.h
+  BdsConsole.c
+  PlatformData.c
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  OpenCorePkg/OpenDuetPkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  OvmfPkg/OvmfPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  DevicePathLib
+  DxeServicesTableLib
+  HobLib
+  MemoryAllocationLib
+  PcdLib
+  PrintLib
+  TimerLib
+  UefiBootServicesTableLib
+  UefiLib
+  UefiRuntimeServicesTableLib
+
+[Guids]
+  gEfiGlobalVariableGuid
+  gEfiAcpi10TableGuid
+  gEfiAcpi20TableGuid
+  gEfiSmbiosTableGuid
+  gEfiSmbios3TableGuid
+  gEfiAcpiTableGuid
+  gLdrMemoryDescriptorGuid
+
+[Protocols]
+  gEfiPciIoProtocolGuid                         # PROTOCOL CONSUMES
+  gEfiSimpleTextInProtocolGuid                  # PROTOCOL CONSUMES
+  gEfiDevicePathProtocolGuid                    # PROTOCOL CONSUMES
+  gEfiGraphicsOutputProtocolGuid                # PROTOCOL SOMETIMES_CONSUMES

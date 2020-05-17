@@ -1,0 +1,25 @@
+## @file
+#
+#  HFS+ Filesystem Driver
+#  
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = HfsPlus
+  FILE_GUID                      = 6839D927-3CAC-4CF9-B05A-400A623B327E
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+
+[Binaries.Ia32]
+  PE32|IA32/HfsPlusLegacy.efi|*
+
+[Binaries.X64]
+  PE32|X64/HfsPlusLegacy.efi|*

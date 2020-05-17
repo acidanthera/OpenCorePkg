@@ -1,0 +1,52 @@
+## @file
+# 
+# Copyright (c) 2006 - 2011, Intel Corporation. All rights reserved.<BR>
+# This program and the accompanying materials                          
+# are licensed and made available under the terms and conditions of the BSD License         
+# which accompanies this distribution.  The full text of the license may be found at        
+# http://opensource.org/licenses/bsd-license.php                                            
+#                                                                                           
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+#
+#  Module Name:
+#    EfiLdr.inf
+#
+#  Abstract:
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = EfiLoader
+  FILE_GUID                      = A9620E5C-5FA1-40b7-8B21-50B632F88F38
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+
+[Packages]
+  OpenCorePkg/OpenDuetPkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  PrintLib
+  LzmaDecompressLib
+  SerialPortLib
+
+[Sources]
+  PeLoader.h
+  Support.h
+  EfiLdrHandoff.h
+  EfiLdr.h
+  EfiLoader.c
+  PeLoader.c
+  Support.c
+  LzmaDecompress.h
+
+[Guids]
+  gTianoCustomDecompressGuid
+
+[BuildOptions]
+  MSFT:*_*_*_DLINK_FLAGS = /BASE:0x10000

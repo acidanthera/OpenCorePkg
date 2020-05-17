@@ -1,0 +1,44 @@
+## @file 
+#
+# This Package provides all definitions(including functions, MACROs, structures and library classes)
+# and libraries instances, which are only used by Duet platform.
+#
+# Copyright (c) 2007 - 2011, Intel Corporation. All rights reserved.<BR>
+#
+# This program and the accompanying materials are licensed and made available under
+# the terms and conditions of the BSD License which accompanies this distribution.
+# The full text of the license may be found at
+# http://opensource.org/licenses/bsd-license.php
+#
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+##
+
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = OpenDuetPkg
+  PACKAGE_GUID                   = C10BE46B-35C3-4B0B-9B9C-3F02051D782F
+  PACKAGE_VERSION                = 0.4
+
+[Includes]
+  Include/Duet
+
+[Guids]
+  ## Include/Duet/Guid/PciExpressBaseAddress.h
+  gEfiPciExpressBaseAddressGuid = {0x3677d529, 0x326f, 0x4603, {0xa9, 0x26, 0xea, 0xac, 0xe0, 0x1d, 0xcb, 0xb0 }}
+
+  ## Include/Duet/Guid/AcpiDescription.h
+  gEfiAcpiDescriptionGuid       = {0x3c699197, 0x093c, 0x4c69, {0xb0, 0x6b, 0x12, 0x8a, 0xe3, 0x48, 0x1d, 0xc9 }}
+
+  ## Include/Duet/Guid/FlashMapHob.h
+  gEfiFlashMapHobGuid           = {0xb091e7d2, 0x05a0, 0x4198, {0x94, 0xf0, 0x74, 0xb7, 0xb8, 0xc5, 0x54, 0x59 }}
+  
+  ## Include/Duet/Guid/PciOptionRomTable.h
+  gEfiPciOptionRomTableGuid     = {0x7462660F, 0x1CBD, 0x48DA, {0xAD, 0x11, 0x91, 0x71, 0x79, 0x13, 0x83, 0x1C }}
+  
+  ## Include/Duet/Guid/DxeCoreFileName.h
+  gDxeCoreFileNameGuid          = {0xD6A2CB7F, 0x6A18, 0x4e2f, {0xB4, 0x3B, 0x99, 0x20, 0xA7, 0x33, 0x70, 0x0A }}
+
+  ## Include/Duet/Guid/LdrMemoryDescriptor.h
+  gLdrMemoryDescriptorGuid      = {0x7701d7e5, 0x7d1d, 0x4432, {0xa4, 0x68, 0x67, 0x3d, 0xab, 0x8a, 0xde, 0x60 }}

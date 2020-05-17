@@ -1,0 +1,56 @@
+## @file
+#  This module provides EFI_GRAPHIC_OUT_PROTOCOL based on functions of video
+#  on legacy BIOS.
+#
+#  Copyright (c) 2006 - 2010, Intel Corporation. All rights reserved.<BR>
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution. The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = BiosVideo
+  FILE_GUID                      = 29CF55F8-B675-4f5d-8F2F-B87A3ECFD063
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = BiosVideoDriverEntryPoint
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenDuetPkg.dec
+  OvmfPkg/OvmfPkg.dec
+
+[LibraryClasses]
+  UefiLib
+  DebugLib
+  PrintLib
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+  BaseMemoryLib
+  MemoryAllocationLib
+  UefiDriverEntryPoint
+  DevicePathLib
+
+[Sources]
+  BiosVideo.h
+  BiosVideo.c
+  ComponentName.c
+  VesaBiosExtensions.h
+  LegacyBiosThunk.c
+
+[Protocols]
+  gEfiPciIoProtocolGuid
+  gEfiVgaMiniPortProtocolGuid
+  gEfiLegacy8259ProtocolGuid
+  gEfiEdidDiscoveredProtocolGuid
+  gEfiEdidActiveProtocolGuid
+
+ [Guids]
+  gEfiGlobalVariableGuid
+

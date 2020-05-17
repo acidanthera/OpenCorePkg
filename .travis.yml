@@ -25,7 +25,8 @@ matrix:
 
     script:
     - HOMEBREW_NO_INSTALL_CLEANUP=1 HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl mingw-w64
-    - "./macbuild.tool"
+    - "./build_oc.tool"
+    - "./build_duet.tool"
 
     deploy:
       provider: releases
@@ -59,7 +60,8 @@ matrix:
     - if [ "$sum" != "$expsum" ]; then echo "Invalid checksum $sum" ; exit 1 ; fi
     - tar -xf "${file}${suf}" || exit 1
     - export PATH="$(pwd)/${file}/bin:$PATH"
-    - "./macbuild.tool"
+    - "./build_oc.tool"
+    - "./build_duet.tool"
 
   - os: linux
     name: "Build Linux CLANG38"
@@ -77,7 +79,8 @@ matrix:
     - sudo apt-get remove -y llvm-3.8 libllvm3.8 # Move LLVM 3.8 out of the way.
     - export PATH="/usr/lib/llvm-8/bin:$PATH" # Default compiler (7.0 or 3.8) has no LTO plugin.
     - export TOOLCHAINS=CLANG38
-    - "./macbuild.tool"
+    - "./build_oc.tool"
+    - "./build_duet.tool"
     # Currently this is too ugly, but maybe we can use that in the future.
     - sudo apt-get install -y doxygen texlive texlive-latex-extra
     - abort() { tail -200 log.txt ; exit 1 ; }
@@ -107,6 +110,6 @@ matrix:
           name: "acidanthera/OpenCorePkg"
           description: "OpenCorePkg"
         notification_email: $NOTIFICATION_EMAIL
-        build_command_prepend: "./macbuild.tool --skip-build --skip-package && cd UDK ; src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/Lilu/master/Lilu/Scripts/covstrap.sh) && eval \"$src\" || exit 1"
-        build_command: "../macbuild.tool --skip-tests --skip-package RELEASE"
+        build_command_prepend: "./build_oc.tool --skip-build --skip-package && cd UDK ; src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/Lilu/master/Lilu/Scripts/covstrap.sh) && eval \"$src\" || exit 1"
+        build_command: "../build_oc.tool --skip-tests --skip-package RELEASE"
         branch_pattern: master

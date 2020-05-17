@@ -1,0 +1,60 @@
+## @file
+#
+# Copyright (c) 2009 - 2010, Intel Corporation. All rights reserved.<BR>
+# This program and the accompanying materials                          
+# are licensed and made available under the terms and conditions of the BSD License         
+# which accompanies this distribution.  The full text of the license may be found at        
+# http://opensource.org/licenses/bsd-license.php                                            
+#                                                                                           
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+# 
+#  Module Name:
+#
+#    SmbiosGen.inf
+#
+#  Abstract:
+#
+#    Component description file for SmbiosGen module.
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SmbiosGenDxe
+  FILE_GUID                      = A17F4A89-5F19-444f-B7BE-48195E0575DB
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = SmbiosGenEntrypoint
+
+[Packages]
+  OpenCorePkg/OpenDuetPkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  UefiLib
+  HobLib
+  UefiBootServicesTableLib
+  BaseMemoryLib
+  MemoryAllocationLib
+  UefiDriverEntryPoint
+  BaseLib
+  HiiLib
+  UefiHiiServicesLib
+  
+[Sources]
+  SmbiosGen.c
+  SmbiosGen.h
+  SmbiosGenStrings.uni
+
+[Guids]
+  gEfiSmbiosTableGuid
+
+[Protocols]
+  gEfiHiiDatabaseProtocolGuid
+  gEfiSmbiosProtocolGuid
+  
+[Depex]
+  gEfiSmbiosProtocolGuid AND gEfiHiiDatabaseProtocolGuid
+

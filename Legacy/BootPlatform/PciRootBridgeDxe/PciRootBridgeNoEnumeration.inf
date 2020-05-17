@@ -1,0 +1,62 @@
+## @file
+# 
+# Copyright (c) 2005 - 2018, Intel Corporation. All rights reserved.<BR>
+# This program and the accompanying materials                          
+# are licensed and made available under the terms and conditions of the BSD License         
+# which accompanies this distribution.  The full text of the license may be found at        
+# http://opensource.org/licenses/bsd-license.php                                            
+#                                                                                           
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+#
+#  Module Name:
+#
+#  Abstract:
+#
+##
+
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = PcatPciRootBridge
+  FILE_GUID                      = 0F7EC77A-1EE1-400f-A99D-7CBD1FEB181E
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+
+  ENTRY_POINT                    = InitializePcatPciRootBridge
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenDuetPkg.dec
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  UefiLib
+  MemoryAllocationLib
+  UefiBootServicesTableLib
+  DebugLib
+  BaseMemoryLib
+  DevicePathLib
+  HobLib
+
+[Sources]
+  PcatPciRootBridge.h
+  PcatPciRootBridge.c
+  PcatPciRootBridgeDevicePath.c
+  PcatPciRootBridgeIo.c
+  DeviceIo.h
+  DeviceIo.c
+  PcatIo.c
+
+[Protocols]
+  gEfiPciRootBridgeIoProtocolGuid
+  gEfiDeviceIoProtocolGuid
+  gEfiCpuIo2ProtocolGuid
+
+[Guids]
+  gEfiPciOptionRomTableGuid
+  gEfiPciExpressBaseAddressGuid
+
+[Depex]
+  gEfiCpuIo2ProtocolGuid
+  

@@ -1,0 +1,25 @@
+## @file
+#
+#  OpenCore USB Keyboard Driver
+#  
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OpenUsbKbDxe
+  FILE_GUID                      = B4B18806-349E-4305-A7F3-2BD23C8FC1B2
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+
+[Binaries.Ia32]
+  PE32|IA32/OpenUsbKbDxe.efi|*
+
+[Binaries.X64]
+  PE32|X64/OpenUsbKbDxe.efi|*
