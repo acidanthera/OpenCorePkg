@@ -609,7 +609,6 @@ Add \texttt{.clang\_complete} file with similar content to your UDK root:
 -I/UefiPackages/MdeModulePkg
 -I/UefiPackages/MdeModulePkg/Include
 -I/UefiPackages/MdeModulePkg/Include/X64
--I/UefiPackages/AppleSupportPkg/Include
 -I/UefiPackages/OpenCorePkg/Include/AMI
 -I/UefiPackages/OpenCorePkg/Include/Acidanthera
 -I/UefiPackages/OpenCorePkg/Include/Apple
@@ -654,8 +653,8 @@ listed below before submitting their patches. In general it is also recommended 
 discuss the issue in \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}
 before sending the patch to ensure no double work and to avoid your patch being rejected.
 
-\textbf{Organisation}. The codebase is primarily in \texttt{OpenCorePkg} repository,
-which is the primary EDK II package. Some drivers can also be found in \texttt{AppleSupportPkg}.
+\textbf{Organisation}. The codebase is contained in \texttt{OpenCorePkg} repository,
+which is the primary EDK II package.
 \begin{itemize}
 \tightlist
 \item Whenever changes are required in multiple repositories, separate pull requests should
@@ -4128,9 +4127,9 @@ Loading an incompatible driver may lead your system to unbootable state or
 even cause permanent firmware damage. Some of the known drivers are listed below:
 
 \begin{tabular}{p{1.3in}p{5.55in}}
-\href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{AudioDxe}}
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AudioDxe}}
 & HDA audio support driver in UEFI firmwares for most Intel and some other analog audio controllers.
-  Refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
+  Staging driver, refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
   for known issues in AudioDxe. \\
 \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ExFatDxe}}
 & Proprietary ExFAT file system driver for Bootcamp support commonly found in Apple
@@ -4175,7 +4174,7 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & USB mouse driver from \texttt{MdeModulePkg}. Some virtual machine firmwares
   like OVMF may not include this driver, but it is necessary for mouse to work
   in UEFI graphical interfaces, such as \texttt{OpenCanopy}. \\
-\href{https://github.com/acidanthera/AppleSupportPkg}{\texttt{VBoxHfs}}
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VBoxHfs}}
 & HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HfsPlus} driver commonly found in Apple firmwares. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo

@@ -1,0 +1,73 @@
+## @file
+# AudioDxe.inf
+#
+# Copyright (c) 2018 John Davis
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+##
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = AudioDxe
+  ENTRY_POINT    = AudioDxeInit
+  FILE_GUID      = AEA1FB0A-8D5B-4733-8D4C-7291D83CE29E
+  MODULE_TYPE    = UEFI_DRIVER
+  VERSION_STRING = 1.0
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+
+[LibraryClasses]
+  BaseMemoryLib
+  SynchronizationLib
+  DebugLib
+  DevicePathLib
+  MemoryAllocationLib
+  OcHdaDevicesLib
+  OcStringLib
+  PcdLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  UefiLib
+
+[Protocols]
+  gEfiPciIoProtocolGuid               # CONSUMES
+  gEfiHdaControllerInfoProtocolGuid   # PRODUCES
+  gEfiHdaIoProtocolGuid               # PRODUCES
+  gEfiHdaCodecInfoProtocolGuid        # PRODUCES
+  gEfiAudioIoProtocolGuid             # PRODUCES
+  gVMwareHdaProtocolGuid              # SOMETIMES_CONSUMES
+
+[Sources]
+  HdaCodec/HdaCodecComponentName.h
+  HdaCodec/HdaCodecComponentName.c
+  HdaCodec/HdaCodecInfo.c
+  HdaCodec/HdaCodecAudioIo.c
+  HdaCodec/HdaCodec.h
+  HdaCodec/HdaCodec.c
+  HdaController/HdaControllerComponentName.h
+  HdaController/HdaControllerComponentName.c
+  HdaController/HdaControllerMem.c
+  HdaController/HdaControllerInfo.c
+  HdaController/HdaControllerHdaIo.c
+  HdaController/HdaController.h
+  HdaController/HdaController.c
+  AudioDxe.h
+  AudioDxe.c

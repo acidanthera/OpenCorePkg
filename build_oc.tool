@@ -45,6 +45,7 @@ package() {
   cp ResetSystem.efi tmp/EFI/OC/Tools || exit 1
   cp RtcRw.efi tmp/EFI/OC/Tools || exit 1
   cp NvmExpressDxe.efi tmp/EFI/OC/Drivers/ || exit 1
+  cp AudioDxe.efi tmp/EFI/OC/Drivers/ || exit 1
   cp OpenCanopy.efi tmp/EFI/OC/Drivers/ || exit 1
   cp OpenControl.efi tmp/EFI/OC/Tools/ || exit 1
   cp OpenCore.efi tmp/EFI/OC/ || exit 1
