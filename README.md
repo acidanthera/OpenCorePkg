@@ -49,14 +49,17 @@ The use of UBSan runtime requires the use of Clang compiler and `-fsanitize=unde
 [Clang documentation](https://releases.llvm.org/7.0.0/tools/clang/docs/UndefinedBehaviorSanitizer.html) for more
 details.
 
-## Credits
+#### Credits
 
 - The HermitCrabs Lab
 - All projects providing third-party code (refer to file headers)
+- [AppleLife](https://applelife.ru) team and user-contributed resources
+- Chameleon and Clover teams for hints and legacy
 - [al3xtjames](https://github.com/al3xtjames)
 - [Andrey1970AppleLife](https://github.com/Andrey1970AppleLife)
 - [Download-Fritz](https://github.com/Download-Fritz)
 - [Goldfish64](https://github.com/Goldfish64)
+- [nms42](https://github.com/nms42)
 - [PMHeart](https://github.com/PMHeart)
 - [savvamitrofanov](https://github.com/savvamitrofanov)
 - [vit9696](https://github.com/vit9696)

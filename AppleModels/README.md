@@ -33,13 +33,3 @@ To use them do as follows:
    file from `BridgeOSUpdateCustomer.pkg` and unpack it.
 5. After unpacking `UpdateBundle.zip` go to `boot/Firmware/MacEFI` directory and unpack im4p files.
    You can use [img4](https://github.com/xerub/img4lib), [img4tool](https://github.com/tihmstar/img4tool), or our dedicated [MacEfiUnpack](https://github.com/acidanthera/OpenCorePkg/blob/master/Utilities/MacEfiUnpack/MacEfiUnpack.py). For example, `for i in *.im4p ; do ./MacEfiUnpack.py "$i" ; done`
-
-## Credits
-
-* All database maintainers, who continue to actualise data
-* [AppleLife](https://applelife.ru/threads/dampy-originalnyx-makov.2943712) and [VirtualSMC](https://github.com/acidanthera/VirtualSMC/tree/master/Docs) hardware dump databases
-* Chameleon and Clover teams for legacy Apple SMBIOS database
-* [al3xjames](https://github.com/al3xtjames) for several hints and another [database](https://github.com/al3xtjames/MacGen)
-* CCC and ...numberinfo.com for hiding their work and inspiring others to reverse it
-* Several guys from AppleLife for conducting relevant parts of the research, thanks a lot!
-* [vit9696](https://github.com/vit9696)
