@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ "$(uname | grep MINGW)" = "" ]; then
+  echo "MinGW is currently not supported"
+  exit 0
+fi
+
 if [ "$(uname)" = "Darwin" ] ; then
   KERNEL_TAG="$(uname -r | cut -f1 -d'.')"
 
