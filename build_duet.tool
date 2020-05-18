@@ -115,11 +115,13 @@ else
   ARCHS=(X64 IA32)
   SELFPKG_DIR="OpenCorePkg"
   SELFPKG=OpenDuetPkg
+  NO_ARCHIVES=1
 
   export TARGETS
   export ARCHS
   export SELFPKG_DIR
   export SELFPKG
+  export NO_ARCHIVES
 
   src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/efibuild.sh) && eval "$src" || exit 1
 fi
