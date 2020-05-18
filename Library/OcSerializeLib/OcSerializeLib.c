@@ -180,10 +180,11 @@ ParseSerializedValue (
 
   if (Result == FALSE) {
     DEBUG ((
-      DEBUG_WARN, "OCS: Failed to parse %a field as type %a with <%.16a> contents\n",
+      DEBUG_WARN,
+      "OCS: Failed to parse %a field as value with type %a and <%a> contents\n",
       XmlNodeName (Node),
       GetSchemaTypeName (Info->Value.Type),
-      XmlNodeContent (Node)
+      XmlNodeContent (Node) != NULL ? XmlNodeContent (Node) : "empty"
       ));
   }
 }
@@ -218,9 +219,9 @@ ParseSerializedBlob (
   if (Result == FALSE) {
     DEBUG ((
       DEBUG_WARN,
-      "OCS: Failed to calculate size of %a field containing <%.16a> as type %u\n",
+      "OCS: Failed to calculate size of %a field containing <%a> as type %a\n",
       XmlNodeName (Node),
-      XmlNodeContent (Node),
+      XmlNodeContent (Node) != NULL ? XmlNodeContent (Node) : "empty",
       GetSchemaTypeName (Info->Blob.Type)
       ));
     return;
@@ -232,10 +233,10 @@ ParseSerializedBlob (
   if (BlobMemory == NULL) {
     DEBUG ((
       DEBUG_INFO,
-      "OCS: Failed to allocate %u bytes %a field of type %u\n",
+      "OCS: Failed to allocate %u bytes %a field of type %a\n",
       Size,
       XmlNodeName (Node),
-      Info->Blob.Type
+      GetSchemaTypeName (Info->Value.Type)
       ));
     return;
   }
@@ -257,10 +258,10 @@ ParseSerializedBlob (
   if (Result == FALSE) {
     DEBUG ((
       DEBUG_WARN,
-      "OCS: Failed to parse %a field as type %a with <%.16a> contents\n",
+      "OCS: Failed to parse %a field as blob with type %a and <%a> contents\n",
       XmlNodeName (Node),
       GetSchemaTypeName (Info->Value.Type),
-      XmlNodeContent (Node)
+      XmlNodeContent (Node) != NULL ? XmlNodeContent (Node) : "empty"
       ));
   }
 }
