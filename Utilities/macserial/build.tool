@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "$(uname | grep MINGW)" = "" ]; then
+if [ "$(uname | grep MINGW)" != "" ]; then
   echo "MinGW is currently not supported"
   exit 0
 fi
