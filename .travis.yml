@@ -83,7 +83,7 @@ matrix:
 
     script:
     - BUILD_UTILITIES=0
-    - choco install microsoft-build-tools visualcpp-build-tools nasm python zip
+    - choco install microsoft-build-tools visualcpp-build-tools make nasm python zip
     - "./build_oc.tool"
     - "./build_duet.tool"
 
