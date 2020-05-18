@@ -34,6 +34,7 @@ ASM_PFX(AsmReadIntelMicrocodeRevision):
   ; Several Intel CPUs, notably Westmere, require a certain assembly
   ; sequence to retrieve microcode revision.
   ; Reference: https://github.com/acidanthera/bugtracker/issues/621.
+  push rbx
   mov ecx, MSR_IA32_BIOS_SIGN_ID
   xor eax, eax
   xor edx, edx
@@ -43,4 +44,5 @@ ASM_PFX(AsmReadIntelMicrocodeRevision):
   mov ecx, MSR_IA32_BIOS_SIGN_ID
   rdmsr
   mov eax, edx
+  pop rbx
   ret
