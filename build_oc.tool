@@ -74,18 +74,20 @@ package() {
   cp "${selfdir}/Utilities/icnspack/icnspack" tmp/Utilities/ || exit 1
   cp "${selfdir}/Utilities/kpdescribe/kpdescribe.sh" tmp/Utilities/ || exit 1
   pushd tmp || exit 1
-  zip -qry -FS ../"OpenCore-${ver}-${2}.zip" ./* || exit 1
+  zip -qr -FS ../"OpenCore-${ver}-${2}.zip" ./* || exit 1
   popd || exit 1
   rm -rf tmp || exit 1
   popd || exit 1
 }
 
 cd "$(dirname "$0")" || exit 1
-ARCHS=(X64 IA32)
+if [ "$ARCHS" = "" ]; then
+  ARCHS=(X64 IA32)
+  export ARCHS
+fi
 SELFPKG=OpenCorePkg
 NO_ARCHIVES=0
 
-export ARCHS
 export SELFPKG
 export NO_ARCHIVES
 

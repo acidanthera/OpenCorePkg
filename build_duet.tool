@@ -112,13 +112,15 @@ if [ "${INTREE}" != "" ]; then
   imgbuild
 else
   TARGETS=(DEBUG RELEASE)
-  ARCHS=(X64 IA32)
+  if [ "$ARCHS" = "" ]; then
+    ARCHS=(X64 IA32)
+    export ARCHS
+  fi
   SELFPKG_DIR="OpenCorePkg"
   SELFPKG=OpenDuetPkg
   NO_ARCHIVES=1
 
   export TARGETS
-  export ARCHS
   export SELFPKG_DIR
   export SELFPKG
   export NO_ARCHIVES
