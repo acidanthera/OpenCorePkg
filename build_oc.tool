@@ -83,9 +83,11 @@ package() {
 cd "$(dirname "$0")" || exit 1
 ARCHS=(X64 IA32)
 SELFPKG=OpenCorePkg
+NO_ARCHIVES=0
 
 export ARCHS
 export SELFPKG
+export NO_ARCHIVES
 
 ./Utilities/macserial/build.tool || exit 1
 
