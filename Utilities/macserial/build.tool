@@ -1,10 +1,5 @@
 #!/bin/bash
 
-if [ "$(uname | grep MINGW)" != "" ]; then
-  echo "MinGW is currently not supported"
-  exit 0
-fi
-
 if [ "$(uname)" = "Darwin" ] ; then
   KERNEL_TAG="$(uname -r | cut -f1 -d'.')"
 
@@ -25,6 +20,9 @@ if [ "$(uname)" = "Darwin" ] ; then
       MACOS_MIN="10.4"
     fi
   fi
+elif [ "$(which gcc)" = "" ]; then
+  echo "GCC is required for compilation with this script"
+  exit 0
 fi
 
 cd "$(dirname "$0")" || exit 1
