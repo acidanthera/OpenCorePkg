@@ -121,7 +121,7 @@ UefiMain (
 
   if (BeepGenProtocol != NULL) {
     Status = BeepGenProtocol->GenBeep (
-      Count,
+      (UINT32) Count,
       Signal,
       Silence
       );

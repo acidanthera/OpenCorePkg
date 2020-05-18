@@ -82,7 +82,7 @@ InternalGetRawData (
     //
     // If chunk size exceeds file size, abort.
     //
-    if ((UINT64) TmpChunk->Size + sizeof (RIFF_CHUNK) > BufferEnd - BufferPtr) {
+    if ((UINT64) TmpChunk->Size + sizeof (RIFF_CHUNK) > (UINTN) (BufferEnd - BufferPtr)) {
       return EFI_INVALID_PARAMETER;
     }
 

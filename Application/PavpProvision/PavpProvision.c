@@ -146,7 +146,7 @@ EFI_STATUS
 ReadProvisioningData (
   OUT EPID_CERTIFICATE       **EpidCertificate,
   OUT EPID_GROUP_PUBLIC_KEY  **EpidGroupPublicKeys,
-  OUT UINT32 *EpidGroupPublicKeysCount
+  OUT UINT32                 *EpidGroupPublicKeysCount
   )
 {
   EFI_STATUS  Status;
@@ -176,7 +176,7 @@ ReadProvisioningData (
 
   if (EpidCertificateSize == EPID_CERTIFICATE_SIZE
     && EpidGroupPublicKeysSize % EPID_GROUP_PUBLIC_KEY_SIZE == 0) {
-    *EpidGroupPublicKeysCount = EpidGroupPublicKeysSize / EPID_GROUP_PUBLIC_KEY_SIZE;
+    *EpidGroupPublicKeysCount = (UINT32) (EpidGroupPublicKeysSize / EPID_GROUP_PUBLIC_KEY_SIZE);
     return EFI_SUCCESS;
   }
 

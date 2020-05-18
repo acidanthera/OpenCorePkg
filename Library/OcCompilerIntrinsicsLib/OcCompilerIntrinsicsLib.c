@@ -33,3 +33,60 @@ __udivdi3 (
 }
 
 #endif
+
+#if defined(_MSC_EXTENSIONS) && !defined(__clang__) && !defined(__GNUC__)
+
+#if defined(MDE_CPU_IA32)
+typedef UINTN size_t;
+#endif
+
+void *
+memset (
+  void   *Buffer,
+  int    Value,
+  size_t Length
+  );
+
+#pragma intrinsic(memset)
+#pragma function(memset)
+void *
+memset (
+  void   *Buffer,
+  int    Value,
+  size_t Length
+  )
+{
+  unsigned char *d = Buffer;
+
+  while (Length--)
+    *d++ = (unsigned char) Value;
+
+  return Buffer;
+}
+
+void *
+memcpy (
+  void         *DestinationBuffer,
+  const void   *SourceBuffer,
+  size_t       Length
+  );
+
+#pragma intrinsic(memcpy)
+#pragma function(memcpy)
+void *
+memcpy (
+  void         *DestinationBuffer,
+  const void   *SourceBuffer,
+  size_t       Length
+  )
+{
+  unsigned char *d = DestinationBuffer;
+  unsigned char const *s = SourceBuffer;
+
+  while (Length--)
+    *d++ = *s++;
+
+  return DestinationBuffer;
+}
+
+#endif

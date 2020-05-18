@@ -665,8 +665,8 @@ AsciiTextSetAttribute (
   if (Attribute != (UINTN) This->Mode->Attribute) {
     FlushCursor (This->Mode->CursorVisible, mPrivateColumn, mPrivateRow);
 
-    FgColor = BitFieldRead32 (Attribute, 0, 3);
-    BgColor = BitFieldRead32 (Attribute, 4, 6);
+    FgColor = BitFieldRead32 ((UINT32) Attribute, 0, 3);
+    BgColor = BitFieldRead32 ((UINT32) Attribute, 4, 6);
 
     //
     // Once we change the background we should redraw everything.
@@ -678,7 +678,7 @@ AsciiTextSetAttribute (
 
     mForegroundColor.Raw  = mGraphicsEfiColors[FgColor];
     mBackgroundColor.Raw  = mGraphicsEfiColors[BgColor];
-    This->Mode->Attribute = Attribute;
+    This->Mode->Attribute = (UINT32) Attribute;
 
     FlushCursor (This->Mode->CursorVisible, mPrivateColumn, mPrivateRow);
   }

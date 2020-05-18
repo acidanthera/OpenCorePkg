@@ -157,7 +157,7 @@ AnalyzeGopHandle (
   if (NewMode >= 0) {
     Status = Gop->SetMode (
       Gop,
-      (UINTN) NewMode
+      (UINT32) NewMode
       );
 
     Info = Gop->Mode->Info;
@@ -437,7 +437,7 @@ UefiMain (
       (UINT32) Date.Second
       );
 
-    SetFileData (NULL, Filename, FinalReport, AsciiStrLen (FinalReport));
+    SetFileData (NULL, Filename, FinalReport, (UINT32) AsciiStrLen (FinalReport));
 
     FreePool (FinalReport);
   } else {
