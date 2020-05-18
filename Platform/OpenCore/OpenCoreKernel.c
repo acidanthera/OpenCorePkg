@@ -297,7 +297,7 @@ OcKernelLoadKextsAndReserve (
       );
   }
 
-  DEBUG ((DEBUG_INFO, "Kext reservation size %u\n", ReserveSize));
+  DEBUG ((DEBUG_INFO, "OC: Kext reservation size %u\n", ReserveSize));
 
   return ReserveSize;
 }

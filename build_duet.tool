@@ -86,7 +86,11 @@ package() {
 cd "$(dirname "$0")" || exit 1
 
 BOOTSECTORS="$(pwd)/Legacy/BootSector/bin"
-FV_TOOLS="$(pwd)/Utilities/BaseTools/bin.$(uname)"
+UNAME="$(uname)"
+if [ "$(echo "${UNAME}" | grep MINGW)" != "" ] || [ "$(echo "${UNAME}" | grep MSYS)" != "" ]; then
+  UNAME="Windows"
+fi
+FV_TOOLS="$(pwd)/Utilities/BaseTools/bin.${UNAME}"
 
 if [ ! -d "${FV_TOOLS}" ]; then
   echo "ERROR: You need to compile BaseTools for your platform!"

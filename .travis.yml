@@ -7,16 +7,6 @@ env:
 
 matrix:
   include:
-  - os: osx
-    name: "Run Scripts"
-
-    script:
-    - HOMEBREW_NO_INSTALL_CLEANUP=1 brew install shellcheck
-    - find . \( -name "*.tool" -o -name "*.command" -o -name "*.sh" \) -exec sh -c 'for TargetFile; do shellcheck --severity=info "${TargetFile}" || exit 1; done' sh {} +
-    - pip2 install pyyaml
-    - cd AppleModels || exit 1
-    - python2 ./update_generated.py  || exit 1
-    - if [ "$(git status --porcelain)" != "" ]; then echo "DataBase desync"; exit 1 ; fi
 
   - os: osx
     name: "Build macOS XCODE5"
@@ -88,6 +78,25 @@ matrix:
     - cd Doxy/latex || abort
     - make pdf &> log.txt || abort
 
+  - os: windows
+    name: "Build Windows VS2017"
+
+    script:
+    - BUILD_UTILITIES=0
+    - choco install microsoft-build-tools visualcpp-build-tools nasm python zip
+    - "./build_oc.tool"
+
+  - os: osx
+    name: "Analyze Scripts"
+
+    script:
+    - HOMEBREW_NO_INSTALL_CLEANUP=1 brew install shellcheck
+    - find . \( -name "*.tool" -o -name "*.command" -o -name "*.sh" \) -exec sh -c 'for TargetFile; do shellcheck --severity=info "${TargetFile}" || exit 1; done' sh {} +
+    - pip2 install pyyaml
+    - cd AppleModels || exit 1
+    - python2 ./update_generated.py  || exit 1
+    - if [ "$(git status --porcelain)" != "" ]; then echo "DataBase desync"; exit 1 ; fi
+
   - os: osx
     name: "Analyze Coverity"
     osx_image: xcode11.3
@@ -113,11 +122,3 @@ matrix:
         build_command_prepend: "./build_oc.tool --skip-build --skip-package && cd UDK ; src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/Lilu/master/Lilu/Scripts/covstrap.sh) && eval \"$src\" || exit 1"
         build_command: "../build_oc.tool --skip-tests --skip-package RELEASE"
         branch_pattern: master
-
-  - os: windows
-    name: "Build Windows VS2017"
-
-    script:
-    - BUILD_UTILITIES=0
-    - choco install microsoft-build-tools visualcpp-build-tools nasm python zip
-    - "./build_oc.tool"

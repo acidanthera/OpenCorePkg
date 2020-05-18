@@ -2,15 +2,13 @@ CC ?= gcc
 CFLAGS ?= -O3 -s
 MKDIR ?= mkdir
 RM ?= /bin/rm
+DIST ?= $(shell uname)
 
-ifneq ($(OS),Windows_NT)
-	UNAME_S := $(shell uname -s)
-	ifeq ($(UNAME_S),Darwin)
-		CFLAGS+=-mmacosx-version-min=10.6
-	endif
+ifeq ($(DIST),Darwin)
+	CFLAGS+=-mmacosx-version-min=10.6
 endif
 
-BINDIR=bin.$(shell uname)
+BINDIR=bin.$(DIST)
 PRODUCTS=$(BINDIR)/GenPage $(BINDIR)/EfiLdrImage
 
 all: $(PRODUCTS)
