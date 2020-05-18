@@ -85,6 +85,7 @@ matrix:
     - BUILD_UTILITIES=0
     - choco install microsoft-build-tools visualcpp-build-tools nasm python zip
     - "./build_oc.tool"
+    - "./build_duet.tool"
 
   - os: osx
     name: "Analyze Scripts"
