@@ -67,7 +67,11 @@ package() {
   cp -r "${selfdir}/Utilities/CreateVault" tmp/Utilities/ || exit 1
   cp -r "${selfdir}/Utilities/LogoutHook" tmp/Utilities/ || exit 1
   cp -r "${selfdir}/Utilities/macrecovery" tmp/Utilities/ || exit 1
-  cp -r "${selfdir}/Utilities/macserial/bin" tmp/Utilities/macserial || exit 1
+  if [ -d "{selfdir}/Utilities/macserial/bin" ]; then
+    cp -r "${selfdir}/Utilities/macserial/bin" tmp/Utilities/macserial || exit 1
+  else
+    mkdir -p tmp/Utilities/macserial || exit 1
+  fi
   cp "${selfdir}/Utilities/macserial/FORMAT.md" tmp/Utilities/macserial/ || exit 1
   cp "${selfdir}/Utilities/macserial/README.md" tmp/Utilities/macserial/ || exit 1
   cp "${selfdir}/Utilities/disklabel/disklabel" tmp/Utilities/ || exit 1
