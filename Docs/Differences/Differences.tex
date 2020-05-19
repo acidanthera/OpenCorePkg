@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Mon May 11 17:11:58 2020
-%DIF ADD ../Configuration.tex        Mon May 18 06:12:17 2020
+%DIF ADD ../Configuration.tex        Tue May 19 14:35:19 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3175,7 +3175,7 @@ rm vault.pub
 \item
   \texttt{ScanPolicy}\\
   \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
-  \textbf{Failsafe}: \texttt{0xF0103}\\
+  \textbf{Failsafe}: \texttt{\DIFdelbegin \DIFdel{0xF0103}\DIFdelend \DIFaddbegin \DIFadd{0x10F0103}\DIFaddend }\\
   \textbf{Description}: Define operating system detection policy.
 
   This value allows to prevent scanning (and booting) from untrusted
@@ -3228,7 +3228,9 @@ rm vault.pub
     scanning FireWire devices.
     \item \texttt{0x00800000} (bit \texttt{23}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SDCARD}, allow
     scanning card reader devices.
-  \end{itemize}
+    \DIFaddbegin \item \texttt{\DIFadd{0x01000000}} \DIFadd{(bit }\texttt{\DIFadd{24}}\DIFadd{) --- }\texttt{\DIFadd{OC\_SCAN\_ALLOW\_DEVICE\_PCI}}\DIFadd{, allow
+    scanning devices directly connected to PCI bus (e.g. VIRTIO).
+  }\DIFaddend \end{itemize}
 
   \emph{Note}: Given the above description, \texttt{0xF0103} value is expected to allow
   scanning of SATA, SAS, SCSI, and NVMe devices with APFS file system, and prevent scanning

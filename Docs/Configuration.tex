@@ -2931,7 +2931,7 @@ rm vault.pub
 \item
   \texttt{ScanPolicy}\\
   \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
-  \textbf{Failsafe}: \texttt{0xF0103}\\
+  \textbf{Failsafe}: \texttt{0x10F0103}\\
   \textbf{Description}: Define operating system detection policy.
 
   This value allows to prevent scanning (and booting) from untrusted
@@ -2984,6 +2984,8 @@ rm vault.pub
     scanning FireWire devices.
     \item \texttt{0x00800000} (bit \texttt{23}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SDCARD}, allow
     scanning card reader devices.
+    \item \texttt{0x01000000} (bit \texttt{24}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_PCI}, allow
+    scanning devices directly connected to PCI bus (e.g. VIRTIO).
   \end{itemize}
 
   \emph{Note}: Given the above description, \texttt{0xF0103} value is expected to allow

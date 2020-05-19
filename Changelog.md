@@ -31,6 +31,7 @@ OpenCore Changelog
 - Fixed ignoring `#` in DeviceProperty and NVRAM `Delete`
 - Renamed `Block` to `Delete` in `ACPI`,`DeviceProperties`, and `NVRAM`
 - Added MacBookPro16,2 and MacBookPro16,3 model codes
+- Added PCI device scanning policy support (e.g. VIRTIO)
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG

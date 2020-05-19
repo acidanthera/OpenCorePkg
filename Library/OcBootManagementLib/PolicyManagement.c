@@ -48,6 +48,8 @@ OcGetDevicePolicyType (
 {
   EFI_STATUS                Status;
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
+  ACPI_HID_DEVICE_PATH      *Acpi;
   UINT8                     SubType;
 
   if (External != NULL) {
@@ -65,9 +67,10 @@ OcGetDevicePolicyType (
   // Currently we do not need it, but in future we may.
   //
 
-  while (!IsDevicePathEnd (DevicePath)) {
-    if (DevicePathType (DevicePath) == MESSAGING_DEVICE_PATH) {
-      SubType = DevicePathSubType (DevicePath);
+  DevicePathWalker = DevicePath;
+  while (!IsDevicePathEnd (DevicePathWalker)) {
+    if (DevicePathType (DevicePathWalker) == MESSAGING_DEVICE_PATH) {
+      SubType = DevicePathSubType (DevicePathWalker);
       switch (SubType) {
         case MSG_SATA_DP:
           return OC_SCAN_ALLOW_DEVICE_SATA;
@@ -113,7 +116,38 @@ OcGetDevicePolicyType (
       break;
     }
 
-    DevicePath = NextDevicePathNode (DevicePath);
+    DevicePathWalker = NextDevicePathNode (DevicePathWalker);
+  }
+
+  DevicePathWalker = DevicePath;
+  while (!IsDevicePathEnd (DevicePathWalker)) {
+    if (DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH) {
+      return OC_SCAN_ALLOW_DEVICE_PCI;
+    }
+
+    if (DevicePathType (DevicePathWalker) == ACPI_DEVICE_PATH) {
+      Acpi = (ACPI_HID_DEVICE_PATH *) DevicePathWalker;
+      if ((Acpi->HID & PNP_EISA_ID_MASK) == PNP_EISA_ID_CONST
+        && EISA_ID_TO_NUM (Acpi->HID) == 0x0A03) {
+        //
+        // Allow PciRoot.
+        //
+        DevicePathWalker = NextDevicePathNode (DevicePathWalker);
+        continue;
+      }
+    } else if (DevicePathType (DevicePathWalker) == HARDWARE_DEVICE_PATH
+      && DevicePathSubType (DevicePathWalker) == HW_PCI_DP) {
+      //
+      // Allow Pci.
+      //
+      DevicePathWalker = NextDevicePathNode (DevicePathWalker);
+      continue;
+    }
+
+    //
+    // Forbid everything else.
+    //
+    break;
   }
 
   return 0;
