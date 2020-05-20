@@ -1,7 +1,7 @@
 /*
  * File: HdaController.h
  *
- * Copyright (c) 2018 John Davis
+ * Copyright (c) 2018, 2020 John Davis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -156,6 +156,23 @@ typedef struct {
   VOID *CallbackContext3;
 } HDA_STREAM;
 
+typedef enum {
+  HDA_RING_BUFFER_TYPE_CORB,
+  HDA_RING_BUFFER_TYPE_RIRB
+} HDA_RING_BUFFER_TYPE;
+
+typedef struct {
+  HDA_CONTROLLER_DEV    *HdaDev;
+  HDA_RING_BUFFER_TYPE  Type;
+
+  VOID                  *Buffer;
+  UINTN                 BufferSize;
+  UINT32                EntryCount;
+  VOID                  *Mapping;
+  EFI_PHYSICAL_ADDRESS  PhysAddr;
+  UINT16                Pointer;
+} HDA_RING_BUFFER;
+
 typedef struct {
   EFI_HANDLE Handle;
   HDA_IO_PRIVATE_DATA *PrivateData;
@@ -188,19 +205,8 @@ struct _HDA_CONTROLLER_DEV {
   UINT8 MinorVersion;
   UINT16 Capabilities;
 
-  // Command output buffer (CORB).
-  UINT32 *CorbBuffer;
-  UINT32 CorbEntryCount;
-  VOID *CorbMapping;
-  EFI_PHYSICAL_ADDRESS CorbPhysAddr;
-  UINT16 CorbWritePointer;
-
-  // Response input buffer (RIRB).
-  UINT64 *RirbBuffer;
-  UINT32 RirbEntryCount;
-  VOID *RirbMapping;
-  EFI_PHYSICAL_ADDRESS RirbPhysAddr;
-  UINT16 RirbReadPointer;
+  HDA_RING_BUFFER Corb;
+  HDA_RING_BUFFER Rirb;
 
   // Streams.
   UINT8 TotalStreamsCount;
@@ -355,29 +361,26 @@ HdaControllerSendCommands(
   IN UINT8 Node,
   IN EFI_HDA_IO_VERB_LIST *Verbs);
 
-EFI_STATUS
-EFIAPI
-HdaControllerInitCorb(
-  IN HDA_CONTROLLER_DEV *HdaDev);
+/*BOOLEAN
+HdaControllerInitCorb (
+  IN HDA_CONTROLLER_DEV   *HdaDev
+  );
 
-EFI_STATUS
-EFIAPI
-HdaControllerCleanupCorb(
-  IN HDA_CONTROLLER_DEV *HdaDev);
+VOID
+HdaControllerCleanupCorb (
+  IN HDA_CONTROLLER_DEV *HdaDev
+  );
 
-EFI_STATUS
-EFIAPI
+BOOLEAN
 HdaControllerSetCorb(
   IN HDA_CONTROLLER_DEV *HdaDev,
   IN BOOLEAN Enable);
 
-EFI_STATUS
-EFIAPI
+BOOLEAN
 HdaControllerInitRirb(
   IN HDA_CONTROLLER_DEV *HdaDev);
 
-EFI_STATUS
-EFIAPI
+VOID
 HdaControllerCleanupRirb(
   IN HDA_CONTROLLER_DEV *HdaDev);
 
@@ -385,7 +388,7 @@ EFI_STATUS
 EFIAPI
 HdaControllerSetRirb(
   IN HDA_CONTROLLER_DEV *HdaDev,
-  IN BOOLEAN Enable);
+  IN BOOLEAN Enable);*/
 
 EFI_STATUS
 EFIAPI
@@ -456,5 +459,27 @@ HdaControllerDriverBindingStop(
   IN EFI_HANDLE ControllerHandle,
   IN UINTN NumberOfChildren,
   IN EFI_HANDLE *ChildHandleBuffer OPTIONAL);
+
+
+BOOLEAN
+HdaControllerInitRingBuffer (
+  IN HDA_RING_BUFFER    *HdaRingBuffer
+  );
+
+VOID
+HdaControllerCleanupRingBuffer (
+  IN HDA_RING_BUFFER    *HdaRingBuffer
+  );
+
+BOOLEAN
+HdaControllerSetRingBufferState(
+  IN HDA_RING_BUFFER    *HdaRingBuffer,
+  IN BOOLEAN            Enable
+  );
+
+BOOLEAN
+HdaControllerResetRingBuffer (
+  IN HDA_RING_BUFFER    *HdaRingBuffer
+  );
 
 #endif
