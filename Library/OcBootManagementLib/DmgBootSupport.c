@@ -226,6 +226,7 @@ InternalFindFirstDmgFileName (
   EFI_FILE_INFO *FileInfo;
   BOOLEAN       NoFile;
   UINTN         ExtOffset;
+  UINTN         Length;
   INTN          Result;
 
   ASSERT (Directory != NULL);
@@ -239,7 +240,15 @@ InternalFindFirstDmgFileName (
       continue;
     }
 
-    ExtOffset = (StrLen (FileInfo->FileName) - L_STR_LEN (L".dmg"));
+    //
+    // Discard filenames that do not contain characters prior to .dmg extension.
+    //
+    Length = StrLen (FileInfo->FileName);
+    if (Length <= L_STR_LEN (L".dmg")) {
+      continue;
+    }
+
+    ExtOffset = Length - L_STR_LEN (L".dmg");
     Result    = StrCmp (&FileInfo->FileName[ExtOffset], L".dmg");
     if (Result == 0) {
       if (FileNameLen != NULL) {

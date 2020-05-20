@@ -246,7 +246,7 @@ AppleRtcRamReset (
   UINTN       Index;
   UINT8       Buffer[APPLE_RTC_TOTAL_SIZE];
 
-  ZeroMem (Buffer, sizeof (APPLE_RTC_TOTAL_SIZE));
+  ZeroMem (Buffer, sizeof (Buffer));
 
   for (Index = APPLE_RTC_CHECKSUM_START; Index < APPLE_RTC_CORE_SIZE; ++Index) {
     Status = SyncRtcWaitForReady ();
