@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu May 21 18:32:35 2020
-%DIF ADD ../Configuration.tex        Thu May 21 18:40:56 2020
+%DIF DEL PreviousConfiguration.tex   Mon May 11 17:11:58 2020
+%DIF ADD ../Configuration.tex        Thu May 21 18:55:22 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1268,7 +1268,11 @@ patching or }\texttt{\DIFadd{NOP}} \DIFadd{the remaining area.
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Provide reset register and flag in FADT table to enable
-  reboot and shutdown on legacy hardware. Not recommended unless required.
+  reboot and shutdown\DIFaddbegin \DIFadd{.
+}
+
+  \DIFadd{Mainly required }\DIFaddend on legacy hardware \DIFdelbegin \DIFdel{. }\DIFdelend \DIFaddbegin \DIFadd{and few laptops. Can also fix power-button
+  shortcuts. }\DIFaddend Not recommended unless required.
 
 \item
   \texttt{NormalizeHeaders}\\
@@ -4912,11 +4916,14 @@ functioning. Feature highlights:
   \textbf{Description}: Codec address on the specified audio controller for audio support.
 
   Normally this contains first audio codec address on the builtin analog audio controller (\texttt{HDEF}).
-  Audio codec addresses, e.g. \texttt{2}, can be found in the debug log (marked in bold):
+  Audio codec addresses, e.g. \texttt{2}, can be found in the debug log (marked in \DIFdelbegin \DIFdel{bold}\DIFdelend \DIFaddbegin \DIFadd{bold-italic}\DIFaddend ):
 
-  \texttt{OCAU: 1/3 PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)/VenMsg(<redacted>,\textbf{00000000}) (4 outputs)}\\
-  \texttt{OCAU: 2/3 PciRoot(0x0)/Pci(0x3,0x0)/VenMsg(<redacted>,\textbf{00000000}) (1 outputs)}\\
-  \texttt{OCAU: 3/3 PciRoot(0x0)/Pci(0x1B,0x0)/VenMsg(<redacted>,\textbf{02000000}) (7 outputs)}
+  \texttt{OCAU: 1/3 PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)/VenMsg(<redacted>,\DIFdelbegin \textbf{\DIFdel{00000000}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \textit{\textbf{\DIFadd{00000000}}}\DIFaddend ) (4 outputs)}\\
+  \texttt{OCAU: 2/3 PciRoot(0x0)/Pci(0x3,0x0)/VenMsg(<redacted>,\DIFdelbegin \textbf{\DIFdel{00000000}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \textit{\textbf{\DIFadd{00000000}}}\DIFaddend ) (1 outputs)}\\
+  \texttt{OCAU: 3/3 PciRoot(0x0)/Pci(0x1B,0x0)/VenMsg(<redacted>,\DIFdelbegin \textbf{\DIFdel{02000000}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \textit{\textbf{\DIFadd{02000000}}}\DIFaddend ) (7 outputs)}
 
   As an alternative this value can be obtained from \texttt{IOHDACodecDevice} class in I/O Registry
   containing it in \texttt{IOHDACodecAddress} field.
@@ -4929,11 +4936,14 @@ functioning. Feature highlights:
 
   Normally this contains builtin analog audio controller (\texttt{HDEF}) device path,
   e.g. \texttt{PciRoot(0x0)/Pci(0x1b,0x0)}. The list of recognised audio controllers can be
-  found in the debug log (marked in bold):
+  found in the debug log (marked in \DIFdelbegin \DIFdel{bold}\DIFdelend \DIFaddbegin \DIFadd{bold-italic}\DIFaddend ):
 
-  \texttt{OCAU: 1/3 \textbf{PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)}/VenMsg(<redacted>,00000000) (4 outputs)}\\
-  \texttt{OCAU: 2/3 \textbf{PciRoot(0x0)/Pci(0x3,0x0)}/VenMsg(<redacted>,00000000) (1 outputs)}\\
-  \texttt{OCAU: 3/3 \textbf{PciRoot(0x0)/Pci(0x1B,0x0)}/VenMsg(<redacted>,02000000) (7 outputs)}
+  \texttt{OCAU: 1/3 \DIFdelbegin \textbf{\DIFdel{PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \textit{\textbf{\DIFadd{PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)}}}\DIFaddend /VenMsg(<redacted>,00000000) (4 outputs)}\\
+  \texttt{OCAU: 2/3 \DIFdelbegin \textbf{\DIFdel{PciRoot(0x0)/Pci(0x3,0x0)}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \textit{\textbf{\DIFadd{PciRoot(0x0)/Pci(0x3,0x0)}}}\DIFaddend /VenMsg(<redacted>,00000000) (1 outputs)}\\
+  \texttt{OCAU: 3/3 \DIFdelbegin \textbf{\DIFdel{PciRoot(0x0)/Pci(0x1B,0x0)}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \textit{\textbf{\DIFadd{PciRoot(0x0)/Pci(0x1B,0x0)}}}\DIFaddend /VenMsg(<redacted>,02000000) (7 outputs)}
 
   As an alternative \texttt{gfxutil -f HDEF} command can be used in macOS. Specifying empty device
   path will result in the first available audio controller to be used.
@@ -4945,11 +4955,14 @@ functioning. Feature highlights:
   \textbf{Description}: Index of the output port of the specified codec starting from 0.
 
   Normally this contains the index of the green out of the builtin analog audio controller (\texttt{HDEF}).
-  The number of output nodes (\texttt{N}) in the debug log (marked in bold):
+  The number of output nodes (\texttt{N}) in the debug log (marked in \DIFdelbegin \DIFdel{bold}\DIFdelend \DIFaddbegin \DIFadd{bold-italic}\DIFaddend ):
 
-  \texttt{OCAU: 1/3 PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)/VenMsg(<redacted>,00000000) (\textbf{4 outputs})}\\
-  \texttt{OCAU: 2/3 PciRoot(0x0)/Pci(0x3,0x0)/VenMsg(<redacted>,00000000) (\textbf{1 outputs})}\\
-  \texttt{OCAU: 3/3 PciRoot(0x0)/Pci(0x1B,0x0)/VenMsg(<redacted>,02000000) (\textbf{7 outputs})}
+  \texttt{OCAU: 1/3 PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)/VenMsg(<redacted>,00000000) (\DIFdelbegin \textbf{\DIFdel{4 outputs}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \textit{\textbf{\DIFadd{4 outputs}}}\DIFaddend )}\\
+  \texttt{OCAU: 2/3 PciRoot(0x0)/Pci(0x3,0x0)/VenMsg(<redacted>,00000000) (\DIFdelbegin \textbf{\DIFdel{1 outputs}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \textit{\textbf{\DIFadd{1 outputs}}}\DIFaddend )}\\
+  \texttt{OCAU: 3/3 PciRoot(0x0)/Pci(0x1B,0x0)/VenMsg(<redacted>,02000000) (\DIFdelbegin \textbf{\DIFdel{7 outputs}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \textit{\textbf{\DIFadd{7 outputs}}}\DIFaddend )}
 
   The quickest way to find the right port is to bruteforce the values from \texttt{0} to \texttt{N - 1}.
 

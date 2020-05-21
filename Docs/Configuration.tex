@@ -1061,7 +1061,10 @@ patching or \texttt{NOP} the remaining area.
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Provide reset register and flag in FADT table to enable
-  reboot and shutdown on legacy hardware. Not recommended unless required.
+  reboot and shutdown.
+
+  Mainly required on legacy hardware and few laptops. Can also fix power-button
+  shortcuts. Not recommended unless required.
 
 \item
   \texttt{NormalizeHeaders}\\
@@ -4629,11 +4632,11 @@ functioning. Feature highlights:
   \textbf{Description}: Codec address on the specified audio controller for audio support.
 
   Normally this contains first audio codec address on the builtin analog audio controller (\texttt{HDEF}).
-  Audio codec addresses, e.g. \texttt{2}, can be found in the debug log (marked in bold):
+  Audio codec addresses, e.g. \texttt{2}, can be found in the debug log (marked in bold-italic):
 
-  \texttt{OCAU: 1/3 PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)/VenMsg(<redacted>,\textbf{00000000}) (4 outputs)}\\
-  \texttt{OCAU: 2/3 PciRoot(0x0)/Pci(0x3,0x0)/VenMsg(<redacted>,\textbf{00000000}) (1 outputs)}\\
-  \texttt{OCAU: 3/3 PciRoot(0x0)/Pci(0x1B,0x0)/VenMsg(<redacted>,\textbf{02000000}) (7 outputs)}
+  \texttt{OCAU: 1/3 PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)/VenMsg(<redacted>,\textit{\textbf{00000000}}) (4 outputs)}\\
+  \texttt{OCAU: 2/3 PciRoot(0x0)/Pci(0x3,0x0)/VenMsg(<redacted>,\textit{\textbf{00000000}}) (1 outputs)}\\
+  \texttt{OCAU: 3/3 PciRoot(0x0)/Pci(0x1B,0x0)/VenMsg(<redacted>,\textit{\textbf{02000000}}) (7 outputs)}
 
   As an alternative this value can be obtained from \texttt{IOHDACodecDevice} class in I/O Registry
   containing it in \texttt{IOHDACodecAddress} field.
@@ -4646,11 +4649,11 @@ functioning. Feature highlights:
 
   Normally this contains builtin analog audio controller (\texttt{HDEF}) device path,
   e.g. \texttt{PciRoot(0x0)/Pci(0x1b,0x0)}. The list of recognised audio controllers can be
-  found in the debug log (marked in bold):
+  found in the debug log (marked in bold-italic):
 
-  \texttt{OCAU: 1/3 \textbf{PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)}/VenMsg(<redacted>,00000000) (4 outputs)}\\
-  \texttt{OCAU: 2/3 \textbf{PciRoot(0x0)/Pci(0x3,0x0)}/VenMsg(<redacted>,00000000) (1 outputs)}\\
-  \texttt{OCAU: 3/3 \textbf{PciRoot(0x0)/Pci(0x1B,0x0)}/VenMsg(<redacted>,02000000) (7 outputs)}
+  \texttt{OCAU: 1/3 \textit{\textbf{PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)}}/VenMsg(<redacted>,00000000) (4 outputs)}\\
+  \texttt{OCAU: 2/3 \textit{\textbf{PciRoot(0x0)/Pci(0x3,0x0)}}/VenMsg(<redacted>,00000000) (1 outputs)}\\
+  \texttt{OCAU: 3/3 \textit{\textbf{PciRoot(0x0)/Pci(0x1B,0x0)}}/VenMsg(<redacted>,02000000) (7 outputs)}
 
   As an alternative \texttt{gfxutil -f HDEF} command can be used in macOS. Specifying empty device
   path will result in the first available audio controller to be used.
@@ -4662,11 +4665,11 @@ functioning. Feature highlights:
   \textbf{Description}: Index of the output port of the specified codec starting from 0.
 
   Normally this contains the index of the green out of the builtin analog audio controller (\texttt{HDEF}).
-  The number of output nodes (\texttt{N}) in the debug log (marked in bold):
+  The number of output nodes (\texttt{N}) in the debug log (marked in bold-italic):
 
-  \texttt{OCAU: 1/3 PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)/VenMsg(<redacted>,00000000) (\textbf{4 outputs})}\\
-  \texttt{OCAU: 2/3 PciRoot(0x0)/Pci(0x3,0x0)/VenMsg(<redacted>,00000000) (\textbf{1 outputs})}\\
-  \texttt{OCAU: 3/3 PciRoot(0x0)/Pci(0x1B,0x0)/VenMsg(<redacted>,02000000) (\textbf{7 outputs})}
+  \texttt{OCAU: 1/3 PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)/VenMsg(<redacted>,00000000) (\textit{\textbf{4 outputs}})}\\
+  \texttt{OCAU: 2/3 PciRoot(0x0)/Pci(0x3,0x0)/VenMsg(<redacted>,00000000) (\textit{\textbf{1 outputs}})}\\
+  \texttt{OCAU: 3/3 PciRoot(0x0)/Pci(0x1B,0x0)/VenMsg(<redacted>,02000000) (\textit{\textbf{7 outputs}})}
 
   The quickest way to find the right port is to bruteforce the values from \texttt{0} to \texttt{N - 1}.
 
