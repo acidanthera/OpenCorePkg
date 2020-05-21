@@ -3546,8 +3546,13 @@ be used. Version with macOS specific enhancements can be downloaded from
   and \texttt{SMBIOS} sections.
 
   Enabling this option is useful when \texttt{Generic} section is flexible
-  enough. When enabled \texttt{SMBIOS}, \texttt{DataHub}, and
+  enough:
+  \begin{itemize}
+  \tightlist
+  \item When enabled \texttt{SMBIOS}, \texttt{DataHub}, and
   \texttt{PlatformNVRAM} data is unused.
+  \item When disabled \texttt{Generic} section is unused.
+  \end{itemize}
 \item
   \texttt{UpdateDataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\

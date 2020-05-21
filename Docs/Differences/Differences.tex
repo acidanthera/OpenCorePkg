@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon May 11 17:11:58 2020
-%DIF ADD ../Configuration.tex        Thu May 21 08:12:54 2020
+%DIF DEL PreviousConfiguration.tex   Thu May 21 18:32:35 2020
+%DIF ADD ../Configuration.tex        Thu May 21 18:40:56 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3806,10 +3806,15 @@ be used. Version with macOS specific enhancements can be downloaded from
   and \texttt{SMBIOS} sections.
 
   Enabling this option is useful when \texttt{Generic} section is flexible
-  enough. When enabled \texttt{SMBIOS}, \texttt{DataHub}, and
+  enough\DIFdelbegin \DIFdel{. }\DIFdelend \DIFaddbegin \DIFadd{:
+  }\begin{itemize}
+  \tightlist
+  \item \DIFaddend When enabled \texttt{SMBIOS}, \texttt{DataHub}, and
   \texttt{PlatformNVRAM} data is unused.
+  \item \DIFaddbegin \DIFadd{When disabled }\texttt{\DIFadd{Generic}} \DIFadd{section is unused.
+  }\end{itemize}
 \item
-  \texttt{UpdateDataHub}\\
+  \DIFaddend \texttt{UpdateDataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Update Data Hub fields. These fields are read
