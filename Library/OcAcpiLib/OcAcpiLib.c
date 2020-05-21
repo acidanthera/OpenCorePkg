@@ -1134,31 +1134,30 @@ AcpiFadtEnableReset (
         Context->Tables[Index] = (EFI_ACPI_COMMON_HEADER *) Fadt;
       }
     }
-  } else if ((Context->Fadt->Flags & EFI_ACPI_6_2_RESET_REG_SUP) == 0 || (Context->Fadt->Flags & EFI_ACPI_6_2_SLP_BUTTON) == 0 || (Context->Fadt->Flags & EFI_ACPI_6_2_PWR_BUTTON)) {
+  } else if ((Context->Fadt->Flags & EFI_ACPI_6_2_RESET_REG_SUP) == 0
+    || (Context->Fadt->Flags & EFI_ACPI_6_2_SLP_BUTTON) == 0
+    || (Context->Fadt->Flags & EFI_ACPI_6_2_PWR_BUTTON) != 0) {
     Fadt = Context->Fadt;
   } else {
     return EFI_SUCCESS;
   }
 
-  if ((Context->Fadt->Flags & EFI_ACPI_6_2_SLP_BUTTON) == 0) {
-    Fadt->Flags |= EFI_ACPI_6_2_SLP_BUTTON;
-  }
+  //
+  // Enable sleep button, but disable power button.
+  //
+  Fadt->Flags |= EFI_ACPI_6_2_SLP_BUTTON | EFI_ACPI_6_2_RESET_REG_SUP;
+  Fadt->Flags &= ~EFI_ACPI_6_2_PWR_BUTTON;
 
-  if (Context->Fadt->Flags & EFI_ACPI_6_2_PWR_BUTTON) {
-    Fadt->Flags &= ~EFI_ACPI_6_2_PWR_BUTTON;
-  }
-
-  if ((Context->Fadt->Flags & EFI_ACPI_6_2_RESET_REG_SUP) == 0) {
-      Fadt->Flags |= EFI_ACPI_6_2_RESET_REG_SUP;
-      //
-      // Resetting through port 0xCF9 is universal on Intel and AMD.
-      //
-      Fadt->ResetReg.AddressSpaceId    = EFI_ACPI_6_2_SYSTEM_IO;
-      Fadt->ResetReg.RegisterBitWidth  = 8;
-      Fadt->ResetReg.RegisterBitOffset = 0;
-      Fadt->ResetReg.AccessSize        = EFI_ACPI_6_2_BYTE;
-      if (Fadt->ResetReg.Address == 0)
-          Fadt->ResetReg.Address = 0xCF9;
+  if (Fadt->ResetReg.Address == 0) {
+    Fadt->Flags |= EFI_ACPI_6_2_RESET_REG_SUP;
+    //
+    // Resetting through port 0xCF9 is universal on Intel and AMD.
+    //
+    Fadt->ResetReg.AddressSpaceId    = EFI_ACPI_6_2_SYSTEM_IO;
+    Fadt->ResetReg.RegisterBitWidth  = 8;
+    Fadt->ResetReg.RegisterBitOffset = 0;
+    Fadt->ResetReg.AccessSize        = EFI_ACPI_6_2_BYTE;
+    Fadt->ResetReg.Address = 0xCF9;
   }
 
   Fadt->Header.Checksum = 0;
