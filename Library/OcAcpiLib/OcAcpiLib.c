@@ -1143,21 +1143,22 @@ AcpiFadtEnableReset (
   }
 
   //
-  // Enable sleep button, but disable power button.
+  // Enable sleep button, but disable power button actions.
+  // This resolves power button action in macOS on some models.
   //
   Fadt->Flags |= EFI_ACPI_6_2_SLP_BUTTON | EFI_ACPI_6_2_RESET_REG_SUP;
   Fadt->Flags &= ~EFI_ACPI_6_2_PWR_BUTTON;
 
   if (Fadt->ResetReg.Address == 0) {
-    Fadt->Flags |= EFI_ACPI_6_2_RESET_REG_SUP;
     //
     // Resetting through port 0xCF9 is universal on Intel and AMD.
+    // But may not be the case on some laptops, which use 0xB2.
     //
     Fadt->ResetReg.AddressSpaceId    = EFI_ACPI_6_2_SYSTEM_IO;
     Fadt->ResetReg.RegisterBitWidth  = 8;
     Fadt->ResetReg.RegisterBitOffset = 0;
     Fadt->ResetReg.AccessSize        = EFI_ACPI_6_2_BYTE;
-    Fadt->ResetReg.Address = 0xCF9;
+    Fadt->ResetReg.Address           = 0xCF9;
   }
 
   Fadt->Header.Checksum = 0;
