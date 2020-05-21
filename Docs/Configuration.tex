@@ -125,7 +125,7 @@ and UEFI functioning. For these reasons this document is available exclusively i
 and all other sources or translations of this document are unofficial and may
 contain errors.
 
-Third-party articles, tools, books, and alike may be more useful for a wider audience as
+Third-party articles, utilities, books, and alike may be more useful for a wider audience as
 they could provide guide-like material. However, they are prone to their authors' preferences,
 tastes, this document misinterpretation, and essential obsolescence.
 In case you use these sources, for example, \href{https://dortania.github.io}{Dortania}'s
@@ -559,7 +559,9 @@ utilised.
 For BIOS booting a third-party UEFI environment provider will have to
 be used. \texttt{OpenDuetPkg} is one of the known UEFI environment providers
 for legacy systems. To run OpenCore on such a legacy system you can install
-\texttt{OpenDuetPkg} with a dedicated tool BootInstall (bundled with OpenCore).
+\texttt{OpenDuetPkg} with a dedicated tool --- BootInstall (bundled with OpenCore).
+\href{https://github.com/corpnewt/gibMacOS}{Third-party utilities} can be used to
+perform this on systems different from macOS.
 
 For upgrade purposes refer to \texttt{Differences.pdf} document, providing
 the information about the changes affecting the configuration compared
@@ -5375,7 +5377,7 @@ functioning. Feature highlights:
   desync between Windows and macOS as explained on
   \href{https://superuser.com/q/494432}{SuperUser} (this one is usually not needed).
   \item To access Apple filesystems like HFS and APFS separate software may need to
-  be installed. Some of the known tools are:
+  be installed. Some of the known utilities are:
   \href{https://forums.macrumors.com/threads/apple-hfs-windows-driver-download.1368010/}{Apple HFS+ driver}
   (\href{https://forums.macrumors.com/threads/apple-hfs-windows-driver-download.1368010/post-24180079}{hack for Windows 10}),
   \href{http://www.catacombae.org/hfsexplorer}{HFSExplorer}, MacDrive, Paragon APFS,
@@ -5387,7 +5389,7 @@ functioning. Feature highlights:
 
   Boot Camp control panel uses GPT partition table to obtain each boot option name.
   After installing Windows separately you will have to relabel the partition manually.
-  This can be done with many tools including open-source
+  This can be done with many utilities including open-source
   \href{https://sourceforge.net/projects/gptfdisk}{gdisk} utility. Reference example:
 
 \begin{lstlisting}[caption=Relabeling Windows volume, label=relabel, style=ocbash]
@@ -5555,7 +5557,7 @@ you will need \texttt{debug=0x8} boot argument.
   For offline installation refer to
   \href{https://support.apple.com/HT201372}{How to create a bootable installer for macOS}
   article. Apart from App Store and \texttt{softwareupdate} utility there also are
-  \href{https://github.com/corpnewt/gibMacOS}{third-party tools} to download an offline image.
+  \href{https://github.com/corpnewt/gibMacOS}{third-party utilities} to download an offline image.
 
 \item
   \textbf{Why do online recovery images (\texttt{*.dmg}) fail to load?}
