@@ -2184,7 +2184,7 @@ for more details. Algorithm to determine boot options behaves as follows:
   \item If partition handle is marked as \textit{unused} execute ``bless'' primary option list retrieval. \\
     In case \texttt{BlessOverride} list is set, not only standard ``bless'' paths will be found but
     also custom ones.
-  \item Exclude options with blacklisted filenames (refer to \item{BlacklistAppleUpdate} option).
+  \item Exclude options with blacklisted filenames (refer to \texttt{BlacklistAppleUpdate} option).
   \item On OpenCore boot partition exclude all OpenCore bootstrap files by header checks.
   \item Register the resulting entries as primary options and determine their types if found. \\
   The option will become auxiliary for some types (e.g. Apple HFS recovery).
