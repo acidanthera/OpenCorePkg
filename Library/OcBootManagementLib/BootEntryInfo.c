@@ -540,15 +540,16 @@ InternalDescribeBootEntry (
   //
   // Windows boot entry may have a custom name, so ensure OC_BOOT_WINDOWS is set correctly.
   //
-  if (BootEntry->Type == OC_BOOT_UNKNOWN) {
+  if (BootEntry->Type == OC_BOOT_UNKNOWN && BootEntry->IsGeneric) {
     DEBUG ((DEBUG_INFO, "OCB: Trying to detect Microsoft BCD\n"));
     Status = ReadFileSize (FileSystem, L"\\EFI\\Microsoft\\Boot\\BCD", &BcdSize);
     if (!EFI_ERROR (Status)) {
       BootEntry->Type = OC_BOOT_WINDOWS;
-      if (BootEntry->Name == NULL) {
-        BootEntry->Name = AllocateCopyPool (sizeof (L"Windows"), L"Windows");
-      }
     }
+  }
+
+  if (BootEntry->Type == OC_BOOT_WINDOWS && BootEntry->Name == NULL) {
+    BootEntry->Name = AllocateCopyPool (sizeof (L"Windows"), L"Windows");
   }
 
   if (BootEntry->Name == NULL) {

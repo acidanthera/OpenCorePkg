@@ -170,6 +170,10 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   BOOLEAN                   IsFolder;
   //
+  // Set when this entry refers to a generic booter (e.g. BOOTx64.EFI).
+  //
+  BOOLEAN                   IsGeneric;
+  //
   // Should make this option default boot option.
   //
   BOOLEAN                   SetDefault;
@@ -1005,14 +1009,16 @@ OcGetFileSystemPolicyType (
 
   @param[in]   DevicePath        Device path.
   @param[out]  IsFolder          Device path represents directory, optional.
+  @param[out]  IsGeneric         Device path represents generic booter, optional.
 
   @retval entry type for potentially known bootloaders.
   @retval OC_BOOT_UNKNOWN for unknown bootloaders.
 **/
 OC_BOOT_ENTRY_TYPE
 OcGetBootDevicePathType (
-  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
-  OUT BOOLEAN                  *IsFolder  OPTIONAL
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  OUT BOOLEAN                   *IsFolder   OPTIONAL,
+  OUT BOOLEAN                   *IsGeneric  OPTIONAL
   );
 
 /**

@@ -626,11 +626,13 @@ OcRunBootPicker (
     if (!EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
-        "OCB: Should boot from %u. %s (T:%d|F:%d|DEF:%d)\n",
+        "OCB: Should boot from %u. %s (T:%d|F:%d|G:%d|E:%d|DEF:%d)\n",
         Chosen->EntryIndex,
         Chosen->Name,
         Chosen->Type,
         Chosen->IsFolder,
+        Chosen->IsGeneric,
+        Chosen->IsExternal,
         Chosen->SetDefault
         ));
 

@@ -257,7 +257,8 @@ InternalCheckScanPolicy (
 OC_BOOT_ENTRY_TYPE
 OcGetBootDevicePathType (
   IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
-  OUT BOOLEAN                   *IsFolder  OPTIONAL
+  OUT BOOLEAN                   *IsFolder   OPTIONAL,
+  OUT BOOLEAN                   *IsGeneric  OPTIONAL
   )
 {
   EFI_DEVICE_PATH_PROTOCOL    *CurrNode;
@@ -295,6 +296,10 @@ OcGetBootDevicePathType (
           Type = OC_BOOT_APPLE_RECOVERY;
         } else if (OcStrStrLength (LastNode->PathName, PathLen,
           L"EFI\\APPLE", L_STR_LEN (L"EFI\\APPLE")) != NULL) {
+          //
+          // FIXME: Support separate file path nodes. Potentially introduce a
+          //        retrieval function that uses a preallocated buffer.
+          //
           Type = OC_BOOT_APPLE_FW_UPDATE;
         }
       }
@@ -317,17 +322,20 @@ OcGetBootDevicePathType (
   //
   STATIC CONST CHAR16 *Bootloaders[] = {
     L"boot.efi",
-    L"tmbootpicker.efi"
+    L"tmbootpicker.efi",
+    L"bootmgfw.efi"
   };
 
   STATIC CONST UINTN BootloaderLengths[] = {
     L_STR_LEN (L"boot.efi"),
-    L_STR_LEN (L"tmbootpicker.efi")
+    L_STR_LEN (L"tmbootpicker.efi"),
+    L_STR_LEN (L"bootmgfw.efi")
   };
 
   STATIC CONST OC_BOOT_ENTRY_TYPE BootloaderTypes[] = {
     OC_BOOT_APPLE_OS,
-    OC_BOOT_APPLE_TIME_MACHINE
+    OC_BOOT_APPLE_TIME_MACHINE,
+    OC_BOOT_WINDOWS
   };
 
   for (Index = 0; Index < ARRAY_SIZE (Bootloaders); ++Index) {
@@ -342,6 +350,24 @@ OcGetBootDevicePathType (
         Bootloaders[Index],
         BootloaderLengths[Index] * sizeof (LastNode->PathName[0])) == 0) {
       return BootloaderTypes[Index];
+    }
+  }
+
+  CONST CHAR16 *GenericBootloader      = &EFI_REMOVABLE_MEDIA_FILE_NAME[L_STR_LEN (L"\\EFI\\BOOT\\")];
+  CONST UINTN  GenericBootloaderLength = L_STR_LEN (EFI_REMOVABLE_MEDIA_FILE_NAME) - L_STR_LEN (L"\\EFI\\BOOT\\");
+
+  if (IsGeneric != NULL) {
+    *IsGeneric = FALSE;
+  
+    if (PathLen >= GenericBootloaderLength) {
+      RestLen = PathLen - GenericBootloaderLength;
+      if ((RestLen == 0 || LastNode->PathName[RestLen - 1] == L'\\')
+        && CompareMem (
+          &LastNode->PathName[RestLen],
+          GenericBootloader,
+          GenericBootloaderLength * sizeof (LastNode->PathName[0])) == 0) {
+        *IsGeneric = TRUE;
+      }
     }
   }
 

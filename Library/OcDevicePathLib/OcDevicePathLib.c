@@ -891,6 +891,10 @@ OcFileDevicePathFullName (
   ASSERT (IsDevicePathValid (&FilePath->Header, 0));
   ASSERT (PathNameSize == OcFileDevicePathFullNameSize (&FilePath->Header));
 
+  //
+  // FIXME: Insert separators between nodes if not present already.
+  //
+
   do {
     PathLen = OcFileDevicePathNameLen (FilePath);
     CopyMem (

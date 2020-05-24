@@ -270,10 +270,11 @@ RegisterBootOption (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCB: Registering entry %s (T:%d|F:%d|E:%d) - %s\n",
+    "OCB: Registering entry %s (T:%d|F:%d|G:%d|E:%d) - %s\n",
     BootEntry->Name,
     BootEntry->Type,
     BootEntry->IsFolder,
+    BootEntry->IsGeneric,
     BootEntry->IsExternal,
     OC_HUMAN_STRING (TextDevicePath)
     ));
@@ -349,8 +350,9 @@ AddBootEntryOnFileSystem (
   OC_BOOT_ENTRY       *ExistingEntry;
   CHAR16              *TextDevicePath;
   BOOLEAN             IsFolder;
+  BOOLEAN             IsGeneric;
 
-  EntryType = OcGetBootDevicePathType (DevicePath, &IsFolder);
+  EntryType = OcGetBootDevicePathType (DevicePath, &IsFolder, &IsGeneric);
 
   DEBUG_CODE_BEGIN ();
 
@@ -358,9 +360,10 @@ AddBootEntryOnFileSystem (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCB: Adding entry type (T:%u|F:%d) - %s\n",
+    "OCB: Adding entry type (T:%u|F:%d|G:%d) - %s\n",
     EntryType,
     IsFolder,
+    IsGeneric,
     OC_HUMAN_STRING (TextDevicePath)
     ));
 
@@ -462,6 +465,7 @@ AddBootEntryOnFileSystem (
   BootEntry->DevicePath = DevicePath;
   BootEntry->Type       = EntryType;
   BootEntry->IsFolder   = IsFolder;
+  BootEntry->IsGeneric  = IsGeneric;
   BootEntry->IsExternal = RecoveryPart ? FileSystem->RecoveryFs->External : FileSystem->External;
 
   Status = InternalDescribeBootEntry (BootEntry);
