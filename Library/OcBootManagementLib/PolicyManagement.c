@@ -390,7 +390,7 @@ OcGetAppleBootLoadedImage (
 
   if (!EFI_ERROR (Status)
     && LoadedImage->FilePath != NULL
-    && (OcGetBootDevicePathType (LoadedImage->FilePath, NULL) & OC_BOOT_APPLE_ANY) != 0) {
+    && (OcGetBootDevicePathType (LoadedImage->FilePath, NULL, NULL) & OC_BOOT_APPLE_ANY) != 0) {
     return LoadedImage;
   }
 
