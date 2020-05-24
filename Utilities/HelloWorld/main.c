@@ -17,7 +17,7 @@
   main.c \
   Math.c \
   BaseMemoryLib.c \
-  CpuBreakPoint.c \
+  DebugBreak.c \
   Pcd.c \
   EfiVar.c \
   BootServices.c \
