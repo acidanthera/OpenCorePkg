@@ -5,7 +5,7 @@
 
 VOID
 EFIAPI
-__debugbreak (
+CpuBreakpoint (
   VOID
   )
 {

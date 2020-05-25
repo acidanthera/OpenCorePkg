@@ -1,4 +1,4 @@
-#include "Pcd.h"
+#include <Pcd.h>
 
 #define _PCD_VALUE_PcdUefiLibMaxPrintBufferSize  320U
 #define _PCD_VALUE_PcdUgaConsumeSupport  ((BOOLEAN)1U)

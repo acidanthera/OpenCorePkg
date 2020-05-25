@@ -8,21 +8,21 @@
   -fsanitize=undefined,address \
   -fshort-wchar \
   -D NO_MSABI_VA_FUNCS \
+  -I../../User/Include \
   -I../../UDK/MdePkg/Include \
   -I../../UDK/MdePkg/Include/Library \
   -I../../UDK/MdePkg/Include/X64 \
-  -include Pcd.h \
-  -include EfiVar.h \
+  -include ../../User/Include/Pcd.h \
+  -include ../../User/Include/EfiVar.h \
   -include BootServices.h \
   main.c \
-  Math.c \
-  BaseMemoryLib.c \
-  DebugBreak.c \
-  Pcd.c \
-  EfiVar.c \
   BootServices.c \
+  ../../User/Library/BaseMemoryLib.c \
+  ../../User/Library/Pcd.c \
+  ../../User/Library/EfiVar.c \
+  ../../User/Library/DebugBreak.c \
+  ../../User/Library/Math.c \
   ../../UDK/MdePkg/Library/UefiLib/UefiLibPrint.c \
-  ../../UDK/MdePkg/Library/BaseLib/X64/CpuBreakpoint.c \
   ../../UDK/MdePkg/Library/BaseLib/CpuDeadLoop.c \
   ../../UDK/MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.c \
   ../../UDK/MdePkg/Library/UefiDebugLibConOut/DebugLib.c \
