@@ -97,7 +97,7 @@ typedef struct {
 
 // Buffer Descriptor List sizes. Max number of entries is 256, min is 2.
 #define HDA_BDL_ENTRY_IOC       BIT0
-#define HDA_BDL_ENTRY_COUNT     8
+#define HDA_BDL_ENTRY_COUNT     2
 #define HDA_BDL_SIZE            (sizeof(HDA_BDL_ENTRY) * HDA_BDL_ENTRY_COUNT)
 #define HDA_BDL_ENTRY_HALF      ((HDA_BDL_ENTRY_COUNT / 2) - 1)
 #define HDA_BDL_ENTRY_LAST      (HDA_BDL_ENTRY_COUNT - 1)
@@ -106,7 +106,8 @@ typedef struct {
 #define HDA_STREAM_BUF_SIZE         BASE_512KB
 #define HDA_STREAM_BUF_SIZE_HALF    (HDA_STREAM_BUF_SIZE / 2)
 #define HDA_BDL_BLOCKSIZE           (HDA_STREAM_BUF_SIZE / HDA_BDL_ENTRY_COUNT)
-#define HDA_STREAM_POLL_TIME        (EFI_TIMER_PERIOD_MILLISECONDS(100))
+#define HDA_STREAM_POLL_TIME        (EFI_TIMER_PERIOD_MILLISECONDS(1))
+#define HDA_STREAM_BUFFER_PADDING   0x200 // 512 byte pad.
 
 // DMA position structure.
 #pragma pack(1)
@@ -143,10 +144,12 @@ typedef struct {
   EFI_PHYSICAL_ADDRESS BufferDataPhysAddr;
 
   // Source buffer.
-  UINT8 *BufferSource;
-  UINTN BufferSourceLength;
-  UINTN BufferSourcePosition;
-  BOOLEAN BufferSourceDone;
+  BOOLEAN BufferActive;
+  UINT8   *BufferSource;
+  UINT32  BufferSourceLength;
+  UINT32  BufferSourcePosition;
+  UINT32  DmaPositionLast;
+  UINT32  DmaPositionTotal;
 
   // Timing elements for buffer filling.
   EFI_EVENT PollTimer;
@@ -344,7 +347,7 @@ HdaControllerInfoGetName(
 //
 VOID
 EFIAPI
-HdaControllerStreamPollTimerHandler(
+HdaControllerStreamOutputPollTimerHandler(
   IN EFI_EVENT Event,
   IN VOID *Context);
 
@@ -480,6 +483,16 @@ HdaControllerSetRingBufferState(
 BOOLEAN
 HdaControllerResetRingBuffer (
   IN HDA_RING_BUFFER    *HdaRingBuffer
+  );
+
+VOID
+HdaControllerStreamIdle (
+  IN HDA_STREAM *HdaStream
+  );
+
+VOID
+HdaControllerStreamAbort (
+  IN HDA_STREAM *HdaStream
   );
 
 #endif

@@ -509,7 +509,7 @@ HdaCodecAudioIoStartPlayback(
     }
 
     // Wait 100ms.
-    gBS->Stall(MS_TO_MICROSECOND(100));
+    //gBS->Stall(MS_TO_MICROSECOND(100));
   }
   return EFI_SUCCESS;
 }

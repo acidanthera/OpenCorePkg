@@ -391,6 +391,7 @@ HdaControllerHdaIoStartStream(
   HdaStream->CallbackContext1 = Context1;
   HdaStream->CallbackContext2 = Context2;
   HdaStream->CallbackContext3 = Context3;
+  HdaStream->DmaPositionTotal = 0;
 
   // Zero out buffer.
   ZeroMem(HdaStream->BufferData, HDA_STREAM_BUF_SIZE);
@@ -416,7 +417,7 @@ HdaControllerHdaIoStartStream(
   }
 
   // Setup polling timer.
-  HdaStream->BufferSourceDone = FALSE;
+  HdaStream->BufferActive = TRUE;
   Status = gBS->SetTimer(HdaStream->PollTimer, TimerPeriodic, HDA_STREAM_POLL_TIME);
   if (EFI_ERROR(Status))
     goto STOP_STREAM;
