@@ -19,6 +19,12 @@ ifeq ($(SANITIZE),1)
 	LDFLAGS += -fsanitize=undefined,address
 endif
 
+ifeq ($(DEBUG),1)
+	CFLAGS  += -g -O0
+else
+	CFLAGS  += -O3
+endif
+
 OBJS      = UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o
 OBJS     += BaseMemoryLib.o BootServices.o DebugBreak.o EfiVar.o Math.o Pcd.o
 

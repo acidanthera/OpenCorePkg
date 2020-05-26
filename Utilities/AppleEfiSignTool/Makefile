@@ -9,8 +9,6 @@ include ../../User/Makefile
 .DEFAULT_GOAL := all
 PRODUCT        = AppleEfiSignTool
 
-CFLAGS        += -O3
-
 OBJS          += main.o
 OBJS          += AppleEfiBinary.o Sha2.o BigNumWordMul64.o BigNumPrimitives.o BigNumMontgomery.o RsaDigitalSign.o SecureMem.o OcAppleKeysLib.o
 

@@ -8,8 +8,6 @@ include ../../User/Makefile
 .DEFAULT_GOAL := all
 PRODUCT        = HelloWorld
 
-CFLAGS        += -O3
-
 OBJS          += main.o
 
 all: $(PRODUCT)

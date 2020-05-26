@@ -8,8 +8,6 @@ include ../../User/Makefile
 .DEFAULT_GOAL := all
 PRODUCT        = ConfigValidty
 
-CFLAGS        += -O3
-
 OBJS          += ConfigValidty.o 
 OBJS          += OcConfigurationLib.o OcTemplateLib.o OcSerializeLib.o OcXmlLib.o OcAsciiLib.o
 
