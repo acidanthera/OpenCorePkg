@@ -3,21 +3,24 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-CC       ?= clang
+CC       ?= gcc
 
 UDK_PATH ?= ../../UDK
 UDK_ARCH ?= X64
 
-CFLAGS   ?= -g -c -fshort-wchar -D NO_MSABI_VA_FUNCS
+CFLAGS    = -c -fshort-wchar -Wall -Wextra -Wno-unused-parameter -D NO_MSABI_VA_FUNCS
 CFLAGS   += -I$(UDK_PATH)/MdePkg/Include -I$(UDK_PATH)/MdePkg/Include/Library -I$(UDK_PATH)/MdePkg/Include/$(UDK_ARCH)
 CFLAGS   += -I../../User/Include
 CFLAGS   += -I../../Include/Acidanthera -I../../Include/Apple -I../../Include/Generic
 CFLAGS   += -include ../../User/Include/Pcd.h -include ../../User/Include/EfiVar.h
 
-OBJS     ?= UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o
-OBJS     += BaseMemoryLib.o BootServices.o DebugBreak.o EfiVar.o Math.o Pcd.o
+ifeq ($(SANITIZE),1)
+	CFLAGS  += -fsanitize=undefined,address
+	LDFLAGS += -fsanitize=undefined,address
+endif
 
-LDFLAGS  ?= -fsanitize=undefined,address
+OBJS      = UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o
+OBJS     += BaseMemoryLib.o BootServices.o DebugBreak.o EfiVar.o Math.o Pcd.o
 
 UefiLibPrint.o:
 	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/UefiLib/UefiLibPrint.c -o $@

@@ -18,6 +18,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <errno.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include "AppleEfiPeImage.h"
 
 #ifdef DEBUG

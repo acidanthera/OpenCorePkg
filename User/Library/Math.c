@@ -62,3 +62,11 @@ MultU64x32 (
 {
   return Multiplicand * Multiplier;
 }
+
+UINT64
+SwapBytes64 (
+  UINT64                    Operand
+  )
+{
+  return __builtin_bswap64 (Operand);
+}

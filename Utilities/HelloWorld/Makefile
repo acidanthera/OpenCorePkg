@@ -6,7 +6,9 @@
 include ../../User/Makefile
 
 .DEFAULT_GOAL := all
-PRODUCT       ?= HelloWorld
+PRODUCT        = HelloWorld
+
+CFLAGS        += -O3
 
 OBJS          += main.o
 

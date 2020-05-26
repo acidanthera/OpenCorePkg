@@ -16,6 +16,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
+#include <string.h>
+#include <stdlib.h>
+
 #include "AppleEfiPeImage.h"
 #include "AppleEfiFatBinary.h"
 #include <Library/OcCryptoLib.h>

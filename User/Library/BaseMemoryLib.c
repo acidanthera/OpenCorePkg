@@ -44,6 +44,17 @@ ZeroMem (
   return memset (Buffer, 0, Length);
 }
 
+INTN
+EFIAPI
+CompareMem (
+  IN CONST VOID  *DestinationBuffer,
+  IN CONST VOID  *SourceBuffer,
+  IN UINTN       Length
+  )
+{
+  return memcmp (DestinationBuffer, SourceBuffer, Length);
+}
+
 VOID *
 EFIAPI
 AllocatePool (
