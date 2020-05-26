@@ -66,6 +66,24 @@ AllocatePool (
 
 VOID *
 EFIAPI
+AllocateCopyPool (
+  IN UINTN       AllocationSize,
+  IN CONST VOID  *Buffer
+  )
+{
+  VOID *Memory;
+
+  ASSERT (Buffer != NULL);
+
+  Memory = AllocatePool (AllocationSize);
+  if (Memory != NULL) {
+    Memory = CopyMem (Memory, Buffer, AllocationSize);
+  }
+  return Memory;
+}
+
+VOID *
+EFIAPI
 AllocateZeroPool (
   IN UINTN  AllocationSize
   )

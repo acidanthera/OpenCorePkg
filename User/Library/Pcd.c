@@ -13,6 +13,8 @@
 #define _PCD_VALUE_PcdDebugPrintErrorLevel  0x80000002U
 #define _PCD_VALUE_PcdMaximumAsciiStringLength  0U
 #define _PCD_VALUE_PcdMaximumUnicodeStringLength  1000000U
+#define _PCD_VALUE_PcdMaximumLinkedListLength  1000000U
+#define _PCD_VALUE_PcdVerifyNodeInList  ((BOOLEAN)0U)
 
 const UINT32 _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize = _PCD_VALUE_PcdUefiLibMaxPrintBufferSize;
 const BOOLEAN _gPcd_FixedAtBuild_PcdUgaConsumeSupport = _PCD_VALUE_PcdUgaConsumeSupport;
@@ -22,3 +24,5 @@ const UINT32 _gPcd_FixedAtBuild_PcdFixedDebugPrintErrorLevel = _PCD_VALUE_PcdFix
 const UINT32 _gPcd_FixedAtBuild_PcdDebugPrintErrorLevel = _PCD_VALUE_PcdDebugPrintErrorLevel;
 const UINT32 _gPcd_FixedAtBuild_PcdMaximumAsciiStringLength = _PCD_VALUE_PcdMaximumAsciiStringLength;
 const UINT32 _gPcd_FixedAtBuild_PcdMaximumUnicodeStringLength = _PCD_VALUE_PcdMaximumUnicodeStringLength;
+const UINT32 _gPcd_FixedAtBuild_PcdMaximumLinkedListLength = _PCD_VALUE_PcdMaximumLinkedListLength;
+const BOOLEAN _gPcd_FixedAtBuild_PcdVerifyNodeInList = _PCD_VALUE_PcdVerifyNodeInList;

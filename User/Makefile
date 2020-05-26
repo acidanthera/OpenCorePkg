@@ -10,8 +10,9 @@ UDK_ARCH ?= X64
 
 CFLAGS    = -c -fshort-wchar -Wall -Wextra -Wno-unused-parameter -D NO_MSABI_VA_FUNCS
 CFLAGS   += -I$(UDK_PATH)/MdePkg/Include -I$(UDK_PATH)/MdePkg/Include/Library -I$(UDK_PATH)/MdePkg/Include/$(UDK_ARCH)
+CFLAGS   += -I$(UDK_PATH)/UefiCpuPkg/Include
 CFLAGS   += -I../../User/Include
-CFLAGS   += -I../../Include/Acidanthera -I../../Include/Apple -I../../Include/Generic
+CFLAGS   += -I../../Include/Acidanthera -I../../Include/Apple -I../../Include/Generic -I../../Include/Intel
 CFLAGS   += -include ../../User/Include/Pcd.h -include ../../User/Include/EfiVar.h
 
 ifeq ($(SANITIZE),1)
@@ -25,7 +26,7 @@ else
 	CFLAGS  += -O3
 endif
 
-OBJS      = UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o
+OBJS      = UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o
 OBJS     += BaseMemoryLib.o BootServices.o DebugBreak.o EfiVar.o Math.o Pcd.o
 
 UefiLibPrint.o:
@@ -57,6 +58,9 @@ SwapBytes16.o:
 
 SwapBytes32.o:
 	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/BaseLib/SwapBytes32.c -o $@
+
+LinkedList.o:
+	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/BaseLib/LinkedList.c -o $@
 
 BaseMemoryLib.o:
 	$(CC) $(CFLAGS) ../../User/Library/BaseMemoryLib.c -o $@

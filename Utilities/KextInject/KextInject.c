@@ -12,17 +12,21 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include <DebugLib.h>
+
 #include <Library/OcTemplateLib.h>
 #include <Library/OcSerializeLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcAppleKernelLib.h>
 
+#include <string.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/time.h>
 
 /*
- clang -g -fsanitize=undefined,address -Wno-incompatible-pointer-types-discards-qualifiers -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -I../../../UefiCpuPkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c ../../Library/OcAppleKernelLib/PrelinkedContext.c ../../Library/OcAppleKernelLib/PrelinkedKext.c ../../Library/OcAppleKernelLib/KextPatcher.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcAppleKernelLib/Link.c ../../Library/OcAppleKernelLib/Vtables.c ../../Library/OcAppleKernelLib/KernelReader.c ../../Library/OcCompressionLib/lzss/lzss.c ../../Library/OcCompressionLib/lzvn/lzvn.c ../../Tests/KernelTest/Lilu.c ../../Tests/KernelTest/Vsmc.c -o Prelinked
-
- for fuzzing:
+ for fuzzing (TODO):
  clang-mp-7.0 -DFUZZING_TEST=1 -g -fsanitize=undefined,address,fuzzer -Wno-incompatible-pointer-types-discards-qualifiers -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c ../../Library/OcAppleKernelLib/PrelinkedContext.c ../../Library/OcAppleKernelLib/PrelinkedKext.c ../../Library/OcAppleKernelLib/KextPatcher.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcAppleKernelLib/Link.c ../../Library/OcAppleKernelLib/Vtables.c ../../Library/OcAppleKernelLib/KernelReader.c ../../Library/OcCompressionLib/lzss/lzss.c ../../Library/OcCompressionLib/lzvn/lzvn.c ../../Tests/KernelTest/Lilu.c ../../Tests/KernelTest/Vsmc.c -o Prelinked
  rm -rf DICT fuzz*.log ; mkdir DICT ; find /System/Library/Extensions/<< * >>/Contents/MacOS -type f -exec cp {} DICT \; UBSAN_OPTIONS='halt_on_error=1' ./Prelinked -jobs=4 DICT -rss_limit_mb=4096
 
@@ -223,6 +227,7 @@ uint8_t *readFile(const char *str, uint32_t *size) {
   return string;
 }
 
+#if 0
 STATIC
 UINT8
 IOAHCIBlockStoragePatchFind[] = {
@@ -247,7 +252,9 @@ IOAHCIBlockStoragePatch = {
   .Count   = 1,
   .Skip    = 0
 };
+#endif
 
+#if 0
 STATIC
 UINT8
 IOAHCIPortPatchFind[] = {
@@ -272,7 +279,9 @@ IOAHCIPortPatch = {
   .Count   = 1,
   .Skip    = 0
 };
+#endif
 
+#if 0
 STATIC
 UINT8
 DisableAppleHDAPatchReplace[] = {
@@ -291,6 +300,7 @@ DisableAppleHDAPatch = {
   .Count   = 1,
   .Skip    = 0
 };
+#endif
 
 STATIC
 UINT8
@@ -505,7 +515,7 @@ int wrap_main(int argc, char** argv) {
 
     Status = PrelinkedInjectPrepare (&Context);
     if (EFI_ERROR (Status)) {
-      printf("Prelink inject prepare error %zx\n", Status);
+      DEBUG ((DEBUG_WARN, "Prelink inject prepare error %r\n", Status));
       return -1;
     }
 
@@ -590,7 +600,7 @@ int wrap_main(int argc, char** argv) {
     Status = PrelinkedInjectComplete (&Context);
 
     if (EFI_ERROR (Status)) {
-      printf("Prelink inject complete error %zx\n", Status);
+      DEBUG ((DEBUG_WARN, "Prelink inject complete error %zx\n", Status));
     }
 
     FILE *Fh = fopen("out.bin", "wb");
@@ -608,7 +618,7 @@ int wrap_main(int argc, char** argv) {
 #endif
     PrelinkedContextFree (&Context);
   } else {
-    printf("Context creation error %zx\n", Status);
+    DEBUG ((DEBUG_WARN, "Context creation error %zx\n", Status));
   }
 
   free(Prelinked);
@@ -647,7 +657,7 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
 
   Status = PrelinkedInjectPrepare (&Context);
   if (EFI_ERROR (Status)) {
-    printf("Prelink inject prepare error %zx\n", Status);
+    DEBUG ((DEBUG_WARN, "Prelink inject prepare error %zx\n", Status));
     PrelinkedContextFree (&Context);
     free (Prelinked);
     return 0;
