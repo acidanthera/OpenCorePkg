@@ -21,6 +21,9 @@ EFI_BOOT_SERVICES *gBS  = &mBootServices;
 
 EFI_HANDLE gImageHandle = (EFI_HANDLE)(UINTN) 0x12345;
 
+BOOLEAN mPostEBS = FALSE;
+EFI_SYSTEM_TABLE *mDebugST = &mSystemTable;
+
 STATIC
 EFI_TPL
 EFIAPI

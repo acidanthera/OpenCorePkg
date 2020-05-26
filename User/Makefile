@@ -9,7 +9,7 @@ CFLAGS   += -I../../User/Include
 CFLAGS   += -I../../Include/Acidanthera -I../../Include/Apple -I../../Include/Generic
 CFLAGS   += -include ../../User/Include/Pcd.h -include ../../User/Include/EfiVar.h
 
-OBJS     ?= UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o DebugLibConstructor.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o
+OBJS     ?= UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o
 OBJS     += BaseMemoryLib.o BootServices.o DebugBreak.o EfiVar.o Math.o Pcd.o
 
 LDFLAGS  ?= -fsanitize=undefined,address
@@ -25,9 +25,6 @@ BaseDebugPrintErrorLevelLib.o:
 
 DebugLib.o:
 	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/UefiDebugLibConOut/DebugLib.c -o $@
-
-DebugLibConstructor.o:
-	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/UefiDebugLibConOut/DebugLibConstructor.c -o $@
 
 PrintLib.o:
 	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/BasePrintLib/PrintLib.c -o $@
@@ -64,6 +61,3 @@ Math.o:
 
 Pcd.o:
 	$(CC) $(CFLAGS) ../../User/Library/Pcd.c -o $@
-
-.c:
-	$(CC) $(CFLAGS) ..< -o $@
