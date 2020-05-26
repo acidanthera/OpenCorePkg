@@ -1006,8 +1006,8 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .MemoryFormFactor = 0x9,
   .PlatformFeature = 0x4,
   .ChassisAssetTag = "",
-  .FirmwareFeatures = 0xE80FE137ULL,
-  .FirmwareFeaturesMask = 0xFF1FFF3FULL,
+  .FirmwareFeatures = 0xE90FF576ULL,
+  .FirmwareFeaturesMask = 0xFF1FFF7FULL,
  },
  {
   .SystemProductName = "MacPro7,1",

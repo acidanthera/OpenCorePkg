@@ -24,10 +24,10 @@ ChassisType: 0x2
 ChassisVersion: "Mac-F60DEB81FF30ACF6"
 ChassisAssetTag: ""
 PlatformFeature: 0x4
-FirmwareFeatures: 0xE80FE137
-FirmwareFeaturesMask: 0xFF1FFF3F
-ExtendedFirmwareFeatures: 0x00000000E80FE137
-ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+FirmwareFeatures: 0xE90FF576
+FirmwareFeaturesMask: 0xFF1FFF7F
+ExtendedFirmwareFeatures: 0x00000000E90FF576
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF7F
 MemoryFormFactor: 0x9
 # FIXME: Correct this one
 ProcessorType:
@@ -143,6 +143,7 @@ AppleModelCode:
 AppleBoardCode:
   - "FHDD" 
   - "FNN1"
+  - "FWC3"
 # Note, first year is used by macserial
 AppleModelYear:
   - 2013

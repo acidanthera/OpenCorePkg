@@ -444,7 +444,7 @@ static const char *AppleBoardCode[][APPLE_BOARD_CODE_MAX] = {
   /* MacPro3,1      */ {"000"},
   /* MacPro4,1      */ {"000"},
   /* MacPro5,1      */ {"BH8"},
-  /* MacPro6,1      */ {"FHDD", "FNN1"},
+  /* MacPro6,1      */ {"FHDD", "FNN1", "FWC3"},
   /* MacPro7,1      */ {"K3F7"},
   /* Macmini1,1     */ {"000"},
   /* Macmini2,1     */ {"000"},
