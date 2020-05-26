@@ -1,3 +1,8 @@
+/** @file
+  Copyright (c) 2020, PMheart. All rights reserved.
+  SPDX-License-Identifier: BSD-3-Clause
+**/
+
 #include <BootServices.h>
 
 EFI_BOOT_SERVICES mBootServices =

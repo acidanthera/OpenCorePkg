@@ -1,3 +1,8 @@
+/** @file
+  Copyright (c) 2020, PMheart. All rights reserved.
+  SPDX-License-Identifier: BSD-3-Clause
+**/
+
 #ifndef OC_USER_BOOT_SERVICES_H
 #define OC_USER_BOOT_SERVICES_H
 

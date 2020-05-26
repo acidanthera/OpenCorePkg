@@ -1,3 +1,8 @@
+/** @file
+  Copyright (c) 2020, PMheart. All rights reserved.
+  SPDX-License-Identifier: BSD-3-Clause
+**/
+
 #include <EfiVar.h>
 
 const CHAR8 *gEfiCallerBaseName = "OpenCore";
