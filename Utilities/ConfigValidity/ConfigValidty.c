@@ -29,41 +29,6 @@
 #include <sys/time.h>
 
 /*
-  clang -g \
-  -fsanitize=undefined,address \
-  -fshort-wchar \
-  -D NO_MSABI_VA_FUNCS \
-  -I../../Include/Acidanthera \
-  -I../../Include/Apple \
-  -I../../Include/Generic \
-  -I../../User/Include \
-  -I../../UDK/MdePkg/Include \
-  -I../../UDK/MdePkg/Include/X64 \
-  -include ../../User/Include/Pcd.h \
-  -include ../../User/Include/EfiVar.h \
-  ConfigValidty.c \
-  ../../User/Library/BaseMemoryLib.c \
-  ../../User/Library/Pcd.c \
-  ../../User/Library/EfiVar.c \
-  ../../User/Library/DebugBreak.c \
-  ../../User/Library/Math.c \
-  ../../UDK/MdePkg/Library/UefiDebugLibConOut/DebugLib.c \
-  ../../UDK/MdePkg/Library/UefiDebugLibConOut/DebugLibConstructor.c \
-  ../../UDK/MdePkg/Library/BaseLib/CpuDeadLoop.c \
-  ../../UDK/MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.c \
-  ../../UDK/MdePkg/Library/BasePrintLib/PrintLib.c \
-  ../../UDK/MdePkg/Library/BasePrintLib/PrintLibInternal.c \
-  ../../UDK/MdePkg/Library/BaseLib/SafeString.c \
-  ../../UDK/MdePkg/Library/BaseLib/String.c \
-  ../../UDK/MdePkg/Library/BaseLib/SwapBytes16.c \
-  ../../UDK/MdePkg/Library/BaseLib/SwapBytes32.c \
-  ../../Library/OcConfigurationLib/OcConfigurationLib.c \
-  ../../Library/OcTemplateLib/OcTemplateLib.c \
-  ../../Library/OcSerializeLib/OcSerializeLib.c \
-  ../../Library/OcXmlLib/OcXmlLib.c \
-  ../../Library/OcStringLib/OcAsciiLib.c \
-  -o ConfigValidty
-
  for fuzzing (TODO):
  clang-mp-7.0 -Dmain=__main -g -fsanitize=undefined,address,fuzzer -I../Include -I../../Include -I../../../MdePkg/Include/ -include ../Include/Base.h ConfigValidty.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcConfigurationLib/OcConfigurationLib.c -o ConfigValidty
  rm -rf DICT fuzz*.log ; mkdir DICT ; cp ConfigValidty.plist DICT ; ./ConfigValidty -jobs=4 DICT
