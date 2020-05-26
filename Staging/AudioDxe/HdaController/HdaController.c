@@ -25,96 +25,123 @@
 #include "HdaController.h"
 #include "HdaControllerComponentName.h"
 
+#include <Library/OcGuardLib.h>
 #include <Library/OcHdaDevicesLib.h>
 #include <Library/OcStringLib.h>
 #include <Protocol/VMwareHda.h>
 
 VOID
 EFIAPI
-HdaControllerStreamPollTimerHandler(
-  IN EFI_EVENT Event,
-  IN VOID *Context) {
+HdaControllerStreamOutputPollTimerHandler (
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
+  )
+{
+  EFI_STATUS            Status;
+  HDA_STREAM            *HdaStream;
+  EFI_PCI_IO_PROTOCOL   *PciIo;
 
-  // Create variables.
-  EFI_STATUS Status;
-  HDA_STREAM *HdaStream = (HDA_STREAM*)Context;
-  EFI_PCI_IO_PROTOCOL *PciIo = HdaStream->HdaControllerDev->PciIo;
-  UINT8 HdaStreamSts = 0;
-  UINT32 HdaStreamDmaPos;
-  UINTN HdaSourceLength;
-  UINTN HdaCurrentBlock;
-  UINTN HdaNextBlock;
+  UINT8                 HdaStreamSts;
+  UINT32                HdaStreamDmaPos;
+  UINT32                HdaSourceLength;
+  UINT32                HdaCurrentBlock;
+  UINT32                HdaNextBlock;
 
-  // Get stream status.
-  Status = PciIo->Mem.Read(PciIo, EfiPciIoWidthFifoUint8, PCI_HDA_BAR, HDA_REG_SDNSTS(HdaStream->Index), 1, &HdaStreamSts);
-  ASSERT_EFI_ERROR(Status);
+  UINT32                DmaChanged;
+  UINT32                Tmp;
 
-  // If there was a FIFO error or DESC error, halt.
-  ASSERT ((HdaStreamSts & (HDA_REG_SDNSTS_FIFOE | HDA_REG_SDNSTS_DESE)) == 0);
+  HdaStream       = (HDA_STREAM*)Context;
+  PciIo           = HdaStream->HdaControllerDev->PciIo;
+  HdaStreamSts    = 0;
 
-  // Has the completion bit been set?
-  if (HdaStreamSts & HDA_REG_SDNSTS_BCIS) {
-    // Are we done playing the stream? If so we can stop now.
-    if (HdaStream->BufferSourceDone) {
-      // Stop stream.
-      Status = HdaControllerSetStream(HdaStream, FALSE);
-      ASSERT_EFI_ERROR(Status);
+  //
+  // Get current stream status bits.
+  //
+  Status = PciIo->Mem.Read (PciIo, EfiPciIoWidthFifoUint8, PCI_HDA_BAR, HDA_REG_SDNSTS (HdaStream->Index), 1, &HdaStreamSts);
+  if (EFI_ERROR (Status) || ((HdaStreamSts & (HDA_REG_SDNSTS_FIFOE | HDA_REG_SDNSTS_DESE)) != 0)) {
+    HdaControllerStreamAbort (HdaStream);
+    return;
+  }
 
-      // Stop timer.
-      Status = gBS->SetTimer(HdaStream->PollTimer, TimerCancel, 0);
-      ASSERT_EFI_ERROR(Status);
+  //
+  // Get stream DMA position.
+  //
+  HdaStreamDmaPos = HdaStream->HdaControllerDev->DmaPositions[HdaStream->Index].Position;
+  if (HdaStreamDmaPos > HdaStream->DmaPositionLast) {
+    DmaChanged = HdaStreamDmaPos - HdaStream->DmaPositionLast;
+  } else {
+    DmaChanged = (HDA_STREAM_BUF_SIZE - HdaStream->DmaPositionLast) + HdaStreamDmaPos;
+  }
+  HdaStream->DmaPositionLast = HdaStreamDmaPos;
 
-      // Trigger callback.
-      if (HdaStream->Callback)
-        HdaStream->Callback(HdaStream->Output ? EfiHdaIoTypeOutput : EfiHdaIoTypeInput,
-          HdaStream->CallbackContext1, HdaStream->CallbackContext2, HdaStream->CallbackContext3);
-      goto CLEAR_BIT;
+  if (HdaStream->BufferActive) {
+    if (OcOverflowAddU32 (HdaStream->DmaPositionTotal, DmaChanged, &HdaStream->DmaPositionTotal)) {
+      HdaControllerStreamAbort (HdaStream);
+      return;
     }
 
-    // Get stream DMA position.
-    HdaStreamDmaPos = HdaStream->HdaControllerDev->DmaPositions[HdaStream->Index].Position;
-    HdaCurrentBlock = HdaStreamDmaPos / HDA_BDL_BLOCKSIZE;
-    HdaNextBlock = HdaCurrentBlock + 1;
-    HdaNextBlock %= HDA_BDL_ENTRY_COUNT;
+    //
+    // Padding added to account for delay between DMA transfer to controller and actual playback.
+    //
+    if (HdaStream->DmaPositionTotal > HdaStream->BufferSourceLength + HDA_STREAM_BUFFER_PADDING) {
+      DEBUG ((DEBUG_VERBOSE, "AudioDxe: Completed playback of 0x%X buffer with 0x%X bytes read, current DMA: 0x%X\n", HdaStream->BufferSourceLength, HdaStream->DmaPositionTotal, HdaStreamDmaPos));
+      HdaControllerStreamIdle (HdaStream);
 
-    // Have we reached the end of the source buffer? If so the stream will stop on the next block.
-    if (HdaStream->BufferSourcePosition >= HdaStream->BufferSourceLength) {
-      // Zero out next block.
-      ZeroMem(HdaStream->BufferData + (HdaNextBlock * HDA_BDL_BLOCKSIZE), HDA_BDL_BLOCKSIZE);
+      //
+      // TODO: Remove when continous stream run is implemented.
+      //
+      HdaControllerStreamAbort (HdaStream);
 
-      // Set flag to stop stream on the next block.
-      HdaStream->BufferSourceDone = TRUE;
-      DEBUG((DEBUG_VERBOSE, "Block %u of %u is the last! (current position 0x%X, buffer 0x%X)\n",
-        HdaStreamDmaPos / HDA_BDL_BLOCKSIZE, HDA_BDL_ENTRY_COUNT, HdaStreamDmaPos, HdaStream->BufferSourcePosition));
-      goto CLEAR_BIT;
+      if (HdaStream->Callback != NULL) {
+        HdaStream->Callback (EfiHdaIoTypeOutput, HdaStream->CallbackContext1, HdaStream->CallbackContext2, HdaStream->CallbackContext3);
+      }
     }
 
-    // Determine number of bytes to pull from or push to source data.
-    HdaSourceLength = HDA_BDL_BLOCKSIZE;
-    if ((HdaStream->BufferSourcePosition + HdaSourceLength) > HdaStream->BufferSourceLength)
-      HdaSourceLength = HdaStream->BufferSourceLength - HdaStream->BufferSourcePosition;
+    //
+    // Fill next block on IOC.
+    //
+    if (HdaStreamSts & HDA_REG_SDNSTS_BCIS && HdaStream->BufferSourcePosition < HdaStream->BufferSourceLength) {
+      HdaCurrentBlock = HdaStreamDmaPos / HDA_BDL_BLOCKSIZE;
+      HdaNextBlock    = HdaCurrentBlock + 1;
+      HdaNextBlock    %= HDA_BDL_ENTRY_COUNT;
 
-    // Is this an output stream (copy data to)?
-    if (HdaStream->Output) {
+      HdaSourceLength = HDA_BDL_BLOCKSIZE;
+      
+      if (OcOverflowAddU32 (HdaStream->BufferSourcePosition, HdaSourceLength, &Tmp)) {
+        HdaControllerStreamAbort (HdaStream);
+        return;
+      }
+      if (Tmp > HdaStream->BufferSourceLength) {
+        HdaSourceLength = HdaStream->BufferSourceLength - HdaStream->BufferSourcePosition;
+      }
+
+      //
       // Copy data to DMA buffer.
-      if (HdaSourceLength < HDA_BDL_BLOCKSIZE)
-        ZeroMem(HdaStream->BufferData + (HdaNextBlock * HDA_BDL_BLOCKSIZE), HDA_BDL_BLOCKSIZE);
-      CopyMem(HdaStream->BufferData + (HdaNextBlock * HDA_BDL_BLOCKSIZE), HdaStream->BufferSource + HdaStream->BufferSourcePosition, HdaSourceLength);
-    } else { // Input stream (copy data from).
-      // Copy data from DMA buffer.
-      CopyMem(HdaStream->BufferSource + HdaStream->BufferSourcePosition, HdaStream->BufferData + (HdaNextBlock * HDA_BDL_BLOCKSIZE), HdaSourceLength);
+      //
+      if (HdaSourceLength < HDA_BDL_BLOCKSIZE) {
+        ZeroMem (HdaStream->BufferData + HdaNextBlock * HDA_BDL_BLOCKSIZE, HDA_BDL_BLOCKSIZE);
+      }
+      CopyMem (HdaStream->BufferData + HdaNextBlock * HDA_BDL_BLOCKSIZE, HdaStream->BufferSource + HdaStream->BufferSourcePosition, HdaSourceLength);
+      if (OcOverflowAddU32 (HdaStream->BufferSourcePosition, HdaSourceLength, &HdaStream->BufferSourcePosition)) {
+        HdaControllerStreamAbort (HdaStream);
+        return;
+      }
+
+      DEBUG ((DEBUG_VERBOSE, "AudioDxe: Block %u of %u filled! (current position 0x%X, buffer 0x%X)\n",
+        HdaStreamDmaPos / HDA_BDL_BLOCKSIZE, HDA_BDL_ENTRY_COUNT, HdaStreamDmaPos, HdaStream->BufferSourcePosition));
     }
+  }
 
-    // Increase source position.
-    HdaStream->BufferSourcePosition += HdaSourceLength;
-    DEBUG((DEBUG_VERBOSE, "Block %u of %u filled! (current position 0x%X, buffer 0x%X)\n",
-      HdaStreamDmaPos / HDA_BDL_BLOCKSIZE, HDA_BDL_ENTRY_COUNT, HdaStreamDmaPos, HdaStream->BufferSourcePosition));
-
-CLEAR_BIT:
-    // Reset completion bit.
+  //
+  // Reset IOC bit as needed.
+  //
+  if (HdaStreamSts & HDA_REG_SDNSTS_BCIS) {
     HdaStreamSts = HDA_REG_SDNSTS_BCIS;
-    Status = PciIo->Mem.Write(PciIo, EfiPciIoWidthUint8, PCI_HDA_BAR, HDA_REG_SDNSTS(HdaStream->Index), 1, &HdaStreamSts);
-    ASSERT_EFI_ERROR(Status);
+    Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint8, PCI_HDA_BAR, HDA_REG_SDNSTS (HdaStream->Index), 1, &HdaStreamSts);
+    if (EFI_ERROR (Status)) {
+      HdaControllerStreamAbort (HdaStream);
+      return;
+    }
   }
 }
 

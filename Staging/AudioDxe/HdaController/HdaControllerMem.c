@@ -357,7 +357,7 @@ HdaControllerInitStreams(
 
     // Initialize polling timer.
     Status = gBS->CreateEvent(EVT_TIMER | EVT_NOTIFY_SIGNAL, TPL_NOTIFY,
-      (EFI_EVENT_NOTIFY)HdaControllerStreamPollTimerHandler, HdaStream, &HdaStream->PollTimer);
+      (EFI_EVENT_NOTIFY)HdaControllerStreamOutputPollTimerHandler, HdaStream, &HdaStream->PollTimer);
     if (EFI_ERROR(Status))
       goto FREE_BUFFER;
 
@@ -540,6 +540,9 @@ HdaControllerResetStream(
   Status = PciIo->Mem.Write(PciIo, EfiPciIoWidthUint32, PCI_HDA_BAR, HDA_REG_SDNCBL(HdaStream->Index), 1, &StreamCbl);
   if (EFI_ERROR(Status))
     return Status;
+
+  HdaStream->DmaPositionTotal = 0;
+  HdaStream->DmaPositionLast = 0;
 
   return EFI_SUCCESS;
 }
@@ -737,4 +740,41 @@ HdaControllerSetStreamId(
 
   // Success.
   return EFI_SUCCESS;
+}
+
+VOID
+HdaControllerStreamIdle (
+  IN HDA_STREAM *HdaStream
+  )
+{
+  ASSERT (HdaStream != NULL);
+
+  //
+  // Reset buffer information to idle stream.
+  //
+  HdaStream->BufferActive           = FALSE;
+  HdaStream->BufferSource           = NULL;
+  HdaStream->BufferSourcePosition   = 0;
+  HdaStream->BufferSourceLength     = 0;
+  HdaStream->DmaPositionTotal       = 0;
+
+  ZeroMem (HdaStream->BufferData, HDA_STREAM_BUF_SIZE);
+} 
+
+VOID
+HdaControllerStreamAbort (
+  IN HDA_STREAM *HdaStream
+  )
+{
+  ASSERT (HdaStream != NULL);
+
+  HdaControllerStreamIdle (HdaStream);
+
+  //
+  // Stop stream and timer.
+  //
+  HdaControllerSetStream (HdaStream, FALSE);
+  gBS->SetTimer (HdaStream->PollTimer, TimerCancel, 0);
+
+  //DEBUG ((DEBUG_INFO, "AudioDxe: Stream %u aborted!\n", HdaStream->Index));
 }
