@@ -600,7 +600,7 @@ int wrap_main(int argc, char** argv) {
     Status = PrelinkedInjectComplete (&Context);
 
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "Prelink inject complete error %zx\n", Status));
+      DEBUG ((DEBUG_WARN, "Prelink inject complete error %r\n", Status));
     }
 
     FILE *Fh = fopen("out.bin", "wb");
@@ -618,7 +618,7 @@ int wrap_main(int argc, char** argv) {
 #endif
     PrelinkedContextFree (&Context);
   } else {
-    DEBUG ((DEBUG_WARN, "Context creation error %zx\n", Status));
+    DEBUG ((DEBUG_WARN, "Context creation error %r\n", Status));
   }
 
   free(Prelinked);
@@ -657,7 +657,7 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
 
   Status = PrelinkedInjectPrepare (&Context);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "Prelink inject prepare error %zx\n", Status));
+    DEBUG ((DEBUG_WARN, "Prelink inject prepare error %r\n", Status));
     PrelinkedContextFree (&Context);
     free (Prelinked);
     return 0;
