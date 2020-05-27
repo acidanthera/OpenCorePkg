@@ -97,8 +97,6 @@ export NO_ARCHIVES
 
 ./Utilities/macserial/build.tool || exit 1
 
-src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/efibuild.sh) && eval "$src" || exit 1
-
 UTILS=(
   "AppleEfiSignTool"
   "ConfigValidity"
@@ -121,6 +119,7 @@ for util in "${UTILS[@]}"; do
 done
 cd .. || exit 1
 
+src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/efibuild.sh) && eval "$src" || exit 1
 
 cd Library/OcConfigurationLib || exit 1
 ./CheckSchema.py OcConfigurationLib.c || exit 1
