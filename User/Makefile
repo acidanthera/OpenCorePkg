@@ -10,7 +10,7 @@ UDK_ARCH ?= X64
 
 DIST     ?= $(shell uname)
 
-CFLAGS    = -c -fshort-wchar -Wall -Wextra -Wno-unused-parameter -D NO_MSABI_VA_FUNCS
+CFLAGS    = -c -fshort-wchar -Wall -Wno-implicit-fallthrough -Wextra -Wno-unused-parameter -D NO_MSABI_VA_FUNCS -D MDE_CPU_$(UDK_ARCH)
 #
 # Skip including when suggesting STANDALONE mode.
 #
