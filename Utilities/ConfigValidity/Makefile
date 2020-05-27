@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-include ../../User/Makefile
+CURR_DIR = $(shell pwd)
+
+include $(CURR_DIR)/../../User/Makefile
 
 .DEFAULT_GOAL := all
 PRODUCT        = ConfigValidity
@@ -17,19 +19,19 @@ $(PRODUCT): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
 
 OcConfigurationLib.o:
-	$(CC) $(CFLAGS) ../../Library/OcConfigurationLib/OcConfigurationLib.c -o $@
+	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcConfigurationLib/OcConfigurationLib.c -o $@
 
 OcTemplateLib.o:
-	$(CC) $(CFLAGS) ../../Library/OcTemplateLib/OcTemplateLib.c -o $@
+	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcTemplateLib/OcTemplateLib.c -o $@
 
 OcSerializeLib.o:
-	$(CC) $(CFLAGS) ../../Library/OcSerializeLib/OcSerializeLib.c -o $@
+	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcSerializeLib/OcSerializeLib.c -o $@
 
 OcXmlLib.o:
-	$(CC) $(CFLAGS) ../../Library/OcXmlLib/OcXmlLib.c -o $@
+	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcXmlLib/OcXmlLib.c -o $@
 
 OcAsciiLib.o:
-	$(CC) $(CFLAGS) ../../Library/OcStringLib/OcAsciiLib.c -o $@
+	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcStringLib/OcAsciiLib.c -o $@
 
 clean:
 	rm -rf *.o *.dSYM $(PRODUCT)

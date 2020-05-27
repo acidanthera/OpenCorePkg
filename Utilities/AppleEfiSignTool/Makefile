@@ -4,7 +4,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-include ../../User/Makefile
+CURR_DIR = $(shell pwd)
+
+include $(CURR_DIR)/../../User/Makefile
 
 .DEFAULT_GOAL := all
 PRODUCT        = AppleEfiSignTool
@@ -18,25 +20,25 @@ $(PRODUCT): $(OBJS)
 	$(CC) $(LDFLAG) $(OBJS) -o $(PRODUCT)
 
 Sha2.o:
-	$(CC) $(CFLAGS) ../../Library/OcCryptoLib/Sha2.c -o $@
+	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcCryptoLib/Sha2.c -o $@
 
 BigNumWordMul64.o:
-	$(CC) $(CFLAGS) ../../Library/OcCryptoLib/IA32/BigNumWordMul64.c -o $@
+	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcCryptoLib/IA32/BigNumWordMul64.c -o $@
 
 BigNumPrimitives.o:
-	$(CC) $(CFLAGS) ../../Library/OcCryptoLib/BigNumPrimitives.c -o $@
+	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcCryptoLib/BigNumPrimitives.c -o $@
 
 BigNumMontgomery.o:
-	$(CC) $(CFLAGS) ../../Library/OcCryptoLib/BigNumMontgomery.c -o $@
+	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcCryptoLib/BigNumMontgomery.c -o $@
 
 RsaDigitalSign.o:
-	$(CC) $(CFLAGS) -include OcCryptoConfig.h ../../Library/OcCryptoLib/RsaDigitalSign.c -o $@
+	$(CC) $(CFLAGS) -include $(CURR_DIR)/OcCryptoConfig.h $(CURR_DIR)/../../Library/OcCryptoLib/RsaDigitalSign.c -o $@
 
 SecureMem.o:
-	$(CC) $(CFLAGS) ../../Library/OcCryptoLib/SecureMem.c -o $@
+	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcCryptoLib/SecureMem.c -o $@
 
 OcAppleKeysLib.o:
-	$(CC) $(CFLAGS) ../../Library/OcAppleKeysLib/OcAppleKeysLib.c -o $@
+	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcAppleKeysLib/OcAppleKeysLib.c -o $@
 
 clean:
 	rm -rf *.o $(PRODUCT)

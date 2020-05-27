@@ -1,6 +1,8 @@
 STANDALONE     = 1
 
-include ../../User/Makefile
+CURR_DIR = $(shell pwd)
+
+include $(CURR_DIR)/../../User/Makefile
 
 .DEFAULT_GOAL := all
 PRODUCT        = icnspack
