@@ -63,6 +63,26 @@ MultU64x32 (
   return Multiplicand * Multiplier;
 }
 
+INT64
+EFIAPI
+MultS64x64 (
+  IN      INT64                     Multiplicand,
+  IN      INT64                     Multiplier
+  )
+{
+  return Multiplicand * Multiplier;
+}
+
+UINT64
+EFIAPI
+MultU64x64 (
+  IN      UINT64                    Multiplicand,
+  IN      UINT64                    Multiplier
+  )
+{
+  return Multiplicand * Multiplier;
+}
+
 UINT64
 SwapBytes64 (
   UINT64                    Operand
