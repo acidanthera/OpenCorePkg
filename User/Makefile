@@ -8,7 +8,7 @@ CC       ?= gcc
 UDK_PATH ?= ../../UDK
 UDK_ARCH ?= X64
 
-CFLAGS    = -c -fshort-wchar -Wall -Wextra -Wno-unused-parameter -D NO_MSABI_VA_FUNCS
+CFLAGS    = -c -fshort-wchar -Wall -Wextra -Wno-unused-parameter -D NO_MSABI_VA_FUNCS -mmacosx-version-min=10.6
 CFLAGS   += -I$(UDK_PATH)/MdePkg/Include -I$(UDK_PATH)/MdePkg/Include/Library -I$(UDK_PATH)/MdePkg/Include/$(UDK_ARCH)
 CFLAGS   += -I$(UDK_PATH)/UefiCpuPkg/Include
 CFLAGS   += -I../../User/Include

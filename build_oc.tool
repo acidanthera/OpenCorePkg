@@ -99,23 +99,28 @@ export NO_ARCHIVES
 
 src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/efibuild.sh) && eval "$src" || exit 1
 
-if [ "$BUILD_UTILITIES" = "1" ]; then
-  UTILS=(
-    "AppleEfiSignTool"
-    "EfiResTool"
-    "disklabel"
-    "icnspack"
-    "RsaTool"
-  )
+UTILS=(
+  "AppleEfiSignTool"
+  "ConfigValidity"
+  "EfiResTool"
+  "disklabel"
+  "HelloWorld"
+  "icnspack"
+  "KextInject"
+)
 
-  cd Utilities || exit 1
-  for util in "${UTILS[@]}"; do
-    cd "$util" || exit 1
-    make || exit 1
-    cd - || exit 1
-  done
-  cd .. || exit 1
+if [ "$HAS_OPENSSL_BUILD" != "" ]; then
+  UTILS+=("RsaTool")
 fi
+
+cd Utilities || exit 1
+for util in "${UTILS[@]}"; do
+  cd "$util" || exit 1
+  make || exit 1
+  cd - || exit 1
+done
+cd .. || exit 1
+
 
 cd Library/OcConfigurationLib || exit 1
 ./CheckSchema.py OcConfigurationLib.c || exit 1
