@@ -12,7 +12,7 @@ DIST     ?= $(shell uname)
 
 CFLAGS    = -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter -D NO_MSABI_VA_FUNCS
 #
-# Skip including when suggesting STANDALONE mode.
+# Skip including UDK when suggesting STANDALONE mode.
 #
 ifneq ($(STANDALONE),1)
 	CFLAGS  += -I$(UDK_PATH)/MdePkg/Include -I$(UDK_PATH)/MdePkg/Include/Library -I$(UDK_PATH)/MdePkg/Include/$(UDK_ARCH)
@@ -41,9 +41,8 @@ endif
 ifneq ($(STANDALONE),1)
 	OBJS     = UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o
 	OBJS    += BaseMemoryLib.o BootServices.o DebugBreak.o EfiVar.o Math.o Pcd.o
+	OBJS    += BitOverflow.o NativeOverflow.o TripleOverflow.o
 endif
-
-OBJS        += BitOverflow.o NativeOverflow.o TripleOverflow.o
 
 UefiLibPrint.o:
 	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/UefiLib/UefiLibPrint.c -o $@
