@@ -8,12 +8,24 @@ CC       ?= gcc
 UDK_PATH ?= ../../UDK
 UDK_ARCH ?= X64
 
-CFLAGS    = -c -fshort-wchar -Wall -Wextra -Wno-unused-parameter -D NO_MSABI_VA_FUNCS -mmacosx-version-min=10.6
-CFLAGS   += -I$(UDK_PATH)/MdePkg/Include -I$(UDK_PATH)/MdePkg/Include/Library -I$(UDK_PATH)/MdePkg/Include/$(UDK_ARCH)
-CFLAGS   += -I$(UDK_PATH)/UefiCpuPkg/Include
+DIST     ?= $(shell uname)
+
+CFLAGS    = -c -fshort-wchar -Wall -Wextra -Wno-unused-parameter -D NO_MSABI_VA_FUNCS
+#
+# Skip including when suggesting STANDALONE mode.
+#
+ifneq ($(STANDALONE),1)
+	CFLAGS += -I$(UDK_PATH)/MdePkg/Include -I$(UDK_PATH)/MdePkg/Include/Library -I$(UDK_PATH)/MdePkg/Include/$(UDK_ARCH)
+	CFLAGS += -I$(UDK_PATH)/UefiCpuPkg/Include
+	CFLAGS += -include ../../User/Include/Pcd.h -include ../../User/Include/EfiVar.h
+endif
 CFLAGS   += -I../../User/Include
 CFLAGS   += -I../../Include/Acidanthera -I../../Include/Apple -I../../Include/Generic -I../../Include/Intel
-CFLAGS   += -include ../../User/Include/Pcd.h -include ../../User/Include/EfiVar.h
+
+ifeq ($(DIST),Darwin)
+	CFLAGS  += -mmacosx-version-min=10.6
+	LDFLAGS += -mmacosx-version-min=10.6
+endif
 
 ifeq ($(SANITIZE),1)
 	CFLAGS  += -fsanitize=undefined,address
@@ -26,8 +38,10 @@ else
 	CFLAGS  += -O3
 endif
 
-OBJS      = UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o
-OBJS     += BaseMemoryLib.o BootServices.o DebugBreak.o EfiVar.o Math.o Pcd.o
+ifneq ($(STANDALONE),1)
+	OBJS     = UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o
+	OBJS    += BaseMemoryLib.o BootServices.o DebugBreak.o EfiVar.o Math.o Pcd.o
+endif
 
 UefiLibPrint.o:
 	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/UefiLib/UefiLibPrint.c -o $@

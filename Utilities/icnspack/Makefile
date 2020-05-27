@@ -1,14 +1,16 @@
-CC ?= gcc
-CFLAGS=-c -Wall -Wextra -pedantic -O3
-LDFLAGS ?=
+STANDALONE     = 1
 
-all: icnspack
+include ../../User/Makefile
 
-icnspack: icnspack.o
-	$(CC) $(LDFLAGS) icnspack.o -o icnspack
+.DEFAULT_GOAL := all
+PRODUCT        = icnspack
 
-.c:
-	$(CC) $(CFLAGS) $< -o $@
+OBJS          += icnspack.o
+
+all: $(PRODUCT)
+
+$(PRODUCT): $(OBJS)
+	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
 
 clean:
-	rm -rf *.o icnspack
+	rm -rf *.o $(PRODUCT)

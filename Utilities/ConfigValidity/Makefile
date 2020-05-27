@@ -14,7 +14,7 @@ OBJS          += OcConfigurationLib.o OcTemplateLib.o OcSerializeLib.o OcXmlLib.
 all: $(PRODUCT)
 
 $(PRODUCT): $(OBJS)
-	$(CC) $(LDFLAG) $(OBJS) -o $(PRODUCT)
+	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
 
 OcConfigurationLib.o:
 	$(CC) $(CFLAGS) ../../Library/OcConfigurationLib/OcConfigurationLib.c -o $@

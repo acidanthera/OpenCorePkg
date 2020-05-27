@@ -15,7 +15,7 @@ OBJS          += KextPatcher.o PrelinkedKext.o PrelinkedContext.o Vtables.o Link
 all: $(PRODUCT)
 
 $(PRODUCT): $(OBJS)
-	$(CC) $(LDFLAG) $(OBJS) -o $(PRODUCT)
+	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
 
 Lilu.o:
 	$(CC) $(CFLAGS) ./Lilu.c -o $@
