@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "181.0.0.0.0"
-BIOSLegacyVersion: "IM181.88Z.F000.B00.2001311754"
-BIOSReleaseDate: "01/31/2020"
+BIOSVersion: "183.0.0.0.0"
+BIOSLegacyVersion: "IM181.88Z.F000.B00.2004240927"
+BIOSReleaseDate: "04/24/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac18,1"
 SystemVersion: "1.0"
@@ -67,12 +67,12 @@ SmcPlatform:
 SmcEPCI: 0xF07009
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      IM181.88Z.F000.B00.2001311754
+    BIOS ID:      IM181.88Z.F000.B00.2004240927
     Model:        IM181
-    EFI Version:  181.0.0.0.0
+    EFI Version:  183.0.0.0.0
     Built by:     _atsserver@xapp157
-    Date:         Fri Jan 31 17:54:10 2020
-    Revision:     181 (B&I)
+    Date:         Fri Apr 24 09:27:59 2020
+    Revision:     183 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
     Compiler:     Apple LLVM version 6.1.0 (clang-602.0.53) (based on LLVM 3.6.0svn)

@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "135.0.0.0.0"
-BIOSLegacyVersion: "MP61.88Z.F000.B00.2002052032"
-BIOSReleaseDate: "02/05/2020"
+BIOSVersion: "136.0.0.0.0"
+BIOSLegacyVersion: "MP61.88Z.F000.B00.2004121755"
+BIOSReleaseDate: "04/12/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacPro6,1"
 SystemVersion: "1.0"
@@ -65,10 +65,10 @@ SmcEPCI: 0xF0F006
 OEMStrings: |-
   Apple ROM Version
     Model:        MP61
-    EFI Version:  135.0.0.0.0
+    EFI Version:  136.0.0.0.0
     Built by:     root@saumon
-    Date:         Wed Feb  5 20:32:36 PST 2020
-    Revision:     135 (B&I)
+    Date:         Sun Apr 12 17:55:07 PDT 2020
+    Revision:     136 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
     Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)

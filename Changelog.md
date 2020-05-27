@@ -33,6 +33,7 @@ OpenCore Changelog
 - Added MacBookPro16,2 and MacBookPro16,3 model codes
 - Added PCI device scanning policy support (e.g. VIRTIO)
 - AudioDxe: Playback performance improvements
+- DataBase: Update builtin firmware versions
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG
