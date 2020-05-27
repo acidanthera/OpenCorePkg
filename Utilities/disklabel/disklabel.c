@@ -24,7 +24,12 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef WIN32
+#include <winsock2.h>
+else
 #include <arpa/inet.h>
+#endif
 
 #ifdef __APPLE__
 #include <ApplicationServices/ApplicationServices.h>
