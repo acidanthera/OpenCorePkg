@@ -1,8 +1,6 @@
 STANDALONE     = 1
 
-CURR_DIR = $(shell pwd)
-
-include $(CURR_DIR)/../../User/Makefile
+include ../../User/Makefile
 
 .DEFAULT_GOAL := all
 PRODUCT        = disklabel

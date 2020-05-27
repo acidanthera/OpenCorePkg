@@ -3,9 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-CURR_DIR = $(shell pwd)
-
-include $(CURR_DIR)/../../User/Makefile
+include ../../User/Makefile
 
 .DEFAULT_GOAL := all
 PRODUCT        = KextInject
@@ -20,55 +18,55 @@ $(PRODUCT): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
 
 Lilu.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/Lilu.c -o $@
+	$(CC) $(CFLAGS) ./Lilu.c -o $@
 
 Vsmc.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/Vsmc.c -o $@
+	$(CC) $(CFLAGS) ./Vsmc.c -o $@
 
 KextPatcher.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcAppleKernelLib/KextPatcher.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcAppleKernelLib/KextPatcher.c -o $@
 
 PrelinkedKext.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcAppleKernelLib/PrelinkedKext.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcAppleKernelLib/PrelinkedKext.c -o $@
 
 PrelinkedContext.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcAppleKernelLib/PrelinkedContext.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcAppleKernelLib/PrelinkedContext.c -o $@
 
 Vtables.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcAppleKernelLib/Vtables.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcAppleKernelLib/Vtables.c -o $@
 
 Link.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcAppleKernelLib/Link.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcAppleKernelLib/Link.c -o $@
 
 KernelReader.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcAppleKernelLib/KernelReader.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcAppleKernelLib/KernelReader.c -o $@
 
 DataPatcher.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcMiscLib/DataPatcher.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcMiscLib/DataPatcher.c -o $@
 
 CxxSymbols.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcMachoLib/CxxSymbols.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcMachoLib/CxxSymbols.c -o $@
 
 Header.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcMachoLib/Header.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcMachoLib/Header.c -o $@
 
 Symbols.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcMachoLib/Symbols.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcMachoLib/Symbols.c -o $@
 
 Relocations.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcMachoLib/Relocations.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcMachoLib/Relocations.c -o $@
 
 OcXmlLib.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcXmlLib/OcXmlLib.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcXmlLib/OcXmlLib.c -o $@
 
 OcAsciiLib.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcStringLib/OcAsciiLib.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcStringLib/OcAsciiLib.c -o $@
 
 lzss.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcCompressionLib/lzss/lzss.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcCompressionLib/lzss/lzss.c -o $@
 
 lzvn.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcCompressionLib/lzvn/lzvn.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcCompressionLib/lzvn/lzvn.c -o $@
 
 clean:
 	rm -rf *.o *.dSYM $(PRODUCT)

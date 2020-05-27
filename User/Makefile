@@ -5,24 +5,22 @@
 
 CC       ?= gcc
 
-CURR_DIR  = $(shell pwd)
-
-UDK_PATH ?= $(CURR_DIR)/../../UDK
+UDK_PATH ?= ../../UDK
 UDK_ARCH ?= X64
 
 DIST     ?= $(shell uname)
 
 CFLAGS    = -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter -D NO_MSABI_VA_FUNCS
 #
-# Skip including UDK when suggesting STANDALONE mode.
+# Skip including when suggesting STANDALONE mode.
 #
 ifneq ($(STANDALONE),1)
 	CFLAGS  += -I$(UDK_PATH)/MdePkg/Include -I$(UDK_PATH)/MdePkg/Include/Library -I$(UDK_PATH)/MdePkg/Include/$(UDK_ARCH)
 	CFLAGS  += -I$(UDK_PATH)/UefiCpuPkg/Include
-	CFLAGS  += -include $(CURR_DIR)/../../User/Include/Pcd.h -include $(CURR_DIR)/../../User/Include/EfiVar.h
+	CFLAGS  += -include ../../User/Include/Pcd.h -include ../../User/Include/EfiVar.h
 endif
-CFLAGS      += -I$(CURR_DIR)/../../User/Include
-CFLAGS      += -I$(CURR_DIR)/../../Include/Acidanthera -I$(CURR_DIR)/../../Include/Apple -I$(CURR_DIR)/../../Include/Generic -I$(CURR_DIR)/../../Include/Intel
+CFLAGS      += -I../../User/Include
+CFLAGS      += -I../../Include/Acidanthera -I../../Include/Apple -I../../Include/Generic -I../../Include/Intel
 
 ifeq ($(DIST),Darwin)
 	CFLAGS  += -mmacosx-version-min=10.6
@@ -43,8 +41,9 @@ endif
 ifneq ($(STANDALONE),1)
 	OBJS     = UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o
 	OBJS    += BaseMemoryLib.o BootServices.o DebugBreak.o EfiVar.o Math.o Pcd.o
-	OBJS    += BitOverflow.o NativeOverflow.o TripleOverflow.o
 endif
+
+OBJS        += BitOverflow.o NativeOverflow.o TripleOverflow.o
 
 UefiLibPrint.o:
 	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/UefiLib/UefiLibPrint.c -o $@
@@ -80,28 +79,28 @@ LinkedList.o:
 	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/BaseLib/LinkedList.c -o $@
 
 BaseMemoryLib.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../User/Library/BaseMemoryLib.c -o $@
+	$(CC) $(CFLAGS) ../../User/Library/BaseMemoryLib.c -o $@
 
 BootServices.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../User/Library/BootServices.c -o $@
+	$(CC) $(CFLAGS) ../../User/Library/BootServices.c -o $@
 
 DebugBreak.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../User/Library/DebugBreak.c -o $@
+	$(CC) $(CFLAGS) ../../User/Library/DebugBreak.c -o $@
 
 EfiVar.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../User/Library/EfiVar.c -o $@
+	$(CC) $(CFLAGS) ../../User/Library/EfiVar.c -o $@
 
 Math.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../User/Library/Math.c -o $@
+	$(CC) $(CFLAGS) ../../User/Library/Math.c -o $@
 
 Pcd.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../User/Library/Pcd.c -o $@
+	$(CC) $(CFLAGS) ../../User/Library/Pcd.c -o $@
 
 BitOverflow.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcGuardLib/BitOverflow.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcGuardLib/BitOverflow.c -o $@
 
 NativeOverflow.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcGuardLib/NativeOverflow.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcGuardLib/NativeOverflow.c -o $@
 
 TripleOverflow.o:
-	$(CC) $(CFLAGS) $(CURR_DIR)/../../Library/OcGuardLib/TripleOverflow.c -o $@
+	$(CC) $(CFLAGS) ../../Library/OcGuardLib/TripleOverflow.c -o $@

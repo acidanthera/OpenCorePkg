@@ -3,9 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-CURR_DIR = $(shell pwd)
-
-include $(CURR_DIR)/../../User/Makefile
+include ../../User/Makefile
 
 .DEFAULT_GOAL := all
 PRODUCT        = HelloWorld
