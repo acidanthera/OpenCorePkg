@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "120.0.0.0.0"
-BIOSLegacyVersion: "MBA61.88Z.F000.B00.2002052050"
-BIOSReleaseDate: "02/05/2020"
+BIOSVersion: "121.0.0.0.0"
+BIOSLegacyVersion: "MBA61.88Z.F000.B00.2004121458"
+BIOSReleaseDate: "04/12/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookAir6,1"
 SystemVersion: "1.0"
@@ -75,10 +75,10 @@ SmcEPCI: 0x7B007
 OEMStrings: |-
   Apple ROM Version
     Model:        MBA61
-    EFI Version:  120.0.0.0.0
+    EFI Version:  121.0.0.0.0
     Built by:     root@saumon
-    Date:         Wed Feb  5 20:50:47 PST 2020
-    Revision:     120 (B&I)
+    Date:         Sun Apr 12 14:58:05 PDT 2020
+    Revision:     121 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
     Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)

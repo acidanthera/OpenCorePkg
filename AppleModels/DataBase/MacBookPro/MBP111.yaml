@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "159.0.0.0.0"
-BIOSLegacyVersion: "MBP111.88Z.F000.B00.2002052022"
-BIOSReleaseDate: "02/05/2020"
+BIOSVersion: "160.0.0.0.0"
+BIOSLegacyVersion: "MBP111.88Z.F000.B00.2004121458"
+BIOSReleaseDate: "04/12/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro11,1"
 SystemVersion: "1.0"
@@ -79,10 +79,10 @@ SmcEPCI: 0xF0B007
 OEMStrings: |-
   Apple ROM Version
     Model:        MBP111
-    EFI Version:  159.0.0.0.0
+    EFI Version:  160.0.0.0.0
     Built by:     root@saumon
-    Date:         Wed Feb  5 20:22:55 PST 2020
-    Revision:     159 (B&I)
+    Date:         Sun Apr 12 14:58:44 PDT 2020
+    Revision:     160 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
     Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)

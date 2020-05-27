@@ -25,6 +25,19 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
 **/
+
+#ifdef WIN32
+
+#include <stdlib.h>
+#include <stdio.h>
+
+int main(int argc, const char* argv[]) {
+    fprintf(stderr, "This utility is not yet supported on Windows\n");
+    return EXIT_FAILURE;
+}
+
+#else
+
 #include <sys/types.h>
 #include <unistd.h>       // write
 #include <fcntl.h>        // open, close
@@ -54,9 +67,13 @@ typedef struct {
 __attribute__((packed, aligned(1)))
 efires_hdr_t;
 
-#ifdef __APPLE__
+#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define le16toh(x) (x)
+#define le32toh(x) (x)
+#define htole16(x) (x)
+#define htole32(x) (x)
+#elif defined(__APPLE__)
 #include <libkern/OSByteOrder.h>
-
 #define le16toh(x) OSSwapLittleToHostInt16(x)
 #define le32toh(x) OSSwapLittleToHostInt32(x)
 #define htole16(x) OSSwapHostToLittleInt16(x)
@@ -508,3 +525,5 @@ out:;
 
     return result;
 }
+
+#endif // WIN32
