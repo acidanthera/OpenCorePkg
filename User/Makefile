@@ -11,16 +11,8 @@ UDK_ARCH ?= X64
 DIST     ?= $(shell uname)
 
 CFLAGS    = -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter -D NO_MSABI_VA_FUNCS
-#
-# Skip including UDK when suggesting STANDALONE mode.
-#
-ifneq ($(STANDALONE),1)
-	CFLAGS  += -I$(UDK_PATH)/MdePkg/Include -I$(UDK_PATH)/MdePkg/Include/Library -I$(UDK_PATH)/MdePkg/Include/$(UDK_ARCH)
-	CFLAGS  += -I$(UDK_PATH)/UefiCpuPkg/Include
-	CFLAGS  += -include ../../User/Include/Pcd.h -include ../../User/Include/EfiVar.h
-endif
-CFLAGS      += -I../../User/Include
-CFLAGS      += -I../../Include/Acidanthera -I../../Include/Apple -I../../Include/Generic -I../../Include/Intel
+CFLAGS   += -I../../User/Include
+CFLAGS   += -I../../Include/Acidanthera -I../../Include/Apple -I../../Include/Generic -I../../Include/Intel
 
 ifeq ($(DIST),Darwin)
 	CFLAGS  += -mmacosx-version-min=10.6
@@ -38,9 +30,27 @@ else
 	CFLAGS  += -O3
 endif
 
+#
+# Skip including UDK when suggesting STANDALONE mode.
+#
 ifneq ($(STANDALONE),1)
+	CFLAGS  += -I$(UDK_PATH)/MdePkg/Include -I$(UDK_PATH)/MdePkg/Include/Library -I$(UDK_PATH)/MdePkg/Include/$(UDK_ARCH)
+	CFLAGS  += -I$(UDK_PATH)/UefiCpuPkg/Include
+	#
+	# Compatibility headers.
+	#
+	CFLAGS  += -include ../../User/Include/Pcd.h -include ../../User/Include/EfiVar.h
+	#
+	# UDK implementations.
+	#
 	OBJS     = UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o
+	#
+	# Customised/Simplified implementations at userspace level.
+	#
 	OBJS    += BaseMemoryLib.o BootServices.o DebugBreak.o EfiVar.o Math.o Pcd.o
+	#
+	# OcGuardLib targets.
+	#
 	OBJS    += BitOverflow.o NativeOverflow.o TripleOverflow.o
 endif
 
