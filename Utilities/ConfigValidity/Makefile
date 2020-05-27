@@ -6,9 +6,9 @@
 include ../../User/Makefile
 
 .DEFAULT_GOAL := all
-PRODUCT        = ConfigValidty
+PRODUCT        = ConfigValidity
 
-OBJS          += ConfigValidty.o 
+OBJS          += ConfigValidity.o 
 OBJS          += OcConfigurationLib.o OcTemplateLib.o OcSerializeLib.o OcXmlLib.o OcAsciiLib.o
 
 all: $(PRODUCT)

@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
   OC_GLOBAL_CONFIG   Config;
   OcConfigurationInit (&Config, b, f);
 
-  DEBUG((EFI_D_ERROR, "Done in %llu ms\n", current_timestamp() - a));
+  DEBUG ((EFI_D_ERROR, "Done in %llu ms\n", current_timestamp() - a));
 
   OcConfigurationFree (&Config);
 
