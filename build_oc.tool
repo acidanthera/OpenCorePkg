@@ -12,7 +12,7 @@ buildutil() {
     "macserial"
   )
 
-  if [ "$HAS_OPENSSL_BUILD" != "" ]; then
+  if [ "$HAS_OPENSSL_BUILD" = "1" ]; then
     UTILS+=("RsaTool")
   fi
 
