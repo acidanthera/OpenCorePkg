@@ -30,7 +30,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <arpa/inet.h>
 
 static int read_file(const char *filename, uint8_t **buffer, size_t *size) {
   FILE *fh = fopen(filename, "rb");
