@@ -27,7 +27,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #ifdef WIN32
 #include <winsock2.h>
-else
+#else
 #include <arpa/inet.h>
 #endif
 
