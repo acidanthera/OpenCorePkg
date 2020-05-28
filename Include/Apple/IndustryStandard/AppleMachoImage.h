@@ -262,6 +262,7 @@ enum {
   MachCpuFamilyIntelKabyLake    = 0x0F817246,
   MachCpuFamilyIntelCoffeeLake  = MachCpuFamilyIntelKabyLake,
   MachCpuFamilyIntelIceLake     = 0x38435547,
+  MachCpuFamilyIntelCometLake   = 0x1CF8A03E,
   //
   // The following synonyms are deprecated:
   //

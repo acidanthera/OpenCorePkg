@@ -188,6 +188,12 @@ enum {
 #define CPU_MODEL_COFFEELAKE_ULT 0x9E
 #define CPU_MODEL_COFFEELAKE_ULX 0x9E
 #define CPU_MODEL_COFFEELAKE_DT  0x9E
+#define CPU_MODEL_ICELAKE_Y      0x7D
+#define CPU_MODEL_ICELAKE_U      0x7E
+#define CPU_MODEL_ICELAKE_SP     0x9F /* Some variation of Ice Lake */
+#define CPU_MODEL_COMETLAKE_S    0xA5 /* desktop CometLake */
+#define CPU_MODEL_COMETLAKE_Y    0xA5 /* aka 10th generation Amber Lake Y */
+#define CPU_MODEL_COMETLAKE_U    0xA6
 
 #define CPU_SOCKET_UNKNOWN  0x02
 #define CPU_SOCKET_PGA478   0x0F

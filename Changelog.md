@@ -32,8 +32,9 @@ OpenCore Changelog
 - Renamed `Block` to `Delete` in `ACPI`,`DeviceProperties`, and `NVRAM`
 - Added MacBookPro16,2 and MacBookPro16,3 model codes
 - Added PCI device scanning policy support (e.g. VIRTIO)
-- AudioDxe: Playback performance improvements
-- DataBase: Update builtin firmware versions
+- Improved playback performance in AudioDxe
+- Updated builtin firmware versions for SMBIOS and the rest
+- Added improved CPU type detection for newer CPU types
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG
