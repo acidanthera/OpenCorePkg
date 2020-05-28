@@ -6,7 +6,7 @@
 include ../../User/Makefile
 
 .DEFAULT_GOAL := all
-PRODUCT        = HelloWorld
+PRODUCT        = HelloWorld$(SUFFIX)
 
 OBJS          += main.o
 

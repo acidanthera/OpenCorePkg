@@ -3,7 +3,7 @@ STANDALONE     = 1
 include ../../User/Makefile
 
 .DEFAULT_GOAL := all
-PRODUCT        = disklabel
+PRODUCT        = disklabel$(SUFFIX)
 
 OBJS          += disklabel.o
 

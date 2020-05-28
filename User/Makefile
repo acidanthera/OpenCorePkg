@@ -8,7 +8,11 @@ CC       ?= gcc
 UDK_PATH ?= ../../UDK
 UDK_ARCH ?= X64
 
-DIST     ?= $(shell uname)
+ifeq ($(OS),Windows_NT)
+	DIST ?= Windows
+else
+	DIST ?= $(shell uname)
+endif
 
 CFLAGS    = -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter
 CFLAGS   += -I../../User/Include
@@ -17,6 +21,10 @@ CFLAGS   += -I../../Include/Acidanthera -I../../Include/Apple -I../../Include/Ge
 ifeq ($(DIST),Darwin)
 	CFLAGS  += -mmacosx-version-min=10.6
 	LDFLAGS += -mmacosx-version-min=10.6
+endif
+
+ifeq ($(DIST),Windows)
+	SUFFIX  := .exe
 endif
 
 ifeq ($(SANITIZE),1)

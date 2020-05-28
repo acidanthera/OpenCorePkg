@@ -6,7 +6,7 @@
 include ../../User/Makefile
 
 .DEFAULT_GOAL := all
-PRODUCT        = KextInject
+PRODUCT        = KextInject$(SUFFIX)
 
 OBJS          += KextInject.o
 OBJS          += Lilu.o Vsmc.o

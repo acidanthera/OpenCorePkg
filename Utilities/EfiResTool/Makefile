@@ -3,7 +3,7 @@ STANDALONE     = 1
 include ../../User/Makefile
 
 .DEFAULT_GOAL := all
-PRODUCT        = EfiResTool
+PRODUCT        = EfiResTool$(SUFFIX)
 
 OBJS          += EfiResTool.o
 

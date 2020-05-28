@@ -6,7 +6,7 @@
 include ../../User/Makefile
 
 .DEFAULT_GOAL := all
-PRODUCT        = ConfigValidity
+PRODUCT        = ConfigValidity$(SUFFIX)
 
 OBJS          += ConfigValidity.o 
 OBJS          += OcConfigurationLib.o OcTemplateLib.o OcSerializeLib.o OcXmlLib.o OcAsciiLib.o
