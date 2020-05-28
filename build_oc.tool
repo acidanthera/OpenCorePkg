@@ -1,8 +1,6 @@
 #!/bin/bash
 
 buildutil() {
-  "${selfdir}/Utilities/macserial/build.tool" || exit 1
-
   UTILS=(
     "AppleEfiSignTool"
     "ConfigValidity"
@@ -11,6 +9,7 @@ buildutil() {
     "HelloWorld"
     "icnspack"
     "KextInject"
+    "macserial"
   )
 
   if [ "$HAS_OPENSSL_BUILD" != "" ]; then
@@ -94,10 +93,9 @@ package() {
   cp -r "${selfdir}/Utilities/LogoutHook" tmp/Utilities/ || exit 1
   cp -r "${selfdir}/Utilities/macrecovery" tmp/Utilities/ || exit 1
   buildutil || exit 1
-  if [ -d "${selfdir}/Utilities/macserial/bin" ]; then
-    cp -r "${selfdir}/Utilities/macserial/bin" tmp/Utilities/macserial || exit 1
-  else
-    mkdir -p tmp/Utilities/macserial || exit 1
+  mkdir -p tmp/Utilities/macserial || exit 1
+  if [ -f "${selfdir}/Utilities/macserial/macserial.zip" ]; then
+    cp "${selfdir}/Utilities/macserial/macserial.zip" tmp/Utilities/macserial || exit 1
   fi
   cp "${selfdir}/Utilities/macserial/FORMAT.md" tmp/Utilities/macserial/ || exit 1
   cp "${selfdir}/Utilities/macserial/README.md" tmp/Utilities/macserial/ || exit 1

@@ -28,6 +28,7 @@ ifeq ($(DEBUG),1)
 	CFLAGS  += -g -O0
 else
 	CFLAGS  += -O3
+	STRIP   := 1
 endif
 
 #
