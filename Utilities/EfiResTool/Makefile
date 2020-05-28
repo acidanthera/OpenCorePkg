@@ -1,13 +1,17 @@
-CC ?= gcc
-CFLAGS=-c -Wall -Wextra -pedantic -O3 -DDEBUG
+STANDALONE     = 1
 
-all: EfiResTool
+include ../../User/Makefile
 
-EfiResTool: EfiResTool.o
-	$(CC) EfiResTool.o -o EfiResTool
+.DEFAULT_GOAL := all
+PRODUCT        = EfiResTool
 
-.c:
-	$(CC) $(CFLAGS) $< -o $@
+OBJS          += EfiResTool.o
+
+all: $(PRODUCT)
+
+$(PRODUCT): $(OBJS)
+	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
+	$(STRIP) $(PRODUCT)
 
 clean:
-	rm -rf *.o EfiResTool
+	rm -rf *.o $(PRODUCT)
