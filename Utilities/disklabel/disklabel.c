@@ -19,38 +19,29 @@ THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
+
+#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define BigEndianToNative16(x) __builtin_bswap16(x)
+#elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define BigEndianToNative16(x) (x)
+#else
+#include <arpa/inet.h>
+#define BigEndianToNative16(x) ntohs(x)
+#endif
+
+#if defined(__APPLE__)
+#include <ApplicationServices/ApplicationServices.h>
+#include <CoreFoundation/CoreFoundation.h>
+#include <CoreGraphics/CoreGraphics.h>
+#elif defined(WIN32) && !defined(_ISOC99_SOURCE)
+#define _ISOC99_SOURCE
+#endif // __APPLE__
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <arpa/inet.h>
-
-#ifdef __APPLE__
-#include <ApplicationServices/ApplicationServices.h>
-#include <CoreFoundation/CoreFoundation.h>
-#include <CoreGraphics/CoreGraphics.h>
-#endif // __APPLE__
-
-/* Antialiasing clut. */
-static const uint8_t clut[] = {
-  0x00, /* 0x00 0x00 0x00 white */
-  0xF6, /* 0x11 0x11 0x11 */
-  0xF7, /* 0x22 0x22 0x22 */
-  0x2A, /* 0x33 = 1*6^2 + 1*6 + 1 = 43 colors */
-  0xF8, /* 0x44 */
-  0xF9, /* 0x55 */
-  0x55, /* 0x66 = 2*(36 + 6 + 1) = 86 colors */
-  0xFA, /* 0x77 */
-  0xFB, /* 0x88 */
-  0x80, /* 0x99 = (3*43) = 129 colors*/
-  0xFC, /* 0xAA */
-  0xFD, /* 0xBB */
-  0xAB, /* 0xCC = 4*43 = 172 colors */
-  0xFE, /* 0xDD */
-  0xFF, /* 0xEE */
-  0xD6, /* 0xFF = 5*43 = 215 */
-};
 
 /* Reverse clut to pixels. */
 static const uint8_t palette[256] = {
@@ -88,6 +79,27 @@ typedef struct DiskLabel_ {
 #pragma pack(pop)
 
 #ifdef __APPLE__
+
+/* Antialiasing clut. */
+static const uint8_t clut[] = {
+  0x00, /* 0x00 0x00 0x00 white */
+  0xF6, /* 0x11 0x11 0x11 */
+  0xF7, /* 0x22 0x22 0x22 */
+  0x2A, /* 0x33 = 1*6^2 + 1*6 + 1 = 43 colors */
+  0xF8, /* 0x44 */
+  0xF9, /* 0x55 */
+  0x55, /* 0x66 = 2*(36 + 6 + 1) = 86 colors */
+  0xFA, /* 0x77 */
+  0xFB, /* 0x88 */
+  0x80, /* 0x99 = (3*43) = 129 colors*/
+  0xFC, /* 0xAA */
+  0xFD, /* 0xBB */
+  0xAB, /* 0xCC = 4*43 = 172 colors */
+  0xFE, /* 0xDD */
+  0xFF, /* 0xEE */
+  0xD6, /* 0xFF = 5*43 = 215 */
+};
+
 static CTLineRef create_text_line(CGColorSpaceRef color_space, const char *str, int scale) {
   /* White text on black background, originating from OF/EFI bitmap. */
   const CGFloat components[] = {
@@ -223,6 +235,23 @@ static void *make_label(const char *label, int scale, bool bgra, uint16_t *label
 
   return label_data;
 }
+
+static int write_file(const char *filename, uint8_t *buffer, size_t size) {
+  FILE *fh = fopen(filename, "wb+");
+  if (!fh) {
+    fprintf(stderr, "Cannot open file %s for writing!\n", filename);
+    return -1;
+  }
+
+  if (fwrite(buffer, size, 1, fh) != 1) {
+    fprintf(stderr, "Cannot write %zu bytes in %s!\n", size, filename);
+    fclose(fh);
+    return -1;
+  }
+
+  fclose(fh);
+  return 0;
+}
 #endif // __APPLE__
 
 static int read_file(const char *filename, uint8_t **buffer, size_t *size) {
@@ -265,23 +294,6 @@ static int read_file(const char *filename, uint8_t **buffer, size_t *size) {
     fprintf(stderr, "Failed to read %zu bytes from %s!\n", *size, filename);
     fclose(fh);
     free(*buffer);
-    return -1;
-  }
-
-  fclose(fh);
-  return 0;
-}
-
-static int write_file(const char *filename, uint8_t *buffer, size_t size) {
-  FILE *fh = fopen(filename, "wb+");
-  if (!fh) {
-    fprintf(stderr, "Cannot open file %s for writing!\n", filename);
-    return -1;
-  }
-
-  if (fwrite(buffer, size, 1, fh) != 1) {
-    fprintf(stderr, "Cannot write %zu bytes in %s!\n", size, filename);
-    fclose(fh);
     return -1;
   }
 
@@ -352,8 +364,8 @@ static int decode_label(const char *infile, const char *outfile) {
     return -1;
   }
 
-  size_t width  = ntohs(label->width);
-  size_t height = ntohs(label->height);
+  size_t width  = BigEndianToNative16(label->width);
+  size_t height = BigEndianToNative16(label->height);
 
   size_t exp_size = width * height;
   bool bgra = label->type == LABEL_TYPE_BGRA;
