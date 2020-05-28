@@ -233,8 +233,6 @@
   OpenCorePkg/Tests/CryptoTest/CryptoTestApp.inf
   OpenCorePkg/Tests/DataHubTest/DataHubTest.inf
   OpenCorePkg/Tests/DataHubTest/DataHubTestApp.inf
-  OpenCorePkg/Tests/KernelTest/KernelTest.inf
-  OpenCorePkg/Tests/KernelTest/KernelTestApp.inf
   OpenCorePkg/Tests/PropertyTest/PropertyTest.inf
   OpenCorePkg/Tests/PropertyTest/PropertyTestApp.inf
   OpenCorePkg/Tests/SmbiosTest/SmbiosTest.inf

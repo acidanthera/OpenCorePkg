@@ -1,22 +1,21 @@
-CC ?= gcc
-CFLAGS=-c -Wall -Wextra -pedantic -O3
-LDFLAGS ?=
+STANDALONE     = 1
 
-ifneq ($(OS),Windows_NT)
-	UNAME_S := $(shell uname -s)
-	ifeq ($(UNAME_S),Darwin)
-		CFLAGS+=-mmacosx-version-min=10.6
-		LDFLAGS+=-Wl,-framework,CoreFoundation -Wl,-framework,CoreGraphics -Wl,-framework,CoreText -mmacosx-version-min=10.6
-	endif
+include ../../User/Makefile
+
+.DEFAULT_GOAL := all
+PRODUCT        = disklabel$(SUFFIX)
+
+OBJS          += disklabel.o
+
+ifeq ($(DIST),Darwin)
+	LDFLAGS += -Wl,-framework,CoreFoundation -Wl,-framework,CoreGraphics -Wl,-framework,CoreText
 endif
 
-all: disklabel
+all: $(PRODUCT)
 
-disklabel: disklabel.o
-	$(CC) $(LDFLAGS) disklabel.o -o disklabel
-
-.c:
-	$(CC) $(CFLAGS) $< -o $@
+$(PRODUCT): $(OBJS)
+	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
+	$(STRIP) $(PRODUCT)
 
 clean:
-	rm -rf *.o disklabel
+	rm -rf *.o $(PRODUCT)

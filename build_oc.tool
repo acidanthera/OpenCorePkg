@@ -1,5 +1,30 @@
 #!/bin/bash
 
+buildutil() {
+  UTILS=(
+    "AppleEfiSignTool"
+    "ConfigValidity"
+    "EfiResTool"
+    "disklabel"
+    "HelloWorld"
+    "icnspack"
+    "KextInject"
+    "macserial"
+  )
+
+  if [ "$HAS_OPENSSL_BUILD" = "1" ]; then
+    UTILS+=("RsaTool")
+  fi
+
+  pushd "${selfdir}/Utilities" || exit 1
+  for util in "${UTILS[@]}"; do
+    cd "$util" || exit 1
+    make || exit 1
+    cd - || exit 1
+  done
+  popd || exit 
+}
+
 package() {
   if [ ! -d "$1" ]; then
     echo "Missing package directory"
@@ -67,13 +92,15 @@ package() {
   cp -r "${selfdir}/Utilities/CreateVault" tmp/Utilities/ || exit 1
   cp -r "${selfdir}/Utilities/LogoutHook" tmp/Utilities/ || exit 1
   cp -r "${selfdir}/Utilities/macrecovery" tmp/Utilities/ || exit 1
-  if [ -d "{selfdir}/Utilities/macserial/bin" ]; then
-    cp -r "${selfdir}/Utilities/macserial/bin" tmp/Utilities/macserial || exit 1
-  else
-    mkdir -p tmp/Utilities/macserial || exit 1
+  buildutil || exit 1
+  mkdir -p tmp/Utilities/macserial || exit 1
+  cp "${selfdir}/Utilities/macserial/macserial" tmp/Utilities/macserial || exit 1
+  if [ -f "${selfdir}/Utilities/macserial/macserial.exe" ]; then
+    cp "${selfdir}/Utilities/macserial/macserial.exe" tmp/Utilities/macserial || exit 1
   fi
   cp "${selfdir}/Utilities/macserial/FORMAT.md" tmp/Utilities/macserial/ || exit 1
   cp "${selfdir}/Utilities/macserial/README.md" tmp/Utilities/macserial/ || exit 1
+  cp "${selfdir}/Utilities/ConfigValidity/ConfigValidity" tmp/Utilities/ || exit 1
   cp "${selfdir}/Utilities/disklabel/disklabel" tmp/Utilities/ || exit 1
   cp "${selfdir}/Utilities/icnspack/icnspack" tmp/Utilities/ || exit 1
   cp "${selfdir}/Utilities/kpdescribe/kpdescribe.sh" tmp/Utilities/ || exit 1
@@ -95,27 +122,7 @@ NO_ARCHIVES=0
 export SELFPKG
 export NO_ARCHIVES
 
-./Utilities/macserial/build.tool || exit 1
-
 src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/efibuild.sh) && eval "$src" || exit 1
-
-if [ "$BUILD_UTILITIES" = "1" ]; then
-  UTILS=(
-    "AppleEfiSignTool"
-    "EfiResTool"
-    "disklabel"
-    "icnspack"
-    "RsaTool"
-  )
-
-  cd Utilities || exit 1
-  for util in "${UTILS[@]}"; do
-    cd "$util" || exit 1
-    make || exit 1
-    cd - || exit 1
-  done
-  cd .. || exit 1
-fi
 
 cd Library/OcConfigurationLib || exit 1
 ./CheckSchema.py OcConfigurationLib.c || exit 1

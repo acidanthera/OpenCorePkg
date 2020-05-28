@@ -3,9 +3,13 @@ STANDALONE     = 1
 include ../../User/Makefile
 
 .DEFAULT_GOAL := all
-PRODUCT        = icnspack$(SUFFIX)
+PRODUCT        = macserial$(SUFFIX)
 
-OBJS          += icnspack.o
+OBJS          += macserial.o
+
+ifeq ($(DIST),Darwin)
+	LDFLAGS += -Wl,-framework,IOKit -Wl,-framework,CoreFoundation
+endif
 
 all: $(PRODUCT)
 

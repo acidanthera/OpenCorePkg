@@ -15,12 +15,21 @@ THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
+
+#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define BigEndianToNative32(x) __builtin_bswap32(x)
+#elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define BigEndianToNative32(x) (x)
+#else
+#include <arpa/inet.h>
+#define BigEndianToNative32(x) ntohl(x)
+#endif
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <arpa/inet.h>
 
 static int read_file(const char *filename, uint8_t **buffer, size_t *size) {
   FILE *fh = fopen(filename, "rb");
@@ -89,16 +98,16 @@ int main(int argc, char *argv[]) {
   if (r1 == 0 && r2 == 0) {
     fh = fopen (argv[1], "wb");
     if (fh != NULL) {
-      uint32_t size = htonl(size1x + size2x + sizeof(uint32_t)*6);
+      uint32_t size = BigEndianToNative32(size1x + size2x + sizeof(uint32_t)*6);
       fwrite("icns", sizeof(uint32_t), 1, fh);
       fwrite(&size, sizeof(uint32_t), 1, fh);
 
-      size = htonl(size1x + sizeof(uint32_t)*2);
+      size = BigEndianToNative32(size1x + sizeof(uint32_t)*2);
       fwrite("ic07", sizeof(uint32_t), 1, fh);
       fwrite(&size, sizeof(uint32_t), 1, fh);
       fwrite(buffer1x, size1x, 1, fh);
 
-      size = htonl(size2x + sizeof(uint32_t)*2);
+      size = BigEndianToNative32(size2x + sizeof(uint32_t)*2);
       fwrite("ic13", sizeof(uint32_t), 1, fh);
       fwrite(&size, sizeof(uint32_t), 1, fh);
       fwrite(buffer2x, size2x, 1, fh);
