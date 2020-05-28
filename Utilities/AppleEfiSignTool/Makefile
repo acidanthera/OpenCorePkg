@@ -15,7 +15,8 @@ OBJS          += AppleEfiBinary.o Sha2.o BigNumWordMul64.o BigNumPrimitives.o Bi
 all: $(PRODUCT)
 
 $(PRODUCT): $(OBJS)
-	$(CC) $(LDFLAG) $(OBJS) -o $(PRODUCT)
+	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
+	$(STRIP) $(PRODUCT)
 
 Sha2.o:
 	$(CC) $(CFLAGS) ../../Library/OcCryptoLib/Sha2.c -o $@

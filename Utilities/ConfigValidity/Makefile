@@ -15,6 +15,7 @@ all: $(PRODUCT)
 
 $(PRODUCT): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
+	$(STRIP) $(PRODUCT)
 
 OcConfigurationLib.o:
 	$(CC) $(CFLAGS) ../../Library/OcConfigurationLib/OcConfigurationLib.c -o $@

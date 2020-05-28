@@ -11,6 +11,7 @@ all: $(PRODUCT)
 
 $(PRODUCT): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
+	$(STRIP) $(PRODUCT)
 
 clean:
 	rm -rf *.o $(PRODUCT)

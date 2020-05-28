@@ -26,9 +26,10 @@ endif
 
 ifeq ($(DEBUG),1)
 	CFLAGS  += -g -O0
+	STRIP   := @echo No strip in DEBUG mode
 else
 	CFLAGS  += -O3
-	STRIP   := 1
+	STRIP   := strip -x
 endif
 
 #

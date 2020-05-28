@@ -16,6 +16,7 @@ all: $(PRODUCT)
 
 $(PRODUCT): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
+	$(STRIP) $(PRODUCT)
 
 Lilu.o:
 	$(CC) $(CFLAGS) ./Lilu.c -o $@

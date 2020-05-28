@@ -15,10 +15,7 @@ all: $(PRODUCT)
 
 $(PRODUCT): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
-	@if [ "${STRIP}" = "1" ]; then\
-		echo "Stripping binary on non-DEBUG mode";\
-		strip -x "${PRODUCT}";\
-	fi
+	$(STRIP) $(PRODUCT)
 
 clean:
 	rm -rf *.o $(PRODUCT)
