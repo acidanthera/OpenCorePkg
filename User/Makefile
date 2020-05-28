@@ -10,7 +10,7 @@ UDK_ARCH ?= X64
 
 DIST     ?= $(shell uname)
 
-CFLAGS    = -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter -D NO_MSABI_VA_FUNCS
+CFLAGS    = -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter
 CFLAGS   += -I../../User/Include
 CFLAGS   += -I../../Include/Acidanthera -I../../Include/Apple -I../../Include/Generic -I../../Include/Intel
 
@@ -34,6 +34,7 @@ endif
 # Skip including UDK when suggesting STANDALONE mode.
 #
 ifneq ($(STANDALONE),1)
+	CFLAGS  += -D NO_MSABI_VA_FUNCS
 	CFLAGS  += -I$(UDK_PATH)/MdePkg/Include -I$(UDK_PATH)/MdePkg/Include/Library -I$(UDK_PATH)/MdePkg/Include/$(UDK_ARCH)
 	CFLAGS  += -I$(UDK_PATH)/UefiCpuPkg/Include
 	#
