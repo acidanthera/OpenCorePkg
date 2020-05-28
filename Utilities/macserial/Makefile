@@ -19,7 +19,6 @@ $(PRODUCT): $(OBJS)
 		echo "Stripping binary on non-DEBUG mode";\
 		strip -x "${PRODUCT}";\
 	fi
-	zip -qr -FS "${PRODUCT}.zip" "${PRODUCT}"
 
 clean:
-	rm -rf *.o *.zip $(PRODUCT)
+	rm -rf *.o $(PRODUCT)

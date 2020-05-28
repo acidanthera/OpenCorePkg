@@ -94,8 +94,9 @@ package() {
   cp -r "${selfdir}/Utilities/macrecovery" tmp/Utilities/ || exit 1
   buildutil || exit 1
   mkdir -p tmp/Utilities/macserial || exit 1
-  if [ -f "${selfdir}/Utilities/macserial/macserial.zip" ]; then
-    cp "${selfdir}/Utilities/macserial/macserial.zip" tmp/Utilities/macserial || exit 1
+  cp "${selfdir}/Utilities/macserial/macserial" tmp/Utilities/macserial || exit 1
+  if [ -f "${selfdir}/Utilities/macserial/macserial.exe" ]; then
+    cp "${selfdir}/Utilities/macserial/macserial.exe" tmp/Utilities/macserial || exit 1
   fi
   cp "${selfdir}/Utilities/macserial/FORMAT.md" tmp/Utilities/macserial/ || exit 1
   cp "${selfdir}/Utilities/macserial/README.md" tmp/Utilities/macserial/ || exit 1
