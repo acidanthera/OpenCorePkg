@@ -536,12 +536,18 @@ OcConfigureLogProtocol (
 
   if (LogRoot != NULL) {
     if (!EFI_ERROR (Status)) {
-      SetFileData (
-        LogRoot,
-        LogPath,
-        OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBuffer,
-        (UINT32) OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBufferSize
-        );
+      if ((Options & (OC_LOG_SERIAL | OC_LOG_ENABLE)) == (OC_LOG_SERIAL | OC_LOG_ENABLE)) {
+        SerialPortInitialize ();
+      }
+
+      if (OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBufferSize > 0) {
+        SetFileData (
+          LogRoot,
+          LogPath,
+          OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBuffer,
+          (UINT32) OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBufferSize
+          );
+      }
     } else {
       LogRoot->Close (LogRoot);
       FreePool (LogPath);
