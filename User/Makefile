@@ -5,7 +5,14 @@
 
 CC       ?= gcc
 
-UDK_PATH ?= ../../UDK
+ifeq ($(UDK_PATH),)
+	ifneq ($(PACKAGES_PATH),)
+		UDK_PATH = $(PACKAGES_PATH)
+	else
+		UDK_PATH ?= ../../UDK
+	endif
+endif
+
 UDK_ARCH ?= X64
 
 ifeq ($(OS),Windows_NT)
