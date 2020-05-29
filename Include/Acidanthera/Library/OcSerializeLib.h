@@ -31,9 +31,10 @@ typedef union OC_SCHEMA_INFO_ OC_SCHEMA_INFO;
 typedef
 VOID
 (*OC_APPLY) (
-  VOID            *Serialized,
-  XML_NODE        *Node,
-  OC_SCHEMA_INFO  *Info
+  OUT VOID            *Serialized,
+  IN  XML_NODE        *Node,
+  IN  OC_SCHEMA_INFO  *Info,
+  IN  CONST CHAR8     *Context  OPTIONAL
   );
 
 //
@@ -150,9 +151,9 @@ struct OC_SCHEMA_ {
 //
 OC_SCHEMA *
 LookupConfigSchema (
-  OC_SCHEMA      *SortedList,
-  UINT32         Size,
-  CONST CHAR8    *Name
+  IN OC_SCHEMA      *SortedList,
+  IN UINT32         Size,
+  IN CONST CHAR8    *Name
   );
 
 //
@@ -160,9 +161,10 @@ LookupConfigSchema (
 //
 VOID
 ParseSerializedDict (
-  VOID                *Serialized,
-  XML_NODE            *Node,
-  OC_SCHEMA_INFO      *Info
+  OUT VOID            *Serialized,
+  IN  XML_NODE        *Node,
+  IN  OC_SCHEMA_INFO  *Info,
+  IN  CONST CHAR8     *Context  OPTIONAL
   );
 
 //
@@ -170,9 +172,10 @@ ParseSerializedDict (
 //
 VOID
 ParseSerializedValue (
-  VOID                *Serialized,
-  XML_NODE            *Node,
-  OC_SCHEMA_INFO      *Info
+  OUT VOID            *Serialized,
+  IN  XML_NODE        *Node,
+  IN  OC_SCHEMA_INFO  *Info,
+  IN  CONST CHAR8     *Context  OPTIONAL
   );
 
 //
@@ -180,9 +183,10 @@ ParseSerializedValue (
 //
 VOID
 ParseSerializedBlob (
-  VOID                *Serialized,
-  XML_NODE            *Node,
-  OC_SCHEMA_INFO      *Info
+  OUT VOID            *Serialized,
+  IN  XML_NODE        *Node,
+  IN  OC_SCHEMA_INFO  *Info,
+  IN  CONST CHAR8     *Context  OPTIONAL
   );
 
 //
@@ -190,9 +194,10 @@ ParseSerializedBlob (
 //
 VOID
 ParseSerializedArray (
-  VOID                *Serialized,
-  XML_NODE            *Node,
-  OC_SCHEMA_INFO      *Info
+  OUT VOID            *Serialized,
+  IN  XML_NODE        *Node,
+  IN  OC_SCHEMA_INFO  *Info,
+  IN  CONST CHAR8     *Context  OPTIONAL
   );
 
 //
@@ -201,9 +206,10 @@ ParseSerializedArray (
 //
 VOID
 ParseSerializedMap (
-  VOID                *Serialized,
-  XML_NODE            *Node,
-  OC_SCHEMA_INFO      *Info
+  OUT VOID            *Serialized,
+  IN  XML_NODE        *Node,
+  IN  OC_SCHEMA_INFO  *Info,
+  IN  CONST CHAR8     *Context  OPTIONAL
   );
 
 //
@@ -212,10 +218,10 @@ ParseSerializedMap (
 //
 BOOLEAN
 ParseSerialized (
-  VOID                *Serialized,
-  OC_SCHEMA_INFO      *RootSchema,
-  VOID                *PlistBuffer,
-  UINT32              PlistSize
+  OUT VOID                *Serialized,
+  IN  OC_SCHEMA_INFO      *RootSchema,
+  IN  VOID                *PlistBuffer,
+  IN  UINT32              PlistSize
   );
 
 //
