@@ -14,8 +14,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "BiosVideo.h"
 
-#define EFI_CPU_EFLAGS_IF 0x200
-
 /**
   Initialize legacy environment for BIOS INI caller.
 
@@ -116,8 +114,6 @@ InitializeInterruptRedirection (
   for (Index = 0; Index < 8; Index++) {
     IdtArray[ProtectedModeBaseVector + Index] = ((EFI_SEGMENT (LegacyRegionBase + Index * 4)) << 16) | (EFI_OFFSET (LegacyRegionBase + Index * 4));
   }
-
-  return ;
 }
 
 /**
@@ -218,5 +214,3 @@ LegacyBiosInt86 (
 
   return Ret;
 }
-
-
