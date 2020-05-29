@@ -88,6 +88,7 @@ InternalCalculateTSCFromPMTimer (
   Calculate the ART frequency and derieve the CPU frequency for Intel CPUs
 
   @param[out] CPUFrequency  The derieved CPU frequency.
+  @param[out] TscAdjustPtr  Adjustment value for TSC, optional.
   @param[in]  Recalculate   Do not re-use previously cached information.
 
   @retval  The calculated ART frequency.
@@ -95,6 +96,7 @@ InternalCalculateTSCFromPMTimer (
 UINT64
 InternalCalculateARTFrequencyIntel (
   OUT UINT64   *CPUFrequency,
+  OUT UINT64   *TscAdjustPtr OPTIONAL,
   IN  BOOLEAN  Recalculate
   );
 

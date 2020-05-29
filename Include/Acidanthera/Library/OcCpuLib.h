@@ -112,6 +112,10 @@ typedef struct {
   //
   UINT64                  CPUFrequencyFromART;
 
+  //
+  // TSC adjustment value read from MSR_IA32_TSC_ADJUST if present.
+  //
+  UINT64                  TscAdjust;
 
   //
   // The CPU frequency derived from the CPUID VMWare Timing leaf.

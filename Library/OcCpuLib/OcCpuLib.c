@@ -384,7 +384,11 @@ ScanIntelProcessor (
     //
     // Determine our core crystal clock frequency
     //
-    Cpu->ARTFrequency = InternalCalculateARTFrequencyIntel (&Cpu->CPUFrequencyFromART, Recalculate);
+    Cpu->ARTFrequency = InternalCalculateARTFrequencyIntel (
+      &Cpu->CPUFrequencyFromART,
+      &Cpu->TscAdjust,
+      Recalculate
+      );
 
     //
     // Calculate the TSC frequency only if ART frequency is not available or we are in debug builds.
