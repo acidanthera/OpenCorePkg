@@ -3,34 +3,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
+PRODUCT = ConfigValidity$(SUFFIX)
+OBJS    = ConfigValidity.o \
+	OcConfigurationLib.o \
+	OcTemplateLib.o \
+	OcSerializeLib.o \
+	OcXmlLib.o \
+	OcAsciiLib.o
+VPATH   = ../../Library/OcConfigurationLib:$\
+	../../Library/OcTemplateLib:$\
+	../../Library/OcSerializeLib:$\
+	../../Library/OcXmlLib:$\
+	../../Library/OcStringLib
 include ../../User/Makefile
-
-.DEFAULT_GOAL := all
-PRODUCT        = ConfigValidity$(SUFFIX)
-
-OBJS          += ConfigValidity.o 
-OBJS          += OcConfigurationLib.o OcTemplateLib.o OcSerializeLib.o OcXmlLib.o OcAsciiLib.o
-
-all: $(PRODUCT)
-
-$(PRODUCT): $(OBJS)
-	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
-	$(STRIP) $(PRODUCT)
-
-OcConfigurationLib.o:
-	$(CC) $(CFLAGS) ../../Library/OcConfigurationLib/OcConfigurationLib.c -o $@
-
-OcTemplateLib.o:
-	$(CC) $(CFLAGS) ../../Library/OcTemplateLib/OcTemplateLib.c -o $@
-
-OcSerializeLib.o:
-	$(CC) $(CFLAGS) ../../Library/OcSerializeLib/OcSerializeLib.c -o $@
-
-OcXmlLib.o:
-	$(CC) $(CFLAGS) ../../Library/OcXmlLib/OcXmlLib.c -o $@
-
-OcAsciiLib.o:
-	$(CC) $(CFLAGS) ../../Library/OcStringLib/OcAsciiLib.c -o $@
-
-clean:
-	rm -rf *.o *.dSYM $(PRODUCT)

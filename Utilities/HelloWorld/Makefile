@@ -3,18 +3,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
+PRODUCT = HelloWorld$(SUFFIX)
+OBJS    = main.o
 include ../../User/Makefile
-
-.DEFAULT_GOAL := all
-PRODUCT        = HelloWorld$(SUFFIX)
-
-OBJS          += main.o
-
-all: $(PRODUCT)
-
-$(PRODUCT): $(OBJS)
-	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
-	$(STRIP) $(PRODUCT)
-
-clean:
-	rm -rf *.o *.dSYM $(PRODUCT)

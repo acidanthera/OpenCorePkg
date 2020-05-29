@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
+.DEFAULT_GOAL := all
+
 CC       ?= gcc
 
 ifeq ($(UDK_PATH),)
@@ -61,73 +63,38 @@ ifneq ($(STANDALONE),1)
 	#
 	# UDK implementations.
 	#
-	OBJS     = UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o
+	OBJS    += UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o
 	#
 	# Customised/Simplified implementations at userspace level.
 	#
-	OBJS    += BaseMemoryLib.o BootServices.o DebugBreak.o EfiVar.o Math.o Pcd.o
+	OBJS    += BaseMemoryLib.o BootServices.o DebugBreak.o EfiVar.o UserMath.o Pcd.o
 	#
 	# OcGuardLib targets.
 	#
 	OBJS    += BitOverflow.o NativeOverflow.o TripleOverflow.o
+
+	#
+	# Add source searchpath for transparent compilation.
+	# This way make will find any file in path in VPATH and apply "%.o: %.c" rule.
+	#
+	VPATH += :$(UDK_PATH)/MdePkg/Library/UefiLib:$\
+		$(UDK_PATH)/MdePkg/Library/BaseLib:$\
+		$(UDK_PATH)/MdePkg/Library/BaseDebugPrintErrorLevelLib:$\
+		$(UDK_PATH)/MdePkg/Library/UefiDebugLibConOut:$\
+		$(UDK_PATH)/MdePkg/Library/BasePrintLib:$\
+		$(UDK_PATH)/MdePkg/Library/BasePrintLib:$\
+		../../User/Library:$\
+		../../Library/OcGuardLib
 endif
 
-UefiLibPrint.o:
-	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/UefiLib/UefiLibPrint.c -o $@
+%.o: %.c
+	$(CC) $(CFLAGS) $< -o $@
 
-CpuDeadLoop.o:
-	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/BaseLib/CpuDeadLoop.c -o $@
+all: $(PRODUCT)
 
-BaseDebugPrintErrorLevelLib.o:
-	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.c -o $@
+$(PRODUCT): $(OBJS)
+	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
+	$(STRIP) $(PRODUCT)
 
-DebugLib.o:
-	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/UefiDebugLibConOut/DebugLib.c -o $@
-
-PrintLib.o:
-	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/BasePrintLib/PrintLib.c -o $@
-
-PrintLibInternal.o:
-	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/BasePrintLib/PrintLibInternal.c -o $@
-
-String.o:
-	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/BaseLib/String.c -o $@
-
-SafeString.o:
-	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/BaseLib/SafeString.c -o $@
-
-SwapBytes16.o:
-	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/BaseLib/SwapBytes16.c -o $@
-
-SwapBytes32.o:
-	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/BaseLib/SwapBytes32.c -o $@
-
-LinkedList.o:
-	$(CC) $(CFLAGS) $(UDK_PATH)/MdePkg/Library/BaseLib/LinkedList.c -o $@
-
-BaseMemoryLib.o:
-	$(CC) $(CFLAGS) ../../User/Library/BaseMemoryLib.c -o $@
-
-BootServices.o:
-	$(CC) $(CFLAGS) ../../User/Library/BootServices.c -o $@
-
-DebugBreak.o:
-	$(CC) $(CFLAGS) ../../User/Library/DebugBreak.c -o $@
-
-EfiVar.o:
-	$(CC) $(CFLAGS) ../../User/Library/EfiVar.c -o $@
-
-Math.o:
-	$(CC) $(CFLAGS) ../../User/Library/Math.c -o $@
-
-Pcd.o:
-	$(CC) $(CFLAGS) ../../User/Library/Pcd.c -o $@
-
-BitOverflow.o:
-	$(CC) $(CFLAGS) ../../Library/OcGuardLib/BitOverflow.c -o $@
-
-NativeOverflow.o:
-	$(CC) $(CFLAGS) ../../Library/OcGuardLib/NativeOverflow.c -o $@
-
-TripleOverflow.o:
-	$(CC) $(CFLAGS) ../../Library/OcGuardLib/TripleOverflow.c -o $@
+clean:
+	rm -rf *.o *.dSYM $(PRODUCT)
