@@ -268,6 +268,7 @@ InternalCalculateTSCFromPMTimer (
 UINT64
 InternalCalculateARTFrequencyIntel (
   OUT UINT64   *CPUFrequency,
+  OUT UINT64   *TscAdjustPtr OPTIONAL,
   IN  BOOLEAN  Recalculate
   )
 {
@@ -307,6 +308,10 @@ InternalCalculateARTFrequencyIntel (
     if (CpuVendor == CPUID_VENDOR_INTEL && MaxId >= CPUID_TIME_STAMP_COUNTER) {
       TscAdjust = AsmReadMsr64 (MSR_IA32_TSC_ADJUST);
       DEBUG ((DEBUG_INFO, "OCCPU: TSC Adjust %Lu\n", TscAdjust));
+
+      if (TscAdjustPtr != NULL) {
+        *TscAdjustPtr = TscAdjust;
+      }
 
       AsmCpuid (
         CPUID_TIME_STAMP_COUNTER,
@@ -486,7 +491,7 @@ OcGetTSCFrequency (
   // available (e.g. 300 series chipsets).
   // TODO: For AMD, the base clock can be determined from P-registers.
   //
-  InternalCalculateARTFrequencyIntel (&CPUFrequency, FALSE);
+  InternalCalculateARTFrequencyIntel (&CPUFrequency, NULL, FALSE);
   if (CPUFrequency == 0) {
     CPUFrequency = InternalCalculateVMTFrequency (NULL, NULL);
     if (CPUFrequency == 0) {

@@ -22,6 +22,15 @@
 #define OC_CPU_FREQUENCY_TOLERANCE 50000000ULL // 50 Mhz
 
 /**
+  Internal CPU synchronisation structure.
+**/
+typedef struct {
+  UINT64           Tsc;
+  volatile UINT32  CurrentCount;
+  UINT32           APThreadCount;
+} OC_CPU_TSC_SYNC;
+
+/**
   Returns microcode revision for Intel CPUs.
 
   @retval  microcode revision.
@@ -88,6 +97,7 @@ InternalCalculateTSCFromPMTimer (
   Calculate the ART frequency and derieve the CPU frequency for Intel CPUs
 
   @param[out] CPUFrequency  The derieved CPU frequency.
+  @param[out] TscAdjustPtr  Adjustment value for TSC, optional.
   @param[in]  Recalculate   Do not re-use previously cached information.
 
   @retval  The calculated ART frequency.
@@ -95,6 +105,7 @@ InternalCalculateTSCFromPMTimer (
 UINT64
 InternalCalculateARTFrequencyIntel (
   OUT UINT64   *CPUFrequency,
+  OUT UINT64   *TscAdjustPtr OPTIONAL,
   IN  BOOLEAN  Recalculate
   );
 

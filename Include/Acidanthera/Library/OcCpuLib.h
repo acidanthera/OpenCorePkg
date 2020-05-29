@@ -112,6 +112,10 @@ typedef struct {
   //
   UINT64                  CPUFrequencyFromART;
 
+  //
+  // TSC adjustment value read from MSR_IA32_TSC_ADJUST if present.
+  //
+  UINT64                  TscAdjust;
 
   //
   // The CPU frequency derived from the CPUID VMWare Timing leaf.
@@ -161,6 +165,25 @@ OcCpuScanProcessor (
 VOID
 OcCpuCorrectFlexRatio (
   IN OC_CPU_INFO  *Cpu
+  );
+
+/**
+  Synchronise TSC on all cores (needed on server chipsets and some laptops).
+  This does not fully replace VoodooTscSync or TSCAdjustReset due to
+  the need to sync on S3 as well and may also work far less reliably
+  due to the limitation of UEFI firmwares not letting us run MSR updates in
+  parallel with BSP and AP cores. However, it lets debug kernels work
+  most of the time till the time TSC kexts start.
+
+  @param[in]  Cpu       A pointer to the cpu info.
+  @param[in]  Timeout   Amount of time to wait for CPU core rendezvous.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcCpuCorrectTscSync (
+  IN OC_CPU_INFO  *Cpu,
+  IN UINTN        Timeout
   );
 
 /**

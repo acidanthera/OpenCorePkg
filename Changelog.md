@@ -35,7 +35,10 @@ OpenCore Changelog
 - Improved playback performance in AudioDxe
 - Updated builtin firmware versions for SMBIOS and the rest
 - Added improved CPU type detection for newer CPU types
-- Added ConfigValidity utility
+- Added ConfigValidity utility and improved config validation
+- Added serial port initialisation for serial debug logging
+- Disabled empty debug log file creation to avoid ESP cluttering
+- Added `TscSyncTimeout` quirk to workaround debug kernel assertions
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG

@@ -50,7 +50,3 @@
   gEfiLegacy8259ProtocolGuid
   gEfiEdidDiscoveredProtocolGuid
   gEfiEdidActiveProtocolGuid
-
- [Guids]
-  gEfiGlobalVariableGuid
-

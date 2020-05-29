@@ -21,6 +21,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcCpuLib.h>
+#include <Library/SynchronizationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <IndustryStandard/ProcessorInfo.h>
 #include <Register/Microcode.h>
@@ -384,7 +385,11 @@ ScanIntelProcessor (
     //
     // Determine our core crystal clock frequency
     //
-    Cpu->ARTFrequency = InternalCalculateARTFrequencyIntel (&Cpu->CPUFrequencyFromART, Recalculate);
+    Cpu->ARTFrequency = InternalCalculateARTFrequencyIntel (
+      &Cpu->CPUFrequencyFromART,
+      &Cpu->TscAdjust,
+      Recalculate
+      );
 
     //
     // Calculate the TSC frequency only if ART frequency is not available or we are in debug builds.
@@ -843,6 +848,114 @@ OcCpuCorrectFlexRatio (
       }
     }
   }
+}
+
+STATIC
+VOID
+EFIAPI
+SyncTscOnCpu (
+  IN  VOID  *Buffer
+  )
+{
+  OC_CPU_TSC_SYNC   *Sync;
+  Sync = Buffer;
+  InterlockedIncrement (&Sync->CurrentCount);
+  while (Sync->CurrentCount < Sync->APThreadCount) {
+    //
+    // Busy-wait on AP CPU cores.
+    //
+  }
+  AsmWriteMsr64 (MSR_IA32_TIME_STAMP_COUNTER, Sync->Tsc);
+}
+
+STATIC
+VOID
+EFIAPI
+ResetAdjustTsc (
+  IN  VOID  *Buffer
+  )
+{
+  OC_CPU_TSC_SYNC   *Sync;
+  Sync = Buffer;
+  InterlockedIncrement (&Sync->CurrentCount);
+  while (Sync->CurrentCount < Sync->APThreadCount) {
+    //
+    // Busy-wait on AP CPU cores.
+    //
+  }
+  AsmWriteMsr64 (MSR_IA32_TSC_ADJUST, 0);
+}
+
+EFI_STATUS
+OcCpuCorrectTscSync (
+  IN OC_CPU_INFO   *Cpu,
+  IN UINTN         Timeout
+  )
+{
+  EFI_STATUS                          Status;
+  EFI_MP_SERVICES_PROTOCOL            *MpServices;
+  FRAMEWORK_EFI_MP_SERVICES_PROTOCOL  *FrameworkMpServices;
+  OC_CPU_TSC_SYNC                     Sync;
+  EFI_TPL                             OldTpl;
+  BOOLEAN                             InterruptState;
+
+  if (Cpu->ThreadCount <= 1) {
+    DEBUG ((DEBUG_INFO, "OCCPU: Thread count is too low for sync - %u\n", Cpu->ThreadCount));
+    return EFI_UNSUPPORTED;
+  }
+
+  Status = gBS->LocateProtocol (
+    &gEfiMpServiceProtocolGuid,
+    NULL,
+    (VOID **) &MpServices
+    );
+
+  if (EFI_ERROR (Status)) {
+    MpServices = NULL;
+    Status = gBS->LocateProtocol (
+      &gFrameworkEfiMpServiceProtocolGuid,
+      NULL,
+      (VOID **) &FrameworkMpServices
+      );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCCPU: Failed to find mp services - %r\n", Status));
+      return Status;
+    }
+  }
+
+  Sync.CurrentCount  = 0;
+  Sync.APThreadCount = Cpu->ThreadCount - 1;
+
+  OldTpl = gBS->RaiseTPL (TPL_HIGH_LEVEL);
+  InterruptState = SaveAndDisableInterrupts ();
+
+  if (Cpu->TscAdjust > 0) {
+    if (MpServices != NULL) {
+      Status = MpServices->StartupAllAPs (MpServices, ResetAdjustTsc, FALSE, NULL, Timeout, &Sync, NULL);
+    } else {
+      Status = FrameworkMpServices->StartupAllAPs (FrameworkMpServices, ResetAdjustTsc, FALSE, NULL, Timeout, &Sync, NULL);
+    }
+
+    AsmWriteMsr64 (MSR_IA32_TSC_ADJUST, 0);
+  } else {
+    Sync.Tsc = AsmReadTsc ();
+
+    if (MpServices != NULL) {
+      Status = MpServices->StartupAllAPs (MpServices, SyncTscOnCpu, FALSE, NULL, Timeout, &Sync, NULL);
+    } else {
+      Status = FrameworkMpServices->StartupAllAPs (FrameworkMpServices, SyncTscOnCpu, FALSE, NULL, Timeout, &Sync, NULL);
+    }
+
+    AsmWriteMsr64 (MSR_IA32_TIME_STAMP_COUNTER, Sync.Tsc);
+  }
+
+  SetInterruptState (InterruptState);
+  gBS->RestoreTPL (OldTpl);
+
+  DEBUG ((DEBUG_INFO, "OCCPU: Completed TSC sync with code - %r\n", Status));
+
+  return Status;
 }
 
 OC_CPU_GENERATION

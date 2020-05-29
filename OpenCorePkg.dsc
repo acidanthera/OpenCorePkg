@@ -97,7 +97,7 @@
   OcStorageLib|OpenCorePkg/Library/OcStorageLib/OcStorageLib.inf
   OcStringLib|OpenCorePkg/Library/OcStringLib/OcStringLib.inf
   OcTemplateLib|OpenCorePkg/Library/OcTemplateLib/OcTemplateLib.inf
-  OcTimerLib|OpenCorePkg/Library/OcTimerLib/OcTimerLib.inf
+  TimerLib|OpenCorePkg/Library/OcTimerLib/OcTimerLib.inf
   OcUnicodeCollationEngGenericLib|OpenCorePkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngGenericLib.inf
   OcUnicodeCollationEngLocalLib|OpenCorePkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngLocalLib.inf
   OcVirtualFsLib|OpenCorePkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
@@ -140,10 +140,7 @@
       !endif
   }
   MdeModulePkg/Bus/Isa/Ps2MouseDxe/Ps2MouseDxe.inf
-  MdeModulePkg/Bus/Isa/Ps2KeyboardDxe/Ps2KeyboardDxe.inf {
-    <LibraryClasses>
-      TimerLib|OpenCorePkg/Library/OcTimerLib/OcTimerLib.inf
-  }
+  MdeModulePkg/Bus/Isa/Ps2KeyboardDxe/Ps2KeyboardDxe.inf
   MdeModulePkg/Bus/Usb/UsbMouseDxe/UsbMouseDxe.inf
   MdeModulePkg/Universal/HiiDatabaseDxe/HiiDatabaseDxe.inf
   OpenCorePkg/Application/BootKicker/BootKicker.inf
@@ -222,10 +219,7 @@
   OpenCorePkg/Platform/OpenCore/OpenCore.inf
   OpenCorePkg/Platform/OpenRuntime/OpenRuntime.inf
   OpenCorePkg/Platform/OpenUsbKbDxe/UsbKbDxe.inf
-  OpenCorePkg/Staging/AudioDxe/AudioDxe.inf {
-    <LibraryClasses>
-      TimerLib|OpenCorePkg/Library/OcTimerLib/OcTimerLib.inf
-  }
+  OpenCorePkg/Staging/AudioDxe/AudioDxe.inf
   OpenCorePkg/Staging/VBoxHfs/VBoxHfs.inf
   OpenCorePkg/Tests/AcpiTest/AcpiTest.inf
   OpenCorePkg/Tests/AcpiTest/AcpiTestApp.inf

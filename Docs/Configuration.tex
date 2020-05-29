@@ -365,6 +365,11 @@ Root configuration entries consist of the following:
   \hyperref[uefi]{\texttt{UEFI}}
 \end{itemize}
 
+It is possible to perform basic validation of the configuration by using
+\texttt{ConfigValidity} utility. Please note, that \texttt{ConfigValidity}
+must match the used OpenCore release and may not be able to detect all
+configuration flaws present in the file.
+
 \emph{Note}: Currently most properties try to have defined values even if not
 specified in the configuration for safety reasons. This behaviour should not
 be relied upon, and all fields must be properly specified in the configuration.
@@ -5275,6 +5280,31 @@ functioning. Feature highlights:
   Simply said, you are required to enable this quirk to be able to reliably
   use \href{https://support.apple.com/HT202796}{Startup Disk} preference
   pane in a firmware that is not compatible with macOS boot entries by design.
+
+\item
+  \texttt{TscSyncTimeout}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Attempts to perform TSC synchronisation with a specified timeout.
+
+  The primary purpose of this quirk is to enable early bootstrap TSC synchronisation
+  on some server and laptop models when running a debug XNU kernel. For the debug kernel
+  the TSC needs to be kept in sync across the cores before any kext could kick in rendering
+  all other solutions problematic. The timeout is specified in microseconds and depends on the
+  amount of cores present on the platform, the recommended starting value is \texttt{500000}.
+
+  This is an experimental quirk, which should only be used for the aforementioned problem.
+  In all other cases the quirk may render the operating system unstable and is not recommended.
+  The recommended solution in the other cases is to install a kernel driver like
+  \href{https://github.com/RehabMan/VoodooTSCSync}{VoodooTSCSync},
+  \href{https://github.com/interferenc/TSCAdjustReset}{TSCAdjustReset},
+  or \href{https://github.com/lvs1974/CpuTscSync}{CpuTscSync} (a more specialised
+  variant of VoodooTSCSync for newer laptops).
+
+  \emph{Note}: The reason this quirk cannot replace the kernel driver is
+  because it cannot operate in ACPI S3 mode (sleep wake) and because the UEFI firmwares
+  provide very limited multicore support preventing the precise update of the MSR
+  registers.
 
 \item
   \texttt{UnblockFsConnect}\\

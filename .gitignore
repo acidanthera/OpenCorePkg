@@ -24,6 +24,7 @@ Utilities/KextInject/KextInject
 Utilities/ConfigValidity/ConfigValidity
 Utilities/disklabel/disklabel
 *.o
+*.exe
 DICT
 fuzz-*.log
 crash-*

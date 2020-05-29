@@ -108,5 +108,5 @@
   OcFileLib
   OcRtcLib
   OcXmlLib
-  OcTimerLib
+  TimerLib
   FileHandleLib

@@ -437,6 +437,10 @@ OcLoadUefiSupport (
     OcCpuCorrectFlexRatio (CpuInfo);
   }
 
+  if (Config->Uefi.Quirks.TscSyncTimeout > 0) {
+    OcCpuCorrectTscSync (CpuInfo, Config->Uefi.Quirks.TscSyncTimeout);
+  }
+
   DEBUG ((
     DEBUG_INFO,
     "OC: RBVR %d DDBR %d\n",

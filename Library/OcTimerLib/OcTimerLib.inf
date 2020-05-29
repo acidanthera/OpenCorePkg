@@ -22,7 +22,7 @@
   FILE_GUID                      = 8BF2026F-C0BB-4A5D-A7DB-395DAB5A73E7
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = OcTimerLib
+  LIBRARY_CLASS                  = TimerLib
   CONSTRUCTOR                    = OcTimerLibConstructor
 
 #
