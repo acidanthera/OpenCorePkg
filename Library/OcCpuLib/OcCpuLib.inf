@@ -35,6 +35,7 @@
 [LibraryClasses]
   BaseLib
   IoLib
+  SynchronizationLib
   UefiRuntimeServicesTableLib
 
 [Guids]

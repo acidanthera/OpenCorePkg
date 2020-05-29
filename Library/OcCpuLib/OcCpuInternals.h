@@ -22,6 +22,15 @@
 #define OC_CPU_FREQUENCY_TOLERANCE 50000000ULL // 50 Mhz
 
 /**
+  Internal CPU synchronisation structure.
+**/
+typedef struct {
+  UINT64           Tsc;
+  volatile UINT32  CurrentCount;
+  UINT32           APThreadCount;
+} OC_CPU_TSC_SYNC;
+
+/**
   Returns microcode revision for Intel CPUs.
 
   @retval  microcode revision.
