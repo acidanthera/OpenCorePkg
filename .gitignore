@@ -17,7 +17,12 @@ TestsUser/Smbios/Smbios
 Utilities/RsaTool/RsaTool
 Utilities/EfiResTool/EfiResTool
 Utilities/AppleEfiSignTool/AppleEfiSignTool
-Utilities/macserial/bin/
+Utilities/macserial/macserial
+Utilities/icnspack/icnspack
+Utilities/HelloWorld/HelloWorld
+Utilities/KextInject/KextInject
+Utilities/ConfigValidity/ConfigValidity
+Utilities/disklabel/disklabel
 *.o
 DICT
 fuzz-*.log
