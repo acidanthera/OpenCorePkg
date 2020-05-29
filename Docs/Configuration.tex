@@ -365,6 +365,11 @@ Root configuration entries consist of the following:
   \hyperref[uefi]{\texttt{UEFI}}
 \end{itemize}
 
+It is possible to perform basic validation of the configuration by using
+\texttt{ConfigValidity} utility. Please note, that \texttt{ConfigValidity}
+must match the used OpenCore release and may not be able to detect all
+configuration flaws present in the file.
+
 \emph{Note}: Currently most properties try to have defined values even if not
 specified in the configuration for safety reasons. This behaviour should not
 be relied upon, and all fields must be properly specified in the configuration.

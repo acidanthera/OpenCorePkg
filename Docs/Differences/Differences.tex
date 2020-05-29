@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Mon May 11 17:11:58 2020
-%DIF ADD ../Configuration.tex        Sat May 30 01:22:19 2020
+%DIF ADD ../Configuration.tex        Sat May 30 01:33:51 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -437,7 +437,13 @@ Root configuration entries consist of the following:
   \hyperref[uefi]{\texttt{UEFI}}
 \end{itemize}
 
-\emph{Note}: Currently most properties try to have defined values even if not
+\DIFaddbegin \DIFadd{It is possible to perform basic validation of the configuration by using
+}\texttt{\DIFadd{ConfigValidity}} \DIFadd{utility. Please note, that }\texttt{\DIFadd{ConfigValidity}}
+\DIFadd{must match the used OpenCore release and may not be able to detect all
+configuration flaws present in the file.
+}
+
+\DIFaddend \emph{Note}: Currently most properties try to have defined values even if not
 specified in the configuration for safety reasons. This behaviour should not
 be relied upon, and all fields must be properly specified in the configuration.
 
