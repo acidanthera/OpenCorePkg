@@ -43,10 +43,18 @@ endif
 
 ifeq ($(DEBUG),1)
 	CFLAGS  += -g -O0
+	#
+	# Forcibly disable stripping when enabling DEBUG mode.
+	#
 	STRIP   := @echo No strip in DEBUG mode
+	STRIPFLAGS :=
 else
 	CFLAGS  += -O3
-	STRIP   := strip -x
+	#
+	# Default strip command with overriding (e.g. i686-w64-mingw32-strip) allowed.
+	#
+	STRIP   ?= strip
+	STRIPFLAGS ?= -x
 endif
 
 #
@@ -94,7 +102,7 @@ all: $(PRODUCT)
 
 $(PRODUCT): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
-	$(STRIP) $(PRODUCT)
+	$(STRIP) $(STRIPFLAGS) $(PRODUCT)
 
 clean:
 	rm -rf *.o *.dSYM $(PRODUCT)

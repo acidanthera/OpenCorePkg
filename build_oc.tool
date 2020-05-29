@@ -19,7 +19,13 @@ buildutil() {
   pushd "${selfdir}/Utilities" || exit 1
   for util in "${UTILS[@]}"; do
     cd "$util" || exit 1
+    echo "Building ${util}..."
     make || exit 1
+    if [ "$(which i686-w64-mingw32-gcc)" != "" ]; then
+      echo "Building ${util} for Windows..."
+      CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make clean || exit 1
+      CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make || exit 1
+    fi
     cd - || exit 1
   done
   popd || exit 
