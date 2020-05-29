@@ -845,7 +845,7 @@
   OcTemplateLib|Include/Acidanthera/Library/OcTemplateLib.h
 
   ##  @libraryclass
-  OcTimerLib|Include/Acidanthera/Library/OcTimerLib.h
+  TimerLib|Include/Acidanthera/Library/OcTimerLib.h
 
   ##  @libraryclass
   OcUnicodeCollationEngGenericLib|Include/Acidanthera/Library/OcUnicodeCollationEngGenericLib.h

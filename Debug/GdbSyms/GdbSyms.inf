@@ -49,7 +49,7 @@
   UefiDriverEntryPoint
   UefiLib
   OcGuardLib
-  OcTimerLib
+  TimerLib
 
 [Guids]
 
