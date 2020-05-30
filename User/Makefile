@@ -15,8 +15,6 @@ ifeq ($(UDK_PATH),)
 	endif
 endif
 
-UDK_ARCH ?= X64
-
 ifeq ($(OS),Windows_NT)
 	DIST ?= Windows
 else
@@ -33,8 +31,11 @@ ifeq ($(DIST),Darwin)
 endif
 
 ifeq ($(DIST),Windows)
-	SUFFIX  := .exe
-	CFLAGS  += -D_ISOC99_SOURCE=1
+	SUFFIX   := .exe
+	CFLAGS   += -D_ISOC99_SOURCE=1
+	UDK_ARCH ?= IA32
+else
+	UDK_ARCH ?= X64
 endif
 
 ifeq ($(SANITIZE),1)
