@@ -21,6 +21,13 @@ buildutil() {
     cd "$util" || exit 1
     echo "Building ${util}..."
     make || exit 1
+    #
+    # FIXME: Do not build RsaTool for Win32 without OpenSSL.
+    #
+    if [ "$util" = "RsaTool" ] && [ "$HAS_OPENSSL_W32BUILD" != "1" ]; then
+      continue
+    fi
+
     if [ "$(which i686-w64-mingw32-gcc)" != "" ]; then
       echo "Building ${util} for Windows..."
       CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make clean || exit 1

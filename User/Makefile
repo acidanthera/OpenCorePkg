@@ -34,6 +34,7 @@ endif
 
 ifeq ($(DIST),Windows)
 	SUFFIX  := .exe
+	CFLAGS  += -D_ISOC99_SOURCE=1
 endif
 
 ifeq ($(SANITIZE),1)
