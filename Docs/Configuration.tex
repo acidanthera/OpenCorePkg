@@ -2254,10 +2254,11 @@ entry choice will update till next manual reconfiguration.
 
   Designed to be filled with \texttt{plist\ string} entries containing
   absolute UEFI paths to customised bootloaders, for example,
-  \texttt{\textbackslash EFI\textbackslash Microsoft\textbackslash Boot\textbackslash bootmgfw.efi}
-  for Microsoft bootloader. This allows unusual boot paths to be automaticlly
+  \texttt{\textbackslash EFI\textbackslash debian\textbackslash grubx64.efi}
+  for Debian bootloader. This allows unusual boot paths to be automaticlly
   discovered by the boot picker. Designwise they are equivalent to predefined blessed path, such as
-  \texttt{\textbackslash System\textbackslash Library\textbackslash CoreServices\textbackslash boot.efi},
+  \texttt{\textbackslash System\textbackslash Library\textbackslash CoreServices\textbackslash boot.efi}
+  or \texttt{\textbackslash EFI\textbackslash Microsoft\textbackslash Boot\textbackslash bootmgfw.efi},
   but unlike predefined bless paths they have highest priority.
 
 \item
@@ -5366,10 +5367,6 @@ functioning. Feature highlights:
 
   \begin{itemize}
   \item MBR (Master Boot Record) installations are legacy and will not be supported.
-  \item To install Windows, macOS, and OpenCore on the same drive you can specify
-  Windows bootloader path
-  (\texttt{\textbackslash EFI\textbackslash Microsoft\textbackslash Boot\textbackslash bootmgfw.efi})
-  in \texttt{BlessOverride} section.
   \item All the modifications applied (to ACPI, NVRAM, SMBIOS, etc.) are supposed
   to be operating system agnostic, i.e. apply equally regardless of the OS booted.
   This enables Boot Camp software experience on Windows.

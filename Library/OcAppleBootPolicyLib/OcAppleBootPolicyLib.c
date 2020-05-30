@@ -13,6 +13,7 @@
 **/
 
 #include <AppleMacEfi.h>
+#include <MicrosoftWindows.h>
 
 #include <Guid/AppleApfsInfo.h>
 #include <Guid/AppleBless.h>
@@ -48,18 +49,38 @@ typedef struct {
 
 ///
 /// An array of file paths to search for in case no file is blessed.
+/// On Apple Macs this list includes:
+/// 1. APPLE_BOOTER_DEFAULT_FILE_NAME  -- \System\Library\CoreServices\boot.efi
+/// 2. APPLE_REMOVABLE_MEDIA_FILE_NAME -- \EFI\APPLE\X64\BOOT.EFI
+/// 3. EFI_REMOVABLE_MEDIA_FILE_NAME   -- \EFI\BOOT\BOOTX64.EFI
+/// 4. APPLE_BOOTER_ROOT_FILE_NAME     -- \boot.efi
+///
+/// Since in real world only 1st and 3rd entries are used, we do not include
+/// 2nd and 4th until further notice. However, we do include a custom entry
+/// for Windows, for the reason OpenCore, unlike Apple EFI, may override
+/// BOOTx64.efi, and this is not the case for Apple EFI. So we end up with:
+/// 1. APPLE_BOOTER_DEFAULT_FILE_NAME  -- \System\Library\CoreServices\boot.efi
+/// 2. MS_BOOTER_DEFAULT_FILE_NAME     -- \EFI\Microsoft\Boot\bootmgfw.efi
+/// 3. EFI_REMOVABLE_MEDIA_FILE_NAME   -- \EFI\BOOT\BOOTX64.EFI
+///
+/// This resolves a problem when Windows installer does not replace our BOOTx64.efi
+/// file with Windows file and then NVRAM reset or Boot Camp software reboot to macOS
+/// results in the removal of the Windows boot entry from NVRAM making Windows
+/// disappear from the list of OpenCore entries without BlessOverride.
+///
+/// Linux and related entries are not present here, because they have fine working
+/// software for boot management and do not use BOOTx64.efi in the first place.
 ///
 GLOBAL_REMOVE_IF_UNREFERENCED CONST CHAR16 *gAppleBootPolicyPredefinedPaths[] = {
   APPLE_BOOTER_DEFAULT_FILE_NAME,
-  APPLE_REMOVABLE_MEDIA_FILE_NAME,
-  EFI_REMOVABLE_MEDIA_FILE_NAME,
-  APPLE_BOOTER_ROOT_FILE_NAME
+  MS_BOOTER_DEFAULT_FILE_NAME,
+  EFI_REMOVABLE_MEDIA_FILE_NAME
 };
 
 GLOBAL_REMOVE_IF_UNREFERENCED CONST UINTN gAppleBootPolicyNumPredefinedPaths =
   ARRAY_SIZE (gAppleBootPolicyPredefinedPaths);
 
-GLOBAL_REMOVE_IF_UNREFERENCED CONST UINTN gAppleBootPolicyCoreNumPredefinedPaths = 1;
+GLOBAL_REMOVE_IF_UNREFERENCED CONST UINTN gAppleBootPolicyCoreNumPredefinedPaths = 2;
 
 EFI_STATUS
 EFIAPI
