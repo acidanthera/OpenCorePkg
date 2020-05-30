@@ -40,6 +40,7 @@ OpenCore Changelog
 - Disabled empty debug log file creation to avoid ESP cluttering
 - Added `TscSyncTimeout` quirk to workaround debug kernel assertions
 - Added first-class Windows support to bless model
+- Fixed `LapicKernelPanic` kernel quirk on 10.9
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG
