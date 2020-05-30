@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Mon May 11 17:11:58 2020
-%DIF ADD ../Configuration.tex        Sat May 30 16:52:33 2020
+%DIF ADD ../Configuration.tex        Sun May 31 01:43:41 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4529,7 +4529,13 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \\
-  \href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
+\DIFaddbegin \href{https://github.com/acidanthera/OcBinaryData}{\texttt{PartitionDxe}}
+& \DIFadd{Proprietary partition management driver with Apple Partitioning Scheme support
+  commonly found in Apple firmwares. This driver can be used to support loading
+  older DMG recoveries such as macOS 10.9 using Apple Partitioning Scheme.
+  For Sandy Bridge and earlier CPUs }\texttt{\DIFadd{PartitionDxeLegacy}} \DIFadd{driver should be
+  used due to the lack of }\texttt{\DIFadd{RDRAND}} \DIFadd{instruction support. }\\
+  \DIFaddend \href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
 & PS/2 keyboard driver from \texttt{MdeModulePkg}. \DIFdelbegin \DIFdel{DuetPkg }\DIFdelend \DIFaddbegin \texttt{\DIFadd{OpenDuetPkg}} \DIFaddend and some firmwares
   may not include this driver, but it is necessary for PS/2 keyboard to work.
   Note, unlike \texttt{OpenUsbKbDxe} this driver has no \texttt{AppleKeyMapAggregator}

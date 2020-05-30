@@ -4250,6 +4250,12 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \\
+\href{https://github.com/acidanthera/OcBinaryData}{\texttt{PartitionDxe}}
+& Proprietary partition management driver with Apple Partitioning Scheme support
+  commonly found in Apple firmwares. This driver can be used to support loading
+  older DMG recoveries such as macOS 10.9 using Apple Partitioning Scheme.
+  For Sandy Bridge and earlier CPUs \texttt{PartitionDxeLegacy} driver should be
+  used due to the lack of \texttt{RDRAND} instruction support. \\
   \href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
 & PS/2 keyboard driver from \texttt{MdeModulePkg}. \texttt{OpenDuetPkg} and some firmwares
   may not include this driver, but it is necessary for PS/2 keyboard to work.
