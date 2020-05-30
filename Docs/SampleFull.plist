@@ -991,6 +991,7 @@
 			<string>#NvmExpressDxe.efi</string>
 			<string>#XhciDxe.efi</string>
 			<string>#ExFatDxe.efi</string>
+			<string>#PartitionDxe.efi</string>
 		</array>
 		<key>Input</key>
 		<dict>
