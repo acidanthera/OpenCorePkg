@@ -18,6 +18,3 @@ VPATH   = ../../Library/OcCryptoLib:$\
 	../../Library/OcCryptoLib/IA32:$\
 	../../Library/OcAppleKeysLib
 include ../../User/Makefile
-
-RsaDigitalSign.o:
-	$(CC) $(CFLAGS) -include OcCryptoConfig.h ../../Library/OcCryptoLib/RsaDigitalSign.c -o $@

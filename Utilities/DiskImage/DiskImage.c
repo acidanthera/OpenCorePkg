@@ -1,3 +1,8 @@
+/** @file
+  Copyright (c) 2018, vit9696. All rights reserved.
+  SPDX-License-Identifier: BSD-3-Clause
+**/
+
 #include "../Include/Uefi.h"
 
 #include <Library/OcAppleChunklistLib.h>
@@ -5,6 +10,13 @@
 #include <Library/OcAppleRamDiskLib.h>
 #include <Library/OcAppleKeysLib.h>
 #include <Library/OcCompressionLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/DebugLib.h>
+
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /**
 

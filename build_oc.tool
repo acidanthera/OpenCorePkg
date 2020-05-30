@@ -5,6 +5,7 @@ buildutil() {
     "AppleEfiSignTool"
     "ConfigValidity"
     "EfiResTool"
+    "DiskImage"
     "disklabel"
     "HelloWorld"
     "icnspack"
