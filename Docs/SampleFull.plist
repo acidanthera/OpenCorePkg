@@ -992,6 +992,7 @@
 			<string>#XhciDxe.efi</string>
 			<string>#ExFatDxe.efi</string>
 			<string>#PartitionDxe.efi</string>
+			<string>#CrScreenshotDxe.efi</string>
 		</array>
 		<key>Input</key>
 		<dict>
