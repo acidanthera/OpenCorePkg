@@ -73,6 +73,8 @@ AcpiGetTableName (
     }
   }
 
+  Name[Index] = '\0';
+
   for (Index = 0; Index < 256; ++Index) {
     UnicodeSPrint (TempName, sizeof (TempName), L"%a-%u.aml", Name, (UINT32) (Index + 1));
 
