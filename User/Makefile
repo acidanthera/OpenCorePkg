@@ -6,6 +6,7 @@
 .DEFAULT_GOAL := all
 
 CC       ?= gcc
+MKDIR    := mkdir -p
 
 ifeq ($(UDK_PATH),)
 	ifneq ($(PACKAGES_PATH),)
@@ -97,7 +98,11 @@ ifneq ($(STANDALONE),1)
 		../../Library/OcGuardLib
 endif
 
-%.o: %.c
+OUT_DIR := $(DIST)_$(UDK_ARCH)
+OBJS    := $(addprefix $(OUT_DIR)/,$(OBJS))
+
+$(OUT_DIR)/%.o: %.c
+	@$(MKDIR) $(OUT_DIR)
 	$(CC) $(CFLAGS) $< -o $@
 
 all: $(PRODUCT)
@@ -107,4 +112,4 @@ $(PRODUCT): $(OBJS)
 	$(STRIP) $(STRIPFLAGS) $(PRODUCT)
 
 clean:
-	rm -rf *.o *.dSYM $(PRODUCT)
+	rm -rf $(OUT_DIR) $(PRODUCT)
