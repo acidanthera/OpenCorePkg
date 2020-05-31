@@ -43,6 +43,7 @@ OpenCore Changelog
 - Fixed `LapicKernelPanic` kernel quirk on 10.9
 - Added prebuilt version of `CrScreenshotDxe` driver
 - Fixed Hyper-V frequency detection compatibility
+- Added `SysReport` option for DEBUG builds to dump system info
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG

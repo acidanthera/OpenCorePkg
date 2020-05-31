@@ -29,6 +29,7 @@
 [Sources]
   DebugSmbios.c
   DebugSmbios.h
+  DumpSmbios.c
   SmbiosPatch.c
   SmbiosInternal.c
   SmbiosInternal.h
@@ -54,5 +55,7 @@
   BaseMemoryLib
   MemoryAllocationLib
   OcCpuLib
+  OcFileLib
   OcMemoryLib
+  PrintLib
 

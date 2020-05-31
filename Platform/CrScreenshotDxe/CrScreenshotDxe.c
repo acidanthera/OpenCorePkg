@@ -165,7 +165,7 @@ FindWritableFs (
   DEBUG ((DEBUG_INFO, "OCSCR: Preferred handle is %p found fs %p\n", PreferedHandle, *FsPtr));
 
   if (*FsPtr == NULL) {
-    return FindWritableFileSystem(FsPtr);
+    return FindWritableFileSystem (FsPtr);
   }
 
   return EFI_SUCCESS;
@@ -206,6 +206,7 @@ TakeScreenshot (
     );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCSCR: Graphics output protocol not found for screen - %r\n", Status));
+    Fs->Close (Fs);
     return EFI_SUCCESS;
   }
 
@@ -218,6 +219,7 @@ TakeScreenshot (
 
   if (ImageSize == 0) {
     DEBUG ((DEBUG_INFO, "OCSCR: Empty screen size\n"));
+    Fs->Close (Fs);
     return EFI_SUCCESS;
   }
 
@@ -259,6 +261,7 @@ TakeScreenshot (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "CRSCR: gBS->AllocatePool returned %r\n", Status));
     ShowStatus (0xFF, 0x00, 0x00); ///< Red
+    Fs->Close (Fs);
     return EFI_SUCCESS;
   }
 
@@ -281,6 +284,7 @@ TakeScreenshot (
     DEBUG ((DEBUG_INFO, "CRSCR: GraphicsOutput->Blt returned %r\n", Status));
     gBS->FreePool (Image);
     ShowStatus (0xFF, 0x00, 0x00); ///< Red
+    Fs->Close (Fs);
     return EFI_SUCCESS;
   }
 
@@ -305,6 +309,7 @@ TakeScreenshot (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "CRSCR: EncodePng returned %r\n", Status));
     ShowStatus (0xFF, 0x00, 0x00); ///< Red
+    Fs->Close (Fs);
     return EFI_SUCCESS;
   }
 
@@ -313,6 +318,7 @@ TakeScreenshot (
   //
   Status = SetFileData (Fs, FileName, PngFile, (UINT32) PngFileSize);
   gBS->FreePool (PngFile);
+  Fs->Close (Fs);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "CRSCR: EncodePng returned %r\n", Status));
     ShowStatus (0xFF, 0x00, 0x00); ///< Red
