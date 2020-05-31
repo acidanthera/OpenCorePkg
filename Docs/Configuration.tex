@@ -429,8 +429,8 @@ be relied upon, and all fields must be properly specified in the configuration.
         }
         child [missing] {}
         child { node [selected] {OpenCore.efi}}
-        child { node [optional] {vault.plist}}
         child { node {config.plist}}
+        child { node [optional] {vault.plist}}
         child { node [optional] {vault.sig}}
       }
     }
@@ -460,8 +460,8 @@ be relied upon, and all fields must be properly specified in the configuration.
     child [missing] {}
     child [missing] {}
     child [missing] {}
-    child { node [optional] {SysReport}}
     child { node [optional] {boot}}
+    child { node [optional] {SysReport}}
     child { node [optional] {nvram.plist}}
     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
     child { node [optional] {panic-YYYY-MM-DD-HHMMSS.txt}}
@@ -517,11 +517,11 @@ entries include:
   \texttt{OpenCore.efi} \\
   Main booter driver responsible for operating system loading.
 \item
-  \texttt{vault.plist} \\
-  Hashes for all files potentially loadable by \texttt{OC Config}.
-\item
   \texttt{config.plist} \\
   \texttt{OC Config}.
+\item
+  \texttt{vault.plist} \\
+  Hashes for all files potentially loadable by \texttt{OC Config}.
 \item
   \texttt{vault.sig} \\
   Signature for \texttt{vault.plist}.
