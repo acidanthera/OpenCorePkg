@@ -27,8 +27,9 @@
 # VALID_ARCHITECTURES = IA32 X64 IPF EBC
 
 [Sources]
-  DebugSmbios.c
   DebugSmbios.h
+  DumpSmbios.c
+  SmbiosDump.c
   SmbiosPatch.c
   SmbiosInternal.c
   SmbiosInternal.h
@@ -54,5 +55,7 @@
   BaseMemoryLib
   MemoryAllocationLib
   OcCpuLib
+  OcFileLib
   OcMemoryLib
+  PrintLib
 

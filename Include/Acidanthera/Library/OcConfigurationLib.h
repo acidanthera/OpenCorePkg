@@ -289,7 +289,8 @@
   _(UINT32                      , Target                      ,     , 0            , ()) \
   _(BOOLEAN                     , AppleDebug                  ,     , FALSE        , ()) \
   _(BOOLEAN                     , ApplePanic                  ,     , FALSE        , ()) \
-  _(BOOLEAN                     , DisableWatchDog             ,     , FALSE        , ())
+  _(BOOLEAN                     , DisableWatchDog             ,     , FALSE        , ()) \
+  _(BOOLEAN                     , SysReport                   ,     , FALSE        , ())
   OC_DECLARE (OC_MISC_DEBUG)
 
 #define OCS_EXPOSE_BOOT_PATH   1U

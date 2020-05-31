@@ -16,6 +16,7 @@
 #define OC_ACPI_LIB_H
 
 #include <IndustryStandard/Acpi62.h>
+#include <Protocol/SimpleFileSystem.h>
 
 #define OC_ACPI_NAME_SIZE 4
 
@@ -155,7 +156,7 @@ typedef struct {
 /**
   Find ACPI System Tables for later table configuration.
 
-  @param Context  ACPI library context.
+  @param[in,out] Context  ACPI library context.
 
   @return EFI_SUCCESS when Rsdp and Xsdt or Rsdt are found.
 **/
@@ -167,7 +168,7 @@ AcpiInitContext (
 /**
   Free ACPI context dynamic resources.
 
-  @param Context  ACPI library context.
+  @param[in,out] Context  ACPI library context.
 **/
 VOID
 AcpiFreeContext (
@@ -177,7 +178,7 @@ AcpiFreeContext (
 /**
   Apply ACPI context to this system.
 
-  @param Context  ACPI library context.
+  @param[in,out] Context  ACPI library context.
 **/
 EFI_STATUS
 AcpiApplyContext (
@@ -187,11 +188,11 @@ AcpiApplyContext (
 /**
   Delete one ACPI table.
 
-  @param Context     ACPI library context.
-  @param Signature   Table signature or 0.
-  @param Length      Table length or 0.
-  @param OemTableId  Table Id or 0.
-  @param All         Delete all tables or first matched.
+  @param[in,out] Context     ACPI library context.
+  @param[in]     Signature   Table signature or 0.
+  @param[in]     Length      Table length or 0.
+  @param[in]     OemTableId  Table Id or 0.
+  @param[in]     All         Delete all tables or first matched.
 **/
 EFI_STATUS
 AcpiDeleteTable (
@@ -205,9 +206,9 @@ AcpiDeleteTable (
 /**
   Install one ACPI table. For DSDT this performs table replacement.
 
-  @param Context     ACPI library context.
-  @param Data        Table data.
-  @param Length      Table length.
+  @param[in,out] Context     ACPI library context.
+  @param[in]     Data        Table data.
+  @param[in]     Length      Table length.
 **/
 EFI_STATUS
 AcpiInsertTable (
@@ -219,7 +220,7 @@ AcpiInsertTable (
 /**
   Normalise ACPI headers to contain 7-bit ASCII.
 
-  @param Context     ACPI library context.
+  @param[in,out] Context     ACPI library context.
 **/
 VOID
 AcpiNormalizeHeaders (
@@ -229,8 +230,8 @@ AcpiNormalizeHeaders (
 /**
   Patch ACPI tables.
 
-  @param Context     ACPI library context.
-  @param Patch       ACPI patch.
+  @param[in,out] Context     ACPI library context.
+  @param[in]     Patch       ACPI patch.
 **/
 EFI_STATUS
 AcpiApplyPatch (
@@ -241,7 +242,7 @@ AcpiApplyPatch (
 /**
   Try to load ACPI regions.
 
-  @param Context     ACPI library context.
+  @param[in,out] Context     ACPI library context.
 **/
 EFI_STATUS
 AcpiLoadRegions (
@@ -251,7 +252,7 @@ AcpiLoadRegions (
 /**
   Attempt to relocate ACPI regions based on loaded ones.
 
-  @param Context     ACPI library context.
+  @param[in,out] Context     ACPI library context.
 **/
 VOID
 AcpiRelocateRegions (
@@ -262,7 +263,7 @@ AcpiRelocateRegions (
   Upgrade FADT to support reset register needed on very
   old legacy hardware.
 
-  @param Context     ACPI library context.
+  @param[in,out] Context     ACPI library context.
 
   @return EFI_SUCCESS if successful or not needed.
 **/
@@ -274,7 +275,7 @@ AcpiFadtEnableReset (
 /**
   Reset BGRT Displayed status.
 
-  @param Context     ACPI library context.
+  @param[in,out] Context     ACPI library context.
 **/
 VOID
 AcpiResetLogoStatus (
@@ -284,13 +285,23 @@ AcpiResetLogoStatus (
 /**
   Log and reset FACS hardware signature.
 
-  @param Context     ACPI library context.
-  @param Reset       Perform reset.
+  @param[in,out] Context     ACPI library context.
+  @param[in]     Reset       Perform reset.
 **/
 VOID
 AcpiHandleHardwareSignature (
   IN OUT OC_ACPI_CONTEXT  *Context,
   IN     BOOLEAN          Reset
+  );
+
+/**
+  Dump ACPI tables to the specified directory.
+
+  @param[in] Root  Directory to write tables.
+**/
+EFI_STATUS
+AcpiDumpTables (
+  IN EFI_FILE_PROTOCOL  *Root
   );
 
 #endif // OC_ACPI_LIB_H

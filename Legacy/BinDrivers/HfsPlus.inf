@@ -19,7 +19,7 @@
 #
 
 [Binaries.Ia32]
-  PE32|IA32/HfsPlusLegacy.efi|*
+  PE32|Ia32/HfsPlusLegacy.efi|*
 
 [Binaries.X64]
   PE32|X64/HfsPlusLegacy.efi|*

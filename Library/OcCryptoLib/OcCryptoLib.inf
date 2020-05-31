@@ -42,11 +42,11 @@
   BigNumPrimitives.c
   BigNumMontgomery.c
 
-[Sources.IA32]
-  IA32/BigNumWordMul64.c
+[Sources.Ia32]
+  Ia32/BigNumWordMul64.c
 
 [Sources.X64]
-  IA32/BigNumWordMul64.c
+  Ia32/BigNumWordMul64.c
 
 [FixedPcd]
   gOpenCorePkgTokenSpaceGuid.PcdOcCryptoAllowedRsaModuli

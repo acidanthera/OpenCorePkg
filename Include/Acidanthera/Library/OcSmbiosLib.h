@@ -20,6 +20,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_SMBIOS_LIB_H
 
 #include <Library/OcCpuLib.h>
+#include <Library/OcFileLib.h>
 #include <IndustryStandard/AppleSmBios.h>
 #include <Guid/OcSmBios.h>
 
@@ -200,6 +201,11 @@ VOID
 OcSmbiosGetSmcVersion (
   IN  CONST UINT8  *SmcRevision,
   OUT UINT8        *SmcVersion
+  );
+
+EFI_STATUS
+OcSmbiosDump (
+  IN EFI_FILE_PROTOCOL  *Root
   );
 
 #endif // OC_SMBIOS_LIB_H

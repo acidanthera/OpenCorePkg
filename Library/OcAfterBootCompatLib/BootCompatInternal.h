@@ -30,7 +30,7 @@
 #if defined(MDE_CPU_X64)
 #include "X64/ContextSwitch.h"
 #elif defined(MDE_CPU_IA32)
-#include <IA32/ContextSwitch.h>
+#include <Ia32/ContextSwitch.h>
 #else
 #error "Unsupported architecture!"
 #endif

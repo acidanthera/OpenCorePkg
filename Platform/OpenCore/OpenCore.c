@@ -118,6 +118,8 @@ OcMain (
 
   DEBUG ((DEBUG_INFO, "OC: OcLoadNvramSupport...\n"));
   OcLoadNvramSupport (Storage, &mOpenCoreConfiguration);
+  DEBUG ((DEBUG_INFO, "OC: OcMiscMiddleInit...\n"));
+  OcMiscMiddleInit (Storage, &mOpenCoreConfiguration, LoadPath, &mLoadHandle);
   DEBUG ((DEBUG_INFO, "OC: OcLoadUefiSupport...\n"));
   OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &mOpenCoreCpuInfo);
   DEBUG ((DEBUG_INFO, "OC: OcLoadAcpiSupport...\n"));
@@ -127,7 +129,7 @@ OcMain (
   DEBUG ((DEBUG_INFO, "OC: OcLoadDevPropsSupport...\n"));
   OcLoadDevPropsSupport (&mOpenCoreConfiguration);
   DEBUG ((DEBUG_INFO, "OC: OcMiscLateInit...\n"));
-  OcMiscLateInit (Storage, &mOpenCoreConfiguration, LoadPath, &mLoadHandle);
+  OcMiscLateInit (Storage, &mOpenCoreConfiguration);
   DEBUG ((DEBUG_INFO, "OC: OcLoadKernelSupport...\n"));
   OcLoadKernelSupport (&mOpenCoreStorage, &mOpenCoreConfiguration, &mOpenCoreCpuInfo);
 
@@ -142,7 +144,7 @@ OcMain (
     Privilege = NULL;
   }
 
-  DEBUG ((DEBUG_INFO, "OC: OpenCore is loaded, showing boot menu...\n"));
+  DEBUG ((DEBUG_INFO, "OC: All green, starting boot management...\n"));
 
   OcMiscBoot (
     &mOpenCoreStorage,

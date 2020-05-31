@@ -15,6 +15,6 @@ OBJS    = main.o \
 	SecureMem.o \
 	OcAppleKeysLib.o
 VPATH   = ../../Library/OcCryptoLib:$\
-	../../Library/OcCryptoLib/IA32:$\
+	../../Library/OcCryptoLib/Ia32:$\
 	../../Library/OcAppleKeysLib
 include ../../User/Makefile

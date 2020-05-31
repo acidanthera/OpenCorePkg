@@ -20,7 +20,7 @@
 [Sources]
   OcCompilerIntrinsicsLib.c
 
-[Sources.IA32]
+[Sources.Ia32]
   MsvcMath32.c | MSFT
 
 [Packages]

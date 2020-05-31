@@ -36,7 +36,7 @@
   UefiBootServicesTableLib
   BaseMemoryLib
 
-[Sources.IA32]
+[Sources.Ia32]
   Ia32/CpuInterrupt.nasm
 
 [Sources.X64]

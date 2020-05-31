@@ -33,11 +33,14 @@
 
 [LibraryClasses]
   BaseLib
+  OcFileLib
   OcMiscLib
+  PrintLib
 
 [Guids]
   gEfiAcpi10TableGuid
   gEfiAcpi20TableGuid
 
 [Sources]
+  AcpiDump.c
   OcAcpiLib.c
