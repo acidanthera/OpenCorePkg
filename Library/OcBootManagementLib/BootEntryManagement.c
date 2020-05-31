@@ -1813,7 +1813,7 @@ OcLoadBootEntry (
       InternalUnloadDmg (&DmgLoadContext);
     }
   } else {
-    DEBUG ((DEBUG_ERROR, "OCB: LoadImage failed - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "OCB: LoadImage failed - %r\n", Status));
   }
 
   return Status;

@@ -22,9 +22,9 @@
 
 BOOLEAN
 OcAppleChunklistInitializeContext (
-  OUT OC_APPLE_CHUNKLIST_CONTEXT  *Context,
-  IN  VOID                        *Buffer,
-  IN  UINT32                      BufferSize
+     OUT OC_APPLE_CHUNKLIST_CONTEXT  *Context,
+  IN OUT VOID                        *Buffer,
+  IN     UINT32                      BufferSize
   )
 {
   APPLE_CHUNKLIST_HEADER  *ChunklistHeader;

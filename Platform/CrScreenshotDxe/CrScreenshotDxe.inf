@@ -1,0 +1,39 @@
+## @file
+# Copyright (c) 2020, vit9696. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = CrScreenshotDxe
+  FILE_GUID                      = 91867CFC-F80C-4BC4-94CC-E9E3ED88BC84
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = CrScreenshotDxeEntry
+
+[Sources.common]
+  CrScreenshotDxe.c
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+  UefiDriverEntryPoint
+  DebugLib
+  PrintLib
+  OcPngLib
+  OcFileLib
+
+[Protocols]
+  gEfiGraphicsOutputProtocolGuid
+  gEfiSimpleTextInputExProtocolGuid
+  gAppleEventProtocolGuid
+  gEfiSimpleFileSystemProtocolGuid
+  gOcBootstrapProtocolGuid
+
+[Depex]
+  gEfiGraphicsOutputProtocolGuid

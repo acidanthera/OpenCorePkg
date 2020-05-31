@@ -1805,14 +1805,14 @@ blocking.
 
   Normally it is only the value of \texttt{EAX} that needs to be taken care of,
   since it represents the full CPUID. The remaining bytes are to be left as zeroes.
-  Byte order is Little Endian, so for example, \texttt{A9 06 03 00} stands for CPUID
-  \texttt{0x0306A9} (Ivy Bridge).
+  Byte order is Little Endian, so for example, \texttt{C3 06 03 00} stands for CPUID
+  \texttt{0x0306C3} (Haswell).
 
   For XCPM support it is recommended to use the following combinations.
 
   \begin{itemize}
     \tightlist
-    \item Haswell-E (\texttt{0x306F2}) to Haswell (\texttt{0x0306C3}):\\
+    \item Haswell-E (\texttt{0x0306F2}) to Haswell (\texttt{0x0306C3}):\\
     \texttt{Cpuid1Data}: \texttt{C3 06 03 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
     \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
     \item Broadwell-E (\texttt{0x0406F1}) to Broadwell (\texttt{0x0306D4}):\\
@@ -1820,9 +1820,17 @@ blocking.
     \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
   \end{itemize}
 
-  Further explanations can be found at
-  \href{https://github.com/acidanthera/bugtracker/issues/365}{acidanthera/bugtracker\#365}.
-  See \texttt{Special NOTES} for Haswell+ low-end.
+  Keep in mind, that the following configurations are unsupported (at least out of the box):
+
+  \begin{itemize}
+    \tightlist
+    \item Consumer Ivy Bridge (\texttt{0x0306A9}) as Apple disabled XCPM for Ivy Bridge
+      and recommends legacy power management for these CPUs. You will need to manually
+      patch \texttt{\_xcpm\_bootstrap} to force XCPM on these CPUs instead of using this option.
+    \item Low-end CPUs (e.g. Haswell+ Pentium) as they are not supported properly by macOS.
+      Legacy hacks for older models can be found in the \texttt{Special NOTES} section of
+      \href{https://github.com/acidanthera/bugtracker/issues/365}{acidanthera/bugtracker\#365}.
+  \end{itemize}
 
 \item
   \texttt{Cpuid1Mask}\\
@@ -2254,10 +2262,11 @@ entry choice will update till next manual reconfiguration.
 
   Designed to be filled with \texttt{plist\ string} entries containing
   absolute UEFI paths to customised bootloaders, for example,
-  \texttt{\textbackslash EFI\textbackslash Microsoft\textbackslash Boot\textbackslash bootmgfw.efi}
-  for Microsoft bootloader. This allows unusual boot paths to be automaticlly
+  \texttt{\textbackslash EFI\textbackslash debian\textbackslash grubx64.efi}
+  for Debian bootloader. This allows unusual boot paths to be automaticlly
   discovered by the boot picker. Designwise they are equivalent to predefined blessed path, such as
-  \texttt{\textbackslash System\textbackslash Library\textbackslash CoreServices\textbackslash boot.efi},
+  \texttt{\textbackslash System\textbackslash Library\textbackslash CoreServices\textbackslash boot.efi}
+  or \texttt{\textbackslash EFI\textbackslash Microsoft\textbackslash Boot\textbackslash bootmgfw.efi},
   but unlike predefined bless paths they have highest priority.
 
 \item
@@ -4241,6 +4250,12 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \\
+\href{https://github.com/acidanthera/OcBinaryData}{\texttt{PartitionDxe}}
+& Proprietary partition management driver with Apple Partitioning Scheme support
+  commonly found in Apple firmwares. This driver can be used to support loading
+  older DMG recoveries such as macOS 10.9 using Apple Partitioning Scheme.
+  For Sandy Bridge and earlier CPUs \texttt{PartitionDxeLegacy} driver should be
+  used due to the lack of \texttt{RDRAND} instruction support. \\
   \href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
 & PS/2 keyboard driver from \texttt{MdeModulePkg}. \texttt{OpenDuetPkg} and some firmwares
   may not include this driver, but it is necessary for PS/2 keyboard to work.
@@ -5366,10 +5381,6 @@ functioning. Feature highlights:
 
   \begin{itemize}
   \item MBR (Master Boot Record) installations are legacy and will not be supported.
-  \item To install Windows, macOS, and OpenCore on the same drive you can specify
-  Windows bootloader path
-  (\texttt{\textbackslash EFI\textbackslash Microsoft\textbackslash Boot\textbackslash bootmgfw.efi})
-  in \texttt{BlessOverride} section.
   \item All the modifications applied (to ACPI, NVRAM, SMBIOS, etc.) are supposed
   to be operating system agnostic, i.e. apply equally regardless of the OS booted.
   This enables Boot Camp software experience on Windows.

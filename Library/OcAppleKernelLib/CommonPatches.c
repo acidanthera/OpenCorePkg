@@ -1365,7 +1365,44 @@ mLapicKernelPanicPatch = {
   .Size    = sizeof (mLapicKernelPanicPatchReplace),
   .Count   = 1,
   .Skip    = 0,
-  .Limit   = 4096
+  .Limit   = 1024
+};
+
+STATIC
+UINT8
+mLapicKernelPanicPatchLegacyFind[] = {
+  // mov eax, gs:1Ch on 10.9.5.
+  // lea rcx, _master_cpu
+  // cmp eax, [rcx]
+  0x65, 0x8B, 0x04, 0x25, 0x18, 0x00, 0x00, 0x00, 0x48, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+STATIC
+UINT8
+mLapicKernelPanicPatchLegacyMask[] = {
+  0xFF, 0xFF, 0xFF, 0xFF, 0xFB, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+STATIC
+UINT8
+mLapicKernelPanicPatchLegacyReplace[] = {
+  // xor eax, eax ; nop further
+  0x31, 0xC0, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mLapicKernelPanicLegacyPatch = {
+  .Comment = DEBUG_POINTER ("LapicKernelPanicLegacy"),
+  .Base    = "_lapic_interrupt",
+  .Find    = mLapicKernelPanicPatchLegacyFind,
+  .Mask    = mLapicKernelPanicPatchLegacyMask,
+  .Replace = mLapicKernelPanicPatchLegacyReplace,
+  .ReplaceMask = NULL,
+  .Size    = sizeof (mLapicKernelPanicPatchLegacyReplace),
+  .Count   = 1,
+  .Skip    = 0,
+  .Limit   = 1024
 };
 
 STATIC
@@ -1416,7 +1453,14 @@ PatchLapicKernelPanic (
   //
   Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicPatch);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply lapic patch - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply modern lapic patch - %r\n", Status));
+
+    Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicLegacyPatch);
+    if (!EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success legacy lapic\n"));
+    } else {
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply modern lapic patch - %r\n", Status));
+    }
   } else {
     DEBUG ((DEBUG_INFO, "OCAK: Patch success lapic\n"));
 

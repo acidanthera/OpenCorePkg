@@ -64,7 +64,7 @@ endif
 # Skip including UDK when suggesting STANDALONE mode.
 #
 ifneq ($(STANDALONE),1)
-	CFLAGS  += -D NO_MSABI_VA_FUNCS
+	CFLAGS  += -D NO_MSABI_VA_FUNCS -D OC_TARGET_DEBUG
 	CFLAGS  += -I$(UDK_PATH)/MdePkg/Include -I$(UDK_PATH)/MdePkg/Include/Library -I$(UDK_PATH)/MdePkg/Include/$(UDK_ARCH)
 	CFLAGS  += -I$(UDK_PATH)/UefiCpuPkg/Include
 	#

@@ -6,6 +6,7 @@
 #include <Uefi.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
+#include <Library/OcCryptoLib.h>
 
 extern const UINT32 _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize;
 extern const BOOLEAN  _gPcd_FixedAtBuild_PcdUgaConsumeSupport;
@@ -28,3 +29,6 @@ extern const BOOLEAN _gPcd_FixedAtBuild_PcdVerifyNodeInList;
 #define _PCD_GET_MODE_32_PcdMaximumUnicodeStringLength  _gPcd_FixedAtBuild_PcdMaximumUnicodeStringLength
 #define _PCD_GET_MODE_32_PcdMaximumLinkedListLength  _gPcd_FixedAtBuild_PcdMaximumLinkedListLength
 #define _PCD_GET_MODE_BOOL_PcdVerifyNodeInList  _gPcd_FixedAtBuild_PcdVerifyNodeInList
+#define _PCD_GET_MODE_16_PcdOcCryptoAllowedRsaModuli  (512U | 256U)
+#define _PCD_GET_MODE_16_PcdOcCryptoAllowedSigHashTypes  \
+  (1U << OcSigHashTypeSha256) | (1U << OcSigHashTypeSha384) | (1U << OcSigHashTypeSha512)

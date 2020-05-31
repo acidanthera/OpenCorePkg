@@ -345,10 +345,7 @@ OcGetBootDevicePathType (
 
     RestLen = PathLen - BootloaderLengths[Index];
     if ((RestLen == 0 || LastNode->PathName[RestLen - 1] == L'\\')
-      && CompareMem (
-        &LastNode->PathName[RestLen],
-        Bootloaders[Index],
-        BootloaderLengths[Index] * sizeof (LastNode->PathName[0])) == 0) {
+      && OcStrniCmp (&LastNode->PathName[RestLen], Bootloaders[Index], BootloaderLengths[Index]) == 0) {
       return BootloaderTypes[Index];
     }
   }
@@ -362,10 +359,7 @@ OcGetBootDevicePathType (
     if (PathLen >= GenericBootloaderLength) {
       RestLen = PathLen - GenericBootloaderLength;
       if ((RestLen == 0 || LastNode->PathName[RestLen - 1] == L'\\')
-        && CompareMem (
-          &LastNode->PathName[RestLen],
-          GenericBootloader,
-          GenericBootloaderLength * sizeof (LastNode->PathName[0])) == 0) {
+        && OcStrniCmp (&LastNode->PathName[RestLen], GenericBootloader, GenericBootloaderLength) == 0) {
         *IsGeneric = TRUE;
       }
     }

@@ -19,6 +19,7 @@ Utilities/EfiResTool/EfiResTool
 Utilities/AppleEfiSignTool/AppleEfiSignTool
 Utilities/macserial/macserial
 Utilities/icnspack/icnspack
+Utilities/DiskImage/DiskImage
 Utilities/HelloWorld/HelloWorld
 Utilities/KextInject/KextInject
 Utilities/ConfigValidity/ConfigValidity
