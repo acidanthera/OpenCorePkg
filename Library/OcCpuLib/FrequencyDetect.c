@@ -19,6 +19,7 @@
 #include <IndustryStandard/GenericIch.h>
 #include <Protocol/PciIo.h>
 #include <Library/BaseLib.h>
+#include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
 #include <Library/OcCpuLib.h>
@@ -422,7 +423,12 @@ InternalCalculateVMTFrequency (
 {
   UINT32                  CpuidEax;
   UINT32                  CpuidEbx;
+  UINT32                  CpuidEcx;
+  UINT32                  CpuidEdx;
   CPUID_VERSION_INFO_ECX  CpuidVerEcx;
+
+  CHAR8                   HvVendor[13];
+  UINT64                  Msr;
 
   AsmCpuid (
     CPUID_VERSION_INFO,
@@ -459,7 +465,35 @@ InternalCalculateVMTFrequency (
   //  2. [Qemu-devel] [PATCH v2 0/3] x86-kvm: Fix Mac guest timekeeping by exposi:
   //     https://lists.gnu.org/archive/html/qemu-devel/2017-01/msg04344.html
   //
-  AsmCpuid (0x40000000, &CpuidEax, NULL, NULL, NULL);
+  // Hyper-V only implements MSRs for TSC and FSB frequencies in Hz.
+  // See https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/reference/tlfs
+  //
+  AsmCpuid (0x40000000, &CpuidEax, &CpuidEbx, &CpuidEcx, &CpuidEdx);
+
+  CopyMem (&HvVendor[0], &CpuidEbx, sizeof (UINT32));
+  CopyMem (&HvVendor[4], &CpuidEcx, sizeof (UINT32));
+  CopyMem (&HvVendor[8], &CpuidEdx, sizeof (UINT32));
+  HvVendor[12] = '\0';
+
+  if (AsciiStrCmp (HvVendor, "Microsoft Hv") == 0) {
+    //
+    // HV_X64_MSR_APIC_FREQUENCY
+    //
+    Msr = AsmReadMsr64 (0x40000023);
+    if (FSBFrequency != NULL) {
+      *FSBFrequency = Msr;
+    }
+
+    //
+    // HV_X64_MSR_TSC_FREQUENCY
+    //
+    Msr = AsmReadMsr64 (0x40000022); 
+    return Msr;
+  }
+
+  //
+  // Other hypervisors implement TSC/FSB frequency as an additional CPUID leaf.
+  //
   if (CpuidEax < 0x40000010) {
     return 0;
   }
