@@ -6,6 +6,7 @@
 .DEFAULT_GOAL := all
 
 CC       ?= gcc
+MKDIR    := mkdir -p
 
 ifeq ($(UDK_PATH),)
 	ifneq ($(PACKAGES_PATH),)
@@ -14,8 +15,6 @@ ifeq ($(UDK_PATH),)
 		UDK_PATH ?= ../../UDK
 	endif
 endif
-
-UDK_ARCH ?= X64
 
 ifeq ($(OS),Windows_NT)
 	DIST ?= Windows
@@ -33,7 +32,11 @@ ifeq ($(DIST),Darwin)
 endif
 
 ifeq ($(DIST),Windows)
-	SUFFIX  := .exe
+	SUFFIX   := .exe
+	CFLAGS   += -D_ISOC99_SOURCE=1
+	UDK_ARCH ?= Ia32
+else
+	UDK_ARCH ?= X64
 endif
 
 ifeq ($(SANITIZE),1)
@@ -43,10 +46,18 @@ endif
 
 ifeq ($(DEBUG),1)
 	CFLAGS  += -g -O0
+	#
+	# Forcibly disable stripping when enabling DEBUG mode.
+	#
 	STRIP   := @echo No strip in DEBUG mode
+	STRIPFLAGS :=
 else
 	CFLAGS  += -O3
-	STRIP   := strip -x
+	#
+	# Default strip command with overriding (e.g. i686-w64-mingw32-strip) allowed.
+	#
+	STRIP   ?= strip
+	STRIPFLAGS ?= -x
 endif
 
 #
@@ -87,14 +98,18 @@ ifneq ($(STANDALONE),1)
 		../../Library/OcGuardLib
 endif
 
-%.o: %.c
+OUT_DIR := $(DIST)_$(UDK_ARCH)
+OBJS    := $(addprefix $(OUT_DIR)/,$(OBJS))
+
+$(OUT_DIR)/%.o: %.c
+	@$(MKDIR) $(OUT_DIR)
 	$(CC) $(CFLAGS) $< -o $@
 
 all: $(PRODUCT)
 
 $(PRODUCT): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) -o $(PRODUCT)
-	$(STRIP) $(PRODUCT)
+	$(STRIP) $(STRIPFLAGS) $(PRODUCT)
 
 clean:
-	rm -rf *.o *.dSYM $(PRODUCT)
+	rm -rf $(OUT_DIR) $(PRODUCT)
