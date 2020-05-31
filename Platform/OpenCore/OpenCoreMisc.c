@@ -490,7 +490,7 @@ OcMiscEarlyInit (
 }
 
 EFI_STATUS
-OcMiscLateInit (
+OcMiscMiddleInit (
   IN  OC_STORAGE_CONTEXT        *Storage,
   IN  OC_GLOBAL_CONFIG          *Config,
   IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath  OPTIONAL,
@@ -498,10 +498,7 @@ OcMiscLateInit (
   )
 {
   EFI_STATUS   Status;
-  EFI_STATUS   HibernateStatus;
   CONST CHAR8  *BootProtect;
-  CONST CHAR8  *HibernateMode;
-  UINT32       HibernateMask;
   UINT32       BootProtectFlag;
   EFI_HANDLE   OcHandle;
 
@@ -543,6 +540,19 @@ OcMiscLateInit (
 
   *LoadHandle = OcHandle;
 
+  return Status;
+}
+
+EFI_STATUS
+OcMiscLateInit (
+  IN  OC_STORAGE_CONTEXT        *Storage,
+  IN  OC_GLOBAL_CONFIG          *Config
+  )
+{
+  EFI_STATUS   HibernateStatus;
+  CONST CHAR8  *HibernateMode;
+  UINT32       HibernateMask;
+
   HibernateMode = OC_BLOB_GET (&Config->Misc.Boot.HibernateMode);
 
   if (AsciiStrCmp (HibernateMode, "None") == 0) {
@@ -569,7 +579,7 @@ OcMiscLateInit (
 
   OcAppleDebugLogConfigure (Config->Misc.Debug.AppleDebug);
 
-  return Status;
+  return EFI_SUCCESS;
 }
 
 VOID

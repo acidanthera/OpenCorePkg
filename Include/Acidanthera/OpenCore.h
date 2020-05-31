@@ -236,7 +236,7 @@ OcMiscEarlyInit (
   );
 
 /**
-  Load late miscellaneous support like boot screen config.
+  Load middle miscellaneous support like device path and system report.
 
   @param[in]  Storage    OpenCore storage.
   @param[in]  Config     OpenCore configuration.
@@ -246,11 +246,25 @@ OcMiscEarlyInit (
   @retval EFI_SUCCESS on success, informational.
 **/
 EFI_STATUS
-OcMiscLateInit (
+OcMiscMiddleInit (
   IN  OC_STORAGE_CONTEXT        *Storage,
   IN  OC_GLOBAL_CONFIG          *Config,
   IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath  OPTIONAL,
   OUT EFI_HANDLE                *LoadHandle
+  );
+
+/**
+  Load late miscellaneous support like Apple hibernation or panic saving.
+
+  @param[in]  Storage    OpenCore storage.
+  @param[in]  Config     OpenCore configuration.
+
+  @retval EFI_SUCCESS on success, informational.
+**/
+EFI_STATUS
+OcMiscLateInit (
+  IN  OC_STORAGE_CONTEXT        *Storage,
+  IN  OC_GLOBAL_CONFIG          *Config
   );
 
 /**
