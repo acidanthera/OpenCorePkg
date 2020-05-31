@@ -123,4 +123,19 @@ InternalCalculateVMTFrequency (
   OUT BOOLEAN  *UnderHypervisor  OPTIONAL
   );
 
+/**
+  Atomically increment 32-bit integer.
+  This is required to be locally implemented as we cannot use SynchronizationLib,
+  which depends on TimerLib, and our TimerLib depends on this library.
+
+  @param[in]  Value  Pointer to 32-bit integer to increment.
+
+  @retval value after incrementing.
+**/
+UINT32
+EFIAPI
+AsmIncrementUint32 (
+  IN volatile UINT32  *Value
+  );
+
 #endif // OC_CPU_INTERNALS_H

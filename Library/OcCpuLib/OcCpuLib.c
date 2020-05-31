@@ -21,7 +21,6 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcCpuLib.h>
-#include <Library/SynchronizationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <IndustryStandard/ProcessorInfo.h>
 #include <Register/Microcode.h>
@@ -859,7 +858,7 @@ SyncTscOnCpu (
 {
   OC_CPU_TSC_SYNC   *Sync;
   Sync = Buffer;
-  InterlockedIncrement (&Sync->CurrentCount);
+  AsmIncrementUint32 (&Sync->CurrentCount);
   while (Sync->CurrentCount < Sync->APThreadCount) {
     //
     // Busy-wait on AP CPU cores.
@@ -877,7 +876,7 @@ ResetAdjustTsc (
 {
   OC_CPU_TSC_SYNC   *Sync;
   Sync = Buffer;
-  InterlockedIncrement (&Sync->CurrentCount);
+  AsmIncrementUint32 (&Sync->CurrentCount);
   while (Sync->CurrentCount < Sync->APThreadCount) {
     //
     // Busy-wait on AP CPU cores.
