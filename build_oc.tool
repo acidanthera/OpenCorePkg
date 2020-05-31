@@ -49,76 +49,128 @@ package() {
   ver=$(grep OPEN_CORE_VERSION ./Include/Acidanthera/OpenCore.h | sed 's/.*"\(.*\)".*/\1/' | grep -E '^[0-9.]+$')
   if [ "$ver" = "" ]; then
     echo "Invalid version $ver"
+    ver="UNKNOWN"
   fi
 
   selfdir=$(pwd)
   pushd "$1" || exit 1
   rm -rf tmp || exit 1
-  mkdir -p tmp/EFI/BOOT || exit 1
-  mkdir -p tmp/EFI/OC/ACPI || exit 1
-  mkdir -p tmp/EFI/OC/Bootstrap || exit 1
-  mkdir -p tmp/EFI/OC/Drivers || exit 1
-  mkdir -p tmp/EFI/OC/Kexts || exit 1
-  mkdir -p tmp/EFI/OC/Tools || exit 1
-  mkdir -p tmp/EFI/OC/Resources/Audio || exit 1
-  mkdir -p tmp/EFI/OC/Resources/Font || exit 1
-  mkdir -p tmp/EFI/OC/Resources/Image || exit 1
-  mkdir -p tmp/EFI/OC/Resources/Label || exit 1
-  mkdir -p tmp/Docs/AcpiSamples || exit 1
-  mkdir -p tmp/Utilities || exit 1
+
+  dirs=(
+    "tmp/EFI/BOOT"
+    "tmp/EFI/OC/ACPI"
+    "tmp/EFI/OC/Bootstrap"
+    "tmp/EFI/OC/Drivers"
+    "tmp/EFI/OC/Kexts"
+    "tmp/EFI/OC/Tools"
+    "tmp/EFI/OC/Resources/Audio"
+    "tmp/EFI/OC/Resources/Font"
+    "tmp/EFI/OC/Resources/Image"
+    "tmp/EFI/OC/Resources/Label"
+    "tmp/Docs/AcpiSamples"
+    "tmp/Utilities"
+    )
+  for dir in "${dirs[@]}"; do
+    mkdir -p "${dir}" || exit 1
+  done
+
+  # copy OpenCore main program.
+  cp OpenCore.efi tmp/EFI/OC/ || exit 1
+
   # Mark binaries to be recognisable by OcBootManagementLib.
-  dd if="${selfdir}/Library/OcBootManagementLib/BootSignature.bin" \
-     of=BOOTx64.efi seek=64 bs=1 count=64 conv=notrunc || exit 1
-  dd if="${selfdir}/Library/OcBootManagementLib/BootSignature.bin" \
-     of=OpenCore.efi seek=64 bs=1 count=64 conv=notrunc || exit 1
-  cp BootKicker.efi tmp/EFI/OC/Tools/ || exit 1
+  bootsig="${selfdir}/Library/OcBootManagementLib/BootSignature.bin"
+  efiOCBMs=(
+    "BOOTx64.efi"
+    "OpenCore.efi"
+    )
+  for efiOCBM in "${efiOCBMs[@]}"; do
+    dd if="${bootsig}" \
+       of="${efiOCBM}" seek=64 bs=1 count=64 conv=notrunc || exit 1
+  done
   cp BOOTx64.efi tmp/EFI/BOOT/ || exit 1
   cp BOOTx64.efi tmp/EFI/OC/Bootstrap/Bootstrap.efi || exit 1
-  cp ChipTune.efi tmp/EFI/OC/Tools/ || exit 1
-  cp CleanNvram.efi tmp/EFI/OC/Tools/ || exit 1
-  cp GopStop.efi tmp/EFI/OC/Tools/ || exit 1
-  cp HdaCodecDump.efi tmp/EFI/OC/Tools/ || exit 1
-  cp HiiDatabase.efi tmp/EFI/OC/Drivers/ || exit 1
-  cp KeyTester.efi tmp/EFI/OC/Tools/ || exit 1
-  cp MmapDump.efi tmp/EFI/OC/Tools/ || exit 1
-  cp ResetSystem.efi tmp/EFI/OC/Tools || exit 1
-  cp RtcRw.efi tmp/EFI/OC/Tools || exit 1
-  cp NvmExpressDxe.efi tmp/EFI/OC/Drivers/ || exit 1
-  cp AudioDxe.efi tmp/EFI/OC/Drivers/ || exit 1
-  cp CrScreenshotDxe.efi tmp/EFI/OC/Drivers/ || exit 1
-  cp OpenCanopy.efi tmp/EFI/OC/Drivers/ || exit 1
-  cp OpenControl.efi tmp/EFI/OC/Tools/ || exit 1
-  cp OpenCore.efi tmp/EFI/OC/ || exit 1
-  cp OpenRuntime.efi tmp/EFI/OC/Drivers/ || exit 1
-  cp OpenUsbKbDxe.efi tmp/EFI/OC/Drivers/ || exit 1
-  cp Ps2MouseDxe.efi tmp/EFI/OC/Drivers/ || exit 1
-  cp Ps2KeyboardDxe.efi tmp/EFI/OC/Drivers/ || exit 1
-  cp UsbMouseDxe.efi tmp/EFI/OC/Drivers/ || exit 1
+
+  efiTools=(
+    "BootKicker.efi"
+    "ChipTune.efi"
+    "CleanNvram.efi"
+    "GopStop.efi"
+    "HdaCodecDump.efi"
+    "KeyTester.efi"
+    "MmapDump.efi"
+    "ResetSystem.efi"
+    "RtcRw.efi"
+    "OpenControl.efi"
+    "VerifyMsrE2.efi"
+    )
+  for efiTool in "${efiTools[@]}"; do
+    cp "${efiTool}" tmp/EFI/OC/Tools/ || exit 1
+  done
+  # Special case: OpenShell.efi
   cp Shell.efi tmp/EFI/OC/Tools/OpenShell.efi || exit 1
-  cp VerifyMsrE2.efi tmp/EFI/OC/Tools/ || exit 1
-  cp XhciDxe.efi tmp/EFI/OC/Drivers/ || exit 1
-  cp "${selfdir}/Docs/Configuration.pdf" tmp/Docs/ || exit 1
-  cp "${selfdir}/Docs/Differences/Differences.pdf" tmp/Docs/ || exit 1
-  cp "${selfdir}/Docs/Sample.plist" tmp/Docs/ || exit 1
-  cp "${selfdir}/Docs/SampleFull.plist" tmp/Docs/ || exit 1
+
+  efiDrivers=(
+    "HiiDatabase.efi"
+    "NvmExpressDxe.efi"
+    "AudioDxe.efi"
+    "CrScreenshotDxe.efi"
+    "OpenCanopy.efi"
+    "OpenRuntime.efi"
+    "OpenUsbKbDxe.efi"
+    "Ps2MouseDxe.efi"
+    "Ps2KeyboardDxe.efi"
+    "UsbMouseDxe.efi"
+    "XhciDxe.efi"
+    )
+  for efiDriver in "${efiDrivers[@]}"; do
+    cp "${efiDriver}" tmp/EFI/OC/Drivers/ || exit 1
+  done
+
+  docs=(
+    "Configuration.pdf"
+    "Differences/Differences.pdf"
+    "Sample.plist"
+    "SampleFull.plist"
+    )
+  for doc in "${docs[@]}"; do
+    cp "${selfdir}/Docs/${doc}" tmp/Docs/ || exit 1
+  done
   cp "${selfdir}/Changelog.md" tmp/Docs/ || exit 1
   cp -r "${selfdir}/Docs/AcpiSamples/" tmp/Docs/AcpiSamples/ || exit 1
-  cp -r "${selfdir}/Utilities/LegacyBoot" tmp/Utilities/ || exit 1
-  cp -r "${selfdir}/Utilities/CreateVault" tmp/Utilities/ || exit 1
-  cp -r "${selfdir}/Utilities/LogoutHook" tmp/Utilities/ || exit 1
-  cp -r "${selfdir}/Utilities/macrecovery" tmp/Utilities/ || exit 1
+
+
+  utilScpts=(
+    "LegacyBoot"
+    "CreateVault"
+    "LogoutHook"
+    "macrecovery"
+    "kpdescribe"
+    )
+  for utilScpt in "${utilScpts[@]}"; do
+    cp -r "${selfdir}/Utilities/${utilScpt}" tmp/Utilities/ || exit 1
+  done
+
   buildutil || exit 1
-  mkdir -p tmp/Utilities/macserial || exit 1
-  cp "${selfdir}/Utilities/macserial/macserial" tmp/Utilities/macserial || exit 1
-  if [ -f "${selfdir}/Utilities/macserial/macserial.exe" ]; then
-    cp "${selfdir}/Utilities/macserial/macserial.exe" tmp/Utilities/macserial || exit 1
-  fi
+  utils=(
+    "macserial"
+    "ConfigValidity"
+    "disklabel"
+    "icnspack"
+    )
+  for util in "${utils[@]}"; do
+    dest="tmp/Utilities/${util}"
+    mkdir -p "${dest}" || exit 1
+    bin="${selfdir}/Utilities/${util}/${util}"
+    binEXE="${selfdir}/Utilities/${util}/${util}.exe"
+    cp "${bin}" "${dest}" || exit 1
+    if [ -f "${binEXE}" ]; then
+      cp "${binEXE}" "${dest}" || exit 1
+    fi
+  done
+  # additional docs for macserial.
   cp "${selfdir}/Utilities/macserial/FORMAT.md" tmp/Utilities/macserial/ || exit 1
   cp "${selfdir}/Utilities/macserial/README.md" tmp/Utilities/macserial/ || exit 1
-  cp "${selfdir}/Utilities/ConfigValidity/ConfigValidity" tmp/Utilities/ || exit 1
-  cp "${selfdir}/Utilities/disklabel/disklabel" tmp/Utilities/ || exit 1
-  cp "${selfdir}/Utilities/icnspack/icnspack" tmp/Utilities/ || exit 1
-  cp "${selfdir}/Utilities/kpdescribe/kpdescribe.sh" tmp/Utilities/ || exit 1
+
   pushd tmp || exit 1
   zip -qr -FS ../"OpenCore-${ver}-${2}.zip" ./* || exit 1
   popd || exit 1
