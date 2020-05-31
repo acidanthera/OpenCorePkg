@@ -60,6 +60,10 @@ OC_PRIVILEGE_CONTEXT
 mOpenCorePrivilege;
 
 STATIC
+EFI_HANDLE
+mLoadHandle;
+
+STATIC
 EFI_STATUS
 EFIAPI
 OcStartImage (
@@ -97,7 +101,6 @@ OcMain (
   )
 {
   EFI_STATUS                Status;
-  EFI_HANDLE                LoadHandle;
   OC_PRIVILEGE_CONTEXT      *Privilege;
 
   DEBUG ((DEBUG_INFO, "OC: OcMiscEarlyInit...\n"));
@@ -124,7 +127,7 @@ OcMain (
   DEBUG ((DEBUG_INFO, "OC: OcLoadDevPropsSupport...\n"));
   OcLoadDevPropsSupport (&mOpenCoreConfiguration);
   DEBUG ((DEBUG_INFO, "OC: OcMiscLateInit...\n"));
-  OcMiscLateInit (Storage, &mOpenCoreConfiguration, LoadPath, &LoadHandle);
+  OcMiscLateInit (Storage, &mOpenCoreConfiguration, LoadPath, &mLoadHandle);
   DEBUG ((DEBUG_INFO, "OC: OcLoadKernelSupport...\n"));
   OcLoadKernelSupport (&mOpenCoreStorage, &mOpenCoreConfiguration, &mOpenCoreCpuInfo);
 
@@ -147,7 +150,7 @@ OcMain (
     Privilege,
     OcStartImage,
     mOpenCoreConfiguration.Uefi.Quirks.RequestBootVarRouting,
-    LoadHandle
+    mLoadHandle
     );
 }
 
@@ -196,12 +199,23 @@ OcBootstrapRerun (
 }
 
 STATIC
+EFI_HANDLE
+EFIAPI
+OcGetLoadHandle (
+  IN OC_BOOTSTRAP_PROTOCOL            *This
+  )
+{
+  return mLoadHandle;
+}
+
+STATIC
 OC_BOOTSTRAP_PROTOCOL
 mOpenCoreBootStrap = {
-  .Revision    = OC_BOOTSTRAP_PROTOCOL_REVISION,
-  .NestedCount = 0,
-  .VaultKey    = NULL,
-  .ReRun       = OcBootstrapRerun
+  .Revision      = OC_BOOTSTRAP_PROTOCOL_REVISION,
+  .NestedCount   = 0,
+  .VaultKey      = NULL,
+  .ReRun         = OcBootstrapRerun,
+  .GetLoadHandle = OcGetLoadHandle,
 };
 
 EFI_STATUS

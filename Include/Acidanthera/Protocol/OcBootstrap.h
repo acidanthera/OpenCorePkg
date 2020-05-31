@@ -30,7 +30,7 @@
 ///
 /// OC_BOOTSTRAP_PROTOCOL revision
 ///
-#define OC_BOOTSTRAP_PROTOCOL_REVISION 5
+#define OC_BOOTSTRAP_PROTOCOL_REVISION 6
 
 ///
 /// Forward declaration of OC_BOOTSTRAP_PROTOCOL structure.
@@ -55,6 +55,20 @@ EFI_STATUS
   IN EFI_DEVICE_PATH_PROTOCOL         *LoadPath  OPTIONAL
   );
 
+/**
+  Obtain OpenCore load handle.
+
+  @param[in] This           This protocol.
+
+  @retval load handle on success.
+  @retval NULL on failure.
+**/
+typedef
+EFI_HANDLE
+(EFIAPI *OC_GET_LOAD_HANDLE) (
+  IN OC_BOOTSTRAP_PROTOCOL            *This
+  );
+
 ///
 /// The structure exposed by the OC_BOOTSTRAP_PROTOCOL.
 ///
@@ -63,6 +77,7 @@ struct OC_BOOTSTRAP_PROTOCOL_ {
   UINTN               NestedCount;
   OC_RSA_PUBLIC_KEY   *VaultKey;
   OC_BOOTSTRAP_RERUN  ReRun;
+  OC_GET_LOAD_HANDLE  GetLoadHandle;
 };
 
 extern EFI_GUID gOcBootstrapProtocolGuid;
