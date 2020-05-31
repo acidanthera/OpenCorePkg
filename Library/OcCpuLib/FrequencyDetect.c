@@ -487,7 +487,7 @@ InternalCalculateVMTFrequency (
     //
     // HV_X64_MSR_TSC_FREQUENCY
     //
-    Msr = AsmReadMsr64 (0x40000022); 
+    Msr = AsmReadMsr64 (0x40000022);
     return Msr;
   }
 
