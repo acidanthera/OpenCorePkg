@@ -10,7 +10,7 @@ MKDIR    := mkdir -p
 
 ifeq ($(UDK_PATH),)
 	ifneq ($(PACKAGES_PATH),)
-		UDK_PATH = $(PACKAGES_PATH)
+		UDK_PATH := $(PACKAGES_PATH)
 	else
 		UDK_PATH ?= ../../UDK
 	endif
@@ -22,7 +22,7 @@ else
 	DIST ?= $(shell uname)
 endif
 
-CFLAGS    = -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter
+CFLAGS   := -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter
 CFLAGS   += -I../../User/Include
 CFLAGS   += -I../../Include/Acidanthera -I../../Include/Apple -I../../Include/Generic -I../../Include/Intel
 
@@ -66,6 +66,7 @@ endif
 ifneq ($(STANDALONE),1)
 	CFLAGS  += -D NO_MSABI_VA_FUNCS -D OC_TARGET_DEBUG
 	CFLAGS  += -I$(UDK_PATH)/MdePkg/Include -I$(UDK_PATH)/MdePkg/Include/Library -I$(UDK_PATH)/MdePkg/Include/$(UDK_ARCH)
+	CFLAGS  += -I$(UDK_PATH)/MdeModulePkg/Include
 	CFLAGS  += -I$(UDK_PATH)/UefiCpuPkg/Include
 	#
 	# Compatibility headers.
@@ -98,6 +99,11 @@ ifneq ($(STANDALONE),1)
 		../../Library/OcGuardLib
 endif
 
+#
+# Miscellaneous implementations that do not depend on UDK.
+#
+OBJS    += File.o
+
 OUT_DIR := $(DIST)_$(UDK_ARCH)
 OBJS    := $(addprefix $(OUT_DIR)/,$(OBJS))
 
@@ -112,4 +118,4 @@ $(PRODUCT): $(OBJS)
 	$(STRIP) $(STRIPFLAGS) $(PRODUCT)
 
 clean:
-	rm -rf $(OUT_DIR) $(PRODUCT)
+	rm -rf $(OUT_DIR) $(PRODUCT) $(PRODUCT).exe

@@ -23,9 +23,7 @@
 #include <Library/OcMiscLib.h>
 #include <Library/OcConfigurationLib.h>
 
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
+#include <File.h>
 #include <sys/time.h>
 
 /*
@@ -43,25 +41,6 @@ long long current_timestamp() {
     long long milliseconds = te.tv_sec*1000LL + te.tv_usec/1000; // calculate milliseconds
     // printf("milliseconds: %lld\n", milliseconds);
     return milliseconds;
-}
-
-uint8_t *readFile(const char *str, uint32_t *size) {
-  FILE *f = fopen(str, "rb");
-
-  if (!f) return NULL;
-
-  fseek(f, 0, SEEK_END);
-  long fsize = ftell(f);
-  fseek(f, 0, SEEK_SET);
-
-  uint8_t *string = malloc(fsize + 1);
-  fread(string, fsize, 1, f);
-  fclose(f);
-
-  string[fsize] = 0;
-  *size = fsize;
-
-  return string;
 }
 
 int main(int argc, char** argv) {
