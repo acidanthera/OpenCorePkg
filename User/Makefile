@@ -34,7 +34,7 @@ endif
 ifeq ($(DIST),Windows)
 	SUFFIX   := .exe
 	CFLAGS   += -D_ISOC99_SOURCE=1
-	UDK_ARCH ?= IA32
+	UDK_ARCH ?= Ia32
 else
 	UDK_ARCH ?= X64
 endif
