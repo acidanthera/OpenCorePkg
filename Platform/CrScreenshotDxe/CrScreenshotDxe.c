@@ -347,13 +347,9 @@ AppleEventKeyHandler (
     return;
   }
 
-  //
-  // Apple calls ALT key by the name of OPTION key.
-  //
-  if (Information->EventData.KeyData->InputKey.ScanCode == SCAN_F12
-    && Information->Modifiers == (APPLE_MODIFIER_LEFT_CONTROL | APPLE_MODIFIER_LEFT_OPTION)) {
+  if (Information->EventData.KeyData->AppleKeyCode == AppleHidUsbKbUsageKeyF10) {
     //
-    // Take a screenshot
+    // Take a screenshot for F10.
     //
     TakeScreenshot (NULL);
   }
@@ -380,86 +376,17 @@ CrScreenshotDxeEntry (
   Installed = FALSE;
 
   //
-  // Locate compatible protocols, firstly try SimpleTextInEx, otherwise use AppleEvent.
+  // Locate compatible protocols, firstly try AppleEvent otherwise try SimpleTextInEx.
+  // This is because we want key swap to take precedence.
   //
   Status = gBS->LocateHandleBuffer (
     ByProtocol,
-    &gEfiSimpleTextInputExProtocolGuid,
+    &gAppleEventProtocolGuid,
     NULL,
     &HandleCount,
     &HandleBuffer
     );
   if (!EFI_ERROR (Status)) {
-    //
-    // Set keystroke to be LCtrl+LAlt+F12.
-    //
-    SimpleTextInExKeyStroke.Key.ScanCode = SCAN_F12;
-    SimpleTextInExKeyStroke.Key.UnicodeChar = 0;
-    SimpleTextInExKeyStroke.KeyState.KeyShiftState = EFI_SHIFT_STATE_VALID | EFI_LEFT_CONTROL_PRESSED | EFI_LEFT_ALT_PRESSED;
-    SimpleTextInExKeyStroke.KeyState.KeyToggleState = 0;
-
-    for (Index = 0; Index < HandleCount; ++Index) {
-      Status = gBS->HandleProtocol (
-        HandleBuffer[Index],
-        &gEfiSimpleTextInputExProtocolGuid,
-        (VOID **) &SimpleTextInEx
-        );
-
-      if (EFI_ERROR (Status)) {
-        DEBUG ((
-          DEBUG_INFO,
-          "CRSCR: gBS->HandleProtocol[%u] SimpleTextInputEx returned %r\n",
-          (UINT32) Index,
-          Status
-          ));
-        continue;
-      }
-
-      //
-      // Register key notification function
-      //
-      Status = SimpleTextInEx->RegisterKeyNotify (
-        SimpleTextInEx,
-        &SimpleTextInExKeyStroke,
-        TakeScreenshot,
-        &SimpleTextInExHandle
-        );
-      if (!EFI_ERROR (Status)) {
-        Installed = TRUE;
-      } else {
-        DEBUG ((
-          DEBUG_INFO,
-          "CRSCR: SimpleTextInEx->RegisterKeyNotify[%u] returned %r\n",
-          (UINT32) Index,
-          Status
-          ));
-      }
-    }
-
-    gBS->FreePool (HandleBuffer);
-  } else {
-    DEBUG ((
-      DEBUG_INFO,
-      "CRSCR: gBS->LocateHandleBuffer SimpleTextInputEx returned %r\n",
-      Status
-      ));
-
-    Status = gBS->LocateHandleBuffer (
-      ByProtocol,
-      &gAppleEventProtocolGuid,
-      NULL,
-      &HandleCount,
-      &HandleBuffer
-      );
-    if (EFI_ERROR (Status)) {
-      DEBUG ((
-        DEBUG_INFO,
-        "CRSCR: gBS->LocateHandleBuffer AppleEvent returned %r\n",
-        Status
-        ));
-      return EFI_UNSUPPORTED;
-    }
-
     for (Index = 0; Index < HandleCount; ++Index) {
       Status = gBS->HandleProtocol (HandleBuffer[Index], &gAppleEventProtocolGuid, (VOID **) &AppleEvent);
 
@@ -485,7 +412,7 @@ CrScreenshotDxeEntry (
       }
 
       //
-      // Register key handler, which will later determine LCtrl+LAlt+F12 combination
+      // Register key handler, which will later determine the combination.
       //
       Status = AppleEvent->RegisterHandler (
         APPLE_EVENT_TYPE_KEY_UP,
@@ -495,24 +422,87 @@ CrScreenshotDxeEntry (
         );
       if (!EFI_ERROR (Status)) {
         Installed = TRUE;
-      } else {
-        DEBUG ((
-          DEBUG_INFO,
-          "CRSCR: AppleEvent->RegisterHandler[%u] returned %r\n",
-          (UINT32) Index,
-          Status
-          ));
       }
+
+      DEBUG ((
+        DEBUG_INFO,
+        "CRSCR: AppleEvent->RegisterHandler[%u] returned %r\n",
+        (UINT32) Index,
+        Status
+        ));
     }
 
     gBS->FreePool (HandleBuffer);
+  } else {
+    DEBUG ((
+      DEBUG_INFO,
+      "CRSCR: gBS->LocateHandleBuffer AppleEvent returned %r\n",
+      Status
+      ));
   }
 
-  //
-  // Show success only when we found at least one working implementation
-  //
-  if (Installed) {
-    ShowStatus (0xFF, 0xFF, 0xFF); //White
+  if (!Installed) {
+    Status = gBS->LocateHandleBuffer (
+      ByProtocol,
+      &gEfiSimpleTextInputExProtocolGuid,
+      NULL,
+      &HandleCount,
+      &HandleBuffer
+      );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "CRSCR: gBS->LocateHandleBuffer SimpleTextInEx returned %r\n",
+        Status
+        ));
+      return EFI_UNSUPPORTED;
+    }
+
+    //
+    // Register key notification function for F10.
+    //
+    SimpleTextInExKeyStroke.Key.ScanCode            = SCAN_F10;
+    SimpleTextInExKeyStroke.Key.UnicodeChar         = 0;
+    SimpleTextInExKeyStroke.KeyState.KeyShiftState  = 0;
+    SimpleTextInExKeyStroke.KeyState.KeyToggleState = 0;
+
+    for (Index = 0; Index < HandleCount; ++Index) {
+      Status = gBS->HandleProtocol (
+        HandleBuffer[Index],
+        &gEfiSimpleTextInputExProtocolGuid,
+        (VOID **) &SimpleTextInEx
+        );
+
+      if (EFI_ERROR (Status)) {
+        DEBUG ((
+          DEBUG_INFO,
+          "CRSCR: gBS->HandleProtocol[%u] SimpleTextInputEx returned %r\n",
+          (UINT32) Index,
+          Status
+          ));
+        continue;
+      }
+
+      Status = SimpleTextInEx->RegisterKeyNotify (
+        SimpleTextInEx,
+        &SimpleTextInExKeyStroke,
+        TakeScreenshot,
+        &SimpleTextInExHandle
+        );
+
+      if (!EFI_ERROR (Status)) {
+        Installed = TRUE;
+      }
+
+      DEBUG ((
+        DEBUG_INFO,
+        "CRSCR: SimpleTextInEx->RegisterKeyNotify[%u] returned %r\n",
+        (UINT32) Index,
+        Status
+        ));
+    }
+
+    gBS->FreePool (HandleBuffer);
   }
 
   return EFI_SUCCESS;
