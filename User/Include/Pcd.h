@@ -31,4 +31,4 @@ extern const BOOLEAN _gPcd_FixedAtBuild_PcdVerifyNodeInList;
 #define _PCD_GET_MODE_BOOL_PcdVerifyNodeInList  _gPcd_FixedAtBuild_PcdVerifyNodeInList
 #define _PCD_GET_MODE_16_PcdOcCryptoAllowedRsaModuli  (512U | 256U)
 #define _PCD_GET_MODE_16_PcdOcCryptoAllowedSigHashTypes  \
-  (1U << OcSigHashTypeSha256) | (1U << OcSigHashTypeSha384) | (1U << OcSigHashTypeSha512)
+  ((1U << OcSigHashTypeSha256) | (1U << OcSigHashTypeSha384) | (1U << OcSigHashTypeSha512))
