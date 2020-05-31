@@ -44,6 +44,7 @@ OpenCore Changelog
 - Added prebuilt version of `CrScreenshotDxe` driver
 - Fixed Hyper-V frequency detection compatibility
 - Added `SysReport` option for DEBUG builds to dump system info
+- Fixed crashes on some AMD firmwares when performing keyboard input
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG

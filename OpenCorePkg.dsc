@@ -25,7 +25,13 @@
 
 [LibraryClasses]
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
-  BaseMemoryLib|MdePkg/Library/BaseMemoryLibOptDxe/BaseMemoryLibOptDxe.inf
+  # We cannot use BaseMemoryLibOptDxe since it uses SSE instructions,
+  # and some firmwares fail to properly maintain MMX register contexts
+  # across the timers. This results in exceptions when trying to execute
+  # primitives like CopyMem in timers (e.g. AIKDataWriteEntry).
+  # Reproduced on ASUS M5A97 with AMD FX8320 CPU.
+  # REF: https://github.com/acidanthera/bugtracker/issues/754
+  BaseMemoryLib|MdePkg/Library/BaseMemoryLibRepStr/BaseMemoryLibRepStr.inf
   BaseRngLib|MdePkg/Library/BaseRngLib/BaseRngLib.inf
   BcfgCommandLib|ShellPkg/Library/UefiShellBcfgCommandLib/UefiShellBcfgCommandLib.inf
   CpuLib|MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
@@ -127,13 +133,13 @@
   !include NetworkPkg/NetworkLibs.dsc.inc
 
 [Components]
-  MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf{
+  MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf {
     <LibraryClasses>
       !if $(TARGET) == RELEASE
         DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
       !endif
   }
-  MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf{
+  MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf {
     <LibraryClasses>
       !if $(TARGET) == RELEASE
         DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
@@ -155,6 +161,10 @@
   OpenCorePkg/Application/PavpProvision/PavpProvision.inf
   OpenCorePkg/Application/ResetSystem/ResetSystem.inf
   OpenCorePkg/Application/RtcRw/RtcRw.inf
+  OpenCorePkg/Application/VerifyMemOpt/VerifyMemOpt.inf {
+    <LibraryClasses>
+      BaseMemoryLib|MdePkg/Library/BaseMemoryLibOptDxe/BaseMemoryLibOptDxe.inf
+  }
   OpenCorePkg/Application/VerifyMsrE2/VerifyMsrE2.inf
   OpenCorePkg/Debug/GdbSyms/GdbSyms.inf
   OpenCorePkg/Library/OcAcpiLib/OcAcpiLib.inf

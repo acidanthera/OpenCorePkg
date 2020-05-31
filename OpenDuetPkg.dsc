@@ -39,7 +39,7 @@
   #
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
   !if $(ARCH) == X64
-    BaseMemoryLib|MdePkg/Library/BaseMemoryLibOptDxe/BaseMemoryLibOptDxe.inf
+    BaseMemoryLib|MdePkg/Library/BaseMemoryLibRepStr/BaseMemoryLibRepStr.inf
   !else
     BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
   !endif
