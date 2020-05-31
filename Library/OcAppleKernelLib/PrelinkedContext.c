@@ -531,6 +531,9 @@ PrelinkedInjectKext (
 
   ASSERT (InfoPlistSize > 0);
 
+  KmodAddress           = 0;
+  AlignedExecutableSize = 0;
+
   //
   // Copy executable to prelinkedkernel.
   //

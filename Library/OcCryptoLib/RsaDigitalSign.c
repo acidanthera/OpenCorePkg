@@ -238,6 +238,8 @@ RsaVerifySigHashFromProcessed (
     default:
     {
       ASSERT (FALSE);
+      Padding     = NULL;
+      PaddingSize = 0;
     }
   }
   //

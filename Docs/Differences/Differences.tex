@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon May 11 17:11:58 2020
-%DIF ADD ../Configuration.tex        Sun May 31 07:57:11 2020
+%DIF DEL PreviousConfiguration.tex   Sun May 31 13:48:13 2020
+%DIF ADD ../Configuration.tex        Sun May 31 13:53:16 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -573,8 +573,8 @@ be relied upon, and all fields must be properly specified in the configuration.
         }
         child [missing] {}
         child { node [selected] {OpenCore.efi}}
-        child { node [optional] {vault.plist}}
         child { node {config.plist}}
+        child { node [optional] {vault.plist}}
         child { node [optional] {vault.sig}}
       }
     }
@@ -604,8 +604,8 @@ be relied upon, and all fields must be properly specified in the configuration.
     child [missing] {}
     child [missing] {}
     child [missing] {}
-    child { node [optional] {SysReport}}
     child { node [optional] {boot}}
+    child { node [optional] {SysReport}}
     child { node [optional] {nvram.plist}}
     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
     child { node [optional] {panic-YYYY-MM-DD-HHMMSS.txt}}
@@ -675,17 +675,24 @@ entries include:
 \DIFdelend \DIFaddbegin \\
   \DIFaddend Main booter driver responsible for operating system loading.
 \item
-  \texttt{vault.plist} \DIFdelbegin %DIFDELCMD < \break
+  \DIFaddbegin \texttt{\DIFadd{config.plist}} \\
+  \texttt{\DIFadd{OC Config}}\DIFadd{.
+}\item
+  \DIFaddend \texttt{vault.plist} \DIFdelbegin %DIFDELCMD < \break
 %DIFDELCMD <   %%%
 \DIFdelend \DIFaddbegin \\
   \DIFaddend Hashes for all files potentially loadable by \texttt{OC Config}.
 \item
-  \texttt{config.plist} \DIFdelbegin %DIFDELCMD < \break
+  \DIFdelbegin \texttt{\DIFdel{config.plist}}
+  %DIFAUXCMD
+%DIFDELCMD < \break
 %DIFDELCMD <   %%%
-\DIFdelend \DIFaddbegin \\
-  \DIFaddend \texttt{OC Config}.
-\item
-  \texttt{vault.sig} \DIFdelbegin %DIFDELCMD < \break
+\texttt{\DIFdel{OC Config}}%DIFAUXCMD
+\DIFdel{.
+}%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdelend \texttt{vault.sig} \DIFdelbegin %DIFDELCMD < \break
 %DIFDELCMD <   %%%
 \DIFdelend \DIFaddbegin \\
   \DIFaddend Signature for \texttt{vault.plist}.
