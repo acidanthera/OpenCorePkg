@@ -91,7 +91,7 @@ AcpiGetTableName (
     TmpFile->Close (TmpFile);
   }
 
-  AsciiSPrint (&Name[4], NameSize - 4, "-%u", (UINT32) Index);
+  AsciiSPrint (&Name[4], NameSize - 4, "-%u", (UINT32) (Index + 1));
 }
 
 EFI_STATUS
