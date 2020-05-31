@@ -35,7 +35,7 @@ VPATH   = ../../Library/OcAppleChunklistLib:$\
 	../../Library/OcAppleRamDiskLib:$\
 	../../Library/OcXmlLib:$\
 	../../Library/OcCryptoLib:$\
-	../../Library/OcCryptoLib/IA32:$\
+	../../Library/OcCryptoLib/Ia32:$\
 	../../Library/OcAppleKeysLib:$\
 	../../Library/OcStringLib:$\
 	../../Library/OcFileLib:$\
