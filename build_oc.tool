@@ -138,7 +138,6 @@ package() {
   cp "${selfdir}/Changelog.md" tmp/Docs/ || exit 1
   cp -r "${selfdir}/Docs/AcpiSamples/" tmp/Docs/AcpiSamples/ || exit 1
 
-
   utilScpts=(
     "LegacyBoot"
     "CreateVault"
@@ -161,8 +160,8 @@ package() {
     dest="tmp/Utilities/${util}"
     mkdir -p "${dest}" || exit 1
     bin="${selfdir}/Utilities/${util}/${util}"
-    binEXE="${selfdir}/Utilities/${util}/${util}.exe"
     cp "${bin}" "${dest}" || exit 1
+    binEXE="${bin}.exe"
     if [ -f "${binEXE}" ]; then
       cp "${binEXE}" "${dest}" || exit 1
     fi
