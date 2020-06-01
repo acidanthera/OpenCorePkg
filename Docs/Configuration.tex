@@ -797,6 +797,20 @@ Applying the patches early makes it possible to write so called ``proxy'' patche
 where the original method is patched in the original table and is implemented in
 the patched table.
 
+There are many places providing ACPI tables and workarounds. Commonly used
+ACPI tables are provided with OpenCore, VirtualSMC, VoodooPS2, and WhateverGreen
+releases. Besides those there are several third-party instructions commonly found
+on AppleLife in \href{https://applelife.ru/forums/xakintosh.67}{Laboratory}
+and \href{https://applelife.ru/forums/dsdt.129}{DSDT} subforums
+(e.g. \href{https://applelife.ru/posts/498967}{Battery register splitting} guide).
+A slightly more user-friendly explanation of some tables included with OpenCore
+can also be found in \href{https://dortania.github.io}{Dortania}'s
+\href{https://dortania.github.io/Getting-Started-With-ACPI}{Getting started with ACPI} guide.
+For more exotic cases there also are several other places including
+\href{https://github.com/daliansky}{daliansky}'s
+\href{https://github.com/daliansky/OC-little}{ACPI sample collection}, but the quality
+of the suggested solutions will vary from case to case.
+
 \subsection{Properties}\label{acpiprops}
 
 \begin{enumerate}

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun May 31 13:48:13 2020
-%DIF ADD ../Configuration.tex        Sun May 31 19:02:58 2020
+%DIF DEL PreviousConfiguration.tex   Mon May 11 17:11:58 2020
+%DIF ADD ../Configuration.tex        Mon Jun  1 03:16:00 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1005,6 +1005,21 @@ writing the changes.
 \DIFadd{Applying the patches early makes it possible to write so called ``proxy'' patches,
 where the original method is patched in the original table and is implemented in
 the patched table.
+}
+
+\DIFadd{There are many places providing ACPI tables and workarounds. Commonly used
+ACPI tables are provided with OpenCore, VirtualSMC, VoodooPS2, and WhateverGreen
+releases. Besides those there are several third-party instructions commonly found
+on AppleLife in }\href{https://applelife.ru/forums/xakintosh.67}{Laboratory}
+\DIFadd{and }\href{https://applelife.ru/forums/dsdt.129}{DSDT} \DIFadd{subforums
+(e.g. }\href{https://applelife.ru/posts/498967}{Battery register splitting} \DIFadd{guide).
+A slightly more user-friendly explanation of some tables included with OpenCore
+can also be found in }\href{https://dortania.github.io}{Dortania}\DIFadd{'s
+}\href{https://dortania.github.io/Getting-Started-With-ACPI}{Getting started with ACPI} \DIFadd{guide.
+For more exotic cases there also are several other places including
+}\href{https://github.com/daliansky}{daliansky}\DIFadd{'s
+}\href{https://github.com/daliansky/OC-little}{ACPI sample collection}\DIFadd{, but the quality
+of the suggested solutions will vary from case to case.
 }
 
 \DIFaddend \subsection{Properties}\label{acpiprops}
@@ -2984,6 +2999,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   }\item \texttt{\DIFadd{OCRST}} \DIFadd{--- ResetSystem
   }\item \texttt{\DIFadd{OCUI}} \DIFadd{--- OpenCanopy
   }\item \texttt{\DIFadd{OC}} \DIFadd{--- OpenCore main
+  }\item \texttt{\DIFadd{VMOPT}} \DIFadd{--- VerifyMemOpt
   }\end{itemize}
 
   \textbf{\DIFadd{Libraries}}\DIFadd{:
