@@ -20,10 +20,9 @@
 #include <Library/OcAppleKernelLib.h>
 
 #include <string.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/time.h>
+
+#include <File.h>
 
 /*
  for fuzzing (TODO):
@@ -206,25 +205,6 @@ long long current_timestamp() {
     long long milliseconds = te.tv_sec*1000LL + te.tv_usec/1000; // calculate milliseconds
     // printf("milliseconds: %lld\n", milliseconds);
     return milliseconds;
-}
-
-uint8_t *readFile(const char *str, uint32_t *size) {
-  FILE *f = fopen(str, "rb");
-
-  if (!f) return NULL;
-
-  fseek(f, 0, SEEK_END);
-  long fsize = ftell(f);
-  fseek(f, 0, SEEK_SET);
-
-  uint8_t *string = malloc(fsize + 1);
-  fread(string, fsize, 1, f);
-  fclose(f);
-
-  string[fsize] = 0;
-  *size = fsize;
-
-  return string;
 }
 
 #if 0

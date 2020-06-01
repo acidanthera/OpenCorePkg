@@ -13,10 +13,9 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DebugLib.h>
 
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+
+#include <File.h>
 
 /**
 
@@ -28,25 +27,6 @@ rm -rf DICT fuzz*.log ; mkdir DICT ; UBSAN_OPTIONS='halt_on_error=1' ./DiskImage
 **/
 
 EFI_GUID gOcVendorVariableGuid;
-
-uint8_t *readFile(const char *str, long *size) {
-  FILE *f = fopen(str, "rb");
-
-  if (!f) return NULL;
-
-  fseek(f, 0, SEEK_END);
-  long fsize = ftell(f);
-  fseek(f, 0, SEEK_SET);
-
-  uint8_t *string = malloc(fsize + 1);
-  fread(string, fsize, 1, f);
-  fclose(f);
-
-  string[fsize] = 0;
-  *size = fsize;
-
-  return string;
-}
 
 #ifdef FUZZING_TEST
 #define main no_main
@@ -72,11 +52,11 @@ int main (int argc, char *argv[]) {
 
   for (int i = 1; i < (argc - 1); i+=2) {
     int     DmgContextValid = 0;
-    uint8_t *Dmg = NULL;
-    long    DmgSize;
+    uint8_t  *Dmg = NULL;
+    uint32_t DmgSize;
 
-    uint8_t *Chunklist = NULL;
-    long    ChunklistSize;
+    uint8_t  *Chunklist = NULL;
+    uint32_t ChunklistSize;
 
     uint8_t  *UncompDmg = NULL;
     uint32_t UncompSize;

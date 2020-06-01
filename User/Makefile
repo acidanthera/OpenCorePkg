@@ -94,7 +94,6 @@ ifneq ($(STANDALONE),1)
 		$(UDK_PATH)/MdePkg/Library/BaseDebugPrintErrorLevelLib:$\
 		$(UDK_PATH)/MdePkg/Library/UefiDebugLibConOut:$\
 		$(UDK_PATH)/MdePkg/Library/BasePrintLib:$\
-		$(UDK_PATH)/MdePkg/Library/BasePrintLib:$\
 		../../Library/OcGuardLib
 endif
 
