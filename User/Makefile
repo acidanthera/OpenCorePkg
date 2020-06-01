@@ -65,7 +65,7 @@ endif
 #
 ifneq ($(STANDALONE),1)
 	CFLAGS  += -D NO_MSABI_VA_FUNCS -D OC_TARGET_DEBUG
-	CFLAGS  += -I$(UDK_PATH)/MdePkg/Include -I$(UDK_PATH)/MdePkg/Include/Library -I$(UDK_PATH)/MdePkg/Include/$(UDK_ARCH)
+	CFLAGS  += -I$(UDK_PATH)/MdePkg/Include -I$(UDK_PATH)/MdePkg/Include/Library -I$(UDK_PATH)/MdePkg/Include/$(UDK_ARCH) -I$(UDK_PATH)/MdePkg/Library/BaseLib
 	CFLAGS  += -I$(UDK_PATH)/MdeModulePkg/Include
 	CFLAGS  += -I$(UDK_PATH)/UefiCpuPkg/Include
 	#
@@ -75,11 +75,11 @@ ifneq ($(STANDALONE),1)
 	#
 	# UDK implementations.
 	#
-	OBJS    += UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o
+	OBJS    += UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o GccInline.o
 	#
 	# Customised/Simplified implementations at userspace level.
 	#
-	OBJS    += BaseMemoryLib.o BootServices.o DebugBreak.o EfiVar.o UserMath.o Pcd.o
+	OBJS    += BaseMemoryLib.o BootServices.o EfiVar.o UserMath.o Pcd.o
 	#
 	# OcGuardLib targets.
 	#
@@ -90,11 +90,12 @@ ifneq ($(STANDALONE),1)
 	# This way make will find any file in path in VPATH and apply "%.o: %.c" rule.
 	#
 	VPATH += :$(UDK_PATH)/MdePkg/Library/UefiLib:$\
-		$(UDK_PATH)/MdePkg/Library/BaseLib:$\
-		$(UDK_PATH)/MdePkg/Library/BaseDebugPrintErrorLevelLib:$\
-		$(UDK_PATH)/MdePkg/Library/UefiDebugLibConOut:$\
-		$(UDK_PATH)/MdePkg/Library/BasePrintLib:$\
-		../../Library/OcGuardLib
+		      $(UDK_PATH)/MdePkg/Library/BaseLib:$\
+		      $(UDK_PATH)/MdePkg/Library/BaseLib/$(UDK_ARCH):$\
+		      $(UDK_PATH)/MdePkg/Library/BaseDebugPrintErrorLevelLib:$\
+		      $(UDK_PATH)/MdePkg/Library/UefiDebugLibConOut:$\
+		      $(UDK_PATH)/MdePkg/Library/BasePrintLib:$\
+		      ../../Library/OcGuardLib
 endif
 
 #
@@ -103,6 +104,10 @@ endif
 VPATH   += ../../User/Library:$
 OBJS    += File.o
 
+#
+# Directory where objects will be produced.
+# As well, OBJS will be prepended with actual paths.
+#
 OUT_DIR := $(DIST)_$(UDK_ARCH)
 OBJS    := $(addprefix $(OUT_DIR)/,$(OBJS))
 
