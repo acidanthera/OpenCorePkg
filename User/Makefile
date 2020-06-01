@@ -95,13 +95,13 @@ ifneq ($(STANDALONE),1)
 		$(UDK_PATH)/MdePkg/Library/UefiDebugLibConOut:$\
 		$(UDK_PATH)/MdePkg/Library/BasePrintLib:$\
 		$(UDK_PATH)/MdePkg/Library/BasePrintLib:$\
-		../../User/Library:$\
 		../../Library/OcGuardLib
 endif
 
 #
 # Miscellaneous implementations that do not depend on UDK.
 #
+VPATH   += ../../User/Library:$
 OBJS    += File.o
 
 OUT_DIR := $(DIST)_$(UDK_ARCH)
