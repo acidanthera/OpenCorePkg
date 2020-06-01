@@ -23,8 +23,7 @@ matrix:
       provider: releases
       skip_cleanup: true
       file:
-      - Binaries/RELEASE/*.zip
-      - Binaries/DEBUG/*.zip
+      - Binaries/*.zip
       file_glob: true
       on:
         tags: true
