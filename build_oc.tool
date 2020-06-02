@@ -31,8 +31,8 @@ buildutil() {
 
     if [ "$(which i686-w64-mingw32-gcc)" != "" ]; then
       echo "Building ${util} for Windows..."
-      CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make clean || exit 1
-      CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make || exit 1
+      UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make clean || exit 1
+      UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make || exit 1
     fi
     cd - || exit 1
   done

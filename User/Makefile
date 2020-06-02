@@ -23,6 +23,11 @@ else
 endif
 
 #
+# Primary architecture. 
+#
+UDK_ARCH ?= X64
+
+#
 # Primary CFLAGS.
 #
 CFLAGS   := -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter
@@ -35,9 +40,6 @@ endif
 ifeq ($(DIST),Windows)
 	SUFFIX   := .exe
 	CFLAGS   += -D_ISOC99_SOURCE=1
-	UDK_ARCH ?= Ia32
-else
-	UDK_ARCH ?= X64
 endif
 
 ifeq ($(SANITIZE),1)
