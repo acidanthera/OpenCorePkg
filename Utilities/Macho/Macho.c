@@ -81,10 +81,6 @@ static int FeedMacho(void *file, uint32_t size) {
 
   MACH_NLIST_64 *Symbol = NULL;
   for (index = 0; (Symbol = MachoGetSymbolByIndex64 (&Context, index)) != NULL; index++) {
-    printf("myindex = %d\n", index);
-    if (index == 31) {
-      
-    }
     CONST CHAR8 *Indirect = MachoGetIndirectSymbolName64 (&Context, Symbol);
     if (!AsciiStrCmp (MachoGetSymbolName64 (&Context, Symbol), "__hack") ||
       (Indirect && !AsciiStrCmp (Indirect, "__hack"))) {
@@ -282,7 +278,6 @@ static int FeedMacho(void *file, uint32_t size) {
     }
   }
 
-  puts("I can reach here, at the end of FeedMacho");
   return code != 963;
 }
 
@@ -294,7 +289,6 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  puts("I can reach here, at main");
   return FeedMacho (b, f);
 }
 
