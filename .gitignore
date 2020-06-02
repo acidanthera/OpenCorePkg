@@ -24,6 +24,7 @@ Utilities/HelloWorld/HelloWorld
 Utilities/KextInject/KextInject
 Utilities/ConfigValidity/ConfigValidity
 Utilities/disklabel/disklabel
+Utilities/Bmf/Bmf
 *.o
 *.exe
 DICT

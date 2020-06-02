@@ -22,9 +22,10 @@ else
 	DIST ?= $(shell uname)
 endif
 
+#
+# Primary CFLAGS.
+#
 CFLAGS   := -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter
-CFLAGS   += -I../../User/Include
-CFLAGS   += -I../../Include/Acidanthera -I../../Include/Apple -I../../Include/Generic -I../../Include/Intel
 
 ifeq ($(DIST),Darwin)
 	CFLAGS  += -mmacosx-version-min=10.6
@@ -61,6 +62,12 @@ else
 endif
 
 #
+# Search Paths.
+#
+CFLAGS   += -I../../User/Include
+CFLAGS   += -I../../Include/Acidanthera -I../../Include/Apple -I../../Include/Apple/$(UDK_ARCH) -I../../Include/Generic -I../../Include/Intel -I../../Include/Microsoft
+
+#
 # Skip including UDK when suggesting STANDALONE mode.
 #
 ifneq ($(STANDALONE),1)
@@ -71,31 +78,63 @@ ifneq ($(STANDALONE),1)
 	#
 	# Compatibility headers.
 	#
-	CFLAGS  += -include ../../User/Include/Pcd.h -include ../../User/Include/EfiVar.h
+	CFLAGS  += -include ../../User/Include/Pcd.h -include ../../User/Include/GlobalVar.h
 	#
 	# UDK implementations.
 	#
-	OBJS    += UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o GccInline.o
+	OBJS    += UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o GccInline.o HighBitSet32.o HighBitSet64.o MtrrLib.o GetPowerOfTwo64.o Cpu.o BmpSupportLib.o SafeIntLib.o X86GetInterruptState.o PciLib.o PciExpressLib.o DevicePathUtilities.o UefiDevicePathLib.o DevicePathToText.o DevicePathFromText.o BitField.o
 	#
 	# Customised/Simplified implementations at userspace level.
 	#
-	OBJS    += BaseMemoryLib.o BootServices.o EfiVar.o UserMath.o Pcd.o
+	OBJS    += BaseMemoryLib.o BootServices.o GlobalVar.o UserMath.o UserMisc.o Pcd.o
 	#
 	# OcGuardLib targets.
 	#
 	OBJS    += BitOverflow.o NativeOverflow.o TripleOverflow.o
+	#
+	# OcSerializeLib targets.
+	#
+	OBJS    += OcSerializeLib.o
+	#
+	# OcTemplateLib targets.
+	#
+	OBJS    += OcTemplateLib.o
+	#
+	# OcXmlLib targets.
+	#
+	OBJS    += OcXmlLib.o
+	#
+	# OcStringLib targets.
+	#
+	OBJS    += OcAsciiLib.o OcUnicodeLib.o
+	#
+	# OcCryptoLib targets.
+	#
+	OBJS    += RsaDigitalSign.o BigNumMontgomery.o BigNumPrimitives.o BigNumWordMul64.o Sha2.o SecureMem.o
 
 	#
 	# Add source searchpath for transparent compilation.
 	# This way make will find any file in path in VPATH and apply "%.o: %.c" rule.
 	#
-	VPATH += :$(UDK_PATH)/MdePkg/Library/UefiLib:$\
-		      $(UDK_PATH)/MdePkg/Library/BaseLib:$\
-		      $(UDK_PATH)/MdePkg/Library/BaseLib/$(UDK_ARCH):$\
-		      $(UDK_PATH)/MdePkg/Library/BaseDebugPrintErrorLevelLib:$\
-		      $(UDK_PATH)/MdePkg/Library/UefiDebugLibConOut:$\
-		      $(UDK_PATH)/MdePkg/Library/BasePrintLib:$\
-		      ../../Library/OcGuardLib
+	VPATH   += :$(UDK_PATH)/MdePkg/Library/UefiLib:$\
+				$(UDK_PATH)/MdePkg/Library/BaseLib:$\
+				$(UDK_PATH)/MdePkg/Library/BaseLib/$(UDK_ARCH):$\
+				$(UDK_PATH)/MdePkg/Library/BaseDebugPrintErrorLevelLib:$\
+				$(UDK_PATH)/MdePkg/Library/UefiDebugLibConOut:$\
+				$(UDK_PATH)/MdePkg/Library/BasePrintLib:$\
+				$(UDK_PATH)/MdePkg/Library/BaseSafeIntLib:$\
+				$(UDK_PATH)/MdePkg/Library/BasePciLibPciExpress:$\
+				$(UDK_PATH)/MdePkg/Library/BasePciExpressLib:$\
+				$(UDK_PATH)/MdePkg/Library/UefiDevicePathLib:$\
+				$(UDK_PATH)/MdeModulePkg/Library/BaseBmpSupportLib:$\
+				$(UDK_PATH)/UefiCpuPkg/Library/MtrrLib:$\
+				../../Library/OcGuardLib:$\
+				../../Library/OcSerializeLib:$\
+				../../Library/OcTemplateLib:$\
+				../../Library/OcXmlLib:$\
+				../../Library/OcStringLib:$\
+				../../Library/OcCryptoLib:$\
+				../../Library/OcCryptoLib/$(UDK_ARCH)
 endif
 
 #

@@ -15,6 +15,8 @@
 #define _PCD_VALUE_PcdMaximumUnicodeStringLength  1000000U
 #define _PCD_VALUE_PcdMaximumLinkedListLength  1000000U
 #define _PCD_VALUE_PcdVerifyNodeInList  ((BOOLEAN)0U)
+#define _PCD_VALUE_PcdCpuNumberOfReservedVariableMtrrs  0x2U
+#define _PCD_VALUE_PcdMaximumDevicePathNodeCount  0U
 
 const UINT32 _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize = _PCD_VALUE_PcdUefiLibMaxPrintBufferSize;
 const BOOLEAN _gPcd_FixedAtBuild_PcdUgaConsumeSupport = _PCD_VALUE_PcdUgaConsumeSupport;
@@ -26,3 +28,5 @@ const UINT32 _gPcd_FixedAtBuild_PcdMaximumAsciiStringLength = _PCD_VALUE_PcdMaxi
 const UINT32 _gPcd_FixedAtBuild_PcdMaximumUnicodeStringLength = _PCD_VALUE_PcdMaximumUnicodeStringLength;
 const UINT32 _gPcd_FixedAtBuild_PcdMaximumLinkedListLength = _PCD_VALUE_PcdMaximumLinkedListLength;
 const BOOLEAN _gPcd_FixedAtBuild_PcdVerifyNodeInList = _PCD_VALUE_PcdVerifyNodeInList;
+const UINT32 _gPcd_FixedAtBuild_PcdCpuNumberOfReservedVariableMtrrs = _PCD_VALUE_PcdCpuNumberOfReservedVariableMtrrs;
+const UINT32 _gPcd_FixedAtBuild_PcdMaximumDevicePathNodeCount = _PCD_VALUE_PcdMaximumDevicePathNodeCount;

@@ -5,18 +5,13 @@
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
-
-/*
-clang -g -fshort-wchar -fsanitize=undefined,address -I$WORKSPACE/Public/Vendor/Acidanthera/OcSupportPkg/Include -I$WORKSPACE/Public/Vendor/Acidanthera/OcSupportPkg/TestsUser/Include -I$WORKSPACE/Public/edk2/MdePkg/Include/ -I$WORKSPACE/Public/edk2/MdeModulePkg/Include/ -include $WORKSPACE/Public/Vendor/Acidanthera/OcSupportPkg/TestsUser/Include/Base.h BitmapFontUser.c BitmapFont.c Images/Helvetica_bmp.c Images/Helvetica_fnt.c $WORKSPACE/Public/Vendor/Acidanthera/OcSupportPkg/Library/BaseBmpSupportLib/BmpSupportLib.c -o Bmf
-*/
-
-#include <stdio.h>
+#include <File.h>
 
 #include <Base.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/DebugLib.h>
 #include <Library/BmpSupportLib.h>
 
-#include "GUI.h"
 #include "BmfLib.h"
 
 EFI_STATUS
@@ -58,23 +53,31 @@ GuiBmpToImage (
   return EFI_SUCCESS;
 }
 
-int main (void)
+int main (int argc, char** argv)
 {
   BOOLEAN Result;
-  GUI_FONT_CONTEXT HelveticaContext;
+  GUI_FONT_CONTEXT Context;
+  uint8_t          *FontImage;
+  uint32_t         FontImageSize;
+  uint8_t          *FontMetrics;
+  uint32_t         FontMetricsSize;
   GUI_IMAGE        Label;
   EFI_STATUS       Status;
   VOID             *BmpImage;
   UINT32           BmpImageSize;
   FILE *write_ptr;
 
-  Result = GuiInitializeFontHelvetica (&HelveticaContext);
+  // Result = GuiInitializeFontHelvetica (&HelveticaContext);
+  // Result = GuiFontConstruct (&GuiFontConstruct, argv[1], sizeof(argv[1]), argv[2], sizeof(argv[2]));
+  FontImage   = readFile (argv[1], &FontImageSize);
+  FontMetrics = readFile (argv[2], &FontMetricsSize);
+  Result      = GuiFontConstruct (&Context, FontImage, FontImageSize, FontMetrics, FontMetricsSize);
   if (!Result) {
     DEBUG ((DEBUG_WARN, "BMF: Helvetica failed\n"));
     return -1;
   }
   
-  Result = GuiGetLabel (&Label, &HelveticaContext, L"Time Machine HD", sizeof ("Time Machine HD") - 1);
+  Result = GuiGetLabel (&Label, &Context, L"Time Machine HD", sizeof ("Time Machine HD") - 1, FALSE);
   if (!Result) {
     DEBUG ((DEBUG_WARN, "BMF: label failed\n"));
     return -1;
@@ -103,7 +106,7 @@ int main (void)
 
   FreePool (BmpImage);
 
-  FreePool (HelveticaContext.FontImage.Buffer);
+  FreePool (Context.FontImage.Buffer);
   FreePool (Label.Buffer);
 
   return 0;

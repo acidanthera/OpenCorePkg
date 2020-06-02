@@ -5,14 +5,7 @@
 
 PRODUCT = ConfigValidity$(SUFFIX)
 OBJS    = ConfigValidity.o \
-	OcConfigurationLib.o \
-	OcTemplateLib.o \
-	OcSerializeLib.o \
-	OcXmlLib.o \
-	OcAsciiLib.o
-VPATH   = ../../Library/OcConfigurationLib:$\
-	../../Library/OcTemplateLib:$\
-	../../Library/OcSerializeLib:$\
-	../../Library/OcXmlLib:$\
-	../../Library/OcStringLib
+		  OcConfigurationLib.o
+VPATH   = ../../Library/OcConfigurationLib
+
 include ../../User/Makefile

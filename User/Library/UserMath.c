@@ -16,6 +16,7 @@ DivU64x32 (
   )
 {
   ASSERT (Divisor != 0);
+  
   return Dividend / Divisor;
 }
 
@@ -27,8 +28,42 @@ DivU64x32Remainder (
   OUT     UINT32                    *Remainder OPTIONAL
   )
 {
+  ASSERT (Divisor != 0);
+
   if (Remainder != NULL) {
     *Remainder = (UINT32)(Dividend % Divisor);
+  }
+  return Dividend / Divisor;
+}
+
+INT64
+EFIAPI
+DivS64x64Remainder (
+  IN      INT64                     Dividend,
+  IN      INT64                     Divisor,
+  OUT     INT64                     *Remainder  OPTIONAL
+  )
+{
+  ASSERT (Divisor != 0);
+
+  if (Remainder != NULL) {
+    *Remainder = Dividend % Divisor;
+  }
+  return Dividend / Divisor;
+}
+
+UINT64
+EFIAPI
+DivU64x64Remainder (
+  IN      UINT64                    Dividend,
+  IN      UINT64                    Divisor,
+  OUT     UINT64                    *Remainder OPTIONAL
+  )
+{
+  ASSERT (Divisor != 0);
+  
+  if (Remainder != NULL) {
+    *Remainder = Dividend % Divisor;
   }
   return Dividend / Divisor;
 }

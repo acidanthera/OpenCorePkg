@@ -21,6 +21,10 @@ EFI_SYSTEM_TABLE mSystemTable =
   .ConOut       = &mConOut
 };
 
+EFI_RUNTIME_SERVICES mRuntimeServices = {
+  
+};
+
 EFI_SYSTEM_TABLE  *gST  = &mSystemTable;
 EFI_BOOT_SERVICES *gBS  = &mBootServices;
 
@@ -28,6 +32,8 @@ EFI_HANDLE gImageHandle = (EFI_HANDLE)(UINTN) 0x12345;
 
 BOOLEAN mPostEBS = FALSE;
 EFI_SYSTEM_TABLE *mDebugST = &mSystemTable;
+
+EFI_RUNTIME_SERVICES *gRT  = &mRuntimeServices;
 
 STATIC
 EFI_TPL
