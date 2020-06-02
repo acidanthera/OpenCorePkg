@@ -7,7 +7,7 @@
 
 #define _PCD_VALUE_PcdUefiLibMaxPrintBufferSize  320U
 #define _PCD_VALUE_PcdUgaConsumeSupport  ((BOOLEAN)1U)
-#define _PCD_VALUE_PcdDebugPropertyMask  2U
+#define _PCD_VALUE_PcdDebugPropertyMask  0x23U
 #define _PCD_VALUE_PcdDebugClearMemoryValue  0xAFU
 #define _PCD_VALUE_PcdFixedDebugPrintErrorLevel  0x80000002U
 #define _PCD_VALUE_PcdDebugPrintErrorLevel  0x80000002U
