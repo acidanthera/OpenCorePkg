@@ -12,15 +12,18 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include <Library/BaseMemoryLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/OcMiscLib.h>
 
+#include <string.h>
 #include <sys/time.h>
 
-/*
- clang -g -fsanitize=undefined,address -I../Include -I../../Include -I../../../MdePkg/Include/ -include ../Include/Base.h -I../../../EfiPkg/Include/ Macho.c  ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c  ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c -o Macho
+#include <File.h>
 
- for fuzzing:
+/*
+ for fuzzing (TODO):
  clang-mp-7.0 -Dmain=__main -g -fsanitize=undefined,address,fuzzer -I../Include -I../../Include -I../../../MdePkg/Include/ -include ../Include/Base.h -I../../../EfiPkg/Include/ Macho.c  ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c  ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c -o Macho
  rm -rf DICT fuzz*.log ; mkdir DICT ; cp /System/Library/Kernels/kernel DICT ; ./Macho -rss_limit_mb=4096M -jobs=4 DICT
 
@@ -28,25 +31,6 @@
 
  rm -rf Macho.dSYM DICT fuzz*.log Macho
 */
-
-uint8_t *readFile(const char *str, uint32_t *size) {
-  FILE *f = fopen(str, "rb");
-
-  if (!f) return NULL;
-
-  fseek(f, 0, SEEK_END);
-  long fsize = ftell(f);
-  fseek(f, 0, SEEK_SET);
-
-  uint8_t *string = malloc(fsize + 1);
-  fread(string, fsize, 1, f);
-  fclose(f);
-
-  string[fsize] = 0;
-  *size = fsize;
-
-  return string;
-}
 
 MACH_HEADER_64 Header;
 MACH_SECTION_64 Sect;
@@ -97,6 +81,10 @@ static int FeedMacho(void *file, uint32_t size) {
 
   MACH_NLIST_64 *Symbol = NULL;
   for (index = 0; (Symbol = MachoGetSymbolByIndex64 (&Context, index)) != NULL; index++) {
+    printf("myindex = %d\n", index);
+    if (index == 31) {
+      
+    }
     CONST CHAR8 *Indirect = MachoGetIndirectSymbolName64 (&Context, Symbol);
     if (!AsciiStrCmp (MachoGetSymbolName64 (&Context, Symbol), "__hack") ||
       (Indirect && !AsciiStrCmp (Indirect, "__hack"))) {
@@ -283,13 +271,14 @@ static int FeedMacho(void *file, uint32_t size) {
   }
 
   for (size_t i = 0x1000000; i < 0x100000000; i+= 0x1000000) {
-    if ((Symbol = MachoGetSymbolByRelocationOffset64 (&Context, i))) {
+    if (MachoGetSymbolByRelocationOffset64 (&Context, i, &Symbol)) {
       if (!AsciiStrCmp (MachoGetSymbolName64 (&Context, Symbol), "__hack")) {
         code++;
       }
     }
   }
 
+  puts("I can reach here, at the end of FeedMacho");
   return code != 963;
 }
 
@@ -301,6 +290,7 @@ int main(int argc, char** argv) {
     return -1;
   }
 
+  puts("I can reach here, at main");
   return FeedMacho (b, f);
 }
 

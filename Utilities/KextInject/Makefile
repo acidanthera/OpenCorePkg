@@ -14,15 +14,10 @@ OBJS    = KextInject.o \
 	Link.o \
 	KernelReader.o \
 	DataPatcher.o \
-	CxxSymbols.o \
-	Header.o \
-	Symbols.o \
-	Relocations.o \
 	lzss.o \
 	lzvn.o
 VPATH   = ../../Library/OcAppleKernelLib:$\
 	../../Library/OcMiscLib:$\
-	../../Library/OcMachoLib:$\
 	../../Library/OcCompressionLib/lzss:$\
 	../../Library/OcCompressionLib/lzvn
 include ../../User/Makefile

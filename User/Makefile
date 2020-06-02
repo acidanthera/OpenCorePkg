@@ -111,6 +111,10 @@ ifneq ($(STANDALONE),1)
 	# OcCryptoLib targets.
 	#
 	OBJS    += RsaDigitalSign.o BigNumMontgomery.o BigNumPrimitives.o BigNumWordMul64.o Sha2.o SecureMem.o
+	#
+	# OcMachoLib targets.
+	#
+	OBJS    += CxxSymbols.o Header.o Symbols.o Relocations.o 
 
 	#
 	# Add source searchpath for transparent compilation.
@@ -134,7 +138,8 @@ ifneq ($(STANDALONE),1)
 				../../Library/OcXmlLib:$\
 				../../Library/OcStringLib:$\
 				../../Library/OcCryptoLib:$\
-				../../Library/OcCryptoLib/$(UDK_ARCH)
+				../../Library/OcCryptoLib/$(UDK_ARCH):$\
+				../../Library/OcMachoLib
 endif
 
 #
