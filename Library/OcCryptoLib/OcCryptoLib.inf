@@ -46,7 +46,7 @@
   Ia32/BigNumWordMul64.c
 
 [Sources.X64]
-  Ia32/BigNumWordMul64.c
+  X64/BigNumWordMul64.c
 
 [FixedPcd]
   gOpenCorePkgTokenSpaceGuid.PcdOcCryptoAllowedRsaModuli
