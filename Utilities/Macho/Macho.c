@@ -126,7 +126,8 @@ static int FeedMacho(void *file, uint32_t size) {
     }
 
     char out[64];
-    if (MachoGetClassNameFromSuperMetaClassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol), sizeof(out), out)) {
+    if (MachoSymbolNameIsSmcp64 (&Context, MachoGetSymbolName64 (&Context, Symbol))
+      && MachoGetClassNameFromSuperMetaClassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol), sizeof(out), out)) {
       code++;
     }
 
@@ -141,7 +142,8 @@ static int FeedMacho(void *file, uint32_t size) {
       code++;
     }
 
-    if (MachoGetClassNameFromMetaClassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol), sizeof(out), out)
+    if (MachoSymbolNameIsMetaclassPointer64 (&Context, MachoGetSymbolName64 (&Context, Symbol))
+      && MachoGetClassNameFromMetaClassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol), sizeof(out), out)
       && !AsciiStrCmp("SomeReallyLongStringJustInCaseToCheckIt", out)) {
       code++;
     }
@@ -229,7 +231,8 @@ static int FeedMacho(void *file, uint32_t size) {
     }
 
     char out[64];
-    if (MachoGetClassNameFromSuperMetaClassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol), sizeof(out), out)
+    if (MachoSymbolNameIsSmcp64 (&Context, MachoGetSymbolName64 (&Context, Symbol))
+      && MachoGetClassNameFromSuperMetaClassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol), sizeof(out), out)
       && !AsciiStrCmp("SomeReallyLongStringJustInCaseToCheckIt", out)) {
       code++;
     }
@@ -245,7 +248,8 @@ static int FeedMacho(void *file, uint32_t size) {
       code++;
     }
 
-    if (MachoGetClassNameFromMetaClassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol), sizeof(out), out)
+    if (MachoSymbolNameIsMetaclassPointer64 (&Context, MachoGetSymbolName64 (&Context, Symbol))
+      && MachoGetClassNameFromMetaClassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol), sizeof(out), out)
       && !AsciiStrCmp("SomeReallyLongStringJustInCaseToCheckIt", out)) {
       code++;
     }
