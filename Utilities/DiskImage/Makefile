@@ -9,7 +9,6 @@ OBJS    = DiskImage.o \
 	OcAppleChunklistLib.o \
 	OcAppleDiskImageLib.o \
 	OcAppleDiskImageLibInternal.o \
-	OcAppleKeysLib.o \
 	OcAppleRamDiskLib.o \
 	adler32.o \
 	compress.o \
@@ -25,6 +24,5 @@ OBJS    = DiskImage.o \
 VPATH   = ../../Library/OcAppleChunklistLib:$\
 	../../Library/OcAppleDiskImageLib:$\
 	../../Library/OcAppleRamDiskLib:$\
-	../../Library/OcAppleKeysLib:$\
 	../../Library/OcCompressionLib/zlib
 include ../../User/Makefile

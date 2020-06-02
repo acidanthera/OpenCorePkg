@@ -20,8 +20,8 @@ extern "C" {
 
 #define DER_IMG4_MAX_DIGEST_SIZE  64
 
-extern const uint8_t *DERImg4RootCertificate;
-extern const size_t  *DERImg4RootCertificateSize;
+extern const UINT8 *DERImg4RootCertificate;
+extern const UINTN  *DERImg4RootCertificateSize;
 
 bool
 DERImg4VerifySignature (

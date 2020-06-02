@@ -22,6 +22,7 @@ Utilities/ConfigValidity/ConfigValidity
 Utilities/disklabel/disklabel
 Utilities/Bmf/Bmf
 Utilities/Macho/Macho
+Utilities/Img4/Img4
 *.o
 *.exe
 DICT

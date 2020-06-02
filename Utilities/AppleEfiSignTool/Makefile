@@ -6,8 +6,6 @@
 
 PRODUCT = AppleEfiSignTool$(SUFFIX)
 OBJS    = main.o \
-	AppleEfiBinary.o \
-	OcAppleKeysLib.o
-VPATH   = ../../Library/OcCryptoLib:$\
-	../../Library/OcAppleKeysLib
+	AppleEfiBinary.o
+VPATH   = ../../Library/OcCryptoLib
 include ../../User/Makefile

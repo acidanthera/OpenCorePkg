@@ -1,6 +1,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <File.h>
 
 #include <Base.h>
 
@@ -45,23 +49,6 @@ void InternalDebugEnvInfo (
     Env->internalUseOnlyUnit,
     Env->xugs
     );
-}
-
-uint8_t *readFile(const char *str, uint32_t *size) {
-  FILE *f = fopen(str, "rb");
-
-  if (!f) return NULL;
-
-  fseek(f, 0, SEEK_END);
-  long fsize = ftell(f);
-  fseek(f, 0, SEEK_SET);
-
-  uint8_t *string = malloc(fsize);
-  fread(string, fsize, 1, f);
-  fclose(f);
-  *size = fsize;
-
-  return string;
 }
 
 int verifyImg4 (char *imageName, char *manifestName, char *type)

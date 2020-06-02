@@ -30,7 +30,7 @@ UDK_ARCH ?= X64
 #
 # Primary CFLAGS.
 #
-CFLAGS   := -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter
+CFLAGS   := -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter -D EFIUSER
 
 ifeq ($(DIST),Darwin)
 	CFLAGS  += -mmacosx-version-min=10.6
@@ -116,7 +116,11 @@ ifneq ($(STANDALONE),1)
 	#
 	# OcMachoLib targets.
 	#
-	OBJS    += CxxSymbols.o Header.o Symbols.o Relocations.o 
+	OBJS    += CxxSymbols.o Header.o Symbols.o Relocations.o
+	#
+	# OcAppleKeysLib targets.
+	#
+	OBJS    += OcAppleKeysLib.o
 
 	#
 	# Add source searchpath for transparent compilation.
@@ -141,7 +145,8 @@ ifneq ($(STANDALONE),1)
 				../../Library/OcStringLib:$\
 				../../Library/OcCryptoLib:$\
 				../../Library/OcCryptoLib/$(UDK_ARCH):$\
-				../../Library/OcMachoLib
+				../../Library/OcMachoLib:$\
+				../../Library/OcAppleKeysLib
 endif
 
 #
