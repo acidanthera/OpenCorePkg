@@ -67,8 +67,6 @@ int main (int argc, char** argv)
   UINT32           BmpImageSize;
   FILE *write_ptr;
 
-  // Result = GuiInitializeFontHelvetica (&HelveticaContext);
-  // Result = GuiFontConstruct (&GuiFontConstruct, argv[1], sizeof(argv[1]), argv[2], sizeof(argv[2]));
   FontImage   = readFile (argv[1], &FontImageSize);
   FontMetrics = readFile (argv[2], &FontMetricsSize);
   Result      = GuiFontConstruct (&Context, FontImage, FontImageSize, FontMetrics, FontMetricsSize);
