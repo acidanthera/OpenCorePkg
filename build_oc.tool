@@ -3,13 +3,16 @@
 buildutil() {
   UTILS=(
     "AppleEfiSignTool"
+    "Bmf"
     "ConfigValidity"
     "EfiResTool"
     "DiskImage"
     "disklabel"
     "HelloWorld"
     "icnspack"
+    "Img4"
     "KextInject"
+    "Macho"
     "macserial"
   )
 
