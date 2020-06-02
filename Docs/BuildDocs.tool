@@ -35,4 +35,16 @@ latexdiff -s ONLYCHANGEDPAGE PreviousConfiguration.tex ../Configuration.tex \
 pdflatex -draftmode -interaction=nonstopmode Differences
 pdflatex -draftmode -interaction=nonstopmode Differences
 pdflatex -interaction=nonstopmode Differences
+
+cd ../Errata || abort "Unable to process annotations"
+
+rm -f ./*.aux ./*.log ./*.out ./*.pdf ./*.toc
+
+pdflatex -draftmode Errata.tex || \
+  abort "Unable to create errata pdf"
+pdflatex -draftmode Errata.tex || \
+  abort "Unable to create errata pdf with TOC"
+pdflatex Errata.tex || \
+  abort "Unable to create errata pdf with TOC"
+
 exit 0

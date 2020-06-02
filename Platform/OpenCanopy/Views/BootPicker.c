@@ -775,6 +775,7 @@ BootPickerEntriesAdd (
       case OC_BOOT_APPLE_OS:
         Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_APPLE]);
         break;
+      case OC_BOOT_APPLE_FW_UPDATE:
       case OC_BOOT_APPLE_RECOVERY:
         Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_APPLE_RECOVERY]);
         break;
@@ -803,7 +804,7 @@ BootPickerEntriesAdd (
         Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_GENERIC_HDD]);
         break;
       default:
-        DEBUG ((DEBUG_WARN, "OCUI: Entry kind %d unsupported for label", Entry->Type));
+        DEBUG ((DEBUG_WARN, "OCUI: Entry kind %d unsupported for label\n", Entry->Type));
         return EFI_UNSUPPORTED;
     }
   }
@@ -855,6 +856,7 @@ BootPickerEntriesAdd (
       case OC_BOOT_APPLE_OS:
         SuggestedIcon = &GuiContext->Icons[ICON_APPLE][IconTypeIndex];
         break;
+      case OC_BOOT_APPLE_FW_UPDATE:
       case OC_BOOT_APPLE_RECOVERY:
         SuggestedIcon = &GuiContext->Icons[ICON_APPLE_RECOVERY][IconTypeIndex];
         if (SuggestedIcon->Buffer == NULL) {
@@ -894,7 +896,7 @@ BootPickerEntriesAdd (
         SuggestedIcon = &GuiContext->Icons[ICON_GENERIC_HDD][IconTypeIndex];
         break;
       default:
-        DEBUG ((DEBUG_WARN, "OCUI: Entry kind %d unsupported for icon", Entry->Type));
+        DEBUG ((DEBUG_WARN, "OCUI: Entry kind %d unsupported for icon\n", Entry->Type));
         return EFI_UNSUPPORTED;
     }
 

@@ -67,7 +67,7 @@ HdaControllerStreamOutputPollTimerHandler (
   // Get stream DMA position.
   //
   HdaStreamDmaPos = HdaStream->HdaControllerDev->DmaPositions[HdaStream->Index].Position;
-  if (HdaStreamDmaPos > HdaStream->DmaPositionLast) {
+  if (HdaStreamDmaPos >= HdaStream->DmaPositionLast) {
     DmaChanged = HdaStreamDmaPos - HdaStream->DmaPositionLast;
   } else {
     DmaChanged = (HDA_STREAM_BUF_SIZE - HdaStream->DmaPositionLast) + HdaStreamDmaPos;
