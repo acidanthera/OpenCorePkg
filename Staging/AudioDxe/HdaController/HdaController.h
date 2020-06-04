@@ -28,6 +28,8 @@
 #include "AudioDxe.h"
 #include <IndustryStandard/HdaRegisters.h>
 
+#include <Library/OcGuardLib.h>
+
 //
 // Consumed protocols.
 //
@@ -125,31 +127,69 @@ typedef struct {
 #define HDA_STREAM_ID_MIN       1
 #define HDA_STREAM_ID_MAX       15
 
-// Stream structure.
+//
+// Stream structure. All streams are assumed to be output
+//   (or configured for output, if a bidirectional stream).
+//
 typedef struct {
-  // Parent controller, type, and index.
-  HDA_CONTROLLER_DEV *HdaControllerDev;
-  UINT8 Type;
-  UINT8 Index;
-  BOOLEAN Output;
-
+  //
+  // Parent HDA controller.
+  //
+  HDA_CONTROLLER_DEV      *HdaDev;
+  //
+  // Stream index. This value is zero-based from the first stream on the controller.
+  //
+  UINT8                   Index;
+  //
+  // Bidirectional stream? This requires a bit to set during reset to enable output.
+  //
+  BOOLEAN                 IsBidirectional;
+  //
   // Buffer Descriptor List.
-  HDA_BDL_ENTRY *BufferList;
-  VOID *BufferListMapping;
-  EFI_PHYSICAL_ADDRESS BufferListPhysAddr;
-
-  // DMA data buffer fed into BDL.
-  UINT8 *BufferData;
-  VOID *BufferDataMapping;
-  EFI_PHYSICAL_ADDRESS BufferDataPhysAddr;
-
-  // Source buffer.
-  BOOLEAN BufferActive;
-  UINT8   *BufferSource;
-  UINT32  BufferSourceLength;
-  UINT32  BufferSourcePosition;
+  //
+  HDA_BDL_ENTRY           *BufferList;
+  //
+  // PCI memory mapping for BDL.
+  //
+  VOID                    *BufferListMapping;
+  //
+  // Physical address of BDL.
+  //
+  EFI_PHYSICAL_ADDRESS    BufferListPhysAddr;
+  //
+  // Buffer fed to BDL.
+  //
+  UINT8                   *BufferData;
+  //
+  // PCI memory mapping of BDL buffer.
+  //
+  VOID                    *BufferDataMapping;
+  //
+  // Physical address of BDL buffer.
+  //
+  EFI_PHYSICAL_ADDRESS    BufferDataPhysAddr;
+  //
+  // Pointer to source data buffer.
+  //
+  UINT8                   *BufferSource;
+  //
+  // Length of source data buffer.
+  //
+  UINT32                  BufferSourceLength;
+  //
+  // Current position in source data buffer.
+  //
+  UINT32                  BufferSourcePosition;
+  //
+  // Source buffer currently active?
+  //
+  BOOLEAN                 BufferActive;
+  
+  
+  
   UINT32  DmaPositionLast;
   UINT32  DmaPositionTotal;
+  UINT32 DmaPositionChangedMax;
 
   // Timing elements for buffer filling.
   EFI_EVENT PollTimer;
@@ -212,19 +252,14 @@ struct _HDA_CONTROLLER_DEV {
   HDA_RING_BUFFER Rirb;
 
   // Streams.
-  UINT8 TotalStreamsCount;
-  UINT8 BidirStreamsCount;
-  UINT8 InputStreamsCount;
-  UINT8 OutputStreamsCount;
-  HDA_STREAM *BidirStreams;
-  HDA_STREAM *InputStreams;
-  HDA_STREAM *OutputStreams;
+  UINT8 StreamsCount;
+  HDA_STREAM *Streams;
 
   // DMA positions.
-  HDA_DMA_POS_ENTRY *DmaPositions;
-  UINTN DmaPositionsSize;
-  VOID *DmaPositionsMapping;
-  EFI_PHYSICAL_ADDRESS DmaPositionsPhysAddr;
+  HDA_DMA_POS_ENTRY     *DmaPositions;
+  UINT32                DmaPositionsSize;
+  VOID                  *DmaPositionsMapping;
+  EFI_PHYSICAL_ADDRESS  DmaPositionsPhysAddr;
 
   // Bitmap for stream ID allocation.
   UINT16 StreamIdMapping;
@@ -364,79 +399,11 @@ HdaControllerSendCommands(
   IN UINT8 Node,
   IN EFI_HDA_IO_VERB_LIST *Verbs);
 
-/*BOOLEAN
-HdaControllerInitCorb (
-  IN HDA_CONTROLLER_DEV   *HdaDev
-  );
 
-VOID
-HdaControllerCleanupCorb (
-  IN HDA_CONTROLLER_DEV *HdaDev
-  );
 
-BOOLEAN
-HdaControllerSetCorb(
-  IN HDA_CONTROLLER_DEV *HdaDev,
-  IN BOOLEAN Enable);
 
-BOOLEAN
-HdaControllerInitRirb(
-  IN HDA_CONTROLLER_DEV *HdaDev);
 
-VOID
-HdaControllerCleanupRirb(
-  IN HDA_CONTROLLER_DEV *HdaDev);
 
-EFI_STATUS
-EFIAPI
-HdaControllerSetRirb(
-  IN HDA_CONTROLLER_DEV *HdaDev,
-  IN BOOLEAN Enable);*/
-
-EFI_STATUS
-EFIAPI
-HdaControllerInitStreams(
-  IN HDA_CONTROLLER_DEV *HdaDev);
-
-EFI_STATUS
-EFIAPI
-HdaControllerResetStream(
-  IN HDA_STREAM *HdaStream);
-
-VOID
-EFIAPI
-HdaControllerCleanupStreams(
-  IN HDA_CONTROLLER_DEV *HdaControllerDev);
-
-EFI_STATUS
-EFIAPI
-HdaControllerGetStream(
-  IN  HDA_STREAM *HdaStream,
-  OUT BOOLEAN *Run);
-
-EFI_STATUS
-EFIAPI
-HdaControllerSetStream(
-  IN HDA_STREAM *HdaStream,
-  IN BOOLEAN Run);
-
-EFI_STATUS
-EFIAPI
-HdaControllerGetStreamLinkPos(
-  IN  HDA_STREAM *HdaStream,
-  OUT UINT32 *Position);
-
-EFI_STATUS
-EFIAPI
-HdaControllerGetStreamId(
-  IN  HDA_STREAM *HdaStream,
-  OUT UINT8 *Index);
-
-EFI_STATUS
-EFIAPI
-HdaControllerSetStreamId(
-  IN HDA_STREAM *HdaStream,
-  IN UINT8 Index);
 
 //
 // Driver Binding protocol functions.
@@ -483,6 +450,51 @@ HdaControllerSetRingBufferState(
 BOOLEAN
 HdaControllerResetRingBuffer (
   IN HDA_RING_BUFFER    *HdaRingBuffer
+  );
+
+BOOLEAN
+HdaControllerInitStreams (
+  IN HDA_CONTROLLER_DEV *HdaDev
+  );
+
+BOOLEAN
+HdaControllerResetStream (
+  IN HDA_STREAM *HdaStream
+  );
+
+VOID
+HdaControllerCleanupStreams (
+  IN HDA_CONTROLLER_DEV *HdaDev
+  );
+
+BOOLEAN
+HdaControllerGetStreamState (
+  IN  HDA_STREAM *HdaStream,
+  OUT BOOLEAN *Run
+  );
+
+BOOLEAN
+HdaControllerSetStreamState (
+  IN HDA_STREAM *HdaStream,
+  IN BOOLEAN Run
+  );
+
+BOOLEAN
+HdaControllerGetStreamLinkPos (
+  IN  HDA_STREAM *HdaStream,
+  OUT UINT32 *Position
+  );
+
+BOOLEAN
+HdaControllerGetStreamId (
+  IN  HDA_STREAM *HdaStream,
+  OUT UINT8 *Index
+  );
+
+BOOLEAN
+HdaControllerSetStreamId (
+  IN HDA_STREAM *HdaStream,
+  IN UINT8 Index
   );
 
 VOID

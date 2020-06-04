@@ -51,7 +51,7 @@ HdaControllerStreamOutputPollTimerHandler (
   UINT32                Tmp;
 
   HdaStream       = (HDA_STREAM*)Context;
-  PciIo           = HdaStream->HdaControllerDev->PciIo;
+  PciIo           = HdaStream->HdaDev->PciIo;
   HdaStreamSts    = 0;
 
   //
@@ -66,7 +66,7 @@ HdaControllerStreamOutputPollTimerHandler (
   //
   // Get stream DMA position.
   //
-  HdaStreamDmaPos = HdaStream->HdaControllerDev->DmaPositions[HdaStream->Index].Position;
+  HdaStreamDmaPos = HdaStream->HdaDev->DmaPositions[HdaStream->Index].Position;
   if (HdaStreamDmaPos >= HdaStream->DmaPositionLast) {
     DmaChanged = HdaStreamDmaPos - HdaStream->DmaPositionLast;
   } else {
@@ -349,7 +349,6 @@ HdaControllerScanCodecs (
   UINT32                VendorResponse;
 
   UINTN                 CurrentOutputStreamIndex = 0;
-  UINTN                 CurrentInputStreamIndex = 0;
 
   HDA_IO_PRIVATE_DATA   *HdaIoPrivateData;
   VOID                  *TmpProtocol;
@@ -415,16 +414,10 @@ HdaControllerScanCodecs (
       //
       // Assign streams.
       //
-      if (CurrentOutputStreamIndex < HdaControllerDev->OutputStreamsCount) {
+      if (CurrentOutputStreamIndex < HdaControllerDev->StreamsCount) {
         DEBUG ((DEBUG_VERBOSE, "Assigning output stream %u to codec\n", CurrentOutputStreamIndex));
-        HdaIoPrivateData->HdaOutputStream = HdaControllerDev->OutputStreams + CurrentOutputStreamIndex;
+        HdaIoPrivateData->HdaOutputStream = HdaControllerDev->Streams + CurrentOutputStreamIndex;
         CurrentOutputStreamIndex++;
-      }
-
-      if (CurrentInputStreamIndex < HdaControllerDev->InputStreamsCount) {
-        DEBUG ((DEBUG_VERBOSE, "Assigning input stream %u to codec\n", CurrentInputStreamIndex));
-        HdaIoPrivateData->HdaInputStream = HdaControllerDev->InputStreams + CurrentInputStreamIndex;
-        CurrentInputStreamIndex++;
       }
 
       HdaControllerDev->HdaIoChildren[Index].PrivateData = HdaIoPrivateData;
