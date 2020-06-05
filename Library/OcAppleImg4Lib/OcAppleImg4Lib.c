@@ -29,7 +29,7 @@
 #include "libDERImg4/Img4oids.h"
 
 GLOBAL_REMOVE_IF_UNREFERENCED const UINT8 *DERImg4RootCertificate     = gAppleX86SecureBootRootCaCert;
-GLOBAL_REMOVE_IF_UNREFERENCED const UINTN  *DERImg4RootCertificateSize = &gAppleX86SecureBootRootCaCertSize;
+GLOBAL_REMOVE_IF_UNREFERENCED const UINTN *DERImg4RootCertificateSize = &gAppleX86SecureBootRootCaCertSize;
 
 bool
 DERImg4VerifySignature (
