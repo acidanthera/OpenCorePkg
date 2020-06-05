@@ -5,6 +5,7 @@
 ##
 
 STANDALONE     = 1
-PRODUCT        = EfiResTool$(SUFFIX)
-OBJS           = EfiResTool.o
+PROJECT        = EfiResTool
+PRODUCT        = $(PROJECT)$(SUFFIX)
+OBJS           = $(PROJECT).o
 include ../../User/Makefile

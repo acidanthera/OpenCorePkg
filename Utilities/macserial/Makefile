@@ -4,8 +4,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 STANDALONE = 1
-PRODUCT    = macserial$(SUFFIX)
-OBJS       = macserial.o
+PROJECT    = macserial
+PRODUCT    = $(PROJECT)$(SUFFIX)
+OBJS       = $(PROJECT).o
 include ../../User/Makefile
 
 ifeq ($(DIST),Darwin)

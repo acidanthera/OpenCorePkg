@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-PRODUCT = HelloWorld$(SUFFIX)
-OBJS    = main.o
+PROJECT = HelloWorld
+PRODUCT = $(PROJECT)$(SUFFIX)
+OBJS    = $(PROJECT).o
 include ../../User/Makefile

@@ -4,8 +4,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-PRODUCT = AppleEfiSignTool$(SUFFIX)
-OBJS    = main.o \
-	AppleEfiBinary.o
+PROJECT = AppleEfiSignTool
+PRODUCT = $(PROJECT)$(SUFFIX)
+OBJS    = $(PROJECT).o \
+          AppleEfiBinary.o
 VPATH   = ../../Library/OcCryptoLib
 include ../../User/Makefile

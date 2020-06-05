@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-PRODUCT = KextInject$(SUFFIX)
-OBJS    = KextInject.o \
+PROJECT = KextInject
+PRODUCT = $(PROJECT)$(SUFFIX)
+OBJS    = $(PROJECT).o \
 	Lilu.o \
 	Vsmc.o \
 	KextPatcher.o \

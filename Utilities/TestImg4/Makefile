@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-PRODUCT = Img4$(SUFFIX)
-OBJS    = Img4.o
+PROJECT = Img4
+PRODUCT = $(PROJECT)$(SUFFIX)
+OBJS    = $(PROJECT).o
 #
 # From OcAppleImg4Lib.
 #

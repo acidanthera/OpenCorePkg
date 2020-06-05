@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-PRODUCT = Smbios$(SUFFIX)
-OBJS    = Smbios.o
+PROJECT = Smbios
+PRODUCT = $(PROJECT)$(SUFFIX)
+OBJS    = $(PROJECT).o
 #
 # From OpenCore.
 #

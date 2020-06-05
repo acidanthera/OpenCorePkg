@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-PRODUCT = DiskImage$(SUFFIX)
-OBJS    = DiskImage.o \
+PROJECT = DiskImage
+PRODUCT = $(PROJECT)$(SUFFIX)
+OBJS    = $(PROJECT).o \
 	FileDummy.o \
 	OcAppleChunklistLib.o \
 	OcAppleDiskImageLib.o \

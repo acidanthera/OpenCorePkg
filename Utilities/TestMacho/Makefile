@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-PRODUCT = Macho$(SUFFIX)
-OBJS    = Macho.o
+PROJECT = Macho
+PRODUCT = $(PROJECT)$(SUFFIX)
+OBJS    = $(PROJECT).o
 include ../../User/Makefile

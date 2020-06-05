@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-PRODUCT = Bmf$(SUFFIX)
-OBJS    = BitmapFontUser.o
+PROJECT = Bmf
+PRODUCT = $(PROJECT)$(SUFFIX)
+OBJS    = $(PROJECT).o
 #
 # From OpenCanopy.
 #

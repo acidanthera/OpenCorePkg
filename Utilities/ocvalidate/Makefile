@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-PRODUCT = ocvalidate$(SUFFIX)
-OBJS    = ocvalidate.o \
+PROJECT = ocvalidate
+PRODUCT = $(PROJECT)$(SUFFIX)
+OBJS    = $(PROJECT).o \
           OcConfigurationLib.o
 VPATH   = ../../Library/OcConfigurationLib
-
 include ../../User/Makefile
