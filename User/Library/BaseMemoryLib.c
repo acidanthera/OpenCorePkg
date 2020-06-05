@@ -12,6 +12,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef WIN32
+#include <malloc.h>
+#endif // WIN32
+
 VOID *
 EFIAPI
 CopyMem (
@@ -142,7 +146,9 @@ AllocatePages (
   IN UINTN  Pages
   )
 {
-  #if __APPLE__
+  #ifdef WIN32
+  return _aligned_malloc (Pages * EFI_PAGE_SIZE, EFI_PAGE_SIZE);
+  #else // !WIN32
   VOID *Memory;
   int  r;
 
@@ -153,9 +159,7 @@ AllocatePages (
   }
   
   return Memory;
-  #else /* !__APPLE__ */
-  return aligned_alloc (EFI_PAGE_SIZE, Pages * EFI_PAGE_SIZE);
-  #endif /* __APPLE__ */
+  #endif // WIN32
 }
 
 VOID

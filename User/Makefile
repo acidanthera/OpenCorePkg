@@ -30,7 +30,7 @@ UDK_ARCH ?= X64
 #
 # Primary CFLAGS.
 #
-CFLAGS   := -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter -D EFIUSER
+CFLAGS   := -c -std=c11 -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter -D EFIUSER
 
 ifeq ($(DIST),Darwin)
 	CFLAGS  += -mmacosx-version-min=10.6
