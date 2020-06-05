@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-PRODUCT = ConfigValidity$(SUFFIX)
-OBJS    = ConfigValidity.o \
-		  OcConfigurationLib.o
+PRODUCT = ocvalidate$(SUFFIX)
+OBJS    = ocvalidate.o \
+          OcConfigurationLib.o
 VPATH   = ../../Library/OcConfigurationLib
 
 include ../../User/Makefile

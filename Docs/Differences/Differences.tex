@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
-%DIF ADD ../Configuration.tex        Tue Jun  2 08:06:06 2020
+%DIF DEL PreviousConfiguration.tex   Tue Jun  2 02:24:29 2020
+%DIF ADD ../Configuration.tex        Fri Jun  5 13:18:28 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -176,9 +176,10 @@ configuration file format used to setup the correct functioning of macOS
 operating system. It is to be read as the official clarification of expected
 OpenCore behaviour. All deviations, if found in published OpenCore releases,
 shall be considered documentation or implementation bugs, and are requested to be
-reported through \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}\DIFaddbegin \DIFadd{.
-Errata sheet is available in
-}\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Errata/Errata.pdf}{OpenCorePkg repository}\DIFaddend .
+reported through \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
+\DIFaddbegin \DIFadd{Errata sheet is available in
+}\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Errata/Errata.pdf}{OpenCorePkg repository}\DIFadd{.
+}\DIFaddend 
 
 This document is structured as a specification, and is not meant to provide a step by
 step algorithm for configuring end-user board support package (BSP). The intended audience
@@ -428,7 +429,7 @@ Root configuration entries consist of the following:
 \end{itemize}
 
 It is possible to perform basic validation of the configuration by using
-\texttt{ConfigValidity} utility. Please note, that \texttt{ConfigValidity}
+\texttt{\DIFdelbegin \DIFdel{ConfigValidity}\DIFdelend \DIFaddbegin \DIFadd{ocvalidate}\DIFaddend } utility. Please note, that \texttt{\DIFdelbegin \DIFdel{ConfigValidity}\DIFdelend \DIFaddbegin \DIFadd{ocvalidate}\DIFaddend }
 must match the used OpenCore release and may not be able to detect all
 configuration flaws present in the file.
 
