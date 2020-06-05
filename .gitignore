@@ -7,7 +7,6 @@ xcshareddata
 xcuserdata
 project.xcworkspace
 *.dSYM
-TestsUser/RsaPreprocess/RsaPreprocess
 Utilities/RsaTool/RsaTool
 Utilities/EfiResTool/EfiResTool
 Utilities/AppleEfiSignTool/AppleEfiSignTool
@@ -23,6 +22,7 @@ Utilities/Bmf/Bmf
 Utilities/Macho/Macho
 Utilities/Img4/Img4
 Utilities/Smbios/Smbios
+Utilities/RsaPreprocess/RsaPreprocess
 *.o
 *.exe
 DICT

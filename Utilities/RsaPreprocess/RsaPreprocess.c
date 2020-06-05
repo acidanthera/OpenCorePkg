@@ -12,10 +12,12 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-/**
-clang -g -fsanitize=undefined,address -I../Include -I../../Include  -I../../Library/OcCryptoLib -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h RsaPreprocess.c  ../../Library/OcAppleKeysLib/OcAppleKeysLib.c ../../Library/OcCryptoLib/BigNumMontgomery.c ../../Library/OcCryptoLib/BigNumPrimitives.c ../../Library/OcCryptoLib/X64/BigNumWordMul64.c -o RsaPreprocess
-**/
+#include <File.h>
 
 #include <Base.h>
 
@@ -23,24 +25,6 @@ clang -g -fsanitize=undefined,address -I../Include -I../../Include  -I../../Libr
 #include <Library/OcAppleKeysLib.h>
 
 #include <BigNumLib.h>
-
-uint8_t *readFile(const char *str, uint32_t *size) {
-  FILE *f = fopen(str, "rb");
-
-  if (!f) return NULL;
-
-  fseek(f, 0, SEEK_END);
-  long fsize = ftell(f);
-  fseek(f, 0, SEEK_SET);
-
-  uint8_t *string = malloc(fsize);
-  fread(string, fsize, 1, f);
-  fclose(f);
-
-  *size = fsize;
-
-  return string;
-}
 
 int verifyRsa (CONST OC_RSA_PUBLIC_KEY *PublicKey, char *Name)
 {
@@ -81,7 +65,7 @@ int main(int argc, char *argv[]) {
   OC_RSA_PUBLIC_KEY *PublicKey;
   uint32_t          PkSize;
 
-  for (Index = 1; Index < argc; ++Index) {
+  for (Index = 1; (int) Index < argc; ++Index) {
     PublicKey = (OC_RSA_PUBLIC_KEY *)readFile (argv[Index], &PkSize);
     if (PublicKey == NULL) {
       printf ("read error\n");
@@ -92,7 +76,7 @@ int main(int argc, char *argv[]) {
     free (PublicKey);
   }
 
-  for (Index = 0; Index < ARRAY_SIZE (PkDataBase); ++Index) {
+  for (Index = 0; (unsigned long) Index < ARRAY_SIZE (PkDataBase); ++Index) {
     verifyRsa (PkDataBase[Index].PublicKey, "inbuilt");
   }
 
