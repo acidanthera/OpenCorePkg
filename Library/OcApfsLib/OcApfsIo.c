@@ -149,19 +149,21 @@ ApfsReadJumpStart (
     PrivateData->ApfsBlockSize,
     JumpStart
     );
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCJS: Block (P:%d|F:%d) read req %Lx -> %Lx of %x (mask %u, mul %u) - %r\n",
+    BlockIo == PrivateData->BlockIo,
+    PrivateData->IsFusion,
+    PrivateData->EfiJumpStart,
+    Lba,
+    PrivateData->ApfsBlockSize,
+    PrivateData->FusionMask,
+    PrivateData->LbaMultiplier,
+    Status
+    ));
+
   if (EFI_ERROR (Status)) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OCJS: Block (P:%d|F:%d) read req %Lx -> %Lx of %x (mask %u, mul %u) - %r\n",
-      BlockIo == PrivateData->BlockIo,
-      PrivateData->IsFusion,
-      PrivateData->EfiJumpStart,
-      Lba,
-      PrivateData->ApfsBlockSize,
-      PrivateData->FusionMask,
-      PrivateData->LbaMultiplier,
-      Status
-      ));
     FreePool (JumpStart);
     return Status;
   }
