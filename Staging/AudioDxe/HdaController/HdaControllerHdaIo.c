@@ -148,9 +148,10 @@ HdaControllerHdaIoSetupStream(
     HdaStream = HdaIoPrivateData->HdaInputStream;
 
   // Get current stream ID.
-  Status = HdaControllerGetStreamId(HdaStream, &HdaStreamId);
-  if (EFI_ERROR(Status))
+  if (!HdaControllerGetStreamId (HdaStream, &HdaStreamId)) {
+    Status = EFI_INVALID_PARAMETER;
     goto DONE;
+  }
 
   // Is a stream ID allocated already? If so that means the stream is already
   // set up and we'll need to tear it down first.
@@ -188,15 +189,17 @@ HdaControllerHdaIoSetupStream(
     // Reset stream.
     DEBUG((DEBUG_VERBOSE, "HdaControllerHdaIoSetupStream(): format changed, resetting stream\n"));
     HdaControllerDev->DmaPositions[HdaStream->Index].Position = 0;
-    Status = HdaControllerResetStream(HdaStream);
-    if (EFI_ERROR(Status))
+    if (!HdaControllerResetStream (HdaStream)) {
+      Status = EFI_INVALID_PARAMETER;
       goto DONE;
+    }
   }
 
   // Set stream ID.
-  Status = HdaControllerSetStreamId(HdaIoPrivateData->HdaOutputStream, HdaStreamId);
-  if (EFI_ERROR(Status))
+  if (!HdaControllerSetStreamId (HdaIoPrivateData->HdaOutputStream, HdaStreamId)) {
+    Status = EFI_INVALID_PARAMETER;
     goto DONE;
+  }
   *StreamId = HdaStreamId;
 
   // Set stream format.
@@ -249,9 +252,10 @@ HdaControllerHdaIoCloseStream(
     HdaStream = HdaIoPrivateData->HdaInputStream;
 
   // Get current stream ID.
-  Status = HdaControllerGetStreamId(HdaStream, &HdaStreamId);
-  if (EFI_ERROR(Status))
+  if (!HdaControllerGetStreamId (HdaStream, &HdaStreamId)) {
+    Status = EFI_INVALID_PARAMETER;
     goto DONE;
+  }
 
   // Is a stream ID already at zero?
   if (HdaStreamId == 0) {
@@ -268,9 +272,10 @@ HdaControllerHdaIoCloseStream(
     goto DONE;
 
   // Set stream ID to zero.
-  Status = HdaControllerSetStreamId(HdaStream, 0);
-  if (EFI_ERROR(Status))
+  if (!HdaControllerSetStreamId (HdaStream, 0)) {
+    Status = EFI_INVALID_PARAMETER;
     goto DONE;
+  }
 
   // De-allocate stream ID from bitmap.
   HdaControllerDev->StreamIdMapping &= ~(1 << HdaStreamId);
@@ -312,7 +317,11 @@ HdaControllerHdaIoGetStream(
     HdaStream = HdaIoPrivateData->HdaInputStream;
 
   // Get stream state.
-  return HdaControllerGetStream(HdaStream, State);
+  if (!HdaControllerGetStreamState (HdaStream, State)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -361,9 +370,9 @@ HdaControllerHdaIoStartStream(
     HdaStream = HdaIoPrivateData->HdaInputStream;
 
   // Get current stream ID.
-  Status = HdaControllerGetStreamId(HdaStream, &HdaStreamId);
-  if (EFI_ERROR(Status))
-    return Status;
+  if (!HdaControllerGetStreamId (HdaStream, &HdaStreamId)) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   // Is a stream ID zero? If so that means the stream is not setup yet.
   if (HdaStreamId == 0)
@@ -380,7 +389,7 @@ HdaControllerHdaIoStartStream(
   HdaStreamCurrentBlock = HdaStreamDmaPos / HDA_BDL_BLOCKSIZE;
   HdaStreamNextBlock = HdaStreamCurrentBlock + 1;
   HdaStreamNextBlock %= HDA_BDL_ENTRY_COUNT;
-  DEBUG((DEBUG_VERBOSE, "HdaControllerHdaIoStartStream(): stream %u DMA pos 0x%X\n",
+  DEBUG((DEBUG_INFO, "HdaControllerHdaIoStartStream(): stream %u DMA pos 0x%X\n",
     HdaStream->Index, HdaStreamDmaPos));
 
   // Save pointer to buffer.
@@ -423,9 +432,11 @@ HdaControllerHdaIoStartStream(
     goto STOP_STREAM;
 
   // Change stream state.
-  Status = HdaControllerSetStream(HdaStream, TRUE);
-  if (EFI_ERROR(Status))
+  if (!HdaControllerSetStreamState (HdaStream, TRUE)) {
+    Status = EFI_INVALID_PARAMETER;
     goto STOP_STREAM;
+  }
+
   return EFI_SUCCESS;
 
 STOP_STREAM:
@@ -463,9 +474,9 @@ HdaControllerHdaIoStopStream(
     HdaStream = HdaIoPrivateData->HdaInputStream;
 
   // Get current stream ID.
-  Status = HdaControllerGetStreamId(HdaStream, &HdaStreamId);
-  if (EFI_ERROR(Status))
-    return Status;
+  if (!HdaControllerGetStreamId (HdaStream, &HdaStreamId)) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   // Is the stream ID zero? If so that means the stream is not setup yet.
   if (HdaStreamId == 0)
@@ -477,9 +488,9 @@ HdaControllerHdaIoStopStream(
     return Status;
 
   // Stop stream.
-  Status = HdaControllerSetStream(HdaStream, FALSE);
-  if (EFI_ERROR(Status))
-    return Status;
+  if (!HdaControllerSetStreamState (HdaStream, FALSE)) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   // Remove source buffer pointer.
   HdaStream->BufferSource = NULL;
