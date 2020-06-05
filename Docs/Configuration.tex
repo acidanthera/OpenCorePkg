@@ -2396,7 +2396,7 @@ entry choice will update till next manual reconfiguration.
     \item Entry is macOS recovery.
     \item Entry is macOS Time Machine.
     \item Entry is explicitly marked as \texttt{Auxiliary}.
-    \item Entry is system (e.g. \texttt{Clean NVRAM}).
+    \item Entry is system (e.g. \texttt{Reset NVRAM}).
   \end{itemize}
 
   To see all entries picker menu needs to be reloaded in extended mode by pressing
@@ -2797,6 +2797,9 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Allow \texttt{CMD+OPT+P+R} handling and enable
   showing \texttt{NVRAM Reset} entry in boot picker.
+
+  \emph{Note}: Resetting NVRAM will also erase all the boot options
+  otherwise not backed up with bless (e.g. Linux).
 
 \item
   \texttt{AllowSetDefault}\\
@@ -5276,7 +5279,7 @@ functioning. Feature highlights:
   firmwares, ASUS firmwares on APTIO V in particular, have bugs. For them scanning is
   implemented improperly, and firmware preferences may get accidentally corrupted
   due to \texttt{BootOrder} entry duplication (each option will be added twice) making
-  it impossible to boot without cleaning NVRAM.
+  it impossible to boot without resetting NVRAM.
 
   To trigger the bug one should have some valid boot options (e.g. OpenCore) and then
   install Windows with \texttt{RequestBootVarRouting} enabled. As Windows bootloader

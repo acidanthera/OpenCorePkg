@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
-%DIF ADD ../Configuration.tex        Tue Jun  2 08:06:06 2020
+%DIF ADD ../Configuration.tex        Fri Jun  5 12:29:25 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -176,9 +176,10 @@ configuration file format used to setup the correct functioning of macOS
 operating system. It is to be read as the official clarification of expected
 OpenCore behaviour. All deviations, if found in published OpenCore releases,
 shall be considered documentation or implementation bugs, and are requested to be
-reported through \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}\DIFaddbegin \DIFadd{.
-Errata sheet is available in
-}\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Errata/Errata.pdf}{OpenCorePkg repository}\DIFaddend .
+reported through \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
+\DIFaddbegin \DIFadd{Errata sheet is available in
+}\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Errata/Errata.pdf}{OpenCorePkg repository}\DIFadd{.
+}\DIFaddend 
 
 This document is structured as a specification, and is not meant to provide a step by
 step algorithm for configuring end-user board support package (BSP). The intended audience
@@ -2456,7 +2457,7 @@ entry choice will update till next manual reconfiguration.
     \item Entry is macOS recovery.
     \item Entry is macOS Time Machine.
     \item Entry is explicitly marked as \texttt{Auxiliary}.
-    \item Entry is system (e.g. \texttt{Clean NVRAM}).
+    \item Entry is system (e.g. \texttt{\DIFdelbegin \DIFdel{Clean }\DIFdelend \DIFaddbegin \DIFadd{Reset }\DIFaddend NVRAM}).
   \end{itemize}
 
   To see all entries picker menu needs to be reloaded in extended mode by pressing
@@ -2858,7 +2859,11 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \textbf{Description}: Allow \texttt{CMD+OPT+P+R} handling and enable
   showing \texttt{NVRAM Reset} entry in boot picker.
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: Resetting NVRAM will also erase all the boot options
+  otherwise not backed up with bless (e.g. Linux).
+}
+
+\DIFaddend \item
   \texttt{AllowSetDefault}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -5336,7 +5341,7 @@ functioning. Feature highlights:
   firmwares, ASUS firmwares on APTIO V in particular, have bugs. For them scanning is
   implemented improperly, and firmware preferences may get accidentally corrupted
   due to \texttt{BootOrder} entry duplication (each option will be added twice) making
-  it impossible to boot without cleaning NVRAM.
+  it impossible to boot without \DIFdelbegin \DIFdel{cleaning }\DIFdelend \DIFaddbegin \DIFadd{resetting }\DIFaddend NVRAM.
 
   To trigger the bug one should have some valid boot options (e.g. OpenCore) and then
   install Windows with \texttt{RequestBootVarRouting} enabled. As Windows bootloader
