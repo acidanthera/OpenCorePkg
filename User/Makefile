@@ -179,7 +179,7 @@ $(OUT_DIR)/%.o: %.c
 all: $(PRODUCT)
 
 $(PRODUCT): $(OBJS)
-	$(CC) $(LDFLAGS) $(LDLIBS) $(OBJS) -o $(PRODUCT)
+	$(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $(PRODUCT)
 	$(STRIP) $(STRIPFLAGS) $(PRODUCT)
 
 clean:
