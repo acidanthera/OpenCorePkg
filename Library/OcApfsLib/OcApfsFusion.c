@@ -42,10 +42,14 @@ InternalApfsInitFusionData (
   PrivateData->IsFusion = TRUE;
 
   //
-  // The highest bit is one for the Fusion set's main device and
-  // zero for the second-tier device.
+  // According to the specification the highest bit is one for the
+  // Fusion set's main device and zero for the second-tier device.
   //
-  PrivateData->IsFusionMaster       = SuperBlock->FusionUuid.Data4[7] & BIT0;
+  // However, the actual implementation of ApfsJumpStart.efi is different
+  // from the specification. The specification says that the slave disk
+  // has the bits set, but the implementation seems to assume that for master.
+  //
+  PrivateData->IsFusionMaster       = (SuperBlock->FusionUuid.Data4[7] & BIT0) == 0;
   //
   // Drop master type from the stored value for easier comparison.
   //
@@ -123,14 +127,11 @@ InternalApfsTranslateBlock (
 
   //
   // For Fusion disks it can be either volume.
-  // Note, the actual implementation of ApfsJumpStart.efi is different
-  // from the specification. The specification says that the slave disk
-  // has the bits set, but the implementation seems to assume that for master.
   //
-  if ((Block & PrivateData->FusionMask) != 0) {
-    Block         &= ~PrivateData->FusionMask;
+  if ((Block & PrivateData->FusionMask) == 0) {
     IsFusionMaster = TRUE;
   } else {
+    Block         &= ~PrivateData->FusionMask;
     IsFusionMaster = FALSE;
   }
 
