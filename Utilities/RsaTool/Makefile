@@ -1,9 +1,14 @@
-CC ?= gcc
-CFLAGS=-Wall -Wextra -pedantic -O3 -I/usr/local/opt/openssl/include -I/opt/local/include
-LDFLAGS=-L/usr/local/opt/openssl/lib -L/opt/local/lib
-LDLIBS=-lcrypto
+## @file
+# Copyright (c) 2020, PMheart. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+##
 
-all: RsaTool
+STANDALONE = 1
+PROJECT    = RsaTool
+PRODUCT    = $(PROJECT)$(SUFFIX)
+OBJS       = $(PROJECT).o
+include ../../User/Makefile
 
-clean:
-	rm RsaTool
+CFLAGS  += -I/usr/local/opt/openssl/include -I/opt/local/include
+LDFLAGS += -L/usr/local/opt/openssl/lib -L/opt/local/lib
+LDLIBS  += -lcrypto
