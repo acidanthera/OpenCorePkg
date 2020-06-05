@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jun  2 02:24:29 2020
-%DIF ADD ../Configuration.tex        Fri Jun  5 13:18:28 2020
+%DIF ADD ../Configuration.tex        Fri Jun  5 19:35:52 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2457,7 +2457,7 @@ entry choice will update till next manual reconfiguration.
     \item Entry is macOS recovery.
     \item Entry is macOS Time Machine.
     \item Entry is explicitly marked as \texttt{Auxiliary}.
-    \item Entry is system (e.g. \texttt{Clean NVRAM}).
+    \item Entry is system (e.g. \texttt{\DIFdelbegin \DIFdel{Clean }\DIFdelend \DIFaddbegin \DIFadd{Reset }\DIFaddend NVRAM}).
   \end{itemize}
 
   To see all entries picker menu needs to be reloaded in extended mode by pressing
@@ -2859,7 +2859,11 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \textbf{Description}: Allow \texttt{CMD+OPT+P+R} handling and enable
   showing \texttt{NVRAM Reset} entry in boot picker.
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: Resetting NVRAM will also erase all the boot options
+  otherwise not backed up with bless (e.g. Linux).
+}
+
+\DIFaddend \item
   \texttt{AllowSetDefault}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -5337,7 +5341,7 @@ functioning. Feature highlights:
   firmwares, ASUS firmwares on APTIO V in particular, have bugs. For them scanning is
   implemented improperly, and firmware preferences may get accidentally corrupted
   due to \texttt{BootOrder} entry duplication (each option will be added twice) making
-  it impossible to boot without cleaning NVRAM.
+  it impossible to boot without \DIFdelbegin \DIFdel{cleaning }\DIFdelend \DIFaddbegin \DIFadd{resetting }\DIFaddend NVRAM.
 
   To trigger the bug one should have some valid boot options (e.g. OpenCore) and then
   install Windows with \texttt{RequestBootVarRouting} enabled. As Windows bootloader

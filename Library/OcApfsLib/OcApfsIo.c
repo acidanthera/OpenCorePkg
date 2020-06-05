@@ -149,6 +149,20 @@ ApfsReadJumpStart (
     PrivateData->ApfsBlockSize,
     JumpStart
     );
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCJS: Block (P:%d|F:%d) read req %Lx -> %Lx of %x (mask %u, mul %u) - %r\n",
+    BlockIo == PrivateData->BlockIo,
+    PrivateData->IsFusion,
+    PrivateData->EfiJumpStart,
+    Lba,
+    PrivateData->ApfsBlockSize,
+    PrivateData->FusionMask,
+    PrivateData->LbaMultiplier,
+    Status
+    ));
+
   if (EFI_ERROR (Status)) {
     FreePool (JumpStart);
     return Status;
@@ -159,6 +173,7 @@ ApfsReadJumpStart (
   // Version is not checked by ApfsJumpStart driver.
   //
   if (JumpStart->Magic != APFS_NX_EFI_JUMPSTART_MAGIC) {
+    DEBUG ((DEBUG_INFO, "OCJS: Unknown JSDR magic %08x, expected %08x\n", JumpStart->Magic, APFS_NX_EFI_JUMPSTART_MAGIC));
     FreePool (JumpStart);
     return EFI_UNSUPPORTED;
   }
@@ -176,6 +191,7 @@ ApfsReadJumpStart (
   //
   MaxExtents = (PrivateData->ApfsBlockSize - sizeof (*JumpStart)) / sizeof (JumpStart->RecordExtents[0]);
   if (MaxExtents < JumpStart->NumExtents) {
+    DEBUG ((DEBUG_INFO, "OCJS: Invalid extent count %u / %u\n", JumpStart->NumExtents, MaxExtents));
     FreePool (JumpStart);
     return EFI_UNSUPPORTED;
   }
@@ -395,7 +411,12 @@ InternalApfsReadDriver (
     &JumpStart
     );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCJS: Failed to read JumpStart for %g\n", &PrivateData->LocationInfo.ContainerUuid));
+    DEBUG ((
+      DEBUG_INFO,
+      "OCJS: Failed to read JumpStart for %g - %r\n",
+      &PrivateData->LocationInfo.ContainerUuid,
+      Status
+      ));
     return Status;
   }
 
@@ -409,7 +430,12 @@ InternalApfsReadDriver (
   FreePool (JumpStart);
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCJS: Failed to read driver for %g\n", &PrivateData->LocationInfo.ContainerUuid));
+    DEBUG ((
+      DEBUG_INFO,
+      "OCJS: Failed to read driver for %g - %r\n",
+      &PrivateData->LocationInfo.ContainerUuid,
+      Status
+      ));
     return Status;
   }
 
