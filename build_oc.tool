@@ -155,7 +155,7 @@ package() {
   buildutil || exit 1
   utils=(
     "macserial"
-    "ConfigValidity"
+    "ocvalidate"
     "disklabel"
     "icnspack"
     )
