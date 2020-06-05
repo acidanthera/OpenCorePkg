@@ -32,6 +32,10 @@ UDK_ARCH ?= X64
 #
 CFLAGS   := -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter -D EFIUSER
 
+ifeq ($(WERROR),1)
+	CFLAGS  += -Werror
+endif
+
 ifeq ($(DIST),Darwin)
 	CFLAGS  += -mmacosx-version-min=10.6
 	LDFLAGS += -mmacosx-version-min=10.6
