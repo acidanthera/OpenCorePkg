@@ -123,11 +123,14 @@ InternalApfsTranslateBlock (
 
   //
   // For Fusion disks it can be either volume.
+  // Note, the actual implementation of ApfsJumpStart.efi is different
+  // from the specification. The specification says that the slave disk
+  // has the bits set, but the implementation seems to assume that for master.
   //
-  if ((Block & PrivateData->FusionMask) == 0) {
+  if ((Block & PrivateData->FusionMask) != 0) {
+    Block         &= ~PrivateData->FusionMask;
     IsFusionMaster = TRUE;
   } else {
-    Block         &= ~PrivateData->FusionMask;
     IsFusionMaster = FALSE;
   }
 
