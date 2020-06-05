@@ -72,7 +72,7 @@ DummyAllocatePages (
   IN OUT EFI_PHYSICAL_ADDRESS         *Memory
   )
 {
-  *Memory = (EFI_PHYSICAL_ADDRESS) AllocatePages (Pages);
+  *Memory = (UINTN) AllocatePages (Pages);
 
   return Memory != NULL ? EFI_SUCCESS : EFI_NOT_FOUND;
 }
