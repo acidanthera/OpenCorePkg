@@ -8,6 +8,40 @@
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/DebugLib.h>
 
+VOID
+EFIAPI
+CpuBreakpoint (
+  VOID
+  )
+{
+  ASSERT (FALSE);
+  while (TRUE);
+}
+
+VOID
+EFIAPI
+CpuPause (
+  VOID
+  )
+{
+}
+
+VOID
+EFIAPI
+DisableInterrupts (
+  VOID
+  )
+{
+}
+
+VOID
+EFIAPI
+EnableInterrupts (
+  VOID
+  )
+{
+}
+
 UINT32
 AsmCpuid (
   UINT32 Index,
@@ -29,6 +63,114 @@ AsmCpuid (
   if (Edx) *Edx = edx;
 
   return Index;
+}
+
+UINT32
+AsmCpuidEx (
+  IN      UINT32                    Index,
+  IN      UINT32                    SubIndex,
+  OUT     UINT32                    *Eax,  OPTIONAL
+  OUT     UINT32                    *Ebx,  OPTIONAL
+  OUT     UINT32                    *Ecx,  OPTIONAL
+  OUT     UINT32                    *Edx   OPTIONAL
+  )
+{
+  UINT32 eax = 0, ebx = 0, ecx = 0, edx = 0;
+
+  asm ("cpuid\n"
+       : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
+       : "0" (Index), "2" (SubIndex));
+
+  if (Eax) *Eax = eax;
+  if (Ebx) *Ebx = ebx;
+  if (Ecx) *Ecx = ecx;
+  if (Edx) *Edx = edx;
+
+  return Index;
+}
+
+UINT32
+EFIAPI
+AsmIncrementUint32 (
+  IN volatile UINT32  *Value
+  )
+{
+  ASSERT (FALSE);
+
+  return 0;
+}
+
+UINT32
+EFIAPI
+AsmReadIntelMicrocodeRevision (
+  VOID
+  )
+{
+  return 0;
+}
+
+UINTN
+EFIAPI
+AsmReadCr4 (
+  VOID
+  )
+{
+  return 0;
+}
+
+UINT16
+EFIAPI
+AsmReadCs (
+  VOID
+  )
+{
+  return 3;
+}
+
+UINTN
+EFIAPI
+AsmReadEflags (
+  VOID
+  )
+{
+  return 0;
+}
+
+UINT64
+EFIAPI
+AsmReadMsr64 (
+  IN      UINT32                    Index
+  )
+{
+  return 0;
+}
+
+UINT64
+EFIAPI
+AsmReadTsc (
+  VOID
+  )
+{
+  return 0;
+}
+
+UINTN
+EFIAPI
+AsmWriteCr4 (
+  UINTN  Cr4
+  )
+{
+  return 0;
+}
+
+UINT64
+EFIAPI
+AsmWriteMsr64 (
+  IN      UINT32                    Index,
+  IN      UINT64                    Value
+  )
+{
+  return 0;
 }
 
 UINT64

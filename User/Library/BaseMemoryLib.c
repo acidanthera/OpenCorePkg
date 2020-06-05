@@ -136,6 +136,28 @@ ReallocatePool (
   return NewBuffer;
 }
 
+VOID *
+EFIAPI
+AllocatePages (
+  IN UINTN  Pages
+  )
+{
+  #if __APPLE__
+  VOID *Memory;
+  int  r;
+
+  r = posix_memalign (&Memory, EFI_PAGE_SIZE, Pages * EFI_PAGE_SIZE);
+  if (r != 0) {
+    DEBUG ((DEBUG_ERROR, "posix_memalign returns error %d\n", r));
+    return NULL;
+  }
+  
+  return Memory;
+  #else /* !__APPLE__ */
+  return aligned_alloc (EFI_PAGE_SIZE, Pages * EFI_PAGE_SIZE);
+  #endif /* __APPLE__ */
+}
+
 VOID
 EFIAPI
 FreePool (
@@ -143,6 +165,19 @@ FreePool (
   )
 {
   ASSERT (Buffer != NULL);
+
+  free (Buffer);
+}
+
+VOID
+EFIAPI
+FreePages (
+  IN VOID   *Buffer,
+  IN UINTN  Pages
+  )
+{
+  ASSERT (Buffer != NULL);
+
   free (Buffer);
 }
 
@@ -188,6 +223,19 @@ WriteUnaligned16 (
   ASSERT (Buffer != NULL);
 
   memmove (Buffer, &Value, sizeof (UINT16));
+  return Value;
+}
+
+UINT32
+EFIAPI
+ReadUnaligned24 (
+  IN CONST UINT32              *Buffer
+  )
+{
+  UINT32 Value;
+
+  Value = ReadUnaligned32 (Buffer) & 0xffffff;
+
   return Value;
 }
 

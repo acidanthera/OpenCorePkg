@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
   OC_GLOBAL_CONFIG   Config;
   OcConfigurationInit (&Config, b, f);
 
-  DEBUG ((EFI_D_ERROR, "Done checking %a in %llu ms\n", argc > 1 ? argv[1] : "./config.plist", current_timestamp() - a));
+  DEBUG ((DEBUG_ERROR, "Done checking %a in %llu ms\n", argc > 1 ? argv[1] : "./config.plist", current_timestamp() - a));
 
   OcConfigurationFree (&Config);
 

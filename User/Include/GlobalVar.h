@@ -44,5 +44,14 @@ extern EFI_GUID gEfiFileInfoGuid;
 extern EFI_GUID gEfiFileSystemVolumeLabelInfoIdGuid;
 extern EFI_GUID gEfiSimpleFileSystemProtocolGuid;
 extern EFI_GUID gEfiUserInterfaceThemeProtocolGuid;
+extern EFI_GUID gEfiMpServiceProtocolGuid;
+extern EFI_GUID gFrameworkEfiMpServiceProtocolGuid;
+extern EFI_GUID gEfiGlobalVariableGuid;
+extern EFI_GUID gEfiSmbios3TableGuid;
+extern EFI_GUID gEfiLegacyRegionProtocolGuid;
+extern EFI_GUID gEfiPciRootBridgeIoProtocolGuid;
+extern EFI_GUID gEfiSmbiosTableGuid;
 
 extern EFI_GUID gOcVendorVariableGuid;
+extern EFI_GUID gOcCustomSmbios3TableGuid;
+extern EFI_GUID gOcCustomSmbiosTableGuid;

@@ -7,6 +7,8 @@
 #define OC_USER_BOOT_SERVICES_H
 
 #include <Uefi.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -18,14 +20,34 @@ extern EFI_BOOT_SERVICES mBootServices;
 extern EFI_SYSTEM_TABLE mSystemTable;
 extern EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL mConOut;
 
-STATIC
 EFI_TPL
 EFIAPI
 DummyRaiseTPL (
   IN EFI_TPL      NewTpl
   );
 
-STATIC
+EFI_STATUS
+DummyLocateProtocol (
+  EFI_GUID        *ProtocolGuid,
+  VOID            *Registration,
+  VOID            **Interface
+  );
+
+EFI_STATUS
+DummyAllocatePages (
+  IN     EFI_ALLOCATE_TYPE            Type,
+  IN     EFI_MEMORY_TYPE              MemoryType,
+  IN     UINTN                        Pages,
+  IN OUT EFI_PHYSICAL_ADDRESS         *Memory
+  );
+
+EFI_STATUS
+EFIAPI
+DummyInstallConfigurationTable (
+  IN EFI_GUID *Guid,
+  IN VOID     *Table
+  );
+
 EFI_STATUS
 EFIAPI
 NullTextOutputString (

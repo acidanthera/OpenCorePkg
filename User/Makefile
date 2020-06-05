@@ -84,7 +84,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# UDK implementations.
 	#
-	OBJS    += UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o GccInline.o HighBitSet32.o HighBitSet64.o MtrrLib.o GetPowerOfTwo64.o Cpu.o BmpSupportLib.o SafeIntLib.o X86GetInterruptState.o PciLib.o PciExpressLib.o DevicePathUtilities.o UefiDevicePathLib.o DevicePathToText.o DevicePathFromText.o BitField.o
+	OBJS    += UefiLib.o UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o HighBitSet32.o HighBitSet64.o MtrrLib.o GetPowerOfTwo32.o GetPowerOfTwo64.o Cpu.o BmpSupportLib.o SafeIntLib.o X86GetInterruptState.o PciLib.o PciExpressLib.o DevicePathUtilities.o UefiDevicePathLib.o DevicePathToText.o DevicePathFromText.o BitField.o CheckSum.o
 	#
 	# Customised/Simplified implementations at userspace level.
 	#
@@ -121,6 +121,14 @@ ifneq ($(STANDALONE),1)
 	# OcAppleKeysLib targets.
 	#
 	OBJS    += OcAppleKeysLib.o
+	#
+	# OcCpuLib targets.
+	#
+	OBJS    += FrequencyDetect.o AppleCpuSupport.o OcCpuLib.o
+	#
+	# OcMiscLib targets.
+	#
+	OBJS    += Math.o ProtocolSupport.o
 
 	#
 	# Add source searchpath for transparent compilation.
@@ -146,7 +154,9 @@ ifneq ($(STANDALONE),1)
 				../../Library/OcCryptoLib:$\
 				../../Library/OcCryptoLib/$(UDK_ARCH):$\
 				../../Library/OcMachoLib:$\
-				../../Library/OcAppleKeysLib
+				../../Library/OcAppleKeysLib:$\
+				../../Library/OcCpuLib:$\
+				../../Library/OcMiscLib
 endif
 
 #
