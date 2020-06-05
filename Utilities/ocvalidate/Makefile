@@ -1,12 +1,11 @@
 ## @file
-# Copyright (c) 2018, savvas. All rights reserved.
 # Copyright (c) 2020, PMheart. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-PROJECT = AppleEfiSignTool
+PROJECT = ocvalidate
 PRODUCT = $(PROJECT)$(SUFFIX)
 OBJS    = $(PROJECT).o \
-          AppleEfiBinary.o
-VPATH   = ../../Library/OcCryptoLib
+          OcConfigurationLib.o
+VPATH   = ../../Library/OcConfigurationLib
 include ../../User/Makefile

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
-%DIF ADD ../Configuration.tex        Fri Jun  5 12:29:25 2020
+%DIF DEL PreviousConfiguration.tex   Tue Jun  2 02:24:29 2020
+%DIF ADD ../Configuration.tex        Fri Jun  5 19:35:52 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -429,7 +429,7 @@ Root configuration entries consist of the following:
 \end{itemize}
 
 It is possible to perform basic validation of the configuration by using
-\texttt{ConfigValidity} utility. Please note, that \texttt{ConfigValidity}
+\texttt{\DIFdelbegin \DIFdel{ConfigValidity}\DIFdelend \DIFaddbegin \DIFadd{ocvalidate}\DIFaddend } utility. Please note, that \texttt{\DIFdelbegin \DIFdel{ConfigValidity}\DIFdelend \DIFaddbegin \DIFadd{ocvalidate}\DIFaddend }
 must match the used OpenCore release and may not be able to detect all
 configuration flaws present in the file.
 

@@ -3,14 +3,19 @@
 buildutil() {
   UTILS=(
     "AppleEfiSignTool"
-    "ConfigValidity"
     "EfiResTool"
-    "DiskImage"
     "disklabel"
-    "HelloWorld"
     "icnspack"
-    "KextInject"
     "macserial"
+    "ocvalidate"
+    "TestBmf"
+    "TestDiskImage"
+    "TestHelloWorld"
+    "TestImg4"
+    "TestKextInject"
+    "TestMacho"
+    "TestRsaPreprocess"
+    "TestSmbios"
   )
 
   if [ "$HAS_OPENSSL_BUILD" = "1" ]; then
@@ -31,8 +36,8 @@ buildutil() {
 
     if [ "$(which i686-w64-mingw32-gcc)" != "" ]; then
       echo "Building ${util} for Windows..."
-      CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make clean || exit 1
-      CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make || exit 1
+      UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make clean || exit 1
+      UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make || exit 1
     fi
     cd - || exit 1
   done
@@ -138,7 +143,6 @@ package() {
   cp "${selfdir}/Changelog.md" tmp/Docs/ || exit 1
   cp -r "${selfdir}/Docs/AcpiSamples/" tmp/Docs/AcpiSamples/ || exit 1
 
-
   utilScpts=(
     "LegacyBoot"
     "CreateVault"
@@ -153,7 +157,7 @@ package() {
   buildutil || exit 1
   utils=(
     "macserial"
-    "ConfigValidity"
+    "ocvalidate"
     "disklabel"
     "icnspack"
     )
@@ -161,8 +165,8 @@ package() {
     dest="tmp/Utilities/${util}"
     mkdir -p "${dest}" || exit 1
     bin="${selfdir}/Utilities/${util}/${util}"
-    binEXE="${selfdir}/Utilities/${util}/${util}.exe"
     cp "${bin}" "${dest}" || exit 1
+    binEXE="${bin}.exe"
     if [ -f "${binEXE}" ]; then
       cp "${binEXE}" "${dest}" || exit 1
     fi

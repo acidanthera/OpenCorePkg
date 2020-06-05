@@ -5,6 +5,7 @@
 ##
 
 STANDALONE = 1
-PRODUCT    = icnspack$(SUFFIX)
-OBJS       = icnspack.o
+PROJECT    = icnspack
+PRODUCT    = $(PROJECT)$(SUFFIX)
+OBJS       = $(PROJECT).o
 include ../../User/Makefile

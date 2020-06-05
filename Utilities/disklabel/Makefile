@@ -5,8 +5,9 @@
 ##
 
 STANDALONE = 1
-PRODUCT    = disklabel$(SUFFIX)
-OBJS       = disklabel.o
+PROJECT    = disklabel
+PRODUCT    = $(PROJECT)$(SUFFIX)
+OBJS       = $(PROJECT).o
 include ../../User/Makefile
 
 ifeq ($(DIST),Darwin)

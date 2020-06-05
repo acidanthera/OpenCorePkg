@@ -19,7 +19,7 @@
 // Tolerance within which we consider two frequency values to be roughly
 // equivalent.
 //
-#define OC_CPU_FREQUENCY_TOLERANCE 50000000ULL // 50 Mhz
+#define OC_CPU_FREQUENCY_TOLERANCE 50000000LL // 50 Mhz
 
 /**
   Internal CPU synchronisation structure.

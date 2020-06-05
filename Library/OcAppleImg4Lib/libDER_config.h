@@ -20,22 +20,34 @@ extern "C" {
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 
+#ifndef EFIUSER
 typedef UINT8   uint8_t;
 typedef UINT16  uint16_t;
 typedef UINT32  uint32_t;
 typedef UINT64  uint64_t;
 typedef UINTN   size_t;
+
 #ifndef bool
 typedef BOOLEAN bool;
-#endif
+#endif /* bool */
+
 #ifndef assert
 #define assert ASSERT
-#endif
-#define DER_ENCODE_ENABLE  0
+#endif /* assert */
 
 #define memset(ptr, c, len)    SetMem(ptr, len, c)
 #define memmove(dst, src, len) CopyMem(dst, src, len)
 #define memcmp(b1, b2, len)    CompareMem(b1, b2, len)
+
+#else /* EFIUSER */
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+#include <assert.h>
+#endif /* !EFIUSER */
+
+#define DER_ENCODE_ENABLE  0
 
 #define DER_TAG_SIZE  8
 //

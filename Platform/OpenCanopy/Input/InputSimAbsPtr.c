@@ -92,7 +92,7 @@ InternalGetInterpolatedValue (
   if (Value != 0) {
     Bit = HighBitSet32 (ABS (Value));
     return (INT64) Value * AccelerationNumbers[
-      MIN (Bit, ARRAY_SIZE (AccelerationNumbers) - 1)
+      MIN (Bit, (INTN) ARRAY_SIZE (AccelerationNumbers) - 1)
       ];
   }
 
