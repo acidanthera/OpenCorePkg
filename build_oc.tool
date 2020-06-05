@@ -3,17 +3,19 @@
 buildutil() {
   UTILS=(
     "AppleEfiSignTool"
-    "Bmf"
     "EfiResTool"
-    "DiskImage"
     "disklabel"
-    "HelloWorld"
     "icnspack"
-    "Img4"
-    "KextInject"
-    "Macho"
     "macserial"
     "ocvalidate"
+    "TestBmf"
+    "TestDiskImage"
+    "TestHelloWorld"
+    "TestImg4"
+    "TestKextInject"
+    "TestMacho"
+    "TestRsaPreprocess"
+    "TestSmbios"
   )
 
   if [ "$HAS_OPENSSL_BUILD" = "1" ]; then
