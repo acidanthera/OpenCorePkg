@@ -3,6 +3,9 @@
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
+#ifndef OC_USER_PCD_H
+#define OC_USER_PCD_H
+
 #include <Uefi.h>
 #include <Library/PcdLib.h>
 #include <Library/UefiLib.h>
@@ -40,3 +43,4 @@ extern UINT32 _gPcd_FixedAtBuild_PcdMaximumDevicePathNodeCount;
 #define _PCD_GET_MODE_64_PcdPciExpressBaseAddress 0
 #define _PCD_GET_MODE_32_PcdMaximumDevicePathNodeCount  _gPcd_FixedAtBuild_PcdMaximumDevicePathNodeCount
 
+#endif // OC_USER_PCD_H

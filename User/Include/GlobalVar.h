@@ -3,6 +3,9 @@
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
+#ifndef OC_USER_GLOBAL_VAR_H
+#define OC_USER_GLOBAL_VAR_H
+
 #include <Uefi.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
@@ -55,3 +58,5 @@ extern EFI_GUID gEfiSmbiosTableGuid;
 extern EFI_GUID gOcVendorVariableGuid;
 extern EFI_GUID gOcCustomSmbios3TableGuid;
 extern EFI_GUID gOcCustomSmbiosTableGuid;
+
+#endif // OC_USER_GLOBAL_VAR_H
