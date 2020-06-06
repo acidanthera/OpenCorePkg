@@ -56,7 +56,7 @@ OpenFile (
   ImageSize = (uint32_t) ftell (ImageFp);
   rewind (ImageFp);
   Image = malloc (ImageSize + 1);
-  fread (Image, ImageSize, 1, ImageFp);
+  (void) fread (Image, ImageSize, 1, ImageFp);
   fclose (ImageFp);
 }
 

@@ -30,7 +30,7 @@ UDK_ARCH ?= X64
 #
 # Primary CFLAGS.
 #
-CFLAGS   := -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter -D EFIUSER
+CFLAGS   := -c -fshort-wchar -Wall -Wextra -Wno-unused-parameter -D EFIUSER
 
 ifeq ($(WERROR),1)
 	CFLAGS  += -Werror
