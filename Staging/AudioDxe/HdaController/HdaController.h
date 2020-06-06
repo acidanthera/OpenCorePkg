@@ -111,18 +111,21 @@ typedef struct {
 #define HDA_STREAM_POLL_TIME        (EFI_TIMER_PERIOD_MILLISECONDS(1))
 #define HDA_STREAM_BUFFER_PADDING   0x200 // 512 byte pad.
 
+//
 // DMA position structure.
+//
 #pragma pack(1)
 typedef struct {
+  //
+  // Current DMA position of hardware.
+  //
   UINT32 Position;
+  //
+  // Reserved.
+  //
   UINT32 Reserved;
 } HDA_DMA_POS_ENTRY;
 #pragma pack()
-
-// Stream types.
-#define HDA_STREAM_TYPE_BIDIR   0
-#define HDA_STREAM_TYPE_IN      1
-#define HDA_STREAM_TYPE_OUT     2
 
 #define HDA_STREAM_ID_MIN       1
 #define HDA_STREAM_ID_MAX       15
@@ -199,20 +202,52 @@ typedef struct {
   VOID *CallbackContext3;
 } HDA_STREAM;
 
+//
+// Ring buffer types.
+//
+// Command Output Ring Buffer - used for sending commands to codecs.
+// Response Input Ring Buffer - used for receiving responses from codecs.
+//
 typedef enum {
   HDA_RING_BUFFER_TYPE_CORB,
   HDA_RING_BUFFER_TYPE_RIRB
 } HDA_RING_BUFFER_TYPE;
 
+//
+// Ring buffer structure.
+//
 typedef struct {
+  //
+  // Parent HDA controller.
+  //
   HDA_CONTROLLER_DEV    *HdaDev;
+  //
+  // Ring buffer type.
+  //
   HDA_RING_BUFFER_TYPE  Type;
-
+  //
+  // Buffer backing.
+  //
   VOID                  *Buffer;
+  //
+  // Buffer size.
+  //
   UINTN                 BufferSize;
+  //
+  // Number of ring buffer entries.
+  //
   UINT32                EntryCount;
+  //
+  // Ring buffer PCI mapping.
+  //
   VOID                  *Mapping;
+  //
+  // Physical address of ring buffer.
+  //
   EFI_PHYSICAL_ADDRESS  PhysAddr;
+  //
+  // Pointer to current entry.
+  //
   UINT16                Pointer;
 } HDA_RING_BUFFER;
 
@@ -442,7 +477,7 @@ HdaControllerCleanupRingBuffer (
   );
 
 BOOLEAN
-HdaControllerSetRingBufferState(
+HdaControllerSetRingBufferState (
   IN HDA_RING_BUFFER    *HdaRingBuffer,
   IN BOOLEAN            Enable
   );
