@@ -25,11 +25,6 @@
 #include "HdaController.h"
 #include <IndustryStandard/HdaRegisters.h>
 
-//
-// Command Output Ring Buffer - used for sending commands to codecs.
-// Response Input Ring Buffer - used for receiving responses from codecs.
-//
-
 BOOLEAN
 HdaControllerInitRingBuffer (
   IN HDA_RING_BUFFER    *HdaRingBuffer
@@ -183,7 +178,7 @@ HdaControllerCleanupRingBuffer (
 }
 
 BOOLEAN
-HdaControllerSetRingBufferState(
+HdaControllerSetRingBufferState (
   IN HDA_RING_BUFFER    *HdaRingBuffer,
   IN BOOLEAN            Enable
   )
@@ -314,6 +309,7 @@ HdaControllerInitStreams (
   UINT8                 InputStreamsCount;
   UINT8                 OutputStreamsCount;
   UINT8                 BidirStreamsCount;
+  UINT32                TotalStreamsCount;
   UINT32                OutputStreamsOffset;
   UINT32                BidirStreamsOffset;
 
@@ -333,6 +329,7 @@ HdaControllerInitStreams (
   InputStreamsCount       = HDA_REG_GCAP_ISS (HdaDev->Capabilities);
   OutputStreamsCount      = HDA_REG_GCAP_OSS (HdaDev->Capabilities);
   BidirStreamsCount       = HDA_REG_GCAP_BSS (HdaDev->Capabilities);
+  TotalStreamsCount       = InputStreamsCount + OutputStreamsCount + BidirStreamsCount;
   OutputStreamsOffset     = InputStreamsCount;
   BidirStreamsOffset      = OutputStreamsOffset + OutputStreamsCount;
 
@@ -424,7 +421,7 @@ HdaControllerInitStreams (
   //
   // Allocate DMA positions structure.
   //
-  HdaDev->DmaPositionsSize = sizeof (HDA_DMA_POS_ENTRY) * HdaDev->StreamsCount;
+  HdaDev->DmaPositionsSize = sizeof (HDA_DMA_POS_ENTRY) * TotalStreamsCount;
   Status = PciIo->AllocateBuffer (PciIo, AllocateAnyPages, EfiBootServicesData,
     EFI_SIZE_TO_PAGES (HdaDev->DmaPositionsSize), (VOID**)&HdaDev->DmaPositions, 0);
   if (EFI_ERROR(Status)) {

@@ -766,7 +766,7 @@ HdaControllerDriverBindingSupported (
   //
   if (!EFI_ERROR (Status)
     && (HdaClassReg.Class != PCI_CLASS_MEDIA
-      || HdaClassReg.SubClass != PCI_CLASS_MEDIA_MIXED_MODE)) {
+    || HdaClassReg.SubClass != PCI_CLASS_MEDIA_MIXED_MODE)) {
     Status = EFI_UNSUPPORTED;
   }
 
