@@ -41,7 +41,7 @@ buildutil() {
     fi
     cd - || exit 1
   done
-  popd || exit 
+  popd || exit
 }
 
 package() {
@@ -107,6 +107,7 @@ package() {
     "RtcRw.efi"
     "OpenControl.efi"
     "VerifyMsrE2.efi"
+    "ControlMsrE2.efi"
     )
   for efiTool in "${efiTools[@]}"; do
     cp "${efiTool}" tmp/EFI/OC/Tools/ || exit 1
