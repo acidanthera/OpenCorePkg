@@ -130,6 +130,7 @@ package() {
       "RtcRw.efi"
       "OpenControl.efi"
       "VerifyMsrE2.efi"
+      "ControlMsrE2.efi"
       )
     for efiTool in "${efiTools[@]}"; do
       cp "${arch}/${efiTool}" "${dstdir}/${arch}/EFI/OC/Tools"/ || exit 1
