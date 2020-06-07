@@ -111,6 +111,8 @@ typedef struct {
 #define HDA_STREAM_POLL_TIME        (EFI_TIMER_PERIOD_MILLISECONDS(1))
 #define HDA_STREAM_BUFFER_PADDING   0x200 // 512 byte pad.
 
+#define HDA_STREAM_DMA_CHECK_THRESH 5
+
 //
 // DMA position structure.
 //
@@ -147,6 +149,19 @@ typedef struct {
   // Bidirectional stream? This requires a bit to set during reset to enable output.
   //
   BOOLEAN                 IsBidirectional;
+  //
+  // Use LPIB register instead of DMA position buffer.
+  //
+  BOOLEAN                 UseLpib;
+  //
+  // Count of times DMA position buffer usability is checked.
+  //
+  UINT32                  DmaCheckCount;
+  //
+  // Indicates whether DMA position buffer usability is complete.
+  //   Ensures we don't accidentally fallback to LPIB if the stream position happens to be zero later on.
+  //
+  BOOLEAN                 DmaCheckComplete;
   //
   // Buffer Descriptor List.
   //

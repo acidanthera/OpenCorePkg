@@ -63,10 +63,51 @@ HdaControllerStreamOutputPollTimerHandler (
     return;
   }
 
+  if (HdaStream->UseLpib) {
+    //
+    // Get stream position through LPIB register.
+    //
+    Status = PciIo->Mem.Read (PciIo, EfiPciIoWidthFifoUint32, PCI_HDA_BAR, HDA_REG_SDNLPIB (HdaStream->Index), 1, &HdaStreamDmaPos);
+    if (EFI_ERROR (Status)) {
+      HdaControllerStreamAbort (HdaStream);
+      return;
+    }
+  } else {
+    //
+    // Get stream position through DMA positions buffer.
+    //
+    HdaStreamDmaPos = HdaStream->HdaDev->DmaPositions[HdaStream->Index].Position;
+
+    //
+    // If zero, give the stream a few cycles to catch up before falling back to LPIB.
+    // Fallback occurs after the set amount of cycles the DMA position is zero.
+    //
+    if (HdaStreamDmaPos == 0 && !HdaStream->DmaCheckComplete) {
+      if (HdaStream->DmaCheckCount >= HDA_STREAM_DMA_CHECK_THRESH) {
+        HdaStream->UseLpib = TRUE;
+      }
+
+      //
+      // Get stream position through LPIB register in the meantime.
+      //
+      DEBUG ((DEBUG_VERBOSE, "AudioDxe: Falling back to LPIB after %u more tries!\n", HDA_STREAM_DMA_CHECK_THRESH - HdaStream->DmaCheckCount));
+      Status = PciIo->Mem.Read (PciIo, EfiPciIoWidthFifoUint32, PCI_HDA_BAR, HDA_REG_SDNLPIB (HdaStream->Index), 1, &HdaStreamDmaPos);
+      if (EFI_ERROR (Status)) {
+        HdaControllerStreamAbort (HdaStream);
+        return;
+      }
+    }
+  }
+
   //
-  // Get stream DMA position.
+  // Increment cycle counter. Once complete, store status to avoid false fallbacks later on.
   //
-  HdaStreamDmaPos = HdaStream->HdaDev->DmaPositions[HdaStream->Index].Position;
+  if (HdaStream->DmaCheckCount < HDA_STREAM_DMA_CHECK_THRESH) {
+    HdaStream->DmaCheckCount++;
+  } else {
+    HdaStream->DmaCheckComplete = TRUE;
+  }
+  
   if (HdaStreamDmaPos >= HdaStream->DmaPositionLast) {
     DmaChanged = HdaStreamDmaPos - HdaStream->DmaPositionLast;
   } else {
