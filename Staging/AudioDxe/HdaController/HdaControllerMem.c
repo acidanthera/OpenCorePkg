@@ -584,7 +584,7 @@ HdaControllerResetStream (
   HdaStream->DmaPositionTotal = 0;
   HdaStream->DmaPositionLast = 0;
   HdaStream->DmaPositionChangedMax = 0;
-  HdaStream->UseLpib = TRUE; // TODO: Allow being forced by NVRAM variable?
+  HdaStream->UseLpib = FALSE; // TODO: Allow being forced by NVRAM variable?
   HdaStream->DmaCheckCount = 0;
   HdaStream->DmaCheckComplete = FALSE;
 
