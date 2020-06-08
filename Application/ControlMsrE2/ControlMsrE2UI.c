@@ -65,12 +65,12 @@ UINT8 EFIAPI StrContains (CHAR16* a, CHAR16* b) {
 }
 
 /*
-    Read up to length -1 Characters from keyboard.
-    CR will exit
-    LF will exit
-    Del key is supported
-    Esc any input will be cleared. If there isn't any ReadLine will exít
-    When length - 1 characters are entered Readline will exit automatically.
+ Read up to length -1 Characters from keyboard.
+ CR will exit
+ LF will exit
+ Del key is supported
+ Esc any input will be cleared. If there isn't any ReadLine will exít
+ When length - 1 characters are entered Readline will exit automatically.
  */
 UINT32 ReadLine (OUT CHAR16* buffer, IN UINT32 length) {
     
@@ -180,74 +180,73 @@ VOID PrintUINT8Str (UINT8 n[1]) {
 EFI_STATUS InterpretArguments () {
     UINTN             Argc;
     CHAR16            **Argv;
-    EFI_STATUS        Status;
     UINTN             ParameterCount;
-
+    
     mFlags = 0;
     
-    Status = GetArguments (&Argc, &Argv);
+    if (EFI_ERROR(GetArguments (&Argc, &Argv)))
+        Argc = 1;
+    
     ParameterCount = 0;
     
-    if (!EFI_ERROR (Status)) {
-        for (UINT32 i = 1; i < Argc; i++) {
+    for (UINT32 i = 1; i < Argc; i++) {
+        
+        CHAR16  token[StrLen(Argv[i]) + 1];
+        StrCpyS (token, StrLen(Argv[i]) + 1, Argv[i]);
+        
+        UINT16 tokenIndex = 0;;
+        
+        while (Argv[i][tokenIndex]) {
+            while (Argv[i][tokenIndex] == ' ') {
+                tokenIndex++;
+            }
             
-            CHAR16  token[StrLen(Argv[i]) + 1];
-            StrCpyS (token, StrLen(Argv[i]) + 1, Argv[i]);
-            
-            UINT16 tokenIndex = 0;;
-            
-            while (Argv[i][tokenIndex]) {
-                while (Argv[i][tokenIndex] == ' ') {
+            if (Argv[i][tokenIndex]) {
+                CHAR16* s = &token[tokenIndex];
+                
+                while (token[tokenIndex] != 0 && token[tokenIndex] != ' ') {
                     tokenIndex++;
                 }
+                token[tokenIndex] = 0;
                 
-                if (Argv[i][tokenIndex]) {
-                    CHAR16* s = &token[tokenIndex];
-                    
-                    while (token[tokenIndex] != 0 && token[tokenIndex] != ' ') {
-                        tokenIndex++;
-                    }
-                    token[tokenIndex] = 0;
-                    
-                    if (!StrCmp (s, L"check")) {
-                        mFlags |= ARG_CHECK;
-                        ParameterCount++;
-                    }
-                    else if (!StrCmp (s, L"lock")) {
-                        mFlags |= ARG_LOCK;
-                        ParameterCount++;
-                    }
-                    else if (!StrCmp (s, L"unlock")) {
-                        mFlags |= ARG_UNLOCK;
-                        ParameterCount++;
-                    }
-                    else if (!StrCmp (s, L"interactive")) {
-                        mFlags |= ARG_INTERACTIVE;
-                        ParameterCount++;
-                    }
-                    else if (!StrCmp (s, L"-v")) {
-                        mFlags |= ARG_VERBOSE;
-                    }
-                    else {
-                        Print (L"Ignoring unknown command line argument: %s\n", s);
-                    }
+                if (!StrCmp (s, L"check")) {
+                    mFlags |= ARG_CHECK;
+                    ParameterCount++;
                 }
-            } // All Tokens parsed
-        } // All Arguments analysed
-        
-        if (ParameterCount == 0) {
-            mFlags = mFlags | ARG_UNLOCK;
-            Print (L"No option selected, default to unlock.\n");
-            Print (L"Usage: ControlMsrE2 <unlock | lock | interactive> [ -v ]\n");
-        }
-        else if (ParameterCount > 1) {
-            Print (L"interactive, unlock, lock, check are exclusive options. Use only one of them.\n");
-            Status = EFI_INVALID_PARAMETER;
-        }
-        
+                else if (!StrCmp (s, L"lock")) {
+                    mFlags |= ARG_LOCK;
+                    ParameterCount++;
+                }
+                else if (!StrCmp (s, L"unlock")) {
+                    mFlags |= ARG_UNLOCK;
+                    ParameterCount++;
+                }
+                else if (!StrCmp (s, L"interactive")) {
+                    mFlags |= ARG_INTERACTIVE;
+                    ParameterCount++;
+                }
+                else if (!StrCmp (s, L"-v")) {
+                    mFlags |= ARG_VERBOSE;
+                }
+                else {
+                    Print (L"Ignoring unknown command line argument: %s\n", s);
+                }
+            }
+        } // All Tokens parsed
+    } // All Arguments analysed
+    
+    if (ParameterCount == 0) {
+        mFlags = mFlags | ARG_UNLOCK;
+        Print (L"No option selected, default to unlock.\n");
+        Print (L"Usage: ControlMsrE2 <unlock | lock | interactive> [-v]\n\n");
+    }
+    else if (ParameterCount > 1) {
+        Print (L"interactive, unlock, lock, check are exclusive options. Use only one of them.\n\n");
+        return EFI_INVALID_PARAMETER;
     }
     
-    return Status;
+    
+    return EFI_SUCCESS;
 }
 
 EFI_STRING ModifySearchString (IN EFI_STRING SearchString) {
@@ -258,9 +257,9 @@ EFI_STRING ModifySearchString (IN EFI_STRING SearchString) {
         Print (L"Do you want to change it ? ");
         if ((flag = ReadYN()) == TRUE) {
             Print (L"\nEnter search string: ");
-
+            
             CHAR16 *Buffer = AllocatePool(BUFFER_LENGTH * sizeof(CHAR16));
-
+            
             if (ReadLine (Buffer, BUFFER_LENGTH) == 0) {
                 Print (L"\nNo Input. Search string not changed.\n");
                 FreePool(Buffer);
