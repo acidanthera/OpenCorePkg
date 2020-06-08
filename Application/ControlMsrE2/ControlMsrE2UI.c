@@ -64,7 +64,15 @@ UINT8 EFIAPI StrContains (CHAR16* a, CHAR16* b) {
     return FALSE;
 }
 
-UINT32 readLine (OUT CHAR16* buffer, IN UINT32 length) {
+/*
+    Read up to length -1 Characters from keyboard.
+    CR will exit
+    LF will exit
+    Del key is supported
+    Esc any input will be cleared. If there isn't any ReadLine will exít
+    When length - 1 characters are entered Readline will exit automatically.
+ */
+UINT32 ReadLine (OUT CHAR16* buffer, IN UINT32 length) {
     
     EFI_STATUS     Status;
     UINTN          EventIndex;
@@ -140,14 +148,14 @@ UINT32 readLine (OUT CHAR16* buffer, IN UINT32 length) {
 
 CHAR16 ReadAnyKey () {
     CHAR16 keys[2];
-    readLine(keys, 2);
+    ReadLine(keys, 2);
     return keys[0];
 }
 
 UINT32 ReadYN () {
     CHAR16 keys[2];
     do {
-        readLine(keys, 2);
+        ReadLine(keys, 2);
     } while (!StrContains (L"yn", keys));
     
     return keys[0] == 'y' || keys[0] == 'Y';
@@ -229,6 +237,8 @@ EFI_STATUS InterpretArguments () {
         
         if (ParameterCount == 0) {
             mFlags = mFlags | ARG_UNLOCK;
+            Print (L"No option selected, default to unlock.\n");
+            Print (L"Usage: ControlMsrE2 <unlock | lock | interactive> [ -v ]\n");
         }
         else if (ParameterCount > 1) {
             Print (L"interactive, unlock, lock, check are exclusive options. Use only one of them.\n");
@@ -251,7 +261,7 @@ EFI_STRING ModifySearchString (IN EFI_STRING SearchString) {
 
             CHAR16 *Buffer = AllocatePool(BUFFER_LENGTH * sizeof(CHAR16));
 
-            if (readLine (Buffer, BUFFER_LENGTH) == 0) {
+            if (ReadLine (Buffer, BUFFER_LENGTH) == 0) {
                 Print (L"\nNo Input. Search string not changed.\n");
                 FreePool(Buffer);
             }
