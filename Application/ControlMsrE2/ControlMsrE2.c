@@ -59,6 +59,9 @@ UefiMain (
                 ListHeaderCount++;
             }
 
+            // Keep list alive 'til program finishes.
+            // So that all lists can be searched, the results be displayed together.
+            // And from all those one Option will be selected to be changed
             EFI_HII_PACKAGE_LIST_HEADER *ListHeaders[ListHeaderCount];
             
             OptionsCount = 0;
