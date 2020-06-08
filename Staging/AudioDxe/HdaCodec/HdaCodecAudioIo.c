@@ -282,8 +282,10 @@ HdaCodecAudioIoSetupPlayback(
 
   // Get supported stream formats.
   Status = HdaCodecGetSupportedPcmRates(OutputWidget, &SupportedRates);
-  if (EFI_ERROR(Status))
+  if (EFI_ERROR(Status)) {
+    DEBUG((DEBUG_INFO, "HdaCodecGetSupportedPcmRates(): failure - %r\n", Status));
     return Status;
+  }
 
   // Determine bitness of samples, ensuring desired bitness is supported.
   switch (Bits) {
