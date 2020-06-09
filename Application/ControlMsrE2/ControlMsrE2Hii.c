@@ -19,8 +19,6 @@ typedef struct {
     EFI_IFR_VARSTORE   *varstoreHeader;
 } VarStoreContext;
 
-typedef VOID OpCodeHandler (EFI_IFR_OP_HEADER* IfrHeader, UINT8* Stop, VOID* Context);
-
 EFI_HII_PACKAGE_LIST_HEADER* HiiExportPackageLists (IN EFI_HII_HANDLE Handle) {
     
     EFI_STATUS Status;
@@ -86,7 +84,7 @@ VOID HandleVarStore (
     }
 }
 
-EFI_IFR_VARSTORE* EFIAPI GetVarStore (
+EFI_IFR_VARSTORE*  GetVarStore (
                                       EFI_IFR_OP_HEADER* header,
                                       EFI_VARSTORE_ID id
                                       ) {
@@ -168,7 +166,7 @@ VOID HandleOneOf (
     FreePool(s);
 }
 
-VOID EFIAPI HandleOneVariable (OneOfContext* Context) {
+VOID  HandleOneVariable (OneOfContext* Context) {
     EFI_STATUS                    Status;
     UINTN                         DataSize;
     UINT8                         *Data;

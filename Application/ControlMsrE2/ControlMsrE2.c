@@ -15,6 +15,9 @@
 
 #define CONTEXTS_MAX 8
 
+// Don't know where it's hidden
+#define memcpy(Dst, Src, Size) do { gBS->CopyMem(Dst, Src, Size); } while (0)
+
 EFI_STATUS
 EFIAPI
 UefiMain (
