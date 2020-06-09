@@ -47,12 +47,12 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
+  MemoryAllocationLib
   OcConsoleControlEntryModeGenericLib
   UefiApplicationEntryPoint
   UefiLib
   HiiLib
   UefiHiiServicesLib
-  BaseLib
   PcdLib
   IoLib
 

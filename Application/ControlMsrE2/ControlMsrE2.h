@@ -66,7 +66,7 @@ typedef struct {
  stop        Ptr to Stop flag. If true no further search for opcodes. Can be NULL.
  context     Ptr to Hanlder specific data
  */
-typedef VOID EFIAPI OpCodeHandler (EFI_IFR_OP_HEADER* ifrHeader, UINT8* stop, VOID* context);
+typedef VOID OpCodeHandler (EFI_IFR_OP_HEADER* ifrHeader, UINT8* stop, VOID* context);
 
 /*
  Commandline Arguments
