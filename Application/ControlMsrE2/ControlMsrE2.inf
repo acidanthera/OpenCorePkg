@@ -48,6 +48,8 @@
   BaseLib
   BaseMemoryLib
   MemoryAllocationLib
+  OcMemoryLib
+  OcMiscLib
   OcConsoleControlEntryModeGenericLib
   UefiApplicationEntryPoint
   UefiLib
