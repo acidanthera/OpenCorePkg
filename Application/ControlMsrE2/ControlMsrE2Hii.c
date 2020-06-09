@@ -23,16 +23,23 @@ typedef VOID EFIAPI OpCodeHandler (EFI_IFR_OP_HEADER* IfrHeader, UINT8* Stop, VO
 
 EFI_HII_PACKAGE_LIST_HEADER* HiiExportPackageLists (IN EFI_HII_HANDLE Handle) {
     
+    EFI_STATUS Status:
     UINTN BufferSize = 0;
+
+    Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, NULL);
     
-    gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, NULL);
-    
-    if (BufferSize > 0) {
+    if (!EFI_ERROR(Status) && BufferSize > 0) {
         EFI_HII_PACKAGE_LIST_HEADER* result = (EFI_HII_PACKAGE_LIST_HEADER*) AllocatePool (BufferSize);
         
-        EFI_STATUS Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, result);
+        Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, result);
         
-        return (Status) ? NULL : result;
+        if (EFI_ERROR(Status)) {
+            FreePool (result);
+            return NULL;
+        }
+        else {
+            return result;
+        }
     }
     return NULL;
 }
@@ -107,7 +114,7 @@ VOID HandleOneOf (
     EFI_STRING s = HiiGetString (ctx->efiHandle, ifrOneOf->Question.Header.Prompt, "en-US");
     
     if ((ifrVarStore = GetVarStore (ctx->firstIfrHeader, ifrOneOf->Question.VarStoreId)) != NULL) {
-        if (StrContains(s, ctx->searchText)) {
+        if (OcStriStr(s, ctx->searchText)) {
             UINT16 old = ctx->count;
             
             if (ctx->ifrOneOf == NULL) {
@@ -134,7 +141,7 @@ VOID HandleOneOf (
                 
                 PrintUINT8Str(ifrVarStore->Name);
                 
-                EFI_STRING s = AllocateStrFromAscii((CHAR8*)ifrVarStore->Name);
+                EFI_STRING s = AsciiStrCopyToUnicode((CHAR8*)ifrVarStore->Name, 0);
                 
                 DataSize = 0;
                 if ((Status = gRT->GetVariable (s, &ifrVarStore->Guid, NULL, &DataSize, NULL)) == EFI_BUFFER_TOO_SMALL) {
@@ -181,7 +188,7 @@ VOID EFIAPI HandleOneVariable (OneOfContext* Context) {
     Print (L" Offset: %04X Size: %X ", Context->ifrOneOf->Question.VarStoreInfo.VarOffset, varSize);
     
     DataSize = 0;
-    s = AllocateStrFromAscii((CHAR8*)Context->ifrVarStore->Name);
+    s = AsciiStrCopyToUnicode((CHAR8*)Context->ifrVarStore->Name, 0);
     if ((Status = gRT->GetVariable (s, &Context->ifrVarStore->Guid, &Attributes, &DataSize, NULL)) == EFI_BUFFER_TOO_SMALL) {
         if ((Data = AllocatePool (DataSize)) != NULL) {
             if ((Status = gRT->GetVariable (s, &Context->ifrVarStore->Guid, &Attributes, &DataSize, Data)) == EFI_SUCCESS) {

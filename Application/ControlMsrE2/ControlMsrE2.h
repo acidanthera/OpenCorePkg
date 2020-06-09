@@ -96,10 +96,6 @@ extern EFI_STATUS EFIAPI VerifyMSRE2 (
                                       IN EFI_SYSTEM_TABLE  *SystemTable
                                       );
 
-// tests whether a string b is part of string a result Bool. Ignores case.
-extern UINT8 StrContains (CHAR16* a, CHAR16* b);
-// Allocates an EFI_String with the equvalent of an AsciiString
-extern EFI_STRING  AllocateStrFromAscii (CHAR8 *s);
 
 // Wait for Keypress of Y or N. Ignores case.
 extern UINT32 ReadYN ();
