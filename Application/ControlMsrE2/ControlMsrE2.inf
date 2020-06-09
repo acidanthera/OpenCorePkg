@@ -44,15 +44,21 @@
   OpenCorePkg/OpenCorePkg.dec
   UefiCpuPkg/UefiCpuPkg.dec
 
-[Protocols]
-  gEfiMpServiceProtocolGuid                 ## CONSUMES
-  gEfiHiiDatabaseProtocolGuid
-  gEfiHiiPlatformSetupFormsetGuid
-
 [LibraryClasses]
+  BaseMemoryLib
   OcConsoleControlEntryModeGenericLib
   UefiApplicationEntryPoint
   UefiLib
   HiiLib
+  UefiHiiServicesLib
+  BaseLib
   PcdLib
   IoLib
+
+[Guids]
+gEfiHiiPlatformSetupFormsetGuid
+
+[Protocols]
+gEfiMpServiceProtocolGuid                 ## CONSUMES
+gEfiHiiDatabaseProtocolGuid
+

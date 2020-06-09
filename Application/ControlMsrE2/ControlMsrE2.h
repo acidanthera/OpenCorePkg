@@ -38,7 +38,7 @@
 #include <Protocol/HiiConfigRouting.h>
 #include <Protocol/HiiConfigAccess.h>
 #include <Protocol/HiiConfigKeyword.h>
-#include <UDK/MdePkg/Include/Guid/HiiPlatformSetupFormset.h>
+#include <Guid/HiiPlatformSetupFormset.h>
 
 #define DONT_STOP_AT 0xFFFF
 
