@@ -19,7 +19,7 @@ typedef struct {
     EFI_IFR_VARSTORE   *varstoreHeader;
 } VarStoreContext;
 
-typedef VOID EFIAPI OpCodeHandler (EFI_IFR_OP_HEADER* IfrHeader, UINT8* Stop, VOID* Context);
+typedef VOID OpCodeHandler (EFI_IFR_OP_HEADER* IfrHeader, UINT8* Stop, VOID* Context);
 
 EFI_HII_PACKAGE_LIST_HEADER* HiiExportPackageLists (IN EFI_HII_HANDLE Handle) {
     
