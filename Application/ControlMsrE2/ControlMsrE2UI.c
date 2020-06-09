@@ -17,53 +17,6 @@
 
 UINTN                     mFlags;
 
-EFI_STRING AllocateStrFromAscii (CHAR8 *s) {
-    EFI_STRING r = AllocatePool(sizeof(CHAR16) * (AsciiStrLen(s) + 1));
-    
-    CHAR16 *rp = r;
-    
-    for (CHAR8 *sp = s; *sp != 0; sp++, rp++)
-        *rp = *sp;
-    
-    *rp = 0;
-    return r;
-}
-
-UINT8 EFIAPI Char16IgnoreCaseCompare (CHAR16 a, CHAR16 b) {
-    if (a >= 'A' && a <= 'Z') {
-        a = a | 0x20;
-    }
-    if (b >= 'A' && b <= 'Z') {
-        b = b | 0x20;
-    }
-    return a - b;
-}
-
-UINT8 EFIAPI StrContains (CHAR16* a, CHAR16* b) {
-    
-    while (*a != 0) {
-        while (Char16IgnoreCaseCompare(*a, *b) != 0) {
-            if (*a == 0) return FALSE;
-            
-            a++;
-        }
-        
-        CHAR16* c = a;
-        CHAR16* d = b;
-        
-        while (Char16IgnoreCaseCompare(*c, *d) == 0) {
-            if (*c == 0) return TRUE;
-            c++;
-            d++;
-        }
-        if (*d == 0) return TRUE;
-        if (*c == 0) return FALSE;
-        
-        a++;
-    }
-    return FALSE;
-}
-
 /*
  Read up to length -1 Characters from keyboard.
  CR will exit
@@ -156,7 +109,7 @@ UINT32 ReadYN () {
     CHAR16 keys[2];
     do {
         ReadLine(keys, 2);
-    } while (!StrContains (L"yn", keys));
+    } while (!OcStriStr (L"yn", keys));
     
     return keys[0] == 'y' || keys[0] == 'Y';
 }
@@ -260,13 +213,18 @@ EFI_STRING ModifySearchString (IN EFI_STRING SearchString) {
             
             CHAR16 *Buffer = AllocatePool(BUFFER_LENGTH * sizeof(CHAR16));
             
-            if (ReadLine (Buffer, BUFFER_LENGTH) == 0) {
-                Print (L"\nNo Input. Search string not changed.\n");
-                FreePool(Buffer);
+            if (Buffer != NULL) {
+                if (ReadLine (Buffer, BUFFER_LENGTH) == 0) {
+                    Print (L"\nNo Input. Search string not changed.\n");
+                    FreePool(Buffer);
+                }
+                else {
+                    FreePool(SearchString);
+                    SearchString = Buffer;
+                }
             }
             else {
-                FreePool(SearchString);
-                SearchString = Buffer;
+                Print (L"Could not allocate memory. Search string can not be changed.\n");
             }
         }
     } while (flag);

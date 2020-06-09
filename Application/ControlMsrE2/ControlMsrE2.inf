@@ -47,6 +47,7 @@
 [Protocols]
   gEfiMpServiceProtocolGuid                 ## CONSUMES
   gEfiHiiDatabaseProtocolGuid
+  gEfiHiiPlatformSetupFormsetGuid
 
 [LibraryClasses]
   OcConsoleControlEntryModeGenericLib
