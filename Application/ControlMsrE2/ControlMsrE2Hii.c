@@ -23,7 +23,7 @@ typedef VOID EFIAPI OpCodeHandler (EFI_IFR_OP_HEADER* IfrHeader, UINT8* Stop, VO
 
 EFI_HII_PACKAGE_LIST_HEADER* HiiExportPackageLists (IN EFI_HII_HANDLE Handle) {
     
-    EFI_STATUS Status:
+    EFI_STATUS Status;
     UINTN BufferSize = 0;
 
     Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, NULL);
