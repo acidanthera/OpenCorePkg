@@ -45,6 +45,7 @@
   UefiCpuPkg/UefiCpuPkg.dec
 
 [LibraryClasses]
+  BaseLib
   BaseMemoryLib
   OcConsoleControlEntryModeGenericLib
   UefiApplicationEntryPoint
