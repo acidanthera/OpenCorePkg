@@ -90,7 +90,9 @@ EFI_IFR_VARSTORE*  GetVarStore (
                                       ) {
     
     UINT8 Stop = FALSE;
-    VarStoreContext Context = { id, NULL };
+    VarStoreContext Context;
+    Context.id = id;
+    Context.varstoreHeader = NULL;
     
     DoForEachOpCode (header, EFI_IFR_VARSTORE_OP, &Stop, &Context, HandleVarStore);
     
@@ -111,7 +113,7 @@ VOID HandleOneOf (
     EFI_IFR_ONE_OF* ifrOneOf = (EFI_IFR_ONE_OF*) IfrHeader;
     EFI_STRING s = HiiGetString (ctx->efiHandle, ifrOneOf->Question.Header.Prompt, "en-US");
     
-    if ((ifrVarStore = GetVarStore (ctx->firstIfrHeader, ifrOneOf->Question.VarStoreId)) != NULL) {
+    if ((s != NULL) && ((ifrVarStore = GetVarStore (ctx->firstIfrHeader, ifrOneOf->Question.VarStoreId)) != NULL)) {
         if (OcStriStr(s, ctx->searchText)) {
             UINT16 old = ctx->count;
             
@@ -139,12 +141,12 @@ VOID HandleOneOf (
                 
                 PrintUINT8Str(ifrVarStore->Name);
                 
-                EFI_STRING s = AsciiStrCopyToUnicode((CHAR8*)ifrVarStore->Name, 0);
+                EFI_STRING VarStoreName = AsciiStrCopyToUnicode((CHAR8*)ifrVarStore->Name, 0);
                 
                 DataSize = 0;
-                if ((Status = gRT->GetVariable (s, &ifrVarStore->Guid, NULL, &DataSize, NULL)) == EFI_BUFFER_TOO_SMALL) {
+                if ((Status = gRT->GetVariable (VarStoreName, &ifrVarStore->Guid, NULL, &DataSize, NULL)) == EFI_BUFFER_TOO_SMALL) {
                     if ((Data = AllocatePool (DataSize)) != NULL) {
-                        if ((Status = gRT->GetVariable (s, &ifrVarStore->Guid, NULL, &DataSize, Data)) == EFI_SUCCESS) {
+                        if ((Status = gRT->GetVariable (VarStoreName, &ifrVarStore->Guid, NULL, &DataSize, Data)) == EFI_SUCCESS) {
                             int varSize = sizeof (EFI_IFR_ONE_OF) - ifrOneOf->Header.Length;
                             varSize = 8 - (varSize / 3);
 
@@ -163,7 +165,9 @@ VOID HandleOneOf (
         }
     }
     
-    FreePool(s);
+    if (s != NULL) {
+        FreePool(s);
+    }
 }
 
 VOID  HandleOneVariable (OneOfContext* Context) {
@@ -214,13 +218,13 @@ VOID  HandleOneVariable (OneOfContext* Context) {
                         
                         switch (varSize) {
                             case 1:
-                                *p = newValue;
+                                *p = (UINT8)newValue;
                                 break;
                             case 2:
-                                *(UINT16*)(p) = newValue;
+                                *(UINT16*)(p) = (UINT16)newValue;
                                 break;
                             case 4:
-                                *(UINT32*)(p) = newValue;
+                                *(UINT32*)(p) = (UINT32)newValue;
                                 break;
                             case 8:
                                 *(UINT64*)(p) = newValue;

@@ -31,7 +31,7 @@ UINT32 ReadLine (OUT CHAR16* buffer, IN UINT32 length) {
     UINTN          EventIndex;
     EFI_INPUT_KEY  Key;
     
-    int pos = 0;
+    UINT32 pos = 0;
     STATIC CHAR16  Output[] = L"A";
     
     gST->ConOut->EnableCursor(gST->ConOut, TRUE);
@@ -68,7 +68,7 @@ UINT32 ReadLine (OUT CHAR16* buffer, IN UINT32 length) {
                 if (pos > 0) {
                     pos = 0;
                     gST->ConOut->SetCursorPosition (gST->ConOut, startColumn + pos, startRow);
-                    for (int i = 1; i < length; i++) {
+                    for (UINT32 i = 1; i < length; i++) {
                         gST->ConOut->OutputString (gST->ConOut, L" ");
                     }
                     gST->ConOut->SetCursorPosition (gST->ConOut, startColumn + pos, startRow);
@@ -144,48 +144,56 @@ EFI_STATUS InterpretArguments () {
     
     for (UINT32 i = 1; i < Argc; i++) {
         
-        CHAR16  token[StrLen(Argv[i]) + 1];
-        StrCpyS (token, StrLen(Argv[i]) + 1, Argv[i]);
+        CHAR16* token = AllocatePool (StrSize(Argv[i]));
         
-        UINT16 tokenIndex = 0;;
-        
-        while (Argv[i][tokenIndex]) {
-            while (Argv[i][tokenIndex] == ' ') {
-                tokenIndex++;
-            }
+        if (token) {
+            StrCpyS (token, StrLen(Argv[i]) + 1, Argv[i]);
             
-            if (Argv[i][tokenIndex]) {
-                CHAR16* s = &token[tokenIndex];
-                
-                while (token[tokenIndex] != 0 && token[tokenIndex] != ' ') {
+            UINT16 tokenIndex = 0;;
+            
+            while (Argv[i][tokenIndex]) {
+                while (Argv[i][tokenIndex] == ' ') {
                     tokenIndex++;
                 }
-                token[tokenIndex] = 0;
                 
-                if (!StrCmp (s, L"check")) {
-                    mFlags |= ARG_CHECK;
-                    ParameterCount++;
+                if (Argv[i][tokenIndex]) {
+                    CHAR16* s = &token[tokenIndex];
+                    
+                    while (token[tokenIndex] != 0 && token[tokenIndex] != ' ') {
+                        tokenIndex++;
+                    }
+                    token[tokenIndex] = 0;
+                    
+                    if (!StrCmp (s, L"check")) {
+                        mFlags |= ARG_CHECK;
+                        ParameterCount++;
+                    }
+                    else if (!StrCmp (s, L"lock")) {
+                        mFlags |= ARG_LOCK;
+                        ParameterCount++;
+                    }
+                    else if (!StrCmp (s, L"unlock")) {
+                        mFlags |= ARG_UNLOCK;
+                        ParameterCount++;
+                    }
+                    else if (!StrCmp (s, L"interactive")) {
+                        mFlags |= ARG_INTERACTIVE;
+                        ParameterCount++;
+                    }
+                    else if (!StrCmp (s, L"-v")) {
+                        mFlags |= ARG_VERBOSE;
+                    }
+                    else {
+                        Print (L"Ignoring unknown command line argument: %s\n", s);
+                    }
                 }
-                else if (!StrCmp (s, L"lock")) {
-                    mFlags |= ARG_LOCK;
-                    ParameterCount++;
-                }
-                else if (!StrCmp (s, L"unlock")) {
-                    mFlags |= ARG_UNLOCK;
-                    ParameterCount++;
-                }
-                else if (!StrCmp (s, L"interactive")) {
-                    mFlags |= ARG_INTERACTIVE;
-                    ParameterCount++;
-                }
-                else if (!StrCmp (s, L"-v")) {
-                    mFlags |= ARG_VERBOSE;
-                }
-                else {
-                    Print (L"Ignoring unknown command line argument: %s\n", s);
-                }
-            }
-        } // All Tokens parsed
+            } //  All Tokens parsed
+            FreePool (token);
+        }
+        else {
+            Print (L"Couldn't allocate memory.\n");
+            return EFI_OUT_OF_RESOURCES;
+        }
     } // All Arguments analysed
     
     if (ParameterCount == 0) {
