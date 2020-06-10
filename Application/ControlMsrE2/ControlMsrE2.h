@@ -91,7 +91,7 @@ enum {
 extern UINTN mFlags;
 
 // Check MsrE2 Status - original VerifyMSRE2
-extern EFI_STATUS  VerifyMSRE2 (
+extern EFI_STATUS EFIAPI VerifyMSRE2 (
                                       IN EFI_HANDLE         ImageHandle,
                                       IN EFI_SYSTEM_TABLE  *SystemTable
                                       );
