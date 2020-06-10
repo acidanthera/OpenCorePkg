@@ -144,7 +144,7 @@ VOID HandleOneOf (
                 EFI_STRING VarStoreName = AsciiStrCopyToUnicode((CHAR8*)ifrVarStore->Name, 0);
                 
                 DataSize = 0;
-                if ((Status = gRT->GetVariable (VarStoreName, &ifrVarStore->Guid, NULL, &DataSize, NULL)) == EFI_BUFFER_TOO_SMALL) {
+                if ((Status = gRT->GetVariable (VarStoreName, (void*)&ifrVarStore->Guid, NULL, &DataSize, NULL)) == EFI_BUFFER_TOO_SMALL) {
                     if ((Data = AllocatePool (DataSize)) != NULL) {
                         if ((Status = gRT->GetVariable (VarStoreName, &ifrVarStore->Guid, NULL, &DataSize, Data)) == EFI_SUCCESS) {
                             int varSize = sizeof (EFI_IFR_ONE_OF) - ifrOneOf->Header.Length;
@@ -183,7 +183,7 @@ VOID  HandleOneVariable (OneOfContext* Context) {
     Print (L"In VarStore \"");
     PrintUINT8Str (Context->ifrVarStore->Name);
     Print (L"\" GUID: ");
-    PrintGuid (&Context->ifrVarStore->Guid);
+    PrintGuid ((void*)&Context->ifrVarStore->Guid);
     
     int varSize = sizeof (EFI_IFR_ONE_OF) - Context->ifrOneOf->Header.Length;
     varSize = 8 - (varSize / 3);
@@ -191,9 +191,9 @@ VOID  HandleOneVariable (OneOfContext* Context) {
     
     DataSize = 0;
     s = AsciiStrCopyToUnicode((CHAR8*)Context->ifrVarStore->Name, 0);
-    if ((Status = gRT->GetVariable (s, &Context->ifrVarStore->Guid, &Attributes, &DataSize, NULL)) == EFI_BUFFER_TOO_SMALL) {
+    if ((Status = gRT->GetVariable (s, (void*)&Context->ifrVarStore->Guid, &Attributes, &DataSize, NULL)) == EFI_BUFFER_TOO_SMALL) {
         if ((Data = AllocatePool (DataSize)) != NULL) {
-            if ((Status = gRT->GetVariable (s, &Context->ifrVarStore->Guid, &Attributes, &DataSize, Data)) == EFI_SUCCESS) {
+            if ((Status = gRT->GetVariable (s, (void*)&Context->ifrVarStore->Guid, &Attributes, &DataSize, Data)) == EFI_SUCCESS) {
                 
                 UINT8 *p = Data + Context->ifrOneOf->Question.VarStoreInfo.VarOffset;
                 UINT64 newValue;
@@ -234,7 +234,7 @@ VOID  HandleOneVariable (OneOfContext* Context) {
                                 break;
                         }
                         
-                        if ((Status = gRT->SetVariable (s, &Context->ifrVarStore->Guid, Attributes, DataSize, Data)) == EFI_SUCCESS) {
+                        if ((Status = gRT->SetVariable (s, (void*)&Context->ifrVarStore->Guid, Attributes, DataSize, Data)) == EFI_SUCCESS) {
                             Print (L"\nDone. You will have to reboot for the change to take effect.\n");
                         }
                         else {
