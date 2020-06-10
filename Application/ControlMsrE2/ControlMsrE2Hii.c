@@ -146,7 +146,7 @@ VOID HandleOneOf (
                 DataSize = 0;
                 if ((Status = gRT->GetVariable (VarStoreName, (void*)&ifrVarStore->Guid, NULL, &DataSize, NULL)) == EFI_BUFFER_TOO_SMALL) {
                     if ((Data = AllocatePool (DataSize)) != NULL) {
-                        if ((Status = gRT->GetVariable (VarStoreName, &ifrVarStore->Guid, NULL, &DataSize, Data)) == EFI_SUCCESS) {
+                        if ((Status = gRT->GetVariable (VarStoreName, (void*)&ifrVarStore->Guid, NULL, &DataSize, Data)) == EFI_SUCCESS) {
                             int varSize = sizeof (EFI_IFR_ONE_OF) - ifrOneOf->Header.Length;
                             varSize = 8 - (varSize / 3);
 
