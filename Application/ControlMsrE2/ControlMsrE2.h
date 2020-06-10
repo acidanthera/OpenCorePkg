@@ -12,6 +12,10 @@
  
  **/
 
+/*
+    Unless otherwise specified all data types are naturally aligned. Structures are aligned on boundaries equal to the largest internal datum of the structure and internal data are implicitly padded to achieve natural alignment.
+*/
+
 #include <Uefi.h>
 #include <PiDxe.h>
 #include <Library/PcdLib.h>
