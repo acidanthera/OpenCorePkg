@@ -68,7 +68,7 @@ EFI_STATUS WalkListHeaders (
                         // Print some Info
                         if (IS_VERBOSE()) {
                             Print (L"Form: ");
-                            PrintGuid ((EFI_GUID*) &(((EFI_IFR_FORM_SET*) IfrHeader)->Guid));
+                            PrintGuid ((void*) &(((EFI_IFR_FORM_SET*) IfrHeader)->Guid));
                         }
                         
                         if (IfrHeader->Length >= 16 + sizeof(EFI_IFR_FORM_SET)) {
