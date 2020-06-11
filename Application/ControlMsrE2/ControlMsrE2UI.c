@@ -25,7 +25,10 @@ UINTN                     mFlags;
  Esc any input will be cleared. If there isn't any ReadLine will exít
  When length - 1 characters are entered Readline will exit automatically.
  */
-UINT32 ReadLine (OUT CHAR16* buffer, IN UINT32 length) {
+UINT32 ReadLine (
+                 OUT CHAR16* buffer,
+                 IN UINT32 length
+                 ) {
     
     EFI_STATUS     Status;
     UINTN          EventIndex;
@@ -46,6 +49,7 @@ UINT32 ReadLine (OUT CHAR16* buffer, IN UINT32 length) {
         gBS->WaitForEvent (1, &gST->ConIn->WaitForKey, &EventIndex);
         ZeroMem (&Key, sizeof (Key));
         Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &Key);
+        
         if (EFI_ERROR (Status)) {
             
             if (Status == EFI_NOT_READY) {
@@ -124,8 +128,10 @@ VOID PrintGuid (IN EFI_GUID* Guid) {
            );
 }
 
-VOID PrintUINT8Str (UINT8 n[1]) {
-    AsciiPrint ((CHAR8*)(&n[0]));
+VOID PrintUINT8Str (
+                    IN UINT8 n[1]
+                    ) {
+    AsciiPrint ((CHAR8*) (&n[0]));
 }
 
 #define TOKENLENGTH 32;
@@ -210,7 +216,9 @@ EFI_STATUS InterpretArguments () {
     return EFI_SUCCESS;
 }
 
-EFI_STRING ModifySearchString (IN EFI_STRING SearchString) {
+EFI_STRING ModifySearchString (
+                               IN EFI_STRING SearchString
+                               ) {
     int flag;
     
     do {

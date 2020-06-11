@@ -16,10 +16,10 @@
 #define CONTEXTS_MAX 8
 
 EFI_STATUS WalkListHeaders (
-                            EFI_HII_HANDLE * handles,
-                            EFI_HII_PACKAGE_LIST_HEADER **ListHeaders,
-                            UINT32 ListHeaderCount,
-                            EFI_STRING SearchString
+                            IN EFI_HII_HANDLE * handles,
+                            IN EFI_HII_PACKAGE_LIST_HEADER **ListHeaders,
+                            IN UINT32 ListHeaderCount,
+                            IN EFI_STRING SearchString
                             ) {
     UINT16           OptionsCount;
     UINT16           ContextsCount;
@@ -33,11 +33,12 @@ EFI_STATUS WalkListHeaders (
     ListHeaderIndex = 0;
     
     // For Each Handle
+
     for (EFI_HII_HANDLE* h = (EFI_HII_HANDLE*) handles; (*h != NULL) && (ContextsCount < CONTEXTS_MAX); h++, ListHeaderIndex++) {
-        
+
         ListHeaders[ListHeaderIndex] = HiiExportPackageLists(*h);
         
-        if (ListHeaders[ListHeaderIndex]) {
+        if (ListHeaders[ListHeaderIndex] != NULL) {
             
             if (IS_VERBOSE()) {
                 Print (L"Package List: ");
@@ -47,18 +48,18 @@ EFI_STATUS WalkListHeaders (
             
             // First package in list
             EFI_HII_PACKAGE_HEADER* PkgHeader = PADD(ListHeaders[ListHeaderIndex], sizeof(EFI_HII_PACKAGE_LIST_HEADER));
-            
+
             // For each package in list
-            do {
-                if (PkgHeader->Type == EFI_HII_PACKAGE_END) {
-                    break;
-                }
-                
+            while (ContextsCount < CONTEXTS_MAX) {
+
                 if (IS_VERBOSE()) {
                     Print (L"Package Type: %02X ", PkgHeader->Type);
                 }
                 
-                if (PkgHeader->Type == EFI_HII_PACKAGE_FORMS) {
+                if (PkgHeader->Type == EFI_HII_PACKAGE_END) {
+                    break;
+                }
+                else if (PkgHeader->Type == EFI_HII_PACKAGE_FORMS) {
                     
                     EFI_IFR_OP_HEADER* IfrHeader = PADD(PkgHeader, sizeof(EFI_HII_PACKAGE_HEADER));
                     
@@ -67,7 +68,7 @@ EFI_STATUS WalkListHeaders (
                         // Print some Info
                         if (IS_VERBOSE()) {
                             Print (L"Form: ");
-                            PrintGuid ((void*)&(((EFI_IFR_FORM_SET*) IfrHeader)->Guid));
+                            PrintGuid ((EFI_GUID*) &(((EFI_IFR_FORM_SET*) IfrHeader)->Guid));
                         }
                         
                         if (IfrHeader->Length >= 16 + sizeof(EFI_IFR_FORM_SET)) {
@@ -101,7 +102,7 @@ EFI_STATUS WalkListHeaders (
                     }
                 }
                 PkgHeader = PADD(PkgHeader, PkgHeader->Length);
-            } while (ContextsCount < CONTEXTS_MAX); // For each package in list
+            } // For each package in list
             
             if (IS_VERBOSE()) {
                 Print(L"\n");
@@ -110,7 +111,7 @@ EFI_STATUS WalkListHeaders (
     }  // For Each Handle
     
     if (IS_VERBOSE()) {
-        Print (L"ContextCount %x OptionsCount %x\n", ContextsCount, OptionsCount);
+        Print (L"Context count: %x Options count %x\n", ContextsCount, OptionsCount);
     }
     
     if (IS_INTERACTIVE() || IS_LOCK() || IS_UNLOCK()) {
@@ -164,7 +165,9 @@ EFI_STATUS WalkListHeaders (
     return Status;
     
 }
-EFI_STATUS SearchForString (EFI_STRING SearchString) {
+EFI_STATUS SearchForString (
+                            IN EFI_STRING SearchString
+                            ) {
     EFI_HII_HANDLE * handles;
     
     EFI_STATUS Status = EFI_SUCCESS;
@@ -180,6 +183,7 @@ EFI_STATUS SearchForString (EFI_STRING SearchString) {
             Status = EFI_OUT_OF_RESOURCES;
         }
         else {
+
             UINT32 ListHeaderCount;
             
             ListHeaderCount = 0;
@@ -224,6 +228,7 @@ UefiMain (
         EFI_STRING SearchString = AsciiStrCopyToUnicode ("cfg", 0);
         
         if (SearchString != NULL)
+
             Status = SearchForString (SearchString);
             FreePool (SearchString);
         }
