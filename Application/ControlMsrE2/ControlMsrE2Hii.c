@@ -19,15 +19,20 @@ typedef struct {
     EFI_IFR_VARSTORE   *varstoreHeader;
 } VarStoreContext;
 
-EFI_HII_PACKAGE_LIST_HEADER* HiiExportPackageLists (IN EFI_HII_HANDLE Handle) {
+EFI_HII_PACKAGE_LIST_HEADER* HiiExportPackageLists (
+                                                    IN EFI_HII_HANDLE Handle
+                                                    ) {
     
     EFI_STATUS Status;
     UINTN BufferSize = 0;
 
     Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, NULL);
     
-    if (!EFI_ERROR(Status) && BufferSize > 0) {
+    if ((Status == EFI_BUFFER_TOO_SMALL) && (BufferSize > 0)) {
         EFI_HII_PACKAGE_LIST_HEADER* result = (EFI_HII_PACKAGE_LIST_HEADER*) AllocatePool (BufferSize);
+        
+        if (result == NULL)
+            return NULL;
         
         Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, result);
         
@@ -45,14 +50,16 @@ EFI_HII_PACKAGE_LIST_HEADER* HiiExportPackageLists (IN EFI_HII_HANDLE Handle) {
 EFI_IFR_OP_HEADER* DoForEachOpCode (
                  IN EFI_IFR_OP_HEADER* Header,
                  IN UINT8 OpCode,
-                 IN UINT8* Stop,
+                 IN OUT UINT8* Stop OPTIONAL,
                  IN void* Context,
                  IN OpCodeHandler Handler
                  ) {
     
-    do {
+    while ((Stop == NULL) || !(*Stop)) {
+        
         if (Header->OpCode == EFI_IFR_END_OP)
             return Header;
+        
         if (Header->OpCode == OpCode) {
             Handler (Header, Stop, Context);
             if ((Stop != NULL) && *Stop)
@@ -63,21 +70,22 @@ EFI_IFR_OP_HEADER* DoForEachOpCode (
         }
         
         Header = PADD(Header, Header->Length);
-    } while ((Stop == NULL) || !(*Stop));
+    }
     
     return Header;
 }
 
 VOID HandleVarStore (
-                EFI_IFR_OP_HEADER* IfrHeader,
-                UINT8* Stop,
-                void* Context
+                IN EFI_IFR_OP_HEADER* IfrHeader,
+                IN OUT UINT8* Stop OPTIONAL,
+                IN OUT void* Context
                 ) {
     
     VarStoreContext *ctx = Context;
     EFI_IFR_VARSTORE* varStore = (EFI_IFR_VARSTORE*) IfrHeader;
     
     if (varStore->VarStoreId == ctx->id) {
+        
         ctx->varstoreHeader = varStore;
         if (Stop)
             *Stop = TRUE;
@@ -85,8 +93,8 @@ VOID HandleVarStore (
 }
 
 EFI_IFR_VARSTORE*  GetVarStore (
-                                      EFI_IFR_OP_HEADER* header,
-                                      EFI_VARSTORE_ID id
+                                      IN EFI_IFR_OP_HEADER* header,
+                                      IN EFI_VARSTORE_ID id
                                       ) {
     
     UINT8 Stop = FALSE;
@@ -100,9 +108,9 @@ EFI_IFR_VARSTORE*  GetVarStore (
 }
 
 VOID HandleOneOf (
-             EFI_IFR_OP_HEADER* IfrHeader,
-             UINT8* Stop,
-             VOID* Context) {
+             IN EFI_IFR_OP_HEADER* IfrHeader,
+             IN OUT UINT8* Stop OPTIONAL,
+             IN OUT VOID* Context) {
     
     
     OneOfContext* ctx = Context;
@@ -111,9 +119,11 @@ VOID HandleOneOf (
     EFI_STATUS Status;
     EFI_IFR_VARSTORE* ifrVarStore;
     EFI_IFR_ONE_OF* ifrOneOf = (EFI_IFR_ONE_OF*) IfrHeader;
+    
     EFI_STRING s = HiiGetString (ctx->efiHandle, ifrOneOf->Question.Header.Prompt, "en-US");
     
     if ((s != NULL) && ((ifrVarStore = GetVarStore (ctx->firstIfrHeader, ifrOneOf->Question.VarStoreId)) != NULL)) {
+        
         if (OcStriStr(s, ctx->searchText)) {
             UINT16 old = ctx->count;
             
@@ -141,22 +151,22 @@ VOID HandleOneOf (
                 
                 PrintUINT8Str(ifrVarStore->Name);
                 
-                EFI_STRING VarStoreName = AsciiStrCopyToUnicode((CHAR8*)ifrVarStore->Name, 0);
+                EFI_STRING VarStoreName = AsciiStrCopyToUnicode((CHAR8*) ifrVarStore->Name, 0);
                 
                 DataSize = 0;
-                if ((Status = gRT->GetVariable (VarStoreName, (void*)&ifrVarStore->Guid, NULL, &DataSize, NULL)) == EFI_BUFFER_TOO_SMALL) {
+                if ((Status = gRT->GetVariable (VarStoreName, (void*) &ifrVarStore->Guid, NULL, &DataSize, NULL)) == EFI_BUFFER_TOO_SMALL) {
                     if ((Data = AllocatePool (DataSize)) != NULL) {
-                        if ((Status = gRT->GetVariable (VarStoreName, (void*)&ifrVarStore->Guid, NULL, &DataSize, Data)) == EFI_SUCCESS) {
+                        if ((Status = gRT->GetVariable (VarStoreName, (void*) &ifrVarStore->Guid, NULL, &DataSize, Data)) == EFI_SUCCESS) {
                             int varSize = sizeof (EFI_IFR_ONE_OF) - ifrOneOf->Header.Length;
                             varSize = 8 - (varSize / 3);
 
                             UINT8 *p = Data + ifrOneOf->Question.VarStoreInfo.VarOffset;
-                            UINT64 value = (varSize == 1) ? *p : (varSize == 2) ? *(UINT16*)(p) : (varSize == 4) ? *(UINT32*)(p)  : *(UINT64*)(p);
+                            UINT64 value = (varSize == 1) ? *p : (varSize == 2) ? *(UINT16*) (p) : (varSize == 4) ? *(UINT32*) (p)  : *(UINT64*) (p);
                             
                             Print (L" Value: value %X", value);
                             
-                            FreePool (Data);
                         }
+                        FreePool (Data);
                     } // Allocate
                 } // GetVariable
                
@@ -170,96 +180,106 @@ VOID HandleOneOf (
     }
 }
 
-VOID  HandleOneVariable (OneOfContext* Context) {
+VOID  HandleOneVariable (
+                         IN OUT OneOfContext* Context
+                         ) {
     EFI_STATUS                    Status;
     UINTN                         DataSize;
     UINT8                         *Data;
     UINT32                        Attributes;
     
     EFI_STRING s = HiiGetString (Context->efiHandle, Context->ifrOneOf->Question.Header.Prompt, "en-US");
-    Print (L"\nBIOS Option found: %s\n", s);
-    FreePool(s);
+    if (s) {
+        Print (L"\nBIOS Option found: %s\n", s);
+        FreePool(s);
+    }
     
     Print (L"In VarStore \"");
     PrintUINT8Str (Context->ifrVarStore->Name);
     Print (L"\" GUID: ");
-    PrintGuid ((void*)&Context->ifrVarStore->Guid);
+    PrintGuid ((void*) &Context->ifrVarStore->Guid);
     
     int varSize = sizeof (EFI_IFR_ONE_OF) - Context->ifrOneOf->Header.Length;
     varSize = 8 - (varSize / 3);
     Print (L" Offset: %04X Size: %X ", Context->ifrOneOf->Question.VarStoreInfo.VarOffset, varSize);
     
     DataSize = 0;
-    s = AsciiStrCopyToUnicode((CHAR8*)Context->ifrVarStore->Name, 0);
-    if ((Status = gRT->GetVariable (s, (void*)&Context->ifrVarStore->Guid, &Attributes, &DataSize, NULL)) == EFI_BUFFER_TOO_SMALL) {
-        if ((Data = AllocatePool (DataSize)) != NULL) {
-            if ((Status = gRT->GetVariable (s, (void*)&Context->ifrVarStore->Guid, &Attributes, &DataSize, Data)) == EFI_SUCCESS) {
-                
-                UINT8 *p = Data + Context->ifrOneOf->Question.VarStoreInfo.VarOffset;
-                UINT64 newValue;
-                UINT64 value = (varSize == 1) ? *p : (varSize == 2) ? *(UINT16*)(p) : (varSize == 4) ? *(UINT32*)(p)  : *(UINT64*)(p);
-                
-                Print (L"Value: value %X\n", value);
-                
-                newValue = (IS_INTERACTIVE()) ? (value) ? 0 : 1 : (IS_LOCK()) ? 1 : (IS_UNLOCK()) ? 0 : value;
-                
-                if (newValue != value) {
-                    if (IS_INTERACTIVE()) {
-                        Print (L"Do you want to toggle the value y/n ?");
-                    }
-                    else if (IS_LOCK()) {
-                        Print (L"Do you want to set the value y/n ?");
-                    }
-                    else {
-                        Print (L"Do you want to clear the value y/n ?");
-                    }
+    s = AsciiStrCopyToUnicode((CHAR8*) Context->ifrVarStore->Name, 0);
+
+    if (s == NULL) {
+        Print (L"\nCouldn't allocate memory\n");
+    }
+    else {
+        if ((Status = gRT->GetVariable (s, (void*) &Context->ifrVarStore->Guid, &Attributes, &DataSize, NULL)) == EFI_BUFFER_TOO_SMALL) {
+            if ((Data = AllocatePool (DataSize)) != NULL) {
+                if ((Status = gRT->GetVariable (s, (void*) &Context->ifrVarStore->Guid, &Attributes, &DataSize, Data)) == EFI_SUCCESS) {
                     
-                    if (ReadYN()) {
-                        
-                        switch (varSize) {
-                            case 1:
-                                *p = (UINT8)newValue;
-                                break;
-                            case 2:
-                                *(UINT16*)(p) = (UINT16)newValue;
-                                break;
-                            case 4:
-                                *(UINT32*)(p) = (UINT32)newValue;
-                                break;
-                            case 8:
-                                *(UINT64*)(p) = newValue;
-                                break;
-                                
-                            default:
-                                break;
+                    UINT8 *p = Data + Context->ifrOneOf->Question.VarStoreInfo.VarOffset;
+                    UINT64 newValue;
+                    UINT64 value = (varSize == 1) ? *p : (varSize == 2) ? *(UINT16*) (p) : (varSize == 4) ? *(UINT32*) (p)  : *(UINT64*) (p);
+                    
+                    Print (L"Value: value %X\n", value);
+                    
+                    newValue = (IS_INTERACTIVE()) ? (value) ? 0 : 1 : (IS_LOCK()) ? 1 : (IS_UNLOCK()) ? 0 : value;
+                    
+                    if (newValue != value) {
+                        if (IS_INTERACTIVE()) {
+                            Print (L"Do you want to toggle the value y/n ?");
                         }
-                        
-                        if ((Status = gRT->SetVariable (s, (void*)&Context->ifrVarStore->Guid, Attributes, DataSize, Data)) == EFI_SUCCESS) {
-                            Print (L"\nDone. You will have to reboot for the change to take effect.\n");
+                        else if (IS_LOCK()) {
+                            Print (L"Do you want to set the value y/n ?");
                         }
                         else {
-                            Print (L"\nProblem writing variable.\n");
+                            Print (L"Do you want to clear the value y/n ?");
+                        }
+                        
+                        if (ReadYN()) {
+                            
+                            switch (varSize) {
+                                case 1:
+                                    *p = (UINT8)newValue;
+                                    break;
+                                case 2:
+                                    *(UINT16*) (p) = (UINT16)newValue;
+                                    break;
+                                case 4:
+                                    *(UINT32*) (p) = (UINT32)newValue;
+                                    break;
+                                case 8:
+                                    *(UINT64*) (p) = newValue;
+                                    break;
+                                    
+                                default:
+                                    break;
+                            }
+                            
+                            if ((Status = gRT->SetVariable (s, (void*) &Context->ifrVarStore->Guid, Attributes, DataSize, Data)) == EFI_SUCCESS) {
+                                Print (L"\nDone. You will have to reboot for the change to take effect.\n");
+                            }
+                            else {
+                                Print (L"\nProblem writing variable.\n");
+                            }
+                        }
+                        else {
+                            Print (L"\n");
                         }
                     }
                     else {
-                        Print (L"\n");
+                        Print (L"Value is as wanted already. No action required.\n");
                     }
                 }
-                else {
-                    Print (L"Value is as wanted already. No action required.\n");
-                }
+                else
+                    Print (L"\nCouldn't read Data\n");
+                FreePool(Data);
             }
-            else
-                Print (L"\nCouldn't read Data\n");
-            FreePool(Data);
+            else {
+                Print (L"\nCouldn't allocate memory\n");
+            }
         }
-        else {
-            Print (L"\nCouldn't allocate memory\n");
-        }
+        else
+            Print (L"\nCouldn't find Variable.\n");
+        
+        FreePool(s);
     }
-    else
-        Print (L"\nCouldn't find Variable.\n");
-    
-    FreePool(s);
 }
 
