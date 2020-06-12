@@ -393,7 +393,9 @@ OcLoadUefiAudioSupport (
       ? Config->Uefi.Audio.MinimumVolume : VolumeLevel
     );
 
-  FreePool (DevicePath);
+  if (DevicePath != NULL) {
+    FreePool (DevicePath);
+  }
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OC: Audio connection failed - %r\n", Status));
