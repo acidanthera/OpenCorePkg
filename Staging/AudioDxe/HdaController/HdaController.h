@@ -483,7 +483,9 @@ HdaControllerDriverBindingStop(
 
 BOOLEAN
 HdaControllerInitRingBuffer (
-  IN HDA_RING_BUFFER    *HdaRingBuffer
+  IN HDA_RING_BUFFER    *HdaRingBuffer,
+  IN HDA_CONTROLLER_DEV *HdaDev,
+  IN HDA_RING_BUFFER_TYPE Type
   );
 
 VOID

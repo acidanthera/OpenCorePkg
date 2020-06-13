@@ -741,10 +741,10 @@ HdaControllerCleanup(
     }
   }
 
-  // Cleanup streams.
-  HdaControllerCleanupStreams(HdaControllerDev);
-
-  // Stop and cleanup CORB and RIRB.
+  //
+  // Cleanup streams, CORB, and RIRB.
+  //
+  HdaControllerCleanupStreams (HdaControllerDev);
   HdaControllerCleanupRingBuffer (&HdaControllerDev->Corb);
   HdaControllerCleanupRingBuffer (&HdaControllerDev->Rirb);
 
@@ -931,12 +931,8 @@ HdaControllerDriverBindingStart (
   //
   // Initialize CORB and RIRB.
   //
-  HdaControllerDev->Corb.HdaDev     = HdaControllerDev;
-  HdaControllerDev->Corb.Type       = HDA_RING_BUFFER_TYPE_CORB;
-  HdaControllerDev->Rirb.HdaDev     = HdaControllerDev;
-  HdaControllerDev->Rirb.Type       = HDA_RING_BUFFER_TYPE_RIRB;
-
-  if (!HdaControllerInitRingBuffer (&HdaControllerDev->Corb) || !HdaControllerInitRingBuffer (&HdaControllerDev->Rirb)) {
+  if (!HdaControllerInitRingBuffer (&HdaControllerDev->Corb, HdaControllerDev, HDA_RING_BUFFER_TYPE_CORB)
+    || !HdaControllerInitRingBuffer (&HdaControllerDev->Rirb, HdaControllerDev, HDA_RING_BUFFER_TYPE_RIRB)) {
     goto FREE_CONTROLLER;
   }
 
