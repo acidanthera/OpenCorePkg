@@ -191,6 +191,7 @@ HdaControllerCleanupRingBuffer (
   HdaRingBuffer->Mapping        = NULL;
   HdaRingBuffer->PhysAddr       = 0;
   HdaRingBuffer->Pointer        = 0;
+  HdaRingBuffer->HdaDev         = NULL;
 }
 
 BOOLEAN
