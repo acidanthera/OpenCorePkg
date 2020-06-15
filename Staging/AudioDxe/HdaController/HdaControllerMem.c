@@ -27,7 +27,9 @@
 
 BOOLEAN
 HdaControllerInitRingBuffer (
-  IN HDA_RING_BUFFER    *HdaRingBuffer
+  IN HDA_RING_BUFFER    *HdaRingBuffer,
+  IN HDA_CONTROLLER_DEV *HdaDev,
+  IN HDA_RING_BUFFER_TYPE Type
   )
 {
   EFI_STATUS            Status;
@@ -41,17 +43,22 @@ HdaControllerInitRingBuffer (
 
   UINTN                 BufferSizeActual;
 
-  PciIo = HdaRingBuffer->HdaDev->PciIo;
+  ASSERT (HdaRingBuffer != NULL);
+  ASSERT (HdaDev != NULL);
 
-  if (HdaRingBuffer->Type == HDA_RING_BUFFER_TYPE_CORB) {
+  if (Type == HDA_RING_BUFFER_TYPE_CORB) {
     Offset          = HDA_REG_CORB_BASE;
     EntrySize       = HDA_CORB_ENTRY_SIZE;
-  } else if (HdaRingBuffer->Type == HDA_RING_BUFFER_TYPE_RIRB) {
+  } else if (Type == HDA_RING_BUFFER_TYPE_RIRB) {
     Offset          = HDA_REG_RIRB_BASE;
     EntrySize       = HDA_RIRB_ENTRY_SIZE;
   } else {
     return FALSE;
   }
+
+  HdaRingBuffer->HdaDev = HdaDev;
+  HdaRingBuffer->Type   = Type;
+  PciIo                 = HdaDev->PciIo;
 
   //
   // Get current value of size register.
@@ -156,6 +163,15 @@ HdaControllerCleanupRingBuffer (
 {
   EFI_PCI_IO_PROTOCOL   *PciIo;
 
+  ASSERT (HdaRingBuffer != NULL);
+
+  //
+  // Already freed if NULL.
+  //
+  if (HdaRingBuffer->HdaDev == NULL) {
+    return;
+  }
+
   PciIo = HdaRingBuffer->HdaDev->PciIo;
 
   //
@@ -175,6 +191,7 @@ HdaControllerCleanupRingBuffer (
   HdaRingBuffer->Mapping        = NULL;
   HdaRingBuffer->PhysAddr       = 0;
   HdaRingBuffer->Pointer        = 0;
+  HdaRingBuffer->HdaDev         = NULL;
 }
 
 BOOLEAN
@@ -584,6 +601,9 @@ HdaControllerResetStream (
   HdaStream->DmaPositionTotal = 0;
   HdaStream->DmaPositionLast = 0;
   HdaStream->DmaPositionChangedMax = 0;
+  HdaStream->UseLpib = FALSE; // TODO: Allow being forced by NVRAM variable?
+  HdaStream->DmaCheckCount = 0;
+  HdaStream->DmaCheckComplete = FALSE;
 
   return TRUE;
 }

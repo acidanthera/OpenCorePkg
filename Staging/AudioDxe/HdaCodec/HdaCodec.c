@@ -765,6 +765,8 @@ HdaCodecGetSupportedPcmRates(
       return EFI_UNSUPPORTED;
     *SupportedRates = HdaOutputWidget->FuncGroup->SupportedPcmRates;
   }
+
+  DEBUG((DEBUG_VERBOSE, "HdaCodecGetSupportedPcmRates(): supported rates - 0x%X\n", *SupportedRates));
   return EFI_SUCCESS;
 }
 

@@ -374,10 +374,16 @@ OcLoadUefiAudioSupport (
     }
   }
 
+  //
+  // NULL DevicePath means choose the first audio device available on the platform.
+  //
+
   OcAudio = OcAudioInstallProtocols (FALSE);
   if (OcAudio == NULL) {
     DEBUG ((DEBUG_INFO, "OC: Cannot locate OcAudio protocol\n"));
-    FreePool (DevicePath);
+    if (DevicePath != NULL) {
+      FreePool (DevicePath);
+    }
     return;
   }
 
@@ -393,7 +399,9 @@ OcLoadUefiAudioSupport (
       ? Config->Uefi.Audio.MinimumVolume : VolumeLevel
     );
 
-  FreePool (DevicePath);
+  if (DevicePath != NULL) {
+    FreePool (DevicePath);
+  }
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OC: Audio connection failed - %r\n", Status));

@@ -4,7 +4,9 @@ OpenCore Changelog
 #### v0.6.0
 - Fixed sound corruption with AudioDxe
 - Fixed icon choice for Apple FW update in OpenCanopy
-- Fixed APFS driver loading on Fusion Drive 
+- Fixed APFS driver loading on Fusion Drive
+- Added Comet Lake HDA device code
+- Fixed audio stream position reporting on non-Intel platforms
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy

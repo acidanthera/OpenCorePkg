@@ -63,10 +63,51 @@ HdaControllerStreamOutputPollTimerHandler (
     return;
   }
 
+  if (HdaStream->UseLpib) {
+    //
+    // Get stream position through LPIB register.
+    //
+    Status = PciIo->Mem.Read (PciIo, EfiPciIoWidthFifoUint32, PCI_HDA_BAR, HDA_REG_SDNLPIB (HdaStream->Index), 1, &HdaStreamDmaPos);
+    if (EFI_ERROR (Status)) {
+      HdaControllerStreamAbort (HdaStream);
+      return;
+    }
+  } else {
+    //
+    // Get stream position through DMA positions buffer.
+    //
+    HdaStreamDmaPos = HdaStream->HdaDev->DmaPositions[HdaStream->Index].Position;
+
+    //
+    // If zero, give the stream a few cycles to catch up before falling back to LPIB.
+    // Fallback occurs after the set amount of cycles the DMA position is zero.
+    //
+    if (HdaStreamDmaPos == 0 && !HdaStream->DmaCheckComplete) {
+      if (HdaStream->DmaCheckCount >= HDA_STREAM_DMA_CHECK_THRESH) {
+        HdaStream->UseLpib = TRUE;
+      }
+
+      //
+      // Get stream position through LPIB register in the meantime.
+      //
+      DEBUG ((DEBUG_VERBOSE, "AudioDxe: Falling back to LPIB after %u more tries!\n", HDA_STREAM_DMA_CHECK_THRESH - HdaStream->DmaCheckCount));
+      Status = PciIo->Mem.Read (PciIo, EfiPciIoWidthFifoUint32, PCI_HDA_BAR, HDA_REG_SDNLPIB (HdaStream->Index), 1, &HdaStreamDmaPos);
+      if (EFI_ERROR (Status)) {
+        HdaControllerStreamAbort (HdaStream);
+        return;
+      }
+    }
+  }
+
   //
-  // Get stream DMA position.
+  // Increment cycle counter. Once complete, store status to avoid false fallbacks later on.
   //
-  HdaStreamDmaPos = HdaStream->HdaDev->DmaPositions[HdaStream->Index].Position;
+  if (HdaStream->DmaCheckCount < HDA_STREAM_DMA_CHECK_THRESH) {
+    HdaStream->DmaCheckCount++;
+  } else {
+    HdaStream->DmaCheckComplete = TRUE;
+  }
+  
   if (HdaStreamDmaPos >= HdaStream->DmaPositionLast) {
     DmaChanged = HdaStreamDmaPos - HdaStream->DmaPositionLast;
   } else {
@@ -700,10 +741,10 @@ HdaControllerCleanup(
     }
   }
 
-  // Cleanup streams.
-  HdaControllerCleanupStreams(HdaControllerDev);
-
-  // Stop and cleanup CORB and RIRB.
+  //
+  // Cleanup streams, CORB, and RIRB.
+  //
+  HdaControllerCleanupStreams (HdaControllerDev);
   HdaControllerCleanupRingBuffer (&HdaControllerDev->Corb);
   HdaControllerCleanupRingBuffer (&HdaControllerDev->Rirb);
 
@@ -890,12 +931,8 @@ HdaControllerDriverBindingStart (
   //
   // Initialize CORB and RIRB.
   //
-  HdaControllerDev->Corb.HdaDev     = HdaControllerDev;
-  HdaControllerDev->Corb.Type       = HDA_RING_BUFFER_TYPE_CORB;
-  HdaControllerDev->Rirb.HdaDev     = HdaControllerDev;
-  HdaControllerDev->Rirb.Type       = HDA_RING_BUFFER_TYPE_RIRB;
-
-  if (!HdaControllerInitRingBuffer (&HdaControllerDev->Corb) || !HdaControllerInitRingBuffer (&HdaControllerDev->Rirb)) {
+  if (!HdaControllerInitRingBuffer (&HdaControllerDev->Corb, HdaControllerDev, HDA_RING_BUFFER_TYPE_CORB)
+    || !HdaControllerInitRingBuffer (&HdaControllerDev->Rirb, HdaControllerDev, HDA_RING_BUFFER_TYPE_RIRB)) {
     goto FREE_CONTROLLER;
   }
 
