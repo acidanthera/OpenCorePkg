@@ -7,6 +7,7 @@ OpenCore Changelog
 - Fixed APFS driver loading on Fusion Drive
 - Added Comet Lake HDA device code
 - Fixed audio stream position reporting on non-Intel platforms
+- Added `Firmware` mode to `ResetSystem` to reboot into preferences
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Jun 10 18:57:35 2020
-%DIF ADD ../Configuration.tex        Wed Jun 10 18:57:35 2020
+%DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
+%DIF ADD ../Configuration.tex        Tue Jun 16 20:51:51 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4450,7 +4450,8 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 & Perform EPID provisioning (requires certificate data configuration). \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ResetSystem}}\textbf{*}
 & Utility to perform system reset. Takes reset type as an argument:
-  \texttt{ColdReset}, \texttt{WarmReset}, \texttt{Shutdown}. Defaults to \texttt{ColdReset}. \\
+  \texttt{ColdReset}, \texttt{\DIFdelbegin \DIFdel{WarmReset}\DIFdelend \DIFaddbegin \DIFadd{Firmware}\DIFaddend }, \texttt{Shutdown}\DIFaddbegin \DIFadd{, }\texttt{\DIFadd{WarmReset}}\DIFaddend .
+  Defaults to \texttt{ColdReset}. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{RtcRw}}\textbf{*}
 & Utility to read and write RTC (CMOS) memory. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VerifyMsrE2}}\textbf{*}
