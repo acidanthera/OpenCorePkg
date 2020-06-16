@@ -2204,7 +2204,6 @@ for more details. Algorithm to determine boot options behaves as follows:
   % it points to the END device path.
   \item For disk device paths (not specifying a bootloader) execute ``bless'' (may return > 1 entry).
   \item For file device paths check presence on the file system directly.
-  \item Exclude options with blacklisted filenames (refer to \texttt{BlacklistAppleUpdate} option).
   % Just kill all \EFI\APPLE\ paths.
   \item On OpenCore boot partition exclude all OpenCore bootstrap files by header checks.
   \item Mark device handle as \textit{used} in the list of partition handles if any.
@@ -2217,7 +2216,6 @@ for more details. Algorithm to determine boot options behaves as follows:
   \item If partition handle is marked as \textit{unused} execute ``bless'' primary option list retrieval. \\
     In case \texttt{BlessOverride} list is set, not only standard ``bless'' paths will be found but
     also custom ones.
-  \item Exclude options with blacklisted filenames (refer to \texttt{BlacklistAppleUpdate} option).
   \item On OpenCore boot partition exclude all OpenCore bootstrap files by header checks.
   \item Register the resulting entries as primary options and determine their types if found. \\
   The option will become auxiliary for some types (e.g. Apple HFS recovery).
@@ -2822,13 +2820,6 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   VirtualSMC performs authenticated restart by saving disk encryption key split in
   NVRAM and RTC, which despite being removed as soon as OpenCore starts, may be
   considered a security risk and thus is optional.
-
-\item
-  \texttt{BlacklistAppleUpdate}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Ignore boot options trying to update Apple peripheral firmware
-  (e.g. \texttt{MultiUpdater.efi}).
 
 \item
   \texttt{BootProtect}\\
@@ -3535,6 +3526,12 @@ troubleshooting:
   \break
   NVIDIA Web Driver control variable. Takes ASCII digit \texttt{1} or \texttt{0}
   to enable or disable installed driver.
+\item
+  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:run-efi-updater}
+  \break
+  Override EFI firmware updating support in macOS (MultiUpdater, ThorUtil, and so on).
+  Setting this to \texttt{No} or alternative boolean-castable value will prevent
+  any firmware updates in macOS starting with 10.10 at least.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:StartupMute}
   \break

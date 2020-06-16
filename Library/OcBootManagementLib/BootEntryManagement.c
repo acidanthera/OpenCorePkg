@@ -407,15 +407,6 @@ AddBootEntryOnFileSystem (
   }
 
   //
-  // Skip firmware updates.
-  //
-  if (BootContext->PickerContext->BlacklistAppleUpdate
-    && EntryType == OC_BOOT_APPLE_FW_UPDATE) {
-    DEBUG ((DEBUG_INFO, "OCB: Discarding discovered Apple FW update\n"));
-    return EFI_UNSUPPORTED;
-  }
-
-  //
   // Skip duplicated entries, which may happen in BootOrder.
   // For example, macOS during hibernation may leave Boot0082 in BootNext and Boot0080 in BootOrder,
   // and they will have exactly the same boot entry.

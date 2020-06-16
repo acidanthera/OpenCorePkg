@@ -676,8 +676,6 @@
 			<false/>
 			<key>AuthRestart</key>
 			<false/>
-			<key>BlacklistAppleUpdate</key>
-			<false/>
 			<key>BootProtect</key>
 			<string>Bootstrap</string>
 			<key>ExposeSensitiveData</key>

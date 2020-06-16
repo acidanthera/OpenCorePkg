@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
-%DIF ADD ../Configuration.tex        Tue Jun 16 20:51:51 2020
+%DIF ADD ../Configuration.tex        Tue Jun 16 21:05:41 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2265,8 +2265,11 @@ for more details. Algorithm to determine boot options behaves as follows:
   % it points to the END device path.
   \item For disk device paths (not specifying a bootloader) execute ``bless'' (may return > 1 entry).
   \item For file device paths check presence on the file system directly.
-  \item Exclude options with blacklisted filenames (refer to \texttt{BlacklistAppleUpdate} option).
-  % Just kill all \EFI\APPLE\ paths.
+  \DIFdelbegin %DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdel{Exclude options with blacklisted filenames (refer to }\texttt{\DIFdel{BlacklistAppleUpdate}} %DIFAUXCMD
+\DIFdel{option).
+  }\DIFdelend % Just kill all \EFI\APPLE\ paths.
   \item On OpenCore boot partition exclude all OpenCore bootstrap files by header checks.
   \item Mark device handle as \textit{used} in the list of partition handles if any.
   % Each partition handle will basically have a list of boot option entries for later quick lookup.
@@ -2278,8 +2281,11 @@ for more details. Algorithm to determine boot options behaves as follows:
   \item If partition handle is marked as \textit{unused} execute ``bless'' primary option list retrieval. \\
     In case \texttt{BlessOverride} list is set, not only standard ``bless'' paths will be found but
     also custom ones.
-  \item Exclude options with blacklisted filenames (refer to \texttt{BlacklistAppleUpdate} option).
-  \item On OpenCore boot partition exclude all OpenCore bootstrap files by header checks.
+  \item \DIFdelbegin \DIFdel{Exclude options with blacklisted filenames (refer to }\texttt{\DIFdel{BlacklistAppleUpdate}} %DIFAUXCMD
+\DIFdel{option).
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdelend On OpenCore boot partition exclude all OpenCore bootstrap files by header checks.
   \item Register the resulting entries as primary options and determine their types if found. \\
   The option will become auxiliary for some types (e.g. Apple HFS recovery).
   % Looking up primary and alternate handles could be done per handle to make sure the list is ordered.
@@ -2886,14 +2892,27 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   considered a security risk and thus is optional.
 
 \item
-  \texttt{BlacklistAppleUpdate}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Ignore boot options trying to update Apple peripheral firmware
-  (e.g. \texttt{MultiUpdater.efi}).
+  \DIFdelbegin \texttt{\DIFdel{BlacklistAppleUpdate}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Ignore boot options trying to update Apple peripheral firmware
+  (e.g. }\texttt{\DIFdel{MultiUpdater.efi}}%DIFAUXCMD
+\DIFdel{).
+}%DIFDELCMD < 
 
-\item
-  \texttt{BootProtect}\\
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdelend \texttt{BootProtect}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{None}\\
   \textbf{Description}: Attempt to provide bootloader persistence.
@@ -3598,7 +3617,13 @@ troubleshooting:
   NVIDIA Web Driver control variable. Takes ASCII digit \texttt{1} or \texttt{0}
   to enable or disable installed driver.
 \item
-  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:StartupMute}
+  \DIFaddbegin \texttt{\DIFadd{7C436110-AB2A-4BBB-A880-FE41995C9F82:run-efi-updater}}
+  \break
+  \DIFadd{Override EFI firmware updating support in macOS (MultiUpdater, ThorUtil, and so on).
+  Setting this to }\texttt{\DIFadd{No}} \DIFadd{or alternative boolean-castable value will prevent
+  any firmware updates in macOS starting with 10.10 at least.
+}\item
+  \DIFaddend \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:StartupMute}
   \break
   Mute startup chime sound in firmware audio support. 8-bit integer.
   The value of \texttt{0x00} means unmuted. Missing variable or any

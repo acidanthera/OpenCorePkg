@@ -804,7 +804,6 @@ OcMiscBoot (
   Context->TakeoffDelay          = Config->Misc.Boot.TakeoffDelay;
   Context->StartImage            = StartImage;
   Context->CustomBootGuid        = CustomBootGuid;
-  Context->BlacklistAppleUpdate  = Config->Misc.Security.BlacklistAppleUpdate;
   Context->LoaderHandle          = LoadHandle;
   Context->CustomEntryContext    = Storage;
   Context->CustomRead            = OcToolLoadEntry;
