@@ -78,11 +78,17 @@ UefiMain (
                         sizeof (OsIndications),
                         &OsIndications
                         );
+        if (EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_WARN, "OCRST: Failed to set EFI_OS_INDICATIONS_BOOT_TO_FW_UI - %r\n", Status));
+          return EFI_ABORTED;
+        }
+      } else {
+        DEBUG ((DEBUG_WARN, "OCRST: Firmware do not support EFI_OS_INDICATIONS_BOOT_TO_FW_UI - %r\n", Status));
+        return EFI_UNSUPPORTED;
       }
-    }
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "OCRST: Failed to enter firmware - %r\n", Status));
-      return EFI_UNSUPPORTED;
+    } else {
+      DEBUG ((DEBUG_WARN, "OCRST: Failed to acquire firmware features - %r\n", Status));
+      return EFI_NOT_FOUND;
     }
     Mode = L"ColdReset";
   }
