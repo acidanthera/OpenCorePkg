@@ -46,21 +46,13 @@ ifeq ($(DIST),Windows)
 	CFLAGS   += -D_ISOC99_SOURCE=1
 endif
 
-#
-# Here the direct command is used to reveal the platform,
-# as overriding is not expected, particularly when building
-# Windows binary under Linux with mingw.
-#
-ifeq ($(shell uname),Linux)
+ifneq ($(shell gcc --version 2>&1 | grep -w clang),)
 	#
-	# Flags that are only required on Linux.
-	#
-	CFLAGS   += -Wno-strict-aliasing -Wno-address
-else
-	#
-	# -Wno-implicit-fallthrough should only be added on non-Linux build.
+	# CFLAGS for clang.
 	#
 	CFLAGS   += -Wno-implicit-fallthrough
+else
+	CFLAGS   += -Wno-strict-aliasing -Wno-address
 endif
 
 ifeq ($(SANITIZE),1)
