@@ -47,7 +47,9 @@ ifeq ($(DIST),Windows)
 endif
 
 ifneq ($(DIST),Linux)
-	CFLAGS   += -Wno-implicit-fallthrough -Wno-strict-aliasing
+	CFLAGS   += -Wno-implicit-fallthrough
+else
+	CFLAGS   += -Wno-strict-aliasing
 endif
 
 ifeq ($(SANITIZE),1)
