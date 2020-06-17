@@ -77,9 +77,11 @@ GetSlideRangeForValue (
 STATIC
 UINT8
 GenerateSlideValue (
+//  IN  UINT8                Offset,
   IN  SLIDE_SUPPORT_STATE  *SlideSupport
   )
 {
+  UINT8   Offset = 0x20;
   UINT32  Slide;
 
   //
@@ -89,11 +91,16 @@ GenerateSlideValue (
     return SlideSupport->ValidSlides[0];
   }
 
-  do {
-    DivU64x32Remainder (GetPseudoRandomNumber64 (), SlideSupport->ValidSlideCount > 0x20 ? SlideSupport->ValidSlideCount - 0x20 : SlideSupport->ValidSlideCount, &Slide);
-  } while (Slide == 0);
+  //
+  // Handle very low available slide case, may still failed to boot.
+  //
+  DivU64x32Remainder (
+    GetPseudoRandomNumber64 (),
+    SlideSupport->ValidSlideCount > Offset ? SlideSupport->ValidSlideCount - Offset : SlideSupport->ValidSlideCount - 1,
+    &Slide
+    );
 
-  return SlideSupport->ValidSlides[Slide];
+  return SlideSupport->ValidSlides[Slide+1];
 }
 
 /**
