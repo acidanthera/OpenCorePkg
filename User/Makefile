@@ -30,7 +30,7 @@ UDK_ARCH ?= X64
 #
 # Primary CFLAGS.
 #
-CFLAGS   := -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter -D EFIUSER
+CFLAGS   := -c -fshort-wchar -Wall -Wextra -Wno-unused-parameter -D EFIUSER
 
 ifeq ($(WERROR),1)
 	CFLAGS  += -Werror
@@ -44,6 +44,10 @@ endif
 ifeq ($(DIST),Windows)
 	SUFFIX   := .exe
 	CFLAGS   += -D_ISOC99_SOURCE=1
+endif
+
+ifneq ($(DIST),Linux)
+	CFLAGS   += -Wno-implicit-fallthrough -Wno-strict-aliasing
 endif
 
 ifeq ($(SANITIZE),1)
