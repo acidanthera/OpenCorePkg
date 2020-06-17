@@ -565,10 +565,6 @@ struct OC_PICKER_CONTEXT_ {
   //
   BOOLEAN                    CustomBootGuid;
   //
-  // Ignore Apple peripheral firmware updates.
-  //
-  BOOLEAN                    BlacklistAppleUpdate;
-  //
   // Custom entry reading routine, optional for no custom entries.
   //
   OC_CUSTOM_READ             CustomRead;
