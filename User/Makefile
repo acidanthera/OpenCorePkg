@@ -55,7 +55,7 @@ ifeq ($(shell uname),Linux)
 	#
 	# -Wno-strict-aliasing is only needed on Linux.
 	#
-	CFLAGS   += -Wno-strict-aliasing -Wno-maybe-uninitialized
+	CFLAGS   += -Wno-strict-aliasing
 else
 	#
 	# -Wno-implicit-fallthrough should only be added on non-Linux build.
