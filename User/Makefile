@@ -53,9 +53,9 @@ endif
 #
 ifeq ($(shell uname),Linux)
 	#
-	# -Wno-strict-aliasing is only needed on Linux.
+	# Flags that are only required on Linux.
 	#
-	CFLAGS   += -Wno-strict-aliasing
+	CFLAGS   += -Wno-strict-aliasing -Wno-address
 else
 	#
 	# -Wno-implicit-fallthrough should only be added on non-Linux build.
