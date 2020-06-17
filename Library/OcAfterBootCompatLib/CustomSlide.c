@@ -77,11 +77,9 @@ GetSlideRangeForValue (
 STATIC
 UINT8
 GenerateSlideValue (
-//  IN  UINT8                Offset,
   IN  SLIDE_SUPPORT_STATE  *SlideSupport
   )
 {
-  UINT8   Offset = 0x20;
   UINT32  Slide;
 
   //
@@ -96,11 +94,13 @@ GenerateSlideValue (
   //
   DivU64x32Remainder (
     GetPseudoRandomNumber64 (),
-    SlideSupport->ValidSlideCount > Offset ? SlideSupport->ValidSlideCount - Offset : SlideSupport->ValidSlideCount - 1,
+    SlideSupport->ValidSlideCount > SlideSupport->ProvideSlideOffset
+      ? SlideSupport->ValidSlideCount - SlideSupport->ProvideSlideOffset - 1
+      : SlideSupport->ValidSlideCount - 1,
     &Slide
     );
 
-  return SlideSupport->ValidSlides[Slide+1];
+  return SlideSupport->ValidSlides[Slide++];
 }
 
 /**

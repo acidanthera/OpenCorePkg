@@ -300,6 +300,10 @@ typedef struct SLIDE_SUPPORT_STATE_ {
   ///
   UINT32                   CsrActiveConfig;
   ///
+  /// Offset of max slides value.
+  ///
+  UINT8                    ProvideSlideOffset;
+  ///
   /// Valid slides to choose from when using custom slide.
   ///
   UINT8                    ValidSlides[TOTAL_SLIDE_NUM];

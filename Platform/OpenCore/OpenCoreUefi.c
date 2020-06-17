@@ -373,6 +373,7 @@ OcLoadBooterUefiSupport (
   AbcSettings.ForceExitBootServices  = Config->Booter.Quirks.ForceExitBootServices;
   AbcSettings.ProtectMemoryRegions   = Config->Booter.Quirks.ProtectMemoryRegions;
   AbcSettings.ProvideCustomSlide     = Config->Booter.Quirks.ProvideCustomSlide;
+  AbcSettings.ProvideSlideOffset     = Config->Booter.Quirks.ProvideSlideOffset;
   AbcSettings.ProtectUefiServices    = Config->Booter.Quirks.ProtectUefiServices;
   AbcSettings.RebuildAppleMemoryMap  = Config->Booter.Quirks.RebuildAppleMemoryMap;
   AbcSettings.SetupVirtualMap        = Config->Booter.Quirks.SetupVirtualMap;
