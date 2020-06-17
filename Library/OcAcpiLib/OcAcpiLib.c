@@ -1159,6 +1159,7 @@ AcpiFadtEnableReset (
     Fadt->ResetReg.RegisterBitOffset = 0;
     Fadt->ResetReg.AccessSize        = EFI_ACPI_6_2_BYTE;
     Fadt->ResetReg.Address           = 0xCF9;
+    Fadt->ResetValue                 = 6;
   }
 
   Fadt->Header.Checksum = 0;
