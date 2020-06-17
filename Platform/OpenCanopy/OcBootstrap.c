@@ -52,6 +52,7 @@ OcShowMenuByOc (
   mGuiContext.BootEntry = NULL;
   mGuiContext.HideAuxiliary = BootContext->PickerContext->HideAuxiliary;
   mGuiContext.Refresh = FALSE;
+  mGuiContext.PickerContext = BootContext->PickerContext;
 
   Status = GuiLibConstruct (
     BootContext->PickerContext,

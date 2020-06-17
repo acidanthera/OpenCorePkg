@@ -99,6 +99,10 @@ InternalBootPickerViewDraw (
   ASSERT (DrawContext != NULL);
   ASSERT (Context != NULL);
 
+  if (!Context->PlayedOnce && Context->PickerContext->PickerAudioAssist) {
+    OcPlayAudioFile (Context->PickerContext, OcVoiceOverAudioFileChooseOS, FALSE);
+  }
+
   GuiDrawToBuffer (
     &mBackgroundImage,
     0xFF,
@@ -125,6 +129,16 @@ InternalBootPickerViewDraw (
     Height,
     FALSE
     );
+
+  if (!Context->PlayedOnce) {
+    OcPlayAudioBeep (
+      Context->PickerContext,
+      OC_VOICE_OVER_SIGNALS_NORMAL,
+      OC_VOICE_OVER_SIGNAL_NORMAL_MS,
+      OC_VOICE_OVER_SILENCE_NORMAL_MS
+      );
+    Context->PlayedOnce = TRUE;
+  }
 }
 
 VOID
@@ -210,6 +224,9 @@ InternalBootPickerChangeEntry (
   //
   PrevEntry = This->SelectedEntry;
   InternalBootPickerSelectEntry (This, NewEntry);
+
+  OcPlayAudioFile (DrawContext->GuiContext->PickerContext, OcVoiceOverAudioFileSelected, FALSE);
+  OcPlayAudioEntry (DrawContext->GuiContext->PickerContext, This->SelectedEntry->Context);
   //
   // To redraw the entry *and* the selector, draw the entire height of the
   // Picker object. For this, the height just reach from the top of the entries
@@ -299,8 +316,12 @@ InternalBootPickerKeyEvent (
   if (Key == OC_INPUT_MORE) {
     GuiContext->HideAuxiliary = FALSE;
     GuiContext->Refresh = TRUE;
+    OcPlayAudioFile (DrawContext->GuiContext->PickerContext, OcVoiceOverAudioFileShowAuxiliary, FALSE);
   } else if (Key == OC_INPUT_ABORTED) {
     GuiContext->Refresh = TRUE;
+    OcPlayAudioFile (DrawContext->GuiContext->PickerContext, OcVoiceOverAudioFileReloading, FALSE);
+  } else if (Key == OC_INPUT_VOICE_OVER) {
+    OcToggleVoiceOver (DrawContext->GuiContext->PickerContext, 0);
   }
 }
 
