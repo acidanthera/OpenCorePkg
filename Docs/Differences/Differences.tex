@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
-%DIF ADD ../Configuration.tex        Tue Jun 16 21:05:41 2020
+%DIF ADD ../Configuration.tex        Wed Jun 17 21:25:43 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2402,7 +2402,7 @@ entry choice will update till next manual reconfiguration.
   \textbf{Description}: Sets specific attributes for console.
 
   Text renderer supports colour arguments as a sum of foreground and background
-  colors according to UEFI specification. The value of black background and
+  \DIFdelbegin \DIFdel{colors }\DIFdelend \DIFaddbegin \DIFadd{colours }\DIFaddend according to UEFI specification. The value of black background and
   black foreground (\texttt{0}) is reserved. List of colour names:
 
   \begin{itemize}
@@ -5105,7 +5105,7 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Some firmwares clear only part of screen when switching
   from graphics to text mode, leaving a fragment of previously drawn image visible.
-  This option fills the entire graphics screen with black color before switching to
+  This option fills the entire graphics screen with black \DIFdelbegin \DIFdel{color }\DIFdelend \DIFaddbegin \DIFadd{colour }\DIFaddend before switching to
   text mode.
 
   \emph{Note}: This option only applies to \texttt{System} renderer.
