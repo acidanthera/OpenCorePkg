@@ -90,17 +90,17 @@ GenerateSlideValue (
   }
 
   //
-  // Handle very low available slide case, may still failed to boot.
+  // Handle maximum available slide case.
   //
   DivU64x32Remainder (
     GetPseudoRandomNumber64 (),
-    SlideSupport->ValidSlideCount > SlideSupport->ProvideSlideOffset
-      ? SlideSupport->ValidSlideCount - SlideSupport->ProvideSlideOffset - 1
-      : SlideSupport->ValidSlideCount - 1,
+    SlideSupport->ProvideSlideOffset == 0
+      ? SlideSupport->ValidSlideCount - 1
+      : SlideSupport->ProvideSlideOffset - 1,
     &Slide
     );
 
-  return SlideSupport->ValidSlides[Slide++];
+  return SlideSupport->ValidSlides[Slide + 1];
 }
 
 /**
@@ -379,6 +379,11 @@ ShouldUseCustomSlideOffset (
     if (Supported) {
       SlideSupport->ValidSlides[SlideSupport->ValidSlideCount++] = (UINT8) Slide;
     }
+  }
+
+  if (SlideSupport->ValidSlideCount < SlideSupport->ProvideSlideOffset) {
+    DEBUG ((DEBUG_WARN, "OCABC: ProvideSlideOffset too large, reset to 0\n"));
+    SlideSupport->ProvideSlideOffset = 0;
   }
 
   //
@@ -743,6 +748,8 @@ AppleSlideGetVariable (
      OUT VOID                  *Data
   )
 {
+  BootCompat->SlideSupport.ProvideSlideOffset =  BootCompat->Settings.ProvideSlideOffset;
+
   if (VariableName != NULL && VendorGuid != NULL && DataSize != NULL
     && CompareGuid (VendorGuid, &gAppleBootVariableGuid)) {
 
