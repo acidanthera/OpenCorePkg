@@ -124,7 +124,7 @@
   _(BOOLEAN                     , ProtectSecureBoot         ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProtectUefiServices       ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProvideCustomSlide        ,     , FALSE  , ()) \
-  _(UINT8                       , ProvideSlideOffset        ,     , 0      , ()) \
+  _(UINT8                       , ProvideMaxSlide           ,     , 0      , ()) \
   _(BOOLEAN                     , RebuildAppleMemoryMap     ,     , FALSE  , ()) \
   _(BOOLEAN                     , SetupVirtualMap           ,     , FALSE  , ()) \
   _(BOOLEAN                     , SignalAppleOS             ,     , FALSE  , ()) \

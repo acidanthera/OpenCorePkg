@@ -36,9 +36,9 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   BOOLEAN  ProvideCustomSlide;
   ///
-  /// Provide KASLR slide offset for firmwares with polluted higher memory ranges.
+  /// Provide max KASLR slide for firmwares with polluted higher memory ranges.
   ///
-  UINT8    ProvideSlideOffset;
+  UINT8    ProvideMaxSlide;
   ///
   /// Remove runtime flag from MMIO areas and prevent virtual address assignment for known
   /// MMIO regions. This may improve the amount of slides available, but may not work on

@@ -124,11 +124,11 @@ OcAbcInitialize (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCABC: FEXITBS %d PRMRG %d CSLIDE %d CSOFST %d PRSRV %d RBMAP %d VMAP %d APPLOS %d RTPERMS %d\n",
+    "OCABC: FEXITBS %d PRMRG %d CSLIDE %d MSLIDE %d PRSRV %d RBMAP %d VMAP %d APPLOS %d RTPERMS %d\n",
     Settings->ForceExitBootServices,
     Settings->ProtectMemoryRegions,
     Settings->ProvideCustomSlide,
-    Settings->ProvideSlideOffset,
+    Settings->ProvideMaxSlide,
     Settings->ProtectUefiServices,
     Settings->RebuildAppleMemoryMap,
     Settings->SetupVirtualMap,
