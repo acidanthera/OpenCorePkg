@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
-%DIF ADD ../Configuration.tex        Tue Jun 16 21:05:41 2020
+%DIF ADD ../Configuration.tex        Fri Jun 19 00:17:56 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -662,14 +662,17 @@ one should also install \href{https://www.nasm.us}{NASM} and
 The latest Xcode version is recommended for use despite the toolchain name. Example
 command sequence may look as follows:
 
-\begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
-git clone https://github.com/acidanthera/audk UDK
+\DIFmodbegin
+\begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash,alsolanguage=DIFcode]
+%DIF < git clone https://github.com/acidanthera/audk UDK
+%DIF > git clone --recursive https://github.com/acidanthera/audk UDK
 cd UDK
 git clone https://github.com/acidanthera/OpenCorePkg
 source edksetup.sh
 make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
+\DIFmodend
 
 For IDE usage Xcode projects are available in the root of the repositories. Another
 approach could be \href{https://www.sublimetext.com}{Sublime Text} with
@@ -2402,7 +2405,7 @@ entry choice will update till next manual reconfiguration.
   \textbf{Description}: Sets specific attributes for console.
 
   Text renderer supports colour arguments as a sum of foreground and background
-  colors according to UEFI specification. The value of black background and
+  \DIFdelbegin \DIFdel{colors }\DIFdelend \DIFaddbegin \DIFadd{colours }\DIFaddend according to UEFI specification. The value of black background and
   black foreground (\texttt{0}) is reserved. List of colour names:
 
   \begin{itemize}
@@ -2786,7 +2789,10 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   and time from the firmware). Please be warned that some file system drivers present
   in firmwares are not reliable, and may corrupt data when writing files through UEFI.
   Log is attempted to be written in the safest manner, and thus is very slow. Ensure that
-  \texttt{DisableWatchDog} is set to \texttt{true} when you use a slow drive.
+  \texttt{DisableWatchDog} is set to \texttt{true} when you use a slow drive. \DIFaddbegin \DIFadd{Try to
+  avoid frequent use of this option when dealing with flash drives as large I/O
+  amounts may speedup memory wear and render this flash drive unusable in shorter time.
+}\DIFaddend 
 
   When interpreting the log, note that the lines are prefixed with a tag describing
   the relevant location (module) of the log line allowing one to better attribute the line
@@ -5105,7 +5111,7 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Some firmwares clear only part of screen when switching
   from graphics to text mode, leaving a fragment of previously drawn image visible.
-  This option fills the entire graphics screen with black color before switching to
+  This option fills the entire graphics screen with black \DIFdelbegin \DIFdel{color }\DIFdelend \DIFaddbegin \DIFadd{colour }\DIFaddend before switching to
   text mode.
 
   \emph{Note}: This option only applies to \texttt{System} renderer.

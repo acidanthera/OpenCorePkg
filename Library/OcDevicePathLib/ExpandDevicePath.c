@@ -543,170 +543,6 @@ BmExpandMediaDevicePath (
 }
 
 /**
-  Get the file buffer from the specified Load File instance.
-
-  @param LoadFileHandle The specified Load File instance.
-  @param FilePath       The file path which will pass to LoadFile().
-
-  @return  The full device path pointing to the load option buffer.
-**/
-STATIC
-EFI_DEVICE_PATH_PROTOCOL *
-BmExpandLoadFile (
-  IN  EFI_HANDLE                      LoadFileHandle,
-  IN  EFI_DEVICE_PATH_PROTOCOL        *FilePath
-  )
-{
-  EFI_STATUS                          Status;
-  EFI_LOAD_FILE_PROTOCOL              *LoadFile;
-  VOID                                *FileBuffer;
-  UINTN                               BufferSize;
-
-  Status = gBS->OpenProtocol (
-                  LoadFileHandle,
-                  &gEfiLoadFileProtocolGuid,
-                  (VOID **) &LoadFile,
-                  gImageHandle,
-                  NULL,
-                  EFI_OPEN_PROTOCOL_GET_PROTOCOL
-                  );
-  ASSERT_EFI_ERROR (Status);
-
-  FileBuffer = NULL;
-  BufferSize = 0;
-  Status = LoadFile->LoadFile (LoadFile, FilePath, TRUE, &BufferSize, FileBuffer);
-  if ((Status != EFI_WARN_FILE_SYSTEM) && (Status != EFI_BUFFER_TOO_SMALL)) {
-    return NULL;
-  }
-
-  if (Status == EFI_BUFFER_TOO_SMALL) {
-    //
-    // The load option buffer is directly returned by LoadFile.
-    //
-    return DuplicateDevicePath (DevicePathFromHandle (LoadFileHandle));
-  }
-
-  //
-  // The load option resides in a RAM disk.
-  // CHANGE: Removed RAM disk support.
-  //
-  return NULL;
-}
-
-/**
-  Return the full device path pointing to the load option.
-
-  FilePath may:
-  1. Exactly matches to a LoadFile instance.
-  2. Cannot match to any LoadFile instance. Wide match is required.
-  In either case, the routine may return:
-  1. A copy of FilePath when FilePath matches to a LoadFile instance and
-     the LoadFile returns a load option buffer.
-  2. A new device path with IP and URI information updated when wide match
-     happens.
-  3. A new device path pointing to a load option in RAM disk.
-  In either case, only one full device path is returned for a specified
-  FilePath.
-
-  @param FilePath    The media device path pointing to a LoadFile instance.
-
-  @return  The load option buffer.
-**/
-STATIC
-EFI_DEVICE_PATH_PROTOCOL *
-BmExpandLoadFiles (
-  IN  EFI_DEVICE_PATH_PROTOCOL        *FilePath
-  )
-{
-  EFI_STATUS                      Status;
-  EFI_HANDLE                      Handle;
-  EFI_DEVICE_PATH_PROTOCOL        *Node;
-
-  //
-  // Get file buffer from load file instance.
-  //
-  Node = FilePath;
-  Status = gBS->LocateDevicePath (&gEfiLoadFileProtocolGuid, &Node, &Handle);
-  // CHANGE: Removed HTTP support.
-  if (EFI_ERROR (Status) || !IsDevicePathEnd (Node)) {
-    return NULL;
-  }
-  //
-  // When wide match happens, pass full device path to LoadFile (),
-  // otherwise, pass remaining device path to LoadFile ().
-  //
-  FilePath = Node;
-
-  return BmExpandLoadFile (Handle, FilePath);
-}
-
-/**
-  Expand URI device path node to be full device path in platform.
-
-  @param FilePath      The device path pointing to a load option.
-                       It could be a short-form device path.
-  @param FullPath      The full path returned by the routine in last call.
-                       Set to NULL in first call.
-
-  @return The next possible full path pointing to the load option.
-          Caller is responsible to free the memory.
-**/
-STATIC
-EFI_DEVICE_PATH_PROTOCOL *
-BmExpandUriDevicePath (
-  IN  EFI_DEVICE_PATH_PROTOCOL    *FilePath,
-  IN  EFI_DEVICE_PATH_PROTOCOL    *FullPath
-  )
-{
-  EFI_STATUS                      Status;
-  UINTN                           Index;
-  UINTN                           HandleCount;
-  EFI_HANDLE                      *Handles;
-  EFI_DEVICE_PATH_PROTOCOL        *NextFullPath;
-  BOOLEAN                         GetNext;
-
-  // CHANGE: Only connect all on failure.
-  Status = gBS->LocateHandleBuffer (ByProtocol, &gEfiLoadFileProtocolGuid, NULL, &HandleCount, &Handles);
-  if (EFI_ERROR (Status)) {
-    HandleCount = 0;
-    Handles = NULL;
-  }
-
-  NextFullPath = NULL;
-  GetNext = (BOOLEAN)(FullPath == NULL);
-  for (Index = 0; Index < HandleCount; Index++) {
-    NextFullPath = BmExpandLoadFile (Handles[Index], FilePath);
-
-    if (NextFullPath == NULL) {
-      continue;
-    }
-
-    if (GetNext) {
-      break;
-    } else {
-      GetNext = (BOOLEAN)(CompareMem (NextFullPath, FullPath, GetDevicePathSize (NextFullPath)) == 0);
-      //
-      // Free the resource occupied by the RAM disk.
-      // CHANGE: RAM Disk support removed.
-      //
-      FreePool (NextFullPath);
-      NextFullPath = NULL;
-    }
-  }
-
-  if (Handles != NULL) {
-    FreePool (Handles);
-  }
-
-  if ((NextFullPath == NULL) && !mConnectAllExecuted) {
-    InternalConnectAll ();
-    return BmExpandUriDevicePath (FilePath, FullPath);
-  }
-
-  return NextFullPath;
-}
-
-/**
   Check whether there is a instance in BlockIoDevicePath, which contain multi device path
   instances, has the same partition node with HardDriveDevicePath device path
 
@@ -1011,9 +847,9 @@ OcGetNextLoadOptionDevicePath (
   } else if ((DevicePathType (FilePath) == MESSAGING_DEVICE_PATH) &&
              (DevicePathSubType (FilePath) == MSG_URI_DP)) {
     //
-    // Expand the URI device path
+    // CHANGE: Removed expansion of the URI device path
     //
-    return BmExpandUriDevicePath (FilePath, FullPath);
+    return NULL;
   } else {
     Node = FilePath;
     Status = gBS->LocateDevicePath (&gEfiUsbIoProtocolGuid, &Node, &Handle);
@@ -1060,7 +896,7 @@ OcGetNextLoadOptionDevicePath (
   // CHANGE: Removed FV support.
 
   //
-  // Last chance to try: Load option may be loaded through LoadFile.
+  // CHANGE: Remove LoadFile support (e.g. PXE network boot).
   //
-  return BmExpandLoadFiles (FilePath);
+  return NULL;
 }

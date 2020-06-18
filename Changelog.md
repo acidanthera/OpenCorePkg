@@ -10,6 +10,8 @@ OpenCore Changelog
 - Added `Firmware` mode to `ResetSystem` to reboot into preferences
 - Replaced `BlacklistAppleUpdate` with `run-efi-updater` NVRAM variable
 - Fixed reset value in `FadtEnableReset` ACPI quirk
+- Fixed freezes during boot option expansion with PXE boot entries
+- Updated underlying EDK II package to edk2-stable202005
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy
