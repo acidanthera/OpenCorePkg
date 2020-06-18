@@ -360,10 +360,17 @@ ShouldUseCustomSlideOffset (
       FallbackSlide    = (UINT8) Slide;
     }
 
-    if ((StartAddr + AvailableSize) != EndAddr
-      || (SlideSupport->ProvideMaxSlide > 0 && Slide > SlideSupport->ProvideMaxSlide)) {
+    //
+    // Stop evalutating slides after exceeding ProvideMaxSlide, may break when
+    // no slides are available.
+    //
+    if (SlideSupport->ProvideMaxSlide > 0 && Slide > SlideSupport->ProvideMaxSlide) {
+      break;
+    }
+
+    if ((StartAddr + AvailableSize) != EndAddr) {
       //
-      // The slide region is not continuous or larger than ProvideMaxSlide.
+      // The slide region is not continuous.
       //
       Supported = FALSE;
     }
