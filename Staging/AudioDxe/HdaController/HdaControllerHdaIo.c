@@ -384,8 +384,19 @@ HdaControllerHdaIoStartStream(
   if (EFI_ERROR(Status))
     return Status;
 
-  // Get current DMA position.
-  HdaStreamDmaPos = HdaControllerDev->DmaPositions[HdaStream->Index].Position;
+  
+  //
+  // Get current stream position through either LPIB or DMA positions buffer.
+  // LPIB fallback will occur if DMA positions buffer does not update (i.e. non-Intel controllers).
+  //
+  if (HdaStream->UseLpib) {
+    Status = PciIo->Mem.Read (PciIo, EfiPciIoWidthFifoUint32, PCI_HDA_BAR, HDA_REG_SDNLPIB (HdaStream->Index), 1, &HdaStreamDmaPos);
+    if (EFI_ERROR (Status)) {
+      return EFI_INVALID_PARAMETER;
+    }
+  } else {
+    HdaStreamDmaPos = HdaStream->HdaDev->DmaPositions[HdaStream->Index].Position;
+  }
   HdaStreamCurrentBlock = HdaStreamDmaPos / HDA_BDL_BLOCKSIZE;
   HdaStreamNextBlock = HdaStreamCurrentBlock + 1;
   HdaStreamNextBlock %= HDA_BDL_ENTRY_COUNT;
