@@ -2717,7 +2717,9 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   and time from the firmware). Please be warned that some file system drivers present
   in firmwares are not reliable, and may corrupt data when writing files through UEFI.
   Log is attempted to be written in the safest manner, and thus is very slow. Ensure that
-  \texttt{DisableWatchDog} is set to \texttt{true} when you use a slow drive.
+  \texttt{DisableWatchDog} is set to \texttt{true} when you use a slow drive. Try to
+  avoid frequent use of this option when dealing with flash drives as large I/O
+  amounts may speedup memory wear and render this flash drive unusable in shorter time.
 
   When interpreting the log, note that the lines are prefixed with a tag describing
   the relevant location (module) of the log line allowing one to better attribute the line
