@@ -89,16 +89,7 @@ GenerateSlideValue (
     return SlideSupport->ValidSlides[0];
   }
 
-  //
-  // Handle maximum available slide case.
-  //
-  DivU64x32Remainder (
-    GetPseudoRandomNumber64 (),
-    SlideSupport->ProvideMaxSlide == 0
-      ? SlideSupport->ValidSlideCount - 1
-      : SlideSupport->ProvideMaxSlide - 1,
-    &Slide
-    );
+  DivU64x32Remainder (GetPseudoRandomNumber64 (), SlideSupport->ValidSlideCount - 1, &Slide);
 
   return SlideSupport->ValidSlides[Slide + 1];
 }
@@ -369,9 +360,10 @@ ShouldUseCustomSlideOffset (
       FallbackSlide    = (UINT8) Slide;
     }
 
-    if ((StartAddr + AvailableSize) != EndAddr) {
+    if ((StartAddr + AvailableSize) != EndAddr
+      || (SlideSupport->ProvideMaxSlide > 0 && Slide > SlideSupport->ProvideMaxSlide)) {
       //
-      // The slide region is not continuous.
+      // The slide region is not continuous or larger than ProvideMaxSlide.
       //
       Supported = FALSE;
     }
