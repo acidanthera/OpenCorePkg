@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
         (void)remove("out.bin");
         FILE *fh = fopen("out.bin", "wb");
         if (fh != NULL) {
-          fwrite((const void *)patchedTablePtr->TableAddress, patchedTablePtr->TableMaximumSize, 1, fh);
+          fwrite((const void *) (uintptr_t) (patchedTablePtr->TableAddress), (size_t) (patchedTablePtr->TableMaximumSize), 1, fh);
           fclose(fh);
         } else {
           DEBUG ((DEBUG_ERROR, "Failed to produce out.bin - %r", Status));

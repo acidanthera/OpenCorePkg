@@ -270,7 +270,7 @@ static int FeedMacho(void *file, uint32_t size) {
     }
   }
 
-  for (size_t i = 0x1000000; i < 0x100000000; i+= 0x1000000) {
+  for (size_t i = 0x1000000; i < MAX_UINTN; i+= 0x1000000) {
     if (MachoGetSymbolByRelocationOffset64 (&Context, i, &Symbol)) {
       if (!AsciiStrCmp (MachoGetSymbolName64 (&Context, Symbol), "__hack")) {
         code++;

@@ -1288,11 +1288,9 @@ OcBootPolicyGetApfsRecoveryFilePath (
   Result = EFI_NOT_FOUND;
 
   for (Index = 0; Index < NoHandles; ++Index) {
-    DEBUG_CODE_BEGIN ();
     ZeroMem (&ContainerGuid2, sizeof (ContainerGuid2));
     ZeroMem (&VolumeGuid2, sizeof (VolumeGuid2));
     VolumeRole2 = 0;
-    DEBUG_CODE_END ();
 
     Status = InternalGetApfsVolumeInfo (
                HandleBuffer[Index],
@@ -1301,7 +1299,6 @@ OcBootPolicyGetApfsRecoveryFilePath (
                &VolumeRole2
                );
 
-    DEBUG_CODE_BEGIN ();
     DEBUG ((
       DEBUG_BULK_INFO,
       "OCBP: APFS recovery info %u/%u due to %g/%g/%X - %r\n",
@@ -1312,7 +1309,6 @@ OcBootPolicyGetApfsRecoveryFilePath (
       (UINT32) VolumeRole2,
       Status
       ));
-    DEBUG_CODE_END ();
 
     if (EFI_ERROR (Status)
       || VolumeRole2 != APPLE_APFS_VOLUME_ROLE_RECOVERY

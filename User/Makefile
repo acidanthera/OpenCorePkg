@@ -5,8 +5,8 @@
 
 .DEFAULT_GOAL := all
 
-CC       ?= gcc
-MKDIR    := mkdir -p
+CC            ?= gcc
+MKDIR         := mkdir -p
 
 ifeq ($(UDK_PATH),)
 	ifneq ($(PACKAGES_PATH),)
@@ -30,7 +30,27 @@ UDK_ARCH ?= X64
 #
 # Primary CFLAGS.
 #
-CFLAGS   := -c -fshort-wchar -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter -D EFIUSER
+CFLAGS   := -c -fshort-wchar -Wall -Wextra -D EFIUSER
+
+ifeq ($(WERROR),1)
+	CFLAGS  += -Werror
+endif
+
+ifeq ($(shell echo 'int a;' | "${CC}" -Wno-unused-parameter -x c -c - -o /dev/null 2>&1),)
+	CFLAGS  += -Wno-unused-parameter
+endif
+
+ifeq ($(shell echo 'int a;' | "${CC}" -Wno-implicit-fallthrough -x c -c - -o /dev/null 2>&1),)
+	CFLAGS  += -Wno-implicit-fallthrough
+endif
+
+ifeq ($(shell echo 'int a;' | "${CC}" -Wno-strict-aliasing -x c -c - -o /dev/null 2>&1),)
+	CFLAGS  += -Wno-strict-aliasing
+endif
+
+ifeq ($(shell echo 'int a;' | "${CC}" -Wno-address -x c -c - -o /dev/null 2>&1),)
+	CFLAGS  += -Wno-address
+endif
 
 ifeq ($(DIST),Darwin)
 	CFLAGS  += -mmacosx-version-min=10.6
@@ -38,8 +58,8 @@ ifeq ($(DIST),Darwin)
 endif
 
 ifeq ($(DIST),Windows)
-	SUFFIX   := .exe
-	CFLAGS   += -D_ISOC99_SOURCE=1
+	SUFFIX  := .exe
+	CFLAGS  += -D_ISOC99_SOURCE=1
 endif
 
 ifeq ($(SANITIZE),1)
@@ -66,8 +86,8 @@ endif
 #
 # Search Paths.
 #
-CFLAGS   += -I../../User/Include
-CFLAGS   += -I../../Include/Acidanthera -I../../Include/Apple -I../../Include/Apple/$(UDK_ARCH) -I../../Include/Generic -I../../Include/Intel -I../../Include/Microsoft
+CFLAGS += -I../../User/Include
+CFLAGS += -I../../Include/Acidanthera -I../../Include/Apple -I../../Include/Apple/$(UDK_ARCH) -I../../Include/Generic -I../../Include/Intel -I../../Include/Microsoft
 
 #
 # Skip including UDK when suggesting STANDALONE mode.

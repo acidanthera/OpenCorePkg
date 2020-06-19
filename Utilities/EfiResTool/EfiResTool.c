@@ -43,7 +43,7 @@ int main(int argc, const char* argv[]) {
 #include <fcntl.h>        // open, close
 #include <stdio.h>        // fprintf
 #include <string.h>       // strerror, strdup, strchr
-#include <stdlib.h>       // free, EXIT_*
+#include <stdlib.h>       // abort, free, EXIT_*
 #include <sys/mman.h>     // mmap, munmap
 #include <sys/stat.h>     // fstat
 #include <errno.h>        // errno
@@ -382,7 +382,8 @@ int pack_efires(const char* fname, const char* fromdir, const char* filelist[]) 
     {
         // write space for header
         efires_hdr_t tmp;
-        write(outfd, &tmp, sizeof(tmp));
+        if (write(outfd, &tmp, sizeof(tmp)) == -1)
+            abort();
     }
 
     // header and one reserved zeroed entry
