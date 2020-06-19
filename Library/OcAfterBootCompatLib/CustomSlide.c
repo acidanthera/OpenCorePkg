@@ -91,7 +91,7 @@ GenerateSlideValue (
 
   do {
     DivU64x32Remainder (GetPseudoRandomNumber64 (), SlideSupport->ValidSlideCount, &Slide);
-  } while (Slide == 0); // or SlideSupport->ValidSlides[Slide] == 0
+  } while (SlideSupport->ValidSlides[Slide] == 0);
 
   return SlideSupport->ValidSlides[Slide];
 }
