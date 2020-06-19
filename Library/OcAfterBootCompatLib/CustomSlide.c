@@ -89,9 +89,11 @@ GenerateSlideValue (
     return SlideSupport->ValidSlides[0];
   }
 
-  DivU64x32Remainder (GetPseudoRandomNumber64 (), SlideSupport->ValidSlideCount - 1, &Slide);
+  do {
+    DivU64x32Remainder (GetPseudoRandomNumber64 (), SlideSupport->ValidSlideCount, &Slide);
+  } while (Slide == 0); // or SlideSupport->ValidSlides[Slide] == 0
 
-  return SlideSupport->ValidSlides[Slide + 1];
+  return SlideSupport->ValidSlides[Slide];
 }
 
 /**
@@ -378,11 +380,6 @@ ShouldUseCustomSlideOffset (
     if (Supported) {
       SlideSupport->ValidSlides[SlideSupport->ValidSlideCount++] = (UINT8) Slide;
     }
-  }
-
-  if (SlideSupport->ValidSlideCount < SlideSupport->ProvideMaxSlide) {
-    DEBUG ((DEBUG_WARN, "OCABC: ProvideMaxSlide too large, reset to 0\n"));
-    SlideSupport->ProvideMaxSlide = 0;
   }
 
   //
