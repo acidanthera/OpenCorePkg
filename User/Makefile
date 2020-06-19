@@ -5,8 +5,8 @@
 
 .DEFAULT_GOAL := all
 
-CC       ?= gcc
-MKDIR    := mkdir -p
+CC            ?= gcc
+MKDIR         := mkdir -p
 
 ifeq ($(UDK_PATH),)
 	ifneq ($(PACKAGES_PATH),)
