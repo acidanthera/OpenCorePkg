@@ -36,19 +36,19 @@ ifeq ($(WERROR),1)
 	CFLAGS  += -Werror
 endif
 
-ifeq ($(shell echo 'int a;' | gcc -Wno-unused-parameter -x c -c - -o /dev/null 2>&1),)
+ifeq ($(shell echo 'int a;' | "${CC}" -Wno-unused-parameter -x c -c - -o /dev/null 2>&1),)
 	CFLAGS  += -Wno-unused-parameter
 endif
 
-ifeq ($(shell echo 'int a;' | gcc -Wno-implicit-fallthrough -x c -c - -o /dev/null 2>&1),)
+ifeq ($(shell echo 'int a;' | "${CC}" -Wno-implicit-fallthrough -x c -c - -o /dev/null 2>&1),)
 	CFLAGS  += -Wno-implicit-fallthrough
 endif
 
-ifeq ($(shell echo 'int a;' | gcc -Wno-strict-aliasing -x c -c - -o /dev/null 2>&1),)
+ifeq ($(shell echo 'int a;' | "${CC}" -Wno-strict-aliasing -x c -c - -o /dev/null 2>&1),)
 	CFLAGS  += -Wno-strict-aliasing
 endif
 
-ifeq ($(shell echo 'int a;' | gcc -Wno-address -x c -c - -o /dev/null 2>&1),)
+ifeq ($(shell echo 'int a;' | "${CC}" -Wno-address -x c -c - -o /dev/null 2>&1),)
 	CFLAGS  += -Wno-address
 endif
 
