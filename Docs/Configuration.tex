@@ -1460,6 +1460,26 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   this option is to be enabled.
 
 \item
+  \texttt{ProvideMaxSlide}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Provide maximum KASLR slide when higher ones are unavailable.
+
+  This option overrides the maximum slide instead of \texttt{TOTAL\_SLIDE\_NUM}
+  (256) when \texttt{ProvideCustomSlide} is enabled. It is believed that modern
+  firmwares allocate pool memory from top to bottom, effectively resulting in
+  free memory at the time of slide scanning being later used as temporary
+  memory during kernel loading. In case those memory are unavailable, this
+  option can stop evaluating higher slides.
+
+  \emph{Note}: The necessity of this quirk is determined by random boot failure
+  when \texttt{ProvideCustomSlide} is enabled and the randomized slide fall
+  into the unavailable range. When \texttt{AppleDebug} is enabled, usually the
+  debug log may contain messages like \texttt{AAPL: [EB|`LD:LKC] \} Err(0x9)}.
+  To find the optimal value, manually append \texttt{slide=X} to \texttt{boot-args}
+  and log the largest one that won't cause boot failure.
+
+\item
   \texttt{RebuildAppleMemoryMap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

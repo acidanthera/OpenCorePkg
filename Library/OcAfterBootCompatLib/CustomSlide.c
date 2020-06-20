@@ -91,7 +91,7 @@ GenerateSlideValue (
 
   do {
     DivU64x32Remainder (GetPseudoRandomNumber64 (), SlideSupport->ValidSlideCount, &Slide);
-  } while (Slide == 0);
+  } while (SlideSupport->ValidSlides[Slide] == 0);
 
   return SlideSupport->ValidSlides[Slide];
 }
@@ -360,6 +360,14 @@ ShouldUseCustomSlideOffset (
     if (AvailableSize > MaxAvailableSize) {
       MaxAvailableSize = AvailableSize;
       FallbackSlide    = (UINT8) Slide;
+    }
+
+    //
+    // Stop evalutating slides after exceeding ProvideMaxSlide, may break when
+    // no slides are available.
+    //
+    if (SlideSupport->ProvideMaxSlide > 0 && Slide > SlideSupport->ProvideMaxSlide) {
+      break;
     }
 
     if ((StartAddr + AvailableSize) != EndAddr) {
@@ -736,6 +744,8 @@ AppleSlideGetVariable (
      OUT VOID                  *Data
   )
 {
+  BootCompat->SlideSupport.ProvideMaxSlide =  BootCompat->Settings.ProvideMaxSlide;
+
   if (VariableName != NULL && VendorGuid != NULL && DataSize != NULL
     && CompareGuid (VendorGuid, &gAppleBootVariableGuid)) {
 
