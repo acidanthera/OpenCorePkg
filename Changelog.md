@@ -12,6 +12,8 @@ OpenCore Changelog
 - Fixed reset value in `FadtEnableReset` ACPI quirk
 - Fixed freezes during boot option expansion with PXE boot entries
 - Updated underlying EDK II package to edk2-stable202005
+- Added `ProvideMaxSlide` quirk to improve laptop stability, thx @zhen-zen
+- Fixed slide choice on platforms when 0 slide is unavailable, thx @zhen-zen
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy

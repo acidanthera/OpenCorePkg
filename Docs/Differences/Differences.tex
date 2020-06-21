@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
-%DIF ADD ../Configuration.tex        Fri Jun 19 00:17:56 2020
+%DIF ADD ../Configuration.tex        Sun Jun 21 16:58:05 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1524,7 +1524,30 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   this option is to be enabled.
 
 \item
-  \texttt{RebuildAppleMemoryMap}\\
+  \DIFaddbegin \texttt{\DIFadd{ProvideMaxSlide}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Provide maximum KASLR slide when higher ones are unavailable.
+}
+
+  \DIFadd{This option overrides the maximum slide instead of }\texttt{\DIFadd{TOTAL\_SLIDE\_NUM}}
+  \DIFadd{(256) when }\texttt{\DIFadd{ProvideCustomSlide}} \DIFadd{is enabled. It is believed that modern
+  firmwares allocate pool memory from top to bottom, effectively resulting in
+  free memory at the time of slide scanning being later used as temporary
+  memory during kernel loading. In case those memory are unavailable, this
+  option can stop evaluating higher slides.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: The necessity of this quirk is determined by random boot failure
+  when }\texttt{\DIFadd{ProvideCustomSlide}} \DIFadd{is enabled and the randomized slide fall
+  into the unavailable range. When }\texttt{\DIFadd{AppleDebug}} \DIFadd{is enabled, usually the
+  debug log may contain messages like }\texttt{\DIFadd{AAPL: }[\DIFadd{EB|`LD:LKC}] \DIFadd{\} Err(0x9)}}\DIFadd{.
+  To find the optimal value, manually append }\texttt{\DIFadd{slide=X}} \DIFadd{to }\texttt{\DIFadd{boot-args}}
+  \DIFadd{and log the largest one that won't cause boot failure.
+}
+
+\item
+  \DIFaddend \texttt{RebuildAppleMemoryMap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Generate Memory Map compatible with macOS.
