@@ -286,6 +286,7 @@ InternalGetBooterFromBlessedSystemFolderPath (
   EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
   FILEPATH_DEVICE_PATH      *FolderDevicePath;
   UINTN                     DevicePathSize;
+  UINTN                     BooterDirPathSize;
   UINTN                     BooterPathSize;
   CHAR16                    *BooterPath;
 
@@ -320,12 +321,15 @@ InternalGetBooterFromBlessedSystemFolderPath (
      && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)) {
 
       FolderDevicePath  = (FILEPATH_DEVICE_PATH *) DevicePathWalker;
-      BooterPathSize    = OcFileDevicePathNameSize (FolderDevicePath)
-                          + L_STR_SIZE (APPLE_BOOTER_ROOT_FILE_NAME) - sizeof (CHAR16);
+      BooterDirPathSize = OcFileDevicePathNameSize (FolderDevicePath);
+      BooterPathSize    = BooterDirPathSize + L_STR_SIZE (APPLE_BOOTER_ROOT_FILE_NAME) - sizeof (CHAR16);
       BooterPath        = AllocateZeroPool (BooterPathSize);
 
       if (BooterPath != NULL) {
-        StrCpyS (BooterPath, BooterPathSize, &FolderDevicePath->PathName[0]);
+        //
+        // FolderDevicePath->PathName may be unaligned, thus byte copying is needed.
+        //
+        CopyMem (BooterPath, FolderDevicePath->PathName, BooterDirPathSize);
         StrCatS (BooterPath, BooterPathSize, APPLE_BOOTER_ROOT_FILE_NAME);
         Status = EFI_SUCCESS;
       } else {
