@@ -479,6 +479,7 @@ typedef enum {
   _(UINT64                      , MinVersion         ,     , 0                             , ()) \
   _(UINT32                      , MinDate            ,     , 0                             , ()) \
   _(BOOLEAN                     , EnableJumpstart    ,     , FALSE                         , ()) \
+  _(BOOLEAN                     , GlobalConnect       ,     , FALSE                         , ()) \
   _(BOOLEAN                     , HideVerbose        ,     , FALSE                         , ()) \
   _(BOOLEAN                     , JumpstartHotPlug   ,     , FALSE                         , ())
   OC_DECLARE (OC_UEFI_APFS)

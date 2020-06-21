@@ -4635,6 +4635,18 @@ functioning. Feature highlights:
   \texttt{ScanPolicy}. See more details in ``EFI Jumpstart'' section of
   \href{https://developer.apple.com/support/apple-file-system/Apple-File-System-Reference.pdf}{Apple File System Reference}.
 
+
+\item
+  \texttt{GlobalConnect}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Perform full device connection during APFS loading.
+
+  Instead of partition handle connection normally used for APFS driver loading
+  every handle is connected recursively. This may take more time than usual
+  but can be the only way to access APFS partitions on some firmwares like
+  those found on older HP laptops.
+
 \item
   \texttt{HideVerbose}\\
   \textbf{Type}: \texttt{plist\ boolean}\\

@@ -57,6 +57,7 @@
   DebugLib
   OcAppleImageVerificationLib
   OcConsoleLib
+  OcDriverConnectionLib
   OcGuardLib
   OcMiscLib
   MemoryAllocationLib

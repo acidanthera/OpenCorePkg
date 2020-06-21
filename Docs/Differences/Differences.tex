@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
-%DIF ADD ../Configuration.tex        Sun Jun 21 16:58:05 2020
+%DIF ADD ../Configuration.tex        Mon Jun 22 00:02:42 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4732,8 +4732,22 @@ functioning. Feature highlights:
   \texttt{ScanPolicy}. See more details in ``EFI Jumpstart'' section of
   \href{https://developer.apple.com/support/apple-file-system/Apple-File-System-Reference.pdf}{Apple File System Reference}.
 
+
 \item
-  \texttt{HideVerbose}\\
+  \DIFaddbegin \texttt{\DIFadd{GlobalConnect}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Perform full device connection during APFS loading.
+}
+
+  \DIFadd{Instead of partition handle connection normally used for APFS driver loading
+  every handle is connected recursively. This may take more time than usual
+  but can be the only way to access APFS partitions on some firmwares like
+  those found on older HP laptops.
+}
+
+\item
+  \DIFaddend \texttt{HideVerbose}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Hide verbose output from APFS driver.

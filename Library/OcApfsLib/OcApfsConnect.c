@@ -20,6 +20,7 @@
 #include <Library/OcAppleImageVerificationLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConsoleLib.h>
+#include <Library/OcDriverConnectionLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -34,6 +35,7 @@ STATIC UINT64            mApfsMinimalVersion = OC_APFS_VERSION_DEFAULT;
 STATIC UINT32            mApfsMinimalDate    = OC_APFS_DATE_DEFAULT;
 STATIC UINT32            mOcScanPolicy;
 STATIC BOOLEAN           mIgnoreVerbose;
+STATIC BOOLEAN           mGlobalConnect;
 STATIC EFI_SYSTEM_TABLE  *mNullSystemTable;
 
 //
@@ -327,12 +329,23 @@ ApfsStartDriver (
     return Status;
   }
 
-  //
-  // Recursively connect controller to get apfs.efi loaded.
-  // We cannot use apfs.efi handle as it apparently creates new handles.
-  // This follows ApfsJumpStart driver implementation.
-  //
-  gBS->ConnectController (PrivateData->LocationInfo.ControllerHandle, NULL, NULL, TRUE);
+  if (mGlobalConnect) {
+    //
+    // Connect all devices when implicitly requested. This is a workaround
+    // for some older HP laptops, which for some reason fail to connect by both
+    // drive and partition handles.
+    // REF: https://github.com/acidanthera/bugtracker/issues/960
+    //
+    OcConnectDrivers ();
+  } else {
+    //
+    // Recursively connect controller to get apfs.efi loaded.
+    // We cannot use apfs.efi handle as it apparently creates new handles.
+    // This follows ApfsJumpStart driver implementation.
+    //
+    gBS->ConnectController (PrivateData->LocationInfo.ControllerHandle, NULL, NULL, TRUE);
+  }
+
   return EFI_SUCCESS;
 }
 
@@ -391,6 +404,7 @@ OcApfsConfigure (
   IN UINT64   MinVersion,
   IN UINT32   MinDate,
   IN UINT32   ScanPolicy,
+  IN BOOLEAN  GlobalConnect,
   IN BOOLEAN  IgnoreVerbose
   )
 {
@@ -413,8 +427,9 @@ OcApfsConfigure (
     mApfsMinimalDate = MinDate;
   }
 
-  mOcScanPolicy       = ScanPolicy;
-  mIgnoreVerbose      = IgnoreVerbose;
+  mOcScanPolicy  = ScanPolicy;
+  mIgnoreVerbose = IgnoreVerbose;
+  mGlobalConnect = GlobalConnect;
 }
 
 EFI_STATUS

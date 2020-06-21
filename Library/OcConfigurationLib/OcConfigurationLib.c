@@ -566,6 +566,7 @@ STATIC
 OC_SCHEMA
 mUefiApfsSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("EnableJumpstart",      OC_GLOBAL_CONFIG, Uefi.Apfs.EnableJumpstart),
+  OC_SCHEMA_BOOLEAN_IN ("GlobalConnect",        OC_GLOBAL_CONFIG, Uefi.Apfs.GlobalConnect),
   OC_SCHEMA_BOOLEAN_IN ("HideVerbose",          OC_GLOBAL_CONFIG, Uefi.Apfs.HideVerbose),
   OC_SCHEMA_BOOLEAN_IN ("JumpstartHotPlug",     OC_GLOBAL_CONFIG, Uefi.Apfs.JumpstartHotPlug),
   OC_SCHEMA_INTEGER_IN ("MinDate",              OC_GLOBAL_CONFIG, Uefi.Apfs.MinDate),

@@ -16,6 +16,7 @@ OpenCore Changelog
 - Fixed slide choice on platforms when 0 slide is unavailable, thx @zhen-zen
 - Fixed assertions caused by unaligned file path access in DEBUG builds
 - Renamed `ConfigValidity` utility to `ocvalidate` for consistency
+- Added `GlobalConnect` for APFS loading to workaround older firmware issues
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy
