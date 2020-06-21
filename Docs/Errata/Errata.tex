@@ -123,7 +123,7 @@ can be found at \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bug
 \item
   \textbf{Identifier}: \texttt{ERR059-1} \\
   \textbf{Published}: 2020-06-02 08:06 MSK \\
-  \textbf{Updated}: 2020-06-16 21:10 MSK \\
+  \textbf{Updated}: 2020-06-21 18:22 MSK \\
   \textbf{Affected versions}: 0.5.9 \\
   \textbf{Resolved in}: 0.6.0 (\href{https://github.com/acidanthera/OpenCorePkg/commit/9d5aa267a9133fd9390b62012c21428fc77681f2}{9d5aa267}) \\
   \textbf{Description}:
@@ -139,13 +139,16 @@ can be found at \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bug
     \item Add \texttt{run-efi-updater} variable with \texttt{NO} string value \texttt{OR}
     \item Avoid using OpenCanopy \texttt{OR}
     \item Disable showing picker by setting \texttt{ShowPicker} to \texttt{false} \texttt{OR}
+    \item Update to master version
   \end{itemize}
+
+
 \item
   \textbf{Identifier}: \texttt{ERR059-2} \\
   \textbf{Published}: 2020-06-02 08:06 MSK \\
-  \textbf{Updated}: 2020-06-16 21:10 MSK \\
+  \textbf{Updated}: 2020-06-21 18:22 MSK \\
   \textbf{Affected versions}: 0.5.9 \\
-  \textbf{Resolved in}: 0.6.0 (\href{https://github.com/acidanthera/OpenCorePkg/commit/670d4e0c4f8538268367d16fc3ddef9b2ed13d46}{670d4e0}) \\
+  \textbf{Resolved in}: 0.6.0 (\href{https://github.com/acidanthera/OpenCorePkg/commit/670d4e0c4f8538268367d16fc3ddef9b2ed13d46}{670d4e0c}) \\
   \textbf{Description}:
 
   Incorrect operating system may be selected as the default during macOS upgrade when
@@ -157,6 +160,26 @@ can be found at \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bug
     \tightlist
     \item Add \texttt{run-efi-updater} variable with \texttt{NO} string value \texttt{OR}
     \item Install Windows on a separate disk \texttt{OR}
+    \item Update to master version
+  \end{itemize}
+
+
+\item
+  \textbf{Identifier}: \texttt{ERR059-3} \\
+  \textbf{Published}: 2020-06-21 18:22 MSK \\
+  \textbf{Updated}: 2020-06-21 18:22 MSK \\
+  \textbf{Affected versions}: 0.5.9 \\
+  \textbf{Resolved in}: 0.6.0 (\href{https://github.com/acidanthera/OpenCorePkg/commit/2449e47cb2d110a288d491beee0b5b168d2bb480}{2449e47c}) \\
+  \textbf{Description}:
+
+  DEBUG builds may fail to load due to unaligned access assertion when accessing device paths.
+  Reference: \href{https://github.com/acidanthera/bugtracker/issues/951}{acidanthera/bugtracker\#951}.
+
+  \textbf{Possible workarounds}:
+  \begin{itemize}
+    \tightlist
+    \item Avoid using DEBUG builds \texttt{OR}
+    \item Update to master version
   \end{itemize}
 \end{itemize}
 

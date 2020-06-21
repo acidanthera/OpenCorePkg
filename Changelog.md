@@ -15,6 +15,7 @@ OpenCore Changelog
 - Added `ProvideMaxSlide` quirk to improve laptop stability, thx @zhen-zen
 - Fixed slide choice on platforms when 0 slide is unavailable, thx @zhen-zen
 - Fixed assertions caused by unaligned file path access in DEBUG builds
+- Renamed `ConfigValidity` utility to `ocvalidate` for consistency
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy
