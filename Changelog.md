@@ -14,6 +14,7 @@ OpenCore Changelog
 - Updated underlying EDK II package to edk2-stable202005
 - Added `ProvideMaxSlide` quirk to improve laptop stability, thx @zhen-zen
 - Fixed slide choice on platforms when 0 slide is unavailable, thx @zhen-zen
+- Fixed assertions caused by unaligned file path access in DEBUG builds
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy

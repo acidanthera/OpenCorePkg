@@ -32,6 +32,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
@@ -262,58 +263,66 @@ OcGetBootDevicePathType (
   )
 {
   EFI_DEVICE_PATH_PROTOCOL    *CurrNode;
-  FILEPATH_DEVICE_PATH        *LastNode;
+  CHAR16                      *Path;
+  UINTN                       PathSize;
   UINTN                       PathLen;
   UINTN                       RestLen;
   UINTN                       Index;
-  OC_BOOT_ENTRY_TYPE          Type;
-  BOOLEAN                     Folder;
 
-  LastNode = NULL;
-  Type     = OC_BOOT_UNKNOWN;
-  Folder   = FALSE;
+  Path = NULL;
+
+  if (IsGeneric != NULL) {
+    *IsGeneric = FALSE;
+  }
+
+  if (IsFolder != NULL) {
+    *IsFolder = FALSE;
+  }
 
   for (CurrNode = DevicePath; !IsDevicePathEnd (CurrNode); CurrNode = NextDevicePathNode (CurrNode)) {
     if ((DevicePathType (CurrNode) == MEDIA_DEVICE_PATH)
      && (DevicePathSubType (CurrNode) == MEDIA_FILEPATH_DP)) {
-      LastNode = (FILEPATH_DEVICE_PATH *) CurrNode;
-      PathLen  = OcFileDevicePathNameLen (LastNode);
-      if (PathLen == 0) {
-        continue;
+      //
+      // Perform copying of all the underlying nodes due to potential unaligned access.
+      //
+      PathSize = OcFileDevicePathFullNameSize (CurrNode);
+      if (PathSize == 0) {
+        return OC_BOOT_UNKNOWN;
       }
 
-      //
-      // Only the trailer of the last (non-empty) FilePath node matters.
-      //
-      Folder = (LastNode->PathName[PathLen - 1] == L'\\');
-
-      //
-      // Detect macOS recovery by com.apple.recovery.boot in the bootloader path.
-      //
-      if (Type == OC_BOOT_UNKNOWN) {
-        if (OcStrStrLength (LastNode->PathName, PathLen,
-          L"com.apple.recovery.boot", L_STR_LEN (L"com.apple.recovery.boot")) != NULL) {
-          Type = OC_BOOT_APPLE_RECOVERY;
-        } else if (OcStrStrLength (LastNode->PathName, PathLen,
-          L"EFI\\APPLE", L_STR_LEN (L"EFI\\APPLE")) != NULL) {
-          //
-          // FIXME: Support separate file path nodes. Potentially introduce a
-          //        retrieval function that uses a preallocated buffer.
-          //
-          Type = OC_BOOT_APPLE_FW_UPDATE;
-        }
+      Path = AllocatePool (PathSize);
+      if (Path == NULL) {
+        return OC_BOOT_UNKNOWN;
       }
-    } else {
-      Folder = FALSE;
+
+      OcFileDevicePathFullName (Path, (FILEPATH_DEVICE_PATH *) CurrNode, PathSize);
+      PathLen = StrLen (Path);
+      break;
     }
   }
 
-  if (IsFolder != NULL) {
-    *IsFolder = Folder;
+  if (Path == NULL) {
+    return OC_BOOT_UNKNOWN;
   }
 
-  if (LastNode == NULL || Type != OC_BOOT_UNKNOWN) {
-    return Type;
+  //
+  // Use the trailing character to determine folder.
+  //
+  if (IsFolder != NULL && Path[PathLen - 1] == L'\\') {
+    *IsFolder = TRUE;
+  }
+
+  //
+  // Detect macOS recovery by com.apple.recovery.boot in the bootloader path.
+  //
+  if (OcStrStrLength (Path, PathLen, L"com.apple.recovery.boot", L_STR_LEN (L"com.apple.recovery.boot")) != NULL) {
+    FreePool (Path);
+    return OC_BOOT_APPLE_RECOVERY;
+  }
+
+  if (OcStrStrLength (Path, PathLen, L"EFI\\APPLE", L_STR_LEN (L"EFI\\APPLE")) != NULL) {
+    FreePool (Path);
+    return OC_BOOT_APPLE_FW_UPDATE;
   }
 
   //
@@ -344,8 +353,9 @@ OcGetBootDevicePathType (
     }
 
     RestLen = PathLen - BootloaderLengths[Index];
-    if ((RestLen == 0 || LastNode->PathName[RestLen - 1] == L'\\')
-      && OcStrniCmp (&LastNode->PathName[RestLen], Bootloaders[Index], BootloaderLengths[Index]) == 0) {
+    if ((RestLen == 0 || Path[RestLen - 1] == L'\\')
+      && OcStrniCmp (&Path[RestLen], Bootloaders[Index], BootloaderLengths[Index]) == 0) {
+      FreePool (Path);
       return BootloaderTypes[Index];
     }
   }
@@ -353,18 +363,15 @@ OcGetBootDevicePathType (
   CONST CHAR16 *GenericBootloader      = &EFI_REMOVABLE_MEDIA_FILE_NAME[L_STR_LEN (L"\\EFI\\BOOT\\")];
   CONST UINTN  GenericBootloaderLength = L_STR_LEN (EFI_REMOVABLE_MEDIA_FILE_NAME) - L_STR_LEN (L"\\EFI\\BOOT\\");
 
-  if (IsGeneric != NULL) {
-    *IsGeneric = FALSE;
-  
-    if (PathLen >= GenericBootloaderLength) {
-      RestLen = PathLen - GenericBootloaderLength;
-      if ((RestLen == 0 || LastNode->PathName[RestLen - 1] == L'\\')
-        && OcStrniCmp (&LastNode->PathName[RestLen], GenericBootloader, GenericBootloaderLength) == 0) {
-        *IsGeneric = TRUE;
-      }
+  if (IsGeneric != NULL && PathLen >= GenericBootloaderLength) {
+    RestLen = PathLen - GenericBootloaderLength;
+    if ((RestLen == 0 || Path[RestLen - 1] == L'\\')
+      && OcStrniCmp (&Path[RestLen], GenericBootloader, GenericBootloaderLength) == 0) {
+      *IsGeneric = TRUE;
     }
   }
 
+  FreePool (Path);
   return OC_BOOT_UNKNOWN;
 }
 
