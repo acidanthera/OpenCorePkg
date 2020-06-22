@@ -1466,7 +1466,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Description}: Provide maximum KASLR slide when higher ones are unavailable.
 
   This option overrides the maximum slide instead of \texttt{TOTAL\_SLIDE\_NUM}
-  (256) when \texttt{ProvideCustomSlide} is enabled. It is believed that modern
+  (255) when \texttt{ProvideCustomSlide} is enabled. It is believed that modern
   firmwares allocate pool memory from top to bottom, effectively resulting in
   free memory at the time of slide scanning being later used as temporary
   memory during kernel loading. In case those memory are unavailable, this

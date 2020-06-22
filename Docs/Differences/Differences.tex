@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
-%DIF ADD ../Configuration.tex        Mon Jun 22 00:02:42 2020
+%DIF DEL PreviousConfiguration.tex   Mon Jun 22 01:30:23 2020
+%DIF ADD ../Configuration.tex        Mon Jun 22 04:10:28 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1531,7 +1531,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 }
 
   \DIFadd{This option overrides the maximum slide instead of }\texttt{\DIFadd{TOTAL\_SLIDE\_NUM}}
-  \DIFadd{(256) when }\texttt{\DIFadd{ProvideCustomSlide}} \DIFadd{is enabled. It is believed that modern
+  \DIFadd{(255) when }\texttt{\DIFadd{ProvideCustomSlide}} \DIFadd{is enabled. It is believed that modern
   firmwares allocate pool memory from top to bottom, effectively resulting in
   free memory at the time of slide scanning being later used as temporary
   memory during kernel loading. In case those memory are unavailable, this
