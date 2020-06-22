@@ -436,6 +436,7 @@ OcFixAppleBootDevicePath (
   )
 {
   INTN                        Result;
+  INTN                        NodePatched;
 
   EFI_DEVICE_PATH_PROTOCOL    *OriginalDevPath;
   EFI_DEVICE_PATH_PROTOCOL    *RemainingDevicePath;
@@ -455,7 +456,7 @@ OcFixAppleBootDevicePath (
   // to the loop for an explanation.
   //
   RestoreContextPtr = &FirstNodeRestoreContext;
-
+  NodePatched       = 0;
   do {
     //
     // Retrieve the first Device Path node that cannot be located.
@@ -481,8 +482,9 @@ OcFixAppleBootDevicePath (
     //
     RestoreContextPtr = NULL;
     //
-    // Continue as long as nodes are being patched.
+    // Continue as long as nodes are being patched. Remember patch status.
     //
+    NodePatched |= Result > 0;
   } while (Result > 0);
 
   *DevicePath = RemainingDevicePath;
@@ -495,7 +497,7 @@ OcFixAppleBootDevicePath (
     // be of a prefix short-form and hence restoring is not beneficial (and most
     // especially would require tracking every node individually).
     //
-    if (RemainingDevicePath == OriginalDevPath) {
+    if (NodePatched != 0 && RemainingDevicePath == OriginalDevPath) {
       OcFixAppleBootDevicePathNodeRestore (
         OriginalDevPath,
         &FirstNodeRestoreContext
@@ -505,7 +507,7 @@ OcFixAppleBootDevicePath (
     return -1;
   }
 
-  return RemainingDevicePath == OriginalDevPath ? 0 : 1;
+  return NodePatched;
 }
 
 STATIC
