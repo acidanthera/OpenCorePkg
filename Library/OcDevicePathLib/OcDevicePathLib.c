@@ -345,20 +345,35 @@ OcFixAppleBootDevicePathNode (
           // UEFI Device Paths. The former contain 0x00, 0x40, 0x80, 0xC0 values, while
           // the latter have ascending numbers.
           // Reference: https://github.com/acidanthera/bugtracker/issues/664.
+          // On other boards it is be even more erratic, refer to:
+          // https://github.com/acidanthera/bugtracker/issues/664#issuecomment-647526506
           //
-          if (Node.Acpi->UID == 0x40) {
-            Node.Acpi->UID = 1;
-            return 1;
-          }
-          
-          if (Node.Acpi->UID == 0x80) {
-            Node.Acpi->UID = 2;
-            return 1;
-          }
-          
-          if (Node.Acpi->UID == 0xC0) {
-            Node.Acpi->UID = 3;
-            return 1;
+          switch (Node.Acpi->UID) {
+            case 0x10:
+            case 0x40:
+              Node.Acpi->UID = 1;
+              return 1;
+
+            case 0x20:
+            case 0x80:
+              Node.Acpi->UID = 2;
+              return 1;
+
+            case 0x28:
+            case 0xC0:
+              Node.Acpi->UID = 3;
+              return 1;
+
+            case 0x30:
+              Node.Acpi->UID = 4;
+              return 1;
+
+            case 0x38:
+              Node.Acpi->UID = 5;
+              return 1;
+
+            default:
+              break;
           }
           //
           // Apple uses PciRoot (EISA 0x0A03) nodes while some firmwares might use
