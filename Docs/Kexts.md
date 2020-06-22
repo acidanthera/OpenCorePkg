@@ -35,6 +35,7 @@ Kexts
 - [VoodooPS2Controller.kext](https://github.com/acidanthera/VoodooPS2)
 - [VoodooInput.kext](https://github.com/acidanthera/VoodooInput)
 - [VoodooSMBus.kext](https://github.com/leo-labs/VoodooSMBus)
+- [VoodooRMI.kext](https://github.com/VoodooSMBus/VoodooRMI)
 - [AlpsT4USB.kext](https://github.com/blankmac/AlpsT4USB)
 
 ## Video and audio
