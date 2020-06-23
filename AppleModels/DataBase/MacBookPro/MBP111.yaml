@@ -24,14 +24,10 @@ ChassisType: 0xA
 ChassisVersion: "Mac-189A3D4F975D5FFC"
 ChassisAssetTag: ""
 PlatformFeature: 0x2
-# FIXME: check
-FirmwareFeatures: 0xE80FE137
-# FIXME: check
-FirmwareFeaturesMask: 0xFF1FFF3F
-# FIXME: check
-ExtendedFirmwareFeatures: 0x00000000E80FE137
-# FIXME: check
-ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+FirmwareFeatures: 0xEB0FF577
+FirmwareFeaturesMask: 0xFF1FFF7F
+ExtendedFirmwareFeatures: 0x00000000EB0FF577
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF7F
 MemoryFormFactor: 0xD
 # FIXME: check values (most should be correct?) and add missing, if any
 ProcessorType:
