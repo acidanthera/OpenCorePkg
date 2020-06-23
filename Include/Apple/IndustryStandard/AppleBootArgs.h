@@ -51,9 +51,10 @@ typedef struct Boot_Video Boot_Video;
 /* Boot argument structure - passed into Mach kernel at boot time.
  * "Revision" can be incremented for compatible changes
  */
-#define kBootArgsRevision       0
-#define kBootArgsRevisionBigSur 1
-#define kBootArgsVersion        2
+#define kBootArgsRevision    0
+#define kBootArgsRevision0   kBootArgsRevision
+#define kBootArgsRevision1   1 /* added KC_hdrs_addr */
+#define kBootArgsVersion     2
 
 /* Snapshot constants of previous revisions that are supported */
 #define kBootArgsVersion1       1
@@ -77,6 +78,7 @@ typedef struct Boot_Video Boot_Video;
 #define kBootArgsFlagBlackBg         (1U << 6U)
 #define kBootArgsFlagLoginUI         (1U << 7U)
 #define kBootArgsFlagInstallUI       (1U << 8U)
+#define kBootArgsFlagRecoveryBoot    (1U << 10U)
 
 #define BOOT_LINE_LENGTH   1024
 
@@ -168,9 +170,17 @@ typedef struct {
   UINT32          apfsDataStart;        /* Physical address of apfs volume key structure */
   UINT32          apfsDataSize;
 
-  UINT64          machoHeaders;         /* First kernel virtual address pointing to Mach-O headers, kBootArgsRevisionBigSur */
+  /* Version 2, Revision 1 */
+  UINT64          KC_hdrs_vaddr; /* First kernel virtual address pointing to Mach-O headers */
 
-  UINT32          __reserved4[708];
+  UINT64          arvRootHashStart; /* Physical address of root hash file */
+  UINT64          arvRootHashSize;
+
+  UINT64          arvManifestStart; /* Physical address of manifest file */
+  UINT64          arvManifestSize;
+
+  /* Reserved */
+  UINT32          __reserved4[700];
 } BootArgs2;
 
 #endif // APPLE_BOOT_ARGS_H
