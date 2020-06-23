@@ -146,4 +146,4 @@ AppleModelYear:
   - 2014
   - 2015
 MinimumOSVersion: "10.8.4"
-MaximumOSVersion: null
+MaximumOSVersion: "10.15.6"
