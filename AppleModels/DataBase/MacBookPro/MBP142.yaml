@@ -16,7 +16,6 @@ BoardManufacturer: "Apple Inc."
 #  "Mac-smthelse"
 BoardProduct: "Mac-CAD6701F7CEA0921"
 BoardVersion: "MacBookPro14,2"
-# FIXME: check
 BoardRevision: 0x1B
 BoardAssetTag: ""
 BoardType: 0xA
@@ -26,14 +25,10 @@ ChassisType: 0x9
 ChassisVersion: "Mac-CAD6701F7CEA0921"
 ChassisAssetTag: ""
 PlatformFeature: 0x1A
-# FIXME: check
-FirmwareFeatures: 0xFD0FF536
-# FIXME: check
-FirmwareFeaturesMask: 0xFF1FFF3F
-# FIXME: check
-ExtendedFirmwareFeatures: 0x00000000FD0FF536
-# FIXME: check
-ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+FirmwareFeatures: 0xFF0FF57E
+FirmwareFeaturesMask: 0xFF1FFF7F
+ExtendedFirmwareFeatures: 0x00000000FF0FF57E
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF7F
 MemoryFormFactor: 0xD
 # FIXME: check values (most should be correct?) and add missing, if any
 ProcessorType:

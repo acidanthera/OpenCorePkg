@@ -25,10 +25,10 @@ ChassisType: 0x9
 ChassisVersion: "Mac-B4831CEBD52A0C4C"
 ChassisAssetTag: ""
 PlatformFeature: 0x1A
-FirmwareFeatures: 0xFD0FF536
-FirmwareFeaturesMask: 0xFF1FFF3F
-ExtendedFirmwareFeatures: 0x00000000FD0FF536
-ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+FirmwareFeatures: 0xFF0FF57E
+FirmwareFeaturesMask: 0xFF1FFF7F
+ExtendedFirmwareFeatures: 0x00000000FF0FF57E
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF7F
 MemoryFormFactor: 0xD
 # FIXME: Correct this one
 ProcessorType:
