@@ -26,8 +26,6 @@ rm -rf DICT fuzz*.log ; mkdir DICT ; UBSAN_OPTIONS='halt_on_error=1' ./DiskImage
 
 **/
 
-EFI_GUID gOcVendorVariableGuid;
-
 #ifdef FUZZING_TEST
 #define main no_main
 #include <sanitizer/asan_interface.h>
