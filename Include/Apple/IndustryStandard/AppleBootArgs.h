@@ -52,6 +52,7 @@ typedef struct Boot_Video Boot_Video;
  * "Revision" can be incremented for compatible changes
  */
 #define kBootArgsRevision       0
+#define kBootArgsRevisionBigSur 1
 #define kBootArgsVersion        2
 
 /* Snapshot constants of previous revisions that are supported */
@@ -167,7 +168,9 @@ typedef struct {
   UINT32          apfsDataStart;        /* Physical address of apfs volume key structure */
   UINT32          apfsDataSize;
 
-  UINT32          __reserved4[710];
+  UINT64          machoHeaders;         /* First kernel virtual address pointing to Mach-O headers, kBootArgsRevisionBigSur */
+
+  UINT32          __reserved4[708];
 } BootArgs2;
 
 #endif // APPLE_BOOT_ARGS_H
