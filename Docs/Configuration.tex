@@ -2818,7 +2818,12 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \textbf{Description}: Allow \texttt{CMD+OPT+P+R} handling and enable
   showing \texttt{NVRAM Reset} entry in boot picker.
 
-  \emph{Note}: Resetting NVRAM will also erase all the boot options
+  \emph{Note 1}: It is known that some Lenovo laptops have a firmware
+  bug, which makes them unbootable after performing NVRAM reset. See
+  \href{https://github.com/acidanthera/bugtracker/issues/995}{acidanthera/bugtracker\#995}
+  for more details.
+
+  \emph{Note 2}: Resetting NVRAM will also erase all the boot options
   otherwise not backed up with bless (e.g. Linux).
 
 \item
@@ -4851,6 +4856,12 @@ functioning. Feature highlights:
   milliseconds and the same value for APTIO V is \texttt{3-4} milliseconds. Thus
   it is possible to set a slightly lower value on faster platforms
   and slightly higher value on slower platforms for more responsive input.
+
+  \emph{Note}: Some platforms may require different values, higher or lower.
+  For example, when detecting key misses in OpenCanopy try increasing this value
+  (e.g. to \texttt{10}), and when detecting key stall, try decreasing this value.
+  Since every platform is different it may be reasonable to check every value
+  from \texttt{1} to \texttt{25}.
 
 \item
   \texttt{KeyMergeThreshold}\\
