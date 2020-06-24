@@ -45,6 +45,7 @@ OcParseBootArgs (
 
     Arguments->DeviceTreeP = &BA1->deviceTreeP;
     Arguments->DeviceTreeLength = &BA1->deviceTreeLength;
+    Arguments->SystemTable = (EFI_SYSTEM_TABLE*)(UINTN) BA1->efiSystemTable;
   } else {
     //
     // Lion and newer
@@ -58,6 +59,7 @@ OcParseBootArgs (
 
     Arguments->DeviceTreeP = &BA2->deviceTreeP;
     Arguments->DeviceTreeLength = &BA2->deviceTreeLength;
+    Arguments->SystemTable = (EFI_SYSTEM_TABLE*)(UINTN) BA2->efiSystemTable;
 
     if (BA2->flags & kBootArgsFlagCSRActiveConfig) {
       Arguments->CsrActiveConfig = &BA2->csrActiveConfig;

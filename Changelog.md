@@ -17,6 +17,7 @@ OpenCore Changelog
 - Fixed assertions caused by unaligned file path access in DEBUG builds
 - Renamed `ConfigValidity` utility to `ocvalidate` for consistency
 - Added `GlobalConnect` for APFS loading to workaround older firmware issues
+- Added 11.0 support for `AvoidRuntimeDefrag` Booter quirk
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy

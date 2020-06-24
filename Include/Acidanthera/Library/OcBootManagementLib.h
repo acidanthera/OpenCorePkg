@@ -1035,14 +1035,15 @@ OcGetAppleBootLoadedImage (
   by other libraries, so values are often pointers to original fields.
 **/
 typedef struct OC_BOOT_ARGUMENTS_ {
-  UINT32  *MemoryMap;
-  UINT32  *MemoryMapSize;
-  UINT32  *MemoryMapDescriptorSize;
-  UINT32  *MemoryMapDescriptorVersion;
-  CHAR8   *CommandLine;
-  UINT32  *DeviceTreeP;
-  UINT32  *DeviceTreeLength;
-  UINT32  *CsrActiveConfig;
+  UINT32            *MemoryMap;
+  UINT32            *MemoryMapSize;
+  UINT32            *MemoryMapDescriptorSize;
+  UINT32            *MemoryMapDescriptorVersion;
+  CHAR8             *CommandLine;
+  UINT32            *DeviceTreeP;
+  UINT32            *DeviceTreeLength;
+  UINT32            *CsrActiveConfig;
+  EFI_SYSTEM_TABLE  *SystemTable;
 } OC_BOOT_ARGUMENTS;
 
 /**

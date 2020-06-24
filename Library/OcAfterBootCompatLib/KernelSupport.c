@@ -381,6 +381,25 @@ AppleMapPrepareForBooting (
       DescriptorSize,
       MemoryMap
       );
+
+    //
+    // On native Macs due to EfiBoot defragmentation it is guaranteed that
+    // VADDR % BASE_1GB == PADDR. macOS 11 started to rely on this in
+    // acpi_count_enabled_logical_processors, which needs to access MADT (APIC)
+    // ACPI table, and does that through ConfigurationTables.
+    //
+    // The simplest approach is to just copy the table, so that it is accessible
+    // at both actual mapping and 1:1 defragmented mapping. This should be safe,
+    // as the memory for 1:1 defragmented mapping is reserved by EfiBoot in the
+    // first place and is otherwise stolen anyway.
+    //
+    if (BootCompat->KernelState.ConfigurationTable != NULL) {
+      CopyMem (
+        (VOID*) ((UINTN) BA.SystemTable->ConfigurationTable & (BASE_1GB - 1)),
+        BootCompat->KernelState.ConfigurationTable,
+        sizeof (*BootCompat->KernelState.ConfigurationTable) * BA.SystemTable->NumberOfTableEntries
+        );
+    }
   }
 }
 
@@ -545,6 +564,10 @@ AppleMapPrepareBooterState (
         gST,
         gST->Hdr.HeaderSize
         );
+      //
+      // Remember physical configuration table location.
+      //
+      BootCompat->KernelState.ConfigurationTable = gST->ConfigurationTable;
     }
 
     //

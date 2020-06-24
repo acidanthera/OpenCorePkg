@@ -256,6 +256,10 @@ typedef struct KERNEL_SUPPORT_STATE_ {
   ///
   UINTN                    SysTableRtAreaSize;
   ///
+  /// Physical configuration table location.
+  ///
+  EFI_CONFIGURATION_TABLE  *ConfigurationTable;
+  ///
   /// Virtual memory mapper context.
   ///
   OC_VMEM_CONTEXT          VmContext;
