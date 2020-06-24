@@ -181,6 +181,29 @@ can be found at \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bug
     \item Avoid using DEBUG builds \texttt{OR}
     \item Update to master version
   \end{itemize}
+
+
+\item
+  \textbf{Identifier}: \texttt{ERR059-4} \\
+  \textbf{Published}: 2020-06-24 21:18 MSK \\
+  \textbf{Updated}: 2020-06-24 21:18 MSK \\
+  \textbf{Affected versions}: 0.5.9 \\
+  \textbf{Resolved in}: \texttt{--} \\
+  \textbf{Description}:
+
+  Driver injection into \texttt{kernel collections} normally used in macOS 11,
+  and required for macOS 11 installer, is unsupported.
+
+  \textbf{Possible workarounds}:
+  \begin{itemize}
+    \tightlist
+    \item For \textbf{preinstalled} versions of macOS 11 add NVRAM variable
+    \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:booter-fileset-kernel}
+    with \texttt{00} value; for some EfiBoot variants it may also be
+    required to set \texttt{booter-fileset-basesystem} vrariable
+  \end{itemize}
+
+
 \end{itemize}
 
 \end{document}
