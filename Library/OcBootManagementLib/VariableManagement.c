@@ -304,8 +304,8 @@ OcDeleteVariables (
       DEBUG ((
         DEBUG_INFO,
         "OCB: Found %g:%s for preservation of %u bytes\n",
-        OC_BOOT_OPTION_VARIABLE_NAME,
         BootProtectGuid,
+        OC_BOOT_OPTION_VARIABLE_NAME,
         (UINT32) BootOptionSize
         ));
     } else {
