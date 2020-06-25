@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
-%DIF ADD ../Configuration.tex        Wed Jun 24 15:03:04 2020
+%DIF DEL PreviousConfiguration.tex   Thu Jun 25 11:21:38 2020
+%DIF ADD ../Configuration.tex        Thu Jun 25 11:21:38 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -665,7 +665,7 @@ command sequence may look as follows:
 \DIFmodbegin
 \begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash,alsolanguage=DIFcode]
 %DIF < git clone https://github.com/acidanthera/audk UDK
-%DIF > git clone --recursive https://github.com/acidanthera/audk UDK
+%DIF > git clone --recursive --depth=1 https://github.com/acidanthera/audk UDK
 cd UDK
 git clone https://github.com/acidanthera/OpenCorePkg
 source edksetup.sh
@@ -1531,7 +1531,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 }
 
   \DIFadd{This option overrides the maximum slide of 255 by a user specified value between 1 and 254 inclusive
-  when }\texttt{\DIFadd{ProvideCustomSlide}} \DIFadd{is enabled. 
+  when }\texttt{\DIFadd{ProvideCustomSlide}} \DIFadd{is enabled.
   It is believed that modern firmwares allocate pool memory from top to bottom, effectively resulting in
   free memory at the time of slide scanning being later used as temporary
   memory during kernel loading. In case those memory are unavailable, this
