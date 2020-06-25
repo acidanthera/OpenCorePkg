@@ -602,7 +602,7 @@ The latest Xcode version is recommended for use despite the toolchain name. Exam
 command sequence may look as follows:
 
 \begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
-git clone --recursive https://github.com/acidanthera/audk UDK
+git clone --recursive --depth=1 https://github.com/acidanthera/audk UDK
 cd UDK
 git clone https://github.com/acidanthera/OpenCorePkg
 source edksetup.sh
@@ -1466,7 +1466,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Description}: Provide maximum KASLR slide when higher ones are unavailable.
 
   This option overrides the maximum slide of 255 by a user specified value between 1 and 254 inclusive
-  when \texttt{ProvideCustomSlide} is enabled. 
+  when \texttt{ProvideCustomSlide} is enabled.
   It is believed that modern firmwares allocate pool memory from top to bottom, effectively resulting in
   free memory at the time of slide scanning being later used as temporary
   memory during kernel loading. In case those memory are unavailable, this
