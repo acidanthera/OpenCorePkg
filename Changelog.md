@@ -18,6 +18,7 @@ OpenCore Changelog
 - Renamed `ConfigValidity` utility to `ocvalidate` for consistency
 - Added `GlobalConnect` for APFS loading to workaround older firmware issues
 - Added 11.0 support for `AvoidRuntimeDefrag` Booter quirk
+- Fixed 11.0 lapic kernel quirk as of DP1
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy
