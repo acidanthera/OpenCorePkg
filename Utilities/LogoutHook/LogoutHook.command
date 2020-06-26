@@ -62,12 +62,12 @@ for key in BootOrder BootNext Boot0080 Boot0081 Boot0082 Boot0083; do
 done
 # not an error
 # shellcheck disable=SC2043
-#for key in DefaultBackgroundColor; do
-#getKey "4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:${key}" > "${key}"
-#if [ -n "$(/usr/bin/hexdump "${key}" )" ]; then
-#/usr/libexec/PlistBuddy -c "Import Add:4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:${key} ${key}" ./nvram.plist || abort "Failed to import ${key} from 4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14!"
-#fi
-#done
+for key in DefaultBackgroundColor; do
+getKey "4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:${key}" > "${key}"
+if [ -n "$(/usr/bin/hexdump "${key}" )" ]; then
+/usr/libexec/PlistBuddy -c "Import Add:4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:${key} ${key}" ./nvram.plist || abort "Failed to import ${key} from 4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14!"
+fi
+done
 
 # Optional for security reasons: Wi-Fi settings for Install OS X and Recovery
 # for key in current-network preferred-count; do
