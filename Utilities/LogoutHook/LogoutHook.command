@@ -13,7 +13,7 @@ if [ "$1" = "install" ]; then
   exit 0
 fi
 
-if [ ! -x /usr/bin/dirname ] || [ ! -x /usr/sbin/nvram ] || [ ! -x /usr/bin/grep ] || [ ! -x /bin/chmod ] || [ ! -x /usr/bin/sed ] || [ ! -x /usr/bin/base64 ] || [ ! -x /bin/rm ] || [ ! -x /bin/mkdir ] || [ ! -x /bin/dd ] || [ ! -x /usr/bin/stat ] || [ ! -x /usr/libexec/PlistBuddy ] || [ ! -x /usr/sbin/ioreg ] || [ ! -x /usr/bin/xxd ] || [ ! -x /usr/sbin/diskutil ] || [ ! -x /bin/cp ] || [ ! -x /usr/bin/wc ] || [ ! -x /usr/bin/uuidgen ] || [ ! -x /usr/bin/hexdump ]; then
+if [ ! -x /usr/bin/dirname ] || [ ! -x /usr/sbin/nvram ] || [ ! -x /usr/bin/grep ] || [ ! -x /bin/chmod ] || [ ! -x /usr/bin/sed ] || [ ! -x /usr/bin/base64 ] || [ ! -x /bin/rm ] || [ ! -x /bin/mkdir ]  || [ ! -x /usr/bin/stat ] || [ ! -x /usr/libexec/PlistBuddy ] || [ ! -x /usr/sbin/ioreg ] || [ ! -x /usr/bin/xxd ] || [ ! -x /usr/sbin/diskutil ] || [ ! -x /bin/cp ] || [ ! -x /usr/bin/wc ] || [ ! -x /usr/bin/uuidgen ] || [ ! -x /usr/bin/hexdump ]; then
   abort "Unix environment is broken!"
 fi
 
@@ -53,14 +53,8 @@ cd "${uuidDump}"         || abort "Failed to enter dump directory!"
 
 "${nvram}" -xp > ./nvram1.plist || abort "Failed to dump nvram!"
 
-getKey "8BE4DF61-93CA-11D2-AA0D-00E098032B8C:Boot0080" > Boot0080
-getKey "efi-boot-device-data" > efi-boot-device-data
-if [ -n "$(/usr/bin/hexdump "Boot0080" )" ] && [ -n "$(/usr/bin/hexdump "efi-boot-device-data" )" ]; then
-  /bin/dd seek=24 if=efi-boot-device-data of=Boot0080 bs=1 count="$(/usr/bin/stat -f%z efi-boot-device-data)"    || abort "Failed to fill Boot0080 with efi-boot-device-data!"
-  /usr/libexec/PlistBuddy -c "Import Add:8BE4DF61-93CA-11D2-AA0D-00E098032B8C:Boot0080 Boot0080" ./nvram.plist || abort "Failed to import Boot0080!"
-fi
 
-for key in BootOrder BootNext Boot0081 Boot0082 Boot0083; do
+for key in BootOrder BootNext Boot0080 Boot0081 Boot0082 Boot0083; do
   getKey "8BE4DF61-93CA-11D2-AA0D-00E098032B8C:${key}" > "${key}"
   if [ -n "$(/usr/bin/hexdump "${key}" )" ]; then
     /usr/libexec/PlistBuddy -c "Import Add:8BE4DF61-93CA-11D2-AA0D-00E098032B8C:${key} ${key}" ./nvram.plist || abort "Failed to import ${key} from 8BE4DF61-93CA-11D2-AA0D-00E098032B8C!"
@@ -68,12 +62,12 @@ for key in BootOrder BootNext Boot0081 Boot0082 Boot0083; do
 done
 # not an error
 # shellcheck disable=SC2043
-for key in DefaultBackgroundColor; do
-getKey "4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:${key}" > "${key}"
-if [ -n "$(/usr/bin/hexdump "${key}" )" ]; then
-/usr/libexec/PlistBuddy -c "Import Add:4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:${key} ${key}" ./nvram.plist || abort "Failed to import ${key} from 4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14!"
-fi
-done
+#for key in DefaultBackgroundColor; do
+#getKey "4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:${key}" > "${key}"
+#if [ -n "$(/usr/bin/hexdump "${key}" )" ]; then
+#/usr/libexec/PlistBuddy -c "Import Add:4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:${key} ${key}" ./nvram.plist || abort "Failed to import ${key} from 4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14!"
+#fi
+#done
 
 # Optional for security reasons: Wi-Fi settings for Install OS X and Recovery
 # for key in current-network preferred-count; do
