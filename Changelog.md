@@ -19,6 +19,7 @@ OpenCore Changelog
 - Added `GlobalConnect` for APFS loading to workaround older firmware issues
 - Added 11.0 support for `AvoidRuntimeDefrag` Booter quirk
 - Fixed 11.0 lapic kernel quirk as of DP1
+- Improved boot selection scripts for macOS without NVRAM
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy
