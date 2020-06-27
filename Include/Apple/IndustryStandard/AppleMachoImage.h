@@ -1780,6 +1780,21 @@ typedef struct {
 } MACH_FIXED_VM_FILE_COMMAND;
 
 ///
+/// LC_FILESET_ENTRY commands describe constituent Mach-O files that are part
+/// of a fileset. In one implementation, entries are dylibs with individual
+/// mach headers and repositionable text and data segments. Each entry is
+/// further described by its own mach header.
+///
+typedef struct {
+  MACH_LOAD_COMMAND_HDR_
+  UINT64                    VirtualAddress;  ///< memory address of the entry
+  UINT64                    FileOffset;      ///< file offset of the entry
+  MACH_LOAD_COMMAND_STRING  EntryId;         ///< contained entry id
+  UINT32                    Reserved;        ///< reserved
+  CHAR8                     Payload[];       ///< file information starting at entry id
+} MACH_FILESET_ENTRY_COMMAND;
+
+///
 /// The entry_point_command is a replacement for thread_command.
 /// It is used for main executables to specify the location (file offset)
 /// of main().  If -stack_size was used at link time, the stacksize
@@ -1813,37 +1828,40 @@ typedef struct {
 } MACH_SOURCE_VERSION_COMMAND;
 
 typedef union {
-  CONST MACH_LOAD_COMMAND               *Hdr;
-  CONST MACH_SEGMENT_COMMAND            *Segment;
-  CONST MACH_SEGMENT_COMMAND_64         *Segment64;
-  CONST MACH_FIXED_VM_LIB_COMMAND       *VmLib;
-  CONST MACH_DYLIB_COMMAND              *Dylib;
-  CONST MACH_SUB_FRAMEWORK_COMMAND      *SubFramework;
-  CONST MACH_SUB_CLIENT_COMMAND         *SubClient;
-  CONST MACH_SUB_UMBRELLA_COMMAND       *SubUmbrella;
-  CONST MACH_SUB_LIBRARY_COMMAND        *SubLibrary;
-  CONST MACH_PREBOUND_DYLIB_COMMAND     *PreboundDyLib;
-  CONST MACH_DYLINKER_COMMAND           *Dylinker;
-  CONST MACH_THREAD_COMMAND             *Thread;
-  CONST MACH_ROUTINES_COMMAND           *Routines;
-  CONST MACH_ROUTINES_COMMAND_64        *Routines64;
-  CONST MACH_SYMTAB_COMMAND             *Symtab;
-  CONST MACH_DYSYMTAB_COMMAND           *Dysymtab;
-  CONST MACH_TWO_LEVEL_HINTS_COMMAND    *TwoLevelHints;
-  CONST MACH_PREBIND_CHECKSUM_COMMAND   *PrebindChecksum;
-  CONST MACH_UUID_COMMAND               *Uuid;
-  CONST MACH_RUN_PATH_COMMAND           *RunPath;
-  CONST MACH_LINKEDIT_DATA_COMMAND      *LinkeditData;
-  CONST MACH_ENCRYPTION_INFO_COMMAND    *EncryptionInfo;
-  CONST MACH_ENCRYPTION_INFO_COMMAND_64 *EncryptionInfo64;
-  CONST MACH_VERSION_MIN_COMMAND        *VersionMin;
-  CONST MACH_BUILD_VERSION_COMMAND      *BuildVersion;
-  CONST MACH_DYLD_INFO_COMMAND          *DyldInfo;
-  CONST MACH_LINKER_OPTION_COMMAND      *LinkerOption;
-  CONST MACH_SYMBOL_SEGMENT_COMMAND     *SymbolSegment;
-  CONST MACH_IDENTIFICATION_COMMAND     *Identification;
-  CONST MACH_FIXED_VM_FILE_COMMAND      *FixedVmFile;
-  CONST VOID                            *Pointer;
+  MACH_LOAD_COMMAND                     *Hdr;
+  MACH_SEGMENT_COMMAND                  *Segment;
+  MACH_SEGMENT_COMMAND_64               *Segment64;
+  MACH_FIXED_VM_LIB_COMMAND             *VmLib;
+  MACH_DYLIB_COMMAND                    *Dylib;
+  MACH_SUB_FRAMEWORK_COMMAND            *SubFramework;
+  MACH_SUB_CLIENT_COMMAND               *SubClient;
+  MACH_SUB_UMBRELLA_COMMAND             *SubUmbrella;
+  MACH_SUB_LIBRARY_COMMAND              *SubLibrary;
+  MACH_PREBOUND_DYLIB_COMMAND           *PreboundDyLib;
+  MACH_DYLINKER_COMMAND                 *Dylinker;
+  MACH_THREAD_COMMAND                   *Thread;
+  MACH_ROUTINES_COMMAND                 *Routines;
+  MACH_ROUTINES_COMMAND_64              *Routines64;
+  MACH_SYMTAB_COMMAND                   *Symtab;
+  MACH_DYSYMTAB_COMMAND                 *Dysymtab;
+  MACH_TWO_LEVEL_HINTS_COMMAND          *TwoLevelHints;
+  MACH_PREBIND_CHECKSUM_COMMAND         *PrebindChecksum;
+  MACH_UUID_COMMAND                     *Uuid;
+  MACH_RUN_PATH_COMMAND                 *RunPath;
+  MACH_LINKEDIT_DATA_COMMAND            *LinkeditData;
+  MACH_ENCRYPTION_INFO_COMMAND          *EncryptionInfo;
+  MACH_ENCRYPTION_INFO_COMMAND_64       *EncryptionInfo64;
+  MACH_VERSION_MIN_COMMAND              *VersionMin;
+  MACH_BUILD_VERSION_COMMAND            *BuildVersion;
+  MACH_DYLD_INFO_COMMAND                *DyldInfo;
+  MACH_LINKER_OPTION_COMMAND            *LinkerOption;
+  MACH_SYMBOL_SEGMENT_COMMAND           *SymbolSegment;
+  MACH_IDENTIFICATION_COMMAND           *Identification;
+  MACH_FIXED_VM_FILE_COMMAND            *FixedVmFile;
+  MACH_LINKEDIT_DATA_COMMAND            *DyldExportsTrie;
+  MACH_LINKEDIT_DATA_COMMAND            *DyldChainedFixups;
+  MACH_FILESET_ENTRY_COMMAND            *FilesetEntry;
+  VOID                                  *Pointer;
   UINTN                                 Address;
 } MACH_LOAD_COMMAND_PTR;
 

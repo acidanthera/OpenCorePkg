@@ -1485,3 +1485,123 @@ MachoRuntimeGetEntryAddress (
 
   return Address;
 }
+
+BOOLEAN
+MachoMergeSegments64 (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST CHAR8          *Prefix
+  )
+{
+  UINT32                  LcIndex;
+  MACH_LOAD_COMMAND       *LoadCommand;
+  MACH_SEGMENT_COMMAND_64 *Segment;
+  MACH_SEGMENT_COMMAND_64 *FirstSegment;
+  UINT64                  MaxAddress;
+  UINT64                  MaxOffset;
+  MACH_VM_PROTECTION      MaxInitProt;
+  MACH_VM_PROTECTION      MaxMaxProt;
+  MACH_HEADER_64          *Header;
+  UINTN                   PrefixLength;
+  UINTN                   SkipCount;
+  UINTN                   RemainingArea;
+
+  ASSERT (Context != NULL);
+  ASSERT (Context->FileSize != 0);
+  ASSERT (Prefix != NULL);
+
+  Header       = MachoGetMachHeader64 (Context);
+  PrefixLength = AsciiStrLen (Prefix);
+  FirstSegment = NULL;
+
+  MaxAddress  = 0;
+  MaxOffset   = 0;
+  MaxInitProt = 0;
+  MaxMaxProt  = 0;
+  SkipCount   = 0;
+
+  LoadCommand = &Header->Commands[0];
+
+  for (LcIndex = 0; LcIndex < Header->NumCommands; ++LcIndex) {
+    //
+    // Either skip or stop at unrelated commands.
+    //
+    if (LoadCommand->CommandType != MACH_LOAD_COMMAND_SEGMENT_64
+      || AsciiStrnCmp (Segment->SegmentName, Prefix, PrefixLength) != 0) {
+      if (FirstSegment != NULL) {
+        break;
+      }
+
+      LoadCommand = NEXT_MACH_LOAD_COMMAND (LoadCommand);
+      continue;
+    }
+
+    //
+    // We have a segment starting with the prefix.
+    //
+    Segment = (MACH_SEGMENT_COMMAND_64 *) (VOID *) LoadCommand;
+
+    //
+    // Do not support this for now as it will require changes in the file.
+    //
+    if (Segment->Size != Segment->FileSize) {
+      return FALSE;
+    }
+
+    //
+    // Remember the first segment or assume it is a skip.
+    //
+    if (FirstSegment == NULL) {
+      FirstSegment = Segment;
+    } else {
+      ++SkipCount;
+
+      //
+      // Expand the first segment.
+      // TODO: Do we need to check these for overflow for our own purposes?
+      //
+      FirstSegment->Size              = Segment->VirtualAddress - FirstSegment->VirtualAddress + Segment->Size;
+      FirstSegment->FileSize          = Segment->FileOffset - FirstSegment->FileOffset + Segment->FileSize;
+
+      //
+      // Add new segment protection to the first segment.
+      //
+      FirstSegment->InitialProtection  |= Segment->InitialProtection;
+      FirstSegment->MaximumProtection  |= Segment->MaximumProtection;
+    }
+
+    LoadCommand = NEXT_MACH_LOAD_COMMAND (LoadCommand);
+  }
+
+  //
+  // The segment does not exist.
+  //
+  if (FirstSegment == NULL) {
+    return FALSE;
+  }
+
+  //
+  // The segment is only one.
+  //
+  if (SkipCount == 0) {
+    return FALSE;
+  }
+
+  //
+  // Move back remaining commands ontop of the skipped ones and zero this area.
+  //
+  RemainingArea = Header->CommandsSize - ((UINTN) LoadCommand - (UINTN) &Header->Commands[0]);
+  CopyMem (
+    (UINT8 *) FirstSegment + FirstSegment->CommandSize,
+    LoadCommand,
+    RemainingArea
+    );
+  ZeroMem (LoadCommand, RemainingArea);
+
+  //
+  // Account for dropped commands in the header.
+  //
+  Header->NumCommands  -= SkipCount;
+  Header->CommandsSize -= sizeof (MACH_SEGMENT_COMMAND_64) * SkipCount;
+
+  return TRUE;
+}

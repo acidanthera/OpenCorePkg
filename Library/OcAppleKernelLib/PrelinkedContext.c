@@ -173,6 +173,7 @@ PrelinkedContextInit (
   // Initialize kext list with kernel pseudo kext.
   //
   InitializeListHead (&Context->PrelinkedKexts);
+  InitializeListHead (&Context->InjectedKexts);
   if (InternalCachedPrelinkedKernel (Context) == NULL) {
     return EFI_INVALID_PARAMETER;
   }
@@ -320,6 +321,11 @@ PrelinkedContextFree (
   }
 
   ZeroMem (&Context->PrelinkedKexts, sizeof (Context->PrelinkedKexts));
+
+  //
+  // We do not need to iterate InjectedKexts here, as its memory was freed above.
+  //
+  ZeroMem (&Context->InjectedKexts, sizeof (Context->InjectedKexts));
 }
 
 EFI_STATUS
@@ -707,6 +713,11 @@ PrelinkedInjectKext (
   //
   if (PrelinkedKext != NULL) {
     InsertTailList (&Context->PrelinkedKexts, &PrelinkedKext->Link);
+    //
+    // Additionally register this kext in the injected list, as this is required
+    // for KernelCollection support.
+    //
+    InsertTailList (&Context->InjectedKexts, &PrelinkedKext->InjectedLink);
   }
 
   return EFI_SUCCESS;

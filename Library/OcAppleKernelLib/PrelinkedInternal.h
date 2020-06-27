@@ -61,7 +61,14 @@ struct PRELINKED_KEXT_ {
   // eventually be part of a list and to save separate allocations per KEXT.
   //
   UINT32                   Signature;
+  //
+  // Link for global list (PRELINKED_CONTEXT -> PrelinkedKexts).
+  //
   LIST_ENTRY               Link;
+  //
+  // Link for local list (PRELINKED_CONTEXT -> InjectedKexts).
+  //
+  LIST_ENTRY               InjectedLink;
   //
   // Kext CFBundleIdentifier.
   //
@@ -129,7 +136,7 @@ struct PRELINKED_KEXT_ {
 #define PRELINKED_KEXT_SIGNATURE  SIGNATURE_32 ('P', 'K', 'X', 'T')
 
 /**
-  Gets the next element in a linked list of PRELINKED_KEXT.
+  Gets the next element in PrelinkedKexts list of PRELINKED_KEXT.
 
   @param[in] This  The current ListEntry.
 **/
@@ -140,6 +147,20 @@ struct PRELINKED_KEXT_ {
     Link,                                   \
     PRELINKED_KEXT_SIGNATURE                \
     ))
+
+/**
+  Gets the next element in InjectedKexts list of PRELINKED_KEXT.
+
+  @param[in] This  The current ListEntry.
+**/
+#define GET_INJECTED_KEXT_FROM_LINK(This)   \
+  (CR (                                     \
+    (This),                                 \
+    PRELINKED_KEXT,                         \
+    InjectedLink,                           \
+    PRELINKED_KEXT_SIGNATURE                \
+    ))
+
 
 /**
   Creates new PRELINKED_KEXT from OC_MACHO_CONTEXT.

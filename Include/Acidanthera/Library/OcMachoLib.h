@@ -232,6 +232,21 @@ MachoGetSectionByAddress64 (
   );
 
 /**
+  Merge Mach-O segments into one with lowest protection.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Prefix   Segment prefix to merge.
+
+  @retval TRUE on success
+
+**/
+BOOLEAN
+MachoMergeSegments64 (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST CHAR8          *Prefix
+  );
+
+/**
   Returns whether Symbol describes a section.
 
   @param[in] Symbol  Symbol to evaluate.

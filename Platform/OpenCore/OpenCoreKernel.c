@@ -722,7 +722,7 @@ OcKernelFileOpen (
   // On 10.9 mach_kernel is loaded for manual linking aferwards, so we cannot skip it.
   //
   if (OpenMode == EFI_FILE_MODE_READ
-    && StrStr (FileName, L"kernel") != NULL
+    && OcStriStr (FileName, L"kernel") != NULL
     && StrCmp (FileName, L"System\\Library\\Kernels\\kernel") != 0) {
 
     DEBUG ((DEBUG_INFO, "OC: Trying XNU hook on %s\n", FileName));

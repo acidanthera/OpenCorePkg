@@ -46,6 +46,10 @@
 
 #define PRELINK_INFO_INTEGER_ATTRIBUTES           "size=\"64\""
 
+#define KC_REGION_SEGMENT_PREFIX                  "__REGION"
+#define KC_TEXT_SEGMENT                           "__TEXT"
+#define KC_MOSCOW_SEGMENT                         "__MOSCOW101"
+
 //
 // Failsafe default for plist reserve allocation.
 //
@@ -125,9 +129,15 @@ typedef struct {
   VOID                     *LinkBuffer;
   UINT32                   LinkBufferSize;
   //
-  // Used for caching prelinked kexts.
+  // Used for caching all prelinked kexts.
+  // I.e. this contains kernel, injected kexts, and kexts used as dependencies.
   //
   LIST_ENTRY               PrelinkedKexts;
+  //
+  // Used for caching prelinked kexts, which we inject.
+  // This is a sublist of PrelinkedKexts.
+  //
+  LIST_ENTRY               InjectedKexts;
 } PRELINKED_CONTEXT;
 
 //
