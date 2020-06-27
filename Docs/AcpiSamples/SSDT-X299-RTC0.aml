@@ -1,0 +1,56 @@
+/*
+ * Intel ACPI Component Architecture
+ * AML/ASL+ Disassembler version 20180427 (64-bit version)(RM)
+ * Copyright (c) 2000 - 2018 Intel Corporation
+ * 
+ * Disassembling to non-symbolic legacy ASL operators
+ *
+ * Disassembly of iASL98QNRT.aml, Sat Jun 27 21:15:03 2020
+ *
+ * Original Table Header:
+ *     Signature        "SSDT"
+ *     Length           0x000000C6 (198)
+ *     Revision         0x02
+ *     Checksum         0x60
+ *     OEM ID           "ACDT"
+ *     OEM Table ID     "FIX_RTC0"
+ *     OEM Revision     0x00000000 (0)
+ *     Compiler ID      "INTL"
+ *     Compiler Version 0x20180427 (538444839)
+ */
+DefinitionBlock ("", "SSDT", 2, "ACDT", "FIX_RTC0", 0x00000000)
+{
+    External (_SB_.PC00, DeviceObj)    // (from opcode)
+    External (_SB_.PC00.LPC0, DeviceObj)    // (from opcode)
+    External (_SB_.PC00.LPC0.RTC_, DeviceObj)    // (from opcode)
+
+    Device (_SB.PC00.LPC0.RTC0)
+    {
+        Name (_HID, EisaId ("PNP0B00"))  // _HID: Hardware ID
+        Name (_CRS, ResourceTemplate ()  // _CRS: Current Resource Settings
+        {
+            IO (Decode16,
+                0x0070,             // Range Minimum
+                0x0070,             // Range Maximum
+                0x01,               // Alignment
+                0x04,               // Length
+                )
+            IRQNoFlags ()
+                {8}
+        })
+        Method (_STA, 0, NotSerialized)  // _STA: Status
+        {
+            If (_OSI ("Darwin"))
+            {
+                Return (0x0F)
+            }
+            Else
+            {
+                Return (Zero)
+            }
+        }
+    }
+
+    Name (_SB.PC00.LPC0.RTC._STA, Zero)  // _STA: Status
+}
+
