@@ -308,16 +308,18 @@ InternalKcInitSegmentFixupChains (
 
   @param[in,out] SegChain     The segment fixup chains information structure to
                               add RelocInfo into.
-  @param[in]     MachContext  The context of the Mach-O RelocInfo belongs to.
   @param[in]     Segment      The segment SegChain is describing.
+  @param[in]     MachContext  The context of the Mach-O RelocInfo belongs to. It
+                              must have been prelinked by OcAppleKernelLib. The
+                              image must reside in Segment.
   @param[in]     RelocInfo    The relocation to add a fixup of.
   @param[in]     RelocBase    The relocation base address.
 */
 VOID
 InternalKcConvertRelocToFixup (
   IN OUT MACH_DYLD_CHAINED_STARTS_IN_SEGMENT  *SegChain,
-  IN     OC_MACHO_CONTEXT                     *MachContext,
   IN     CONST MACH_SEGMENT_COMMAND_64        *Segment,
+  IN     OC_MACHO_CONTEXT                     *MachContext,
   IN     CONST MACH_RELOCATION_INFO           *RelocInfo,
   IN     UINT64                               RelocBase
   )
@@ -433,4 +435,85 @@ InternalKcConvertRelocToFixup (
   }
 
   CopyMem (RelocDest, &NewFixup, sizeof (NewFixup));
+}
+
+/*
+  Indexes all relocations of MachContext into the fixup chains SegChain of
+  Segment.
+
+  @param[in,out] SegChain     The segment fixup chains information structure to
+                              add RelocInfo into.
+  @param[in]     Segment      The segment SegChain is describing.
+  @param[in]     MachContext  The context of the Mach-O to index. It must have
+                              been prelinked by OcAppleKernelLib. The image
+                              must reside in Segment.
+*/
+VOID
+InternalKcKextIndexFixups (
+  IN OUT MACH_DYLD_CHAINED_STARTS_IN_SEGMENT  *SegChain,
+  IN     CONST MACH_SEGMENT_COMMAND_64        *Segment,
+  IN     OC_MACHO_CONTEXT                     *MachContext
+  )
+{
+  CONST MACH_DYSYMTAB_COMMAND   *DySymtab;
+  CONST MACH_SEGMENT_COMMAND_64 *FirstSegment;
+  CONST MACH_HEADER_64          *MachHeader;
+  CONST MACH_RELOCATION_INFO    *Relocations;
+  UINT32                        RelocIndex;
+
+  ASSERT (SegChain != NULL);
+  ASSERT (Segment != NULL);
+  ASSERT (MachContext != NULL);
+
+  MachHeader = MachoGetMachHeader64 (MachContext);
+  //
+  // Only perform actions when the kext is flag'd to be dynamically linked.
+  // FIXME: Somehow unify this with the prelink function?
+  //
+  if ((MachHeader->Flags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) == 0) {
+    return;
+  }
+  //
+  // FIXME: The current OcMachoLib was not written with post-linking
+  // re-initialisation in mind. We really don't want to sanitise everything
+  // again, so avoid the dedicated API for now.
+  //
+  DySymtab = (MACH_DYSYMTAB_COMMAND *) MachoGetNextCommand64 (
+    MachContext,
+    MACH_LOAD_COMMAND_DYSYMTAB,
+    NULL
+    );
+
+  FirstSegment = MachoGetNextSegment64 (MachContext, NULL);
+  //
+  // DYSYMTAB and at least one segment must exist, otherwise prelinking would
+  // have failed.
+  //
+  ASSERT (DySymtab != NULL);
+  ASSERT (FirstSegment != NULL);
+  //
+  // The Mach-O file to index must be included in Segment.
+  //
+  ASSERT (FirstSegment->VirtualAddress >= Segment->VirtualAddress
+    && MachoGetLastAddress64 (MachContext) <= Segment->VirtualAddress + Segment->Size);
+  //
+  // Prelinking must have eliminated all external relocations.
+  //
+  ASSERT (DySymtab->NumExternalRelocations == 0);
+  //
+  // Convert all relocations to fixups.
+  //
+  Relocations = (MACH_RELOCATION_INFO *) (
+    (UINTN) MachHeader + DySymtab->ExternalRelocationsOffset
+    );
+
+  for (RelocIndex = 0; RelocIndex < DySymtab->NumOfLocalRelocations; ++RelocIndex) {
+    InternalKcConvertRelocToFixup (
+      SegChain,
+      Segment,
+      MachContext,
+      &Relocations[RelocIndex],
+      FirstSegment->VirtualAddress
+      );
+  }
 }
