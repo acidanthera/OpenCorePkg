@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Jun 26 18:57:44 2020
-%DIF ADD ../Configuration.tex        Fri Jun 26 18:57:44 2020
+%DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
+%DIF ADD ../Configuration.tex        Sun Jun 28 09:37:24 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -5205,9 +5205,10 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Ensure GOP (Graphics Output Protocol) on console handle.
 
-  macOS bootloader requires GOP to be present on console handle, yet the exact
-  location of GOP is not covered by the UEFI specification. This option will
-  ensure GOP is installed on console handle if it is present.
+  macOS bootloader requires GOP \DIFaddbegin \DIFadd{or UGA (for 10.4 EfiBoot) }\DIFaddend to be present on console
+  handle, yet the exact location of \DIFdelbegin \DIFdel{GOP }\DIFdelend \DIFaddbegin \DIFadd{the graphics protocol }\DIFaddend is not covered by the
+  UEFI specification. This option will ensure GOP \DIFdelbegin \DIFdel{is installed on console handle if it is present}\DIFdelend \DIFaddbegin \DIFadd{and UGA, if present, are available
+  on the console handle}\DIFaddend .
 
   \emph{Note}: This option will also replace broken GOP protocol on console handle,
   which may be the case on \texttt{MacPro5,1} with newer GPUs.

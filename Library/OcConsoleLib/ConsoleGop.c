@@ -63,15 +63,30 @@ ConsoleHandleProtocol (
 
   Status = mOriginalHandleProtocol (Handle, Protocol, Interface);
 
-  if (Status == EFI_UNSUPPORTED) {
-    if (CompareGuid (&gEfiGraphicsOutputProtocolGuid, Protocol)
-      && mConsoleGraphicsOutput != NULL) {
+  if (Status != EFI_UNSUPPORTED) {
+    return Status;
+  }
+
+  if (CompareGuid (&gEfiGraphicsOutputProtocolGuid, Protocol)) {
+    if (mConsoleGraphicsOutput != NULL) {
       *Interface = mConsoleGraphicsOutput;
-      Status = EFI_SUCCESS;
+      return EFI_SUCCESS;
+    }
+  } else if (CompareGuid (&gEfiUgaDrawProtocolGuid, Protocol)) {
+    //
+    // EfiBoot from 10.4 can only use UgaDraw protocol.
+    //
+    Status = gBS->LocateProtocol (
+      &gEfiUgaDrawProtocolGuid,
+      NULL,
+      Interface
+      );
+    if (!EFI_ERROR (Status)) {
+      return EFI_SUCCESS;
     }
   }
 
-  return Status;
+  return EFI_UNSUPPORTED;
 }
 
 VOID

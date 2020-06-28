@@ -20,6 +20,7 @@ OpenCore Changelog
 - Added 11.0 support for `AvoidRuntimeDefrag` Booter quirk
 - Fixed 11.0 lapic kernel quirk as of DP1
 - Improved boot selection scripts for macOS without NVRAM
+- Added UGA protocol compatibility in `ProvideConsoleGop` quirk
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy

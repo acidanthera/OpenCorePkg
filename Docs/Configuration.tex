@@ -5104,9 +5104,10 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Ensure GOP (Graphics Output Protocol) on console handle.
 
-  macOS bootloader requires GOP to be present on console handle, yet the exact
-  location of GOP is not covered by the UEFI specification. This option will
-  ensure GOP is installed on console handle if it is present.
+  macOS bootloader requires GOP or UGA (for 10.4 EfiBoot) to be present on console
+  handle, yet the exact location of the graphics protocol is not covered by the
+  UEFI specification. This option will ensure GOP and UGA, if present, are available
+  on the console handle.
 
   \emph{Note}: This option will also replace broken GOP protocol on console handle,
   which may be the case on \texttt{MacPro5,1} with newer GPUs.
