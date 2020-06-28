@@ -229,3 +229,208 @@ InternalKcRebuildMachHeader (
 
   return EFI_SUCCESS;
 }
+
+/*
+  Returns the size required to store a segment's fixup chains information.
+
+  @param[in] SegmentSize  The size, in bytes, of the segment to index.
+
+  @retval 0      The segment is too large to index with a single structure.
+  @retval other  The size, in bytes, required to store a segment's fixup chain
+                 information.
+*/
+UINT32
+InternalKcGetSegmentFixupChainsSize (
+  IN UINT32  SegmentSize
+  )
+{
+  CONST MACH_DYLD_CHAINED_STARTS_IN_SEGMENT *Dummy;
+  //
+  // Theis assertion is propagated from OcMachoLib.
+  //
+  ASSERT (SegmentSize % MACHO_PAGE_SIZE == 0);
+  //
+  // As PageCount is UINT16, we can only index 2^16 * 4096 Bytes with one chain.
+  //
+  if (SegmentSize > BIT16 * MACHO_PAGE_SIZE) {
+    return 0;
+  }
+
+  return (UINT32) (sizeof (*Dummy)
+    + (SegmentSize / MACHO_PAGE_SIZE) * sizeof (Dummy->PageStart[0]));
+}
+
+/*
+  Initialises a structure that stores Segment's fixup chains information.
+
+  @param[out] SegChain      The information structure to initialise.
+  @param[in]  SegChainSize  The size, in bytes, available to SegChain.
+  @param[in]  Segment       The segment to index the fixup chains of.
+*/
+VOID
+InternalKcInitSegmentFixupChains (
+  OUT MACH_DYLD_CHAINED_STARTS_IN_SEGMENT  *SegChain,
+  IN  UINT32                               SegChainSize, 
+  IN  CONST MACH_SEGMENT_COMMAND_64        *Segment
+  )
+{
+  UINT16 PageIndex;
+
+  ASSERT (SegChain != NULL);
+  ASSERT (Segment != NULL);
+  //
+  // These assertions are propagated from OcMachoLib.
+  //
+  ASSERT (Segment->Size <= MAX_UINT32);
+  ASSERT (Segment->Size % MACHO_PAGE_SIZE == 0);
+
+  ASSERT (SegChainSize != 0);
+  ASSERT (
+    SegChainSize == InternalKcGetSegmentFixupChainsSize ((UINT32) Segment->Size)
+    );
+
+  SegChain->Size            = SegChainSize;
+  SegChain->PageSize        = MACHO_PAGE_SIZE;
+  SegChain->PointerFormat   = MACH_DYLD_CHAINED_PTR_X86_64_KERNEL_CACHE;
+  SegChain->SegmentOffset   = Segment->VirtualAddress;
+  SegChain->MaxValidPointer = 0;
+  SegChain->PageCount       = Segment->Size / MACHO_PAGE_SIZE;
+  //
+  // Initialise all pages with no associated fixups.
+  //
+  for (PageIndex = 0; PageIndex < SegChain->PageCount; ++PageIndex) {
+    SegChain->PageStart[PageIndex] = MACH_DYLD_CHAINED_PTR_START_NONE;
+  }
+}
+
+/*
+  Indexes RelocInfo into the fixup chains SegChain of Segment.
+
+  @param[in,out] SegChain     The segment fixup chains information structure to
+                              add RelocInfo into.
+  @param[in]     MachContext  The context of the Mach-O RelocInfo belongs to.
+  @param[in]     Segment      The segment SegChain is describing.
+  @param[in]     RelocInfo    The relocation to add a fixup of.
+  @param[in]     RelocBase    The relocation base address.
+*/
+VOID
+InternalKcConvertRelocToFixup (
+  IN OUT MACH_DYLD_CHAINED_STARTS_IN_SEGMENT  *SegChain,
+  IN     OC_MACHO_CONTEXT                     *MachContext,
+  IN     CONST MACH_SEGMENT_COMMAND_64        *Segment,
+  IN     CONST MACH_RELOCATION_INFO           *RelocInfo,
+  IN     UINT64                               RelocBase
+  )
+{
+  UINT8                                        *SegmentData;
+  UINT8                                        *SegmentPageData;
+
+  UINT64                                       RelocAddress;
+  UINT32                                       RelocOffsetInSeg;
+  VOID                                         *RelocDest;
+
+  UINT16                                       NewFixupPage;
+  UINT16                                       NewFixupPageOffset;
+  MACH_DYKD_CHAINED_PTR_64_KERNEL_CACHE_REBASE NewFixup;
+
+  UINT16                                       IterFixupPageOffset;
+  VOID                                         *IterFixupData;
+  MACH_DYKD_CHAINED_PTR_64_KERNEL_CACHE_REBASE IterFixup;
+  UINT16                                       NextIterFixupPageOffset;
+
+  UINT16                                       FixupDelta;
+
+  ASSERT (SegChain != NULL);
+  ASSERT (MachContext != NULL);
+  ASSERT (Segment != NULL);
+  ASSERT (RelocInfo != NULL);
+  //
+  // SegChain must belong to Segment.
+  //
+  ASSERT (SegChain->SegmentOffset == Segment->VirtualAddress);
+  //
+  // This assertion is propagated from OcMachoLib.
+  //
+  ASSERT (SegChain->PageSize == MACHO_PAGE_SIZE);
+  //
+  // The entire KEXT and thus its relocations must be in Segment.
+  // Mach-O images are limited to 4 GB size by OcMachoLib, so the cast is safe.
+  //
+  RelocAddress     = RelocBase + (UINT32) RelocInfo->Address;
+  RelocOffsetInSeg = (UINT32) (RelocAddress - Segment->VirtualAddress);
+  //
+  // For now we assume we prelinked already and the relocations are sane.
+  //
+  ASSERT (RelocInfo->Extern == 0);
+  ASSERT (RelocInfo->Type == MachX8664RelocUnsigned);
+  ASSERT (RelocAddress >= Segment->VirtualAddress
+    && RelocOffsetInSeg <= Segment->FileSize
+    && Segment->FileSize - RelocOffsetInSeg <= 8);
+  //
+  // Create a new fixup based on the data of RelocInfo.
+  //
+  SegmentData = (UINT8 *) MachContext->MachHeader + Segment->FileOffset;
+  RelocDest   = SegmentData + RelocOffsetInSeg;
+  //
+  // It has been observed all fields but target and next are 0 for the kernel
+  // KC. For isAuth, this is because x86 does not support Pointer
+  // Authentication.
+  //
+  ZeroMem (&NewFixup, sizeof (NewFixup));
+  NewFixup.Target = ReadUnaligned64 (RelocDest);
+
+  NewFixupPage       = (UINT16) (RelocOffsetInSeg / MACHO_PAGE_SIZE);
+  NewFixupPageOffset = (UINT16) (RelocOffsetInSeg % MACHO_PAGE_SIZE);
+
+  IterFixupPageOffset = SegChain->PageStart[NewFixupPage];
+
+  if (IterFixupPageOffset == MACH_DYLD_CHAINED_PTR_START_NONE) {
+    //
+    // The current page has no fixups, just assign and terminate this one.
+    //
+    SegChain->PageStart[NewFixupPage] = NewFixupPageOffset;
+    //
+    // Fixup.next is 0 (i.e. the chain is terminated) already.
+    //
+  } else if (NewFixupPageOffset < IterFixupPageOffset) {
+    //
+    // RelocInfo preceeds the first fixup of the page - prepend the new fixup.
+    //
+    NewFixup.Next = IterFixupPageOffset - NewFixupPageOffset;
+    SegChain->PageStart[NewFixupPage] = NewFixupPageOffset;
+  } else {
+    SegmentPageData = SegmentData + NewFixupPage * MACHO_PAGE_SIZE;
+    //
+    // Find the last fixup of this page that preceeds RelocInfo.
+    // FIXME: Consider sorting the relocations in descending order first to
+    //        then always prepend the new fixup.
+    //
+    NextIterFixupPageOffset = IterFixupPageOffset;
+    do {
+      IterFixupPageOffset = NextIterFixupPageOffset;
+      IterFixupData       = SegmentPageData + IterFixupPageOffset;
+
+      CopyMem (&IterFixup, IterFixupData, sizeof (IterFixup));
+      NextIterFixupPageOffset = IterFixupPageOffset + IterFixup.Next;
+    } while (NextIterFixupPageOffset < NewFixupPageOffset && IterFixup.Next != 0);
+
+    FixupDelta = NewFixupPageOffset - IterFixupPageOffset;
+    //
+    // Our new fixup needs to point to the first fixup following it or terminate
+    // if the previous one was the last.
+    //
+    if (IterFixup.Next != 0) {
+      ASSERT (IterFixup.Next > FixupDelta);
+      NewFixup.Next = IterFixup.Next - FixupDelta;
+    } else {
+      NewFixup.Next = 0;
+    }
+    //
+    // The last fixup preceeding RelocInfo must point to our new fixup.
+    //
+    IterFixup.Next = FixupDelta;
+    CopyMem (IterFixupData, &IterFixup, sizeof (IterFixup));
+  }
+
+  CopyMem (RelocDest, &NewFixup, sizeof (NewFixup));
+}

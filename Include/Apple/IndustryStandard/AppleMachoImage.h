@@ -1795,6 +1795,59 @@ typedef struct {
 } MACH_FILESET_ENTRY_COMMAND;
 
 ///
+/// DYLD_CHAINED_PTR_64_KERNEL_CACHE, DYLD_CHAINED_PTR_X86_64_KERNEL_CACHE
+///
+typedef struct {
+  UINT64 Target     : 30,  ///< basePointers[cacheLevel] + target
+         CacheLevel :  2,  ///< what level of cache to bind to (indexes a mach_header array)
+         Diversity  : 16,
+         AddrDiv    :  1,
+         Key        :  2,
+         Next       : 12,  ///< 1 or 4-byte stide
+         IsAuth     :  1;  ///< 0 -> not authenticated.  1 -> authenticated
+} MACH_DYKD_CHAINED_PTR_64_KERNEL_CACHE_REBASE;
+
+typedef struct {
+  UINT32 Size;             ///< size of this (amount kernel needs to copy)
+  UINT16 PageSize;         ///< 0x1000 or 0x4000
+  UINT16 PointerFormat;    ///< DYLD_CHAINED_PTR_*
+  UINT64 SegmentOffset;    ///< offset in memory to start of segment
+  UINT32 MaxValidPointer;  ///< for 32-bit OS, any value beyond this is not a pointer
+  UINT16 PageCount;        ///< how many pages are in array
+  UINT16 PageStart[];      ///< each entry is offset in each page of first element in chain
+                           ///< or DYLD_CHAINED_PTR_START_NONE if no fixups on page
+//UINT16 ChainStarts[];    ///< some 32-bit formats may require multiple starts per page.
+                           ///< for those, if high bit is set in page_starts[], then it
+                           ///< is index into chain_starts[] which is a list of starts
+                           ///< the last of which has the high bit set
+} MACH_DYLD_CHAINED_STARTS_IN_SEGMENT;
+
+///
+/// Values for MACH_DYLD_CHAINED_STARTS_IN_SEGMENT.PointerFormat.
+///
+enum {
+  MACH_DYLD_CHAINED_PTR_ARM64E              =  1,  ///< stride 8, unauth target is vmaddr
+  MACH_DYLD_CHAINED_PTR_64                  =  2,  ///< target is vmaddr
+  MACH_DYLD_CHAINED_PTR_32                  =  3,
+  MACH_DYLD_CHAINED_PTR_32_CACHE            =  4,
+  MACH_DYLD_CHAINED_PTR_32_FIRMWARE         =  5,
+  MACH_DYLD_CHAINED_PTR_64_OFFSET           =  6,  ///< target is vm offset
+  MACH_DYLD_CHAINED_PTR_ARM64E_OFFSET       =  7,  ///< old name
+  MACH_DYLD_CHAINED_PTR_ARM64E_KERNEL       =  7,  ///< stride 4, unauth target is vm offset
+  MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE     =  8,
+  MACH_DYLD_CHAINED_PTR_ARM64E_USERLAND     =  9,  ///< stride 8, unauth target is vm offset
+  MACH_DYLD_CHAINED_PTR_ARM64E_FIRMWARE     = 10,  ///< stride 4, unauth target is vmaddr
+  MACH_DYLD_CHAINED_PTR_X86_64_KERNEL_CACHE = 11,  ///< stride 1, x86_64 kernel caches
+  MACH_DYLD_CHAINED_PTR_ARM64E_USERLAND24   = 12   ///< stride 8, unauth target is vm offset, 24-bit bind
+};
+
+enum {
+  MACH_DYLD_CHAINED_PTR_START_NONE  = 0xFFFF,  ///< used in page_start[] to denote a page with no fixups
+  MACH_DYLD_CHAINED_PTR_START_MULTI = 0x8000,  ///< used in page_start[] to denote a page which has multiple starts
+  MACH_DYLD_CHAINED_PTR_START_LAST  = 0x8000,  ///< used in chain_starts[] to denote last start in list for page
+};
+
+///
 /// The entry_point_command is a replacement for thread_command.
 /// It is used for main executables to specify the location (file offset)
 /// of main().  If -stack_size was used at link time, the stacksize
