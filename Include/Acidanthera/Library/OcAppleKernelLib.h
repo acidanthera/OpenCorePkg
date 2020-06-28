@@ -101,6 +101,18 @@ typedef struct {
   //
   MACH_SECTION_64          *PrelinkedTextSection;
   //
+  // Mach-O context for inner prelinkedkernel (for KC mode).
+  //
+  OC_MACHO_CONTEXT         InnerMachContext;
+  //
+  // Pointer to PRELINK_INFO_SEGMENT in the inner prelinkedkernel.
+  //
+  MACH_SEGMENT_COMMAND_64  *InnerInfoSegment;
+  //
+  // Pointer to PRELINK_INFO_SECTION in the inner prelinkedkernel.
+  //
+  MACH_SECTION_64          *InnerInfoSection;
+  //
   // Copy of prelinkedkernel PRELINK_INFO_SECTION used for XML_DOCUMENT.
   // Freed upon context destruction.
   //
@@ -138,6 +150,10 @@ typedef struct {
   // This is a sublist of PrelinkedKexts.
   //
   LIST_ENTRY               InjectedKexts;
+  //
+  // Whether this kernel is a kernel collection (used by macOS 11.0+).
+  //
+  BOOLEAN                  IsKernelCollection;
 } PRELINKED_CONTEXT;
 
 //

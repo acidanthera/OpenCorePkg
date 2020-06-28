@@ -145,6 +145,40 @@ PrelinkedFindKmodAddress (
   return TRUE;
 }
 
+STATIC
+EFI_STATUS
+PrelinkedGetSegmentsFromMacho (
+  IN   OC_MACHO_CONTEXT         *MachoContext,
+  OUT  MACH_SEGMENT_COMMAND_64  **PrelinkedInfoSegment,
+  OUT  MACH_SECTION_64          **PrelinkedInfoSection
+  )
+{
+  *PrelinkedInfoSegment = MachoGetSegmentByName64 (
+    MachoContext,
+    PRELINK_INFO_SEGMENT
+    );
+  if (*PrelinkedInfoSegment == NULL) {
+    return EFI_NOT_FOUND;
+  }
+  if ((*PrelinkedInfoSegment)->FileOffset > MAX_UINT32) {
+    return EFI_UNSUPPORTED;
+  }
+
+  *PrelinkedInfoSection = MachoGetSectionByName64 (
+    MachoContext,
+    *PrelinkedInfoSegment,
+    PRELINK_INFO_SECTION
+    );
+  if (*PrelinkedInfoSection == NULL) {
+    return EFI_NOT_FOUND;
+  }
+  if ((*PrelinkedInfoSection)->Size > MAX_UINT32) {
+    return EFI_UNSUPPORTED;
+  }
+
+  return EFI_SUCCESS;
+}
+
 EFI_STATUS
 PrelinkedContextInit (
   IN OUT  PRELINKED_CONTEXT  *Context,
@@ -153,10 +187,14 @@ PrelinkedContextInit (
   IN      UINT32             PrelinkedAllocSize
   )
 {
-  XML_NODE     *PrelinkedInfoRoot;
-  CONST CHAR8  *PrelinkedInfoRootKey;
-  UINT32       PrelinkedInfoRootIndex;
-  UINT32       PrelinkedInfoRootCount;
+  EFI_STATUS               Status;
+  MACH_HEADER_64           *Header;
+  MACH_SEGMENT_COMMAND_64  *Segment;
+  XML_NODE                 *DocumentRoot;
+  XML_NODE                 *PrelinkedInfoRoot;
+  CONST CHAR8              *PrelinkedInfoRootKey;
+  UINT32                   PrelinkedInfoRootIndex;
+  UINT32                   PrelinkedInfoRootCount;
 
   ASSERT (Context != NULL);
   ASSERT (Prelinked != NULL);
@@ -170,15 +208,6 @@ PrelinkedContextInit (
   Context->PrelinkedAllocSize = PrelinkedAllocSize;
 
   //
-  // Initialize kext list with kernel pseudo kext.
-  //
-  InitializeListHead (&Context->PrelinkedKexts);
-  InitializeListHead (&Context->InjectedKexts);
-  if (InternalCachedPrelinkedKernel (Context) == NULL) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  //
   // Ensure that PrelinkedSize is always aligned.
   //
   if (Context->PrelinkedSize != PrelinkedSize) {
@@ -189,7 +218,45 @@ PrelinkedContextInit (
     ZeroMem (&Prelinked[PrelinkedSize], Context->PrelinkedSize - PrelinkedSize);
   }
 
+  //
+  // Initialise primary context.
+  //
   if (!MachoInitializeContext (&Context->PrelinkedMachContext, Prelinked, PrelinkedSize)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // Detect kernel type.
+  //
+  Header = MachoGetMachHeader64 (&Context->PrelinkedMachContext);
+  Context->IsKernelCollection = Header->FileType == MachHeaderFileTypeFileSet;
+
+  //
+  // When dealing with the kernel collections the actual kernel is pointed by one of the segments.
+  //
+  if (Context->IsKernelCollection) {
+    Segment = MachoGetSegmentByName64 (
+      &Context->PrelinkedMachContext,
+      "__TEXT_EXEC"
+      );
+    if (Segment == NULL || Segment->VirtualAddress < Segment->FileOffset) {
+      return EFI_INVALID_PARAMETER;
+    }
+
+    if (!MachoInitializeContext (
+      &Context->InnerMachContext,
+      &Context->Prelinked[Segment->FileOffset],
+      Context->PrelinkedSize - Segment->FileOffset)) {
+      return EFI_INVALID_PARAMETER;
+    }
+  }
+
+  //
+  // Initialize kext list with kernel pseudo kext.
+  //
+  InitializeListHead (&Context->PrelinkedKexts);
+  InitializeListHead (&Context->InjectedKexts);
+  if (InternalCachedPrelinkedKernel (Context) == NULL) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -198,27 +265,16 @@ PrelinkedContextInit (
     return EFI_INVALID_PARAMETER;
   }
 
-  Context->PrelinkedInfoSegment = MachoGetSegmentByName64 (
+  //
+  // Register normal segment entries.
+  //
+  Status = PrelinkedGetSegmentsFromMacho (
     &Context->PrelinkedMachContext,
-    PRELINK_INFO_SEGMENT
+    &Context->PrelinkedInfoSegment,
+    &Context->PrelinkedInfoSection
     );
-  if (Context->PrelinkedInfoSegment == NULL) {
-    return EFI_NOT_FOUND;
-  }
-  if (Context->PrelinkedInfoSegment->FileOffset > MAX_UINT32) {
-    return EFI_UNSUPPORTED;
-  }
-
-  Context->PrelinkedInfoSection = MachoGetSectionByName64 (
-    &Context->PrelinkedMachContext,
-    Context->PrelinkedInfoSegment,
-    PRELINK_INFO_SECTION
-    );
-  if (Context->PrelinkedInfoSection == NULL) {
-    return EFI_NOT_FOUND;
-  }
-  if (Context->PrelinkedInfoSection->Size > MAX_UINT32) {
-    return EFI_UNSUPPORTED;
+  if (EFI_ERROR (Status)) {
+    return Status;
   }
 
   Context->PrelinkedTextSegment = MachoGetSegmentByName64 (
@@ -238,6 +294,20 @@ PrelinkedContextInit (
     return EFI_NOT_FOUND;
   }
 
+  //
+  // Additionally process inner entries for KC.
+  //
+  if (Context->IsKernelCollection) {
+    Status = PrelinkedGetSegmentsFromMacho (
+      &Context->InnerMachContext,
+      &Context->InnerInfoSegment,
+      &Context->InnerInfoSection
+      );
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+  }
+
   Context->PrelinkedInfo = AllocateCopyPool (
     (UINTN)Context->PrelinkedInfoSection->Size,
     &Context->Prelinked[Context->PrelinkedInfoSection->Offset]
@@ -252,7 +322,17 @@ PrelinkedContextInit (
     return EFI_INVALID_PARAMETER;
   }
 
-  PrelinkedInfoRoot = PlistNodeCast (XmlDocumentRoot (Context->PrelinkedInfoDocument), PLIST_NODE_TYPE_DICT);
+  //
+  // For a kernel collection the this is a full plist, while for legacy prelinked format
+  // it starts with a <dict> node.
+  //
+  if (Context->IsKernelCollection) {
+    DocumentRoot = PlistDocumentRoot (Context->PrelinkedInfoDocument);
+  } else {
+    DocumentRoot = XmlDocumentRoot (Context->PrelinkedInfoDocument);
+  }
+
+  PrelinkedInfoRoot = PlistNodeCast (DocumentRoot, PLIST_NODE_TYPE_DICT);
   if (PrelinkedInfoRoot == NULL) {
     PrelinkedContextFree (Context);
     return EFI_INVALID_PARAMETER;
@@ -368,17 +448,6 @@ PrelinkedInjectPrepare (
 {
   UINT64  SegmentEndOffset;
 
-  //
-  // Plist info is normally the last segment, so we may potentially save
-  // some data by removing it and then appending new kexts over.
-  //
-
-  SegmentEndOffset = Context->PrelinkedInfoSegment->FileOffset + Context->PrelinkedInfoSegment->FileSize;
-
-  if (MACHO_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
-    Context->PrelinkedSize = (UINT32) MACHO_ALIGN (Context->PrelinkedInfoSegment->FileOffset);
-  }
-
   Context->PrelinkedInfoSegment->VirtualAddress = 0;
   Context->PrelinkedInfoSegment->Size           = 0;
   Context->PrelinkedInfoSegment->FileOffset     = 0;
@@ -386,6 +455,31 @@ PrelinkedInjectPrepare (
   Context->PrelinkedInfoSection->Address        = 0;
   Context->PrelinkedInfoSection->Size           = 0;
   Context->PrelinkedInfoSection->Offset         = 0;
+
+  if (Context->IsKernelCollection) {
+    Context->InnerInfoSegment->VirtualAddress = 0;
+    Context->InnerInfoSegment->Size           = 0;
+    Context->InnerInfoSegment->FileOffset     = 0;
+    Context->InnerInfoSegment->FileSize       = 0;
+    Context->InnerInfoSection->Address        = 0;
+    Context->InnerInfoSection->Size           = 0;
+    Context->InnerInfoSection->Offset         = 0;
+
+    return EFI_SUCCESS;
+  }
+
+  //
+  // For older variant of the prelinkedkernel plist info is normally
+  // the last segment, so we may potentially save some data by removing
+  // it and then appending new kexts over. This is different for KC,
+  // where plist info is in the middle of the file.
+  //
+
+  SegmentEndOffset = Context->PrelinkedInfoSegment->FileOffset + Context->PrelinkedInfoSegment->FileSize;
+
+  if (MACHO_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
+    Context->PrelinkedSize = (UINT32) MACHO_ALIGN (Context->PrelinkedInfoSegment->FileOffset);
+  }
 
   Context->PrelinkedLastAddress = MACHO_ALIGN (MachoGetLastAddress64 (&Context->PrelinkedMachContext));
   if (Context->PrelinkedLastAddress == 0) {
@@ -395,7 +489,6 @@ PrelinkedInjectPrepare (
   //
   // Prior to plist there usually is prelinked text. 
   //
-
   SegmentEndOffset = Context->PrelinkedTextSegment->FileOffset + Context->PrelinkedTextSegment->FileSize;
 
   if (MACHO_ALIGN (SegmentEndOffset) != Context->PrelinkedSize) {

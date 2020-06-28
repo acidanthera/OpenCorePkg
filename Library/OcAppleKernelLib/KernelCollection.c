@@ -85,7 +85,7 @@ InternalKcWriteCommandHeaders (
     // Write 8-byte aligned fileset command.
     //
     Command.FilesetEntry->CommandType = MACH_LOAD_COMMAND_FILESET_ENTRY;
-    Command.FilesetEntry->CommandSize = ALIGN_VALUE (sizeof (MACH_FILESET_ENTRY_COMMAND) + StringSize, 8);
+    Command.FilesetEntry->CommandSize = (UINT32) ALIGN_VALUE (sizeof (MACH_FILESET_ENTRY_COMMAND) + StringSize, 8);
     Command.FilesetEntry->VirtualAddress = PrelinkedKext->Context.VirtualBase;
     Segment = MachoGetNextSegment64 (&PrelinkedKext->Context.MachContext, NULL);
     ASSERT (Segment != NULL);
@@ -294,7 +294,7 @@ InternalKcInitSegmentFixupChains (
   SegChain->PointerFormat   = MACH_DYLD_CHAINED_PTR_X86_64_KERNEL_CACHE;
   SegChain->SegmentOffset   = Segment->VirtualAddress;
   SegChain->MaxValidPointer = 0;
-  SegChain->PageCount       = Segment->Size / MACHO_PAGE_SIZE;
+  SegChain->PageCount       = (UINT16) (Segment->Size / MACHO_PAGE_SIZE);
   //
   // Initialise all pages with no associated fixups.
   //
@@ -413,7 +413,7 @@ InternalKcConvertRelocToFixup (
       IterFixupData       = SegmentPageData + IterFixupPageOffset;
 
       CopyMem (&IterFixup, IterFixupData, sizeof (IterFixup));
-      NextIterFixupPageOffset = IterFixupPageOffset + IterFixup.Next;
+      NextIterFixupPageOffset = (UINT16) (IterFixupPageOffset + IterFixup.Next);
     } while (NextIterFixupPageOffset < NewFixupPageOffset && IterFixup.Next != 0);
 
     FixupDelta = NewFixupPageOffset - IterFixupPageOffset;
