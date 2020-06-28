@@ -773,4 +773,21 @@ MachoRuntimeGetEntryAddress (
   IN VOID  *Image
   );
 
+/**
+  Retrieves the next Load Command of type LoadCommandType.
+
+  @param[in,out] Context          Context of the Mach-O.
+  @param[in]     LoadCommandType  Type of the Load Command to retrieve.
+  @param[in]     LoadCommand      Previous Load Command.
+                                  If NULL, the first match is returned.
+
+  @retval NULL  NULL is returned on failure.
+**/
+MACH_LOAD_COMMAND *
+MachoGetNextCommand64 (
+  IN OUT OC_MACHO_CONTEXT         *Context,
+  IN     MACH_LOAD_COMMAND_TYPE   LoadCommandType,
+  IN     CONST MACH_LOAD_COMMAND  *LoadCommand  OPTIONAL
+  );
+
 #endif // OC_MACHO_LIB_H

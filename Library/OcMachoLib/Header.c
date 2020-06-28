@@ -315,20 +315,8 @@ MachoGetLastAddress64 (
   return LastAddress;
 }
 
-/**
-  Retrieves the first Load Command of type LoadCommandType.
-
-  @param[in,out] Context          Context of the Mach-O.
-  @param[in]     LoadCommandType  Type of the Load Command to retrieve.
-  @param[in]     LoadCommand      Previous Load Command.
-                                  If NULL, the first match is returned.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
-STATIC
 MACH_LOAD_COMMAND *
-InternalGetNextCommand64 (
+MachoGetNextCommand64 (
   IN OUT OC_MACHO_CONTEXT         *Context,
   IN     MACH_LOAD_COMMAND_TYPE   LoadCommandType,
   IN     CONST MACH_LOAD_COMMAND  *LoadCommand  OPTIONAL
@@ -387,7 +375,7 @@ MachoGetUuid64 (
 
   ASSERT (Context != NULL);
 
-  Tmp = InternalGetNextCommand64 (
+  Tmp = MachoGetNextCommand64 (
           Context,
           MACH_LOAD_COMMAND_UUID,
           NULL
@@ -631,7 +619,7 @@ MachoGetNextSegment64 (
       );
   }
 
-  Tmp = InternalGetNextCommand64 (
+  Tmp = MachoGetNextCommand64 (
           Context,
           MACH_LOAD_COMMAND_SEGMENT_64,
           (MACH_LOAD_COMMAND *)Segment
@@ -846,7 +834,7 @@ InternalRetrieveSymtabs64 (
   //
   // Retrieve SYMTAB.
   //
-  Tmp = InternalGetNextCommand64 (
+  Tmp = MachoGetNextCommand64 (
           Context,
           MACH_LOAD_COMMAND_SYMTAB,
           NULL
@@ -902,7 +890,7 @@ InternalRetrieveSymtabs64 (
     //
     // Retrieve DYSYMTAB.
     //
-    Tmp = InternalGetNextCommand64 (
+    Tmp = MachoGetNextCommand64 (
             Context,
             MACH_LOAD_COMMAND_DYSYMTAB,
             NULL
@@ -1331,7 +1319,7 @@ MachoExpandImage64 (
     //
     if (AsciiStrnCmp (DstSegment->SegmentName, "__LINKEDIT", ARRAY_SIZE (DstSegment->SegmentName)) == 0) {
       Symtab = (MACH_SYMTAB_COMMAND *)(
-                 InternalGetNextCommand64 (
+                 MachoGetNextCommand64 (
                    Context,
                    MACH_LOAD_COMMAND_SYMTAB,
                    NULL
@@ -1349,7 +1337,7 @@ MachoExpandImage64 (
       }
 
       DySymtab = (MACH_DYSYMTAB_COMMAND *)(
-                     InternalGetNextCommand64 (
+                     MachoGetNextCommand64 (
                        Context,
                        MACH_LOAD_COMMAND_DYSYMTAB,
                        NULL
