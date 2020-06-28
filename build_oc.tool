@@ -12,6 +12,7 @@ buildutil() {
     "TestDiskImage"
     "TestHelloWorld"
     "TestImg4"
+    "TestKernelCollection"
     "TestKextInject"
     "TestMacho"
     "TestRsaPreprocess"

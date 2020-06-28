@@ -12,4 +12,6 @@
 
 uint8_t *readFile(const char *str, uint32_t *size);
 
+void writeFile(const char *str, void *data, uint32_t size);
+
 #endif // OC_USER_FILE_H

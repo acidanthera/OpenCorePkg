@@ -265,7 +265,8 @@ MachoInitializeContext (
   //
   if ((MachHeader->CpuType != MachCpuTypeX8664)
    || ((MachHeader->FileType != MachHeaderFileTypeKextBundle)
-    && (MachHeader->FileType != MachHeaderFileTypeExecute))) {
+    && (MachHeader->FileType != MachHeaderFileTypeExecute)
+    && (MachHeader->FileType != MachHeaderFileTypeFileSet))) {
     return FALSE;
   }
 
@@ -1496,10 +1497,6 @@ MachoMergeSegments64 (
   MACH_LOAD_COMMAND       *LoadCommand;
   MACH_SEGMENT_COMMAND_64 *Segment;
   MACH_SEGMENT_COMMAND_64 *FirstSegment;
-  UINT64                  MaxAddress;
-  UINT64                  MaxOffset;
-  MACH_VM_PROTECTION      MaxInitProt;
-  MACH_VM_PROTECTION      MaxMaxProt;
   MACH_HEADER_64          *Header;
   UINTN                   PrefixLength;
   UINTN                   SkipCount;
@@ -1513,10 +1510,6 @@ MachoMergeSegments64 (
   PrefixLength = AsciiStrLen (Prefix);
   FirstSegment = NULL;
 
-  MaxAddress  = 0;
-  MaxOffset   = 0;
-  MaxInitProt = 0;
-  MaxMaxProt  = 0;
   SkipCount   = 0;
 
   LoadCommand = &Header->Commands[0];
@@ -1525,6 +1518,8 @@ MachoMergeSegments64 (
     //
     // Either skip or stop at unrelated commands.
     //
+    Segment = (MACH_SEGMENT_COMMAND_64 *) (VOID *) LoadCommand;
+
     if (LoadCommand->CommandType != MACH_LOAD_COMMAND_SEGMENT_64
       || AsciiStrnCmp (Segment->SegmentName, Prefix, PrefixLength) != 0) {
       if (FirstSegment != NULL) {
@@ -1538,7 +1533,6 @@ MachoMergeSegments64 (
     //
     // We have a segment starting with the prefix.
     //
-    Segment = (MACH_SEGMENT_COMMAND_64 *) (VOID *) LoadCommand;
 
     //
     // Do not support this for now as it will require changes in the file.

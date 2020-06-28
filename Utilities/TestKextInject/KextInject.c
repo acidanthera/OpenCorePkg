@@ -583,17 +583,11 @@ int wrap_main(int argc, char** argv) {
       DEBUG ((DEBUG_WARN, "Prelink inject complete error %r\n", Status));
     }
 
-    FILE *Fh = fopen("out.bin", "wb");
-
-    if (Fh != NULL) {
-      fwrite (Prelinked, Context.PrelinkedSize, 1, Fh);
-      fclose(Fh);
-
-      if (!EFI_ERROR (Status)) {
-        printf("All good\n");
-      }
+    writeFile("out.bin", Prelinked, Context.PrelinkedSize);
+    if (!EFI_ERROR (Status)) {
+      printf("All good\n");
     } else {
-      printf("File error\n");
+      printf("Inject error\n");
     }
 #endif
     PrelinkedContextFree (&Context);
