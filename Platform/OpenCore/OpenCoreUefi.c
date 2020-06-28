@@ -349,6 +349,10 @@ OcReinstallProtocols (
   if (OcAppleRtcRamInstallProtocol (Config->Uefi.ProtocolOverrides.AppleRtcRam) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install rtc ram protocol\n"));
   }
+
+  if (OcAppleFbInfoInstallProtocol (Config->Uefi.ProtocolOverrides.AppleFramebufferInfo) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install fb info protocol\n"));
+  }
 }
 
 VOID

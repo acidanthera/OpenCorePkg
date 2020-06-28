@@ -16,6 +16,7 @@
 #define OC_CONSOLE_LIB_H
 
 #include <Protocol/ConsoleControl.h>
+#include <Protocol/AppleFramebufferInfo.h>
 
 /**
   Console renderer to use.
@@ -175,6 +176,21 @@ AllocateNullTextOutSystemTable (
 EFI_STATUS
 OcProvideUgaPassThrough (
   VOID
+  );
+
+/**
+  Install and initialise Apple Framebuffer Info protocol
+  on top of GOP protocol. For EfiBoot 10.4, which can only
+  use UGA, this is the only way to obtain framebuffer base
+  for XNU kernel PE Boot_args.
+
+  @param[in] Reinstall  Overwrite installed protocol.
+
+  @retval installed or located protocol or NULL.
+**/
+APPLE_FRAMEBUFFER_INFO_PROTOCOL *
+OcAppleFbInfoInstallProtocol (
+  IN BOOLEAN  Reinstall
   );
 
 #endif // OC_CONSOLE_LIB_H

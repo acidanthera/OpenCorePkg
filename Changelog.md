@@ -22,6 +22,7 @@ OpenCore Changelog
 - Improved boot selection scripts for macOS without NVRAM
 - Added UGA protocol compatibility in `ProvideConsoleGop` quirk
 - Added `UgaPassThrough` option to support UGA protocol over GOP
+- Added `AppleFramebufferInfo` protocol implementation and override
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy

@@ -537,6 +537,7 @@ typedef enum {
   _(BOOLEAN                     , AppleBootPolicy             ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleDebugLog               ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleEvent                  ,     , FALSE  , ()) \
+  _(BOOLEAN                     , AppleFramebufferInfo        ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleImageConversion        ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleKeyMap                 ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleRtcRam                 ,     , FALSE  , ()) \

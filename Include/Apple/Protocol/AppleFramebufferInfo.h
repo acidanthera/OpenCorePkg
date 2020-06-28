@@ -27,11 +27,11 @@ EFI_STATUS
 (EFIAPI *APPLE_FRAMEBUFFER_INFO_GET_INFO) (
   IN   APPLE_FRAMEBUFFER_INFO_PROTOCOL  *This,
   OUT  EFI_PHYSICAL_ADDRESS             *FramebufferBase,
-  OUT  UINTN                            *FramebufferSize,
-  OUT  UINTN                            *ScreenRowBytes,
-  OUT  UINTN                            *ScreenWidth,
-  OUT  UINTN                            *ScreenHeight,
-  OUT  UINTN                            *ScreenDepth
+  OUT  UINT32                           *FramebufferSize,
+  OUT  UINT32                           *ScreenRowBytes,
+  OUT  UINT32                           *ScreenWidth,
+  OUT  UINT32                           *ScreenHeight,
+  OUT  UINT32                           *ScreenDepth
   );
 
 struct APPLE_FRAMEBUFFER_INFO_PROTOCOL_ {

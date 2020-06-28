@@ -59,8 +59,8 @@ OcUgaDrawGetMode (
 
   *HorizontalResolution = Info->HorizontalResolution;
   *VerticalResolution = Info->VerticalResolution;
-  *ColorDepth = 24;
-  *RefreshRate = 60;
+  *ColorDepth  = DEFAULT_COLOUR_DEPTH;
+  *RefreshRate = DEFAULT_REFRESH_RATE;
 
   return EFI_SUCCESS;
 }
