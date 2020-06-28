@@ -534,12 +534,13 @@ OcConfigureLogProtocol (
     }
   }
 
+  if (!EFI_ERROR (Status)
+    && (Options & (OC_LOG_SERIAL | OC_LOG_ENABLE)) == (OC_LOG_SERIAL | OC_LOG_ENABLE)) {
+    SerialPortInitialize ();
+  }
+
   if (LogRoot != NULL) {
     if (!EFI_ERROR (Status)) {
-      if ((Options & (OC_LOG_SERIAL | OC_LOG_ENABLE)) == (OC_LOG_SERIAL | OC_LOG_ENABLE)) {
-        SerialPortInitialize ();
-      }
-
       if (OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBufferSize > 0) {
         SetFileData (
           LogRoot,

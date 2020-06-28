@@ -23,6 +23,7 @@ OpenCore Changelog
 - Added UGA protocol compatibility in `ProvideConsoleGop` quirk
 - Added `UgaPassThrough` option to support UGA protocol over GOP
 - Added `AppleFramebufferInfo` protocol implementation and override
+- Fixed serial initialisation when file logging is disabled
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy
