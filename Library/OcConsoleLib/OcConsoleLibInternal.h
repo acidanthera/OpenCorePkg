@@ -62,9 +62,4 @@ OcUseSystemTextOutput (
   IN BOOLEAN                      ReplaceTabWithSpace
   );
 
-VOID
-OcProvideUgaPassThrough (
-  VOID
-  );
-
 #endif // OC_CONSOLE_LIB_INTERNAL_H

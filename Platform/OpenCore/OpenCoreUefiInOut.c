@@ -247,6 +247,10 @@ OcLoadUefiOutputSupport (
     OcReconnectConsole ();
   }
 
+  if (Config->Uefi.Output.UgaPassThrough) {
+    OcProvideUgaPassThrough ();
+  }
+
   AsciiRenderer = OC_BLOB_GET (&Config->Uefi.Output.TextRenderer);
 
   if (AsciiRenderer[0] == '\0' || AsciiStrCmp (AsciiRenderer, "BuiltinGraphics") == 0) {

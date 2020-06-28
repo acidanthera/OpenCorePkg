@@ -149,7 +149,7 @@ OcUgaDrawBlt (
     );
 }
 
-VOID
+EFI_STATUS
 OcProvideUgaPassThrough (
   VOID
   )
@@ -248,4 +248,6 @@ OcProvideUgaPassThrough (
   } else {
     DEBUG ((DEBUG_INFO, "OCC: Failed to find handles with GOP\n"));
   }
+
+  return Status;
 }

@@ -5139,6 +5139,15 @@ functioning. Feature highlights:
    On all known affected systems \texttt{ConsoleMode} had to be set to
    empty string for this to work.
 
+\item
+  \texttt{UgaPassThrough}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Provide UGA protocol instances on top of GOP protocol.
+
+  Some firmwares do not implement legacy UGA protocol, but it may be required
+  for screen output by older EFI applications like EfiBoot from 10.4.
+
 \end{enumerate}
 
 

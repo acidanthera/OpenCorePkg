@@ -167,4 +167,14 @@ AllocateNullTextOutSystemTable (
   IN EFI_SYSTEM_TABLE  *SystemTable
   );
 
+/**
+  Provide UGA protocol instances on top of existing GOP instances.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcProvideUgaPassThrough (
+  VOID
+  );
+
 #endif // OC_CONSOLE_LIB_H

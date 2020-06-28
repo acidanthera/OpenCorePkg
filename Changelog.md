@@ -21,6 +21,7 @@ OpenCore Changelog
 - Fixed 11.0 lapic kernel quirk as of DP1
 - Improved boot selection scripts for macOS without NVRAM
 - Added UGA protocol compatibility in `ProvideConsoleGop` quirk
+- Added `UgaPassThrough` option to support UGA protocol over GOP
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy
