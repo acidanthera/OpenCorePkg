@@ -1487,8 +1487,8 @@ MachoMergeSegments64 (
   MACH_SEGMENT_COMMAND_64 *FirstSegment;
   MACH_HEADER_64          *Header;
   UINTN                   PrefixLength;
-  UINTN                   SkipCount;
   UINTN                   RemainingArea;
+  UINT32                  SkipCount;
 
   ASSERT (Context != NULL);
   ASSERT (Context->FileSize != 0);
@@ -1583,7 +1583,7 @@ MachoMergeSegments64 (
   // Account for dropped commands in the header.
   //
   Header->NumCommands  -= SkipCount;
-  Header->CommandsSize -= sizeof (MACH_SEGMENT_COMMAND_64) * SkipCount;
+  Header->CommandsSize -= (UINT32) (sizeof (MACH_SEGMENT_COMMAND_64) * SkipCount);
 
   return TRUE;
 }
