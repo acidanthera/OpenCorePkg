@@ -335,7 +335,7 @@ ScanIntelProcessor (
       } else {
         Cpu->CurBusRatio = (UINT8) (PerfStatus.Bits.State >> 8U);
       }
-    } else if (Cpu->Model >= CPU_MODEL_PENRYN) {
+    } else {
       PerfStatus.Uint64 = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
       Cpu->MaxBusRatio = (UINT8) (RShiftU64 (PerfStatus.Uint64, 8) & 0x1FU);
       //
