@@ -603,32 +603,9 @@ InternalCachedPrelinkedKernel (
   ASSERT (Prelinked->Prelinked != NULL);
   ASSERT (Prelinked->PrelinkedSize > 0);
 
-  //
-  // When dealing with the kernel collections the actual kernel is pointed by one of the segments.
-  //
-  if (Prelinked->IsKernelCollection) {
-    Segment = MachoGetSegmentByName64 (
-      &Prelinked->PrelinkedMachContext,
-      "__TEXT_EXEC"
-      );
-    if (Segment == NULL || Segment->VirtualAddress < Segment->FileOffset) {
-      FreePool (NewKext);
-      return NULL;
-    }
-
-    if (!MachoInitializeContext (
-      &NewKext->Context.MachContext,
-      &Prelinked->Prelinked[Segment->FileOffset],
-      Prelinked->PrelinkedSize - Segment->FileOffset)) {
-      FreePool (NewKext);
-      return NULL;
-    }
-  } else {
-    CopyMem (
-      &NewKext->Context.MachContext,
-      &Prelinked->PrelinkedMachContext,
-      sizeof (NewKext->Context.MachContext)
-      );
+  if (!MachoInitializeContext (&NewKext->Context.MachContext, &Prelinked->Prelinked[0], Prelinked->PrelinkedSize)) {
+    FreePool (NewKext);
+    return NULL;
   }
 
   Segment = MachoGetSegmentByName64 (

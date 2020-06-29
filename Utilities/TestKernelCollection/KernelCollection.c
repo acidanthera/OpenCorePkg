@@ -16,14 +16,12 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/OcMiscLib.h>
-#include <Library/OcAppleKernelLib.h>
 #include <Library/DebugLib.h>
 
 #include <string.h>
 #include <sys/time.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include <File.h>
 
@@ -36,15 +34,6 @@
 
  rm -rf Macho.dSYM DICT fuzz*.log Macho
 */
-
-extern UINT8 LiluKextData[];
-extern UINT32 LiluKextDataSize;
-extern CHAR8 LiluKextInfoPlistData[];
-extern UINT32 LiluKextInfoPlistDataSize;
-extern UINT8 VsmcKextData[];
-extern UINT32 VsmcKextDataSize;
-extern CHAR8 VsmcKextInfoPlistData[];
-extern UINT32 VsmcKextInfoPlistDataSize;
 
 static int FeedMacho(void *file, uint32_t size) {
   OC_MACHO_CONTEXT Context;
@@ -94,109 +83,16 @@ __LINKEDIT     __LINKEDIT     __REGIONX      (new kext)
   return 0;
 }
 
-EFI_STATUS
-GetFileData (
-  IN  EFI_FILE_PROTOCOL  *File,
-  IN  UINT32             Position,
-  IN  UINT32             Size,
-  OUT UINT8              *Buffer
-  )
-{
-  abort();
-  return EFI_SUCCESS;
-}
-
-EFI_STATUS
-GetFileSize (
-  IN  EFI_FILE_PROTOCOL  *File,
-  OUT UINT32             *Size
-  )
-{
-  abort();
-  return EFI_SUCCESS;
-}
-
-
 int main(int argc, char** argv) {
-  uint32_t PrelinkedSize;
-  uint8_t *Prelinked;
-  UINT32 AllocSize;
-  PRELINKED_CONTEXT Context;
-
-  if ((Prelinked = readFile(argc > 1 ? argv[1] : "/System/Library/KernelCollections/BootKernelExtensions.kc", &PrelinkedSize)) == NULL) {
+  uint32_t f;
+  uint8_t *b;
+  if ((b = readFile(argc > 1 ? argv[1] : "/System/Library/KernelCollections/BootKernelExtensions.kc", &f)) == NULL) {
     printf("Read fail\n");
     return -1;
   }
 
-
-  AllocSize = MACHO_ALIGN (PrelinkedSize + 1*1024*1024);
-
-  Prelinked = realloc (Prelinked, AllocSize);
-  if (Prelinked == NULL) {
-    printf("Realloc fail\n");
-    abort();
-    return -1;
-  }
-
-#if 0
-  ApplyKernelPatches (Prelinked, PrelinkedSize);
-#endif
-
-  EFI_STATUS Status = PrelinkedContextInit (&Context, Prelinked, PrelinkedSize, AllocSize);
-
-  if (!EFI_ERROR (Status)) {
-
-    Status = PrelinkedInjectPrepare (&Context);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "Prelink inject prepare error %r\n", Status));
-      return -1;
-    }
-
-    Status = PrelinkedInjectKext (
-      &Context,
-      "/Library/Extensions/Lilu.kext",
-      LiluKextInfoPlistData,
-      LiluKextInfoPlistDataSize,
-      "Contents/MacOS/Lilu",
-      LiluKextData,
-      LiluKextDataSize
-      );
-
-    DEBUG ((DEBUG_WARN, "%a injected - %r\n", "Lilu.kext", Status));
-
-
-    Status = PrelinkedInjectKext (
-      &Context,
-      "/Library/Extensions/VirtualSMC.kext",
-      VsmcKextInfoPlistData,
-      VsmcKextInfoPlistDataSize,
-      "Contents/MacOS/VirtualSMC",
-      VsmcKextData,
-      VsmcKextDataSize
-      );
-
-    DEBUG ((DEBUG_WARN, "VirtualSMC.kext injected - %r\n", Status));
-
-    Status = PrelinkedInjectComplete (&Context);
-
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "Prelink inject complete error %r\n", Status));
-    }
-
-    writeFile("out.bin", Prelinked, Context.PrelinkedSize);
-    if (!EFI_ERROR (Status)) {
-      printf("All good\n");
-    } else {
-      printf("Inject error\n");
-    }
-
-    PrelinkedContextFree (&Context);
-  } else {
-    DEBUG ((DEBUG_WARN, "Context creation error %r\n", Status));
-  }
-
-  free(Prelinked);
- 
+  FeedMacho (b, f);
+  free(b);
   return 0;
 }
 

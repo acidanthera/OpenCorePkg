@@ -5,20 +5,5 @@
 
 PROJECT = KernelCollection
 PRODUCT = $(PROJECT)$(SUFFIX)
-OBJS    = $(PROJECT).o \
-	Lilu.o \
-	Vsmc.o \
-	KextPatcher.o \
-	PrelinkedKext.o \
-	PrelinkedContext.o \
-	Vtables.o \
-	Link.o \
-	KernelReader.o \
-	DataPatcher.o \
-	lzss.o \
-	lzvn.o
-VPATH   = ../../Library/OcAppleKernelLib:$\
-	../../Library/OcMiscLib:$\
-	../../Library/OcCompressionLib/lzss:$\
-	../../Library/OcCompressionLib/lzvn
+OBJS    = $(PROJECT).o
 include ../../User/Makefile
