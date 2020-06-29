@@ -371,23 +371,23 @@ MachoGetUuid64 (
 {
   MACH_UUID_COMMAND *UuidCommand;
 
-  VOID              *Tmp;
-
   ASSERT (Context != NULL);
+  //
+  // Context initialisation guarantees the command size is a multiple of 8.
+  //
+  STATIC_ASSERT (
+    OC_ALIGNOF (MACH_UUID_COMMAND) <= sizeof (UINT64),
+    "Alignment is not guaranteed."
+    );
 
-  Tmp = MachoGetNextCommand64 (
-          Context,
-          MACH_LOAD_COMMAND_UUID,
-          NULL
-          );
-  if (Tmp == NULL || !OC_TYPE_ALIGNED (MACH_UUID_COMMAND, Tmp)) {
+  UuidCommand = (MACH_UUID_COMMAND *) (VOID *) MachoGetNextCommand64 (
+    Context,
+    MACH_LOAD_COMMAND_UUID,
+    NULL
+    );
+  if (UuidCommand == NULL || UuidCommand->CommandSize != sizeof (*UuidCommand)) {
     return NULL;
   }
-  UuidCommand = (MACH_UUID_COMMAND *)Tmp;
-  if (UuidCommand->CommandSize != sizeof (*UuidCommand)) {
-    return NULL;
-  }
-
   return UuidCommand;
 }
 
@@ -603,8 +603,6 @@ MachoGetNextSegment64 (
   UINT64                  TopOfSegment;
   UINTN                   TopOfSections;
 
-  VOID                    *Tmp;
-
   ASSERT (Context != NULL);
 
   ASSERT (Context->MachHeader != NULL);
@@ -618,17 +616,19 @@ MachoGetNextSegment64 (
         && ((UINTN) Segment < TopOfCommands)
       );
   }
-
-  Tmp = MachoGetNextCommand64 (
-          Context,
-          MACH_LOAD_COMMAND_SEGMENT_64,
-          (MACH_LOAD_COMMAND *)Segment
-          );
-  if (Tmp == NULL || !OC_TYPE_ALIGNED (MACH_SEGMENT_COMMAND_64, Tmp)) {
-    return NULL;
-  }
-  NextSegment = (MACH_SEGMENT_COMMAND_64 *)Tmp;
-  if (NextSegment->CommandSize < sizeof (*NextSegment)) {
+  //
+  // Context initialisation guarantees the command size is a multiple of 8.
+  //
+  STATIC_ASSERT (
+    OC_ALIGNOF (MACH_SEGMENT_COMMAND_64) <= sizeof (UINT64),
+    "Alignment is not guaranteed."
+    );
+  NextSegment = (MACH_SEGMENT_COMMAND_64 *) (VOID *) MachoGetNextCommand64 (
+    Context,
+    MACH_LOAD_COMMAND_SEGMENT_64,
+    (CONST MACH_LOAD_COMMAND *) Segment
+    );
+  if (NextSegment == NULL || NextSegment->CommandSize < sizeof (*NextSegment)) {
     return NULL;
   }
 
@@ -832,18 +832,21 @@ InternalRetrieveSymtabs64 (
     return TRUE;
   }
   //
+  // Context initialisation guarantees the command size is a multiple of 8.
+  //
+  STATIC_ASSERT (
+    OC_ALIGNOF (MACH_SYMTAB_COMMAND) <= sizeof (UINT64),
+    "Alignment is not guaranteed."
+    );
+  //
   // Retrieve SYMTAB.
   //
-  Tmp = MachoGetNextCommand64 (
-          Context,
-          MACH_LOAD_COMMAND_SYMTAB,
-          NULL
-          );
-  if (Tmp == NULL || !OC_TYPE_ALIGNED (MACH_SYMTAB_COMMAND, Tmp)) {
-    return FALSE;
-  }
-  Symtab = (MACH_SYMTAB_COMMAND *)Tmp;
-  if (Symtab->CommandSize != sizeof (*Symtab)) {
+  Symtab = (MACH_SYMTAB_COMMAND *) (VOID *) MachoGetNextCommand64 (
+    Context,
+    MACH_LOAD_COMMAND_SYMTAB,
+    NULL
+    );
+  if (Symtab == NULL || Symtab->CommandSize != sizeof (*Symtab)) {
     return FALSE;
   }
 
@@ -888,18 +891,21 @@ InternalRetrieveSymtabs64 (
 
   if ((Context->MachHeader->Flags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) != 0) {
     //
+    // Context initialisation guarantees the command size is a multiple of 8.
+    //
+    STATIC_ASSERT (
+      OC_ALIGNOF (MACH_DYSYMTAB_COMMAND) <= sizeof (UINT64),
+      "Alignment is not guaranteed."
+      );
+    //
     // Retrieve DYSYMTAB.
     //
-    Tmp = MachoGetNextCommand64 (
-            Context,
-            MACH_LOAD_COMMAND_DYSYMTAB,
-            NULL
-            );
-    if (Tmp == NULL || !OC_TYPE_ALIGNED (MACH_DYSYMTAB_COMMAND, Tmp)) {
-      return FALSE;
-    }
-    DySymtab = (MACH_DYSYMTAB_COMMAND *)Tmp;
-    if (DySymtab->CommandSize != sizeof (*DySymtab)) {
+    DySymtab = (MACH_DYSYMTAB_COMMAND *) (VOID *) MachoGetNextCommand64 (
+      Context,
+      MACH_LOAD_COMMAND_DYSYMTAB,
+      NULL
+      );
+    if (DySymtab == NULL || DySymtab->CommandSize != sizeof (*DySymtab)) {
       return FALSE;
     }
 
