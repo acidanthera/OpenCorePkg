@@ -510,7 +510,7 @@ int wrap_main(int argc, char** argv) {
       0
       );
 
-    DEBUG ((DEBUG_WARN, "TestDriver.kext injected - %zx\n", Status));
+    DEBUG ((DEBUG_WARN, "TestDriver.kext injected - %r\n", Status));
 #endif
 
     int c = 0;
@@ -552,7 +552,7 @@ int wrap_main(int argc, char** argv) {
         TestDataSize
         );
 
-      DEBUG ((DEBUG_WARN, "%s injected - %r\n", argc > 2 ? "Passed.kext" : "Lilu.kext", Status));
+      DEBUG ((DEBUG_WARN, "%a injected - %r\n", argc > 2 ? "Passed.kext" : "Lilu.kext", Status));
 
       if (argc > 2) free(TestData);
       if (argc > 3) free(TestPlist);

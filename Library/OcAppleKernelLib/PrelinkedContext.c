@@ -448,6 +448,34 @@ PrelinkedInjectPrepare (
 {
   UINT64  SegmentEndOffset;
 
+  if (!Context->IsKernelCollection) {
+    //
+    // For older variant of the prelinkedkernel plist info is normally
+    // the last segment, so we may potentially save some data by removing
+    // it and then appending new kexts over. This is different for KC,
+    // where plist info is in the middle of the file.
+    //
+
+    SegmentEndOffset = Context->PrelinkedInfoSegment->FileOffset + Context->PrelinkedInfoSegment->FileSize;
+
+    if (MACHO_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
+      Context->PrelinkedSize = (UINT32) MACHO_ALIGN (Context->PrelinkedInfoSegment->FileOffset);
+    }
+  } else {
+    //
+    // For newer variant of the prelinkedkernel plist we need to kill it
+    // in both inner and outer images.
+    //
+
+    Context->InnerInfoSegment->VirtualAddress = 0;
+    Context->InnerInfoSegment->Size           = 0;
+    Context->InnerInfoSegment->FileOffset     = 0;
+    Context->InnerInfoSegment->FileSize       = 0;
+    Context->InnerInfoSection->Address        = 0;
+    Context->InnerInfoSection->Size           = 0;
+    Context->InnerInfoSection->Offset         = 0;
+  }
+
   Context->PrelinkedInfoSegment->VirtualAddress = 0;
   Context->PrelinkedInfoSegment->Size           = 0;
   Context->PrelinkedInfoSegment->FileOffset     = 0;
@@ -457,28 +485,7 @@ PrelinkedInjectPrepare (
   Context->PrelinkedInfoSection->Offset         = 0;
 
   if (Context->IsKernelCollection) {
-    Context->InnerInfoSegment->VirtualAddress = 0;
-    Context->InnerInfoSegment->Size           = 0;
-    Context->InnerInfoSegment->FileOffset     = 0;
-    Context->InnerInfoSegment->FileSize       = 0;
-    Context->InnerInfoSection->Address        = 0;
-    Context->InnerInfoSection->Size           = 0;
-    Context->InnerInfoSection->Offset         = 0;
-
     return EFI_SUCCESS;
-  }
-
-  //
-  // For older variant of the prelinkedkernel plist info is normally
-  // the last segment, so we may potentially save some data by removing
-  // it and then appending new kexts over. This is different for KC,
-  // where plist info is in the middle of the file.
-  //
-
-  SegmentEndOffset = Context->PrelinkedInfoSegment->FileOffset + Context->PrelinkedInfoSegment->FileSize;
-
-  if (MACHO_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
-    Context->PrelinkedSize = (UINT32) MACHO_ALIGN (Context->PrelinkedInfoSegment->FileOffset);
   }
 
   Context->PrelinkedLastAddress = MACHO_ALIGN (MachoGetLastAddress64 (&Context->PrelinkedMachContext));
