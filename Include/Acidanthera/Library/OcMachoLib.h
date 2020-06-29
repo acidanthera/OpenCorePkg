@@ -683,6 +683,20 @@ MachoPreserveRelocationIntel64 (
   IN UINT8  Type
   );
 
+/*
+  Initialises Context with the symbol tables of SymsContext.
+
+  @param[in,out] Context      The context to initialise the symbol info of.
+  @param[in]     SymsContext  The context to retrieve the symbol tables from.
+
+  @returns  Whether the operation was successful.
+*/
+BOOLEAN
+MachoInitialiseSymtabsExternal64 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     OC_MACHO_CONTEXT  *SymsContext
+  );
+
 /**
   Obtain symbol tables.
 

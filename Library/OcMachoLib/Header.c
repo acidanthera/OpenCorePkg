@@ -797,21 +797,24 @@ MachoGetSectionByAddress64 (
 }
 
 /**
-  Retrieves the SYMTAB command.
+  Initialises the symbol information of Context.
 
-  @param[in,out] Context  Context of the Mach-O.
+  @param[in,out] Context   Context of the Mach-O.
+  @param[in]     Symtab    The SYMTAB command to initialise with.
+  @param[in]     DySymtab  The DYSYMTAB command to initialise with.
 
-  @retval NULL  NULL is returned on failure.
+  @returns  Whether the operation was successful.
 
 **/
+STATIC
 BOOLEAN
-InternalRetrieveSymtabs64 (
-  IN OUT OC_MACHO_CONTEXT  *Context
+InternalInitialiseSymtabs64 (
+  IN OUT OC_MACHO_CONTEXT       *Context,
+  IN     MACH_SYMTAB_COMMAND    *Symtab,
+  IN     MACH_DYSYMTAB_COMMAND  *DySymtab
   )
 {
   UINTN                 MachoAddress;
-  MACH_SYMTAB_COMMAND   *Symtab;
-  MACH_DYSYMTAB_COMMAND *DySymtab;
   CHAR8                 *StringTable;
   UINT32                FileSize;
   UINT32                OffsetTop;
@@ -827,28 +830,7 @@ InternalRetrieveSymtabs64 (
   ASSERT (Context != NULL);
   ASSERT (Context->MachHeader != NULL);
   ASSERT (Context->FileSize > 0);
-
-  if (Context->SymbolTable != NULL) {
-    return TRUE;
-  }
-  //
-  // Context initialisation guarantees the command size is a multiple of 8.
-  //
-  STATIC_ASSERT (
-    OC_ALIGNOF (MACH_SYMTAB_COMMAND) <= sizeof (UINT64),
-    "Alignment is not guaranteed."
-    );
-  //
-  // Retrieve SYMTAB.
-  //
-  Symtab = (MACH_SYMTAB_COMMAND *) (VOID *) MachoGetNextCommand64 (
-    Context,
-    MACH_LOAD_COMMAND_SYMTAB,
-    NULL
-    );
-  if (Symtab == NULL || Symtab->CommandSize != sizeof (*Symtab)) {
-    return FALSE;
-  }
+  ASSERT (Context->SymbolTable == NULL);
 
   FileSize = Context->FileSize;
 
@@ -884,31 +866,11 @@ InternalRetrieveSymtabs64 (
   }
   SymbolTable = (MACH_NLIST_64 *)Tmp;
 
-  DySymtab          = NULL;
   IndirectSymtab    = NULL;
   LocalRelocations  = NULL;
   ExternRelocations = NULL;
 
-  if ((Context->MachHeader->Flags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) != 0) {
-    //
-    // Context initialisation guarantees the command size is a multiple of 8.
-    //
-    STATIC_ASSERT (
-      OC_ALIGNOF (MACH_DYSYMTAB_COMMAND) <= sizeof (UINT64),
-      "Alignment is not guaranteed."
-      );
-    //
-    // Retrieve DYSYMTAB.
-    //
-    DySymtab = (MACH_DYSYMTAB_COMMAND *) (VOID *) MachoGetNextCommand64 (
-      Context,
-      MACH_LOAD_COMMAND_DYSYMTAB,
-      NULL
-      );
-    if (DySymtab == NULL || DySymtab->CommandSize != sizeof (*DySymtab)) {
-      return FALSE;
-    }
-
+  if (DySymtab != NULL) {
     Result = OcOverflowAddU32 (
                DySymtab->LocalSymbolsIndex,
                DySymtab->NumLocalSymbols,
@@ -998,6 +960,85 @@ InternalRetrieveSymtabs64 (
   Context->ExternRelocations   = ExternRelocations;
 
   return TRUE;
+}
+
+BOOLEAN
+MachoInitialiseSymtabsExternal64 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     OC_MACHO_CONTEXT  *SymsContext
+  )
+{
+  MACH_SYMTAB_COMMAND   *Symtab;
+  MACH_DYSYMTAB_COMMAND *DySymtab;
+  BOOLEAN               IsDyld;
+
+  if (Context->SymbolTable != NULL) {
+    return TRUE;
+  }
+  //
+  // We cannot use SymsContext's symbol tables if Context is flagged for DYLD
+  // and SymsContext is not.
+  //
+  IsDyld = (Context->MachHeader->Flags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) != 0;
+  if (IsDyld
+   && (SymsContext->MachHeader->Flags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) == 0) {
+    return FALSE;
+  }
+
+  //
+  // Context initialisation guarantees the command size is a multiple of 8.
+  //
+  STATIC_ASSERT (
+    OC_ALIGNOF (MACH_SYMTAB_COMMAND) <= sizeof (UINT64),
+    "Alignment is not guaranteed."
+    );
+  //
+  // Retrieve SYMTAB.
+  //
+  Symtab = (MACH_SYMTAB_COMMAND *) (VOID *) MachoGetNextCommand64 (
+    SymsContext,
+    MACH_LOAD_COMMAND_SYMTAB,
+    NULL
+    );
+  if (Symtab == NULL || Symtab->CommandSize != sizeof (*Symtab)) {
+    return FALSE;
+  }
+
+  DySymtab = NULL;
+
+  if (IsDyld) {
+    //
+    // Context initialisation guarantees the command size is a multiple of 8.
+    //
+    STATIC_ASSERT (
+      OC_ALIGNOF (MACH_DYSYMTAB_COMMAND) <= sizeof (UINT64),
+      "Alignment is not guaranteed."
+      );
+    //
+    // Retrieve DYSYMTAB.
+    //
+    DySymtab = (MACH_DYSYMTAB_COMMAND *) (VOID *) MachoGetNextCommand64 (
+      SymsContext,
+      MACH_LOAD_COMMAND_DYSYMTAB,
+      NULL
+      );
+    if (DySymtab == NULL || DySymtab->CommandSize != sizeof (*DySymtab)) {
+      return FALSE;
+    }
+  }
+
+  return InternalInitialiseSymtabs64 (Context, Symtab, DySymtab);
+}
+
+BOOLEAN
+InternalRetrieveSymtabs64 (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  )
+{
+  //
+  // Retrieve the symbol information for Context from itself.
+  //
+  return MachoInitialiseSymtabsExternal64 (Context, Context);
 }
 
 UINT32
