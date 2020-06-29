@@ -1,5 +1,4 @@
-GOP Testing Tool
-================
+# GOP Testing Tool
 
 1. Disable watchdog timer.
 2. Gather all N available GOP protocols.
@@ -39,4 +38,3 @@ New: W x H, pixel %u (%X %X %X %X), scan: %u
 - Due to not all resolutions being divisible by 2 and 3, right and bottom pixel rows may be unused in corresponding tests.
 - Depending on rendering performance and amount of GOPs the test may take up to several minutes.
 - Reference images for some tests are availale in `Examples` directory.
-

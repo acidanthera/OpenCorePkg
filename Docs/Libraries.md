@@ -1,4 +1,4 @@
-#### Library Descriptions
+# Library Descriptions
 
 * OcAcpiLib — ACPI injector and patcher
 * OcAppleBootPolicyLib — Apple bless protocol implementation

@@ -1,7 +1,7 @@
-OpenCore Changelog
-==================
+# OpenCore Changelog
 
-#### v0.6.0
+## v0.6.0
+
 - Fixed sound corruption with AudioDxe
 - Fixed icon choice for Apple FW update in OpenCanopy
 - Fixed APFS driver loading on Fusion Drive
@@ -27,7 +27,8 @@ OpenCore Changelog
 - Fixed FSBFrequency reporting on Meron and similar CPUs
 - Fixed incorrect volume icon dimension requirements in OpenCanopy
 
-#### v0.5.9
+## v0.5.9
+
 - Added full HiDPI support in OpenCanopy
 - Improved OpenCanopy font rendering by using CoreText
 - Fixed light and custom background font rendering
@@ -72,7 +73,8 @@ OpenCore Changelog
 - Added `SysReport` option for DEBUG builds to dump system info
 - Fixed crashes on some AMD firmwares when performing keyboard input
 
-#### v0.5.8
+## v0.5.8
+
 - Fixed invalid CPU object reference in SSDT-PLUG
 - Fixed incorrect utilities and resources packaging
 - Fixed `Custom` `UpdateSMBIOSMode` modifying SMBIOSv3 table
@@ -98,7 +100,8 @@ OpenCore Changelog
 - Update builtin firmware
 - Fixed invalid checksum checks when creating vault (thx @dakanji)
 
-#### v0.5.7
+## v0.5.7
+
 - Added TimeMachine detection to picker
 - Added early preview version of OpenCanopy
 - Fixed FS discovery on NVMe with legacy drivers
@@ -126,7 +129,8 @@ OpenCore Changelog
 - Renamed `PickerAttributes` to `ConsoleAttributes`
 - Introduced `PickerAttributes` as a matter of UI configuration
 
-#### v0.5.6
+## v0.5.6
+
 - Various improvements to builtin text renderer
 - Fixed locating DMG recovery in APTIO IV firmwares on FAT32
 - Fixed loading DMG recovery in APTIO IV firmwares on FAT32
@@ -160,7 +164,8 @@ OpenCore Changelog
 - Merged `OcSupportPkg` with `OpenCorePkg` for easier bisection
 - Disabled warnings in release versions of NVMe and XHCI drivers
 
-#### v0.5.5
+## v0.5.5
+
 - Fixed CPU bus ratio calculation for Nehalem and Westmere
 - Fixed CPU package calculation on MacPro5,1 and similar
 - Improved OpenCore rerun detection for new versions
@@ -179,7 +184,8 @@ OpenCore Changelog
 - Added experimental `BuiltinTextRenderer` boot option
 - Added `DummyPowerManagement` kernel quirk to disable CPU PM
 
-#### v0.5.4
+## v0.5.4
+
 - Added Enter key handling in boot menu for quick proceed
 - Update builtin firmware versions
 - Bundled FwRuntimeServices driver with OpenCore
@@ -206,7 +212,8 @@ OpenCore Changelog
 - Bundled NvmExpressDxe and XhciDxe drivers for platforms that need them
 - Added `IncreasePciBarSize` kernel quirk for select platforms with PCI space issues
 
-#### v0.5.3
+## v0.5.3
+
 - Update builtin firmware versions
 - Fixed interpreting letters in boot menu
 - Fixed timeout abortion with PollAppleHotKeys quirk
@@ -222,6 +229,7 @@ OpenCore Changelog
 - Switched to edk2-stable201911, which is now the minimum supportd EDK II version
 
 #### v0.5.2
+
 - Fixed `MinKernel` and `MaxKernel` logic (thx @dhinakg, @reitermarkus)
 - Fixed ASSERT when booting non-Apple OSes without arguments from the DEBUG version
 - Added `MmioWhitelist` configuration option
@@ -231,7 +239,8 @@ OpenCore Changelog
 - Added OpenCore version to picker ui, configured by `ExposeSensitiveData`
 - Added hypervisor CPUID support to work with virtualization (thx @Leoyzen)
 
-#### v0.5.1
+## v0.5.1
+
 - Added support of kernel resource kext injection
 - Added support for 0.25% clock slowdown on Xeon Scalable CPUs (thx @mrmiller)
 - Replaced `MatchKernel` with `MinKernel` and `MaxKernel`
@@ -239,7 +248,8 @@ OpenCore Changelog
 - Fixed broken timer for 300 series Intel chipsets
 - Added `Input` section for mouse and keyboard aggregation
 
-#### v0.5.0
+## v0.5.0
+
 - Added builtin firmware versions for new models 2019
 - Fixed LogoutHook leaving random directories in `$HOME`
 - Fixed FSBFrequency calculation on Xeon Scalable CPUs (thx @mrmiller)
@@ -259,7 +269,8 @@ OpenCore Changelog
 - Upgraded EDK II base package to edk2-stable201908
 - Prohibited argument changing by BootNext
 
-#### v0.0.4
+## v0.0.4
+
 - Fixed kext injection issues with dummy dependencies
 - Fixed kext injection issues with reused vtables
 - Fixed Custom SMBIOS table update patches
@@ -276,7 +287,8 @@ OpenCore Changelog
 - Added advanced user-specified boot entries through `Misc` -> `Entries`
 - Added `DisableVariableWrite` quirk to disable hardware NVRAM write in macOS
 
-#### v0.0.3
+## v0.0.3
+
 - Added complete modern platform database (2012+)
 - Added `DisableIoMapper` kernel quirk
 - Fixed ACPI modification failures with nested multiboot
@@ -301,7 +313,8 @@ OpenCore Changelog
 - Added ESP partition type detection to ScanPolicy
 - Added support for third-party user interfaces
 
-#### v0.0.2
+## v0.0.2
+
 - Documentation improvements (see Differences.pdf)
 - Platform information database updates
 - Fixed misbehaving `Debug` -> `Target` enable bit
@@ -317,5 +330,6 @@ OpenCore Changelog
 - Fixed SMBIOS Type 133 table exposure
 - Added support for SMBIOS Type 134 table exposure
 
-#### v0.0.1
+## v0.0.1
+
 - Initial developer preview release

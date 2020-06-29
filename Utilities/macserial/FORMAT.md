@@ -1,5 +1,5 @@
-Apple Mac Serial Format
-=======================
+# Apple Mac Serial Format
+
 
 It is reasonably important to get more information about the goods you buy, especially if they are not new, and you do not have absolute confidence in the seller. Serial numbers are the first thing to look at. For Apple products [Apple Check Coverage](https://checkcoverage.apple.com) is your best friend.
 
@@ -35,10 +35,10 @@ Select fields in the numbers are encoded values in base 34. So, certain alpha-nu
 
 There generally are 2 similar formats of serial encoding: the old 11 character format, and the new 12 character format. 
 
-| Type      | Location  | Year | Week | Line  | Product  |
-| --------- | --------- | ---- | ---- | ----- | -------- |
-| Old (11)  | `LL`      | `Y`  | `WW` | `SSS` | `PPP`    |
-| New (12)  | `LLL`     | `Y`  | `W`  | `SSS` | `PPPP`   |
+| Type     | Location | Year | Week | Line  | Product |
+| -------- | -------- | ---- | ---- | ----- | ------- |
+| Old (11) | `LL`     | `Y`  | `WW` | `SSS` | `PPP`   |
+| New (12) | `LLL`    | `Y`  | `W`  | `SSS` | `PPPP`  |
 
 ### Location
 
@@ -64,7 +64,6 @@ For old-style serials it always is a digit that encodes the last digit of the ye
 | `0`  | 2010 |
 | `1`  | 2011 |
 | `2`  | 2012 |
-
 
 For new-style serials it is an alphanumeric value, which not only encodes the year, but its half as well. Not all the values are allowed. The table below outlines the pairs of characters which are assumed to encode each supported year. First character in the pair is believed to encode the first half of the year, and the second character — the second half.
 
@@ -134,7 +133,7 @@ This formula effectively defines a compression function, which allows to encode 
 
 While the formula does look strange, it was experimentally discovered that up to `N` first encoded derivatives are valid, and starting with the first invalid derivative there will be no valid ones. Thus for a complete serial list made up with all the derivatives from the above the following is assumed to be true: if `0TM` and `2PM` are valid and `3MM` is invalid, then `1RM` will also be valid, and `4KM` to `D1M` will be invalid. From this data it could be theorised that the encoded value is incremented for each model produced from the same line. So `0TM` is the first copy produced, and `D1M` is the last copy.
 
-**Update**: At a later stage very few examples of valid derivatives after invalid were found. These exceptions disprove at least some parts of the model, but currently there exists no better theory.
+**Update :** At a later stage very few examples of valid derivatives after invalid were found. These exceptions disprove at least some parts of the model, but currently there exists no better theory.
 
 ### Product model
 
@@ -146,16 +145,16 @@ http://support-sp.apple.com/sp/index?page=cpuspec&cc=PPPP
 
 For example, for iMacPro1,1 it could be [HX87](http://support-sp.apple.com/sp/index?page=cpuspec&cc=HX87) and for MacBookPro14,3 it could be [HTD5](http://support-sp.apple.com/sp/index?page=cpuspec&cc=HTD5).
 
-The list is not standardised or published anywhere, but you can see most products by running `./macserial -lp` and `./macserial -l` to match against mac models. The value seems to be a classic base 34 sequence: `P1 * 39304 + P2 * 1156 + P3 * 34 + P4`. The ranges seem to be allocated in chunks in non-decreasing manner. Normally each chunk is distanced from another chunk by up to 64 (90% matches). 
+The list is not standardised or published anywhere, but you can see most products by running `./macserial -lp` and `./macserial -l` to match against mac models. The value seems to be a classic base 34 sequence: `P1 * 39304 + P2 * 1156 + P3 * 34 + P4`. The ranges seem to be allocated in chunks in non-decreasing manner. Normally each chunk is distanced from another chunk by up to 64 (90% matches).
 
 ## Logic board serial number (MLB)
 
 There generally are 2 formats of logic board serial encoding: the old 13 character format, and the new 17 character format. Unlike serial number, these formats are quite different and in addition very little is known about MLB in general.
 
-| Type      | Location  | Year | Week | Item   | Infix  | Product  | Suffix |
-| --------- | --------- | ---- | ---- | ------ | ------ | -------- | ------ |
-| Old (13)  | `LL`      | `Y`  | `WW` | `IIII` |        | `EEE`    | `C`    |
-| New (17)  | `LLL`     | `Y`  | `WW` | `III`  | `AA`   | `EEEE`   | `CC`   |
+| Type     | Location | Year | Week | Item   | Infix | Product | Suffix |
+| -------- | -------- | ---- | ---- | ------ | ----- | ------- | ------ |
+| Old (13) | `LL`     | `Y`  | `WW` | `IIII` |       | `EEE`   | `C`    |
+| New (17) | `LLL`    | `Y`  | `WW` | `III`  | `AA`  | `EEEE`  | `CC`   |
 
 While it is unclear if this is intentional, for 17 character MLB it is possible to perform basic validation online through `osrecovery.apple.com`. The recovery server will return valid latest recovery image only when MLB is valid. Use `./macrecovery.py verify -m MLB -b BOARD-ID` to try verifying your MLB number.
 
@@ -166,6 +165,7 @@ It is not clear how strongly MLB is attached to serial number (SN). The followin
 - Recovery server accepts a range of models with the same MLB (with only latest os different)
 
 The following is suspected:
+
 - `EEEE` is unique number for all MLBs
 - `EEEE` are shared across different models and thus cannot identify the model
 

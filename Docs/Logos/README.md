@@ -1,5 +1,4 @@
-OpenCore Logo
-=============
+# OpenCore Logo
 
 This directory contains OpenCore project official logo. The following
 formats are supported:

@@ -1,20 +1,19 @@
-UEFI Debugging with GDB
-=======================
+# UEFI Debugging with GDB
 
 These scripts provide support for easier UEFI code debugging on virtual machines like VMware Fusion
 or QEMU. The code is based on [Andrei Warkentin](https://github.com/andreiw)'s
 [DebugPkg](https://github.com/andreiw/andreiw-wip/tree/master/uefi/DebugPkg) with improvements
 in macOS support, pretty printing, and bug fixing.
 
-The general approach is as follows:
+The general approach is as follows :
 
 1. Build GdbSyms binary with EDK II type info in DWARF
-1. Locate `EFI_SYSTEM_TABLE` in memory by its magic
-1. Locate `EFI_DEBUG_IMAGE_INFO_TABLE` by its GUID
-1. Map relocated images within GDB
-1. Provide handy functions and pretty printers
+2. Locate `EFI_SYSTEM_TABLE` in memory by its magic
+3. Locate `EFI_DEBUG_IMAGE_INFO_TABLE` by its GUID
+4. Map relocated images within GDB
+5. Provide handy functions and pretty printers
 
-#### Preparing Source Code
+### Preparing Source Code
 
 By default EDK II optimises produced binaries, so to build a "real" debug binary one should target
 `NOOPT`. Do be aware that it strongly affects resulting binary size:
@@ -32,17 +31,19 @@ To wait for debugger connection on startup `WaitForKeyPress` functions from `OcM
 utilised. Do be aware that this function additionally calls `DebugBreak` function, which may
 be broken at during GDB init.
 
-#### VMware Configuration
+### VMware Configuration
 
 VMware Fusion contains a dedicated debugStub, which can be enabled by adding the following
 lines to .vmx file. Afterwards vmware-vmx will listen on TCP ports 8832 and 8864 (on the host)
 for 32-bit and 64-bit gdb connections respectively, similarly to QEMU:
+
 ```
 debugStub.listen.guest32 = "TRUE"
 debugStub.listen.guest64 = "TRUE"
 ```
 
 In case the debugging session is remote the following lines should be appended:
+
 ```
 debugStub.listen.guest32.remote = "TRUE"
 debugStub.listen.guest64.remote = "TRUE"
@@ -50,22 +51,25 @@ debugStub.listen.guest64.remote = "TRUE"
 
 To halt the virtual machine upon executing the first instruction the following line code be added.
 Note, that it does not seem to work on VMware Fusion 11 and results in freezes:
+
 ```
 monitor.debugOnStartGuest32 = "TRUE"
 ```
 
 To force hardware breakpoints (instead of software INT 3 breakpoints) add the following line:
+
 ```
 debugStub.hideBreakpoints = "TRUE"
 ```
 
 To stall during POST for 3 seconds add the following line. Pressing any key will boot into firmware
 settings:
+
 ```
 bios.bootDelay = "3000"
 ```
 
-#### QEMU configuration
+### QEMU configuration
 
 In addition to VMware it is also possible to use [QEMU](https://www.qemu.org). QEMU debugging
 on macOS host is generally rather limited and slow, but it is enough for generic troubleshooting
@@ -98,14 +102,15 @@ when no macOS guest booting is required.
     ```
 
 3. Run QEMU (`OVMF_BUILD` should point to OVMF build directory, e.g.
-    `$HOME/UefiWorkspace/Build/OvmfX64/NOOPT_XCODE5/FV`):
+    `$HOME/UefiWorkspace/Build/OvmfX64/NOOPT_XCODE5/FV`) :
 
     ```
     qemu-system-x86_64 -L . -bios "$OVMF_BUILD/OVMF.fd" -hda fat:rw:ESP \
       -machine q35 -m 2048 -cpu Penryn -smp 4,cores=2 -usb -device usb-mouse -gdb tcp::8864
     ```
 
-    To run QEMU with SMM support use the following command:
+    To run QEMU with SMM support use the following command :
+
     ```
     qemu-system-x86_64 -L . -global driver=cfi.pflash01,property=secure,value=on \
       -drive if=pflash,format=raw,unit=0,file="$OVMF_BUILD"/OVMF_CODE.fd,readonly=on \
@@ -117,7 +122,7 @@ when no macOS guest booting is required.
     You may additionally pass `-S` flag to QEMU to stop at first instruction
     and wait for GDB connection. To use serial debugging add `-serial stdio`.
 
-#### Debugger Configuration
+### Debugger Configuration
 
 For simplicitly `efidebug.tool` performs all the necessary GDB or LLDB scripting.
 Note, that you need to run `reload-uefi` after any new binary loads.
@@ -147,7 +152,7 @@ reload-uefi
 b DebugBreak
 ```
 
-#### CLANGDWARF
+### CLANGDWARF
 
 CLANGDWARF toolchain is an LLVM-based toolchain that directly generates
 PE/COFF images with DWARF debug information via LLD linker. LLVM 9.0 or
@@ -170,7 +175,7 @@ The reason for this requirement is fragile `--add-gnudebug-link` option
 It strips path from the debug file preserving only filename and also does not
 update DataDirectory debug entry.
 
-#### References
+### References
 
 1. https://communities.vmware.com/thread/390128
 1. https://wiki.osdev.org/VMware

@@ -1,5 +1,4 @@
-Kexts
-=====
+# Kexts
 
 ## Ethernet
 
@@ -87,5 +86,5 @@ Kexts
 - [WebCamera.kext](https://www.applelife.ru/threads/asus-x550vc-i-asus-x550cc.41752/page-130#post-593586)
 - [TOSMotionSensor.kext](https://github.com/jslegendre/TOSMotionSensor)
 
-More complete list with legacy kexts is hosted [here](https://docs.google.com/spreadsheets/d/15S-ocrkm_VTUJpKxNII-YUyQFd5VYdjbe0DHlZVCQyM). Full Lilu plugin list with legacy kexts is hosted [here](https://github.com/acidanthera/Lilu/blob/master/KnownPlugins.md). For developers only.   
-Acidanthera members are not affiliated with the authors of any kernel extensions but ones hosted at https://github.com/acidanthera. This list is provided for information purposes without warranty of any kind.  
+More complete list with legacy kexts is hosted [here](https://docs.google.com/spreadsheets/d/15S-ocrkm_VTUJpKxNII-YUyQFd5VYdjbe0DHlZVCQyM). Full Lilu plugin list with legacy kexts is hosted [here](https://github.com/acidanthera/Lilu/blob/master/KnownPlugins.md). For developers only.  
+Acidanthera members are not affiliated with the authors of any kernel extensions but ones hosted at [Acidanthera](https://github.com/acidanthera). This list is provided for information purposes without warranty of any kind.  
