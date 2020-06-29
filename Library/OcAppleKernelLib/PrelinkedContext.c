@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include <Base.h>
+#include <Uefi.h>
 
 #include <IndustryStandard/AppleKmodInfo.h>
 
@@ -248,6 +248,12 @@ PrelinkedContextInit (
       &Context->InnerMachContext,
       &Context->Prelinked[Segment->FileOffset],
       (UINT32) (Context->PrelinkedSize - Segment->FileOffset))) {
+      return EFI_INVALID_PARAMETER;
+    }
+
+    if (!MachoInitialiseSymtabsExternal64 (
+      &Context->PrelinkedMachContext,
+      &Context->InnerMachContext)) {
       return EFI_INVALID_PARAMETER;
     }
   }
@@ -588,6 +594,20 @@ PrelinkedInjectComplete (
   Context->PrelinkedInfoSection->Address        = Context->PrelinkedLastAddress;
   Context->PrelinkedInfoSection->Size           = ExportedInfoSize;
   Context->PrelinkedInfoSection->Offset         = Context->PrelinkedSize;
+
+  if (Context->IsKernelCollection) {
+    //
+    // For newer variant of the prelinkedkernel plist we need to adapt it
+    // in both inner and outer images.
+    //
+    Context->InnerInfoSegment->VirtualAddress = Context->PrelinkedLastAddress;
+    Context->InnerInfoSegment->Size           = ExportedInfoSize;
+    Context->InnerInfoSegment->FileOffset     = Context->PrelinkedSize;
+    Context->InnerInfoSegment->FileSize       = ExportedInfoSize;
+    Context->InnerInfoSection->Address        = Context->PrelinkedLastAddress;
+    Context->InnerInfoSection->Size           = ExportedInfoSize;
+    Context->InnerInfoSection->Offset         = Context->PrelinkedSize;
+  }
 
   CopyMem (
     &Context->Prelinked[Context->PrelinkedSize],
