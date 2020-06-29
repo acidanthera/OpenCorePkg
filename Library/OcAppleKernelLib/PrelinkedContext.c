@@ -246,7 +246,7 @@ PrelinkedContextInit (
     if (!MachoInitializeContext (
       &Context->InnerMachContext,
       &Context->Prelinked[Segment->FileOffset],
-      Context->PrelinkedSize - Segment->FileOffset)) {
+      (UINT32) (Context->PrelinkedSize - Segment->FileOffset))) {
       return EFI_INVALID_PARAMETER;
     }
   }
