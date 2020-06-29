@@ -41,6 +41,7 @@ GetFileData (
 
   ReadSize = Size;
   Status = File->Read (File, &ReadSize, Buffer);
+  File->SetPosition (File, 0);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -67,6 +68,7 @@ GetFileSize (
   }
 
   Status = File->GetPosition (File, &Position);
+  File->SetPosition (File, 0);
   if (EFI_ERROR (Status)) {
     return Status;
   }

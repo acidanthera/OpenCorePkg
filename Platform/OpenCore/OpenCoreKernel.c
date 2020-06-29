@@ -735,9 +735,6 @@ OcKernelFileOpen (
       );
     DEBUG ((DEBUG_INFO, "OC: Result of XNU hook on %s is %r\n", FileName, Status));
 
-    //
-    // This is not Apple kernel, just return the original file.
-    //
     if (!EFI_ERROR (Status)) {
       DarwinVersion = OcKernelReadDarwinVersion (Kernel, KernelSize);
       OcKernelApplyPatches (mOcConfiguration, DarwinVersion, NULL, Kernel, KernelSize);
@@ -786,6 +783,7 @@ OcKernelFileOpen (
   }
 
   //
+  // This is not Apple kernel, just return the original file.
   // We recurse the filtering to additionally catch com.apple.boot.[RPS] directories.
   //
   return CreateRealFile (*NewHandle, OcKernelFileOpen, TRUE, NewHandle);
