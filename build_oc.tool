@@ -19,7 +19,7 @@ buildutil() {
     "TestSmbios"
   )
 
-  if [ "$HAS_OPENSSL_BUILD" = "1" ]; then
+  if [ "$HAS_OPENSSL_BUILD" == "1" ]; then
     UTILS+=("RsaTool")
   fi
 
@@ -31,7 +31,7 @@ buildutil() {
     #
     # FIXME: Do not build RsaTool for Win32 without OpenSSL.
     #
-    if [ "$util" = "RsaTool" ] && [ "$HAS_OPENSSL_W32BUILD" != "1" ]; then
+    if [ "$util" == "RsaTool" ] && [ "$HAS_OPENSSL_W32BUILD" != "1" ]; then
       continue
     fi
 
@@ -42,7 +42,7 @@ buildutil() {
     fi
     cd - || exit 1
   done
-  popd || exit 
+  popd || exit
 }
 
 package() {
@@ -53,7 +53,7 @@ package() {
 
   local ver
   ver=$(grep OPEN_CORE_VERSION ./Include/Acidanthera/OpenCore.h | sed 's/.*"\(.*\)".*/\1/' | grep -E '^[0-9.]+$')
-  if [ "$ver" = "" ]; then
+  if [ "$ver" == "" ]; then
     echo "Invalid version $ver"
     ver="UNKNOWN"
   fi
@@ -75,7 +75,7 @@ package() {
     "tmp/EFI/OC/Resources/Label"
     "tmp/Docs/AcpiSamples"
     "tmp/Utilities"
-    )
+  )
   for dir in "${dirs[@]}"; do
     mkdir -p "${dir}" || exit 1
   done
@@ -88,10 +88,10 @@ package() {
   efiOCBMs=(
     "BOOTx64.efi"
     "OpenCore.efi"
-    )
+  )
   for efiOCBM in "${efiOCBMs[@]}"; do
     dd if="${bootsig}" \
-       of="${efiOCBM}" seek=64 bs=1 count=64 conv=notrunc || exit 1
+      of="${efiOCBM}" seek=64 bs=1 count=64 conv=notrunc || exit 1
   done
   cp BOOTx64.efi tmp/EFI/BOOT/ || exit 1
   cp BOOTx64.efi tmp/EFI/OC/Bootstrap/Bootstrap.efi || exit 1
@@ -108,7 +108,7 @@ package() {
     "RtcRw.efi"
     "OpenControl.efi"
     "VerifyMsrE2.efi"
-    )
+  )
   for efiTool in "${efiTools[@]}"; do
     cp "${efiTool}" tmp/EFI/OC/Tools/ || exit 1
   done
@@ -127,7 +127,7 @@ package() {
     "Ps2KeyboardDxe.efi"
     "UsbMouseDxe.efi"
     "XhciDxe.efi"
-    )
+  )
   for efiDriver in "${efiDrivers[@]}"; do
     cp "${efiDriver}" tmp/EFI/OC/Drivers/ || exit 1
   done
@@ -137,7 +137,7 @@ package() {
     "Differences/Differences.pdf"
     "Sample.plist"
     "SampleFull.plist"
-    )
+  )
   for doc in "${docs[@]}"; do
     cp "${selfdir}/Docs/${doc}" tmp/Docs/ || exit 1
   done
@@ -150,7 +150,7 @@ package() {
     "LogoutHook"
     "macrecovery"
     "kpdescribe"
-    )
+  )
   for utilScpt in "${utilScpts[@]}"; do
     cp -r "${selfdir}/Utilities/${utilScpt}" tmp/Utilities/ || exit 1
   done
@@ -161,7 +161,7 @@ package() {
     "ocvalidate"
     "disklabel"
     "icnspack"
-    )
+  )
   for util in "${utils[@]}"; do
     dest="tmp/Utilities/${util}"
     mkdir -p "${dest}" || exit 1
@@ -184,7 +184,7 @@ package() {
 }
 
 cd "$(dirname "$0")" || exit 1
-if [ "$ARCHS" = "" ]; then
+if [ "$ARCHS" == "" ]; then
   ARCHS=(X64 IA32)
   export ARCHS
 fi

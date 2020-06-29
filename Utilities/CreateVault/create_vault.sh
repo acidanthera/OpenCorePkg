@@ -7,7 +7,7 @@
 #
 OCPath="$1"
 
-if [ "${OCPath}" = "" ]; then
+if [ "${OCPath}" == "" ]; then
   echo "Usage ./create_vault.sh path/to/EFI/OC"
   exit 1
 fi
@@ -54,13 +54,13 @@ echo "Hashing files in ${OCPath}..."
   wname="${fname//\//\\\\}"
   shasum=$(/usr/bin/shasum -a 256 "${fname}") || abort "Failed to hash ${fname}"
   sha=$(echo "$shasum" | /usr/bin/sed 's/^\([a-f0-9]\{64\}\).*/\1/') || abort "Illegit hashsum"
-  if [ "${#sha}" != 64 ] || [ "$(echo "$sha"| /usr/bin/sed 's/^[a-f0-9]*$//')" ]; then
+  if [ "${#sha}" != 64 ] || [ "$(echo "$sha" | /usr/bin/sed 's/^[a-f0-9]*$//')" ]; then
     abort "Got invalid hash: ${sha}!"
   fi
 
   echo "${wname}: ${sha}"
 
-  echo "${sha}" | /usr/bin/xxd -r -p > /tmp/vault_hash || abort "Hashing failure"
+  echo "${sha}" | /usr/bin/xxd -r -p >/tmp/vault_hash || abort "Hashing failure"
   /usr/libexec/PlistBuddy -c "Import Files:'${wname}' /tmp/vault_hash" vault.plist || abort "Failed to append vault.plist!"
 done
 

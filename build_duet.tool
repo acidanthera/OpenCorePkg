@@ -23,14 +23,14 @@ imgbuild() {
 
   # Calculate page table location for 64-bit builds.
   # Page table must be 4K aligned, bootsectors are 4K each, and 0x20000 is base address.
-  if [ "${TARGETARCH}" = "X64" ]; then
-    if [ "$(uname)" = "Darwin" ]; then
+  if [ "${TARGETARCH}" == "X64" ]; then
+    if [ "$(uname)" == "Darwin" ]; then
       EL_SIZE=$(stat -f "%z" "${BUILD_DIR}/FV/Efildr${TARGETARCH}")
     else
       EL_SIZE=$(stat --printf="%s\n" "${BUILD_DIR}/FV/Efildr${TARGETARCH}")
     fi
-    PAGE_TABLE_OFF=$( printf "0x%x" $(( (EL_SIZE + 0x2000 + 0xFFF) & ~0xFFF )) )
-    PAGE_TABLE=$( printf "0x%x" $(( PAGE_TABLE_OFF + 0x20000 )) )
+    PAGE_TABLE_OFF=$(printf "0x%x" $(((EL_SIZE + 0x2000 + 0xFFF) & ~0xFFF)))
+    PAGE_TABLE=$(printf "0x%x" $((PAGE_TABLE_OFF + 0x20000)))
 
     export PAGE_TABLE_OFF
     export PAGE_TABLE
@@ -48,10 +48,10 @@ imgbuild() {
 
   # Concatenate bootsector into the resulting image.
   cat "${BOOTSECTORS}/Start${TARGETARCH}${BOOTSECTOR_SUFFIX}.com" "${BOOTSECTORS}/Efi${TARGETARCH}.com" \
-    "${BUILD_DIR}/FV/Efildr${TARGETARCH}" > "${BUILD_DIR}/FV/Efildr${TARGETARCH}Pure" || exit 1
+    "${BUILD_DIR}/FV/Efildr${TARGETARCH}" >"${BUILD_DIR}/FV/Efildr${TARGETARCH}Pure" || exit 1
 
   # Append page table and skip empty data in 64-bit mode.
-  if [ "${TARGETARCH}" = "X64" ]; then
+  if [ "${TARGETARCH}" == "X64" ]; then
     "${FV_TOOLS}/GenPage" "${BUILD_DIR}/FV/Efildr${TARGETARCH}Pure" \
       -b "${PAGE_TABLE}" -f "${PAGE_TABLE_OFF}" \
       -o "${BUILD_DIR}/FV/Efildr${TARGETARCH}Out" || exit 1
@@ -67,7 +67,7 @@ package() {
     echo "Missing package directory $1"
     exit 1
   fi
-  
+
   if [ ! -d "$1"/../FV ]; then
     echo "Missing FV directory $1/../FV"
     exit 1
@@ -97,11 +97,11 @@ if [ ! -d "${FV_TOOLS}" ]; then
   exit 1
 fi
 
-if [ "${TARGETARCH}" = "" ]; then
+if [ "${TARGETARCH}" == "" ]; then
   TARGETARCH="X64"
 fi
 
-if [ "${TARGET}" = "" ]; then
+if [ "${TARGET}" == "" ]; then
   TARGET="RELEASE"
 fi
 
@@ -110,13 +110,13 @@ if [ "${INTREE}" != "" ]; then
   cd .. || exit 1
 
   build -a "${TARGETARCH}" -b "${TARGET}" -t XCODE5 -p OpenCorePkg/OpenDuetPkg.dsc || exit 1
-  
+
   BUILD_DIR="${WORKSPACE}/Build/OpenDuetPkg/${TARGET}_XCODE5"
   BUILD_DIR_ARCH="${BUILD_DIR}/${TARGETARCH}"
   imgbuild
 else
   TARGETS=(DEBUG RELEASE)
-  if [ "$ARCHS" = "" ]; then
+  if [ "$ARCHS" == "" ]; then
     ARCHS=(X64 IA32)
     export ARCHS
   fi

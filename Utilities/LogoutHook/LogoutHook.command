@@ -5,7 +5,7 @@
 # Slight optimizations by PMheart and vit9696.
 #
 
-if [ "$1" = "install" ]; then
+if [ "$1" == "install" ]; then
   SELFNAME=$(basename "$0")
   SELFDIR=$(dirname "$0")
   cd "$SELFDIR" || exit 1
@@ -13,7 +13,7 @@ if [ "$1" = "install" ]; then
   exit 0
 fi
 
-if [ ! -x /usr/bin/dirname ] || [ ! -x /usr/sbin/nvram ] || [ ! -x /usr/bin/grep ] || [ ! -x /bin/chmod ] || [ ! -x /usr/bin/sed ] || [ ! -x /usr/bin/base64 ] || [ ! -x /bin/rm ] || [ ! -x /bin/mkdir ]  || [ ! -x /usr/bin/stat ] || [ ! -x /usr/libexec/PlistBuddy ] || [ ! -x /usr/sbin/ioreg ] || [ ! -x /usr/bin/xxd ] || [ ! -x /usr/sbin/diskutil ] || [ ! -x /bin/cp ] || [ ! -x /usr/bin/wc ] || [ ! -x /usr/bin/uuidgen ] || [ ! -x /usr/bin/hexdump ]; then
+if [ ! -x /usr/bin/dirname ] || [ ! -x /usr/sbin/nvram ] || [ ! -x /usr/bin/grep ] || [ ! -x /bin/chmod ] || [ ! -x /usr/bin/sed ] || [ ! -x /usr/bin/base64 ] || [ ! -x /bin/rm ] || [ ! -x /bin/mkdir ] || [ ! -x /usr/bin/stat ] || [ ! -x /usr/libexec/PlistBuddy ] || [ ! -x /usr/sbin/ioreg ] || [ ! -x /usr/bin/xxd ] || [ ! -x /usr/sbin/diskutil ] || [ ! -x /bin/cp ] || [ ! -x /usr/bin/wc ] || [ ! -x /usr/bin/uuidgen ] || [ ! -x /usr/bin/hexdump ]; then
   abort "Unix environment is broken!"
 fi
 
@@ -33,7 +33,7 @@ abort() {
 
 nvram=/usr/sbin/nvram
 # FIXME: find an nvram key that is mandatory
-if  ! "${nvram}" -x '4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path' | grep -q 'xml' ; then
+if ! "${nvram}" -x '4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path' | grep -q 'xml'; then
   nvram="$(pwd)/nvram.mojave"
   if [ ! -f "${nvram}" ]; then
     abort "${nvram} does NOT exist!"
@@ -49,24 +49,23 @@ getKey() {
 
 /bin/rm -rf "${uuidDump}"
 /bin/mkdir "${uuidDump}" || abort "Failed to create dump directory!"
-cd "${uuidDump}"         || abort "Failed to enter dump directory!"
+cd "${uuidDump}" || abort "Failed to enter dump directory!"
 
-"${nvram}" -xp > ./nvram1.plist || abort "Failed to dump nvram!"
-
+"${nvram}" -xp >./nvram1.plist || abort "Failed to dump nvram!"
 
 for key in BootOrder BootNext Boot0080 Boot0081 Boot0082 Boot0083; do
-  getKey "8BE4DF61-93CA-11D2-AA0D-00E098032B8C:${key}" > "${key}"
-  if [ -n "$(/usr/bin/hexdump "${key}" )" ]; then
+  getKey "8BE4DF61-93CA-11D2-AA0D-00E098032B8C:${key}" >"${key}"
+  if [ -n "$(/usr/bin/hexdump "${key}")" ]; then
     /usr/libexec/PlistBuddy -c "Import Add:8BE4DF61-93CA-11D2-AA0D-00E098032B8C:${key} ${key}" ./nvram.plist || abort "Failed to import ${key} from 8BE4DF61-93CA-11D2-AA0D-00E098032B8C!"
   fi
 done
 # not an error
 # shellcheck disable=SC2043
 for key in DefaultBackgroundColor; do
-  getKey "4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:${key}" > "${key}"
-    if [ -n "$(/usr/bin/hexdump "${key}" )" ]; then
-      /usr/libexec/PlistBuddy -c "Import Add:4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:${key} ${key}" ./nvram.plist || abort "Failed to import ${key} from 4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14!"
-    fi
+  getKey "4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:${key}" >"${key}"
+  if [ -n "$(/usr/bin/hexdump "${key}")" ]; then
+    /usr/libexec/PlistBuddy -c "Import Add:4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:${key} ${key}" ./nvram.plist || abort "Failed to import ${key} from 4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14!"
+  fi
 done
 
 # Optional for security reasons: Wi-Fi settings for Install OS X and Recovery
@@ -77,8 +76,8 @@ done
 #   fi
 # done
 
-/usr/libexec/PlistBuddy -c "Add Version integer 1"                                       ./nvram.plist || abort "Failed to add Version!"
-/usr/libexec/PlistBuddy -c "Add Add:7C436110-AB2A-4BBB-A880-FE41995C9F82 dict"           ./nvram.plist || abort "Failed to add dict 7C436110-AB2A-4BBB-A880-FE41995C9F82"
+/usr/libexec/PlistBuddy -c "Add Version integer 1" ./nvram.plist || abort "Failed to add Version!"
+/usr/libexec/PlistBuddy -c "Add Add:7C436110-AB2A-4BBB-A880-FE41995C9F82 dict" ./nvram.plist || abort "Failed to add dict 7C436110-AB2A-4BBB-A880-FE41995C9F82"
 /usr/libexec/PlistBuddy -c "Merge nvram1.plist Add:7C436110-AB2A-4BBB-A880-FE41995C9F82" ./nvram.plist || abort "Failed to merge with nvram1.plist!"
 
 UUID="$("${nvram}" 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | /usr/bin/sed 's/.*GPT,\([^,]*\),.*/\1/')"

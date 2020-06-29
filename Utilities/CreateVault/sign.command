@@ -5,7 +5,7 @@ abort() {
   exit 1
 }
 
-if [ ! -x /usr/bin/dirname ] || [ ! -x /bin/chmod ] || [ ! -x /bin/mkdir ] || [ ! -x /usr/bin/openssl ] || [ ! -x /bin/rm ] || [ ! -x /usr/bin/strings ] || [ ! -x /usr/bin/grep ] || [ ! -x /usr/bin/cut ] || [ ! -x /bin/dd ] ; then
+if [ ! -x /usr/bin/dirname ] || [ ! -x /bin/chmod ] || [ ! -x /bin/mkdir ] || [ ! -x /usr/bin/openssl ] || [ ! -x /bin/rm ] || [ ! -x /usr/bin/strings ] || [ ! -x /usr/bin/grep ] || [ ! -x /usr/bin/cut ] || [ ! -x /bin/dd ]; then
   abort "Unix environment is broken!"
 fi
 
@@ -13,7 +13,7 @@ cd "$(/usr/bin/dirname "$0")" || abort "Failed to enter working directory!"
 
 OCPath="$1"
 
-if [ "$OCPath" = "" ]; then
+if [ "$OCPath" == "" ]; then
   OCPath=../../EFI/OC
 fi
 
@@ -64,7 +64,7 @@ echo "Issuing a new private key..."
 
 /bin/rm -fP "${PubKey}" || abort "Failed to remove ${PubKey}"
 echo "Getting public key based off private key..."
-./RsaTool -cert "${PrivKey}" > "${PubKey}" || abort "Failed to get public key"
+./RsaTool -cert "${PrivKey}" >"${PubKey}" || abort "Failed to get public key"
 
 echo "Signing ${OCBin}..."
 ./RsaTool -sign "${OCPath}/vault.plist" "${OCPath}/vault.sig" "${PubKey}" || abort "Failed to patch ${PubKey}"

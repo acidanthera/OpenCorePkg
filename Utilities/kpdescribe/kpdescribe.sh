@@ -55,12 +55,12 @@ if [ ! -f "$kernel" ]; then
 	kernel=/System/Library/Kernels/kernel
 fi
 
-function usage {
+function usage() {
 	echo "USAGE: $0 [-f kernel_file] [-k kext_dir1;kext_dir2] Kernel_diag_report.panic [...]"
 	echo "   eg, $0 /Library/Logs/DiagnosticReports/Kernel_2014-05-26-124827_bgregg.panic"
 	exit
 }
-(( $# == 0 )) && usage
+(($# == 0)) && usage
 [[ $1 == "-h" || $1 == "--help" ]] && usage
 
 while true; do
@@ -93,7 +93,7 @@ for kextdir in ${kextdirs[@]}; do
 	fi
 done
 
-while (( $# != 0 )); do
+while (($# != 0)); do
 	if [[ "$file" != "" ]]; then print; fi
 	file=$1
 	shift
@@ -113,7 +113,7 @@ while (( $# != 0 )); do
 	fi
 
 	# Print panic line
-  (grep -E -A 50 '^panic' | grep -E -B 50 '^Backtrace') < "$file" | grep -vE '^Backtrace'
+	(grep -E -A 50 '^panic' | grep -E -B 50 '^Backtrace') <"$file" | grep -vE '^Backtrace'
 
 	# Check kernel version match (uname -v string)
 	kernel_ver=$(strings -a "$kernel" | grep 'Darwin Kernel Version' | grep -v '@(#)')
@@ -133,7 +133,7 @@ while (( $# != 0 )); do
 		}
 		/Kernel Extensions in backtrace/ { ext = 1 }
 		/^$/ { ext = 0 }
-	' < "$file" | while read -r n v s e; do
+	' <"$file" | while read -r n v s e; do
 		# the awk gsub's convert this line:
 		#   com.apple.driver.AppleUSBHub(666.4)[CD9B71FF-2FDD-3BC4-9C39-5E066F66D158]@0xffffff7f84ed2000->0xffffff7f84ee9fff
 		# into this:
@@ -144,8 +144,8 @@ while (( $# != 0 )); do
 
 	i=0
 	unset name version start end kfile
-	while (( i < ${#ranges[@]} )); do
-		read -r n v s e <<< "${ranges[$i]}"
+	while ((i < ${#ranges[@]})); do
+		read -r n v s e <<<"${ranges[$i]}"
 		name[i]=$n
 		start[i]=$s
 		end[i]=$e
@@ -169,7 +169,7 @@ while (( $# != 0 )); do
 				echo "Version mismatch for $kname ($kver vs $v)"
 			fi
 		done
-		(( i++ ))
+		((i++))
 	done
 
 	# Print and translate stack
@@ -178,16 +178,16 @@ while (( $# != 0 )); do
 	awk 'backtrace == 1 && /^[^ ]/ { print $3 }
 		/Backtrace.*Return Address/ { backtrace = 1 }
 		/^$/ { backtrace = 0 }
-	' < "$file" | while read -r addr; do
+	' <"$file" | while read -r addr; do
 		line=""
 		# Check extensions
 		if [[ $addr =~ 0x* ]]; then
 			i=0
-			while (( i <= ${#name[@]} )); do
+			while ((i <= ${#name[@]})); do
 				[[ "${start[i]}" == "" ]] && break
 				# Assuming fixed width addresses, use string comparison:
 				if [[ $addr > ${start[$i]} && $addr < ${end[$i]} ]]; then
-					unslid=$((addr-${start[$i]}))
+					unslid=$((addr - ${start[$i]}))
 					if [ "${kfile[$i]}" != "" ]; then
 						line=$(atos -o "${kfile[$i]}" -l "${start[$i]}" "$addr")
 					else
@@ -195,13 +195,13 @@ while (( $# != 0 )); do
 					fi
 					break
 				fi
-				(( i++ ))
+				((i++))
 			done
 		fi
 		# Fallback to kernel
-		if [ "$line" = "" ] ; then
+		if [ "$line" = "" ]; then
 			line=$(atos -o "$kernel" -s "$slide" "$addr")
-			unslid=$((addr-slide))
+			unslid=$((addr - slide))
 		fi
 		printf "0x%016llx  0x%016llx  %s\n" "$addr" "$unslid" "$line"
 	done
@@ -211,7 +211,7 @@ while (( $# != 0 )); do
 		ver == 1 { print "Mac OS version:", $0; ver = 0 }
 		/^Mac OS version/ { ver = 1 }
 		/^Boot args:/ { print $0 }
-	' < "$file"
+	' <"$file"
 done
 
 echo ""
