@@ -25,6 +25,7 @@ OpenCore Changelog
 - Added `AppleFramebufferInfo` protocol implementation and override
 - Fixed serial initialisation when file logging is disabled
 - Fixed FSBFrequency reporting on Meron and similar CPUs
+- Fixed incorrect volume icon dimension requirements in OpenCanopy
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy
