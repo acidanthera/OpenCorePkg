@@ -619,7 +619,7 @@ InternalCachedPrelinkedKernel (
     if (!MachoInitializeContext (
       &NewKext->Context.MachContext,
       &Prelinked->Prelinked[Segment->FileOffset],
-      Prelinked->PrelinkedSize - Segment->FileOffset)) {
+      (UINT32) (Prelinked->PrelinkedSize - Segment->FileOffset))) {
       FreePool (NewKext);
       return NULL;
     }

@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
 
   if (!EFI_ERROR (Status)) {
 
-    Status = PrelinkedInjectPrepare (&Context);
+    Status = PrelinkedInjectPrepare (&Context, EFI_PAGE_SIZE);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "Prelink inject prepare error %r\n", Status));
       return -1;

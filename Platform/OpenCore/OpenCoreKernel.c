@@ -605,7 +605,7 @@ OcKernelProcessPrelinked (
 
     OcKernelBlockKexts (Config, DarwinVersion, &Context);
 
-    Status = PrelinkedInjectPrepare (&Context);
+    Status = PrelinkedInjectPrepare (&Context, 0);
     if (!EFI_ERROR (Status)) {
 
       for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {

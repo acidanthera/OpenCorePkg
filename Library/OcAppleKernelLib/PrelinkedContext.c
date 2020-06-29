@@ -193,6 +193,7 @@ PrelinkedContextInit (
   XML_NODE                 *DocumentRoot;
   XML_NODE                 *PrelinkedInfoRoot;
   CONST CHAR8              *PrelinkedInfoRootKey;
+  UINT64                   SegmentEndOffset;
   UINT32                   PrelinkedInfoRootIndex;
   UINT32                   PrelinkedInfoRootCount;
 
@@ -295,7 +296,7 @@ PrelinkedContextInit (
   }
 
   //
-  // Additionally process inner entries for KC.
+  // Additionally process special entries for KC.
   //
   if (Context->IsKernelCollection) {
     Status = PrelinkedGetSegmentsFromMacho (
@@ -305,6 +306,14 @@ PrelinkedContextInit (
       );
     if (EFI_ERROR (Status)) {
       return Status;
+    }
+
+    Context->LinkeditSegment = MachoGetSegmentByName64 (
+      &Context->PrelinkedMachContext,
+      KC_LINKEDIT_SEGMENT
+      );
+    if (Context->LinkeditSegment == NULL) {
+      return EFI_NOT_FOUND;
     }
   }
 
@@ -338,6 +347,23 @@ PrelinkedContextInit (
     return EFI_INVALID_PARAMETER;
   }
 
+  if (Context->IsKernelCollection) {
+    //
+    // In KC mode last load address is the __LINKEDIT address.
+    //
+    SegmentEndOffset = Context->LinkeditSegment->FileOffset + Context->LinkeditSegment->FileSize;
+
+    if (MACHO_ALIGN (SegmentEndOffset) != Context->PrelinkedSize) {
+      PrelinkedContextFree (Context);
+      return EFI_INVALID_PARAMETER;
+    }
+    
+    Context->PrelinkedLastLoadAddress = Context->LinkeditSegment->VirtualAddress + Context->LinkeditSegment->Size;
+  }
+
+  //
+  // In legacy mode last load address is last kext address.
+  //
   PrelinkedInfoRootCount = PlistDictChildren (PrelinkedInfoRoot);
   for (PrelinkedInfoRootIndex = 0; PrelinkedInfoRootIndex < PrelinkedInfoRootCount; ++PrelinkedInfoRootIndex) {
     PrelinkedInfoRootKey = PlistKeyValue (PlistDictChild (PrelinkedInfoRoot, PrelinkedInfoRootIndex, &Context->KextList));
@@ -347,7 +373,9 @@ PrelinkedContextInit (
 
     if (AsciiStrCmp (PrelinkedInfoRootKey, PRELINK_INFO_DICTIONARY_KEY) == 0) {
       if (PlistNodeCast (Context->KextList, PLIST_NODE_TYPE_ARRAY) != NULL) {
-        Context->PrelinkedLastLoadAddress = PrelinkedFindLastLoadAddress (Context->KextList);
+        if (Context->PrelinkedLastLoadAddress == 0) {
+          Context->PrelinkedLastLoadAddress = PrelinkedFindLastLoadAddress (Context->KextList);
+        }
         if (Context->PrelinkedLastLoadAddress != 0) {
           return EFI_SUCCESS;
         }
@@ -443,37 +471,44 @@ PrelinkedDependencyInsert (
 
 EFI_STATUS
 PrelinkedInjectPrepare (
-  IN OUT PRELINKED_CONTEXT  *Context
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     UINT32             LinkedExpansion
   )
 {
   UINT64  SegmentEndOffset;
 
-  if (!Context->IsKernelCollection) {
+  if (Context->IsKernelCollection) {
+    //
+    // For newer variant (KC mode) __LINKEDIT is last, and we need to expand it to enable
+    // dyld fixup generation.
+    //
+    if (Context->PrelinkedAllocSize < LinkedExpansion
+      || Context->PrelinkedAllocSize - LinkedExpansion < Context->PrelinkedSize) {
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    LinkedExpansion = MACHO_ALIGN (LinkedExpansion);
+
+    ASSERT (Context->PrelinkedLastAddress == Context->PrelinkedLastLoadAddress);
+
+    Context->PrelinkedSize              += LinkedExpansion;
+    Context->PrelinkedLastAddress       += LinkedExpansion;
+    Context->PrelinkedLastLoadAddress   += LinkedExpansion;
+    Context->LinkeditSegment->Size      += LinkedExpansion;
+    Context->LinkeditSegment->FileSize  += LinkedExpansion;
+    Context->LinkeditSegment->Size      += LinkedExpansion;
+  } else {
     //
     // For older variant of the prelinkedkernel plist info is normally
     // the last segment, so we may potentially save some data by removing
     // it and then appending new kexts over. This is different for KC,
     // where plist info is in the middle of the file.
     //
-
     SegmentEndOffset = Context->PrelinkedInfoSegment->FileOffset + Context->PrelinkedInfoSegment->FileSize;
 
     if (MACHO_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
       Context->PrelinkedSize = (UINT32) MACHO_ALIGN (Context->PrelinkedInfoSegment->FileOffset);
     }
-  } else {
-    //
-    // For newer variant of the prelinkedkernel plist we need to kill it
-    // in both inner and outer images.
-    //
-
-    Context->InnerInfoSegment->VirtualAddress = 0;
-    Context->InnerInfoSegment->Size           = 0;
-    Context->InnerInfoSegment->FileOffset     = 0;
-    Context->InnerInfoSegment->FileSize       = 0;
-    Context->InnerInfoSection->Address        = 0;
-    Context->InnerInfoSection->Size           = 0;
-    Context->InnerInfoSection->Offset         = 0;
   }
 
   Context->PrelinkedInfoSegment->VirtualAddress = 0;
@@ -485,6 +520,18 @@ PrelinkedInjectPrepare (
   Context->PrelinkedInfoSection->Offset         = 0;
 
   if (Context->IsKernelCollection) {
+    //
+    // For newer variant of the prelinkedkernel plist we need to kill it
+    // in both inner and outer images.
+    //
+    Context->InnerInfoSegment->VirtualAddress = 0;
+    Context->InnerInfoSegment->Size           = 0;
+    Context->InnerInfoSegment->FileOffset     = 0;
+    Context->InnerInfoSegment->FileSize       = 0;
+    Context->InnerInfoSection->Address        = 0;
+    Context->InnerInfoSection->Size           = 0;
+    Context->InnerInfoSection->Offset         = 0;
+
     return EFI_SUCCESS;
   }
 

@@ -48,6 +48,7 @@
 
 #define KC_REGION_SEGMENT_PREFIX                  "__REGION"
 #define KC_TEXT_SEGMENT                           "__TEXT"
+#define KC_LINKEDIT_SEGMENT                       "__LINKEDIT"
 #define KC_MOSCOW_SEGMENT                         "__MOSCOW101"
 
 //
@@ -100,6 +101,10 @@ typedef struct {
   // Pointer to PRELINK_TEXT_SECTION.
   //
   MACH_SECTION_64          *PrelinkedTextSection;
+  //
+  // Pointer to KC_LINKEDIT_SEGMENT (for KC mode).
+  //
+  MACH_SEGMENT_COMMAND_64  *LinkeditSegment;
   //
   // Mach-O context for inner prelinkedkernel (for KC mode).
   //
@@ -290,11 +295,16 @@ PrelinkedDependencyInsert (
   Drop current plist entry, required for kext injection.
   Ensure that prelinked text can grow with new kexts.
 
-  @param[in,out] Context  Prelinked context.
+  @param[in,out] Context          Prelinked context.
+  @param[in]     LinkedExpansion  Extra LINKEDIT size for KC required
+                                  to hold DYLD chained fixups.
+
+  @retval  EFI_SUCCESS on success.
 **/
 EFI_STATUS
 PrelinkedInjectPrepare (
-  IN OUT PRELINKED_CONTEXT  *Context
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     UINT32             LinkedExpansion
   );
 
 /**
