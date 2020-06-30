@@ -6,6 +6,10 @@
  * 
  * To resolve this, we'll want to create a new RTC device(PNP0B00) with the correct
  * range.
+ * 
+ * Note that due to AWAC systems having an _STA method already defined, attempting
+ * to set another _STA method in your RTC device will conflict. To resolve this,
+ * SSDT-AWAC should be removed and instead opt for this SSDT instead.
  */
 DefinitionBlock ("", "SSDT", 2, "ACDT", "RtcRange", 0x00000000)
 {
@@ -14,6 +18,10 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "RtcRange", 0x00000000)
 
     Scope (_SB.PC00.LPC0)
     {
+       /* 
+        * Uncomment below if your ACPI doesn't have an AWAC device(ACPI000E)
+        */
+       /*
         Scope (RTC)
         {
             Method (_STA, 0, NotSerialized)  // _STA: Status
@@ -28,6 +36,8 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "RtcRange", 0x00000000)
                 }
             }
         }
+        */
+        
         Device (RTC0)
         {
            /*
