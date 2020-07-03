@@ -1,6 +1,16 @@
 #!/bin/bash
 
 imgbuild() {
+  echo "Erasing older files..."
+  rm -f "${BUILD_DIR}/FV/DUETEFIMAINFV${TARGETARCH}.z" \
+    "${BUILD_DIR}/FV/DxeMain${TARGETARCH}.z" \
+    "${BUILD_DIR}/FV/DxeIpl${TARGETARCH}.z" \
+    "${BUILD_DIR_ARCH}/EfiLoaderRebased.efi" \
+    "${BUILD_DIR}/FV/Efildr${TARGETARCH}" \
+    "${BUILD_DIR}/FV/Efildr${TARGETARCH}Pure" \
+    "${BUILD_DIR}/FV/Efildr${TARGETARCH}Out" \
+    "${BUILD_DIR_ARCH}/boot"
+
   echo "Compressing DUETEFIMainFv.FV..."
   LzmaCompress -e -o "${BUILD_DIR}/FV/DUETEFIMAINFV${TARGETARCH}.z" \
     "${BUILD_DIR}/FV/DUETEFIMAINFV${TARGETARCH}.Fv" || exit 1
