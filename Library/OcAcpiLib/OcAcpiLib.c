@@ -1136,7 +1136,8 @@ AcpiFadtEnableReset (
     }
   } else if ((Context->Fadt->Flags & EFI_ACPI_6_2_RESET_REG_SUP) == 0
     || (Context->Fadt->Flags & EFI_ACPI_6_2_SLP_BUTTON) == 0
-    || (Context->Fadt->Flags & EFI_ACPI_6_2_PWR_BUTTON) != 0) {
+    || (Context->Fadt->Flags & EFI_ACPI_6_2_PWR_BUTTON) != 0
+    || Context->Fadt->ResetReg.Address == 0) {
     Fadt = Context->Fadt;
   } else {
     return EFI_SUCCESS;
