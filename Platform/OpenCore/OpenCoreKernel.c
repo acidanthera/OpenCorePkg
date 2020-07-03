@@ -12,6 +12,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
+#include "ProcessorBind.h"
 #include <OpenCore.h>
 
 #include <Library/BaseLib.h>
@@ -168,15 +169,16 @@ OcKernelReadDarwinVersion (
 }
 
 STATIC
-UINT32
+EFI_STATUS
 OcKernelLoadKextsAndReserve (
   IN OC_STORAGE_CONTEXT  *Storage,
-  IN OC_GLOBAL_CONFIG    *Config
+  IN OC_GLOBAL_CONFIG    *Config,
+  OUT UINT32             *ReservedExeSize,
+  OUT UINT32             *ReservedInfoSize
   )
 {
   EFI_STATUS           Status;
   UINT32               Index;
-  UINT32               ReserveSize;
   CHAR8                *BundlePath;
   CHAR8                *Comment;
   CHAR8                *PlistPath;
@@ -184,7 +186,8 @@ OcKernelLoadKextsAndReserve (
   CHAR16               FullPath[OC_STORAGE_SAFE_PATH_MAX];
   OC_KERNEL_ADD_ENTRY  *Kext;
 
-  ReserveSize = PRELINK_INFO_RESERVE_SIZE;
+  *ReservedInfoSize = PRELINK_INFO_RESERVE_SIZE;
+  *ReservedExeSize  = 0;
 
   for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
     Kext = Config->Kernel.Add.Values[Index];
@@ -289,17 +292,38 @@ OcKernelLoadKextsAndReserve (
       }
     }
 
-    PrelinkedReserveKextSize (
-      &ReserveSize,
+    Status = PrelinkedReserveKextSize (
+      ReservedInfoSize,
+      ReservedExeSize,
       Kext->PlistDataSize,
       Kext->ImageData,
       Kext->ImageDataSize
       );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "OC: Failed to fit kext %a (%a)\n",
+        BundlePath,
+        Comment
+        ));
+      Kext->Enabled = FALSE;
+      FreePool (Kext->PlistData);
+      Kext->PlistData = NULL;
+      continue;
+    }
   }
 
-  DEBUG ((DEBUG_INFO, "OC: Kext reservation size %u\n", ReserveSize));
+  if (*ReservedExeSize > PRELINKED_KEXTS_MAX_SIZE
+   || *ReservedInfoSize + *ReservedExeSize < *ReservedExeSize) {
+    return EFI_UNSUPPORTED;
+  }
 
-  return ReserveSize;
+  DEBUG ((
+    DEBUG_INFO,
+    "OC: Kext reservation size %u\n",
+    *ReservedInfoSize + *ReservedExeSize
+    ));
+  return EFI_SUCCESS;
 }
 
 STATIC
@@ -584,7 +608,9 @@ OcKernelProcessPrelinked (
   IN     UINT32            DarwinVersion,
   IN OUT UINT8             *Kernel,
   IN     UINT32            *KernelSize,
-  IN     UINT32            AllocatedSize
+  IN     UINT32            AllocatedSize,
+  IN     UINT32            LinkedExpansion,
+  IN     UINT32            ReservedExeSize
   )
 {
   EFI_STATUS           Status;
@@ -605,9 +631,12 @@ OcKernelProcessPrelinked (
 
     OcKernelBlockKexts (Config, DarwinVersion, &Context);
 
-    Status = PrelinkedInjectPrepare (&Context, 0);
+    Status = PrelinkedInjectPrepare (
+      &Context,
+      LinkedExpansion,
+      ReservedExeSize
+      );
     if (!EFI_ERROR (Status)) {
-
       for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
         Kext = Config->Kernel.Add.Values[Index];
 
@@ -665,6 +694,8 @@ OcKernelProcessPrelinked (
           ));
       }
 
+      ASSERT (Context.PrelinkedSize - Context.KextsFileOffset <= ReservedExeSize);
+
       Status = PrelinkedInjectComplete (&Context);
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_WARN, "OC: Prelink insertion error - %r\n", Status));
@@ -693,6 +724,7 @@ OcKernelFileOpen (
   )
 {
   EFI_STATUS         Status;
+  BOOLEAN            Result;
   UINT8              *Kernel;
   UINT32             KernelSize;
   UINT32             AllocatedSize;
@@ -701,6 +733,10 @@ OcKernelFileOpen (
   EFI_STATUS         PrelinkedStatus;
   EFI_TIME           ModificationTime;
   UINT32             DarwinVersion;
+  UINT32             ReservedInfoSize;
+  UINT32             ReservedExeSize;
+  UINT32             LinkedExpansion;
+  UINT32             ReservedFullSize;
 
   Status = SafeFileOpen (This, NewHandle, FileName, OpenMode, Attributes);
 
@@ -725,13 +761,35 @@ OcKernelFileOpen (
     && OcStriStr (FileName, L"kernel") != NULL
     && StrCmp (FileName, L"System\\Library\\Kernels\\kernel") != 0) {
 
+    OcKernelLoadKextsAndReserve (
+      mOcStorage,
+      mOcConfiguration,
+      &ReservedInfoSize,
+      &ReservedExeSize
+      );
+
+    LinkedExpansion = KcGetSegmentFixupChainsSize (ReservedExeSize);
+    if (LinkedExpansion == 0) {
+      return EFI_UNSUPPORTED;
+    }
+
+    Result = OcOverflowTriAddU32 (
+      ReservedInfoSize,
+      ReservedExeSize,
+      LinkedExpansion,
+      &ReservedFullSize
+      );
+    if (Result) {
+      return EFI_UNSUPPORTED;
+    }
+
     DEBUG ((DEBUG_INFO, "OC: Trying XNU hook on %s\n", FileName));
     Status = ReadAppleKernel (
       *NewHandle,
       &Kernel,
       &KernelSize,
       &AllocatedSize,
-      OcKernelLoadKextsAndReserve (mOcStorage, mOcConfiguration)
+      ReservedFullSize
       );
     DEBUG ((DEBUG_INFO, "OC: Result of XNU hook on %s is %r\n", FileName, Status));
 
@@ -744,7 +802,9 @@ OcKernelFileOpen (
         DarwinVersion,
         Kernel,
         &KernelSize,
-        AllocatedSize
+        AllocatedSize,
+        LinkedExpansion,
+        ReservedExeSize
         );
 
       DEBUG ((DEBUG_INFO, "OC: Prelinked status - %r\n", PrelinkedStatus));

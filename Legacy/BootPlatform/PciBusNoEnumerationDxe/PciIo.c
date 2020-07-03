@@ -1435,14 +1435,14 @@ Returns:
       if (IS_PCI_GFX(&PciIoDevice->Pci)) {
 
         //
-        //Get the boot VGA on the same segement
+        //Get the boot VGA on the same segment
         //
         Temp = ActiveVGADeviceOnTheSameSegment (PciIoDevice);
 
         if (!Temp) {
 
           //
-          // If there is no VGA device on the segement, set
+          // If there is no VGA device on the segment, set
           // this graphics card to decode the palette range
           //
           DisableCommand  |= EFI_PCI_COMMAND_VGA_PALETTE_SNOOP;

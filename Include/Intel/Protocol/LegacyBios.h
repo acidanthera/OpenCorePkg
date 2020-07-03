@@ -1164,7 +1164,7 @@ BOOLEAN
   the Stack argument
 
   @param[in] This        The protocol instance pointer.
-  @param[in] Segment     The segemnt of 16-bit mode call.
+  @param[in] Segment     The segment of 16-bit mode call.
   @param[in] Offset      The offset of 16-bit mdoe call.
   @param[in] Reg         Register contexted passed into (and returned) from thunk to
                          16-bit mode.

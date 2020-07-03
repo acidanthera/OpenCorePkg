@@ -52,6 +52,11 @@
 #define KC_MOSCOW_SEGMENT                         "__MOSCOW101"
 
 //
+// As PageCount is UINT16, we can only index 2^16 * 4096 Bytes with one chain.
+//
+#define PRELINKED_KEXTS_MAX_SIZE (BIT16 * MACHO_PAGE_SIZE)
+
+//
 // Failsafe default for plist reserve allocation.
 //
 #define PRELINK_INFO_RESERVE_SIZE (5U * 1024U * 1024U)
@@ -159,6 +164,14 @@ typedef struct {
   // Whether this kernel is a kernel collection (used by macOS 11.0+).
   //
   BOOLEAN                  IsKernelCollection;
+
+  UINT32                   KextsFileOffset;
+
+  UINT64                   KextsVmAddress;
+
+  MACH_DYLD_CHAINED_STARTS_IN_SEGMENT  *KextsFixupChains;
+
+  UINT64 VirtualBase;
 } PRELINKED_CONTEXT;
 
 //
@@ -304,7 +317,8 @@ PrelinkedDependencyInsert (
 EFI_STATUS
 PrelinkedInjectPrepare (
   IN OUT PRELINKED_CONTEXT  *Context,
-  IN     UINT32             LinkedExpansion
+  IN     UINT32             LinkedExpansion,
+  IN     UINT32             ReservedExeSize
   );
 
 /**
@@ -322,16 +336,18 @@ PrelinkedInjectComplete (
 /**
   Updated required reserve size to inject this kext.
 
-  @param[in,out] ReservedSize    Current reserved size, updated.
-  @param[in]     InfoPlistSize   Kext Info.plist size.
-  @param[in]     Executable      Kext executable, optional.
-  @param[in]     ExecutableSize  Kext executable size, optional.
+  @param[in,out] ReservedInfoSize  Current reserved PLIST size, updated.
+  @param[in,out] ReservedExeSize   Current reserved KEXT size, updated.
+  @param[in]     InfoPlistSize     Kext Info.plist size.
+  @param[in]     Executable        Kext executable, optional.
+  @param[in]     ExecutableSize    Kext executable size, optional.
 
   @return  EFI_SUCCESS on success.
 **/
 EFI_STATUS
 PrelinkedReserveKextSize (
-  IN OUT UINT32       *ReservedSize,
+  IN OUT UINT32       *ReservedInfoSize,
+  IN OUT UINT32       *ReservedExeSize,
   IN     UINT32       InfoPlistSize,
   IN     UINT8        *Executable OPTIONAL,
   IN     UINT32       ExecutableSize OPTIONAL
@@ -359,6 +375,84 @@ PrelinkedInjectKext (
   IN     CONST CHAR8        *ExecutablePath OPTIONAL,
   IN OUT CONST UINT8        *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL
+  );
+
+EFI_STATUS
+KcRebuildMachHeader (
+  IN OUT PRELINKED_CONTEXT  *Context
+  );
+
+/*
+  Returns the size required to store a segment's fixup chains information.
+
+  @param[in] SegmentSize  The size, in bytes, of the segment to index.
+
+  @retval 0      The segment is too large to index with a single structure.
+  @retval other  The size, in bytes, required to store a segment's fixup chain
+                 information.
+*/
+UINT32
+KcGetSegmentFixupChainsSize (
+  IN UINT32  SegmentSize
+  );
+
+/*
+  Initialises a structure that stores a segments's fixup chains information.
+
+  @param[out] SegChain      The information structure to initialise.
+  @param[in]  SegChainSize  The size, in bytes, available to SegChain.
+  @param[in]  VmAddress     The virtual address of the segment to index.
+  @param[in]  VmSize        The virtual size of the segment to index.
+*/
+EFI_STATUS
+KcInitKextFixupChains (
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     UINT32             SegChainSize,
+  IN     UINT32             ReservedSize
+  );
+
+/*
+  Indexes all relocations of MachContext into the kernel described by Context.
+
+  @param[in,out] Context      Prelinked context.
+  @param[in]     MachContext  The context of the Mach-O to index. It must have
+                              been prelinked by OcAppleKernelLib. The image
+                              must reside in Segment.
+*/
+VOID
+KcKextIndexFixups (
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     OC_MACHO_CONTEXT   *MachContext
+  );
+
+/*
+  Retrieves a KC KEXT's virtual size.
+
+  @param[in] Context        Prelinked context.
+  @param[in] SourceAddress  The virtual address within the KC image of the KEXT.
+
+  @retval 0      An error has occured.
+  @retval other  The virtual size, in bytes, of the KEXT at SourceAddress.
+*/
+UINT32
+KcGetKextSize (
+  IN PRELINKED_CONTEXT  *Context,
+  IN UINT64             SourceAddress
+  );
+
+/*
+  Apply the delta from KC header to the file's offsets.
+
+  @param[in,out] Context  The context of the KEXT to rebase.
+  @param[in]     Delta    The offset from KC header the KEXT starts at.
+
+  @retval EFI_SUCCESS  The file has beem rebased successfully.
+  @retval other        An error has occured.
+*/
+EFI_STATUS
+KcKextApplyFileDelta (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT32            Delta
   );
 
 /**

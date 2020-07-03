@@ -19,6 +19,7 @@
 #include <Library/OcAppleKernelLib.h>
 #include <Library/DebugLib.h>
 
+#include <assert.h>
 #include <string.h>
 #include <sys/time.h>
 #include <stdint.h>
@@ -128,8 +129,44 @@ int main(int argc, char** argv) {
     return -1;
   }
 
+  uint32_t ReservedInfoSize = PrelinkedSize + 5*1024*1024;
+  uint32_t ReservedExeSize  = 0;
+  EFI_STATUS Status = PrelinkedReserveKextSize (
+    &ReservedInfoSize,
+    &ReservedExeSize,
+    LiluKextInfoPlistDataSize,
+    LiluKextData,
+    LiluKextDataSize
+    );
+  /*Status |= PrelinkedReserveKextSize (
+    &ReservedInfoSize,
+    &ReservedExeSize,
+    VsmcKextInfoPlistDataSize,
+    VsmcKextData,
+    VsmcKextDataSize
+    );*/
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "PrelinkedReserveKextSize failed - %r.\n", Status));
+    return -1;
+  }
 
-  AllocSize = MACHO_ALIGN (PrelinkedSize + 1*1024*1024);
+  DEBUG ((DEBUG_WARN, "Kexts size %u\n", ReservedExeSize));
+
+  uint32_t LinkedExpansion = KcGetSegmentFixupChainsSize (ReservedExeSize);
+  if (LinkedExpansion == 0) {
+    DEBUG ((DEBUG_ERROR, "KcGetSegmentFixupChainsSize failed.\n"));
+    return -1;
+  }
+
+  uint32_t LinkedExpansionA = MACHO_ALIGN (LinkedExpansion);
+
+  if (ReservedInfoSize + ReservedExeSize < ReservedExeSize
+   || ReservedInfoSize + ReservedExeSize + LinkedExpansionA < LinkedExpansionA) {
+    DEBUG ((DEBUG_ERROR, "Overflow.\n"));
+    return -1;
+  }
+
+  AllocSize = MACHO_ALIGN (ReservedInfoSize + ReservedExeSize + LinkedExpansionA);
 
   Prelinked = realloc (Prelinked, AllocSize);
   if (Prelinked == NULL) {
@@ -142,11 +179,15 @@ int main(int argc, char** argv) {
   ApplyKernelPatches (Prelinked, PrelinkedSize);
 #endif
 
-  EFI_STATUS Status = PrelinkedContextInit (&Context, Prelinked, PrelinkedSize, AllocSize);
+  Status = PrelinkedContextInit (&Context, Prelinked, PrelinkedSize, AllocSize);
 
   if (!EFI_ERROR (Status)) {
 
-    Status = PrelinkedInjectPrepare (&Context, EFI_PAGE_SIZE);
+    Status = PrelinkedInjectPrepare (
+      &Context,
+      LinkedExpansion,
+      ReservedExeSize
+      );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "Prelink inject prepare error %r\n", Status));
       return -1;

@@ -1807,6 +1807,27 @@ typedef struct {
          IsAuth     :  1;  ///< 0 -> not authenticated.  1 -> authenticated
 } MACH_DYKD_CHAINED_PTR_64_KERNEL_CACHE_REBASE;
 
+// header of the LC_DYLD_CHAINED_FIXUPS payload
+typedef struct {
+  UINT32 FixupsVersion;  ///< 0
+  UINT32 StartsOffset;   ///< offset of dyld_chained_starts_in_image in chain_data
+  UINT32 ImportsOffset;  ///< offset of imports table in chain_data
+  UINT32 SymbolsOffset;  ///< offset of symbol strings in chain_data
+  UINT32 ImportsCount;   ///< number of imported symbol names
+  UINT32 ImportsFormat;  ///< DYLD_CHAINED_IMPORT*
+  UINT32 SymbolsFormat;  ///< 0 => uncompressed, 1 => zlib compressed
+} MACHO_DYLD_CHAINED_FIXUPS_HEADER;
+
+///
+/// This struct is embedded in LC_DYLD_CHAINED_FIXUPS payload
+///
+typedef struct {
+  UINT32 NumSegments;
+  UINT32 SegInfoOffset[];  ///< each entry is offset into this struct for that
+                           ///< segment followed by pool of
+                           ///< dyld_chain_starts_in_segment data
+} MACH_DYLD_CHAINED_STARTS_IN_IMAGE;
+
 typedef struct {
   UINT32 Size;             ///< size of this (amount kernel needs to copy)
   UINT16 PageSize;         ///< 0x1000 or 0x4000
@@ -1995,6 +2016,7 @@ typedef UINT32 MACH_HEADER_FILE_TYPE;
 #define MACH_HEADER_FLAG_APP_EXTENSION_SAFE               BIT25
 #define MACH_HEADER_FLAG_NLIST_OUTOFSYNC_WITH_DYLDINFO    BIT26
 #define MACH_HEADER_FLAG_SIM_SUPPORT                      BIT27
+#define MACH_HEADER_FLAG_DYLIB_IN_CACHE                   BIT31
 
 typedef UINT32 MACH_HEADER_FLAGS;
 

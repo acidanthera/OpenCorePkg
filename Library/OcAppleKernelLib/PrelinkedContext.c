@@ -25,6 +25,7 @@
 #include <Library/OcStringLib.h>
 
 #include "PrelinkedInternal.h"
+#include "ProcessorBind.h"
 
 STATIC
 UINT64
@@ -196,6 +197,7 @@ PrelinkedContextInit (
   UINT64                   SegmentEndOffset;
   UINT32                   PrelinkedInfoRootIndex;
   UINT32                   PrelinkedInfoRootCount;
+  PRELINKED_KEXT           *PrelinkedKext;
 
   ASSERT (Context != NULL);
   ASSERT (Prelinked != NULL);
@@ -263,9 +265,12 @@ PrelinkedContextInit (
   //
   InitializeListHead (&Context->PrelinkedKexts);
   InitializeListHead (&Context->InjectedKexts);
-  if (InternalCachedPrelinkedKernel (Context) == NULL) {
+  PrelinkedKext = InternalCachedPrelinkedKernel (Context);
+  if (PrelinkedKext == NULL) {
     return EFI_INVALID_PARAMETER;
   }
+
+  Context->VirtualBase = PrelinkedKext->Context.VirtualBase;
 
   Context->PrelinkedLastAddress = MACHO_ALIGN (MachoGetLastAddress64 (&Context->PrelinkedMachContext));
   if (Context->PrelinkedLastAddress == 0) {
@@ -478,44 +483,13 @@ PrelinkedDependencyInsert (
 EFI_STATUS
 PrelinkedInjectPrepare (
   IN OUT PRELINKED_CONTEXT  *Context,
-  IN     UINT32             LinkedExpansion
+  IN     UINT32             LinkedExpansion,
+  IN     UINT32             ReservedExeSize
   )
 {
-  UINT64  SegmentEndOffset;
-
-  if (Context->IsKernelCollection) {
-    //
-    // For newer variant (KC mode) __LINKEDIT is last, and we need to expand it to enable
-    // dyld fixup generation.
-    //
-    if (Context->PrelinkedAllocSize < LinkedExpansion
-      || Context->PrelinkedAllocSize - LinkedExpansion < Context->PrelinkedSize) {
-      return EFI_OUT_OF_RESOURCES;
-    }
-
-    LinkedExpansion = MACHO_ALIGN (LinkedExpansion);
-
-    ASSERT (Context->PrelinkedLastAddress == Context->PrelinkedLastLoadAddress);
-
-    Context->PrelinkedSize              += LinkedExpansion;
-    Context->PrelinkedLastAddress       += LinkedExpansion;
-    Context->PrelinkedLastLoadAddress   += LinkedExpansion;
-    Context->LinkeditSegment->Size      += LinkedExpansion;
-    Context->LinkeditSegment->FileSize  += LinkedExpansion;
-    Context->LinkeditSegment->Size      += LinkedExpansion;
-  } else {
-    //
-    // For older variant of the prelinkedkernel plist info is normally
-    // the last segment, so we may potentially save some data by removing
-    // it and then appending new kexts over. This is different for KC,
-    // where plist info is in the middle of the file.
-    //
-    SegmentEndOffset = Context->PrelinkedInfoSegment->FileOffset + Context->PrelinkedInfoSegment->FileSize;
-
-    if (MACHO_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
-      Context->PrelinkedSize = (UINT32) MACHO_ALIGN (Context->PrelinkedInfoSegment->FileOffset);
-    }
-  }
+  EFI_STATUS Status;
+  UINT64     SegmentEndOffset;
+  UINT32     AlignedExpansion;
 
   Context->PrelinkedInfoSegment->VirtualAddress = 0;
   Context->PrelinkedInfoSegment->Size           = 0;
@@ -537,26 +511,69 @@ PrelinkedInjectPrepare (
     Context->InnerInfoSection->Address        = 0;
     Context->InnerInfoSection->Size           = 0;
     Context->InnerInfoSection->Offset         = 0;
-
-    return EFI_SUCCESS;
-  }
-
-  Context->PrelinkedLastAddress = MACHO_ALIGN (MachoGetLastAddress64 (&Context->PrelinkedMachContext));
-  if (Context->PrelinkedLastAddress == 0) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  //
-  // Prior to plist there usually is prelinked text. 
-  //
-  SegmentEndOffset = Context->PrelinkedTextSegment->FileOffset + Context->PrelinkedTextSegment->FileSize;
-
-  if (MACHO_ALIGN (SegmentEndOffset) != Context->PrelinkedSize) {
     //
-    // TODO: Implement prelinked text relocation when it is not preceding prelinked info
-    // and is not in the end of prelinked info.
+    // For newer variant (KC mode) __LINKEDIT is last, and we need to expand it to enable
+    // dyld fixup generation.
     //
-    return EFI_UNSUPPORTED;
+    if (Context->PrelinkedAllocSize < LinkedExpansion
+      || Context->PrelinkedAllocSize - LinkedExpansion < Context->PrelinkedSize) {
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    ASSERT (Context->PrelinkedLastAddress == Context->PrelinkedLastLoadAddress);
+
+    Context->KextsFixupChains = (VOID *) (Context->Prelinked +
+      Context->LinkeditSegment->FileOffset + Context->LinkeditSegment->FileSize);
+
+    AlignedExpansion = MACHO_ALIGN (LinkedExpansion);
+
+    Context->PrelinkedSize              += AlignedExpansion;
+    Context->PrelinkedLastAddress       += AlignedExpansion;
+    Context->PrelinkedLastLoadAddress   += AlignedExpansion;
+    Context->LinkeditSegment->Size      += AlignedExpansion;
+    Context->LinkeditSegment->FileSize  += AlignedExpansion;
+  } else {
+    //
+    // For older variant of the prelinkedkernel plist info is normally
+    // the last segment, so we may potentially save some data by removing
+    // it and then appending new kexts over. This is different for KC,
+    // where plist info is in the middle of the file.
+    //
+    SegmentEndOffset = Context->PrelinkedInfoSegment->FileOffset + Context->PrelinkedInfoSegment->FileSize;
+
+    if (MACHO_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
+      Context->PrelinkedSize = (UINT32) MACHO_ALIGN (Context->PrelinkedInfoSegment->FileOffset);
+    }
+
+    Context->PrelinkedLastAddress = MACHO_ALIGN (MachoGetLastAddress64 (&Context->PrelinkedMachContext));
+    if (Context->PrelinkedLastAddress == 0) {
+      return EFI_INVALID_PARAMETER;
+    }
+
+    //
+    // Prior to plist there usually is prelinked text. 
+    //
+    SegmentEndOffset = Context->PrelinkedTextSegment->FileOffset + Context->PrelinkedTextSegment->FileSize;
+
+    if (MACHO_ALIGN (SegmentEndOffset) != Context->PrelinkedSize) {
+      //
+      // TODO: Implement prelinked text relocation when it is not preceding prelinked info
+      // and is not in the end of prelinked info.
+      //
+      return EFI_UNSUPPORTED;
+    }
+  }
+  //
+  // Append the injected KEXTs to the current kernel end.
+  //
+  Context->KextsFileOffset = Context->PrelinkedSize;
+  Context->KextsVmAddress  = Context->PrelinkedLastAddress;
+
+  if (Context->IsKernelCollection) {
+    Status = KcInitKextFixupChains (Context, LinkedExpansion, ReservedExeSize);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
   }
 
   return EFI_SUCCESS;
@@ -567,9 +584,32 @@ PrelinkedInjectComplete (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
+  EFI_STATUS  Status;
   CHAR8       *ExportedInfo;
   UINT32      ExportedInfoSize;
   UINT32      NewSize;
+  UINT32      KextsSize;
+  UINT32      ChainSize;
+
+  if (Context->IsKernelCollection) {
+    //
+    // Fix up the segment fixup chains structure to reflect the actually
+    // injected segment size.
+    //
+    KextsSize = Context->PrelinkedSize - Context->KextsFileOffset;
+
+    ChainSize = KcGetSegmentFixupChainsSize (KextsSize);
+    ASSERT (ChainSize != 0);
+    ASSERT (ChainSize <= Context->KextsFixupChains->Size);
+
+    Context->KextsFixupChains->Size      = ChainSize;
+    Context->KextsFixupChains->PageCount = KextsSize / MACHO_PAGE_SIZE;
+
+    Status = KcRebuildMachHeader (Context);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+  }
 
   ExportedInfo = XmlDocumentExport (Context->PrelinkedInfoDocument, &ExportedInfoSize, 0);
   if (ExportedInfo == NULL) {
@@ -630,7 +670,8 @@ PrelinkedInjectComplete (
 
 EFI_STATUS
 PrelinkedReserveKextSize (
-  IN OUT UINT32       *ReservedSize,
+  IN OUT UINT32       *ReservedInfoSize,
+  IN OUT UINT32       *ReservedExeSize,
   IN     UINT32       InfoPlistSize,
   IN     UINT8        *Executable,
   IN     UINT32       ExecutableSize OPTIONAL
@@ -659,11 +700,14 @@ PrelinkedReserveKextSize (
     }
   }
 
-  if (OcOverflowTriAddU32 (*ReservedSize, InfoPlistSize, ExecutableSize, &ExecutableSize)) {
+  if (OcOverflowAddU32 (*ReservedInfoSize, InfoPlistSize, &InfoPlistSize)
+   || OcOverflowAddU32 (*ReservedExeSize, ExecutableSize, &ExecutableSize)) {
     return EFI_INVALID_PARAMETER;
   }
 
-  *ReservedSize = ExecutableSize;
+  *ReservedInfoSize = InfoPlistSize;
+  *ReservedExeSize  = ExecutableSize;
+
   return EFI_SUCCESS;
 }
 
@@ -699,6 +743,7 @@ PrelinkedInjectKext (
   CHAR8             ExecutableSizeStr[24];
   CHAR8             ExecutableLoadAddrStr[24];
   CHAR8             KmodInfoStr[24];
+  UINT32            KextOffset;
 
   PrelinkedKext = NULL;
 
@@ -716,28 +761,32 @@ PrelinkedInjectKext (
       DEBUG ((DEBUG_INFO, "OCAK: Injected kext %a/%a is not a supported executable\n", BundlePath, ExecutablePath));
       return EFI_INVALID_PARAMETER;
     }
+    //
+    // Append the KEXT to the current prelinked end.
+    //
+    KextOffset = Context->PrelinkedSize;
 
     ExecutableSize = MachoExpandImage64 (
       &ExecutableContext,
-      &Context->Prelinked[Context->PrelinkedSize],
-      Context->PrelinkedAllocSize - Context->PrelinkedSize,
+      &Context->Prelinked[KextOffset],
+      Context->PrelinkedAllocSize - KextOffset,
       TRUE
       );
 
     AlignedExecutableSize = MACHO_ALIGN (ExecutableSize);
 
-    if (OcOverflowAddU32 (Context->PrelinkedSize, AlignedExecutableSize, &NewPrelinkedSize)
+    if (OcOverflowAddU32 (KextOffset, AlignedExecutableSize, &NewPrelinkedSize)
       || NewPrelinkedSize > Context->PrelinkedAllocSize
       || ExecutableSize == 0) {
       return EFI_BUFFER_TOO_SMALL;
     }
 
     ZeroMem (
-      &Context->Prelinked[Context->PrelinkedSize + ExecutableSize],
+      &Context->Prelinked[KextOffset + ExecutableSize],
       AlignedExecutableSize - ExecutableSize
       );
 
-    if (!MachoInitializeContext (&ExecutableContext, &Context->Prelinked[Context->PrelinkedSize], ExecutableSize)) {
+    if (!MachoInitializeContext (&ExecutableContext, &Context->Prelinked[KextOffset], ExecutableSize)) {
       return EFI_INVALID_PARAMETER;
     }
 
@@ -839,9 +888,32 @@ PrelinkedInjectKext (
     Context->PrelinkedSize                  += AlignedExecutableSize;
     Context->PrelinkedLastAddress           += AlignedExecutableSize;
     Context->PrelinkedLastLoadAddress       += AlignedExecutableSize;
-    Context->PrelinkedTextSegment->Size     += AlignedExecutableSize;
-    Context->PrelinkedTextSegment->FileSize += AlignedExecutableSize;
-    Context->PrelinkedTextSection->Size     += AlignedExecutableSize;
+
+    if (Context->IsKernelCollection) {
+      //
+      // For KC, our KEXTs have their own segment - do not mod __PRELINK_INFO.
+      // Integrate the KEXT into KC by indexing its fixups and rebasing.
+      //
+      KcKextIndexFixups (Context, &ExecutableContext);
+      Status = KcKextApplyFileDelta (&ExecutableContext, KextOffset);
+      if (EFI_ERROR (Status)) {
+        DEBUG ((
+          DEBUG_WARN,
+          "Failed to rebase injected kext %a/%a by %u\n",
+          BundlePath,
+          ExecutablePath,
+          KextOffset
+          ));
+        return Status;
+      }
+    } else {
+      //
+      // For legacy prelinkedkernel we append to __PRELINK_TEXT.
+      //
+      Context->PrelinkedTextSegment->Size     += AlignedExecutableSize;
+      Context->PrelinkedTextSegment->FileSize += AlignedExecutableSize;
+      Context->PrelinkedTextSection->Size     += AlignedExecutableSize;
+    }
   }
 
   //

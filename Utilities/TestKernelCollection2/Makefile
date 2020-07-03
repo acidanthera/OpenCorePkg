@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-PROJECT = KernelCollection
+PROJECT = KernelCollection2
 PRODUCT = $(PROJECT)$(SUFFIX)
 OBJS    = $(PROJECT).o \
 	Lilu.o \
@@ -11,6 +11,7 @@ OBJS    = $(PROJECT).o \
 	KextPatcher.o \
 	PrelinkedKext.o \
 	PrelinkedContext.o \
+	KernelCollection.o \
 	Vtables.o \
 	Link.o \
 	KernelReader.o \

@@ -651,6 +651,10 @@ MachoGetNextSegment64 (
     return NULL;
   }
 
+  if (NextSegment->VirtualAddress + NextSegment->Size < NextSegment->VirtualAddress) {
+    return NULL;
+  }
+
   return NextSegment;
 }
 

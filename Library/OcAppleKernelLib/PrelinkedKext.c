@@ -129,8 +129,18 @@ InternalCreatePrelinkedKext (
   // BundleLibraries, CompatibleVersion, and KmodInfo are optional and thus not checked.
   //
   if (!Found || KextIdentifier == NULL || SourceBase < VirtualBase
-    || (Prelinked != NULL && (VirtualBase == 0 || SourceBase == 0 || SourceSize == 0 || SourceSize > MAX_UINT32))) {
-    return NULL;
+    || (Prelinked != NULL && (VirtualBase == 0 || SourceBase == 0))) {
+    //
+    // KC expectedly lacks PRELINK_INFO_EXECUTABLE_SIZE_KEY - parse the KEXT at
+    // SourceBase and retrieve its virtual size from the Mach-O header.
+    //
+    if (SourceSize == 0 && Prelinked != NULL && Prelinked->IsKernelCollection) {
+      SourceSize = KcGetKextSize (Prelinked, SourceBase);
+    }
+    
+    if (SourceSize == 0 || SourceSize > MAX_UINT32) {
+      return NULL;
+    }
   }
 
   if (Prelinked != NULL) {
