@@ -9,7 +9,7 @@ OpenCore Changelog
 - Fixed audio stream position reporting on non-Intel platforms
 - Added `Firmware` mode to `ResetSystem` to reboot into preferences
 - Replaced `BlacklistAppleUpdate` with `run-efi-updater` NVRAM variable
-- Fixed reset value in `FadtEnableReset` ACPI quirk
+- Fixed reset value and detection in `FadtEnableReset` ACPI quirk
 - Fixed freezes during boot option expansion with PXE boot entries
 - Updated underlying EDK II package to edk2-stable202005
 - Added `ProvideMaxSlide` quirk to improve laptop stability, thx @zhen-zen
