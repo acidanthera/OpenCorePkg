@@ -287,7 +287,7 @@ KcInitKextFixupChains (
   // Show that StartsInImage is aligned relative to __LINKEDIT start so we only
   // need to check DataOffset below.
   //
-  ASSERT ((Context->LinkeditSegment->FileOffset % MACHO_PAGE_SIZE) == 0);
+  ASSERT ((Context->LinkEditSegment->FileOffset % MACHO_PAGE_SIZE) == 0);
   STATIC_ASSERT (
     OC_TYPE_ALIGNED (MACHO_DYLD_CHAINED_FIXUPS_HEADER, MACHO_PAGE_SIZE),
     "Alignment is not guaranteed."
@@ -296,8 +296,8 @@ KcInitKextFixupChains (
   if (DyldChainedFixups == NULL
    || DyldChainedFixups->CommandSize != sizeof (*DyldChainedFixups)
    || DyldChainedFixups->DataSize < sizeof (MACHO_DYLD_CHAINED_FIXUPS_HEADER)
-   || DyldChainedFixups->DataOffset < Context->LinkeditSegment->FileOffset
-   || (Context->LinkeditSegment->FileOffset + Context->LinkeditSegment->FileSize)
+   || DyldChainedFixups->DataOffset < Context->LinkEditSegment->FileOffset
+   || (Context->LinkEditSegment->FileOffset + Context->LinkEditSegment->FileSize)
         - DyldChainedFixups->DataOffset < DyldChainedFixups->DataSize
    || !OC_TYPE_ALIGNED (MACHO_DYLD_CHAINED_FIXUPS_HEADER, DyldChainedFixups->DataOffset)) {
     DEBUG ((DEBUG_WARN, "ChainedFixups insane\n"));
@@ -604,11 +604,8 @@ KcGetKextSize (
   IN UINT64             SourceAddress
   )
 {
-  BOOLEAN                 Result;
   MACH_HEADER_64          *KcHeader;
   MACH_SEGMENT_COMMAND_64 *Segment;
-  UINT32                  KextOffset;
-  OC_MACHO_CONTEXT        KextContext;
 
   ASSERT (Context != NULL);
   ASSERT (Context->IsKernelCollection);
@@ -632,24 +629,12 @@ KcGetKextSize (
       if (SourceAddress - Segment->VirtualAddress > Segment->FileSize) {
         return 0;
       }
-      //
-      // Parse the Mach-O header to retrieve the virtual size.
-      // As we have no further information, allow parsing till the end of KC.
-      //
-      KextOffset = (UINT32) (
-        SourceAddress - Segment->VirtualAddress + Segment->FileOffset
-        );
-      Result = MachoInitializeContext (
-        &KextContext,
-        Context->Prelinked + KextOffset,
-        Context->PrelinkedSize - KextOffset,
-        KextOffset
-        );
-      if (!Result) {
-        return 0;
-      }
 
-      return MachoGetVmSize64 (&KextContext);
+      //
+      // All kexts in KC use joint __LINKEDIT with the kernel.
+      //
+      return (UINT32) (Context->LinkEditSegment->VirtualAddress
+        - Segment->VirtualAddress + Context->LinkEditSegment->Size);
     }
   }
 

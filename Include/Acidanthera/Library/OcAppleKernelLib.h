@@ -110,7 +110,7 @@ typedef struct {
   //
   // Pointer to KC_LINKEDIT_SEGMENT (for KC mode).
   //
-  MACH_SEGMENT_COMMAND_64  *LinkeditSegment;
+  MACH_SEGMENT_COMMAND_64  *LinkEditSegment;
   //
   // Pointer to KC_REGION0_SEGMENT (for KC mode).
   //

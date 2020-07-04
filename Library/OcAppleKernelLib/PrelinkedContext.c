@@ -328,11 +328,11 @@ PrelinkedContextInit (
       return EFI_NOT_FOUND;
     }
 
-    Context->LinkeditSegment = MachoGetSegmentByName64 (
+    Context->LinkEditSegment = MachoGetSegmentByName64 (
       &Context->PrelinkedMachContext,
       KC_LINKEDIT_SEGMENT
       );
-    if (Context->LinkeditSegment == NULL) {
+    if (Context->LinkEditSegment == NULL) {
       return EFI_NOT_FOUND;
     }
   }
@@ -371,14 +371,14 @@ PrelinkedContextInit (
     //
     // In KC mode last load address is the __LINKEDIT address.
     //
-    SegmentEndOffset = Context->LinkeditSegment->FileOffset + Context->LinkeditSegment->FileSize;
+    SegmentEndOffset = Context->LinkEditSegment->FileOffset + Context->LinkEditSegment->FileSize;
 
     if (MACHO_ALIGN (SegmentEndOffset) != Context->PrelinkedSize) {
       PrelinkedContextFree (Context);
       return EFI_INVALID_PARAMETER;
     }
     
-    Context->PrelinkedLastLoadAddress = Context->LinkeditSegment->VirtualAddress + Context->LinkeditSegment->Size;
+    Context->PrelinkedLastLoadAddress = Context->LinkEditSegment->VirtualAddress + Context->LinkEditSegment->Size;
   }
 
   //
@@ -513,15 +513,15 @@ PrelinkedInjectPrepare (
     ASSERT (Context->PrelinkedLastAddress == Context->PrelinkedLastLoadAddress);
 
     Context->KextsFixupChains = (VOID *) (Context->Prelinked +
-      Context->LinkeditSegment->FileOffset + Context->LinkeditSegment->FileSize);
+      Context->LinkEditSegment->FileOffset + Context->LinkEditSegment->FileSize);
 
     AlignedExpansion = MACHO_ALIGN (LinkedExpansion);
 
     Context->PrelinkedSize              += AlignedExpansion;
     Context->PrelinkedLastAddress       += AlignedExpansion;
     Context->PrelinkedLastLoadAddress   += AlignedExpansion;
-    Context->LinkeditSegment->Size      += AlignedExpansion;
-    Context->LinkeditSegment->FileSize  += AlignedExpansion;
+    Context->LinkEditSegment->Size      += AlignedExpansion;
+    Context->LinkEditSegment->FileSize  += AlignedExpansion;
   } else {
     //
     // For older variant of the prelinkedkernel plist info is normally

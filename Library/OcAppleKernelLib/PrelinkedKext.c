@@ -55,6 +55,7 @@ InternalCreatePrelinkedKext (
   UINT64                   VirtualKmod;
   UINT64                   SourceBase;
   UINT64                   SourceSize;
+  UINT64                   CalculatedSourceSize;
   UINT64                   SourceEnd;
   MACH_SEGMENT_COMMAND_64  *BaseSegment;
   UINT32                   ContainerOffset;
@@ -136,6 +137,20 @@ InternalCreatePrelinkedKext (
     return NULL;
   }
 
+  if (Prelinked != NULL && Prelinked->IsKernelCollection) {
+    CalculatedSourceSize = KcGetKextSize (Prelinked, SourceBase);
+    if (CalculatedSourceSize < MAX_UINT32 && CalculatedSourceSize > SourceSize) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCAK: Patching invalid size %Lx with %Lx for %a\n",
+        SourceSize,
+        CalculatedSourceSize,
+        KextIdentifier
+        ));
+      SourceSize = CalculatedSourceSize;
+    }
+  }
+
   if (Prelinked != NULL) {
     if (Prelinked->IsKernelCollection) {
       BaseSegment = Prelinked->RegionSegment;
@@ -183,14 +198,20 @@ InternalCreatePrelinkedKext (
 STATIC
 VOID
 InternalScanCurrentPrelinkedKextLinkInfo (
-  IN OUT PRELINKED_KEXT  *Kext
+  IN OUT PRELINKED_KEXT     *Kext,
+  IN     PRELINKED_CONTEXT  *Context
   )
 {
   if (Kext->LinkEditSegment == NULL) {
-    Kext->LinkEditSegment = MachoGetSegmentByName64 (
-      &Kext->Context.MachContext,
-      "__LINKEDIT"
-      );
+    DEBUG ((DEBUG_VERBOSE, "OCAK: Requesting __LINKEDIT for %a\n", Kext->Identifier));
+    if (AsciiStrCmp (Kext->Identifier, PRELINK_KERNEL_IDENTIFIER) == 0) {
+      Kext->LinkEditSegment = Context->LinkEditSegment;
+    } else {
+      Kext->LinkEditSegment = MachoGetSegmentByName64 (
+        &Kext->Context.MachContext,
+        "__LINKEDIT"
+        );
+    }    
   }
 
   if (Kext->SymbolTable == NULL) {
@@ -693,7 +714,7 @@ InternalScanPrelinkedKext (
   // __LINKEDIT may validly not be present, as seen for 10.7.5's
   // com.apple.kpi.unsupported.
   //
-  InternalScanCurrentPrelinkedKextLinkInfo (Kext);
+  InternalScanCurrentPrelinkedKextLinkInfo (Kext, Context);
   //
   // Find the biggest LinkBuffer size down the first dependency tree walk to
   // possibly save a few re-allocations.
