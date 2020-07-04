@@ -493,7 +493,7 @@ int wrap_main(int argc, char** argv) {
   if (!EFI_ERROR (Status)) {
     ApplyKextPatches (&Context);
 
-    Status = PrelinkedInjectPrepare (&Context, 0);
+    Status = PrelinkedInjectPrepare (&Context, 0, 0);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "Prelink inject prepare error %r\n", Status));
       return -1;
@@ -629,7 +629,7 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
     return 0;
   }
 
-  Status = PrelinkedInjectPrepare (&Context, 0);
+  Status = PrelinkedInjectPrepare (&Context, 0, 0);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "Prelink inject prepare error %r\n", Status));
     PrelinkedContextFree (&Context);

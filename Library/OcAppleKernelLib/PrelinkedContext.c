@@ -491,26 +491,7 @@ PrelinkedInjectPrepare (
   UINT64     SegmentEndOffset;
   UINT32     AlignedExpansion;
 
-  Context->PrelinkedInfoSegment->VirtualAddress = 0;
-  Context->PrelinkedInfoSegment->Size           = 0;
-  Context->PrelinkedInfoSegment->FileOffset     = 0;
-  Context->PrelinkedInfoSegment->FileSize       = 0;
-  Context->PrelinkedInfoSection->Address        = 0;
-  Context->PrelinkedInfoSection->Size           = 0;
-  Context->PrelinkedInfoSection->Offset         = 0;
-
   if (Context->IsKernelCollection) {
-    //
-    // For newer variant of the prelinkedkernel plist we need to kill it
-    // in both inner and outer images.
-    //
-    Context->InnerInfoSegment->VirtualAddress = 0;
-    Context->InnerInfoSegment->Size           = 0;
-    Context->InnerInfoSegment->FileOffset     = 0;
-    Context->InnerInfoSegment->FileSize       = 0;
-    Context->InnerInfoSection->Address        = 0;
-    Context->InnerInfoSection->Size           = 0;
-    Context->InnerInfoSection->Offset         = 0;
     //
     // For newer variant (KC mode) __LINKEDIT is last, and we need to expand it to enable
     // dyld fixup generation.
@@ -544,6 +525,14 @@ PrelinkedInjectPrepare (
     if (MACHO_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
       Context->PrelinkedSize = (UINT32) MACHO_ALIGN (Context->PrelinkedInfoSegment->FileOffset);
     }
+
+    Context->PrelinkedInfoSegment->VirtualAddress = 0;
+    Context->PrelinkedInfoSegment->Size           = 0;
+    Context->PrelinkedInfoSegment->FileOffset     = 0;
+    Context->PrelinkedInfoSegment->FileSize       = 0;
+    Context->PrelinkedInfoSection->Address        = 0;
+    Context->PrelinkedInfoSection->Size           = 0;
+    Context->PrelinkedInfoSection->Offset         = 0;
 
     Context->PrelinkedLastAddress = MACHO_ALIGN (MachoGetLastAddress64 (&Context->PrelinkedMachContext));
     if (Context->PrelinkedLastAddress == 0) {

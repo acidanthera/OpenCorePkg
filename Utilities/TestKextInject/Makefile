@@ -14,6 +14,7 @@ OBJS    = $(PROJECT).o \
 	Vtables.o \
 	Link.o \
 	KernelReader.o \
+	KernelCollection.o \
 	DataPatcher.o \
 	lzss.o \
 	lzvn.o
