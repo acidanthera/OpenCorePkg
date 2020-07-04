@@ -592,7 +592,7 @@ PrelinkedInjectComplete (
     ASSERT (ChainSize <= Context->KextsFixupChains->Size);
 
     Context->KextsFixupChains->Size      = ChainSize;
-    Context->KextsFixupChains->PageCount = KextsSize / MACHO_PAGE_SIZE;
+    Context->KextsFixupChains->PageCount = (UINT16) (KextsSize / MACHO_PAGE_SIZE);
 
     Status = KcRebuildMachHeader (Context);
     if (EFI_ERROR (Status)) {

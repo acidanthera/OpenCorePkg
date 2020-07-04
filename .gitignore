@@ -18,7 +18,7 @@ Utilities/TestBmf/Bmf
 Utilities/TestDiskImage/DiskImage
 Utilities/TestHelloWorld/HelloWorld
 Utilities/TestImg4/Img4
-Utilities/TestKernelCollection/KernelCollection
+Utilities/TestKernelCollection2/KernelCollection2
 Utilities/TestKextInject/KextInject
 Utilities/TestKextInject/Result.xml
 Utilities/TestMacho/Macho

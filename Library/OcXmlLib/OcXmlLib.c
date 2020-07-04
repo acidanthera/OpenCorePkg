@@ -1550,6 +1550,10 @@ PlistIntegerValue (
     ++TempStr;
   }
 
+  if (Hex && TempStr[0] != '0' && TempStr[1] != 'x') {
+    Hex = FALSE;
+  }
+
   if (Hex) {
     Temp = AsciiStrHexToUint64 (TempStr);
   } else {

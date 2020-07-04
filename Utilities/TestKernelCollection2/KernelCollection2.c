@@ -124,6 +124,9 @@ int main(int argc, char** argv) {
   UINT32 AllocSize;
   PRELINKED_CONTEXT Context;
 
+  PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO;
+  PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
+
   if ((Prelinked = readFile(argc > 1 ? argv[1] : "/System/Library/KernelCollections/BootKernelExtensions.kc", &PrelinkedSize)) == NULL) {
     printf("Read fail\n");
     return -1;
