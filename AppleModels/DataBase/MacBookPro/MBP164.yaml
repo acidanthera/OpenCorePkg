@@ -1,0 +1,91 @@
+BIOSVendor: "Apple Inc."
+BIOSVersion: "1517.0.0.115.1"
+BIOSLegacyVersion: "MBP164.88Z.F000.B00.2006142109"
+BIOSReleaseDate: "06/14/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "MacBookPro16,4"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "000000000000"
+SystemSKUNumber: ""
+SystemFamily: "MacBook Pro"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-A61BADE1FDAD7B05"
+#  "Mac-smthelse"
+BoardProduct: "Mac-A61BADE1FDAD7B05"
+BoardVersion: "MacBookPro16,4"
+BoardRevision: 0x3
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0x9
+ChassisVersion: "Mac-A61BADE1FDAD7B05"
+ChassisAssetTag: ""
+PlatformFeature: 0x32
+FirmwareFeatures: 0xFDAFF066
+FirmwareFeaturesMask: 0xFFFFFF7F
+ExtendedFirmwareFeatures: 0x00000000FDAFF066
+ExtendedFirmwareFeaturesMask: 0x00000000FFFFFF7F
+MemoryFormFactor: 0xD
+# FIXME: Correct this one
+ProcessorType:
+  - 0x0701
+  - 0x1001
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+SmcGeneration: 3
+SmcPlatform:
+  - 0x6a
+  - 0x32
+  - 0x31
+  - 0x35
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      MBP164.88Z.F000.B00.2006142109
+    Model:        MBP164
+    EFI Version:  1517.0.0.115.1
+    Built by:     root@bb-g9-pdb82
+    Date:         Sun Jun 14 21:09:11 2020
+    Revision:     1517.0.0.115.1 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     clang-1103.2.32.82
+    UUID:         30482AD3-881A-3C3A-BC6C-D9CCF47F01A4
+    UUID:         A5832A9F-E837-387C-B399-CE2F6A88F89B
+Specifications:
+  CPUCodename:
+    - "Coffee Lake"
+    - "Coffee Lake"
+    - "Coffee Lake"
+  CPU:
+    - "Intel Core i7-9750H @ 2.60 GHz"
+    - "Intel Core i9-9880H @ 2.30 GHz"
+    - "Intel Core i9-9980HK @ 2.40 GHz"
+  GPU:
+    - "AMD Radeon Pro 5600M"
+  RAM:
+    - "16GB 2666 MHz LPDDR4 SDRAM"
+  SystemReportName:
+    - "MacBook Pro (16-inch, 2020)"
+  MarketingName:
+    - "MacBook Pro (16-inch, 2020)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "0000"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "0000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2020
+MinimumOSVersion: "10.15.5"
+MaximumOSVersion: null
+AppleModelId: "J215"

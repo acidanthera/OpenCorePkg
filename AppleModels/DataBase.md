@@ -80,6 +80,7 @@ MacBookPro15,4 | Yes | Yes
 MacBookPro16,1 | Yes | Yes
 MacBookPro16,2 | Yes | Yes
 MacBookPro16,3 | Yes | Yes
+MacBookPro16,4 | Yes | Yes
 ||
 Macmini1,1 | Yes |
 Macmini2,1 | Yes |
