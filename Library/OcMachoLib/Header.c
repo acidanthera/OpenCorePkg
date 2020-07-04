@@ -929,68 +929,78 @@ InternalInitialiseSymtabs64 (
       return FALSE;
     }
 
-    Result = OcOverflowSubU32 (
-               DySymtab->IndirectSymbolsOffset,
-               Context->ContainerOffset,
-               &IndirectSymbolsOffset
-               );
-    Result |= OcOverflowMulAddU32 (
-                DySymtab->NumIndirectSymbols,
-                sizeof (MACH_NLIST_64),
-                IndirectSymbolsOffset,
-                &OffsetTop
-                );
-    if (Result || (OffsetTop > FileSize)) {
-      return FALSE;
+    //
+    // We additionally check for offset validity here, as KC kexts have some garbage
+    // in their DySymtab, but it is "valid" for symbols.
+    //
+    if (DySymtab->NumIndirectSymbols > 0 && DySymtab->IndirectSymbolsOffset != 0) {
+      Result = OcOverflowSubU32 (
+                 DySymtab->IndirectSymbolsOffset,
+                 Context->ContainerOffset,
+                 &IndirectSymbolsOffset
+                 );
+      Result |= OcOverflowMulAddU32 (
+                  DySymtab->NumIndirectSymbols,
+                  sizeof (MACH_NLIST_64),
+                  IndirectSymbolsOffset,
+                  &OffsetTop
+                  );
+      if (Result || (OffsetTop > FileSize)) {
+        return FALSE;
+      }
+
+      Tmp = (VOID *)(MachoAddress + IndirectSymbolsOffset);
+      if (!OC_TYPE_ALIGNED (MACH_NLIST_64, Tmp)) {
+        return FALSE;
+      }
+      IndirectSymtab = (MACH_NLIST_64 *)Tmp;
     }
 
-    Result = OcOverflowSubU32 (
-               DySymtab->LocalRelocationsOffset,
-               Context->ContainerOffset,
-               &LocalRelocationsOffset
-               );
-    Result |= OcOverflowMulAddU32 (
-                DySymtab->NumOfLocalRelocations,
-                sizeof (MACH_RELOCATION_INFO),
-                LocalRelocationsOffset,
-                &OffsetTop
-                );
-    if (Result || (OffsetTop > FileSize)) {
-      return FALSE;
+    if (DySymtab->NumOfLocalRelocations > 0 && DySymtab->LocalRelocationsOffset != 0) {
+      Result = OcOverflowSubU32 (
+                 DySymtab->LocalRelocationsOffset,
+                 Context->ContainerOffset,
+                 &LocalRelocationsOffset
+                 );
+      Result |= OcOverflowMulAddU32 (
+                  DySymtab->NumOfLocalRelocations,
+                  sizeof (MACH_RELOCATION_INFO),
+                  LocalRelocationsOffset,
+                  &OffsetTop
+                  );
+      if (Result || (OffsetTop > FileSize)) {
+        return FALSE;
+      }
+
+      Tmp = (VOID *)(MachoAddress + LocalRelocationsOffset);
+      if (!OC_TYPE_ALIGNED (MACH_RELOCATION_INFO, Tmp)) {
+        return FALSE;
+      }
+      LocalRelocations = (MACH_RELOCATION_INFO *)Tmp;
     }
 
-    Result = OcOverflowSubU32 (
-               DySymtab->ExternalRelocationsOffset,
-               Context->ContainerOffset,
-               &ExternalRelocationsOffset
-               );
-    Result |= OcOverflowMulAddU32 (
-                DySymtab->NumExternalRelocations,
-                sizeof (MACH_RELOCATION_INFO),
-                ExternalRelocationsOffset,
-                &OffsetTop
-                );
-    if (Result || (OffsetTop > FileSize)) {
-      return FALSE;
-    }
+    if (DySymtab->NumExternalRelocations > 0 && DySymtab->ExternalRelocationsOffset != 0) {
+      Result = OcOverflowSubU32 (
+                 DySymtab->ExternalRelocationsOffset,
+                 Context->ContainerOffset,
+                 &ExternalRelocationsOffset
+                 );
+      Result |= OcOverflowMulAddU32 (
+                  DySymtab->NumExternalRelocations,
+                  sizeof (MACH_RELOCATION_INFO),
+                  ExternalRelocationsOffset,
+                  &OffsetTop
+                  );
+      if (Result || (OffsetTop > FileSize)) {
+        return FALSE;
+      }
 
-    Tmp = (VOID *)(MachoAddress + IndirectSymbolsOffset);
-    if (!OC_TYPE_ALIGNED (MACH_NLIST_64, Tmp)) {
-      return FALSE;
+      Tmp = (VOID *)(MachoAddress + ExternalRelocationsOffset);
+      if (!OC_TYPE_ALIGNED (MACH_RELOCATION_INFO, Tmp)) {
+        return FALSE;
+      }
+      ExternRelocations = (MACH_RELOCATION_INFO *)Tmp;
     }
-    IndirectSymtab = (MACH_NLIST_64 *)Tmp;
-
-    Tmp = (VOID *)(MachoAddress + LocalRelocationsOffset);
-    if (!OC_TYPE_ALIGNED (MACH_RELOCATION_INFO, Tmp)) {
-      return FALSE;
-    }
-    LocalRelocations = (MACH_RELOCATION_INFO *)Tmp;
-
-    Tmp = (VOID *)(MachoAddress + ExternalRelocationsOffset);
-    if (!OC_TYPE_ALIGNED (MACH_RELOCATION_INFO, Tmp)) {
-      return FALSE;
-    }
-    ExternRelocations = (MACH_RELOCATION_INFO *)Tmp;
   }
 
   //
@@ -1108,8 +1118,11 @@ MachoGetSymbolTable (
 
   ASSERT (Context != NULL);
 
-  if (!InternalRetrieveSymtabs64 (Context)
-   || (Context->Symtab->NumSymbols == 0)) {
+  if (!InternalRetrieveSymtabs64 (Context)) {
+    return 0;
+  }
+
+  if (Context->Symtab->NumSymbols == 0) {
     return 0;
   }
 

@@ -194,7 +194,21 @@ InternalPrepareCreateVtablesPrelinked64 (
     ) {
     Symbol = &Kext->LinkedSymbolTable[Index];
     if (MachoSymbolNameIsVtable64 (Symbol->Name)) {
-      if ((Symbol->Value == 0) || (VtableIndex >= MaxSize)) {
+      //
+      // This seems to be valid for KC format as some symbols may be kernel imports?!
+      // Observed with IOACPIFamily when injecting VirtualSMC:
+      // __ZTV18IODTPlatformExpert                 (zero value)
+      // __ZTV16IOPlatformDevice                   (zero value)
+      // __ZTVN20IOACPIPlatformExpert9MetaClassE
+      // __ZTVN20IOACPIPlatformDevice9MetaClassE
+      // __ZTV20IOACPIPlatformExpert
+      // __ZTV20IOACPIPlatformDevice
+      //
+      if (Symbol->Value == 0) {
+        continue;
+      }
+
+      if (VtableIndex >= MaxSize) {
         return FALSE;
       }
 
