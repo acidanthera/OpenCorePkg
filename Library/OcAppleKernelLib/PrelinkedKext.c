@@ -20,6 +20,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleKernelLib.h>
 #include <Library/OcMachoLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/OcXmlLib.h>
 
 #include "PrelinkedInternal.h"
@@ -41,22 +42,23 @@ InternalCreatePrelinkedKext (
   IN CONST CHAR8            *Identifier OPTIONAL
   )
 {
-  PRELINKED_KEXT  *NewKext;
-  UINT32          FieldIndex;
-  UINT32          FieldCount;
-  CONST CHAR8     *KextPlistKey;
-  XML_NODE        *KextPlistValue;
-  CONST CHAR8     *KextIdentifier;
-  XML_NODE        *BundleLibraries;
-  XML_NODE        *BundleLibraries64;
-  CONST CHAR8     *CompatibleVersion;
-  UINT64          VirtualBase;
-  UINT64          VirtualKmod;
-  UINT64          SourceBase;
-  UINT64          SourceSize;
-  UINT64          SourceEnd;
-  BOOLEAN         Found;
-  UINT32          ContainerOffset;
+  PRELINKED_KEXT           *NewKext;
+  UINT32                   FieldIndex;
+  UINT32                   FieldCount;
+  CONST CHAR8              *KextPlistKey;
+  XML_NODE                 *KextPlistValue;
+  CONST CHAR8              *KextIdentifier;
+  XML_NODE                 *BundleLibraries;
+  XML_NODE                 *BundleLibraries64;
+  CONST CHAR8              *CompatibleVersion;
+  UINT64                   VirtualBase;
+  UINT64                   VirtualKmod;
+  UINT64                   SourceBase;
+  UINT64                   SourceSize;
+  UINT64                   SourceEnd;
+  MACH_SEGMENT_COMMAND_64  *BaseSegment;
+  UINT32                   ContainerOffset;
+  BOOLEAN                  Found;
 
   KextIdentifier    = NULL;
   BundleLibraries   = NULL;
@@ -130,28 +132,19 @@ InternalCreatePrelinkedKext (
   // BundleLibraries, CompatibleVersion, and KmodInfo are optional and thus not checked.
   //
   if (!Found || KextIdentifier == NULL || SourceBase < VirtualBase
-    || (Prelinked != NULL && (VirtualBase == 0 || SourceBase == 0 || SourceSize > MAX_UINT32))) {
+    || (Prelinked != NULL && (VirtualBase == 0 || SourceBase == 0 || SourceSize == 0 || SourceSize > MAX_UINT32))) {
     return NULL;
   }
 
-  if (Prelinked != NULL && SourceSize == 0) {
-    if (!Prelinked->IsKernelCollection) {
-      return NULL;
-    }
-
-    //
-    // KC expectedly lacks PRELINK_INFO_EXECUTABLE_SIZE_KEY - parse the KEXT at
-    // SourceBase and retrieve its virtual size from the Mach-O header.
-    //
-    SourceSize = KcGetKextSize (Prelinked, SourceBase);
-    if (SourceSize == 0 || SourceSize > MAX_UINT32) {
-      return NULL;
-    }
-  }
-
   if (Prelinked != NULL) {
-    SourceBase -= Prelinked->PrelinkedTextSegment->VirtualAddress;
-    if (OcOverflowAddU64 (SourceBase, Prelinked->PrelinkedTextSegment->FileOffset, &SourceBase) ||
+    if (Prelinked->IsKernelCollection) {
+      BaseSegment = Prelinked->RegionSegment;
+    } else {
+      BaseSegment = Prelinked->PrelinkedTextSegment;
+    }
+
+    SourceBase -= BaseSegment->VirtualAddress;
+    if (OcOverflowAddU64 (SourceBase, BaseSegment->FileOffset, &SourceBase) ||
       OcOverflowAddU64 (SourceBase, SourceSize, &SourceEnd) ||
       SourceEnd > Prelinked->PrelinkedSize) {
       return NULL;
@@ -734,6 +727,17 @@ InternalScanPrelinkedKext (
     for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
       DependencyId = PlistKeyValue (PlistDictChild (Kext->BundleLibraries, FieldIndex, NULL));
       if (DependencyId == NULL) {
+        continue;
+      }
+
+      //
+      // In 11.0 KPIs just like plist-only kexts are not present in memory and their
+      // _PrelinkExecutableLoadAddr / _PrelinkExecutableSourceAddr values equal to MAX_INT64.
+      // Skip them early to improve performance.
+      //
+      if (Context->IsKernelCollection
+        && AsciiStrnCmp (DependencyId, "com.apple.kpi.", L_STR_LEN ("com.apple.kpi.")) == 0) {
+        DEBUG ((DEBUG_VERBOSE, "OCAK: Ignoring KPI %a for kext %a in KC mode\n", DependencyId, Kext->Identifier));
         continue;
       }
 

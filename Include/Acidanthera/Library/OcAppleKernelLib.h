@@ -47,6 +47,7 @@
 #define PRELINK_INFO_INTEGER_ATTRIBUTES           "size=\"64\""
 
 #define KC_REGION_SEGMENT_PREFIX                  "__REGION"
+#define KC_REGION0_SEGMENT                        "__REGION0"
 #define KC_TEXT_SEGMENT                           "__TEXT"
 #define KC_LINKEDIT_SEGMENT                       "__LINKEDIT"
 #define KC_MOSCOW_SEGMENT                         "__MOSCOW101"
@@ -110,6 +111,10 @@ typedef struct {
   // Pointer to KC_LINKEDIT_SEGMENT (for KC mode).
   //
   MACH_SEGMENT_COMMAND_64  *LinkeditSegment;
+  //
+  // Pointer to KC_REGION0_SEGMENT (for KC mode).
+  //
+  MACH_SEGMENT_COMMAND_64  *RegionSegment;
   //
   // Mach-O context for inner prelinkedkernel (for KC mode).
   //

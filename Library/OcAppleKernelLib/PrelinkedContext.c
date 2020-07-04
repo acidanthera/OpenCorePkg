@@ -320,6 +320,14 @@ PrelinkedContextInit (
       return Status;
     }
 
+    Context->RegionSegment = MachoGetSegmentByName64 (
+      &Context->PrelinkedMachContext,
+      KC_REGION0_SEGMENT
+      );
+    if (Context->RegionSegment == NULL) {
+      return EFI_NOT_FOUND;
+    }
+
     Context->LinkeditSegment = MachoGetSegmentByName64 (
       &Context->PrelinkedMachContext,
       KC_LINKEDIT_SEGMENT
