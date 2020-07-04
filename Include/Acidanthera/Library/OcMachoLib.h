@@ -34,6 +34,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 typedef struct {
   MACH_HEADER_64        *MachHeader;
   UINT32                FileSize;
+  UINT32                ContainerOffset;
   MACH_SYMTAB_COMMAND   *Symtab;
   MACH_NLIST_64         *SymbolTable;
   CHAR8                 *StringTable;
@@ -46,9 +47,11 @@ typedef struct {
 /**
   Initializes a Mach-O Context.
 
-  @param[out] Context   Mach-O Context to initialize.
-  @param[in]  FileData  Pointer to the file's data.
-  @param[in]  FileSize  File size of FileData.
+  @param[out] Context          Mach-O Context to initialize.
+  @param[in]  FileData         Pointer to the file's expected Mach-O header.
+  @param[in]  FileSize         File size of FileData.
+  @param[in]  ContainerOffset  The amount of Bytes the Mach-O header is offset
+                               from the base (container, e.g. KC) of the file.
 
   @return  Whether Context has been initialized successfully.
 
@@ -57,7 +60,8 @@ BOOLEAN
 MachoInitializeContext (
   OUT OC_MACHO_CONTEXT  *Context,
   IN  VOID              *FileData,
-  IN  UINT32            FileSize
+  IN  UINT32            FileSize,
+  IN  UINT32            ContainerOffset
   );
 
 /**

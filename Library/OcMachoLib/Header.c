@@ -187,7 +187,8 @@ BOOLEAN
 MachoInitializeContext (
   OUT OC_MACHO_CONTEXT  *Context,
   IN  VOID              *FileData,
-  IN  UINT32            FileSize
+  IN  UINT32            FileSize,
+  IN  UINT32            ContainerOffset
   )
 {
   MACH_HEADER_64          *MachHeader;
@@ -272,8 +273,9 @@ MachoInitializeContext (
 
   ZeroMem (Context, sizeof (*Context));
 
-  Context->MachHeader = MachHeader;
-  Context->FileSize   = FileSize;
+  Context->MachHeader      = MachHeader;
+  Context->FileSize        = FileSize;
+  Context->ContainerOffset = ContainerOffset;
 
   return TRUE;
 }
@@ -485,10 +487,15 @@ InternalSectionIsSane (
   }
 
   if (Section->NumRelocations != 0) {
-    Result = OcOverflowMulAddU32 (
+    Result = OcOverflowSubU32 (
+                Section->RelocationsOffset,
+                Context->ContainerOffset,
+                &TopOffset32
+                );
+    Result |= OcOverflowMulAddU32 (
                Section->NumRelocations,
                sizeof (MACH_RELOCATION_INFO),
-               Section->RelocationsOffset,
+               TopOffset32,
                &TopOffset32
                );
     if (Result || (TopOffset32 > Context->FileSize)) {
@@ -642,11 +649,16 @@ MachoGetNextSegment64 (
     return NULL;
   }
 
-  Result = OcOverflowAddU64 (
+  Result = OcOverflowSubU64 (
              NextSegment->FileOffset,
-             NextSegment->FileSize,
+             Context->ContainerOffset,
              &TopOfSegment
              );
+  Result |= OcOverflowAddU64 (
+              TopOfSegment,
+              NextSegment->FileSize,
+              &TopOfSegment
+              );
   if (Result || (TopOfSegment > Context->FileSize)) {
     return NULL;
   }
@@ -821,9 +833,14 @@ InternalInitialiseSymtabs64 (
   UINTN                 MachoAddress;
   CHAR8                 *StringTable;
   UINT32                FileSize;
+  UINT32                SymbolsOffset;
+  UINT32                StringsOffset;
   UINT32                OffsetTop;
   BOOLEAN               Result;
 
+  UINT32                IndirectSymbolsOffset;
+  UINT32                LocalRelocationsOffset;
+  UINT32                ExternalRelocationsOffset;
   MACH_NLIST_64         *SymbolTable;
   MACH_NLIST_64         *IndirectSymtab;
   MACH_RELOCATION_INFO  *LocalRelocations;
@@ -838,33 +855,43 @@ InternalInitialiseSymtabs64 (
 
   FileSize = Context->FileSize;
 
-  Result = OcOverflowMulAddU32 (
-             Symtab->NumSymbols,
-             sizeof (MACH_NLIST_64),
+  Result = OcOverflowSubU32 (
              Symtab->SymbolsOffset,
-             &OffsetTop
+             Context->ContainerOffset,
+             &SymbolsOffset
              );
+  Result |= OcOverflowMulAddU32 (
+              Symtab->NumSymbols,
+              sizeof (MACH_NLIST_64),
+              SymbolsOffset,
+              &OffsetTop
+              );
   if (Result || (OffsetTop > FileSize)) {
     return FALSE;
   }
 
-  Result = OcOverflowAddU32 (
+  Result = OcOverflowSubU32 (
              Symtab->StringsOffset,
-             Symtab->StringsSize,
-             &OffsetTop
+             Context->ContainerOffset,
+             &StringsOffset
              );
+  Result |= OcOverflowAddU32 (
+              StringsOffset,
+              Symtab->StringsSize,
+              &OffsetTop
+              );
   if (Result || (OffsetTop > FileSize)) {
     return FALSE;
   }
 
   MachoAddress = (UINTN)Context->MachHeader;
-  StringTable  = (CHAR8 *)(MachoAddress + Symtab->StringsOffset);
+  StringTable  = (CHAR8 *)(MachoAddress + StringsOffset);
 
   if (Symtab->StringsSize == 0 || StringTable[Symtab->StringsSize - 1] != '\0') {
     return FALSE;
   }
 
-  Tmp = (VOID *)(MachoAddress + Symtab->SymbolsOffset);
+  Tmp = (VOID *)(MachoAddress + SymbolsOffset);
   if (!OC_TYPE_ALIGNED (MACH_NLIST_64, Tmp)) {
     return FALSE;
   }
@@ -902,49 +929,64 @@ InternalInitialiseSymtabs64 (
       return FALSE;
     }
 
-    Result = OcOverflowMulAddU32 (
-               DySymtab->NumIndirectSymbols,
-               sizeof (MACH_NLIST_64),
+    Result = OcOverflowSubU32 (
                DySymtab->IndirectSymbolsOffset,
-               &OffsetTop
+               Context->ContainerOffset,
+               &IndirectSymbolsOffset
                );
+    Result |= OcOverflowMulAddU32 (
+                DySymtab->NumIndirectSymbols,
+                sizeof (MACH_NLIST_64),
+                IndirectSymbolsOffset,
+                &OffsetTop
+                );
     if (Result || (OffsetTop > FileSize)) {
       return FALSE;
     }
 
-    Result = OcOverflowMulAddU32 (
-               DySymtab->NumOfLocalRelocations,
-               sizeof (MACH_RELOCATION_INFO),
+    Result = OcOverflowSubU32 (
                DySymtab->LocalRelocationsOffset,
-               &OffsetTop
+               Context->ContainerOffset,
+               &LocalRelocationsOffset
                );
+    Result |= OcOverflowMulAddU32 (
+                DySymtab->NumOfLocalRelocations,
+                sizeof (MACH_RELOCATION_INFO),
+                LocalRelocationsOffset,
+                &OffsetTop
+                );
     if (Result || (OffsetTop > FileSize)) {
       return FALSE;
     }
 
-    Result = OcOverflowMulAddU32 (
-               DySymtab->NumExternalRelocations,
-               sizeof (MACH_RELOCATION_INFO),
+    Result = OcOverflowSubU32 (
                DySymtab->ExternalRelocationsOffset,
-               &OffsetTop
+               Context->ContainerOffset,
+               &ExternalRelocationsOffset
                );
+    Result |= OcOverflowMulAddU32 (
+                DySymtab->NumExternalRelocations,
+                sizeof (MACH_RELOCATION_INFO),
+                ExternalRelocationsOffset,
+                &OffsetTop
+                );
     if (Result || (OffsetTop > FileSize)) {
       return FALSE;
     }
 
-    Tmp = (VOID *)(MachoAddress + DySymtab->IndirectSymbolsOffset);
+    Tmp = (VOID *)(MachoAddress + IndirectSymbolsOffset);
     if (!OC_TYPE_ALIGNED (MACH_NLIST_64, Tmp)) {
       return FALSE;
     }
     IndirectSymtab = (MACH_NLIST_64 *)Tmp;
 
-    Tmp = (VOID *)(MachoAddress + DySymtab->LocalRelocationsOffset);
+    Tmp = (VOID *)(MachoAddress + LocalRelocationsOffset);
     if (!OC_TYPE_ALIGNED (MACH_RELOCATION_INFO, Tmp)) {
       return FALSE;
     }
     LocalRelocations = (MACH_RELOCATION_INFO *)Tmp;
 
-    Tmp = (VOID *)(MachoAddress + DySymtab->ExternalRelocationsOffset);
+    Tmp = (VOID *)(MachoAddress + ExternalRelocationsOffset);
     if (!OC_TYPE_ALIGNED (MACH_RELOCATION_INFO, Tmp)) {
       return FALSE;
     }
@@ -1176,7 +1218,7 @@ MachoGetFilePointerByAddress64 (
         *MaxSize = (UINT32)(Segment->Size - Offset);
       }
 
-      Offset += Segment->FileOffset;
+      Offset += Segment->FileOffset - Context->ContainerOffset;
       return (VOID *)((UINTN)Context->MachHeader + (UINTN)Offset);
     }
   }
@@ -1322,7 +1364,7 @@ MachoExpandImage64 (
     //
     // Do not overwrite header.
     //
-    CopyFileOffset = Segment->FileOffset;
+    CopyFileOffset = Segment->FileOffset - Context->ContainerOffset;
     CopyFileSize   = Segment->FileSize;
     CopyVmSize     = Segment->Size;
     if (CopyFileOffset <= HeaderSize) {
@@ -1359,7 +1401,7 @@ MachoExpandImage64 (
     DstSegment->FileOffset += CurrentDelta;
     DstSegment->FileSize    = DstSegment->Size;
 
-    if (DstSegment->VirtualAddress - DstSegment->FileOffset != FirstSegment->VirtualAddress) {
+    if (DstSegment->VirtualAddress - (DstSegment->FileOffset - Context->ContainerOffset) != FirstSegment->VirtualAddress) {
       return 0;
     }
 

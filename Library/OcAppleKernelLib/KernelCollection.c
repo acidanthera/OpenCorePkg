@@ -642,7 +642,8 @@ KcGetKextSize (
       Result = MachoInitializeContext (
         &KextContext,
         Context->Prelinked + KextOffset,
-        Context->PrelinkedSize - KextOffset
+        Context->PrelinkedSize - KextOffset,
+        KextOffset
         );
       if (!Result) {
         return 0;

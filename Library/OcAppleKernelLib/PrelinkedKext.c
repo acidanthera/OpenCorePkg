@@ -56,6 +56,7 @@ InternalCreatePrelinkedKext (
   UINT64          SourceSize;
   UINT64          SourceEnd;
   BOOLEAN         Found;
+  UINT32          ContainerOffset;
 
   KextIdentifier    = NULL;
   BundleLibraries   = NULL;
@@ -155,6 +156,11 @@ InternalCreatePrelinkedKext (
       SourceEnd > Prelinked->PrelinkedSize) {
       return NULL;
     }
+
+    ContainerOffset = 0;
+    if (Prelinked->IsKernelCollection) {
+      ContainerOffset = (UINT32) SourceBase;
+    }
   }
 
   //
@@ -166,7 +172,7 @@ InternalCreatePrelinkedKext (
   }
 
   if (Prelinked != NULL
-    && !MachoInitializeContext (&NewKext->Context.MachContext, &Prelinked->Prelinked[SourceBase], (UINT32)SourceSize)) {
+    && !MachoInitializeContext (&NewKext->Context.MachContext, &Prelinked->Prelinked[SourceBase], (UINT32)SourceSize, ContainerOffset)) {
     FreePool (NewKext);
     return NULL;
   }

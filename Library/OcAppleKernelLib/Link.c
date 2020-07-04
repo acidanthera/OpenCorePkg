@@ -1644,7 +1644,7 @@ InternalPrelinkKext64 (
   // Reinitialize the Mach-O context to account for the changed __LINKEDIT
   // segment and file size.
   //
-  if (!MachoInitializeContext (MachoContext, MachHeader, (SegmentOffset + SegmentSize))) {
+  if (!MachoInitializeContext (MachoContext, MachHeader, (SegmentOffset + SegmentSize), MachoContext->ContainerOffset)) {
     //
     // This should never failed under normal and abnormal conditions.
     //

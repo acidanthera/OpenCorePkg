@@ -49,7 +49,7 @@ extern UINT32 VsmcKextInfoPlistDataSize;
 
 static int FeedMacho(void *file, uint32_t size) {
   OC_MACHO_CONTEXT Context;
-  if (!MachoInitializeContext (&Context, file, size)) {
+  if (!MachoInitializeContext (&Context, file, size, 0)) {
     DEBUG ((DEBUG_WARN, "MachoInitializeContext failure\n"));
     return -1;
   }

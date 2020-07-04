@@ -64,7 +64,7 @@ PatcherInitContextFromBuffer (
   // and request PRELINK_KERNEL_IDENTIFIER.
   //
 
-  if (!MachoInitializeContext (&Context->MachContext, Buffer, BufferSize)) {
+  if (!MachoInitializeContext (&Context->MachContext, Buffer, BufferSize, 0)) {
     return EFI_INVALID_PARAMETER;
   }
 

@@ -224,7 +224,7 @@ PrelinkedContextInit (
   //
   // Initialise primary context.
   //
-  if (!MachoInitializeContext (&Context->PrelinkedMachContext, Prelinked, PrelinkedSize)) {
+  if (!MachoInitializeContext (&Context->PrelinkedMachContext, Prelinked, PrelinkedSize, 0)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -249,7 +249,8 @@ PrelinkedContextInit (
     if (!MachoInitializeContext (
       &Context->InnerMachContext,
       &Context->Prelinked[Segment->FileOffset],
-      (UINT32) (Context->PrelinkedSize - Segment->FileOffset))) {
+      (UINT32) (Context->PrelinkedSize - Segment->FileOffset),
+      (UINT32) Segment->FileOffset)) {
       return EFI_INVALID_PARAMETER;
     }
 
@@ -679,7 +680,7 @@ PrelinkedReserveKextSize (
 
   if (Executable != NULL) {
     ASSERT (ExecutableSize > 0);
-    if (!MachoInitializeContext (&Context, Executable, ExecutableSize)) {
+    if (!MachoInitializeContext (&Context, Executable, ExecutableSize, 0)) {
       return EFI_INVALID_PARAMETER;
     }
 
@@ -747,7 +748,7 @@ PrelinkedInjectKext (
   //
   if (Executable != NULL) {
     ASSERT (ExecutableSize > 0);
-    if (!MachoInitializeContext (&ExecutableContext, (UINT8 *)Executable, ExecutableSize)) {
+    if (!MachoInitializeContext (&ExecutableContext, (UINT8 *)Executable, ExecutableSize, 0)) {
       DEBUG ((DEBUG_INFO, "OCAK: Injected kext %a/%a is not a supported executable\n", BundlePath, ExecutablePath));
       return EFI_INVALID_PARAMETER;
     }
@@ -776,7 +777,7 @@ PrelinkedInjectKext (
       AlignedExecutableSize - ExecutableSize
       );
 
-    if (!MachoInitializeContext (&ExecutableContext, &Context->Prelinked[KextOffset], ExecutableSize)) {
+    if (!MachoInitializeContext (&ExecutableContext, &Context->Prelinked[KextOffset], ExecutableSize, 0)) {
       return EFI_INVALID_PARAMETER;
     }
 
