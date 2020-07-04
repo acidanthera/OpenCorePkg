@@ -740,6 +740,7 @@ PrelinkedInjectKext (
 
   KmodAddress           = 0;
   AlignedExecutableSize = 0;
+  KextOffset            = 0;
 
   //
   // Copy executable to prelinkedkernel.

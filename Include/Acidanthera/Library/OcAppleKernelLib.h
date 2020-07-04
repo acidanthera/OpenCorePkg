@@ -164,14 +164,22 @@ typedef struct {
   // Whether this kernel is a kernel collection (used by macOS 11.0+).
   //
   BOOLEAN                  IsKernelCollection;
-
+  //
+  // Kext segment file location for kernel collection.
+  //
   UINT32                   KextsFileOffset;
-
+  //
+  // Kext segment memory location for kernel collection.
+  //
   UINT64                   KextsVmAddress;
-
+  //
+  // Kext fixup chain for kernel collection.
+  //
   MACH_DYLD_CHAINED_STARTS_IN_SEGMENT  *KextsFixupChains;
-
-  UINT64 VirtualBase;
+  //
+  // Kernel virtual base.
+  //
+  UINT64                   VirtualBase;
 } PRELINKED_CONTEXT;
 
 //
