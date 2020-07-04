@@ -688,7 +688,7 @@ KcKextApplyFileDelta (
         //
         // Rebase the segment itself.
         //
-        if (Segment->FileOffset != 0) {
+        if (Segment->FileOffset != 0 || Segment->FileSize != 0) {
           Segment->FileOffset += Delta;
         }
 
@@ -740,6 +740,12 @@ KcKextApplyFileDelta (
         break;
     }
   }
+
+  //
+  // Update the container offset to make sure we can link against this
+  // kext later as well.
+  //
+  Context->ContainerOffset = Delta;
 
   return EFI_SUCCESS;
 }

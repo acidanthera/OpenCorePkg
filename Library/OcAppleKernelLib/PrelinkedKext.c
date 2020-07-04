@@ -215,6 +215,7 @@ InternalScanCurrentPrelinkedKextLinkInfo (
   }
 
   if (Kext->SymbolTable == NULL) {
+    DEBUG ((DEBUG_VERBOSE, "OCAK: Requesting SymbolTable for %a\n", Kext->Identifier));
     Kext->NumberOfSymbols = MachoGetSymbolTable (
                    &Kext->Context.MachContext,
                    &Kext->SymbolTable,

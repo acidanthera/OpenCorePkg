@@ -892,9 +892,11 @@ PrelinkedInjectKext (
       //
       // For KC, our KEXTs have their own segment - do not mod __PRELINK_INFO.
       // Integrate the KEXT into KC by indexing its fixups and rebasing.
+      // Note, we are no longer using ExecutableContext here, as the context
+      // ownership was transferred by InternalLinkPrelinkedKext.
       //
-      KcKextIndexFixups (Context, &ExecutableContext);
-      Status = KcKextApplyFileDelta (&ExecutableContext, KextOffset);
+      KcKextIndexFixups (Context, &PrelinkedKext->Context.MachContext);
+      Status = KcKextApplyFileDelta (&PrelinkedKext->Context.MachContext, KextOffset);
       if (EFI_ERROR (Status)) {
         DEBUG ((
           DEBUG_WARN,
