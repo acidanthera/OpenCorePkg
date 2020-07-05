@@ -131,7 +131,7 @@ InternalConstructVtablePrelinked64 (
     // For now we will just detect them by the kernel address
     // as it is faster than compare Kext->Identifier and Context->IsKernelCollection.
     //
-    if ((Value & KERNEL_ADDRESS_MASK) != KERNEL_ADDRESS_BASE) {
+    if (Context->IsKernelCollection && (Value & KERNEL_ADDRESS_MASK) != KERNEL_ADDRESS_BASE) {
       //
       // FIXME: This needs a bit more love with aliasing and alignment.
       // Some day, when Intel rewrites EDK II.
