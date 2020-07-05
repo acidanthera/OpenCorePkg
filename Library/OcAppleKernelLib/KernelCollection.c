@@ -144,6 +144,44 @@ InternalKcWriteCommandHeaders (
   //
   MachHeader->NumCommands++;
   MachHeader->CommandsSize += sizeof (MACH_SEGMENT_COMMAND_64);
+
+  //
+  // Proceed to the next command.
+  //
+  Command.Address += Command.FilesetEntry->CommandSize;
+
+  //
+  // Write new __PRELINKED_INFO segment, as the first writeable segment is used by EfiBoot
+  // as a relocation base. Relocation in KC mode is very simplified, and this segment PADDR
+  // is simply used for all the relocations in DYSYMTAB. Unless we leave it untouched, sliding
+  // will "relocate" invalid memory, as new plist is normally put at the end of KC memory.
+  //
+  // Note, that we might need to resolve Context->PrelinkedInfoSegment if regions move upper
+  // and current __PRELINKED_INFO gets shifted.
+  //
+  CopyMem (
+    (VOID *) Command.Address,
+    Context->PrelinkedInfoSegment,
+    Context->PrelinkedInfoSegment->CommandSize
+    );
+
+  //
+  // Must choose a different name to avoid collisions.
+  //
+  CopyMem (Context->PrelinkedInfoSegment->SegmentName, "__KREMLIN_START", sizeof ("__KREMLIN_START"));
+  CopyMem (Context->PrelinkedInfoSection->SectionName, "__kremlin_start", sizeof ("__kremlin_start"));
+
+  //
+  // Refresh Mach-O header constants to include the new segment command.
+  //
+  MachHeader->NumCommands++;
+  MachHeader->CommandsSize += Context->PrelinkedInfoSegment->CommandSize;
+
+  //
+  // Update __PRELINKED_INFO pointers to get them updated at a later stage.
+  //
+  Context->PrelinkedInfoSegment = (MACH_SEGMENT_COMMAND_64 *) Command.Address;
+  Context->PrelinkedInfoSection = &Context->PrelinkedInfoSegment->Sections[0];
 }
 
 EFI_STATUS
@@ -163,7 +201,7 @@ KcRebuildMachHeader (
 
   CurrentSize  = MachHeader->CommandsSize + sizeof (*MachHeader);
   FilesetSize  = InternalKcGetKextFilesetSize (Context);
-  RequiredSize = FilesetSize + sizeof (MACH_LOAD_COMMAND_SEGMENT_64);
+  RequiredSize = FilesetSize + sizeof (MACH_LOAD_COMMAND_SEGMENT_64) + Context->PrelinkedInfoSegment->CommandSize;
 
   TextSegment = MachoGetSegmentByName64 (
     &Context->PrelinkedMachContext,

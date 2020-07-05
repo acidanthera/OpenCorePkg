@@ -652,12 +652,35 @@ PrelinkedInjectComplete (
     return EFI_BUFFER_TOO_SMALL;
   }
 
+#if 0
+  //
+  // This is a potential optimisation for smaller kexts allowing us to use less space.
+  // This requires disable __KREMLIN relocation segment addition.
+  //
+  if (Context->IsKernelCollection && MACHO_ALIGN (ExportedInfoSize) <= Context->PrelinkedInfoSegment->Size) {
+    CopyMem (
+      &Context->Prelinked[Context->PrelinkedInfoSegment->FileOffset],
+      ExportedInfo,
+      ExportedInfoSize
+      );
+
+    ZeroMem (
+      &Context->Prelinked[Context->PrelinkedInfoSegment->FileOffset + ExportedInfoSize],
+      Context->PrelinkedInfoSegment->FileSize - ExportedInfoSize
+      );
+
+    FreePool (ExportedInfo);
+
+    return EFI_SUCCESS;
+  }
+#endif
+
   Context->PrelinkedInfoSegment->VirtualAddress = Context->PrelinkedLastAddress;
-  Context->PrelinkedInfoSegment->Size           = ExportedInfoSize;
+  Context->PrelinkedInfoSegment->Size           = MACHO_ALIGN (ExportedInfoSize);
   Context->PrelinkedInfoSegment->FileOffset     = Context->PrelinkedSize;
-  Context->PrelinkedInfoSegment->FileSize       = ExportedInfoSize;
+  Context->PrelinkedInfoSegment->FileSize       = MACHO_ALIGN (ExportedInfoSize);
   Context->PrelinkedInfoSection->Address        = Context->PrelinkedLastAddress;
-  Context->PrelinkedInfoSection->Size           = ExportedInfoSize;
+  Context->PrelinkedInfoSection->Size           = MACHO_ALIGN (ExportedInfoSize);
   Context->PrelinkedInfoSection->Offset         = Context->PrelinkedSize;
 
   if (Context->IsKernelCollection) {
@@ -666,11 +689,11 @@ PrelinkedInjectComplete (
     // in both inner and outer images.
     //
     Context->InnerInfoSegment->VirtualAddress = Context->PrelinkedLastAddress;
-    Context->InnerInfoSegment->Size           = ExportedInfoSize;
+    Context->InnerInfoSegment->Size           = MACHO_ALIGN (ExportedInfoSize);
     Context->InnerInfoSegment->FileOffset     = Context->PrelinkedSize;
-    Context->InnerInfoSegment->FileSize       = ExportedInfoSize;
+    Context->InnerInfoSegment->FileSize       = MACHO_ALIGN (ExportedInfoSize);
     Context->InnerInfoSection->Address        = Context->PrelinkedLastAddress;
-    Context->InnerInfoSection->Size           = ExportedInfoSize;
+    Context->InnerInfoSection->Size           = MACHO_ALIGN (ExportedInfoSize);
     Context->InnerInfoSection->Offset         = Context->PrelinkedSize;
   }
 
