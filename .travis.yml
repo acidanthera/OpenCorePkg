@@ -84,7 +84,8 @@ matrix:
 
     script:
     - HAS_OPENSSL_BUILD=0
-    - choco install microsoft-build-tools visualcpp-build-tools make nasm python zip
+    - choco install python
+    - choco install microsoft-build-tools visualcpp-build-tools make nasm zip
     - "./build_oc.tool"
     - "./build_duet.tool"
 
