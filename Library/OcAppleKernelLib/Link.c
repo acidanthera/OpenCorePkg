@@ -1405,10 +1405,11 @@ InternalPrelinkKext64 (
     //
     // Undefined symbols are solved via their name.
     //
+    SymbolName = MachoGetSymbolName64 (MachoContext, Symbol);
     Result = InternalSolveSymbol64 (
                Context,
                Kext,
-               MachoGetSymbolName64 (MachoContext, Symbol),
+               SymbolName,
                Symbol,
                &WeakTestValue,
                UndefinedSymtab,

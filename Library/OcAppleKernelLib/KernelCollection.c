@@ -444,11 +444,11 @@ InternalKcConvertRelocToFixup (
 
   UINT16                                       NewFixupPage;
   UINT16                                       NewFixupPageOffset;
-  MACH_DYKD_CHAINED_PTR_64_KERNEL_CACHE_REBASE NewFixup;
+  MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE NewFixup;
 
   UINT16                                       IterFixupPageOffset;
   VOID                                         *IterFixupData;
-  MACH_DYKD_CHAINED_PTR_64_KERNEL_CACHE_REBASE IterFixup;
+  MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE IterFixup;
   UINT16                                       NextIterFixupPageOffset;
 
   UINT16                                       FixupDelta;
@@ -488,7 +488,7 @@ InternalKcConvertRelocToFixup (
   // This 1MB here is a bit of a hack. I think it is just the same thing
   // as KERNEL_BASE_PADDR in OcAfterBootCompatLib.
   //
-  NewFixup.Target = ReadUnaligned64 (RelocDest) - BASE_1MB;
+  NewFixup.Target = ReadUnaligned64 (RelocDest) - KERNEL_FIXUP_OFFSET;
 
   NewFixupPage       = (UINT16) (RelocOffsetInSeg / MACHO_PAGE_SIZE);
   NewFixupPageOffset = (UINT16) (RelocOffsetInSeg % MACHO_PAGE_SIZE);

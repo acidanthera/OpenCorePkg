@@ -1805,7 +1805,7 @@ typedef struct {
          Key        :  2,
          Next       : 12,  ///< 1 or 4-byte stide
          IsAuth     :  1;  ///< 0 -> not authenticated.  1 -> authenticated
-} MACH_DYKD_CHAINED_PTR_64_KERNEL_CACHE_REBASE;
+} MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE;
 
 // header of the LC_DYLD_CHAINED_FIXUPS payload
 typedef struct {

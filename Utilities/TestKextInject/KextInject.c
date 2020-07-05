@@ -446,6 +446,10 @@ GetFileSize (
 }
 
 int wrap_main(int argc, char** argv) {
+  PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO;
+  PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
+
+
   UINT32 AllocSize;
   PRELINKED_CONTEXT Context;
   const char *name = argc > 1 ? argv[1] : "/System/Library/PrelinkedKernels/prelinkedkernel";
