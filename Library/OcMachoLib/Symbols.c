@@ -688,10 +688,10 @@ MachoSymbolGetFileOffset64 (
     }
   }
 
-  *FileOffset = Base - Context->ContainerOffset + (UINT32)Offset;
+  *FileOffset = (UINT32) (Base - Context->ContainerOffset + Offset);
 
   if (MaxSize != NULL) {
-    *MaxSize = (UINT32)(Size - Offset);
+    *MaxSize = (UINT32) (Size - Offset);
   }
 
   return TRUE;
