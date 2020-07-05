@@ -51,6 +51,8 @@ PatcherInitContextFromBuffer (
   IN     UINT32             BufferSize
   )
 {
+  EFI_STATUS               Status;
+  OC_MACHO_CONTEXT         InnerContext;
   MACH_SEGMENT_COMMAND_64  *Segment;
 
   ASSERT (Context != NULL);
@@ -78,6 +80,17 @@ PatcherInitContextFromBuffer (
 
   Context->VirtualBase = Segment->VirtualAddress - Segment->FileOffset;
   Context->VirtualKmod = 0;
+
+  Status = InternalConnectExternalSymtab (
+    &Context->MachContext,
+    &InnerContext,
+    Buffer,
+    BufferSize,
+    NULL
+    );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   return EFI_SUCCESS;
 }

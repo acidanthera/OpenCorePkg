@@ -638,8 +638,11 @@ MachoSymbolGetFileOffset64 (
   OUT    UINT32                *MaxSize OPTIONAL
   )
 {
-  UINT64          Offset;
-  MACH_SECTION_64 *Section;
+  UINT64                   Offset;
+  UINT64                   Base;
+  UINT64                   Size;
+  MACH_SEGMENT_COMMAND_64  *Segment;
+  MACH_SECTION_64          *Section;
 
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
@@ -653,19 +656,42 @@ MachoSymbolGetFileOffset64 (
               Context,
               (Symbol->Section - 1)
               );
-  if ((Section == NULL) || (Symbol->Value < Section->Address)) {
-    return FALSE;
+  if (Section == NULL || Section->Size == 0) {
+    for (
+      Segment = MachoGetNextSegment64 (Context, NULL);
+      Segment != NULL;
+      Segment = MachoGetNextSegment64 (Context, Segment)
+      ) {
+      if ((Symbol->Value >= Segment->VirtualAddress)
+       && (Symbol->Value < (Segment->VirtualAddress + Segment->Size))) {
+        break;
+      }
+    }
+
+    if (Segment == NULL) {
+      return FALSE;
+    }
+
+    Offset = Symbol->Value - Segment->VirtualAddress;
+    Base   = Segment->FileOffset;
+    Size   = Segment->Size;
+  } else {
+    if (Symbol->Value < Section->Address) {
+      return FALSE;
+    }
+
+    Offset = Symbol->Value - Section->Address;
+    Base   = Section->Offset;
+    Size   = Section->Size;
+    if (Offset > Section->Size) {
+      return FALSE;
+    }
   }
 
-  Offset = (Symbol->Value - Section->Address);
-  if (Offset > Section->Size) {
-    return FALSE;
-  }
-
-  *FileOffset = (Section->Offset - Context->ContainerOffset + (UINT32)Offset);
+  *FileOffset = Base - Context->ContainerOffset + (UINT32)Offset;
 
   if (MaxSize != NULL) {
-    *MaxSize = (UINT32)(Section->Size - Offset);
+    *MaxSize = (UINT32)(Size - Offset);
   }
 
   return TRUE;

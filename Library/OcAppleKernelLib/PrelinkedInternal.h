@@ -236,6 +236,15 @@ InternalLinkPrelinkedKext (
   IN     UINT64             KmodAddress
   );
 
+EFI_STATUS
+InternalConnectExternalSymtab (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+     OUT OC_MACHO_CONTEXT  *InnerContext,
+  IN     UINT8             *Buffer,
+  IN     UINT32            BufferSize,
+     OUT BOOLEAN           *KernelCollection  OPTIONAL
+  );
+
 #define KXLD_WEAK_TEST_SYMBOL  "_gOSKextUnresolved"
 
 #define OS_METACLASS_VTABLE_NAME "__ZTV11OSMetaClass"

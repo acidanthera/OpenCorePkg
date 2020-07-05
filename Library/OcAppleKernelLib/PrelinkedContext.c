@@ -181,6 +181,57 @@ PrelinkedGetSegmentsFromMacho (
 }
 
 EFI_STATUS
+InternalConnectExternalSymtab (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+     OUT OC_MACHO_CONTEXT  *InnerContext,
+  IN     UINT8             *Buffer,
+  IN     UINT32            BufferSize,
+     OUT BOOLEAN           *KernelCollection  OPTIONAL
+  )
+{
+  MACH_HEADER_64           *Header;
+  MACH_SEGMENT_COMMAND_64  *Segment;
+  BOOLEAN                  IsKernelCollection;
+
+  //
+  // Detect kernel type.
+  //
+  Header             = MachoGetMachHeader64 (Context);
+  IsKernelCollection = Header->FileType == MachHeaderFileTypeFileSet;
+
+  if (KernelCollection != NULL) {
+    *KernelCollection = IsKernelCollection;
+  }
+
+  //
+  // When dealing with the kernel collections the actual kernel is pointed by one of the segments.
+  //
+  if (IsKernelCollection) {
+    Segment = MachoGetSegmentByName64 (
+      Context,
+      "__TEXT_EXEC"
+      );
+    if (Segment == NULL || Segment->VirtualAddress < Segment->FileOffset) {
+      return EFI_INVALID_PARAMETER;
+    }
+
+    if (!MachoInitializeContext (
+      InnerContext,
+      &Buffer[Segment->FileOffset],
+      (UINT32) (BufferSize - Segment->FileOffset),
+      (UINT32) Segment->FileOffset)) {
+      return EFI_INVALID_PARAMETER;
+    }
+
+    if (!MachoInitialiseSymtabsExternal64 (Context, InnerContext)) {
+      return EFI_INVALID_PARAMETER;
+    }
+  }
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
 PrelinkedContextInit (
   IN OUT  PRELINKED_CONTEXT  *Context,
   IN OUT  UINT8              *Prelinked,
@@ -189,8 +240,6 @@ PrelinkedContextInit (
   )
 {
   EFI_STATUS               Status;
-  MACH_HEADER_64           *Header;
-  MACH_SEGMENT_COMMAND_64  *Segment;
   XML_NODE                 *DocumentRoot;
   XML_NODE                 *PrelinkedInfoRoot;
   CONST CHAR8              *PrelinkedInfoRootKey;
@@ -228,37 +277,15 @@ PrelinkedContextInit (
     return EFI_INVALID_PARAMETER;
   }
 
-  //
-  // Detect kernel type.
-  //
-  Header = MachoGetMachHeader64 (&Context->PrelinkedMachContext);
-  Context->IsKernelCollection = Header->FileType == MachHeaderFileTypeFileSet;
-
-  //
-  // When dealing with the kernel collections the actual kernel is pointed by one of the segments.
-  //
-  if (Context->IsKernelCollection) {
-    Segment = MachoGetSegmentByName64 (
-      &Context->PrelinkedMachContext,
-      "__TEXT_EXEC"
-      );
-    if (Segment == NULL || Segment->VirtualAddress < Segment->FileOffset) {
-      return EFI_INVALID_PARAMETER;
-    }
-
-    if (!MachoInitializeContext (
-      &Context->InnerMachContext,
-      &Context->Prelinked[Segment->FileOffset],
-      (UINT32) (Context->PrelinkedSize - Segment->FileOffset),
-      (UINT32) Segment->FileOffset)) {
-      return EFI_INVALID_PARAMETER;
-    }
-
-    if (!MachoInitialiseSymtabsExternal64 (
-      &Context->PrelinkedMachContext,
-      &Context->InnerMachContext)) {
-      return EFI_INVALID_PARAMETER;
-    }
+  Status = InternalConnectExternalSymtab (
+    &Context->PrelinkedMachContext,
+    &Context->InnerMachContext,
+    Context->Prelinked,
+    Context->PrelinkedSize,
+    &Context->IsKernelCollection
+    );
+  if (EFI_ERROR (Status)) {
+    return Status;
   }
 
   //
