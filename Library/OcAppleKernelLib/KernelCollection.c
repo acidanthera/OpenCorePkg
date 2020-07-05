@@ -306,7 +306,7 @@ KcInitKextFixupChains (
 
   ASSERT (SegChainSize != 0);
   ASSERT (
-    SegChainSize == KcGetSegmentFixupChainsSize (ReservedSize)
+    SegChainSize >= KcGetSegmentFixupChainsSize (ReservedSize)
     );
   //
   // Context initialisation guarantees the command size is a multiple of 8.

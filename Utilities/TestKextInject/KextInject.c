@@ -454,7 +454,7 @@ int wrap_main(int argc, char** argv) {
     return -1;
   }
 
-  AllocSize = MACHO_ALIGN (PrelinkedSize + 1*1024*1024);
+  AllocSize = MACHO_ALIGN (PrelinkedSize + BASE_16MB);
 
   if (PrelinkedSize > 4 && *(UINT32 *)Prelinked == 0xbebafeca) {
     UINT8 *NewPrelinked = NULL;
@@ -464,7 +464,7 @@ int wrap_main(int argc, char** argv) {
       &NewPrelinked,
       &NewPrelinkedSize,
       &AllocSize,
-      5992448
+      BASE_2MB
       );
 
     if (!EFI_ERROR (Status)) {
@@ -493,7 +493,7 @@ int wrap_main(int argc, char** argv) {
   if (!EFI_ERROR (Status)) {
     ApplyKextPatches (&Context);
 
-    Status = PrelinkedInjectPrepare (&Context, 0, 0);
+    Status = PrelinkedInjectPrepare (&Context, BASE_2MB, BASE_2MB);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "Prelink inject prepare error %r\n", Status));
       return -1;
@@ -629,7 +629,7 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
     return 0;
   }
 
-  Status = PrelinkedInjectPrepare (&Context, 0, 0);
+  Status = PrelinkedInjectPrepare (&Context, BASE_2MB, BASE_2MB);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "Prelink inject prepare error %r\n", Status));
     PrelinkedContextFree (&Context);
