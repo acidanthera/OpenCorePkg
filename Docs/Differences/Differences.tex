@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
-%DIF ADD ../Configuration.tex        Sun Jun 28 09:37:24 2020
+%DIF ADD ../Configuration.tex        Sun Jun 28 10:17:00 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -5240,7 +5240,18 @@ functioning. Feature highlights:
    On all known affected systems \texttt{ConsoleMode} had to be set to
    empty string for this to work.
 
-\end{enumerate}
+\DIFaddbegin \item
+  \texttt{\DIFadd{UgaPassThrough}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Provide UGA protocol instances on top of GOP protocol.
+}
+
+  \DIFadd{Some firmwares do not implement legacy UGA protocol, but it may be required
+  for screen output by older EFI applications like EfiBoot from 10.4.
+}
+
+\DIFaddend \end{enumerate}
 
 
 \subsection{ProtocolOverrides Properties}\label{uefiprotoprops}
@@ -5294,7 +5305,16 @@ functioning. Feature highlights:
   version. This may be used to ensure File Vault 2 compatibility on VMs or legacy Macs.
 
 \item
-  \texttt{AppleImageConversion}\\
+  \DIFaddbegin \texttt{\DIFadd{AppleFramebufferInfo}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Reinstalls Apple Framebuffer Info protocol with a builtin
+  version. This may be used to override framebuffer information on VMs or legacy Macs
+  to improve compatibility with legacy EfiBoot like the one in macOS 10.4.
+}
+
+\item
+  \DIFaddend \texttt{AppleImageConversion}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Apple Image Conversion protocol with a builtin

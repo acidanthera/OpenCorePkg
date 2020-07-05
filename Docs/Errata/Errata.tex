@@ -186,9 +186,9 @@ can be found at \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bug
 \item
   \textbf{Identifier}: \texttt{ERR059-4} \\
   \textbf{Published}: 2020-06-24 21:18 MSK \\
-  \textbf{Updated}: 2020-06-24 21:18 MSK \\
+  \textbf{Updated}: 2020-07-05 23:20 MSK \\
   \textbf{Affected versions}: 0.5.9 \\
-  \textbf{Resolved in}: \texttt{--} \\
+  \textbf{Resolved in}: 0.6.0 (\href{https://github.com/acidanthera/OpenCorePkg/commit/d8ace476067ebb4b5abe17e4cdcd094fa3641689}{d8ace476}) \\
   \textbf{Description}:
 
   Driver injection into \texttt{kernel collections} normally used in macOS 11,
@@ -197,6 +197,10 @@ can be found at \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bug
   \textbf{Possible workarounds}:
   \begin{itemize}
     \tightlist
+    \item For \textbf{preview} version of KernelCollection injection code please update
+    to commit \texttt{d8ace476} and make sure that variables forcing legacy
+    kernel loading (\texttt{booter-fileset-kernel} and \texttt{booter-fileset-basesystem})
+    are deleted from NVRAM.
     \item For \textbf{preinstalled} versions of macOS 11 add NVRAM variable \\
     \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:booter-fileset-kernel}
     with \texttt{00} value; for some EfiBoot variants it may also be
