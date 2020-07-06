@@ -1137,7 +1137,8 @@ AcpiFadtEnableReset (
   } else if ((Context->Fadt->Flags & EFI_ACPI_6_2_RESET_REG_SUP) == 0
     || (Context->Fadt->Flags & EFI_ACPI_6_2_SLP_BUTTON) == 0
     || (Context->Fadt->Flags & EFI_ACPI_6_2_PWR_BUTTON) != 0
-    || Context->Fadt->ResetReg.Address == 0) {
+    || Context->Fadt->ResetReg.Address == 0
+    || Context->Fadt->ResetReg.RegisterBitWidth != 8) {
     Fadt = Context->Fadt;
   } else {
     return EFI_SUCCESS;
@@ -1150,7 +1151,7 @@ AcpiFadtEnableReset (
   Fadt->Flags |= EFI_ACPI_6_2_SLP_BUTTON | EFI_ACPI_6_2_RESET_REG_SUP;
   Fadt->Flags &= ~EFI_ACPI_6_2_PWR_BUTTON;
 
-  if (Fadt->ResetReg.Address == 0) {
+  if (Fadt->ResetReg.Address == 0 || Fadt->ResetReg.RegisterBitWidth != 8) {
     //
     // Resetting through port 0xCF9 is universal on Intel and AMD.
     // But may not be the case on some laptops, which use 0xB2.
