@@ -320,8 +320,8 @@ OcKernelLoadKextsAndReserve (
 
   DEBUG ((
     DEBUG_INFO,
-    "OC: Kext reservation size %u\n",
-    *ReservedInfoSize + *ReservedExeSize
+    "OC: Kext reservation size info %X exe %X\n",
+    *ReservedInfoSize, *ReservedExeSize
     ));
   return EFI_SUCCESS;
 }
@@ -694,6 +694,14 @@ OcKernelProcessPrelinked (
           ));
       }
 
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: Prelink size %u kext offset %u reserved %u\n",
+        Context.PrelinkedSize,
+        Context.KextsFileOffset,
+        ReservedExeSize
+        ));
+
       ASSERT (Context.PrelinkedSize - Context.KextsFileOffset <= ReservedExeSize);
 
       Status = PrelinkedInjectComplete (&Context);
@@ -764,8 +772,8 @@ OcKernelFileOpen (
     OcKernelLoadKextsAndReserve (
       mOcStorage,
       mOcConfiguration,
-      &ReservedInfoSize,
-      &ReservedExeSize
+      &ReservedExeSize,
+      &ReservedInfoSize
       );
 
     LinkedExpansion = KcGetSegmentFixupChainsSize (ReservedExeSize);

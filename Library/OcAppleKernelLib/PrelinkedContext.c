@@ -212,6 +212,13 @@ InternalConnectExternalSymtab (
       "__TEXT_EXEC"
       );
     if (Segment == NULL || Segment->VirtualAddress < Segment->FileOffset) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCAK: KC symtab failed locating inner %Lx %Lx (%d)\n",
+        Segment != NULL ? Segment->VirtualAddress : 0,
+        Segment != NULL ? Segment->FileOffset : 0,
+        Segment != NULL
+        ));
       return EFI_INVALID_PARAMETER;
     }
 
@@ -220,10 +227,22 @@ InternalConnectExternalSymtab (
       &Buffer[Segment->FileOffset],
       (UINT32) (BufferSize - Segment->FileOffset),
       (UINT32) Segment->FileOffset)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCAK: KC symtab failed initialising inner %Lx %x\n",
+        Segment->FileOffset,
+        BufferSize
+        ));
       return EFI_INVALID_PARAMETER;
     }
 
     if (!MachoInitialiseSymtabsExternal64 (Context, InnerContext)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCAK: KC symtab failed getting symtab from inner %Lx %x\n",
+        Segment->FileOffset,
+        BufferSize
+        ));
       return EFI_INVALID_PARAMETER;
     }
   }
@@ -559,7 +578,20 @@ PrelinkedInjectPrepare (
     SegmentEndOffset = Context->PrelinkedInfoSegment->FileOffset + Context->PrelinkedInfoSegment->FileSize;
 
     if (MACHO_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCAK: Reducing prelink size from %X to %X via plist\n",
+        Context->PrelinkedSize, 
+        (UINT32) MACHO_ALIGN (Context->PrelinkedInfoSegment->FileOffset)
+        ));
       Context->PrelinkedSize = (UINT32) MACHO_ALIGN (Context->PrelinkedInfoSegment->FileOffset);
+    } else {
+       DEBUG ((
+        DEBUG_INFO,
+        "OCAK:Leaving unchanged prelink size %X due to %LX plist\n",
+        Context->PrelinkedSize, 
+        SegmentEndOffset
+        ));
     }
 
     Context->PrelinkedInfoSegment->VirtualAddress = 0;

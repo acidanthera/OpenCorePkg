@@ -67,6 +67,7 @@ PatcherInitContextFromBuffer (
   //
 
   if (!MachoInitializeContext (&Context->MachContext, Buffer, BufferSize, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Patcher init from buffer %p %u has unsupported mach-o\n", Buffer, BufferSize));
     return EFI_INVALID_PARAMETER;
   }
 
