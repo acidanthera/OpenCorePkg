@@ -620,7 +620,7 @@ KcKextIndexFixups (
     );
 
   DEBUG ((
-    DEBUG_WARN,
+    DEBUG_INFO,
     "OCAK: Local relocs %u on %LX\n",
     DySymtab->NumOfLocalRelocations,
     FirstSegment->VirtualAddress
