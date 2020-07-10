@@ -27,6 +27,7 @@ OpenCore Changelog
 - Fixed FSBFrequency reporting on Meron and similar CPUs
 - Fixed incorrect volume icon dimension requirements in OpenCanopy
 - Added preview version of KernelCollection injection code
+- Fixed ACPI reset register detection in DxeIpl
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy
