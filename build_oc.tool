@@ -96,18 +96,10 @@ package() {
   cp BOOTx64.efi tmp/EFI/OC/Bootstrap/Bootstrap.efi || exit 1
 
   efiTools=(
-    "BootKicker.efi"
-    "ChipTune.efi"
     "CleanNvram.efi"
-    "GopStop.efi"
-    "HdaCodecDump.efi"
-    "KeyTester.efi"
-    "MmapDump.efi"
     "ResetSystem.efi"
-    "RtcRw.efi"
     "OpenControl.efi"
-    "VerifyMsrE2.efi"
-    )
+        )
   for efiTool in "${efiTools[@]}"; do
     cp "${efiTool}" tmp/EFI/OC/Tools/ || exit 1
   done
@@ -115,16 +107,9 @@ package() {
   cp Shell.efi tmp/EFI/OC/Tools/OpenShell.efi || exit 1
 
   efiDrivers=(
-    "HiiDatabase.efi"
-    "NvmExpressDxe.efi"
-    "AudioDxe.efi"
     "CrScreenshotDxe.efi"
     "OpenCanopy.efi"
     "OpenRuntime.efi"
-    "OpenUsbKbDxe.efi"
-    "Ps2MouseDxe.efi"
-    "Ps2KeyboardDxe.efi"
-    "UsbMouseDxe.efi"
     "XhciDxe.efi"
     )
   for efiDriver in "${efiDrivers[@]}"; do
@@ -149,7 +134,7 @@ package() {
     "LogoutHook"
     "macrecovery"
     "kpdescribe"
-    )
+        )
   for utilScpt in "${utilScpts[@]}"; do
     cp -r "${selfdir}/Utilities/${utilScpt}" tmp/Utilities/ || exit 1
   done
@@ -184,7 +169,7 @@ package() {
 
 cd "$(dirname "$0")" || exit 1
 if [ "$ARCHS" = "" ]; then
-  ARCHS=(X64 IA32)
+  ARCHS=(X64)
   export ARCHS
 fi
 SELFPKG=OpenCorePkg
