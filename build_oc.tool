@@ -141,6 +141,7 @@ package() {
     cp "${selfdir}/Docs/${doc}" tmp/Docs/ || exit 1
   done
   cp "${selfdir}/Changelog.md" tmp/Docs/ || exit 1
+  cp "${selfdir}/LICENSE.txt" tmp/Docs/ || exit 1
   cp -r "${selfdir}/Docs/AcpiSamples/" tmp/Docs/AcpiSamples/ || exit 1
 
   utilScpts=(
