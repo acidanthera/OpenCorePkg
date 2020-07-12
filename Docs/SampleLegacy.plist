@@ -849,23 +849,6 @@
 			<key>SystemUUID</key>
 			<string>00000000-0000-0000-0000-000000000000</string>
 		</dict>
-		<key>Generic</key>
-		<dict>
-			<key>AdviseWindows</key>
-			<false/>
-			<key>MLB</key>
-			<string>M0000000000000001</string>
-			<key>ROM</key>
-			<data>ESIzRFVm</data>
-			<key>SpoofVendor</key>
-			<true/>
-			<key>SystemProductName</key>
-			<string>iMac19,1</string>
-			<key>SystemSerialNumber</key>
-			<string>W00000000001</string>
-			<key>SystemUUID</key>
-			<string>00000000-0000-0000-0000-000000000000</string>
-		</dict>
 		<key>PlatformNVRAM</key>
 		<dict>
 			<key>BID</key>
