@@ -38,7 +38,15 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "RtcRange", 0x00000000)
         }
         */
         
-        Device (RTC0)
+        Scope (RTC_)
+        {
+            Name (_STA, Zero)  // _STA: Status
+        }
+        /*
+        Reset device to merge RTC0 to  RTC_
+        */
+
+        Device (RTC_)
         {
            /*
             * Change the below _CSR range to match your hardware.
