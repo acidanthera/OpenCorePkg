@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Jul 11 12:05:16 2020
-%DIF ADD ../Configuration.tex        Sat Jul 11 12:05:16 2020
+%DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
+%DIF ADD ../Configuration.tex        Sun Jul 12 16:55:45 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1442,6 +1442,8 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   \emph{Note}: This quirk may potentially weaken firmware security, please use
   \texttt{RebuildAppleMemoryMap} if your firmware supports memory attributes table (MAT).
+  \DIFaddbegin \DIFadd{Refer to }\texttt{\DIFadd{OCABC: MAT support is 1/0}} \DIFadd{log entry to determine whether MAT is supported.
+}\DIFaddend 
 
 \item
   \texttt{ForceExitBootServices}\\
@@ -5869,11 +5871,13 @@ you will need \texttt{debug=0x8} boot argument.
   necessary.
 
   Unfortunately for some quirks like \texttt{RebuildAppleMemoryMap},
-  \texttt{EnableWriteUnprotector}, \texttt{ProtectMemoryRegions},
-  \texttt{RebuildAppleMemoryMap}, \texttt{SetupVirtualMap},
-  and \texttt{SyncRuntimePermissions} there is no definite approach even on similar
-  systems, so trying all their combinations may be required for optimal setup.
-  Refer to individual quirk descriptions in this document for more details.
+  \texttt{EnableWriteUnprotector}, \texttt{ProtectMemoryRegions}\DIFdelbegin \DIFdel{,
+  }\texttt{\DIFdel{RebuildAppleMemoryMap}}%DIFAUXCMD
+\DIFdelend ,
+  \texttt{SetupVirtualMap}, and \texttt{SyncRuntimePermissions} there
+  is no definite approach even on similar systems, so trying all their
+  combinations may be required for optimal setup. Refer to individual quirk
+  descriptions in this document for more details.
 
 \end{enumerate}
 

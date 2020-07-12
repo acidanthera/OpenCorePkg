@@ -1378,6 +1378,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   \emph{Note}: This quirk may potentially weaken firmware security, please use
   \texttt{RebuildAppleMemoryMap} if your firmware supports memory attributes table (MAT).
+  Refer to \texttt{OCABC: MAT support is 1/0} log entry to determine whether MAT is supported.
 
 \item
   \texttt{ForceExitBootServices}\\
@@ -5763,10 +5764,10 @@ you will need \texttt{debug=0x8} boot argument.
 
   Unfortunately for some quirks like \texttt{RebuildAppleMemoryMap},
   \texttt{EnableWriteUnprotector}, \texttt{ProtectMemoryRegions},
-  \texttt{RebuildAppleMemoryMap}, \texttt{SetupVirtualMap},
-  and \texttt{SyncRuntimePermissions} there is no definite approach even on similar
-  systems, so trying all their combinations may be required for optimal setup.
-  Refer to individual quirk descriptions in this document for more details.
+  \texttt{SetupVirtualMap}, and \texttt{SyncRuntimePermissions} there
+  is no definite approach even on similar systems, so trying all their
+  combinations may be required for optimal setup. Refer to individual quirk
+  descriptions in this document for more details.
 
 \end{enumerate}
 
