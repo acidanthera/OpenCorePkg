@@ -2442,7 +2442,8 @@ entry choice will update till next manual reconfiguration.
       \tightlist
       \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS.
       \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
-      \item \texttt{<TOOL\_NAME>.icns} file for \texttt{Tools}.
+      \item \texttt{<ENTRY\_PATH>.icns} file near bootloader for \texttt{Entries}.
+      \item \texttt{<TOOL\_NAME>.icns} file near tool for \texttt{Tools}.
     \end{itemize}
     Volume icons can be set in Finder. Note, that enabling this may result in
     external and internal icons to be indistinguishable.
@@ -2451,7 +2452,7 @@ entry choice will update till next manual reconfiguration.
     \begin{itemize}
       \tightlist
       \item \texttt{.disk\_label} (\texttt{.disk\_label\_2x}) file near bootloader for all filesystems.
-      \item \texttt{<TOOL\_NAME.lbl} (\texttt{<TOOL\_NAME.l2x}) file near tool for \texttt{Tools}.
+      \item \texttt{<TOOL\_NAME>.lbl} (\texttt{<TOOL\_NAME>.l2x}) file near tool for \texttt{Tools}.
     \end{itemize}
     Prerendered labels can be generated via \texttt{disklabel} utility or \texttt{bless} command.
     When disabled or missing text labels (\texttt{.contentDetails} or \texttt{.disk\_label.contentDetails})
