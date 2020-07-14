@@ -28,6 +28,7 @@ OpenCore Changelog
 - Fixed incorrect volume icon dimension requirements in OpenCanopy
 - Added preview version of KernelCollection injection code
 - Fixed ACPI reset register detection in DxeIpl
+- Added MacBookPro16,4 model code
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy
