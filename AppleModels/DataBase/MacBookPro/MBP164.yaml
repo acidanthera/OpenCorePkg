@@ -6,7 +6,7 @@ SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro16,4"
 SystemVersion: "1.0"
 # Note, this one is used by macserial
-SystemSerialNumber: "000000000000"
+SystemSerialNumber: "C02CW3CTMD6T"
 SystemSKUNumber: ""
 SystemFamily: "MacBook Pro"
 BoardManufacturer: "Apple Inc."
@@ -74,12 +74,12 @@ Specifications:
   RAM:
     - "16GB 2666 MHz LPDDR4 SDRAM"
   SystemReportName:
-    - "MacBook Pro (16-inch, 2020)"
+    - "MacBook Pro (16-inch, 2019)"
   MarketingName:
     - "MacBook Pro (16-inch, 2020)"
 # Note, first model code is used by macserial
 AppleModelCode:
-  - "0000"
+  - "MD6T"
 # Note, first board code is used by macserial
 AppleBoardCode:
   - "0000"
