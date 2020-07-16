@@ -27,6 +27,7 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
+#include <Library/OcGuardLib.h>
 
 VOID *
 GetFileInfo (
@@ -52,6 +53,12 @@ GetFileInfo (
                    );
 
   if (Status == EFI_BUFFER_TOO_SMALL && FileInfoSize >= MinFileInfoSize) {
+    //
+    // Some drivers (i.e. built-in 32-bit Apple HFS driver) may possibly omit null terminators from file info data.
+    //
+    if (CompareGuid (InformationType, &gEfiFileInfoGuid) && OcOverflowAddUN (FileInfoSize, sizeof (CHAR16), &FileInfoSize)) {
+      return NULL;
+    }
     FileInfoBuffer = AllocateZeroPool (FileInfoSize);
 
     if (FileInfoBuffer != NULL) {
