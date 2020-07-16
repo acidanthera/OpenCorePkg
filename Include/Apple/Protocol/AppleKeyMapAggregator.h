@@ -83,7 +83,7 @@ EFI_STATUS
 
 // APPLE_KEY_MAP_AGGREGATOR_PROTOCOL
 struct APPLE_KEY_MAP_AGGREGATOR_PROTOCOL {
-  UINTN                        Revision;
+  UINT64                       Revision;
   KEY_MAP_GET_KEY_STROKES      GetKeyStrokes;
   KEY_MAP_CONTAINS_KEY_STROKES ContainsKeyStrokes;
 };
