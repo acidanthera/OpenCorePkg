@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "203.0.0.0.0"
-BIOSLegacyVersion: "IM144.88Z.F000.B00.2004121755"
-BIOSReleaseDate: "04/12/2020"
+BIOSVersion: "204.0.0.0.0"
+BIOSLegacyVersion: "IM144.88Z.F000.B00.2006101937"
+BIOSReleaseDate: "06/10/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac14,4"
 SystemVersion: "1.0"
@@ -74,10 +74,10 @@ SmcEPCI: 0x7A007
 OEMStrings: |-
   Apple ROM Version
     Model:        IM144
-    EFI Version:  203.0.0.0.0
+    EFI Version:  204.0.0.0.0
     Built by:     root@saumon
-    Date:         Sun Apr 12 17:55:33 PDT 2020
-    Revision:     203 (B&I)
+    Date:         Wed Jun 10 19:37:56 PDT 2020
+    Revision:     204 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
     Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)

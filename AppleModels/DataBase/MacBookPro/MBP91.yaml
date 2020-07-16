@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "232.0.0.0.0"
-BIOSLegacyVersion: "MBP91.88Z.F000.B00.2004121621"
-BIOSReleaseDate: "04/12/2020"
+BIOSVersion: "233.0.0.0.0"
+BIOSLegacyVersion: "MBP91.88Z.F000.B00.2006101934"
+BIOSReleaseDate: "06/10/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro9,1"
 SystemVersion: "1.0"
@@ -77,10 +77,10 @@ SmcEPCI: 0x76006
 OEMStrings: |-
   Apple ROM Version
     Model:        MBP91
-    EFI Version:  232.0.0.0.0
+    EFI Version:  233.0.0.0.0
     Built by:     root@saumon
-    Date:         Sun Apr 12 16:21:09 PDT 2020
-    Revision:     232 (B&I)
+    Date:         Wed Jun 10 19:34:44 PDT 2020
+    Revision:     233 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
     Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
