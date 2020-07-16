@@ -340,7 +340,7 @@ OcRebuildAttributes (
   @retval amount of runtime descriptors.
 **/
 UINTN
-OcCountSplitDescritptors (
+OcCountSplitDescriptors (
   VOID
   );
 

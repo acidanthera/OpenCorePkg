@@ -55,7 +55,7 @@ OcGetCurrentMemoryMap (
   }
 
   if (IncludeSplitSpace) {
-    ExtraSize = OcCountSplitDescritptors () * *DescriptorSize;
+    ExtraSize = OcCountSplitDescriptors () * *DescriptorSize;
   } else {
     ExtraSize = 0;
   }

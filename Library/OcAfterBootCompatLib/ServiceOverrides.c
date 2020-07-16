@@ -456,7 +456,7 @@ OcGetMemoryMap (
   // Reserve larger area for the memory map when we need to split it.
   //
   if (BootCompat->ServiceState.AppleBootNestedCount > 0 && Status == EFI_BUFFER_TOO_SMALL) {
-    *MemoryMapSize += OcCountSplitDescritptors () * *DescriptorSize;
+    *MemoryMapSize += OcCountSplitDescriptors () * *DescriptorSize;
     return EFI_BUFFER_TOO_SMALL;
   }
 

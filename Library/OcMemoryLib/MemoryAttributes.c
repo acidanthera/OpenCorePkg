@@ -462,7 +462,7 @@ OcRebuildAttributes (
 }
 
 UINTN
-OcCountSplitDescritptors (
+OcCountSplitDescriptors (
   VOID
   )
 {
