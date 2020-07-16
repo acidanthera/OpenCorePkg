@@ -37,8 +37,6 @@ ProcessorType:
 ProcessorBusSpeed:
   - 12345
 SmcGeneration: 2
-# FIXME: I believe it should match iMac18,3...
-# But it was checked from Firmware.pkg of 10.15.1
 SmcRevision:
   - 0x02
   - 0x39
@@ -59,7 +57,7 @@ SmcPlatform:
   - 0x6a
   - 0x31
   - 0x33
-  - 0x35
+  - 0x33
   - 0x00
   - 0x00
   - 0x00
