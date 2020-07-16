@@ -29,6 +29,7 @@ OpenCore Changelog
 - Added preview version of KernelCollection injection code
 - Fixed ACPI reset register detection in DxeIpl
 - Added MacBookPro16,4 model code
+- Updated builtin firmware versions for SMBIOS and the rest
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy
