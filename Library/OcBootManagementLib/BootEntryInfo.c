@@ -432,7 +432,7 @@ OcGetBootEntryIcon (
       NULL
       );
 
-    DEBUG ((DEBUG_INFO, "Get custom icon %s - %r\n", BootEntry->Name, Status));
+    DEBUG ((DEBUG_INFO, "OCB: OcGetBootEntryIcon - %s (tool) - %r\n", BootEntry->Name, Status));
     return Status;
   }
 
@@ -459,6 +459,29 @@ OcGetBootEntryIcon (
     return Status;
   }
 
+  if (BootEntry->Type == OC_BOOT_EXTERNAL_OS && BootEntry->PathName != NULL) {
+    //
+    // Try to load the icon from the same path with appended .icns extension.
+    //
+    Status = InternalGetAppleImage (
+      FileSystem,
+      BootEntry->PathName,
+      L".icns",
+      ImageData,
+      DataLength
+      );
+    
+    DEBUG ((DEBUG_INFO, "OCB: OcGetBootEntryIcon - %s (custom entry) - %r\n", BootEntry->Name, Status));
+    
+    //
+    // Return early if custom icon was loaded successfully.
+    //
+    if(!EFI_ERROR (Status)) {
+      FreePool (BootDirectoryName);
+      return Status;
+    }
+  }
+
   Status = InternalGetAppleImage (
     FileSystem,
     L"",
@@ -467,7 +490,7 @@ OcGetBootEntryIcon (
     DataLength
     );
 
-  DEBUG ((DEBUG_INFO, "OCB: Get normal icon %s - %r\n", BootEntry->Name, Status));
+  DEBUG ((DEBUG_INFO, "OCB: OcGetBootEntryIcon - %s (volume icon) - %r\n", BootEntry->Name, Status));
 
   FreePool (BootDirectoryName);
 

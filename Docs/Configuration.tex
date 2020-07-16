@@ -2438,20 +2438,38 @@ entry choice will update till next manual reconfiguration.
   \tightlist
   \item \texttt{0x0001} --- \texttt{OC\_ATTR\_USE\_VOLUME\_ICON}, provides custom icons
     for boot entries:
+    
+    For \texttt{Tools} OpenCore will try to load a custom icon and fallback to the default icon:
     \begin{itemize}
-      \tightlist
+    \tightlist
+      \item \texttt{ResetNVRAM} --- \texttt{Resources\textbackslash Image\textbackslash ResetNVRAM.icns}
+        --- \texttt{ResetNVRAM.icns} from icons directory.
+      \item \texttt{Tools\textbackslash <TOOL\_RELATIVE\_PATH>.icns}
+        --- icon near the tool file with appended \texttt{.icns} extension.
+    \end{itemize} \medskip
+    
+    For custom boot \texttt{Entries} OpenCore will try to load a custom icon and fallback
+    to the volume icon or the default icon:
+    \begin{itemize}
+    \tightlist
+      \item \texttt{<ENTRY\_PATH>.icns} --- icon near the entry file with appended \texttt{.icns} extension.
+    \end{itemize} \medskip
+    
+    For all other entries OpenCore will try to load a volume icon and fallback to the default icon:
+    \begin{itemize}
+    \tightlist
       \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS.
       \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
-      \item \texttt{<TOOL\_NAME>.icns} file for \texttt{Tools}.
-    \end{itemize}
+    \end{itemize} \medskip
+    
     Volume icons can be set in Finder. Note, that enabling this may result in
     external and internal icons to be indistinguishable.
   \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
     rendered titles for boot entries:
     \begin{itemize}
-      \tightlist
+    \tightlist
       \item \texttt{.disk\_label} (\texttt{.disk\_label\_2x}) file near bootloader for all filesystems.
-      \item \texttt{<TOOL\_NAME.lbl} (\texttt{<TOOL\_NAME.l2x}) file near tool for \texttt{Tools}.
+      \item \texttt{<TOOL\_NAME>.lbl} (\texttt{<TOOL\_NAME>.l2x}) file near tool for \texttt{Tools}.
     \end{itemize}
     Prerendered labels can be generated via \texttt{disklabel} utility or \texttt{bless} command.
     When disabled or missing text labels (\texttt{.contentDetails} or \texttt{.disk\_label.contentDetails})
