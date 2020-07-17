@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jul 14 04:58:38 2020
-%DIF ADD ../Configuration.tex        Tue Jul 14 15:50:47 2020
+%DIF DEL PreviousConfiguration.tex   Fri Jul 17 03:06:36 2020
+%DIF ADD ../Configuration.tex        Fri Jul 17 03:06:36 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2514,20 +2514,44 @@ entry choice will update till next manual reconfiguration.
   \tightlist
   \item \texttt{0x0001} --- \texttt{OC\_ATTR\_USE\_VOLUME\_ICON}, provides custom icons
     for boot entries:
-    \begin{itemize}
-      \tightlist
-      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS.
+    \DIFaddbegin 
+
+    \DIFadd{For }\texttt{\DIFadd{Tools}} \DIFadd{OpenCore will try to load a custom icon and fallback to the default icon:
+    }\DIFaddend \begin{itemize}
+    \tightlist
+      \item \DIFaddbegin \texttt{\DIFadd{ResetNVRAM}} \DIFadd{--- }\texttt{\DIFadd{Resources\textbackslash Image\textbackslash ResetNVRAM.icns}}
+        \DIFadd{--- }\texttt{\DIFadd{ResetNVRAM.icns}} \DIFadd{from icons directory.
+      }\item \texttt{\DIFadd{Tools\textbackslash <TOOL\_RELATIVE\_PATH>.icns}}
+        \DIFadd{--- icon near the tool file with appended }\texttt{\DIFadd{.icns}} \DIFadd{extension.
+    }\end{itemize} \medskip
+
+    \DIFadd{For custom boot }\texttt{\DIFadd{Entries}} \DIFadd{OpenCore will try to load a custom icon and fallback
+    to the volume icon or the default icon:
+    }\begin{itemize}
+    \tightlist
+      \item \texttt{\DIFadd{<ENTRY\_PATH>.icns}} \DIFadd{--- icon near the entry file with appended }\texttt{\DIFadd{.icns}} \DIFadd{extension.
+    }\end{itemize} \medskip
+
+    \DIFadd{For all other entries OpenCore will try to load a volume icon and fallback to the default icon:
+    }\begin{itemize}
+    \tightlist
+      \item \DIFaddend \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS.
       \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
-      \item \texttt{<TOOL\_NAME>.icns} file for \texttt{Tools}.
-    \end{itemize}
-    Volume icons can be set in Finder. Note, that enabling this may result in
+    \DIFdelbegin %DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\texttt{\DIFdel{<TOOL\_NAME>.icns}} %DIFAUXCMD
+\DIFdel{file for }\texttt{\DIFdel{Tools}}%DIFAUXCMD
+\DIFdel{.
+    }\DIFdelend \end{itemize} \DIFaddbegin \medskip
+
+    \DIFaddend Volume icons can be set in Finder. Note, that enabling this may result in
     external and internal icons to be indistinguishable.
   \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
     rendered titles for boot entries:
     \begin{itemize}
-      \tightlist
+    \tightlist
       \item \texttt{.disk\_label} (\texttt{.disk\_label\_2x}) file near bootloader for all filesystems.
-      \item \texttt{<TOOL\_NAME.lbl} (\texttt{<TOOL\_NAME.l2x}) file near tool for \texttt{Tools}.
+      \item \texttt{<TOOL\_NAME\DIFaddbegin \DIFadd{>}\DIFaddend .lbl} (\texttt{<TOOL\_NAME\DIFaddbegin \DIFadd{>}\DIFaddend .l2x}) file near tool for \texttt{Tools}.
     \end{itemize}
     Prerendered labels can be generated via \texttt{disklabel} utility or \texttt{bless} command.
     When disabled or missing text labels (\texttt{.contentDetails} or \texttt{.disk\_label.contentDetails})
