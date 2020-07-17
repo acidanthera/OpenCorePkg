@@ -531,7 +531,7 @@ InternalKcConvertRelocToFixup (
     // if the previous one was the last.
     //
     if (IterFixup.Next != 0) {
-      ASSERT (IterFixup.Next > FixupDelta);
+      ASSERT (IterFixup.Next >= FixupDelta);
       NewFixup.Next = IterFixup.Next - FixupDelta;
     } else {
       NewFixup.Next = 0;

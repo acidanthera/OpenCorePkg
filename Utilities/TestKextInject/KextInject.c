@@ -454,50 +454,105 @@ int wrap_main(int argc, char** argv) {
   PRELINKED_CONTEXT Context;
   const char *name = argc > 1 ? argv[1] : "/System/Library/PrelinkedKernels/prelinkedkernel";
   if ((Prelinked = readFile(name, &PrelinkedSize)) == NULL) {
-    printf("Read fail\n");
+    printf("Read fail %s\n", name);
     return -1;
   }
 
-  AllocSize = MACHO_ALIGN (PrelinkedSize + BASE_16MB);
+  UINT32 ReservedInfoSize = PRELINK_INFO_RESERVE_SIZE;
+  UINT32 ReservedExeSize  = 0;
 
-  if (PrelinkedSize > 4 && *(UINT32 *)Prelinked == 0xbebafeca) {
-    UINT8 *NewPrelinked = NULL;
-    UINT32 NewPrelinkedSize = PrelinkedSize;
-    EFI_STATUS Status = ReadAppleKernel (
-      &nilFilProtocol,
-      &NewPrelinked,
-      &NewPrelinkedSize,
-      &AllocSize,
-      BASE_2MB
+  for (int argi = 0; argc - argi > 2; argi += 2) {
+    UINT8  *TestData = LiluKextData;
+    UINT32 TestDataSize = LiluKextDataSize;
+    CHAR8  *TestPlist = LiluKextInfoPlistData;
+    UINT32 TestPlistSize = LiluKextInfoPlistDataSize;
+
+    if (argc - argi > 2) {
+      if (argv[argi + 2][0] == 'n' && argv[argi + 2][1] == 0) {
+        TestData = NULL;
+        TestDataSize = 0;
+      } else {
+        TestData = readFile(argv[argi + 2], &TestDataSize);
+        if (TestData == NULL) {
+          printf("Read data fail %s\n", argv[argi + 2]);
+          abort();
+          return -1;
+        }
+      }
+    }
+
+    if (argc - argi > 3) {
+      TestPlist = (CHAR8*) readFile(argv[argi + 3], &TestPlistSize);
+      if (TestPlist == NULL) {
+        printf("Read plist fail\n");
+        free(TestData);
+        abort();
+        return -1;
+      }
+
+      free(TestPlist);
+    }
+
+    EFI_STATUS Status = PrelinkedReserveKextSize (
+      &ReservedInfoSize,
+      &ReservedExeSize,
+      TestPlistSize,
+      TestData,
+      TestDataSize
       );
 
-    if (!EFI_ERROR (Status)) {
-      free(Prelinked);
-      Prelinked = NewPrelinked;
-      PrelinkedSize = NewPrelinkedSize;
-    } else {
-      printf("Unpack fail\n");
-      return -1;
+    free(TestData);
+    
+    if (EFI_ERROR (Status)) {
+      printf (
+        "OC: Failed to fit kext %s\n",
+        argv[argi + 2]
+        );
     }
+  }
+
+  UINT32 LinkedExpansion = KcGetSegmentFixupChainsSize (ReservedExeSize);
+  if (LinkedExpansion == 0) {
+    return -1;
+  }
+
+  UINT8 *NewPrelinked;
+  UINT32 NewPrelinkedSize;
+  EFI_STATUS Status = ReadAppleKernel (
+    &nilFilProtocol,
+    &NewPrelinked,
+    &NewPrelinkedSize,
+    &AllocSize,
+    ReservedInfoSize + ReservedExeSize + LinkedExpansion
+    );
+
+  if (!EFI_ERROR (Status)) {
+    free(Prelinked);
+    Prelinked = NewPrelinked;
+    PrelinkedSize = NewPrelinkedSize;
   } else {
-    Prelinked = realloc (Prelinked, AllocSize);
-    if (Prelinked == NULL) {
-      printf("Realloc fail\n");
-      abort();
-      return -1;
-    }
-  }  
+    printf("Unpack fail\n");
+    return -1;
+  }
 
 #if 0
   ApplyKernelPatches (Prelinked, PrelinkedSize);
 #endif
 
-  EFI_STATUS Status = PrelinkedContextInit (&Context, Prelinked, PrelinkedSize, AllocSize);
+  PATCHER_CONTEXT        Patcher;
+  Status = PatcherInitContextFromBuffer (
+    &Patcher,
+    Prelinked,
+    PrelinkedSize
+    );
+  DEBUG ((DEBUG_ERROR, "Patcher init status %r\n", Status));
+
+  Status = PrelinkedContextInit (&Context, Prelinked, PrelinkedSize, AllocSize);
 
   if (!EFI_ERROR (Status)) {
     ApplyKextPatches (&Context);
 
-    Status = PrelinkedInjectPrepare (&Context, BASE_2MB, BASE_2MB);
+    Status = PrelinkedInjectPrepare (&Context, LinkedExpansion, ReservedExeSize);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "Prelink inject prepare error %r\n", Status));
       return -1;
@@ -526,11 +581,16 @@ int wrap_main(int argc, char** argv) {
       UINT32 TestPlistSize = LiluKextInfoPlistDataSize;
 
       if (argc > 2) {
-        TestData = readFile(argv[2], &TestDataSize);
-        if (TestData == NULL) {
-          printf("Read data fail\n");
-          abort();
-          return -1;
+        if (argv[2][0] == 'n' && argv[2][1] == 0) {
+          TestData = NULL;
+          TestDataSize = 0;
+        } else {
+          TestData = readFile(argv[2], &TestDataSize);
+          if (TestData == NULL) {
+            printf("Read data fail %s\n", argv[2]);
+            abort();
+            return -1;
+          }
         }
       }
 
@@ -566,6 +626,7 @@ int wrap_main(int argc, char** argv) {
       c++;
     }
 
+    ASSERT (Context.PrelinkedSize - Context.KextsFileOffset <= ReservedExeSize);
 #ifndef TEST_SLE
     if (argc <= 2) {
       Status = PrelinkedInjectKext (
