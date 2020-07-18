@@ -2251,7 +2251,7 @@ typedef struct {
 #define MACH_N_REF_TO_WEAK  0x0080U
 ///
 /// The N_ARM_THUMB_DEF bit of the n_desc field indicates that the symbol is
-/// a defintion of a Thumb function.
+/// a definition of a Thumb function.
 ///
 #define MACH_N_ARM_THUMB_DEF  0x0008U
 ///

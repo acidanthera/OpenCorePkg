@@ -29,7 +29,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define MACH_COMPRESSED_BINARY_INVERT_LZSS       0x73737A6C
 
 ///
-/// Defintion of the the compressed header structure.
+/// Definition of the the compressed header structure.
 ///
 typedef struct {
   ///

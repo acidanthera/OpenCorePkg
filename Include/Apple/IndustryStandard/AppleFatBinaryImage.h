@@ -38,7 +38,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 
 ///
-/// Defintion of the the Fat architecture-specific file header.
+/// Definition of the the Fat architecture-specific file header.
 ///
 typedef struct {
   ///
@@ -64,7 +64,7 @@ typedef struct {
 } MACH_FAT_ARCH;
 
 ///
-/// Defintion of the Fat file header
+/// Definition of the Fat file header
 ///
 typedef struct {
   ///
@@ -91,7 +91,7 @@ typedef struct {
 ///
 
 ///
-/// Defintion of the the Fat architecture-specific file header.
+/// Definition of the the Fat architecture-specific file header.
 ///
 typedef struct {
   ///
@@ -121,7 +121,7 @@ typedef struct {
 } MACH_FAT_ARCH_64;
 
 ///
-/// Defintion of the Fat file header
+/// Definition of the Fat file header
 ///
 typedef struct {
   ///
