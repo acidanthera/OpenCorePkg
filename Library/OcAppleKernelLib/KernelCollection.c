@@ -201,7 +201,7 @@ KcRebuildMachHeader (
 
   CurrentSize  = MachHeader->CommandsSize + sizeof (*MachHeader);
   FilesetSize  = InternalKcGetKextFilesetSize (Context);
-  RequiredSize = FilesetSize + sizeof (MACH_LOAD_COMMAND_SEGMENT_64) + Context->PrelinkedInfoSegment->CommandSize;
+  RequiredSize = FilesetSize + sizeof (MACH_SEGMENT_COMMAND_64) + Context->PrelinkedInfoSegment->CommandSize;
 
   TextSegment = MachoGetSegmentByName64 (
     &Context->PrelinkedMachContext,
