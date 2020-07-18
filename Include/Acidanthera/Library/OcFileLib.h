@@ -227,7 +227,7 @@ GetFileSize (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-GetFileModifcationTime (
+GetFileModificationTime (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT EFI_TIME           *Time
   );

@@ -817,7 +817,7 @@ OcKernelFileOpen (
 
       DEBUG ((DEBUG_INFO, "OC: Prelinked status - %r\n", PrelinkedStatus));
 
-      Status = GetFileModifcationTime (*NewHandle, &ModificationTime);
+      Status = GetFileModificationTime (*NewHandle, &ModificationTime);
       if (EFI_ERROR (Status)) {
         ZeroMem (&ModificationTime, sizeof (ModificationTime));
       }
