@@ -562,7 +562,8 @@ InternalFileDevicePathsEqualClipNode (
 
     if ((DevicePathType (DevPath.DevPath) != MEDIA_DEVICE_PATH)
      || (DevicePathSubType (DevPath.DevPath) != MEDIA_FILEPATH_DP)) {
-      return 0;
+      Length = 0;
+      break;
     }
 
     Length = OcFileDevicePathNameLen (DevPath.FilePath);
