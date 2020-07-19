@@ -50,6 +50,7 @@
 typedef struct {
   //
   // MKEXT magic value "MKXT".
+  //
   UINT32           Magic;
   //
   // MKEXT signature "MOSX".
@@ -186,7 +187,7 @@ typedef struct {
   //
   UINT32              PlistOffset;
   //
-  // Compressed size of plist. Zero indicates no compression?
+  // Compressed size of plist. Zero indicates no compression.
   //
   UINT32              PlistCompressedSize;
   //
