@@ -996,7 +996,7 @@
 		<true/>
 		<key>Drivers</key>
 		<array>
-			<string>HfsPlus.efi</string>
+			<string>HfsPlusLegacy.efi</string>
 			<string>OpenRuntime.efi</string>
 			<string>#OpenCanopy.efi</string>
 			<string>#AudioDxe.efi</string>
@@ -1007,8 +1007,8 @@
 			<string>#HiiDatabase.efi</string>
 			<string>#NvmExpressDxe.efi</string>
 			<string>#XhciDxe.efi</string>
-			<string>#ExFatDxe.efi</string>
-			<string>#PartitionDxe.efi</string>
+			<string>#ExFatDxeLegacy.efi</string>
+			<string>#PartitionDxeLegacy.efi</string>
 			<string>#CrScreenshotDxe.efi</string>
 		</array>
 		<key>Input</key>
