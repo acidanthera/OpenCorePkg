@@ -88,30 +88,11 @@ GetFileModificationTime (
   OUT EFI_TIME           *Time
   )
 {
-  EFI_STATUS     Status;
-  UINTN          BufferSize;
   EFI_FILE_INFO  *FileInfo;
 
-  BufferSize = 0;
-  Status = File->GetInfo (File, &gEfiFileInfoGuid, &BufferSize, NULL);
-
-  if (Status != EFI_BUFFER_TOO_SMALL) {
-    return Status;
-  }
-
-  if (BufferSize < sizeof (EFI_FILE_INFO)) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  FileInfo = (EFI_FILE_INFO *) AllocatePool (BufferSize);
+  FileInfo = GetFileInfo (File, &gEfiFileInfoGuid, 0, NULL);
   if (FileInfo == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  Status = File->GetInfo (File, &gEfiFileInfoGuid, &BufferSize, FileInfo);
-  if (EFI_ERROR (Status)) {
-    FreePool (FileInfo);
-    return Status;
+    return EFI_INVALID_PARAMETER;
   }
 
   CopyMem (Time, &FileInfo->ModificationTime, sizeof (*Time));
