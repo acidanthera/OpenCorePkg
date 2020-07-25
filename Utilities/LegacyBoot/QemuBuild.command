@@ -4,7 +4,13 @@
 # qemu-system-x86_64 -drive file=$QEMU_IMAGE/OpenCore.RO.raw -serial stdio \
 #   -usb -device usb-kbd -device usb-mouse -s -m 8192
 
-cd "$(dirname "$0")" || exit
+cd "$(dirname "$0")" || exit 1
+
+if [ ! -f boot ] || [ ! -f boot0 ] || [ ! -f boot1f32 ]; then
+  echo "Boot files are missing from this package!"
+  echo "You probably forgot to build DuetPkg first."
+  exit 1
+fi
 
 if [ "$(which qemu-img)" = "" ]; then
   echo "QEMU installation missing"
@@ -32,7 +38,7 @@ echo "Will be installed to Disk ${N}"
 if [[ ! $(diskutil info disk"${N}" |  sed -n 's/.*Device Node: *//p') ]]
 then
   echo Disk "$N" not found
-  exit
+  exit 1
 fi
 
 FS=$(diskutil info disk"${N}"s1 | sed -n 's/.*File System Personality: *//p')
@@ -41,7 +47,7 @@ echo "$FS"
 if [ "$FS" != "MS-DOS FAT32" ]
 then
   echo "No FAT32 partition to install"
-  exit
+  exit 1
 fi
 
 # Write MBR

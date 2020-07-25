@@ -22,11 +22,14 @@ buildutil() {
     UTILS+=("RsaTool")
   fi
 
+  local cores
+  cores=$(getconf _NPROCESSORS_ONLN)
+
   pushd "${selfdir}/Utilities" || exit 1
   for util in "${UTILS[@]}"; do
     cd "$util" || exit 1
     echo "Building ${util}..."
-    make || exit 1
+    make -j $cores || exit 1
     #
     # FIXME: Do not build RsaTool for Win32 without OpenSSL.
     #
@@ -37,7 +40,7 @@ buildutil() {
     if [ "$(which i686-w64-mingw32-gcc)" != "" ]; then
       echo "Building ${util} for Windows..."
       UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make clean || exit 1
-      UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make || exit 1
+      UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make -j $cores || exit 1
     fi
     cd - || exit 1
   done
@@ -46,7 +49,7 @@ buildutil() {
 
 package() {
   if [ ! -d "$1" ]; then
-    echo "Missing package directory"
+    echo "Missing package directory $1"
     exit 1
   fi
 
@@ -153,6 +156,21 @@ package() {
   for utilScpt in "${utilScpts[@]}"; do
     cp -r "${selfdir}/Utilities/${utilScpt}" tmp/Utilities/ || exit 1
   done
+
+  # Copy OpenDuetPkg booter.
+  local arch
+  local tgt
+  local booter
+  arch="$(basename $(pwd))"
+  tgt="$(basename $(dirname $(pwd)))"
+  booter="$(pwd)/../../../OpenDuetPkg/${tgt}/${arch}/boot"
+
+  if [ -f "${booter}" ]; then
+    echo "Copying OpenDuetPkg boot file from ${booter}..."
+    cp "${booter}" tmp/Utilities/LegacyBoot/boot || exit 1
+  else
+    echo "Failed to find OpenDuetPkg at ${booter}!"
+  fi
 
   buildutil || exit 1
   utils=(

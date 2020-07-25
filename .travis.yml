@@ -17,8 +17,8 @@ matrix:
 
     script:
     - HOMEBREW_NO_INSTALL_CLEANUP=1 HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl mingw-w64
-    - "./build_oc.tool"
     - "./build_duet.tool"
+    - "./build_oc.tool"
 
     deploy:
       provider: releases
@@ -51,8 +51,8 @@ matrix:
     - if [ "$sum" != "$expsum" ]; then echo "Invalid checksum $sum" ; exit 1 ; fi
     - tar -xf "${file}${suf}" || exit 1
     - export PATH="$(pwd)/${file}/bin:$PATH"
-    - "./build_oc.tool"
     - "./build_duet.tool"
+    - "./build_oc.tool"
 
   - os: linux
     name: "Build Linux CLANG38"
@@ -70,8 +70,8 @@ matrix:
     - sudo apt-get remove -y llvm-3.8 libllvm3.8 # Move LLVM 3.8 out of the way.
     - export PATH="/usr/lib/llvm-8/bin:$PATH" # Default compiler (7.0 or 3.8) has no LTO plugin.
     - export TOOLCHAINS=CLANG38
-    - "./build_oc.tool"
     - "./build_duet.tool"
+    - "./build_oc.tool"
     # Currently this is too ugly, but maybe we can use that in the future.
     - sudo apt-get install -y doxygen texlive texlive-latex-extra
     - abort() { tail -200 log.txt ; exit 1 ; }
@@ -86,8 +86,8 @@ matrix:
     - HAS_OPENSSL_BUILD=0
     - choco install python
     - choco install microsoft-build-tools visualcpp-build-tools make nasm zip
-    - "./build_oc.tool"
     - "./build_duet.tool"
+    - "./build_oc.tool"
 
   - os: osx
     name: "Analyze Scripts"
