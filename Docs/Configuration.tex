@@ -1285,11 +1285,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   support on many firmwares using SMM backing for select services like variable
   storage. SMM may try to access physical addresses, but they get moved by boot.efi.
 
-  \emph{Note}: Most but Apple and VMware firmwares need this quirk. This quirk
-  is generally unnecessary when using \texttt{OpenDuetPkg}, but may be required
-  to boot macOS 10.6 and earlier for unclear reasons.
-
-  % The reasons are unclear here.
+  \emph{Note}: Most but Apple and VMware firmwares need this quirk.
 
 \item
   \texttt{DevirtualiseMmio}\\
@@ -1515,7 +1511,9 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   \emph{Note 2}: The necessity of this quirk is determined by early boot failures.
   This quirk replaces \texttt{EnableWriteUnprotector} on firmwares supporting
-  memory attributes table (MAT).
+  memory attributes table (MAT). This quirk is generally unnecessary when using
+  \texttt{OpenDuetPkg}, but may be required to boot macOS 10.6 and earlier for
+  unclear reasons.
 
 \item
   \texttt{SetupVirtualMap}\\

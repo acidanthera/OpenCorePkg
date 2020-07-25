@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
-%DIF ADD ../Configuration.tex        Sat Jul 25 18:04:52 2020
+%DIF ADD ../Configuration.tex        Sat Jul 25 18:44:25 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1351,15 +1351,9 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   support on many firmwares using SMM backing for select services like variable
   storage. SMM may try to access physical addresses, but they get moved by boot.efi.
 
-  \emph{Note}: Most but Apple and VMware firmwares need this quirk. \DIFaddbegin \DIFadd{This quirk
-  is generally unnecessary when using }\texttt{\DIFadd{OpenDuetPkg}}\DIFadd{, but may be required
-  to boot macOS 10.6 and earlier for unclear reasons.
-}\DIFaddend 
+  \emph{Note}: Most but Apple and VMware firmwares need this quirk.
 
-  %DIF >  The reasons are unclear here.
-\DIFaddbegin 
-
-\DIFaddend \item
+\item
   \texttt{DevirtualiseMmio}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -1587,7 +1581,10 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   \emph{Note 2}: The necessity of this quirk is determined by early boot failures.
   This quirk replaces \texttt{EnableWriteUnprotector} on firmwares supporting
-  memory attributes table (MAT).
+  memory attributes table (MAT). \DIFaddbegin \DIFadd{This quirk is generally unnecessary when using
+  }\texttt{\DIFadd{OpenDuetPkg}}\DIFadd{, but may be required to boot macOS 10.6 and earlier for
+  unclear reasons.
+}\DIFaddend 
 
 \item
   \texttt{SetupVirtualMap}\\
