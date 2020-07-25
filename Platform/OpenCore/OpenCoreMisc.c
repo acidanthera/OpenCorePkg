@@ -27,6 +27,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcSmbiosLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/PrintLib.h>
+#include <Library/SerialPortLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
@@ -534,6 +535,10 @@ OcMiscEarlyInit (
     // boot.efi kills watchdog only in FV2 UI.
     //
     gBS->SetWatchdogTimer (0, 0, 0, NULL);
+  }
+
+  if (Config->Misc.Debug.SerialInit) {
+    SerialPortInitialize ();
   }
 
   OcConfigureLogProtocol (

@@ -291,6 +291,7 @@
   _(BOOLEAN                     , AppleDebug                  ,     , FALSE        , ()) \
   _(BOOLEAN                     , ApplePanic                  ,     , FALSE        , ()) \
   _(BOOLEAN                     , DisableWatchDog             ,     , FALSE        , ()) \
+  _(BOOLEAN                     , SerialInit                  ,     , FALSE        , ()) \
   _(BOOLEAN                     , SysReport                   ,     , FALSE        , ())
   OC_DECLARE (OC_MISC_DEBUG)
 

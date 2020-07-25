@@ -31,6 +31,7 @@ OpenCore Changelog
 - Added MacBookPro16,4 model code
 - Updated builtin firmware versions for SMBIOS and the rest
 - Fixed OSXSAVE reporting when emulating CPUID on newer CPUs
+- Added `SerialInit` option to perform serial initialisation separately
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy

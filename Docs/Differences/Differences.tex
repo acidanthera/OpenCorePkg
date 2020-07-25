@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
-%DIF ADD ../Configuration.tex        Sat Jul 25 18:44:25 2020
+%DIF ADD ../Configuration.tex        Sat Jul 25 19:03:36 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2788,7 +2788,29 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
   \end{itemize}
 
 \item
-  \texttt{SysReport}\\
+  \DIFaddbegin \texttt{\DIFadd{SerialInit}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Perform serial port initialisation.
+}
+
+  \DIFadd{This option will perform serial port initialisation within OpenCore prior to enabling
+  (any) debug logging. Serial port configuration is defined via PCDs at compile time
+  in }\texttt{\DIFadd{gEfiMdeModulePkgTokenSpaceGuid}} \DIFadd{GUID. Default values as found in
+  }\texttt{\DIFadd{MdeModulePkg.dec}} \DIFadd{are as follows:
+  }
+
+  \begin{itemize}
+  \tightlist
+    \item \texttt{\DIFadd{PcdSerialBaudRate}} \DIFadd{--- Baud rate: }\texttt{\DIFadd{115200}}\DIFadd{.
+    }\item \texttt{\DIFadd{PcdSerialLineControl}} \DIFadd{--- Line control: no parity, 8 data bits, 1 stop bit.
+  }\end{itemize}
+
+  \DIFadd{See more details in }\hyperref[troubleshootingdebug]{\texttt{Debugging}} \DIFadd{section.
+}
+
+\item
+  \DIFaddend \texttt{SysReport}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Produce system report on ESP folder.
@@ -5756,8 +5778,11 @@ page. For IDA Pro you will need IDA Pro 7.3 or newer, refer to
 for more details.
 
 To obtain the log during boot you can make the use of serial port debugging. Serial port
-debugging is enabled in \texttt{Target}, e.g. \texttt{0xB} for onscreen with serial. OpenCore
-uses \texttt{115200} baud rate, \texttt{8} data bits, no parity, and \texttt{1} stop bit.
+debugging is enabled in \texttt{Target}, e.g. \texttt{0xB} for onscreen with serial. \DIFdelbegin \DIFdel{OpenCore
+uses }\DIFdelend \DIFaddbegin \DIFadd{To
+initialise serial within OpenCore use }\DIFaddend \texttt{\DIFdelbegin \DIFdel{115200}\DIFdelend \DIFaddbegin \DIFadd{SerialInit}\DIFaddend } \DIFdelbegin \DIFdel{baud rate, }\texttt{\DIFdel{8}} %DIFAUXCMD
+\DIFdel{data bits, no parity, and }\texttt{\DIFdel{1}} %DIFAUXCMD
+\DIFdel{stop bit}\DIFdelend \DIFaddbegin \DIFadd{configuration option}\DIFaddend .
 For macOS your best choice are CP2102-based UART devices. Connect motherboard \texttt{TX}
 to USB UART \texttt{RX}, and motherboard \texttt{GND} to USB UART \texttt{GND}. Use
 \texttt{screen} utility to get the output, or download GUI software, such as

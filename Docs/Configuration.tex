@@ -2701,6 +2701,25 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
   \end{itemize}
 
 \item
+  \texttt{SerialInit}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Perform serial port initialisation.
+
+  This option will perform serial port initialisation within OpenCore prior to enabling
+  (any) debug logging. Serial port configuration is defined via PCDs at compile time
+  in \texttt{gEfiMdeModulePkgTokenSpaceGuid} GUID. Default values as found in
+  \texttt{MdeModulePkg.dec} are as follows:
+  
+  \begin{itemize}
+  \tightlist
+    \item \texttt{PcdSerialBaudRate} --- Baud rate: \texttt{115200}.
+    \item \texttt{PcdSerialLineControl} --- Line control: no parity, 8 data bits, 1 stop bit.
+  \end{itemize}
+
+  See more details in \hyperref[troubleshootingdebug]{\texttt{Debugging}} section.
+
+\item
   \texttt{SysReport}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -5636,8 +5655,8 @@ page. For IDA Pro you will need IDA Pro 7.3 or newer, refer to
 for more details.
 
 To obtain the log during boot you can make the use of serial port debugging. Serial port
-debugging is enabled in \texttt{Target}, e.g. \texttt{0xB} for onscreen with serial. OpenCore
-uses \texttt{115200} baud rate, \texttt{8} data bits, no parity, and \texttt{1} stop bit.
+debugging is enabled in \texttt{Target}, e.g. \texttt{0xB} for onscreen with serial. To
+initialise serial within OpenCore use \texttt{SerialInit} configuration option.
 For macOS your best choice are CP2102-based UART devices. Connect motherboard \texttt{TX}
 to USB UART \texttt{RX}, and motherboard \texttt{GND} to USB UART \texttt{GND}. Use
 \texttt{screen} utility to get the output, or download GUI software, such as
