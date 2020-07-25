@@ -163,7 +163,7 @@ OcProvideUgaPassThrough (
   OC_UGA_PROTOCOL                *OcUgaDraw;
 
   //
-  // For now we do not use this, but as a side note:
+  // For now we do not need this but for launching 10.4, but as a side note:
   // MacPro5,1 has 2 GOP protocols:
   // - for GPU
   // - for ConsoleOutput
