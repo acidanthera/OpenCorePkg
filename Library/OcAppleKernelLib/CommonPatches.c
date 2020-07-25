@@ -1093,6 +1093,7 @@ PatchKernelCpuId (
   CPUID_VERSION_INFO_EBX    Ebx;
   CPUID_VERSION_INFO_ECX    Ecx;
   CPUID_VERSION_INFO_EDX    Edx;
+  BOOLEAN                   FoundReleaseKernel;
 
   STATIC_ASSERT (
     sizeof (mKernelCpuIdFindRelNew) > sizeof (mKernelCpuIdFindRelOld),
@@ -1132,12 +1133,31 @@ PatchKernelCpuId (
     }
   }
 
+  FoundReleaseKernel = FoundSize > 0;
+
+  //
+  // When patching the release kernel we do not allow reevaluating CPUID information,
+  // which is used to report OSXSAVE availability. This causes issues with some programs,
+  // like Docker using Hypervisor.framework, which rely on sysctl to track CPU feature.
+  //
+  // To workaround this we make sure to always report OSXSAVE bit when it is available
+  // regardless of the reevaluation performed by init_fpu in XNU.
+  //
+  // REF: https://github.com/acidanthera/bugtracker/issues/1035
+  //
+  if (FoundReleaseKernel
+    && CpuInfo->CpuidVerEcx.Bits.XSAVE != 0
+    && CpuInfo->CpuidVerEcx.Bits.OSXSAVE == 0
+    && CpuInfo->CpuidVerEcx.Bits.AVX != 0) {
+    CpuInfo->CpuidVerEcx.Bits.OSXSAVE = 1;
+  }
+
   Eax.Uint32 = (Data[0] & DataMask[0]) | (CpuInfo->CpuidVerEax.Uint32 & ~DataMask[0]);
   Ebx.Uint32 = (Data[1] & DataMask[1]) | (CpuInfo->CpuidVerEbx.Uint32 & ~DataMask[1]);
   Ecx.Uint32 = (Data[2] & DataMask[2]) | (CpuInfo->CpuidVerEcx.Uint32 & ~DataMask[2]);
   Edx.Uint32 = (Data[3] & DataMask[3]) | (CpuInfo->CpuidVerEdx.Uint32 & ~DataMask[3]);
 
-  if (FoundSize > 0) {
+  if (FoundReleaseKernel) {
     CpuidPatch         = (INTERNAL_CPUID_PATCH *) Record;
     CpuidPatch->EaxCmd = 0xB8;
     CpuidPatch->EaxVal = Eax.Uint32;
