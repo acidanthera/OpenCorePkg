@@ -131,7 +131,7 @@ Third-party articles, utilities, books, and alike may be more useful for a wider
 they could provide guide-like material. However, they are prone to their authors' preferences,
 tastes, this document misinterpretation, and essential obsolescence.
 In case you use these sources, for example, \href{https://dortania.github.io}{Dortania}'s
-\href{https://dortania.github.io/OpenCore-Desktop-Guide}{OpenCore Desktop Guide}
+\href{https://dortania.github.io/OpenCore-Install-Guide}{OpenCore Install Guide}
 and \href{https://dortania.github.io/getting-started}{related material},
 please ensure to follow this document for every made decision and judge its consequences.
 
@@ -1285,7 +1285,11 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   support on many firmwares using SMM backing for select services like variable
   storage. SMM may try to access physical addresses, but they get moved by boot.efi.
 
-  \emph{Note}: Most but Apple and VMware firmwares need this quirk.
+  \emph{Note}: Most but Apple and VMware firmwares need this quirk. This quirk
+  is generally unnecessary when using \texttt{OpenDuetPkg}, but may be required
+  to boot macOS 10.6 and earlier for unclear reasons.
+
+  % The reasons are unclear here.
 
 \item
   \texttt{DevirtualiseMmio}\\
@@ -1657,6 +1661,13 @@ blocking.
   See \hyperref[kernelpropsadd]{Add Properties} section below. Kernel driver load
   order follows the item order in the array, thus the dependencies should be written
   prior to their consumers.
+
+  To track the dependency order one can inspect the \texttt{OSBundleLibraries} key
+  in the \texttt{Info.plist} of the kext. Any kext mentioned in the
+  \texttt{OSBundleLibraries} of the other kext must be precede this kext.
+
+  \emph{Note}: Kexts may have inner kexts (\texttt{Plug-Ins}) in their bundle. Each
+  inner kext must be added separately.
 
 \item
   \texttt{Block}\\

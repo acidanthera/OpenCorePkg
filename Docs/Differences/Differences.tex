@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Jul 17 03:06:36 2020
-%DIF ADD ../Configuration.tex        Fri Jul 17 03:06:36 2020
+%DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
+%DIF ADD ../Configuration.tex        Sat Jul 25 18:04:52 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -192,8 +192,10 @@ Third-party articles, utilities, books, and alike may be more useful for a wider
 they could provide guide-like material. However, they are prone to their authors' preferences,
 tastes, this document misinterpretation, and essential obsolescence.
 In case you use these sources, for example, \href{https://dortania.github.io}{Dortania}'s
-\href{https://dortania.github.io/OpenCore-Desktop-Guide}{OpenCore Desktop Guide}
-and \href{https://dortania.github.io/getting-started}{related material},
+\DIFdelbegin %DIFDELCMD < \href{https://dortania.github.io/OpenCore-Desktop-Guide}{OpenCore Desktop Guide}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \href{https://dortania.github.io/OpenCore-Install-Guide}{OpenCore Install Guide}
+\DIFaddend and \href{https://dortania.github.io/getting-started}{related material},
 please ensure to follow this document for every made decision and judge its consequences.
 
 Be warned that regardless of the sources used you are required to fully understand every
@@ -1349,9 +1351,15 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   support on many firmwares using SMM backing for select services like variable
   storage. SMM may try to access physical addresses, but they get moved by boot.efi.
 
-  \emph{Note}: Most but Apple and VMware firmwares need this quirk.
+  \emph{Note}: Most but Apple and VMware firmwares need this quirk. \DIFaddbegin \DIFadd{This quirk
+  is generally unnecessary when using }\texttt{\DIFadd{OpenDuetPkg}}\DIFadd{, but may be required
+  to boot macOS 10.6 and earlier for unclear reasons.
+}\DIFaddend 
 
-\item
+  %DIF >  The reasons are unclear here.
+\DIFaddbegin 
+
+\DIFaddend \item
   \texttt{DevirtualiseMmio}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -1726,7 +1734,16 @@ blocking.
   order follows the item order in the array, thus the dependencies should be written
   prior to their consumers.
 
-\item
+  \DIFaddbegin \DIFadd{To track the dependency order one can inspect the }\texttt{\DIFadd{OSBundleLibraries}} \DIFadd{key
+  in the }\texttt{\DIFadd{Info.plist}} \DIFadd{of the kext. Any kext mentioned in the
+  }\texttt{\DIFadd{OSBundleLibraries}} \DIFadd{of the other kext must be precede this kext.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: Kexts may have inner kexts (}\texttt{\DIFadd{Plug-Ins}}\DIFadd{) in their bundle. Each
+  inner kext must be added separately.
+}
+
+\DIFaddend \item
   \texttt{Block}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Failsafe}: Empty\\
