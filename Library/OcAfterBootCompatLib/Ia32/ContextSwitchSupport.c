@@ -23,5 +23,8 @@ AppleMapPlatformSaveState (
      OUT ASM_KERNEL_JUMP    *KernelJump
   )
 {
-  CpuDeadLoop ();
+  //
+  // Currently unsupported as not required.
+  // The warning is present in AppleMapPrepareKernelJump when quirks are accidentally enabled.
+  //
 }

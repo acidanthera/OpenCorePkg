@@ -596,6 +596,11 @@ AppleMapPrepareKernelJump (
     return;
   }
 
+#ifndef MDE_CPU_X64
+  RUNTIME_DEBUG ((DEBUG_ERROR, "OCABC: Kernel trampolines are unsupported for non-X64\n"));
+  CpuDeadLoop ();
+#endif
+
   //
   // Check whether we have image address and abort if not.
   //
