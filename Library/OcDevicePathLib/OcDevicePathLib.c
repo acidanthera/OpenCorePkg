@@ -347,8 +347,14 @@ OcFixAppleBootDevicePathNode (
           // Reference: https://github.com/acidanthera/bugtracker/issues/664.
           // On other boards it is be even more erratic, refer to:
           // https://github.com/acidanthera/bugtracker/issues/664#issuecomment-647526506
+          // On older boards there also is a PCI0/_UID1 issue, refer to:
+          // https://github.com/acidanthera/bugtracker/issues/664#issuecomment-663873846
           //
           switch (Node.Acpi->UID) {
+            case 0x1:
+              Node.Acpi->UID = 0;
+              return 1;            
+
             case 0x10:
             case 0x40:
               Node.Acpi->UID = 1;
