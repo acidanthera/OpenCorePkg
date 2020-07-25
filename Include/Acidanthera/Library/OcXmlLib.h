@@ -186,6 +186,19 @@ XmlNodeContent (
   );
 
 //
+// Changes the XML_NODE's string content to the passed content.
+//
+// @param Content New node content.
+//
+// @warning Content must stay valid till XmlDocumentFree.
+//
+VOID
+XmlNodeChangeContent (
+  XML_NODE     *Node,
+  CONST CHAR8  *Content
+  );
+
+//
 // @return Number of child nodes.
 //
 UINT32

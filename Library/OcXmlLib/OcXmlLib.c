@@ -1209,6 +1209,18 @@ XmlNodeContent (
   return Node->Real != NULL ? Node->Real->Content : Node->Content;
 }
 
+VOID
+XmlNodeChangeContent (
+  XML_NODE     *Node,
+  CONST CHAR8  *Content
+  )
+{
+  if (Node->Real != NULL) {
+    Node->Real->Content = Content;
+  }
+  Node->Content = Content;
+}
+
 UINT32
 XmlNodeChildren (
   XML_NODE  *Node
