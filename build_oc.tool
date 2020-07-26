@@ -138,7 +138,7 @@ package() {
     "Configuration.pdf"
     "Differences/Differences.pdf"
     "Sample.plist"
-    "SampleLegacy.plist"
+    "SampleCustom.plist"
     )
   for doc in "${docs[@]}"; do
     cp "${selfdir}/Docs/${doc}" tmp/Docs/ || exit 1

@@ -33,6 +33,7 @@ OpenCore Changelog
 - Fixed OSXSAVE reporting when emulating CPUID on newer CPUs
 - Added `SerialInit` option to perform serial initialisation separately
 - Fixed OpenDuetPkg booting on Intel G33 with SATA controller in RAID mode
+- `PlatformInfo` `Automatic` for all models
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy
