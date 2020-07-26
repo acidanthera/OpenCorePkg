@@ -29,7 +29,7 @@ buildutil() {
   for util in "${UTILS[@]}"; do
     cd "$util" || exit 1
     echo "Building ${util}..."
-    make -j $cores || exit 1
+    make -j "$cores" || exit 1
     #
     # FIXME: Do not build RsaTool for Win32 without OpenSSL.
     #
@@ -40,7 +40,7 @@ buildutil() {
     if [ "$(which i686-w64-mingw32-gcc)" != "" ]; then
       echo "Building ${util} for Windows..."
       UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make clean || exit 1
-      UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make -j $cores || exit 1
+      UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make -j "$cores" || exit 1
     fi
     cd - || exit 1
   done
@@ -161,8 +161,8 @@ package() {
   local arch
   local tgt
   local booter
-  arch="$(basename $(pwd))"
-  tgt="$(basename $(dirname $(pwd)))"
+  arch="$(basename "$(pwd)")"
+  tgt="$(basename "$(dirname "$(pwd)")")"
   booter="$(pwd)/../../../OpenDuetPkg/${tgt}/${arch}/boot"
 
   if [ -f "${booter}" ]; then
