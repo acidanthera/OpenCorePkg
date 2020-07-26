@@ -246,3 +246,37 @@ SetFileData (
 
   return Status;
 }
+
+EFI_STATUS
+AllocateCopyFileData (
+  IN  EFI_FILE_PROTOCOL  *File,
+  OUT UINT8              **Buffer,
+  OUT UINT32             *BufferSize
+  )
+{
+  EFI_STATUS    Status;
+  UINT8         *FileBuffer;
+  UINT32        ReadSize;
+
+  //
+  // Get full file data.
+  //
+  Status = GetFileSize (File, &ReadSize);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  FileBuffer = AllocatePool (ReadSize);
+  if (FileBuffer == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+  Status = GetFileData (File, 0, ReadSize, FileBuffer);
+  if (EFI_ERROR (Status)) {
+    FreePool (FileBuffer);
+    return Status;
+  }
+
+  *Buffer     = FileBuffer;
+  *BufferSize = ReadSize;
+  return EFI_SUCCESS;
+}
