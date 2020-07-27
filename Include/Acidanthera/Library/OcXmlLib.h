@@ -137,9 +137,10 @@ XmlDocumentParse (
 //
 // Exports parsed document into the buffer.
 //
-// @param Document XML_DOCUMENT to export
-// @param Length   Resulting length of the buffer without trailing \0 (optional)
-// @param Skip     N root levels before exporting, normally 0.
+// @param Document          XML_DOCUMENT to export
+// @param Length            Resulting length of the buffer without trailing \0 (optional)
+// @param Skip              N root levels before exporting, normally 0.
+// @param PrependPlistInfo  Prepend XML plist doc info to exported document.
 //
 // @return Exported buffer allocated from pool or NULL.
 //
@@ -147,7 +148,8 @@ CHAR8 *
 XmlDocumentExport (
   XML_DOCUMENT  *Document,
   UINT32        *Length,
-  UINT32        Skip
+  UINT32        Skip,
+  BOOLEAN       PrependPlistInfo
   );
 
 //

@@ -668,7 +668,7 @@ PrelinkedInjectComplete (
     }
   }
 
-  ExportedInfo = XmlDocumentExport (Context->PrelinkedInfoDocument, &ExportedInfoSize, 0);
+  ExportedInfo = XmlDocumentExport (Context->PrelinkedInfoDocument, &ExportedInfoSize, 0, FALSE);
   if (ExportedInfo == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -1002,7 +1002,7 @@ PrelinkedInjectKext (
   //
   // Strip outer plist & dict.
   //
-  NewInfoPlist = XmlDocumentExport (InfoPlistDocument, &NewInfoPlistSize, 2);
+  NewInfoPlist = XmlDocumentExport (InfoPlistDocument, &NewInfoPlistSize, 2, FALSE);
 
   XmlDocumentFree (InfoPlistDocument);
   FreePool (TmpInfoPlist);

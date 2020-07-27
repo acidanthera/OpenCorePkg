@@ -52,6 +52,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 #define XML_EXPORT_MIN_ALLOCATION_SIZE 4096
 
+#define XML_PLIST_HEADER  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">"
+
 struct XML_NODE_LIST_;
 struct XML_PARSER_;
 
@@ -1146,22 +1148,36 @@ CHAR8 *
 XmlDocumentExport (
   XML_DOCUMENT  *Document,
   UINT32        *Length,
-  UINT32        Skip
+  UINT32        Skip,
+  BOOLEAN       PrependPlistInfo
   )
 {
   CHAR8   *Buffer;
+  CHAR8   *BufferXmlContent;
   UINT32  AllocSize;
   UINT32  CurrentSize;
 
   AllocSize = Document->Buffer.Length + 1;
-  Buffer    = AllocatePool (AllocSize);
+  if (PrependPlistInfo && OcOverflowAddU32 (AllocSize, L_STR_SIZE_NT (XML_PLIST_HEADER), &AllocSize)) {
+      return NULL;
+  }
+  Buffer = AllocatePool (AllocSize);
   if (Buffer == NULL) {
     XML_USAGE_ERROR ("XmlDocumentExport::failed to allocate");
     return NULL;
   }
+  BufferXmlContent = PrependPlistInfo ? &Buffer[L_STR_LEN (XML_PLIST_HEADER)] : Buffer;
 
   CurrentSize = 0;
-  XmlNodeExportRecursive (Document->Root, &Buffer, &AllocSize, &CurrentSize, Skip);
+  XmlNodeExportRecursive (Document->Root, &BufferXmlContent, &AllocSize, &CurrentSize, Skip);
+
+  if (PrependPlistInfo) {
+    if (OcOverflowAddU32 (CurrentSize, L_STR_SIZE_NT (XML_PLIST_HEADER), &CurrentSize)) {
+      FreePool (Buffer);
+      return NULL;
+    }
+    CopyMem (Buffer, XML_PLIST_HEADER, L_STR_SIZE_NT (XML_PLIST_HEADER));
+  }
 
   if (Length != NULL) {
     *Length = CurrentSize;
