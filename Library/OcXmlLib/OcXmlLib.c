@@ -1153,30 +1153,33 @@ XmlDocumentExport (
   )
 {
   CHAR8   *Buffer;
-  CHAR8   *BufferXmlContent;
+  CHAR8   *NewBuffer;
   UINT32  AllocSize;
   UINT32  CurrentSize;
+  UINT32  NewSize;
 
   AllocSize = Document->Buffer.Length + 1;
-  if (PrependPlistInfo && OcOverflowAddU32 (AllocSize, L_STR_SIZE_NT (XML_PLIST_HEADER), &AllocSize)) {
-      return NULL;
-  }
   Buffer = AllocatePool (AllocSize);
   if (Buffer == NULL) {
     XML_USAGE_ERROR ("XmlDocumentExport::failed to allocate");
     return NULL;
   }
-  BufferXmlContent = PrependPlistInfo ? &Buffer[L_STR_LEN (XML_PLIST_HEADER)] : Buffer;
 
   CurrentSize = 0;
-  XmlNodeExportRecursive (Document->Root, &BufferXmlContent, &AllocSize, &CurrentSize, Skip);
+  XmlNodeExportRecursive (Document->Root, &Buffer, &AllocSize, &CurrentSize, Skip);
 
   if (PrependPlistInfo) {
-    if (OcOverflowAddU32 (CurrentSize, L_STR_SIZE_NT (XML_PLIST_HEADER), &CurrentSize)) {
+    if (OcOverflowTriAddU32 (CurrentSize, L_STR_SIZE_NT (XML_PLIST_HEADER), 1, &NewSize)) {
       FreePool (Buffer);
       return NULL;
     }
-    CopyMem (Buffer, XML_PLIST_HEADER, L_STR_SIZE_NT (XML_PLIST_HEADER));
+    NewBuffer = AllocatePool (NewSize);
+    CopyMem (&NewBuffer[L_STR_LEN (XML_PLIST_HEADER)], Buffer, CurrentSize);
+    CopyMem (NewBuffer, XML_PLIST_HEADER, L_STR_SIZE_NT (XML_PLIST_HEADER));
+    FreePool (Buffer);
+
+    CurrentSize = NewSize - 1;
+    Buffer      = NewBuffer;
   }
 
   if (Length != NULL) {
