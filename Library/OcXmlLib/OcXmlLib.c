@@ -1169,15 +1169,28 @@ XmlDocumentExport (
   XmlNodeExportRecursive (Document->Root, &Buffer, &AllocSize, &CurrentSize, Skip);
 
   if (PrependPlistInfo) {
-    if (OcOverflowTriAddU32 (CurrentSize, L_STR_SIZE_NT (XML_PLIST_HEADER), 1, &NewSize)) {
+    //
+    // XmlNodeExportRecursive returns a size that does not include the null terminator,
+    // but the allocated buffer does. During this reallocation, we count the null terminator
+    // of the plist header instead to ensure allocated buffer is the proper size.
+    //
+    if (OcOverflowAddU32 (CurrentSize, L_STR_SIZE (XML_PLIST_HEADER), &NewSize)) {
       FreePool (Buffer);
       return NULL;
     }
+
     NewBuffer = AllocatePool (NewSize);
-    CopyMem (&NewBuffer[L_STR_LEN (XML_PLIST_HEADER)], Buffer, CurrentSize);
+    if (NewBuffer == NULL) {
+      XML_USAGE_ERROR ("XmlDocumentExport::failed to allocate");
+      return NULL;
+    }
     CopyMem (NewBuffer, XML_PLIST_HEADER, L_STR_SIZE_NT (XML_PLIST_HEADER));
+    CopyMem (&NewBuffer[L_STR_LEN (XML_PLIST_HEADER)], Buffer, CurrentSize);
     FreePool (Buffer);
 
+    //
+    // Null terminator is not included in size returned by XmlBufferAppend.
+    //
     CurrentSize = NewSize - 1;
     Buffer      = NewBuffer;
   }
@@ -1187,7 +1200,8 @@ XmlDocumentExport (
   }
 
   //
-  // XmlBufferAppend guarantees one more byte.
+  // Null terminator is not included in size returned by XmlBufferAppend,
+  // but the buffer is allocated to include it.
   //
   Buffer[CurrentSize] = '\0';
 
