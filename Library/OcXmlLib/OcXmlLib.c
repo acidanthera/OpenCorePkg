@@ -1181,6 +1181,7 @@ XmlDocumentExport (
 
     NewBuffer = AllocatePool (NewSize);
     if (NewBuffer == NULL) {
+      FreePool (Buffer);
       XML_USAGE_ERROR ("XmlDocumentExport::failed to allocate");
       return NULL;
     }
