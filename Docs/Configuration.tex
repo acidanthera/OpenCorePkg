@@ -1582,6 +1582,42 @@ ioreg -lw0 -p IODeviceTree -n efi -r -x | grep device-properties |
   cat /tmp/device-properties.plist
 \end{lstlisting}
 
+Device propertties are part of the \texttt{IODeviceTree} (\texttt{gIODT})
+plane of macOS I/O Registry. This plane has several construction stages
+relevant for the platform initialisation. While the early construction
+stage is performed by the XNU kernel in the \texttt{IODeviceTreeAlloc}
+method, the majority of the construction is performed by the platform expert,
+implemented in \texttt{AppleACPIPlatformExpert.kext}.
+
+AppleACPIPlatformExpert incorporates two stages of \texttt{IODeviceTree}
+construction implemented by calling \\
+\texttt{AppleACPIPlatformExpert::mergeDeviceProperties}:
+
+\begin{enumerate}
+  \tightlist
+  \item During ACPI table initialisation through the recursive ACPI namespace scanning
+  by the calls to \\
+  \texttt{AppleACPIPlatformExpert::createDTNubs}.
+  \item During IOService registration (\texttt{IOServices::registerService}) callbacks
+  implemented as a part of \\
+  \texttt{AppleACPIPlatformExpert::platformAdjustService}
+  function and its private worker method \\
+  \texttt{AppleACPIPlatformExpert::platformAdjustPCIDevice}
+  specific to the PCI devices.
+\end{enumerate}
+
+The application of the stages depends on the device presence in ACPI tables.
+The first stage applies very early but exclusively to the devices present in ACPI tables.
+The second stage applies to all devices much later after the PCI configuration
+and may repeat the first stage if the device was not present in ACPI.
+
+For all kernel drivers, which may inspect the \texttt{IODeviceTree} plane without
+probing (e.g. \texttt{Lilu} and its plugins like \texttt{WhateverGreen}) it is particularly
+important to ensure device presence in the ACPI tables. Failing to do so may result
+\textbf{in all kinds of erratic behaviour} caused by ignoring the injected device properties
+as they were not constructed at the first stage. See \texttt{SSDT-IMEI.dsl} and
+\texttt{SSDT-BRG0.dsl} for an example.
+
 \subsection{Properties}\label{devpropsprops}
 
 \begin{enumerate}

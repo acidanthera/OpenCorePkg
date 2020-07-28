@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
-%DIF ADD ../Configuration.tex        Sat Jul 25 19:03:36 2020
+%DIF ADD ../Configuration.tex        Wed Jul 29 01:17:13 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1653,7 +1653,47 @@ ioreg -lw0 -p IODeviceTree -n efi -r -x | grep device-properties |
   cat /tmp/device-properties.plist
 \end{lstlisting}
 
-\subsection{Properties}\label{devpropsprops}
+\DIFaddbegin \DIFadd{Device propertties are part of the }\texttt{\DIFadd{IODeviceTree}} \DIFadd{(}\texttt{\DIFadd{gIODT}}\DIFadd{)
+plane of macOS I/O Registry. This plane has several construction stages
+relevant for the platform initialisation. While the early construction
+stage is performed by the XNU kernel in the }\texttt{\DIFadd{IODeviceTreeAlloc}}
+\DIFadd{method, the majority of the construction is performed by the platform expert,
+implemented in }\texttt{\DIFadd{AppleACPIPlatformExpert.kext}}\DIFadd{.
+}
+
+\DIFadd{AppleACPIPlatformExpert incorporates two stages of }\texttt{\DIFadd{IODeviceTree}}
+\DIFadd{construction implemented by calling }\\
+\texttt{\DIFadd{AppleACPIPlatformExpert::mergeDeviceProperties}}\DIFadd{:
+}
+
+\begin{enumerate}
+  \tightlist
+  \item \DIFadd{During ACPI table initialisation through the recursive ACPI namespace scanning
+  by the calls to }\\
+  \texttt{\DIFadd{AppleACPIPlatformExpert::createDTNubs}}\DIFadd{.
+  }\item \DIFadd{During IOService registration (}\texttt{\DIFadd{IOServices::registerService}}\DIFadd{) callbacks
+  implemented as a part of }\\
+  \texttt{\DIFadd{AppleACPIPlatformExpert::platformAdjustService}}
+  \DIFadd{function and its private worker method }\\
+  \texttt{\DIFadd{AppleACPIPlatformExpert::platformAdjustPCIDevice}}
+  \DIFadd{specific to the PCI devices.
+}\end{enumerate}
+
+\DIFadd{The application of the stages depends on the device presence in ACPI tables.
+The first stage applies very early but exclusively to the devices present in ACPI tables.
+The second stage applies to all devices much later after the PCI configuration
+and may repeat the first stage if the device was not present in ACPI.
+}
+
+\DIFadd{For all kernel drivers, which may inspect the }\texttt{\DIFadd{IODeviceTree}} \DIFadd{plane without
+probing (e.g. }\texttt{\DIFadd{Lilu}} \DIFadd{and its plugins like }\texttt{\DIFadd{WhateverGreen}}\DIFadd{) it is particularly
+important to ensure device presence in the ACPI tables. Failing to do so may result
+}\textbf{\DIFadd{in all kinds of erratic behaviour}} \DIFadd{caused by ignoring the injected device properties
+as they were not constructed at the first stage. See }\texttt{\DIFadd{SSDT-IMEI.dsl}} \DIFadd{and
+}\texttt{\DIFadd{SSDT-BRG0.dsl}} \DIFadd{for an example.
+}
+
+\DIFaddend \subsection{Properties}\label{devpropsprops}
 
 \begin{enumerate}
 \item
