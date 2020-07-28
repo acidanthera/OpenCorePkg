@@ -78,7 +78,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "SsdtEC", 0x00001000)
             }
         }
 
-        Scope (\_SB.PCI0.LPCB)
+        Scope (PCI0.LPCB)
         {
             Device (EC)
             {
