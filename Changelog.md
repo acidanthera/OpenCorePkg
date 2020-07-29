@@ -34,6 +34,7 @@ OpenCore Changelog
 - Added `SerialInit` option to perform serial initialisation separately
 - Fixed OpenDuetPkg booting on Intel G33 with SATA controller in RAID mode
 - `PlatformInfo` `Automatic` for all models
+- Fixed 32-bit OpenDuetPkg booting on machines with over 4 GBs of RAM
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy
