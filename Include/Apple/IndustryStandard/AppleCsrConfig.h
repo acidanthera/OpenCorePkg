@@ -23,18 +23,19 @@
 /// Rootless configuration flags.
 ///
 
-#define CSR_ALLOW_UNTRUSTED_KEXTS             (1U << 0U)
-#define CSR_ALLOW_UNRESTRICTED_FS             (1U << 1U)
-#define CSR_ALLOW_TASK_FOR_PID                (1U << 2U)
-#define CSR_ALLOW_KERNEL_DEBUGGER             (1U << 3U)
-#define CSR_ALLOW_APPLE_INTERNAL              (1U << 4U)
-#define CSR_ALLOW_DESTRUCTIVE_DTRACE          (1U << 5U) /// < Name deprecated
-#define CSR_ALLOW_UNRESTRICTED_DTRACE         (1U << 5U)
-#define CSR_ALLOW_UNRESTRICTED_NVRAM          (1U << 6U)
-#define CSR_ALLOW_DEVICE_CONFIGURATION        (1U << 7U)
-#define CSR_ALLOW_ANY_RECOVERY_OS             (1U << 8U)
-#define CSR_ALLOW_UNAPPROVED_KEXTS            (1U << 9U)
-#define CSR_ALLOW_EXECUTABLE_POLICY_OVERRIDE  (1U << 10U)
+#define CSR_ALLOW_UNTRUSTED_KEXTS             BIT0
+#define CSR_ALLOW_UNRESTRICTED_FS             BIT1
+#define CSR_ALLOW_TASK_FOR_PID                BIT2
+#define CSR_ALLOW_KERNEL_DEBUGGER             BIT3
+#define CSR_ALLOW_APPLE_INTERNAL              BIT4
+#define CSR_ALLOW_DESTRUCTIVE_DTRACE          BIT5 ///< Name deprecated
+#define CSR_ALLOW_UNRESTRICTED_DTRACE         BIT5
+#define CSR_ALLOW_UNRESTRICTED_NVRAM          BIT6
+#define CSR_ALLOW_DEVICE_CONFIGURATION        BIT7
+#define CSR_ALLOW_ANY_RECOVERY_OS             BIT8
+#define CSR_ALLOW_UNAPPROVED_KEXTS            BIT9
+#define CSR_ALLOW_EXECUTABLE_POLICY_OVERRIDE  BIT10
+#define CSR_ALLOW_UNAUTHENTICATED_ROOT        BIT11 ///< Temporary name till 11.0 csr.h release
 
 #define CSR_VALID_FLAGS (CSR_ALLOW_UNTRUSTED_KEXTS | \
                          CSR_ALLOW_UNRESTRICTED_FS | \
@@ -46,16 +47,17 @@
                          CSR_ALLOW_DEVICE_CONFIGURATION | \
                          CSR_ALLOW_ANY_RECOVERY_OS | \
                          CSR_ALLOW_UNAPPROVED_KEXTS | \
-                         CSR_ALLOW_EXECUTABLE_POLICY_OVERRIDE)
+                         CSR_ALLOW_EXECUTABLE_POLICY_OVERRIDE | \
+                         CSR_ALLOW_UNAUTHENTICATED_ROOT)
 
 #define CSR_ALWAYS_ENFORCED_FLAGS (CSR_ALLOW_DEVICE_CONFIGURATION | CSR_ALLOW_ANY_RECOVERY_OS)
 
 ///
 /// CSR capabilities that a booter can give to the system.
 ///
-#define CSR_CAPABILITY_UNLIMITED        (1U << 0U)
-#define CSR_CAPABILITY_CONFIG           (1U << 1U)
-#define CSR_CAPABILITY_APPLE_INTERNAL   (1U << 2U)
+#define CSR_CAPABILITY_UNLIMITED        BIT0
+#define CSR_CAPABILITY_CONFIG           BIT1
+#define CSR_CAPABILITY_APPLE_INTERNAL   BIT2
 
 #define CSR_VALID_CAPABILITIES (CSR_CAPABILITY_UNLIMITED | CSR_CAPABILITY_CONFIG | CSR_CAPABILITY_APPLE_INTERNAL)
 
