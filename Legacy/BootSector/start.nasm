@@ -5,8 +5,6 @@
 ;   LEGACY_A20 - use slow A20 Gate
 ;   CHARACTER_TO_SHOW - character to display
 ;   FORCE_TEXT_MODE - switch to 80x25 mono mode
-;   USB_LOW_EBDA - low-ebda mode
-;   GENPAGE - genpage mode
 ;
 
 %ifdef LEGACY_A20
@@ -47,16 +45,12 @@ IA32_EFER:              equ 0xC0000080
 %endif
 
 %ifdef X64
-  %ifndef GENPAGE
-        section .pagezero start=0
-        times BASE_ADR_16 db 0
+    section .pagezero start=0
+    times BASE_ADR_16 db 0
 
     %ifndef PAGE_TABLE
         %error "PAGE_TABLE is not defined!"
     %endif
-  %endif
-%else
-  %undef GENPAGE
 %endif
 
         bits 16
@@ -152,13 +146,6 @@ _start:
 
 .A20GateEnabled:
 
-%ifdef GENPAGE
-;
-; Create Page Table
-;
-        call    CreatePageTable
-%endif
-
 %ifdef FORCE_TEXT_MODE
 ;
 ; Switch to 80x25 mono text mode (2)
@@ -186,14 +173,6 @@ _start:
 ; DISABLE INTERRUPTS - Entering Protected Mode
 ;
         cli
-
-%ifdef GENPAGE
-;
-; Ready Address of Page Table in EDX
-;
-        movzx   edx, word [PageTableSegment]
-        shl     edx, 4
-%endif
 
 ;
 ; load GDT
@@ -252,12 +231,8 @@ _start:
 ;    22000 ~    90000 - efildr
 ;    90000 ~    96000 - 4G pagetable (will be reload later)
 ;
-%ifdef GENPAGE
-        mov     cr3, edx
-%else
         mov     eax, PAGE_TABLE
         mov     cr3, eax
-%endif
 
 ;
 ; Enable long mode (set EFER.LME=1).
@@ -306,121 +281,6 @@ Empty8042InputBuffer:
         and     al, 2                   ; Check the Input Buffer Full Flag
         loopnz  .Empty8042Loop          ; Loop until the input buffer is empty or a timout of 65536 uS
         ret
-%endif
-
-%ifdef GENPAGE
-;
-; Find place for page table and create it
-;
-
-EFILDR_BASE:            equ 0x2000      ; Offset to start of EFILDR block
-EFILDR_FILE_LENGTH      equ 8           ; Dword in EFILDR_HEADER holding size of block
-EBDA_SEG:               equ 0x40        ; Segment:Offset for finding the EBDA
-EBDA_OFFSET:            equ 0xE
-
-CreatePageTable:
-        mov     edx, [EFILDR_BASE + EFILDR_FILE_LENGTH] ; Size of EFILDR block -> EDX
-        add     edx, EFILDR_BASE + 15                   ; Add base
-        shr     edx, 4                                  ; And round up to multiple of 16
-        mov     ax, ds
-        add     dx, ax                                  ; Add in linear base
-        add     dx, 255
-        xor     dl, dl                                  ; And round up to page size
-; DX holds 16-bit segment of page table
-
-        mov     cx, ds                  ; Save DS
-        mov     ax, EBDA_SEG
-        add     dh, 6                   ; Need 6 pages for table
-        mov     ds, ax
-        mov     ax, [EBDA_OFFSET]       ; EBDA 16-bit segment now in AX
-        mov     ds, cx                  ; Restore DS
-        cmp     ax, dx                  ; Does page table fit under EBDA?
-        jae     .continue               ; Yes, continue
-        jmp     PageTableError          ; No, abort
-.continue:
-        sub     dh, 6                   ; Restore DX to start segment of page table
-        mov     [PageTableSegment], dx  ; Stash it for client
-        push    es
-        push    di                      ; Save ES:DI used to build page table
-
-        mov     es, dx
-        xor     di, di                  ; ES:DI points to start of page table
-        inc     dh                      ; Bump DX to next page
-
-;
-; Set up page table root page (only 1 entry)
-;
-        xor     eax, eax
-        mov     ax, dx
-        inc     dh                      ; Bump DX to next page
-        shl     eax, 4
-        or      al, 3
-        stosd
-        xor     eax, eax
-        mov     cx, 2046
-        rep stosw                       ; Wipe rest of 1st page
-
-;
-; Set up page table 2nd page (depth 1 - 4 entries)
-;
-        mov     cx, 4
-.loop1:
-        mov     ax, dx
-        inc     dh                      ; Bump DX to next page
-        shl     eax, 4
-        or      al, 3
-        stosd
-        xor     eax, eax
-        stosd
-        loop    .loop1
-        mov     cx, 2032                ; Wipe rest of 2nd page
-        rep stosw
-
-;
-; Set up pages 3 - 6 (depth 2 - 2048 entries)
-;
-        xor     edx, edx                ; Start at base of memory
-        mov     dl, 0x83                ; Flags at leaf nodes mark large pages (2MB each)
-        mov     cx, 2048
-.loop2:
-        mov     eax, edx
-        add     edx, 0x200000           ; Bump EDX to next large page
-        stosd
-        xor     eax, eax
-        stosd
-        loop    .loop2
-
-;
-; Done - restore ES:DI and return
-;
-        pop     di
-        pop     es
-        ret
-
-;
-; Get here if not enough space between boot file
-;   and bottom of the EBDA - print error and halt
-;
-PageTableError:
-        add     sp, 2                   ; Clear return address of CreatePageTable
-        mov     bx, 15
-        mov     si, PageErrorMsg
-.loop:
-        lodsb
-        test    al, al
-        jz      .halt
-        mov     ah, 14
-        int     16
-        jmp     .loop
-.halt:
-        hlt
-        jmp .halt
-
-        align 2, db 0
-
-PageTableSegment:       dw 0
-PageErrorMsg:           db 'Unable to Allocate Memory for Page Table', 0
-
 %endif
 
 ;
