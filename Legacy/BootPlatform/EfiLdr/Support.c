@@ -106,14 +106,14 @@ FindSpace (
   MaxNoPages       = 0;
   CurrentMemoryDescriptor = NULL;
   for (Index = 0; Index < *NumberOfMemoryMapEntries; Index++) {
-    if (EfiMemoryDescriptor[Index].PhysicalStart + EFI_PAGES_TO_SIZE (EfiMemoryDescriptor[Index].NumberOfPages) <= BASE_1MB) {
+    if (EfiMemoryDescriptor[Index].PhysicalStart + LShiftU64 (EfiMemoryDescriptor[Index].NumberOfPages, EFI_PAGE_SHIFT) <= BASE_1MB) {
       continue;
     }
 
     if ((EfiMemoryDescriptor[Index].Type == EfiConventionalMemory) && 
         (EfiMemoryDescriptor[Index].NumberOfPages >= NoPages)) {
       if (EfiMemoryDescriptor[Index].PhysicalStart > MaxPhysicalStart) {
-        if (EfiMemoryDescriptor[Index].PhysicalStart + EFI_PAGES_TO_SIZE (EfiMemoryDescriptor[Index].NumberOfPages) <= BASE_4GB) {
+        if (EfiMemoryDescriptor[Index].PhysicalStart + LShiftU64 (EfiMemoryDescriptor[Index].NumberOfPages, EFI_PAGE_SHIFT) <= BASE_4GB) {
           MaxPhysicalStart = EfiMemoryDescriptor[Index].PhysicalStart;
           MaxNoPages       = EfiMemoryDescriptor[Index].NumberOfPages;
           CurrentMemoryDescriptor = &EfiMemoryDescriptor[Index];
@@ -139,7 +139,7 @@ FindSpace (
   if (MaxNoPages != NoPages) {
     CurrentMemoryDescriptor->NumberOfPages = MaxNoPages - NoPages;
     EfiMemoryDescriptor[*NumberOfMemoryMapEntries].Type          = Type;
-    EfiMemoryDescriptor[*NumberOfMemoryMapEntries].PhysicalStart = MaxPhysicalStart + EFI_PAGES_TO_SIZE (MaxNoPages - NoPages);
+    EfiMemoryDescriptor[*NumberOfMemoryMapEntries].PhysicalStart = MaxPhysicalStart + LShiftU64 (MaxNoPages - NoPages, EFI_PAGE_SHIFT);
     EfiMemoryDescriptor[*NumberOfMemoryMapEntries].NumberOfPages = NoPages;
     EfiMemoryDescriptor[*NumberOfMemoryMapEntries].VirtualStart  = 0;
     EfiMemoryDescriptor[*NumberOfMemoryMapEntries].Attribute     = Attribute;
@@ -149,7 +149,7 @@ FindSpace (
     CurrentMemoryDescriptor->Attribute = Attribute;
   }
 
-  return (UINTN)(MaxPhysicalStart + EFI_PAGES_TO_SIZE (MaxNoPages - NoPages));
+  return (UINTN)(MaxPhysicalStart + LShiftU64 (MaxNoPages - NoPages, EFI_PAGE_SHIFT));
 }
 
 VOID
@@ -261,7 +261,7 @@ GenMemoryMap (
       EfiMemoryDescriptor,
       Type,
       (EFI_PHYSICAL_ADDRESS) BaseAddress,
-      EFI_SIZE_TO_PAGES (Length),
+      RShiftU64 (Length, EFI_PAGE_SHIFT),
       Attr
       );
   }
@@ -276,7 +276,7 @@ GenMemoryMap (
     EfiMemoryDescriptor,
     EfiReservedMemoryType,
     (EFI_PHYSICAL_ADDRESS)EBDAaddr,
-    EFI_SIZE_TO_PAGES (EBDAsize + EFI_PAGE_MASK),
+    RShiftU64 (EBDAsize + EFI_PAGE_MASK, EFI_PAGE_SHIFT),
     EFI_MEMORY_UC
     );
 
