@@ -168,15 +168,9 @@ AIKSourceInstall (
 
   DEBUG ((DEBUG_INFO, "OCII: gST->ConIn %p vs found %p\n", gST->ConIn, Source->TextInput));
 
-  //
-  // We additionally reset the protocols as our buffers are empty, and we do not want old data.
-  //
   if (Source->AmiKeycode) {
-    Source->AmiKeycode->Reset (Source->AmiKeycode, FALSE);
-    Source->AmiReset                      = Source->AmiKeycode->Reset;
     Source->AmiReadEfikey                 = Source->AmiKeycode->ReadEfikey;
     Source->AmiWait                       = Source->AmiKeycode->WaitForKeyEx;
-    Source->AmiKeycode->Reset             = AIKShimAmiKeycodeReset;
     Source->AmiKeycode->ReadEfikey        = AIKShimAmiKeycodeReadEfikey;
     Status = gBS->CreateEvent (
       EVT_NOTIFY_WAIT, TPL_NOTIFY, AIKShimWaitForKeyHandler,
@@ -190,11 +184,8 @@ AIKSourceInstall (
   }
 
   if (Source->TextInput) {
-    Source->TextInput->Reset (Source->TextInput, FALSE);
-    Source->TextReset                     = Source->TextInput->Reset;
     Source->TextReadKeyStroke             = Source->TextInput->ReadKeyStroke;
     Source->TextWait                      = Source->TextInput->WaitForKey;
-    Source->TextInput->Reset              = AIKShimTextInputReset;
     Source->TextInput->ReadKeyStroke      = AIKShimTextInputReadKeyStroke;
     Status = gBS->CreateEvent (
       EVT_NOTIFY_WAIT, TPL_NOTIFY, AIKShimWaitForKeyHandler,
@@ -208,11 +199,8 @@ AIKSourceInstall (
   }
 
   if (Source->TextInputEx) {
-    Source->TextInputEx->Reset (Source->TextInputEx, FALSE);
-    Source->TextResetEx                   = Source->TextInputEx->Reset;
     Source->TextWaitEx                    = Source->TextInputEx->WaitForKeyEx;
     Source->TextReadKeyStrokeEx           = Source->TextInputEx->ReadKeyStrokeEx;
-    Source->TextInputEx->Reset            = AIKShimTextInputResetEx;
     Source->TextInputEx->ReadKeyStrokeEx  = AIKShimTextInputReadKeyStrokeEx;
     Status = gBS->CreateEvent (
       EVT_NOTIFY_WAIT, TPL_NOTIFY, AIKShimWaitForKeyHandler,
@@ -234,40 +222,34 @@ AIKSourceUninstall (
   )
 {
   if (Source->AmiKeycode) {
-    Source->AmiKeycode->Reset             = Source->AmiReset;
     Source->AmiKeycode->ReadEfikey        = Source->AmiReadEfikey;
     if (Source->AmiWait != NULL && Source->AmiWait != Source->AmiKeycode->WaitForKeyEx) {
       gBS->CloseEvent (Source->AmiKeycode->WaitForKeyEx);
       Source->AmiKeycode->WaitForKeyEx = Source->AmiWait;
     }
-    Source->AmiReset       = NULL;
     Source->AmiReadEfikey  = NULL;
     Source->AmiWait        = NULL;
     Source->AmiKeycode     = NULL;
   }
 
   if (Source->TextInput) {
-    Source->TextInput->Reset              = Source->TextReset;
     Source->TextInput->ReadKeyStroke      = Source->TextReadKeyStroke;
     if (Source->TextWait != NULL && Source->TextWait != Source->TextInput->WaitForKey) {
       gBS->CloseEvent (Source->TextInput->WaitForKey);
       Source->TextInput->WaitForKey = Source->TextWait;
     }
     Source->TextInput         = NULL;
-    Source->TextReset         = NULL;
     Source->TextWait          = NULL;
     Source->TextReadKeyStroke = NULL;
   }
 
   if (Source->TextInputEx) {
-    Source->TextInputEx->Reset            = Source->TextResetEx;
     Source->TextInputEx->ReadKeyStrokeEx  = Source->TextReadKeyStrokeEx;
     if (Source->TextWaitEx != NULL && Source->TextWaitEx != Source->TextInputEx->WaitForKeyEx) {
       gBS->CloseEvent (Source->TextInputEx->WaitForKeyEx);
       Source->TextInputEx->WaitForKeyEx = Source->TextWaitEx;
     }
     Source->TextInputEx         = NULL;
-    Source->TextResetEx         = NULL;
     Source->TextWaitEx          = NULL;
     Source->TextReadKeyStrokeEx = NULL;
   }

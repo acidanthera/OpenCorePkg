@@ -29,8 +29,8 @@ typedef struct {
 
   //
   // Solved input protocol instances from ConSplitHandler
-  // We override their ReadKey and Reset handlers and implement
-  // them ourselves via polled data from one of these protocols.
+  // We override their ReadKey handlers and implement them
+  // ourselves via polled data from one of these protocols.
   // Polled proto is prioritised as present: AMI, EX, Legacy.
   //
   AMI_EFIKEYCODE_PROTOCOL            *AmiKeycode;
@@ -40,13 +40,10 @@ typedef struct {
   //
   // Original implementations of the protocols.
   //
-  AMI_RESET_EX                       AmiReset;
   AMI_READ_EFI_KEY                   AmiReadEfikey;
   EFI_EVENT                          AmiWait;
-  EFI_INPUT_RESET                    TextReset;
   EFI_EVENT                          TextWait;
   EFI_INPUT_READ_KEY                 TextReadKeyStroke;
-  EFI_INPUT_RESET_EX                 TextResetEx;
   EFI_INPUT_READ_KEY_EX              TextReadKeyStrokeEx;
   EFI_EVENT                          TextWaitEx;
 } AIK_SOURCE;
