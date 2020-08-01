@@ -14,6 +14,7 @@
 #define OC_APPLE_SECURE_BOOT_LIB_H
 
 #include <Protocol/AppleSecureBoot.h>
+#include <Protocol/AppleImg4Verification.h>
 
 /**
   Install and initialise the Apple Secure Boot protocol.

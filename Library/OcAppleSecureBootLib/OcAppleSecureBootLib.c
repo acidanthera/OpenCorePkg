@@ -514,7 +514,7 @@ InternalVerifyImg4Worker (
   ASSERT (ImageBuffer != NULL);
   ASSERT (ImageSize != 0);
   ASSERT (ManifestBuffer != NULL);
-  ASSERT (ManifestSize == 0);
+  ASSERT (ManifestSize > 0);
 
   if (Img4Verify == NULL) {
     Status = gBS->LocateProtocol (
@@ -955,18 +955,6 @@ AppleSbVerifyWindows (
   return Status;
 }
 
-/**
-  Install and initialise the Apple Secure Boot protocol.
-
-  @param[in] Reinstall          Replace any installed protocol.
-  @param[in] SbPolicy           Apple Secure Boot Policy to install.
-  @param[in] SbWinPolicy        Apple Secure Boot Windows Policy to install.
-  @param[in] SbWinPolicyValid   Whether SbWinPolicy should be installed.
-
-  @returns Installed or located protocol.
-  @retval NULL  There was an error locating or installing the protocol.
-
-**/
 APPLE_SECURE_BOOT_PROTOCOL *
 OcAppleSecureBootInstallProtocol (
   IN BOOLEAN  Reinstall,
