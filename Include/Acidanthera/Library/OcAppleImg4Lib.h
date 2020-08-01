@@ -14,6 +14,19 @@
 #ifndef OC_APPLE_IMG4_LIB_H
 #define OC_APPLE_IMG4_LIB_H
 
+#include <Library/OcCryptoLib.h>
+#include <Protocol/AppleImg4Verification.h>
+
+/**
+  Chooses the default model (most recent broadly supported).
+**/
+#define OC_SB_MODEL_DEFAULT "Default"
+
+/**
+  No secure boot mode special value.
+**/
+#define OC_SB_MODEL_DISABLED "Disabled"
+
 /**
   Verify the signature of ImageBuffer against Type of its IMG4 Manifest.
 
@@ -35,7 +48,7 @@
 **/
 EFI_STATUS
 EFIAPI
-AppleImg4Verify (
+OcAppleImg4Verify (
   IN  APPLE_IMG4_VERIFICATION_PROTOCOL  *This,
   IN  UINT32                            ObjType,
   IN  CONST VOID                        *ImageBuffer,
@@ -45,6 +58,65 @@ AppleImg4Verify (
   IN  UINTN                             ManifestSize,
   OUT UINT8                             **HashDigest OPTIONAL,
   OUT UINTN                             *DigestSize OPTIONAL
+  );
+
+/**
+  Register digest override with SHA-384 hash. This allows to replace
+  one image with another.
+
+  @param[in] OriginalDigest   Original SHA-384 digest.
+  @param[in] Image            Pointer to new image.
+  @param[in] ImageSize        Image size.
+**/
+VOID
+OcAppleImg4RegisterOverride (
+  IN CONST UINT8  *OriginalDigest,
+  IN CONST UINT8  *Image,
+  IN UINT32       ImageSize
+  );
+
+/**
+  Obtain hardware model for secure booting from the model request.
+
+  @param[in]  ModelRequest  Raw model or configuration strings like
+                            Latest or Disabled.
+
+  @retval Model in lower case on success.
+  @retval NULL  on failure
+**/
+CONST CHAR8 *
+OcAppleImg4GetHardwareModel (
+  IN CONST CHAR8    *ModelRequest
+  );
+
+/**
+  Bootstrap NVRAM and library values for secure booting.
+
+  @param[in] Model          Secure boot model (without ap suffix in lower-case).
+  @param[in] Ecid           Secure boot ECID identifier for this model, optional.
+
+  @returns Installed or located protocol.
+  @retval NULL  There was an error locating or installing the protocol.
+
+**/
+EFI_STATUS
+OcAppleImg4BootstrapValues (
+  IN CONST CHAR8   *Model,
+  IN UINT64        Ecid  OPTIONAL
+  );
+
+/**
+  Install and initialise the Apple IMG4 verification protocol.
+
+  @param[in] Reinstall          Replace any installed protocol.
+
+  @returns Installed or located protocol.
+  @retval NULL  There was an error locating or installing the protocol.
+
+**/
+APPLE_IMG4_VERIFICATION_PROTOCOL *
+OcAppleImg4VerificationInstallProtocol (
+  IN BOOLEAN  Reinstall
   );
 
 #endif // OC_APPLE_IMG4_LIB_H

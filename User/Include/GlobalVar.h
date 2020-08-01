@@ -21,6 +21,7 @@ extern EFI_GUID gAppleBlessedSystemFileInfoGuid;
 extern EFI_GUID gAppleBlessedSystemFolderInfoGuid;
 extern EFI_GUID gAppleBootPolicyProtocolGuid;
 extern EFI_GUID gAppleVendorVariableGuid;
+extern EFI_GUID gAppleImg4VerificationProtocolGuid;
 
 extern const CHAR8 *gEfiCallerBaseName;
 extern EFI_GUID gEfiGraphicsOutputProtocolGuid;

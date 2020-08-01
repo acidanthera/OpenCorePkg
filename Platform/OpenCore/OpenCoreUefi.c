@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <OpenCore.h>
 
+#include <Guid/AppleVariable.h>
 #include <Guid/OcVariable.h>
 #include <Guid/GlobalVariable.h>
 
@@ -28,7 +29,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcInputLib.h>
 #include <Library/OcApfsLib.h>
+#include <Library/OcAppleImg4Lib.h>
 #include <Library/OcAppleKeyMapLib.h>
+#include <Library/OcAppleSecureBootLib.h>
 #include <Library/OcAppleUserInterfaceThemeLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcCpuLib.h>
@@ -356,6 +359,76 @@ OcReinstallProtocols (
 }
 
 VOID
+OcLoadAppleSecureBoot (
+  IN OC_GLOBAL_CONFIG  *Config
+  )
+{
+  EFI_STATUS                  Status;
+  APPLE_SECURE_BOOT_PROTOCOL  *SecureBoot;
+  CONST CHAR8                 *SecureBootModel;
+  CONST CHAR8                 *RealSecureBootModel;
+  UINT8                       SecureBootPolicy;
+
+  SecureBootModel = OC_BLOB_GET (&Config->Misc.Security.SecureBootModel);
+
+  if (AsciiStrCmp (SecureBootModel, OC_SB_MODEL_DISABLED) == 0) {
+    SecureBootPolicy = AppleImg4SbModeDisabled;
+  } else if (Config->Misc.Security.ApECID != 0) {
+    SecureBootPolicy = AppleImg4SbModeFull;
+  } else {
+    SecureBootPolicy = AppleImg4SbModeMedium;
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OC: Loading Apple Secure Boot with %a (level %u)\n",
+    SecureBootModel,
+    SecureBootPolicy
+    ));
+
+  if (SecureBootPolicy != AppleImg4SbModeDisabled) {
+    RealSecureBootModel = OcAppleImg4GetHardwareModel (SecureBootModel);
+    if (RealSecureBootModel == NULL) {
+      DEBUG ((DEBUG_ERROR, "OC: Failed to find SB model %a\n", SecureBootModel));
+      return;
+    }
+
+    Status = OcAppleImg4BootstrapValues (RealSecureBootModel, Config->Misc.Security.ApECID);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OC: Failed to bootstrap IMG4 values - %r\n", Status));
+      return;
+    }
+
+    Status = OcAppleSecureBootBootstrapValues (RealSecureBootModel);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OC: Failed to bootstrap SB values - %r\n", Status));
+      return;
+    }
+  }
+
+  //
+  // Provide protocols even in disabled state.
+  //
+  if (OcAppleImg4VerificationInstallProtocol (Config->Uefi.ProtocolOverrides.AppleImg4Verification) == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install im4m protocol\n"));
+    return;
+  }
+
+  //
+  // TODO: Do we need to make Windows policy configurable?
+  //
+  SecureBoot = OcAppleSecureBootInstallProtocol (
+    Config->Uefi.ProtocolOverrides.AppleSecureBoot,
+    SecureBootPolicy,
+    0,
+    FALSE
+    );
+  if (SecureBoot == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install secure boot protocol\n"));
+  }
+}
+
+VOID
 OcLoadBooterUefiSupport (
   IN OC_GLOBAL_CONFIG  *Config
   )
@@ -430,6 +503,8 @@ OcLoadUefiSupport (
   EFI_PHYSICAL_ADDRESS  ReservedAddress;
 
   OcReinstallProtocols (Config);
+
+  OcLoadAppleSecureBoot (Config);
 
   OcLoadUefiInputSupport (Config);
 

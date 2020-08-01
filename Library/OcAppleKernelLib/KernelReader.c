@@ -22,6 +22,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleKernelLib.h>
 #include <Library/OcCompressionLib.h>
+#include <Library/OcCryptoLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcGuardLib.h>
 
@@ -29,6 +30,10 @@
 // Pick a reasonable maximum to fit.
 //
 #define KERNEL_HEADER_SIZE (EFI_PAGE_SIZE*2)
+
+STATIC SHA384_CONTEXT mKernelDigestContext;
+STATIC UINT32         mKernelDigestPosition;
+STATIC BOOLEAN        mNeedKernelDigest;
 
 STATIC
 EFI_STATUS
@@ -59,6 +64,70 @@ ReplaceBuffer (
   *AllocatedSize = TargetSize;
 
   return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+KernelGetFileData (
+  IN  EFI_FILE_PROTOCOL  *File,
+  IN  UINT32             Position,
+  IN  UINT32             Size,
+  OUT UINT8              *Buffer
+  )
+{
+  EFI_STATUS  Status;
+  UINT32      RemainingSize;
+  UINT32      ChunkSize;
+
+  //
+  // Calculate hash for the prefix.
+  //
+  if (mNeedKernelDigest && Position > mKernelDigestPosition) {
+    RemainingSize = Position - mKernelDigestPosition;
+
+    while (RemainingSize > 0) {
+      ChunkSize = MIN (RemainingSize, Size);
+      Status = GetFileData (
+        File,
+        mKernelDigestPosition,
+        ChunkSize,
+        Buffer
+        );
+      if (EFI_ERROR (Status)) {
+        return Status;
+      }
+
+      Sha384Update (&mKernelDigestContext, Buffer, ChunkSize);
+      mKernelDigestPosition += ChunkSize;
+      RemainingSize -= ChunkSize;
+    }
+  }
+
+  Status = GetFileData (
+    File,
+    Position,
+    Size,
+    Buffer
+    );
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  //
+  // Calculate hash for the suffix.
+  //
+  if (mNeedKernelDigest && Position >= mKernelDigestPosition) {
+    RemainingSize = Position + Size - mKernelDigestPosition;
+    Sha384Update (
+      &mKernelDigestContext,
+      Buffer + (Position - mKernelDigestPosition),
+      RemainingSize
+      );
+    mKernelDigestPosition += RemainingSize;
+  }
+
+  return Status;
 }
 
 STATIC
@@ -171,7 +240,7 @@ ParseCompressedHeader (
     return KernelSize;
   }
 
-  Status = GetFileData (File, Offset + sizeof (MACH_COMP_HEADER), CompressedSize, CompressedBuffer);
+  Status = KernelGetFileData (File, Offset + sizeof (MACH_COMP_HEADER), CompressedSize, CompressedBuffer);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCAK: Comp kernel (%u bytes) cannot be read at %08X\n", CompressedSize, Offset));
     FreePool (CompressedBuffer);
@@ -214,7 +283,7 @@ ReadAppleKernelImage (
   BOOLEAN           ForbidFat;
   BOOLEAN           Compressed;
 
-  Status = GetFileData (File, Offset, KERNEL_HEADER_SIZE, *Buffer);
+  Status = KernelGetFileData (File, Offset, KERNEL_HEADER_SIZE, *Buffer);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -266,7 +335,7 @@ ReadAppleKernelImage (
           return Status;
         }
 
-        Status = GetFileData (File, Offset, *KernelSize, *Buffer);
+        Status = KernelGetFileData (File, Offset, *KernelSize, *Buffer);
         if (EFI_ERROR (Status)) {
           DEBUG ((DEBUG_INFO, "OCAK: Kernel (%u bytes) cannot be read at %08X\n", *KernelSize, Offset));
         }
@@ -321,10 +390,13 @@ ReadAppleKernel (
      OUT UINT8              **Kernel,
      OUT UINT32             *KernelSize,
      OUT UINT32             *AllocatedSize,
-  IN     UINT32             ReservedSize
+  IN     UINT32             ReservedSize,
+     OUT UINT8              *Digest  OPTIONAL
   )
 {
   EFI_STATUS  Status;
+  UINT32      FullSize;
+  UINT8       *Remainder;
 
   *KernelSize    = 0;
   *AllocatedSize = KERNEL_HEADER_SIZE;
@@ -332,6 +404,12 @@ ReadAppleKernel (
 
   if (*Kernel == NULL) {
     return EFI_INVALID_PARAMETER;
+  }
+
+  mNeedKernelDigest = Digest != NULL;
+  if (mNeedKernelDigest) {
+    mKernelDigestPosition = 0;
+    Sha384Init (&mKernelDigestContext);
   }
 
   Status = ReadAppleKernelImage (
@@ -345,7 +423,41 @@ ReadAppleKernel (
 
   if (EFI_ERROR (Status)) {
     FreePool (*Kernel);
+    mNeedKernelDigest = FALSE;
+    return Status;
   }
 
-  return Status;
+  if (mNeedKernelDigest) {
+    Status = GetFileSize (File, &FullSize);
+    if (EFI_ERROR (Status)) {
+      mNeedKernelDigest = FALSE;
+      return Status;
+    }
+
+    if (FullSize > mKernelDigestPosition) {
+      Remainder = AllocatePool (FullSize - mKernelDigestPosition);
+      if (Remainder == NULL) {
+        mNeedKernelDigest = FALSE;
+        return EFI_OUT_OF_RESOURCES;
+      }
+
+      Status = KernelGetFileData (
+        File,
+        mKernelDigestPosition,
+        FullSize - mKernelDigestPosition,
+        Remainder
+        );
+      mNeedKernelDigest = FALSE;
+      FreePool (Remainder);
+      if (EFI_ERROR (Status)) {
+        return Status;
+      }
+
+      ASSERT (FullSize == mKernelDigestPosition);
+    }
+
+    Sha384Final (&mKernelDigestContext, Digest);
+  }
+
+  return EFI_SUCCESS;
 }

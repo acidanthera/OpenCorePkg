@@ -34,7 +34,7 @@ void InternalDebugEnvInfo (
     "ProductionStatus: %x\n"
     "SecurityMode: %x\n"
     "EffectiveProductionStatus: %x\n"
-    "EffectiveSecurityMode:%x \n"
+    "EffectiveSecurityMode: %x\n"
     "InternalUseOnlyUnit: %x\n"
     "Xugs: %x\n\n",
     (unsigned long long)Env->ecid,
@@ -49,6 +49,65 @@ void InternalDebugEnvInfo (
     Env->internalUseOnlyUnit,
     Env->xugs
     );
+}
+
+int debugManifest (char *manifestName)
+{
+  void *Manifest;
+  uint32_t ManSize;
+  DERImg4ManifestInfo ManInfo;
+
+  Manifest = readFile (manifestName, &ManSize);
+  if (Manifest == NULL) {
+    printf ("\n!!! read error !!!\n");
+    return -1;
+  }
+
+  //
+  // The keys are iterated in the order in which they are defined here in
+  // AppleBds to validate any loaded image.
+  //
+  uint32_t objs[] = {
+    APPLE_SB_OBJ_EFIBOOT,
+    APPLE_SB_OBJ_EFIBOOT_DEBUG,
+    APPLE_SB_OBJ_EFIBOOT_BASE,
+    APPLE_SB_OBJ_MUPD,
+    APPLE_SB_OBJ_HPMU,
+    APPLE_SB_OBJ_THOU,
+    APPLE_SB_OBJ_GPUU,
+    APPLE_SB_OBJ_ETHU,
+    APPLE_SB_OBJ_SDFU,
+    APPLE_SB_OBJ_DTHU,
+    APPLE_SB_OBJ_KERNEL,
+    APPLE_SB_OBJ_KERNEL_DEBUG,
+  };
+
+  uint32_t success = 0;
+
+  for (uint32_t i = 0; i < ARRAY_SIZE(objs); i++) {
+    DERReturn r = DERImg4ParseManifest (
+      &ManInfo,
+      Manifest,
+      ManSize,
+      objs[i]
+      );
+
+    if (r == DR_Success) {
+      printf ("Manifest has %c%c%c%c\n",
+        ((char *)&objs[i])[3], ((char *)&objs[i])[2], ((char *)&objs[i])[1], ((char *)&objs[i])[0]);
+      InternalDebugEnvInfo (&ManInfo.environment);
+      ++success;
+    }
+  }
+
+  free (Manifest);
+
+  if (success == 0) {
+    printf ("Supplied manifest is not valid or has no known objects!\n");
+    return -1;
+  }
+
+  return 0;
 }
 
 int verifyImg4 (char *imageName, char *manifestName, char *type)
@@ -83,6 +142,8 @@ int verifyImg4 (char *imageName, char *manifestName, char *type)
     return -1;
   }
 
+  printf("ManInfo.imageDigestSize %zu\n", ManInfo.imageDigestSize);
+
   INTN CmpResult = SigVerifyShaHashBySize (
                      Image,
                      ImgSize,
@@ -102,9 +163,14 @@ int verifyImg4 (char *imageName, char *manifestName, char *type)
 
 int main (int argc, char *argv[])
 {
-  if (argc < 2 || (argc % 3) != 1) {
+  if (argc < 2 || ((argc % 3) != 1 && argc != 2)) {
     printf ("Img4 ([image path] [manifest path] [object type])*\n");
+    printf ("Img4 [manifest path]\n");
     return -1;
+  }
+
+  if (argc == 2) {
+    return debugManifest(argv[1]);
   }
 
   int r = 0;

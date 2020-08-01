@@ -319,6 +319,8 @@ typedef enum {
   _(BOOLEAN                     , EnablePassword              ,      , FALSE                   , ()) \
   _(UINT8                       , PasswordHash                , [64] , {0}                     , ()) \
   _(OC_DATA                     , PasswordSalt                ,      , OC_EDATA_CONSTR (_, __) , OC_DESTR (OC_DATA)) \
+  _(OC_STRING                   , SecureBootModel             ,      , OC_STRING_CONSTR ("Default", _, __), OC_DESTR (OC_STRING) ) \
+  _(UINT64                      , ApECID                      ,      , 0                       , ()) \
   _(UINT64                      , HaltLevel                   ,      , 0x80000000              , ())
   OC_DECLARE (OC_MISC_SECURITY)
 
@@ -541,8 +543,10 @@ typedef enum {
   _(BOOLEAN                     , AppleEvent                  ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleFramebufferInfo        ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleImageConversion        ,     , FALSE  , ()) \
+  _(BOOLEAN                     , AppleImg4Verification       ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleKeyMap                 ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleRtcRam                 ,     , FALSE  , ()) \
+  _(BOOLEAN                     , AppleSecureBoot             ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleSmcIo                  ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleUserInterfaceTheme     ,     , FALSE  , ()) \
   _(BOOLEAN                     , DataHub                     ,     , FALSE  , ()) \

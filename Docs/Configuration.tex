@@ -2921,6 +2921,21 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   to set the default boot option in boot picker.
 
 \item
+  \texttt{ApECID}\\
+  \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Apple Enclave Identifier.
+
+  Setting this value to any (random) non-zero 64-bit integer will allow using
+  personalised Apple Secure Boot identifiers. This value set and
+  \texttt{SecureBootModel} valid and not \texttt{Disabled} is equivalent to
+  to ahieve \href{https://support.apple.com/en-us/HT208330}{\texttt{Full Security}}
+  of Apple Secure Boot.
+
+  \emph{Note}: You will have to reinstall the operating system or use the recovery
+  after setting this value to non-zero.
+
+\item
   \texttt{AuthRestart}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -3177,6 +3192,50 @@ rm vault.pub
   \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SCSI}
   \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_NVME}
   \end{itemize}
+
+\item
+  \texttt{SecureBootModel}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Default}\\
+  \textbf{Description}: Apple Secure Boot hardware model.
+
+  Defines Apple Secure Boot hardware model and policy. Specifying
+  this value defines which operating systems will be bootable.
+  Operating systems shipped before the specified model was released
+  will not boot. Valid values:
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Default} --- Recent available model, currently set to \texttt{j215}.
+  \item \texttt{Disabled} --- No model, Secure Boot will be disabled.
+  \item \texttt{j137} --- \texttt{iMacPro1,1}
+  \item \texttt{j680} --- \texttt{MacBookPro15,1}
+  \item \texttt{j132} --- \texttt{MacBookPro15,2}
+  \item \texttt{j140k} --- \texttt{MacBookAir8,1}
+  \item \texttt{j140a} --- \texttt{MacBookAir8,2}
+  \item \texttt{j174} --- \texttt{Macmini8,1}
+  \item \texttt{j160} --- \texttt{MacPro7,1}
+  \item \texttt{j780} --- \texttt{MacBookPro15,3}
+  \item \texttt{j213} --- \texttt{MacBookPro15,4}
+  \item \texttt{j152f} --- \texttt{MacBookPro16,1}
+  \item \texttt{j214k} --- \texttt{MacBookPro16,2}
+  \item \texttt{j230k} --- \texttt{MacBookAir9,1}
+  \item \texttt{j223} --- \texttt{MacBookPro16,3}
+  \item \texttt{j215} --- \texttt{MacBookPro16,4}
+  \item \texttt{j185} --- \texttt{iMac20,1 (?)}
+  \item \texttt{j185f} --- \texttt{iMac20,2 (?)}
+  \end{itemize}
+
+  \texttt{PlatformInfo} and \texttt{SecureBootModel} are independent,
+  allowing to enabling Apple Secure Boot with any SMBIOS. Setting
+  \texttt{SecureBootModel} to any valid value but \texttt{Disabled} is equivalent to
+  \href{https://support.apple.com/en-us/HT208330}{\texttt{Medium Security}}
+  of Apple Secure Boot. To achieve \texttt{Full Security} one will need to
+  also specify \texttt{ApECID} value.
+
+  \emph{Note}: \texttt{Default} value will increase with time to support the latest
+  major release operating system. It is not recommended to use \texttt{ApECID}
+  and \texttt{Default} value together.
 
 \end{enumerate}
 
@@ -5319,6 +5378,14 @@ functioning. Feature highlights:
   version.
 
 \item
+  \texttt{AppleImg4Verification}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple IMG4 Verification protocol with a builtin
+  version. This protocol is used to verify \texttt{im4m} manifest files used by
+  Apple Secure Boot.
+
+\item
   \texttt{AppleKeyMap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -5336,6 +5403,13 @@ functioning. Feature highlights:
   I/O attempts to select RTC memory addresses. The list of addresses
   can be specified in \texttt{4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:rtc-blacklist}
   variable as a data array.
+
+\item
+  \texttt{AppleSecureBoot}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple Secure Boot protocol with a builtin
+  version.
 
 \item
   \texttt{AppleSmcIo}\\

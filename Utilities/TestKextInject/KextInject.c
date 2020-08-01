@@ -518,18 +518,21 @@ int wrap_main(int argc, char** argv) {
 
   UINT8 *NewPrelinked;
   UINT32 NewPrelinkedSize;
+  UINT8 Sha384[48];
   EFI_STATUS Status = ReadAppleKernel (
     &nilFilProtocol,
     &NewPrelinked,
     &NewPrelinkedSize,
     &AllocSize,
-    ReservedInfoSize + ReservedExeSize + LinkedExpansion
+    ReservedInfoSize + ReservedExeSize + LinkedExpansion,
+    Sha384
     );
 
   if (!EFI_ERROR (Status)) {
     free(Prelinked);
     Prelinked = NewPrelinked;
     PrelinkedSize = NewPrelinkedSize;
+    printf("Sha384 is %02X%02X%02X%02X\n", Sha384[0], Sha384[1], Sha384[2], Sha384[3]);
   } else {
     printf("Unpack fail\n");
     return -1;
