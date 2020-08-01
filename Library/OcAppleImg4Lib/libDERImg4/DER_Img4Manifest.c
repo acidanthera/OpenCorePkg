@@ -606,11 +606,15 @@ DERImg4FindDecodeProperty (
   DERImg4Property  *Property
   )
 {
+  STATIC CONST DERItemSpec PropertyItemSpecTpl[] = DER_IMG4_PROPERTY_SPEC_INIT;
+
   DERReturn   DerResult;
   DERItem     PropItem;
   uint32_t    CurPropTag;
+  DERItemSpec PropertyItemSpec[ARRAY_SIZE (PropertyItemSpecTpl)];
 
-  DERItemSpec PropertyItemSpec[] = DER_IMG4_PROPERTY_SPEC_INIT;
+  CopyMem (PropertyItemSpec, PropertyItemSpecTpl, sizeof (PropertyItemSpecTpl));
+
   PropertyItemSpec[1].tag = PropValueTag;
 
   assert (PropSetItem != NULL);
