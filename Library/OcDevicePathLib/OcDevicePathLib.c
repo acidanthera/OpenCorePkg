@@ -265,16 +265,11 @@ OcFixAppleBootDevicePathNodeRestoreFree (
   IN OUT APPLE_BOOT_DP_PATCH_CONTEXT     *RestoreContext
   )
 {
-  UINT8 NodeType;
-  UINT8 NodeSubType;
-
   //
   // ATTENTION: This function must be carefully sync'd with changes to
   //            OcFixAppleBootDevicePathNode().
   //
 
-  NodeType    = DevicePathType (DevicePathNode);
-  NodeSubType = DevicePathSubType (DevicePathNode);
   //
   // Free the previously stored original Device Path for expansion patches.
   //
@@ -351,7 +346,9 @@ InternalExpandNewPath (
       continue;
     }
     //
-    // Skip this expansion if the target type does not match.
+    // The suffix is handled implicitly (by OcGetNextLoadOptionDevicePath).
+    // Keep in mind that with this logic our broken node may expand to an
+    // arbitrary number of nodes now. 
     //
     ExpandedNode = (EFI_DEVICE_PATH_PROTOCOL *) (
       (UINTN) ExpandedPath + PrefixSize
@@ -601,6 +598,7 @@ OcFixAppleBootDevicePath (
 {
   INTN                        Result;
   INTN                        NodePatched;
+  UINTN                       DevicePathSize;
 
   APPLE_BOOT_DP_PATCH_CONTEXT FirstNodeRestoreContext;
   APPLE_BOOT_DP_PATCH_CONTEXT *RestoreContextPtr;
@@ -676,6 +674,15 @@ OcFixAppleBootDevicePath (
 
     return -1;
   }
+
+  //
+  // Double-check that *RemainingDevicePath still points into *DevicePath.
+  //
+  DEBUG_CODE_BEGIN ();
+  DevicePathSize = GetDevicePathSize (*DevicePath);
+  ASSERT ((UINTN) *RemainingDevicePath >= (UINTN) *DevicePath);
+  ASSERT ((UINTN) *RemainingDevicePath < ((UINTN) *DevicePath) + DevicePathSize);
+  DEBUG_CODE_END ();
 
   return NodePatched;
 }

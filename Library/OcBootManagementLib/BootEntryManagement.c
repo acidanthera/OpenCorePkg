@@ -1025,12 +1025,17 @@ AddBootEntryFromBootOption (
 
   //
   // Fixup device path if necessary.
+  // WARN: DevicePath must be allocated from pool as it may be reallocated.
   //
   NumPatchedNodes = OcFixAppleBootDevicePath (
     &DevicePath,
     &RemainingDevicePath
     );
   if (NumPatchedNodes > 0) {
+    //
+    // DevicePath size may be different on successful update.
+    //
+    DevicePathSize = GetDevicePathSize (DevicePath);
     DebugPrintDevicePath (DEBUG_INFO, "OCB: Fixed DP", DevicePath);
   }
 
@@ -1119,6 +1124,7 @@ AddBootEntryFromBootOption (
 
       //
       // If short-form expansion failed, try to fix the short-form and re-try.
+      // WARN: DevicePath must be allocated from pool here.
       //
       NumPatchedNodes = OcFixAppleBootDevicePathNode (
         &DevicePath,

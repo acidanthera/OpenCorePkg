@@ -81,7 +81,9 @@ OcActivateHibernateWake (
         BootImagePath
         );
 
-      RemainingPath   = BootImagePath;
+      //
+      // WARN: BootImagePath must be allocated from pool as it may be reallocated.
+      //
       NumPatchedNodes = OcFixAppleBootDevicePath (
         &BootImagePath,
         &RemainingPath
@@ -92,6 +94,11 @@ OcActivateHibernateWake (
           "OCB: boot-image post-fix",
           BootImagePath
           );
+
+        //
+        // Updated DevicePath may have different size.
+        //
+        Size = GetDevicePathSize (BootImagePath);
 
         Status = gRT->SetVariable (
                         L"boot-image",

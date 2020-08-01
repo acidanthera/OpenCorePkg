@@ -208,7 +208,7 @@ OcGetNumDevicePathInstances (
 /// Used to store information on how to restore a node patched by
 /// OcFixAppleBootDevicePathNode().
 ///
-typedef union {
+typedef struct {
   //
   // Stores the old device path prior to expansion.
   //
@@ -318,6 +318,11 @@ OcFixAppleBootDevicePathNodeRestoreFree (
                                       reallocated pool memory buffer.
   @param[in,out] RemainingDevicePath  A pointer the remaining part of the device
                                       path is returned into.
+
+  Note, RemainingDevicePath will always point into DevicePath after this function
+  completes. RemainingDevicePath being equal to DevicePath means that we failed to
+  advance, and this device path is likely a short form device path or something
+  completely not valid.
 
   @retval -1  *DevicePath could not be fixed.
   @retval 0   *DevicePath was not modified and may be valid.
