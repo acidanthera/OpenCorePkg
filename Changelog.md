@@ -35,6 +35,7 @@ OpenCore Changelog
 - Fixed OpenDuetPkg booting on Intel G33 with SATA controller in RAID mode
 - `PlatformInfo` `Automatic` for all models
 - Fixed 32-bit OpenDuetPkg booting on machines with over 4 GBs of RAM
+- Fixed delays with OpenDuetPkg booting with certain SATA controllers in IDE mode
 
 #### v0.5.9
 - Added full HiDPI support in OpenCanopy
