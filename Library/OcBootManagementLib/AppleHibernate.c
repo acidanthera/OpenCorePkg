@@ -82,7 +82,10 @@ OcActivateHibernateWake (
         );
 
       RemainingPath   = BootImagePath;
-      NumPatchedNodes = OcFixAppleBootDevicePath (&RemainingPath);
+      NumPatchedNodes = OcFixAppleBootDevicePath (
+        &BootImagePath,
+        &RemainingPath
+        );
       if (NumPatchedNodes > 0) {
         DebugPrintDevicePath (
           DEBUG_INFO,

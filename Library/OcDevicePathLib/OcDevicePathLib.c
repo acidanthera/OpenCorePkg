@@ -189,7 +189,8 @@ TrailedBooterDevicePath (
 
 VOID
 OcFixAppleBootDevicePathNodeRestore (
-  IN OUT EFI_DEVICE_PATH_PROTOCOL           *DevicePathNode,
+  IN OUT EFI_DEVICE_PATH_PROTOCOL           **DevicePath,
+  IN OUT EFI_DEVICE_PATH_PROTOCOL           **DevicePathNode,
   IN     CONST APPLE_BOOT_DP_PATCH_CONTEXT  *RestoreContext
   )
 {
@@ -202,15 +203,28 @@ OcFixAppleBootDevicePathNodeRestore (
   //            OcFixAppleBootDevicePathNode().
   //
 
-  Node.DevPath = DevicePathNode;
+  Node.DevPath = *DevicePathNode;
 
   NodeType    = DevicePathType (Node.DevPath);
   NodeSubType = DevicePathSubType (Node.DevPath);
 
+  if (RestoreContext->OldPath != NULL) {
+    //
+    // Restore the previously stored Device Path prior to patching.
+    //
+    *DevicePathNode = (EFI_DEVICE_PATH_PROTOCOL *) (
+      (UINTN) RestoreContext->OldPath +
+        ((UINTN) *DevicePathNode - (UINTN) *DevicePath)
+      );
+    FreePool (*DevicePath);
+    *DevicePath = RestoreContext->OldPath;
+    return;
+  }
+
   if (NodeType == MESSAGING_DEVICE_PATH) {
     switch (NodeSubType) {
       case MSG_SATA_DP:
-        Node.Sata->PortMultiplierPortNumber = RestoreContext->Sata.PortMultiplierPortNumber;
+        Node.Sata->PortMultiplierPortNumber = RestoreContext->Types.Sata.PortMultiplierPortNumber;
         break;
 
       //
@@ -221,7 +235,7 @@ OcFixAppleBootDevicePathNodeRestore (
       //
       case MSG_NVME_NAMESPACE_DP:
       case 0x22:
-        Node.NvmeNamespace->Header.SubType = RestoreContext->SasExNvme.SubType;
+        Node.NvmeNamespace->Header.SubType = RestoreContext->Types.SasExNvme.SubType;
         break;
 
       default:
@@ -230,13 +244,13 @@ OcFixAppleBootDevicePathNodeRestore (
   } else if (NodeType == ACPI_DEVICE_PATH) {
     switch (NodeSubType) {
       case ACPI_DP:
-        Node.Acpi->HID = RestoreContext->Acpi.HID;
-        Node.Acpi->UID = RestoreContext->Acpi.UID;
+        Node.Acpi->HID = RestoreContext->Types.Acpi.HID;
+        Node.Acpi->UID = RestoreContext->Types.Acpi.UID;
         break;
 
       case ACPI_EXTENDED_DP:
-        Node.ExtendedAcpi->HID = RestoreContext->ExtendedAcpi.HID;
-        Node.ExtendedAcpi->CID = RestoreContext->ExtendedAcpi.CID;
+        Node.ExtendedAcpi->HID = RestoreContext->Types.ExtendedAcpi.HID;
+        Node.ExtendedAcpi->CID = RestoreContext->Types.ExtendedAcpi.CID;
         break;
 
       default:
@@ -245,16 +259,127 @@ OcFixAppleBootDevicePathNodeRestore (
   }
 }
 
+VOID
+OcFixAppleBootDevicePathNodeRestoreFree (
+  IN     CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePathNode,
+  IN OUT APPLE_BOOT_DP_PATCH_CONTEXT     *RestoreContext
+  )
+{
+  UINT8 NodeType;
+  UINT8 NodeSubType;
+
+  //
+  // ATTENTION: This function must be carefully sync'd with changes to
+  //            OcFixAppleBootDevicePathNode().
+  //
+
+  NodeType    = DevicePathType (DevicePathNode);
+  NodeSubType = DevicePathSubType (DevicePathNode);
+  //
+  // Free the previously stored original Device Path for expansion patches.
+  //
+  if (RestoreContext->OldPath != NULL) {
+    FreePool (RestoreContext->OldPath);
+  }
+}
+
+/*
+  Constructs a new device path for an unrecognised device path with a hard drive
+  node.
+
+  @param[in,out] DevicePath      A pointer to the device path to fix the node
+                                 of. It must be a pool memory buffer.
+                                 On success, may be updated with a reallocated
+                                 pool memory buffer.
+  @param[in,out] DevicePathNode  A pointer to the device path node to fix. It
+                                 must be a node of *DevicePath.
+                                 On success, may be updated with the
+                                 corresponding node of *DevicePath.
+  @param[out]    RestoreContext  A pointer to a context that can be used to
+                                 restore DevicePathNode's original content in
+                                 the case of failure.
+                                 On success, data may need to be freed.
+
+  @retval -1  DevicePathNode could not be fixed.
+  @retval 1   DevicePathNode and is valid.
+
+*/
+STATIC
+INTN
+InternalExpandNewPath (
+  IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath,
+  IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePathNode
+  )
+{
+  EFI_DEVICE_PATH_PROTOCOL *HdNode;
+  UINTN                    PrefixSize;
+  EFI_DEVICE_PATH_PROTOCOL *ExpandedPath;
+  EFI_DEVICE_PATH_PROTOCOL *ExpandedNode;
+  //
+  // Find HD node to locate a valid Device Path of. We require the prefix
+  // till the offending node (ATAPI in this case, which should be
+  // preceeded by a PCI chain) as well as the suffix match (though latter
+  // may be expanded). The ATAPI should be an arbitrary SATA node.
+  //
+  HdNode = FindDevicePathNodeWithType (
+    *DevicePath,
+    MEDIA_DEVICE_PATH,
+    MEDIA_HARDDRIVE_DP
+    );
+  if (HdNode == NULL) {
+    //
+    // Expansion makes little sense when we don't have a HD node.
+    //
+    return -1;
+  }
+
+  PrefixSize = (UINTN) DevicePathNode - (UINTN) *DevicePath;
+  //
+  // Expand the Device Path based of the HD node and sanity-check it
+  // likely describes the intended path.
+  //
+  for (
+    ExpandedPath = OcGetNextLoadOptionDevicePath (HdNode, NULL);
+    ExpandedPath != NULL;
+    ExpandedPath = OcGetNextLoadOptionDevicePath (HdNode, ExpandedPath)
+  ) {
+    //
+    // Skip this expansion if the prefix does not match.
+    //
+    if (GetDevicePathSize (ExpandedPath) < PrefixSize
+     || CompareMem (ExpandedPath, *DevicePath, PrefixSize) != 0) {
+      continue;
+    }
+    //
+    // Skip this expansion if the target type does not match.
+    //
+    ExpandedNode = (EFI_DEVICE_PATH_PROTOCOL *) (
+      (UINTN) ExpandedPath + PrefixSize
+      );
+
+    *DevicePath     = ExpandedPath;
+    *DevicePathNode = ExpandedNode;
+    return 1;
+  }
+  //
+  // No adequate expansion could be found.
+  //
+  return -1;
+}
+
 INTN
 OcFixAppleBootDevicePathNode (
-  IN OUT EFI_DEVICE_PATH_PROTOCOL     *DevicePathNode,
+  IN OUT EFI_DEVICE_PATH_PROTOCOL     **DevicePath,
+  IN OUT EFI_DEVICE_PATH_PROTOCOL     **DevicePathNode,
   OUT    APPLE_BOOT_DP_PATCH_CONTEXT  *RestoreContext OPTIONAL
   )
 {
-  EFI_DEV_PATH_PTR Node;
-  UINT8            NodeType;
-  UINT8            NodeSubType;
-  UINTN            NodeSize;
+  INTN                     Result;
+  EFI_DEVICE_PATH_PROTOCOL *OldPath;
+  EFI_DEV_PATH_PTR         Node;
+  UINT8                    NodeType;
+  UINT8                    NodeSubType;
+  UINTN                    NodeSize;
 
   ASSERT (DevicePathNode != NULL);
 
@@ -263,7 +388,11 @@ OcFixAppleBootDevicePathNode (
   //            OcFixAppleBootDevicePathNodeRestore().
   //
 
-  Node.DevPath = DevicePathNode;
+  if (RestoreContext != NULL) {
+    RestoreContext->OldPath = NULL;
+  }
+
+  Node.DevPath = *DevicePathNode;
 
   NodeType    = DevicePathType (Node.DevPath);
   NodeSubType = DevicePathSubType (Node.DevPath);
@@ -271,11 +400,10 @@ OcFixAppleBootDevicePathNode (
   if (NodeType == MESSAGING_DEVICE_PATH) {
     switch (NodeSubType) {
       case MSG_SATA_DP:
-        if (RestoreContext != NULL) {
-          RestoreContext->Sata.PortMultiplierPortNumber = Node.Sata->PortMultiplierPortNumber;
-        }
-
         if (Node.Sata->PortMultiplierPortNumber != 0xFFFF) {
+          if (RestoreContext != NULL) {
+            RestoreContext->Types.Sata.PortMultiplierPortNumber = Node.Sata->PortMultiplierPortNumber;
+          }
           //
           // Must be set to 0xFFFF if the device is directly connected to the
           // HBA. This rule has been established by UEFI 2.5 via an Erratum
@@ -286,8 +414,37 @@ OcFixAppleBootDevicePathNode (
           Node.Sata->PortMultiplierPortNumber = 0xFFFF;
           return 1;
         }
+        //
+        // Fall-through to the expansion code.
+        // REF: https://github.com/acidanthera/bugtracker/issues/991#issue-643248184
+        //
 
-        return -1;
+      case MSG_ATAPI_DP:
+        //
+        // Some vendors report incorrect info via ACPI on storage devices or
+        // use proprietary node types over standardised ones. Find a new, valid
+        // DevicePath that matches in prefix and suffix to the given one but
+        // ignore the data of the node that matches the malformed one.
+        //
+        // REF: https://github.com/acidanthera/bugtracker/issues/664#issuecomment-663873846
+        //
+        OldPath = *DevicePath;
+        Result  = InternalExpandNewPath (
+          DevicePath,
+          DevicePathNode
+          );
+        if (Result > 0) {
+          //
+          // On success, handle restoring and resources.
+          //
+          if (RestoreContext != NULL) {
+            RestoreContext->OldPath = OldPath;
+          } else {
+            FreePool (OldPath);
+          }
+        }
+
+        return Result;
 
       case MSG_SASEX_DP:
         //
@@ -298,7 +455,7 @@ OcFixAppleBootDevicePathNode (
         //            appendNVMeDevicePathNodeForIOMedia
         //
         if (RestoreContext != NULL) {
-          RestoreContext->SasExNvme.SubType = Node.DevPath->SubType;
+          RestoreContext->Types.SasExNvme.SubType = Node.DevPath->SubType;
         }
 
         STATIC_ASSERT (
@@ -322,7 +479,7 @@ OcFixAppleBootDevicePathNode (
         // Reference: https://forums.macrumors.com/posts/28169441.
         //
         if (RestoreContext != NULL) {
-          RestoreContext->SasExNvme.SubType = Node.DevPath->SubType;
+          RestoreContext->Types.SasExNvme.SubType = Node.DevPath->SubType;
         }
 
         Node.NvmeNamespace->Header.SubType = 0x22;
@@ -335,8 +492,8 @@ OcFixAppleBootDevicePathNode (
     switch (NodeSubType) {
       case ACPI_DP:
         if (RestoreContext != NULL) {
-          RestoreContext->Acpi.HID = Node.Acpi->HID;
-          RestoreContext->Acpi.UID = Node.Acpi->UID;
+          RestoreContext->Types.Acpi.HID = Node.Acpi->HID;
+          RestoreContext->Types.Acpi.UID = Node.Acpi->UID;
         }
 
         if (EISA_ID_TO_NUM (Node.Acpi->HID) == 0x0A03) {
@@ -398,8 +555,8 @@ OcFixAppleBootDevicePathNode (
 
       case ACPI_EXTENDED_DP:
         if (RestoreContext != NULL) {
-          RestoreContext->ExtendedAcpi.HID = Node.ExtendedAcpi->HID;
-          RestoreContext->ExtendedAcpi.CID = Node.ExtendedAcpi->CID;
+          RestoreContext->Types.ExtendedAcpi.HID = Node.ExtendedAcpi->HID;
+          RestoreContext->Types.ExtendedAcpi.CID = Node.ExtendedAcpi->CID;
         }
         //
         // Apple uses PciRoot (EISA 0x0A03) nodes while some firmwares might use
@@ -438,14 +595,12 @@ OcFixAppleBootDevicePathNode (
 
 INTN
 OcFixAppleBootDevicePath (
-  IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath
+  IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath,
+  OUT    EFI_DEVICE_PATH_PROTOCOL  **RemainingDevicePath
   )
 {
   INTN                        Result;
   INTN                        NodePatched;
-
-  EFI_DEVICE_PATH_PROTOCOL    *OriginalDevPath;
-  EFI_DEVICE_PATH_PROTOCOL    *RemainingDevicePath;
 
   APPLE_BOOT_DP_PATCH_CONTEXT FirstNodeRestoreContext;
   APPLE_BOOT_DP_PATCH_CONTEXT *RestoreContextPtr;
@@ -455,8 +610,6 @@ OcFixAppleBootDevicePath (
   ASSERT (DevicePath != NULL);
   ASSERT (*DevicePath != NULL);
   ASSERT (IsDevicePathValid (*DevicePath, 0));
-
-  OriginalDevPath = *DevicePath;
   //
   // Restoring is only required for the first Device Path node. Please refer
   // to the loop for an explanation.
@@ -467,16 +620,17 @@ OcFixAppleBootDevicePath (
     //
     // Retrieve the first Device Path node that cannot be located.
     //
-    RemainingDevicePath = OriginalDevPath;
+    *RemainingDevicePath = *DevicePath;
     gBS->LocateDevicePath (
            &gEfiDevicePathProtocolGuid,
-           &RemainingDevicePath,
+           RemainingDevicePath,
            &Device
            );
     //
     // Patch the potentially invalid node.
     //
     Result = OcFixAppleBootDevicePathNode (
+               DevicePath,
                RemainingDevicePath,
                RestoreContextPtr
                );
@@ -493,21 +647,31 @@ OcFixAppleBootDevicePath (
     NodePatched |= Result > 0;
   } while (Result > 0);
 
-  *DevicePath = RemainingDevicePath;
-
   if (Result < 0) {
-    //
-    // If the path could not be fixed, restore the first node if it's the one
-    // failing to be located. Please refer to the loop for an explanation.
-    // If advancing by at least one node happened, the Device Path cannot
-    // be of a prefix short-form and hence restoring is not beneficial (and most
-    // especially would require tracking every node individually).
-    //
-    if (NodePatched != 0 && RemainingDevicePath == OriginalDevPath) {
-      OcFixAppleBootDevicePathNodeRestore (
-        OriginalDevPath,
-        &FirstNodeRestoreContext
-        );
+    if (NodePatched != 0) {
+      if (*RemainingDevicePath == *DevicePath) {
+        //
+        // If the path could not be fixed, restore the first node if it's the
+        // one failing to be located. Please refer to the loop for an
+        // explanation.
+        // If advancing by at least one node happened, the Device Path cannot
+        // be of a prefix short-form and hence restoring is not beneficial (and
+        // most especially would require tracking every node individually).
+        //
+        OcFixAppleBootDevicePathNodeRestore (
+          DevicePath,
+          RemainingDevicePath,
+          &FirstNodeRestoreContext
+          );
+      } else {
+        //
+        // If patching was successful, explicitly free the used resources.
+        //
+        OcFixAppleBootDevicePathNodeRestoreFree (
+          *DevicePath,
+          &FirstNodeRestoreContext
+          );
+      }
     }
 
     return -1;

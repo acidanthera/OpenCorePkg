@@ -187,8 +187,7 @@ InternalOcAudioConnect (
         );
 
       if (EFI_ERROR (Status)) {
-        TmpDevicePath = DevicePath;
-        if (OcFixAppleBootDevicePath (&TmpDevicePath) > 0) {
+        if (OcFixAppleBootDevicePath (&DevicePath, &TmpDevicePath) > 0) {
           DEBUG ((DEBUG_INFO, "OCAU: Retrying with fixed device path\n"));
           Status = InternalMatchCodecDevicePath (
             Private,
