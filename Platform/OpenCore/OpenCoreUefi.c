@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <OpenCore.h>
 
+#include <Guid/AppleVariable.h>
 #include <Guid/OcVariable.h>
 #include <Guid/GlobalVariable.h>
 
@@ -28,7 +29,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcInputLib.h>
 #include <Library/OcApfsLib.h>
+#include <Library/OcAppleImg4Lib.h>
 #include <Library/OcAppleKeyMapLib.h>
+#include <Library/OcAppleSecureBootLib.h>
 #include <Library/OcAppleUserInterfaceThemeLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcCpuLib.h>
@@ -353,6 +356,32 @@ OcReinstallProtocols (
   if (OcAppleFbInfoInstallProtocol (Config->Uefi.ProtocolOverrides.AppleFramebufferInfo) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install fb info protocol\n"));
   }
+
+  //
+  // FIXME: This one needs to be handled and activate recovery boot mode when set.
+  //
+  gRT->SetVariable (
+                  L"recovery-boot-mode",
+                  &gAppleBootVariableGuid,
+                  EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+                  0,
+                  NULL
+                  );
+
+  EFI_STATUS Status = gRT->SetVariable (
+                  L"HardwareModel",
+                  &gAppleSecureBootVariableGuid,
+                  EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+                  AsciiStrSize("j137ap"),
+                  "j137ap"
+                  );
+
+  ASSERT_EFI_ERROR(Status);
+
+  OcAppleImg4VerificationInstallProtocol (FALSE);
+
+  VOID *p = OcAppleSecureBootInstallProtocol (FALSE, AppleImg4SbModeMedium, 1, TRUE);
+  DEBUG ((DEBUG_INFO, "OC: SECUREBOOT INSTALLLED %p - %r\n", p, Status));
 }
 
 VOID

@@ -22,6 +22,8 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleKeysLib.h>
 #include <Library/OcCryptoLib.h>
+#include <Library/OcMiscLib.h>
+#include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
 #include "libDER/oids.h"
@@ -319,4 +321,49 @@ AppleImg4Verify (
   }
 
   return EFI_SUCCESS;
+}
+
+APPLE_IMG4_VERIFICATION_PROTOCOL *
+OcAppleImg4VerificationInstallProtocol (
+  IN BOOLEAN  Reinstall
+  )
+{
+  STATIC APPLE_IMG4_VERIFICATION_PROTOCOL Img4Verification = {
+    APPLE_IMG4_VERIFICATION_PROTOCOL_REVISION,
+    AppleImg4Verify
+  };
+
+  EFI_STATUS                       Status;
+  APPLE_IMG4_VERIFICATION_PROTOCOL *Protocol;
+  EFI_HANDLE                       Handle;
+
+  if (Reinstall) {
+    Status = OcUninstallAllProtocolInstances (&gAppleImg4VerificationProtocolGuid);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OCI4: Uninstall failed: %r\n", Status));
+      return NULL;
+    }
+  } else {
+    Status = gBS->LocateProtocol (
+      &gAppleImg4VerificationProtocolGuid,
+      NULL,
+      (VOID **)&Protocol
+      );
+    if (!EFI_ERROR (Status)) {
+      return Protocol;
+    }
+  }
+
+  Handle = NULL;
+  Status = gBS->InstallMultipleProtocolInterfaces (
+    &Handle,
+    &gAppleImg4VerificationProtocolGuid,
+    (VOID **)&Img4Verification,
+    NULL
+    );
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
+
+  return &Img4Verification;
 }

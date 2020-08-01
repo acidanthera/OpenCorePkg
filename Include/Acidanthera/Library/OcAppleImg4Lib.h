@@ -14,6 +14,8 @@
 #ifndef OC_APPLE_IMG4_LIB_H
 #define OC_APPLE_IMG4_LIB_H
 
+#include <Protocol/AppleImg4Verification.h>
+
 /**
   Verify the signature of ImageBuffer against Type of its IMG4 Manifest.
 
@@ -45,6 +47,11 @@ AppleImg4Verify (
   IN  UINTN                             ManifestSize,
   OUT UINT8                             **HashDigest OPTIONAL,
   OUT UINTN                             *DigestSize OPTIONAL
+  );
+
+APPLE_IMG4_VERIFICATION_PROTOCOL *
+OcAppleImg4VerificationInstallProtocol (
+  IN BOOLEAN  Reinstall
   );
 
 #endif // OC_APPLE_IMG4_LIB_H
