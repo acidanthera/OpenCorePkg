@@ -77,22 +77,22 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "SsdtEC", 0x00001000)
                 })
             }
         }
+    }
 
-        Scope (PCI0.LPCB)
+    Scope (\_SB.PCI0.LPCB)
+    {
+        Device (EC)
         {
-            Device (EC)
+            Name (_HID, "ACID0001")  // _HID: Hardware ID
+            Method (_STA, 0, NotSerialized)  // _STA: Status
             {
-                Name (_HID, "ACID0001")  // _HID: Hardware ID
-                Method (_STA, 0, NotSerialized)  // _STA: Status
+                If (_OSI ("Darwin"))
                 {
-                    If (_OSI ("Darwin"))
-                    {
-                        Return (0x0F)
-                    }
-                    Else
-                    {
-                        Return (Zero)
-                    }
+                    Return (0x0F)
+                }
+                Else
+                {
+                    Return (Zero)
                 }
             }
         }
