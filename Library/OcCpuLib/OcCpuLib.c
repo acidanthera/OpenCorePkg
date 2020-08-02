@@ -272,6 +272,20 @@ ScanThreadCount (
 
 STATIC
 VOID
+ScanIntelProcessorApple (
+  IN OUT OC_CPU_INFO  *Cpu
+  )
+{
+  UINT8  AppleMajorType;
+
+  AppleMajorType = InternalDetectAppleMajorType (Cpu->BrandString);
+  Cpu->AppleProcessorType = InternalDetectAppleProcessorType (Cpu->Model, Cpu->Stepping, AppleMajorType, Cpu->CoreCount);
+
+  DEBUG ((DEBUG_INFO, "OCCPU: Detected Apple Processor Type: %02X -> %04X\n", AppleMajorType, Cpu->AppleProcessorType));
+}
+
+STATIC
+VOID
 ScanIntelProcessor (
   IN OUT OC_CPU_INFO  *Cpu
   )
@@ -279,7 +293,6 @@ ScanIntelProcessor (
   UINT64                                            Msr;
   CPUID_CACHE_PARAMS_EAX                            CpuidCacheEax;
   CPUID_CACHE_PARAMS_EBX                            CpuidCacheEbx;
-  UINT8                                             AppleMajorType;
   MSR_SANDY_BRIDGE_PKG_CST_CONFIG_CONTROL_REGISTER  PkgCstConfigControl;
   MSR_IA32_PERF_STATUS_REGISTER                     PerfStatus;
   MSR_NEHALEM_PLATFORM_INFO_REGISTER                PlatformInfo;
@@ -290,13 +303,9 @@ ScanIntelProcessor (
   UINTN                                             TimerAddr;
   BOOLEAN                                           Recalculate;
 
-  AppleMajorType = InternalDetectAppleMajorType (Cpu->BrandString);
-  Cpu->AppleProcessorType = InternalDetectAppleProcessorType (Cpu->Model, Cpu->Stepping, AppleMajorType);
-
-  DEBUG ((DEBUG_INFO, "OCCPU: Detected Apple Processor Type: %02X -> %04X\n", AppleMajorType, Cpu->AppleProcessorType));
-
   if ((Cpu->Family != 0x06 || Cpu->Model < 0x0c)
     && (Cpu->Family != 0x0f || Cpu->Model < 0x03)) {
+    ScanIntelProcessorApple (Cpu);
     return;
   }
 
@@ -469,6 +478,8 @@ ScanIntelProcessor (
   if (Cpu->ThreadCount == 0) {
     Cpu->ThreadCount = 1;
   }
+
+  ScanIntelProcessorApple (Cpu);
 }
 
 STATIC

@@ -59,6 +59,7 @@ InternalDetectAppleMajorType (
   @param[in] Model           CPU model from CPUID.
   @param[in] Stepping        CPU stepping from CPUID.
   @param[in] AppleMajorType  Apple CPU major type.
+  @param[in] CoreCount       Number of physical cores.
 
   @retval Apple CPU type.
 **/
@@ -66,7 +67,8 @@ UINT16
 InternalDetectAppleProcessorType (
   IN UINT8  Model,
   IN UINT8  Stepping,
-  IN UINT8  AppleMajorType
+  IN UINT8  AppleMajorType,
+  IN UINT16 CoreCount
   );
 
 /**
