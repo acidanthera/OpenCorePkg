@@ -265,6 +265,9 @@ AppleImg4Verify (
   if (DerResult != DR_Success) {
     return EFI_SECURITY_VIOLATION;
   }
+
+  if (FALSE) {
+
   //
   // As ManInfo.imageDigest is a buffer of static size, the bounds check to
   // retrieve it acts as implicit sanitizing of ManInfo.imageDigestSize which
@@ -309,6 +312,8 @@ AppleImg4Verify (
     && (ManInfo.environment.effectiveSecurityMode     != EnvInfo.effectiveSecurityMode && !ManInfo.environment.effectiveSecurityMode))
     ) {
     return EFI_SECURITY_VIOLATION;
+  }
+
   }
 
   if (HashDigest != NULL) {
