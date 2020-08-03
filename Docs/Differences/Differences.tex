@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jun  2 03:55:18 2020
-%DIF ADD ../Configuration.tex        Wed Jul 29 01:17:13 2020
+%DIF DEL PreviousConfiguration.tex   Mon Aug  3 19:08:50 2020
+%DIF ADD ../Configuration.tex        Mon Aug  3 19:14:02 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -149,7 +149,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (\DIFdelbegin \DIFdel{0.5.9}\DIFdelend \DIFaddbegin \DIFadd{0.6.0}\DIFaddend )
+       Reference Manual (0.6\DIFdelbegin \DIFdel{.0}\DIFdelend \DIFaddbegin \DIFadd{.1}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -177,9 +177,8 @@ operating system. It is to be read as the official clarification of expected
 OpenCore behaviour. All deviations, if found in published OpenCore releases,
 shall be considered documentation or implementation bugs, and are requested to be
 reported through \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
-\DIFaddbegin \DIFadd{Errata sheet is available in
-}\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Errata/Errata.pdf}{OpenCorePkg repository}\DIFadd{.
-}\DIFaddend 
+Errata sheet is available in
+\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Errata/Errata.pdf}{OpenCorePkg repository}.
 
 This document is structured as a specification, and is not meant to provide a step by
 step algorithm for configuring end-user board support package (BSP). The intended audience
@@ -192,10 +191,8 @@ Third-party articles, utilities, books, and alike may be more useful for a wider
 they could provide guide-like material. However, they are prone to their authors' preferences,
 tastes, this document misinterpretation, and essential obsolescence.
 In case you use these sources, for example, \href{https://dortania.github.io}{Dortania}'s
-\DIFdelbegin %DIFDELCMD < \href{https://dortania.github.io/OpenCore-Desktop-Guide}{OpenCore Desktop Guide}
-%DIFDELCMD < %%%
-\DIFdelend \DIFaddbegin \href{https://dortania.github.io/OpenCore-Install-Guide}{OpenCore Install Guide}
-\DIFaddend and \href{https://dortania.github.io/getting-started}{related material},
+\href{https://dortania.github.io/OpenCore-Install-Guide}{OpenCore Install Guide}
+and \href{https://dortania.github.io/getting-started}{related material},
 please ensure to follow this document for every made decision and judge its consequences.
 
 Be warned that regardless of the sources used you are required to fully understand every
@@ -431,7 +428,7 @@ Root configuration entries consist of the following:
 \end{itemize}
 
 It is possible to perform basic validation of the configuration by using
-\texttt{\DIFdelbegin \DIFdel{ConfigValidity}\DIFdelend \DIFaddbegin \DIFadd{ocvalidate}\DIFaddend } utility. Please note, that \texttt{\DIFdelbegin \DIFdel{ConfigValidity}\DIFdelend \DIFaddbegin \DIFadd{ocvalidate}\DIFaddend }
+\texttt{ocvalidate} utility. Please note, that \texttt{ocvalidate}
 must match the used OpenCore release and may not be able to detect all
 configuration flaws present in the file.
 
@@ -664,17 +661,14 @@ one should also install \href{https://www.nasm.us}{NASM} and
 The latest Xcode version is recommended for use despite the toolchain name. Example
 command sequence may look as follows:
 
-\DIFmodbegin
-\begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash,alsolanguage=DIFcode]
-%DIF < git clone https://github.com/acidanthera/audk UDK
-%DIF > git clone --recursive --depth=1 https://github.com/acidanthera/audk UDK
+\begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
+git clone --recursive --depth=1 https://github.com/acidanthera/audk UDK
 cd UDK
 git clone https://github.com/acidanthera/OpenCorePkg
 source edksetup.sh
 make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
-\DIFmodend
 
 For IDE usage Xcode projects are available in the root of the repositories. Another
 approach could be \href{https://www.sublimetext.com}{Sublime Text} with
@@ -1140,7 +1134,7 @@ source file may help understanding ACPI opcodes.
 
 \emph{Note}: Patches of different \texttt{Find} and \texttt{Replace} lengths
 are unsupported as they may corrupt ACPI tables and make you system unstable
-due to area relocation. If you need such changes you may \DIFdelbegin \DIFdel{utilities }\DIFdelend \DIFaddbegin \DIFadd{utilise }\DIFaddend ``proxy''
+due to area relocation. If you need such changes you may utilise ``proxy''
 patching or \texttt{NOP} the remaining area.
 
 \subsection{Quirks Properties}\label{acpipropsquirks}
@@ -1444,8 +1438,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   \emph{Note}: This quirk may potentially weaken firmware security, please use
   \texttt{RebuildAppleMemoryMap} if your firmware supports memory attributes table (MAT).
-  \DIFaddbegin \DIFadd{Refer to }\texttt{\DIFadd{OCABC: MAT support is 1/0}} \DIFadd{log entry to determine whether MAT is supported.
-}\DIFaddend 
+  Refer to \texttt{OCABC: MAT support is 1/0} log entry to determine whether MAT is supported.
 
 \item
   \texttt{ForceExitBootServices}\\
@@ -1528,30 +1521,27 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   this option is to be enabled.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{ProvideMaxSlide}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Provide maximum KASLR slide when higher ones are unavailable.
-}
+  \texttt{ProvideMaxSlide}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Provide maximum KASLR slide when higher ones are unavailable.
 
-  \DIFadd{This option overrides the maximum slide of 255 by a user specified value between 1 and 254 inclusive
-  when }\texttt{\DIFadd{ProvideCustomSlide}} \DIFadd{is enabled.
+  This option overrides the maximum slide of 255 by a user specified value between 1 and 254 inclusive
+  when \texttt{ProvideCustomSlide} is enabled.
   It is believed that modern firmwares allocate pool memory from top to bottom, effectively resulting in
   free memory at the time of slide scanning being later used as temporary
   memory during kernel loading. In case those memory are unavailable, this
   option can stop evaluating higher slides.
-}
 
-  \emph{\DIFadd{Note}}\DIFadd{: The necessity of this quirk is determined by random boot failure
-  when }\texttt{\DIFadd{ProvideCustomSlide}} \DIFadd{is enabled and the randomized slide fall
-  into the unavailable range. When }\texttt{\DIFadd{AppleDebug}} \DIFadd{is enabled, usually the
-  debug log may contain messages like }\texttt{\DIFadd{AAPL: }[\DIFadd{EB|`LD:LKC}] \DIFadd{\} Err(0x9)}}\DIFadd{.
-  To find the optimal value, manually append }\texttt{\DIFadd{slide=X}} \DIFadd{to }\texttt{\DIFadd{boot-args}}
-  \DIFadd{and log the largest one that won't cause boot failure.
-}
+  \emph{Note}: The necessity of this quirk is determined by random boot failure
+  when \texttt{ProvideCustomSlide} is enabled and the randomized slide fall
+  into the unavailable range. When \texttt{AppleDebug} is enabled, usually the
+  debug log may contain messages like \texttt{AAPL: [EB|`LD:LKC] \} Err(0x9)}.
+  To find the optimal value, manually append \texttt{slide=X} to \texttt{boot-args}
+  and log the largest one that won't cause boot failure.
 
 \item
-  \DIFaddend \texttt{RebuildAppleMemoryMap}\\
+  \texttt{RebuildAppleMemoryMap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Generate Memory Map compatible with macOS.
@@ -1581,10 +1571,9 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   \emph{Note 2}: The necessity of this quirk is determined by early boot failures.
   This quirk replaces \texttt{EnableWriteUnprotector} on firmwares supporting
-  memory attributes table (MAT). \DIFaddbegin \DIFadd{This quirk is generally unnecessary when using
-  }\texttt{\DIFadd{OpenDuetPkg}}\DIFadd{, but may be required to boot macOS 10.6 and earlier for
+  memory attributes table (MAT). This quirk is generally unnecessary when using
+  \texttt{OpenDuetPkg}, but may be required to boot macOS 10.6 and earlier for
   unclear reasons.
-}\DIFaddend 
 
 \item
   \texttt{SetupVirtualMap}\\
@@ -1653,47 +1642,43 @@ ioreg -lw0 -p IODeviceTree -n efi -r -x | grep device-properties |
   cat /tmp/device-properties.plist
 \end{lstlisting}
 
-\DIFaddbegin \DIFadd{Device propertties are part of the }\texttt{\DIFadd{IODeviceTree}} \DIFadd{(}\texttt{\DIFadd{gIODT}}\DIFadd{)
+Device propertties are part of the \texttt{IODeviceTree} (\texttt{gIODT})
 plane of macOS I/O Registry. This plane has several construction stages
 relevant for the platform initialisation. While the early construction
-stage is performed by the XNU kernel in the }\texttt{\DIFadd{IODeviceTreeAlloc}}
-\DIFadd{method, the majority of the construction is performed by the platform expert,
-implemented in }\texttt{\DIFadd{AppleACPIPlatformExpert.kext}}\DIFadd{.
-}
+stage is performed by the XNU kernel in the \texttt{IODeviceTreeAlloc}
+method, the majority of the construction is performed by the platform expert,
+implemented in \texttt{AppleACPIPlatformExpert.kext}.
 
-\DIFadd{AppleACPIPlatformExpert incorporates two stages of }\texttt{\DIFadd{IODeviceTree}}
-\DIFadd{construction implemented by calling }\\
-\texttt{\DIFadd{AppleACPIPlatformExpert::mergeDeviceProperties}}\DIFadd{:
-}
+AppleACPIPlatformExpert incorporates two stages of \texttt{IODeviceTree}
+construction implemented by calling \\
+\texttt{AppleACPIPlatformExpert::mergeDeviceProperties}:
 
 \begin{enumerate}
   \tightlist
-  \item \DIFadd{During ACPI table initialisation through the recursive ACPI namespace scanning
-  by the calls to }\\
-  \texttt{\DIFadd{AppleACPIPlatformExpert::createDTNubs}}\DIFadd{.
-  }\item \DIFadd{During IOService registration (}\texttt{\DIFadd{IOServices::registerService}}\DIFadd{) callbacks
-  implemented as a part of }\\
-  \texttt{\DIFadd{AppleACPIPlatformExpert::platformAdjustService}}
-  \DIFadd{function and its private worker method }\\
-  \texttt{\DIFadd{AppleACPIPlatformExpert::platformAdjustPCIDevice}}
-  \DIFadd{specific to the PCI devices.
-}\end{enumerate}
+  \item During ACPI table initialisation through the recursive ACPI namespace scanning
+  by the calls to \\
+  \texttt{AppleACPIPlatformExpert::createDTNubs}.
+  \item During IOService registration (\texttt{IOServices::registerService}) callbacks
+  implemented as a part of \\
+  \texttt{AppleACPIPlatformExpert::platformAdjustService}
+  function and its private worker method \\
+  \texttt{AppleACPIPlatformExpert::platformAdjustPCIDevice}
+  specific to the PCI devices.
+\end{enumerate}
 
-\DIFadd{The application of the stages depends on the device presence in ACPI tables.
+The application of the stages depends on the device presence in ACPI tables.
 The first stage applies very early but exclusively to the devices present in ACPI tables.
 The second stage applies to all devices much later after the PCI configuration
 and may repeat the first stage if the device was not present in ACPI.
-}
 
-\DIFadd{For all kernel drivers, which may inspect the }\texttt{\DIFadd{IODeviceTree}} \DIFadd{plane without
-probing (e.g. }\texttt{\DIFadd{Lilu}} \DIFadd{and its plugins like }\texttt{\DIFadd{WhateverGreen}}\DIFadd{) it is particularly
+For all kernel drivers, which may inspect the \texttt{IODeviceTree} plane without
+probing (e.g. \texttt{Lilu} and its plugins like \texttt{WhateverGreen}) it is particularly
 important to ensure device presence in the ACPI tables. Failing to do so may result
-}\textbf{\DIFadd{in all kinds of erratic behaviour}} \DIFadd{caused by ignoring the injected device properties
-as they were not constructed at the first stage. See }\texttt{\DIFadd{SSDT-IMEI.dsl}} \DIFadd{and
-}\texttt{\DIFadd{SSDT-BRG0.dsl}} \DIFadd{for an example.
-}
+\textbf{in all kinds of erratic behaviour} caused by ignoring the injected device properties
+as they were not constructed at the first stage. See \texttt{SSDT-IMEI.dsl} and
+\texttt{SSDT-BRG0.dsl} for an example.
 
-\DIFaddend \subsection{Properties}\label{devpropsprops}
+\subsection{Properties}\label{devpropsprops}
 
 \begin{enumerate}
 \item
@@ -1771,16 +1756,14 @@ blocking.
   order follows the item order in the array, thus the dependencies should be written
   prior to their consumers.
 
-  \DIFaddbegin \DIFadd{To track the dependency order one can inspect the }\texttt{\DIFadd{OSBundleLibraries}} \DIFadd{key
-  in the }\texttt{\DIFadd{Info.plist}} \DIFadd{of the kext. Any kext mentioned in the
-  }\texttt{\DIFadd{OSBundleLibraries}} \DIFadd{of the other kext must be precede this kext.
-}
+  To track the dependency order one can inspect the \texttt{OSBundleLibraries} key
+  in the \texttt{Info.plist} of the kext. Any kext mentioned in the
+  \texttt{OSBundleLibraries} of the other kext must be precede this kext.
 
-  \emph{\DIFadd{Note}}\DIFadd{: Kexts may have inner kexts (}\texttt{\DIFadd{Plug-Ins}}\DIFadd{) in their bundle. Each
+  \emph{Note}: Kexts may have inner kexts (\texttt{Plug-Ins}) in their bundle. Each
   inner kext must be added separately.
-}
 
-\DIFaddend \item
+\item
   \texttt{Block}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Failsafe}: Empty\\
@@ -2347,11 +2330,7 @@ for more details. Algorithm to determine boot options behaves as follows:
   % it points to the END device path.
   \item For disk device paths (not specifying a bootloader) execute ``bless'' (may return > 1 entry).
   \item For file device paths check presence on the file system directly.
-  \DIFdelbegin %DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdel{Exclude options with blacklisted filenames (refer to }\texttt{\DIFdel{BlacklistAppleUpdate}} %DIFAUXCMD
-\DIFdel{option).
-  }\DIFdelend % Just kill all \EFI\APPLE\ paths.
+  % Just kill all \EFI\APPLE\ paths.
   \item On OpenCore boot partition exclude all OpenCore bootstrap files by header checks.
   \item Mark device handle as \textit{used} in the list of partition handles if any.
   % Each partition handle will basically have a list of boot option entries for later quick lookup.
@@ -2363,11 +2342,7 @@ for more details. Algorithm to determine boot options behaves as follows:
   \item If partition handle is marked as \textit{unused} execute ``bless'' primary option list retrieval. \\
     In case \texttt{BlessOverride} list is set, not only standard ``bless'' paths will be found but
     also custom ones.
-  \item \DIFdelbegin \DIFdel{Exclude options with blacklisted filenames (refer to }\texttt{\DIFdel{BlacklistAppleUpdate}} %DIFAUXCMD
-\DIFdel{option).
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdelend On OpenCore boot partition exclude all OpenCore bootstrap files by header checks.
+  \item On OpenCore boot partition exclude all OpenCore bootstrap files by header checks.
   \item Register the resulting entries as primary options and determine their types if found. \\
   The option will become auxiliary for some types (e.g. Apple HFS recovery).
   % Looking up primary and alternate handles could be done per handle to make sure the list is ordered.
@@ -2484,7 +2459,7 @@ entry choice will update till next manual reconfiguration.
   \textbf{Description}: Sets specific attributes for console.
 
   Text renderer supports colour arguments as a sum of foreground and background
-  \DIFdelbegin \DIFdel{colors }\DIFdelend \DIFaddbegin \DIFadd{colours }\DIFaddend according to UEFI specification. The value of black background and
+  colours according to UEFI specification. The value of black background and
   black foreground (\texttt{0}) is reserved. List of colour names:
 
   \begin{itemize}
@@ -2545,7 +2520,7 @@ entry choice will update till next manual reconfiguration.
     \item Entry is macOS recovery.
     \item Entry is macOS Time Machine.
     \item Entry is explicitly marked as \texttt{Auxiliary}.
-    \item Entry is system (e.g. \texttt{\DIFdelbegin \DIFdel{Clean }\DIFdelend \DIFaddbegin \DIFadd{Reset }\DIFaddend NVRAM}).
+    \item Entry is system (e.g. \texttt{Reset NVRAM}).
   \end{itemize}
 
   To see all entries picker menu needs to be reloaded in extended mode by pressing
@@ -2568,44 +2543,38 @@ entry choice will update till next manual reconfiguration.
   \tightlist
   \item \texttt{0x0001} --- \texttt{OC\_ATTR\_USE\_VOLUME\_ICON}, provides custom icons
     for boot entries:
-    \DIFaddbegin 
 
-    \DIFadd{For }\texttt{\DIFadd{Tools}} \DIFadd{OpenCore will try to load a custom icon and fallback to the default icon:
-    }\DIFaddend \begin{itemize}
+    For \texttt{Tools} OpenCore will try to load a custom icon and fallback to the default icon:
+    \begin{itemize}
     \tightlist
-      \item \DIFaddbegin \texttt{\DIFadd{ResetNVRAM}} \DIFadd{--- }\texttt{\DIFadd{Resources\textbackslash Image\textbackslash ResetNVRAM.icns}}
-        \DIFadd{--- }\texttt{\DIFadd{ResetNVRAM.icns}} \DIFadd{from icons directory.
-      }\item \texttt{\DIFadd{Tools\textbackslash <TOOL\_RELATIVE\_PATH>.icns}}
-        \DIFadd{--- icon near the tool file with appended }\texttt{\DIFadd{.icns}} \DIFadd{extension.
-    }\end{itemize} \medskip
+      \item \texttt{ResetNVRAM} --- \texttt{Resources\textbackslash Image\textbackslash ResetNVRAM.icns}
+        --- \texttt{ResetNVRAM.icns} from icons directory.
+      \item \texttt{Tools\textbackslash <TOOL\_RELATIVE\_PATH>.icns}
+        --- icon near the tool file with appended \texttt{.icns} extension.
+    \end{itemize} \medskip
 
-    \DIFadd{For custom boot }\texttt{\DIFadd{Entries}} \DIFadd{OpenCore will try to load a custom icon and fallback
+    For custom boot \texttt{Entries} OpenCore will try to load a custom icon and fallback
     to the volume icon or the default icon:
-    }\begin{itemize}
+    \begin{itemize}
     \tightlist
-      \item \texttt{\DIFadd{<ENTRY\_PATH>.icns}} \DIFadd{--- icon near the entry file with appended }\texttt{\DIFadd{.icns}} \DIFadd{extension.
-    }\end{itemize} \medskip
+      \item \texttt{<ENTRY\_PATH>.icns} --- icon near the entry file with appended \texttt{.icns} extension.
+    \end{itemize} \medskip
 
-    \DIFadd{For all other entries OpenCore will try to load a volume icon and fallback to the default icon:
-    }\begin{itemize}
+    For all other entries OpenCore will try to load a volume icon and fallback to the default icon:
+    \begin{itemize}
     \tightlist
-      \item \DIFaddend \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS.
+      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS.
       \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
-    \DIFdelbegin %DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\texttt{\DIFdel{<TOOL\_NAME>.icns}} %DIFAUXCMD
-\DIFdel{file for }\texttt{\DIFdel{Tools}}%DIFAUXCMD
-\DIFdel{.
-    }\DIFdelend \end{itemize} \DIFaddbegin \medskip
+    \end{itemize} \medskip
 
-    \DIFaddend Volume icons can be set in Finder. Note, that enabling this may result in
+    Volume icons can be set in Finder. Note, that enabling this may result in
     external and internal icons to be indistinguishable.
   \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
     rendered titles for boot entries:
     \begin{itemize}
     \tightlist
       \item \texttt{.disk\_label} (\texttt{.disk\_label\_2x}) file near bootloader for all filesystems.
-      \item \texttt{<TOOL\_NAME\DIFaddbegin \DIFadd{>}\DIFaddend .lbl} (\texttt{<TOOL\_NAME\DIFaddbegin \DIFadd{>}\DIFaddend .l2x}) file near tool for \texttt{Tools}.
+      \item \texttt{<TOOL\_NAME>.lbl} (\texttt{<TOOL\_NAME>.l2x}) file near tool for \texttt{Tools}.
     \end{itemize}
     Prerendered labels can be generated via \texttt{disklabel} utility or \texttt{bless} command.
     When disabled or missing text labels (\texttt{.contentDetails} or \texttt{.disk\_label.contentDetails})
@@ -2781,8 +2750,8 @@ entry choice will update till next manual reconfiguration.
   kernel is a development (or a debug) kernel.
 
   In case OpenCore kernel panic saving mechanism was not used, kernel panics may
-  still be found in \DIFaddbegin \\
-  \DIFaddend \texttt{/Library/Logs/DiagnosticReports} directory.
+  still be found in \\
+  \texttt{/Library/Logs/DiagnosticReports} directory.
   Starting with macOS Catalina kernel panics are stored in JSON format, so they
   need to be preprocessed before passing to \texttt{kpdescribe.sh}:
 
@@ -2828,29 +2797,26 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
   \end{itemize}
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{SerialInit}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Perform serial port initialisation.
-}
+  \texttt{SerialInit}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Perform serial port initialisation.
 
-  \DIFadd{This option will perform serial port initialisation within OpenCore prior to enabling
+  This option will perform serial port initialisation within OpenCore prior to enabling
   (any) debug logging. Serial port configuration is defined via PCDs at compile time
-  in }\texttt{\DIFadd{gEfiMdeModulePkgTokenSpaceGuid}} \DIFadd{GUID. Default values as found in
-  }\texttt{\DIFadd{MdeModulePkg.dec}} \DIFadd{are as follows:
-  }
+  in \texttt{gEfiMdeModulePkgTokenSpaceGuid} GUID. Default values as found in
+  \texttt{MdeModulePkg.dec} are as follows:
 
   \begin{itemize}
   \tightlist
-    \item \texttt{\DIFadd{PcdSerialBaudRate}} \DIFadd{--- Baud rate: }\texttt{\DIFadd{115200}}\DIFadd{.
-    }\item \texttt{\DIFadd{PcdSerialLineControl}} \DIFadd{--- Line control: no parity, 8 data bits, 1 stop bit.
-  }\end{itemize}
+    \item \texttt{PcdSerialBaudRate} --- Baud rate: \texttt{115200}.
+    \item \texttt{PcdSerialLineControl} --- Line control: no parity, 8 data bits, 1 stop bit.
+  \end{itemize}
 
-  \DIFadd{See more details in }\hyperref[troubleshootingdebug]{\texttt{Debugging}} \DIFadd{section.
-}
+  See more details in \hyperref[troubleshootingdebug]{\texttt{Debugging}} section.
 
 \item
-  \DIFaddend \texttt{SysReport}\\
+  \texttt{SysReport}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Produce system report on ESP folder.
@@ -2915,10 +2881,9 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   and time from the firmware). Please be warned that some file system drivers present
   in firmwares are not reliable, and may corrupt data when writing files through UEFI.
   Log is attempted to be written in the safest manner, and thus is very slow. Ensure that
-  \texttt{DisableWatchDog} is set to \texttt{true} when you use a slow drive. \DIFaddbegin \DIFadd{Try to
+  \texttt{DisableWatchDog} is set to \texttt{true} when you use a slow drive. Try to
   avoid frequent use of this option when dealing with flash drives as large I/O
   amounts may speedup memory wear and render this flash drive unusable in shorter time.
-}\DIFaddend 
 
   When interpreting the log, note that the lines are prefixed with a tag describing
   the relevant location (module) of the log line allowing one to better attribute the line
@@ -2997,17 +2962,15 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \textbf{Description}: Allow \texttt{CMD+OPT+P+R} handling and enable
   showing \texttt{NVRAM Reset} entry in boot picker.
 
-  \DIFaddbegin \emph{\DIFadd{Note 1}}\DIFadd{: It is known that some Lenovo laptops have a firmware
+  \emph{Note 1}: It is known that some Lenovo laptops have a firmware
   bug, which makes them unbootable after performing NVRAM reset. See
-  }\href{https://github.com/acidanthera/bugtracker/issues/995}{acidanthera/bugtracker\#995}
-  \DIFadd{for more details.
-}
+  \href{https://github.com/acidanthera/bugtracker/issues/995}{acidanthera/bugtracker\#995}
+  for more details.
 
-  \emph{\DIFadd{Note 2}}\DIFadd{: Resetting NVRAM will also erase all the boot options
+  \emph{Note 2}: Resetting NVRAM will also erase all the boot options
   otherwise not backed up with bless (e.g. Linux).
-}
 
-\DIFaddend \item
+\item
   \texttt{AllowSetDefault}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -3030,27 +2993,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   considered a security risk and thus is optional.
 
 \item
-  \DIFdelbegin \texttt{\DIFdel{BlacklistAppleUpdate}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Type}}%DIFAUXCMD
-\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
-\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Description}}%DIFAUXCMD
-\DIFdel{: Ignore boot options trying to update Apple peripheral firmware
-  (e.g. }\texttt{\DIFdel{MultiUpdater.efi}}%DIFAUXCMD
-\DIFdel{).
-}%DIFDELCMD < 
-
-%DIFDELCMD < \item
-\item%DIFAUXCMD
-%DIFDELCMD <   %%%
-\DIFdelend \texttt{BootProtect}\\
+  \texttt{BootProtect}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{None}\\
   \textbf{Description}: Attempt to provide bootloader persistence.
@@ -3755,13 +3698,13 @@ troubleshooting:
   NVIDIA Web Driver control variable. Takes ASCII digit \texttt{1} or \texttt{0}
   to enable or disable installed driver.
 \item
-  \DIFaddbegin \texttt{\DIFadd{7C436110-AB2A-4BBB-A880-FE41995C9F82:run-efi-updater}}
+  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:run-efi-updater}
   \break
-  \DIFadd{Override EFI firmware updating support in macOS (MultiUpdater, ThorUtil, and so on).
-  Setting this to }\texttt{\DIFadd{No}} \DIFadd{or alternative boolean-castable value will prevent
+  Override EFI firmware updating support in macOS (MultiUpdater, ThorUtil, and so on).
+  Setting this to \texttt{No} or alternative boolean-castable value will prevent
   any firmware updates in macOS starting with 10.10 at least.
-}\item
-  \DIFaddend \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:StartupMute}
+\item
+  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:StartupMute}
   \break
   Mute startup chime sound in firmware audio support. 8-bit integer.
   The value of \texttt{0x00} means unmuted. Missing variable or any
@@ -4613,7 +4556,7 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 & Perform EPID provisioning (requires certificate data configuration). \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ResetSystem}}\textbf{*}
 & Utility to perform system reset. Takes reset type as an argument:
-  \texttt{ColdReset}, \texttt{\DIFdelbegin \DIFdel{WarmReset}\DIFdelend \DIFaddbegin \DIFadd{Firmware}\DIFaddend }, \texttt{Shutdown}\DIFaddbegin \DIFadd{, }\texttt{\DIFadd{WarmReset}}\DIFaddend .
+  \texttt{ColdReset}, \texttt{Firmware}, \texttt{Shutdown}, \texttt{WarmReset}.
   Defaults to \texttt{ColdReset}. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{RtcRw}}\textbf{*}
 & Utility to read and write RTC (CMOS) memory. \\
@@ -4630,9 +4573,8 @@ similar to the builtin text interface.
 
 OpenCanopy requires graphical resources located in \texttt{Resources} directory to run.
 Sample resources (fonts and images) can be found in
-\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}. \DIFaddbegin \DIFadd{You can find customised icons over the internet 
-(e.g. }\href{https://github.com/blackosx/OpenCanopyIcons}{here} \DIFadd{or }\href{https://applelife.ru/threads/kastomizacija-opencanopy.2945020/}{there}\DIFadd{).
-}\DIFaddend 
+\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}. You can find customised icons over the internet 
+(e.g. \href{https://github.com/blackosx/OpenCanopyIcons}{here} or \href{https://applelife.ru/threads/kastomizacija-opencanopy.2945020/}{there}).
 
 OpenCanopy provides full support for \texttt{PickerAttributes} and offers a configurable
 builtin icon set. The default chosen icon set depends on the \texttt{DefaultBackgroundColor}
@@ -4750,8 +4692,7 @@ functioning. Feature highlights:
   \item Audio path is the base filename corresponding to a file identifier. For macOS bootloader audio paths refer to
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_AUDIO\_FILE} definition}.
   For OpenCore audio paths refer to
-  \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}%%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}\DIFaddend .
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}.
   The only exception is OpenCore boot chime file, which is \texttt{OCEFIAudio\_VoiceOver\_Boot.wav}.
   \end{itemize}
 
@@ -4846,20 +4787,18 @@ functioning. Feature highlights:
 
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{GlobalConnect}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Perform full device connection during APFS loading.
-}
+  \texttt{GlobalConnect}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Perform full device connection during APFS loading.
 
-  \DIFadd{Instead of partition handle connection normally used for APFS driver loading
+  Instead of partition handle connection normally used for APFS driver loading
   every handle is connected recursively. This may take more time than usual
   but can be the only way to access APFS partitions on some firmwares like
   those found on older HP laptops.
-}
 
 \item
-  \DIFaddend \texttt{HideVerbose}\\
+  \texttt{HideVerbose}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Hide verbose output from APFS driver.
@@ -4895,8 +4834,7 @@ functioning. Feature highlights:
     \item \texttt{-1} --- permit any release date to load (strongly discouraged).
     \item Other --- use custom minimal APFS release date, e.g. \texttt{20200401}
     for 2020/04/01. APFS release dates can be found in OpenCore boot log
-    and \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Library/OcApfsLib.h}{\texttt{OcApfsLib}}%%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Library/OcApfsLib.h}{\texttt{OcApfsLib}}\DIFaddend .
+    and \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Library/OcApfsLib.h}{\texttt{OcApfsLib}}.
   \end{itemize}
 
 \item
@@ -4920,8 +4858,7 @@ functioning. Feature highlights:
     \item \texttt{-1} --- permit any version to load (strongly discouraged).
     \item Other --- use custom minimal APFS version, e.g. \texttt{1412101001000000}
     from macOS Catalina 10.15.4. APFS versions can be found in OpenCore boot log
-    and \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Library/OcApfsLib.h}{\texttt{OcApfsLib}}%%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Library/OcApfsLib.h}{\texttt{OcApfsLib}}\DIFaddend .
+    and \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Library/OcApfsLib.h}{\texttt{OcApfsLib}}.
   \end{itemize}
 
 \end{enumerate}
@@ -5065,14 +5002,13 @@ functioning. Feature highlights:
   it is possible to set a slightly lower value on faster platforms
   and slightly higher value on slower platforms for more responsive input.
 
-  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: Some platforms may require different values, higher or lower.
+  \emph{Note}: Some platforms may require different values, higher or lower.
   For example, when detecting key misses in OpenCanopy try increasing this value
-  (e.g. to }\texttt{\DIFadd{10}}\DIFadd{), and when detecting key stall, try decreasing this value.
+  (e.g. to \texttt{10}), and when detecting key stall, try decreasing this value.
   Since every platform is different it may be reasonable to check every value
-  from }\texttt{\DIFadd{1}} \DIFadd{to }\texttt{\DIFadd{25}}\DIFadd{.
-}
+  from \texttt{1} to \texttt{25}.
 
-\DIFaddend \item
+\item
   \texttt{KeyMergeThreshold}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
@@ -5269,7 +5205,7 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Some firmwares clear only part of screen when switching
   from graphics to text mode, leaving a fragment of previously drawn image visible.
-  This option fills the entire graphics screen with black \DIFdelbegin \DIFdel{color }\DIFdelend \DIFaddbegin \DIFadd{colour }\DIFaddend before switching to
+  This option fills the entire graphics screen with black colour before switching to
   text mode.
 
   \emph{Note}: This option only applies to \texttt{System} renderer.
@@ -5312,10 +5248,10 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Ensure GOP (Graphics Output Protocol) on console handle.
 
-  macOS bootloader requires GOP \DIFaddbegin \DIFadd{or UGA (for 10.4 EfiBoot) }\DIFaddend to be present on console
-  handle, yet the exact location of \DIFdelbegin \DIFdel{GOP }\DIFdelend \DIFaddbegin \DIFadd{the graphics protocol }\DIFaddend is not covered by the
-  UEFI specification. This option will ensure GOP \DIFdelbegin \DIFdel{is installed on console handle if it is present}\DIFdelend \DIFaddbegin \DIFadd{and UGA, if present, are available
-  on the console handle}\DIFaddend .
+  macOS bootloader requires GOP or UGA (for 10.4 EfiBoot) to be present on console
+  handle, yet the exact location of the graphics protocol is not covered by the
+  UEFI specification. This option will ensure GOP and UGA, if present, are available
+  on the console handle.
 
   \emph{Note}: This option will also replace broken GOP protocol on console handle,
   which may be the case on \texttt{MacPro5,1} with newer GPUs.
@@ -5347,18 +5283,16 @@ functioning. Feature highlights:
    On all known affected systems \texttt{ConsoleMode} had to be set to
    empty string for this to work.
 
-\DIFaddbegin \item
-  \texttt{\DIFadd{UgaPassThrough}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Provide UGA protocol instances on top of GOP protocol.
-}
+\item
+  \texttt{UgaPassThrough}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Provide UGA protocol instances on top of GOP protocol.
 
-  \DIFadd{Some firmwares do not implement legacy UGA protocol, but it may be required
+  Some firmwares do not implement legacy UGA protocol, but it may be required
   for screen output by older EFI applications like EfiBoot from 10.4.
-}
 
-\DIFaddend \end{enumerate}
+\end{enumerate}
 
 
 \subsection{ProtocolOverrides Properties}\label{uefiprotoprops}
@@ -5412,16 +5346,15 @@ functioning. Feature highlights:
   version. This may be used to ensure File Vault 2 compatibility on VMs or legacy Macs.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{AppleFramebufferInfo}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Reinstalls Apple Framebuffer Info protocol with a builtin
+  \texttt{AppleFramebufferInfo}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple Framebuffer Info protocol with a builtin
   version. This may be used to override framebuffer information on VMs or legacy Macs
   to improve compatibility with legacy EfiBoot like the one in macOS 10.4.
-}
 
 \item
-  \DIFaddend \texttt{AppleImageConversion}\\
+  \texttt{AppleImageConversion}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Apple Image Conversion protocol with a builtin
@@ -5552,7 +5485,7 @@ functioning. Feature highlights:
   firmwares, ASUS firmwares on APTIO V in particular, have bugs. For them scanning is
   implemented improperly, and firmware preferences may get accidentally corrupted
   due to \texttt{BootOrder} entry duplication (each option will be added twice) making
-  it impossible to boot without \DIFdelbegin \DIFdel{cleaning }\DIFdelend \DIFaddbegin \DIFadd{resetting }\DIFaddend NVRAM.
+  it impossible to boot without resetting NVRAM.
 
   To trigger the bug one should have some valid boot options (e.g. OpenCore) and then
   install Windows with \texttt{RequestBootVarRouting} enabled. As Windows bootloader
@@ -5818,11 +5751,8 @@ page. For IDA Pro you will need IDA Pro 7.3 or newer, refer to
 for more details.
 
 To obtain the log during boot you can make the use of serial port debugging. Serial port
-debugging is enabled in \texttt{Target}, e.g. \texttt{0xB} for onscreen with serial. \DIFdelbegin \DIFdel{OpenCore
-uses }\DIFdelend \DIFaddbegin \DIFadd{To
-initialise serial within OpenCore use }\DIFaddend \texttt{\DIFdelbegin \DIFdel{115200}\DIFdelend \DIFaddbegin \DIFadd{SerialInit}\DIFaddend } \DIFdelbegin \DIFdel{baud rate, }\texttt{\DIFdel{8}} %DIFAUXCMD
-\DIFdel{data bits, no parity, and }\texttt{\DIFdel{1}} %DIFAUXCMD
-\DIFdel{stop bit}\DIFdelend \DIFaddbegin \DIFadd{configuration option}\DIFaddend .
+debugging is enabled in \texttt{Target}, e.g. \texttt{0xB} for onscreen with serial. To
+initialise serial within OpenCore use \texttt{SerialInit} configuration option.
 For macOS your best choice are CP2102-based UART devices. Connect motherboard \texttt{TX}
 to USB UART \texttt{RX}, and motherboard \texttt{GND} to USB UART \texttt{GND}. Use
 \texttt{screen} utility to get the output, or download GUI software, such as
@@ -5976,9 +5906,7 @@ you will need \texttt{debug=0x8} boot argument.
   necessary.
 
   Unfortunately for some quirks like \texttt{RebuildAppleMemoryMap},
-  \texttt{EnableWriteUnprotector}, \texttt{ProtectMemoryRegions}\DIFdelbegin \DIFdel{,
-  }\texttt{\DIFdel{RebuildAppleMemoryMap}}%DIFAUXCMD
-\DIFdelend ,
+  \texttt{EnableWriteUnprotector}, \texttt{ProtectMemoryRegions},
   \texttt{SetupVirtualMap}, and \texttt{SyncRuntimePermissions} there
   is no definite approach even on similar systems, so trying all their
   combinations may be required for optimal setup. Refer to individual quirk
