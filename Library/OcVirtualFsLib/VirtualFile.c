@@ -576,6 +576,33 @@ CreateVirtualFile (
   return EFI_SUCCESS;
 }
 
+EFI_STATUS
+CreateVirtualFileFileNameCopy (
+  IN     CHAR16             *FileName,
+  IN     VOID               *FileBuffer,
+  IN     UINT64             FileSize,
+  IN     EFI_TIME           *ModificationTime OPTIONAL,
+  IN OUT EFI_FILE_PROTOCOL  **File
+  )
+{
+  EFI_STATUS          Status;
+  CHAR16              *FileNameCopy;
+
+  FileNameCopy = AllocateCopyPool (StrSize (FileName), FileName);
+  if (FileNameCopy == NULL) {
+    DEBUG ((DEBUG_WARN, "OCVFS: Failed to allocate file name (%a) copy\n", FileName));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Status = CreateVirtualFile (FileNameCopy, FileBuffer, FileSize, ModificationTime, File);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OCVFS: Failed to virtualise file (%a)\n", FileName));
+    FreePool (FileNameCopy);
+    return EFI_OUT_OF_RESOURCES;
+  }
+  return Status;
+}
+
 STATIC
 VOID
 InternalInitVirtualVolumeData (
