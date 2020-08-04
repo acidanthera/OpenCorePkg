@@ -42,6 +42,8 @@ VirtualDirOpen (
   EFI_STATUS         Status;
   VIRTUAL_DIR_DATA   *Data;
 
+  ASSERT (This != NULL);
+
   Data = VIRTUAL_DIR_FROM_PROTOCOL (This);
 
   if (Data->UnderlyingProtocol != NULL) {
@@ -73,6 +75,8 @@ VirtualDirClose (
 {
   EFI_STATUS         Status;
   VIRTUAL_DIR_DATA   *Data;
+
+  ASSERT (This != NULL);
 
   Data = VIRTUAL_DIR_FROM_PROTOCOL (This);
 
@@ -125,6 +129,9 @@ VirtualDirRead (
   VIRTUAL_DIR_ENTRY     *DirEntry;
   UINTN                 ReadSize;
   UINTN                 FileStrSize;
+
+  ASSERT (This != NULL);
+  ASSERT (BufferSize != NULL);
 
   Data = VIRTUAL_DIR_FROM_PROTOCOL (This);
 
@@ -186,6 +193,8 @@ VirtualDirRead (
     return EFI_BUFFER_TOO_SMALL;
   }
 
+  ASSERT (Buffer != NULL);
+
   //
   // Copy entry to buffer and advance to next entry.
   //
@@ -221,13 +230,15 @@ VirtualDirSetPosition (
 {
   EFI_STATUS         Status;
   VIRTUAL_DIR_DATA   *Data;
+
+  ASSERT (This != NULL);
   
   Data = VIRTUAL_DIR_FROM_PROTOCOL (This);
 
   //
   // Non-zero requests are not supported for directories.
   //
-  if (Position != 0) {
+  if (Position > 0) {
     return EFI_UNSUPPORTED;
   }
 
@@ -269,36 +280,38 @@ VirtualDirGetInfo (
   OUT VOID                    *Buffer
   )
 {
-  //EFI_STATUS         Status;
   VIRTUAL_DIR_DATA   *Data;
   UINTN              InfoSize;  
   UINTN              NameSize;
   EFI_FILE_INFO      *FileInfo;
   BOOLEAN            Fits;
-  UINTN              BaseFileSize;
+
+  ASSERT (This != NULL);
+  ASSERT (InformationType != NULL);
+  ASSERT (BufferSize != NULL);
 
   Data = VIRTUAL_DIR_FROM_PROTOCOL (This);
 
   //
   // Get underlying protocol info.
   //
-  BaseFileSize = 0;
-
   if (CompareGuid (InformationType, &gEfiFileInfoGuid)) {
     STATIC_ASSERT (
       sizeof (FileInfo->FileName) == sizeof (CHAR16),
       "Header changed, flexible array member is now supported"
       );
 
-    FileInfo    = (EFI_FILE_INFO *) Buffer;
     NameSize    = StrSize (Data->FileName);
-    InfoSize    = sizeof (EFI_FILE_INFO) - sizeof (CHAR16) + NameSize;
+    InfoSize    = SIZE_OF_EFI_FILE_INFO + NameSize;
     Fits        = *BufferSize >= InfoSize;
     *BufferSize = InfoSize;
 
     if (!Fits) {
       return EFI_BUFFER_TOO_SMALL;
     }
+
+    ASSERT (Buffer != NULL);
+    FileInfo = (EFI_FILE_INFO *) Buffer;
 
     ZeroMem (FileInfo, InfoSize - NameSize);
     FileInfo->Size = InfoSize;
@@ -369,7 +382,6 @@ VirtualDirOpenEx (
   //  "The specified file could not be found on the device." error case.
   //  We do not care for simplicity.
   //
-
   Status = VirtualDirOpen (
     This,
     NewHandle,
@@ -500,6 +512,9 @@ VirtualDirCreateOverlayFileNameCopy (
 {
   EFI_STATUS          Status;
   CHAR16              *FileNameCopy;
+
+  ASSERT (FileName != NULL);
+  ASSERT (File != NULL);
 
   FileNameCopy = AllocateCopyPool (StrSize (FileName), FileName);
   if (FileNameCopy == NULL) {
