@@ -21,27 +21,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 EFI_STATUS
 EFIAPI
-AIKShimAmiKeycodeReset (
-  IN AMI_EFIKEYCODE_PROTOCOL  *This,
-  IN BOOLEAN                  ExtendedVerification
-  )
-{
-  if (This == NULL || gAikSelf.OurJobIsDone) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  if (This == gAikSelf.Source.AmiKeycode && !gAikSelf.InPollKeyboardEvent) {
-    //
-    // Do not touch any protocol but ours.
-    //
-    AIKDataReset (&gAikSelf.Data);
-  }
-
-  return gAikSelf.Source.AmiReset (This, ExtendedVerification);
-}
-
-EFI_STATUS
-EFIAPI
 AIKShimAmiKeycodeReadEfikey (
   IN  AMI_EFIKEYCODE_PROTOCOL  *This,
   OUT AMI_EFI_KEY_DATA         *KeyData
@@ -62,27 +41,6 @@ AIKShimAmiKeycodeReadEfikey (
   }
 
   return gAikSelf.Source.AmiReadEfikey (This, KeyData);
-}
-
-EFI_STATUS
-EFIAPI
-AIKShimTextInputReset (
-  IN EFI_SIMPLE_TEXT_INPUT_PROTOCOL   *This,
-  IN BOOLEAN                          ExtendedVerification
-  )
-{
-  if (This == NULL || gAikSelf.OurJobIsDone) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  if (This == gAikSelf.Source.TextInput && !gAikSelf.InPollKeyboardEvent) {
-    //
-    // Do not touch any protocol but ours.
-    //
-    AIKDataReset (&gAikSelf.Data);
-  }
-
-  return gAikSelf.Source.TextReset (This, ExtendedVerification);
 }
 
 EFI_STATUS
@@ -123,27 +81,6 @@ AIKShimTextInputReadKeyStroke (
   }
 
   return gAikSelf.Source.TextReadKeyStroke (This, Key);
-}
-
-EFI_STATUS
-EFIAPI
-AIKShimTextInputResetEx (
-  IN EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *This,
-  IN BOOLEAN                            ExtendedVerification
-  )
-{
-  if (This == NULL || gAikSelf.OurJobIsDone) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  if (This == gAikSelf.Source.TextInputEx && !gAikSelf.InPollKeyboardEvent) {
-    //
-    // Do not touch any protocol but ours.
-    //
-    AIKDataReset (&gAikSelf.Data);
-  }
-
-  return gAikSelf.Source.TextResetEx (This, ExtendedVerification);
 }
 
 EFI_STATUS

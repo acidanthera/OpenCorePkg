@@ -21,13 +21,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 EFI_STATUS
 EFIAPI
-AIKShimAmiKeycodeReset (
-  IN AMI_EFIKEYCODE_PROTOCOL  *This,
-  IN BOOLEAN                  ExtendedVerification
-  );
-
-EFI_STATUS
-EFIAPI
 AIKShimAmiKeycodeReadEfikey (
   IN  AMI_EFIKEYCODE_PROTOCOL  *This,
   OUT AMI_EFI_KEY_DATA         *KeyData
@@ -35,23 +28,9 @@ AIKShimAmiKeycodeReadEfikey (
 
 EFI_STATUS
 EFIAPI
-AIKShimTextInputReset (
-  IN EFI_SIMPLE_TEXT_INPUT_PROTOCOL   *This,
-  IN BOOLEAN                          ExtendedVerification
-  );
-
-EFI_STATUS
-EFIAPI
 AIKShimTextInputReadKeyStroke (
   IN  EFI_SIMPLE_TEXT_INPUT_PROTOCOL  *This,
   OUT EFI_INPUT_KEY                   *Key
-  );
-
-EFI_STATUS
-EFIAPI
-AIKShimTextInputResetEx (
-  IN EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *This,
-  IN BOOLEAN                            ExtendedVerification
   );
 
 EFI_STATUS
