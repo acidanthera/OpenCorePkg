@@ -29,6 +29,7 @@
 #
 
 [Sources]
+  VirtualDir.c
   VirtualFile.c
   VirtualFs.c
   VirtualFsInternal.h

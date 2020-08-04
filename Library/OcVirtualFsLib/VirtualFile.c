@@ -42,6 +42,10 @@ VirtualFileOpen (
   EFI_STATUS         Status;
   VIRTUAL_FILE_DATA  *Data;
 
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
   if (Data->OpenCallback != NULL) {
@@ -85,6 +89,10 @@ VirtualFileClose (
   EFI_STATUS         Status;
   VIRTUAL_FILE_DATA  *Data;
 
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
   if (Data->OriginalProtocol == NULL) {
@@ -112,6 +120,10 @@ VirtualFileDelete (
 {
   EFI_STATUS         Status;
   VIRTUAL_FILE_DATA  *Data;
+
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -145,6 +157,12 @@ VirtualFileRead (
   VIRTUAL_FILE_DATA  *Data;
   UINT64             ReadSize;
   UINTN              ReadBufferSize;
+
+  if (This == NULL
+    || BufferSize == NULL
+    || Buffer == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -195,6 +213,10 @@ VirtualFileWrite (
 {
   VIRTUAL_FILE_DATA  *Data;
 
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
   if (Data->OriginalProtocol == NULL) {
@@ -220,6 +242,10 @@ VirtualFileSetPosition (
   )
 {
   VIRTUAL_FILE_DATA  *Data;
+
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -252,6 +278,11 @@ VirtualFileGetPosition (
 {
   VIRTUAL_FILE_DATA  *Data;
 
+  if (This == NULL
+    || Position == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
   if (Data->OriginalProtocol == NULL) {
@@ -282,6 +313,12 @@ VirtualFileGetInfo (
   EFI_FILE_INFO      *FileInfo;
   BOOLEAN            Fits;
 
+  if (This == NULL
+    || InformationType == NULL
+    || BufferSize == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
   if (Data->OriginalProtocol == NULL) {
@@ -291,15 +328,19 @@ VirtualFileGetInfo (
         "Header changed, flexible array member is now supported"
         );
 
-      FileInfo    = (EFI_FILE_INFO *) Buffer;
       NameSize    = StrSize (Data->FileName);
-      InfoSize    = sizeof (EFI_FILE_INFO) - sizeof (CHAR16) + NameSize;
+      InfoSize    = SIZE_OF_EFI_FILE_INFO + NameSize;
       Fits        = *BufferSize >= InfoSize;
       *BufferSize = InfoSize;
 
       if (!Fits) {
         return EFI_BUFFER_TOO_SMALL;
       }
+
+      if (Buffer == NULL) {
+        return EFI_INVALID_PARAMETER;
+      }
+      FileInfo = (EFI_FILE_INFO *) Buffer;
 
       ZeroMem (FileInfo, InfoSize - NameSize);
       FileInfo->Size         = InfoSize;
@@ -355,6 +396,10 @@ VirtualFileSetInfo (
 {
   VIRTUAL_FILE_DATA  *Data;
 
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
   if (Data->OriginalProtocol == NULL) {
@@ -380,6 +425,10 @@ VirtualFileFlush (
   )
 {
   VIRTUAL_FILE_DATA  *Data;
+
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -418,7 +467,6 @@ VirtualFileOpenEx (
   //  "The specified file could not be found on the device." error case.
   //  We do not care for simplicity.
   //
-
   Status = VirtualFileOpen (
     This,
     NewHandle,
@@ -445,6 +493,11 @@ VirtualFileReadEx (
 {
   EFI_STATUS         Status;
   VIRTUAL_FILE_DATA  *Data;
+
+  if (This == NULL
+    || Token == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -475,6 +528,8 @@ VirtualFileWriteEx (
 {
   VIRTUAL_FILE_DATA  *Data;
 
+  ASSERT (This != NULL);
+
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
   if (Data->OriginalProtocol == NULL) {
@@ -499,6 +554,10 @@ VirtualFileFlushEx (
   )
 {
   VIRTUAL_FILE_DATA  *Data;
+
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -538,11 +597,11 @@ mVirtualFileProtocolTemplate = {
 
 EFI_STATUS
 CreateVirtualFile (
-  IN     CHAR16             *FileName,
-  IN     VOID               *FileBuffer,
-  IN     UINT64             FileSize,
-  IN     EFI_TIME           *ModificationTime OPTIONAL,
-  IN OUT EFI_FILE_PROTOCOL  **File
+  IN  CHAR16             *FileName,
+  IN  VOID               *FileBuffer,
+  IN  UINT64             FileSize,
+  IN  CONST EFI_TIME     *ModificationTime OPTIONAL,
+  OUT EFI_FILE_PROTOCOL  **File
   )
 {
   VIRTUAL_FILE_DATA  *Data;
@@ -576,6 +635,36 @@ CreateVirtualFile (
   return EFI_SUCCESS;
 }
 
+EFI_STATUS
+CreateVirtualFileFileNameCopy (
+  IN  CONST CHAR16       *FileName,
+  IN  VOID               *FileBuffer,
+  IN  UINT64             FileSize,
+  IN  CONST EFI_TIME     *ModificationTime OPTIONAL,
+  OUT EFI_FILE_PROTOCOL  **File
+  )
+{
+  EFI_STATUS          Status;
+  CHAR16              *FileNameCopy;
+
+  ASSERT (FileName != NULL);
+  ASSERT (File != NULL);
+
+  FileNameCopy = AllocateCopyPool (StrSize (FileName), FileName);
+  if (FileNameCopy == NULL) {
+    DEBUG ((DEBUG_WARN, "OCVFS: Failed to allocate file name (%a) copy\n", FileName));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Status = CreateVirtualFile (FileNameCopy, FileBuffer, FileSize, ModificationTime, File);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OCVFS: Failed to virtualise file (%a)\n", FileName));
+    FreePool (FileNameCopy);
+    return EFI_OUT_OF_RESOURCES;
+  }
+  return Status;
+}
+
 STATIC
 VOID
 InternalInitVirtualVolumeData (
@@ -591,10 +680,10 @@ InternalInitVirtualVolumeData (
 
 EFI_STATUS
 CreateRealFile (
-  IN     EFI_FILE_PROTOCOL  *OriginalFile OPTIONAL,
-  IN     EFI_FILE_OPEN      OpenCallback OPTIONAL,
-  IN     BOOLEAN            CloseOnFailure,
-  IN OUT EFI_FILE_PROTOCOL  **File
+  IN  EFI_FILE_PROTOCOL  *OriginalFile OPTIONAL,
+  IN  EFI_FILE_OPEN      OpenCallback OPTIONAL,
+  IN  BOOLEAN            CloseOnFailure,
+  OUT EFI_FILE_PROTOCOL  **File
   )
 {
   VIRTUAL_FILE_DATA  *Data;

@@ -17,6 +17,7 @@
 
 #include <Uefi.h>
 #include <Protocol/SimpleFileSystem.h>
+#include <Guid/FileInfo.h>
 
 #define VIRTUAL_VOLUME_DATA_SIGNATURE  \
   SIGNATURE_32 ('V', 'F', 'S', 'v')
@@ -40,8 +41,27 @@
     VIRTUAL_FILE_DATA_SIGNATURE  \
     )
 
+#define VIRTUAL_DIR_DATA_SIGNATURE  \
+  SIGNATURE_32 ('V', 'F', 'S', 'd')
+
+#define VIRTUAL_DIR_FROM_PROTOCOL(This) \
+  CR (                           \
+    This,                        \
+    VIRTUAL_DIR_DATA,            \
+    Protocol,                    \
+    VIRTUAL_DIR_DATA_SIGNATURE   \
+    )
+
 typedef struct VIRTUAL_FILESYSTEM_DATA_ VIRTUAL_FILESYSTEM_DATA;
 typedef struct VIRTUAL_FILE_DATA_ VIRTUAL_FILE_DATA;
+typedef struct VIRTUAL_DIR_DATA_ VIRTUAL_DIR_DATA;
+
+struct VIRTUAL_FILESYSTEM_DATA_ {
+  UINT32                           Signature;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *OriginalFileSystem;
+  EFI_FILE_OPEN                    OpenCallback;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  FileSystem;
+};
 
 struct VIRTUAL_FILE_DATA_ {
   UINT32                   Signature;
@@ -55,11 +75,38 @@ struct VIRTUAL_FILE_DATA_ {
   EFI_FILE_PROTOCOL        Protocol;
 };
 
-struct VIRTUAL_FILESYSTEM_DATA_ {
-  UINT32                           Signature;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *OriginalFileSystem;
-  EFI_FILE_OPEN                    OpenCallback;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  FileSystem;
+struct VIRTUAL_DIR_DATA_ {
+  UINT32                   Signature;
+  CHAR16                   *FileName;
+  LIST_ENTRY               Entries;
+  LIST_ENTRY               *CurrentEntry;
+  EFI_TIME                 ModificationTime;
+  EFI_FILE_PROTOCOL        *UnderlyingProtocol;
+  EFI_FILE_PROTOCOL        Protocol;
 };
+
+typedef struct {
+  UINT32                   Signature;
+  LIST_ENTRY               Link;
+  EFI_FILE_INFO            *FileInfo;
+} VIRTUAL_DIR_ENTRY;
+
+//
+// PRELINKED_KEXT signature for list identification.
+//
+#define VIRTUAL_DIR_ENTRY_SIGNATURE  SIGNATURE_32 ('V', 'S', 'd', 'L')
+
+/**
+  Gets the next element in list of VIRTUAL_DIR_ENTRY.
+
+  @param[in] This  The current ListEntry.
+**/
+#define GET_VIRTUAL_DIR_ENTRY_FROM_LINK(This)  \
+  (CR (                                        \
+    (This),                                    \
+    VIRTUAL_DIR_ENTRY,                         \
+    Link,                                      \
+    VIRTUAL_DIR_ENTRY_SIGNATURE                \
+    ))
 
 #endif // VIRTUAL_FS_INTERNAL_H

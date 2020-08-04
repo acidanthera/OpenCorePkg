@@ -69,9 +69,9 @@ mVirtualFileSystemProtocolTemplate = {
 
 EFI_STATUS
 CreateVirtualFs (
-  IN     EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *OriginalFileSystem,
-  IN     EFI_FILE_OPEN                    OpenCallback,
-  IN OUT EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  **NewFileSystem
+  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *OriginalFileSystem,
+  IN  EFI_FILE_OPEN                    OpenCallback,
+  OUT EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  **NewFileSystem
   )
 {
   UINTN                    Index;
