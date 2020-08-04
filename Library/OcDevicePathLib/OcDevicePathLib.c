@@ -328,7 +328,7 @@ InternalExpandNewPath (
     return -1;
   }
 
-  PrefixSize = (UINTN) DevicePathNode - (UINTN) *DevicePath;
+  PrefixSize = (UINTN) *DevicePathNode - (UINTN) *DevicePath;
   //
   // Expand the Device Path based of the HD node and sanity-check it
   // likely describes the intended path.
