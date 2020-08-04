@@ -27,6 +27,8 @@
 #include <Library/OcDevicePathLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
+#include <Library/OcDebugLogLib.h>
+
 EFI_DEVICE_PATH_PROTOCOL *
 AppendFileNameDevicePath (
   IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
@@ -310,6 +312,9 @@ InternalExpandNewPath (
   UINTN                    PrefixSize;
   EFI_DEVICE_PATH_PROTOCOL *ExpandedPath;
   EFI_DEVICE_PATH_PROTOCOL *ExpandedNode;
+
+  DebugPrintDevicePath (DEBUG_VERBOSE, "Expanding new DP from", *DevicePath);
+  DebugPrintDevicePath (DEBUG_VERBOSE, "at node", *DevicePathNode);
   //
   // Find HD node to locate a valid Device Path of. We require the prefix
   // till the offending node (ATAPI in this case, which should be
@@ -322,6 +327,7 @@ InternalExpandNewPath (
     MEDIA_HARDDRIVE_DP
     );
   if (HdNode == NULL) {
+    DEBUG ((DEBUG_VERBOSE, "Failed to find HD node\n"));
     //
     // Expansion makes little sense when we don't have a HD node.
     //
@@ -338,11 +344,13 @@ InternalExpandNewPath (
     ExpandedPath != NULL;
     ExpandedPath = OcGetNextLoadOptionDevicePath (HdNode, ExpandedPath)
   ) {
+    DebugPrintDevicePath (DEBUG_VERBOSE, "DP candidate", ExpandedPath);
     //
     // Skip this expansion if the prefix does not match.
     //
     if (GetDevicePathSize (ExpandedPath) < PrefixSize
      || CompareMem (ExpandedPath, *DevicePath, PrefixSize) != 0) {
+      DEBUG ((DEBUG_VERBOSE, "Prefix does not match\n"));
       continue;
     }
     //
@@ -352,6 +360,18 @@ InternalExpandNewPath (
     //
     ExpandedNode = (EFI_DEVICE_PATH_PROTOCOL *) (
       (UINTN) ExpandedPath + PrefixSize
+      );
+
+    DebugPrintDevicePath (DEBUG_VERBOSE, "accepted DP", ExpandedPath);
+    DebugPrintDevicePath (DEBUG_VERBOSE, "fix starting at", ExpandedNode);
+
+    DEBUG_CODE (
+      EFI_DEVICE_PATH_PROTOCOL *RemDevPath = ExpandedPath;
+      EFI_HANDLE Dev;
+      EFI_STATUS Status = gBS->LocateDevicePath (&gEfiDevicePathProtocolGuid, &RemDevPath, &Dev);
+      if (EFI_ERROR (Status) || RemDevPath->Type != END_DEVICE_PATH_TYPE || RemDevPath->SubType != END_ENTIRE_DEVICE_PATH_SUBTYPE) {
+        DEBUG ((DEBUG_VERBOSE, "borked piece of crap\n"));
+      }
       );
 
     *DevicePath     = ExpandedPath;
