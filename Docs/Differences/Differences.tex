@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Aug  3 19:08:50 2020
-%DIF ADD ../Configuration.tex        Mon Aug  3 19:14:02 2020
+%DIF DEL PreviousConfiguration.tex   Wed Aug  5 06:12:32 2020
+%DIF ADD ../Configuration.tex        Wed Aug  5 06:19:42 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -822,6 +822,9 @@ for extensive messages that should not appear in NVRAM log that is heavily limit
 
 When trying to find the problematic change it is useful to rely on
 \href{https://git-scm.com/docs/git-bisect}{\texttt{git-bisect}} functionality.
+\DIFaddbegin \DIFadd{There also are some unnoficial resources that provide per-commit binary
+builds of OpenCore, like }\href{https://dortania.github.io/builds}{Dortania}\DIFadd{.
+}\DIFaddend 
 
 \section{ACPI}\label{acpi}
 
@@ -3020,6 +3023,25 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 
   \emph{Note 2}: Be warned that while NVRAM reset executed from OpenCore should not erase the boot
   option created in \texttt{Bootstrap}, executing NVRAM reset prior to loading OpenCore will remove it.
+\DIFaddbegin 
+
+\item
+  \texttt{\DIFadd{DmgLoading}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Signed}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Attempt to provide bootloader persistence.
+}
+
+  \DIFadd{Valid values:
+}
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{Disabled}} \DIFadd{--- loading DMG images will fail.
+  }\item \texttt{\DIFadd{Signed}} \DIFadd{--- only Apple-signed DMG images will load.
+  }\item \texttt{\DIFadd{Any}} \DIFadd{--- any DMG images will mount as normal filesystems.
+  }\end{itemize}
+\DIFaddend 
 
 \item
   \texttt{ExposeSensitiveData}\\

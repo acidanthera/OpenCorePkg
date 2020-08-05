@@ -980,12 +980,12 @@ InternalLoadBootEntry (
   ParentFilePath     = NULL;
 
   if (BootEntry->IsFolder) {
-    if ((Context->LoadPolicy & OC_LOAD_ALLOW_DMG_BOOT) == 0) {
+    if (Context->DmgLoading == OcDmgLoadingDisabled) {
       return EFI_SECURITY_VIOLATION;
     }
 
     DmgLoadContext->DevicePath = BootEntry->DevicePath;
-    DevicePath = InternalLoadDmg (DmgLoadContext, Context->LoadPolicy);
+    DevicePath = InternalLoadDmg (DmgLoadContext, Context->DmgLoading);
     if (DevicePath == NULL) {
       return EFI_UNSUPPORTED;
     }

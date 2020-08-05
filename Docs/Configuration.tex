@@ -762,6 +762,8 @@ for extensive messages that should not appear in NVRAM log that is heavily limit
 
 When trying to find the problematic change it is useful to rely on
 \href{https://git-scm.com/docs/git-bisect}{\texttt{git-bisect}} functionality.
+There also are some unnoficial resources that provide per-commit binary
+builds of OpenCore, like \href{https://dortania.github.io/builds}{Dortania}.
 
 \section{ACPI}\label{acpi}
 
@@ -2960,6 +2962,21 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 
   \emph{Note 2}: Be warned that while NVRAM reset executed from OpenCore should not erase the boot
   option created in \texttt{Bootstrap}, executing NVRAM reset prior to loading OpenCore will remove it.
+
+\item
+  \texttt{DmgLoading}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Signed}\\
+  \textbf{Description}: Attempt to provide bootloader persistence.
+
+  Valid values:
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Disabled} --- loading DMG images will fail.
+  \item \texttt{Signed} --- only Apple-signed DMG images will load.
+  \item \texttt{Any} --- any DMG images will mount as normal filesystems.
+  \end{itemize}
 
 \item
   \texttt{ExposeSensitiveData}\\

@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.6.1
 - Improved recognition of early pressed hotkeys, thx @varahash
+- Made DMG loading support configurable via `DmgLoading`
 
 #### v0.6.0
 - Fixed sound corruption with AudioDxe

@@ -364,65 +364,13 @@ typedef struct OC_BOOT_CONTEXT_ {
   OC_SCAN_ALLOW_DEVICE_PCI)
 
 /**
-  OcLoadBootEntry Mode policy bits allow to configure OcLoadBootEntry behaviour.
+  OcLoadBootEntry DMG loading policy rules.
 **/
-
-/**
-  Thin EFI image loading (normal PE) is allowed.
-**/
-#define OC_LOAD_ALLOW_EFI_THIN_BOOT  BIT0
-/**
-  FAT EFI image loading (Apple FAT PE) is allowed.
-  These can be found on macOS 10.8 and below.
-**/
-#define OC_LOAD_ALLOW_EFI_FAT_BOOT   BIT1
-/**
-  One level recursion into dmg file is allowed.
-  It is assumed that dmg contains a single volume and a single blessed entry.
-  Loading dmg from dmg is not allowed in any case.
-**/
-#define OC_LOAD_ALLOW_DMG_BOOT       BIT2
-/**
-  Abort loading on invalid Apple-like signature.
-  If file is signed with Apple-like signature, and it is mismatched, then abort.
-  @warn Unsigned files or UEFI-signed files will skip this check.
-  @warn It is ignored what certificate was used for signing.
-**/
-#define OC_LOAD_VERIFY_APPLE_SIGN    BIT8
-/**
-  Abort loading on missing Apple-like signature.
-  If file is not signed with Apple-like signature (valid or not) then abort.
-  @warn Unsigned files or UEFI-signed files will not load with this check.
-  @warn Without OC_LOAD_VERIFY_APPLE_SIGN corrupted binaries may still load.
-**/
-#define OC_LOAD_REQUIRE_APPLE_SIGN   BIT9
-/**
-  Abort loading on untrusted key (otherwise may warn).
-  @warn Unsigned files or UEFI-signed files will skip this check.
-**/
-#define OC_LOAD_REQUIRE_TRUSTED_KEY  BIT10
-/**
-  Trust specified (as OcLoadBootEntry argument) custom keys.
-**/
-#define OC_LOAD_TRUST_CUSTOM_KEY     BIT16
-/**
-  Trust Apple CFFD3E6B public key.
-  TODO: Move certificates from ApplePublicKeyDb.h to EfiPkg?
-**/
-#define OC_LOAD_TRUST_APPLE_V1_KEY   BIT17
-/**
-  Trust Apple E50AC288 public key.
-  TODO: Move certificates from ApplePublicKeyDb.h to EfiPkg?
-**/
-#define OC_LOAD_TRUST_APPLE_V2_KEY   BIT18
-/**
-  Default moderate policy meant to augment secure boot facilities.
-  Loads almost everything and bypasses secure boot for Apple and Custom signed binaries.
-**/
-#define OC_LOAD_DEFAULT_POLICY ( \
-  OC_LOAD_ALLOW_EFI_THIN_BOOT | OC_LOAD_ALLOW_DMG_BOOT      | OC_LOAD_REQUIRE_APPLE_SIGN | \
-  OC_LOAD_VERIFY_APPLE_SIGN   | OC_LOAD_REQUIRE_TRUSTED_KEY | \
-  OC_LOAD_TRUST_CUSTOM_KEY    | OC_LOAD_TRUST_APPLE_V1_KEY  | OC_LOAD_TRUST_APPLE_V2_KEY)
+typedef enum {
+  OcDmgLoadingDisabled,
+  OcDmgLoadingAnyImage,
+  OcDmgLoadingAppleSigned,
+} OC_DMG_LOADING_SUPPORT;
 
 /**
   Exposed start interface with chosen boot entry but otherwise equivalent
@@ -544,9 +492,9 @@ struct OC_PICKER_CONTEXT_ {
   //
   UINT32                     ScanPolicy;
   //
-  // Load policy (e.g. OC_LOAD_DEFAULT_POLICY).
+  // DMG loading mode (e.g. OcDmgLoadingAppleSigned).
   //
-  UINT32                     LoadPolicy;
+  OC_DMG_LOADING_SUPPORT     DmgLoading;
   //
   // Default entry selection timeout (pass 0 to ignore).
   //

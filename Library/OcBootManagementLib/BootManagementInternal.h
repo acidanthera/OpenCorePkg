@@ -52,7 +52,7 @@ InternalCheckScanPolicy (
 EFI_DEVICE_PATH_PROTOCOL *
 InternalLoadDmg (
   IN OUT INTERNAL_DMG_LOAD_CONTEXT   *Context,
-  IN     UINT32                      Policy
+  IN     OC_DMG_LOADING_SUPPORT      DmgLoading
   );
 
 VOID
