@@ -47,9 +47,9 @@
 #define VIRTUAL_DIR_FROM_PROTOCOL(This) \
   CR (                           \
     This,                        \
-    VIRTUAL_DIR_DATA,           \
+    VIRTUAL_DIR_DATA,            \
     Protocol,                    \
-    VIRTUAL_DIR_DATA_SIGNATURE  \
+    VIRTUAL_DIR_DATA_SIGNATURE   \
     )
 
 typedef struct VIRTUAL_FILESYSTEM_DATA_ VIRTUAL_FILESYSTEM_DATA;
@@ -102,10 +102,10 @@ typedef struct {
   @param[in] This  The current ListEntry.
 **/
 #define GET_VIRTUAL_DIR_ENTRY_FROM_LINK(This)  \
-  (CR (                                     \
-    (This),                                 \
+  (CR (                                        \
+    (This),                                    \
     VIRTUAL_DIR_ENTRY,                         \
-    Link,                                   \
+    Link,                                      \
     VIRTUAL_DIR_ENTRY_SIGNATURE                \
     ))
 

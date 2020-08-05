@@ -42,7 +42,9 @@ VirtualFileOpen (
   EFI_STATUS         Status;
   VIRTUAL_FILE_DATA  *Data;
 
-  ASSERT (This != NULL);
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -87,7 +89,9 @@ VirtualFileClose (
   EFI_STATUS         Status;
   VIRTUAL_FILE_DATA  *Data;
 
-  ASSERT (This != NULL);
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -117,7 +121,9 @@ VirtualFileDelete (
   EFI_STATUS         Status;
   VIRTUAL_FILE_DATA  *Data;
 
-  ASSERT (This != NULL);
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -152,9 +158,11 @@ VirtualFileRead (
   UINT64             ReadSize;
   UINTN              ReadBufferSize;
 
-  ASSERT (This != NULL);
-  ASSERT (BufferSize != NULL);
-  ASSERT (Buffer != NULL);
+  if (This == NULL
+    || BufferSize == NULL
+    || Buffer == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -205,7 +213,9 @@ VirtualFileWrite (
 {
   VIRTUAL_FILE_DATA  *Data;
 
-  ASSERT (This != NULL);
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -233,7 +243,9 @@ VirtualFileSetPosition (
 {
   VIRTUAL_FILE_DATA  *Data;
 
-  ASSERT (This != NULL);
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -266,8 +278,10 @@ VirtualFileGetPosition (
 {
   VIRTUAL_FILE_DATA  *Data;
 
-  ASSERT (This != NULL);
-  ASSERT (Position != NULL);
+  if (This == NULL
+    || Position == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -299,9 +313,11 @@ VirtualFileGetInfo (
   EFI_FILE_INFO      *FileInfo;
   BOOLEAN            Fits;
 
-  ASSERT (This != NULL);
-  ASSERT (InformationType != NULL);
-  ASSERT (BufferSize != NULL);
+  if (This == NULL
+    || InformationType == NULL
+    || BufferSize == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -321,7 +337,9 @@ VirtualFileGetInfo (
         return EFI_BUFFER_TOO_SMALL;
       }
 
-      ASSERT (Buffer != NULL);
+      if (Buffer == NULL) {
+        return EFI_INVALID_PARAMETER;
+      }
       FileInfo = (EFI_FILE_INFO *) Buffer;
 
       ZeroMem (FileInfo, InfoSize - NameSize);
@@ -378,7 +396,9 @@ VirtualFileSetInfo (
 {
   VIRTUAL_FILE_DATA  *Data;
 
-  ASSERT (This != NULL);
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -406,7 +426,9 @@ VirtualFileFlush (
 {
   VIRTUAL_FILE_DATA  *Data;
 
-  ASSERT (This != NULL);
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -445,7 +467,6 @@ VirtualFileOpenEx (
   //  "The specified file could not be found on the device." error case.
   //  We do not care for simplicity.
   //
-
   Status = VirtualFileOpen (
     This,
     NewHandle,
@@ -473,8 +494,10 @@ VirtualFileReadEx (
   EFI_STATUS         Status;
   VIRTUAL_FILE_DATA  *Data;
 
-  ASSERT (This != NULL);
-  ASSERT (Token != NULL);
+  if (This == NULL
+    || Token == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -532,7 +555,9 @@ VirtualFileFlushEx (
 {
   VIRTUAL_FILE_DATA  *Data;
 
-  ASSERT (This != NULL);
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_FILE_FROM_PROTOCOL (This);
 
@@ -575,7 +600,7 @@ CreateVirtualFile (
   IN     CHAR16             *FileName,
   IN     VOID               *FileBuffer,
   IN     UINT64             FileSize,
-  IN     EFI_TIME           *ModificationTime OPTIONAL,
+  IN     CONST EFI_TIME     *ModificationTime OPTIONAL,
   IN OUT EFI_FILE_PROTOCOL  **File
   )
 {
@@ -612,10 +637,10 @@ CreateVirtualFile (
 
 EFI_STATUS
 CreateVirtualFileFileNameCopy (
-  IN     CHAR16             *FileName,
+  IN     CONST CHAR16       *FileName,
   IN     VOID               *FileBuffer,
   IN     UINT64             FileSize,
-  IN     EFI_TIME           *ModificationTime OPTIONAL,
+  IN     CONST EFI_TIME     *ModificationTime OPTIONAL,
   IN OUT EFI_FILE_PROTOCOL  **File
   )
 {

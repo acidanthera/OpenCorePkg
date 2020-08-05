@@ -25,7 +25,7 @@
   Creates read-only EFI_FILE_PROTOCOL instance over a buffer allocated
   from pool. On success FileName and FileData ownership is transferred
   to the resulting EFI_FILE_PROTOCOL, which frees them with FreePool
-  upon closing EFI_FILE_PROTOCOL.
+  upon closing EFI_FILE_PROTOCOL. All other fields are copied.
 
   Resulting EFI_FILE_PROTOCOL has 2nd revision, but may be downgraded
   to 1st by updating the corresponding field.
@@ -43,15 +43,15 @@ CreateVirtualFile (
   IN     CHAR16             *FileName,
   IN     VOID               *FileBuffer,
   IN     UINT64             FileSize,
-  IN     EFI_TIME           *ModificationTime OPTIONAL,
+  IN     CONST EFI_TIME     *ModificationTime OPTIONAL,
   IN OUT EFI_FILE_PROTOCOL  **File
   );
 
 /**
   Creates read-only EFI_FILE_PROTOCOL instance over a buffer allocated
-  from pool, but copies FileName internally. On success FileData ownership is transferred
-  to the resulting EFI_FILE_PROTOCOL, which frees them with FreePool
-  upon closing EFI_FILE_PROTOCOL.
+  from pool. On success FileData ownership is transferred to the
+  resulting EFI_FILE_PROTOCOL, which frees them with FreePool upon
+  closing EFI_FILE_PROTOCOL. All other fields are copied.
 
   Resulting EFI_FILE_PROTOCOL has 2nd revision, but may be downgraded
   to 1st by updating the corresponding field.
@@ -66,10 +66,10 @@ CreateVirtualFile (
 **/
 EFI_STATUS
 CreateVirtualFileFileNameCopy (
-  IN     CHAR16             *FileName,
+  IN     CONST CHAR16       *FileName,
   IN     VOID               *FileBuffer,
   IN     UINT64             FileSize,
-  IN     EFI_TIME           *ModificationTime OPTIONAL,
+  IN     CONST EFI_TIME     *ModificationTime OPTIONAL,
   IN OUT EFI_FILE_PROTOCOL  **File
   );
 
@@ -97,9 +97,9 @@ CreateRealFile (
 /**
   Creates read-only EFI_FILE_PROTOCOL virtual directory instance,
   optionally as an overlay over an existing EFI_FILE_PROTOCOL instance.
-  On success ownership of FileName and UnderlyingFile
-  is transferred to the resulting EFI_FILE_PROTOCOL, which frees them
-  with FreePool upon closing EFI_FILE_PROTOCOL.
+  On success ownership of FileName and UnderlyingFile is transferred
+  to the resulting EFI_FILE_PROTOCOL, which frees them with FreePool
+  upon closing EFI_FILE_PROTOCOL. All other fields are copied.
 
   Resulting EFI_FILE_PROTOCOL has 2nd revision, but may be downgraded
   to 1st by updating the corresponding field.
@@ -114,7 +114,7 @@ CreateRealFile (
 EFI_STATUS
 VirtualDirCreateOverlay (
   IN     CHAR16             *FileName,
-  IN     EFI_TIME           *ModificationTime OPTIONAL,
+  IN     CONST EFI_TIME     *ModificationTime OPTIONAL,
   IN     EFI_FILE_PROTOCOL  *UnderlyingFile OPTIONAL,
   IN OUT EFI_FILE_PROTOCOL  **File
   );
@@ -122,9 +122,9 @@ VirtualDirCreateOverlay (
 /**
   Creates read-only EFI_FILE_PROTOCOL virtual directory instance,
   optionally as an overlay over an existing EFI_FILE_PROTOCOL instance.
-  On success, FileName is copied internally, and ownership of UnderlyingFile
-  is transferred to the resulting EFI_FILE_PROTOCOL, which frees them
-  with FreePool upon closing EFI_FILE_PROTOCOL.
+  On success, ownership of UnderlyingFile is transferred to the
+  resulting EFI_FILE_PROTOCOL, which frees them with FreePool upon
+  closing EFI_FILE_PROTOCOL. All other fields are copied.
 
   Resulting EFI_FILE_PROTOCOL has 2nd revision, but may be downgraded
   to 1st by updating the corresponding field.
@@ -138,20 +138,21 @@ VirtualDirCreateOverlay (
 **/
 EFI_STATUS
 VirtualDirCreateOverlayFileNameCopy (
-  IN     CHAR16             *FileName,
-  IN     EFI_TIME           *ModificationTime OPTIONAL,
+  IN     CONST CHAR16       *FileName,
+  IN     CONST EFI_TIME     *ModificationTime OPTIONAL,
   IN     EFI_FILE_PROTOCOL  *UnderlyingFile OPTIONAL,
   IN OUT EFI_FILE_PROTOCOL  **File
   );
 
 /**
-  Adds an EFI_FILE_INFO instance to the virtual directory.
-  Ownership of the instance is retained until the EFI_FILE_PROTOCOL is closed.
+  Adds an EFI_FILE_INFO instance to the virtual directory as a file entry.
+  Ownership of the EFI_FILE_INFO is transferred to the EFI_FILE_PROTOCOL,
+  which is freed with FreePool upon closing EFI_FILE_PROTOCOL.
 
   @param[in]      This             File protocol pointer.
   @param[in]      FileInfo         EFI_FILE_INFO instance pointer.
 
-  @return  EFI_SUCCESS if the instance was successfully added.
+  @return  EFI_SUCCESS if the entry was successfully added.
 **/
 EFI_STATUS
 VirtualDirAddEntry (

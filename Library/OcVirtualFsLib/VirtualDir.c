@@ -42,7 +42,9 @@ VirtualDirOpen (
   EFI_STATUS         Status;
   VIRTUAL_DIR_DATA   *Data;
 
-  ASSERT (This != NULL);
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_DIR_FROM_PROTOCOL (This);
 
@@ -76,7 +78,9 @@ VirtualDirClose (
   EFI_STATUS         Status;
   VIRTUAL_DIR_DATA   *Data;
 
-  ASSERT (This != NULL);
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_DIR_FROM_PROTOCOL (This);
 
@@ -130,8 +134,10 @@ VirtualDirRead (
   UINTN                 ReadSize;
   UINTN                 FileStrSize;
 
-  ASSERT (This != NULL);
-  ASSERT (BufferSize != NULL);
+  if (This == NULL
+    || BufferSize == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_DIR_FROM_PROTOCOL (This);
 
@@ -193,7 +199,9 @@ VirtualDirRead (
     return EFI_BUFFER_TOO_SMALL;
   }
 
-  ASSERT (Buffer != NULL);
+  if (Buffer == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   //
   // Copy entry to buffer and advance to next entry.
@@ -231,7 +239,9 @@ VirtualDirSetPosition (
   EFI_STATUS         Status;
   VIRTUAL_DIR_DATA   *Data;
 
-  ASSERT (This != NULL);
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
   
   Data = VIRTUAL_DIR_FROM_PROTOCOL (This);
 
@@ -286,9 +296,11 @@ VirtualDirGetInfo (
   EFI_FILE_INFO      *FileInfo;
   BOOLEAN            Fits;
 
-  ASSERT (This != NULL);
-  ASSERT (InformationType != NULL);
-  ASSERT (BufferSize != NULL);
+  if (This == NULL
+    || InformationType == NULL
+    || BufferSize == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   Data = VIRTUAL_DIR_FROM_PROTOCOL (This);
 
@@ -310,7 +322,9 @@ VirtualDirGetInfo (
       return EFI_BUFFER_TOO_SMALL;
     }
 
-    ASSERT (Buffer != NULL);
+    if (Buffer == NULL) {
+      return EFI_INVALID_PARAMETER;
+    }
     FileInfo = (EFI_FILE_INFO *) Buffer;
 
     ZeroMem (FileInfo, InfoSize - NameSize);
@@ -408,6 +422,11 @@ VirtualDirReadEx (
 {
   EFI_STATUS         Status;
 
+  if (This == NULL
+    || Token == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
   Status = VirtualDirRead (This, Token->Buffer, &Token->BufferSize);
 
   if (!EFI_ERROR (Status) && Token->Event != NULL) {
@@ -470,7 +489,7 @@ mVirtualDirProtocolTemplate = {
 EFI_STATUS
 VirtualDirCreateOverlay (
   IN     CHAR16             *FileName,
-  IN     EFI_TIME           *ModificationTime OPTIONAL,
+  IN     CONST EFI_TIME     *ModificationTime OPTIONAL,
   IN     EFI_FILE_PROTOCOL  *UnderlyingFile OPTIONAL,
   IN OUT EFI_FILE_PROTOCOL  **File
   )
@@ -504,8 +523,8 @@ VirtualDirCreateOverlay (
 
 EFI_STATUS
 VirtualDirCreateOverlayFileNameCopy (
-  IN     CHAR16             *FileName,
-  IN     EFI_TIME           *ModificationTime OPTIONAL,
+  IN     CONST CHAR16       *FileName,
+  IN     CONST EFI_TIME     *ModificationTime OPTIONAL,
   IN     EFI_FILE_PROTOCOL  *UnderlyingFile OPTIONAL,
   IN OUT EFI_FILE_PROTOCOL  **File
   )
