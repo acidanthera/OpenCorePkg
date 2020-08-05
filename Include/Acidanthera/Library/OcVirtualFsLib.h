@@ -116,7 +116,7 @@ VirtualDirCreateOverlay (
   IN     CHAR16             *FileName,
   IN     CONST EFI_TIME     *ModificationTime OPTIONAL,
   IN     EFI_FILE_PROTOCOL  *UnderlyingFile OPTIONAL,
-  IN OUT EFI_FILE_PROTOCOL  **File
+     OUT EFI_FILE_PROTOCOL  **File
   );
 
 /**
@@ -141,7 +141,7 @@ VirtualDirCreateOverlayFileNameCopy (
   IN     CONST CHAR16       *FileName,
   IN     CONST EFI_TIME     *ModificationTime OPTIONAL,
   IN     EFI_FILE_PROTOCOL  *UnderlyingFile OPTIONAL,
-  IN OUT EFI_FILE_PROTOCOL  **File
+     OUT EFI_FILE_PROTOCOL  **File
   );
 
 /**
