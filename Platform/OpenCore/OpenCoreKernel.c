@@ -29,6 +29,8 @@ STATIC OC_STORAGE_CONTEXT  *mOcStorage;
 STATIC OC_GLOBAL_CONFIG    *mOcConfiguration;
 STATIC OC_CPU_INFO         *mOcCpuInfo;
 
+STATIC UINT32              mOcDarwinVersion;
+
 STATIC CACHELESS_CONTEXT   mOcCachelessContext;
 STATIC BOOLEAN             mOcCachelessInProgress;
 
@@ -763,7 +765,7 @@ OcKernelInitCacheless (
     MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
     MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
 
-    /*if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
+    if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
       DEBUG ((
         DEBUG_INFO,
         "OC: Cacheless injection skips %a (%a) kext at %u due to version %u <= %u <= %u\n",
@@ -775,7 +777,7 @@ OcKernelInitCacheless (
         MaxKernel
         ));
       continue;
-    }*/ // TODO
+    }
 
     Status = CachelessContextAddKext (
       Context,
@@ -813,7 +815,6 @@ OcKernelFileOpen (
   EFI_FILE_PROTOCOL  *VirtualFileHandle;
   EFI_STATUS         PrelinkedStatus;
   EFI_TIME           ModificationTime;
-  UINT32             DarwinVersion;
   UINT32             ReservedInfoSize;
   UINT32             ReservedExeSize;
   UINT32             LinkedExpansion;
@@ -893,12 +894,12 @@ OcKernelFileOpen (
     DEBUG ((DEBUG_INFO, "OC: Result of XNU hook on %s is %r\n", FileName, Status));
 
     if (!EFI_ERROR (Status)) {
-      DarwinVersion = OcKernelReadDarwinVersion (Kernel, KernelSize);
-      OcKernelApplyPatches (mOcConfiguration, DarwinVersion, NULL, Kernel, KernelSize);
+      mOcDarwinVersion = OcKernelReadDarwinVersion (Kernel, KernelSize);
+      OcKernelApplyPatches (mOcConfiguration, mOcDarwinVersion, NULL, Kernel, KernelSize);
 
       PrelinkedStatus = OcKernelProcessPrelinked (
         mOcConfiguration,
-        DarwinVersion,
+        mOcDarwinVersion,
         Kernel,
         &KernelSize,
         AllocatedSize,
@@ -962,7 +963,7 @@ OcKernelFileOpen (
     Status = OcKernelInitCacheless (
       mOcConfiguration,
       &mOcCachelessContext,
-      0, //DarwinVersion,
+      mOcDarwinVersion,
       FileName,
       *NewHandle,
       &VirtualFileHandle
@@ -1018,6 +1019,7 @@ OcLoadKernelSupport (
     mOcStorage              = Storage;
     mOcConfiguration        = Config;
     mOcCpuInfo              = CpuInfo;
+    mOcDarwinVersion        = 0;
     mOcCachelessInProgress  = FALSE;
   } else {
     DEBUG ((DEBUG_ERROR, "OC: Failed to enable vfs - %r\n", Status));
