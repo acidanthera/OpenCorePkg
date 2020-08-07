@@ -1,0 +1,96 @@
+BIOSVendor: "Apple Inc."
+# FIXME:
+BIOSVersion: "1539.0.0.0.1"
+# FIXME:
+BIOSLegacyVersion: ""
+# FIXME:
+BIOSReleaseDate: "07/12/2020"
+SystemManufacturer: "Apple Inc."
+SystemProductName: "iMac20,1"
+SystemVersion: "1.0"
+# Note, this one is used by macserial
+SystemSerialNumber: "C02D38RCPN5T"
+SystemSKUNumber: ""
+SystemFamily: "iMac"
+BoardManufacturer: "Apple Inc."
+# This and similar ones can be an array itself, like this:
+# BoardProduct:
+#  "Mac-CFF7D910A743CAAF"
+#  "Mac-smthelse"
+BoardProduct: "Mac-CFF7D910A743CAAF"
+BoardVersion: "iMac20,1"
+# FIXME:
+BoardRevision: 0x1
+BoardAssetTag: ""
+BoardType: 0xA
+BoardLocationInChassis: ""
+ChassisManufacturer: "Apple Inc."
+ChassisType: 0xD
+ChassisVersion: "Mac-CFF7D910A743CAAF"
+ChassisAssetTag: ""
+# FIXME:
+PlatformFeature: 0x20
+# FIXME:
+FirmwareFeatures: 0xFD8FF576
+# FIXME:
+FirmwareFeaturesMask: 0xFFDFFF7F
+# FIXME:
+ExtendedFirmwareFeatures: 0x00000000FD8FF576
+# FIXME:
+ExtendedFirmwareFeaturesMask: 0x00000000FFDFFF7F
+MemoryFormFactor: 0x9
+# FIXME: Correct this one
+ProcessorType:
+  - 0x1009
+# FIXME: Correct this one
+ProcessorBusSpeed:
+  - 12345
+SmcGeneration: 3
+# FIXME: or 6a3138356600000000
+SmcPlatform:
+  - 0x6a
+  - 0x31
+  - 0x38
+  - 0x35
+  - 0x00
+  - 0x00
+  - 0x00
+  - 0x00
+# FIXME:
+OEMStrings: |-
+Specifications:
+  CPUCodename:
+    - "Comet Lake"
+    - "Comet Lake"
+    - "Comet Lake"
+    - "Comet Lake"
+  CPU:
+    - "Intel Core i5-10500 @ 3.10 GHz"
+    - "Intel Core i5-10600 @ 3.30 GHz"
+    - "Intel Core i7-10700KF @ 3.80 GHz"
+    - "Intel Core I9-10850K @ 3.60 GHz"
+  GPU:
+    - "Radeon Pro 5300"
+    - "Radeon Pro 5500 XT"
+    - "Radeon Pro 5700"
+    - "Radeon Pro 5700 XT"
+  RAM:
+    - "8GB 2666 MHz DDR4 SDRAM"
+  SystemReportName:
+    - "iMac (Retina 5K, 27-inch, 2020)"
+  MarketingName:
+    # FIXME
+    - "iMac (Retina 5K, 27-inch, 2020)"
+# Note, first model code is used by macserial
+AppleModelCode:
+  - "PN5T"
+# Note, first board code is used by macserial
+AppleBoardCode:
+  - "0000"
+# Note, first year is used by macserial
+AppleModelYear:
+  - 2020
+MinimumOSVersion: "10.15.6"
+MaximumOSVersion: null
+# FIXME: or J185F
+AppleModelId: "J185"

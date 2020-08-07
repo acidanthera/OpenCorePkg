@@ -116,6 +116,7 @@ typedef enum {
   iMac18_3, // Intel Core i5-7600K @ 3.80 GHz
   iMac19_1, // Intel Core i9-9900K @ 3.60 GHz
   iMac19_2, // Intel Core i5-8500 @ 3.00 GHz
+  iMac20_1, // Intel Core i5-10500 @ 3.10 GHz
   iMac4_1, // Intel Core Duo T2400 @ 1.83 GHz
   iMac4_2, // Intel Core Duo T2400 @ 1.83 GHz
   iMac5_1, // Intel Core 2 Duo T7200 @ 2.00 GHz
@@ -127,7 +128,7 @@ typedef enum {
   iMacPro1_1, // Intel Xeon W-2140B CPU @ 3.20 GHz
 } AppleModel;
 
-#define APPLE_MODEL_MAX 119
+#define APPLE_MODEL_MAX 120
 
 static PLATFORMDATA ApplePlatformData[] = {
   { "MacBook1,1", "W80A041AU9B" },
@@ -240,6 +241,7 @@ static PLATFORMDATA ApplePlatformData[] = {
   { "iMac18,3", "C02TDHACJ1GJ" },
   { "iMac19,1", "C02Y90H3JV3Q" },
   { "iMac19,2", "C02Y93YXJWDX" },
+  { "iMac20,1", "C02D38RCPN5T" },
   { "iMac4,1", "W8608HACU2P" },
   { "iMac4,2", "W8627HACV2H" },
   { "iMac5,1", "CK637HACX1A" },
@@ -363,6 +365,7 @@ static const char *AppleModelCode[][APPLE_MODEL_CODE_MAX] = {
   /* iMac18,3       */ {"J1GJ", "J1GQ", "J1GG", "J9XC", "J9X7", "J9X6", "J9X9", "JNGD", "JNGF", "JCCR", "JCCT", "JT72", "J9X8", "JM3R", "JM3V", "J1GR", "J1GP", "J1GV", "J1GT", "J1GK", "J1GH", "J1GN", "J1GL", "J1GM", "JCND", "JC5L", "JX8H", "J2GJ", "J609", "J60C"},
   /* iMac19,1       */ {"JV3Q", "JV3P", "JV40", "JV41", "JV42", "JV43", "MC9K", "MC9J", "MX7W", "JV3N", "JV3T", "JV3W", "JV3R", "JV3Y", "JV3X", "MW2R", "MW2P", "MW2Q", "MW2V", "MW2W", "MW2T", "MQQP", "NY2G", "P1WV", "MMTC"},
   /* iMac19,2       */ {"JWDW", "JWDX", "MQ87", "MC9M", "MC9L", "MRVM", "MPM0", "MW28", "JWDY", "MMTK", "MMTL", "MTML", "MCC1", "JWF3", "JWF2", "JWF1", "JWF0", "JWF4", "N6JT", "N9LN", "N07H"},
+  /* iMac20,1       */ {"PN5T"},
   /* iMac4,1        */ {"U2P", "V67", "V4Q", "VX0", "V4P", "V4R", "X0U", "U2S", "VH0", "VH2", "VW4", "WXN", "VGM", "VGC", "V66", "V4U", "V4N", "VV4", "VHP", "VH1", "VV6", "V4M", "U2N", "U2R", "VGB", "VGZ"},
   /* iMac4,2        */ {"V2H", "W8K", "WCV", "WAE", "WD4", "W9E", "X11", "V2J", "WKT"},
   /* iMac5,1        */ {"X1A", "X9G", "Y3U", "Y9B", "X29", "WRS", "WSD", "YAE", "X0E", "Y3R", "X9E", "XCR", "XCY", "XA4", "WRX", "X6S", "VUV", "VUW", "YDW", "X9Y", "Y3X", "YAG", "WVR", "WV8", "Y3W", "Y3V", "WAR", "X2W", "Y6K", "YLJ", "Y97", "X6Q", "WRR", "X9F", "Y94", "X1W", "WRW", "AC1", "XLF", "VUX", "VUY"},
@@ -486,6 +489,7 @@ static const char *AppleBoardCode[][APPLE_BOARD_CODE_MAX] = {
   /* iMac18,3       */ {"J0PG", "J0PH", "J0PJ", "J0PC", "J0PD", "J0PF", "HX77", "HX78", "HX79", "HX7C", "HX7D", "HX7F", "HNL6", "HNL7", "HNL8"},
   /* iMac19,1       */ {"LNV9", "KDP0", "KDN8"},
   /* iMac19,2       */ {"KGQG"},
+  /* iMac20,1       */ {"0000"},
   /* iMac4,1        */ {"000"},
   /* iMac4,2        */ {"000"},
   /* iMac5,1        */ {"000"},
@@ -609,6 +613,7 @@ static uint32_t AppleModelYear[][APPLE_MODEL_YEAR_MAX] = {
   /* iMac18,3       */ {2017, 2018, 2019},
   /* iMac19,1       */ {2019, 2020},
   /* iMac19,2       */ {2019, 2020},
+  /* iMac20,1       */ {2020},
   /* iMac4,1        */ {2006},
   /* iMac4,2        */ {2006},
   /* iMac5,1        */ {2006, 2007},
@@ -731,6 +736,7 @@ static uint32_t ApplePreferredModelYear[] = {
   /* iMac18,3       */ 0,
   /* iMac19,1       */ 0,
   /* iMac19,2       */ 0,
+  /* iMac20,1       */ 0,
   /* iMac4,1        */ 0,
   /* iMac4,2        */ 0,
   /* iMac5,1        */ 0,
@@ -9662,6 +9668,7 @@ static APPLE_MODEL_DESC AppleModelDesc[] = {
  {"PLXW", "Mac Pro (2019)"},
  {"PLXX", "Mac Pro (2019)"},
  {"PLXY", "Mac Pro (2019)"},
+ {"PN5T", "iMac (Retina 5K, 27-inch, 2020)"},
  {"ST61", "MacBook Pro (13-inch, Early 2011)"},
 };
 
