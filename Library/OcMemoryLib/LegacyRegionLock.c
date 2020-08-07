@@ -19,6 +19,7 @@
 #include <Guid/ApplePlatformInfo.h>
 
 #include <Protocol/LegacyRegion.h>
+#include <Protocol/LegacyRegion2.h>
 #include <Protocol/PciIo.h>
 
 #include <Library/BaseLib.h>
@@ -44,33 +45,55 @@ LegacyRegionLock (
   IN UINT32  LegacyLength
   )
 {
-  EFI_STATUS                 Status;
+  EFI_STATUS                    Status;
 
-  EFI_LEGACY_REGION_PROTOCOL *LegacyRegionProtocol;
-  UINT32                     Granularity;
+  EFI_LEGACY_REGION_PROTOCOL    *LegacyRegionProtocol;
+  EFI_LEGACY_REGION2_PROTOCOL   *LegacyRegion2Protocol;
+  UINT32                        Granularity;
 
-  LegacyRegionProtocol = NULL;
-  Status               = gBS->LocateProtocol (
-                                &gEfiLegacyRegionProtocolGuid,
-                                NULL,
-                                (VOID **) &LegacyRegionProtocol
-                                );
+  //
+  // Locate v2 protocol and fallback to v1 if unavailable.
+  //
+  LegacyRegionProtocol  = NULL;
+  LegacyRegion2Protocol = NULL;
+  Status                = gBS->LocateProtocol (
+                            &gEfiLegacyRegion2ProtocolGuid,
+                            NULL,
+                            (VOID **) &LegacyRegion2Protocol
+                            );
+
+  if (Status == EFI_NOT_FOUND) {
+    Status = gBS->LocateProtocol (
+      &gEfiLegacyRegionProtocolGuid,
+      NULL,
+      (VOID **) &LegacyRegionProtocol
+      );
+  }
 
   if (!EFI_ERROR (Status)) {
     //
-    // Lock Region Using LegacyRegionProtocol
+    // Lock region using LegacyRegionProtocol or LegacyRegion2Protocol.
     //
-
     Granularity = 0;
-    Status      = LegacyRegionProtocol->Lock (
-                                          LegacyRegionProtocol,
-                                          LegacyAddress,
-                                          LegacyLength,
-                                          &Granularity
-                                          );
+    if (LegacyRegionProtocol != NULL) {
+      Status = LegacyRegionProtocol->Lock (
+                                        LegacyRegionProtocol,
+                                        LegacyAddress,
+                                        LegacyLength,
+                                        &Granularity
+                                        );
+    } else {
+      Status = LegacyRegion2Protocol->Lock (
+                                        LegacyRegion2Protocol,
+                                        LegacyAddress,
+                                        LegacyLength,
+                                        &Granularity
+                                        );
+    }
+
     DEBUG ((
       DEBUG_INFO,
-      "Lock LegacyRegion 0x%0X-0x%0X - %r\n",
+      "Lock LegacyRegion %0X-%0X - %r\n",
       LegacyAddress,
       (LegacyAddress + (LegacyLength - 1)),
       Status

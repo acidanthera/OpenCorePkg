@@ -52,6 +52,7 @@ extern EFI_GUID gFrameworkEfiMpServiceProtocolGuid;
 extern EFI_GUID gEfiGlobalVariableGuid;
 extern EFI_GUID gEfiSmbios3TableGuid;
 extern EFI_GUID gEfiLegacyRegionProtocolGuid;
+extern EFI_GUID gEfiLegacyRegion2ProtocolGuid;
 extern EFI_GUID gEfiPciRootBridgeIoProtocolGuid;
 extern EFI_GUID gEfiSmbiosTableGuid;
 

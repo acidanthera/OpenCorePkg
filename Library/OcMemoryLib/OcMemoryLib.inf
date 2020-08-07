@@ -36,6 +36,7 @@
 
 [Protocols]
   gEfiLegacyRegionProtocolGuid
+  gEfiLegacyRegion2ProtocolGuid
 
 [LibraryClasses]
   BaseLib
