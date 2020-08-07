@@ -67,7 +67,7 @@ Specifications:
   CPU:
     - "Intel Core i5-10500 @ 3.10 GHz"
     - "Intel Core i5-10600 @ 3.30 GHz"
-    - "Intel Core i7-10700KF @ 3.80 GHz"
+    - "Intel Core i7-10700K @ 3.80 GHz"
     - "Intel Core I9-10850K @ 3.60 GHz"
   GPU:
     - "Radeon Pro 5300"
