@@ -317,9 +317,10 @@ InternalExpandNewPath (
   DebugPrintDevicePath (DEBUG_VERBOSE, "at node", *DevicePathNode);
   //
   // Find HD node to locate a valid Device Path of. We require the prefix
-  // till the offending node (ATAPI in this case, which should be
+  // till the offending node (e.g. a SATA node, which should be
   // preceeded by a PCI chain) as well as the suffix match (though latter
-  // may be expanded). The ATAPI should be an arbitrary SATA node.
+  // may be expanded). For example SATA should be an arbitrary VendorBlockIo
+  // node.
   //
   HdNode = FindDevicePathNodeWithType (
     *DevicePath,
@@ -432,18 +433,11 @@ OcFixAppleBootDevicePathNode (
           return 1;
         }
         //
-        // Fall-through to the expansion code.
+        // Some vendors use proprietary node types over standardised ones. Find
+        // a new, valid DevicePath that matches in prefix and suffix to the
+        // given one but ignore the data of the node that matches the malformed
+        // one.
         // REF: https://github.com/acidanthera/bugtracker/issues/991#issue-643248184
-        //
-
-      case MSG_ATAPI_DP:
-        //
-        // Some vendors report incorrect info via ACPI on storage devices or
-        // use proprietary node types over standardised ones. Find a new, valid
-        // DevicePath that matches in prefix and suffix to the given one but
-        // ignore the data of the node that matches the malformed one.
-        //
-        // REF: https://github.com/acidanthera/bugtracker/issues/664#issuecomment-663873846
         //
         OldPath = *DevicePath;
         Result  = InternalExpandNewPath (
