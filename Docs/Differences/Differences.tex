@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Aug  5 06:12:32 2020
-%DIF ADD ../Configuration.tex        Wed Aug  5 06:19:42 2020
+%DIF ADD ../Configuration.tex        Sat Aug  8 17:16:03 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2718,7 +2718,8 @@ entry choice will update till next manual reconfiguration.
   presses of \texttt{Escape} key to enter the boot menu.
 
   \emph{Note 3}: On Macs with problematic GOP it may be difficult to access Apple BootPicker.
-  To workaround this problem even without loading OpenCore \texttt{BootKicker} utility can be blessed.
+  \DIFdelbegin \DIFdel{To }\DIFdelend \DIFaddbegin \texttt{\DIFadd{BootKicker}} \DIFadd{utility can be blessed to }\DIFaddend workaround this problem even without loading
+  OpenCore\DIFaddbegin \DIFadd{. On some Macs }\DIFaddend \texttt{BootKicker} \DIFdelbegin \DIFdel{utility can be blessed}\DIFdelend \DIFaddbegin \DIFadd{will not run from OpenCore}\DIFaddend .
 
 \end{enumerate}
 

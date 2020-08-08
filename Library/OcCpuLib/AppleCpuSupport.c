@@ -171,7 +171,9 @@ InternalDetectAppleProcessorType (
         // MB21 (unknown), MB31 (T7500), MB41 (T8300), MB51 (P8600), MB52 (P7450), MB61 (P7550), MB71 (P8600)
         return AppleProcessorTypeCore2DuoType1; // 0x0301
       }
-      if (AppleMajorType == AppleProcessorMajorXeonPenryn) {
+      if (AppleMajorType == AppleProcessorMajorXeonPenryn
+        || AppleMajorType == AppleProcessorMajorXeonE5
+        || AppleMajorType == AppleProcessorMajorXeonNehalem) {
         // MP21 (2x X5365), MP31 (2x E5462) - 0x0402
         // FIXME: check when 0x0401 will be used.
         return AppleProcessorTypeXeonPenrynType2; // 0x0402
