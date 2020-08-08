@@ -5,6 +5,7 @@ OpenCore Changelog
 - Made DMG loading support configurable via `DmgLoading`
 - Added iMac20,1 model code
 - Fixed display name for older Xeon CPUs like Xeon E5450
+- Added kext injection support without kernel caches
 
 #### v0.6.0
 - Fixed sound corruption with AudioDxe
