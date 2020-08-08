@@ -42,6 +42,10 @@
 #define INFO_BUNDLE_LIBRARIES_64_KEY              "OSBundleLibraries_x86_64"
 #define INFO_BUNDLE_VERSION_KEY                   "CFBundleVersion"
 #define INFO_BUNDLE_COMPATIBLE_VERSION_KEY        "OSBundleCompatibleVersion"
+#define INFO_BUNDLE_OS_BUNDLE_REQUIRED_KEY        "OSBundleRequired"
+
+#define OS_BUNDLE_REQUIRED_ROOT                   "Root"
+#define OS_BUNDLE_REQUIRED_SAFE_BOOT              "Safe Boot"
 
 
 #define PRELINK_INFO_INTEGER_ATTRIBUTES           "size=\"64\""
@@ -250,6 +254,36 @@ typedef struct {
   //
   UINT32       Limit;
 } PATCHER_GENERIC_PATCH;
+
+//
+// Context for cacheless boot (S/L/E).
+//
+typedef struct {
+  //
+  // Extensions directory EFI_FILE_PROTOCOL instance.
+  //
+  EFI_FILE_PROTOCOL     *ExtensionsDir;
+  //
+  // Extensions directory filename. This is freed by the caller.
+  //
+  CONST CHAR16          *ExtensionsDirFileName;
+  //
+  // Injected kext list.
+  //
+  LIST_ENTRY            InjectedKexts;
+  //
+  // Dependency bundle list for injected kexts.
+  //
+  LIST_ENTRY            InjectedDependencies;
+  //
+  // List of built-in shipping kexts.
+  //
+  LIST_ENTRY            BuiltInKexts;
+  //
+  // Flag to indicate if above list is valid. List is built during the first read from SLE.
+  //
+  BOOLEAN               BuiltInKextsValid;
+} CACHELESS_CONTEXT;
 
 /**
   Read Apple kernel for target architecture (possibly decompressing)
@@ -739,6 +773,103 @@ PatchPowerStateTimeout (
 EFI_STATUS
 PatchAppleRtcChecksum (
   IN OUT PRELINKED_CONTEXT  *Context
+  );
+
+/**
+  Initializes cacheless context for later modification.
+  Must be freed with CachelessContextFree on success.
+
+  @param[in,out] Context             Cacheless context.
+  @param[in]     FileName            Extensions directory filename.
+  @param[in]     ExtensionsDir       Extensions directory EFI_FILE_PROTOCOL. 
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+CachelessContextInit (
+  IN OUT CACHELESS_CONTEXT    *Context,
+  IN     CONST CHAR16         *FileName,
+  IN     EFI_FILE_PROTOCOL    *ExtensionsDir
+  );
+
+/**
+  Frees cacheless context.
+
+  @param[in,out] Context             Cacheless context.
+
+  @return  EFI_SUCCESS on success.
+**/
+VOID
+CachelessContextFree (
+  IN OUT CACHELESS_CONTEXT    *Context
+  );
+
+/**
+  Add kext to cacheless context to be injected later on.
+
+  @param[in,out] Context         Cacheless context.
+  @param[in]     InfoPlist       Kext Info.plist.
+  @param[in]     InfoPlistSize   Kext Info.plist size.
+  @param[in]     Executable      Kext executable, optional.
+  @param[in]     ExecutableSize  Kext executable size, optional.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+CachelessContextAddKext (
+  IN OUT CACHELESS_CONTEXT    *Context,
+  IN     CONST CHAR8          *InfoPlist,
+  IN     UINT32               InfoPlistSize,
+  IN     CONST UINT8          *Executable OPTIONAL,
+  IN     UINT32               ExecutableSize OPTIONAL
+  );
+
+/**
+  Creates virtual directory overlay EFI_FILE_PROTOCOL from cacheless context.
+
+  @param[in,out] Context             Cacheless context.
+  @param[out]    File                The virtual directory instance.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+CachelessContextOverlayExtensionsDir (
+  IN OUT CACHELESS_CONTEXT    *Context,
+     OUT EFI_FILE_PROTOCOL    **File
+  );
+
+/**
+  Perform kext injection.
+
+  @param[in,out] Context         Prelinked context.
+  @param[in]     FileName        Filename of kext file to be injected.
+  @param[out]    VirtualFile     Newly created virtualised EFI_FILE_PROTOCOL instance.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+CachelessContextPerformInject (
+  IN OUT CACHELESS_CONTEXT    *Context,
+  IN     CONST CHAR16         *FileName,
+     OUT EFI_FILE_PROTOCOL    **VirtualFile
+  );
+
+/**
+  Apply patches to built-in kexts.
+
+  @param[in,out] Context         Prelinked context.
+  @param[in]     FileName        Filename of kext file to be injected.
+  @param[in]     File            EFI_FILE_PROTOCOL instance of kext file.
+  @param[out]    VirtualFile     Newly created virtualised EFI_FILE_PROTOCOL instance.
+
+  @return  EFI_SUCCESS on success. If no patches are applicable, VirtualFile will be NULL.
+**/
+EFI_STATUS
+CachelessContextHookBuiltin (
+  IN OUT CACHELESS_CONTEXT    *Context,
+  IN     CONST CHAR16         *FileName,
+  IN     EFI_FILE_PROTOCOL    *File,
+     OUT EFI_FILE_PROTOCOL    **VirtualFile
   );
 
 #endif // OC_APPLE_KERNEL_LIB_H

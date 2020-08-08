@@ -38,6 +38,7 @@
   PrelinkedInternal.h
   PrelinkedKext.c
   Vtables.c
+  CachelessContext.c
 
 [Packages]
   MdePkg/MdePkg.dec
