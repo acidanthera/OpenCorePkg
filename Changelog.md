@@ -6,6 +6,7 @@ OpenCore Changelog
 - Added iMac20,1 model code
 - Fixed display name for older Xeon CPUs like Xeon E5450
 - Added kext injection support without kernel caches
+- Added Comet Lake-LP HDA device code
 
 #### v0.6.0
 - Fixed sound corruption with AudioDxe

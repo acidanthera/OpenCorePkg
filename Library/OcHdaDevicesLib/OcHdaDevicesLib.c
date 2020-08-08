@@ -98,7 +98,8 @@ STATIC HDA_CONTROLLER_LIST_ENTRY mHdaControllerList[] = {
   { HDA_CONTROLLER (INTEL, 0xA270),   "Intel Lewisburg HD Audio Controller" },
   { HDA_CONTROLLER (INTEL, 0xA2F0),   "Intel 200 Series HD Audio Controller" },
   { HDA_CONTROLLER (INTEL, 0xA348),   "Intel 300 Series HD Audio Controller" },
-  { HDA_CONTROLLER (INTEL, 0x06C8),   "Intel 400 Series HD Audio Controller" },
+  { HDA_CONTROLLER (INTEL, 0x06C8),   "Intel Comet Lake HD Audio Controller" },
+  { HDA_CONTROLLER (INTEL, 0x02C8),   "Intel Comet Lake-LP HD Audio Controller" },
   { HDA_CONTROLLER (INTEL, 0xFFFF),   "Intel HD Audio Controller" },
   ///
   /// 10de  NVIDIA Corporation
