@@ -158,7 +158,7 @@ ScanExtensions (
     //
     FileInfoSize = SIZE_1KB - sizeof (CHAR16);
     Status = File->Read (File, &FileInfoSize, FileInfo);
-    if (Status == EFI_BUFFER_TOO_SMALL) {
+    if (EFI_ERROR (Status)) {
       FileKext->Close (FileKext);
       File->SetPosition (File, 0);
       FreePool (FileInfo);
