@@ -786,7 +786,7 @@ CachelessContextOverlayExtensionsDir (
     ZeroMem (&ModificationTime, sizeof (ModificationTime));
   }
 
-  Status = VirtualDirCreateOverlayFileNameCopy (Context->ExtensionsDirFileName, NULL, Context->ExtensionsDir, &ExtensionsDirOverlay);
+  Status = VirtualDirCreateOverlayFileNameCopy (Context->ExtensionsDirFileName, &ModificationTime, Context->ExtensionsDir, &ExtensionsDirOverlay);
   if (EFI_ERROR (Status)) {
     return Status;
   }
