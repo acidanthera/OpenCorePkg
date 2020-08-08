@@ -166,3 +166,23 @@ OcAsciiSafeSPrint (
 
   return Status;
 }
+
+BOOLEAN
+EFIAPI
+OcAsciiEndsWith (
+  IN CONST CHAR8      *String,
+  IN CONST CHAR8      *SearchString
+  )
+{
+  UINTN   StringLength;
+  UINTN   SearchStringLength;
+
+  ASSERT (String != NULL);
+  ASSERT (SearchString != NULL);
+
+  StringLength        = AsciiStrLen (String);
+  SearchStringLength  = AsciiStrLen (SearchString);
+
+  return StringLength >= SearchStringLength
+    && AsciiStrnCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
+}
