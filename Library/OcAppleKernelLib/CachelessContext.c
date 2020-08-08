@@ -483,8 +483,6 @@ CachelessContextInit (
   IN     EFI_FILE_PROTOCOL    *ExtensionsDir
   )
 {
-  EFI_STATUS Status;
-
   ASSERT (Context != NULL);
   ASSERT (FileName != NULL);
   ASSERT (ExtensionsDir != NULL);
@@ -497,14 +495,6 @@ CachelessContextInit (
   InitializeListHead (&Context->InjectedKexts);
   InitializeListHead (&Context->InjectedDependencies);
   InitializeListHead (&Context->BuiltInKexts);
-
-  //
-  // Build list of kexts in system Extensions directory.
-  //
-  Status = ScanExtensions (Context, Context->ExtensionsDir, Context->ExtensionsDirFileName, TRUE);
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
 
   return EFI_SUCCESS;
 }
@@ -763,7 +753,6 @@ CachelessContextOverlayExtensionsDir (
   EFI_FILE_PROTOCOL     *ExtensionsDirOverlay;
 
   CACHELESS_KEXT        *Kext;
-  DEPEND_KEXT           *DependKext;
   LIST_ENTRY            *KextLink;
   EFI_FILE_INFO         *DirectoryEntry;
   EFI_FILE_PROTOCOL     *NewFile;
@@ -772,18 +761,6 @@ CachelessContextOverlayExtensionsDir (
 
   ASSERT (Context != NULL);
   ASSERT (File != NULL);
-
-  //
-  // Check dependencies.
-  //
-  KextLink          = GetFirstNode (&Context->InjectedDependencies);
-  while (!IsNull (&Context->InjectedDependencies, KextLink)) {
-    DependKext = GET_DEPEND_KEXT_FROM_LINK (KextLink);
-
-    ScanDependencies (Context, DependKext->BundleId);
-
-    KextLink = GetNextNode (&Context->InjectedDependencies, KextLink);
-  }
 
   //
   // Create directory overlay.
@@ -1020,6 +997,8 @@ CachelessContextHookBuiltin (
 {
   EFI_STATUS          Status;
   BUILTIN_KEXT        *BuiltinKext;
+  DEPEND_KEXT         *DependKext;
+  LIST_ENTRY          *KextLink;
 
   CHAR8               *InfoPlist;
   UINT32              InfoPlistSize;
@@ -1030,9 +1009,45 @@ CachelessContextHookBuiltin (
   UINT32              FieldCount;
   UINT32              FieldIndex;
 
-  BOOLEAN           Failed;
-  CHAR8             *NewPlistData;
-  UINT32            NewPlistDataSize;
+  BOOLEAN             Failed;
+  CHAR8               *NewPlistData;
+  UINT32              NewPlistDataSize;
+
+  ASSERT (Context != NULL);
+  ASSERT (FileName != NULL);
+  ASSERT (File != NULL);
+  ASSERT (VirtualFile != NULL);
+
+  //
+  // Scan built-in kexts if we have not yet done so.
+  //
+  if (!Context->BuiltInKextsValid) {
+    DEBUG ((DEBUG_INFO, "OCAK: Built-in kext cache is not yet built, building...\n"));
+
+    //
+    // Build list of kexts in system Extensions directory.
+    //
+    Status = ScanExtensions (Context, Context->ExtensionsDir, Context->ExtensionsDirFileName, TRUE);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+
+    //
+    // Scan dependencies, adding any others besides ones being injected.
+    //
+    KextLink = GetFirstNode (&Context->InjectedDependencies);
+    while (!IsNull (&Context->InjectedDependencies, KextLink)) {
+      DependKext = GET_DEPEND_KEXT_FROM_LINK (KextLink);
+
+      Status = ScanDependencies (Context, DependKext->BundleId);
+      if (EFI_ERROR (Status)) {
+        return Status;
+      }
+
+      KextLink = GetNextNode (&Context->InjectedDependencies, KextLink);
+    }
+    Context->BuiltInKextsValid = TRUE;
+  }
 
   //
   // Info.plist.

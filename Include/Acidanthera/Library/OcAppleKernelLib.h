@@ -279,6 +279,10 @@ typedef struct {
   // List of built-in shipping kexts.
   //
   LIST_ENTRY            BuiltInKexts;
+  //
+  // Flag to indicate if above list is valid. List is built during the first read from SLE.
+  //
+  BOOLEAN               BuiltInKextsValid;
 } CACHELESS_CONTEXT;
 
 /**
