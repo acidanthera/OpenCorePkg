@@ -62,11 +62,11 @@ OcLoadPickerHotKeys (
 
   NumKeys = ARRAY_SIZE (Keys);
   Status = KeyMap->GetKeyStrokes (
-                     KeyMap,
-                     &Modifiers,
-                     &NumKeys,
-                     Keys
-                     );
+    KeyMap,
+    &Modifiers,
+    &NumKeys,
+    Keys
+    );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OCB: GetKeyStrokes - %r\n", Status));

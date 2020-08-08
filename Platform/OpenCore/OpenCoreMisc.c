@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <OpenCore.h>
 
+#include <Guid/AppleVariable.h>
 #include <Guid/OcVariable.h>
 
 #include <Library/BaseLib.h>
@@ -704,6 +705,8 @@ OcMiscBoot (
   CHAR16                 **BlessOverride;
   CONST CHAR8            *AsciiPicker;
   CONST CHAR8            *AsciiDmg;
+  CHAR8                  RecoveryBootMode[16];
+  UINTN                  RecoveryBootModeSize;
 
   AsciiPicker = OC_BLOB_GET (&Config->Misc.Boot.PickerMode);
 
@@ -839,7 +842,30 @@ OcMiscBoot (
     Context->TitleSuffix      = OcMiscGetVersionString ();
   }
 
-  if (Config->Misc.Boot.ShowPicker) {
+  //
+  // Provide basic support for recovery-boot-mode variable, which is meant
+  // to perform one-time recovery boot. In general BootOrder and BootNext
+  // are set to the recovery path, but this is not the case for secure-boot.
+  // TODO: Maybe there are more to handle.
+  //
+  RecoveryBootModeSize = sizeof (RecoveryBootModeSize);
+  Status = gRT->GetVariable (
+    APPLE_RECOVERY_BOOT_MODE_VARIABLE_NAME,
+    &gAppleBootVariableGuid,
+    NULL,
+    &RecoveryBootModeSize,
+    RecoveryBootMode
+    );
+  if (!EFI_ERROR (Status) && AsciiStrnCmp (RecoveryBootMode, "secure-boot", L_STR_LEN ("secure-boot")) == 0) {
+    gRT->SetVariable (
+      APPLE_RECOVERY_BOOT_MODE_VARIABLE_NAME,
+      &gAppleBootVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+      0,
+      NULL
+      );
+    PickerCommand = Context->PickerCommand = OcPickerBootAppleRecovery;
+  } else if (Config->Misc.Boot.ShowPicker) {
     PickerCommand = Context->PickerCommand = OcPickerShowPicker;
   } else {
     PickerCommand = Context->PickerCommand = OcPickerDefault;
