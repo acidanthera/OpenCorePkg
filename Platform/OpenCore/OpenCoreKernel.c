@@ -948,6 +948,12 @@ OcKernelFileOpen (
   if (OpenMode == EFI_FILE_MODE_READ
     && StrCmp (FileName, L"System\\Library\\Extensions") == 0) {
 
+    //
+    // Free existing context if we are re-opening Extensions directory.
+    //
+    if (mOcCachelessInProgress) {
+      CachelessContextFree (&mOcCachelessContext);
+    }
     mOcCachelessInProgress = FALSE;
 
     OcKernelLoadKextsAndReserve (
