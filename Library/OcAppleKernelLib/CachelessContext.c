@@ -151,15 +151,18 @@ ScanExtensions (
   File->SetPosition (File, 0);
 
   do {
+    //
+    // Apple's HFS+ driver does not adhere to the spec and will return zero for
+    // EFI_BUFFER_TOO_SMALL. EFI_FILE_INFO structures larger than 1KB are
+    // unrealistic as the filename is the only variable.
+    //
     FileInfoSize = SIZE_1KB - sizeof (CHAR16);
     Status = File->Read (File, &FileInfoSize, FileInfo);
     if (Status == EFI_BUFFER_TOO_SMALL) {
-      FileInfoSize = SIZE_2KB - sizeof (CHAR16);
-      FileInfo = ReallocatePool (SIZE_2KB, SIZE_1KB, FileInfo);
-      Status = File->Read (File, &FileInfoSize, FileInfo);
-      //
-      // TODO? would the buffer ever be this big realistically.
-      //
+      FileKext->Close (FileKext);
+      File->SetPosition (File, 0);
+      FreePool (FileInfo);
+      return Status;
     }
 
     if (FileInfoSize > 0) {
@@ -174,6 +177,7 @@ ScanExtensions (
           if (EFI_ERROR (Status)) {
             FileKext->Close (FileKext);
             File->SetPosition (File, 0);
+            FreePool (FileInfo);
             return Status;
           }
 
@@ -185,6 +189,7 @@ ScanExtensions (
           if (EFI_ERROR (Status)) {
             FileKext->Close (FileKext);
             File->SetPosition (File, 0);
+            FreePool (FileInfo);
             return Status;
           }
 
@@ -193,6 +198,7 @@ ScanExtensions (
             FreePool (InfoPlist);
             FileKext->Close (FileKext);
             File->SetPosition (File, 0);
+            FreePool (FileInfo);
             return EFI_INVALID_PARAMETER;
           }
 
@@ -202,6 +208,7 @@ ScanExtensions (
             FreePool (InfoPlist);
             FileKext->Close (FileKext);
             File->SetPosition (File, 0);
+            FreePool (FileInfo);
             return EFI_INVALID_PARAMETER;
           }
 
@@ -214,6 +221,7 @@ ScanExtensions (
             FreePool (InfoPlist);
             FileKext->Close (FileKext);
             File->SetPosition (File, 0);
+            FreePool (FileInfo);
             return EFI_OUT_OF_RESOURCES;
           }
           BuiltinKext->Signature = BUILTIN_KEXT_SIGNATURE;
@@ -237,6 +245,7 @@ ScanExtensions (
                 FreePool (InfoPlist);
                 FileKext->Close (FileKext);
                 File->SetPosition (File, 0);
+                FreePool (FileInfo);
                 return EFI_OUT_OF_RESOURCES;
               }
 
@@ -248,6 +257,7 @@ ScanExtensions (
                 FreePool (InfoPlist);
                 FileKext->Close (FileKext);
                 File->SetPosition (File, 0);
+                FreePool (FileInfo);
                 return EFI_OUT_OF_RESOURCES;
               }
 
@@ -269,6 +279,7 @@ ScanExtensions (
                 FreePool (InfoPlist);
                 FileKext->Close (FileKext);
                 File->SetPosition (File, 0);
+                FreePool (FileInfo);
                 return EFI_INVALID_PARAMETER;
               }
 
@@ -283,6 +294,7 @@ ScanExtensions (
             FreeBuiltInKext (BuiltinKext);
             FileKext->Close (FileKext);
             File->SetPosition (File, 0);
+            FreePool (FileInfo);
             return EFI_INVALID_PARAMETER;
           }
 
@@ -298,6 +310,7 @@ ScanExtensions (
             FreeBuiltInKext (BuiltinKext);
             FileKext->Close (FileKext);
             File->SetPosition (File, 0);
+            FreePool (FileInfo);
             return EFI_INVALID_PARAMETER;
           }
 
@@ -306,6 +319,7 @@ ScanExtensions (
             FreeBuiltInKext (BuiltinKext);
             FileKext->Close (FileKext);
             File->SetPosition (File, 0);
+            FreePool (FileInfo);
             return EFI_OUT_OF_RESOURCES;
           }
 
@@ -339,11 +353,13 @@ ScanExtensions (
               if (EFI_ERROR (Status)) {
                 FileKext->Close (FileKext);
                 File->SetPosition (File, 0);
+                FreePool (FileInfo);
                 return Status;
               }
             } else if (Status != EFI_NOT_FOUND) {
               FileKext->Close (FileKext);
               File->SetPosition (File, 0);
+              FreePool (FileInfo);
               return Status;
             }
           }
@@ -354,9 +370,9 @@ ScanExtensions (
     }
   } while (FileInfoSize > 0);
 
+  File->SetPosition (File, 0);
   FreePool (FileInfo);
 
-  File->SetPosition (File, 0);
   return EFI_SUCCESS;
 }
 
