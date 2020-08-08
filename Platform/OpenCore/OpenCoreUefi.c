@@ -360,13 +360,6 @@ OcReinstallProtocols (
   //
   // FIXME: This one needs to be handled and activate recovery boot mode when set.
   //
-  gRT->SetVariable (
-                  L"recovery-boot-mode",
-                  &gAppleBootVariableGuid,
-                  EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-                  0,
-                  NULL
-                  );
 
   EFI_STATUS Status = gRT->SetVariable (
                   L"HardwareModel",
