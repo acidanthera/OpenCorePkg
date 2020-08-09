@@ -379,6 +379,13 @@ OcLoadAppleSecureBoot (
     SecureBootPolicy = AppleImg4SbModeMedium;
   }
 
+  DEBUG ((
+    DEBUG_INFO,
+    "OC: Loading Apple Secure Boot with %a (level %u)\n",
+    SecureBootModel,
+    SecureBootPolicy
+    ));
+
   if (SecureBootPolicy != AppleImg4SbModeDisabled) {
     RealSecureBootModel = OcAppleImg4GetHardwareModel (SecureBootModel);
     if (RealSecureBootModel == NULL) {

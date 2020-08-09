@@ -294,6 +294,7 @@ typedef struct {
   @param[out]     KernelSize     Actual kernel size.
   @param[out]     AllocatedSize  Allocated kernel size (AllocatedSize >= KernelSize).
   @param[in]      ReservedSize   Allocated extra size for added kernel extensions.
+  @param[out]     Digest         SHA-384 digest for the original kernel, optional.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -303,7 +304,8 @@ ReadAppleKernel (
      OUT UINT8              **Kernel,
      OUT UINT32             *KernelSize,
      OUT UINT32             *AllocatedSize,
-  IN     UINT32             ReservedSize
+  IN     UINT32             ReservedSize,
+     OUT UINT8              *Digest  OPTIONAL
   );
 
 /**

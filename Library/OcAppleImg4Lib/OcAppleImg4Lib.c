@@ -61,6 +61,10 @@ STATIC OC_SB_MODEL_DESC mModelInformation[] = {
   { "j185f", 0x23 }, ///< iMac20,2 (?)
 };
 
+STATIC BOOLEAN mHasDigestOverride;
+STATIC UINT8   mOriginalDigest[SHA384_DIGEST_SIZE];
+STATIC UINT8   mOverrideDigest[SHA384_DIGEST_SIZE];
+
 STATIC
 OC_SB_MODEL_DESC *
 InternalGetModelInfo (
@@ -157,6 +161,7 @@ OcAppleImg4Verify (
 {
   DERReturn           DerResult;
   INTN                CmpResult;
+  UINT8               Digest[SHA384_DIGEST_SIZE];
 
   DERImg4ManifestInfo ManInfo;
 
@@ -179,17 +184,53 @@ OcAppleImg4Verify (
     return EFI_SECURITY_VIOLATION;
   }
 
+  CmpResult = -1;
+
+  //
+  // Provide a route to accept our modified kernel as long as we can trust it is really it.
+  //
+  if (mHasDigestOverride) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCI4: Trying override %u vs %u for %02X%02X%02X%02X\n",
+      ManInfo.imageDigestSize,
+      SHA384_DIGEST_SIZE,
+      ManInfo.imageDigest[0],
+      ManInfo.imageDigest[1],
+      ManInfo.imageDigest[2],
+      ManInfo.imageDigest[3]
+      ));
+    if (ManInfo.imageDigestSize == SHA384_DIGEST_SIZE) {
+      Sha384 (Digest, ImageBuffer, ImageSize);
+      if (CompareMem (Digest, mOverrideDigest, sizeof (mOverrideDigest)) == 0
+        && CompareMem (mOriginalDigest, ManInfo.imageDigest, sizeof (mOriginalDigest)) == 0) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCI4: Digest matched %02X%02X%02X%02X, accepting and disabling\n",
+          mOriginalDigest[0],
+          mOriginalDigest[1],
+          mOriginalDigest[2],
+          mOriginalDigest[3]
+          ));
+        CmpResult = 0;
+        mHasDigestOverride = FALSE;
+      }
+    }
+  }
+
   //
   // As ManInfo.imageDigest is a buffer of static size, the bounds check to
   // retrieve it acts as implicit sanitizing of ManInfo.imageDigestSize which
   // can be considered trusted at this point.
   //
-  CmpResult = SigVerifyShaHashBySize (
-                ImageBuffer,
-                ImageSize,
-                ManInfo.imageDigest,
-                ManInfo.imageDigestSize
-                );
+  if (CmpResult != 0) {
+    CmpResult = SigVerifyShaHashBySize (
+      ImageBuffer,
+      ImageSize,
+      ManInfo.imageDigest,
+      ManInfo.imageDigestSize
+      );
+  }
   if (CmpResult != 0) {
     return EFI_SECURITY_VIOLATION;
   }
@@ -233,6 +274,22 @@ OcAppleImg4Verify (
   }
 
   return EFI_SUCCESS;
+}
+
+VOID
+OcAppleImg4RegisterOverride (
+  IN CONST UINT8  *OriginalDigest,
+  IN CONST UINT8  *Image,
+  IN UINT32       ImageSize
+  )
+{
+  ASSERT (OriginalDigest != NULL);
+  ASSERT (Image != NULL);
+  ASSERT (ImageSize > 0);
+
+  mHasDigestOverride = TRUE;
+  CopyMem (mOriginalDigest, OriginalDigest, sizeof (mOriginalDigest));
+  Sha384 (mOverrideDigest, Image, ImageSize);
 }
 
 EFI_STATUS

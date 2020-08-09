@@ -14,6 +14,7 @@
 #ifndef OC_APPLE_IMG4_LIB_H
 #define OC_APPLE_IMG4_LIB_H
 
+#include <Library/OcCryptoLib.h>
 #include <Protocol/AppleImg4Verification.h>
 
 /**
@@ -57,6 +58,21 @@ OcAppleImg4Verify (
   IN  UINTN                             ManifestSize,
   OUT UINT8                             **HashDigest OPTIONAL,
   OUT UINTN                             *DigestSize OPTIONAL
+  );
+
+/**
+  Register digest override with SHA-384 hash. This allows to replace
+  one image with another.
+
+  @param[in] OriginalDigest   Original SHA-384 digest.
+  @param[in] Image            Pointer to new image.
+  @param[in] ImageSize        Image size.
+**/
+VOID
+OcAppleImg4RegisterOverride (
+  IN CONST UINT8  *OriginalDigest,
+  IN CONST UINT8  *Image,
+  IN UINT32       ImageSize
   );
 
 /**

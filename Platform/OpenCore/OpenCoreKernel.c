@@ -20,6 +20,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleKernelLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcAppleImg4Lib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcVirtualFsLib.h>
 #include <Library/PrintLib.h>
@@ -28,6 +29,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 STATIC OC_STORAGE_CONTEXT  *mOcStorage;
 STATIC OC_GLOBAL_CONFIG    *mOcConfiguration;
 STATIC OC_CPU_INFO         *mOcCpuInfo;
+STATIC UINT8               mKernelDigest[SHA384_DIGEST_SIZE];
 
 STATIC UINT32              mOcDarwinVersion;
 
@@ -889,9 +891,19 @@ OcKernelFileOpen (
       &Kernel,
       &KernelSize,
       &AllocatedSize,
-      ReservedFullSize
+      ReservedFullSize,
+      mKernelDigest
       );
-    DEBUG ((DEBUG_INFO, "OC: Result of XNU hook on %s is %r\n", FileName, Status));
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: Result of XNU hook on %s (%02X%02X%02X%02X) is %r\n",
+      FileName,
+      mKernelDigest[0],
+      mKernelDigest[1],
+      mKernelDigest[2],
+      mKernelDigest[3],
+      Status
+      ));
 
     if (!EFI_ERROR (Status)) {
       mOcDarwinVersion = OcKernelReadDarwinVersion (Kernel, KernelSize);
@@ -933,6 +945,8 @@ OcKernelFileOpen (
         FreePool (FileNameCopy);
         return EFI_OUT_OF_RESOURCES;
       }
+
+      OcAppleImg4RegisterOverride (mKernelDigest, Kernel, KernelSize);
 
       //
       // Return our handle.
