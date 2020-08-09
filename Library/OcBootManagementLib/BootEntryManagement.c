@@ -969,6 +969,7 @@ AddBootEntryFromBootOption (
   EFI_STATUS                 Status;
   EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
   EFI_DEVICE_PATH_PROTOCOL   *RemainingDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL   *ExpandedDevicePath;
   EFI_HANDLE                 FileSystemHandle;
   OC_BOOT_FILESYSTEM         *FileSystem;
   UINTN                      DevicePathSize;
@@ -1024,10 +1025,17 @@ AddBootEntryFromBootOption (
 
   //
   // Fixup device path if necessary.
+  // WARN: DevicePath must be allocated from pool as it may be reallocated.
   //
-  RemainingDevicePath = DevicePath;
-  NumPatchedNodes = OcFixAppleBootDevicePath (&RemainingDevicePath);
+  NumPatchedNodes = OcFixAppleBootDevicePath (
+    &DevicePath,
+    &RemainingDevicePath
+    );
   if (NumPatchedNodes > 0) {
+    //
+    // DevicePath size may be different on successful update.
+    //
+    DevicePathSize = GetDevicePathSize (DevicePath);
     DebugPrintDevicePath (DEBUG_INFO, "OCB: Fixed DP", DevicePath);
   }
 
@@ -1099,29 +1107,34 @@ AddBootEntryFromBootOption (
     //
     // Expand and on failure fix the Device Path till both yields no new result.
     //
-    RemainingDevicePath = DevicePath;
     do {
       //
       // Expand the short-form Device Path.
       //
-      DevicePath = ExpandShortFormBootPath (
+      ExpandedDevicePath = ExpandShortFormBootPath (
         BootContext,
-        RemainingDevicePath,
+        DevicePath,
         LazyScan,
         &FileSystem,
         &IsRoot
         );
-      if (DevicePath != NULL) {
+      if (ExpandedDevicePath != NULL) {
         break;
       }
 
       //
       // If short-form expansion failed, try to fix the short-form and re-try.
+      // WARN: DevicePath must be allocated from pool here.
       //
-      NumPatchedNodes = OcFixAppleBootDevicePathNode (RemainingDevicePath, NULL);
+      NumPatchedNodes = OcFixAppleBootDevicePathNode (
+        &DevicePath,
+        &RemainingDevicePath,
+        NULL
+        );
     } while (NumPatchedNodes > 0);
 
-    FreePool (RemainingDevicePath);
+    FreePool (DevicePath);
+    DevicePath = ExpandedDevicePath;
 
     if (DevicePath == NULL) {
       return EFI_NOT_FOUND;

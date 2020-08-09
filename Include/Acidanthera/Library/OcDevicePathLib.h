@@ -208,34 +208,51 @@ OcGetNumDevicePathInstances (
 /// Used to store information on how to restore a node patched by
 /// OcFixAppleBootDevicePathNode().
 ///
-typedef union {
-  struct {
-    UINT16 PortMultiplierPortNumber;
-  } Sata;
+typedef struct {
+  //
+  // Stores the old device path prior to expansion.
+  //
+  EFI_DEVICE_PATH_PROTOCOL *OldPath;
+  //
+  // Valid iff OldPath == NULL.
+  //
+  union {
+    struct {
+      UINT16 PortMultiplierPortNumber;
+    } Sata;
 
-  struct {
-    UINT8 SubType;
-  } SasExNvme;
+    struct {
+      UINT8 SubType;
+    } SasExNvme;
 
-  struct {
-    UINT32 HID;
-    UINT32 UID;
-  } Acpi;
+    struct {
+      UINT32 HID;
+      UINT32 UID;
+    } Acpi;
 
-  struct {
-    UINT32 HID;
-    UINT32 CID;
-  } ExtendedAcpi;
+    struct {
+      UINT32 HID;
+      UINT32 CID;
+    } ExtendedAcpi;
+  } Types;
 } APPLE_BOOT_DP_PATCH_CONTEXT;
 
 /**
   Fix Apple Boot Device Path node to be compatible with conventional UEFI
   implementations.
 
-  @param[in,out] DevicePathNode  A pointer to the device path node to fix.
+  @param[in,out] DevicePath      A pointer to the device path to fix a node of.
+                                 It must be a pool memory buffer.
+                                 On success, may be updated with a reallocated
+                                 pool memory buffer.
+  @param[in,out] DevicePathNode  A pointer to the device path node to fix. It
+                                 must be a node of *DevicePath.
+                                 On success, may be updated with the
+                                 corresponding node of *DevicePath.
   @param[out]    RestoreContext  A pointer to a context that can be used to
                                  restore DevicePathNode's original content in
                                  the case of failure.
+                                 On success, data may need to be freed.
 
   @retval -1  DevicePathNode could not be fixed.
   @retval 0   DevicePathNode was not modified and may be valid.
@@ -244,23 +261,49 @@ typedef union {
 **/
 INTN
 OcFixAppleBootDevicePathNode (
-  IN OUT EFI_DEVICE_PATH_PROTOCOL     *DevicePathNode,
+  IN OUT EFI_DEVICE_PATH_PROTOCOL     **DevicePath,
+  IN OUT EFI_DEVICE_PATH_PROTOCOL     **DevicePathNode,
   OUT    APPLE_BOOT_DP_PATCH_CONTEXT  *RestoreContext OPTIONAL
   );
 
 /**
   Restore the original content of DevicePathNode before calling
   OcFixAppleBootDevicePathNode() with RestoreContext.
+  Modifying a device path and then restoring a node may lead to lost updates.
 
+  @param[in,out] DevicePath      A pointer to the device path to restore a node
+                                 of.
+                                 May be updated with the previous pool memory
+                                 buffer.
   @param[in,out] DevicePathNode  A pointer to the device path node to restore.
+                                 It must be a node of *DevicePath.
+                                 May be updated with the corresponding
+                                 node of *DevicePath.
   @param[out]    RestoreContext  A pointer to a context that was used to call
-                                 OcFixAppleBootDevicePathNode().
+                                 OcFixAppleBootDevicePathNode(). All resources
+                                 are freed.
 
 **/
 VOID
 OcFixAppleBootDevicePathNodeRestore (
-  IN OUT EFI_DEVICE_PATH_PROTOCOL           *DevicePathNode,
+  IN OUT EFI_DEVICE_PATH_PROTOCOL           **DevicePath,
+  IN OUT EFI_DEVICE_PATH_PROTOCOL           **DevicePathNode,
   IN     CONST APPLE_BOOT_DP_PATCH_CONTEXT  *RestoreContext
+  );
+
+/*
+  Frees any resources allocated by OcFixAppleBootDevicePathNode().
+
+  @param[in]     DevicePath      A pointer to the device path associated with
+                                 RestoreContext.
+  @param[in,out] RestoreContext  A pointer to a context that was used to call
+                                 OcFixAppleBootDevicePathNode(). All resources
+                                 are freed.
+*/
+VOID
+OcFixAppleBootDevicePathNodeRestoreFree (
+  IN     CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePathNode,
+  IN OUT APPLE_BOOT_DP_PATCH_CONTEXT     *RestoreContext
   );
 
 /**
@@ -269,9 +312,17 @@ OcFixAppleBootDevicePathNodeRestore (
   located or fixed, DevicePath's original state will be preserved. In all other
   cases, it may be destroyed.
 
-  @param[in,out] DevicePath  On input, a pointer to the device path to fix.
-                             On output, the device path pointer is modified to
-                             point to the remaining part of the device path.
+  @param[in,out] DevicePath           A pointer to the device path to fix. It
+                                      must be a pool memory buffer.
+                                      On success, may be updated with a
+                                      reallocated pool memory buffer.
+  @param[in,out] RemainingDevicePath  A pointer the remaining part of the device
+                                      path is returned into.
+
+  Note, RemainingDevicePath will always point into DevicePath after this function
+  completes. RemainingDevicePath being equal to DevicePath means that we failed to
+  advance, and this device path is likely a short form device path or something
+  completely not valid.
 
   @retval -1  *DevicePath could not be fixed.
   @retval 0   *DevicePath was not modified and may be valid.
@@ -280,7 +331,8 @@ OcFixAppleBootDevicePathNodeRestore (
 **/
 INTN
 OcFixAppleBootDevicePath (
-  IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath
+  IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath,
+  OUT    EFI_DEVICE_PATH_PROTOCOL  **RemainingDevicePath
   );
 
 /**

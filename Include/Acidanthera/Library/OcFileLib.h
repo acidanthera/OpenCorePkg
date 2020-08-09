@@ -327,6 +327,7 @@ OcPartitionGetDiskHandle (
   @param[out] EspDevicePathSize  The size of the returned Device Path.
   @param[out] EspDeviceHandle    Device handle of the returned partition.
 
+  @return The device path protocol from the discovered handle or NULL.
 **/
 EFI_DEVICE_PATH_PROTOCOL *
 OcDiskFindSystemPartitionPath (

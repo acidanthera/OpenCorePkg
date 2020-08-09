@@ -187,8 +187,10 @@ InternalOcAudioConnect (
         );
 
       if (EFI_ERROR (Status)) {
-        TmpDevicePath = DevicePath;
-        if (OcFixAppleBootDevicePath (&TmpDevicePath) > 0) {
+        //
+        // WARN: DevicePath must be allocated from pool as it may be reallocated.
+        //
+        if (OcFixAppleBootDevicePath (&DevicePath, &TmpDevicePath) > 0) {
           DEBUG ((DEBUG_INFO, "OCAU: Retrying with fixed device path\n"));
           Status = InternalMatchCodecDevicePath (
             Private,
