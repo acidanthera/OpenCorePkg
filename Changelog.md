@@ -7,6 +7,7 @@ OpenCore Changelog
 - Fixed display name for older Xeon CPUs like Xeon E5450
 - Added kext injection support without kernel caches
 - Added Comet Lake-LP HDA device code
+- Fixed OS boot selection on SATA controllers with legacy OPROMs
 
 #### v0.6.0
 - Fixed sound corruption with AudioDxe
