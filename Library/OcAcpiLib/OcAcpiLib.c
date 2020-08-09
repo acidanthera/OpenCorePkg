@@ -693,11 +693,21 @@ AcpiApplyContext (
     Table += ALIGN_VALUE (RsdtSize, sizeof (UINT64));
   }
 
+  //
+  // Checksum is to be the first 0-19 bytes of RSDP.
+  // ExtendedChecksum is the entire table, only if newer than ACPI 1.0.
+  //
   Context->Rsdp->Checksum = 0;
   Context->Rsdp->Checksum = CalculateCheckSum8 (
-    (UINT8 *) Context->Rsdp,
-    Context->Xsdt != NULL ? Context->Rsdp->Length : 20
+    (UINT8 *) Context->Rsdp, 20
     );
+
+  if (Context->Xsdt != NULL) {
+    Context->Rsdp->ExtendedChecksum = 0;
+    Context->Rsdp->ExtendedChecksum = CalculateCheckSum8 (
+      (UINT8 *) Context->Rsdp, Context->Rsdp->Length
+      );
+  }
 
   return EFI_SUCCESS;
 }
