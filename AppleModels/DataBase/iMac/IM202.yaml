@@ -61,7 +61,7 @@ Specifications:
   CPUCodename:
     - "Comet Lake"
   CPU:
-    - "Intel Core I9-10910 @ 3.60 GHz"
+    - "Intel Core i9-10910 @ 3.60 GHz"
   GPU:
     - "Radeon Pro 5300"
     - "Radeon Pro 5500 XT"

@@ -117,7 +117,7 @@ typedef enum {
   iMac19_1, // Intel Core i9-9900K @ 3.60 GHz
   iMac19_2, // Intel Core i5-8500 @ 3.00 GHz
   iMac20_1, // Intel Core i5-10500 @ 3.10 GHz
-  iMac20_2, // Intel Core I9-10910 @ 3.60 GHz
+  iMac20_2, // Intel Core i9-10910 @ 3.60 GHz
   iMac4_1, // Intel Core Duo T2400 @ 1.83 GHz
   iMac4_2, // Intel Core Duo T2400 @ 1.83 GHz
   iMac5_1, // Intel Core 2 Duo T7200 @ 2.00 GHz
