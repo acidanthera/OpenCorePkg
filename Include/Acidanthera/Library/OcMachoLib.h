@@ -45,6 +45,56 @@ typedef struct {
 } OC_MACHO_CONTEXT;
 
 /**
+  Moves file pointer and size to point to specified slice in case
+  FAT Mach-O is used.
+
+  @param[in,out] FileData  Pointer to pointer of the file's data.
+  @param[in,out] FileSize  Pointer to file size of FileData.
+  @param[in]     CpuType   Desired CPU slice to use.
+
+  @return FALSE is not valid FAT image.
+  
+**/
+BOOLEAN
+MachoFilterFatArchitectureByType (
+  IN OUT UINT8         **FileData,
+  IN OUT UINT32        *FileSize,
+  IN     MACH_CPU_TYPE CpuType
+  );
+
+/**
+  Moves file pointer and size to point to x86 slice in case
+  FAT Mach-O is used.
+
+  @param[in,out] FileData  Pointer to pointer of the file's data.
+  @param[in,out] FileSize  Pointer to file size of FileData.
+
+  @return FALSE is not valid FAT image.
+
+**/
+BOOLEAN
+MachoFilterFatArchitecture32 (
+  IN OUT UINT8         **FileData,
+  IN OUT UINT32        *FileSize
+  );
+
+/**
+  Moves file pointer and size to point to x86_64 slice in case
+  FAT Mach-O is used.
+
+  @param[in,out] FileData  Pointer to pointer of the file's data.
+  @param[in,out] FileSize  Pointer to file size of FileData.
+  
+  @return FALSE is not valid FAT image.
+
+**/
+BOOLEAN
+MachoFilterFatArchitecture64 (
+  IN OUT UINT8         **FileData,
+  IN OUT UINT32        *FileSize
+  );
+
+/**
   Initializes a Mach-O Context.
 
   @param[out] Context          Mach-O Context to initialize.

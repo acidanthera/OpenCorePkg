@@ -97,29 +97,33 @@ MachoGetVmSize64 (
 }
 
 /**
-  Moves file pointer and size to point to x86_64 slice in case
+  Moves file pointer and size to point to specified slice in case
   FAT Mach-O is used.
 
   @param[in,out] FileData  Pointer to pointer of the file's data.
   @param[in,out] FileSize  Pointer to file size of FileData.
+  @param[in]     CpuType   Desired CPU slice to use.
 
   @return FALSE is not valid FAT image.
 **/
-STATIC
 BOOLEAN
-MachoFilterFatArchitecture64 (
+MachoFilterFatArchitectureByType (
   IN OUT UINT8         **FileData,
-  IN OUT UINT32        *FileSize
+  IN OUT UINT32        *FileSize,
+  IN     MACH_CPU_TYPE CpuType
   )
 {
   BOOLEAN           SwapBytes;
   MACH_FAT_HEADER   *FatHeader;
   UINT32            NumberOfFatArch;
   UINT32            Offset;
-  MACH_CPU_TYPE     CpuType;
+  MACH_CPU_TYPE     TmpCpuType;
   UINT32            TmpSize;
   UINT32            Index;
   UINT32            Size;
+
+  ASSERT (FileData != NULL);
+  ASSERT (FileSize != NULL);
 
   if (*FileSize < sizeof (MACH_FAT_HEADER)
    || !OC_TYPE_ALIGNED (MACH_FAT_HEADER, *FileData)) {
@@ -146,11 +150,11 @@ MachoFilterFatArchitecture64 (
   // TODO: extend the interface to support MachCpuSubtypeX8664H some day.
   //
   for (Index = 0; Index < NumberOfFatArch; ++Index) {
-    CpuType = FatHeader->FatArch[Index].CpuType;
+    TmpCpuType = FatHeader->FatArch[Index].CpuType;
     if (SwapBytes) {
-      CpuType = SwapBytes32 (CpuType);
+      TmpCpuType = SwapBytes32 (TmpCpuType);
     }
-    if (CpuType == MachCpuTypeX8664) {
+    if (TmpCpuType == CpuType) {
       Offset = FatHeader->FatArch[Index].Offset;
       Size   = FatHeader->FatArch[Index].Size;
       if (SwapBytes) {
@@ -172,6 +176,42 @@ MachoFilterFatArchitecture64 (
   }
 
   return FALSE;
+}
+
+/**
+  Moves file pointer and size to point to x86 slice in case
+  FAT Mach-O is used.
+
+  @param[in,out] FileData  Pointer to pointer of the file's data.
+  @param[in,out] FileSize  Pointer to file size of FileData.
+
+  @return FALSE is not valid FAT image.
+**/
+BOOLEAN
+MachoFilterFatArchitecture32 (
+  IN OUT UINT8         **FileData,
+  IN OUT UINT32        *FileSize
+  )
+{
+  return MachoFilterFatArchitectureByType (FileData, FileSize, MachCpuTypeX86);
+}
+
+/**
+  Moves file pointer and size to point to x86_64 slice in case
+  FAT Mach-O is used.
+
+  @param[in,out] FileData  Pointer to pointer of the file's data.
+  @param[in,out] FileSize  Pointer to file size of FileData.
+  
+  @return FALSE is not valid FAT image.
+**/
+BOOLEAN
+MachoFilterFatArchitecture64 (
+  IN OUT UINT8         **FileData,
+  IN OUT UINT32        *FileSize
+  )
+{
+  return MachoFilterFatArchitectureByType (FileData, FileSize, MachCpuTypeX8664);
 }
 
 /**
