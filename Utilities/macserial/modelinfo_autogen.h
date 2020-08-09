@@ -117,6 +117,7 @@ typedef enum {
   iMac19_1, // Intel Core i9-9900K @ 3.60 GHz
   iMac19_2, // Intel Core i5-8500 @ 3.00 GHz
   iMac20_1, // Intel Core i5-10500 @ 3.10 GHz
+  iMac20_2, // Intel Core I9-10910 @ 3.60 GHz
   iMac4_1, // Intel Core Duo T2400 @ 1.83 GHz
   iMac4_2, // Intel Core Duo T2400 @ 1.83 GHz
   iMac5_1, // Intel Core 2 Duo T7200 @ 2.00 GHz
@@ -128,7 +129,7 @@ typedef enum {
   iMacPro1_1, // Intel Xeon W-2140B CPU @ 3.20 GHz
 } AppleModel;
 
-#define APPLE_MODEL_MAX 120
+#define APPLE_MODEL_MAX 121
 
 static PLATFORMDATA ApplePlatformData[] = {
   { "MacBook1,1", "W80A041AU9B" },
@@ -242,6 +243,7 @@ static PLATFORMDATA ApplePlatformData[] = {
   { "iMac19,1", "C02Y90H3JV3Q" },
   { "iMac19,2", "C02Y93YXJWDX" },
   { "iMac20,1", "C02D38RCPN5T" },
+  { "iMac20,2", "000000000000" },
   { "iMac4,1", "W8608HACU2P" },
   { "iMac4,2", "W8627HACV2H" },
   { "iMac5,1", "CK637HACX1A" },
@@ -366,6 +368,7 @@ static const char *AppleModelCode[][APPLE_MODEL_CODE_MAX] = {
   /* iMac19,1       */ {"JV3Q", "JV3P", "JV40", "JV41", "JV42", "JV43", "MC9K", "MC9J", "MX7W", "JV3N", "JV3T", "JV3W", "JV3R", "JV3Y", "JV3X", "MW2R", "MW2P", "MW2Q", "MW2V", "MW2W", "MW2T", "MQQP", "NY2G", "P1WV", "MMTC"},
   /* iMac19,2       */ {"JWDW", "JWDX", "MQ87", "MC9M", "MC9L", "MRVM", "MPM0", "MW28", "JWDY", "MMTK", "MMTL", "MTML", "MCC1", "JWF3", "JWF2", "JWF1", "JWF0", "JWF4", "N6JT", "N9LN", "N07H"},
   /* iMac20,1       */ {"PN5T"},
+  /* iMac20,2       */ {"0000"},
   /* iMac4,1        */ {"U2P", "V67", "V4Q", "VX0", "V4P", "V4R", "X0U", "U2S", "VH0", "VH2", "VW4", "WXN", "VGM", "VGC", "V66", "V4U", "V4N", "VV4", "VHP", "VH1", "VV6", "V4M", "U2N", "U2R", "VGB", "VGZ"},
   /* iMac4,2        */ {"V2H", "W8K", "WCV", "WAE", "WD4", "W9E", "X11", "V2J", "WKT"},
   /* iMac5,1        */ {"X1A", "X9G", "Y3U", "Y9B", "X29", "WRS", "WSD", "YAE", "X0E", "Y3R", "X9E", "XCR", "XCY", "XA4", "WRX", "X6S", "VUV", "VUW", "YDW", "X9Y", "Y3X", "YAG", "WVR", "WV8", "Y3W", "Y3V", "WAR", "X2W", "Y6K", "YLJ", "Y97", "X6Q", "WRR", "X9F", "Y94", "X1W", "WRW", "AC1", "XLF", "VUX", "VUY"},
@@ -490,6 +493,7 @@ static const char *AppleBoardCode[][APPLE_BOARD_CODE_MAX] = {
   /* iMac19,1       */ {"LNV9", "KDP0", "KDN8"},
   /* iMac19,2       */ {"KGQG"},
   /* iMac20,1       */ {"0000"},
+  /* iMac20,2       */ {"0000"},
   /* iMac4,1        */ {"000"},
   /* iMac4,2        */ {"000"},
   /* iMac5,1        */ {"000"},
@@ -614,6 +618,7 @@ static uint32_t AppleModelYear[][APPLE_MODEL_YEAR_MAX] = {
   /* iMac19,1       */ {2019, 2020},
   /* iMac19,2       */ {2019, 2020},
   /* iMac20,1       */ {2020},
+  /* iMac20,2       */ {2020},
   /* iMac4,1        */ {2006},
   /* iMac4,2        */ {2006},
   /* iMac5,1        */ {2006, 2007},
@@ -737,6 +742,7 @@ static uint32_t ApplePreferredModelYear[] = {
   /* iMac19,1       */ 0,
   /* iMac19,2       */ 0,
   /* iMac20,1       */ 0,
+  /* iMac20,2       */ 0,
   /* iMac4,1        */ 0,
   /* iMac4,2        */ 0,
   /* iMac5,1        */ 0,

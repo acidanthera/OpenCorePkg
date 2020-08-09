@@ -131,3 +131,4 @@ iMac18,3 | Yes
 iMac19,1 | Yes
 iMac19,2 | Yes
 iMac20,1 | Yes
+iMac20,2 | Yes
