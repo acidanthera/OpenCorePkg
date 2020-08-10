@@ -3,7 +3,7 @@ OpenCore Changelog
 #### v0.6.1
 - Improved recognition of early pressed hotkeys, thx @varahash
 - Made DMG loading support configurable via `DmgLoading`
-- Added iMac20,1 model code
+- Added iMac20,1 and iMac20,2 model codes
 - Fixed display name for older Xeon CPUs like Xeon E5450
 - Added kext injection support without kernel caches
 - Added Comet Lake-LP HDA device code

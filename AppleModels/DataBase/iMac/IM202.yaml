@@ -8,7 +8,7 @@ SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac20,2"
 SystemVersion: "1.0"
 # Note, this one is used by macserial
-SystemSerialNumber: "000000000000"
+SystemSerialNumber: "C02D201H046M"
 SystemSKUNumber: ""
 SystemFamily: "iMac"
 BoardManufacturer: "Apple Inc."
@@ -75,7 +75,7 @@ Specifications:
     - "iMac (Retina 5K, 27-inch, 2020)"
 # Note, first model code is used by macserial
 AppleModelCode:
-  - "0000"
+  - "046M"
 # Note, first board code is used by macserial
 AppleBoardCode:
   - "0000"
