@@ -42,23 +42,27 @@ typedef struct OC_SB_MODEL_DESC_ {
 
 STATIC DERImg4Environment mEnvInfo;
 STATIC CONST CHAR8 *mModelDefault = "j215";
+///
+/// List of model mapping to board identifiers.
+/// Alphabetically sorted (!), for release order refer to the documentation.
+///
 STATIC OC_SB_MODEL_DESC mModelInformation[] = {
-  { "j137",  0x0A }, ///< iMacPro1,1
-  { "j680",  0x0B }, ///< MacBookPro15,1
   { "j132",  0x0C }, ///< MacBookPro15,2
-  { "j140k", 0x17 }, ///< MacBookAir8,1
+  { "j137",  0x0A }, ///< iMacPro1,1
   { "j140a", 0x37 }, ///< MacBookAir8,2
-  { "j174",  0x0E }, ///< Macmini8,1
-  { "j160",  0x0F }, ///< MacPro7,1
-  { "j780",  0x07 }, ///< MacBookPro15,3
-  { "j213",  0x18 }, ///< MacBookPro15,4
+  { "j140k", 0x17 }, ///< MacBookAir8,1
   { "j152f", 0x3A }, ///< MacBookPro16,1
+  { "j160",  0x0F }, ///< MacPro7,1
+  { "j174",  0x0E }, ///< Macmini8,1
+  { "j185",  0x22 }, ///< iMac20,1
+  { "j185f", 0x23 }, ///< iMac20,2
+  { "j213",  0x18 }, ///< MacBookPro15,4
   { "j214k", 0x3E }, ///< MacBookPro16,2
-  { "j230k", 0x3F }, ///< MacBookAir9,1
-  { "j223",  0x3B }, ///< MacBookPro16,3
   { "j215",  0x38 }, ///< MacBookPro16,4
-  { "j185",  0x22 }, ///< iMac20,1 (?)
-  { "j185f", 0x23 }, ///< iMac20,2 (?)
+  { "j223",  0x3B }, ///< MacBookPro16,3
+  { "j230k", 0x3F }, ///< MacBookAir9,1
+  { "j680",  0x0B }, ///< MacBookPro15,1
+  { "j780",  0x07 }, ///< MacBookPro15,3
 };
 
 STATIC BOOLEAN mHasDigestOverride;
@@ -71,11 +75,32 @@ InternalGetModelInfo (
   IN CONST CHAR8  *Model
   )
 {
-  UINTN  Index;
+  UINTN  Start;
+  UINTN  End;
+  UINTN  Curr;
+  INTN   Cmp;
 
-  for (Index = 0; Index < ARRAY_SIZE (mModelInformation); ++Index) {
-    if (AsciiStrCmp (Model, mModelInformation[Index].HardwareModel) == 0) {
-      return &mModelInformation[Index];
+  //
+  // Classic binary search in a sorted string list.
+  //
+  Start = 0;
+  End   = ARRAY_SIZE (mModelInformation) - 1;
+
+  while (Start <= End) {
+    Curr = (Start + End) / 2;
+    Cmp = AsciiStrCmp (mModelInformation[Curr].HardwareModel, Model);
+
+    if (Cmp == 0) {
+      return &mModelInformation[Curr];
+    } else if (Cmp < 0) {
+      Start = Curr + 1;
+    } else if (Curr > 0) {
+      End = Curr - 1;
+    } else {
+      //
+      // Even the first element does not match, required due to unsigned End.
+      //
+      return NULL;
     }
   }
 

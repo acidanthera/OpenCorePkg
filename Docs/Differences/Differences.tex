@@ -1,12 +1,14 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Aug 10 07:19:59 2020
-%DIF ADD ../Configuration.tex        Mon Aug 10 07:25:17 2020
+%DIF DEL PreviousConfiguration.tex   Sat Aug  8 20:55:30 2020
+%DIF ADD ../Configuration.tex        Mon Aug 10 11:05:50 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
 \usepackage{ifxetex,ifluatex}
-\usepackage{fixltx2e} % provides \textsubscript
+%DIF 6d6
+%DIF < \usepackage{fixltx2e} % provides \textsubscript
+%DIF -------
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{upquote}
@@ -2437,7 +2439,7 @@ entry choice will update till next manual reconfiguration.
   \hyperref[miscsecurityprops]{Security Properties} section below.
 
 \item
-  \texttt{Tools}\\
+  \texttt{Tools}\DIFaddbegin \label{misctools}\DIFaddend \\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Description}: Add tool entries to boot picker.
 
@@ -2447,7 +2449,9 @@ entry choice will update till next manual reconfiguration.
   \emph{Note}: Select tools, for example, UEFI Shell, are very
   dangerous and \textbf{MUST NOT} appear in production configurations, especially
   in vaulted ones and protected with secure boot, as they may be used to easily
-  bypass secure boot chain.
+  bypass secure boot chain. \DIFaddbegin \DIFadd{For tool examples check the }\hyperref[uefitools]{UEFI}
+  \DIFadd{section of this document.
+}\DIFaddend 
 
 \end{enumerate}
 
@@ -3092,7 +3096,9 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 \end{lstlisting}
 
   To obtain OEM information use the following commands in macOS:
-\begin{lstlisting}[label=nvramver, style=ocbash]
+\DIFdelbegin %DIFDELCMD < \begin{lstlisting}[label=nvramver, style=ocbash]
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \begin{lstlisting}[label=nvramoem, style=ocbash]
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-product # SMBIOS Type1 ProductName
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-vendor  # SMBIOS Type2 Manufacturer
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductName
@@ -3290,8 +3296,8 @@ rm vault.pub
   \item \texttt{\DIFadd{j214k}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro16,2}}
   \item \texttt{\DIFadd{j223}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro16,3}}
   \item \texttt{\DIFadd{j215}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro16,4}}
-  \item \texttt{\DIFadd{j185}} \DIFadd{--- }\texttt{\DIFadd{iMac20,1 (?)}}
-  \item \texttt{\DIFadd{j185f}} \DIFadd{--- }\texttt{\DIFadd{iMac20,2 (?)}}
+  \item \texttt{\DIFadd{j185}} \DIFadd{--- }\texttt{\DIFadd{iMac20,1}}
+  \item \texttt{\DIFadd{j185f}} \DIFadd{--- }\texttt{\DIFadd{iMac20,2}}
   \end{itemize}
 
   \texttt{\DIFadd{PlatformInfo}} \DIFadd{and }\texttt{\DIFadd{SecureBootModel}} \DIFadd{are independent,
@@ -4588,11 +4594,12 @@ build -a X64 -b RELEASE -t XCODE5 -p FatPkg/FatPkg.dsc
 build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \end{lstlisting}
 
-\subsection{Tools}\label{uefitools}
+\subsection{Tools \DIFaddbegin \DIFadd{and Applications}\DIFaddend }\label{uefitools}
 
 Standalone tools may help to debug firmware and hardware. Some of the known tools are listed below.
-While some tools can be launched from within OpenCore many should be run separately either directly
-or from \texttt{Shell}.
+While some tools can be launched from within OpenCore\DIFdelbegin \DIFdel{many }\DIFdelend \DIFaddbegin \DIFadd{, see more details in
+the }\hyperref[misctools]{Tools} \DIFadd{subsection of the configuration, most }\DIFaddend should be run
+separately either directly or from \texttt{Shell}.
 
 To boot into OpenShell or any other tool directly save \texttt{OpenShell.efi}
 under the name of \texttt{EFI\textbackslash BOOT\textbackslash BOOTX64.EFI}

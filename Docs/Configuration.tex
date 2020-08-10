@@ -3,7 +3,6 @@
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
 \usepackage{ifxetex,ifluatex}
-\usepackage{fixltx2e} % provides \textsubscript
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{upquote}
@@ -2376,7 +2375,7 @@ entry choice will update till next manual reconfiguration.
   \hyperref[miscsecurityprops]{Security Properties} section below.
 
 \item
-  \texttt{Tools}\\
+  \texttt{Tools}\label{misctools}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Description}: Add tool entries to boot picker.
 
@@ -2386,7 +2385,8 @@ entry choice will update till next manual reconfiguration.
   \emph{Note}: Select tools, for example, UEFI Shell, are very
   dangerous and \textbf{MUST NOT} appear in production configurations, especially
   in vaulted ones and protected with secure boot, as they may be used to easily
-  bypass secure boot chain.
+  bypass secure boot chain. For tool examples check the \hyperref[uefitools]{UEFI}
+  section of this document.
 
 \end{enumerate}
 
@@ -3026,7 +3026,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 \end{lstlisting}
 
   To obtain OEM information use the following commands in macOS:
-\begin{lstlisting}[label=nvramver, style=ocbash]
+\begin{lstlisting}[label=nvramoem, style=ocbash]
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-product # SMBIOS Type1 ProductName
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-vendor  # SMBIOS Type2 Manufacturer
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductName
@@ -3222,8 +3222,8 @@ rm vault.pub
   \item \texttt{j214k} --- \texttt{MacBookPro16,2}
   \item \texttt{j223} --- \texttt{MacBookPro16,3}
   \item \texttt{j215} --- \texttt{MacBookPro16,4}
-  \item \texttt{j185} --- \texttt{iMac20,1 (?)}
-  \item \texttt{j185f} --- \texttt{iMac20,2 (?)}
+  \item \texttt{j185} --- \texttt{iMac20,1}
+  \item \texttt{j185f} --- \texttt{iMac20,2}
   \end{itemize}
 
   \texttt{PlatformInfo} and \texttt{SecureBootModel} are independent,
@@ -4518,11 +4518,12 @@ build -a X64 -b RELEASE -t XCODE5 -p FatPkg/FatPkg.dsc
 build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \end{lstlisting}
 
-\subsection{Tools}\label{uefitools}
+\subsection{Tools and Applications}\label{uefitools}
 
 Standalone tools may help to debug firmware and hardware. Some of the known tools are listed below.
-While some tools can be launched from within OpenCore many should be run separately either directly
-or from \texttt{Shell}.
+While some tools can be launched from within OpenCore, see more details in
+the \hyperref[misctools]{Tools} subsection of the configuration, most should be run
+separately either directly or from \texttt{Shell}.
 
 To boot into OpenShell or any other tool directly save \texttt{OpenShell.efi}
 under the name of \texttt{EFI\textbackslash BOOT\textbackslash BOOTX64.EFI}

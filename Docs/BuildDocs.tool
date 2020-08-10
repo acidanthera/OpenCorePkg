@@ -5,6 +5,31 @@ abort() {
   exit 1
 }
 
+latexbuild() {
+  # Perform file cleanup.
+  rm -f ./*.aux ./*.log ./*.out ./*.pdf ./*.toc
+
+  # Perform a first pass
+  pdflatex -draftmode $1 $2 || \
+    abort "Unable to create $1 draft"
+
+  # Perform a number of TOC passes.
+  while grep 'Rerun to get ' "${1}.log" ; do
+    pdflatex -draftmode $1 $2 || \
+      abort "Unable to create $1 draft with TOC"
+  done
+
+  # Create a real PDF.
+  pdflatex $1 $2 || \
+    abort "Unable to create $1 PDF"
+
+  # Perform a number of TOC passes for PDF (usually not needed).
+  while grep 'Rerun to get ' "${1}.log" ; do
+    pdflatex -draftmode $1 $2 || \
+      abort "Unable to create $1 PDF with TOC"
+  done
+}
+
 cd "$(dirname "$0")" || abort "Wrong directory"
 
 if [ "$(which latexdiff)" = "" ]; then
@@ -15,36 +40,16 @@ if [ "$(which pdflatex)" = "" ]; then
   abort "pdflatex is missing, check your TeX Live installation"
 fi
 
-rm -f ./*.aux ./*.log ./*.out ./*.pdf ./*.toc
-
-pdflatex -draftmode Configuration.tex || \
-  abort "Unable to create configuration pdf"
-pdflatex -draftmode Configuration.tex || \
-  abort "Unable to create configuration pdf with TOC"
-pdflatex Configuration.tex || \
-  abort "Unable to create configuration pdf with TOC"
+latexbuild Configuration
 
 cd Differences || abort "Unable to process annotations"
-
 rm -f ./*.aux ./*.log ./*.out ./*.pdf ./*.toc
-
 latexdiff -s ONLYCHANGEDPAGE PreviousConfiguration.tex ../Configuration.tex \
   > Differences.tex || \
   abort "Unable to differentiate"
-
-pdflatex -draftmode -interaction=nonstopmode Differences
-pdflatex -draftmode -interaction=nonstopmode Differences
-pdflatex -interaction=nonstopmode Differences
+latexbuild Differences -interaction=nonstopmode
 
 cd ../Errata || abort "Unable to process annotations"
-
-rm -f ./*.aux ./*.log ./*.out ./*.pdf ./*.toc
-
-pdflatex -draftmode Errata.tex || \
-  abort "Unable to create errata pdf"
-pdflatex -draftmode Errata.tex || \
-  abort "Unable to create errata pdf with TOC"
-pdflatex Errata.tex || \
-  abort "Unable to create errata pdf with TOC"
+latexbuild Errata
 
 exit 0

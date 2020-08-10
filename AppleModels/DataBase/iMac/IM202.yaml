@@ -85,5 +85,4 @@ AppleModelYear:
   - 2020
 MinimumOSVersion: "10.15.6"
 MaximumOSVersion: null
-# FIXME: or J185
 AppleModelId: "J185F"
