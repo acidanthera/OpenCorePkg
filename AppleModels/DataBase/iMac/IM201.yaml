@@ -45,7 +45,6 @@ ProcessorType:
 ProcessorBusSpeed:
   - 12345
 SmcGeneration: 3
-# FIXME: or 6a31383566000000
 SmcPlatform:
   - 0x6a
   - 0x31

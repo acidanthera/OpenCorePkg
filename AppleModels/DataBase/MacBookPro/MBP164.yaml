@@ -76,7 +76,7 @@ Specifications:
   SystemReportName:
     - "MacBook Pro (16-inch, 2019)"
   MarketingName:
-    - "MacBook Pro (16-inch, 2020)"
+    - "MacBook Pro 16-inch with 5600M, 2020"
 # Note, first model code is used by macserial
 AppleModelCode:
   - "MD6T"
