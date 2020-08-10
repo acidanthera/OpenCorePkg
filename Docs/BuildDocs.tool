@@ -10,22 +10,22 @@ latexbuild() {
   rm -f ./*.aux ./*.log ./*.out ./*.pdf ./*.toc
 
   # Perform a first pass
-  pdflatex -draftmode $1 $2 || \
+  pdflatex -draftmode "$1" "$2" || \
     abort "Unable to create $1 draft"
 
   # Perform a number of TOC passes.
   while grep 'Rerun to get ' "${1}.log" ; do
-    pdflatex -draftmode $1 $2 || \
+    pdflatex -draftmode "$1" "$2" || \
       abort "Unable to create $1 draft with TOC"
   done
 
   # Create a real PDF.
-  pdflatex $1 $2 || \
+  pdflatex "$1" "$2" || \
     abort "Unable to create $1 PDF"
 
   # Perform a number of TOC passes for PDF (usually not needed).
   while grep 'Rerun to get ' "${1}.log" ; do
-    pdflatex -draftmode $1 $2 || \
+    pdflatex -draftmode "$1" "$2" || \
       abort "Unable to create $1 PDF with TOC"
   done
 }
