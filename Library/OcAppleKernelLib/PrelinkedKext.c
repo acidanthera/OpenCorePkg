@@ -280,18 +280,19 @@ InternalScanBuildLinkedSymbolTable (
       continue;
     }
 
+    //
+    // Undefined symbols will be resolved via the KPI's dependencies and
+    // hence do not need to be included (again).
+    //
+    if ((Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_UNDF) {
+      ++NumDiscardedSyms;
+      continue;
+    }
+
     Name   = MachoGetSymbolName64 (&Kext->Context.MachContext, Symbol);
     Result = MachoSymbolNameIsCxx (Name);
 
     if (ResolveSymbols) {
-      //
-      // Undefined symbols will be resolved via the KPI's dependencies and
-      // hence do not need to be included (again).
-      //
-      if ((Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_UNDF) {
-        ++NumDiscardedSyms;
-        continue;
-      }
       //
       // Resolve indirect symbols via the KPI's dependencies (kernel).
       //

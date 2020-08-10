@@ -10,6 +10,7 @@ OpenCore Changelog
 - Fixed OS boot selection on SATA controllers with legacy OPROMs
 - Fixed RSDP ACPI table checksum recalculation
 - Added immutablekernel loading support for 10.13+
+- Fixed solving some symbols to zero in 11.0 kext inject
 
 #### v0.6.0
 - Fixed sound corruption with AudioDxe
