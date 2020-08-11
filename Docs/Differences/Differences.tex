@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Aug 10 14:47:09 2020
-%DIF ADD ../Configuration.tex        Mon Aug 10 15:16:49 2020
+%DIF DEL PreviousConfiguration.tex   Sat Aug  8 20:55:30 2020
+%DIF ADD ../Configuration.tex        Tue Aug 11 15:34:19 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2138,7 +2138,7 @@ blocking.
       your actual offset, and reboot.
   \end{enumerate}
 
-  \textbf{WARNING}: Variable offsets are unique not only to each motherboard but even to its firmware
+  \textbf{\DIFdelbegin \DIFdel{WARNING}\DIFdelend \DIFaddbegin \DIFadd{Warning}\DIFaddend }: Variable offsets are unique not only to each motherboard but even to its firmware
   version. Never ever try to use an offset without checking.
 
 \item
@@ -2876,7 +2876,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   awk '{gsub(/%0d%0a%00/,"");gsub(/%0d%0a/,"\n")}1'
 \end{lstlisting}
 
-  \emph{Warning}: Some firmwares are reported to have broken NVRAM garbage collection.
+  \DIFdelbegin \emph{\DIFdel{Warning}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \textbf{\DIFadd{Warning}}\DIFaddend : Some firmwares are reported to have broken NVRAM garbage collection.
   This means that they may not be able to always free space after variable deletion.
   Do not use non-volatile NVRAM logging without extra need on such devices.
 
@@ -2992,15 +2993,18 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \textbf{\DIFadd{Description}}\DIFadd{: Apple Enclave Identifier.
 }
 
-  \DIFadd{Setting this value to any (random) non-zero 64-bit integer will allow using
-  personalised Apple Secure Boot identifiers. This value set and
-  }\texttt{\DIFadd{SecureBootModel}} \DIFadd{valid and not }\texttt{\DIFadd{Disabled}} \DIFadd{is equivalent to
-  to ahieve }\href{https://support.apple.com/en-us/HT208330}{\texttt{Full Security}}
-  \DIFadd{of Apple Secure Boot.
+  \DIFadd{Setting this value to any non-zero 64-bit integer will allow using
+  personalised Apple Secure Boot identifiers. If you want to use this setting,
+  make sure to generate a random 64-bit number with a cryptographically secure
+  random number generator. With this value set and }\texttt{\DIFadd{SecureBootModel}} \DIFadd{valid
+  and not }\texttt{\DIFadd{Disabled}} \DIFadd{it is possible to ahieve
+  }\href{https://support.apple.com/en-us/HT208330}{\texttt{Full Security}} \DIFadd{of Apple
+  Secure Boot.
 }
 
-  \emph{\DIFadd{Note}}\DIFadd{: You will have to reinstall the operating system or use the recovery
-  after setting this value to non-zero.
+  \emph{\DIFadd{Note}}\DIFadd{: You will have to reinstall the operating system or use macOS recovery
+  after setting this value to non-zero. Installing the operating system with
+  }\texttt{\DIFadd{ApECID}} \DIFadd{value set to non-zero is only possible through macOS recovery.
 }
 
 \item
@@ -3051,7 +3055,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \DIFaddbegin \texttt{\DIFadd{DmgLoading}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Signed}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Attempt to provide bootloader persistence.
+  \textbf{\DIFadd{Description}}\DIFadd{: Define Disk Image (DMG) loading policy used for macOS Recovery.
 }
 
   \DIFadd{Valid values:
@@ -3474,7 +3478,7 @@ use.
   scripts may require \texttt{ExposeSensitiveData} set to \texttt{0x3} to provide
   \texttt{boot-path} variable with OpenCore EFI partition UUID.
 
-  \textbf{WARNING}: This feature is very dangerous as it passes unprotected data to your
+  \textbf{\DIFdelbegin \DIFdel{WARNING}\DIFdelend \DIFaddbegin \DIFadd{Warning}\DIFaddend }: This feature is very dangerous as it passes unprotected data to your
   firmware variable services. Use it only when no hardware NVRAM implementation is provided
   by the firmware or it is incompatible.
 
@@ -3520,7 +3524,8 @@ A continuously updated variable list can be found in a corresponding document:
 
 \subsection{Mandatory Variables}\label{nvramvars}
 
-\emph{Warning}: These variables may be added by
+\DIFdelbegin \emph{\DIFdel{Warning}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \textbf{\DIFadd{Warning}}\DIFaddend : These variables may be added by
 \hyperref[platforminfonvram]{PlatformNVRAM} or
 \hyperref[platforminfogeneric]{Generic} subsections of
 \hyperref[platforminfo]{PlatformInfo} section.
@@ -3867,7 +3872,15 @@ be used. Version with macOS specific enhancements can be downloaded from
   \texttt{PlatformNVRAM} data is unused.
   \item When disabled \texttt{Generic} section is unused.
   \end{itemize}
-\item
+\DIFaddbegin 
+
+  \textbf{\DIFadd{Warning}}\DIFadd{: It is strongly discouraged set this option to }\texttt{\DIFadd{false}}
+  \DIFadd{when intending to update platform information. The only reason to do that is
+  when doing minor correction of the SMBIOS present and alike. In all other
+  cases not using }\texttt{\DIFadd{Automatic}} \DIFadd{may lead to hard to debug errors.
+}
+
+\DIFaddend \item
   \texttt{UpdateDataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -4723,12 +4736,16 @@ While there are many utilities to generate font files, currently it is recommend
 (\href{https://github.com/danpla/dpfontbaker/pull/1}{using CoreText produces best results})
 and \href{https://github.com/usr-sse2/fonverter}{fonverter} to export it to binary format.
 
-\emph{WARNING}: OpenCanopy is currently considered experimental and is not recommended for
+\DIFdelbegin \emph{\DIFdel{WARNING}}%DIFAUXCMD
+\DIFdel{: OpenCanopy is currently considered experimental and is not recommended for
 everyday use. Refer to
-\href{https://github.com/acidanthera/bugtracker/issues/759}{acidanthera/bugtracker\#759}
-for more details regarding the current limitations.
+}%DIFDELCMD < \href{https://github.com/acidanthera/bugtracker/issues/759}{acidanthera/bugtracker\#759}
+%DIFDELCMD < %%%
+\DIFdel{for more details regarding the current limitations.
+}%DIFDELCMD < 
 
-\subsection{OpenRuntime}\label{uefiruntime}
+%DIFDELCMD < %%%
+\DIFdelend \subsection{OpenRuntime}\label{uefiruntime}
 
 \texttt{OpenRuntime} is an OpenCore plugin implementing \texttt{OC\_FIRMWARE\_RUNTIME} protocol.
 This protocol implements multiple features required for OpenCore that are otherwise not possible

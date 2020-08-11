@@ -2074,7 +2074,7 @@ blocking.
       your actual offset, and reboot.
   \end{enumerate}
 
-  \textbf{WARNING}: Variable offsets are unique not only to each motherboard but even to its firmware
+  \textbf{Warning}: Variable offsets are unique not only to each motherboard but even to its firmware
   version. Never ever try to use an offset without checking.
 
 \item
@@ -2811,7 +2811,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   awk '{gsub(/%0d%0a%00/,"");gsub(/%0d%0a/,"\n")}1'
 \end{lstlisting}
 
-  \emph{Warning}: Some firmwares are reported to have broken NVRAM garbage collection.
+  \textbf{Warning}: Some firmwares are reported to have broken NVRAM garbage collection.
   This means that they may not be able to always free space after variable deletion.
   Do not use non-volatile NVRAM logging without extra need on such devices.
 
@@ -2926,14 +2926,17 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Apple Enclave Identifier.
 
-  Setting this value to any (random) non-zero 64-bit integer will allow using
-  personalised Apple Secure Boot identifiers. This value set and
-  \texttt{SecureBootModel} valid and not \texttt{Disabled} is equivalent to
-  to ahieve \href{https://support.apple.com/en-us/HT208330}{\texttt{Full Security}}
-  of Apple Secure Boot.
+  Setting this value to any non-zero 64-bit integer will allow using
+  personalised Apple Secure Boot identifiers. If you want to use this setting,
+  make sure to generate a random 64-bit number with a cryptographically secure
+  random number generator. With this value set and \texttt{SecureBootModel} valid
+  and not \texttt{Disabled} it is possible to ahieve
+  \href{https://support.apple.com/en-us/HT208330}{\texttt{Full Security}} of Apple
+  Secure Boot.
 
-  \emph{Note}: You will have to reinstall the operating system or use the recovery
-  after setting this value to non-zero.
+  \emph{Note}: You will have to reinstall the operating system or use macOS recovery
+  after setting this value to non-zero. Installing the operating system with
+  \texttt{ApECID} value set to non-zero is only possible through macOS recovery.
 
 \item
   \texttt{AuthRestart}\\
@@ -2983,7 +2986,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \texttt{DmgLoading}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Signed}\\
-  \textbf{Description}: Attempt to provide bootloader persistence.
+  \textbf{Description}: Define Disk Image (DMG) loading policy used for macOS Recovery.
 
   Valid values:
 
@@ -3398,7 +3401,7 @@ use.
   scripts may require \texttt{ExposeSensitiveData} set to \texttt{0x3} to provide
   \texttt{boot-path} variable with OpenCore EFI partition UUID.
 
-  \textbf{WARNING}: This feature is very dangerous as it passes unprotected data to your
+  \textbf{Warning}: This feature is very dangerous as it passes unprotected data to your
   firmware variable services. Use it only when no hardware NVRAM implementation is provided
   by the firmware or it is incompatible.
 
@@ -3444,7 +3447,7 @@ A continuously updated variable list can be found in a corresponding document:
 
 \subsection{Mandatory Variables}\label{nvramvars}
 
-\emph{Warning}: These variables may be added by
+\textbf{Warning}: These variables may be added by
 \hyperref[platforminfonvram]{PlatformNVRAM} or
 \hyperref[platforminfogeneric]{Generic} subsections of
 \hyperref[platforminfo]{PlatformInfo} section.
@@ -3791,6 +3794,12 @@ be used. Version with macOS specific enhancements can be downloaded from
   \texttt{PlatformNVRAM} data is unused.
   \item When disabled \texttt{Generic} section is unused.
   \end{itemize}
+
+  \textbf{Warning}: It is strongly discouraged set this option to \texttt{false}
+  when intending to update platform information. The only reason to do that is
+  when doing minor correction of the SMBIOS present and alike. In all other
+  cases not using \texttt{Automatic} may lead to hard to debug errors.
+
 \item
   \texttt{UpdateDataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -4646,11 +4655,6 @@ While there are many utilities to generate font files, currently it is recommend
 \href{https://github.com/danpla/dpfontbaker}{dpFontBaker} to generate bitmap font
 (\href{https://github.com/danpla/dpfontbaker/pull/1}{using CoreText produces best results})
 and \href{https://github.com/usr-sse2/fonverter}{fonverter} to export it to binary format.
-
-\emph{WARNING}: OpenCanopy is currently considered experimental and is not recommended for
-everyday use. Refer to
-\href{https://github.com/acidanthera/bugtracker/issues/759}{acidanthera/bugtracker\#759}
-for more details regarding the current limitations.
 
 \subsection{OpenRuntime}\label{uefiruntime}
 
