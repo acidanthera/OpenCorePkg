@@ -121,6 +121,7 @@ OcLoadPickerHotKeys (
 }
 
 INTN
+EFIAPI
 OcGetAppleKeyIndex (
   IN OUT OC_PICKER_CONTEXT                  *Context,
   IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,

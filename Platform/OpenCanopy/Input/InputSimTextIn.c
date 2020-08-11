@@ -49,7 +49,7 @@ GuiKeyRead (
   ASSERT (Context != NULL);
 
   *Modifier = FALSE;
-  *KeyIndex = OcGetAppleKeyIndex (
+  *KeyIndex = Context->Context->GetKeyIndex (
     Context->Context,
     Context->KeyMap,
     Modifier

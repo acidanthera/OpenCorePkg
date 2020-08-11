@@ -121,18 +121,10 @@ InternalContextConstruct (
   IN  OC_PICKER_CONTEXT        *Picker
   );
 
-/**
-  Add an entry to the log buffer
-
-  @param[in] This          This protocol.
-  @param[in] Storage       File system access storage.
-  @param[in] Context        User interface configuration.
-
-  @retval does not return unless a fatal error happened.
-**/
+STATIC
 EFI_STATUS
 EFIAPI
-GuiOcInterfaceRun (
+GuiOcInterfacePopulate (
   IN OC_INTERFACE_PROTOCOL  *This,
   IN OC_STORAGE_CONTEXT     *Storage,
   IN OC_PICKER_CONTEXT      *Context
@@ -147,12 +139,12 @@ GuiOcInterfaceRun (
 
   Context->ShowMenu = OcShowMenuByOc;
 
-  return OcRunBootPicker (Context);
+  return EFI_SUCCESS;
 }
 
 STATIC OC_INTERFACE_PROTOCOL mOcInterface = {
   OC_INTERFACE_REVISION,
-  GuiOcInterfaceRun
+  GuiOcInterfacePopulate
 };
 
 EFI_STATUS

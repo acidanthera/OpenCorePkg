@@ -24,7 +24,7 @@
 
   WARNING: This protocol currently undergoes design process.
 **/
-#define OC_INTERFACE_REVISION  4
+#define OC_INTERFACE_REVISION  5
 
 /**
   The GUID of the OC_INTERFACE_PROTOCOL.
@@ -34,33 +34,33 @@
     { 0xAE, 0x29, 0xD6, 0x66, 0x6E, 0xFE, 0x99, 0xEF } }
 
 /**
-  The forward declaration for the protocol for the OC_INTERFACE_PROTOCOL_H.
+  The forward declaration for the protocol for the OC_INTERFACE_PROTOCOL.
 **/
 typedef struct OC_INTERFACE_PROTOCOL_ OC_INTERFACE_PROTOCOL;
 
 /**
-  Add an entry to the log buffer
+  Update context member functions with custom interface overrides.
 
-  @param[in] This          This protocol.
-  @param[in] Storage       File system access storage.
-  @param[in] Picker        User interface configuration.
+  @param[in]     This          This protocol.
+  @param[in]     Storage       File system access storage.
+  @param[in,out] Picker        User interface context to be updated.
 
-  @retval does not return unless a fatal error happened.
+  @retval EFI_SUCCESS on successful context update.
 **/
 typedef
 EFI_STATUS
-(EFIAPI *OC_INTERFACE_RUN) (
-  IN OC_INTERFACE_PROTOCOL  *This,
-  IN OC_STORAGE_CONTEXT     *Storage,
-  IN OC_PICKER_CONTEXT      *Picker
+(EFIAPI *OC_POPULATE_CONTEXT) (
+  IN     OC_INTERFACE_PROTOCOL  *This,
+  IN     OC_STORAGE_CONTEXT     *Storage,
+  IN OUT OC_PICKER_CONTEXT      *Picker
   );
 
 /**
   The structure exposed by the OC_INTERFACE_PROTOCOL.
 **/
 struct OC_INTERFACE_PROTOCOL_ {
-  UINT32                  Revision;     ///< The revision of the installed protocol.
-  OC_INTERFACE_RUN        ShowInteface; ///< A pointer to the ShowInterface function.
+  UINT32                  Revision;        ///< The revision of the installed protocol.
+  OC_POPULATE_CONTEXT     PopulateContext; ///< A pointer to the PopulateContext function.
 };
 
 /**

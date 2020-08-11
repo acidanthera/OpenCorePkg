@@ -333,6 +333,7 @@ InternalGetRecoveryOsBooter (
 }
 
 EFI_STATUS
+EFIAPI
 OcGetBootEntryLabelImage (
   IN  OC_PICKER_CONTEXT          *Context,
   IN  OC_BOOT_ENTRY              *BootEntry,
@@ -404,6 +405,7 @@ OcGetBootEntryLabelImage (
 }
 
 EFI_STATUS
+EFIAPI
 OcGetBootEntryIcon (
   IN  OC_PICKER_CONTEXT          *Context,
   IN  OC_BOOT_ENTRY              *BootEntry,

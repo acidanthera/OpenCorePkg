@@ -36,6 +36,7 @@
 [LibraryClasses]
   BaseLib
   MemoryAllocationLib
+  OcCryptoLib
   OcFileLib
   OcSerializeLib
   OcStringLib

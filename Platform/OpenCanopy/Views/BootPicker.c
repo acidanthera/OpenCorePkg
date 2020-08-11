@@ -750,7 +750,7 @@ BootPickerEntriesAdd (
   }
 
   if (UseDiskLabel) {
-    Status = OcGetBootEntryLabelImage (
+    Status = Context->GetEntryLabelImage (
       Context,
       Entry,
       GuiContext->Scale,
@@ -826,7 +826,7 @@ BootPickerEntriesAdd (
   VolumeEntry->Context = Entry;
 
   if (UseVolumeIcon) {
-    Status = OcGetBootEntryIcon (Context, Entry, &IconFileData, &IconFileSize);
+    Status = Context->GetEntryIcon (Context, Entry, &IconFileData, &IconFileSize);
 
     if (!EFI_ERROR (Status)) {
       Status = GuiIcnsToImageIcon (

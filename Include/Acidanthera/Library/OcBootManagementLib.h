@@ -473,6 +473,42 @@ EFI_STATUS
   );
 
 /**
+  Get label contents (e.g. '.disk_label' or '.disk_label_2x').
+**/
+typedef
+EFI_STATUS
+(EFIAPI *OC_GET_ENTRY_LABEL_IMAGE) (
+  IN  OC_PICKER_CONTEXT          *Context,
+  IN  OC_BOOT_ENTRY              *BootEntry,
+  IN  UINT8                      Scale,
+  OUT VOID                       **ImageData,
+  OUT UINT32                     *DataLength
+  );
+
+/**
+  Get icon contents (e.g. '.VolumeIcon.icns').
+**/
+typedef
+EFI_STATUS
+(EFIAPI *OC_GET_ENTRY_ICON) (
+  IN  OC_PICKER_CONTEXT          *Context,
+  IN  OC_BOOT_ENTRY              *BootEntry,
+  OUT VOID                       **ImageData,
+  OUT UINT32                     *DataLength
+  );
+
+/**
+  Get pressed key index.
+**/
+typedef
+INTN
+(EFIAPI *OC_GET_KEY_INDEX) (
+  IN OUT OC_PICKER_CONTEXT                  *Context,
+  IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,
+     OUT BOOLEAN                            *SetDefault  OPTIONAL
+  );
+
+/**
   Picker behaviour action.
 **/
 typedef enum {
@@ -533,6 +569,14 @@ struct OC_PICKER_CONTEXT_ {
   //
   EFI_HANDLE                 LoaderHandle;
   //
+  // Get entry label image.
+  //
+  OC_GET_ENTRY_LABEL_IMAGE   GetEntryLabelImage;
+  //
+  // Get entry icon.
+  //
+  OC_GET_ENTRY_ICON          GetEntryIcon;
+  //
   // Entry display routine.
   //
   OC_SHOW_MENU               ShowMenu;
@@ -540,6 +584,10 @@ struct OC_PICKER_CONTEXT_ {
   // Privilege escalation requesting routine.
   //
   OC_REQ_PRIVILEGE           RequestPrivilege;
+  //
+  // Get pressed key index.
+  //
+  OC_GET_KEY_INDEX           GetKeyIndex;
   //
   // Context to pass to RequestPrivilege, optional.
   //
@@ -647,6 +695,7 @@ struct OC_PICKER_CONTEXT_ {
   @retval EFI_SUCCESS   The file was read successfully.
 **/
 EFI_STATUS
+EFIAPI
 OcGetBootEntryLabelImage (
   IN  OC_PICKER_CONTEXT          *Context,
   IN  OC_BOOT_ENTRY              *BootEntry,
@@ -665,6 +714,7 @@ OcGetBootEntryLabelImage (
   @retval EFI_SUCCESS   The file was read successfully.
 **/
 EFI_STATUS
+EFIAPI
 OcGetBootEntryIcon (
   IN  OC_PICKER_CONTEXT          *Context,
   IN  OC_BOOT_ENTRY              *BootEntry,
@@ -886,6 +936,7 @@ OcLoadPickerHotKeys (
   @returns OC_INPUT_INVALID when unknown key is pressed.
 **/
 INTN
+EFIAPI
 OcGetAppleKeyIndex (
   IN OUT OC_PICKER_CONTEXT                  *Context,
   IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,

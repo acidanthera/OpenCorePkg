@@ -11,6 +11,7 @@ OpenCore Changelog
 - Fixed RSDP ACPI table checksum recalculation
 - Added immutablekernel loading support for 10.13+
 - Fixed solving some symbols to zero in 11.0 kext inject
+- Reduced OpenCanopy size by restricting boot management access
 
 #### v0.6.0
 - Fixed sound corruption with AudioDxe

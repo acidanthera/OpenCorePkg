@@ -834,6 +834,9 @@ OcMiscBoot (
   Context->PrivilegeContext      = Privilege;
   Context->RequestPrivilege      = OcShowSimplePasswordRequest;
   Context->ShowMenu              = OcShowSimpleBootMenu;
+  Context->GetEntryLabelImage    = OcGetBootEntryLabelImage;
+  Context->GetEntryIcon          = OcGetBootEntryIcon;
+  Context->GetKeyIndex           = OcGetAppleKeyIndex;
   Context->PickerMode            = PickerMode;
   Context->ConsoleAttributes     = Config->Misc.Boot.ConsoleAttributes;
   Context->PickerAttributes      = Config->Misc.Boot.PickerAttributes;
@@ -914,15 +917,13 @@ OcMiscBoot (
   }
 
   if (Interface != NULL) {
-    Status = Interface->ShowInteface (Interface, Storage, Context);
-    DEBUG ((DEBUG_WARN, "OC: External interface failure, fallback to builtin - %r\n", Status));
-  } else {
-    Status = EFI_UNSUPPORTED;
+    Status = Interface->PopulateContext (Interface, Storage, Context);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "OC: External interface failure, fallback to builtin - %r\n", Status));
+    }
   }
 
-  if (EFI_ERROR (Status)) {
-    Status = OcRunBootPicker (Context);
-  }
+  Status = OcRunBootPicker (Context);
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to show boot menu!\n"));

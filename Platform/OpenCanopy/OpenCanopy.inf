@@ -50,6 +50,9 @@
   MdeModulePkg/MdeModulePkg.dec
   UefiCpuPkg/UefiCpuPkg.dec
 
+[Guids]
+  gAppleVendorVariableGuid
+
 [Protocols]
   gEfiGraphicsOutputProtocolGuid
   gEfiSimplePointerProtocolGuid
@@ -67,12 +70,13 @@
   DebugLib
   FrameBufferBltLib
   MemoryAllocationLib
+  MtrrLib
   OcAppleKeyMapLib
-  OcBootManagementLib
   OcCompressionLib
   OcGuardLib
   OcMiscLib
   OcPngLib
   OcStorageLib
+  TimerLib
   UefiBootServicesTableLib
   UefiDriverEntryPoint
