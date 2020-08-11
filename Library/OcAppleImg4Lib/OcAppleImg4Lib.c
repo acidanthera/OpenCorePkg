@@ -206,40 +206,57 @@ OcAppleImg4Verify (
                 ObjType
                 );
   if (DerResult != DR_Success) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCI4: Manifest (%u) for %08X parse fail with code %d\n",
+      ManifestSize,
+      ObjType,
+      DerResult
+      ));
     return EFI_SECURITY_VIOLATION;
   }
 
   CmpResult = -1;
 
+  DEBUG ((
+    DEBUG_INFO,
+    "OCI4: Verifying digest %u (%02X%02X%02X%02X) override %d %u (%02X%02X%02X%02X)\n",
+    ManInfo.imageDigestSize,
+    ManInfo.imageDigest[0],
+    ManInfo.imageDigest[1],
+    ManInfo.imageDigest[2],
+    ManInfo.imageDigest[3],
+    mHasDigestOverride,
+    SHA384_DIGEST_SIZE,
+    mOriginalDigest[0],
+    mOriginalDigest[1],
+    mOriginalDigest[2],
+    mOriginalDigest[3]
+    ));
+
   //
   // Provide a route to accept our modified kernel as long as we can trust it is really it.
   //
-  if (mHasDigestOverride) {
+  if (mHasDigestOverride
+    && ManInfo.imageDigestSize == SHA384_DIGEST_SIZE
+    && CompareMem (mOriginalDigest, ManInfo.imageDigest, sizeof (mOriginalDigest)) == 0) {
+    Sha384 (Digest, ImageBuffer, ImageSize);
+    CmpResult = CompareMem (Digest, mOverrideDigest, sizeof (mOverrideDigest));
     DEBUG ((
       DEBUG_INFO,
-      "OCI4: Trying override %u vs %u for %02X%02X%02X%02X\n",
-      ManInfo.imageDigestSize,
-      SHA384_DIGEST_SIZE,
-      ManInfo.imageDigest[0],
-      ManInfo.imageDigest[1],
-      ManInfo.imageDigest[2],
-      ManInfo.imageDigest[3]
+      "OCI4: Matching override %02X%02X%02X%02X with %02X%02X%02X%02X - %a\n",
+      mOverrideDigest[0],
+      mOverrideDigest[1],
+      mOverrideDigest[2],
+      mOverrideDigest[3],
+      Digest[0],
+      Digest[1],
+      Digest[2],
+      Digest[3],
+      CmpResult == 0 ? "success" : "failure"
       ));
-    if (ManInfo.imageDigestSize == SHA384_DIGEST_SIZE) {
-      Sha384 (Digest, ImageBuffer, ImageSize);
-      if (CompareMem (Digest, mOverrideDigest, sizeof (mOverrideDigest)) == 0
-        && CompareMem (mOriginalDigest, ManInfo.imageDigest, sizeof (mOriginalDigest)) == 0) {
-        DEBUG ((
-          DEBUG_INFO,
-          "OCI4: Digest matched %02X%02X%02X%02X, accepting and disabling\n",
-          mOriginalDigest[0],
-          mOriginalDigest[1],
-          mOriginalDigest[2],
-          mOriginalDigest[3]
-          ));
-        CmpResult = 0;
-        mHasDigestOverride = FALSE;
-      }
+    if (CmpResult == 0) {
+      mHasDigestOverride = FALSE;
     }
   }
 

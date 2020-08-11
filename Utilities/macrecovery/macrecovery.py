@@ -183,6 +183,8 @@ def action_download(args):
   session = get_session()
   info    = get_image_info(session, bid=args.board_id, mlb=args.mlb,
     diag=args.diagnostics, os_type=args.os_type)
+  if args.verbose:
+    print(info)
   print('Downloading ' + info[INFO_PRODUCT] + '...')
   dmgname = '' if args.basename == '' else args.basename + '.dmg'
   save_image(info[INFO_IMAGE_LINK], info[INFO_IMAGE_SESS], dmgname, args.outdir)
