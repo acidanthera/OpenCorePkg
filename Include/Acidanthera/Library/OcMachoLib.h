@@ -45,6 +45,32 @@ typedef struct {
 } OC_MACHO_CONTEXT;
 
 /**
+  Returns offset and size of specified slice in case
+  FAT Mach-O is used. If no FAT is detected, FatOffset and
+  FatSize are set to 0 and FullSize respectively.
+
+  @param[in]  Buffer      Pointer to the buffer data.
+  @param[in]  BufferSize  Size of Buffer.
+  @param[in]  FullSize    Full size of Buffer, used to validate sizes
+                          within FAT structure.
+  @param[in]  CpuType     Desired CPU slice to use.
+  @param[out] FatOffset   Pointer to offset of FAT slice.
+  @param[out] FatSize     Pointer to size of FAT slice.
+
+  @return FALSE is not valid FAT image.
+  
+**/
+BOOLEAN
+MachoGetFatArchitectureOffset (
+  IN  CONST UINT8       *Buffer,
+  IN  UINT32            BufferSize,
+  IN  UINT32            FullSize,
+  IN  MACH_CPU_TYPE     CpuType,
+  OUT UINT32            *FatOffset,
+  OUT UINT32            *FatSize
+  );
+
+/**
   Moves file pointer and size to point to specified slice in case
   FAT Mach-O is used.
 

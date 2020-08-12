@@ -97,20 +97,28 @@ MachoGetVmSize64 (
 }
 
 /**
-  Moves file pointer and size to point to specified slice in case
-  FAT Mach-O is used.
+  Returns offset and size of specified slice in case
+  FAT Mach-O is used. If no FAT is detected, FatOffset and
+  FatSize are set to 0 and FullSize respectively.
 
-  @param[in,out] FileData  Pointer to pointer of the file's data.
-  @param[in,out] FileSize  Pointer to file size of FileData.
-  @param[in]     CpuType   Desired CPU slice to use.
+  @param[in]  Buffer      Pointer to the buffer data.
+  @param[in]  BufferSize  Size of Buffer.
+  @param[in]  FullSize    Full size of Buffer, used to validate sizes
+                          within FAT structure.
+  @param[in]  CpuType     Desired CPU slice to use.
+  @param[out] FatOffset   Pointer to offset of FAT slice.
+  @param[out] FatSize     Pointer to size of FAT slice.
 
   @return FALSE is not valid FAT image.
 **/
 BOOLEAN
-MachoFilterFatArchitectureByType (
-  IN OUT UINT8         **FileData,
-  IN OUT UINT32        *FileSize,
-  IN     MACH_CPU_TYPE CpuType
+MachoGetFatArchitectureOffset (
+  IN  CONST UINT8       *Buffer,
+  IN  UINT32            BufferSize,
+  IN  UINT32            FullSize,
+  IN  MACH_CPU_TYPE     CpuType,
+  OUT UINT32            *FatOffset,
+  OUT UINT32            *FatSize
   )
 {
   BOOLEAN           SwapBytes;
@@ -122,14 +130,18 @@ MachoFilterFatArchitectureByType (
   UINT32            Index;
   UINT32            Size;
 
-  ASSERT (FileData != NULL);
-  ASSERT (FileSize != NULL);
+  ASSERT (Buffer != NULL);
+  ASSERT (BufferSize > 0);
+  ASSERT (FullSize > 0);
+  ASSERT (FatOffset != NULL);
+  ASSERT (FatSize != NULL);
 
-  if (*FileSize < sizeof (MACH_FAT_HEADER)
-   || !OC_TYPE_ALIGNED (MACH_FAT_HEADER, *FileData)) {
+  if (BufferSize < sizeof (MACH_FAT_HEADER)
+   || !OC_TYPE_ALIGNED (MACH_FAT_HEADER, Buffer)) {
     return FALSE;
   }
-  FatHeader = (MACH_FAT_HEADER *)* FileData;
+
+  FatHeader = (MACH_FAT_HEADER*) Buffer;
   if (FatHeader->Signature != MACH_FAT_BINARY_INVERT_SIGNATURE
    && FatHeader->Signature != MACH_FAT_BINARY_SIGNATURE) {
     return FALSE;
@@ -142,7 +154,7 @@ MachoFilterFatArchitectureByType (
   }
 
   if (OcOverflowMulAddU32 (NumberOfFatArch, sizeof (MACH_FAT_ARCH), sizeof (MACH_FAT_HEADER), &TmpSize)
-    || TmpSize > *FileSize) {
+    || TmpSize > BufferSize) {
     return FALSE;
   }
 
@@ -164,18 +176,53 @@ MachoFilterFatArchitectureByType (
 
       if (Offset == 0
         || OcOverflowAddU32 (Offset, Size, &TmpSize)
-        || TmpSize > *FileSize) {
+        || TmpSize > FullSize) {
         return FALSE;
       }
 
-      *FileData = *FileData + Offset;
-      *FileSize = Size;
-
+      *FatOffset  = Offset;
+      *FatSize    = Size;
       return TRUE;
     }
   }
 
+  *FatOffset = 0;
+  *FatSize = FullSize;
   return FALSE;
+}
+
+/**
+  Moves file pointer and size to point to specified slice in case
+  FAT Mach-O is used.
+
+  @param[in,out] FileData  Pointer to pointer of the file's data.
+  @param[in,out] FileSize  Pointer to file size of FileData.
+  @param[in]     CpuType   Desired CPU slice to use.
+
+  @return FALSE is not valid FAT image.
+**/
+BOOLEAN
+MachoFilterFatArchitectureByType (
+  IN OUT UINT8         **FileData,
+  IN OUT UINT32        *FileSize,
+  IN     MACH_CPU_TYPE CpuType
+  )
+{
+  UINT32        FatOffset;
+  UINT32        FatSize;
+
+  ASSERT (FileData != NULL);
+  ASSERT (FileSize != NULL);
+  ASSERT (*FileSize > 0);
+
+  if (!MachoGetFatArchitectureOffset (*FileData, *FileSize, *FileSize, CpuType, &FatOffset, &FatSize)) {
+    return FALSE;
+  }
+
+  *FileData = FileData[FatOffset];
+  *FileSize = FatSize;
+
+  return TRUE;
 }
 
 /**
