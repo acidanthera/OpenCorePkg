@@ -1,8 +1,6 @@
 BIOSVendor: "Apple Inc."
 BIOSVersion: "1037.147.4.0.0"
-# FIXME:
-BIOSLegacyVersion: ""
-# FIXME:
+BIOSLegacyVersion: "IM201.88Z.F000.B00.2007122318"
 BIOSReleaseDate: "07/12/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac20,1"
@@ -54,8 +52,19 @@ SmcPlatform:
   - 0x00
   - 0x00
   - 0x00
-# FIXME:
 OEMStrings: |-
+  Apple ROM Version
+    BIOS ID:      IM201.88Z.F000.B00.2007122318
+    Model:        IM201
+    EFI Version:  1037.147.4.0.0
+    Built by:     _securitya@almond
+    Date:         Sun Jul 12 23:18:56 2020
+    Revision:     1037.147.4 (B&I)
+    ROM Version:  F000_B00
+    Build Type:   Official Build, RELEASE
+    Compiler:     clang-1103.2.29.8
+    UUID:         D026CD04-8E2E-3668-9055-35EE212CAEDE
+    UUID:         8329D16E-2E8B-3413-9CA1-F7EA790C457A
 Specifications:
   CPUCodename:
     - "Comet Lake"
