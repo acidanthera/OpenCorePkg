@@ -356,7 +356,9 @@ OcSetupConsole (
   )
 {
   if (Renderer == OcConsoleRendererBuiltinGraphics) {
-    OcUseBuiltinTextOutput ();
+    OcUseBuiltinTextOutput (EfiConsoleControlScreenGraphics);
+  } else if (Renderer == OcConsoleRendererBuiltinText) {
+    OcUseBuiltinTextOutput (EfiConsoleControlScreenText);
   } else {
     OcUseSystemTextOutput (
       Renderer,

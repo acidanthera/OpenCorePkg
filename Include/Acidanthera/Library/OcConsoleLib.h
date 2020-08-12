@@ -23,6 +23,7 @@
 **/
 typedef enum {
   OcConsoleRendererBuiltinGraphics,
+  OcConsoleRendererBuiltinText,
   OcConsoleRendererSystemGraphics,
   OcConsoleRendererSystemText,
   OcConsoleRendererSystemGeneric

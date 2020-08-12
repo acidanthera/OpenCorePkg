@@ -12,6 +12,7 @@ OpenCore Changelog
 - Added immutablekernel loading support for 10.13+
 - Fixed solving some symbols to zero in 11.0 kext inject
 - Reduced OpenCanopy size by restricting boot management access
+- Added `BuiltinText` variant for `TextRenderer` for older laptops
 
 #### v0.6.0
 - Fixed sound corruption with AudioDxe

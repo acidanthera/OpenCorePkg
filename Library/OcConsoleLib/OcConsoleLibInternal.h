@@ -53,7 +53,7 @@ OcConsoleControlInstallProtocol (
 
 VOID
 OcUseBuiltinTextOutput (
-  VOID
+  IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode
   );
 
 VOID

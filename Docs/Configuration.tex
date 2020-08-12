@@ -5156,6 +5156,9 @@ functioning. Feature highlights:
   \item \texttt{BuiltinGraphics} --- Switch to \texttt{Graphics}
     mode and use \texttt{Builtin} renderer with
     custom \texttt{ConsoleControl}.
+  \item \texttt{BuiltinText} --- Switch to \texttt{Text}
+    mode and use \texttt{Builtin} renderer with
+    custom \texttt{ConsoleControl}.
   \item \texttt{SystemGraphics} --- Switch to \texttt{Graphics}
     mode and use \texttt{System} renderer with
     custom \texttt{ConsoleControl}.
@@ -5168,7 +5171,9 @@ functioning. Feature highlights:
 
   The use of \texttt{BuiltinGraphics} is generally straightforward.
   For most platforms it is necessary to enable \texttt{ProvideConsoleGop},
-  set \texttt{Resolution} to \texttt{Max}.
+  set \texttt{Resolution} to \texttt{Max}. \texttt{BuiltinText} variant is
+  an alternative \texttt{BuiltinGraphics} for some very old and buggy laptop
+  firmwares, which can only draw in \texttt{Text} mode.
 
   The use of \texttt{System} protocols is more complicated. In general
   the preferred setting is \texttt{SystemGraphics} or \texttt{SystemText}.

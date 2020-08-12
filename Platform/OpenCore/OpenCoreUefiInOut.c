@@ -255,6 +255,8 @@ OcLoadUefiOutputSupport (
 
   if (AsciiRenderer[0] == '\0' || AsciiStrCmp (AsciiRenderer, "BuiltinGraphics") == 0) {
     Renderer = OcConsoleRendererBuiltinGraphics;
+  } else if (AsciiStrCmp (AsciiRenderer, "BuiltinText") == 0) {
+    Renderer = OcConsoleRendererBuiltinText;
   } else if (AsciiStrCmp (AsciiRenderer, "SystemGraphics") == 0) {
     Renderer = OcConsoleRendererSystemGraphics;
   } else if (AsciiStrCmp (AsciiRenderer, "SystemText") == 0) {

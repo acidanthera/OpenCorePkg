@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sat Aug  8 20:55:30 2020
-%DIF ADD ../Configuration.tex        Tue Aug 11 20:28:27 2020
+%DIF ADD ../Configuration.tex        Wed Aug 12 19:43:57 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -5245,7 +5245,10 @@ functioning. Feature highlights:
   \item \texttt{BuiltinGraphics} --- Switch to \texttt{Graphics}
     mode and use \texttt{Builtin} renderer with
     custom \texttt{ConsoleControl}.
-  \item \texttt{SystemGraphics} --- Switch to \texttt{Graphics}
+  \item \DIFaddbegin \texttt{\DIFadd{BuiltinText}} \DIFadd{--- Switch to }\texttt{\DIFadd{Text}}
+    \DIFadd{mode and use }\texttt{\DIFadd{Builtin}} \DIFadd{renderer with
+    custom }\texttt{\DIFadd{ConsoleControl}}\DIFadd{.
+  }\item \DIFaddend \texttt{SystemGraphics} --- Switch to \texttt{Graphics}
     mode and use \texttt{System} renderer with
     custom \texttt{ConsoleControl}.
   \item \texttt{SystemText} --- Switch to \texttt{Text}
@@ -5257,7 +5260,10 @@ functioning. Feature highlights:
 
   The use of \texttt{BuiltinGraphics} is generally straightforward.
   For most platforms it is necessary to enable \texttt{ProvideConsoleGop},
-  set \texttt{Resolution} to \texttt{Max}.
+  set \texttt{Resolution} to \texttt{Max}. \DIFaddbegin \texttt{\DIFadd{BuiltinText}} \DIFadd{variant is
+  an alternative }\texttt{\DIFadd{BuiltinGraphics}} \DIFadd{for some very old and buggy laptop
+  firmwares, which can only draw in }\texttt{\DIFadd{Text}} \DIFadd{mode.
+}\DIFaddend 
 
   The use of \texttt{System} protocols is more complicated. In general
   the preferred setting is \texttt{SystemGraphics} or \texttt{SystemText}.

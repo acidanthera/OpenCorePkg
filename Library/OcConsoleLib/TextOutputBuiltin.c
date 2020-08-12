@@ -920,7 +920,7 @@ ConsoleControlInstall (
 
 VOID
 OcUseBuiltinTextOutput (
-  VOID
+  IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode
   )
 {
   EFI_STATUS  Status;
@@ -949,7 +949,7 @@ OcUseBuiltinTextOutput (
     return;
   }
 
-  OcConsoleControlSetMode (EfiConsoleControlScreenGraphics);
+  OcConsoleControlSetMode (Mode);
   OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
 
   gST->ConOut = &mAsciiTextOutputProtocol;
