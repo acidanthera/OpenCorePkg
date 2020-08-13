@@ -136,6 +136,9 @@ MachoGetFatArchitectureOffset (
   ASSERT (FatOffset != NULL);
   ASSERT (FatSize != NULL);
 
+  *FatOffset  = 0;
+  *FatSize    = FullSize;
+
   if (BufferSize < sizeof (MACH_FAT_HEADER)
    || !OC_TYPE_ALIGNED (MACH_FAT_HEADER, Buffer)) {
     return FALSE;
@@ -186,8 +189,6 @@ MachoGetFatArchitectureOffset (
     }
   }
 
-  *FatOffset = 0;
-  *FatSize = FullSize;
   return FALSE;
 }
 
