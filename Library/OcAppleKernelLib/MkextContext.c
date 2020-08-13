@@ -567,6 +567,36 @@ MkextDecompress (
   return EFI_SUCCESS;
 }
 
+BOOLEAN
+MkextCheckCpuType (
+  IN UINT8            *Mkext,
+  IN UINT32           MkextSize,
+  IN MACH_CPU_TYPE    CpuType
+  )
+{
+  MKEXT_HEADER_ANY    *MkextHeader;
+  MACH_CPU_TYPE       MkextCpuType;
+
+  ASSERT (Mkext != NULL);
+  ASSERT (MkextSize > 0);
+
+  if (MkextSize < sizeof (MKEXT_CORE_HEADER)
+    || !OC_TYPE_ALIGNED (MKEXT_CORE_HEADER, Mkext)) {
+    return FALSE;
+  }
+
+  MkextHeader   = (MKEXT_HEADER_ANY *) Mkext;
+  MkextCpuType  = SwapBytes32 (MkextHeader->Common.CpuType);
+
+  if (MkextHeader->Common.Magic != MKEXT_INVERT_MAGIC
+    || MkextHeader->Common.Signature != MKEXT_INVERT_SIGNATURE
+    || MkextSize != SwapBytes32 (MkextHeader->Common.Length)) {
+    return FALSE;
+  }
+
+  return MkextCpuType == CpuType;
+}
+
 EFI_STATUS
 MkextContextInit (
   IN OUT  MKEXT_CONTEXT      *Context,
@@ -735,7 +765,7 @@ MkextContextInit (
     return EFI_UNSUPPORTED;
   }
 
-  ZeroMem (Context, sizeof (MKEXT_CONTEXT));
+  ZeroMem (Context, sizeof (*Context));
   Context->Mkext                = Mkext;
   Context->MkextSize            = MkextSize;
   Context->MkextHeader          = MkextHeader;
@@ -754,6 +784,23 @@ MkextContextInit (
   }
 
   return EFI_SUCCESS;
+}
+
+VOID
+MkextContextFree (
+  IN OUT MKEXT_CONTEXT      *Context
+  )
+{
+  ASSERT (Context != NULL);
+
+  if (Context->MkextInfoDocument != NULL) {
+    XmlDocumentFree (Context->MkextInfoDocument);
+  }
+  if (Context->MkextInfo != NULL) {
+    FreePool (Context->MkextInfo);
+  }
+
+  ZeroMem (Context, sizeof (*Context));
 }
 
 EFI_STATUS

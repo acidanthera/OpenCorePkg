@@ -20,7 +20,6 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleKernelLib.h>
-#include <Library/OcCompressionLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/OcStringLib.h>
@@ -33,6 +32,7 @@
 EFI_STATUS
 ReadAppleMkext (
   IN     EFI_FILE_PROTOCOL  *File,
+  IN     MACH_CPU_TYPE      CpuType,
      OUT UINT8              **Mkext,
      OUT UINT32             *MkextSize,
      OUT UINT32             *AllocatedSize,
@@ -45,14 +45,21 @@ ReadAppleMkext (
   UINT32            TmpMkextSize;
   UINT32            TmpMkextFileSize;
 
-  TmpMkextSize = MKEXT_HEADER_SIZE;
+  ASSERT (File != NULL);
+  ASSERT (Mkext != NULL);
+  ASSERT (MkextSize != NULL);
+  ASSERT (AllocatedSize != NULL);
 
+  //
+  // Read enough to get fat binary header if present.
+  //
+  TmpMkextSize = MKEXT_HEADER_SIZE;
   Status = GetFileSize (File, &TmpMkextFileSize);
   if (TmpMkextSize >= TmpMkextFileSize) {
     return EFI_INVALID_PARAMETER;
   }
-  TmpMkext  = AllocatePool (TmpMkextSize);
 
+  TmpMkext = AllocatePool (TmpMkextSize);
   if (TmpMkext == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -62,23 +69,36 @@ ReadAppleMkext (
     FreePool (TmpMkext);
     return Status;
   }
-  MachoGetFatArchitectureOffset (TmpMkext, TmpMkextSize, TmpMkextFileSize, MachCpuTypeI386, &Offset, &TmpMkextSize);
+  MachoGetFatArchitectureOffset (TmpMkext, TmpMkextSize, TmpMkextFileSize, CpuType, &Offset, &TmpMkextSize);
   FreePool (TmpMkext);
 
+  //
+  // Read target slice of mkext.
+  //
   TmpMkext = AllocatePool (TmpMkextSize);
   if (TmpMkext == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
   GetFileData (File, Offset, TmpMkextSize, TmpMkext);
 
+  //
+  // Verify mkext arch.
+  //
+  if (!MkextCheckCpuType (TmpMkext, TmpMkextSize, CpuType)) {
+    FreePool (TmpMkext);
+    return EFI_UNSUPPORTED;
+  }
+  DEBUG ((DEBUG_INFO, "OCAK: Got mkext of %u bytes with 0x%X arch\n", TmpMkextSize, CpuType));
+
+  //
+  // Calculate size of decompressed mkext.
+  //
   *AllocatedSize = 0;
   Status = MkextDecompress (TmpMkext, TmpMkextSize, 5, NULL, 0, AllocatedSize);
   if (EFI_ERROR (Status)) {
     FreePool (TmpMkext);
     return Status;
   }
-  DEBUG ((DEBUG_INFO, "Mkext will be 0x%X\n", *AllocatedSize));
-
   if (OcOverflowAddU32 (*AllocatedSize, ReservedSize, AllocatedSize)) {
     FreePool (TmpMkext);
     return EFI_INVALID_PARAMETER;
@@ -90,8 +110,10 @@ ReadAppleMkext (
     return EFI_OUT_OF_RESOURCES;
   }
 
+  //
+  // Decompress mkext into final buffer.
+  //
   Status = MkextDecompress (TmpMkext, TmpMkextSize, 5, *Mkext, *AllocatedSize, MkextSize);
-  DEBUG ((DEBUG_INFO, "Mkextdecom %r 0x%X 0x%X\n", Status, *AllocatedSize, *MkextSize));
   FreePool (TmpMkext);
 
   if (EFI_ERROR (Status)) {

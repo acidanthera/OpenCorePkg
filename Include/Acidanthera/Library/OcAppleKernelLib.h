@@ -936,6 +936,18 @@ CachelessContextHookBuiltin (
      OUT EFI_FILE_PROTOCOL    **VirtualFile
   );
 
+/**
+  Decompress mkext buffer while reserving space for injected kexts later on.
+
+  @param[in]     Buffer               Mkext buffer.
+  @param[in]     BufferSize           Mkext buffer size.
+  @param[in]     NumReservedKexts     Number of kext slots to reserve for injection.
+  @param[in,out] OutBuffer            Output buffer.
+  @param[in]     OutBufferSize        Total output buffer size.
+  @param[in,out] OutMkextSize         Decompressed Mkext size.
+
+  @return  EFI_SUCCESS on success.
+**/
 EFI_STATUS
 MkextDecompress (
   IN     CONST UINT8      *Buffer,
@@ -946,6 +958,37 @@ MkextDecompress (
   IN OUT UINT32           *OutMkextSize
   );
 
+/**
+  Check if passed mkext is of desired CPU arch.
+
+  @param[in] Mkext          Mkext buffer.
+  @param[in] MkextSize      Mkext buffer size.
+  @param[in] CpuType        Desired CPU arch.
+
+  @return  FALSE if mismatched arch or invalid mkext.
+**/
+BOOLEAN
+MkextCheckCpuType (
+  IN UINT8            *Mkext,
+  IN UINT32           MkextSize,
+  IN MACH_CPU_TYPE    CpuType
+  );
+
+/**
+  Construct mkext context for later modification.
+  Must be freed with MkextContextFree on success.
+  Note that MkextAllocSize never changes, and is to be estimated.
+
+  Mkext buffers cannot contain any compression, and should be run
+  through MkextDecompress first.
+
+  @param[in,out] Context            Mkext context.
+  @param[in,out] Mkext              Decompressed Mkext buffer.
+  @param[in]     MkextSize          Decompressed Mkext buffer size.
+  @param[in]     MkextAllocSize     Decompressed Mkext buffer allocated size.
+
+  @return  EFI_SUCCESS on success.
+**/
 EFI_STATUS
 MkextContextInit (
   IN OUT  MKEXT_CONTEXT      *Context,
@@ -954,6 +997,28 @@ MkextContextInit (
   IN      UINT32             MkextAllocSize
   );
 
+/**
+  Free resources consumed by mkext context.
+
+  @param[in,out] Context    Mkext context.
+**/
+VOID
+MkextContextFree (
+  IN OUT MKEXT_CONTEXT      *Context
+  );
+
+/**
+  Perform mkext kext injection.
+
+  @param[in,out] Context          Mkext context.
+  @param[in]     BundlePath       Kext bundle path (e.g. /L/E/mykext.kext).
+  @param[in,out] InfoPlist        Kext Info.plist.
+  @param[in]     InfoPlistSize    Kext Info.plist size.
+  @param[in,out] Executable       Kext executable, optional.
+  @param[in]     ExecutableSize   Kext executable size, optional.
+
+  @return  EFI_SUCCESS on success.
+**/
 EFI_STATUS
 MkextInjectKext (
   IN OUT MKEXT_CONTEXT      *Context,
@@ -964,14 +1029,37 @@ MkextInjectKext (
   IN     UINT32             ExecutableSize OPTIONAL
   );
 
+/**
+  Refresh plist and checksum after kext
+  injection and/or patching.
+
+  @param[in,out] Context    Mkext context.
+
+  @return  EFI_SUCCESS on success.
+**/
 EFI_STATUS
 MkextInjectPatchComplete (
   IN OUT MKEXT_CONTEXT      *Context
   );
 
+/**
+  Read mkext for target architecture (possibly decompressing)
+  into pool allocated buffer. If CpuType does not exist in fat
+  mkext, an error is returned.
+
+  @param[in]     File             File handle instance.
+  @param[in]     CpuType          Desired architecture of mkext.
+  @param[in,out] Mkext            Resulting non-fat mkext buffer from pool.
+  @param[out]    MkextSize        Actual mkext size.
+  @param[out]    AllocatedSize    Allocated mkext size (AllocatedSize >= MkextSize).
+  @param[in]     ReservedSize     Allocated extra size for added kernel extensions.
+
+  @return  EFI_SUCCESS on success.
+**/
 EFI_STATUS
 ReadAppleMkext (
   IN     EFI_FILE_PROTOCOL  *File,
+  IN     MACH_CPU_TYPE      CpuType,
      OUT UINT8              **Mkext,
      OUT UINT32             *MkextSize,
      OUT UINT32             *AllocatedSize,
