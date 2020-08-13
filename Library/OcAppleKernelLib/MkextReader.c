@@ -69,8 +69,11 @@ ReadAppleMkext (
     FreePool (TmpMkext);
     return Status;
   }
-  MachoGetFatArchitectureOffset (TmpMkext, TmpMkextSize, TmpMkextFileSize, CpuType, &Offset, &TmpMkextSize);
+  Status = FatGetArchitectureOffset (TmpMkext, TmpMkextSize, TmpMkextFileSize, CpuType, &Offset, &TmpMkextSize);
   FreePool (TmpMkext);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   //
   // Read target slice of mkext.

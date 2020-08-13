@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <Base.h>
+#include <Uefi.h>
 
 #include <IndustryStandard/AppleMachoImage.h>
 #include <IndustryStandard/AppleFatBinaryImage.h>
@@ -97,172 +97,6 @@ MachoGetVmSize64 (
 }
 
 /**
-  Returns offset and size of specified slice in case
-  FAT Mach-O is used. If no FAT is detected, FatOffset and
-  FatSize are set to 0 and FullSize respectively.
-
-  @param[in]  Buffer      Pointer to the buffer data.
-  @param[in]  BufferSize  Size of Buffer.
-  @param[in]  FullSize    Full size of Buffer, used to validate sizes
-                          within FAT structure.
-  @param[in]  CpuType     Desired CPU slice to use.
-  @param[out] FatOffset   Pointer to offset of FAT slice.
-  @param[out] FatSize     Pointer to size of FAT slice.
-
-  @return FALSE is not valid FAT image.
-**/
-BOOLEAN
-MachoGetFatArchitectureOffset (
-  IN  CONST UINT8       *Buffer,
-  IN  UINT32            BufferSize,
-  IN  UINT32            FullSize,
-  IN  MACH_CPU_TYPE     CpuType,
-  OUT UINT32            *FatOffset,
-  OUT UINT32            *FatSize
-  )
-{
-  BOOLEAN           SwapBytes;
-  MACH_FAT_HEADER   *FatHeader;
-  UINT32            NumberOfFatArch;
-  UINT32            Offset;
-  MACH_CPU_TYPE     TmpCpuType;
-  UINT32            TmpSize;
-  UINT32            Index;
-  UINT32            Size;
-
-  ASSERT (Buffer != NULL);
-  ASSERT (BufferSize > 0);
-  ASSERT (FullSize > 0);
-  ASSERT (FatOffset != NULL);
-  ASSERT (FatSize != NULL);
-
-  *FatOffset  = 0;
-  *FatSize    = FullSize;
-
-  if (BufferSize < sizeof (MACH_FAT_HEADER)
-   || !OC_TYPE_ALIGNED (MACH_FAT_HEADER, Buffer)) {
-    return FALSE;
-  }
-
-  FatHeader = (MACH_FAT_HEADER*) Buffer;
-  if (FatHeader->Signature != MACH_FAT_BINARY_INVERT_SIGNATURE
-   && FatHeader->Signature != MACH_FAT_BINARY_SIGNATURE) {
-    return FALSE;
-  }
-
-  SwapBytes       = FatHeader->Signature == MACH_FAT_BINARY_INVERT_SIGNATURE;
-  NumberOfFatArch = FatHeader->NumberOfFatArch;
-  if (SwapBytes) {
-    NumberOfFatArch = SwapBytes32 (NumberOfFatArch);
-  }
-
-  if (OcOverflowMulAddU32 (NumberOfFatArch, sizeof (MACH_FAT_ARCH), sizeof (MACH_FAT_HEADER), &TmpSize)
-    || TmpSize > BufferSize) {
-    return FALSE;
-  }
-
-  //
-  // TODO: extend the interface to support MachCpuSubtypeX8664H some day.
-  //
-  for (Index = 0; Index < NumberOfFatArch; ++Index) {
-    TmpCpuType = FatHeader->FatArch[Index].CpuType;
-    if (SwapBytes) {
-      TmpCpuType = SwapBytes32 (TmpCpuType);
-    }
-    if (TmpCpuType == CpuType) {
-      Offset = FatHeader->FatArch[Index].Offset;
-      Size   = FatHeader->FatArch[Index].Size;
-      if (SwapBytes) {
-        Offset = SwapBytes32 (Offset);
-        Size   = SwapBytes32 (Size);
-      }
-
-      if (Offset == 0
-        || OcOverflowAddU32 (Offset, Size, &TmpSize)
-        || TmpSize > FullSize) {
-        return FALSE;
-      }
-
-      *FatOffset  = Offset;
-      *FatSize    = Size;
-      return TRUE;
-    }
-  }
-
-  return FALSE;
-}
-
-/**
-  Moves file pointer and size to point to specified slice in case
-  FAT Mach-O is used.
-
-  @param[in,out] FileData  Pointer to pointer of the file's data.
-  @param[in,out] FileSize  Pointer to file size of FileData.
-  @param[in]     CpuType   Desired CPU slice to use.
-
-  @return FALSE is not valid FAT image.
-**/
-BOOLEAN
-MachoFilterFatArchitectureByType (
-  IN OUT UINT8         **FileData,
-  IN OUT UINT32        *FileSize,
-  IN     MACH_CPU_TYPE CpuType
-  )
-{
-  UINT32        FatOffset;
-  UINT32        FatSize;
-
-  ASSERT (FileData != NULL);
-  ASSERT (FileSize != NULL);
-  ASSERT (*FileSize > 0);
-
-  if (!MachoGetFatArchitectureOffset (*FileData, *FileSize, *FileSize, CpuType, &FatOffset, &FatSize)) {
-    return FALSE;
-  }
-
-  *FileData = FileData[FatOffset];
-  *FileSize = FatSize;
-
-  return TRUE;
-}
-
-/**
-  Moves file pointer and size to point to x86 slice in case
-  FAT Mach-O is used.
-
-  @param[in,out] FileData  Pointer to pointer of the file's data.
-  @param[in,out] FileSize  Pointer to file size of FileData.
-
-  @return FALSE is not valid FAT image.
-**/
-BOOLEAN
-MachoFilterFatArchitecture32 (
-  IN OUT UINT8         **FileData,
-  IN OUT UINT32        *FileSize
-  )
-{
-  return MachoFilterFatArchitectureByType (FileData, FileSize, MachCpuTypeX86);
-}
-
-/**
-  Moves file pointer and size to point to x86_64 slice in case
-  FAT Mach-O is used.
-
-  @param[in,out] FileData  Pointer to pointer of the file's data.
-  @param[in,out] FileSize  Pointer to file size of FileData.
-  
-  @return FALSE is not valid FAT image.
-**/
-BOOLEAN
-MachoFilterFatArchitecture64 (
-  IN OUT UINT8         **FileData,
-  IN OUT UINT32        *FileSize
-  )
-{
-  return MachoFilterFatArchitectureByType (FileData, FileSize, MachCpuTypeX8664);
-}
-
-/**
   Initializes a Mach-O Context.
 
   @param[out] Context   Mach-O Context to initialize.
@@ -295,7 +129,7 @@ MachoInitializeContext (
   TopOfFile = ((UINTN)FileData + FileSize);
   ASSERT (TopOfFile > (UINTN)FileData);
 
-  MachoFilterFatArchitecture64 ((UINT8 **) &FileData, &FileSize);
+  FatFilterArchitecture64 ((UINT8 **) &FileData, &FileSize);
 
   if (FileSize < sizeof (*MachHeader)
     || !OC_TYPE_ALIGNED (MACH_HEADER_64, FileData)) {

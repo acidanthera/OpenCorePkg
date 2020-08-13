@@ -43,9 +43,13 @@ ParseKextBinary (
   IN     BOOLEAN       Is64Bit
   )
 {
-  MACH_HEADER_ANY *MachHeader;
+  EFI_STATUS        Status;
+  MACH_HEADER_ANY   *MachHeader;
   
-  MachoFilterFatArchitectureByType (Buffer, BufferSize, Is64Bit ? MachCpuTypeX8664 : MachCpuTypeI386);
+  Status = FatFilterArchitectureByType (Buffer, BufferSize, Is64Bit ? MachCpuTypeX8664 : MachCpuTypeI386);
+  if (EFI_ERROR (Status)) {
+    return FALSE;
+  }
   MachHeader = (MACH_HEADER_ANY *)* Buffer; // TODO alignment?
 
   if ((!Is64Bit && MachHeader->Signature == MACH_HEADER_SIGNATURE)

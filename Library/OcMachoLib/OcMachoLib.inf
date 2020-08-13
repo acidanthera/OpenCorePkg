@@ -30,6 +30,7 @@
 
 [Sources]
   CxxSymbols.c
+  Fat.c
   Header.c
   OcMachoLibInternal.h
   Relocations.c
