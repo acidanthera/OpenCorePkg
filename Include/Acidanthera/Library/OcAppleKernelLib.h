@@ -938,12 +938,15 @@ CachelessContextHookBuiltin (
 
 /**
   Decompress mkext buffer while reserving space for injected kexts later on.
+  Specifying zero for OutBufferSize will calculate the size of the
+  buffer required for the decompressed mkext in OutMkextSize.
 
   @param[in]     Buffer               Mkext buffer.
   @param[in]     BufferSize           Mkext buffer size.
   @param[in]     NumReservedKexts     Number of kext slots to reserve for injection.
   @param[in,out] OutBuffer            Output buffer.
-  @param[in]     OutBufferSize        Total output buffer size.
+  @param[in]     OutBufferSize        Total output buffer size. Specify zero to
+                                      calculate output buffer size.
   @param[in,out] OutMkextSize         Decompressed Mkext size.
 
   @return  EFI_SUCCESS on success.
