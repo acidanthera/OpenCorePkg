@@ -49,6 +49,7 @@ ParseKextBinary (
   Status = FatFilterArchitectureByType (Buffer, BufferSize, Is64Bit ? MachCpuTypeX8664 : MachCpuTypeI386);
   if (EFI_ERROR (Status)) {
     return FALSE;
+  }
 
   //
   // Size/alignment checked by FatFilterArchitectureByType.
