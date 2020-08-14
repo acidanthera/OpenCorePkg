@@ -547,12 +547,12 @@ MkextDecompress (
       }
     } else {
       //
-      // Account for plist, 128 bytes per bundle for future plist expansion, 
+      // Account for plist, future plist expansion for each bundle, 
       //   and additional headers for future kext injection.
       //
       PlistFullSize = SwapBytes32 (MkextHeader->V2.PlistFullSize);
       if (OcOverflowAddU32 (CurrentOffset, PlistFullSize, &CurrentOffset)
-        || OcOverflowMulAddU32 (PlistBundlesCount, 128, CurrentOffset, &CurrentOffset)
+        || OcOverflowMulAddU32 (PlistBundlesCount, PLIST_EXPANSION_SIZE, CurrentOffset, &CurrentOffset)
         || OcOverflowMulAddU32 (NumReservedKexts, sizeof (MKEXT_V2_FILE_ENTRY), CurrentOffset, OutMkextSize)) {
         return EFI_INVALID_PARAMETER;
       }

@@ -75,6 +75,11 @@
 #define PRELINK_INFO_RESERVE_SIZE (5U * 1024U * 1024U)
 
 //
+// Size to reserve per kext for plist expansion.
+//
+#define PLIST_EXPANSION_SIZE      512
+
+//
 // Prelinked context used for kernel modification.
 //
 typedef struct {

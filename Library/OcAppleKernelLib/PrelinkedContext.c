@@ -762,7 +762,7 @@ PrelinkedReserveKextSize (
   //
   // For new fields.
   //
-  if (OcOverflowAddU32 (InfoPlistSize, 512, &InfoPlistSize)) {
+  if (OcOverflowAddU32 (InfoPlistSize, PLIST_EXPANSION_SIZE, &InfoPlistSize)) {
     return EFI_INVALID_PARAMETER;
   }
 
