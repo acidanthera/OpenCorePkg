@@ -1097,23 +1097,26 @@ OcKernelFileOpen (
       //
       Status = OcKernelProcessMkext (mOcConfiguration, mOcDarwinVersion, Kernel, &KernelSize, AllocatedSize);
       DEBUG ((DEBUG_INFO, "OC: Mkext status - %r\n", Status));
+      if (!EFI_ERROR (Status)) {
+        Status = GetFileModificationTime (*NewHandle, &ModificationTime);
+        if (EFI_ERROR (Status)) {
+          ZeroMem (&ModificationTime, sizeof (ModificationTime));
+        }
 
-      Status = GetFileModificationTime (*NewHandle, &ModificationTime);
-      if (EFI_ERROR (Status)) {
-        ZeroMem (&ModificationTime, sizeof (ModificationTime));
-      }
+        (*NewHandle)->Close(*NewHandle);
 
-      (*NewHandle)->Close(*NewHandle);
+        Status = CreateVirtualFileFileNameCopy (FileName, Kernel, KernelSize, &ModificationTime, &VirtualFileHandle);
+        if (EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_WARN, "OC: Failed to virtualise mkext file (%a) - %r\n", FileName, Status));
+          FreePool (Kernel);
+          return EFI_OUT_OF_RESOURCES;
+        }
 
-      Status = CreateVirtualFileFileNameCopy (FileName, Kernel, KernelSize, &ModificationTime, &VirtualFileHandle);
-      if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_WARN, "OC: Failed to virtualise mkext file (%a)\n", FileName));
+        *NewHandle = VirtualFileHandle;
+        return EFI_SUCCESS;
+      } else {
         FreePool (Kernel);
-        return EFI_OUT_OF_RESOURCES;
       }
-
-      *NewHandle = VirtualFileHandle;
-      return EFI_SUCCESS;
     }
   }
 
