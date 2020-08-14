@@ -75,9 +75,6 @@ FatGetArchitectureOffset (
     return EFI_INVALID_PARAMETER;
   }
 
-  //
-  // TODO: extend the interface to support MachCpuSubtypeX8664H some day.
-  //
   for (Index = 0; Index < NumberOfFatArch; ++Index) {
     TmpCpuType = FatHeader->FatArch[Index].CpuType;
     if (SwapBytes) {

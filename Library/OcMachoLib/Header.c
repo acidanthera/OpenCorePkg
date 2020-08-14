@@ -113,6 +113,7 @@ MachoInitializeContext (
   IN  UINT32            ContainerOffset
   )
 {
+  EFI_STATUS              Status;
   MACH_HEADER_64          *MachHeader;
   UINTN                   TopOfFile;
   UINTN                   TopOfCommands;
@@ -129,7 +130,10 @@ MachoInitializeContext (
   TopOfFile = ((UINTN)FileData + FileSize);
   ASSERT (TopOfFile > (UINTN)FileData);
 
-  FatFilterArchitecture64 ((UINT8 **) &FileData, &FileSize);
+  Status = FatFilterArchitecture64 ((UINT8 **) &FileData, &FileSize);
+  if (EFI_ERROR (Status)) {
+    return FALSE;
+  }
 
   if (FileSize < sizeof (*MachHeader)
     || !OC_TYPE_ALIGNED (MACH_HEADER_64, FileData)) {
