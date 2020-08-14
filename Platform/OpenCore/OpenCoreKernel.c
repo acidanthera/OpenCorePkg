@@ -34,6 +34,15 @@ STATIC UINT32              mOcDarwinVersion;
 STATIC CACHELESS_CONTEXT   mOcCachelessContext;
 STATIC BOOLEAN             mOcCachelessInProgress;
 
+//
+// Kernel cache types.
+//
+typedef enum KERNEL_CACHE_TYPE_ {
+  CacheTypeCacheless,
+  CacheTypeMkext,
+  CacheTypePrelinked
+} KERNEL_CACHE_TYPE;
+
 STATIC
 UINT32
 OcParseDarwinVersion (
@@ -176,10 +185,12 @@ OcKernelReadDarwinVersion (
 STATIC
 EFI_STATUS
 OcKernelLoadKextsAndReserve (
-  IN OC_STORAGE_CONTEXT  *Storage,
-  IN OC_GLOBAL_CONFIG    *Config,
-  OUT UINT32             *ReservedExeSize,
-  OUT UINT32             *ReservedInfoSize
+  IN  OC_STORAGE_CONTEXT  *Storage,
+  IN  OC_GLOBAL_CONFIG    *Config,
+  IN  KERNEL_CACHE_TYPE   CacheType,
+  OUT UINT32              *ReservedExeSize,
+  OUT UINT32              *ReservedInfoSize,
+  OUT UINT32              *NumReservedKexts
   )
 {
   EFI_STATUS           Status;
@@ -193,6 +204,7 @@ OcKernelLoadKextsAndReserve (
 
   *ReservedInfoSize = PRELINK_INFO_RESERVE_SIZE;
   *ReservedExeSize  = 0;
+  *NumReservedKexts = 0;
 
   for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
     Kext = Config->Kernel.Add.Values[Index];
@@ -297,13 +309,24 @@ OcKernelLoadKextsAndReserve (
       }
     }
 
-    Status = PrelinkedReserveKextSize (
-      ReservedInfoSize,
-      ReservedExeSize,
-      Kext->PlistDataSize,
-      Kext->ImageData,
-      Kext->ImageDataSize
-      );
+    if (CacheType == CacheTypeCacheless || CacheType == CacheTypeMkext) {
+      Status = MkextReserveKextSize (
+        ReservedInfoSize,
+        ReservedExeSize,
+        Kext->PlistDataSize,
+        Kext->ImageData,
+        Kext->ImageDataSize
+        );
+    } else if (CacheType == CacheTypePrelinked) {
+      Status = PrelinkedReserveKextSize (
+        ReservedInfoSize,
+        ReservedExeSize,
+        Kext->PlistDataSize,
+        Kext->ImageData,
+        Kext->ImageDataSize
+        );
+    }
+
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_ERROR,
@@ -316,11 +339,15 @@ OcKernelLoadKextsAndReserve (
       Kext->PlistData = NULL;
       continue;
     }
+
+    (*NumReservedKexts)++;
   }
 
-  if (*ReservedExeSize > PRELINKED_KEXTS_MAX_SIZE
-   || *ReservedInfoSize + *ReservedExeSize < *ReservedExeSize) {
-    return EFI_UNSUPPORTED;
+  if (CacheType == CacheTypePrelinked) {
+    if (*ReservedExeSize > PRELINKED_KEXTS_MAX_SIZE
+      || *ReservedInfoSize + *ReservedExeSize < *ReservedExeSize) {
+      return EFI_UNSUPPORTED;
+    }
   }
 
   DEBUG ((
@@ -903,6 +930,7 @@ OcKernelFileOpen (
   EFI_TIME           ModificationTime;
   UINT32             ReservedInfoSize;
   UINT32             ReservedExeSize;
+  UINT32             NumReservedKexts;
   UINT32             LinkedExpansion;
   UINT32             ReservedFullSize;
 
@@ -950,8 +978,10 @@ OcKernelFileOpen (
     OcKernelLoadKextsAndReserve (
       mOcStorage,
       mOcConfiguration,
+      CacheTypePrelinked,
       &ReservedExeSize,
-      &ReservedInfoSize
+      &ReservedInfoSize,
+      &NumReservedKexts
       );
 
     LinkedExpansion = KcGetSegmentFixupChainsSize (ReservedExeSize);
@@ -1034,8 +1064,10 @@ OcKernelFileOpen (
     OcKernelLoadKextsAndReserve (
       mOcStorage,
       mOcConfiguration,
+      CacheTypeMkext,
       &ReservedExeSize,
-      &ReservedInfoSize
+      &ReservedInfoSize,
+      &NumReservedKexts
       );
 
     Result = OcOverflowAddU32 (
@@ -1048,7 +1080,15 @@ OcKernelFileOpen (
     }
 
     DEBUG ((DEBUG_INFO, "OC: Trying mkext hook on %s\n", FileName));
-    Status = ReadAppleMkext (*NewHandle, MachCpuTypeX8664, &Kernel, &KernelSize, &AllocatedSize, ReservedFullSize);
+    Status = ReadAppleMkext (
+      *NewHandle,
+      MachCpuTypeX8664,
+      &Kernel,
+      &KernelSize,
+      &AllocatedSize,
+      ReservedFullSize,
+      NumReservedKexts
+      );
     DEBUG ((DEBUG_INFO, "OC: Result of mkext hook on %s is %r\n", FileName, Status));
 
     if (!EFI_ERROR (Status)) {
@@ -1094,8 +1134,10 @@ OcKernelFileOpen (
     OcKernelLoadKextsAndReserve (
       mOcStorage,
       mOcConfiguration,
+      CacheTypeCacheless,
       &ReservedExeSize,
-      &ReservedInfoSize
+      &ReservedInfoSize,
+      &NumReservedKexts
       );
 
     //

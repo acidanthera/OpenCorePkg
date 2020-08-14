@@ -808,6 +808,45 @@ MkextContextFree (
 }
 
 EFI_STATUS
+MkextReserveKextSize (
+  IN OUT UINT32       *ReservedInfoSize,
+  IN OUT UINT32       *ReservedExeSize,
+  IN     UINT32       InfoPlistSize,
+  IN     UINT8        *Executable,
+  IN     UINT32       ExecutableSize OPTIONAL
+  )
+{
+  OC_MACHO_CONTEXT  Context;
+
+  ASSERT (ReservedInfoSize != NULL);
+  ASSERT (ReservedExeSize != NULL);
+
+  InfoPlistSize = MACHO_ALIGN (InfoPlistSize);
+
+  if (Executable != NULL) {
+    ASSERT (ExecutableSize > 0);
+    if (!MachoInitializeContext (&Context, Executable, ExecutableSize, 0)) {
+      return EFI_INVALID_PARAMETER;
+    }
+
+    ExecutableSize = MachoGetVmSize64 (&Context);
+    if (ExecutableSize == 0) {
+      return EFI_INVALID_PARAMETER;
+    }
+  }
+
+  if (OcOverflowAddU32 (*ReservedInfoSize, InfoPlistSize, &InfoPlistSize)
+   || OcOverflowAddU32 (*ReservedExeSize, ExecutableSize, &ExecutableSize)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  *ReservedInfoSize = InfoPlistSize;
+  *ReservedExeSize  = ExecutableSize;
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
 MkextInjectKext (
   IN OUT MKEXT_CONTEXT      *Context,
   IN     CONST CHAR8        *BundlePath,

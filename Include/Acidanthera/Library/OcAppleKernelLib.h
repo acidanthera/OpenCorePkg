@@ -1011,6 +1011,26 @@ MkextContextFree (
   );
 
 /**
+  Updated required mkext reserve size to inject this kext.
+
+  @param[in,out] ReservedInfoSize  Current reserved PLIST size, updated.
+  @param[in,out] ReservedExeSize   Current reserved KEXT size, updated.
+  @param[in]     InfoPlistSize     Kext Info.plist size.
+  @param[in]     Executable        Kext executable, optional.
+  @param[in]     ExecutableSize    Kext executable size, optional.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+MkextReserveKextSize (
+  IN OUT UINT32       *ReservedInfoSize,
+  IN OUT UINT32       *ReservedExeSize,
+  IN     UINT32       InfoPlistSize,
+  IN     UINT8        *Executable,
+  IN     UINT32       ExecutableSize OPTIONAL
+  );
+
+/**
   Perform mkext kext injection.
 
   @param[in,out] Context          Mkext context.
@@ -1056,6 +1076,7 @@ MkextInjectPatchComplete (
   @param[out]    MkextSize        Actual mkext size.
   @param[out]    AllocatedSize    Allocated mkext size (AllocatedSize >= MkextSize).
   @param[in]     ReservedSize     Allocated extra size for added kernel extensions.
+  @param[in]     NumReservedKexts Number of kext slots to reserve in mkext.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -1066,7 +1087,8 @@ ReadAppleMkext (
      OUT UINT8              **Mkext,
      OUT UINT32             *MkextSize,
      OUT UINT32             *AllocatedSize,
-  IN     UINT32             ReservedSize
+  IN     UINT32             ReservedSize,
+  IN     UINT32             NumReservedKexts
   );
 
 #endif // OC_APPLE_KERNEL_LIB_H

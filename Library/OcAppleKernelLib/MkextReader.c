@@ -36,7 +36,8 @@ ReadAppleMkext (
      OUT UINT8              **Mkext,
      OUT UINT32             *MkextSize,
      OUT UINT32             *AllocatedSize,
-  IN     UINT32             ReservedSize
+  IN     UINT32             ReservedSize,
+  IN     UINT32             NumReservedKexts
   )
 {
   EFI_STATUS        Status;
@@ -82,7 +83,11 @@ ReadAppleMkext (
   if (TmpMkext == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
-  GetFileData (File, Offset, TmpMkextSize, TmpMkext);
+  Status = GetFileData (File, Offset, TmpMkextSize, TmpMkext);
+  if (EFI_ERROR (Status)) {
+    FreePool (TmpMkext);
+    return Status;
+  }
 
   //
   // Verify mkext arch.
@@ -97,7 +102,7 @@ ReadAppleMkext (
   // Calculate size of decompressed mkext.
   //
   *AllocatedSize = 0;
-  Status = MkextDecompress (TmpMkext, TmpMkextSize, 5, NULL, 0, AllocatedSize);
+  Status = MkextDecompress (TmpMkext, TmpMkextSize, NumReservedKexts, NULL, 0, AllocatedSize);
   if (EFI_ERROR (Status)) {
     FreePool (TmpMkext);
     return Status;
@@ -116,7 +121,7 @@ ReadAppleMkext (
   //
   // Decompress mkext into final buffer.
   //
-  Status = MkextDecompress (TmpMkext, TmpMkextSize, 5, *Mkext, *AllocatedSize, MkextSize);
+  Status = MkextDecompress (TmpMkext, TmpMkextSize, NumReservedKexts, *Mkext, *AllocatedSize, MkextSize);
   FreePool (TmpMkext);
 
   if (EFI_ERROR (Status)) {
