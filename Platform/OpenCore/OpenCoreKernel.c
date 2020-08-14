@@ -36,6 +36,15 @@ STATIC UINT32              mOcDarwinVersion;
 STATIC CACHELESS_CONTEXT   mOcCachelessContext;
 STATIC BOOLEAN             mOcCachelessInProgress;
 
+//
+// Kernel cache types.
+//
+typedef enum KERNEL_CACHE_TYPE_ {
+  CacheTypeCacheless,
+  CacheTypeMkext,
+  CacheTypePrelinked
+} KERNEL_CACHE_TYPE;
+
 STATIC
 UINT32
 OcParseDarwinVersion (
@@ -178,10 +187,12 @@ OcKernelReadDarwinVersion (
 STATIC
 EFI_STATUS
 OcKernelLoadKextsAndReserve (
-  IN OC_STORAGE_CONTEXT  *Storage,
-  IN OC_GLOBAL_CONFIG    *Config,
-  OUT UINT32             *ReservedExeSize,
-  OUT UINT32             *ReservedInfoSize
+  IN  OC_STORAGE_CONTEXT  *Storage,
+  IN  OC_GLOBAL_CONFIG    *Config,
+  IN  KERNEL_CACHE_TYPE   CacheType,
+  OUT UINT32              *ReservedExeSize,
+  OUT UINT32              *ReservedInfoSize,
+  OUT UINT32              *NumReservedKexts
   )
 {
   EFI_STATUS           Status;
@@ -195,6 +206,7 @@ OcKernelLoadKextsAndReserve (
 
   *ReservedInfoSize = PRELINK_INFO_RESERVE_SIZE;
   *ReservedExeSize  = 0;
+  *NumReservedKexts = 0;
 
   for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
     Kext = Config->Kernel.Add.Values[Index];
@@ -299,13 +311,24 @@ OcKernelLoadKextsAndReserve (
       }
     }
 
-    Status = PrelinkedReserveKextSize (
-      ReservedInfoSize,
-      ReservedExeSize,
-      Kext->PlistDataSize,
-      Kext->ImageData,
-      Kext->ImageDataSize
-      );
+    if (CacheType == CacheTypeCacheless || CacheType == CacheTypeMkext) {
+      Status = MkextReserveKextSize (
+        ReservedInfoSize,
+        ReservedExeSize,
+        Kext->PlistDataSize,
+        Kext->ImageData,
+        Kext->ImageDataSize
+        );
+    } else if (CacheType == CacheTypePrelinked) {
+      Status = PrelinkedReserveKextSize (
+        ReservedInfoSize,
+        ReservedExeSize,
+        Kext->PlistDataSize,
+        Kext->ImageData,
+        Kext->ImageDataSize
+        );
+    }
+
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_ERROR,
@@ -318,11 +341,15 @@ OcKernelLoadKextsAndReserve (
       Kext->PlistData = NULL;
       continue;
     }
+
+    (*NumReservedKexts)++;
   }
 
-  if (*ReservedExeSize > PRELINKED_KEXTS_MAX_SIZE
-   || *ReservedInfoSize + *ReservedExeSize < *ReservedExeSize) {
-    return EFI_UNSUPPORTED;
+  if (CacheType == CacheTypePrelinked) {
+    if (*ReservedExeSize > PRELINKED_KEXTS_MAX_SIZE
+      || *ReservedInfoSize + *ReservedExeSize < *ReservedExeSize) {
+      return EFI_UNSUPPORTED;
+    }
   }
 
   DEBUG ((
@@ -729,6 +756,92 @@ OcKernelProcessPrelinked (
 
 STATIC
 EFI_STATUS
+OcKernelProcessMkext (
+  IN     OC_GLOBAL_CONFIG  *Config,
+  IN     UINT32            DarwinVersion,
+  IN OUT UINT8             *Mkext,
+  IN OUT UINT32            *MkextSize,
+  IN     UINT32            AllocatedSize
+  )
+{
+  EFI_STATUS            Status;
+  MKEXT_CONTEXT         Context;
+  CHAR8                 *BundlePath;
+  CHAR8                 *Comment;
+  UINT32                Index;
+  CHAR8                 FullPath[OC_STORAGE_SAFE_PATH_MAX];
+  OC_KERNEL_ADD_ENTRY   *Kext;
+  UINT32                MaxKernel;
+  UINT32                MinKernel;
+
+  Status = MkextContextInit (&Context, Mkext, *MkextSize, AllocatedSize);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
+    Kext = Config->Kernel.Add.Values[Index];
+
+    if (!Kext->Enabled || Kext->PlistDataSize == 0) {
+      continue;
+    }
+
+    BundlePath  = OC_BLOB_GET (&Kext->BundlePath);
+    Comment     = OC_BLOB_GET (&Kext->Comment);
+    MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
+    MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
+
+    if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: Mkext injection skips %a (%a) kext at %u due to version %u <= %u <= %u\n",
+        BundlePath,
+        Comment,
+        Index,
+        MinKernel,
+        DarwinVersion,
+        MaxKernel
+        ));
+      continue;
+    }
+
+    Status = OcAsciiSafeSPrint (FullPath, sizeof (FullPath), "/Library/Extensions/%a", BundlePath);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "OC: Failed to fit kext path /Library/Extensions/%a", BundlePath));
+      continue;
+    }
+
+    Status = MkextInjectKext (
+      &Context,
+      FullPath,
+      Kext->PlistData,
+      Kext->PlistDataSize,
+      Kext->ImageData,
+      Kext->ImageDataSize
+      );
+
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Mkext injection %a (%a) - %r\n",
+      BundlePath,
+      Comment,
+      Status
+      ));
+  }
+
+  Status = MkextInjectPatchComplete (&Context);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OC: Mkext insertion error - %r\n", Status));
+  }
+
+  *MkextSize = Context.MkextSize;
+
+  MkextContextFree (&Context);
+  return Status;
+}
+
+STATIC
+EFI_STATUS
 OcKernelInitCacheless (
   IN     OC_GLOBAL_CONFIG       *Config,
   IN     CACHELESS_CONTEXT      *Context,
@@ -819,6 +932,7 @@ OcKernelFileOpen (
   EFI_TIME           ModificationTime;
   UINT32             ReservedInfoSize;
   UINT32             ReservedExeSize;
+  UINT32             NumReservedKexts;
   UINT32             LinkedExpansion;
   UINT32             ReservedFullSize;
 
@@ -866,8 +980,10 @@ OcKernelFileOpen (
     OcKernelLoadKextsAndReserve (
       mOcStorage,
       mOcConfiguration,
+      CacheTypePrelinked,
       &ReservedExeSize,
-      &ReservedInfoSize
+      &ReservedInfoSize,
+      &NumReservedKexts
       );
 
     LinkedExpansion = KcGetSegmentFixupChainsSize (ReservedExeSize);
@@ -956,6 +1072,68 @@ OcKernelFileOpen (
     }
   }
 
+  if (OpenMode == EFI_FILE_MODE_READ
+    && OcStriStr (FileName, L"Extensions.mkext") != NULL) {
+    
+    OcKernelLoadKextsAndReserve (
+      mOcStorage,
+      mOcConfiguration,
+      CacheTypeMkext,
+      &ReservedExeSize,
+      &ReservedInfoSize,
+      &NumReservedKexts
+      );
+
+    Result = OcOverflowAddU32 (
+      ReservedInfoSize,
+      ReservedExeSize,
+      &ReservedFullSize
+      );
+    if (Result) {
+      return EFI_UNSUPPORTED;
+    }
+
+    DEBUG ((DEBUG_INFO, "OC: Trying mkext hook on %s\n", FileName));
+    Status = ReadAppleMkext (
+      *NewHandle,
+      MachCpuTypeX8664,
+      &Kernel,
+      &KernelSize,
+      &AllocatedSize,
+      ReservedFullSize,
+      NumReservedKexts
+      );
+    DEBUG ((DEBUG_INFO, "OC: Result of mkext hook on %s is %r\n", FileName, Status));
+
+    if (!EFI_ERROR (Status)) {
+      //
+      // Process mkext.
+      //
+      Status = OcKernelProcessMkext (mOcConfiguration, mOcDarwinVersion, Kernel, &KernelSize, AllocatedSize);
+      DEBUG ((DEBUG_INFO, "OC: Mkext status - %r\n", Status));
+      if (!EFI_ERROR (Status)) {
+        Status = GetFileModificationTime (*NewHandle, &ModificationTime);
+        if (EFI_ERROR (Status)) {
+          ZeroMem (&ModificationTime, sizeof (ModificationTime));
+        }
+
+        (*NewHandle)->Close(*NewHandle);
+
+        Status = CreateVirtualFileFileNameCopy (FileName, Kernel, KernelSize, &ModificationTime, &VirtualFileHandle);
+        if (EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_WARN, "OC: Failed to virtualise mkext file (%a) - %r\n", FileName, Status));
+          FreePool (Kernel);
+          return EFI_OUT_OF_RESOURCES;
+        }
+
+        *NewHandle = VirtualFileHandle;
+        return EFI_SUCCESS;
+      } else {
+        FreePool (Kernel);
+      }
+    }
+  }
+
   //
   // Hook /S/L/E for cacheless boots.
   //
@@ -973,8 +1151,10 @@ OcKernelFileOpen (
     OcKernelLoadKextsAndReserve (
       mOcStorage,
       mOcConfiguration,
+      CacheTypeCacheless,
       &ReservedExeSize,
-      &ReservedInfoSize
+      &ReservedInfoSize,
+      &NumReservedKexts
       );
 
     //

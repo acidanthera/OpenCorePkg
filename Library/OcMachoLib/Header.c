@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <Base.h>
+#include <Uefi.h>
 
 #include <IndustryStandard/AppleMachoImage.h>
 #include <IndustryStandard/AppleFatBinaryImage.h>
@@ -97,84 +97,6 @@ MachoGetVmSize64 (
 }
 
 /**
-  Moves file pointer and size to point to x86_64 slice in case
-  FAT Mach-O is used.
-
-  @param[in,out] FileData  Pointer to pointer of the file's data.
-  @param[in,out] FileSize  Pointer to file size of FileData.
-
-  @return FALSE is not valid FAT image.
-**/
-STATIC
-BOOLEAN
-MachoFilterFatArchitecture64 (
-  IN OUT UINT8         **FileData,
-  IN OUT UINT32        *FileSize
-  )
-{
-  BOOLEAN           SwapBytes;
-  MACH_FAT_HEADER   *FatHeader;
-  UINT32            NumberOfFatArch;
-  UINT32            Offset;
-  MACH_CPU_TYPE     CpuType;
-  UINT32            TmpSize;
-  UINT32            Index;
-  UINT32            Size;
-
-  if (*FileSize < sizeof (MACH_FAT_HEADER)
-   || !OC_TYPE_ALIGNED (MACH_FAT_HEADER, *FileData)) {
-    return FALSE;
-  }
-  FatHeader = (MACH_FAT_HEADER *)* FileData;
-  if (FatHeader->Signature != MACH_FAT_BINARY_INVERT_SIGNATURE
-   && FatHeader->Signature != MACH_FAT_BINARY_SIGNATURE) {
-    return FALSE;
-  }
-
-  SwapBytes       = FatHeader->Signature == MACH_FAT_BINARY_INVERT_SIGNATURE;
-  NumberOfFatArch = FatHeader->NumberOfFatArch;
-  if (SwapBytes) {
-    NumberOfFatArch = SwapBytes32 (NumberOfFatArch);
-  }
-
-  if (OcOverflowMulAddU32 (NumberOfFatArch, sizeof (MACH_FAT_ARCH), sizeof (MACH_FAT_HEADER), &TmpSize)
-    || TmpSize > *FileSize) {
-    return FALSE;
-  }
-
-  //
-  // TODO: extend the interface to support MachCpuSubtypeX8664H some day.
-  //
-  for (Index = 0; Index < NumberOfFatArch; ++Index) {
-    CpuType = FatHeader->FatArch[Index].CpuType;
-    if (SwapBytes) {
-      CpuType = SwapBytes32 (CpuType);
-    }
-    if (CpuType == MachCpuTypeX8664) {
-      Offset = FatHeader->FatArch[Index].Offset;
-      Size   = FatHeader->FatArch[Index].Size;
-      if (SwapBytes) {
-        Offset = SwapBytes32 (Offset);
-        Size   = SwapBytes32 (Size);
-      }
-
-      if (Offset == 0
-        || OcOverflowAddU32 (Offset, Size, &TmpSize)
-        || TmpSize > *FileSize) {
-        return FALSE;
-      }
-
-      *FileData = *FileData + Offset;
-      *FileSize = Size;
-
-      return TRUE;
-    }
-  }
-
-  return FALSE;
-}
-
-/**
   Initializes a Mach-O Context.
 
   @param[out] Context   Mach-O Context to initialize.
@@ -191,6 +113,7 @@ MachoInitializeContext (
   IN  UINT32            ContainerOffset
   )
 {
+  EFI_STATUS              Status;
   MACH_HEADER_64          *MachHeader;
   UINTN                   TopOfFile;
   UINTN                   TopOfCommands;
@@ -207,7 +130,10 @@ MachoInitializeContext (
   TopOfFile = ((UINTN)FileData + FileSize);
   ASSERT (TopOfFile > (UINTN)FileData);
 
-  MachoFilterFatArchitecture64 ((UINT8 **) &FileData, &FileSize);
+  Status = FatFilterArchitecture64 ((UINT8 **) &FileData, &FileSize);
+  if (EFI_ERROR (Status)) {
+    return FALSE;
+  }
 
   if (FileSize < sizeof (*MachHeader)
     || !OC_TYPE_ALIGNED (MACH_HEADER_64, FileData)) {

@@ -808,4 +808,76 @@ MachoGetNextCommand64 (
   IN     CONST MACH_LOAD_COMMAND  *LoadCommand  OPTIONAL
   );
 
+/**
+  Returns offset and size of specified slice in case
+  FAT Mach-O is used. If no FAT is detected, FatOffset and
+  FatSize are set to 0 and FullSize respectively.
+
+  @param[in]  Buffer      Pointer to the buffer data.
+  @param[in]  BufferSize  Size of Buffer.
+  @param[in]  FullSize    Full file size, used to validate sizes
+                          within FAT structure.
+  @param[in]  CpuType     Desired CPU slice to use.
+  @param[out] FatOffset   Pointer to offset of FAT slice.
+  @param[out] FatSize     Pointer to size of FAT slice.
+
+  @return EFI_SUCCESS if no FAT, or arch was found in valid FAT image.
+**/
+EFI_STATUS
+FatGetArchitectureOffset (
+  IN  CONST UINT8       *Buffer,
+  IN  UINT32            BufferSize,
+  IN  UINT32            FullSize,
+  IN  MACH_CPU_TYPE     CpuType,
+  OUT UINT32            *FatOffset,
+  OUT UINT32            *FatSize
+  );
+
+/**
+  Moves file pointer and size to point to specified slice in case
+  FAT Mach-O is used.
+
+  @param[in,out] FileData  Pointer to pointer of the file's data.
+  @param[in,out] FileSize  Pointer to file size of FileData.
+  @param[in]     CpuType   Desired CPU slice to use.
+
+  @return EFI_SUCCESS if no FAT, or arch was found in valid FAT image.
+**/
+EFI_STATUS
+FatFilterArchitectureByType (
+  IN OUT UINT8         **FileData,
+  IN OUT UINT32        *FileSize,
+  IN     MACH_CPU_TYPE CpuType
+  );
+
+/**
+  Moves file pointer and size to point to x86 slice in case
+  FAT Mach-O is used.
+
+  @param[in,out] FileData  Pointer to pointer of the file's data.
+  @param[in,out] FileSize  Pointer to file size of FileData.
+
+  @return EFI_SUCCESS if no FAT, or a valid 32-bit arch exists.
+**/
+EFI_STATUS
+FatFilterArchitecture32 (
+  IN OUT UINT8         **FileData,
+  IN OUT UINT32        *FileSize
+  );
+
+/**
+  Moves file pointer and size to point to x86_64 slice in case
+  FAT Mach-O is used.
+
+  @param[in,out] FileData  Pointer to pointer of the file's data.
+  @param[in,out] FileSize  Pointer to file size of FileData.
+  
+  @return EFI_SUCCESS if no FAT, or a valid 64-bit arch exists.
+**/
+EFI_STATUS
+FatFilterArchitecture64 (
+  IN OUT UINT8         **FileData,
+  IN OUT UINT32        *FileSize
+  );
+
 #endif // OC_MACHO_LIB_H
