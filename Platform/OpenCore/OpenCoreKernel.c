@@ -738,7 +738,6 @@ OcKernelProcessMkext (
   EFI_STATUS            Status;
   MKEXT_CONTEXT         Context;
   CHAR8                 *BundlePath;
-  CHAR8                 *ExecutablePath;
   CHAR8                 *Comment;
   UINT32                Index;
   CHAR8                 FullPath[OC_STORAGE_SAFE_PATH_MAX];
@@ -781,12 +780,6 @@ OcKernelProcessMkext (
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "OC: Failed to fit kext path /Library/Extensions/%a", BundlePath));
       continue;
-    }
-
-    if (Kext->ImageData != NULL) {
-      ExecutablePath = OC_BLOB_GET (&Kext->ExecutablePath);
-    } else {
-      ExecutablePath = NULL;
     }
 
     Status = MkextInjectKext (
@@ -1045,10 +1038,9 @@ OcKernelFileOpen (
       &ReservedInfoSize
       );
 
-    Result = OcOverflowTriAddU32 (
+    Result = OcOverflowAddU32 (
       ReservedInfoSize,
       ReservedExeSize,
-      LinkedExpansion,
       &ReservedFullSize
       );
     if (Result) {
