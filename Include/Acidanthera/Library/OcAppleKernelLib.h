@@ -76,6 +76,7 @@
 
 //
 // Size to reserve per kext for plist expansion.
+// Additional properties are added to prelinked and mkext v2, this should account for those.
 //
 #define PLIST_EXPANSION_SIZE      512
 
@@ -949,7 +950,7 @@ CachelessContextHookBuiltin (
   @param[in]     Buffer               Mkext buffer.
   @param[in]     BufferSize           Mkext buffer size.
   @param[in]     NumReservedKexts     Number of kext slots to reserve for injection.
-  @param[in,out] OutBuffer            Output buffer.
+  @param[in,out] OutBuffer            Output buffer. Optional if OutBufferSize is zero.
   @param[in]     OutBufferSize        Total output buffer size. Specify zero to
                                       calculate output buffer size.
   @param[in,out] OutMkextSize         Decompressed Mkext size.
@@ -961,8 +962,8 @@ MkextDecompress (
   IN     CONST UINT8      *Buffer,
   IN     UINT32           BufferSize,
   IN     UINT32           NumReservedKexts,
-  IN OUT UINT8            *OutBuffer,
-  IN     UINT32           OutBufferSize,
+  IN OUT UINT8            *OutBuffer OPTIONAL,
+  IN     UINT32           OutBufferSize OPTIONAL,
   IN OUT UINT32           *OutMkextSize
   );
 
