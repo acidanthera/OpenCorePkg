@@ -76,6 +76,9 @@ Specifications:
 # Note, first model code is used by macserial
 AppleModelCode:
   - "046M"
+  - "046N"
+  - "046L"
+  - "046T"
 # Note, first board code is used by macserial
 AppleBoardCode:
   - "0000"
