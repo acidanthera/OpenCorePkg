@@ -198,10 +198,8 @@ InternalKxldStateBuildLinkedSymbolTable (
   UINT32                   NumCxxSymbols;
   BOOLEAN                  Result;  
 
-  if (Kext->KxldState == NULL || Kext->KxldStateSize == 0) {
-    DEBUG ((DEBUG_INFO, "OCAK: %a has %u size KXLD, ignoring symbols\n", Kext->Identifier, Kext->KxldStateSize));
-    return EFI_SUCCESS;
-  }
+  ASSERT (Kext->KxldState != NULL);
+  ASSERT (Kext->KxldStateSize > 0);
 
   if (Kext->LinkedSymbolTable != NULL) {
     return EFI_SUCCESS;
@@ -295,10 +293,8 @@ InternalKxldStateBuildLinkedVtables (
   UINT32                           NumEntries;
   UINT32                           ResultingSize;
 
-  if (Kext->KxldState == NULL || Kext->KxldStateSize == 0) {
-    DEBUG ((DEBUG_INFO, "OCAK: %a has %u size KXLD, ignoring symbols\n", Kext->Identifier, Kext->KxldStateSize));
-    return EFI_SUCCESS;
-  }
+  ASSERT (Kext->KxldState != NULL);
+  ASSERT (Kext->KxldStateSize > 0);
 
   if (Kext->LinkedVtables != NULL) {
     return EFI_SUCCESS;
@@ -451,12 +447,12 @@ InternalKxldStateRebuild (
   //
   // This is a requirement from 10.6.8, should be guaranteed?
   //
-  ASSERT (OC_POT_ALIGNED (EFI_PAGE_SIZE, Context->PrelinkedLastAddress));
+  ASSERT (OC_POT_ALIGNED (MACHO_PAGE_SIZE, Context->PrelinkedLastAddress));
 
   //
   // Append prelink state for 10.6.8
   //
-  AlignedSize = ALIGN_VALUE (Context->PrelinkedStateKernelSize, EFI_PAGE_SIZE);
+  AlignedSize = MACHO_ALIGN (Context->PrelinkedStateKernelSize);
   if (OcOverflowAddU32 (Context->PrelinkedSize, AlignedSize, &NewSize)
     || NewSize > Context->PrelinkedAllocSize) {
     return EFI_BUFFER_TOO_SMALL;
@@ -483,7 +479,7 @@ InternalKxldStateRebuild (
   Context->PrelinkedLastAddress += AlignedSize;
   Context->PrelinkedSize        += AlignedSize;
 
-  AlignedSize = ALIGN_VALUE (Context->PrelinkedStateKextsSize, EFI_PAGE_SIZE);
+  AlignedSize = MACHO_ALIGN (Context->PrelinkedStateKextsSize);
   if (OcOverflowAddU32 (Context->PrelinkedSize, AlignedSize, &NewSize)
     || NewSize > Context->PrelinkedAllocSize) {
     return EFI_BUFFER_TOO_SMALL;

@@ -751,7 +751,9 @@ InternalCachedPrelinkedKernel (
         );
 
       if (Prelinked->PrelinkedStateSectionKernel != NULL
-        && Prelinked->PrelinkedStateSectionKexts != NULL) {
+        && Prelinked->PrelinkedStateSectionKexts != NULL
+        && Prelinked->PrelinkedStateKernelSize > 0
+        && Prelinked->PrelinkedStateKextsSize > 0) {
         Prelinked->PrelinkedStateKernelSize = (UINT32) Prelinked->PrelinkedStateSectionKernel->Size;
         Prelinked->PrelinkedStateKextsSize = (UINT32) Prelinked->PrelinkedStateSectionKexts->Size;
         Prelinked->PrelinkedStateKernel = AllocateCopyPool (
@@ -772,10 +774,16 @@ InternalCachedPrelinkedKernel (
       } else {
         DEBUG ((
           DEBUG_INFO,
-          "OCAK: Failed to find PK state __kernel %p __kexts %p\n",
+          "OCAK: Ignoring unused PK state __kernel %p __kexts %p\n",
           Prelinked->PrelinkedStateSectionKernel,
           Prelinked->PrelinkedStateSectionKexts
           ));
+        if (Prelinked->PrelinkedStateKernel != NULL) {
+          FreePool (Prelinked->PrelinkedStateKernel);
+        }
+        if (Prelinked->PrelinkedStateKexts != NULL) {
+          FreePool (Prelinked->PrelinkedStateKexts);
+        }
         Prelinked->PrelinkedStateSectionKernel = NULL;
         Prelinked->PrelinkedStateSectionKexts = NULL;
         Prelinked->PrelinkedStateSegment = NULL;
@@ -931,7 +939,7 @@ InternalScanPrelinkedKext (
   // Collect data to enable linking against this KEXT.
   //
   if (Dependency) {
-    if (Context->PrelinkedStateSegment != NULL) {
+    if (Kext->KxldState != NULL) {
       //
       // Use KXLD state as is for 10.6.8 kernel.
       //
