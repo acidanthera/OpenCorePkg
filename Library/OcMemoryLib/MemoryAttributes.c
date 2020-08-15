@@ -162,6 +162,84 @@ OcSplitMemoryEntryByAttribute (
   return EFI_SUCCESS;
 }
 
+STATIC
+EFI_STATUS
+OcExpandAttributeWrite (
+  IN OUT EFI_MEMORY_ATTRIBUTES_TABLE  *MemoryAttributesTable,
+  IN OUT EFI_MEMORY_DESCRIPTOR        *MemoryAttributesEntry OPTIONAL,
+  IN     UINTN                        MaxDescriptors,
+  IN     EFI_MEMORY_DESCRIPTOR        *MemoryMapEntry,
+  IN     EFI_PHYSICAL_ADDRESS         CurrentMapAddress
+  )
+{
+  EFI_PHYSICAL_ADDRESS    NextMatAddress;
+
+  //
+  // Simply abort on failing to write any new entry.
+  //
+  if (MemoryAttributesTable->NumberOfEntries >= MaxDescriptors) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  if (MemoryAttributesEntry != NULL) {
+    //
+    // Insert to the middle of MAT table at current MAT entry position.
+    // Assert that this MAT entry follows this map entry.
+    //
+    ASSERT (MemoryAttributesEntry->PhysicalStart > CurrentMapAddress);
+
+    //
+    // Create a free MAT entry inbetween.
+    //
+    CopyMem (
+      NEXT_MEMORY_DESCRIPTOR (MemoryAttributesEntry, MemoryAttributesTable->DescriptorSize),
+      MemoryAttributesEntry,
+      MemoryAttributesTable->NumberOfEntries * MemoryAttributesTable->DescriptorSize
+        - ((UINTN) MemoryAttributesEntry - (UINTN) MemoryAttributesTable - sizeof (*MemoryAttributesTable))
+      );
+
+    //
+    // Calculate the location of the next MAT entry to get the size of this one.
+    // This MAT entry will either:
+    // - fill the whole gap right away, by reaching the next MAT entry.
+    //   MA: [   GAP   ][ MAT ]
+    //   MM: [   MAP   ]
+    // - fill part of the gap up to MAP entry end.
+    //   MA: [   GAP      ][ MAT ]
+    //   MM: [   MAP  ][ OTHER MAP ]
+    //
+    NextMatAddress = LAST_DESCRIPTOR_ADDR (MemoryMapEntry) + 1;
+    if (MemoryAttributesEntry->PhysicalStart < NextMatAddress) {
+      NextMatAddress = MemoryAttributesEntry->PhysicalStart;
+    }
+  } else {
+    //
+    // Append to the end of MAT table.
+    //
+    MemoryAttributesEntry = (VOID *) ((UINTN) MemoryAttributesTable + sizeof (*MemoryAttributesTable)
+      + MemoryAttributesTable->NumberOfEntries * MemoryAttributesTable->DescriptorSize);
+    NextMatAddress = LAST_DESCRIPTOR_ADDR (MemoryMapEntry) + 1;
+  }
+
+  //
+  // Write the new attribute.
+  //
+  MemoryAttributesEntry->Type          = OcRealMemoryType (MemoryMapEntry);
+  MemoryAttributesEntry->PhysicalStart = CurrentMapAddress;
+  MemoryAttributesEntry->VirtualStart  = 0;
+  MemoryAttributesEntry->NumberOfPages = EFI_SIZE_TO_PAGES (NextMatAddress - CurrentMapAddress);
+  MemoryAttributesEntry->Attribute     = EFI_MEMORY_RUNTIME;
+  if (MemoryAttributesEntry->Type == EfiRuntimeServicesCode) {
+    MemoryAttributesEntry->Attribute |= EFI_MEMORY_RO;
+  } else {
+    MemoryAttributesEntry->Attribute |= EFI_MEMORY_XP;
+  }
+
+  ++MemoryAttributesTable->NumberOfEntries;
+
+  return EFI_SUCCESS;
+}
+
 /**
   Expand attributes table by adding memory map runtime entries into it.
   Requires sorted memory map.
@@ -190,147 +268,129 @@ OcExpandAttributesByMap (
   EFI_STATUS             Status;
   UINTN                  MapIndex;
   UINTN                  MatIndex;
-  EFI_PHYSICAL_ADDRESS   LastMapAddress;
+  EFI_PHYSICAL_ADDRESS   NextMapAddress;
   EFI_PHYSICAL_ADDRESS   LastMatAddress;
-  EFI_PHYSICAL_ADDRESS   NewNextGluedAddress;
-  EFI_PHYSICAL_ADDRESS   NextGluedAddress;
-  BOOLEAN                LastMat;
+  EFI_PHYSICAL_ADDRESS   CurrentMapAddress;
 
   MatIndex = 0;
   Status   = EFI_NOT_FOUND;
 
   for (MapIndex = 0; MapIndex < MemoryMapDescriptors; ++MapIndex) {
-    if (MemoryMap->Type == EfiRuntimeServicesCode
-      || MemoryMap->Type == EfiRuntimeServicesData) {
-
-      LastMapAddress   = LAST_DESCRIPTOR_ADDR (MemoryMap);
-      NextGluedAddress = MemoryMap->PhysicalStart;
-      LastMat          = FALSE;
-
-      while (MatIndex < MemoryAttributesTable->NumberOfEntries && !LastMat) {
-        //
-        // Process MAT with RT code or RT data type, which is the last one or resides at MAP entry or after.
-        //
-        LastMatAddress = LAST_DESCRIPTOR_ADDR (MemoryAttributesEntry);
-        LastMat        = MatIndex + 1 == MemoryAttributesTable->NumberOfEntries;
-        if ((MemoryMap->Type == EfiRuntimeServicesCode || MemoryMap->Type == EfiRuntimeServicesData)
-          && (LastMatAddress >= MemoryMap->PhysicalStart || LastMat)) {
-          //
-          // MAT is a suffix of MAP (MAT ends at MAP end).
-          //
-          if (NextGluedAddress == MemoryAttributesEntry->PhysicalStart
-            && LastMatAddress == LastMapAddress) {
-            //
-            // Completed iterating over this MAP entry.
-            //
-            break;
-          }
-
-          //
-          // MAT is a prefix or an infix of MAP:
-          // 1. MAT entry at the beginning of MAP entry.
-          // 2. MAT entry continuing previous MAT entry within MAP entry.
-          // If this MAT is last, we have a hole in the end.
-          //
-          if (NextGluedAddress == MemoryAttributesEntry->PhysicalStart && !LastMat) {
-            //
-            // MAT is required to be smaller or equal than MAP by UEFI spec.
-            //
-            ASSERT (MemoryAttributesEntry->NumberOfPages <= MemoryMap->NumberOfPages);
-            NextGluedAddress = LastMatAddress + 1;
-          } else {
-            //
-            // Have a hole between neighbouring MAT entries, 3 variants:
-            // - MAT is within MAP (but starts later).
-            // - MAT starts after MAP.
-            // - No MAT fully covers MAP end (this is the last MAT entry).
-            // Need to insert a new MAT entry to cover the hole.
-            //
-            if (MemoryAttributesTable->NumberOfEntries >= MaxDescriptors) {
-              return EFI_OUT_OF_RESOURCES;
-            }
-
-            if (!LastMat) {
-              //
-              // Append to the middle.
-              // Choose the next processed address. This is the closest boundary for us:
-              // - First MAT address, when MAT is within MAP.
-              // - Last MAP address, when MAT starts after MAP.
-              //
-              NewNextGluedAddress = MIN (MemoryAttributesEntry->PhysicalStart, LastMapAddress + 1);
-              //
-              // Copy existing attributes to the right.
-              //
-              ASSERT (MemoryAttributesEntry->PhysicalStart > NextGluedAddress);
-              CopyMem (
-                NEXT_MEMORY_DESCRIPTOR (MemoryAttributesEntry, MemoryAttributesTable->DescriptorSize),
-                MemoryAttributesEntry,
-                (MemoryAttributesTable->NumberOfEntries - MatIndex) * MemoryAttributesTable->DescriptorSize
-                );
-            } else {
-              //
-              // Append to the end.
-              // Next processed address is the end of MAP.
-              // There are no MATs left to copy.
-              //
-              NewNextGluedAddress = LastMapAddress + 1;
-              //
-              // If current MAT is a prefix or an infix of MAP, take it into account.
-              //
-              if (MemoryAttributesEntry->PhysicalStart == NextGluedAddress) {
-                NextGluedAddress = LastMatAddress + 1;
-              } else {
-                ASSERT (MemoryAttributesEntry->PhysicalStart < NextGluedAddress);
-              }
-              //
-              // Update current entry the new the last entry we are about to write.
-              //
-              MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (MemoryAttributesEntry, MemoryAttributesTable->DescriptorSize);
-              ++MatIndex;
-            }
-            //
-            // Write the new attribute.
-            //
-            MemoryAttributesEntry->Type          = OcRealMemoryType (MemoryMap);
-            MemoryAttributesEntry->PhysicalStart = NextGluedAddress;
-            MemoryAttributesEntry->VirtualStart  = 0;
-            MemoryAttributesEntry->NumberOfPages = EFI_SIZE_TO_PAGES (NewNextGluedAddress - NextGluedAddress);
-            MemoryAttributesEntry->Attribute     = EFI_MEMORY_RUNTIME;
-            if (MemoryAttributesEntry->Type == EfiRuntimeServicesCode) {
-              MemoryAttributesEntry->Attribute |= EFI_MEMORY_RO;
-            } else {
-              MemoryAttributesEntry->Attribute |= EFI_MEMORY_XP;
-            }
-            //
-            // Update the next processed address.
-            // Increase the amount of MAT entries in the table.
-            // Report success.
-            //
-            NextGluedAddress = NewNextGluedAddress;
-            ++MemoryAttributesTable->NumberOfEntries;
-            Status = EFI_SUCCESS;
-            //
-            // Done processing MATs.
-            //
-            if (NextGluedAddress == LastMapAddress + 1) {
-              break;
-            }
-          }
-        }
-        //
-        // Process next MAT.
-        // Do not increment if it is the last MAT, as we need to fill holes in the end.
-        //
-        if (!LastMat) {
-          MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (
-            MemoryAttributesEntry,
-            MemoryAttributesTable->DescriptorSize
-            );
-          ++MatIndex;
-        }
-      }
+    //
+    // Skip MAP entries, which are not RTCode or RTData.
+    //
+    if (MemoryMap->Type != EfiRuntimeServicesCode
+      && MemoryMap->Type != EfiRuntimeServicesData) {
+      goto NEXT_MEMORY_MAP_DESCRIPTOR;
     }
 
+    NextMapAddress    = LAST_DESCRIPTOR_ADDR (MemoryMap) + 1;
+    CurrentMapAddress = MemoryMap->PhysicalStart;
+
+    //
+    // Iterate MAT entries till we are over them or till
+    // we finish iterating this MAP entry memory.
+    //
+    while (MatIndex < MemoryAttributesTable->NumberOfEntries
+      && CurrentMapAddress < NextMapAddress) {
+      //
+      // Skip MAT entries, which are not RTCode or RTData.
+      //
+      if (MemoryAttributesEntry->Type != EfiRuntimeServicesCode
+        && MemoryAttributesEntry->Type != EfiRuntimeServicesData) {
+        goto NEXT_MEMORY_ATTRIBUTE_DESCRIPTOR;
+      }
+
+      //
+      // Skip MAT entries which end before this MAP entry. This should
+      // not happen normally, as each MAT entry is supposed to be within
+      // a single RTCode/RTData MAP entry according to UEFI spec, and
+      // our memory map is sorted.
+      //
+      LastMatAddress = LAST_DESCRIPTOR_ADDR (MemoryAttributesEntry);
+      if (LastMatAddress < MemoryMap->PhysicalStart) {
+        goto NEXT_MEMORY_ATTRIBUTE_DESCRIPTOR;
+      }
+
+      //
+      // Advance MAP iterator if we found a MAT entry that follows the
+      // current MAP entry address.
+      //
+      if (CurrentMapAddress == MemoryAttributesEntry->PhysicalStart) {
+        //
+        // MAT is required to be smaller or equal than MAP by UEFI spec.
+        // For now just assert on this, but if we find anybody violating this,
+        // we will have to adapt this code.
+        //
+        ASSERT (MemoryAttributesEntry->NumberOfPages <= MemoryMap->NumberOfPages);
+        CurrentMapAddress = LastMatAddress + 1;
+        goto NEXT_MEMORY_ATTRIBUTE_DESCRIPTOR;
+      }
+
+      //
+      // At this step we have a hole between the current MAP entry address
+      // and the MAT entry. Fill it in.
+      //
+      Status = OcExpandAttributeWrite (
+        MemoryAttributesTable,
+        MemoryAttributesEntry,
+        MaxDescriptors,
+        MemoryMap,
+        CurrentMapAddress
+        );
+      if (EFI_ERROR (Status)) {
+        return Status;
+      }
+
+      //
+      // Advance MAP iterator with the entry we have just added and continue
+      // processing the next MAT entry.
+      //
+      CurrentMapAddress = LAST_DESCRIPTOR_ADDR (MemoryAttributesEntry) + 1;
+
+NEXT_MEMORY_ATTRIBUTE_DESCRIPTOR:
+      MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (
+        MemoryAttributesEntry,
+        MemoryAttributesTable->DescriptorSize
+        );
+      ++MatIndex;
+    }
+
+    //
+    // We completed to process this MAP entry, proceed to the next one.
+    //
+    if (CurrentMapAddress == NextMapAddress) {
+      goto NEXT_MEMORY_MAP_DESCRIPTOR;
+    }
+
+    //
+    // We have finished processing all the available MAT entries,
+    // but this MAP entry has more memory, which is not reflected
+    // in the MAT table. Add this memory and continue processing
+    // the next MAP entry.
+    //
+    ASSERT (CurrentMapAddress < NextMapAddress);
+    ASSERT (MatIndex == MemoryAttributesTable->NumberOfEntries);
+    Status = OcExpandAttributeWrite (
+      MemoryAttributesTable,
+      NULL,
+      MaxDescriptors,
+      MemoryMap,
+      CurrentMapAddress
+      );
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+
+    //
+    // Increment MatIndex to ensure that we no longer enter the MAT entry
+    // loop on the next iteration. Do not care updating CurrentMapAddress
+    // as we will overwrite it immediate on the next MAP entry iteration.
+    // Do not care updating MemoryAttribute as we will no longer use it.
+    //
+    ++MatIndex;
+
+NEXT_MEMORY_MAP_DESCRIPTOR:
     MemoryMap = NEXT_MEMORY_DESCRIPTOR (
       MemoryMap,
       DescriptorSize
@@ -381,6 +441,16 @@ OcRebuildAttributes (
   if (MemoryAttributesTable == NULL) {
     return EFI_UNSUPPORTED;
   }
+
+  //
+  // MAT is normally sorted, and so far nobody had issues
+  // caused by unsorted MAT, but we do not want to risk.
+  //
+  OcSortMemoryMap (
+    MemoryAttributesTable->NumberOfEntries * MemoryAttributesTable->DescriptorSize,
+    MemoryAttributesEntry,
+    MemoryAttributesTable->DescriptorSize
+    );
 
   //
   // Some boards create entry duplicates and lose all non-PE entries
