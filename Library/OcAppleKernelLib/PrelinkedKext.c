@@ -752,8 +752,8 @@ InternalCachedPrelinkedKernel (
 
       if (Prelinked->PrelinkedStateSectionKernel != NULL
         && Prelinked->PrelinkedStateSectionKexts != NULL
-        && Prelinked->PrelinkedStateKernelSize > 0
-        && Prelinked->PrelinkedStateKextsSize > 0) {
+        && Prelinked->PrelinkedStateSectionKernel->Size > 0
+        && Prelinked->PrelinkedStateSectionKexts->Size > 0) {
         Prelinked->PrelinkedStateKernelSize = (UINT32) Prelinked->PrelinkedStateSectionKernel->Size;
         Prelinked->PrelinkedStateKextsSize = (UINT32) Prelinked->PrelinkedStateSectionKexts->Size;
         Prelinked->PrelinkedStateKernel = AllocateCopyPool (
