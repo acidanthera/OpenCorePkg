@@ -89,6 +89,10 @@ Specifications:
 # Note, first model code is used by macserial
 AppleModelCode:
   - "PN5T"
+  - "PN5Y"
+  - "PN5X"
+  - "PN5W"
+  - "PN5V"
 # Note, first board code is used by macserial
 AppleBoardCode:
   - "0000"

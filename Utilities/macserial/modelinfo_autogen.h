@@ -367,7 +367,7 @@ static const char *AppleModelCode[][APPLE_MODEL_CODE_MAX] = {
   /* iMac18,3       */ {"J1GJ", "J1GQ", "J1GG", "J9XC", "J9X7", "J9X6", "J9X9", "JNGD", "JNGF", "JCCR", "JCCT", "JT72", "J9X8", "JM3R", "JM3V", "J1GR", "J1GP", "J1GV", "J1GT", "J1GK", "J1GH", "J1GN", "J1GL", "J1GM", "JCND", "JC5L", "JX8H", "J2GJ", "J609", "J60C"},
   /* iMac19,1       */ {"JV3Q", "JV3P", "JV40", "JV41", "JV42", "JV43", "MC9K", "MC9J", "MX7W", "JV3N", "JV3T", "JV3W", "JV3R", "JV3Y", "JV3X", "MW2R", "MW2P", "MW2Q", "MW2V", "MW2W", "MW2T", "MQQP", "NY2G", "P1WV", "MMTC"},
   /* iMac19,2       */ {"JWDW", "JWDX", "MQ87", "MC9M", "MC9L", "MRVM", "MPM0", "MW28", "JWDY", "MMTK", "MMTL", "MTML", "MCC1", "JWF3", "JWF2", "JWF1", "JWF0", "JWF4", "N6JT", "N9LN", "N07H"},
-  /* iMac20,1       */ {"PN5T"},
+  /* iMac20,1       */ {"PN5T", "PN5Y", "PN5X", "PN5W", "PN5V"},
   /* iMac20,2       */ {"046M"},
   /* iMac4,1        */ {"U2P", "V67", "V4Q", "VX0", "V4P", "V4R", "X0U", "U2S", "VH0", "VH2", "VW4", "WXN", "VGM", "VGC", "V66", "V4U", "V4N", "VV4", "VHP", "VH1", "VV6", "V4M", "U2N", "U2R", "VGB", "VGZ"},
   /* iMac4,2        */ {"V2H", "W8K", "WCV", "WAE", "WD4", "W9E", "X11", "V2J", "WKT"},
@@ -9676,6 +9676,10 @@ static APPLE_MODEL_DESC AppleModelDesc[] = {
  {"PLXX", "Mac Pro (2019)"},
  {"PLXY", "Mac Pro (2019)"},
  {"PN5T", "iMac (Retina 5K, 27-inch, 2020)"},
+ {"PN5V", "iMac (Retina 5K, 27-inch, 2020)"},
+ {"PN5W", "iMac (Retina 5K, 27-inch, 2020)"},
+ {"PN5X", "iMac (Retina 5K, 27-inch, 2020)"},
+ {"PN5Y", "iMac (Retina 5K, 27-inch, 2020)"},
  {"ST61", "MacBook Pro (13-inch, Early 2011)"},
 };
 
