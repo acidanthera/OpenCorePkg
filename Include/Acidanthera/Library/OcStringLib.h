@@ -84,6 +84,8 @@ AsciiStrCopyToUnicode (
   @param[out]  Buffer      Destination buffer.
   @param[in]   BufferSize  Destination buffer size in bytes.
   @param[in]   Value       Value to convert.
+
+  @retval TRUE on fit
 **/
 BOOLEAN
 AsciiUint64ToLowerHex (

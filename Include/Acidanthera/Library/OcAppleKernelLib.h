@@ -198,6 +198,10 @@ typedef struct {
   //
   XML_NODE                 *KextList;
   //
+  // Plist scratch buffer used when updating values.
+  //
+  CHAR8                    *KextScratchBuffer;
+  //
   // Buffers allocated from pool for internal needs.
   //
   VOID                     **PooledBuffers;

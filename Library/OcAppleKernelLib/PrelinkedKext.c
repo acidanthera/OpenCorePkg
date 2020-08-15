@@ -879,9 +879,9 @@ InternalScanPrelinkedKext (
       // _PrelinkExecutableLoadAddr / _PrelinkExecutableSourceAddr values equal to MAX_INT64.
       // Skip them early to improve performance.
       //
-      if (Context->IsKernelCollection
+      if ((Context->IsKernelCollection || Context->PrelinkedStateSegment != NULL)
         && AsciiStrnCmp (DependencyId, "com.apple.kpi.", L_STR_LEN ("com.apple.kpi.")) == 0) {
-        DEBUG ((DEBUG_VERBOSE, "OCAK: Ignoring KPI %a for kext %a in KC mode\n", DependencyId, Kext->Identifier));
+        DEBUG ((DEBUG_VERBOSE, "OCAK: Ignoring KPI %a for kext %a in KC/state mode\n", DependencyId, Kext->Identifier));
         continue;
       }
 

@@ -27,6 +27,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 #define MAX_KEXT_DEPEDENCIES 16
 
+//
+// Aligned maximum virtual address size with 0x prefix and \0 terminator.
+//
+#define KEXT_OFFSET_STR_LEN    24
+
 typedef struct PRELINKED_KEXT_ PRELINKED_KEXT;
 
 typedef struct {
@@ -451,6 +456,18 @@ EFI_STATUS
 InternalKxldStateBuildLinkedVtables (
   IN OUT PRELINKED_KEXT     *Kext,
   IN     PRELINKED_CONTEXT  *Context
+  );
+
+/**
+  Update KXLD state in the resulting image.
+
+  @param[in,out] Context   Prelinking context.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+InternalKxldStateRebuild (
+  IN OUT PRELINKED_CONTEXT  *Context
   );
 
 #endif // PRELINKED_INTERNAL_H

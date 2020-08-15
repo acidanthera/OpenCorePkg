@@ -469,6 +469,11 @@ PrelinkedContextFree (
     Context->PrelinkedInfoDocument = NULL;
   }
 
+  if (Context->KextScratchBuffer != NULL) {
+    FreePool (Context->KextScratchBuffer);
+    Context->KextScratchBuffer = NULL;
+  }
+
   if (Context->PrelinkedInfo != NULL) {
     FreePool (Context->PrelinkedInfo);
     Context->PrelinkedInfo = NULL;
@@ -747,50 +752,10 @@ PrelinkedInjectComplete (
       return Status;
     }
   } else if (Context->PrelinkedStateSegment != NULL && Context->PrelinkedStateSegment->VirtualAddress == 0) {
-    //
-    // Append prelink state for 10.6.8
-    //
-    if (OcOverflowAddU32 (Context->PrelinkedSize, MACHO_ALIGN (Context->PrelinkedStateKernelSize), &NewSize)
-      || NewSize > Context->PrelinkedAllocSize) {
-      return EFI_BUFFER_TOO_SMALL;
+    Status = InternalKxldStateRebuild (Context);
+    if (EFI_ERROR (Status)) {
+      return Status;
     }
-
-    Context->PrelinkedStateSegment->VirtualAddress = Context->PrelinkedLastAddress;
-    Context->PrelinkedStateSegment->Size           = MACHO_ALIGN (Context->PrelinkedStateKernelSize);
-    Context->PrelinkedStateSegment->FileOffset     = Context->PrelinkedSize;
-    Context->PrelinkedStateSegment->FileSize       = MACHO_ALIGN (Context->PrelinkedStateKernelSize);
-    Context->PrelinkedStateSectionKernel->Address  = Context->PrelinkedLastAddress;
-    Context->PrelinkedStateSectionKernel->Offset   = Context->PrelinkedSize;
-    Context->PrelinkedStateSectionKernel->Size     = MACHO_ALIGN (Context->PrelinkedStateKernelSize);
-
-    CopyMem (
-      &Context->Prelinked[Context->PrelinkedSize],
-      Context->PrelinkedStateKernel,
-      Context->PrelinkedStateKernelSize
-      );
-
-    Context->PrelinkedLastAddress += Context->PrelinkedStateSectionKernel->Size;
-    Context->PrelinkedSize        += Context->PrelinkedStateSectionKernel->Size;
-
-    if (OcOverflowAddU32 (Context->PrelinkedSize, MACHO_ALIGN (Context->PrelinkedStateKextsSize), &NewSize)
-      || NewSize > Context->PrelinkedAllocSize) {
-      return EFI_BUFFER_TOO_SMALL;
-    }
-
-    Context->PrelinkedStateSegment->Size          += MACHO_ALIGN (Context->PrelinkedStateKextsSize);
-    Context->PrelinkedStateSegment->FileSize      += MACHO_ALIGN (Context->PrelinkedStateKextsSize);
-    Context->PrelinkedStateSectionKernel->Address  = Context->PrelinkedLastAddress;
-    Context->PrelinkedStateSectionKernel->Offset   = Context->PrelinkedSize;
-    Context->PrelinkedStateSectionKernel->Size     = MACHO_ALIGN (Context->PrelinkedStateKextsSize);
-
-    CopyMem (
-      &Context->Prelinked[Context->PrelinkedSize],
-      Context->PrelinkedStateKexts,
-      Context->PrelinkedStateKextsSize
-      );
-
-    Context->PrelinkedLastAddress += Context->PrelinkedStateSectionKernel->Size;
-    Context->PrelinkedSize        += Context->PrelinkedStateSectionKernel->Size;
   }
 
   ExportedInfo = XmlDocumentExport (Context->PrelinkedInfoDocument, &ExportedInfoSize, 0, FALSE);

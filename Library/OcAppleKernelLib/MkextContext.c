@@ -17,7 +17,6 @@
 
 #include <IndustryStandard/AppleFatBinaryImage.h>
 
-
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
@@ -28,7 +27,7 @@
 #include <Library/OcGuardLib.h>
 #include <Library/OcStringLib.h>
 
-#define MKEXT_OFFSET_STR_LEN    24
+#include "PrelinkedInternal.h"
 
 //
 // Alignment to 8 bytes.
@@ -472,7 +471,7 @@ MkextDecompress (
     BinaryOffsetStrings = NULL;
 
     if (Decompress) {
-      if (OcOverflowTriMulU32 (PlistBundlesCount, MKEXT_OFFSET_STR_LEN, sizeof (CHAR8), &BinaryOffsetStringsSize)) {
+      if (OcOverflowTriMulU32 (PlistBundlesCount, KEXT_OFFSET_STR_LEN, sizeof (CHAR8), &BinaryOffsetStringsSize)) {
         XmlDocumentFree (PlistXml);
         FreePool (PlistBuffer);
         return EFI_INVALID_PARAMETER;
@@ -577,8 +576,8 @@ MkextDecompress (
             }
 
             if (!AsciiUint64ToLowerHex (
-              &BinaryOffsetStrings[Index * MKEXT_OFFSET_STR_LEN],
-              MKEXT_OFFSET_STR_LEN,
+              &BinaryOffsetStrings[Index * KEXT_OFFSET_STR_LEN],
+              KEXT_OFFSET_STR_LEN,
               CurrentOffset
               )) {
               XmlDocumentFree (PlistXml);
@@ -586,7 +585,7 @@ MkextDecompress (
               FreePool (BinaryOffsetStrings);
               return EFI_INVALID_PARAMETER;
             }
-            XmlNodeChangeContent (BundleExecutable, &BinaryOffsetStrings[Index * MKEXT_OFFSET_STR_LEN]);
+            XmlNodeChangeContent (BundleExecutable, &BinaryOffsetStrings[Index * KEXT_OFFSET_STR_LEN]);
           }
 
           //
