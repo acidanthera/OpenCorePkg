@@ -27,6 +27,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 #define MAX_KEXT_DEPEDENCIES 16
 
+//
+// Aligned maximum virtual address size with 0x prefix and \0 terminator.
+//
+#define KEXT_OFFSET_STR_LEN    24
+
 typedef struct PRELINKED_KEXT_ PRELINKED_KEXT;
 
 typedef struct {
@@ -112,6 +117,14 @@ struct PRELINKED_KEXT_ {
   // Calculated at LinkedSymbolTable construction.
   //
   UINT32                   NumberOfCxxSymbols;
+  //
+  // Pointer to KXLD state (read only, it is allocated in PrelinkedStateKexts).
+  //
+  CONST VOID               *KxldState;
+  //
+  // Pointer to KXLD state (read only, it is allocated in PrelinkedStateKexts).
+  //
+  UINT32                   KxldStateSize;
   //
   // Sorted symbol table used only for dependencies.
   //
@@ -415,6 +428,46 @@ InternalPrelinkKext64 (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     PRELINKED_KEXT     *Kext,
   IN     UINT64             LoadAddress
+  );
+
+/**
+  Build symbol table from KXLD state.
+
+  @param[in,out] Kext        Kext dependency.
+  @param[in]     Context     Prelinking context.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+InternalKxldStateBuildLinkedSymbolTable (
+  IN OUT PRELINKED_KEXT     *Kext,
+  IN     PRELINKED_CONTEXT  *Context
+  );
+
+/**
+  Build virtual tables from KXLD state.
+
+  @param[in,out] Kext      Kext dependency.
+  @param[in]     Context   Prelinking context.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+InternalKxldStateBuildLinkedVtables (
+  IN OUT PRELINKED_KEXT     *Kext,
+  IN     PRELINKED_CONTEXT  *Context
+  );
+
+/**
+  Update KXLD state in the resulting image.
+
+  @param[in,out] Context   Prelinking context.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+InternalKxldStateRebuild (
+  IN OUT PRELINKED_CONTEXT  *Context
   );
 
 #endif // PRELINKED_INTERNAL_H

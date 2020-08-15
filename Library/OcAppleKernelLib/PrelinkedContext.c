@@ -353,10 +353,10 @@ PrelinkedContextInit (
     return EFI_NOT_FOUND;
   }
 
-  //
-  // Additionally process special entries for KC.
-  //
   if (Context->IsKernelCollection) {
+    //
+    // Additionally process special entries for KC.
+    //
     Status = PrelinkedGetSegmentsFromMacho (
       &Context->InnerMachContext,
       &Context->InnerInfoSegment,
@@ -388,6 +388,7 @@ PrelinkedContextInit (
     &Context->Prelinked[Context->PrelinkedInfoSection->Offset]
     );
   if (Context->PrelinkedInfo == NULL) {
+    PrelinkedContextFree (Context);
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -468,6 +469,11 @@ PrelinkedContextFree (
     Context->PrelinkedInfoDocument = NULL;
   }
 
+  if (Context->KextScratchBuffer != NULL) {
+    FreePool (Context->KextScratchBuffer);
+    Context->KextScratchBuffer = NULL;
+  }
+
   if (Context->PrelinkedInfo != NULL) {
     FreePool (Context->PrelinkedInfo);
     Context->PrelinkedInfo = NULL;
@@ -485,6 +491,16 @@ PrelinkedContextFree (
     ZeroMem (Context->LinkBuffer, Context->LinkBufferSize);
     FreePool (Context->LinkBuffer);
     Context->LinkBuffer = NULL;
+  }
+
+  if (Context->PrelinkedStateKernel != NULL) {
+    FreePool (Context->PrelinkedStateKernel);
+    Context->PrelinkedStateKernel = NULL;
+  }
+
+  if (Context->PrelinkedStateKexts != NULL) {
+    FreePool (Context->PrelinkedStateKexts);
+    Context->PrelinkedStateKexts = NULL;
   }
 
   while (!IsListEmpty (&Context->PrelinkedKexts)) {
@@ -573,7 +589,40 @@ PrelinkedInjectPrepare (
     // For older variant of the prelinkedkernel plist info is normally
     // the last segment, so we may potentially save some data by removing
     // it and then appending new kexts over. This is different for KC,
-    // where plist info is in the middle of the file.
+    // where plist info is in the middle of the file. For 10.6.8 we will
+    // also need to move __PRELINK_STATE, which is just some blob for kextd.
+    //
+    // 10.6.8
+    //
+    // ffffff8000200000 - ffffff8000600000 (at 0000000000000000 - 0000000000400000) - __TEXT
+    // ffffff8000600000 - ffffff80006da000 (at 0000000000400000 - 000000000046f000) - __DATA
+    // ffffff8000106000 - ffffff8000107000 (at 000000000046f000 - 0000000000470000) - __INITGDT
+    // ffffff8000100000 - ffffff8000106000 (at 0000000000470000 - 0000000000476000) - __INITPT
+    // ffffff80006da000 - ffffff80006db000 (at 0000000000476000 - 0000000000477000) - __DESC
+    // ffffff80006db000 - ffffff80006dc000 (at 0000000000477000 - 0000000000478000) - __VECTORS
+    // ffffff8000108000 - ffffff800010e000 (at 0000000000478000 - 000000000047d000) - __HIB
+    // ffffff8000107000 - ffffff8000108000 (at 000000000047d000 - 000000000047e000) - __SLEEP
+    // ffffff80006dc000 - ffffff80006de000 (at 000000000047e000 - 0000000000480000) - __KLD
+    // ffffff80006de000 - ffffff80006de000 (at 0000000000480000 - 0000000000480000) - __LAST
+    // ffffff8000772000 - ffffff800100a000 (at 0000000000514000 - 0000000000dac000) - __PRELINK_TEXT
+    // ffffff800100a000 - ffffff800155c000 (at 0000000000dac000 - 00000000012fe000) - __PRELINK_STATE
+    // ffffff800155c000 - ffffff8001612000 (at 00000000012fe000 - 00000000013b4000) - __PRELINK_INFO
+    // 0000000000000000 - 0000000000000000 (at 0000000000513018 - 0000000000551269) - __CTF
+    // ffffff80006de000 - ffffff8000771018 (at 0000000000480000 - 0000000000513018) - __LINKEDIT
+    //
+    // 10.15.6
+    //
+    // ffffff8000200000 - ffffff8000c00000 (at 0000000000000000 - 0000000000a00000) - __TEXT
+    // ffffff8000c00000 - ffffff8000e70000 (at 0000000000a00000 - 0000000000c70000) - __DATA
+    // ffffff8000e70000 - ffffff8000ea9000 (at 0000000000c70000 - 0000000000ca9000) - __DATA_CONST
+    // ffffff8000100000 - ffffff800019e000 (at 0000000000ca9000 - 0000000000d47000) - __HIB
+    // ffffff8000ea9000 - ffffff8000eaa000 (at 0000000000d47000 - 0000000000d48000) - __VECTORS
+    // ffffff8000eaa000 - ffffff8000ec4000 (at 0000000000d48000 - 0000000000d62000) - __KLD
+    // ffffff8000ec4000 - ffffff8000ec5000 (at 0000000000d62000 - 0000000000d63000) - __LAST
+    // ffffff8001036000 - ffffff8002e24000 (at 0000000000f48000 - 0000000002d36000) - __PRELINK_TEXT
+    // ffffff8002e24000 - ffffff80030d2000 (at 0000000002d36000 - 0000000002fe3389) - __PRELINK_INFO
+    // ffffff8000ec5000 - ffffff8000ec5000 (at 0000000000d63000 - 0000000000dd7000) - __CTF
+    // ffffff8000ec5000 - ffffff80010358a8 (at 0000000000dd7000 - 0000000000f478a8) - __LINKEDIT
     //
     SegmentEndOffset = Context->PrelinkedInfoSegment->FileOffset + Context->PrelinkedInfoSegment->FileSize;
 
@@ -581,7 +630,7 @@ PrelinkedInjectPrepare (
       DEBUG ((
         DEBUG_INFO,
         "OCAK: Reducing prelink size from %X to %X via plist\n",
-        Context->PrelinkedSize, 
+        Context->PrelinkedSize,
         (UINT32) MACHO_ALIGN (Context->PrelinkedInfoSegment->FileOffset)
         ));
       Context->PrelinkedSize = (UINT32) MACHO_ALIGN (Context->PrelinkedInfoSegment->FileOffset);
@@ -589,9 +638,45 @@ PrelinkedInjectPrepare (
        DEBUG ((
         DEBUG_INFO,
         "OCAK:Leaving unchanged prelink size %X due to %LX plist\n",
-        Context->PrelinkedSize, 
+        Context->PrelinkedSize,
         SegmentEndOffset
         ));
+    }
+
+    if (Context->PrelinkedStateSegment != NULL) {
+      SegmentEndOffset = Context->PrelinkedStateSegment->FileOffset + Context->PrelinkedStateSegment->FileSize;
+
+      if (MACHO_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCAK: Reducing prelink size from %X to %X via state\n",
+          Context->PrelinkedSize,
+          (UINT32) MACHO_ALIGN (Context->PrelinkedStateSegment->FileOffset)
+          ));
+        Context->PrelinkedSize = (UINT32) MACHO_ALIGN (Context->PrelinkedStateSegment->FileOffset);
+
+        //
+        // Need to NULL this, as they are used in address calculations
+        // in e.g. MachoGetLastAddress64.
+        //
+        Context->PrelinkedStateSegment->VirtualAddress = 0;
+        Context->PrelinkedStateSegment->Size           = 0;
+        Context->PrelinkedStateSegment->FileOffset     = 0;
+        Context->PrelinkedStateSegment->FileSize       = 0;
+        Context->PrelinkedStateSectionKernel->Address  = 0;
+        Context->PrelinkedStateSectionKernel->Size     = 0;
+        Context->PrelinkedStateSectionKernel->Offset   = 0;
+        Context->PrelinkedStateSectionKexts->Address   = 0;
+        Context->PrelinkedStateSectionKexts->Size      = 0;
+        Context->PrelinkedStateSectionKexts->Offset    = 0;
+      } else {
+         DEBUG ((
+          DEBUG_INFO,
+          "OCAK:Leaving unchanged prelink size %X due to %LX state\n",
+          Context->PrelinkedSize,
+          SegmentEndOffset
+          ));
+      }
     }
 
     Context->PrelinkedInfoSegment->VirtualAddress = 0;
@@ -663,6 +748,11 @@ PrelinkedInjectComplete (
     Context->KextsFixupChains->PageCount = (UINT16) (KextsSize / MACHO_PAGE_SIZE);
 
     Status = KcRebuildMachHeader (Context);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+  } else if (Context->PrelinkedStateSegment != NULL && Context->PrelinkedStateSegment->VirtualAddress == 0) {
+    Status = InternalKxldStateRebuild (Context);
     if (EFI_ERROR (Status)) {
       return Status;
     }

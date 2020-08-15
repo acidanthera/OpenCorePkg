@@ -24,10 +24,14 @@
 #define PRELINK_KERNEL_IDENTIFIER "__kernel__"
 #define PRELINK_KPI_IDENTIFIER_PREFIX "com.apple.kpi."
 
-#define PRELINK_INFO_SEGMENT "__PRELINK_INFO"
-#define PRELINK_INFO_SECTION "__info"
-#define PRELINK_TEXT_SEGMENT "__PRELINK_TEXT"
-#define PRELINK_TEXT_SECTION "__text"
+#define PRELINK_INFO_SEGMENT  "__PRELINK_INFO"
+#define PRELINK_INFO_SECTION  "__info"
+#define PRELINK_TEXT_SEGMENT  "__PRELINK_TEXT"
+#define PRELINK_TEXT_SECTION  "__text"
+#define PRELINK_STATE_SEGMENT "__PRELINK_STATE"
+#define PRELINK_STATE_SECTION_KERNEL "__kernel"
+#define PRELINK_STATE_SECTION_KEXTS  "__kexts"
+
 
 #define PRELINK_INFO_DICTIONARY_KEY               "_PrelinkInfoDictionary"
 #define PRELINK_INFO_KMOD_INFO_KEY                "_PrelinkKmodInfo"
@@ -36,6 +40,8 @@
 #define PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY     "_PrelinkExecutableLoadAddr"
 #define PRELINK_INFO_EXECUTABLE_SOURCE_ADDR_KEY   "_PrelinkExecutableSourceAddr"
 #define PRELINK_INFO_EXECUTABLE_SIZE_KEY          "_PrelinkExecutableSize"
+#define PRELINK_INFO_LINK_STATE_ADDR_KEY          "_PrelinkLinkState"
+#define PRELINK_INFO_LINK_STATE_SIZE_KEY          "_PrelinkLinkStateSize"
 
 #define INFO_BUNDLE_IDENTIFIER_KEY                "CFBundleIdentifier"
 #define INFO_BUNDLE_EXECUTABLE_KEY                "CFBundleExecutable"
@@ -126,6 +132,38 @@ typedef struct {
   //
   MACH_SECTION_64          *PrelinkedTextSection;
   //
+  // Pointer to PRELINK_STATE_SEGMENT (for 10.6.8).
+  //
+  MACH_SEGMENT_COMMAND_64  *PrelinkedStateSegment;
+  //
+  // Pointer to PRELINK_STATE_SECTION_KERNEL (for 10.6.8).
+  //
+  MACH_SECTION_64          *PrelinkedStateSectionKernel;
+  //
+  // Pointer to PRELINK_STATE_SECTION_KEXTS (for 10.6.8).
+  //
+  MACH_SECTION_64          *PrelinkedStateSectionKexts;
+  //
+  // Contents of PRELINK_STATE_SECTION_KERNEL section (for 10.6.8).
+  //
+  VOID                     *PrelinkedStateKernel;
+  //
+  // Contents of PRELINK_STATE_SECTION_KEXTS (for 10.6.8).
+  //
+  VOID                     *PrelinkedStateKexts;
+  //
+  // PRELINK_STATE_SECTION_KEXTS original load address.
+  //
+  UINT64                   PrelinkedStateKextsAddress;
+  //
+  // PRELINK_STATE_SECTION_KERNEL section size (for 10.6.8).
+  //
+  UINT32                   PrelinkedStateKernelSize;
+  //
+  // PRELINK_STATE_SECTION_KEXTS section size (for 10.6.8).
+  //
+  UINT32                   PrelinkedStateKextsSize;
+  //
   // Pointer to KC_LINKEDIT_SEGMENT (for KC mode).
   //
   MACH_SEGMENT_COMMAND_64  *LinkEditSegment;
@@ -159,6 +197,10 @@ typedef struct {
   // This reference is used for quick path during kext injection.
   //
   XML_NODE                 *KextList;
+  //
+  // Plist scratch buffer used when updating values.
+  //
+  CHAR8                    *KextScratchBuffer;
   //
   // Buffers allocated from pool for internal needs.
   //

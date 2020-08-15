@@ -17,6 +17,7 @@
 #define CACHELESS_INTERNAL_H
 
 #include <Library/OcAppleKernelLib.h>
+#include <Library/OcStringLib.h>
 
 //
 // Names are of format OcXXXXXXXX.kext, where XXXXXXXX is a 32-bit hexadecimal number.
