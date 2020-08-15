@@ -24,10 +24,11 @@
 #define PRELINK_KERNEL_IDENTIFIER "__kernel__"
 #define PRELINK_KPI_IDENTIFIER_PREFIX "com.apple.kpi."
 
-#define PRELINK_INFO_SEGMENT "__PRELINK_INFO"
-#define PRELINK_INFO_SECTION "__info"
-#define PRELINK_TEXT_SEGMENT "__PRELINK_TEXT"
-#define PRELINK_TEXT_SECTION "__text"
+#define PRELINK_INFO_SEGMENT  "__PRELINK_INFO"
+#define PRELINK_INFO_SECTION  "__info"
+#define PRELINK_TEXT_SEGMENT  "__PRELINK_TEXT"
+#define PRELINK_TEXT_SECTION  "__text"
+#define PRELINK_STATE_SEGMENT "__PRELINK_STATE"
 
 #define PRELINK_INFO_DICTIONARY_KEY               "_PrelinkInfoDictionary"
 #define PRELINK_INFO_KMOD_INFO_KEY                "_PrelinkKmodInfo"
@@ -125,6 +126,18 @@ typedef struct {
   // Pointer to PRELINK_TEXT_SECTION.
   //
   MACH_SECTION_64          *PrelinkedTextSection;
+  //
+  // Pointer to PRELINK_STATE_SEGMENT (for 10.6.8).
+  //
+  MACH_SEGMENT_COMMAND_64  *PrelinkedStateSegment;
+  //
+  // Contents of PRELINK_STATE_SEGMENT (for 10.6.8).
+  //
+  VOID                     *PrelinkedStateContents;
+  //
+  // Pointer to PRELINK_STATE_SEGMENT (for 10.6.8).
+  //
+  MACH_SEGMENT_COMMAND_64  *PrelinkedStateSegmentOld;
   //
   // Pointer to KC_LINKEDIT_SEGMENT (for KC mode).
   //
