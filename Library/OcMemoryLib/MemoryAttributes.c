@@ -443,6 +443,16 @@ OcRebuildAttributes (
   }
 
   //
+  // MAT is normally sorted, and so far nobody had issues
+  // caused by unsorted MAT, but we do not want to risk.
+  //
+  OcSortMemoryMap (
+    MemoryAttributesTable->NumberOfEntries * MemoryAttributesTable->DescriptorSize,
+    MemoryAttributesEntry,
+    MemoryAttributesTable->DescriptorSize
+    );
+
+  //
   // Some boards create entry duplicates and lose all non-PE entries
   // after loading runtime drivers after EndOfDxe.
   // REF: https://github.com/acidanthera/bugtracker/issues/491#issuecomment-609014334
@@ -483,14 +493,6 @@ OcRebuildAttributes (
         MemoryMap,
         DescriptorSize
         );
-
-#if 0
-      OcSortMemoryMap (
-        MemoryAttributesTable->NumberOfEntries * MemoryAttributesTable->DescriptorSize,
-        MemoryAttributesEntry,
-        MemoryAttributesTable->DescriptorSize
-        );
-#endif
 
       OcExpandAttributesByMap (
         MemoryAttributesTable,
