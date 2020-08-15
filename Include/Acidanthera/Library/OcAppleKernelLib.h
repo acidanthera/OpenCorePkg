@@ -40,6 +40,8 @@
 #define PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY     "_PrelinkExecutableLoadAddr"
 #define PRELINK_INFO_EXECUTABLE_SOURCE_ADDR_KEY   "_PrelinkExecutableSourceAddr"
 #define PRELINK_INFO_EXECUTABLE_SIZE_KEY          "_PrelinkExecutableSize"
+#define PRELINK_INFO_LINK_STATE_ADDR_KEY          "_PrelinkLinkState"
+#define PRELINK_INFO_LINK_STATE_SIZE_KEY          "_PrelinkLinkStateSize"
 
 #define INFO_BUNDLE_IDENTIFIER_KEY                "CFBundleIdentifier"
 #define INFO_BUNDLE_EXECUTABLE_KEY                "CFBundleExecutable"
@@ -149,6 +151,10 @@ typedef struct {
   // Contents of PRELINK_STATE_SECTION_KEXTS (for 10.6.8).
   //
   VOID                     *PrelinkedStateKexts;
+  //
+  // PRELINK_STATE_SECTION_KEXTS original load address.
+  //
+  UINT64                   PrelinkedStateKextsAddress;
   //
   // PRELINK_STATE_SECTION_KERNEL section size (for 10.6.8).
   //

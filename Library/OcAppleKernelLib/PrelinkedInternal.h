@@ -113,6 +113,14 @@ struct PRELINKED_KEXT_ {
   //
   UINT32                   NumberOfCxxSymbols;
   //
+  // Pointer to KXLD state (read only, it is allocated in PrelinkedStateKexts).
+  //
+  CONST VOID               *KxldState;
+  //
+  // Pointer to KXLD state (read only, it is allocated in PrelinkedStateKexts).
+  //
+  UINT32                   KxldStateSize;
+  //
   // Sorted symbol table used only for dependencies.
   //
   PRELINKED_KEXT_SYMBOL    *LinkedSymbolTable;
@@ -415,6 +423,34 @@ InternalPrelinkKext64 (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     PRELINKED_KEXT     *Kext,
   IN     UINT64             LoadAddress
+  );
+
+/**
+  Build symbol table from KXLD state.
+
+  @param[in,out] Kext        Kext dependency.
+  @param[in]     Context     Prelinking context.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+InternalKxldStateBuildLinkedSymbolTable (
+  IN OUT PRELINKED_KEXT     *Kext,
+  IN     PRELINKED_CONTEXT  *Context
+  );
+
+/**
+  Build virtual tables from KXLD state.
+
+  @param[in,out] Kext      Kext dependency.
+  @param[in]     Context   Prelinking context.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+InternalKxldStateBuildLinkedVtables (
+  IN OUT PRELINKED_KEXT     *Kext,
+  IN     PRELINKED_CONTEXT  *Context
   );
 
 #endif // PRELINKED_INTERNAL_H

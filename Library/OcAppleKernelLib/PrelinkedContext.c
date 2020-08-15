@@ -381,54 +381,6 @@ PrelinkedContextInit (
     if (Context->LinkEditSegment == NULL) {
       return EFI_NOT_FOUND;
     }
-  } else {
-    //
-    // Find optional __PRELINK_STATE segment, present in 10.6.8
-    //
-    Context->PrelinkedStateSegment = MachoGetSegmentByName64 (
-      &Context->PrelinkedMachContext,
-      PRELINK_STATE_SEGMENT
-      );
-
-    if (Context->PrelinkedStateSegment != NULL) {
-      Context->PrelinkedStateSectionKernel = MachoGetSectionByName64 (
-        &Context->PrelinkedMachContext,
-        Context->PrelinkedStateSegment,
-        PRELINK_STATE_SECTION_KERNEL
-        );
-      Context->PrelinkedStateSectionKexts = MachoGetSectionByName64 (
-        &Context->PrelinkedMachContext,
-        Context->PrelinkedStateSegment,
-        PRELINK_STATE_SECTION_KEXTS
-        );
-
-      if (Context->PrelinkedStateSectionKernel != NULL
-        && Context->PrelinkedStateSectionKexts != NULL) {
-        Context->PrelinkedStateKernelSize = (UINT32) Context->PrelinkedStateSectionKernel->Size;
-        Context->PrelinkedStateKextsSize = (UINT32) Context->PrelinkedStateSectionKexts->Size;
-        Context->PrelinkedStateKernel = AllocateCopyPool (
-          Context->PrelinkedStateKernelSize,
-          &Context->Prelinked[Context->PrelinkedStateSectionKernel->Offset]
-          );
-        Context->PrelinkedStateKexts = AllocateCopyPool (
-          Context->PrelinkedStateKextsSize,
-          &Context->Prelinked[Context->PrelinkedStateSectionKexts->Offset]
-          );
-      }
-
-      if (Context->PrelinkedStateKernel == NULL
-        || Context->PrelinkedStateKexts == NULL) {
-        DEBUG ((
-          DEBUG_INFO,
-          "OCAK: Failed to find PK state __kernel %p __kexts %p\n",
-          Context->PrelinkedStateSectionKernel,
-          Context->PrelinkedStateSectionKexts
-          ));
-        Context->PrelinkedStateSectionKernel = NULL;
-        Context->PrelinkedStateSectionKexts = NULL;
-        Context->PrelinkedStateSegment = NULL;
-      }
-    }
   }
 
   Context->PrelinkedInfo = AllocateCopyPool (
@@ -601,9 +553,9 @@ PrelinkedInjectPrepare (
   IN     UINT32             ReservedExeSize
   )
 {
-  EFI_STATUS       Status;
-  UINT64           SegmentEndOffset;
-  UINT32           AlignedExpansion;
+  EFI_STATUS Status;
+  UINT64     SegmentEndOffset;
+  UINT32     AlignedExpansion;
 
   if (Context->IsKernelCollection) {
     //
@@ -769,12 +721,12 @@ PrelinkedInjectComplete (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
-  EFI_STATUS       Status;
-  CHAR8            *ExportedInfo;
-  UINT32           ExportedInfoSize;
-  UINT32           NewSize;
-  UINT32           KextsSize;
-  UINT32           ChainSize;
+  EFI_STATUS  Status;
+  CHAR8       *ExportedInfo;
+  UINT32      ExportedInfoSize;
+  UINT32      NewSize;
+  UINT32      KextsSize;
+  UINT32      ChainSize;
 
   if (Context->IsKernelCollection) {
     //

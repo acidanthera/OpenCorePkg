@@ -9,6 +9,7 @@ OBJS    = $(PROJECT).o \
 	Lilu.o \
 	Vsmc.o \
 	KextPatcher.o \
+	KxldState.o \
 	PrelinkedKext.o \
 	PrelinkedContext.o \
 	Vtables.o \

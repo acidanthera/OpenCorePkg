@@ -51,7 +51,7 @@
 /**
   The only existent KXLD state version.
 **/
-#define LINK_STATE_VERSION 1
+#define KXLD_LINK_STATE_VERSION 1
 
 /**
   Link state header.
@@ -69,9 +69,11 @@ typedef struct {
   UINT32            SymbolOffset;    ///< Offset to normal symbols.
 } KXLD_LINK_STATE_HEADER;
 
+#pragma pack(push, 1)
+
 typedef struct {
   UINT32            NameOffset;
-  UINT32            VtableOffset;
+  UINT32            EntryOffset;
   UINT32            NumEntries;
 } KXLD_VTABLE_HEADER;
 
@@ -91,6 +93,11 @@ typedef struct {
   UINT32            NameOffset;
   UINT32            Flags;
 } KXLD_SYM_ENTRY_64;
+
+STATIC_ASSERT (sizeof (KXLD_SYM_ENTRY_32) == 12, "Invalid KXLD_SYM_ENTRY_32 size");
+STATIC_ASSERT (sizeof (KXLD_SYM_ENTRY_64) == 16, "Invalid KXLD_SYM_ENTRY_64 size");
+
+#pragma pack(pop)
 
 /**
   Symbol marked with this flag is obsolete (deprecated).
