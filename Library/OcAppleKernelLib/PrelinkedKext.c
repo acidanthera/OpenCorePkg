@@ -203,7 +203,6 @@ InternalScanCurrentPrelinkedKextLinkInfo (
   )
 {
   if (Kext->LinkEditSegment == NULL) {
-    DEBUG ((DEBUG_VERBOSE, "OCAK: Requesting __LINKEDIT for %a\n", Kext->Identifier));
     if (AsciiStrCmp (Kext->Identifier, PRELINK_KERNEL_IDENTIFIER) == 0) {
       Kext->LinkEditSegment = Context->LinkEditSegment;
     } else {
@@ -212,10 +211,16 @@ InternalScanCurrentPrelinkedKextLinkInfo (
         "__LINKEDIT"
         );
     }    
+    DEBUG ((
+      DEBUG_VERBOSE,
+      "OCAK: Requesting __LINKEDIT for %a - %p at %p\n",
+      Kext->Identifier,
+      Kext->LinkEditSegment,
+      (UINT8 *) MachoGetMachHeader64 (&Kext->Context.MachContext) - Context->Prelinked
+      ));
   }
 
   if (Kext->SymbolTable == NULL) {
-    DEBUG ((DEBUG_VERBOSE, "OCAK: Requesting SymbolTable for %a\n", Kext->Identifier));
     Kext->NumberOfSymbols = MachoGetSymbolTable (
                    &Kext->Context.MachContext,
                    &Kext->SymbolTable,
@@ -227,6 +232,12 @@ InternalScanCurrentPrelinkedKextLinkInfo (
                    NULL,
                    NULL
                    );
+    DEBUG ((
+      DEBUG_VERBOSE,
+      "OCAK: Requesting SymbolTable for %a - %u\n",
+      Kext->Identifier,
+      Kext->NumberOfSymbols
+      ));
   }
 }
 

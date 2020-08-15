@@ -389,6 +389,46 @@ PrelinkedContextInit (
       &Context->PrelinkedMachContext,
       PRELINK_STATE_SEGMENT
       );
+
+    if (Context->PrelinkedStateSegment != NULL) {
+      Context->PrelinkedStateSectionKernel = MachoGetSectionByName64 (
+        &Context->PrelinkedMachContext,
+        Context->PrelinkedStateSegment,
+        PRELINK_STATE_SECTION_KERNEL
+        );
+      Context->PrelinkedStateSectionKexts = MachoGetSectionByName64 (
+        &Context->PrelinkedMachContext,
+        Context->PrelinkedStateSegment,
+        PRELINK_STATE_SECTION_KEXTS
+        );
+
+      if (Context->PrelinkedStateSectionKernel != NULL
+        && Context->PrelinkedStateSectionKexts != NULL) {
+        Context->PrelinkedStateKernelSize = (UINT32) Context->PrelinkedStateSectionKernel->Size;
+        Context->PrelinkedStateKextsSize = (UINT32) Context->PrelinkedStateSectionKexts->Size;
+        Context->PrelinkedStateKernel = AllocateCopyPool (
+          Context->PrelinkedStateKernelSize,
+          &Context->Prelinked[Context->PrelinkedStateSectionKernel->Offset]
+          );
+        Context->PrelinkedStateKexts = AllocateCopyPool (
+          Context->PrelinkedStateKextsSize,
+          &Context->Prelinked[Context->PrelinkedStateSectionKexts->Offset]
+          );
+      }
+
+      if (Context->PrelinkedStateKernel == NULL
+        || Context->PrelinkedStateKexts == NULL) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCAK: Failed to find PK state __kernel %p __kexts %p\n",
+          Context->PrelinkedStateSectionKernel,
+          Context->PrelinkedStateSectionKexts
+          ));
+        Context->PrelinkedStateSectionKernel = NULL;
+        Context->PrelinkedStateSectionKexts = NULL;
+        Context->PrelinkedStateSegment = NULL;
+      }
+    }
   }
 
   Context->PrelinkedInfo = AllocateCopyPool (
@@ -396,6 +436,7 @@ PrelinkedContextInit (
     &Context->Prelinked[Context->PrelinkedInfoSection->Offset]
     );
   if (Context->PrelinkedInfo == NULL) {
+    PrelinkedContextFree (Context);
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -495,14 +536,14 @@ PrelinkedContextFree (
     Context->LinkBuffer = NULL;
   }
 
-  if (Context->PrelinkedStateContents != NULL) {
-    FreePool (Context->PrelinkedStateContents);
-    Context->PrelinkedStateContents = NULL;
+  if (Context->PrelinkedStateKernel != NULL) {
+    FreePool (Context->PrelinkedStateKernel);
+    Context->PrelinkedStateKernel = NULL;
   }
 
-  if (Context->PrelinkedStateSegmentOld != NULL) {
-    FreePool (Context->PrelinkedStateSegmentOld);
-    Context->PrelinkedStateSegmentOld = NULL;
+  if (Context->PrelinkedStateKexts != NULL) {
+    FreePool (Context->PrelinkedStateKexts);
+    Context->PrelinkedStateKexts = NULL;
   }
 
   while (!IsListEmpty (&Context->PrelinkedKexts)) {
@@ -563,7 +604,6 @@ PrelinkedInjectPrepare (
   EFI_STATUS       Status;
   UINT64           SegmentEndOffset;
   UINT32           AlignedExpansion;
-  MACH_SECTION_64  *Section;
 
   if (Context->IsKernelCollection) {
     //
@@ -658,41 +698,20 @@ PrelinkedInjectPrepare (
           ));
         Context->PrelinkedSize = (UINT32) MACHO_ALIGN (Context->PrelinkedStateSegment->FileOffset);
 
-        Context->PrelinkedStateContents = AllocateCopyPool (
-          (UINTN)Context->PrelinkedStateSegment->Size,
-          &Context->Prelinked[Context->PrelinkedStateSegment->FileOffset]
-          );
-        Context->PrelinkedStateSegmentOld = AllocateCopyPool (
-          (UINTN)Context->PrelinkedStateSegment->CommandSize,
-          Context->PrelinkedStateSegment
-          );
-        if (Context->PrelinkedStateContents == NULL || Context->PrelinkedStateSegmentOld == NULL) {
-          DEBUG ((
-            DEBUG_INFO,
-            "OCAK: Failed to copy prelink state of %u bytes (%p) or command %u\n",
-            (UINT32) Context->PrelinkedStateSegment->Size,
-            Context->PrelinkedStateContents,
-            (UINT32) Context->PrelinkedStateSegment->CommandSize
-            ));
-          return EFI_OUT_OF_RESOURCES;
-        }
-
         //
         // Need to NULL this, as they are used in address calculations
         // in e.g. MachoGetLastAddress64.
         //
-        Section = NULL;
-        while ((Section = MachoGetNextSection64 (
-          &Context->PrelinkedMachContext, Context->PrelinkedStateSegment, Section)) != NULL) {
-          Section->Address = 0;
-          Section->Size    = 0;
-          Section->Offset  = 0;
-        }
-
         Context->PrelinkedStateSegment->VirtualAddress = 0;
         Context->PrelinkedStateSegment->Size           = 0;
         Context->PrelinkedStateSegment->FileOffset     = 0;
         Context->PrelinkedStateSegment->FileSize       = 0;
+        Context->PrelinkedStateSectionKernel->Address  = 0;
+        Context->PrelinkedStateSectionKernel->Size     = 0;
+        Context->PrelinkedStateSectionKernel->Offset   = 0;
+        Context->PrelinkedStateSectionKexts->Address   = 0;
+        Context->PrelinkedStateSectionKexts->Size      = 0;
+        Context->PrelinkedStateSectionKexts->Offset    = 0;
       } else {
          DEBUG ((
           DEBUG_INFO,
@@ -756,9 +775,6 @@ PrelinkedInjectComplete (
   UINT32           NewSize;
   UINT32           KextsSize;
   UINT32           ChainSize;
-  MACH_SECTION_64  *Section;
-  MACH_SECTION_64  *OldSection;
-  INT64            Delta;
 
   if (Context->IsKernelCollection) {
     //
@@ -778,40 +794,51 @@ PrelinkedInjectComplete (
     if (EFI_ERROR (Status)) {
       return Status;
     }
-  } else if (Context->PrelinkedStateContents != NULL) {
+  } else if (Context->PrelinkedStateSegment != NULL && Context->PrelinkedStateSegment->VirtualAddress == 0) {
     //
     // Append prelink state for 10.6.8
     //
-    if (OcOverflowAddU32 (Context->PrelinkedSize, MACHO_ALIGN (Context->PrelinkedStateSegmentOld->FileSize), &NewSize)
+    if (OcOverflowAddU32 (Context->PrelinkedSize, MACHO_ALIGN (Context->PrelinkedStateKernelSize), &NewSize)
       || NewSize > Context->PrelinkedAllocSize) {
       return EFI_BUFFER_TOO_SMALL;
     }
 
     Context->PrelinkedStateSegment->VirtualAddress = Context->PrelinkedLastAddress;
-    Context->PrelinkedStateSegment->Size           = MACHO_ALIGN (Context->PrelinkedStateSegmentOld->Size);
+    Context->PrelinkedStateSegment->Size           = MACHO_ALIGN (Context->PrelinkedStateKernelSize);
     Context->PrelinkedStateSegment->FileOffset     = Context->PrelinkedSize;
-    Context->PrelinkedStateSegment->FileSize       = Context->PrelinkedStateSegmentOld->FileSize;
-
-    Delta = (INT64) Context->PrelinkedStateSegment->FileOffset
-          - (INT64) Context->PrelinkedStateSegmentOld->FileOffset;
-    Section    = NULL;
-    OldSection = &Context->PrelinkedStateSegmentOld->Sections[0];
-    while ((Section = MachoGetNextSection64 (
-      &Context->PrelinkedMachContext, Context->PrelinkedStateSegment, Section)) != NULL) {
-      Section->Address = OldSection->Address + Delta;
-      Section->Size    = OldSection->Size    + Delta;
-      Section->Offset  = OldSection->Offset  + Delta;
-      ++OldSection;
-    }
+    Context->PrelinkedStateSegment->FileSize       = MACHO_ALIGN (Context->PrelinkedStateKernelSize);
+    Context->PrelinkedStateSectionKernel->Address  = Context->PrelinkedLastAddress;
+    Context->PrelinkedStateSectionKernel->Offset   = Context->PrelinkedSize;
+    Context->PrelinkedStateSectionKernel->Size     = MACHO_ALIGN (Context->PrelinkedStateKernelSize);
 
     CopyMem (
       &Context->Prelinked[Context->PrelinkedSize],
-      Context->PrelinkedStateContents,
-      Context->PrelinkedStateSegment->FileSize
+      Context->PrelinkedStateKernel,
+      Context->PrelinkedStateKernelSize
       );
 
-    Context->PrelinkedLastAddress += Context->PrelinkedInfoSegment->Size;
-    Context->PrelinkedSize        += Context->PrelinkedInfoSegment->FileSize;
+    Context->PrelinkedLastAddress += Context->PrelinkedStateSectionKernel->Size;
+    Context->PrelinkedSize        += Context->PrelinkedStateSectionKernel->Size;
+
+    if (OcOverflowAddU32 (Context->PrelinkedSize, MACHO_ALIGN (Context->PrelinkedStateKextsSize), &NewSize)
+      || NewSize > Context->PrelinkedAllocSize) {
+      return EFI_BUFFER_TOO_SMALL;
+    }
+
+    Context->PrelinkedStateSegment->Size          += MACHO_ALIGN (Context->PrelinkedStateKextsSize);
+    Context->PrelinkedStateSegment->FileSize      += MACHO_ALIGN (Context->PrelinkedStateKextsSize);
+    Context->PrelinkedStateSectionKernel->Address  = Context->PrelinkedLastAddress;
+    Context->PrelinkedStateSectionKernel->Offset   = Context->PrelinkedSize;
+    Context->PrelinkedStateSectionKernel->Size     = MACHO_ALIGN (Context->PrelinkedStateKextsSize);
+
+    CopyMem (
+      &Context->Prelinked[Context->PrelinkedSize],
+      Context->PrelinkedStateKexts,
+      Context->PrelinkedStateKextsSize
+      );
+
+    Context->PrelinkedLastAddress += Context->PrelinkedStateSectionKernel->Size;
+    Context->PrelinkedSize        += Context->PrelinkedStateSectionKernel->Size;
   }
 
   ExportedInfo = XmlDocumentExport (Context->PrelinkedInfoDocument, &ExportedInfoSize, 0, FALSE);

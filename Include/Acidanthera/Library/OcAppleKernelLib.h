@@ -29,6 +29,9 @@
 #define PRELINK_TEXT_SEGMENT  "__PRELINK_TEXT"
 #define PRELINK_TEXT_SECTION  "__text"
 #define PRELINK_STATE_SEGMENT "__PRELINK_STATE"
+#define PRELINK_STATE_SECTION_KERNEL "__kernel"
+#define PRELINK_STATE_SECTION_KEXTS  "__kexts"
+
 
 #define PRELINK_INFO_DICTIONARY_KEY               "_PrelinkInfoDictionary"
 #define PRELINK_INFO_KMOD_INFO_KEY                "_PrelinkKmodInfo"
@@ -131,13 +134,29 @@ typedef struct {
   //
   MACH_SEGMENT_COMMAND_64  *PrelinkedStateSegment;
   //
-  // Contents of PRELINK_STATE_SEGMENT (for 10.6.8).
+  // Pointer to PRELINK_STATE_SECTION_KERNEL (for 10.6.8).
   //
-  VOID                     *PrelinkedStateContents;
+  MACH_SECTION_64          *PrelinkedStateSectionKernel;
   //
-  // Pointer to PRELINK_STATE_SEGMENT (for 10.6.8).
+  // Pointer to PRELINK_STATE_SECTION_KEXTS (for 10.6.8).
   //
-  MACH_SEGMENT_COMMAND_64  *PrelinkedStateSegmentOld;
+  MACH_SECTION_64          *PrelinkedStateSectionKexts;
+  //
+  // Contents of PRELINK_STATE_SECTION_KERNEL section (for 10.6.8).
+  //
+  VOID                     *PrelinkedStateKernel;
+  //
+  // Contents of PRELINK_STATE_SECTION_KEXTS (for 10.6.8).
+  //
+  VOID                     *PrelinkedStateKexts;
+  //
+  // PRELINK_STATE_SECTION_KERNEL section size (for 10.6.8).
+  //
+  UINT32                   PrelinkedStateKernelSize;
+  //
+  // PRELINK_STATE_SECTION_KEXTS section size (for 10.6.8).
+  //
+  UINT32                   PrelinkedStateKextsSize;
   //
   // Pointer to KC_LINKEDIT_SEGMENT (for KC mode).
   //
