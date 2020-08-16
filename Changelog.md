@@ -14,6 +14,9 @@ OpenCore Changelog
 - Reduced OpenCanopy size by restricting boot management access
 - Added `BuiltinText` variant for `TextRenderer` for older laptops
 - Fixed `SyncRuntimePermissions` creating invalid MAT table
+- Added EFI FAT image loading support (macOS 10.8 and earlier)
+- Added cacheless kext injection support (macOS 10.9 and earlier)
+- Added mkext kext injection support (macOS 10.6 and earlier)
 
 #### v0.6.0
 - Fixed sound corruption with AudioDxe

@@ -55,7 +55,8 @@ FatGetArchitectureOffset (
 
   FatHeader = (MACH_FAT_HEADER*) Buffer;
   if (FatHeader->Signature != MACH_FAT_BINARY_INVERT_SIGNATURE
-   && FatHeader->Signature != MACH_FAT_BINARY_SIGNATURE) {
+   && FatHeader->Signature != MACH_FAT_BINARY_SIGNATURE
+   && FatHeader->Signature != EFI_FAT_BINARY_SIGNATURE) {
     //
     // Non-fat binary.
     //

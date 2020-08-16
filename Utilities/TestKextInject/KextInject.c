@@ -12,8 +12,7 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include <DebugLib.h>
-
+#include <Library/DebugLib.h>
 #include <Library/OcTemplateLib.h>
 #include <Library/OcSerializeLib.h>
 #include <Library/OcMiscLib.h>

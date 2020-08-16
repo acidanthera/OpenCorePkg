@@ -176,4 +176,14 @@ InternalSystemActionResetNvram (
   VOID
   );
 
+/**
+  Initialises custom gBS->LoadImage override.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+InternalInitImageLoader (
+  VOID
+  );
+
 #endif // BOOT_MANAGEMENET_INTERNAL_H

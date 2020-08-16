@@ -508,6 +508,11 @@ OcRunBootPicker (
 
   SaidWelcome = FALSE;
 
+  Status = InternalInitImageLoader ();
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
   //
   // Reset NVRAM right away if requested by a key combination.
   // This function should not return under normal conditions.
