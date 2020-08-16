@@ -983,13 +983,28 @@ PatchIncreasePciBarSize (
 STATIC
 CONST UINT8
 mKernelCpuIdFindRelNew[] = {
-  0xB9, 0x8B, 0x00, 0x00, 0x00, 0x31, 0xC0, 0x31, 0xD2, 0x0F, 0x30, 0xB8, 0x01, 0x00, 0x00, 0x00, 0x31, 0xDB, 0x31, 0xC9, 0x31, 0xD2, 0x0F, 0xA2
+  0xB9, 0x8B, 0x00, 0x00, 0x00, ///< mov ecx, 8Bh
+  0x31, 0xC0,                   ///< xor eax, eax
+  0x31, 0xD2,                   ///< xor edx, edx
+  0x0F, 0x30,                   ///< wrmsr
+  0xB8, 0x01, 0x00, 0x00, 0x00, ///< mov eax, 1
+  0x31, 0xDB,                   ///< xor ebx, ebx
+  0x31, 0xC9,                   ///< xor ecx, ecx
+  0x31, 0xD2,                   ///< xor edx, edx
+  0x0F, 0xA2                    ///< cpuid
 };
 
 STATIC
 CONST UINT8
 mKernelCpuIdFindRelOld[] = {
-  0xB9, 0x8B, 0x00, 0x00, 0x00, 0x31, 0xD2, 0x0F, 0x30, 0xB8, 0x01, 0x00, 0x00, 0x00, 0x31, 0xDB, 0x31, 0xC9, 0x31, 0xD2, 0x0F, 0xA2
+  0xB9, 0x8B, 0x00, 0x00, 0x00, ///< mov ecx, 8Bh
+  0x31, 0xD2,                   ///< xor edx, edx
+  0x0F, 0x30,                   ///< wrmsr
+  0xB8, 0x01, 0x00, 0x00, 0x00, ///< mov eax, 1
+  0x31, 0xDB,                   ///< xor ebx, ebx
+  0x31, 0xC9,                   ///< xor ecx, ecx
+  0x31, 0xD2,                   ///< xor edx, edx
+  0x0F, 0xA2                    ///< cpuid
 };
 
 STATIC
@@ -1073,6 +1088,197 @@ typedef struct {
 
 #pragma pack(pop)
 
+STATIC
+EFI_STATUS
+PatchKernelCpuIdLegacy (
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     OC_CPU_INFO      *CpuInfo,
+  IN     UINT32           *Data,
+  IN     UINT32           *DataMask,
+  IN     UINT8            *Record
+  )
+{
+  UINT8                 *StartPointer;
+  UINT8                 *EndPointer;
+  UINT8                 *Location;
+  UINT32                Signature[3];
+  UINT32                Index;
+  UINT32                MaxExt;
+  INT32                 Delta;
+  INTERNAL_CPUID_PATCH  Patch;
+
+  STATIC CONST UINT8 mKernelCpuidFindLegacyStart[8] = {
+    0xBA, 0x04, 0x00, 0x00, 0x00,  ///< mov edx, 4
+    0x48, 0x8D, 0x35               ///< lea rsi from lea rsi, byte_FFFFFF80006C5900
+  };
+
+  for (Index = 0; Index < EFI_PAGE_SIZE; ++Index, ++Record) {
+    if (Record[0] == mKernelCpuidFindLegacyStart[0]
+      && Record[1] == mKernelCpuidFindLegacyStart[1]
+      && Record[2] == mKernelCpuidFindLegacyStart[2]
+      && Record[3] == mKernelCpuidFindLegacyStart[3]
+      && Record[4] == mKernelCpuidFindLegacyStart[4]
+      && Record[5] == mKernelCpuidFindLegacyStart[5]
+      && Record[6] == mKernelCpuidFindLegacyStart[6]
+      && Record[7] == mKernelCpuidFindLegacyStart[7]) {
+      break;
+    }
+  }
+
+  if (Index >= EFI_PAGE_SIZE) {
+    return EFI_NOT_FOUND;
+  }
+
+  StartPointer = Record + sizeof (mKernelCpuidFindLegacyStart) + sizeof (UINT32);
+
+  STATIC CONST UINT8 mKernelCpuidFindLegacyEnd[9] = {
+    0x00,                         ///< 0 from mov cs:byte_FFFFFF80006C590C, 0
+    0xB8, 0x00, 0x00, 0x00, 0x80, ///< mov eax, 80000000h
+    0x0F, 0xA2,                   ///< cpuid
+    0x89                          ///< mov prefix from mov [rbp+var_40], eax
+  };
+
+  for (; Index < EFI_PAGE_SIZE; ++Index, ++Record) {
+    if (Record[0] == mKernelCpuidFindLegacyEnd[0]
+      && Record[1] == mKernelCpuidFindLegacyEnd[1]
+      && Record[2] == mKernelCpuidFindLegacyEnd[2]
+      && Record[3] == mKernelCpuidFindLegacyEnd[3]
+      && Record[4] == mKernelCpuidFindLegacyEnd[4]
+      && Record[5] == mKernelCpuidFindLegacyEnd[5]
+      && Record[6] == mKernelCpuidFindLegacyEnd[6]
+      && Record[7] == mKernelCpuidFindLegacyEnd[7]
+      && Record[8] == mKernelCpuidFindLegacyEnd[8]) {
+      break;
+    }
+  }
+
+  if (Index >= EFI_PAGE_SIZE) {
+    return EFI_NOT_FOUND;
+  }
+
+  EndPointer = Record + 1;
+
+  STATIC CONST UINT8 mKernelCpuidFindLegacyLoc[8] = {
+    0xB8, 0x01, 0x00, 0x00, 0x00, ///< mov eax, 1
+    0x0F, 0xA2,                   ///< cpuid
+    0x89                          ///< mov prefix from mov [rbp+var_40], eax
+  };
+
+  for (; Index < EFI_PAGE_SIZE; ++Index, ++Record) {
+    if (Record[0] == mKernelCpuidFindLegacyLoc[0]
+      && Record[1] == mKernelCpuidFindLegacyLoc[1]
+      && Record[2] == mKernelCpuidFindLegacyLoc[2]
+      && Record[3] == mKernelCpuidFindLegacyLoc[3]
+      && Record[4] == mKernelCpuidFindLegacyLoc[4]
+      && Record[5] == mKernelCpuidFindLegacyLoc[5]
+      && Record[6] == mKernelCpuidFindLegacyLoc[6]
+      && Record[7] == mKernelCpuidFindLegacyLoc[7]) {
+      break;
+    }
+  }
+
+  if (Index >= EFI_PAGE_SIZE) {
+    return EFI_NOT_FOUND;
+  }
+
+  Location = Record;
+
+  //
+  // Free 2 more bytes in the end by assigning EAX directly.
+  //
+  AsmCpuid (0x80000000, &MaxExt, NULL, NULL, NULL);
+  EndPointer += 2;
+  EndPointer[0] = 0xB8;
+  CopyMem (&EndPointer[1], &MaxExt, sizeof (MaxExt));
+
+  //
+  // Short-write CPU signature at RSI save space.
+  //
+  AsmCpuid (0, NULL, &Signature[0], &Signature[2], &Signature[1]);
+  for (Index = 0; Index < 3; ++Index) {
+    //
+    // mov eax, <signature>
+    //
+    *StartPointer++ = 0xB8;
+    CopyMem (StartPointer, &Signature[Index], sizeof (Signature[0]));
+    StartPointer += sizeof (Signature[0]);
+    //
+    // mov [rsi], eax
+    //
+    *StartPointer++ = 0x89;
+    *StartPointer++ = 0x06;
+    if (Index < 2) {
+      //
+      // add rsi, 4
+      //
+      *StartPointer++ = 0x48;
+      *StartPointer++ = 0x83;
+      *StartPointer++ = 0xC6;
+      *StartPointer++ = 0x04;
+    }
+  }
+
+  //
+  // Ensure that we still have room, which is within 2-byte jmp (127)
+  // and has at least 2-byte jmp and patch + 5-byte jmp area.
+  // Should have around 25 bytes here.
+  //
+  if (StartPointer >= EndPointer
+    || EndPointer - StartPointer > 128
+    || (UINTN) (EndPointer - StartPointer) < sizeof (INTERNAL_CPUID_PATCH) + 7) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  //
+  // Short jmp to EndPointer
+  //
+  StartPointer[0] = 0xEB;
+  StartPointer[1] = (UINT8) (EndPointer - StartPointer - 2);
+  StartPointer += 2;
+
+  //
+  // Workaround incorrect OSXSAVE handling, see below.
+  //
+  if (CpuInfo->CpuidVerEcx.Bits.XSAVE != 0
+    && CpuInfo->CpuidVerEcx.Bits.OSXSAVE == 0
+    && CpuInfo->CpuidVerEcx.Bits.AVX != 0) {
+    CpuInfo->CpuidVerEcx.Bits.OSXSAVE = 1;
+  }
+
+  //
+  // Jump from location to patch area.
+  //
+  Delta = (INT32) (StartPointer - (Location + 5));
+  *Location++ = 0xE9;
+  CopyMem (Location, &Delta, sizeof (Delta));
+  Location   += sizeof (Delta);
+  *Location++ = 0x90;
+  *Location++ = 0x90;
+
+  //
+  // Write virtualised CPUID.
+  //
+  Patch.EaxCmd = 0xB8;
+  Patch.EaxVal = (Data[0] & DataMask[0]) | (CpuInfo->CpuidVerEax.Uint32 & ~DataMask[0]);
+  Patch.EbxCmd = 0xBB;
+  Patch.EbxVal = (Data[1] & DataMask[1]) | (CpuInfo->CpuidVerEbx.Uint32 & ~DataMask[1]);
+  Patch.EcxCmd = 0xB9;
+  Patch.EcxVal = (Data[2] & DataMask[2]) | (CpuInfo->CpuidVerEcx.Uint32 & ~DataMask[2]);
+  Patch.EdxCmd = 0xBA;
+  Patch.EdxVal = (Data[3] & DataMask[3]) | (CpuInfo->CpuidVerEdx.Uint32 & ~DataMask[3]);
+  CopyMem (StartPointer, &Patch, sizeof (Patch));
+  StartPointer += sizeof (Patch);
+
+  //
+  // Jump to the end of location (5-byte mov + 2-byte cpuid).
+  //
+  Delta = (INT32) (Location - (StartPointer + 5));
+  *StartPointer++ = 0xE9;
+  CopyMem (StartPointer, &Delta, sizeof (Delta));
+
+  return EFI_SUCCESS;
+}
+
 EFI_STATUS
 PatchKernelCpuId (
   IN OUT PATCHER_CONTEXT  *Patcher,
@@ -1082,6 +1288,7 @@ PatchKernelCpuId (
   )
 {
   EFI_STATUS                Status;
+  UINT8                     *CpuidSetInfo;
   UINT8                     *Record;
   UINT8                     *Last;
   UINT32                    Index;
@@ -1109,12 +1316,13 @@ PatchKernelCpuId (
   Last = ((UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext)
     + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE*2 - sizeof (mKernelCpuIdFindRelNew));
 
-  Status = PatcherGetSymbolAddress (Patcher, "_cpuid_set_info", (UINT8 **) &Record);
-  if (EFI_ERROR (Status) || Record >= Last) {
-    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _cpuid_set_info (%p) - %r\n", Record, Status));
+  Status = PatcherGetSymbolAddress (Patcher, "_cpuid_set_info", (UINT8 **) &CpuidSetInfo);
+  if (EFI_ERROR (Status) || CpuidSetInfo >= Last) {
+    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _cpuid_set_info (%p) - %r\n", CpuidSetInfo, Status));
     return EFI_NOT_FOUND;
   }
 
+  Record = CpuidSetInfo;
   FoundSize = 0;
 
   for (Index = 0; Index < EFI_PAGE_SIZE; ++Index, ++Record) {
@@ -1134,6 +1342,13 @@ PatchKernelCpuId (
   }
 
   FoundReleaseKernel = FoundSize > 0;
+
+  if (!FoundReleaseKernel) {
+    Status = PatchKernelCpuIdLegacy (Patcher, CpuInfo, Data, DataMask, CpuidSetInfo);
+    if (!EFI_ERROR (Status)) {
+      return EFI_SUCCESS;
+    }
+  }
 
   //
   // When patching the release kernel we do not allow reevaluating CPUID information,

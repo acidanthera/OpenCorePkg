@@ -87,6 +87,11 @@
 #define PLIST_EXPANSION_SIZE      512
 
 //
+// Make integral kernel version.
+//
+#define KERNEL_VERSION(A, B, C) ((A) * 10000 + (B) * 100 + (C))
+
+//
 // Prelinked context used for kernel modification.
 //
 typedef struct {
@@ -418,6 +423,50 @@ ReadAppleKernel (
      OUT UINT32             *AllocatedSize,
   IN     UINT32             ReservedSize,
      OUT UINT8              *Digest  OPTIONAL
+  );
+
+/**
+  Create Apple kernel version in integer format.
+  See KERNEL_VERSION on how to build it from integers.
+
+  @param[in]  String      Apple kernel version.
+
+  @returns Kernel version or 0.
+**/
+UINT32
+OcParseDarwinVersion (
+  IN  CONST CHAR8         *String
+  );
+
+/**
+  Read Apple kernel version in integer format.
+
+  @param[in]  Kernel      Apple kernel binary.
+  @param[in]  KernelSize  Apple kernel size.
+
+  @returns Kernel version or 0.
+**/
+UINT32
+OcKernelReadDarwinVersion (
+  IN  CONST UINT8   *Kernel,
+  IN  UINT32        KernelSize
+  );
+
+/**
+  Check whether min <= current <= max is true.
+  When current or max are 0 they are considered infinite.
+
+  @param[in]  CurrentVersion  Current kernel version.
+  @param[in]  MinVersion      Minimal kernel version.
+  @param[in]  MaxVersion      Maximum kernel version.
+
+  @returns TRUE on match.
+**/
+BOOLEAN
+OcMatchDarwinVersion (
+  IN  UINT32  CurrentVersion OPTIONAL,
+  IN  UINT32  MinVersion     OPTIONAL,
+  IN  UINT32  MaxVersion     OPTIONAL
   );
 
 /**

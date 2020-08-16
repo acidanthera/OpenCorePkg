@@ -42,6 +42,11 @@ prelinkedkernel.unpack
 *.dmg
 *.chunklist
 *.pyc
+*.id0
+*.id1
+*.id2
+*.nam
+*.til
 Debug/QemuRun
 Doxy
 Legacy/BinDrivers/X64
