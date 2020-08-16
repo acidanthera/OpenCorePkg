@@ -127,6 +127,7 @@ PatchAppleCpuPmCfgLock (
     }
   } else {
     DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
+    Status2 = Status;
   }
 
   //
