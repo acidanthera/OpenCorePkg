@@ -1042,20 +1042,20 @@ fsw_hfs_cmpf_catkey (BTreeKey *btkey1, BTreeKey *btkey2)
 
 		for (ac = 0; ac == 0 && apos < ckey1nlen; apos++) {
 			ac = be16_to_cpu (p1[apos]);
-			ac = ac ? fsw_to_lower (ac) : 0xFFFF;
+			ac = fsw_to_lower (ac);
 		}
 
 		/* get next valid character from ckey2 */
 
 		for (bc = 0; bc == 0 && bpos < ckey2nlen; bpos++) {
 			bc = p2[bpos];
-			bc = bc ? fsw_to_lower (bc) : 0xFFFF;
+			bc = fsw_to_lower (bc);
 		}
 
 		if (ac != bc)
 			break;
 
-		if (bpos == ckey1nlen)
+		if (ac == 0)
 			return 0;
 	}
 
