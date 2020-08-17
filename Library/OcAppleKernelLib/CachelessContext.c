@@ -620,8 +620,8 @@ InternalAddKextPatch (
   KERNEL_QUIRK          *KernelQuirk;
 
   if (Patch == NULL) {
-    KernelQuirk = KernelQuirkLookup (QuirkName);
-    if (KernelQuirk == NULL || KernelQuirk->BundleId == NULL) {
+    KernelQuirk = &gKernelQuirks[QuirkName];
+    if (KernelQuirk->BundleId == NULL) {
       return EFI_INVALID_PARAMETER;
     }
 

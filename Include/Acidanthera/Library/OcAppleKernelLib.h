@@ -501,17 +501,10 @@ typedef struct {
   KERNEL_QUIRK_PATCH_FUNCTION   *PatchFunction;
 } KERNEL_QUIRK;
 
-/**
-  Returns the matching KERNEL_QUIRK for the specified quirk name.
-
-  @param[in]  Name      KERNEL_QUIRK_NAME specifying the quirk name.
-
-  @returns KERNEL_QUIRK pointer.
-**/
-KERNEL_QUIRK*
-KernelQuirkLookup (
-  IN KERNEL_QUIRK_NAME  Name
-  );
+//
+// Kernel quirks array.
+//
+extern KERNEL_QUIRK gKernelQuirks[];
 
 /**
   Applies the specified quirk.

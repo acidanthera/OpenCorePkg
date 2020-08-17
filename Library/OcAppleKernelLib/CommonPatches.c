@@ -1747,8 +1747,7 @@ PatchAppleRtcChecksum (
 //
 // Quirks table.
 //
-STATIC
-KERNEL_QUIRK Quirks[] = {
+KERNEL_QUIRK gKernelQuirks[] = {
   [KernelQuirkAppleCpuPmCfgLock] = { "com.apple.driver.AppleIntelCPUPowerManagement", PatchAppleCpuPmCfgLock }, 
   [KernelQuirkAppleXcpmCfgLock] = { NULL, PatchAppleXcpmCfgLock },
   [KernelQuirkAppleXcpmExtraMsrs] = { NULL, PatchAppleXcpmExtraMsrs },
@@ -1769,24 +1768,13 @@ KERNEL_QUIRK Quirks[] = {
   [KernelQuirkXhciPortLimit3] = { "com.apple.driver.usb.AppleUSBXHCIPCI", PatchUsbXhciPortLimit3 },
 };
 
-KERNEL_QUIRK*
-KernelQuirkLookup (
-  IN KERNEL_QUIRK_NAME  Name
-  )
-{
-  return &Quirks[Name];
-}
-
 EFI_STATUS
 KernelQuirkApply (
   IN     KERNEL_QUIRK_NAME  Name,
   IN OUT PATCHER_CONTEXT    *Patcher
  )
 {
-  KERNEL_QUIRK  *KernelQuirk;
-
   ASSERT (Patcher != NULL);
 
-  KernelQuirk = KernelQuirkLookup (Name);
-  return KernelQuirk->PatchFunction (Patcher);
+  return gKernelQuirks[Name].PatchFunction (Patcher);
 }
