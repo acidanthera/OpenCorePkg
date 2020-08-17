@@ -213,13 +213,13 @@ UpdateMkextV2Plist (
     return 0;
   }
 
-  MkextBuffer = (UINT8*)Mkext;
+  MkextBuffer = (UINT8 *) Mkext;
   CopyMem (&MkextBuffer[Offset], ExportedInfo, ExportedInfoSize);
   FreePool (ExportedInfo);
 
-  Mkext->PlistOffset = SwapBytes32 (Offset);
-  Mkext->PlistFullSize = SwapBytes32 (ExportedInfoSize);
-  Mkext->PlistCompressedSize = 0;
+  Mkext->PlistOffset          = SwapBytes32 (Offset);
+  Mkext->PlistFullSize        = SwapBytes32 (ExportedInfoSize);
+  Mkext->PlistCompressedSize  = 0;
   return ExportedInfoSize;
 }
 
@@ -577,7 +577,7 @@ MkextDecompress (
             || DecompressLZSS (
               &OutBuffer[CurrentOffset],
               PlistFullSize,
-              &((UINT8*)Buffer)[PlistOffset],
+              &((UINT8 *) Buffer)[PlistOffset],
               PlistCompSize
             ) != PlistFullSize) {
             return EFI_INVALID_PARAMETER;
@@ -606,7 +606,7 @@ MkextDecompress (
               || DecompressLZSS (
                 &OutBuffer[CurrentOffset],
                 BinFullSize,
-                &((UINT8*)Buffer)[BinOffset],
+                &((UINT8 *) Buffer)[BinOffset],
                 BinCompSize
               ) != BinFullSize) {
               return EFI_INVALID_PARAMETER;
