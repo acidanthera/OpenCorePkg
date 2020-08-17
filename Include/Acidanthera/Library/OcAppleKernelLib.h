@@ -404,6 +404,10 @@ typedef struct {
   // Array of kexts.
   //
   XML_NODE                 *MkextKexts;
+  //
+  // List of cached kexts, used for patching and blocking.
+  //
+  LIST_ENTRY               CachedKexts;
 } MKEXT_CONTEXT;
 
 //
@@ -706,7 +710,7 @@ PrelinkedInjectKext (
   );
 
 /**
-  Apply kext patch.
+  Apply kext patch to prelinked.
 
   @param[in,out] Context         Prelinked context.
   @param[in]     BundleId        Kext bundle ID.
@@ -722,7 +726,7 @@ PrelinkedContextApplyPatch (
   );
 
 /**
-  Apply kext quirk.
+  Apply kext quirk to prelinked.
 
   @param[in,out] Context         Prelinked context.
   @param[in]     Quirk           Kext quirk to apply.
@@ -826,6 +830,22 @@ EFI_STATUS
 PatcherInitContextFromPrelinked (
   IN OUT PATCHER_CONTEXT    *Context,
   IN OUT PRELINKED_CONTEXT  *Prelinked,
+  IN     CONST CHAR8        *Name
+  );
+
+/**
+  Initialize patcher from mkext context for kext patching.
+
+  @param[in,out] Context         Patcher context.
+  @param[in,out] Mkext           Mkext context.
+  @param[in]     Name            Kext bundle identifier.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PatcherInitContextFromMkext(
+  IN OUT PATCHER_CONTEXT    *Context,
+  IN OUT MKEXT_CONTEXT      *Mkext,
   IN     CONST CHAR8        *Name
   );
 
@@ -1146,6 +1166,36 @@ MkextInjectKext (
   IN     UINT32             InfoPlistSize,
   IN     UINT8              *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL
+  );
+
+/**
+  Apply kext patch to mkext.
+
+  @param[in,out] Context         Mkext context.
+  @param[in]     BundleId        Kext bundle ID.
+  @param[in]     Patch           Patch to apply.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+MkextContextApplyPatch (
+  IN OUT MKEXT_CONTEXT          *Context,
+  IN     CONST CHAR8            *BundleId,
+  IN     PATCHER_GENERIC_PATCH  *Patch
+  );
+
+/**
+  Apply kext quirk to mkext.
+
+  @param[in,out] Context         Mkext context.
+  @param[in]     Quirk           Kext quirk to apply.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+MkextContextApplyQuirk (
+  IN OUT MKEXT_CONTEXT        *Context,
+  IN     KERNEL_QUIRK_NAME    Quirk
   );
 
 /**

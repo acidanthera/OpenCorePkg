@@ -241,9 +241,7 @@ OcKernelApplyQuirk (
     if (CacheType == CacheTypeCacheless) {
       return CachelessContextAddQuirk ((CACHELESS_CONTEXT *) Context, Quirk);
     } else if (CacheType == CacheTypeMkext) {
-      //
-      // TODO: Implement in MKEXT lib.
-      //
+      return MkextContextApplyQuirk ((MKEXT_CONTEXT *) Context, Quirk);
     } else if (CacheType == CacheTypePrelinked) {
       return PrelinkedContextApplyQuirk ((PRELINKED_CONTEXT *) Context, Quirk);
     }
@@ -367,9 +365,7 @@ OcKernelApplyPatches (
       if (CacheType == CacheTypeCacheless) {
         Status = CachelessContextAddPatch ((CACHELESS_CONTEXT *) Context, Target, &Patch);
       } else if (CacheType == CacheTypeMkext) {
-        //
-        // TODO: Implement MKEXT lib.
-        //
+        Status = MkextContextApplyPatch ((MKEXT_CONTEXT *) Context, Target, &Patch);
       } else if (CacheType == CacheTypePrelinked) {
         Status = PrelinkedContextApplyPatch ((PRELINKED_CONTEXT *) Context, Target, &Patch);
       }
@@ -672,6 +668,8 @@ OcKernelProcessMkext (
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
+  OcKernelApplyPatches (Config, DarwinVersion, CacheTypeMkext, &Context, NULL, 0);
 
   for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
     Kext = Config->Kernel.Add.Values[Index];

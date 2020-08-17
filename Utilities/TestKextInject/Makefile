@@ -12,15 +12,29 @@ OBJS    = $(PROJECT).o \
 	KxldState.o \
 	PrelinkedKext.o \
 	PrelinkedContext.o \
+	MkextContext.o \
+	MkextReader.o \
 	Vtables.o \
 	Link.o \
 	KernelReader.o \
 	KernelCollection.o \
 	DataPatcher.o \
 	lzss.o \
-	lzvn.o
+	lzvn.o \
+	adler32.o \
+	compress.o \
+	crc32.o \
+	deflate.o \
+	infback.o \
+	inffast.o \
+	inflate.o \
+	inftrees.o \
+	trees.o \
+	uncompr.o \
+	zlib_uefi.o
 VPATH   = ../../Library/OcAppleKernelLib:$\
 	../../Library/OcMiscLib:$\
 	../../Library/OcCompressionLib/lzss:$\
-	../../Library/OcCompressionLib/lzvn
+	../../Library/OcCompressionLib/lzvn:$\
+	../../Library/OcCompressionLib/zlib
 include ../../User/Makefile
