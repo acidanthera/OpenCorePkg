@@ -275,7 +275,7 @@ typedef struct {
 //
 typedef struct {
   //
-  // Comment or NULL (0 base is used then).
+  // Comment or NULL.
   //
   CONST CHAR8  *Comment;
   //
@@ -329,13 +329,17 @@ typedef struct {
   //
   CONST CHAR16          *ExtensionsDirFileName;
   //
-  // Injected kext list.
+  // List of injected kexts.
   //
   LIST_ENTRY            InjectedKexts;
   //
-  // Dependency bundle list for injected kexts.
+  // List of dependencies that need to be injected.
   //
   LIST_ENTRY            InjectedDependencies;
+  //
+  // List of kext patches for built-in shipping kexts.
+  //
+  LIST_ENTRY            PatchedKexts;
   //
   // List of built-in shipping kexts.
   //
@@ -401,6 +405,127 @@ typedef struct {
   //
   XML_NODE                 *MkextKexts;
 } MKEXT_CONTEXT;
+
+//
+// Kernel quirk names.
+//
+typedef enum {
+  //
+  // Apply MSR E2 patches to AppleIntelCPUPowerManagement kext.
+  //
+  KernelQuirkAppleCpuPmCfgLock,
+  //
+  // Apply MSR E2 patches to XNU kernel (XCPM).
+  //
+  KernelQuirkAppleXcpmCfgLock,
+  //
+  // Apply extra MSR patches to XNU kernel (XCPM).
+  //
+  KernelQuirkAppleXcpmExtraMsrs,
+  //
+  // Apply max MSR_IA32_PERF_CONTROL patches to XNU kernel (XCPM).
+  //
+  KernelQuirkAppleXcpmForceBoost,
+  //
+  // Apply custom AppleSMBIOS kext GUID patch for Custom UpdateSMBIOSMode.
+  //
+  KernelQuirkCustomSmbiosGuid1,
+  KernelQuirkCustomSmbiosGuid2,
+  //
+  // Apply VT-d disabling patches to IOPCIFamily kext to disable IOMapper in macOS.
+  //
+  KernelQuirkDisableIoMapper,
+  //
+  // Disable AppleRTC checksum writing.
+  //
+  KernelQuirkDisableRtcChecksum,
+  //
+  // Apply dummy power management patches to AppleIntelCpuPowerManagement in macOS.
+  //
+  KernelQuirkDummyPowerManagement,
+  //
+  // Apply icon type patches to IOAHCIPort kext to force internal disk icons.
+  //
+  KernelQuirkExternalDiskIcons,
+  //
+  // Apply PCI bar size patches to IOPCIFamily kext for compatibility with select configuration.
+  //
+  KernelQuirkIncreasePciBarSize,
+  //
+  // Disable LAPIC interrupt kernel panic on AP cores.
+  //
+  KernelQuirkLapicKernelPanic,
+  //
+  // Apply kernel patches to remove kext dumping in the panic log.
+  //
+  KernelQuirkPanicNoKextDump,
+  //
+  // Disable power state change timeout kernel panic (10.15+).
+  //
+  KernelQuirkPowerTimeoutKernelPanic,
+  //
+  // Apply vendor patches to IOAHCIFamily kext to enable native features for third-party drives,
+  //   such as TRIM on SSDs or hibernation support on 10.15.
+  //
+  KernelQuirkThirdPartyDrives,
+  //
+  // Apply port limit patches to AppleUSBXHCI and AppleUSBXHCIPCI kexts.
+  //
+  KernelQuirkXhciPortLimit1,
+  KernelQuirkXhciPortLimit2,
+  KernelQuirkXhciPortLimit3,
+
+  KernelQuirkMax
+} KERNEL_QUIRK_NAME;
+
+//
+// Kernel quirk patch function.
+//
+typedef
+EFI_STATUS
+(KERNEL_QUIRK_PATCH_FUNCTION)(
+  IN OUT PATCHER_CONTEXT    *Patcher
+  );
+
+//
+// Kernel quirk.
+//
+typedef struct {
+  //
+  // Target bundle ID. NULL for kernel.
+  //
+  CONST CHAR8                   *BundleId;
+  //
+  // Quirk patch function.
+  //
+  KERNEL_QUIRK_PATCH_FUNCTION   *PatchFunction;
+} KERNEL_QUIRK;
+
+/**
+  Returns the matching KERNEL_QUIRK for the specified quirk name.
+
+  @param[in]  Name      KERNEL_QUIRK_NAME specifying the quirk name.
+
+  @returns KERNEL_QUIRK pointer.
+**/
+KERNEL_QUIRK*
+KernelQuirkLookup (
+  IN KERNEL_QUIRK_NAME  Name
+  );
+
+/**
+  Applies the specified quirk.
+
+  @param[in]     Name     KERNEL_QUIRK_NAME specifying the quirk name.
+  @param[in,out] Patcher  PATCHER_CONTEXT instance.
+
+  @returns EFI_SUCCESS on success.
+**/
+EFI_STATUS
+KernelQuirkApply (
+  IN     KERNEL_QUIRK_NAME  Name,
+  IN OUT PATCHER_CONTEXT    *Patcher
+ );
 
 /**
   Read Apple kernel for target architecture (possibly decompressing)
@@ -740,127 +865,6 @@ PatcherBlockKext (
   );
 
 /**
-  Apply MSR E2 patches to AppleIntelCPUPowerManagement kext.
-
-  @param Context  Prelinked kernel context.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-PatchAppleCpuPmCfgLock (
-  IN OUT PRELINKED_CONTEXT  *Context
-  );
-
-/**
-  Apply MSR E2 patches to XNU kernel (XCPM).
-
-  @param Patcher  Patcher context.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-PatchAppleXcpmCfgLock (
-  IN OUT PATCHER_CONTEXT  *Patcher
-  );
-
-/**
-  Apply extra MSR patches to XNU kernel (XCPM).
-
-  @param Patcher  Patcher context.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-PatchAppleXcpmExtraMsrs (
-  IN OUT PATCHER_CONTEXT  *Patcher
-  );
-
-/**
-  Apply max MSR_IA32_PERF_CONTROL patches to XNU kernel (XCPM).
-
-  @param Patcher  Patcher context.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-PatchAppleXcpmForceBoost (
-  IN OUT PATCHER_CONTEXT   *Patcher
-  );
-
-/**
-  Apply port limit patches to AppleUSBXHCI and AppleUSBXHCIPCI kexts.
-
-  @param Context  Prelinked kernel context.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-PatchUsbXhciPortLimit (
-  IN OUT PRELINKED_CONTEXT  *Context
-  );
-
-/**
-  Apply vendor patches to IOAHCIFamily kext to enable native features for third-party drives,
-  such as TRIM on SSDs or hibernation support on 10.15.
-
-  @param Context  Prelinked kernel context.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-PatchThirdPartyDriveSupport (
-  IN OUT PRELINKED_CONTEXT  *Context
-  );
-
-/**
-  Apply icon type patches to IOAHCIPort kext to force internal disk icons.
-
-  @param Context  Prelinked kernel context.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-PatchForceInternalDiskIcons (
-  IN OUT PRELINKED_CONTEXT  *Context
-  );
-
-/**
-  Apply VT-d disabling patches to IOPCIFamily kext to disable IOMapper in macOS.
-
-  @param Context  Prelinked kernel context.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-PatchAppleIoMapperSupport (
-  IN OUT PRELINKED_CONTEXT  *Context
-  );
-
-/**
-  Apply dummy power management patches to AppleIntelCpuPowerManagement in macOS.
-
-  @param Context  Prelinked kernel context.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-PatchDummyPowerManagement (
-  IN OUT PRELINKED_CONTEXT  *Context
-  );
-
-/**
-  Apply PCI bar size patches to IOPCIFamily kext for compatibility with select configuration.
-
-  @param Context  Prelinked kernel context.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-PatchIncreasePciBarSize (
-  IN OUT PRELINKED_CONTEXT  *Context
-  );
-
-/**
   Apply modification to CPUID 1.
 
   @param Patcher  Patcher context.
@@ -876,66 +880,6 @@ PatchKernelCpuId (
   IN     OC_CPU_INFO      *CpuInfo,
   IN     UINT32           *Data,
   IN     UINT32           *DataMask
-  );
-
-/**
-  Apply custom AppleSMBIOS kext GUID patch for Custom UpdateSMBIOSMode.
-
-  @param Context  Prelinked kernel context.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-PatchCustomSmbiosGuid (
-  IN OUT PRELINKED_CONTEXT  *Context
-  );
-
-/**
-  Apply kernel patches to remove kext dumping in the panic log.
-
-  @param Patcher  Patcher context.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-PatchPanicKextDump (
-  IN OUT PATCHER_CONTEXT  *Patcher
-  );
-
-/**
-  Disable LAPIC interrupt kernel panic on AP cores.
-
-  @param Patcher  Patcher context.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-PatchLapicKernelPanic (
-  IN OUT PATCHER_CONTEXT  *Patcher
-  );
-
-/**
-  Disable power state change timeout kernel panic (10.15+).
-
-  @param Patcher  Patcher context.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-PatchPowerStateTimeout (
-  IN OUT PATCHER_CONTEXT   *Patcher
-  );
-
-/**
-  Disable AppleRTC checksum writing.
-
-  @param Context  Patcher context.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-PatchAppleRtcChecksum (
-  IN OUT PRELINKED_CONTEXT  *Context
   );
 
 /**
@@ -985,6 +929,36 @@ CachelessContextAddKext (
   IN     UINT32               InfoPlistSize,
   IN     CONST UINT8          *Executable OPTIONAL,
   IN     UINT32               ExecutableSize OPTIONAL
+  );
+
+/**
+  Add patch to cacheless context to be applied later on.
+
+  @param[in,out] Context         Cacheless context.
+  @param[in]     BundleId        Bundle ID to patch.
+  @param[in]     Patch           Patch to apply.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+CachelessContextAddGenericPatch (
+  IN OUT CACHELESS_CONTEXT      *Context,
+  IN     CONST CHAR8            *BundleId,
+  IN     PATCHER_GENERIC_PATCH  *Patch
+  );
+
+/**
+  Add kernel quirk to cacheless context to be applied later on.
+
+  @param[in,out] Context         Cacheless context.
+  @param[in]     Quirk           Quirk to apply.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+CachlessContextAddQuirk (
+  IN OUT CACHELESS_CONTEXT    *Context,
+  IN     KERNEL_QUIRK_NAME    Quirk
   );
 
 /**

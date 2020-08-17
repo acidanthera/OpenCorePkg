@@ -222,17 +222,51 @@ OcKernelLoadKextsAndReserve (
 }
 
 STATIC
+EFI_STATUS
+OcKernelApplyQuirk (
+  IN     KERNEL_QUIRK_NAME  Quirk,
+  IN     KERNEL_CACHE_TYPE  CacheType,
+  IN OUT VOID               *Context,
+  IN OUT PATCHER_CONTEXT    *KernelPatcher
+  )
+{
+  //
+  // Apply kernel quirks to kernel, kext patches to context.
+  //
+  if (Context == NULL) {
+    ASSERT (KernelPatcher != NULL);
+
+    return KernelQuirkApply (Quirk, KernelPatcher);
+  } else {
+    if (CacheType == CacheTypeCacheless) {
+      return CachlessContextAddQuirk ((CACHELESS_CONTEXT *) Context, Quirk);
+    } else if (CacheType == CacheTypeMkext) {
+      //
+      // TODO: Implement in MKEXT lib.
+      //
+    } else if (CacheType == CacheTypePrelinked) {
+      //
+      // TODO: Implement in PK lib.
+      //
+    }
+  }
+
+  return EFI_UNSUPPORTED;
+}
+
+STATIC
 VOID
 OcKernelApplyPatches (
   IN     OC_GLOBAL_CONFIG  *Config,
   IN     UINT32            DarwinVersion,
-  IN     PRELINKED_CONTEXT *Context,
+  IN     KERNEL_CACHE_TYPE CacheType,
+  IN     VOID              *Context,
   IN OUT UINT8             *Kernel,
   IN     UINT32            Size
   )
 {
   EFI_STATUS             Status;
-  PATCHER_CONTEXT        Patcher;
+  PATCHER_CONTEXT        KernelPatcher;
   UINT32                 Index;
   PATCHER_GENERIC_PATCH  Patch;
   OC_KERNEL_PATCH_ENTRY  *UserPatch;
