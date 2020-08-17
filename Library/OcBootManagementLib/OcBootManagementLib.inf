@@ -107,6 +107,7 @@
   OcDevicePathLib
   OcGuardLib
   OcFileLib
+  OcMachoLib
   OcRtcLib
   OcXmlLib
   TimerLib
