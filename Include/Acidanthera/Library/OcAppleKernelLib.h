@@ -705,6 +705,36 @@ PrelinkedInjectKext (
   IN     UINT32             ExecutableSize OPTIONAL
   );
 
+/**
+  Apply kext patch.
+
+  @param[in,out] Context         Prelinked context.
+  @param[in]     BundleId        Kext bundle ID.
+  @param[in]     Patch           Patch to apply.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PrelinkedContextApplyPatch (
+  IN OUT PRELINKED_CONTEXT      *Context,
+  IN     CONST CHAR8            *BundleId,
+  IN     PATCHER_GENERIC_PATCH  *Patch
+  );
+
+/**
+  Apply kext quirk.
+
+  @param[in,out] Context         Prelinked context.
+  @param[in]     Quirk           Kext quirk to apply.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PrelinkedContextApplyQuirk (
+  IN OUT PRELINKED_CONTEXT    *Context,
+  IN     KERNEL_QUIRK_NAME    Quirk
+  );
+
 EFI_STATUS
 KcRebuildMachHeader (
   IN OUT PRELINKED_CONTEXT  *Context
@@ -928,13 +958,13 @@ CachelessContextAddKext (
   Add patch to cacheless context to be applied later on.
 
   @param[in,out] Context         Cacheless context.
-  @param[in]     BundleId        Bundle ID to patch.
+  @param[in]     BundleId        Kext bundle ID.
   @param[in]     Patch           Patch to apply.
 
   @return  EFI_SUCCESS on success.
 **/
 EFI_STATUS
-CachelessContextAddGenericPatch (
+CachelessContextAddPatch (
   IN OUT CACHELESS_CONTEXT      *Context,
   IN     CONST CHAR8            *BundleId,
   IN     PATCHER_GENERIC_PATCH  *Patch
@@ -949,7 +979,7 @@ CachelessContextAddGenericPatch (
   @return  EFI_SUCCESS on success.
 **/
 EFI_STATUS
-CachlessContextAddQuirk (
+CachelessContextAddQuirk (
   IN OUT CACHELESS_CONTEXT    *Context,
   IN     KERNEL_QUIRK_NAME    Quirk
   );

@@ -239,15 +239,13 @@ OcKernelApplyQuirk (
     return KernelQuirkApply (Quirk, KernelPatcher);
   } else {
     if (CacheType == CacheTypeCacheless) {
-      return CachlessContextAddQuirk ((CACHELESS_CONTEXT *) Context, Quirk);
+      return CachelessContextAddQuirk ((CACHELESS_CONTEXT *) Context, Quirk);
     } else if (CacheType == CacheTypeMkext) {
       //
       // TODO: Implement in MKEXT lib.
       //
     } else if (CacheType == CacheTypePrelinked) {
-      //
-      // TODO: Implement in PK lib.
-      //
+      return PrelinkedContextApplyQuirk ((PRELINKED_CONTEXT *) Context, Quirk);
     }
   }
 
@@ -319,21 +317,6 @@ OcKernelApplyPatches (
       continue;
     }
 
-    if (!IsKernelPatch) {
-      /*Status = PatcherInitContextFromPrelinked (
-        &Patcher,
-        Context,
-        Target
-        );
-
-      if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_WARN, "OC: Kernel patcher %a (%a) init failure - %r\n", Target, Comment, Status));
-        continue;
-      } else {
-        DEBUG ((DEBUG_INFO, "OC: Kernel patcher %a (%a) init succeed\n", Target, Comment));
-      }*/
-    }
-
     //
     // Ignore patch if:
     // - There is nothing to replace.
@@ -382,7 +365,13 @@ OcKernelApplyPatches (
       Status = PatcherApplyGenericPatch (&KernelPatcher, &Patch);
     } else {
       if (CacheType == CacheTypeCacheless) {
-        Status = CachelessContextAddGenericPatch ((CACHELESS_CONTEXT *) Context, Target, &Patch);
+        Status = CachelessContextAddPatch ((CACHELESS_CONTEXT *) Context, Target, &Patch);
+      } else if (CacheType == CacheTypeMkext) {
+        //
+        // TODO: Implement MKEXT lib.
+        //
+      } else if (CacheType == CacheTypePrelinked) {
+        Status = PrelinkedContextApplyPatch ((PRELINKED_CONTEXT *) Context, Target, &Patch);
       }
     }
 

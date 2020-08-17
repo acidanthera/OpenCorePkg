@@ -1009,7 +1009,7 @@ CachelessContextAddKext (
 }
 
 EFI_STATUS
-CachelessContextAddGenericPatch (
+CachelessContextAddPatch (
   IN OUT CACHELESS_CONTEXT      *Context,
   IN     CONST CHAR8            *BundleId,
   IN     PATCHER_GENERIC_PATCH  *Patch
@@ -1023,7 +1023,7 @@ CachelessContextAddGenericPatch (
 }
 
 EFI_STATUS
-CachlessContextAddQuirk (
+CachelessContextAddQuirk (
   IN OUT CACHELESS_CONTEXT    *Context,
   IN     KERNEL_QUIRK_NAME    Quirk
   )
