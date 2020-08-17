@@ -1774,8 +1774,6 @@ KernelQuirkLookup (
   IN KERNEL_QUIRK_NAME  Name
   )
 {
-  ASSERT (Name < sizeof (Quirks));
-
   return &Quirks[Name];
 }
 
@@ -1787,10 +1785,8 @@ KernelQuirkApply (
 {
   KERNEL_QUIRK  *KernelQuirk;
 
-  ASSERT (Name < sizeof (Quirks));
   ASSERT (Patcher != NULL);
 
   KernelQuirk = KernelQuirkLookup (Name);
-
   return KernelQuirk->PatchFunction (Patcher);
 }
