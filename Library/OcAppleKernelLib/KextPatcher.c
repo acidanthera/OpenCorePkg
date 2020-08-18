@@ -24,6 +24,7 @@
 #include <Library/OcMiscLib.h>
 #include <Library/OcXmlLib.h>
 
+#include "MkextInternal.h"
 #include "PrelinkedInternal.h"
 
 EFI_STATUS
@@ -42,6 +43,23 @@ PatcherInitContextFromPrelinked (
 
   CopyMem (Context, &Kext->Context, sizeof (*Context));
   return EFI_SUCCESS;
+}
+
+EFI_STATUS
+PatcherInitContextFromMkext(
+  IN OUT PATCHER_CONTEXT    *Context,
+  IN OUT MKEXT_CONTEXT      *Mkext,
+  IN     CONST CHAR8        *Name
+  )
+{
+  MKEXT_KEXT  *Kext;
+
+  Kext = InternalCachedMkextKext (Mkext, Name);
+  if (Kext == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  return PatcherInitContextFromBuffer (Context, &Mkext->Mkext[Kext->BinaryOffset], Kext->BinarySize);
 }
 
 EFI_STATUS

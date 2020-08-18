@@ -1134,3 +1134,50 @@ PrelinkedInjectKext (
 
   return EFI_SUCCESS;
 }
+
+EFI_STATUS
+PrelinkedContextApplyPatch (
+  IN OUT PRELINKED_CONTEXT      *Context,
+  IN     CONST CHAR8            *BundleId,
+  IN     PATCHER_GENERIC_PATCH  *Patch
+  )
+{
+  EFI_STATUS            Status;
+  PATCHER_CONTEXT       Patcher;
+
+  ASSERT (Context != NULL);
+  ASSERT (BundleId != NULL);
+  ASSERT (Patch != NULL);
+
+  Status = PatcherInitContextFromPrelinked (&Patcher, Context, BundleId);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to find %a - %r\n", BundleId, Status));
+    return Status;
+  }
+
+  return PatcherApplyGenericPatch (&Patcher, Patch);
+}
+
+EFI_STATUS
+PrelinkedContextApplyQuirk (
+  IN OUT PRELINKED_CONTEXT    *Context,
+  IN     KERNEL_QUIRK_NAME    Quirk
+  )
+{
+  EFI_STATUS            Status;
+  KERNEL_QUIRK          *KernelQuirk;
+  PATCHER_CONTEXT       Patcher;
+
+  ASSERT (Context != NULL);
+
+  KernelQuirk = &gKernelQuirks[Quirk];
+  ASSERT (KernelQuirk->BundleId != NULL);
+
+  Status = PatcherInitContextFromPrelinked (&Patcher, Context, KernelQuirk->BundleId);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to find %a - %r\n", KernelQuirk->BundleId, Status));
+    return Status;
+  }
+
+  return KernelQuirk->PatchFunction (&Patcher);
+}

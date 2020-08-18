@@ -1,5 +1,5 @@
 /** @file
-  Commonly used kext patches.
+  Commonly used kext and kernel patches.
 
 Copyright (c) 2018, vit9696. All rights reserved.<BR>
 This program and the accompanying materials
@@ -96,38 +96,27 @@ mAppleIntelCPUPowerManagementPatch2 = {
   .Skip        = 0
 };
 
+STATIC
 EFI_STATUS
 PatchAppleCpuPmCfgLock (
-  IN OUT PRELINKED_CONTEXT  *Context
+  IN OUT PATCHER_CONTEXT    *Patcher
   )
 {
   EFI_STATUS          Status;
   EFI_STATUS          Status2;
-  PATCHER_CONTEXT     Patcher;
 
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.driver.AppleIntelCPUPowerManagement"
-    );
-
+  Status = PatcherApplyGenericPatch (Patcher, &mAppleIntelCPUPowerManagementPatch);
   if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &mAppleIntelCPUPowerManagementPatch);
-    if (!EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch v1 success com.apple.driver.AppleIntelCPUPowerManagement\n"));
-    }
+    DEBUG ((DEBUG_INFO, "OCAK: Patch v1 success com.apple.driver.AppleIntelCPUPowerManagement\n"));
+  }
 
-    Status2 = PatcherApplyGenericPatch (&Patcher, &mAppleIntelCPUPowerManagementPatch2);
-    if (!EFI_ERROR (Status2)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch v2 success com.apple.driver.AppleIntelCPUPowerManagement\n"));
-    }
+  Status2 = PatcherApplyGenericPatch (Patcher, &mAppleIntelCPUPowerManagementPatch2);
+  if (!EFI_ERROR (Status2)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Patch v2 success com.apple.driver.AppleIntelCPUPowerManagement\n"));
+  }
 
-    if (EFI_ERROR (Status) && EFI_ERROR (Status2)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patches com.apple.driver.AppleIntelCPUPowerManagement - %r/%r\n", Status, Status2));
-    }
-  } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.driver.AppleIntelCPUPowerManagement - %r\n", Status));
-    Status2 = Status;
+  if (EFI_ERROR (Status) && EFI_ERROR (Status2)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patches com.apple.driver.AppleIntelCPUPowerManagement - %r/%r\n", Status, Status2));
   }
 
   //
@@ -207,9 +196,10 @@ mXcpmCfgLockDbgPatch = {
   .Limit       = 4096
 };
 
+STATIC
 EFI_STATUS
 PatchAppleXcpmCfgLock (
-  IN OUT PATCHER_CONTEXT  *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher
   )
 {
   EFI_STATUS          Status;
@@ -330,9 +320,10 @@ mMiscPwrMgmtDbgPatch = {
   .Limit       = 0
 };
 
+STATIC
 EFI_STATUS
 PatchAppleXcpmExtraMsrs (
-  IN OUT PATCHER_CONTEXT  *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher
   )
 {
   EFI_STATUS          Status;
@@ -449,9 +440,10 @@ mPerfCtrlMax[] = {
   0xC3                          ///< ret
 };
 
+STATIC
 EFI_STATUS
 PatchAppleXcpmForceBoost (
-  IN OUT PATCHER_CONTEXT   *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher
   )
 {
   UINT8   *Start;
@@ -587,34 +579,35 @@ mRemoveUsbLimitIoP1Patch = {
   .Limit       = 4096
 };
 
+STATIC
 EFI_STATUS
-PatchUsbXhciPortLimit (
-  IN OUT PRELINKED_CONTEXT  *Context
+PatchUsbXhciPortLimit1 (
+  IN OUT PATCHER_CONTEXT    *Patcher
   )
 {
-  EFI_STATUS       Status;
-  PATCHER_CONTEXT  Patcher;
+  EFI_STATUS  Status;
 
   //
   // On 10.14.4 and newer IOUSBHostFamily also needs limit removal.
   // Thanks to ydeng discovering this.
   //
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.iokit.IOUSBHostFamily"
-    );
-
-  if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &mRemoveUsbLimitIoP1Patch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply P1 patch com.apple.iokit.IOUSBHostFamily - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOUSBHostFamily\n"));
-    }
+  Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitIoP1Patch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply P1 patch com.apple.iokit.IOUSBHostFamily - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.iokit.IOUSBHostFamily - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOUSBHostFamily\n"));
   }
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
+PatchUsbXhciPortLimit2 (
+  IN OUT PATCHER_CONTEXT    *Patcher
+  )
+{
+  EFI_STATUS  Status;
 
   //
   // TODO: Implement some locationID hack in IOUSBHFamily.
@@ -637,47 +630,36 @@ PatchUsbXhciPortLimit (
   //
   // C~F are filled as many times as many USB Hubs are there on the port.
   //
-
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.driver.usb.AppleUSBXHCI"
-    );
-
+  Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitV2Patch);
   if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &mRemoveUsbLimitV2Patch);
-    if (!EFI_ERROR (Status)) {
-      //
-      // We do not need to patch com.apple.driver.usb.AppleUSBXHCI if this patch was successful.
-      // Only legacy systems require com.apple.driver.usb.AppleUSBXHCI to be patched.
-      //
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.usb.AppleUSBXHCI\n"));
-      return EFI_SUCCESS;
-    }
-
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
+    //
+    // We do not need to patch com.apple.driver.usb.AppleUSBXHCI if this patch was successful.
+    // Only legacy systems require com.apple.driver.usb.AppleUSBXHCI to be patched.
+    //
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.usb.AppleUSBXHCI\n"));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
   }
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
+PatchUsbXhciPortLimit3 (
+  IN OUT PATCHER_CONTEXT    *Patcher
+  )
+{
+  EFI_STATUS  Status;
 
   //
   // If we are here, we are on legacy 10.13 or below, try the oldest patch.
   //
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.driver.usb.AppleUSBXHCIPCI"
-    );
-
-  if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &mRemoveUsbLimitV1Patch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.usb.AppleUSBXHCIPCI\n"));
-    }
+  Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitV1Patch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.usb.AppleUSBXHCIPCI\n"));
   }
 
   return Status;
@@ -735,37 +717,27 @@ mIOAHCIBlockStoragePatchV2 = {
   .Skip        = 0
 };
 
+STATIC
 EFI_STATUS
 PatchThirdPartyDriveSupport (
-  IN OUT PRELINKED_CONTEXT  *Context
+  IN OUT PATCHER_CONTEXT    *Patcher
   )
 {
   EFI_STATUS       Status;
-  PATCHER_CONTEXT  Patcher;
 
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.iokit.IOAHCIBlockStorage"
-    );
-
-  if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &mIOAHCIBlockStoragePatchV1);
+    Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIBlockStoragePatchV1);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOAHCIBlockStorage V1 - %r\n", Status));
     } else {
       DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOAHCIBlockStorage V1\n"));
     }
 
-    Status = PatcherApplyGenericPatch (&Patcher, &mIOAHCIBlockStoragePatchV2);
+    Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIBlockStoragePatchV2);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOAHCIBlockStorage V2 - %r\n", Status));
     } else {
       DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOAHCIBlockStorage V2\n"));
     }
-  } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.iokit.IOAHCIBlockStorage - %r\n", Status));
-  }
 
   return Status;
 }
@@ -785,40 +757,30 @@ mIOAHCIPortPatchReplace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mIOAHCIPortPatch = {
-  .Comment     = DEBUG_POINTER ("IOAHCIPort"),
-  .Base    = NULL,
-  .Find    = mIOAHCIPortPatchFind,
-  .Mask    = NULL,
-  .Replace = mIOAHCIPortPatchReplace,
-  .ReplaceMask = NULL,
-  .Size    = sizeof (mIOAHCIPortPatchFind),
-  .Count   = 1,
-  .Skip    = 0
+  .Comment      = DEBUG_POINTER ("IOAHCIPort"),
+  .Base         = NULL,
+  .Find         = mIOAHCIPortPatchFind,
+  .Mask         = NULL,
+  .Replace      = mIOAHCIPortPatchReplace,
+  .ReplaceMask  = NULL,
+  .Size         = sizeof (mIOAHCIPortPatchFind),
+  .Count        = 1,
+  .Skip         = 0
 };
 
+STATIC
 EFI_STATUS
 PatchForceInternalDiskIcons (
-  IN OUT PRELINKED_CONTEXT  *Context
+  IN OUT PATCHER_CONTEXT    *Patcher
   )
 {
   EFI_STATUS          Status;
-  PATCHER_CONTEXT     Patcher;
 
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.driver.AppleAHCIPort"
-    );
-
-  if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &mIOAHCIPortPatch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.AppleAHCIPort - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.AppleAHCIPort\n"));
-    }
+  Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIPortPatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.AppleAHCIPort - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.driver.AppleAHCIPort - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.AppleAHCIPort\n"));
   }
 
   return Status;
@@ -850,29 +812,19 @@ mAppleIoMapperPatch = {
   .Skip        = 0
 };
 
+STATIC
 EFI_STATUS
 PatchAppleIoMapperSupport (
-  IN OUT PRELINKED_CONTEXT  *Context
+  IN OUT PATCHER_CONTEXT    *Patcher
   )
 {
   EFI_STATUS          Status;
-  PATCHER_CONTEXT     Patcher;
 
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.iokit.IOPCIFamily"
-    );
-
-  if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &mAppleIoMapperPatch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOPCIFamily AppleIoMapper - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOPCIFamily AppleIoMapper\n"));
-    }
+  Status = PatcherApplyGenericPatch (Patcher, &mAppleIoMapperPatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOPCIFamily AppleIoMapper - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.iokit.IOPCIFamily for AppleIoMapper - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOPCIFamily AppleIoMapper\n"));
   }
 
   return Status;
@@ -898,29 +850,19 @@ mAppleDummyCpuPmPatch = {
   .Skip        = 0
 };
 
+STATIC
 EFI_STATUS
 PatchDummyPowerManagement (
-  IN OUT PRELINKED_CONTEXT  *Context
+  IN OUT PATCHER_CONTEXT    *Patcher
   )
 {
   EFI_STATUS          Status;
-  PATCHER_CONTEXT     Patcher;
 
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.driver.AppleIntelCPUPowerManagement"
-    );
-
-  if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &mAppleDummyCpuPmPatch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch dummy AppleIntelCPUPowerManagement - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success dummy AppleIntelCPUPowerManagement\n"));
-    }
+  Status = PatcherApplyGenericPatch (Patcher, &mAppleDummyCpuPmPatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch dummy AppleIntelCPUPowerManagement - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to find AppleIntelCPUPowerManagement for dummy - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success dummy AppleIntelCPUPowerManagement\n"));
   }
 
   return Status;
@@ -953,33 +895,24 @@ mIncreasePciBarSizePatch = {
   .Limit       = EFI_PAGE_SIZE
 };
 
+STATIC
 EFI_STATUS
 PatchIncreasePciBarSize (
-  IN OUT PRELINKED_CONTEXT  *Context
+  IN OUT PATCHER_CONTEXT    *Patcher
   )
 {
   EFI_STATUS          Status;
-  PATCHER_CONTEXT     Patcher;
 
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.iokit.IOPCIFamily"
-    );
-
-  if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &mIncreasePciBarSizePatch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOPCIFamily IncreasePciBarSize - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOPCIFamily IncreasePciBarSize\n"));
-    }
+  Status = PatcherApplyGenericPatch (Patcher, &mIncreasePciBarSizePatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOPCIFamily IncreasePciBarSize - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.iokit.IOPCIFamily for IncreasePciBarSize - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOPCIFamily IncreasePciBarSize\n"));
   }
 
   return Status;
 }
+
 
 STATIC
 CONST UINT8
@@ -1027,6 +960,8 @@ mKernelCpuidFindMcRel[] = {
   cpu->cpuid_cpufamily           = 0xAAAAAAAA;
   return 0xAAAAAAAA;
 **/
+
+
 STATIC
 CONST UINT8
 mKernelCpuidReplaceDbg[] = {
@@ -1454,48 +1389,30 @@ mCustomSmbiosGuidPatchReplace[] = {
 STATIC
 PATCHER_GENERIC_PATCH
 mCustomSmbiosGuidPatch = {
-  .Comment     = DEBUG_POINTER ("CustomSmbiosGuid"),
-  .Base    = NULL,
-  .Find    = mCustomSmbiosGuidPatchFind,
-  .Mask    = NULL,
-  .Replace = mCustomSmbiosGuidPatchReplace,
-  .ReplaceMask = NULL,
-  .Size    = sizeof (mCustomSmbiosGuidPatchFind),
-  .Count   = 1,
-  .Skip    = 0
+  .Comment      = DEBUG_POINTER ("CustomSmbiosGuid"),
+  .Base         = NULL,
+  .Find         = mCustomSmbiosGuidPatchFind,
+  .Mask         = NULL,
+  .Replace      = mCustomSmbiosGuidPatchReplace,
+  .ReplaceMask  = NULL,
+  .Size         = sizeof (mCustomSmbiosGuidPatchFind),
+  .Count        = 1,
+  .Skip         = 0
 };
 
+STATIC
 EFI_STATUS
 PatchCustomSmbiosGuid (
-  IN OUT PRELINKED_CONTEXT  *Context
+  IN OUT PATCHER_CONTEXT    *Patcher
   )
 {
   EFI_STATUS          Status;
-  PATCHER_CONTEXT     Patcher;
-  UINT32              Index;
   
-  STATIC CONST CHAR8 *Kexts[] = {
-    "com.apple.driver.AppleSMBIOS",
-    "com.apple.driver.AppleACPIPlatform"
-  };
-  
-  for (Index = 0; Index < ARRAY_SIZE (Kexts); ++Index) {
-    Status = PatcherInitContextFromPrelinked (
-      &Patcher,
-      Context,
-      Kexts[Index]
-      );
-    
-    if (!EFI_ERROR (Status)) {
-      Status = PatcherApplyGenericPatch (&Patcher, &mCustomSmbiosGuidPatch);
-      if (!EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_INFO, "OCAK: SMBIOS Patch success %a\n", Kexts[Index]));
-      } else {
-        DEBUG ((DEBUG_INFO, "OCAK: Failed to apply SMBIOS patch %a - %r\n", Kexts[Index], Status));
-      }
-    } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to find SMBIOS kext %a - %r\n", Kexts[Index], Status));
-    }
+  Status = PatcherApplyGenericPatch (Patcher, &mCustomSmbiosGuidPatch);
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: SMBIOS Patch success\n"));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply SMBIOS patch - %r\n", Status));
   }
 
   return Status;
@@ -1527,9 +1444,10 @@ mPanicKextDumpPatch = {
   .Skip    = 0
 };
 
+STATIC
 EFI_STATUS
 PatchPanicKextDump (
-  IN OUT PATCHER_CONTEXT  *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher
   )
 {
   EFI_STATUS          Status;
@@ -1676,9 +1594,10 @@ mLapicKernelPanicMasterPatch = {
   .Limit   = 4096
 };
 
+STATIC
 EFI_STATUS
 PatchLapicKernelPanic (
-  IN OUT PATCHER_CONTEXT  *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher
   )
 {
   EFI_STATUS  Status;
@@ -1744,9 +1663,10 @@ mPowerStateTimeoutPanicMasterPatch = {
   .Limit       = 0
 };
 
+STATIC
 EFI_STATUS
 PatchPowerStateTimeout (
-  IN OUT PATCHER_CONTEXT   *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher
   )
 {
   EFI_STATUS  Status;
@@ -1806,30 +1726,55 @@ mAppleRtcChecksumPatch = {
   .Limit       = 0
 };
 
+STATIC
 EFI_STATUS
 PatchAppleRtcChecksum (
-  IN OUT PRELINKED_CONTEXT  *Context
+  IN PATCHER_CONTEXT    *Patcher
   )
 {
-  EFI_STATUS          Status;
-  PATCHER_CONTEXT     Patcher;
+  EFI_STATUS Status;
 
-  Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.driver.AppleRTC"
-    );
-
-  if (!EFI_ERROR (Status)) {
-    Status = PatcherApplyGenericPatch (&Patcher, &mAppleRtcChecksumPatch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.AppleRTC DisableRtcChecksum - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.AppleRTC DisableRtcChecksum\n"));
-    }
+  Status = PatcherApplyGenericPatch (Patcher, &mAppleRtcChecksumPatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.AppleRTC DisableRtcChecksum - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to find com.apple.driver.AppleRTC for DisableRtcChecksum - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.AppleRTC DisableRtcChecksum\n"));
   }
 
   return Status;
+}
+
+//
+// Quirks table.
+//
+KERNEL_QUIRK gKernelQuirks[] = {
+  [KernelQuirkAppleCpuPmCfgLock] = { "com.apple.driver.AppleIntelCPUPowerManagement", PatchAppleCpuPmCfgLock }, 
+  [KernelQuirkAppleXcpmCfgLock] = { NULL, PatchAppleXcpmCfgLock },
+  [KernelQuirkAppleXcpmExtraMsrs] = { NULL, PatchAppleXcpmExtraMsrs },
+  [KernelQuirkAppleXcpmForceBoost] = { NULL, PatchAppleXcpmForceBoost },
+  [KernelQuirkCustomSmbiosGuid1] = { "com.apple.driver.AppleSMBIOS", PatchCustomSmbiosGuid },
+  [KernelQuirkCustomSmbiosGuid2] = { "com.apple.driver.AppleACPIPlatform", PatchCustomSmbiosGuid },
+  [KernelQuirkDisableIoMapper] = { "com.apple.iokit.IOPCIFamily", PatchAppleIoMapperSupport },
+  [KernelQuirkDisableRtcChecksum] = { "com.apple.driver.AppleRTC", PatchAppleRtcChecksum },
+  [KernelQuirkDummyPowerManagement] = { "com.apple.driver.AppleIntelCPUPowerManagement", PatchDummyPowerManagement },
+  [KernelQuirkExternalDiskIcons] = { "com.apple.driver.AppleAHCIPort", PatchForceInternalDiskIcons },
+  [KernelQuirkIncreasePciBarSize] = { "com.apple.iokit.IOPCIFamily", PatchIncreasePciBarSize },
+  [KernelQuirkLapicKernelPanic] = { NULL, PatchLapicKernelPanic },
+  [KernelQuirkPanicNoKextDump] = { NULL, PatchPanicKextDump },
+  [KernelQuirkPowerTimeoutKernelPanic] = { NULL, PatchPowerStateTimeout },
+  [KernelQuirkThirdPartyDrives] = { "com.apple.iokit.IOAHCIBlockStorage", PatchThirdPartyDriveSupport },
+  [KernelQuirkXhciPortLimit1] = { "com.apple.iokit.IOUSBHostFamily", PatchUsbXhciPortLimit1 },
+  [KernelQuirkXhciPortLimit2] = { "com.apple.driver.usb.AppleUSBXHCI", PatchUsbXhciPortLimit2 },
+  [KernelQuirkXhciPortLimit3] = { "com.apple.driver.usb.AppleUSBXHCIPCI", PatchUsbXhciPortLimit3 },
+};
+
+EFI_STATUS
+KernelQuirkApply (
+  IN     KERNEL_QUIRK_NAME  Name,
+  IN OUT PATCHER_CONTEXT    *Patcher
+  )
+{
+  ASSERT (Patcher != NULL);
+
+  return gKernelQuirks[Name].PatchFunction (Patcher);
 }

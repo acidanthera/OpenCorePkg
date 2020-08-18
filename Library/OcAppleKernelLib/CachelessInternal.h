@@ -90,6 +90,54 @@ typedef struct {
 } CACHELESS_KEXT;
 
 //
+// Kext patch.
+//
+typedef struct {
+  //
+  // Signature.
+  //
+  UINT32                  Signature;
+  //
+  // Link for global list (PATCHED_BUILTIN_KEXT -> Patches).
+  //
+  LIST_ENTRY              Link;
+  //
+  // Generic patch.
+  //
+  PATCHER_GENERIC_PATCH   Patch;
+  //
+  // Apply Quirk instead of Patch.
+  //
+  BOOLEAN                 ApplyQuirk;
+  //
+  // Kernel quirk to apply.
+  //
+  KERNEL_QUIRK_NAME       QuirkName;
+} KEXT_PATCH;
+
+//
+// Built-in kext in SLE requiring patches.
+//
+typedef struct {
+  //
+  // Signature.
+  //
+  UINT32              Signature;
+  //
+  // Link for global list (CACHELESS_CONTEXT -> PatchedKexts).
+  //
+  LIST_ENTRY          Link;
+  //
+  // Bundle ID.
+  //
+  CHAR8               *BundleId;
+  //
+  // List of patches to apply.
+  //
+  LIST_ENTRY          Patches;
+} PATCHED_KEXT;
+
+//
 // Built-in kexts in SLE.
 //
 typedef struct {
@@ -113,6 +161,10 @@ typedef struct {
   // Binary file name.
   //
   CHAR16              *BinaryFileName;
+  //
+  // Binary file path.
+  //
+  CHAR16              *BinaryPath;
   //
   // Dependencies.
   //
@@ -168,12 +220,48 @@ typedef struct {
     ))
 
 //
+// KEXT_PATCH signature for list identification.
+//
+#define KEXT_PATCH_SIGNATURE  SIGNATURE_32 ('K', 'x', 't', 'P')
+
+/**
+  Gets the next element in Patches list of KEXT_PATCH.
+
+  @param[in] This  The current ListEntry.
+**/
+#define GET_KEXT_PATCH_FROM_LINK(This)  \
+  (CR (                                 \
+    (This),                             \
+    KEXT_PATCH,                         \
+    Link,                               \
+    KEXT_PATCH_SIGNATURE                \
+    ))
+
+//
+// PATCHED_KEXT signature for list identification.
+//
+#define PATCHED_KEXT_SIGNATURE  SIGNATURE_32 ('S', 'l', 'e', 'P')
+
+/**
+  Gets the next element in PatchedKexts list of PATCHED_KEXT.
+
+  @param[in] This  The current ListEntry.
+**/
+#define GET_PATCHED_KEXT_FROM_LINK(This)  \
+  (CR (                                   \
+    (This),                               \
+    PATCHED_KEXT,                         \
+    Link,                                 \
+    PATCHED_KEXT_SIGNATURE                \
+    ))
+
+//
 // BUILTIN_KEXT signature for list identification.
 //
 #define BUILTIN_KEXT_SIGNATURE  SIGNATURE_32 ('S', 'l', 'e', 'B')
 
 /**
-  Gets the next element in BuiltInKexts list of CACHELESS_KEXT.
+  Gets the next element in BuiltInKexts list of BUILTIN_KEXT.
 
   @param[in] This  The current ListEntry.
 **/

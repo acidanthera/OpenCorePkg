@@ -222,17 +222,47 @@ OcKernelLoadKextsAndReserve (
 }
 
 STATIC
+EFI_STATUS
+OcKernelApplyQuirk (
+  IN     KERNEL_QUIRK_NAME  Quirk,
+  IN     KERNEL_CACHE_TYPE  CacheType,
+  IN OUT VOID               *Context,
+  IN OUT PATCHER_CONTEXT    *KernelPatcher
+  )
+{
+  //
+  // Apply kernel quirks to kernel, kext patches to context.
+  //
+  if (Context == NULL) {
+    ASSERT (KernelPatcher != NULL);
+
+    return KernelQuirkApply (Quirk, KernelPatcher);
+  } else {
+    if (CacheType == CacheTypeCacheless) {
+      return CachelessContextAddQuirk ((CACHELESS_CONTEXT *) Context, Quirk);
+    } else if (CacheType == CacheTypeMkext) {
+      return MkextContextApplyQuirk ((MKEXT_CONTEXT *) Context, Quirk);
+    } else if (CacheType == CacheTypePrelinked) {
+      return PrelinkedContextApplyQuirk ((PRELINKED_CONTEXT *) Context, Quirk);
+    }
+  }
+
+  return EFI_UNSUPPORTED;
+}
+
+STATIC
 VOID
 OcKernelApplyPatches (
   IN     OC_GLOBAL_CONFIG  *Config,
   IN     UINT32            DarwinVersion,
-  IN     PRELINKED_CONTEXT *Context,
+  IN     KERNEL_CACHE_TYPE CacheType,
+  IN     VOID              *Context,
   IN OUT UINT8             *Kernel,
   IN     UINT32            Size
   )
 {
   EFI_STATUS             Status;
-  PATCHER_CONTEXT        Patcher;
+  PATCHER_CONTEXT        KernelPatcher;
   UINT32                 Index;
   PATCHER_GENERIC_PATCH  Patch;
   OC_KERNEL_PATCH_ENTRY  *UserPatch;
@@ -248,7 +278,7 @@ OcKernelApplyPatches (
     ASSERT (Kernel != NULL);
 
     Status = PatcherInitContextFromBuffer (
-      &Patcher,
+      &KernelPatcher,
       Kernel,
       Size
       );
@@ -283,21 +313,6 @@ OcKernelApplyPatches (
         MaxKernel
         ));
       continue;
-    }
-
-    if (!IsKernelPatch) {
-      Status = PatcherInitContextFromPrelinked (
-        &Patcher,
-        Context,
-        Target
-        );
-
-      if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_WARN, "OC: Kernel patcher %a (%a) init failure - %r\n", Target, Comment, Status));
-        continue;
-      } else {
-        DEBUG ((DEBUG_INFO, "OC: Kernel patcher %a (%a) init succeed\n", Target, Comment));
-      }
     }
 
     //
@@ -344,7 +359,18 @@ OcKernelApplyPatches (
     Patch.Skip    = UserPatch->Skip;
     Patch.Limit   = UserPatch->Limit;
 
-    Status = PatcherApplyGenericPatch (&Patcher, &Patch);
+    if (IsKernelPatch) {
+      Status = PatcherApplyGenericPatch (&KernelPatcher, &Patch);
+    } else {
+      if (CacheType == CacheTypeCacheless) {
+        Status = CachelessContextAddPatch ((CACHELESS_CONTEXT *) Context, Target, &Patch);
+      } else if (CacheType == CacheTypeMkext) {
+        Status = MkextContextApplyPatch ((MKEXT_CONTEXT *) Context, Target, &Patch);
+      } else if (CacheType == CacheTypePrelinked) {
+        Status = PrelinkedContextApplyPatch ((PRELINKED_CONTEXT *) Context, Target, &Patch);
+      }
+    }
+
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
       "OC: Kernel patcher result %u for %a (%a) - %r\n",
@@ -357,55 +383,58 @@ OcKernelApplyPatches (
 
   if (!IsKernelPatch) {
     if (Config->Kernel.Quirks.AppleCpuPmCfgLock) {
-      PatchAppleCpuPmCfgLock (Context);
+      OcKernelApplyQuirk (KernelQuirkAppleCpuPmCfgLock, CacheType, Context, NULL);
     }
 
     if (Config->Kernel.Quirks.ExternalDiskIcons) {
-      PatchForceInternalDiskIcons (Context);
+      OcKernelApplyQuirk (KernelQuirkExternalDiskIcons, CacheType, Context, NULL);
     }
 
     if (Config->Kernel.Quirks.ThirdPartyDrives) {
-      PatchThirdPartyDriveSupport (Context);
+      OcKernelApplyQuirk (KernelQuirkThirdPartyDrives, CacheType, Context, NULL);
     }
 
     if (Config->Kernel.Quirks.XhciPortLimit) {
-      PatchUsbXhciPortLimit (Context);
+      OcKernelApplyQuirk (KernelQuirkXhciPortLimit1, CacheType, Context, NULL);
+      OcKernelApplyQuirk (KernelQuirkXhciPortLimit2, CacheType, Context, NULL);
+      OcKernelApplyQuirk (KernelQuirkXhciPortLimit3, CacheType, Context, NULL);
     }
 
     if (Config->Kernel.Quirks.DisableIoMapper) {
-      PatchAppleIoMapperSupport (Context);
+      OcKernelApplyQuirk (KernelQuirkDisableIoMapper, CacheType, Context, NULL);
     }
 
     if (Config->Kernel.Quirks.DisableRtcChecksum) {
-      PatchAppleRtcChecksum (Context);
+      OcKernelApplyQuirk (KernelQuirkDisableRtcChecksum, CacheType, Context, NULL);
     }
 
     if (Config->Kernel.Quirks.IncreasePciBarSize) {
-      PatchIncreasePciBarSize (Context);     
+      OcKernelApplyQuirk (KernelQuirkIncreasePciBarSize, CacheType, Context, NULL);     
     }
 
     if (Config->Kernel.Quirks.CustomSmbiosGuid) {
-      PatchCustomSmbiosGuid (Context);
+      OcKernelApplyQuirk (KernelQuirkCustomSmbiosGuid1, CacheType, Context, NULL);
+      OcKernelApplyQuirk (KernelQuirkCustomSmbiosGuid2, CacheType, Context, NULL);
     }
 
     if (Config->Kernel.Quirks.DummyPowerManagement) {
-      PatchDummyPowerManagement (Context);
+      OcKernelApplyQuirk (KernelQuirkDummyPowerManagement, CacheType, Context, NULL);
     }
   } else {
     if (Config->Kernel.Quirks.AppleXcpmCfgLock) {
-      PatchAppleXcpmCfgLock (&Patcher);
+      OcKernelApplyQuirk (KernelQuirkAppleXcpmCfgLock, CacheType, NULL, &KernelPatcher);
     }
 
     if (Config->Kernel.Quirks.AppleXcpmExtraMsrs) {
-      PatchAppleXcpmExtraMsrs (&Patcher);
+      OcKernelApplyQuirk (KernelQuirkAppleXcpmExtraMsrs, CacheType, NULL, &KernelPatcher);
     }
 
     if (Config->Kernel.Quirks.AppleXcpmForceBoost) {
-      PatchAppleXcpmForceBoost (&Patcher);
+      OcKernelApplyQuirk (KernelQuirkAppleXcpmForceBoost, CacheType, NULL, &KernelPatcher);
     }
 
     if (Config->Kernel.Quirks.PanicNoKextDump) {
-      PatchPanicKextDump (&Patcher);
+      OcKernelApplyQuirk (KernelQuirkPanicNoKextDump, CacheType, NULL, &KernelPatcher);
     }
 
     if (Config->Kernel.Emulate.Cpuid1Data[0] != 0
@@ -413,7 +442,7 @@ OcKernelApplyPatches (
       || Config->Kernel.Emulate.Cpuid1Data[2] != 0
       || Config->Kernel.Emulate.Cpuid1Data[3] != 0) {
       PatchKernelCpuId (
-        &Patcher,
+        &KernelPatcher,
         mOcCpuInfo,
         Config->Kernel.Emulate.Cpuid1Data,
         Config->Kernel.Emulate.Cpuid1Mask
@@ -421,11 +450,11 @@ OcKernelApplyPatches (
     }
 
     if (Config->Kernel.Quirks.LapicKernelPanic) {
-      PatchLapicKernelPanic (&Patcher);
+      OcKernelApplyQuirk (KernelQuirkLapicKernelPanic, CacheType, NULL, &KernelPatcher);
     }
 
     if (Config->Kernel.Quirks.PowerTimeoutKernelPanic) {
-      PatchPowerStateTimeout (&Patcher);
+      OcKernelApplyQuirk (KernelQuirkPowerTimeoutKernelPanic, CacheType, NULL, &KernelPatcher);
     }
   }
 }
@@ -522,7 +551,7 @@ OcKernelProcessPrelinked (
   Status = PrelinkedContextInit (&Context, Kernel, *KernelSize, AllocatedSize);
 
   if (!EFI_ERROR (Status)) {
-    OcKernelApplyPatches (Config, DarwinVersion, &Context, NULL, 0);
+    OcKernelApplyPatches (Config, DarwinVersion, CacheTypePrelinked, &Context, NULL, 0);
 
     OcKernelBlockKexts (Config, DarwinVersion, &Context);
 
@@ -639,6 +668,8 @@ OcKernelProcessMkext (
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
+  OcKernelApplyPatches (Config, DarwinVersion, CacheTypeMkext, &Context, NULL, 0);
 
   for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
     Kext = Config->Kernel.Add.Values[Index];
@@ -768,6 +799,11 @@ OcKernelInitCacheless (
     }
   }
 
+  //
+  // Process patches and blocks.
+  //
+  OcKernelApplyPatches (Config, DarwinVersion, CacheTypeCacheless, Context, NULL, 0);
+
   return CachelessContextOverlayExtensionsDir (Context, File);
 }
 
@@ -884,7 +920,7 @@ OcKernelFileOpen (
 
     if (!EFI_ERROR (Status)) {
       mOcDarwinVersion = OcKernelReadDarwinVersion (Kernel, KernelSize);
-      OcKernelApplyPatches (mOcConfiguration, mOcDarwinVersion, NULL, Kernel, KernelSize);
+      OcKernelApplyPatches (mOcConfiguration, mOcDarwinVersion, 0, NULL, Kernel, KernelSize);
 
       PrelinkedStatus = OcKernelProcessPrelinked (
         mOcConfiguration,
