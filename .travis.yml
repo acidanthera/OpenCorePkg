@@ -40,6 +40,7 @@ matrix:
         - nasm
         - uuid-dev
         - libssl-dev
+        - iasl
 
     script:
     - export PYTHON_COMMAND=python3 # Something is broken in Travis CI environment, it asks for python3.7.
@@ -62,6 +63,7 @@ matrix:
         packages:
         - nasm
         - uuid-dev
+        - iasl
         - clang-8
         - llvm-8-dev
 
@@ -86,6 +88,7 @@ matrix:
     - HAS_OPENSSL_BUILD=0
     - choco install python
     - choco install microsoft-build-tools visualcpp-build-tools make nasm zip
+    - choco install iasl --version=2017.11.10
     - "./build_duet.tool"
     - "./build_oc.tool"
 
