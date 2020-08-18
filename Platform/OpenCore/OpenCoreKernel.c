@@ -869,10 +869,13 @@ OcKernelFileOpen (
   // boot.efi uses /S/L/K/kernel as is to determine valid filesystem.
   // Just skip it to speedup the boot process.
   // On 10.9 mach_kernel is loaded for manual linking aferwards, so we cannot skip it.
+  // We also want to skip files named "kernel" that are part of kext bundles, and im4m.
   //
   if (OpenMode == EFI_FILE_MODE_READ
     && OcStriStr (FileName, L"kernel") != NULL
-    && StrCmp (FileName, L"System\\Library\\Kernels\\kernel") != 0) {
+    && StrCmp (FileName, L"System\\Library\\Kernels\\kernel") != 0
+    && OcStriStr (FileName, L".kext") == NULL
+    && OcStriStr (FileName, L".im4m") == NULL) {
 
     OcKernelLoadKextsAndReserve (
       mOcStorage,
