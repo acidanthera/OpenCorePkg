@@ -235,6 +235,8 @@ InternalCachedMkextKext (
   MKEXT_KEXT          *MkextKext;
   LIST_ENTRY          *KextLink;
   UINT32              Index;
+  UINT32              PlistOffsetSize;
+  UINT32              BinOffsetSize;
   BOOLEAN             IsKextMatch;
 
   UINT32              PlistOffset;
@@ -293,6 +295,16 @@ InternalCachedMkextKext (
       PlistSize     = SwapBytes32 (MkextHeader->V1.Kexts[Index].Plist.FullSize);
       KextBinOffset = SwapBytes32 (MkextHeader->V1.Kexts[Index].Binary.Offset);
       KextBinSize   = SwapBytes32 (MkextHeader->V1.Kexts[Index].Binary.FullSize);
+
+      //
+      // Verify plist and binary are within bounds.
+      //
+      if (OcOverflowAddU32 (PlistOffset, PlistSize, &PlistOffsetSize)
+        || PlistOffsetSize > Context->MkextSize
+        || OcOverflowAddU32 (KextBinOffset, KextBinSize, &BinOffsetSize)
+        || BinOffsetSize > Context->MkextSize) {
+        return NULL;
+      }
 
       PlistBuffer = AllocateCopyPool (PlistSize, &Context->Mkext[PlistOffset]);
       if (PlistBuffer == NULL) {
@@ -380,7 +392,10 @@ InternalCachedMkextKext (
         }
       }
 
-      if (KextBundleId != NULL && AsciiStrCmp (KextBundleId, BundleId) == 0 && KextBinOffset > 0) {
+      if (KextBundleId != NULL
+        && AsciiStrCmp (KextBundleId, BundleId) == 0
+        && KextBinOffset > 0
+        && KextBinOffset < Context->MkextSize - sizeof (MKEXT_V2_FILE_ENTRY)) {
         IsKextMatch = TRUE;
         break;
       }
@@ -406,6 +421,14 @@ InternalCachedMkextKext (
     }
     KextBinOffset += OFFSET_OF (MKEXT_V2_FILE_ENTRY, Data);
     KextBinSize   = SwapBytes32 (MkextV2FileEntry->FullSize);
+
+    //
+    // Ensure binary is within mkext bounds.
+    //
+    if (OcOverflowAddU32 (KextBinOffset, KextBinSize, &BinOffsetSize)
+      || BinOffsetSize > Context->MkextSize) {
+      return NULL;
+    }
 
   //
   // Unsupported version.
