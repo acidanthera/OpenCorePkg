@@ -1351,9 +1351,7 @@ MkextContextApplyQuirk (
   ASSERT (Context != NULL);
 
   KernelQuirk = &gKernelQuirks[Quirk];
-  if (KernelQuirk->BundleId == NULL) {
-    return EFI_INVALID_PARAMETER;
-  }
+  ASSERT (KernelQuirk->BundleId != NULL);
 
   Status = PatcherInitContextFromMkext (&Patcher, Context, KernelQuirk->BundleId);
   if (EFI_ERROR (Status)) {

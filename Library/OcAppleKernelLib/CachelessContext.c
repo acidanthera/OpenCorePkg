@@ -27,6 +27,7 @@
 #include <Library/OcVirtualFsLib.h>
 
 #include "CachelessInternal.h"
+#include "PrelinkedInternal.h"
 
 STATIC
 VOID
@@ -579,39 +580,11 @@ ScanDependencies (
 }
 
 STATIC
-VOID
-FreeGenericPatch (
-  PATCHER_GENERIC_PATCH       *Patch
-  )
-{
-  if (Patch->Comment != NULL) {
-    FreePool ((VOID*)Patch->Comment);
-  }
-  if (Patch->Base != NULL) {
-    FreePool ((VOID*)Patch->Base);
-  }
-  if (Patch->Find != NULL) {
-    FreePool ((VOID*)Patch->Find);
-  }
-  if (Patch->Replace != NULL) {
-    FreePool ((VOID*)Patch->Replace);
-  }
-  if (Patch->Mask != NULL) {
-    FreePool ((VOID*)Patch->Mask);
-  }
-  if (Patch->ReplaceMask != NULL) {
-    FreePool ((VOID*)Patch->ReplaceMask);
-  }
-
-  ZeroMem (Patch, sizeof (*Patch));
-}
-
-STATIC
 EFI_STATUS
 InternalAddKextPatch (
   IN OUT CACHELESS_CONTEXT      *Context,
   IN     CONST CHAR8            *BundleId,
-  IN     PATCHER_GENERIC_PATCH  *Patch,
+  IN     PATCHER_GENERIC_PATCH  *Patch OPTIONAL,
   IN     KERNEL_QUIRK_NAME      QuirkName
   )
 {
@@ -621,9 +594,7 @@ InternalAddKextPatch (
 
   if (Patch == NULL) {
     KernelQuirk = &gKernelQuirks[QuirkName];
-    if (KernelQuirk->BundleId == NULL) {
-      return EFI_INVALID_PARAMETER;
-    }
+    ASSERT (KernelQuirk->BundleId != NULL);
 
     BundleId = KernelQuirk->BundleId;
   }
@@ -659,53 +630,7 @@ InternalAddKextPatch (
   KextPatch->Signature = KEXT_PATCH_SIGNATURE;
 
   if (Patch != NULL) {
-    if (Patch->Comment != NULL) {
-      KextPatch->Patch.Comment = AllocateCopyPool (AsciiStrSize (Patch->Comment), Patch->Comment);
-      if (KextPatch->Patch.Comment == NULL) {
-        FreeGenericPatch (&KextPatch->Patch);
-        return EFI_OUT_OF_RESOURCES;
-      }
-    }
-    if (Patch->Base != NULL) {
-      KextPatch->Patch.Base = AllocateCopyPool (AsciiStrSize (Patch->Base), Patch->Base);
-      if (KextPatch->Patch.Base == NULL) {
-        FreeGenericPatch (&KextPatch->Patch);
-        return EFI_OUT_OF_RESOURCES;
-      }
-    }
-    if (Patch->Find != NULL) {
-      KextPatch->Patch.Find = AllocateCopyPool (Patch->Size, Patch->Find);
-      if (KextPatch->Patch.Find == NULL) {
-        FreeGenericPatch (&KextPatch->Patch);
-        return EFI_OUT_OF_RESOURCES;
-      }
-    }
-    if (Patch->Replace != NULL) {
-      KextPatch->Patch.Replace = AllocateCopyPool (Patch->Size, Patch->Replace);
-      if (KextPatch->Patch.Replace == NULL) {
-        FreeGenericPatch (&KextPatch->Patch);
-        return EFI_OUT_OF_RESOURCES;
-      }
-    }
-    if (Patch->Mask != NULL) {
-      KextPatch->Patch.Mask = AllocateCopyPool (Patch->Size, Patch->Mask);
-      if (KextPatch->Patch.Mask == NULL) {
-        FreeGenericPatch (&KextPatch->Patch);
-        return EFI_OUT_OF_RESOURCES;
-      }
-    }
-    if (Patch->ReplaceMask != NULL) {
-      KextPatch->Patch.ReplaceMask = AllocateCopyPool (Patch->Size, Patch->ReplaceMask);
-      if (KextPatch->Patch.ReplaceMask == NULL) {
-        FreeGenericPatch (&KextPatch->Patch);
-        return EFI_OUT_OF_RESOURCES;
-      }
-    }
-
-    KextPatch->Patch.Size   = Patch->Size;
-    KextPatch->Patch.Count  = Patch->Count;
-    KextPatch->Patch.Skip   = Patch->Skip;
-    KextPatch->Patch.Limit  = Patch->Limit;
+    CopyMem (&KextPatch->Patch, Patch, sizeof (KextPatch->Patch));
 
   } else {
     //
@@ -785,7 +710,6 @@ CachelessContextFree (
       KextPatch = GET_KEXT_PATCH_FROM_LINK (PatchLink);
       RemoveEntryList (PatchLink);
 
-      FreeGenericPatch (&KextPatch->Patch);
       FreePool (KextPatch);
     }
 

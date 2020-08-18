@@ -505,11 +505,6 @@ typedef struct {
   KERNEL_QUIRK_PATCH_FUNCTION   *PatchFunction;
 } KERNEL_QUIRK;
 
-//
-// Kernel quirks array.
-//
-extern KERNEL_QUIRK gKernelQuirks[];
-
 /**
   Applies the specified quirk.
 
@@ -522,7 +517,7 @@ EFI_STATUS
 KernelQuirkApply (
   IN     KERNEL_QUIRK_NAME  Name,
   IN OUT PATCHER_CONTEXT    *Patcher
- );
+  );
 
 /**
   Read Apple kernel for target architecture (possibly decompressing)

@@ -69,4 +69,4 @@ InternalCachedMkextKext (
   IN     CONST CHAR8        *BundleId
   );
 
-#endif
+#endif // MKEXT_INTERNAL_H

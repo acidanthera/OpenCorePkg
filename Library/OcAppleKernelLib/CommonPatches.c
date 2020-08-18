@@ -1772,7 +1772,7 @@ EFI_STATUS
 KernelQuirkApply (
   IN     KERNEL_QUIRK_NAME  Name,
   IN OUT PATCHER_CONTEXT    *Patcher
- )
+  )
 {
   ASSERT (Patcher != NULL);
 
