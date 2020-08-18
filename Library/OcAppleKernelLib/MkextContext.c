@@ -506,6 +506,8 @@ MkextDecompress (
     return EFI_INVALID_PARAMETER;
   }
 
+  MkextHeaderOut = NULL;
+
   //
   // Mkext v1.
   //
@@ -1132,6 +1134,8 @@ MkextInjectKext (
   ASSERT (BundlePath != NULL);
   ASSERT (InfoPlist != NULL);
   ASSERT (InfoPlistSize > 0);
+
+  BinOffset = 0;
 
   //
   // Mkext v1.
