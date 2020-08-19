@@ -18,6 +18,7 @@ OpenCore Changelog
 - Added 64-bit cacheless kext injection and patching support (macOS 10.9 and earlier)
 - Added 64-bit mkext kext injection and patching support (macOS 10.6 and earlier)
 - Fixed XNU hook matching non-kernel files
+- Updated builtin firmware versions for SMBIOS and the rest
 
 #### v0.6.0
 - Fixed sound corruption with AudioDxe
