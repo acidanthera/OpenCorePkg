@@ -1056,6 +1056,7 @@ CachelessContextPerformInject (
   CACHELESS_KEXT      *Kext;
   LIST_ENTRY          *KextLink;
 
+  BOOLEAN             IsBinaryKext;
   CHAR16              *BundleName;
   CHAR16              *KextExtension;
   CHAR16              *BundlePath;
@@ -1093,6 +1094,8 @@ CachelessContextPerformInject (
   while (!IsNull (&Context->InjectedKexts, KextLink)) {
     Kext = GET_CACHELESS_KEXT_FROM_LINK (KextLink);
     if (StrnCmp (BundleName, Kext->BundleFileName, BundleLength) == 0) {
+      IsBinaryKext = Kext->BinaryFileName != NULL;
+
       //
       // Contents is being requested.
       //
@@ -1105,57 +1108,51 @@ CachelessContextPerformInject (
           return Status;
         }
 
-        ContentsInfoEntrySize   = SIZE_OF_EFI_FILE_INFO + L_STR_SIZE (L"Info.plist");
-        ContentsMacOsEntrySize  = SIZE_OF_EFI_FILE_INFO + L_STR_SIZE (L"MacOS");
-
         //
         // Create Info.plist directory entry.
         //
+        ContentsInfoEntrySize   = SIZE_OF_EFI_FILE_INFO + L_STR_SIZE (L"Info.plist");
         ContentsInfo = AllocateZeroPool (ContentsInfoEntrySize);
         if (ContentsInfo == NULL) {
           VirtualDirFree (VirtualFileHandle);
           return EFI_OUT_OF_RESOURCES;
         }
+
         ContentsInfo->Size = ContentsInfoEntrySize;
         CopyMem (ContentsInfo->FileName, L"Info.plist", L_STR_SIZE (L"Info.plist"));
         ContentsInfo->Attribute = EFI_FILE_READ_ONLY;
         ContentsInfo->PhysicalSize = ContentsInfo->FileSize = Kext->PlistDataSize;
-
-        //
-        // Create MacOS directory entry.
-        //
-        ContentsMacOs = AllocateZeroPool (ContentsMacOsEntrySize);
-        if (ContentsMacOs == NULL) {
-          FreePool (ContentsInfo);
-          VirtualDirFree (VirtualFileHandle);
-          return EFI_OUT_OF_RESOURCES;
-        }
-        ContentsMacOs->Size = ContentsMacOsEntrySize;
-        CopyMem (ContentsMacOs->FileName, L"MacOS", L_STR_SIZE (L"MacOS"));
-        ContentsMacOs->Attribute = EFI_FILE_READ_ONLY | EFI_FILE_DIRECTORY;
-        if (OcOverflowAddU64 (SIZE_OF_EFI_FILE_INFO, StrSize (Kext->BinaryFileName), &ContentsMacOs->FileSize)) {
-          FreePool (ContentsInfo);
-          VirtualDirFree (VirtualFileHandle);
-          return EFI_INVALID_PARAMETER;
-        }
-        ContentsMacOs->PhysicalSize = ContentsMacOs->FileSize;
-
         VirtualDirAddEntry (VirtualFileHandle, ContentsInfo);
-        VirtualDirAddEntry (VirtualFileHandle, ContentsMacOs);
+
+        if (IsBinaryKext) {
+          //
+          // Create MacOS directory entry.
+          //
+          ContentsMacOsEntrySize  = SIZE_OF_EFI_FILE_INFO + L_STR_SIZE (L"MacOS");
+          ContentsMacOs = AllocateZeroPool (ContentsMacOsEntrySize);
+          if (ContentsMacOs == NULL) {
+            FreePool (ContentsInfo);
+            VirtualDirFree (VirtualFileHandle);
+            return EFI_OUT_OF_RESOURCES;
+          }
+
+          ContentsMacOs->Size = ContentsMacOsEntrySize;
+          CopyMem (ContentsMacOs->FileName, L"MacOS", L_STR_SIZE (L"MacOS"));
+          ContentsMacOs->Attribute = EFI_FILE_READ_ONLY | EFI_FILE_DIRECTORY;
+          if (OcOverflowAddU64 (SIZE_OF_EFI_FILE_INFO, StrSize (Kext->BinaryFileName), &ContentsMacOs->FileSize)) {
+            FreePool (ContentsInfo);
+            VirtualDirFree (VirtualFileHandle);
+            return EFI_INVALID_PARAMETER;
+          }
+          ContentsMacOs->PhysicalSize = ContentsMacOs->FileSize;
+          VirtualDirAddEntry (VirtualFileHandle, ContentsMacOs);
+        }
 
       } else {
-        if (OcOverflowAddUN (L_STR_SIZE (L"\\Contents\\MacOS\\"), StrSize (Kext->BinaryFileName), &BundleBinaryPathSize)) {
-          return EFI_OUT_OF_RESOURCES;
-        }
-        BundleBinaryPath = AllocateZeroPool (BundleBinaryPathSize);
-        StrCatS (BundleBinaryPath, BundleBinaryPathSize / sizeof (CHAR16), L"\\Contents\\MacOS\\");
-        StrCatS (BundleBinaryPath, BundleBinaryPathSize / sizeof (CHAR16), Kext->BinaryFileName);
-
         //
         // Contents/Info.plist is being requested.
         //
         if (StrCmp (BundlePath, L"\\Contents\\Info.plist") == 0) {
-          // Get Info.plist.
           RealFileName = L"Info.plist";
           BufferSize = Kext->PlistDataSize;
           Buffer = AllocateCopyPool (BufferSize, Kext->PlistData);
@@ -1167,12 +1164,29 @@ CachelessContextPerformInject (
         // Contents/MacOS/BINARY is being requested.
         // It should be safe to assume there will only be one binary ever requested per kext?
         //
-        } else if (StrCmp (BundlePath, BundleBinaryPath) == 0) {
-          RealFileName = Kext->BinaryFileName;
-          BufferSize = Kext->BinaryDataSize;
-          Buffer = AllocateCopyPool (BufferSize, Kext->BinaryData);
-          if (Buffer == NULL) {
+        } else if (IsBinaryKext) {
+          if (OcOverflowAddUN (L_STR_SIZE (L"\\Contents\\MacOS\\"), StrSize (Kext->BinaryFileName), &BundleBinaryPathSize)) {
             return EFI_OUT_OF_RESOURCES;
+          }
+          BundleBinaryPath = AllocateZeroPool (BundleBinaryPathSize);
+          if (BundleBinaryPath == NULL) {
+            return EFI_OUT_OF_RESOURCES;
+          }
+          StrCatS (BundleBinaryPath, BundleBinaryPathSize / sizeof (CHAR16), L"\\Contents\\MacOS\\");
+          StrCatS (BundleBinaryPath, BundleBinaryPathSize / sizeof (CHAR16), Kext->BinaryFileName);
+
+          if (StrCmp (BundlePath, BundleBinaryPath) == 0) {
+            FreePool (BundleBinaryPath);
+
+            RealFileName = Kext->BinaryFileName;
+            BufferSize = Kext->BinaryDataSize;
+            Buffer = AllocateCopyPool (BufferSize, Kext->BinaryData);
+            if (Buffer == NULL) {
+              return EFI_OUT_OF_RESOURCES;
+            }
+          } else {
+            FreePool (BundleBinaryPath);
+            return EFI_NOT_FOUND;
           }
         } else {
           return EFI_NOT_FOUND;
