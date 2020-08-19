@@ -1273,11 +1273,12 @@ MkextInjectKext (
     //
     // Executable, if present, will be placed at end of mkext and plist will be moved further out.
     //
+    PlistOffset = Context->MkextInfoOffset;
     PlistFailed = FALSE;
     if (Executable != NULL) {
       ASSERT (ExecutableSize > 0);
       
-      BinOffset = Context->MkextInfoOffset;
+      BinOffset = PlistOffset;
       if (!ParseKextBinary (&Executable, &ExecutableSize, Context->Is64Bit)) {
         XmlDocumentFree (PlistXml);
         FreePool (PlistBuffer);
