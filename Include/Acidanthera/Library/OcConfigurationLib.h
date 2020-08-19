@@ -247,6 +247,7 @@
   _(BOOLEAN                     , DisableRtcChecksum          ,     , FALSE  , ()) \
   _(BOOLEAN                     , DummyPowerManagement        ,     , FALSE  , ()) \
   _(BOOLEAN                     , ExternalDiskIcons           ,     , FALSE  , ()) \
+  _(OC_STRING                   , ForceKernelCache            ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(BOOLEAN                     , IncreasePciBarSize          ,     , FALSE  , ()) \
   _(BOOLEAN                     , LapicKernelPanic            ,     , FALSE  , ()) \
   _(BOOLEAN                     , PanicNoKextDump             ,     , FALSE  , ()) \
@@ -483,7 +484,7 @@ typedef enum {
   _(UINT64                      , MinVersion         ,     , 0                             , ()) \
   _(UINT32                      , MinDate            ,     , 0                             , ()) \
   _(BOOLEAN                     , EnableJumpstart    ,     , FALSE                         , ()) \
-  _(BOOLEAN                     , GlobalConnect       ,     , FALSE                         , ()) \
+  _(BOOLEAN                     , GlobalConnect      ,     , FALSE                         , ()) \
   _(BOOLEAN                     , HideVerbose        ,     , FALSE                         , ()) \
   _(BOOLEAN                     , JumpstartHotPlug   ,     , FALSE                         , ())
   OC_DECLARE (OC_UEFI_APFS)
