@@ -652,13 +652,13 @@ CreateVirtualFileFileNameCopy (
 
   FileNameCopy = AllocateCopyPool (StrSize (FileName), FileName);
   if (FileNameCopy == NULL) {
-    DEBUG ((DEBUG_WARN, "OCVFS: Failed to allocate file name (%a) copy\n", FileName));
+    DEBUG ((DEBUG_WARN, "OCVFS: Failed to allocate file name (%s) copy\n", FileName));
     return EFI_OUT_OF_RESOURCES;
   }
 
   Status = CreateVirtualFile (FileNameCopy, FileBuffer, FileSize, ModificationTime, File);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OCVFS: Failed to virtualise file (%a)\n", FileName));
+    DEBUG ((DEBUG_WARN, "OCVFS: Failed to virtualise file (%s)\n", FileName));
     FreePool (FileNameCopy);
     return EFI_OUT_OF_RESOURCES;
   }

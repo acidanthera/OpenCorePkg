@@ -825,7 +825,6 @@ OcKernelFileOpen (
   UINT8              *Kernel;
   UINT32             KernelSize;
   UINT32             AllocatedSize;
-  CHAR16             *FileNameCopy;
   EFI_FILE_PROTOCOL  *VirtualFileHandle;
   EFI_STATUS         PrelinkedStatus;
   EFI_TIME           ModificationTime;
@@ -974,20 +973,12 @@ OcKernelFileOpen (
       (*NewHandle)->Close(*NewHandle);
 
       //
-      // This was our file, yet firmware is dying.
+      // Virtualise newly created kernel.
       //
-      FileNameCopy = AllocateCopyPool (StrSize (FileName), FileName);
-      if (FileNameCopy == NULL) {
-        DEBUG ((DEBUG_WARN, "OC: Failed to allocate kernel name (%a) copy\n", FileName));
-        FreePool (Kernel);
-        return EFI_OUT_OF_RESOURCES;
-      }
-
-      Status = CreateVirtualFile (FileNameCopy, Kernel, KernelSize, &ModificationTime, &VirtualFileHandle);
+      Status = CreateVirtualFileFileNameCopy (FileName, Kernel, KernelSize, &ModificationTime, &VirtualFileHandle);
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_WARN, "OC: Failed to virtualise kernel file (%a)\n", FileName));
+        DEBUG ((DEBUG_WARN, "OC: Failed to virtualise kernel file (%s) - %r\n", FileName, Status));
         FreePool (Kernel);
-        FreePool (FileNameCopy);
         return EFI_OUT_OF_RESOURCES;
       }
 
@@ -1059,9 +1050,12 @@ OcKernelFileOpen (
 
         (*NewHandle)->Close(*NewHandle);
 
+        //
+        // Virtualise newly created mkext.
+        //
         Status = CreateVirtualFileFileNameCopy (FileName, Kernel, KernelSize, &ModificationTime, &VirtualFileHandle);
         if (EFI_ERROR (Status)) {
-          DEBUG ((DEBUG_WARN, "OC: Failed to virtualise mkext file (%a) - %r\n", FileName, Status));
+          DEBUG ((DEBUG_WARN, "OC: Failed to virtualise mkext file (%s) - %r\n", FileName, Status));
           FreePool (Kernel);
           return EFI_OUT_OF_RESOURCES;
         }
