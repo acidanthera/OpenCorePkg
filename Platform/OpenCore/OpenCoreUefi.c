@@ -411,7 +411,7 @@ OcLoadAppleSecureBoot (
       return;
     }
 
-    Status = OcAppleSecureBootBootstrapValues (RealSecureBootModel);
+    Status = OcAppleSecureBootBootstrapValues (RealSecureBootModel, Config->Misc.Security.ApECID);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OC: Failed to bootstrap SB values - %r\n", Status));
       return;

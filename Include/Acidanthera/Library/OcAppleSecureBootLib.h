@@ -20,12 +20,14 @@
   Bootstrap NVRAM and library values for secure booting.
 
   @param[in] Model          Secure boot model (without ap suffix in lower-case).
+  @param[in] Ecid           Enclave identifier, optional.
 
   @retval EFI_SUCCESS  On success.
 **/
 EFI_STATUS
 OcAppleSecureBootBootstrapValues (
-  IN CONST CHAR8  *Model
+  IN CONST CHAR8  *Model,
+  IN UINT64       Ecid  OPTIONAL
   );
 
 /**
@@ -48,13 +50,21 @@ OcAppleSecureBootInstallProtocol (
   );
 
 /**
+  Obtain initialised Apple Secure Boot protocol.
+
+  @returns initialised protocol.
+**/
+APPLE_SECURE_BOOT_PROTOCOL *
+OcAppleSecureBootGetProtocol (
+  VOID
+  );
+
+/**
   Report DMG loading to Apple Secure Boot protocol.
 
   @param[in]  LoadingDmg  TRUE after loading DMG.
-
-  @retval EFI_SUCCESS on success.
 **/
-EFI_STATUS
+VOID
 OcAppleSecureBootSetDmgLoading (
   IN BOOLEAN  LoadingDmg
   );
@@ -67,6 +77,24 @@ OcAppleSecureBootSetDmgLoading (
 BOOLEAN
 OcAppleSecureBootGetDmgLoading (
   VOID
+  );
+
+/**
+  Perform image verification at path.
+
+  @param[in] DevicePath     Path to the image.
+  @param[in] SourceBuffer   Image contents.
+  @param[in] SourceSize     Image size.
+
+  @retval EFI_SUCCESS on success.
+  @retval EFI_SECURITY_VIOLATION when corrupted signature (should abort and die).
+  @retval EFI_ERROR when other errors happened (can continue with UEFI loader).
+**/
+EFI_STATUS
+OcAppleSecureBootVerify (
+  IN  EFI_DEVICE_PATH_PROTOCOL     *DevicePath,
+  IN  VOID                         *SourceBuffer,
+  IN  UINTN                        SourceSize
   );
 
 #endif // OC_APPLE_SECURE_BOOT_LIB_H
