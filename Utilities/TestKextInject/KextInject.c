@@ -447,6 +447,7 @@ int wrap_main(int argc, char** argv) {
   UINT8 Sha384[48];
   EFI_STATUS Status = ReadAppleKernel (
     &nilFilProtocol,
+    MachCpuTypeX8664,
     &NewPrelinked,
     &NewPrelinkedSize,
     &AllocSize,
