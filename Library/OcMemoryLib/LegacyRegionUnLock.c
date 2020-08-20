@@ -93,7 +93,7 @@ LegacyRegionUnlock (
 
     DEBUG ((
       DEBUG_INFO,
-      "Unlock LegacyRegion %0X-%0X - %r\n",
+      "OCMM: Unlock LegacyRegion %0X-%0X - %r\n",
       LegacyAddress,
       (LegacyAddress + (LegacyLength - 1)),
       Status
