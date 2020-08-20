@@ -47,4 +47,26 @@ OcAppleSecureBootInstallProtocol (
   IN BOOLEAN  SbWinPolicyValid
   );
 
+/**
+  Report DMG loading to Apple Secure Boot protocol.
+
+  @param[in]  LoadingDmg  TRUE after loading DMG.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcAppleSecureBootSetDmgLoading (
+  IN BOOLEAN  LoadingDmg
+  );
+
+/**
+  Get DMG loading status on Apple Secure Boot protocol.
+
+  @retval TRUE when loading DMG.
+**/
+BOOLEAN
+OcAppleSecureBootGetDmgLoading (
+  VOID
+  );
+
 #endif // OC_APPLE_SECURE_BOOT_LIB_H
