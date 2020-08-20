@@ -145,6 +145,9 @@ ParseFatArchitecture (
   UINT32            FileSize;
 
   Status = GetFileSize (File, &FileSize);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
   if (BufferSize >= FileSize) {
     return EFI_INVALID_PARAMETER;
   }
