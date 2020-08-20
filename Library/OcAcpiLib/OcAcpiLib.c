@@ -572,7 +572,7 @@ AcpiInitContext (
         Context->Tables[DstIndex]->Signature,
         Context->Tables[DstIndex]
         ));
-      LegacyRegionUnlock ((UINTN)Context->Tables[DstIndex], Context->Tables[DstIndex]->Length);
+      LegacyRegionUnlock ((UINT32)Context->Tables[DstIndex], Context->Tables[DstIndex]->Length);
     }
 
     if (Context->Tables[DstIndex]->Signature == EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE_SIGNATURE) {
