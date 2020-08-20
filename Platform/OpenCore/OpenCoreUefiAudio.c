@@ -114,9 +114,6 @@ OcAudioAcquireFile (
         case OcVoiceOverAudioFileDefault:
           BasePath = "Default";
           break;
-        case OcVoiceOverAudioFileDiskImage:
-          BasePath = "DiskImage";
-          break;
         case OcVoiceOverAudioFileEnterPassword:
           BasePath = "EnterPassword";
           break;

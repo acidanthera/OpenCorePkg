@@ -188,9 +188,6 @@ OcShowSimpleBootMenu (
       gST->ConOut->OutputString (gST->ConOut, Code);
       gST->ConOut->OutputString (gST->ConOut, L". ");
       gST->ConOut->OutputString (gST->ConOut, BootEntries[Index]->Name);
-      if (BootEntries[Index]->IsFolder) {
-        gST->ConOut->OutputString (gST->ConOut, OC_MENU_DISK_IMAGE);
-      }
       if (BootEntries[Index]->IsExternal) {
         gST->ConOut->OutputString (gST->ConOut, OC_MENU_EXTERNAL);
       }

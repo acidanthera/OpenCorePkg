@@ -142,7 +142,10 @@ int verifyImg4 (char *imageName, char *manifestName, char *type)
     return -1;
   }
 
-  printf("ManInfo.imageDigestSize %zu\n", ManInfo.imageDigestSize);
+  printf("ManInfo.imageDigestSize %02X%02X%02X%02X %zu\n",
+    ManInfo.imageDigest[0], ManInfo.imageDigest[1],
+    ManInfo.imageDigest[2], ManInfo.imageDigest[3],
+    ManInfo.imageDigestSize);
 
   INTN CmpResult = SigVerifyShaHashBySize (
                      Image,

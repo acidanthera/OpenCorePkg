@@ -44,7 +44,6 @@ typedef struct OC_PICKER_CONTEXT_ OC_PICKER_CONTEXT;
 #define OC_MENU_RELOADING            L"Reloading"
 #define OC_MENU_TIMEOUT              L"Timeout"
 #define OC_MENU_OK                   L"OK"
-#define OC_MENU_DISK_IMAGE           L" (dmg)"
 #define OC_MENU_EXTERNAL             L" (external)"
 
 /**

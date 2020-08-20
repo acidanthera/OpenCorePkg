@@ -177,6 +177,10 @@ OcPlayAudioEntry (
 {
   OcPlayAudioFile (Context, OcVoiceOverAudioFileIndexBase + Entry->EntryIndex, FALSE);
 
+  if (Entry->IsExternal) {
+    OcPlayAudioFile (Context, OcVoiceOverAudioFileExternal, FALSE);
+  }
+
   if (Entry->Type == OC_BOOT_APPLE_OS) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFilemacOS, FALSE);
   } else if (Entry->Type == OC_BOOT_APPLE_RECOVERY) {
@@ -197,14 +201,6 @@ OcPlayAudioEntry (
     OcPlayAudioFile (Context, OcVoiceOverAudioFileExternalTool, FALSE);
   } else {
     OcPlayAudioFile (Context, OcVoiceOverAudioFileOtherOS, FALSE);
-  }
-
-  if (Entry->IsFolder) {
-    OcPlayAudioFile (Context, OcVoiceOverAudioFileDiskImage, FALSE);
-  }
-
-  if (Entry->IsExternal) {
-    OcPlayAudioFile (Context, OcVoiceOverAudioFileExternal, FALSE);
   }
 
   return EFI_SUCCESS;
