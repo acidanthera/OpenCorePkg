@@ -29,7 +29,7 @@
 //
 // Pick a reasonable maximum to fit.
 //
-#define KERNEL_HEADER_SIZE (EFI_PAGE_SIZE*2)
+#define KERNEL_HEADER_SIZE (EFI_PAGE_SIZE * 2)
 
 STATIC SHA384_CONTEXT mKernelDigestContext;
 STATIC UINT32         mKernelDigestPosition;
@@ -131,65 +131,25 @@ KernelGetFileData (
 }
 
 STATIC
-UINT32
+EFI_STATUS
 ParseFatArchitecture (
-  IN OUT UINT8             **Buffer,
-  IN OUT UINT32            *Offset
+  IN     EFI_FILE_PROTOCOL  *File,
+  IN     MACH_CPU_TYPE      CpuType,
+  IN     UINT8              *Buffer,
+  IN     UINT32             BufferSize,
+     OUT UINT32             *FatOffset,
+     OUT UINT32             *FatSize
   )
 {
-  BOOLEAN           SwapBytes;
-  MACH_FAT_HEADER   *FatHeader;
-  UINT32            NumberOfFatArch;
-  MACH_CPU_TYPE     CpuType;
-  UINT32            TmpSize;
-  UINT32            Index;
-  UINT32            Size;
+  EFI_STATUS        Status;
+  UINT32            FileSize;
 
-  FatHeader       = (MACH_FAT_HEADER *)*Buffer;
-  SwapBytes       = FatHeader->Signature == MACH_FAT_BINARY_INVERT_SIGNATURE;
-  NumberOfFatArch = FatHeader->NumberOfFatArch;
-  if (SwapBytes) {
-    NumberOfFatArch = SwapBytes32 (NumberOfFatArch);
+  Status = GetFileSize (File, &FileSize);
+  if (BufferSize >= FileSize) {
+    return EFI_INVALID_PARAMETER;
   }
 
-  if (OcOverflowMulAddU32 (NumberOfFatArch, sizeof (MACH_FAT_ARCH), sizeof (MACH_FAT_HEADER), &TmpSize)
-    || TmpSize > KERNEL_HEADER_SIZE) {
-    DEBUG ((DEBUG_INFO, "OCAK: Fat kernel invalid arch count %u\n", NumberOfFatArch));
-    return 0;
-  }
-
-  //
-  // TODO: Currently there are no kernels with MachCpuSubtypeX8664H, but we should support them. 
-  //
-  for (Index = 0; Index < NumberOfFatArch; Index++) {
-    CpuType = FatHeader->FatArch[Index].CpuType;
-    if (SwapBytes) {
-      CpuType = SwapBytes32 (CpuType);
-    }
-    if (CpuType == MachCpuTypeX8664) {
-      *Offset = FatHeader->FatArch[Index].Offset;
-      Size   = FatHeader->FatArch[Index].Size;
-      if (SwapBytes) {
-        *Offset = SwapBytes32 (*Offset);
-        Size    = SwapBytes32 (Size);
-      }
-
-      if (*Offset == 0) {
-        DEBUG ((DEBUG_INFO, "OCAK: Fat kernel has 0 offset\n"));
-        return 0;
-      }
-
-      if (OcOverflowAddU32 (*Offset, Size, &TmpSize)) {
-        DEBUG ((DEBUG_INFO, "OCAK: Fat kernel invalid size %u\n", Size));
-        return 0;
-      }
-
-      return Size;
-    }
-  }
-
-  DEBUG ((DEBUG_INFO, "OCAK: Fat kernel has no x86_64 arch\n"));
-  return 0;
+  return FatGetArchitectureOffset (Buffer, BufferSize, FileSize, CpuType, FatOffset, FatSize);
 }
 
 STATIC
@@ -271,6 +231,7 @@ STATIC
 EFI_STATUS
 ReadAppleKernelImage (
   IN     EFI_FILE_PROTOCOL  *File,
+  IN     MACH_CPU_TYPE      CpuType,
   IN OUT UINT8              **Buffer,
      OUT UINT32             *KernelSize,
      OUT UINT32             *AllocatedSize,
@@ -302,8 +263,18 @@ ReadAppleKernelImage (
     MagicPtr = (UINT32 *)* Buffer;
 
     switch (*MagicPtr) {
+      case MACH_HEADER_SIGNATURE:
       case MACH_HEADER_64_SIGNATURE:
-        DEBUG ((DEBUG_VERBOSE, "OCAK: Found Mach-O compressed %d offset %u size %u\n", Compressed, Offset, *KernelSize));
+        //
+        // Ensure we have the desired arch.
+        //
+        if ((CpuType == MachCpuTypeI386 && *MagicPtr != MACH_HEADER_SIGNATURE)
+          || (CpuType == MachCpuTypeX8664 && *MagicPtr != MACH_HEADER_64_SIGNATURE)) {
+          DEBUG ((DEBUG_INFO, "OCAK: Invalid kernel magic %08X for architecture %X\n", *MagicPtr, CpuType));
+          return EFI_INVALID_PARAMETER;
+        }
+
+        DEBUG ((DEBUG_VERBOSE, "OCAK: Found Mach-O arch %X compressed %d offset %u size %u\n", CpuType, Compressed, Offset, *KernelSize));
 
         //
         // This is just a valid (formerly) compressed image.
@@ -315,7 +286,6 @@ ReadAppleKernelImage (
         //
         // This is an uncompressed image, just fully read it.
         //
-
         if (Offset == 0) {
           //
           // Figure out size for a non fat image.
@@ -349,11 +319,11 @@ ReadAppleKernelImage (
           return EFI_INVALID_PARAMETER;
         }
 
-        *KernelSize = ParseFatArchitecture (Buffer, &Offset);
-        if (*KernelSize != 0) {
-          return ReadAppleKernelImage (File, Buffer, KernelSize, AllocatedSize, ReservedSize, Offset);
+        Status = ParseFatArchitecture (File, CpuType, *Buffer, KERNEL_HEADER_SIZE, &Offset, KernelSize);
+        if (EFI_ERROR (Status)) {
+          return Status;
         }
-        return EFI_INVALID_PARAMETER;
+        return ReadAppleKernelImage (File, CpuType, Buffer, KernelSize, AllocatedSize, ReservedSize, Offset);
       }
       case MACH_COMPRESSED_BINARY_INVERT_SIGNATURE:
       {
@@ -387,6 +357,7 @@ ReadAppleKernelImage (
 EFI_STATUS
 ReadAppleKernel (
   IN     EFI_FILE_PROTOCOL  *File,
+  IN     MACH_CPU_TYPE      CpuType,
      OUT UINT8              **Kernel,
      OUT UINT32             *KernelSize,
      OUT UINT32             *AllocatedSize,
@@ -398,12 +369,17 @@ ReadAppleKernel (
   UINT32      FullSize;
   UINT8       *Remainder;
 
+  ASSERT (File != NULL);
+  ASSERT (Kernel != NULL);
+  ASSERT (KernelSize != NULL);
+  ASSERT (AllocatedSize != NULL);
+
   *KernelSize    = 0;
   *AllocatedSize = KERNEL_HEADER_SIZE;
   *Kernel        = AllocatePool (*AllocatedSize);
 
   if (*Kernel == NULL) {
-    return EFI_INVALID_PARAMETER;
+    return EFI_OUT_OF_RESOURCES;
   }
 
   mNeedKernelDigest = Digest != NULL;
@@ -414,6 +390,7 @@ ReadAppleKernel (
 
   Status = ReadAppleKernelImage (
     File,
+    CpuType,
     Kernel,
     KernelSize,
     AllocatedSize,
@@ -431,6 +408,7 @@ ReadAppleKernel (
     Status = GetFileSize (File, &FullSize);
     if (EFI_ERROR (Status)) {
       mNeedKernelDigest = FALSE;
+      FreePool (*Kernel);
       return Status;
     }
 
@@ -438,6 +416,7 @@ ReadAppleKernel (
       Remainder = AllocatePool (FullSize - mKernelDigestPosition);
       if (Remainder == NULL) {
         mNeedKernelDigest = FALSE;
+        FreePool (*Kernel);
         return EFI_OUT_OF_RESOURCES;
       }
 
@@ -450,6 +429,7 @@ ReadAppleKernel (
       mNeedKernelDigest = FALSE;
       FreePool (Remainder);
       if (EFI_ERROR (Status)) {
+        FreePool (*Kernel);
         return Status;
       }
 
@@ -460,4 +440,100 @@ ReadAppleKernel (
   }
 
   return EFI_SUCCESS;
+}
+
+EFI_STATUS
+ReadAppleMkext (
+  IN     EFI_FILE_PROTOCOL  *File,
+  IN     MACH_CPU_TYPE      CpuType,
+     OUT UINT8              **Mkext,
+     OUT UINT32             *MkextSize,
+     OUT UINT32             *AllocatedSize,
+  IN     UINT32             ReservedSize,
+  IN     UINT32             NumReservedKexts
+  )
+{
+  EFI_STATUS        Status;
+  UINT32            Offset;
+  UINT8             *TmpMkext;
+  UINT32            TmpMkextSize;
+
+  ASSERT (File != NULL);
+  ASSERT (Mkext != NULL);
+  ASSERT (MkextSize != NULL);
+  ASSERT (AllocatedSize != NULL);
+
+  //
+  // Read enough to get fat binary header if present.
+  //
+  TmpMkextSize = KERNEL_HEADER_SIZE;
+  TmpMkext = AllocatePool (TmpMkextSize);
+  if (TmpMkext == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Status = GetFileData (File, 0, TmpMkextSize, TmpMkext);
+  if (EFI_ERROR (Status)) {
+    FreePool (TmpMkext);
+    return Status;
+  }
+  Status = ParseFatArchitecture (File, CpuType, TmpMkext, TmpMkextSize, &Offset, &TmpMkextSize);
+  FreePool (TmpMkext);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  //
+  // Read target slice of mkext.
+  //
+  TmpMkext = AllocatePool (TmpMkextSize);
+  if (TmpMkext == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+  Status = GetFileData (File, Offset, TmpMkextSize, TmpMkext);
+  if (EFI_ERROR (Status)) {
+    FreePool (TmpMkext);
+    return Status;
+  }
+
+  //
+  // Verify mkext arch.
+  //
+  if (!MkextCheckCpuType (TmpMkext, TmpMkextSize, CpuType)) {
+    FreePool (TmpMkext);
+    return EFI_UNSUPPORTED;
+  }
+  DEBUG ((DEBUG_INFO, "OCAK: Got mkext of %u bytes with 0x%X arch\n", TmpMkextSize, CpuType));
+
+  //
+  // Calculate size of decompressed mkext.
+  //
+  *AllocatedSize = 0;
+  Status = MkextDecompress (TmpMkext, TmpMkextSize, NumReservedKexts, NULL, 0, AllocatedSize);
+  if (EFI_ERROR (Status)) {
+    FreePool (TmpMkext);
+    return Status;
+  }
+  if (OcOverflowAddU32 (*AllocatedSize, ReservedSize, AllocatedSize)) {
+    FreePool (TmpMkext);
+    return EFI_INVALID_PARAMETER;
+  }
+
+  *Mkext = AllocatePool (*AllocatedSize);
+  if (*Mkext == NULL) {
+    FreePool (TmpMkext);
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  //
+  // Decompress mkext into final buffer.
+  //
+  Status = MkextDecompress (TmpMkext, TmpMkextSize, NumReservedKexts, *Mkext, *AllocatedSize, MkextSize);
+  FreePool (TmpMkext);
+
+  if (EFI_ERROR (Status)) {
+    FreePool (*Mkext);
+  }
+
+  return Status;
 }

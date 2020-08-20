@@ -917,6 +917,7 @@ OcKernelFileOpen (
     DEBUG ((DEBUG_INFO, "OC: Trying XNU hook on %s\n", FileName));
     Status = ReadAppleKernel (
       *NewHandle,
+      MachCpuTypeX8664,
       &Kernel,
       &KernelSize,
       &AllocatedSize,

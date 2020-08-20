@@ -554,9 +554,11 @@ KernelQuirkApply (
 
 /**
   Read Apple kernel for target architecture (possibly decompressing)
-  into pool allocated buffer.
+  into pool allocated buffer. If CpuType does not exist in fat
+  mkext, an error is returned.
 
   @param[in]      File           File handle instance.
+  @param[in]      CpuType        Desired architecture of mkext.
   @param[in,out]  Kernel         Resulting non-fat kernel buffer from pool.
   @param[out]     KernelSize     Actual kernel size.
   @param[out]     AllocatedSize  Allocated kernel size (AllocatedSize >= KernelSize).
@@ -568,6 +570,7 @@ KernelQuirkApply (
 EFI_STATUS
 ReadAppleKernel (
   IN     EFI_FILE_PROTOCOL  *File,
+  IN     MACH_CPU_TYPE      CpuType,
      OUT UINT8              **Kernel,
      OUT UINT32             *KernelSize,
      OUT UINT32             *AllocatedSize,

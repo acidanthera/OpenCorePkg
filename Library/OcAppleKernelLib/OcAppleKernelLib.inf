@@ -42,7 +42,6 @@
   Vtables.c
   CachelessContext.c
   MkextContext.c
-  MkextReader.c
 
 [Packages]
   MdePkg/MdePkg.dec
