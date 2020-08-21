@@ -44,20 +44,38 @@ typedef struct {
   CONST UINT64        FirmwareFeaturesMask;
 } MAC_INFO_INTERNAL_ENTRY;
 
-/**
-  Statically compiled array with model entries.
-  The array is sorted by ProductName field.
-**/
+//
+// Statically compiled array with model entries.
+// The array is sorted by ProductName field.
+//
 extern CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[];
 
-/**
-  Entry count in statically compiled array with model entries.
-**/
+//
+// Entry count in statically compiled array with model entries.
+//
 extern CONST UINTN gMacInfoModelCount;
 
-/**
-  Default entry in a statically compiled array with model entries.
-**/
+//
+// Default entry in a statically compiled array with model entries.
+//
 extern CONST UINTN gMacInfoDefaultModel;
+
+//
+// Entry in 64-bit compatibility table.
+//
+typedef struct {
+  //
+  // Mac model.
+  //
+  CONST CHAR8     *ModelName;
+  //
+  // Minimum major version for 64-bit kernel mode under 10.6.
+  //
+  UINT8           SnowLeoMin64;
+  //
+  // Minimum major version for 64-bit kernel mode under 10.7.
+  //
+  UINT8           LionMin64;
+} MAC_INFO_64BIT_COMPAT_ENTRY;
 
 #endif // MAC_INFO_INTERNAL_H
