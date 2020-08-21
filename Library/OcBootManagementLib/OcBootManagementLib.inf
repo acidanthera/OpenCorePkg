@@ -97,6 +97,7 @@
   MemoryAllocationLib
   PrintLib
   UefiBootServicesTableLib
+  OcApfsLib
   OcAppleBootPolicyLib
   OcAppleChunklistLib
   OcAppleDiskImageLib

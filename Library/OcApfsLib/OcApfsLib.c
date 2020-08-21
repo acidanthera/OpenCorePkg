@@ -16,6 +16,7 @@
 #include <Library/OcApfsLib.h>
 #include <Library/DebugLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiLib.h>
 #include <Protocol/BlockIo.h>
 
 STATIC VOID *mApfsNewPartitionsEventKey;
@@ -82,8 +83,8 @@ ApfsMonitorNewPartitions (
 }
 
 EFI_STATUS
-OcApfsConnectDevices (
-  IN BOOLEAN  Monitor
+OcApfsConnectParentDevice (
+  IN EFI_HANDLE  Handle  OPTIONAL
   )
 {
   EFI_STATUS  Status;
@@ -91,13 +92,6 @@ OcApfsConnectDevices (
   UINTN       HandleCount;
   EFI_HANDLE  *HandleBuffer;
   UINTN       Index;
-
-  if (Monitor) {
-    Status = ApfsMonitorNewPartitions ();
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCJS: Failed to setup drive monitoring - %r\n", Status));
-    }
-  }
 
   HandleCount = 0;
   Status = gBS->LocateHandleBuffer (
@@ -112,6 +106,17 @@ OcApfsConnectDevices (
     Status = EFI_NOT_FOUND;
 
     for (Index = 0; Index < HandleCount; ++Index) {
+      if (Handle != NULL) {
+        Status2 = EfiTestChildHandle (
+          Handle,
+          HandleBuffer[Index],
+          &gEfiBlockIoProtocolGuid
+          );
+        if (EFI_ERROR (Status)) {
+          continue;
+        }
+      }
+
       Status2 = OcApfsConnectDevice (
         HandleBuffer[Index]
         );
@@ -122,4 +127,21 @@ OcApfsConnectDevices (
   }
 
   return Status;
+}
+
+EFI_STATUS
+OcApfsConnectDevices (
+  IN BOOLEAN  Monitor
+  )
+{
+  EFI_STATUS  Status;
+
+  if (Monitor) {
+    Status = ApfsMonitorNewPartitions ();
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCJS: Failed to setup drive monitoring - %r\n", Status));
+    }
+  }
+
+  return OcApfsConnectParentDevice (NULL);
 }
