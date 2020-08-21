@@ -33,7 +33,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Guid/AppleVariable.h>
 
-CONST CHAR8     *CurrentSmbiosProductName;
+STATIC CONST CHAR8     *mCurrentSmbiosProductName;
 
 STATIC
 VOID
@@ -355,7 +355,7 @@ OcPlatformUpdateSmbios (
   }
 
   DEBUG ((DEBUG_INFO, "OC: New SMBIOS: %a model %a\n", Data.SystemManufacturer, Data.SystemProductName));
-  CurrentSmbiosProductName = Data.SystemProductName;
+  mCurrentSmbiosProductName = Data.SystemProductName;
 
   Status = OcSmbiosCreate (SmbiosTable, &Data, UpdateMode, CpuInfo);
   if (EFI_ERROR (Status)) {
@@ -587,8 +587,8 @@ OcLoadPlatformSupport (
         OcSmbiosExposeOemInfo (&SmbiosTable);
       }
 
-      CurrentSmbiosProductName = OcSmbiosGetProductName (&SmbiosTable);
-      DEBUG ((DEBUG_INFO, "OC: Current SMBIOS: %a model %a\n", OcSmbiosGetManufacturer (&SmbiosTable), CurrentSmbiosProductName));
+      mCurrentSmbiosProductName = OcSmbiosGetProductName (&SmbiosTable);
+      DEBUG ((DEBUG_INFO, "OC: Current SMBIOS: %a model %a\n", OcSmbiosGetManufacturer (&SmbiosTable), mCurrentSmbiosProductName));
 
       if (Config->PlatformInfo.UpdateSmbios) {
         SmbiosUpdateStr  = OC_BLOB_GET (&Config->PlatformInfo.UpdateSmbiosMode);
@@ -625,5 +625,5 @@ OcPlatformIs64BitSupported (
   IN UINT32     KernelVersion
   )
 {
-  return IsMacModel64BitCompatible (CurrentSmbiosProductName, KernelVersion);
+  return IsMacModel64BitCompatible (mCurrentSmbiosProductName, KernelVersion);
 }
