@@ -99,13 +99,13 @@ GetMacInfo (
   Determine if specified model and kernel version can
   run in 64-bit kernel mode.
 
-  @param[in] BoardProductName   Board-id to get information for.
+  @param[in] ProductName        Product to get information for.
   @param[in] KernelVersion      Kernel version.
 **/
 BOOLEAN
 IsMacModel64BitCompatible (
-  CHAR8         *BoardProductName,
-  UINT32        KernelVersion
+  IN CONST CHAR8    *ProductName,
+  IN UINT32         KernelVersion
   );
 
 #endif // OC_MAC_INFO_LIB_H
