@@ -1845,3 +1845,33 @@ OcSmbiosExposeOemInfo (
     DEBUG ((DEBUG_INFO, "OCSMB: Cannot access OEM Type2\n"));
   }
 }
+
+CHAR8*
+OcSmbiosGetManufacturer (
+  IN OC_SMBIOS_TABLE   *SmbiosTable
+  )
+{
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+
+  Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_INFORMATION, 1);
+  if (Original.Raw != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type1->Manufacturer)) {
+    return SmbiosGetString (Original, Original.Standard.Type1->Manufacturer);
+  }
+
+  return NULL;
+}
+
+CHAR8*
+OcSmbiosGetProductName (
+  IN OC_SMBIOS_TABLE   *SmbiosTable
+  )
+{
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+
+  Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_INFORMATION, 1);
+  if (Original.Raw != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type1->ProductName)) {
+    return SmbiosGetString (Original, Original.Standard.Type1->ProductName);
+  }
+
+  return NULL;
+}

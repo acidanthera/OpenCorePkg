@@ -33,6 +33,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Guid/AppleVariable.h>
 
+CONST CHAR8     *CurrentSmbiosProductName;
+
 STATIC
 VOID
 OcPlatformUpdateDataHub (
@@ -352,6 +354,9 @@ OcPlatformUpdateSmbios (
     }
   }
 
+  DEBUG ((DEBUG_INFO, "OC: New SMBIOS: %a model %a\n", Data.SystemManufacturer, Data.SystemProductName));
+  CurrentSmbiosProductName = Data.SystemProductName;
+
   Status = OcSmbiosCreate (SmbiosTable, &Data, UpdateMode, CpuInfo);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OC: Failed to update SMBIOS - %r\n", Status));
@@ -582,6 +587,9 @@ OcLoadPlatformSupport (
         OcSmbiosExposeOemInfo (&SmbiosTable);
       }
 
+      CurrentSmbiosProductName = OcSmbiosGetProductName (&SmbiosTable);
+      DEBUG ((DEBUG_INFO, "OC: Current SMBIOS: %a model %a\n", OcSmbiosGetManufacturer (&SmbiosTable), CurrentSmbiosProductName));
+
       if (Config->PlatformInfo.UpdateSmbios) {
         SmbiosUpdateStr  = OC_BLOB_GET (&Config->PlatformInfo.UpdateSmbiosMode);
 
@@ -610,4 +618,12 @@ OcLoadPlatformSupport (
   if (Config->PlatformInfo.UpdateNvram) {
     OcPlatformUpdateNvram (Config, UsedMacInfo);
   }
+}
+
+BOOLEAN
+OcPlatformIs64BitSupported (
+  IN UINT32     KernelVersion
+  )
+{
+  return IsMacModel64BitCompatible (CurrentSmbiosProductName, KernelVersion);
 }
