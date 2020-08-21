@@ -93,6 +93,10 @@ AppleModelCode:
   - "PN5X"
   - "PN5W"
   - "PN5V"
+  - "PN78"
+  - "PN7D"
+  - "PN77"
+  - "PN7C"
 # Note, first board code is used by macserial
 AppleBoardCode:
   - "0000"

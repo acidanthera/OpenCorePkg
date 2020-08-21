@@ -88,6 +88,7 @@ AppleModelCode:
   - "046N"
   - "046L"
   - "046T"
+  - "090Y"
 # Note, first board code is used by macserial
 AppleBoardCode:
   - "0000"
