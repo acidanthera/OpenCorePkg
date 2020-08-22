@@ -1008,7 +1008,7 @@ OcKernelFileOpen (
             if (mUse32BitKernel != IsKernel32Bit) {
               DEBUG ((DEBUG_WARN, "OC: %a kernel architecture is not available, aborting.\n", mUse32BitKernel ? "32-bit" : "64-bit"));
               FreePool (Kernel);
-              Status = EFI_INVALID_PARAMETER;
+              return EFI_INVALID_PARAMETER;
             }
           }
         }
