@@ -301,6 +301,14 @@ typedef struct {
   // Virtual kmod_info_t address.
   //
   UINT64                   VirtualKmod;
+  //
+  // Pointer to KXLD state (read only, it is allocated in PrelinkedStateKexts).
+  //
+  CONST VOID               *KxldState;
+  //
+  // Pointer to KXLD state (read only, it is allocated in PrelinkedStateKexts).
+  //
+  UINT32                   KxldStateSize;
 } PATCHER_CONTEXT;
 
 //

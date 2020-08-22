@@ -433,6 +433,26 @@ MachoSymbolGetFileOffset64 (
   );
 
 /**
+  Retrieves the Mach-O file offset of the address pointed to by Symbol.
+
+  @param[in,out] Context     Context of the Mach-O.
+  @param[in]     Address     Virtual address to retrieve the offset of.
+  @param[out]    FileOffset  Pointer the file offset is returned into.
+                             If FALSE is returned, the output is undefined.
+  @param[out]    MaxSize     Maximum data safely available from FileOffset.
+
+  @retval 0  0 is returned on failure.
+
+**/
+BOOLEAN
+MachoSymbolGetDirectFileOffset64 (
+  IN OUT OC_MACHO_CONTEXT      *Context,
+  IN     UINT64                Address,
+  OUT    UINT32                *FileOffset,
+  OUT    UINT32                *MaxSize OPTIONAL
+  );
+
+/**
   Returns whether Name is pure virtual.
 
   @param[in] Name  The name to evaluate.

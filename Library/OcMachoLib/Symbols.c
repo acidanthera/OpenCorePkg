@@ -559,16 +559,6 @@ MachoGetLocalDefinedSymbolByName (
   return Symbol;
 }
 
-/**
-  Relocate Symbol to be against LinkAddress.
-
-  @param[in,out] Context      Context of the Mach-O.
-  @param[in]     LinkAddress  The address to be linked against.
-  @param[in,out] Symbol       The symbol to be relocated.
-
-  @returns  Whether the operation has been completed successfully.
-
-**/
 BOOLEAN
 MachoRelocateSymbol64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
@@ -618,18 +608,6 @@ MachoRelocateSymbol64 (
   return TRUE;
 }
 
-/**
-  Retrieves the Mach-O file offset of the address pointed to by Symbol.
-
-  @param[in,ouz] Context     Context of the Mach-O.
-  @param[in]     Symbol      Symbol to retrieve the offset of.
-  @param[out]    FileOffset  Pointer the file offset is returned into.
-                             If FALSE is returned, the output is undefined.
-  @param[out]    MaxSize     Maximum data safely available from FileOffset.
-
-  @retval 0  0 is returned on failure.
-
-**/
 BOOLEAN
 MachoSymbolGetFileOffset64 (
   IN OUT OC_MACHO_CONTEXT      *Context,
@@ -687,6 +665,50 @@ MachoSymbolGetFileOffset64 (
       return FALSE;
     }
   }
+
+  *FileOffset = (UINT32) (Base - Context->ContainerOffset + Offset);
+
+  if (MaxSize != NULL) {
+    *MaxSize = (UINT32) (Size - Offset);
+  }
+
+  return TRUE;
+}
+
+BOOLEAN
+MachoSymbolGetDirectFileOffset64 (
+  IN OUT OC_MACHO_CONTEXT      *Context,
+  IN     UINT64                Address,
+  OUT    UINT32                *FileOffset,
+  OUT    UINT32                *MaxSize OPTIONAL
+  )
+{
+  UINT64                   Offset;
+  UINT64                   Base;
+  UINT64                   Size;
+  MACH_SEGMENT_COMMAND_64  *Segment;
+
+  ASSERT (Context != NULL);
+  ASSERT (FileOffset != NULL);
+
+  for (
+    Segment = MachoGetNextSegment64 (Context, NULL);
+    Segment != NULL;
+    Segment = MachoGetNextSegment64 (Context, Segment)
+    ) {
+    if ((Address >= Segment->VirtualAddress)
+     && (Address < (Segment->VirtualAddress + Segment->Size))) {
+      break;
+    }
+  }
+
+  if (Segment == NULL) {
+    return FALSE;
+  }
+
+  Offset = Address - Segment->VirtualAddress;
+  Base   = Segment->FileOffset;
+  Size   = Segment->Size;
 
   *FileOffset = (UINT32) (Base - Context->ContainerOffset + Offset);
 

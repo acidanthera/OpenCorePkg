@@ -231,8 +231,8 @@ InternalCreatePrelinkedKext (
     && Prelinked->PrelinkedStateKextsSize >= KxldStateSize) {
     KxldOffset = KxldState - Prelinked->PrelinkedStateKextsAddress;
     if (KxldOffset <= Prelinked->PrelinkedStateKextsSize - KxldStateSize) {
-      NewKext->KxldState = (UINT8 *)Prelinked->PrelinkedStateKexts + KxldOffset;
-      NewKext->KxldStateSize = KxldStateSize;
+      NewKext->Context.KxldState = (UINT8 *)Prelinked->PrelinkedStateKexts + KxldOffset;
+      NewKext->Context.KxldStateSize = KxldStateSize;
     }
   }
 
@@ -249,7 +249,7 @@ InternalScanCurrentPrelinkedKextLinkInfo (
   //
   // Prefer KXLD state when available.
   //
-  if (Kext->KxldState != NULL) {
+  if (Kext->Context.KxldState != NULL) {
     return;
   }
 
@@ -769,8 +769,8 @@ InternalCachedPrelinkedKernel (
       if (Prelinked->PrelinkedStateKernel != NULL
         && Prelinked->PrelinkedStateKexts != NULL) {
         Prelinked->PrelinkedStateKextsAddress = Prelinked->PrelinkedStateSectionKexts->Address;
-        NewKext->KxldState = Prelinked->PrelinkedStateKernel;
-        NewKext->KxldStateSize = Prelinked->PrelinkedStateKernelSize;
+        NewKext->Context.KxldState = Prelinked->PrelinkedStateKernel;
+        NewKext->Context.KxldStateSize = Prelinked->PrelinkedStateKernelSize;
       } else {
         DEBUG ((
           DEBUG_INFO,
@@ -939,7 +939,7 @@ InternalScanPrelinkedKext (
   // Collect data to enable linking against this KEXT.
   //
   if (Dependency) {
-    if (Kext->KxldState != NULL) {
+    if (Kext->Context.KxldState != NULL) {
       //
       // Use KXLD state as is for 10.6.8 kernel.
       //

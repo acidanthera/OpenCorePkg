@@ -123,14 +123,6 @@ struct PRELINKED_KEXT_ {
   //
   UINT32                   NumberOfCxxSymbols;
   //
-  // Pointer to KXLD state (read only, it is allocated in PrelinkedStateKexts).
-  //
-  CONST VOID               *KxldState;
-  //
-  // Pointer to KXLD state (read only, it is allocated in PrelinkedStateKexts).
-  //
-  UINT32                   KxldStateSize;
-  //
   // Sorted symbol table used only for dependencies.
   //
   PRELINKED_KEXT_SYMBOL    *LinkedSymbolTable;
@@ -473,6 +465,23 @@ InternalKxldStateBuildLinkedVtables (
 EFI_STATUS
 InternalKxldStateRebuild (
   IN OUT PRELINKED_CONTEXT  *Context
+  );
+
+/**
+  Solve symbol through KXLD state.
+
+  @param[in] KxldState       KXLD state.
+  @param[in] KxldStateSize   KXLD state size.
+  @param[in] Name            Symbol name.
+
+  @retval Address on success.
+  @retval 0 on failure.
+**/
+UINT64
+InternalKxldSolveSymbol (
+  IN CONST VOID    *KxldState,
+  IN UINT32        KxldStateSize,
+  IN CONST CHAR8   *Name
   );
 
 #endif // PRELINKED_INTERNAL_H

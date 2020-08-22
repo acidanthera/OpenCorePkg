@@ -198,16 +198,16 @@ InternalKxldStateBuildLinkedSymbolTable (
   UINT32                   NumCxxSymbols;
   BOOLEAN                  Result;  
 
-  ASSERT (Kext->KxldState != NULL);
-  ASSERT (Kext->KxldStateSize > 0);
+  ASSERT (Kext->Context.KxldState != NULL);
+  ASSERT (Kext->Context.KxldStateSize > 0);
 
   if (Kext->LinkedSymbolTable != NULL) {
     return EFI_SUCCESS;
   }
 
   KxldSymbols = InternalGetKxldSymbols (
-    Kext->KxldState,
-    Kext->KxldStateSize,
+    Kext->Context.KxldState,
+    Kext->Context.KxldStateSize,
     MachCpuTypeX8664,
     &NumSymbols
     );
@@ -235,8 +235,8 @@ InternalKxldStateBuildLinkedSymbolTable (
 
   for (Index = 0; Index < NumSymbols; ++Index) {
     Name = InternalGetKxldString (
-      Kext->KxldState,
-      Kext->KxldStateSize,
+      Kext->Context.KxldState,
+      Kext->Context.KxldStateSize,
       KxldSymbols->NameOffset
       );
     if (Name == NULL) {
@@ -293,16 +293,16 @@ InternalKxldStateBuildLinkedVtables (
   UINT32                           NumEntries;
   UINT32                           ResultingSize;
 
-  ASSERT (Kext->KxldState != NULL);
-  ASSERT (Kext->KxldStateSize > 0);
+  ASSERT (Kext->Context.KxldState != NULL);
+  ASSERT (Kext->Context.KxldStateSize > 0);
 
   if (Kext->LinkedVtables != NULL) {
     return EFI_SUCCESS;
   }
 
   KxldVtables = InternalGetKxldVtables (
-    Kext->KxldState,
-    Kext->KxldStateSize,
+    Kext->Context.KxldState,
+    Kext->Context.KxldStateSize,
     MachCpuTypeX8664,
     &NumVtables
     );
@@ -332,8 +332,8 @@ InternalKxldStateBuildLinkedVtables (
   CurrentVtable = LinkedVtables;
   for (Index = 0; Index < NumVtables; ++Index) {
     CurrentVtable->Name = InternalGetKxldString (
-      Kext->KxldState,
-      Kext->KxldStateSize,
+      Kext->Context.KxldState,
+      Kext->Context.KxldStateSize,
       KxldVtables[Index].NameOffset
       );
     if (CurrentVtable->Name == NULL) {
@@ -341,7 +341,7 @@ InternalKxldStateBuildLinkedVtables (
       return EFI_INVALID_PARAMETER;
     }
 
-    KxldSymbols = (KXLD_SYM_ENTRY_64 *) ((UINT8 *) Kext->KxldState + KxldVtables[Index].EntryOffset);
+    KxldSymbols = (KXLD_SYM_ENTRY_64 *) ((UINT8 *) Kext->Context.KxldState + KxldVtables[Index].EntryOffset);
     CurrentVtable->NumEntries = KxldVtables[Index].NumEntries;
 
     DEBUG ((
@@ -357,8 +357,8 @@ InternalKxldStateBuildLinkedVtables (
     for (Index2 = 0; Index2 < CurrentVtable->NumEntries; ++Index2) {
       CurrentVtable->Entries[Index2].Address = KxldSymbols->Address;
       CurrentVtable->Entries[Index2].Name    = InternalGetKxldString (
-        Kext->KxldState,
-        Kext->KxldStateSize,
+        Kext->Context.KxldState,
+        Kext->Context.KxldStateSize,
         KxldSymbols->NameOffset
         );
       if (CurrentVtable->Entries[Index2].Name == NULL) {
@@ -521,4 +521,66 @@ InternalKxldStateRebuild (
   }
 
   return Status;
+}
+
+UINT64
+InternalKxldSolveSymbol (
+  IN CONST VOID    *KxldState,
+  IN UINT32        KxldStateSize,
+  IN CONST CHAR8   *Name
+  )
+{
+  CONST CHAR8              *LocalName;
+  CONST KXLD_SYM_ENTRY_64  *KxldSymbols;
+  UINT32                   Index;
+  UINT32                   NumSymbols;
+
+  ASSERT (KxldState != NULL);
+  ASSERT (KxldStateSize > 0);
+  ASSERT (Name != NULL);
+
+  KxldSymbols = InternalGetKxldSymbols (
+    KxldState,
+    KxldStateSize,
+    MachCpuTypeX8664,
+    &NumSymbols
+    );
+
+  if (KxldSymbols == NULL) {
+    return 0;
+  }
+
+  DEBUG ((
+    DEBUG_VERBOSE,
+    "OCAK: Processing KXLD state for %a with %u symbols\n",
+    Name,
+    NumSymbols
+    ));
+
+  for (Index = 0; Index < NumSymbols; ++Index) {
+    LocalName = InternalGetKxldString (
+      KxldState,
+      KxldStateSize,
+      KxldSymbols->NameOffset
+      );
+    if (LocalName == NULL) {
+      return 0;
+    }
+
+    DEBUG ((
+      DEBUG_VERBOSE,
+      "OCAK: Checking symbol %a with %Lx value (flags %u)\n",
+      LocalName,
+      KxldSymbols->Address,
+      KxldSymbols->Flags
+      ));
+
+    if (AsciiStrCmp (LocalName, Name) == 0) {
+      return KxldSymbols->Address;
+    }
+
+    ++KxldSymbols;
+  }
+
+  return 0;
 }
