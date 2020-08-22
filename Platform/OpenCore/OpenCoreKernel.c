@@ -1218,7 +1218,7 @@ OcLoadKernelSupport (
     mOcCachelessInProgress  = FALSE;
 
 #if defined(MDE_CPU_IA32)
-    Use32BitKernel         = TRUE;
+    mUse32BitKernel         = TRUE;
 #elif defined(MDE_CPU_X64)
     mUse32BitKernel         = FALSE;
 #else
