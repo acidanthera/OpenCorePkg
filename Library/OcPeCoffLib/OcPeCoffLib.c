@@ -328,6 +328,14 @@ InternalInitializePe (
   ASSERT (Context != NULL);
 
   OptHdrPtr = (CONST CHAR8 *) Context->FileBuffer + Context->ExeHdrOffset + sizeof (EFI_IMAGE_NT_HEADERS_COMMON_HDR);
+  ASSERT (OC_TYPE_ALIGNED (EFI_IMAGE_NT_HEADERS_COMMON_HDR, Context->ExeHdrOffset));
+  
+  STATIC_ASSERT (
+    OC_TYPE_ALIGNED (UINT16, OC_ALIGNOF (EFI_IMAGE_NT_HEADERS_COMMON_HDR))
+   && OC_TYPE_ALIGNED (UINT16, sizeof (EFI_IMAGE_NT_HEADERS_COMMON_HDR)),
+    "The following operation might be an unaligned access."
+  );
+
   //
   // Determine the type of and retrieve data from the PE Optional Header.
   //
