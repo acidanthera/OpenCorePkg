@@ -576,7 +576,7 @@ OcPeCoffLoaderInitializeContext (
     return InternalInitializeTe (Context, FileSize);
   }
   
-  if (FileSize - Context->ExeHdrOffset >= sizeof (EFI_IMAGE_NT_HEADERS_COMMON_HDR)
+  if (FileSize - Context->ExeHdrOffset >= sizeof (EFI_IMAGE_NT_HEADERS_COMMON_HDR) + sizeof (UINT16)
    && OC_TYPE_ALIGNED (EFI_IMAGE_NT_HEADERS_COMMON_HDR, Context->ExeHdrOffset)
    && *(CONST UINT32 *) ImageSig == EFI_IMAGE_NT_SIGNATURE) {
     return InternalInitializePe (Context, FileSize);
