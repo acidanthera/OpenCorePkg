@@ -187,18 +187,21 @@ OcDirectLoadImage (
     SourceSize
     );
   if (ImageStatus != IMAGE_ERROR_SUCCESS) {
+    DEBUG ((DEBUG_INFO, "OCB: PeCoff init failure - %d\n", ImageStatus));
     return EFI_UNSUPPORTED;
   }
   //
   // Reject images that are not meant for the platform's architecture.
   //
   if (ImageContext.Machine != OC_IMAGE_FILE_MACHINE) {
+    DEBUG ((DEBUG_INFO, "OCB: PeCoff wrong machine - %x\n", ImageContext.Machine));
     return EFI_UNSUPPORTED;
   }
   //
   // Reject RT drivers for the moment.
   //
   if (ImageContext.Subsystem == EFI_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER) {
+    DEBUG ((DEBUG_INFO, "OCB: PeCoff no support for RT drivers\n"));
     return EFI_UNSUPPORTED;
   }
   //
@@ -218,6 +221,7 @@ OcDirectLoadImage (
     ImageContext.SizeOfImage
     );
   if (ImageStatus != IMAGE_ERROR_SUCCESS) {
+    DEBUG ((DEBUG_INFO, "OCB: PeCoff load image error - %d\n", ImageStatus));
     FreePool (DestinationBuffer);
     return EFI_UNSUPPORTED;
   }
@@ -229,6 +233,7 @@ OcDirectLoadImage (
     (UINTN) DestinationBuffer
     );
   if (ImageStatus != IMAGE_ERROR_SUCCESS) {
+    DEBUG ((DEBUG_INFO, "OCB: PeCoff relocate image error - %d\n", ImageStatus));
     FreePool (DestinationBuffer);
     return EFI_UNSUPPORTED;
   }
@@ -273,6 +278,7 @@ OcDirectLoadImage (
     NULL
     );
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCB: PeCoff proto install error - %r\n", Status));
     FreePool (LoadedImage);
     FreePool (DestinationBuffer);
     return Status;

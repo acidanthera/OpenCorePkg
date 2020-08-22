@@ -331,9 +331,13 @@ InternalInitializePe (
   //
   // Determine the type of and retrieve data from the PE Optional Header.
   //
+  //
+  // FIXME: OptHdrPtr could point to unaligned memory.
+  //
   switch (*(CONST UINT16 *) OptHdrPtr) {
     case EFI_IMAGE_NT_OPTIONAL_HDR32_MAGIC:
       if (sizeof (*Pe32) > FileSize - Context->ExeHdrOffset) {
+        DEBUG ((DEBUG_INFO, "OCPE: Invalid 32-bit OPT header\n"));
         return IMAGE_ERROR_UNSUPPORTED;
       }
 
@@ -360,6 +364,7 @@ InternalInitializePe (
 
     case EFI_IMAGE_NT_OPTIONAL_HDR64_MAGIC:
       if (sizeof (*Pe32Plus) > FileSize - Context->ExeHdrOffset) {
+        DEBUG ((DEBUG_INFO, "OCPE: Invalid 64-bit OPT header\n"));
         return IMAGE_ERROR_UNSUPPORTED;
       }
 
@@ -390,16 +395,19 @@ InternalInitializePe (
   }
 
   if (PeCommon->FileHeader.NumberOfSections == 0) {
+    DEBUG ((DEBUG_INFO, "OCPE: No sections in the image\n"));
     return IMAGE_ERROR_UNSUPPORTED;
   }
   //
   // Do not load images with unknown directories.
   //
   if (NumberOfRvaAndSizes > EFI_IMAGE_NUMBER_OF_DIRECTORY_ENTRIES) {
+    DEBUG ((DEBUG_INFO, "OCPE: NumberOfRvaAndSizes is too high %u\n", NumberOfRvaAndSizes));
     return IMAGE_ERROR_UNSUPPORTED;
   }
 
   if (!IS_POW2 (Context->SectionAlignment)) {
+    DEBUG ((DEBUG_INFO, "OCPE: Invalid section alignment %u\n", Context->SectionAlignment));
     return IMAGE_ERROR_UNSUPPORTED;
   }
   //
@@ -427,12 +435,20 @@ InternalInitializePe (
              );
 
   if (Result) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCPE: Sections offset overflow %u + %u + %u\n",
+      Context->ExeHdrOffset,
+      (UINT32) sizeof (*PeCommon),
+      SizeOfOptionalHdr
+      ));
     return IMAGE_ERROR_UNSUPPORTED;
   }
   //
   // Ensure the section headers offset is properly aligned.
   //
   if (!OC_TYPE_ALIGNED (EFI_IMAGE_SECTION_HEADER, SectHdrOffset)) {
+    DEBUG ((DEBUG_INFO, "OCPE: Sections are unaligned %u\n", SectHdrOffset));
     return IMAGE_ERROR_UNSUPPORTED;
   }
 
@@ -448,6 +464,7 @@ InternalInitializePe (
              );
 
   if (Result) {
+    DEBUG ((DEBUG_INFO, "OCPE: Sections overflow %u %u\n", SectHdrOffset, PeCommon->FileHeader.NumberOfSections));
     return IMAGE_ERROR_UNSUPPORTED;
   }
   //
@@ -456,12 +473,15 @@ InternalInitializePe (
   //
   if (PeCommon->FileHeader.SizeOfOptionalHeader != SizeOfOptionalHdr
    || ImageSizeOfHeaders != Context->SizeOfHeaders) {
+    DEBUG ((DEBUG_INFO, "OCPE: SizeOfOptionalHeader %u %u\n", PeCommon->FileHeader.SizeOfOptionalHeader, SizeOfOptionalHdr));
+    DEBUG ((DEBUG_INFO, "OCPE: ImageSizeOfHeaders %u %u\n", ImageSizeOfHeaders, Context->SizeOfHeaders));
     return IMAGE_ERROR_UNSUPPORTED;
   }
   //
   // Ensure that all headers are in bounds of the file buffer.
   //
   if (Context->SizeOfHeaders > FileSize) {
+    DEBUG ((DEBUG_INFO, "OCPE: Context->SizeOfHeaders > FileSize %u %u\n", Context->SizeOfHeaders, FileSize));
     return IMAGE_ERROR_UNSUPPORTED;
   }
 
@@ -474,12 +494,14 @@ InternalInitializePe (
              &SizeOfImage
              );
   if (Status != IMAGE_ERROR_SUCCESS) {
+    DEBUG ((DEBUG_INFO, "OCPE: InternalVerifySections %d\n", Status));
     return Status;
   }  
   //
   // Ensure SizeOfImage is equal to the top of the image's virtual space.
   //
   if (Context->SizeOfImage != SizeOfImage) {
+    DEBUG ((DEBUG_INFO, "OCPE: Context->SizeOfImage != SizeOfImage %u %u\n", Context->SizeOfImage, SizeOfImage));
     return IMAGE_ERROR_UNSUPPORTED;
   }
   //
@@ -548,6 +570,9 @@ OcPeCoffLoaderInitializeContext (
   //
   ImageSig = (CONST CHAR8 *) Context->FileBuffer + Context->ExeHdrOffset;
 
+  //
+  // FIXME ExeHdrOffset could point to unaligned memory.
+  //
   if (FileSize - Context->ExeHdrOffset >= sizeof (EFI_TE_IMAGE_HEADER)
    && OC_TYPE_ALIGNED (EFI_TE_IMAGE_HEADER, Context->ExeHdrOffset)
    && *(CONST UINT16 *) ImageSig == EFI_TE_IMAGE_HEADER_SIGNATURE) {
