@@ -962,6 +962,7 @@ OcKernelFileOpen (
       if (DarwinVersion != mOcDarwinVersion || mUse32BitKernel != IsKernel32Bit) {
         //
         // Query command line arch= argument and fallback to SMBIOS checking.
+        // Arch argument will force the desired arch.
         //
         Status2 = OcAbcIs32BitPreferred (&mUse32BitKernel);
         if (EFI_ERROR (Status2)) {
@@ -1005,6 +1006,7 @@ OcKernelFileOpen (
             // Ensure we are now matching the requested arch.
             //
             if (mUse32BitKernel != IsKernel32Bit) {
+              DEBUG ((DEBUG_WARN, "OC: %a kernel architecture is not available, aborting.\n", mUse32BitKernel ? "32-bit" : "64-bit"));
               FreePool (Kernel);
               Status = EFI_INVALID_PARAMETER;
             }
