@@ -119,7 +119,7 @@ OcApfsConnectParentDevice (
     if (!EFI_ERROR (Status2)) {
       PrefixLength = GetDevicePathSize (ParentDevicePath) - END_DEVICE_PATH_LENGTH;
     } else {
-      DEBUG ((DEBUG_INFO, "OCJS: No parent device path - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCJS: No parent device path - %r\n", Status2));
       ParentDevicePath = NULL;
     }
   }
@@ -135,7 +135,7 @@ OcApfsConnectParentDevice (
           (VOID **) &ChildDevicePath
           );
         if (EFI_ERROR (Status2)) {
-          DEBUG ((DEBUG_INFO, "OCJS: No child device path - %r\n", Status));
+          DEBUG ((DEBUG_INFO, "OCJS: No child device path - %r\n", Status2));
           continue;
         }
 
@@ -155,6 +155,8 @@ OcApfsConnectParentDevice (
     }
 
     FreePool (HandleBuffer);
+  } else {
+    DEBUG ((DEBUG_INFO, "OCJS: BlockIo buffer error - %r\n", Status));
   }
 
   return Status;
