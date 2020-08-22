@@ -570,9 +570,6 @@ OcPeCoffLoaderInitializeContext (
   //
   ImageSig = (CONST CHAR8 *) Context->FileBuffer + Context->ExeHdrOffset;
 
-  //
-  // FIXME ExeHdrOffset could point to unaligned memory.
-  //
   if (FileSize - Context->ExeHdrOffset >= sizeof (EFI_TE_IMAGE_HEADER)
    && OC_TYPE_ALIGNED (EFI_TE_IMAGE_HEADER, Context->ExeHdrOffset)
    && *(CONST UINT16 *) ImageSig == EFI_TE_IMAGE_HEADER_SIGNATURE) {
