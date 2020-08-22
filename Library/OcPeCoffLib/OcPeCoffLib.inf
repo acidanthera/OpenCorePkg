@@ -1,0 +1,36 @@
+## @file
+#  PE/COFF Loader Library implementation.
+#
+#  Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
+#  Portions copyright (c) 2008 - 2009, Apple Inc. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OcPeCoffLib
+  FILE_GUID                      = 556f5d10-7309-4af4-b80a-8196bd60946e
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = OcPeCoffLib
+
+[Sources]
+  OcPeCoffLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  MemoryAllocationLib
+  OcGuardLib
+
+[FixedPcd]
+  gOpenCorePkgTokenSpaceGuid.PcdImageLoaderLoadHeader
+  gOpenCorePkgTokenSpaceGuid.PcdImageLoaderHashProhibitOverlap

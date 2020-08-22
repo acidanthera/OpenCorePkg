@@ -110,6 +110,7 @@
   OcGuardLib
   OcFileLib
   OcMachoLib
+  OcPeCoffLib
   OcRtcLib
   OcXmlLib
   TimerLib

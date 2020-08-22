@@ -1238,4 +1238,19 @@ OcRegisterBootOption (
   IN CONST CHAR16    *FilePath
   );
 
+EFI_STATUS
+OcDirectLoadImage (
+  IN  EFI_HANDLE  ParentImageHandle,
+  IN  VOID        *SourceBuffer OPTIONAL,
+  IN  UINTN       SourceSize,
+  OUT EFI_HANDLE  *ImageHandle
+  );
+
+EFI_STATUS
+OcDirectStartImage (
+  IN  EFI_HANDLE  ImageHandle,
+  OUT UINTN       *ExitDataSize,
+  OUT CHAR16      **ExitData OPTIONAL
+  );
+
 #endif // OC_BOOT_MANAGEMENT_LIB_H

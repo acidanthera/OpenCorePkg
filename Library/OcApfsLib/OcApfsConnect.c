@@ -273,10 +273,8 @@ ApfsStartDriver (
   }
 
   ImageHandle = NULL;
-  Status = gBS->LoadImage (
-    FALSE,
+  Status = OcDirectLoadImage (
     gImageHandle,
-    DevicePath,
     DriverBuffer,
     DriverSize,
     &ImageHandle
@@ -311,7 +309,7 @@ ApfsStartDriver (
     }
   }
 
-  Status = gBS->StartImage (
+  Status = OcDirectStartImage (
     ImageHandle,
     NULL,
     NULL
