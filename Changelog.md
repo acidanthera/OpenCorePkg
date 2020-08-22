@@ -20,6 +20,7 @@ OpenCore Changelog
 - Fixed XNU hook matching non-kernel files
 - Updated builtin firmware versions for SMBIOS and the rest
 - Fixed patching of ACPI tables in low memory
+- Fixed macOS 11.0 DMG recovery loading without hotplug
 
 #### v0.6.0
 - Fixed sound corruption with AudioDxe

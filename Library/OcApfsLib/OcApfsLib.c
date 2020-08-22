@@ -14,7 +14,10 @@
 
 #include "OcApfsInternal.h"
 #include <Library/OcApfsLib.h>
+#include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/DevicePathLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 #include <Protocol/BlockIo.h>
@@ -87,11 +90,14 @@ OcApfsConnectParentDevice (
   IN EFI_HANDLE  Handle  OPTIONAL
   )
 {
-  EFI_STATUS  Status;
-  EFI_STATUS  Status2;
-  UINTN       HandleCount;
-  EFI_HANDLE  *HandleBuffer;
-  UINTN       Index;
+  EFI_STATUS       Status;
+  EFI_STATUS       Status2;
+  UINTN            HandleCount;
+  EFI_HANDLE       *HandleBuffer;
+  EFI_DEVICE_PATH  *ParentDevicePath;
+  EFI_DEVICE_PATH  *ChildDevicePath;
+  UINTN            Index;
+  UINTN            PrefixLength;
 
   HandleCount = 0;
   Status = gBS->LocateHandleBuffer (
@@ -102,17 +108,40 @@ OcApfsConnectParentDevice (
     &HandleBuffer
     );
 
+  ParentDevicePath = NULL;
+  PrefixLength = 0;
+  if (Handle != NULL) {
+    Status2 = gBS->HandleProtocol (
+      Handle,
+      &gEfiDevicePathProtocolGuid,
+      (VOID **) &ParentDevicePath
+      );
+    if (!EFI_ERROR (Status2)) {
+      PrefixLength = GetDevicePathSize (ParentDevicePath) - END_DEVICE_PATH_LENGTH;
+    } else {
+      DEBUG ((DEBUG_INFO, "OCJS: No parent device path - %r\n", Status));
+      ParentDevicePath = NULL;
+    }
+  }
+
   if (!EFI_ERROR (Status)) {
     Status = EFI_NOT_FOUND;
 
     for (Index = 0; Index < HandleCount; ++Index) {
-      if (Handle != NULL) {
-        Status2 = EfiTestChildHandle (
-          Handle,
+      if (ParentDevicePath != NULL && PrefixLength > 0) {
+        Status2 = gBS->HandleProtocol (
           HandleBuffer[Index],
-          &gEfiBlockIoProtocolGuid
+          &gEfiDevicePathProtocolGuid,
+          (VOID **) &ChildDevicePath
           );
-        if (EFI_ERROR (Status)) {
+        if (EFI_ERROR (Status2)) {
+          DEBUG ((DEBUG_INFO, "OCJS: No child device path - %r\n", Status));
+          continue;
+        }
+
+        if (CompareMem (ParentDevicePath, ChildDevicePath, PrefixLength) == 0) {
+          DEBUG ((DEBUG_INFO, "OCJS: Matched device path\n"));
+        } else {
           continue;
         }
       }
@@ -124,6 +153,8 @@ OcApfsConnectParentDevice (
         Status = Status2;
       }
     }
+
+    FreePool (HandleBuffer);
   }
 
   return Status;

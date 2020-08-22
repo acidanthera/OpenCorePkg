@@ -50,11 +50,13 @@
   gApfsEfiBootRecordInfoProtocolGuid              ## PROTOCOL PRODUCES
   gApfsUnsupportedBdsProtocolGuid                 ## PROTOCOL CONSUMES
   gEfiLoadedImageProtocolGuid                     ## PROTOCOL CONSUMES
+  gEfiDevicePathProtocolGuid
 
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
   DebugLib
+  DevicePathLib
   OcAppleImageVerificationLib
   OcConsoleLib
   OcDriverConnectionLib
