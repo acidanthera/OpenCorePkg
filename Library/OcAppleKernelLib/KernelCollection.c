@@ -787,3 +787,40 @@ KcKextApplyFileDelta (
 
   return EFI_SUCCESS;
 }
+
+UINT64
+KcFixupValue (
+  IN UINT64             Value,
+  IN CONST CHAR8        *Name OPTIONAL
+  )
+{
+  MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE  *Rebase;
+
+  //
+  // For all non-kernel (which uses own relocation) all virtual tables
+  // and several other symbols will contain fixups exclusively.
+  // For now we will just detect them by the kernel address
+  // as it is faster than compare Kext->Identifier and Context->IsKernelCollection.
+  //
+  if ((Value & KERNEL_ADDRESS_MASK) != KERNEL_ADDRESS_BASE
+    && (Value & KERNEL_ADDRESS_MASK) != KERNEL_ADDRESS_KEXT) {
+    //
+    // FIXME: This needs a bit more love with aliasing and alignment.
+    // Some day, when Intel rewrites EDK II.
+    //
+    Rebase = (MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE *)(UINTN) &Value;
+    DEBUG_CODE_BEGIN ();
+    if (Rebase->CacheLevel != 0
+      || Rebase->Diversity != 0
+      || Rebase->AddrDiv != 0
+      || Rebase->Key != 0
+      || Rebase->IsAuth != 0) {
+      DEBUG ((DEBUG_INFO, "OCAK: Invalid fixup %Lx for %a\n", Value, Name != NULL ? Name : "<none>"));
+    }
+    DEBUG_CODE_END ();
+
+    Value = Rebase->Target + KERNEL_FIXUP_OFFSET + KERNEL_ADDRESS_BASE;
+  }
+
+  return Value;
+}

@@ -100,7 +100,6 @@ InternalConstructVtablePrelinked64 (
   UINT64                                        Value;
   UINT32                                        Index;
   CONST PRELINKED_KEXT_SYMBOL                   *Symbol;
-  MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE  *Rebase;
 
   ASSERT (Kext != NULL);
   ASSERT (VtableLookup != NULL);
@@ -125,29 +124,8 @@ InternalConstructVtablePrelinked64 (
     ++Index
     ) {
 
-    //
-    // For all non-kernel (which uses own relocation) virtual tables
-    // all virtual tables will contain fixups exclusively.
-    // For now we will just detect them by the kernel address
-    // as it is faster than compare Kext->Identifier and Context->IsKernelCollection.
-    //
-    if (Context->IsKernelCollection && (Value & KERNEL_ADDRESS_MASK) != KERNEL_ADDRESS_BASE) {
-      //
-      // FIXME: This needs a bit more love with aliasing and alignment.
-      // Some day, when Intel rewrites EDK II.
-      //
-      Rebase = (MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE *)(UINTN) &Value;
-      DEBUG_CODE_BEGIN ();
-      if (Rebase->CacheLevel != 0
-        || Rebase->Diversity != 0
-        || Rebase->AddrDiv != 0
-        || Rebase->Key != 0
-        || Rebase->IsAuth != 0) {
-        DEBUG ((DEBUG_INFO, "OCAK: Invalid fixup %Lx in %a for %a\n", Value, Vtable->Name, Kext->Identifier));
-      }
-      DEBUG_CODE_END ();
-
-      Value = Rebase->Target + KERNEL_FIXUP_OFFSET + KERNEL_ADDRESS_BASE;
+    if (Context->IsKernelCollection) {
+      Value = KcFixupValue (Value, Kext->Identifier);
     }
 
     //

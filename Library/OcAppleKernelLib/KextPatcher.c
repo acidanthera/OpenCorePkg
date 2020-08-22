@@ -270,6 +270,7 @@ PatcherBlockKext (
   )
 {
   UINT64           KmodOffset;
+  UINT64           StartAddr;
   UINT64           TmpOffset;
   KMOD_INFO_64_V1  *KmodInfo;
   UINT8            *PatchAddr;
@@ -283,14 +284,16 @@ PatcherBlockKext (
 
   KmodOffset = Context->VirtualKmod - Context->VirtualBase;
   KmodInfo   = (KMOD_INFO_64_V1 *)((UINT8 *) MachoGetMachHeader64 (&Context->MachContext) + KmodOffset);
+  StartAddr  = KcFixupValue (KmodInfo->StartAddr, NULL);;
+
   if (OcOverflowAddU64 (KmodOffset, sizeof (KMOD_INFO_64_V1), &TmpOffset)
-    || KmodOffset > MachoGetFileSize (&Context->MachContext)
-    || KmodInfo->StartAddr == 0
-    || Context->VirtualBase > KmodInfo->StartAddr) {
+    || TmpOffset > MachoGetFileSize (&Context->MachContext)
+    || StartAddr == 0
+    || Context->VirtualBase > StartAddr) {
     return EFI_INVALID_PARAMETER;
   }
 
-  TmpOffset = KmodInfo->StartAddr - Context->VirtualBase;
+  TmpOffset = StartAddr - Context->VirtualBase;
   if (TmpOffset > MachoGetFileSize (&Context->MachContext) - 6) {
     return EFI_BUFFER_TOO_SMALL;
   }
