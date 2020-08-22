@@ -625,5 +625,11 @@ OcPlatformIs64BitSupported (
   IN UINT32     KernelVersion
   )
 {
+#if defined(MDE_CPU_IA32)
+  return FALSE;
+#elif defined(MDE_CPU_X64)
   return IsMacModel64BitCompatible (mCurrentSmbiosProductName, KernelVersion);
+#else
+#error "Unsupported architecture"
+#endif
 }

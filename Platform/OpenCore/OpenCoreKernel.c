@@ -952,7 +952,7 @@ OcKernelFileOpen (
         //
         // If a different kernel arch is required, but we did not originally read it,
         // we'll need to try to get the kernel again.
-        // 
+        //
         mUse32BitKernel = !OcPlatformIs64BitSupported (DarwinVersion);
         if (mUse32BitKernel != IsKernel32Bit) {
           FreePool (Kernel);
@@ -1215,8 +1215,15 @@ OcLoadKernelSupport (
     mOcConfiguration        = Config;
     mOcCpuInfo              = CpuInfo;
     mOcDarwinVersion        = 0;
-    mUse32BitKernel         = FALSE;
     mOcCachelessInProgress  = FALSE;
+
+#if defined(MDE_CPU_IA32)
+    Use32BitKernel         = TRUE;
+#elif defined(MDE_CPU_X64)
+    mUse32BitKernel         = FALSE;
+#else
+#error "Unsupported architecture"
+#endif
   } else {
     DEBUG ((DEBUG_ERROR, "OC: Failed to enable vfs - %r\n", Status));
   }
