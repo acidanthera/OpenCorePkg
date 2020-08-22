@@ -549,11 +549,13 @@ OcPeCoffLoaderInitializeContext (
   ImageSig = (CONST CHAR8 *) Context->FileBuffer + Context->ExeHdrOffset;
 
   if (FileSize - Context->ExeHdrOffset >= sizeof (EFI_TE_IMAGE_HEADER)
+   && OC_TYPE_ALIGNED (EFI_TE_IMAGE_HEADER, Context->ExeHdrOffset)
    && *(CONST UINT16 *) ImageSig == EFI_TE_IMAGE_HEADER_SIGNATURE) {
     return InternalInitializeTe (Context, FileSize);
   }
   
   if (FileSize - Context->ExeHdrOffset >= sizeof (EFI_IMAGE_NT_HEADERS_COMMON_HDR)
+   && OC_TYPE_ALIGNED (EFI_IMAGE_NT_HEADERS_COMMON_HDR, Context->ExeHdrOffset)
    && *(CONST UINT32 *) ImageSig == EFI_IMAGE_NT_SIGNATURE) {
     return InternalInitializePe (Context, FileSize);
   }
