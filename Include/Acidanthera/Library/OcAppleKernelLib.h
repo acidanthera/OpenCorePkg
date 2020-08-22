@@ -411,7 +411,7 @@ typedef struct {
   //
   // CPU type.
   //
-  BOOLEAN                   Is64Bit;
+  BOOLEAN                   Is32Bit;
   //
   // Current number of kexts.
   //
@@ -558,7 +558,8 @@ KernelQuirkApply (
   mkext, an error is returned.
 
   @param[in]      File           File handle instance.
-  @param[in]      CpuType        Desired architecture of mkext.
+  @param[in]      Prefer32Bit    Prefer 32-bit in case of fat binary.
+  @param[out]     Is32Bit        Whether resulting kernel is 32-bit or not.
   @param[in,out]  Kernel         Resulting non-fat kernel buffer from pool.
   @param[out]     KernelSize     Actual kernel size.
   @param[out]     AllocatedSize  Allocated kernel size (AllocatedSize >= KernelSize).
@@ -570,12 +571,39 @@ KernelQuirkApply (
 EFI_STATUS
 ReadAppleKernel (
   IN     EFI_FILE_PROTOCOL  *File,
-  IN     MACH_CPU_TYPE      CpuType,
+  IN     BOOLEAN            Prefer32Bit,
+     OUT BOOLEAN            *Is32Bit,
      OUT UINT8              **Kernel,
      OUT UINT32             *KernelSize,
      OUT UINT32             *AllocatedSize,
   IN     UINT32             ReservedSize,
      OUT UINT8              *Digest  OPTIONAL
+  );
+
+/**
+  Read mkext for target architecture (possibly decompressing)
+  into pool allocated buffer. If CpuType does not exist in fat
+  mkext, an error is returned.
+
+  @param[in]     File             File handle instance.
+  @param[in]     Prefer32Bit      Prefer 32-bit in case of fat binary.
+  @param[in,out] Mkext            Resulting non-fat mkext buffer from pool.
+  @param[out]    MkextSize        Actual mkext size.
+  @param[out]    AllocatedSize    Allocated mkext size (AllocatedSize >= MkextSize).
+  @param[in]     ReservedSize     Allocated extra size for added kernel extensions.
+  @param[in]     NumReservedKexts Number of kext slots to reserve in mkext.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+ReadAppleMkext (
+  IN     EFI_FILE_PROTOCOL  *File,
+  IN     BOOLEAN            Prefer32Bit,
+     OUT UINT8              **Mkext,
+     OUT UINT32             *MkextSize,
+     OUT UINT32             *AllocatedSize,
+  IN     UINT32             ReservedSize,
+  IN     UINT32             NumReservedKexts
   );
 
 /**
@@ -1240,32 +1268,6 @@ MkextContextApplyQuirk (
 EFI_STATUS
 MkextInjectPatchComplete (
   IN OUT MKEXT_CONTEXT      *Context
-  );
-
-/**
-  Read mkext for target architecture (possibly decompressing)
-  into pool allocated buffer. If CpuType does not exist in fat
-  mkext, an error is returned.
-
-  @param[in]     File             File handle instance.
-  @param[in]     CpuType          Desired architecture of mkext.
-  @param[in,out] Mkext            Resulting non-fat mkext buffer from pool.
-  @param[out]    MkextSize        Actual mkext size.
-  @param[out]    AllocatedSize    Allocated mkext size (AllocatedSize >= MkextSize).
-  @param[in]     ReservedSize     Allocated extra size for added kernel extensions.
-  @param[in]     NumReservedKexts Number of kext slots to reserve in mkext.
-
-  @return  EFI_SUCCESS on success.
-**/
-EFI_STATUS
-ReadAppleMkext (
-  IN     EFI_FILE_PROTOCOL  *File,
-  IN     MACH_CPU_TYPE      CpuType,
-     OUT UINT8              **Mkext,
-     OUT UINT32             *MkextSize,
-     OUT UINT32             *AllocatedSize,
-  IN     UINT32             ReservedSize,
-  IN     UINT32             NumReservedKexts
   );
 
 #endif // OC_APPLE_KERNEL_LIB_H

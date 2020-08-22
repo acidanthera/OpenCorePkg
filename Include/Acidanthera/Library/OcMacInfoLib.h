@@ -95,4 +95,17 @@ GetMacInfo (
   OUT MAC_INFO_DATA  *MacInfo
   );
 
+/**
+  Determine if specified model and kernel version can
+  run in 64-bit kernel mode.
+
+  @param[in] ProductName        Product to get information for.
+  @param[in] KernelVersion      Kernel version.
+**/
+BOOLEAN
+IsMacModel64BitCompatible (
+  IN CONST CHAR8    *ProductName,
+  IN UINT32         KernelVersion
+  );
+
 #endif // OC_MAC_INFO_LIB_H

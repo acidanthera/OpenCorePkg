@@ -33,6 +33,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Guid/AppleVariable.h>
 
+STATIC CONST CHAR8     *mCurrentSmbiosProductName;
+
 STATIC
 VOID
 OcPlatformUpdateDataHub (
@@ -352,6 +354,9 @@ OcPlatformUpdateSmbios (
     }
   }
 
+  DEBUG ((DEBUG_INFO, "OC: New SMBIOS: %a model %a\n", Data.SystemManufacturer, Data.SystemProductName));
+  mCurrentSmbiosProductName = Data.SystemProductName;
+
   Status = OcSmbiosCreate (SmbiosTable, &Data, UpdateMode, CpuInfo);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OC: Failed to update SMBIOS - %r\n", Status));
@@ -582,6 +587,9 @@ OcLoadPlatformSupport (
         OcSmbiosExposeOemInfo (&SmbiosTable);
       }
 
+      mCurrentSmbiosProductName = OcSmbiosGetProductName (&SmbiosTable);
+      DEBUG ((DEBUG_INFO, "OC: Current SMBIOS: %a model %a\n", OcSmbiosGetManufacturer (&SmbiosTable), mCurrentSmbiosProductName));
+
       if (Config->PlatformInfo.UpdateSmbios) {
         SmbiosUpdateStr  = OC_BLOB_GET (&Config->PlatformInfo.UpdateSmbiosMode);
 
@@ -610,4 +618,18 @@ OcLoadPlatformSupport (
   if (Config->PlatformInfo.UpdateNvram) {
     OcPlatformUpdateNvram (Config, UsedMacInfo);
   }
+}
+
+BOOLEAN
+OcPlatformIs64BitSupported (
+  IN UINT32     KernelVersion
+  )
+{
+#if defined(MDE_CPU_IA32)
+  return FALSE;
+#elif defined(MDE_CPU_X64)
+  return IsMacModel64BitCompatible (mCurrentSmbiosProductName, KernelVersion);
+#else
+#error "Unsupported architecture"
+#endif
 }

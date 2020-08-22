@@ -134,9 +134,10 @@ STATIC
 EFI_STATUS
 ParseFatArchitecture (
   IN     EFI_FILE_PROTOCOL  *File,
-  IN     MACH_CPU_TYPE      CpuType,
+  IN     BOOLEAN            Prefer32Bit,
   IN     UINT8              *Buffer,
   IN     UINT32             BufferSize,
+     OUT BOOLEAN            *Is32Bit,
      OUT UINT32             *FatOffset,
      OUT UINT32             *FatSize
   )
@@ -152,7 +153,32 @@ ParseFatArchitecture (
     return EFI_INVALID_PARAMETER;
   }
 
-  return FatGetArchitectureOffset (Buffer, BufferSize, FileSize, CpuType, FatOffset, FatSize);
+  Status = FatGetArchitectureOffset (
+    Buffer,
+    BufferSize,
+    FileSize,
+    Prefer32Bit ? MachCpuTypeI386 : MachCpuTypeX8664,
+    FatOffset,
+    FatSize
+    );
+  *Is32Bit = Prefer32Bit;
+
+  //
+  // If desired arch is not found, retry with inverse.
+  //
+  if (Status == EFI_NOT_FOUND) {
+    Status = FatGetArchitectureOffset (
+      Buffer,
+      BufferSize,
+      FileSize,
+      !Prefer32Bit ? MachCpuTypeI386 : MachCpuTypeX8664,
+      FatOffset,
+      FatSize
+      );
+    *Is32Bit = !Prefer32Bit;
+  }
+
+  return Status;
 }
 
 STATIC
@@ -234,7 +260,8 @@ STATIC
 EFI_STATUS
 ReadAppleKernelImage (
   IN     EFI_FILE_PROTOCOL  *File,
-  IN     MACH_CPU_TYPE      CpuType,
+  IN     BOOLEAN            Prefer32Bit,
+     OUT BOOLEAN            *Is32Bit,
   IN OUT UINT8              **Buffer,
      OUT UINT32             *KernelSize,
      OUT UINT32             *AllocatedSize,
@@ -271,13 +298,18 @@ ReadAppleKernelImage (
         //
         // Ensure we have the desired arch.
         //
-        if ((CpuType == MachCpuTypeI386 && *MagicPtr != MACH_HEADER_SIGNATURE)
-          || (CpuType == MachCpuTypeX8664 && *MagicPtr != MACH_HEADER_64_SIGNATURE)) {
-          DEBUG ((DEBUG_INFO, "OCAK: Invalid kernel magic %08X for architecture %X\n", *MagicPtr, CpuType));
+        if ((*Is32Bit && *MagicPtr != MACH_HEADER_SIGNATURE)
+          || (!*Is32Bit && *MagicPtr != MACH_HEADER_64_SIGNATURE)) {
           return EFI_INVALID_PARAMETER;
         }
-
-        DEBUG ((DEBUG_VERBOSE, "OCAK: Found Mach-O arch %X compressed %d offset %u size %u\n", CpuType, Compressed, Offset, *KernelSize));
+        DEBUG ((
+          DEBUG_VERBOSE,
+          "OCAK: Found %a Mach-O compressed %d offset %u size %u\n",
+          *Is32Bit ? "32-bit" : "64-bit",
+          Compressed,
+          Offset,
+          *KernelSize
+          ));
 
         //
         // This is just a valid (formerly) compressed image.
@@ -322,11 +354,11 @@ ReadAppleKernelImage (
           return EFI_INVALID_PARAMETER;
         }
 
-        Status = ParseFatArchitecture (File, CpuType, *Buffer, KERNEL_HEADER_SIZE, &Offset, KernelSize);
+        Status = ParseFatArchitecture (File, Prefer32Bit, *Buffer, KERNEL_HEADER_SIZE, Is32Bit, &Offset, KernelSize);
         if (EFI_ERROR (Status)) {
           return Status;
         }
-        return ReadAppleKernelImage (File, CpuType, Buffer, KernelSize, AllocatedSize, ReservedSize, Offset);
+        return ReadAppleKernelImage (File, Prefer32Bit, Is32Bit, Buffer, KernelSize, AllocatedSize, ReservedSize, Offset);
       }
       case MACH_COMPRESSED_BINARY_INVERT_SIGNATURE:
       {
@@ -360,7 +392,8 @@ ReadAppleKernelImage (
 EFI_STATUS
 ReadAppleKernel (
   IN     EFI_FILE_PROTOCOL  *File,
-  IN     MACH_CPU_TYPE      CpuType,
+  IN     BOOLEAN            Prefer32Bit,
+     OUT BOOLEAN            *Is32Bit,
      OUT UINT8              **Kernel,
      OUT UINT32             *KernelSize,
      OUT UINT32             *AllocatedSize,
@@ -373,6 +406,7 @@ ReadAppleKernel (
   UINT8       *Remainder;
 
   ASSERT (File != NULL);
+  ASSERT (Is32Bit != NULL);
   ASSERT (Kernel != NULL);
   ASSERT (KernelSize != NULL);
   ASSERT (AllocatedSize != NULL);
@@ -393,7 +427,8 @@ ReadAppleKernel (
 
   Status = ReadAppleKernelImage (
     File,
-    CpuType,
+    Prefer32Bit,
+    Is32Bit,
     Kernel,
     KernelSize,
     AllocatedSize,
@@ -448,7 +483,7 @@ ReadAppleKernel (
 EFI_STATUS
 ReadAppleMkext (
   IN     EFI_FILE_PROTOCOL  *File,
-  IN     MACH_CPU_TYPE      CpuType,
+  IN     BOOLEAN            Prefer32Bit,
      OUT UINT8              **Mkext,
      OUT UINT32             *MkextSize,
      OUT UINT32             *AllocatedSize,
@@ -458,6 +493,7 @@ ReadAppleMkext (
 {
   EFI_STATUS        Status;
   UINT32            Offset;
+  BOOLEAN           Is32Bit;
   UINT8             *TmpMkext;
   UINT32            TmpMkextSize;
 
@@ -480,10 +516,13 @@ ReadAppleMkext (
     FreePool (TmpMkext);
     return Status;
   }
-  Status = ParseFatArchitecture (File, CpuType, TmpMkext, TmpMkextSize, &Offset, &TmpMkextSize);
+  Status = ParseFatArchitecture (File, Prefer32Bit, TmpMkext, TmpMkextSize, &Is32Bit, &Offset, &TmpMkextSize);
   FreePool (TmpMkext);
   if (EFI_ERROR (Status)) {
     return Status;
+  }
+  if (Prefer32Bit != Is32Bit) {
+    return EFI_NOT_FOUND;
   }
 
   //
@@ -502,11 +541,11 @@ ReadAppleMkext (
   //
   // Verify mkext arch.
   //
-  if (!MkextCheckCpuType (TmpMkext, TmpMkextSize, CpuType)) {
+  if (!MkextCheckCpuType (TmpMkext, TmpMkextSize, Prefer32Bit ? MachCpuTypeI386 : MachCpuTypeX8664)) {
     FreePool (TmpMkext);
     return EFI_UNSUPPORTED;
   }
-  DEBUG ((DEBUG_INFO, "OCAK: Got mkext of %u bytes with 0x%X arch\n", TmpMkextSize, CpuType));
+  DEBUG ((DEBUG_VERBOSE, "OCAK: Found %a mkext offset %u size %u\n", Prefer32Bit ? "32-bit" : "64-bit", Offset, TmpMkextSize));
 
   //
   // Calculate size of decompressed mkext.

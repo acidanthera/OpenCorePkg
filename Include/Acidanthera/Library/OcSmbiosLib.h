@@ -203,6 +203,16 @@ OcSmbiosGetSmcVersion (
   OUT UINT8        *SmcVersion
   );
 
+CHAR8*
+OcSmbiosGetManufacturer (
+  IN OC_SMBIOS_TABLE   *SmbiosTable
+  );
+
+CHAR8*
+OcSmbiosGetProductName (
+  IN OC_SMBIOS_TABLE   *SmbiosTable
+  );
+
 EFI_STATUS
 OcSmbiosDump (
   IN EFI_FILE_PROTOCOL  *Root
