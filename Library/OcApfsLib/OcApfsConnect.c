@@ -434,7 +434,8 @@ OcApfsConfigure (
 
 EFI_STATUS
 OcApfsConnectDevice (
-  IN EFI_HANDLE  Handle
+  IN EFI_HANDLE  Handle,
+  IN BOOLEAN     VerifyPolicy
   )
 {
   EFI_STATUS             Status;
@@ -477,8 +478,11 @@ OcApfsConnectDevice (
   // - Which have non-POT block size.
   //
   if (BlockIo->Media == NULL
-    || !BlockIo->Media->LogicalPartition
-    || BlockIo->Media->BlockSize == 0
+    || !BlockIo->Media->LogicalPartition) {
+    return EFI_UNSUPPORTED;
+  }
+
+  if (BlockIo->Media->BlockSize == 0
     || (BlockIo->Media->BlockSize & (BlockIo->Media->BlockSize - 1)) != 0) {
     DEBUG ((
       DEBUG_INFO,
@@ -492,10 +496,12 @@ OcApfsConnectDevice (
   //
   // Filter out handles, which do not respect OpenCore policy.
   //
-  Status = ApfsCheckOpenCoreScanPolicy (Handle);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCJS: Cannot connect, Policy error - %r\n", Status));
-    return Status;
+  if (VerifyPolicy) {
+    Status = ApfsCheckOpenCoreScanPolicy (Handle);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCJS: Cannot connect, Policy error - %r\n", Status));
+      return Status;
+    }
   }
 
   //

@@ -73,24 +73,28 @@ OcApfsConfigure (
   Connect APFS driver to partitions on media handle.
 
   @param[in] Handle   Media handle (disk).
+  @param[in] VerifyPolicy  Apply ScanPolicy rules.
 
   @retval EFI_SUCCESS if the device was connected.
 **/
 EFI_STATUS
 OcApfsConnectParentDevice (
-  IN EFI_HANDLE  Handle  OPTIONAL
+  IN EFI_HANDLE  Handle  OPTIONAL,
+  IN BOOLEAN     VerifyPolicy
   );
 
 /**
   Connect APFS driver to a device at handle.
 
-  @param[in] Handle   Device handle (APFS container).
+  @param[in] Handle        Device handle (APFS container).
+  @param[in] VerifyPolicy  Apply ScanPolicy rules.
 
   @retval EFI_SUCCESS if the device was connected.
 **/
 EFI_STATUS
 OcApfsConnectDevice (
-  IN EFI_HANDLE  Handle
+  IN EFI_HANDLE  Handle,
+  IN BOOLEAN     VerifyPolicy
   );
 
 /**

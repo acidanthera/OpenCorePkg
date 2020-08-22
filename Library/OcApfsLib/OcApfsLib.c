@@ -46,7 +46,7 @@ ApfsNewPartitionArrived (
       &Handle
       );
     if (!EFI_ERROR (Status)) {
-      OcApfsConnectDevice (Handle);
+      OcApfsConnectDevice (Handle, TRUE);
     } else {
       break;
     }
@@ -87,7 +87,8 @@ ApfsMonitorNewPartitions (
 
 EFI_STATUS
 OcApfsConnectParentDevice (
-  IN EFI_HANDLE  Handle  OPTIONAL
+  IN EFI_HANDLE  Handle  OPTIONAL,
+  IN BOOLEAN     VerifyPolicy
   )
 {
   EFI_STATUS       Status;
@@ -147,7 +148,8 @@ OcApfsConnectParentDevice (
       }
 
       Status2 = OcApfsConnectDevice (
-        HandleBuffer[Index]
+        HandleBuffer[Index],
+        VerifyPolicy
         );
       if (!EFI_ERROR (Status2)) {
         Status = Status2;
@@ -176,5 +178,5 @@ OcApfsConnectDevices (
     }
   }
 
-  return OcApfsConnectParentDevice (NULL);
+  return OcApfsConnectParentDevice (NULL, TRUE);
 }

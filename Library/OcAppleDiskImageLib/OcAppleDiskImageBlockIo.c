@@ -292,7 +292,7 @@ OcAppleDiskImageInstallBlockIo (
 
   Status = gBS->ConnectController (BlockIoHandle, NULL, NULL, TRUE);
   if (!EFI_ERROR (Status)) {
-    OcApfsConnectParentDevice (BlockIoHandle);
+    OcApfsConnectParentDevice (BlockIoHandle, FALSE);
   } else {
     DEBUG ((DEBUG_INFO, "OCDI: Failed to connect DMG handle %r\n", Status));
 
