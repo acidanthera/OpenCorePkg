@@ -317,7 +317,7 @@ InternalInitializePe (
   CONST VOID                            *OptHdrPtr;
   UINT32                                HdrSizeWithoutDataDir;
   UINT32                                SizeOfOptionalHdr;
-  UINT32                                ImageSizeOfHeaders;
+  UINT32                                SizeOfHeaders;
   CONST EFI_IMAGE_DATA_DIRECTORY        *RelocDir;
   UINT32                                NumberOfRvaAndSizes;
   UINT32                                SectHdrOffset;
@@ -362,7 +362,7 @@ InternalInitializePe (
       RelocDir = Pe32->DataDirectory + EFI_IMAGE_DIRECTORY_ENTRY_BASERELOC;
 
       Context->SizeOfImage         = Pe32->SizeOfImage;
-      ImageSizeOfHeaders           = Pe32->SizeOfHeaders;
+      Context->SizeOfHeaders       = Pe32->SizeOfHeaders;
       Context->ImageBase           = Pe32->ImageBase;
       Context->AddressOfEntryPoint = Pe32->AddressOfEntryPoint;
       Context->SectionAlignment    = Pe32->SectionAlignment;
@@ -390,7 +390,7 @@ InternalInitializePe (
       RelocDir = Pe32Plus->DataDirectory + EFI_IMAGE_DIRECTORY_ENTRY_BASERELOC;
 
       Context->SizeOfImage         = Pe32Plus->SizeOfImage;
-      ImageSizeOfHeaders           = Pe32Plus->SizeOfHeaders;
+      Context->SizeOfHeaders       = Pe32Plus->SizeOfHeaders;
       Context->ImageBase           = Pe32Plus->ImageBase;
       Context->AddressOfEntryPoint = Pe32Plus->AddressOfEntryPoint;
       Context->SectionAlignment    = Pe32Plus->SectionAlignment;
@@ -468,7 +468,7 @@ InternalInitializePe (
   Result = OcOverflowAddU32 (
              SectHdrOffset,
              (UINT32) PeCommon->FileHeader.NumberOfSections * sizeof (EFI_IMAGE_SECTION_HEADER),
-             &Context->SizeOfHeaders
+             &SizeOfHeaders
              );
 
   if (Result) {
@@ -479,10 +479,10 @@ InternalInitializePe (
   // Ensure the header sizes are sane. SizeOfHeaders contains all header
   // components (DOS, PE Common and Optional Header).
   //
-  if (PeCommon->FileHeader.SizeOfOptionalHeader != SizeOfOptionalHdr
-   || ImageSizeOfHeaders != Context->SizeOfHeaders) {
+  if (PeCommon->FileHeader.SizeOfOptionalHeader < SizeOfOptionalHdr
+   || Context->SizeOfHeaders < SizeOfHeaders) {
     DEBUG ((DEBUG_INFO, "OCPE: SizeOfOptionalHeader %u %u\n", PeCommon->FileHeader.SizeOfOptionalHeader, SizeOfOptionalHdr));
-    DEBUG ((DEBUG_INFO, "OCPE: ImageSizeOfHeaders %u %u\n", ImageSizeOfHeaders, Context->SizeOfHeaders));
+    DEBUG ((DEBUG_INFO, "OCPE: ImageSizeOfHeaders %u %u\n", Context->SizeOfHeaders, SizeOfHeaders));
     return IMAGE_ERROR_UNSUPPORTED;
   }
   //
