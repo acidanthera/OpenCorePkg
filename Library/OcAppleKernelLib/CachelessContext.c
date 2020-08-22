@@ -649,7 +649,8 @@ EFI_STATUS
 CachelessContextInit (
   IN OUT CACHELESS_CONTEXT    *Context,
   IN     CONST CHAR16         *FileName,
-  IN     EFI_FILE_PROTOCOL    *ExtensionsDir
+  IN     EFI_FILE_PROTOCOL    *ExtensionsDir,
+  IN     UINT32               KernelVersion
   )
 {
   ASSERT (Context != NULL);
@@ -660,6 +661,7 @@ CachelessContextInit (
 
   Context->ExtensionsDir          = ExtensionsDir;
   Context->ExtensionsDirFileName  = FileName;
+  Context->KernelVersion          = KernelVersion;
   
   InitializeListHead (&Context->InjectedKexts);
   InitializeListHead (&Context->InjectedDependencies);
@@ -1424,7 +1426,7 @@ CachelessContextHookBuiltin (
         KextPatch = GET_KEXT_PATCH_FROM_LINK (KextLink);
 
         if (KextPatch->ApplyQuirk) {
-          Status = KernelQuirkApply (KextPatch->QuirkName, &Patcher);
+          Status = KernelApplyQuirk (KextPatch->QuirkName, &Patcher, Context->KernelVersion);
           DEBUG ((
             EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
             "OCAK: Kernel quirk result for %a (%u) - %r\n",

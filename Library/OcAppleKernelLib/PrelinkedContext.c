@@ -1161,7 +1161,8 @@ PrelinkedContextApplyPatch (
 EFI_STATUS
 PrelinkedContextApplyQuirk (
   IN OUT PRELINKED_CONTEXT    *Context,
-  IN     KERNEL_QUIRK_NAME    Quirk
+  IN     KERNEL_QUIRK_NAME    Quirk,
+  IN     UINT32               KernelVersion
   )
 {
   EFI_STATUS            Status;
@@ -1179,5 +1180,5 @@ PrelinkedContextApplyQuirk (
     return Status;
   }
 
-  return KernelQuirk->PatchFunction (&Patcher);
+  return KernelQuirk->PatchFunction (&Patcher, KernelVersion);
 }

@@ -99,7 +99,8 @@ mAppleIntelCPUPowerManagementPatch2 = {
 STATIC
 EFI_STATUS
 PatchAppleCpuPmCfgLock (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   EFI_STATUS          Status;
@@ -199,7 +200,8 @@ mXcpmCfgLockDbgPatch = {
 STATIC
 EFI_STATUS
 PatchAppleXcpmCfgLock (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   EFI_STATUS          Status;
@@ -323,7 +325,8 @@ mMiscPwrMgmtDbgPatch = {
 STATIC
 EFI_STATUS
 PatchAppleXcpmExtraMsrs (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   EFI_STATUS          Status;
@@ -443,7 +446,8 @@ mPerfCtrlMax[] = {
 STATIC
 EFI_STATUS
 PatchAppleXcpmForceBoost (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   UINT8   *Start;
@@ -582,7 +586,8 @@ mRemoveUsbLimitIoP1Patch = {
 STATIC
 EFI_STATUS
 PatchUsbXhciPortLimit1 (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   EFI_STATUS  Status;
@@ -591,11 +596,16 @@ PatchUsbXhciPortLimit1 (
   // On 10.14.4 and newer IOUSBHostFamily also needs limit removal.
   // Thanks to ydeng discovering this.
   //
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION(18, 5, 0), 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping port patch IOUSBHostFamily on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
   Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitIoP1Patch);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply P1 patch com.apple.iokit.IOUSBHostFamily - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply port patch com.apple.iokit.IOUSBHostFamily - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOUSBHostFamily\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success port com.apple.iokit.IOUSBHostFamily\n"));
   }
 
   return Status;
@@ -604,13 +614,19 @@ PatchUsbXhciPortLimit1 (
 STATIC
 EFI_STATUS
 PatchUsbXhciPortLimit2 (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   EFI_STATUS  Status;
 
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping legacy port patch AppleUSBXHCIPCI on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
   //
-  // TODO: Implement some locationID hack in IOUSBHFamily.
+  // TODO: Implement some locationID hack in IOUSBHostFamily.
   // The location ID is a 32 bit number which is unique among all USB devices in the system,
   // and which will not change on a system reboot unless the topology of the bus itself changes.
   // See AppleUSBHostPort::setPortLocation():
@@ -647,7 +663,8 @@ PatchUsbXhciPortLimit2 (
 STATIC
 EFI_STATUS
 PatchUsbXhciPortLimit3 (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   EFI_STATUS  Status;
@@ -720,7 +737,8 @@ mIOAHCIBlockStoragePatchV2 = {
 STATIC
 EFI_STATUS
 PatchThirdPartyDriveSupport (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   EFI_STATUS       Status;
@@ -771,7 +789,8 @@ mIOAHCIPortPatch = {
 STATIC
 EFI_STATUS
 PatchForceInternalDiskIcons (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   EFI_STATUS          Status;
@@ -815,7 +834,8 @@ mAppleIoMapperPatch = {
 STATIC
 EFI_STATUS
 PatchAppleIoMapperSupport (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   EFI_STATUS          Status;
@@ -853,7 +873,8 @@ mAppleDummyCpuPmPatch = {
 STATIC
 EFI_STATUS
 PatchDummyPowerManagement (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   EFI_STATUS          Status;
@@ -898,7 +919,8 @@ mIncreasePciBarSizePatch = {
 STATIC
 EFI_STATUS
 PatchIncreasePciBarSize (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   EFI_STATUS          Status;
@@ -1430,7 +1452,8 @@ mCustomSmbiosGuidPatch = {
 STATIC
 EFI_STATUS
 PatchCustomSmbiosGuid (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   EFI_STATUS          Status;
@@ -1474,7 +1497,8 @@ mPanicKextDumpPatch = {
 STATIC
 EFI_STATUS
 PatchPanicKextDump (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   EFI_STATUS          Status;
@@ -1624,7 +1648,8 @@ mLapicKernelPanicMasterPatch = {
 STATIC
 EFI_STATUS
 PatchLapicKernelPanic (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   EFI_STATUS  Status;
@@ -1693,7 +1718,8 @@ mPowerStateTimeoutPanicMasterPatch = {
 STATIC
 EFI_STATUS
 PatchPowerStateTimeout (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   EFI_STATUS  Status;
@@ -1756,7 +1782,8 @@ mAppleRtcChecksumPatch = {
 STATIC
 EFI_STATUS
 PatchAppleRtcChecksum (
-  IN PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   EFI_STATUS Status;
@@ -1796,12 +1823,13 @@ KERNEL_QUIRK gKernelQuirks[] = {
 };
 
 EFI_STATUS
-KernelQuirkApply (
+KernelApplyQuirk (
   IN     KERNEL_QUIRK_NAME  Name,
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   )
 {
   ASSERT (Patcher != NULL);
 
-  return gKernelQuirks[Name].PatchFunction (Patcher);
+  return gKernelQuirks[Name].PatchFunction (Patcher, KernelVersion);
 }

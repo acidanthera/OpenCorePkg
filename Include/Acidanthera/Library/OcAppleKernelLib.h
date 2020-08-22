@@ -386,6 +386,10 @@ typedef struct {
   //
   LIST_ENTRY            BuiltInKexts;
   //
+  // Current kernel version.
+  //
+  UINT32                KernelVersion;
+  //
   // Flag to indicate if above list is valid. List is built during the first read from SLE.
   //
   BOOLEAN               BuiltInKextsValid;
@@ -529,7 +533,8 @@ typedef enum {
 typedef
 EFI_STATUS
 (KERNEL_QUIRK_PATCH_FUNCTION)(
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   );
 
 //
@@ -549,15 +554,17 @@ typedef struct {
 /**
   Applies the specified quirk.
 
-  @param[in]     Name     KERNEL_QUIRK_NAME specifying the quirk name.
-  @param[in,out] Patcher  PATCHER_CONTEXT instance.
+  @param[in]     Name           KERNEL_QUIRK_NAME specifying the quirk name.
+  @param[in,out] Patcher        PATCHER_CONTEXT instance.
+  @param[in]     KernelVersion  Current kernel version.
 
   @returns EFI_SUCCESS on success.
 **/
 EFI_STATUS
-KernelQuirkApply (
+KernelApplyQuirk (
   IN     KERNEL_QUIRK_NAME  Name,
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
   );
 
 /**
@@ -797,13 +804,15 @@ PrelinkedContextApplyPatch (
 
   @param[in,out] Context         Prelinked context.
   @param[in]     Quirk           Kext quirk to apply.
+  @param[in]     KernelVersion   Current kernel version.
 
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
 PrelinkedContextApplyQuirk (
   IN OUT PRELINKED_CONTEXT    *Context,
-  IN     KERNEL_QUIRK_NAME    Quirk
+  IN     KERNEL_QUIRK_NAME    Quirk,
+  IN     UINT32               KernelVersion
   );
 
 /**
@@ -1020,6 +1029,7 @@ PatchKernelCpuId (
   @param[in,out] Context             Cacheless context.
   @param[in]     FileName            Extensions directory filename.
   @param[in]     ExtensionsDir       Extensions directory EFI_FILE_PROTOCOL. 
+  @param[in]     KernelVersion       Current kernel version.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -1027,7 +1037,8 @@ EFI_STATUS
 CachelessContextInit (
   IN OUT CACHELESS_CONTEXT    *Context,
   IN     CONST CHAR16         *FileName,
-  IN     EFI_FILE_PROTOCOL    *ExtensionsDir
+  IN     EFI_FILE_PROTOCOL    *ExtensionsDir,
+  IN     UINT32               KernelVersion
   );
 
 /**
@@ -1277,13 +1288,15 @@ MkextContextApplyPatch (
 
   @param[in,out] Context         Mkext context.
   @param[in]     Quirk           Kext quirk to apply.
+  @param[in]     KernelVersion   Current kernel version.
 
   @return  EFI_SUCCESS on success.
 **/
 EFI_STATUS
 MkextContextApplyQuirk (
   IN OUT MKEXT_CONTEXT        *Context,
-  IN     KERNEL_QUIRK_NAME    Quirk
+  IN     KERNEL_QUIRK_NAME    Quirk,
+  IN     UINT32               KernelVersion
   );
 
 /**

@@ -236,16 +236,19 @@ OcKernelApplyQuirk (
   //
   if (Context == NULL) {
     ASSERT (KernelPatcher != NULL);
+    return KernelApplyQuirk (Quirk, KernelPatcher, mOcDarwinVersion);
+  }
 
-    return KernelQuirkApply (Quirk, KernelPatcher);
-  } else {
-    if (CacheType == CacheTypeCacheless) {
-      return CachelessContextAddQuirk ((CACHELESS_CONTEXT *) Context, Quirk);
-    } else if (CacheType == CacheTypeMkext) {
-      return MkextContextApplyQuirk ((MKEXT_CONTEXT *) Context, Quirk);
-    } else if (CacheType == CacheTypePrelinked) {
-      return PrelinkedContextApplyQuirk ((PRELINKED_CONTEXT *) Context, Quirk);
-    }
+  if (CacheType == CacheTypeCacheless) {
+    return CachelessContextAddQuirk (Context, Quirk);
+  }
+  
+  if (CacheType == CacheTypeMkext) {
+    return MkextContextApplyQuirk (Context, Quirk, mOcDarwinVersion);
+  }
+
+  if (CacheType == CacheTypePrelinked) {
+    return PrelinkedContextApplyQuirk (Context, Quirk, mOcDarwinVersion);
   }
 
   return EFI_UNSUPPORTED;
@@ -753,7 +756,12 @@ OcKernelInitCacheless (
   UINT32                MaxKernel;
   UINT32                MinKernel;
 
-  Status = CachelessContextInit (Context, FileName, ExtensionsDir);
+  Status = CachelessContextInit (
+    Context,
+    FileName,
+    ExtensionsDir,
+    DarwinVersion
+    );
   if (EFI_ERROR (Status)) {
     return Status;
   }

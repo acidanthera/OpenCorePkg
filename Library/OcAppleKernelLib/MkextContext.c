@@ -1369,7 +1369,8 @@ MkextContextApplyPatch (
 EFI_STATUS
 MkextContextApplyQuirk (
   IN OUT MKEXT_CONTEXT        *Context,
-  IN     KERNEL_QUIRK_NAME    Quirk
+  IN     KERNEL_QUIRK_NAME    Quirk,
+  IN     UINT32               KernelVersion
   )
 {
   EFI_STATUS            Status;
@@ -1387,7 +1388,7 @@ MkextContextApplyQuirk (
     return Status;
   }
 
-  return KernelQuirk->PatchFunction (&Patcher);
+  return KernelQuirk->PatchFunction (&Patcher, KernelVersion);
 }
 
 EFI_STATUS
