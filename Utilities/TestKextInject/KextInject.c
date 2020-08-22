@@ -445,9 +445,11 @@ int wrap_main(int argc, char** argv) {
   UINT8 *NewPrelinked;
   UINT32 NewPrelinkedSize;
   UINT8 Sha384[48];
+  BOOLEAN Is32Bit;
   EFI_STATUS Status = ReadAppleKernel (
     &nilFilProtocol,
-    MachCpuTypeX8664,
+    FALSE,
+    &Is32Bit,
     &NewPrelinked,
     &NewPrelinkedSize,
     &AllocSize,

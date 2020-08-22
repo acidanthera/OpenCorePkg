@@ -37,13 +37,13 @@ BOOLEAN
 ParseKextBinary (
   IN OUT UINT8         **Buffer,
   IN OUT UINT32        *BufferSize,
-  IN     BOOLEAN       Is64Bit
+  IN     BOOLEAN       Is32Bit
   )
 {
   EFI_STATUS        Status;
   MACH_HEADER_ANY   *MachHeader;
   
-  Status = FatFilterArchitectureByType (Buffer, BufferSize, Is64Bit ? MachCpuTypeX8664 : MachCpuTypeI386);
+  Status = FatFilterArchitectureByType (Buffer, BufferSize, Is32Bit ? MachCpuTypeI386 : MachCpuTypeX8664);
   if (EFI_ERROR (Status)) {
     return FALSE;
   }
@@ -53,8 +53,8 @@ ParseKextBinary (
   //
   MachHeader = (MACH_HEADER_ANY *)* Buffer;
 
-  if ((!Is64Bit && MachHeader->Signature == MACH_HEADER_SIGNATURE)
-    || (Is64Bit && MachHeader->Signature == MACH_HEADER_64_SIGNATURE)) {
+  if ((!Is32Bit && MachHeader->Signature == MACH_HEADER_64_SIGNATURE)
+    || (Is32Bit && MachHeader->Signature == MACH_HEADER_SIGNATURE)) {
     return TRUE;
   }
 
@@ -912,7 +912,7 @@ MkextContextInit (
   UINT32              MkextVersion;
   UINT32              MkextHeaderSize;
   MACH_CPU_TYPE       CpuType;
-  BOOLEAN             Is64Bit;
+  BOOLEAN             Is32Bit;
   UINT32              NumKexts;
   UINT32              NumMaxKexts;
 
@@ -957,9 +957,9 @@ MkextContextInit (
   }
 
   if (CpuType == MachCpuTypeI386) {
-    Is64Bit = FALSE;
+    Is32Bit = TRUE;
   } else if (CpuType == MachCpuTypeX8664) {
-    Is64Bit = TRUE;
+    Is32Bit = FALSE;
   } else {
     return EFI_UNSUPPORTED;
   }
@@ -1039,7 +1039,7 @@ MkextContextInit (
   Context->MkextHeader          = MkextHeader;
   Context->MkextAllocSize       = MkextAllocSize;
   Context->MkextVersion         = MkextVersion;
-  Context->Is64Bit              = Is64Bit;
+  Context->Is32Bit              = Is32Bit;
   Context->NumKexts             = NumKexts;
   InitializeListHead (&Context->CachedKexts);
 
@@ -1191,7 +1191,7 @@ MkextInjectKext (
       ASSERT (ExecutableSize > 0);
 
       BinOffset = MkextNewSize;
-      if (!ParseKextBinary (&Executable, &ExecutableSize, Context->Is64Bit)) {
+      if (!ParseKextBinary (&Executable, &ExecutableSize, Context->Is32Bit)) {
         return EFI_INVALID_PARAMETER;
       }
 
@@ -1279,7 +1279,7 @@ MkextInjectKext (
       ASSERT (ExecutableSize > 0);
       
       BinOffset = PlistOffset;
-      if (!ParseKextBinary (&Executable, &ExecutableSize, Context->Is64Bit)) {
+      if (!ParseKextBinary (&Executable, &ExecutableSize, Context->Is32Bit)) {
         XmlDocumentFree (PlistXml);
         FreePool (PlistBuffer);
         return EFI_INVALID_PARAMETER;
