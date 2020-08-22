@@ -411,6 +411,7 @@ ReadAppleKernel (
   ASSERT (KernelSize != NULL);
   ASSERT (AllocatedSize != NULL);
 
+  *Is32Bit       = FALSE;
   *KernelSize    = 0;
   *AllocatedSize = KERNEL_HEADER_SIZE;
   *Kernel        = AllocatePool (*AllocatedSize);
