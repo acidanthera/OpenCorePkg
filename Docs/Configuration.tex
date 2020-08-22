@@ -2042,6 +2042,7 @@ blocking.
   \texttt{AppleCpuPmCfgLock}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: FIXME\\
   \textbf{Description}: Disables \texttt{PKG\_CST\_CONFIG\_CONTROL} (\texttt{0xE2})
   MSR modification in AppleIntelCPUPowerManagement.kext, commonly causing early
   kernel panic, when it is locked from writing.
@@ -2081,6 +2082,7 @@ blocking.
   \texttt{AppleXcpmCfgLock}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.8 (not required for older)\\
   \textbf{Description}: Disables \texttt{PKG\_CST\_CONFIG\_CONTROL} (\texttt{0xE2})
   MSR modification in XNU kernel, commonly causing early kernel panic, when it is
   locked from writing (XCPM power management).
@@ -2092,6 +2094,7 @@ blocking.
   \texttt{AppleXcpmExtraMsrs}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.8 (not required for older)\\
   \textbf{Description}: Disables multiple MSR access critical for select CPUs,
   which have no native XCPM support.
 
@@ -2106,6 +2109,7 @@ blocking.
   \texttt{AppleXcpmForceBoost}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.8 (not required for older)\\
   \textbf{Description}: Forces maximum performance in XCPM mode.
 
   This patch writes \texttt{0xFF00} to \texttt{MSR\_IA32\_PERF\_CONTROL} (\texttt{0x199}),
@@ -2119,6 +2123,7 @@ blocking.
   \texttt{CustomSMBIOSGuid}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.6 (64-bit)\\
   \textbf{Description}: Performs GUID patching for \texttt{UpdateSMBIOSMode}
   \texttt{Custom} mode. Usually relevant for Dell laptops.
 
@@ -2126,6 +2131,7 @@ blocking.
   \texttt{DisableIoMapper}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.8 (not required for older)\\
   \textbf{Description}: Disables \texttt{IOMapper} support in XNU (VT-d),
   which may conflict with the firmware implementation.
 
@@ -2137,6 +2143,7 @@ blocking.
   \texttt{DisableRtcChecksum}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.6 (64-bit)\\
   \textbf{Description}: Disables primary checksum (\texttt{0x58}-\texttt{0x59})
   writing in AppleRTC.
 
@@ -2152,6 +2159,7 @@ blocking.
   \texttt{DummyPowerManagement}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.6 (64-bit)\\
   \textbf{Description}: Disables \texttt{AppleIntelCpuPowerManagement}.
 
   \emph{Note}: This option is a preferred alternative to
@@ -2162,6 +2170,7 @@ blocking.
   \texttt{ExternalDiskIcons}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.6 (64-bit)\\
   \textbf{Description}: Apply icon type patches to AppleAHCIPort.kext to force
   internal disk icons for all AHCI disks.
 
@@ -2172,6 +2181,7 @@ blocking.
   \texttt{IncreasePciBarSize}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: FIXME\\
   \textbf{Description}: Increases 32-bit PCI bar size in IOPCIFamily from 1 to 4 GBs.
 
   \emph{Note}: This option should be avoided whenever possible. In general the necessity
@@ -2181,12 +2191,14 @@ blocking.
   \texttt{LapicKernelPanic}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: FIXME\\
   \textbf{Description}: Disables kernel panic on LAPIC interrupts.
 
 \item
   \texttt{PanicNoKextDump}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.13 (not required for older)\\
   \textbf{Description}: Prevent kernel from printing kext dump in the panic
   log preventing from observing panic details. Affects 10.13 and above.
 
@@ -2194,6 +2206,7 @@ blocking.
   \texttt{PowerTimeoutKernelPanic}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.15 (not required for older)\\
   \textbf{Description}: Disables kernel panic on setPowerState timeout.
 
   An additional security measure was added to macOS Catalina (10.15) causing
@@ -2206,6 +2219,7 @@ blocking.
   \texttt{ThirdPartyDrives}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.6 (not required for older)\\
   \textbf{Description}: Apply vendor patches to IOAHCIBlockStorage.kext to enable
   native features for third-party drives, such as TRIM on SSDs or hibernation
   support on 10.15 and newer.
@@ -2220,6 +2234,7 @@ blocking.
   \texttt{XhciPortLimit}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: FIXME\\
   \textbf{Description}: Patch various kexts (AppleUSBXHCI.kext, AppleUSBXHCIPCI.kext,
   IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 

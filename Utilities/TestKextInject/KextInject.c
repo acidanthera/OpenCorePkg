@@ -283,6 +283,102 @@ ApplyKextPatches (
     DEBUG ((DEBUG_WARN, "[FAIL] Failed to find com.apple.iokit.IOHIDFamily - %r\n", Status));
     FailedToProcess = TRUE;
   }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkAppleCpuPmCfgLock, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkAppleCpuPmCfgLock - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkAppleCpuPmCfgLock\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkExternalDiskIcons, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkExternalDiskIcons - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkExternalDiskIcons\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkThirdPartyDrives, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkThirdPartyDrives - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkThirdPartyDrives\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkDisableIoMapper, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkDisableIoMapper - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkDisableIoMapper\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkDisableRtcChecksum, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkDisableRtcChecksum - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkDisableRtcChecksum\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkIncreasePciBarSize, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkIncreasePciBarSize - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkIncreasePciBarSize\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkDummyPowerManagement, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkDummyPowerManagement - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkDummyPowerManagement\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkXhciPortLimit1, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkXhciPortLimit1 - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkXhciPortLimit1\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkXhciPortLimit2, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkXhciPortLimit2 - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkXhciPortLimit2\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkXhciPortLimit3, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkXhciPortLimit3 - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkXhciPortLimit3\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkCustomSmbiosGuid1, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkCustomSmbiosGuid1 - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkCustomSmbiosGuid1\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkCustomSmbiosGuid2, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkCustomSmbiosGuid2 - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkCustomSmbiosGuid2\n"));
+  }
 }
 
 VOID
@@ -325,6 +421,55 @@ ApplyKernelPatches (
       FailedToProcess = TRUE;
     } else {
       DEBUG ((DEBUG_WARN, "[OK] CPUID kernel patch\n"));
+    }
+
+    Status = KernelApplyQuirk (KernelQuirkAppleXcpmCfgLock, &Patcher, KernelVersion);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkAppleXcpmCfgLock - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] KernelQuirkAppleXcpmCfgLock patch\n"));
+    }
+
+    Status = KernelApplyQuirk (KernelQuirkAppleXcpmExtraMsrs, &Patcher, KernelVersion);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkAppleXcpmExtraMsrs - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] KernelQuirkAppleXcpmExtraMsrs patch\n"));
+    }
+
+    Status = KernelApplyQuirk (KernelQuirkAppleXcpmForceBoost, &Patcher, KernelVersion);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkAppleXcpmForceBoost - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] KernelQuirkAppleXcpmForceBoost patch\n"));
+    }
+
+    Status = KernelApplyQuirk (KernelQuirkPanicNoKextDump, &Patcher, KernelVersion);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkPanicNoKextDump - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] KernelQuirkPanicNoKextDump patch\n"));
+    }
+
+    Status = KernelApplyQuirk (KernelQuirkLapicKernelPanic, &Patcher, KernelVersion);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkLapicKernelPanic - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] KernelQuirkLapicKernelPanic patch\n"));
+    }
+
+
+    Status = KernelApplyQuirk (KernelQuirkPowerTimeoutKernelPanic, &Patcher, KernelVersion);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkPowerTimeoutKernelPanic - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] KernelQuirkPowerTimeoutKernelPanic patch\n"));
     }
   } else {
     DEBUG ((DEBUG_WARN, "Failed to find kernel - %r\n", Status));

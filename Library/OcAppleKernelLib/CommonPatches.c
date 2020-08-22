@@ -210,6 +210,11 @@ PatchAppleXcpmCfgLock (
 
   UINT32              Replacements;
 
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmCfgLock on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
   Last = (XCPM_MSR_RECORD *) ((UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext)
     + MachoGetFileSize (&Patcher->MachContext) - sizeof (XCPM_MSR_RECORD));
 
@@ -334,6 +339,11 @@ PatchAppleXcpmExtraMsrs (
   XCPM_MSR_RECORD     *Last;
   UINT32              Replacements;
 
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmExtraMsrs on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
   Last = (XCPM_MSR_RECORD *) ((UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext)
     + MachoGetFileSize (&Patcher->MachContext) - sizeof (XCPM_MSR_RECORD));
 
@@ -453,6 +463,11 @@ PatchAppleXcpmForceBoost (
   UINT8   *Start;
   UINT8   *Last;
   UINT8   *Current;
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmForceBoost on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
 
   Start   = (UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext);
   Last    = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE*2;
@@ -657,6 +672,15 @@ PatchUsbXhciPortLimit2 (
     DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
   }
 
+  //
+  // TODO: Check when the patch changed actually.
+  //
+  if (EFI_ERROR (Status)
+    && OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, KERNEL_VERSION_HIGH_SIERRA_MAX)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Assuming success for AppleUSBXHCI on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
   return Status;
 }
 
@@ -669,6 +693,11 @@ PatchUsbXhciPortLimit3 (
 {
   EFI_STATUS  Status;
 
+  if (!OcMatchDarwinVersion (KernelVersion, 0, KERNEL_VERSION_HIGH_SIERRA_MAX)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping legacy port patch AppleUSBXHCIPCI on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
   //
   // If we are here, we are on legacy 10.13 or below, try the oldest patch.
   //
@@ -677,6 +706,15 @@ PatchUsbXhciPortLimit3 (
     DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
   } else {
     DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.usb.AppleUSBXHCIPCI\n"));
+  }
+
+  //
+  // TODO: Check when the patch changed actually.
+  //
+  if (EFI_ERROR (Status)
+    && OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, KERNEL_VERSION_HIGH_SIERRA_MAX)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Assuming success for AppleUSBXHCIPCI on %u\n", KernelVersion));
+    return EFI_SUCCESS;
   }
 
   return Status;
@@ -743,19 +781,33 @@ PatchThirdPartyDriveSupport (
 {
   EFI_STATUS       Status;
 
-    Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIBlockStoragePatchV1);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOAHCIBlockStorage V1 - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOAHCIBlockStorage V1\n"));
-    }
+  Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIBlockStoragePatchV1);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOAHCIBlockStorage V1 - %r\n", Status));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOAHCIBlockStorage V1\n"));
+  }
 
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_CATALINA_MIN, 0)) {
     Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIBlockStoragePatchV2);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOAHCIBlockStorage V2 - %r\n", Status));
     } else {
       DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOAHCIBlockStorage V2\n"));
     }
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping IOAHCIBlockStorage V2 on %u\n", KernelVersion));
+  }
+
+  //
+  // This started to be required on 10.6.7 or so.
+  // We cannot trust which minor SnowLeo version is this, just let it pass.
+  //
+  if (EFI_ERROR (Status)
+    && OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_SNOW_LEOPARD_MIN, KERNEL_VERSION_SNOW_LEOPARD_MAX)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Assuming success for IOAHCIBlockStorage on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
 
   return Status;
 }
@@ -839,6 +891,11 @@ PatchAppleIoMapperSupport (
   )
 {
   EFI_STATUS          Status;
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping AppleIoMapper patch on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
 
   Status = PatcherApplyGenericPatch (Patcher, &mAppleIoMapperPatch);
   if (EFI_ERROR (Status)) {
@@ -1505,6 +1562,11 @@ PatchPanicKextDump (
   UINT8               *Record;
   UINT8               *Last;
 
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmCfgLock on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
   Last = ((UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext)
     + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE);
 
@@ -1723,6 +1785,11 @@ PatchPowerStateTimeout (
   )
 {
   EFI_STATUS  Status;
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_CATALINA_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping power state patch on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
 
   Status = PatcherApplyGenericPatch (Patcher, &mPowerStateTimeoutPanicMasterPatch);
   if (EFI_ERROR (Status)) {
