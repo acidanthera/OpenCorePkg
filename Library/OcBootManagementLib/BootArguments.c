@@ -16,6 +16,7 @@
 
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiLib.h>
@@ -69,12 +70,14 @@ OcParseBootArgs (
 
 CONST CHAR8 *
 OcGetArgumentFromCmd (
-  IN CONST CHAR8  *CommandLine,
-  IN CONST CHAR8  *Argument,
-  IN CONST UINTN  ArgumentLength
+  IN  CONST CHAR8   *CommandLine,
+  IN  CONST CHAR8   *Argument,
+  IN  CONST UINTN   ArgumentLength,
+  OUT UINTN         *ValueLength OPTIONAL
   )
 {
-  CHAR8 *Str;
+  CHAR8   *Str;
+  CHAR8   *StrEnd;
 
   Str = AsciiStrStr (CommandLine, Argument);
 
@@ -88,8 +91,18 @@ OcGetArgumentFromCmd (
        Str[ArgumentLength - 1] != '=')) {
     return NULL;
   }
+  Str += ArgumentLength;
 
-  return Str + ArgumentLength;
+  if (ValueLength != NULL) {
+    StrEnd = AsciiStrStr (Str, " ");
+    if (StrEnd == NULL) {
+      *ValueLength = AsciiStrLen (Str);
+    } else {
+      *ValueLength = StrEnd - Str;
+    }
+  }
+
+  return Str;
 }
 
 VOID
@@ -176,10 +189,11 @@ OcAppendArgumentToCmd (
 
 BOOLEAN
 OcCheckArgumentFromEnv (
-  IN EFI_LOADED_IMAGE  *LoadedImage  OPTIONAL,
-  IN EFI_GET_VARIABLE  GetVariable  OPTIONAL,
-  IN CONST CHAR8       *Argument,
-  IN CONST UINTN       ArgumentLength
+  IN     EFI_LOADED_IMAGE   *LoadedImage OPTIONAL,
+  IN     EFI_GET_VARIABLE   GetVariable OPTIONAL,
+  IN     CONST CHAR8        *Argument,
+  IN     CONST UINTN        ArgumentLength,
+  IN OUT CHAR8              **Value OPTIONAL
   )
 {
   CHAR16      *Options;
@@ -190,6 +204,8 @@ OcCheckArgumentFromEnv (
   UINTN       LastIndex;
   CHAR16      Last;
   BOOLEAN     HasArgument;
+  CONST CHAR8 *ArgValue;
+  UINTN       ArgValueLength;
 
   HasArgument = FALSE;
 
@@ -208,7 +224,8 @@ OcCheckArgumentFromEnv (
 
       UnicodeStrToAsciiStrS (Options, BootArgsVar, BOOT_LINE_LENGTH);
 
-      if (OcGetArgumentFromCmd (BootArgsVar, Argument, ArgumentLength)) {
+      ArgValue = OcGetArgumentFromCmd (BootArgsVar, Argument, ArgumentLength, &ArgValueLength);
+      if (ArgValue != NULL) {
         HasArgument = TRUE;
       }
 
@@ -238,9 +255,17 @@ OcCheckArgumentFromEnv (
       //
       BootArgsVar[BootArgsVarLen-1] = '\0';
 
-      if (OcGetArgumentFromCmd (BootArgsVar, Argument, ArgumentLength)) {
+      ArgValue = OcGetArgumentFromCmd (BootArgsVar, Argument, ArgumentLength, &ArgValueLength);
+      if (ArgValue != NULL) {
         HasArgument = TRUE;
       }
+    }
+  }
+
+  if (HasArgument) {
+    *Value = AllocateCopyPool (AsciiStrnSizeS (ArgValue, ArgValueLength), ArgValue);
+    if (*Value == NULL) {
+      return FALSE;
     }
   }
 

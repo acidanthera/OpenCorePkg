@@ -1059,19 +1059,21 @@ OcParseBootArgs (
 /**
   Check if boot argument is currently passed (via image options or NVRAM).
 
-  @param[in]  LoadedImage    UEFI loaded image protocol instance, optional.
-  @param[in]  GetVariable  Preferred UEFI NVRAM reader, optional.
-  @param[in]  Argument        Argument, e.g. -v, slide=, debug=, etc.
-  @param[in]  ArgumentLength  Argument length, e.g. L_STR_LEN ("-v").
+  @param[in]     LoadedImage      UEFI loaded image protocol instance, optional.
+  @param[in]     GetVariable      Preferred UEFI NVRAM reader, optional.
+  @param[in]     Argument         Argument, e.g. -v, slide=, debug=, etc.
+  @param[in]     ArgumentLength   Argument length, e.g. L_STR_LEN ("-v").
+  @param[in,out] Value            Argument value length allocated from pool.
 
   @retval TRUE if argument is present.
 **/
 BOOLEAN
 OcCheckArgumentFromEnv (
-  IN EFI_LOADED_IMAGE  *LoadedImage  OPTIONAL,
-  IN EFI_GET_VARIABLE  GetVariable  OPTIONAL,
-  IN CONST CHAR8       *Argument,
-  IN CONST UINTN       ArgumentLength
+  IN     EFI_LOADED_IMAGE   *LoadedImage OPTIONAL,
+  IN     EFI_GET_VARIABLE   GetVariable OPTIONAL,
+  IN     CONST CHAR8        *Argument,
+  IN     CONST UINTN        ArgumentLength,
+  IN OUT CHAR8              **Value OPTIONAL
   );
 
 /**
@@ -1080,14 +1082,16 @@ OcCheckArgumentFromEnv (
   @param[in]  CommandLine     Argument command line, e.g. for boot.efi.
   @param[in]  Argument        Argument, e.g. -v, slide=, debug=, etc.
   @param[in]  ArgumentLength  Argument length, e.g. L_STR_LEN ("-v").
+  @param[out] ValueLength     Argument value length, optional.
 
   @retval pointer to argument value or NULL.
 **/
 CONST CHAR8 *
 OcGetArgumentFromCmd (
-  IN CONST CHAR8  *CommandLine,
-  IN CONST CHAR8  *Argument,
-  IN CONST UINTN  ArgumentLength
+  IN  CONST CHAR8   *CommandLine,
+  IN  CONST CHAR8   *Argument,
+  IN  CONST UINTN   ArgumentLength,
+  OUT UINTN         *ValueLength OPTIONAL
   );
 
 /**

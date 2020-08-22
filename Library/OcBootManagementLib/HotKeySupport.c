@@ -180,7 +180,7 @@ OcGetAppleKeyIndex (
     // Shift is always valid and enables Safe Mode.
     //
     if (HasShift) {
-      if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-x", L_STR_LEN ("-x")) == NULL) {
+      if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-x", L_STR_LEN ("-x"), NULL) == NULL) {
         DEBUG ((DEBUG_INFO, "OCB: Shift means -x\n"));
         OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-x", L_STR_LEN ("-x"));
       }
@@ -191,7 +191,7 @@ OcGetAppleKeyIndex (
     // CMD+V is always valid and enables Verbose Mode.
     //
     if (HasCommand && HasKeyV) {
-      if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-v", L_STR_LEN ("-v")) == NULL) {
+      if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-v", L_STR_LEN ("-v"), NULL) == NULL) {
         DEBUG ((DEBUG_INFO, "OCB: CMD+V means -v\n"));
         OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-v", L_STR_LEN ("-v"));
       }
@@ -202,7 +202,7 @@ OcGetAppleKeyIndex (
     // CMD+C+MINUS is always valid and disables compatibility check.
     //
     if (HasCommand && HasKeyC && HasKeyMinus) {
-      if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-no_compat_check", L_STR_LEN ("-no_compat_check")) == NULL) {
+      if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-no_compat_check", L_STR_LEN ("-no_compat_check"), NULL) == NULL) {
         DEBUG ((DEBUG_INFO, "OCB: CMD+C+MINUS means -no_compat_check\n"));
         OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-no_compat_check", L_STR_LEN ("-no_compat_check"));
       }
@@ -256,7 +256,7 @@ OcGetAppleKeyIndex (
           DEBUG ((DEBUG_INFO, "OCB: CMD+S+MINUS means slide=0\n"));
           OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "slide=0", L_STR_LEN ("slide=0"));
         }
-      } else if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-s", L_STR_LEN ("-s")) == NULL) {
+      } else if (OcGetArgumentFromCmd (Context->AppleBootArgs, "-s", L_STR_LEN ("-s"), NULL) == NULL) {
         DEBUG ((DEBUG_INFO, "OCB: CMD+S means -s\n"));
         OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-s", L_STR_LEN ("-s"));
       }

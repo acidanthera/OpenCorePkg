@@ -229,6 +229,14 @@ typedef struct SERVICES_OVERRIDE_STATE_ {
   /// TRUE if we are waiting for performance memory allocation.
   ///
   BOOLEAN                       AwaitingPerfAlloc;
+  ///
+  /// TRUE if arch= argument is present in boot args.
+  ///
+  BOOLEAN                       AppleArch;
+  ///
+  /// TRUE if we should boot in 32-bit kernel mode.
+  ///
+  BOOLEAN                       AppleArchPrefer32Bit;
 } SERVICES_OVERRIDE_STATE;
 
 /**

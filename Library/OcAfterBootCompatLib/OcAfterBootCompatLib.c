@@ -158,3 +158,20 @@ OcAbcInitialize (
 
   return EFI_SUCCESS;
 }
+
+EFI_STATUS
+OcAbcIs32BitPreferred (
+  OUT BOOLEAN     *Prefer32Bit
+  )
+{
+  BOOT_COMPAT_CONTEXT    *BootCompat;
+
+  BootCompat = GetBootCompatContext ();
+
+  if (BootCompat->ServiceState.AppleArch) {
+    *Prefer32Bit = BootCompat->ServiceState.AppleArchPrefer32Bit;
+    return EFI_SUCCESS;
+  }
+
+  return EFI_NOT_FOUND;
+}

@@ -141,4 +141,16 @@ OcAbcInitialize (
   IN OC_ABC_SETTINGS  *Settings
   );
 
+/**
+  Determine if 32-bit kernel boot mode is preferred.
+
+  @param[out]  Prefer32Bit  TRUE if 32-bit is preferred.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcAbcIs32BitPreferred (
+  OUT BOOLEAN     *Prefer32Bit
+  );
+
 #endif // OC_AFTER_BOOT_COMPAT_LIB_H

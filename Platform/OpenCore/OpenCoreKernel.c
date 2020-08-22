@@ -18,6 +18,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcAfterBootCompatLib.h>
 #include <Library/OcAppleKernelLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcAppleImg4Lib.h>
@@ -828,6 +829,7 @@ OcKernelFileOpen (
   )
 {
   EFI_STATUS         Status;
+  EFI_STATUS         Status2;
   CONST CHAR8        *ForceCacheType;
   KERNEL_CACHE_TYPE  MaxCacheTypeAllowed;
   BOOLEAN            Result;
@@ -953,15 +955,23 @@ OcKernelFileOpen (
 
     if (!EFI_ERROR (Status)) {
       //
-      // Get kernel version. If this differs from what is cached, recheck 64-bit suitability.
+      // Recheck kernel version and expected vs actual bitness returned. If either of those differ,
+      // re-evaluate whether we can run 64-bit kernels on this platform.
       //
       DarwinVersion = OcKernelReadDarwinVersion (Kernel, KernelSize);
       if (DarwinVersion != mOcDarwinVersion || mUse32BitKernel != IsKernel32Bit) {
         //
+        // Query command line arch= argument and fallback to SMBIOS checking.
+        //
+        Status2 = OcAbcIs32BitPreferred (&mUse32BitKernel);
+        if (EFI_ERROR (Status2)) {
+          mUse32BitKernel = !OcPlatformIs64BitSupported (DarwinVersion);
+        }
+
+        //
         // If a different kernel arch is required, but we did not originally read it,
         // we'll need to try to get the kernel again.
         //
-        mUse32BitKernel = !OcPlatformIs64BitSupported (DarwinVersion);
         if (mUse32BitKernel != IsKernel32Bit) {
           FreePool (Kernel);
 
