@@ -176,6 +176,7 @@ OcDirectLoadImage (
   EFI_STATUS                   Status;
   IMAGE_STATUS                 ImageStatus;
   PE_COFF_LOADER_IMAGE_CONTEXT ImageContext;      
+  EFI_PHYSICAL_ADDRESS         DestinationArea;
   VOID                         *DestinationBuffer;
   EFI_LOADED_IMAGE_PROTOCOL    *LoadedImage;
   //
@@ -206,12 +207,20 @@ OcDirectLoadImage (
   }
   //
   // Allocate the image destination memory.
-  // FIXME: RT drivers require page memory.
+  // FIXME: RT drivers require EfiRuntimeServicesCode.
   //
-  DestinationBuffer = AllocatePool (ImageContext.SizeOfImage);
-  if (DestinationBuffer == NULL) {
-    return EFI_OUT_OF_RESOURCES;
+  Status = gBS->AllocatePages (
+    AllocateAnyPages,
+    EfiBootServicesCode,
+    EFI_SIZE_TO_PAGES (ImageContext.SizeOfImage),
+    &DestinationArea
+    );
+  if (EFI_ERROR (Status)) {
+    return Status;
   }
+
+  DestinationBuffer = (VOID *)(UINTN) DestinationArea;
+
   //
   // Load SourceBuffer into DestinationBuffer.
   //

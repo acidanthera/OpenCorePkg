@@ -547,6 +547,8 @@ OcPeCoffLoaderInitializeContext (
   ASSERT (FileBuffer != NULL);
   ASSERT (FileSize > 0);
 
+  ZeroMem (Context, sizeof (*Context));
+
   Context->FileBuffer = (VOID *) FileBuffer;
 
   ASSERT (Context != NULL);

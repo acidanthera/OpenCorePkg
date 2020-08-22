@@ -146,7 +146,7 @@ typedef struct {
 } EFI_IMAGE_NT_HEADERS_COMMON_HDR;
 
 STATIC_ASSERT (
-  sizeof (EFI_IMAGE_NT_HEADERS_COMMON_HDR) == sizeof (UINT32) + sizeof (EFI_IMAGE_NT_HEADERS_COMMON_HDR),
+  sizeof (EFI_IMAGE_NT_HEADERS_COMMON_HDR) == sizeof (UINT32) + sizeof (EFI_IMAGE_FILE_HEADER),
   "Unsupported padding."
   );
 
