@@ -1037,6 +1037,7 @@ PatchKernelCpuIdLegacy (
   UINT8                 *StartPointer;
   UINT8                 *EndPointer;
   UINT8                 *Location;
+  UINT8                 *LocationEnd;
   UINT32                Signature[3];
   UINT32                Index;
   UINT32                MaxExt;
@@ -1067,23 +1068,18 @@ PatchKernelCpuIdLegacy (
 
   StartPointer = Record + sizeof (mKernelCpuidFindLegacyStart) + sizeof (UINT32);
 
-  STATIC CONST UINT8 mKernelCpuidFindLegacyEnd[9] = {
+  STATIC CONST UINT8 mKernelCpuidFindLegacyEnd1[6] = {
     0x00,                         ///< 0 from mov cs:byte_FFFFFF80006C590C, 0
     0xB8, 0x00, 0x00, 0x00, 0x80, ///< mov eax, 80000000h
-    0x0F, 0xA2,                   ///< cpuid
-    0x89                          ///< mov prefix from mov [rbp+var_40], eax
   };
 
   for (; Index < EFI_PAGE_SIZE; ++Index, ++Record) {
-    if (Record[0] == mKernelCpuidFindLegacyEnd[0]
-      && Record[1] == mKernelCpuidFindLegacyEnd[1]
-      && Record[2] == mKernelCpuidFindLegacyEnd[2]
-      && Record[3] == mKernelCpuidFindLegacyEnd[3]
-      && Record[4] == mKernelCpuidFindLegacyEnd[4]
-      && Record[5] == mKernelCpuidFindLegacyEnd[5]
-      && Record[6] == mKernelCpuidFindLegacyEnd[6]
-      && Record[7] == mKernelCpuidFindLegacyEnd[7]
-      && Record[8] == mKernelCpuidFindLegacyEnd[8]) {
+    if (Record[0] == mKernelCpuidFindLegacyEnd1[0]
+      && Record[1] == mKernelCpuidFindLegacyEnd1[1]
+      && Record[2] == mKernelCpuidFindLegacyEnd1[2]
+      && Record[3] == mKernelCpuidFindLegacyEnd1[3]
+      && Record[4] == mKernelCpuidFindLegacyEnd1[4]
+      && Record[5] == mKernelCpuidFindLegacyEnd1[5]) {
       break;
     }
   }
@@ -1092,23 +1088,35 @@ PatchKernelCpuIdLegacy (
     return EFI_NOT_FOUND;
   }
 
-  EndPointer = Record + 1;
-
-  STATIC CONST UINT8 mKernelCpuidFindLegacyLoc[8] = {
-    0xB8, 0x01, 0x00, 0x00, 0x00, ///< mov eax, 1
+  STATIC CONST UINT8 mKernelCpuidFindLegacyEnd2[3] = {
     0x0F, 0xA2,                   ///< cpuid
     0x89                          ///< mov prefix from mov [rbp+var_40], eax
   };
 
   for (; Index < EFI_PAGE_SIZE; ++Index, ++Record) {
-    if (Record[0] == mKernelCpuidFindLegacyLoc[0]
-      && Record[1] == mKernelCpuidFindLegacyLoc[1]
-      && Record[2] == mKernelCpuidFindLegacyLoc[2]
-      && Record[3] == mKernelCpuidFindLegacyLoc[3]
-      && Record[4] == mKernelCpuidFindLegacyLoc[4]
-      && Record[5] == mKernelCpuidFindLegacyLoc[5]
-      && Record[6] == mKernelCpuidFindLegacyLoc[6]
-      && Record[7] == mKernelCpuidFindLegacyLoc[7]) {
+    if (Record[0] == mKernelCpuidFindLegacyEnd2[0]
+      && Record[1] == mKernelCpuidFindLegacyEnd2[1]
+      && Record[2] == mKernelCpuidFindLegacyEnd2[2]) {
+      break;
+    }
+  }
+
+  if (Index >= EFI_PAGE_SIZE) {
+    return EFI_NOT_FOUND;
+  }
+
+  EndPointer = Record - 3;
+
+  STATIC CONST UINT8 mKernelCpuidFindLegacyLoc1[5] = {
+    0xB8, 0x01, 0x00, 0x00, 0x00, ///< mov eax, 1
+  };
+
+  for (; Index < EFI_PAGE_SIZE; ++Index, ++Record) {
+    if (Record[0] == mKernelCpuidFindLegacyLoc1[0]
+      && Record[1] == mKernelCpuidFindLegacyLoc1[1]
+      && Record[2] == mKernelCpuidFindLegacyLoc1[2]
+      && Record[3] == mKernelCpuidFindLegacyLoc1[3]
+      && Record[4] == mKernelCpuidFindLegacyLoc1[4]) {
       break;
     }
   }
@@ -1119,11 +1127,29 @@ PatchKernelCpuIdLegacy (
 
   Location = Record;
 
+  STATIC CONST UINT8 mKernelCpuidFindLegacyLoc2[3] = {
+    0x0F, 0xA2,                   ///< cpuid
+    0x89                          ///< mov prefix from mov [rbp+var_40], eax
+  };
+
+  for (; Index < EFI_PAGE_SIZE; ++Index, ++Record) {
+    if (Record[0] == mKernelCpuidFindLegacyLoc2[0]
+      && Record[1] == mKernelCpuidFindLegacyLoc2[1]
+      && Record[2] == mKernelCpuidFindLegacyLoc2[2]) {
+      break;
+    }
+  }
+
+  if (Index >= EFI_PAGE_SIZE) {
+    return EFI_NOT_FOUND;
+  }
+
+  LocationEnd = Record + 2;
+
   //
-  // Free 2 more bytes in the end by assigning EAX directly.
+  // Free 2+ more bytes in the end by assigning EAX directly.
   //
   AsmCpuid (0x80000000, &MaxExt, NULL, NULL, NULL);
-  EndPointer += 2;
   EndPointer[0] = 0xB8;
   CopyMem (&EndPointer[1], &MaxExt, sizeof (MaxExt));
 
@@ -1188,8 +1214,9 @@ PatchKernelCpuIdLegacy (
   *Location++ = 0xE9;
   CopyMem (Location, &Delta, sizeof (Delta));
   Location   += sizeof (Delta);
-  *Location++ = 0x90;
-  *Location++ = 0x90;
+  while (Location < LocationEnd) {
+    *Location++ = 0x90;
+  }
 
   //
   // Write virtualised CPUID.
