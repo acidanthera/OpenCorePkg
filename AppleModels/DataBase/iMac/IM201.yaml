@@ -1,5 +1,5 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "1554.40.9.0.0"
+BIOSVersion: "1037.147.4.0.0"
 BIOSLegacyVersion: "IM201.88Z.F000.B00.2008092228"
 BIOSReleaseDate: "08/09/2020"
 SystemManufacturer: "Apple Inc."
@@ -56,7 +56,7 @@ OEMStrings: |-
   Apple ROM Version
     BIOS ID:      IM201.88Z.F000.B00.2008092228
     Model:        IM201
-    EFI Version:  1554.40.9.0.0
+    EFI Version:  1037.147.4.0.0
     Built by:     root@bb-g9-pdb127
     Date:         Sun Aug  9 22:28:11 2020
     Revision:     1554.40.9 (B&I)
@@ -74,6 +74,7 @@ Specifications:
     - "Intel Core i5-10500 @ 3.10 GHz"
     - "Intel Core i5-10600 @ 3.30 GHz"
     - "Intel Core i7-10700K @ 3.80 GHz"
+    - "Intel Core i9-10910 @ 3.60 GHz"
   GPU:
     - "Radeon Pro 5300"
     - "Radeon Pro 5500 XT"
