@@ -1000,6 +1000,33 @@ mIncreasePciBarSizePatch = {
 };
 
 STATIC
+UINT8
+mIncreasePciBarSizePatchLegacyFind[] = {
+  0x01, 0x00, 0x00, 0x40
+};
+
+STATIC
+UINT8
+mIncreasePciBarSizePatchLegacyReplace[] = {
+  0x01, 0x00, 0x00, 0x80
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mIncreasePciBarSizeLegacyPatch = {
+  .Comment     = DEBUG_POINTER ("IncreasePciBarSizeLegacy"),
+  .Base        = "__ZN17IOPCIConfigurator24probeBaseAddressRegisterEP16IOPCIConfigEntryjj",
+  .Find        = mIncreasePciBarSizePatchLegacyFind,
+  .Mask        = NULL,
+  .Replace     = mIncreasePciBarSizePatchLegacyReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mIncreasePciBarSizePatchLegacyFind),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = EFI_PAGE_SIZE
+};
+
+STATIC
 EFI_STATUS
 PatchIncreasePciBarSize (
   IN OUT PATCHER_CONTEXT    *Patcher,
@@ -1012,9 +1039,20 @@ PatchIncreasePciBarSize (
     return EFI_NOT_FOUND;
   }
 
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_YOSEMITE_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping com.apple.iokit.IOPCIFamily IncreasePciBarSize on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
   Status = PatcherApplyGenericPatch (Patcher, &mIncreasePciBarSizePatch);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOPCIFamily IncreasePciBarSize - %r\n", Status));
+    Status = PatcherApplyGenericPatch (Patcher, &mIncreasePciBarSizeLegacyPatch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply legacy patch com.apple.iokit.IOPCIFamily IncreasePciBarSize - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success legacy com.apple.iokit.IOPCIFamily IncreasePciBarSize\n"));
+    }
   } else {
     DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOPCIFamily IncreasePciBarSize\n"));
   }
