@@ -23,6 +23,7 @@ OpenCore Changelog
 - Fixed macOS 11.0 DMG recovery loading without hotplug
 - Fixed `XhciPortLimit` quirk on 10.12.6 and possibly other versions
 - Fixed `IncreasePciBarSize` quirk on 10.11.5 and possibly other versions
+- Fixed `LapicKernelPanic` quirk on 10.8.5 and possibly other versions
 
 #### v0.6.0
 - Fixed sound corruption with AudioDxe
