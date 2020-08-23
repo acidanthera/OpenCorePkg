@@ -673,7 +673,7 @@ InternalHashSections (
     }
   }
 
-  FreePool (SortedSections);
+  FreePool ((VOID *)SortedSections);
   return Result;
 }
 

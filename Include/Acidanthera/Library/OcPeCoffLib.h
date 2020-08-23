@@ -103,7 +103,7 @@ typedef struct {
   /// Initialization Core Interface Specification.
   ///
   UINT8   ImageType;
-  UINT8   Subsystem;
+  UINT16  Subsystem;
   UINT16  Machine;
   UINT32  TeStrippedOffset;
 
