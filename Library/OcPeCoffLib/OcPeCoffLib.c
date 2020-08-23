@@ -49,6 +49,7 @@ InternalVerifySections (
 {
   BOOLEAN                        Result;
   UINT32                         NextSectRva;
+  UINT32                         SectRvaPrevEnd;
   UINT32                         SectRvaEnd;
   UINT32                         SectRawEnd;
   UINT16                         SectIndex;
@@ -84,6 +85,8 @@ InternalVerifySections (
     }
   }
 
+  SectRvaPrevEnd = NextSectRva;
+
   *BottomAddress = NextSectRva;
   
   for (SectIndex = 0; SectIndex < NumberOfSections; ++SectIndex) {
@@ -114,10 +117,17 @@ InternalVerifySections (
     if (Result) {
       return IMAGE_ERROR_UNSUPPORTED;
     }
-    
-    if (Sections[SectIndex].VirtualAddress != NextSectRva) {
+
+    //
+    // FIXME: Misaligned images should be handled with a PCD.
+    //
+    if (Sections[SectIndex].VirtualAddress < SectRvaPrevEnd
+      || Sections[SectIndex].VirtualAddress > NextSectRva) {
       return IMAGE_ERROR_UNSUPPORTED;
     }
+
+    SectRvaPrevEnd = SectRvaEnd;
+
     //
     // Sections must have virtual addresses adjacent in ascending order.
     // SectionSize does not need to be aligned, so align the result.
@@ -507,9 +517,10 @@ InternalInitializePe (
   }  
   //
   // Ensure SizeOfImage is equal to the top of the image's virtual space.
+  // FIXME: Misaligned images should load with a PCD
   //
-  if (Context->SizeOfImage != SizeOfImage) {
-    DEBUG ((DEBUG_INFO, "OCPE: Context->SizeOfImage != SizeOfImage %u %u\n", Context->SizeOfImage, SizeOfImage));
+  if (Context->SizeOfImage < SizeOfImage) {
+    DEBUG ((DEBUG_INFO, "OCPE: Context->SizeOfImage < SizeOfImage %u %u\n", Context->SizeOfImage, SizeOfImage));
     return IMAGE_ERROR_UNSUPPORTED;
   }
   //
