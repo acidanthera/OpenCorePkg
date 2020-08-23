@@ -136,7 +136,6 @@ typedef struct {
 
 **/
 IMAGE_STATUS
-EFIAPI
 OcPeCoffLoaderInitializeContext (
   OUT PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
   IN  CONST VOID                    *FileBuffer,
@@ -175,7 +174,6 @@ OcPeCoffLoaderInitializeContext (
 
 **/
 IMAGE_STATUS
-EFIAPI
 OcPeCoffLoaderLoadImage (
   IN OUT PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
   OUT    VOID                          *Destination,
@@ -189,7 +187,6 @@ OcPeCoffLoaderRelocateImage (
   );
 
 BOOLEAN
-EFIAPI
 OcPeCoffLoaderHashImage (
   IN     CONST PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
   IN     HASH_UPDATE                         HashUpdate,
