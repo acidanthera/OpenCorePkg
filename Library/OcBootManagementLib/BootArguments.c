@@ -262,7 +262,7 @@ OcCheckArgumentFromEnv (
     }
   }
 
-  if (HasArgument) {
+  if (HasArgument && Value != NULL) {
     *Value = AllocateCopyPool (AsciiStrnSizeS (ArgValue, ArgValueLength), ArgValue);
     if (*Value == NULL) {
       return FALSE;
