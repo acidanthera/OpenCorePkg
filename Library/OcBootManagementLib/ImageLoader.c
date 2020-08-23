@@ -247,7 +247,7 @@ OcDirectLoadImage (
     );
   if (ImageStatus != IMAGE_ERROR_SUCCESS) {
     DEBUG ((DEBUG_INFO, "OCB: PeCoff load image error - %d\n", ImageStatus));
-    FreePool (DestinationBuffer);
+    FreePages (DestinationBuffer, EFI_SIZE_TO_PAGES (ImageContext.SizeOfImage));
     return EFI_UNSUPPORTED;
   }
   //
@@ -259,7 +259,7 @@ OcDirectLoadImage (
     );
   if (ImageStatus != IMAGE_ERROR_SUCCESS) {
     DEBUG ((DEBUG_INFO, "OCB: PeCoff relocate image error - %d\n", ImageStatus));
-    FreePool (DestinationBuffer);
+    FreePages (DestinationBuffer, EFI_SIZE_TO_PAGES (ImageContext.SizeOfImage));
     return EFI_UNSUPPORTED;
   }
   //
@@ -267,7 +267,7 @@ OcDirectLoadImage (
   //
   OcLoadedImage = AllocatePool (sizeof (*OcLoadedImage) + sizeof (*LoadedImage));
   if (OcLoadedImage == NULL) {
-    FreePool (DestinationBuffer);
+    FreePages (DestinationBuffer, EFI_SIZE_TO_PAGES (ImageContext.SizeOfImage));
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -311,7 +311,7 @@ OcDirectLoadImage (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCB: PeCoff proto install error - %r\n", Status));
     FreePool (OcLoadedImage);
-    FreePool (DestinationBuffer);
+    FreePages (DestinationBuffer, EFI_SIZE_TO_PAGES (ImageContext.SizeOfImage));
     return Status;
   }
 

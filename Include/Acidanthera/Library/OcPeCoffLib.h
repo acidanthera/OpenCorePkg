@@ -13,6 +13,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #ifndef OC_PE_COFF_LIB_H
 #define OC_PE_COFF_LIB_H
 
+#include <IndustryStandard/OcPeImage.h>
+
 // TODO: move?
 /**
   Performs digest on a data buffer of the specified length. This function can
