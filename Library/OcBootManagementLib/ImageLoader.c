@@ -338,10 +338,22 @@ InternalDirectStartImage (
   OUT CHAR16                    **ExitData OPTIONAL
   )
 {
+  EFI_STATUS                 Status;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+
+  Status = gBS->HandleProtocol (
+    ImageHandle,
+    &gEfiLoadedImageProtocolGuid,
+    (VOID **)&LoadedImage
+    );
+  if (EFI_ERROR (Status)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
   //
   // Invoke the manually loaded image entry point.
   //
-  OcLoadedImage->EntryPoint (ImageHandle, gST);
+  OcLoadedImage->EntryPoint (ImageHandle, LoadedImage->SystemTable);
   //
   // FIXME: Support gBS->Exit().
   //
