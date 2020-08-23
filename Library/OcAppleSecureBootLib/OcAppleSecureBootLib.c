@@ -601,6 +601,12 @@ InternalGetImg4ByPath (
     return EFI_NO_MEDIA;
   }
 
+  OcFileDevicePathFullName (
+    Path,
+    (FILEPATH_DEVICE_PATH *)DevicePath,
+    ImagePathSize
+    );
+
   Result = mSbHardwareModel[0] != '\0';
   if (Result) {
     ManifestSuffix = &Path[(ImagePathSize / sizeof (*Path)) - 1];
