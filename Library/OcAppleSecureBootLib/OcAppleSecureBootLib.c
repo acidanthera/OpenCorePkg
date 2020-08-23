@@ -1066,14 +1066,6 @@ OcAppleSecureBootVerify (
       );
 
     //
-    // This is our signature, but the file is corrupted.
-    //
-    if (Status == EFI_SECURITY_VIOLATION) {
-      DEBUG ((DEBUG_WARN, "OCB: IMG4 %08X verification gave secure violation\n"));
-      return EFI_SECURITY_VIOLATION;
-    }
-
-    //
     // We are successful.
     //
     if (!EFI_ERROR (Status)) {
