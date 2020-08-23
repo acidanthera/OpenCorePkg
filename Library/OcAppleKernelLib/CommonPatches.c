@@ -69,7 +69,7 @@ PatchAppleCpuPmCfgLock (
       && Walker[3] == mMovEcxE2[3]
       && Walker[4] == mMovEcxE2[4]) {
       STATIC_ASSERT (sizeof (mMovEcxE2) == 5, "Unsupported mMovEcxE2");
-      Walker += sizeof (mMovCxE2);
+      Walker += sizeof (mMovEcxE2);
     } else if (Walker[0] == mMovCxE2[0]
       && Walker[1] == mMovCxE2[1]
       && Walker[2] == mMovCxE2[2]
@@ -94,21 +94,29 @@ PatchAppleCpuPmCfgLock (
         *Walker++ = 0x90;
         *Walker++ = 0x90;
         break;
-      } else if ((Walker[0] == 0xC9 && Walker[1] == 0xC3) ///< leave; ret
-        || (Walker[0] == 0x5D && Walker[1] == 0xC3) ///< pop rbp; ret
-        || (Walker[0] == 0xB9 && Walker[3] == 0 && Walker[4] == 0) ///< mov ecx, 00000xxxxh
-        || (Walker[0] == 0x66 && Walker[1] == 0xB9 && Walker[3] == 0)) { ///< mov cx, 00xxh
+      }
+
+      if ((Walker[0] == 0xC9 && Walker[1] == 0xC3) ///< leave; ret
+        || (Walker[0] == 0x5D && Walker[1] == 0xC3)) { ///< pop rbp; ret
         //
-        // Stop searching upon matching return and reassign sequences.
+        // Stop searching upon matching return sequences.
         //
         Walker += 2;
         break;
-      } else {
-        //
-        // Continue searching.
-        //
-        ++Walker;
       }
+
+      if ((Walker[0] == 0xB9 && Walker[3] == 0 && Walker[4] == 0) ///< mov ecx, 00000xxxxh
+        || (Walker[0] == 0x66 && Walker[1] == 0xB9 && Walker[3] == 0)) { ///< mov cx, 00xxh
+        //
+        // Stop searching upon matching reassign sequences.
+        //
+        break;
+      }
+
+      //
+      // Continue searching.
+      //
+      ++Walker;
     }
   }
   
