@@ -609,6 +609,8 @@ OcLoadUefiSupport (
       ));
   }
 
+  OcInitDirectImageLoader ();
+
   if (Config->Uefi.ConnectDrivers) {
     OcLoadDrivers (Storage, Config, &DriversToConnect);
     DEBUG ((DEBUG_INFO, "OC: Connecting drivers...\n"));

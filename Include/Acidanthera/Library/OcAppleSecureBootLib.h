@@ -72,11 +72,13 @@ OcAppleSecureBootSetDmgLoading (
 /**
   Get DMG loading status on Apple Secure Boot protocol.
 
+  @param[out]  RealPolicy  Actual secure boot policy, optional.
+
   @retval TRUE when loading DMG.
 **/
 BOOLEAN
 OcAppleSecureBootGetDmgLoading (
-  VOID
+  OUT UINT8  *RealPolicy  OPTIONAL
   );
 
 /**

@@ -37,6 +37,7 @@ STATIC APPLE_SECURE_BOOT_PROTOCOL *mSecureBoot;
 STATIC CHAR8   mSbHardwareModel[16];
 STATIC UINT64  mSbEcid;
 STATIC BOOLEAN mDmgLoading = FALSE;
+STATIC UINT8   mDmgLoadingPolicy     = AppleImg4SbModeMedium;
 STATIC BOOLEAN mSbAvailable = TRUE;
 STATIC UINT8   mSbPolicy             = AppleImg4SbModeMedium;
 STATIC UINT8   mSbWindowsPolicy      = 1;
@@ -958,9 +959,15 @@ OcAppleSecureBootSetDmgLoading (
   IN BOOLEAN  LoadingDmg
   )
 {
+  EFI_STATUS  Status;
   ASSERT (mSecureBoot != NULL);
 
   mDmgLoading = LoadingDmg;
+
+  Status = mSecureBoot->GetPolicy (mSecureBoot, &mDmgLoadingPolicy);
+  if (EFI_ERROR (Status)) {
+    mDmgLoadingPolicy = AppleImg4SbModeMedium;
+  }
 
   if (LoadingDmg) {
     DEBUG ((DEBUG_INFO, "OCB: Disabling secure boot for Apple images\n"));
@@ -973,9 +980,12 @@ OcAppleSecureBootSetDmgLoading (
 
 BOOLEAN
 OcAppleSecureBootGetDmgLoading (
-  VOID
+  OUT UINT8  *RealPolicy  OPTIONAL
   )
 {
+  if (RealPolicy != NULL) {
+    *RealPolicy = mDmgLoadingPolicy;
+  }
   return mDmgLoading;
 }
 
@@ -1015,7 +1025,7 @@ OcAppleSecureBootVerify (
   // they do not even have global manifests in DMG images.
   // Can consider checking boot.efi codesign integrity if we want.
   //
-  if (Policy == AppleImg4SbModeDisabled && OcAppleSecureBootGetDmgLoading ()) {
+  if (Policy == AppleImg4SbModeDisabled && OcAppleSecureBootGetDmgLoading (NULL)) {
     return EFI_SUCCESS;
   }
 
