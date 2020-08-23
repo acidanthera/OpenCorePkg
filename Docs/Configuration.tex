@@ -2219,7 +2219,7 @@ blocking.
   \texttt{ThirdPartyDrives}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.6 (not required for older)\\
+  \textbf{Requirement}: 10.6 (64-bit, not required for older)\\
   \textbf{Description}: Apply vendor patches to IOAHCIBlockStorage.kext to enable
   native features for third-party drives, such as TRIM on SSDs or hibernation
   support on 10.15 and newer.
@@ -2234,7 +2234,7 @@ blocking.
   \texttt{XhciPortLimit}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: FIXME\\
+  \textbf{Requirement}: 10.11 (not required for older)\\
   \textbf{Description}: Patch various kexts (AppleUSBXHCI.kext, AppleUSBXHCIPCI.kext,
   IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 

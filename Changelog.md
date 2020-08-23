@@ -21,6 +21,7 @@ OpenCore Changelog
 - Updated builtin firmware versions for SMBIOS and the rest
 - Fixed patching of ACPI tables in low memory
 - Fixed macOS 11.0 DMG recovery loading without hotplug
+- Fixed `XhciPortLimit` quirk on 10.12.6 and possibly other versions
 
 #### v0.6.0
 - Fixed sound corruption with AudioDxe

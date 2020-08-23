@@ -541,7 +541,7 @@ mRemoveUsbLimitV1Patch = {
   .Size        = sizeof (mRemoveUsbLimitV1Replace),
   .Count       = 1,
   .Skip        = 0,
-  .Limit       = 4096
+  .Limit       = 8192
 };
 
 STATIC
@@ -703,9 +703,9 @@ PatchUsbXhciPortLimit3 (
   //
   Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitV1Patch);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.usb.AppleUSBXHCIPCI - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply legacy port patch AppleUSBXHCIPCI - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.usb.AppleUSBXHCIPCI\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success apply legacy port AppleUSBXHCIPCI\n"));
   }
 
   //
@@ -713,7 +713,7 @@ PatchUsbXhciPortLimit3 (
   //
   if (EFI_ERROR (Status)
     && OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, KERNEL_VERSION_HIGH_SIERRA_MAX)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Assuming success for AppleUSBXHCIPCI on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: Assuming success for legacy port AppleUSBXHCIPCI on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
