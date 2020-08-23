@@ -1026,6 +1026,7 @@ OcAppleSecureBootVerify (
   // Can consider checking boot.efi codesign integrity if we want.
   //
   if (Policy == AppleImg4SbModeDisabled && OcAppleSecureBootGetDmgLoading (NULL)) {
+    DEBUG ((DEBUG_INFO, "OCAB: Direct booting for DMG image\n"));
     return EFI_SUCCESS;
   }
 
@@ -1033,6 +1034,7 @@ OcAppleSecureBootVerify (
   // For everything else it is unsupported, meaning let the system decide.
   //
   if (Policy == AppleImg4SbModeDisabled) {
+    DEBUG ((DEBUG_INFO, "OCB: Secure boot is disbled, skipping\n"));
     return EFI_UNSUPPORTED;
   }
 
@@ -1044,7 +1046,7 @@ OcAppleSecureBootVerify (
     &ManifestSize
     );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCB: No IMG4 found - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCSB: No IMG4 found - %r\n", Status));
     return EFI_UNSUPPORTED;
   }
 

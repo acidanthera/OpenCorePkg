@@ -516,6 +516,8 @@ OcLoadUefiSupport (
 
   OcReinstallProtocols (Config);
 
+  OcInitDirectImageLoader ();
+
   OcLoadAppleSecureBoot (Config);
 
   OcLoadUefiInputSupport (Config);
@@ -608,8 +610,6 @@ OcLoadUefiSupport (
       Status
       ));
   }
-
-  OcInitDirectImageLoader ();
 
   if (Config->Uefi.ConnectDrivers) {
     OcLoadDrivers (Storage, Config, &DriversToConnect);
