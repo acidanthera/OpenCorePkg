@@ -831,10 +831,13 @@ OcKernelFileOpen (
   EFI_STATUS         Status;
   EFI_STATUS         Status2;
   CONST CHAR8        *ForceCacheType;
+  CONST CHAR8        *SecureBootModel;
   KERNEL_CACHE_TYPE  MaxCacheTypeAllowed;
+  BOOLEAN            UseSecureBoot;
   BOOLEAN            Result;
   UINT32             DarwinVersion;
   BOOLEAN            IsKernel32Bit;
+
   UINT8              *Kernel;
   UINT32             KernelSize;
   UINT32             AllocatedSize;
@@ -858,6 +861,12 @@ OcKernelFileOpen (
   } else {
     MaxCacheTypeAllowed = CacheTypePrelinked;
   }
+
+  //
+  // We only want to calculate kernel hashes if secure boot is enabled.
+  //
+  SecureBootModel = OC_BLOB_GET (&mOcConfiguration->Misc.Security.SecureBootModel);
+  UseSecureBoot = AsciiStrCmp (SecureBootModel, OC_SB_MODEL_DISABLED) != 0;
 
   //
   // Hook injected OcXXXXXXXX.kext reads from /S/L/E.
@@ -939,7 +948,7 @@ OcKernelFileOpen (
       &KernelSize,
       &AllocatedSize,
       ReservedFullSize,
-      mKernelDigest
+      UseSecureBoot ? mKernelDigest : NULL
       );
     DEBUG ((
       DEBUG_INFO,
@@ -985,7 +994,7 @@ OcKernelFileOpen (
             &KernelSize,
             &AllocatedSize,
             ReservedFullSize,
-            mKernelDigest
+            UseSecureBoot ? mKernelDigest : NULL
             );
           DEBUG ((
             DEBUG_INFO,
@@ -1007,8 +1016,12 @@ OcKernelFileOpen (
             //
             if (mUse32BitKernel != IsKernel32Bit) {
               DEBUG ((DEBUG_WARN, "OC: %a kernel architecture is not available, aborting.\n", mUse32BitKernel ? "32-bit" : "64-bit"));
+
               FreePool (Kernel);
-              return EFI_INVALID_PARAMETER;
+              (*NewHandle)->Close(*NewHandle);
+              *NewHandle = NULL;
+
+              return EFI_NOT_FOUND;
             }
           }
         }
@@ -1063,7 +1076,9 @@ OcKernelFileOpen (
         return EFI_OUT_OF_RESOURCES;
       }
 
-      OcAppleImg4RegisterOverride (mKernelDigest, Kernel, KernelSize);
+      if (UseSecureBoot) {
+        OcAppleImg4RegisterOverride (mKernelDigest, Kernel, KernelSize);
+      }
 
       //
       // Return our handle.
