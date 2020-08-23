@@ -58,6 +58,7 @@ typedef struct {
   EFI_IMAGE_ENTRY_POINT  EntryPoint;
   EFI_PHYSICAL_ADDRESS   ImageArea;
   UINTN                  PageCount;
+  BOOLEAN                Started;
 } OC_LOADED_IMAGE_PROTOCOL;
 
 STATIC EFI_IMAGE_LOAD   mOriginalEfiLoadImage;
@@ -275,6 +276,7 @@ OcDirectLoadImage (
   OcLoadedImage->EntryPoint = (EFI_IMAGE_ENTRY_POINT) ((UINTN) DestinationBuffer + ImageContext.AddressOfEntryPoint);
   OcLoadedImage->ImageArea  = DestinationArea;
   OcLoadedImage->PageCount  = EFI_SIZE_TO_PAGES (ImageContext.SizeOfImage);
+  OcLoadedImage->Started    = FALSE;
 
   LoadedImage = (EFI_LOADED_IMAGE *)(OcLoadedImage + 1);
 
@@ -358,6 +360,7 @@ InternalDirectStartImage (
   //
   // Invoke the manually loaded image entry point.
   //
+  OcLoadedImage->Started = TRUE;
   OcLoadedImage->EntryPoint (ImageHandle, LoadedImage->SystemTable);
   //
   // FIXME: Support gBS->Exit().
@@ -391,14 +394,41 @@ InternalDirectUnloadImage (
   IN  EFI_HANDLE                ImageHandle
   )
 {
+  EFI_STATUS                Status;
+  EFI_LOADED_IMAGE_PROTOCOL *LoadedImage;
+
+  LoadedImage = (EFI_LOADED_IMAGE_PROTOCOL *) (OcLoadedImage + 1);
+  if (LoadedImage->Unload != NULL) {
+    Status = LoadedImage->Unload (ImageHandle);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+    //
+    // Do not allow to execute Unload multiple times.
+    //
+    LoadedImage->Unload = NULL;
+  } else if (OcLoadedImage->Started) {
+    return EFI_UNSUPPORTED;
+  }
+
+  Status = gBS->UninstallMultipleProtocolInterfaces (
+    ImageHandle,
+    &gEfiLoadedImageProtocolGuid,
+    LoadedImage,
+    &mOcLoadedImageProtocolGuid,
+    OcLoadedImage,
+    NULL
+    );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  gBS->FreePages (OcLoadedImage->ImageArea, OcLoadedImage->PageCount);
+  FreePool (OcLoadedImage);
   //
-  // FIXME: Implement unloading.
+  // NOTE: Avoid EFI 1.10 extension of closing opened protocols.
   //
-  DEBUG ((
-    DEBUG_INFO,
-    "OCB: Requested unsupported unloading\n"
-    ));
-  return EFI_INVALID_PARAMETER;
+  return EFI_SUCCESS;
 }
 
 /**
