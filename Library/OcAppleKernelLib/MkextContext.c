@@ -1383,12 +1383,16 @@ MkextContextApplyQuirk (
   ASSERT (KernelQuirk->BundleId != NULL);
 
   Status = PatcherInitContextFromMkext (&Patcher, Context, KernelQuirk->BundleId);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to find %a - %r\n", KernelQuirk->BundleId, Status));
-    return Status;
+  if (!EFI_ERROR (Status)) {
+    return KernelQuirk->PatchFunction (&Patcher, KernelVersion);
   }
 
-  return KernelQuirk->PatchFunction (&Patcher, KernelVersion);
+  //
+  // It is up to the function to decice whether this is critical or not.
+  //
+  DEBUG ((DEBUG_INFO, "OCAK: Failed to mkext find %a - %r\n", KernelQuirk->BundleId, Status));
+  return KernelQuirk->PatchFunction (NULL, KernelVersion);
+
 }
 
 EFI_STATUS
