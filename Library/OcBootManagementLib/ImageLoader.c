@@ -227,7 +227,8 @@ OcDirectLoadImage (
   //
   Status = gBS->AllocatePages (
     AllocateAnyPages,
-    EfiBootServicesCode,
+    ImageContext.Subsystem == EFI_IMAGE_SUBSYSTEM_EFI_APPLICATION
+      ? EfiLoaderCode : EfiBootServicesCode,
     EFI_SIZE_TO_PAGES (ImageContext.SizeOfImage),
     &DestinationArea
     );
@@ -378,9 +379,8 @@ InternalDirectUnloadImage (
   //
   DEBUG ((
     DEBUG_INFO,
-    "OCB: Requested unsupported unloading"
+    "OCB: Requested unsupported unloading\n"
     ));
-
   return EFI_INVALID_PARAMETER;
 }
 
@@ -415,9 +415,9 @@ InternalDirectExit (
   //
   DEBUG ((
     DEBUG_INFO,
-    "OCB: Requested unsupported exit"
+    "OCB: Requested unsupported exit\n"
     ));
-
+  CpuDeadLoop ();
   return EFI_INVALID_PARAMETER;
 }
 
