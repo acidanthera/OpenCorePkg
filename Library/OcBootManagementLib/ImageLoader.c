@@ -271,7 +271,7 @@ OcDirectLoadImage (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  OcLoadedImage->EntryPoint = (VOID *) ((UINTN) DestinationBuffer + ImageContext.AddressOfEntryPoint);
+  OcLoadedImage->EntryPoint = (EFI_IMAGE_ENTRY_POINT) ((UINTN) DestinationBuffer + ImageContext.AddressOfEntryPoint);
   OcLoadedImage->ImageArea  = DestinationArea;
   OcLoadedImage->PageCount  = EFI_SIZE_TO_PAGES (ImageContext.SizeOfImage);
 
