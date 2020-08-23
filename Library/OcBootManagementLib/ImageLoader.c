@@ -291,8 +291,13 @@ OcDirectLoadImage (
   //
   // FIXME: Support RT drivers.
   //
-  LoadedImage->ImageCodeType   = EfiBootServicesCode;
-  LoadedImage->ImageDataType   = EfiBootServicesData;
+  if (ImageContext.Subsystem == EFI_IMAGE_SUBSYSTEM_EFI_APPLICATION) {
+    LoadedImage->ImageCodeType   = EfiLoaderCode;
+    LoadedImage->ImageDataType   = EfiLoaderData;
+  } else {
+    LoadedImage->ImageCodeType   = EfiBootServicesCode;
+    LoadedImage->ImageDataType   = EfiBootServicesData;
+  }
   //
   // FIXME: Support driver unloading.
   //
