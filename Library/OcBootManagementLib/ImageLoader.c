@@ -494,7 +494,7 @@ InternalDirectStartImage (
 {
   EFI_STATUS  Status;
   EFI_HANDLE  LastImage;
-  BOOLEAN     SetJumpFlag;
+  UINTN       SetJumpFlag;
 
   //
   // Push the current image.
