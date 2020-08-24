@@ -322,7 +322,7 @@ OcDirectLoadImage (
     return Status;
   }
 
-  DEBUG ((DEBUG_INFO, "OCB: Loaded image at %p\n", *ImageHandle));
+  DEBUG ((DEBUG_VERBOSE, "OCB: Loaded image at %p\n", *ImageHandle));
 
   return EFI_SUCCESS;
 }
@@ -408,7 +408,7 @@ InternalDirectExit (
   EFI_TPL                    OldTpl;
 
   DEBUG ((
-    DEBUG_INFO, "OCB: Exit %p %p (%d) - %r\n",
+    DEBUG_VERBOSE, "OCB: Exit %p %p (%d) - %r\n",
     ImageHandle,
     mCurrentImageHandle,
     OcLoadedImage->Started,
@@ -531,7 +531,7 @@ InternalDirectStartImage (
     //
     // Invoke the manually loaded image entry point.
     //
-    DEBUG ((DEBUG_INFO, "OCB: Starting image %p\n", ImageHandle));
+    DEBUG ((DEBUG_VERBOSE, "OCB: Starting image %p\n", ImageHandle));
     OcLoadedImage->Started = TRUE;
     OcLoadedImage->Status = OcLoadedImage->EntryPoint (
       ImageHandle,
@@ -811,7 +811,7 @@ InternalEfiExit (
     (VOID **) &OcLoadedImage
     );
 
-  DEBUG ((DEBUG_INFO, "OCB: InternalEfiExit %p - %r / %r\n", ImageHandle, ExitStatus, Status));
+  DEBUG ((DEBUG_VERBOSE, "OCB: InternalEfiExit %p - %r / %r\n", ImageHandle, ExitStatus, Status));
 
   if (!EFI_ERROR (Status)) {
     return InternalDirectExit (
@@ -823,7 +823,7 @@ InternalEfiExit (
       );
   }
 
-  return mOriginalEfiUnloadImage (ImageHandle);
+  return mOriginalEfiExit (ImageHandle, ExitStatus, ExitDataSize, ExitData);
 }
 
 VOID
