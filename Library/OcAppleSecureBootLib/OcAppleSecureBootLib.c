@@ -1034,7 +1034,7 @@ OcAppleSecureBootVerify (
   // For everything else it is unsupported, meaning let the system decide.
   //
   if (Policy == AppleImg4SbModeDisabled) {
-    DEBUG ((DEBUG_INFO, "OCSB: Secure boot is disbled, skipping\n"));
+    DEBUG ((DEBUG_INFO, "OCSB: Secure boot is disabled, skipping\n"));
     return EFI_UNSUPPORTED;
   }
 
