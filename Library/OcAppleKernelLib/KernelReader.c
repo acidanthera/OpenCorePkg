@@ -35,6 +35,12 @@ STATIC SHA384_CONTEXT mKernelDigestContext;
 STATIC UINT32         mKernelDigestPosition;
 STATIC BOOLEAN        mNeedKernelDigest;
 
+typedef enum {
+  KernelArchUnknown,
+  KernelArch32,
+  KernelArch64
+} KERNEL_ARCH;
+
 STATIC
 EFI_STATUS
 ReplaceBuffer (
@@ -261,7 +267,7 @@ EFI_STATUS
 ReadAppleKernelImage (
   IN     EFI_FILE_PROTOCOL  *File,
   IN     BOOLEAN            Prefer32Bit,
-     OUT BOOLEAN            *Is32Bit,
+  IN OUT KERNEL_ARCH        *Arch,
   IN OUT UINT8              **Buffer,
      OUT UINT32             *KernelSize,
      OUT UINT32             *AllocatedSize,
@@ -273,6 +279,7 @@ ReadAppleKernelImage (
   UINT32            *MagicPtr;
   BOOLEAN           ForbidFat;
   BOOLEAN           Compressed;
+  BOOLEAN           Is32Bit;
 
   Status = KernelGetFileData (File, Offset, KERNEL_HEADER_SIZE, *Buffer);
   if (EFI_ERROR (Status)) {
@@ -298,14 +305,23 @@ ReadAppleKernelImage (
         //
         // Ensure we have the desired arch.
         //
-        if ((*Is32Bit && *MagicPtr != MACH_HEADER_SIGNATURE)
-          || (!*Is32Bit && *MagicPtr != MACH_HEADER_64_SIGNATURE)) {
+        if (*Arch == KernelArchUnknown) {
+          if (*MagicPtr == MACH_HEADER_SIGNATURE) {
+            *Arch = KernelArch32;
+          } else {
+            *Arch = KernelArch64;
+          }
+        }
+        Is32Bit = *Arch == KernelArch32;
+
+        if ((Is32Bit && *MagicPtr != MACH_HEADER_SIGNATURE)
+          || (!Is32Bit && *MagicPtr != MACH_HEADER_64_SIGNATURE)) {
           return EFI_INVALID_PARAMETER;
         }
         DEBUG ((
           DEBUG_VERBOSE,
           "OCAK: Found %a Mach-O compressed %d offset %u size %u\n",
-          *Is32Bit ? "32-bit" : "64-bit",
+          Is32Bit ? "32-bit" : "64-bit",
           Compressed,
           Offset,
           *KernelSize
@@ -354,11 +370,12 @@ ReadAppleKernelImage (
           return EFI_INVALID_PARAMETER;
         }
 
-        Status = ParseFatArchitecture (File, Prefer32Bit, *Buffer, KERNEL_HEADER_SIZE, Is32Bit, &Offset, KernelSize);
+        Status = ParseFatArchitecture (File, Prefer32Bit, *Buffer, KERNEL_HEADER_SIZE, &Is32Bit, &Offset, KernelSize);
         if (EFI_ERROR (Status)) {
           return Status;
         }
-        return ReadAppleKernelImage (File, Prefer32Bit, Is32Bit, Buffer, KernelSize, AllocatedSize, ReservedSize, Offset);
+        *Arch = Is32Bit ? KernelArch32 : KernelArch64;
+        return ReadAppleKernelImage (File, Prefer32Bit, Arch, Buffer, KernelSize, AllocatedSize, ReservedSize, Offset);
       }
       case MACH_COMPRESSED_BINARY_INVERT_SIGNATURE:
       {
@@ -404,6 +421,7 @@ ReadAppleKernel (
   EFI_STATUS  Status;
   UINT32      FullSize;
   UINT8       *Remainder;
+  KERNEL_ARCH Arch;
 
   ASSERT (File != NULL);
   ASSERT (Is32Bit != NULL);
@@ -415,6 +433,7 @@ ReadAppleKernel (
   *KernelSize    = 0;
   *AllocatedSize = KERNEL_HEADER_SIZE;
   *Kernel        = AllocatePool (*AllocatedSize);
+  Arch           = KernelArchUnknown;
 
   if (*Kernel == NULL) {
     return EFI_OUT_OF_RESOURCES;
@@ -429,7 +448,7 @@ ReadAppleKernel (
   Status = ReadAppleKernelImage (
     File,
     Prefer32Bit,
-    Is32Bit,
+    &Arch,
     Kernel,
     KernelSize,
     AllocatedSize,
@@ -442,6 +461,8 @@ ReadAppleKernel (
     mNeedKernelDigest = FALSE;
     return Status;
   }
+
+  *Is32Bit = Arch == KernelArch32;
 
   if (mNeedKernelDigest) {
     Status = GetFileSize (File, &FullSize);

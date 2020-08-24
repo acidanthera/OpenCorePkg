@@ -29,6 +29,11 @@
 **/
 #define OC_MAX_VOLUME_LABEL_SIZE 64
 
+typedef struct {
+  UINT32  PreviousTime;
+  UINTN   PreviousIndex;
+} DIRECTORY_SEARCH_CONTEXT;
+
 /**
   Locate file system from Device handle or path.
 
@@ -200,6 +205,34 @@ AllocateCopyFileData (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT UINT8              **Buffer,
   OUT UINT32             *BufferSize
+  );
+
+/**
+  Initialize DIRECTORY_SEARCH_CONTEXT.
+
+  @param[in,out]  Context     A pointer to the DIRECTORY_SEARCH_CONTEXT.
+**/
+VOID
+DirectorySeachContextInit (
+  IN OUT DIRECTORY_SEARCH_CONTEXT *Context
+  );
+
+/**
+  Gets the next newest file from the specified directory.
+
+  @param[in,out]  Context               Context.
+  @param[in]      Directory             The directory EFI_FILE_PROTOCOL instance.
+  @param[in]      FileNameStartsWith    Skip files starting with this value.
+  @param[out]     FileInfo              EFI_FILE_INFO allocated from pool memory.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+GetNewestFileFromDirectory (
+  IN OUT DIRECTORY_SEARCH_CONTEXT *Context,
+  IN     EFI_FILE_PROTOCOL        *Directory,
+  IN     CHAR16                   *FileNameStartsWith OPTIONAL,
+     OUT EFI_FILE_INFO            **FileInfo
   );
 
 /**

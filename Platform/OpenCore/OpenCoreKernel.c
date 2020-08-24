@@ -819,6 +819,296 @@ OcKernelInitCacheless (
 
 STATIC
 EFI_STATUS
+OcKernelReadAppleKernel (
+  IN     EFI_FILE_PROTOCOL  *File,
+  IN     CHAR16             *FileName,
+     OUT UINT8              **Kernel,
+     OUT UINT32             *KernelSize,
+     OUT UINT32             *AllocatedSize,
+     OUT UINT32             *ReservedExeSize,
+     OUT UINT32             *LinkedExpansion,
+     OUT UINT8              *Digest  OPTIONAL
+  )
+{
+  EFI_STATUS         Status;
+  EFI_STATUS         Status2;
+  BOOLEAN            Result;
+  UINT32             DarwinVersion;
+  BOOLEAN            IsKernel32Bit;
+  BOOLEAN            Use32BitKernel;
+
+  UINT32             ReservedInfoSize;
+  UINT32             NumReservedKexts;
+  UINT32             ReservedFullSize;
+
+  OcKernelLoadKextsAndReserve (
+    mOcStorage,
+    mOcConfiguration,
+    CacheTypePrelinked,
+    ReservedExeSize,
+    &ReservedInfoSize,
+    &NumReservedKexts
+    );
+
+  *LinkedExpansion = KcGetSegmentFixupChainsSize (*ReservedExeSize);
+  if (*LinkedExpansion == 0) {
+    return EFI_UNSUPPORTED;
+  }
+
+  Result = OcOverflowTriAddU32 (
+    ReservedInfoSize,
+    *ReservedExeSize,
+    *LinkedExpansion,
+    &ReservedFullSize
+    );
+  if (Result) {
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Read last requested architecture for kernel.
+  //
+  DEBUG ((DEBUG_INFO, "OC: Trying %a XNU hook on %s\n", mUse32BitKernel ? "32-bit" : "64-bit", FileName));
+  Status = ReadAppleKernel (
+    File,
+    mUse32BitKernel,
+    &IsKernel32Bit,
+    Kernel,
+    KernelSize,
+    AllocatedSize,
+    ReservedFullSize,
+    Digest
+    );
+  DEBUG ((
+    DEBUG_INFO,
+    "OC: Result of %a XNU hook on %s (%02X%02X%02X%02X) is %r\n",
+    IsKernel32Bit ? "32-bit" : "64-bit",
+    FileName,
+    Digest ? Digest[0] : 0,
+    Digest ? Digest[1] : 0,
+    Digest ? Digest[2] : 0,
+    Digest ? Digest[3] : 0,
+    Status
+    ));
+
+  if (!EFI_ERROR (Status)) {
+    //
+    // 10.6 and below may keep older prelinkedkernels around, do not load those.
+    //
+    DarwinVersion = OcKernelReadDarwinVersion (*Kernel, *KernelSize);
+    if (DarwinVersion < mOcDarwinVersion) {
+      FreePool (*Kernel);
+      *Kernel = NULL;
+
+      return EFI_INVALID_PARAMETER;
+    }
+
+    //
+    // Recheck kernel version and expected vs actual bitness returned. If either of those differ,
+    // re-evaluate whether we can run 64-bit kernels on this platform.
+    //
+    if (DarwinVersion != mOcDarwinVersion || mUse32BitKernel != IsKernel32Bit) {
+      //
+      // Query command line arch= argument and fallback to SMBIOS checking.
+      // Arch argument will force the desired arch.
+      //
+      Status2 = OcAbcIs32BitPreferred (&Use32BitKernel);
+      if (EFI_ERROR (Status2)) {
+        Use32BitKernel = !OcPlatformIs64BitSupported (DarwinVersion);
+      }
+
+      //
+      // If we did not change our desired arch, but the original kernel
+      // was wrong, just abort right away as the desired arch does not exist.
+      //
+      if (mUse32BitKernel == Use32BitKernel && mUse32BitKernel != IsKernel32Bit) {
+        DEBUG ((DEBUG_WARN, "OC: %a kernel architecture is not available, aborting.\n", mUse32BitKernel ? "32-bit" : "64-bit"));
+        FreePool (*Kernel);
+        *Kernel = NULL;
+
+        return EFI_NOT_FOUND;
+      }
+
+      //
+      // If a different kernel arch is required, but we did not originally read it,
+      // we'll need to try to get the kernel again.
+      //
+      if (mUse32BitKernel != Use32BitKernel) {
+        FreePool (*Kernel);
+        mUse32BitKernel = Use32BitKernel;
+
+        DEBUG ((DEBUG_INFO, "OC: Wrong arch read, retrying %a XNU hook on %s\n", mUse32BitKernel ? "32-bit" : "64-bit", FileName));
+        Status = ReadAppleKernel (
+          File,
+          mUse32BitKernel,
+          &IsKernel32Bit,
+          Kernel,
+          KernelSize,
+          AllocatedSize,
+          ReservedFullSize,
+          Digest
+          );
+        DEBUG ((
+          DEBUG_INFO,
+          "OC: Result of %a XNU hook on %s (%02X%02X%02X%02X) is %r\n",
+          IsKernel32Bit ? "32-bit" : "64-bit",
+          FileName,
+          Digest != NULL ? Digest[0] : 0,
+          Digest != NULL ? Digest[1] : 0,
+          Digest != NULL ? Digest[2] : 0,
+          Digest != NULL ? Digest[3] : 0,
+          Status
+          ));
+
+        if (!EFI_ERROR (Status)) {
+          DarwinVersion = OcKernelReadDarwinVersion (*Kernel, *KernelSize);
+
+          //
+          // 10.6 and below may keep older prelinkedkernels around, do not load those.
+          //
+          DarwinVersion = OcKernelReadDarwinVersion (*Kernel, *KernelSize);
+          if (DarwinVersion < mOcDarwinVersion) {
+            FreePool (*Kernel);
+            *Kernel = NULL;
+
+            return EFI_INVALID_PARAMETER;
+          }
+
+          //
+          // We should be matching the required arch if we get here, but check just in case.
+          //
+          if (mUse32BitKernel != IsKernel32Bit) {
+            DEBUG ((DEBUG_WARN, "OC: %a kernel architecture is not available, aborting.\n", mUse32BitKernel ? "32-bit" : "64-bit"));
+            FreePool (*Kernel);
+            *Kernel = NULL;
+
+            return EFI_NOT_FOUND;
+          }
+        }
+      }
+
+      mOcDarwinVersion = DarwinVersion;
+    }
+  }
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
+OcKernelFuzzyMatch (
+  IN     EFI_FILE_PROTOCOL  *This,
+  IN     CHAR16             *FileName,
+  IN     UINT64             OpenMode,
+  IN     UINT64             Attributes,
+     OUT EFI_FILE_PROTOCOL  **KernelFile,
+     OUT UINT8              **Kernel,
+     OUT UINT32             *KernelSize,
+     OUT UINT32             *AllocatedSize,
+     OUT UINT32             *ReservedExeSize,
+     OUT UINT32             *LinkedExpansion,
+     OUT UINT8              *Digest  OPTIONAL
+  )
+{
+  EFI_STATUS          Status;
+  EFI_FILE_PROTOCOL   *FileDirectory;
+  CHAR16              *FileNameDir;
+  UINTN               FileNameDirLength;
+
+  EFI_FILE_INFO       *FileInfo;
+  EFI_FILE_INFO       *FileInfoNext;
+  CHAR16              *FileNameCacheNew;
+  UINTN               FileNameCacheNewLength;
+  UINTN               FileNameCacheNewSize;
+
+  DIRECTORY_SEARCH_CONTEXT Context;
+
+  FileInfo          = NULL;
+  FileNameCacheNew  = NULL;
+
+  //
+  // Open parent directory.
+  //
+  FileNameDirLength = OcStriStr (FileName, L"\\kernelcache") - FileName;
+  FileNameDir = AllocateZeroPool (StrnSizeS (FileName, FileNameDirLength));
+  if (FileNameDir == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+  CopyMem (FileNameDir, FileName, StrnSizeS (FileName, FileNameDirLength) - sizeof (*FileName));
+
+  Status = SafeFileOpen (This, &FileDirectory, FileNameDir, EFI_FILE_MODE_READ, 0);
+  if (EFI_ERROR (Status)) {
+    FreePool (FileNameDir);
+    return Status;
+  }
+
+  //
+  // Search for kernelcache files, trying each one.
+  //
+  DirectorySeachContextInit (&Context);
+  do {
+    Status = GetNewestFileFromDirectory (
+      &Context,
+      FileDirectory,
+      L"kernelcache",
+      &FileInfoNext
+      );
+
+    if (EFI_ERROR (Status)) {
+      break;
+    }
+        
+    if (FileInfo != NULL) {
+      FreePool (FileInfo);
+    }
+    if (FileNameCacheNew != NULL) {
+      FreePool (FileNameCacheNew);
+    }
+    FileInfo = FileInfoNext;
+
+    FileNameCacheNewLength = FileNameDirLength + L_STR_LEN ("\\") + StrLen (FileInfo->FileName);
+    FileNameCacheNewSize = (FileNameCacheNewLength + 1) * sizeof (*FileNameCacheNew);
+    FileNameCacheNew = AllocateZeroPool (FileNameCacheNewSize);
+    if (FileNameCacheNew == NULL) {
+      Status = EFI_OUT_OF_RESOURCES;
+      break;
+    }
+
+    Status = OcUnicodeSafeSPrint (FileNameCacheNew, FileNameCacheNewSize, L"%s\\%s", FileNameDir, FileInfo->FileName);
+    if (EFI_ERROR (Status)) {
+      break;
+    }
+
+    Status = SafeFileOpen (This, KernelFile, FileNameCacheNew, OpenMode, Attributes);
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    Status = OcKernelReadAppleKernel (
+      *KernelFile,
+      FileNameCacheNew,
+      Kernel,
+      KernelSize,
+      AllocatedSize,
+      ReservedExeSize,
+      LinkedExpansion,
+      Digest
+      );
+  } while (EFI_ERROR (Status));
+
+  if (FileInfo != NULL) {
+    FreePool (FileInfo);
+  }
+  if (FileNameCacheNew != NULL) {
+    FreePool (FileNameCacheNew);
+  }
+  FreePool (FileNameDir);
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
 EFIAPI
 OcKernelFileOpen (
   IN  EFI_FILE_PROTOCOL       *This,
@@ -829,14 +1119,11 @@ OcKernelFileOpen (
   )
 {
   EFI_STATUS         Status;
-  EFI_STATUS         Status2;
+  BOOLEAN            Result;
   CONST CHAR8        *ForceCacheType;
   CONST CHAR8        *SecureBootModel;
   KERNEL_CACHE_TYPE  MaxCacheTypeAllowed;
   BOOLEAN            UseSecureBoot;
-  BOOLEAN            Result;
-  UINT32             DarwinVersion;
-  BOOLEAN            IsKernel32Bit;
 
   UINT8              *Kernel;
   UINT32             KernelSize;
@@ -896,6 +1183,33 @@ OcKernelFileOpen (
     Status
     ));
 
+  //
+  // Hook kernelcache read attempts for fuzzy kernelcache matching.
+  // Only hook if the desired kernelcache file does not exist.
+  //
+  Kernel = NULL;
+  if (mOcConfiguration->Kernel.Scheme.FuzzyMatch
+    && Status == EFI_NOT_FOUND
+    && OpenMode == EFI_FILE_MODE_READ
+    && (StrStr (FileName, L"\\kernelcache") != NULL)) {
+
+    DEBUG ((DEBUG_INFO, "OC: Trying kernelcache fuzzy matching on %s\n", FileName));
+
+    Status = OcKernelFuzzyMatch (
+      This,
+      FileName,
+      OpenMode,
+      Attributes,
+      NewHandle,
+      &Kernel,
+      &KernelSize,
+      &AllocatedSize,
+      &ReservedExeSize,
+      &LinkedExpansion,
+      UseSecureBoot ? mKernelDigest : NULL
+      );
+  }
+
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -912,121 +1226,26 @@ OcKernelFileOpen (
     && OcStriStr (FileName, L".kext\\") == NULL
     && OcStriStr (FileName, L".im4m") == NULL) {
 
-    OcKernelLoadKextsAndReserve (
-      mOcStorage,
-      mOcConfiguration,
-      CacheTypePrelinked,
-      &ReservedExeSize,
-      &ReservedInfoSize,
-      &NumReservedKexts
-      );
-
-    LinkedExpansion = KcGetSegmentFixupChainsSize (ReservedExeSize);
-    if (LinkedExpansion == 0) {
-      return EFI_UNSUPPORTED;
-    }
-
-    Result = OcOverflowTriAddU32 (
-      ReservedInfoSize,
-      ReservedExeSize,
-      LinkedExpansion,
-      &ReservedFullSize
-      );
-    if (Result) {
-      return EFI_UNSUPPORTED;
-    }
-
     //
-    // Read last used architecture for kernel.
+    // Kernel loading for fuzzy kernelcache is performed earlier.
     //
-    DEBUG ((DEBUG_INFO, "OC: Trying %a XNU hook on %s\n", mUse32BitKernel ? "32-bit" : "64-bit", FileName));
-    Status = ReadAppleKernel (
-      *NewHandle,
-      mUse32BitKernel,
-      &IsKernel32Bit,
-      &Kernel,
-      &KernelSize,
-      &AllocatedSize,
-      ReservedFullSize,
-      UseSecureBoot ? mKernelDigest : NULL
-      );
-    DEBUG ((
-      DEBUG_INFO,
-      "OC: Result of %a XNU hook on %s (%02X%02X%02X%02X) is %r\n",
-      IsKernel32Bit ? "32-bit" : "64-bit",
-      FileName,
-      mKernelDigest[0],
-      mKernelDigest[1],
-      mKernelDigest[2],
-      mKernelDigest[3],
-      Status
-      ));
+    if (Kernel == NULL) {
+      Status = OcKernelReadAppleKernel (
+        *NewHandle,
+        FileName,
+        &Kernel,
+        &KernelSize,
+        &AllocatedSize,
+        &ReservedExeSize,
+        &LinkedExpansion,
+        UseSecureBoot ? mKernelDigest : NULL
+        );
 
-    if (!EFI_ERROR (Status)) {
-      //
-      // Recheck kernel version and expected vs actual bitness returned. If either of those differ,
-      // re-evaluate whether we can run 64-bit kernels on this platform.
-      //
-      DarwinVersion = OcKernelReadDarwinVersion (Kernel, KernelSize);
-      if (DarwinVersion != mOcDarwinVersion || mUse32BitKernel != IsKernel32Bit) {
-        //
-        // Query command line arch= argument and fallback to SMBIOS checking.
-        // Arch argument will force the desired arch.
-        //
-        Status2 = OcAbcIs32BitPreferred (&mUse32BitKernel);
-        if (EFI_ERROR (Status2)) {
-          mUse32BitKernel = !OcPlatformIs64BitSupported (DarwinVersion);
-        }
+      if (Status == EFI_NOT_FOUND) {
+        (*NewHandle)->Close(*NewHandle);
+        *NewHandle = NULL;
 
-        //
-        // If a different kernel arch is required, but we did not originally read it,
-        // we'll need to try to get the kernel again.
-        //
-        if (mUse32BitKernel != IsKernel32Bit) {
-          FreePool (Kernel);
-
-          DEBUG ((DEBUG_INFO, "OC: Wrong arch read, retrying %a XNU hook on %s\n", mUse32BitKernel ? "32-bit" : "64-bit", FileName));
-          Status = ReadAppleKernel (
-            *NewHandle,
-            mUse32BitKernel,
-            &IsKernel32Bit,
-            &Kernel,
-            &KernelSize,
-            &AllocatedSize,
-            ReservedFullSize,
-            UseSecureBoot ? mKernelDigest : NULL
-            );
-          DEBUG ((
-            DEBUG_INFO,
-            "OC: Result of %a XNU hook on %s (%02X%02X%02X%02X) is %r\n",
-            IsKernel32Bit ? "32-bit" : "64-bit",
-            FileName,
-            mKernelDigest[0],
-            mKernelDigest[1],
-            mKernelDigest[2],
-            mKernelDigest[3],
-            Status
-            ));
-
-          if (!EFI_ERROR (Status)) {
-            DarwinVersion = OcKernelReadDarwinVersion (Kernel, KernelSize);
-
-            //
-            // Ensure we are now matching the requested arch.
-            //
-            if (mUse32BitKernel != IsKernel32Bit) {
-              DEBUG ((DEBUG_WARN, "OC: %a kernel architecture is not available, aborting.\n", mUse32BitKernel ? "32-bit" : "64-bit"));
-
-              FreePool (Kernel);
-              (*NewHandle)->Close(*NewHandle);
-              *NewHandle = NULL;
-
-              return EFI_NOT_FOUND;
-            }
-          }
-        }
-
-        mOcDarwinVersion = DarwinVersion;
+        return Status;
       }
     }
 
@@ -1085,6 +1304,7 @@ OcKernelFileOpen (
       //
       *NewHandle = VirtualFileHandle;
       return EFI_SUCCESS;
+
     }
   }
 
