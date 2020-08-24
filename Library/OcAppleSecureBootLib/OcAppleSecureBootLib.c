@@ -37,6 +37,7 @@ STATIC APPLE_SECURE_BOOT_PROTOCOL *mSecureBoot;
 STATIC CHAR8   mSbHardwareModel[16];
 STATIC UINT64  mSbEcid;
 STATIC BOOLEAN mDmgLoading = FALSE;
+STATIC UINT8   mDmgLoadingPolicy     = AppleImg4SbModeMedium;
 STATIC BOOLEAN mSbAvailable = TRUE;
 STATIC UINT8   mSbPolicy             = AppleImg4SbModeMedium;
 STATIC UINT8   mSbWindowsPolicy      = 1;
@@ -958,24 +959,33 @@ OcAppleSecureBootSetDmgLoading (
   IN BOOLEAN  LoadingDmg
   )
 {
+  EFI_STATUS  Status;
   ASSERT (mSecureBoot != NULL);
 
   mDmgLoading = LoadingDmg;
 
+  Status = mSecureBoot->GetPolicy (mSecureBoot, &mDmgLoadingPolicy);
+  if (EFI_ERROR (Status)) {
+    mDmgLoadingPolicy = AppleImg4SbModeMedium;
+  }
+
   if (LoadingDmg) {
-    DEBUG ((DEBUG_INFO, "OCB: Disabling secure boot for Apple images\n"));
+    DEBUG ((DEBUG_INFO, "OCSB: Disabling secure boot for Apple images\n"));
     mSecureBoot->SetAvailability (mSecureBoot, FALSE);
   } else {
-    DEBUG ((DEBUG_INFO, "OCB: Reenabling secure boot after Apple images\n"));
+    DEBUG ((DEBUG_INFO, "OCSB: Reenabling secure boot after Apple images\n"));
     mSecureBoot->SetAvailability (mSecureBoot, FALSE);
   }
 }
 
 BOOLEAN
 OcAppleSecureBootGetDmgLoading (
-  VOID
+  OUT UINT8  *RealPolicy  OPTIONAL
   )
 {
+  if (RealPolicy != NULL) {
+    *RealPolicy = mDmgLoadingPolicy;
+  }
   return mDmgLoading;
 }
 
@@ -1015,7 +1025,8 @@ OcAppleSecureBootVerify (
   // they do not even have global manifests in DMG images.
   // Can consider checking boot.efi codesign integrity if we want.
   //
-  if (Policy == AppleImg4SbModeDisabled && OcAppleSecureBootGetDmgLoading ()) {
+  if (Policy == AppleImg4SbModeDisabled && OcAppleSecureBootGetDmgLoading (NULL)) {
+    DEBUG ((DEBUG_INFO, "OCSB: Direct booting for DMG image\n"));
     return EFI_SUCCESS;
   }
 
@@ -1023,6 +1034,7 @@ OcAppleSecureBootVerify (
   // For everything else it is unsupported, meaning let the system decide.
   //
   if (Policy == AppleImg4SbModeDisabled) {
+    DEBUG ((DEBUG_INFO, "OCSB: Secure boot is disabled, skipping\n"));
     return EFI_UNSUPPORTED;
   }
 
@@ -1034,7 +1046,7 @@ OcAppleSecureBootVerify (
     &ManifestSize
     );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCB: No IMG4 found - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCSB: No IMG4 found - %r\n", Status));
     return EFI_UNSUPPORTED;
   }
 
@@ -1056,17 +1068,11 @@ OcAppleSecureBootVerify (
       );
 
     //
-    // This is our signature, but the file is corrupted.
-    //
-    if (Status == EFI_SECURITY_VIOLATION) {
-      DEBUG ((DEBUG_WARN, "OCB: IMG4 %08X verification gave secure violation\n"));
-      return EFI_SECURITY_VIOLATION;
-    }
-
-    //
     // We are successful.
     //
     if (!EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCSB: Verified IMG4 without issues\n"));
+      FreePool (ManifestBuffer);
       return Status;
     }
   }
@@ -1074,5 +1080,7 @@ OcAppleSecureBootVerify (
   //
   // No suitable signature.
   //
+  DEBUG ((DEBUG_INFO, "OCSB: No suitable signature - %r\n", Status));
+  FreePool (ManifestBuffer);
   return EFI_UNSUPPORTED;
 }

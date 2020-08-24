@@ -505,10 +505,7 @@ OcRunBootPicker (
 
   SaidWelcome = FALSE;
 
-  Status = InternalInitImageLoader ();
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
+  OcActivateDirectImageLoader ();
 
   //
   // Reset NVRAM right away if requested by a key combination.

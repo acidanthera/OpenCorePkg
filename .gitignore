@@ -24,6 +24,7 @@ Utilities/TestKextInject/Result.xml
 Utilities/TestMacho/Macho
 Utilities/TestRsaPreprocess/RsaPreprocess
 Utilities/TestSmbios/Smbios
+Utilities/TestPeCoff/PeCoff
 *.o
 *.exe
 DICT

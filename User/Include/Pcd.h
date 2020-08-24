@@ -24,6 +24,8 @@ extern UINT32 _gPcd_FixedAtBuild_PcdMaximumLinkedListLength;
 extern BOOLEAN _gPcd_FixedAtBuild_PcdVerifyNodeInList;
 extern UINT32 _gPcd_FixedAtBuild_PcdCpuNumberOfReservedVariableMtrrs;
 extern UINT32 _gPcd_FixedAtBuild_PcdMaximumDevicePathNodeCount;
+extern BOOLEAN _gPcd_FixedAtBuild_PcdImageLoaderHashProhibitOverlap;
+extern BOOLEAN _gPcd_FixedAtBuild_PcdImageLoaderLoadHeader;
 
 #define _PCD_GET_MODE_32_PcdUefiLibMaxPrintBufferSize  _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize
 #define _PCD_GET_MODE_BOOL_PcdUgaConsumeSupport  _gPcd_FixedAtBuild_PcdUgaConsumeSupport
@@ -42,5 +44,7 @@ extern UINT32 _gPcd_FixedAtBuild_PcdMaximumDevicePathNodeCount;
 // this will not be of any effect at userspace
 #define _PCD_GET_MODE_64_PcdPciExpressBaseAddress 0
 #define _PCD_GET_MODE_32_PcdMaximumDevicePathNodeCount  _gPcd_FixedAtBuild_PcdMaximumDevicePathNodeCount
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderHashProhibitOverlap  _gPcd_FixedAtBuild_PcdImageLoaderHashProhibitOverlap
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderLoadHeader  _gPcd_FixedAtBuild_PcdImageLoaderLoadHeader
 
 #endif // OC_USER_PCD_H

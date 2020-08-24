@@ -516,6 +516,8 @@ OcLoadUefiSupport (
 
   OcReinstallProtocols (Config);
 
+  OcInitDirectImageLoader ();
+
   OcLoadAppleSecureBoot (Config);
 
   OcLoadUefiInputSupport (Config);

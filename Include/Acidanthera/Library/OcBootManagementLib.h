@@ -1238,4 +1238,43 @@ OcRegisterBootOption (
   IN CONST CHAR16    *FilePath
   );
 
+/**
+  Initialises custom Boot Services overrides to support direct images.
+**/
+VOID
+OcInitDirectImageLoader (
+  VOID
+  );
+
+/**
+  Make DirectImageLoader the default for Apple Secure Boot.
+**/
+VOID
+OcActivateDirectImageLoader (
+  VOID
+  );
+
+/**
+  Simplified load image routine, which bypasses UEFI and loads the image directly.
+
+  @param[in]   BootPolicy        Ignored.
+  @param[in]   ParentImageHandle The caller's image handle.
+  @param[in]   DevicePath        Ignored.
+  @param[in]   SourceBuffer      Pointer to the memory location containing image to be loaded.
+  @param[in]   SourceSize        The size in bytes of SourceBuffer.
+  @param[out]  ImageHandle       The pointer to the returned image handle created on success.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+EFIAPI
+OcDirectLoadImage (
+  IN  BOOLEAN                  BootPolicy,
+  IN  EFI_HANDLE               ParentImageHandle,
+  IN  EFI_DEVICE_PATH_PROTOCOL *DevicePath,
+  IN  VOID                     *SourceBuffer OPTIONAL,
+  IN  UINTN                    SourceSize,
+  OUT EFI_HANDLE               *ImageHandle
+  );
+
 #endif // OC_BOOT_MANAGEMENT_LIB_H

@@ -29,6 +29,7 @@
 #
 
 [Sources]
+  Alignment.c
   BitOverflow.c
   Canary.c
   NativeOverflow.c

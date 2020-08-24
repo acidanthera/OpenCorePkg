@@ -110,6 +110,13 @@ OcOverflowMulAddU32 (
   );
 
 BOOLEAN
+OcOverflowAlignUpU32 (
+  UINT32  Value,
+  UINT32  Alignment,
+  UINT32  *Result
+  );
+
+BOOLEAN
 OcOverflowAddS32 (
   INT32  A,
   INT32  B,

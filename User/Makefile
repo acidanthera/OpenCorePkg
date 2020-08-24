@@ -112,7 +112,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# OcGuardLib targets.
 	#
-	OBJS    += BitOverflow.o NativeOverflow.o TripleOverflow.o
+	OBJS    += BitOverflow.o NativeOverflow.o TripleOverflow.o Alignment.o
 	#
 	# OcSerializeLib targets.
 	#
