@@ -1071,6 +1071,8 @@ OcAppleSecureBootVerify (
     // We are successful.
     //
     if (!EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCSB: Verified IMG4 without issues\n"));
+      FreePool (ManifestBuffer);
       return Status;
     }
   }
@@ -1078,5 +1080,7 @@ OcAppleSecureBootVerify (
   //
   // No suitable signature.
   //
+  DEBUG ((DEBUG_INFO, "OCSB: No suitable signature - %r\n", Status));
+  FreePool (ManifestBuffer);
   return EFI_UNSUPPORTED;
 }
