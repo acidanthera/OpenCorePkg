@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Aug  8 20:55:30 2020
-%DIF ADD ../Configuration.tex        Sun Aug 16 23:23:14 2020
+%DIF DEL PreviousConfiguration.tex   Mon Aug 24 20:46:07 2020
+%DIF ADD ../Configuration.tex        Mon Aug 24 21:14:53 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2106,7 +2106,8 @@ blocking.
   \texttt{AppleCpuPmCfgLock}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Disables \texttt{PKG\_CST\_CONFIG\_CONTROL} (\texttt{0xE2})
+  \DIFaddbegin \textbf{\DIFadd{Requirement}}\DIFadd{: 10.6 (64-bit)}\\
+  \DIFaddend \textbf{Description}: Disables \texttt{PKG\_CST\_CONFIG\_CONTROL} (\texttt{0xE2})
   MSR modification in AppleIntelCPUPowerManagement.kext, commonly causing early
   kernel panic, when it is locked from writing.
 
@@ -2145,7 +2146,8 @@ blocking.
   \texttt{AppleXcpmCfgLock}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Disables \texttt{PKG\_CST\_CONFIG\_CONTROL} (\texttt{0xE2})
+  \DIFaddbegin \textbf{\DIFadd{Requirement}}\DIFadd{: 10.8 (not required for older)}\\
+  \DIFaddend \textbf{Description}: Disables \texttt{PKG\_CST\_CONFIG\_CONTROL} (\texttt{0xE2})
   MSR modification in XNU kernel, commonly causing early kernel panic, when it is
   locked from writing (XCPM power management).
 
@@ -2156,7 +2158,8 @@ blocking.
   \texttt{AppleXcpmExtraMsrs}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Disables multiple MSR access critical for select CPUs,
+  \DIFaddbegin \textbf{\DIFadd{Requirement}}\DIFadd{: 10.8 (not required for older)}\\
+  \DIFaddend \textbf{Description}: Disables multiple MSR access critical for select CPUs,
   which have no native XCPM support.
 
   This is normally used in conjunction with \texttt{Emulate} section on Haswell-E,
@@ -2170,7 +2173,8 @@ blocking.
   \texttt{AppleXcpmForceBoost}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Forces maximum performance in XCPM mode.
+  \DIFaddbegin \textbf{\DIFadd{Requirement}}\DIFadd{: 10.8 (not required for older)}\\
+  \DIFaddend \textbf{Description}: Forces maximum performance in XCPM mode.
 
   This patch writes \texttt{0xFF00} to \texttt{MSR\_IA32\_PERF\_CONTROL} (\texttt{0x199}),
   effectively setting maximum multiplier for all the time.
@@ -2183,14 +2187,16 @@ blocking.
   \texttt{CustomSMBIOSGuid}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Performs GUID patching for \texttt{UpdateSMBIOSMode}
+  \DIFaddbegin \textbf{\DIFadd{Requirement}}\DIFadd{: 10.6 (64-bit)}\\
+  \DIFaddend \textbf{Description}: Performs GUID patching for \texttt{UpdateSMBIOSMode}
   \texttt{Custom} mode. Usually relevant for Dell laptops.
 
 \item
   \texttt{DisableIoMapper}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Disables \texttt{IOMapper} support in XNU (VT-d),
+  \DIFaddbegin \textbf{\DIFadd{Requirement}}\DIFadd{: 10.8 (not required for older)}\\
+  \DIFaddend \textbf{Description}: Disables \texttt{IOMapper} support in XNU (VT-d),
   which may conflict with the firmware implementation.
 
   \emph{Note}: This option is a preferred alternative to deleting \texttt{DMAR}
@@ -2201,7 +2207,8 @@ blocking.
   \texttt{DisableRtcChecksum}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Disables primary checksum (\texttt{0x58}-\texttt{0x59})
+  \DIFaddbegin \textbf{\DIFadd{Requirement}}\DIFadd{: 10.6 (64-bit)}\\
+  \DIFaddend \textbf{Description}: Disables primary checksum (\texttt{0x58}-\texttt{0x59})
   writing in AppleRTC.
 
   \emph{Note 1}: This option will not protect other areas from being overwritten,
@@ -2216,7 +2223,8 @@ blocking.
   \texttt{DummyPowerManagement}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Disables \texttt{AppleIntelCpuPowerManagement}.
+  \DIFaddbegin \textbf{\DIFadd{Requirement}}\DIFadd{: 10.6 (64-bit)}\\
+  \DIFaddend \textbf{Description}: Disables \texttt{AppleIntelCpuPowerManagement}.
 
   \emph{Note}: This option is a preferred alternative to
   \texttt{NullCpuPowerManagement.kext} for CPUs without native power
@@ -2226,7 +2234,8 @@ blocking.
   \texttt{ExternalDiskIcons}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Apply icon type patches to AppleAHCIPort.kext to force
+  \DIFaddbegin \textbf{\DIFadd{Requirement}}\DIFadd{: 10.6 (64-bit)}\\
+  \DIFaddend \textbf{Description}: Apply icon type patches to AppleAHCIPort.kext to force
   internal disk icons for all AHCI disks.
 
   \emph{Note}: This option should be avoided whenever possible. Modern firmwares
@@ -2236,7 +2245,8 @@ blocking.
   \texttt{IncreasePciBarSize}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Increases 32-bit PCI bar size in IOPCIFamily from 1 to 4 GBs.
+  \DIFaddbegin \textbf{\DIFadd{Requirement}}\DIFadd{: 10.10}\\
+  \DIFaddend \textbf{Description}: Increases 32-bit PCI bar size in IOPCIFamily from 1 to 4 GBs.
 
   \emph{Note}: This option should be avoided whenever possible. In general the necessity
   of this option means misconfigured or broken firmware.
@@ -2245,20 +2255,23 @@ blocking.
   \texttt{LapicKernelPanic}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Disables kernel panic on LAPIC interrupts.
+  \DIFaddbegin \textbf{\DIFadd{Requirement}}\DIFadd{: 10.6 (64-bit)}\\
+  \DIFaddend \textbf{Description}: Disables kernel panic on LAPIC interrupts.
 
 \item
   \texttt{PanicNoKextDump}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Prevent kernel from printing kext dump in the panic
+  \DIFaddbegin \textbf{\DIFadd{Requirement}}\DIFadd{: 10.13 (not required for older)}\\
+  \DIFaddend \textbf{Description}: Prevent kernel from printing kext dump in the panic
   log preventing from observing panic details. Affects 10.13 and above.
 
 \item
   \texttt{PowerTimeoutKernelPanic}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Disables kernel panic on setPowerState timeout.
+  \DIFaddbegin \textbf{\DIFadd{Requirement}}\DIFadd{: 10.15 (not required for older)}\\
+  \DIFaddend \textbf{Description}: Disables kernel panic on setPowerState timeout.
 
   An additional security measure was added to macOS Catalina (10.15) causing
   kernel panic on power change timeout for Apple drivers. Sometimes it may cause
@@ -2270,7 +2283,8 @@ blocking.
   \texttt{ThirdPartyDrives}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Apply vendor patches to IOAHCIBlockStorage.kext to enable
+  \DIFaddbegin \textbf{\DIFadd{Requirement}}\DIFadd{: 10.6 (64-bit, not required for older)}\\
+  \DIFaddend \textbf{Description}: Apply vendor patches to IOAHCIBlockStorage.kext to enable
   native features for third-party drives, such as TRIM on SSDs or hibernation
   support on 10.15 and newer.
 
@@ -2284,7 +2298,8 @@ blocking.
   \texttt{XhciPortLimit}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Patch various kexts (AppleUSBXHCI.kext, AppleUSBXHCIPCI.kext,
+  \DIFaddbegin \textbf{\DIFadd{Requirement}}\DIFadd{: 10.11 (not required for older)}\\
+  \DIFaddend \textbf{Description}: Patch various kexts (AppleUSBXHCI.kext, AppleUSBXHCIPCI.kext,
   IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 
   \emph{Note}: This option should be avoided whenever possible. USB port limit
@@ -3286,22 +3301,22 @@ rm vault.pub
   \tightlist
   \item \texttt{\DIFadd{Default}} \DIFadd{--- Recent available model, currently set to }\texttt{\DIFadd{j215}}\DIFadd{.
   }\item \texttt{\DIFadd{Disabled}} \DIFadd{--- No model, Secure Boot will be disabled.
-  }\item \texttt{\DIFadd{j137}} \DIFadd{--- }\texttt{\DIFadd{iMacPro1,1 (December 2017)}}
-  \item \texttt{\DIFadd{j680}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro15,1 (July 2018)}}
-  \item \texttt{\DIFadd{j132}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro15,2 (July 2018)}}
-  \item \texttt{\DIFadd{j174}} \DIFadd{--- }\texttt{\DIFadd{Macmini8,1 (October 2018)}}
-  \item \texttt{\DIFadd{j140k}} \DIFadd{--- }\texttt{\DIFadd{MacBookAir8,1 (October 2018)}}
-  \item \texttt{\DIFadd{j780}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro15,3 (May 2019)}}
-  \item \texttt{\DIFadd{j213}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro15,4 (July 2019)}}
-  \item \texttt{\DIFadd{j140a}} \DIFadd{--- }\texttt{\DIFadd{MacBookAir8,2 (July 2019)}}
-  \item \texttt{\DIFadd{j152f}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro16,1 (November 2019)}}
-  \item \texttt{\DIFadd{j160}} \DIFadd{--- }\texttt{\DIFadd{MacPro7,1 (December 2019)}}
-  \item \texttt{\DIFadd{j230k}} \DIFadd{--- }\texttt{\DIFadd{MacBookAir9,1 (March 2020)}}
-  \item \texttt{\DIFadd{j214k}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro16,2 (May 2020)}}
-  \item \texttt{\DIFadd{j223}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro16,3 (May 2020)}}
-  \item \texttt{\DIFadd{j215}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro16,4 (June 2020)}}
-  \item \texttt{\DIFadd{j185}} \DIFadd{--- }\texttt{\DIFadd{iMac20,1 (August 2020)}}
-  \item \texttt{\DIFadd{j185f}} \DIFadd{--- }\texttt{\DIFadd{iMac20,2 (August 2020)}}
+  }\item \texttt{\DIFadd{j137}} \DIFadd{--- }\texttt{\DIFadd{iMacPro1,1 (December 2017) minimum macOS 10.13.2}}
+  \item \texttt{\DIFadd{j680}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro15,1 (July 2018) minimum macOS 10.13.6}}
+  \item \texttt{\DIFadd{j132}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro15,2 (July 2018) minimum macOS 10.13.6}}
+  \item \texttt{\DIFadd{j174}} \DIFadd{--- }\texttt{\DIFadd{Macmini8,1 (October 2018) minimum macOS 10.14}}
+  \item \texttt{\DIFadd{j140k}} \DIFadd{--- }\texttt{\DIFadd{MacBookAir8,1 (October 2018) minimum macOS 10.14.1}}
+  \item \texttt{\DIFadd{j780}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro15,3 (May 2019)  minimum macOS 10.14.5}}
+  \item \texttt{\DIFadd{j213}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro15,4 (July 2019) minimum macOS 10.14.5}}
+  \item \texttt{\DIFadd{j140a}} \DIFadd{--- }\texttt{\DIFadd{MacBookAir8,2 (July 2019) minimum macOS 10.14.5}}
+  \item \texttt{\DIFadd{j152f}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro16,1 (November 2019) minimum macOS 10.15.1}}
+  \item \texttt{\DIFadd{j160}} \DIFadd{--- }\texttt{\DIFadd{MacPro7,1 (December 2019) minimum macOS 10.15.1}}
+  \item \texttt{\DIFadd{j230k}} \DIFadd{--- }\texttt{\DIFadd{MacBookAir9,1 (March 2020) minimum macOS 10.15.3}}
+  \item \texttt{\DIFadd{j214k}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro16,2 (May 2020) minimum macOS 10.15.4}}
+  \item \texttt{\DIFadd{j223}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro16,3 (May 2020) minimum macOS 10.15.4}}
+  \item \texttt{\DIFadd{j215}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro16,4 (June 2020) minimum macOS 10.15.5}}
+  \item \texttt{\DIFadd{j185}} \DIFadd{--- }\texttt{\DIFadd{iMac20,1 (August 2020) minimum macOS 10.15.6}}
+  \item \texttt{\DIFadd{j185f}} \DIFadd{--- }\texttt{\DIFadd{iMac20,2 (August 2020) minimum macOS 10.15.6}}
   \end{itemize}
 
   \texttt{\DIFadd{PlatformInfo}} \DIFadd{and }\texttt{\DIFadd{SecureBootModel}} \DIFadd{are independent,
