@@ -970,10 +970,10 @@ OcAppleSecureBootSetDmgLoading (
   }
 
   if (LoadingDmg) {
-    DEBUG ((DEBUG_INFO, "OCB: Disabling secure boot for Apple images\n"));
+    DEBUG ((DEBUG_INFO, "OCSB: Disabling secure boot for Apple images\n"));
     mSecureBoot->SetAvailability (mSecureBoot, FALSE);
   } else {
-    DEBUG ((DEBUG_INFO, "OCB: Reenabling secure boot after Apple images\n"));
+    DEBUG ((DEBUG_INFO, "OCSB: Reenabling secure boot after Apple images\n"));
     mSecureBoot->SetAvailability (mSecureBoot, FALSE);
   }
 }
@@ -1026,7 +1026,7 @@ OcAppleSecureBootVerify (
   // Can consider checking boot.efi codesign integrity if we want.
   //
   if (Policy == AppleImg4SbModeDisabled && OcAppleSecureBootGetDmgLoading (NULL)) {
-    DEBUG ((DEBUG_INFO, "OCAB: Direct booting for DMG image\n"));
+    DEBUG ((DEBUG_INFO, "OCSB: Direct booting for DMG image\n"));
     return EFI_SUCCESS;
   }
 
@@ -1034,7 +1034,7 @@ OcAppleSecureBootVerify (
   // For everything else it is unsupported, meaning let the system decide.
   //
   if (Policy == AppleImg4SbModeDisabled) {
-    DEBUG ((DEBUG_INFO, "OCB: Secure boot is disbled, skipping\n"));
+    DEBUG ((DEBUG_INFO, "OCSB: Secure boot is disbled, skipping\n"));
     return EFI_UNSUPPORTED;
   }
 

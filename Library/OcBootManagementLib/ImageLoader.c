@@ -546,6 +546,17 @@ InternalEfiLoadImage (
 #else
     Status = FatFilterArchitecture64 ((UINT8 **) &SourceBuffer, &RealSize);
 #endif
+
+    DEBUG ((
+      DEBUG_INFO,
+      "OCB: Arch filtering %p(%u)->%p(%u) - %r\n",
+      AllocatedBuffer,
+      (UINT32) SourceSize,
+      SourceBuffer,
+      RealSize,
+      Status
+      ));
+
     if (!EFI_ERROR (Status)) {
       SourceSize = RealSize;
     } else if (AllocatedBuffer != NULL) {
@@ -600,6 +611,7 @@ InternalEfiLoadImage (
   return Status;
 }
 
+STATIC
 EFI_STATUS
 EFIAPI
 InternalEfiStartImage (
