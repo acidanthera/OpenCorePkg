@@ -1841,7 +1841,7 @@ OcLoadBootEntry (
   if (!EFI_ERROR (Status)) {
     Status = Context->StartImage (BootEntry, EntryHandle, NULL, NULL);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCB: StartImage failed - %r\n", Status));
+      DEBUG ((DEBUG_WARN, "OCB: StartImage failed - %r\n", Status));
       //
       // Unload dmg if any.
       //
