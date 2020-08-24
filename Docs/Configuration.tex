@@ -1735,11 +1735,24 @@ blocking.
   \textbf{Description}: Apply individual kernel and driver quirks described
   in \hyperref[kernelpropsquirks]{Quirks Properties} section below.
 
+\item
+  \texttt{Scheme}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Description}: Define kernelspace operation mode via parameters
+  described in \hyperref[kernelpropsscheme]{Scheme Properties} section below.
+
+
 \end{enumerate}
 
 \subsection{Add Properties}\label{kernelpropsadd}
 
 \begin{enumerate}
+\item
+  \texttt{Arch}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Any}\\
+  \textbf{Description}: Kext architecture (\texttt{Any}, \texttt{i386}, \texttt{x86\_64}).
+
 \item
   \texttt{BundlePath}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -1832,6 +1845,12 @@ blocking.
 \subsection{Block Properties}\label{kernelpropsblock}
 
 \begin{enumerate}
+\item
+  \texttt{Arch}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Any}\\
+  \textbf{Description}: Kext block architecture (\texttt{Any}, \texttt{i386}, \texttt{x86\_64}).
+
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -1933,6 +1952,12 @@ blocking.
 \subsection{Patch Properties}\label{kernelpropspatch}
 
 \begin{enumerate}
+\item
+  \texttt{Arch}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Any}\\
+  \textbf{Description}: Kext patch architecture (\texttt{Any}, \texttt{i386}, \texttt{x86\_64}).
+
 \item
   \texttt{Base}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -2245,6 +2270,129 @@ blocking.
   More details can be found on \href{https://applelife.ru/posts/550233}{AppleLife.ru}.
 
 \end{enumerate}
+
+\subsection{Scheme Properties}\label{kernelpropsscheme}
+
+\begin{enumerate}
+
+\item
+  \texttt{FuzzyMatch}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Use \texttt{kernelcache} with different checksums when available.
+
+  On macOS 10.6 and earlier \texttt{kernelcache} filename has a checksum, which essentially
+  is \texttt{adler32} from SMBIOS product name and EfiBoot device path. On certain firmwares
+  EfiBoot device path differs between UEFI and macOS due to ACPI or hardware specifics,
+  rendering \texttt{kernelcache} checksum as always different.
+
+  This setting allows matching the latest \texttt{kernelcache} with a suitable architecture
+  when the \texttt{kernelcache} without suffix is unavailable, improving macOS 10.6 boot
+  performance on several platforms.
+
+\item
+  \texttt{KernelArch}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{Description}: Prefer specified kernel architecture (\texttt{Auto}, \texttt{i386},
+  \texttt{x86\_64}) when available.
+
+  On macOS 10.7 and earlier XNU kernel may not boot with the usual \texttt{x86\_64} architecture,
+  and the exact choice depends on many factors including boot arguments, SMBIOS, and operating
+  system type. This setting will use the specified architecture to boot macOS when it is supported
+  by the macOS and the configuration. Below is the algorithm determining the kernel architecture.
+
+  \begin{enumerate}
+    \tightlist
+    \item \texttt{arch} argument in image arguments (e.g. when launched
+    via UEFI Shell) or in \texttt{boot-args} variable override any compatibility
+    checks and force the specified architecture.
+    \item Determined EfiBoot version restricts architecture choice:
+      \begin{itemize}
+      \item 10.4-10.5 --- \texttt{i386}
+      \item 10.6-10.7 --- \texttt{i386} or \texttt{x86\_64}
+      \item 10.8 or newer --- \texttt{x86\_64}
+      \end{itemize}
+    \item SMBIOS model information and EfiBoot version restrict
+      architecture choice and define architecture preference for client
+      and server operating systems according to the table below.
+    \item \texttt{KernelArch} setting updates architecture preference
+      for both client and server operating systems if the architecture
+      is supported and \texttt{KernelArch} is not \texttt{Auto}.
+    \item EfiBoot decides on server boot picking either server
+      or client preference.
+  \end{enumerate}
+
+  \begin{center}
+  \begin{tabular}{|p{0.9in}|c|c|c|c|} 
+  \hline
+  \textbf{Model} & \textbf{10.6 (minimal)} & \textbf{10.6 (client)} & \textbf{10.6 (server)} & \textbf{10.7 (any)} \\
+  \hline
+  Macmini & 4,x (Mid 2010) & 5,x (Mid 2011) & 4,x (Mid 2010) & 3,x (Early 2009) \\
+  \hline
+  MacBook & Unsupported & Unsupported & Unsupported & 5,x (2009/09) \\
+  \hline
+  MacBookAir & Unsupported & Unsupported & Unsupported & 2,x (Late 2008) \\
+  \hline
+  MacBookPro & 4,x (Early 2008) & 8,x (Early 2011) & 8,x (Early 2011) & 3,x (Mid 2007) \\
+  \hline
+  iMac & 8,x (Early 2008) & 12,x (Mid 2011) & 12,x (Mid 2011) & 7,x (Mid 2007) \\
+  \hline
+  MacPro & 3,x (Early 2008) & 5,x (Mid 2010) & 3,x (Early 2008) & 3,x (Early 2008) \\
+  \hline
+  Xserve & 2,x (Early 2008) & 2,x (Early 2008) & 2,x (Early 2008) & 2,x (Early 2008) \\
+  \hline
+  \end{tabular}
+  \end{center}
+
+  \emph{Note 1}: Unlike 10.7 and newer, on 10.6 many models support 64-bit
+    kernel loading but have it disabled by default. Information about 10.6
+    64-bit Mac model compatibility is incorrect on Apple support website
+    and does not correspond to actual EfiBoot behaviour.
+
+  \emph{Note 2}: Older 10.6 server versions will start in client mode due
+    to a bug in EfiBoot. Consider using this preference to workaround
+    the issue.
+
+\item
+  \texttt{KernelCache}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{Description}: Prefer specified kernel cache type (\texttt{Auto}, \texttt{Cacheless},
+  \texttt{Mkext}, \texttt{Prelinked}) when available.
+
+  Different variants of macOS support different kernel caching variants designed to improve
+  boot performance. This setting allows to prevent using faster kernel caching variants
+  if slower variants are available for debugging and stability reasons. I.e. by
+  specifying \texttt{Mkext} one will disable \texttt{Prelinked} for e.g. 10.6 but not 10.7.
+
+  The list of available kernel caching types and its current support in OpenCore is listed below.
+
+  \begin{center}
+  \begin{tabular}{|p{0.67in}|c|c|c|c|c|c|c|} 
+  \hline
+  \textbf{macOS} & \textbf{i386 NC} & \textbf{i386 MK} & \textbf{i386 PK} & \textbf{x86\_64 NC} & \textbf{x86\_64 MK} & \textbf{x86\_64 PK} & \textbf{x86\_64 KC} \\
+  \hline
+  10.4 & NO & NO (V1) & NO & --- & --- & --- & --- \\
+  \hline
+  10.5 & NO & NO (V1) & NO & --- & --- & --- & --- \\
+  \hline
+  10.6 & NO & NO (V2) & NO & YES & YES (V2) & YES & --- \\
+  \hline
+  10.7 & NO & --- & NO & YES & --- & YES & --- \\
+  \hline
+  10.8-10.9 & --- & --- & --- & YES & --- & YES & --- \\
+  \hline
+  10.10-10.15 & --- & --- & --- & --- & --- & YES & --- \\
+  \hline
+  11.0+ & --- & --- & --- & --- & --- & YES & YES \\
+  \hline
+  \end{tabular}
+  \end{center}
+
+
+\end{enumerate}
+
 
 \section{Misc}\label{misc}
 

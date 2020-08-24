@@ -853,7 +853,7 @@ OcKernelFileOpen (
   //
   // Prevent access to cache files depending on maximum cache type allowed.
   //
-  ForceCacheType = OC_BLOB_GET (&mOcConfiguration->Kernel.Quirks.ForceKernelCache);
+  ForceCacheType = OC_BLOB_GET (&mOcConfiguration->Kernel.Scheme.KernelCache);
   if (AsciiStrCmp (ForceCacheType, "Cacheless") == 0) {
     MaxCacheTypeAllowed = CacheTypeCacheless;
   } else if (AsciiStrCmp (ForceCacheType, "Mkext") == 0) {

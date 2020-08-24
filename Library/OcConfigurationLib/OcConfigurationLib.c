@@ -41,6 +41,7 @@ OC_STRUCTORS       (OC_KERNEL_EMULATE, ())
 OC_STRUCTORS       (OC_KERNEL_PATCH_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_KERNEL_PATCH_ARRAY)
 OC_STRUCTORS       (OC_KERNEL_QUIRKS, ())
+OC_STRUCTORS       (OC_KERNEL_SCHEME, ())
 OC_STRUCTORS       (OC_KERNEL_CONFIG, ())
 
 OC_ARRAY_STRUCTORS (OC_MISC_BLESS_ARRAY)
@@ -229,6 +230,7 @@ mDevicePropertiesSchema[] = {
 STATIC
 OC_SCHEMA
 mKernelAddSchemaEntry[] = {
+  OC_SCHEMA_STRING_IN    ("Arch",           OC_KERNEL_ADD_ENTRY, Arch),
   OC_SCHEMA_STRING_IN    ("BundlePath",     OC_KERNEL_ADD_ENTRY, BundlePath),
   OC_SCHEMA_STRING_IN    ("Comment",        OC_KERNEL_ADD_ENTRY, Comment),
   OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_KERNEL_ADD_ENTRY, Enabled),
@@ -245,6 +247,7 @@ mKernelAddSchema = OC_SCHEMA_DICT (NULL, mKernelAddSchemaEntry);
 STATIC
 OC_SCHEMA
 mKernelBlockSchemaEntry[] = {
+  OC_SCHEMA_STRING_IN    ("Arch",           OC_KERNEL_BLOCK_ENTRY, Arch),
   OC_SCHEMA_STRING_IN    ("Comment",        OC_KERNEL_BLOCK_ENTRY, Comment),
   OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_KERNEL_BLOCK_ENTRY, Enabled),
   OC_SCHEMA_STRING_IN    ("Identifier",     OC_KERNEL_BLOCK_ENTRY, Identifier),
@@ -266,6 +269,7 @@ mKernelEmulateSchema[] = {
 STATIC
 OC_SCHEMA
 mKernelPatchSchemaEntry[] = {
+  OC_SCHEMA_STRING_IN    ("Arch",           OC_KERNEL_PATCH_ENTRY, Arch),
   OC_SCHEMA_STRING_IN    ("Base",           OC_KERNEL_PATCH_ENTRY, Base),
   OC_SCHEMA_STRING_IN    ("Comment",        OC_KERNEL_PATCH_ENTRY, Comment),
   OC_SCHEMA_INTEGER_IN   ("Count",          OC_KERNEL_PATCH_ENTRY, Count),
@@ -297,7 +301,6 @@ mKernelQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("DisableRtcChecksum",      OC_GLOBAL_CONFIG, Kernel.Quirks.DisableRtcChecksum),
   OC_SCHEMA_BOOLEAN_IN ("DummyPowerManagement",    OC_GLOBAL_CONFIG, Kernel.Quirks.DummyPowerManagement),
   OC_SCHEMA_BOOLEAN_IN ("ExternalDiskIcons",       OC_GLOBAL_CONFIG, Kernel.Quirks.ExternalDiskIcons),
-  OC_SCHEMA_STRING_IN  ("ForceKernelCache",        OC_GLOBAL_CONFIG, Kernel.Quirks.ForceKernelCache),
   OC_SCHEMA_BOOLEAN_IN ("IncreasePciBarSize",      OC_GLOBAL_CONFIG, Kernel.Quirks.IncreasePciBarSize),
   OC_SCHEMA_BOOLEAN_IN ("LapicKernelPanic",        OC_GLOBAL_CONFIG, Kernel.Quirks.LapicKernelPanic),
   OC_SCHEMA_BOOLEAN_IN ("PanicNoKextDump",         OC_GLOBAL_CONFIG, Kernel.Quirks.PanicNoKextDump),
@@ -308,12 +311,21 @@ mKernelQuirksSchema[] = {
 
 STATIC
 OC_SCHEMA
+mKernelSchemeSchema[] = {
+  OC_SCHEMA_BOOLEAN_IN ("FuzzyMatch",         OC_GLOBAL_CONFIG, Kernel.Scheme.FuzzyMatch),
+  OC_SCHEMA_STRING_IN  ("KernelArch",         OC_GLOBAL_CONFIG, Kernel.Scheme.KernelArch),
+  OC_SCHEMA_STRING_IN  ("KernelCache",        OC_GLOBAL_CONFIG, Kernel.Scheme.KernelCache),
+};
+
+STATIC
+OC_SCHEMA
 mKernelConfigurationSchema[] = {
   OC_SCHEMA_ARRAY_IN   ("Add",     OC_GLOBAL_CONFIG, Kernel.Add, &mKernelAddSchema),
   OC_SCHEMA_ARRAY_IN   ("Block",   OC_GLOBAL_CONFIG, Kernel.Block, &mKernelBlockSchema),
   OC_SCHEMA_DICT       ("Emulate", mKernelEmulateSchema),
   OC_SCHEMA_ARRAY_IN   ("Patch",   OC_GLOBAL_CONFIG, Kernel.Patch, &mKernelPatchSchema),
   OC_SCHEMA_DICT       ("Quirks",  mKernelQuirksSchema),
+  OC_SCHEMA_DICT       ("Scheme",  mKernelSchemeSchema),
 };
 
 //
