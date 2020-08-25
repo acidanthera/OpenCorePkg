@@ -41,7 +41,7 @@ typedef struct OC_SB_MODEL_DESC_ {
 } OC_SB_MODEL_DESC;
 
 STATIC DERImg4Environment mEnvInfo;
-STATIC CONST CHAR8 *mModelDefault = "j215";
+STATIC CONST CHAR8 *mModelDefault = "j137";
 ///
 /// List of model mapping to board identifiers.
 /// Alphabetically sorted (!), for release order refer to the documentation.
