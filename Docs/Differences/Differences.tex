@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Aug 24 21:43:09 2020
-%DIF ADD ../Configuration.tex        Mon Aug 24 22:07:45 2020
+%DIF DEL PreviousConfiguration.tex   Tue Aug 25 23:11:15 2020
+%DIF ADD ../Configuration.tex        Tue Aug 25 23:11:15 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1799,13 +1799,28 @@ blocking.
   \textbf{Description}: Apply individual kernel and driver quirks described
   in \hyperref[kernelpropsquirks]{Quirks Properties} section below.
 
-\end{enumerate}
+\DIFaddbegin \item
+  \texttt{\DIFadd{Scheme}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ dict}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Define kernelspace operation mode via parameters
+  described in }\hyperref[kernelpropsscheme]{Scheme Properties} \DIFadd{section below.
+}
+
+
+\DIFaddend \end{enumerate}
 
 \subsection{Add Properties}\label{kernelpropsadd}
 
 \begin{enumerate}
 \item
-  \texttt{BundlePath}\\
+  \DIFaddbegin \texttt{\DIFadd{Arch}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Any}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Kext architecture (}\texttt{\DIFadd{Any}}\DIFadd{, }\texttt{\DIFadd{i386}}\DIFadd{, }\texttt{\DIFadd{x86\_64}}\DIFadd{).
+}
+
+\item
+  \DIFaddend \texttt{BundlePath}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Kext bundle path (e.g. \texttt{Lilu.kext}
@@ -1897,7 +1912,14 @@ blocking.
 
 \begin{enumerate}
 \item
-  \texttt{Comment}\\
+  \DIFaddbegin \texttt{\DIFadd{Arch}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Any}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Kext block architecture (}\texttt{\DIFadd{Any}}\DIFadd{, }\texttt{\DIFadd{i386}}\DIFadd{, }\texttt{\DIFadd{x86\_64}}\DIFadd{).
+}
+
+\item
+  \DIFaddend \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
@@ -1998,7 +2020,14 @@ blocking.
 
 \begin{enumerate}
 \item
-  \texttt{Base}\\
+  \DIFaddbegin \texttt{\DIFadd{Arch}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Any}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Kext patch architecture (}\texttt{\DIFadd{Any}}\DIFadd{, }\texttt{\DIFadd{i386}}\DIFadd{, }\texttt{\DIFadd{x86\_64}}\DIFadd{).
+}
+
+\item
+  \DIFaddend \texttt{Base}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
   \textbf{Description}: Selects symbol-matched base for patch lookup (or immediate
@@ -2310,7 +2339,140 @@ blocking.
 
 \end{enumerate}
 
-\section{Misc}\label{misc}
+\DIFaddbegin \subsection{\DIFadd{Scheme Properties}}\label{kernelpropsscheme}
+
+\begin{enumerate}
+
+\item
+  \texttt{\DIFadd{FuzzyMatch}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Use }\texttt{\DIFadd{kernelcache}} \DIFadd{with different checksums when available.
+}
+
+  \DIFadd{On macOS 10.6 and earlier }\texttt{\DIFadd{kernelcache}} \DIFadd{filename has a checksum, which essentially
+  is }\texttt{\DIFadd{adler32}} \DIFadd{from SMBIOS product name and EfiBoot device path. On certain firmwares
+  EfiBoot device path differs between UEFI and macOS due to ACPI or hardware specifics,
+  rendering }\texttt{\DIFadd{kernelcache}} \DIFadd{checksum as always different.
+}
+
+  \DIFadd{This setting allows matching the latest }\texttt{\DIFadd{kernelcache}} \DIFadd{with a suitable architecture
+  when the }\texttt{\DIFadd{kernelcache}} \DIFadd{without suffix is unavailable, improving macOS 10.6 boot
+  performance on several platforms.
+}
+
+\item
+  \texttt{\DIFadd{KernelArch}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Auto}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Prefer specified kernel architecture (}\texttt{\DIFadd{Auto}}\DIFadd{, }\texttt{\DIFadd{i386}}\DIFadd{,
+  }\texttt{\DIFadd{x86\_64}}\DIFadd{) when available.
+}
+
+  \DIFadd{On macOS 10.7 and earlier XNU kernel may not boot with the usual }\texttt{\DIFadd{x86\_64}} \DIFadd{architecture,
+  and the exact choice depends on many factors including boot arguments, SMBIOS, and operating
+  system type. This setting will use the specified architecture to boot macOS when it is supported
+  by the macOS and the configuration. Below is the algorithm determining the kernel architecture.
+}
+
+  \begin{enumerate}
+    \tightlist
+    \item \texttt{\DIFadd{arch}} \DIFadd{argument in image arguments (e.g. when launched
+    via UEFI Shell) or in }\texttt{\DIFadd{boot-args}} \DIFadd{variable override any compatibility
+    checks and force the specified architecture.
+    }\item \DIFadd{Determined EfiBoot version restricts architecture choice:
+      }\begin{itemize}
+      \item \DIFadd{10.4-10.5 --- }\texttt{\DIFadd{i386}}
+      \item \DIFadd{10.6-10.7 --- }\texttt{\DIFadd{i386}} \DIFadd{or }\texttt{\DIFadd{x86\_64}}
+      \item \DIFadd{10.8 or newer --- }\texttt{\DIFadd{x86\_64}}
+      \end{itemize}
+    \item \DIFadd{SMBIOS model information and EfiBoot version restrict
+      architecture choice and define architecture preference for client
+      and server operating systems according to the table below.
+    }\item \texttt{\DIFadd{KernelArch}} \DIFadd{setting updates architecture preference
+      for both client and server operating systems if the architecture
+      is supported and }\texttt{\DIFadd{KernelArch}} \DIFadd{is not }\texttt{\DIFadd{Auto}}\DIFadd{.
+    }\item \DIFadd{EfiBoot decides on server boot picking either server
+      or client preference.
+  }\end{enumerate}
+
+  \begin{center}
+  \begin{tabular}{|p{0.9in}|c|c|c|c|} 
+  \hline
+  \textbf{\DIFadd{Model}} & \textbf{\DIFadd{10.6 (minimal)}} & \textbf{\DIFadd{10.6 (client)}} & \textbf{\DIFadd{10.6 (server)}} & \textbf{\DIFadd{10.7 (any)}} \\
+  \hline
+  \DIFadd{Macmini }& \DIFadd{4,x (Mid 2010) }& \DIFadd{5,x (Mid 2011) }& \DIFadd{4,x (Mid 2010) }& \DIFadd{3,x (Early 2009) }\\
+  \hline
+  \DIFadd{MacBook }& \DIFadd{Unsupported }& \DIFadd{Unsupported }& \DIFadd{Unsupported }& \DIFadd{5,x (2009/09) }\\
+  \hline
+  \DIFadd{MacBookAir }& \DIFadd{Unsupported }& \DIFadd{Unsupported }& \DIFadd{Unsupported }& \DIFadd{2,x (Late 2008) }\\
+  \hline
+  \DIFadd{MacBookPro }& \DIFadd{4,x (Early 2008) }& \DIFadd{8,x (Early 2011) }& \DIFadd{8,x (Early 2011) }& \DIFadd{3,x (Mid 2007) }\\
+  \hline
+  \DIFadd{iMac }& \DIFadd{8,x (Early 2008) }& \DIFadd{12,x (Mid 2011) }& \DIFadd{12,x (Mid 2011) }& \DIFadd{7,x (Mid 2007) }\\
+  \hline
+  \DIFadd{MacPro }& \DIFadd{3,x (Early 2008) }& \DIFadd{5,x (Mid 2010) }& \DIFadd{3,x (Early 2008) }& \DIFadd{3,x (Early 2008) }\\
+  \hline
+  \DIFadd{Xserve }& \DIFadd{2,x (Early 2008) }& \DIFadd{2,x (Early 2008) }& \DIFadd{2,x (Early 2008) }& \DIFadd{2,x (Early 2008) }\\
+  \hline
+  \end{tabular}
+  \end{center}
+
+  \emph{\DIFadd{Note 1}}\DIFadd{: Unlike 10.7 and newer, on 10.6 many models support 64-bit
+    kernel loading but have it disabled by default. Information about 10.6
+    64-bit Mac model compatibility is incorrect on Apple support website
+    and does not correspond to actual EfiBoot behaviour.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: Older 10.6 server versions will start in client mode due
+    to a bug in EfiBoot. Consider using this preference to workaround
+    the issue.
+}
+
+\item
+  \texttt{\DIFadd{KernelCache}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Auto}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Prefer specified kernel cache type (}\texttt{\DIFadd{Auto}}\DIFadd{, }\texttt{\DIFadd{Cacheless}}\DIFadd{,
+  }\texttt{\DIFadd{Mkext}}\DIFadd{, }\texttt{\DIFadd{Prelinked}}\DIFadd{) when available.
+}
+
+  \DIFadd{Different variants of macOS support different kernel caching variants designed to improve
+  boot performance. This setting allows to prevent using faster kernel caching variants
+  if slower variants are available for debugging and stability reasons. I.e. by
+  specifying }\texttt{\DIFadd{Mkext}} \DIFadd{one will disable }\texttt{\DIFadd{Prelinked}} \DIFadd{for e.g. 10.6 but not 10.7.
+}
+
+  \DIFadd{The list of available kernel caching types and its current support in OpenCore is listed below.
+}
+
+  \begin{center}
+  \begin{tabular}{|p{0.67in}|c|c|c|c|c|c|c|} 
+  \hline
+  \textbf{\DIFadd{macOS}} & \textbf{\DIFadd{i386 NC}} & \textbf{\DIFadd{i386 MK}} & \textbf{\DIFadd{i386 PK}} & \textbf{\DIFadd{x86\_64 NC}} & \textbf{\DIFadd{x86\_64 MK}} & \textbf{\DIFadd{x86\_64 PK}} & \textbf{\DIFadd{x86\_64 KC}} \\
+  \hline
+  \DIFadd{10.4 }& \DIFadd{NO }& \DIFadd{NO (V1) }& \DIFadd{NO }& \DIFadd{--- }& \DIFadd{--- }& \DIFadd{--- }& \DIFadd{--- }\\
+  \hline
+  \DIFadd{10.5 }& \DIFadd{NO }& \DIFadd{NO (V1) }& \DIFadd{NO }& \DIFadd{--- }& \DIFadd{--- }& \DIFadd{--- }& \DIFadd{--- }\\
+  \hline
+  \DIFadd{10.6 }& \DIFadd{NO }& \DIFadd{NO (V2) }& \DIFadd{NO }& \DIFadd{YES }& \DIFadd{YES (V2) }& \DIFadd{YES }& \DIFadd{--- }\\
+  \hline
+  \DIFadd{10.7 }& \DIFadd{NO }& \DIFadd{--- }& \DIFadd{NO }& \DIFadd{YES }& \DIFadd{--- }& \DIFadd{YES }& \DIFadd{--- }\\
+  \hline
+  \DIFadd{10.8-10.9 }& \DIFadd{--- }& \DIFadd{--- }& \DIFadd{--- }& \DIFadd{YES }& \DIFadd{--- }& \DIFadd{YES }& \DIFadd{--- }\\
+  \hline
+  \DIFadd{10.10-10.15 }& \DIFadd{--- }& \DIFadd{--- }& \DIFadd{--- }& \DIFadd{--- }& \DIFadd{--- }& \DIFadd{YES }& \DIFadd{--- }\\
+  \hline
+  \DIFadd{11.0+ }& \DIFadd{--- }& \DIFadd{--- }& \DIFadd{--- }& \DIFadd{--- }& \DIFadd{--- }& \DIFadd{YES }& \DIFadd{YES }\\
+  \hline
+  \end{tabular}
+  \end{center}
+
+
+\end{enumerate}
+
+
+\DIFaddend \section{Misc}\label{misc}
 
 \subsection{Introduction}\label{miscintro}
 
@@ -3299,7 +3461,7 @@ rm vault.pub
 
   \begin{itemize}
   \tightlist
-  \item \texttt{\DIFadd{Default}} \DIFadd{--- Recent available model, currently set to }\texttt{\DIFadd{j215}}\DIFadd{.
+  \item \texttt{\DIFadd{Default}} \DIFadd{--- Recent available model, currently set to }\texttt{\DIFadd{j137}}\DIFadd{.
   }\item \texttt{\DIFadd{Disabled}} \DIFadd{--- No model, Secure Boot will be disabled.
   }\item \texttt{\DIFadd{j137}} \DIFadd{--- }\texttt{\DIFadd{iMacPro1,1 (December 2017) minimum macOS 10.13.2 (17C2111)}}
   \item \texttt{\DIFadd{j680}} \DIFadd{--- }\texttt{\DIFadd{MacBookPro15,1 (July 2018) minimum macOS 10.13.6 (17G2112)}}
