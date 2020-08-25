@@ -601,9 +601,10 @@ The latest Xcode version is recommended for use despite the toolchain name. Exam
 command sequence may look as follows:
 
 \begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
-git clone --recursive --depth=1 https://github.com/acidanthera/audk UDK
+git clone --depth=1 https://github.com/acidanthera/audk UDK
 cd UDK
-git clone https://github.com/acidanthera/OpenCorePkg
+git submodule update --init --recommend-shallow
+git clone --depth=1 https://github.com/acidanthera/OpenCorePkg
 source edksetup.sh
 make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
@@ -2500,7 +2501,7 @@ entry choice will update till next manual reconfiguration.
   \tightlist
   \item \texttt{0x0001} --- \texttt{OC\_ATTR\_USE\_VOLUME\_ICON}, provides custom icons
     for boot entries:
-    
+
     For \texttt{Tools} OpenCore will try to load a custom icon and fallback to the default icon:
     \begin{itemize}
     \tightlist
@@ -2509,21 +2510,21 @@ entry choice will update till next manual reconfiguration.
       \item \texttt{Tools\textbackslash <TOOL\_RELATIVE\_PATH>.icns}
         --- icon near the tool file with appended \texttt{.icns} extension.
     \end{itemize} \medskip
-    
+
     For custom boot \texttt{Entries} OpenCore will try to load a custom icon and fallback
     to the volume icon or the default icon:
     \begin{itemize}
     \tightlist
       \item \texttt{<ENTRY\_PATH>.icns} --- icon near the entry file with appended \texttt{.icns} extension.
     \end{itemize} \medskip
-    
+
     For all other entries OpenCore will try to load a volume icon and fallback to the default icon:
     \begin{itemize}
     \tightlist
       \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS.
       \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
     \end{itemize} \medskip
-    
+
     Volume icons can be set in Finder. Note, that enabling this may result in
     external and internal icons to be indistinguishable.
   \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
@@ -2764,7 +2765,7 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
   (any) debug logging. Serial port configuration is defined via PCDs at compile time
   in \texttt{gEfiMdeModulePkgTokenSpaceGuid} GUID. Default values as found in
   \texttt{MdeModulePkg.dec} are as follows:
-  
+
   \begin{itemize}
   \tightlist
     \item \texttt{PcdSerialBaudRate} --- Baud rate: \texttt{115200}.
@@ -4615,7 +4616,7 @@ similar to the builtin text interface.
 
 OpenCanopy requires graphical resources located in \texttt{Resources} directory to run.
 Sample resources (fonts and images) can be found in
-\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}. You can find customised icons over the internet 
+\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}. You can find customised icons over the internet
 (e.g. \href{https://github.com/blackosx/OpenCanopyIcons}{here} or \href{https://applelife.ru/threads/kastomizacija-opencanopy.2945020/}{there}).
 
 OpenCanopy provides full support for \texttt{PickerAttributes} and offers a configurable
