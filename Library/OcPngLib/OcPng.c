@@ -91,7 +91,7 @@ DecodePng (
   Error = lodepng_decode ((unsigned char **) RawData, &W, &H, &State, Buffer, Size);
 
   if (Error != 0) {
-    DEBUG ((DEBUG_INFO, "OCPNG: Error while decoding PNG image\n"));
+    DEBUG ((DEBUG_INFO, "OCPNG: Error while decoding PNG image - %u\n", Error));
     lodepng_state_cleanup (&State);
     return EFI_INVALID_PARAMETER;
   }
