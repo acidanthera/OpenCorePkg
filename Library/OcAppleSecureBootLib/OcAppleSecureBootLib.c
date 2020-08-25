@@ -1052,8 +1052,8 @@ OcAppleSecureBootVerify (
 
   STATIC UINT32 mCheckedObjects[] = {
     APPLE_SB_OBJ_EFIBOOT,
+    APPLE_SB_OBJ_EFIBOOT_BASE,
     APPLE_SB_OBJ_EFIBOOT_DEBUG,
-    APPLE_SB_OBJ_EFIBOOT_BASE
   };
 
   for (Index = 0; Index < ARRAY_SIZE (mCheckedObjects); ++Index) {
@@ -1073,14 +1073,15 @@ OcAppleSecureBootVerify (
     if (!EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCSB: Verified IMG4 without issues\n"));
       FreePool (ManifestBuffer);
-      return Status;
+      return EFI_SUCCESS;
     }
   }
 
   //
-  // No suitable signature.
+  // No suitable signature in the manifest.
+  // Treat as a hard error, as this should not happen.
   //
-  DEBUG ((DEBUG_INFO, "OCSB: No suitable signature - %r\n", Status));
+  DEBUG ((DEBUG_WARN, "OCSB: No suitable signature - %r\n", Status));
   FreePool (ManifestBuffer);
-  return EFI_UNSUPPORTED;
+  return EFI_SECURITY_VIOLATION;
 }
