@@ -1201,7 +1201,7 @@ GuiDrawLoop (
         }
       }
       //
-      // If detected key press then disable menu timeout
+      // If detected pointer event then disable menu timeout
       //
       TimeOutSeconds = 0;
     }
