@@ -55,6 +55,18 @@ IsAsciiSpace (
        || (Char == '\n'));
 }
 
+VOID
+AsciiUefiSlashes (
+  IN OUT CHAR8    *String
+  )
+{
+  CHAR8  *Needle;
+
+  while ((Needle = AsciiStrStr (String, "/")) != NULL) {
+    *Needle = '\\';
+  }
+}
+
 /** Convert null terminated ascii string to unicode.
 
   @param[in]  String1  A pointer to the ascii string to convert to unicode.

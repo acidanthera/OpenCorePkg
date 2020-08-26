@@ -167,6 +167,11 @@ OcKernelLoadKextsAndReserve (
       continue;
     }
 
+    //
+    // Required for possible cacheless force injection later on.
+    //
+    AsciiUefiSlashes (BundlePath);
+
     Status = OcUnicodeSafeSPrint (
       FullPath,
       sizeof (FullPath),
@@ -803,8 +808,9 @@ OcKernelInjectKext (
   }
 
   if (CacheType == CacheTypeCacheless) {
-    if (IsForced) {
-      Status = EFI_UNSUPPORTED; // TODO
+    if (IsForced
+      && AsciiStrnCmp (BundlePath, "System\\Library\\Extensions", L_STR_LEN ("System\\Library\\Extensions")) == 0) {
+      Status = CachelessContextForceKext (Context, Identifier);
     } else {
       Status = CachelessContextAddKext (
         Context,
@@ -902,9 +908,7 @@ OcKernelInjectKexts (
       );
   }
 
-  if (CacheType == CacheTypeCacheless) {
-    Status = EFI_SUCCESS;
-  } else if (CacheType == CacheTypeMkext) {
+  if (CacheType == CacheTypeCacheless || CacheType == CacheTypeMkext) {
     Status = EFI_SUCCESS;
   } else if (CacheType == CacheTypePrelinked) {
     DEBUG ((

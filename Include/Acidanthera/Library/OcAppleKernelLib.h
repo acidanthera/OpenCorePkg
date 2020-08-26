@@ -1077,6 +1077,20 @@ CachelessContextAddKext (
   );
 
 /**
+  Force built-in kext to load.
+
+  @param[in,out] Context         Cacheless context.
+  @param[in]     Identifier      Kext bundle identifier.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+CachelessContextForceKext (
+  IN OUT CACHELESS_CONTEXT    *Context,
+  IN     CONST CHAR8          *Identifier
+  );
+
+/**
   Add patch to cacheless context to be applied later on.
 
   @param[in,out] Context         Cacheless context.

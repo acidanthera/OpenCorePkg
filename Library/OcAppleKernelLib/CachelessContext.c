@@ -66,19 +66,52 @@ FreeBuiltInKext (
 }
 
 STATIC
-BOOLEAN
+EFI_STATUS
+AddKextDependency (
+  IN OUT LIST_ENTRY           *Dependencies,
+  IN     CONST CHAR8          *Identifier
+  )
+{
+  DEPEND_KEXT       *DependKext;
+  LIST_ENTRY        *KextLink;
+
+  KextLink          = GetFirstNode (Dependencies);
+  while (!IsNull (Dependencies, KextLink)) {
+    DependKext = GET_DEPEND_KEXT_FROM_LINK (KextLink);
+
+    if (AsciiStrCmp (DependKext->Identifier, Identifier) == 0) {
+      return EFI_SUCCESS;
+    }
+
+    KextLink = GetNextNode (Dependencies, KextLink);
+  }
+
+  DependKext = AllocateZeroPool (sizeof (*DependKext));
+  if (DependKext == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+  DependKext->Signature = DEPEND_KEXT_SIGNATURE;
+  DependKext->Identifier = AllocateCopyPool (AsciiStrSize (Identifier), Identifier);
+  if (DependKext->Identifier == NULL) {
+    FreePool (DependKext);
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  InsertTailList (Dependencies, &DependKext->Link);
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
 AddKextDependencies (
   IN OUT LIST_ENTRY           *Dependencies,
   IN     XML_NODE             *InfoPlistLibraries
   )
 {
-  DEPEND_KEXT       *DependKext;
+  EFI_STATUS        Status;
   UINT32            ChildCount;
   UINT32            ChildIndex;
   CONST CHAR8       *ChildPlistKey;
-
-  LIST_ENTRY        *KextLink;
-  BOOLEAN           DependencyExists;
 
   ChildCount = PlistDictChildren (InfoPlistLibraries);
   for (ChildIndex = 0; ChildIndex < ChildCount; ChildIndex++) {
@@ -87,32 +120,13 @@ AddKextDependencies (
       continue;
     }
 
-    DependencyExists  = FALSE;
-    KextLink          = GetFirstNode (Dependencies);
-    while (!IsNull (Dependencies, KextLink)) {
-      DependKext = GET_DEPEND_KEXT_FROM_LINK (KextLink);
-
-      if (AsciiStrCmp (DependKext->Identifier, ChildPlistKey) == 0) {
-        DependencyExists = TRUE;
-        break;
-      }
-
-      KextLink = GetNextNode (Dependencies, KextLink);
-    }
-
-    if (!DependencyExists) {
-      DependKext = AllocateZeroPool (sizeof (*DependKext));
-      if (DependKext == NULL) {
-        return FALSE;
-      }
-      DependKext->Signature = DEPEND_KEXT_SIGNATURE;
-      DependKext->Identifier = AllocateCopyPool (AsciiStrSize (ChildPlistKey), ChildPlistKey);
-
-      InsertTailList (Dependencies, &DependKext->Link);
+    Status = AddKextDependency (Dependencies, ChildPlistKey);
+    if (EFI_ERROR (Status)) {
+      return Status;
     }
   }
 
-  return TRUE;
+  return EFI_SUCCESS;
 }
 
 STATIC
@@ -287,7 +301,16 @@ ScanExtensions (
                 return EFI_INVALID_PARAMETER;
               }
 
-              AddKextDependencies (&BuiltinKext->Dependencies, InfoPlistLibraries);
+              Status = AddKextDependencies (&BuiltinKext->Dependencies, InfoPlistLibraries);
+              if (EFI_ERROR (Status)) {
+                FreeBuiltInKext (BuiltinKext);
+                XmlDocumentFree (InfoPlistDocument);
+                FreePool (InfoPlist);
+                FileKext->Close (FileKext);
+                File->SetPosition (File, 0);
+                FreePool (FileInfo);
+                return Status;
+              }
             }
           }
 
@@ -523,8 +546,6 @@ ScanDependencies (
   DEPEND_KEXT     *DependKext;
   LIST_ENTRY      *KextLink;
 
-  BOOLEAN         DependencyExists;
-
   BuiltinKext = LookupBuiltinKextForIdentifier (Context, Identifier);
   if (BuiltinKext == NULL || BuiltinKext->OSBundleRequiredValue == KEXT_OSBUNDLE_REQUIRED_VALID) {
     //
@@ -536,32 +557,8 @@ ScanDependencies (
 
   BuiltinKext->PatchValidOSBundleRequired = TRUE;
 
-  //
-  // Add bundle to list.
-  //
-  DependencyExists  = FALSE;
-  KextLink          = GetFirstNode (&Context->InjectedDependencies);
-  while (!IsNull (&Context->InjectedDependencies, KextLink)) {
-    DependKext = GET_DEPEND_KEXT_FROM_LINK (KextLink);
-
-    if (AsciiStrCmp (DependKext->Identifier, Identifier) == 0) {
-      DependencyExists = TRUE;
-      break;
-    }
-
-    KextLink = GetNextNode (&Context->InjectedDependencies, KextLink);
-  }
-
-  if (!DependencyExists) {
-    DependKext = AllocateZeroPool (sizeof (*DependKext));
-    if (DependKext == NULL) {
-      return EFI_OUT_OF_RESOURCES;
-    }
-    DependKext->Signature = DEPEND_KEXT_SIGNATURE;
-    DependKext->Identifier = AllocateCopyPool (AsciiStrSize (Identifier), Identifier);
-
-    DEBUG ((DEBUG_INFO, "OCAK: Adding built-in dependency %a\n", Identifier));
-    InsertTailList (&Context->InjectedDependencies, &DependKext->Link);
+  if (!AddKextDependency (&Context->InjectedDependencies, Identifier)) {
+    return EFI_INVALID_PARAMETER;
   }
 
   KextLink = GetFirstNode (&BuiltinKext->Dependencies);
@@ -747,6 +744,7 @@ CachelessContextAddKext (
   IN     UINT32               ExecutableSize OPTIONAL
   )
 {
+  EFI_STATUS        Status;
   CACHELESS_KEXT    *NewKext;
 
   XML_DOCUMENT      *InfoPlistDocument;
@@ -864,7 +862,14 @@ CachelessContextAddKext (
         return EFI_INVALID_PARAMETER;
       }
 
-      AddKextDependencies (&Context->InjectedDependencies, InfoPlistLibraries);
+      Status = AddKextDependencies (&Context->InjectedDependencies, InfoPlistLibraries);
+      if (EFI_ERROR (Status)) {
+        XmlDocumentFree (InfoPlistDocument);
+        FreePool (TmpInfoPlist);
+        FreePool (NewKext->PlistData);
+        FreePool (NewKext);
+        return Status;
+      }
     }
   }
 
@@ -932,6 +937,18 @@ CachelessContextAddKext (
 
   InsertTailList (&Context->InjectedKexts, &NewKext->Link);
   return EFI_SUCCESS;
+}
+
+EFI_STATUS
+CachelessContextForceKext (
+  IN OUT CACHELESS_CONTEXT    *Context,
+  IN     CONST CHAR8          *Identifier
+  )
+{
+  ASSERT (Context != NULL);
+  ASSERT (Identifier != NULL);
+
+  return AddKextDependency (&Context->InjectedDependencies, Identifier);
 }
 
 EFI_STATUS
