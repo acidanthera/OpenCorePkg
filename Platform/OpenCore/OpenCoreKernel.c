@@ -48,9 +48,9 @@ typedef enum KERNEL_CACHE_TYPE_ {
 } KERNEL_CACHE_TYPE;
 
 #define PRINT_KERNEL_CACHE_TYPE(a) ( \
-          a == CacheTypeCacheless ? L"Cacheless" : \
-          (a == CacheTypeMkext ? L"Mkext" : \
-          ((a == CacheTypePrelinked ? L"Prelinked" : L"Unknown"))))
+          (a)   == CacheTypeCacheless ? L"Cacheless" : \
+          ((a)  == CacheTypeMkext     ? L"Mkext" : \
+          (((a) == CacheTypePrelinked ? L"Prelinked" : L"Unknown"))))
 
 STATIC
 EFI_STATUS
@@ -233,6 +233,7 @@ EFI_STATUS
 OcKernelApplyQuirk (
   IN     KERNEL_QUIRK_NAME  Quirk,
   IN     KERNEL_CACHE_TYPE  CacheType,
+  IN     UINT32             DarwinVersion,
   IN OUT VOID               *Context,
   IN OUT PATCHER_CONTEXT    *KernelPatcher
   )
@@ -242,7 +243,7 @@ OcKernelApplyQuirk (
   //
   if (Context == NULL) {
     ASSERT (KernelPatcher != NULL);
-    return KernelApplyQuirk (Quirk, KernelPatcher, mOcDarwinVersion);
+    return KernelApplyQuirk (Quirk, KernelPatcher, DarwinVersion);
   }
 
   if (CacheType == CacheTypeCacheless) {
@@ -250,11 +251,11 @@ OcKernelApplyQuirk (
   }
   
   if (CacheType == CacheTypeMkext) {
-    return MkextContextApplyQuirk (Context, Quirk, mOcDarwinVersion);
+    return MkextContextApplyQuirk (Context, Quirk, DarwinVersion);
   }
 
   if (CacheType == CacheTypePrelinked) {
-    return PrelinkedContextApplyQuirk (Context, Quirk, mOcDarwinVersion);
+    return PrelinkedContextApplyQuirk (Context, Quirk, DarwinVersion);
   }
 
   return EFI_UNSUPPORTED;
@@ -373,11 +374,11 @@ OcKernelApplyPatches (
       Status = PatcherApplyGenericPatch (&KernelPatcher, &Patch);
     } else {
       if (CacheType == CacheTypeCacheless) {
-        Status = CachelessContextAddPatch ((CACHELESS_CONTEXT *) Context, Target, &Patch);
+        Status = CachelessContextAddPatch (Context, Target, &Patch);
       } else if (CacheType == CacheTypeMkext) {
-        Status = MkextContextApplyPatch ((MKEXT_CONTEXT *) Context, Target, &Patch);
+        Status = MkextContextApplyPatch (Context, Target, &Patch);
       } else if (CacheType == CacheTypePrelinked) {
-        Status = PrelinkedContextApplyPatch ((PRELINKED_CONTEXT *) Context, Target, &Patch);
+        Status = PrelinkedContextApplyPatch (Context, Target, &Patch);
       }
     }
 
@@ -393,58 +394,58 @@ OcKernelApplyPatches (
 
   if (!IsKernelPatch) {
     if (Config->Kernel.Quirks.AppleCpuPmCfgLock) {
-      OcKernelApplyQuirk (KernelQuirkAppleCpuPmCfgLock, CacheType, Context, NULL);
+      OcKernelApplyQuirk (KernelQuirkAppleCpuPmCfgLock, CacheType, DarwinVersion, Context, NULL);
     }
 
     if (Config->Kernel.Quirks.ExternalDiskIcons) {
-      OcKernelApplyQuirk (KernelQuirkExternalDiskIcons, CacheType, Context, NULL);
+      OcKernelApplyQuirk (KernelQuirkExternalDiskIcons, CacheType, DarwinVersion, Context, NULL);
     }
 
     if (Config->Kernel.Quirks.ThirdPartyDrives) {
-      OcKernelApplyQuirk (KernelQuirkThirdPartyDrives, CacheType, Context, NULL);
+      OcKernelApplyQuirk (KernelQuirkThirdPartyDrives, CacheType, DarwinVersion, Context, NULL);
     }
 
     if (Config->Kernel.Quirks.XhciPortLimit) {
-      OcKernelApplyQuirk (KernelQuirkXhciPortLimit1, CacheType, Context, NULL);
-      OcKernelApplyQuirk (KernelQuirkXhciPortLimit2, CacheType, Context, NULL);
-      OcKernelApplyQuirk (KernelQuirkXhciPortLimit3, CacheType, Context, NULL);
+      OcKernelApplyQuirk (KernelQuirkXhciPortLimit1, CacheType, DarwinVersion, Context, NULL);
+      OcKernelApplyQuirk (KernelQuirkXhciPortLimit2, CacheType, DarwinVersion, Context, NULL);
+      OcKernelApplyQuirk (KernelQuirkXhciPortLimit3, CacheType, DarwinVersion, Context, NULL);
     }
 
     if (Config->Kernel.Quirks.DisableIoMapper) {
-      OcKernelApplyQuirk (KernelQuirkDisableIoMapper, CacheType, Context, NULL);
+      OcKernelApplyQuirk (KernelQuirkDisableIoMapper, CacheType, DarwinVersion, Context, NULL);
     }
 
     if (Config->Kernel.Quirks.DisableRtcChecksum) {
-      OcKernelApplyQuirk (KernelQuirkDisableRtcChecksum, CacheType, Context, NULL);
+      OcKernelApplyQuirk (KernelQuirkDisableRtcChecksum, CacheType, DarwinVersion, Context, NULL);
     }
 
     if (Config->Kernel.Quirks.IncreasePciBarSize) {
-      OcKernelApplyQuirk (KernelQuirkIncreasePciBarSize, CacheType, Context, NULL);     
+      OcKernelApplyQuirk (KernelQuirkIncreasePciBarSize, CacheType, DarwinVersion, Context, NULL);     
     }
 
     if (Config->Kernel.Quirks.CustomSmbiosGuid) {
-      OcKernelApplyQuirk (KernelQuirkCustomSmbiosGuid1, CacheType, Context, NULL);
-      OcKernelApplyQuirk (KernelQuirkCustomSmbiosGuid2, CacheType, Context, NULL);
+      OcKernelApplyQuirk (KernelQuirkCustomSmbiosGuid1, CacheType, DarwinVersion, Context, NULL);
+      OcKernelApplyQuirk (KernelQuirkCustomSmbiosGuid2, CacheType, DarwinVersion, Context, NULL);
     }
 
     if (Config->Kernel.Quirks.DummyPowerManagement) {
-      OcKernelApplyQuirk (KernelQuirkDummyPowerManagement, CacheType, Context, NULL);
+      OcKernelApplyQuirk (KernelQuirkDummyPowerManagement, CacheType, DarwinVersion, Context, NULL);
     }
   } else {
     if (Config->Kernel.Quirks.AppleXcpmCfgLock) {
-      OcKernelApplyQuirk (KernelQuirkAppleXcpmCfgLock, CacheType, NULL, &KernelPatcher);
+      OcKernelApplyQuirk (KernelQuirkAppleXcpmCfgLock, CacheType, DarwinVersion, NULL, &KernelPatcher);
     }
 
     if (Config->Kernel.Quirks.AppleXcpmExtraMsrs) {
-      OcKernelApplyQuirk (KernelQuirkAppleXcpmExtraMsrs, CacheType, NULL, &KernelPatcher);
+      OcKernelApplyQuirk (KernelQuirkAppleXcpmExtraMsrs, CacheType, DarwinVersion, NULL, &KernelPatcher);
     }
 
     if (Config->Kernel.Quirks.AppleXcpmForceBoost) {
-      OcKernelApplyQuirk (KernelQuirkAppleXcpmForceBoost, CacheType, NULL, &KernelPatcher);
+      OcKernelApplyQuirk (KernelQuirkAppleXcpmForceBoost, CacheType, DarwinVersion, NULL, &KernelPatcher);
     }
 
     if (Config->Kernel.Quirks.PanicNoKextDump) {
-      OcKernelApplyQuirk (KernelQuirkPanicNoKextDump, CacheType, NULL, &KernelPatcher);
+      OcKernelApplyQuirk (KernelQuirkPanicNoKextDump, CacheType, DarwinVersion, NULL, &KernelPatcher);
     }
 
     if (Config->Kernel.Emulate.Cpuid1Data[0] != 0
@@ -460,11 +461,11 @@ OcKernelApplyPatches (
     }
 
     if (Config->Kernel.Quirks.LapicKernelPanic) {
-      OcKernelApplyQuirk (KernelQuirkLapicKernelPanic, CacheType, NULL, &KernelPatcher);
+      OcKernelApplyQuirk (KernelQuirkLapicKernelPanic, CacheType, DarwinVersion, NULL, &KernelPatcher);
     }
 
     if (Config->Kernel.Quirks.PowerTimeoutKernelPanic) {
-      OcKernelApplyQuirk (KernelQuirkPowerTimeoutKernelPanic, CacheType, NULL, &KernelPatcher);
+      OcKernelApplyQuirk (KernelQuirkPowerTimeoutKernelPanic, CacheType, DarwinVersion, NULL, &KernelPatcher);
     }
   }
 }
@@ -538,11 +539,12 @@ OcKernelBlockKexts (
 STATIC
 VOID
 OcKernelInjectKexts (
-  IN     OC_GLOBAL_CONFIG  *Config,
-  IN     KERNEL_CACHE_TYPE CacheType,
-  IN     VOID              *Context,
-  IN     UINT32            LinkedExpansion,
-  IN     UINT32            ReservedExeSize
+  IN OC_GLOBAL_CONFIG   *Config,
+  IN KERNEL_CACHE_TYPE  CacheType,
+  IN VOID               *Context,
+  IN UINT32             DarwinVersion,
+  IN UINT32             LinkedExpansion,
+  IN UINT32             ReservedExeSize
   )
 {
   EFI_STATUS           Status;
@@ -557,7 +559,7 @@ OcKernelInjectKexts (
 
   if (CacheType == CacheTypePrelinked) {
     Status = PrelinkedInjectPrepare (
-      (PRELINKED_CONTEXT *) Context,
+      Context,
       LinkedExpansion,
       ReservedExeSize
       );
@@ -579,7 +581,7 @@ OcKernelInjectKexts (
     MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
     MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
 
-    if (!OcMatchDarwinVersion (mOcDarwinVersion, MinKernel, MaxKernel)) {
+    if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
       DEBUG ((
         DEBUG_INFO,
         "OC: %s injection skips %a (%a) kext at %u due to version %u <= %u <= %u\n",
@@ -588,7 +590,7 @@ OcKernelInjectKexts (
         Comment,
         Index,
         MinKernel,
-        mOcDarwinVersion,
+        DarwinVersion,
         MaxKernel
         ));
       continue;
@@ -608,7 +610,7 @@ OcKernelInjectKexts (
 
     if (CacheType == CacheTypeCacheless) {
       Status = CachelessContextAddKext (
-        (CACHELESS_CONTEXT *) Context,
+        Context,
         Kext->PlistData,
         Kext->PlistDataSize,
         Kext->ImageData,
@@ -616,7 +618,7 @@ OcKernelInjectKexts (
         );
     } else if (CacheType == CacheTypeMkext) {
       Status = MkextInjectKext (
-        (MKEXT_CONTEXT *) Context,
+        Context,
         FullPath,
         Kext->PlistData,
         Kext->PlistDataSize,
@@ -625,7 +627,7 @@ OcKernelInjectKexts (
         );
     } else if (CacheType == CacheTypePrelinked) {
       Status = PrelinkedInjectKext (
-        (PRELINKED_CONTEXT *) Context,
+        Context,
         FullPath,
         Kext->PlistData,
         Kext->PlistDataSize,
@@ -648,7 +650,7 @@ OcKernelInjectKexts (
   if (CacheType == CacheTypeCacheless) {
     Status = EFI_SUCCESS;
   } else if (CacheType == CacheTypeMkext) {
-    Status = MkextInjectPatchComplete ((MKEXT_CONTEXT *) Context);
+    Status = MkextInjectPatchComplete (Context);
   } else if (CacheType == CacheTypePrelinked) {
     DEBUG ((
       DEBUG_INFO,
@@ -663,7 +665,7 @@ OcKernelInjectKexts (
       ((PRELINKED_CONTEXT *) Context)->KextsFileOffset <= ReservedExeSize
       );
     
-    Status = PrelinkedInjectComplete ((PRELINKED_CONTEXT *) Context);
+    Status = PrelinkedInjectComplete (Context);
   }
 
   if (EFI_ERROR (Status)) {
@@ -693,7 +695,7 @@ OcKernelProcessPrelinked (
 
     OcKernelBlockKexts (Config, DarwinVersion, &Context);
 
-    OcKernelInjectKexts (Config, CacheTypePrelinked, &Context, LinkedExpansion, ReservedExeSize);
+    OcKernelInjectKexts (Config, CacheTypePrelinked, &Context, DarwinVersion, LinkedExpansion, ReservedExeSize);
 
     *KernelSize = Context.PrelinkedSize;
 
@@ -723,7 +725,7 @@ OcKernelProcessMkext (
 
   OcKernelApplyPatches (Config, DarwinVersion, CacheTypeMkext, &Context, NULL, 0);
 
-  OcKernelInjectKexts (Config, CacheTypeMkext, &Context, 0, 0);
+  OcKernelInjectKexts (Config, CacheTypeMkext, &Context, DarwinVersion, 0, 0);
 
   *MkextSize = Context.MkextSize;
 
@@ -754,7 +756,7 @@ OcKernelInitCacheless (
     return Status;
   }
 
-  OcKernelInjectKexts (Config, CacheTypeCacheless, Context, 0, 0);
+  OcKernelInjectKexts (Config, CacheTypeCacheless, Context, DarwinVersion, 0, 0);
 
   OcKernelApplyPatches (Config, DarwinVersion, CacheTypeCacheless, Context, NULL, 0);
 
@@ -766,6 +768,7 @@ EFI_STATUS
 OcKernelReadAppleKernel (
   IN     EFI_FILE_PROTOCOL  *File,
   IN     CHAR16             *FileName,
+  IN OUT UINT32             *DarwinVersion,
      OUT UINT8              **Kernel,
      OUT UINT32             *KernelSize,
      OUT UINT32             *AllocatedSize,
@@ -777,7 +780,7 @@ OcKernelReadAppleKernel (
   EFI_STATUS         Status;
   EFI_STATUS         Status2;
   BOOLEAN            Result;
-  UINT32             DarwinVersion;
+  UINT32             DarwinVersionNew;
   BOOLEAN            IsKernel32Bit;
   BOOLEAN            Use32BitKernel;
 
@@ -839,8 +842,8 @@ OcKernelReadAppleKernel (
     //
     // 10.6 and below may keep older prelinkedkernels around, do not load those.
     //
-    DarwinVersion = OcKernelReadDarwinVersion (*Kernel, *KernelSize);
-    if (DarwinVersion < mOcDarwinVersion) {
+    DarwinVersionNew = OcKernelReadDarwinVersion (*Kernel, *KernelSize);
+    if (DarwinVersionNew < *DarwinVersion) {
       FreePool (*Kernel);
       *Kernel = NULL;
 
@@ -851,14 +854,14 @@ OcKernelReadAppleKernel (
     // Recheck kernel version and expected vs actual bitness returned. If either of those differ,
     // re-evaluate whether we can run 64-bit kernels on this platform.
     //
-    if (DarwinVersion != mOcDarwinVersion || mUse32BitKernel != IsKernel32Bit) {
+    if (DarwinVersionNew != *DarwinVersion || mUse32BitKernel != IsKernel32Bit) {
       //
       // Query command line arch= argument and fallback to SMBIOS checking.
       // Arch argument will force the desired arch.
       //
       Status2 = OcAbcIs32BitPreferred (&Use32BitKernel);
       if (EFI_ERROR (Status2)) {
-        Use32BitKernel = !OcPlatformIs64BitSupported (DarwinVersion);
+        Use32BitKernel = !OcPlatformIs64BitSupported (DarwinVersionNew);
       }
 
       //
@@ -905,13 +908,11 @@ OcKernelReadAppleKernel (
           ));
 
         if (!EFI_ERROR (Status)) {
-          DarwinVersion = OcKernelReadDarwinVersion (*Kernel, *KernelSize);
-
           //
           // 10.6 and below may keep older prelinkedkernels around, do not load those.
           //
-          DarwinVersion = OcKernelReadDarwinVersion (*Kernel, *KernelSize);
-          if (DarwinVersion < mOcDarwinVersion) {
+          DarwinVersionNew = OcKernelReadDarwinVersion (*Kernel, *KernelSize);
+          if (DarwinVersionNew < *DarwinVersion) {
             FreePool (*Kernel);
             *Kernel = NULL;
 
@@ -931,7 +932,7 @@ OcKernelReadAppleKernel (
         }
       }
 
-      mOcDarwinVersion = DarwinVersion;
+      *DarwinVersion = DarwinVersionNew;
     }
   }
 
@@ -945,6 +946,7 @@ OcKernelFuzzyMatch (
   IN     CHAR16             *FileName,
   IN     UINT64             OpenMode,
   IN     UINT64             Attributes,
+  IN OUT UINT32             *DarwinVersion,
      OUT EFI_FILE_PROTOCOL  **KernelFile,
      OUT UINT8              **Kernel,
      OUT UINT32             *KernelSize,
@@ -1031,6 +1033,7 @@ OcKernelFuzzyMatch (
     Status = OcKernelReadAppleKernel (
       *KernelFile,
       FileNameCacheNew,
+      DarwinVersion,
       Kernel,
       KernelSize,
       AllocatedSize,
@@ -1144,6 +1147,7 @@ OcKernelFileOpen (
       FileName,
       OpenMode,
       Attributes,
+      &mOcDarwinVersion,
       NewHandle,
       &Kernel,
       &KernelSize,
@@ -1177,6 +1181,7 @@ OcKernelFileOpen (
       Status = OcKernelReadAppleKernel (
         *NewHandle,
         FileName,
+        &mOcDarwinVersion,
         &Kernel,
         &KernelSize,
         &AllocatedSize,
