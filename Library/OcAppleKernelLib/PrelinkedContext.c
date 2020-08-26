@@ -932,6 +932,7 @@ PrelinkedInjectKext (
   //
   if (Identifier != NULL) {
     if (InternalCachedPrelinkedKext (Context, Identifier) != NULL) {
+      DEBUG ((DEBUG_INFO, "OCAK: Bundle %a is already present in prelinked\n", Identifier));
       return EFI_ALREADY_STARTED;
     }
   }

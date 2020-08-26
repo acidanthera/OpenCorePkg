@@ -1166,6 +1166,7 @@ MkextInjectKext (
   //
   if (Identifier != NULL) {
     if (InternalCachedMkextKext (Context, Identifier) != NULL) {
+      DEBUG ((DEBUG_INFO, "OCAK: Bundle %a is already present in mkext\n", Identifier));
       return EFI_ALREADY_STARTED;
     }
   }
