@@ -514,6 +514,9 @@ InternalKxldStateRebuild (
       Context,
       (INT64) (Context->PrelinkedStateSectionKexts->Address - Context->PrelinkedStateKextsAddress)
       );
+    if (!EFI_ERROR (Status)) {
+      Context->PrelinkedStateKextsAddress = Context->PrelinkedStateSectionKexts->Address;
+    }
     DEBUG ((
       DEBUG_INFO,
       "OCAK: Rebasing KXLD state from %Lx to %Lx - %r\n",
