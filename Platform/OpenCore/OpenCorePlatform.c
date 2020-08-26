@@ -33,7 +33,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Guid/AppleVariable.h>
 
-STATIC CONST CHAR8     *mCurrentSmbiosProductName;
+STATIC CHAR8    mCurrentSmbiosProductName[48];
 
 STATIC
 VOID
@@ -356,7 +356,10 @@ OcPlatformUpdateSmbios (
 
   if (Data.SystemProductName != NULL) {
     DEBUG ((DEBUG_INFO, "OC: New SMBIOS: %a model %a\n", Data.SystemManufacturer, Data.SystemProductName));
-    mCurrentSmbiosProductName = Data.SystemProductName;
+    Status = AsciiStrCpyS (mCurrentSmbiosProductName, sizeof (mCurrentSmbiosProductName), Data.SystemProductName);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OC: Failed to copy new SMBIOS product name %a\n", Data.SystemProductName));
+    }
   }
 
   Status = OcSmbiosCreate (SmbiosTable, &Data, UpdateMode, CpuInfo);
@@ -568,6 +571,7 @@ OcLoadPlatformSupport (
   EFI_STATUS             Status;
   OC_SMBIOS_TABLE        SmbiosTable;
   BOOLEAN                ExposeOem;
+  CONST CHAR8            *SmbiosProductName;
 
   if (Config->PlatformInfo.Automatic) {
     GetMacInfo (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemProductName), &InfoData);
@@ -589,8 +593,12 @@ OcLoadPlatformSupport (
         OcSmbiosExposeOemInfo (&SmbiosTable);
       }
 
-      mCurrentSmbiosProductName = OcSmbiosGetProductName (&SmbiosTable);
-      DEBUG ((DEBUG_INFO, "OC: Current SMBIOS: %a model %a\n", OcSmbiosGetManufacturer (&SmbiosTable), mCurrentSmbiosProductName));
+      SmbiosProductName = OcSmbiosGetProductName (&SmbiosTable);
+      DEBUG ((DEBUG_INFO, "OC: Current SMBIOS: %a model %a\n", OcSmbiosGetManufacturer (&SmbiosTable), SmbiosProductName));
+      Status = AsciiStrCpyS (mCurrentSmbiosProductName, sizeof (mCurrentSmbiosProductName), SmbiosProductName);
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "OC: Failed to copy SMBIOS product name %a\n", SmbiosProductName));
+      }
 
       if (Config->PlatformInfo.UpdateSmbios) {
         SmbiosUpdateStr  = OC_BLOB_GET (&Config->PlatformInfo.UpdateSmbiosMode);
