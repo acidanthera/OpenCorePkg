@@ -1418,11 +1418,19 @@ InternalPrelinkKext64 (
     if (!Result) {
       DEBUG ((
         DEBUG_INFO,
-        "OCAK: Symbol %s was unresolved for kext %a\n",
+        "OCAK: Symbol %a was unresolved for kext %a\n",
         MachoGetSymbolName64 (MachoContext, Symbol),
         Kext->Identifier
         ));
       return EFI_LOAD_ERROR;
+    } else {
+      DEBUG ((
+        DEBUG_VERBOSE,
+        "OCAK: Symbol %a was resolved for kext %a to %Lx\n",
+        MachoGetSymbolName64 (MachoContext, Symbol),
+        Kext->Identifier,
+        Symbol->Value
+        ));
     }
   }
   //

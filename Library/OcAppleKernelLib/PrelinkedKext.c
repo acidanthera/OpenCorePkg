@@ -63,6 +63,8 @@ InternalCreatePrelinkedKext (
   UINT32                   KxldStateSize;
   UINT32                   ContainerOffset;
   BOOLEAN                  Found;
+  BOOLEAN                  HasExe;
+  BOOLEAN                  IsKpi;
 
   KextIdentifier    = NULL;
   BundleLibraries   = NULL;
@@ -154,15 +156,20 @@ InternalCreatePrelinkedKext (
   //
   // BundleLibraries, CompatibleVersion, and KmodInfo are optional and thus not checked.
   //
-  if (!Found
-    || KextIdentifier == NULL
-    || SourceBase < VirtualBase
-    || (Prelinked != NULL
-      && (VirtualBase == 0
-        || SourceBase == 0
-        || SourceSize == 0
-        || SourceSize > MAX_UINT32))) {
+  if (!Found || KextIdentifier == NULL || SourceBase < VirtualBase) {
     return NULL;
+  }
+
+  //
+  // KPIs on 10.6.8 may not have executables, but for all other types they are required.
+  //
+  if (Prelinked != NULL) {
+    HasExe = VirtualBase != 0 && SourceBase != 0 && SourceSize != 0 && SourceSize <= MAX_UINT32;
+    IsKpi  = VirtualBase == 0 && SourceBase == 0 && SourceSize == 0
+      && KxldState != 0 && KxldStateSize != 0 && !Prelinked->IsKernelCollection;
+    if (!IsKpi && !HasExe) {
+      return NULL;
+    }
   }
 
   if (Prelinked != NULL && Prelinked->IsKernelCollection) {
@@ -179,7 +186,7 @@ InternalCreatePrelinkedKext (
     }
   }
 
-  if (Prelinked != NULL) {
+  if (Prelinked != NULL && HasExe) {
     if (Prelinked->IsKernelCollection) {
       BaseSegment = Prelinked->RegionSegment;
     } else {
@@ -208,6 +215,7 @@ InternalCreatePrelinkedKext (
   }
 
   if (Prelinked != NULL
+    && HasExe
     && !MachoInitializeContext (&NewKext->Context.MachContext, &Prelinked->Prelinked[SourceBase], (UINT32)SourceSize, ContainerOffset)) {
     FreePool (NewKext);
     return NULL;
@@ -235,6 +243,14 @@ InternalCreatePrelinkedKext (
       NewKext->Context.KxldStateSize = KxldStateSize;
     }
   }
+
+  DEBUG ((
+    DEBUG_VERBOSE,
+    "OCAK: %a got KXLD %p %u\n",
+    NewKext->Identifier,
+    NewKext->Context.KxldState,
+    NewKext->Context.KxldStateSize
+    ));
 
   return NewKext;
 }
@@ -887,7 +903,7 @@ InternalScanPrelinkedKext (
       // _PrelinkExecutableLoadAddr / _PrelinkExecutableSourceAddr values equal to MAX_INT64.
       // Skip them early to improve performance.
       //
-      if ((Context->IsKernelCollection || Context->PrelinkedStateSegment != NULL)
+      if (Context->IsKernelCollection
         && AsciiStrnCmp (DependencyId, "com.apple.kpi.", L_STR_LEN ("com.apple.kpi.")) == 0) {
         DEBUG ((DEBUG_VERBOSE, "OCAK: Ignoring KPI %a for kext %a in KC/state mode\n", DependencyId, Kext->Identifier));
         continue;

@@ -307,8 +307,13 @@ InternalKxldStateBuildLinkedVtables (
     &NumVtables
     );
 
+  //
+  // Some KPIs may not have vtables (e.g. BSD).
+  //
   if (KxldVtables == NULL) {
-    return EFI_UNSUPPORTED;
+    Kext->LinkedVtables   = NULL;
+    Kext->NumberOfVtables = 0;
+    return EFI_SUCCESS;
   }
 
   NumEntries = 0;
