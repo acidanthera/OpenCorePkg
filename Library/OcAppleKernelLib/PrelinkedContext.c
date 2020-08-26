@@ -884,6 +884,7 @@ PrelinkedReserveKextSize (
 EFI_STATUS
 PrelinkedInjectKext (
   IN OUT PRELINKED_CONTEXT  *Context,
+  IN     CONST CHAR8        *Identifier OPTIONAL,
   IN     CONST CHAR8        *BundlePath,
   IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,
@@ -917,11 +918,23 @@ PrelinkedInjectKext (
 
   PrelinkedKext = NULL;
 
+  ASSERT (Context != NULL);
+  ASSERT (BundlePath != NULL);
+  ASSERT (InfoPlist != NULL);
   ASSERT (InfoPlistSize > 0);
 
   KmodAddress           = 0;
   AlignedExecutableSize = 0;
   KextOffset            = 0;
+
+  //
+  // If an identifier was passed, ensure it does not already exist.
+  //
+  if (Identifier != NULL) {
+    if (InternalCachedPrelinkedKext (Context, Identifier) != NULL) {
+      return EFI_ALREADY_STARTED;
+    }
+  }
 
   //
   // Copy executable to prelinkedkernel.

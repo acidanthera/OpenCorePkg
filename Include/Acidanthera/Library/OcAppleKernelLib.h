@@ -763,6 +763,8 @@ PrelinkedReserveKextSize (
   Perform kext injection.
 
   @param[in,out] Context         Prelinked context.
+  @param[in]     Identifier      Kext bundle identifier. If a kext with this identifier
+                                 already exists, the kext will not be injected. Optional.
   @param[in]     BundlePath      Kext bundle path (e.g. /L/E/mykext.kext).
   @param[in,out] InfoPlist       Kext Info.plist.
   @param[in]     InfoPlistSize   Kext Info.plist size.
@@ -775,6 +777,7 @@ PrelinkedReserveKextSize (
 EFI_STATUS
 PrelinkedInjectKext (
   IN OUT PRELINKED_CONTEXT  *Context,
+  IN     CONST CHAR8        *Identifier OPTIONAL,
   IN     CONST CHAR8        *BundlePath,
   IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,
@@ -1249,6 +1252,8 @@ MkextReserveKextSize (
   Perform mkext kext injection.
 
   @param[in,out] Context          Mkext context.
+  @param[in]     Identifier       Kext bundle identifier. If a kext with this identifier
+                                  already exists, the kext will not be injected. Optional.
   @param[in]     BundlePath       Kext bundle path (e.g. /L/E/mykext.kext).
   @param[in,out] InfoPlist        Kext Info.plist.
   @param[in]     InfoPlistSize    Kext Info.plist size.
@@ -1260,6 +1265,7 @@ MkextReserveKextSize (
 EFI_STATUS
 MkextInjectKext (
   IN OUT MKEXT_CONTEXT      *Context,
+  IN     CONST CHAR8        *Identifier OPTIONAL,
   IN     CONST CHAR8        *BundlePath,
   IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,

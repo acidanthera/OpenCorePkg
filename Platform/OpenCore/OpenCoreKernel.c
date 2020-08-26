@@ -53,8 +53,63 @@ typedef enum KERNEL_CACHE_TYPE_ {
           (((a) == CacheTypePrelinked ? L"Prelinked" : L"Unknown"))))
 
 STATIC
+VOID *
+OcKernelReadSystemKextFile (
+  IN  EFI_FILE_PROTOCOL   *RootFile,
+  IN  CONST CHAR16        *FilePath,
+  OUT UINT32              *FileSize OPTIONAL
+  )
+{
+  EFI_STATUS            Status;
+  EFI_FILE_PROTOCOL     *File;
+  UINT32                Size;
+  UINT8                 *FileBuffer;
+
+  Status = SafeFileOpen (
+    RootFile,
+    &File,
+    (CHAR16 *) FilePath,
+    EFI_FILE_MODE_READ,
+    0
+    );
+
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
+
+  Status = GetFileSize (File, &Size);
+  if (EFI_ERROR (Status) || Size >= MAX_UINT32 - 1) {
+    File->Close (File);
+    return NULL;
+  }
+
+  FileBuffer = AllocatePool (Size + 2);
+  if (FileBuffer == NULL) {
+    File->Close (File);
+    return NULL;
+  }
+
+  Status = GetFileData (File, 0, Size, FileBuffer);
+  File->Close (File);
+  if (EFI_ERROR (Status)) {
+    FreePool (FileBuffer);
+    return NULL;
+  }
+
+  FileBuffer[Size]     = 0;
+  FileBuffer[Size + 1] = 0;
+
+  if (FileSize != NULL) {
+    *FileSize = Size;
+  }
+
+  return FileBuffer;
+}
+
+STATIC
 EFI_STATUS
 OcKernelLoadKextsAndReserve (
+  IN  EFI_FILE_PROTOCOL   *RootFile,
   IN  OC_STORAGE_CONTEXT  *Storage,
   IN  OC_GLOBAL_CONFIG    *Config,
   IN  KERNEL_CACHE_TYPE   CacheType,
@@ -63,33 +118,185 @@ OcKernelLoadKextsAndReserve (
   OUT UINT32              *NumReservedKexts
   )
 {
-  EFI_STATUS           Status;
-  UINT32               Index;
-  CHAR8                *BundlePath;
-  CHAR8                *Comment;
-  CHAR8                *PlistPath;
-  CHAR8                *ExecutablePath;
-  CHAR16               FullPath[OC_STORAGE_SAFE_PATH_MAX];
-  OC_KERNEL_ADD_ENTRY  *Kext;
+  EFI_STATUS              Status;
+  UINT32                  Index;
+  CHAR8                   *Identifier;
+  CHAR8                   *BundlePath;
+  CHAR8                   *Comment;
+  CHAR8                   *PlistPath;
+  CHAR8                   *ExecutablePath;
+  CHAR16                  FullPath[OC_STORAGE_SAFE_PATH_MAX];
+  OC_KERNEL_FORCE_ENTRY   *ForceKext;
+  OC_KERNEL_ADD_ENTRY     *AddKext;
 
   *ReservedInfoSize = PRELINK_INFO_RESERVE_SIZE;
   *ReservedExeSize  = 0;
   *NumReservedKexts = 0;
 
-  for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
-    Kext = Config->Kernel.Add.Values[Index];
+  //
+  // Process system kexts to be force injected.
+  //
+  for (Index = 0; Index < Config->Kernel.Force.Count; Index++) {
+    ForceKext = Config->Kernel.Force.Values[Index];
 
-    if (!Kext->Enabled) {
+    if (!ForceKext->Enabled) {
       continue;
     }
 
-    if (Kext->PlistDataSize == 0) {
-      BundlePath     = OC_BLOB_GET (&Kext->BundlePath);
-      Comment        = OC_BLOB_GET (&Kext->Comment);
-      PlistPath      = OC_BLOB_GET (&Kext->PlistPath);
-      if (BundlePath[0] == '\0' || PlistPath[0] == '\0') {
-        DEBUG ((DEBUG_ERROR, "OC: Your config has improper for kext info\n"));
-        Kext->Enabled = FALSE;
+    //
+    // Free existing data if present.
+    //
+    if (ForceKext->PlistData != NULL) {
+      FreePool (ForceKext->PlistData);
+      ForceKext->PlistDataSize  = 0;
+      ForceKext->PlistData      = NULL;
+
+      if (ForceKext->ImageData != NULL) {
+        FreePool (ForceKext->ImageData);
+        ForceKext->ImageDataSize  = 0;
+        ForceKext->ImageData      = NULL;
+      }
+    }
+
+    Identifier     = OC_BLOB_GET (&ForceKext->Identifier);
+    BundlePath     = OC_BLOB_GET (&ForceKext->BundlePath);
+    Comment        = OC_BLOB_GET (&ForceKext->Comment);
+    PlistPath      = OC_BLOB_GET (&ForceKext->PlistPath);
+    if (Identifier[0] == '\0' || BundlePath[0] == '\0' || PlistPath[0] == '\0') {
+      DEBUG ((DEBUG_ERROR, "OC: Forced kext %u (%a) has invalid info\n", Index, Comment));
+      ForceKext->Enabled = FALSE;
+      continue;
+    }
+
+    Status = OcUnicodeSafeSPrint (
+      FullPath,
+      sizeof (FullPath),
+      L"%a\\%a",
+      BundlePath,
+      PlistPath
+      );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_WARN,
+        "OC: Failed to fit kext path %a\\%a",
+        BundlePath,
+        PlistPath
+        ));
+      continue;
+    }
+
+    UnicodeUefiSlashes (FullPath);
+
+    ForceKext->PlistData = OcKernelReadSystemKextFile (
+      RootFile,
+      FullPath,
+      &ForceKext->PlistDataSize
+      );
+
+    if (ForceKext->PlistData == NULL) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: Plist %s is missing for forced kext %a (%a)\n",
+        FullPath,
+        BundlePath,
+        Comment
+        ));
+      continue;
+    }
+
+    ExecutablePath = OC_BLOB_GET (&ForceKext->ExecutablePath);
+    if (ExecutablePath[0] != '\0') {
+      Status = OcUnicodeSafeSPrint (
+        FullPath,
+        sizeof (FullPath),
+        L"%a\\%a",
+        BundlePath,
+        ExecutablePath
+        );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((
+          DEBUG_WARN,
+          "OC: Failed to fit kext path %a\\%a",
+          BundlePath,
+          ExecutablePath
+          ));
+        FreePool (ForceKext->PlistData);
+        ForceKext->PlistData = NULL;
+        continue;
+      }
+
+      UnicodeUefiSlashes (FullPath);
+
+      ForceKext->ImageData = OcKernelReadSystemKextFile (
+        RootFile,
+        FullPath,
+        &ForceKext->ImageDataSize
+        );
+
+      if (ForceKext->ImageData == NULL) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OC: Image %s is missing for kext %a (%a)\n",
+          FullPath,
+          BundlePath,
+          Comment
+          ));
+        FreePool (ForceKext->PlistData);
+        ForceKext->PlistData = NULL;
+        continue;
+      }
+    }
+
+    if (CacheType == CacheTypeCacheless || CacheType == CacheTypeMkext) {
+      Status = MkextReserveKextSize (
+        ReservedInfoSize,
+        ReservedExeSize,
+        ForceKext->PlistDataSize,
+        ForceKext->ImageData,
+        ForceKext->ImageDataSize
+        );
+    } else if (CacheType == CacheTypePrelinked) {
+      Status = PrelinkedReserveKextSize (
+        ReservedInfoSize,
+        ReservedExeSize,
+        ForceKext->PlistDataSize,
+        ForceKext->ImageData,
+        ForceKext->ImageDataSize
+        );
+    }
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "OC: Failed to fit kext %a (%a)\n",
+        BundlePath,
+        Comment
+        ));
+      FreePool (ForceKext->PlistData);
+      ForceKext->PlistData = NULL;
+      continue;
+    }
+
+    (*NumReservedKexts)++;
+  }
+
+  //
+  // Process kexts to be injected.
+  //
+  for (Index = 0; Index < Config->Kernel.Add.Count; Index++) {
+    AddKext = Config->Kernel.Add.Values[Index];
+
+    if (!AddKext->Enabled) {
+      continue;
+    }
+
+    if (AddKext->PlistDataSize == 0) {
+      BundlePath     = OC_BLOB_GET (&AddKext->BundlePath);
+      Comment        = OC_BLOB_GET (&AddKext->Comment);
+      PlistPath      = OC_BLOB_GET (&AddKext->PlistPath);
+      if ( BundlePath[0] == '\0' || PlistPath[0] == '\0') {
+        DEBUG ((DEBUG_ERROR, "OC: Injected kext %u (%a) has invalid info\n", Index, Comment));
+        AddKext->Enabled = FALSE;
         continue;
       }
 
@@ -108,19 +315,19 @@ OcKernelLoadKextsAndReserve (
           BundlePath,
           PlistPath
           ));
-        Kext->Enabled = FALSE;
+        AddKext->Enabled = FALSE;
         continue;
       }
 
       UnicodeUefiSlashes (FullPath);
 
-      Kext->PlistData = OcStorageReadFileUnicode (
+      AddKext->PlistData = OcStorageReadFileUnicode (
         Storage,
         FullPath,
-        &Kext->PlistDataSize
+        &AddKext->PlistDataSize
         );
 
-      if (Kext->PlistData == NULL) {
+      if (AddKext->PlistData == NULL) {
         DEBUG ((
           DEBUG_ERROR,
           "OC: Plist %s is missing for kext %a (%a)\n",
@@ -128,11 +335,11 @@ OcKernelLoadKextsAndReserve (
           BundlePath,
           Comment
           ));
-        Kext->Enabled = FALSE;
+        AddKext->Enabled = FALSE;
         continue;
       }
 
-      ExecutablePath = OC_BLOB_GET (&Kext->ExecutablePath);
+      ExecutablePath = OC_BLOB_GET (&AddKext->ExecutablePath);
       if (ExecutablePath[0] != '\0') {
         Status = OcUnicodeSafeSPrint (
           FullPath,
@@ -149,21 +356,21 @@ OcKernelLoadKextsAndReserve (
             BundlePath,
             ExecutablePath
             ));
-          Kext->Enabled = FALSE;
-          FreePool (Kext->PlistData);
-          Kext->PlistData = NULL;
+          AddKext->Enabled = FALSE;
+          FreePool (AddKext->PlistData);
+          AddKext->PlistData = NULL;
           continue;
         }
 
         UnicodeUefiSlashes (FullPath);
 
-        Kext->ImageData = OcStorageReadFileUnicode (
+        AddKext->ImageData = OcStorageReadFileUnicode (
           Storage,
           FullPath,
-          &Kext->ImageDataSize
+          &AddKext->ImageDataSize
           );
 
-        if (Kext->ImageData == NULL) {
+        if (AddKext->ImageData == NULL) {
           DEBUG ((
             DEBUG_ERROR,
             "OC: Image %s is missing for kext %a (%a)\n",
@@ -171,9 +378,9 @@ OcKernelLoadKextsAndReserve (
             BundlePath,
             Comment
             ));
-          Kext->Enabled = FALSE;
-          FreePool (Kext->PlistData);
-          Kext->PlistData = NULL;
+          AddKext->Enabled = FALSE;
+          FreePool (AddKext->PlistData);
+          AddKext->PlistData = NULL;
           continue;
         }
       }
@@ -183,17 +390,17 @@ OcKernelLoadKextsAndReserve (
       Status = MkextReserveKextSize (
         ReservedInfoSize,
         ReservedExeSize,
-        Kext->PlistDataSize,
-        Kext->ImageData,
-        Kext->ImageDataSize
+        AddKext->PlistDataSize,
+        AddKext->ImageData,
+        AddKext->ImageDataSize
         );
     } else if (CacheType == CacheTypePrelinked) {
       Status = PrelinkedReserveKextSize (
         ReservedInfoSize,
         ReservedExeSize,
-        Kext->PlistDataSize,
-        Kext->ImageData,
-        Kext->ImageDataSize
+        AddKext->PlistDataSize,
+        AddKext->ImageData,
+        AddKext->ImageDataSize
         );
     }
 
@@ -204,9 +411,9 @@ OcKernelLoadKextsAndReserve (
         BundlePath,
         Comment
         ));
-      Kext->Enabled = FALSE;
-      FreePool (Kext->PlistData);
-      Kext->PlistData = NULL;
+      AddKext->Enabled = FALSE;
+      FreePool (AddKext->PlistData);
+      AddKext->PlistData = NULL;
       continue;
     }
 
@@ -547,15 +754,17 @@ OcKernelInjectKexts (
   IN UINT32             ReservedExeSize
   )
 {
-  EFI_STATUS           Status;
-  CHAR8                *BundlePath;
-  CHAR8                *ExecutablePath;
-  CHAR8                *Comment;
-  UINT32               Index;
-  CHAR8                FullPath[OC_STORAGE_SAFE_PATH_MAX];
-  OC_KERNEL_ADD_ENTRY  *Kext;
-  UINT32               MaxKernel;
-  UINT32               MinKernel;
+  EFI_STATUS              Status;
+  CHAR8                   *Identifier;
+  CHAR8                   *BundlePath;
+  CHAR8                   *ExecutablePath;
+  CHAR8                   *Comment;
+  UINT32                  Index;
+  CHAR8                   FullPath[OC_STORAGE_SAFE_PATH_MAX];
+  OC_KERNEL_FORCE_ENTRY   *ForceKext;
+  OC_KERNEL_ADD_ENTRY     *AddKext;
+  UINT32                  MaxKernel;
+  UINT32                  MinKernel;
 
   if (CacheType == CacheTypePrelinked) {
     Status = PrelinkedInjectPrepare (
@@ -569,17 +778,92 @@ OcKernelInjectKexts (
     }
   }
 
-  for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
-    Kext = Config->Kernel.Add.Values[Index];
+  //
+  // Process system kexts to be force injected.
+  //
+  for (Index = 0; Index < Config->Kernel.Force.Count; Index++) {
+    ForceKext = Config->Kernel.Force.Values[Index];
 
-    if (!Kext->Enabled || Kext->PlistDataSize == 0) {
+    if (!ForceKext->Enabled || ForceKext->PlistData == NULL) {
       continue;
     }
 
-    BundlePath  = OC_BLOB_GET (&Kext->BundlePath);
-    Comment     = OC_BLOB_GET (&Kext->Comment);
-    MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
-    MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
+    Identifier  = OC_BLOB_GET (&ForceKext->Identifier);
+    BundlePath  = OC_BLOB_GET (&ForceKext->BundlePath);
+    Comment     = OC_BLOB_GET (&ForceKext->Comment);
+    MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&ForceKext->MaxKernel));
+    MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&ForceKext->MinKernel));
+
+    if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: %s force injection skips %a (%a) kext at %u due to version %u <= %u <= %u\n",
+        PRINT_KERNEL_CACHE_TYPE (CacheType),
+        BundlePath,
+        Comment,
+        Index,
+        MinKernel,
+        DarwinVersion,
+        MaxKernel
+        ));
+      continue;
+    }
+
+    if (ForceKext->ImageData != NULL) {
+      ExecutablePath = OC_BLOB_GET (&ForceKext->ExecutablePath);
+    } else {
+      ExecutablePath = NULL;
+    }
+
+    if (CacheType == CacheTypeCacheless) {
+      Status = EFI_UNSUPPORTED; // TODO
+    } else if (CacheType == CacheTypeMkext) {
+      Status = MkextInjectKext (
+        Context,
+        Identifier,
+        BundlePath,
+        ForceKext->PlistData,
+        ForceKext->PlistDataSize,
+        ForceKext->ImageData,
+        ForceKext->ImageDataSize
+        );
+    } else if (CacheType == CacheTypePrelinked) {
+      Status = PrelinkedInjectKext (
+        Context,
+        Identifier,
+        BundlePath,
+        ForceKext->PlistData,
+        ForceKext->PlistDataSize,
+        ExecutablePath,
+        ForceKext->ImageData,
+        ForceKext->ImageDataSize
+        );
+    }
+
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: %s force injection %a (%a) - %r\n",
+      PRINT_KERNEL_CACHE_TYPE (CacheType),
+      BundlePath,
+      Comment,
+      Status
+      ));
+  }
+
+  //
+  // Process kexts to be injected.
+  //
+  for (Index = 0; Index < Config->Kernel.Add.Count; Index++) {
+    AddKext = Config->Kernel.Add.Values[Index];
+
+    if (!AddKext->Enabled || AddKext->PlistDataSize == 0) {
+      continue;
+    }
+
+    BundlePath  = OC_BLOB_GET (&AddKext->BundlePath);
+    Comment     = OC_BLOB_GET (&AddKext->Comment);
+    MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&AddKext->MaxKernel));
+    MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&AddKext->MinKernel));
 
     if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
       DEBUG ((
@@ -602,8 +886,8 @@ OcKernelInjectKexts (
       continue;
     }
 
-    if (Kext->ImageData != NULL) {
-      ExecutablePath = OC_BLOB_GET (&Kext->ExecutablePath);
+    if (AddKext->ImageData != NULL) {
+      ExecutablePath = OC_BLOB_GET (&AddKext->ExecutablePath);
     } else {
       ExecutablePath = NULL;
     }
@@ -611,35 +895,37 @@ OcKernelInjectKexts (
     if (CacheType == CacheTypeCacheless) {
       Status = CachelessContextAddKext (
         Context,
-        Kext->PlistData,
-        Kext->PlistDataSize,
-        Kext->ImageData,
-        Kext->ImageDataSize
+        AddKext->PlistData,
+        AddKext->PlistDataSize,
+        AddKext->ImageData,
+        AddKext->ImageDataSize
         );
     } else if (CacheType == CacheTypeMkext) {
       Status = MkextInjectKext (
         Context,
+        NULL,
         FullPath,
-        Kext->PlistData,
-        Kext->PlistDataSize,
-        Kext->ImageData,
-        Kext->ImageDataSize
+        AddKext->PlistData,
+        AddKext->PlistDataSize,
+        AddKext->ImageData,
+        AddKext->ImageDataSize
         );
     } else if (CacheType == CacheTypePrelinked) {
       Status = PrelinkedInjectKext (
         Context,
+        NULL,
         FullPath,
-        Kext->PlistData,
-        Kext->PlistDataSize,
+        AddKext->PlistData,
+        AddKext->PlistDataSize,
         ExecutablePath,
-        Kext->ImageData,
-        Kext->ImageDataSize
+        AddKext->ImageData,
+        AddKext->ImageDataSize
         );
     }
 
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-      "OC: %s injection type %u %a (%a) - %r\n",
+      "OC: %s injection %a (%a) - %r\n",
       PRINT_KERNEL_CACHE_TYPE (CacheType),
       BundlePath,
       Comment,
@@ -766,7 +1052,8 @@ OcKernelInitCacheless (
 STATIC
 EFI_STATUS
 OcKernelReadAppleKernel (
-  IN     EFI_FILE_PROTOCOL  *File,
+  IN     EFI_FILE_PROTOCOL  *RootFile,
+  IN     EFI_FILE_PROTOCOL  *KernelFile,
   IN     CHAR16             *FileName,
   IN OUT UINT32             *DarwinVersion,
      OUT UINT8              **Kernel,
@@ -789,6 +1076,7 @@ OcKernelReadAppleKernel (
   UINT32             ReservedFullSize;
 
   OcKernelLoadKextsAndReserve (
+    RootFile,
     mOcStorage,
     mOcConfiguration,
     CacheTypePrelinked,
@@ -817,7 +1105,7 @@ OcKernelReadAppleKernel (
   //
   DEBUG ((DEBUG_INFO, "OC: Trying %a XNU hook on %s\n", mUse32BitKernel ? "32-bit" : "64-bit", FileName));
   Status = ReadAppleKernel (
-    File,
+    KernelFile,
     mUse32BitKernel,
     &IsKernel32Bit,
     Kernel,
@@ -886,7 +1174,7 @@ OcKernelReadAppleKernel (
 
         DEBUG ((DEBUG_INFO, "OC: Wrong arch read, retrying %a XNU hook on %s\n", mUse32BitKernel ? "32-bit" : "64-bit", FileName));
         Status = ReadAppleKernel (
-          File,
+          KernelFile,
           mUse32BitKernel,
           &IsKernel32Bit,
           Kernel,
@@ -942,7 +1230,7 @@ OcKernelReadAppleKernel (
 STATIC
 EFI_STATUS
 OcKernelFuzzyMatch (
-  IN     EFI_FILE_PROTOCOL  *This,
+  IN     EFI_FILE_PROTOCOL  *RootFile,
   IN     CHAR16             *FileName,
   IN     UINT64             OpenMode,
   IN     UINT64             Attributes,
@@ -982,7 +1270,7 @@ OcKernelFuzzyMatch (
   }
   CopyMem (FileNameDir, FileName, StrnSizeS (FileName, FileNameDirLength) - sizeof (*FileName));
 
-  Status = SafeFileOpen (This, &FileDirectory, FileNameDir, EFI_FILE_MODE_READ, 0);
+  Status = SafeFileOpen (RootFile, &FileDirectory, FileNameDir, EFI_FILE_MODE_READ, 0);
   if (EFI_ERROR (Status)) {
     FreePool (FileNameDir);
     return Status;
@@ -1025,12 +1313,13 @@ OcKernelFuzzyMatch (
       break;
     }
 
-    Status = SafeFileOpen (This, KernelFile, FileNameCacheNew, OpenMode, Attributes);
+    Status = SafeFileOpen (RootFile, KernelFile, FileNameCacheNew, OpenMode, Attributes);
     if (EFI_ERROR (Status)) {
       continue;
     }
 
     Status = OcKernelReadAppleKernel (
+      RootFile,
       *KernelFile,
       FileNameCacheNew,
       DarwinVersion,
@@ -1179,6 +1468,7 @@ OcKernelFileOpen (
     //
     if (Kernel == NULL) {
       Status = OcKernelReadAppleKernel (
+        This,
         *NewHandle,
         FileName,
         &mOcDarwinVersion,
@@ -1272,6 +1562,7 @@ OcKernelFileOpen (
     }
     
     OcKernelLoadKextsAndReserve (
+      This,
       mOcStorage,
       mOcConfiguration,
       CacheTypeMkext,
@@ -1348,6 +1639,7 @@ OcKernelFileOpen (
     mOcCachelessInProgress = FALSE;
 
     OcKernelLoadKextsAndReserve (
+      This,
       mOcStorage,
       mOcConfiguration,
       CacheTypeCacheless,

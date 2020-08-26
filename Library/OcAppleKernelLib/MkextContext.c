@@ -1126,6 +1126,7 @@ MkextReserveKextSize (
 EFI_STATUS
 MkextInjectKext (
   IN OUT MKEXT_CONTEXT      *Context,
+  IN     CONST CHAR8        *Identifier OPTIONAL,
   IN     CONST CHAR8        *BundlePath,
   IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,
@@ -1159,6 +1160,15 @@ MkextInjectKext (
   ASSERT (InfoPlistSize > 0);
 
   BinOffset = 0;
+
+  //
+  // If an identifier was passed, ensure it does not already exist.
+  //
+  if (Identifier != NULL) {
+    if (InternalCachedMkextKext (Context, Identifier) != NULL) {
+      return EFI_ALREADY_STARTED;
+    }
+  }
 
   //
   // Mkext v1.
