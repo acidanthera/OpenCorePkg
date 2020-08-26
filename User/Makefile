@@ -23,7 +23,7 @@ else
 endif
 
 #
-# Primary architecture. 
+# Primary architecture.
 #
 UDK_ARCH ?= X64
 

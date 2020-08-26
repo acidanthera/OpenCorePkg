@@ -191,9 +191,9 @@ class ReloadUefi (gdb.Command):
         dosh_t = self.ptype ('EFI_IMAGE_DOS_HEADER')
         head_t = self.ptype ('EFI_IMAGE_OPTIONAL_HEADER_UNION')
         dosh = imagebase.cast (dosh_t)
-        h_addr = imagebase
+        h_addr = long(imagebase)
         if dosh['e_magic'] == self.DOS_MAGIC:
-            h_addr = h_addr + dosh['e_lfanew']
+            h_addr = h_addr + long(dosh['e_lfanew'])
         return gdb.Value(h_addr).cast (head_t)
 
     #
@@ -366,6 +366,7 @@ class ReloadUefi (gdb.Command):
     def parse_edii (self, edii, count):
         index = 0
         syms = []
+        print ("Found {} images...".format(count))
         while index != count:
             entry = edii[index]
             if entry['ImageInfoType'].dereference () == 1:
