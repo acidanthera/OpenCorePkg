@@ -651,6 +651,7 @@ int wrap_main(int argc, char** argv) {
 
     Status = PrelinkedInjectKext (
       &Context,
+      NULL,
       "/Library/Extensions/PlistKext.kext",
       KextInfoPlistData,
       sizeof (KextInfoPlistData),
@@ -702,6 +703,7 @@ int wrap_main(int argc, char** argv) {
 
       Status = PrelinkedInjectKext (
         &Context,
+        NULL,
         KextPath,
         TestPlist,
         TestPlistSize,
@@ -788,6 +790,7 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
 
   Status = PrelinkedInjectKext (
       &Context,
+      NULL,
       "/Library/Extensions/Lilu.kext",
       KextInfoPlistData, ///< FIXME: has no executable
       sizeof (KextInfoPlistData),
