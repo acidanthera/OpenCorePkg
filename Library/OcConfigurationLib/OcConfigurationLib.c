@@ -38,7 +38,6 @@ OC_ARRAY_STRUCTORS (OC_KERNEL_ADD_ARRAY)
 OC_STRUCTORS       (OC_KERNEL_BLOCK_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_KERNEL_BLOCK_ARRAY)
 OC_STRUCTORS       (OC_KERNEL_EMULATE, ())
-OC_STRUCTORS       (OC_KERNEL_FORCE_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_KERNEL_FORCE_ARRAY)
 OC_STRUCTORS       (OC_KERNEL_PATCH_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_KERNEL_PATCH_ARRAY)
@@ -271,15 +270,15 @@ mKernelEmulateSchema[] = {
 STATIC
 OC_SCHEMA
 mKernelForceSchemaEntry[] = {
-  OC_SCHEMA_STRING_IN    ("Arch",           OC_KERNEL_FORCE_ENTRY, Arch),
-  OC_SCHEMA_STRING_IN    ("BundlePath",     OC_KERNEL_FORCE_ENTRY, BundlePath),
-  OC_SCHEMA_STRING_IN    ("Comment",        OC_KERNEL_FORCE_ENTRY, Comment),
-  OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_KERNEL_FORCE_ENTRY, Enabled),
-  OC_SCHEMA_STRING_IN    ("ExecutablePath", OC_KERNEL_FORCE_ENTRY, ExecutablePath),
-  OC_SCHEMA_STRING_IN    ("Identifier",     OC_KERNEL_FORCE_ENTRY, Identifier),
-  OC_SCHEMA_STRING_IN    ("MaxKernel",      OC_KERNEL_FORCE_ENTRY, MaxKernel),
-  OC_SCHEMA_STRING_IN    ("MinKernel",      OC_KERNEL_FORCE_ENTRY, MinKernel),
-  OC_SCHEMA_STRING_IN    ("PlistPath",      OC_KERNEL_FORCE_ENTRY, PlistPath),
+  OC_SCHEMA_STRING_IN    ("Arch",           OC_KERNEL_ADD_ENTRY, Arch),
+  OC_SCHEMA_STRING_IN    ("BundlePath",     OC_KERNEL_ADD_ENTRY, BundlePath),
+  OC_SCHEMA_STRING_IN    ("Comment",        OC_KERNEL_ADD_ENTRY, Comment),
+  OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_KERNEL_ADD_ENTRY, Enabled),
+  OC_SCHEMA_STRING_IN    ("ExecutablePath", OC_KERNEL_ADD_ENTRY, ExecutablePath),
+  OC_SCHEMA_STRING_IN    ("Identifier",     OC_KERNEL_ADD_ENTRY, Identifier),
+  OC_SCHEMA_STRING_IN    ("MaxKernel",      OC_KERNEL_ADD_ENTRY, MaxKernel),
+  OC_SCHEMA_STRING_IN    ("MinKernel",      OC_KERNEL_ADD_ENTRY, MinKernel),
+  OC_SCHEMA_STRING_IN    ("PlistPath",      OC_KERNEL_ADD_ENTRY, PlistPath),
 };
 
 STATIC

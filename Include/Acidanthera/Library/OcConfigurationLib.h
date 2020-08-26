@@ -176,6 +176,7 @@
   _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , MaxKernel        ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , MinKernel        ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , BundlePath       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , ExecutablePath   ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , PlistPath        ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
@@ -216,24 +217,8 @@
 ///
 /// KernelSpace forced loaded kexts.
 ///
-#define OC_KERNEL_FORCE_ENTRY_FIELDS(_, __) \
-  _(BOOLEAN                     , Enabled          ,     , FALSE                       , ()                   ) \
-  _(OC_STRING                   , Arch             ,     , OC_STRING_CONSTR ("Any", _, __), OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , MaxKernel        ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , MinKernel        ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , BundlePath       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , ExecutablePath   ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , PlistPath        ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
-  _(UINT8 *                     , ImageData        ,     , NULL                        , OcFreePointer        ) \
-  _(UINT32                      , ImageDataSize    ,     , 0                           , ()                   ) \
-  _(CHAR8 *                     , PlistData        ,     , NULL                        , OcFreePointer        ) \
-  _(UINT32                      , PlistDataSize    ,     , 0                           , ()                   )
-  OC_DECLARE (OC_KERNEL_FORCE_ENTRY)
-
 #define OC_KERNEL_FORCE_ARRAY_FIELDS(_, __) \
-  OC_ARRAY (OC_KERNEL_FORCE_ENTRY, _, __)
+  OC_ARRAY (OC_KERNEL_ADD_ENTRY, _, __)
   OC_DECLARE (OC_KERNEL_FORCE_ARRAY)
 
 ///
