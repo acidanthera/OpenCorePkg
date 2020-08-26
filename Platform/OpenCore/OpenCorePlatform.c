@@ -354,8 +354,10 @@ OcPlatformUpdateSmbios (
     }
   }
 
-  DEBUG ((DEBUG_INFO, "OC: New SMBIOS: %a model %a\n", Data.SystemManufacturer, Data.SystemProductName));
-  mCurrentSmbiosProductName = Data.SystemProductName;
+  if (Data.SystemProductName != NULL) {
+    DEBUG ((DEBUG_INFO, "OC: New SMBIOS: %a model %a\n", Data.SystemManufacturer, Data.SystemProductName));
+    mCurrentSmbiosProductName = Data.SystemProductName;
+  }
 
   Status = OcSmbiosCreate (SmbiosTable, &Data, UpdateMode, CpuInfo);
   if (EFI_ERROR (Status)) {
