@@ -31,9 +31,9 @@ typedef struct {
   //
   LIST_ENTRY          Link;
   //
-  // Kext bundle ID.
+  // Kext bundle identifier.
   //
-  CHAR8               *BundleId;
+  CHAR8               *Identifier;
   //
   // Offset of binary in mkext.
   //

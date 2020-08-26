@@ -542,9 +542,9 @@ EFI_STATUS
 //
 typedef struct {
   //
-  // Target bundle ID. NULL for kernel.
+  // Target bundle identifier. NULL for kernel.
   //
-  CONST CHAR8                   *BundleId;
+  CONST CHAR8                   *Identifier;
   //
   // Quirk patch function.
   //
@@ -787,7 +787,7 @@ PrelinkedInjectKext (
   Apply kext patch to prelinked.
 
   @param[in,out] Context         Prelinked context.
-  @param[in]     BundleId        Kext bundle ID.
+  @param[in]     Identifier      Kext bundle identifier.
   @param[in]     Patch           Patch to apply.
 
   @return  EFI_SUCCESS on success.
@@ -795,7 +795,7 @@ PrelinkedInjectKext (
 EFI_STATUS
 PrelinkedContextApplyPatch (
   IN OUT PRELINKED_CONTEXT      *Context,
-  IN     CONST CHAR8            *BundleId,
+  IN     CONST CHAR8            *Identifier,
   IN     PATCHER_GENERIC_PATCH  *Patch
   );
 
@@ -1077,7 +1077,7 @@ CachelessContextAddKext (
   Add patch to cacheless context to be applied later on.
 
   @param[in,out] Context         Cacheless context.
-  @param[in]     BundleId        Kext bundle ID.
+  @param[in]     Identifier      Kext bundle identifier.
   @param[in]     Patch           Patch to apply.
 
   @return  EFI_SUCCESS on success.
@@ -1085,7 +1085,7 @@ CachelessContextAddKext (
 EFI_STATUS
 CachelessContextAddPatch (
   IN OUT CACHELESS_CONTEXT      *Context,
-  IN     CONST CHAR8            *BundleId,
+  IN     CONST CHAR8            *Identifier,
   IN     PATCHER_GENERIC_PATCH  *Patch
   );
 
@@ -1271,7 +1271,7 @@ MkextInjectKext (
   Apply kext patch to mkext.
 
   @param[in,out] Context         Mkext context.
-  @param[in]     BundleId        Kext bundle ID.
+  @param[in]     Identifier      Kext bundle identifier.
   @param[in]     Patch           Patch to apply.
 
   @return  EFI_SUCCESS on success.
@@ -1279,7 +1279,7 @@ MkextInjectKext (
 EFI_STATUS
 MkextContextApplyPatch (
   IN OUT MKEXT_CONTEXT          *Context,
-  IN     CONST CHAR8            *BundleId,
+  IN     CONST CHAR8            *Identifier,
   IN     PATCHER_GENERIC_PATCH  *Patch
   );
 
