@@ -46,9 +46,9 @@ typedef struct {
   //
   LIST_ENTRY          Link;
   //
-  // Bundle ID.
+  // Bundle identifier.
   //
-  CHAR8               *BundleId;
+  CHAR8               *Identifier;
 } DEPEND_KEXT;
 
 //
@@ -128,9 +128,9 @@ typedef struct {
   //
   LIST_ENTRY          Link;
   //
-  // Bundle ID.
+  // Bundle identifier.
   //
-  CHAR8               *BundleId;
+  CHAR8               *Identifier;
   //
   // List of patches to apply.
   //
@@ -154,9 +154,9 @@ typedef struct {
   //
   CHAR16              *PlistPath;
   //
-  // Bundle ID.
+  // Bundle identifier.
   //
-  CHAR8               *BundleId;
+  CHAR8               *Identifier;
   //
   // Binary file name.
   //

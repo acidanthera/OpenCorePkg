@@ -38,6 +38,7 @@ OC_ARRAY_STRUCTORS (OC_KERNEL_ADD_ARRAY)
 OC_STRUCTORS       (OC_KERNEL_BLOCK_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_KERNEL_BLOCK_ARRAY)
 OC_STRUCTORS       (OC_KERNEL_EMULATE, ())
+OC_ARRAY_STRUCTORS (OC_KERNEL_FORCE_ARRAY)
 OC_STRUCTORS       (OC_KERNEL_PATCH_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_KERNEL_PATCH_ARRAY)
 OC_STRUCTORS       (OC_KERNEL_QUIRKS, ())
@@ -268,6 +269,24 @@ mKernelEmulateSchema[] = {
 
 STATIC
 OC_SCHEMA
+mKernelForceSchemaEntry[] = {
+  OC_SCHEMA_STRING_IN    ("Arch",           OC_KERNEL_ADD_ENTRY, Arch),
+  OC_SCHEMA_STRING_IN    ("BundlePath",     OC_KERNEL_ADD_ENTRY, BundlePath),
+  OC_SCHEMA_STRING_IN    ("Comment",        OC_KERNEL_ADD_ENTRY, Comment),
+  OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_KERNEL_ADD_ENTRY, Enabled),
+  OC_SCHEMA_STRING_IN    ("ExecutablePath", OC_KERNEL_ADD_ENTRY, ExecutablePath),
+  OC_SCHEMA_STRING_IN    ("Identifier",     OC_KERNEL_ADD_ENTRY, Identifier),
+  OC_SCHEMA_STRING_IN    ("MaxKernel",      OC_KERNEL_ADD_ENTRY, MaxKernel),
+  OC_SCHEMA_STRING_IN    ("MinKernel",      OC_KERNEL_ADD_ENTRY, MinKernel),
+  OC_SCHEMA_STRING_IN    ("PlistPath",      OC_KERNEL_ADD_ENTRY, PlistPath),
+};
+
+STATIC
+OC_SCHEMA
+mKernelForceSchema = OC_SCHEMA_DICT (NULL, mKernelForceSchemaEntry);
+
+STATIC
+OC_SCHEMA
 mKernelPatchSchemaEntry[] = {
   OC_SCHEMA_STRING_IN    ("Arch",           OC_KERNEL_PATCH_ENTRY, Arch),
   OC_SCHEMA_STRING_IN    ("Base",           OC_KERNEL_PATCH_ENTRY, Base),
@@ -323,6 +342,7 @@ mKernelConfigurationSchema[] = {
   OC_SCHEMA_ARRAY_IN   ("Add",     OC_GLOBAL_CONFIG, Kernel.Add, &mKernelAddSchema),
   OC_SCHEMA_ARRAY_IN   ("Block",   OC_GLOBAL_CONFIG, Kernel.Block, &mKernelBlockSchema),
   OC_SCHEMA_DICT       ("Emulate", mKernelEmulateSchema),
+  OC_SCHEMA_ARRAY_IN   ("Force",   OC_GLOBAL_CONFIG, Kernel.Force, &mKernelForceSchema),
   OC_SCHEMA_ARRAY_IN   ("Patch",   OC_GLOBAL_CONFIG, Kernel.Patch, &mKernelPatchSchema),
   OC_SCHEMA_DICT       ("Quirks",  mKernelQuirksSchema),
   OC_SCHEMA_DICT       ("Scheme",  mKernelSchemeSchema),

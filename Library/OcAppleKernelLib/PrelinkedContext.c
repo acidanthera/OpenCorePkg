@@ -884,6 +884,7 @@ PrelinkedReserveKextSize (
 EFI_STATUS
 PrelinkedInjectKext (
   IN OUT PRELINKED_CONTEXT  *Context,
+  IN     CONST CHAR8        *Identifier OPTIONAL,
   IN     CONST CHAR8        *BundlePath,
   IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,
@@ -917,11 +918,24 @@ PrelinkedInjectKext (
 
   PrelinkedKext = NULL;
 
+  ASSERT (Context != NULL);
+  ASSERT (BundlePath != NULL);
+  ASSERT (InfoPlist != NULL);
   ASSERT (InfoPlistSize > 0);
 
   KmodAddress           = 0;
   AlignedExecutableSize = 0;
   KextOffset            = 0;
+
+  //
+  // If an identifier was passed, ensure it does not already exist.
+  //
+  if (Identifier != NULL) {
+    if (InternalCachedPrelinkedKext (Context, Identifier) != NULL) {
+      DEBUG ((DEBUG_INFO, "OCAK: Bundle %a is already present in prelinked\n", Identifier));
+      return EFI_ALREADY_STARTED;
+    }
+  }
 
   //
   // Copy executable to prelinkedkernel.
@@ -1138,7 +1152,7 @@ PrelinkedInjectKext (
 EFI_STATUS
 PrelinkedContextApplyPatch (
   IN OUT PRELINKED_CONTEXT      *Context,
-  IN     CONST CHAR8            *BundleId,
+  IN     CONST CHAR8            *Identifier,
   IN     PATCHER_GENERIC_PATCH  *Patch
   )
 {
@@ -1146,12 +1160,12 @@ PrelinkedContextApplyPatch (
   PATCHER_CONTEXT       Patcher;
 
   ASSERT (Context != NULL);
-  ASSERT (BundleId != NULL);
+  ASSERT (Identifier != NULL);
   ASSERT (Patch != NULL);
 
-  Status = PatcherInitContextFromPrelinked (&Patcher, Context, BundleId);
+  Status = PatcherInitContextFromPrelinked (&Patcher, Context, Identifier);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to pk find %a - %r\n", BundleId, Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to pk find %a - %r\n", Identifier, Status));
     return Status;
   }
 
@@ -1172,16 +1186,16 @@ PrelinkedContextApplyQuirk (
   ASSERT (Context != NULL);
 
   KernelQuirk = &gKernelQuirks[Quirk];
-  ASSERT (KernelQuirk->BundleId != NULL);
+  ASSERT (KernelQuirk->Identifier != NULL);
 
-  Status = PatcherInitContextFromPrelinked (&Patcher, Context, KernelQuirk->BundleId);
+  Status = PatcherInitContextFromPrelinked (&Patcher, Context, KernelQuirk->Identifier);
   if (!EFI_ERROR (Status)) {
     return KernelQuirk->PatchFunction (&Patcher, KernelVersion);
   }
 
   //
-  // It is up to the function to decice whether this is critical or not.
+  // It is up to the function to decide whether this is critical or not.
   //
-  DEBUG ((DEBUG_INFO, "OCAK: Failed to find %a - %r\n", KernelQuirk->BundleId, Status));
+  DEBUG ((DEBUG_INFO, "OCAK: Failed to find %a - %r\n", KernelQuirk->Identifier, Status));
   return KernelQuirk->PatchFunction (NULL, KernelVersion);
 }

@@ -65,6 +65,16 @@ IsAsciiSpace (
   IN CHAR8  Char
   );
 
+/**
+  Convert path with mixed slashes to UEFI slashes (\\).
+
+  @param[in,out]  String      Path.
+**/
+VOID
+AsciiUefiSlashes (
+  IN OUT CHAR8    *String
+  );
+
 /** Convert null terminated ascii string to unicode.
 
   @param[in]  String  A pointer to the ascii string to convert to unicode.

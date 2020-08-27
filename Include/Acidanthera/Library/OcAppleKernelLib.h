@@ -542,9 +542,9 @@ EFI_STATUS
 //
 typedef struct {
   //
-  // Target bundle ID. NULL for kernel.
+  // Target bundle identifier. NULL for kernel.
   //
-  CONST CHAR8                   *BundleId;
+  CONST CHAR8                   *Identifier;
   //
   // Quirk patch function.
   //
@@ -763,6 +763,8 @@ PrelinkedReserveKextSize (
   Perform kext injection.
 
   @param[in,out] Context         Prelinked context.
+  @param[in]     Identifier      Kext bundle identifier. If a kext with this identifier
+                                 already exists, the kext will not be injected. Optional.
   @param[in]     BundlePath      Kext bundle path (e.g. /L/E/mykext.kext).
   @param[in,out] InfoPlist       Kext Info.plist.
   @param[in]     InfoPlistSize   Kext Info.plist size.
@@ -775,6 +777,7 @@ PrelinkedReserveKextSize (
 EFI_STATUS
 PrelinkedInjectKext (
   IN OUT PRELINKED_CONTEXT  *Context,
+  IN     CONST CHAR8        *Identifier OPTIONAL,
   IN     CONST CHAR8        *BundlePath,
   IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,
@@ -787,7 +790,7 @@ PrelinkedInjectKext (
   Apply kext patch to prelinked.
 
   @param[in,out] Context         Prelinked context.
-  @param[in]     BundleId        Kext bundle ID.
+  @param[in]     Identifier      Kext bundle identifier.
   @param[in]     Patch           Patch to apply.
 
   @return  EFI_SUCCESS on success.
@@ -795,7 +798,7 @@ PrelinkedInjectKext (
 EFI_STATUS
 PrelinkedContextApplyPatch (
   IN OUT PRELINKED_CONTEXT      *Context,
-  IN     CONST CHAR8            *BundleId,
+  IN     CONST CHAR8            *Identifier,
   IN     PATCHER_GENERIC_PATCH  *Patch
   );
 
@@ -1074,10 +1077,24 @@ CachelessContextAddKext (
   );
 
 /**
+  Force built-in kext to load.
+
+  @param[in,out] Context         Cacheless context.
+  @param[in]     Identifier      Kext bundle identifier.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+CachelessContextForceKext (
+  IN OUT CACHELESS_CONTEXT    *Context,
+  IN     CONST CHAR8          *Identifier
+  );
+
+/**
   Add patch to cacheless context to be applied later on.
 
   @param[in,out] Context         Cacheless context.
-  @param[in]     BundleId        Kext bundle ID.
+  @param[in]     Identifier      Kext bundle identifier.
   @param[in]     Patch           Patch to apply.
 
   @return  EFI_SUCCESS on success.
@@ -1085,7 +1102,7 @@ CachelessContextAddKext (
 EFI_STATUS
 CachelessContextAddPatch (
   IN OUT CACHELESS_CONTEXT      *Context,
-  IN     CONST CHAR8            *BundleId,
+  IN     CONST CHAR8            *Identifier,
   IN     PATCHER_GENERIC_PATCH  *Patch
   );
 
@@ -1249,6 +1266,8 @@ MkextReserveKextSize (
   Perform mkext kext injection.
 
   @param[in,out] Context          Mkext context.
+  @param[in]     Identifier       Kext bundle identifier. If a kext with this identifier
+                                  already exists, the kext will not be injected. Optional.
   @param[in]     BundlePath       Kext bundle path (e.g. /L/E/mykext.kext).
   @param[in,out] InfoPlist        Kext Info.plist.
   @param[in]     InfoPlistSize    Kext Info.plist size.
@@ -1260,6 +1279,7 @@ MkextReserveKextSize (
 EFI_STATUS
 MkextInjectKext (
   IN OUT MKEXT_CONTEXT      *Context,
+  IN     CONST CHAR8        *Identifier OPTIONAL,
   IN     CONST CHAR8        *BundlePath,
   IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,
@@ -1271,7 +1291,7 @@ MkextInjectKext (
   Apply kext patch to mkext.
 
   @param[in,out] Context         Mkext context.
-  @param[in]     BundleId        Kext bundle ID.
+  @param[in]     Identifier      Kext bundle identifier.
   @param[in]     Patch           Patch to apply.
 
   @return  EFI_SUCCESS on success.
@@ -1279,7 +1299,7 @@ MkextInjectKext (
 EFI_STATUS
 MkextContextApplyPatch (
   IN OUT MKEXT_CONTEXT          *Context,
-  IN     CONST CHAR8            *BundleId,
+  IN     CONST CHAR8            *Identifier,
   IN     PATCHER_GENERIC_PATCH  *Patch
   );
 

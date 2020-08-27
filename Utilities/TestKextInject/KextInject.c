@@ -640,8 +640,6 @@ int wrap_main(int argc, char** argv) {
   Status = PrelinkedContextInit (&Context, Prelinked, PrelinkedSize, AllocSize);
 
   if (!EFI_ERROR (Status)) {
-    ApplyKextPatches (&Context);
-
     Status = PrelinkedInjectPrepare (&Context, LinkedExpansion, ReservedExeSize);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "[FAIL] Prelink inject prepare error %r\n", Status));
@@ -651,6 +649,7 @@ int wrap_main(int argc, char** argv) {
 
     Status = PrelinkedInjectKext (
       &Context,
+      NULL,
       "/Library/Extensions/PlistKext.kext",
       KextInfoPlistData,
       sizeof (KextInfoPlistData),
@@ -702,6 +701,7 @@ int wrap_main(int argc, char** argv) {
 
       Status = PrelinkedInjectKext (
         &Context,
+        NULL,
         KextPath,
         TestPlist,
         TestPlistSize,
@@ -728,6 +728,8 @@ int wrap_main(int argc, char** argv) {
     ASSERT (Context.PrelinkedSize - Context.KextsFileOffset <= ReservedExeSize);
 
     Status = PrelinkedInjectComplete (&Context);
+
+    ApplyKextPatches (&Context);
 
     writeFile("out.bin", Prelinked, Context.PrelinkedSize);
 
@@ -788,6 +790,7 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
 
   Status = PrelinkedInjectKext (
       &Context,
+      NULL,
       "/Library/Extensions/Lilu.kext",
       KextInfoPlistData, ///< FIXME: has no executable
       sizeof (KextInfoPlistData),

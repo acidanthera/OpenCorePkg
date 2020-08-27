@@ -226,7 +226,7 @@ UpdateMkextV2Plist (
 MKEXT_KEXT *
 InternalCachedMkextKext (
   IN OUT MKEXT_CONTEXT      *Context,
-  IN     CONST CHAR8        *BundleId
+  IN     CONST CHAR8        *Identifier
   )
 {
   MKEXT_HEADER_ANY    *MkextHeader;
@@ -252,7 +252,7 @@ InternalCachedMkextKext (
   CONST CHAR8         *PlistBundleKey;
   XML_NODE            *PlistBundleKeyValue;
 
-  CONST CHAR8         *KextBundleId;
+  CONST CHAR8         *KextIdentifier;
   UINT32              KextBinOffset;
   UINT32              KextBinSize;
 
@@ -265,7 +265,7 @@ InternalCachedMkextKext (
   while (!IsNull (&Context->CachedKexts, KextLink)) {
     MkextKext = GET_MKEXT_KEXT_FROM_LINK (KextLink);
 
-    if (AsciiStrCmp (BundleId, MkextKext->BundleId) == 0) {
+    if (AsciiStrCmp (Identifier, MkextKext->Identifier) == 0) {
       return MkextKext;
     }
 
@@ -324,7 +324,7 @@ InternalCachedMkextKext (
         return NULL;
       }
 
-      KextBundleId = NULL;
+      KextIdentifier = NULL;
       PlistBundleCount = PlistDictChildren (PlistRoot);
       for (PlistBundleIndex = 0; PlistBundleIndex < PlistBundleCount; PlistBundleIndex++) {
         PlistBundleKey = PlistKeyValue (PlistDictChild (PlistRoot, PlistBundleIndex, &PlistBundleKeyValue));
@@ -333,12 +333,12 @@ InternalCachedMkextKext (
         }
         
         if (AsciiStrCmp (PlistBundleKey, INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
-          KextBundleId = XmlNodeContent (PlistBundleKeyValue);
+          KextIdentifier = XmlNodeContent (PlistBundleKeyValue);
           break;
         }
       }
 
-      IsKextMatch = KextBundleId != NULL && AsciiStrCmp (KextBundleId, BundleId) == 0;
+      IsKextMatch = KextIdentifier != NULL && AsciiStrCmp (KextIdentifier, Identifier) == 0;
       XmlDocumentFree (PlistXml);
       FreePool (PlistBuffer);
 
@@ -358,7 +358,7 @@ InternalCachedMkextKext (
   // Mkext v2.
   //
   } else if (Context->MkextVersion == MKEXT_VERSION_V2) {
-    KextBundleId    = NULL;
+    KextIdentifier  = NULL;
     KextBinOffset   = 0;
 
     //
@@ -379,7 +379,7 @@ InternalCachedMkextKext (
         }
         
         if (AsciiStrCmp (PlistBundleKey, INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
-          KextBundleId = XmlNodeContent (PlistBundleKeyValue);
+          KextIdentifier = XmlNodeContent (PlistBundleKeyValue);
         }
 
         if (AsciiStrCmp (PlistBundleKey, MKEXT_EXECUTABLE_KEY) == 0) {
@@ -392,15 +392,15 @@ InternalCachedMkextKext (
         }
       }
 
-      if (KextBundleId != NULL
-        && AsciiStrCmp (KextBundleId, BundleId) == 0
+      if (KextIdentifier != NULL
+        && AsciiStrCmp (KextIdentifier, Identifier) == 0
         && KextBinOffset > 0
         && KextBinOffset < Context->MkextSize - sizeof (MKEXT_V2_FILE_ENTRY)) {
         IsKextMatch = TRUE;
         break;
       }
 
-      KextBundleId    = NULL;
+      KextIdentifier  = NULL;
       KextBinOffset   = 0;
     }
 
@@ -445,8 +445,8 @@ InternalCachedMkextKext (
   MkextKext->Signature    = MKEXT_KEXT_SIGNATURE;
   MkextKext->BinaryOffset = KextBinOffset;
   MkextKext->BinarySize   = KextBinSize;
-  MkextKext->BundleId     = AllocateCopyPool (AsciiStrSize (BundleId), BundleId);
-  if (MkextKext->BundleId == NULL) {
+  MkextKext->Identifier   = AllocateCopyPool (AsciiStrSize (Identifier), Identifier);
+  if (MkextKext->Identifier == NULL) {
     FreePool (MkextKext);
     return NULL;
   }
@@ -1070,7 +1070,7 @@ MkextContextFree (
     MkextKext = GET_MKEXT_KEXT_FROM_LINK (KextLink);
     RemoveEntryList (KextLink);
 
-    FreePool (MkextKext->BundleId);
+    FreePool (MkextKext->Identifier);
     FreePool (MkextKext);
   }
 
@@ -1126,6 +1126,7 @@ MkextReserveKextSize (
 EFI_STATUS
 MkextInjectKext (
   IN OUT MKEXT_CONTEXT      *Context,
+  IN     CONST CHAR8        *Identifier OPTIONAL,
   IN     CONST CHAR8        *BundlePath,
   IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,
@@ -1159,6 +1160,16 @@ MkextInjectKext (
   ASSERT (InfoPlistSize > 0);
 
   BinOffset = 0;
+
+  //
+  // If an identifier was passed, ensure it does not already exist.
+  //
+  if (Identifier != NULL) {
+    if (InternalCachedMkextKext (Context, Identifier) != NULL) {
+      DEBUG ((DEBUG_INFO, "OCAK: Bundle %a is already present in mkext\n", Identifier));
+      return EFI_ALREADY_STARTED;
+    }
+  }
 
   //
   // Mkext v1.
@@ -1346,7 +1357,7 @@ MkextInjectKext (
 EFI_STATUS
 MkextContextApplyPatch (
   IN OUT MKEXT_CONTEXT          *Context,
-  IN     CONST CHAR8            *BundleId,
+  IN     CONST CHAR8            *Identifier,
   IN     PATCHER_GENERIC_PATCH  *Patch
   )
 {
@@ -1354,12 +1365,12 @@ MkextContextApplyPatch (
   PATCHER_CONTEXT       Patcher;
 
   ASSERT (Context != NULL);
-  ASSERT (BundleId != NULL);
+  ASSERT (Identifier != NULL);
   ASSERT (Patch != NULL);
 
-  Status = PatcherInitContextFromMkext (&Patcher, Context, BundleId);
+  Status = PatcherInitContextFromMkext (&Patcher, Context, Identifier);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to find %a - %r\n", BundleId, Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to find %a - %r\n", Identifier, Status));
     return Status;
   }
 
@@ -1380,17 +1391,17 @@ MkextContextApplyQuirk (
   ASSERT (Context != NULL);
 
   KernelQuirk = &gKernelQuirks[Quirk];
-  ASSERT (KernelQuirk->BundleId != NULL);
+  ASSERT (KernelQuirk->Identifier != NULL);
 
-  Status = PatcherInitContextFromMkext (&Patcher, Context, KernelQuirk->BundleId);
+  Status = PatcherInitContextFromMkext (&Patcher, Context, KernelQuirk->Identifier);
   if (!EFI_ERROR (Status)) {
     return KernelQuirk->PatchFunction (&Patcher, KernelVersion);
   }
 
   //
-  // It is up to the function to decice whether this is critical or not.
+  // It is up to the function to decide whether this is critical or not.
   //
-  DEBUG ((DEBUG_INFO, "OCAK: Failed to mkext find %a - %r\n", KernelQuirk->BundleId, Status));
+  DEBUG ((DEBUG_INFO, "OCAK: Failed to mkext find %a - %r\n", KernelQuirk->Identifier, Status));
   return KernelQuirk->PatchFunction (NULL, KernelVersion);
 
 }
