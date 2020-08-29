@@ -289,7 +289,7 @@ ApfsStartDriver (
   //
   if ((!EFI_ERROR (Status) && Policy != AppleImg4SbModeDisabled)
     || (OcAppleSecureBootGetDmgLoading (&Policy) && Policy != AppleImg4SbModeDisabled)) {
-    LoadImage = OcDirectLoadImage;
+    LoadImage = OcImageLoaderLoad;
   } else {
     LoadImage = gBS->LoadImage;
   }

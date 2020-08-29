@@ -505,7 +505,7 @@ OcRunBootPicker (
 
   SaidWelcome = FALSE;
 
-  OcActivateDirectImageLoader ();
+  OcImageLoaderActivate ();
 
   //
   // Reset NVRAM right away if requested by a key combination.

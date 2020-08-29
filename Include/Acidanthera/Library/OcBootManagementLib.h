@@ -116,6 +116,13 @@ typedef enum OC_PICKER_MODE_ {
 } OC_PICKER_MODE;
 
 /**
+  macOS Kernel capabilities.
+**/
+#define OC_KERN_CAPABILITY_K32_32  BIT0 ///< Supports K32 with 32-bit apps (10.4~10.6)
+#define OC_KERN_CAPABILITY_K32_64  BIT1 ///< Supports K32 with 64-bit apps (10.7)
+#define OC_KERN_CAPABILITY_K64     BIT2 ///< Supports K64 (10.6+)
+
+/**
   Action to perform as part of executing a system boot entry.
 **/
 typedef
@@ -1242,7 +1249,7 @@ OcRegisterBootOption (
   Initialises custom Boot Services overrides to support direct images.
 **/
 VOID
-OcInitDirectImageLoader (
+OcImageLoaderInit (
   VOID
   );
 
@@ -1250,7 +1257,17 @@ OcInitDirectImageLoader (
   Make DirectImageLoader the default for Apple Secure Boot.
 **/
 VOID
-OcActivateDirectImageLoader (
+OcImageLoaderActivate (
+  VOID
+  );
+
+/**
+  Get Apple kernel capabilities for the currently loaded image.
+
+  @returns OC_KERN_CAPABILITY bitmask.
+**/
+UINT32
+OcImageLoaderGetKernCaps (
   VOID
   );
 
@@ -1268,7 +1285,7 @@ OcActivateDirectImageLoader (
 **/
 EFI_STATUS
 EFIAPI
-OcDirectLoadImage (
+OcImageLoaderLoad (
   IN  BOOLEAN                  BootPolicy,
   IN  EFI_HANDLE               ParentImageHandle,
   IN  EFI_DEVICE_PATH_PROTOCOL *DevicePath,
