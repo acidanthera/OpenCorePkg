@@ -958,7 +958,6 @@ InternalLoadBootEntry (
   VOID                       *EntryData;
   UINT32                     EntryDataSize;
   CONST CHAR8                *Args;
-  UINT32                     ArgsLen;
 
   ASSERT (BootEntry != NULL);
   //
@@ -1058,18 +1057,17 @@ InternalLoadBootEntry (
 
       if (BootEntry->LoadOptions == NULL && (BootEntry->Type & OC_BOOT_APPLE_ANY) != 0) {
         Args    = Context->AppleBootArgs;
-        ArgsLen = (UINT32) AsciiStrLen (Args);
       } else {
         Args    = BootEntry->LoadOptions;
-        ArgsLen = BootEntry->LoadOptionsSize;
-        ASSERT (ArgsLen == ((Args == NULL) ? 0 : (UINT32) AsciiStrLen (Args)));
       }
 
-      if (ArgsLen > 0) {
-        LoadedImage->LoadOptions = AsciiStrCopyToUnicode (Args, ArgsLen);
-        if (LoadedImage->LoadOptions != NULL) {
-          LoadedImage->LoadOptionsSize = ArgsLen * sizeof (CHAR16) + sizeof (CHAR16);
-        }
+      if (Args != NULL && Args[0] != '\0') {
+        OcAppendArgumentsToLoadedImage (
+          LoadedImage,
+          &Args,
+          1,
+          TRUE
+          );
       }
 
       if (BootEntry->Type == OC_BOOT_EXTERNAL_OS || BootEntry->Type == OC_BOOT_EXTERNAL_TOOL) {

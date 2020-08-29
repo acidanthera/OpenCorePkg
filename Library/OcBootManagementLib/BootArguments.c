@@ -19,6 +19,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/PrintLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
@@ -184,6 +185,79 @@ OcAppendArgumentToCmd (
   }
 
   AsciiStrnCpyS (CommandLine, ArgumentLength + 1, Argument, ArgumentLength + 1);
+  return TRUE;
+}
+
+BOOLEAN
+OcAppendArgumentsToLoadedImage (
+  IN OUT EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage,
+  IN     CONST CHAR8                **Arguments,
+  IN     UINT32                     ArgumentCount,
+  IN     BOOLEAN                    Replace
+  )
+{
+  UINT32  Index;
+  UINTN   ArgumentLength;
+  UINTN   TotalLength;
+  CHAR16  *NewArguments;
+  CHAR16  *Walker;
+
+  ASSERT (LoadedImage != NULL);
+  ASSERT (Arguments != NULL);
+  ASSERT (ArgumentCount > 0);
+
+  TotalLength = 0;
+
+  //
+  // Count length including spaces between or '\0' for the last argument.
+  //
+  for (Index = 0; Index < ArgumentCount; ++Index) {
+    ArgumentLength = AsciiStrSize (Arguments[Index]);
+    if (OcOverflowAddUN (TotalLength, ArgumentLength, &TotalLength)) {
+      return FALSE;
+    }
+  }
+
+  if (OcOverflowMulUN (TotalLength, sizeof (CHAR16), &TotalLength)) {
+    return FALSE;
+  }
+
+  Replace |= LoadedImage->LoadOptionsSize < sizeof (CHAR16);
+  if (!Replace
+    && OcOverflowTriAddUN (TotalLength, sizeof (CHAR16), LoadedImage->LoadOptionsSize, &TotalLength)) {
+    return FALSE;
+  }
+
+  NewArguments = AllocatePool (TotalLength);
+  if (NewArguments == NULL) {
+    return FALSE;
+  }
+
+  Walker = NewArguments;
+  for (Index = 0; Index < ArgumentCount; ++Index) {
+    if (Index != 0) {
+      *Walker++ = ' ';
+    }
+
+    ArgumentLength = AsciiStrLen (Arguments[Index]);
+    AsciiStrToUnicodeStrS (
+      Arguments[Index],
+      Walker,
+      ArgumentLength + 1
+      );
+    Walker += ArgumentLength;
+  }
+
+  if (!Replace) {
+    *Walker++ = ' ';
+    CopyMem (Walker, LoadedImage->LoadOptions, LoadedImage->LoadOptionsSize);
+    Walker += LoadedImage->LoadOptionsSize / sizeof (CHAR16);
+    *Walker++ = '\0';
+  }
+
+  LoadedImage->LoadOptions = NewArguments;
+  LoadedImage->LoadOptionsSize = TotalLength;
+
   return TRUE;
 }
 

@@ -1143,6 +1143,24 @@ OcAppendArgumentToCmd (
   );
 
 /**
+  Append 1 or more arguments to Loaded Image protocol.
+
+  @param[in,out]  LoadedImage    Loaded Image protocol instance.
+  @param[in]      Arguments      Argument array.
+  @param[in]      ArgumentCount  Number of arguments in the array.
+  @param[in]      Replace        Whether to append to existing arguments or replace.
+
+  @retval TRUE on success.
+**/
+BOOLEAN
+OcAppendArgumentsToLoadedImage (
+  IN OUT EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage,
+  IN     CONST CHAR8                **Arguments,
+  IN     UINT32                     ArgumentCount,
+  IN     BOOLEAN                    Replace
+  );
+
+/**
   Perform NVRAM UEFI variable deletion.
 **/
 VOID

@@ -762,7 +762,7 @@ for extensive messages that should not appear in NVRAM log that is heavily limit
 
 When trying to find the problematic change it is useful to rely on
 \href{https://git-scm.com/docs/git-bisect}{\texttt{git-bisect}} functionality.
-There also are some unnoficial resources that provide per-commit binary
+There also are some unofficial resources that provide per-commit binary
 builds of OpenCore, like \href{https://dortania.github.io/builds}{Dortania}.
 
 \section{ACPI}\label{acpi}
@@ -2298,20 +2298,20 @@ blocking.
   \textbf{Description}: Prefer specified kernel architecture (\texttt{Auto}, \texttt{i386},
   \texttt{i386-user32}, \texttt{x86\_64}) when available.
 
-  On macOS 10.7 and earlier XNU kernel may not boot with the usual \texttt{x86\_64} architecture,
-  and the exact choice depends on many factors including boot arguments, SMBIOS, and operating
-  system type. This setting will use the specified architecture to boot macOS when it is supported
-  by the macOS and the configuration:
+  On macOS 10.7 and earlier XNU kernel can boot with architectures different from
+  the usual \texttt{x86\_64}. This setting will use the specified architecture to boot
+  macOS when it is supported by the macOS and the configuration:
 
   \begin{itemize}
     \tightlist
     \item \texttt{Auto} --- Choose the preferred architecture automatically.
     \item \texttt{i386} --- Use \texttt{i386} (32-bit) kernel when available.
     \item \texttt{i386-user32} --- Use \texttt{i386} (32-bit) kernel when available
-      and force the use of 32-bit userspace even on 64-bit capable processors
-      (similar to \texttt{-legacy} boot argument). This mode is relevant for older Pentium
-      processors with \texttt{x86\_64} support but without \texttt{SSSE3}, which
-      on macOS 10.6 will result in some applications crashing.
+      and force the use of 32-bit userspace on 64-bit capable processors.
+      On macOS 64-bit capable processors are assumed to support \texttt{SSSE3}.
+      This is not the case for older 64-bit capable Pentium processors, which
+      cause some applications to crash on macOS~10.6. The behaviour corresponds
+      to \texttt{-legacy} kernel boot argument.
     \item \texttt{x86\_64} --- Use \texttt{x86\_64} (64-bit) kernel when available.
   \end{itemize}
 
@@ -2321,27 +2321,40 @@ blocking.
     \tightlist
     \item \texttt{arch} argument in image arguments (e.g. when launched
     via UEFI Shell) or in \texttt{boot-args} variable overrides any compatibility
-    checks and forces the specified architecture, ending this algorithm.
+    checks and forces the specified architecture, completing this algorithm.
     \item OpenCore build architecture restricts capabilities to \texttt{i386}
-    and \texttt{i386-user32} mode in 32-bit firmware variant.
+      and \texttt{i386-user32} mode for the 32-bit firmware variant.
     \item Determined EfiBoot version restricts architecture choice:
       \begin{itemize}
       \item 10.4-10.5 --- \texttt{i386} or \texttt{i386-user32}
       \item 10.6-10.7 --- \texttt{i386}, \texttt{i386-user32}, or \texttt{x86\_64}
       \item 10.8 or newer --- \texttt{x86\_64}
       \end{itemize}
-    \item \texttt{CPUID} capabilities restrict capabilities to
-      \texttt{i386-user32} if \texttt{SSSE3} is not available
-      and \texttt{KernelArch} is set to \texttt{Auto}.
-    \item SMBIOS model information and EfiBoot version restrict
-      architecture choice and define architecture preference for client
-      and server operating systems according to the table below.
-    \item \texttt{KernelArch} setting updates architecture preference
-      for both client and server operating systems if the architecture
-      is supported and \texttt{KernelArch} is not \texttt{Auto}.
-    \item EfiBoot decides on server boot picking either server
-      or client preference.
+    \item If \texttt{KernelArch} is set to \texttt{Auto} and \texttt{SSSE3}
+      is not supported by the CPU, capabilities are restricted to \texttt{i386-user32}
+      if supported by EfiBoot.
+    \item Board identifier (from SMBIOS) based on EfiBoot version
+      disables \texttt{x86\_64} support on an unsupported model
+      if any \texttt{i386} variant is supported. \texttt{Auto}
+      is not consulted here as the list is not overridable in EfiBoot.
+    \item \texttt{KernelArch} restricts the support to the explicitly
+      specified architecture (when not set to \texttt{Auto}) if
+      the architecture remains present in the capabilities.
+    \item The best supported architecture is chosen in this order:
+      \texttt{x86\_64}, \texttt{i386}, \texttt{i386-user32}.
   \end{enumerate}
+
+  Unlike macOS~10.7, where select boards identifiers are treated as the \texttt{i386}
+  only machines, and macOS~10.5 or earlier, where \texttt{x86\_64} is not supported
+  by the macOS kernel, macOS~10.6 is very special. The architecture choice on macOS~10.6
+  depends on many factors including not only the board identifier, but also macOS
+  product type (client vs server), macOS point release, and RAM amount. The detection
+  of them all is complicated and not practical, because several point releases had genuine
+  bugs and failed to properly perform the server detection in the first place.
+  For this reason OpenCore on macOS~10.6 will fallback to \texttt{x86\_64}
+  architecture whenever it is supported by the board at all, just like on macOS~10.7.
+  As a reference here is the 64-bit Mac model compatibility corresponding to actual
+  EfiBoot behaviour on macOS 10.6.8 and 10.7.5.
 
   \begin{center}
   \begin{tabular}{|p{0.9in}|c|c|c|c|} 
@@ -2364,15 +2377,6 @@ blocking.
   \hline
   \end{tabular}
   \end{center}
-
-  \emph{Note 1}: Unlike 10.7 and newer, on 10.6 many models support 64-bit
-    kernel loading but have it disabled by default. Information about 10.6
-    64-bit Mac model compatibility is incorrect on Apple support website
-    and does not correspond to actual EfiBoot behaviour.
-
-  \emph{Note 2}: Older 10.6 server versions will start in client mode due
-    to a bug in EfiBoot. Consider using this preference to workaround
-    the issue.
 
 \item
   \texttt{KernelCache}\\

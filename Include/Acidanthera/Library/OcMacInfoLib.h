@@ -101,6 +101,8 @@ GetMacInfo (
 
   @param[in] ProductName        Product to get information for.
   @param[in] KernelVersion      Kernel version.
+
+  @retval TRUE if supported.
 **/
 BOOLEAN
 IsMacModel64BitCompatible (

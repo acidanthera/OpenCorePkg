@@ -48,8 +48,12 @@ OcKernelConfigureCapabilities (
 {
   CONST CHAR8  *KernelArch;
   CHAR8        *AppleArchValue;
+  CONST CHAR8  *NewArguments[2];
+  UINT32       ArgumentCount;
+  UINT32       RequestedArch;
   BOOLEAN      HasAppleArch;
-  BOOLEAN      Automatic;
+  BOOLEAN      SnowLeo64;
+  BOOLEAN      Lion64;
 
   //
   // Reset to the default value.
@@ -76,7 +80,7 @@ OcKernelConfigureCapabilities (
     &AppleArchValue
     );
 
-  if (AppleArchValue) {
+  if (HasAppleArch) {
     mUse32BitKernel = AsciiStrCmp (AppleArchValue, "i386") == 0;
     DEBUG ((DEBUG_INFO, "OC: Arch %a overrides capabilities %u\n", AppleArchValue, Capabilities));
     FreePool (AppleArchValue);
@@ -84,20 +88,92 @@ OcKernelConfigureCapabilities (
   }
 
   //
-  // FIXME: The rest is not complete.
+  // Determine requested arch.
   //
-
   KernelArch = OC_BLOB_GET (&mOcConfiguration->Kernel.Scheme.KernelArch);
-  Automatic = KernelArch[0] == '\0' || AsciiStrCmp (KernelArch, "Auto") == 0;
+  if (AsciiStrCmp (KernelArch, "x86_64") == 0) {
+    RequestedArch = OC_KERN_CAPABILITY_K64_U64;
+  } else if (AsciiStrCmp (KernelArch, "i386") == 0) {
+    RequestedArch = OC_KERN_CAPABILITY_K32_U64;
+  } else if (AsciiStrCmp (KernelArch, "i386-user32") == 0) {
+    RequestedArch = OC_KERN_CAPABILITY_K32_U32;
+  } else {
+    RequestedArch = 0;
+  }
+
+  //
+  // Determine the current operating system.
+  //
+  SnowLeo64 = (Capabilities & (OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64))
+    == (OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64);
+  Lion64 = (Capabilities & (OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64))
+    == (OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64);
 
   //
   // In automatic mode, if we do not support SSSE3 and can downgrade to U32, do it.
   //
-  if (Automatic && (Capabilities & OC_KERN_CAPABILITY_K32_U32) != 0
-    && (Capabilities & (OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64)) != 0
-    && (mOcCpuInfo->Features & CPUID_FEATURE_SSSE3) == 0) {
+  if (RequestedArch == 0
+    && (mOcCpuInfo->Features & CPUID_FEATURE_SSSE3) == 0
+    && (Capabilities & OC_KERN_CAPABILITY_K32_U32) != 0
+    && (Capabilities & (OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64)) != 0) {
     DEBUG ((DEBUG_INFO, "OC: Missing SSSE3 disables U64 capabilities %u\n", Capabilities));
     Capabilities &= ~(OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64);
+  }
+
+  //
+  // If we support K64 mode, check whether the board supports it.
+  //
+  if ((Capabilities & OC_KERN_CAPABILITY_K64_U64) != 0
+    && !OcPlatformIs64BitSupported (SnowLeo64 ? KERNEL_VERSION_SNOW_LEOPARD_MIN : KERNEL_VERSION_LION_MIN)) {
+    Capabilities &= ~(OC_KERN_CAPABILITY_K64_U64);
+  }
+
+  //
+  // If we are not choosing the architecture automatically, try to use the requested one.
+  // Otherwise try best available.
+  //
+  if (RequestedArch != 0 && (Capabilities & RequestedArch) != 0) {
+    Capabilities = RequestedArch;
+  } else if ((Capabilities & OC_KERN_CAPABILITY_K64_U64) != 0) {
+    Capabilities = OC_KERN_CAPABILITY_K64_U64;
+  } else if ((Capabilities & OC_KERN_CAPABILITY_K32_U64) != 0) {
+    Capabilities = OC_KERN_CAPABILITY_K32_U64;
+  } else if ((Capabilities & OC_KERN_CAPABILITY_K32_U32) != 0) {
+    Capabilities = OC_KERN_CAPABILITY_K32_U32;
+  } else {
+    ASSERT (FALSE);
+  }
+
+  //
+  // Pass arch argument when we are:
+  // - SnowLeo64 and try to boot x86_64.
+  // - SnowLeo64 or Lion64 and try to boot i386.
+  //
+  ArgumentCount = 0;
+  if (Capabilities == OC_KERN_CAPABILITY_K64_U64 && SnowLeo64) {
+    NewArguments[ArgumentCount++] = "arch=x86_64";
+  } else if (Capabilities != OC_KERN_CAPABILITY_K64_U64 && (SnowLeo64 || Lion64)) {
+    NewArguments[ArgumentCount++] = "arch=i386";
+  }
+
+  //
+  // Pass legacy argument when we are booting i386.
+  //
+  if (Capabilities == OC_KERN_CAPABILITY_K32_U32
+    && OcCheckArgumentFromEnv (LoadedImage, gRT->GetVariable, "-legacy", L_STR_LEN ("-legacy"), NULL)) {
+    NewArguments[ArgumentCount++] = "-legacy";
+  }
+
+  //
+  // Update argument list.
+  //
+  if (ArgumentCount > 0) {
+    OcAppendArgumentsToLoadedImage (
+      LoadedImage,
+      &NewArguments[0],
+      ArgumentCount,
+      FALSE
+      );
   }
 
   //

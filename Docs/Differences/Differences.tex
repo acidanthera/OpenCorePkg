@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Aug 25 23:11:15 2020
-%DIF ADD ../Configuration.tex        Tue Aug 25 23:11:15 2020
+%DIF DEL PreviousConfiguration.tex   Sat Aug  8 20:55:30 2020
+%DIF ADD ../Configuration.tex        Sat Aug 29 16:17:38 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -663,14 +663,19 @@ one should also install \href{https://www.nasm.us}{NASM} and
 The latest Xcode version is recommended for use despite the toolchain name. Example
 command sequence may look as follows:
 
-\begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
-git clone --recursive --depth=1 https://github.com/acidanthera/audk UDK
+\DIFmodbegin
+\begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash,alsolanguage=DIFcode]
+%DIF < git clone --recursive --depth=1 https://github.com/acidanthera/audk UDK
+%DIF > git clone --depth=1 https://github.com/acidanthera/audk UDK
 cd UDK
-git clone https://github.com/acidanthera/OpenCorePkg
+%DIF < git clone https://github.com/acidanthera/OpenCorePkg
+%DIF > git submodule update --init --recommend-shallow
+%DIF > git clone --depth=1 https://github.com/acidanthera/OpenCorePkg
 source edksetup.sh
 make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
+\DIFmodend
 
 For IDE usage Xcode projects are available in the root of the repositories. Another
 approach could be \href{https://www.sublimetext.com}{Sublime Text} with
@@ -824,7 +829,7 @@ for extensive messages that should not appear in NVRAM log that is heavily limit
 
 When trying to find the problematic change it is useful to rely on
 \href{https://git-scm.com/docs/git-bisect}{\texttt{git-bisect}} functionality.
-\DIFaddbegin \DIFadd{There also are some unnoficial resources that provide per-commit binary
+\DIFaddbegin \DIFadd{There also are some unofficial resources that provide per-commit binary
 builds of OpenCore, like }\href{https://dortania.github.io/builds}{Dortania}\DIFadd{.
 }\DIFaddend 
 
@@ -2366,35 +2371,69 @@ blocking.
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Auto}}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Prefer specified kernel architecture (}\texttt{\DIFadd{Auto}}\DIFadd{, }\texttt{\DIFadd{i386}}\DIFadd{,
-  }\texttt{\DIFadd{x86\_64}}\DIFadd{) when available.
+  }\texttt{\DIFadd{i386-user32}}\DIFadd{, }\texttt{\DIFadd{x86\_64}}\DIFadd{) when available.
 }
 
-  \DIFadd{On macOS 10.7 and earlier XNU kernel may not boot with the usual }\texttt{\DIFadd{x86\_64}} \DIFadd{architecture,
-  and the exact choice depends on many factors including boot arguments, SMBIOS, and operating
-  system type. This setting will use the specified architecture to boot macOS when it is supported
-  by the macOS and the configuration. Below is the algorithm determining the kernel architecture.
+  \DIFadd{On macOS 10.7 and earlier XNU kernel can boot with architectures different from
+  the usual }\texttt{\DIFadd{x86\_64}}\DIFadd{. This setting will use the specified architecture to boot
+  macOS when it is supported by the macOS and the configuration:
+}
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{\DIFadd{Auto}} \DIFadd{--- Choose the preferred architecture automatically.
+    }\item \texttt{\DIFadd{i386}} \DIFadd{--- Use }\texttt{\DIFadd{i386}} \DIFadd{(32-bit) kernel when available.
+    }\item \texttt{\DIFadd{i386-user32}} \DIFadd{--- Use }\texttt{\DIFadd{i386}} \DIFadd{(32-bit) kernel when available
+      and force the use of 32-bit userspace on 64-bit capable processors.
+      On macOS 64-bit capable processors are assumed to support }\texttt{\DIFadd{SSSE3}}\DIFadd{.
+      This is not the case for older 64-bit capable Pentium processors, which
+      cause some applications to crash on macOS~10.6. The behaviour corresponds
+      to }\texttt{\DIFadd{-legacy}} \DIFadd{kernel boot argument.
+    }\item \texttt{\DIFadd{x86\_64}} \DIFadd{--- Use }\texttt{\DIFadd{x86\_64}} \DIFadd{(64-bit) kernel when available.
+  }\end{itemize}
+
+  \DIFadd{Below is the algorithm determining the kernel architecture.
 }
 
   \begin{enumerate}
     \tightlist
     \item \texttt{\DIFadd{arch}} \DIFadd{argument in image arguments (e.g. when launched
-    via UEFI Shell) or in }\texttt{\DIFadd{boot-args}} \DIFadd{variable override any compatibility
-    checks and force the specified architecture.
+    via UEFI Shell) or in }\texttt{\DIFadd{boot-args}} \DIFadd{variable overrides any compatibility
+    checks and forces the specified architecture, completing this algorithm.
+    }\item \DIFadd{OpenCore build architecture restricts capabilities to }\texttt{\DIFadd{i386}}
+      \DIFadd{and }\texttt{\DIFadd{i386-user32}} \DIFadd{mode for the 32-bit firmware variant.
     }\item \DIFadd{Determined EfiBoot version restricts architecture choice:
       }\begin{itemize}
-      \item \DIFadd{10.4-10.5 --- }\texttt{\DIFadd{i386}}
-      \item \DIFadd{10.6-10.7 --- }\texttt{\DIFadd{i386}} \DIFadd{or }\texttt{\DIFadd{x86\_64}}
+      \item \DIFadd{10.4-10.5 --- }\texttt{\DIFadd{i386}} \DIFadd{or }\texttt{\DIFadd{i386-user32}}
+      \item \DIFadd{10.6-10.7 --- }\texttt{\DIFadd{i386}}\DIFadd{, }\texttt{\DIFadd{i386-user32}}\DIFadd{, or }\texttt{\DIFadd{x86\_64}}
       \item \DIFadd{10.8 or newer --- }\texttt{\DIFadd{x86\_64}}
       \end{itemize}
-    \item \DIFadd{SMBIOS model information and EfiBoot version restrict
-      architecture choice and define architecture preference for client
-      and server operating systems according to the table below.
-    }\item \texttt{\DIFadd{KernelArch}} \DIFadd{setting updates architecture preference
-      for both client and server operating systems if the architecture
-      is supported and }\texttt{\DIFadd{KernelArch}} \DIFadd{is not }\texttt{\DIFadd{Auto}}\DIFadd{.
-    }\item \DIFadd{EfiBoot decides on server boot picking either server
-      or client preference.
+    \item \DIFadd{If }\texttt{\DIFadd{KernelArch}} \DIFadd{is set to }\texttt{\DIFadd{Auto}} \DIFadd{and }\texttt{\DIFadd{SSSE3}}
+      \DIFadd{is not supported by the CPU, capabilities are restricted to }\texttt{\DIFadd{i386-user32}}
+      \DIFadd{if supported by EfiBoot.
+    }\item \DIFadd{Board identifier (from SMBIOS) based on EfiBoot version
+      disables }\texttt{\DIFadd{x86\_64}} \DIFadd{support on an unsupported model
+      if any }\texttt{\DIFadd{i386}} \DIFadd{variant is supported. }\texttt{\DIFadd{Auto}}
+      \DIFadd{is not consulted here as the list is not overridable in EfiBoot.
+    }\item \texttt{\DIFadd{KernelArch}} \DIFadd{restricts the support to the explicitly
+      specified architecture (when not set to }\texttt{\DIFadd{Auto}}\DIFadd{) if
+      the architecture remains present in the capabilities.
+    }\item \DIFadd{The best supported architecture is chosen in this order:
+      }\texttt{\DIFadd{x86\_64}}\DIFadd{, }\texttt{\DIFadd{i386}}\DIFadd{, }\texttt{\DIFadd{i386-user32}}\DIFadd{.
   }\end{enumerate}
+
+  \DIFadd{Unlike macOS~10.7, where select boards identifiers are treated as the }\texttt{\DIFadd{i386}}
+  \DIFadd{only machines, and macOS~10.5 or earlier, where }\texttt{\DIFadd{x86\_64}} \DIFadd{is not supported
+  by the macOS kernel, macOS~10.6 is very special. The architecture choice on macOS~10.6
+  depends on many factors including not only the board identifier, but also macOS
+  product type (client vs server), macOS point release, and RAM amount. The detection
+  of them all is complicated and not practical, because several point releases had genuine
+  bugs and failed to properly perform the server detection in the first place.
+  For this reason OpenCore on macOS~10.6 will fallback to }\texttt{\DIFadd{x86\_64}}
+  \DIFadd{architecture whenever it is supported by the board at all, just like on macOS~10.7.
+  As a reference here is the 64-bit Mac model compatibility corresponding to actual
+  EfiBoot behaviour on macOS 10.6.8 and 10.7.5.
+}
 
   \begin{center}
   \begin{tabular}{|p{0.9in}|c|c|c|c|} 
@@ -2417,17 +2456,6 @@ blocking.
   \hline
   \end{tabular}
   \end{center}
-
-  \emph{\DIFadd{Note 1}}\DIFadd{: Unlike 10.7 and newer, on 10.6 many models support 64-bit
-    kernel loading but have it disabled by default. Information about 10.6
-    64-bit Mac model compatibility is incorrect on Apple support website
-    and does not correspond to actual EfiBoot behaviour.
-}
-
-  \emph{\DIFadd{Note 2}}\DIFadd{: Older 10.6 server versions will start in client mode due
-    to a bug in EfiBoot. Consider using this preference to workaround
-    the issue.
-}
 
 \item
   \texttt{\DIFadd{KernelCache}}\\
@@ -4857,7 +4885,7 @@ similar to the builtin text interface.
 
 OpenCanopy requires graphical resources located in \texttt{Resources} directory to run.
 Sample resources (fonts and images) can be found in
-\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}. You can find customised icons over the internet 
+\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}. You can find customised icons over the internet
 (e.g. \href{https://github.com/blackosx/OpenCanopyIcons}{here} or \href{https://applelife.ru/threads/kastomizacija-opencanopy.2945020/}{there}).
 
 OpenCanopy provides full support for \texttt{PickerAttributes} and offers a configurable
