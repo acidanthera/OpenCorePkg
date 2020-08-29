@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sat Aug  8 20:55:30 2020
-%DIF ADD ../Configuration.tex        Sat Aug 29 18:52:39 2020
+%DIF ADD ../Configuration.tex        Sat Aug 29 20:30:21 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6134,8 +6134,58 @@ functioning. Feature highlights:
 
 \subsection{\DIFadd{Legacy Apple OS}}\label{legacyapple}
 
-\DIFadd{TBA
+\DIFadd{Older operating systems may be more complicated to install, but sometimes can
+be necessary to use for all kinds of reasons. While a compatible board identifier
+and CPUID are the obvious requiremenets for proper functioning of an older
+operating system, there are many other less obvious things to keep in mind.
+This section tries to cover a common set of issues relevant to installing
+older macOS operating systems.
 }
+
+\subsubsection{\DIFadd{macOS 10.8 and 10.9}}\label{legacy108}
+
+\begin{itemize}
+  \item \DIFadd{Disk images on these systems use Apple Partitioning Scheme
+    and will require the proprietary }\texttt{\DIFadd{PartitionDxe}} \DIFadd{driver
+    to run DMG recovery and installation. It is possible to set
+    }\texttt{\DIFadd{DmgLoading}} \DIFadd{to }\texttt{\DIFadd{Disabled}} \DIFadd{to run the recovery
+    without DMG loading avoiding the need for }\texttt{\DIFadd{PartitionDxe}}\DIFadd{.
+  }\item \DIFadd{Cached kernel images often do not contain family drivers
+    for networking (}\texttt{\DIFadd{IONetworkingFamily}}\DIFadd{) or audio
+    (}\texttt{\DIFadd{IOAudioFamily}}\DIFadd{) requiring one to use }\texttt{\DIFadd{Force}}
+    \DIFadd{loading in order to inject networking or audio drivers.
+}\end{itemize}
+
+\subsubsection{\DIFadd{macOS 10.7}}\label{legacy107}
+
+\begin{itemize}
+  \item \DIFadd{All previous issues apply.
+  }\item \DIFadd{Many kexts, including }\texttt{\DIFadd{Lilu}} \DIFadd{and its plugins, are
+    unsupported on macOS~10.7 and older as they require newer
+    kernel APIs, which are not part of the macOS~10.7 SDK.
+  }\item \DIFadd{Prior to macOS~10.8 KASLR sliding is not supported, which
+    will result in memory allocation failures on firmwares
+    that utilise lower memory for their own purposes. Refer to
+    }\href{https://github.com/acidanthera/bugtracker/issues/1125}{acidanthera/bugtracker\#1125}
+    \DIFadd{for tracking.
+  }\item \DIFadd{32-bit kernel interaction is unsupported and will lead to
+    issues like kernel patching or injection failure.
+}\end{itemize}
+
+\subsubsection{\DIFadd{macOS 10.6}}\label{legacy106}
+
+\begin{itemize}
+  \item \DIFadd{All previous issues apply.
+  }\item \DIFadd{Last released installer images for macOS~10.6 are macOS~10.6.7
+    builds }\texttt{\DIFadd{10J3250}} \DIFadd{and }\texttt{\DIFadd{10J4139}} \DIFadd{(without Xcode).
+    These images are limited to certain model identifiers and have no
+    }\texttt{\DIFadd{-no\_compat\_check}} \DIFadd{boot argument support. Images without
+    such restrictions can be found }\href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{here}\DIFadd{,
+    assuming that you legally own macOS~10.6. Read }\texttt{\DIFadd{DIGEST.txt}}
+    \DIFadd{for more details. Keep in mind, that these are the earliest tested
+    versions of macOS~10.6 with OpenCore.
+}\end{itemize}
+
 
 \subsection{\DIFadd{UEFI Secure Boot}}\label{uefisecureboot}
 
