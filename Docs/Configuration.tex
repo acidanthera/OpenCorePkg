@@ -3275,7 +3275,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \emph{Note 2}: Be warned that while NVRAM reset executed from OpenCore should not erase the boot
   option created in \texttt{Bootstrap}, executing NVRAM reset prior to loading OpenCore will remove it.
 
-\item
+\item \label{securedmgloading}
   \texttt{DmgLoading}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Signed}\\
@@ -3345,7 +3345,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   halt (stop execution) after obtaining a message of \texttt{HaltLevel}.
   Possible values match \texttt{DisplayLevel} values.
 
-\item
+\item \label{securevaulting}
   \texttt{Vault}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Secure}\\
@@ -3498,7 +3498,7 @@ rm vault.pub
   \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_NVME}
   \end{itemize}
 
-\item
+\item \label{secureapplesb}
   \texttt{SecureBootModel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Default}\\
@@ -5990,7 +5990,56 @@ TBA
 
 \subsection{UEFI Secure Boot}\label{uefisecureboot}
 
-TBA
+OpenCore is designed to provide a secure boot chain between your firmware
+and your operating system. On most x86 platforms trusted loading is implemented
+via \href{https://en.wikipedia.org/wiki/UEFI_Secure_Boot}{UEFI Secure Boot} model.
+Not only OpenCore fully supports this model, but it also extends its capabilities
+to ensure sealed configuration via \hyperref[securevaulting]{vaulting} and
+provide trusted loading to the operating systems using custom verification,
+such as \hyperref[secureapplesb]{Apple Secure Boot}. Proper secure boot chain
+requires several steps and careful configuration of select settings as explained below:
+
+\begin{enumerate}
+\item Enable Apple Secure Boot by setting \texttt{SecureBootModel} if you need to
+  run macOS. Note, that not every macOS is compatible with Apple Secure Boot and
+  there are several other restrictions as explained in
+  \hyperref[secureapplesb]{Apple Secure Boot} section.
+\item Disable DMG loading by setting \texttt{DmgLoading} to \texttt{Disabled}
+  if you are concerned of loading old vulnerable DMG recoveries. This is
+  \textbf{not} required, but recommended. For the actual tradeoffs
+  see the details in \hyperref[securedmgloading]{DMG loading} section.
+\item Make sure that APFS JumpStart functionality restricts the loading
+  of old vulnerable drivers by setting \texttt{MinDate} and \texttt{MinVersion}
+  to \texttt{0}. More details are provided in \hyperref[uefiapfsprops]{APFS JumpStart}
+  section. An alternative is to install \texttt{apfs.efi} driver manually. 
+\item Make sure that you do not need \texttt{Force} driver loading and can
+  still boot all the operating systems you need.
+\item Make sure that \texttt{ScanPolicy} restricts loading from undesired
+  devices. It is a good idea to prohibit all removable drivers or unknown
+  filesystems.
+\item Sign all the installed drivers and tools with your private key. Do not sign
+  tools that provide administrative access to your computer, like UEFI Shell.
+\item Vault your configuration as explained \hyperref[securevaulting]{Vaulting}
+  section.
+\item Sign all OpenCore binaries (\texttt{BOOTX64.efi}, \texttt{BOOTIa32.efi},
+  \texttt{Bootstrap.efi}, \texttt{OpenCore.efi}) used on this system with
+  the same private key.
+\item Sign all third-party operating system (not made by Microsoft or Apple)
+  bootloaders if you need them. For Linux there is an option to install
+  Microsoft-signed Shim bootloader as explained on e.g.
+  \href{https://wiki.debian.org/SecureBoot}{Debian Wiki}. 
+\item Enable UEFI Secure Boot in your firmware preferences and install the
+  certificate with a private key you own. Details on how to generate a certificate
+  can be found in various articles, like \href{https://habr.com/en/post/273497}{this one},
+  and are out of the scope of this document. If you need to launch Windows you
+  will also need to add the
+  \href{http://go.microsoft.com/fwlink/?LinkID=321192}{Microsoft Windows Production CA 2011}.
+  If you need to launch option ROMs or decided to use signed Linux drivers
+  you will also need the
+  \href{http://go.microsoft.com/fwlink/?LinkId=321194}{Microsoft UEFI Driver Signing CA}.
+\item Password-protect changing firmware settings to ensure that UEFI Secure Boot
+  cannot be disabled without your knowledge.
+\end{enumerate}
 
 \subsection{Windows support}\label{troubleshootingwin}
 

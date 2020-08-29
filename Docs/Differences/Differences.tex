@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sat Aug  8 20:55:30 2020
-%DIF ADD ../Configuration.tex        Sat Aug 29 17:50:22 2020
+%DIF ADD ../Configuration.tex        Sat Aug 29 18:52:39 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3398,8 +3398,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \emph{Note 2}: Be warned that while NVRAM reset executed from OpenCore should not erase the boot
   option created in \texttt{Bootstrap}, executing NVRAM reset prior to loading OpenCore will remove it.
 
-\item
-  \DIFaddbegin \texttt{\DIFadd{DmgLoading}}\\
+\item \DIFaddbegin \label{securedmgloading}
+  \texttt{\DIFadd{DmgLoading}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Signed}}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Define Disk Image (DMG) loading policy used for macOS Recovery.
@@ -3472,8 +3472,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   halt (stop execution) after obtaining a message of \texttt{HaltLevel}.
   Possible values match \texttt{DisplayLevel} values.
 
-\item
-  \texttt{Vault}\\
+\item \DIFaddbegin \label{securevaulting}
+  \DIFaddend \texttt{Vault}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Secure}\\
   \textbf{Description}: Enables vaulting mechanism in OpenCore.
@@ -3625,7 +3625,7 @@ rm vault.pub
   \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_NVME}
   \end{itemize}
 
-\DIFaddbegin \item
+\DIFaddbegin \item \label{secureapplesb}
   \texttt{\DIFadd{SecureBootModel}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Default}}\\
@@ -6139,8 +6139,58 @@ functioning. Feature highlights:
 
 \subsection{\DIFadd{UEFI Secure Boot}}\label{uefisecureboot}
 
-\DIFadd{TBA
-}\DIFaddend 
+\DIFadd{OpenCore is designed to provide a secure boot chain between your firmware
+and your operating system. On most x86 platforms trusted loading is implemented
+via }\href{https://en.wikipedia.org/wiki/UEFI_Secure_Boot}{UEFI Secure Boot} \DIFadd{model.
+Not only OpenCore fully supports this model, but it also extends its capabilities
+to ensure sealed configuration via }\hyperref[securevaulting]{vaulting} \DIFadd{and
+provide trusted loading to the operating systems using custom verification,
+such as }\hyperref[secureapplesb]{Apple Secure Boot}\DIFadd{. Proper secure boot chain
+requires several steps and careful configuration of select settings as explained below:
+}
+
+\begin{enumerate}
+\item \DIFadd{Enable Apple Secure Boot by setting }\texttt{\DIFadd{SecureBootModel}} \DIFadd{if you need to
+  run macOS. Note, that not every macOS is compatible with Apple Secure Boot and
+  there are several other restrictions as explained in
+  }\hyperref[secureapplesb]{Apple Secure Boot} \DIFadd{section.
+}\item \DIFadd{Disable DMG loading by setting }\texttt{\DIFadd{DmgLoading}} \DIFadd{to }\texttt{\DIFadd{Disabled}}
+  \DIFadd{if you are concerned of loading old vulnerable DMG recoveries. This is
+  }\textbf{\DIFadd{not}} \DIFadd{required, but recommended. For the actual tradeoffs
+  see the details in }\hyperref[securedmgloading]{DMG loading} \DIFadd{section.
+}\item \DIFadd{Make sure that APFS JumpStart functionality restricts the loading
+  of old vulnerable drivers by setting }\texttt{\DIFadd{MinDate}} \DIFadd{and }\texttt{\DIFadd{MinVersion}}
+  \DIFadd{to }\texttt{\DIFadd{0}}\DIFadd{. More details are provided in }\hyperref[uefiapfsprops]{APFS JumpStart}
+  \DIFadd{section. An alternative is to install }\texttt{\DIFadd{apfs.efi}} \DIFadd{driver manually. 
+}\item \DIFadd{Make sure that you do not need }\texttt{\DIFadd{Force}} \DIFadd{driver loading and can
+  still boot all the operating systems you need.
+}\item \DIFadd{Make sure that }\texttt{\DIFadd{ScanPolicy}} \DIFadd{restricts loading from undesired
+  devices. It is a good idea to prohibit all removable drivers or unknown
+  filesystems.
+}\item \DIFadd{Sign all the installed drivers and tools with your private key. Do not sign
+  tools that provide administrative access to your computer, like UEFI Shell.
+}\item \DIFadd{Vault your configuration as explained }\hyperref[securevaulting]{Vaulting}
+  \DIFadd{section.
+}\item \DIFadd{Sign all OpenCore binaries (}\texttt{\DIFadd{BOOTX64.efi}}\DIFadd{, }\texttt{\DIFadd{BOOTIa32.efi}}\DIFadd{,
+  }\texttt{\DIFadd{Bootstrap.efi}}\DIFadd{, }\texttt{\DIFadd{OpenCore.efi}}\DIFadd{) used on this system with
+  the same private key.
+}\item \DIFadd{Sign all third-party operating system (not made by Microsoft or Apple)
+  bootloaders if you need them. For Linux there is an option to install
+  Microsoft-signed Shim bootloader as explained on e.g.
+  }\href{https://wiki.debian.org/SecureBoot}{Debian Wiki}\DIFadd{. 
+}\item \DIFadd{Enable UEFI Secure Boot in your firmware preferences and install the
+  certificate with a private key you own. Details on how to generate a certificate
+  can be found in various articles, like }\href{https://habr.com/en/post/273497}{this one}\DIFadd{,
+  and are out of the scope of this document. If you need to launch Windows you
+  will also need to add the
+  }\href{http://go.microsoft.com/fwlink/?LinkID=321192}{Microsoft Windows Production CA 2011}\DIFadd{.
+  If you need to launch option ROMs or decided to use signed Linux drivers
+  you will also need the
+  }\href{http://go.microsoft.com/fwlink/?LinkId=321194}{Microsoft UEFI Driver Signing CA}\DIFadd{.
+}\item \DIFadd{Password-protect changing firmware settings to ensure that UEFI Secure Boot
+  cannot be disabled without your knowledge.
+}\end{enumerate}
+\DIFaddend 
 
 \subsection{Windows support}\label{troubleshootingwin}
 
